@@ -45,8 +45,8 @@ const ThemeProvider = ({ children }: Readonly<{ children: React.ReactNode }>) =>
   /* jsx
   ---------------------------------------------------------------------------------------------------- */
   return (
-    // <MuiThemeProvider theme={lightTheme}>
-    <MuiThemeProvider theme={mode === 'dark' ? darkTheme : lightTheme}>
+    // <MuiThemeProvider theme={mode === 'dark' ? darkTheme : lightTheme}>
+    <MuiThemeProvider theme={lightTheme}>
       <CssBaseline />
       {children}
     </MuiThemeProvider>

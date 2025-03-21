@@ -38,7 +38,7 @@ const Page = () => {
             <Typography variant="body1">多様性</Typography>
           </li>
         </ol>
-        <Button sx={{ width: '100%' }} variant="contained">
+        <Button sx={styles.button} variant="contained">
           先人たちから受け継いできた大切な在り方
         </Button>
       </main>
@@ -66,5 +66,9 @@ const styles: { [key: string]: React.CSSProperties } = {
     justifyContent: 'center',
     alignItems: 'flex-start',
     gap: '32px',
+  },
+  // ボタン
+  button: {
+    width: '100%',
   },
 };
