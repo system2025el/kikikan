@@ -1,0 +1,7 @@
+**/.next/*
+**/node_modules/*
+**/.prettierrc
+**/eslint.config.mjs
+**/next-env.d.ts
+**/next.config.ts
+**/tsconfig.json
