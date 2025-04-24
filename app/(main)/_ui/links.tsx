@@ -2,11 +2,11 @@
 
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
+import StopSharpIcon from '@mui/icons-material/StopSharp';
 import { Collapse, Link, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
 import { blue, lightBlue } from '@mui/material/colors';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
-import StopSharpIcon from '@mui/icons-material/StopSharp';
 
 type MenuItem = {
   name: string;

@@ -50,7 +50,7 @@ const Date = () => {
           calendarHeader: { format: 'YYYY年MM月' },
         }} // カレンダーヘッダーのフォーマット
         defaultValue={today}
-        onError={(newError: any) => setError(newError)}
+        onError={(newError: DateValidationError) => setError(newError)}
         views={['year', 'month', 'day']}
         sx={{ width: '25%' }}
       />
