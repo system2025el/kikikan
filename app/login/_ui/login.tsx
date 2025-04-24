@@ -7,7 +7,7 @@ const Login = () => {
       <TextField sx={{ bgcolor: 'white', width: '30%' }} size="small"></TextField>
       <Typography marginTop={4}>パスワード</Typography>
       <TextField sx={{ bgcolor: 'white', width: '30%' }} size="small"></TextField>
-      <Button variant="contained" href="/new-order" sx={{ marginTop: 4 }}>
+      <Button variant="contained" href="/dashboard" sx={{ marginTop: 4 }}>
         次へ
       </Button>
     </Stack>

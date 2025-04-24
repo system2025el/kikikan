@@ -82,7 +82,7 @@ const Sidebar = ({ children }: Props) => {
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
-      <AppBar position="fixed" open={open}>
+      <AppBar position="fixed" open={open} color="secondary">
         <Toolbar>
           <IconButton color="inherit" onClick={toggleDrawer} edge="start" sx={{ mr: 2 }}>
             <MenuIcon />
