@@ -95,7 +95,7 @@ const Sidebar = ({ children }: Props) => {
       <Drawer variant="persistent" anchor="left" open={open}>
         <Toolbar />
         <Divider />
-        <Box sx={{ overflow: 'auto' }}>
+        <Box sx={{ overflow: 'auto', bgcolor: 'lightBlue[300]' }}>
           <NavLinks />
         </Box>
       </Drawer>

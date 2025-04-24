@@ -15,7 +15,7 @@ import {
 import Link from 'next/link';
 import { useState } from 'react';
 
-import { Date } from '@/app/(main)/_ui/date';
+import Date from '@/app/(main)/_ui/date';
 import SelectTable from '@/app/(main)/_ui/table';
 import { carHeaders, carRows, eqyipmentHeaders, eqyipmentRows } from '@/app/(main)/new-order/_lib/data';
 
@@ -73,7 +73,7 @@ const NewOrder = () => {
         </Box>
         <Box display="flex">
           <Stack sx={{ width: '55%' }} bgcolor="lightgray">
-            <Box display="flex" alignItems="center" margin={1} marginLeft={2}>
+            <Box sx={styles.container}>
               <Typography marginRight={5} whiteSpace="nowrap">
                 受注番号
               </Typography>
@@ -88,11 +88,11 @@ const NewOrder = () => {
                 </Select>
               </FormControl>
             </Box>
-            <Box display="flex" alignItems="center" margin={1} marginLeft={2}>
+            <Box sx={styles.container}>
               <Typography marginRight={7}>受注日</Typography>
               <Date />
             </Box>
-            <Box display="flex" alignItems="center" margin={1} marginLeft={2}>
+            <Box sx={styles.container}>
               <Typography marginRight={7}>入力者</Typography>
               <FormControl disabled size="small" sx={{ width: '25%' }}>
                 <Select value={selectInputPerson} onChange={inputPersonChange}>
@@ -103,11 +103,11 @@ const NewOrder = () => {
                 </Select>
               </FormControl>
             </Box>
-            <Box display="flex" alignItems="center" margin={1} marginLeft={2}>
+            <Box sx={styles.container}>
               <Typography marginRight={5}>公演開始</Typography>
               <Date />
             </Box>
-            <Box display="flex" alignItems="center" margin={1} marginLeft={2}>
+            <Box sx={styles.container}>
               <Typography marginRight={5}>公演終了</Typography>
               <Date />
             </Box>
@@ -116,27 +116,27 @@ const NewOrder = () => {
             </Button>
           </Stack>
           <Stack sx={{ width: '45%' }} marginLeft={2} bgcolor="lightgray">
-            <Box display="flex" alignItems="center" margin={1} marginLeft={2}>
+            <Box sx={styles.container}>
               <Typography marginRight={7}>公演名</Typography>
               <TextField size="small" sx={{ width: '50%' }}></TextField>
             </Box>
-            <Box display="flex" alignItems="center" margin={1} marginLeft={2}>
+            <Box sx={styles.container}>
               <Typography marginRight={5}>公演場所</Typography>
               <TextField disabled size="small" sx={{ width: '8%', marginRight: 4 }}></TextField>
               <TextField disabled size="small" sx={{ width: '50%' }}></TextField>
               <Button variant="contained">選択</Button>
             </Box>
-            <Box display="flex" alignItems="center" margin={1} marginLeft={2}>
+            <Box sx={styles.container}>
               <Typography marginRight={9}>相手</Typography>
               <TextField disabled size="small" sx={{ width: '8%', marginRight: 4 }}></TextField>
               <TextField disabled size="small" sx={{ width: '50%' }}></TextField>
               <Button variant="contained">選択</Button>
             </Box>
-            <Box display="flex" alignItems="center" margin={1} marginLeft={2}>
+            <Box sx={styles.container}>
               <Typography marginRight={9}>メモ</Typography>
               <TextField size="small" sx={{ width: '50%' }}></TextField>
             </Box>
-            <Box display="flex" alignItems="center" margin={1} marginLeft={2}>
+            <Box sx={styles.container}>
               <Typography marginRight={7}>値引き</Typography>
               <TextField size="small" sx={{ width: '30%' }}></TextField>
             </Box>
@@ -154,10 +154,10 @@ const NewOrder = () => {
           <TextField size="small" sx={{ width: '5%' }}></TextField>
           <Typography mx={1}>合計金額</Typography>
           <TextField size="small" sx={{ width: '20%' }}></TextField>
-          <Button variant="contained" sx={{ mx: 3 }} href="/equipment">
+          <Button variant="contained" sx={{ mx: 3 }} href="/new-order/equipment-order-detail">
             ＋ 機材入力
           </Button>
-          <Button variant="contained" href="/car">
+          <Button variant="contained" href="/new-order/vehicle-order-detail">
             ＋ 車両入力
           </Button>
         </Box>
@@ -174,3 +174,16 @@ const NewOrder = () => {
 };
 
 export default NewOrder;
+
+/* style
+---------------------------------------------------------------------------------------------------- */
+/** @type {{ [key: string]: React.CSSProperties }} style */
+const styles: { [key: string]: React.CSSProperties } = {
+  // コンテナ
+  container: {
+    display: 'flex',
+    alignItems: 'center',
+    margin: 1,
+    marginLeft: 2,
+  },
+};

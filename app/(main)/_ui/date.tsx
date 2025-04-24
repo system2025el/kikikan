@@ -12,7 +12,7 @@ dayjs.locale('ja'); // カレンダーの曜日のフォーマット
 
 const today = dayjs();
 
-export function Date() {
+const Date = () => {
   const [error, setError] = useState<DateValidationError | null>(null);
 
   const errorMessage = useMemo(() => {
@@ -56,4 +56,6 @@ export function Date() {
       />
     </LocalizationProvider>
   );
-}
+};
+
+export default Date;
