@@ -1,6 +1,7 @@
 'use client';
 
 import { useMediaQuery } from '@mui/material';
+import { grey, lightBlue } from '@mui/material/colors';
 import CssBaseline from '@mui/material/CssBaseline';
 import type { Palette } from '@mui/material/styles';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
@@ -19,7 +20,24 @@ const lightTheme = createTheme({
   typography,
   cssVariables,
   palette: {
+    primary: {
+      main: lightBlue[300],
+      contrastText: 'white',
+    },
+    secondary: {
+      main: grey[300],
+      contrastText: '#000',
+    },
     mode: 'light',
+  },
+  components: {
+    MuiDrawer: {
+      styleOverrides: {
+        paper: {
+          backgroundColor: lightBlue[300],
+        },
+      },
+    },
   },
 });
 
