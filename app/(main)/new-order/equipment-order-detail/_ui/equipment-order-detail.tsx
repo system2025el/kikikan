@@ -15,10 +15,9 @@ import { grey } from '@mui/material/colors';
 import { useRef, useState } from 'react';
 import React from 'react';
 
-import ScheduleGrid from '@/app/(main)/_ui/calendargrid';
-import GridTable from '@/app/(main)/_ui/calendargrid';
 import Date from '@/app/(main)/_ui/date';
 import Grid, { EditableGridHandle } from '@/app/(main)/_ui/grid';
+import GridTable from '@/app/(main)/_ui/gridtable';
 import Time from '@/app/(main)/_ui/time';
 import { columns, data, header } from '@/app/(main)/new-order/equipment-order-detail/_lib/data';
 
