@@ -14,4 +14,17 @@ const rows = [
   { id: 2, set: 'ROBIN T2 Profile', all: 26, orders: 3, spare: 1, total: 4, memo: '' },
 ];
 
-export { columns, rows };
+const data = [
+  {
+    id: 1,
+    data: ['SHARPY PLUS', '148', '2', '1', '3', ''],
+  },
+  {
+    id: 2,
+    data: ['ROBIN T2 Profile', '26', '3', '1', '4', ''],
+  },
+];
+
+const header = ['セット(1)', '全', '受注数', '予備数', '合計', '機材メモ'];
+
+export { columns, data, header, rows };
