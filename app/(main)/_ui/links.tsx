@@ -63,7 +63,6 @@ export default function NavLinks() {
     return false;
   };
 
-  const [dashboardOpen, setdashboardOpen] = useState(false);
   const [orderOpen, setorderOpen] = useState(false);
   const [printOpen, setprintOpen] = useState(false);
   const [rateOpen, setrateOpen] = useState(false);
@@ -72,9 +71,6 @@ export default function NavLinks() {
   const [settingOpen, setsettingOpen] = useState(false);
   const [loginOpen, setroginOpen] = useState(false);
 
-  const dashboardClick = () => {
-    setdashboardOpen(!dashboardOpen);
-  };
   const orderClick = () => {
     setorderOpen(!orderOpen);
   };

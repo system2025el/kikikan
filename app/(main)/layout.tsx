@@ -1,8 +1,12 @@
 //import '/globals.css';
 
+import 'rsuite/dist/rsuite-no-reset.min.css';
+
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
 import type { Metadata } from 'next';
 import React from 'react';
+import { CustomProvider } from 'rsuite';
+import { jaJP } from 'rsuite/esm/locales';
 
 import { notoSansJp } from '@/app/_ui/fonts';
 import ThemeProvider from '@/app/_ui/theme-provider';
@@ -27,9 +31,11 @@ const Layout = ({ children }: Readonly<{ children: React.ReactNode }>) => {
     <html lang="ja">
       <body className={notoSansJp.variable}>
         <AppRouterCacheProvider>
-          <ThemeProvider>
-            <Sidebar>{children}</Sidebar>
-          </ThemeProvider>
+          <CustomProvider locale={jaJP}>
+            <ThemeProvider>
+              <Sidebar>{children}</Sidebar>
+            </ThemeProvider>
+          </CustomProvider>
         </AppRouterCacheProvider>
       </body>
     </html>

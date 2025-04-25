@@ -3,6 +3,7 @@
 import { useMediaQuery } from '@mui/material';
 import { grey, lightBlue } from '@mui/material/colors';
 import CssBaseline from '@mui/material/CssBaseline';
+import { jaJP } from '@mui/material/locale';
 import type { Palette } from '@mui/material/styles';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
 import { createTheme } from '@mui/material/styles';
@@ -16,30 +17,75 @@ const typography: TypographyOptions | ((palette: Palette) => TypographyOptions) 
 const cssVariables = true;
 
 /** @type {Theme} lightTheme */
-const lightTheme = createTheme({
-  typography,
-  cssVariables,
-  palette: {
-    primary: {
-      main: lightBlue[300],
-      contrastText: 'white',
+const lightTheme = createTheme(
+  {
+    typography,
+    cssVariables,
+    palette: {
+      primary: {
+        main: lightBlue[300],
+        contrastText: 'white',
+      },
+      secondary: {
+        main: grey[300],
+        contrastText: '#000',
+      },
+      mode: 'light',
     },
-    secondary: {
-      main: grey[300],
-      contrastText: '#000',
-    },
-    mode: 'light',
-  },
-  components: {
-    MuiDrawer: {
-      styleOverrides: {
-        paper: {
-          backgroundColor: lightBlue[300],
+    components: {
+      MuiDrawer: {
+        styleOverrides: {
+          paper: {
+            backgroundColor: lightBlue[300],
+          },
+        },
+      },
+      MuiSelect: {
+        defaultProps: {
+          size: 'small',
+        },
+      },
+      MuiInputLabel: {
+        defaultProps: {
+          size: 'small',
+        },
+      },
+      MuiRadio: {
+        defaultProps: {
+          size: 'small',
+        },
+      },
+      MuiButton: {
+        defaultProps: {
+          size: 'small',
+          variant: 'contained',
+        },
+      },
+      MuiStack: {
+        defaultProps: {
+          direction: 'row',
+          justifyContent: 'flex-start',
+          alignItems: 'center',
+          spacing: 1,
+        },
+      },
+      MuiCheckbox: {
+        defaultProps: {
+          size: 'small',
+        },
+      },
+      MuiTextField: {
+        defaultProps: {
+          size: 'small',
+          sx: {
+            bgcolor: 'white',
+          },
         },
       },
     },
   },
-});
+  jaJP
+);
 
 /** @type {Theme} darkTheme */
 const darkTheme = createTheme({
