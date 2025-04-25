@@ -125,7 +125,9 @@ const NewOrder = () => {
               <Typography marginRight={5}>公演場所</Typography>
               <TextField disabled size="small" sx={{ width: '8%', marginRight: 4 }}></TextField>
               <TextField disabled size="small" sx={{ width: '50%' }}></TextField>
-              <Button variant="contained">選択</Button>
+              <Button variant="contained" href="/new-order/location-selection">
+                選択
+              </Button>
             </Box>
             <Box sx={styles.container}>
               <Typography marginRight={9}>相手</Typography>
