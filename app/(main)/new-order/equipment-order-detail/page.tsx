@@ -1,6 +1,6 @@
-import Equipment from '@/app/(main)/new-order/equipment-order-detail/_ui/equipment-order-detail';
+import EquipmentOrderDetail from '@/app/(main)/new-order/equipment-order-detail/_ui/equipment-order-detail';
 
 const Page = () => {
-  return <Equipment />;
+  return <EquipmentOrderDetail />;
 };
 export default Page;

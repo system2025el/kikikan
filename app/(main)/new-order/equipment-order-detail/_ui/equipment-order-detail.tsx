@@ -15,15 +15,19 @@ import { grey } from '@mui/material/colors';
 import { useRef, useState } from 'react';
 import React from 'react';
 
+import ScheduleGrid from '@/app/(main)/_ui/calendargrid';
+import GridTable from '@/app/(main)/_ui/calendargrid';
 import Date from '@/app/(main)/_ui/date';
 import Grid, { EditableGridHandle } from '@/app/(main)/_ui/grid';
 import Time from '@/app/(main)/_ui/time';
-import { columns, rows } from '@/app/(main)/new-order/equipment-order-detail/_lib/data';
+import { columns, data, header } from '@/app/(main)/new-order/equipment-order-detail/_lib/data';
 
 const EquipmentOrderDetail = () => {
   const [selectStatus, setSelectStatus] = useState('入力中');
   const [selectIssueBase, setSelectIssueBase] = useState('KICKS');
   const [selectReturnBase, setSelectReturnBase] = useState('YARD');
+  const [rows, setRows] = useState(data);
+  const editableColumns = [2, 3];
 
   const selectStatusChange = (event: SelectChangeEvent) => {
     setSelectStatus(event.target.value);
@@ -40,6 +44,13 @@ const EquipmentOrderDetail = () => {
   const handleClick = () => {
     const data = gridRef.current?.getData();
     console.log(data);
+  };
+
+  const handleCellChange = (rowIndex: number, colIndex: number, newValue: string) => {
+    const updatedRows = [...rows];
+    updatedRows[rowIndex].data[colIndex] = newValue;
+    setRows(updatedRows);
+    console.log(`Row ${rowIndex}, Column ${colIndex} changed to "${newValue}"`);
   };
 
   return (
@@ -119,7 +130,7 @@ const EquipmentOrderDetail = () => {
             <Typography marginRight={11} whiteSpace="nowrap">
               機材
             </Typography>
-            <Grid ref={gridRef} columns={columns} rows={rows} />
+            <GridTable header={header} rows={rows} editableColumns={editableColumns} onChange={handleCellChange} />
           </Box>
           <Box sx={styles.container}>
             <Typography marginRight={1} whiteSpace="nowrap">
