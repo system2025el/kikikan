@@ -16,6 +16,7 @@ import {
   TableHead,
   TablePagination,
   TableRow,
+  Typography,
   useTheme,
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
@@ -51,7 +52,8 @@ export const TablePaginationActions = (props: TablePaginationActionsProps) => {
   };
 
   return (
-    <Box sx={{ flexShrink: 0, ml: 2.5 }}>
+    <Box display={'flex'} alignItems={'center'} sx={{ flexShrink: 0 }}>
+      <Typography>件</Typography>
       <IconButton onClick={handleFirstPageButtonClick} disabled={page === 0} aria-label="first page">
         {theme.direction === 'rtl' ? <LastPageIcon /> : <FirstPageIcon />}
       </IconButton>
@@ -92,7 +94,7 @@ export const OrderTable = () => {
 
   return (
     <>
-      <TableContainer component={Paper} variant="outlined" square sx={{ p: 2, maxHeight: 800, bgcolor: grey[200] }}>
+      <TableContainer component={Paper} variant="outlined" square sx={{ maxHeight: 600, bgcolor: grey[200], mt: 3 }}>
         <Table stickyHeader size="small">
           <TableHead>
             <TableRow>
@@ -119,15 +121,15 @@ export const OrderTable = () => {
               </TableCell>
             </TableRow>
             <TableRow>
-              <TableCell sx={{ bgcolor: grey[300], width: 50, maxWidth: 50 }}></TableCell>
-              <TableCell sx={{ bgcolor: grey[300] }}>受注番号</TableCell>
-              <TableCell sx={{ bgcolor: grey[300] }}>受注ステータス</TableCell>
-              <TableCell sx={{ bgcolor: grey[300], minWidth: 150 }}>公演名</TableCell>
-              <TableCell sx={{ bgcolor: grey[300], minWidth: 150 }}>公演場所</TableCell>
-              <TableCell sx={{ bgcolor: grey[300], minWidth: 150 }}>顧客名</TableCell>
-              <TableCell sx={{ bgcolor: grey[300], minWidth: 100 }}>受注日</TableCell>
-              <TableCell sx={{ bgcolor: grey[300], minWidth: 100 }}>出庫日</TableCell>
-              <TableCell sx={{ bgcolor: grey[300], minWidth: 100 }}>返却日</TableCell>
+              <TableCell sx={{ bgcolor: grey[300], width: 50, maxWidth: 50, top: 65 }}></TableCell>
+              <TableCell sx={{ bgcolor: grey[300], top: 65 }}>受注番号</TableCell>
+              <TableCell sx={{ bgcolor: grey[300], top: 65 }}>受注ステータス</TableCell>
+              <TableCell sx={{ bgcolor: grey[300], minWidth: '20%', top: 65 }}>公演名</TableCell>
+              <TableCell sx={{ bgcolor: grey[300], minWidth: '20%', top: 65 }}>公演場所</TableCell>
+              <TableCell sx={{ bgcolor: grey[300], minWidth: '20%', top: 65 }}>顧客名</TableCell>
+              <TableCell sx={{ bgcolor: grey[300], minWidth: 100, top: 65 }}>受注日</TableCell>
+              <TableCell sx={{ bgcolor: grey[300], minWidth: 100, top: 65 }}>出庫日</TableCell>
+              <TableCell sx={{ bgcolor: grey[300], minWidth: 100, top: 65 }}>返却日</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
