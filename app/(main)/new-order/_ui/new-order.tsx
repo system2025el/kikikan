@@ -73,7 +73,7 @@ const NewOrder = () => {
           </Button>
         </Box>
         <Box display="flex">
-          <Stack sx={{ width: '55%' }} bgcolor={grey[300]}>
+          <Box sx={{ width: '55%' }} bgcolor={grey[300]}>
             <Box sx={styles.container}>
               <Typography marginRight={5} whiteSpace="nowrap">
                 受注番号
@@ -115,8 +115,8 @@ const NewOrder = () => {
             <Button variant="contained" sx={{ width: '20%', margin: 2 }}>
               スケジュール表
             </Button>
-          </Stack>
-          <Stack sx={{ width: '45%' }} marginLeft={2} bgcolor={grey[300]}>
+          </Box>
+          <Box sx={{ width: '45%' }} marginLeft={2} bgcolor={grey[300]}>
             <Box sx={styles.container}>
               <Typography marginRight={7}>公演名</Typography>
               <TextField size="small" sx={{ width: '50%' }}></TextField>
@@ -141,7 +141,7 @@ const NewOrder = () => {
               <Typography marginRight={7}>値引き</Typography>
               <TextField size="small" sx={{ width: '30%' }}></TextField>
             </Box>
-          </Stack>
+          </Box>
         </Box>
       </Box>
       <Box display="flex" justifyContent="space-between" alignItems="center" bgcolor={grey[400]} sx={{ marginTop: 2 }}>

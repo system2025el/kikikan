@@ -59,7 +59,7 @@ const EquipmentOrderDetail = () => {
         </Button>
       </Box>
       <Box display="flex" sx={{ bgcolor: grey[300] }}>
-        <Stack sx={{ width: '60%' }}>
+        <Box sx={{ width: '60%' }}>
           <Box sx={styles.container}>
             <Typography marginRight={3} whiteSpace="nowrap">
               受注番号
@@ -84,8 +84,8 @@ const EquipmentOrderDetail = () => {
             </Typography>
             <TextField size="small" disabled></TextField>
           </Box>
-        </Stack>
-        <Stack sx={{ width: '40%' }}>
+        </Box>
+        <Box sx={{ width: '40%' }}>
           <Box sx={styles.container}>
             <Typography marginRight={5} whiteSpace="nowrap">
               公演名
@@ -104,10 +104,10 @@ const EquipmentOrderDetail = () => {
             </Typography>
             <TextField size="small" defaultValue="(株)シアターブレーン"></TextField>
           </Box>
-        </Stack>
+        </Box>
       </Box>
       <Box display="flex" marginTop={2} sx={{ bgcolor: grey[300] }}>
-        <Stack sx={{ width: '100%' }}>
+        <Box sx={{ width: '100%' }}>
           <Typography whiteSpace="nowrap">機材入力</Typography>
           <Box display="flex" alignItems="center" margin={1} marginLeft={17}>
             <Button variant="contained" sx={{ marginRight: 4 }}>
@@ -194,7 +194,7 @@ const EquipmentOrderDetail = () => {
             </Button>
             <TextField disabled size="small" sx={{ marginLeft: 4 }} />
           </Box>
-        </Stack>
+        </Box>
       </Box>
     </Box>
   );

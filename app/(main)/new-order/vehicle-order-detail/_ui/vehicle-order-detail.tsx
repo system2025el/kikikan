@@ -53,7 +53,7 @@ const VehicleOrderDetail = () => {
         </Button>
       </Box>
       <Box display="flex" sx={{ bgcolor: grey[300] }}>
-        <Stack sx={{ width: '60%' }}>
+        <Box sx={{ width: '60%' }}>
           <Box display="flex" alignItems="center" margin={1} marginLeft={2}>
             <Typography marginRight={3} whiteSpace="nowrap">
               受注番号
@@ -78,8 +78,8 @@ const VehicleOrderDetail = () => {
             </Typography>
             <TextField size="small" disabled></TextField>
           </Box>
-        </Stack>
-        <Stack sx={{ width: '40%' }}>
+        </Box>
+        <Box sx={{ width: '40%' }}>
           <Box display="flex" alignItems="center" margin={1} marginLeft={2}>
             <Typography marginRight={5} whiteSpace="nowrap">
               公演名
@@ -98,10 +98,10 @@ const VehicleOrderDetail = () => {
             </Typography>
             <TextField size="small" defaultValue="(株)シアターブレーン"></TextField>
           </Box>
-        </Stack>
+        </Box>
       </Box>
       <Box display="flex" marginTop={2} sx={{ bgcolor: grey[300] }}>
-        <Stack sx={{ width: '100%' }}>
+        <Box sx={{ width: '100%' }}>
           <Typography whiteSpace="nowrap">車両入力</Typography>
           <Box display="flex" alignItems="center" margin={1} marginLeft={2}>
             <Typography marginRight={2} whiteSpace="nowrap">
@@ -163,7 +163,7 @@ const VehicleOrderDetail = () => {
               </Select>
             </FormControl>
           </Box>
-        </Stack>
+        </Box>
       </Box>
     </Box>
   );
