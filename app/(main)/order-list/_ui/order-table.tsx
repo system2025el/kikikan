@@ -93,37 +93,41 @@ export const OrderTable = () => {
   return (
     <>
       <TableContainer component={Paper} variant="outlined" square sx={{ p: 2, maxHeight: 800, bgcolor: grey[200] }}>
-        <Stack>
-          <Box width={300} justifyItems={'end'}>
-            <TablePagination
-              count={orderList.length}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              onPageChange={handleChangePage}
-              ActionsComponent={TablePaginationActions}
-              rowsPerPageOptions={[20]}
-              sx={{ bgcolor: grey[200] }}
-            />
-          </Box>
-          <Box width={'50%'}></Box>
-          <Button color="error" sx={{ ml: '40%' }}>
-            -削除
-          </Button>
-          <Button>マージ</Button>
-          <Button>コピー</Button>
-        </Stack>
         <Table stickyHeader size="small">
           <TableHead>
             <TableRow>
-              <TableCell sx={{ bgcolor: grey[300] }}></TableCell>
+              <TablePagination
+                count={orderList.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                onPageChange={handleChangePage}
+                ActionsComponent={TablePaginationActions}
+                rowsPerPageOptions={[20]}
+                sx={{ bgcolor: grey[200], justifyContent: 'start' }}
+                colSpan={3}
+              />
+              <TableCell colSpan={4} sx={{ bgcolor: grey[200] }}>
+                <Button color="error" sx={{ ml: '40%' }}>
+                  -削除
+                </Button>
+              </TableCell>
+              <TableCell colSpan={1} sx={{ bgcolor: grey[200] }}>
+                <Button>マージ</Button>
+              </TableCell>
+              <TableCell colSpan={1} sx={{ bgcolor: grey[200] }}>
+                <Button>コピー</Button>
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell sx={{ bgcolor: grey[300], width: 50, maxWidth: 50 }}></TableCell>
               <TableCell sx={{ bgcolor: grey[300] }}>受注番号</TableCell>
               <TableCell sx={{ bgcolor: grey[300] }}>受注ステータス</TableCell>
-              <TableCell sx={{ bgcolor: grey[300] }}>公演名</TableCell>
-              <TableCell sx={{ bgcolor: grey[300] }}>公演場所</TableCell>
-              <TableCell sx={{ bgcolor: grey[300] }}>顧客名</TableCell>
-              <TableCell sx={{ bgcolor: grey[300] }}>受注日</TableCell>
-              <TableCell sx={{ bgcolor: grey[300] }}>出庫日</TableCell>
-              <TableCell sx={{ bgcolor: grey[300] }}>返却日</TableCell>
+              <TableCell sx={{ bgcolor: grey[300], minWidth: 150 }}>公演名</TableCell>
+              <TableCell sx={{ bgcolor: grey[300], minWidth: 150 }}>公演場所</TableCell>
+              <TableCell sx={{ bgcolor: grey[300], minWidth: 150 }}>顧客名</TableCell>
+              <TableCell sx={{ bgcolor: grey[300], minWidth: 100 }}>受注日</TableCell>
+              <TableCell sx={{ bgcolor: grey[300], minWidth: 100 }}>出庫日</TableCell>
+              <TableCell sx={{ bgcolor: grey[300], minWidth: 100 }}>返却日</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
