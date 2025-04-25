@@ -31,7 +31,7 @@ const printList: MenuItem[] = [
 const rateList: MenuItem[] = [{ name: '稼働率', url: '/' }];
 const equipmentList: MenuItem[] = [{ name: '機材マスタ', url: '/equipment' }];
 const masterList: MenuItem[] = [
-  { name: '顧客マスタ', url: '/' },
+  { name: '顧客マスタ', url: '/customer-master' },
   { name: '車両マスタ', url: '/' },
   { name: '場所マスタ', url: '/' },
   { name: '担当者マスタ', url: '/' },
