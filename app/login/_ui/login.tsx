@@ -1,15 +1,22 @@
-import { Button, Stack, TextField, Typography } from '@mui/material';
+import { Box, Button, Stack, TextField, Typography } from '@mui/material';
+import { grey } from '@mui/material/colors';
 
 const Login = () => {
   return (
-    <Stack display="flex" justifyContent="center" alignItems="center" bgcolor="lightgray" width="100%" height="100vh">
-      <Typography>ログインID（メールアドレス）</Typography>
-      <TextField sx={{ bgcolor: 'white', width: '30%' }} size="small"></TextField>
-      <Typography marginTop={4}>パスワード</Typography>
-      <TextField sx={{ bgcolor: 'white', width: '30%' }} size="small"></TextField>
-      <Button variant="contained" href="/dashboard" sx={{ marginTop: 4 }}>
-        次へ
-      </Button>
+    <Stack spacing={4} justifyContent="center" bgcolor={grey[300]} alignItems="center" width="100%" height="100vh">
+      <Box width={'30%'}>
+        <Typography>ログインID（メールアドレス）</Typography>
+        <TextField sx={{ bgcolor: 'white', width: '100%' }} size="small"></TextField>
+      </Box>
+      <Box width={'30%'}>
+        <Typography>パスワード</Typography>
+        <TextField sx={{ bgcolor: 'white', width: '100%' }} size="small"></TextField>
+      </Box>
+      <Box display="flex" width={'30%'} justifyContent="flex-end">
+        <Button variant="contained" href="/dashboard">
+          次へ
+        </Button>
+      </Box>
     </Stack>
   );
 };
