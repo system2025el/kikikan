@@ -12,6 +12,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import { grey } from '@mui/material/colors';
 import Link from 'next/link';
 import { useState } from 'react';
 
@@ -56,7 +57,7 @@ const NewOrder = () => {
 
   return (
     <Box>
-      <Box bgcolor="gray">
+      <Box bgcolor={grey[400]}>
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Typography margin={1}>受注ヘッダー</Typography>
           <Box>
@@ -72,7 +73,7 @@ const NewOrder = () => {
           </Button>
         </Box>
         <Box display="flex">
-          <Stack sx={{ width: '55%' }} bgcolor="lightgray">
+          <Stack sx={{ width: '55%' }} bgcolor={grey[300]}>
             <Box sx={styles.container}>
               <Typography marginRight={5} whiteSpace="nowrap">
                 受注番号
@@ -115,7 +116,7 @@ const NewOrder = () => {
               スケジュール表
             </Button>
           </Stack>
-          <Stack sx={{ width: '45%' }} marginLeft={2} bgcolor="lightgray">
+          <Stack sx={{ width: '45%' }} marginLeft={2} bgcolor={grey[300]}>
             <Box sx={styles.container}>
               <Typography marginRight={7}>公演名</Typography>
               <TextField size="small" sx={{ width: '50%' }}></TextField>
@@ -143,7 +144,7 @@ const NewOrder = () => {
           </Stack>
         </Box>
       </Box>
-      <Box display="flex" justifyContent="space-between" alignItems="center" bgcolor="gray" sx={{ marginTop: 2 }}>
+      <Box display="flex" justifyContent="space-between" alignItems="center" bgcolor={grey[400]} sx={{ marginTop: 2 }}>
         <Box display="flex" sx={{ width: '20%' }}>
           <Typography margin={1}>受注明細（機材・車両）</Typography>
         </Box>

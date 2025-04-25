@@ -11,6 +11,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import { grey } from '@mui/material/colors';
 import { useRef, useState } from 'react';
 import React from 'react';
 
@@ -43,7 +44,7 @@ const EquipmentOrderDetail = () => {
 
   return (
     <Box>
-      <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ bgcolor: 'gray' }}>
+      <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ bgcolor: grey[400] }}>
         <Typography margin={1}>受注明細（機材）</Typography>
         <Box>
           <Button variant="contained" sx={{ margin: 1 }}>
@@ -57,7 +58,7 @@ const EquipmentOrderDetail = () => {
           戻る
         </Button>
       </Box>
-      <Box display="flex" sx={{ bgcolor: 'lightgray' }}>
+      <Box display="flex" sx={{ bgcolor: grey[300] }}>
         <Stack sx={{ width: '60%' }}>
           <Box sx={styles.container}>
             <Typography marginRight={3} whiteSpace="nowrap">
@@ -105,7 +106,7 @@ const EquipmentOrderDetail = () => {
           </Box>
         </Stack>
       </Box>
-      <Box display="flex" marginTop={2} sx={{ bgcolor: 'lightgray' }}>
+      <Box display="flex" marginTop={2} sx={{ bgcolor: grey[300] }}>
         <Stack sx={{ width: '100%' }}>
           <Typography whiteSpace="nowrap">機材入力</Typography>
           <Box display="flex" alignItems="center" margin={1} marginLeft={17}>

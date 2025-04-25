@@ -1,4 +1,5 @@
 import Checkbox from '@mui/material/Checkbox';
+import { grey } from '@mui/material/colors';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -38,7 +39,7 @@ const SelectTable: React.FC<TableProps> = ({ headers, rows, onSelectionChange })
 
   return (
     <Paper sx={{ width: '100%', mb: 2 }}>
-      <TableContainer sx={{ overflow: 'auto', height: '20vh', bgcolor: 'lightgray' }}>
+      <TableContainer sx={{ overflow: 'auto', height: '20vh', bgcolor: grey[300] }}>
         <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle" size="small">
           <TableHead>
             <TableRow sx={{ whiteSpace: 'nowrap' }}>

@@ -11,6 +11,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import { grey } from '@mui/material/colors';
 import { useState } from 'react';
 
 import Date from '@/app/(main)/_ui/date';
@@ -37,7 +38,7 @@ const VehicleOrderDetail = () => {
 
   return (
     <Box>
-      <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ bgcolor: 'gray' }}>
+      <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ bgcolor: grey[400] }}>
         <Typography margin={1}>受注明細（車両）</Typography>
         <Box>
           <Button variant="contained" sx={{ margin: 1 }}>
@@ -51,7 +52,7 @@ const VehicleOrderDetail = () => {
           戻る
         </Button>
       </Box>
-      <Box display="flex" sx={{ bgcolor: 'lightgray' }}>
+      <Box display="flex" sx={{ bgcolor: grey[300] }}>
         <Stack sx={{ width: '60%' }}>
           <Box display="flex" alignItems="center" margin={1} marginLeft={2}>
             <Typography marginRight={3} whiteSpace="nowrap">
@@ -99,7 +100,7 @@ const VehicleOrderDetail = () => {
           </Box>
         </Stack>
       </Box>
-      <Box display="flex" marginTop={2} sx={{ bgcolor: 'lightgray' }}>
+      <Box display="flex" marginTop={2} sx={{ bgcolor: grey[300] }}>
         <Stack sx={{ width: '100%' }}>
           <Typography whiteSpace="nowrap">車両入力</Typography>
           <Box display="flex" alignItems="center" margin={1} marginLeft={2}>
