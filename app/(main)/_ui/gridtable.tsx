@@ -3,12 +3,12 @@ import { colors, Paper, Table, TableBody, TableCell, TableContainer, TableHead, 
 import React, { useState } from 'react';
 
 type TableProps = {
-  header: string[];
+  header: string[] | null;
   rows: Array<{
     id: number;
     data: string[];
   }>;
-  editableColumns?: number[];
+  editableColumns?: number[] | null;
   onChange?: (rowIndex: number, colIndex: number, newValue: string) => void;
 };
 
@@ -27,12 +27,12 @@ const GridTable: React.FC<TableProps> = ({ header, rows, editableColumns = [], o
   };
 
   return (
-    <TableContainer component={Paper} style={{ overflowX: 'auto' }} sx={{ width: '60%' }}>
+    <TableContainer component={Paper} style={{ overflowX: 'auto' }}>
       <Table>
         <TableHead>
           <TableRow>
-            {header.map((date, index) => (
-              <TableCell key={index} align="center" sx={{ border: '1px solid black' }}>
+            {header?.map((date, index) => (
+              <TableCell key={index} align="center" sx={{ border: '1px solid black', whiteSpace: 'nowrap' }}>
                 {date}
               </TableCell>
             ))}
@@ -42,7 +42,7 @@ const GridTable: React.FC<TableProps> = ({ header, rows, editableColumns = [], o
           {localRows.map((row, rowIndex) => (
             <TableRow key={rowIndex}>
               {row.data.map((cell, colIndex) => {
-                const isEditable = editableColumns.includes(colIndex);
+                const isEditable = editableColumns?.includes(colIndex);
 
                 return (
                   <TableCell
@@ -50,7 +50,7 @@ const GridTable: React.FC<TableProps> = ({ header, rows, editableColumns = [], o
                     align="center"
                     sx={{
                       border: '1px solid black',
-                      width: '10%',
+                      whiteSpace: 'nowrap',
                     }}
                   >
                     {isEditable ? (
@@ -62,7 +62,7 @@ const GridTable: React.FC<TableProps> = ({ header, rows, editableColumns = [], o
                           border: 'none',
                           textAlign: 'center',
                           outline: 'none',
-                          width: '50%',
+                          whiteSpace: 'nowrap',
                         }}
                       />
                     ) : (

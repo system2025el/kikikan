@@ -112,7 +112,7 @@ const NewOrder = () => {
               <Typography marginRight={5}>公演終了</Typography>
               <Date />
             </Box>
-            <Button variant="contained" sx={{ width: '20%', margin: 2 }}>
+            <Button variant="contained" sx={{ width: '20%', margin: 2 }} href="/new-order/schedule">
               スケジュール表
             </Button>
           </Box>
