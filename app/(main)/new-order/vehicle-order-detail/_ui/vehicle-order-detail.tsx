@@ -14,7 +14,7 @@ import {
 import { grey } from '@mui/material/colors';
 import { useState } from 'react';
 
-import Date from '@/app/(main)/_ui/date';
+import DateX from '@/app/(main)/_ui/date';
 import Time from '@/app/(main)/_ui/time';
 
 const VehicleOrderDetail = () => {
@@ -40,14 +40,7 @@ const VehicleOrderDetail = () => {
     <Box>
       <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ bgcolor: grey[400] }}>
         <Typography margin={1}>受注明細（車両）</Typography>
-        <Box>
-          <Button variant="contained" sx={{ margin: 1 }}>
-            編集
-          </Button>
-          <Button variant="contained" sx={{ margin: 1 }}>
-            保存
-          </Button>
-        </Box>
+
         <Button variant="contained" sx={{ margin: 1 }} href="/new-order">
           戻る
         </Button>
@@ -100,9 +93,21 @@ const VehicleOrderDetail = () => {
           </Box>
         </Box>
       </Box>
-      <Box display="flex" marginTop={2} sx={{ bgcolor: grey[300] }}>
+      <Box display={'flex'} marginTop={2} px={1} sx={{ bgcolor: grey[400] }} alignItems={'center'}>
+        <Typography whiteSpace="nowrap" textAlign={'center'}>
+          車両入力
+        </Typography>
+        <Box ml={'35%'}>
+          <Button variant="contained" sx={{ margin: 1 }}>
+            編集
+          </Button>
+          <Button variant="contained" sx={{ margin: 1 }}>
+            保存
+          </Button>
+        </Box>
+      </Box>
+      <Box display="flex" sx={{ bgcolor: grey[300] }}>
         <Box sx={{ width: '100%' }}>
-          <Typography whiteSpace="nowrap">車両入力</Typography>
           <Box display="flex" alignItems="center" margin={1} marginLeft={2}>
             <Typography marginRight={2} whiteSpace="nowrap">
               車両サイズ
@@ -146,7 +151,7 @@ const VehicleOrderDetail = () => {
             <Typography marginRight={8} whiteSpace="nowrap">
               日時
             </Typography>
-            <Date />
+            <DateX />
             <Typography marginLeft={5} marginRight={2} whiteSpace="nowrap">
               時刻
             </Typography>

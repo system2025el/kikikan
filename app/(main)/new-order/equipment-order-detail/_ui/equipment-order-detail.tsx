@@ -15,7 +15,7 @@ import { grey } from '@mui/material/colors';
 import { useRef, useState } from 'react';
 import React from 'react';
 
-import Date from '@/app/(main)/_ui/date';
+import DateX from '@/app/(main)/_ui/date';
 import Grid, { EditableGridHandle } from '@/app/(main)/_ui/grid';
 import GridTable from '@/app/(main)/_ui/gridtable';
 import Time from '@/app/(main)/_ui/time';
@@ -56,14 +56,6 @@ const EquipmentOrderDetail = () => {
     <Box>
       <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ bgcolor: grey[400] }}>
         <Typography margin={1}>受注明細（機材）</Typography>
-        <Box>
-          <Button variant="contained" sx={{ margin: 1 }}>
-            編集
-          </Button>
-          <Button variant="contained" sx={{ margin: 1 }} onClick={handleClick}>
-            保存
-          </Button>
-        </Box>
         <Button variant="contained" sx={{ margin: 1 }} href="/new-order">
           戻る
         </Button>
@@ -116,9 +108,21 @@ const EquipmentOrderDetail = () => {
           </Box>
         </Box>
       </Box>
-      <Box display="flex" marginTop={2} sx={{ bgcolor: grey[300] }}>
+      <Box display={'flex'} marginTop={2} px={1} sx={{ bgcolor: grey[400] }} alignItems={'center'}>
+        <Typography whiteSpace="nowrap" textAlign={'center'}>
+          機材入力
+        </Typography>
+        <Box ml={'35%'}>
+          <Button variant="contained" sx={{ margin: 1 }}>
+            編集
+          </Button>
+          <Button variant="contained" sx={{ margin: 1 }} onClick={handleClick}>
+            保存
+          </Button>
+        </Box>
+      </Box>
+      <Box display="flex" sx={{ bgcolor: grey[300] }}>
         <Box sx={{ width: '100%' }}>
-          <Typography whiteSpace="nowrap">機材入力</Typography>
           <Box display="flex" alignItems="center" margin={1} marginLeft={17}>
             <Button variant="contained" sx={{ marginRight: 4 }}>
               ＋ 機材追加
@@ -148,7 +152,7 @@ const EquipmentOrderDetail = () => {
             <Typography marginRight={9} whiteSpace="nowrap">
               出庫日
             </Typography>
-            <Date />
+            <DateX />
             <Typography marginLeft={5} marginRight={2} whiteSpace="nowrap">
               時刻
             </Typography>
@@ -166,7 +170,7 @@ const EquipmentOrderDetail = () => {
             <Typography marginRight={9} whiteSpace="nowrap">
               返却日
             </Typography>
-            <Date />
+            <DateX />
             <Typography marginLeft={5} marginRight={2} whiteSpace="nowrap">
               時刻
             </Typography>
