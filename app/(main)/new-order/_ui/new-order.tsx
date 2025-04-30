@@ -16,7 +16,7 @@ import { grey } from '@mui/material/colors';
 import Link from 'next/link';
 import { useState } from 'react';
 
-import Date from '@/app/(main)/_ui/date';
+import DateX, { RSuiteDateRangePicker, TwoDatePickers } from '@/app/(main)/_ui/date';
 import SelectTable from '@/app/(main)/_ui/table';
 import { carHeaders, carRows, eqyipmentHeaders, eqyipmentRows } from '@/app/(main)/new-order/_lib/data';
 
@@ -55,6 +55,7 @@ const NewOrder = () => {
     setSelectPartner(event.target.value);
   };
 
+  // const [rentalPeriod, setRentalPeriod] = useState<[Date, Date]>([new Date(), new Date()]);
   return (
     <Box>
       <Box bgcolor={grey[400]}>
@@ -91,7 +92,7 @@ const NewOrder = () => {
             </Box>
             <Box sx={styles.container}>
               <Typography marginRight={7}>受注日</Typography>
-              <Date />
+              <DateX />
             </Box>
             <Box sx={styles.container}>
               <Typography marginRight={7}>入力者</Typography>
@@ -105,12 +106,12 @@ const NewOrder = () => {
               </FormControl>
             </Box>
             <Box sx={styles.container}>
-              <Typography marginRight={5}>公演開始</Typography>
-              <Date />
-            </Box>
-            <Box sx={styles.container}>
-              <Typography marginRight={5}>公演終了</Typography>
-              <Date />
+              <Typography>
+                レンタル開始/
+                <br />
+                レンタル終了
+              </Typography>
+              <RSuiteDateRangePicker /*val={rentalPeriod}*/ />
             </Box>
             <Button variant="contained" sx={{ width: '20%', margin: 2 }} href="/new-order/schedule">
               スケジュール表

@@ -7,12 +7,13 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DateValidationError } from '@mui/x-date-pickers/models';
 import dayjs from 'dayjs';
 import { useMemo, useState } from 'react';
+import { DateRangePicker } from 'rsuite';
 
 dayjs.locale('ja'); // カレンダーの曜日のフォーマット
 
 const today = dayjs();
 
-const Date = () => {
+const DateX = () => {
   const [error, setError] = useState<DateValidationError | null>(null);
 
   const errorMessage = useMemo(() => {
@@ -58,7 +59,7 @@ const Date = () => {
   );
 };
 
-export default Date;
+export default DateX;
 
 export const TwoDatePickers = () => {
   return (
@@ -81,7 +82,7 @@ export const TwoDatePickers = () => {
           }} // カレンダーヘッダーのフォーマット
           defaultValue={today}
           views={['year', 'month', 'day']}
-          sx={{ width: '15%' }}
+          sx={{ width: '15%', minWidth: 150 }}
         />
         ～
         <DatePicker
@@ -93,9 +94,25 @@ export const TwoDatePickers = () => {
           }} // カレンダーヘッダーのフォーマット
           defaultValue={today}
           views={['year', 'month', 'day']}
-          sx={{ width: '15%' }}
+          sx={{ width: '15%', minWidth: 150 }}
         />
       </LocalizationProvider>
     </>
+  );
+};
+
+export const RSuiteDateRangePicker = (/*props: { val: [Date, Date] }*/) => {
+  const [dateRange, setDateRange] = useState<[Date, Date]>([new Date(), new Date()]);
+  return (
+    <DateRangePicker
+      style={{ width: 250 }}
+      format="yyyy/MM/dd"
+      size="md"
+      character=" - "
+      placeholder="年/月/日 - 年/月/日"
+      placement="autoVertical"
+      value={dateRange}
+      onOk={(date) => setDateRange(date)}
+    />
   );
 };
