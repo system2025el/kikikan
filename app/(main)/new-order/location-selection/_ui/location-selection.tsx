@@ -6,11 +6,7 @@ import {
   Button,
   Container,
   Dialog,
-  DialogActions,
-  DialogContent,
-  MenuItem,
   Paper,
-  Select,
   Stack,
   Table,
   TableBody,
@@ -28,7 +24,7 @@ import { useState } from 'react';
 
 import { locationList } from '@/app/_lib/mock-data';
 
-import { DialogContentsComponent } from './dialog-contents';
+import { AreaSelectionDialog } from './area-selection-dialog';
 
 export const LocationSelectionComponent = () => {
   const [DialogOpen, setDialogOpen] = useState(false);
@@ -76,7 +72,7 @@ export const LocationSelectionComponent = () => {
               <TextField />
               <Button onClick={handleOpenDialog}>選択</Button>
               <Dialog open={DialogOpen} onClose={handleCloseDialog} fullScreen>
-                <DialogContentsComponent />
+                <AreaSelectionDialog />
               </Dialog>
             </Box>
           </Stack>

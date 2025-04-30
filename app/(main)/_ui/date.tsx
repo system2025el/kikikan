@@ -59,3 +59,43 @@ const Date = () => {
 };
 
 export default Date;
+
+export const TwoDatePickers = () => {
+  return (
+    <>
+      <LocalizationProvider
+        dateAdapter={AdapterDayjs}
+        dateFormats={{ year: 'YYYY年', month: 'MM' }} // カレンダー内の年一覧のフォーマット
+        adapterLocale="ja"
+        localeText={{
+          previousMonth: '前月を表示',
+          nextMonth: '翌月を表示',
+        }}
+      >
+        <DatePicker
+          name="date"
+          format="YYYY/MM/DD" // テキストエリア内のフォーマット
+          slotProps={{
+            textField: { size: 'small' },
+            calendarHeader: { format: 'YYYY年MM月' },
+          }} // カレンダーヘッダーのフォーマット
+          defaultValue={today}
+          views={['year', 'month', 'day']}
+          sx={{ width: '15%' }}
+        />
+        ～
+        <DatePicker
+          name="date"
+          format="YYYY/MM/DD" // テキストエリア内のフォーマット
+          slotProps={{
+            textField: { size: 'small' },
+            calendarHeader: { format: 'YYYY年MM月' },
+          }} // カレンダーヘッダーのフォーマット
+          defaultValue={today}
+          views={['year', 'month', 'day']}
+          sx={{ width: '15%' }}
+        />
+      </LocalizationProvider>
+    </>
+  );
+};

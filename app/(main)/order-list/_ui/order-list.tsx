@@ -26,6 +26,7 @@ import { DateRangePicker } from 'rsuite';
 
 import { customers } from '@/app/_lib/mock-data';
 
+import { TwoDatePickers } from '../../_ui/date';
 import { OrderTable } from './order-table';
 
 export const OrderList = () => {
@@ -54,7 +55,7 @@ export const OrderList = () => {
     setCustSort(event.target.value);
   };
 
-  const [dateRange, setDateRange] = useState<[Date, Date]>([new Date(), new Date()]);
+  const [dateRange, setDateRange] = useState<[Date, Date]>([new Date(''), new Date('')]);
 
   return (
     <Container disableGutters sx={{ minWidth: '100%', p: 3 }} maxWidth={'xl'}>
@@ -84,7 +85,7 @@ export const OrderList = () => {
             </Select>
           </FormControl>
           <FormControl>
-            <Box display={'flex'}>
+            <Box display={'flex'} alignItems={'center'}>
               <RadioGroup defaultValue={'past'} row>
                 {radioData.map((data) => (
                   <FormControlLabel
@@ -96,18 +97,7 @@ export const OrderList = () => {
                   />
                 ))}
               </RadioGroup>
-              {val === 'select' ? (
-                <DateRangePicker
-                  style={{ width: 220 }}
-                  format="yyyy/MM/dd"
-                  size="md"
-                  character=" - "
-                  placeholder="年/月/日 - 年/月/日"
-                  placement="autoVerticalEnd"
-                />
-              ) : (
-                ''
-              )}
+              {val === 'select' ? <TwoDatePickers /> : ''}
             </Box>
           </FormControl>
         </Stack>
