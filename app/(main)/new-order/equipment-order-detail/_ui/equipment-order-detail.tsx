@@ -19,7 +19,7 @@ import Date from '@/app/(main)/_ui/date';
 import Grid, { EditableGridHandle } from '@/app/(main)/_ui/grid';
 import GridTable from '@/app/(main)/_ui/gridtable';
 import Time from '@/app/(main)/_ui/time';
-import { columns, data, header } from '@/app/(main)/new-order/equipment-order-detail/_lib/data';
+import { cellWidths, data, header } from '@/app/(main)/new-order/equipment-order-detail/_lib/data';
 
 const EquipmentOrderDetail = () => {
   const [selectStatus, setSelectStatus] = useState('入力中');
@@ -123,13 +123,21 @@ const EquipmentOrderDetail = () => {
             <Button variant="contained" sx={{ marginRight: 4 }}>
               ＋ 機材追加
             </Button>
-            <Button variant="contained">受注機材・スケジュール</Button>
+            <Button variant="contained" href="/new-order/schedule">
+              受注機材・スケジュール
+            </Button>
           </Box>
-          <Box sx={styles.container}>
+          <Box sx={styles.container} width="75%">
             <Typography marginRight={11} whiteSpace="nowrap">
               機材
             </Typography>
-            <GridTable header={header} rows={rows} editableColumns={editableColumns} onChange={handleCellChange} />
+            <GridTable
+              header={header}
+              rows={rows}
+              editableColumns={editableColumns}
+              onChange={handleCellChange}
+              cellWidths={cellWidths}
+            />
           </Box>
           <Box sx={styles.container}>
             <Typography marginRight={1} whiteSpace="nowrap">
@@ -193,7 +201,7 @@ const EquipmentOrderDetail = () => {
             <Button value="仕込" size="small" sx={{ color: 'white', bgcolor: 'blue' }}>
               仕込
             </Button>
-            <Button value="RH" size="small" sx={{ color: 'white', bgcolor: 'green', marginLeft: 2 }}>
+            <Button value="RH" size="small" sx={{ color: 'white', bgcolor: 'orange', marginLeft: 2 }}>
               RH
             </Button>
             <Button value="GP" size="small" sx={{ color: 'white', bgcolor: 'green', marginLeft: 2 }}>

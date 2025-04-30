@@ -25,6 +25,8 @@ const data = [
   },
 ];
 
+const cellWidths = ['200px', '150px'];
+
 const header = ['セット(1)', '全', '受注数', '予備数', '合計', '機材メモ'];
 
-export { columns, data, header, rows };
+export { cellWidths, columns, data, header, rows };

@@ -1,5 +1,15 @@
 import { BorderColor } from '@mui/icons-material';
-import { colors, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
+import {
+  colors,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+} from '@mui/material';
 import React, { useState } from 'react';
 
 type TableProps = {
@@ -10,9 +20,10 @@ type TableProps = {
   }>;
   editableColumns?: number[] | null;
   onChange?: (rowIndex: number, colIndex: number, newValue: string) => void;
+  cellWidths?: Array<string | number>;
 };
 
-const GridTable: React.FC<TableProps> = ({ header, rows, editableColumns = [], onChange }) => {
+const GridTable: React.FC<TableProps> = ({ header, rows, editableColumns = [], onChange, cellWidths = [] }) => {
   const [localRows, setLocalRows] = useState(rows);
 
   const handleCellChange = (rowIndex: number, colIndex: number, newValue: string) => {
@@ -26,13 +37,20 @@ const GridTable: React.FC<TableProps> = ({ header, rows, editableColumns = [], o
     onChange?.(rowIndex, colIndex, newValue);
   };
 
+  const getWidth = (index: number) => cellWidths[index] ?? cellWidths[1];
+
   return (
     <TableContainer component={Paper} style={{ overflowX: 'auto' }}>
       <Table>
         <TableHead>
           <TableRow>
             {header?.map((date, index) => (
-              <TableCell key={index} align="center" sx={{ border: '1px solid black', whiteSpace: 'nowrap' }}>
+              <TableCell
+                key={index}
+                align="center"
+                size="small"
+                sx={{ border: '1px solid black', whiteSpace: 'nowrap' }}
+              >
                 {date}
               </TableCell>
             ))}
@@ -43,6 +61,7 @@ const GridTable: React.FC<TableProps> = ({ header, rows, editableColumns = [], o
             <TableRow key={rowIndex}>
               {row.data.map((cell, colIndex) => {
                 const isEditable = editableColumns?.includes(colIndex);
+                const minWidth = getWidth(colIndex);
 
                 return (
                   <TableCell
@@ -51,18 +70,26 @@ const GridTable: React.FC<TableProps> = ({ header, rows, editableColumns = [], o
                     sx={{
                       border: '1px solid black',
                       whiteSpace: 'nowrap',
+                      minWidth,
+                      height: 45,
                     }}
+                    size="small"
                   >
                     {isEditable ? (
-                      <input
-                        type="text"
+                      <TextField
+                        variant="standard"
                         value={cell}
                         onChange={(e) => handleCellChange(rowIndex, colIndex, e.target.value)}
-                        style={{
-                          border: 'none',
-                          textAlign: 'center',
-                          outline: 'none',
-                          whiteSpace: 'nowrap',
+                        sx={{
+                          '& .MuiInputBase-input': {
+                            textAlign: 'center',
+                          },
+                        }}
+                        slotProps={{
+                          input: {
+                            style: { textAlign: 'center' },
+                            disableUnderline: true,
+                          },
                         }}
                       />
                     ) : (

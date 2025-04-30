@@ -16,16 +16,24 @@ import { grey } from '@mui/material/colors';
 import { useState } from 'react';
 
 import GridTable from '@/app/(main)/_ui/gridtable';
-import { equipmentData, equipmentHeader } from '@/app/(main)/new-order/schedule/_lib/data';
+import {
+  dateData,
+  dateHeader,
+  dateWidths,
+  equipmentData,
+  equipmentHeader,
+  equipmentWidths,
+} from '@/app/(main)/new-order/schedule/_lib/data';
 
 const Schedule = () => {
-  const [equipmentRows, setRows] = useState(equipmentData);
-  const editableColumns = null;
+  const [equipmentRows, setEquipmentRows] = useState(equipmentData);
+  const [testRows, setTestRows] = useState(dateData);
+  const editableColumns = [2, 3];
 
-  const handleCellChange = (rowIndex: number, colIndex: number, newValue: string) => {
+  const equipmentCellChange = (rowIndex: number, colIndex: number, newValue: string) => {
     const updatedRows = [...equipmentRows];
     updatedRows[rowIndex].data[colIndex] = newValue;
-    setRows(updatedRows);
+    setEquipmentRows(updatedRows);
     console.log(`Row ${rowIndex}, Column ${colIndex} changed to "${newValue}"`);
   };
 
@@ -62,16 +70,25 @@ const Schedule = () => {
         <Button sx={{ bgcolor: 'white', color: 'black' }}>日付選択</Button>
         <Button>＞＞</Button>
       </Box>
-      <Box>
-        <GridTable
-          header={equipmentHeader}
-          rows={equipmentRows}
-          editableColumns={editableColumns}
-          onChange={handleCellChange}
-        />
-      </Box>
-      <Box marginTop={2}>
-        <GridTable header={null} rows={equipmentRows} editableColumns={editableColumns} onChange={handleCellChange} />
+      <Box display="flex" flexDirection="row" width="90%">
+        <Box width="40%">
+          <GridTable
+            header={equipmentHeader}
+            rows={equipmentRows}
+            editableColumns={editableColumns}
+            onChange={equipmentCellChange}
+            cellWidths={equipmentWidths}
+          />
+        </Box>
+        <Box width="60%">
+          <GridTable
+            header={dateHeader}
+            rows={testRows}
+            editableColumns={null}
+            onChange={equipmentCellChange}
+            cellWidths={dateWidths}
+          />
+        </Box>
       </Box>
     </Box>
   );
