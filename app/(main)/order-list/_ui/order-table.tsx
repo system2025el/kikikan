@@ -108,16 +108,19 @@ export const OrderTable = () => {
                 sx={{ bgcolor: grey[200], justifyContent: 'start' }}
                 colSpan={3}
               />
-              <TableCell colSpan={4} sx={{ bgcolor: grey[200] }}>
-                <Button color="error" sx={{ ml: '40%' }}>
-                  -削除
+              <TableCell colSpan={3} sx={{ bgcolor: grey[200] }}>
+                <Button sx={{ ml: '40%' }} size="medium" href="/new-order">
+                  +新規受注
                 </Button>
               </TableCell>
               <TableCell colSpan={1} sx={{ bgcolor: grey[200] }}>
-                <Button>マージ</Button>
+                <Button color="error">-受注削除</Button>
               </TableCell>
               <TableCell colSpan={1} sx={{ bgcolor: grey[200] }}>
-                <Button>コピー</Button>
+                <Button>受注マージ</Button>
+              </TableCell>
+              <TableCell colSpan={1} sx={{ bgcolor: grey[200] }}>
+                <Button>受注コピー</Button>
               </TableCell>
             </TableRow>
             <TableRow>

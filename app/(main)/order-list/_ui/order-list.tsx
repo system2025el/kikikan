@@ -22,7 +22,6 @@ import {
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import { useState } from 'react';
-import { DateRangePicker } from 'rsuite';
 
 import { customers } from '@/app/_lib/mock-data';
 
@@ -55,12 +54,11 @@ export const OrderList = () => {
     setCustSort(event.target.value);
   };
 
-  const [dateRange, setDateRange] = useState<[Date, Date]>([new Date(''), new Date('')]);
-
   return (
     <Container disableGutters sx={{ minWidth: '100%', p: 3 }} maxWidth={'xl'}>
-      <Box width={'100%'} bgcolor={grey[300]} py={2} justifySelf={'center'} p={2}>
+      <Box width={'100%'} bgcolor={grey[300]} py={2} display={'flex'} p={2} justifyContent={'space-between'}>
         <Typography>受注一覧</Typography>
+        <Button>戻る</Button>
       </Box>
       <Box width={'100%'} bgcolor={grey[200]} justifySelf={'center'} p={2}>
         <Stack justifyContent={'space-between'}>
@@ -139,16 +137,7 @@ export const OrderList = () => {
           <Typography>公演名</Typography>
           <TextField sx={{ bgcolor: 'white' }} />
           <Typography>公演日</Typography>
-          <DateRangePicker
-            style={{ width: 250 }}
-            format="yyyy/MM/dd"
-            size="md"
-            character=" - "
-            placeholder="年/月/日 - 年/月/日"
-            placement="autoVertical"
-            value={dateRange}
-            onOk={(date) => setDateRange(date)}
-          />
+          <TwoDatePickers />
         </Stack>
       </Box>
       <OrderTable />
