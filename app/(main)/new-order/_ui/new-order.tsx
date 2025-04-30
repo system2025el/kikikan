@@ -113,9 +113,6 @@ const NewOrder = () => {
               </Typography>
               <RSuiteDateRangePicker /*val={rentalPeriod}*/ />
             </Box>
-            <Button variant="contained" sx={{ width: '20%', margin: 2 }} href="/new-order/schedule">
-              スケジュール表
-            </Button>
           </Box>
           <Box sx={{ width: '45%' }} marginLeft={2} bgcolor={grey[300]}>
             <Box sx={styles.container}>
@@ -147,31 +144,37 @@ const NewOrder = () => {
           </Box>
         </Box>
       </Box>
-      <Box display="flex" justifyContent="space-between" alignItems="center" bgcolor={grey[400]} sx={{ marginTop: 2 }}>
-        <Box display="flex" sx={{ width: '20%' }}>
-          <Typography margin={1}>受注明細（機材・車両）</Typography>
+      <Box bgcolor={grey[400]} sx={{ marginTop: 2 }}>
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Box display="flex" sx={{ width: '20%' }}>
+            <Typography margin={1}>受注明細（機材）</Typography>
+          </Box>
+          <Box display="flex" sx={{ width: '60%' }} alignItems="center" margin={1}>
+            <Typography mx={1}>機材数</Typography>
+            <TextField size="small" sx={{ width: '5%' }}></TextField>
+            <Typography mx={1}>車両数</Typography>
+            <TextField size="small" sx={{ width: '5%' }}></TextField>
+            <Typography mx={1}>合計金額</Typography>
+            <TextField size="small" sx={{ width: '20%' }}></TextField>
+            <Button variant="contained" sx={{ mx: 3 }} href="/new-order/equipment-order-detail">
+              ＋ 機材入力
+            </Button>
+            <Button variant="contained" href="/new-order/vehicle-order-detail">
+              ＋ 車両入力
+            </Button>
+          </Box>
+          <Box display="flex" sx={{ width: '20%' }}>
+            <Button variant="contained" sx={{ bgcolor: 'red' }}>
+              － 削除
+            </Button>
+          </Box>
         </Box>
-        <Box display="flex" sx={{ width: '60%' }} alignItems="center" margin={1}>
-          <Typography mx={1}>機材数</Typography>
-          <TextField size="small" sx={{ width: '5%' }}></TextField>
-          <Typography mx={1}>車両数</Typography>
-          <TextField size="small" sx={{ width: '5%' }}></TextField>
-          <Typography mx={1}>合計金額</Typography>
-          <TextField size="small" sx={{ width: '20%' }}></TextField>
-          <Button variant="contained" sx={{ mx: 3 }} href="/new-order/equipment-order-detail">
-            ＋ 機材入力
-          </Button>
-          <Button variant="contained" href="/new-order/vehicle-order-detail">
-            ＋ 車両入力
-          </Button>
-        </Box>
-        <Box display="flex" sx={{ width: '20%' }}>
-          <Button variant="contained" sx={{ bgcolor: 'red' }}>
-            － 削除
-          </Button>
-        </Box>
+        <Button href="/new-order/schedule">受注機材・スケジュール</Button>
       </Box>
       <SelectTable headers={eqyipmentHeaders} rows={eqyipmentRows} onSelectionChange={handleSelectionChange} />
+      <Box display="flex" bgcolor={grey[400]}>
+        <Typography margin={1}>受注明細（車両）</Typography>
+      </Box>
       <SelectTable headers={carHeaders} rows={carRows} onSelectionChange={handleSelectionChange} />
     </Box>
   );
