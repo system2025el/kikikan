@@ -1,5 +1,6 @@
 import { Box, Button, DialogContent, DialogTitle, Grid2, Typography } from '@mui/material';
 import { grey } from '@mui/material/colors';
+
 import { areaCate, areaList } from '../_lib/data';
 
 export const AreaSelectionDialog = () => {
