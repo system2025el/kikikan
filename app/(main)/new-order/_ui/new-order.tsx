@@ -5,6 +5,7 @@ import {
   Button,
   Dialog,
   FormControl,
+  Grid2,
   MenuItem,
   Paper,
   Select,
@@ -72,17 +73,14 @@ const NewOrder = () => {
       <Box bgcolor={grey[400]}>
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Typography margin={1}>受注ヘッダー</Typography>
-          <Box>
-            <Button variant="contained" sx={{ margin: 1 }}>
-              編集
-            </Button>
-            <Button variant="contained" sx={{ margin: 1 }}>
-              保存
-            </Button>
+          <Box width={'40%'} textAlign={'end'}>
+            <Button sx={{ margin: 1 }}>編集</Button>
+            <Button sx={{ margin: 1 }}>保存</Button>
           </Box>
-          <Button variant="contained" sx={{ margin: 1 }}>
-            複製
+          <Button color="error" sx={{ ml: '20%' }}>
+            ー削除
           </Button>
+          <Button sx={{ margin: 1 }}>コピー</Button>
         </Box>
         <Box display="flex">
           <Box sx={{ width: '55%' }} bgcolor={grey[300]}>
@@ -134,9 +132,7 @@ const NewOrder = () => {
               <Typography marginRight={5}>公演場所</Typography>
               <TextField disabled size="small" sx={{ width: '8%', marginRight: 4 }}></TextField>
               <TextField disabled size="small" sx={{ width: '50%' }}></TextField>
-              <Button variant="contained" onClick={() => handleOpenLocationDialog()}>
-                選択
-              </Button>
+              <Button onClick={() => handleOpenLocationDialog()}>選択</Button>
               <Dialog open={locationDialogOpen} fullScreen>
                 <LocationSelectDialog handleCloseLocationDialog={handleCloseLocationDailog} />
               </Dialog>
@@ -145,7 +141,7 @@ const NewOrder = () => {
               <Typography marginRight={9}>相手</Typography>
               <TextField disabled size="small" sx={{ width: '8%', marginRight: 4 }}></TextField>
               <TextField disabled size="small" sx={{ width: '50%' }}></TextField>
-              <Button variant="contained">選択</Button>
+              <Button>選択</Button>
             </Box>
             <Box sx={styles.container}>
               <Typography marginRight={9}>メモ</Typography>
@@ -158,36 +154,59 @@ const NewOrder = () => {
           </Box>
         </Box>
       </Box>
+      {/* --------------------------------受注明細（機材）------------------------------------- */}
       <Box bgcolor={grey[400]} sx={{ marginTop: 2 }}>
-        <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Box display="flex" sx={{ width: '20%' }}>
+        <Grid2 container alignItems="center" pt={2}>
+          <Grid2 size={3}>
             <Typography margin={1}>受注明細（機材）</Typography>
-          </Box>
-          <Box display="flex" sx={{ width: '60%' }} alignItems="center" margin={1}>
-            <Typography mx={1}>機材数</Typography>
-            <TextField size="small" sx={{ width: '5%' }}></TextField>
-            <Typography mx={1}>車両数</Typography>
-            <TextField size="small" sx={{ width: '5%' }}></TextField>
-            <Typography mx={1}>合計金額</Typography>
-            <TextField size="small" sx={{ width: '20%' }}></TextField>
-            <Button variant="contained" sx={{ mx: 3 }} href="/new-order/equipment-order-detail">
-              ＋ 機材入力
-            </Button>
-            <Button variant="contained" href="/new-order/vehicle-order-detail">
-              ＋ 車両入力
-            </Button>
-          </Box>
-          <Box display="flex" sx={{ width: '20%' }}>
-            <Button variant="contained" sx={{ bgcolor: 'red' }}>
-              － 削除
-            </Button>
-          </Box>
-        </Box>
+          </Grid2>
+          <Grid2 size={4} display="flex" alignItems="center" justifyItems={'stretch'}>
+            <Box display="flex" sx={{ width: '100%' }} alignItems="center">
+              <Typography mx={1}>機材数</Typography>
+              <TextField size="small" sx={{ width: '10%' }}></TextField>
+              <Typography mx={1}>車両数</Typography>
+              <TextField size="small" sx={{ width: '10%' }}></TextField>
+              <Typography mx={1}>合計金額</Typography>
+              <TextField size="small" sx={{ width: '40%' }}></TextField>
+            </Box>
+          </Grid2>
+          <Grid2 size={5} display={'flex'} justifyContent={'space-between'} pr={1}>
+            <Box>
+              <Button href="/new-order/vehicle-order-detail">＋ 車両入力</Button>
+            </Box>
+            <Box>
+              <Button>編集</Button>
+            </Box>
+            <Box>
+              <Button color="error">－ 削除</Button>
+            </Box>
+          </Grid2>
+        </Grid2>
         <Button href="/new-order/schedule">受注機材・スケジュール</Button>
       </Box>
       <SelectTable headers={eqyipmentHeaders} rows={eqyipmentRows} onSelectionChange={handleSelectionChange} />
-      <Box display="flex" bgcolor={grey[400]}>
-        <Typography margin={1}>受注明細（車両）</Typography>
+      {/* -------------------------車両----------------------------------- */}
+      <Box bgcolor={grey[400]} justifyContent={'space-between'}>
+        <Grid2 container alignItems="center" pt={2}>
+          <Grid2 size={3}>
+            <Typography margin={1}>（車両）</Typography>
+          </Grid2>
+          <Grid2 size={4} display="flex" alignItems="center" justifyItems={'stretch'}>
+            <Box display="flex" sx={{ width: '100%' }}></Box>
+          </Grid2>
+          <Grid2 size={5} display={'flex'} justifyContent={'space-between'} pr={1}>
+            <Box>
+              <Button href="/new-order/equipment-order-detail">＋ 機材入力</Button>
+            </Box>
+            <Box>
+              <Button>編集</Button>
+            </Box>
+            <Box>
+              <Button color="error">－ 削除</Button>
+            </Box>
+          </Grid2>
+        </Grid2>
+        <Button href="/new-order/schedule">受注機材・スケジュール</Button>
       </Box>
       <SelectTable headers={carHeaders} rows={carRows} onSelectionChange={handleSelectionChange} />
     </Box>
