@@ -1,6 +1,16 @@
 'use client';
 
-import { Box, Button, FormControl, MenuItem, Select, SelectChangeEvent, TextField, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  Dialog,
+  FormControl,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { grey } from '@mui/material/colors';
 import { useRef, useState } from 'react';
 import React from 'react';
@@ -10,6 +20,8 @@ import { EditableGridHandle } from '@/app/(main)/_ui/grid';
 import GridTable from '@/app/(main)/_ui/gridtable';
 import Time from '@/app/(main)/_ui/time';
 import { cellWidths, data, header } from '@/app/(main)/new-order/equipment-order-detail/_lib/data';
+
+import { EquipmentSelectionDialog } from './equipment-selection-dailog';
 
 const EquipmentOrderDetail = () => {
   const [selectStatus, setSelectStatus] = useState('入力中');
@@ -40,6 +52,14 @@ const EquipmentOrderDetail = () => {
     updatedRows[rowIndex].data[colIndex] = newValue;
     setRows(updatedRows);
     console.log(`Row ${rowIndex}, Column ${colIndex} changed to "${newValue}"`);
+  };
+
+  const [EqSelectionDialogOpen, setEqSelectionDialogOpen] = useState(false);
+  const handleOpenEqDialog = () => {
+    setEqSelectionDialogOpen(true);
+  };
+  const handleCloseEqDialog = () => {
+    setEqSelectionDialogOpen(false);
   };
 
   return (
@@ -114,13 +134,12 @@ const EquipmentOrderDetail = () => {
       <Box display="flex" sx={{ bgcolor: grey[300] }}>
         <Box sx={{ width: '100%' }}>
           <Box display="flex" alignItems="center" margin={1} marginLeft={17}>
-            <Button
-              variant="contained"
-              sx={{ marginRight: 4 }}
-              href="/new-order/equipment-order-detail/equipment-selection"
-            >
+            <Button variant="contained" sx={{ marginRight: 4 }} onClick={() => handleOpenEqDialog()}>
               ＋ 機材追加
             </Button>
+            <Dialog open={EqSelectionDialogOpen} fullScreen>
+              <EquipmentSelectionDialog handleCloseDialog={handleCloseEqDialog} />
+            </Dialog>
             <Button variant="contained" href="/new-order/schedule">
               受注機材・スケジュール
             </Button>

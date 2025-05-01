@@ -1,5 +1,3 @@
-import { equipmentData } from '../../../schedule/_lib/data';
-
 export type Cate = {
   id: number;
   name: string;
