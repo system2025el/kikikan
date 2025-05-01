@@ -24,7 +24,7 @@ import { cellWidths, data, header } from '@/app/(main)/new-order/equipment-order
 import { EquipmentSelectionDialog } from './equipment-selection-dailog';
 
 const EquipmentOrderDetail = () => {
-  const [selectStatus, setSelectStatus] = useState('入力中');
+  const [selectStatus, setSelectStatus] = useState('準備中');
   const [selectIssueBase, setSelectIssueBase] = useState('KICKS');
   const [selectReturnBase, setSelectReturnBase] = useState('YARD');
   const [rows, setRows] = useState(data);
@@ -76,11 +76,11 @@ const EquipmentOrderDetail = () => {
             <Typography marginRight={3} whiteSpace="nowrap">
               受注番号
             </Typography>
-            <TextField size="small" disabled></TextField>
+            <TextField size="small" defaultValue="81694" disabled></TextField>
             <Typography mx={2} whiteSpace="nowrap">
               受注ステータス
             </Typography>
-            <TextField size="small" disabled>
+            <TextField size="small" defaultValue="確定" disabled>
               確定
             </TextField>
           </Box>
@@ -88,13 +88,13 @@ const EquipmentOrderDetail = () => {
             <Typography marginRight={5} whiteSpace="nowrap">
               受注日
             </Typography>
-            <TextField size="small" disabled></TextField>
+            <TextField size="small" defaultValue="2025/10/01" disabled></TextField>
           </Box>
           <Box sx={styles.container}>
             <Typography marginRight={5} whiteSpace="nowrap">
               入力者
             </Typography>
-            <TextField size="small" disabled></TextField>
+            <TextField size="small" defaultValue="XXXXXXXX" disabled></TextField>
           </Box>
         </Box>
         <Box sx={{ width: '40%' }}>
@@ -102,19 +102,19 @@ const EquipmentOrderDetail = () => {
             <Typography marginRight={5} whiteSpace="nowrap">
               公演名
             </Typography>
-            <TextField size="small" defaultValue="A/Zepp Tour"></TextField>
+            <TextField size="small" defaultValue="A/Zepp Tour" disabled></TextField>
           </Box>
           <Box sx={styles.container}>
             <Typography marginRight={3} whiteSpace="nowrap">
               公演場所
             </Typography>
-            <TextField size="small" defaultValue="Zepp Osaka"></TextField>
+            <TextField size="small" defaultValue="Zepp Osaka" disabled></TextField>
           </Box>
           <Box sx={styles.container}>
             <Typography marginRight={7} whiteSpace="nowrap">
               相手
             </Typography>
-            <TextField size="small" defaultValue="(株)シアターブレーン"></TextField>
+            <TextField size="small" defaultValue="(株)シアターブレーン" disabled></TextField>
           </Box>
         </Box>
       </Box>
@@ -156,21 +156,18 @@ const EquipmentOrderDetail = () => {
               cellWidths={cellWidths}
               colorSelect={false}
             />
+            <Box display="flex" flexDirection="column" sx={{ placeSelf: 'flex-end' }}>
+              <Box>
+                <Button size="large" sx={{ marginBottom: '3px', color: 'white', bgcolor: 'red' }}>
+                  削除
+                </Button>
+                <Button size="large" sx={{ color: 'white', bgcolor: 'red' }}>
+                  削除
+                </Button>
+              </Box>
+            </Box>
           </Box>
-          <Box sx={styles.container}>
-            <Typography marginRight={1} whiteSpace="nowrap">
-              機材ステータス
-            </Typography>
-            <FormControl size="small" sx={{ width: '10%' }}>
-              <Select value={selectStatus} onChange={selectStatusChange}>
-                <MenuItem value={'入力中'}>入力中</MenuItem>
-                <MenuItem value={'準備可'}>準備可</MenuItem>
-                <MenuItem value={'作業中'}>作業中</MenuItem>
-                <MenuItem value={'OK'}>OK</MenuItem>
-              </Select>
-            </FormControl>
-          </Box>
-          <Box sx={styles.container} width="60%">
+          <Box display="flex" alignItems="center" margin={1} marginLeft={2} marginTop={4} width="60%">
             <Typography marginRight={9} whiteSpace="nowrap">
               出庫日
             </Typography>
@@ -216,19 +213,71 @@ const EquipmentOrderDetail = () => {
             <Typography marginRight={9} whiteSpace="nowrap">
               本番日
             </Typography>
-            <Button value="仕込" size="small" sx={{ color: 'white', bgcolor: 'blue' }}>
+            <Button size="small" sx={{ color: 'white', bgcolor: 'purple' }}>
               仕込
             </Button>
-            <Button value="RH" size="small" sx={{ color: 'white', bgcolor: 'orange', marginLeft: 2 }}>
-              RH
-            </Button>
-            <Button value="GP" size="small" sx={{ color: 'white', bgcolor: 'green', marginLeft: 2 }}>
-              GP
-            </Button>
-            <Button value="本番" size="small" sx={{ color: 'white', bgcolor: 'pink', marginLeft: 2 }}>
-              本番
-            </Button>
-            <TextField disabled size="small" sx={{ marginLeft: 4 }} />
+            <Button sx={{ marginLeft: '40%' }}>編集</Button>
+          </Box>
+          <Box sx={styles.container}>
+            <Box display="flex" flexDirection="column">
+              <TextField defaultValue="2025/11/03" sx={{ marginLeft: 25 }} />
+              <TextField defaultValue="2025/11/04" sx={{ marginLeft: 25 }} />
+            </Box>
+            <Box display="flex" flexDirection="column">
+              <TextField defaultValue="XXXXXXXXXX" sx={{ marginLeft: 4 }} />
+              <TextField defaultValue="XXXXXXXXXX" sx={{ marginLeft: 4 }} />
+            </Box>
+          </Box>
+          <Button size="small" sx={{ color: 'white', bgcolor: 'orange', marginLeft: 17 }}>
+            RH
+          </Button>
+          <Box sx={styles.container}>
+            <Box display="flex" flexDirection="column">
+              <TextField defaultValue="2025/11/03" sx={{ marginLeft: 25 }} />
+              <TextField defaultValue="2025/11/04" sx={{ marginLeft: 25 }} />
+            </Box>
+            <Box display="flex" flexDirection="column">
+              <TextField defaultValue="XXXXXXXXXX" sx={{ marginLeft: 4 }} />
+              <TextField defaultValue="XXXXXXXXXX" sx={{ marginLeft: 4 }} />
+            </Box>
+          </Box>
+          <Button size="small" sx={{ color: 'white', bgcolor: 'green', marginLeft: 17 }}>
+            GP
+          </Button>
+          <Box sx={styles.container}>
+            <Box display="flex" flexDirection="column">
+              <TextField defaultValue="2025/11/03" sx={{ marginLeft: 25 }} />
+              <TextField defaultValue="2025/11/04" sx={{ marginLeft: 25 }} />
+            </Box>
+            <Box display="flex" flexDirection="column">
+              <TextField defaultValue="XXXXXXXXXX" sx={{ marginLeft: 4 }} />
+              <TextField defaultValue="XXXXXXXXXX" sx={{ marginLeft: 4 }} />
+            </Box>
+          </Box>
+          <Button size="small" sx={{ color: 'white', bgcolor: 'pink', marginLeft: 17 }}>
+            本番
+          </Button>
+          <Box sx={styles.container}>
+            <Box display="flex" flexDirection="column">
+              <TextField defaultValue="2025/11/03" sx={{ marginLeft: 25 }} />
+              <TextField defaultValue="2025/11/04" sx={{ marginLeft: 25 }} />
+            </Box>
+            <Box display="flex" flexDirection="column">
+              <TextField defaultValue="XXXXXXXXXX" sx={{ marginLeft: 4 }} />
+              <TextField defaultValue="XXXXXXXXXX" sx={{ marginLeft: 4 }} />
+            </Box>
+          </Box>
+          <Box display="flex" alignItems="center" margin={1} marginLeft={2} marginTop={4}>
+            <Typography marginRight={1} whiteSpace="nowrap">
+              受注機材ステータス
+            </Typography>
+            <FormControl size="small" sx={{ width: '10%' }}>
+              <Select value={selectStatus} onChange={selectStatusChange}>
+                <MenuItem value={'準備中'}>準備中</MenuItem>
+                <MenuItem value={'作業中'}>作業中</MenuItem>
+                <MenuItem value={'OK'}>OK</MenuItem>
+              </Select>
+            </FormControl>
           </Box>
         </Box>
       </Box>
