@@ -25,7 +25,7 @@ const data = [
   },
 ];
 
-const cellWidths = ['200px', '150px'];
+const cellWidths = ['30%', '5%', '5%', '5%', '5%', '50%'];
 
 const header = ['セット(1)', '全', '受注数', '予備数', '合計', '機材メモ'];
 

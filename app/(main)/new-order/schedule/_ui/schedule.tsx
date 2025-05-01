@@ -78,6 +78,7 @@ const Schedule = () => {
             editableColumns={editableColumns}
             onChange={equipmentCellChange}
             cellWidths={equipmentWidths}
+            colorSelect={false}
           />
         </Box>
         <Box width="60%">
@@ -87,6 +88,7 @@ const Schedule = () => {
             editableColumns={null}
             onChange={equipmentCellChange}
             cellWidths={dateWidths}
+            colorSelect={true}
           />
         </Box>
       </Box>

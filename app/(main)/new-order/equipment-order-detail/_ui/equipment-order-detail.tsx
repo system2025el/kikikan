@@ -141,6 +141,7 @@ const EquipmentOrderDetail = () => {
               editableColumns={editableColumns}
               onChange={handleCellChange}
               cellWidths={cellWidths}
+              colorSelect={false}
             />
           </Box>
           <Box sx={styles.container}>
