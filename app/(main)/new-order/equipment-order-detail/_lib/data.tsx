@@ -17,16 +17,16 @@ const rows = [
 const data = [
   {
     id: 1,
-    data: ['SHARPY PLUS', '148', '2', '1', '3', ''],
+    data: ['SHARPY PLUS', '148', '2', '1', '3', 'XXXXXXXX'],
   },
   {
     id: 2,
-    data: ['ROBIN T2 Profile', '26', '3', '1', '4', ''],
+    data: ['ROBIN T2 Profile', '26', '3', '1', '4', 'XXXXXXXX'],
   },
 ];
 
 const cellWidths = ['30%', '5%', '5%', '5%', '5%', '50%'];
 
-const header = ['セット(1)', '全', '受注数', '予備数', '合計', '機材メモ'];
+const header = ['', '全', '受注数', '予備数', '合計', '機材メモ'];
 
 export { cellWidths, columns, data, header, rows };

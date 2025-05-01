@@ -2,6 +2,7 @@
 
 import { BorderColor } from '@mui/icons-material';
 import {
+  Button,
   colors,
   Paper,
   Table,
@@ -35,7 +36,6 @@ const GridTable: React.FC<TableProps> = ({
   colorSelect,
 }) => {
   const [localRows, setLocalRows] = useState(rows);
-  console.log(header?.length);
 
   const handleCellChange = (rowIndex: number, colIndex: number, newValue: string) => {
     const updated = [...localRows];
