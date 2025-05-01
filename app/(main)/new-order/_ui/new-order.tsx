@@ -3,6 +3,7 @@
 import {
   Box,
   Button,
+  Dialog,
   FormControl,
   MenuItem,
   Paper,
@@ -19,6 +20,8 @@ import { useState } from 'react';
 import DateX, { RSuiteDateRangePicker, TwoDatePickers } from '@/app/(main)/_ui/date';
 import SelectTable from '@/app/(main)/_ui/table';
 import { carHeaders, carRows, eqyipmentHeaders, eqyipmentRows } from '@/app/(main)/new-order/_lib/data';
+
+import { LocationSelectDialog } from './location-selection';
 
 const NewOrder = () => {
   const handleSelectionChange = (selectedIds: (string | number)[]) => {
@@ -47,6 +50,14 @@ const NewOrder = () => {
 
   const locationChange = (event: SelectChangeEvent) => {
     setSelectLocation(event.target.value);
+  };
+
+  const [locationDialogOpen, setLocationDialogOpen] = useState(false);
+  const handleOpenLocationDialog = () => {
+    setLocationDialogOpen(true);
+  };
+  const handleCloseLocationDailog = () => {
+    setLocationDialogOpen(false);
   };
 
   const [selectPartner, setSelectPartner] = useState('');
@@ -123,9 +134,12 @@ const NewOrder = () => {
               <Typography marginRight={5}>公演場所</Typography>
               <TextField disabled size="small" sx={{ width: '8%', marginRight: 4 }}></TextField>
               <TextField disabled size="small" sx={{ width: '50%' }}></TextField>
-              <Button variant="contained" href="/new-order/location-selection">
+              <Button variant="contained" onClick={() => handleOpenLocationDialog()}>
                 選択
               </Button>
+              <Dialog open={locationDialogOpen} fullScreen>
+                <LocationSelectDialog handleCloseLocationDialog={handleCloseLocationDailog} />
+              </Dialog>
             </Box>
             <Box sx={styles.container}>
               <Typography marginRight={9}>相手</Typography>
