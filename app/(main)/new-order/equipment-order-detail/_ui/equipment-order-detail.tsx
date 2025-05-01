@@ -140,9 +140,6 @@ const EquipmentOrderDetail = () => {
             <Dialog open={EqSelectionDialogOpen} fullScreen>
               <EquipmentSelectionDialog handleCloseDialog={handleCloseEqDialog} />
             </Dialog>
-            <Button variant="contained" href="/new-order/schedule">
-              受注機材・スケジュール
-            </Button>
           </Box>
           <Box sx={styles.container} width="75%">
             <Typography marginRight={11} whiteSpace="nowrap">
