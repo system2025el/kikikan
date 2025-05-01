@@ -1,14 +1,14 @@
 import { Box, Button, DialogContent, DialogTitle, Grid2, Typography } from '@mui/material';
 import { grey } from '@mui/material/colors';
 
-import { areaCate, areaList } from '../_lib/data';
+import { areaCate, areaList } from '../_lib/locationdata';
 
-export const AreaSelectionDialog = () => {
+export const AreaSelectionDialog = (props: { handleClose: VoidFunction }) => {
   return (
     <>
       <DialogTitle bgcolor={grey[300]} display={'flex'}>
         地域選択
-        <Button href="/new-order/location-selection" sx={{ ml: '90%' }}>
+        <Button onClick={() => props.handleClose()} sx={{ ml: '90%' }}>
           戻る
         </Button>
       </DialogTitle>

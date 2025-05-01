@@ -1,22 +1,12 @@
 'use client';
 
-import {
-  Box,
-  Button,
-  FormControl,
-  MenuItem,
-  Select,
-  SelectChangeEvent,
-  Stack,
-  TextField,
-  Typography,
-} from '@mui/material';
+import { Box, Button, FormControl, MenuItem, Select, SelectChangeEvent, TextField, Typography } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import { useRef, useState } from 'react';
 import React from 'react';
 
 import DateX from '@/app/(main)/_ui/date';
-import Grid, { EditableGridHandle } from '@/app/(main)/_ui/grid';
+import { EditableGridHandle } from '@/app/(main)/_ui/grid';
 import GridTable from '@/app/(main)/_ui/gridtable';
 import Time from '@/app/(main)/_ui/time';
 import { cellWidths, data, header } from '@/app/(main)/new-order/equipment-order-detail/_lib/data';
@@ -124,7 +114,11 @@ const EquipmentOrderDetail = () => {
       <Box display="flex" sx={{ bgcolor: grey[300] }}>
         <Box sx={{ width: '100%' }}>
           <Box display="flex" alignItems="center" margin={1} marginLeft={17}>
-            <Button variant="contained" sx={{ marginRight: 4 }}>
+            <Button
+              variant="contained"
+              sx={{ marginRight: 4 }}
+              href="/new-order/equipment-order-detail/equipment-selection"
+            >
               ＋ 機材追加
             </Button>
             <Button variant="contained" href="/new-order/schedule">

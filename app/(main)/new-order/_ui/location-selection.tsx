@@ -26,7 +26,7 @@ import { locationList } from '@/app/_lib/mock-data';
 
 import { AreaSelectionDialog } from './area-selection-dialog';
 
-export const LocationSelectionComponent = () => {
+export const LocationSelectDialog = (props: { handleCloseLocationDialog: VoidFunction }) => {
   const [DialogOpen, setDialogOpen] = useState(false);
   const handleOpenDialog = () => {
     setDialogOpen(true);
@@ -49,7 +49,7 @@ export const LocationSelectionComponent = () => {
       <Container disableGutters sx={{ minWidth: '100%', p: 3 }} maxWidth={'xl'}>
         <Box width={'100%'} bgcolor={grey[300]} py={2} alignItems={'center'} p={2} display={'flex'}>
           <Typography>公演場所選択</Typography>
-          <Button sx={{ ml: '40%' }} href="/dashboard">
+          <Button sx={{ ml: '40%' }} onClick={() => props.handleCloseLocationDialog()}>
             戻る
           </Button>
         </Box>
@@ -71,8 +71,8 @@ export const LocationSelectionComponent = () => {
             <Box display={'flex'} alignItems={'center'}>
               <TextField />
               <Button onClick={handleOpenDialog}>選択</Button>
-              <Dialog open={DialogOpen} onClose={handleCloseDialog} fullScreen>
-                <AreaSelectionDialog />
+              <Dialog open={DialogOpen} fullScreen>
+                <AreaSelectionDialog handleClose={handleCloseDialog} />
               </Dialog>
             </Box>
           </Stack>
