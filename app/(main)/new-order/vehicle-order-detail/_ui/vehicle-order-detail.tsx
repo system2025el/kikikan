@@ -41,7 +41,7 @@ const VehicleOrderDetail = () => {
       <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ bgcolor: grey[400] }}>
         <Typography margin={1}>受注明細（車両）</Typography>
 
-        <Button variant="contained" sx={{ margin: 1 }} href="/new-order">
+        <Button sx={{ margin: 1 }} href="/new-order">
           戻る
         </Button>
       </Box>
@@ -51,25 +51,23 @@ const VehicleOrderDetail = () => {
             <Typography marginRight={3} whiteSpace="nowrap">
               受注番号
             </Typography>
-            <TextField size="small" disabled></TextField>
+            <TextField disabled></TextField>
             <Typography mx={2} whiteSpace="nowrap">
               受注ステータス
             </Typography>
-            <TextField size="small" disabled>
-              確定
-            </TextField>
+            <TextField disabled>確定</TextField>
           </Box>
           <Box display="flex" alignItems="center" margin={1} marginLeft={2}>
             <Typography marginRight={5} whiteSpace="nowrap">
               受注日
             </Typography>
-            <TextField size="small" disabled></TextField>
+            <TextField disabled></TextField>
           </Box>
           <Box display="flex" alignItems="center" margin={1} marginLeft={2}>
             <Typography marginRight={5} whiteSpace="nowrap">
               入力者
             </Typography>
-            <TextField size="small" disabled></TextField>
+            <TextField disabled></TextField>
           </Box>
         </Box>
         <Box sx={{ width: '40%' }}>
@@ -77,19 +75,19 @@ const VehicleOrderDetail = () => {
             <Typography marginRight={5} whiteSpace="nowrap">
               公演名
             </Typography>
-            <TextField size="small" defaultValue="A/Zepp Tour"></TextField>
+            <TextField defaultValue="A/Zepp Tour"></TextField>
           </Box>
           <Box display="flex" alignItems="center" margin={1} marginLeft={2}>
             <Typography marginRight={3} whiteSpace="nowrap">
               公演場所
             </Typography>
-            <TextField size="small" defaultValue="Zepp Osaka"></TextField>
+            <TextField defaultValue="Zepp Osaka"></TextField>
           </Box>
           <Box display="flex" alignItems="center" margin={1} marginLeft={2}>
             <Typography marginRight={7} whiteSpace="nowrap">
               相手
             </Typography>
-            <TextField size="small" defaultValue="(株)シアターブレーン"></TextField>
+            <TextField defaultValue="(株)シアターブレーン"></TextField>
           </Box>
         </Box>
       </Box>
@@ -98,17 +96,13 @@ const VehicleOrderDetail = () => {
           車両入力
         </Typography>
         <Box ml={'35%'}>
-          <Button variant="contained" sx={{ margin: 1 }}>
-            編集
-          </Button>
-          <Button variant="contained" sx={{ margin: 1 }}>
-            保存
-          </Button>
+          <Button sx={{ margin: 1 }}>編集</Button>
+          <Button sx={{ margin: 1 }}>保存</Button>
         </Box>
       </Box>
       <Box display="flex" sx={{ bgcolor: grey[300] }}>
         <Box sx={{ width: '100%' }}>
-          <Box display="flex" alignItems="center" margin={1} marginLeft={2}>
+          <Stack spacing={1} alignItems="center" margin={1} marginLeft={2}>
             <Typography marginRight={2} whiteSpace="nowrap">
               車両サイズ
             </Typography>
@@ -120,11 +114,10 @@ const VehicleOrderDetail = () => {
                 <MenuItem value={'ハイエース'}>ハイエース</MenuItem>
               </Select>
             </FormControl>
-          </Box>
-          <Box display="flex" alignItems="center" margin={1} marginLeft={2}>
-            <Typography marginRight={2} whiteSpace="nowrap">
-              ステータス
-            </Typography>
+            <Button color="error">削除</Button>
+          </Stack>
+          <Stack spacing={1} alignItems="center" margin={1} marginLeft={2}>
+            <Box width={79.5}></Box>
             <FormControl size="small" sx={{ width: '10%' }}>
               <Select value={selectStatus} onChange={selectStatusChange}>
                 <MenuItem value={'入力中'}>入力中</MenuItem>
@@ -133,11 +126,14 @@ const VehicleOrderDetail = () => {
                 <MenuItem value={'OK'}>OK</MenuItem>
               </Select>
             </FormControl>
-          </Box>
+            <Button color="error">削除</Button>
+          </Stack>
           <Box display="flex" alignItems="center" margin={1} marginLeft={14}>
-            <Button variant="contained">スケジュール表</Button>
+            <Button>＋車両追加</Button>
           </Box>
-          <Box display="flex" alignItems="center" margin={1} marginLeft={14}>
+          <Stack spacing={1} alignItems="center" margin={1} marginLeft={2}>
+            <Typography whiteSpace={'nowrap'}>区分</Typography>
+            <Box width={42}></Box>
             <FormControl size="small" sx={{ width: '10%' }}>
               <Select value={selectSituation} onChange={selectSituationChange}>
                 <MenuItem value={'出庫'}>出庫</MenuItem>
@@ -146,11 +142,12 @@ const VehicleOrderDetail = () => {
                 <MenuItem value={'Y→K移動'}>Y→K移動</MenuItem>
               </Select>
             </FormControl>
-          </Box>
-          <Box display="flex" alignItems="center" margin={1} marginLeft={2} sx={{ width: '60%' }}>
+          </Stack>
+          <Stack spacing={1} alignItems="center" margin={1} marginLeft={2} sx={{ width: '60%' }}>
             <Typography marginRight={8} whiteSpace="nowrap">
               日時
             </Typography>
+            <Box width={42}></Box>
             <DateX />
             <Typography marginLeft={5} marginRight={2} whiteSpace="nowrap">
               時刻
@@ -167,7 +164,7 @@ const VehicleOrderDetail = () => {
                 <MenuItem value={'厚木'}>厚木</MenuItem>
               </Select>
             </FormControl>
-          </Box>
+          </Stack>
         </Box>
       </Box>
     </Box>

@@ -170,9 +170,9 @@ const NewOrder = () => {
               <TextField size="small" sx={{ width: '40%' }}></TextField>
             </Box>
           </Grid2>
-          <Grid2 size={5} display={'flex'} justifyContent={'space-between'} pr={1}>
+          <Grid2 size={5} display={'flex'} justifyContent={'space-between'} px={1}>
             <Box>
-              <Button href="/new-order/vehicle-order-detail">＋ 車両入力</Button>
+              <Button href="/new-order/equipment-order-detail">＋ 機材入力</Button>
             </Box>
             <Box>
               <Button>編集</Button>
@@ -194,9 +194,9 @@ const NewOrder = () => {
           <Grid2 size={4} display="flex" alignItems="center" justifyItems={'stretch'}>
             <Box display="flex" sx={{ width: '100%' }}></Box>
           </Grid2>
-          <Grid2 size={5} display={'flex'} justifyContent={'space-between'} pr={1}>
+          <Grid2 size={5} display={'flex'} justifyContent={'space-between'} px={1}>
             <Box>
-              <Button href="/new-order/equipment-order-detail">＋ 機材入力</Button>
+              <Button href="/new-order/vehicle-order-detail">＋ 車両入力</Button>
             </Box>
             <Box>
               <Button>編集</Button>
