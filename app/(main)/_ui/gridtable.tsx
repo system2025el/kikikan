@@ -15,6 +15,8 @@ import {
 } from '@mui/material';
 import React, { useState } from 'react';
 
+import { getBackgroundColor } from '@/app/(main)/new-order/schedule/_lib/colorselect';
+
 type TableProps = {
   header: string[] | null;
   rows: Array<{
@@ -89,6 +91,7 @@ const GridTable: React.FC<TableProps> = ({
                       whiteSpace: 'nowrap',
                       width,
                       height: 45,
+                      bgcolor: getBackgroundColor(rowIndex, colIndex, colorSelect),
                     }}
                     size="small"
                   >
