@@ -118,9 +118,9 @@ export const eqList: eqData[] = [
 ];
 
 export const bundleData = [
-  { name: 'MAC Ultra Wash' },
-  { name: 'MAC Viper XIP' },
-  { name: 'MAC Viper_Ω' },
-  { name: 'VL-6000 Beam' },
-  { name: 'VL-1100 AS' },
+  { id: 1, name: 'MAC Ultra Wash' },
+  { id: 2, name: 'MAC Viper XIP' },
+  { id: 3, name: 'MAC Viper_Ω' },
+  { id: 4, name: 'VL-6000 Beam' },
+  { id: 5, name: 'VL-1100 AS' },
 ];

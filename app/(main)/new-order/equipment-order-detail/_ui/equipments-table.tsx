@@ -67,43 +67,41 @@ const EnhancedTableHead = (props: EnhancedTableProps) => {
 
 export const EquipmentTable = (props: {
   eqSelected: readonly number[];
+  categoryID: number;
   handleSelect: (event: React.MouseEvent<unknown>, id: number) => void;
 }) => {
-  const [order, setOrder] = useState<Order>('asc');
-  const [orderBy, setOrderBy] = useState<keyof eqData>('id');
-
-  const visibleRows = React.useMemo(() => [...eqList].sort(getComparator(order, orderBy)), [order, orderBy]);
-
   console.log(props.eqSelected);
   return (
     <TableContainer component={Paper} sx={{ width: '60%', height: 600 }}>
       <Table>
         <EnhancedTableHead numSelected={props.eqSelected.length} />
         <TableBody>
-          {visibleRows.map((row, index) => {
-            const isItemSelected = props.eqSelected.includes(row.id);
-            const labelId = `enhanced-table-checkbox-${index}`;
+          {eqList
+            .filter((eq) => eq.cateId === props.categoryID)
+            .map((row, index) => {
+              const isItemSelected = props.eqSelected.includes(row.id);
+              const labelId = `enhanced-table-checkbox-${index}`;
 
-            return (
-              <TableRow
-                hover
-                onClick={(event) => props.handleSelect(event, row.id)}
-                role="checkbox"
-                aria-checked={isItemSelected}
-                tabIndex={-1}
-                key={row.id}
-                selected={isItemSelected}
-                sx={{ cursor: 'pointer' }}
-              >
-                <TableCell padding="checkbox">
-                  <Checkbox color="primary" checked={isItemSelected} />
-                </TableCell>
-                <TableCell component="th" id={labelId} scope="row" padding="none">
-                  {row.name}
-                </TableCell>
-              </TableRow>
-            );
-          })}
+              return (
+                <TableRow
+                  hover
+                  onClick={(event) => props.handleSelect(event, row.id)}
+                  role="checkbox"
+                  aria-checked={isItemSelected}
+                  tabIndex={-1}
+                  key={row.id}
+                  selected={isItemSelected}
+                  sx={{ cursor: 'pointer' }}
+                >
+                  <TableCell padding="checkbox">
+                    <Checkbox color="primary" checked={isItemSelected} />
+                  </TableCell>
+                  <TableCell component="th" id={labelId} scope="row" padding="none">
+                    {row.name}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
         </TableBody>
       </Table>
     </TableContainer>

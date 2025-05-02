@@ -52,6 +52,12 @@ export const EquipmentSelectionDialog = (props: { handleCloseDialog: VoidFunctio
     }
     setSelectedEq(newSelected);
   };
+
+  const [selectedCategory, setSelectedCategory] = useState(-100);
+
+  const handleClickCategory = (id: number) => {
+    setSelectedCategory(id);
+  };
   return (
     <>
       <DialogTitle display={'flex'} marginTop={2} p={1} sx={{ bgcolor: grey[400] }} alignItems={'center'}>
@@ -69,14 +75,31 @@ export const EquipmentSelectionDialog = (props: { handleCloseDialog: VoidFunctio
         </Dialog>
       </Box>
       <Box display={'flex'} p={1} sx={{ bgcolor: grey[300] }} justifyContent={'space-between'}>
-        <EquipmentCategoriesTable />
-        <EquipmentTable eqSelected={eqSelected} handleSelect={handleClick} />
+        <EquipmentCategoriesTable selected={selectedCategory} handleClick={handleClickCategory} />
+        <EquipmentTable eqSelected={eqSelected} handleSelect={handleClick} categoryID={selectedCategory} />
       </Box>
     </>
   );
 };
 
 const BundleDialog = (props: { handleClose: VoidFunction }) => {
+  const [selected, setSelected] = useState<readonly number[]>([]);
+  const handleClick = (event: React.MouseEvent<unknown>, id: number) => {
+    const selectedIndex = selected.indexOf(id);
+    let newSelected: readonly number[] = [];
+
+    if (selectedIndex === -1) {
+      newSelected = newSelected.concat(selected, id);
+    } else if (selectedIndex === 0) {
+      newSelected = newSelected.concat(selected.slice(1));
+    } else if (selectedIndex === selected.length - 1) {
+      newSelected = newSelected.concat(selected.slice(0, -1));
+    } else if (selectedIndex > 0) {
+      newSelected = newSelected.concat(selected.slice(0, selectedIndex), selected.slice(selectedIndex + 1));
+    }
+    setSelected(newSelected);
+  };
+
   return (
     <>
       <DialogTitle justifyContent={'space-between'} display={'flex'}>
@@ -96,12 +119,24 @@ const BundleDialog = (props: { handleClose: VoidFunction }) => {
             </TableHead>
             <TableBody>
               {bundleData.map((row, index) => {
+                const isItemSelected = selected.includes(row.id);
+                const labelId = `enhanced-table-checkbox-${index}`;
+
                 return (
-                  <TableRow hover role="checkbox" tabIndex={-1} key={row.name} sx={{ cursor: 'pointer' }}>
+                  <TableRow
+                    hover
+                    onClick={(event) => handleClick(event, row.id)}
+                    role="checkbox"
+                    aria-checked={isItemSelected}
+                    tabIndex={-1}
+                    key={row.id}
+                    selected={isItemSelected}
+                    sx={{ cursor: 'pointer' }}
+                  >
                     <TableCell padding="checkbox">
-                      <Checkbox color="primary" />
+                      <Checkbox color="primary" checked={isItemSelected} />
                     </TableCell>
-                    <TableCell component="th" scope="row" padding="none">
+                    <TableCell component="th" id={labelId} scope="row" padding="none">
                       {row.name}
                     </TableCell>
                   </TableRow>

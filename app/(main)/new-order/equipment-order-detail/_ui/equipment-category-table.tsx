@@ -25,14 +25,8 @@ const EnhancedTableHead = () => {
   );
 };
 
-export const EquipmentCategoriesTable = () => {
-  const [selected, setSelected] = React.useState(-100);
-
-  const handleClick = (id: number) => {
-    setSelected(id);
-  };
-
-  console.log(selected);
+export const EquipmentCategoriesTable = (props: { selected: number; handleClick: (id: number) => void }) => {
+  console.log(props.selected);
   return (
     <TableContainer component={Paper} sx={{ width: '38%', height: 600 }}>
       <Table stickyHeader>
@@ -42,10 +36,10 @@ export const EquipmentCategoriesTable = () => {
             return (
               <TableRow
                 hover
-                onClick={() => handleClick(row.id)}
+                onClick={() => props.handleClick(row.id)}
                 tabIndex={-1}
                 key={row.id}
-                sx={{ cursor: 'pointer', bgcolor: selected === row.id ? lightBlue[300] : '' }}
+                sx={{ cursor: 'pointer', bgcolor: props.selected === row.id ? lightBlue[300] : '' }}
               >
                 <TableCell component="th" scope="row">
                   {row.name}
