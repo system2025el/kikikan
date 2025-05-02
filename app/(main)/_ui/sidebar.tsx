@@ -17,6 +17,7 @@ import Typography from '@mui/material/Typography';
 import * as React from 'react';
 import { useState } from 'react';
 
+import { BreadCrumbs } from '@/app/(main)/_lib/breadcrumbs';
 import NavLinks from '@/app/(main)/_ui/links';
 
 const drawerWidth = 240;
@@ -89,6 +90,9 @@ const Sidebar = ({ children }: Props) => {
           </IconButton>
           <Typography variant="h6" noWrap>
             RFID機材管理システム
+          </Typography>
+          <Typography margin={2} fontSize="small">
+            {BreadCrumbs()}
           </Typography>
         </Toolbar>
       </AppBar>
