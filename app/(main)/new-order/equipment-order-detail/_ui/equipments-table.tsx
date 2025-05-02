@@ -1,6 +1,5 @@
 'use client';
 
-import Box from '@mui/material/Box';
 import Checkbox from '@mui/material/Checkbox';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
@@ -9,11 +8,10 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import TableSortLabel from '@mui/material/TableSortLabel';
-import { visuallyHidden } from '@mui/utils';
-import * as React from 'react';
 
 import { eqCategories, eqData, eqList } from '../_lib/eqdata';
+import { useState } from 'react';
+import React from 'react';
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (b[orderBy] < a[orderBy]) {
@@ -67,51 +65,39 @@ const EnhancedTableHead = (props: EnhancedTableProps) => {
   );
 };
 
-export const EquipmentTable = () => {
-  const [order, setOrder] = React.useState<Order>('asc');
-  const [orderBy, setOrderBy] = React.useState<keyof eqData>('id');
-  const [selected, setSelected] = React.useState<readonly number[]>([]);
-
-  const handleRequestSort = (event: React.MouseEvent<unknown>, property: keyof eqData) => {
-    const isAsc = orderBy === property && order === 'asc';
-    setOrder(isAsc ? 'desc' : 'asc');
-    setOrderBy(property);
-  };
-
-  const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.checked) {
-      const newSelected = eqCategories.map((n) => n.id);
-      setSelected(newSelected);
-      return;
-    }
-    setSelected([]);
-  };
+export const EquipmentTable = (props: { eqSelected: readonly number[]; setSelectedEq: Function }) => {
+  const [order, setOrder] = useState<Order>('asc');
+  const [orderBy, setOrderBy] = useState<keyof eqData>('id');
 
   const handleClick = (event: React.MouseEvent<unknown>, id: number) => {
-    const selectedIndex = selected.indexOf(id);
+    const selectedIndex = props.eqSelected.indexOf(id);
     let newSelected: readonly number[] = [];
 
     if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, id);
+      newSelected = newSelected.concat(props.eqSelected, id);
     } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(selected.slice(1));
-    } else if (selectedIndex === selected.length - 1) {
-      newSelected = newSelected.concat(selected.slice(0, -1));
+      newSelected = newSelected.concat(props.eqSelected.slice(1));
+    } else if (selectedIndex === props.eqSelected.length - 1) {
+      newSelected = newSelected.concat(props.eqSelected.slice(0, -1));
     } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(selected.slice(0, selectedIndex), selected.slice(selectedIndex + 1));
+      newSelected = newSelected.concat(
+        props.eqSelected.slice(0, selectedIndex),
+        props.eqSelected.slice(selectedIndex + 1)
+      );
     }
-    setSelected(newSelected);
+    props.setSelectedEq(newSelected);
   };
 
   const visibleRows = React.useMemo(() => [...eqList].sort(getComparator(order, orderBy)), [order, orderBy]);
-  console.log(selected);
+
+  console.log(props.eqSelected);
   return (
     <TableContainer component={Paper} sx={{ width: '60%', height: 600 }}>
       <Table>
-        <EnhancedTableHead numSelected={selected.length} />
+        <EnhancedTableHead numSelected={props.eqSelected.length} />
         <TableBody>
           {visibleRows.map((row, index) => {
-            const isItemSelected = selected.includes(row.id);
+            const isItemSelected = props.eqSelected.includes(row.id);
             const labelId = `enhanced-table-checkbox-${index}`;
 
             return (
