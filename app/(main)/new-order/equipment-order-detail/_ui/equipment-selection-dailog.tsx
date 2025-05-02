@@ -1,3 +1,4 @@
+import { CheckBox } from '@mui/icons-material';
 import {
   Box,
   Button,
@@ -16,12 +17,11 @@ import {
   Typography,
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
+import { useState } from 'react';
 
+import { bundleData } from '../_lib/eqdata';
 import { EquipmentCategoriesTable } from './equipment-category-table';
 import { EquipmentTable } from './equipments-table';
-import { useState } from 'react';
-import { CheckBox } from '@mui/icons-material';
-import { bundleData } from '../_lib/eqdata';
 
 export const EquipmentSelectionDialog = (props: { handleCloseDialog: VoidFunction }) => {
   const [eqSelected, setSelectedEq] = useState<readonly number[]>([]);
@@ -35,6 +35,22 @@ export const EquipmentSelectionDialog = (props: { handleCloseDialog: VoidFunctio
   const handleCloseBundle = () => {
     setBundleDialogOpen(false);
     props.handleCloseDialog();
+  };
+
+  const handleClick = (event: React.MouseEvent<unknown>, id: number) => {
+    const selectedIndex = eqSelected.indexOf(id);
+    let newSelected: readonly number[] = [];
+
+    if (selectedIndex === -1) {
+      newSelected = newSelected.concat(eqSelected, id);
+    } else if (selectedIndex === 0) {
+      newSelected = newSelected.concat(eqSelected.slice(1));
+    } else if (selectedIndex === eqSelected.length - 1) {
+      newSelected = newSelected.concat(eqSelected.slice(0, -1));
+    } else if (selectedIndex > 0) {
+      newSelected = newSelected.concat(eqSelected.slice(0, selectedIndex), eqSelected.slice(selectedIndex + 1));
+    }
+    setSelectedEq(newSelected);
   };
   return (
     <>
@@ -54,7 +70,7 @@ export const EquipmentSelectionDialog = (props: { handleCloseDialog: VoidFunctio
       </Box>
       <Box display={'flex'} p={1} sx={{ bgcolor: grey[300] }} justifyContent={'space-between'}>
         <EquipmentCategoriesTable />
-        <EquipmentTable eqSelected={eqSelected} setSelectedEq={setSelectedEq} />
+        <EquipmentTable eqSelected={eqSelected} handleSelect={handleClick} />
       </Box>
     </>
   );

@@ -8,10 +8,10 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-
-import { eqCategories, eqData, eqList } from '../_lib/eqdata';
 import { useState } from 'react';
 import React from 'react';
+
+import { eqCategories, eqData, eqList } from '../_lib/eqdata';
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (b[orderBy] < a[orderBy]) {
@@ -65,28 +65,12 @@ const EnhancedTableHead = (props: EnhancedTableProps) => {
   );
 };
 
-export const EquipmentTable = (props: { eqSelected: readonly number[]; setSelectedEq: Function }) => {
+export const EquipmentTable = (props: {
+  eqSelected: readonly number[];
+  handleSelect: (event: React.MouseEvent<unknown>, id: number) => void;
+}) => {
   const [order, setOrder] = useState<Order>('asc');
   const [orderBy, setOrderBy] = useState<keyof eqData>('id');
-
-  const handleClick = (event: React.MouseEvent<unknown>, id: number) => {
-    const selectedIndex = props.eqSelected.indexOf(id);
-    let newSelected: readonly number[] = [];
-
-    if (selectedIndex === -1) {
-      newSelected = newSelected.concat(props.eqSelected, id);
-    } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(props.eqSelected.slice(1));
-    } else if (selectedIndex === props.eqSelected.length - 1) {
-      newSelected = newSelected.concat(props.eqSelected.slice(0, -1));
-    } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(
-        props.eqSelected.slice(0, selectedIndex),
-        props.eqSelected.slice(selectedIndex + 1)
-      );
-    }
-    props.setSelectedEq(newSelected);
-  };
 
   const visibleRows = React.useMemo(() => [...eqList].sort(getComparator(order, orderBy)), [order, orderBy]);
 
@@ -103,7 +87,7 @@ export const EquipmentTable = (props: { eqSelected: readonly number[]; setSelect
             return (
               <TableRow
                 hover
-                onClick={(event) => handleClick(event, row.id)}
+                onClick={(event) => props.handleSelect(event, row.id)}
                 role="checkbox"
                 aria-checked={isItemSelected}
                 tabIndex={-1}
