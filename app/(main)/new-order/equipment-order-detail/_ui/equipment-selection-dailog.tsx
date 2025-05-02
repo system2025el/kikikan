@@ -1,3 +1,4 @@
+import { CheckBox } from '@mui/icons-material';
 import {
   Box,
   Button,
@@ -16,12 +17,11 @@ import {
   Typography,
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
+import { useState } from 'react';
 
+import { bundleData } from '../_lib/eqdata';
 import { EquipmentCategoriesTable } from './equipment-category-table';
 import { EquipmentTable } from './equipments-table';
-import { useState } from 'react';
-import { CheckBox } from '@mui/icons-material';
-import { bundleData } from '../_lib/eqdata';
 
 export const EquipmentSelectionDialog = (props: { handleCloseDialog: VoidFunction }) => {
   const [eqSelected, setSelectedEq] = useState<readonly number[]>([]);

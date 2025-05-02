@@ -8,10 +8,10 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-
-import { eqCategories, eqData, eqList } from '../_lib/eqdata';
 import { useState } from 'react';
 import React from 'react';
+
+import { eqCategories, eqData, eqList } from '../_lib/eqdata';
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (b[orderBy] < a[orderBy]) {
