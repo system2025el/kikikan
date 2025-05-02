@@ -130,7 +130,6 @@ const NewOrder = () => {
             </Box>
             <Box sx={styles.container}>
               <Typography marginRight={5}>公演場所</Typography>
-              <TextField disabled size="small" sx={{ width: '8%', marginRight: 4 }}></TextField>
               <TextField disabled size="small" sx={{ width: '50%' }}></TextField>
               <Button onClick={() => handleOpenLocationDialog()}>選択</Button>
               <Dialog open={locationDialogOpen} fullScreen>
@@ -139,7 +138,6 @@ const NewOrder = () => {
             </Box>
             <Box sx={styles.container}>
               <Typography marginRight={9}>相手</Typography>
-              <TextField disabled size="small" sx={{ width: '8%', marginRight: 4 }}></TextField>
               <TextField disabled size="small" sx={{ width: '50%' }}></TextField>
               <Button>選択</Button>
             </Box>
