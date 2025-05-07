@@ -16,7 +16,6 @@ import { useRef, useState } from 'react';
 import React from 'react';
 
 import DateX from '@/app/(main)/_ui/date';
-import { EditableGridHandle } from '@/app/(main)/_ui/grid';
 import GridTable from '@/app/(main)/_ui/gridtable';
 import Time from '@/app/(main)/_ui/time';
 import { cellWidths, data, header } from '@/app/(main)/new-order/equipment-order-detail/_lib/data';
@@ -38,13 +37,6 @@ const EquipmentOrderDetail = () => {
   };
   const selectReturnBaseChange = (event: SelectChangeEvent) => {
     setSelectReturnBase(event.target.value);
-  };
-
-  const gridRef = useRef<EditableGridHandle>(null);
-
-  const handleClick = () => {
-    const data = gridRef.current?.getData();
-    console.log(data);
   };
 
   const handleCellChange = (rowIndex: number, colIndex: number, newValue: string) => {
@@ -126,7 +118,7 @@ const EquipmentOrderDetail = () => {
           <Button variant="contained" sx={{ margin: 1 }}>
             編集
           </Button>
-          <Button variant="contained" sx={{ margin: 1 }} onClick={handleClick}>
+          <Button variant="contained" sx={{ margin: 1 }}>
             保存
           </Button>
         </Box>
