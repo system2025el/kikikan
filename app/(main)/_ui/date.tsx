@@ -53,7 +53,7 @@ const DateX = () => {
         defaultValue={today}
         onError={(newError: DateValidationError) => setError(newError)}
         views={['year', 'month', 'day']}
-        sx={{ width: '25%' }}
+        sx={{ width: '25%', minWidth: 200 }}
       />
     </LocalizationProvider>
   );

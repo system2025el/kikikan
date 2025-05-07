@@ -38,7 +38,7 @@ const Time = () => {
         onError={(newError) => setError(newError)}
         views={['hours', 'minutes']}
         format="HH:mm"
-        sx={{ width: '25%' }}
+        sx={{ width: '25%', minWidth: 200 }}
         timeSteps={{ minutes: 15 }}
       />
     </LocalizationProvider>

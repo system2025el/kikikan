@@ -24,7 +24,8 @@ import { EquipmentSelectionDialog } from './equipment-selection-dailog';
 
 const EquipmentOrderDetail = () => {
   const [selectStatus, setSelectStatus] = useState('準備中');
-  const [selectIssueBase, setSelectIssueBase] = useState('KICKS');
+  const [selectIssueBase1, setSelectIssueBase1] = useState('KICS');
+  const [selectIssueBase2, setSelectIssueBase2] = useState('YARD');
   const [selectReturnBase, setSelectReturnBase] = useState('YARD');
   const [rows, setRows] = useState(data);
   const editableColumns = [2, 3];
@@ -32,8 +33,11 @@ const EquipmentOrderDetail = () => {
   const selectStatusChange = (event: SelectChangeEvent) => {
     setSelectStatus(event.target.value);
   };
-  const selectIssueBaseChange = (event: SelectChangeEvent) => {
-    setSelectIssueBase(event.target.value);
+  const selectIssueBase1Change = (event: SelectChangeEvent) => {
+    setSelectIssueBase1(event.target.value);
+  };
+  const selectIssueBase2Change = (event: SelectChangeEvent) => {
+    setSelectIssueBase2(event.target.value);
   };
   const selectReturnBaseChange = (event: SelectChangeEvent) => {
     setSelectReturnBase(event.target.value);
@@ -133,7 +137,7 @@ const EquipmentOrderDetail = () => {
               <EquipmentSelectionDialog handleCloseDialog={handleCloseEqDialog} />
             </Dialog>
           </Box>
-          <Box sx={styles.container} width="75%">
+          <Box sx={styles.container} width="70%">
             <Typography marginRight={11} whiteSpace="nowrap">
               機材
             </Typography>
@@ -145,12 +149,27 @@ const EquipmentOrderDetail = () => {
               cellWidths={cellWidths}
               colorSelect={false}
             />
-            <Box display="flex" flexDirection="column" sx={{ placeSelf: 'flex-end' }}>
-              <Box>
-                <Button size="large" sx={{ marginBottom: '3px', color: 'white', bgcolor: 'red' }}>
+            <Box marginLeft={6}>
+              <Typography>出庫場所</Typography>
+              <Box display="flex" alignItems="center">
+                <FormControl size="small" sx={{ width: '25%', minWidth: 200, marginTop: 1 }}>
+                  <Select value={selectIssueBase1} onChange={selectIssueBase1Change}>
+                    <MenuItem value={'KICS'}>KICS</MenuItem>
+                    <MenuItem value={'YARD'}>YARD</MenuItem>
+                  </Select>
+                </FormControl>
+                <Button size="medium" sx={{ marginTop: 1, marginLeft: 2, color: 'white', bgcolor: 'red' }}>
                   削除
                 </Button>
-                <Button size="large" sx={{ color: 'white', bgcolor: 'red' }}>
+              </Box>
+              <Box display="flex" alignItems="center">
+                <FormControl size="small" sx={{ width: '25%', minWidth: 200, marginTop: 1 }}>
+                  <Select value={selectIssueBase2} onChange={selectIssueBase2Change}>
+                    <MenuItem value={'KICS'}>KICS</MenuItem>
+                    <MenuItem value={'YARD'}>YARD</MenuItem>
+                  </Select>
+                </FormControl>
+                <Button size="medium" sx={{ marginTop: 1, marginLeft: 2, color: 'white', bgcolor: 'red' }}>
                   削除
                 </Button>
               </Box>
@@ -160,37 +179,62 @@ const EquipmentOrderDetail = () => {
             <Typography marginRight={9} whiteSpace="nowrap">
               出庫日
             </Typography>
-            <DateX />
-            <Typography marginLeft={5} marginRight={2} whiteSpace="nowrap">
-              時刻
-            </Typography>
-            <Time />
-            <Typography marginLeft={5} marginRight={2} whiteSpace="nowrap">
-              拠点
-            </Typography>
-            <FormControl size="small" sx={{ width: '25%' }}>
-              <Select value={selectIssueBase} onChange={selectIssueBaseChange}>
-                <MenuItem value={'KICKS'}>KICKS</MenuItem>
-              </Select>
-            </FormControl>
+            <Box display="flex" flexDirection="column">
+              <DateX />
+              <DateX />
+            </Box>
+            <Box>
+              <Box display="flex" alignItems="center">
+                <Typography marginLeft={5} marginRight={2} whiteSpace="nowrap">
+                  時刻
+                </Typography>
+                <Time />
+              </Box>
+              <Box display="flex" alignItems="center">
+                <Typography marginLeft={5} marginRight={2} whiteSpace="nowrap">
+                  時刻
+                </Typography>
+                <Time />
+              </Box>
+            </Box>
+            <Box>
+              <Box display="flex" alignItems="center">
+                <Typography marginLeft={5} marginRight={2} whiteSpace="nowrap">
+                  作業場
+                </Typography>
+                <TextField defaultValue={'KICS'} sx={{ minWidth: 200 }} />
+              </Box>
+              <Box display="flex" alignItems="center">
+                <Typography marginLeft={5} marginRight={2} whiteSpace="nowrap">
+                  作業場
+                </Typography>
+                <TextField defaultValue={'YARD'} sx={{ minWidth: 200 }} />
+              </Box>
+            </Box>
           </Box>
           <Box sx={styles.container} width="60%">
             <Typography marginRight={9} whiteSpace="nowrap">
               返却日
             </Typography>
-            <DateX />
+            <Box>
+              <DateX />
+            </Box>
             <Typography marginLeft={5} marginRight={2} whiteSpace="nowrap">
               時刻
             </Typography>
-            <Time />
+            <Box>
+              <Time />
+            </Box>
             <Typography marginLeft={5} marginRight={2} whiteSpace="nowrap">
-              拠点
+              作業場
             </Typography>
-            <FormControl size="small" sx={{ width: '25%' }}>
-              <Select value={selectReturnBase} onChange={selectReturnBaseChange}>
-                <MenuItem value={'YARD'}>YARD</MenuItem>
-              </Select>
-            </FormControl>
+            <Box>
+              <FormControl size="small" sx={{ width: '25%', minWidth: 200 }}>
+                <Select value={selectReturnBase} onChange={selectReturnBaseChange}>
+                  <MenuItem value={'YARD'}>YARD</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
           </Box>
           <Box sx={styles.container}>
             <Typography marginRight={7} whiteSpace="nowrap">
@@ -209,10 +253,12 @@ const EquipmentOrderDetail = () => {
           </Box>
           <Box sx={styles.container}>
             <Box display="flex" flexDirection="column">
+              <Typography sx={{ marginLeft: 25 }}>日付</Typography>
               <TextField defaultValue="2025/11/03" sx={{ marginLeft: 25 }} />
               <TextField defaultValue="2025/11/04" sx={{ marginLeft: 25 }} />
             </Box>
             <Box display="flex" flexDirection="column">
+              <Typography sx={{ marginLeft: 4 }}>メモ</Typography>
               <TextField defaultValue="XXXXXXXXXX" sx={{ marginLeft: 4 }} />
               <TextField defaultValue="XXXXXXXXXX" sx={{ marginLeft: 4 }} />
             </Box>
@@ -222,10 +268,12 @@ const EquipmentOrderDetail = () => {
           </Button>
           <Box sx={styles.container}>
             <Box display="flex" flexDirection="column">
+              <Typography sx={{ marginLeft: 25 }}>日付</Typography>
               <TextField defaultValue="2025/11/03" sx={{ marginLeft: 25 }} />
               <TextField defaultValue="2025/11/04" sx={{ marginLeft: 25 }} />
             </Box>
             <Box display="flex" flexDirection="column">
+              <Typography sx={{ marginLeft: 4 }}>メモ</Typography>
               <TextField defaultValue="XXXXXXXXXX" sx={{ marginLeft: 4 }} />
               <TextField defaultValue="XXXXXXXXXX" sx={{ marginLeft: 4 }} />
             </Box>
@@ -235,10 +283,12 @@ const EquipmentOrderDetail = () => {
           </Button>
           <Box sx={styles.container}>
             <Box display="flex" flexDirection="column">
+              <Typography sx={{ marginLeft: 25 }}>日付</Typography>
               <TextField defaultValue="2025/11/03" sx={{ marginLeft: 25 }} />
               <TextField defaultValue="2025/11/04" sx={{ marginLeft: 25 }} />
             </Box>
             <Box display="flex" flexDirection="column">
+              <Typography sx={{ marginLeft: 4 }}>メモ</Typography>
               <TextField defaultValue="XXXXXXXXXX" sx={{ marginLeft: 4 }} />
               <TextField defaultValue="XXXXXXXXXX" sx={{ marginLeft: 4 }} />
             </Box>
@@ -248,10 +298,12 @@ const EquipmentOrderDetail = () => {
           </Button>
           <Box sx={styles.container}>
             <Box display="flex" flexDirection="column">
+              <Typography sx={{ marginLeft: 25 }}>日付</Typography>
               <TextField defaultValue="2025/11/03" sx={{ marginLeft: 25 }} />
               <TextField defaultValue="2025/11/04" sx={{ marginLeft: 25 }} />
             </Box>
             <Box display="flex" flexDirection="column">
+              <Typography sx={{ marginLeft: 4 }}>メモ</Typography>
               <TextField defaultValue="XXXXXXXXXX" sx={{ marginLeft: 4 }} />
               <TextField defaultValue="XXXXXXXXXX" sx={{ marginLeft: 4 }} />
             </Box>
@@ -284,7 +336,7 @@ const styles: { [key: string]: React.CSSProperties } = {
   container: {
     display: 'flex',
     alignItems: 'center',
-    margin: 1,
+    margin: 2,
     marginLeft: 2,
   },
   // ボタン
