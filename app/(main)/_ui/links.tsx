@@ -17,7 +17,7 @@ const dashboardList: MenuItem[] = [{ name: 'ダッシュボード', url: '/dashb
 const orderList: MenuItem[] = [
   { name: '新規受注', url: '/new-order' },
   { name: '受注一覧', url: '/order-list' },
-  { name: '見積書', url: '/' },
+  { name: '見積一覧', url: '/quotation-list' },
   { name: '在庫確認', url: '/' },
   { name: '出庫履歴', url: '/' },
   { name: '貸出状況', url: '/' },
