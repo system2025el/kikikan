@@ -182,7 +182,7 @@ const NewOrder = () => {
         </Grid2>
         <Button href="/new-order/schedule">受注機材・スケジュール</Button>
       </Box>
-      <SelectTable headers={eqyipmentHeaders} rows={eqyipmentRows} onSelectionChange={handleSelectionChange} />
+      <SelectTable headers={eqyipmentHeaders} datas={eqyipmentRows} onSelectionChange={handleSelectionChange} />
       {/* -------------------------車両----------------------------------- */}
       <Box bgcolor={grey[400]} justifyContent={'space-between'}>
         <Grid2 container alignItems="center" pt={2}>
@@ -206,7 +206,7 @@ const NewOrder = () => {
         </Grid2>
         <Button href="/new-order/schedule">受注機材・スケジュール</Button>
       </Box>
-      <SelectTable headers={vehicleHeaders} rows={vehicleRows} onSelectionChange={handleSelectionChange} />
+      <SelectTable headers={vehicleHeaders} datas={vehicleRows} onSelectionChange={handleSelectionChange} />
     </Box>
   );
 };
