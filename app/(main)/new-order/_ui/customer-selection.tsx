@@ -39,7 +39,7 @@ export const CustomerSelectionDialog = (props: { handleCloseCustDialog: () => vo
     <>
       <Container disableGutters sx={{ minWidth: '100%', p: 3 }} maxWidth={'xl'}>
         <Box width={'100%'} bgcolor={grey[300]} py={2} alignItems={'center'} p={2} display={'flex'}>
-          <Typography>公演場所選択</Typography>
+          <Typography>相手選択</Typography>
           <Button sx={{ ml: '40%' }} onClick={() => props.handleCloseCustDialog()}>
             戻る
           </Button>
