@@ -18,20 +18,20 @@ const SearchArea = () => {
     <Paper sx={{ p: 1, m: 1, bgcolor: grey[300] }} variant="outlined">
       <Typography variant="body1">検索条件</Typography>
       <Stack direction={'row'} justifyContent={'space-between'} spacing={1}>
-        <Button variant="contained">あ</Button>
-        <Button variant="contained">か</Button>
-        <Button variant="contained">さ</Button>
-        <Button variant="contained">た</Button>
-        <Button variant="contained">な</Button>
-        <Button variant="contained">は</Button>
-        <Button variant="contained">ま</Button>
-        <Button variant="contained">や</Button>
-        <Button variant="contained">ら</Button>
-        <Button variant="contained">わ</Button>
-        <Button variant="contained">英数</Button>
-        <Button variant="contained">全て</Button>
+        <Button>あ</Button>
+        <Button>か</Button>
+        <Button>さ</Button>
+        <Button>た</Button>
+        <Button>な</Button>
+        <Button>は</Button>
+        <Button>ま</Button>
+        <Button>や</Button>
+        <Button>ら</Button>
+        <Button>わ</Button>
+        <Button>英数</Button>
+        <Button>全て</Button>
 
-        <TextField fullWidth placeholder="検索" size="small"></TextField>
+        <TextField fullWidth placeholder="検索"></TextField>
       </Stack>
     </Paper>
   );

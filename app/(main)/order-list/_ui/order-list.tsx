@@ -11,7 +11,6 @@ import {
   FormGroup,
   InputLabel,
   MenuItem,
-  Paper,
   Radio,
   RadioGroup,
   Select,
@@ -109,8 +108,7 @@ export const OrderList = () => {
           </FormGroup>
         </Stack>
         <Stack>
-          <Typography id="cust">顧客</Typography>
-          <Paper variant="outlined" sx={{ bgcolor: grey[300], minWidth: 100, minHeight: 40 }}></Paper>
+          <Typography>顧客</Typography>
           <FormControl>
             <Select value={customer} sx={{ minWidth: 300, bgcolor: grey[300] }} onChange={handleCustomerSelect}>
               {customers.map((customer) => (
@@ -145,6 +143,7 @@ export const OrderList = () => {
   );
 };
 
+/** ラヂオボタン用データ */
 const radioData = [
   { value: 'past', label: '過去' },
   { value: 'later', label: '今日以降' },

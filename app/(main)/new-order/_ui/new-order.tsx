@@ -22,6 +22,7 @@ import DateX, { RSuiteDateRangePicker, TwoDatePickers } from '@/app/(main)/_ui/d
 import SelectTable from '@/app/(main)/_ui/table';
 import { eqyipmentHeaders, eqyipmentRows, vehicleHeaders, vehicleRows } from '@/app/(main)/new-order/_lib/data';
 
+import { CustomerSelectionDialog } from './customer-selection';
 import { LocationSelectDialog } from './location-selection';
 
 const NewOrder = () => {
@@ -61,6 +62,14 @@ const NewOrder = () => {
     setLocationDialogOpen(false);
   };
 
+  const [customerDialogOpen, setCustomerDialogOpen] = useState(false);
+  const handleOpenCustomerDialog = () => {
+    setCustomerDialogOpen(true);
+  };
+  const handleCloseCustomerDialog = () => {
+    setCustomerDialogOpen(false);
+  };
+
   const [selectPartner, setSelectPartner] = useState('');
 
   const partnerChange = (event: SelectChangeEvent) => {
@@ -88,7 +97,7 @@ const NewOrder = () => {
               <Typography marginRight={5} whiteSpace="nowrap">
                 受注番号
               </Typography>
-              <TextField size="small" disabled></TextField>
+              <TextField disabled></TextField>
               <Typography mx={2}>受注ステータス</Typography>
               <FormControl size="small" sx={{ width: '20%' }}>
                 <Select value={selectStatus} onChange={statusChange}>
@@ -126,11 +135,11 @@ const NewOrder = () => {
           <Box sx={{ width: '45%' }} marginLeft={2} bgcolor={grey[300]}>
             <Box sx={styles.container}>
               <Typography marginRight={7}>公演名</Typography>
-              <TextField size="small" sx={{ width: '50%' }}></TextField>
+              <TextField sx={{ width: '50%' }}></TextField>
             </Box>
             <Box sx={styles.container}>
               <Typography marginRight={5}>公演場所</Typography>
-              <TextField disabled size="small" sx={{ width: '50%' }}></TextField>
+              <TextField disabled sx={{ width: '50%' }}></TextField>
               <Button onClick={() => handleOpenLocationDialog()}>選択</Button>
               <Dialog open={locationDialogOpen} fullScreen>
                 <LocationSelectDialog handleCloseLocationDialog={handleCloseLocationDailog} />
@@ -138,16 +147,19 @@ const NewOrder = () => {
             </Box>
             <Box sx={styles.container}>
               <Typography marginRight={9}>相手</Typography>
-              <TextField disabled size="small" sx={{ width: '50%' }}></TextField>
-              <Button>選択</Button>
+              <TextField disabled sx={{ width: '50%' }}></TextField>
+              <Button onClick={() => handleOpenCustomerDialog()}>選択</Button>
+              <Dialog open={customerDialogOpen} fullScreen>
+                <CustomerSelectionDialog handleCloseCustDialog={handleCloseCustomerDialog} />
+              </Dialog>
             </Box>
             <Box sx={styles.container}>
               <Typography marginRight={9}>メモ</Typography>
-              <TextField size="small" sx={{ width: '50%' }}></TextField>
+              <TextField sx={{ width: '50%' }}></TextField>
             </Box>
             <Box sx={styles.container}>
               <Typography marginRight={7}>値引き</Typography>
-              <TextField size="small" sx={{ width: '30%' }}></TextField>
+              <TextField sx={{ width: '30%' }}></TextField>
             </Box>
           </Box>
         </Box>
@@ -161,11 +173,11 @@ const NewOrder = () => {
           <Grid2 size={4} display="flex" alignItems="center" justifyItems={'stretch'}>
             <Box display="flex" sx={{ width: '100%' }} alignItems="center">
               <Typography mx={1}>機材数</Typography>
-              <TextField size="small" sx={{ width: '10%' }}></TextField>
+              <TextField sx={{ width: '10%' }}></TextField>
               <Typography mx={1}>車両数</Typography>
-              <TextField size="small" sx={{ width: '10%' }}></TextField>
+              <TextField sx={{ width: '10%' }}></TextField>
               <Typography mx={1}>合計金額</Typography>
-              <TextField size="small" sx={{ width: '40%' }}></TextField>
+              <TextField sx={{ width: '40%' }}></TextField>
             </Box>
           </Grid2>
           <Grid2 size={5} display={'flex'} justifyContent={'space-between'} px={1}>
