@@ -1,3 +1,4 @@
+import { IconButton } from '@mui/material';
 import Checkbox from '@mui/material/Checkbox';
 import { grey } from '@mui/material/colors';
 import Paper from '@mui/material/Paper';
@@ -23,11 +24,12 @@ type Row = {
 
 type TableProps = {
   headers: Header[];
-  rows: Row[];
+  datas: Row[];
   onSelectionChange?: (selectedIds: (string | number)[]) => void;
 };
 
-const SelectTable: React.FC<TableProps> = ({ headers, rows, onSelectionChange }) => {
+const SelectTable: React.FC<TableProps> = ({ headers, datas, onSelectionChange }) => {
+  const [rows, setRows] = useState(datas);
   const [selected, setSelected] = useState<(string | number)[]>([]);
 
   const handleSelect = (id: string | number) => {
@@ -35,6 +37,16 @@ const SelectTable: React.FC<TableProps> = ({ headers, rows, onSelectionChange })
 
     setSelected(newSelected);
     onSelectionChange?.(newSelected);
+  };
+
+  const moveRow = (index: number, direction: number) => {
+    console.log(index);
+    const newIndex = index + direction;
+    if (newIndex < 0 || newIndex >= rows.length) return;
+
+    const updatedRows = [...rows];
+    [updatedRows[index], updatedRows[newIndex]] = [updatedRows[newIndex], updatedRows[index]];
+    setRows(updatedRows);
   };
 
   return (
@@ -57,10 +69,12 @@ const SelectTable: React.FC<TableProps> = ({ headers, rows, onSelectionChange })
               {headers.map((header) => (
                 <TableCell key={header.key}>{header.label}</TableCell>
               ))}
+              <TableCell></TableCell>
+              <TableCell></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((row) => (
+            {rows.map((row, index) => (
               <TableRow key={row.id} hover>
                 <TableCell padding="checkbox">
                   <Checkbox checked={selected.includes(row.id)} onChange={() => handleSelect(row.id)} />
@@ -68,6 +82,16 @@ const SelectTable: React.FC<TableProps> = ({ headers, rows, onSelectionChange })
                 {headers.map((header) => (
                   <TableCell key={header.key}>{row[header.key]}</TableCell>
                 ))}
+                <TableCell>
+                  <IconButton onClick={() => moveRow(index, -1)} disabled={index === 0}>
+                    ↑
+                  </IconButton>
+                </TableCell>
+                <TableCell>
+                  <IconButton onClick={() => moveRow(index, 1)} disabled={index === rows.length - 1}>
+                    ↓
+                  </IconButton>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
