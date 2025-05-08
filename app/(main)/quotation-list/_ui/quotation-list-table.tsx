@@ -21,7 +21,7 @@ import {
 import { grey } from '@mui/material/colors';
 import React, { useState } from 'react';
 
-import { orderList } from '@/app/_lib/mock-data';
+import { quotaionList } from '@/app/_lib/mock-data';
 
 type TablePaginationActionsProps = {
   count: number;
@@ -82,7 +82,7 @@ export const QuotaionListTable = () => {
   const [page, setPage] = useState(0);
   const rowsPerPage = 20;
 
-  const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - orderList.length) : 0;
+  const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - quotaionList.length) : 0;
 
   const handleChangePage = (event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
     setPage(newPage);
@@ -98,7 +98,7 @@ export const QuotaionListTable = () => {
           <TableHead>
             <TableRow>
               <TablePagination
-                count={orderList.length}
+                count={quotaionList.length}
                 rowsPerPage={rowsPerPage}
                 page={page}
                 onPageChange={handleChangePage}
@@ -132,24 +132,25 @@ export const QuotaionListTable = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {(rowsPerPage > 0 ? orderList.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage) : orderList).map(
-              (order) => (
-                <TableRow key={order.id}>
-                  <TableCell>
-                    <Checkbox color="primary" />
-                  </TableCell>
-                  <TableCell>
-                    <Button variant="text">{order.orderNumber}</Button>
-                  </TableCell>
-                  <TableCell>{order.status}</TableCell>
-                  <TableCell>{order.name}</TableCell>
-                  <TableCell>{order.customerName}</TableCell>
-                  <TableCell>{order.orderedDate}</TableCell>
-                  <TableCell>{order.issueDate}</TableCell>
-                  <TableCell>{order.returnDate}</TableCell>
-                </TableRow>
-              )
-            )}
+            {(rowsPerPage > 0
+              ? quotaionList.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              : quotaionList
+            ).map((quotation) => (
+              <TableRow key={quotation.id}>
+                <TableCell>
+                  <Checkbox color="primary" />
+                </TableCell>
+                <TableCell>
+                  <Button variant="text">{quotation.quoteNumber}</Button>
+                </TableCell>
+                <TableCell>{quotation.status}</TableCell>
+                <TableCell>{quotation.name}</TableCell>
+                <TableCell>{quotation.customerName}</TableCell>
+                <TableCell>{quotation.quotationDate}</TableCell>
+                <TableCell>{quotation.invoiceNumber}</TableCell>
+                <TableCell>{quotation.quotationmemo}</TableCell>
+              </TableRow>
+            ))}
             {emptyRows > 0 && (
               <TableRow style={{ height: 53 * emptyRows }}>
                 <TableCell colSpan={8} />

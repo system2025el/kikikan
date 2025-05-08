@@ -1,10 +1,10 @@
 'use client';
 import SearchIcon from '@mui/icons-material/Search';
-import { Box, Button, Container, Stack, Typography } from '@mui/material';
+import { Box, Button, Container, FormControl, MenuItem, Select, Stack, TextField, Typography } from '@mui/material';
 import { grey } from '@mui/material/colors';
 
-import { OrderTable } from '../../order-list/_ui/order-table';
-import { QuotaionListTable } from '../quotation/_ui/quotation-list-table';
+import { QuotaionListTable } from './quotation-list-table';
+import { TwoDatePickers } from '../../_ui/date';
 
 export const QuotationList = () => {
   return (
@@ -20,6 +20,42 @@ export const QuotationList = () => {
             検索
             <SearchIcon />
           </Button>
+        </Stack>
+        <Stack>
+          <Stack>
+            <Typography>見積番号</Typography>
+            <TextField type="number" sx={{ width: '35%', bgcolor: 'white' }} />
+            　～　 <TextField type="number" sx={{ width: '35%', bgcolor: 'white' }} />
+          </Stack>
+          <Stack pt={1}>
+            <Typography>請求番号</Typography>
+            <TextField type="number" sx={{ width: '35%', bgcolor: 'white' }} />
+            　～　 <TextField type="number" sx={{ width: '35%', bgcolor: 'white' }} />
+          </Stack>
+        </Stack>
+        <Stack pt={1}>
+          <Typography>見積日</Typography>
+          <TwoDatePickers />
+        </Stack>
+        <Stack width={'30%'} pt={1}>
+          <Typography>見積件名</Typography>
+          <FormControl sx={{ minWidth: '70%' }}>
+            <Select>
+              <MenuItem></MenuItem>
+            </Select>
+          </FormControl>
+        </Stack>
+        <Stack width={'30%'} pt={1}>
+          <Typography>見積相手</Typography>
+          <FormControl sx={{ minWidth: '70%' }}>
+            <Select>
+              <MenuItem></MenuItem>
+            </Select>
+          </FormControl>
+        </Stack>
+        <Stack width={'40%'} pt={1}>
+          <Typography>見積メモ</Typography>
+          <TextField />
         </Stack>
       </Box>
       <QuotaionListTable />
