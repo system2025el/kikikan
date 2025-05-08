@@ -4,6 +4,7 @@ import {
   Button,
   Container,
   Dialog,
+  Divider,
   Paper,
   Stack,
   Table,
@@ -18,14 +19,14 @@ import {
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import TablePaginationActions from '@mui/material/TablePagination/TablePaginationActions';
+import Form from 'next/form';
 import { useState } from 'react';
-import { Divider } from 'rsuite';
 
 import { customers, locationList } from '@/app/_lib/mock-data';
 
 import { AreaSelectionDialog } from './area-selection-dialog';
 
-export const CustomerSelectionDialog = (props: { handleCloseCustDialog: () => void }) => {
+export const CustomerSelectionDialog = (props: { handleCloseCustDialog: () => void; query: string }) => {
   const [page, setPage] = useState(0);
   const rowsPerPage = 20;
 
@@ -34,6 +35,10 @@ export const CustomerSelectionDialog = (props: { handleCloseCustDialog: () => vo
   const handleChangePage = (event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
     setPage(newPage);
   };
+
+  const filterdCustomer = customers.filter((c) => {
+    return !props.query || c.name.toLowerCase().includes(props.query);
+  });
 
   return (
     <>
@@ -48,36 +53,38 @@ export const CustomerSelectionDialog = (props: { handleCloseCustDialog: () => vo
           <Stack justifyContent={'space-between'}>
             <Typography variant="body1">検索</Typography>
           </Stack>
-          <Stack direction={'row'} justifyContent={'space-between'} spacing={1}>
-            <Button>あ</Button>
-            <Button>か</Button>
-            <Button>さ</Button>
-            <Button>た</Button>
-            <Button>な</Button>
-            <Button>は</Button>
-            <Button>ま</Button>
-            <Button>や</Button>
-            <Button>ら</Button>
-            <Button>わ</Button>
-            <Button>英数</Button>
-            <Button>全て</Button>
-            <TextField fullWidth placeholder="検索"></TextField>
-          </Stack>
-          <Divider />
-          <Stack justifyContent={'space-between'} width={'70%'}>
-            <Stack display={'flex'}>
-              <Typography>キーワード</Typography>
+          <Form action="">
+            <Stack direction={'row'} justifyContent={'space-between'} spacing={1}>
+              <Button>あ</Button>
+              <Button>か</Button>
+              <Button>さ</Button>
+              <Button>た</Button>
+              <Button>な</Button>
+              <Button>は</Button>
+              <Button>ま</Button>
+              <Button>や</Button>
+              <Button>ら</Button>
+              <Button>わ</Button>
+              <Button>英数</Button>
+              <Button>全て</Button>
+              <TextField fullWidth placeholder="検索"></TextField>
+            </Stack>
+            <Divider />
+            <Stack justifyContent={'space-between'} width={'70%'}>
+              <Stack display={'flex'}>
+                <Typography>キーワード</Typography>
+                <Box>
+                  <TextField name="name" defaultValue={props.query} />
+                </Box>
+              </Stack>
               <Box>
-                <TextField />
+                <Button type="submit">
+                  検索
+                  <SearchIcon />
+                </Button>
               </Box>
             </Stack>
-            <Box>
-              <Button>
-                検索
-                <SearchIcon />
-              </Button>
-            </Box>
-          </Stack>
+          </Form>
           <Typography></Typography>
         </Box>
 
@@ -87,7 +94,7 @@ export const CustomerSelectionDialog = (props: { handleCloseCustDialog: () => vo
               <TableRow>
                 <TablePagination
                   colSpan={8}
-                  count={locationList.length}
+                  count={filterdCustomer.length}
                   rowsPerPage={rowsPerPage}
                   page={page}
                   onPageChange={handleChangePage}
@@ -98,7 +105,6 @@ export const CustomerSelectionDialog = (props: { handleCloseCustDialog: () => vo
               </TableRow>
               <TableRow>
                 <TableCell sx={{ bgcolor: grey[300] }}>場所</TableCell>
-
                 <TableCell sx={{ bgcolor: grey[300] }}>住所</TableCell>
                 <TableCell sx={{ bgcolor: grey[300] }}>TEL</TableCell>
                 <TableCell sx={{ bgcolor: grey[300] }}>FAX</TableCell>
@@ -107,8 +113,8 @@ export const CustomerSelectionDialog = (props: { handleCloseCustDialog: () => vo
             </TableHead>
             <TableBody>
               {(rowsPerPage > 0
-                ? customers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                : customers
+                ? filterdCustomer.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                : filterdCustomer
               ).map((customer) => (
                 <TableRow key={customer.name}>
                   <TableCell>{customer.name}</TableCell>
@@ -117,7 +123,9 @@ export const CustomerSelectionDialog = (props: { handleCloseCustDialog: () => vo
                   </TableCell>
                   <TableCell>{customer.tel}</TableCell>
                   <TableCell>{customer.fax}</TableCell>
-                  <TableCell sx={{ maxWidth: 20 }}>{customer.memo}</TableCell>
+                  <TableCell sx={{ maxWidth: 20 }}>
+                    <Typography noWrap>{customer.memo}</Typography>
+                  </TableCell>
                 </TableRow>
               ))}
               {emptyRows > 0 && (
