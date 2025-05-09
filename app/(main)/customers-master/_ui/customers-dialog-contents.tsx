@@ -23,9 +23,9 @@ export const CustomerDialogContents = (props: { customerId?: number; handleClose
 
   return (
     <>
-      <DialogTitle justifyContent={'space-between>'}>
+      <DialogTitle justifyContent={'space-between>'} display={'flex'}>
         顧客情報
-        <Stack>
+        <Stack ml={'50%'}>
           <Button onClick={() => props.handleClose()}>保存</Button>
           <Button>編集</Button>
         </Stack>
