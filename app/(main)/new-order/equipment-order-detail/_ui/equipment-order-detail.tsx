@@ -148,6 +148,7 @@ const EquipmentOrderDetail = () => {
               onChange={handleCellChange}
               cellWidths={cellWidths}
               colorSelect={false}
+              getBackgroundColor={() => ''}
             />
             <Box marginLeft={6}>
               <Typography>出庫場所</Typography>
