@@ -108,7 +108,7 @@ export const QuotaionListTable = () => {
                 colSpan={3}
               />
               <TableCell colSpan={3} sx={{ bgcolor: grey[200] }}>
-                <Button sx={{ ml: '40%' }} size="medium" href="/quotaion-list/quotation">
+                <Button sx={{ ml: '40%' }} size="medium" href="/quotation-list/quotation">
                   +新規見積
                 </Button>
               </TableCell>
