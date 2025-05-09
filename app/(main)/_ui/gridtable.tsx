@@ -15,8 +15,6 @@ import {
 } from '@mui/material';
 import React, { useState } from 'react';
 
-import { getBackgroundColor } from '@/app/(main)/new-order/schedule/_lib/colorselect';
-
 type TableProps = {
   header: string[] | null;
   rows: Array<{
@@ -27,6 +25,7 @@ type TableProps = {
   onChange?: (rowIndex: number, colIndex: number, newValue: string) => void;
   cellWidths?: Array<string | number>;
   colorSelect: boolean;
+  getBackgroundColor: (rowIndex: number, colIndex: number, colorSelect: boolean) => string;
 };
 
 const GridTable: React.FC<TableProps> = ({
@@ -36,6 +35,7 @@ const GridTable: React.FC<TableProps> = ({
   onChange,
   cellWidths = [],
   colorSelect,
+  getBackgroundColor,
 }) => {
   const [localRows, setLocalRows] = useState(rows);
 

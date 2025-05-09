@@ -1,0 +1,66 @@
+'use client';
+
+import { Box, Button, TextField, Typography } from '@mui/material';
+import { grey } from '@mui/material/colors';
+import { useState } from 'react';
+
+import GridTable from '../../_ui/gridtable';
+import { getBackgroundColor } from '../_lib/colorselect';
+import { dateData, dateHeader, dateWidths, equipmentData, equipmentHeader, equipmentWidths } from '../_lib/data';
+
+export const Stock = () => {
+  const [equipmentRows, setEquipmentRows] = useState(equipmentData);
+  const [dateRows, setTestRows] = useState(dateData);
+  const editableColumns = [2, 3];
+
+  const equipmentCellChange = (rowIndex: number, colIndex: number, newValue: string) => {
+    const updatedRows = [...equipmentRows];
+    updatedRows[rowIndex].data[colIndex] = newValue;
+    setEquipmentRows(updatedRows);
+    console.log(`Row ${rowIndex}, Column ${colIndex} changed to "${newValue}"`);
+  };
+
+  return (
+    <>
+      <Box display="flex" justifyContent="space-between" alignItems="center" bgcolor={grey[300]}>
+        <Typography margin={1}>在庫確認</Typography>
+        <Button sx={{ margin: 2 }}>検索</Button>
+      </Box>
+      <Box bgcolor={grey[200]}>
+        <Box display="flex" alignItems="center">
+          <Typography margin={1}>機材名</Typography>
+          <TextField defaultValue="SHARPY Plus" sx={{ ml: 4 }}></TextField>
+        </Box>
+        <Box marginTop={6} width="90%" display="flex" justifyContent="center">
+          <Button>＜＜</Button>
+          <Button sx={{ bgcolor: 'white', color: 'black' }}>日付選択</Button>
+          <Button>＞＞</Button>
+        </Box>
+        <Box display="flex" flexDirection="row" width="95%" marginTop={2}>
+          <Box width="40%">
+            <GridTable
+              header={equipmentHeader}
+              rows={equipmentRows}
+              editableColumns={editableColumns}
+              onChange={equipmentCellChange}
+              cellWidths={equipmentWidths}
+              colorSelect={false}
+              getBackgroundColor={getBackgroundColor}
+            />
+          </Box>
+          <Box width="60%">
+            <GridTable
+              header={dateHeader}
+              rows={dateRows}
+              editableColumns={null}
+              onChange={equipmentCellChange}
+              cellWidths={dateWidths}
+              colorSelect={true}
+              getBackgroundColor={getBackgroundColor}
+            />
+          </Box>
+        </Box>
+      </Box>
+    </>
+  );
+};
