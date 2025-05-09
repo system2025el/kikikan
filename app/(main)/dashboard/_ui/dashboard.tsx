@@ -41,22 +41,14 @@ export const Dashboard = () => {
           <Typography variant="body1">在庫状況</Typography>
         </AccordionSummary>
         <AccordionDetails>
-          <Stack direction={'row'}>
-            <Link href={'/dashboard'}>少ない</Link>
-            <Typography>1</Typography>
-          </Stack>
-        </AccordionDetails>
-        <AccordionDetails>
-          <Stack direction={'row'}>
-            <Link href={'/dashboard'}>ゼロ</Link>
-            <Typography>2</Typography>
-          </Stack>
-        </AccordionDetails>
-        <AccordionDetails>
-          <Stack direction={'row'}>
+          <Stack>
             <Link href={'/dashboard'}>マイナス</Link>
-            <Typography>1</Typography>
+            <Typography>1件</Typography>
           </Stack>
+          <Typography>機材名</Typography>
+          <Link href={'/'}>SHARPY PLUS</Link>
+          <br />
+          <Link href={'/'}>JDC</Link>
         </AccordionDetails>
       </Accordion>
     </>
