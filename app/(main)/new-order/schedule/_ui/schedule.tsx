@@ -16,6 +16,7 @@ import { grey } from '@mui/material/colors';
 import { useState } from 'react';
 
 import GridTable from '@/app/(main)/_ui/gridtable';
+import { getBackgroundColor } from '@/app/(main)/new-order/schedule/_lib/colorselect';
 import {
   dateData,
   dateHeader,
@@ -79,6 +80,7 @@ const Schedule = () => {
             onChange={equipmentCellChange}
             cellWidths={equipmentWidths}
             colorSelect={false}
+            getBackgroundColor={getBackgroundColor}
           />
         </Box>
         <Box width="60%">
@@ -89,6 +91,7 @@ const Schedule = () => {
             onChange={equipmentCellChange}
             cellWidths={dateWidths}
             colorSelect={true}
+            getBackgroundColor={getBackgroundColor}
           />
         </Box>
       </Box>

@@ -18,6 +18,7 @@ export const BreadCrumbs = () => {
     { path: '/order-list', name: '受注管理＞受注一覧' },
     { path: '/quotation-list', name: '受注管理＞見積一覧' },
     { path: '/quotation-list/quotation', name: '受注管理＞見積一覧＞見積書' },
+    { path: '/stock', name: '受注管理＞在庫確認' },
   ];
 
   for (let i = 0; i < items.length; i++) {
