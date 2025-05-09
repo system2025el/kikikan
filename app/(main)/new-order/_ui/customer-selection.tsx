@@ -3,7 +3,6 @@ import {
   Box,
   Button,
   Container,
-  Dialog,
   Divider,
   Paper,
   Stack,
@@ -22,11 +21,9 @@ import TablePaginationActions from '@mui/material/TablePagination/TablePaginatio
 import Form from 'next/form';
 import { useState } from 'react';
 
-import { customers, locationList } from '@/app/_lib/mock-data';
+import { customers } from '@/app/_lib/mock-data';
 
-import { AreaSelectionDialog } from './area-selection-dialog';
-
-export const CustomerSelectionDialog = (props: { handleCloseCustDialog: () => void; query: string }) => {
+export const CustomerSelectionDialog = (props: { handleCloseCustDialog: () => void }) => {
   const [page, setPage] = useState(0);
   const rowsPerPage = 20;
 
@@ -35,10 +32,6 @@ export const CustomerSelectionDialog = (props: { handleCloseCustDialog: () => vo
   const handleChangePage = (event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
     setPage(newPage);
   };
-
-  const filterdCustomer = customers.filter((c) => {
-    return !props.query || c.name.toLowerCase().includes(props.query);
-  });
 
   return (
     <>
@@ -74,7 +67,7 @@ export const CustomerSelectionDialog = (props: { handleCloseCustDialog: () => vo
               <Stack display={'flex'}>
                 <Typography>キーワード</Typography>
                 <Box>
-                  <TextField name="name" defaultValue={props.query} />
+                  <TextField />
                 </Box>
               </Stack>
               <Box>
@@ -94,7 +87,7 @@ export const CustomerSelectionDialog = (props: { handleCloseCustDialog: () => vo
               <TableRow>
                 <TablePagination
                   colSpan={8}
-                  count={filterdCustomer.length}
+                  count={customers.length}
                   rowsPerPage={rowsPerPage}
                   page={page}
                   onPageChange={handleChangePage}
@@ -113,8 +106,8 @@ export const CustomerSelectionDialog = (props: { handleCloseCustDialog: () => vo
             </TableHead>
             <TableBody>
               {(rowsPerPage > 0
-                ? filterdCustomer.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                : filterdCustomer
+                ? customers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                : customers
               ).map((customer) => (
                 <TableRow key={customer.name}>
                   <TableCell>{customer.name}</TableCell>
