@@ -25,7 +25,7 @@ import { eqyipmentHeaders, eqyipmentRows, vehicleHeaders, vehicleRows } from '@/
 import { CustomerSelectionDialog } from './customer-selection';
 import { LocationSelectDialog } from './location-selection';
 
-const NewOrder = (props: { query: string }) => {
+const NewOrder = () => {
   const handleSelectionChange = (selectedIds: (string | number)[]) => {
     console.log('選択されたID:', selectedIds);
   };
@@ -150,7 +150,7 @@ const NewOrder = (props: { query: string }) => {
               <TextField disabled sx={{ width: '50%' }}></TextField>
               <Button onClick={() => handleOpenCustomerDialog()}>選択</Button>
               <Dialog open={customerDialogOpen} fullScreen>
-                <CustomerSelectionDialog handleCloseCustDialog={handleCloseCustomerDialog} query={props.query} />
+                <CustomerSelectionDialog handleCloseCustDialog={handleCloseCustomerDialog} />
               </Dialog>
             </Box>
             <Box sx={styles.container}>

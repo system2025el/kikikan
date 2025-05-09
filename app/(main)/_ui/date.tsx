@@ -101,13 +101,13 @@ export const TwoDatePickers = () => {
   );
 };
 
-export const RSuiteDateRangePicker = (/*props: { val: [Date, Date] }*/) => {
+export const RSuiteDateRangePicker = () => {
   const [dateRange, setDateRange] = useState<[Date, Date]>([new Date(), new Date()]);
   return (
     <DateRangePicker
       style={{ width: 250 }}
       format="yyyy/MM/dd"
-      size="md"
+      size="lg"
       character=" - "
       placeholder="年/月/日 - 年/月/日"
       placement="autoVertical"
