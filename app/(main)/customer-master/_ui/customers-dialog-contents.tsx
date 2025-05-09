@@ -1,13 +1,36 @@
-import { Box, Button, DialogContentText, Grid2 } from '@mui/material';
+import { Box, Button, DialogContentText, DialogTitle, Grid2, Stack } from '@mui/material';
 import { grey } from '@mui/material/colors';
 
 import { customers } from '../../../_lib/mock-data';
 
-export const CustomerDialogContents = (props: { customerId: number }) => {
-  const customer = { ...customers[props.customerId - 1] };
+export const CustomerDialogContents = (props: { customerId?: number; handleClose: () => void }) => {
+  const customer =
+    props.customerId !== undefined
+      ? { ...customers[props.customerId - 1] }
+      : {
+          id: '',
+          name: '',
+          nameKana: '',
+          postnum: '',
+          addressA: '',
+          addressB: '',
+          tel: '',
+          fax: '',
+          mail: '',
+          keishou: '',
+          memo: '',
+        };
 
   return (
     <>
+      <DialogTitle justifyContent={'space-between>'}>
+        顧客情報
+        <Stack>
+          <Button onClick={() => props.handleClose()}>保存</Button>
+          <Button>編集</Button>
+        </Stack>
+        <Box></Box>
+      </DialogTitle>
       {/** 1段目　敬称（前後）略称 ------------------------------------------------------- */}
       <Grid2 container spacing={1} justifyContent={'space-between'}>
         <Grid2 container spacing={1} size={{ lg: 7 }} sx={styles.justContentBox}>

@@ -24,12 +24,12 @@ import React, { useState } from 'react';
 
 import { orderList } from '../../../_lib/mock-data';
 
-interface TablePaginationActionsProps {
+type TablePaginationActionsProps = {
   count: number;
   page: number;
   rowsPerPage: number;
   onPageChange: (event: React.MouseEvent<HTMLButtonElement>, newPage: number) => void;
-}
+};
 
 export const TablePaginationActions = (props: TablePaginationActionsProps) => {
   const theme = useTheme();
