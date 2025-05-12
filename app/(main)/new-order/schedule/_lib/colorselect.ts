@@ -1,4 +1,4 @@
-export const getBackgroundColor = (rowIndex: number, colIndex: number, colorSelect: boolean): string => {
+export const getDateRowBackgroundColor = (rowIndex: number, colIndex: number, colorSelect: boolean): string => {
   if (colorSelect && (rowIndex === 0 || rowIndex === 1)) {
     switch (colIndex) {
       case 2:
@@ -55,4 +55,48 @@ export const getBackgroundColor = (rowIndex: number, colIndex: number, colorSele
     return 'yellow';
   }
   return 'white';
+};
+
+export const getEquipmentRowBackgroundColor = (rowIndex: number, colIndex: number, colorSelect: boolean): string => {
+  if (colorSelect && rowIndex < 3) {
+    switch (colIndex) {
+      case 1:
+        return 'lightgrey';
+      case 4:
+        return 'lightgrey';
+      default:
+        return 'white';
+    }
+  } else if (colorSelect && rowIndex > 3 && colIndex < 5) {
+    return 'lightgrey';
+  }
+  return 'white';
+};
+
+export const getDateHeaderBackgroundColor = (index: number, colorSelect: boolean): string => {
+  return colorSelect && 0 < index && index < 11 ? 'blue' : 'black';
+};
+
+export const getEquipmentHeaderBackgroundColor = (index: number, colorSelect: boolean): string => {
+  switch (index) {
+    case 0:
+      return 'black';
+    case 1:
+      return 'lightgrey';
+    case 4:
+      return 'lightgrey';
+    default:
+      return 'white';
+  }
+};
+
+export const getDateTextColor = (index: number, colorSelect: boolean): string => {
+  return 'white';
+};
+
+export const getEquipmentTextColor = (index: number, colorSelect: boolean): string => {
+  if (index === 0) {
+    return 'white';
+  }
+  return 'black';
 };

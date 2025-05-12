@@ -19,6 +19,7 @@ import DateX from '@/app/(main)/_ui/date';
 import GridTable from '@/app/(main)/_ui/gridtable';
 import Time from '@/app/(main)/_ui/time';
 import { cellWidths, data, header } from '@/app/(main)/new-order/equipment-order-detail/_lib/data';
+import { getEquipmentRowBackgroundColor } from '@/app/(main)/new-order/schedule/_lib/colorselect';
 
 import { EquipmentSelectionDialog } from './equipment-selection-dailog';
 
@@ -147,8 +148,11 @@ const EquipmentOrderDetail = () => {
               editableColumns={editableColumns}
               onChange={handleCellChange}
               cellWidths={cellWidths}
-              colorSelect={false}
-              getBackgroundColor={() => ''}
+              headerColorSelect={false}
+              getHeaderBackgroundColor={() => ''}
+              getHeaderTextColor={() => ''}
+              rowColorSelect={true}
+              getRowBackgroundColor={getEquipmentRowBackgroundColor}
             />
             <Box marginLeft={6}>
               <Typography>出庫場所</Typography>

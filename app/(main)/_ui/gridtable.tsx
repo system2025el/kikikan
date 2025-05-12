@@ -24,8 +24,11 @@ type TableProps = {
   editableColumns?: number[] | null;
   onChange?: (rowIndex: number, colIndex: number, newValue: string) => void;
   cellWidths?: Array<string | number>;
-  colorSelect: boolean;
-  getBackgroundColor: (rowIndex: number, colIndex: number, colorSelect: boolean) => string;
+  headerColorSelect: boolean;
+  getHeaderBackgroundColor: (index: number, headerColorSelect: boolean) => string;
+  getHeaderTextColor: (index: number, headerColorSelect: boolean) => string;
+  rowColorSelect: boolean;
+  getRowBackgroundColor: (rowIndex: number, colIndex: number, rowColorSelect: boolean) => string;
 };
 
 const GridTable: React.FC<TableProps> = ({
@@ -34,8 +37,11 @@ const GridTable: React.FC<TableProps> = ({
   editableColumns = [],
   onChange,
   cellWidths = [],
-  colorSelect,
-  getBackgroundColor,
+  headerColorSelect,
+  getHeaderBackgroundColor,
+  getHeaderTextColor,
+  rowColorSelect,
+  getRowBackgroundColor,
 }) => {
   const [localRows, setLocalRows] = useState(rows);
 
@@ -66,8 +72,8 @@ const GridTable: React.FC<TableProps> = ({
                 sx={{
                   border: '1px solid black',
                   whiteSpace: 'nowrap',
-                  color: colorSelect && 0 < index && index < 11 ? 'white' : 'black',
-                  bgcolor: colorSelect && 0 < index && index < 11 ? 'blue' : 'white',
+                  color: getHeaderTextColor(index, headerColorSelect),
+                  bgcolor: getHeaderBackgroundColor(index, headerColorSelect),
                 }}
               >
                 {date}
@@ -91,7 +97,7 @@ const GridTable: React.FC<TableProps> = ({
                       whiteSpace: 'nowrap',
                       width,
                       height: 45,
-                      bgcolor: getBackgroundColor(rowIndex, colIndex, colorSelect),
+                      bgcolor: getRowBackgroundColor(rowIndex, colIndex, rowColorSelect),
                     }}
                     size="small"
                   >
