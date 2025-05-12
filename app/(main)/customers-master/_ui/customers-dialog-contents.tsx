@@ -3,23 +3,25 @@ import { grey } from '@mui/material/colors';
 
 import { customers } from '../../../_lib/mock-data';
 
-export const CustomerDialogContents = (props: { customerId?: number; handleClose: () => void }) => {
-  const customer =
-    props.customerId !== undefined
-      ? { ...customers[props.customerId - 1] }
-      : {
-          id: '',
-          name: '',
-          nameKana: '',
-          postnum: '',
-          addressA: '',
-          addressB: '',
-          tel: '',
-          fax: '',
-          mail: '',
-          keishou: '',
-          memo: '',
-        };
+export const CustomerDialogContents = (props: { customerId: number; handleClose: () => void }) => {
+  // const customer =
+  //   props.customerId !== undefined
+  //     ? { ...customers[props.customerId - 1] }
+  //     : {
+  //         id: '',
+  //         name: '',
+  //         nameKana: '',
+  //         postnum: '',
+  //         addressA: '',
+  //         addressB: '',
+  //         tel: '',
+  //         fax: '',
+  //         mail: '',
+  //         keishou: '',
+  //         memo: '',
+  //       };
+
+  const customer = { ...customers[props.customerId - 1] };
 
   return (
     <>
