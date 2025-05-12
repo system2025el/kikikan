@@ -5,6 +5,13 @@ import { grey } from '@mui/material/colors';
 import { useState } from 'react';
 
 import GridTable from '../../_ui/gridtable';
+import {
+  getDateHeaderBackgroundColor,
+  getDateTextColor,
+  getEquipmentHeaderBackgroundColor,
+  getEquipmentRowBackgroundColor,
+  getEquipmentTextColor,
+} from '../../new-order/schedule/_lib/colorselect';
 import { getBackgroundColor } from '../_lib/colorselect';
 import { dateData, dateHeader, dateWidths, equipmentData, equipmentHeader, equipmentWidths } from '../_lib/data';
 
@@ -36,27 +43,33 @@ export const Stock = () => {
           <Button sx={{ bgcolor: 'white', color: 'black' }}>日付選択</Button>
           <Button>＞＞</Button>
         </Box>
-        <Box display="flex" flexDirection="row" width="95%" marginTop={2}>
-          <Box width="40%">
+        <Box display="flex" flexDirection="row" width="100%" marginTop={2}>
+          <Box width="35%">
             <GridTable
               header={equipmentHeader}
               rows={equipmentRows}
               editableColumns={editableColumns}
               onChange={equipmentCellChange}
               cellWidths={equipmentWidths}
-              colorSelect={false}
-              getBackgroundColor={getBackgroundColor}
+              headerColorSelect={true}
+              getHeaderBackgroundColor={getEquipmentHeaderBackgroundColor}
+              getHeaderTextColor={getEquipmentTextColor}
+              rowColorSelect={true}
+              getRowBackgroundColor={getEquipmentRowBackgroundColor}
             />
           </Box>
-          <Box width="60%">
+          <Box width="65%">
             <GridTable
               header={dateHeader}
               rows={dateRows}
               editableColumns={null}
               onChange={equipmentCellChange}
               cellWidths={dateWidths}
-              colorSelect={true}
-              getBackgroundColor={getBackgroundColor}
+              headerColorSelect={true}
+              getHeaderBackgroundColor={getDateHeaderBackgroundColor}
+              getHeaderTextColor={getDateTextColor}
+              rowColorSelect={true}
+              getRowBackgroundColor={getBackgroundColor}
             />
           </Box>
         </Box>

@@ -1,22 +1,18 @@
 'use client';
 
-import {
-  Box,
-  Button,
-  FormControl,
-  MenuItem,
-  Paper,
-  Select,
-  SelectChangeEvent,
-  Stack,
-  TextField,
-  Typography,
-} from '@mui/material';
+import { Box, Button, TextField, Typography } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import { useState } from 'react';
 
 import GridTable from '@/app/(main)/_ui/gridtable';
-import { getBackgroundColor } from '@/app/(main)/new-order/schedule/_lib/colorselect';
+import {
+  getDateHeaderBackgroundColor,
+  getDateRowBackgroundColor,
+  getDateTextColor,
+  getEquipmentHeaderBackgroundColor,
+  getEquipmentRowBackgroundColor,
+  getEquipmentTextColor,
+} from '@/app/(main)/new-order/schedule/_lib/colorselect';
 import {
   dateData,
   dateHeader,
@@ -66,32 +62,40 @@ const Schedule = () => {
         </Typography>
         <TextField disabled defaultValue={'XXXXXXXX'}></TextField>
       </Box>
-      <Box sx={styles.container}>
+      <Box display="flex" justifyContent="center" alignItems="center" margin={2}>
         <Button>＜＜</Button>
         <Button sx={{ bgcolor: 'white', color: 'black' }}>日付選択</Button>
         <Button>＞＞</Button>
+        <Button sx={{ marginLeft: 10 }}>編集</Button>
+        <Button sx={{ marginLeft: 10 }}>確定</Button>
       </Box>
-      <Box display="flex" flexDirection="row" width="90%">
-        <Box width="40%">
+      <Box display="flex" flexDirection="row" width="100%">
+        <Box width="35%">
           <GridTable
             header={equipmentHeader}
             rows={equipmentRows}
             editableColumns={editableColumns}
             onChange={equipmentCellChange}
             cellWidths={equipmentWidths}
-            colorSelect={false}
-            getBackgroundColor={getBackgroundColor}
+            headerColorSelect={true}
+            getHeaderBackgroundColor={getEquipmentHeaderBackgroundColor}
+            getHeaderTextColor={getEquipmentTextColor}
+            rowColorSelect={true}
+            getRowBackgroundColor={getEquipmentRowBackgroundColor}
           />
         </Box>
-        <Box width="60%">
+        <Box width="65%">
           <GridTable
             header={dateHeader}
             rows={testRows}
             editableColumns={null}
             onChange={equipmentCellChange}
             cellWidths={dateWidths}
-            colorSelect={true}
-            getBackgroundColor={getBackgroundColor}
+            headerColorSelect={true}
+            getHeaderBackgroundColor={getDateHeaderBackgroundColor}
+            getHeaderTextColor={getDateTextColor}
+            rowColorSelect={true}
+            getRowBackgroundColor={getDateRowBackgroundColor}
           />
         </Box>
       </Box>
