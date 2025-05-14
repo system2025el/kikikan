@@ -11,27 +11,24 @@ import {
   TableCell,
   TableContainer,
   TableHead,
-  TablePagination,
   TableRow,
   TextField,
   Typography,
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
-import TablePaginationActions from '@mui/material/TablePagination/TablePaginationActions';
 import Form from 'next/form';
 import { useState } from 'react';
 
 import { customers } from '@/app/_lib/mock-data';
 
+import { MuiTablePagination } from '../../_ui/table-pagination';
+
+/** 新規受注の相手選択ダイアログ（全画面） */
 export const CustomerSelectionDialog = (props: { handleCloseCustDialog: () => void }) => {
   const [page, setPage] = useState(0);
   const rowsPerPage = 20;
 
   const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - customers.length) : 0;
-
-  const handleChangePage = (event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
-    setPage(newPage);
-  };
 
   return (
     <>
@@ -85,15 +82,13 @@ export const CustomerSelectionDialog = (props: { handleCloseCustDialog: () => vo
           <Table stickyHeader size="small">
             <TableHead>
               <TableRow>
-                <TablePagination
+                <MuiTablePagination
+                  arrayList={customers}
                   colSpan={8}
-                  count={customers.length}
                   rowsPerPage={rowsPerPage}
-                  page={page}
-                  onPageChange={handleChangePage}
-                  ActionsComponent={TablePaginationActions}
-                  rowsPerPageOptions={[20]}
                   sx={{ bgcolor: grey[200] }}
+                  page={page}
+                  setPage={setPage}
                 />
               </TableRow>
               <TableRow>
