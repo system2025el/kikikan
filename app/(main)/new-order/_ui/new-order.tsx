@@ -79,7 +79,7 @@ const NewOrder = () => {
   // const [rentalPeriod, setRentalPeriod] = useState<[Date, Date]>([new Date(), new Date()]);
   return (
     <Box>
-      <Box bgcolor={grey[400]}>
+      <Box bgcolor={grey[300]}>
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Typography margin={1}>受注ヘッダー</Typography>
           <Box width={'40%'} textAlign={'end'}>
@@ -92,7 +92,7 @@ const NewOrder = () => {
           <Button sx={{ margin: 1 }}>コピー</Button>
         </Box>
         <Box display="flex">
-          <Box sx={{ width: '55%' }} bgcolor={grey[300]}>
+          <Box sx={{ width: '55%' }} bgcolor={grey[200]}>
             <Box sx={styles.container}>
               <Typography marginRight={5} whiteSpace="nowrap">
                 受注番号
@@ -132,7 +132,7 @@ const NewOrder = () => {
               <RSuiteDateRangePicker /*val={rentalPeriod}*/ />
             </Box>
           </Box>
-          <Box sx={{ width: '45%' }} marginLeft={2} bgcolor={grey[300]}>
+          <Box sx={{ width: '45%' }} marginLeft={2} bgcolor={grey[200]}>
             <Box sx={styles.container}>
               <Typography marginRight={7}>公演名</Typography>
               <TextField sx={{ width: '50%' }}></TextField>
@@ -165,7 +165,7 @@ const NewOrder = () => {
         </Box>
       </Box>
       {/* --------------------------------受注明細（機材）------------------------------------- */}
-      <Box bgcolor={grey[400]} sx={{ marginTop: 2 }}>
+      <Box bgcolor={grey[300]} sx={{ marginTop: 2 }}>
         <Grid2 container alignItems="center" pt={2}>
           <Grid2 size={3}>
             <Typography margin={1}>受注明細（機材）</Typography>
@@ -173,8 +173,6 @@ const NewOrder = () => {
           <Grid2 size={4} display="flex" alignItems="center" justifyItems={'stretch'}>
             <Box display="flex" sx={{ width: '100%' }} alignItems="center">
               <Typography mx={1}>機材数</Typography>
-              <TextField sx={{ width: '10%' }}></TextField>
-              <Typography mx={1}>車両数</Typography>
               <TextField sx={{ width: '10%' }}></TextField>
               <Typography mx={1}>合計金額</Typography>
               <TextField sx={{ width: '40%' }}></TextField>
@@ -196,15 +194,24 @@ const NewOrder = () => {
       </Box>
       <SelectTable headers={eqyipmentHeaders} datas={eqyipmentRows} onSelectionChange={handleSelectionChange} />
       {/* -------------------------車両----------------------------------- */}
-      <Box bgcolor={grey[400]} justifyContent={'space-between'}>
+      <Box bgcolor={grey[300]} justifyContent={'space-between'}>
         <Grid2 container alignItems="center" pt={2}>
-          <Grid2 size={3}>
+          <Grid2 size={2}>
             <Typography margin={1}>（車両）</Typography>
           </Grid2>
-          <Grid2 size={4} display="flex" alignItems="center" justifyItems={'stretch'}>
-            <Box display="flex" sx={{ width: '100%' }}></Box>
+          <Grid2 size={3} alignItems="center" justifyItems={'stretch'}>
+            <Box display="flex" alignItems="center" sx={{ width: '100%' }}>
+              <Typography mx={1}>出庫車両数</Typography>
+              <TextField sx={{ width: '15%' }}></TextField>
+            </Box>
           </Grid2>
-          <Grid2 size={5} display={'flex'} justifyContent={'space-between'} px={1}>
+          <Grid2 size={3} alignItems="center" justifyItems={'stretch'}>
+            <Box display="flex" alignItems="center" sx={{ width: '100%' }}>
+              <Typography mx={1}>入庫車両数</Typography>
+              <TextField sx={{ width: '15%' }}></TextField>
+            </Box>
+          </Grid2>
+          <Grid2 size={4} display={'flex'} justifyContent={'space-between'} px={1}>
             <Box>
               <Button href="/new-order/vehicle-order-detail">＋ 車両入力</Button>
             </Box>
