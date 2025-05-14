@@ -13,19 +13,19 @@ import {
   TableCell,
   TableContainer,
   TableHead,
-  TablePagination,
   TableRow,
   TextField,
   Typography,
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
-import TablePaginationActions from '@mui/material/TablePagination/TablePaginationActions';
 import { useState } from 'react';
 
 import { locationList } from '@/app/_lib/mock-data';
 
+import { MuiTablePagination } from '../../_ui/table-pagination';
 import { AreaSelectionDialog } from './area-selection-dialog';
 
+/** 新規受注の場所選択ダイアログ */
 export const LocationSelectDialog = (props: { handleCloseLocationDialog: VoidFunction }) => {
   const [DialogOpen, setDialogOpen] = useState(false);
   const handleOpenDialog = () => {
@@ -39,10 +39,6 @@ export const LocationSelectDialog = (props: { handleCloseLocationDialog: VoidFun
   const rowsPerPage = 20;
 
   const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - locationList.length) : 0;
-
-  const handleChangePage = (event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
-    setPage(newPage);
-  };
 
   return (
     <>
@@ -82,15 +78,13 @@ export const LocationSelectDialog = (props: { handleCloseLocationDialog: VoidFun
           <Table stickyHeader size="small">
             <TableHead>
               <TableRow>
-                <TablePagination
+                <MuiTablePagination
+                  arrayList={locationList}
                   colSpan={8}
-                  count={locationList.length}
                   rowsPerPage={rowsPerPage}
-                  page={page}
-                  onPageChange={handleChangePage}
-                  ActionsComponent={TablePaginationActions}
-                  rowsPerPageOptions={[20]}
                   sx={{ bgcolor: grey[200] }}
+                  page={page}
+                  setPage={setPage}
                 />
               </TableRow>
               <TableRow>

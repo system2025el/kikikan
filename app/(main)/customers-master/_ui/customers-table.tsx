@@ -8,17 +8,17 @@ import {
   TableCell,
   TableContainer,
   TableHead,
-  TablePagination,
   TableRow,
   Typography,
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
-import TablePaginationActions from '@mui/material/TablePagination/TablePaginationActions';
 import { useState } from 'react';
 
 import { customers } from '../../../_lib/mock-data';
+import { MuiTablePagination } from '../../_ui/table-pagination';
 import { CustomerDialogContents } from './customers-dialog-contents';
 
+/** 顧客マスタのテーブルコンポーネント */
 export const CustomersMasterTable = () => {
   const [openId, setOpenID] = useState(-100);
   const handleOpen = (id: number) => {
@@ -40,24 +40,18 @@ export const CustomersMasterTable = () => {
   const rowsPerPage = 20;
 
   const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - customers.length) : 0;
-
-  const handleChangePage = (event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
-    setPage(newPage);
-  };
   return (
     <TableContainer component={Paper} square sx={{ p: 2, maxHeight: 800, bgcolor: grey[200] }}>
       <Table stickyHeader size="small">
         <TableHead>
           <TableRow>
-            <TablePagination
-              count={customers.length}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              onPageChange={handleChangePage}
-              ActionsComponent={TablePaginationActions}
-              rowsPerPageOptions={[20]}
-              sx={{ bgcolor: grey[200], justifyContent: 'start' }}
+            <MuiTablePagination
+              arrayList={customers}
               colSpan={2}
+              rowsPerPage={rowsPerPage}
+              sx={{ bgcolor: grey[200], justifyContent: 'start' }}
+              page={page}
+              setPage={setPage}
             />
             <TableCell colSpan={2} sx={{ bgcolor: grey[200] }}>
               <Button sx={{ ml: '40%' }} size="medium" onClick={() => handleOpen(-100)}>
