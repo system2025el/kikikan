@@ -1,0 +1,102 @@
+'use client';
+
+import {
+  Box,
+  Button,
+  FormControl,
+  FormControlLabel,
+  FormLabel,
+  Radio,
+  RadioGroup,
+  TextField,
+  Typography,
+} from '@mui/material';
+import { grey } from '@mui/material/colors';
+
+import GridTable from '../../_ui/gridtable';
+import {
+  getDateHeaderBackgroundColor,
+  getDateHeaderTextColor,
+  getDateRowBackgroundColor,
+  getLoanHeaderBackgroundColor,
+  getLoanRowBackgroundColor,
+  getLoanTextColor,
+} from '../_lib/colorselect';
+import { dateData, dateHeader, dateWidth, loanData, loanHeader, loanWidth } from '../_lib/data';
+
+export const LoanSituation = () => {
+  return (
+    <Box bgcolor={grey[200]}>
+      <Box display="flex" justifyContent="space-between" alignItems="center" bgcolor={grey[300]}>
+        <Typography margin={1}>貸出状況</Typography>
+        <Button sx={{ margin: 1 }}>戻る</Button>
+      </Box>
+      <Box sx={styles.container}>
+        <Typography marginRight={2}>機材名</Typography>
+        <TextField disabled defaultValue="SHARPY PLUS"></TextField>
+      </Box>
+      <Box sx={styles.container}>
+        <Typography marginRight={2}>保有数</Typography>
+        <TextField disabled defaultValue="200"></TextField>
+        <Typography marginRight={2} marginLeft={10}>
+          定価
+        </Typography>
+        <TextField disabled defaultValue="20,000円"></TextField>
+        <FormControl sx={{ marginLeft: 10 }}>
+          <RadioGroup defaultValue="出庫日順">
+            <FormControlLabel value="出庫日順" control={<Radio />} label="出庫日順" />
+            <FormControlLabel value="返却日順" control={<Radio />} label="返却日順" />
+          </RadioGroup>
+        </FormControl>
+      </Box>
+      <Box sx={styles.container} justifyContent="center">
+        <Button>＜＜</Button>
+        <Button sx={{ bgcolor: 'white', color: 'black' }}>日付選択</Button>
+        <Button>＞＞</Button>
+      </Box>
+      <Box display="flex" flexDirection="row" width="100%">
+        <Box width="45%">
+          <GridTable
+            header={loanHeader}
+            rows={loanData}
+            editableColumns={null}
+            onChange={undefined}
+            cellWidths={loanWidth}
+            headerColorSelect={true}
+            getHeaderBackgroundColor={getLoanHeaderBackgroundColor}
+            getHeaderTextColor={getLoanTextColor}
+            rowColorSelect={true}
+            getRowBackgroundColor={getLoanRowBackgroundColor}
+          />
+        </Box>
+        <Box width="55%">
+          <GridTable
+            header={dateHeader}
+            rows={dateData}
+            editableColumns={null}
+            onChange={undefined}
+            cellWidths={dateWidth}
+            headerColorSelect={true}
+            getHeaderBackgroundColor={getDateHeaderBackgroundColor}
+            getHeaderTextColor={getDateHeaderTextColor}
+            rowColorSelect={true}
+            getRowBackgroundColor={getDateRowBackgroundColor}
+          />
+        </Box>
+      </Box>
+    </Box>
+  );
+};
+
+/* style
+---------------------------------------------------------------------------------------------------- */
+/** @type {{ [key: string]: React.CSSProperties }} style */
+const styles: { [key: string]: React.CSSProperties } = {
+  // コンテナ
+  container: {
+    display: 'flex',
+    alignItems: 'center',
+    margin: 1,
+    marginLeft: 2,
+  },
+};
