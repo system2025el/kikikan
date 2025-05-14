@@ -20,7 +20,7 @@ const orderList: MenuItem[] = [
   { name: '見積一覧', url: '/quotation-list' },
   { name: '在庫確認', url: '/stock' },
   { name: '出庫履歴', url: '/' },
-  { name: '貸出状況', url: '/' },
+  { name: '貸出状況', url: '/loan-situation' },
 ];
 const printList: MenuItem[] = [
   { name: '出庫指示書', url: '/' },
