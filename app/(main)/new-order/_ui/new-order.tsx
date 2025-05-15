@@ -30,6 +30,8 @@ const NewOrder = () => {
     console.log('選択されたID:', selectedIds);
   };
 
+  const total = equipmentRows.reduce((sum, row) => sum + row.price, 0);
+
   const [buttonValue, setButtonValue] = useState<string | null>('');
 
   const handleAlignment = (event: React.MouseEvent<HTMLElement>, newAlignment: string | null) => {
@@ -175,7 +177,7 @@ const NewOrder = () => {
               <Typography mx={1}>機材数</Typography>
               <TextField sx={{ width: '10%' }}></TextField>
               <Typography mx={1}>合計金額</Typography>
-              <TextField sx={{ width: '40%' }}></TextField>
+              <TextField sx={{ width: '40%' }} defaultValue={'¥' + total}></TextField>
             </Box>
           </Grid2>
           <Grid2 size={5} display={'flex'} justifyContent={'space-between'} px={1}>
