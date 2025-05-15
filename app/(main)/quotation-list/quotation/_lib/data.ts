@@ -1,3 +1,10 @@
+export const quotation = [
+  { label: '（株）シアターブレーン', id: 1 },
+  { label: '（株）リファクト', id: 2 },
+];
+
+export const terms = [{ label: 'aaa', id: 1 }];
+
 export const quotationHeaders = [
   { key: 'name', label: '名称' },
   { key: 'unitprice', label: '単価' },

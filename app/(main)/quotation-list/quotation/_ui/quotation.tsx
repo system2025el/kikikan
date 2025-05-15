@@ -5,6 +5,7 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
+  Autocomplete,
   Box,
   Button,
   Checkbox,
@@ -23,7 +24,7 @@ import { useState } from 'react';
 import DateX from '@/app/(main)/_ui/date';
 import SelectTable from '@/app/(main)/_ui/table';
 
-import { quotationHeaders, quotationRows } from '../_lib/data';
+import { quotation, quotationHeaders, quotationRows, terms } from '../_lib/data';
 
 export const Quotation = () => {
   const [selectInputPerson, setSelectInputPerson] = useState('XXXXXXXX');
@@ -31,10 +32,10 @@ export const Quotation = () => {
   const [selectPartner, setSelectPartner] = useState('（株）シアターブレーン');
   const [selectOrderStatus, setSelectOrderStatus] = useState('確定');
   const [selectQuotationStatus, setSelectQuotationStatus] = useState('処理中');
-  const [selectQuotation, setSelectQuotation] = useState('（株）シアターブレーン');
-  const [selectTransactions, setSelectTransactions] = useState('');
+  // const [selectQuotation, setSelectQuotation] = useState('（株）シアターブレーン');
+  // const [selectTransactions, setSelectTransactions] = useState('');
   const [selectRequestStatus, setSelectRequestStatus] = useState('処理中');
-  const [selectRequest, setSelectRequest] = useState('（株）シアターブレーン');
+  // const [selectRequest, setSelectRequest] = useState('（株）シアターブレーン');
 
   const inputPersonChange = (event: SelectChangeEvent) => {
     setSelectInputPerson(event.target.value);
@@ -51,18 +52,18 @@ export const Quotation = () => {
   const quotationStatusChange = (event: SelectChangeEvent) => {
     setSelectQuotationStatus(event.target.value);
   };
-  const quotationChange = (event: SelectChangeEvent) => {
-    setSelectQuotation(event.target.value);
-  };
-  const transactionsChange = (event: SelectChangeEvent) => {
-    setSelectTransactions(event.target.value);
-  };
+  // const quotationChange = (event: SelectChangeEvent) => {
+  //   setSelectQuotation(event.target.value);
+  // };
+  // const transactionsChange = (event: SelectChangeEvent) => {
+  //   setSelectTransactions(event.target.value);
+  // };
   const requestStatusChange = (event: SelectChangeEvent) => {
     setSelectRequestStatus(event.target.value);
   };
-  const requestChange = (event: SelectChangeEvent) => {
-    setSelectRequest(event.target.value);
-  };
+  // const requestChange = (event: SelectChangeEvent) => {
+  //   setSelectRequest(event.target.value);
+  // };
 
   const handleSelectionChange = (selectedIds: (string | number)[]) => {
     console.log('選択されたID:', selectedIds);
@@ -206,19 +207,31 @@ export const Quotation = () => {
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={7}>見積先</Typography>
-                <FormControl size="small" sx={{ width: '50%' }}>
+                <Autocomplete
+                  freeSolo
+                  options={quotation}
+                  sx={{ width: '50%' }}
+                  renderInput={(params) => <TextField {...params} />}
+                />
+                {/* <FormControl size="small" sx={{ width: '50%' }}>
                   <Select value={selectQuotation} onChange={quotationChange}>
                     <MenuItem value={'（株）シアターブレーン'}>（株）シアターブレーン</MenuItem>
                   </Select>
-                </FormControl>
+                </FormControl> */}
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={5}>取引条件</Typography>
-                <FormControl size="small" sx={{ width: '50%' }}>
+                <Autocomplete
+                  freeSolo
+                  options={terms}
+                  sx={{ width: '50%' }}
+                  renderInput={(params) => <TextField {...params} />}
+                />
+                {/* <FormControl size="small" sx={{ width: '50%' }}>
                   <Select value={selectTransactions} onChange={transactionsChange}>
                     <MenuItem value={''}></MenuItem>
                   </Select>
-                </FormControl>
+                </FormControl> */}
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={5}>見積メモ</Typography>
@@ -279,11 +292,17 @@ export const Quotation = () => {
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={7}>請求先</Typography>
-                <FormControl size="small" sx={{ width: '50%' }}>
+                <Autocomplete
+                  freeSolo
+                  options={quotation}
+                  sx={{ width: '50%' }}
+                  renderInput={(params) => <TextField {...params} />}
+                />
+                {/* <FormControl size="small" sx={{ width: '50%' }}>
                   <Select value={selectRequest} onChange={requestChange}>
                     <MenuItem value={'（株）シアターブレーン'}>（株）シアターブレーン</MenuItem>
                   </Select>
-                </FormControl>
+                </FormControl> */}
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={5}>請求メモ</Typography>
@@ -304,7 +323,12 @@ export const Quotation = () => {
             <Box width="65%" display="flex" alignItems="center" justifyContent="space-evenly">
               <Box display="flex" alignItems="center">
                 <Typography mx={1}>合計金額</Typography>
-                <TextField size="small"></TextField>
+                <TextField
+                  size="small"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                ></TextField>
               </Box>
               <Button
                 href="/new-order/equipment-order-detail"
