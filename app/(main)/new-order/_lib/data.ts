@@ -1,4 +1,4 @@
-const eqyipmentHeaders = [
+const equipmentHeaders = [
   { key: 'name', label: '名称' },
   { key: 'status', label: 'ステータス' },
   { key: 'issue', label: '出庫' },
@@ -24,7 +24,7 @@ const vehicleHeaders = [
   { key: 'work', label: '作業' },
   { key: 'memo', label: '車両メモ' },
 ];
-const eqyipmentRows = [
+const equipmentRows = [
   {
     id: 1,
     name: 'SHARPY',
@@ -165,4 +165,4 @@ const vehicleRows = [
   },
 ];
 
-export { eqyipmentHeaders, eqyipmentRows, vehicleHeaders, vehicleRows };
+export { equipmentHeaders, equipmentRows, vehicleHeaders, vehicleRows };

@@ -20,7 +20,7 @@ import { useState } from 'react';
 
 import DateX, { RSuiteDateRangePicker, TwoDatePickers } from '@/app/(main)/_ui/date';
 import SelectTable from '@/app/(main)/_ui/table';
-import { eqyipmentHeaders, eqyipmentRows, vehicleHeaders, vehicleRows } from '@/app/(main)/new-order/_lib/data';
+import { equipmentHeaders, equipmentRows, vehicleHeaders, vehicleRows } from '@/app/(main)/new-order/_lib/data';
 
 import { CustomerSelectionDialog } from './customer-selection';
 import { LocationSelectDialog } from './location-selection';
@@ -192,7 +192,7 @@ const NewOrder = () => {
         </Grid2>
         <Button href="/new-order/schedule">受注機材・スケジュール</Button>
       </Box>
-      <SelectTable headers={eqyipmentHeaders} datas={eqyipmentRows} onSelectionChange={handleSelectionChange} />
+      <SelectTable headers={equipmentHeaders} datas={equipmentRows} onSelectionChange={handleSelectionChange} />
       {/* -------------------------車両----------------------------------- */}
       <Box bgcolor={grey[300]} justifyContent={'space-between'}>
         <Grid2 container alignItems="center" pt={2}>
