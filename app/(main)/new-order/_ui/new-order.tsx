@@ -156,6 +156,10 @@ const NewOrder = () => {
               </Dialog>
             </Box>
             <Box sx={styles.container}>
+              <Typography marginRight={3}>相手担当者</Typography>
+              <TextField disabled sx={{ width: '50%' }}></TextField>
+            </Box>
+            <Box sx={styles.container}>
               <Typography marginRight={9}>メモ</Typography>
               <TextField sx={{ width: '50%' }}></TextField>
             </Box>
