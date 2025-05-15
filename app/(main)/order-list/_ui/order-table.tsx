@@ -1,4 +1,5 @@
 import {
+  Box,
   Button,
   Checkbox,
   Paper,
@@ -32,7 +33,7 @@ export const OrderTable = () => {
                 arrayList={orderList}
                 colSpan={3}
                 rowsPerPage={rowsPerPage}
-                sx={{ bgcolor: grey[200] }}
+                sx={{ bgcolor: grey[200], minWidth: '9vw', maxWidth: '9vw' }}
                 page={page}
                 setPage={setPage}
               />
@@ -52,15 +53,21 @@ export const OrderTable = () => {
               </TableCell>
             </TableRow>
             <TableRow>
-              <TableCell sx={{ bgcolor: grey[300], width: 50, maxWidth: 50, top: 65 }}></TableCell>
-              <TableCell sx={{ bgcolor: grey[300], top: 65 }}>受注番号</TableCell>
-              <TableCell sx={{ bgcolor: grey[300], top: 65 }}>受注ステータス</TableCell>
-              <TableCell sx={{ bgcolor: grey[300], minWidth: '20%', top: 65 }}>公演名</TableCell>
-              <TableCell sx={{ bgcolor: grey[300], minWidth: '20%', top: 65 }}>公演場所</TableCell>
-              <TableCell sx={{ bgcolor: grey[300], minWidth: '20%', top: 65 }}>顧客名</TableCell>
-              <TableCell sx={{ bgcolor: grey[300], minWidth: 100, top: 65 }}>受注日</TableCell>
-              <TableCell sx={{ bgcolor: grey[300], minWidth: 100, top: 65 }}>出庫日</TableCell>
-              <TableCell sx={{ bgcolor: grey[300], minWidth: 100, top: 65 }}>返却日</TableCell>
+              <TableCell sx={{ bgcolor: grey[300], top: 65 }}></TableCell>
+              <TableCell sx={{ bgcolor: grey[300], top: 65 }} align="center">
+                受注番号
+              </TableCell>
+              <TableCell sx={{ bgcolor: grey[300], top: 65 }}>
+                <Box minWidth={100} maxWidth={100}>
+                  受注ステータス
+                </Box>
+              </TableCell>
+              <TableCell sx={{ bgcolor: grey[300], top: 65 }}>公演名</TableCell>
+              <TableCell sx={{ bgcolor: grey[300], top: 65 }}>公演場所</TableCell>
+              <TableCell sx={{ bgcolor: grey[300], top: 65 }}>顧客名</TableCell>
+              <TableCell sx={{ bgcolor: grey[300], top: 65 }}>受注日</TableCell>
+              <TableCell sx={{ bgcolor: grey[300], top: 65 }}>出庫日</TableCell>
+              <TableCell sx={{ bgcolor: grey[300], top: 65 }}>返却日</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -68,18 +75,52 @@ export const OrderTable = () => {
               (order) => (
                 <TableRow key={order.id}>
                   <TableCell>
-                    <Checkbox color="primary" />
+                    <Box minWidth={10} maxWidth={10}>
+                      <Checkbox color="primary" />
+                    </Box>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Button variant="text">
+                      <Box minWidth={60} maxWidth={60}>
+                        {order.orderNumber}
+                      </Box>
+                    </Button>
                   </TableCell>
                   <TableCell>
-                    <Button variant="text">{order.orderNumber}</Button>
+                    <Box minWidth={80} maxWidth={80}>
+                      {order.status}
+                    </Box>
                   </TableCell>
-                  <TableCell>{order.status}</TableCell>
-                  <TableCell>{order.name}</TableCell>
-                  <TableCell>{order.location}</TableCell>
-                  <TableCell>{order.customerName}</TableCell>
-                  <TableCell>{order.orderedDate}</TableCell>
-                  <TableCell>{order.issueDate}</TableCell>
-                  <TableCell>{order.returnDate}</TableCell>
+                  <TableCell>
+                    <Box minWidth={100} maxWidth={100}>
+                      {order.name}
+                    </Box>
+                  </TableCell>
+                  <TableCell>
+                    <Box minWidth={100} maxWidth={100}>
+                      {order.location}
+                    </Box>
+                  </TableCell>
+                  <TableCell>
+                    <Box minWidth={100} maxWidth={100}>
+                      {order.customerName}
+                    </Box>
+                  </TableCell>
+                  <TableCell>
+                    <Box minWidth={'5vw'} maxWidth={'5vw'}>
+                      {order.orderedDate}
+                    </Box>
+                  </TableCell>
+                  <TableCell>
+                    <Box minWidth={'5vw'} maxWidth={'5vw'}>
+                      {order.issueDate}
+                    </Box>
+                  </TableCell>
+                  <TableCell>
+                    <Box minWidth={'5vw'} maxWidth={'5vw'}>
+                      {order.returnDate}
+                    </Box>
+                  </TableCell>
                 </TableRow>
               )
             )}
