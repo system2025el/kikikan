@@ -21,6 +21,7 @@ import Time from '@/app/(main)/_ui/time';
 import { cellWidths, data, header } from '@/app/(main)/new-order/equipment-order-detail/_lib/data';
 import { getEquipmentRowBackgroundColor } from '@/app/(main)/new-order/schedule/_lib/colorselect';
 
+import { DateSelectDialog } from './date-selection-dialog';
 import { EquipmentSelectionDialog } from './equipment-selection-dailog';
 
 const EquipmentOrderDetail = () => {
@@ -57,6 +58,14 @@ const EquipmentOrderDetail = () => {
   };
   const handleCloseEqDialog = () => {
     setEqSelectionDialogOpen(false);
+  };
+
+  const [dateSelectionDialogOpne, setDateSelectionDialogOpne] = useState(false);
+  const handleOpenDateDialog = () => {
+    setDateSelectionDialogOpne(true);
+  };
+  const handleCloseDateDialog = () => {
+    setDateSelectionDialogOpne(false);
   };
 
   return (
@@ -251,66 +260,69 @@ const EquipmentOrderDetail = () => {
             <Typography marginRight={9} whiteSpace="nowrap">
               本番日
             </Typography>
-            <Button size="small" sx={{ color: 'white', bgcolor: 'purple' }}>
-              仕込
-            </Button>
-            <Button sx={{ marginLeft: '40%' }}>編集</Button>
+            <Button onClick={handleOpenDateDialog}>編集</Button>
+            <Dialog open={dateSelectionDialogOpne} fullScreen>
+              <DateSelectDialog handleCloseCustDialog={handleCloseDateDialog} />
+            </Dialog>
           </Box>
-          <Box sx={styles.container}>
+          <Button size="small" sx={{ color: 'white', bgcolor: 'purple', marginLeft: 17 }}>
+            仕込
+          </Button>
+          <Box display="flex" alignItems="center" mb={2} ml={28}>
             <Box display="flex" flexDirection="column">
-              <Typography sx={{ marginLeft: 25 }}>日付</Typography>
-              <TextField defaultValue="2025/11/03" sx={{ marginLeft: 25 }} />
-              <TextField defaultValue="2025/11/04" sx={{ marginLeft: 25 }} />
+              <Typography>日付</Typography>
+              <Typography>2025/11/03</Typography>
+              <Typography>2025/11/04</Typography>
             </Box>
-            <Box display="flex" flexDirection="column">
-              <Typography sx={{ marginLeft: 4 }}>メモ</Typography>
-              <TextField defaultValue="XXXXXXXXXX" sx={{ marginLeft: 4 }} />
-              <TextField defaultValue="XXXXXXXXXX" sx={{ marginLeft: 4 }} />
+            <Box display="flex" flexDirection="column" ml={25}>
+              <Typography>メモ</Typography>
+              <Typography>XXXXXXXXXX</Typography>
+              <Typography>XXXXXXXXXX</Typography>
             </Box>
           </Box>
           <Button size="small" sx={{ color: 'white', bgcolor: 'orange', marginLeft: 17 }}>
             RH
           </Button>
-          <Box sx={styles.container}>
+          <Box display="flex" alignItems="center" mb={2} ml={28}>
             <Box display="flex" flexDirection="column">
-              <Typography sx={{ marginLeft: 25 }}>日付</Typography>
-              <TextField defaultValue="2025/11/03" sx={{ marginLeft: 25 }} />
-              <TextField defaultValue="2025/11/04" sx={{ marginLeft: 25 }} />
+              <Typography>日付</Typography>
+              <Typography>2025/11/03</Typography>
+              <Typography>2025/11/04</Typography>
             </Box>
-            <Box display="flex" flexDirection="column">
-              <Typography sx={{ marginLeft: 4 }}>メモ</Typography>
-              <TextField defaultValue="XXXXXXXXXX" sx={{ marginLeft: 4 }} />
-              <TextField defaultValue="XXXXXXXXXX" sx={{ marginLeft: 4 }} />
+            <Box display="flex" flexDirection="column" ml={25}>
+              <Typography>メモ</Typography>
+              <Typography>XXXXXXXXXX</Typography>
+              <Typography>XXXXXXXXXX</Typography>
             </Box>
           </Box>
           <Button size="small" sx={{ color: 'white', bgcolor: 'green', marginLeft: 17 }}>
             GP
           </Button>
-          <Box sx={styles.container}>
+          <Box display="flex" alignItems="center" mb={2} ml={28}>
             <Box display="flex" flexDirection="column">
-              <Typography sx={{ marginLeft: 25 }}>日付</Typography>
-              <TextField defaultValue="2025/11/03" sx={{ marginLeft: 25 }} />
-              <TextField defaultValue="2025/11/04" sx={{ marginLeft: 25 }} />
+              <Typography>日付</Typography>
+              <Typography>2025/11/03</Typography>
+              <Typography>2025/11/04</Typography>
             </Box>
-            <Box display="flex" flexDirection="column">
-              <Typography sx={{ marginLeft: 4 }}>メモ</Typography>
-              <TextField defaultValue="XXXXXXXXXX" sx={{ marginLeft: 4 }} />
-              <TextField defaultValue="XXXXXXXXXX" sx={{ marginLeft: 4 }} />
+            <Box display="flex" flexDirection="column" ml={25}>
+              <Typography>メモ</Typography>
+              <Typography>XXXXXXXXXX</Typography>
+              <Typography>XXXXXXXXXX</Typography>
             </Box>
           </Box>
           <Button size="small" sx={{ color: 'white', bgcolor: 'pink', marginLeft: 17 }}>
             本番
           </Button>
-          <Box sx={styles.container}>
+          <Box display="flex" alignItems="center" mb={2} ml={28}>
             <Box display="flex" flexDirection="column">
-              <Typography sx={{ marginLeft: 25 }}>日付</Typography>
-              <TextField defaultValue="2025/11/03" sx={{ marginLeft: 25 }} />
-              <TextField defaultValue="2025/11/04" sx={{ marginLeft: 25 }} />
+              <Typography>日付</Typography>
+              <Typography>2025/11/03</Typography>
+              <Typography>2025/11/04</Typography>
             </Box>
-            <Box display="flex" flexDirection="column">
-              <Typography sx={{ marginLeft: 4 }}>メモ</Typography>
-              <TextField defaultValue="XXXXXXXXXX" sx={{ marginLeft: 4 }} />
-              <TextField defaultValue="XXXXXXXXXX" sx={{ marginLeft: 4 }} />
+            <Box display="flex" flexDirection="column" ml={25}>
+              <Typography>メモ</Typography>
+              <Typography>XXXXXXXXXX</Typography>
+              <Typography>XXXXXXXXXX</Typography>
             </Box>
           </Box>
           <Box display="flex" alignItems="center" margin={1} marginLeft={2} marginTop={4}>
