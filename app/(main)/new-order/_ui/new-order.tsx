@@ -127,9 +127,9 @@ const NewOrder = () => {
             </Box>
             <Box sx={styles.container}>
               <Typography>
-                レンタル開始/
+                受注開始日/
                 <br />
-                レンタル終了
+                受注終了日
               </Typography>
               <RSuiteDateRangePicker /*val={rentalPeriod}*/ />
             </Box>
