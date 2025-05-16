@@ -2,7 +2,7 @@
 import { KeyboardArrowLeft, KeyboardArrowRight } from '@mui/icons-material';
 import FirstPageIcon from '@mui/icons-material/FirstPage';
 import LastPageIcon from '@mui/icons-material/LastPage';
-import { Box, IconButton, TablePagination, Typography, useTheme } from '@mui/material';
+import { Box, IconButton, LabelDisplayedRowsArgs, TablePagination, Typography, useTheme } from '@mui/material';
 
 /** テーブルページネイションコンポーネント */
 type TablePaginationActionsProps = {
@@ -33,7 +33,6 @@ export const TablePaginationActions = (props: TablePaginationActionsProps) => {
 
   return (
     <Box display={'flex'} alignItems={'center'} sx={{ flexShrink: 0 }}>
-      <Typography>件</Typography>
       <IconButton onClick={handleFirstPageButtonClick} disabled={page === 0} aria-label="first page">
         {theme.direction === 'rtl' ? <LastPageIcon /> : <FirstPageIcon />}
       </IconButton>
@@ -79,6 +78,7 @@ export const MuiTablePagination = (props: MuiTablePaginationProps) => {
       onPageChange={handleChangePage}
       ActionsComponent={TablePaginationActions}
       rowsPerPageOptions={[props.rowsPerPage]}
+      labelDisplayedRows={({ count, from, page, to }) => `${page + 1}ページ目 ${from}-${to}件 全${count}件`}
       sx={props.sx}
       colSpan={props.colSpan}
     />
