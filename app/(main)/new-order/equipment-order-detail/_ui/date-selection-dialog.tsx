@@ -25,6 +25,65 @@ export const DateSelectDialog = (props: { handleCloseCustDialog: () => void }) =
   const handleChange = (event: React.SyntheticEvent, newValue: string) => {
     setValue(newValue);
   };
+
+  const handleAddInput = (value: string) => {
+    console.log(value);
+    switch (value) {
+      case '仕込':
+        return setInputPreparation([...inputPreparation, '']);
+      case 'RH':
+        return setInputRH([...inputRH, '']);
+      case 'GP':
+        return setInputGP([...inputGP, '']);
+      case '本番':
+        return setInputActual([...inputActual, '']);
+    }
+  };
+
+  const [inputPreparation, setInputPreparation] = useState<string[]>([]);
+  const handleInputPreparationChange = (index: number, value: string) => {
+    const updatedInputs = [...inputPreparation];
+    updatedInputs[index] = value;
+    setInputPreparation(updatedInputs);
+  };
+  const handleRemoveInputPreparation = (index: number) => {
+    const updatedInputs = inputPreparation.filter((_, i) => i !== index);
+    setInputPreparation(updatedInputs);
+  };
+
+  const [inputRH, setInputRH] = useState<string[]>([]);
+  const handleInputRHChange = (index: number, value: string) => {
+    const updatedInputs = [...inputRH];
+    updatedInputs[index] = value;
+    setInputRH(updatedInputs);
+  };
+  const handleRemoveInputRH = (index: number) => {
+    const updatedInputs = inputRH.filter((_, i) => i !== index);
+    setInputRH(updatedInputs);
+  };
+
+  const [inputGP, setInputGP] = useState<string[]>([]);
+  const handleInputGPChange = (index: number, value: string) => {
+    const updatedInputs = [...inputGP];
+    updatedInputs[index] = value;
+    setInputGP(updatedInputs);
+  };
+  const handleRemoveInputGP = (index: number) => {
+    const updatedInputs = inputGP.filter((_, i) => i !== index);
+    setInputGP(updatedInputs);
+  };
+
+  const [inputActual, setInputActual] = useState<string[]>([]);
+  const handleInputActualChange = (index: number, value: string) => {
+    const updatedInputs = [...inputActual];
+    updatedInputs[index] = value;
+    setInputActual(updatedInputs);
+  };
+  const handleRemoveInputActual = (index: number) => {
+    const updatedInputs = inputActual.filter((_, i) => i !== index);
+    setInputActual(updatedInputs);
+  };
+
   return (
     <Container disableGutters sx={{ minWidth: '100%', p: 3 }} maxWidth={'xl'}>
       <Box display="flex" justifyContent="space-between" alignItems="center" p={2} bgcolor={grey[300]}>
@@ -46,80 +105,72 @@ export const DateSelectDialog = (props: { handleCloseCustDialog: () => void }) =
             <Tab value="本番" label="本番" sx={{ bgcolor: 'pink' }} />
           </Tabs>
           <Box ml={20}>
-            <Button sx={{ ml: 2 }}>追加</Button>
+            <Button sx={{ ml: 2 }} onClick={() => handleAddInput(value)}>
+              追加
+            </Button>
           </Box>
         </Box>
         <TabPanel value={value} index="仕込">
-          <Box display="flex" alignItems="center" margin={2}>
-            <RSuiteDateRangePicker />
-            <Typography ml={2} mr={1}>
-              メモ
-            </Typography>
-            <TextField defaultValue={'XXXXXXXX'}></TextField>
-            <Button sx={{ ml: 4, bgcolor: 'red', color: 'white' }}>削除</Button>
-          </Box>
-          <Box display="flex" alignItems="center" margin={2}>
-            <RSuiteDateRangePicker />
-            <Typography ml={2} mr={1}>
-              メモ
-            </Typography>
-            <TextField defaultValue={'XXXXXXXX'}></TextField>
-            <Button sx={{ ml: 4, bgcolor: 'red', color: 'white' }}>削除</Button>
-          </Box>
+          {inputPreparation.map((input, index) => (
+            <Box display="flex" alignItems="center" margin={2} key={index}>
+              <RSuiteDateRangePicker />
+              <Typography ml={2} mr={1}>
+                メモ
+              </Typography>
+              <TextField
+                value={input}
+                onChange={(e) => handleInputPreparationChange(index, e.target.value)}
+              ></TextField>
+              <Button
+                sx={{ ml: 4, bgcolor: 'red', color: 'white' }}
+                onClick={() => handleRemoveInputPreparation(index)}
+              >
+                削除
+              </Button>
+            </Box>
+          ))}
         </TabPanel>
         <TabPanel value={value} index="RH">
-          <Box display="flex" alignItems="center" margin={2}>
-            <RSuiteDateRangePicker />
-            <Typography ml={2} mr={1}>
-              メモ
-            </Typography>
-            <TextField defaultValue={'XXXXXXXX'}></TextField>
-            <Button sx={{ ml: 4, bgcolor: 'red', color: 'white' }}>削除</Button>
-          </Box>
-          <Box display="flex" alignItems="center" margin={2}>
-            <RSuiteDateRangePicker />
-            <Typography ml={2} mr={1}>
-              メモ
-            </Typography>
-            <TextField defaultValue={'XXXXXXXX'}></TextField>
-            <Button sx={{ ml: 4, bgcolor: 'red', color: 'white' }}>削除</Button>
-          </Box>
+          {inputRH.map((input, index) => (
+            <Box display="flex" alignItems="center" margin={2} key={index}>
+              <RSuiteDateRangePicker />
+              <Typography ml={2} mr={1}>
+                メモ
+              </Typography>
+              <TextField value={input} onChange={(e) => handleInputRHChange(index, e.target.value)}></TextField>
+              <Button sx={{ ml: 4, bgcolor: 'red', color: 'white' }} onClick={() => handleRemoveInputRH(index)}>
+                削除
+              </Button>
+            </Box>
+          ))}
         </TabPanel>
         <TabPanel value={value} index="GP">
-          <Box display="flex" alignItems="center" margin={2}>
-            <RSuiteDateRangePicker />
-            <Typography ml={2} mr={1}>
-              メモ
-            </Typography>
-            <TextField defaultValue={'XXXXXXXX'}></TextField>
-            <Button sx={{ ml: 4, bgcolor: 'red', color: 'white' }}>削除</Button>
-          </Box>
-          <Box display="flex" alignItems="center" margin={2}>
-            <RSuiteDateRangePicker />
-            <Typography ml={2} mr={1}>
-              メモ
-            </Typography>
-            <TextField defaultValue={'XXXXXXXX'}></TextField>
-            <Button sx={{ ml: 4, bgcolor: 'red', color: 'white' }}>削除</Button>
-          </Box>
+          {inputGP.map((input, index) => (
+            <Box display="flex" alignItems="center" margin={2} key={index}>
+              <RSuiteDateRangePicker />
+              <Typography ml={2} mr={1}>
+                メモ
+              </Typography>
+              <TextField value={input} onChange={(e) => handleInputGPChange(index, e.target.value)}></TextField>
+              <Button sx={{ ml: 4, bgcolor: 'red', color: 'white' }} onClick={() => handleRemoveInputGP(index)}>
+                削除
+              </Button>
+            </Box>
+          ))}
         </TabPanel>
         <TabPanel value={value} index="本番">
-          <Box display="flex" alignItems="center" margin={2}>
-            <RSuiteDateRangePicker />
-            <Typography ml={2} mr={1}>
-              メモ
-            </Typography>
-            <TextField defaultValue={'XXXXXXXX'}></TextField>
-            <Button sx={{ ml: 4, bgcolor: 'red', color: 'white' }}>削除</Button>
-          </Box>
-          <Box display="flex" alignItems="center" margin={2}>
-            <RSuiteDateRangePicker />
-            <Typography ml={2} mr={1}>
-              メモ
-            </Typography>
-            <TextField defaultValue={'XXXXXXXX'}></TextField>
-            <Button sx={{ ml: 4, bgcolor: 'red', color: 'white' }}>削除</Button>
-          </Box>
+          {inputActual.map((input, index) => (
+            <Box display="flex" alignItems="center" margin={2} key={index}>
+              <RSuiteDateRangePicker />
+              <Typography ml={2} mr={1}>
+                メモ
+              </Typography>
+              <TextField value={input} onChange={(e) => handleInputActualChange(index, e.target.value)}></TextField>
+              <Button sx={{ ml: 4, bgcolor: 'red', color: 'white' }} onClick={() => handleRemoveInputActual(index)}>
+                削除
+              </Button>
+            </Box>
+          ))}
         </TabPanel>
       </Box>
     </Container>
