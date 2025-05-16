@@ -27,13 +27,13 @@ import { customers } from '@/app/_lib/mock-data';
 import { TwoDatePickers } from '../../_ui/date';
 import { OrderTable } from './order-table';
 
+/** 受注一覧画面 */
 export const OrderList = () => {
   const [criteria, setCriteria] = useState('');
   const handleSelect = (event: SelectChangeEvent) => {
     setCriteria(event.target.value);
   };
-
-  const [val, setVal] = useState('past');
+  const [val, setVal] = useState('yesterday');
   const handleChange = (value: string) => {
     setVal(value);
   };
@@ -55,8 +55,8 @@ export const OrderList = () => {
 
   return (
     <Container disableGutters sx={{ minWidth: '100%', p: 3 }} maxWidth={'xl'}>
-      <Box width={'100%'} bgcolor={grey[300]} py={2} display={'flex'} p={2} justifyContent={'space-between'}>
-        <Typography>受注一覧</Typography>
+      <Box width={'100%'} bgcolor={grey[300]} display={'flex'} p={2} justifyContent={'space-between'}>
+        <Typography>受注検索</Typography>
         <Button>戻る</Button>
       </Box>
       <Box width={'100%'} bgcolor={grey[200]} justifySelf={'center'} p={2}>
@@ -98,16 +98,7 @@ export const OrderList = () => {
             </Box>
           </FormControl>
         </Stack>
-        <Stack spacing={3}>
-          <Typography id="state">状態</Typography>
-          <FormGroup row id="state">
-            <FormControlLabel control={<Checkbox />} label="出庫済" />
-            <FormControlLabel control={<Checkbox />} label="未出庫" />
-            <FormControlLabel control={<Checkbox />} label="返却済" />
-            <FormControlLabel control={<Checkbox />} label="未返却" />
-          </FormGroup>
-        </Stack>
-        <Stack>
+        <Stack pt={1}>
           <Typography>顧客</Typography>
           <FormControl>
             <Select value={customer} sx={{ minWidth: 300, bgcolor: grey[300] }} onChange={handleCustomerSelect}>
@@ -123,7 +114,7 @@ export const OrderList = () => {
             <MenuItem value="顧客名簿">顧客名簿</MenuItem>
           </Select>
         </Stack>
-        <Stack>
+        <Stack pt={1}>
           <Typography>受注ステータス</Typography>
           <FormControl>
             <Select value={orderStatus} onChange={handleOrder} sx={{ minWidth: 80, bgcolor: 'white' }}>
@@ -131,10 +122,10 @@ export const OrderList = () => {
             </Select>
           </FormControl>
         </Stack>
-        <Stack>
+        <Stack pt={1}>
           <Typography>公演名</Typography>
           <TextField sx={{ bgcolor: 'white' }} />
-          <Typography>公演日</Typography>
+          <Typography>受注開始日～終了日</Typography>
           <TwoDatePickers />
         </Stack>
       </Box>
@@ -145,10 +136,11 @@ export const OrderList = () => {
 
 /** ラヂオボタン用データ */
 const radioData = [
-  { value: 'past', label: '過去' },
-  { value: 'later', label: '今日以降' },
-  { value: 'today', label: '本日のみ' },
-  { value: 'thismonth', label: '今月全て' },
-  { value: 'nowontour', label: 'Tour中' },
+  { value: 'lastMonth', label: '先月全て' },
+  { value: 'thisMonth', label: '今月全て' },
+  { value: 'yesterday', label: '昨日' },
+  { value: 'today', label: '今日' },
+  { value: 'tomorrow', label: '明日' },
+  { value: 'tomorrowOnward', label: '明日以降' },
   { value: 'select', label: '指定期間' },
 ];

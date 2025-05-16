@@ -9,6 +9,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  Typography,
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import React, { useState } from 'react';
@@ -26,18 +27,21 @@ export const OrderTable = () => {
   return (
     <>
       <TableContainer component={Paper} variant="outlined" square sx={{ maxHeight: 600, bgcolor: grey[200], mt: 3 }}>
+        <Typography pt={2} pl={2}>
+          受注一覧
+        </Typography>
         <Table stickyHeader size="small">
           <TableHead>
             <TableRow>
               <MuiTablePagination
                 arrayList={orderList}
-                colSpan={3}
+                colSpan={4}
                 rowsPerPage={rowsPerPage}
-                sx={{ bgcolor: grey[200], minWidth: '9vw', maxWidth: '9vw' }}
+                sx={{ bgcolor: grey[200], minWidth: '20vw', maxWidth: '20vw', justifyItems: 'start' }}
                 page={page}
                 setPage={setPage}
               />
-              <TableCell colSpan={3} sx={{ bgcolor: grey[200] }}>
+              <TableCell colSpan={2} sx={{ bgcolor: grey[200] }}>
                 <Button sx={{ ml: '40%', px: 1.5, py: 1.5 }} href="/new-order">
                   +新規受注
                 </Button>
@@ -66,8 +70,8 @@ export const OrderTable = () => {
               <TableCell sx={{ bgcolor: grey[300], top: 65 }}>公演場所</TableCell>
               <TableCell sx={{ bgcolor: grey[300], top: 65 }}>顧客名</TableCell>
               <TableCell sx={{ bgcolor: grey[300], top: 65 }}>受注日</TableCell>
-              <TableCell sx={{ bgcolor: grey[300], top: 65 }}>出庫日</TableCell>
-              <TableCell sx={{ bgcolor: grey[300], top: 65 }}>返却日</TableCell>
+              <TableCell sx={{ bgcolor: grey[300], top: 65 }}>受注開始日</TableCell>
+              <TableCell sx={{ bgcolor: grey[300], top: 65 }}>終了日</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
