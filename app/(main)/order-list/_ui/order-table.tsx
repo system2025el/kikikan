@@ -39,7 +39,8 @@ export const OrderTable = () => {
                 rowsPerPage={rowsPerPage}
                 sx={{
                   bgcolor: grey[200],
-                  justifyItems: 'start',
+                  justifyItems: 'end',
+                  width: '25vw',
                 }}
                 page={page}
                 setPage={setPage}
@@ -107,7 +108,7 @@ export const OrderTable = () => {
                     </Box>
                   </TableCell>
                   <TableCell>
-                    <Box minWidth={100} maxWidth={100}>
+                    <Box minWidth={200} maxWidth={200}>
                       {order.customerName}
                     </Box>
                   </TableCell>
