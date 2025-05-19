@@ -9,6 +9,7 @@ import {
   IconButton,
   LabelDisplayedRowsArgs,
   Pagination,
+  Paper,
   TablePagination,
   Typography,
   useTheme,
@@ -51,14 +52,16 @@ export const MuiTablePagination = (props: MuiTablePaginationProps) => {
           count={Math.ceil(props.arrayList.length / props.rowsPerPage)}
           page={props.page + 1}
           onChange={handleChangePage}
-          showFirstButton
-          showLastButton
           color="primary"
           size="small"
+          variant="outlined"
+          shape="rounded"
         />
       )}
       rowsPerPageOptions={[props.rowsPerPage]}
-      labelDisplayedRows={({ count, from, to }) => `${from}-${to}件 全${count}件`}
+      labelDisplayedRows={({ count, from, to }) => {
+        return `${from}-${to}件 全${count}件`;
+      }}
       sx={{
         ...props.sx,
         '& .MuiTablePagination-spacer': {
