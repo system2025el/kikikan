@@ -37,7 +37,10 @@ export const OrderTable = () => {
                 arrayList={orderList}
                 colSpan={4}
                 rowsPerPage={rowsPerPage}
-                sx={{ bgcolor: grey[200], minWidth: '20vw', maxWidth: '20vw', justifyItems: 'start' }}
+                sx={{
+                  bgcolor: grey[200],
+                  justifyItems: 'start',
+                }}
                 page={page}
                 setPage={setPage}
               />
@@ -61,10 +64,8 @@ export const OrderTable = () => {
               <TableCell sx={{ bgcolor: grey[300], top: 65 }} align="center">
                 受注番号
               </TableCell>
-              <TableCell sx={{ bgcolor: grey[300], top: 65 }}>
-                <Box minWidth={100} maxWidth={100}>
-                  受注ステータス
-                </Box>
+              <TableCell sx={{ bgcolor: grey[300], top: 65, maxWidth: 100 }}>
+                <Box maxWidth={100}>受注ステータス</Box>
               </TableCell>
               <TableCell sx={{ bgcolor: grey[300], top: 65 }}>公演名</TableCell>
               <TableCell sx={{ bgcolor: grey[300], top: 65 }}>公演場所</TableCell>
@@ -91,7 +92,7 @@ export const OrderTable = () => {
                     </Button>
                   </TableCell>
                   <TableCell>
-                    <Box minWidth={80} maxWidth={80}>
+                    <Box minWidth={60} maxWidth={60}>
                       {order.status}
                     </Box>
                   </TableCell>
