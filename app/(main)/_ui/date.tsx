@@ -1,6 +1,7 @@
 'use client';
 
 import 'dayjs/locale/ja';
+import 'rsuite/dist/rsuite.min.css';
 
 import { Box, Button, Container, Tab, Tabs, TextField, Typography } from '@mui/material';
 import { grey, purple } from '@mui/material/colors';
@@ -103,8 +104,14 @@ export const TwoDatePickers = () => {
   );
 };
 
-export const RSuiteDateRangePicker = () => {
-  const [dateRange, setDateRange] = useState<[Date, Date]>([new Date(), new Date()]);
+type DateRange = [Date, Date] | null;
+
+type Props = {
+  value: DateRange;
+  onChange: (value: DateRange) => void;
+};
+
+export const RSuiteDateRangePicker = (props: Props) => {
   return (
     <DateRangePicker
       style={{ width: 250 }}
@@ -113,8 +120,25 @@ export const RSuiteDateRangePicker = () => {
       character=" - "
       placeholder="年/月/日 - 年/月/日"
       placement="autoVertical"
-      value={dateRange}
-      onOk={(date) => setDateRange(date)}
+      value={props.value}
+      onOk={props.onChange}
     />
   );
+};
+
+export const toISOStringWithTimezone = (date: Date): string => {
+  const pad = function (str: string): string {
+    return ('0' + str).slice(-2);
+  };
+  const year = date.getFullYear().toString();
+  const month = pad((date.getMonth() + 1).toString());
+  const day = pad(date.getDate().toString());
+  const hour = pad(date.getHours().toString());
+  const min = pad(date.getMinutes().toString());
+  const sec = pad(date.getSeconds().toString());
+  const tz = -date.getTimezoneOffset();
+  const sign = tz >= 0 ? '+' : '-';
+  const tzHour = pad((tz / 60).toString());
+  const tzMin = pad((tz % 60).toString());
+  return `${year}/${month}/${day}T${hour}:${min}:${sec}${sign}${tzHour}:${tzMin}`;
 };
