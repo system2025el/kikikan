@@ -78,6 +78,11 @@ const NewOrder = () => {
     setSelectPartner(event.target.value);
   };
 
+  const [dateRange, setDateRange] = useState<[Date, Date] | null>([new Date(), new Date()]);
+  const handleDateChange = (range: [Date, Date] | null) => {
+    setDateRange(range);
+  };
+
   // const [rentalPeriod, setRentalPeriod] = useState<[Date, Date]>([new Date(), new Date()]);
   return (
     <Box>
@@ -126,12 +131,12 @@ const NewOrder = () => {
               </FormControl>
             </Box>
             <Box sx={styles.container}>
-              <Typography>
+              <Typography mr={2}>
                 受注開始日/
                 <br />
                 受注終了日
               </Typography>
-              <RSuiteDateRangePicker /*val={rentalPeriod}*/ />
+              <RSuiteDateRangePicker value={dateRange} onChange={handleDateChange} /*val={rentalPeriod}*/ />
             </Box>
           </Box>
           <Box sx={{ width: '45%' }} marginLeft={2} bgcolor={grey[200]}>

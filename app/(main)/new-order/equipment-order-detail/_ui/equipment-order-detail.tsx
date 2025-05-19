@@ -68,6 +68,39 @@ const EquipmentOrderDetail = () => {
     setDateSelectionDialogOpne(false);
   };
 
+  const handleSave = (
+    preparationDates: string[],
+    preparationMemo: string[],
+    RHDates: string[],
+    RHMemo: string[],
+    GPDates: string[],
+    GPMemo: string[],
+    actualDates: string[],
+    actualMemo: string[]
+  ) => {
+    setPreparationDates(preparationDates);
+    setInputPreparation(preparationMemo);
+    setRHDates(RHDates);
+    setInputRH(RHMemo);
+    setGPDates(GPDates);
+    setInputGP(GPMemo);
+    setActualDates(actualDates);
+    setInputActual(actualMemo);
+    setDateSelectionDialogOpne(false);
+  };
+
+  const [preparationDates, setPreparationDates] = useState<string[]>([]);
+  const [inputPreparation, setInputPreparation] = useState<string[]>([]);
+
+  const [RHDates, setRHDates] = useState<string[]>([]);
+  const [inputRH, setInputRH] = useState<string[]>([]);
+
+  const [GPDates, setGPDates] = useState<string[]>([]);
+  const [inputGP, setInputGP] = useState<string[]>([]);
+
+  const [actualDates, setActualDates] = useState<string[]>([]);
+  const [inputActual, setInputActual] = useState<string[]>([]);
+
   return (
     <Box>
       <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ bgcolor: grey[400] }}>
@@ -261,8 +294,19 @@ const EquipmentOrderDetail = () => {
               本番日
             </Typography>
             <Button onClick={handleOpenDateDialog}>編集</Button>
-            <Dialog open={dateSelectionDialogOpne} fullScreen>
-              <DateSelectDialog handleCloseCustDialog={handleCloseDateDialog} />
+            <Dialog open={dateSelectionDialogOpne} fullScreen sx={{ zIndex: 1201 }}>
+              <DateSelectDialog
+                preparationRange={preparationDates}
+                preparationMemo={inputPreparation}
+                RHRange={RHDates}
+                RHMemo={inputRH}
+                GPRange={GPDates}
+                GPMemo={inputGP}
+                actualRange={actualDates}
+                actualMemo={inputActual}
+                onClose={handleCloseDateDialog}
+                onSave={handleSave}
+              />
             </Dialog>
           </Box>
           <Button size="small" sx={{ color: 'white', bgcolor: 'purple', marginLeft: 17 }}>
@@ -271,13 +315,15 @@ const EquipmentOrderDetail = () => {
           <Box display="flex" alignItems="center" mb={2} ml={28}>
             <Box display="flex" flexDirection="column">
               <Typography>日付</Typography>
-              <Typography>2025/11/03</Typography>
-              <Typography>2025/11/04</Typography>
+              {preparationDates.map((date, index) => (
+                <Typography key={index}>{date}</Typography>
+              ))}
             </Box>
             <Box display="flex" flexDirection="column" ml={25}>
               <Typography>メモ</Typography>
-              <Typography>XXXXXXXXXX</Typography>
-              <Typography>XXXXXXXXXX</Typography>
+              {inputPreparation.map((memo, index) => (
+                <Typography key={index}>{memo}</Typography>
+              ))}
             </Box>
           </Box>
           <Button size="small" sx={{ color: 'white', bgcolor: 'orange', marginLeft: 17 }}>
@@ -286,13 +332,15 @@ const EquipmentOrderDetail = () => {
           <Box display="flex" alignItems="center" mb={2} ml={28}>
             <Box display="flex" flexDirection="column">
               <Typography>日付</Typography>
-              <Typography>2025/11/03</Typography>
-              <Typography>2025/11/04</Typography>
+              {RHDates.map((date, index) => (
+                <Typography key={index}>{date}</Typography>
+              ))}
             </Box>
             <Box display="flex" flexDirection="column" ml={25}>
               <Typography>メモ</Typography>
-              <Typography>XXXXXXXXXX</Typography>
-              <Typography>XXXXXXXXXX</Typography>
+              {inputRH.map((memo, index) => (
+                <Typography key={index}>{memo}</Typography>
+              ))}
             </Box>
           </Box>
           <Button size="small" sx={{ color: 'white', bgcolor: 'green', marginLeft: 17 }}>
@@ -301,13 +349,15 @@ const EquipmentOrderDetail = () => {
           <Box display="flex" alignItems="center" mb={2} ml={28}>
             <Box display="flex" flexDirection="column">
               <Typography>日付</Typography>
-              <Typography>2025/11/03</Typography>
-              <Typography>2025/11/04</Typography>
+              {GPDates.map((date, index) => (
+                <Typography key={index}>{date}</Typography>
+              ))}
             </Box>
             <Box display="flex" flexDirection="column" ml={25}>
               <Typography>メモ</Typography>
-              <Typography>XXXXXXXXXX</Typography>
-              <Typography>XXXXXXXXXX</Typography>
+              {inputGP.map((memo, index) => (
+                <Typography key={index}>{memo}</Typography>
+              ))}
             </Box>
           </Box>
           <Button size="small" sx={{ color: 'white', bgcolor: 'pink', marginLeft: 17 }}>
@@ -316,13 +366,15 @@ const EquipmentOrderDetail = () => {
           <Box display="flex" alignItems="center" mb={2} ml={28}>
             <Box display="flex" flexDirection="column">
               <Typography>日付</Typography>
-              <Typography>2025/11/03</Typography>
-              <Typography>2025/11/04</Typography>
+              {actualDates.map((date, index) => (
+                <Typography key={index}>{date}</Typography>
+              ))}
             </Box>
             <Box display="flex" flexDirection="column" ml={25}>
               <Typography>メモ</Typography>
-              <Typography>XXXXXXXXXX</Typography>
-              <Typography>XXXXXXXXXX</Typography>
+              {inputActual.map((memo, index) => (
+                <Typography key={index}>{memo}</Typography>
+              ))}
             </Box>
           </Box>
           <Box display="flex" alignItems="center" margin={1} marginLeft={2} marginTop={4}>
