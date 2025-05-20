@@ -1,6 +1,10 @@
 'use client';
 
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   Box,
   Button,
   Dialog,
@@ -176,67 +180,154 @@ const NewOrder = () => {
         </Box>
       </Box>
       {/* --------------------------------受注明細（機材）------------------------------------- */}
-      <Box bgcolor={grey[300]} sx={{ marginTop: 2 }}>
-        <Grid2 container alignItems="center" pt={2}>
-          <Grid2 size={3}>
-            <Typography margin={1}>受注明細（機材）</Typography>
+      <Accordion sx={{ marginTop: 2, bgcolor: grey[300] }}>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />} component="div">
+          <Grid2 container alignItems="center" pt={2} sx={{ width: '100%' }}>
+            <Grid2 size={3}>
+              <Typography margin={1}>受注明細（機材）</Typography>
+              <Button
+                href="/new-order/schedule"
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+              >
+                受注機材・スケジュール
+              </Button>
+            </Grid2>
+            <Grid2 size={4} display="flex" alignItems="center" justifyItems={'stretch'}>
+              <Box display="flex" sx={{ width: '100%' }} alignItems="center">
+                <Typography mx={1}>機材数</Typography>
+                <TextField
+                  sx={{ width: '10%' }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                  disabled
+                ></TextField>
+                <Typography mx={1}>合計金額</Typography>
+                <TextField
+                  sx={{ width: '40%' }}
+                  defaultValue={'¥' + total}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                  disabled
+                ></TextField>
+              </Box>
+            </Grid2>
+            <Grid2 size={5} display={'flex'} justifyContent={'space-between'} px={2}>
+              <Box>
+                <Button
+                  href="/new-order/equipment-order-detail"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                >
+                  ＋ 機材入力
+                </Button>
+              </Box>
+              <Box>
+                <Button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                >
+                  編集
+                </Button>
+              </Box>
+              <Box>
+                <Button
+                  color="error"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                >
+                  － 削除
+                </Button>
+              </Box>
+            </Grid2>
           </Grid2>
-          <Grid2 size={4} display="flex" alignItems="center" justifyItems={'stretch'}>
-            <Box display="flex" sx={{ width: '100%' }} alignItems="center">
-              <Typography mx={1}>機材数</Typography>
-              <TextField sx={{ width: '10%' }}></TextField>
-              <Typography mx={1}>合計金額</Typography>
-              <TextField sx={{ width: '40%' }} defaultValue={'¥' + total}></TextField>
-            </Box>
-          </Grid2>
-          <Grid2 size={5} display={'flex'} justifyContent={'space-between'} px={1}>
-            <Box>
-              <Button href="/new-order/equipment-order-detail">＋ 機材入力</Button>
-            </Box>
-            <Box>
-              <Button>編集</Button>
-            </Box>
-            <Box>
-              <Button color="error">－ 削除</Button>
-            </Box>
-          </Grid2>
-        </Grid2>
-        <Button href="/new-order/schedule">受注機材・スケジュール</Button>
-      </Box>
-      <SelectTable headers={equipmentHeaders} datas={equipmentRows} onSelectionChange={handleSelectionChange} />
+        </AccordionSummary>
+        <AccordionDetails sx={{ padding: 0 }}>
+          <SelectTable headers={equipmentHeaders} datas={equipmentRows} onSelectionChange={handleSelectionChange} />
+        </AccordionDetails>
+      </Accordion>
       {/* -------------------------車両----------------------------------- */}
-      <Box bgcolor={grey[300]} justifyContent={'space-between'}>
-        <Grid2 container alignItems="center" pt={2}>
-          <Grid2 size={2}>
-            <Typography margin={1}>（車両）</Typography>
+      <Accordion sx={{ marginTop: 2, bgcolor: grey[300] }}>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />} component="div">
+          <Grid2 container alignItems="center" pt={2} sx={{ width: '100%' }}>
+            <Grid2 size={3}>
+              <Typography margin={1}>（車両）</Typography>
+              <Button
+                href="/new-order/schedule"
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+              >
+                受注機材・スケジュール
+              </Button>
+            </Grid2>
+            <Grid2 size={2} alignItems="center" justifyItems={'stretch'}>
+              <Box display="flex" alignItems="center" sx={{ width: '100%' }}>
+                <Typography mx={1}>出庫車両数</Typography>
+                <TextField
+                  sx={{ width: '20%' }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                  disabled
+                ></TextField>
+              </Box>
+            </Grid2>
+            <Grid2 size={2} alignItems="center" justifyItems={'stretch'}>
+              <Box display="flex" alignItems="center" sx={{ width: '100%' }}>
+                <Typography mx={1}>入庫車両数</Typography>
+                <TextField
+                  sx={{ width: '20%' }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                  disabled
+                ></TextField>
+              </Box>
+            </Grid2>
+            <Grid2 size={5} display={'flex'} justifyContent={'space-between'} px={2}>
+              <Box>
+                <Button
+                  href="/new-order/vehicle-order-detail"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                >
+                  ＋ 車両入力
+                </Button>
+              </Box>
+              <Box>
+                <Button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                >
+                  編集
+                </Button>
+              </Box>
+              <Box>
+                <Button
+                  color="error"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                >
+                  － 削除
+                </Button>
+              </Box>
+            </Grid2>
           </Grid2>
-          <Grid2 size={3} alignItems="center" justifyItems={'stretch'}>
-            <Box display="flex" alignItems="center" sx={{ width: '100%' }}>
-              <Typography mx={1}>出庫車両数</Typography>
-              <TextField sx={{ width: '15%' }}></TextField>
-            </Box>
-          </Grid2>
-          <Grid2 size={3} alignItems="center" justifyItems={'stretch'}>
-            <Box display="flex" alignItems="center" sx={{ width: '100%' }}>
-              <Typography mx={1}>入庫車両数</Typography>
-              <TextField sx={{ width: '15%' }}></TextField>
-            </Box>
-          </Grid2>
-          <Grid2 size={4} display={'flex'} justifyContent={'space-between'} px={1}>
-            <Box>
-              <Button href="/new-order/vehicle-order-detail">＋ 車両入力</Button>
-            </Box>
-            <Box>
-              <Button>編集</Button>
-            </Box>
-            <Box>
-              <Button color="error">－ 削除</Button>
-            </Box>
-          </Grid2>
-        </Grid2>
-        <Button href="/new-order/schedule">受注機材・スケジュール</Button>
-      </Box>
-      <SelectTable headers={vehicleHeaders} datas={vehicleRows} onSelectionChange={handleSelectionChange} />
+        </AccordionSummary>
+        <AccordionDetails sx={{ padding: 0 }}>
+          <SelectTable headers={vehicleHeaders} datas={vehicleRows} onSelectionChange={handleSelectionChange} />
+        </AccordionDetails>
+      </Accordion>
     </Box>
   );
 };
