@@ -1,4 +1,3 @@
-import { CheckBox } from '@mui/icons-material';
 import {
   Box,
   Button,
@@ -7,6 +6,7 @@ import {
   DialogContent,
   DialogTitle,
   Paper,
+  Stack,
   Table,
   TableBody,
   TableCell,
@@ -60,21 +60,38 @@ export const EquipmentSelectionDialog = (props: { handleCloseDialog: VoidFunctio
   };
   return (
     <>
-      <DialogTitle display={'flex'} marginTop={2} p={1} sx={{ bgcolor: grey[400] }} alignItems={'center'}>
+      <DialogTitle
+        display={'flex'}
+        marginTop={2}
+        p={1}
+        sx={{ bgcolor: grey[400] }}
+        alignItems={'center'}
+        justifyContent={'space-between'}
+      >
         <Typography whiteSpace="nowrap" textAlign={'center'}>
-          機材入力
+          機材選択
         </Typography>
         <Button onClick={() => props.handleCloseDialog()}>戻る</Button>
       </DialogTitle>
-      <Box display={'flex'} p={1} sx={{ bgcolor: grey[300] }} justifyContent={'space-between'}>
+      <Box p={1} sx={{ bgcolor: grey[200] }}>
+        <Stack justifyContent="space-between" mx={1}>
+          <Typography ml={1}>検索</Typography>
+          <Button>検索</Button>
+        </Stack>
+        <Stack mx={1}>
+          <Typography>キーワード</Typography>
+          <TextField name="eqsearch" />
+        </Stack>
+      </Box>
+      <Box display={'flex'} mt={5} p={2} sx={{ bgcolor: grey[200] }} justifyContent={'space-between'}>
         <Box></Box>
-        <TextField />
+        <TextField sx={{ width: '2%' }} />
         <Button onClick={() => handleClickEqSelected()}>確定</Button>
         <Dialog open={bundleDialogOpen} onClose={() => setBundleDialogOpen(false)}>
           <BundleDialog handleClose={handleCloseBundle} />
         </Dialog>
       </Box>
-      <Box display={'flex'} p={1} sx={{ bgcolor: grey[300] }} justifyContent={'space-between'}>
+      <Box display={'flex'} px={2} pb={2} sx={{ bgcolor: grey[200] }} justifyContent={'space-between'}>
         <EquipmentCategoriesTable selected={selectedCategory} handleClick={handleClickCategory} />
         <EquipmentTable eqSelected={eqSelected} handleSelect={handleClick} categoryID={selectedCategory} />
       </Box>

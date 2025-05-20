@@ -13,7 +13,7 @@ import TableSortLabel from '@mui/material/TableSortLabel';
 import { visuallyHidden } from '@mui/utils';
 import * as React from 'react';
 
-import { Cate, eqCategories } from '../_lib/eqdata';
+import { eqCategories } from '../_lib/eqdata';
 
 const EnhancedTableHead = () => {
   return (
