@@ -1,19 +1,5 @@
 'use client';
-import { KeyboardArrowLeft, KeyboardArrowRight } from '@mui/icons-material';
-import FirstPageIcon from '@mui/icons-material/FirstPage';
-import LastPageIcon from '@mui/icons-material/LastPage';
-import {
-  Box,
-  createMuiTheme,
-  createTheme,
-  IconButton,
-  LabelDisplayedRowsArgs,
-  Pagination,
-  Paper,
-  TablePagination,
-  Typography,
-  useTheme,
-} from '@mui/material';
+import { Pagination, TablePagination } from '@mui/material';
 import { useCallback } from 'react';
 
 /** テーブルページネイションコンポーネント */
