@@ -56,7 +56,7 @@ const SearchArea = () => {
               <Typography id="a">顧客キーワード</Typography>
               <Box>
                 <TextField id="a" />
-                <Typography variant="body2">社名、かな、略称、住所、TEL、FAX、メモから部分一致検索</Typography>
+                <Typography variant="body2">社名、かな、住所、TEL、FAX、メモから部分一致検索</Typography>
               </Box>
             </Stack>
             <Box>

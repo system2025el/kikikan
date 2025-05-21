@@ -69,22 +69,22 @@ export const EquipmentTable = (props: {
   categoryID: number;
   handleSelect: (event: React.MouseEvent<unknown>, id: number) => void;
 }) => {
-  console.log(props.eqSelected);
+  const { eqSelected, handleSelect, categoryID } = props;
   return (
     <TableContainer component={Paper} sx={{ width: '60%', height: 600 }}>
       <Table>
-        <EnhancedTableHead numSelected={props.eqSelected.length} />
+        <EnhancedTableHead numSelected={eqSelected.length} />
         <TableBody>
           {eqList
-            .filter((eq) => eq.cateId === props.categoryID)
+            .filter((eq) => eq.cateId === categoryID)
             .map((row, index) => {
-              const isItemSelected = props.eqSelected.includes(row.id);
+              const isItemSelected = eqSelected.includes(row.id);
               const labelId = `enhanced-table-checkbox-${index}`;
 
               return (
                 <TableRow
                   hover
-                  onClick={(event) => props.handleSelect(event, row.id)}
+                  onClick={(event) => handleSelect(event, row.id)}
                   role="checkbox"
                   aria-checked={isItemSelected}
                   tabIndex={-1}

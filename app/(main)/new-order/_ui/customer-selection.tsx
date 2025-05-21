@@ -2,6 +2,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import {
   Box,
   Button,
+  Card,
   Container,
   Divider,
   Paper,
@@ -25,6 +26,7 @@ import { MuiTablePagination } from '../../_ui/table-pagination';
 
 /** 新規受注の相手選択ダイアログ（全画面） */
 export const CustomerSelectionDialog = (props: { handleCloseCustDialog: () => void }) => {
+  const { handleCloseCustDialog } = props;
   const [page, setPage] = useState(0);
   const rowsPerPage = 20;
 
@@ -35,7 +37,7 @@ export const CustomerSelectionDialog = (props: { handleCloseCustDialog: () => vo
       <Container disableGutters sx={{ minWidth: '100%', p: 3 }} maxWidth={'xl'}>
         <Box width={'100%'} bgcolor={grey[300]} py={2} alignItems={'center'} p={2} display={'flex'}>
           <Typography>相手選択</Typography>
-          <Button sx={{ ml: '40%' }} onClick={() => props.handleCloseCustDialog()}>
+          <Button sx={{ ml: '40%' }} onClick={() => handleCloseCustDialog()}>
             戻る
           </Button>
         </Box>
@@ -78,7 +80,7 @@ export const CustomerSelectionDialog = (props: { handleCloseCustDialog: () => vo
           <Typography></Typography>
         </Box>
 
-        <TableContainer component={Paper} square sx={{ p: 2, maxHeight: 800, bgcolor: grey[200] }}>
+        <TableContainer component={Card} square sx={{ p: 2, maxHeight: 800, bgcolor: grey[200] }}>
           <Table stickyHeader size="small">
             <TableHead>
               <TableRow>

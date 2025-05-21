@@ -4,9 +4,10 @@ import { grey } from '@mui/material/colors';
 import { customers } from '../../../_lib/mock-data';
 
 export const CustomerDialogContents = (props: { customerId: number; handleClose: () => void }) => {
+  const { customerId, handleClose } = props;
   // const customer =
-  //   props.customerId !== undefined
-  //     ? { ...customers[props.customerId - 1] }
+  //   customerId !== undefined
+  //     ? { ...customers[customerId - 1] }
   //     : {
   //         id: '',
   //         name: '',
@@ -21,14 +22,14 @@ export const CustomerDialogContents = (props: { customerId: number; handleClose:
   //         memo: '',
   //       };
 
-  const customer = { ...customers[props.customerId - 1] };
+  const customer = { ...customers[customerId - 1] };
 
   return (
     <>
       <DialogTitle justifyContent={'space-between>'} display={'flex'} bgcolor={grey[300]}>
         顧客情報
         <Stack ml={'50%'}>
-          <Button onClick={() => props.handleClose()}>保存</Button>
+          <Button onClick={() => handleClose()}>保存</Button>
           <Button>編集</Button>
         </Stack>
         <Box></Box>
@@ -51,19 +52,7 @@ export const CustomerDialogContents = (props: { customerId: number; handleClose:
             </Grid2>
           </Grid2>
 
-          <Grid2 container spacing={1} size={{ lg: 4 }} sx={styles.justContentBox} justifyContent={'flex-end'}>
-            <Grid2 sx={styles.justContentBox}>
-              <Button variant="outlined" size="small" sx={{ maxHeight: 30 }}>
-                略称変更
-              </Button>
-              <Box sx={styles.justContentBox}>
-                <DialogContentText sx={{ ml: 1 }}>略称</DialogContentText>
-                <Box sx={styles.greyBox} minWidth={{ lg: 180 }}>
-                  {customer.keishou}
-                </Box>
-              </Box>
-            </Grid2>
-          </Grid2>
+          <Grid2 container spacing={1} size={{ lg: 4 }} sx={styles.justContentBox} justifyContent={'flex-end'}></Grid2>
         </Grid2>
 
         {/** 2段目　かな -------------------------------------------------------- */}
@@ -145,7 +134,7 @@ export const CustomerDialogContents = (props: { customerId: number; handleClose:
 
           <Grid2 container spacing={1} size={{ lg: 4 }} sx={styles.justContentBox} justifyContent={'flex-end'}>
             <Grid2 sx={styles.justContentBox}>
-              <DialogContentText sx={{ ml: 1 }}>敬称</DialogContentText>
+              <DialogContentText sx={{ ml: 1 }}>ランク</DialogContentText>
               <Box sx={styles.greyBox} minWidth={{ lg: 180 }}>
                 {customer.keishou}
               </Box>

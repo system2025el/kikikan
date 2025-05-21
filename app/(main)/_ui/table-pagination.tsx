@@ -13,30 +13,31 @@ type MuiTablePaginationProps = {
 };
 
 export const MuiTablePagination = (props: MuiTablePaginationProps) => {
+  const { setPage, arrayList, rowsPerPage, sx, page, colSpan } = props;
   const handleChangePage = useCallback(
     (event: unknown, newPage: number) => {
-      props.setPage(newPage - 1);
+      setPage(newPage - 1);
     },
-    [props]
+    [setPage]
   );
 
   const handleChangeTablePage = useCallback(
     (event: unknown, newPage: number) => {
-      props.setPage(newPage);
+      setPage(newPage);
     },
-    [props]
+    [setPage]
   );
 
   return (
     <TablePagination
-      count={props.arrayList.length}
-      rowsPerPage={props.rowsPerPage}
-      page={props.page}
+      count={arrayList.length}
+      rowsPerPage={rowsPerPage}
+      page={page}
       onPageChange={handleChangeTablePage}
       ActionsComponent={() => (
         <Pagination
-          count={Math.ceil(props.arrayList.length / props.rowsPerPage)}
-          page={props.page + 1}
+          count={Math.ceil(arrayList.length / rowsPerPage)}
+          page={page + 1}
           onChange={handleChangePage}
           color="primary"
           size="small"
@@ -44,17 +45,17 @@ export const MuiTablePagination = (props: MuiTablePaginationProps) => {
           shape="rounded"
         />
       )}
-      rowsPerPageOptions={[props.rowsPerPage]}
+      rowsPerPageOptions={[rowsPerPage]}
       labelDisplayedRows={({ count, from, to }) => {
         return `${from}-${to}件 全${count}件`;
       }}
       sx={{
-        ...props.sx,
+        ...sx,
         '& .MuiTablePagination-spacer': {
           display: 'none',
         },
       }}
-      colSpan={props.colSpan}
+      colSpan={colSpan}
       size="small"
     />
   );

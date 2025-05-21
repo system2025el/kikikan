@@ -112,6 +112,7 @@ type Props = {
 };
 
 export const RSuiteDateRangePicker = (props: Props) => {
+  const { value, onChange } = props;
   return (
     <DateRangePicker
       style={{ width: 250 }}
@@ -120,8 +121,8 @@ export const RSuiteDateRangePicker = (props: Props) => {
       character=" - "
       placeholder="年/月/日 - 年/月/日"
       placement="autoVertical"
-      value={props.value}
-      onOk={props.onChange}
+      value={value}
+      onOk={onChange}
     />
   );
 };
