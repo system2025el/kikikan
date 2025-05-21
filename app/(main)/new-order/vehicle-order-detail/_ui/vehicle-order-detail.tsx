@@ -211,10 +211,10 @@ const VehicleOrderDetail = () => {
               control={control}
               render={({ field }) => (
                 <Select {...field} sx={{ minWidth: '10vw' }}>
-                  <MenuItem value="出庫">立合</MenuItem>
-                  <MenuItem value="入庫">YARD</MenuItem>
-                  <MenuItem value="移動Y-K">KICD</MenuItem>
-                  <MenuItem value="移動K-Y">厚木</MenuItem>
+                  <MenuItem value="立合">立合</MenuItem>
+                  <MenuItem value="YARD">YARD</MenuItem>
+                  <MenuItem value="KICD-K">KICD</MenuItem>
+                  <MenuItem value="厚木-Y">厚木</MenuItem>
                 </Select>
               )}
             />
