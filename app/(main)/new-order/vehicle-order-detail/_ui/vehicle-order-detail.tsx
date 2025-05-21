@@ -13,19 +13,16 @@ import {
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import { useState } from 'react';
+import { Controller, useFieldArray, useForm } from 'react-hook-form';
 
 import DateX from '@/app/(main)/_ui/date';
 import Time from '@/app/(main)/_ui/time';
 
 const VehicleOrderDetail = () => {
-  const [selectcar, setSelectcar] = useState('ハイエース');
   const [selectStatus, setSelectStatus] = useState('入力中');
   const [selectSituation, setSelectSituation] = useState('出庫');
   const [selectPlace, setSelectPlace] = useState('立合');
 
-  const selectCarChange = (event: SelectChangeEvent) => {
-    setSelectcar(event.target.value);
-  };
   const selectStatusChange = (event: SelectChangeEvent) => {
     setSelectStatus(event.target.value);
   };
@@ -34,6 +31,32 @@ const VehicleOrderDetail = () => {
   };
   const selectPlaceChange = (event: SelectChangeEvent) => {
     setSelectPlace(event.target.value);
+  };
+  /** 動的フォーム準備 */
+  // フォームの型定義
+  type FormValue = {
+    profile: {
+      vehicleName: string;
+    }[];
+  };
+  // デフォルト値
+  const defaultValue = { vehicleName: '' };
+
+  // React hook formの設定
+  const { control, handleSubmit } = useForm<FormValue>({
+    mode: 'onTouched',
+    defaultValues: {
+      profile: [defaultValue],
+    },
+  });
+  // useFieldArrayの設定と関数呼び出し
+  const { fields, append, remove } = useFieldArray({
+    control: control,
+    name: 'profile',
+  });
+  // フォーム送信処理
+  const onSubmit = async (data: FormValue) => {
+    console.log(data.profile);
   };
 
   return (
@@ -91,46 +114,55 @@ const VehicleOrderDetail = () => {
           </Box>
         </Box>
       </Box>
+
+      {/* ----------------下側------------------ */}
       <Box display={'flex'} marginTop={2} px={1} sx={{ bgcolor: grey[400] }} alignItems={'center'}>
         <Typography whiteSpace="nowrap" textAlign={'center'}>
           車両入力
         </Typography>
         <Box ml={'35%'}>
           <Button sx={{ margin: 1 }}>編集</Button>
-          <Button sx={{ margin: 1 }}>保存</Button>
+          {/* フォーム送信ボタン */}
+          <Button onClick={handleSubmit(onSubmit)}>保存</Button>
         </Box>
       </Box>
       <Box display="flex" sx={{ bgcolor: grey[300] }}>
         <Box sx={{ width: '100%' }}>
-          <Stack spacing={1} alignItems="center" margin={1} marginLeft={2}>
-            <Typography marginRight={2} whiteSpace="nowrap">
+          <Stack pl={13} py={1}>
+            {/* フォーム追加ボタン */}
+            <Button onClick={() => append(defaultValue)}>+車両追加</Button>
+          </Stack>
+          <Stack spacing={1} margin={1} marginLeft={2}>
+            <Typography marginRight={2} marginTop={10} whiteSpace="nowrap">
               車両サイズ
             </Typography>
-            <FormControl size="small" sx={{ width: '10%' }}>
-              <Select value={selectcar} onChange={selectCarChange}>
-                <MenuItem value={'11t'}>11t</MenuItem>
-                <MenuItem value={'2t'}>2t</MenuItem>
-                <MenuItem value={'4t'}>4t</MenuItem>
-                <MenuItem value={'ハイエース'}>ハイエース</MenuItem>
-              </Select>
-            </FormControl>
-            <Button color="error">削除</Button>
+            {/* --動的フォーム-- */}
+            <Box component="form" noValidate onSubmit={handleSubmit(onSubmit)}>
+              {/* 動的に追加される入力フォーム */}
+              {fields.map((field, index) => {
+                return (
+                  <Stack key={field.id} direction={'row'} spacing={1} my={1}>
+                    <Controller
+                      name={`profile.${index}.vehicleName`}
+                      control={control}
+                      render={({ field }) => (
+                        <Select {...field} sx={{ minWidth: '20vw' }}>
+                          <MenuItem value={'11t'}>11t</MenuItem>
+                          <MenuItem value={'2t'}>2t</MenuItem>
+                          <MenuItem value={'4t'}>4t</MenuItem>
+                          <MenuItem value={'ハイエース'}>ハイエース</MenuItem>
+                        </Select>
+                      )}
+                    />
+                    <Button color="error" onClick={() => remove(index)}>
+                      削除
+                    </Button>
+                  </Stack>
+                );
+              })}
+            </Box>
+            {/*  */}
           </Stack>
-          <Stack spacing={1} alignItems="center" margin={1} marginLeft={2}>
-            <Box width={79.5}></Box>
-            <FormControl size="small" sx={{ width: '10%' }}>
-              <Select value={selectStatus} onChange={selectStatusChange}>
-                <MenuItem value={'入力中'}>入力中</MenuItem>
-                <MenuItem value={'準備可'}>準備可</MenuItem>
-                <MenuItem value={'作業中'}>作業中</MenuItem>
-                <MenuItem value={'OK'}>OK</MenuItem>
-              </Select>
-            </FormControl>
-            <Button color="error">削除</Button>
-          </Stack>
-          <Box display="flex" alignItems="center" margin={1} marginLeft={14}>
-            <Button>＋車両追加</Button>
-          </Box>
           <Stack spacing={1} alignItems="center" margin={1} marginLeft={2}>
             <Typography whiteSpace={'nowrap'}>区分</Typography>
             <Box width={42}></Box>
