@@ -3,12 +3,13 @@ import { grey } from '@mui/material/colors';
 import { Container } from 'rsuite';
 
 export const AddVehicleDialog = (props: { handleClose: () => void }) => {
+  const { handleClose } = props;
   return (
     <>
       <Container>
         <DialogTitle bgcolor={grey[300]}>
           新規車両
-          <Button sx={{ ml: '50%' }} onClick={() => props.handleClose()}>
+          <Button sx={{ ml: '50%' }} onClick={() => handleClose()}>
             戻る
           </Button>
         </DialogTitle>

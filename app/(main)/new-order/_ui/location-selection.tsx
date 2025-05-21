@@ -26,7 +26,8 @@ import { MuiTablePagination } from '../../_ui/table-pagination';
 import { AreaSelectionDialog } from './area-selection-dialog';
 
 /** 新規受注の場所選択ダイアログ */
-export const LocationSelectDialog = (props: { handleCloseLocationDialog: VoidFunction }) => {
+export const LocationSelectDialog = (props: { handleCloseLocationDialog: () => void }) => {
+  const { handleCloseLocationDialog } = props;
   const [DialogOpen, setDialogOpen] = useState(false);
   const handleOpenDialog = () => {
     setDialogOpen(true);
@@ -45,7 +46,7 @@ export const LocationSelectDialog = (props: { handleCloseLocationDialog: VoidFun
       <Container disableGutters sx={{ minWidth: '100%', p: 3 }} maxWidth={'xl'}>
         <Box width={'100%'} bgcolor={grey[300]} py={2} alignItems={'center'} p={2} display={'flex'}>
           <Typography>公演場所選択</Typography>
-          <Button sx={{ ml: '40%' }} onClick={() => props.handleCloseLocationDialog()}>
+          <Button sx={{ ml: '40%' }} onClick={() => handleCloseLocationDialog()}>
             戻る
           </Button>
         </Box>
@@ -60,7 +61,7 @@ export const LocationSelectDialog = (props: { handleCloseLocationDialog: VoidFun
           <Stack>
             <Typography>キーワード</Typography>
             <TextField />
-            <Typography paddingLeft={'8%'}>場所、略称、住所、TEL、Faxから検索</Typography>
+            <Typography paddingLeft={'8%'}>場所、住所、TEL、Faxから検索</Typography>
           </Stack>
           <Stack sx={{ pt: 1 }}>
             <Typography>地域</Typography>
@@ -73,7 +74,7 @@ export const LocationSelectDialog = (props: { handleCloseLocationDialog: VoidFun
             </Box>
           </Stack>
         </Box>
-
+        {/*  ---------- ↑検索 ↓場所テーブル-------------- */}
         <TableContainer component={Paper} square sx={{ p: 2, maxHeight: 800, bgcolor: grey[200] }}>
           <Table stickyHeader size="small">
             <TableHead>
@@ -89,7 +90,6 @@ export const LocationSelectDialog = (props: { handleCloseLocationDialog: VoidFun
               </TableRow>
               <TableRow>
                 <TableCell sx={{ bgcolor: grey[300] }}>場所</TableCell>
-                <TableCell sx={{ bgcolor: grey[300] }}>略称</TableCell>
                 <TableCell sx={{ bgcolor: grey[300] }}>住所</TableCell>
                 <TableCell sx={{ bgcolor: grey[300] }}>TEL</TableCell>
                 <TableCell sx={{ bgcolor: grey[300] }}>FAX</TableCell>
@@ -102,7 +102,6 @@ export const LocationSelectDialog = (props: { handleCloseLocationDialog: VoidFun
               ).map((location) => (
                 <TableRow key={location.name}>
                   <TableCell>{location.name}</TableCell>
-                  <TableCell>{location.shortName}</TableCell>
                   <TableCell>{location.address}</TableCell>
                   <TableCell>{location.tel}</TableCell>
                   <TableCell>{location.fax}</TableCell>

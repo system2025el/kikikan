@@ -23,7 +23,8 @@ import { bundleData } from '../_lib/eqdata';
 import { EquipmentCategoriesTable } from './equipment-category-table';
 import { EquipmentTable } from './equipments-table';
 
-export const EquipmentSelectionDialog = (props: { handleCloseDialog: VoidFunction }) => {
+export const EquipmentSelectionDialog = (props: { handleCloseDialog: () => void }) => {
+  const { handleCloseDialog } = props;
   const [eqSelected, setSelectedEq] = useState<readonly number[]>([]);
 
   const [bundleDialogOpen, setBundleDialogOpen] = useState(false);
@@ -34,7 +35,7 @@ export const EquipmentSelectionDialog = (props: { handleCloseDialog: VoidFunctio
   };
   const handleCloseBundle = () => {
     setBundleDialogOpen(false);
-    props.handleCloseDialog();
+    handleCloseDialog();
   };
 
   const handleClick = (event: React.MouseEvent<unknown>, id: number) => {
@@ -71,7 +72,7 @@ export const EquipmentSelectionDialog = (props: { handleCloseDialog: VoidFunctio
         <Typography whiteSpace="nowrap" textAlign={'center'}>
           機材選択
         </Typography>
-        <Button onClick={() => props.handleCloseDialog()}>戻る</Button>
+        <Button onClick={() => handleCloseDialog()}>戻る</Button>
       </DialogTitle>
       <Box p={1} sx={{ bgcolor: grey[200] }}>
         <Stack justifyContent="space-between" mx={1}>
@@ -83,7 +84,7 @@ export const EquipmentSelectionDialog = (props: { handleCloseDialog: VoidFunctio
           <TextField name="eqsearch" />
         </Stack>
       </Box>
-      <Box display={'flex'} mt={5} p={2} sx={{ bgcolor: grey[200] }} justifyContent={'space-between'}>
+      <Box display={'flex'} mt={2} p={2} sx={{ bgcolor: grey[200] }} justifyContent={'space-between'}>
         <Box></Box>
         <TextField sx={{ width: '2%' }} />
         <Button onClick={() => handleClickEqSelected()}>確定</Button>
@@ -99,7 +100,8 @@ export const EquipmentSelectionDialog = (props: { handleCloseDialog: VoidFunctio
   );
 };
 
-const BundleDialog = (props: { handleClose: VoidFunction }) => {
+const BundleDialog = (props: { handleClose: () => void }) => {
+  const { handleClose } = props;
   const [selected, setSelected] = useState<readonly number[]>([]);
   const handleClick = (event: React.MouseEvent<unknown>, id: number) => {
     const selectedIndex = selected.indexOf(id);
@@ -122,7 +124,7 @@ const BundleDialog = (props: { handleClose: VoidFunction }) => {
       <DialogTitle justifyContent={'space-between'} display={'flex'}>
         セットオプション
         <Box>
-          <Button onClick={() => props.handleClose()}>確定</Button>
+          <Button onClick={() => handleClose()}>確定</Button>
         </Box>
       </DialogTitle>
       <DialogContent>

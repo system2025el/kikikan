@@ -3,12 +3,13 @@ import { grey } from '@mui/material/colors';
 
 import { areaCate, areaList } from '../_lib/locationdata';
 
-export const AreaSelectionDialog = (props: { handleClose: VoidFunction }) => {
+export const AreaSelectionDialog = (props: { handleClose: () => void }) => {
+  const { handleClose } = props;
   return (
     <>
       <DialogTitle bgcolor={grey[300]} display={'flex'}>
         地域選択
-        <Button onClick={() => props.handleClose()} sx={{ ml: '90%' }}>
+        <Button onClick={() => handleClose()} sx={{ ml: '90%' }}>
           戻る
         </Button>
       </DialogTitle>

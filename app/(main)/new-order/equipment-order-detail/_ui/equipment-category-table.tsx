@@ -26,7 +26,8 @@ const EnhancedTableHead = () => {
 };
 
 export const EquipmentCategoriesTable = (props: { selected: number; handleClick: (id: number) => void }) => {
-  console.log(props.selected);
+  const { selected, handleClick } = props;
+
   return (
     <TableContainer component={Paper} sx={{ width: '38%', height: 600 }}>
       <Table stickyHeader>
@@ -36,10 +37,10 @@ export const EquipmentCategoriesTable = (props: { selected: number; handleClick:
             return (
               <TableRow
                 hover
-                onClick={() => props.handleClick(row.id)}
+                onClick={() => handleClick(row.id)}
                 tabIndex={-1}
                 key={row.id}
-                sx={{ cursor: 'pointer', bgcolor: props.selected === row.id ? lightBlue[300] : '' }}
+                sx={{ cursor: 'pointer', bgcolor: selected === row.id ? lightBlue[300] : '' }}
               >
                 <TableCell component="th" scope="row">
                   {row.name}
