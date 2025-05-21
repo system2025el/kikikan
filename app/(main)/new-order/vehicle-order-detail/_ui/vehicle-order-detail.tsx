@@ -12,6 +12,9 @@ import {
   Typography,
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
+import { DatePicker, DateValidationError, LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs from 'dayjs';
 import { useState } from 'react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 
@@ -35,9 +38,13 @@ const VehicleOrderDetail = () => {
   /** 動的フォーム準備 */
   // フォームの型定義
   type FormValue = {
-    profile: {
+    vehicles: {
       vehicleName: string;
     }[];
+    situation: string;
+    date: string;
+    time: string;
+    place: string;
   };
   // デフォルト値
   const defaultValue = { vehicleName: '' };
@@ -46,24 +53,31 @@ const VehicleOrderDetail = () => {
   const { control, handleSubmit } = useForm<FormValue>({
     mode: 'onTouched',
     defaultValues: {
-      profile: [defaultValue],
+      vehicles: [defaultValue],
+      situation: '',
+      date: '',
+      time: '',
+      place: '',
     },
   });
   // useFieldArrayの設定と関数呼び出し
   const { fields, append, remove } = useFieldArray({
     control: control,
-    name: 'profile',
+    name: 'vehicles',
   });
   // フォーム送信処理
   const onSubmit = async (data: FormValue) => {
-    console.log(data.profile);
+    console.log(data);
   };
+
+  function setError(newError: string | null): void {
+    throw new Error('Function not implemented.');
+  }
 
   return (
     <Box>
       <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ bgcolor: grey[400] }}>
         <Typography margin={1}>受注明細（車両）</Typography>
-
         <Button sx={{ margin: 1 }} href="/new-order">
           戻る
         </Button>
@@ -128,7 +142,7 @@ const VehicleOrderDetail = () => {
       </Box>
       <Box display="flex" sx={{ bgcolor: grey[300] }}>
         <Box sx={{ width: '100%' }}>
-          <Stack pl={13} py={1}>
+          <Stack pl={13} pt={2}>
             {/* フォーム追加ボタン */}
             <Button onClick={() => append(defaultValue)}>+車両追加</Button>
           </Stack>
@@ -143,7 +157,7 @@ const VehicleOrderDetail = () => {
                 return (
                   <Stack key={field.id} direction={'row'} spacing={1} my={1}>
                     <Controller
-                      name={`profile.${index}.vehicleName`}
+                      name={`vehicles.${index}.vehicleName`}
                       control={control}
                       render={({ field }) => (
                         <Select {...field} sx={{ minWidth: '20vw' }}>
@@ -166,36 +180,44 @@ const VehicleOrderDetail = () => {
           <Stack spacing={1} alignItems="center" margin={1} marginLeft={2}>
             <Typography whiteSpace={'nowrap'}>区分</Typography>
             <Box width={42}></Box>
-            <FormControl size="small" sx={{ width: '10%' }}>
-              <Select value={selectSituation} onChange={selectSituationChange}>
-                <MenuItem value={'出庫'}>出庫</MenuItem>
-                <MenuItem value={'返却'}>返却</MenuItem>
-                <MenuItem value={'K→Y移動'}>K→Y移動</MenuItem>
-                <MenuItem value={'Y→K移動'}>Y→K移動</MenuItem>
-              </Select>
-            </FormControl>
+            <Controller
+              name="situation"
+              control={control}
+              render={({ field }) => (
+                <Select {...field} sx={{ minWidth: '10vw' }}>
+                  <MenuItem value="出庫">出庫</MenuItem>
+                  <MenuItem value="入庫">入庫</MenuItem>
+                  <MenuItem value="移動Y-K">移動Y→K</MenuItem>
+                  <MenuItem value="移動K-Y">移動K→Y</MenuItem>
+                </Select>
+              )}
+            />
           </Stack>
           <Stack spacing={1} alignItems="center" margin={1} marginLeft={2} sx={{ width: '60%' }}>
             <Typography marginRight={8} whiteSpace="nowrap">
               日時
             </Typography>
             <Box width={42}></Box>
-            <DateX />
+            <Controller name="date" control={control} render={({ field }) => <DateX />} />
             <Typography marginLeft={5} marginRight={2} whiteSpace="nowrap">
               時刻
             </Typography>
-            <Time />
+            <Controller name="time" control={control} render={({ field }) => <Time />} />
             <Typography marginLeft={5} marginRight={2} whiteSpace="nowrap">
               作業場所
             </Typography>
-            <FormControl size="small" sx={{ width: '25%' }}>
-              <Select value={selectPlace} onChange={selectPlaceChange}>
-                <MenuItem value={'立合'}>立合</MenuItem>
-                <MenuItem value={'KICKS'}>KICKS</MenuItem>
-                <MenuItem value={'YARD'}>YARD</MenuItem>
-                <MenuItem value={'厚木'}>厚木</MenuItem>
-              </Select>
-            </FormControl>
+            <Controller
+              name="place"
+              control={control}
+              render={({ field }) => (
+                <Select {...field} sx={{ minWidth: '10vw' }}>
+                  <MenuItem value="出庫">立合</MenuItem>
+                  <MenuItem value="入庫">YARD</MenuItem>
+                  <MenuItem value="移動Y-K">KICD</MenuItem>
+                  <MenuItem value="移動K-Y">厚木</MenuItem>
+                </Select>
+              )}
+            />
           </Stack>
         </Box>
       </Box>
