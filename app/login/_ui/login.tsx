@@ -22,9 +22,7 @@ const Login = () => {
         <TextField sx={{ bgcolor: 'white', width: '100%' }} size="small"></TextField>
       </Box>
       <Box display="flex" width={'30%'} justifyContent="flex-end">
-        <Button variant="contained" href="/dashboard">
-          次へ
-        </Button>
+        <Button href="/dashboard">次へ</Button>
       </Box>
     </Stack>
   );
