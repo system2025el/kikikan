@@ -24,14 +24,43 @@ type Row = {
   [key: string]: any;
 };
 
+type Cell = {
+  id: number;
+  parent: Row;
+  child: Row[];
+};
+
 type TableProps = {
   headers: Header[];
   datas: Row[];
   onSelectionChange?: (selectedIds: (string | number)[]) => void;
 };
 
+type RowProps = {
+  headers: Header[];
+  row: Cell;
+  index: number;
+  length: number;
+  selected: (string | number)[];
+  handleSelect: (id: string | number) => void;
+  moveRow: (index: number, direction: number) => void;
+};
+
 export const SelectTable: React.FC<TableProps> = ({ headers, datas, onSelectionChange }) => {
-  const [rows, setRows] = useState(datas);
+  const cells: Cell[] = [
+    {
+      id: 1,
+      parent: datas[0],
+      child: [datas[1]],
+    },
+    {
+      id: 2,
+      parent: datas[2],
+      child: [datas[3], datas[4]],
+    },
+  ];
+
+  const [rows, setRows] = useState(cells);
   const [selected, setSelected] = useState<(string | number)[]>([]);
 
   const handleSelect = (id: string | number) => {
@@ -49,12 +78,6 @@ export const SelectTable: React.FC<TableProps> = ({ headers, datas, onSelectionC
     const updatedRows = [...rows];
     [updatedRows[index], updatedRows[newIndex]] = [updatedRows[newIndex], updatedRows[index]];
     setRows(updatedRows);
-  };
-
-  const [isExpanded, setIsExpanded] = useState(false);
-
-  const handleClick = () => {
-    setIsExpanded(!isExpanded);
   };
 
   return (
@@ -83,68 +106,79 @@ export const SelectTable: React.FC<TableProps> = ({ headers, datas, onSelectionC
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((row, index) => {
-              if (row.id === 1 || row.id === 3) {
-                return (
-                  <React.Fragment key={row.id}>
-                    {/* 親行 */}
-                    <TableRow hover>
-                      <TableCell padding="checkbox">
-                        <Checkbox checked={selected.includes(row.id)} onChange={() => handleSelect(row.id)} />
-                      </TableCell>
-                      <TableCell>
-                        <IconButton onClick={handleClick}>
-                          {isExpanded ? <ExpandMoreIcon /> : <ExpandLessIcon />}
-                        </IconButton>
-                      </TableCell>
-                      {headers.map((header) => (
-                        <TableCell key={header.key}>{row[header.key]}</TableCell>
-                      ))}
-                      <TableCell>
-                        <IconButton onClick={() => moveRow(index, -1)} disabled={index === 0}>
-                          ↑
-                        </IconButton>
-                      </TableCell>
-                      <TableCell>
-                        <IconButton onClick={() => moveRow(index, 1)} disabled={index === rows.length - 1}>
-                          ↓
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                  </React.Fragment>
-                );
-              } else {
-                return (
-                  <React.Fragment key={row.id}>
-                    <TableRow>
-                      <TableCell padding="checkbox" sx={isExpanded ? styles.cell : styles.closeCell}>
-                        <Collapse in={isExpanded} timeout="auto" unmountOnExit></Collapse>
-                      </TableCell>
-                      <TableCell sx={isExpanded ? styles.cell : styles.closeCell}>
-                        <Collapse in={isExpanded} timeout="auto" unmountOnExit></Collapse>
-                      </TableCell>
-                      {headers.map((header) => (
-                        <TableCell key={header.key} sx={isExpanded ? styles.cell : styles.closeCell}>
-                          <Collapse in={isExpanded} timeout="auto" unmountOnExit>
-                            {row[header.key]}
-                          </Collapse>
-                        </TableCell>
-                      ))}
-                      <TableCell sx={isExpanded ? styles.cell : styles.closeCell}>
-                        <Collapse in={isExpanded} timeout="auto" unmountOnExit></Collapse>
-                      </TableCell>
-                      <TableCell sx={isExpanded ? styles.cell : styles.closeCell}>
-                        <Collapse in={isExpanded} timeout="auto" unmountOnExit></Collapse>
-                      </TableCell>
-                    </TableRow>
-                  </React.Fragment>
-                );
-              }
-            })}
+            {rows.map((row, index) => (
+              <Row
+                key={row.id}
+                headers={headers}
+                row={row}
+                index={index}
+                length={rows.length}
+                selected={selected}
+                handleSelect={handleSelect}
+                moveRow={moveRow}
+              />
+            ))}
           </TableBody>
         </Table>
       </TableContainer>
     </Paper>
+  );
+};
+
+const Row = (props: RowProps) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const handleClick = () => {
+    setIsExpanded(!isExpanded);
+  };
+
+  return (
+    <>
+      <TableRow hover>
+        <TableCell padding="checkbox">
+          <Checkbox checked={props.selected.includes(props.row.id)} onChange={() => props.handleSelect(props.row.id)} />
+        </TableCell>
+        <TableCell>
+          <IconButton onClick={handleClick}>{isExpanded ? <ExpandMoreIcon /> : <ExpandLessIcon />}</IconButton>
+        </TableCell>
+        {props.headers.map((header) => (
+          <TableCell key={header.key}>{props.row.parent[header.key]}</TableCell>
+        ))}
+        <TableCell>
+          <IconButton onClick={() => props.moveRow(props.index, -1)} disabled={props.index === 0}>
+            ↑
+          </IconButton>
+        </TableCell>
+        <TableCell>
+          <IconButton onClick={() => props.moveRow(props.index, 1)} disabled={props.index === props.length - 1}>
+            ↓
+          </IconButton>
+        </TableCell>
+      </TableRow>
+      {props.row.child.map((row) => (
+        <TableRow key={row.id}>
+          <TableCell padding="checkbox" sx={!isExpanded ? styles.closeCell : undefined}>
+            <Collapse in={isExpanded} timeout="auto" unmountOnExit></Collapse>
+          </TableCell>
+          <TableCell sx={!isExpanded ? styles.closeCell : undefined}>
+            <Collapse in={isExpanded} timeout="auto" unmountOnExit></Collapse>
+          </TableCell>
+          {props.headers.map((header) => (
+            <TableCell key={header.key} sx={!isExpanded ? styles.closeCell : undefined}>
+              <Collapse in={isExpanded} timeout="auto" unmountOnExit>
+                {row[header.key]}
+              </Collapse>
+            </TableCell>
+          ))}
+          <TableCell sx={!isExpanded ? styles.closeCell : undefined}>
+            <Collapse in={isExpanded} timeout="auto" unmountOnExit></Collapse>
+          </TableCell>
+          <TableCell sx={!isExpanded ? styles.closeCell : undefined}>
+            <Collapse in={isExpanded} timeout="auto" unmountOnExit></Collapse>
+          </TableCell>
+        </TableRow>
+      ))}
+    </>
   );
 };
 
