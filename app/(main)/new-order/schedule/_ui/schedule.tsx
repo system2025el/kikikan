@@ -38,9 +38,7 @@ const Schedule = () => {
     <Box width="100%" bgcolor={grey[300]}>
       <Box display="flex" justifyContent="space-between" alignItems="center" bgcolor={grey[400]}>
         <Typography margin={1}>受注機材・スケジュール</Typography>
-        <Button variant="contained" href="/new-order">
-          戻る
-        </Button>
+        <Button href="/new-order">戻る</Button>
       </Box>
       <Box sx={styles.container}>
         <Typography marginRight={4}>受注番号</Typography>
