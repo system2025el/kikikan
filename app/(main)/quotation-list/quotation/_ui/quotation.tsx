@@ -1,6 +1,6 @@
 'use client';
 
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import {
   Accordion,
   AccordionDetails,
@@ -22,7 +22,7 @@ import { grey } from '@mui/material/colors';
 import { useState } from 'react';
 
 import DateX from '@/app/(main)/_ui/date';
-import SelectTable from '@/app/(main)/_ui/table';
+import { SelectTable } from '@/app/(main)/_ui/table';
 
 import { quotation, quotationHeaders, quotationRows, terms } from '../_lib/data';
 
@@ -82,7 +82,7 @@ export const Quotation = () => {
       {/* 受注選択
       ----------------------------------------------------------------------------------*/}
       <Accordion sx={{ marginTop: 2, bgcolor: grey[300] }}>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+        <AccordionSummary expandIcon={<ExpandLessIcon />}>
           <Typography component="span">受注選択</Typography>
         </AccordionSummary>
         <AccordionDetails sx={{ padding: 0 }}>
@@ -160,7 +160,7 @@ export const Quotation = () => {
       {/* 見積ヘッダー
       ----------------------------------------------------------------------------------*/}
       <Accordion sx={{ marginTop: 2, bgcolor: grey[300] }}>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+        <AccordionSummary expandIcon={<ExpandLessIcon />}>
           <Typography component="span">見積ヘッダー</Typography>
         </AccordionSummary>
         <AccordionDetails sx={{ padding: 0 }}>
@@ -249,7 +249,7 @@ export const Quotation = () => {
       {/* 請求情報
       ----------------------------------------------------------------------------------*/}
       <Accordion sx={{ marginTop: 2, bgcolor: grey[300] }}>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+        <AccordionSummary expandIcon={<ExpandLessIcon />}>
           <Typography component="span">請求情報</Typography>
         </AccordionSummary>
         <AccordionDetails sx={{ padding: 0 }}>
@@ -315,7 +315,7 @@ export const Quotation = () => {
       {/* 見積明細
       ----------------------------------------------------------------------------------*/}
       <Accordion sx={{ marginTop: 2, bgcolor: grey[300] }}>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />} component="div">
+        <AccordionSummary expandIcon={<ExpandLessIcon />} component="div">
           <Box display="flex" alignItems="center" sx={{ width: '100%' }}>
             <Box width="35%">
               <Typography>見積明細</Typography>

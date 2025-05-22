@@ -1,4 +1,6 @@
-import { IconButton } from '@mui/material';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { Box, Collapse, IconButton } from '@mui/material';
 import Checkbox from '@mui/material/Checkbox';
 import { grey } from '@mui/material/colors';
 import Paper from '@mui/material/Paper';
@@ -28,7 +30,7 @@ type TableProps = {
   onSelectionChange?: (selectedIds: (string | number)[]) => void;
 };
 
-const SelectTable: React.FC<TableProps> = ({ headers, datas, onSelectionChange }) => {
+export const SelectTable: React.FC<TableProps> = ({ headers, datas, onSelectionChange }) => {
   const [rows, setRows] = useState(datas);
   const [selected, setSelected] = useState<(string | number)[]>([]);
 
@@ -49,6 +51,12 @@ const SelectTable: React.FC<TableProps> = ({ headers, datas, onSelectionChange }
     setRows(updatedRows);
   };
 
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const handleClick = () => {
+    setIsExpanded(!isExpanded);
+  };
+
   return (
     <Paper sx={{ width: '100%', mb: 2 }}>
       <TableContainer sx={{ overflow: 'auto', bgcolor: grey[200] }}>
@@ -66,34 +74,73 @@ const SelectTable: React.FC<TableProps> = ({ headers, datas, onSelectionChange }
                   }}
                 />
               </TableCell>
+              <TableCell />
               {headers.map((header) => (
                 <TableCell key={header.key}>{header.label}</TableCell>
               ))}
-              <TableCell></TableCell>
-              <TableCell></TableCell>
+              <TableCell />
+              <TableCell />
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((row, index) => (
-              <TableRow key={row.id} hover>
-                <TableCell padding="checkbox">
-                  <Checkbox checked={selected.includes(row.id)} onChange={() => handleSelect(row.id)} />
-                </TableCell>
-                {headers.map((header) => (
-                  <TableCell key={header.key}>{row[header.key]}</TableCell>
-                ))}
-                <TableCell>
-                  <IconButton onClick={() => moveRow(index, -1)} disabled={index === 0}>
-                    ↑
-                  </IconButton>
-                </TableCell>
-                <TableCell>
-                  <IconButton onClick={() => moveRow(index, 1)} disabled={index === rows.length - 1}>
-                    ↓
-                  </IconButton>
-                </TableCell>
-              </TableRow>
-            ))}
+            {rows.map((row, index) => {
+              if (row.id === 1 || row.id === 3) {
+                return (
+                  <React.Fragment key={row.id}>
+                    {/* 親行 */}
+                    <TableRow hover>
+                      <TableCell padding="checkbox">
+                        <Checkbox checked={selected.includes(row.id)} onChange={() => handleSelect(row.id)} />
+                      </TableCell>
+                      <TableCell>
+                        <IconButton onClick={handleClick}>
+                          {isExpanded ? <ExpandMoreIcon /> : <ExpandLessIcon />}
+                        </IconButton>
+                      </TableCell>
+                      {headers.map((header) => (
+                        <TableCell key={header.key}>{row[header.key]}</TableCell>
+                      ))}
+                      <TableCell>
+                        <IconButton onClick={() => moveRow(index, -1)} disabled={index === 0}>
+                          ↑
+                        </IconButton>
+                      </TableCell>
+                      <TableCell>
+                        <IconButton onClick={() => moveRow(index, 1)} disabled={index === rows.length - 1}>
+                          ↓
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  </React.Fragment>
+                );
+              } else {
+                return (
+                  <React.Fragment key={row.id}>
+                    <TableRow>
+                      <TableCell padding="checkbox" sx={isExpanded ? styles.cell : styles.closeCell}>
+                        <Collapse in={isExpanded} timeout="auto" unmountOnExit></Collapse>
+                      </TableCell>
+                      <TableCell sx={isExpanded ? styles.cell : styles.closeCell}>
+                        <Collapse in={isExpanded} timeout="auto" unmountOnExit></Collapse>
+                      </TableCell>
+                      {headers.map((header) => (
+                        <TableCell key={header.key} sx={isExpanded ? styles.cell : styles.closeCell}>
+                          <Collapse in={isExpanded} timeout="auto" unmountOnExit>
+                            {row[header.key]}
+                          </Collapse>
+                        </TableCell>
+                      ))}
+                      <TableCell sx={isExpanded ? styles.cell : styles.closeCell}>
+                        <Collapse in={isExpanded} timeout="auto" unmountOnExit></Collapse>
+                      </TableCell>
+                      <TableCell sx={isExpanded ? styles.cell : styles.closeCell}>
+                        <Collapse in={isExpanded} timeout="auto" unmountOnExit></Collapse>
+                      </TableCell>
+                    </TableRow>
+                  </React.Fragment>
+                );
+              }
+            })}
           </TableBody>
         </Table>
       </TableContainer>
@@ -101,4 +148,14 @@ const SelectTable: React.FC<TableProps> = ({ headers, datas, onSelectionChange }
   );
 };
 
-export default SelectTable;
+/* style
+---------------------------------------------------------------------------------------------------- */
+/** @type {{ [key: string]: React.CSSProperties }} style */
+const styles: { [key: string]: React.CSSProperties } = {
+  cell: {},
+  closeCell: {
+    border: 'none',
+    paddingTop: 0,
+    paddingBottom: 0,
+  },
+};

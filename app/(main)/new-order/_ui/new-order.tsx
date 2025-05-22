@@ -1,6 +1,6 @@
 'use client';
 
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import {
   Accordion,
   AccordionDetails,
@@ -23,7 +23,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 
 import DateX, { RSuiteDateRangePicker, TwoDatePickers } from '@/app/(main)/_ui/date';
-import SelectTable from '@/app/(main)/_ui/table';
+import { SelectTable } from '@/app/(main)/_ui/table';
 import { equipmentHeaders, equipmentRows, vehicleHeaders, vehicleRows } from '@/app/(main)/new-order/_lib/data';
 
 import { CustomerSelectionDialog } from './customer-selection';
@@ -181,7 +181,7 @@ const NewOrder = () => {
       </Box>
       {/* --------------------------------受注明細（機材）------------------------------------- */}
       <Accordion sx={{ marginTop: 2, bgcolor: grey[300] }}>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />} component="div">
+        <AccordionSummary expandIcon={<ExpandLessIcon />} component="div">
           <Grid2 container alignItems="center" pt={2} sx={{ width: '100%' }}>
             <Grid2 size={3}>
               <Typography margin={1}>受注明細（機材）</Typography>
@@ -254,7 +254,7 @@ const NewOrder = () => {
       </Accordion>
       {/* -------------------------車両----------------------------------- */}
       <Accordion sx={{ marginTop: 2, bgcolor: grey[300] }}>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />} component="div">
+        <AccordionSummary expandIcon={<ExpandLessIcon />} component="div">
           <Grid2 container alignItems="center" pt={2} sx={{ width: '100%' }}>
             <Grid2 size={3}>
               <Typography margin={1}>（車両）</Typography>
