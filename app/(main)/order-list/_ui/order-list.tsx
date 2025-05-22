@@ -4,11 +4,9 @@ import SearchIcon from '@mui/icons-material/Search';
 import {
   Box,
   Button,
-  Checkbox,
   Container,
   FormControl,
   FormControlLabel,
-  FormGroup,
   InputLabel,
   MenuItem,
   Radio,
@@ -24,6 +22,7 @@ import { useState } from 'react';
 
 import { customers } from '@/app/_lib/mock-data';
 
+import { BackButton } from '../../_ui/back-button';
 import { TwoDatePickers } from '../../_ui/date';
 import { OrderTable } from './order-table';
 
@@ -57,7 +56,7 @@ export const OrderList = () => {
     <Container disableGutters sx={{ minWidth: '100%', p: 3 }} maxWidth={'xl'}>
       <Box width={'100%'} bgcolor={grey[300]} display={'flex'} p={2} justifyContent={'space-between'}>
         <Typography>受注検索</Typography>
-        <Button>戻る</Button>
+        <BackButton sx={{}} label="戻る" />
       </Box>
       <Box width={'100%'} bgcolor={grey[200]} justifySelf={'center'} p={2}>
         <Stack justifyContent={'space-between'}>
