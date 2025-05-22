@@ -30,10 +30,10 @@ export const Dashboard = () => {
           <Link href={'/dashboard'}>YARD 出庫日時が近づいています　XXXXXX</Link>
         </AccordionDetails>
         <AccordionDetails>
-          <Link href={'/dashboard'}>KICKS 返却日時が近づいています　XXXXXX</Link>
+          <Link href={'/dashboard'}>KICKS 入庫日時が近づいています　XXXXXX</Link>
         </AccordionDetails>
         <AccordionDetails>
-          <Link href={'/dashboard'}>YARD 返却日時が近づいています　XXXXXX</Link>
+          <Link href={'/dashboard'}>YARD 入庫日時が近づいています　XXXXXX</Link>
         </AccordionDetails>
       </Accordion>
       <Accordion defaultExpanded>

@@ -2,7 +2,7 @@ const equipmentHeaders = [
   { key: 'name', label: '名称' },
   { key: 'status', label: 'ステータス' },
   { key: 'issue', label: '出庫' },
-  { key: 'return', label: '返却' },
+  { key: 'return', label: '入庫' },
   { key: 'preparation', label: '仕込' },
   { key: 'rh', label: 'RH' },
   { key: 'gp', label: 'GP' },

@@ -261,7 +261,7 @@ const EquipmentOrderDetail = () => {
           </Box>
           <Box sx={styles.container} width="60%">
             <Typography marginRight={9} whiteSpace="nowrap">
-              返却日
+              入庫日
             </Typography>
             <Box>
               <DateX />

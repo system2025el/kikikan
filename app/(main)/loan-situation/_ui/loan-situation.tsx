@@ -45,7 +45,7 @@ export const LoanSituation = () => {
         <FormControl sx={{ marginLeft: 10 }}>
           <RadioGroup defaultValue="出庫日順">
             <FormControlLabel value="出庫日順" control={<Radio />} label="出庫日順" />
-            <FormControlLabel value="返却日順" control={<Radio />} label="返却日順" />
+            <FormControlLabel value="入庫日順" control={<Radio />} label="入庫日順" />
           </RadioGroup>
         </FormControl>
       </Box>
