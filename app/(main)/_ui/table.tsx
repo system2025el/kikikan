@@ -46,6 +46,19 @@ type RowProps = {
   moveRow: (index: number, direction: number) => void;
 };
 
+const test = (datas: Row[]) => {
+  const cells: Cell[] = [];
+  for (let i = 1; i < 100; i++) {
+    const test: Cell = {
+      id: i,
+      parent: datas[0],
+      child: [datas[1], datas[2], datas[3], datas[4]],
+    };
+    cells.push(test);
+  }
+  return cells;
+};
+
 export const SelectTable: React.FC<TableProps> = ({ headers, datas, onSelectionChange }) => {
   const cells: Cell[] = [
     {
@@ -60,7 +73,9 @@ export const SelectTable: React.FC<TableProps> = ({ headers, datas, onSelectionC
     },
   ];
 
-  const [rows, setRows] = useState(cells);
+  const testRow: Cell[] = test(datas);
+
+  const [rows, setRows] = useState(testRow);
   const [selected, setSelected] = useState<(string | number)[]>([]);
 
   const handleSelect = (id: string | number) => {
