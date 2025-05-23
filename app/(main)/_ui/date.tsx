@@ -3,10 +3,9 @@
 import 'dayjs/locale/ja';
 import 'rsuite/dist/rsuite.min.css';
 
-import { Box, Button, Container, Tab, Tabs, TextField, Typography } from '@mui/material';
-import { grey, purple } from '@mui/material/colors';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
 import { DateValidationError } from '@mui/x-date-pickers/models';
 import dayjs from 'dayjs';
 import { useMemo, useState } from 'react';
@@ -15,6 +14,28 @@ import { DateRangePicker } from 'rsuite';
 dayjs.locale('ja'); // カレンダーの曜日のフォーマット
 
 const today = dayjs();
+
+export const Calendar = () => {
+  return (
+    <LocalizationProvider
+      dateAdapter={AdapterDayjs}
+      dateFormats={{ year: 'YYYY年', month: 'MM' }} // カレンダー内の年一覧のフォーマット
+      adapterLocale="ja"
+      localeText={{
+        previousMonth: '前月を表示',
+        nextMonth: '翌月を表示',
+      }}
+    >
+      <DateCalendar
+        slotProps={{
+          calendarHeader: { format: 'YYYY年MM月' },
+        }} // カレンダーヘッダーのフォーマット
+        defaultValue={today}
+        views={['year', 'month', 'day']}
+      ></DateCalendar>
+    </LocalizationProvider>
+  );
+};
 
 const DateX = () => {
   const [error, setError] = useState<DateValidationError | null>(null);
