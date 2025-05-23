@@ -32,10 +32,7 @@ export const Quotation = () => {
   const [selectPartner, setSelectPartner] = useState('（株）シアターブレーン');
   const [selectOrderStatus, setSelectOrderStatus] = useState('確定');
   const [selectQuotationStatus, setSelectQuotationStatus] = useState('処理中');
-  // const [selectQuotation, setSelectQuotation] = useState('（株）シアターブレーン');
-  // const [selectTransactions, setSelectTransactions] = useState('');
   const [selectRequestStatus, setSelectRequestStatus] = useState('処理中');
-  // const [selectRequest, setSelectRequest] = useState('（株）シアターブレーン');
 
   const inputPersonChange = (event: SelectChangeEvent) => {
     setSelectInputPerson(event.target.value);
@@ -52,18 +49,9 @@ export const Quotation = () => {
   const quotationStatusChange = (event: SelectChangeEvent) => {
     setSelectQuotationStatus(event.target.value);
   };
-  // const quotationChange = (event: SelectChangeEvent) => {
-  //   setSelectQuotation(event.target.value);
-  // };
-  // const transactionsChange = (event: SelectChangeEvent) => {
-  //   setSelectTransactions(event.target.value);
-  // };
   const requestStatusChange = (event: SelectChangeEvent) => {
     setSelectRequestStatus(event.target.value);
   };
-  // const requestChange = (event: SelectChangeEvent) => {
-  //   setSelectRequest(event.target.value);
-  // };
 
   const handleSelectionChange = (selectedIds: (string | number)[]) => {
     console.log('選択されたID:', selectedIds);
