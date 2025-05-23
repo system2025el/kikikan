@@ -12,7 +12,9 @@ import {
   Typography,
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
+import { useState } from 'react';
 
+import { Calendar } from '../../_ui/date';
 import GridTable from '../../_ui/gridtable';
 import {
   getDateHeaderBackgroundColor,
@@ -25,6 +27,8 @@ import {
 import { dateData, dateHeader, dateWidth, loanData, loanHeader, loanWidth } from '../_lib/data';
 
 export const LoanSituation = () => {
+  const [visible, setVisible] = useState(false);
+
   return (
     <Box bgcolor={grey[200]}>
       <Box display="flex" justifyContent="space-between" alignItems="center" bgcolor={grey[300]}>
@@ -51,7 +55,22 @@ export const LoanSituation = () => {
       </Box>
       <Box sx={styles.container} justifyContent="center">
         <Button>＜＜</Button>
-        <Button sx={{ bgcolor: 'white', color: 'black' }}>日付選択</Button>
+        <Box>
+          <Button sx={{ bgcolor: 'white', color: 'black' }} onClick={() => setVisible(true)}>
+            日付選択
+          </Button>
+          <Box position="absolute" bgcolor={grey[200]} zIndex={1000} display={visible ? 'block' : 'none'}>
+            <Calendar />
+            <Box display="flex" justifyContent="space-between">
+              <Button onClick={() => setVisible(false)} sx={{ margin: 1 }}>
+                キャンセル
+              </Button>
+              <Button onClick={() => setVisible(false)} sx={{ margin: 1 }}>
+                確定
+              </Button>
+            </Box>
+          </Box>
+        </Box>
         <Button>＞＞</Button>
       </Box>
       <Box display="flex" flexDirection="row" width="100%">

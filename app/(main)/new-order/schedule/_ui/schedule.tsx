@@ -4,6 +4,7 @@ import { Box, Button, TextField, Typography } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import { useState } from 'react';
 
+import { Calendar } from '@/app/(main)/_ui/date';
 import GridTable from '@/app/(main)/_ui/gridtable';
 import {
   getDateHeaderBackgroundColor,
@@ -25,6 +26,7 @@ import {
 const Schedule = () => {
   const [equipmentRows, setEquipmentRows] = useState(equipmentData);
   const [testRows, setTestRows] = useState(dateData);
+  const [visible, setVisible] = useState(false);
   const editableColumns = [2, 3];
 
   const equipmentCellChange = (rowIndex: number, colIndex: number, newValue: string) => {
@@ -62,7 +64,22 @@ const Schedule = () => {
       </Box>
       <Box display="flex" justifyContent="center" alignItems="center" margin={2}>
         <Button>＜＜</Button>
-        <Button sx={{ bgcolor: 'white', color: 'black' }}>日付選択</Button>
+        <Box>
+          <Button sx={{ bgcolor: 'white', color: 'black' }} onClick={() => setVisible(true)}>
+            日付選択
+          </Button>
+          <Box position="absolute" bgcolor={grey[200]} zIndex={1000} display={visible ? 'block' : 'none'}>
+            <Calendar />
+            <Box display="flex" justifyContent="space-between">
+              <Button onClick={() => setVisible(false)} sx={{ margin: 1 }}>
+                キャンセル
+              </Button>
+              <Button onClick={() => setVisible(false)} sx={{ margin: 1 }}>
+                確定
+              </Button>
+            </Box>
+          </Box>
+        </Box>
         <Button>＞＞</Button>
         <Button sx={{ marginLeft: 10 }}>編集</Button>
         <Button sx={{ marginLeft: 10 }}>確定</Button>

@@ -4,6 +4,7 @@ import { Box, Button, TextField, Typography } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import { useState } from 'react';
 
+import { Calendar } from '../../_ui/date';
 import GridTable from '../../_ui/gridtable';
 import {
   getDateHeaderBackgroundColor,
@@ -18,6 +19,7 @@ import { dateData, dateHeader, dateWidths, equipmentData, equipmentHeader, equip
 export const Stock = () => {
   const [equipmentRows, setEquipmentRows] = useState(equipmentData);
   const [dateRows, setTestRows] = useState(dateData);
+  const [visible, setVisible] = useState(false);
   const editableColumns = [2, 3];
 
   const equipmentCellChange = (rowIndex: number, colIndex: number, newValue: string) => {
@@ -38,9 +40,24 @@ export const Stock = () => {
           <Typography margin={1}>機材名</Typography>
           <TextField defaultValue="SHARPY Plus" sx={{ ml: 4 }}></TextField>
         </Box>
-        <Box marginTop={6} width="90%" display="flex" justifyContent="center">
+        <Box marginTop={6} display="flex" justifyContent="center">
           <Button>＜＜</Button>
-          <Button sx={{ bgcolor: 'white', color: 'black' }}>日付選択</Button>
+          <Box>
+            <Button sx={{ bgcolor: 'white', color: 'black' }} onClick={() => setVisible(true)}>
+              日付選択
+            </Button>
+            <Box position="absolute" bgcolor={grey[200]} zIndex={1000} display={visible ? 'block' : 'none'}>
+              <Calendar />
+              <Box display="flex" justifyContent="space-between">
+                <Button onClick={() => setVisible(false)} sx={{ margin: 1 }}>
+                  キャンセル
+                </Button>
+                <Button onClick={() => setVisible(false)} sx={{ margin: 1 }}>
+                  確定
+                </Button>
+              </Box>
+            </Box>
+          </Box>
           <Button>＞＞</Button>
         </Box>
         <Box display="flex" flexDirection="row" width="100%" marginTop={2}>
