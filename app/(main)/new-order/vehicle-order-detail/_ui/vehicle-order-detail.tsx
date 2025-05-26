@@ -6,6 +6,7 @@ import dayjs from 'dayjs';
 import { useState } from 'react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 
+import { BackButton } from '@/app/(main)/_ui/back-button';
 import DateX from '@/app/(main)/_ui/date';
 import Time from '@/app/(main)/_ui/time';
 
@@ -64,35 +65,35 @@ const VehicleOrderDetail = () => {
 
   return (
     <Box>
-      <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ bgcolor: grey[400] }}>
+      <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ bgcolor: grey[300] }}>
         <Typography margin={1}>受注明細（車両）</Typography>
-        <Button sx={{ margin: 1 }} href="/new-order">
-          戻る
-        </Button>
+        <BackButton label={'戻る'} />
       </Box>
-      <Box display="flex" sx={{ bgcolor: grey[300] }}>
+      <Box display="flex" sx={{ bgcolor: grey[200] }}>
         <Box sx={{ width: '60%' }}>
           <Box display="flex" alignItems="center" margin={1} marginLeft={2}>
             <Typography marginRight={3} whiteSpace="nowrap">
               受注番号
             </Typography>
-            <TextField disabled></TextField>
+            <TextField disabled sx={{ bgcolor: grey[300] }}></TextField>
             <Typography mx={2} whiteSpace="nowrap">
               受注ステータス
             </Typography>
-            <TextField disabled>確定</TextField>
+            <TextField disabled sx={{ bgcolor: grey[300] }}>
+              確定
+            </TextField>
           </Box>
           <Box display="flex" alignItems="center" margin={1} marginLeft={2}>
             <Typography marginRight={5} whiteSpace="nowrap">
               受注日
             </Typography>
-            <TextField disabled></TextField>
+            <TextField disabled sx={{ bgcolor: grey[300] }}></TextField>
           </Box>
           <Box display="flex" alignItems="center" margin={1} marginLeft={2}>
             <Typography marginRight={5} whiteSpace="nowrap">
               入力者
             </Typography>
-            <TextField disabled></TextField>
+            <TextField disabled sx={{ bgcolor: grey[300] }}></TextField>
           </Box>
         </Box>
         <Box sx={{ width: '40%' }}>
@@ -100,25 +101,25 @@ const VehicleOrderDetail = () => {
             <Typography marginRight={5} whiteSpace="nowrap">
               公演名
             </Typography>
-            <TextField defaultValue="A/Zepp Tour"></TextField>
+            <TextField defaultValue="A/Zepp Tour" disabled sx={{ bgcolor: grey[300] }}></TextField>
           </Box>
           <Box display="flex" alignItems="center" margin={1} marginLeft={2}>
             <Typography marginRight={3} whiteSpace="nowrap">
               公演場所
             </Typography>
-            <TextField defaultValue="Zepp Osaka"></TextField>
+            <TextField defaultValue="Zepp Osaka" disabled sx={{ bgcolor: grey[300] }}></TextField>
           </Box>
           <Box display="flex" alignItems="center" margin={1} marginLeft={2}>
             <Typography marginRight={7} whiteSpace="nowrap">
               相手
             </Typography>
-            <TextField defaultValue="(株)シアターブレーン"></TextField>
+            <TextField defaultValue="(株)シアターブレーン" disabled sx={{ bgcolor: grey[300] }}></TextField>
           </Box>
         </Box>
       </Box>
 
       {/* ----------------下側------------------ */}
-      <Box display={'flex'} marginTop={2} px={1} sx={{ bgcolor: grey[400] }} alignItems={'center'}>
+      <Box display={'flex'} marginTop={2} px={1} sx={{ bgcolor: grey[300] }} alignItems={'center'}>
         <Typography whiteSpace="nowrap" textAlign={'center'}>
           車両入力
         </Typography>
@@ -128,7 +129,7 @@ const VehicleOrderDetail = () => {
           <Button onClick={handleSubmit(onSubmit)}>保存</Button>
         </Box>
       </Box>
-      <Box display="flex" sx={{ bgcolor: grey[300] }}>
+      <Box display="flex" sx={{ bgcolor: grey[200] }}>
         <Box sx={{ width: '100%' }}>
           <Stack pl={13} pt={2}>
             {/* フォーム追加ボタン */}
@@ -148,7 +149,7 @@ const VehicleOrderDetail = () => {
                       name={`vehicles.${index}.vehicleName`}
                       control={control}
                       render={({ field }) => (
-                        <Select {...field} sx={{ minWidth: '20vw' }}>
+                        <Select {...field} sx={{ minWidth: '20vw', bgcolor: 'white' }}>
                           <MenuItem value={'11t'}>11t</MenuItem>
                           <MenuItem value={'2t'}>2t</MenuItem>
                           <MenuItem value={'4t'}>4t</MenuItem>
@@ -172,7 +173,7 @@ const VehicleOrderDetail = () => {
               name="situation"
               control={control}
               render={({ field }) => (
-                <Select {...field} sx={{ minWidth: '10vw' }}>
+                <Select {...field} sx={{ minWidth: '10vw', bgcolor: 'white' }}>
                   <MenuItem value="出庫">出庫</MenuItem>
                   <MenuItem value="入庫">入庫</MenuItem>
                   <MenuItem value="移動Y-K">移動Y→K</MenuItem>
@@ -186,11 +187,11 @@ const VehicleOrderDetail = () => {
               日時
             </Typography>
             <Box width={42}></Box>
-            <Controller name="date" control={control} render={({ field }) => <DateX />} />
+            <Controller name="date" control={control} render={({ field }) => <DateX sx={{ bgcolor: 'white' }} />} />
             <Typography marginLeft={5} marginRight={2} whiteSpace="nowrap">
               時刻
             </Typography>
-            <Controller name="time" control={control} render={({ field }) => <Time />} />
+            <Controller name="time" control={control} render={({ field }) => <Time sx={{ bgcolor: 'white' }} />} />
             <Typography marginLeft={5} marginRight={2} whiteSpace="nowrap">
               作業場所
             </Typography>
@@ -198,7 +199,7 @@ const VehicleOrderDetail = () => {
               name="place"
               control={control}
               render={({ field }) => (
-                <Select {...field} sx={{ minWidth: '10vw' }}>
+                <Select {...field} sx={{ minWidth: '10vw', bgcolor: 'white' }}>
                   <MenuItem value="立合">立合</MenuItem>
                   <MenuItem value="YARD">YARD</MenuItem>
                   <MenuItem value="KICD-K">KICD</MenuItem>

@@ -81,7 +81,7 @@ export const Quotation = () => {
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={5}>受注番号</Typography>
-                <TextField disabled size="small"></TextField>
+                <TextField disabled></TextField>
                 <Typography marginLeft={5} marginRight={1}>
                   受注ステータス
                 </Typography>
@@ -115,7 +115,7 @@ export const Quotation = () => {
             <Box marginLeft={4} width="45%" bgcolor={grey[200]}>
               <Box sx={styles.container}>
                 <Typography marginRight={7}>公演名</Typography>
-                <TextField disabled size="small" defaultValue="A/Zepp Tour" sx={{ width: '50%' }}></TextField>
+                <TextField disabled defaultValue="A/Zepp Tour" sx={{ width: '50%' }}></TextField>
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={5}>公演場所</Typography>
@@ -135,11 +135,11 @@ export const Quotation = () => {
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={5}>受注メモ</Typography>
-                <TextField disabled size="small" defaultValue="XXXXXXXXX" sx={{ width: '50%' }}></TextField>
+                <TextField disabled defaultValue="XXXXXXXXX" sx={{ width: '50%' }}></TextField>
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={3}>受注値引き</Typography>
-                <TextField disabled size="small"></TextField>
+                <TextField disabled></TextField>
               </Box>
             </Box>
           </Box>
@@ -161,7 +161,7 @@ export const Quotation = () => {
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={5}>見積番号</Typography>
-                <TextField disabled size="small"></TextField>
+                <TextField disabled></TextField>
                 <Typography marginLeft={5} marginRight={1}>
                   見積ステータス
                 </Typography>
@@ -177,7 +177,7 @@ export const Quotation = () => {
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={3}>見積入力者</Typography>
-                <TextField disabled size="small"></TextField>
+                <TextField disabled></TextField>
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={3}>見積郵送日</Typography>
@@ -191,7 +191,7 @@ export const Quotation = () => {
             <Box marginLeft={4} width="45%" bgcolor={grey[200]}>
               <Box sx={styles.container}>
                 <Typography marginRight={5}>見積件名</Typography>
-                <TextField size="small" defaultValue="A/Zepp Tour" sx={{ width: '50%' }}></TextField>
+                <TextField defaultValue="A/Zepp Tour" sx={{ width: '50%' }}></TextField>
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={7}>見積先</Typography>
@@ -223,11 +223,11 @@ export const Quotation = () => {
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={5}>見積メモ</Typography>
-                <TextField size="small" sx={{ width: '50%' }}></TextField>
+                <TextField sx={{ width: '50%' }}></TextField>
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={3}>見積値引き</Typography>
-                <TextField size="small"></TextField>
+                <TextField></TextField>
                 <Button sx={{ marginLeft: 4 }}>値引追加</Button>
               </Box>
             </Box>
@@ -250,7 +250,7 @@ export const Quotation = () => {
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={5}>請求番号</Typography>
-                <TextField disabled size="small"></TextField>
+                <TextField disabled></TextField>
                 <Typography marginLeft={5} marginRight={1}>
                   請求ステータス
                 </Typography>
@@ -266,7 +266,7 @@ export const Quotation = () => {
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={7}>入力者</Typography>
-                <TextField disabled size="small"></TextField>
+                <TextField disabled></TextField>
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={1}>請求有効期限</Typography>
@@ -276,7 +276,7 @@ export const Quotation = () => {
             <Box marginLeft={4} width="45%" bgcolor={grey[200]}>
               <Box sx={styles.container}>
                 <Typography marginRight={5}>請求件名</Typography>
-                <TextField size="small" defaultValue="A/Zepp Tour" sx={{ width: '50%' }}></TextField>
+                <TextField defaultValue="A/Zepp Tour" sx={{ width: '50%' }}></TextField>
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={7}>請求先</Typography>
@@ -294,7 +294,7 @@ export const Quotation = () => {
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={5}>請求メモ</Typography>
-                <TextField size="small" sx={{ width: '50%' }}></TextField>
+                <TextField sx={{ width: '50%' }}></TextField>
               </Box>
             </Box>
           </Box>
@@ -312,7 +312,6 @@ export const Quotation = () => {
               <Box display="flex" alignItems="center">
                 <Typography mx={1}>合計金額</Typography>
                 <TextField
-                  size="small"
                   onClick={(e) => {
                     e.stopPropagation();
                   }}

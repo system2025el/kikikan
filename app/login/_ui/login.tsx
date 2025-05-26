@@ -15,11 +15,11 @@ const Login = () => {
     >
       <Box width={'30%'}>
         <Typography>ログインID（メールアドレス）</Typography>
-        <TextField sx={{ bgcolor: 'white', width: '100%' }} size="small"></TextField>
+        <TextField sx={{ bgcolor: 'white', width: '100%' }}></TextField>
       </Box>
       <Box width={'30%'}>
         <Typography>パスワード</Typography>
-        <TextField sx={{ bgcolor: 'white', width: '100%' }} size="small"></TextField>
+        <TextField sx={{ bgcolor: 'white', width: '100%' }}></TextField>
       </Box>
       <Box display="flex" width={'30%'} justifyContent="flex-end">
         <Button href="/dashboard">次へ</Button>

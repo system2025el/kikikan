@@ -108,10 +108,10 @@ const NewOrder = () => {
               <Typography marginRight={5} whiteSpace="nowrap">
                 受注番号
               </Typography>
-              <TextField disabled></TextField>
+              <TextField defaultValue={81694} disabled sx={{ bgcolor: grey[300] }}></TextField>
               <Typography mx={2}>受注ステータス</Typography>
               <FormControl size="small" sx={{ width: '20%' }}>
-                <Select value={selectStatus} onChange={statusChange}>
+                <Select value={selectStatus} onChange={statusChange} disabled sx={{ bgcolor: grey[300] }}>
                   <MenuItem value="">
                     <em>None</em>
                   </MenuItem>
@@ -121,11 +121,11 @@ const NewOrder = () => {
             </Box>
             <Box sx={styles.container}>
               <Typography marginRight={7}>受注日</Typography>
-              <DateX />
+              <DateX disabled sx={{ bgcolor: grey[300] }} />
             </Box>
             <Box sx={styles.container}>
               <Typography marginRight={7}>入力者</Typography>
-              <FormControl disabled size="small" sx={{ width: '25%' }}>
+              <FormControl disabled size="small" sx={{ width: '25%', bgcolor: grey[300] }}>
                 <Select value={selectInputPerson} onChange={inputPersonChange}>
                   <MenuItem value="">
                     <em>None</em>
@@ -140,17 +140,21 @@ const NewOrder = () => {
                 <br />
                 受注終了日
               </Typography>
-              <RSuiteDateRangePicker value={dateRange} onChange={handleDateChange} /*val={rentalPeriod}*/ />
+              <RSuiteDateRangePicker
+                styles={{ background: 'grey' }}
+                value={dateRange}
+                onChange={handleDateChange} /*val={rentalPeriod}*/
+              />
             </Box>
           </Box>
           <Box sx={{ width: '45%' }} marginLeft={2} bgcolor={grey[200]}>
             <Box sx={styles.container}>
               <Typography marginRight={7}>公演名</Typography>
-              <TextField sx={{ width: '50%' }}></TextField>
+              <TextField disabled sx={{ width: '50%', bgcolor: grey[300] }}></TextField>
             </Box>
             <Box sx={styles.container}>
               <Typography marginRight={5}>公演場所</Typography>
-              <TextField disabled sx={{ width: '50%' }}></TextField>
+              <TextField disabled sx={{ width: '50%', bgcolor: grey[300] }}></TextField>
               <Button onClick={() => handleOpenLocationDialog()}>選択</Button>
               <Dialog open={locationDialogOpen} fullScreen>
                 <LocationSelectDialog handleCloseLocationDialog={handleCloseLocationDailog} />
@@ -158,7 +162,7 @@ const NewOrder = () => {
             </Box>
             <Box sx={styles.container}>
               <Typography marginRight={9}>相手</Typography>
-              <TextField disabled sx={{ width: '50%' }}></TextField>
+              <TextField disabled sx={{ width: '50%', bgcolor: grey[300] }}></TextField>
               <Button onClick={() => handleOpenCustomerDialog()}>選択</Button>
               <Dialog open={customerDialogOpen} fullScreen>
                 <CustomerSelectionDialog handleCloseCustDialog={handleCloseCustomerDialog} />
@@ -166,15 +170,15 @@ const NewOrder = () => {
             </Box>
             <Box sx={styles.container}>
               <Typography marginRight={3}>相手担当者</Typography>
-              <TextField disabled sx={{ width: '50%' }}></TextField>
+              <TextField disabled sx={{ width: '50%', bgcolor: grey[300] }}></TextField>
             </Box>
             <Box sx={styles.container}>
               <Typography marginRight={9}>メモ</Typography>
-              <TextField sx={{ width: '50%' }}></TextField>
+              <TextField disabled sx={{ width: '50%', bgcolor: grey[300] }}></TextField>
             </Box>
             <Box sx={styles.container}>
               <Typography marginRight={7}>値引き</Typography>
-              <TextField sx={{ width: '30%' }}></TextField>
+              <TextField disabled sx={{ width: '30%', bgcolor: grey[300] }}></TextField>
             </Box>
           </Box>
         </Box>

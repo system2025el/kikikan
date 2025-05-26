@@ -8,7 +8,8 @@ import { useMemo, useState } from 'react';
 
 dayjs.locale('ja');
 
-const Time = () => {
+const Time = (props: { sx?: object }) => {
+  const { sx } = props;
   const [error, setError] = useState<TimeValidationError | null>(null);
 
   const errorMessage = useMemo(() => {
@@ -38,7 +39,7 @@ const Time = () => {
         onError={(newError) => setError(newError)}
         views={['hours', 'minutes']}
         format="HH:mm"
-        sx={{ width: '25%', minWidth: 200 }}
+        sx={{ width: '25%', minWidth: 200, ...sx }}
         timeSteps={{ minutes: 15 }}
       />
     </LocalizationProvider>
