@@ -61,7 +61,7 @@ export const Stock = () => {
           <Button>＞＞</Button>
         </Box>
         <Box display="flex" flexDirection="row" width="100%" marginTop={2}>
-          <Box width="35%">
+          <Box width="30%">
             <GridTable
               header={equipmentHeader}
               rows={equipmentRows}
@@ -75,7 +75,7 @@ export const Stock = () => {
               getRowBackgroundColor={getEquipmentRowBackgroundColor}
             />
           </Box>
-          <Box width="65%">
+          <Box width="70%">
             <GridTable
               header={dateHeader}
               rows={dateRows}

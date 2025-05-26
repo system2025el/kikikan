@@ -16,7 +16,7 @@ import { useRef, useState } from 'react';
 import React from 'react';
 
 import DateX from '@/app/(main)/_ui/date';
-import GridTable from '@/app/(main)/_ui/gridtable';
+import { GridSelectBoxTable } from '@/app/(main)/_ui/gridtable';
 import Time from '@/app/(main)/_ui/time';
 import { cellWidths, data, header } from '@/app/(main)/new-order/equipment-order-detail/_lib/data';
 import { getEquipmentRowBackgroundColor } from '@/app/(main)/new-order/schedule/_lib/colorselect';
@@ -26,21 +26,22 @@ import { EquipmentSelectionDialog } from './equipment-selection-dailog';
 
 const EquipmentOrderDetail = () => {
   const [selectStatus, setSelectStatus] = useState('準備中');
-  const [selectIssueBase1, setSelectIssueBase1] = useState('KICS');
-  const [selectIssueBase2, setSelectIssueBase2] = useState('YARD');
+  const [selectedValues, setSelectedValues] = useState<string[]>(Array(2).fill('KICS'));
   const [selectReturnBase, setSelectReturnBase] = useState('YARD');
   const [rows, setRows] = useState(data);
   const editableColumns = [2, 3];
 
+  const selectIssueBaseChange = (index: number, value: string) => {
+    const newValues = [...selectedValues];
+    newValues[index] = value;
+    setSelectedValues(newValues);
+  };
   const selectStatusChange = (event: SelectChangeEvent) => {
     setSelectStatus(event.target.value);
   };
-  const selectIssueBase1Change = (event: SelectChangeEvent) => {
-    setSelectIssueBase1(event.target.value);
-  };
-  const selectIssueBase2Change = (event: SelectChangeEvent) => {
-    setSelectIssueBase2(event.target.value);
-  };
+  // const selectIssueBaseChange = (event: SelectChangeEvent) => {
+  //   setSelectIssueBase(event.target.value);
+  // };
   const selectReturnBaseChange = (event: SelectChangeEvent) => {
     setSelectReturnBase(event.target.value);
   };
@@ -165,7 +166,7 @@ const EquipmentOrderDetail = () => {
           <Button variant="contained" sx={{ margin: 1 }}>
             編集
           </Button>
-          <Button variant="contained" sx={{ margin: 1 }}>
+          <Button variant="contained" sx={{ margin: 1 }} onClick={() => console.log(selectedValues)}>
             保存
           </Button>
         </Box>
@@ -184,7 +185,7 @@ const EquipmentOrderDetail = () => {
             <Typography marginRight={11} whiteSpace="nowrap">
               機材
             </Typography>
-            <GridTable
+            <GridSelectBoxTable
               header={header}
               rows={rows}
               editableColumns={editableColumns}
@@ -195,8 +196,10 @@ const EquipmentOrderDetail = () => {
               getHeaderTextColor={() => ''}
               rowColorSelect={true}
               getRowBackgroundColor={getEquipmentRowBackgroundColor}
+              selectIssueBase={selectedValues}
+              selectIssueBaseChange={selectIssueBaseChange}
             />
-            <Box marginLeft={6}>
+            {/* <Box marginLeft={6}>
               <Typography>出庫場所</Typography>
               <Box display="flex" alignItems="center">
                 <FormControl size="small" sx={{ width: '25%', minWidth: 200, marginTop: 1 }}>
@@ -220,7 +223,7 @@ const EquipmentOrderDetail = () => {
                   削除
                 </Button>
               </Box>
-            </Box>
+            </Box> */}
           </Box>
           <Box display="flex" alignItems="center" margin={1} marginLeft={2} marginTop={4} width="60%">
             <Typography marginRight={9} whiteSpace="nowrap">
