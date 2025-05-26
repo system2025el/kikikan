@@ -17,11 +17,11 @@ const rows = [
 const data = [
   {
     id: 1,
-    data: ['SHARPY PLUS', '148', '2', '1', '3', 'XXXXXXXX'],
+    data: ['SHARPY PLUS', 148, 2, 1, 3, 'XXXXXXXX'],
   },
   {
     id: 2,
-    data: ['ROBIN T2 Profile', '26', '3', '1', '4', 'XXXXXXXX'],
+    data: ['ROBIN T2 Profile', 26, 3, 1, 4, 'XXXXXXXX'],
   },
 ];
 
