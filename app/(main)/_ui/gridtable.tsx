@@ -99,7 +99,7 @@ const GridTable: React.FC<TableProps> = ({
                 return (
                   <TableCell
                     key={colIndex}
-                    align={typeof cell === 'string' ? 'left' : typeof cell === 'number' ? 'right' : 'center'}
+                    align={typeof cell === 'number' ? 'right' : 'left'}
                     sx={{
                       border: '1px solid black',
                       whiteSpace: 'nowrap',
@@ -242,7 +242,7 @@ export const GridSelectBoxTable: React.FC<GridSelectBoxTableProps> = ({
                 return (
                   <TableCell
                     key={colIndex}
-                    align={typeof cell === 'string' ? 'left' : typeof cell === 'number' ? 'right' : 'center'}
+                    align={typeof cell === 'number' ? 'right' : 'left'}
                     sx={{
                       border: '1px solid black',
                       whiteSpace: 'nowrap',

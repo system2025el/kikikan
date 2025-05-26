@@ -159,7 +159,9 @@ const Row = (props: RowProps) => {
           <IconButton onClick={handleClick}>{isExpanded ? <ExpandMoreIcon /> : <ExpandLessIcon />}</IconButton>
         </TableCell>
         {props.headers.map((header) => (
-          <TableCell key={header.key}>{props.row.parent[header.key]}</TableCell>
+          <TableCell key={header.key} align={typeof props.row.parent[header.key] === 'number' ? 'right' : 'left'}>
+            {props.row.parent[header.key]}
+          </TableCell>
         ))}
         <TableCell>
           <IconButton onClick={() => props.moveRow(props.index, -1)} disabled={props.index === 0}>
@@ -181,7 +183,11 @@ const Row = (props: RowProps) => {
             <Collapse in={isExpanded} timeout="auto" unmountOnExit></Collapse>
           </TableCell>
           {props.headers.map((header) => (
-            <TableCell key={header.key} sx={!isExpanded ? styles.closeCell : undefined}>
+            <TableCell
+              key={header.key}
+              sx={!isExpanded ? styles.closeCell : undefined}
+              align={typeof row[header.key] === 'number' ? 'right' : 'left'}
+            >
               <Collapse in={isExpanded} timeout="auto" unmountOnExit>
                 {row[header.key]}
               </Collapse>
