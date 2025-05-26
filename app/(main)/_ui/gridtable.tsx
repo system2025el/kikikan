@@ -23,7 +23,7 @@ type TableProps = {
   header: string[] | null;
   rows: Array<{
     id: number;
-    data: string[];
+    data: Array<string | number>;
   }>;
   editableColumns?: number[] | null;
   onChange?: (rowIndex: number, colIndex: number, newValue: string) => void;
@@ -99,14 +99,15 @@ const GridTable: React.FC<TableProps> = ({
                 return (
                   <TableCell
                     key={colIndex}
-                    align="center"
+                    align={typeof cell === 'string' ? 'left' : typeof cell === 'number' ? 'right' : 'center'}
                     sx={{
                       border: '1px solid black',
                       whiteSpace: 'nowrap',
                       width,
                       height: 25,
                       bgcolor: getRowBackgroundColor(rowIndex, colIndex, rowColorSelect),
-                      padding: 0,
+                      py: 0,
+                      px: 1,
                     }}
                     size="small"
                   >
@@ -118,7 +119,7 @@ const GridTable: React.FC<TableProps> = ({
                         onChange={(e) => handleCellChange(rowIndex, colIndex, e.target.value)}
                         sx={{
                           '& .MuiInputBase-input': {
-                            textAlign: 'center',
+                            textAlign: 'right',
                             padding: 0,
                             fontSize: 'small',
                           },
@@ -161,7 +162,7 @@ type GridSelectBoxTableProps = {
   header: string[] | null;
   rows: Array<{
     id: number;
-    data: string[];
+    data: Array<string | number>;
   }>;
   editableColumns?: number[] | null;
   onChange?: (rowIndex: number, colIndex: number, newValue: string) => void;
@@ -210,7 +211,7 @@ export const GridSelectBoxTable: React.FC<GridSelectBoxTableProps> = ({
       <Table>
         <TableHead>
           <TableRow>
-            {header?.map((date, index) => (
+            {header?.map((data, index) => (
               <TableCell
                 key={index}
                 align="center"
@@ -226,7 +227,7 @@ export const GridSelectBoxTable: React.FC<GridSelectBoxTableProps> = ({
                   padding: 0,
                 }}
               >
-                {date}
+                {data}
               </TableCell>
             ))}
           </TableRow>
@@ -241,14 +242,15 @@ export const GridSelectBoxTable: React.FC<GridSelectBoxTableProps> = ({
                 return (
                   <TableCell
                     key={colIndex}
-                    align="center"
+                    align={typeof cell === 'string' ? 'left' : typeof cell === 'number' ? 'right' : 'center'}
                     sx={{
                       border: '1px solid black',
                       whiteSpace: 'nowrap',
                       width,
                       height: 25,
                       bgcolor: getRowBackgroundColor(rowIndex, colIndex, rowColorSelect),
-                      padding: 0,
+                      py: 0,
+                      px: 1,
                     }}
                     size="small"
                   >
@@ -260,7 +262,7 @@ export const GridSelectBoxTable: React.FC<GridSelectBoxTableProps> = ({
                         onChange={(e) => handleCellChange(rowIndex, colIndex, e.target.value)}
                         sx={{
                           '& .MuiInputBase-input': {
-                            textAlign: 'center',
+                            textAlign: 'right',
                             padding: 0,
                             fontSize: 'small',
                           },
@@ -278,7 +280,7 @@ export const GridSelectBoxTable: React.FC<GridSelectBoxTableProps> = ({
                         }}
                         slotProps={{
                           input: {
-                            style: { textAlign: 'center' },
+                            style: { textAlign: 'right' },
                             disableUnderline: true,
                           },
                         }}
