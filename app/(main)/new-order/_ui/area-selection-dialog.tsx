@@ -1,3 +1,5 @@
+'use client';
+
 import { Box, Button, DialogContent, DialogTitle, Grid2, Typography } from '@mui/material';
 import { grey } from '@mui/material/colors';
 

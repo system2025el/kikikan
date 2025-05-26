@@ -1,3 +1,5 @@
+'use client';
+
 import { CheckBox } from '@mui/icons-material';
 import {
   Button,

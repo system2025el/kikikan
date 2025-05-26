@@ -39,7 +39,7 @@ export const QuotationList = () => {
         </Stack>
         <Stack width={'30%'} pt={1}>
           <Typography>見積件名</Typography>
-          <FormControl sx={{ minWidth: '70%' }}>
+          <FormControl sx={{ minWidth: '70%', bgcolor: 'white' }}>
             <Select>
               <MenuItem></MenuItem>
             </Select>
@@ -47,7 +47,7 @@ export const QuotationList = () => {
         </Stack>
         <Stack width={'30%'} pt={1}>
           <Typography>見積相手</Typography>
-          <FormControl sx={{ minWidth: '70%' }}>
+          <FormControl sx={{ minWidth: '70%', bgcolor: 'white' }}>
             <Select>
               <MenuItem></MenuItem>
             </Select>

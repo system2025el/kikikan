@@ -100,7 +100,7 @@ export const OrderList = () => {
         <Stack pt={1}>
           <Typography>顧客</Typography>
           <FormControl>
-            <Select value={customer} sx={{ minWidth: 300, bgcolor: grey[300] }} onChange={handleCustomerSelect}>
+            <Select value={customer} sx={{ minWidth: 300, bgcolor: 'white' }} onChange={handleCustomerSelect}>
               {customers.map((customer) => (
                 <MenuItem key={customer.id} value={customer.name}>
                   {customer.name}
@@ -109,7 +109,7 @@ export const OrderList = () => {
             </Select>
           </FormControl>
           <Typography sx={{ pl: 2 }}>ソート</Typography>
-          <Select value={custSort} onChange={handleCustSortSelect}>
+          <Select value={custSort} onChange={handleCustSortSelect} sx={{ bgcolor: 'white' }}>
             <MenuItem value="顧客名簿">顧客名簿</MenuItem>
           </Select>
         </Stack>

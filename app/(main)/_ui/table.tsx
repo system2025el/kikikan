@@ -1,3 +1,5 @@
+'use client';
+
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { Box, Collapse, IconButton } from '@mui/material';
