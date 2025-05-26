@@ -37,9 +37,9 @@ export const Calendar = () => {
   );
 };
 
-const DateX = () => {
+const DateX = (props: { sx?: object; disabled?: boolean }) => {
   const [error, setError] = useState<DateValidationError | null>(null);
-
+  const { sx, disabled } = props;
   const errorMessage = useMemo(() => {
     switch (error) {
       case 'maxDate':
@@ -77,7 +77,8 @@ const DateX = () => {
         defaultValue={today}
         onError={(newError: DateValidationError) => setError(newError)}
         views={['year', 'month', 'day']}
-        sx={{ width: '25%', minWidth: 200 }}
+        disabled={disabled ? true : false}
+        sx={{ width: '25%', minWidth: 200, ...sx }}
       />
     </LocalizationProvider>
   );
@@ -85,7 +86,8 @@ const DateX = () => {
 
 export default DateX;
 
-export const TwoDatePickers = () => {
+export const TwoDatePickers = (props: { sx?: object }) => {
+  const { sx } = props;
   return (
     <>
       <LocalizationProvider
@@ -106,7 +108,7 @@ export const TwoDatePickers = () => {
           }} // カレンダーヘッダーのフォーマット
           defaultValue={today}
           views={['year', 'month', 'day']}
-          sx={{ width: '15%', minWidth: 150 }}
+          sx={{ width: '15%', minWidth: 150, ...sx }}
         />
         ～
         <DatePicker
@@ -118,7 +120,7 @@ export const TwoDatePickers = () => {
           }} // カレンダーヘッダーのフォーマット
           defaultValue={today}
           views={['year', 'month', 'day']}
-          sx={{ width: '15%', minWidth: 150 }}
+          sx={{ width: '15%', minWidth: 150, ...sx }}
         />
       </LocalizationProvider>
     </>
@@ -130,16 +132,17 @@ type DateRange = [Date, Date] | null;
 type Props = {
   value: DateRange;
   onChange: (value: DateRange) => void;
+  styles?: object;
 };
 
 export const RSuiteDateRangePicker = (props: Props) => {
-  const { value, onChange } = props;
+  const { value, onChange, styles } = props;
   return (
     <DateRangePicker
-      style={{ width: 250 }}
+      style={{ width: 250, ...styles }}
       format="yyyy/MM/dd"
       size="lg"
-      character=" - "
+      character=" ～ "
       placeholder="年/月/日 - 年/月/日"
       placement="autoVertical"
       value={value}

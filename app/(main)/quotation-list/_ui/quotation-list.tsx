@@ -35,7 +35,7 @@ export const QuotationList = () => {
         </Stack>
         <Stack pt={1}>
           <Typography>見積日</Typography>
-          <TwoDatePickers />
+          <TwoDatePickers sx={{ bgcolor: 'white' }} />
         </Stack>
         <Stack width={'30%'} pt={1}>
           <Typography>見積件名</Typography>

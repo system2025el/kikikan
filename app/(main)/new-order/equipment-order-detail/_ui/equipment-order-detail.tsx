@@ -15,6 +15,7 @@ import { grey } from '@mui/material/colors';
 import { useRef, useState } from 'react';
 import React from 'react';
 
+import { BackButton } from '@/app/(main)/_ui/back-button';
 import DateX from '@/app/(main)/_ui/date';
 import { GridSelectBoxTable } from '@/app/(main)/_ui/gridtable';
 import Time from '@/app/(main)/_ui/time';
@@ -104,23 +105,21 @@ const EquipmentOrderDetail = () => {
 
   return (
     <Box>
-      <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ bgcolor: grey[400] }}>
+      <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ bgcolor: grey[300] }}>
         <Typography margin={1}>受注明細（機材）</Typography>
-        <Button variant="contained" sx={{ margin: 1 }} href="/new-order">
-          戻る
-        </Button>
+        <BackButton label={'戻る'} />
       </Box>
-      <Box display="flex" sx={{ bgcolor: grey[300] }}>
+      <Box display="flex" sx={{ bgcolor: grey[200] }}>
         <Box sx={{ width: '60%' }}>
           <Box sx={styles.container}>
             <Typography marginRight={3} whiteSpace="nowrap">
               受注番号
             </Typography>
-            <TextField size="small" defaultValue="81694" disabled></TextField>
+            <TextField defaultValue="81694" disabled sx={{ bgcolor: grey[300] }}></TextField>
             <Typography mx={2} whiteSpace="nowrap">
               受注ステータス
             </Typography>
-            <TextField size="small" defaultValue="確定" disabled>
+            <TextField defaultValue="確定" disabled sx={{ bgcolor: grey[300] }}>
               確定
             </TextField>
           </Box>
@@ -128,13 +127,13 @@ const EquipmentOrderDetail = () => {
             <Typography marginRight={5} whiteSpace="nowrap">
               受注日
             </Typography>
-            <TextField size="small" defaultValue="2025/10/01" disabled></TextField>
+            <TextField defaultValue="2025/10/01" disabled sx={{ bgcolor: grey[300] }}></TextField>
           </Box>
           <Box sx={styles.container}>
             <Typography marginRight={5} whiteSpace="nowrap">
               入力者
             </Typography>
-            <TextField size="small" defaultValue="XXXXXXXX" disabled></TextField>
+            <TextField defaultValue="XXXXXXXX" disabled sx={{ bgcolor: grey[300] }}></TextField>
           </Box>
         </Box>
         <Box sx={{ width: '40%' }}>
@@ -142,23 +141,23 @@ const EquipmentOrderDetail = () => {
             <Typography marginRight={5} whiteSpace="nowrap">
               公演名
             </Typography>
-            <TextField size="small" defaultValue="A/Zepp Tour" disabled></TextField>
+            <TextField defaultValue="A/Zepp Tour" disabled sx={{ bgcolor: grey[300] }}></TextField>
           </Box>
           <Box sx={styles.container}>
             <Typography marginRight={3} whiteSpace="nowrap">
               公演場所
             </Typography>
-            <TextField size="small" defaultValue="Zepp Osaka" disabled></TextField>
+            <TextField defaultValue="Zepp Osaka" disabled sx={{ bgcolor: grey[300] }}></TextField>
           </Box>
           <Box sx={styles.container}>
             <Typography marginRight={7} whiteSpace="nowrap">
               相手
             </Typography>
-            <TextField size="small" defaultValue="(株)シアターブレーン" disabled></TextField>
+            <TextField defaultValue="(株)シアターブレーン" disabled sx={{ bgcolor: grey[300] }}></TextField>
           </Box>
         </Box>
       </Box>
-      <Box display={'flex'} marginTop={2} px={1} sx={{ bgcolor: grey[400] }} alignItems={'center'}>
+      <Box display={'flex'} marginTop={2} px={1} sx={{ bgcolor: grey[300] }} alignItems={'center'}>
         <Typography whiteSpace="nowrap" textAlign={'center'}>
           機材入力
         </Typography>
@@ -171,7 +170,7 @@ const EquipmentOrderDetail = () => {
           </Button>
         </Box>
       </Box>
-      <Box display="flex" sx={{ bgcolor: grey[300] }}>
+      <Box display="flex" sx={{ bgcolor: grey[200] }}>
         <Box sx={{ width: '100%' }}>
           <Box display="flex" alignItems="center" margin={1} marginLeft={17}>
             <Button variant="contained" sx={{ marginRight: 4 }} onClick={() => handleOpenEqDialog()}>
@@ -290,7 +289,7 @@ const EquipmentOrderDetail = () => {
             <Typography marginRight={7} whiteSpace="nowrap">
               本番日数
             </Typography>
-            <TextField size="small" defaultValue="4" sx={{ width: '5%' }} />日
+            <TextField defaultValue="4" sx={{ width: '5%' }} />日
           </Box>
           <Box sx={styles.container}>
             <Typography marginRight={9} whiteSpace="nowrap">
@@ -312,9 +311,7 @@ const EquipmentOrderDetail = () => {
               />
             </Dialog>
           </Box>
-          <Button size="small" sx={{ color: 'white', bgcolor: 'purple', marginLeft: 17 }}>
-            仕込
-          </Button>
+          <Button sx={{ color: 'white', bgcolor: 'purple', marginLeft: 17 }}>仕込</Button>
           <Box display="flex" alignItems="center" mb={2} ml={28}>
             <Box display="flex" flexDirection="column">
               <Typography>日付</Typography>
@@ -329,9 +326,7 @@ const EquipmentOrderDetail = () => {
               ))}
             </Box>
           </Box>
-          <Button size="small" sx={{ color: 'white', bgcolor: 'orange', marginLeft: 17 }}>
-            RH
-          </Button>
+          <Button sx={{ color: 'white', bgcolor: 'orange', marginLeft: 17 }}>RH</Button>
           <Box display="flex" alignItems="center" mb={2} ml={28}>
             <Box display="flex" flexDirection="column">
               <Typography>日付</Typography>
@@ -346,9 +341,7 @@ const EquipmentOrderDetail = () => {
               ))}
             </Box>
           </Box>
-          <Button size="small" sx={{ color: 'white', bgcolor: 'green', marginLeft: 17 }}>
-            GP
-          </Button>
+          <Button sx={{ color: 'white', bgcolor: 'green', marginLeft: 17 }}>GP</Button>
           <Box display="flex" alignItems="center" mb={2} ml={28}>
             <Box display="flex" flexDirection="column">
               <Typography>日付</Typography>
@@ -363,9 +356,7 @@ const EquipmentOrderDetail = () => {
               ))}
             </Box>
           </Box>
-          <Button size="small" sx={{ color: 'white', bgcolor: 'pink', marginLeft: 17 }}>
-            本番
-          </Button>
+          <Button sx={{ color: 'white', bgcolor: 'pink', marginLeft: 17 }}>本番</Button>
           <Box display="flex" alignItems="center" mb={2} ml={28}>
             <Box display="flex" flexDirection="column">
               <Typography>日付</Typography>

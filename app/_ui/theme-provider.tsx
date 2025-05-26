@@ -22,6 +22,7 @@ const lightTheme = createTheme(
     typography,
     cssVariables,
     palette: {
+      text: { disabled: 'black' },
       primary: {
         main: lightBlue[300],
         contrastText: 'white',

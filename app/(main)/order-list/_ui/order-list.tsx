@@ -125,7 +125,7 @@ export const OrderList = () => {
           <Typography>公演名</Typography>
           <TextField sx={{ bgcolor: 'white' }} />
           <Typography>受注開始日～終了日</Typography>
-          <TwoDatePickers />
+          <TwoDatePickers sx={{ bgcolor: 'white' }} />
         </Stack>
       </Box>
       <OrderTable />
