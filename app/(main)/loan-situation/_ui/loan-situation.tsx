@@ -74,7 +74,7 @@ export const LoanSituation = () => {
         <Button>＞＞</Button>
       </Box>
       <Box display="flex" flexDirection="row" width="100%">
-        <Box width="45%">
+        <Box width="30%">
           <GridTable
             header={loanHeader}
             rows={loanData}
@@ -88,7 +88,7 @@ export const LoanSituation = () => {
             getRowBackgroundColor={getLoanRowBackgroundColor}
           />
         </Box>
-        <Box width="55%">
+        <Box width="70%">
           <GridTable
             header={dateHeader}
             rows={dateData}

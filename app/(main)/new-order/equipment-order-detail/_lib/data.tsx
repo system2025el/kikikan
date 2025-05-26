@@ -25,8 +25,8 @@ const data = [
   },
 ];
 
-const cellWidths = ['30%', '5%', '5%', '5%', '5%', '50%'];
+const cellWidths = ['25%', '5%', '5%', '5%', '5%', '40%', '10%', '5%'];
 
-const header = ['', '全', '受注数', '予備数', '合計', '機材メモ'];
+const header = ['', '全', '受注数', '予備数', '合計', '機材メモ', '出庫場所', ''];
 
 export { cellWidths, columns, data, header, rows };

@@ -85,7 +85,7 @@ const Schedule = () => {
         <Button sx={{ marginLeft: 10 }}>確定</Button>
       </Box>
       <Box display="flex" flexDirection="row" width="100%">
-        <Box width="35%">
+        <Box width="30%">
           <GridTable
             header={equipmentHeader}
             rows={equipmentRows}
@@ -99,7 +99,7 @@ const Schedule = () => {
             getRowBackgroundColor={getEquipmentRowBackgroundColor}
           />
         </Box>
-        <Box width="65%">
+        <Box width="70%">
           <GridTable
             header={dateHeader}
             rows={testRows}
