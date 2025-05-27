@@ -198,31 +198,6 @@ const EquipmentOrderDetail = () => {
               selectIssueBase={selectedValues}
               selectIssueBaseChange={selectIssueBaseChange}
             />
-            {/* <Box marginLeft={6}>
-              <Typography>出庫場所</Typography>
-              <Box display="flex" alignItems="center">
-                <FormControl size="small" sx={{ width: '25%', minWidth: 200, marginTop: 1 }}>
-                  <Select value={selectIssueBase1} onChange={selectIssueBase1Change}>
-                    <MenuItem value={'KICS'}>KICS</MenuItem>
-                    <MenuItem value={'YARD'}>YARD</MenuItem>
-                  </Select>
-                </FormControl>
-                <Button size="medium" sx={{ marginTop: 1, marginLeft: 2, color: 'white', bgcolor: 'red' }}>
-                  削除
-                </Button>
-              </Box>
-              <Box display="flex" alignItems="center">
-                <FormControl size="small" sx={{ width: '25%', minWidth: 200, marginTop: 1 }}>
-                  <Select value={selectIssueBase2} onChange={selectIssueBase2Change}>
-                    <MenuItem value={'KICS'}>KICS</MenuItem>
-                    <MenuItem value={'YARD'}>YARD</MenuItem>
-                  </Select>
-                </FormControl>
-                <Button size="medium" sx={{ marginTop: 1, marginLeft: 2, color: 'white', bgcolor: 'red' }}>
-                  削除
-                </Button>
-              </Box>
-            </Box> */}
           </Box>
           <Box display="flex" alignItems="center" margin={1} marginLeft={2} marginTop={4} width="60%">
             <Typography marginRight={9} whiteSpace="nowrap">
@@ -289,7 +264,16 @@ const EquipmentOrderDetail = () => {
             <Typography marginRight={7} whiteSpace="nowrap">
               本番日数
             </Typography>
-            <TextField defaultValue="4" sx={{ width: '5%' }} />日
+            <TextField
+              defaultValue="4"
+              sx={{
+                width: '5%',
+                '& .MuiInputBase-input': {
+                  textAlign: 'right',
+                },
+              }}
+            />
+            日
           </Box>
           <Box sx={styles.container}>
             <Typography marginRight={9} whiteSpace="nowrap">

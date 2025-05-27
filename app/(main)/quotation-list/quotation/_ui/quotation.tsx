@@ -34,6 +34,8 @@ export const Quotation = () => {
   const [selectQuotationStatus, setSelectQuotationStatus] = useState('処理中');
   const [selectRequestStatus, setSelectRequestStatus] = useState('処理中');
 
+  const priceTotal = quotationRows.reduce((sum, row) => sum + row.price, 0);
+
   const inputPersonChange = (event: SelectChangeEvent) => {
     setSelectInputPerson(event.target.value);
   };
@@ -312,6 +314,13 @@ export const Quotation = () => {
               <Box display="flex" alignItems="center">
                 <Typography mx={1}>合計金額</Typography>
                 <TextField
+                  sx={{
+                    '& .MuiInputBase-input': {
+                      textAlign: 'right',
+                      padding: 1,
+                    },
+                  }}
+                  value={'¥' + priceTotal}
                   onClick={(e) => {
                     e.stopPropagation();
                   }}

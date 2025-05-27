@@ -141,7 +141,7 @@ const vehicleRows = [
   },
   {
     id: 3,
-    classification: '出庫',
+    classification: '入庫',
     days: '2025/11/2',
     name: 'ハイエース',
     work: 'KICK',
@@ -149,7 +149,7 @@ const vehicleRows = [
   },
   {
     id: 4,
-    classification: '出庫',
+    classification: '入庫',
     days: '2025/11/2',
     name: '11t',
     work: 'YARD',
@@ -157,7 +157,7 @@ const vehicleRows = [
   },
   {
     id: 5,
-    classification: '出庫',
+    classification: '入庫',
     days: '2025/11/2',
     name: '11t',
     work: 'YARD',

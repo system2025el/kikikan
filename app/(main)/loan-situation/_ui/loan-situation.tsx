@@ -41,11 +41,27 @@ export const LoanSituation = () => {
       </Box>
       <Box sx={styles.container}>
         <Typography marginRight={2}>保有数</Typography>
-        <TextField disabled defaultValue="200"></TextField>
+        <TextField
+          disabled
+          defaultValue="200"
+          sx={{
+            '& .MuiInputBase-input': {
+              textAlign: 'right',
+            },
+          }}
+        ></TextField>
         <Typography marginRight={2} marginLeft={10}>
           定価
         </Typography>
-        <TextField disabled defaultValue="20,000円"></TextField>
+        <TextField
+          disabled
+          defaultValue="20,000円"
+          sx={{
+            '& .MuiInputBase-input': {
+              textAlign: 'right',
+            },
+          }}
+        ></TextField>
         <FormControl sx={{ marginLeft: 10 }}>
           <RadioGroup defaultValue="出庫日順">
             <FormControlLabel value="出庫日順" control={<Radio />} label="出庫日順" />
