@@ -34,7 +34,10 @@ const NewOrder = () => {
     console.log('選択されたID:', selectedIds);
   };
 
-  const total = equipmentRows.reduce((sum, row) => sum + row.price, 0);
+  const equipmentTotal = equipmentRows.reduce((sum, row) => sum + row.quantity, 0);
+  const priceTotal = equipmentRows.reduce((sum, row) => sum + row.price, 0);
+  const issueTotal = vehicleRows.filter((row) => row.classification === '出庫').length;
+  const returnTotal = vehicleRows.filter((row) => row.classification === '入庫').length;
 
   const [buttonValue, setButtonValue] = useState<string | null>('');
 
@@ -202,7 +205,14 @@ const NewOrder = () => {
               <Box display="flex" sx={{ width: '100%' }} alignItems="center">
                 <Typography mx={1}>機材数</Typography>
                 <TextField
-                  sx={{ width: '10%' }}
+                  sx={{
+                    width: '10%',
+                    '& .MuiInputBase-input': {
+                      textAlign: 'right',
+                      padding: 1,
+                    },
+                  }}
+                  value={equipmentTotal}
                   onClick={(e) => {
                     e.stopPropagation();
                   }}
@@ -210,8 +220,14 @@ const NewOrder = () => {
                 ></TextField>
                 <Typography mx={1}>合計金額</Typography>
                 <TextField
-                  sx={{ width: '40%' }}
-                  defaultValue={'¥' + total}
+                  sx={{
+                    width: '40%',
+                    '& .MuiInputBase-input': {
+                      textAlign: 'right',
+                      padding: 1,
+                    },
+                  }}
+                  value={'¥' + priceTotal}
                   onClick={(e) => {
                     e.stopPropagation();
                   }}
@@ -275,7 +291,14 @@ const NewOrder = () => {
               <Box display="flex" alignItems="center" sx={{ width: '100%' }}>
                 <Typography mx={1}>出庫車両数</Typography>
                 <TextField
-                  sx={{ width: '20%' }}
+                  sx={{
+                    width: '20%',
+                    '& .MuiInputBase-input': {
+                      textAlign: 'right',
+                      padding: 1,
+                    },
+                  }}
+                  value={issueTotal}
                   onClick={(e) => {
                     e.stopPropagation();
                   }}
@@ -287,7 +310,14 @@ const NewOrder = () => {
               <Box display="flex" alignItems="center" sx={{ width: '100%' }}>
                 <Typography mx={1}>入庫車両数</Typography>
                 <TextField
-                  sx={{ width: '20%' }}
+                  sx={{
+                    width: '20%',
+                    '& .MuiInputBase-input': {
+                      textAlign: 'right',
+                      padding: 1,
+                    },
+                  }}
+                  value={returnTotal}
                   onClick={(e) => {
                     e.stopPropagation();
                   }}
