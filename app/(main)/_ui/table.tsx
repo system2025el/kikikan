@@ -116,7 +116,9 @@ export const SelectTable: React.FC<TableProps> = ({ headers, datas, onSelectionC
               </TableCell>
               <TableCell />
               {headers.map((header) => (
-                <TableCell key={header.key}>{header.label}</TableCell>
+                <TableCell key={header.key} align={typeof rows[0].parent[header.key] === 'number' ? 'right' : 'left'}>
+                  {header.label}
+                </TableCell>
               ))}
               <TableCell />
               <TableCell />
