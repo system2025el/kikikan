@@ -22,7 +22,7 @@ export const Stock = () => {
   const [visible, setVisible] = useState(false);
   const editableColumns = [2, 3];
 
-  const equipmentCellChange = (rowIndex: number, colIndex: number, newValue: string) => {
+  const equipmentCellChange = (rowIndex: number, colIndex: number, newValue: number) => {
     const updatedRows = [...equipmentRows];
     updatedRows[rowIndex].data[colIndex] = newValue;
     setEquipmentRows(updatedRows);
