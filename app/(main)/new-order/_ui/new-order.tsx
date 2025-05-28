@@ -144,6 +144,7 @@ const NewOrder = () => {
                 styles={{ background: 'grey' }}
                 value={dateRange}
                 onChange={handleDateChange} /*val={rentalPeriod}*/
+                disabled
               />
             </Box>
           </Box>
