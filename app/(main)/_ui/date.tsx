@@ -86,7 +86,7 @@ const DateX = (props: { sx?: object; disabled?: boolean }) => {
           },
           calendarHeader: { format: 'YYYY年MM月' },
         }} // カレンダーヘッダーのフォーマット
-        defaultValue={null}
+        defaultValue={today}
         onError={(newError: DateValidationError) => setError(newError)}
         views={['year', 'month', 'day']}
         disabled={disabled ? true : false}
@@ -128,7 +128,12 @@ export const TwoDatePickers = (props: { sx?: object }) => {
           }} // カレンダーヘッダーのフォーマット
           defaultValue={today}
           views={['year', 'month', 'day']}
-          sx={{ width: '15%', minWidth: 150, ...sx }}
+          sx={{
+            width: '15%',
+            minWidth: 150,
+            ...sx,
+          }}
+          className="MuiDateText"
         />
         ～
         <DatePicker
@@ -171,7 +176,7 @@ type Props = {
   /**
    * disabledかどうか
    */
-  disabled: boolean;
+  disabled?: boolean;
 };
 /**
  * @param props props
