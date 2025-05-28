@@ -61,7 +61,6 @@ const DateX = (props: { sx?: object; disabled?: boolean }) => {
       }
     }
   }, [error]);
-  console.log(`ttttttttttttttttttttttttttttttttttttt${today}`);
 
   return (
     <LocalizationProvider
@@ -82,6 +81,12 @@ const DateX = (props: { sx?: object; disabled?: boolean }) => {
             size: 'small',
             sx: {
               bgcolor: disabled ? grey[300] : 'white',
+              width: '25%',
+              minWidth: 200,
+              '.Mui-disabled': {
+                WebkitTextFillColor: 'black',
+              },
+              ...sx,
             },
           },
           calendarHeader: { format: 'YYYY年MM月' },
@@ -90,17 +95,13 @@ const DateX = (props: { sx?: object; disabled?: boolean }) => {
         onError={(newError: DateValidationError) => setError(newError)}
         views={['year', 'month', 'day']}
         disabled={disabled ? true : false}
-        sx={{
-          width: '25%',
-          minWidth: 200,
-          ...sx,
-        }}
       />
     </LocalizationProvider>
   );
 };
 
 export default DateX;
+
 /**
  * 2つ並んだ日付選択コンポーネント
  * @param props sx スタイルを決めるオブジェクト

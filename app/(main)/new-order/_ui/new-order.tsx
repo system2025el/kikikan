@@ -11,23 +11,23 @@ import {
   FormControl,
   Grid2,
   MenuItem,
-  Paper,
   Select,
   SelectChangeEvent,
-  Stack,
   TextField,
   Typography,
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
-import Link from 'next/link';
+import dayjs from 'dayjs';
 import { useState } from 'react';
 
-import DateX, { RSuiteDateRangePicker, TwoDatePickers } from '@/app/(main)/_ui/date';
+import DateX, { RSuiteDateRangePicker } from '@/app/(main)/_ui/date';
 import { SelectTable } from '@/app/(main)/_ui/table';
 import { equipmentHeaders, equipmentRows, vehicleHeaders, vehicleRows } from '@/app/(main)/new-order/_lib/data';
 
 import { CustomerSelectionDialog } from './customer-selection';
 import { LocationSelectDialog } from './location-selection';
+
+const today = dayjs();
 
 const NewOrder = () => {
   const handleSelectionChange = (selectedIds: (string | number)[]) => {
@@ -124,7 +124,7 @@ const NewOrder = () => {
             </Box>
             <Box sx={styles.container}>
               <Typography marginRight={7}>受注日</Typography>
-              <DateX disabled sx={{ bgcolor: grey[300] }} />
+              <DateX disabled />
             </Box>
             <Box sx={styles.container}>
               <Typography marginRight={7}>入力者</Typography>
