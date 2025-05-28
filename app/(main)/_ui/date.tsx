@@ -9,6 +9,8 @@ import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
 import { DateValidationError } from '@mui/x-date-pickers/models';
 import dayjs from 'dayjs';
 import { useMemo, useState } from 'react';
+
+import { grey } from '@mui/material/colors';
 import { DateRangePicker } from 'rsuite';
 
 dayjs.locale('ja'); // カレンダーの曜日のフォーマット
@@ -36,7 +38,11 @@ export const Calendar = () => {
     </LocalizationProvider>
   );
 };
-
+/**
+ * 日付を選択し取得するコンポーネント
+ * @param props sx スタイル disbled disabledかどうか
+ * @returns {JSX.Element} MUIX DatePickerコンポーネント
+ */
 const DateX = (props: { sx?: object; disabled?: boolean }) => {
   const [error, setError] = useState<DateValidationError | null>(null);
   const { sx, disabled } = props;
@@ -56,6 +62,7 @@ const DateX = (props: { sx?: object; disabled?: boolean }) => {
       }
     }
   }, [error]);
+  console.log(`ttttttttttttttttttttttttttttttttttttt${today}`);
 
   return (
     <LocalizationProvider
@@ -71,21 +78,35 @@ const DateX = (props: { sx?: object; disabled?: boolean }) => {
         name="date"
         format="YYYY/MM/DD" // テキストエリア内のフォーマット
         slotProps={{
-          textField: { helperText: errorMessage, size: 'small' },
+          textField: {
+            helperText: errorMessage,
+            size: 'small',
+            sx: {
+              bgcolor: disabled ? grey[300] : 'white',
+            },
+          },
           calendarHeader: { format: 'YYYY年MM月' },
         }} // カレンダーヘッダーのフォーマット
-        defaultValue={today}
+        defaultValue={null}
         onError={(newError: DateValidationError) => setError(newError)}
         views={['year', 'month', 'day']}
         disabled={disabled ? true : false}
-        sx={{ width: '25%', minWidth: 200, ...sx }}
+        sx={{
+          width: '25%',
+          minWidth: 200,
+          ...sx,
+        }}
       />
     </LocalizationProvider>
   );
 };
 
 export default DateX;
-
+/**
+ * 2つ並んだ日付選択コンポーネント
+ * @param props sx スタイルを決めるオブジェクト
+ * @returns {JSX.Element} MUIX DatePicker × 2
+ */
 export const TwoDatePickers = (props: { sx?: object }) => {
   const { sx } = props;
   return (
@@ -126,28 +147,69 @@ export const TwoDatePickers = (props: { sx?: object }) => {
     </>
   );
 };
-
+/**
+ * 日付幅を取得する時のデータ型
+ */
 type DateRange = [Date, Date] | null;
-
+/**
+ * RsuiteDateRangePickerのprops
+ */
 type Props = {
+  /**
+   * DateRagePickerで取得する日付幅の最初と最後の値の配列
+   */
   value: DateRange;
+  /**
+   * 新しく選択したDateRangeをセットする関数
+   * @param value DateRange型の新しい値
+   * @returns void
+   */
   onChange: (value: DateRange) => void;
+  /**
+   * コンポーネントのスタイル
+   */
   styles?: object;
+  /**
+   * disabledかどうか
+   */
+  disabled: boolean;
 };
-
+/**
+ * @param props props
+ * @returns {JSX.Element} 日付幅を選ぶコンポーネントDateRangePicker (rsuite)
+ */
 export const RSuiteDateRangePicker = (props: Props) => {
-  const { value, onChange, styles } = props;
+  const { value, onChange, styles, disabled } = props;
+  console.log(value);
   return (
-    <DateRangePicker
-      style={{ width: 250, ...styles }}
-      format="yyyy/MM/dd"
-      size="lg"
-      character=" ～ "
-      placeholder="年/月/日 - 年/月/日"
-      placement="autoVertical"
-      value={value}
-      onOk={onChange}
-    />
+    <>
+      <style>
+        {`
+          .custom-date-range-picker.rs-picker-disabled .rs-picker-toggle {
+            background-color: #000000 !important;
+            color: #ffffff !important;
+          }
+
+          .custom-date-range-picker.rs-picker-disabled .rs-picker-toggle-input {
+            background-color: #000000 !important;
+            color: #ffffff !important;
+          }
+        `}
+      </style>
+      <DateRangePicker
+        className="custom-date-range-picker"
+        style={{ width: 250, ...styles }}
+        format="yyyy/MM/dd"
+        size="lg"
+        character=" ～ "
+        placeholder="年/月/日 - 年/月/日"
+        placement="autoVertical"
+        value={value}
+        onOk={onChange}
+        disabled={disabled ? true : false}
+        /*calendarSnapping*/
+      />
+    </>
   );
 };
 
