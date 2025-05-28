@@ -38,7 +38,7 @@ export const Stock = () => {
       <Box bgcolor={grey[200]}>
         <Box display="flex" alignItems="center">
           <Typography margin={1}>機材名</Typography>
-          <TextField defaultValue="SHARPY Plus" sx={{ ml: 4 }}></TextField>
+          <TextField defaultValue="SHARPY Plus" sx={{ ml: 4, bgcolor: 'white' }}></TextField>
         </Box>
         <Box marginTop={6} display="flex" justifyContent="center">
           <Button>＜＜</Button>
