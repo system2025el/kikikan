@@ -17,7 +17,6 @@ import {
   Typography,
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
-import dayjs from 'dayjs';
 import { useState } from 'react';
 
 import DateX, { RSuiteDateRangePicker } from '@/app/(main)/_ui/date';
@@ -26,8 +25,6 @@ import { equipmentHeaders, equipmentRows, vehicleHeaders, vehicleRows } from '@/
 
 import { CustomerSelectionDialog } from './customer-selection';
 import { LocationSelectDialog } from './location-selection';
-
-const today = dayjs();
 
 const NewOrder = () => {
   const handleSelectionChange = (selectedIds: (string | number)[]) => {
