@@ -26,7 +26,7 @@ type TableProps = {
     data: Array<string | number>;
   }>;
   editableColumns?: number[] | null;
-  onChange?: (rowIndex: number, colIndex: number, newValue: string) => void;
+  onChange?: (rowIndex: number, colIndex: number, newValue: number) => void;
   cellWidths?: Array<string | number>;
   headerColorSelect: boolean;
   getHeaderBackgroundColor: (index: number, headerColorSelect: boolean) => string;
@@ -49,14 +49,14 @@ const GridTable: React.FC<TableProps> = ({
 }) => {
   const [localRows, setLocalRows] = useState(rows);
 
-  const handleCellChange = (rowIndex: number, colIndex: number, newValue: string) => {
+  const handleCellChange = (rowIndex: number, colIndex: number, newValue: number) => {
     const updated = [...localRows];
     updated[rowIndex] = {
       ...updated[rowIndex],
       data: [...updated[rowIndex].data],
     };
     updated[rowIndex].data[colIndex] = newValue;
-    updated[rowIndex].data[4] = (Number(updated[rowIndex].data[2]) + Number(updated[rowIndex].data[3])).toString();
+    updated[rowIndex].data[4] = Number(updated[rowIndex].data[2]) + Number(updated[rowIndex].data[3]);
     setLocalRows(updated);
     onChange?.(rowIndex, colIndex, newValue);
   };
@@ -71,7 +71,7 @@ const GridTable: React.FC<TableProps> = ({
             {header?.map((date, index) => (
               <TableCell
                 key={index}
-                align="center"
+                align={typeof localRows[0].data[index] === 'number' ? 'right' : 'left'}
                 size="small"
                 sx={{
                   border:
@@ -116,7 +116,7 @@ const GridTable: React.FC<TableProps> = ({
                         variant="standard"
                         value={cell}
                         type="number"
-                        onChange={(e) => handleCellChange(rowIndex, colIndex, e.target.value)}
+                        onChange={(e) => handleCellChange(rowIndex, colIndex, Number(e.target.value))}
                         sx={{
                           '& .MuiInputBase-input': {
                             textAlign: 'right',
@@ -165,7 +165,7 @@ type GridSelectBoxTableProps = {
     data: Array<string | number>;
   }>;
   editableColumns?: number[] | null;
-  onChange?: (rowIndex: number, colIndex: number, newValue: string) => void;
+  onChange?: (rowIndex: number, colIndex: number, newValue: number) => void;
   cellWidths?: Array<string | number>;
   headerColorSelect: boolean;
   getHeaderBackgroundColor: (index: number, headerColorSelect: boolean) => string;
@@ -192,14 +192,14 @@ export const GridSelectBoxTable: React.FC<GridSelectBoxTableProps> = ({
 }) => {
   const [localRows, setLocalRows] = useState(rows);
 
-  const handleCellChange = (rowIndex: number, colIndex: number, newValue: string) => {
+  const handleCellChange = (rowIndex: number, colIndex: number, newValue: number) => {
     const updated = [...localRows];
     updated[rowIndex] = {
       ...updated[rowIndex],
       data: [...updated[rowIndex].data],
     };
     updated[rowIndex].data[colIndex] = newValue;
-    updated[rowIndex].data[4] = (Number(updated[rowIndex].data[2]) + Number(updated[rowIndex].data[3])).toString();
+    updated[rowIndex].data[4] = Number(updated[rowIndex].data[2]) + Number(updated[rowIndex].data[3]);
     setLocalRows(updated);
     onChange?.(rowIndex, colIndex, newValue);
   };
@@ -214,7 +214,7 @@ export const GridSelectBoxTable: React.FC<GridSelectBoxTableProps> = ({
             {header?.map((data, index) => (
               <TableCell
                 key={index}
-                align="center"
+                align={typeof localRows[0].data[index] === 'number' ? 'right' : 'left'}
                 size="small"
                 sx={{
                   border:
@@ -259,7 +259,7 @@ export const GridSelectBoxTable: React.FC<GridSelectBoxTableProps> = ({
                         variant="standard"
                         value={cell}
                         type="number"
-                        onChange={(e) => handleCellChange(rowIndex, colIndex, e.target.value)}
+                        onChange={(e) => handleCellChange(rowIndex, colIndex, Number(e.target.value))}
                         sx={{
                           '& .MuiInputBase-input': {
                             textAlign: 'right',

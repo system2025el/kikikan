@@ -40,14 +40,11 @@ const EquipmentOrderDetail = () => {
   const selectStatusChange = (event: SelectChangeEvent) => {
     setSelectStatus(event.target.value);
   };
-  // const selectIssueBaseChange = (event: SelectChangeEvent) => {
-  //   setSelectIssueBase(event.target.value);
-  // };
   const selectReturnBaseChange = (event: SelectChangeEvent) => {
     setSelectReturnBase(event.target.value);
   };
 
-  const handleCellChange = (rowIndex: number, colIndex: number, newValue: string) => {
+  const handleCellChange = (rowIndex: number, colIndex: number, newValue: number) => {
     const updatedRows = [...rows];
     updatedRows[rowIndex].data[colIndex] = newValue;
     setRows(updatedRows);
