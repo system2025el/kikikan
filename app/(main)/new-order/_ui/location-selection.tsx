@@ -23,7 +23,6 @@ import { useState } from 'react';
 import { locationList } from '@/app/_lib/mock-data';
 
 import { MuiTablePagination } from '../../_ui/table-pagination';
-import { AreaSelectionDialog } from './area-selection-dialog';
 
 /** 新規受注の場所選択ダイアログ */
 export const LocationSelectDialog = (props: { handleCloseLocationDialog: () => void }) => {
@@ -68,9 +67,6 @@ export const LocationSelectDialog = (props: { handleCloseLocationDialog: () => v
             <Box display={'flex'} alignItems={'center'}>
               <TextField />
               <Button onClick={handleOpenDialog}>選択</Button>
-              <Dialog open={DialogOpen} fullScreen>
-                <AreaSelectionDialog handleClose={handleCloseDialog} />
-              </Dialog>
             </Box>
           </Stack>
         </Box>
