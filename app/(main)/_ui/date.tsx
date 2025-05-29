@@ -124,16 +124,11 @@ export const TwoDatePickers = (props: { sx?: object }) => {
           name="date"
           format="YYYY/MM/DD" // テキストエリア内のフォーマット
           slotProps={{
-            textField: { size: 'small' },
+            textField: { size: 'small', sx: { width: '15%', minWidth: 150, ...sx } },
             calendarHeader: { format: 'YYYY年MM月' },
           }} // カレンダーヘッダーのフォーマット
           defaultValue={today}
           views={['year', 'month', 'day']}
-          sx={{
-            width: '15%',
-            minWidth: 150,
-            ...sx,
-          }}
           className="MuiDateText"
         />
         ～
@@ -141,12 +136,11 @@ export const TwoDatePickers = (props: { sx?: object }) => {
           name="date"
           format="YYYY/MM/DD" // テキストエリア内のフォーマット
           slotProps={{
-            textField: { size: 'small' },
+            textField: { size: 'small', sx: { width: '15%', minWidth: 150, ...sx } },
             calendarHeader: { format: 'YYYY年MM月' },
           }} // カレンダーヘッダーのフォーマット
           defaultValue={today}
           views={['year', 'month', 'day']}
-          sx={{ width: '15%', minWidth: 150, ...sx }}
         />
       </LocalizationProvider>
     </>
@@ -190,14 +184,29 @@ export const RSuiteDateRangePicker = (props: Props) => {
     <>
       <style>
         {`
-          .custom-date-range-picker.rs-picker-disabled .rs-picker-toggle {
-            background-color: #000000 !important;
-            color: #ffffff !important;
+          .rs-input-group.rs-input-group-disabled {
+            color: black;
           }
 
-          .custom-date-range-picker.rs-picker-disabled .rs-picker-toggle-input {
-            background-color: #000000 !important;
-            color: #ffffff !important;
+          .rs-input-group input.rs-input ~ .rs-input-group-addon {
+            color: #9e9e9e;
+          }
+
+          .rs-input:disabled {
+            background-color: #e0e0e0;
+          }
+
+          .rs-picker-default.rs-picker .rs-input-group {
+            border-color: #bdbdbd;
+          }
+
+          .rs-picker-default.rs-picker-disabled .rs-input-group {
+            background-color: #e0e0e0;
+            border-color: #9e9e9e;
+          }
+
+          .rs-input-group.rs-input-group-inside-disabled .rs-input-group-addon {
+            background-color: #e0e0e0;
           }
         `}
       </style>
