@@ -107,8 +107,8 @@ export default DateX;
  * @param props sx スタイルを決めるオブジェクト
  * @returns {JSX.Element} MUIX DatePicker × 2
  */
-export const TwoDatePickers = (props: { sx?: object }) => {
-  const { sx } = props;
+export const TwoDatePickers = (props: { sx?: object; disabled?: boolean }) => {
+  const { sx, disabled } = props;
   return (
     <>
       <LocalizationProvider
@@ -124,7 +124,19 @@ export const TwoDatePickers = (props: { sx?: object }) => {
           name="date"
           format="YYYY/MM/DD" // テキストエリア内のフォーマット
           slotProps={{
-            textField: { size: 'small', sx: { width: '15%', minWidth: 150, ...sx } },
+            textField: {
+              size: 'small',
+              sx: {
+                width: '15%',
+                minWidth: 150,
+                ...sx,
+                bgcolor: disabled ? grey[300] : 'white',
+                '.Mui-disabled': {
+                  WebkitTextFillColor: 'black',
+                },
+                ...sx,
+              },
+            },
             calendarHeader: { format: 'YYYY年MM月' },
           }} // カレンダーヘッダーのフォーマット
           defaultValue={today}
@@ -136,7 +148,19 @@ export const TwoDatePickers = (props: { sx?: object }) => {
           name="date"
           format="YYYY/MM/DD" // テキストエリア内のフォーマット
           slotProps={{
-            textField: { size: 'small', sx: { width: '15%', minWidth: 150, ...sx } },
+            textField: {
+              size: 'small',
+              sx: {
+                width: '15%',
+                minWidth: 150,
+                ...sx,
+                bgcolor: disabled ? grey[300] : 'white',
+                '.Mui-disabled': {
+                  WebkitTextFillColor: 'black',
+                },
+                ...sx,
+              },
+            },
             calendarHeader: { format: 'YYYY年MM月' },
           }} // カレンダーヘッダーのフォーマット
           defaultValue={today}
