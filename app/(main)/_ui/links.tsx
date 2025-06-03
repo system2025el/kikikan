@@ -1,10 +1,17 @@
-'use client';
-
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import StopSharpIcon from '@mui/icons-material/StopSharp';
-import { Collapse, Link, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
-import { blue, lightBlue } from '@mui/material/colors';
+import {
+  alpha,
+  Collapse,
+  Link,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  useTheme,
+} from '@mui/material';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 
@@ -54,6 +61,8 @@ const loginList: MenuItem[] = [
 ];
 
 export default function NavLinks() {
+  const theme = useTheme();
+  const selectedBgColor = alpha(theme.palette.primary.light, 0.2);
   const pathname = usePathname();
 
   const isSelected = (url: string) => {
@@ -63,13 +72,13 @@ export default function NavLinks() {
     return false;
   };
 
-  const [orderOpen, setorderOpen] = useState(false);
-  const [printOpen, setprintOpen] = useState(false);
-  const [rateOpen, setrateOpen] = useState(false);
-  const [equipmentOpen, setequipmentOpen] = useState(false);
-  const [masterOpen, setmasterOpen] = useState(false);
-  const [settingOpen, setsettingOpen] = useState(false);
-  const [loginOpen, setroginOpen] = useState(false);
+  const [orderOpen, setorderOpen] = useState(true);
+  const [printOpen, setprintOpen] = useState(true);
+  const [rateOpen, setrateOpen] = useState(true);
+  const [equipmentOpen, setequipmentOpen] = useState(true);
+  const [masterOpen, setmasterOpen] = useState(true);
+  const [settingOpen, setsettingOpen] = useState(true);
+  const [loginOpen, setroginOpen] = useState(true);
 
   const orderClick = () => {
     setorderOpen(!orderOpen);
@@ -95,18 +104,23 @@ export default function NavLinks() {
 
   return (
     <List dense sx={{ pt: 0 }}>
-      <ListItemButton sx={{ bgcolor: blue[800] }} href="/dashboard">
+      <ListItemButton
+        href="/dashboard"
+        sx={{
+          backgroundColor: pathname === '/dashboard' ? selectedBgColor : '',
+        }}
+      >
         <ListItemIcon>
-          <StopSharpIcon sx={{ color: 'white' }} />
+          <StopSharpIcon />
         </ListItemIcon>
-        <ListItemText sx={{ color: 'white' }}>ダッシュボード</ListItemText>
+        <ListItemText sx={{ color: pathname === '/dashboard' ? 'primary.dark' : '' }}>ダッシュボード</ListItemText>
       </ListItemButton>
-      <ListItemButton onClick={orderClick} sx={{ bgcolor: blue[800] }}>
+      <ListItemButton onClick={orderClick}>
         <ListItemIcon>
-          <StopSharpIcon sx={{ color: 'white' }} />
+          <StopSharpIcon />
         </ListItemIcon>
-        <ListItemText sx={{ color: 'white' }}>受注管理</ListItemText>
-        {orderOpen ? <ExpandLess sx={styles.colorWhite} /> : <ExpandMore sx={styles.colorWhite} />}
+        <ListItemText>受注管理</ListItemText>
+        {orderOpen ? <ExpandLess /> : <ExpandMore />}
       </ListItemButton>
       <Collapse in={orderOpen} timeout="auto" unmountOnExit>
         <List component="div" disablePadding>
@@ -115,25 +129,22 @@ export default function NavLinks() {
               key={text.name}
               disablePadding
               sx={{
-                backgroundColor: isSelected(text.url) ? 'white' : '',
+                backgroundColor: isSelected(text.url) ? selectedBgColor : '',
               }}
             >
-              <ListItemButton href={text.url} onClick={orderClick} dense>
-                <ListItemText
-                  primary={text.name}
-                  sx={{ color: isSelected(text.url) ? lightBlue[700] : 'white', pl: 8 }}
-                />
+              <ListItemButton href={text.url} dense>
+                <ListItemText primary={text.name} sx={{ color: isSelected(text.url) ? 'primary.dark' : '', pl: 8 }} />
               </ListItemButton>
             </ListItem>
           ))}
         </List>
       </Collapse>
-      <ListItemButton onClick={printClick} sx={{ bgcolor: blue[800] }}>
+      <ListItemButton onClick={printClick}>
         <ListItemIcon>
-          <StopSharpIcon sx={{ color: 'white' }} />
+          <StopSharpIcon />
         </ListItemIcon>
-        <ListItemText sx={{ color: 'white' }}>プリントアウト</ListItemText>
-        {printOpen ? <ExpandLess sx={styles.colorWhite} /> : <ExpandMore sx={styles.colorWhite} />}
+        <ListItemText>プリントアウト</ListItemText>
+        {printOpen ? <ExpandLess /> : <ExpandMore />}
       </ListItemButton>
       <Collapse in={printOpen} timeout="auto" unmountOnExit>
         <List component="div" disablePadding>
@@ -142,76 +153,70 @@ export default function NavLinks() {
               key={text.name}
               disablePadding
               sx={{
-                backgroundColor: isSelected(text.url) ? 'white' : '',
+                backgroundColor: isSelected(text.url) ? selectedBgColor : '',
               }}
             >
-              <ListItemButton href={text.url} onClick={printClick} dense>
-                <ListItemText
-                  primary={text.name}
-                  sx={{ color: isSelected(text.url) ? lightBlue[700] : 'white', pl: 8 }}
-                />
+              <ListItemButton href={text.url} dense>
+                <ListItemText primary={text.name} sx={{ color: isSelected(text.url) ? 'primary.dark' : '', pl: 8 }} />
               </ListItemButton>
             </ListItem>
           ))}
         </List>
       </Collapse>
 
-      <ListItemButton onClick={rateClick} sx={{ bgcolor: blue[800] }}>
+      <ListItemButton onClick={rateClick}>
         <ListItemIcon>
-          <StopSharpIcon sx={styles.colorWhite} />
+          <StopSharpIcon />
         </ListItemIcon>
-        <ListItemText sx={styles.colorWhite}>稼働率</ListItemText>
-        {rateOpen ? <ExpandLess sx={styles.colorWhite} /> : <ExpandMore sx={styles.colorWhite} />}
+        <ListItemText>稼働率</ListItemText>
+        {rateOpen ? <ExpandLess /> : <ExpandMore />}
       </ListItemButton>
       <Collapse in={rateOpen} timeout="auto" unmountOnExit>
         <List component="div" disablePadding>
           <ListItem
             disablePadding
             sx={{
-              backgroundColor: pathname === '/kadouritu' ? 'white' : '',
+              backgroundColor: pathname === '/kadouritu' ? selectedBgColor : '',
             }}
           >
-            <ListItemButton href="/kadouritu" onClick={rateClick} dense>
-              <ListItemText
-                primary="稼働率"
-                sx={{ color: pathname === '/kadouritu' ? lightBlue[700] : 'white', pl: 8 }}
-              />
+            <ListItemButton href="/kadouritu" dense>
+              <ListItemText primary="稼働率" sx={{ color: pathname === '/kadouritu' ? 'primary.dark' : '', pl: 8 }} />
             </ListItemButton>
           </ListItem>
         </List>
       </Collapse>
 
-      <ListItemButton onClick={equipmentClick} sx={{ bgcolor: blue[800] }}>
+      <ListItemButton onClick={equipmentClick}>
         <ListItemIcon>
-          <StopSharpIcon sx={styles.colorWhite} />
+          <StopSharpIcon />
         </ListItemIcon>
-        <ListItemText sx={styles.colorWhite}>機材マスタ</ListItemText>
-        {equipmentOpen ? <ExpandLess sx={styles.colorWhite} /> : <ExpandMore sx={styles.colorWhite} />}
+        <ListItemText>機材マスタ</ListItemText>
+        {equipmentOpen ? <ExpandLess /> : <ExpandMore />}
       </ListItemButton>
       <Collapse in={equipmentOpen} timeout="auto" unmountOnExit>
         <List component="div" disablePadding>
           <ListItem
             disablePadding
             sx={{
-              backgroundColor: pathname === '/eqpmaster' ? 'white' : '',
+              backgroundColor: pathname === '/eqpmaster' ? selectedBgColor : '',
             }}
           >
-            <ListItemButton href="/eqpmaster" onClick={equipmentClick} dense>
+            <ListItemButton href="/eqpmaster" dense>
               <ListItemText
                 primary="機材マスタ"
-                sx={{ color: pathname === '/eqpmaster' ? lightBlue[700] : 'white', pl: 8 }}
+                sx={{ color: pathname === '/eqpmaster' ? 'primary.dark' : '', pl: 8 }}
               />
             </ListItemButton>
           </ListItem>
         </List>
       </Collapse>
 
-      <ListItemButton onClick={masterClick} sx={{ bgcolor: blue[800] }}>
+      <ListItemButton onClick={masterClick}>
         <ListItemIcon>
-          <StopSharpIcon sx={styles.colorWhite} />
+          <StopSharpIcon />
         </ListItemIcon>
-        <ListItemText sx={styles.colorWhite}>マスタ管理</ListItemText>
-        {masterOpen ? <ExpandLess sx={styles.colorWhite} /> : <ExpandMore sx={styles.colorWhite} />}
+        <ListItemText>マスタ管理</ListItemText>
+        {masterOpen ? <ExpandLess /> : <ExpandMore />}
       </ListItemButton>
       <Collapse in={masterOpen} timeout="auto" unmountOnExit>
         <List component="div" disablePadding>
@@ -220,26 +225,23 @@ export default function NavLinks() {
               key={text.name}
               disablePadding
               sx={{
-                backgroundColor: isSelected(text.url) ? 'white' : '',
+                backgroundColor: isSelected(text.url) ? selectedBgColor : '',
               }}
             >
-              <ListItemButton href={text.url} onClick={masterClick} dense>
-                <ListItemText
-                  primary={text.name}
-                  sx={{ color: isSelected(text.url) ? lightBlue[700] : 'white', pl: 8 }}
-                />
+              <ListItemButton href={text.url} dense>
+                <ListItemText primary={text.name} sx={{ color: isSelected(text.url) ? 'primary.dark' : '', pl: 8 }} />
               </ListItemButton>
             </ListItem>
           ))}
         </List>
       </Collapse>
 
-      <ListItemButton onClick={settingClick} sx={{ bgcolor: blue[800] }}>
+      <ListItemButton onClick={settingClick}>
         <ListItemIcon>
-          <StopSharpIcon sx={styles.colorWhite} />
+          <StopSharpIcon />
         </ListItemIcon>
-        <ListItemText sx={styles.colorWhite}>設定</ListItemText>
-        {settingOpen ? <ExpandLess sx={styles.colorWhite} /> : <ExpandMore sx={styles.colorWhite} />}
+        <ListItemText>設定</ListItemText>
+        {settingOpen ? <ExpandLess /> : <ExpandMore />}
       </ListItemButton>
       <Collapse in={settingOpen} timeout="auto" unmountOnExit>
         <List component="div" disablePadding>
@@ -248,26 +250,23 @@ export default function NavLinks() {
               key={text.name}
               disablePadding
               sx={{
-                backgroundColor: isSelected(text.url) ? 'white' : '',
+                backgroundColor: isSelected(text.url) ? selectedBgColor : '',
               }}
             >
-              <ListItemButton href={text.url} onClick={settingClick} dense>
-                <ListItemText
-                  primary={text.name}
-                  sx={{ color: isSelected(text.url) ? lightBlue[700] : 'white', pl: 8 }}
-                />
+              <ListItemButton href={text.url} dense>
+                <ListItemText primary={text.name} sx={{ color: isSelected(text.url) ? 'primary.dark' : '', pl: 8 }} />
               </ListItemButton>
             </ListItem>
           ))}
         </List>
       </Collapse>
 
-      <ListItemButton onClick={loginClick} sx={{ bgcolor: blue[800] }}>
+      <ListItemButton onClick={loginClick}>
         <ListItemIcon>
-          <StopSharpIcon sx={styles.colorWhite} />
+          <StopSharpIcon />
         </ListItemIcon>
-        <ListItemText sx={styles.colorWhite}>ログアウト</ListItemText>
-        {loginOpen ? <ExpandLess sx={styles.colorWhite} /> : <ExpandMore sx={styles.colorWhite} />}
+        <ListItemText>ログアウト</ListItemText>
+        {loginOpen ? <ExpandLess /> : <ExpandMore />}
       </ListItemButton>
       <Collapse in={loginOpen} timeout="auto" unmountOnExit>
         <List component="div" disablePadding>
@@ -276,14 +275,11 @@ export default function NavLinks() {
               key={text.name}
               disablePadding
               sx={{
-                backgroundColor: isSelected(text.url) ? 'white' : '',
+                backgroundColor: isSelected(text.url) ? selectedBgColor : '',
               }}
             >
-              <ListItemButton href={text.url} onClick={loginClick} dense>
-                <ListItemText
-                  primary={text.name}
-                  sx={{ color: isSelected(text.url) ? lightBlue[700] : 'white', pl: 8 }}
-                />
+              <ListItemButton href={text.url} dense>
+                <ListItemText primary={text.name} sx={{ color: isSelected(text.url) ? 'primary.dark' : '', pl: 8 }} />
               </ListItemButton>
             </ListItem>
           ))}
@@ -296,6 +292,6 @@ export default function NavLinks() {
 /** ------------------------スタイル----------------------------------- */
 const styles: { [key: string]: React.CSSProperties } = {
   colorWhite: {
-    color: 'white',
+    color: '',
   },
 };
