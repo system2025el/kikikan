@@ -5,7 +5,6 @@ import {
   AppBar as MuiAppBar,
   AppBarProps as MuiAppBarProps,
   Backdrop,
-  createTheme,
   CssBaseline,
   Divider,
   Drawer as MuiDrawer,
@@ -82,7 +81,7 @@ type Props = {
 };
 
 const Sidebar = ({ children }: Props) => {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
   const theme = useTheme();
 
   const toggleDrawer = () => {
@@ -93,7 +92,7 @@ const Sidebar = ({ children }: Props) => {
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
       {/**ヘッダー */}
-      <AppBar position="fixed" open={open} color="secondary">
+      <AppBar position="fixed" open={open} color="primary">
         <Toolbar>
           <IconButton color="inherit" onClick={toggleDrawer} edge="start" sx={{ mr: 2 }}>
             <MenuIcon />
@@ -102,7 +101,7 @@ const Sidebar = ({ children }: Props) => {
             RFID機材管理システム
           </Typography>
           <Typography margin={2} fontSize="small">
-            {BreadCrumbs()}
+            <BreadCrumbs />
           </Typography>
         </Toolbar>
       </AppBar>
@@ -119,7 +118,7 @@ const Sidebar = ({ children }: Props) => {
       <Drawer variant="persistent" anchor="left" open={open}>
         <Toolbar />
         <Divider />
-        <Box sx={{ overflow: 'auto', bgcolor: 'lightBlue[300]' }}>
+        <Box sx={{ overflow: 'auto' }}>
           <NavLinks />
         </Box>
       </Drawer>

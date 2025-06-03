@@ -1,20 +1,21 @@
 'use client';
 
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { Stack } from '@mui/material';
+import { alpha, Stack, useTheme } from '@mui/material';
 import Accordion from '@mui/material/Accordion';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
-import { grey } from '@mui/material/colors';
 import Typography from '@mui/material/Typography';
 import Link from 'next/link';
 
 export const Dashboard = () => {
+  const theme = useTheme();
+  const selectedBgColor = alpha(theme.palette.primary.main, 0.6);
   return (
     <>
       <Typography variant="h5">ダッシュボード</Typography>
       <Accordion defaultExpanded>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />} id="info" sx={{ bgcolor: grey[400] }}>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />} id="info" sx={{ bgcolor: selectedBgColor }}>
           <Typography variant="body1">お知らせ</Typography>
         </AccordionSummary>
         <AccordionDetails>
@@ -37,7 +38,7 @@ export const Dashboard = () => {
         </AccordionDetails>
       </Accordion>
       <Accordion defaultExpanded>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />} id="info" sx={{ bgcolor: grey[400] }}>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />} id="info" sx={{ bgcolor: selectedBgColor }}>
           <Typography variant="body1">在庫状況</Typography>
         </AccordionSummary>
         <AccordionDetails>

@@ -1,7 +1,6 @@
 'use client';
 
 import { useMediaQuery } from '@mui/material';
-import { grey, lightBlue } from '@mui/material/colors';
 import CssBaseline from '@mui/material/CssBaseline';
 import { jaJP } from '@mui/material/locale';
 import type { Palette } from '@mui/material/styles';
@@ -23,24 +22,9 @@ const lightTheme = createTheme(
     cssVariables,
     palette: {
       text: { disabled: 'black' },
-      primary: {
-        main: lightBlue[300],
-        contrastText: 'white',
-      },
-      secondary: {
-        main: grey[300],
-        contrastText: '#000',
-      },
       mode: 'light',
     },
     components: {
-      MuiDrawer: {
-        styleOverrides: {
-          paper: {
-            backgroundColor: lightBlue[300],
-          },
-        },
-      },
       MuiSelect: {
         defaultProps: {
           size: 'small',
@@ -81,6 +65,12 @@ const lightTheme = createTheme(
           sx: {
             bgcolor: 'white',
           },
+        },
+      },
+      MuiGrid2: {
+        defaultProps: {
+          display: 'flex',
+          alignItems: 'center',
         },
       },
     },
