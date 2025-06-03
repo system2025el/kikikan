@@ -179,7 +179,6 @@ type Props = {
  */
 export const RSuiteDateRangePicker = (props: Props) => {
   const { value, onChange, styles, disabled } = props;
-  console.log(value);
   return (
     <>
       <style>
