@@ -90,35 +90,44 @@ const NewOrder = () => {
   // const [rentalPeriod, setRentalPeriod] = useState<[Date, Date]>([new Date(), new Date()]);
   return (
     <Box>
+      {/* --------------------------------受注ヘッダー------------------------------------- */}
       <Box bgcolor={grey[300]}>
-        <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Typography margin={1}>受注ヘッダー</Typography>
-          <Box width={'40%'} textAlign={'end'}>
+        <Grid2 container display="flex" alignItems="center">
+          <Grid2 size={4}>
+            <Typography margin={1}>受注ヘッダー</Typography>
+          </Grid2>
+          <Grid2 size={4}>
             <Button sx={{ margin: 1 }}>編集</Button>
             <Button sx={{ margin: 1 }}>保存</Button>
-          </Box>
-          <Button color="error" sx={{ ml: '20%' }}>
-            ー削除
-          </Button>
-          <Button sx={{ margin: 1 }}>コピー</Button>
-        </Box>
-        <Box display="flex">
-          <Box sx={{ width: '55%' }} bgcolor={grey[200]}>
-            <Box sx={styles.container}>
-              <Typography marginRight={5} whiteSpace="nowrap">
-                受注番号
-              </Typography>
-              <TextField defaultValue={81694} disabled sx={{ bgcolor: grey[300] }}></TextField>
-              <Typography mx={2}>受注ステータス</Typography>
-              <FormControl size="small" sx={{ width: '20%' }}>
-                <Select value={selectStatus} onChange={statusChange} disabled sx={{ bgcolor: grey[300] }}>
-                  <MenuItem value="">
-                    <em>None</em>
-                  </MenuItem>
-                  <MenuItem value={'確定'}>確定</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
+          </Grid2>
+          <Grid2 size={4}>
+            <Button color="error" sx={{ margin: 1 }}>
+              ー削除
+            </Button>
+            <Button sx={{ margin: 1 }}>コピー</Button>
+          </Grid2>
+        </Grid2>
+        <Grid2 container spacing={{ xs: 0, sm: 0, md: 2 }}>
+          <Grid2 size={{ xs: 12, sm: 12, md: 7 }} bgcolor={grey[200]}>
+            <Grid2 container margin={2} spacing={2}>
+              <Grid2 display="flex" direction="row" alignItems="center" size={{ sm: 12, md: 5 }}>
+                <Typography marginRight={5} whiteSpace="nowrap">
+                  受注番号
+                </Typography>
+                <TextField defaultValue={81694} disabled sx={{ bgcolor: grey[300] }}></TextField>
+              </Grid2>
+              <Grid2 display="flex" direction="row" alignItems="center" size={{ sm: 12, md: 7 }}>
+                <Typography mr={2}>受注ステータス</Typography>
+                <FormControl size="small" sx={{ width: 120 }}>
+                  <Select value={selectStatus} onChange={statusChange} disabled sx={{ bgcolor: grey[300] }}>
+                    <MenuItem value="">
+                      <em>None</em>
+                    </MenuItem>
+                    <MenuItem value={'確定'}>確定</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid2>
+            </Grid2>
             <Box sx={styles.container}>
               <Typography marginRight={7}>受注日</Typography>
               <DateX disabled />
@@ -141,14 +150,14 @@ const NewOrder = () => {
                 受注終了日
               </Typography>
               <RSuiteDateRangePicker
-                styles={{ background: 'grey' }}
+                //styles={{ background: 'grey' }}
                 value={dateRange}
                 onChange={handleDateChange} /*val={rentalPeriod}*/
                 disabled
               />
             </Box>
-          </Box>
-          <Box sx={{ width: '45%' }} marginLeft={2} bgcolor={grey[200]}>
+          </Grid2>
+          <Grid2 size={{ xs: 12, sm: 12, md: 5 }} bgcolor={grey[200]}>
             <Box sx={styles.container}>
               <Typography marginRight={7}>公演名</Typography>
               <TextField disabled sx={{ width: '50%', bgcolor: grey[300] }}></TextField>
@@ -181,15 +190,15 @@ const NewOrder = () => {
               <Typography marginRight={7}>値引き</Typography>
               <TextField disabled sx={{ width: '30%', bgcolor: grey[300] }}></TextField>
             </Box>
-          </Box>
-        </Box>
+          </Grid2>
+        </Grid2>
       </Box>
       {/* --------------------------------受注明細（機材）------------------------------------- */}
       <Accordion sx={{ marginTop: 2, bgcolor: grey[300] }}>
         <AccordionSummary expandIcon={<ExpandLessIcon />} component="div">
-          <Grid2 container alignItems="center" pt={2} sx={{ width: '100%' }}>
-            <Grid2 size={3}>
-              <Typography margin={1}>受注明細（機材）</Typography>
+          <Grid2 container alignItems="center" pt={2} sx={{ width: '100%' }} spacing={1}>
+            <Grid2 size={{ sm: 12, md: 3 }}>
+              <Typography margin={1}>受注明細(機材)</Typography>
               <Button
                 href="/new-order/schedule"
                 onClick={(e) => {
@@ -199,12 +208,14 @@ const NewOrder = () => {
                 受注機材・スケジュール
               </Button>
             </Grid2>
-            <Grid2 size={4} display="flex" alignItems="center" justifyItems={'stretch'}>
+            <Grid2 size={{ xs: 12, sm: 12, md: 4 }} display="flex" alignItems="center" justifyItems={'stretch'}>
               <Box display="flex" sx={{ width: '100%' }} alignItems="center">
-                <Typography mx={1}>機材数</Typography>
+                <Typography mr={1}>機材数</Typography>
                 <TextField
                   sx={{
+                    mr: 2,
                     width: '10%',
+                    minWidth: '45px',
                     '& .MuiInputBase-input': {
                       textAlign: 'right',
                       padding: 1,
@@ -216,10 +227,11 @@ const NewOrder = () => {
                   }}
                   disabled
                 ></TextField>
-                <Typography mx={1}>合計金額</Typography>
+                <Typography mr={1}>合計金額</Typography>
                 <TextField
                   sx={{
-                    width: '40%',
+                    width: '25%',
+                    minWidth: '90px',
                     '& .MuiInputBase-input': {
                       textAlign: 'right',
                       padding: 1,
@@ -233,7 +245,7 @@ const NewOrder = () => {
                 ></TextField>
               </Box>
             </Grid2>
-            <Grid2 size={5} display={'flex'} justifyContent={'space-between'} px={2}>
+            <Grid2 size={{ xs: 12, sm: 12, md: 5 }} display="flex" justifyContent={'space-between'} px={{ md: 2 }}>
               <Box>
                 <Button
                   href="/new-order/equipment-order-detail"
@@ -273,9 +285,9 @@ const NewOrder = () => {
       {/* -------------------------車両----------------------------------- */}
       <Accordion sx={{ marginTop: 2, bgcolor: grey[300] }}>
         <AccordionSummary expandIcon={<ExpandLessIcon />} component="div">
-          <Grid2 container alignItems="center" pt={2} sx={{ width: '100%' }}>
-            <Grid2 size={3}>
-              <Typography margin={1}>（車両）</Typography>
+          <Grid2 container alignItems="center" pt={2} sx={{ width: '100%' }} spacing={1}>
+            <Grid2 size={{ xs: 12, sm: 12, md: 3 }}>
+              <Typography margin={1}>(車両)</Typography>
               <Button
                 href="/new-order/schedule"
                 onClick={(e) => {
@@ -285,12 +297,14 @@ const NewOrder = () => {
                 受注機材・スケジュール
               </Button>
             </Grid2>
-            <Grid2 size={2} alignItems="center" justifyItems={'stretch'}>
+            <Grid2 size={{ xs: 12, sm: 12, md: 4 }} alignItems="center">
               <Box display="flex" alignItems="center" sx={{ width: '100%' }}>
-                <Typography mx={1}>出庫車両数</Typography>
+                <Typography mr={1}>出庫車両数</Typography>
                 <TextField
                   sx={{
-                    width: '20%',
+                    mr: 2,
+                    width: '10%',
+                    minWidth: '45px',
                     '& .MuiInputBase-input': {
                       textAlign: 'right',
                       padding: 1,
@@ -302,14 +316,11 @@ const NewOrder = () => {
                   }}
                   disabled
                 ></TextField>
-              </Box>
-            </Grid2>
-            <Grid2 size={2} alignItems="center" justifyItems={'stretch'}>
-              <Box display="flex" alignItems="center" sx={{ width: '100%' }}>
-                <Typography mx={1}>入庫車両数</Typography>
+                <Typography mr={1}>入庫車両数</Typography>
                 <TextField
                   sx={{
-                    width: '20%',
+                    width: '10%',
+                    minWidth: '45px',
                     '& .MuiInputBase-input': {
                       textAlign: 'right',
                       padding: 1,
@@ -323,7 +334,7 @@ const NewOrder = () => {
                 ></TextField>
               </Box>
             </Grid2>
-            <Grid2 size={5} display={'flex'} justifyContent={'space-between'} px={2}>
+            <Grid2 size={{ xs: 12, sm: 12, md: 5 }} display="flex" justifyContent={'space-between'} px={{ md: 2 }}>
               <Box>
                 <Button
                   href="/new-order/vehicle-order-detail"

@@ -6,6 +6,8 @@ import { useEffect, useState } from 'react';
 
 import { RSuiteDateRangePicker, toISOStringWithTimezone } from '@/app/(main)/_ui/date';
 
+import { EquipmentData } from './equipment-order-detail';
+
 type TabPanelProps = {
   children?: React.ReactNode;
   index: string;
@@ -13,14 +15,18 @@ type TabPanelProps = {
 };
 
 type DateDialogProps = {
-  preparationRange: string[];
-  preparationMemo: string[];
-  RHRange: string[];
-  RHMemo: string[];
-  GPRange: string[];
-  GPMemo: string[];
-  actualRange: string[];
-  actualMemo: string[];
+  preparation: EquipmentData[];
+  RH: EquipmentData[];
+  GP: EquipmentData[];
+  actual: EquipmentData[];
+  // preparationRange: string[];
+  // preparationMemo: string[];
+  // RHRange: string[];
+  // RHMemo: string[];
+  // GPRange: string[];
+  // GPMemo: string[];
+  // actualRange: string[];
+  // actualMemo: string[];
   onClose: () => void;
   onSave: (
     preparationDates: string[],
@@ -45,14 +51,18 @@ const TabPanel = (props: TabPanelProps) => {
 };
 
 export const DateSelectDialog = ({
-  preparationRange,
-  preparationMemo,
-  RHRange,
-  RHMemo,
-  GPRange,
-  GPMemo,
-  actualRange,
-  actualMemo,
+  preparation,
+  RH,
+  GP,
+  actual,
+  // preparationRange,
+  // preparationMemo,
+  // RHRange,
+  // RHMemo,
+  // GPRange,
+  // GPMemo,
+  // actualRange,
+  // actualMemo,
   onClose,
   onSave,
 }: DateDialogProps) => {
@@ -84,8 +94,8 @@ export const DateSelectDialog = ({
     }
   };
 
-  const [preparationDates, setPreparationDates] = useState<string[]>(preparationRange);
-  const [inputPreparation, setInputPreparation] = useState<string[]>(preparationMemo);
+  const [preparationDates, setPreparationDates] = useState<string[]>(preparation.map((item) => item.date));
+  const [inputPreparation, setInputPreparation] = useState<string[]>(preparation.map((item) => item.memo));
   const handleInputPreparationChange = (index: number, value: string) => {
     const updatedInputs = [...inputPreparation];
     updatedInputs[index] = value;
@@ -98,8 +108,8 @@ export const DateSelectDialog = ({
     setInputPreparation(updatedInputs);
   };
 
-  const [RHDates, setRHDates] = useState<string[]>(RHRange);
-  const [inputRH, setInputRH] = useState<string[]>(RHMemo);
+  const [RHDates, setRHDates] = useState<string[]>(RH.map((item) => item.date));
+  const [inputRH, setInputRH] = useState<string[]>(RH.map((item) => item.memo));
   const handleInputRHChange = (index: number, value: string) => {
     const updatedInputs = [...inputRH];
     updatedInputs[index] = value;
@@ -112,8 +122,8 @@ export const DateSelectDialog = ({
     setInputRH(updatedInputs);
   };
 
-  const [GPDates, setGPDates] = useState<string[]>(GPRange);
-  const [inputGP, setInputGP] = useState<string[]>(GPMemo);
+  const [GPDates, setGPDates] = useState<string[]>(GP.map((item) => item.date));
+  const [inputGP, setInputGP] = useState<string[]>(GP.map((item) => item.memo));
   const handleInputGPChange = (index: number, value: string) => {
     const updatedInputs = [...inputGP];
     updatedInputs[index] = value;
@@ -126,8 +136,8 @@ export const DateSelectDialog = ({
     setInputGP(updatedInputs);
   };
 
-  const [actualDates, setActualDates] = useState<string[]>(actualRange);
-  const [inputActual, setInputActual] = useState<string[]>(actualMemo);
+  const [actualDates, setActualDates] = useState<string[]>(actual.map((item) => item.date));
+  const [inputActual, setInputActual] = useState<string[]>(actual.map((item) => item.memo));
   const handleInputActualChange = (index: number, value: string) => {
     const updatedInputs = [...inputActual];
     updatedInputs[index] = value;

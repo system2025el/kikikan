@@ -4,7 +4,9 @@ import {
   Box,
   Button,
   Dialog,
+  Divider,
   FormControl,
+  Grid2,
   MenuItem,
   Select,
   SelectChangeEvent,
@@ -24,6 +26,11 @@ import { getEquipmentRowBackgroundColor } from '@/app/(main)/new-order/schedule/
 
 import { DateSelectDialog } from './date-selection-dialog';
 import { EquipmentSelectionDialog } from './equipment-selection-dailog';
+
+export type EquipmentData = {
+  date: string;
+  memo: string;
+};
 
 const EquipmentOrderDetail = () => {
   const [selectStatus, setSelectStatus] = useState('準備中');
@@ -77,16 +84,44 @@ const EquipmentOrderDetail = () => {
     actualDates: string[],
     actualMemo: string[]
   ) => {
-    setPreparationDates(preparationDates);
-    setInputPreparation(preparationMemo);
-    setRHDates(RHDates);
-    setInputRH(RHMemo);
-    setGPDates(GPDates);
-    setInputGP(GPMemo);
-    setActualDates(actualDates);
-    setInputActual(actualMemo);
+    setPreparation(
+      preparationDates.map((date, index) => ({
+        date: date,
+        memo: preparationMemo[index] ?? '',
+      }))
+    );
+    setRH(
+      RHDates.map((date, index) => ({
+        date: date,
+        memo: RHMemo[index] ?? '',
+      }))
+    );
+    setGP(
+      GPDates.map((date, index) => ({
+        date: date,
+        memo: GPMemo[index] ?? '',
+      }))
+    );
+    setActual(
+      actualDates.map((date, index) => ({
+        date: date,
+        memo: actualMemo[index] ?? '',
+      }))
+    );
+    // setPreparationDates(preparationDates);
+    // setInputPreparation(preparationMemo);
+    // setRHDates(RHDates);
+    // setInputRH(RHMemo);
+    // setGPDates(GPDates);
+    // setInputGP(GPMemo);
+    // setActualDates(actualDates);
+    // setInputActual(actualMemo);
     setDateSelectionDialogOpne(false);
   };
+  const [preparation, setPreparation] = useState<EquipmentData[]>([]);
+  const [RH, setRH] = useState<EquipmentData[]>([]);
+  const [GP, setGP] = useState<EquipmentData[]>([]);
+  const [actual, setActual] = useState<EquipmentData[]>([]);
 
   const [preparationDates, setPreparationDates] = useState<string[]>([]);
   const [inputPreparation, setInputPreparation] = useState<string[]>([]);
@@ -106,20 +141,30 @@ const EquipmentOrderDetail = () => {
         <Typography margin={1}>受注明細（機材）</Typography>
         <BackButton label={'戻る'} />
       </Box>
-      <Box display="flex" sx={{ bgcolor: grey[200] }}>
-        <Box sx={{ width: '60%' }}>
-          <Box sx={styles.container}>
-            <Typography marginRight={3} whiteSpace="nowrap">
-              受注番号
-            </Typography>
-            <TextField defaultValue="81694" disabled sx={{ bgcolor: grey[300] }}></TextField>
-            <Typography mx={2} whiteSpace="nowrap">
-              受注ステータス
-            </Typography>
-            <TextField defaultValue="確定" disabled sx={{ bgcolor: grey[300] }}>
-              確定
-            </TextField>
-          </Box>
+      <Grid2 container display="flex" sx={{ bgcolor: grey[200] }}>
+        <Grid2 size={{ xs: 12, sm: 12, md: 7 }}>
+          <Grid2 container margin={2} spacing={1}>
+            <Grid2 display="flex" direction="row" alignItems="center" size={{ sm: 12, md: 5 }}>
+              <Typography marginRight={3} whiteSpace="nowrap">
+                受注番号
+              </Typography>
+              <TextField defaultValue="81694" disabled sx={{ bgcolor: grey[300] }}></TextField>
+            </Grid2>
+            <Grid2
+              display="flex"
+              direction="row"
+              alignItems="center"
+              size={{ sm: 12, md: 7 }}
+              sx={{ mt: { xs: 1, sm: 1, md: 0 } }}
+            >
+              <Typography mr={2} whiteSpace="nowrap">
+                受注ステータス
+              </Typography>
+              <TextField defaultValue="確定" disabled sx={{ bgcolor: grey[300] }}>
+                確定
+              </TextField>
+            </Grid2>
+          </Grid2>
           <Box sx={styles.container}>
             <Typography marginRight={5} whiteSpace="nowrap">
               受注日
@@ -132,9 +177,9 @@ const EquipmentOrderDetail = () => {
             </Typography>
             <TextField defaultValue="XXXXXXXX" disabled sx={{ bgcolor: grey[300] }}></TextField>
           </Box>
-        </Box>
-        <Box sx={{ width: '40%' }}>
-          <Box sx={styles.container}>
+        </Grid2>
+        <Grid2 size={{ xs: 12, sm: 12, md: 5 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', ml: 2, mt: { xs: 0, sm: 0, md: 2 } }}>
             <Typography marginRight={5} whiteSpace="nowrap">
               公演名
             </Typography>
@@ -152,8 +197,8 @@ const EquipmentOrderDetail = () => {
             </Typography>
             <TextField defaultValue="(株)シアターブレーン" disabled sx={{ bgcolor: grey[300] }}></TextField>
           </Box>
-        </Box>
-      </Box>
+        </Grid2>
+      </Grid2>
       <Box display={'flex'} marginTop={2} px={1} sx={{ bgcolor: grey[300] }} alignItems={'center'}>
         <Typography whiteSpace="nowrap" textAlign={'center'}>
           機材入力
@@ -162,23 +207,23 @@ const EquipmentOrderDetail = () => {
           <Button variant="contained" sx={{ margin: 1 }}>
             編集
           </Button>
-          <Button variant="contained" sx={{ margin: 1 }} onClick={() => console.log(selectedValues)}>
+          <Button variant="contained" sx={{ margin: 1 }} onClick={() => console.log(preparation)}>
             保存
           </Button>
         </Box>
       </Box>
       <Box display="flex" sx={{ bgcolor: grey[200] }}>
         <Box sx={{ width: '100%' }}>
-          <Box display="flex" alignItems="center" margin={1} marginLeft={17}>
-            <Button variant="contained" sx={{ marginRight: 4 }} onClick={() => handleOpenEqDialog()}>
+          <Box display="flex" alignItems="center" margin={1} marginLeft={{ xs: 8, sm: 12, md: 14, lg: 17 }}>
+            <Button variant="contained" onClick={() => handleOpenEqDialog()}>
               ＋ 機材追加
             </Button>
             <Dialog open={EqSelectionDialogOpen} fullScreen>
               <EquipmentSelectionDialog handleCloseDialog={handleCloseEqDialog} />
             </Dialog>
           </Box>
-          <Box sx={styles.container} width="70%">
-            <Typography marginRight={11} whiteSpace="nowrap">
+          <Box sx={styles.container} width="90%">
+            <Typography marginRight={{ xs: 2, sm: 6, md: 8, lg: 11 }} whiteSpace="nowrap">
               機材
             </Typography>
             <GridSelectBoxTable
@@ -196,66 +241,86 @@ const EquipmentOrderDetail = () => {
               selectIssueBaseChange={selectIssueBaseChange}
             />
           </Box>
-          <Box display="flex" alignItems="center" margin={1} marginLeft={2} marginTop={4} width="60%">
-            <Typography marginRight={9} whiteSpace="nowrap">
+          <Box display="flex" alignItems="center" mt={4}>
+            <Typography ml={2} whiteSpace="nowrap">
               出庫日
             </Typography>
-            <Box display="flex" flexDirection="column">
-              <DateX />
-              <DateX />
-            </Box>
-            <Box>
-              <Box display="flex" alignItems="center">
-                <Typography marginLeft={5} marginRight={2} whiteSpace="nowrap">
-                  時刻
-                </Typography>
-                <Time />
-              </Box>
-              <Box display="flex" alignItems="center">
-                <Typography marginLeft={5} marginRight={2} whiteSpace="nowrap">
-                  時刻
-                </Typography>
-                <Time />
-              </Box>
-            </Box>
-            <Box>
-              <Box display="flex" alignItems="center">
-                <Typography marginLeft={5} marginRight={2} whiteSpace="nowrap">
-                  作業場
-                </Typography>
-                <TextField defaultValue={'KICS'} sx={{ minWidth: 200 }} />
-              </Box>
-              <Box display="flex" alignItems="center">
-                <Typography marginLeft={5} marginRight={2} whiteSpace="nowrap">
-                  作業場
-                </Typography>
-                <TextField defaultValue={'YARD'} sx={{ minWidth: 200 }} />
-              </Box>
-            </Box>
+            <Grid2
+              container
+              //display="flex"
+              alignItems="center"
+              ml={{ xs: 3, sm: 9, md: 9, lg: 9 }}
+              spacing={{ xs: 2, sm: 2, md: 2, lg: 0 }}
+            >
+              <Grid2 size={{ xs: 12, sm: 12, md: 6, lg: 12 }} display={{ lg: 'flex' }} alignItems="center">
+                <Box display="flex" alignItems="center" mr={3}>
+                  <Typography marginRight={2} whiteSpace="nowrap">
+                    作業場
+                  </Typography>
+                  <TextField defaultValue={'KICS'} sx={{ width: 200 }} />
+                </Box>
+                <Box display="flex" alignItems="center" mr={3}>
+                  <Typography marginRight={{ xs: 4, sm: 4, md: 4, lg: 2 }} whiteSpace="nowrap">
+                    日付
+                  </Typography>
+                  <DateX />
+                </Box>
+                <Box display="flex" alignItems="center">
+                  <Typography marginRight={{ xs: 4, sm: 4, md: 4, lg: 2 }} whiteSpace="nowrap">
+                    時刻
+                  </Typography>
+                  <Time />
+                </Box>
+              </Grid2>
+              <Grid2 size={{ xs: 12, sm: 12, md: 6, lg: 12 }} display={{ lg: 'flex' }} alignItems="center">
+                <Box display="flex" alignItems="center" mr={3}>
+                  <Typography marginRight={2} whiteSpace="nowrap">
+                    作業場
+                  </Typography>
+                  <TextField defaultValue={'YARD'} sx={{ width: 200 }} />
+                </Box>
+                <Box display="flex" alignItems="center" mr={3}>
+                  <Typography marginRight={{ xs: 4, sm: 4, md: 4, lg: 2 }} whiteSpace="nowrap">
+                    日付
+                  </Typography>
+                  <DateX />
+                </Box>
+                <Box display="flex" alignItems="center">
+                  <Typography marginRight={{ xs: 4, sm: 4, md: 4, lg: 2 }} whiteSpace="nowrap">
+                    時刻
+                  </Typography>
+                  <Time />
+                </Box>
+              </Grid2>
+            </Grid2>
           </Box>
-          <Box sx={styles.container} width="60%">
-            <Typography marginRight={9} whiteSpace="nowrap">
-              入庫日
-            </Typography>
-            <Box>
-              <DateX />
-            </Box>
-            <Typography marginLeft={5} marginRight={2} whiteSpace="nowrap">
-              時刻
-            </Typography>
-            <Box>
-              <Time />
-            </Box>
-            <Typography marginLeft={5} marginRight={2} whiteSpace="nowrap">
-              作業場
-            </Typography>
-            <Box>
-              <FormControl size="small" sx={{ width: '25%', minWidth: 200 }}>
-                <Select value={selectReturnBase} onChange={selectReturnBaseChange}>
-                  <MenuItem value={'YARD'}>YARD</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
+          <Divider variant="middle" sx={{ mt: 2, mx: 4, display: { sm: 'block', md: 'none' } }} />
+          <Box sx={styles.container}>
+            <Typography whiteSpace="nowrap">入庫日</Typography>
+            <Grid2 display={{ lg: 'flex' }} alignItems="center" ml={{ xs: 3, sm: 9, md: 9, lg: 9 }}>
+              <Box display="flex" alignItems="center" mr={3}>
+                <Typography marginRight={2} whiteSpace="nowrap">
+                  作業場
+                </Typography>
+                <FormControl size="small" sx={{ minWidth: 200 }}>
+                  <Select value={selectReturnBase} onChange={selectReturnBaseChange}>
+                    <MenuItem value={'YARD'}>YARD</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
+              <Box display="flex" alignItems="center" mr={3}>
+                <Typography marginRight={{ xs: 4, sm: 4, md: 4, lg: 2 }} whiteSpace="nowrap">
+                  日付
+                </Typography>
+                <DateX />
+              </Box>
+              <Box display="flex" alignItems="center">
+                <Typography marginRight={{ xs: 4, sm: 4, md: 4, lg: 2 }} whiteSpace="nowrap">
+                  時刻
+                </Typography>
+                <Time />
+              </Box>
+            </Grid2>
           </Box>
           <Box sx={styles.container}>
             <Typography marginRight={7} whiteSpace="nowrap">
@@ -265,6 +330,7 @@ const EquipmentOrderDetail = () => {
               defaultValue="4"
               sx={{
                 width: '5%',
+                minWidth: '45px',
                 '& .MuiInputBase-input': {
                   textAlign: 'right',
                 },
@@ -273,41 +339,174 @@ const EquipmentOrderDetail = () => {
             日
           </Box>
           <Box sx={styles.container}>
-            <Typography marginRight={9} whiteSpace="nowrap">
+            <Typography marginRight={{ xs: 2, sm: 9, md: 9, lg: 9 }} whiteSpace="nowrap">
               本番日
             </Typography>
             <Button onClick={handleOpenDateDialog}>編集</Button>
             <Dialog open={dateSelectionDialogOpne} fullScreen sx={{ zIndex: 1201 }}>
               <DateSelectDialog
-                preparationRange={preparationDates}
-                preparationMemo={inputPreparation}
-                RHRange={RHDates}
-                RHMemo={inputRH}
-                GPRange={GPDates}
-                GPMemo={inputGP}
-                actualRange={actualDates}
-                actualMemo={inputActual}
+                preparation={preparation}
+                RH={RH}
+                GP={GP}
+                actual={actual}
+                // preparationRange={preparationDates}
+                // preparationMemo={inputPreparation}
+                // RHRange={RHDates}
+                // RHMemo={inputRH}
+                // GPRange={GPDates}
+                // GPMemo={inputGP}
+                // actualRange={actualDates}
+                // actualMemo={inputActual}
                 onClose={handleCloseDateDialog}
                 onSave={handleSave}
               />
             </Dialog>
           </Box>
-          <Button sx={{ color: 'white', bgcolor: 'purple', marginLeft: 17 }}>仕込</Button>
-          <Box display="flex" alignItems="center" mb={2} ml={28}>
-            <Box display="flex" flexDirection="column">
+          <Grid2 container spacing={1} ml={{ xs: 10, sm: 17, md: 17, lg: 17 }} py={2} width="70%">
+            <Grid2 size={12}>
+              <Button sx={{ color: 'white', bgcolor: 'purple' }}>仕込</Button>
+            </Grid2>
+            <Grid2 size={5} display="flex">
               <Typography>日付</Typography>
-              {preparationDates.map((date, index) => (
-                <Typography key={index}>{date}</Typography>
-              ))}
-            </Box>
-            <Box display="flex" flexDirection="column" ml={25}>
+            </Grid2>
+            <Grid2 size={7} display="flex">
               <Typography>メモ</Typography>
-              {inputPreparation.map((memo, index) => (
-                <Typography key={index}>{memo}</Typography>
-              ))}
-            </Box>
-          </Box>
-          <Button sx={{ color: 'white', bgcolor: 'orange', marginLeft: 17 }}>RH</Button>
+            </Grid2>
+          </Grid2>
+          <Grid2
+            container
+            display="flex"
+            flexDirection="column"
+            spacing={1}
+            ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
+            width="70%"
+          >
+            {preparation.map((data, index) => (
+              <Grid2 key={index} container display="flex" flexDirection="row">
+                <Grid2 size={5}>
+                  <Typography>{data.date}</Typography>
+                </Grid2>
+                <Grid2 size={7}>
+                  <Typography sx={{ wordBreak: 'break-word' }}>{data.memo}</Typography>
+                </Grid2>
+              </Grid2>
+            ))}
+          </Grid2>
+          <Grid2
+            container
+            display="flex"
+            flexDirection="row"
+            spacing={1}
+            ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
+            py={2}
+            width="70%"
+          >
+            <Grid2 size={12}>
+              <Button sx={{ color: 'white', bgcolor: 'orange' }}>RH</Button>
+            </Grid2>
+            <Grid2 size={5}>
+              <Typography>日付</Typography>
+            </Grid2>
+            <Grid2 size={7}>
+              <Typography>メモ</Typography>
+            </Grid2>
+          </Grid2>
+          <Grid2
+            container
+            display="flex"
+            flexDirection="column"
+            spacing={1}
+            ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
+            width="70%"
+          >
+            {RH.map((data, index) => (
+              <Grid2 key={index} container display="flex" flexDirection="row">
+                <Grid2 size={5}>
+                  <Typography>{data.date}</Typography>
+                </Grid2>
+                <Grid2 size={7}>
+                  <Typography sx={{ wordBreak: 'break-word' }}>{data.memo}</Typography>
+                </Grid2>
+              </Grid2>
+            ))}
+          </Grid2>
+          <Grid2
+            container
+            display="flex"
+            flexDirection="row"
+            spacing={1}
+            ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
+            py={2}
+            width="70%"
+          >
+            <Grid2 size={12}>
+              <Button sx={{ color: 'white', bgcolor: 'green' }}>GP</Button>
+            </Grid2>
+            <Grid2 size={5}>
+              <Typography>日付</Typography>
+            </Grid2>
+            <Grid2 size={7}>
+              <Typography>メモ</Typography>
+            </Grid2>
+          </Grid2>
+          <Grid2
+            container
+            display="flex"
+            flexDirection="column"
+            spacing={1}
+            ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
+            width="70%"
+          >
+            {GP.map((data, index) => (
+              <Grid2 key={index} container display="flex" flexDirection="row">
+                <Grid2 size={5}>
+                  <Typography>{data.date}</Typography>
+                </Grid2>
+                <Grid2 size={7}>
+                  <Typography sx={{ wordBreak: 'break-word' }}>{data.memo}</Typography>
+                </Grid2>
+              </Grid2>
+            ))}
+          </Grid2>
+          <Grid2
+            container
+            display="flex"
+            flexDirection="row"
+            spacing={1}
+            ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
+            py={2}
+            width="70%"
+          >
+            <Grid2 size={12}>
+              <Button sx={{ color: 'white', bgcolor: 'pink' }}>本番</Button>
+            </Grid2>
+            <Grid2 size={5}>
+              <Typography>日付</Typography>
+            </Grid2>
+            <Grid2 size={7}>
+              <Typography>メモ</Typography>
+            </Grid2>
+          </Grid2>
+          <Grid2
+            container
+            display="flex"
+            flexDirection="column"
+            spacing={1}
+            ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
+            width="70%"
+          >
+            {actual.map((data, index) => (
+              <Grid2 key={index} container display="flex" flexDirection="row">
+                <Grid2 size={5}>
+                  <Typography>{data.date}</Typography>
+                </Grid2>
+                <Grid2 size={7}>
+                  <Typography sx={{ wordBreak: 'break-word' }}>{data.memo}</Typography>
+                </Grid2>
+              </Grid2>
+            ))}
+          </Grid2>
+          {/* <Button sx={{ color: 'white', bgcolor: 'orange', marginLeft: 17 }}>RH</Button>
           <Box display="flex" alignItems="center" mb={2} ml={28}>
             <Box display="flex" flexDirection="column">
               <Typography>日付</Typography>
@@ -351,12 +550,12 @@ const EquipmentOrderDetail = () => {
                 <Typography key={index}>{memo}</Typography>
               ))}
             </Box>
-          </Box>
+          </Box> */}
           <Box display="flex" alignItems="center" margin={1} marginLeft={2} marginTop={4}>
             <Typography marginRight={1} whiteSpace="nowrap">
               受注機材ステータス
             </Typography>
-            <FormControl size="small" sx={{ width: '10%' }}>
+            <FormControl size="small" sx={{ width: '10%', minWidth: 150 }}>
               <Select value={selectStatus} onChange={selectStatusChange}>
                 <MenuItem value={'準備中'}>準備中</MenuItem>
                 <MenuItem value={'作業中'}>作業中</MenuItem>
