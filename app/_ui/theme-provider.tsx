@@ -67,12 +67,6 @@ const lightTheme = createTheme(
           },
         },
       },
-      MuiGrid2: {
-        defaultProps: {
-          display: 'flex',
-          alignItems: 'center',
-        },
-      },
     },
   },
   jaJP
