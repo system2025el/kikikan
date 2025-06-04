@@ -1,10 +1,14 @@
+import SearchIcon from '@mui/icons-material/Search';
 import {
   Box,
   Button,
   Checkbox,
+  Container,
   Dialog,
   DialogContent,
   DialogTitle,
+  Divider,
+  Grid2,
   Paper,
   Stack,
   Table,
@@ -61,41 +65,45 @@ export const EquipmentSelectionDialog = (props: { handleCloseDialog: () => void 
   };
   return (
     <>
-      <DialogTitle
-        display={'flex'}
-        marginTop={2}
-        p={1}
-        sx={{ bgcolor: grey[400] }}
-        alignItems={'center'}
-        justifyContent={'space-between'}
-      >
-        <Typography whiteSpace="nowrap" textAlign={'center'}>
-          機材選択
-        </Typography>
-        <Button onClick={() => handleCloseDialog()}>戻る</Button>
-      </DialogTitle>
-      <Box p={1} sx={{ bgcolor: grey[200] }}>
-        <Stack justifyContent="space-between" mx={1}>
-          <Typography ml={1}>検索</Typography>
-          <Button>検索</Button>
-        </Stack>
-        <Stack mx={1}>
-          <Typography>キーワード</Typography>
-          <TextField name="eqsearch" />
-        </Stack>
-      </Box>
-      <Box display={'flex'} mt={2} p={2} sx={{ bgcolor: grey[200] }} justifyContent={'space-between'}>
-        <Box></Box>
-        <TextField sx={{ width: '2%' }} />
-        <Button onClick={() => handleClickEqSelected()}>確定</Button>
-        <Dialog open={bundleDialogOpen} onClose={() => setBundleDialogOpen(false)}>
-          <BundleDialog handleClose={handleCloseBundle} />
-        </Dialog>
-      </Box>
-      <Box display={'flex'} px={2} pb={2} sx={{ bgcolor: grey[200] }} justifyContent={'space-between'}>
-        <EquipmentCategoriesTable selected={selectedCategory} handleClick={handleClickCategory} />
-        <EquipmentTable eqSelected={eqSelected} handleSelect={handleClick} categoryID={selectedCategory} />
-      </Box>
+      <Container disableGutters sx={{ p: 3, maxHeight: '100vh' }} maxWidth={'xl'}>
+        <Paper variant="outlined">
+          <Box width={'100%'} display={'flex'} p={2} justifyContent={'space-between'} alignItems={'center'}>
+            <Typography>機材選択</Typography>
+            <Button onClick={() => handleCloseDialog()}>戻る</Button>
+          </Box>
+          <Divider />
+          <Box width={'100%'} p={2}>
+            <Stack justifyContent={'space-between'}>
+              <Typography variant="body2">検索</Typography>
+              <Button>
+                <SearchIcon />
+                検索
+              </Button>
+            </Stack>
+            <Stack mx={1}>
+              <Typography>キーワード</Typography>
+              <TextField name="eqsearch" />
+            </Stack>
+          </Box>
+        </Paper>
+        <Box display={'flex'} p={2} justifyContent={'space-between'}>
+          <Box></Box>
+          <TextField sx={{ width: '2%' }} />
+          <Button onClick={() => handleClickEqSelected()}>確定</Button>
+          <Dialog open={bundleDialogOpen} onClose={() => setBundleDialogOpen(false)}>
+            <BundleDialog handleClose={handleCloseBundle} />
+          </Dialog>
+        </Box>
+
+        <Grid2 container display={'flex'} pb={2} spacing={1} justifyContent={'space-between'}>
+          <Grid2 size={5}>
+            <EquipmentCategoriesTable selected={selectedCategory} handleClick={handleClickCategory} />
+          </Grid2>
+          <Grid2 size={7}>
+            <EquipmentTable eqSelected={eqSelected} handleSelect={handleClick} categoryID={selectedCategory} />
+          </Grid2>
+        </Grid2>
+      </Container>
     </>
   );
 };
@@ -129,7 +137,7 @@ const BundleDialog = (props: { handleClose: () => void }) => {
       </DialogTitle>
       <DialogContent>
         <TableContainer component={Paper} sx={{ width: 500 }}>
-          <Table>
+          <Table stickyHeader padding="none">
             <TableHead>
               <TableRow>
                 <TableCell padding="checkbox"></TableCell>

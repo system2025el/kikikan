@@ -1,5 +1,6 @@
 'use client';
 
+import { alpha, useTheme } from '@mui/material';
 import Box from '@mui/material/Box';
 import { lightBlue } from '@mui/material/colors';
 import Paper from '@mui/material/Paper';
@@ -19,7 +20,7 @@ const EnhancedTableHead = () => {
   return (
     <TableHead>
       <TableRow>
-        <TableCell>部門</TableCell>
+        <TableCell sx={{ bgcolor: 'primary.light' }}>部門</TableCell>
       </TableRow>
     </TableHead>
   );
@@ -27,10 +28,12 @@ const EnhancedTableHead = () => {
 
 export const EquipmentCategoriesTable = (props: { selected: number; handleClick: (id: number) => void }) => {
   const { selected, handleClick } = props;
+  const theme = useTheme();
+  const selectedColor = alpha(theme.palette.primary.light, 0.4);
 
   return (
-    <TableContainer component={Paper} sx={{ width: '38%', height: 600 }}>
-      <Table stickyHeader>
+    <TableContainer component={Paper} variant="outlined" square sx={{ height: '65vh' }}>
+      <Table stickyHeader padding="none">
         <EnhancedTableHead />
         <TableBody>
           {eqCategories.map((row) => {
@@ -40,7 +43,7 @@ export const EquipmentCategoriesTable = (props: { selected: number; handleClick:
                 onClick={() => handleClick(row.id)}
                 tabIndex={-1}
                 key={row.id}
-                sx={{ cursor: 'pointer', bgcolor: selected === row.id ? lightBlue[300] : '' }}
+                sx={{ cursor: 'pointer', bgcolor: selected === row.id ? selectedColor : '' }}
               >
                 <TableCell component="th" scope="row">
                   {row.name}
