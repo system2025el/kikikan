@@ -68,70 +68,74 @@ export const OrderList = () => {
             <SearchIcon />
           </Button>
         </Stack>
-        <Grid2 container mt={1} columns={7}>
-          <Grid2 size={{ xs: 7, sm: 7, md: 'grow' }}>
-            <FormControl sx={{ minWidth: '80%' }}>
-              <InputLabel id="search">検索条件</InputLabel>
-              <Select
-                labelId="search"
-                label="検索条件"
-                onChange={handleSelect}
-                value={criteria}
-                sx={{ bgcolor: 'white' }}
-              >
-                <MenuItem value="出庫日が">出庫日が</MenuItem>
-                <MenuItem value="入庫日が">入庫日が</MenuItem>
-              </Select>
+
+        <Grid2 size={{ sm: 'grow' }}>
+          <FormControl sx={{ minWidth: '40%' }}>
+            <InputLabel id="search">検索条件</InputLabel>
+            <Select
+              labelId="search"
+              label="検索条件"
+              onChange={handleSelect}
+              value={criteria}
+              sx={{ bgcolor: 'white' }}
+            >
+              <MenuItem value="出庫日が">出庫日が</MenuItem>
+              <MenuItem value="入庫日が">入庫日が</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid2>
+        <Grid2 container>
+          <Grid2 size={{ sm: 12, md: 12 }}>
+            <FormControl>
+              <Box display={'flex'} alignItems={'center'}>
+                <RadioGroup defaultValue={'past'} row>
+                  {radioData.map((data) => (
+                    <FormControlLabel
+                      key={data.value}
+                      value={data.value}
+                      control={<Radio />}
+                      onChange={() => handleChange(data.value)}
+                      label={data.label}
+                    />
+                  ))}
+                </RadioGroup>
+              </Box>
             </FormControl>
           </Grid2>
-          <Grid2 container size={{ xs: 7, sm: 7, md: 6 }}>
-            <Grid2 size={{ xs: 12, sm: 12, md: 4 }}>
-              <FormControl>
-                <Box display={'flex'} alignItems={'center'}>
-                  <RadioGroup defaultValue={'past'} row>
-                    {radioData.map((data) => (
-                      <FormControlLabel
-                        key={data.value}
-                        value={data.value}
-                        control={<Radio />}
-                        onChange={() => handleChange(data.value)}
-                        label={data.label}
-                      />
-                    ))}
-                  </RadioGroup>
-                </Box>
+          {valIsSelect ? (
+            <Grid2 justifyContent={'end'} size={{ sm: 12, md: 12, lg: 12, xl: 12 }}>
+              <TwoDatePickers />
+            </Grid2>
+          ) : (
+            ''
+          )}
+        </Grid2>
+
+        <Grid2 container spacing={1} mt={1}>
+          <Grid2 container display={'flex'} alignItems={'center'} size={{ sm: 12, md: 7 }} spacing={1}>
+            <Grid2 size={{ sm: 4 }} justifyItems={'end'}>
+              <Typography noWrap>顧客</Typography>
+            </Grid2>
+            <Grid2 size={{ sm: 8 }}>
+              <FormControl sx={{ ml: 1 }}>
+                <Select value={customer} sx={{ minWidth: 300, bgcolor: 'white' }} onChange={handleCustomerSelect}>
+                  {customers.map((customer) => (
+                    <MenuItem key={customer.id} value={customer.name}>
+                      {customer.name}
+                    </MenuItem>
+                  ))}
+                </Select>
               </FormControl>
             </Grid2>
-            {valIsSelect ? (
-              <Grid2 size={{ xs: 12, sm: 12, md: 3, lg: 3, xl: 3 }}>
-                <TwoDatePickers />
-              </Grid2>
-            ) : (
-              ''
-            )}
           </Grid2>
-        </Grid2>
-        <Grid2 container spacing={1} pt={1}>
-          <Grid2 size={{ xs: 12, sm: 12, md: 5 }} spacing={1}>
-            <Typography>顧客</Typography>
-            <FormControl sx={{ ml: 1 }}>
-              <Select value={customer} sx={{ minWidth: 300, bgcolor: 'white' }} onChange={handleCustomerSelect}>
-                {customers.map((customer) => (
-                  <MenuItem key={customer.id} value={customer.name}>
-                    {customer.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid2>
-          <Grid2>
-            <Typography sx={{ pl: { xs: 0, sm: 0, md: 2 } }}>ソート</Typography>
+          <Grid2 display={'flex'} alignItems={'center'}>
+            <Typography sx={{ pl: { xs: 0, sm: 0, md: 5 } }}>ソート</Typography>
             <Select value={custSort} onChange={handleCustSortSelect} sx={{ bgcolor: 'white', ml: 1 }}>
               <MenuItem value="顧客名簿">顧客名簿</MenuItem>
             </Select>
           </Grid2>
         </Grid2>
-        <Stack pt={1}>
+        <Stack mt={1}>
           <Typography>受注ステータス</Typography>
           <FormControl>
             <Select value={orderStatus} onChange={handleOrder} sx={{ minWidth: 80, bgcolor: 'white' }}>
@@ -140,15 +144,15 @@ export const OrderList = () => {
           </FormControl>
         </Stack>
         <Grid2 container mt={1} spacing={1}>
-          <Grid2 size={{ xs: 12, sm: 12, md: 4.5 }}>
+          <Grid2 display={'flex'} alignItems={'center'} size={{ sm: 12, md: 4.5 }}>
             <Typography>公演名</Typography>
             <TextField sx={{ bgcolor: 'white', ml: 1 }} />
           </Grid2>
-          <Grid2 container size={{ xs: 12, sm: 12, md: 'grow' }}>
-            <Grid2 size={{ xs: 12, sm: 12, md: 3.5 }}>
+          <Grid2 container size={{ sm: 12, md: 'grow' }}>
+            <Grid2 display={'flex'} alignItems={'center'} size={{ sm: 12, md: 3.5 }}>
               <Typography>受注開始日～終了日</Typography>
             </Grid2>
-            <Grid2 size={{ xs: 12, sm: 12, md: 5 }}>
+            <Grid2 display={'flex'} alignItems={'center'} size={{ sm: 12, md: 5 }}>
               <TwoDatePickers sx={{ bgcolor: 'white' }} />
             </Grid2>
           </Grid2>
