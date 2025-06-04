@@ -31,6 +31,15 @@ const lightTheme = createTheme(
           whiteSpace: 'nowrap',
         },
       },
+      MuiOutlinedInput: {
+        styleOverrides: {
+          root: {
+            '&.Mui-disabled': {
+              backgroundColor: grey[200], // 任意のカラー
+            },
+          },
+        },
+      },
       MuiSelect: {
         defaultProps: {
           size: 'small',
@@ -71,16 +80,6 @@ const lightTheme = createTheme(
           size: 'small',
           sx: {
             bgcolor: 'white',
-          },
-        },
-      },
-      MuiInputBase: {
-        styleOverrides: {
-          root: {
-            backgroundColor: 'white',
-            '&.Mui-disabled': {
-              backgroundColor: grey[300],
-            },
           },
         },
       },
