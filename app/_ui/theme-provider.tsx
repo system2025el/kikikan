@@ -1,6 +1,7 @@
 'use client';
 
 import { useMediaQuery } from '@mui/material';
+import { grey } from '@mui/material/colors';
 import CssBaseline from '@mui/material/CssBaseline';
 import { jaJP } from '@mui/material/locale';
 import type { Palette } from '@mui/material/styles';
@@ -25,6 +26,15 @@ const lightTheme = createTheme(
       mode: 'light',
     },
     components: {
+      MuiOutlinedInput: {
+        styleOverrides: {
+          root: {
+            '&.Mui-disabled': {
+              backgroundColor: grey[200], // 任意のカラー
+            },
+          },
+        },
+      },
       MuiSelect: {
         defaultProps: {
           size: 'small',
@@ -68,6 +78,7 @@ const lightTheme = createTheme(
           },
         },
       },
+
       MuiPagination: {
         defaultProps: {
           size: 'small',
