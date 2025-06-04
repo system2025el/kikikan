@@ -18,7 +18,7 @@ import {
   Typography,
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import { orderList, quotaionList } from '@/app/_lib/mock-data';
 
@@ -27,9 +27,16 @@ import { MuiTablePagination } from '../../_ui/table-pagination';
 /** 見積一覧テーブルのコンポーネント */
 export const QuotaionListTable = () => {
   const [page, setPage] = useState(1);
-  const rowsPerPage = 20;
+  const rowsPerPage = 50;
 
-  const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - quotaionList.length) : 0;
+  // 表示するデータ
+  const list = useMemo(
+    () =>
+      rowsPerPage > 0 ? quotaionList.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage) : quotaionList,
+    [page, rowsPerPage]
+  );
+  // テーブル最後のページ用の空データの長さ
+  const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - list.length) : 0;
 
   return (
     <>
@@ -67,7 +74,7 @@ export const QuotaionListTable = () => {
             </Grid2>
           </Grid2>
         </Grid2>
-        <TableContainer component={Paper} square sx={{ maxHeight: 600, mt: 1 }}>
+        <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 1 }}>
           <Table stickyHeader padding="none">
             <TableHead>
               <TableRow>
@@ -82,12 +89,9 @@ export const QuotaionListTable = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {(rowsPerPage > 0
-                ? quotaionList.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                : quotaionList
-              ).map((quotation) => (
+              {list.map((quotation) => (
                 <TableRow key={quotation.id}>
-                  <TableCell>
+                  <TableCell padding="checkbox">
                     <Checkbox color="primary" />
                   </TableCell>
                   <TableCell>

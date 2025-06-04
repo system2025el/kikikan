@@ -20,7 +20,7 @@ import {
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import Form from 'next/form';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { customers } from '@/app/_lib/mock-data';
 
@@ -30,9 +30,15 @@ import { MuiTablePagination } from '../../_ui/table-pagination';
 export const CustomerSelectionDialog = (props: { handleCloseCustDialog: () => void }) => {
   const { handleCloseCustDialog } = props;
   const [page, setPage] = useState(1);
-  const rowsPerPage = 20;
+  const rowsPerPage = 50;
 
-  const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - customers.length) : 0;
+  // 表示するデータ
+  const list = useMemo(
+    () => (rowsPerPage > 0 ? customers.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage) : customers),
+    [page, rowsPerPage]
+  );
+  // テーブル最後のページ用の空データの長さ
+  const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - list.length) : 0;
 
   return (
     <>
@@ -86,7 +92,7 @@ export const CustomerSelectionDialog = (props: { handleCloseCustDialog: () => vo
         <Stack mt={1} mx={0.5} justifyContent={'space-between'}>
           <MuiTablePagination arrayList={customers} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
         </Stack>
-        <TableContainer component={Paper} square sx={{ maxHeight: 800, mt: 1 }}>
+        <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 1 }}>
           <Table stickyHeader padding="none">
             <TableHead>
               <TableRow>
@@ -98,10 +104,7 @@ export const CustomerSelectionDialog = (props: { handleCloseCustDialog: () => vo
               </TableRow>
             </TableHead>
             <TableBody>
-              {(rowsPerPage > 0
-                ? customers.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                : customers
-              ).map((customer) => (
+              {list.map((customer) => (
                 <TableRow key={customer.name}>
                   <TableCell>{customer.name}</TableCell>
                   <TableCell>

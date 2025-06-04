@@ -13,7 +13,6 @@ export const VehiclesMaster = () => {
           <Typography>車両マスタ</Typography>
           <BackButton sx={{ ml: '40%' }} label={'戻る'} />
         </Box>
-        <Divider />
       </Paper>
       <VehiclesMasterTable />
     </Container>
