@@ -1,6 +1,6 @@
 'use client';
 
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
   Accordion,
   AccordionDetails,
@@ -195,7 +195,7 @@ const NewOrder = () => {
       </Box>
       {/* --------------------------------受注明細（機材）------------------------------------- */}
       <Accordion sx={{ marginTop: 2, bgcolor: grey[300] }}>
-        <AccordionSummary expandIcon={<ExpandLessIcon />} component="div">
+        <AccordionSummary expandIcon={<ExpandMoreIcon />} component="div">
           <Grid2 container alignItems="center" pt={2} sx={{ width: '100%' }} spacing={1}>
             <Grid2 size={{ sm: 12, md: 3 }}>
               <Typography margin={1}>受注明細(機材)</Typography>
@@ -284,7 +284,7 @@ const NewOrder = () => {
       </Accordion>
       {/* -------------------------車両----------------------------------- */}
       <Accordion sx={{ marginTop: 2, bgcolor: grey[300] }}>
-        <AccordionSummary expandIcon={<ExpandLessIcon />} component="div">
+        <AccordionSummary expandIcon={<ExpandMoreIcon />} component="div">
           <Grid2 container alignItems="center" pt={2} sx={{ width: '100%' }} spacing={1}>
             <Grid2 size={{ xs: 12, sm: 12, md: 3 }}>
               <Typography margin={1}>(車両)</Typography>
