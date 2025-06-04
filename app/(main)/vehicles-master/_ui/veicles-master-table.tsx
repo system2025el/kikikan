@@ -3,9 +3,11 @@ import { CheckBox } from '@mui/icons-material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import {
+  alpha,
   Box,
   Button,
   Dialog,
+  Divider,
   Grid2,
   Paper,
   Table,
@@ -15,9 +17,10 @@ import {
   TableHead,
   TableRow,
   Typography,
+  useTheme,
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { vehicles } from '@/app/_lib/mock-data';
 
@@ -27,9 +30,7 @@ import { AddVehicleDialog } from './add-vehicle-dialog';
 /** 車両マスタのテーブルコンポーネント */
 export const VehiclesMasterTable = () => {
   const [page, setPage] = useState(1);
-  const rowsPerPage = 20;
-
-  const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - vehicles.length) : 0;
+  const rowsPerPage = 50;
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const handleOpenNewVehicle = () => {
@@ -38,11 +39,21 @@ export const VehiclesMasterTable = () => {
   const handleCloseNewVehicle = () => {
     setDialogOpen(false);
   };
+
+  // 表示するデータ
+  const list = useMemo(
+    () => (rowsPerPage > 0 ? vehicles.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage) : vehicles),
+    [page, rowsPerPage]
+  );
+  // テーブル最後のページ用の空データの長さ
+  const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - list.length) : 0;
+
   return (
     <Box>
       <Typography pt={2} pl={2}>
         車両一覧
       </Typography>
+      <Divider />
       <Grid2 container mt={1} mx={0.5} justifyContent={'space-between'}>
         <Grid2 spacing={1}>
           <MuiTablePagination arrayList={vehicles} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
@@ -68,18 +79,15 @@ export const VehiclesMasterTable = () => {
         <Table stickyHeader padding="none">
           <TableHead>
             <TableRow>
-              <TableCell sx={{ bgcolor: 'primary.light' }}></TableCell>
+              <TableCell sx={{ bgcolor: 'primary.light', color: 'primary.contrastText' }}></TableCell>
               <TableCell sx={{ bgcolor: 'primary.light' }}>車種</TableCell>
               <TableCell sx={{ bgcolor: 'primary.light' }}>メモ</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {(rowsPerPage > 0
-              ? vehicles.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              : vehicles
-            ).map((vehicle) => (
+            {list.map((vehicle) => (
               <TableRow key={vehicle.id}>
-                <TableCell>
+                <TableCell padding="checkbox">
                   <CheckBox color="primary" />
                 </TableCell>
                 <TableCell>{vehicle.vehicleType}</TableCell>

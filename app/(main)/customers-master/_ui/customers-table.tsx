@@ -18,7 +18,7 @@ import {
   Typography,
 } from '@mui/material';
 import {} from '@mui/material/colors';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { customers } from '../../../_lib/mock-data';
 import { MuiTablePagination } from '../../_ui/table-pagination';
@@ -27,6 +27,11 @@ import { CustomerDialogContents } from './customers-dialog-contents';
 /** 顧客マスタのテーブルコンポーネント */
 export const CustomersMasterTable = () => {
   const [openId, setOpenID] = useState(-100);
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  const [page, setPage] = useState(1);
+  const rowsPerPage = 50;
+  // dialog
   const handleOpen = (id: number) => {
     setOpenID(id);
     setDialogOpen(true);
@@ -39,13 +44,14 @@ export const CustomersMasterTable = () => {
     setOpenID(-100);
     setDialogOpen(false);
   };
+  // 表示するデータ
+  const list = useMemo(
+    () => (rowsPerPage > 0 ? customers.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage) : customers),
+    [page, rowsPerPage]
+  );
+  // テーブル最後のページ用の空データの長さ
+  const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - list.length) : 0;
 
-  const [dialogOpen, setDialogOpen] = useState(false);
-
-  const [page, setPage] = useState(1);
-  const rowsPerPage = 20;
-
-  const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - customers.length) : 0;
   return (
     <Box>
       <Typography pt={2} pl={2}>
@@ -86,10 +92,7 @@ export const CustomersMasterTable = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {(rowsPerPage > 0
-              ? customers.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              : customers
-            ).map((customer) => (
+            {list.map((customer) => (
               <TableRow key={customer.id} onClick={() => handleOpen(customer.id)}>
                 <TableCell>
                   <CheckBox color="primary" />
