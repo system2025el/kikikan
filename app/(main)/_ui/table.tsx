@@ -99,9 +99,9 @@ export const SelectTable: React.FC<TableProps> = ({ headers, datas, onSelectionC
 
   return (
     <Paper sx={{ width: '100%', mb: 2 }}>
-      <TableContainer sx={{ overflow: 'auto', bgcolor: grey[200] }}>
+      <TableContainer sx={{ overflow: 'auto' }}>
         <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle" size="small">
-          <TableHead sx={{ bgcolor: grey[400] }}>
+          <TableHead sx={{ bgcolor: 'primary.light' }}>
             <TableRow sx={{ whiteSpace: 'nowrap' }}>
               <TableCell padding="checkbox">
                 <Checkbox
