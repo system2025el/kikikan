@@ -1,6 +1,6 @@
 'use client';
 
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
   Accordion,
   AccordionDetails,
@@ -72,7 +72,7 @@ export const Quotation = () => {
       {/* 受注選択
       ----------------------------------------------------------------------------------*/}
       <Accordion sx={{ marginTop: 2, bgcolor: grey[300] }}>
-        <AccordionSummary expandIcon={<ExpandLessIcon />}>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Typography component="span">受注選択</Typography>
         </AccordionSummary>
         <AccordionDetails sx={{ padding: 0 }}>
@@ -150,7 +150,7 @@ export const Quotation = () => {
       {/* 見積ヘッダー
       ----------------------------------------------------------------------------------*/}
       <Accordion sx={{ marginTop: 2, bgcolor: grey[300] }}>
-        <AccordionSummary expandIcon={<ExpandLessIcon />}>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Typography component="span">見積ヘッダー</Typography>
         </AccordionSummary>
         <AccordionDetails sx={{ padding: 0 }}>
@@ -203,11 +203,6 @@ export const Quotation = () => {
                   sx={{ width: '50%' }}
                   renderInput={(params) => <TextField {...params} />}
                 />
-                {/* <FormControl size="small" sx={{ width: '50%' }}>
-                  <Select value={selectQuotation} onChange={quotationChange}>
-                    <MenuItem value={'（株）シアターブレーン'}>（株）シアターブレーン</MenuItem>
-                  </Select>
-                </FormControl> */}
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={5}>取引条件</Typography>
@@ -217,11 +212,6 @@ export const Quotation = () => {
                   sx={{ width: '50%' }}
                   renderInput={(params) => <TextField {...params} />}
                 />
-                {/* <FormControl size="small" sx={{ width: '50%' }}>
-                  <Select value={selectTransactions} onChange={transactionsChange}>
-                    <MenuItem value={''}></MenuItem>
-                  </Select>
-                </FormControl> */}
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={5}>見積メモ</Typography>
@@ -239,7 +229,7 @@ export const Quotation = () => {
       {/* 請求情報
       ----------------------------------------------------------------------------------*/}
       <Accordion sx={{ marginTop: 2, bgcolor: grey[300] }}>
-        <AccordionSummary expandIcon={<ExpandLessIcon />}>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Typography component="span">請求情報</Typography>
         </AccordionSummary>
         <AccordionDetails sx={{ padding: 0 }}>
@@ -288,11 +278,6 @@ export const Quotation = () => {
                   sx={{ width: '50%' }}
                   renderInput={(params) => <TextField {...params} />}
                 />
-                {/* <FormControl size="small" sx={{ width: '50%' }}>
-                  <Select value={selectRequest} onChange={requestChange}>
-                    <MenuItem value={'（株）シアターブレーン'}>（株）シアターブレーン</MenuItem>
-                  </Select>
-                </FormControl> */}
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={5}>請求メモ</Typography>
@@ -305,7 +290,7 @@ export const Quotation = () => {
       {/* 見積明細
       ----------------------------------------------------------------------------------*/}
       <Accordion sx={{ marginTop: 2, bgcolor: grey[300] }}>
-        <AccordionSummary expandIcon={<ExpandLessIcon />} component="div">
+        <AccordionSummary expandIcon={<ExpandMoreIcon />} component="div">
           <Box display="flex" alignItems="center" sx={{ width: '100%' }}>
             <Box width="35%">
               <Typography>見積明細</Typography>

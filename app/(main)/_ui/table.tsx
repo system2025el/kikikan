@@ -158,7 +158,7 @@ const Row = (props: RowProps) => {
           <Checkbox checked={props.selected.includes(props.row.id)} onChange={() => props.handleSelect(props.row.id)} />
         </TableCell>
         <TableCell>
-          <IconButton onClick={handleClick}>{isExpanded ? <ExpandMoreIcon /> : <ExpandLessIcon />}</IconButton>
+          <IconButton onClick={handleClick}>{isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
         </TableCell>
         {props.headers.map((header) => (
           <TableCell key={header.key} align={typeof props.row.parent[header.key] === 'number' ? 'right' : 'left'}>
