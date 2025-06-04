@@ -6,6 +6,7 @@ import {
   Button,
   Container,
   Dialog,
+  Divider,
   Paper,
   Stack,
   Table,
@@ -35,7 +36,7 @@ export const LocationSelectDialog = (props: { handleCloseLocationDialog: () => v
     setDialogOpen(false);
   };
 
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(1);
   const rowsPerPage = 20;
 
   const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - locationList.length) : 0;
@@ -43,57 +44,51 @@ export const LocationSelectDialog = (props: { handleCloseLocationDialog: () => v
   return (
     <>
       <Container disableGutters sx={{ minWidth: '100%', p: 3 }} maxWidth={'xl'}>
-        <Box width={'100%'} bgcolor={grey[300]} py={2} alignItems={'center'} p={2} display={'flex'}>
-          <Typography>公演場所選択</Typography>
-          <Button sx={{ ml: '40%' }} onClick={() => handleCloseLocationDialog()}>
-            戻る
-          </Button>
-        </Box>
-        <Box width={'100%'} bgcolor={grey[200]} p={2}>
-          <Stack justifyContent={'space-between'}>
-            <Typography variant="body1">検索</Typography>
-            <Button>
-              検索
-              <SearchIcon />
-            </Button>
-          </Stack>
-          <Stack>
-            <Typography>キーワード</Typography>
-            <TextField />
-            <Typography paddingLeft={'8%'}>場所、住所、TEL、Faxから検索</Typography>
-          </Stack>
-          <Stack sx={{ pt: 1 }}>
-            <Typography>地域</Typography>
-            <Box display={'flex'} alignItems={'center'}>
+        <Paper variant="outlined">
+          <Box width={'100%'} display={'flex'} p={2} justifyContent={'space-between'} alignItems={'center'}>
+            <Typography>公演場所選択</Typography>
+            <Button onClick={() => handleCloseLocationDialog()}>戻る</Button>
+          </Box>
+          <Divider />
+          <Box width={'100%'} p={2}>
+            <Stack justifyContent={'space-between'}>
+              <Typography variant="body2">検索</Typography>
+              <Button>
+                <SearchIcon />
+                検索
+              </Button>
+            </Stack>
+            <Stack>
+              <Typography>キーワード</Typography>
               <TextField />
-              <Button onClick={handleOpenDialog}>選択</Button>
-            </Box>
-          </Stack>
-        </Box>
+              <Typography paddingLeft={'8%'}>場所、住所、TEL、Faxから検索</Typography>
+            </Stack>
+            <Stack sx={{ pt: 1 }}>
+              <Typography>地域</Typography>
+              <Box display={'flex'} alignItems={'center'}>
+                <TextField />
+                <Button onClick={handleOpenDialog}>選択</Button>
+              </Box>
+            </Stack>
+          </Box>
+        </Paper>
         {/*  ---------- ↑検索 ↓場所テーブル-------------- */}
-        <TableContainer component={Paper} square sx={{ p: 2, maxHeight: 800, bgcolor: grey[200] }}>
-          <Table stickyHeader size="small">
+        <Stack mt={1} mx={0.5} justifyContent={'space-between'}>
+          <MuiTablePagination arrayList={locationList} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
+        </Stack>
+        <TableContainer component={Paper} square sx={{ maxHeight: 800, mt: 1 }}>
+          <Table stickyHeader padding="none">
             <TableHead>
               <TableRow>
-                <MuiTablePagination
-                  arrayList={locationList}
-                  colSpan={8}
-                  rowsPerPage={rowsPerPage}
-                  sx={{ bgcolor: grey[200] }}
-                  page={page}
-                  setPage={setPage}
-                />
-              </TableRow>
-              <TableRow>
-                <TableCell sx={{ bgcolor: grey[300] }}>場所</TableCell>
-                <TableCell sx={{ bgcolor: grey[300] }}>住所</TableCell>
-                <TableCell sx={{ bgcolor: grey[300] }}>TEL</TableCell>
-                <TableCell sx={{ bgcolor: grey[300] }}>FAX</TableCell>
+                <TableCell sx={{ bgcolor: 'primary.light' }}>場所</TableCell>
+                <TableCell sx={{ bgcolor: 'primary.light' }}>住所</TableCell>
+                <TableCell sx={{ bgcolor: 'primary.light' }}>TEL</TableCell>
+                <TableCell sx={{ bgcolor: 'primary.light' }}>FAX</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {(rowsPerPage > 0
-                ? locationList.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                ? locationList.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 : locationList
               ).map((location) => (
                 <TableRow key={location.name}>
@@ -104,7 +99,7 @@ export const LocationSelectDialog = (props: { handleCloseLocationDialog: () => v
                 </TableRow>
               ))}
               {emptyRows > 0 && (
-                <TableRow style={{ height: 53 * emptyRows }}>
+                <TableRow style={{ height: 30 * emptyRows }}>
                   <TableCell colSpan={8} />
                 </TableRow>
               )}

@@ -1,9 +1,13 @@
 'use client';
-
 import { CheckBox } from '@mui/icons-material';
+import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
 import {
+  Box,
   Button,
   Dialog,
+  Divider,
+  Grid2,
   Paper,
   Table,
   TableBody,
@@ -13,7 +17,7 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import { grey } from '@mui/material/colors';
+import {} from '@mui/material/colors';
 import { useState } from 'react';
 
 import { customers } from '../../../_lib/mock-data';
@@ -38,47 +42,54 @@ export const CustomersMasterTable = () => {
 
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(1);
   const rowsPerPage = 20;
 
   const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - customers.length) : 0;
   return (
-    <TableContainer component={Paper} square sx={{ p: 2, maxHeight: 800, bgcolor: grey[200] }}>
-      <Table stickyHeader size="small">
-        <TableHead>
-          <TableRow>
-            <MuiTablePagination
-              arrayList={customers}
-              colSpan={2}
-              rowsPerPage={rowsPerPage}
-              sx={{ bgcolor: grey[200], justifyContent: 'start' }}
-              page={page}
-              setPage={setPage}
-            />
-            <TableCell colSpan={2} sx={{ bgcolor: grey[200] }}>
-              <Button sx={{ ml: '40%' }} size="medium" onClick={() => handleOpen(-100)}>
-                +新規
+    <Box>
+      <Typography pt={2} pl={2}>
+        顧客一覧
+      </Typography>
+      <Divider />
+      <Grid2 container mt={1} mx={0.5} justifyContent={'space-between'}>
+        <Grid2 spacing={1}>
+          <MuiTablePagination arrayList={customers} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
+        </Grid2>
+        <Grid2 container spacing={1}>
+          <Grid2 container spacing={1}>
+            <Grid2>
+              <Button href="/new-order">
+                <AddIcon fontSize="small" />
+                追加
               </Button>
-              {/* <Dialog open={dialogOpen} fullScreen>
-                <CustomerDialogContents handleClose={handleCloseNewCustomer}></CustomerDialogContents>
-              </Dialog> */}
-            </TableCell>
-            <TableCell colSpan={2} sx={{ bgcolor: grey[200] }}>
-              <Button color="error">-削除</Button>
-            </TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell sx={{ bgcolor: grey[300] }}></TableCell>
-            <TableCell sx={{ bgcolor: grey[300] }}>顧客名</TableCell>
-            <TableCell sx={{ bgcolor: grey[300] }}>住所</TableCell>
-            <TableCell sx={{ bgcolor: grey[300] }}>TEL</TableCell>
-            <TableCell sx={{ bgcolor: grey[300] }}>FAX</TableCell>
-            <TableCell sx={{ bgcolor: grey[300] }}>メモ</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {(rowsPerPage > 0 ? customers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage) : customers).map(
-            (customer) => (
+            </Grid2>
+            <Grid2>
+              <Button color="error">
+                <DeleteIcon fontSize="small" />
+                削除
+              </Button>
+            </Grid2>
+          </Grid2>
+        </Grid2>
+      </Grid2>
+      <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 1 }}>
+        <Table stickyHeader padding="none">
+          <TableHead>
+            <TableRow>
+              <TableCell sx={{ bgcolor: 'primary.light' }}></TableCell>
+              <TableCell sx={{ bgcolor: 'primary.light' }}>顧客名</TableCell>
+              <TableCell sx={{ bgcolor: 'primary.light' }}>住所</TableCell>
+              <TableCell sx={{ bgcolor: 'primary.light' }}>TEL</TableCell>
+              <TableCell sx={{ bgcolor: 'primary.light' }}>FAX</TableCell>
+              <TableCell sx={{ bgcolor: 'primary.light' }}>メモ</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {(rowsPerPage > 0
+              ? customers.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              : customers
+            ).map((customer) => (
               <TableRow key={customer.id} onClick={() => handleOpen(customer.id)}>
                 <TableCell>
                   <CheckBox color="primary" />
@@ -96,18 +107,18 @@ export const CustomersMasterTable = () => {
                   <Typography noWrap>{customer.memo}</Typography>
                 </TableCell>
               </TableRow>
-            )
-          )}
-          <Dialog open={dialogOpen} fullScreen>
-            <CustomerDialogContents customerId={openId} handleClose={handleClose} />
-          </Dialog>
-          {emptyRows > 0 && (
-            <TableRow style={{ height: 53 * emptyRows }}>
-              <TableCell colSpan={6} />
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
-    </TableContainer>
+            ))}
+            <Dialog open={dialogOpen} fullScreen>
+              <CustomerDialogContents customerId={openId} handleClose={handleClose} />
+            </Dialog>
+            {emptyRows > 0 && (
+              <TableRow style={{ height: 30 * emptyRows }}>
+                <TableCell colSpan={6} />
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Box>
   );
 };
