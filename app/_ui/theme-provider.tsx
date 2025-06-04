@@ -44,6 +44,7 @@ const lightTheme = createTheme(
         defaultProps: {
           size: 'small',
           variant: 'contained',
+          sx: { whiteSpace: 'nowrap', minWidth: 'max-content' },
         },
       },
       MuiStack: {
@@ -65,6 +66,13 @@ const lightTheme = createTheme(
           sx: {
             bgcolor: 'white',
           },
+        },
+      },
+      MuiPagination: {
+        defaultProps: {
+          size: 'small',
+          variant: 'outlined',
+          shape: 'rounded',
         },
       },
     },
