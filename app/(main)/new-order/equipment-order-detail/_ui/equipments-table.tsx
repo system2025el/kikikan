@@ -55,8 +55,8 @@ const EnhancedTableHead = (props: EnhancedTableProps) => {
   return (
     <TableHead>
       <TableRow>
-        <TableCell padding="checkbox" sx={{ bgcolor: 'primary.light' }}></TableCell>
-        <TableCell sx={{ bgcolor: 'primary.light' }}>機材名</TableCell>
+        <TableCell padding="checkbox"></TableCell>
+        <TableCell>機材名</TableCell>
       </TableRow>
     </TableHead>
   );

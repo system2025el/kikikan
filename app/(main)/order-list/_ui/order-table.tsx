@@ -87,41 +87,39 @@ export const OrderTable = () => {
           <Table stickyHeader size="small" padding="none">
             <TableHead>
               <TableRow>
-                <TableCell sx={{ bgcolor: 'primary.light' }}></TableCell>
-                <TableCell align="center" sx={{ bgcolor: 'primary.light' }}>
-                  受注番号
-                </TableCell>
-                <TableCell sx={{ bgcolor: 'primary.light' }}>
+                <TableCell></TableCell>
+                <TableCell align="center">受注番号</TableCell>
+                <TableCell>
                   <Box minWidth={100} maxWidth={100}>
                     受注ステータス
                   </Box>
                 </TableCell>
-                <TableCell sx={{ bgcolor: 'primary.light' }}>
+                <TableCell>
                   <Box minWidth={100} maxWidth={100}>
                     公演名
                   </Box>
                 </TableCell>
-                <TableCell sx={{ bgcolor: 'primary.light' }}>
+                <TableCell>
                   <Box minWidth={100} maxWidth={100}>
                     公演場所
                   </Box>
                 </TableCell>
-                <TableCell sx={{ bgcolor: 'primary.light' }}>
+                <TableCell>
                   <Box minWidth={200} maxWidth={200}>
                     顧客名
                   </Box>
                 </TableCell>
-                <TableCell sx={{ bgcolor: 'primary.light' }}>
+                <TableCell>
                   <Box minWidth={100} maxWidth={100}>
                     受注日
                   </Box>
                 </TableCell>
-                <TableCell sx={{ bgcolor: 'primary.light' }}>
+                <TableCell>
                   <Box minWidth={100} maxWidth={100}>
                     受注開始日
                   </Box>
                 </TableCell>
-                <TableCell sx={{ bgcolor: 'primary.light' }}>
+                <TableCell>
                   <Box minWidth={100} maxWidth={100}>
                     終了日
                   </Box>

@@ -20,7 +20,7 @@ const EnhancedTableHead = () => {
   return (
     <TableHead>
       <TableRow>
-        <TableCell sx={{ bgcolor: 'primary.light' }}>部門</TableCell>
+        <TableCell>部門</TableCell>
       </TableRow>
     </TableHead>
   );

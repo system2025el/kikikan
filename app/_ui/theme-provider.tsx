@@ -1,7 +1,7 @@
 'use client';
 
 import { useMediaQuery } from '@mui/material';
-import { grey } from '@mui/material/colors';
+import { blue, grey } from '@mui/material/colors';
 import CssBaseline from '@mui/material/CssBaseline';
 import { jaJP } from '@mui/material/locale';
 import type { Palette } from '@mui/material/styles';
@@ -38,6 +38,14 @@ const lightTheme = createTheme(
               backgroundColor: grey[200], // 任意のカラー
             },
           },
+        },
+      },
+      MuiTableCell: {
+        styleOverrides: {
+          head: ({ theme }) => ({
+            backgroundColor: theme.palette.primary.light,
+            color: theme.palette.primary.contrastText,
+          }),
         },
       },
       MuiSelect: {

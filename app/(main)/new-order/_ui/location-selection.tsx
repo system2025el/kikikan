@@ -87,10 +87,10 @@ export const LocationSelectDialog = (props: { handleCloseLocationDialog: () => v
           <Table stickyHeader padding="none">
             <TableHead>
               <TableRow>
-                <TableCell sx={{ bgcolor: 'primary.light' }}>場所</TableCell>
-                <TableCell sx={{ bgcolor: 'primary.light' }}>住所</TableCell>
-                <TableCell sx={{ bgcolor: 'primary.light' }}>TEL</TableCell>
-                <TableCell sx={{ bgcolor: 'primary.light' }}>FAX</TableCell>
+                <TableCell>場所</TableCell>
+                <TableCell>住所</TableCell>
+                <TableCell>TEL</TableCell>
+                <TableCell>FAX</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>

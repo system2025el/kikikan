@@ -104,20 +104,20 @@ export const EqptMasterTable = (props: {
         <Table stickyHeader padding="none">
           <TableHead>
             <TableRow>
-              <TableCell sx={{ bgcolor: 'primary.light' }}></TableCell>
-              <TableCell sx={{ bgcolor: 'primary.light' }}>機材名</TableCell>
-              <TableCell sx={{ bgcolor: 'primary.light' }}>保有数</TableCell>
-              <TableCell sx={{ bgcolor: 'primary.light' }}>部門</TableCell>
-              <TableCell sx={{ bgcolor: 'primary.light' }}>大部門</TableCell>
-              <TableCell sx={{ bgcolor: 'primary.light' }}>集計部門</TableCell>
-              <TableCell sx={{ bgcolor: 'primary.light' }}>一式</TableCell>
-              <TableCell sx={{ bgcolor: 'primary.light' }}>シリアル</TableCell>
-              <TableCell sx={{ bgcolor: 'primary.light' }}>価格1</TableCell>
-              <TableCell sx={{ bgcolor: 'primary.light' }}>価格2</TableCell>
-              <TableCell sx={{ bgcolor: 'primary.light' }}>価格3</TableCell>
-              <TableCell sx={{ bgcolor: 'primary.light' }}>価格4</TableCell>
-              <TableCell sx={{ bgcolor: 'primary.light' }}>価格5</TableCell>
-              <TableCell sx={{ bgcolor: 'primary.light' }}>メモ</TableCell>
+              <TableCell></TableCell>
+              <TableCell>機材名</TableCell>
+              <TableCell>保有数</TableCell>
+              <TableCell>部門</TableCell>
+              <TableCell>大部門</TableCell>
+              <TableCell>集計部門</TableCell>
+              <TableCell>一式</TableCell>
+              <TableCell>シリアル</TableCell>
+              <TableCell>価格1</TableCell>
+              <TableCell>価格2</TableCell>
+              <TableCell>価格3</TableCell>
+              <TableCell>価格4</TableCell>
+              <TableCell>価格5</TableCell>
+              <TableCell>メモ</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>

@@ -83,12 +83,12 @@ export const CustomersMasterTable = () => {
         <Table stickyHeader padding="none">
           <TableHead>
             <TableRow>
-              <TableCell sx={{ bgcolor: 'primary.light' }}></TableCell>
-              <TableCell sx={{ bgcolor: 'primary.light' }}>顧客名</TableCell>
-              <TableCell sx={{ bgcolor: 'primary.light' }}>住所</TableCell>
-              <TableCell sx={{ bgcolor: 'primary.light' }}>TEL</TableCell>
-              <TableCell sx={{ bgcolor: 'primary.light' }}>FAX</TableCell>
-              <TableCell sx={{ bgcolor: 'primary.light' }}>メモ</TableCell>
+              <TableCell></TableCell>
+              <TableCell>顧客名</TableCell>
+              <TableCell>住所</TableCell>
+              <TableCell>TEL</TableCell>
+              <TableCell>FAX</TableCell>
+              <TableCell>メモ</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>

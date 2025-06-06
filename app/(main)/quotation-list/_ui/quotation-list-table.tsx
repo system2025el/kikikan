@@ -78,14 +78,14 @@ export const QuotaionListTable = () => {
           <Table stickyHeader padding="none">
             <TableHead>
               <TableRow>
-                <TableCell sx={{ bgcolor: 'primary.light', width: 50, maxWidth: 50 }}></TableCell>
-                <TableCell sx={{ bgcolor: 'primary.light' }}>見積番号</TableCell>
-                <TableCell sx={{ bgcolor: 'primary.light' }}>見積ステータス</TableCell>
-                <TableCell sx={{ bgcolor: 'primary.light', minWidth: '20%' }}>見積件名</TableCell>
-                <TableCell sx={{ bgcolor: 'primary.light', minWidth: '20%' }}>見積相手</TableCell>
-                <TableCell sx={{ bgcolor: 'primary.light', minWidth: 100 }}>見積日</TableCell>
-                <TableCell sx={{ bgcolor: 'primary.light', minWidth: 100 }}>請求番号</TableCell>
-                <TableCell sx={{ bgcolor: 'primary.light', minWidth: 100 }}>見積メモ</TableCell>
+                <TableCell sx={{ width: 50, maxWidth: 50 }}></TableCell>
+                <TableCell>見積番号</TableCell>
+                <TableCell>見積ステータス</TableCell>
+                <TableCell sx={{ minWidth: '20%' }}>見積件名</TableCell>
+                <TableCell sx={{ minWidth: '20%' }}>見積相手</TableCell>
+                <TableCell sx={{ minWidth: 100 }}>見積日</TableCell>
+                <TableCell sx={{ minWidth: 100 }}>請求番号</TableCell>
+                <TableCell sx={{ minWidth: 100 }}>見積メモ</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>

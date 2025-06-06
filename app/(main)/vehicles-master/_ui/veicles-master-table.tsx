@@ -79,9 +79,9 @@ export const VehiclesMasterTable = () => {
         <Table stickyHeader padding="none">
           <TableHead>
             <TableRow>
-              <TableCell sx={{ bgcolor: 'primary.light', color: 'primary.contrastText' }}></TableCell>
-              <TableCell sx={{ bgcolor: 'primary.light' }}>車種</TableCell>
-              <TableCell sx={{ bgcolor: 'primary.light' }}>メモ</TableCell>
+              <TableCell></TableCell>
+              <TableCell>車種</TableCell>
+              <TableCell>メモ</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
