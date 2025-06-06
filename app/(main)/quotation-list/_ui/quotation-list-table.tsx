@@ -36,7 +36,7 @@ export const QuotaionListTable = () => {
     [page, rowsPerPage]
   );
   // テーブル最後のページ用の空データの長さ
-  const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - list.length) : 0;
+  const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - quotaionList.length) : 0;
 
   return (
     <>
@@ -89,7 +89,7 @@ export const QuotaionListTable = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {list.map((quotation) => (
+              {quotaionList.map((quotation) => (
                 <TableRow key={quotation.id}>
                   <TableCell padding="checkbox">
                     <Checkbox color="primary" />
