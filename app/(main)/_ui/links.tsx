@@ -201,10 +201,10 @@ export default function NavLinks() {
               backgroundColor: pathname === '/eqpmaster' ? selectedBgColor : '',
             }}
           >
-            <ListItemButton href="/eqpmaster" dense>
+            <ListItemButton href="/eqpt-master" dense>
               <ListItemText
                 primary="機材マスタ"
-                sx={{ color: pathname === '/eqpmaster' ? 'primary.dark' : '', pl: 8 }}
+                sx={{ color: pathname === '/eqpt-master' ? 'primary.dark' : '', pl: 8 }}
               />
             </ListItemButton>
           </ListItem>

@@ -46,7 +46,7 @@ export const LocationSelectDialog = (props: { handleCloseLocationDialog: () => v
     [page, rowsPerPage]
   );
   // テーブル最後のページ用の空データの長さ
-  const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - list.length) : 0;
+  const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - locationList.length) : 0;
 
   return (
     <>
@@ -94,7 +94,7 @@ export const LocationSelectDialog = (props: { handleCloseLocationDialog: () => v
               </TableRow>
             </TableHead>
             <TableBody>
-              {list.map((location) => (
+              {locationList.map((location) => (
                 <TableRow key={location.name}>
                   <TableCell>{location.name}</TableCell>
                   <TableCell>{location.address}</TableCell>

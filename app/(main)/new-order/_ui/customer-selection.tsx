@@ -38,7 +38,7 @@ export const CustomerSelectionDialog = (props: { handleCloseCustDialog: () => vo
     [page, rowsPerPage]
   );
   // テーブル最後のページ用の空データの長さ
-  const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - list.length) : 0;
+  const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - customers.length) : 0;
 
   return (
     <>
@@ -104,7 +104,7 @@ export const CustomerSelectionDialog = (props: { handleCloseCustDialog: () => vo
               </TableRow>
             </TableHead>
             <TableBody>
-              {list.map((customer) => (
+              {customers.map((customer) => (
                 <TableRow key={customer.name}>
                   <TableCell>{customer.name}</TableCell>
                   <TableCell>

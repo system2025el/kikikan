@@ -46,7 +46,7 @@ export const VehiclesMasterTable = () => {
     [page, rowsPerPage]
   );
   // テーブル最後のページ用の空データの長さ
-  const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - list.length) : 0;
+  const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - vehicles.length) : 0;
 
   return (
     <Box>
@@ -85,7 +85,7 @@ export const VehiclesMasterTable = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {list.map((vehicle) => (
+            {vehicles.map((vehicle) => (
               <TableRow key={vehicle.id}>
                 <TableCell padding="checkbox">
                   <CheckBox color="primary" />

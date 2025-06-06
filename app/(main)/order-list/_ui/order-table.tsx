@@ -39,7 +39,7 @@ export const OrderTable = () => {
     [page, rowsPerPage]
   );
   // テーブル最後のページ用の空データの長さ
-  const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - list.length) : 0;
+  const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - orderList.length) : 0;
 
   return (
     <>
@@ -129,7 +129,7 @@ export const OrderTable = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {list.map((order) => (
+              {orderList.map((order) => (
                 <TableRow key={order.id}>
                   <TableCell padding="checkbox">
                     <Box minWidth={10} maxWidth={10}>
