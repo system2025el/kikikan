@@ -92,7 +92,7 @@ export const CustomersMasterTable = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {customers.map((customer) => (
+            {list.map((customer) => (
               <TableRow key={customer.id} onClick={() => handleOpen(customer.id)}>
                 <TableCell>
                   <CheckBox color="primary" />

@@ -121,7 +121,7 @@ export const EqptMasterTable = (props: {
             </TableRow>
           </TableHead>
           <TableBody>
-            {arrayList.map((eq) => (
+            {list.map((eq) => (
               <TableRow key={eq.id} onClick={() => handleOpen(eq.id)}>
                 <TableCell>
                   <CheckBox color="primary" />

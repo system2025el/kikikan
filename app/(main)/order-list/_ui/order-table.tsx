@@ -23,8 +23,8 @@ import {
 } from '@mui/material';
 import React, { useMemo, useState } from 'react';
 
-import { orderList } from '../../../_lib/mock-data';
 import { MuiTablePagination } from '../../_ui/table-pagination';
+import { orderList } from '../_lib/types';
 
 /** 受注一覧テーブルのコンポーネント */
 export const OrderTable = () => {
@@ -124,10 +124,11 @@ export const OrderTable = () => {
                     終了日
                   </Box>
                 </TableCell>
+                <TableCell>入出庫ステータス</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {orderList.map((order) => (
+              {list.map((order) => (
                 <TableRow key={order.id}>
                   <TableCell padding="checkbox">
                     <Box minWidth={10} maxWidth={10}>
@@ -148,6 +149,7 @@ export const OrderTable = () => {
                   <TableCell>{order.orderedDate}</TableCell>
                   <TableCell>{order.issueDate}</TableCell>
                   <TableCell>{order.returnDate}</TableCell>
+                  <TableCell>{order.inventoryStatus}</TableCell>
                 </TableRow>
               ))}
               {emptyRows > 0 && (

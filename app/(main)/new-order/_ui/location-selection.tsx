@@ -94,7 +94,7 @@ export const LocationSelectDialog = (props: { handleCloseLocationDialog: () => v
               </TableRow>
             </TableHead>
             <TableBody>
-              {locationList.map((location) => (
+              {list.map((location) => (
                 <TableRow key={location.name}>
                   <TableCell>{location.name}</TableCell>
                   <TableCell>{location.address}</TableCell>

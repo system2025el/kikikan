@@ -85,7 +85,7 @@ export const VehiclesMasterTable = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {vehicles.map((vehicle) => (
+            {list.map((vehicle) => (
               <TableRow key={vehicle.id}>
                 <TableCell padding="checkbox">
                   <CheckBox color="primary" />

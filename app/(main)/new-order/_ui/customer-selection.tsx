@@ -104,7 +104,7 @@ export const CustomerSelectionDialog = (props: { handleCloseCustDialog: () => vo
               </TableRow>
             </TableHead>
             <TableBody>
-              {customers.map((customer) => (
+              {list.map((customer) => (
                 <TableRow key={customer.name}>
                   <TableCell>{customer.name}</TableCell>
                   <TableCell>

@@ -20,7 +20,7 @@ import {
 import { grey } from '@mui/material/colors';
 import React, { useMemo, useState } from 'react';
 
-import { orderList, quotaionList } from '@/app/_lib/mock-data';
+import { quotaionList } from '@/app/_lib/mock-data';
 
 import { MuiTablePagination } from '../../_ui/table-pagination';
 
@@ -89,7 +89,7 @@ export const QuotaionListTable = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {quotaionList.map((quotation) => (
+              {list.map((quotation) => (
                 <TableRow key={quotation.id}>
                   <TableCell padding="checkbox">
                     <Checkbox color="primary" />

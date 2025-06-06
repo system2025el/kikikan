@@ -27,7 +27,7 @@ export const EqptMaster = () => {
     if (data.name === '') {
       setDisplayList([...eqptMasterList]);
     } else {
-      const list = displayList.filter((c) => c.name.includes(data.name));
+      const list = eqptMasterList.filter((c) => c.name.includes(data.name.trim()));
       setDisplayList(list);
       console.log(data);
     }

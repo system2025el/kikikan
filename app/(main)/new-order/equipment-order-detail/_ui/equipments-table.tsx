@@ -76,7 +76,7 @@ export const EquipmentTable = (props: {
       <Table stickyHeader padding="none">
         <EnhancedTableHead numSelected={eqSelected.length} />
         <TableBody>
-          {eqList.map((row, index) => {
+          {list.map((row, index) => {
             const isItemSelected = eqSelected.includes(row.id);
             const labelId = `enhanced-table-checkbox-${index}`;
 
