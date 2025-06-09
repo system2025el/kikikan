@@ -19,50 +19,54 @@ import {
   TableRow,
   TextField,
 } from '@mui/material';
+import { Dayjs } from 'dayjs';
 import React, { useState } from 'react';
 
+import { EquipmentData } from './equipment-order-detail';
+
 type TableProps = {
-  header: string[] | null;
+  header: string[];
   rows: Array<{
     id: number;
     data: Array<string | number>;
   }>;
+  dateRange: string[];
+  startKICSDate: Dayjs | null;
+  endKICSDate: Dayjs | null;
+  preparation: EquipmentData[];
+  RH: EquipmentData[];
+  GP: EquipmentData[];
+  actual: EquipmentData[];
   editableColumns?: number[] | null;
-  onChange?: (rowIndex: number, colIndex: number, newValue: number) => void;
   cellWidths?: Array<string | number>;
-  headerColorSelect: boolean;
-  getHeaderBackgroundColor: (index: number, headerColorSelect: boolean) => string;
-  getHeaderTextColor: (index: number, headerColorSelect: boolean) => string;
+  getHeaderBackgroundColor: (date: string, dateRange: string[]) => string;
   rowColorSelect: boolean;
-  getRowBackgroundColor: (rowIndex: number, colIndex: number, rowColorSelect: boolean) => string;
+  getRowBackgroundColor: (
+    dateHeader: string,
+    startKICSDate: Dayjs | null,
+    endKICSDate: Dayjs | null,
+    preparation: EquipmentData[],
+    RH: EquipmentData[],
+    GP: EquipmentData[],
+    actual: EquipmentData[]
+  ) => string;
 };
 
 const GridTable: React.FC<TableProps> = ({
   header,
   rows,
-  editableColumns = [],
-  onChange,
+  dateRange,
+  startKICSDate,
+  endKICSDate,
+  preparation,
+  RH,
+  GP,
+  actual,
   cellWidths = [],
-  headerColorSelect,
   getHeaderBackgroundColor,
-  getHeaderTextColor,
   rowColorSelect,
   getRowBackgroundColor,
 }) => {
-  const [localRows, setLocalRows] = useState(rows);
-
-  const handleCellChange = (rowIndex: number, colIndex: number, newValue: number) => {
-    const updated = [...localRows];
-    updated[rowIndex] = {
-      ...updated[rowIndex],
-      data: [...updated[rowIndex].data],
-    };
-    updated[rowIndex].data[colIndex] = newValue;
-    updated[rowIndex].data[4] = Number(updated[rowIndex].data[2]) + Number(updated[rowIndex].data[3]);
-    setLocalRows(updated);
-    //onChange?.(rowIndex, colIndex, newValue);
-  };
-
   const getWidth = (index: number) => cellWidths[index] ?? cellWidths[1];
 
   return (
@@ -73,16 +77,13 @@ const GridTable: React.FC<TableProps> = ({
             {header?.map((date, index) => (
               <TableCell
                 key={index}
-                align={typeof localRows[0].data[index] === 'number' ? 'right' : 'left'}
+                align={typeof rows[0].data[index] === 'number' ? 'right' : 'left'}
                 size="small"
                 sx={{
-                  border:
-                    getHeaderBackgroundColor(index, headerColorSelect) === 'black'
-                      ? '1px solid grey'
-                      : '1px solid black',
+                  border: getHeaderBackgroundColor(date, dateRange) === 'black' ? '1px solid grey' : '1px solid black',
                   whiteSpace: 'nowrap',
-                  color: getHeaderTextColor(index, headerColorSelect),
-                  bgcolor: getHeaderBackgroundColor(index, headerColorSelect),
+                  color: 'white',
+                  bgcolor: getHeaderBackgroundColor(date, dateRange),
                   padding: 0,
                 }}
               >
@@ -92,10 +93,9 @@ const GridTable: React.FC<TableProps> = ({
           </TableRow>
         </TableHead>
         <TableBody>
-          {localRows.map((row, rowIndex) => (
+          {rows.map((row, rowIndex) => (
             <TableRow key={rowIndex}>
               {row.data.map((cell, colIndex) => {
-                const isEditable = editableColumns?.includes(colIndex);
                 const width = getWidth(colIndex);
 
                 return (
@@ -107,46 +107,21 @@ const GridTable: React.FC<TableProps> = ({
                       whiteSpace: 'nowrap',
                       width,
                       height: 25,
-                      bgcolor: getRowBackgroundColor(rowIndex, colIndex, rowColorSelect),
+                      bgcolor: getRowBackgroundColor(
+                        header[colIndex],
+                        startKICSDate,
+                        endKICSDate,
+                        preparation,
+                        RH,
+                        GP,
+                        actual
+                      ),
                       py: 0,
                       px: 1,
                     }}
                     size="small"
                   >
-                    {isEditable && (rowIndex === 0 || rowIndex === 1 || rowIndex === 2) ? (
-                      <TextField
-                        variant="standard"
-                        value={cell}
-                        type="number"
-                        onChange={(e) => handleCellChange(rowIndex, colIndex, Number(e.target.value))}
-                        sx={{
-                          '& .MuiInputBase-input': {
-                            textAlign: 'right',
-                            padding: 0,
-                            fontSize: 'small',
-                          },
-                          '& input[type=number]': {
-                            MozAppearance: 'textfield',
-                          },
-                          '& input[type=number]::-webkit-outer-spin-button': {
-                            WebkitAppearance: 'none',
-                            margin: 0,
-                          },
-                          '& input[type=number]::-webkit-inner-spin-button': {
-                            WebkitAppearance: 'none',
-                            margin: 0,
-                          },
-                        }}
-                        slotProps={{
-                          input: {
-                            style: { textAlign: 'center' },
-                            disableUnderline: true,
-                          },
-                        }}
-                      />
-                    ) : (
-                      cell
-                    )}
+                    {cell}
                   </TableCell>
                 );
               })}
@@ -167,7 +142,7 @@ type GridSelectBoxTableProps = {
     data: Array<string | number>;
   }>;
   editableColumns?: number[] | null;
-  onChange?: (rowIndex: number, colIndex: number, newValue: number) => void;
+  onChange?: (rowIndex: number, colIndex: number, newValue: number, value: number) => void;
   cellWidths?: Array<string | number>;
   headerColorSelect: boolean;
   getHeaderBackgroundColor: (index: number, headerColorSelect: boolean) => string;
@@ -203,7 +178,7 @@ export const GridSelectBoxTable: React.FC<GridSelectBoxTableProps> = ({
     updated[rowIndex].data[colIndex] = newValue;
     updated[rowIndex].data[4] = Number(updated[rowIndex].data[2]) + Number(updated[rowIndex].data[3]);
     setLocalRows(updated);
-    onChange?.(rowIndex, colIndex, newValue);
+    onChange?.(rowIndex, colIndex, newValue, updated[rowIndex].data[4]);
   };
 
   const getWidth = (index: number) => cellWidths[index] ?? cellWidths[1];
@@ -257,7 +232,7 @@ export const GridSelectBoxTable: React.FC<GridSelectBoxTableProps> = ({
                     }}
                     size="small"
                   >
-                    {isEditable && (rowIndex === 0 || rowIndex === 1 || rowIndex === 2) ? (
+                    {isEditable ? (
                       <TextField
                         variant="standard"
                         value={cell}
@@ -308,13 +283,7 @@ type CellProps = {
   onChange: (index: number, value: string) => void;
 };
 
-const options = ['KICS', 'YARD'];
-
 export const Cell = (props: CellProps) => {
-  const handleSelectChange = (event: SelectChangeEvent) => {
-    props.onChange(props.index, event.target.value);
-  };
-
   return (
     <>
       <TableCell sx={{ padding: 0 }}>
