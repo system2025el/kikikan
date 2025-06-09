@@ -20,7 +20,7 @@ import {
 import { grey } from '@mui/material/colors';
 import React, { useMemo, useState } from 'react';
 
-import { orderList, quotaionList } from '@/app/_lib/mock-data';
+import { quotaionList } from '@/app/_lib/mock-data';
 
 import { MuiTablePagination } from '../../_ui/table-pagination';
 
@@ -36,7 +36,7 @@ export const QuotaionListTable = () => {
     [page, rowsPerPage]
   );
   // テーブル最後のページ用の空データの長さ
-  const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - list.length) : 0;
+  const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - quotaionList.length) : 0;
 
   return (
     <>
@@ -78,14 +78,14 @@ export const QuotaionListTable = () => {
           <Table stickyHeader padding="none">
             <TableHead>
               <TableRow>
-                <TableCell sx={{ bgcolor: 'primary.light', width: 50, maxWidth: 50 }}></TableCell>
-                <TableCell sx={{ bgcolor: 'primary.light' }}>見積番号</TableCell>
-                <TableCell sx={{ bgcolor: 'primary.light' }}>見積ステータス</TableCell>
-                <TableCell sx={{ bgcolor: 'primary.light', minWidth: '20%' }}>見積件名</TableCell>
-                <TableCell sx={{ bgcolor: 'primary.light', minWidth: '20%' }}>見積相手</TableCell>
-                <TableCell sx={{ bgcolor: 'primary.light', minWidth: 100 }}>見積日</TableCell>
-                <TableCell sx={{ bgcolor: 'primary.light', minWidth: 100 }}>請求番号</TableCell>
-                <TableCell sx={{ bgcolor: 'primary.light', minWidth: 100 }}>見積メモ</TableCell>
+                <TableCell sx={{ width: 50, maxWidth: 50 }}></TableCell>
+                <TableCell>見積番号</TableCell>
+                <TableCell>見積ステータス</TableCell>
+                <TableCell sx={{ minWidth: '20%' }}>見積件名</TableCell>
+                <TableCell sx={{ minWidth: '20%' }}>見積相手</TableCell>
+                <TableCell sx={{ minWidth: 100 }}>見積日</TableCell>
+                <TableCell sx={{ minWidth: 100 }}>請求番号</TableCell>
+                <TableCell sx={{ minWidth: 100 }}>見積メモ</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>

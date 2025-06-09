@@ -23,8 +23,8 @@ import {
 } from '@mui/material';
 import React, { useMemo, useState } from 'react';
 
-import { orderList } from '../../../_lib/mock-data';
 import { MuiTablePagination } from '../../_ui/table-pagination';
+import { orderList } from '../_lib/types';
 
 /** 受注一覧テーブルのコンポーネント */
 export const OrderTable = () => {
@@ -39,7 +39,7 @@ export const OrderTable = () => {
     [page, rowsPerPage]
   );
   // テーブル最後のページ用の空データの長さ
-  const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - list.length) : 0;
+  const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - orderList.length) : 0;
 
   return (
     <>
@@ -87,45 +87,44 @@ export const OrderTable = () => {
           <Table stickyHeader size="small" padding="none">
             <TableHead>
               <TableRow>
-                <TableCell sx={{ bgcolor: 'primary.light' }}></TableCell>
-                <TableCell align="center" sx={{ bgcolor: 'primary.light' }}>
-                  受注番号
-                </TableCell>
-                <TableCell sx={{ bgcolor: 'primary.light' }}>
+                <TableCell></TableCell>
+                <TableCell align="center">受注番号</TableCell>
+                <TableCell>
                   <Box minWidth={100} maxWidth={100}>
                     受注ステータス
                   </Box>
                 </TableCell>
-                <TableCell sx={{ bgcolor: 'primary.light' }}>
+                <TableCell>
                   <Box minWidth={100} maxWidth={100}>
                     公演名
                   </Box>
                 </TableCell>
-                <TableCell sx={{ bgcolor: 'primary.light' }}>
+                <TableCell>
                   <Box minWidth={100} maxWidth={100}>
                     公演場所
                   </Box>
                 </TableCell>
-                <TableCell sx={{ bgcolor: 'primary.light' }}>
+                <TableCell>
                   <Box minWidth={200} maxWidth={200}>
                     顧客名
                   </Box>
                 </TableCell>
-                <TableCell sx={{ bgcolor: 'primary.light' }}>
+                <TableCell>
                   <Box minWidth={100} maxWidth={100}>
                     受注日
                   </Box>
                 </TableCell>
-                <TableCell sx={{ bgcolor: 'primary.light' }}>
+                <TableCell>
                   <Box minWidth={100} maxWidth={100}>
                     受注開始日
                   </Box>
                 </TableCell>
-                <TableCell sx={{ bgcolor: 'primary.light' }}>
+                <TableCell>
                   <Box minWidth={100} maxWidth={100}>
                     終了日
                   </Box>
                 </TableCell>
+                <TableCell>入出庫ステータス</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -150,6 +149,7 @@ export const OrderTable = () => {
                   <TableCell>{order.orderedDate}</TableCell>
                   <TableCell>{order.issueDate}</TableCell>
                   <TableCell>{order.returnDate}</TableCell>
+                  <TableCell>{order.inventoryStatus}</TableCell>
                 </TableRow>
               ))}
               {emptyRows > 0 && (

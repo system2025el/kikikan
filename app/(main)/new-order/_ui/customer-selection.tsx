@@ -38,7 +38,7 @@ export const CustomerSelectionDialog = (props: { handleCloseCustDialog: () => vo
     [page, rowsPerPage]
   );
   // テーブル最後のページ用の空データの長さ
-  const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - list.length) : 0;
+  const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - customers.length) : 0;
 
   return (
     <>
@@ -96,11 +96,11 @@ export const CustomerSelectionDialog = (props: { handleCloseCustDialog: () => vo
           <Table stickyHeader padding="none">
             <TableHead>
               <TableRow>
-                <TableCell sx={{ bgcolor: 'primary.light' }}>場所</TableCell>
-                <TableCell sx={{ bgcolor: 'primary.light' }}>住所</TableCell>
-                <TableCell sx={{ bgcolor: 'primary.light' }}>TEL</TableCell>
-                <TableCell sx={{ bgcolor: 'primary.light' }}>FAX</TableCell>
-                <TableCell sx={{ bgcolor: 'primary.light' }}>メモ</TableCell>
+                <TableCell>場所</TableCell>
+                <TableCell>住所</TableCell>
+                <TableCell>TEL</TableCell>
+                <TableCell>FAX</TableCell>
+                <TableCell>メモ</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
