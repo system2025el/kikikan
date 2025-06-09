@@ -7,8 +7,9 @@ import { grey } from '@mui/material/colors';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
+import { PickerValue } from '@mui/x-date-pickers/internals';
 import { DateValidationError } from '@mui/x-date-pickers/models';
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import { useMemo, useState } from 'react';
 import { DateRangePicker } from 'rsuite';
 
@@ -37,6 +38,7 @@ export const Calendar = () => {
     </LocalizationProvider>
   );
 };
+
 /**
  * 日付を選択し取得するコンポーネント
  * @param props sx スタイル disbled disabledかどうか
@@ -82,7 +84,8 @@ const DateX = (props: { sx?: object; disabled?: boolean }) => {
             sx: {
               bgcolor: disabled ? grey[300] : 'white',
               width: '25%',
-              minWidth: 200,
+              minWidth: 150,
+              padding: 0,
               '.Mui-disabled': {
                 WebkitTextFillColor: 'black',
               },
@@ -101,6 +104,57 @@ const DateX = (props: { sx?: object; disabled?: boolean }) => {
 };
 
 export default DateX;
+
+/**
+ * 日付を選択し取得するコンポーネント
+ * @param props sx スタイル disbled disabledかどうか
+ * @returns {JSX.Element} MUIX DatePickerコンポーネント
+ */
+export const TestDate = (props: {
+  sx?: object;
+  disabled?: boolean;
+  date: Dayjs | null;
+  onChange: (value?: Dayjs | null) => void;
+}) => {
+  const { sx, disabled, date, onChange } = props;
+
+  return (
+    <LocalizationProvider
+      dateAdapter={AdapterDayjs}
+      dateFormats={{ year: 'YYYY年', month: 'MM' }} // カレンダー内の年一覧のフォーマット
+      adapterLocale="ja"
+      localeText={{
+        previousMonth: '前月を表示',
+        nextMonth: '翌月を表示',
+      }}
+    >
+      <DatePicker
+        name="date"
+        format="YYYY/MM/DD" // テキストエリア内のフォーマット
+        slotProps={{
+          textField: {
+            size: 'small',
+            sx: {
+              bgcolor: disabled ? grey[300] : 'white',
+              width: '25%',
+              minWidth: 150,
+              padding: 0,
+              '.Mui-disabled': {
+                WebkitTextFillColor: 'black',
+              },
+              ...sx,
+            },
+          },
+          calendarHeader: { format: 'YYYY年MM月' },
+        }} // カレンダーヘッダーのフォーマット
+        value={date}
+        views={['year', 'month', 'day']}
+        disabled={disabled ? true : false}
+        onChange={onChange}
+      />
+    </LocalizationProvider>
+  );
+};
 
 /**
  * 2つ並んだ日付選択コンポーネント
@@ -265,4 +319,13 @@ export const toISOStringWithTimezone = (date: Date): string => {
   const tzHour = pad((tz / 60).toString());
   const tzMin = pad((tz % 60).toString());
   return `${year}/${month}/${day}T${hour}:${min}:${sec}${sign}${tzHour}:${tzMin}`;
+};
+
+export const toISOStringWithTimezoneMonthDay = (date: Date): string => {
+  const pad = function (str: string): string {
+    return ('0' + str).slice(-2);
+  };
+  const month = pad((date.getMonth() + 1).toString());
+  const day = pad(date.getDate().toString());
+  return `${month}/${day}`;
 };
