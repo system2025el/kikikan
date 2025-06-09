@@ -18,7 +18,6 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { grey } from '@mui/material/colors';
 import { useState } from 'react';
 
 import DateX, { RSuiteDateRangePicker } from '@/app/(main)/_ui/date';
@@ -33,10 +32,7 @@ const NewOrder = () => {
     console.log('選択されたID:', selectedIds);
   };
 
-  const equipmentTotal = equipmentRows.reduce((sum, row) => sum + row.quantity, 0);
   const priceTotal = equipmentRows.reduce((sum, row) => sum + row.price, 0);
-  const issueTotal = vehicleRows.filter((row) => row.classification === '出庫').length;
-  const returnTotal = vehicleRows.filter((row) => row.classification === '入庫').length;
 
   const [buttonValue, setButtonValue] = useState<string | null>('');
 
@@ -44,7 +40,7 @@ const NewOrder = () => {
     setButtonValue(newAlignment);
   };
 
-  const [selectStatus, setSelectStatus] = useState('');
+  const [selectStatus, setSelectStatus] = useState('処理中');
 
   const statusChange = (event: SelectChangeEvent) => {
     setSelectStatus(event.target.value);
@@ -120,18 +116,19 @@ const NewOrder = () => {
               <Grid2 display="flex" direction="row" alignItems="center">
                 <Typography mr={2}>受注ステータス</Typography>
                 <FormControl size="small" sx={{ width: 120 }}>
-                  <Select value={selectStatus} onChange={statusChange} disabled>
+                  <Select value={selectStatus} onChange={statusChange}>
                     <MenuItem value="">
                       <em>None</em>
                     </MenuItem>
                     <MenuItem value={'確定'}>確定</MenuItem>
+                    <MenuItem value={'処理中'}>処理中</MenuItem>
                   </Select>
                 </FormControl>
               </Grid2>
             </Grid2>
             <Box sx={styles.container}>
               <Typography marginRight={7}>受注日</Typography>
-              <DateX disabled />
+              <DateX />
             </Box>
             <Box sx={styles.container}>
               <Typography marginRight={7}>入力者</Typography>
@@ -154,18 +151,17 @@ const NewOrder = () => {
                 //styles={{ background: 'grey' }}
                 value={dateRange}
                 onChange={handleDateChange} /*val={rentalPeriod}*/
-                disabled
               />
             </Box>
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 12, md: 5 }}>
             <Box sx={styles.container}>
               <Typography marginRight={7}>公演名</Typography>
-              <TextField disabled sx={{ width: '50%' }}></TextField>
+              <TextField sx={{ width: '50%' }}></TextField>
             </Box>
             <Box sx={styles.container}>
               <Typography marginRight={5}>公演場所</Typography>
-              <TextField disabled sx={{ width: '50%' }}></TextField>
+              <TextField sx={{ width: '50%' }}></TextField>
               <Button onClick={() => handleOpenLocationDialog()}>選択</Button>
               <Dialog open={locationDialogOpen} fullScreen>
                 <LocationSelectDialog handleCloseLocationDialog={handleCloseLocationDailog} />
@@ -173,7 +169,7 @@ const NewOrder = () => {
             </Box>
             <Box sx={styles.container}>
               <Typography marginRight={9}>相手</Typography>
-              <TextField disabled sx={{ width: '50%' }}></TextField>
+              <TextField sx={{ width: '50%' }}></TextField>
               <Button onClick={() => handleOpenCustomerDialog()}>選択</Button>
               <Dialog open={customerDialogOpen} fullScreen>
                 <CustomerSelectionDialog handleCloseCustDialog={handleCloseCustomerDialog} />
@@ -181,55 +177,31 @@ const NewOrder = () => {
             </Box>
             <Box sx={styles.container}>
               <Typography marginRight={3}>相手担当者</Typography>
-              <TextField disabled sx={{ width: '50%' }}></TextField>
+              <TextField sx={{ width: '50%' }}></TextField>
             </Box>
             <Box sx={styles.container}>
               <Typography marginRight={9}>メモ</Typography>
-              <TextField disabled sx={{ width: '50%' }}></TextField>
+              <TextField sx={{ width: '50%' }}></TextField>
             </Box>
             <Box sx={styles.container}>
               <Typography marginRight={7}>値引き</Typography>
-              <TextField disabled sx={{ width: '30%' }}></TextField>
+              <TextField sx={{ width: '30%' }}></TextField>
             </Box>
           </Grid2>
         </Grid2>
       </Paper>
       {/* --------------------------------受注明細（機材）------------------------------------- */}
-      <Accordion sx={{ marginTop: 2 }}>
+      <Accordion sx={{ marginTop: 2 }} defaultExpanded>
         <AccordionSummary expandIcon={<ExpandMoreIcon />} component="div">
           <Grid2 container alignItems="center" justifyContent="space-between" pt={2} sx={{ width: '100%' }} spacing={1}>
             <Grid2>
               <Typography>受注明細(機材)</Typography>
-              <Button
-                href="/new-order/schedule"
-                onClick={(e) => {
-                  e.stopPropagation();
-                }}
-              >
-                受注機材・スケジュール
-              </Button>
             </Grid2>
             <Grid2 container display="flex" alignItems="center" spacing={1}>
-              <Typography>機材数</Typography>
-              <TextField
-                sx={{
-                  width: '10%',
-                  minWidth: '45px',
-                  '& .MuiInputBase-input': {
-                    textAlign: 'right',
-                    padding: 1,
-                  },
-                }}
-                value={equipmentTotal}
-                onClick={(e) => {
-                  e.stopPropagation();
-                }}
-                disabled
-              ></TextField>
               <Typography>合計金額</Typography>
               <TextField
                 sx={{
-                  width: '25%',
+                  width: '40%',
                   minWidth: '90px',
                   '& .MuiInputBase-input': {
                     textAlign: 'right',
@@ -275,53 +247,11 @@ const NewOrder = () => {
         </AccordionDetails>
       </Accordion>
       {/* -------------------------車両----------------------------------- */}
-      <Accordion sx={{ marginTop: 2 }}>
+      <Accordion sx={{ marginTop: 2 }} defaultExpanded>
         <AccordionSummary expandIcon={<ExpandMoreIcon />} component="div">
           <Grid2 container alignItems="center" justifyContent="space-between" pt={2} sx={{ width: '100%' }} spacing={1}>
             <Grid2>
-              <Typography>(車両)</Typography>
-              <Button
-                href="/new-order/schedule"
-                onClick={(e) => {
-                  e.stopPropagation();
-                }}
-              >
-                受注機材・スケジュール
-              </Button>
-            </Grid2>
-            <Grid2 container display="flex" alignItems="center" spacing={1}>
-              <Typography>出庫車両数</Typography>
-              <TextField
-                sx={{
-                  width: '10%',
-                  minWidth: '45px',
-                  '& .MuiInputBase-input': {
-                    textAlign: 'right',
-                    padding: 1,
-                  },
-                }}
-                value={issueTotal}
-                onClick={(e) => {
-                  e.stopPropagation();
-                }}
-                disabled
-              ></TextField>
-              <Typography>入庫車両数</Typography>
-              <TextField
-                sx={{
-                  width: '10%',
-                  minWidth: '45px',
-                  '& .MuiInputBase-input': {
-                    textAlign: 'right',
-                    padding: 1,
-                  },
-                }}
-                value={returnTotal}
-                onClick={(e) => {
-                  e.stopPropagation();
-                }}
-                disabled
-              ></TextField>
+              <Typography>受注明細(車両)</Typography>
             </Grid2>
             <Grid2 container spacing={1}>
               <Button
