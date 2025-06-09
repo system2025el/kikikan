@@ -1,5 +1,6 @@
 'use client';
 
+import { zodResolver } from '@hookform/resolvers/zod';
 import SearchIcon from '@mui/icons-material/Search';
 import {
   Box,
@@ -20,12 +21,18 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { useState } from 'react';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { useEffect, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { RadioButtonGroup, SelectElement, TextFieldElement } from 'react-hook-form-mui';
+import { DatePickerElement } from 'react-hook-form-mui/date-pickers';
 
 import { customers } from '@/app/_lib/mock-data';
 
 import { BackButton } from '../../_ui/back-button';
 import { TwoDatePickers } from '../../_ui/date';
+import { OrderSchema, OrderSearchValues } from '../_lib/types';
 import { OrderTable } from './order-table';
 
 /** 受注一覧画面 */
@@ -55,6 +62,33 @@ export const OrderList = () => {
     setCustSort(event.target.value);
   };
 
+  const { control, getValues, handleSubmit, watch } = useForm({
+    mode: 'onSubmit',
+    reValidateMode: 'onSubmit',
+    resolver: zodResolver(OrderSchema),
+    defaultValues: {
+      criteria: '',
+      selectedDate: '4',
+      customer: '',
+      customerSort: '1',
+      stageName: '',
+      orderStartDate: '',
+      orderFinishDate: '',
+    },
+  });
+
+  const onSubmit = (data: OrderSearchValues) => {
+    console.log(data);
+  };
+
+  // 検索条件のラジオボタンとdatepickerを制御
+  const selectedDate = watch('selectedDate');
+  useEffect(() => {
+    if (selectedDate !== undefined) {
+      console.log('selectedDateが変わった:', selectedDate);
+    }
+  }, [selectedDate]);
+
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
       <Paper variant="outlined">
@@ -63,66 +97,70 @@ export const OrderList = () => {
           <BackButton label="戻る" />
         </Box>
         <Divider />
-        <Box width={'100%'} p={2}>
-          <Stack justifyContent={'space-between'}>
-            <Typography variant="body2">検索</Typography>
-            <Button>
-              <SearchIcon />
-              検索
-            </Button>
-          </Stack>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <Grid2 container p={2} spacing={1}>
+            <Grid2 container justifyContent={'space-between'} size={{ sm: 12, md: 12 }}>
+              <Typography variant="body2">検索</Typography>
+              <Button type="submit">
+                <SearchIcon />
+                検索
+              </Button>
+            </Grid2>
 
-          <Grid2 size={{ sm: 'grow' }}>
-            <FormControl sx={{ minWidth: '40%' }}>
-              <InputLabel id="search">検索条件</InputLabel>
-              <Select
-                labelId="search"
-                label="検索条件"
-                onChange={handleSelect}
-                value={criteria}
-                sx={{ bgcolor: 'white' }}
-              >
-                <MenuItem value="出庫日が">出庫日が</MenuItem>
-                <MenuItem value="入庫日が">入庫日が</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid2>
-          <Grid2 container>
             <Grid2 size={{ sm: 12, md: 12 }}>
-              <FormControl>
+              <SelectElement
+                name="criteria"
+                label="検索条件"
+                control={control}
+                options={[
+                  { id: '1', label: '出庫日が' },
+                  { id: '2', label: '入庫日が' },
+                ]}
+                sx={{ bgcolor: 'white', minWidth: 150 }}
+              />
+            </Grid2>
+
+            <Grid2 container direction={'row'} width={'100%'} alignItems={'center'}>
+              <Grid2 alignItems={'center'}>
+                <RadioButtonGroup control={control} name="selectedDate" options={radioData} row />
+                {/* <FormControl>
                 <Box display={'flex'} alignItems={'center'}>
                   <RadioGroup defaultValue={'past'} row>
                     {radioData.map((data) => (
                       <FormControlLabel
-                        key={data.value}
-                        value={data.value}
+                        key={data.id}
+                        value={data.id}
                         control={<Radio />}
-                        onChange={() => handleChange(data.value)}
+                        onChange={() => handleChange(data.id)}
                         label={data.label}
                       />
                     ))}
                   </RadioGroup>
                 </Box>
-              </FormControl>
-            </Grid2>
-            {valIsSelect ? (
-              <Grid2 justifyContent={'end'} size={{ sm: 12, md: 12, lg: 12, xl: 12 }}>
-                <TwoDatePickers />
+              </FormControl> */}
               </Grid2>
-            ) : (
-              ''
-            )}
-          </Grid2>
+              {selectedDate === '7' && (
+                <Grid2 display={'flex'} alignItems={'center'}>
+                  <TwoDatePickers />
+                </Grid2>
+              )}
+            </Grid2>
 
-          <Grid2 container mt={1}>
-            <Grid2 container display={'flex'} alignItems={'center'} size={{ sm: 12, md: 7 }}>
-              {/* <Grid2 size={{ sm: 4, md: 2 }} justifyItems={{ sm: 'end', md: 'start' }}> */}
-              <Typography noWrap minWidth={110}>
-                顧客
-              </Typography>
-              {/* </Grid2> */}
-              <Grid2 size={{ sm: 8, md: 4 }}>
-                <FormControl sx={{ ml: 1 }}>
+            <Grid2 container width={'100%'}>
+              <Grid2 display={'flex'} alignItems={'center'} size={{ sm: 12, md: 6 }}>
+                <Typography noWrap minWidth={110}>
+                  顧客
+                </Typography>
+                <SelectElement
+                  name="customer"
+                  control={control}
+                  options={customers.map(({ id, name }) => ({
+                    id: id.toString(),
+                    label: name,
+                  }))}
+                  sx={{ minWidth: 250 }}
+                />
+                {/* <FormControl>
                   <Select value={customer} sx={{ minWidth: 300, bgcolor: 'white' }} onChange={handleCustomerSelect}>
                     {customers.map((customer) => (
                       <MenuItem key={customer.id} value={customer.name}>
@@ -130,45 +168,62 @@ export const OrderList = () => {
                       </MenuItem>
                     ))}
                   </Select>
-                </FormControl>
+                </FormControl> */}
+              </Grid2>
+              <Grid2 display={'flex'} alignItems={'center'}>
+                <Typography noWrap minWidth={110}>
+                  ソート
+                </Typography>
+                <SelectElement
+                  name="customerSort"
+                  control={control}
+                  options={[
+                    { id: '1', label: '顧客名簿' },
+                    { id: '2', label: '顧客名' },
+                  ]}
+                  sx={{ minWidth: 150 }}
+                />
               </Grid2>
             </Grid2>
-            <Grid2 display={'flex'} alignItems={'center'}>
-              <Typography noWrap minWidth={110} sx={{ pl: { xs: 0, sm: 0, md: 5 } }}>
-                ソート
-              </Typography>
-              <Select value={custSort} onChange={handleCustSortSelect} sx={{ bgcolor: 'white', ml: 1 }}>
-                <MenuItem value="顧客名簿">顧客名簿</MenuItem>
-              </Select>
+
+            <Grid2 container spacing={1}>
+              <Grid2 display={'flex'} alignItems={'center'} size={{ sm: 12, md: 4.5 }}>
+                <Typography noWrap minWidth={110}>
+                  公演名
+                </Typography>
+                <TextFieldElement name="stageName" control={control} />
+              </Grid2>
+              <Grid2 container size={{ sm: 12, md: 'grow' }}>
+                <Grid2 display={'flex'} alignItems={'center'} size={{ sm: 12, md: 3.5 }}>
+                  <Typography>受注開始日～終了日</Typography>
+                </Grid2>
+                <Grid2 display={'flex'} alignItems={'center'} size={{ sm: 12, md: 5 }}>
+                  {/* <LocalizationProvider
+                  dateAdapter={AdapterDayjs}
+                  dateFormats={{ year: 'YYYY年', month: 'MM' }} // カレンダー内の年一覧のフォーマット
+                  adapterLocale="ja"
+                  localeText={{
+                    previousMonth: '前月を表示',
+                    nextMonth: '翌月を表示',
+                  }}
+                >
+                  <DatePickerElement
+                    name="orderStartDate"
+                    control={control}
+                    slotProps={{
+                      calendarHeader: { format: 'YYYY年MM月' },
+                      toolbar: { format: '' }
+                    }}
+                  />
+                  ～
+                  <DatePickerElement name="orderFinishDate" control={control} />
+                </LocalizationProvider> */}
+                  <TwoDatePickers />
+                </Grid2>
+              </Grid2>
             </Grid2>
           </Grid2>
-          <Stack mt={1}>
-            <Typography noWrap minWidth={110}>
-              受注ステータス
-            </Typography>
-            <FormControl>
-              <Select value={orderStatus} onChange={handleOrder} sx={{ minWidth: 80, bgcolor: 'white' }}>
-                <MenuItem value="確定">確定</MenuItem>
-              </Select>
-            </FormControl>
-          </Stack>
-          <Grid2 container mt={1} spacing={1}>
-            <Grid2 display={'flex'} alignItems={'center'} size={{ sm: 12, md: 4.5 }}>
-              <Typography noWrap minWidth={110}>
-                公演名
-              </Typography>
-              <TextField sx={{ bgcolor: 'white', ml: 1 }} />
-            </Grid2>
-            <Grid2 container size={{ sm: 12, md: 'grow' }}>
-              <Grid2 display={'flex'} alignItems={'center'} size={{ sm: 12, md: 3.5 }}>
-                <Typography>受注開始日～終了日</Typography>
-              </Grid2>
-              <Grid2 display={'flex'} alignItems={'center'} size={{ sm: 12, md: 5 }}>
-                <TwoDatePickers sx={{ bgcolor: 'white' }} />
-              </Grid2>
-            </Grid2>
-          </Grid2>
-        </Box>
+        </form>
       </Paper>
       <OrderTable />
     </Container>
@@ -177,11 +232,21 @@ export const OrderList = () => {
 
 /** ラヂオボタン用データ */
 const radioData = [
-  { value: 'lastMonth', label: '先月全て' },
-  { value: 'thisMonth', label: '今月全て' },
-  { value: 'yesterday', label: '昨日' },
-  { value: 'today', label: '今日' },
-  { value: 'tomorrow', label: '明日' },
-  { value: 'tomorrowOnward', label: '明日以降' },
-  { value: 'select', label: '指定期間' },
+  {
+    id: '1',
+    label: '先月全て',
+    FormControlLabelProps: {
+      sx: {
+        '& .MuiFormControlLabel-label': {
+          fontSize: '0.5rem',
+        },
+      },
+    },
+  },
+  { id: '2', label: '今月全て' },
+  { id: '3', label: '昨日' },
+  { id: '4', label: '今日' },
+  { id: '5', label: '明日' },
+  { id: '6', label: '明日以降' },
+  { id: '7', label: '指定期間' },
 ];

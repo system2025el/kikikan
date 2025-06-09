@@ -1,4 +1,18 @@
-/** --------------------受注一覧------------------------- */
+import z from 'zod';
+/** 検索用型、ヴァリデーション */
+export const OrderSchema = z.object({
+  criteria: z.string(),
+  selectedDate: z.string(),
+  customer: z.string(),
+  customerSort: z.string(),
+  stageName: z.string(),
+  orderStartDate: z.string(),
+  orderFinishDate: z.string(),
+});
+/** 検索用タイプ */
+export type OrderSearchValues = z.infer<typeof OrderSchema>;
+
+/** --------------------受注一覧表示用------------------------- */
 const enum OrderStatus {
   processing = '処理中',
   processed = '処理済み',
@@ -16,7 +30,7 @@ type OrderData = {
   returnDate: string;
   inventoryStatus: string;
 };
-
+/** モックデータ削除する delete */
 export const orderList: OrderData[] = [
   {
     id: 1,

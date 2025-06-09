@@ -84,7 +84,7 @@ export const OrderTable = () => {
           </Grid2>
         </Grid2>
         <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 1 }}>
-          <Table stickyHeader size="small" padding="none">
+          <Table stickyHeader size="small" padding="none" sx={{ width: '100vw' }}>
             <TableHead>
               <TableRow>
                 <TableCell></TableCell>
@@ -124,7 +124,9 @@ export const OrderTable = () => {
                     終了日
                   </Box>
                 </TableCell>
-                <TableCell>入出庫ステータス</TableCell>
+                <TableCell>
+                  <Typography noWrap>入出庫ステータス</Typography>
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>

@@ -62,6 +62,9 @@ const lightTheme = createTheme(
         defaultProps: {
           size: 'small',
         },
+        styleOverrides: {
+          root: { padding: 2 },
+        },
       },
       MuiButton: {
         defaultProps: {
