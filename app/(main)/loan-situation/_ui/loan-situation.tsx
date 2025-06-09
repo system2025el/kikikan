@@ -3,15 +3,16 @@
 import {
   Box,
   Button,
+  Divider,
   FormControl,
   FormControlLabel,
   FormLabel,
+  Paper,
   Radio,
   RadioGroup,
   TextField,
   Typography,
 } from '@mui/material';
-import { grey } from '@mui/material/colors';
 import { useState } from 'react';
 
 import { Calendar } from '../../_ui/date';
@@ -30,11 +31,12 @@ export const LoanSituation = () => {
   const [visible, setVisible] = useState(false);
 
   return (
-    <Box bgcolor={grey[200]}>
-      <Box display="flex" justifyContent="space-between" alignItems="center" bgcolor={grey[300]}>
+    <Paper variant="outlined">
+      <Box display="flex" justifyContent="space-between" alignItems="center">
         <Typography margin={1}>貸出状況</Typography>
         <Button sx={{ margin: 1 }}>戻る</Button>
       </Box>
+      <Divider />
       <Box sx={styles.container}>
         <Typography marginRight={2}>機材名</Typography>
         <TextField disabled defaultValue="SHARPY PLUS"></TextField>
@@ -75,7 +77,7 @@ export const LoanSituation = () => {
           <Button sx={{ bgcolor: 'white', color: 'black' }} onClick={() => setVisible(true)}>
             日付選択
           </Button>
-          <Box position="absolute" bgcolor={grey[200]} zIndex={1000} display={visible ? 'block' : 'none'}>
+          <Box position="absolute" zIndex={1000} display={visible ? 'block' : 'none'}>
             <Calendar />
             <Box display="flex" justifyContent="space-between">
               <Button onClick={() => setVisible(false)} sx={{ margin: 1 }}>
@@ -119,7 +121,7 @@ export const LoanSituation = () => {
           />
         </Box>
       </Box>
-    </Box>
+    </Paper>
   );
 };
 
