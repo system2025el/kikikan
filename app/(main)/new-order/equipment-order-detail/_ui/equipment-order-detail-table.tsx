@@ -176,9 +176,9 @@ export const GridSelectBoxTable: React.FC<GridSelectBoxTableProps> = ({
       data: [...updated[rowIndex].data],
     };
     updated[rowIndex].data[colIndex] = newValue;
-    updated[rowIndex].data[4] = Number(updated[rowIndex].data[2]) + Number(updated[rowIndex].data[3]);
+    updated[rowIndex].data[6] = Number(updated[rowIndex].data[4]) + Number(updated[rowIndex].data[5]);
     setLocalRows(updated);
-    onChange?.(rowIndex, colIndex, newValue, updated[rowIndex].data[4]);
+    onChange?.(rowIndex, colIndex, newValue, Number(updated[rowIndex].data[6]));
   };
 
   const getWidth = (index: number) => cellWidths[index] ?? cellWidths[1];
