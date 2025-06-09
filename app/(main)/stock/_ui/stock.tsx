@@ -1,7 +1,6 @@
 'use client';
 
-import { Box, Button, TextField, Typography } from '@mui/material';
-import { grey } from '@mui/material/colors';
+import { Box, Button, Divider, Paper, TextField, Typography } from '@mui/material';
 import { useState } from 'react';
 
 import { Calendar } from '../../_ui/date';
@@ -30,23 +29,24 @@ export const Stock = () => {
   };
 
   return (
-    <>
-      <Box display="flex" justifyContent="space-between" alignItems="center" bgcolor={grey[300]}>
+    <Paper>
+      <Box display="flex" justifyContent="space-between" alignItems="center">
         <Typography margin={1}>在庫確認</Typography>
         <Button sx={{ margin: 2 }}>検索</Button>
       </Box>
-      <Box bgcolor={grey[200]}>
-        <Box display="flex" alignItems="center">
-          <Typography margin={1}>機材名</Typography>
-          <TextField defaultValue="SHARPY Plus" sx={{ ml: 4, bgcolor: 'white' }}></TextField>
+      <Divider />
+      <Box>
+        <Box display="flex" alignItems="center" p={2}>
+          <Typography mr={2}>部門</Typography>
+          <TextField defaultValue="SHARPY Plus"></TextField>
         </Box>
-        <Box marginTop={6} display="flex" justifyContent="center">
+        <Box marginTop={2} display="flex" justifyContent="center">
           <Button>＜＜</Button>
           <Box>
             <Button sx={{ bgcolor: 'white', color: 'black' }} onClick={() => setVisible(true)}>
               日付選択
             </Button>
-            <Box position="absolute" bgcolor={grey[200]} zIndex={1000} display={visible ? 'block' : 'none'}>
+            <Box position="absolute" zIndex={1000} display={visible ? 'block' : 'none'}>
               <Calendar />
               <Box display="flex" justifyContent="space-between">
                 <Button onClick={() => setVisible(false)} sx={{ margin: 1 }}>
@@ -91,6 +91,6 @@ export const Stock = () => {
           </Box>
         </Box>
       </Box>
-    </>
+    </Paper>
   );
 };

@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Button, Container, Tab, Tabs, TextField, Typography } from '@mui/material';
+import { Box, Button, Container, Divider, Grid2, Paper, Tab, Tabs, TextField, Typography } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import { useEffect, useState } from 'react';
 
@@ -171,30 +171,18 @@ export const DateSelectDialog = ({
 
   return (
     <Container disableGutters sx={{ minWidth: '100%', p: 3 }} maxWidth={'xl'}>
-      <Box display="flex" justifyContent="space-between" alignItems="center" p={2} bgcolor={grey[300]}>
-        <Typography margin={1}>日付選択</Typography>
-        <Box>
-          <Button sx={{ mx: 4 }} onClick={handleSave}>
-            保存
-          </Button>
-          <Button
-            sx={{ mx: 4 }}
-            onClick={() => {
-              console.log('仕込日', { preparationDates }, { inputPreparation });
-              console.log('RH日', { RHDates }, { inputRH });
-              console.log('GP日', { GPDates }, { inputGP });
-              console.log('本番日', { actualDates }, { inputActual });
-            }}
-          >
-            追加
-          </Button>
+      <Paper variant="outlined">
+        <Box display="flex" justifyContent="space-between" alignItems="center" p={2}>
+          <Typography margin={1}>日付選択</Typography>
+          <Grid2 container spacing={1}>
+            <Button onClick={handleSave}>保存</Button>
+            <Button>追加</Button>
+            <Button onClick={onClose}>戻る</Button>
+          </Grid2>
         </Box>
-        <Button sx={{ margin: 1 }} onClick={onClose}>
-          戻る
-        </Button>
-      </Box>
-      <Box bgcolor={grey[200]} mt={2}>
-        <Box display="flex" sx={{ pt: 3, bgcolor: grey[300] }}>
+      </Paper>
+      <Paper variant="outlined" sx={{ mt: 2 }}>
+        <Grid2 container spacing={2} pt={2}>
           <Tabs value={value} onChange={handleChange}>
             <Tab value="仕込" label="仕込" sx={{ bgcolor: 'purple' }} />
             <Tab value="RH" label="RH" sx={{ bgcolor: 'orange' }} />
@@ -207,7 +195,8 @@ export const DateSelectDialog = ({
               追加
             </Button>
           </Box>
-        </Box>
+        </Grid2>
+        <Divider />
         <TabPanel value={value} index="仕込">
           {preparationDates.map((input, index) => (
             <Box display="flex" alignItems="center" margin={2} key={index}>
@@ -279,7 +268,7 @@ export const DateSelectDialog = ({
             </Box>
           ))}
         </TabPanel>
-      </Box>
+      </Paper>
     </Container>
   );
 };

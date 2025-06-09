@@ -9,16 +9,18 @@ import {
   Box,
   Button,
   Checkbox,
+  Divider,
   FormControl,
   FormControlLabel,
   FormGroup,
+  Grid2,
   MenuItem,
+  Paper,
   Select,
   SelectChangeEvent,
   TextField,
   Typography,
 } from '@mui/material';
-import { grey } from '@mui/material/colors';
 import { useState } from 'react';
 
 import DateX from '@/app/(main)/_ui/date';
@@ -61,41 +63,46 @@ export const Quotation = () => {
 
   return (
     <>
-      <Box display="flex" justifyContent="space-between" alignItems="center" bgcolor={grey[300]}>
-        <Typography margin={1}>見積書</Typography>
-        <Box>
-          <Button sx={{ margin: 1 }}>編集</Button>
-          <Button sx={{ margin: 1 }}>保存</Button>
-        </Box>
-        <Button sx={{ margin: 1 }}>複製</Button>
-      </Box>
+      <Paper variant="outlined">
+        <Grid2 container display="flex" alignItems="center" justifyContent="space-between" p={1}>
+          <Typography margin={1}>見積書</Typography>
+          <Box>
+            <Button sx={{ margin: 1 }}>編集</Button>
+            <Button sx={{ margin: 1 }}>保存</Button>
+            <Button sx={{ margin: 1 }}>複製</Button>
+          </Box>
+        </Grid2>
+      </Paper>
       {/* 受注選択
       ----------------------------------------------------------------------------------*/}
-      <Accordion sx={{ marginTop: 2, bgcolor: grey[300] }}>
+      <Accordion sx={{ marginTop: 2 }}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Typography component="span">受注選択</Typography>
         </AccordionSummary>
         <AccordionDetails sx={{ padding: 0 }}>
-          <Box display="flex">
-            <Box width="55%" bgcolor={grey[200]}>
-              <Box my={1} mx={2}>
-                <Button href="/order-list">受注選択</Button>
-              </Box>
-              <Box sx={styles.container}>
-                <Typography marginRight={5}>受注番号</Typography>
-                <TextField disabled></TextField>
-                <Typography marginLeft={5} marginRight={1}>
-                  受注ステータス
-                </Typography>
-                <FormControl disabled size="small" sx={{ width: '25%' }}>
-                  <Select value={selectOrderStatus} onChange={orderStatusChange}>
-                    <MenuItem value={'確定'}>確定</MenuItem>
-                  </Select>
-                </FormControl>
-              </Box>
+          <Divider />
+          <Box pt={2} pl={2}>
+            <Button href="/order-list">受注選択</Button>
+          </Box>
+          <Grid2 container>
+            <Grid2>
+              <Grid2 container margin={2} spacing={2}>
+                <Grid2 display="flex" direction="row" alignItems="center">
+                  <Typography marginRight={5}>受注番号</Typography>
+                  <TextField disabled></TextField>
+                </Grid2>
+                <Grid2 display="flex" direction="row" alignItems="center">
+                  <Typography marginRight={1}>受注ステータス</Typography>
+                  <FormControl disabled size="small" sx={{ width: 120 }}>
+                    <Select value={selectOrderStatus} onChange={orderStatusChange}>
+                      <MenuItem value={'確定'}>確定</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid2>
+              </Grid2>
               <Box sx={styles.container}>
                 <Typography marginRight={7}>受注日</Typography>
-                <DateX />
+                <DateX disabled />
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={7}>入力者</Typography>
@@ -107,14 +114,14 @@ export const Quotation = () => {
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={5}>受注開始</Typography>
-                <DateX />
+                <DateX disabled />
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={5}>受注終了</Typography>
-                <DateX />
+                <DateX disabled />
               </Box>
-            </Box>
-            <Box marginLeft={4} width="45%" bgcolor={grey[200]}>
+            </Grid2>
+            <Grid2>
               <Box sx={styles.container}>
                 <Typography marginRight={7}>公演名</Typography>
                 <TextField disabled defaultValue="A/Zepp Tour" sx={{ width: '50%' }}></TextField>
@@ -143,36 +150,39 @@ export const Quotation = () => {
                 <Typography marginRight={3}>受注値引き</Typography>
                 <TextField disabled></TextField>
               </Box>
-            </Box>
-          </Box>
+            </Grid2>
+          </Grid2>
         </AccordionDetails>
       </Accordion>
       {/* 見積ヘッダー
       ----------------------------------------------------------------------------------*/}
-      <Accordion sx={{ marginTop: 2, bgcolor: grey[300] }}>
+      <Accordion sx={{ marginTop: 2 }}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Typography component="span">見積ヘッダー</Typography>
         </AccordionSummary>
         <AccordionDetails sx={{ padding: 0 }}>
-          <Box display="flex">
-            <Box width="55%" bgcolor={grey[200]}>
-              <Box my={1} mx={2}>
-                <FormGroup>
-                  <FormControlLabel control={<Checkbox defaultChecked />} label="見積対象" />
-                </FormGroup>
-              </Box>
-              <Box sx={styles.container}>
-                <Typography marginRight={5}>見積番号</Typography>
-                <TextField disabled></TextField>
-                <Typography marginLeft={5} marginRight={1}>
-                  見積ステータス
-                </Typography>
-                <FormControl size="small" sx={{ width: '25%' }}>
-                  <Select value={selectQuotationStatus} onChange={quotationStatusChange}>
-                    <MenuItem value={'処理中'}>処理中</MenuItem>
-                  </Select>
-                </FormControl>
-              </Box>
+          <Divider />
+          <Box pt={2} pl={2}>
+            <FormGroup>
+              <FormControlLabel control={<Checkbox defaultChecked />} label="見積対象" />
+            </FormGroup>
+          </Box>
+          <Grid2 container>
+            <Grid2>
+              <Grid2 container margin={2} spacing={2}>
+                <Grid2 display="flex" direction="row" alignItems="center">
+                  <Typography marginRight={5}>見積番号</Typography>
+                  <TextField disabled></TextField>
+                </Grid2>
+                <Grid2 display="flex" direction="row" alignItems="center">
+                  <Typography marginRight={1}>見積ステータス</Typography>
+                  <FormControl size="small" sx={{ width: 150 }}>
+                    <Select value={selectQuotationStatus} onChange={quotationStatusChange}>
+                      <MenuItem value={'処理中'}>処理中</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid2>
+              </Grid2>
               <Box sx={styles.container}>
                 <Typography marginRight={7}>見積日</Typography>
                 <DateX />
@@ -189,8 +199,8 @@ export const Quotation = () => {
                 <Typography marginRight={1}>見積有効期限</Typography>
                 <DateX />
               </Box>
-            </Box>
-            <Box marginLeft={4} width="45%" bgcolor={grey[200]}>
+            </Grid2>
+            <Grid2>
               <Box sx={styles.container}>
                 <Typography marginRight={5}>見積件名</Typography>
                 <TextField defaultValue="A/Zepp Tour" sx={{ width: '50%' }}></TextField>
@@ -222,36 +232,39 @@ export const Quotation = () => {
                 <TextField></TextField>
                 <Button sx={{ marginLeft: 4 }}>値引追加</Button>
               </Box>
-            </Box>
-          </Box>
+            </Grid2>
+          </Grid2>
         </AccordionDetails>
       </Accordion>
       {/* 請求情報
       ----------------------------------------------------------------------------------*/}
-      <Accordion sx={{ marginTop: 2, bgcolor: grey[300] }}>
+      <Accordion sx={{ marginTop: 2 }}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Typography component="span">請求情報</Typography>
         </AccordionSummary>
         <AccordionDetails sx={{ padding: 0 }}>
-          <Box display="flex">
-            <Box width="55%" bgcolor={grey[200]}>
-              <Box my={1} mx={2}>
-                <FormGroup>
-                  <FormControlLabel control={<Checkbox defaultChecked />} label="請求対象" />
-                </FormGroup>
-              </Box>
-              <Box sx={styles.container}>
-                <Typography marginRight={5}>請求番号</Typography>
-                <TextField disabled></TextField>
-                <Typography marginLeft={5} marginRight={1}>
-                  請求ステータス
-                </Typography>
-                <FormControl size="small" sx={{ width: '25%' }}>
-                  <Select value={selectRequestStatus} onChange={requestStatusChange}>
-                    <MenuItem value={'処理中'}>処理中</MenuItem>
-                  </Select>
-                </FormControl>
-              </Box>
+          <Divider />
+          <Box pt={2} pl={2}>
+            <FormGroup>
+              <FormControlLabel control={<Checkbox defaultChecked />} label="請求対象" />
+            </FormGroup>
+          </Box>
+          <Grid2 container>
+            <Grid2>
+              <Grid2 container margin={2} spacing={2}>
+                <Grid2 display="flex" direction="row" alignItems="center">
+                  <Typography marginRight={5}>請求番号</Typography>
+                  <TextField disabled></TextField>
+                </Grid2>
+                <Grid2 display="flex" direction="row" alignItems="center">
+                  <Typography marginRight={1}>請求ステータス</Typography>
+                  <FormControl size="small" sx={{ width: 150 }}>
+                    <Select value={selectRequestStatus} onChange={requestStatusChange}>
+                      <MenuItem value={'処理中'}>処理中</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid2>
+              </Grid2>
               <Box sx={styles.container}>
                 <Typography marginRight={7}>請求日</Typography>
                 <DateX />
@@ -264,8 +277,8 @@ export const Quotation = () => {
                 <Typography marginRight={1}>請求有効期限</Typography>
                 <DateX />
               </Box>
-            </Box>
-            <Box marginLeft={4} width="45%" bgcolor={grey[200]}>
+            </Grid2>
+            <Grid2>
               <Box sx={styles.container}>
                 <Typography marginRight={5}>請求件名</Typography>
                 <TextField defaultValue="A/Zepp Tour" sx={{ width: '50%' }}></TextField>
@@ -283,41 +296,41 @@ export const Quotation = () => {
                 <Typography marginRight={5}>請求メモ</Typography>
                 <TextField sx={{ width: '50%' }}></TextField>
               </Box>
-            </Box>
-          </Box>
+            </Grid2>
+          </Grid2>
         </AccordionDetails>
       </Accordion>
       {/* 見積明細
       ----------------------------------------------------------------------------------*/}
-      <Accordion sx={{ marginTop: 2, bgcolor: grey[300] }}>
+      <Accordion sx={{ marginTop: 2 }}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />} component="div">
-          <Box display="flex" alignItems="center" sx={{ width: '100%' }}>
-            <Box width="35%">
+          <Grid2 container alignItems="center" justifyContent="space-between" pt={2} sx={{ width: '100%' }} spacing={1}>
+            <Grid2>
               <Typography>見積明細</Typography>
-            </Box>
-            <Box width="65%" display="flex" alignItems="center" justifyContent="space-evenly">
-              <Box display="flex" alignItems="center">
-                <Typography mx={1}>合計金額</Typography>
-                <TextField
-                  sx={{
-                    '& .MuiInputBase-input': {
-                      textAlign: 'right',
-                      padding: 1,
-                    },
-                  }}
-                  value={'¥' + priceTotal}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                  }}
-                ></TextField>
-              </Box>
+            </Grid2>
+            <Grid2 container display="flex" alignItems="center" spacing={1}>
+              <Typography>合計金額</Typography>
+              <TextField
+                sx={{
+                  '& .MuiInputBase-input': {
+                    textAlign: 'right',
+                    padding: 1,
+                  },
+                }}
+                value={'¥' + priceTotal}
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+              ></TextField>
+            </Grid2>
+            <Grid2 container spacing={1}>
               <Button
                 href="/new-order/equipment-order-detail"
                 onClick={(e) => {
                   e.stopPropagation();
                 }}
               >
-                ＋ 機材入力
+                機材入力
               </Button>
               <Button
                 onClick={(e) => {
@@ -332,7 +345,7 @@ export const Quotation = () => {
                   e.stopPropagation();
                 }}
               >
-                － 削除
+                削除
               </Button>
               <Button
                 onClick={(e) => {
@@ -341,8 +354,8 @@ export const Quotation = () => {
               >
                 見積書印刷
               </Button>
-            </Box>
-          </Box>
+            </Grid2>
+          </Grid2>
         </AccordionSummary>
         <AccordionDetails sx={{ padding: 0 }}>
           <SelectTable headers={quotationHeaders} datas={quotationRows} onSelectionChange={handleSelectionChange} />
