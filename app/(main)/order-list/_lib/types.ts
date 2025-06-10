@@ -17,6 +17,14 @@ const enum OrderStatus {
   processing = '処理中',
   processed = '処理済み',
 }
+const enum InventoryStatus {
+  notStarted = '未作業',
+  standbyForShipment = '出庫スタンバイ中',
+  shipmentStandbyDone = '出庫スタンバイ済み',
+  shipmentCheckOngoing = '出庫チェック中',
+  shipmentChecked = '出庫チェック済み',
+  stocked = '入庫',
+}
 
 type OrderData = {
   id: number;
@@ -42,7 +50,7 @@ export const orderList: OrderData[] = [
     orderedDate: '2023/10/01',
     issueDate: '2025/11/02',
     returnDate: '2025/11/06',
-    inventoryStatus: '',
+    inventoryStatus: InventoryStatus.shipmentCheckOngoing,
   },
   {
     id: 2,
@@ -54,7 +62,7 @@ export const orderList: OrderData[] = [
     orderedDate: '2025/10/01',
     issueDate: '2026/01/01',
     returnDate: '2026/01/10',
-    inventoryStatus: '',
+    inventoryStatus: InventoryStatus.stocked,
   },
   {
     id: 3,
@@ -66,7 +74,7 @@ export const orderList: OrderData[] = [
     orderedDate: '2025/10/01',
     issueDate: '2026/01/01',
     returnDate: '2026/01/10',
-    inventoryStatus: '',
+    inventoryStatus: InventoryStatus.standbyForShipment,
   },
   {
     id: 4,
@@ -78,7 +86,7 @@ export const orderList: OrderData[] = [
     orderedDate: '2025/10/02',
     issueDate: '2026/01/02',
     returnDate: '2026/01/11',
-    inventoryStatus: '',
+    inventoryStatus: InventoryStatus.shipmentChecked,
   },
   {
     id: 5,
