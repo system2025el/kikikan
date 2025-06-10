@@ -27,16 +27,16 @@ export const getDateHeaderBackgroundColor = (date: string, dateRange: string[]):
 
 export const getDateRowBackgroundColor = (
   date: string,
-  startKICSDate: Dayjs | null,
-  endKICSDate: Dayjs | null,
+  startKICSDate: Date,
+  endKICSDate: Date,
   preparation: EquipmentData[],
   RH: EquipmentData[],
   GP: EquipmentData[],
   actual: EquipmentData[]
 ): string => {
   if (startKICSDate !== null && endKICSDate !== null) {
-    const startDate = toISOStringWithTimezoneMonthDay(new Date(startKICSDate.toDate())).split('T')[0];
-    const endDate = toISOStringWithTimezoneMonthDay(new Date(endKICSDate.toDate())).split('T')[0];
+    const startDate = toISOStringWithTimezoneMonthDay(new Date(startKICSDate)).split('T')[0];
+    const endDate = toISOStringWithTimezoneMonthDay(new Date(endKICSDate)).split('T')[0];
     const preparationDate: string[] = [];
     const RHDate: string[] = [];
     const GPDate: string[] = [];

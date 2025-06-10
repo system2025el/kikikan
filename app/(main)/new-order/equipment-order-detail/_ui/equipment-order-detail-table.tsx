@@ -31,8 +31,8 @@ type TableProps = {
     data: Array<string | number>;
   }>;
   dateRange: string[];
-  startKICSDate: Dayjs | null;
-  endKICSDate: Dayjs | null;
+  startKICSDate: Date;
+  endKICSDate: Date;
   preparation: EquipmentData[];
   RH: EquipmentData[];
   GP: EquipmentData[];
@@ -43,8 +43,8 @@ type TableProps = {
   rowColorSelect: boolean;
   getRowBackgroundColor: (
     dateHeader: string,
-    startKICSDate: Dayjs | null,
-    endKICSDate: Dayjs | null,
+    startKICSDate: Date,
+    endKICSDate: Date,
     preparation: EquipmentData[],
     RH: EquipmentData[],
     GP: EquipmentData[],
