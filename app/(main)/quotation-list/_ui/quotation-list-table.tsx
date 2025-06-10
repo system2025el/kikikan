@@ -52,7 +52,7 @@ export const QuotaionListTable = () => {
           <Grid2 container spacing={1}>
             <Grid2 container spacing={1}>
               <Grid2>
-                <Button href="/new-order">
+                <Button href="/quotation-list/quotation">
                   <AddIcon fontSize="small" />
                   新規見積
                 </Button>

@@ -115,13 +115,14 @@ export const OrderList = () => {
                 options={[
                   { id: '1', label: '出庫日が' },
                   { id: '2', label: '入庫日が' },
+                  { id: '3', label: '受注日が' },
                 ]}
                 sx={{ bgcolor: 'white', minWidth: 150 }}
               />
             </Grid2>
 
             <Grid2 container direction={'row'} width={'100%'} alignItems={'center'}>
-              <Grid2 alignItems={'center'}>
+              <Grid2 alignItems={'center'} mx={1}>
                 <RadioButtonGroup control={control} name="selectedDate" options={radioData} row />
                 {/* <FormControl>
                 <Box display={'flex'} alignItems={'center'}>
@@ -147,7 +148,7 @@ export const OrderList = () => {
             </Grid2>
 
             <Grid2 container width={'100%'}>
-              <Grid2 display={'flex'} alignItems={'center'} size={{ sm: 12, md: 6 }}>
+              <Grid2 display={'flex'} alignItems={'center'} size={{ sm: 12, md: 5 }}>
                 <Typography noWrap minWidth={110}>
                   顧客
                 </Typography>
@@ -170,34 +171,38 @@ export const OrderList = () => {
                   </Select>
                 </FormControl> */}
               </Grid2>
-              <Grid2 display={'flex'} alignItems={'center'}>
-                <Typography noWrap minWidth={110}>
-                  ソート
-                </Typography>
-                <SelectElement
-                  name="customerSort"
-                  control={control}
-                  options={[
-                    { id: '1', label: '顧客名簿' },
-                    { id: '2', label: '顧客名' },
-                  ]}
-                  sx={{ minWidth: 150 }}
-                />
+              <Grid2 container display={'flex'} alignItems={'center'} size={{ md: 'grow' }}>
+                <Grid2 display={'flex'} alignItems={'center'} size={{ sm: 12, md: 4 }}>
+                  <Typography noWrap minWidth={110}>
+                    ソート
+                  </Typography>
+                </Grid2>
+                <Grid2 size={{ sm: 12, md: 'grow' }}>
+                  <SelectElement
+                    name="customerSort"
+                    control={control}
+                    options={[
+                      { id: '1', label: '顧客名簿' },
+                      { id: '2', label: '顧客名' },
+                    ]}
+                    sx={{ minWidth: 150 }}
+                  />
+                </Grid2>
               </Grid2>
             </Grid2>
 
-            <Grid2 container spacing={1}>
-              <Grid2 display={'flex'} alignItems={'center'} size={{ sm: 12, md: 4.5 }}>
+            <Grid2 container spacing={1} width={'100%'}>
+              <Grid2 display={'flex'} alignItems={'center'} size={{ sm: 12, md: 5 }}>
                 <Typography noWrap minWidth={110}>
                   公演名
                 </Typography>
-                <TextFieldElement name="stageName" control={control} />
+                <TextFieldElement name="stageName" control={control} sx={{ minWidth: 250 }} />
               </Grid2>
               <Grid2 container size={{ sm: 12, md: 'grow' }}>
-                <Grid2 display={'flex'} alignItems={'center'} size={{ sm: 12, md: 3.5 }}>
+                <Grid2 display={'flex'} alignItems={'center'} size={{ sm: 12, md: 4 }}>
                   <Typography>受注開始日～終了日</Typography>
                 </Grid2>
-                <Grid2 display={'flex'} alignItems={'center'} size={{ sm: 12, md: 5 }}>
+                <Grid2 display={'flex'} alignItems={'center'} size={{ sm: 12, md: 'grow' }}>
                   {/* <LocalizationProvider
                   dateAdapter={AdapterDayjs}
                   dateFormats={{ year: 'YYYY年', month: 'MM' }} // カレンダー内の年一覧のフォーマット
