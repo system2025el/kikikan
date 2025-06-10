@@ -270,7 +270,7 @@ export const RSuiteDateRangePicker = (props: Props) => {
           }
 
           .rs-input:disabled {
-            background-color: #e0e0e0;
+            background-color: #eeeeee;
           }
 
           .rs-picker-default.rs-picker .rs-input-group {
@@ -278,12 +278,12 @@ export const RSuiteDateRangePicker = (props: Props) => {
           }
 
           .rs-picker-default.rs-picker-disabled .rs-input-group {
-            background-color: #e0e0e0;
+            background-color: #eeeeee;
             border-color: #9e9e9e;
           }
 
           .rs-input-group.rs-input-group-inside-disabled .rs-input-group-addon {
-            background-color: #e0e0e0;
+            background-color: #eeeeee;
           }
         `}
       </style>
