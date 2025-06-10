@@ -113,8 +113,8 @@ export default DateX;
 export const TestDate = (props: {
   sx?: object;
   disabled?: boolean;
-  date: Dayjs | null;
-  onChange: (value?: Dayjs | null) => void;
+  date: Date;
+  onChange: (value: Dayjs | null) => void;
 }) => {
   const { sx, disabled, date, onChange } = props;
 
@@ -147,7 +147,7 @@ export const TestDate = (props: {
           },
           calendarHeader: { format: 'YYYY年MM月' },
         }} // カレンダーヘッダーのフォーマット
-        value={date}
+        value={dayjs(date)}
         views={['year', 'month', 'day']}
         disabled={disabled ? true : false}
         onChange={onChange}

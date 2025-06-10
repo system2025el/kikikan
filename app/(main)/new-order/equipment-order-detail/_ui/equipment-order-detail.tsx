@@ -46,12 +46,12 @@ type row = {
   data: number[];
 };
 
-const getRange = (start: Dayjs | null, end: Dayjs | null): string[] => {
+const getRange = (start: Date, end: Date): string[] => {
   if (start !== null && end !== null) {
     const range: string[] = [];
-    const current = new Date(start.toDate());
+    const current = new Date(start);
 
-    while (current <= end.toDate()) {
+    while (current <= end) {
       const dateStr = toISOStringWithTimezoneMonthDay(current).split('T')[0];
       range.push(dateStr);
       current.setDate(current.getDate() + 1);
@@ -62,10 +62,10 @@ const getRange = (start: Dayjs | null, end: Dayjs | null): string[] => {
   return [];
 };
 
-const getDateRange = (date: Dayjs | null) => {
+const getDateRange = (date: Date) => {
   if (date !== null) {
-    const start = subDays(date.toDate(), 1);
-    const end = endOfMonth(addMonths(date.toDate(), 2));
+    const start = subDays(date, 1);
+    const end = endOfMonth(addMonths(date, 2));
     const range: string[] = [];
     const current = new Date(start);
 
@@ -96,9 +96,9 @@ const getRow = (stock: number[], length: number) => {
 };
 
 const EquipmentOrderDetail = () => {
-  const [startKICSDate, setStartKICSDate] = useState<Dayjs | null>(dayjs);
-  const [startYARDDate, setStartYARDDate] = useState<Dayjs | null>(dayjs);
-  const [endKICSDate, setEndKICSDate] = useState<Dayjs | null>(dayjs);
+  const [startKICSDate, setStartKICSDate] = useState<Date>(new Date());
+  const [startYARDDate, setStartYARDDate] = useState<Date>(new Date());
+  const [endKICSDate, setEndKICSDate] = useState<Date>(new Date());
   // ヘッダー用の日付
   const [dateHeader, setDateHeader] = useState<string[]>(getDateRange(startKICSDate));
   // 出庫日から入庫日
@@ -230,11 +230,11 @@ const EquipmentOrderDetail = () => {
               <TestDate
                 date={startKICSDate}
                 onChange={(newDate) => {
-                  if (newDate !== undefined) {
-                    const updatedDateRange = getDateRange(newDate);
-                    setStartKICSDate(newDate);
+                  if (newDate !== null) {
+                    const updatedDateRange = getDateRange(newDate?.toDate());
+                    setStartKICSDate(newDate?.toDate());
                     setDateHeader(updatedDateRange);
-                    setDateRange(getRange(newDate, endKICSDate));
+                    setDateRange(getRange(newDate?.toDate(), endKICSDate));
                     setDateRow(getRow(stock, updatedDateRange.length));
                   }
                 }}
@@ -246,8 +246,8 @@ const EquipmentOrderDetail = () => {
               <TestDate
                 date={startYARDDate}
                 onChange={(newDate) => {
-                  if (newDate !== undefined) {
-                    setStartYARDDate(newDate);
+                  if (newDate !== null) {
+                    setStartYARDDate(newDate?.toDate());
                   }
                 }}
               />
@@ -261,9 +261,9 @@ const EquipmentOrderDetail = () => {
               <TestDate
                 date={endKICSDate}
                 onChange={(newDate) => {
-                  if (newDate !== undefined) {
-                    setEndKICSDate(newDate);
-                    setDateRange(getRange(startKICSDate, newDate));
+                  if (newDate !== null) {
+                    setEndKICSDate(newDate?.toDate());
+                    setDateRange(getRange(startKICSDate, newDate?.toDate()));
                   }
                 }}
               />
