@@ -99,6 +99,7 @@ const EquipmentOrderDetail = () => {
   const [startKICSDate, setStartKICSDate] = useState<Date>(new Date());
   const [startYARDDate, setStartYARDDate] = useState<Date>(new Date());
   const [endKICSDate, setEndKICSDate] = useState<Date>(new Date());
+  const [endYARDDate, setEndYARDDate] = useState<Date>(new Date());
   // ヘッダー用の日付
   const [dateHeader, setDateHeader] = useState<string[]>(getDateRange(startKICSDate));
   // 出庫日から入庫日
@@ -226,7 +227,7 @@ const EquipmentOrderDetail = () => {
           <Grid2>
             <Typography>出庫日時</Typography>
             <Grid2>
-              <TextField defaultValue={'KICS'} sx={{ width: '10%', minWidth: 120 }} />
+              <TextField defaultValue={'KICS'} sx={{ width: '10%', minWidth: 150 }} />
               <TestDate
                 date={startKICSDate}
                 onChange={(newDate) => {
@@ -242,7 +243,7 @@ const EquipmentOrderDetail = () => {
               <Time />
             </Grid2>
             <Grid2>
-              <TextField defaultValue={'YARD'} sx={{ width: '10%', minWidth: 120 }} />
+              <TextField defaultValue={'YARD'} sx={{ width: '10%', minWidth: 150 }} />
               <TestDate
                 date={startYARDDate}
                 onChange={(newDate) => {
@@ -257,12 +258,25 @@ const EquipmentOrderDetail = () => {
           <Grid2>
             <Typography>入庫日時</Typography>
             <Grid2>
-              <TextField defaultValue={'KICS'} sx={{ width: '10%', minWidth: 120 }} />
+              <TextField defaultValue={'KICS'} sx={{ width: '10%', minWidth: 150 }} />
               <TestDate
                 date={endKICSDate}
                 onChange={(newDate) => {
                   if (newDate !== null) {
                     setEndKICSDate(newDate?.toDate());
+                    setDateRange(getRange(startKICSDate, newDate?.toDate()));
+                  }
+                }}
+              />
+              <Time />
+            </Grid2>
+            <Grid2>
+              <TextField defaultValue={'YARD'} sx={{ width: '10%', minWidth: 150 }} />
+              <TestDate
+                date={endYARDDate}
+                onChange={(newDate) => {
+                  if (newDate !== null) {
+                    setEndYARDDate(newDate?.toDate());
                     setDateRange(getRange(startKICSDate, newDate?.toDate()));
                   }
                 }}
@@ -303,6 +317,12 @@ const EquipmentOrderDetail = () => {
             <Typography>合計金額</Typography>
           </Grid2>
         </Grid2>
+        <Button sx={{ m: 2 }} onClick={() => handleOpenEqDialog()}>
+          ＋ 機材追加
+        </Button>
+        <Dialog open={EqSelectionDialogOpen} fullScreen>
+          <EquipmentSelectionDialog handleCloseDialog={handleCloseEqDialog} />
+        </Dialog>
         <Box display="flex" flexDirection="row" width="100%">
           <Box width="40%">
             <GridSelectBoxTable
@@ -338,12 +358,6 @@ const EquipmentOrderDetail = () => {
             />
           </Box>
         </Box>
-        <Button sx={{ mx: 8 }} onClick={() => handleOpenEqDialog()}>
-          ＋ 機材追加
-        </Button>
-        <Dialog open={EqSelectionDialogOpen} fullScreen>
-          <EquipmentSelectionDialog handleCloseDialog={handleCloseEqDialog} />
-        </Dialog>
       </Paper>
       {/*本番日*/}
       <Paper variant="outlined" sx={{ mt: 2 }}>
