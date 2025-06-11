@@ -1,6 +1,10 @@
 'use client';
 
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   Box,
   Button,
   Dialog,
@@ -109,6 +113,11 @@ const EquipmentOrderDetail = () => {
   const [RH, setRH] = useState<EquipmentData[]>([]);
   const [GP, setGP] = useState<EquipmentData[]>([]);
   const [actual, setActual] = useState<EquipmentData[]>([]);
+  const [expanded, setExpanded] = useState(false);
+
+  const handleExpansion = () => {
+    setExpanded((prevExpanded) => !prevExpanded);
+  };
 
   const stockChange = (row: row[], rowIndex: number, value: number, range: string[], dateRange: string[]) => {
     const updatedRows = [...row];
@@ -204,97 +213,157 @@ const EquipmentOrderDetail = () => {
   return (
     <Box>
       {/*受注ヘッダー*/}
-      <Paper variant="outlined">
-        <Box display="flex" justifyContent="space-between" alignItems="center" p={2}>
-          <Grid2 container display="flex" justifyContent="space-between" spacing={2}>
-            <Typography>受注ヘッダー</Typography>
-            <Grid2 container spacing={2}>
-              <Typography>公演名</Typography>
-              <Typography>A/Zepp Tour</Typography>
+      <Accordion expanded={expanded} onChange={handleExpansion}>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />} component="div">
+          <Box display="flex" justifyContent="space-between" alignItems="center" py={1} width="100%">
+            <Grid2 container display="flex" justifyContent="space-between" spacing={2}>
+              <Typography>受注ヘッダー</Typography>
+              <Grid2 container display={expanded ? 'none' : 'flex'} spacing={2}>
+                <Typography>公演名</Typography>
+                <Typography>A/Zepp Tour</Typography>
+              </Grid2>
+            </Grid2>
+            <BackButton label={'戻る'} />
+          </Box>
+        </AccordionSummary>
+        <AccordionDetails sx={{ padding: 0 }}>
+          <Divider />
+          <Grid2 container display="flex">
+            <Grid2>
+              <Grid2 container margin={2} spacing={2}>
+                <Grid2 container display="flex" direction="row" alignItems="center">
+                  <Grid2 display="flex" direction="row" alignItems="center">
+                    <Typography marginRight={3} whiteSpace="nowrap">
+                      受注番号
+                    </Typography>
+                    <TextField defaultValue="81694" disabled></TextField>
+                  </Grid2>
+                  <Grid2 display="flex" direction="row" alignItems="center">
+                    <Typography mr={2}>受注ステータス</Typography>
+                    <TextField defaultValue="確定" disabled sx={{ width: 120 }}>
+                      確定
+                    </TextField>
+                  </Grid2>
+                </Grid2>
+              </Grid2>
+              <Box sx={styles.container}>
+                <Typography marginRight={5} whiteSpace="nowrap">
+                  受注日
+                </Typography>
+                <TextField defaultValue="2025/10/01" disabled></TextField>
+              </Box>
+              <Box sx={styles.container}>
+                <Typography marginRight={5} whiteSpace="nowrap">
+                  入力者
+                </Typography>
+                <TextField defaultValue="XXXXXXXX" disabled></TextField>
+              </Box>
+            </Grid2>
+            <Grid2>
+              <Box sx={{ display: 'flex', alignItems: 'center', ml: 2, mt: { xs: 0, sm: 0, md: 2 } }}>
+                <Typography marginRight={5} whiteSpace="nowrap">
+                  公演名
+                </Typography>
+                <TextField defaultValue="A/Zepp Tour" disabled></TextField>
+              </Box>
+              <Box sx={styles.container}>
+                <Typography marginRight={3} whiteSpace="nowrap">
+                  公演場所
+                </Typography>
+                <TextField defaultValue="Zepp Osaka" disabled></TextField>
+              </Box>
+              <Box sx={styles.container}>
+                <Typography marginRight={7} whiteSpace="nowrap">
+                  相手
+                </Typography>
+                <TextField defaultValue="(株)シアターブレーン" disabled></TextField>
+              </Box>
             </Grid2>
           </Grid2>
-          <BackButton label={'戻る'} />
-        </Box>
-        <Divider />
-      </Paper>
+        </AccordionDetails>
+      </Accordion>
       {/*受注明細ヘッダー*/}
-      <Paper variant="outlined" sx={{ mt: 2 }}>
-        <Grid2 container display="flex" justifyContent="space-between" spacing={2} p={2}>
-          <Typography>受注機材ヘッダー</Typography>
-        </Grid2>
-        <Divider />
-        <Grid2 container p={2} spacing={1} flexWrap="nowrap">
-          <Grid2>
-            <Typography>出庫日時</Typography>
+      <Accordion sx={{ mt: 2 }} defaultExpanded>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />} component="div">
+          <Grid2 container display="flex" justifyContent="space-between" spacing={2} py={1}>
+            <Typography>受注機材ヘッダー</Typography>
+          </Grid2>
+        </AccordionSummary>
+        <AccordionDetails sx={{ padding: 0 }}>
+          <Divider />
+          <Grid2 container p={2} spacing={1} flexWrap="nowrap">
             <Grid2>
-              <TextField defaultValue={'KICS'} sx={{ width: '10%', minWidth: 150 }} />
-              <TestDate
-                date={startKICSDate}
-                onChange={(newDate) => {
-                  if (newDate !== null) {
-                    const updatedDateRange = getDateRange(newDate?.toDate());
-                    setStartKICSDate(newDate?.toDate());
-                    setDateHeader(updatedDateRange);
-                    setDateRange(getRange(newDate?.toDate(), endKICSDate));
-                    setDateRow(getRow(stock, updatedDateRange.length));
-                  }
-                }}
-              />
-              <Time />
+              <Typography>出庫日時</Typography>
+              <Grid2>
+                <TextField defaultValue={'KICS'} sx={{ width: '10%', minWidth: 150 }} />
+                <TestDate
+                  date={startKICSDate}
+                  onChange={(newDate) => {
+                    if (newDate !== null) {
+                      const updatedDateRange = getDateRange(newDate?.toDate());
+                      setStartKICSDate(newDate?.toDate());
+                      setDateHeader(updatedDateRange);
+                      setDateRange(getRange(newDate?.toDate(), endKICSDate));
+                      setDateRow(getRow(stock, updatedDateRange.length));
+                    }
+                  }}
+                />
+                <Time />
+              </Grid2>
+              <Grid2>
+                <TextField defaultValue={'YARD'} sx={{ width: '10%', minWidth: 150 }} />
+                <TestDate
+                  date={startYARDDate}
+                  onChange={(newDate) => {
+                    if (newDate !== null) {
+                      setStartYARDDate(newDate?.toDate());
+                    }
+                  }}
+                />
+                <Time />
+              </Grid2>
             </Grid2>
             <Grid2>
-              <TextField defaultValue={'YARD'} sx={{ width: '10%', minWidth: 150 }} />
-              <TestDate
-                date={startYARDDate}
-                onChange={(newDate) => {
-                  if (newDate !== null) {
-                    setStartYARDDate(newDate?.toDate());
-                  }
-                }}
-              />
-              <Time />
+              <Typography>入庫日時</Typography>
+              <Grid2>
+                <TextField defaultValue={'KICS'} sx={{ width: '10%', minWidth: 150 }} />
+                <TestDate
+                  date={endKICSDate}
+                  onChange={(newDate) => {
+                    if (newDate !== null) {
+                      setEndKICSDate(newDate?.toDate());
+                      setDateRange(getRange(startKICSDate, newDate?.toDate()));
+                    }
+                  }}
+                />
+                <Time />
+              </Grid2>
+              <Grid2>
+                <TextField defaultValue={'YARD'} sx={{ width: '10%', minWidth: 150 }} />
+                <TestDate
+                  date={endYARDDate}
+                  onChange={(newDate) => {
+                    if (newDate !== null) {
+                      setEndYARDDate(newDate?.toDate());
+                      setDateRange(getRange(startKICSDate, newDate?.toDate()));
+                    }
+                  }}
+                />
+                <Time />
+              </Grid2>
             </Grid2>
           </Grid2>
-          <Grid2>
-            <Typography>入庫日時</Typography>
-            <Grid2>
-              <TextField defaultValue={'KICS'} sx={{ width: '10%', minWidth: 150 }} />
-              <TestDate
-                date={endKICSDate}
-                onChange={(newDate) => {
-                  if (newDate !== null) {
-                    setEndKICSDate(newDate?.toDate());
-                    setDateRange(getRange(startKICSDate, newDate?.toDate()));
-                  }
-                }}
-              />
-              <Time />
-            </Grid2>
-            <Grid2>
-              <TextField defaultValue={'YARD'} sx={{ width: '10%', minWidth: 150 }} />
-              <TestDate
-                date={endYARDDate}
-                onChange={(newDate) => {
-                  if (newDate !== null) {
-                    setEndYARDDate(newDate?.toDate());
-                    setDateRange(getRange(startKICSDate, newDate?.toDate()));
-                  }
-                }}
-              />
-              <Time />
-            </Grid2>
-          </Grid2>
-        </Grid2>
-        <Box display="flex" alignItems="center" p={2}>
-          <Typography>税区分</Typography>
-          <FormControl size="small" sx={{ width: '8%', minWidth: '80px', ml: 2 }}>
-            <Select value={selectTax} onChange={selectTaxChange}>
-              <MenuItem value={'外税'}>外税</MenuItem>
-              <MenuItem value={'内税'}>内税</MenuItem>
-            </Select>
-          </FormControl>
-        </Box>
-      </Paper>
+          <Box display="flex" alignItems="center" p={2}>
+            <Typography>税区分</Typography>
+            <FormControl size="small" sx={{ width: '8%', minWidth: '80px', ml: 2 }}>
+              <Select value={selectTax} onChange={selectTaxChange}>
+                <MenuItem value={'外税'}>外税</MenuItem>
+                <MenuItem value={'内税'}>内税</MenuItem>
+              </Select>
+            </FormControl>
+          </Box>
+        </AccordionDetails>
+      </Accordion>
       {/*受注明細(機材)*/}
       <Paper variant="outlined" sx={{ mt: 2 }}>
         <Box display="flex" justifyContent="space-between" alignItems="center" p={2}>
