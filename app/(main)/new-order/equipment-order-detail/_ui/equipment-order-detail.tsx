@@ -1,5 +1,7 @@
 'use client';
 
+import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
@@ -8,6 +10,7 @@ import {
   AccordionSummary,
   Box,
   Button,
+  ClickAwayListener,
   Dialog,
   Divider,
   Fab,
@@ -26,7 +29,7 @@ import { useState } from 'react';
 import React from 'react';
 
 import { BackButton } from '@/app/(main)/_ui/back-button';
-import { TestDate, toISOStringWithTimezoneMonthDay } from '@/app/(main)/_ui/date';
+import { Calendar, TestDate, toISOStringWithTimezoneMonthDay } from '@/app/(main)/_ui/date';
 import Time from '@/app/(main)/_ui/time';
 import {
   getDateHeaderBackgroundColor,
@@ -116,6 +119,7 @@ const EquipmentOrderDetail = () => {
   const [GP, setGP] = useState<EquipmentData[]>([]);
   const [actual, setActual] = useState<EquipmentData[]>([]);
   const [expanded, setExpanded] = useState(false);
+  const [visible, setVisible] = useState(false);
 
   const handleExpansion = () => {
     setExpanded((prevExpanded) => !prevExpanded);
@@ -123,6 +127,10 @@ const EquipmentOrderDetail = () => {
 
   const scrollTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleClickAway = () => {
+    setVisible(false);
   };
 
   const stockChange = (row: row[], rowIndex: number, value: number, range: string[], dateRange: string[]) => {
@@ -396,14 +404,16 @@ const EquipmentOrderDetail = () => {
             <Typography>合計金額</Typography>
           </Grid2>
         </Grid2>
-        <Button sx={{ m: 2 }} onClick={() => handleOpenEqDialog()}>
-          ＋ 機材追加
-        </Button>
+
         <Dialog open={EqSelectionDialogOpen} fullScreen>
           <EquipmentSelectionDialog handleCloseDialog={handleCloseEqDialog} />
         </Dialog>
+
         <Box display="flex" flexDirection="row" width="100%">
-          <Box width="40%">
+          <Box sx={{ width: { xs: '40%', sm: '40%', md: 'auto' } }}>
+            <Button sx={{ m: 2 }} onClick={() => handleOpenEqDialog()}>
+              ＋ 機材追加
+            </Button>
             <GridSelectBoxTable
               header={header}
               rows={rows}
@@ -419,7 +429,31 @@ const EquipmentOrderDetail = () => {
               selectIssueBaseChange={selectIssueBaseChange}
             />
           </Box>
-          <Box width="60%">
+          <Box overflow="auto" sx={{ width: { xs: '60%', sm: '60%', md: 'auto' } }}>
+            <Box display="flex" my={2}>
+              <Button>
+                <ArrowBackIosNewIcon fontSize="small" />
+              </Button>
+              <ClickAwayListener onClickAway={handleClickAway}>
+                <Box>
+                  <Button onClick={() => setVisible(true)}>日付選択</Button>
+                  <Paper sx={{ position: 'absolute', zIndex: 1000, display: visible ? 'block' : 'none' }}>
+                    <Calendar />
+                    <Box display="flex" justifyContent="space-between">
+                      <Button onClick={() => setVisible(false)} sx={{ margin: 1 }}>
+                        キャンセル
+                      </Button>
+                      <Button onClick={() => setVisible(false)} sx={{ margin: 1 }}>
+                        確定
+                      </Button>
+                    </Box>
+                  </Paper>
+                </Box>
+              </ClickAwayListener>
+              <Button>
+                <ArrowForwardIosIcon fontSize="small" />
+              </Button>
+            </Box>
             <GridTable
               header={dateHeader}
               rows={dateRow}
