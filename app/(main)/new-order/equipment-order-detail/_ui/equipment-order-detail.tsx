@@ -1,5 +1,6 @@
 'use client';
 
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
   Accordion,
@@ -9,6 +10,7 @@ import {
   Button,
   Dialog,
   Divider,
+  Fab,
   FormControl,
   Grid2,
   MenuItem,
@@ -117,6 +119,10 @@ const EquipmentOrderDetail = () => {
 
   const handleExpansion = () => {
     setExpanded((prevExpanded) => !prevExpanded);
+  };
+
+  const scrollTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const stockChange = (row: row[], rowIndex: number, value: number, range: string[], dateRange: string[]) => {
@@ -362,6 +368,10 @@ const EquipmentOrderDetail = () => {
               </Select>
             </FormControl>
           </Box>
+          <Grid2 container alignItems="center" spacing={2} p={2}>
+            <Typography>メモ</Typography>
+            <TextField multiline rows={3} />
+          </Grid2>
         </AccordionDetails>
       </Accordion>
       {/*受注明細(機材)*/}
@@ -601,6 +611,9 @@ const EquipmentOrderDetail = () => {
           </Grid2>
         </Box>
       </Paper>
+      <Fab color="primary" onClick={scrollTop} sx={{ position: 'fixed', bottom: 32, right: 32, zIndex: 1000 }}>
+        <ArrowUpwardIcon fontSize="small" />
+      </Fab>
       {/* <Paper variant="outlined">
         <Grid2 container display="flex">
           <Grid2 size={{ xs: 12, sm: 12, md: 7 }}>
