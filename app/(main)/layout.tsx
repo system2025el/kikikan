@@ -28,17 +28,9 @@ const Layout = ({ children }: Readonly<{ children: React.ReactNode }>) => {
   /* jsx
   ---------------------------------------------------------------------------------------------------- */
   return (
-    <html lang="ja">
-      <body className={notoSansJp.variable}>
-        <AppRouterCacheProvider>
-          <CustomProvider locale={jaJP}>
-            <ThemeProvider>
-              <Sidebar>{children}</Sidebar>
-            </ThemeProvider>
-          </CustomProvider>
-        </AppRouterCacheProvider>
-      </body>
-    </html>
+    <CustomProvider locale={jaJP}>
+      <Sidebar>{children}</Sidebar>
+    </CustomProvider>
   );
 };
 export default Layout;
