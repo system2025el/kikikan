@@ -149,10 +149,6 @@ const EquipmentOrderDetail = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // const handleClickAway = () => {
-  //   setVisible(false);
-  // };
-
   const stockChange = (row: row[], rowIndex: number, value: number, range: string[], dateRange: string[]) => {
     const updatedRows = [...row];
     const targetIndex: number[] = [];
