@@ -29,7 +29,6 @@ import { Dayjs } from 'dayjs';
 import React, { useState } from 'react';
 
 import { EquipmentData } from './equipment-order-detail';
-//import { MemoTooltip } from './tooltip';
 
 type TableProps = {
   header: string[];
@@ -125,6 +124,7 @@ const GridTable: React.FC<TableProps> = ({
                       ),
                       py: 0,
                       px: 1,
+                      color: typeof cell === 'number' && cell < 0 ? 'red' : 'black',
                     }}
                     size="small"
                   >

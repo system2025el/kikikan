@@ -387,15 +387,21 @@ const EquipmentOrderDetail = () => {
               </Grid2>
             </Grid2>
           </Grid2>
-          <Box display="flex" alignItems="center" p={2}>
-            <Typography>税区分</Typography>
-            <FormControl size="small" sx={{ width: '8%', minWidth: '80px', ml: 2 }}>
-              <Select value={selectTax} onChange={selectTaxChange}>
-                <MenuItem value={'外税'}>外税</MenuItem>
-                <MenuItem value={'内税'}>内税</MenuItem>
-              </Select>
-            </FormControl>
-          </Box>
+          <Grid2 container alignItems="center" spacing={2} p={2}>
+            <Grid2 container alignItems="center">
+              <Typography>税区分</Typography>
+              <FormControl size="small" sx={{ width: '8%', minWidth: '80px' }}>
+                <Select value={selectTax} onChange={selectTaxChange}>
+                  <MenuItem value={'外税'}>外税</MenuItem>
+                  <MenuItem value={'内税'}>内税</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid2>
+            <Grid2 container alignItems="center">
+              <Typography>値引き</Typography>
+              <TextField />
+            </Grid2>
+          </Grid2>
           <Grid2 container alignItems="center" spacing={2} p={2}>
             <Typography>メモ</Typography>
             <TextField multiline rows={3} />
@@ -415,13 +421,14 @@ const EquipmentOrderDetail = () => {
           </Grid2>
         </Box>
         <Divider />
-        <Grid2 container direction="row" alignItems="center" spacing={2} p={2}>
-          <Grid2 container direction="row" alignItems="center">
+        <Grid2 container alignItems="center" spacing={2} p={2}>
+          <Grid2 container alignItems="center">
             <Typography>機材明細名</Typography>
             <TextField />
           </Grid2>
-          <Grid2>
-            <Typography>合計金額</Typography>
+          <Grid2 container alignItems="center">
+            <Typography>小計金額</Typography>
+            <TextField />
           </Grid2>
         </Grid2>
 
