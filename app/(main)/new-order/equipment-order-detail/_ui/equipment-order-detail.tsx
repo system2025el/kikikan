@@ -115,6 +115,7 @@ const EquipmentOrderDetail = () => {
   // 出庫日から入庫日
   const [dateRange, setDateRange] = useState<string[]>(getRange(startKICSDate, endKICSDate));
   const [dateRow, setDateRow] = useState<row[]>(getRow(stock, dateHeader.length));
+  const [rows, setRows] = useState(data);
   const [preparation, setPreparation] = useState<EquipmentData[]>([]);
   const [RH, setRH] = useState<EquipmentData[]>([]);
   const [GP, setGP] = useState<EquipmentData[]>([]);
@@ -122,6 +123,9 @@ const EquipmentOrderDetail = () => {
   const [expanded, setExpanded] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectDate, setSelectDate] = useState<Date>(new Date());
+
+  const editableColumns = [5, 6];
+  const open = Boolean(anchorEl);
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(anchorEl ? null : event.currentTarget);
@@ -131,6 +135,14 @@ const EquipmentOrderDetail = () => {
     if (date !== null) {
       setSelectDate(date?.toDate());
       setDateHeader(getDateRange(date?.toDate()));
+      setDateRow(getRow(stock, getDateRange(date?.toDate()).length));
+      const updatedRows = [...rows];
+      updatedRows.map((row) => {
+        row.data[5] = 0;
+        row.data[6] = 0;
+        row.data[7] = 0;
+      });
+      setRows(updatedRows);
       setAnchorEl(null);
     }
   };
@@ -138,8 +150,6 @@ const EquipmentOrderDetail = () => {
   const handleClickAway = () => {
     setAnchorEl(null);
   };
-
-  const open = Boolean(anchorEl);
 
   const handleExpansion = () => {
     setExpanded((prevExpanded) => !prevExpanded);
@@ -165,26 +175,20 @@ const EquipmentOrderDetail = () => {
     });
   };
 
-  const [selectedValues, setSelectedValues] = useState<string[]>(Array(2).fill('KICS'));
-  const [rows, setRows] = useState(data);
-  const editableColumns = [4, 5];
+  const handleMemoChange = (rowIndex: number, memo: string) => {
+    const updatedRows = [...rows];
+    updatedRows[rowIndex].data[2] = memo;
+    setRows(updatedRows);
+  };
 
   const [selectTax, setSelectTax] = useState('外税');
   const selectTaxChange = (event: SelectChangeEvent) => {
     setSelectTax(event.target.value);
   };
 
-  const selectIssueBaseChange = (index: number, value: string) => {
-    const newValues = [...selectedValues];
-    newValues[index] = value;
-    setSelectedValues(newValues);
-  };
-
-  const handleCellChange = (rowIndex: number, colIndex: number, newValue: number, value: number) => {
-    const updatedRows = [...rows];
-    updatedRows[rowIndex].data[colIndex] = newValue;
+  const handleCellChange = (rowIndex: number, updatedRows: { id: number; data: Array<string | number> }[]) => {
     setRows(updatedRows);
-    stockChange(dateRow, rowIndex, value, dateRange, dateHeader);
+    stockChange(dateRow, rowIndex, Number(updatedRows[rowIndex].data[7]), dateRange, dateHeader);
   };
 
   const [EqSelectionDialogOpen, setEqSelectionDialogOpen] = useState(false);
@@ -436,13 +440,8 @@ const EquipmentOrderDetail = () => {
               editableColumns={editableColumns}
               onChange={handleCellChange}
               cellWidths={cellWidths}
-              headerColorSelect={false}
-              getHeaderBackgroundColor={() => ''}
-              getHeaderTextColor={() => ''}
-              rowColorSelect={true}
               getRowBackgroundColor={getEquipmentRowBackgroundColor}
-              selectIssueBase={selectedValues}
-              selectIssueBaseChange={selectIssueBaseChange}
+              handleMemoChange={handleMemoChange}
             />
           </Box>
           <Box overflow="auto" sx={{ width: { xs: '60%', sm: '60%', md: 'auto' } }}>
