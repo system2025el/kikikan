@@ -13,6 +13,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import { Dayjs } from 'dayjs';
 import { useState } from 'react';
 
 import { Calendar } from '../../_ui/date';
@@ -29,6 +30,13 @@ import { dateData, dateHeader, dateWidth, loanData, loanHeader, loanWidth } from
 
 export const LoanSituation = () => {
   const [visible, setVisible] = useState(false);
+  const [selectDate, setSelectDate] = useState<Date>(new Date());
+
+  const handleDateChange = (date: Dayjs | null) => {
+    if (date !== null) {
+      setSelectDate(date?.toDate());
+    }
+  };
 
   return (
     <Paper variant="outlined">
@@ -78,7 +86,7 @@ export const LoanSituation = () => {
             日付選択
           </Button>
           <Box position="absolute" zIndex={1000} display={visible ? 'block' : 'none'}>
-            <Calendar />
+            <Calendar date={selectDate} onChange={handleDateChange} />
             <Box display="flex" justifyContent="space-between">
               <Button onClick={() => setVisible(false)} sx={{ margin: 1 }}>
                 キャンセル

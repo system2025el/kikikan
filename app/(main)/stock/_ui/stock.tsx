@@ -1,6 +1,7 @@
 'use client';
 
 import { Box, Button, Divider, Paper, TextField, Typography } from '@mui/material';
+import { Dayjs } from 'dayjs';
 import { useState } from 'react';
 
 import { Calendar } from '../../_ui/date';
@@ -20,6 +21,13 @@ export const Stock = () => {
   const [dateRows, setTestRows] = useState(dateData);
   const [visible, setVisible] = useState(false);
   const editableColumns = [2, 3];
+  const [selectDate, setSelectDate] = useState<Date>(new Date());
+
+  const handleDateChange = (date: Dayjs | null) => {
+    if (date !== null) {
+      setSelectDate(date?.toDate());
+    }
+  };
 
   const equipmentCellChange = (rowIndex: number, colIndex: number, newValue: number) => {
     const updatedRows = [...equipmentRows];
@@ -47,7 +55,7 @@ export const Stock = () => {
               日付選択
             </Button>
             <Box position="absolute" zIndex={1000} display={visible ? 'block' : 'none'}>
-              <Calendar />
+              <Calendar date={selectDate} onChange={handleDateChange} />
               <Box display="flex" justifyContent="space-between">
                 <Button onClick={() => setVisible(false)} sx={{ margin: 1 }}>
                   キャンセル
