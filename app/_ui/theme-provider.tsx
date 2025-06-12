@@ -1,6 +1,5 @@
 'use client';
 
-import { useMediaQuery } from '@mui/material';
 import { blue, grey } from '@mui/material/colors';
 import CssBaseline from '@mui/material/CssBaseline';
 import { jaJP } from '@mui/material/locale';
@@ -8,8 +7,9 @@ import type { Palette } from '@mui/material/styles';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
 import { createTheme } from '@mui/material/styles';
 import type { TypographyOptions } from '@mui/material/styles/createTypography';
+// import { useMediaQuery } from '@mui/material';
 
-/** @type {TypographyOptions | ((palette: Palette) => TypographyOptions)} typography */
+/** @type {TypographyOptions | ((palette: Palette) = TypographyOptions)} typography */
 const typography: TypographyOptions | ((palette: Palette) => TypographyOptions) = {
   fontFamily: 'var(--font-noto-sans-jp)',
 };
@@ -36,6 +36,14 @@ const lightTheme = createTheme(
           root: {
             '&.Mui-disabled': {
               backgroundColor: grey[200], // 任意のカラー
+            },
+          },
+          // ここを消すかcssVariablesを消すかのどちらかです。delete
+          input: {
+            '&:-webkit-autofill': {
+              WebkitBoxShadow: '0 0 0 100px #e8eaf6 inset',
+              WebkitTextFillColor: '#000000',
+              caretColor: '#000000',
             },
           },
         },
@@ -107,13 +115,13 @@ const lightTheme = createTheme(
 );
 
 /** @type {Theme} darkTheme */
-const darkTheme = createTheme({
-  typography,
-  cssVariables,
-  palette: {
-    mode: 'dark',
-  },
-});
+// const darkTheme = createTheme({
+//   typography,
+//   cssVariables,
+//   palette: {
+//     mode: 'dark',
+//   },
+// });
 
 /**
  * ThemeProvider
@@ -123,7 +131,7 @@ const darkTheme = createTheme({
 const ThemeProvider = ({ children }: Readonly<{ children: React.ReactNode }>) => {
   /* カラースキーム
   ---------------------------------------------------------------------------------------------------- */
-  const mode = useMediaQuery('(prefers-color-scheme: dark)') ? 'dark' : 'light';
+  // const mode = useMediaQuery('(prefers-color-scheme: dark)') ? 'dark' : 'light';
 
   /* jsx
   ---------------------------------------------------------------------------------------------------- */
