@@ -18,6 +18,7 @@ import {
   Grid2,
   MenuItem,
   Paper,
+  Popper,
   Select,
   SelectChangeEvent,
   TextField,
@@ -119,7 +120,26 @@ const EquipmentOrderDetail = () => {
   const [GP, setGP] = useState<EquipmentData[]>([]);
   const [actual, setActual] = useState<EquipmentData[]>([]);
   const [expanded, setExpanded] = useState(false);
-  const [visible, setVisible] = useState(false);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [selectDate, setSelectDate] = useState<Date>(new Date());
+
+  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(anchorEl ? null : event.currentTarget);
+  };
+
+  const handleDateChange = (date: Dayjs | null) => {
+    if (date !== null) {
+      setSelectDate(date?.toDate());
+      setDateHeader(getDateRange(date?.toDate()));
+      setAnchorEl(null);
+    }
+  };
+
+  const handleClickAway = () => {
+    setAnchorEl(null);
+  };
+
+  const open = Boolean(anchorEl);
 
   const handleExpansion = () => {
     setExpanded((prevExpanded) => !prevExpanded);
@@ -129,9 +149,9 @@ const EquipmentOrderDetail = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleClickAway = () => {
-    setVisible(false);
-  };
+  // const handleClickAway = () => {
+  //   setVisible(false);
+  // };
 
   const stockChange = (row: row[], rowIndex: number, value: number, range: string[], dateRange: string[]) => {
     const updatedRows = [...row];
@@ -434,22 +454,16 @@ const EquipmentOrderDetail = () => {
               <Button>
                 <ArrowBackIosNewIcon fontSize="small" />
               </Button>
-              <ClickAwayListener onClickAway={handleClickAway}>
-                <Box>
-                  <Button onClick={() => setVisible(true)}>日付選択</Button>
-                  <Paper sx={{ position: 'absolute', zIndex: 1000, display: visible ? 'block' : 'none' }}>
-                    <Calendar />
-                    <Box display="flex" justifyContent="space-between">
-                      <Button onClick={() => setVisible(false)} sx={{ margin: 1 }}>
-                        キャンセル
-                      </Button>
-                      <Button onClick={() => setVisible(false)} sx={{ margin: 1 }}>
-                        確定
-                      </Button>
-                    </Box>
+              <Button variant="outlined" onClick={handleClick}>
+                日付選択
+              </Button>
+              <Popper open={open} anchorEl={anchorEl} placement="bottom-start">
+                <ClickAwayListener onClickAway={handleClickAway}>
+                  <Paper elevation={3} sx={{ mt: 1 }}>
+                    <Calendar date={selectDate} onChange={handleDateChange} />
                   </Paper>
-                </Box>
-              </ClickAwayListener>
+                </ClickAwayListener>
+              </Popper>
               <Button>
                 <ArrowForwardIosIcon fontSize="small" />
               </Button>
