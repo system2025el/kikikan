@@ -1,14 +1,24 @@
 'use client';
 
+import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   Box,
   Button,
+  ClickAwayListener,
   Dialog,
   Divider,
+  Fab,
   FormControl,
   Grid2,
   MenuItem,
   Paper,
+  Popper,
   Select,
   SelectChangeEvent,
   TextField,
@@ -20,7 +30,7 @@ import { useState } from 'react';
 import React from 'react';
 
 import { BackButton } from '@/app/(main)/_ui/back-button';
-import { TestDate, toISOStringWithTimezoneMonthDay } from '@/app/(main)/_ui/date';
+import { Calendar, TestDate, toISOStringWithTimezoneMonthDay } from '@/app/(main)/_ui/date';
 import Time from '@/app/(main)/_ui/time';
 import {
   getDateHeaderBackgroundColor,
@@ -99,15 +109,55 @@ const EquipmentOrderDetail = () => {
   const [startKICSDate, setStartKICSDate] = useState<Date>(new Date());
   const [startYARDDate, setStartYARDDate] = useState<Date>(new Date());
   const [endKICSDate, setEndKICSDate] = useState<Date>(new Date());
+  const [endYARDDate, setEndYARDDate] = useState<Date>(new Date());
   // ヘッダー用の日付
   const [dateHeader, setDateHeader] = useState<string[]>(getDateRange(startKICSDate));
   // 出庫日から入庫日
   const [dateRange, setDateRange] = useState<string[]>(getRange(startKICSDate, endKICSDate));
   const [dateRow, setDateRow] = useState<row[]>(getRow(stock, dateHeader.length));
+  const [rows, setRows] = useState(data);
   const [preparation, setPreparation] = useState<EquipmentData[]>([]);
   const [RH, setRH] = useState<EquipmentData[]>([]);
   const [GP, setGP] = useState<EquipmentData[]>([]);
   const [actual, setActual] = useState<EquipmentData[]>([]);
+  const [expanded, setExpanded] = useState(false);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [selectDate, setSelectDate] = useState<Date>(new Date());
+
+  const editableColumns = [5, 6];
+  const open = Boolean(anchorEl);
+
+  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(anchorEl ? null : event.currentTarget);
+  };
+
+  const handleDateChange = (date: Dayjs | null) => {
+    if (date !== null) {
+      setSelectDate(date?.toDate());
+      setDateHeader(getDateRange(date?.toDate()));
+      setDateRow(getRow(stock, getDateRange(date?.toDate()).length));
+      const updatedRows = [...rows];
+      updatedRows.map((row) => {
+        row.data[5] = 0;
+        row.data[6] = 0;
+        row.data[7] = 0;
+      });
+      setRows(updatedRows);
+      setAnchorEl(null);
+    }
+  };
+
+  const handleClickAway = () => {
+    setAnchorEl(null);
+  };
+
+  const handleExpansion = () => {
+    setExpanded((prevExpanded) => !prevExpanded);
+  };
+
+  const scrollTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const stockChange = (row: row[], rowIndex: number, value: number, range: string[], dateRange: string[]) => {
     const updatedRows = [...row];
@@ -125,26 +175,20 @@ const EquipmentOrderDetail = () => {
     });
   };
 
-  const [selectedValues, setSelectedValues] = useState<string[]>(Array(2).fill('KICS'));
-  const [rows, setRows] = useState(data);
-  const editableColumns = [4, 5];
+  const handleMemoChange = (rowIndex: number, memo: string) => {
+    const updatedRows = [...rows];
+    updatedRows[rowIndex].data[2] = memo;
+    setRows(updatedRows);
+  };
 
   const [selectTax, setSelectTax] = useState('外税');
   const selectTaxChange = (event: SelectChangeEvent) => {
     setSelectTax(event.target.value);
   };
 
-  const selectIssueBaseChange = (index: number, value: string) => {
-    const newValues = [...selectedValues];
-    newValues[index] = value;
-    setSelectedValues(newValues);
-  };
-
-  const handleCellChange = (rowIndex: number, colIndex: number, newValue: number, value: number) => {
-    const updatedRows = [...rows];
-    updatedRows[rowIndex].data[colIndex] = newValue;
+  const handleCellChange = (rowIndex: number, updatedRows: { id: number; data: Array<string | number> }[]) => {
     setRows(updatedRows);
-    stockChange(dateRow, rowIndex, value, dateRange, dateHeader);
+    stockChange(dateRow, rowIndex, Number(updatedRows[rowIndex].data[7]), dateRange, dateHeader);
   };
 
   const [EqSelectionDialogOpen, setEqSelectionDialogOpen] = useState(false);
@@ -203,84 +247,167 @@ const EquipmentOrderDetail = () => {
   return (
     <Box>
       {/*受注ヘッダー*/}
-      <Paper variant="outlined">
-        <Box display="flex" justifyContent="space-between" alignItems="center" p={2}>
-          <Grid2 container display="flex" justifyContent="space-between" spacing={2}>
-            <Typography>受注ヘッダー</Typography>
-            <Grid2 container spacing={2}>
-              <Typography>公演名</Typography>
-              <Typography>A/Zepp Tour</Typography>
+      <Accordion expanded={expanded} onChange={handleExpansion}>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />} component="div">
+          <Box display="flex" justifyContent="space-between" alignItems="center" py={1} width="100%">
+            <Grid2 container display="flex" justifyContent="space-between" spacing={2}>
+              <Typography>受注ヘッダー</Typography>
+              <Grid2 container display={expanded ? 'none' : 'flex'} spacing={2}>
+                <Typography>公演名</Typography>
+                <Typography>A/Zepp Tour</Typography>
+              </Grid2>
+            </Grid2>
+            <BackButton label={'戻る'} />
+          </Box>
+        </AccordionSummary>
+        <AccordionDetails sx={{ padding: 0 }}>
+          <Divider />
+          <Grid2 container display="flex">
+            <Grid2>
+              <Grid2 container margin={2} spacing={2}>
+                <Grid2 container display="flex" direction="row" alignItems="center">
+                  <Grid2 display="flex" direction="row" alignItems="center">
+                    <Typography marginRight={3} whiteSpace="nowrap">
+                      受注番号
+                    </Typography>
+                    <TextField defaultValue="81694" disabled></TextField>
+                  </Grid2>
+                  <Grid2 display="flex" direction="row" alignItems="center">
+                    <Typography mr={2}>受注ステータス</Typography>
+                    <TextField defaultValue="確定" disabled sx={{ width: 120 }}>
+                      確定
+                    </TextField>
+                  </Grid2>
+                </Grid2>
+              </Grid2>
+              <Box sx={styles.container}>
+                <Typography marginRight={5} whiteSpace="nowrap">
+                  受注日
+                </Typography>
+                <TextField defaultValue="2025/10/01" disabled></TextField>
+              </Box>
+              <Box sx={styles.container}>
+                <Typography marginRight={5} whiteSpace="nowrap">
+                  入力者
+                </Typography>
+                <TextField defaultValue="XXXXXXXX" disabled></TextField>
+              </Box>
+            </Grid2>
+            <Grid2>
+              <Box sx={{ display: 'flex', alignItems: 'center', ml: 2, mt: { xs: 0, sm: 0, md: 2 } }}>
+                <Typography marginRight={5} whiteSpace="nowrap">
+                  公演名
+                </Typography>
+                <TextField defaultValue="A/Zepp Tour" disabled></TextField>
+              </Box>
+              <Box sx={styles.container}>
+                <Typography marginRight={3} whiteSpace="nowrap">
+                  公演場所
+                </Typography>
+                <TextField defaultValue="Zepp Osaka" disabled></TextField>
+              </Box>
+              <Box sx={styles.container}>
+                <Typography marginRight={7} whiteSpace="nowrap">
+                  相手
+                </Typography>
+                <TextField defaultValue="(株)シアターブレーン" disabled></TextField>
+              </Box>
             </Grid2>
           </Grid2>
-          <BackButton label={'戻る'} />
-        </Box>
-        <Divider />
-      </Paper>
+        </AccordionDetails>
+      </Accordion>
       {/*受注明細ヘッダー*/}
-      <Paper variant="outlined" sx={{ mt: 2 }}>
-        <Grid2 container display="flex" justifyContent="space-between" spacing={2} p={2}>
-          <Typography>受注機材ヘッダー</Typography>
-        </Grid2>
-        <Divider />
-        <Grid2 container p={2} spacing={1} flexWrap="nowrap">
-          <Grid2>
-            <Typography>出庫日時</Typography>
+      <Accordion sx={{ mt: 2 }} defaultExpanded>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />} component="div">
+          <Grid2 container display="flex" justifyContent="space-between" spacing={2} py={1}>
+            <Typography>受注機材ヘッダー</Typography>
+          </Grid2>
+        </AccordionSummary>
+        <AccordionDetails sx={{ padding: 0 }}>
+          <Divider />
+          <Grid2 container p={2} spacing={1} flexWrap="nowrap">
             <Grid2>
-              <TextField defaultValue={'KICS'} sx={{ width: '10%', minWidth: 120 }} />
-              <TestDate
-                date={startKICSDate}
-                onChange={(newDate) => {
-                  if (newDate !== null) {
-                    const updatedDateRange = getDateRange(newDate?.toDate());
-                    setStartKICSDate(newDate?.toDate());
-                    setDateHeader(updatedDateRange);
-                    setDateRange(getRange(newDate?.toDate(), endKICSDate));
-                    setDateRow(getRow(stock, updatedDateRange.length));
-                  }
-                }}
-              />
-              <Time />
+              <Typography>出庫日時</Typography>
+              <Grid2>
+                <TextField defaultValue={'KICS'} sx={{ width: '10%', minWidth: 150 }} />
+                <TestDate
+                  date={startKICSDate}
+                  onChange={(newDate) => {
+                    if (newDate !== null) {
+                      const updatedDateRange = getDateRange(newDate?.toDate());
+                      setStartKICSDate(newDate?.toDate());
+                      setDateHeader(updatedDateRange);
+                      setDateRange(getRange(newDate?.toDate(), endKICSDate));
+                      setDateRow(getRow(stock, updatedDateRange.length));
+                    }
+                  }}
+                />
+                <Time />
+              </Grid2>
+              <Grid2>
+                <TextField defaultValue={'YARD'} sx={{ width: '10%', minWidth: 150 }} />
+                <TestDate
+                  date={startYARDDate}
+                  onChange={(newDate) => {
+                    if (newDate !== null) {
+                      setStartYARDDate(newDate?.toDate());
+                    }
+                  }}
+                />
+                <Time />
+              </Grid2>
             </Grid2>
             <Grid2>
-              <TextField defaultValue={'YARD'} sx={{ width: '10%', minWidth: 120 }} />
-              <TestDate
-                date={startYARDDate}
-                onChange={(newDate) => {
-                  if (newDate !== null) {
-                    setStartYARDDate(newDate?.toDate());
-                  }
-                }}
-              />
-              <Time />
+              <Typography>入庫日時</Typography>
+              <Grid2>
+                <TextField defaultValue={'KICS'} sx={{ width: '10%', minWidth: 150 }} />
+                <TestDate
+                  date={endKICSDate}
+                  onChange={(newDate) => {
+                    if (newDate !== null) {
+                      setEndKICSDate(newDate?.toDate());
+                      setDateRange(getRange(startKICSDate, newDate?.toDate()));
+                    }
+                  }}
+                />
+                <Time />
+              </Grid2>
+              <Grid2>
+                <TextField defaultValue={'YARD'} sx={{ width: '10%', minWidth: 150 }} />
+                <TestDate
+                  date={endYARDDate}
+                  onChange={(newDate) => {
+                    if (newDate !== null) {
+                      setEndYARDDate(newDate?.toDate());
+                      setDateRange(getRange(startKICSDate, newDate?.toDate()));
+                    }
+                  }}
+                />
+                <Time />
+              </Grid2>
             </Grid2>
           </Grid2>
-          <Grid2>
-            <Typography>入庫日時</Typography>
-            <Grid2>
-              <TextField defaultValue={'KICS'} sx={{ width: '10%', minWidth: 120 }} />
-              <TestDate
-                date={endKICSDate}
-                onChange={(newDate) => {
-                  if (newDate !== null) {
-                    setEndKICSDate(newDate?.toDate());
-                    setDateRange(getRange(startKICSDate, newDate?.toDate()));
-                  }
-                }}
-              />
-              <Time />
+          <Grid2 container alignItems="center" spacing={2} p={2}>
+            <Grid2 container alignItems="center">
+              <Typography>税区分</Typography>
+              <FormControl size="small" sx={{ width: '8%', minWidth: '80px' }}>
+                <Select value={selectTax} onChange={selectTaxChange}>
+                  <MenuItem value={'外税'}>外税</MenuItem>
+                  <MenuItem value={'内税'}>内税</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid2>
+            <Grid2 container alignItems="center">
+              <Typography>値引き</Typography>
+              <TextField />
             </Grid2>
           </Grid2>
-        </Grid2>
-        <Box display="flex" alignItems="center" p={2}>
-          <Typography>税区分</Typography>
-          <FormControl size="small" sx={{ width: '8%', minWidth: '80px', ml: 2 }}>
-            <Select value={selectTax} onChange={selectTaxChange}>
-              <MenuItem value={'外税'}>外税</MenuItem>
-              <MenuItem value={'内税'}>内税</MenuItem>
-            </Select>
-          </FormControl>
-        </Box>
-      </Paper>
+          <Grid2 container alignItems="center" spacing={2} p={2}>
+            <Typography>メモ</Typography>
+            <TextField multiline rows={3} />
+          </Grid2>
+        </AccordionDetails>
+      </Accordion>
       {/*受注明細(機材)*/}
       <Paper variant="outlined" sx={{ mt: 2 }}>
         <Box display="flex" justifyContent="space-between" alignItems="center" p={2}>
@@ -294,33 +421,55 @@ const EquipmentOrderDetail = () => {
           </Grid2>
         </Box>
         <Divider />
-        <Grid2 container direction="row" alignItems="center" spacing={2} p={2}>
-          <Grid2 container direction="row" alignItems="center">
+        <Grid2 container alignItems="center" spacing={2} p={2}>
+          <Grid2 container alignItems="center">
             <Typography>機材明細名</Typography>
             <TextField />
           </Grid2>
-          <Grid2>
-            <Typography>合計金額</Typography>
+          <Grid2 container alignItems="center">
+            <Typography>小計金額</Typography>
+            <TextField />
           </Grid2>
         </Grid2>
+
+        <Dialog open={EqSelectionDialogOpen} fullScreen>
+          <EquipmentSelectionDialog handleCloseDialog={handleCloseEqDialog} />
+        </Dialog>
+
         <Box display="flex" flexDirection="row" width="100%">
-          <Box width="40%">
+          <Box sx={{ width: { xs: '40%', sm: '40%', md: 'auto' } }}>
+            <Button sx={{ m: 2 }} onClick={() => handleOpenEqDialog()}>
+              ＋ 機材追加
+            </Button>
             <GridSelectBoxTable
               header={header}
               rows={rows}
               editableColumns={editableColumns}
               onChange={handleCellChange}
               cellWidths={cellWidths}
-              headerColorSelect={false}
-              getHeaderBackgroundColor={() => ''}
-              getHeaderTextColor={() => ''}
-              rowColorSelect={true}
               getRowBackgroundColor={getEquipmentRowBackgroundColor}
-              selectIssueBase={selectedValues}
-              selectIssueBaseChange={selectIssueBaseChange}
+              handleMemoChange={handleMemoChange}
             />
           </Box>
-          <Box width="60%">
+          <Box overflow="auto" sx={{ width: { xs: '60%', sm: '60%', md: 'auto' } }}>
+            <Box display="flex" my={2}>
+              <Button>
+                <ArrowBackIosNewIcon fontSize="small" />
+              </Button>
+              <Button variant="outlined" onClick={handleClick}>
+                日付選択
+              </Button>
+              <Popper open={open} anchorEl={anchorEl} placement="bottom-start">
+                <ClickAwayListener onClickAway={handleClickAway}>
+                  <Paper elevation={3} sx={{ mt: 1 }}>
+                    <Calendar date={selectDate} onChange={handleDateChange} />
+                  </Paper>
+                </ClickAwayListener>
+              </Popper>
+              <Button>
+                <ArrowForwardIosIcon fontSize="small" />
+              </Button>
+            </Box>
             <GridTable
               header={dateHeader}
               rows={dateRow}
@@ -338,12 +487,6 @@ const EquipmentOrderDetail = () => {
             />
           </Box>
         </Box>
-        <Button sx={{ mx: 8 }} onClick={() => handleOpenEqDialog()}>
-          ＋ 機材追加
-        </Button>
-        <Dialog open={EqSelectionDialogOpen} fullScreen>
-          <EquipmentSelectionDialog handleCloseDialog={handleCloseEqDialog} />
-        </Dialog>
       </Paper>
       {/*本番日*/}
       <Paper variant="outlined" sx={{ mt: 2 }}>
@@ -518,6 +661,9 @@ const EquipmentOrderDetail = () => {
           </Grid2>
         </Box>
       </Paper>
+      <Fab color="primary" onClick={scrollTop} sx={{ position: 'fixed', bottom: 32, right: 32, zIndex: 1000 }}>
+        <ArrowUpwardIcon fontSize="small" />
+      </Fab>
       {/* <Paper variant="outlined">
         <Grid2 container display="flex">
           <Grid2 size={{ xs: 12, sm: 12, md: 7 }}>

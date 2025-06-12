@@ -2,9 +2,14 @@
 
 import { BorderColor } from '@mui/icons-material';
 import Delete from '@mui/icons-material/Delete';
+import EditNoteIcon from '@mui/icons-material/EditNote';
 import {
   Button,
   colors,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   FormControl,
   IconButton,
   MenuItem,
@@ -18,6 +23,7 @@ import {
   TableHead,
   TableRow,
   TextField,
+  Tooltip,
 } from '@mui/material';
 import { Dayjs } from 'dayjs';
 import React, { useState } from 'react';
@@ -118,6 +124,7 @@ const GridTable: React.FC<TableProps> = ({
                       ),
                       py: 0,
                       px: 1,
+                      color: typeof cell === 'number' && cell < 0 ? 'red' : 'black',
                     }}
                     size="small"
                   >
@@ -142,15 +149,10 @@ type GridSelectBoxTableProps = {
     data: Array<string | number>;
   }>;
   editableColumns?: number[] | null;
-  onChange?: (rowIndex: number, colIndex: number, newValue: number, value: number) => void;
+  onChange?: (rowIndex: number, updatedRows: { id: number; data: Array<string | number> }[]) => void;
   cellWidths?: Array<string | number>;
-  headerColorSelect: boolean;
-  getHeaderBackgroundColor: (index: number, headerColorSelect: boolean) => string;
-  getHeaderTextColor: (index: number, headerColorSelect: boolean) => string;
-  rowColorSelect: boolean;
-  getRowBackgroundColor: (rowIndex: number, colIndex: number, rowColorSelect: boolean) => string;
-  selectIssueBase: string[];
-  selectIssueBaseChange: (index: number, value: string) => void;
+  getRowBackgroundColor: (rowIndex: number, colIndex: number) => string;
+  handleMemoChange: (rowIndex: number, memo: string) => void;
 };
 
 export const GridSelectBoxTable: React.FC<GridSelectBoxTableProps> = ({
@@ -159,26 +161,18 @@ export const GridSelectBoxTable: React.FC<GridSelectBoxTableProps> = ({
   editableColumns = [],
   onChange,
   cellWidths = [],
-  headerColorSelect,
-  getHeaderBackgroundColor,
-  getHeaderTextColor,
-  rowColorSelect,
   getRowBackgroundColor,
-  selectIssueBase,
-  selectIssueBaseChange,
+  handleMemoChange,
 }) => {
-  const [localRows, setLocalRows] = useState(rows);
-
   const handleCellChange = (rowIndex: number, colIndex: number, newValue: number) => {
-    const updated = [...localRows];
-    updated[rowIndex] = {
-      ...updated[rowIndex],
-      data: [...updated[rowIndex].data],
+    const updatedRows = [...rows];
+    updatedRows[rowIndex] = {
+      ...updatedRows[rowIndex],
+      data: [...updatedRows[rowIndex].data],
     };
-    updated[rowIndex].data[colIndex] = newValue;
-    updated[rowIndex].data[6] = Number(updated[rowIndex].data[4]) + Number(updated[rowIndex].data[5]);
-    setLocalRows(updated);
-    onChange?.(rowIndex, colIndex, newValue, Number(updated[rowIndex].data[6]));
+    updatedRows[rowIndex].data[colIndex] = newValue;
+    updatedRows[rowIndex].data[7] = Number(updatedRows[rowIndex].data[5]) + Number(updatedRows[rowIndex].data[6]);
+    onChange?.(rowIndex, updatedRows);
   };
 
   const getWidth = (index: number) => cellWidths[index] ?? cellWidths[1];
@@ -191,16 +185,11 @@ export const GridSelectBoxTable: React.FC<GridSelectBoxTableProps> = ({
             {header?.map((data, index) => (
               <TableCell
                 key={index}
-                align={typeof localRows[0].data[index] === 'number' ? 'right' : 'left'}
+                align={typeof rows[0].data[index] === 'number' ? 'right' : 'left'}
                 size="small"
                 sx={{
-                  border:
-                    getHeaderBackgroundColor(index, headerColorSelect) === 'black'
-                      ? '1px solid grey'
-                      : '1px solid black',
+                  border: '1px solid grey',
                   whiteSpace: 'nowrap',
-                  color: getHeaderTextColor(index, headerColorSelect),
-                  bgcolor: getHeaderBackgroundColor(index, headerColorSelect),
                   padding: 0,
                 }}
               >
@@ -210,9 +199,13 @@ export const GridSelectBoxTable: React.FC<GridSelectBoxTableProps> = ({
           </TableRow>
         </TableHead>
         <TableBody>
-          {localRows.map((row, rowIndex) => (
+          {rows.map((row, rowIndex) => (
             <TableRow key={rowIndex}>
-              <Cell index={rowIndex} value={selectIssueBase[rowIndex]} onChange={selectIssueBaseChange} />
+              <TableCell sx={{ padding: 0 }}>
+                <IconButton sx={{ padding: 0, color: 'red' }}>
+                  <Delete fontSize="small" />
+                </IconButton>
+              </TableCell>
               {row.data.map((cell, colIndex) => {
                 const isEditable = editableColumns?.includes(colIndex);
                 const width = getWidth(colIndex);
@@ -226,7 +219,7 @@ export const GridSelectBoxTable: React.FC<GridSelectBoxTableProps> = ({
                       whiteSpace: 'nowrap',
                       width,
                       height: 25,
-                      bgcolor: getRowBackgroundColor(rowIndex, colIndex, rowColorSelect),
+                      bgcolor: getRowBackgroundColor(rowIndex, colIndex),
                       py: 0,
                       px: 1,
                     }}
@@ -263,6 +256,13 @@ export const GridSelectBoxTable: React.FC<GridSelectBoxTableProps> = ({
                           },
                         }}
                       />
+                    ) : colIndex === 2 ? (
+                      <MemoTooltip
+                        name={row.data[1].toString()}
+                        memo={row.data[2].toString()}
+                        handleMemoChange={handleMemoChange}
+                        rowIndex={rowIndex}
+                      />
                     ) : (
                       cell
                     )}
@@ -277,20 +277,51 @@ export const GridSelectBoxTable: React.FC<GridSelectBoxTableProps> = ({
   );
 };
 
-type CellProps = {
-  index: number;
-  value: string;
-  onChange: (index: number, value: string) => void;
+type Props = {
+  name: string;
+  memo: string;
+  rowIndex: number;
+  handleMemoChange: (rowIndex: number, memo: string) => void;
 };
 
-export const Cell = (props: CellProps) => {
+export const MemoTooltip = (props: Props) => {
+  const [open, setOpen] = useState(false);
+  const [equipmentMemo, setEquipmentMemo] = useState(props.memo);
+
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
+  const handleSave = () => {
+    props.handleMemoChange(props.rowIndex, equipmentMemo);
+    handleClose();
+  };
+
   return (
     <>
-      <TableCell sx={{ padding: 0 }}>
-        <IconButton sx={{ padding: 0, color: 'red' }}>
-          <Delete fontSize="small" />
+      <Tooltip title={equipmentMemo} arrow sx={{ p: 0 }}>
+        <IconButton onClick={handleOpen} sx={{ padding: 0 }} color={equipmentMemo ? 'primary' : 'default'}>
+          <EditNoteIcon fontSize="small" />
         </IconButton>
-      </TableCell>
+      </Tooltip>
+
+      <Dialog open={open} onClose={handleClose}>
+        <DialogTitle>{props.name}</DialogTitle>
+        <DialogContent>
+          <TextField
+            value={equipmentMemo}
+            onChange={(e) => setEquipmentMemo(e.target.value)}
+            fullWidth
+            multiline
+            minRows={3}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose}>キャンセル</Button>
+          <Button onClick={handleSave} variant="contained">
+            保存
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 };

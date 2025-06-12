@@ -4,20 +4,17 @@ import { toISOStringWithTimezoneMonthDay } from '@/app/(main)/_ui/date';
 
 import { EquipmentData } from '../_ui/equipment-order-detail';
 
-export const getEquipmentRowBackgroundColor = (rowIndex: number, colIndex: number, colorSelect: boolean): string => {
-  if (colorSelect) {
-    switch (colIndex) {
-      case 2:
-        return 'lightgrey';
-      case 3:
-        return 'lightgrey';
-      case 6:
-        return 'lightgrey';
-      default:
-        return 'white';
-    }
+export const getEquipmentRowBackgroundColor = (rowIndex: number, colIndex: number): string => {
+  switch (colIndex) {
+    case 3:
+      return 'lightgrey';
+    case 4:
+      return 'lightgrey';
+    case 7:
+      return 'lightgrey';
+    default:
+      return 'white';
   }
-  return 'white';
 };
 
 export const getDateHeaderBackgroundColor = (date: string, dateRange: string[]): string => {
