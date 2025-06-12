@@ -38,7 +38,7 @@ const lightTheme = createTheme(
               backgroundColor: grey[200], // 任意のカラー
             },
           },
-          // ここを消すかcssVariablesを消すかのどちらかです。delete
+          // ここを消すかcssVariablesを消すかのどちらかです。delete 。CSS 変数ベースのスタイリングとChrome の :-webkit-autofill の相性が不安定
           input: {
             '&:-webkit-autofill': {
               WebkitBoxShadow: '0 0 0 100px #e8eaf6 inset',
