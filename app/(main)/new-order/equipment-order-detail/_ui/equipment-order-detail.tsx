@@ -24,7 +24,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { addMonths, endOfMonth, subDays } from 'date-fns';
+import { addMonths, endOfMonth, subDays, subMonths } from 'date-fns';
 import dayjs, { Dayjs } from 'dayjs';
 import { useState } from 'react';
 import React from 'react';
@@ -145,6 +145,16 @@ const EquipmentOrderDetail = () => {
       setRows(updatedRows);
       setAnchorEl(null);
     }
+  };
+
+  const handleBackDateChange = () => {
+    const date = subMonths(new Date(dateHeader[1]), 3);
+    setDateHeader(getDateRange(date));
+  };
+
+  const handleForwardDateChange = () => {
+    const date = addMonths(new Date(dateHeader[1]), 3);
+    setDateHeader(getDateRange(date));
   };
 
   const handleClickAway = () => {
@@ -453,7 +463,7 @@ const EquipmentOrderDetail = () => {
           </Box>
           <Box overflow="auto" sx={{ width: { xs: '60%', sm: '60%', md: 'auto' } }}>
             <Box display="flex" my={2}>
-              <Button>
+              <Button onClick={handleBackDateChange}>
                 <ArrowBackIosNewIcon fontSize="small" />
               </Button>
               <Button variant="outlined" onClick={handleClick}>
@@ -466,7 +476,7 @@ const EquipmentOrderDetail = () => {
                   </Paper>
                 </ClickAwayListener>
               </Popper>
-              <Button>
+              <Button onClick={handleForwardDateChange}>
                 <ArrowForwardIosIcon fontSize="small" />
               </Button>
             </Box>
