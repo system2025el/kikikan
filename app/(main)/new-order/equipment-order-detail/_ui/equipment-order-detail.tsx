@@ -120,11 +120,12 @@ const EquipmentOrderDetail = () => {
   const [RH, setRH] = useState<EquipmentData[]>([]);
   const [GP, setGP] = useState<EquipmentData[]>([]);
   const [actual, setActual] = useState<EquipmentData[]>([]);
+  const [keep, setKeep] = useState<EquipmentData[]>([]);
   const [expanded, setExpanded] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectDate, setSelectDate] = useState<Date>(new Date());
 
-  const editableColumns = [5, 6];
+  const editableColumns = [4, 5];
   const open = Boolean(anchorEl);
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -138,9 +139,9 @@ const EquipmentOrderDetail = () => {
       setDateRow(getRow(stock, getDateRange(date?.toDate()).length));
       const updatedRows = [...rows];
       updatedRows.map((row) => {
+        row.data[4] = 0;
         row.data[5] = 0;
         row.data[6] = 0;
-        row.data[7] = 0;
       });
       setRows(updatedRows);
       setAnchorEl(null);
@@ -187,7 +188,7 @@ const EquipmentOrderDetail = () => {
 
   const handleMemoChange = (rowIndex: number, memo: string) => {
     const updatedRows = [...rows];
-    updatedRows[rowIndex].data[2] = memo;
+    updatedRows[rowIndex].data[1] = memo;
     setRows(updatedRows);
   };
 
@@ -198,7 +199,7 @@ const EquipmentOrderDetail = () => {
 
   const handleCellChange = (rowIndex: number, updatedRows: { id: number; data: Array<string | number> }[]) => {
     setRows(updatedRows);
-    stockChange(dateRow, rowIndex, Number(updatedRows[rowIndex].data[7]), dateRange, dateHeader);
+    stockChange(dateRow, rowIndex, Number(updatedRows[rowIndex].data[6]), dateRange, dateHeader);
   };
 
   const [EqSelectionDialogOpen, setEqSelectionDialogOpen] = useState(false);
@@ -225,7 +226,9 @@ const EquipmentOrderDetail = () => {
     GPDates: string[],
     GPMemo: string[],
     actualDates: string[],
-    actualMemo: string[]
+    actualMemo: string[],
+    keepDates: string[],
+    keepMemo: string[]
   ) => {
     setPreparation(
       preparationDates.map((date, index) => ({
@@ -249,6 +252,12 @@ const EquipmentOrderDetail = () => {
       actualDates.map((date, index) => ({
         date: date,
         memo: actualMemo[index] ?? '',
+      }))
+    );
+    setKeep(
+      keepDates.map((date, index) => ({
+        date: date,
+        memo: keepMemo[index] ?? '',
       }))
     );
     setDateSelectionDialogOpne(false);
@@ -499,6 +508,7 @@ const EquipmentOrderDetail = () => {
               RH={RH}
               GP={GP}
               actual={actual}
+              keep={keep}
               cellWidths={dateWidths}
               getHeaderBackgroundColor={getDateHeaderBackgroundColor}
               rowColorSelect={true}
@@ -525,6 +535,7 @@ const EquipmentOrderDetail = () => {
                 RH={RH}
                 GP={GP}
                 actual={actual}
+                keep={keep}
                 onClose={handleCloseDateDialog}
                 onSave={handleSave}
               />
@@ -664,6 +675,44 @@ const EquipmentOrderDetail = () => {
             width={{ md: '50%' }}
           >
             {actual.map((data, index) => (
+              <Grid2 key={index} container display="flex" flexDirection="row">
+                <Grid2 size={5}>
+                  <Typography>{data.date}</Typography>
+                </Grid2>
+                <Grid2 size={7}>
+                  <Typography sx={{ wordBreak: 'break-word' }}>{data.memo}</Typography>
+                </Grid2>
+              </Grid2>
+            ))}
+          </Grid2>
+          <Grid2
+            container
+            display="flex"
+            flexDirection="row"
+            spacing={1}
+            ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
+            py={2}
+            width={{ md: '50%' }}
+          >
+            <Grid2 size={12}>
+              <Button sx={{ color: 'white', bgcolor: '#ACB9CA' }}>キープ</Button>
+            </Grid2>
+            <Grid2 size={5}>
+              <Typography>日付</Typography>
+            </Grid2>
+            <Grid2 size={7}>
+              <Typography>メモ</Typography>
+            </Grid2>
+          </Grid2>
+          <Grid2
+            container
+            display="flex"
+            flexDirection="column"
+            spacing={1}
+            ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
+            width={{ md: '50%' }}
+          >
+            {keep.map((data, index) => (
               <Grid2 key={index} container display="flex" flexDirection="row">
                 <Grid2 size={5}>
                   <Typography>{data.date}</Typography>

@@ -43,6 +43,7 @@ type TableProps = {
   RH: EquipmentData[];
   GP: EquipmentData[];
   actual: EquipmentData[];
+  keep: EquipmentData[];
   editableColumns?: number[] | null;
   cellWidths?: Array<string | number>;
   getHeaderBackgroundColor: (date: string, dateRange: string[]) => string;
@@ -54,7 +55,8 @@ type TableProps = {
     preparation: EquipmentData[],
     RH: EquipmentData[],
     GP: EquipmentData[],
-    actual: EquipmentData[]
+    actual: EquipmentData[],
+    keep: EquipmentData[]
   ) => string;
 };
 
@@ -68,6 +70,7 @@ const GridTable: React.FC<TableProps> = ({
   RH,
   GP,
   actual,
+  keep,
   cellWidths = [],
   getHeaderBackgroundColor,
   rowColorSelect,
@@ -120,7 +123,8 @@ const GridTable: React.FC<TableProps> = ({
                         preparation,
                         RH,
                         GP,
-                        actual
+                        actual,
+                        keep
                       ),
                       py: 0,
                       px: 1,
@@ -171,7 +175,7 @@ export const GridSelectBoxTable: React.FC<GridSelectBoxTableProps> = ({
       data: [...updatedRows[rowIndex].data],
     };
     updatedRows[rowIndex].data[colIndex] = newValue;
-    updatedRows[rowIndex].data[7] = Number(updatedRows[rowIndex].data[5]) + Number(updatedRows[rowIndex].data[6]);
+    updatedRows[rowIndex].data[6] = Number(updatedRows[rowIndex].data[4]) + Number(updatedRows[rowIndex].data[5]);
     onChange?.(rowIndex, updatedRows);
   };
 
@@ -183,13 +187,13 @@ export const GridSelectBoxTable: React.FC<GridSelectBoxTableProps> = ({
   const handleKeyDown = (e: React.KeyboardEvent, rowIndex: number, colIndex: number) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      if (colIndex === 5) {
-        const next = 8 * rowIndex + colIndex + 1;
+      if (colIndex === 4) {
+        const next = 7 * rowIndex + colIndex + 1;
         if (next < inputRefs.current.length) {
           inputRefs.current[next]?.focus();
         }
-      } else if (colIndex === 6) {
-        const next = 8 * rowIndex + colIndex + 7;
+      } else if (colIndex === 5) {
+        const next = 7 * rowIndex + colIndex + 6;
         if (next < inputRefs.current.length) {
           inputRefs.current[next]?.focus();
         }
@@ -198,7 +202,7 @@ export const GridSelectBoxTable: React.FC<GridSelectBoxTableProps> = ({
   };
 
   const handleSelect = (rowIndex: number, colIndex: number) => {
-    const target = 8 * rowIndex + colIndex;
+    const target = 7 * rowIndex + colIndex;
     inputRefs.current[target]?.select();
   };
 
@@ -207,6 +211,20 @@ export const GridSelectBoxTable: React.FC<GridSelectBoxTableProps> = ({
       <Table>
         <TableHead>
           <TableRow>
+            <TableCell
+              sx={{
+                border: '1px solid grey',
+                whiteSpace: 'nowrap',
+                padding: 0,
+              }}
+            />
+            <TableCell
+              sx={{
+                border: '1px solid grey',
+                whiteSpace: 'nowrap',
+                padding: 0,
+              }}
+            />
             {header?.map((data, index) => (
               <TableCell
                 key={index}
@@ -226,11 +244,12 @@ export const GridSelectBoxTable: React.FC<GridSelectBoxTableProps> = ({
         <TableBody>
           {rows.map((row, rowIndex) => (
             <TableRow key={rowIndex}>
-              <TableCell sx={{ padding: 0 }}>
+              <TableCell sx={{ padding: 0, border: '1px solid black' }}>
                 <IconButton sx={{ padding: 0, color: 'red' }}>
                   <Delete fontSize="small" />
                 </IconButton>
               </TableCell>
+              <TableCell sx={{ py: 0, px: 1, border: '1px solid black' }}>{rowIndex + 1}</TableCell>
               {row.data.map((cell, colIndex) => {
                 const isEditable = editableColumns?.includes(colIndex);
                 const width = getWidth(colIndex);
@@ -294,10 +313,10 @@ export const GridSelectBoxTable: React.FC<GridSelectBoxTableProps> = ({
                         }}
                         onFocus={() => handleSelect(rowIndex, colIndex)}
                       />
-                    ) : colIndex === 2 ? (
+                    ) : colIndex === 1 ? (
                       <MemoTooltip
-                        name={row.data[1].toString()}
-                        memo={row.data[2].toString()}
+                        name={row.data[0].toString()}
+                        memo={row.data[1].toString()}
                         handleMemoChange={handleMemoChange}
                         rowIndex={rowIndex}
                       />
@@ -343,7 +362,7 @@ export const MemoTooltip = (props: Props) => {
       </Tooltip>
 
       <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>{props.name}</DialogTitle>
+        <DialogTitle fontSize="medium">{props.name}</DialogTitle>
         <DialogContent>
           <TextField
             value={equipmentMemo}

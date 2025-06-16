@@ -6,11 +6,11 @@ import { EquipmentData } from '../_ui/equipment-order-detail';
 
 export const getEquipmentRowBackgroundColor = (rowIndex: number, colIndex: number): string => {
   switch (colIndex) {
+    case 2:
+      return 'lightgrey';
     case 3:
       return 'lightgrey';
-    case 4:
-      return 'lightgrey';
-    case 7:
+    case 6:
       return 'lightgrey';
     default:
       return 'white';
@@ -29,7 +29,8 @@ export const getDateRowBackgroundColor = (
   preparation: EquipmentData[],
   RH: EquipmentData[],
   GP: EquipmentData[],
-  actual: EquipmentData[]
+  actual: EquipmentData[],
+  keep: EquipmentData[]
 ): string => {
   if (startKICSDate !== null && endKICSDate !== null) {
     const startDate = toISOStringWithTimezoneMonthDay(new Date(startKICSDate)).split('T')[0];
@@ -38,6 +39,7 @@ export const getDateRowBackgroundColor = (
     const RHDate: string[] = [];
     const GPDate: string[] = [];
     const actualDate: string[] = [];
+    const keepDate: string[] = [];
 
     preparation.map((prev) => {
       preparationDate.push(prev.date.slice(5));
@@ -51,8 +53,12 @@ export const getDateRowBackgroundColor = (
     actual.map((prev) => {
       actualDate.push(prev.date.slice(5));
     });
+    keep.map((prev) => {
+      keepDate.push(prev.date.slice(5));
+    });
     if (date === startDate) return 'lightblue';
     if (date === endDate) return 'yellow';
+    if (keepDate.includes(date)) return '#ACB9CA';
     if (preparationDate.includes(date)) return 'mediumpurple';
     if (RHDate.includes(date)) return 'orange';
     if (GPDate.includes(date)) return 'lightgreen';
