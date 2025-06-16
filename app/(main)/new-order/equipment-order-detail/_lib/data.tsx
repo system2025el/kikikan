@@ -41,7 +41,7 @@ const data = [
   },
   {
     id: 7,
-    data: [100, 'XXXXXXXXXX', '', 'YARD', 45, 0, 0, 0],
+    data: [100, 'XXXXXXXXXXXX', '', 'YARD', 45, 0, 0, 0],
   },
 ];
 

@@ -26,7 +26,7 @@ import {
   Tooltip,
 } from '@mui/material';
 import { Dayjs } from 'dayjs';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 
 import { EquipmentData } from './equipment-order-detail';
 
@@ -177,6 +177,31 @@ export const GridSelectBoxTable: React.FC<GridSelectBoxTableProps> = ({
 
   const getWidth = (index: number) => cellWidths[index] ?? cellWidths[1];
 
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  let currentIndex = 0;
+
+  const handleKeyDown = (e: React.KeyboardEvent, rowIndex: number, colIndex: number) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (colIndex === 5) {
+        const next = 8 * rowIndex + colIndex + 1;
+        if (next < inputRefs.current.length) {
+          inputRefs.current[next]?.focus();
+        }
+      } else if (colIndex === 6) {
+        const next = 8 * rowIndex + colIndex + 7;
+        if (next < inputRefs.current.length) {
+          inputRefs.current[next]?.focus();
+        }
+      }
+    }
+  };
+
+  const handleSelect = (rowIndex: number, colIndex: number) => {
+    const target = 8 * rowIndex + colIndex;
+    inputRefs.current[target]?.select();
+  };
+
   return (
     <TableContainer component={Paper} style={{ overflowX: 'auto' }}>
       <Table>
@@ -209,6 +234,7 @@ export const GridSelectBoxTable: React.FC<GridSelectBoxTableProps> = ({
               {row.data.map((cell, colIndex) => {
                 const isEditable = editableColumns?.includes(colIndex);
                 const width = getWidth(colIndex);
+                const targetIndex = currentIndex++;
 
                 return (
                   <TableCell
@@ -229,8 +255,12 @@ export const GridSelectBoxTable: React.FC<GridSelectBoxTableProps> = ({
                       <TextField
                         variant="standard"
                         value={cell}
-                        type="number"
-                        onChange={(e) => handleCellChange(rowIndex, colIndex, Number(e.target.value))}
+                        type="text"
+                        onChange={(e) => {
+                          if (/^\d*$/.test(e.target.value)) {
+                            handleCellChange(rowIndex, colIndex, Number(e.target.value));
+                          }
+                        }}
                         sx={{
                           '& .MuiInputBase-input': {
                             textAlign: 'right',
@@ -253,8 +283,16 @@ export const GridSelectBoxTable: React.FC<GridSelectBoxTableProps> = ({
                           input: {
                             style: { textAlign: 'right' },
                             disableUnderline: true,
+                            inputMode: 'numeric',
                           },
                         }}
+                        inputRef={(el) => {
+                          inputRefs.current[targetIndex] = el;
+                        }}
+                        onKeyDown={(e) => {
+                          handleKeyDown(e, rowIndex, colIndex);
+                        }}
+                        onFocus={() => handleSelect(rowIndex, colIndex)}
                       />
                     ) : colIndex === 2 ? (
                       <MemoTooltip

@@ -447,7 +447,16 @@ const EquipmentOrderDetail = () => {
         </Dialog>
 
         <Box display="flex" flexDirection="row" width="100%">
-          <Box sx={{ width: { xs: '40%', sm: '40%', md: 'auto' } }}>
+          <Box
+            sx={{
+              width: {
+                xs: '40%',
+                sm: '40%',
+                md: '40%',
+                lg: 'min-content',
+              },
+            }}
+          >
             <Button sx={{ m: 2 }} onClick={() => handleOpenEqDialog()}>
               ＋ 機材追加
             </Button>
