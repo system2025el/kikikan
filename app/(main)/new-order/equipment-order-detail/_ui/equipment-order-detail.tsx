@@ -105,28 +105,28 @@ const getRow = (stock: number[], length: number) => {
   return rows;
 };
 
-// const rowRoop = () => {
-//   const rows = [];
-//   for (let i = 0; i < 28; i++) {
-//     rows.push(...data);
-//   }
-//   return rows;
-// };
+const rowRoop = () => {
+  const rows = [];
+  for (let i = 0; i < 15; i++) {
+    rows.push(...data);
+  }
+  return rows;
+};
 
-// const getRowRoop = (stock: number[], length: number) => {
-//   const rows: row[] = [];
-//   for (let i = 0; i < 28; i++) {
-//     stock.map((num, index) => {
-//       const data: number[] = [];
-//       for (let i = 0; i < length; i++) {
-//         data.push(num);
-//       }
-//       const row: row = { id: index + 1, data: data };
-//       rows.push(row);
-//     });
-//   }
-//   return rows;
-// };
+const getRowRoop = (stock: number[], length: number) => {
+  const rows: row[] = [];
+  for (let i = 0; i < 15; i++) {
+    stock.map((num, index) => {
+      const data: number[] = [];
+      for (let i = 0; i < length; i++) {
+        data.push(num);
+      }
+      const row: row = { id: index + 1, data: data };
+      rows.push(row);
+    });
+  }
+  return rows;
+};
 
 const EquipmentOrderDetail = () => {
   const [startKICSDate, setStartKICSDate] = useState<Date>(new Date());
@@ -137,8 +137,8 @@ const EquipmentOrderDetail = () => {
   const [dateHeader, setDateHeader] = useState<string[]>(getDateRange(startKICSDate));
   // 出庫日から入庫日
   const [dateRange, setDateRange] = useState<string[]>(getRange(startKICSDate, endKICSDate));
-  const [dateRow, setDateRow] = useState<row[]>(getRow(stock, dateHeader.length));
-  const [rows, setRows] = useState(data);
+  const [dateRow, setDateRow] = useState<row[]>(getRowRoop(stock, dateHeader.length));
+  const [rows, setRows] = useState(rowRoop);
   const [preparation, setPreparation] = useState<EquipmentData[]>([]);
   const [RH, setRH] = useState<EquipmentData[]>([]);
   const [GP, setGP] = useState<EquipmentData[]>([]);
@@ -159,7 +159,7 @@ const EquipmentOrderDetail = () => {
     if (date !== null) {
       setSelectDate(date?.toDate());
       setDateHeader(getDateRange(date?.toDate()));
-      setDateRow(getRow(stock, getDateRange(date?.toDate()).length));
+      setDateRow(getRowRoop(stock, getDateRange(date?.toDate()).length));
       const updatedRows = [...rows];
       updatedRows.map((row) => {
         row.data[4] = 0;
@@ -380,7 +380,7 @@ const EquipmentOrderDetail = () => {
                       setStartKICSDate(newDate?.toDate());
                       setDateHeader(updatedDateRange);
                       setDateRange(getRange(newDate?.toDate(), endKICSDate));
-                      setDateRow(getRow(stock, updatedDateRange.length));
+                      setDateRow(getRowRoop(stock, updatedDateRange.length));
                     }
                   }}
                 />
