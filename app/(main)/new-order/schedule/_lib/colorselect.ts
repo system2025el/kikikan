@@ -4,11 +4,11 @@ export const getDateRowBackgroundColor = (rowIndex: number, colIndex: number, co
       case 2:
         return 'lightblue';
       case 3:
-        return 'purple';
+        return 'mediumpurple';
       case 4:
         return 'orange';
       case 5:
-        return 'green';
+        return 'grlightgreeneen';
       case 6:
         return 'pink';
       case 7:
@@ -27,11 +27,11 @@ export const getDateRowBackgroundColor = (rowIndex: number, colIndex: number, co
       case 1:
         return 'lightblue';
       case 2:
-        return 'purple';
+        return 'mediumpurple';
       case 3:
         return 'orange';
       case 4:
-        return 'green';
+        return 'lightgreen';
       case 5:
         return 'pink';
       case 6:

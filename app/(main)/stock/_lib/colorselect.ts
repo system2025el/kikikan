@@ -2,11 +2,11 @@ export const getBackgroundColor = (rowIndex: number, colIndex: number, colorSele
   if (colorSelect && (rowIndex === 0 || rowIndex === 1)) {
     switch (colIndex) {
       case 3:
-        return 'purple';
+        return 'mediumpurple';
       case 4:
         return 'orange';
       case 5:
-        return 'green';
+        return 'lightgreen';
       case 6:
         return 'pink';
       case 7:
@@ -21,11 +21,11 @@ export const getBackgroundColor = (rowIndex: number, colIndex: number, colorSele
   } else if (colorSelect && rowIndex === 2) {
     switch (colIndex) {
       case 2:
-        return 'purple';
+        return 'mediumpurple';
       case 3:
         return 'orange';
       case 4:
-        return 'green';
+        return 'lightgreen';
       case 5:
         return 'pink';
       case 6:
