@@ -532,7 +532,7 @@ const EquipmentOrderDetail = () => {
           </Box>
           <Grid2 container spacing={1} ml={{ xs: 10, sm: 17, md: 17, lg: 17 }} py={2} width={{ md: '50%' }}>
             <Grid2 size={12}>
-              <Button sx={{ color: 'white', bgcolor: 'purple' }}>仕込</Button>
+              <Button sx={{ color: 'white', bgcolor: 'mediumpurple' }}>仕込</Button>
             </Grid2>
             <Grid2 size={5} display="flex">
               <Typography>日付</Typography>
@@ -608,7 +608,7 @@ const EquipmentOrderDetail = () => {
             width={{ md: '50%' }}
           >
             <Grid2 size={12}>
-              <Button sx={{ color: 'white', bgcolor: 'green' }}>GP</Button>
+              <Button sx={{ color: 'white', bgcolor: 'lightgreen' }}>GP</Button>
             </Grid2>
             <Grid2 size={5}>
               <Typography>日付</Typography>

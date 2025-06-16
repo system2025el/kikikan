@@ -53,9 +53,9 @@ export const getDateRowBackgroundColor = (
     });
     if (date === startDate) return 'lightblue';
     if (date === endDate) return 'yellow';
-    if (preparationDate.includes(date)) return 'purple';
+    if (preparationDate.includes(date)) return 'mediumpurple';
     if (RHDate.includes(date)) return 'orange';
-    if (GPDate.includes(date)) return 'green';
+    if (GPDate.includes(date)) return 'lightgreen';
     if (actualDate.includes(date)) return 'pink';
     return 'white';
   }

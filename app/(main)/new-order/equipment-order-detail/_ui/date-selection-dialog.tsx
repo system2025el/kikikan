@@ -184,9 +184,9 @@ export const DateSelectDialog = ({
       <Paper variant="outlined" sx={{ mt: 2 }}>
         <Grid2 container spacing={2} pt={2}>
           <Tabs value={value} onChange={handleChange}>
-            <Tab value="仕込" label="仕込" sx={{ bgcolor: 'purple' }} />
+            <Tab value="仕込" label="仕込" sx={{ bgcolor: 'mediumpurple' }} />
             <Tab value="RH" label="RH" sx={{ bgcolor: 'orange' }} />
-            <Tab value="GP" label="GP" sx={{ bgcolor: 'green' }} />
+            <Tab value="GP" label="GP" sx={{ bgcolor: 'lightgreen' }} />
             <Tab value="本番" label="本番" sx={{ bgcolor: 'pink' }} />
           </Tabs>
           <Box ml={20}>
