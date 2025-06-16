@@ -249,7 +249,9 @@ export const GridSelectBoxTable: React.FC<GridSelectBoxTableProps> = ({
                   <Delete fontSize="small" />
                 </IconButton>
               </TableCell>
-              <TableCell sx={{ py: 0, px: 1, border: '1px solid black' }}>{rowIndex + 1}</TableCell>
+              <TableCell align="right" sx={{ py: 0, px: 1, border: '1px solid black' }}>
+                {rowIndex + 1}
+              </TableCell>
               {row.data.map((cell, colIndex) => {
                 const isEditable = editableColumns?.includes(colIndex);
                 const width = getWidth(colIndex);

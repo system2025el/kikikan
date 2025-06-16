@@ -344,11 +344,11 @@ const EquipmentOrderDetail = () => {
         </AccordionSummary>
         <AccordionDetails sx={{ padding: 0 }}>
           <Divider />
-          <Grid2 container p={2} spacing={1} flexWrap="nowrap">
-            <Grid2>
+          <Grid2 container p={2} spacing={2}>
+            <Grid2 width={500}>
               <Typography>出庫日時</Typography>
               <Grid2>
-                <TextField defaultValue={'KICS'} sx={{ width: '10%', minWidth: 150 }} />
+                <TextField defaultValue={'KICS'} disabled sx={{ width: '10%', minWidth: 150 }} />
                 <TestDate
                   date={startKICSDate}
                   onChange={(newDate) => {
@@ -364,7 +364,7 @@ const EquipmentOrderDetail = () => {
                 <Time />
               </Grid2>
               <Grid2>
-                <TextField defaultValue={'YARD'} sx={{ width: '10%', minWidth: 150 }} />
+                <TextField defaultValue={'YARD'} disabled sx={{ width: '10%', minWidth: 150 }} />
                 <TestDate
                   date={startYARDDate}
                   onChange={(newDate) => {
@@ -376,10 +376,10 @@ const EquipmentOrderDetail = () => {
                 <Time />
               </Grid2>
             </Grid2>
-            <Grid2>
+            <Grid2 width={500}>
               <Typography>入庫日時</Typography>
               <Grid2>
-                <TextField defaultValue={'KICS'} sx={{ width: '10%', minWidth: 150 }} />
+                <TextField defaultValue={'KICS'} disabled sx={{ width: '10%', minWidth: 150 }} />
                 <TestDate
                   date={endKICSDate}
                   onChange={(newDate) => {
@@ -392,7 +392,7 @@ const EquipmentOrderDetail = () => {
                 <Time />
               </Grid2>
               <Grid2>
-                <TextField defaultValue={'YARD'} sx={{ width: '10%', minWidth: 150 }} />
+                <TextField defaultValue={'YARD'} disabled sx={{ width: '10%', minWidth: 150 }} />
                 <TestDate
                   date={endYARDDate}
                   onChange={(newDate) => {
@@ -405,25 +405,25 @@ const EquipmentOrderDetail = () => {
                 <Time />
               </Grid2>
             </Grid2>
-          </Grid2>
-          <Grid2 container alignItems="center" spacing={2} p={2}>
-            <Grid2 container alignItems="center">
-              <Typography>税区分</Typography>
-              <FormControl size="small" sx={{ width: '8%', minWidth: '80px' }}>
-                <Select value={selectTax} onChange={selectTaxChange}>
-                  <MenuItem value={'外税'}>外税</MenuItem>
-                  <MenuItem value={'内税'}>内税</MenuItem>
-                </Select>
-              </FormControl>
+            <Grid2 container direction="column" p={1}>
+              <Grid2 container alignItems="center">
+                <Typography>税区分</Typography>
+                <FormControl size="small" sx={{ width: '8%', minWidth: '80px' }}>
+                  <Select value={selectTax} onChange={selectTaxChange}>
+                    <MenuItem value={'外税'}>外税</MenuItem>
+                    <MenuItem value={'内税'}>内税</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid2>
+              <Grid2 container alignItems="center">
+                <Typography>値引き</Typography>
+                <TextField />
+              </Grid2>
             </Grid2>
-            <Grid2 container alignItems="center">
-              <Typography>値引き</Typography>
-              <TextField />
+            <Grid2 container alignItems="center" py={1}>
+              <Typography>メモ</Typography>
+              <TextField multiline rows={3} />
             </Grid2>
-          </Grid2>
-          <Grid2 container alignItems="center" spacing={2} p={2}>
-            <Typography>メモ</Typography>
-            <TextField multiline rows={3} />
           </Grid2>
         </AccordionDetails>
       </Accordion>
