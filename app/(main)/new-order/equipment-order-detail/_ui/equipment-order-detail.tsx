@@ -120,11 +120,12 @@ const EquipmentOrderDetail = () => {
   const [RH, setRH] = useState<EquipmentData[]>([]);
   const [GP, setGP] = useState<EquipmentData[]>([]);
   const [actual, setActual] = useState<EquipmentData[]>([]);
+  const [keep, setKeep] = useState<EquipmentData[]>([]);
   const [expanded, setExpanded] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectDate, setSelectDate] = useState<Date>(new Date());
 
-  const editableColumns = [5, 6];
+  const editableColumns = [4, 5];
   const open = Boolean(anchorEl);
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -138,9 +139,9 @@ const EquipmentOrderDetail = () => {
       setDateRow(getRow(stock, getDateRange(date?.toDate()).length));
       const updatedRows = [...rows];
       updatedRows.map((row) => {
+        row.data[4] = 0;
         row.data[5] = 0;
         row.data[6] = 0;
-        row.data[7] = 0;
       });
       setRows(updatedRows);
       setAnchorEl(null);
@@ -187,7 +188,7 @@ const EquipmentOrderDetail = () => {
 
   const handleMemoChange = (rowIndex: number, memo: string) => {
     const updatedRows = [...rows];
-    updatedRows[rowIndex].data[2] = memo;
+    updatedRows[rowIndex].data[1] = memo;
     setRows(updatedRows);
   };
 
@@ -198,7 +199,7 @@ const EquipmentOrderDetail = () => {
 
   const handleCellChange = (rowIndex: number, updatedRows: { id: number; data: Array<string | number> }[]) => {
     setRows(updatedRows);
-    stockChange(dateRow, rowIndex, Number(updatedRows[rowIndex].data[7]), dateRange, dateHeader);
+    stockChange(dateRow, rowIndex, Number(updatedRows[rowIndex].data[6]), dateRange, dateHeader);
   };
 
   const [EqSelectionDialogOpen, setEqSelectionDialogOpen] = useState(false);
@@ -225,7 +226,9 @@ const EquipmentOrderDetail = () => {
     GPDates: string[],
     GPMemo: string[],
     actualDates: string[],
-    actualMemo: string[]
+    actualMemo: string[],
+    keepDates: string[],
+    keepMemo: string[]
   ) => {
     setPreparation(
       preparationDates.map((date, index) => ({
@@ -249,6 +252,12 @@ const EquipmentOrderDetail = () => {
       actualDates.map((date, index) => ({
         date: date,
         memo: actualMemo[index] ?? '',
+      }))
+    );
+    setKeep(
+      keepDates.map((date, index) => ({
+        date: date,
+        memo: keepMemo[index] ?? '',
       }))
     );
     setDateSelectionDialogOpne(false);
@@ -335,11 +344,11 @@ const EquipmentOrderDetail = () => {
         </AccordionSummary>
         <AccordionDetails sx={{ padding: 0 }}>
           <Divider />
-          <Grid2 container p={2} spacing={1} flexWrap="nowrap">
-            <Grid2>
+          <Grid2 container p={2} spacing={2}>
+            <Grid2 width={500}>
               <Typography>出庫日時</Typography>
               <Grid2>
-                <TextField defaultValue={'KICS'} sx={{ width: '10%', minWidth: 150 }} />
+                <TextField defaultValue={'KICS'} disabled sx={{ width: '10%', minWidth: 150 }} />
                 <TestDate
                   date={startKICSDate}
                   onChange={(newDate) => {
@@ -355,7 +364,7 @@ const EquipmentOrderDetail = () => {
                 <Time />
               </Grid2>
               <Grid2>
-                <TextField defaultValue={'YARD'} sx={{ width: '10%', minWidth: 150 }} />
+                <TextField defaultValue={'YARD'} disabled sx={{ width: '10%', minWidth: 150 }} />
                 <TestDate
                   date={startYARDDate}
                   onChange={(newDate) => {
@@ -367,10 +376,10 @@ const EquipmentOrderDetail = () => {
                 <Time />
               </Grid2>
             </Grid2>
-            <Grid2>
+            <Grid2 width={500}>
               <Typography>入庫日時</Typography>
               <Grid2>
-                <TextField defaultValue={'KICS'} sx={{ width: '10%', minWidth: 150 }} />
+                <TextField defaultValue={'KICS'} disabled sx={{ width: '10%', minWidth: 150 }} />
                 <TestDate
                   date={endKICSDate}
                   onChange={(newDate) => {
@@ -383,7 +392,7 @@ const EquipmentOrderDetail = () => {
                 <Time />
               </Grid2>
               <Grid2>
-                <TextField defaultValue={'YARD'} sx={{ width: '10%', minWidth: 150 }} />
+                <TextField defaultValue={'YARD'} disabled sx={{ width: '10%', minWidth: 150 }} />
                 <TestDate
                   date={endYARDDate}
                   onChange={(newDate) => {
@@ -396,25 +405,25 @@ const EquipmentOrderDetail = () => {
                 <Time />
               </Grid2>
             </Grid2>
-          </Grid2>
-          <Grid2 container alignItems="center" spacing={2} p={2}>
-            <Grid2 container alignItems="center">
-              <Typography>税区分</Typography>
-              <FormControl size="small" sx={{ width: '8%', minWidth: '80px' }}>
-                <Select value={selectTax} onChange={selectTaxChange}>
-                  <MenuItem value={'外税'}>外税</MenuItem>
-                  <MenuItem value={'内税'}>内税</MenuItem>
-                </Select>
-              </FormControl>
+            <Grid2 container direction="column" p={1}>
+              <Grid2 container alignItems="center">
+                <Typography>税区分</Typography>
+                <FormControl size="small" sx={{ width: '8%', minWidth: '80px' }}>
+                  <Select value={selectTax} onChange={selectTaxChange}>
+                    <MenuItem value={'外税'}>外税</MenuItem>
+                    <MenuItem value={'内税'}>内税</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid2>
+              <Grid2 container alignItems="center">
+                <Typography>値引き</Typography>
+                <TextField />
+              </Grid2>
             </Grid2>
-            <Grid2 container alignItems="center">
-              <Typography>値引き</Typography>
-              <TextField />
+            <Grid2 container alignItems="center" py={1}>
+              <Typography>メモ</Typography>
+              <TextField multiline rows={3} />
             </Grid2>
-          </Grid2>
-          <Grid2 container alignItems="center" spacing={2} p={2}>
-            <Typography>メモ</Typography>
-            <TextField multiline rows={3} />
           </Grid2>
         </AccordionDetails>
       </Accordion>
@@ -499,6 +508,7 @@ const EquipmentOrderDetail = () => {
               RH={RH}
               GP={GP}
               actual={actual}
+              keep={keep}
               cellWidths={dateWidths}
               getHeaderBackgroundColor={getDateHeaderBackgroundColor}
               rowColorSelect={true}
@@ -525,6 +535,7 @@ const EquipmentOrderDetail = () => {
                 RH={RH}
                 GP={GP}
                 actual={actual}
+                keep={keep}
                 onClose={handleCloseDateDialog}
                 onSave={handleSave}
               />
@@ -664,6 +675,44 @@ const EquipmentOrderDetail = () => {
             width={{ md: '50%' }}
           >
             {actual.map((data, index) => (
+              <Grid2 key={index} container display="flex" flexDirection="row">
+                <Grid2 size={5}>
+                  <Typography>{data.date}</Typography>
+                </Grid2>
+                <Grid2 size={7}>
+                  <Typography sx={{ wordBreak: 'break-word' }}>{data.memo}</Typography>
+                </Grid2>
+              </Grid2>
+            ))}
+          </Grid2>
+          <Grid2
+            container
+            display="flex"
+            flexDirection="row"
+            spacing={1}
+            ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
+            py={2}
+            width={{ md: '50%' }}
+          >
+            <Grid2 size={12}>
+              <Button sx={{ color: 'white', bgcolor: '#ACB9CA' }}>キープ</Button>
+            </Grid2>
+            <Grid2 size={5}>
+              <Typography>日付</Typography>
+            </Grid2>
+            <Grid2 size={7}>
+              <Typography>メモ</Typography>
+            </Grid2>
+          </Grid2>
+          <Grid2
+            container
+            display="flex"
+            flexDirection="column"
+            spacing={1}
+            ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
+            width={{ md: '50%' }}
+          >
+            {keep.map((data, index) => (
               <Grid2 key={index} container display="flex" flexDirection="row">
                 <Grid2 size={5}>
                   <Typography>{data.date}</Typography>
