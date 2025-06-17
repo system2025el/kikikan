@@ -37,8 +37,16 @@ import {
   getDateRowBackgroundColor,
   getEquipmentRowBackgroundColor,
 } from '@/app/(main)/new-order/equipment-order-detail/_lib/colorselect';
-import { cellWidths, data, dateWidths, header, stock } from '@/app/(main)/new-order/equipment-order-detail/_lib/data';
+import {
+  cellWidths,
+  data,
+  dateWidths,
+  header,
+  stock,
+  testData,
+} from '@/app/(main)/new-order/equipment-order-detail/_lib/data';
 import GridTable, {
+  Equipment,
   GridSelectBoxTable,
 } from '@/app/(main)/new-order/equipment-order-detail/_ui/equipment-order-detail-table';
 import { getDateTextColor } from '@/app/(main)/new-order/schedule/_lib/colorselect';
@@ -138,7 +146,7 @@ const EquipmentOrderDetail = () => {
   // 出庫日から入庫日
   const [dateRange, setDateRange] = useState<string[]>(getRange(startKICSDate, endKICSDate));
   const [dateRow, setDateRow] = useState<row[]>(getRow(stock, dateHeader.length));
-  const [rows, setRows] = useState(data);
+  const [rows, setRows] = useState<Equipment[]>(testData);
   const [preparation, setPreparation] = useState<EquipmentData[]>([]);
   const [RH, setRH] = useState<EquipmentData[]>([]);
   const [GP, setGP] = useState<EquipmentData[]>([]);
@@ -148,7 +156,6 @@ const EquipmentOrderDetail = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectDate, setSelectDate] = useState<Date>(new Date());
 
-  const editableColumns = [4, 5];
   const open = Boolean(anchorEl);
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -162,9 +169,9 @@ const EquipmentOrderDetail = () => {
       setDateRow(getRow(stock, getDateRange(date?.toDate()).length));
       const updatedRows = [...rows];
       updatedRows.map((row) => {
-        row.data[4] = 0;
-        row.data[5] = 0;
-        row.data[6] = 0;
+        row.order = 0;
+        row.spare = 0;
+        row.total = 0;
       });
       setRows(updatedRows);
       setAnchorEl(null);
@@ -211,7 +218,7 @@ const EquipmentOrderDetail = () => {
 
   const handleMemoChange = (rowIndex: number, memo: string) => {
     const updatedRows = [...rows];
-    updatedRows[rowIndex].data[1] = memo;
+    updatedRows[rowIndex].memo = memo;
     setRows(updatedRows);
   };
 
@@ -220,9 +227,9 @@ const EquipmentOrderDetail = () => {
     setSelectTax(event.target.value);
   };
 
-  const handleCellChange = (rowIndex: number, updatedRows: { id: number; data: Array<string | number> }[]) => {
+  const handleCellChange = (rowIndex: number, updatedRows: Equipment[]) => {
     setRows(updatedRows);
-    stockChange(dateRow, rowIndex, Number(updatedRows[rowIndex].data[6]), dateRange, dateHeader);
+    stockChange(dateRow, rowIndex, updatedRows[rowIndex].total, dateRange, dateHeader);
   };
 
   const [EqSelectionDialogOpen, setEqSelectionDialogOpen] = useState(false);
@@ -492,15 +499,7 @@ const EquipmentOrderDetail = () => {
             <Button sx={{ m: 2 }} onClick={() => handleOpenEqDialog()}>
               ＋ 機材追加
             </Button>
-            <GridSelectBoxTable
-              header={header}
-              rows={rows}
-              editableColumns={editableColumns}
-              onChange={handleCellChange}
-              cellWidths={cellWidths}
-              getRowBackgroundColor={getEquipmentRowBackgroundColor}
-              handleMemoChange={handleMemoChange}
-            />
+            <GridSelectBoxTable rows={rows} onChange={handleCellChange} handleMemoChange={handleMemoChange} />
           </Box>
           <Box overflow="auto" sx={{ width: { xs: '60%', sm: '60%', md: 'auto' } }}>
             <Box display="flex" my={2}>

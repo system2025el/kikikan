@@ -146,40 +146,34 @@ const GridTable: React.FC<TableProps> = ({
 
 export default GridTable;
 
+export type Equipment = {
+  id: number;
+  name: string;
+  memo: string;
+  place: string;
+  all: number;
+  order: number;
+  spare: number;
+  total: number;
+};
+
 type GridSelectBoxTableProps = {
-  header: string[] | null;
-  rows: Array<{
-    id: number;
-    data: Array<string | number>;
-  }>;
-  editableColumns?: number[] | null;
-  onChange?: (rowIndex: number, updatedRows: { id: number; data: Array<string | number> }[]) => void;
-  cellWidths?: Array<string | number>;
-  getRowBackgroundColor: (rowIndex: number, colIndex: number) => string;
+  rows: Equipment[];
+  onChange?: (rowIndex: number, updatedRows: Equipment[]) => void;
   handleMemoChange: (rowIndex: number, memo: string) => void;
 };
 
-export const GridSelectBoxTable: React.FC<GridSelectBoxTableProps> = ({
-  header,
-  rows,
-  editableColumns = [],
-  onChange,
-  cellWidths = [],
-  getRowBackgroundColor,
-  handleMemoChange,
-}) => {
+export const GridSelectBoxTable: React.FC<GridSelectBoxTableProps> = ({ rows, onChange, handleMemoChange }) => {
   const handleCellChange = (rowIndex: number, colIndex: number, newValue: number) => {
     const updatedRows = [...rows];
-    updatedRows[rowIndex] = {
-      ...updatedRows[rowIndex],
-      data: [...updatedRows[rowIndex].data],
-    };
-    updatedRows[rowIndex].data[colIndex] = newValue;
-    updatedRows[rowIndex].data[6] = Number(updatedRows[rowIndex].data[4]) + Number(updatedRows[rowIndex].data[5]);
+    if (colIndex === 4) {
+      updatedRows[rowIndex].order = newValue;
+    } else if (colIndex === 5) {
+      updatedRows[rowIndex].spare = newValue;
+    }
+    updatedRows[rowIndex].total = updatedRows[rowIndex].order + updatedRows[rowIndex].spare;
     onChange?.(rowIndex, updatedRows);
   };
-
-  const getWidth = (index: number) => cellWidths[index] ?? cellWidths[1];
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   let currentIndex = 0;
@@ -188,22 +182,19 @@ export const GridSelectBoxTable: React.FC<GridSelectBoxTableProps> = ({
     if (e.key === 'Enter') {
       e.preventDefault();
       if (colIndex === 4) {
-        const next = 7 * rowIndex + colIndex + 1;
-        if (next < inputRefs.current.length) {
-          inputRefs.current[next]?.focus();
-        }
-      } else if (colIndex === 5) {
-        const next = 7 * rowIndex + colIndex + 6;
-        if (next < inputRefs.current.length) {
-          inputRefs.current[next]?.focus();
-        }
+        inputRefs.current[rowIndex * 2 + 1]?.focus();
+      } else {
+        inputRefs.current[rowIndex * 2 + 2]?.focus();
       }
     }
   };
 
   const handleSelect = (rowIndex: number, colIndex: number) => {
-    const target = 7 * rowIndex + colIndex;
-    inputRefs.current[target]?.select();
+    if (colIndex === 4) {
+      inputRefs.current[rowIndex * 2]?.select();
+    } else {
+      inputRefs.current[rowIndex * 2 + 1]?.select();
+    }
   };
 
   return (
@@ -211,123 +202,149 @@ export const GridSelectBoxTable: React.FC<GridSelectBoxTableProps> = ({
       <Table>
         <TableHead>
           <TableRow>
-            <TableCell
-              sx={{
-                border: '1px solid grey',
-                whiteSpace: 'nowrap',
-                padding: 0,
-              }}
-            />
-            <TableCell
-              sx={{
-                border: '1px solid grey',
-                whiteSpace: 'nowrap',
-                padding: 0,
-              }}
-            />
-            {header?.map((data, index) => (
-              <TableCell
-                key={index}
-                align={typeof rows[0].data[index] === 'number' ? 'right' : 'left'}
-                size="small"
-                sx={{
-                  border: '1px solid grey',
-                  whiteSpace: 'nowrap',
-                  padding: 0,
-                }}
-              >
-                {data}
-              </TableCell>
-            ))}
+            <TableCell size="small" style={styles.header} />
+            <TableCell size="small" style={styles.header} />
+            <TableCell align="left" size="small" style={styles.header}>
+              機材名
+            </TableCell>
+            <TableCell align="left" size="small" style={styles.header}>
+              メモ
+            </TableCell>
+            <TableCell align="left" size="small" style={styles.header}>
+              在庫場所
+            </TableCell>
+            <TableCell align="right" size="small" style={styles.header}>
+              全数
+            </TableCell>
+            <TableCell align="right" size="small" style={styles.header}>
+              受注数
+            </TableCell>
+            <TableCell align="right" size="small" style={styles.header}>
+              予備数
+            </TableCell>
+            <TableCell align="right" size="small" style={styles.header}>
+              合計数
+            </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {rows.map((row, rowIndex) => (
-            <TableRow key={rowIndex}>
+            <TableRow key={row.id}>
               <TableCell sx={{ padding: 0, border: '1px solid black' }}>
                 <IconButton sx={{ padding: 0, color: 'red' }}>
                   <Delete fontSize="small" />
                 </IconButton>
               </TableCell>
-              <TableCell align="right" sx={{ py: 0, px: 1, border: '1px solid black' }}>
+              <TableCell
+                align="right"
+                size="small"
+                sx={{ bgcolor: 'lightgrey', py: 0, px: 1, border: '1px solid black' }}
+              >
                 {rowIndex + 1}
               </TableCell>
-              {row.data.map((cell, colIndex) => {
-                const isEditable = editableColumns?.includes(colIndex);
-                const width = getWidth(colIndex);
-                const targetIndex = currentIndex++;
-
-                return (
-                  <TableCell
-                    key={colIndex}
-                    align={typeof cell === 'number' ? 'right' : 'left'}
-                    sx={{
-                      border: '1px solid black',
-                      whiteSpace: 'nowrap',
-                      width,
-                      height: 25,
-                      bgcolor: getRowBackgroundColor(rowIndex, colIndex),
-                      py: 0,
-                      px: 1,
-                    }}
-                    size="small"
-                  >
-                    {isEditable ? (
-                      <TextField
-                        variant="standard"
-                        value={cell}
-                        type="text"
-                        onChange={(e) => {
-                          if (/^\d*$/.test(e.target.value)) {
-                            handleCellChange(rowIndex, colIndex, Number(e.target.value));
-                          }
-                        }}
-                        sx={{
-                          '& .MuiInputBase-input': {
-                            textAlign: 'right',
-                            padding: 0,
-                            fontSize: 'small',
-                          },
-                          '& input[type=number]': {
-                            MozAppearance: 'textfield',
-                          },
-                          '& input[type=number]::-webkit-outer-spin-button': {
-                            WebkitAppearance: 'none',
-                            margin: 0,
-                          },
-                          '& input[type=number]::-webkit-inner-spin-button': {
-                            WebkitAppearance: 'none',
-                            margin: 0,
-                          },
-                        }}
-                        slotProps={{
-                          input: {
-                            style: { textAlign: 'right' },
-                            disableUnderline: true,
-                            inputMode: 'numeric',
-                          },
-                        }}
-                        inputRef={(el) => {
-                          inputRefs.current[targetIndex] = el;
-                        }}
-                        onKeyDown={(e) => {
-                          handleKeyDown(e, rowIndex, colIndex);
-                        }}
-                        onFocus={() => handleSelect(rowIndex, colIndex)}
-                      />
-                    ) : colIndex === 1 ? (
-                      <MemoTooltip
-                        name={row.data[0].toString()}
-                        memo={row.data[1].toString()}
-                        handleMemoChange={handleMemoChange}
-                        rowIndex={rowIndex}
-                      />
-                    ) : (
-                      cell
-                    )}
-                  </TableCell>
-                );
-              })}
+              <TableCell style={styles.row} align="left" size="small" sx={{ bgcolor: 'lightgrey' }}>
+                {row.name}
+              </TableCell>
+              <TableCell style={styles.row} align="center" size="small">
+                <MemoTooltip name={row.name} memo={row.memo} handleMemoChange={handleMemoChange} rowIndex={rowIndex} />
+              </TableCell>
+              <TableCell style={styles.row} align="left" size="small" sx={{ bgcolor: 'lightgrey' }}>
+                {row.place}
+              </TableCell>
+              <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: 'lightgrey' }}>
+                {row.all}
+              </TableCell>
+              <TableCell style={styles.row} align="right" size="small">
+                <TextField
+                  variant="standard"
+                  value={row.order}
+                  type="text"
+                  onChange={(e) => {
+                    if (/^\d*$/.test(e.target.value)) {
+                      handleCellChange(rowIndex, 4, Number(e.target.value));
+                    }
+                  }}
+                  sx={{
+                    '& .MuiInputBase-input': {
+                      textAlign: 'right',
+                      padding: 0,
+                      fontSize: 'small',
+                    },
+                    '& input[type=number]': {
+                      MozAppearance: 'textfield',
+                    },
+                    '& input[type=number]::-webkit-outer-spin-button': {
+                      WebkitAppearance: 'none',
+                      margin: 0,
+                    },
+                    '& input[type=number]::-webkit-inner-spin-button': {
+                      WebkitAppearance: 'none',
+                      margin: 0,
+                    },
+                  }}
+                  slotProps={{
+                    input: {
+                      style: { textAlign: 'right' },
+                      disableUnderline: true,
+                      inputMode: 'numeric',
+                    },
+                  }}
+                  inputRef={(el) => {
+                    inputRefs.current[currentIndex++] = el;
+                  }}
+                  onKeyDown={(e) => {
+                    handleKeyDown(e, rowIndex, 4);
+                  }}
+                  onFocus={() => handleSelect(rowIndex, 4)}
+                />
+              </TableCell>
+              <TableCell style={styles.row} align="right" size="small">
+                <TextField
+                  variant="standard"
+                  value={row.spare}
+                  type="text"
+                  onChange={(e) => {
+                    if (/^\d*$/.test(e.target.value)) {
+                      handleCellChange(rowIndex, 5, Number(e.target.value));
+                    }
+                  }}
+                  sx={{
+                    '& .MuiInputBase-input': {
+                      textAlign: 'right',
+                      padding: 0,
+                      fontSize: 'small',
+                    },
+                    '& input[type=number]': {
+                      MozAppearance: 'textfield',
+                    },
+                    '& input[type=number]::-webkit-outer-spin-button': {
+                      WebkitAppearance: 'none',
+                      margin: 0,
+                    },
+                    '& input[type=number]::-webkit-inner-spin-button': {
+                      WebkitAppearance: 'none',
+                      margin: 0,
+                    },
+                  }}
+                  slotProps={{
+                    input: {
+                      style: { textAlign: 'right' },
+                      disableUnderline: true,
+                      inputMode: 'numeric',
+                    },
+                  }}
+                  inputRef={(el) => {
+                    inputRefs.current[currentIndex++] = el;
+                  }}
+                  onKeyDown={(e) => {
+                    handleKeyDown(e, rowIndex, 5);
+                  }}
+                  onFocus={() => handleSelect(rowIndex, 5)}
+                />
+              </TableCell>
+              <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: 'lightgrey' }}>
+                {row.total}
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -383,4 +400,26 @@ export const MemoTooltip = (props: Props) => {
       </Dialog>
     </>
   );
+};
+
+/* style
+---------------------------------------------------------------------------------------------------- */
+/** @type {{ [key: string]: React.CSSProperties }} style */
+const styles: { [key: string]: React.CSSProperties } = {
+  // ヘッダー
+  header: {
+    border: '1px solid grey',
+    whiteSpace: 'nowrap',
+    padding: 0,
+  },
+  // 行
+  row: {
+    border: '1px solid black',
+    whiteSpace: 'nowrap',
+    height: 25,
+    paddingTop: 0,
+    paddingBottom: 0,
+    paddingLeft: 1,
+    paddingRight: 1,
+  },
 };

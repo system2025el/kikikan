@@ -14,6 +14,79 @@ const rows = [
   { id: 2, set: 'ROBIN T2 Profile', all: 26, orders: 3, spare: 1, total: 4, memo: '' },
 ];
 
+const testData = [
+  {
+    id: 1,
+    name: 'SHARPY PLUS',
+    memo: '',
+    place: 'KICS',
+    all: 148,
+    order: 0,
+    spare: 0,
+    total: 0,
+  },
+  {
+    id: 2,
+    name: 'ROBIN T2 Profile',
+    memo: '',
+    place: 'KICS',
+    all: 55,
+    order: 0,
+    spare: 0,
+    total: 0,
+  },
+  {
+    id: 3,
+    name: 'Sharpy X Spot',
+    memo: '',
+    place: 'KICS',
+    all: 26,
+    order: 0,
+    spare: 0,
+    total: 0,
+  },
+  {
+    id: 4,
+    name: 'VL6000 Beam',
+    memo: '',
+    place: 'YARD',
+    all: 27,
+    order: 0,
+    spare: 0,
+    total: 0,
+  },
+  {
+    id: 5,
+    name: 'Arolla Profile MP',
+    memo: '',
+    place: 'YARD',
+    all: 28,
+    order: 0,
+    spare: 0,
+    total: 0,
+  },
+  {
+    id: 6,
+    name: '20D電源BOX 3相専用（12口）',
+    memo: '',
+    place: 'YARD',
+    all: 44,
+    order: 0,
+    spare: 0,
+    total: 0,
+  },
+  {
+    id: 7,
+    name: 'XXXXXXXXXXXX',
+    memo: '',
+    place: 'YARD',
+    all: 45,
+    order: 0,
+    spare: 0,
+    total: 0,
+  },
+];
+
 const data = [
   {
     id: 1,
@@ -53,4 +126,4 @@ const header = ['機材名', 'メモ', '在庫場所', '全', '受注数', '予�
 
 const dateWidths = [''];
 
-export { cellWidths, columns, data, dateWidths, header, rows, stock };
+export { cellWidths, columns, data, dateWidths, header, rows, stock, testData };
