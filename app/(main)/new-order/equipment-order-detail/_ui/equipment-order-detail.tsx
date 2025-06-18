@@ -36,7 +36,7 @@ import {
   getDateHeaderBackgroundColor,
   getDateRowBackgroundColor,
 } from '@/app/(main)/new-order/equipment-order-detail/_lib/colorselect';
-import { dateWidths, stock, testData } from '@/app/(main)/new-order/equipment-order-detail/_lib/data';
+import { data, dateWidths, stock } from '@/app/(main)/new-order/equipment-order-detail/_lib/data';
 import GridTable, {
   Equipment,
   GridSelectBoxTable,
@@ -104,17 +104,9 @@ const getRow = (stock: number[], length: number) => {
   return rows;
 };
 
-// const rowRoop = () => {
-//   const rows = [];
-//   for (let i = 0; i < 15; i++) {
-//     rows.push(...data);
-//   }
-//   return rows;
-// };
-
 // const getRowRoop = (stock: number[], length: number) => {
 //   const rows: row[] = [];
-//   for (let i = 0; i < 15; i++) {
+//   for (let i = 0; i < 28; i++) {
 //     stock.map((num, index) => {
 //       const data: number[] = [];
 //       for (let i = 0; i < length; i++) {
@@ -127,6 +119,35 @@ const getRow = (stock: number[], length: number) => {
 //   return rows;
 // };
 
+export const testeqData = Array.from({ length: 200 }, (_, i) => {
+  const original = data[i % data.length];
+  return {
+    ...original,
+    id: i + 1,
+    name: `${original.name} (${i + 1})`,
+    memo: original.memo,
+    place: original.place,
+    all: original.all,
+    order: original.order,
+    spare: original.spare,
+    total: original.total,
+  };
+});
+
+export const testDateData = Array.from({ length: 200 }, (_, i) => {
+  const base = getRow(stock, getDateRange(new Date()).length);
+  const original = base[i % data.length];
+  return {
+    ...original,
+    id: i + 1,
+    data: original.data,
+  };
+});
+
+export const testStock = Array.from({ length: 200 }, (_, i) => {
+  return [...stock];
+});
+
 const EquipmentOrderDetail = () => {
   const [startKICSDate, setStartKICSDate] = useState<Date>(new Date());
   const [startYARDDate, setStartYARDDate] = useState<Date>(new Date());
@@ -137,7 +158,7 @@ const EquipmentOrderDetail = () => {
   // 出庫日から入庫日
   const [dateRange, setDateRange] = useState<string[]>(getRange(startKICSDate, endKICSDate));
   const [dateRow, setDateRow] = useState<row[]>(getRow(stock, dateHeader.length));
-  const [rows, setRows] = useState<Equipment[]>(testData);
+  const [rows, setRows] = useState<Equipment[]>(data);
   const [preparation, setPreparation] = useState<EquipmentData[]>([]);
   const [RH, setRH] = useState<EquipmentData[]>([]);
   const [GP, setGP] = useState<EquipmentData[]>([]);
@@ -164,19 +185,27 @@ const EquipmentOrderDetail = () => {
         row.spare = 0;
         row.total = 0;
       });
-      setRows(updatedRows);
+      setRows((prev) =>
+        prev.map((row) => ({
+          ...row,
+          order: 0,
+          spare: 0,
+          total: 0,
+        }))
+      );
+      //setRows(updatedRows);
       setAnchorEl(null);
     }
   };
 
   const handleBackDateChange = () => {
     const date = subMonths(new Date(dateHeader[1]), 3);
-    setDateHeader(getDateRange(date));
+    handleDateChange(dayjs(date));
   };
 
   const handleForwardDateChange = () => {
     const date = addMonths(new Date(dateHeader[1]), 3);
-    setDateHeader(getDateRange(date));
+    handleDateChange(dayjs(date));
   };
 
   const handleClickAway = () => {
@@ -193,6 +222,7 @@ const EquipmentOrderDetail = () => {
 
   const stockChange = (row: row[], rowIndex: number, value: number, range: string[], dateRange: string[]) => {
     const updatedRows = [...row];
+    const updatedData = row[rowIndex].data;
     const targetIndex: number[] = [];
     range.map((targetDate) => {
       dateRange.map((date, index) => {
@@ -202,9 +232,11 @@ const EquipmentOrderDetail = () => {
       });
     });
     targetIndex.map((index) => {
-      updatedRows[rowIndex].data[index] = stock[rowIndex] - value;
-      setDateRow(updatedRows);
+      updatedData[index] = stock[rowIndex] - value;
+      // updatedRows[rowIndex].data[index] = stock[rowIndex] - value;
+      // setDateRow(updatedRows);
     });
+    setDateRow((prev) => prev.map((row, i) => (i === rowIndex ? { ...row, data: updatedData } : row)));
   };
 
   const handleMemoChange = (rowIndex: number, memo: string) => {
@@ -218,9 +250,12 @@ const EquipmentOrderDetail = () => {
     setSelectTax(event.target.value);
   };
 
-  const handleCellChange = (rowIndex: number, updatedRows: Equipment[]) => {
-    setRows(updatedRows);
-    stockChange(dateRow, rowIndex, updatedRows[rowIndex].total, dateRange, dateHeader);
+  const handleCellChange = (rowIndex: number, orderValue: number, spareValue: number, totalValue: number) => {
+    setRows((prev) =>
+      prev.map((row, i) => (i === rowIndex ? { ...row, order: orderValue, spare: spareValue, total: totalValue } : row))
+    );
+    //setRows(updatedRows);
+    stockChange(dateRow, rowIndex, totalValue, dateRange, dateHeader);
   };
 
   const [EqSelectionDialogOpen, setEqSelectionDialogOpen] = useState(false);
@@ -457,7 +492,7 @@ const EquipmentOrderDetail = () => {
           </Grid2>
           <Grid2 container spacing={2}>
             <Button>編集</Button>
-            <Button>保存</Button>
+            <Button onClick={() => console.log(rows, dateRow)}>保存</Button>
           </Grid2>
         </Box>
         <Divider />
