@@ -1,6 +1,6 @@
 'use client';
 import SearchIcon from '@mui/icons-material/Search';
-import { Box, Button, Container, Divider, Paper, Stack, TextField, Typography } from '@mui/material';
+import { Box, Button, Container, Divider, Grid2, Paper, Stack, TextField, Typography } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import Form from 'next/form';
 
@@ -17,31 +17,52 @@ export const CustomersMaster = () => {
         </Box>
         <Divider />
         <Box width={'100%'} p={2}>
-          <Stack justifyContent={'space-between'}>
+          <Stack>
             <Typography variant="body2">検索</Typography>
           </Stack>
-          <Form action="">
-            <Stack direction={'row'} justifyContent={'space-between'} spacing={1} py={1}>
-              <Button>あ</Button>
-              <Button>か</Button>
-              <Button>さ</Button>
-              <Button>た</Button>
-              <Button>な</Button>
-              <Button>は</Button>
-              <Button>ま</Button>
-              <Button>や</Button>
-              <Button>ら</Button>
-              <Button>わ</Button>
-              <Button>英数</Button>
-              <Button>全て</Button>
-              <TextField fullWidth placeholder="検索"></TextField>
-            </Stack>
-            <Divider />
+          <form>
+            <Grid2 container direction={'row'} spacing={3}>
+              <Grid2>
+                <Button>あ</Button>
+              </Grid2>
+              <Grid2>
+                <Button>か</Button>
+              </Grid2>
+              <Grid2>
+                <Button>さ</Button>
+              </Grid2>
+              <Grid2>
+                <Button>た</Button>
+              </Grid2>
+              <Grid2>
+                <Button>な</Button>
+              </Grid2>
+              <Grid2>
+                <Button>は</Button>
+              </Grid2>
+              <Grid2>
+                <Button>ま</Button>
+              </Grid2>
+              <Grid2>
+                <Button>や</Button>
+              </Grid2>
+              <Grid2>
+                <Button>ら</Button>
+              </Grid2>
+              <Grid2>
+                <Button>わ</Button>
+              </Grid2>
+              <Grid2>
+                <Button>英数</Button>
+              </Grid2>
+              <Grid2>
+                <Button>全て</Button>
+              </Grid2>
+            </Grid2>
+            <Divider sx={{ mt: 1 }} />
             <Stack justifyContent={'space-between'} alignItems={'start'} mt={1}>
               <Stack>
-                <Typography noWrap id="a">
-                  顧客キーワード
-                </Typography>
+                <Typography noWrap>顧客キーワード</Typography>
                 <Box>
                   <TextField id="a" />
                   <Typography noWrap variant="body2">
@@ -56,7 +77,7 @@ export const CustomersMaster = () => {
                 </Button>
               </Box>
             </Stack>
-          </Form>
+          </form>
           <Typography></Typography>
         </Box>
       </Paper>

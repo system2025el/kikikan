@@ -1,5 +1,5 @@
 'use client';
-import { CheckBox } from '@mui/icons-material';
+import { CheckBox, SellTwoTone } from '@mui/icons-material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import {
@@ -20,23 +20,33 @@ import {
   useTheme,
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
-import { useMemo, useState } from 'react';
+import { SetStateAction, useMemo, useState } from 'react';
 
 import { vehicles } from '@/app/_lib/mock-data';
 
+import { MuiTable } from '../../_ui/table';
 import { MuiTablePagination } from '../../_ui/table-pagination';
+import { vMHeader } from '../_lib/datas';
 import { AddVehicleDialog } from './add-vehicle-dialog';
 
 /** 車両マスタのテーブルコンポーネント */
 export const VehiclesMasterTable = () => {
   const [page, setPage] = useState(1);
   const rowsPerPage = 50;
-
+  /* ダイアログ開く顧客のID、閉じるとき、未選択で-100とする */
+  const [openId, setOpenID] = useState<string | number>(-100);
+  /* 車両詳細ダイアログの開閉状態 */
   const [dialogOpen, setDialogOpen] = useState(false);
-  const handleOpenNewVehicle = () => {
+  /* ダイアログでの編集モード */
+  const [editable, setEditable] = useState(false);
+  const handleOpenDialog = (id: string | number) => {
+    if (id === -100) {
+      setEditable(true);
+    }
+    setOpenID(id);
     setDialogOpen(true);
   };
-  const handleCloseNewVehicle = () => {
+  const handleCloseDialog = () => {
     setDialogOpen(false);
   };
 
@@ -61,7 +71,7 @@ export const VehiclesMasterTable = () => {
         <Grid2 container spacing={1}>
           <Grid2 container spacing={1}>
             <Grid2>
-              <Button href="/new-order">
+              <Button onClick={() => handleOpenDialog(-100)}>
                 <AddIcon fontSize="small" />
                 車両追加
               </Button>
@@ -75,8 +85,10 @@ export const VehiclesMasterTable = () => {
           </Grid2>
         </Grid2>
       </Grid2>
+
       <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 1 }}>
-        <Table stickyHeader padding="none">
+        <MuiTable headers={vMHeader} datas={list} handleOpenDialog={handleOpenDialog} />
+        {/* <Table stickyHeader padding="none">
           <TableHead>
             <TableRow>
               <TableCell></TableCell>
@@ -100,7 +112,15 @@ export const VehiclesMasterTable = () => {
               </TableRow>
             )}
           </TableBody>
-        </Table>
+        </Table> */}
+        <Dialog open={dialogOpen} fullScreen>
+          <AddVehicleDialog
+            handleClose={handleCloseDialog}
+            vehicleId={openId}
+            editable={editable}
+            setEditable={setEditable}
+          />
+        </Dialog>
       </TableContainer>
     </Box>
   );

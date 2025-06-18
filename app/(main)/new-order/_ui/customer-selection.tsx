@@ -7,6 +7,7 @@ import {
   Card,
   Container,
   Divider,
+  Grid2,
   Paper,
   Stack,
   Table,
@@ -50,27 +51,51 @@ export const CustomerSelectionDialog = (props: { handleCloseCustDialog: () => vo
           </Box>
           <Divider />
           <Box width={'100%'} p={2}>
-            <Stack justifyContent={'space-between'}>
+            <Stack>
               <Typography variant="body2">検索</Typography>
             </Stack>
-            <Form action="">
-              <Stack direction={'row'} justifyContent={'space-between'} spacing={1}>
-                <Button>あ</Button>
-                <Button>か</Button>
-                <Button>さ</Button>
-                <Button>た</Button>
-                <Button>な</Button>
-                <Button>は</Button>
-                <Button>ま</Button>
-                <Button>や</Button>
-                <Button>ら</Button>
-                <Button>わ</Button>
-                <Button>英数</Button>
-                <Button>全て</Button>
-                <TextField fullWidth placeholder="検索"></TextField>
-              </Stack>
-              <Divider />
-              <Stack justifyContent={'space-between'}>
+            <form>
+              <Grid2 container direction={'row'} spacing={3}>
+                <Grid2>
+                  <Button>あ</Button>
+                </Grid2>
+                <Grid2>
+                  <Button>か</Button>
+                </Grid2>
+                <Grid2>
+                  <Button>さ</Button>
+                </Grid2>
+                <Grid2>
+                  <Button>た</Button>
+                </Grid2>
+                <Grid2>
+                  <Button>な</Button>
+                </Grid2>
+                <Grid2>
+                  <Button>は</Button>
+                </Grid2>
+                <Grid2>
+                  <Button>ま</Button>
+                </Grid2>
+                <Grid2>
+                  <Button>や</Button>
+                </Grid2>
+                <Grid2>
+                  <Button>ら</Button>
+                </Grid2>
+                <Grid2>
+                  <Button>わ</Button>
+                </Grid2>
+                <Grid2>
+                  <Button>英数</Button>
+                </Grid2>
+                <Grid2>
+                  <Button>全て</Button>
+                </Grid2>
+              </Grid2>
+
+              <Divider sx={{ mt: 1 }} />
+              <Stack justifyContent={'space-between'} mt={1}>
                 <Stack display={'flex'}>
                   <Typography>キーワード</Typography>
                   <Box>
@@ -84,7 +109,7 @@ export const CustomerSelectionDialog = (props: { handleCloseCustDialog: () => vo
                   </Button>
                 </Box>
               </Stack>
-            </Form>
+            </form>
             <Typography></Typography>
           </Box>
         </Paper>
