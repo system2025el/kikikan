@@ -1,56 +1,46 @@
 /** ----------------顧客マスタ-------------------------- */
-export type CustomerData = {
-  id: number;
-  name: string;
-  nameKana: string;
-  postnum: string;
-  addressA: string;
-  addressB: string;
-  tel: string;
-  fax: string;
-  mail: string;
-  keishou: string;
-  memo: string;
-};
-export const customers: CustomerData[] = [
+
+import { CustomerMasterTableValues } from '../(main)/customers-master/_lib/types';
+
+export const customers: CustomerMasterTableValues[] = [
   {
-    id: 1,
-    name: 'エンジニアライティング',
-    addressA: '東京都世田谷区',
-    nameKana: 'えんじにあらいてぃんぐ',
-    postnum: '154-0004',
-    addressB: '太子堂1-12-38 藤和三軒茶屋コープ205号',
+    kokyakuId: 1,
+    kokyakuNam: 'エンジニアライティング',
+    adrShozai: '東京都世田谷区',
+    adrTatemono: 'えんじにあらいてぃんぐ',
+    // adrPost: '154-0004',
+    adrSonota: '太子堂1-12-38 藤和三軒茶屋コープ205号',
     tel: '03-3413-8441',
     fax: '03-3413-8466',
-    mail: 'FFFFFFFFFFFFF@EEEEEEEEEEEEEEEEEE',
-    keishou: '御中',
-    memo: 'あああああああああああああああああああ',
+    // mail: 'FFFFFFFFFFFFF@EEEEEEEEEEEEEEEEEE',
+    // keishou: '御中',
+    mem: 'あああああああああああああああああああ',
   },
   {
-    id: 2,
-    name: '(株)スペースエンジニアリング',
-    addressA: '東京都新宿区',
-    nameKana: 'すぺーすえんじにありんぐ',
-    postnum: '162-0041',
-    addressB: '早稲田鶴巻町５２３',
+    kokyakuId: 2,
+    kokyakuNam: '(株)スペースエンジニアリング',
+    adrShozai: '東京都新宿区',
+    adrTatemono: 'すぺーすえんじにありんぐ',
+    // postnum: '162-0041',
+    adrSonota: '早稲田鶴巻町５２３',
     tel: '03-5292-2380',
     fax: '03-5292-2382',
-    mail: 'YYYYYYYYYYYYYYYYYYYYYY@DDDDDDDDD',
-    keishou: '御中',
-    memo: 'あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやいゆえよらりるれろわいうえをあいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやいゆえよらりるれろわいうえをあいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやいゆえよらりるれろわいうえをあいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやいゆえよらりるれろわいうえをあいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやいゆえよらりるれろわいうえをあいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやいゆえよらりるれろわいうえを',
+    // mail: 'YYYYYYYYYYYYYYYYYYYYYY@DDDDDDDDD',
+    // keishou: '御中',
+    mem: 'あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやいゆえよらりるれろわいうえをあいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやいゆえよらりるれろわいうえをあいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやいゆえよらりるれろわいうえをあいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやいゆえよらりるれろわいうえをあいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやいゆえよらりるれろわいうえをあいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやいゆえよらりるれろわいうえを',
   },
   {
-    id: 3,
-    name: '(株)シアタープレーン',
-    nameKana: 'しあたーぷれーん',
-    postnum: 'XXX-XXXX',
-    addressA: 'XXXXXXXXXX',
-    addressB: 'XXXXXXXXXXXXXXXXXXXXXXX',
+    kokyakuId: 3,
+    kokyakuNam: '(株)シアタープレーン',
+    adrShozai: 'しあたーぷれーん',
+    // postnum: 'XXX-XXXX',
+    adrTatemono: 'XXXXXXXXXX',
+    adrSonota: 'XXXXXXXXXXXXXXXXXXXXXXX',
     tel: '999-999-9999',
     fax: '999-999-9999',
-    mail: 'aaaaaaaaaa@eeeeeeeeeeeeee',
-    keishou: '御中',
-    memo: '',
+    // mail: 'aaaaaaaaaa@eeeeeeeeeeeeee',
+    // keishou: '御中',
+    mem: '',
   },
 ];
 

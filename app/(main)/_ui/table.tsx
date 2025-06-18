@@ -193,6 +193,92 @@ export const SelectTable: React.FC<TableProps> = ({ headers, datas, onSelectionC
 //   );
 // };
 
+export const MuiTable = (props: {
+  headers: Header[];
+  datas: Row[];
+  onSelectionChange?: (selectedIds: (string | number)[]) => void;
+  handleOpenDialog: (id: string | number) => void;
+}) => {
+  //const [rows, setRows] = useState(test(datas));
+  const { headers, datas, onSelectionChange, handleOpenDialog } = props;
+
+  const [rows, setRows] = useState(datas);
+  const [selected, setSelected] = useState<(string | number)[]>([]);
+
+  const handleSelect = (id: string | number) => {
+    const newSelected = selected.includes(id) ? selected.filter((item) => item !== id) : [...selected, id];
+
+    setSelected(newSelected);
+    onSelectionChange?.(newSelected);
+  };
+
+  const moveRow = (index: number, direction: number) => {
+    console.log(index);
+    const newIndex = index + direction;
+    if (newIndex < 0 || newIndex >= rows.length) return;
+
+    const updatedRows = [...rows];
+    [updatedRows[index], updatedRows[newIndex]] = [updatedRows[newIndex], updatedRows[index]];
+    setRows(updatedRows);
+  };
+
+  return (
+    <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle" padding="none" stickyHeader>
+      <TableHead sx={{ bgcolor: 'primary.light' }}>
+        <TableRow sx={{ whiteSpace: 'nowrap' }}>
+          <TableCell padding="checkbox">
+            <Checkbox
+              size="small"
+              indeterminate={selected.length > 0 && selected.length < rows.length}
+              checked={rows.length > 0 && selected.length === rows.length}
+              onChange={(e) => {
+                const newSelected = e.target.checked ? rows.map((row) => row.id) : [];
+                setSelected(newSelected);
+                onSelectionChange?.(newSelected);
+              }}
+            />
+          </TableCell>
+          {headers.map((header) => (
+            <TableCell key={header.key} align={typeof rows[0][header.key] === 'number' ? 'right' : 'left'}>
+              {header.label}
+            </TableCell>
+          ))}
+          <TableCell />
+          <TableCell />
+        </TableRow>
+      </TableHead>
+      <TableBody>
+        {rows.map((row, index) => (
+          <TableRow hover key={row.id}>
+            <TableCell padding="checkbox">
+              <Checkbox checked={selected.includes(row.id)} onChange={() => handleSelect(row.id)} />
+            </TableCell>
+            {headers.map((header) => (
+              <TableCell
+                key={header.key}
+                align={typeof row[header.key] === 'number' ? 'right' : 'left'}
+                onClick={() => handleOpenDialog(row.id)}
+              >
+                {row[header.key]}
+              </TableCell>
+            ))}
+            <TableCell>
+              <IconButton size="small" onClick={() => moveRow(index, -1)} disabled={index === 0}>
+                <ArrowUpwardIcon fontSize="small" />
+              </IconButton>
+            </TableCell>
+            <TableCell>
+              <IconButton size="small" onClick={() => moveRow(index, 1)} disabled={index === rows.length - 1}>
+                <ArrowDownwardIcon fontSize="small" />
+              </IconButton>
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
+};
+
 /* style
 ---------------------------------------------------------------------------------------------------- */
 /** @type {{ [key: string]: React.CSSProperties }} style */

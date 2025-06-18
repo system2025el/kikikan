@@ -66,15 +66,17 @@ export const LocationSelectDialog = (props: { handleCloseLocationDialog: () => v
               </Button>
             </Stack>
             <Stack>
-              <Typography>キーワード</Typography>
+              <Typography width={100}>キーワード</Typography>
               <TextField />
               <Typography paddingLeft={'8%'}>場所、住所、TEL、Faxから検索</Typography>
             </Stack>
             <Stack sx={{ pt: 1 }}>
-              <Typography>地域</Typography>
+              <Typography width={100}>地域</Typography>
               <Box display={'flex'} alignItems={'center'}>
                 <TextField />
-                <Button onClick={handleOpenDialog}>選択</Button>
+                <Button onClick={handleOpenDialog} sx={{ ml: 1 }}>
+                  選択
+                </Button>
               </Box>
             </Stack>
           </Box>
