@@ -653,7 +653,26 @@ const EquipmentOrderDetail = () => {
         <Box>
           <Box display="flex" alignItems="center" p={2}>
             <Typography>本番日数</Typography>
-            <TextField sx={{ width: '5%', minWidth: '60px', ml: 2 }} />日
+            <TextField
+              type="number"
+              sx={{
+                width: '5%',
+                minWidth: '60px',
+                ml: 2,
+                '& .MuiInputBase-input': {
+                  textAlign: 'right',
+                },
+                '& input[type=number]::-webkit-outer-spin-button': {
+                  WebkitAppearance: 'none',
+                  margin: 0,
+                },
+                '& input[type=number]::-webkit-inner-spin-button': {
+                  WebkitAppearance: 'none',
+                  margin: 0,
+                },
+              }}
+            />
+            日
           </Box>
           <Box sx={styles.container}>
             <Typography marginRight={{ xs: 2, sm: 9, md: 9, lg: 9 }} whiteSpace="nowrap">

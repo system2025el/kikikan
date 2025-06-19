@@ -70,19 +70,19 @@ export const DateSelectDialog = ({ preparation, RH, GP, actual, keep, onClose, o
       const newDates = getDateRange(dateRange[0], dateRange[1]);
       switch (value) {
         case '仕込':
-          setPreparationDates((prevDates) => [...new Set([...prevDates, ...newDates])]);
+          setPreparationDates((prevDates) => [...new Set([...prevDates, ...newDates])].sort());
           break;
         case 'RH':
-          setRHDates((prevDates) => [...new Set([...prevDates, ...newDates])]);
+          setRHDates((prevDates) => [...new Set([...prevDates, ...newDates])].sort());
           break;
         case 'GP':
-          setGPDates((prevDates) => [...new Set([...prevDates, ...newDates])]);
+          setGPDates((prevDates) => [...new Set([...prevDates, ...newDates])].sort());
           break;
         case '本番':
-          setActualDates((prevDates) => [...new Set([...prevDates, ...newDates])]);
+          setActualDates((prevDates) => [...new Set([...prevDates, ...newDates])].sort());
           break;
         case 'キープ':
-          setKeepDates((prevDates) => [...new Set([...prevDates, ...newDates])]);
+          setKeepDates((prevDates) => [...new Set([...prevDates, ...newDates])].sort());
           break;
       }
     }
