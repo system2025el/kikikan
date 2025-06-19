@@ -150,9 +150,9 @@ const EquipmentOrderDetail = () => {
   // ヘッダー用の日付
   const [dateHeader, setDateHeader] = useState<string[]>(getStockHeader(startKICSDate));
   // ストックテーブルの行配列
-  const [stockRows, setStockRows] = useState<StockData[]>(getStockRow(stock, dateHeader.length));
+  const [stockRows, setStockRows] = useState<StockData[]>(getStockRow(testStock, dateHeader.length));
   // 機材テーブルの行配列
-  const [equipmentRows, setEquipmentRows] = useState<Equipment[]>(data);
+  const [equipmentRows, setEquipmentRows] = useState<Equipment[]>(testeqData);
 
   // 仕込日
   const [preparation, setPreparation] = useState<EquipmentData[]>([]);
@@ -201,7 +201,7 @@ const EquipmentOrderDetail = () => {
     if (date !== null) {
       setSelectDate(date.toDate());
       const updatedHeader = getStockHeader(date?.toDate());
-      const updatedRow = getStockRow(stock, updatedHeader.length);
+      const updatedRow = getStockRow(testStock, updatedHeader.length);
       setDateHeader(updatedHeader);
       const targetIndex: number[] = [];
       dateRangeRef.current.map((targetDate) => {
@@ -213,7 +213,7 @@ const EquipmentOrderDetail = () => {
       });
       targetIndex.map((index) => {
         updatedRow.map((date, i) => {
-          date.data[index] = stock[i] - equipmentRows[i].total;
+          date.data[index] = testStock[i] - equipmentRows[i].total;
         });
       });
       setStockRows(updatedRow);
@@ -265,7 +265,7 @@ const EquipmentOrderDetail = () => {
     setEquipmentRows((prev) =>
       prev.map((row, i) => (i === rowIndex ? { ...row, order: orderValue, spare: spareValue, total: totalValue } : row))
     );
-    const updatedRow = getStockRow(stock, dateHeaderRef.current.length);
+    const updatedRow = getStockRow(testStock, dateHeaderRef.current.length);
     const updatedData = updatedRow[rowIndex].data;
     const targetIndex: number[] = [];
     dateRangeRef.current.map((targetDate) => {
@@ -276,7 +276,7 @@ const EquipmentOrderDetail = () => {
       });
     });
     targetIndex.map((index) => {
-      updatedData[index] = stock[rowIndex] - totalValue;
+      updatedData[index] = testStock[rowIndex] - totalValue;
     });
     setStockRows((prev) => prev.map((row, i) => (i === rowIndex ? { ...row, data: updatedData } : row)));
   };
@@ -289,7 +289,7 @@ const EquipmentOrderDetail = () => {
     if (newDate !== null) {
       const updatedHeader = getStockHeader(newDate?.toDate());
       const updatedDateRange = getRange(newDate?.toDate(), endKICSDate);
-      const updatedRow = getStockRow(stock, updatedHeader.length);
+      const updatedRow = getStockRow(testStock, updatedHeader.length);
       setStartKICSDate(newDate?.toDate());
       setDateHeader(updatedHeader);
       setDateRange(updatedDateRange);
@@ -303,7 +303,7 @@ const EquipmentOrderDetail = () => {
       });
       targetIndex.map((index) => {
         updatedRow.map((date, i) => {
-          date.data[index] = stock[i] - equipmentRows[i].total;
+          date.data[index] = testStock[i] - equipmentRows[i].total;
         });
       });
       setStockRows(updatedRow);
@@ -317,7 +317,7 @@ const EquipmentOrderDetail = () => {
   const handleEndChange = (newDate: Dayjs | null) => {
     if (newDate !== null) {
       const updatedDateRange = getRange(startKICSDate, newDate?.toDate());
-      const updatedRow = getStockRow(stock, dateHeader.length);
+      const updatedRow = getStockRow(testStock, dateHeader.length);
       setEndKICSDate(newDate?.toDate());
       setDateRange(updatedDateRange);
       const targetIndex: number[] = [];
@@ -330,7 +330,7 @@ const EquipmentOrderDetail = () => {
       });
       targetIndex.map((index) => {
         updatedRow.map((date, i) => {
-          date.data[index] = stock[i] - equipmentRows[i].total;
+          date.data[index] = testStock[i] - equipmentRows[i].total;
         });
       });
       setStockRows(updatedRow);
