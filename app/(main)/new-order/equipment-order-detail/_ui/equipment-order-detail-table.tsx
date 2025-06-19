@@ -44,10 +44,7 @@ type TableProps = {
   GP: EquipmentData[];
   actual: EquipmentData[];
   keep: EquipmentData[];
-  editableColumns?: number[] | null;
-  cellWidths?: Array<string | number>;
   getHeaderBackgroundColor: (date: string, dateRange: string[]) => string;
-  rowColorSelect: boolean;
   getRowBackgroundColor: (
     dateHeader: string,
     startKICSDate: Date,
@@ -71,13 +68,9 @@ const GridTable: React.FC<TableProps> = ({
   GP,
   actual,
   keep,
-  cellWidths = [],
   getHeaderBackgroundColor,
-  rowColorSelect,
   getRowBackgroundColor,
 }) => {
-  const getWidth = (index: number) => cellWidths[index] ?? cellWidths[1];
-
   return (
     <TableContainer component={Paper} style={{ overflowX: 'auto' }}>
       <Table>
@@ -263,25 +256,35 @@ export type Equipment = {
 };
 
 type GridSelectBoxTableProps = {
+  dateHeader: string[];
   rows: Equipment[];
+  dateRange: string[];
   onChange: (rowIndex: number, orderValue: number, spareValue: number, totalValue: number) => void;
   handleMemoChange: (rowIndex: number, memo: string) => void;
 };
 
-export const GridSelectBoxTable: React.FC<GridSelectBoxTableProps> = ({ rows, onChange, handleMemoChange }) => {
-  const handleCellChange = (rowIndex: number, colIndex: number, newValue: number) => {
+export const GridSelectBoxTable: React.FC<GridSelectBoxTableProps> = ({
+  dateHeader,
+  rows,
+  dateRange,
+  onChange,
+  handleMemoChange,
+}) => {
+  const handleOrderCellChange = (rowIndex: number, newValue: number) => {
     const updatedRows = [...rows];
-    if (colIndex === 4) {
-      updatedRows[rowIndex].order = newValue;
-    } else if (colIndex === 5) {
-      updatedRows[rowIndex].spare = newValue;
-    }
+    updatedRows[rowIndex].order = newValue;
+    updatedRows[rowIndex].total = updatedRows[rowIndex].order + updatedRows[rowIndex].spare;
+    onChange(rowIndex, updatedRows[rowIndex].order, updatedRows[rowIndex].spare, updatedRows[rowIndex].total);
+  };
+
+  const handleSpareCellChange = (rowIndex: number, newValue: number) => {
+    const updatedRows = [...rows];
+    updatedRows[rowIndex].spare = newValue;
     updatedRows[rowIndex].total = updatedRows[rowIndex].order + updatedRows[rowIndex].spare;
     onChange(rowIndex, updatedRows[rowIndex].order, updatedRows[rowIndex].spare, updatedRows[rowIndex].total);
   };
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
-  // let currentIndex = 0;
 
   const handleKeyDown = (e: React.KeyboardEvent, rowIndex: number, colIndex: number) => {
     if (e.key === 'Enter') {
@@ -336,13 +339,16 @@ export const GridSelectBoxTable: React.FC<GridSelectBoxTableProps> = ({ rows, on
           {rows.map((row, rowIndex) => (
             <GridSelectBoxRow
               key={rowIndex}
+              dateHeader={dateHeader}
               row={row}
+              dateRange={dateRange}
               rowIndex={rowIndex}
               handleOrderRef={handleOrderRef(rowIndex)}
               handleSpareRef={handleSpareRef(rowIndex)}
               handleMemoChange={handleMemoChange}
               handleKeyDown={handleKeyDown}
-              handleCellChange={handleCellChange}
+              handleOrderCellChange={handleOrderCellChange}
+              handleSpareCellChange={handleSpareCellChange}
             />
             // <TableRow key={row.id}>
             //   <TableCell sx={{ padding: 0, border: '1px solid black' }}>
@@ -469,17 +475,31 @@ export const GridSelectBoxTable: React.FC<GridSelectBoxTableProps> = ({ rows, on
 };
 
 type RowProps = {
+  dateHeader: string[];
   row: Equipment;
+  dateRange: string[];
   rowIndex: number;
   handleOrderRef: (el: HTMLInputElement | null) => void;
   handleSpareRef: (el: HTMLInputElement | null) => void;
   handleMemoChange: (rowIndex: number, memo: string) => void;
-  handleCellChange: (rowIndex: number, colIndex: number, newValue: number) => void;
+  handleOrderCellChange: (rowIndex: number, newValue: number) => void;
+  handleSpareCellChange: (rowIndex: number, newValue: number) => void;
   handleKeyDown: (e: React.KeyboardEvent, rowIndex: number, colIndex: number) => void;
 };
 
 const GridSelectBoxRow = React.memo(
-  ({ row, rowIndex, handleOrderRef, handleSpareRef, handleMemoChange, handleCellChange, handleKeyDown }: RowProps) => {
+  ({
+    dateHeader,
+    row,
+    rowIndex,
+    dateRange,
+    handleOrderRef,
+    handleSpareRef,
+    handleMemoChange,
+    handleOrderCellChange,
+    handleSpareCellChange,
+    handleKeyDown,
+  }: RowProps) => {
     console.log('描画', rowIndex);
     return (
       <TableRow>
@@ -510,7 +530,7 @@ const GridSelectBoxRow = React.memo(
             type="text"
             onChange={(e) => {
               if (/^\d*$/.test(e.target.value)) {
-                handleCellChange(rowIndex, 4, Number(e.target.value));
+                handleOrderCellChange(rowIndex, Number(e.target.value));
               }
             }}
             sx={{
@@ -552,7 +572,7 @@ const GridSelectBoxRow = React.memo(
             type="text"
             onChange={(e) => {
               if (/^\d*$/.test(e.target.value)) {
-                handleCellChange(rowIndex, 5, Number(e.target.value));
+                handleSpareCellChange(rowIndex, Number(e.target.value));
               }
             }}
             sx={{
@@ -594,7 +614,11 @@ const GridSelectBoxRow = React.memo(
     );
   },
   (prevProps, nextProps) => {
-    return prevProps.row === nextProps.row;
+    return (
+      prevProps.row === nextProps.row &&
+      prevProps.dateRange === nextProps.dateRange &&
+      prevProps.dateHeader === nextProps.dateHeader
+    );
   }
 );
 

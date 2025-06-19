@@ -93,6 +93,4 @@ const cellWidths = ['65%', '5%', '5%', '5%', '5%', '5%', '5%', '5%'];
 
 const header = ['機材名', 'メモ', '在庫場所', '全', '受注数', '予備数', '合計'];
 
-const dateWidths = [''];
-
-export { cellWidths, columns, data, dateWidths, header, rows, stock };
+export { cellWidths, columns, data, header, rows, stock };

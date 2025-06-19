@@ -26,7 +26,7 @@ import {
 } from '@mui/material';
 import { addMonths, endOfMonth, subDays, subMonths } from 'date-fns';
 import dayjs, { Dayjs } from 'dayjs';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import React from 'react';
 
 import { BackButton } from '@/app/(main)/_ui/back-button';
@@ -36,7 +36,7 @@ import {
   getDateHeaderBackgroundColor,
   getDateRowBackgroundColor,
 } from '@/app/(main)/new-order/equipment-order-detail/_lib/colorselect';
-import { data, dateWidths, stock } from '@/app/(main)/new-order/equipment-order-detail/_lib/data';
+import { data, stock } from '@/app/(main)/new-order/equipment-order-detail/_lib/data';
 import GridTable, {
   Equipment,
   GridSelectBoxTable,
@@ -176,24 +176,24 @@ const EquipmentOrderDetail = () => {
 
   const handleDateChange = (date: Dayjs | null) => {
     if (date !== null) {
-      setSelectDate(date?.toDate());
-      setDateHeader(getDateRange(date?.toDate()));
-      setDateRow(getRow(stock, getDateRange(date?.toDate()).length));
-      const updatedRows = [...rows];
-      updatedRows.map((row) => {
-        row.order = 0;
-        row.spare = 0;
-        row.total = 0;
+      const updatedHeader = getDateRange(date?.toDate());
+      const updatedRow = getRow(stock, updatedHeader.length);
+      setDateHeader(updatedHeader);
+      const targetIndex: number[] = [];
+      dateRange.map((targetDate) => {
+        updatedHeader.map((date, index) => {
+          if (targetDate === date) {
+            targetIndex.push(index);
+          }
+        });
       });
-      setRows((prev) =>
-        prev.map((row) => ({
-          ...row,
-          order: 0,
-          spare: 0,
-          total: 0,
-        }))
-      );
-      //setRows(updatedRows);
+      targetIndex.map((index) => {
+        updatedRow.map((date, i) => {
+          date.data[index] = stock[i] - rows[i].total;
+        });
+      });
+      setDateRow(updatedRow);
+
       setAnchorEl(null);
     }
   };
@@ -220,25 +220,6 @@ const EquipmentOrderDetail = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const stockChange = (row: row[], rowIndex: number, value: number, range: string[], dateRange: string[]) => {
-    const updatedRows = [...row];
-    const updatedData = row[rowIndex].data;
-    const targetIndex: number[] = [];
-    range.map((targetDate) => {
-      dateRange.map((date, index) => {
-        if (targetDate === date) {
-          targetIndex.push(index);
-        }
-      });
-    });
-    targetIndex.map((index) => {
-      updatedData[index] = stock[rowIndex] - value;
-      // updatedRows[rowIndex].data[index] = stock[rowIndex] - value;
-      // setDateRow(updatedRows);
-    });
-    setDateRow((prev) => prev.map((row, i) => (i === rowIndex ? { ...row, data: updatedData } : row)));
-  };
-
   const handleMemoChange = (rowIndex: number, memo: string) => {
     const updatedRows = [...rows];
     updatedRows[rowIndex].memo = memo;
@@ -254,8 +235,68 @@ const EquipmentOrderDetail = () => {
     setRows((prev) =>
       prev.map((row, i) => (i === rowIndex ? { ...row, order: orderValue, spare: spareValue, total: totalValue } : row))
     );
-    //setRows(updatedRows);
-    stockChange(dateRow, rowIndex, totalValue, dateRange, dateHeader);
+    const updatedData = dateRow[rowIndex].data;
+    const targetIndex: number[] = [];
+    console.log(dateHeader);
+    dateRange.map((targetDate) => {
+      dateHeader.map((date, index) => {
+        if (targetDate === date) {
+          targetIndex.push(index);
+        }
+      });
+    });
+    targetIndex.map((index) => {
+      updatedData[index] = stock[rowIndex] - totalValue;
+    });
+    setDateRow((prev) => prev.map((row, i) => (i === rowIndex ? { ...row, data: updatedData } : row)));
+  };
+
+  const handleStartChange = (newDate: Dayjs | null) => {
+    if (newDate !== null) {
+      const updatedHeader = getDateRange(newDate?.toDate());
+      const updatedDateRange = getRange(newDate?.toDate(), endKICSDate);
+      const updatedRow = getRow(stock, updatedHeader.length);
+      setStartKICSDate(newDate?.toDate());
+      setDateHeader(updatedHeader);
+      setDateRange(updatedDateRange);
+      const targetIndex: number[] = [];
+      updatedDateRange.map((targetDate) => {
+        updatedHeader.map((date, index) => {
+          if (targetDate === date) {
+            targetIndex.push(index);
+          }
+        });
+      });
+      targetIndex.map((index) => {
+        updatedRow.map((date, i) => {
+          date.data[index] = stock[i] - rows[i].total;
+        });
+      });
+      setDateRow(updatedRow);
+    }
+  };
+
+  const handleEndChange = (newDate: Dayjs | null) => {
+    if (newDate !== null) {
+      const updatedDateRange = getRange(startKICSDate, newDate?.toDate());
+      const updatedRow = getRow(stock, dateHeader.length);
+      setEndKICSDate(newDate?.toDate());
+      setDateRange(updatedDateRange);
+      const targetIndex: number[] = [];
+      updatedDateRange.map((targetDate) => {
+        dateHeader.map((date, index) => {
+          if (targetDate === date) {
+            targetIndex.push(index);
+          }
+        });
+      });
+      targetIndex.map((index) => {
+        updatedRow.map((date, i) => {
+          date.data[index] = stock[i] - rows[i].total;
+        });
+      });
+      setDateRow(updatedRow);
+    }
   };
 
   const [EqSelectionDialogOpen, setEqSelectionDialogOpen] = useState(false);
@@ -405,18 +446,7 @@ const EquipmentOrderDetail = () => {
               <Typography>出庫日時</Typography>
               <Grid2>
                 <TextField defaultValue={'KICS'} disabled sx={{ width: '10%', minWidth: 150 }} />
-                <TestDate
-                  date={startKICSDate}
-                  onChange={(newDate) => {
-                    if (newDate !== null) {
-                      const updatedDateRange = getDateRange(newDate?.toDate());
-                      setStartKICSDate(newDate?.toDate());
-                      setDateHeader(updatedDateRange);
-                      setDateRange(getRange(newDate?.toDate(), endKICSDate));
-                      setDateRow(getRow(stock, updatedDateRange.length));
-                    }
-                  }}
-                />
+                <TestDate date={startKICSDate} onChange={handleStartChange} />
                 <Time />
               </Grid2>
               <Grid2>
@@ -436,15 +466,7 @@ const EquipmentOrderDetail = () => {
               <Typography>入庫日時</Typography>
               <Grid2>
                 <TextField defaultValue={'KICS'} disabled sx={{ width: '10%', minWidth: 150 }} />
-                <TestDate
-                  date={endKICSDate}
-                  onChange={(newDate) => {
-                    if (newDate !== null) {
-                      setEndKICSDate(newDate?.toDate());
-                      setDateRange(getRange(startKICSDate, newDate?.toDate()));
-                    }
-                  }}
-                />
+                <TestDate date={endKICSDate} onChange={handleEndChange} />
                 <Time />
               </Grid2>
               <Grid2>
@@ -454,7 +476,6 @@ const EquipmentOrderDetail = () => {
                   onChange={(newDate) => {
                     if (newDate !== null) {
                       setEndYARDDate(newDate?.toDate());
-                      setDateRange(getRange(startKICSDate, newDate?.toDate()));
                     }
                   }}
                 />
@@ -492,7 +513,7 @@ const EquipmentOrderDetail = () => {
           </Grid2>
           <Grid2 container spacing={2}>
             <Button>編集</Button>
-            <Button onClick={() => console.log(rows, dateRow)}>保存</Button>
+            <Button onClick={() => console.log(rows, dateRow, dateRange)}>保存</Button>
           </Grid2>
         </Box>
         <Divider />
@@ -525,7 +546,13 @@ const EquipmentOrderDetail = () => {
             <Button sx={{ m: 2 }} onClick={() => handleOpenEqDialog()}>
               ＋ 機材追加
             </Button>
-            <GridSelectBoxTable rows={rows} onChange={handleCellChange} handleMemoChange={handleMemoChange} />
+            <GridSelectBoxTable
+              dateHeader={dateHeader}
+              rows={rows}
+              dateRange={dateRange}
+              onChange={handleCellChange}
+              handleMemoChange={handleMemoChange}
+            />
           </Box>
           <Box overflow="auto" sx={{ width: { xs: '60%', sm: '60%', md: 'auto' } }}>
             <Box display="flex" my={2}>
@@ -557,9 +584,7 @@ const EquipmentOrderDetail = () => {
               GP={GP}
               actual={actual}
               keep={keep}
-              cellWidths={dateWidths}
               getHeaderBackgroundColor={getDateHeaderBackgroundColor}
-              rowColorSelect={true}
               getRowBackgroundColor={getDateRowBackgroundColor}
             />
           </Box>
