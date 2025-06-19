@@ -4,19 +4,6 @@ import { toISOStringWithTimezoneMonthDay } from '@/app/(main)/_ui/date';
 
 import { EquipmentData } from '../_ui/equipment-order-detail';
 
-export const getEquipmentRowBackgroundColor = (rowIndex: number, colIndex: number): string => {
-  switch (colIndex) {
-    case 2:
-      return 'lightgrey';
-    case 3:
-      return 'lightgrey';
-    case 6:
-      return 'lightgrey';
-    default:
-      return 'white';
-  }
-};
-
 export const getDateHeaderBackgroundColor = (date: string, dateRange: string[]): string => {
   const isMatched = dateRange.some((targetDate) => targetDate === date);
   return isMatched ? 'blue' : 'black';

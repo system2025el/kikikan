@@ -26,7 +26,7 @@ import {
 } from '@mui/material';
 import { addMonths, endOfMonth, subDays, subMonths } from 'date-fns';
 import dayjs, { Dayjs } from 'dayjs';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import React from 'react';
 
 import { BackButton } from '@/app/(main)/_ui/back-button';
@@ -37,10 +37,7 @@ import {
   getDateRowBackgroundColor,
 } from '@/app/(main)/new-order/equipment-order-detail/_lib/colorselect';
 import { data, stock } from '@/app/(main)/new-order/equipment-order-detail/_lib/data';
-import GridTable, {
-  Equipment,
-  GridSelectBoxTable,
-} from '@/app/(main)/new-order/equipment-order-detail/_ui/equipment-order-detail-table';
+import { EqTable, StockTable } from '@/app/(main)/new-order/equipment-order-detail/_ui/equipment-order-detail-table';
 
 import { DateSelectDialog } from './date-selection-dialog';
 import { EquipmentSelectionDialog } from './equipment-selection-dailog';
@@ -50,11 +47,23 @@ export type EquipmentData = {
   memo: string;
 };
 
-type row = {
+export type StockData = {
   id: number;
   data: number[];
 };
 
+export type Equipment = {
+  id: number;
+  name: string;
+  memo: string;
+  place: string;
+  all: number;
+  order: number;
+  spare: number;
+  total: number;
+};
+
+// 開始日から終了日までの日付配列の作成
 const getRange = (start: Date, end: Date): string[] => {
   if (start !== null && end !== null) {
     const range: string[] = [];
@@ -71,7 +80,8 @@ const getRange = (start: Date, end: Date): string[] => {
   return [];
 };
 
-const getDateRange = (date: Date) => {
+// ストックテーブルの日付ヘッダーの作成
+const getStockHeader = (date: Date) => {
   if (date !== null) {
     const start = subDays(date, 1);
     const end = endOfMonth(addMonths(date, 2));
@@ -89,37 +99,24 @@ const getDateRange = (date: Date) => {
   return [];
 };
 
-const getRow = (stock: number[], length: number) => {
-  const rows: row[] = [];
+// ストックテーブルの行作成
+const getStockRow = (stock: number[], length: number) => {
+  const rows: StockData[] = [];
 
   stock.map((num, index) => {
     const data: number[] = [];
     for (let i = 0; i < length; i++) {
       data.push(num);
     }
-    const row: row = { id: index + 1, data: data };
+    const row: StockData = { id: index + 1, data: data };
     rows.push(row);
   });
 
   return rows;
 };
 
-// const getRowRoop = (stock: number[], length: number) => {
-//   const rows: row[] = [];
-//   for (let i = 0; i < 28; i++) {
-//     stock.map((num, index) => {
-//       const data: number[] = [];
-//       for (let i = 0; i < length; i++) {
-//         data.push(num);
-//       }
-//       const row: row = { id: index + 1, data: data };
-//       rows.push(row);
-//     });
-//   }
-//   return rows;
-// };
-
-export const testeqData = Array.from({ length: 200 }, (_, i) => {
+// 200件用データ作成
+export const testeqData: Equipment[] = Array.from({ length: 200 }, (_, i) => {
   const original = data[i % data.length];
   return {
     ...original,
@@ -133,54 +130,81 @@ export const testeqData = Array.from({ length: 200 }, (_, i) => {
     total: original.total,
   };
 });
-
-export const testDateData = Array.from({ length: 200 }, (_, i) => {
-  const base = getRow(stock, getDateRange(new Date()).length);
-  const original = base[i % data.length];
-  return {
-    ...original,
-    id: i + 1,
-    data: original.data,
-  };
-});
-
-export const testStock = Array.from({ length: 200 }, (_, i) => {
-  return [...stock];
-});
+// 200件用データ作成
+export const testStock = Array.from({ length: 200 }, (_, i) => stock[i % stock.length]);
 
 const EquipmentOrderDetail = () => {
+  // KICS出庫日
   const [startKICSDate, setStartKICSDate] = useState<Date>(new Date());
+  // YARD出庫日
   const [startYARDDate, setStartYARDDate] = useState<Date>(new Date());
+  // KICS入庫日
   const [endKICSDate, setEndKICSDate] = useState<Date>(new Date());
+  // YARD入庫日
   const [endYARDDate, setEndYARDDate] = useState<Date>(new Date());
-  // ヘッダー用の日付
-  const [dateHeader, setDateHeader] = useState<string[]>(getDateRange(startKICSDate));
   // 出庫日から入庫日
   const [dateRange, setDateRange] = useState<string[]>(getRange(startKICSDate, endKICSDate));
-  const [dateRow, setDateRow] = useState<row[]>(getRow(stock, dateHeader.length));
-  const [rows, setRows] = useState<Equipment[]>(data);
-  const [preparation, setPreparation] = useState<EquipmentData[]>([]);
-  const [RH, setRH] = useState<EquipmentData[]>([]);
-  const [GP, setGP] = useState<EquipmentData[]>([]);
-  const [actual, setActual] = useState<EquipmentData[]>([]);
-  const [keep, setKeep] = useState<EquipmentData[]>([]);
-  const [expanded, setExpanded] = useState(false);
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  // カレンダー選択日
   const [selectDate, setSelectDate] = useState<Date>(new Date());
 
+  // ヘッダー用の日付
+  const [dateHeader, setDateHeader] = useState<string[]>(getStockHeader(startKICSDate));
+  // ストックテーブルの行配列
+  const [stockRows, setStockRows] = useState<StockData[]>(getStockRow(stock, dateHeader.length));
+  // 機材テーブルの行配列
+  const [equipmentRows, setEquipmentRows] = useState<Equipment[]>(data);
+
+  // 仕込日
+  const [preparation, setPreparation] = useState<EquipmentData[]>([]);
+  // RH日
+  const [RH, setRH] = useState<EquipmentData[]>([]);
+  // GP日
+  const [GP, setGP] = useState<EquipmentData[]>([]);
+  // 本番日
+  const [actual, setActual] = useState<EquipmentData[]>([]);
+  // キープ日
+  const [keep, setKeep] = useState<EquipmentData[]>([]);
+
+  // 内税、外税
+  const [selectTax, setSelectTax] = useState('外税');
+
+  // 機材追加ダイアログ制御
+  const [EqSelectionDialogOpen, setEqSelectionDialogOpen] = useState(false);
+  // 日付選択カレンダーダイアログ制御
+  const [dateSelectionDialogOpne, setDateSelectionDialogOpne] = useState(false);
+
+  // アコーディオン制御
+  const [expanded, setExpanded] = useState(false);
+  // ポッパー制御
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(anchorEl ? null : event.currentTarget);
-  };
+  // ref
+  const dateRangeRef = useRef(dateRange);
+  const dateHeaderRef = useRef(dateHeader);
 
+  useEffect(() => {
+    console.log('dateRange変更');
+    dateRangeRef.current = dateRange;
+  }, [dateRange]);
+
+  useEffect(() => {
+    console.log('dateHeader変更');
+    dateHeaderRef.current = dateHeader;
+  }, [dateHeader]);
+
+  /**
+   * 日付選択カレンダー選択時
+   * @param date カレンダー選択日付
+   */
   const handleDateChange = (date: Dayjs | null) => {
     if (date !== null) {
-      const updatedHeader = getDateRange(date?.toDate());
-      const updatedRow = getRow(stock, updatedHeader.length);
+      setSelectDate(date.toDate());
+      const updatedHeader = getStockHeader(date?.toDate());
+      const updatedRow = getStockRow(stock, updatedHeader.length);
       setDateHeader(updatedHeader);
       const targetIndex: number[] = [];
-      dateRange.map((targetDate) => {
+      dateRangeRef.current.map((targetDate) => {
         updatedHeader.map((date, index) => {
           if (targetDate === date) {
             targetIndex.push(index);
@@ -189,57 +213,63 @@ const EquipmentOrderDetail = () => {
       });
       targetIndex.map((index) => {
         updatedRow.map((date, i) => {
-          date.data[index] = stock[i] - rows[i].total;
+          date.data[index] = stock[i] - equipmentRows[i].total;
         });
       });
-      setDateRow(updatedRow);
+      setStockRows(updatedRow);
 
       setAnchorEl(null);
     }
   };
-
+  // 3か月前
   const handleBackDateChange = () => {
     const date = subMonths(new Date(dateHeader[1]), 3);
     handleDateChange(dayjs(date));
   };
-
+  // 3か月後
   const handleForwardDateChange = () => {
     const date = addMonths(new Date(dateHeader[1]), 3);
     handleDateChange(dayjs(date));
   };
 
+  /**
+   * ポッパー開閉
+   * @param event マウスイベント
+   */
+  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(anchorEl ? null : event.currentTarget);
+  };
   const handleClickAway = () => {
     setAnchorEl(null);
   };
 
-  const handleExpansion = () => {
-    setExpanded((prevExpanded) => !prevExpanded);
-  };
-
-  const scrollTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
+  /**
+   * 機材メモ入力時
+   * @param rowIndex 入力された行番号
+   * @param memo メモ内容
+   */
   const handleMemoChange = (rowIndex: number, memo: string) => {
-    const updatedRows = [...rows];
+    const updatedRows = [...equipmentRows];
     updatedRows[rowIndex].memo = memo;
-    setRows(updatedRows);
+    setEquipmentRows(updatedRows);
   };
 
-  const [selectTax, setSelectTax] = useState('外税');
-  const selectTaxChange = (event: SelectChangeEvent) => {
-    setSelectTax(event.target.value);
-  };
-
+  /**
+   * 機材テーブルの受注数、予備数入力時
+   * @param rowIndex 入力された行番号
+   * @param orderValue 受注数
+   * @param spareValue 予備数
+   * @param totalValue 合計
+   */
   const handleCellChange = (rowIndex: number, orderValue: number, spareValue: number, totalValue: number) => {
-    setRows((prev) =>
+    setEquipmentRows((prev) =>
       prev.map((row, i) => (i === rowIndex ? { ...row, order: orderValue, spare: spareValue, total: totalValue } : row))
     );
-    const updatedData = dateRow[rowIndex].data;
+    const updatedRow = getStockRow(stock, dateHeaderRef.current.length);
+    const updatedData = updatedRow[rowIndex].data;
     const targetIndex: number[] = [];
-    console.log(dateHeader);
-    dateRange.map((targetDate) => {
-      dateHeader.map((date, index) => {
+    dateRangeRef.current.map((targetDate) => {
+      dateHeaderRef.current.map((date, index) => {
         if (targetDate === date) {
           targetIndex.push(index);
         }
@@ -248,14 +278,18 @@ const EquipmentOrderDetail = () => {
     targetIndex.map((index) => {
       updatedData[index] = stock[rowIndex] - totalValue;
     });
-    setDateRow((prev) => prev.map((row, i) => (i === rowIndex ? { ...row, data: updatedData } : row)));
+    setStockRows((prev) => prev.map((row, i) => (i === rowIndex ? { ...row, data: updatedData } : row)));
   };
 
+  /**
+   * 出庫日時変更時
+   * @param newDate 出庫日
+   */
   const handleStartChange = (newDate: Dayjs | null) => {
     if (newDate !== null) {
-      const updatedHeader = getDateRange(newDate?.toDate());
+      const updatedHeader = getStockHeader(newDate?.toDate());
       const updatedDateRange = getRange(newDate?.toDate(), endKICSDate);
-      const updatedRow = getRow(stock, updatedHeader.length);
+      const updatedRow = getStockRow(stock, updatedHeader.length);
       setStartKICSDate(newDate?.toDate());
       setDateHeader(updatedHeader);
       setDateRange(updatedDateRange);
@@ -269,17 +303,21 @@ const EquipmentOrderDetail = () => {
       });
       targetIndex.map((index) => {
         updatedRow.map((date, i) => {
-          date.data[index] = stock[i] - rows[i].total;
+          date.data[index] = stock[i] - equipmentRows[i].total;
         });
       });
-      setDateRow(updatedRow);
+      setStockRows(updatedRow);
     }
   };
 
+  /**
+   * 入庫日時変更時
+   * @param newDate 入庫日
+   */
   const handleEndChange = (newDate: Dayjs | null) => {
     if (newDate !== null) {
       const updatedDateRange = getRange(startKICSDate, newDate?.toDate());
-      const updatedRow = getRow(stock, dateHeader.length);
+      const updatedRow = getStockRow(stock, dateHeader.length);
       setEndKICSDate(newDate?.toDate());
       setDateRange(updatedDateRange);
       const targetIndex: number[] = [];
@@ -292,29 +330,26 @@ const EquipmentOrderDetail = () => {
       });
       targetIndex.map((index) => {
         updatedRow.map((date, i) => {
-          date.data[index] = stock[i] - rows[i].total;
+          date.data[index] = stock[i] - equipmentRows[i].total;
         });
       });
-      setDateRow(updatedRow);
+      setStockRows(updatedRow);
     }
   };
 
-  const [EqSelectionDialogOpen, setEqSelectionDialogOpen] = useState(false);
-  const handleOpenEqDialog = () => {
-    setEqSelectionDialogOpen(true);
-  };
-  const handleCloseEqDialog = () => {
-    setEqSelectionDialogOpen(false);
-  };
-
-  const [dateSelectionDialogOpne, setDateSelectionDialogOpne] = useState(false);
-  const handleOpenDateDialog = () => {
-    setDateSelectionDialogOpne(true);
-  };
-  const handleCloseDateDialog = () => {
-    setDateSelectionDialogOpne(false);
-  };
-
+  /**
+   * 本番日入力ダイアログでの入力値反映
+   * @param preparationDates 仕込日
+   * @param preparationMemo 仕込日メモ
+   * @param RHDates RH日
+   * @param RHMemo RH日メモ
+   * @param GPDates GP日
+   * @param GPMemo GP日メモ
+   * @param actualDates 本番日
+   * @param actualMemo 本番日メモ
+   * @param keepDates キープ日
+   * @param keepMemo キープ日メモ
+   */
   const handleSave = (
     preparationDates: string[],
     preparationMemo: string[],
@@ -357,6 +392,35 @@ const EquipmentOrderDetail = () => {
         memo: keepMemo[index] ?? '',
       }))
     );
+    setDateSelectionDialogOpne(false);
+  };
+
+  // 内税、外税変更
+  const selectTaxChange = (event: SelectChangeEvent) => {
+    setSelectTax(event.target.value);
+  };
+
+  // ぺージトップへ戻る
+  const scrollTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // アコーディオン開閉
+  const handleExpansion = () => {
+    setExpanded((prevExpanded) => !prevExpanded);
+  };
+  // 機材入力ダイアログ開閉
+  const handleOpenEqDialog = () => {
+    setEqSelectionDialogOpen(true);
+  };
+  const handleCloseEqDialog = () => {
+    setEqSelectionDialogOpen(false);
+  };
+  // 本番日入力ダイアログ開閉
+  const handleOpenDateDialog = () => {
+    setDateSelectionDialogOpne(true);
+  };
+  const handleCloseDateDialog = () => {
     setDateSelectionDialogOpne(false);
   };
 
@@ -513,7 +577,7 @@ const EquipmentOrderDetail = () => {
           </Grid2>
           <Grid2 container spacing={2}>
             <Button>編集</Button>
-            <Button onClick={() => console.log(rows, dateRow, dateRange)}>保存</Button>
+            <Button onClick={() => console.log(equipmentRows, stockRows, dateRange)}>保存</Button>
           </Grid2>
         </Box>
         <Divider />
@@ -546,13 +610,7 @@ const EquipmentOrderDetail = () => {
             <Button sx={{ m: 2 }} onClick={() => handleOpenEqDialog()}>
               ＋ 機材追加
             </Button>
-            <GridSelectBoxTable
-              dateHeader={dateHeader}
-              rows={rows}
-              dateRange={dateRange}
-              onChange={handleCellChange}
-              handleMemoChange={handleMemoChange}
-            />
+            <EqTable rows={equipmentRows} onChange={handleCellChange} handleMemoChange={handleMemoChange} />
           </Box>
           <Box overflow="auto" sx={{ width: { xs: '60%', sm: '60%', md: 'auto' } }}>
             <Box display="flex" my={2}>
@@ -573,9 +631,9 @@ const EquipmentOrderDetail = () => {
                 <ArrowForwardIosIcon fontSize="small" />
               </Button>
             </Box>
-            <GridTable
+            <StockTable
               header={dateHeader}
-              rows={dateRow}
+              rows={stockRows}
               dateRange={dateRange}
               startKICSDate={startKICSDate}
               endKICSDate={endKICSDate}

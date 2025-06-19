@@ -1,21 +1,15 @@
 'use client';
 
-import { BorderColor } from '@mui/icons-material';
 import Delete from '@mui/icons-material/Delete';
 import EditNoteIcon from '@mui/icons-material/EditNote';
 import {
   Button,
-  colors,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  FormControl,
   IconButton,
-  MenuItem,
   Paper,
-  Select,
-  SelectChangeEvent,
   Table,
   TableBody,
   TableCell,
@@ -25,17 +19,13 @@ import {
   TextField,
   Tooltip,
 } from '@mui/material';
-import { Dayjs } from 'dayjs';
 import React, { useRef, useState } from 'react';
 
-import { EquipmentData } from './equipment-order-detail';
+import { Equipment, EquipmentData, StockData } from './equipment-order-detail';
 
-type TableProps = {
+type StockTableProps = {
   header: string[];
-  rows: Array<{
-    id: number;
-    data: number[];
-  }>;
+  rows: StockData[];
   dateRange: string[];
   startKICSDate: Date;
   endKICSDate: Date;
@@ -57,7 +47,7 @@ type TableProps = {
   ) => string;
 };
 
-const GridTable: React.FC<TableProps> = ({
+export const StockTable: React.FC<StockTableProps> = ({
   header,
   rows,
   dateRange,
@@ -96,7 +86,7 @@ const GridTable: React.FC<TableProps> = ({
         </TableHead>
         <TableBody>
           {rows.map((row, rowIndex) => (
-            <GridTableRow
+            <StockTableRow
               key={rowIndex}
               header={header}
               row={row}
@@ -109,40 +99,6 @@ const GridTable: React.FC<TableProps> = ({
               keep={keep}
               getRowBackgroundColor={getRowBackgroundColor}
             />
-            // <TableRow key={rowIndex}>
-            //   {row.data.map((cell, colIndex) => {
-            //     const width = getWidth(colIndex);
-
-            //     return (
-            //       <TableCell
-            //         key={colIndex}
-            //         align={typeof cell === 'number' ? 'right' : 'left'}
-            //         sx={{
-            //           border: '1px solid black',
-            //           whiteSpace: 'nowrap',
-            //           width,
-            //           height: 25,
-            //           bgcolor: getRowBackgroundColor(
-            //             header[colIndex],
-            //             startKICSDate,
-            //             endKICSDate,
-            //             preparation,
-            //             RH,
-            //             GP,
-            //             actual,
-            //             keep
-            //           ),
-            //           py: 0,
-            //           px: 1,
-            //           color: typeof cell === 'number' && cell < 0 ? 'red' : 'black',
-            //         }}
-            //         size="small"
-            //       >
-            //         {cell}
-            //       </TableCell>
-            //     );
-            //   })}
-            // </TableRow>
           ))}
         </TableBody>
       </Table>
@@ -150,16 +106,9 @@ const GridTable: React.FC<TableProps> = ({
   );
 };
 
-export default GridTable;
-
-export type Stock = {
-  id: number;
-  data: number[];
-};
-
-export type GridTableRowProps = {
+export type StockTableRowProps = {
   header: string[];
-  row: Stock;
+  row: StockData;
   startKICSDate: Date;
   endKICSDate: Date;
   preparation: EquipmentData[];
@@ -179,7 +128,7 @@ export type GridTableRowProps = {
   ) => string;
 };
 
-const GridTableRow = React.memo(
+const StockTableRow = React.memo(
   ({
     header,
     row,
@@ -191,7 +140,7 @@ const GridTableRow = React.memo(
     actual,
     keep,
     getRowBackgroundColor,
-  }: GridTableRowProps) => {
+  }: StockTableRowProps) => {
     console.log('date側描画', row.id);
     return (
       <TableRow>
@@ -242,34 +191,17 @@ const GridTableRow = React.memo(
   }
 );
 
-GridTableRow.displayName = 'GridTableRow';
+StockTableRow.displayName = 'StockTableRow';
 
-export type Equipment = {
-  id: number;
-  name: string;
-  memo: string;
-  place: string;
-  all: number;
-  order: number;
-  spare: number;
-  total: number;
-};
-
-type GridSelectBoxTableProps = {
-  dateHeader: string[];
+type EqTableProps = {
   rows: Equipment[];
-  dateRange: string[];
   onChange: (rowIndex: number, orderValue: number, spareValue: number, totalValue: number) => void;
   handleMemoChange: (rowIndex: number, memo: string) => void;
 };
 
-export const GridSelectBoxTable: React.FC<GridSelectBoxTableProps> = ({
-  dateHeader,
-  rows,
-  dateRange,
-  onChange,
-  handleMemoChange,
-}) => {
+export const EqTable: React.FC<EqTableProps> = ({ rows, onChange, handleMemoChange }) => {
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
   const handleOrderCellChange = (rowIndex: number, newValue: number) => {
     const updatedRows = [...rows];
     updatedRows[rowIndex].order = newValue;
@@ -284,25 +216,15 @@ export const GridSelectBoxTable: React.FC<GridSelectBoxTableProps> = ({
     onChange(rowIndex, updatedRows[rowIndex].order, updatedRows[rowIndex].spare, updatedRows[rowIndex].total);
   };
 
-  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
-
-  const handleKeyDown = (e: React.KeyboardEvent, rowIndex: number, colIndex: number) => {
+  const handleKeyDown = (e: React.KeyboardEvent, rowIndex: number) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      if (colIndex === 4) {
-        inputRefs.current[rowIndex * 2 + 1]?.focus();
-      } else {
-        inputRefs.current[rowIndex * 2 + 2]?.focus();
-      }
+      inputRefs.current[rowIndex + 1]?.focus();
     }
   };
 
   const handleOrderRef = (rowIndex: number) => (el: HTMLInputElement | null) => {
-    inputRefs.current[rowIndex * 2] = el;
-  };
-
-  const handleSpareRef = (rowIndex: number) => (el: HTMLInputElement | null) => {
-    inputRefs.current[rowIndex * 2 + 1] = el;
+    inputRefs.current[rowIndex] = el;
   };
 
   return (
@@ -337,136 +259,16 @@ export const GridSelectBoxTable: React.FC<GridSelectBoxTableProps> = ({
         </TableHead>
         <TableBody>
           {rows.map((row, rowIndex) => (
-            <GridSelectBoxRow
+            <EqTableRow
               key={rowIndex}
-              dateHeader={dateHeader}
               row={row}
-              dateRange={dateRange}
               rowIndex={rowIndex}
               handleOrderRef={handleOrderRef(rowIndex)}
-              handleSpareRef={handleSpareRef(rowIndex)}
               handleMemoChange={handleMemoChange}
               handleKeyDown={handleKeyDown}
               handleOrderCellChange={handleOrderCellChange}
               handleSpareCellChange={handleSpareCellChange}
             />
-            // <TableRow key={row.id}>
-            //   <TableCell sx={{ padding: 0, border: '1px solid black' }}>
-            //     <IconButton sx={{ padding: 0, color: 'red' }}>
-            //       <Delete fontSize="small" />
-            //     </IconButton>
-            //   </TableCell>
-            //   <TableCell
-            //     align="right"
-            //     size="small"
-            //     sx={{ bgcolor: 'lightgrey', py: 0, px: 1, border: '1px solid black' }}
-            //   >
-            //     {rowIndex + 1}
-            //   </TableCell>
-            //   <TableCell style={styles.row} align="left" size="small" sx={{ bgcolor: 'lightgrey' }}>
-            //     {row.name}
-            //   </TableCell>
-            //   <TableCell style={styles.row} align="center" size="small">
-            //     <MemoTooltip name={row.name} memo={row.memo} handleMemoChange={handleMemoChange} rowIndex={rowIndex} />
-            //   </TableCell>
-            //   <TableCell style={styles.row} align="left" size="small" sx={{ bgcolor: 'lightgrey' }}>
-            //     {row.place}
-            //   </TableCell>
-            //   <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: 'lightgrey' }}>
-            //     {row.all}
-            //   </TableCell>
-            //   <TableCell style={styles.row} align="right" size="small">
-            //     <TextField
-            //       variant="standard"
-            //       value={row.order}
-            //       type="text"
-            //       onChange={(e) => {
-            //         if (/^\d*$/.test(e.target.value)) {
-            //           handleCellChange(rowIndex, 4, Number(e.target.value));
-            //         }
-            //       }}
-            //       sx={{
-            //         '& .MuiInputBase-input': {
-            //           textAlign: 'right',
-            //           padding: 0,
-            //           fontSize: 'small',
-            //         },
-            //         '& input[type=number]': {
-            //           MozAppearance: 'textfield',
-            //         },
-            //         '& input[type=number]::-webkit-outer-spin-button': {
-            //           WebkitAppearance: 'none',
-            //           margin: 0,
-            //         },
-            //         '& input[type=number]::-webkit-inner-spin-button': {
-            //           WebkitAppearance: 'none',
-            //           margin: 0,
-            //         },
-            //       }}
-            //       slotProps={{
-            //         input: {
-            //           style: { textAlign: 'right' },
-            //           disableUnderline: true,
-            //           inputMode: 'numeric',
-            //         },
-            //       }}
-            //       inputRef={(el) => {
-            //         inputRefs.current[currentIndex++] = el;
-            //       }}
-            //       onKeyDown={(e) => {
-            //         handleKeyDown(e, rowIndex, 4);
-            //       }}
-            //       onFocus={() => handleSelect(rowIndex, 4)}
-            //     />
-            //   </TableCell>
-            //   <TableCell style={styles.row} align="right" size="small">
-            //     <TextField
-            //       variant="standard"
-            //       value={row.spare}
-            //       type="text"
-            //       onChange={(e) => {
-            //         if (/^\d*$/.test(e.target.value)) {
-            //           handleCellChange(rowIndex, 5, Number(e.target.value));
-            //         }
-            //       }}
-            //       sx={{
-            //         '& .MuiInputBase-input': {
-            //           textAlign: 'right',
-            //           padding: 0,
-            //           fontSize: 'small',
-            //         },
-            //         '& input[type=number]': {
-            //           MozAppearance: 'textfield',
-            //         },
-            //         '& input[type=number]::-webkit-outer-spin-button': {
-            //           WebkitAppearance: 'none',
-            //           margin: 0,
-            //         },
-            //         '& input[type=number]::-webkit-inner-spin-button': {
-            //           WebkitAppearance: 'none',
-            //           margin: 0,
-            //         },
-            //       }}
-            //       slotProps={{
-            //         input: {
-            //           style: { textAlign: 'right' },
-            //           disableUnderline: true,
-            //           inputMode: 'numeric',
-            //         },
-            //       }}
-            //       inputRef={(el) => {
-            //         inputRefs.current[currentIndex++] = el;
-            //       }}
-            //       onKeyDown={(e) => {
-            //         handleKeyDown(e, rowIndex, 5);
-            //       }}
-            //       onFocus={() => handleSelect(rowIndex, 5)}
-            //     />
-            //   </TableCell>
-            //   <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: 'lightgrey' }}>
-            //     {row.total}
-            //   </TableCell>
-            // </TableRow>
           ))}
         </TableBody>
       </Table>
@@ -474,32 +276,26 @@ export const GridSelectBoxTable: React.FC<GridSelectBoxTableProps> = ({
   );
 };
 
-type RowProps = {
-  dateHeader: string[];
+type EqTableRowProps = {
   row: Equipment;
-  dateRange: string[];
   rowIndex: number;
   handleOrderRef: (el: HTMLInputElement | null) => void;
-  handleSpareRef: (el: HTMLInputElement | null) => void;
   handleMemoChange: (rowIndex: number, memo: string) => void;
   handleOrderCellChange: (rowIndex: number, newValue: number) => void;
   handleSpareCellChange: (rowIndex: number, newValue: number) => void;
-  handleKeyDown: (e: React.KeyboardEvent, rowIndex: number, colIndex: number) => void;
+  handleKeyDown: (e: React.KeyboardEvent, rowIndex: number) => void;
 };
 
-const GridSelectBoxRow = React.memo(
+const EqTableRow = React.memo(
   ({
-    dateHeader,
     row,
     rowIndex,
-    dateRange,
     handleOrderRef,
-    handleSpareRef,
     handleMemoChange,
     handleOrderCellChange,
     handleSpareCellChange,
     handleKeyDown,
-  }: RowProps) => {
+  }: EqTableRowProps) => {
     console.log('描画', rowIndex);
     return (
       <TableRow>
@@ -560,7 +356,7 @@ const GridSelectBoxRow = React.memo(
             }}
             inputRef={handleOrderRef}
             onKeyDown={(e) => {
-              handleKeyDown(e, rowIndex, 4);
+              handleKeyDown(e, rowIndex);
             }}
             onFocus={(e) => e.target.select()}
           />
@@ -600,10 +396,6 @@ const GridSelectBoxRow = React.memo(
                 inputMode: 'numeric',
               },
             }}
-            inputRef={handleSpareRef}
-            onKeyDown={(e) => {
-              handleKeyDown(e, rowIndex, 5);
-            }}
             onFocus={(e) => e.target.select()}
           />
         </TableCell>
@@ -614,24 +406,20 @@ const GridSelectBoxRow = React.memo(
     );
   },
   (prevProps, nextProps) => {
-    return (
-      prevProps.row === nextProps.row &&
-      prevProps.dateRange === nextProps.dateRange &&
-      prevProps.dateHeader === nextProps.dateHeader
-    );
+    return prevProps.row === nextProps.row;
   }
 );
 
-GridSelectBoxRow.displayName = 'GridSelectBoxRow';
+EqTableRow.displayName = 'EqTableRow';
 
-type Props = {
+type MemoTooltipProps = {
   name: string;
   memo: string;
   rowIndex: number;
   handleMemoChange: (rowIndex: number, memo: string) => void;
 };
 
-export const MemoTooltip = (props: Props) => {
+export const MemoTooltip = (props: MemoTooltipProps) => {
   const [open, setOpen] = useState(false);
   const [equipmentMemo, setEquipmentMemo] = useState(props.memo);
 
