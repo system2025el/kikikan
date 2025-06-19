@@ -22,8 +22,8 @@ import {} from '@mui/material/colors';
 import { useEffect, useMemo, useState } from 'react';
 
 import { customers } from '@/app/_lib/mock-data';
-// import { getAllCustomers } from '@/app/_lib/supabase/supabaseFuncs';
 
+// import { getAllCustomers } from '@/app/_lib/supabase/supabaseFuncs';
 import { MuiTablePagination } from '../../_ui/table-pagination';
 import { cMHeader, customerMasterDialogDetailsValues, CustomerMasterTableValues } from '../_lib/types';
 import { CustomerDialogContents } from './customers-dialog-contents';
