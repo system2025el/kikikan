@@ -155,9 +155,9 @@ export const OrderList = () => {
                 <SelectElement
                   name="customer"
                   control={control}
-                  options={customers.map(({ id, name }) => ({
-                    id: id.toString(),
-                    label: name,
+                  options={customers.map(({ kokyakuId, kokyakuNam }) => ({
+                    id: kokyakuId.toString(),
+                    label: kokyakuNam,
                   }))}
                   sx={{ minWidth: 250 }}
                 />

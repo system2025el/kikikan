@@ -130,15 +130,15 @@ export const CustomerSelectionDialog = (props: { handleCloseCustDialog: () => vo
             </TableHead>
             <TableBody>
               {list.map((customer) => (
-                <TableRow key={customer.name}>
-                  <TableCell>{customer.name}</TableCell>
+                <TableRow key={customer.kokyakuId}>
+                  <TableCell>{customer.kokyakuNam}</TableCell>
                   <TableCell>
-                    {customer.addressA} {customer.addressB}
+                    {customer.adrShozai} {customer.adrTatemono}
                   </TableCell>
                   <TableCell>{customer.tel}</TableCell>
                   <TableCell>{customer.fax}</TableCell>
                   <TableCell sx={{ maxWidth: 20 }}>
-                    <Typography noWrap>{customer.memo}</Typography>
+                    <Typography noWrap>{customer.mem}</Typography>
                   </TableCell>
                 </TableRow>
               ))}
