@@ -26,7 +26,7 @@ import {
 } from '@mui/material';
 import { addMonths, endOfMonth, subDays, subMonths } from 'date-fns';
 import dayjs, { Dayjs } from 'dayjs';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import React from 'react';
 
 import { BackButton } from '@/app/(main)/_ui/back-button';
@@ -35,13 +35,9 @@ import Time from '@/app/(main)/_ui/time';
 import {
   getDateHeaderBackgroundColor,
   getDateRowBackgroundColor,
-  getEquipmentRowBackgroundColor,
 } from '@/app/(main)/new-order/equipment-order-detail/_lib/colorselect';
-import { cellWidths, data, dateWidths, header, stock } from '@/app/(main)/new-order/equipment-order-detail/_lib/data';
-import GridTable, {
-  GridSelectBoxTable,
-} from '@/app/(main)/new-order/equipment-order-detail/_ui/equipment-order-detail-table';
-import { getDateTextColor } from '@/app/(main)/new-order/schedule/_lib/colorselect';
+import { data, stock } from '@/app/(main)/new-order/equipment-order-detail/_lib/data';
+import { EqTable, StockTable } from '@/app/(main)/new-order/equipment-order-detail/_ui/equipment-order-detail-table';
 
 import { DateSelectDialog } from './date-selection-dialog';
 import { EquipmentSelectionDialog } from './equipment-selection-dailog';
@@ -51,11 +47,23 @@ export type EquipmentData = {
   memo: string;
 };
 
-type row = {
+export type StockData = {
   id: number;
   data: number[];
 };
 
+export type Equipment = {
+  id: number;
+  name: string;
+  memo: string;
+  place: string;
+  all: number;
+  order: number;
+  spare: number;
+  total: number;
+};
+
+// 開始日から終了日までの日付配列の作成
 const getRange = (start: Date, end: Date): string[] => {
   if (start !== null && end !== null) {
     const range: string[] = [];
@@ -72,7 +80,8 @@ const getRange = (start: Date, end: Date): string[] => {
   return [];
 };
 
-const getDateRange = (date: Date) => {
+// ストックテーブルの日付ヘッダーの作成
+const getStockHeader = (date: Date) => {
   if (date !== null) {
     const start = subDays(date, 1);
     const end = endOfMonth(addMonths(date, 2));
@@ -90,157 +99,257 @@ const getDateRange = (date: Date) => {
   return [];
 };
 
-const getRow = (stock: number[], length: number) => {
-  const rows: row[] = [];
+// ストックテーブルの行作成
+const getStockRow = (stock: number[], length: number) => {
+  const rows: StockData[] = [];
 
   stock.map((num, index) => {
     const data: number[] = [];
     for (let i = 0; i < length; i++) {
       data.push(num);
     }
-    const row: row = { id: index + 1, data: data };
+    const row: StockData = { id: index + 1, data: data };
     rows.push(row);
   });
 
   return rows;
 };
 
-// const rowRoop = () => {
-//   const rows = [];
-//   for (let i = 0; i < 15; i++) {
-//     rows.push(...data);
-//   }
-//   return rows;
-// };
-
-// const getRowRoop = (stock: number[], length: number) => {
-//   const rows: row[] = [];
-//   for (let i = 0; i < 15; i++) {
-//     stock.map((num, index) => {
-//       const data: number[] = [];
-//       for (let i = 0; i < length; i++) {
-//         data.push(num);
-//       }
-//       const row: row = { id: index + 1, data: data };
-//       rows.push(row);
-//     });
-//   }
-//   return rows;
-// };
+// 200件用データ作成
+export const testeqData: Equipment[] = Array.from({ length: 200 }, (_, i) => {
+  const original = data[i % data.length];
+  return {
+    ...original,
+    id: i + 1,
+    name: `${original.name} (${i + 1})`,
+    memo: original.memo,
+    place: original.place,
+    all: original.all,
+    order: original.order,
+    spare: original.spare,
+    total: original.total,
+  };
+});
+// 200件用データ作成
+export const testStock = Array.from({ length: 200 }, (_, i) => stock[i % stock.length]);
 
 const EquipmentOrderDetail = () => {
+  // KICS出庫日
   const [startKICSDate, setStartKICSDate] = useState<Date>(new Date());
+  // YARD出庫日
   const [startYARDDate, setStartYARDDate] = useState<Date>(new Date());
+  // KICS入庫日
   const [endKICSDate, setEndKICSDate] = useState<Date>(new Date());
+  // YARD入庫日
   const [endYARDDate, setEndYARDDate] = useState<Date>(new Date());
-  // ヘッダー用の日付
-  const [dateHeader, setDateHeader] = useState<string[]>(getDateRange(startKICSDate));
   // 出庫日から入庫日
   const [dateRange, setDateRange] = useState<string[]>(getRange(startKICSDate, endKICSDate));
-  const [dateRow, setDateRow] = useState<row[]>(getRow(stock, dateHeader.length));
-  const [rows, setRows] = useState(data);
-  const [preparation, setPreparation] = useState<EquipmentData[]>([]);
-  const [RH, setRH] = useState<EquipmentData[]>([]);
-  const [GP, setGP] = useState<EquipmentData[]>([]);
-  const [actual, setActual] = useState<EquipmentData[]>([]);
-  const [keep, setKeep] = useState<EquipmentData[]>([]);
-  const [expanded, setExpanded] = useState(false);
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  // カレンダー選択日
   const [selectDate, setSelectDate] = useState<Date>(new Date());
 
-  const editableColumns = [4, 5];
+  // ヘッダー用の日付
+  const [dateHeader, setDateHeader] = useState<string[]>(getStockHeader(startKICSDate));
+  // ストックテーブルの行配列
+  const [stockRows, setStockRows] = useState<StockData[]>(getStockRow(stock, dateHeader.length));
+  // 機材テーブルの行配列
+  const [equipmentRows, setEquipmentRows] = useState<Equipment[]>(data);
+
+  // 仕込日
+  const [preparation, setPreparation] = useState<EquipmentData[]>([]);
+  // RH日
+  const [RH, setRH] = useState<EquipmentData[]>([]);
+  // GP日
+  const [GP, setGP] = useState<EquipmentData[]>([]);
+  // 本番日
+  const [actual, setActual] = useState<EquipmentData[]>([]);
+  // キープ日
+  const [keep, setKeep] = useState<EquipmentData[]>([]);
+
+  // 内税、外税
+  const [selectTax, setSelectTax] = useState('外税');
+
+  // 機材追加ダイアログ制御
+  const [EqSelectionDialogOpen, setEqSelectionDialogOpen] = useState(false);
+  // 日付選択カレンダーダイアログ制御
+  const [dateSelectionDialogOpne, setDateSelectionDialogOpne] = useState(false);
+
+  // アコーディオン制御
+  const [expanded, setExpanded] = useState(false);
+  // ポッパー制御
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(anchorEl ? null : event.currentTarget);
-  };
+  // ref
+  const dateRangeRef = useRef(dateRange);
+  const dateHeaderRef = useRef(dateHeader);
 
+  useEffect(() => {
+    console.log('dateRange変更');
+    dateRangeRef.current = dateRange;
+  }, [dateRange]);
+
+  useEffect(() => {
+    console.log('dateHeader変更');
+    dateHeaderRef.current = dateHeader;
+  }, [dateHeader]);
+
+  /**
+   * 日付選択カレンダー選択時
+   * @param date カレンダー選択日付
+   */
   const handleDateChange = (date: Dayjs | null) => {
     if (date !== null) {
-      setSelectDate(date?.toDate());
-      setDateHeader(getDateRange(date?.toDate()));
-      setDateRow(getRow(stock, getDateRange(date?.toDate()).length));
-      const updatedRows = [...rows];
-      updatedRows.map((row) => {
-        row.data[4] = 0;
-        row.data[5] = 0;
-        row.data[6] = 0;
+      setSelectDate(date.toDate());
+      const updatedHeader = getStockHeader(date?.toDate());
+      const updatedRow = getStockRow(stock, updatedHeader.length);
+      setDateHeader(updatedHeader);
+      const targetIndex: number[] = [];
+      dateRangeRef.current.map((targetDate) => {
+        updatedHeader.map((date, index) => {
+          if (targetDate === date) {
+            targetIndex.push(index);
+          }
+        });
       });
-      setRows(updatedRows);
+      targetIndex.map((index) => {
+        updatedRow.map((date, i) => {
+          date.data[index] = stock[i] - equipmentRows[i].total;
+        });
+      });
+      setStockRows(updatedRow);
+
       setAnchorEl(null);
     }
   };
-
+  // 3か月前
   const handleBackDateChange = () => {
     const date = subMonths(new Date(dateHeader[1]), 3);
-    setDateHeader(getDateRange(date));
+    handleDateChange(dayjs(date));
   };
-
+  // 3か月後
   const handleForwardDateChange = () => {
     const date = addMonths(new Date(dateHeader[1]), 3);
-    setDateHeader(getDateRange(date));
+    handleDateChange(dayjs(date));
   };
 
+  /**
+   * ポッパー開閉
+   * @param event マウスイベント
+   */
+  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(anchorEl ? null : event.currentTarget);
+  };
   const handleClickAway = () => {
     setAnchorEl(null);
   };
 
-  const handleExpansion = () => {
-    setExpanded((prevExpanded) => !prevExpanded);
+  /**
+   * 機材メモ入力時
+   * @param rowIndex 入力された行番号
+   * @param memo メモ内容
+   */
+  const handleMemoChange = (rowIndex: number, memo: string) => {
+    const updatedRows = [...equipmentRows];
+    updatedRows[rowIndex].memo = memo;
+    setEquipmentRows(updatedRows);
   };
 
-  const scrollTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const stockChange = (row: row[], rowIndex: number, value: number, range: string[], dateRange: string[]) => {
-    const updatedRows = [...row];
+  /**
+   * 機材テーブルの受注数、予備数入力時
+   * @param rowIndex 入力された行番号
+   * @param orderValue 受注数
+   * @param spareValue 予備数
+   * @param totalValue 合計
+   */
+  const handleCellChange = (rowIndex: number, orderValue: number, spareValue: number, totalValue: number) => {
+    setEquipmentRows((prev) =>
+      prev.map((row, i) => (i === rowIndex ? { ...row, order: orderValue, spare: spareValue, total: totalValue } : row))
+    );
+    const updatedRow = getStockRow(stock, dateHeaderRef.current.length);
+    const updatedData = updatedRow[rowIndex].data;
     const targetIndex: number[] = [];
-    range.map((targetDate) => {
-      dateRange.map((date, index) => {
+    dateRangeRef.current.map((targetDate) => {
+      dateHeaderRef.current.map((date, index) => {
         if (targetDate === date) {
           targetIndex.push(index);
         }
       });
     });
     targetIndex.map((index) => {
-      updatedRows[rowIndex].data[index] = stock[rowIndex] - value;
-      setDateRow(updatedRows);
+      updatedData[index] = stock[rowIndex] - totalValue;
     });
+    setStockRows((prev) => prev.map((row, i) => (i === rowIndex ? { ...row, data: updatedData } : row)));
   };
 
-  const handleMemoChange = (rowIndex: number, memo: string) => {
-    const updatedRows = [...rows];
-    updatedRows[rowIndex].data[1] = memo;
-    setRows(updatedRows);
+  /**
+   * 出庫日時変更時
+   * @param newDate 出庫日
+   */
+  const handleStartChange = (newDate: Dayjs | null) => {
+    if (newDate !== null) {
+      const updatedHeader = getStockHeader(newDate?.toDate());
+      const updatedDateRange = getRange(newDate?.toDate(), endKICSDate);
+      const updatedRow = getStockRow(stock, updatedHeader.length);
+      setStartKICSDate(newDate?.toDate());
+      setDateHeader(updatedHeader);
+      setDateRange(updatedDateRange);
+      const targetIndex: number[] = [];
+      updatedDateRange.map((targetDate) => {
+        updatedHeader.map((date, index) => {
+          if (targetDate === date) {
+            targetIndex.push(index);
+          }
+        });
+      });
+      targetIndex.map((index) => {
+        updatedRow.map((date, i) => {
+          date.data[index] = stock[i] - equipmentRows[i].total;
+        });
+      });
+      setStockRows(updatedRow);
+    }
   };
 
-  const [selectTax, setSelectTax] = useState('外税');
-  const selectTaxChange = (event: SelectChangeEvent) => {
-    setSelectTax(event.target.value);
+  /**
+   * 入庫日時変更時
+   * @param newDate 入庫日
+   */
+  const handleEndChange = (newDate: Dayjs | null) => {
+    if (newDate !== null) {
+      const updatedDateRange = getRange(startKICSDate, newDate?.toDate());
+      const updatedRow = getStockRow(stock, dateHeader.length);
+      setEndKICSDate(newDate?.toDate());
+      setDateRange(updatedDateRange);
+      const targetIndex: number[] = [];
+      updatedDateRange.map((targetDate) => {
+        dateHeader.map((date, index) => {
+          if (targetDate === date) {
+            targetIndex.push(index);
+          }
+        });
+      });
+      targetIndex.map((index) => {
+        updatedRow.map((date, i) => {
+          date.data[index] = stock[i] - equipmentRows[i].total;
+        });
+      });
+      setStockRows(updatedRow);
+    }
   };
 
-  const handleCellChange = (rowIndex: number, updatedRows: { id: number; data: Array<string | number> }[]) => {
-    setRows(updatedRows);
-    stockChange(dateRow, rowIndex, Number(updatedRows[rowIndex].data[6]), dateRange, dateHeader);
-  };
-
-  const [EqSelectionDialogOpen, setEqSelectionDialogOpen] = useState(false);
-  const handleOpenEqDialog = () => {
-    setEqSelectionDialogOpen(true);
-  };
-  const handleCloseEqDialog = () => {
-    setEqSelectionDialogOpen(false);
-  };
-
-  const [dateSelectionDialogOpne, setDateSelectionDialogOpne] = useState(false);
-  const handleOpenDateDialog = () => {
-    setDateSelectionDialogOpne(true);
-  };
-  const handleCloseDateDialog = () => {
-    setDateSelectionDialogOpne(false);
-  };
-
+  /**
+   * 本番日入力ダイアログでの入力値反映
+   * @param preparationDates 仕込日
+   * @param preparationMemo 仕込日メモ
+   * @param RHDates RH日
+   * @param RHMemo RH日メモ
+   * @param GPDates GP日
+   * @param GPMemo GP日メモ
+   * @param actualDates 本番日
+   * @param actualMemo 本番日メモ
+   * @param keepDates キープ日
+   * @param keepMemo キープ日メモ
+   */
   const handleSave = (
     preparationDates: string[],
     preparationMemo: string[],
@@ -283,6 +392,35 @@ const EquipmentOrderDetail = () => {
         memo: keepMemo[index] ?? '',
       }))
     );
+    setDateSelectionDialogOpne(false);
+  };
+
+  // 内税、外税変更
+  const selectTaxChange = (event: SelectChangeEvent) => {
+    setSelectTax(event.target.value);
+  };
+
+  // ぺージトップへ戻る
+  const scrollTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // アコーディオン開閉
+  const handleExpansion = () => {
+    setExpanded((prevExpanded) => !prevExpanded);
+  };
+  // 機材入力ダイアログ開閉
+  const handleOpenEqDialog = () => {
+    setEqSelectionDialogOpen(true);
+  };
+  const handleCloseEqDialog = () => {
+    setEqSelectionDialogOpen(false);
+  };
+  // 本番日入力ダイアログ開閉
+  const handleOpenDateDialog = () => {
+    setDateSelectionDialogOpne(true);
+  };
+  const handleCloseDateDialog = () => {
     setDateSelectionDialogOpne(false);
   };
 
@@ -372,18 +510,7 @@ const EquipmentOrderDetail = () => {
               <Typography>出庫日時</Typography>
               <Grid2>
                 <TextField defaultValue={'KICS'} disabled sx={{ width: '10%', minWidth: 150 }} />
-                <TestDate
-                  date={startKICSDate}
-                  onChange={(newDate) => {
-                    if (newDate !== null) {
-                      const updatedDateRange = getDateRange(newDate?.toDate());
-                      setStartKICSDate(newDate?.toDate());
-                      setDateHeader(updatedDateRange);
-                      setDateRange(getRange(newDate?.toDate(), endKICSDate));
-                      setDateRow(getRow(stock, updatedDateRange.length));
-                    }
-                  }}
-                />
+                <TestDate date={startKICSDate} onChange={handleStartChange} />
                 <Time />
               </Grid2>
               <Grid2>
@@ -403,15 +530,7 @@ const EquipmentOrderDetail = () => {
               <Typography>入庫日時</Typography>
               <Grid2>
                 <TextField defaultValue={'KICS'} disabled sx={{ width: '10%', minWidth: 150 }} />
-                <TestDate
-                  date={endKICSDate}
-                  onChange={(newDate) => {
-                    if (newDate !== null) {
-                      setEndKICSDate(newDate?.toDate());
-                      setDateRange(getRange(startKICSDate, newDate?.toDate()));
-                    }
-                  }}
-                />
+                <TestDate date={endKICSDate} onChange={handleEndChange} />
                 <Time />
               </Grid2>
               <Grid2>
@@ -421,7 +540,6 @@ const EquipmentOrderDetail = () => {
                   onChange={(newDate) => {
                     if (newDate !== null) {
                       setEndYARDDate(newDate?.toDate());
-                      setDateRange(getRange(startKICSDate, newDate?.toDate()));
                     }
                   }}
                 />
@@ -459,7 +577,7 @@ const EquipmentOrderDetail = () => {
           </Grid2>
           <Grid2 container spacing={2}>
             <Button>編集</Button>
-            <Button>保存</Button>
+            <Button onClick={() => console.log(equipmentRows, stockRows, dateRange)}>保存</Button>
           </Grid2>
         </Box>
         <Divider />
@@ -492,15 +610,7 @@ const EquipmentOrderDetail = () => {
             <Button sx={{ m: 2 }} onClick={() => handleOpenEqDialog()}>
               ＋ 機材追加
             </Button>
-            <GridSelectBoxTable
-              header={header}
-              rows={rows}
-              editableColumns={editableColumns}
-              onChange={handleCellChange}
-              cellWidths={cellWidths}
-              getRowBackgroundColor={getEquipmentRowBackgroundColor}
-              handleMemoChange={handleMemoChange}
-            />
+            <EqTable rows={equipmentRows} onChange={handleCellChange} handleMemoChange={handleMemoChange} />
           </Box>
           <Box overflow="auto" sx={{ width: { xs: '60%', sm: '60%', md: 'auto' } }}>
             <Box display="flex" my={2}>
@@ -521,9 +631,9 @@ const EquipmentOrderDetail = () => {
                 <ArrowForwardIosIcon fontSize="small" />
               </Button>
             </Box>
-            <GridTable
+            <StockTable
               header={dateHeader}
-              rows={dateRow}
+              rows={stockRows}
               dateRange={dateRange}
               startKICSDate={startKICSDate}
               endKICSDate={endKICSDate}
@@ -532,9 +642,7 @@ const EquipmentOrderDetail = () => {
               GP={GP}
               actual={actual}
               keep={keep}
-              cellWidths={dateWidths}
               getHeaderBackgroundColor={getDateHeaderBackgroundColor}
-              rowColorSelect={true}
               getRowBackgroundColor={getDateRowBackgroundColor}
             />
           </Box>
@@ -755,371 +863,6 @@ const EquipmentOrderDetail = () => {
       <Fab color="primary" onClick={scrollTop} sx={{ position: 'fixed', bottom: 32, right: 32, zIndex: 1000 }}>
         <ArrowUpwardIcon fontSize="small" />
       </Fab>
-      {/* <Paper variant="outlined">
-        <Grid2 container display="flex">
-          <Grid2 size={{ xs: 12, sm: 12, md: 7 }}>
-            <Grid2 container margin={2} spacing={2}>
-              <Grid2 container display="flex" direction="row" alignItems="center">
-                <Grid2 display="flex" direction="row" alignItems="center">
-                  <Typography marginRight={3} whiteSpace="nowrap">
-                    受注番号
-                  </Typography>
-                  <TextField defaultValue="81694" disabled></TextField>
-                </Grid2>
-                <Grid2 display="flex" direction="row" alignItems="center">
-                  <Typography mr={2} whiteSpace="nowrap">
-                    受注ステータス
-                  </Typography>
-                  <TextField defaultValue="確定" disabled>
-                    確定
-                  </TextField>
-                </Grid2>
-              </Grid2>
-            </Grid2>
-            <Box sx={styles.container}>
-              <Typography marginRight={5} whiteSpace="nowrap">
-                受注日
-              </Typography>
-              <TextField defaultValue="2025/10/01" disabled sx={{ bgcolor: grey[300] }}></TextField>
-            </Box>
-            <Box sx={styles.container}>
-              <Typography marginRight={5} whiteSpace="nowrap">
-                入力者
-              </Typography>
-              <TextField defaultValue="XXXXXXXX" disabled sx={{ bgcolor: grey[300] }}></TextField>
-            </Box>
-          </Grid2>
-          <Grid2 size={{ xs: 12, sm: 12, md: 5 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', ml: 2, mt: { xs: 0, sm: 0, md: 2 } }}>
-              <Typography marginRight={5} whiteSpace="nowrap">
-                公演名
-              </Typography>
-              <TextField defaultValue="A/Zepp Tour" disabled sx={{ bgcolor: grey[300] }}></TextField>
-            </Box>
-            <Box sx={styles.container}>
-              <Typography marginRight={3} whiteSpace="nowrap">
-                公演場所
-              </Typography>
-              <TextField defaultValue="Zepp Osaka" disabled sx={{ bgcolor: grey[300] }}></TextField>
-            </Box>
-            <Box sx={styles.container}>
-              <Typography marginRight={7} whiteSpace="nowrap">
-                相手
-              </Typography>
-              <TextField defaultValue="(株)シアターブレーン" disabled sx={{ bgcolor: grey[300] }}></TextField>
-            </Box>
-          </Grid2>
-        </Grid2>
-      </Paper>
-      <Paper variant="outlined" sx={{ mt: 2 }}>
-        <Box display={'flex'} p={2} alignItems={'center'} justifyContent="space-between">
-          <Typography>機材入力</Typography>
-          <Grid2 container display={'flex'} spacing={1}>
-            <Button>編集</Button>
-            <Button onClick={() => console.log(preparation)}>保存</Button>
-          </Grid2>
-        </Box>
-        <Divider />
-        <Box display="flex">
-          <Box sx={{ width: '100%' }}>
-            <Box display="flex" alignItems="center" margin={1} marginLeft={{ xs: 8, sm: 12, md: 14, lg: 17 }}>
-              <Button variant="contained" onClick={() => handleOpenEqDialog()}>
-                ＋ 機材追加
-              </Button>
-              <Dialog open={EqSelectionDialogOpen} fullScreen>
-                <EquipmentSelectionDialog handleCloseDialog={handleCloseEqDialog} />
-              </Dialog>
-            </Box>
-            <Box sx={styles.container} width="90%">
-              <Typography marginRight={{ xs: 2, sm: 6, md: 8, lg: 11 }} whiteSpace="nowrap">
-                機材
-              </Typography>
-              <GridSelectBoxTable
-                header={header}
-                rows={rows}
-                editableColumns={editableColumns}
-                onChange={handleCellChange}
-                cellWidths={cellWidths}
-                headerColorSelect={false}
-                getHeaderBackgroundColor={() => ''}
-                getHeaderTextColor={() => ''}
-                rowColorSelect={true}
-                getRowBackgroundColor={getEquipmentRowBackgroundColor}
-                selectIssueBase={selectedValues}
-                selectIssueBaseChange={selectIssueBaseChange}
-              />
-            </Box>
-            <Box display="flex" alignItems="center" mt={4}>
-              <Typography ml={2} whiteSpace="nowrap">
-                出庫日
-              </Typography>
-              <Grid2
-                container
-                alignItems="center"
-                ml={{ xs: 3, sm: 9, md: 9, lg: 9 }}
-                spacing={{ xs: 2, sm: 2, md: 2, lg: 0 }}
-              >
-                <Grid2 display={{ lg: 'flex' }} alignItems="center">
-                  <Box display="flex" alignItems="center" mr={3}>
-                    <Typography marginRight={2} whiteSpace="nowrap">
-                      作業場
-                    </Typography>
-                    <TextField defaultValue={'KICS'} sx={{ width: 200 }} />
-                  </Box>
-                  <Box display="flex" alignItems="center" mr={3}>
-                    <Typography marginRight={{ xs: 4, sm: 4, md: 4, lg: 2 }} whiteSpace="nowrap">
-                      日付
-                    </Typography>
-                    <DateX />
-                  </Box>
-                  <Box display="flex" alignItems="center">
-                    <Typography marginRight={{ xs: 4, sm: 4, md: 4, lg: 2 }} whiteSpace="nowrap">
-                      時刻
-                    </Typography>
-                    <Time />
-                  </Box>
-                </Grid2>
-                <Grid2 display={{ lg: 'flex' }} alignItems="center">
-                  <Box display="flex" alignItems="center" mr={3}>
-                    <Typography marginRight={2} whiteSpace="nowrap">
-                      作業場
-                    </Typography>
-                    <TextField defaultValue={'YARD'} sx={{ width: 200 }} />
-                  </Box>
-                  <Box display="flex" alignItems="center" mr={3}>
-                    <Typography marginRight={{ xs: 4, sm: 4, md: 4, lg: 2 }} whiteSpace="nowrap">
-                      日付
-                    </Typography>
-                    <DateX />
-                  </Box>
-                  <Box display="flex" alignItems="center">
-                    <Typography marginRight={{ xs: 4, sm: 4, md: 4, lg: 2 }} whiteSpace="nowrap">
-                      時刻
-                    </Typography>
-                    <Time />
-                  </Box>
-                </Grid2>
-              </Grid2>
-            </Box>
-            <Divider variant="middle" sx={{ mt: 2, mx: 4 }} />
-            <Box sx={styles.container}>
-              <Typography whiteSpace="nowrap">入庫日</Typography>
-              <Grid2 display={{ lg: 'flex' }} alignItems="center" ml={{ xs: 3, sm: 9, md: 9, lg: 9 }}>
-                <Box display="flex" alignItems="center" mr={3}>
-                  <Typography marginRight={2} whiteSpace="nowrap">
-                    作業場
-                  </Typography>
-                  <FormControl size="small" sx={{ minWidth: 200 }}>
-                    <Select value={selectReturnBase} onChange={selectReturnBaseChange}>
-                      <MenuItem value={'YARD'}>YARD</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Box>
-                <Box display="flex" alignItems="center" mr={3}>
-                  <Typography marginRight={{ xs: 4, sm: 4, md: 4, lg: 2 }} whiteSpace="nowrap">
-                    日付
-                  </Typography>
-                  <DateX />
-                </Box>
-                <Box display="flex" alignItems="center">
-                  <Typography marginRight={{ xs: 4, sm: 4, md: 4, lg: 2 }} whiteSpace="nowrap">
-                    時刻
-                  </Typography>
-                  <Time />
-                </Box>
-              </Grid2>
-            </Box>
-            <Box sx={styles.container}>
-              <Typography marginRight={7} whiteSpace="nowrap">
-                本番日数
-              </Typography>
-              <TextField
-                defaultValue="4"
-                sx={{
-                  width: '5%',
-                  minWidth: '45px',
-                  '& .MuiInputBase-input': {
-                    textAlign: 'right',
-                  },
-                }}
-              />
-              日
-            </Box>
-            <Box sx={styles.container}>
-              <Typography marginRight={{ xs: 2, sm: 9, md: 9, lg: 9 }} whiteSpace="nowrap">
-                本番日
-              </Typography>
-              <Button onClick={handleOpenDateDialog}>編集</Button>
-              <Dialog open={dateSelectionDialogOpne} fullScreen sx={{ zIndex: 1201 }}>
-                <DateSelectDialog
-                  preparation={preparation}
-                  RH={RH}
-                  GP={GP}
-                  actual={actual}
-                  onClose={handleCloseDateDialog}
-                  onSave={handleSave}
-                />
-              </Dialog>
-            </Box>
-            <Grid2 container spacing={1} ml={{ xs: 10, sm: 17, md: 17, lg: 17 }} py={2} width="70%">
-              <Grid2 size={12}>
-                <Button sx={{ color: 'white', bgcolor: 'purple' }}>仕込</Button>
-              </Grid2>
-              <Grid2 size={5} display="flex">
-                <Typography>日付</Typography>
-              </Grid2>
-              <Grid2 size={7} display="flex">
-                <Typography>メモ</Typography>
-              </Grid2>
-            </Grid2>
-            <Grid2
-              container
-              display="flex"
-              flexDirection="column"
-              spacing={1}
-              ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
-              width="70%"
-            >
-              {preparation.map((data, index) => (
-                <Grid2 key={index} container display="flex" flexDirection="row">
-                  <Grid2 size={5}>
-                    <Typography>{data.date}</Typography>
-                  </Grid2>
-                  <Grid2 size={7}>
-                    <Typography sx={{ wordBreak: 'break-word' }}>{data.memo}</Typography>
-                  </Grid2>
-                </Grid2>
-              ))}
-            </Grid2>
-            <Grid2
-              container
-              display="flex"
-              flexDirection="row"
-              spacing={1}
-              ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
-              py={2}
-              width="70%"
-            >
-              <Grid2 size={12}>
-                <Button sx={{ color: 'white', bgcolor: 'orange' }}>RH</Button>
-              </Grid2>
-              <Grid2 size={5}>
-                <Typography>日付</Typography>
-              </Grid2>
-              <Grid2 size={7}>
-                <Typography>メモ</Typography>
-              </Grid2>
-            </Grid2>
-            <Grid2
-              container
-              display="flex"
-              flexDirection="column"
-              spacing={1}
-              ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
-              width="70%"
-            >
-              {RH.map((data, index) => (
-                <Grid2 key={index} container display="flex" flexDirection="row">
-                  <Grid2 size={5}>
-                    <Typography>{data.date}</Typography>
-                  </Grid2>
-                  <Grid2 size={7}>
-                    <Typography sx={{ wordBreak: 'break-word' }}>{data.memo}</Typography>
-                  </Grid2>
-                </Grid2>
-              ))}
-            </Grid2>
-            <Grid2
-              container
-              display="flex"
-              flexDirection="row"
-              spacing={1}
-              ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
-              py={2}
-              width="70%"
-            >
-              <Grid2 size={12}>
-                <Button sx={{ color: 'white', bgcolor: 'green' }}>GP</Button>
-              </Grid2>
-              <Grid2 size={5}>
-                <Typography>日付</Typography>
-              </Grid2>
-              <Grid2 size={7}>
-                <Typography>メモ</Typography>
-              </Grid2>
-            </Grid2>
-            <Grid2
-              container
-              display="flex"
-              flexDirection="column"
-              spacing={1}
-              ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
-              width="70%"
-            >
-              {GP.map((data, index) => (
-                <Grid2 key={index} container display="flex" flexDirection="row">
-                  <Grid2 size={5}>
-                    <Typography>{data.date}</Typography>
-                  </Grid2>
-                  <Grid2 size={7}>
-                    <Typography sx={{ wordBreak: 'break-word' }}>{data.memo}</Typography>
-                  </Grid2>
-                </Grid2>
-              ))}
-            </Grid2>
-            <Grid2
-              container
-              display="flex"
-              flexDirection="row"
-              spacing={1}
-              ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
-              py={2}
-              width="70%"
-            >
-              <Grid2 size={12}>
-                <Button sx={{ color: 'white', bgcolor: 'pink' }}>本番</Button>
-              </Grid2>
-              <Grid2 size={5}>
-                <Typography>日付</Typography>
-              </Grid2>
-              <Grid2 size={7}>
-                <Typography>メモ</Typography>
-              </Grid2>
-            </Grid2>
-            <Grid2
-              container
-              display="flex"
-              flexDirection="column"
-              spacing={1}
-              ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
-              width="70%"
-            >
-              {actual.map((data, index) => (
-                <Grid2 key={index} container display="flex" flexDirection="row">
-                  <Grid2 size={5}>
-                    <Typography>{data.date}</Typography>
-                  </Grid2>
-                  <Grid2 size={7}>
-                    <Typography sx={{ wordBreak: 'break-word' }}>{data.memo}</Typography>
-                  </Grid2>
-                </Grid2>
-              ))}
-            </Grid2>
-            <Box display="flex" alignItems="center" margin={1} marginLeft={2} marginTop={4}>
-              <Typography marginRight={1} whiteSpace="nowrap">
-                受注機材ステータス
-              </Typography>
-              <FormControl size="small" sx={{ width: '10%', minWidth: 150 }}>
-                <Select value={selectStatus} onChange={selectStatusChange}>
-                  <MenuItem value={'準備中'}>準備中</MenuItem>
-                  <MenuItem value={'作業中'}>作業中</MenuItem>
-                  <MenuItem value={'OK'}>OK</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
-          </Box>
-        </Box>
-      </Paper> */}
     </Box>
   );
 };
