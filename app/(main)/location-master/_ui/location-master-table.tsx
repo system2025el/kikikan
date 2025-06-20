@@ -24,11 +24,11 @@ import { SetStateAction, useMemo, useState } from 'react';
 
 import { MuiTable } from '../../_ui/table';
 import { MuiTablePagination } from '../../_ui/table-pagination';
-import { vehicles, vMHeader } from '../_lib/datas';
-import { AddVehicleDialog } from './add-vehicle-dialog';
+import { lMHeader, locationList } from '../_lib/types';
+import { LocationMasterDialog } from './location-master-dialog';
 
 /** 車両マスタのテーブルコンポーネント */
-export const VehiclesMasterTable = () => {
+export const LocationMasterTable = () => {
   const [page, setPage] = useState(1);
   const rowsPerPage = 50;
   /* ダイアログ開く顧客のID、閉じるとき、未選択で-100とする */
@@ -50,11 +50,12 @@ export const VehiclesMasterTable = () => {
 
   // 表示するデータ
   const list = useMemo(
-    () => (rowsPerPage > 0 ? vehicles.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage) : vehicles),
+    () =>
+      rowsPerPage > 0 ? locationList.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage) : locationList,
     [page, rowsPerPage]
   );
   // テーブル最後のページ用の空データの長さ
-  const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - vehicles.length) : 0;
+  const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - locationList.length) : 0;
 
   return (
     <Box>
@@ -64,7 +65,7 @@ export const VehiclesMasterTable = () => {
       <Divider />
       <Grid2 container mt={1} mx={0.5} justifyContent={'space-between'}>
         <Grid2 spacing={1}>
-          <MuiTablePagination arrayList={vehicles} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
+          <MuiTablePagination arrayList={locationList} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
         </Grid2>
         <Grid2 container spacing={1}>
           <Grid2 container spacing={1}>
@@ -85,7 +86,15 @@ export const VehiclesMasterTable = () => {
       </Grid2>
 
       <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 1 }}>
-        <MuiTable headers={vMHeader} datas={list} handleOpenDialog={handleOpenDialog} />
+        <MuiTable
+          headers={lMHeader}
+          datas={list.map((l) => ({
+            ...l,
+            id: l.locId,
+            address: `${l.adrShozai}${l.adrTatemono}${l.adrSonota}`,
+          }))}
+          handleOpenDialog={handleOpenDialog}
+        />
         {/* <Table stickyHeader padding="none">
           <TableHead>
             <TableRow>
@@ -112,9 +121,9 @@ export const VehiclesMasterTable = () => {
           </TableBody>
         </Table> */}
         <Dialog open={dialogOpen} fullScreen>
-          <AddVehicleDialog
+          <LocationMasterDialog
             handleClose={handleCloseDialog}
-            vehicleId={openId}
+            locationId={openId}
             editable={editable}
             setEditable={setEditable}
           />

@@ -21,9 +21,8 @@ import {
 import { grey } from '@mui/material/colors';
 import { useMemo, useState } from 'react';
 
-import { locationList } from '@/app/_lib/mock-data';
-
 import { MuiTablePagination } from '../../_ui/table-pagination';
+import { locationList } from '../../location-master/_lib/types';
 
 /** 新規受注の場所選択ダイアログ */
 export const LocationSelectDialog = (props: { handleCloseLocationDialog: () => void }) => {
@@ -97,9 +96,11 @@ export const LocationSelectDialog = (props: { handleCloseLocationDialog: () => v
             </TableHead>
             <TableBody>
               {list.map((location) => (
-                <TableRow key={location.name}>
-                  <TableCell>{location.name}</TableCell>
-                  <TableCell>{location.address}</TableCell>
+                <TableRow key={location.locId}>
+                  <TableCell>{location.locNam}</TableCell>
+                  <TableCell>
+                    {location.adrShozai} {location.adrTatemono} {location.adrSonota}
+                  </TableCell>
                   <TableCell>{location.tel}</TableCell>
                   <TableCell>{location.fax}</TableCell>
                 </TableRow>
