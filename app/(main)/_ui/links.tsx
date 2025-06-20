@@ -40,7 +40,7 @@ const equipmentList: MenuItem[] = [{ name: '機材マスタ', url: '/equipment' 
 const masterList: MenuItem[] = [
   { name: '顧客マスタ', url: '/customers-master' },
   { name: '車両マスタ', url: '/vehicles-master' },
-  { name: '場所マスタ', url: '/' },
+  { name: '場所マスタ', url: '/location-master' },
   { name: '担当者マスタ', url: '/' },
   { name: '権限マスタ', url: '/' },
   { name: '一式マスタ', url: '/' },
