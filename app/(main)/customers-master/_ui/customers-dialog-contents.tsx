@@ -6,7 +6,7 @@ import { grey } from '@mui/material/colors';
 import { useEffect, useState } from 'react';
 import { CheckboxElement, SelectElement, TextFieldElement, useForm } from 'react-hook-form-mui';
 
-import { getOneCustomer } from '@/app/_lib/supabase/supabaseFuncs';
+// import { getOneCustomer } from '@/app/_lib/supabase/supabaseFuncs';
 import { FormBox } from '@/app/(main)/_ui/form-box';
 
 import { customerMasterDialogDetailsValues, customerMaterDialogDetailsSchema } from '../_lib/types';
@@ -51,17 +51,17 @@ export const CustomerDialogContents = (props: {
     handleClose();
   };
 
-  useEffect(() => {
-    const getThatOneCustomer = async () => {
-      const customer1 = await getOneCustomer(customerId);
-      reset(customer1);
-      console.log(customerId);
-      console.log('?????????????????????????????????????????????????????', customer1);
-      setCustomer(customer1!);
-      setIsLoading(false);
-    };
-    getThatOneCustomer();
-  }, [customerId, reset]);
+  // useEffect(() => {
+  //   const getThatOneCustomer = async () => {
+  //     const customer1 = await getOneCustomer(customerId);
+  //     reset(customer1);
+  //     console.log(customerId);
+  //     console.log('?????????????????????????????????????????????????????', customer1);
+  //     setCustomer(customer1!);
+  //     setIsLoading(false);
+  //   };
+  //   getThatOneCustomer();
+  // }, [customerId, reset]);
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit)}>
