@@ -1,23 +1,9 @@
-import { GridColDef } from '@mui/x-data-grid';
-
-const columns: GridColDef[] = [
-  { field: 'set', headerName: 'セット(1)', width: 150 },
-  { field: 'all', headerName: '全', editable: false },
-  { field: 'orders', headerName: '受注数', editable: true },
-  { field: 'spare', headerName: '入力欄', editable: true },
-  { field: 'total', headerName: '合計', editable: false },
-  { field: 'memo', headerName: '機材メモ', editable: true, width: 230 },
-];
-
-const rows = [
-  { id: 1, set: 'SHARPY PLUS', all: 148, orders: 2, spare: 1, total: 3, memo: '' },
-  { id: 2, set: 'ROBIN T2 Profile', all: 26, orders: 3, spare: 1, total: 4, memo: '' },
-];
-
 const data = [
   {
     id: 1,
     name: 'SHARPY PLUS',
+    date: '2025/10/30 15:00',
+    move: 'KICS→YARD',
     memo: '',
     place: 'KICS',
     all: 148,
@@ -28,6 +14,8 @@ const data = [
   {
     id: 2,
     name: 'ROBIN T2 Profile',
+    date: '2025/10/30 15:00',
+    move: 'KICS→YARD',
     memo: '',
     place: 'KICS',
     all: 55,
@@ -38,6 +26,8 @@ const data = [
   {
     id: 3,
     name: 'Sharpy X Spot',
+    date: '2025/10/30 15:00',
+    move: 'KICS→YARD',
     memo: '',
     place: 'KICS',
     all: 26,
@@ -48,6 +38,8 @@ const data = [
   {
     id: 4,
     name: 'VL6000 Beam',
+    date: '',
+    move: '',
     memo: '',
     place: 'YARD',
     all: 27,
@@ -58,6 +50,8 @@ const data = [
   {
     id: 5,
     name: 'Arolla Profile MP',
+    date: '',
+    move: '',
     memo: '',
     place: 'YARD',
     all: 28,
@@ -68,6 +62,8 @@ const data = [
   {
     id: 6,
     name: '20D電源BOX 3相専用（12口）',
+    date: '',
+    move: '',
     memo: '',
     place: 'YARD',
     all: 44,
@@ -78,6 +74,8 @@ const data = [
   {
     id: 7,
     name: 'XXXXXXXXXXXX',
+    date: '',
+    move: '',
     memo: '',
     place: 'YARD',
     all: 45,
@@ -93,4 +91,4 @@ const cellWidths = ['65%', '5%', '5%', '5%', '5%', '5%', '5%', '5%'];
 
 const header = ['機材名', 'メモ', '在庫場所', '全', '受注数', '予備数', '合計'];
 
-export { cellWidths, columns, data, header, rows, stock };
+export { cellWidths, data, header, stock };
