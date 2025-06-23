@@ -30,7 +30,7 @@ import { useEffect, useRef, useState } from 'react';
 import React from 'react';
 
 import { BackButton } from '@/app/(main)/_ui/back-button';
-import { Calendar, TestDate, toISOStringWithTimezoneMonthDay } from '@/app/(main)/_ui/date';
+import { Calendar, TestDate, toISOStringWithTimezone, toISOStringWithTimezoneMonthDay } from '@/app/(main)/_ui/date';
 import Time from '@/app/(main)/_ui/time';
 import {
   getDateHeaderBackgroundColor,
@@ -55,6 +55,8 @@ export type StockData = {
 export type Equipment = {
   id: number;
   name: string;
+  date: string;
+  move: string;
   memo: string;
   place: string;
   all: number;
@@ -122,6 +124,8 @@ export const testeqData: Equipment[] = Array.from({ length: 200 }, (_, i) => {
     ...original,
     id: i + 1,
     name: `${original.name} (${i + 1})`,
+    date: original.date,
+    move: original.move,
     memo: original.memo,
     place: original.place,
     all: original.all,
@@ -279,6 +283,13 @@ const EquipmentOrderDetail = () => {
       updatedData[index] = stock[rowIndex] - totalValue;
     });
     setStockRows((prev) => prev.map((row, i) => (i === rowIndex ? { ...row, data: updatedData } : row)));
+  };
+
+  const handleCellDateChange = (rowIndex: number, date: Dayjs | null) => {
+    if (date !== null) {
+      const newDate = toISOStringWithTimezone(date.toDate());
+      setEquipmentRows((prev) => prev.map((row, i) => (i === rowIndex ? { ...row, date: newDate } : row)));
+    }
   };
 
   /**
@@ -610,7 +621,12 @@ const EquipmentOrderDetail = () => {
             <Button sx={{ m: 2 }} onClick={() => handleOpenEqDialog()}>
               ＋ 機材追加
             </Button>
-            <EqTable rows={equipmentRows} onChange={handleCellChange} handleMemoChange={handleMemoChange} />
+            <EqTable
+              rows={equipmentRows}
+              onChange={handleCellChange}
+              handleCellDateChange={handleCellDateChange}
+              handleMemoChange={handleMemoChange}
+            />
           </Box>
           <Box overflow="auto" sx={{ width: { xs: '60%', sm: '60%', md: 'auto' } }}>
             <Box display="flex" my={2}>

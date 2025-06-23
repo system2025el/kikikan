@@ -3,6 +3,7 @@
 import Delete from '@mui/icons-material/Delete';
 import EditNoteIcon from '@mui/icons-material/EditNote';
 import {
+  Box,
   Button,
   Dialog,
   DialogActions,
@@ -10,6 +11,7 @@ import {
   DialogTitle,
   IconButton,
   Paper,
+  Stack,
   Table,
   TableBody,
   TableCell,
@@ -18,8 +20,13 @@ import {
   TableRow,
   TextField,
   Tooltip,
+  Typography,
 } from '@mui/material';
+import { Dayjs } from 'dayjs';
 import React, { useRef, useState } from 'react';
+
+import { TestDate } from '@/app/(main)/_ui/date';
+import { TestTime } from '@/app/(main)/_ui/time';
 
 import { Equipment, EquipmentData, StockData } from './equipment-order-detail';
 
@@ -196,10 +203,11 @@ StockTableRow.displayName = 'StockTableRow';
 type EqTableProps = {
   rows: Equipment[];
   onChange: (rowIndex: number, orderValue: number, spareValue: number, totalValue: number) => void;
+  handleCellDateChange: (rowIndex: number, date: Dayjs | null) => void;
   handleMemoChange: (rowIndex: number, memo: string) => void;
 };
 
-export const EqTable: React.FC<EqTableProps> = ({ rows, onChange, handleMemoChange }) => {
+export const EqTable: React.FC<EqTableProps> = ({ rows, onChange, handleCellDateChange, handleMemoChange }) => {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const handleOrderCellChange = (rowIndex: number, newValue: number) => {
@@ -238,6 +246,9 @@ export const EqTable: React.FC<EqTableProps> = ({ rows, onChange, handleMemoChan
               機材名
             </TableCell>
             <TableCell align="left" size="small" style={styles.header}>
+              移動日時
+            </TableCell>
+            <TableCell align="left" size="small" style={styles.header}>
               メモ
             </TableCell>
             <TableCell align="left" size="small" style={styles.header}>
@@ -264,6 +275,7 @@ export const EqTable: React.FC<EqTableProps> = ({ rows, onChange, handleMemoChan
               row={row}
               rowIndex={rowIndex}
               handleOrderRef={handleOrderRef(rowIndex)}
+              handleCellDateChange={handleCellDateChange}
               handleMemoChange={handleMemoChange}
               handleKeyDown={handleKeyDown}
               handleOrderCellChange={handleOrderCellChange}
@@ -280,6 +292,7 @@ type EqTableRowProps = {
   row: Equipment;
   rowIndex: number;
   handleOrderRef: (el: HTMLInputElement | null) => void;
+  handleCellDateChange: (rowIndex: number, date: Dayjs | null) => void;
   handleMemoChange: (rowIndex: number, memo: string) => void;
   handleOrderCellChange: (rowIndex: number, newValue: number) => void;
   handleSpareCellChange: (rowIndex: number, newValue: number) => void;
@@ -291,12 +304,23 @@ const EqTableRow = React.memo(
     row,
     rowIndex,
     handleOrderRef,
+    handleCellDateChange,
     handleMemoChange,
     handleOrderCellChange,
     handleSpareCellChange,
     handleKeyDown,
   }: EqTableRowProps) => {
     console.log('描画', rowIndex);
+
+    const [date, setDate] = useState(new Date(row.date));
+
+    const handleDateChange = (date: Dayjs | null) => {
+      if (date !== null) {
+        setDate(date.toDate());
+        handleCellDateChange(rowIndex, date);
+      }
+    };
+
     return (
       <TableRow>
         <TableCell sx={{ padding: 0, border: '1px solid black' }}>
@@ -309,6 +333,33 @@ const EqTableRow = React.memo(
         </TableCell>
         <TableCell style={styles.row} align="left" size="small" sx={{ bgcolor: 'lightgrey' }}>
           {row.name}
+        </TableCell>
+        <TableCell style={styles.row} size="small">
+          <Box display="flex" width={'400px'}>
+            {row.date && (
+              <TestDate
+                sx={{
+                  '& .MuiPickersInputBase-root': {
+                    height: '24px',
+                  },
+                }}
+                date={date}
+                onChange={handleDateChange}
+              ></TestDate>
+            )}
+            {row.date && (
+              <TestTime
+                sx={{
+                  '& .MuiPickersInputBase-root': {
+                    height: '24px',
+                  },
+                }}
+                time={date}
+                onChange={handleDateChange}
+              ></TestTime>
+            )}
+            {row.move && <Typography>{row.move}</Typography>}
+          </Box>
         </TableCell>
         <TableCell style={styles.row} align="center" size="small">
           <MemoTooltip name={row.name} memo={row.memo} handleMemoChange={handleMemoChange} rowIndex={rowIndex} />
