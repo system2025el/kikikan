@@ -18,7 +18,6 @@ import {
   TableSortLabel,
   Typography,
 } from '@mui/material';
-import {} from '@mui/material/colors';
 import { useEffect, useMemo, useState } from 'react';
 
 // import { getAllCustomers } from '@/app/_lib/supabase/supabaseFuncs';
@@ -27,7 +26,7 @@ import { cMHeader, customerMasterDialogDetailsValues, CustomerMasterTableValues,
 import { CustomerDialogContents } from './customers-dialog-contents';
 
 /** 顧客マスタのテーブルコンポーネント */
-export const CustomersMasterTable = () => {
+export const CustomersMasterTable = (/*{ customers }: { customers: CustomerMasterTableValues[] | undefined }*/) => {
   /* useState
    * -------------------------------------------------------- */
   /* ダイアログ開く顧客のID、閉じるとき、未選択で-100とする */
@@ -43,7 +42,7 @@ export const CustomersMasterTable = () => {
   /* ソート対象 */
   const [orderBy, setOrderBy] = useState<string>('');
   /* 表示する列 今のところソート、フィルターなし */
-  const [customersList, setCustomers] = useState<CustomerMasterTableValues[]>(customers);
+  const [customersList, setCustomers] = useState<CustomerMasterTableValues[]>();
   /* ダイアログでの編集モード */
   const [editable, setEditable] = useState(false);
 
@@ -58,17 +57,20 @@ export const CustomersMasterTable = () => {
   const handleOpen = (id: number) => {
     if (id === -100) {
       setEditable(true);
+    } else {
+      setOpenID(id);
+      console.log(openId);
     }
-    setOpenID(id);
     setDialogOpen(true);
-    console.log(customers[id - 1]);
   };
   /**
    * 顧客詳細ダイアログを閉じる関数
    */
   const handleClose = () => {
+    console.log(openId);
     setOpenID(-100);
     setDialogOpen(false);
+    setEditable(false);
   };
   /** */
   const deleteInfo = (id: number) => {
@@ -105,15 +107,14 @@ export const CustomersMasterTable = () => {
    *  表示する顧客リスト
    */
   const list = useMemo(
-    () =>
-      rowsPerPage > 0 ? customersList.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage) : customersList,
-    [page, rowsPerPage, customersList]
+    () => (rowsPerPage > 0 ? customers!.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage) : customers),
+    [page, rowsPerPage]
   );
   console.log('list is here : ', list);
   /**
    * テーブル最後のページ用の空データの長さ
    */
-  const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - customersList.length) : 0;
+  const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - customers!.length) : 0;
 
   return (
     <Box>
@@ -127,20 +128,14 @@ export const CustomersMasterTable = () => {
       <Divider />
       <Grid2 container mt={1} mx={0.5} justifyContent={'space-between'}>
         <Grid2 spacing={1}>
-          <MuiTablePagination arrayList={customersList} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
+          <MuiTablePagination arrayList={customers!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
         </Grid2>
         <Grid2 container spacing={1}>
           <Grid2 container spacing={1}>
             <Grid2>
               <Button onClick={() => handleOpen(-100)}>
                 <AddIcon fontSize="small" />
-                追加
-              </Button>
-            </Grid2>
-            <Grid2>
-              <Button color="error">
-                <DeleteIcon fontSize="small" />
-                削除
+                新規顧客
               </Button>
             </Grid2>
           </Grid2>
@@ -163,7 +158,7 @@ export const CustomersMasterTable = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {list.map((customer) => (
+            {customers!.map((customer) => (
               <TableRow key={customer.kokyakuId} onClick={() => handleOpen(customer.kokyakuId)}>
                 <TableCell>
                   <CheckBox color="primary" />

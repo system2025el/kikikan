@@ -3,9 +3,10 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { alpha, Button, DialogTitle, Grid2, Stack, Typography, useTheme } from '@mui/material';
 import { grey } from '@mui/material/colors';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CheckboxElement, SelectElement, TextFieldElement, useForm } from 'react-hook-form-mui';
 
+import { getOneCustomer } from '@/app/_lib/supabase/supabaseFuncs';
 import { FormBox } from '@/app/(main)/_ui/form-box';
 
 import { customerMasterDialogDetailsValues, customerMaterDialogDetailsSchema } from '../_lib/types';
@@ -25,6 +26,7 @@ export const CustomerDialogContents = (props: {
   };
 
   const [customer, setCustomer] = useState<customerMasterDialogDetailsValues>();
+  const [isLoading, setIsLoading] = useState(true);
 
   const {
     control,
@@ -44,16 +46,22 @@ export const CustomerDialogContents = (props: {
     console.log(data);
   };
 
-  // useEffect(() => {
-  //   const getThatOneCustomer = async () => {
-  //     const customer1 = await getOneCustomer(customerId);
-  //     console.log(customerId);
-  //     console.log('?????????????????????????????????????????????????????', customer1);
-  //     setCustomer(customer1!);
-  //   };
-  //   getThatOneCustomer();
-  //   console.log('chaaaaaaaaaaaaaaaaaaaaaange', customer);
-  // }, [customerId]);
+  const handleCloseDialog = () => {
+    console.log('☆☆☆☆☆☆★★★★', customer);
+    handleClose();
+  };
+
+  useEffect(() => {
+    const getThatOneCustomer = async () => {
+      const customer1 = await getOneCustomer(customerId);
+      reset(customer1);
+      console.log(customerId);
+      console.log('?????????????????????????????????????????????????????', customer1);
+      setCustomer(customer1!);
+      setIsLoading(false);
+    };
+    getThatOneCustomer();
+  }, [customerId, reset]);
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit)}>
@@ -61,7 +69,7 @@ export const CustomerDialogContents = (props: {
           顧客情報
           {editable && <Typography>編集モード</Typography>}
           <Stack>
-            <Button /*type="submit"*/ onClick={() => handleClose()}>保存</Button>
+            <Button /*type="submit"*/ onClick={() => handleCloseDialog()}>保存</Button>
             <Button
               onClick={() => {
                 handleEditable();
@@ -72,216 +80,219 @@ export const CustomerDialogContents = (props: {
             </Button>
           </Stack>
         </DialogTitle>
-
-        <Grid2 container spacing={1} p={5} direction={'column'} justifyContent={'center'} width={'100%'}>
-          <Grid2>
-            <FormBox label={formItems[0].label} description={formItems[0].description} required={true}>
-              <TextFieldElement
-                name="kokyakuNam"
-                control={control}
-                label={formItems[0].description}
-                fullWidth
-                sx={{ maxWidth: '80%' }}
-                disabled={editable ? false : true}
-              />
-            </FormBox>
+        {isLoading ? (
+          <Typography>now loading</Typography>
+        ) : (
+          <Grid2 container spacing={1} p={5} direction={'column'} justifyContent={'center'} width={'100%'}>
+            <Grid2>
+              <FormBox label={formItems[0].label} description={formItems[0].description} required={true}>
+                <TextFieldElement
+                  name="kokyakuNam"
+                  control={control}
+                  label={formItems[0].description}
+                  fullWidth
+                  sx={{ maxWidth: '80%' }}
+                  disabled={editable ? false : true}
+                />
+              </FormBox>
+            </Grid2>
+            <Grid2>
+              <FormBox label={formItems[1].label} description={formItems[1].description} required={true}>
+                <TextFieldElement
+                  name="kana"
+                  control={control}
+                  label={formItems[1].description}
+                  fullWidth
+                  sx={{ maxWidth: '80%' }}
+                  disabled={editable ? false : true}
+                />
+              </FormBox>
+            </Grid2>
+            <Grid2>
+              <FormBox label={formItems[2].label} description={formItems[2].description} required={true}>
+                <SelectElement
+                  name="kokyakuRank"
+                  control={control}
+                  label={formItems[2].description}
+                  options={[
+                    { id: 1, label: 1 },
+                    { id: 2, label: 2 },
+                    { id: 3, label: 3 },
+                    { id: 4, label: 4 },
+                    { id: 5, label: 5 },
+                  ]}
+                  fullWidth
+                  sx={{ maxWidth: '80%' }}
+                  disabled={editable ? false : true}
+                />
+              </FormBox>
+            </Grid2>
+            <Grid2>
+              <FormBox label={formItems[3].label} description={formItems[3].description}>
+                <CheckboxElement name="delFlg" control={control} size="medium" disabled={editable ? false : true} />
+              </FormBox>
+            </Grid2>
+            <Grid2>
+              <FormBox label={formItems[4].label} description={formItems[4].description}>
+                <TextFieldElement
+                  name="keisho"
+                  control={control}
+                  label={formItems[4].description}
+                  fullWidth
+                  sx={{ maxWidth: '80%' }}
+                  disabled={editable ? false : true}
+                />
+              </FormBox>
+            </Grid2>
+            <Grid2>
+              <FormBox label={formItems[5].label} description={formItems[5].description}>
+                <TextFieldElement
+                  name="adrPost"
+                  control={control}
+                  label={formItems[5].description}
+                  fullWidth
+                  sx={{ maxWidth: '80%' }}
+                  disabled={editable ? false : true}
+                />
+              </FormBox>
+            </Grid2>
+            <Grid2>
+              <FormBox label={formItems[6].label} description={formItems[6].description}>
+                <TextFieldElement
+                  name="adrShozai"
+                  control={control}
+                  label={formItems[6].description}
+                  fullWidth
+                  sx={{ maxWidth: '80%' }}
+                  disabled={editable ? false : true}
+                />
+              </FormBox>
+            </Grid2>
+            <Grid2>
+              <FormBox label={formItems[7].label} description={formItems[7].description}>
+                <TextFieldElement
+                  name="adrTatemono"
+                  control={control}
+                  label={formItems[7].description}
+                  fullWidth
+                  sx={{ maxWidth: '80%' }}
+                  disabled={editable ? false : true}
+                />
+              </FormBox>
+            </Grid2>
+            <Grid2>
+              <FormBox label={formItems[8].label} description={formItems[8].description}>
+                <TextFieldElement
+                  name="adrSonota"
+                  control={control}
+                  label={formItems[8].description}
+                  fullWidth
+                  sx={{ maxWidth: '80%' }}
+                  disabled={editable ? false : true}
+                />
+              </FormBox>
+            </Grid2>
+            <Grid2>
+              <FormBox label={formItems[9].label} description={formItems[9].description}>
+                <TextFieldElement
+                  name="tel"
+                  control={control}
+                  label={formItems[9].description}
+                  fullWidth
+                  sx={{ maxWidth: '80%' }}
+                  disabled={editable ? false : true}
+                />
+              </FormBox>
+            </Grid2>
+            <Grid2>
+              <FormBox label={formItems[10].label} description={formItems[10].description}>
+                <TextFieldElement
+                  name="telMobile"
+                  control={control}
+                  label={formItems[10].description}
+                  fullWidth
+                  sx={{ maxWidth: '80%' }}
+                  disabled={editable ? false : true}
+                />
+              </FormBox>
+            </Grid2>
+            <Grid2>
+              <FormBox label={formItems[11].label} description={formItems[11].description}>
+                <TextFieldElement
+                  name="fax"
+                  control={control}
+                  label={formItems[11].description}
+                  fullWidth
+                  sx={{ maxWidth: '80%' }}
+                  disabled={editable ? false : true}
+                />
+              </FormBox>
+            </Grid2>
+            <Grid2>
+              <FormBox label={formItems[12].label} description={formItems[12].description}>
+                <TextFieldElement
+                  name="mail"
+                  control={control}
+                  label={formItems[12].description}
+                  fullWidth
+                  sx={{ maxWidth: '80%' }}
+                  disabled={editable ? false : true}
+                />
+              </FormBox>
+            </Grid2>
+            <Grid2>
+              <FormBox label={formItems[13].label} description={formItems[13].description}>
+                <TextFieldElement ////////////// 200文字までの設定をしなければならない
+                  name="mem"
+                  control={control}
+                  label={formItems[13].description}
+                  fullWidth
+                  sx={{ maxWidth: '80%' }}
+                  disabled={editable ? false : true}
+                />
+              </FormBox>
+            </Grid2>
+            <Grid2>
+              <FormBox label={formItems[14].label} description={formItems[14].description}>
+                <CheckboxElement name="dspFlg" control={control} size="medium" disabled={editable ? false : true} />
+              </FormBox>
+            </Grid2>
+            <Grid2>
+              <FormBox label={formItems[15].label} description={formItems[15].description}>
+                <TextFieldElement
+                  name="closeDay"
+                  control={control}
+                  label={formItems[15].description}
+                  fullWidth
+                  sx={{ maxWidth: '80%' }}
+                  disabled={editable ? false : true}
+                />
+              </FormBox>
+            </Grid2>
+            <Grid2>
+              <FormBox label={formItems[16].label} description={formItems[16].description}>
+                <TextFieldElement
+                  name="siteDay"
+                  control={control}
+                  label={formItems[16].description}
+                  fullWidth
+                  sx={{ maxWidth: '80%' }}
+                  disabled={editable ? false : true}
+                />
+              </FormBox>
+            </Grid2>
+            <Grid2>
+              <FormBox label={formItems[17].label} description={formItems[17].description}>
+                <CheckboxElement
+                  name="kizaiNebikiFlg"
+                  control={control}
+                  size="medium"
+                  disabled={editable ? false : true}
+                />
+              </FormBox>
+            </Grid2>
           </Grid2>
-          <Grid2>
-            <FormBox label={formItems[1].label} description={formItems[1].description} required={true}>
-              <TextFieldElement
-                name="kana"
-                control={control}
-                label={formItems[1].description}
-                fullWidth
-                sx={{ maxWidth: '80%' }}
-                disabled={editable ? false : true}
-              />
-            </FormBox>
-          </Grid2>
-          <Grid2>
-            <FormBox label={formItems[2].label} description={formItems[2].description} required={true}>
-              <SelectElement
-                name="kokyakuRank"
-                control={control}
-                label={formItems[2].description}
-                options={[
-                  { id: 1, label: 1 },
-                  { id: 2, label: 2 },
-                  { id: 3, label: 3 },
-                  { id: 4, label: 4 },
-                  { id: 5, label: 5 },
-                ]}
-                fullWidth
-                sx={{ maxWidth: '80%' }}
-                disabled={editable ? false : true}
-              />
-            </FormBox>
-          </Grid2>
-          <Grid2>
-            <FormBox label={formItems[3].label} description={formItems[3].description}>
-              <CheckboxElement name="delFlg" control={control} size="medium" disabled={editable ? false : true} />
-            </FormBox>
-          </Grid2>
-          <Grid2>
-            <FormBox label={formItems[4].label} description={formItems[4].description}>
-              <TextFieldElement
-                name="keisho"
-                control={control}
-                label={formItems[4].description}
-                fullWidth
-                sx={{ maxWidth: '80%' }}
-                disabled={editable ? false : true}
-              />
-            </FormBox>
-          </Grid2>
-          <Grid2>
-            <FormBox label={formItems[5].label} description={formItems[5].description}>
-              <TextFieldElement
-                name="adrPost"
-                control={control}
-                label={formItems[5].description}
-                fullWidth
-                sx={{ maxWidth: '80%' }}
-                disabled={editable ? false : true}
-              />
-            </FormBox>
-          </Grid2>
-          <Grid2>
-            <FormBox label={formItems[6].label} description={formItems[6].description}>
-              <TextFieldElement
-                name="adrShozai"
-                control={control}
-                label={formItems[6].description}
-                fullWidth
-                sx={{ maxWidth: '80%' }}
-                disabled={editable ? false : true}
-              />
-            </FormBox>
-          </Grid2>
-          <Grid2>
-            <FormBox label={formItems[7].label} description={formItems[7].description}>
-              <TextFieldElement
-                name="adrTatemono"
-                control={control}
-                label={formItems[7].description}
-                fullWidth
-                sx={{ maxWidth: '80%' }}
-                disabled={editable ? false : true}
-              />
-            </FormBox>
-          </Grid2>
-          <Grid2>
-            <FormBox label={formItems[8].label} description={formItems[8].description}>
-              <TextFieldElement
-                name="adrSonota"
-                control={control}
-                label={formItems[8].description}
-                fullWidth
-                sx={{ maxWidth: '80%' }}
-                disabled={editable ? false : true}
-              />
-            </FormBox>
-          </Grid2>
-          <Grid2>
-            <FormBox label={formItems[9].label} description={formItems[9].description}>
-              <TextFieldElement
-                name="tel"
-                control={control}
-                label={formItems[9].description}
-                fullWidth
-                sx={{ maxWidth: '80%' }}
-                disabled={editable ? false : true}
-              />
-            </FormBox>
-          </Grid2>
-          <Grid2>
-            <FormBox label={formItems[10].label} description={formItems[10].description}>
-              <TextFieldElement
-                name="telMobile"
-                control={control}
-                label={formItems[10].description}
-                fullWidth
-                sx={{ maxWidth: '80%' }}
-                disabled={editable ? false : true}
-              />
-            </FormBox>
-          </Grid2>
-          <Grid2>
-            <FormBox label={formItems[11].label} description={formItems[11].description}>
-              <TextFieldElement
-                name="fax"
-                control={control}
-                label={formItems[11].description}
-                fullWidth
-                sx={{ maxWidth: '80%' }}
-                disabled={editable ? false : true}
-              />
-            </FormBox>
-          </Grid2>
-          <Grid2>
-            <FormBox label={formItems[12].label} description={formItems[12].description}>
-              <TextFieldElement
-                name="mail"
-                control={control}
-                label={formItems[12].description}
-                fullWidth
-                sx={{ maxWidth: '80%' }}
-                disabled={editable ? false : true}
-              />
-            </FormBox>
-          </Grid2>
-          <Grid2>
-            <FormBox label={formItems[13].label} description={formItems[13].description}>
-              <TextFieldElement ////////////// 200文字までの設定をしなければならない
-                name="mem"
-                control={control}
-                label={formItems[13].description}
-                fullWidth
-                sx={{ maxWidth: '80%' }}
-                disabled={editable ? false : true}
-              />
-            </FormBox>
-          </Grid2>
-          <Grid2>
-            <FormBox label={formItems[14].label} description={formItems[14].description}>
-              <CheckboxElement name="dspFlg" control={control} size="medium" disabled={editable ? false : true} />
-            </FormBox>
-          </Grid2>
-          <Grid2>
-            <FormBox label={formItems[15].label} description={formItems[15].description}>
-              <TextFieldElement
-                name="closeDay"
-                control={control}
-                label={formItems[15].description}
-                fullWidth
-                sx={{ maxWidth: '80%' }}
-                disabled={editable ? false : true}
-              />
-            </FormBox>
-          </Grid2>
-          <Grid2>
-            <FormBox label={formItems[16].label} description={formItems[16].description}>
-              <TextFieldElement
-                name="siteDay"
-                control={control}
-                label={formItems[16].description}
-                fullWidth
-                sx={{ maxWidth: '80%' }}
-                disabled={editable ? false : true}
-              />
-            </FormBox>
-          </Grid2>
-          <Grid2>
-            <FormBox label={formItems[17].label} description={formItems[17].description}>
-              <CheckboxElement
-                name="kizaiNebikiFlg"
-                control={control}
-                size="medium"
-                disabled={editable ? false : true}
-              />
-            </FormBox>
-          </Grid2>
-        </Grid2>
+        )}
       </form>
     </>
   );

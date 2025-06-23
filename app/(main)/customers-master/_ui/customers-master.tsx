@@ -1,13 +1,12 @@
 'use client';
 import SearchIcon from '@mui/icons-material/Search';
 import { Box, Button, Container, Divider, Grid2, Paper, Stack, TextField, Typography } from '@mui/material';
-import { grey } from '@mui/material/colors';
-import Form from 'next/form';
 
 import { BackButton } from '../../_ui/back-button';
+import { CustomerMasterTableValues } from '../_lib/types';
 import { CustomersMasterTable } from './customers-table';
 
-export const CustomersMaster = () => {
+export const CustomersMaster = (/*{ customers }: { customers: CustomerMasterTableValues[] | undefined }*/) => {
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
       <Paper variant="outlined">
@@ -63,12 +62,11 @@ export const CustomersMaster = () => {
             <Stack justifyContent={'space-between'} alignItems={'start'} mt={1}>
               <Stack>
                 <Typography noWrap>顧客キーワード</Typography>
-                <Box>
-                  <TextField id="a" />
-                  <Typography noWrap variant="body2">
-                    社名、かな、住所、TEL、FAX、メモから部分一致検索
-                  </Typography>
-                </Box>
+
+                <TextField />
+                <Typography noWrap variant="body2">
+                  社名、かな、住所、TEL、FAX、メモから部分一致検索
+                </Typography>
               </Stack>
               <Box>
                 <Button type="submit">
@@ -81,7 +79,7 @@ export const CustomersMaster = () => {
           <Typography></Typography>
         </Box>
       </Paper>
-      <CustomersMasterTable />
+      <CustomersMasterTable /*customers={customers}*/ />
     </Container>
   );
 };
