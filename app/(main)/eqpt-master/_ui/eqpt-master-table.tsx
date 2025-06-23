@@ -91,12 +91,6 @@ export const EqptMasterTable = (props: {
                 追加
               </Button>
             </Grid2>
-            <Grid2>
-              <Button color="error">
-                <DeleteIcon fontSize="small" />
-                削除
-              </Button>
-            </Grid2>
           </Grid2>
         </Grid2>
       </Grid2>

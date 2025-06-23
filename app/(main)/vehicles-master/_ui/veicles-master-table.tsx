@@ -20,15 +20,15 @@ import {
   useTheme,
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
-import { SetStateAction, useMemo, useState } from 'react';
+import { SetStateAction, useEffect, useMemo, useState } from 'react';
 
 import { MuiTable } from '../../_ui/table';
 import { MuiTablePagination } from '../../_ui/table-pagination';
-import { vehicles, vMHeader } from '../_lib/datas';
+import { VehMasterDialogValues, VehMasterTableValues, vMHeader } from '../_lib/datas';
 import { AddVehicleDialog } from './add-vehicle-dialog';
 
 /** 車両マスタのテーブルコンポーネント */
-export const VehiclesMasterTable = () => {
+export const VehiclesMasterTable = ({ vehs }: { vehs: VehMasterTableValues[] | undefined }) => {
   const [page, setPage] = useState(1);
   const rowsPerPage = 50;
   /* ダイアログ開く顧客のID、閉じるとき、未選択で-100とする */
@@ -50,11 +50,11 @@ export const VehiclesMasterTable = () => {
 
   // 表示するデータ
   const list = useMemo(
-    () => (rowsPerPage > 0 ? vehicles.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage) : vehicles),
-    [page, rowsPerPage]
+    () => (rowsPerPage > 0 ? vehs!.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage) : vehs),
+    [page, rowsPerPage, vehs]
   );
   // テーブル最後のページ用の空データの長さ
-  const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - vehicles.length) : 0;
+  const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - vehs!.length) : 0;
 
   return (
     <Box>
@@ -64,7 +64,7 @@ export const VehiclesMasterTable = () => {
       <Divider />
       <Grid2 container mt={1} mx={0.5} justifyContent={'space-between'}>
         <Grid2 spacing={1}>
-          <MuiTablePagination arrayList={vehicles} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
+          <MuiTablePagination arrayList={vehs!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
         </Grid2>
         <Grid2 container spacing={1}>
           <Grid2 container spacing={1}>
@@ -74,18 +74,16 @@ export const VehiclesMasterTable = () => {
                 車両追加
               </Button>
             </Grid2>
-            <Grid2>
-              <Button color="error">
-                <DeleteIcon fontSize="small" />
-                削除
-              </Button>
-            </Grid2>
           </Grid2>
         </Grid2>
       </Grid2>
 
       <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 1 }}>
-        <MuiTable headers={vMHeader} datas={list} handleOpenDialog={handleOpenDialog} />
+        <MuiTable
+          headers={vMHeader}
+          datas={list!.map((l) => ({ id: l.sharyoId, sharyoNam: l.sharyoNam, mem: l.mem! }))}
+          handleOpenDialog={handleOpenDialog}
+        />
         {/* <Table stickyHeader padding="none">
           <TableHead>
             <TableRow>

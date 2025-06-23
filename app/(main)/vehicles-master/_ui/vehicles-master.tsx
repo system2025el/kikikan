@@ -3,9 +3,10 @@ import { Box, Button, Container, Divider, Paper, Stack, TextField, Typography } 
 import { grey } from '@mui/material/colors';
 
 import { BackButton } from '../../_ui/back-button';
+import { VehMasterDialogValues, VehMasterTableValues } from '../_lib/datas';
 import { VehiclesMasterTable } from './veicles-master-table';
 
-export const VehiclesMaster = () => {
+export const VehiclesMaster = ({ vehs }: { vehs: VehMasterTableValues[] | undefined }) => {
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
       <Paper variant="outlined">
@@ -14,7 +15,7 @@ export const VehiclesMaster = () => {
           <BackButton sx={{ ml: '40%' }} label={'戻る'} />
         </Box>
       </Paper>
-      <VehiclesMasterTable />
+      <VehiclesMasterTable vehs={vehs} />
     </Container>
   );
 };

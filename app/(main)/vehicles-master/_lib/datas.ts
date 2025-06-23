@@ -1,52 +1,105 @@
+import z from 'zod';
+
 export const vMHeader = [
   { key: 'check', label: '' },
-  { key: 'vehicleType', label: '車両タイプ' },
-  { key: 'memo', label: 'メモ' },
+  { key: 'sharyoNam', label: '車両タイプ' },
+  { key: 'mem', label: 'メモ' },
   { key: 'up', label: '' },
   { key: 'down', label: '' },
 ];
 
 /**---------車両データ------------ */
+export const VehMasterTableSchema = z.object({
+  sharyoId: z.number(),
+  sharyoNam: z.string(),
+  delFlg: z.boolean(),
+  mem: z.string(),
+  dspFlg: z.boolean(),
+});
+
+export type VehMasterTableValues = z.infer<typeof VehMasterTableSchema>;
+
+const vehMasterDialogSchema = z.object({
+  sharyoId: z.number(),
+  sharyoNam: z.string(),
+  delFlg: z.boolean().optional(),
+  mem: z.string().optional(),
+  dspFlg: z.boolean().optional(),
+  dspOrderNum: z.number().optional(),
+  addDate: z.date(),
+  addUser: z.string(),
+  updDate: z.date(),
+  updUser: z.string(),
+});
+
+export const VehMasterDialogSchema = vehMasterDialogSchema.omit({
+  sharyoId: true,
+  dspOrderNum: true,
+  addDate: true,
+  addUser: true,
+  updDate: true,
+  updUser: true,
+});
+
+export type VehAllValues = z.infer<typeof vehMasterDialogSchema>;
+export type VehMasterDialogValues = z.infer<typeof VehMasterDialogSchema>;
+
 type VehicleData = {
-  id: number;
-  vehicleType: string;
-  memo: string;
+  sharyoId: number;
+  sharyoNam: string;
+  delFlg: boolean;
+  mem: string;
+  dspFlg: boolean;
 };
 
 export const vehicles: VehicleData[] = [
   {
-    id: 1,
-    vehicleType: '不明',
-    memo: '',
+    sharyoId: 1,
+    sharyoNam: '不明',
+    delFlg: false,
+    mem: '',
+    dspFlg: true,
   },
   {
-    id: 2,
-    vehicleType: '1t',
-    memo: '',
+    sharyoId: 2,
+    sharyoNam: '1t',
+    delFlg: false,
+    mem: '',
+    dspFlg: true,
   },
   {
-    id: 3,
-    vehicleType: '2t',
-    memo: '',
+    sharyoId: 3,
+    sharyoNam: '2t',
+    delFlg: false,
+    mem: '',
+    dspFlg: true,
   },
   {
-    id: 4,
-    vehicleType: '3t',
-    memo: '',
+    sharyoId: 4,
+    sharyoNam: '3t',
+    delFlg: false,
+    mem: '',
+    dspFlg: true,
   },
   {
-    id: 5,
-    vehicleType: '4t',
-    memo: '',
+    sharyoId: 5,
+    sharyoNam: '4t',
+    delFlg: false,
+    mem: '',
+    dspFlg: true,
   },
   {
-    id: 6,
-    vehicleType: '11t',
-    memo: '',
+    sharyoId: 6,
+    sharyoNam: '11t',
+    delFlg: false,
+    mem: '',
+    dspFlg: true,
   },
   {
-    id: 7,
-    vehicleType: 'ハイエース',
-    memo: '',
+    sharyoId: 7,
+    sharyoNam: 'ハイエース',
+    delFlg: false,
+    mem: '',
+    dspFlg: true,
   },
 ];

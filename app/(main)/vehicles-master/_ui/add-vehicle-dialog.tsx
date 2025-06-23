@@ -1,3 +1,4 @@
+import { zodResolver } from '@hookform/resolvers/zod';
 import { CheckBox } from '@mui/icons-material';
 import {
   alpha,
@@ -12,9 +13,13 @@ import {
   Typography,
   useTheme,
 } from '@mui/material';
-import { TextFieldElement } from 'react-hook-form-mui';
+import { useEffect, useState } from 'react';
+import { CheckboxElement, TextFieldElement, useForm } from 'react-hook-form-mui';
 
+// import { addNewVehicle, getOneVehicle } from '@/app/_lib/supabase/supabaseFuncs';
 import { FormBox } from '../../_ui/form-box';
+import { Loading } from '../../_ui/loading';
+import { VehMasterDialogSchema, VehMasterDialogValues } from '../_lib/datas';
 
 export const AddVehicleDialog = (props: {
   vehicleId: string | number;
@@ -25,68 +30,114 @@ export const AddVehicleDialog = (props: {
   const { vehicleId, handleClose, editable, setEditable } = props;
   const theme = useTheme();
   const colorOfThis = alpha(theme.palette.primary.main, 0.5);
-
+  const [veh, setVeh] = useState<VehMasterDialogValues>();
+  const [isLoading, setIsLoading] = useState(true);
   const handleEditable = () => {
     setEditable(true);
   };
+  const handleCloseDialog = () => {
+    setEditable(false);
+    handleClose();
+  };
+
+  const onSubmit = async (data: VehMasterDialogValues) => {
+    console.log('★★★★★★★★★ ', data);
+    // await addNewVehicle(data!);
+    handleCloseDialog();
+  };
+  const { control, handleSubmit, reset } = useForm({
+    mode: 'onSubmit',
+    reValidateMode: 'onSubmit',
+    resolver: zodResolver(VehMasterDialogSchema),
+    defaultValues: {
+      sharyoNam: '',
+      delFlg: false,
+      dspFlg: true,
+      mem: '',
+    },
+  });
+
+  useEffect(() => {
+    if (vehicleId === -100) {
+      setIsLoading(false);
+      return;
+    } else {
+      // const getThatOneCustomer = async () => {
+      //   const veh1 = await getOneVehicle(vehicleId);
+      //   reset(veh1);
+      //   console.log('vehId : ', vehicleId, ' sharyoId : ', veh1?.sharyoNam);
+      //   setVeh(veh1!);
+      //   setIsLoading(false);
+      // };
+      // getThatOneCustomer();
+    }
+  }, [vehicleId]);
   return (
     <>
-      <DialogTitle display={'flex'} justifyContent={'space-between'} alignItems={'center'} bgcolor={colorOfThis}>
-        新規車両
-        {editable && <Typography>編集モード</Typography>}
-        <Stack>
-          <Button /*type="submit"*/ onClick={() => handleClose()}>保存</Button>
-          <Button
-            onClick={() => {
-              handleEditable();
-              console.log('pushpushpush');
-            }}
-          >
-            編集
-          </Button>
-        </Stack>
-      </DialogTitle>
-
-      <Grid2 container spacing={1} p={5} direction={'column'} justifyContent={'center'} width={'100%'}>
-        <Grid2>
-          <FormBox label="車両名" description="100文字まで" required={true}>
-            {/* <TextFieldElement
-              name=""
-              control={control}
-              label='100文字まで' 
-              fullWidth
-              sx={{ maxWidth: '80%' }}
-              disabled={editable ? false : true}
-            /> */}
-            <TextField fullWidth label="100文字まで" sx={{ maxWidth: '80%' }} disabled={editable ? false : true} />
-          </FormBox>
-        </Grid2>
-        <Grid2>
-          <FormBox label="削除フラグ" description="論理削除（データは物理削除されません）">
-            <CheckBox fontSize="medium" color="primary" />
-            {/* <CheckboxElement name="delFlg" control={control} size="medium" disabled={editable ? false : true} /> */}
-          </FormBox>
-        </Grid2>
-        <Grid2>
-          <FormBox label="メモ" description="200文字まで">
-            {/* <TextFieldElement ////////////// 200文字までの設定をしなければならない
-                        name="mem"
-                        control={control}
-                        label={formItems[13].description}
-                        fullWidth
-                        sx={{ maxWidth: '80%' }}
-                        disabled={editable ? false : true}
-                      /> */}
-            <TextField fullWidth label="200文字まで" sx={{ maxWidth: '80%' }} disabled={editable ? false : true} />
-          </FormBox>
-        </Grid2>
-        <Grid2>
-          <FormBox label="表示フラグ" description="選択リストへの表示">
-            <CheckBox fontSize="medium" color="primary" />
-            {/* <CheckboxElement name="delFlg" control={control} size="medium" disabled={editable ? false : true} /> */}
-          </FormBox>
-        </Grid2>
-      </Grid2>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <DialogTitle display={'flex'} justifyContent={'space-between'} alignItems={'center'} bgcolor={colorOfThis}>
+          新規車両
+          {editable && <Typography>編集モード</Typography>}
+          <Stack>
+            <Button onClick={() => handleCloseDialog()}>戻る</Button>
+            <Button type="submit">保存</Button>
+            <Button
+              onClick={() => {
+                handleEditable();
+                console.log('pushEdit');
+              }}
+            >
+              編集
+            </Button>
+          </Stack>
+        </DialogTitle>
+        {isLoading ? (
+          <Loading />
+        ) : (
+          <>
+            <Grid2 container spacing={1} p={5} direction={'column'} justifyContent={'center'} width={'100%'}>
+              <Grid2>
+                <FormBox label="車両名" description="100文字まで" required={true}>
+                  <TextFieldElement
+                    name="sharyoNam"
+                    control={control}
+                    label="100文字まで"
+                    fullWidth
+                    sx={{ maxWidth: '80%' }}
+                    disabled={editable ? false : true}
+                  />
+                  {/* <TextField fullWidth label="100文字まで" sx={{ maxWidth: '80%' }} disabled={editable ? false : true} /> */}
+                </FormBox>
+              </Grid2>
+              <Grid2>
+                <FormBox label="削除フラグ" description="論理削除（データは物理削除されません）">
+                  {/* <CheckBox fontSize="medium" color="primary" /> */}
+                  <CheckboxElement name="delFlg" control={control} size="medium" disabled={editable ? false : true} />
+                </FormBox>
+              </Grid2>
+              <Grid2>
+                <FormBox label="メモ" description="200文字まで">
+                  <TextFieldElement ////////////// 200文字までの設定をしなければならない
+                    name="mem"
+                    control={control}
+                    label="200文字まで"
+                    fullWidth
+                    sx={{ maxWidth: '80%' }}
+                    disabled={editable ? false : true}
+                  />
+                  {/* <TextField fullWidth label="200文字まで" sx={{ maxWidth: '80%' }} disabled={editable ? false : true} /> */}
+                </FormBox>
+              </Grid2>
+              <Grid2>
+                <FormBox label="表示フラグ" description="選択リストへの表示">
+                  {/* <CheckBox fontSize="medium" color="primary" /> */}
+                  <CheckboxElement name="dspFlg" control={control} size="medium" disabled={editable ? false : true} />
+                </FormBox>
+              </Grid2>
+            </Grid2>
+          </>
+        )}
+      </form>
     </>
   );
 };
