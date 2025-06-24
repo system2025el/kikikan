@@ -83,11 +83,6 @@ export const ManagerssMasterTable = () => {
     setSelected(newSelected);
   };
 
-  const handleDelete = () => {
-    const newManagersList = managersList.filter((manager) => !selected.includes(manager.Id));
-    setManagersList(newManagersList);
-  };
-
   /**
    *
    */
@@ -134,12 +129,6 @@ export const ManagerssMasterTable = () => {
               <Button onClick={() => handleOpen(-100)}>
                 <AddIcon fontSize="small" />
                 追加
-              </Button>
-            </Grid2>
-            <Grid2>
-              <Button color="error" onClick={handleDelete}>
-                <DeleteIcon fontSize="small" />
-                削除
               </Button>
             </Grid2>
           </Grid2>
