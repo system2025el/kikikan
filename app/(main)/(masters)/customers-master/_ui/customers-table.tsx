@@ -21,7 +21,7 @@ import {
 import { useEffect, useMemo, useState } from 'react';
 
 // import { getAllCustomers } from '@/app/_lib/supabase/supabaseFuncs';
-import { MuiTablePagination } from '../../_ui/table-pagination';
+import { MuiTablePagination } from '../../../_ui/table-pagination';
 import { cMHeader, customerMasterDialogDetailsValues, CustomerMasterTableValues, customers } from '../_lib/types';
 import { CustomerDialogContents } from './customers-dialog-contents';
 

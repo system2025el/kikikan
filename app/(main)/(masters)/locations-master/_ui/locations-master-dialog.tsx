@@ -2,15 +2,14 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { alpha, Button, DialogTitle, Grid2, Stack, Typography, useTheme } from '@mui/material';
-import { grey } from '@mui/material/colors';
 import { useState } from 'react';
-import { CheckboxElement, SelectElement, TextFieldElement, useForm } from 'react-hook-form-mui';
+import { CheckboxElement, TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { FormBox } from '@/app/(main)/_ui/form-box';
 
-import { locationList, LocMasterSchema, LocMasterValues } from '../_lib/types';
+import { LocMasterSchema, LocMasterValues } from '../_lib/types';
 
-export const LocationMasterDialog = (props: {
+export const LocationsMasterDialog = (props: {
   locationId: number | string;
   handleClose: () => void;
   editable: boolean;

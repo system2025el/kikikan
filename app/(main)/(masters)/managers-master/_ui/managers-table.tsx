@@ -20,7 +20,7 @@ import {
 import {} from '@mui/material/colors';
 import { useMemo, useState } from 'react';
 
-import { MuiTablePagination } from '../../_ui/table-pagination';
+import { MuiTablePagination } from '../../../_ui/table-pagination';
 import { managers } from '../_lib/data';
 import { ManagerMasterTableValues, mMHeader } from '../_lib/types';
 import { ManagerDialogContents } from './managers-dialog-contents';
