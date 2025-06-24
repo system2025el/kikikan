@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const managerMaterDialogDetailsSchema = z.object({
-  tantouId: z.number(),
+  tantouId: z.number().optional(),
   tantouNam: z.string().optional(),
 });
 export type ManagerMasterDialogDetailsValues = z.infer<typeof managerMaterDialogDetailsSchema>;

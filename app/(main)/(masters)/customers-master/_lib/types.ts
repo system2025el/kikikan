@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const customerMaterDialogDetailsSchema = z.object({
-  kokyakuId: z.number(),
+  kokyakuId: z.number().optional(),
   kokyakuNam: z.string(),
   kana: z.string(),
   kokyakuRank: z.number(),
