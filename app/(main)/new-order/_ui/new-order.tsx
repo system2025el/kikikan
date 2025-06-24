@@ -28,11 +28,21 @@ import { CustomerSelectionDialog } from './customer-selection';
 import { LocationSelectDialog } from './location-selection';
 
 const NewOrder = () => {
+  // 内税、外税
+  const [selectTax, setSelectTax] = useState('外税');
+
+  // 内税、外税変更
+  const selectTaxChange = (event: SelectChangeEvent) => {
+    setSelectTax(event.target.value);
+  };
+
   const handleSelectionChange = (selectedIds: (string | number)[]) => {
     console.log('選択されたID:', selectedIds);
   };
 
-  const priceTotal = equipmentRows.reduce((sum, row) => sum + row.price, 0);
+  const priceTotal = equipmentRows
+    .filter((row) => typeof row.price === 'number')
+    .reduce((sum, row) => sum + row.price, 0);
 
   const [buttonValue, setButtonValue] = useState<string | null>('');
 
@@ -186,6 +196,16 @@ const NewOrder = () => {
             <Box sx={styles.container}>
               <Typography marginRight={7}>値引き</Typography>
               <TextField sx={{ width: '30%' }}></TextField>
+              <Typography>円</Typography>
+              <Typography ml={4} mr={2}>
+                税区分
+              </Typography>
+              <FormControl size="small" sx={{ width: '8%', minWidth: '80px' }}>
+                <Select value={selectTax} onChange={selectTaxChange}>
+                  <MenuItem value={'外税'}>外税</MenuItem>
+                  <MenuItem value={'内税'}>内税</MenuItem>
+                </Select>
+              </FormControl>
             </Box>
           </Grid2>
         </Grid2>
