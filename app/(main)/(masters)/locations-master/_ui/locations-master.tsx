@@ -2,10 +2,10 @@
 import SearchIcon from '@mui/icons-material/Search';
 import { Box, Button, Container, Divider, Grid2, Paper, Stack, TextField, Typography } from '@mui/material';
 
-import { BackButton } from '../../_ui/back-button';
-import { LocationMasterTable } from './location-master-table';
+import { BackButton } from '../../../_ui/back-button';
+import { LocationsMasterTable } from './locations-master-table';
 
-export const LocationMaster = () => {
+export const LocationsMaster = () => {
   return (
     <>
       <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
@@ -47,7 +47,7 @@ export const LocationMaster = () => {
             </form>
           </Box>
         </Paper>
-        <LocationMasterTable />
+        <LocationsMasterTable />
       </Container>
     </>
   );

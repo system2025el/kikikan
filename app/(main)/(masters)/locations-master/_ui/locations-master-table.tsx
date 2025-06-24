@@ -20,15 +20,15 @@ import {
   useTheme,
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
-import { SetStateAction, useEffect, useMemo, useState } from 'react';
+import { SetStateAction, useMemo, useState } from 'react';
 
-import { MuiTable } from '../../_ui/table';
-import { MuiTablePagination } from '../../_ui/table-pagination';
-import { VehMasterDialogValues, VehMasterTableValues, vMHeader } from '../_lib/datas';
-import { AddVehicleDialog } from './add-vehicle-dialog';
+import { MuiTable } from '../../../_ui/table';
+import { MuiTablePagination } from '../../../_ui/table-pagination';
+import { lMHeader, locationList } from '../_lib/types';
+import { LocationsMasterDialog } from './locations-master-dialog';
 
 /** 車両マスタのテーブルコンポーネント */
-export const VehiclesMasterTable = ({ vehs }: { vehs: VehMasterTableValues[] | undefined }) => {
+export const LocationsMasterTable = () => {
   const [page, setPage] = useState(1);
   const rowsPerPage = 50;
   /* ダイアログ開く顧客のID、閉じるとき、未選択で-100とする */
@@ -50,11 +50,12 @@ export const VehiclesMasterTable = ({ vehs }: { vehs: VehMasterTableValues[] | u
 
   // 表示するデータ
   const list = useMemo(
-    () => (rowsPerPage > 0 ? vehs!.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage) : vehs),
-    [page, rowsPerPage, vehs]
+    () =>
+      rowsPerPage > 0 ? locationList.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage) : locationList,
+    [page, rowsPerPage]
   );
   // テーブル最後のページ用の空データの長さ
-  const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - vehs!.length) : 0;
+  const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - locationList.length) : 0;
 
   return (
     <Box>
@@ -64,7 +65,7 @@ export const VehiclesMasterTable = ({ vehs }: { vehs: VehMasterTableValues[] | u
       <Divider />
       <Grid2 container mt={1} mx={0.5} justifyContent={'space-between'}>
         <Grid2 spacing={1}>
-          <MuiTablePagination arrayList={vehs!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
+          <MuiTablePagination arrayList={locationList} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
         </Grid2>
         <Grid2 container spacing={1}>
           <Grid2 container spacing={1}>
@@ -80,8 +81,12 @@ export const VehiclesMasterTable = ({ vehs }: { vehs: VehMasterTableValues[] | u
 
       <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 1 }}>
         <MuiTable
-          headers={vMHeader}
-          datas={list!.map((l) => ({ id: l.sharyoId, sharyoNam: l.sharyoNam, mem: l.mem! }))}
+          headers={lMHeader}
+          datas={list.map((l) => ({
+            ...l,
+            id: l.locId,
+            address: `${l.adrShozai}${l.adrTatemono}${l.adrSonota}`,
+          }))}
           handleOpenDialog={handleOpenDialog}
         />
         {/* <Table stickyHeader padding="none">
@@ -110,9 +115,9 @@ export const VehiclesMasterTable = ({ vehs }: { vehs: VehMasterTableValues[] | u
           </TableBody>
         </Table> */}
         <Dialog open={dialogOpen} fullScreen>
-          <AddVehicleDialog
+          <LocationsMasterDialog
             handleClose={handleCloseDialog}
-            vehicleId={openId}
+            locationId={openId}
             editable={editable}
             setEditable={setEditable}
           />

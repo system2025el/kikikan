@@ -36,24 +36,22 @@ const printList: MenuItem[] = [
   { name: '請求書', url: '/' },
 ];
 const rateList: MenuItem[] = [{ name: '稼働率', url: '/' }];
-const equipmentList: MenuItem[] = [{ name: '機材マスタ', url: '/equipment' }];
+const equipmentList: MenuItem[] = [{ name: '機材マスタ', url: '/eqpt-master' }];
 const masterList: MenuItem[] = [
   { name: '顧客マスタ', url: '/customers-master' },
   { name: '車両マスタ', url: '/vehicles-master' },
-  { name: '場所マスタ', url: '/location-master' },
+  { name: '場所マスタ', url: '/locations-master' },
   { name: '担当者マスタ', url: '/managers-master' },
-  { name: '権限マスタ', url: '/' },
   { name: '一式マスタ', url: '/' },
-  { name: '大部門マスタ', url: '/' },
-  { name: '集計部門マスタ', url: '/' },
-  { name: '口座マスタ', url: '/' },
-  { name: '拠点マスタ', url: '/' },
+  { name: '大部門マスタ', url: '/daibumons-master' },
+  { name: '集計部門マスタ', url: '/shukeibumons-master' },
+  { name: '部門マスタ', url: '/bumons-master' },
+  { name: '拠点マスタ', url: '/bases-master' },
+  { name: '権限マスタ', url: '/' },
 ];
 const settingList: MenuItem[] = [
-  { name: 'データ', url: '/' },
-  { name: '表示', url: '/' },
-  { name: '会社情報', url: '/' },
-  { name: '価格改定', url: '/' },
+  { name: 'マスタインポート', url: '/' },
+  { name: 'マスタエクスポート', url: '/' },
 ];
 const loginList: MenuItem[] = [
   { name: 'ログアウト', url: '/' },

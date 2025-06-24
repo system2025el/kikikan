@@ -1,17 +1,17 @@
 'use client';
+
 import SearchIcon from '@mui/icons-material/Search';
 import { Box, Button, Container, Divider, Grid2, Paper, Stack, TextField, Typography } from '@mui/material';
 
-import { BackButton } from '../../_ui/back-button';
-import { CustomerMasterTableValues } from '../_lib/types';
-import { CustomersMasterTable } from './customers-table';
+import { BackButton } from '../../../_ui/back-button';
+import { ManagerssMasterTable } from './managers-table';
 
-export const CustomersMaster = (/*{ customers }: { customers: CustomerMasterTableValues[] | undefined }*/) => {
+export const ManagersMaster = () => {
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
       <Paper variant="outlined">
         <Box width={'100%'} display={'flex'} p={2} justifyContent={'space-between'} alignItems={'center'}>
-          <Typography>顧客マスタ検索</Typography>
+          <Typography>担当者マスタ検索</Typography>
           <BackButton sx={{ ml: '40%' }} label={'戻る'} />
         </Box>
         <Divider />
@@ -60,26 +60,21 @@ export const CustomersMaster = (/*{ customers }: { customers: CustomerMasterTabl
             </Grid2>
             <Divider sx={{ mt: 1 }} />
             <Stack justifyContent={'space-between'} alignItems={'start'} mt={1}>
-              <Stack>
-                <Typography noWrap>顧客キーワード</Typography>
-
-                <TextField />
-                <Typography noWrap variant="body2">
-                  社名、かな、住所、TEL、FAX、メモから部分一致検索
-                </Typography>
+              <Stack alignItems={'baseline'}>
+                <Typography>担当者キーワード</Typography>
+                <TextField id="a" helperText={'～から部分一致検索'} />
               </Stack>
               <Box>
-                <Button type="submit">
+                <Button /*type="submit"*/>
                   <SearchIcon />
                   検索
                 </Button>
               </Box>
             </Stack>
           </form>
-          <Typography></Typography>
         </Box>
       </Paper>
-      <CustomersMasterTable /*customers={customers}*/ />
+      <ManagerssMasterTable />
     </Container>
   );
 };
