@@ -68,12 +68,11 @@ export const ManagerDialogContents = (props: {
           handleCloseDialog={handleCloseDialog}
           dialogTitle={'担当者情報'}
         />
-
         <Grid2 container spacing={1} p={5} direction={'column'} justifyContent={'center'} width={'100%'}>
           <Grid2>
             <FormBox label={formItems[0].label} description={formItems[0].description} required={true}>
               <TextFieldElement
-                name="Nam"
+                name="tantouNam"
                 control={control}
                 label={formItems[0].description}
                 fullWidth

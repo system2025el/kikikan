@@ -88,6 +88,8 @@ export const LocationsMasterTable = () => {
             address: `${l.adrShozai}${l.adrTatemono}${l.adrSonota}`,
           }))}
           handleOpenDialog={handleOpenDialog}
+          page={page}
+          rowsPerPage={rowsPerPage}
         />
         {/* <Table stickyHeader padding="none">
           <TableHead>

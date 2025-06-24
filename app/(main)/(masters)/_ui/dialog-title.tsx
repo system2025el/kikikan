@@ -1,8 +1,8 @@
 'use client';
 
-import { DialogTitle, Stack,Typography } from '@mui/material';
+import { DialogTitle, Stack, Typography } from '@mui/material';
 
-import { CloseMasterDialogButton,MakeEditModeButton, SubmitButton } from '../../_ui/buttons';
+import { CloseMasterDialogButton, MakeEditModeButton, SubmitButton } from '../../_ui/buttons';
 
 export const MasterDialogTitle = ({
   colorOfThis,

@@ -20,6 +20,8 @@ import {
 import {} from '@mui/material/colors';
 import { useMemo, useState } from 'react';
 
+import { MasterTable } from '@/app/(main)/_ui/table';
+
 import { MuiTablePagination } from '../../../_ui/table-pagination';
 import { managers } from '../_lib/data';
 import { ManagerMasterTableValues, mMHeader } from '../_lib/types';
@@ -135,54 +137,21 @@ export const ManagerssMasterTable = () => {
         </Grid2>
       </Grid2>
       <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 1 }}>
-        <Table stickyHeader padding="none">
-          <TableHead>
-            <TableRow>
-              {mMHeader.map((column) => (
-                <TableCell key={column.id} /*sortDirection={orderBy === column.id ? order : 'desc'}*/>
-                  {column.label}
-                  {/* <TableSortLabel
-            active={orderBy === column.id}
-            direction={orderBy === column.id ? order : 'asc'}
-            onClick={createSortHandler(column.id)}
-          ></TableSortLabel> */}
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {list.map((manager) => (
-              <TableRow key={manager.Id} onClick={() => handleOpen(manager.Id)}>
-                <TableCell>
-                  <Checkbox
-                    checked={selected.includes(manager.Id)}
-                    onChange={() => handleSelect(manager.Id)}
-                    color="primary"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                    }}
-                  />
-                </TableCell>
-                <TableCell>
-                  <Button variant="text">{manager.Nam}</Button>
-                </TableCell>
-              </TableRow>
-            ))}
-            <Dialog open={dialogOpen} fullScreen>
-              <ManagerDialogContents
-                managerId={openId}
-                handleClose={handleClose}
-                editable={editable}
-                setEditable={setEditable}
-              />
-            </Dialog>
-            {emptyRows > 0 && (
-              <TableRow style={{ height: 30 * emptyRows }}>
-                <TableCell colSpan={6} />
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+        <MasterTable
+          headers={mMHeader}
+          datas={managers.map((l) => ({ ...l, id: l.tantouId }))}
+          page={page}
+          rowsPerPage={rowsPerPage}
+          handleOpenDialog={handleOpen}
+        />
+        <Dialog open={dialogOpen} fullScreen>
+          <ManagerDialogContents
+            managerId={openId}
+            handleClose={handleClose}
+            editable={editable}
+            setEditable={setEditable}
+          />
+        </Dialog>
       </TableContainer>
       {/* </>
       )} */}
