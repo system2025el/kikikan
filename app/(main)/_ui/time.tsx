@@ -8,8 +8,8 @@ import { useMemo, useState } from 'react';
 
 dayjs.locale('ja');
 
-const Time = (props: { sx?: object }) => {
-  const { sx } = props;
+const Time = (props: { sx?: object; disabled?: boolean }) => {
+  const { sx, disabled } = props;
   const [error, setError] = useState<TimeValidationError | null>(null);
 
   const errorMessage = useMemo(() => {
@@ -41,6 +41,7 @@ const Time = (props: { sx?: object }) => {
         format="HH:mm"
         sx={{ width: '25%', minWidth: 150, ...sx }}
         timeSteps={{ minutes: 15 }}
+        disabled={disabled ? true : false}
       />
     </LocalizationProvider>
   );
@@ -48,8 +49,13 @@ const Time = (props: { sx?: object }) => {
 
 export default Time;
 
-export const TestTime = (props: { sx?: object; time: Date; onChange: (value: Dayjs | null) => void }) => {
-  const { sx, time, onChange } = props;
+export const TestTime = (props: {
+  sx?: object;
+  disabled?: boolean;
+  time: Date;
+  onChange: (value: Dayjs | null) => void;
+}) => {
+  const { sx, disabled, time, onChange } = props;
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="ja">
@@ -64,6 +70,7 @@ export const TestTime = (props: { sx?: object; time: Date; onChange: (value: Day
         format="HH:mm"
         sx={{ width: '25%', minWidth: 150, ...sx }}
         timeSteps={{ minutes: 15 }}
+        disabled={disabled ? true : false}
       />
     </LocalizationProvider>
   );
