@@ -29,7 +29,7 @@ import dayjs, { Dayjs } from 'dayjs';
 import { useEffect, useRef, useState } from 'react';
 import React from 'react';
 
-import { BackButton } from '@/app/(main)/_ui/back-button';
+import { BackButton } from '@/app/(main)/_ui/buttons';
 import { Calendar, TestDate, toISOStringWithTimezone, toISOStringWithTimezoneMonthDay } from '@/app/(main)/_ui/date';
 import Time from '@/app/(main)/_ui/time';
 import {

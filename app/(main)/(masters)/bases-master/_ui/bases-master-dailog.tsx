@@ -5,8 +5,8 @@ import {
   Box,
   Button,
   Container,
-  DialogTitle,
   Grid2,
+  IconButton,
   Paper,
   Stack,
   TextField,
@@ -17,6 +17,7 @@ import { useEffect, useState } from 'react';
 import { CheckboxElement, TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { FormBox } from '../../../_ui/form-box';
+import { MasterDialogTitle } from '../../_ui/dialog-title';
 // import { Loading } from '../../../_ui/loading';
 import { BaseMasterDialogSchema, BaseMasterDialogValues, basesList, BasesMasterValues } from '../_lib/types';
 
@@ -85,22 +86,13 @@ export const BasesMasterDialog = (props: {
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <DialogTitle display={'flex'} justifyContent={'space-between'} alignItems={'center'} bgcolor={colorOfThis}>
-          所属マスタ登録
-          {editable && <Typography>編集モード</Typography>}
-          <Stack>
-            <Button onClick={() => handleCloseDialog()}>戻る</Button>
-            <Button type="submit">保存</Button>
-            <Button
-              onClick={() => {
-                handleEditable();
-                console.log('pushEdit');
-              }}
-            >
-              編集
-            </Button>
-          </Stack>
-        </DialogTitle>
+        <MasterDialogTitle
+          colorOfThis={colorOfThis}
+          editable={editable}
+          handleEditable={handleEditable}
+          handleCloseDialog={handleCloseDialog}
+          dialogTitle="所属マスタ登録"
+        />
         {/* {isLoading ? ( //DB
           <Loading />
         ) : ( */}

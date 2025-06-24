@@ -7,6 +7,7 @@ import { CheckboxElement, TextFieldElement, useForm } from 'react-hook-form-mui'
 
 import { FormBox } from '@/app/(main)/_ui/form-box';
 
+import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { LocMasterSchema, LocMasterValues } from '../_lib/types';
 
 export const LocationsMasterDialog = (props: {
@@ -22,7 +23,10 @@ export const LocationsMasterDialog = (props: {
   const handleEditable = () => {
     setEditable(true);
   };
-
+  const handleCloseDialog = () => {
+    setEditable(false);
+    handleClose();
+  };
   const [location, setLocation] = useState<LocMasterValues>();
 
   const {
@@ -38,7 +42,7 @@ export const LocationsMasterDialog = (props: {
   });
 
   const onSubmit = (data: LocMasterValues) => {
-    handleClose();
+    handleCloseDialog();
     console.log(isDirty);
     console.log(data);
   };
@@ -56,21 +60,13 @@ export const LocationsMasterDialog = (props: {
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <DialogTitle display={'flex'} justifyContent={'space-between'} alignItems={'center'} bgcolor={colorOfThis}>
-          公演場所情報
-          {editable && <Typography>編集モード</Typography>}
-          <Stack>
-            <Button /*type="submit"*/ onClick={() => handleClose()}>保存</Button>
-            <Button
-              onClick={() => {
-                handleEditable();
-                console.log('pushpushpush');
-              }}
-            >
-              編集
-            </Button>
-          </Stack>
-        </DialogTitle>
+        <MasterDialogTitle
+          colorOfThis={colorOfThis}
+          editable={editable}
+          handleEditable={handleEditable}
+          handleCloseDialog={handleCloseDialog}
+          dialogTitle={'公演場所'}
+        />
 
         <Grid2 container spacing={1} p={5} direction={'column'} justifyContent={'center'} width={'100%'}>
           <Grid2>

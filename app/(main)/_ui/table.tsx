@@ -4,7 +4,7 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { Box, Collapse, IconButton } from '@mui/material';
+import { Box, Collapse, IconButton, Typography } from '@mui/material';
 import Checkbox from '@mui/material/Checkbox';
 import { grey } from '@mui/material/colors';
 import Paper from '@mui/material/Paper';
@@ -250,7 +250,13 @@ export const MasterTable = (props: {
                 align={typeof row[header.key] === 'number' ? 'right' : 'left'}
                 onClick={() => handleOpenDialog(row.id)}
               >
-                {row[header.key]}
+                {header.key === 'mem' ? (
+                  <Typography noWrap maxWidth={50}>
+                    {row[header.key]}
+                  </Typography>
+                ) : (
+                  <>{row[header.key]}</>
+                )}
               </TableCell>
             ))}
             <TableCell>

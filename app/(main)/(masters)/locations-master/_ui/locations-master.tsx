@@ -2,7 +2,7 @@
 import SearchIcon from '@mui/icons-material/Search';
 import { Box, Button, Container, Divider, Grid2, Paper, Stack, TextField, Typography } from '@mui/material';
 
-import { BackButton } from '../../../_ui/back-button';
+import { BackButton } from '../../../_ui/buttons';
 import { LocationsMasterTable } from './locations-master-table';
 
 export const LocationsMaster = () => {

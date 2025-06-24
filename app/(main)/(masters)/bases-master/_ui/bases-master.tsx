@@ -1,7 +1,7 @@
 'use client';
 import { Box, Button, Container, Divider, Paper, Stack, TextField, Typography } from '@mui/material';
 
-import { BackButton } from '../../../_ui/back-button';
+import { BackButton } from '../../../_ui/buttons';
 import { BaseMasterTableValues, BasesMasterValues } from '../_lib/types';
 import { BasesMasterTable } from './bases-master-table';
 

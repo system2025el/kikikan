@@ -6,7 +6,7 @@ import { Box, Button, Container, Divider, FormControl, Grid2, Paper, Select, Sta
 import { useState } from 'react';
 import { TextFieldElement, useForm } from 'react-hook-form-mui';
 
-import { BackButton } from '../../_ui/back-button';
+import { BackButton } from '../../../_ui/buttons';
 import { EqptMasterData, eqptMasterList, eqptMasterSchema, eqptMasterSearchData } from '../_lib/types';
 import { EqptMasterTable } from './eqpt-master-table';
 
