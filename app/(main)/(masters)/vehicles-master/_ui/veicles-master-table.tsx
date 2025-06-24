@@ -83,6 +83,8 @@ export const VehiclesMasterTable = ({ vehs }: { vehs: VehMasterTableValues[] | u
           headers={vMHeader}
           datas={list!.map((l) => ({ id: l.sharyoId, sharyoNam: l.sharyoNam, mem: l.mem! }))}
           handleOpenDialog={handleOpenDialog}
+          page={page}
+          rowsPerPage={rowsPerPage}
         />
         {/* <Table stickyHeader padding="none">
           <TableHead>

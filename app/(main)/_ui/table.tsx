@@ -201,10 +201,12 @@ type MasterRow = {
 export const MasterTable = (props: {
   headers: Header[];
   datas: MasterRow[];
+  page: number;
+  rowsPerPage: number;
   handleOpenDialog: (id: number) => void;
 }) => {
   //const [rows, setRows] = useState(test(datas));
-  const { headers, datas, handleOpenDialog } = props;
+  const { headers, datas, page, rowsPerPage, handleOpenDialog } = props;
 
   const [rows, setRows] = useState(datas);
 
@@ -217,6 +219,8 @@ export const MasterTable = (props: {
     [updatedRows[index], updatedRows[newIndex]] = [updatedRows[newIndex], updatedRows[index]];
     setRows(updatedRows);
   };
+
+  const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - datas!.length) : 0;
 
   return (
     <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle" padding="none" stickyHeader>
@@ -261,6 +265,11 @@ export const MasterTable = (props: {
             </TableCell>
           </TableRow>
         ))}
+        {emptyRows > 0 && (
+          <TableRow style={{ height: 30 * emptyRows }}>
+            <TableCell colSpan={headers.length} />
+          </TableRow>
+        )}
       </TableBody>
     </Table>
   );

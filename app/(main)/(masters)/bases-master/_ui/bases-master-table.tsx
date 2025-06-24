@@ -82,6 +82,8 @@ export const BasesMasterTable = ({ bases }: { bases: BaseMasterTableValues[] | u
             headers={bMHeader}
             datas={list!.map((l) => ({ id: l.kyotenId, kyotenNam: l.kyotenNam, mem: l.mem! }))}
             handleOpenDialog={handleOpenDialog}
+            page={page}
+            rowsPerPage={rowsPerPage}
           />
           <Dialog open={dialogOpen} fullScreen>
             <BasesMasterDialog
