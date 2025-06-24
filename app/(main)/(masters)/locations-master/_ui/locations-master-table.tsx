@@ -22,7 +22,7 @@ import {
 import { grey } from '@mui/material/colors';
 import { SetStateAction, useMemo, useState } from 'react';
 
-import { MuiTable } from '../../../_ui/table';
+import { MasterTable } from '../../../_ui/table';
 import { MuiTablePagination } from '../../../_ui/table-pagination';
 import { lMHeader, locationList } from '../_lib/types';
 import { LocationsMasterDialog } from './locations-master-dialog';
@@ -37,7 +37,7 @@ export const LocationsMasterTable = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   /* ダイアログでの編集モード */
   const [editable, setEditable] = useState(false);
-  const handleOpenDialog = (id: string | number) => {
+  const handleOpenDialog = (id: number) => {
     if (id === -100) {
       setEditable(true);
     }
@@ -80,7 +80,7 @@ export const LocationsMasterTable = () => {
       </Grid2>
 
       <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 1 }}>
-        <MuiTable
+        <MasterTable
           headers={lMHeader}
           datas={list.map((l) => ({
             ...l,

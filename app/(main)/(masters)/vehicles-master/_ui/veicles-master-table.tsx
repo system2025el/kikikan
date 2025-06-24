@@ -22,7 +22,7 @@ import {
 import { grey } from '@mui/material/colors';
 import { SetStateAction, useEffect, useMemo, useState } from 'react';
 
-import { MuiTable } from '../../../_ui/table';
+import { MasterTable } from '../../../_ui/table';
 import { MuiTablePagination } from '../../../_ui/table-pagination';
 import { VehMasterDialogValues, VehMasterTableValues, vMHeader } from '../_lib/datas';
 import { VehiclesMasterDialog } from './vehicles-master-dialog';
@@ -32,12 +32,12 @@ export const VehiclesMasterTable = ({ vehs }: { vehs: VehMasterTableValues[] | u
   const [page, setPage] = useState(1);
   const rowsPerPage = 50;
   /* ダイアログ開く顧客のID、閉じるとき、未選択で-100とする */
-  const [openId, setOpenID] = useState<string | number>(-100);
+  const [openId, setOpenID] = useState<number>(-100);
   /* 車両詳細ダイアログの開閉状態 */
   const [dialogOpen, setDialogOpen] = useState(false);
   /* ダイアログでの編集モード */
   const [editable, setEditable] = useState(false);
-  const handleOpenDialog = (id: string | number) => {
+  const handleOpenDialog = (id: number) => {
     if (id === -100) {
       setEditable(true);
     }
@@ -79,7 +79,7 @@ export const VehiclesMasterTable = ({ vehs }: { vehs: VehMasterTableValues[] | u
       </Grid2>
 
       <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 1 }}>
-        <MuiTable
+        <MasterTable
           headers={vMHeader}
           datas={list!.map((l) => ({ id: l.sharyoId, sharyoNam: l.sharyoNam, mem: l.mem! }))}
           handleOpenDialog={handleOpenDialog}
