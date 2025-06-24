@@ -16,8 +16,7 @@ import {
 import { useEffect, useState } from 'react';
 import { CheckboxElement, TextFieldElement, useForm } from 'react-hook-form-mui';
 
-import { addNewVehicle, getOneVehicle } from '@/app/_lib/supabase/supabaseFuncs';
-
+// import { addNewVehicle, getOneVehicle } from '@/app/_lib/supabase/supabaseFuncs';
 import { FormBox } from '../../../_ui/form-box';
 import { Loading } from '../../../_ui/loading';
 import { VehMasterDialogSchema, VehMasterDialogValues } from '../_lib/datas';
@@ -44,7 +43,7 @@ export const VehiclesMasterDialog = (props: {
   const onSubmit = async (data: VehMasterDialogValues) => {
     console.log('★★★★★★★★★ ', data);
     handleCloseDialog();
-    await addNewVehicle(data!);
+    // await addNewVehicle(data!);
   };
   const { control, handleSubmit, reset } = useForm({
     mode: 'onSubmit',
@@ -58,21 +57,21 @@ export const VehiclesMasterDialog = (props: {
     },
   });
 
-  useEffect(() => {
-    if (vehicleId === -100) {
-      setIsLoading(false);
-      return;
-    } else {
-      const getThatOneCustomer = async () => {
-        const veh1 = await getOneVehicle(vehicleId);
-        reset(veh1);
-        console.log('vehId : ', vehicleId, ' sharyoId : ', veh1?.sharyoNam);
-        setVeh(veh1!);
-        setIsLoading(false);
-      };
-      getThatOneCustomer();
-    }
-  }, [vehicleId, reset]);
+  // useEffect(() => {
+  // if (vehicleId === -100) {
+  //   setIsLoading(false);
+  //   return;
+  // } else {
+  //   const getThatOneCustomer = async () => {
+  //     const veh1 = await getOneVehicle(vehicleId);
+  //     reset(veh1);
+  //     console.log('vehId : ', vehicleId, ' sharyoId : ', veh1?.sharyoNam);
+  //     setVeh(veh1!);
+  //     setIsLoading(false);
+  //   };
+  //   getThatOneCustomer();
+  // }
+  // }, [vehicleId, reset]);
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit)}>
