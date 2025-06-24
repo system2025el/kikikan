@@ -60,7 +60,7 @@ export const LocationsMasterTable = () => {
   return (
     <Box>
       <Typography pt={2} pl={2}>
-        車両一覧
+        公演場所一覧
       </Typography>
       <Divider />
       <Grid2 container mt={1} mx={0.5} justifyContent={'space-between'}>

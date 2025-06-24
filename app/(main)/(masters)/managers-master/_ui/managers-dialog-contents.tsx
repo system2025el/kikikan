@@ -26,7 +26,7 @@ export const ManagerDialogContents = (props: {
   };
   const handleCloseDialog = () => {
     handleClose();
-    handleEditable();
+    setEditable(false);
   };
   const [manager, setManager] = useState<ManagerMasterDialogDetailsValues>();
 
