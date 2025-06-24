@@ -24,7 +24,7 @@ type Header = {
 
 type Row = {
   id: string | number;
-  [key: string]: string | number;
+  [key: string]: string | number | undefined;
 };
 
 type TableProps = {
