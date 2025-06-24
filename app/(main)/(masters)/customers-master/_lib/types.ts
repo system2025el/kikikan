@@ -26,27 +26,23 @@ export type customerMasterDialogDetailsValues = z.infer<typeof customerMaterDial
 
 export const cMHeader = [
   {
-    id: 'check',
-    label: '',
-  },
-  {
-    id: 'custName',
+    key: 'kokyakuNam',
     label: '顧客名',
   },
   {
-    id: 'address',
+    key: 'address',
     label: '住所',
   },
   {
-    id: 'tel',
+    key: 'tel',
     label: 'TEL',
   },
   {
-    id: 'fax',
+    key: 'fax',
     label: 'FAX',
   },
   {
-    id: 'memo',
+    key: 'mem',
     label: 'メモ',
   },
 ];
@@ -67,10 +63,10 @@ export const customers: CustomerMasterTableValues[] = [
   {
     kokyakuId: 1,
     kokyakuNam: 'エンジニアライティング',
-    adrShozai: '東京都世田谷区',
-    adrTatemono: 'えんじにあらいてぃんぐ',
+    adrShozai: '東京都世田谷区太子堂1-12-38',
+    adrTatemono: '藤和三軒茶屋コープ205号',
     // adrPost: '154-0004',
-    adrSonota: '太子堂1-12-38 藤和三軒茶屋コープ205号',
+    adrSonota: '',
     tel: '03-3413-8441',
     fax: '03-3413-8466',
     // mail: 'FFFFFFFFFFFFF@EEEEEEEEEEEEEEEEEE',
@@ -80,10 +76,10 @@ export const customers: CustomerMasterTableValues[] = [
   {
     kokyakuId: 2,
     kokyakuNam: '(株)スペースエンジニアリング',
-    adrShozai: '東京都新宿区',
-    adrTatemono: 'すぺーすえんじにありんぐ',
+    adrShozai: '東京都新宿区早稲田鶴巻町５２３',
+    adrTatemono: '',
     // postnum: '162-0041',
-    adrSonota: '早稲田鶴巻町５２３',
+    adrSonota: '',
     tel: '03-5292-2380',
     fax: '03-5292-2382',
     // mail: 'YYYYYYYYYYYYYYYYYYYYYY@DDDDDDDDD',
@@ -93,10 +89,10 @@ export const customers: CustomerMasterTableValues[] = [
   {
     kokyakuId: 3,
     kokyakuNam: '(株)シアタープレーン',
-    adrShozai: 'しあたーぷれーん',
+    adrShozai: 'XXXXXXXXXXXXXXXXXXXXXXX',
     // postnum: 'XXX-XXXX',
     adrTatemono: 'XXXXXXXXXX',
-    adrSonota: 'XXXXXXXXXXXXXXXXXXXXXXX',
+    adrSonota: '',
     tel: '999-999-9999',
     fax: '999-999-9999',
     // mail: 'aaaaaaaaaa@eeeeeeeeeeeeee',

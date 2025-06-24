@@ -19,6 +19,7 @@ import { CheckboxElement, TextFieldElement, useForm } from 'react-hook-form-mui'
 // import { addNewVehicle, getOneVehicle } from '@/app/_lib/supabase/supabaseFuncs';
 import { FormBox } from '../../../_ui/form-box';
 import { Loading } from '../../../_ui/loading';
+import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { VehMasterDialogSchema, VehMasterDialogValues } from '../_lib/datas';
 
 export const VehiclesMasterDialog = (props: {
@@ -75,22 +76,13 @@ export const VehiclesMasterDialog = (props: {
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <DialogTitle display={'flex'} justifyContent={'space-between'} alignItems={'center'} bgcolor={colorOfThis}>
-          新規車両
-          {editable && <Typography>編集モード</Typography>}
-          <Stack>
-            <Button onClick={() => handleCloseDialog()}>戻る</Button>
-            <Button type="submit">保存</Button>
-            <Button
-              onClick={() => {
-                handleEditable();
-                console.log('pushEdit');
-              }}
-            >
-              編集
-            </Button>
-          </Stack>
-        </DialogTitle>
+        <MasterDialogTitle
+          colorOfThis={colorOfThis}
+          editable={editable}
+          handleEditable={handleEditable}
+          handleCloseDialog={handleCloseDialog}
+          dialogTitle={'車両マスタ'}
+        />
         {/* {isLoading ? ( //DB
           <Loading />
         ) : ( */}

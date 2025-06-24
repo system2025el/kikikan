@@ -20,6 +20,8 @@ import {
 } from '@mui/material';
 import { useEffect, useMemo, useState } from 'react';
 
+import { MasterTable } from '@/app/(main)/_ui/table';
+
 // import { getAllCustomers } from '@/app/_lib/supabase/supabaseFuncs';
 import { MuiTablePagination } from '../../../_ui/table-pagination';
 import { cMHeader, customerMasterDialogDetailsValues, CustomerMasterTableValues, customers } from '../_lib/types';
@@ -119,7 +121,7 @@ export const CustomersMasterTable = (/*{ customers }: { customers: CustomerMaste
   return (
     <Box>
       {/* {loading ? (
-        <p>読み込み中...</p>
+        <Loading>
       ) : ( */}
       {/* <> */}
       <Typography pt={2} pl={2}>
@@ -142,56 +144,25 @@ export const CustomersMasterTable = (/*{ customers }: { customers: CustomerMaste
         </Grid2>
       </Grid2>
       <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 1 }}>
-        <Table stickyHeader padding="none">
-          <TableHead>
-            <TableRow>
-              {cMHeader.map((column) => (
-                <TableCell key={column.id} /*sortDirection={orderBy === column.id ? order : 'desc'}*/>
-                  {column.label}
-                  {/* <TableSortLabel
-            active={orderBy === column.id}
-            direction={orderBy === column.id ? order : 'asc'}
-            onClick={createSortHandler(column.id)}
-          ></TableSortLabel> */}
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {customers!.map((customer) => (
-              <TableRow key={customer.kokyakuId} onClick={() => handleOpen(customer.kokyakuId)}>
-                <TableCell>
-                  <CheckBox color="primary" />
-                </TableCell>
-                <TableCell>
-                  <Button variant="text">{customer.kokyakuNam}</Button>
-                </TableCell>
-
-                <TableCell>
-                  {customer.adrShozai} {customer.adrTatemono} {customer.adrSonota}
-                </TableCell>
-                <TableCell>{customer.tel}</TableCell>
-                <TableCell>{customer.fax}</TableCell>
-                <TableCell sx={{ maxWidth: 40 }}>
-                  <Typography noWrap>{customer.mem}</Typography>
-                </TableCell>
-              </TableRow>
-            ))}
-            <Dialog open={dialogOpen} fullScreen>
-              <CustomerDialogContents
-                customerId={openId}
-                handleClose={handleClose}
-                editable={editable}
-                setEditable={setEditable}
-              />
-            </Dialog>
-            {emptyRows > 0 && (
-              <TableRow style={{ height: 30 * emptyRows }}>
-                <TableCell colSpan={6} />
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+        <MasterTable
+          headers={cMHeader}
+          datas={customers.map((l) => ({
+            ...l,
+            id: l.kokyakuId,
+            address: [l.adrShozai, l.adrTatemono, l.adrSonota].filter(Boolean).join(' '),
+          }))}
+          page={page}
+          rowsPerPage={rowsPerPage}
+          handleOpenDialog={handleOpen}
+        />
+        <Dialog open={dialogOpen} fullScreen>
+          <CustomerDialogContents
+            customerId={openId}
+            handleClose={handleClose}
+            editable={editable}
+            setEditable={setEditable}
+          />
+        </Dialog>
       </TableContainer>
       {/* </>
       )} */}

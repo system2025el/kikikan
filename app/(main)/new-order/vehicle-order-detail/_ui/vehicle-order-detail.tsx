@@ -20,7 +20,7 @@ import dayjs from 'dayjs';
 import { useState } from 'react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 
-import { BackButton } from '@/app/(main)/_ui/back-button';
+import { BackButton } from '@/app/(main)/_ui/buttons';
 import DateX from '@/app/(main)/_ui/date';
 import Time from '@/app/(main)/_ui/time';
 

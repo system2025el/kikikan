@@ -2,7 +2,7 @@
 import { Box, Button, Container, Divider, Paper, Stack, TextField, Typography } from '@mui/material';
 import { grey } from '@mui/material/colors';
 
-import { BackButton } from '../../../_ui/back-button';
+import { BackButton } from '../../../_ui/buttons';
 import { VehMasterDialogValues, VehMasterTableValues } from '../_lib/datas';
 import { VehiclesMasterTable } from './veicles-master-table';
 

@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
 
-import { BackButton } from '../../_ui/back-button';
+import { BackButton } from '../../_ui/buttons';
 import { TwoDatePickers } from '../../_ui/date';
 import { QuotaionListTable } from './quotation-list-table';
 

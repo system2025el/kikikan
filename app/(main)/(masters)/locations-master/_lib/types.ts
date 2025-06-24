@@ -1,25 +1,25 @@
-import { z } from 'zod';
+import { optional, z } from 'zod';
 
 export const LocMasterSchema = z.object({
-  locId: z.number(),
+  locId: z.number().optional(),
   locNam: z.string(),
   kana: z.string(),
-  delFlg: z.number(),
-  dspOrder: z.number(),
-  adrPost: z.string(),
-  adrShozai: z.string(),
-  adrTatemono: z.string(),
-  adrSonota: z.string(),
-  tel: z.string(),
-  telMobile: z.string(),
-  fax: z.string(),
-  mail: z.string().email(),
-  mem: z.string(),
-  dspFlg: z.number(),
-  addDate: z.date(),
-  addUser: z.string(),
-  apdDate: z.date(),
-  updUser: z.string(),
+  delFlg: z.number().optional(),
+  dspOrder: z.number().optional(),
+  adrPost: z.string().optional(),
+  adrShozai: z.string().optional(),
+  adrTatemono: z.string().optional(),
+  adrSonota: z.string().optional(),
+  tel: z.string().optional(),
+  telMobile: z.string().optional(),
+  fax: z.string().optional(),
+  mail: z.string().email().optional(),
+  mem: z.string().optional(),
+  dspFlg: z.number().optional(),
+  addDate: z.date().optional(),
+  addUser: z.string().optional(),
+  apdDate: z.date().optional(),
+  updUser: z.string().optional(),
 });
 
 export type LocMasterValues = z.infer<typeof LocMasterSchema>;

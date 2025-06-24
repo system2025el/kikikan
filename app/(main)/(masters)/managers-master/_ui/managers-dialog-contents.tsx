@@ -8,6 +8,7 @@ import { CheckboxElement, SelectElement, TextFieldElement, useForm } from 'react
 
 import { FormBox } from '@/app/(main)/_ui/form-box';
 
+import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { ManagerMasterDialogDetailsValues, managerMaterDialogDetailsSchema } from '../_lib/types';
 
 export const ManagerDialogContents = (props: {
@@ -23,7 +24,10 @@ export const ManagerDialogContents = (props: {
   const handleEditable = () => {
     setEditable(true);
   };
-
+  const handleCloseDialog = () => {
+    handleClose();
+    handleEditable();
+  };
   const [manager, setManager] = useState<ManagerMasterDialogDetailsValues>();
 
   const {
@@ -39,7 +43,7 @@ export const ManagerDialogContents = (props: {
   });
 
   const onSubmit = (data: ManagerMasterDialogDetailsValues) => {
-    handleClose();
+    handleCloseDialog();
     console.log(isDirty);
     console.log(data);
   };
@@ -57,21 +61,13 @@ export const ManagerDialogContents = (props: {
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <DialogTitle display={'flex'} justifyContent={'space-between'} alignItems={'center'} bgcolor={colorOfThis}>
-          担当者情報
-          {editable && <Typography>編集モード</Typography>}
-          <Stack>
-            <Button /*type="submit"*/ onClick={() => handleClose()}>保存</Button>
-            <Button
-              onClick={() => {
-                handleEditable();
-                console.log('pushpushpush');
-              }}
-            >
-              編集
-            </Button>
-          </Stack>
-        </DialogTitle>
+        <MasterDialogTitle
+          colorOfThis={colorOfThis}
+          editable={editable}
+          handleEditable={handleEditable}
+          handleCloseDialog={handleCloseDialog}
+          dialogTitle={'担当者情報'}
+        />
 
         <Grid2 container spacing={1} p={5} direction={'column'} justifyContent={'center'} width={'100%'}>
           <Grid2>

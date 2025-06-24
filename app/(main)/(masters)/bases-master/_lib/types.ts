@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { BasesMasterDialog } from '../_ui/bases-master-dailog';
 
 const basesMasterSChema = z.object({
-  kyotenId: z.number(),
+  kyotenId: z.number().optional(),
   kyotenNam: z.string(),
   delFlg: z.boolean().optional(),
   mem: z.string().optional(),

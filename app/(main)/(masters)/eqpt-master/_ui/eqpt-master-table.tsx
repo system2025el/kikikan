@@ -22,7 +22,7 @@ import {
 } from '@mui/material';
 import { useMemo, useState } from 'react';
 
-import { MuiTablePagination } from '../../_ui/table-pagination';
+import { MuiTablePagination } from '../../../_ui/table-pagination';
 import { EqptMasterData, eqptMasterList } from '../_lib/types';
 
 /** 機材マスタのテーブルコンポーネント */
