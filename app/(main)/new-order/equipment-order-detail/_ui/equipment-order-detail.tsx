@@ -570,7 +570,9 @@ const EquipmentOrderDetail = () => {
               <TextField multiline rows={3} />
             </Grid2>
             <Grid2 p={1}>
-              <Button color="error">返却伝票作成</Button>
+              <Button color="error" href="/new-order/equipment-order-detail/return-slip">
+                返却伝票作成
+              </Button>
             </Grid2>
           </Grid2>
         </AccordionDetails>
