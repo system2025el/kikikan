@@ -22,7 +22,7 @@ import { addMonths, endOfMonth, subDays, subMonths } from 'date-fns';
 import { Dayjs } from 'dayjs';
 import { useState } from 'react';
 
-import { BackButton } from '@/app/(main)/_ui/back-button';
+import { BackButton } from '@/app/(main)/_ui/buttons';
 import { TestDate, toISOStringWithTimezoneMonthDay } from '@/app/(main)/_ui/date';
 import Time from '@/app/(main)/_ui/time';
 
