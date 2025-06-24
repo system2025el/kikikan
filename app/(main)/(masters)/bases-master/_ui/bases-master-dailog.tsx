@@ -16,21 +16,20 @@ import {
 import { useEffect, useState } from 'react';
 import { CheckboxElement, TextFieldElement, useForm } from 'react-hook-form-mui';
 
-// import { addNewVehicle, getOneVehicle } from '@/app/_lib/supabase/supabaseFuncs';
 import { FormBox } from '../../../_ui/form-box';
-import { Loading } from '../../../_ui/loading';
-import { VehMasterDialogSchema, VehMasterDialogValues } from '../_lib/datas';
+// import { Loading } from '../../../_ui/loading';
+import { BaseMasterDialogSchema, BaseMasterDialogValues, basesList, BasesMasterValues } from '../_lib/types';
 
-export const VehiclesMasterDialog = (props: {
-  vehicleId: number;
+export const BasesMasterDialog = (props: {
+  baseId: number;
   handleClose: () => void;
   editable: boolean;
   setEditable: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
-  const { vehicleId, handleClose, editable, setEditable } = props;
+  const { baseId, handleClose, editable, setEditable } = props;
   const theme = useTheme();
   const colorOfThis = alpha(theme.palette.primary.main, 0.5);
-  const [veh, setVeh] = useState<VehMasterDialogValues>();
+  const [base, setBase] = useState<BaseMasterDialogValues | undefined>();
   const [isLoading, setIsLoading] = useState(true);
   const handleEditable = () => {
     setEditable(true);
@@ -40,43 +39,54 @@ export const VehiclesMasterDialog = (props: {
     handleClose();
   };
 
-  const onSubmit = async (data: VehMasterDialogValues) => {
+  const onSubmit = async (data: BasesMasterValues) => {
     console.log('★★★★★★★★★ ', data);
     handleCloseDialog();
-    // await addNewVehicle(data!);
+    // await addNewBase(data!);
   };
   const { control, handleSubmit, reset } = useForm({
     mode: 'onSubmit',
     reValidateMode: 'onSubmit',
-    resolver: zodResolver(VehMasterDialogSchema),
+    resolver: zodResolver(BaseMasterDialogSchema),
     defaultValues: {
-      sharyoNam: '',
-      delFlg: false,
-      dspFlg: true,
-      mem: '',
+      //DB   kyotenNam: '',
+      //   delFlg: false,
+      //   mem: '',
+      kyotenId: base?.kyotenId,
+      kyotenNam: base?.kyotenNam,
+      delFlg: base?.delFlg,
+      mem: base?.mem,
     },
   });
 
+  //モック
+  useEffect(() => {
+    console.log('baseId : ', baseId, ' baseList : ', basesList);
+
+    setBase(basesList[baseId - 1]);
+    console.log('base : ', base);
+  }, [base, baseId]);
+  //DB
   // useEffect(() => {
-  // if (vehicleId === -100) {
+  // if (baseId === -100) {
   //   setIsLoading(false);
   //   return;
   // } else {
-  //   const getThatOneCustomer = async () => {
-  //     const veh1 = await getOneVehicle(vehicleId);
-  //     reset(veh1);
-  //     console.log('vehId : ', vehicleId, ' sharyoId : ', veh1?.sharyoNam);
-  //     setVeh(veh1!);
+  //   const getThatOneBase = async () => {
+  //     const base1 = await getOneBase(baseId);
+  //     reset(base1);
+  //     console.log('baseId : ', baseId, ' kyotenId : ', base1?.kyotenNam);
+  //     setBase(veh1!);
   //     setIsLoading(false);
   //   };
-  //   getThatOneCustomer();
+  //   getThatOneBase();
   // }
-  // }, [vehicleId, reset]);
+  // }, [baseId, reset]);
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit)}>
         <DialogTitle display={'flex'} justifyContent={'space-between'} alignItems={'center'} bgcolor={colorOfThis}>
-          新規車両
+          所属マスタ登録
           {editable && <Typography>編集モード</Typography>}
           <Stack>
             <Button onClick={() => handleCloseDialog()}>戻る</Button>
@@ -97,9 +107,9 @@ export const VehiclesMasterDialog = (props: {
         <>
           <Grid2 container spacing={1} p={5} direction={'column'} justifyContent={'center'} width={'100%'}>
             <Grid2>
-              <FormBox label="車両名" description="100文字まで" required={true}>
+              <FormBox label="所属名" description="100文字まで" required={true}>
                 <TextFieldElement
-                  name="sharyoNam"
+                  name="kyotenNam"
                   control={control}
                   label="100文字まで"
                   fullWidth
@@ -126,12 +136,6 @@ export const VehiclesMasterDialog = (props: {
                   disabled={editable ? false : true}
                 />
                 {/* <TextField fullWidth label="200文字まで" sx={{ maxWidth: '80%' }} disabled={editable ? false : true} /> */}
-              </FormBox>
-            </Grid2>
-            <Grid2>
-              <FormBox label="表示フラグ" description="選択リストへの表示">
-                {/* <CheckBox fontSize="medium" color="primary" /> */}
-                <CheckboxElement name="dspFlg" control={control} size="medium" disabled={editable ? false : true} />
               </FormBox>
             </Grid2>
           </Grid2>
