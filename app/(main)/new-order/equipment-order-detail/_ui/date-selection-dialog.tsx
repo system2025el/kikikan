@@ -19,7 +19,6 @@ type DateDialogProps = {
   RH: EquipmentData[];
   GP: EquipmentData[];
   actual: EquipmentData[];
-  keep: EquipmentData[];
   onClose: () => void;
   onSave: (
     preparationDates: string[],
@@ -29,9 +28,7 @@ type DateDialogProps = {
     GPDates: string[],
     GPMemo: string[],
     actualDates: string[],
-    actualMemo: string[],
-    keepDates: string[],
-    keepMemo: string[]
+    actualMemo: string[]
   ) => void;
 };
 
@@ -45,20 +42,9 @@ const TabPanel = (props: TabPanelProps) => {
   );
 };
 
-export const DateSelectDialog = ({ preparation, RH, GP, actual, keep, onClose, onSave }: DateDialogProps) => {
+export const DateSelectDialog = ({ preparation, RH, GP, actual, onClose, onSave }: DateDialogProps) => {
   const handleSave = () => {
-    onSave(
-      preparationDates,
-      inputPreparation,
-      RHDates,
-      inputRH,
-      GPDates,
-      inputGP,
-      actualDates,
-      inputActual,
-      keepDates,
-      inputKeep
-    );
+    onSave(preparationDates, inputPreparation, RHDates, inputRH, GPDates, inputGP, actualDates, inputActual);
   };
   const [value, setValue] = useState('仕込');
   const handleChange = (event: React.SyntheticEvent, newValue: string) => {
@@ -80,9 +66,6 @@ export const DateSelectDialog = ({ preparation, RH, GP, actual, keep, onClose, o
           break;
         case '本番':
           setActualDates((prevDates) => [...new Set([...prevDates, ...newDates])].sort());
-          break;
-        case 'キープ':
-          setKeepDates((prevDates) => [...new Set([...prevDates, ...newDates])].sort());
           break;
       }
     }
@@ -144,20 +127,6 @@ export const DateSelectDialog = ({ preparation, RH, GP, actual, keep, onClose, o
     setInputActual(updatedInputs);
   };
 
-  const [keepDates, setKeepDates] = useState<string[]>(keep.map((item) => item.date));
-  const [inputKeep, setInputKeep] = useState<string[]>(keep.map((item) => item.memo));
-  const handleInputKeepChange = (index: number, value: string) => {
-    const updatedInputs = [...inputKeep];
-    updatedInputs[index] = value;
-    setInputKeep(updatedInputs);
-  };
-  const handleRemoveInputKeep = (index: number) => {
-    const updatedDates = keepDates.filter((_, i) => i !== index);
-    const updatedInputs = inputKeep.filter((_, i) => i !== index);
-    setKeepDates(updatedDates);
-    setInputKeep(updatedInputs);
-  };
-
   const [dateRange, setDateRange] = useState<[Date, Date] | null>([new Date(), new Date()]);
 
   const handleDateChange = (range: [Date, Date] | null) => {
@@ -196,7 +165,6 @@ export const DateSelectDialog = ({ preparation, RH, GP, actual, keep, onClose, o
             <Tab value="RH" label="RH" sx={{ bgcolor: 'orange' }} />
             <Tab value="GP" label="GP" sx={{ bgcolor: 'lightgreen' }} />
             <Tab value="本番" label="本番" sx={{ bgcolor: 'pink' }} />
-            <Tab value="キープ" label="キープ" sx={{ bgcolor: '#ACB9CA' }} />
           </Tabs>
           <Box ml={20}>
             <RSuiteDateRangePicker value={dateRange} onChange={handleDateChange} />
@@ -272,23 +240,6 @@ export const DateSelectDialog = ({ preparation, RH, GP, actual, keep, onClose, o
                 onChange={(e) => handleInputActualChange(index, e.target.value)}
               ></TextField>
               <Button sx={{ ml: 4, bgcolor: 'red', color: 'white' }} onClick={() => handleRemoveInputActual(index)}>
-                削除
-              </Button>
-            </Box>
-          ))}
-        </TabPanel>
-        <TabPanel value={value} index="キープ">
-          {keepDates.map((input, index) => (
-            <Box display="flex" alignItems="center" margin={2} key={index}>
-              <TextField value={input} />
-              <Typography ml={2} mr={1}>
-                メモ
-              </Typography>
-              <TextField
-                value={inputKeep[index] ?? ''}
-                onChange={(e) => handleInputKeepChange(index, e.target.value)}
-              ></TextField>
-              <Button sx={{ ml: 4, bgcolor: 'red', color: 'white' }} onClick={() => handleRemoveInputKeep(index)}>
                 削除
               </Button>
             </Box>

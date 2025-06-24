@@ -40,17 +40,16 @@ type StockTableProps = {
   RH: EquipmentData[];
   GP: EquipmentData[];
   actual: EquipmentData[];
-  keep: EquipmentData[];
   getHeaderBackgroundColor: (date: string, dateRange: string[]) => string;
   getRowBackgroundColor: (
     dateHeader: string,
+    dateRange: string[],
     startKICSDate: Date,
     endKICSDate: Date,
     preparation: EquipmentData[],
     RH: EquipmentData[],
     GP: EquipmentData[],
-    actual: EquipmentData[],
-    keep: EquipmentData[]
+    actual: EquipmentData[]
   ) => string;
 };
 
@@ -64,7 +63,6 @@ export const StockTable: React.FC<StockTableProps> = ({
   RH,
   GP,
   actual,
-  keep,
   getHeaderBackgroundColor,
   getRowBackgroundColor,
 }) => {
@@ -97,13 +95,13 @@ export const StockTable: React.FC<StockTableProps> = ({
               key={rowIndex}
               header={header}
               row={row}
+              dateRange={dateRange}
               startKICSDate={startKICSDate}
               endKICSDate={endKICSDate}
               preparation={preparation}
               RH={RH}
               GP={GP}
               actual={actual}
-              keep={keep}
               getRowBackgroundColor={getRowBackgroundColor}
             />
           ))}
@@ -116,22 +114,22 @@ export const StockTable: React.FC<StockTableProps> = ({
 export type StockTableRowProps = {
   header: string[];
   row: StockData;
+  dateRange: string[];
   startKICSDate: Date;
   endKICSDate: Date;
   preparation: EquipmentData[];
   RH: EquipmentData[];
   GP: EquipmentData[];
   actual: EquipmentData[];
-  keep: EquipmentData[];
   getRowBackgroundColor: (
     dateHeader: string,
+    dateRange: string[],
     startKICSDate: Date,
     endKICSDate: Date,
     preparation: EquipmentData[],
     RH: EquipmentData[],
     GP: EquipmentData[],
-    actual: EquipmentData[],
-    keep: EquipmentData[]
+    actual: EquipmentData[]
   ) => string;
 };
 
@@ -139,13 +137,13 @@ const StockTableRow = React.memo(
   ({
     header,
     row,
+    dateRange,
     startKICSDate,
     endKICSDate,
     preparation,
     RH,
     GP,
     actual,
-    keep,
     getRowBackgroundColor,
   }: StockTableRowProps) => {
     console.log('date側描画', row.id);
@@ -162,13 +160,13 @@ const StockTableRow = React.memo(
                 height: 25,
                 bgcolor: getRowBackgroundColor(
                   header[colIndex],
+                  dateRange,
                   startKICSDate,
                   endKICSDate,
                   preparation,
                   RH,
                   GP,
-                  actual,
-                  keep
+                  actual
                 ),
                 py: 0,
                 px: 1,
@@ -192,8 +190,7 @@ const StockTableRow = React.memo(
       prevProps.preparation === nextProps.preparation &&
       prevProps.RH === nextProps.RH &&
       prevProps.GP === nextProps.GP &&
-      prevProps.actual === nextProps.actual &&
-      prevProps.keep === nextProps.keep
+      prevProps.actual === nextProps.actual
     );
   }
 );
