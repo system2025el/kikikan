@@ -166,8 +166,6 @@ const EquipmentOrderDetail = () => {
   const [GP, setGP] = useState<EquipmentData[]>([]);
   // 本番日
   const [actual, setActual] = useState<EquipmentData[]>([]);
-  // キープ日
-  const [keep, setKeep] = useState<EquipmentData[]>([]);
 
   // 内税、外税
   const [selectTax, setSelectTax] = useState('外税');
@@ -285,6 +283,11 @@ const EquipmentOrderDetail = () => {
     setStockRows((prev) => prev.map((row, i) => (i === rowIndex ? { ...row, data: updatedData } : row)));
   };
 
+  /**
+   * 機材テーブルの日付変更時
+   * @param rowIndex 入力された行番号
+   * @param date 日付
+   */
   const handleCellDateChange = (rowIndex: number, date: Dayjs | null) => {
     if (date !== null) {
       const newDate = toISOStringWithTimezone(date.toDate());
@@ -358,8 +361,6 @@ const EquipmentOrderDetail = () => {
    * @param GPMemo GP日メモ
    * @param actualDates 本番日
    * @param actualMemo 本番日メモ
-   * @param keepDates キープ日
-   * @param keepMemo キープ日メモ
    */
   const handleSave = (
     preparationDates: string[],
@@ -369,9 +370,7 @@ const EquipmentOrderDetail = () => {
     GPDates: string[],
     GPMemo: string[],
     actualDates: string[],
-    actualMemo: string[],
-    keepDates: string[],
-    keepMemo: string[]
+    actualMemo: string[]
   ) => {
     setPreparation(
       preparationDates.map((date, index) => ({
@@ -395,12 +394,6 @@ const EquipmentOrderDetail = () => {
       actualDates.map((date, index) => ({
         date: date,
         memo: actualMemo[index] ?? '',
-      }))
-    );
-    setKeep(
-      keepDates.map((date, index) => ({
-        date: date,
-        memo: keepMemo[index] ?? '',
       }))
     );
     setDateSelectionDialogOpne(false);
@@ -576,6 +569,9 @@ const EquipmentOrderDetail = () => {
               <Typography>メモ</Typography>
               <TextField multiline rows={3} />
             </Grid2>
+            <Grid2 p={1}>
+              <Button color="error">返却伝票作成</Button>
+            </Grid2>
           </Grid2>
         </AccordionDetails>
       </Accordion>
@@ -657,7 +653,6 @@ const EquipmentOrderDetail = () => {
               RH={RH}
               GP={GP}
               actual={actual}
-              keep={keep}
               getHeaderBackgroundColor={getDateHeaderBackgroundColor}
               getRowBackgroundColor={getDateRowBackgroundColor}
             />
@@ -701,7 +696,6 @@ const EquipmentOrderDetail = () => {
                 RH={RH}
                 GP={GP}
                 actual={actual}
-                keep={keep}
                 onClose={handleCloseDateDialog}
                 onSave={handleSave}
               />
@@ -841,44 +835,6 @@ const EquipmentOrderDetail = () => {
             width={{ md: '50%' }}
           >
             {actual.map((data, index) => (
-              <Grid2 key={index} container display="flex" flexDirection="row">
-                <Grid2 size={5}>
-                  <Typography>{data.date}</Typography>
-                </Grid2>
-                <Grid2 size={7}>
-                  <Typography sx={{ wordBreak: 'break-word' }}>{data.memo}</Typography>
-                </Grid2>
-              </Grid2>
-            ))}
-          </Grid2>
-          <Grid2
-            container
-            display="flex"
-            flexDirection="row"
-            spacing={1}
-            ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
-            py={2}
-            width={{ md: '50%' }}
-          >
-            <Grid2 size={12}>
-              <Button sx={{ color: 'white', bgcolor: '#ACB9CA' }}>キープ</Button>
-            </Grid2>
-            <Grid2 size={5}>
-              <Typography>日付</Typography>
-            </Grid2>
-            <Grid2 size={7}>
-              <Typography>メモ</Typography>
-            </Grid2>
-          </Grid2>
-          <Grid2
-            container
-            display="flex"
-            flexDirection="column"
-            spacing={1}
-            ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
-            width={{ md: '50%' }}
-          >
-            {keep.map((data, index) => (
               <Grid2 key={index} container display="flex" flexDirection="row">
                 <Grid2 size={5}>
                   <Typography>{data.date}</Typography>
