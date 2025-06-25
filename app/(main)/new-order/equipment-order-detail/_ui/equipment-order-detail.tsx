@@ -509,6 +509,29 @@ const EquipmentOrderDetail = () => {
         </AccordionSummary>
         <AccordionDetails sx={{ padding: 0 }}>
           <Divider />
+          <Grid2 container alignItems="center" spacing={2} p={2}>
+            <Grid2 container alignItems="center">
+              <Typography>機材明細名</Typography>
+              <TextField />
+            </Grid2>
+            <Grid2 container alignItems="center">
+              <Typography>小計金額</Typography>
+              <TextField />
+            </Grid2>
+            <Grid2 container alignItems="center">
+              <Typography>値引き</Typography>
+              <TextField />
+            </Grid2>
+            <Grid2 container alignItems="center">
+              <Typography>税区分</Typography>
+              <FormControl size="small" sx={{ width: '8%', minWidth: '80px' }}>
+                <Select value={selectTax} onChange={selectTaxChange}>
+                  <MenuItem value={'外税'}>外税</MenuItem>
+                  <MenuItem value={'内税'}>内税</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid2>
+          </Grid2>
           <Grid2 container p={2} spacing={2}>
             <Grid2 width={400}>
               <Typography>出庫日時</Typography>
@@ -550,21 +573,6 @@ const EquipmentOrderDetail = () => {
                 <Time />
               </Grid2>
             </Grid2>
-            <Grid2 container direction="column" p={1}>
-              <Grid2 container alignItems="center">
-                <Typography>税区分</Typography>
-                <FormControl size="small" sx={{ width: '8%', minWidth: '80px' }}>
-                  <Select value={selectTax} onChange={selectTaxChange}>
-                    <MenuItem value={'外税'}>外税</MenuItem>
-                    <MenuItem value={'内税'}>内税</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid2>
-              <Grid2 container alignItems="center">
-                <Typography>値引き</Typography>
-                <TextField />
-              </Grid2>
-            </Grid2>
             <Grid2 container alignItems="center" py={1}>
               <Typography>メモ</Typography>
               <TextField multiline rows={3} />
@@ -585,16 +593,6 @@ const EquipmentOrderDetail = () => {
           </Grid2>
         </Box>
         <Divider />
-        <Grid2 container alignItems="center" spacing={2} p={2}>
-          <Grid2 container alignItems="center">
-            <Typography>機材明細名</Typography>
-            <TextField />
-          </Grid2>
-          <Grid2 container alignItems="center">
-            <Typography>小計金額</Typography>
-            <TextField />
-          </Grid2>
-        </Grid2>
 
         <Dialog open={EqSelectionDialogOpen} fullScreen>
           <EquipmentSelectionDialog handleCloseDialog={handleCloseEqDialog} />
