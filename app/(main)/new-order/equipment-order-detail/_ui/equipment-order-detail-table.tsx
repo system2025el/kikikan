@@ -240,16 +240,16 @@ export const EqTable: React.FC<EqTableProps> = ({ rows, onChange, handleCellDate
             <TableCell size="small" style={styles.header} />
             <TableCell size="small" style={styles.header} />
             <TableCell align="left" size="small" style={styles.header}>
-              機材名
+              移動日時
             </TableCell>
             <TableCell align="left" size="small" style={styles.header}>
-              移動日時
+              在庫場所
             </TableCell>
             <TableCell align="left" size="small" style={styles.header}>
               メモ
             </TableCell>
             <TableCell align="left" size="small" style={styles.header}>
-              在庫場所
+              機材名
             </TableCell>
             <TableCell align="right" size="small" style={styles.header}>
               全数
@@ -328,11 +328,8 @@ const EqTableRow = React.memo(
         <TableCell align="right" size="small" sx={{ bgcolor: 'lightgrey', py: 0, px: 1, border: '1px solid black' }}>
           {rowIndex + 1}
         </TableCell>
-        <TableCell style={styles.row} align="left" size="small" sx={{ bgcolor: 'lightgrey' }}>
-          {row.name}
-        </TableCell>
         <TableCell style={styles.row} size="small">
-          <Box display="flex" width={'400px'}>
+          <Box display="flex" width={'200px'}>
             {row.date && (
               <TestDate
                 sx={{
@@ -344,25 +341,17 @@ const EqTableRow = React.memo(
                 onChange={handleDateChange}
               ></TestDate>
             )}
-            {row.date && (
-              <TestTime
-                sx={{
-                  '& .MuiPickersInputBase-root': {
-                    height: '24px',
-                  },
-                }}
-                time={date}
-                onChange={handleDateChange}
-              ></TestTime>
-            )}
             {row.move && <Typography>{row.move}</Typography>}
           </Box>
+        </TableCell>
+        <TableCell style={styles.row} align="left" size="small" sx={{ bgcolor: 'lightgrey' }}>
+          {row.place}
         </TableCell>
         <TableCell style={styles.row} align="center" size="small">
           <MemoTooltip name={row.name} memo={row.memo} handleMemoChange={handleMemoChange} rowIndex={rowIndex} />
         </TableCell>
         <TableCell style={styles.row} align="left" size="small" sx={{ bgcolor: 'lightgrey' }}>
-          {row.place}
+          {row.name}
         </TableCell>
         <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: 'lightgrey' }}>
           {row.all}

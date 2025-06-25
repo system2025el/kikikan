@@ -510,15 +510,15 @@ const EquipmentOrderDetail = () => {
         <AccordionDetails sx={{ padding: 0 }}>
           <Divider />
           <Grid2 container p={2} spacing={2}>
-            <Grid2 width={500}>
+            <Grid2 width={400}>
               <Typography>出庫日時</Typography>
               <Grid2>
-                <TextField defaultValue={'KICS'} disabled sx={{ width: '10%', minWidth: 150 }} />
+                <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
                 <TestDate date={startKICSDate} onChange={handleStartChange} />
                 <Time />
               </Grid2>
               <Grid2>
-                <TextField defaultValue={'YARD'} disabled sx={{ width: '10%', minWidth: 150 }} />
+                <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
                 <TestDate
                   date={startYARDDate}
                   onChange={(newDate) => {
@@ -530,15 +530,15 @@ const EquipmentOrderDetail = () => {
                 <Time />
               </Grid2>
             </Grid2>
-            <Grid2 width={500}>
+            <Grid2 width={400}>
               <Typography>入庫日時</Typography>
               <Grid2>
-                <TextField defaultValue={'KICS'} disabled sx={{ width: '10%', minWidth: 150 }} />
+                <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
                 <TestDate date={endKICSDate} onChange={handleEndChange} />
                 <Time />
               </Grid2>
               <Grid2>
-                <TextField defaultValue={'YARD'} disabled sx={{ width: '10%', minWidth: 150 }} />
+                <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
                 <TestDate
                   date={endYARDDate}
                   onChange={(newDate) => {
@@ -568,11 +568,6 @@ const EquipmentOrderDetail = () => {
             <Grid2 container alignItems="center" py={1}>
               <Typography>メモ</Typography>
               <TextField multiline rows={3} />
-            </Grid2>
-            <Grid2 p={1}>
-              <Button color="error" href="/new-order/equipment-order-detail/return-slip">
-                返却伝票作成
-              </Button>
             </Grid2>
           </Grid2>
         </AccordionDetails>
