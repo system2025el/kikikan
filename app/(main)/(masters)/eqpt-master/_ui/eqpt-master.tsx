@@ -7,27 +7,25 @@ import { useState } from 'react';
 import { TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { BackButton } from '../../../_ui/buttons';
-import { EqptMasterData, eqptMasterList, eqptMasterSchema, eqptMasterSearchData } from '../_lib/types';
+import { EqptMasterDialogSchema, EqptMasterDialogValues, eqptMasterList } from '../_lib/types';
 import { EqptMasterTable } from './eqpt-master-table';
 
 export const EqptMaster = () => {
   // useState
-  const [displayList, setDisplayList] = useState<EqptMasterData[]>(eqptMasterList);
+  const [displayList, setDisplayList] = useState<EqptMasterDialogValues[]>(eqptMasterList);
   const [page, setPage] = useState(1);
   // 検索useForm--------------------------
   const { control, handleSubmit } = useForm({
     mode: 'onSubmit',
     reValidateMode: 'onSubmit',
-    resolver: zodResolver(eqptMasterSchema),
-    defaultValues: {
-      name: '',
-    },
+    resolver: zodResolver(EqptMasterDialogSchema),
+    defaultValues: {},
   });
-  const onSubmit = (data: eqptMasterSearchData) => {
-    if (data.name === '') {
+  const onSubmit = (data: EqptMasterDialogValues) => {
+    if (data.kizaiNam === '') {
       setDisplayList([...eqptMasterList]);
     } else {
-      const list = eqptMasterList.filter((c) => c.name.includes(data.name.trim()));
+      const list = eqptMasterList.filter((c) => c.kizaiNam.includes(data.kizaiNam.trim()));
       setDisplayList(list);
       console.log(data);
     }
@@ -51,7 +49,7 @@ export const EqptMaster = () => {
                   機材名キーワード
                 </Typography>
                 <Box>
-                  <TextFieldElement name={'name'} control={control} color="primary"></TextFieldElement>
+                  <TextFieldElement name={'kizaiNam'} control={control} color="primary"></TextFieldElement>
                 </Box>
               </Stack>
               <Box>

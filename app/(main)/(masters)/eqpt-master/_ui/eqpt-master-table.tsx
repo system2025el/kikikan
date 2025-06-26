@@ -20,20 +20,27 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import { useMemo, useState } from 'react';
+import { SetStateAction, useMemo, useState } from 'react';
+
+import { MasterTable } from '@/app/(main)/_ui/table';
 
 import { MuiTablePagination } from '../../../_ui/table-pagination';
-import { EqptMasterData, eqptMasterList } from '../_lib/types';
+import { EqptMasterData, EqptMasterDialogValues, eqptMasterList, eqptMHeader } from '../_lib/types';
+import { EqMasterDialog } from './eqpt-master-dialog';
 
 /** 機材マスタのテーブルコンポーネント */
 export const EqptMasterTable = (props: {
-  arrayList: EqptMasterData[];
+  arrayList: EqptMasterDialogValues[];
   page: number;
   setPage: React.Dispatch<React.SetStateAction<number>>;
 }) => {
   const { arrayList, page, setPage } = props;
-  const [openId, setOpenID] = useState(-100);
+  /* ダイアログ開く機材のID、閉じるとき、未選択で-100とする */
+  const [openId, setOpenID] = useState<number>(-100);
+  /* 機材詳細ダイアログの開閉状態 */
   const [dialogOpen, setDialogOpen] = useState(false);
+  /* ダイアログでの編集モード */
+  const [editable, setEditable] = useState(false);
 
   const rowsPerPage = 50;
   // dialog
@@ -72,21 +79,7 @@ export const EqptMasterTable = (props: {
         <Grid2 container spacing={1}>
           <Grid2 container spacing={1}>
             <Grid2>
-              <Button>
-                <FileDownloadIcon fontSize="small" />
-                Excel表インポート
-              </Button>
-            </Grid2>
-            <Grid2>
-              <Button>
-                <FileUploadIcon fontSize="small" />
-                Excel表エクスポート
-              </Button>
-            </Grid2>
-          </Grid2>
-          <Grid2 container spacing={1}>
-            <Grid2>
-              <Button href="/new-order">
+              <Button onClick={() => handleOpen(-100)}>
                 <AddIcon fontSize="small" />
                 追加
               </Button>
@@ -95,60 +88,24 @@ export const EqptMasterTable = (props: {
         </Grid2>
       </Grid2>
       <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 1 }}>
-        <Table stickyHeader padding="none">
-          <TableHead>
-            <TableRow>
-              <TableCell></TableCell>
-              <TableCell>機材名</TableCell>
-              <TableCell>保有数</TableCell>
-              <TableCell>部門</TableCell>
-              <TableCell>大部門</TableCell>
-              <TableCell>集計部門</TableCell>
-              <TableCell>一式</TableCell>
-              <TableCell>シリアル</TableCell>
-              <TableCell>価格1</TableCell>
-              <TableCell>価格2</TableCell>
-              <TableCell>価格3</TableCell>
-              <TableCell>価格4</TableCell>
-              <TableCell>価格5</TableCell>
-              <TableCell>メモ</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {list.map((eq) => (
-              <TableRow key={eq.id} onClick={() => handleOpen(eq.id)}>
-                <TableCell>
-                  <CheckBox color="primary" />
-                </TableCell>
-                <TableCell>
-                  <Button variant="text">{eq.name}</Button>
-                </TableCell>
-                <TableCell>{eq.quantity}</TableCell>
-                <TableCell>{eq.bumon}</TableCell>
-                <TableCell>{eq.daiBumon}</TableCell>
-                <TableCell>{eq.shuukeibumon}</TableCell>
-                <TableCell>{eq.isshiki}</TableCell>
-                <TableCell>{eq.serialnumber}</TableCell>
-                <TableCell>{eq.price1}</TableCell>
-                <TableCell>{eq.price2}</TableCell>
-                <TableCell>{eq.price3}</TableCell>
-                <TableCell>{eq.price4}</TableCell>
-                <TableCell>{eq.price5}</TableCell>
-                <TableCell sx={{ maxWidth: 30 }}>
-                  <Typography noWrap>{eq.memo}</Typography>
-                </TableCell>
-              </TableRow>
-            ))}
-            {/* <Dialog open={dialogOpen} fullScreen>
-              <eqDialogContents eqId={openId} handleClose={handleClose} />
-            </Dialog> */}
-            {emptyRows > 0 && (
-              <TableRow style={{ height: 30 * emptyRows }}>
-                <TableCell colSpan={14} />
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+        <MasterTable
+          headers={eqptMHeader}
+          datas={eqptMasterList.map((l) => ({
+            id: l.kizaiId,
+            kizaiNam: l.kizaiNam,
+            rankAmt1: l.rankAmt1,
+            rankAmt2: l.rankAmt2,
+            rankAmt3: l.rankAmt3,
+            rankAmt4: l.rankAmt4,
+            rankAmt5: l.rankAmt5,
+          }))}
+          page={page}
+          rowsPerPage={rowsPerPage}
+          handleOpenDialog={handleOpen}
+        />
+        <Dialog open={dialogOpen} fullScreen>
+          <EqMasterDialog handleClose={handleClose} eqptId={openId} editable={editable} setEditable={setEditable} />
+        </Dialog>
       </TableContainer>
     </Box>
   );
