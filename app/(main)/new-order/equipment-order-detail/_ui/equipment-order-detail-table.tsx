@@ -34,8 +34,8 @@ type StockTableProps = {
   header: string[];
   rows: StockData[];
   dateRange: string[];
-  startKICSDate: Date;
-  endKICSDate: Date;
+  startKICSDate: Date | null;
+  endKICSDate: Date | null;
   preparation: EquipmentData[];
   RH: EquipmentData[];
   GP: EquipmentData[];
@@ -44,8 +44,8 @@ type StockTableProps = {
   getRowBackgroundColor: (
     dateHeader: string,
     dateRange: string[],
-    startKICSDate: Date,
-    endKICSDate: Date,
+    startKICSDate: Date | null,
+    endKICSDate: Date | null,
     preparation: EquipmentData[],
     RH: EquipmentData[],
     GP: EquipmentData[],
@@ -115,8 +115,8 @@ export type StockTableRowProps = {
   header: string[];
   row: StockData;
   dateRange: string[];
-  startKICSDate: Date;
-  endKICSDate: Date;
+  startKICSDate: Date | null;
+  endKICSDate: Date | null;
   preparation: EquipmentData[];
   RH: EquipmentData[];
   GP: EquipmentData[];
@@ -124,8 +124,8 @@ export type StockTableRowProps = {
   getRowBackgroundColor: (
     dateHeader: string,
     dateRange: string[],
-    startKICSDate: Date,
-    endKICSDate: Date,
+    startKICSDate: Date | null,
+    endKICSDate: Date | null,
     preparation: EquipmentData[],
     RH: EquipmentData[],
     GP: EquipmentData[],

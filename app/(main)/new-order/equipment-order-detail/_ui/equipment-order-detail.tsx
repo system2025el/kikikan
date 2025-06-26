@@ -66,7 +66,7 @@ export type Equipment = {
 };
 
 // 開始日から終了日までの日付配列の作成
-const getRange = (start: Date, end: Date): string[] => {
+const getRange = (start: Date | null, end: Date | null): string[] => {
   if (start !== null && end !== null) {
     const range: string[] = [];
     const current = new Date(start);
@@ -83,22 +83,19 @@ const getRange = (start: Date, end: Date): string[] => {
 };
 
 // ストックテーブルの日付ヘッダーの作成
-const getStockHeader = (date: Date) => {
-  if (date !== null) {
-    const start = subDays(date, 1);
-    const end = endOfMonth(addMonths(date, 2));
-    const range: string[] = [];
-    const current = new Date(start);
+const getStockHeader = (date: Date | null) => {
+  const start = date !== null ? subDays(date, 1) : subDays(new Date(), 1);
+  const end = date !== null ? endOfMonth(addMonths(date, 2)) : endOfMonth(addMonths(new Date(), 2));
+  const range: string[] = [];
+  const current = new Date(start);
 
-    while (current <= end) {
-      const dateStr = toISOStringWithTimezoneMonthDay(current).split('T')[0];
-      range.push(dateStr);
-      current.setDate(current.getDate() + 1);
-    }
-
-    return range;
+  while (current <= end) {
+    const dateStr = toISOStringWithTimezoneMonthDay(current).split('T')[0];
+    range.push(dateStr);
+    current.setDate(current.getDate() + 1);
   }
-  return [];
+
+  return range;
 };
 
 // ストックテーブルの行作成
@@ -139,13 +136,13 @@ export const testStock = Array.from({ length: 200 }, (_, i) => stock[i % stock.l
 
 const EquipmentOrderDetail = () => {
   // KICS出庫日
-  const [startKICSDate, setStartKICSDate] = useState<Date>(new Date());
+  const [startKICSDate, setStartKICSDate] = useState<Date | null>(null);
   // YARD出庫日
-  const [startYARDDate, setStartYARDDate] = useState<Date>(new Date());
+  const [startYARDDate, setStartYARDDate] = useState<Date | null>(null);
   // KICS入庫日
-  const [endKICSDate, setEndKICSDate] = useState<Date>(new Date());
+  const [endKICSDate, setEndKICSDate] = useState<Date | null>(null);
   // YARD入庫日
-  const [endYARDDate, setEndYARDDate] = useState<Date>(new Date());
+  const [endYARDDate, setEndYARDDate] = useState<Date | null>(null);
   // 出庫日から入庫日
   const [dateRange, setDateRange] = useState<string[]>(getRange(startKICSDate, endKICSDate));
   // カレンダー選択日
@@ -597,8 +594,7 @@ const EquipmentOrderDetail = () => {
         <Dialog open={EqSelectionDialogOpen} fullScreen>
           <EquipmentSelectionDialog handleCloseDialog={handleCloseEqDialog} />
         </Dialog>
-
-        <Box display="flex" flexDirection="row" width="100%">
+        <Box display={'flex'} flexDirection="row" width="100%">
           <Box
             sx={{
               width: {
@@ -609,17 +605,23 @@ const EquipmentOrderDetail = () => {
               },
             }}
           >
-            <Button sx={{ m: 2 }} onClick={() => handleOpenEqDialog()}>
-              ＋ 機材追加
-            </Button>
-            <EqTable
-              rows={equipmentRows}
-              onChange={handleCellChange}
-              handleCellDateChange={handleCellDateChange}
-              handleMemoChange={handleMemoChange}
-            />
+            <Box m={2}>
+              <Button onClick={() => handleOpenEqDialog()}>＋ 機材追加</Button>
+            </Box>
+            <Box display={Object.keys(equipmentRows).length > 0 ? 'block' : 'none'}>
+              <EqTable
+                rows={equipmentRows}
+                onChange={handleCellChange}
+                handleCellDateChange={handleCellDateChange}
+                handleMemoChange={handleMemoChange}
+              />
+            </Box>
           </Box>
-          <Box overflow="auto" sx={{ width: { xs: '60%', sm: '60%', md: 'auto' } }}>
+          <Box
+            display={Object.keys(equipmentRows).length > 0 ? 'block' : 'none'}
+            overflow="auto"
+            sx={{ width: { xs: '60%', sm: '60%', md: 'auto' } }}
+          >
             <Box display="flex" my={2}>
               <Button onClick={handleBackDateChange}>
                 <ArrowBackIosNewIcon fontSize="small" />

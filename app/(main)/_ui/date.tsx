@@ -116,7 +116,7 @@ export default DateX;
 export const TestDate = (props: {
   sx?: object;
   disabled?: boolean;
-  date: Date;
+  date: Date | null;
   onChange: (value: Dayjs | null) => void;
 }) => {
   const { sx, disabled, date, onChange } = props;
