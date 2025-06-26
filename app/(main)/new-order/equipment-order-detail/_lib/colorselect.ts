@@ -12,41 +12,39 @@ export const getDateHeaderBackgroundColor = (date: string, dateRange: string[]):
 export const getDateRowBackgroundColor = (
   date: string,
   dateRange: string[],
-  startKICSDate: Date,
-  endKICSDate: Date,
+  startKICSDate: Date | null,
+  endKICSDate: Date | null,
   preparation: EquipmentData[],
   RH: EquipmentData[],
   GP: EquipmentData[],
   actual: EquipmentData[]
 ): string => {
-  if (startKICSDate !== null && endKICSDate !== null) {
-    const startDate = toISOStringWithTimezoneMonthDay(new Date(startKICSDate)).split('T')[0];
-    const endDate = toISOStringWithTimezoneMonthDay(new Date(endKICSDate)).split('T')[0];
-    const preparationDate: string[] = [];
-    const RHDate: string[] = [];
-    const GPDate: string[] = [];
-    const actualDate: string[] = [];
+  const startDate =
+    startKICSDate !== null ? toISOStringWithTimezoneMonthDay(new Date(startKICSDate)).split('T')[0] : '';
+  const endDate = endKICSDate !== null ? toISOStringWithTimezoneMonthDay(new Date(endKICSDate)).split('T')[0] : '';
+  const preparationDate: string[] = [];
+  const RHDate: string[] = [];
+  const GPDate: string[] = [];
+  const actualDate: string[] = [];
 
-    preparation.map((prev) => {
-      preparationDate.push(prev.date.slice(5));
-    });
-    RH.map((prev) => {
-      RHDate.push(prev.date.slice(5));
-    });
-    GP.map((prev) => {
-      GPDate.push(prev.date.slice(5));
-    });
-    actual.map((prev) => {
-      actualDate.push(prev.date.slice(5));
-    });
-    if (date === startDate) return 'lightblue';
-    if (date === endDate) return 'yellow';
-    if (preparationDate.includes(date)) return 'mediumpurple';
-    if (RHDate.includes(date)) return 'orange';
-    if (GPDate.includes(date)) return 'lightgreen';
-    if (actualDate.includes(date)) return 'pink';
-    if (dateRange.includes(date)) return '#ACB9CA';
-    return 'white';
-  }
+  preparation.map((prev) => {
+    preparationDate.push(prev.date.slice(5));
+  });
+  RH.map((prev) => {
+    RHDate.push(prev.date.slice(5));
+  });
+  GP.map((prev) => {
+    GPDate.push(prev.date.slice(5));
+  });
+  actual.map((prev) => {
+    actualDate.push(prev.date.slice(5));
+  });
+  if (date === startDate) return 'lightblue';
+  if (date === endDate) return 'yellow';
+  if (preparationDate.includes(date)) return 'mediumpurple';
+  if (RHDate.includes(date)) return 'orange';
+  if (GPDate.includes(date)) return 'lightgreen';
+  if (actualDate.includes(date)) return 'pink';
+  if (dateRange.includes(date)) return '#ACB9CA';
   return 'white';
 };
