@@ -15,6 +15,8 @@ type TabPanelProps = {
 };
 
 type DateDialogProps = {
+  startDate: Date | null;
+  endDate: Date | null;
   preparation: EquipmentData[];
   RH: EquipmentData[];
   GP: EquipmentData[];
@@ -42,7 +44,16 @@ const TabPanel = (props: TabPanelProps) => {
   );
 };
 
-export const DateSelectDialog = ({ preparation, RH, GP, actual, onClose, onSave }: DateDialogProps) => {
+export const DateSelectDialog = ({
+  startDate,
+  endDate,
+  preparation,
+  RH,
+  GP,
+  actual,
+  onClose,
+  onSave,
+}: DateDialogProps) => {
   const handleSave = () => {
     onSave(preparationDates, inputPreparation, RHDates, inputRH, GPDates, inputGP, actualDates, inputActual);
   };
@@ -167,7 +178,12 @@ export const DateSelectDialog = ({ preparation, RH, GP, actual, onClose, onSave 
             <Tab value="本番" label="本番" sx={{ bgcolor: 'pink' }} />
           </Tabs>
           <Box ml={20}>
-            <RSuiteDateRangePicker value={dateRange} onChange={handleDateChange} />
+            <RSuiteDateRangePicker
+              value={dateRange}
+              minDate={startDate}
+              maxDate={endDate}
+              onChange={handleDateChange}
+            />
             <Button sx={{ ml: 2 }} onClick={() => handleAddInput(value)}>
               追加
             </Button>

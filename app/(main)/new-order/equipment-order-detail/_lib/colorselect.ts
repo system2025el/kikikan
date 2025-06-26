@@ -39,12 +39,12 @@ export const getDateRowBackgroundColor = (
   actual.map((prev) => {
     actualDate.push(prev.date.slice(5));
   });
-  if (date === startDate) return 'lightblue';
-  if (date === endDate) return 'yellow';
-  if (preparationDate.includes(date)) return 'mediumpurple';
-  if (RHDate.includes(date)) return 'orange';
-  if (GPDate.includes(date)) return 'lightgreen';
   if (actualDate.includes(date)) return 'pink';
+  if (GPDate.includes(date)) return 'lightgreen';
+  if (RHDate.includes(date)) return 'orange';
+  if (preparationDate.includes(date)) return 'mediumpurple';
+  if (date === endDate) return 'yellow';
+  if (date === startDate) return 'lightblue';
   if (dateRange.includes(date)) return '#ACB9CA';
   return 'white';
 };

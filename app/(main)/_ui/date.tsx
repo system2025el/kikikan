@@ -85,7 +85,7 @@ const DateX = (props: { sx?: object; disabled?: boolean }) => {
             helperText: errorMessage,
             size: 'small',
             sx: {
-              bgcolor: disabled ? grey[300] : 'white',
+              bgcolor: disabled ? grey[200] : 'white',
               width: '25%',
               minWidth: 150,
               padding: 0,
@@ -117,9 +117,11 @@ export const TestDate = (props: {
   sx?: object;
   disabled?: boolean;
   date: Date | null;
+  minDate?: Date;
+  maxDate?: Date;
   onChange: (value: Dayjs | null) => void;
 }) => {
-  const { sx, disabled, date, onChange } = props;
+  const { sx, disabled, date, minDate, maxDate, onChange } = props;
 
   return (
     <LocalizationProvider
@@ -138,7 +140,7 @@ export const TestDate = (props: {
           textField: {
             size: 'small',
             sx: {
-              bgcolor: disabled ? grey[300] : 'white',
+              bgcolor: disabled ? grey[200] : 'white',
               width: '25%',
               minWidth: 150,
               padding: 0,
@@ -150,7 +152,9 @@ export const TestDate = (props: {
           },
           calendarHeader: { format: 'YYYY年MM月' },
         }} // カレンダーヘッダーのフォーマット
-        value={dayjs(date)}
+        value={date && dayjs(date)}
+        minDate={minDate && dayjs(minDate)}
+        maxDate={maxDate && dayjs(maxDate)}
         views={['year', 'month', 'day']}
         disabled={disabled ? true : false}
         onChange={onChange}
@@ -187,7 +191,7 @@ export const TwoDatePickers = (props: { sx?: object; disabled?: boolean }) => {
                 width: '15%',
                 minWidth: 150,
                 ...sx,
-                bgcolor: disabled ? grey[300] : 'white',
+                bgcolor: disabled ? grey[200] : 'white',
                 '.Mui-disabled': {
                   WebkitTextFillColor: 'black',
                 },
@@ -244,6 +248,8 @@ type Props = {
    * @param value DateRange型の新しい値
    * @returns void
    */
+  minDate?: Date | null;
+  maxDate?: Date | null;
   onChange: (value: DateRange) => void;
   /**
    * コンポーネントのスタイル
@@ -259,7 +265,7 @@ type Props = {
  * @returns {JSX.Element} 日付幅を選ぶコンポーネントDateRangePicker (rsuite)
  */
 export const RSuiteDateRangePicker = (props: Props) => {
-  const { value, onChange, styles, disabled } = props;
+  const { value, minDate, maxDate, onChange, styles, disabled } = props;
   return (
     <>
       <style>
@@ -299,6 +305,11 @@ export const RSuiteDateRangePicker = (props: Props) => {
         placeholder="年/月/日 - 年/月/日"
         placement="autoVertical"
         value={value}
+        shouldDisableDate={(date) => {
+          if (minDate && date < minDate) return true;
+          if (maxDate && date > maxDate) return true;
+          return false;
+        }}
         onOk={onChange}
         disabled={disabled ? true : false}
         /*calendarSnapping*/

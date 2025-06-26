@@ -22,6 +22,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
+import { subDays } from 'date-fns';
 import { Dayjs } from 'dayjs';
 import React, { useRef, useState } from 'react';
 
@@ -198,13 +199,22 @@ const StockTableRow = React.memo(
 StockTableRow.displayName = 'StockTableRow';
 
 type EqTableProps = {
+  startKDate: Date | null;
+  startYDate: Date | null;
   rows: Equipment[];
   onChange: (rowIndex: number, orderValue: number, spareValue: number, totalValue: number) => void;
   handleCellDateChange: (rowIndex: number, date: Dayjs | null) => void;
   handleMemoChange: (rowIndex: number, memo: string) => void;
 };
 
-export const EqTable: React.FC<EqTableProps> = ({ rows, onChange, handleCellDateChange, handleMemoChange }) => {
+export const EqTable: React.FC<EqTableProps> = ({
+  startKDate,
+  startYDate,
+  rows,
+  onChange,
+  handleCellDateChange,
+  handleMemoChange,
+}) => {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const handleOrderCellChange = (rowIndex: number, newValue: number) => {
@@ -268,6 +278,8 @@ export const EqTable: React.FC<EqTableProps> = ({ rows, onChange, handleCellDate
         <TableBody>
           {rows.map((row, rowIndex) => (
             <EqTableRow
+              startKDate={startKDate}
+              startYDate={startYDate}
               key={rowIndex}
               row={row}
               rowIndex={rowIndex}
@@ -286,6 +298,8 @@ export const EqTable: React.FC<EqTableProps> = ({ rows, onChange, handleCellDate
 };
 
 type EqTableRowProps = {
+  startKDate: Date | null;
+  startYDate: Date | null;
   row: Equipment;
   rowIndex: number;
   handleOrderRef: (el: HTMLInputElement | null) => void;
@@ -298,6 +312,8 @@ type EqTableRowProps = {
 
 const EqTableRow = React.memo(
   ({
+    startKDate,
+    startYDate,
     row,
     rowIndex,
     handleOrderRef,
@@ -307,13 +323,13 @@ const EqTableRow = React.memo(
     handleSpareCellChange,
     handleKeyDown,
   }: EqTableRowProps) => {
-    console.log('描画', rowIndex);
+    console.log('描画', rowIndex, startKDate);
 
-    const [date, setDate] = useState(new Date(row.date));
+    //const [date, setDate] = useState(row.date);
 
     const handleDateChange = (date: Dayjs | null) => {
       if (date !== null) {
-        setDate(date.toDate());
+        //setDate(date.toDate());
         handleCellDateChange(rowIndex, date);
       }
     };
@@ -330,18 +346,16 @@ const EqTableRow = React.memo(
         </TableCell>
         <TableCell style={styles.row} size="small">
           <Box display="flex" width={'200px'}>
-            {row.date && (
-              <TestDate
-                sx={{
-                  '& .MuiPickersInputBase-root': {
-                    height: '24px',
-                  },
-                }}
-                date={date}
-                onChange={handleDateChange}
-              ></TestDate>
-            )}
-            {row.move && <Typography>{row.move}</Typography>}
+            <TestDate
+              sx={{
+                '& .MuiPickersInputBase-root': {
+                  height: '24px',
+                },
+              }}
+              date={row.date}
+              onChange={handleDateChange}
+            />
+            {row.date && <Typography>{row.place === 'K' ? 'K→Y' : 'Y→K'}</Typography>}
           </Box>
         </TableCell>
         <TableCell style={styles.row} align="left" size="small" sx={{ bgcolor: 'lightgrey' }}>

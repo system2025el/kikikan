@@ -2,8 +2,7 @@ const data = [
   {
     id: 1,
     name: 'SHARPY PLUS',
-    date: '2025/10/30',
-    move: 'K→Y',
+    date: null,
     memo: '',
     place: 'K',
     all: 148,
@@ -14,8 +13,7 @@ const data = [
   {
     id: 2,
     name: 'ROBIN T2 Profile',
-    date: '2025/10/30',
-    move: 'K→Y',
+    date: null,
     memo: '',
     place: 'K',
     all: 55,
@@ -26,8 +24,7 @@ const data = [
   {
     id: 3,
     name: 'Sharpy X Spot',
-    date: '2025/10/30',
-    move: 'K→Y',
+    date: null,
     memo: '',
     place: 'K',
     all: 26,
@@ -38,8 +35,7 @@ const data = [
   {
     id: 4,
     name: 'VL6000 Beam',
-    date: '',
-    move: '',
+    date: null,
     memo: '',
     place: 'Y',
     all: 27,
@@ -50,8 +46,7 @@ const data = [
   {
     id: 5,
     name: 'Arolla Profile MP',
-    date: '',
-    move: '',
+    date: null,
     memo: '',
     place: 'Y',
     all: 28,
@@ -62,8 +57,7 @@ const data = [
   {
     id: 6,
     name: '20D電源BOX 3相専用（12口）',
-    date: '',
-    move: '',
+    date: null,
     memo: '',
     place: 'Y',
     all: 44,
@@ -74,8 +68,7 @@ const data = [
   {
     id: 7,
     name: 'XXXXXXXXXXXX',
-    date: '',
-    move: '',
+    date: null,
     memo: '',
     place: 'Y',
     all: 45,

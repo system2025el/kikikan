@@ -55,8 +55,7 @@ export type StockData = {
 export type Equipment = {
   id: number;
   name: string;
-  date: string;
-  move: string;
+  date: Date | null;
   memo: string;
   place: string;
   all: number;
@@ -122,7 +121,6 @@ export const testeqData: Equipment[] = Array.from({ length: 200 }, (_, i) => {
     id: i + 1,
     name: `${original.name} (${i + 1})`,
     date: original.date,
-    move: original.move,
     memo: original.memo,
     place: original.place,
     all: original.all,
@@ -163,6 +161,8 @@ const EquipmentOrderDetail = () => {
   const [GP, setGP] = useState<EquipmentData[]>([]);
   // 本番日
   const [actual, setActual] = useState<EquipmentData[]>([]);
+  //
+  const [actualDateRange, setActualDateRange] = useState<string[]>([]);
 
   // 内税、外税
   const [selectTax, setSelectTax] = useState('外税');
@@ -287,7 +287,7 @@ const EquipmentOrderDetail = () => {
    */
   const handleCellDateChange = (rowIndex: number, date: Dayjs | null) => {
     if (date !== null) {
-      const newDate = toISOStringWithTimezone(date.toDate());
+      const newDate = date.toDate();
       setEquipmentRows((prev) => prev.map((row, i) => (i === rowIndex ? { ...row, date: newDate } : row)));
     }
   };
@@ -318,6 +318,13 @@ const EquipmentOrderDetail = () => {
         });
       });
       setStockRows(updatedRow);
+
+      if (Object.keys(equipmentRows).length > 0) {
+        console.log('start');
+        setEquipmentRows((prev) =>
+          prev.map((row) => (row.place === 'Y' ? { ...row, date: subDays(newDate.toDate(), 2) } : row))
+        );
+      }
     }
   };
 
@@ -393,6 +400,8 @@ const EquipmentOrderDetail = () => {
         memo: actualMemo[index] ?? '',
       }))
     );
+    const range = preparationDates.concat(RHDates, GPDates, actualDates);
+    setActualDateRange(range.sort());
     setDateSelectionDialogOpne(false);
   };
 
@@ -534,13 +543,14 @@ const EquipmentOrderDetail = () => {
               <Typography>出庫日時</Typography>
               <Grid2>
                 <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                <TestDate date={startKICSDate} onChange={handleStartChange} />
+                <TestDate date={startKICSDate} maxDate={new Date(actualDateRange[0])} onChange={handleStartChange} />
                 <Time />
               </Grid2>
               <Grid2>
                 <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
                 <TestDate
                   date={startYARDDate}
+                  maxDate={new Date(actualDateRange[0])}
                   onChange={(newDate) => {
                     if (newDate !== null) {
                       setStartYARDDate(newDate?.toDate());
@@ -554,13 +564,18 @@ const EquipmentOrderDetail = () => {
               <Typography>入庫日時</Typography>
               <Grid2>
                 <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                <TestDate date={endKICSDate} onChange={handleEndChange} />
+                <TestDate
+                  date={endKICSDate}
+                  minDate={new Date(actualDateRange[actualDateRange.length - 1])}
+                  onChange={handleEndChange}
+                />
                 <Time />
               </Grid2>
               <Grid2>
                 <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
                 <TestDate
                   date={endYARDDate}
+                  minDate={new Date(actualDateRange[actualDateRange.length - 1])}
                   onChange={(newDate) => {
                     if (newDate !== null) {
                       setEndYARDDate(newDate?.toDate());
@@ -594,6 +609,7 @@ const EquipmentOrderDetail = () => {
         <Dialog open={EqSelectionDialogOpen} fullScreen>
           <EquipmentSelectionDialog handleCloseDialog={handleCloseEqDialog} />
         </Dialog>
+
         <Box display={'flex'} flexDirection="row" width="100%">
           <Box
             sx={{
@@ -610,6 +626,8 @@ const EquipmentOrderDetail = () => {
             </Box>
             <Box display={Object.keys(equipmentRows).length > 0 ? 'block' : 'none'}>
               <EqTable
+                startKDate={startKICSDate}
+                startYDate={startYARDDate}
                 rows={equipmentRows}
                 onChange={handleCellChange}
                 handleCellDateChange={handleCellDateChange}
@@ -689,6 +707,8 @@ const EquipmentOrderDetail = () => {
             <Button onClick={handleOpenDateDialog}>編集</Button>
             <Dialog open={dateSelectionDialogOpne} fullScreen sx={{ zIndex: 1201 }}>
               <DateSelectDialog
+                startDate={startKICSDate}
+                endDate={endKICSDate}
                 preparation={preparation}
                 RH={RH}
                 GP={GP}
