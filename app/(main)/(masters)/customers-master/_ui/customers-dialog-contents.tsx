@@ -122,7 +122,7 @@ export const CustomerDialogContents = (props: {
                   { id: 5, label: 5 },
                 ]}
                 fullWidth
-                sx={{ maxWidth: '80%' }}
+                sx={{ maxWidth: '50%' }}
                 disabled={editable ? false : true}
               />
             </FormBox>
@@ -139,7 +139,7 @@ export const CustomerDialogContents = (props: {
                 control={control}
                 label={formItems[4].description}
                 fullWidth
-                sx={{ maxWidth: '80%' }}
+                sx={{ maxWidth: '50%' }}
                 disabled={editable ? false : true}
               />
             </FormBox>
@@ -151,7 +151,7 @@ export const CustomerDialogContents = (props: {
                 control={control}
                 label={formItems[5].description}
                 fullWidth
-                sx={{ maxWidth: '80%' }}
+                sx={{ maxWidth: '50%' }}
                 disabled={editable ? false : true}
               />
             </FormBox>
@@ -199,7 +199,7 @@ export const CustomerDialogContents = (props: {
                 control={control}
                 label={formItems[9].description}
                 fullWidth
-                sx={{ maxWidth: '80%' }}
+                sx={{ maxWidth: '50%' }}
                 disabled={editable ? false : true}
               />
             </FormBox>
@@ -211,7 +211,7 @@ export const CustomerDialogContents = (props: {
                 control={control}
                 label={formItems[10].description}
                 fullWidth
-                sx={{ maxWidth: '80%' }}
+                sx={{ maxWidth: '50%' }}
                 disabled={editable ? false : true}
               />
             </FormBox>
@@ -223,7 +223,7 @@ export const CustomerDialogContents = (props: {
                 control={control}
                 label={formItems[11].description}
                 fullWidth
-                sx={{ maxWidth: '80%' }}
+                sx={{ maxWidth: '50%' }}
                 disabled={editable ? false : true}
               />
             </FormBox>
@@ -264,7 +264,7 @@ export const CustomerDialogContents = (props: {
                 control={control}
                 label={formItems[15].description}
                 fullWidth
-                sx={{ maxWidth: '80%' }}
+                sx={{ maxWidth: '50%' }}
                 disabled={editable ? false : true}
               />
             </FormBox>
@@ -276,7 +276,7 @@ export const CustomerDialogContents = (props: {
                 control={control}
                 label={formItems[16].description}
                 fullWidth
-                sx={{ maxWidth: '80%' }}
+                sx={{ maxWidth: '50%' }}
                 disabled={editable ? false : true}
               />
             </FormBox>
