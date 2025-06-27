@@ -1,5 +1,9 @@
 'use client';
 
+import AddIcon from '@mui/icons-material/Add';
+import CheckIcon from '@mui/icons-material/Check';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import Delete from '@mui/icons-material/Delete';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
   Accordion,
@@ -22,10 +26,11 @@ import { useState } from 'react';
 
 import DateX, { RSuiteDateRangePicker } from '@/app/(main)/_ui/date';
 import { SelectTable } from '@/app/(main)/_ui/table';
-import { equipmentHeaders, equipmentRows, vehicleHeaders, vehicleRows } from '@/app/(main)/new-order/_lib/data';
+import { equipmentRows, vehicleHeaders, vehicleRows } from '@/app/(main)/new-order/_lib/data';
 
 import { CustomerSelectionDialog } from './customer-selection';
 import { LocationSelectDialog } from './location-selection';
+import { NewOrderTable } from './new-order-table';
 
 const NewOrder = () => {
   // 内税、外税
@@ -40,9 +45,7 @@ const NewOrder = () => {
     console.log('選択されたID:', selectedIds);
   };
 
-  const priceTotal = equipmentRows
-    .filter((row) => typeof row.price === 'number')
-    .reduce((sum, row) => sum + row.price, 0);
+  const priceTotal = equipmentRows.reduce((sum, row) => sum + (row.price ?? 0), 0);
 
   const [buttonValue, setButtonValue] = useState<string | null>('');
 
@@ -105,12 +108,18 @@ const NewOrder = () => {
             <Typography margin={1}>受注ヘッダー</Typography>
           </Grid2>
           <Grid2>
-            <Button sx={{ margin: 1 }}>編集</Button>
-            <Button sx={{ margin: 1 }}>保存</Button>
-            <Button color="error" sx={{ margin: 1 }}>
-              ー削除
+            <Button sx={{ margin: 1 }}>
+              <CheckIcon fontSize="small" />
+              保存
             </Button>
-            <Button sx={{ margin: 1 }}>コピー</Button>
+            <Button color="error" sx={{ margin: 1 }}>
+              <Delete fontSize="small" />
+              伝票削除
+            </Button>
+            <Button sx={{ margin: 1 }}>
+              <ContentCopyIcon fontSize="small" />
+              コピー
+            </Button>
           </Grid2>
         </Grid2>
         <Divider />
@@ -172,7 +181,7 @@ const NewOrder = () => {
             <Box sx={styles.container}>
               <Typography marginRight={5}>公演場所</Typography>
               <TextField sx={{ width: '50%' }}></TextField>
-              <Button onClick={() => handleOpenLocationDialog()}>選択</Button>
+              <Button onClick={() => handleOpenLocationDialog()}>検索</Button>
               <Dialog open={locationDialogOpen} fullScreen>
                 <LocationSelectDialog handleCloseLocationDialog={handleCloseLocationDailog} />
               </Dialog>
@@ -180,7 +189,7 @@ const NewOrder = () => {
             <Box sx={styles.container}>
               <Typography marginRight={9}>相手</Typography>
               <TextField sx={{ width: '50%' }}></TextField>
-              <Button onClick={() => handleOpenCustomerDialog()}>選択</Button>
+              <Button onClick={() => handleOpenCustomerDialog()}>検索</Button>
               <Dialog open={customerDialogOpen} fullScreen>
                 <CustomerSelectionDialog handleCloseCustDialog={handleCloseCustomerDialog} />
               </Dialog>
@@ -242,14 +251,8 @@ const NewOrder = () => {
                   e.stopPropagation();
                 }}
               >
-                ＋ 機材入力
-              </Button>
-              <Button
-                onClick={(e) => {
-                  e.stopPropagation();
-                }}
-              >
-                編集
+                <AddIcon fontSize="small" />
+                機材入力
               </Button>
               <Button
                 color="error"
@@ -257,13 +260,23 @@ const NewOrder = () => {
                   e.stopPropagation();
                 }}
               >
-                － 削除
+                <AddIcon fontSize="small" />
+                返却入力
+              </Button>
+              <Button
+                color="error"
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+              >
+                <Delete fontSize="small" />
+                受注明細削除
               </Button>
             </Grid2>
           </Grid2>
         </AccordionSummary>
         <AccordionDetails sx={{ padding: 0 }}>
-          <SelectTable headers={equipmentHeaders} datas={equipmentRows} onSelectionChange={handleSelectionChange} />
+          <NewOrderTable orderRows={equipmentRows} onSelectionChange={handleSelectionChange} />
         </AccordionDetails>
       </Accordion>
       {/* -------------------------車両----------------------------------- */}
@@ -280,22 +293,18 @@ const NewOrder = () => {
                   e.stopPropagation();
                 }}
               >
-                ＋ 車両入力
+                <AddIcon fontSize="small" />
+                車両入力
               </Button>
-              <Button
-                onClick={(e) => {
-                  e.stopPropagation();
-                }}
-              >
-                編集
-              </Button>
+
               <Button
                 color="error"
                 onClick={(e) => {
                   e.stopPropagation();
                 }}
               >
-                － 削除
+                <Delete fontSize="small" />
+                受注明細削除
               </Button>
             </Grid2>
           </Grid2>
