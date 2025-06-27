@@ -91,12 +91,12 @@ export const SelectTable: React.FC<TableProps> = ({ headers, datas, onSelectionC
                   }}
                 />
               </TableCell>
+              <TableCell padding="none" />
               {headers.map((header) => (
                 <TableCell key={header.key} align={typeof rows[0][header.key] === 'number' ? 'right' : 'left'}>
                   {header.label}
                 </TableCell>
               ))}
-              <TableCell />
               <TableCell />
             </TableRow>
           </TableHead>
@@ -106,20 +106,21 @@ export const SelectTable: React.FC<TableProps> = ({ headers, datas, onSelectionC
                 <TableCell padding="checkbox">
                   <Checkbox checked={selected.includes(row.id)} onChange={() => handleSelect(row.id)} />
                 </TableCell>
+                <TableCell padding="none">{index + 1}</TableCell>
                 {headers.map((header) => (
                   <TableCell key={header.key} align={typeof row[header.key] === 'number' ? 'right' : 'left'}>
                     {row[header.key]}
                   </TableCell>
                 ))}
                 <TableCell>
-                  <IconButton onClick={() => moveRow(index, -1)} disabled={index === 0}>
-                    <ArrowUpwardIcon fontSize="small" />
-                  </IconButton>
-                </TableCell>
-                <TableCell>
-                  <IconButton onClick={() => moveRow(index, 1)} disabled={index === rows.length - 1}>
-                    <ArrowDownwardIcon fontSize="small" />
-                  </IconButton>
+                  <Box display={'flex'}>
+                    <IconButton onClick={() => moveRow(index, -1)} disabled={index === 0}>
+                      <ArrowUpwardIcon fontSize="small" />
+                    </IconButton>
+                    <IconButton onClick={() => moveRow(index, 1)} disabled={index === rows.length - 1}>
+                      <ArrowDownwardIcon fontSize="small" />
+                    </IconButton>
+                  </Box>
                 </TableCell>
               </TableRow>
             ))}
