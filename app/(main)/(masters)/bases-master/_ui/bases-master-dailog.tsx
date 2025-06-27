@@ -14,7 +14,7 @@ import {
   useTheme,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { CheckboxElement, TextFieldElement, useForm } from 'react-hook-form-mui';
+import { CheckboxElement, TextareaAutosizeElement, TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { FormBox } from '../../../_ui/form-box';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
@@ -42,7 +42,7 @@ export const BasesMasterDialog = (props: {
 
   const onSubmit = async (data: BasesMasterValues) => {
     console.log('★★★★★★★★★ ', data);
-    handleCloseDialog();
+    // handleCloseDialog();
     // await addNewBase(data!);
   };
   const { control, handleSubmit, reset } = useForm({
@@ -99,7 +99,7 @@ export const BasesMasterDialog = (props: {
         <>
           <Grid2 container spacing={1} p={5} direction={'column'} justifyContent={'center'} width={'100%'}>
             <Grid2>
-              <FormBox label="所属名" description="100文字まで" required={true}>
+              <FormBox label="所属名" required={true}>
                 <TextFieldElement
                   name="kyotenNam"
                   control={control}
@@ -112,14 +112,14 @@ export const BasesMasterDialog = (props: {
               </FormBox>
             </Grid2>
             <Grid2>
-              <FormBox label="削除フラグ" description="論理削除（データは物理削除されません）">
+              <FormBox label="削除フラグ">
                 {/* <CheckBox fontSize="medium" color="primary" /> */}
                 <CheckboxElement name="delFlg" control={control} size="medium" disabled={editable ? false : true} />
               </FormBox>
             </Grid2>
             <Grid2>
-              <FormBox label="メモ" description="200文字まで">
-                <TextFieldElement ////////////// 200文字までの設定をしなければならない
+              <FormBox label="メモ">
+                <TextareaAutosizeElement ////////////// 200文字までの設定をしなければならない
                   name="mem"
                   control={control}
                   label="200文字まで"

@@ -4,7 +4,13 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { alpha, Button, DialogTitle, Grid2, Stack, Typography, useTheme } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import { useEffect, useState } from 'react';
-import { CheckboxElement, SelectElement, TextFieldElement, useForm } from 'react-hook-form-mui';
+import {
+  CheckboxElement,
+  SelectElement,
+  TextareaAutosizeElement,
+  TextFieldElement,
+  useForm,
+} from 'react-hook-form-mui';
 
 // import { getOneCustomer } from '@/app/_lib/supabase/supabaseFuncs';
 import { FormBox } from '@/app/(main)/_ui/form-box';
@@ -43,7 +49,7 @@ export const CustomerDialogContents = (props: {
   });
 
   const onSubmit = (data: customerMasterDialogDetailsValues) => {
-    handleCloseDialog();
+    // handleCloseDialog();
     console.log(isDirty);
     console.log(data);
   };
@@ -79,7 +85,7 @@ export const CustomerDialogContents = (props: {
         ) : ( */}
         <Grid2 container spacing={1} p={5} direction={'column'} justifyContent={'center'} width={'100%'}>
           <Grid2>
-            <FormBox label={formItems[0].label} description={formItems[0].description} required={true}>
+            <FormBox label={formItems[0].label} required={true}>
               <TextFieldElement
                 name="kokyakuNam"
                 control={control}
@@ -91,7 +97,7 @@ export const CustomerDialogContents = (props: {
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[1].label} description={formItems[1].description} required={true}>
+            <FormBox label={formItems[1].label} required={true}>
               <TextFieldElement
                 name="kana"
                 control={control}
@@ -103,7 +109,7 @@ export const CustomerDialogContents = (props: {
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[2].label} description={formItems[2].description} required={true}>
+            <FormBox label={formItems[2].label} required={true}>
               <SelectElement
                 name="kokyakuRank"
                 control={control}
@@ -122,12 +128,12 @@ export const CustomerDialogContents = (props: {
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[3].label} description={formItems[3].description}>
+            <FormBox label={formItems[3].label}>
               <CheckboxElement name="delFlg" control={control} size="medium" disabled={editable ? false : true} />
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[4].label} description={formItems[4].description}>
+            <FormBox label={formItems[4].label}>
               <TextFieldElement
                 name="keisho"
                 control={control}
@@ -139,7 +145,7 @@ export const CustomerDialogContents = (props: {
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[5].label} description={formItems[5].description}>
+            <FormBox label={formItems[5].label}>
               <TextFieldElement
                 name="adrPost"
                 control={control}
@@ -151,7 +157,7 @@ export const CustomerDialogContents = (props: {
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[6].label} description={formItems[6].description}>
+            <FormBox label={formItems[6].label}>
               <TextFieldElement
                 name="adrShozai"
                 control={control}
@@ -163,7 +169,7 @@ export const CustomerDialogContents = (props: {
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[7].label} description={formItems[7].description}>
+            <FormBox label={formItems[7].label}>
               <TextFieldElement
                 name="adrTatemono"
                 control={control}
@@ -175,7 +181,7 @@ export const CustomerDialogContents = (props: {
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[8].label} description={formItems[8].description}>
+            <FormBox label={formItems[8].label}>
               <TextFieldElement
                 name="adrSonota"
                 control={control}
@@ -187,7 +193,7 @@ export const CustomerDialogContents = (props: {
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[9].label} description={formItems[9].description}>
+            <FormBox label={formItems[9].label}>
               <TextFieldElement
                 name="tel"
                 control={control}
@@ -199,7 +205,7 @@ export const CustomerDialogContents = (props: {
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[10].label} description={formItems[10].description}>
+            <FormBox label={formItems[10].label}>
               <TextFieldElement
                 name="telMobile"
                 control={control}
@@ -211,7 +217,7 @@ export const CustomerDialogContents = (props: {
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[11].label} description={formItems[11].description}>
+            <FormBox label={formItems[11].label}>
               <TextFieldElement
                 name="fax"
                 control={control}
@@ -223,7 +229,7 @@ export const CustomerDialogContents = (props: {
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[12].label} description={formItems[12].description}>
+            <FormBox label={formItems[12].label}>
               <TextFieldElement
                 name="mail"
                 control={control}
@@ -235,8 +241,8 @@ export const CustomerDialogContents = (props: {
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[13].label} description={formItems[13].description}>
-              <TextFieldElement ////////////// 200文字までの設定をしなければならない
+            <FormBox label={formItems[13].label}>
+              <TextareaAutosizeElement ////////////// 200文字までの設定をしなければならない
                 name="mem"
                 control={control}
                 label={formItems[13].description}
@@ -247,12 +253,12 @@ export const CustomerDialogContents = (props: {
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[14].label} description={formItems[14].description}>
+            <FormBox label={formItems[14].label}>
               <CheckboxElement name="dspFlg" control={control} size="medium" disabled={editable ? false : true} />
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[15].label} description={formItems[15].description}>
+            <FormBox label={formItems[15].label}>
               <TextFieldElement
                 name="closeDay"
                 control={control}
@@ -264,7 +270,7 @@ export const CustomerDialogContents = (props: {
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[16].label} description={formItems[16].description}>
+            <FormBox label={formItems[16].label}>
               <TextFieldElement
                 name="siteDay"
                 control={control}
@@ -276,7 +282,7 @@ export const CustomerDialogContents = (props: {
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[17].label} description={formItems[17].description}>
+            <FormBox label={formItems[17].label}>
               <CheckboxElement
                 name="kizaiNebikiFlg"
                 control={control}

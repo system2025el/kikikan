@@ -3,12 +3,10 @@ import { Grid2, Typography } from '@mui/material';
 export const FormBox = ({
   children,
   label,
-  description,
   required,
 }: {
   children: React.ReactNode;
   label: string;
-  description: string;
   required?: boolean;
 }) => {
   return (
@@ -28,3 +26,5 @@ export const FormBox = ({
     </Grid2>
   );
 };
+
+export type FormItemsType = { label: string; description: string };

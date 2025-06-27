@@ -3,7 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { alpha, Button, DialogTitle, Grid2, Stack, Typography, useTheme } from '@mui/material';
 import { useState } from 'react';
-import { CheckboxElement, TextFieldElement, useForm } from 'react-hook-form-mui';
+import { CheckboxElement, TextareaAutosizeElement, TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { FormBox } from '@/app/(main)/_ui/form-box';
 
@@ -42,7 +42,7 @@ export const LocationsMasterDialog = (props: {
   });
 
   const onSubmit = (data: LocMasterValues) => {
-    handleCloseDialog();
+    // handleCloseDialog();
     console.log(isDirty);
     console.log(data);
   };
@@ -70,7 +70,7 @@ export const LocationsMasterDialog = (props: {
 
         <Grid2 container spacing={1} p={5} direction={'column'} justifyContent={'center'} width={'100%'}>
           <Grid2>
-            <FormBox label={formItems[0].label} description={formItems[0].description} required={true}>
+            <FormBox label={formItems[0].label}>
               <TextFieldElement
                 name="locNam"
                 control={control}
@@ -82,7 +82,7 @@ export const LocationsMasterDialog = (props: {
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[1].label} description={formItems[1].description} required={true}>
+            <FormBox label={formItems[1].label}>
               <TextFieldElement
                 name="kana"
                 control={control}
@@ -95,12 +95,12 @@ export const LocationsMasterDialog = (props: {
           </Grid2>
 
           <Grid2>
-            <FormBox label={formItems[2].label} description={formItems[2].description}>
+            <FormBox label={formItems[2].label}>
               <CheckboxElement name="delFlg" control={control} size="medium" disabled={editable ? false : true} />
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[3].label} description={formItems[3].description}>
+            <FormBox label={formItems[3].label}>
               <TextFieldElement
                 name="adrPost"
                 control={control}
@@ -112,7 +112,7 @@ export const LocationsMasterDialog = (props: {
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[4].label} description={formItems[4].description}>
+            <FormBox label={formItems[4].label}>
               <TextFieldElement
                 name="adrShozai"
                 control={control}
@@ -124,7 +124,7 @@ export const LocationsMasterDialog = (props: {
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[5].label} description={formItems[5].description}>
+            <FormBox label={formItems[5].label}>
               <TextFieldElement
                 name="adrTatemono"
                 control={control}
@@ -136,7 +136,7 @@ export const LocationsMasterDialog = (props: {
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[6].label} description={formItems[6].description}>
+            <FormBox label={formItems[6].label}>
               <TextFieldElement
                 name="adrSonota"
                 control={control}
@@ -148,7 +148,7 @@ export const LocationsMasterDialog = (props: {
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[7].label} description={formItems[7].description}>
+            <FormBox label={formItems[7].label}>
               <TextFieldElement
                 name="tel"
                 control={control}
@@ -160,7 +160,7 @@ export const LocationsMasterDialog = (props: {
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[8].label} description={formItems[8].description}>
+            <FormBox label={formItems[8].label}>
               <TextFieldElement
                 name="telMobile"
                 control={control}
@@ -172,7 +172,7 @@ export const LocationsMasterDialog = (props: {
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[9].label} description={formItems[9].description}>
+            <FormBox label={formItems[9].label}>
               <TextFieldElement
                 name="fax"
                 control={control}
@@ -184,7 +184,7 @@ export const LocationsMasterDialog = (props: {
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[10].label} description={formItems[10].description}>
+            <FormBox label={formItems[10].label}>
               <TextFieldElement
                 name="mail"
                 control={control}
@@ -196,8 +196,8 @@ export const LocationsMasterDialog = (props: {
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[11].label} description={formItems[11].description}>
-              <TextFieldElement ////////////// 200文字までの設定をしなければならない
+            <FormBox label={formItems[11].label}>
+              <TextareaAutosizeElement ////////////// 200文字までの設定をしなければならない
                 name="mem"
                 control={control}
                 label={formItems[11].description}
@@ -208,7 +208,7 @@ export const LocationsMasterDialog = (props: {
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[12].label} description={formItems[12].description}>
+            <FormBox label={formItems[12].label}>
               <CheckboxElement name="dspFlg" control={control} size="medium" disabled={editable ? false : true} />
             </FormBox>
           </Grid2>

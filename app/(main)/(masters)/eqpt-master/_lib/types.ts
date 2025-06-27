@@ -95,7 +95,6 @@ const eqptMasterTableSchema = z.object({
 
 export const EqptMasterDialogSchema = eqptMasterSchema.omit({
   sectionNum: true,
-  elNum: true,
   addDat: true,
   addUser: true,
   updDat: true,

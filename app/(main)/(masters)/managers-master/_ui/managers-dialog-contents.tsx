@@ -43,7 +43,7 @@ export const ManagerDialogContents = (props: {
   });
 
   const onSubmit = (data: ManagerMasterDialogDetailsValues) => {
-    handleCloseDialog();
+    // handleCloseDialog();
     console.log(isDirty);
     console.log(data);
   };
@@ -70,7 +70,7 @@ export const ManagerDialogContents = (props: {
         />
         <Grid2 container spacing={1} p={5} direction={'column'} justifyContent={'center'} width={'100%'}>
           <Grid2>
-            <FormBox label={formItems[0].label} description={formItems[0].description} required={true}>
+            <FormBox label={formItems[0].label} required={true}>
               <TextFieldElement
                 name="tantouNam"
                 control={control}
