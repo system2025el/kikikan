@@ -141,13 +141,17 @@ const EquipmentOrderDetail = () => {
   const [endKICSDate, setEndKICSDate] = useState<Date | null>(null);
   // YARD入庫日
   const [endYARDDate, setEndYARDDate] = useState<Date | null>(null);
+  // 出庫日
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  // 入庫日
+  const [endDate, setEndDate] = useState<Date | null>(null);
   // 出庫日から入庫日
-  const [dateRange, setDateRange] = useState<string[]>(getRange(startKICSDate, endKICSDate));
+  const [dateRange, setDateRange] = useState<string[]>(getRange(startDate, endDate));
   // カレンダー選択日
   const [selectDate, setSelectDate] = useState<Date>(new Date());
 
   // ヘッダー用の日付
-  const [dateHeader, setDateHeader] = useState<string[]>(getStockHeader(startKICSDate));
+  const [dateHeader, setDateHeader] = useState<string[]>(getStockHeader(startDate));
   // ストックテーブルの行配列
   const [stockRows, setStockRows] = useState<StockData[]>(getStockRow(stock, dateHeader.length));
   // 機材テーブルの行配列
@@ -293,15 +297,17 @@ const EquipmentOrderDetail = () => {
   };
 
   /**
-   * 出庫日時変更時
-   * @param newDate 出庫日
+   * KICS出庫日時変更時
+   * @param newDate KICS出庫日
    */
-  const handleStartChange = (newDate: Dayjs | null) => {
-    if (newDate !== null) {
+  const handleKICSStartChange = (newDate: Dayjs | null) => {
+    if (newDate === null) return;
+    setStartKICSDate(newDate?.toDate());
+
+    if (startYARDDate === null || newDate.toDate() < startYARDDate) {
       const updatedHeader = getStockHeader(newDate?.toDate());
-      const updatedDateRange = getRange(newDate?.toDate(), endKICSDate);
+      const updatedDateRange = getRange(newDate?.toDate(), endDate);
       const updatedRow = getStockRow(stock, updatedHeader.length);
-      setStartKICSDate(newDate?.toDate());
       setDateHeader(updatedHeader);
       setDateRange(updatedDateRange);
       const targetIndex: number[] = [];
@@ -318,25 +324,65 @@ const EquipmentOrderDetail = () => {
         });
       });
       setStockRows(updatedRow);
+      setStartDate(newDate.toDate());
+    }
 
-      if (Object.keys(equipmentRows).length > 0) {
-        console.log('start');
-        setEquipmentRows((prev) =>
-          prev.map((row) => (row.place === 'Y' ? { ...row, date: subDays(newDate.toDate(), 2) } : row))
-        );
-      }
+    if (Object.keys(equipmentRows).length > 0 && startYARDDate === null) {
+      setEquipmentRows((prev) =>
+        prev.map((row) => (row.place === 'Y' ? { ...row, date: subDays(newDate.toDate(), 2) } : row))
+      );
     }
   };
 
   /**
-   * 入庫日時変更時
-   * @param newDate 入庫日
+   * YARD出庫日時変更時
+   * @param newDate YARD出庫日
    */
-  const handleEndChange = (newDate: Dayjs | null) => {
-    if (newDate !== null) {
-      const updatedDateRange = getRange(startKICSDate, newDate?.toDate());
+  const handleYARDStartChange = (newDate: Dayjs | null) => {
+    if (newDate === null) return;
+    setStartYARDDate(newDate?.toDate());
+
+    if (startKICSDate === null || newDate.toDate() < startKICSDate) {
+      const updatedHeader = getStockHeader(newDate?.toDate());
+      const updatedDateRange = getRange(newDate?.toDate(), endDate);
+      const updatedRow = getStockRow(stock, updatedHeader.length);
+      setDateHeader(updatedHeader);
+      setDateRange(updatedDateRange);
+      const targetIndex: number[] = [];
+      updatedDateRange.map((targetDate) => {
+        updatedHeader.map((date, index) => {
+          if (targetDate === date) {
+            targetIndex.push(index);
+          }
+        });
+      });
+      targetIndex.map((index) => {
+        updatedRow.map((date, i) => {
+          date.data[index] = stock[i] - equipmentRows[i].total;
+        });
+      });
+      setStockRows(updatedRow);
+      setStartDate(newDate.toDate());
+    }
+
+    if (Object.keys(equipmentRows).length > 0 && startKICSDate === null) {
+      setEquipmentRows((prev) =>
+        prev.map((row) => (row.place === 'Y' ? { ...row, date: subDays(newDate.toDate(), 2) } : row))
+      );
+    }
+  };
+
+  /**
+   * KICS入庫日時変更時
+   * @param newDate KICS入庫日
+   */
+  const handleKICSEndChange = (newDate: Dayjs | null) => {
+    if (newDate === null) return;
+    setEndKICSDate(newDate?.toDate());
+
+    if (endYARDDate === null || newDate.toDate() > endYARDDate) {
+      const updatedDateRange = getRange(startDate, newDate?.toDate());
       const updatedRow = getStockRow(stock, dateHeader.length);
-      setEndKICSDate(newDate?.toDate());
       setDateRange(updatedDateRange);
       const targetIndex: number[] = [];
       updatedDateRange.map((targetDate) => {
@@ -352,6 +398,37 @@ const EquipmentOrderDetail = () => {
         });
       });
       setStockRows(updatedRow);
+      setEndDate(newDate.toDate());
+    }
+  };
+
+  /**
+   * YARD入庫日時変更時
+   * @param newDate YARD入庫日
+   */
+  const handleYARDEndChange = (newDate: Dayjs | null) => {
+    if (newDate === null) return;
+    setEndYARDDate(newDate?.toDate());
+
+    if (endKICSDate === null || newDate.toDate() > endKICSDate) {
+      const updatedDateRange = getRange(startDate, newDate?.toDate());
+      const updatedRow = getStockRow(stock, dateHeader.length);
+      setDateRange(updatedDateRange);
+      const targetIndex: number[] = [];
+      updatedDateRange.map((targetDate) => {
+        dateHeader.map((date, index) => {
+          if (targetDate === date) {
+            targetIndex.push(index);
+          }
+        });
+      });
+      targetIndex.map((index) => {
+        updatedRow.map((date, i) => {
+          date.data[index] = stock[i] - equipmentRows[i].total;
+        });
+      });
+      setStockRows(updatedRow);
+      setEndDate(newDate.toDate());
     }
   };
 
@@ -543,7 +620,11 @@ const EquipmentOrderDetail = () => {
               <Typography>出庫日時</Typography>
               <Grid2>
                 <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                <TestDate date={startKICSDate} maxDate={new Date(actualDateRange[0])} onChange={handleStartChange} />
+                <TestDate
+                  date={startKICSDate}
+                  maxDate={new Date(actualDateRange[0])}
+                  onChange={handleKICSStartChange}
+                />
                 <Time />
               </Grid2>
               <Grid2>
@@ -551,11 +632,7 @@ const EquipmentOrderDetail = () => {
                 <TestDate
                   date={startYARDDate}
                   maxDate={new Date(actualDateRange[0])}
-                  onChange={(newDate) => {
-                    if (newDate !== null) {
-                      setStartYARDDate(newDate?.toDate());
-                    }
-                  }}
+                  onChange={handleYARDStartChange}
                 />
                 <Time />
               </Grid2>
@@ -567,7 +644,7 @@ const EquipmentOrderDetail = () => {
                 <TestDate
                   date={endKICSDate}
                   minDate={new Date(actualDateRange[actualDateRange.length - 1])}
-                  onChange={handleEndChange}
+                  onChange={handleKICSEndChange}
                 />
                 <Time />
               </Grid2>
@@ -576,11 +653,7 @@ const EquipmentOrderDetail = () => {
                 <TestDate
                   date={endYARDDate}
                   minDate={new Date(actualDateRange[actualDateRange.length - 1])}
-                  onChange={(newDate) => {
-                    if (newDate !== null) {
-                      setEndYARDDate(newDate?.toDate());
-                    }
-                  }}
+                  onChange={handleYARDEndChange}
                 />
                 <Time />
               </Grid2>
@@ -626,8 +699,6 @@ const EquipmentOrderDetail = () => {
             </Box>
             <Box display={Object.keys(equipmentRows).length > 0 ? 'block' : 'none'}>
               <EqTable
-                startKDate={startKICSDate}
-                startYDate={startYARDDate}
                 rows={equipmentRows}
                 onChange={handleCellChange}
                 handleCellDateChange={handleCellDateChange}
@@ -662,8 +733,8 @@ const EquipmentOrderDetail = () => {
               header={dateHeader}
               rows={stockRows}
               dateRange={dateRange}
-              startKICSDate={startKICSDate}
-              endKICSDate={endKICSDate}
+              startDate={startDate}
+              endDate={endDate}
               preparation={preparation}
               RH={RH}
               GP={GP}
@@ -707,8 +778,8 @@ const EquipmentOrderDetail = () => {
             <Button onClick={handleOpenDateDialog}>編集</Button>
             <Dialog open={dateSelectionDialogOpne} fullScreen sx={{ zIndex: 1201 }}>
               <DateSelectDialog
-                startDate={startKICSDate}
-                endDate={endKICSDate}
+                startDate={startDate}
+                endDate={endDate}
                 preparation={preparation}
                 RH={RH}
                 GP={GP}
