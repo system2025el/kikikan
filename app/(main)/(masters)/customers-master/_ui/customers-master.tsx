@@ -4,7 +4,7 @@ import { Box, Button, Container, Divider, Grid2, Paper, Stack, TextField, Typogr
 
 import { BackButton } from '../../../_ui/buttons';
 import { CustomerMasterTableValues } from '../_lib/types';
-import { CustomersMasterTable } from './customers-table';
+import { CustomersMasterTable } from './customers-master-table';
 
 export const CustomersMaster = (/*{ customers }: { customers: CustomerMasterTableValues[] | undefined }*/) => {
   return (

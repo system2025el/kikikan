@@ -57,6 +57,7 @@ const EnhancedTableHead = (props: EnhancedTableProps) => {
       <TableRow>
         <TableCell padding="checkbox"></TableCell>
         <TableCell>機材名</TableCell>
+        <TableCell>在庫場所</TableCell>
       </TableRow>
     </TableHead>
   );
@@ -97,6 +98,7 @@ export const EquipmentTable = (props: {
                 <TableCell component="th" id={labelId} scope="row" padding="none">
                   {row.name}
                 </TableCell>
+                <TableCell>{row.loc}</TableCell>
               </TableRow>
             );
           })}

@@ -81,14 +81,12 @@ export const EquipmentSelectionDialog = (props: { handleCloseDialog: () => void 
               </Button>
             </Stack>
             <Stack mx={1}>
-              <Typography>キーワード</Typography>
+              <Typography>機材名キーワード</Typography>
               <TextField name="eqsearch" />
             </Stack>
           </Box>
         </Paper>
-        <Box display={'flex'} p={2} justifyContent={'space-between'}>
-          <Box></Box>
-          <TextField sx={{ width: '2%' }} />
+        <Box display={'flex'} p={2} justifyContent={'end'}>
           <Button onClick={() => handleClickEqSelected()}>確定</Button>
           <Dialog open={bundleDialogOpen} onClose={() => setBundleDialogOpen(false)}>
             <BundleDialog handleClose={handleCloseBundle} />
@@ -142,6 +140,7 @@ const BundleDialog = (props: { handleClose: () => void }) => {
               <TableRow>
                 <TableCell padding="checkbox"></TableCell>
                 <TableCell>機材名</TableCell>
+                <TableCell>在庫場所</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -166,6 +165,7 @@ const BundleDialog = (props: { handleClose: () => void }) => {
                     <TableCell component="th" id={labelId} scope="row" padding="none">
                       {row.name}
                     </TableCell>
+                    <TableCell>{row.loc}</TableCell>
                   </TableRow>
                 );
               })}
