@@ -11,7 +11,6 @@ import {
   DialogTitle,
   IconButton,
   Paper,
-  Stack,
   Table,
   TableBody,
   TableCell,
@@ -22,12 +21,10 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import { subDays } from 'date-fns';
 import { Dayjs } from 'dayjs';
 import React, { useRef, useState } from 'react';
 
 import { TestDate } from '@/app/(main)/_ui/date';
-import { TestTime } from '@/app/(main)/_ui/time';
 
 import { Equipment, EquipmentData, StockData } from './equipment-order-detail';
 
@@ -35,8 +32,8 @@ type StockTableProps = {
   header: string[];
   rows: StockData[];
   dateRange: string[];
-  startKICSDate: Date | null;
-  endKICSDate: Date | null;
+  startDate: Date | null;
+  endDate: Date | null;
   preparation: EquipmentData[];
   RH: EquipmentData[];
   GP: EquipmentData[];
@@ -58,8 +55,8 @@ export const StockTable: React.FC<StockTableProps> = ({
   header,
   rows,
   dateRange,
-  startKICSDate,
-  endKICSDate,
+  startDate,
+  endDate,
   preparation,
   RH,
   GP,
@@ -97,8 +94,8 @@ export const StockTable: React.FC<StockTableProps> = ({
               header={header}
               row={row}
               dateRange={dateRange}
-              startKICSDate={startKICSDate}
-              endKICSDate={endKICSDate}
+              startDate={startDate}
+              endDate={endDate}
               preparation={preparation}
               RH={RH}
               GP={GP}
@@ -116,8 +113,8 @@ export type StockTableRowProps = {
   header: string[];
   row: StockData;
   dateRange: string[];
-  startKICSDate: Date | null;
-  endKICSDate: Date | null;
+  startDate: Date | null;
+  endDate: Date | null;
   preparation: EquipmentData[];
   RH: EquipmentData[];
   GP: EquipmentData[];
@@ -139,8 +136,8 @@ const StockTableRow = React.memo(
     header,
     row,
     dateRange,
-    startKICSDate,
-    endKICSDate,
+    startDate,
+    endDate,
     preparation,
     RH,
     GP,
@@ -162,8 +159,8 @@ const StockTableRow = React.memo(
                 bgcolor: getRowBackgroundColor(
                   header[colIndex],
                   dateRange,
-                  startKICSDate,
-                  endKICSDate,
+                  startDate,
+                  endDate,
                   preparation,
                   RH,
                   GP,
@@ -186,8 +183,8 @@ const StockTableRow = React.memo(
     return (
       prevProps.header === nextProps.header &&
       prevProps.row === nextProps.row &&
-      prevProps.startKICSDate === nextProps.startKICSDate &&
-      prevProps.endKICSDate === nextProps.endKICSDate &&
+      // prevProps.startKICSDate === nextProps.startKICSDate &&
+      // prevProps.endKICSDate === nextProps.endKICSDate &&
       prevProps.preparation === nextProps.preparation &&
       prevProps.RH === nextProps.RH &&
       prevProps.GP === nextProps.GP &&
@@ -199,22 +196,13 @@ const StockTableRow = React.memo(
 StockTableRow.displayName = 'StockTableRow';
 
 type EqTableProps = {
-  startKDate: Date | null;
-  startYDate: Date | null;
   rows: Equipment[];
   onChange: (rowIndex: number, orderValue: number, spareValue: number, totalValue: number) => void;
   handleCellDateChange: (rowIndex: number, date: Dayjs | null) => void;
   handleMemoChange: (rowIndex: number, memo: string) => void;
 };
 
-export const EqTable: React.FC<EqTableProps> = ({
-  startKDate,
-  startYDate,
-  rows,
-  onChange,
-  handleCellDateChange,
-  handleMemoChange,
-}) => {
+export const EqTable: React.FC<EqTableProps> = ({ rows, onChange, handleCellDateChange, handleMemoChange }) => {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const handleOrderCellChange = (rowIndex: number, newValue: number) => {
@@ -278,8 +266,6 @@ export const EqTable: React.FC<EqTableProps> = ({
         <TableBody>
           {rows.map((row, rowIndex) => (
             <EqTableRow
-              startKDate={startKDate}
-              startYDate={startYDate}
               key={rowIndex}
               row={row}
               rowIndex={rowIndex}
@@ -298,8 +284,6 @@ export const EqTable: React.FC<EqTableProps> = ({
 };
 
 type EqTableRowProps = {
-  startKDate: Date | null;
-  startYDate: Date | null;
   row: Equipment;
   rowIndex: number;
   handleOrderRef: (el: HTMLInputElement | null) => void;
@@ -312,8 +296,6 @@ type EqTableRowProps = {
 
 const EqTableRow = React.memo(
   ({
-    startKDate,
-    startYDate,
     row,
     rowIndex,
     handleOrderRef,
@@ -323,13 +305,10 @@ const EqTableRow = React.memo(
     handleSpareCellChange,
     handleKeyDown,
   }: EqTableRowProps) => {
-    console.log('描画', rowIndex, startKDate);
-
-    //const [date, setDate] = useState(row.date);
+    console.log('描画', rowIndex);
 
     const handleDateChange = (date: Dayjs | null) => {
       if (date !== null) {
-        //setDate(date.toDate());
         handleCellDateChange(rowIndex, date);
       }
     };
