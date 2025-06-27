@@ -349,7 +349,13 @@ const EqTableRow = React.memo(
             <TestDate
               sx={{
                 '& .MuiPickersInputBase-root': {
-                  height: '24px',
+                  height: '23px',
+                },
+                '& .MuiPickersSectionList-root': {
+                  padding: 0,
+                },
+                '& .MuiButtonBase-root': {
+                  padding: 0,
                 },
               }}
               date={row.date}
