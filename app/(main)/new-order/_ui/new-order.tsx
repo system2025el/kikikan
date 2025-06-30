@@ -255,6 +255,7 @@ const NewOrder = () => {
                 機材入力
               </Button>
               <Button
+                href="/new-order/equipment-return-order-detail"
                 color="error"
                 onClick={(e) => {
                   e.stopPropagation();

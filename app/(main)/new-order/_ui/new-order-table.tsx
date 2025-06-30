@@ -100,6 +100,13 @@ export const NewOrderTable: React.FC<NewOrderTableProps> = ({ orderRows, onSelec
                 <TableCell padding="none">{index + 1}</TableCell>
                 <TableCell align="left">
                   <Button
+                    href={
+                      row.juchuKizaiHeadKbn === 1
+                        ? '/new-order/equipment-order-detail'
+                        : row.juchuKizaiHeadKbn === 2
+                          ? '/new-order/equipment-return-order-detail'
+                          : '/new-order/equipment-keep-order-detail'
+                    }
                     variant="text"
                     sx={{
                       color: row.juchuKizaiHeadKbn === 1 ? 'primary' : row.juchuKizaiHeadKbn === 2 ? 'red' : 'green',
