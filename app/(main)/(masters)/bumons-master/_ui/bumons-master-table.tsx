@@ -68,7 +68,7 @@ export const BumonsMasterTable = ({ bumons }: { bumons: BumonsMasterTableValues[
               <Grid2>
                 <Button onClick={() => handleOpenDialog(-100)}>
                   <AddIcon fontSize="small" />
-                  拠点追加
+                  新規
                 </Button>
               </Grid2>
             </Grid2>

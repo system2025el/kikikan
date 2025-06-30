@@ -1,11 +1,17 @@
 'use client';
+import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import CloseIcon from '@mui/icons-material/Close';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
+import SaveAsIcon from '@mui/icons-material/SaveAs';
 import { Button, IconButton } from '@mui/material';
 import { useRouter } from 'next/navigation';
 
-export const BackButton = (props: { sx?: object; label: string }) => {
-  const { sx, label } = props;
+/**
+ * ブラウザバックするボタン
+ * @param スタイルオブジェクトとボタンの表示文字
+ * @returns 戻るボタン
+ */
+export const BackButton = ({ sx, label }: { sx?: object; label: string }) => {
   const router = useRouter();
   const handleBack = () => {
     router.back();
@@ -13,11 +19,17 @@ export const BackButton = (props: { sx?: object; label: string }) => {
 
   return (
     <Button sx={{ ...sx }} onClick={() => handleBack()}>
+      <ArrowBackIosNewIcon fontSize="small" />
       {label}
     </Button>
   );
 };
 
+/**
+ * ダイアログを閉じるボタン
+ * @param param0 ダイアログを閉じる関数
+ * @returns 閉じるボタン（×ボタン）
+ */
 export const CloseMasterDialogButton = ({ handleCloseDialog }: { handleCloseDialog: () => void }) => {
   return (
     <IconButton sx={{ bgcolor: 'primary.main', color: 'white' }} onClick={() => handleCloseDialog()}>
@@ -25,7 +37,11 @@ export const CloseMasterDialogButton = ({ handleCloseDialog }: { handleCloseDial
     </IconButton>
   );
 };
-
+/**
+ * ダイアログの編集モードを操作するボタン
+ * @param param0 編集モードを操作する関数
+ * @returns {JSXElement} 編集ボタン
+ */
 export const MakeEditModeButton = ({ handleEditable }: { handleEditable: () => void }) => {
   return (
     <Button
@@ -40,6 +56,16 @@ export const MakeEditModeButton = ({ handleEditable }: { handleEditable: () => v
   );
 };
 
-export const SubmitButton = ({ type }: { type: 'button' | 'submit' | 'reset' | undefined }) => {
-  return <Button type={type}>保存</Button>;
+/**
+ * フォームの内容をサブミットする保存ボタン
+ * @param param0 フォームのボタン押下されたときの種類
+ * @returns 保存ボタン
+ */
+export const SubmitButton = ({ type }: { type: 'submit' | undefined }) => {
+  return (
+    <Button type={type}>
+      <SaveAsIcon fontSize="small" />
+      保存終了
+    </Button>
+  );
 };

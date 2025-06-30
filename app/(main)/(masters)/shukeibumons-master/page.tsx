@@ -1,10 +1,12 @@
+import { shukeibumonsList } from './_lib/type';
 import { ShukeibumonsMaster } from './_ui/shukeibumons-master';
 
 const Page = async () => {
-  // const sbumon = await getAllShukeibumon()
+  // DB const shukeibumons = await getAllShukeibumons();
+  const shukeibumons = shukeibumonsList;
   return (
     <>
-      <ShukeibumonsMaster />
+      <ShukeibumonsMaster shukeibumons={shukeibumons} />
     </>
   );
 };

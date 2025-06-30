@@ -31,9 +31,9 @@ import { LocationsMasterDialog } from './locations-master-dialog';
 export const LocationsMasterTable = () => {
   const [page, setPage] = useState(1);
   const rowsPerPage = 50;
-  /* ダイアログ開く顧客のID、閉じるとき、未選択で-100とする */
+  /* ダイアログ開く公演場所のID、閉じるとき、未選択で-100とする */
   const [openId, setOpenID] = useState<string | number>(-100);
-  /* 車両詳細ダイアログの開閉状態 */
+  /* 詳細ダイアログの開閉状態 */
   const [dialogOpen, setDialogOpen] = useState(false);
   /* ダイアログでの編集モード */
   const [editable, setEditable] = useState(false);
@@ -54,13 +54,11 @@ export const LocationsMasterTable = () => {
       rowsPerPage > 0 ? locationList.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage) : locationList,
     [page, rowsPerPage]
   );
-  // テーブル最後のページ用の空データの長さ
-  const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - locationList.length) : 0;
 
   return (
     <Box>
       <Typography pt={2} pl={2}>
-        公演場所一覧
+        一覧
       </Typography>
       <Divider />
       <Grid2 container mt={1} mx={0.5} justifyContent={'space-between'}>
@@ -72,7 +70,7 @@ export const LocationsMasterTable = () => {
             <Grid2>
               <Button onClick={() => handleOpenDialog(-100)}>
                 <AddIcon fontSize="small" />
-                車両追加
+                新規
               </Button>
             </Grid2>
           </Grid2>

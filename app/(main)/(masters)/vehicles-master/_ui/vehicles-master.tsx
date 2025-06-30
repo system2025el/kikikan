@@ -9,10 +9,12 @@ import { VehiclesMasterTable } from './veicles-master-table';
 export const VehiclesMaster = ({ vehs }: { vehs: VehMasterTableValues[] | undefined }) => {
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
+      <Box justifySelf={'end'} mb={0.5}>
+        <BackButton label={'戻る'} />
+      </Box>
       <Paper variant="outlined">
-        <Box width={'100%'} display={'flex'} p={2} justifyContent={'space-between'} alignItems={'center'}>
+        <Box width={'100%'} display={'flex'} p={2}>
           <Typography>車両マスタ</Typography>
-          <BackButton sx={{ ml: '40%' }} label={'戻る'} />
         </Box>
       </Paper>
       <VehiclesMasterTable vehs={vehs} />

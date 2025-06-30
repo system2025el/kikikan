@@ -118,7 +118,7 @@ export const ManagerssMasterTable = () => {
       ) : ( */}
       {/* <> */}
       <Typography pt={2} pl={2}>
-        担当者一覧
+        一覧
       </Typography>
       <Divider />
       <Grid2 container mt={1} mx={0.5} justifyContent={'space-between'}>
@@ -130,7 +130,7 @@ export const ManagerssMasterTable = () => {
             <Grid2>
               <Button onClick={() => handleOpen(-100)}>
                 <AddIcon fontSize="small" />
-                追加
+                新規
               </Button>
             </Grid2>
           </Grid2>

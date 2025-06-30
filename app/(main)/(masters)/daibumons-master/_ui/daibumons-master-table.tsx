@@ -1,5 +1,5 @@
 import AddIcon from '@mui/icons-material/Add';
-import { Box, Button,Dialog, Divider, Grid2, Paper, TableContainer, Typography } from '@mui/material';
+import { Box, Button, Dialog, Divider, Grid2, Paper, TableContainer, Typography } from '@mui/material';
 import { useMemo, useState } from 'react';
 
 import { MasterTable } from '@/app/(main)/_ui/table';
@@ -11,11 +11,11 @@ import { DaibumonsMasterDialog } from './daibumons-master-dialog';
 export const DaibumonsMasterTable = ({ daibumons }: { daibumons: DaibumonsMasterDialogValues[] }) => {
   const [page, setPage] = useState(1);
   const rowsPerPage = 50;
-  /* ダイアログ開く顧客のID、閉じるとき、未選択で-100とする */
+  /* ダイアログ開く大部門のID、閉じるとき、未選択で-100とする */
   const [openId, setOpenID] = useState<number>(-100);
-  /* 車両詳細ダイアログの開閉状態 */
+  /* 詳細ダイアログの開閉状態 */
   const [dialogOpen, setDialogOpen] = useState(false);
-  /* ダイアログでの編集モード */
+  /* ダイアログでの編集モード管理 */
   const [editable, setEditable] = useState(false);
   const handleOpenDialog = (id: number) => {
     if (id === -100) {

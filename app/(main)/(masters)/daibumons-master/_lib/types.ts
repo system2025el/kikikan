@@ -57,16 +57,6 @@ export const daibumonsList: DaibumonsMasterDialogValues[] = [
     mem: '',
     delFlg: false,
   },
-  //   {
-  //     daibumonId: 3,
-  //     daibumonNam: 'その他',
-  //     dspOrdNum: 3,
-  //     mem: '厚木など',
-  //     addDat: new Date(),
-  //     addUser: '',
-  //     updDat: new Date(''),
-  //     updUser: '',
-  //   },
 ];
 
 export const daibumonMHeader = [

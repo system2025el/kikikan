@@ -32,10 +32,12 @@ export const EqptMaster = () => {
   };
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
+      <Box justifySelf={'end'} mb={0.5}>
+        <BackButton label={'戻る'} />
+      </Box>
       <Paper variant="outlined">
-        <Box width={'100%'} display={'flex'} p={2} justifyContent={'space-between'} alignItems={'center'}>
+        <Box width={'100%'} display={'flex'} p={2}>
           <Typography>機材マスタ検索</Typography>
-          <BackButton label={'戻る'} />
         </Box>
         <Divider />
         <Box width={'100%'} p={2}>

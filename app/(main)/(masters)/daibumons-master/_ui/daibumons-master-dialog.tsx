@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { alpha, Grid2, useTheme } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { CheckboxElement, TextareaAutosizeElement,TextFieldElement } from 'react-hook-form-mui';
+import { CheckboxElement, TextareaAutosizeElement, TextFieldElement } from 'react-hook-form-mui';
 
 import { FormBox, FormItemsType } from '@/app/(main)/_ui/form-box';
 
@@ -20,10 +20,15 @@ export const DaibumonsMasterDialog = ({
   editable: boolean;
   setEditable: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
+  /**/
   const theme = useTheme();
+  /**/
   const colorOfThis = alpha(theme.palette.primary.main, 0.5);
+  /**/
   const [daibumon, setdaibumon] = useState<DaibumonsMasterDialogValues | undefined>();
+  /**/
   const [isLoading, setIsLoading] = useState(true);
+  /*  */
   const handleEditable = () => {
     setEditable(true);
   };

@@ -1,39 +1,21 @@
-'use client';
-import { CheckBox, SellTwoTone } from '@mui/icons-material';
 import AddIcon from '@mui/icons-material/Add';
-import {
-  alpha,
-  Box,
-  Button,
-  Dialog,
-  Divider,
-  Grid2,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
-  useTheme,
-} from '@mui/material';
-import { SetStateAction, useEffect, useMemo, useState } from 'react';
+import { Box, Button, Dialog, Divider, Grid2, Paper, TableContainer, Typography } from '@mui/material';
+import { useMemo, useState } from 'react';
 
 import { MasterTable } from '@/app/(main)/_ui/table';
+import { MuiTablePagination } from '@/app/(main)/_ui/table-pagination';
 
-import { MuiTablePagination } from '../../../_ui/table-pagination';
-import { BasesMasterTableValues, bMHeader } from '../_lib/types';
-import { BasesMasterDialog } from './bases-master-dailog';
+import { shukeibumonMHeader, ShukeibumonsMasterDialogValues } from '../_lib/type';
+import { ShukeibumonsMasterDialog } from './shukeibumons-master-dialog';
 
-export const BasesMasterTable = ({ bases }: { bases: BasesMasterTableValues[] | undefined }) => {
+export const ShukeibumonsMasterTable = ({ shukeibumons }: { shukeibumons: ShukeibumonsMasterDialogValues[] }) => {
   const [page, setPage] = useState(1);
   const rowsPerPage = 50;
-  /* ダイアログ開く顧客のID、閉じるとき、未選択で-100とする */
+  /* ダイアログ開く集計部門のID、閉じるとき、未選択で-100とする */
   const [openId, setOpenID] = useState<number>(-100);
-  /* 車両詳細ダイアログの開閉状態 */
+  /* 詳細ダイアログの開閉状態 */
   const [dialogOpen, setDialogOpen] = useState(false);
-  /* ダイアログでの編集モード */
+  /* ダイアログでの編集モード管理 */
   const [editable, setEditable] = useState(false);
   const handleOpenDialog = (id: number) => {
     if (id === -100) {
@@ -48,8 +30,9 @@ export const BasesMasterTable = ({ bases }: { bases: BasesMasterTableValues[] | 
 
   // 表示するデータ
   const list = useMemo(
-    () => (rowsPerPage > 0 ? bases!.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage) : bases),
-    [page, rowsPerPage, bases]
+    () =>
+      rowsPerPage > 0 ? shukeibumons!.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage) : shukeibumons,
+    [page, rowsPerPage, shukeibumons]
   );
   // テーブル最後のページ用の空データの長さ
 
@@ -62,7 +45,7 @@ export const BasesMasterTable = ({ bases }: { bases: BasesMasterTableValues[] | 
         <Divider />
         <Grid2 container mt={1} mx={0.5} justifyContent={'space-between'}>
           <Grid2 spacing={1}>
-            <MuiTablePagination arrayList={bases!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
+            <MuiTablePagination arrayList={shukeibumons!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
           </Grid2>
           <Grid2 container spacing={1}>
             <Grid2 container spacing={1}>
@@ -78,16 +61,16 @@ export const BasesMasterTable = ({ bases }: { bases: BasesMasterTableValues[] | 
 
         <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 1 }}>
           <MasterTable
-            headers={bMHeader}
-            datas={list!.map((l) => ({ id: l.kyotenId!, kyotenNam: l.kyotenNam, mem: l.mem! }))}
+            headers={shukeibumonMHeader}
+            datas={list!.map((l) => ({ id: l.shukeibumonId!, shukeibumonNam: l.shukeibumonNam, mem: l.mem! }))}
             handleOpenDialog={handleOpenDialog}
             page={page}
             rowsPerPage={rowsPerPage}
           />
           <Dialog open={dialogOpen} fullScreen>
-            <BasesMasterDialog
+            <ShukeibumonsMasterDialog
               handleClose={handleCloseDialog}
-              baseId={openId}
+              shukeibumonId={openId}
               editable={editable}
               setEditable={setEditable}
             />

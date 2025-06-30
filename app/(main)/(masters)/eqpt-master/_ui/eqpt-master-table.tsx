@@ -69,7 +69,7 @@ export const EqptMasterTable = (props: {
   return (
     <Box>
       <Typography pt={2} pl={2}>
-        顧客一覧
+        一覧
       </Typography>
       <Divider />
       <Grid2 container mt={1} mx={0.5} justifyContent={'space-between'}>
@@ -81,7 +81,7 @@ export const EqptMasterTable = (props: {
             <Grid2>
               <Button onClick={() => handleOpen(-100)}>
                 <AddIcon fontSize="small" />
-                追加
+                新規
               </Button>
             </Grid2>
           </Grid2>
