@@ -13,7 +13,7 @@ import {
 } from 'react-hook-form-mui';
 
 // import { getOneCustomer } from '@/app/_lib/supabase/supabaseFuncs';
-import { FormBox } from '@/app/(main)/_ui/form-box';
+import { FormBox, FormItemsType } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { MasterDialogTitle } from '../../_ui/dialog-title';
@@ -42,9 +42,27 @@ export const CustomerDialogContents = (props: {
     reset,
     formState: { isDirty },
   } = useForm({
-    mode: 'onSubmit',
-    reValidateMode: 'onSubmit',
-    defaultValues: customer,
+    mode: 'onBlur',
+    reValidateMode: 'onBlur',
+    defaultValues: {
+      kokyakuNam: customer?.kokyakuNam,
+      kana: customer?.kana,
+      kokyakuRank: customer?.kokyakuRank,
+      keisho: customer?.keisho,
+      adrPost: customer?.adrPost,
+      adrShozai: customer?.adrShozai,
+      adrTatemono: customer?.adrTatemono,
+      adrSonota: customer?.adrSonota,
+      tel: customer?.tel,
+      telMobile: customer?.telMobile,
+      mail: customer?.mail,
+      mem: customer?.mem,
+      delFlg: customer?.delFlg,
+      dspFlg: customer?.dspFlg,
+      closeDay: customer?.closeDay,
+      siteDay: customer?.siteDay,
+      kizaiNebikiFlg: customer?.kizaiNebikiFlg,
+    }, //DB customer,
     resolver: zodResolver(customerMaterDialogDetailsSchema),
   });
 
@@ -85,11 +103,11 @@ export const CustomerDialogContents = (props: {
         ) : ( */}
         <Grid2 container spacing={1} p={5} direction={'column'} justifyContent={'center'} width={'100%'}>
           <Grid2>
-            <FormBox label={formItems[0].label} required={true}>
+            <FormBox formItem={formItems[0]} required={true}>
               <TextFieldElement
                 name="kokyakuNam"
                 control={control}
-                label={formItems[0].description}
+                label={formItems[0].exsample}
                 fullWidth
                 sx={{ maxWidth: '80%' }}
                 disabled={editable ? false : true}
@@ -97,11 +115,11 @@ export const CustomerDialogContents = (props: {
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[1].label} required={true}>
+            <FormBox formItem={formItems[1]} required={true}>
               <TextFieldElement
                 name="kana"
                 control={control}
-                label={formItems[1].description}
+                label={formItems[1].exsample}
                 fullWidth
                 sx={{ maxWidth: '80%' }}
                 disabled={editable ? false : true}
@@ -109,11 +127,11 @@ export const CustomerDialogContents = (props: {
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[2].label} required={true}>
+            <FormBox formItem={formItems[2]} required={true}>
               <SelectElement
                 name="kokyakuRank"
                 control={control}
-                label={formItems[2].description}
+                label={formItems[2].exsample}
                 options={[
                   { id: 1, label: 1 },
                   { id: 2, label: 2 },
@@ -128,16 +146,16 @@ export const CustomerDialogContents = (props: {
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[3].label}>
+            <FormBox formItem={formItems[3]}>
               <CheckboxElement name="delFlg" control={control} size="medium" disabled={editable ? false : true} />
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[4].label}>
+            <FormBox formItem={formItems[4]}>
               <TextFieldElement
                 name="keisho"
                 control={control}
-                label={formItems[4].description}
+                label={formItems[4].exsample}
                 fullWidth
                 sx={{ maxWidth: '50%' }}
                 disabled={editable ? false : true}
@@ -145,11 +163,11 @@ export const CustomerDialogContents = (props: {
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[5].label}>
+            <FormBox formItem={formItems[5]}>
               <TextFieldElement
                 name="adrPost"
                 control={control}
-                label={formItems[5].description}
+                label={formItems[5].exsample}
                 fullWidth
                 sx={{ maxWidth: '50%' }}
                 disabled={editable ? false : true}
@@ -157,11 +175,11 @@ export const CustomerDialogContents = (props: {
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[6].label}>
+            <FormBox formItem={formItems[6]}>
               <TextFieldElement
                 name="adrShozai"
                 control={control}
-                label={formItems[6].description}
+                label={formItems[6].exsample}
                 fullWidth
                 sx={{ maxWidth: '80%' }}
                 disabled={editable ? false : true}
@@ -169,11 +187,11 @@ export const CustomerDialogContents = (props: {
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[7].label}>
+            <FormBox formItem={formItems[7]}>
               <TextFieldElement
                 name="adrTatemono"
                 control={control}
-                label={formItems[7].description}
+                label={formItems[7].exsample}
                 fullWidth
                 sx={{ maxWidth: '80%' }}
                 disabled={editable ? false : true}
@@ -181,11 +199,11 @@ export const CustomerDialogContents = (props: {
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[8].label}>
+            <FormBox formItem={formItems[8]}>
               <TextFieldElement
                 name="adrSonota"
                 control={control}
-                label={formItems[8].description}
+                label={formItems[8].exsample}
                 fullWidth
                 sx={{ maxWidth: '80%' }}
                 disabled={editable ? false : true}
@@ -193,11 +211,11 @@ export const CustomerDialogContents = (props: {
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[9].label}>
+            <FormBox formItem={formItems[9]}>
               <TextFieldElement
                 name="tel"
                 control={control}
-                label={formItems[9].description}
+                label={formItems[9].exsample}
                 fullWidth
                 sx={{ maxWidth: '50%' }}
                 disabled={editable ? false : true}
@@ -205,11 +223,11 @@ export const CustomerDialogContents = (props: {
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[10].label}>
+            <FormBox formItem={formItems[10]}>
               <TextFieldElement
                 name="telMobile"
                 control={control}
-                label={formItems[10].description}
+                label={formItems[10].exsample}
                 fullWidth
                 sx={{ maxWidth: '50%' }}
                 disabled={editable ? false : true}
@@ -217,11 +235,11 @@ export const CustomerDialogContents = (props: {
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[11].label}>
+            <FormBox formItem={formItems[11]}>
               <TextFieldElement
                 name="fax"
                 control={control}
-                label={formItems[11].description}
+                label={formItems[11].exsample}
                 fullWidth
                 sx={{ maxWidth: '50%' }}
                 disabled={editable ? false : true}
@@ -229,11 +247,11 @@ export const CustomerDialogContents = (props: {
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[12].label}>
+            <FormBox formItem={formItems[12]}>
               <TextFieldElement
                 name="mail"
                 control={control}
-                label={formItems[12].description}
+                label={formItems[12].exsample}
                 fullWidth
                 sx={{ maxWidth: '80%' }}
                 disabled={editable ? false : true}
@@ -241,11 +259,11 @@ export const CustomerDialogContents = (props: {
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[13].label}>
+            <FormBox formItem={formItems[13]}>
               <TextareaAutosizeElement ////////////// 200文字までの設定をしなければならない
                 name="mem"
                 control={control}
-                label={formItems[13].description}
+                label={formItems[13].exsample}
                 fullWidth
                 sx={{ maxWidth: '80%' }}
                 disabled={editable ? false : true}
@@ -253,16 +271,16 @@ export const CustomerDialogContents = (props: {
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[14].label}>
+            <FormBox formItem={formItems[14]}>
               <CheckboxElement name="dspFlg" control={control} size="medium" disabled={editable ? false : true} />
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[15].label}>
+            <FormBox formItem={formItems[15]}>
               <TextFieldElement
                 name="closeDay"
                 control={control}
-                label={formItems[15].description}
+                label={formItems[15].exsample}
                 fullWidth
                 sx={{ maxWidth: '50%' }}
                 disabled={editable ? false : true}
@@ -270,11 +288,11 @@ export const CustomerDialogContents = (props: {
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[16].label}>
+            <FormBox formItem={formItems[16]}>
               <TextFieldElement
                 name="siteDay"
                 control={control}
-                label={formItems[16].description}
+                label={formItems[16].exsample}
                 fullWidth
                 sx={{ maxWidth: '50%' }}
                 disabled={editable ? false : true}
@@ -282,7 +300,7 @@ export const CustomerDialogContents = (props: {
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[17].label}>
+            <FormBox formItem={formItems[17]}>
               <CheckboxElement
                 name="kizaiNebikiFlg"
                 control={control}
@@ -299,79 +317,97 @@ export const CustomerDialogContents = (props: {
 };
 
 /* 移動する予定move */
-type formItemsType = { label: string; description: string };
-const formItems: formItemsType[] = [
+
+const formItems: FormItemsType[] = [
   {
     label: '顧客名',
-    description: '社名、氏名、団体名　※前㈱、後㈱等も付記',
+    exsample: '例）㈱エンジニア･ライティング',
+    constraints: '100文字まで',
   },
   {
     label: '顧客かな',
-    description: 'かな名',
+    exsample: '例）えんじにあ　らいてぃんぐ',
+    constraints: '100文字まで',
   },
   {
     label: '顧客ランク',
-    description: '１～５',
+    exsample: '',
+    constraints: '１～５選択',
   },
   {
     label: '削除フラグ',
-    description: '論理削除（データは物理削除されません）',
+    exsample: '',
+    constraints: '論理削除（データは物理削除されません）',
   },
   {
     label: '顧客敬称',
-    description: '例）御中、様',
+    exsample: '',
+    constraints: '10文字まで',
   },
   {
     label: '顧客住所（郵便番号）',
-    description: '例）242-0018 ',
+    exsample: '例）242-0018 ',
+    constraints: '20文字まで',
   },
   {
     label: '顧客住所（所在地）',
-    description: '例）神奈川県大和市深見西9-99-99',
+    exsample: '例）神奈川県大和市深見西9-99-99',
+    constraints: '100文字まで',
   },
   {
     label: '顧客住所（建物名）',
-    description: '例）XXビル 11F',
+    exsample: '例）XXビル 11F',
+    constraints: '100文字まで',
   },
   {
     label: '顧客住所（その他）',
-    description: 'その他の住所情報',
+    exsample: 'その他の住所情報',
+    constraints: '100文字まで',
   },
   {
     label: '電話',
-    description: '例）046-999-1234',
+    exsample: '例）046-999-1234',
+    constraints: '20文字まで',
   },
   {
     label: '携帯',
-    description: '例）070-9999-9999',
+    exsample: '例）070-9999-9999',
+    constraints: '20文字まで',
   },
   {
     label: 'FAX',
-    description: '例）046-999-1235',
+    exsample: '例）046-999-1235',
+    constraints: '20文字まで',
   },
   {
     label: 'メールアドレス',
-    description: '例）abc@zzz.co.jp',
+    exsample: '例）abc@zzz.co.jp',
+    constraints: '100文字まで',
   },
   {
     label: 'メモ',
-    description: '200文字まで',
+    exsample: '',
+    constraints: '200文字まで',
   },
   {
     label: '表示フラグ',
-    description: '選択リストへの表示',
+    exsample: '',
+    constraints: '選択リストへの表示',
   },
   {
     label: '月締日',
-    description: '例）31、15　※月末締めの場合31を指定',
+    exsample: '例）31、15　※月末締めの場合31を指定',
+    constraints: '数字',
   },
   {
     label: '支払サイト日数',
-    description: '例）月末締め翌月末払いの場合30、翌々月末払いは60を指定',
+    exsample: '例）月末締め翌月末払いの場合30、翌々月末払いは60を指定',
+    constraints: '数字',
   },
   {
     label: '機材値引き対象フラグ',
-    description: '',
+    exsample: '',
+    constraints: '数字',
   },
 ];
 

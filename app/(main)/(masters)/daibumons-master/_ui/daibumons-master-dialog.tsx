@@ -1,37 +1,28 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CheckBox } from '@mui/icons-material';
-import {
-  alpha,
-  Box,
-  Button,
-  Container,
-  DialogTitle,
-  Grid2,
-  Paper,
-  Stack,
-  TextField,
-  Typography,
-  useTheme,
-} from '@mui/material';
+import { alpha, Grid2, useTheme } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { CheckboxElement, TextareaAutosizeElement, TextFieldElement, useForm } from 'react-hook-form-mui';
+import { useForm } from 'react-hook-form';
+import { CheckboxElement, TextareaAutosizeElement,TextFieldElement } from 'react-hook-form-mui';
 
-// import { addNewVehicle, getOneVehicle } from '@/app/_lib/supabase/supabaseFuncs';
-import { FormBox, FormItemsType } from '../../../_ui/form-box';
-import { Loading } from '../../../_ui/loading';
+import { FormBox, FormItemsType } from '@/app/(main)/_ui/form-box';
+
 import { MasterDialogTitle } from '../../_ui/dialog-title';
-import { VehMasterDialogSchema, VehMasterDialogValues } from '../_lib/datas';
+import { daibumonsList, DaibumonsMasterDialogSchema, DaibumonsMasterDialogValues } from '../_lib/types';
 
-export const VehiclesMasterDialog = (props: {
-  vehicleId: number;
+export const DaibumonsMasterDialog = ({
+  daibumonId,
+  handleClose,
+  editable,
+  setEditable,
+}: {
+  daibumonId: number;
   handleClose: () => void;
   editable: boolean;
   setEditable: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
-  const { vehicleId, handleClose, editable, setEditable } = props;
   const theme = useTheme();
   const colorOfThis = alpha(theme.palette.primary.main, 0.5);
-  const [veh, setVeh] = useState<VehMasterDialogValues>();
+  const [daibumon, setdaibumon] = useState<DaibumonsMasterDialogValues | undefined>();
   const [isLoading, setIsLoading] = useState(true);
   const handleEditable = () => {
     setEditable(true);
@@ -41,39 +32,49 @@ export const VehiclesMasterDialog = (props: {
     handleClose();
   };
 
-  const onSubmit = async (data: VehMasterDialogValues) => {
+  const onSubmit = async (data: DaibumonsMasterDialogValues) => {
     console.log('★★★★★★★★★ ', data);
     // handleCloseDialog();
-    // await addNewVehicle(data!);
+    // await addNewdaibumon(data!);
   };
   const { control, handleSubmit, reset } = useForm({
     mode: 'onBlur',
     reValidateMode: 'onBlur',
-    resolver: zodResolver(VehMasterDialogSchema),
+    resolver: zodResolver(DaibumonsMasterDialogSchema),
     defaultValues: {
-      sharyoNam: '',
-      delFlg: false,
-      dspFlg: true,
-      mem: '',
+      //DB   kyotenNam: '',
+      //   delFlg: false,
+      //   mem: '',
+      daibumonNam: daibumon?.daibumonNam,
+      daibumonId: daibumon?.daibumonId,
+      delFlg: daibumon?.delFlg,
+      mem: daibumon?.mem,
     },
   });
 
+  //モック
+  useEffect(() => {
+    console.log('daibumonId : ', daibumonId, ' daibumonList : ', daibumonsList);
+
+    setdaibumon(daibumonsList[daibumonId - 1]);
+    console.log('daibumon : ', daibumon);
+  }, [daibumon, daibumonId]);
   //DB
   // useEffect(() => {
-  // if (vehicleId === -100) {
+  // if (daibumonId === -100) {
   //   setIsLoading(false);
   //   return;
   // } else {
-  //   const getThatOneCustomer = async () => {
-  //     const veh1 = await getOneVehicle(vehicleId);
-  //     reset(veh1);
-  //     console.log('vehId : ', vehicleId, ' sharyoId : ', veh1?.sharyoNam);
-  //     setVeh(veh1!);
+  //   const getThatOnedaibumon = async () => {
+  //     const daibumon1 = await getOnedaibumon(daibumonId);
+  //     reset(daibumon1);
+  //     console.log('daibumonId : ', daibumonId, ' kyotenId : ', daibumon1?.kyotenNam);
+  //     setdaibumon(veh1!);
   //     setIsLoading(false);
   //   };
-  //   getThatOneCustomer();
+  //   getThatOnedaibumon();
   // }
-  // }, [vehicleId, reset]);
+  // }, [daibumonId, reset]);
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit)}>
@@ -82,29 +83,27 @@ export const VehiclesMasterDialog = (props: {
           editable={editable}
           handleEditable={handleEditable}
           handleCloseDialog={handleCloseDialog}
-          dialogTitle={'車両マスタ'}
+          dialogTitle="大部門マスタ登録"
         />
         {/* {isLoading ? ( //DB
-          <Loading />
-        ) : ( */}
+            <Loading />
+          ) : ( */}
         <>
           <Grid2 container spacing={1} p={5} direction={'column'} justifyContent={'center'} width={'100%'}>
             <Grid2>
               <FormBox formItem={formItems[0]} required={true}>
                 <TextFieldElement
-                  name="sharyoNam"
+                  name="daibumonNam"
                   control={control}
                   label={formItems[0].exsample}
                   fullWidth
-                  sx={{ maxWidth: '80%' }}
+                  sx={{ maxWidth: '90%' }}
                   disabled={editable ? false : true}
                 />
-                {/* <TextField fullWidth label="100文字まで" sx={{ maxWidth: '80%' }} disabled={editable ? false : true} /> */}
               </FormBox>
             </Grid2>
             <Grid2>
               <FormBox formItem={formItems[1]}>
-                {/* <CheckBox fontSize="medium" color="primary" /> */}
                 <CheckboxElement name="delFlg" control={control} size="medium" disabled={editable ? false : true} />
               </FormBox>
             </Grid2>
@@ -115,16 +114,9 @@ export const VehiclesMasterDialog = (props: {
                   control={control}
                   label={formItems[2].exsample}
                   fullWidth
-                  sx={{ maxWidth: '80%' }}
+                  sx={{ maxWidth: '90%' }}
                   disabled={editable ? false : true}
                 />
-                {/* <TextField fullWidth label="200文字まで" sx={{ maxWidth: '80%' }} disabled={editable ? false : true} /> */}
-              </FormBox>
-            </Grid2>
-            <Grid2>
-              <FormBox formItem={formItems[3]}>
-                {/* <CheckBox fontSize="medium" color="primary" /> */}
-                <CheckboxElement name="dspFlg" control={control} size="medium" disabled={editable ? false : true} />
               </FormBox>
             </Grid2>
           </Grid2>
@@ -137,8 +129,8 @@ export const VehiclesMasterDialog = (props: {
 
 const formItems: FormItemsType[] = [
   {
-    label: '車両名',
-    exsample: '例）ハイエース',
+    label: '大部門名',
+    exsample: '例）照明',
     constraints: '100文字まで',
   },
   {
@@ -150,10 +142,5 @@ const formItems: FormItemsType[] = [
     label: 'メモ',
     exsample: '',
     constraints: '200文字まで',
-  },
-  {
-    label: '表示フラグ',
-    exsample: '選択リストへの表示',
-    constraints: '',
   },
 ];

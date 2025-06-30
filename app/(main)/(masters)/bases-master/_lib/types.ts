@@ -1,47 +1,44 @@
 import { z } from 'zod';
 
-import { BasesMasterDialog } from '../_ui/bases-master-dailog';
-
-const basesMasterSChema = z.object({
+const basesMasterSchema = z.object({
   kyotenId: z.number().optional(),
   kyotenNam: z.string(),
   delFlg: z.boolean().optional(),
   mem: z.string().optional(),
   dspFlg: z.boolean().optional(),
   dspOrdNum: z.number().optional(),
-  addDate: z.date(),
+  addDat: z.date(),
   addUser: z.string(),
-  updDate: z.date(),
+  updDat: z.date(),
   updUser: z.string(),
 });
 
-export const BaseMasterTableSchema = basesMasterSChema.omit({
+export const BasesMasterTableSchema = basesMasterSchema.omit({
   dspOrdNum: true,
-  addDate: true,
+  addDat: true,
   addUser: true,
-  updDate: true,
+  updDat: true,
   updUser: true,
   dspFlg: true,
 });
 
-export type BaseMasterTableValues = z.infer<typeof BaseMasterTableSchema>;
+export type BasesMasterTableValues = z.infer<typeof BasesMasterTableSchema>;
 
-export const BaseMasterDialogSchema = basesMasterSChema.omit({
+export const BasesMasterDialogSchema = basesMasterSchema.omit({
   //DB   kyotenId: true,
   dspOrdNum: true,
-  addDate: true,
+  addDat: true,
   addUser: true,
-  updDate: true,
+  updDat: true,
   updUser: true,
   dspFlg: true,
 });
 
-export type BaseMasterDialogValues = z.infer<typeof BaseMasterDialogSchema>;
+export type BasesMasterDialogValues = z.infer<typeof BasesMasterDialogSchema>;
 
 // export type BasesMasterValues = { kyotenId: number; kyotenNam: string; dspOrdNum: number };
-export type BasesMasterValues = z.infer<typeof BaseMasterDialogSchema>;
 
-export const basesList: BaseMasterDialogValues[] = [
+export const basesList: BasesMasterDialogValues[] = [
   {
     kyotenNam: 'KICS',
     mem: '川崎',
@@ -65,9 +62,9 @@ export const basesList: BaseMasterDialogValues[] = [
   //     kyotenNam: 'その他',
   //     dspOrdNum: 3,
   //     mem: '厚木など',
-  //     addDate: new Date(),
+  //     addDat: new Date(),
   //     addUser: '',
-  //     updDate: new Date(''),
+  //     updDat: new Date(''),
   //     updUser: '',
   //   },
 ];

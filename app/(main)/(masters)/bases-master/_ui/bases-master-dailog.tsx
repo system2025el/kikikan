@@ -16,21 +16,25 @@ import {
 import { useEffect, useState } from 'react';
 import { CheckboxElement, TextareaAutosizeElement, TextFieldElement, useForm } from 'react-hook-form-mui';
 
-import { FormBox } from '../../../_ui/form-box';
+import { FormBox, FormItemsType } from '../../../_ui/form-box';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 // import { Loading } from '../../../_ui/loading';
-import { BaseMasterDialogSchema, BaseMasterDialogValues, basesList, BasesMasterValues } from '../_lib/types';
+import { basesList,BasesMasterDialogSchema, BasesMasterDialogValues } from '../_lib/types';
 
-export const BasesMasterDialog = (props: {
+export const BasesMasterDialog = ({
+  baseId,
+  handleClose,
+  editable,
+  setEditable,
+}: {
   baseId: number;
   handleClose: () => void;
   editable: boolean;
   setEditable: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
-  const { baseId, handleClose, editable, setEditable } = props;
   const theme = useTheme();
   const colorOfThis = alpha(theme.palette.primary.main, 0.5);
-  const [base, setBase] = useState<BaseMasterDialogValues | undefined>();
+  const [base, setBase] = useState<BasesMasterDialogValues | undefined>();
   const [isLoading, setIsLoading] = useState(true);
   const handleEditable = () => {
     setEditable(true);
@@ -40,15 +44,15 @@ export const BasesMasterDialog = (props: {
     handleClose();
   };
 
-  const onSubmit = async (data: BasesMasterValues) => {
+  const onSubmit = async (data: BasesMasterDialogValues) => {
     console.log('★★★★★★★★★ ', data);
     // handleCloseDialog();
     // await addNewBase(data!);
   };
   const { control, handleSubmit, reset } = useForm({
-    mode: 'onSubmit',
-    reValidateMode: 'onSubmit',
-    resolver: zodResolver(BaseMasterDialogSchema),
+    mode: 'onBlur',
+    reValidateMode: 'onBlur',
+    resolver: zodResolver(BasesMasterDialogSchema),
     defaultValues: {
       //DB   kyotenNam: '',
       //   delFlg: false,
@@ -99,35 +103,32 @@ export const BasesMasterDialog = (props: {
         <>
           <Grid2 container spacing={1} p={5} direction={'column'} justifyContent={'center'} width={'100%'}>
             <Grid2>
-              <FormBox label="所属名" required={true}>
+              <FormBox formItem={formItems[0]} required={true}>
                 <TextFieldElement
                   name="kyotenNam"
                   control={control}
-                  label="100文字まで"
+                  label={formItems[0].exsample}
                   fullWidth
-                  sx={{ maxWidth: '80%' }}
+                  sx={{ maxWidth: '90%' }}
                   disabled={editable ? false : true}
                 />
-                {/* <TextField fullWidth label="100文字まで" sx={{ maxWidth: '80%' }} disabled={editable ? false : true} /> */}
               </FormBox>
             </Grid2>
             <Grid2>
-              <FormBox label="削除フラグ">
-                {/* <CheckBox fontSize="medium" color="primary" /> */}
+              <FormBox formItem={formItems[1]}>
                 <CheckboxElement name="delFlg" control={control} size="medium" disabled={editable ? false : true} />
               </FormBox>
             </Grid2>
             <Grid2>
-              <FormBox label="メモ">
+              <FormBox formItem={formItems[2]}>
                 <TextareaAutosizeElement ////////////// 200文字までの設定をしなければならない
                   name="mem"
                   control={control}
-                  label="200文字まで"
+                  label={formItems[2].exsample}
                   fullWidth
-                  sx={{ maxWidth: '80%' }}
+                  sx={{ maxWidth: '90%' }}
                   disabled={editable ? false : true}
                 />
-                {/* <TextField fullWidth label="200文字まで" sx={{ maxWidth: '80%' }} disabled={editable ? false : true} /> */}
               </FormBox>
             </Grid2>
           </Grid2>
@@ -137,3 +138,21 @@ export const BasesMasterDialog = (props: {
     </>
   );
 };
+
+const formItems: FormItemsType[] = [
+  {
+    label: '所属名',
+    exsample: '例）YARD',
+    constraints: '100文字まで',
+  },
+  {
+    label: '削除フラグ',
+    exsample: '',
+    constraints: '論理削除（データは物理削除されません）',
+  },
+  {
+    label: 'メモ',
+    exsample: '',
+    constraints: '200文字まで',
+  },
+];

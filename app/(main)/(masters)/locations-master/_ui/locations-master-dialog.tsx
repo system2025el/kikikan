@@ -5,7 +5,7 @@ import { alpha, Button, DialogTitle, Grid2, Stack, Typography, useTheme } from '
 import { useState } from 'react';
 import { CheckboxElement, TextareaAutosizeElement, TextFieldElement, useForm } from 'react-hook-form-mui';
 
-import { FormBox } from '@/app/(main)/_ui/form-box';
+import { FormBox, FormItemsType } from '@/app/(main)/_ui/form-box';
 
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { LocMasterSchema, LocMasterValues } from '../_lib/types';
@@ -35,8 +35,8 @@ export const LocationsMasterDialog = (props: {
     reset,
     formState: { isDirty },
   } = useForm({
-    mode: 'onSubmit',
-    reValidateMode: 'onSubmit',
+    mode: 'onBlur',
+    reValidateMode: 'onBlur',
     defaultValues: {},
     resolver: zodResolver(LocMasterSchema),
   });
@@ -70,11 +70,11 @@ export const LocationsMasterDialog = (props: {
 
         <Grid2 container spacing={1} p={5} direction={'column'} justifyContent={'center'} width={'100%'}>
           <Grid2>
-            <FormBox label={formItems[0].label}>
+            <FormBox formItem={formItems[0]}>
               <TextFieldElement
                 name="locNam"
                 control={control}
-                label={formItems[0].description}
+                label={formItems[0].exsample}
                 fullWidth
                 sx={{ maxWidth: '80%' }}
                 disabled={editable ? false : true}
@@ -82,11 +82,11 @@ export const LocationsMasterDialog = (props: {
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[1].label}>
+            <FormBox formItem={formItems[1]}>
               <TextFieldElement
                 name="kana"
                 control={control}
-                label={formItems[1].description}
+                label={formItems[1].exsample}
                 fullWidth
                 sx={{ maxWidth: '80%' }}
                 disabled={editable ? false : true}
@@ -95,16 +95,16 @@ export const LocationsMasterDialog = (props: {
           </Grid2>
 
           <Grid2>
-            <FormBox label={formItems[2].label}>
+            <FormBox formItem={formItems[2]}>
               <CheckboxElement name="delFlg" control={control} size="medium" disabled={editable ? false : true} />
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[3].label}>
+            <FormBox formItem={formItems[3]}>
               <TextFieldElement
                 name="adrPost"
                 control={control}
-                label={formItems[3].description}
+                label={formItems[3].exsample}
                 fullWidth
                 sx={{ maxWidth: '80%' }}
                 disabled={editable ? false : true}
@@ -112,11 +112,11 @@ export const LocationsMasterDialog = (props: {
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[4].label}>
+            <FormBox formItem={formItems[4]}>
               <TextFieldElement
                 name="adrShozai"
                 control={control}
-                label={formItems[4].description}
+                label={formItems[4].exsample}
                 fullWidth
                 sx={{ maxWidth: '80%' }}
                 disabled={editable ? false : true}
@@ -124,11 +124,11 @@ export const LocationsMasterDialog = (props: {
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[5].label}>
+            <FormBox formItem={formItems[5]}>
               <TextFieldElement
                 name="adrTatemono"
                 control={control}
-                label={formItems[5].description}
+                label={formItems[5].exsample}
                 fullWidth
                 sx={{ maxWidth: '80%' }}
                 disabled={editable ? false : true}
@@ -136,11 +136,11 @@ export const LocationsMasterDialog = (props: {
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[6].label}>
+            <FormBox formItem={formItems[6]}>
               <TextFieldElement
                 name="adrSonota"
                 control={control}
-                label={formItems[6].description}
+                label={formItems[6].exsample}
                 fullWidth
                 sx={{ maxWidth: '80%' }}
                 disabled={editable ? false : true}
@@ -148,11 +148,11 @@ export const LocationsMasterDialog = (props: {
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[7].label}>
+            <FormBox formItem={formItems[7]}>
               <TextFieldElement
                 name="tel"
                 control={control}
-                label={formItems[7].description}
+                label={formItems[7].exsample}
                 fullWidth
                 sx={{ maxWidth: '80%' }}
                 disabled={editable ? false : true}
@@ -160,11 +160,11 @@ export const LocationsMasterDialog = (props: {
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[8].label}>
+            <FormBox formItem={formItems[8]}>
               <TextFieldElement
                 name="telMobile"
                 control={control}
-                label={formItems[8].description}
+                label={formItems[8].exsample}
                 fullWidth
                 sx={{ maxWidth: '80%' }}
                 disabled={editable ? false : true}
@@ -172,11 +172,11 @@ export const LocationsMasterDialog = (props: {
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[9].label}>
+            <FormBox formItem={formItems[9]}>
               <TextFieldElement
                 name="fax"
                 control={control}
-                label={formItems[9].description}
+                label={formItems[9].exsample}
                 fullWidth
                 sx={{ maxWidth: '80%' }}
                 disabled={editable ? false : true}
@@ -184,11 +184,11 @@ export const LocationsMasterDialog = (props: {
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[10].label}>
+            <FormBox formItem={formItems[10]}>
               <TextFieldElement
                 name="mail"
                 control={control}
-                label={formItems[10].description}
+                label={formItems[10].exsample}
                 fullWidth
                 sx={{ maxWidth: '80%' }}
                 disabled={editable ? false : true}
@@ -196,11 +196,11 @@ export const LocationsMasterDialog = (props: {
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[11].label}>
+            <FormBox formItem={formItems[11]}>
               <TextareaAutosizeElement ////////////// 200文字までの設定をしなければならない
                 name="mem"
                 control={control}
-                label={formItems[11].description}
+                label={formItems[11].exsample}
                 fullWidth
                 sx={{ maxWidth: '80%' }}
                 disabled={editable ? false : true}
@@ -208,7 +208,7 @@ export const LocationsMasterDialog = (props: {
             </FormBox>
           </Grid2>
           <Grid2>
-            <FormBox label={formItems[12].label}>
+            <FormBox formItem={formItems[12]}>
               <CheckboxElement name="dspFlg" control={control} size="medium" disabled={editable ? false : true} />
             </FormBox>
           </Grid2>
@@ -219,59 +219,72 @@ export const LocationsMasterDialog = (props: {
 };
 
 /* 移動する予定move */
-type formItemsType = { label: string; description: string };
-const formItems: formItemsType[] = [
+
+const formItems: FormItemsType[] = [
   {
     label: '公演場所名',
-    description: '100文字まで',
+    exsample: '例）渋谷公会堂',
+    constraints: '100文字まで',
   },
   {
     label: '公演場所かな',
-    description: '100文字まで',
+    exsample: '例）しぶやこうかいどう',
+    constraints: '100文字まで',
   },
   {
     label: '削除フラグ',
-    description: '論理削除（データは物理削除されません）',
+    exsample: '',
+    constraints: '論理削除（データは物理削除されません）',
   },
   {
     label: '公演場所住所（郵便番号）',
-    description: '例）242-0018 ',
+    exsample: '例）242-0018 ',
+    constraints: '20文字まで',
   },
   {
     label: '公演場所住所（所在地）',
-    description: '例）神奈川県大和市深見西9-99-99',
+    exsample: '例）神奈川県大和市深見西9-99-99',
+    constraints: '100文字まで',
   },
   {
     label: '公演場所住所（建物名）',
-    description: '例）XXビル 11F',
+    exsample: '例）XXビル 11F',
+    constraints: '100文字まで',
   },
   {
     label: '公演場所住所（その他）',
-    description: 'その他の住所情報',
+    exsample: 'その他の住所情報',
+    constraints: '100文字まで',
   },
   {
     label: '代表電話',
-    description: '例）046-999-1234',
+    exsample: '例）046-999-1234',
+    constraints: '20文字まで',
   },
   {
     label: '代表携帯',
-    description: '例）070-9999-9999',
+    exsample: '例）070-9999-9999',
+    constraints: '20文字まで',
   },
   {
     label: '代表FAX',
-    description: '例）046-999-1235',
+    exsample: '例）046-999-1235',
+    constraints: '20文字まで',
   },
   {
     label: '代表メールアドレス',
-    description: '例）abc@zzz.co.jp',
+    exsample: '例）abc@zzz.co.jp',
+    constraints: '100文字まで',
   },
   {
     label: 'メモ',
-    description: '200文字まで',
+    exsample: '',
+    constraints: '200文字まで',
   },
   {
     label: '表示フラグ',
-    description: '選択リストへの表示',
+    exsample: '',
+    constraints: '選択リストへの表示',
   },
 ];
 

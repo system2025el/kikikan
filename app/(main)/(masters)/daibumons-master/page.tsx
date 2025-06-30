@@ -1,10 +1,12 @@
+import { daibumonsList } from './_lib/types';
 import { DaibumonsMaster } from './_ui/daibumons-master';
 
 const Page = async () => {
-  // const dbumon = await getAllDaibumon();
+  // const daibumon = await getAllDaibumon();
+  const daibumons = daibumonsList;
   return (
     <>
-      <DaibumonsMaster />
+      <DaibumonsMaster daibumons={daibumons} />
     </>
   );
 };

@@ -23,10 +23,10 @@ import { SetStateAction, useEffect, useMemo, useState } from 'react';
 import { MasterTable } from '@/app/(main)/_ui/table';
 
 import { MuiTablePagination } from '../../../_ui/table-pagination';
-import { BasesMasterTableValues, bMHeader } from '../_lib/types';
-import { BasesMasterDialog } from './bases-master-dailog';
+import { BumonsMasterTableValues, BumonsMHeader } from '../_lib/types';
+import { BumonsMasterDialog } from './bumons-master-dialog';
 
-export const BasesMasterTable = ({ bases }: { bases: BasesMasterTableValues[] | undefined }) => {
+export const BumonsMasterTable = ({ bumons }: { bumons: BumonsMasterTableValues[] | undefined }) => {
   const [page, setPage] = useState(1);
   const rowsPerPage = 50;
   /* ダイアログ開く顧客のID、閉じるとき、未選択で-100とする */
@@ -48,21 +48,20 @@ export const BasesMasterTable = ({ bases }: { bases: BasesMasterTableValues[] | 
 
   // 表示するデータ
   const list = useMemo(
-    () => (rowsPerPage > 0 ? bases!.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage) : bases),
-    [page, rowsPerPage, bases]
+    () => (rowsPerPage > 0 ? bumons!.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage) : bumons),
+    [page, rowsPerPage, bumons]
   );
-  // テーブル最後のページ用の空データの長さ
 
   return (
     <>
       <Box>
         <Typography pt={2} pl={2}>
-          拠点一覧
+          一覧
         </Typography>
         <Divider />
         <Grid2 container mt={1} mx={0.5} justifyContent={'space-between'}>
           <Grid2 spacing={1}>
-            <MuiTablePagination arrayList={bases!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
+            <MuiTablePagination arrayList={bumons!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
           </Grid2>
           <Grid2 container spacing={1}>
             <Grid2 container spacing={1}>
@@ -78,16 +77,16 @@ export const BasesMasterTable = ({ bases }: { bases: BasesMasterTableValues[] | 
 
         <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 1 }}>
           <MasterTable
-            headers={bMHeader}
-            datas={list!.map((l) => ({ id: l.kyotenId!, kyotenNam: l.kyotenNam, mem: l.mem! }))}
+            headers={BumonsMHeader}
+            datas={list!.map((l) => ({ id: l.bumonId!, bumonNam: l.bumonNam, mem: l.mem! }))}
             handleOpenDialog={handleOpenDialog}
             page={page}
             rowsPerPage={rowsPerPage}
           />
           <Dialog open={dialogOpen} fullScreen>
-            <BasesMasterDialog
+            <BumonsMasterDialog
               handleClose={handleCloseDialog}
-              baseId={openId}
+              bumonId={openId}
               editable={editable}
               setEditable={setEditable}
             />

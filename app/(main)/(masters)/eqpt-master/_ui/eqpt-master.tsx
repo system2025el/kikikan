@@ -16,8 +16,8 @@ export const EqptMaster = () => {
   const [page, setPage] = useState(1);
   // 検索useForm--------------------------
   const { control, handleSubmit } = useForm({
-    mode: 'onSubmit',
-    reValidateMode: 'onSubmit',
+    mode: 'onBlur',
+    reValidateMode: 'onBlur',
     resolver: zodResolver(EqptMasterDialogSchema),
     defaultValues: {},
   });
