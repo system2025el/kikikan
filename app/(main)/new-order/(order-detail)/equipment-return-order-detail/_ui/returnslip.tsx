@@ -26,7 +26,7 @@ import { BackButton } from '@/app/(main)/_ui/buttons';
 import { TestDate, toISOStringWithTimezoneMonthDay } from '@/app/(main)/_ui/date';
 import Time from '@/app/(main)/_ui/time';
 
-import { EquipmentSelectionDialog } from '../../_ui/equipment-selection-dailog';
+import { EquipmentSelectionDialog } from '../../equipment-order-detail/_ui/equipment-selection-dailog';
 import { getDateHeaderBackgroundColor, getDateRowBackgroundColor } from '../_lib/colorselect';
 import { data, stock } from '../_lib/data';
 import { ReturnEqTable, ReturnStockTable } from './returnslip-table';

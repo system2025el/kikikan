@@ -1,5 +1,6 @@
 'use client';
 
+import { grey } from '@mui/material/colors';
 import { LocalizationProvider, TimePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { TimeValidationError } from '@mui/x-date-pickers/models';
@@ -34,12 +35,23 @@ const Time = (props: { sx?: object; disabled?: boolean }) => {
       <TimePicker
         name="time"
         slotProps={{
-          textField: { helperText: errorMessage, size: 'small' },
+          textField: {
+            helperText: errorMessage,
+            size: 'small',
+            sx: {
+              bgcolor: disabled ? grey[200] : 'white',
+              '.Mui-disabled': {
+                WebkitTextFillColor: 'black',
+              },
+              width: '25%',
+              minWidth: 150,
+              ...sx,
+            },
+          },
         }}
         onError={(newError) => setError(newError)}
         views={['hours', 'minutes']}
         format="HH:mm"
-        sx={{ width: '25%', minWidth: 150, ...sx }}
         timeSteps={{ minutes: 15 }}
         disabled={disabled ? true : false}
       />
@@ -64,11 +76,21 @@ export const TestTime = (props: {
         value={dayjs(time)}
         onChange={onChange}
         slotProps={{
-          textField: { size: 'small' },
+          textField: {
+            size: 'small',
+            sx: {
+              bgcolor: disabled ? grey[200] : 'white',
+              '.Mui-disabled': {
+                WebkitTextFillColor: 'black',
+              },
+              width: '25%',
+              minWidth: 150,
+              ...sx,
+            },
+          },
         }}
         views={['hours', 'minutes']}
         format="HH:mm"
-        sx={{ width: '25%', minWidth: 150, ...sx }}
         timeSteps={{ minutes: 15 }}
         disabled={disabled ? true : false}
       />
