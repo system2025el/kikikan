@@ -62,8 +62,8 @@ export const OrderList = () => {
   };
 
   const { control, getValues, handleSubmit, watch } = useForm({
-    mode: 'onSubmit',
-    reValidateMode: 'onSubmit',
+    mode: 'onBlur',
+    reValidateMode: 'onBlur',
     resolver: zodResolver(OrderSchema),
     defaultValues: {
       criteria: '',

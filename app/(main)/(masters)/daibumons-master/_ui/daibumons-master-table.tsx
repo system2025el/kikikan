@@ -1,32 +1,14 @@
-'use client';
-import { CheckBox, SellTwoTone } from '@mui/icons-material';
 import AddIcon from '@mui/icons-material/Add';
-import {
-  alpha,
-  Box,
-  Button,
-  Dialog,
-  Divider,
-  Grid2,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
-  useTheme,
-} from '@mui/material';
-import { SetStateAction, useEffect, useMemo, useState } from 'react';
+import { Box, Button,Dialog, Divider, Grid2, Paper, TableContainer, Typography } from '@mui/material';
+import { useMemo, useState } from 'react';
 
 import { MasterTable } from '@/app/(main)/_ui/table';
+import { MuiTablePagination } from '@/app/(main)/_ui/table-pagination';
 
-import { MuiTablePagination } from '../../../_ui/table-pagination';
-import { BasesMasterTableValues, bMHeader } from '../_lib/types';
-import { BasesMasterDialog } from './bases-master-dailog';
+import { daibumonMHeader, DaibumonsMasterDialogValues } from '../_lib/types';
+import { DaibumonsMasterDialog } from './daibumons-master-dialog';
 
-export const BasesMasterTable = ({ bases }: { bases: BasesMasterTableValues[] | undefined }) => {
+export const DaibumonsMasterTable = ({ daibumons }: { daibumons: DaibumonsMasterDialogValues[] }) => {
   const [page, setPage] = useState(1);
   const rowsPerPage = 50;
   /* ダイアログ開く顧客のID、閉じるとき、未選択で-100とする */
@@ -48,8 +30,8 @@ export const BasesMasterTable = ({ bases }: { bases: BasesMasterTableValues[] | 
 
   // 表示するデータ
   const list = useMemo(
-    () => (rowsPerPage > 0 ? bases!.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage) : bases),
-    [page, rowsPerPage, bases]
+    () => (rowsPerPage > 0 ? daibumons!.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage) : daibumons),
+    [page, rowsPerPage, daibumons]
   );
   // テーブル最後のページ用の空データの長さ
 
@@ -57,19 +39,19 @@ export const BasesMasterTable = ({ bases }: { bases: BasesMasterTableValues[] | 
     <>
       <Box>
         <Typography pt={2} pl={2}>
-          拠点一覧
+          一覧
         </Typography>
         <Divider />
         <Grid2 container mt={1} mx={0.5} justifyContent={'space-between'}>
           <Grid2 spacing={1}>
-            <MuiTablePagination arrayList={bases!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
+            <MuiTablePagination arrayList={daibumons!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
           </Grid2>
           <Grid2 container spacing={1}>
             <Grid2 container spacing={1}>
               <Grid2>
                 <Button onClick={() => handleOpenDialog(-100)}>
                   <AddIcon fontSize="small" />
-                  拠点追加
+                  新規
                 </Button>
               </Grid2>
             </Grid2>
@@ -78,16 +60,16 @@ export const BasesMasterTable = ({ bases }: { bases: BasesMasterTableValues[] | 
 
         <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 1 }}>
           <MasterTable
-            headers={bMHeader}
-            datas={list!.map((l) => ({ id: l.kyotenId!, kyotenNam: l.kyotenNam, mem: l.mem! }))}
+            headers={daibumonMHeader}
+            datas={list!.map((l) => ({ id: l.daibumonId!, daibumonNam: l.daibumonNam, mem: l.mem! }))}
             handleOpenDialog={handleOpenDialog}
             page={page}
             rowsPerPage={rowsPerPage}
           />
           <Dialog open={dialogOpen} fullScreen>
-            <BasesMasterDialog
+            <DaibumonsMasterDialog
               handleClose={handleCloseDialog}
-              baseId={openId}
+              daibumonId={openId}
               editable={editable}
               setEditable={setEditable}
             />

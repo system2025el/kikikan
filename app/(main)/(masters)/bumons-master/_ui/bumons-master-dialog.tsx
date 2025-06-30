@@ -5,8 +5,8 @@ import {
   Box,
   Button,
   Container,
-  DialogTitle,
   Grid2,
+  IconButton,
   Paper,
   Stack,
   TextField,
@@ -14,24 +14,29 @@ import {
   useTheme,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { CheckboxElement, TextareaAutosizeElement, TextFieldElement, useForm } from 'react-hook-form-mui';
+import {
+  CheckboxElement,
+  SelectElement,
+  TextareaAutosizeElement,
+  TextFieldElement,
+  useForm,
+} from 'react-hook-form-mui';
 
-// import { addNewVehicle, getOneVehicle } from '@/app/_lib/supabase/supabaseFuncs';
 import { FormBox, FormItemsType } from '../../../_ui/form-box';
-import { Loading } from '../../../_ui/loading';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
-import { VehMasterDialogSchema, VehMasterDialogValues } from '../_lib/datas';
+import { bumonsList, BumonsMasterDialogSchema, BumonsMasterDialogValues } from '../_lib/types';
+// import { Loading } from '../../../_ui/loading';
 
-export const VehiclesMasterDialog = (props: {
-  vehicleId: number;
+export const BumonsMasterDialog = (props: {
+  bumonId: number;
   handleClose: () => void;
   editable: boolean;
   setEditable: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
-  const { vehicleId, handleClose, editable, setEditable } = props;
+  const { bumonId, handleClose, editable, setEditable } = props;
   const theme = useTheme();
   const colorOfThis = alpha(theme.palette.primary.main, 0.5);
-  const [veh, setVeh] = useState<VehMasterDialogValues>();
+  const [bumon, setBumon] = useState<BumonsMasterDialogValues | undefined>();
   const [isLoading, setIsLoading] = useState(true);
   const handleEditable = () => {
     setEditable(true);
@@ -41,39 +46,50 @@ export const VehiclesMasterDialog = (props: {
     handleClose();
   };
 
-  const onSubmit = async (data: VehMasterDialogValues) => {
+  const onSubmit = async (data: BumonsMasterDialogValues) => {
     console.log('★★★★★★★★★ ', data);
     // handleCloseDialog();
-    // await addNewVehicle(data!);
+    // await addNewBumon(data!);
   };
   const { control, handleSubmit, reset } = useForm({
     mode: 'onBlur',
     reValidateMode: 'onBlur',
-    resolver: zodResolver(VehMasterDialogSchema),
+    resolver: zodResolver(BumonsMasterDialogSchema),
     defaultValues: {
-      sharyoNam: '',
-      delFlg: false,
-      dspFlg: true,
-      mem: '',
+      //DB   kyotenNam: '',
+      //   delFlg: false,
+      //   mem: '',
+      bumonNam: bumon?.bumonNam,
+      delFlg: bumon?.delFlg,
+      daibumonId: bumon?.daibumonId,
+      shukeibumonId: bumon?.shukeibumonId,
+      mem: bumon?.mem,
     },
   });
 
+  //モック
+  useEffect(() => {
+    console.log('bumonId : ', bumonId, ' bumonList : ', bumonsList);
+
+    setBumon(bumonsList[bumonId - 1]);
+    console.log('bumon : ', bumon);
+  }, [bumon, bumonId]);
   //DB
   // useEffect(() => {
-  // if (vehicleId === -100) {
+  // if (bumonId === -100) {
   //   setIsLoading(false);
   //   return;
   // } else {
-  //   const getThatOneCustomer = async () => {
-  //     const veh1 = await getOneVehicle(vehicleId);
-  //     reset(veh1);
-  //     console.log('vehId : ', vehicleId, ' sharyoId : ', veh1?.sharyoNam);
-  //     setVeh(veh1!);
+  //   const getThatOnebumon = async () => {
+  //     const bumon1 = await getOnebumon(bumonId);
+  //     reset(bumon1);
+  //     console.log('bumonId : ', bumonId, ' kyotenId : ', bumon1?.kyotenNam);
+  //     setbumon(veh1!);
   //     setIsLoading(false);
   //   };
-  //   getThatOneCustomer();
+  //   getThatOnebumon();
   // }
-  // }, [vehicleId, reset]);
+  // }, [bumonId, reset]);
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit)}>
@@ -82,7 +98,8 @@ export const VehiclesMasterDialog = (props: {
           editable={editable}
           handleEditable={handleEditable}
           handleCloseDialog={handleCloseDialog}
-          dialogTitle={'車両マスタ'}
+          dialogTitle="集計部門マスタ登録
+"
         />
         {/* {isLoading ? ( //DB
           <Loading />
@@ -92,19 +109,17 @@ export const VehiclesMasterDialog = (props: {
             <Grid2>
               <FormBox formItem={formItems[0]} required={true}>
                 <TextFieldElement
-                  name="sharyoNam"
+                  name="bumonNam"
                   control={control}
                   label={formItems[0].exsample}
                   fullWidth
                   sx={{ maxWidth: '80%' }}
                   disabled={editable ? false : true}
                 />
-                {/* <TextField fullWidth label="100文字まで" sx={{ maxWidth: '80%' }} disabled={editable ? false : true} /> */}
               </FormBox>
             </Grid2>
             <Grid2>
               <FormBox formItem={formItems[1]}>
-                {/* <CheckBox fontSize="medium" color="primary" /> */}
                 <CheckboxElement name="delFlg" control={control} size="medium" disabled={editable ? false : true} />
               </FormBox>
             </Grid2>
@@ -118,13 +133,30 @@ export const VehiclesMasterDialog = (props: {
                   sx={{ maxWidth: '80%' }}
                   disabled={editable ? false : true}
                 />
-                {/* <TextField fullWidth label="200文字まで" sx={{ maxWidth: '80%' }} disabled={editable ? false : true} /> */}
               </FormBox>
             </Grid2>
             <Grid2>
               <FormBox formItem={formItems[3]}>
-                {/* <CheckBox fontSize="medium" color="primary" /> */}
-                <CheckboxElement name="dspFlg" control={control} size="medium" disabled={editable ? false : true} />
+                <SelectElement
+                  name="daibumonId"
+                  control={control}
+                  label={formItems[3].exsample}
+                  fullWidth
+                  sx={{ maxWidth: '80%' }}
+                  disabled={editable ? false : true}
+                />
+              </FormBox>
+            </Grid2>
+            <Grid2>
+              <FormBox formItem={formItems[4]}>
+                <SelectElement
+                  name="shukeibumonId"
+                  control={control}
+                  label={formItems[4].exsample}
+                  fullWidth
+                  sx={{ maxWidth: '80%' }}
+                  disabled={editable ? false : true}
+                />
               </FormBox>
             </Grid2>
           </Grid2>
@@ -137,8 +169,8 @@ export const VehiclesMasterDialog = (props: {
 
 const formItems: FormItemsType[] = [
   {
-    label: '車両名',
-    exsample: '例）ハイエース',
+    label: '部門名',
+    exsample: '例）ムービングライト',
     constraints: '100文字まで',
   },
   {
@@ -152,8 +184,13 @@ const formItems: FormItemsType[] = [
     constraints: '200文字まで',
   },
   {
-    label: '表示フラグ',
-    exsample: '選択リストへの表示',
-    constraints: '',
+    label: '大部門',
+    exsample: '例）ムービング ゴボ',
+    constraints: 'リスト選択、または、入力（100文字まで）',
+  },
+  {
+    label: '集計部門',
+    exsample: '例）証明部',
+    constraints: 'リスト選択、または、入力（100文字まで）',
   },
 ];

@@ -2,10 +2,10 @@
 import { Box, Button, Container, Divider, Paper, Stack, TextField, Typography } from '@mui/material';
 
 import { BackButton } from '../../../_ui/buttons';
-import { BaseMasterTableValues, BasesMasterValues } from '../_lib/types';
+import { BasesMasterTableValues } from '../_lib/types';
 import { BasesMasterTable } from './bases-master-table';
 
-export const BasesMaster = ({ bases }: { bases: BaseMasterTableValues[] | undefined }) => {
+export const BasesMaster = ({ bases }: { bases: BasesMasterTableValues[] | undefined }) => {
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
       <Paper variant="outlined">

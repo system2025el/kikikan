@@ -6,7 +6,7 @@ import { grey } from '@mui/material/colors';
 import { useState } from 'react';
 import { CheckboxElement, SelectElement, TextFieldElement, useForm } from 'react-hook-form-mui';
 
-import { FormBox } from '@/app/(main)/_ui/form-box';
+import { FormBox, FormItemsType } from '@/app/(main)/_ui/form-box';
 
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { ManagerMasterDialogDetailsValues, managerMaterDialogDetailsSchema } from '../_lib/types';
@@ -36,8 +36,8 @@ export const ManagerDialogContents = (props: {
     reset,
     formState: { isDirty },
   } = useForm({
-    mode: 'onSubmit',
-    reValidateMode: 'onSubmit',
+    mode: 'onBlur',
+    reValidateMode: 'onBlur',
     defaultValues: manager,
     resolver: zodResolver(managerMaterDialogDetailsSchema),
   });
@@ -70,11 +70,11 @@ export const ManagerDialogContents = (props: {
         />
         <Grid2 container spacing={1} p={5} direction={'column'} justifyContent={'center'} width={'100%'}>
           <Grid2>
-            <FormBox label={formItems[0].label} required={true}>
+            <FormBox formItem={formItems[0]} required={true}>
               <TextFieldElement
                 name="tantouNam"
                 control={control}
-                label={formItems[0].description}
+                label={formItems[0].exsample}
                 fullWidth
                 sx={{ maxWidth: '80%' }}
                 disabled={editable ? false : true}
@@ -88,79 +88,12 @@ export const ManagerDialogContents = (props: {
 };
 
 /* 移動する予定move */
-type formItemsType = { label: string; description: string };
-const formItems: formItemsType[] = [
+
+const formItems: FormItemsType[] = [
   {
     label: '担当者名',
-    description: '担当者名',
-  },
-  {
-    label: '顧客かな',
-    description: 'かな名',
-  },
-  {
-    label: '顧客ランク',
-    description: '１～５',
-  },
-  {
-    label: '削除フラグ',
-    description: '論理削除（データは物理削除されません）',
-  },
-  {
-    label: '顧客敬称',
-    description: '例）御中、様',
-  },
-  {
-    label: '顧客住所（郵便番号）',
-    description: '例）242-0018 ',
-  },
-  {
-    label: '顧客住所（所在地）',
-    description: '例）神奈川県大和市深見西9-99-99',
-  },
-  {
-    label: '顧客住所（建物名）',
-    description: '例）XXビル 11F',
-  },
-  {
-    label: '顧客住所（その他）',
-    description: 'その他の住所情報',
-  },
-  {
-    label: '電話',
-    description: '例）046-999-1234',
-  },
-  {
-    label: '携帯',
-    description: '例）070-9999-9999',
-  },
-  {
-    label: 'FAX',
-    description: '例）046-999-1235',
-  },
-  {
-    label: 'メールアドレス',
-    description: '例）abc@zzz.co.jp',
-  },
-  {
-    label: 'メモ',
-    description: '200文字まで',
-  },
-  {
-    label: '表示フラグ',
-    description: '選択リストへの表示',
-  },
-  {
-    label: '月締日',
-    description: '例）31、15　※月末締めの場合31を指定',
-  },
-  {
-    label: '支払サイト日数',
-    description: '例）月末締め翌月末払いの場合30、翌々月末払いは60を指定',
-  },
-  {
-    label: '機材値引き対象フラグ',
-    description: '',
+    constraints: '100文字まで',
+    exsample: 'あいうえお',
   },
 ];
 
