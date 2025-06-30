@@ -25,7 +25,7 @@ import { MasterTable } from '@/app/(main)/_ui/table';
 // import { getAllCustomers } from '@/app/_lib/supabase/supabaseFuncs';
 import { MuiTablePagination } from '../../../_ui/table-pagination';
 import { cMHeader, customerMasterDialogDetailsValues, CustomerMasterTableValues, customers } from '../_lib/types';
-import { CustomerDialogContents } from './customers-dialog-contents';
+import { CustomerDialogContents } from './customers-master-dialog';
 
 /** 顧客マスタのテーブルコンポーネント */
 export const CustomersMasterTable = (/*{ customers }: { customers: CustomerMasterTableValues[] | undefined }*/) => {
@@ -125,7 +125,7 @@ export const CustomersMasterTable = (/*{ customers }: { customers: CustomerMaste
       ) : ( */}
       {/* <> */}
       <Typography pt={2} pl={2}>
-        顧客一覧
+        一覧
       </Typography>
       <Divider />
       <Grid2 container mt={1} mx={0.5} justifyContent={'space-between'}>
@@ -137,7 +137,7 @@ export const CustomersMasterTable = (/*{ customers }: { customers: CustomerMaste
             <Grid2>
               <Button onClick={() => handleOpen(-100)}>
                 <AddIcon fontSize="small" />
-                新規顧客
+                新規
               </Button>
             </Grid2>
           </Grid2>

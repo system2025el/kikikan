@@ -10,10 +10,12 @@ import { DaibumonsMasterTable } from './daibumons-master-table';
 export const DaibumonsMaster = ({ daibumons }: { daibumons: DaibumonsMasterDialogValues[] }) => {
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
+      <Box justifySelf={'end'} mb={0.5}>
+        <BackButton label={'戻る'} />
+      </Box>
       <Paper variant="outlined">
         <Box width={'100%'} display={'flex'} p={2} justifyContent={'space-between'} alignItems={'center'}>
           <Typography>大部門マスタ</Typography>
-          <BackButton sx={{ ml: '40%' }} label={'戻る'} />
         </Box>
       </Paper>
       <DaibumonsMasterTable daibumons={daibumons} />

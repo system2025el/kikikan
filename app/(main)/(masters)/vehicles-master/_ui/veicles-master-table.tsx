@@ -59,7 +59,7 @@ export const VehiclesMasterTable = ({ vehs }: { vehs: VehMasterTableValues[] | u
   return (
     <Box>
       <Typography pt={2} pl={2}>
-        車両一覧
+        一覧
       </Typography>
       <Divider />
       <Grid2 container mt={1} mx={0.5} justifyContent={'space-between'}>
@@ -71,7 +71,7 @@ export const VehiclesMasterTable = ({ vehs }: { vehs: VehMasterTableValues[] | u
             <Grid2>
               <Button onClick={() => handleOpenDialog(-100)}>
                 <AddIcon fontSize="small" />
-                車両追加
+                新規
               </Button>
             </Grid2>
           </Grid2>

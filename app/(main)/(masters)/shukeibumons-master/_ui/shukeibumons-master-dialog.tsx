@@ -1,41 +1,34 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CheckBox } from '@mui/icons-material';
-import {
-  alpha,
-  Box,
-  Button,
-  Container,
-  Grid2,
-  IconButton,
-  Paper,
-  Stack,
-  TextField,
-  Typography,
-  useTheme,
-} from '@mui/material';
+import { alpha, Grid2, useTheme } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { CheckboxElement, TextareaAutosizeElement, TextFieldElement, useForm } from 'react-hook-form-mui';
+import { useForm } from 'react-hook-form';
+import { CheckboxElement, TextareaAutosizeElement, TextFieldElement } from 'react-hook-form-mui';
 
-import { FormBox, FormItemsType } from '../../../_ui/form-box';
+import { FormBox, FormItemsType } from '@/app/(main)/_ui/form-box';
+
 import { MasterDialogTitle } from '../../_ui/dialog-title';
-// import { Loading } from '../../../_ui/loading';
-import { basesList, BasesMasterDialogSchema, BasesMasterDialogValues } from '../_lib/types';
+import { shukeibumonsList, ShukeibumonsMasterDialogSchema, ShukeibumonsMasterDialogValues } from '../_lib/type';
 
-export const BasesMasterDialog = ({
-  baseId,
+export const ShukeibumonsMasterDialog = ({
+  shukeibumonId,
   handleClose,
   editable,
   setEditable,
 }: {
-  baseId: number;
+  shukeibumonId: number;
   handleClose: () => void;
   editable: boolean;
   setEditable: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
+  /**/
   const theme = useTheme();
+  /**/
   const colorOfThis = alpha(theme.palette.primary.main, 0.5);
-  const [base, setBase] = useState<BasesMasterDialogValues | undefined>();
+  /**/
+  const [shukeibumon, setshukeibumon] = useState<ShukeibumonsMasterDialogValues | undefined>();
+  /**/
   const [isLoading, setIsLoading] = useState(true);
+  /*  */
   const handleEditable = () => {
     setEditable(true);
   };
@@ -44,49 +37,49 @@ export const BasesMasterDialog = ({
     handleClose();
   };
 
-  const onSubmit = async (data: BasesMasterDialogValues) => {
+  const onSubmit = async (data: ShukeibumonsMasterDialogValues) => {
     console.log('★★★★★★★★★ ', data);
     // handleCloseDialog();
-    // await addNewBase(data!);
+    // await addNewshukeibumon(data!);
   };
   const { control, handleSubmit, reset } = useForm({
     mode: 'onBlur',
     reValidateMode: 'onBlur',
-    resolver: zodResolver(BasesMasterDialogSchema),
+    resolver: zodResolver(ShukeibumonsMasterDialogSchema),
     defaultValues: {
       //DB   kyotenNam: '',
       //   delFlg: false,
       //   mem: '',
-      kyotenId: base?.kyotenId,
-      kyotenNam: base?.kyotenNam,
-      delFlg: base?.delFlg,
-      mem: base?.mem,
+      shukeibumonNam: shukeibumon?.shukeibumonNam,
+      shukeibumonId: shukeibumon?.shukeibumonId,
+      delFlg: shukeibumon?.delFlg,
+      mem: shukeibumon?.mem,
     },
   });
 
   //モック
   useEffect(() => {
-    console.log('baseId : ', baseId, ' baseList : ', basesList);
+    console.log('shukeibumonId : ', shukeibumonId, ' shukeibumonList : ', shukeibumonsList);
 
-    setBase(basesList[baseId - 1]);
-    console.log('base : ', base);
-  }, [base, baseId]);
+    setshukeibumon(shukeibumonsList[shukeibumonId - 1]);
+    console.log('shukeibumon : ', shukeibumon);
+  }, [shukeibumon, shukeibumonId]);
   //DB
   // useEffect(() => {
-  // if (baseId === -100) {
+  // if (shukeibumonId === -100) {
   //   setIsLoading(false);
   //   return;
   // } else {
-  //   const getThatOneBase = async () => {
-  //     const base1 = await getOneBase(baseId);
-  //     reset(base1);
-  //     console.log('baseId : ', baseId, ' kyotenId : ', base1?.kyotenNam);
-  //     setBase(veh1!);
+  //   const getThatOneshukeibumon = async () => {
+  //     const shukeibumon1 = await getOneshukeibumon(shukeibumonId);
+  //     reset(shukeibumon1);
+  //     console.log('shukeibumonId : ', shukeibumonId, ' kyotenId : ', shukeibumon1?.kyotenNam);
+  //     setshukeibumon(veh1!);
   //     setIsLoading(false);
   //   };
-  //   getThatOneBase();
+  //   getThatOneshukeibumon();
   // }
-  // }, [baseId, reset]);
+  // }, [shukeibumonId, reset]);
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit)}>
@@ -95,17 +88,17 @@ export const BasesMasterDialog = ({
           editable={editable}
           handleEditable={handleEditable}
           handleCloseDialog={handleCloseDialog}
-          dialogTitle="所属マスタ登録"
+          dialogTitle="集計部門マスタ登録"
         />
         {/* {isLoading ? ( //DB
-          <Loading />
-        ) : ( */}
+            <Loading />
+          ) : ( */}
         <>
           <Grid2 container spacing={1} p={5} direction={'column'} justifyContent={'center'} width={'100%'}>
             <Grid2>
               <FormBox formItem={formItems[0]} required={true}>
                 <TextFieldElement
-                  name="kyotenNam"
+                  name="shukeibumonNam"
                   control={control}
                   label={formItems[0].exsample}
                   fullWidth
@@ -141,8 +134,8 @@ export const BasesMasterDialog = ({
 
 const formItems: FormItemsType[] = [
   {
-    label: '所属名',
-    exsample: '例）YARD',
+    label: '集計部門名',
+    exsample: '例）照明部',
     constraints: '100文字まで',
   },
   {
