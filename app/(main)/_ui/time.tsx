@@ -64,7 +64,7 @@ export default Time;
 export const TestTime = (props: {
   sx?: object;
   disabled?: boolean;
-  time: Date;
+  time: Date | null;
   onChange: (value: Dayjs | null) => void;
 }) => {
   const { sx, disabled, time, onChange } = props;
@@ -73,7 +73,7 @@ export const TestTime = (props: {
     <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="ja">
       <TimePicker
         name="time"
-        value={dayjs(time)}
+        value={time && dayjs(time)}
         onChange={onChange}
         slotProps={{
           textField: {
