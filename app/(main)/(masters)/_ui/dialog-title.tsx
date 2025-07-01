@@ -4,6 +4,11 @@ import { DialogTitle, Stack, Typography } from '@mui/material';
 
 import { CloseMasterDialogButton, MakeEditModeButton, SubmitButton } from '../../_ui/buttons';
 
+/**
+ * マスタ系統一の詳細ダイアログタイトル
+ * @param
+ * @returns {JSX.Element} マスタ系統一の詳細ダイアログタイトル
+ */
 export const MasterDialogTitle = ({
   colorOfThis,
   editable,

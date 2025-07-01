@@ -27,30 +27,31 @@ import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { bumonsList, BumonsMasterDialogSchema, BumonsMasterDialogValues } from '../_lib/types';
 // import { Loading } from '../../../_ui/loading';
 
-export const BumonsMasterDialog = (props: {
+/**
+ * 部門マスタ詳細ダイアログ
+ * @param
+ * @returns {JSX.Element} 部門マスタ詳細ダイアログコンポーネント
+ */
+export const BumonsMasterDialog = ({
+  bumonId,
+  handleClose,
+  editable,
+  setEditable,
+}: {
   bumonId: number;
   handleClose: () => void;
   editable: boolean;
   setEditable: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
-  const { bumonId, handleClose, editable, setEditable } = props;
+  /* useTheme */
   const theme = useTheme();
   const colorOfThis = alpha(theme.palette.primary.main, 0.5);
+  /* useState -------------------------------------- */
+  /* 部門 */
   const [bumon, setBumon] = useState<BumonsMasterDialogValues | undefined>();
+  /* DBのローディング状態 */
   const [isLoading, setIsLoading] = useState(true);
-  const handleEditable = () => {
-    setEditable(true);
-  };
-  const handleCloseDialog = () => {
-    setEditable(false);
-    handleClose();
-  };
-
-  const onSubmit = async (data: BumonsMasterDialogValues) => {
-    console.log('★★★★★★★★★ ', data);
-    // handleCloseDialog();
-    // await addNewBumon(data!);
-  };
+  /* useForm ----------------------------------------- */
   const { control, handleSubmit, reset } = useForm({
     mode: 'onBlur',
     reValidateMode: 'onBlur',
@@ -66,6 +67,23 @@ export const BumonsMasterDialog = (props: {
       mem: bumon?.mem,
     },
   });
+
+  /* methods ---------------------------------------- */
+  /* ダイアログ内を編集モードにする */
+  const handleEditable = () => {
+    setEditable(true);
+  };
+  /* ダイアログを閉じる */
+  const handleCloseDialog = () => {
+    setEditable(false);
+    handleClose();
+  };
+  /* フォームを送信 */
+  const onSubmit = async (data: BumonsMasterDialogValues) => {
+    console.log('★★★★★★★★★ ', data);
+    // handleCloseDialog();
+    // await addNewBumon(data!);
+  };
 
   //モック
   useEffect(() => {
@@ -113,7 +131,7 @@ export const BumonsMasterDialog = (props: {
                   control={control}
                   label={formItems[0].exsample}
                   fullWidth
-                  sx={{ maxWidth: '80%' }}
+                  sx={{ maxWidth: '90%' }}
                   disabled={editable ? false : true}
                 />
               </FormBox>
@@ -130,7 +148,7 @@ export const BumonsMasterDialog = (props: {
                   control={control}
                   label={formItems[2].exsample}
                   fullWidth
-                  sx={{ maxWidth: '80%' }}
+                  sx={{ maxWidth: '90%' }}
                   disabled={editable ? false : true}
                 />
               </FormBox>
@@ -142,7 +160,7 @@ export const BumonsMasterDialog = (props: {
                   control={control}
                   label={formItems[3].exsample}
                   fullWidth
-                  sx={{ maxWidth: '80%' }}
+                  sx={{ maxWidth: '90%' }}
                   disabled={editable ? false : true}
                 />
               </FormBox>
@@ -154,7 +172,7 @@ export const BumonsMasterDialog = (props: {
                   control={control}
                   label={formItems[4].exsample}
                   fullWidth
-                  sx={{ maxWidth: '80%' }}
+                  sx={{ maxWidth: '90%' }}
                   disabled={editable ? false : true}
                 />
               </FormBox>

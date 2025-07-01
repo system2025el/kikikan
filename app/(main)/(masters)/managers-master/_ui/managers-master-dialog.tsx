@@ -10,26 +10,32 @@ import { FormBox, FormItemsType } from '@/app/(main)/_ui/form-box';
 
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { ManagerMasterDialogDetailsValues, managerMaterDialogDetailsSchema } from '../_lib/types';
-
-export const ManagerDialogContents = (props: {
+/**
+ * 担当者マスタの詳細ダイアログ
+ * @param
+ * @returns {JSX.Element} 担当者マスタの詳細ダイアログコンポーネント
+ */
+export const ManagerDialogContents = ({
+  managerId,
+  handleClose,
+  editable,
+  setEditable,
+}: {
   managerId: number;
   handleClose: () => void;
   editable: boolean;
   setEditable: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
+  /* useTheme */
   const theme = useTheme();
   const colorOfThis = alpha(theme.palette.primary.main, 0.5);
-  const { managerId, handleClose, editable, setEditable } = props;
-
-  const handleEditable = () => {
-    setEditable(true);
-  };
-  const handleCloseDialog = () => {
-    handleClose();
-    setEditable(false);
-  };
+  /* useState --------------------- */
+  /** 担当者リストの配列 */
   const [manager, setManager] = useState<ManagerMasterDialogDetailsValues>();
+  /** DBのローディング状態 */
+  const [isLoading, setIsLoading] = useState(true);
 
+  /* useForm ------------------------- */
   const {
     control,
     handleSubmit,
@@ -42,6 +48,17 @@ export const ManagerDialogContents = (props: {
     resolver: zodResolver(managerMaterDialogDetailsSchema),
   });
 
+  /* 関数 ---------------------------- */
+  /* ダイアログ内を編集モードにする */
+  const handleEditable = () => {
+    setEditable(true);
+  };
+  /* ダイアログを閉じる */
+  const handleCloseDialog = () => {
+    handleClose();
+    setEditable(false);
+  };
+  /* フォームを送信 */
   const onSubmit = (data: ManagerMasterDialogDetailsValues) => {
     // handleCloseDialog();
     console.log(isDirty);
@@ -76,7 +93,7 @@ export const ManagerDialogContents = (props: {
                 control={control}
                 label={formItems[0].exsample}
                 fullWidth
-                sx={{ maxWidth: '80%' }}
+                sx={{ maxWidth: '90%' }}
                 disabled={editable ? false : true}
               />
             </FormBox>

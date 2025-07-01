@@ -30,6 +30,7 @@ export const BumonsMasterDialogSchema = BumonsMasterTableSchema.omit({
 
 export type BumonsMasterDialogValues = z.infer<typeof BumonsMasterDialogSchema>;
 
+/*モック削除delete */
 export const bumonsList: BumonsMasterDialogValues[] = [
   {
     bumonId: 1,
@@ -56,7 +57,7 @@ export const bumonsList: BumonsMasterDialogValues[] = [
     shukeibumonId: 2,
   },
 ];
-
+/* 部門マスタテーブルヘッダー */
 export const BumonsMHeader = [
   { key: 'bumonNam', label: '名称' },
   { key: 'mem', label: 'メモ' },

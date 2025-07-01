@@ -1,5 +1,10 @@
 import { Grid2, Typography } from '@mui/material';
 
+/**
+ * フォームなどをきれいに配置したいときの共通コンポーネント
+ * @param
+ * @returns
+ */
 export const FormBox = ({
   children,
   formItem,

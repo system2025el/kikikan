@@ -23,7 +23,9 @@ export const customerMaterDialogDetailsSchema = z.object({
   kizaiNebikiFlg: z.number().optional(),
 });
 export type customerMasterDialogDetailsValues = z.infer<typeof customerMaterDialogDetailsSchema>;
-
+/**
+ * 顧客マスタテーブルのヘッダー
+ */
 export const cMHeader = [
   {
     key: 'kokyakuNam',
@@ -59,6 +61,7 @@ export const customerMasterTableSchema = z.object({
 });
 export type CustomerMasterTableValues = z.infer<typeof customerMasterTableSchema>;
 
+//モック用削除delete
 export const customers: CustomerMasterTableValues[] = [
   {
     kokyakuId: 1,

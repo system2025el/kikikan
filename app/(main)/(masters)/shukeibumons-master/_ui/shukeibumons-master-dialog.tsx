@@ -9,6 +9,11 @@ import { FormBox, FormItemsType } from '@/app/(main)/_ui/form-box';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { shukeibumonsList, ShukeibumonsMasterDialogSchema, ShukeibumonsMasterDialogValues } from '../_lib/type';
 
+/**
+ * 集計部門マスタ詳細ダイアログ
+ * @param
+ * @returns {JSX.Element} 集計部門マスタ詳細ダイアログ
+ */
 export const ShukeibumonsMasterDialog = ({
   shukeibumonId,
   handleClose,
@@ -20,28 +25,15 @@ export const ShukeibumonsMasterDialog = ({
   editable: boolean;
   setEditable: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
-  /**/
+  /* useTheme */
   const theme = useTheme();
-  /**/
   const colorOfThis = alpha(theme.palette.primary.main, 0.5);
-  /**/
+  /* useState -------------------------------------- */
+  /* 集計部門リスト */
   const [shukeibumon, setshukeibumon] = useState<ShukeibumonsMasterDialogValues | undefined>();
-  /**/
+  /* DBのローディング状態 */
   const [isLoading, setIsLoading] = useState(true);
-  /*  */
-  const handleEditable = () => {
-    setEditable(true);
-  };
-  const handleCloseDialog = () => {
-    setEditable(false);
-    handleClose();
-  };
-
-  const onSubmit = async (data: ShukeibumonsMasterDialogValues) => {
-    console.log('★★★★★★★★★ ', data);
-    // handleCloseDialog();
-    // await addNewshukeibumon(data!);
-  };
+  /* useForm ----------------------------------------- */
   const { control, handleSubmit, reset } = useForm({
     mode: 'onBlur',
     reValidateMode: 'onBlur',
@@ -56,6 +48,22 @@ export const ShukeibumonsMasterDialog = ({
       mem: shukeibumon?.mem,
     },
   });
+  /* methods ---------------------------------------- */
+  /* ダイアログ内を編集モードにする */
+  const handleEditable = () => {
+    setEditable(true);
+  };
+  /* ダイアログを閉じる */
+  const handleCloseDialog = () => {
+    setEditable(false);
+    handleClose();
+  };
+  /* フォームを送信 */
+  const onSubmit = async (data: ShukeibumonsMasterDialogValues) => {
+    console.log('★★★★★★★★★ ', data);
+    // handleCloseDialog();
+    // await addNewshukeibumon(data!);
+  };
 
   //モック
   useEffect(() => {

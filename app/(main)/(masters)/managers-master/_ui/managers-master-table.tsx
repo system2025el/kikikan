@@ -25,10 +25,15 @@ import { MasterTable } from '@/app/(main)/_ui/table';
 import { MuiTablePagination } from '../../../_ui/table-pagination';
 import { managers } from '../_lib/data';
 import { ManagerMasterTableValues, mMHeader } from '../_lib/types';
-import { ManagerDialogContents } from './managers-dialog-contents';
+import { ManagerDialogContents } from './managers-master-dialog';
 
-/** 担当者マスタのテーブルコンポーネント */
+/**
+ * 担当者マスタのテーブル
+ * @returns {JSX.Element} 担当者マスタのテーブルコンポーネント
+ */
 export const ManagerssMasterTable = () => {
+  /* 1ページごとの表示数 */
+  const rowsPerPage = 50;
   /* useState
    * -------------------------------------------------------- */
   /* ダイアログ開く顧客のID、閉じるとき、未選択で-100とする */
@@ -37,8 +42,6 @@ export const ManagerssMasterTable = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   /* 今開いてるテーブルのページ数 */
   const [page, setPage] = useState(1);
-  /* 1ページごとの表示数 */
-  const rowsPerPage = 50;
   /* ソート方法 */
   const [order, setOrder] = useState<'desc' | 'asc'>('desc');
   /* ソート対象 */
@@ -47,9 +50,7 @@ export const ManagerssMasterTable = () => {
   const [managersList, setManagersList] = useState<ManagerMasterTableValues[]>(managers);
   /* ダイアログでの編集モード */
   const [editable, setEditable] = useState(false);
-
-  const [selected, setSelected] = useState<number[]>([]);
-
+  /* DBのローディング状態 */
   const [loading, setLoading] = useState(true);
 
   /* Methods
@@ -73,21 +74,7 @@ export const ManagerssMasterTable = () => {
     setOpenID(-100);
     setDialogOpen(false);
   };
-  /** */
-  const deleteInfo = (id: number) => {
-    setOpenID(-100);
-    setDialogOpen(false);
-  };
 
-  const handleSelect = (id: number) => {
-    const newSelected = selected.includes(id) ? selected.filter((item) => item !== id) : [...selected, id];
-
-    setSelected(newSelected);
-  };
-
-  /**
-   *
-   */
   /* ソート対象、方法の変更 */
   const handleRequestSort = (property: string) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -106,10 +93,6 @@ export const ManagerssMasterTable = () => {
     [page, rowsPerPage, managersList]
   );
   console.log('list is here : ', list);
-  /**
-   * テーブル最後のページ用の空データの長さ
-   */
-  const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - managersList.length) : 0;
 
   return (
     <Box>
@@ -121,22 +104,27 @@ export const ManagerssMasterTable = () => {
         一覧
       </Typography>
       <Divider />
-      <Grid2 container mt={1} mx={0.5} justifyContent={'space-between'}>
+      <Grid2 container mt={0.5} mx={0.5} justifyContent={'space-between'} alignItems={'center'}>
         <Grid2 spacing={1}>
           <MuiTablePagination arrayList={managersList} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
         </Grid2>
-        <Grid2 container spacing={1}>
-          <Grid2 container spacing={1}>
-            <Grid2>
-              <Button onClick={() => handleOpen(-100)}>
-                <AddIcon fontSize="small" />
-                新規
-              </Button>
-            </Grid2>
+        <Grid2 container spacing={3}>
+          <Grid2>
+            <Typography color="error" variant="body2">
+              ※マスタは削除できません。登録画面で削除フラグを付けてください
+              <br />
+              ※表示順を変更する場合は、検索条件無しで全件表示してください
+            </Typography>
+          </Grid2>
+          <Grid2>
+            <Button onClick={() => handleOpen(-100)}>
+              <AddIcon fontSize="small" />
+              新規
+            </Button>
           </Grid2>
         </Grid2>
       </Grid2>
-      <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 1 }}>
+      <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
         <MasterTable
           headers={mMHeader}
           datas={managers.map((l) => ({ ...l, id: l.tantouId }))}

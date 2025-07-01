@@ -26,15 +26,27 @@ import { MuiTablePagination } from '../../../_ui/table-pagination';
 import { BasesMasterTableValues, bMHeader } from '../_lib/types';
 import { BasesMasterDialog } from './bases-master-dailog';
 
+/**
+ * 拠点マスタテーブル
+ * @param
+ * @returns {JSX.Element} 拠点マスタテーブルコンポーネント
+ */
 export const BasesMasterTable = ({ bases }: { bases: BasesMasterTableValues[] | undefined }) => {
-  const [page, setPage] = useState(1);
+  /* 1ページごとの表示数 */
   const rowsPerPage = 50;
+  /* useState --------------------------------------- */
+  /* 今開いてるテーブルのページ数 */
+  const [page, setPage] = useState(1);
   /* ダイアログ開く顧客のID、閉じるとき、未選択で-100とする */
   const [openId, setOpenID] = useState<number>(-100);
   /* 車両詳細ダイアログの開閉状態 */
   const [dialogOpen, setDialogOpen] = useState(false);
   /* ダイアログでの編集モード */
   const [editable, setEditable] = useState(false);
+  /* DBのローディング状態 */
+  const [loading, setLoading] = useState(true);
+  /* methods ---------------------------------------- */
+  /* 詳細ダイアログを開く関数 */
   const handleOpenDialog = (id: number) => {
     if (id === -100) {
       setEditable(true);
@@ -42,6 +54,7 @@ export const BasesMasterTable = ({ bases }: { bases: BasesMasterTableValues[] | 
     setOpenID(id);
     setDialogOpen(true);
   };
+  /* ダイアログを閉じる関数 */
   const handleCloseDialog = () => {
     setDialogOpen(false);
   };
@@ -51,7 +64,6 @@ export const BasesMasterTable = ({ bases }: { bases: BasesMasterTableValues[] | 
     () => (rowsPerPage > 0 ? bases!.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage) : bases),
     [page, rowsPerPage, bases]
   );
-  // テーブル最後のページ用の空データの長さ
 
   return (
     <>
@@ -60,23 +72,27 @@ export const BasesMasterTable = ({ bases }: { bases: BasesMasterTableValues[] | 
           一覧
         </Typography>
         <Divider />
-        <Grid2 container mt={1} mx={0.5} justifyContent={'space-between'}>
+        <Grid2 container mt={0.5} mx={0.5} justifyContent={'space-between'} alignItems={'center'}>
           <Grid2 spacing={1}>
             <MuiTablePagination arrayList={bases!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
           </Grid2>
-          <Grid2 container spacing={1}>
-            <Grid2 container spacing={1}>
-              <Grid2>
-                <Button onClick={() => handleOpenDialog(-100)}>
-                  <AddIcon fontSize="small" />
-                  新規
-                </Button>
-              </Grid2>
+          <Grid2 container spacing={3}>
+            <Grid2>
+              <Typography color="error" variant="body2">
+                ※マスタは削除できません。登録画面で削除フラグを付けてください
+                <br />
+                ※表示順を変更する場合は、検索条件無しで全件表示してください
+              </Typography>
+            </Grid2>
+            <Grid2>
+              <Button onClick={() => handleOpenDialog(-100)}>
+                <AddIcon fontSize="small" />
+                新規
+              </Button>
             </Grid2>
           </Grid2>
         </Grid2>
-
-        <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 1 }}>
+        <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
           <MasterTable
             headers={bMHeader}
             datas={list!.map((l) => ({ id: l.kyotenId!, kyotenNam: l.kyotenNam, mem: l.mem! }))}

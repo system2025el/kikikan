@@ -72,22 +72,27 @@ export const EqptMasterTable = (props: {
         一覧
       </Typography>
       <Divider />
-      <Grid2 container mt={1} mx={0.5} justifyContent={'space-between'}>
+      <Grid2 container mt={0.5} mx={0.5} justifyContent={'space-between'} alignItems={'center'}>
         <Grid2 spacing={1}>
           <MuiTablePagination arrayList={arrayList} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
         </Grid2>
-        <Grid2 container spacing={1}>
-          <Grid2 container spacing={1}>
-            <Grid2>
-              <Button onClick={() => handleOpen(-100)}>
-                <AddIcon fontSize="small" />
-                新規
-              </Button>
-            </Grid2>
+        <Grid2 container spacing={3}>
+          <Grid2>
+            <Typography color="error" variant="body2">
+              ※マスタは削除できません。登録画面で削除フラグを付けてください
+              <br />
+              ※表示順を変更する場合は、検索条件無しで全件表示してください
+            </Typography>
+          </Grid2>
+          <Grid2>
+            <Button onClick={() => handleOpen(-100)}>
+              <AddIcon fontSize="small" />
+              新規
+            </Button>
           </Grid2>
         </Grid2>
       </Grid2>
-      <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 1 }}>
+      <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
         <MasterTable
           headers={eqptMHeader}
           datas={eqptMasterList.map((l) => ({

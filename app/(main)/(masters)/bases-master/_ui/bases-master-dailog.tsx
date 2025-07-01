@@ -21,6 +21,11 @@ import { MasterDialogTitle } from '../../_ui/dialog-title';
 // import { Loading } from '../../../_ui/loading';
 import { basesList, BasesMasterDialogSchema, BasesMasterDialogValues } from '../_lib/types';
 
+/**
+ * 拠点マスタ詳細ダイアログ
+ * @param
+ * @returns {JSX.Element} 拠点マスタ詳細ダイアログコンポーネント
+ */
 export const BasesMasterDialog = ({
   baseId,
   handleClose,
@@ -32,23 +37,15 @@ export const BasesMasterDialog = ({
   editable: boolean;
   setEditable: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
+  /* useTheme */
   const theme = useTheme();
   const colorOfThis = alpha(theme.palette.primary.main, 0.5);
+  /* useState -------------------------------------- */
+  /* 拠点 */
   const [base, setBase] = useState<BasesMasterDialogValues | undefined>();
+  /* DBのローディング状態 */
   const [isLoading, setIsLoading] = useState(true);
-  const handleEditable = () => {
-    setEditable(true);
-  };
-  const handleCloseDialog = () => {
-    setEditable(false);
-    handleClose();
-  };
-
-  const onSubmit = async (data: BasesMasterDialogValues) => {
-    console.log('★★★★★★★★★ ', data);
-    // handleCloseDialog();
-    // await addNewBase(data!);
-  };
+  /* useForm ----------------------------------------- */
   const { control, handleSubmit, reset } = useForm({
     mode: 'onBlur',
     reValidateMode: 'onBlur',
@@ -63,6 +60,23 @@ export const BasesMasterDialog = ({
       mem: base?.mem,
     },
   });
+
+  /* methods ---------------------------------------- */
+  /* ダイアログ内を編集モードにする */
+  const handleEditable = () => {
+    setEditable(true);
+  };
+  /* ダイアログを閉じる */
+  const handleCloseDialog = () => {
+    setEditable(false);
+    handleClose();
+  };
+  /* フォームを送信 */
+  const onSubmit = async (data: BasesMasterDialogValues) => {
+    console.log('★★★★★★★★★ ', data);
+    // handleCloseDialog();
+    // await addNewBase(data!);
+  };
 
   //モック
   useEffect(() => {

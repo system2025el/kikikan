@@ -1,5 +1,7 @@
 import z from 'zod';
-
+/**
+ * 車両マスタテーブルのヘッダー
+ */
 export const vMHeader = [
   { key: 'check', label: '' },
   { key: 'sharyoNam', label: '車両タイプ' },
@@ -52,6 +54,7 @@ type VehicleData = {
   dspFlg: boolean;
 };
 
+/* 削除モックdelete */
 export const vehicles: VehicleData[] = [
   {
     sharyoId: 1,

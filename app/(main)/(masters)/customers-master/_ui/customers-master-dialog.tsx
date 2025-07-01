@@ -19,23 +19,32 @@ import { Loading } from '@/app/(main)/_ui/loading';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { customerMasterDialogDetailsValues, customerMaterDialogDetailsSchema } from '../_lib/types';
 
-export const CustomerDialogContents = (props: {
+/**
+ * 顧客マスタの顧客詳細ダイアログ
+ * @param props
+ * @returns {JSX.Element} 顧客ダイアログ
+ */
+export const CustomerDialogContents = ({
+  customerId,
+  handleClose,
+  editable,
+  setEditable,
+}: {
   customerId: number;
   handleClose: () => void;
   editable: boolean;
   setEditable: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
+  /* useTheme */
   const theme = useTheme();
   const colorOfThis = alpha(theme.palette.primary.main, 0.5);
-  const { customerId, handleClose, editable, setEditable } = props;
-
-  const handleEditable = () => {
-    setEditable(true);
-  };
-
+  /* useState --------------------- */
+  /** 顧客リスト */
   const [customer, setCustomer] = useState<customerMasterDialogDetailsValues>();
+  /** DBのローディング状態 */
   const [isLoading, setIsLoading] = useState(true);
 
+  /* useForm ------------------------- */
   const {
     control,
     handleSubmit,
@@ -66,12 +75,18 @@ export const CustomerDialogContents = (props: {
     resolver: zodResolver(customerMaterDialogDetailsSchema),
   });
 
+  /* 関数 ---------------------------- */
+  /* ダイアログ内を編集モードにする */
+  const handleEditable = () => {
+    setEditable(true);
+  };
+  /* フォームを送信 */
   const onSubmit = (data: customerMasterDialogDetailsValues) => {
     // handleCloseDialog();
     console.log(isDirty);
     console.log(data);
   };
-
+  /* ダイアログを閉じる */
   const handleCloseDialog = () => {
     console.log('☆☆☆☆☆☆★★★★', customer);
     handleClose();
@@ -109,7 +124,7 @@ export const CustomerDialogContents = (props: {
                 control={control}
                 label={formItems[0].exsample}
                 fullWidth
-                sx={{ maxWidth: '80%' }}
+                sx={{ maxWidth: '90%' }}
                 disabled={editable ? false : true}
               />
             </FormBox>
@@ -121,7 +136,7 @@ export const CustomerDialogContents = (props: {
                 control={control}
                 label={formItems[1].exsample}
                 fullWidth
-                sx={{ maxWidth: '80%' }}
+                sx={{ maxWidth: '90%' }}
                 disabled={editable ? false : true}
               />
             </FormBox>
@@ -181,7 +196,7 @@ export const CustomerDialogContents = (props: {
                 control={control}
                 label={formItems[6].exsample}
                 fullWidth
-                sx={{ maxWidth: '80%' }}
+                sx={{ maxWidth: '90%' }}
                 disabled={editable ? false : true}
               />
             </FormBox>
@@ -193,7 +208,7 @@ export const CustomerDialogContents = (props: {
                 control={control}
                 label={formItems[7].exsample}
                 fullWidth
-                sx={{ maxWidth: '80%' }}
+                sx={{ maxWidth: '90%' }}
                 disabled={editable ? false : true}
               />
             </FormBox>
@@ -205,7 +220,7 @@ export const CustomerDialogContents = (props: {
                 control={control}
                 label={formItems[8].exsample}
                 fullWidth
-                sx={{ maxWidth: '80%' }}
+                sx={{ maxWidth: '90%' }}
                 disabled={editable ? false : true}
               />
             </FormBox>
@@ -253,7 +268,7 @@ export const CustomerDialogContents = (props: {
                 control={control}
                 label={formItems[12].exsample}
                 fullWidth
-                sx={{ maxWidth: '80%' }}
+                sx={{ maxWidth: '90%' }}
                 disabled={editable ? false : true}
               />
             </FormBox>
@@ -265,7 +280,7 @@ export const CustomerDialogContents = (props: {
                 control={control}
                 label={formItems[13].exsample}
                 fullWidth
-                sx={{ maxWidth: '80%' }}
+                sx={{ maxWidth: '90%' }}
                 disabled={editable ? false : true}
               />
             </FormBox>

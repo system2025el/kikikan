@@ -1,4 +1,4 @@
-import { optional, z } from 'zod';
+import { z } from 'zod';
 
 export const LocMasterSchema = z.object({
   locId: z.number().optional(),
@@ -39,7 +39,9 @@ export const LocMasterTableSchema = z.object({
 export type LocMasterTableValues = z.infer<typeof LocMasterTableSchema>;
 
 /** 場所マスタデータ */
-
+/**
+ * 場所マスタテーブルヘッダー
+ */
 export const lMHeader = [
   { key: 'check', label: '' },
   { key: 'locNam', label: '場所' },
@@ -49,7 +51,7 @@ export const lMHeader = [
   { key: 'up', label: '' },
   { key: 'down', label: '' },
 ];
-
+/**モック削除delete */
 export const locationList: LocMasterTableValues[] = [
   {
     locNam: '日比谷音楽堂',
