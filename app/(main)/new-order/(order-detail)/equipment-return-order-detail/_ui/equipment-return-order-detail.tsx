@@ -585,6 +585,10 @@ export const EquipmentReturnOrderDetail = () => {
             <Typography>受注明細(機材)</Typography>
             <Typography fontSize={'small'}>機材入力</Typography>
           </Grid2>
+          <Button>
+            <CheckIcon fontSize="small" />
+            保存
+          </Button>
         </Box>
         <Divider />
         <Dialog open={EqSelectionDialogOpen} fullScreen>
