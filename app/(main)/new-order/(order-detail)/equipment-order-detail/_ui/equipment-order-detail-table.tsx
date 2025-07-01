@@ -21,6 +21,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
+import { grey } from '@mui/material/colors';
 import { Dayjs } from 'dayjs';
 import React, { useRef, useState } from 'react';
 
@@ -343,16 +344,16 @@ const EqTableRow = React.memo(
             {row.date && <Typography>{row.place === 'K' ? 'K→Y' : 'Y→K'}</Typography>}
           </Box>
         </TableCell>
-        <TableCell style={styles.row} align="left" size="small" sx={{ bgcolor: 'lightgrey' }}>
+        <TableCell style={styles.row} align="left" size="small" sx={{ bgcolor: grey[200] }}>
           {row.place}
         </TableCell>
         <TableCell style={styles.row} align="center" size="small">
           <MemoTooltip name={row.name} memo={row.memo} handleMemoChange={handleMemoChange} rowIndex={rowIndex} />
         </TableCell>
-        <TableCell style={styles.row} align="left" size="small" sx={{ bgcolor: 'lightgrey' }}>
+        <TableCell style={styles.row} align="left" size="small" sx={{ bgcolor: grey[200] }}>
           {row.name}
         </TableCell>
-        <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: 'lightgrey' }}>
+        <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
           {row.all}
         </TableCell>
         <TableCell style={styles.row} align="right" size="small">
@@ -435,7 +436,7 @@ const EqTableRow = React.memo(
             onFocus={(e) => e.target.select()}
           />
         </TableCell>
-        <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: 'lightgrey' }}>
+        <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
           {row.total}
         </TableCell>
       </TableRow>

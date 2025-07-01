@@ -3,6 +3,7 @@
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import CheckIcon from '@mui/icons-material/Check';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
   Accordion,
@@ -516,6 +517,9 @@ const EquipmentOrderDetail = () => {
 
   return (
     <Box>
+      <Box display={'flex'} justifyContent={'end'}>
+        <BackButton label={'戻る'} />
+      </Box>
       {/*受注ヘッダー*/}
       <Accordion expanded={expanded} onChange={handleExpansion}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />} component="div">
@@ -527,7 +531,6 @@ const EquipmentOrderDetail = () => {
                 <Typography>A/Zepp Tour</Typography>
               </Grid2>
             </Grid2>
-            <BackButton label={'戻る'} />
           </Box>
         </AccordionSummary>
         <AccordionDetails sx={{ padding: 0 }}>
@@ -589,9 +592,13 @@ const EquipmentOrderDetail = () => {
       {/*受注明細ヘッダー*/}
       <Accordion sx={{ mt: 2 }} defaultExpanded>
         <AccordionSummary expandIcon={<ExpandMoreIcon />} component="div">
-          <Grid2 container display="flex" justifyContent="space-between" spacing={2} py={1}>
+          <Box display="flex" alignItems={'center'} justifyContent="space-between" py={1} width={'100%'}>
             <Typography>受注機材ヘッダー</Typography>
-          </Grid2>
+            <Button>
+              <CheckIcon fontSize="small" />
+              保存
+            </Button>
+          </Box>
         </AccordionSummary>
         <AccordionDetails sx={{ padding: 0 }}>
           <Divider />
@@ -670,14 +677,16 @@ const EquipmentOrderDetail = () => {
       </Accordion>
       {/*受注明細(機材)*/}
       <Paper variant="outlined" sx={{ mt: 2 }}>
-        <Box display="flex" justifyContent="space-between" alignItems="center" p={2}>
+        <Box display="flex" justifyContent="space-between" alignItems="center" py={1} px={2}>
           <Grid2 container direction="column" spacing={1}>
             <Typography>受注明細(機材)</Typography>
             <Typography fontSize={'small'}>機材入力</Typography>
           </Grid2>
-          <Grid2 container spacing={2}>
-            <Button>編集</Button>
-            <Button onClick={() => console.log(equipmentRows, stockRows, dateRange)}>保存</Button>
+          <Grid2>
+            <Button>
+              <CheckIcon fontSize="small" />
+              保存
+            </Button>
           </Grid2>
         </Box>
         <Divider />
