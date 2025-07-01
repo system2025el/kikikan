@@ -5,12 +5,11 @@ export const getDateHeaderBackgroundColor = (date: string, dateRange: string[]):
   return isMatched ? 'blue' : 'black';
 };
 
-export const getDateRowBackgroundColor = (date: string, endKICSDate: Date): string => {
-  if (endKICSDate !== null) {
-    const endDate = toISOStringWithTimezoneMonthDay(new Date(endKICSDate)).split('T')[0];
+export const getDateRowBackgroundColor = (date: string, startDate: Date | null, endDate: Date | null): string => {
+  const issueDate = startDate && toISOStringWithTimezoneMonthDay(new Date(startDate));
+  const returnDate = endDate && toISOStringWithTimezoneMonthDay(new Date(endDate)).split('T')[0];
 
-    if (date === endDate) return 'yellow';
-    return 'white';
-  }
+  if (date === returnDate) return 'yellow';
+  if (date === issueDate) return 'lightblue';
   return 'white';
 };

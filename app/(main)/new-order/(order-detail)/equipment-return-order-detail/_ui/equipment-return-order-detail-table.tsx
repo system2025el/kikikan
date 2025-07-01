@@ -22,30 +22,28 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
+import { grey } from '@mui/material/colors';
 import { Dayjs } from 'dayjs';
 import React, { useRef, useState } from 'react';
 
-import { TestDate } from '@/app/(main)/_ui/date';
-import { TestTime } from '@/app/(main)/_ui/time';
-
-import { Equipment, EquipmentData, StockData } from './returnslip';
+import { ReturnEquipment, ReturnEquipmentData, StockData } from './equipment-return-order-detail';
 
 type ReturnStockTableProps = {
   header: string[];
   rows: StockData[];
   dateRange: string[];
-  startKICSDate: Date;
-  endKICSDate: Date;
+  startDate: Date | null;
+  endDate: Date | null;
   getHeaderBackgroundColor: (date: string, dateRange: string[]) => string;
-  getRowBackgroundColor: (dateHeader: string, endKICSDate: Date) => string;
+  getRowBackgroundColor: (dateHeader: string, startDate: Date | null, endDate: Date | null) => string;
 };
 
 export const ReturnStockTable: React.FC<ReturnStockTableProps> = ({
   header,
   rows,
   dateRange,
-  startKICSDate,
-  endKICSDate,
+  startDate,
+  endDate,
   getHeaderBackgroundColor,
   getRowBackgroundColor,
 }) => {
@@ -78,9 +76,8 @@ export const ReturnStockTable: React.FC<ReturnStockTableProps> = ({
               key={rowIndex}
               header={header}
               row={row}
-              dateRange={dateRange}
-              startKICSDate={startKICSDate}
-              endKICSDate={endKICSDate}
+              startDate={startDate}
+              endDate={endDate}
               getRowBackgroundColor={getRowBackgroundColor}
             />
           ))}
@@ -93,14 +90,13 @@ export const ReturnStockTable: React.FC<ReturnStockTableProps> = ({
 export type ReturnStockTableRowProps = {
   header: string[];
   row: StockData;
-  dateRange: string[];
-  startKICSDate: Date;
-  endKICSDate: Date;
-  getRowBackgroundColor: (dateHeader: string, endKICSDate: Date) => string;
+  startDate: Date | null;
+  endDate: Date | null;
+  getRowBackgroundColor: (dateHeader: string, startDate: Date | null, endDate: Date | null) => string;
 };
 
 const ReturnStockTableRow = React.memo(
-  ({ header, row, dateRange, startKICSDate, endKICSDate, getRowBackgroundColor }: ReturnStockTableRowProps) => {
+  ({ header, row, startDate, endDate, getRowBackgroundColor }: ReturnStockTableRowProps) => {
     console.log('date側描画', row.id);
     return (
       <TableRow>
@@ -113,7 +109,7 @@ const ReturnStockTableRow = React.memo(
                 border: '1px solid black',
                 whiteSpace: 'nowrap',
                 height: 25,
-                bgcolor: getRowBackgroundColor(header[colIndex], endKICSDate),
+                bgcolor: getRowBackgroundColor(header[colIndex], startDate, endDate),
                 py: 0,
                 px: 1,
                 color: typeof cell === 'number' && cell < 0 ? 'red' : 'black',
@@ -131,8 +127,7 @@ const ReturnStockTableRow = React.memo(
     return (
       prevProps.header === nextProps.header &&
       prevProps.row === nextProps.row &&
-      prevProps.startKICSDate === nextProps.startKICSDate &&
-      prevProps.endKICSDate === nextProps.endKICSDate
+      prevProps.endDate === nextProps.endDate
     );
   }
 );
@@ -140,7 +135,7 @@ const ReturnStockTableRow = React.memo(
 ReturnStockTableRow.displayName = 'ReturnStockTableRow';
 
 type ReturnEqTableProps = {
-  rows: Equipment[];
+  rows: ReturnEquipment[];
   onChange: (rowIndex: number, returnValue: number) => void;
   handleMemoChange: (rowIndex: number, memo: string) => void;
 };
@@ -206,7 +201,7 @@ export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({ rows, onChange, ha
 };
 
 type ReturnEqTableRowProps = {
-  row: Equipment;
+  row: ReturnEquipment;
   rowIndex: number;
   handleOrderRef: (el: HTMLInputElement | null) => void;
   handleMemoChange: (rowIndex: number, memo: string) => void;
@@ -232,19 +227,21 @@ const ReturnEqTableRow = React.memo(
             <Delete fontSize="small" />
           </IconButton>
         </TableCell>
-        <TableCell align="right" size="small" sx={{ bgcolor: 'lightgrey', py: 0, px: 1, border: '1px solid black' }}>
+        <TableCell align="right" size="small" sx={{ bgcolor: grey[200], py: 0, px: 1, border: '1px solid black' }}>
           {rowIndex + 1}
         </TableCell>
-        <TableCell style={styles.row} align="left" size="small" sx={{ bgcolor: 'lightgrey' }}>
-          {row.name}
+        <TableCell style={styles.row} align="left" size="small">
+          <Button variant="text" sx={{ p: 0 }}>
+            {row.name}
+          </Button>
         </TableCell>
         <TableCell style={styles.row} align="center" size="small">
           <MemoTooltip name={row.name} memo={row.memo} handleMemoChange={handleMemoChange} rowIndex={rowIndex} />
         </TableCell>
-        <TableCell style={styles.row} align="left" size="small" sx={{ bgcolor: 'lightgrey' }}>
+        <TableCell style={styles.row} align="left" size="small" sx={{ bgcolor: grey[200] }}>
           {row.place}
         </TableCell>
-        <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: 'lightgrey' }}>
+        <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
           {row.issue}
         </TableCell>
         <TableCell style={styles.row} align="right" size="small">
@@ -253,7 +250,7 @@ const ReturnEqTableRow = React.memo(
             value={row.return}
             type="text"
             onChange={(e) => {
-              if (/^\d*$/.test(e.target.value)) {
+              if (/^\d*$/.test(e.target.value) && Number(e.target.value) <= row.issue) {
                 handleReturnCellChange(rowIndex, Number(e.target.value));
               }
             }}
