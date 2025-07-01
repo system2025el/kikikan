@@ -103,20 +103,20 @@ const NewOrder = () => {
     <Box>
       {/* --------------------------------受注ヘッダー------------------------------------- */}
       <Paper>
-        <Grid2 container display="flex" alignItems="center" justifyContent="space-between">
+        <Grid2 container display="flex" alignItems="center" justifyContent="space-between" p={2}>
           <Grid2>
-            <Typography margin={1}>受注ヘッダー</Typography>
+            <Typography>受注ヘッダー</Typography>
           </Grid2>
-          <Grid2>
-            <Button sx={{ margin: 1 }}>
+          <Grid2 container spacing={1}>
+            <Button>
               <CheckIcon fontSize="small" />
               保存
             </Button>
-            <Button color="error" sx={{ margin: 1 }}>
+            <Button color="error">
               <Delete fontSize="small" />
               伝票削除
             </Button>
-            <Button sx={{ margin: 1 }}>
+            <Button>
               <ContentCopyIcon fontSize="small" />
               コピー
             </Button>
@@ -222,9 +222,9 @@ const NewOrder = () => {
       {/* --------------------------------受注明細（機材）------------------------------------- */}
       <Accordion sx={{ marginTop: 2 }} defaultExpanded>
         <AccordionSummary expandIcon={<ExpandMoreIcon />} component="div">
-          <Grid2 container alignItems="center" justifyContent="space-between" pt={2} sx={{ width: '100%' }} spacing={1}>
+          <Grid2 container alignItems="center" justifyContent="space-between" py={1} sx={{ width: '100%' }} spacing={1}>
             <Grid2>
-              <Typography>受注明細(機材)</Typography>
+              <Typography>受注機材ヘッダー一覧</Typography>
             </Grid2>
             <Grid2 container display="flex" alignItems="center" spacing={1}>
               <Typography>合計金額</Typography>
@@ -283,9 +283,9 @@ const NewOrder = () => {
       {/* -------------------------車両----------------------------------- */}
       <Accordion sx={{ marginTop: 2 }} defaultExpanded>
         <AccordionSummary expandIcon={<ExpandMoreIcon />} component="div">
-          <Grid2 container alignItems="center" justifyContent="space-between" pt={2} sx={{ width: '100%' }} spacing={1}>
+          <Grid2 container alignItems="center" justifyContent="space-between" py={1} sx={{ width: '100%' }} spacing={1}>
             <Grid2>
-              <Typography>受注明細(車両)</Typography>
+              <Typography>受注車両ヘッダー一覧</Typography>
             </Grid2>
             <Grid2 container spacing={1}>
               <Button
