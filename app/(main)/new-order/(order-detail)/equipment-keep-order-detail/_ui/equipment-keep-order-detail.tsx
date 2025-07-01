@@ -2,6 +2,7 @@
 
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import CheckIcon from '@mui/icons-material/Check';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
   Accordion,
@@ -28,7 +29,7 @@ import { useState } from 'react';
 
 import { BackButton } from '@/app/(main)/_ui/buttons';
 import { Calendar, TestDate, toISOStringWithTimezoneMonthDay } from '@/app/(main)/_ui/date';
-import Time from '@/app/(main)/_ui/time';
+import Time, { TestTime } from '@/app/(main)/_ui/time';
 
 import { getDateHeaderBackgroundColor, getDateRowBackgroundColor } from '../_lib/colorselect';
 import { data, stock } from '../_lib/data';
@@ -116,7 +117,7 @@ export const EquipmentKeepOrderDetail = () => {
   // KICS入庫日
   const [endKICSDate, setEndKICSDate] = useState<Date | null>(null);
   // YARD入庫日
-  const [endYARDDate, setEndYARDDate] = useState<Date | null>(new Date('2025/11/4'));
+  const [endYARDDate, setEndYARDDate] = useState<Date | null>(new Date('2025/11/9 15:00'));
   // 出庫日
   const [startDate, setStartDate] = useState<Date | null>(null);
   // 出庫日から入庫日
@@ -302,8 +303,20 @@ export const EquipmentKeepOrderDetail = () => {
       {/*受注明細ヘッダー(キープ)*/}
       <Accordion sx={{ mt: 2 }} defaultExpanded>
         <AccordionSummary expandIcon={<ExpandMoreIcon />} component="div" sx={{ bgcolor: 'green', color: 'white' }}>
-          <Grid2 container display="flex" justifyContent="space-between" spacing={2} py={1}>
+          <Grid2
+            container
+            display="flex"
+            alignItems={'center'}
+            justifyContent="space-between"
+            spacing={2}
+            py={1}
+            width={'100%'}
+          >
             <Typography>受注機材ヘッダー(キープ)</Typography>
+            <Button>
+              <CheckIcon fontSize="small" />
+              保存
+            </Button>
           </Grid2>
         </AccordionSummary>
         <AccordionDetails sx={{ padding: 0 }}>
@@ -364,7 +377,11 @@ export const EquipmentKeepOrderDetail = () => {
                     }
                   }}
                 />
-                <Time disabled />
+                <TestTime
+                  disabled
+                  time={endYARDDate}
+                  onChange={(newDate) => newDate && setEndYARDDate(newDate?.toDate())}
+                />
               </Grid2>
             </Grid2>
             <Grid2 container alignItems="center" py={1}>
@@ -376,13 +393,10 @@ export const EquipmentKeepOrderDetail = () => {
       </Accordion>
       {/*受注明細(機材)*/}
       <Paper variant="outlined" sx={{ mt: 2 }}>
-        <Box display="flex" justifyContent="space-between" alignItems="center" p={2}>
+        <Box display="flex" justifyContent="space-between" alignItems="center" py={1} px={2}>
           <Grid2 container direction="column" spacing={1}>
             <Typography>受注明細(機材)</Typography>
             <Typography fontSize={'small'}>機材入力</Typography>
-          </Grid2>
-          <Grid2 container spacing={2}>
-            <Button>保存</Button>
           </Grid2>
         </Box>
         <Divider />

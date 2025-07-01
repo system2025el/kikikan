@@ -22,6 +22,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
+import { grey } from '@mui/material/colors';
 import React, { useRef, useState } from 'react';
 
 import { KeepEquipment, KeepEquipmentData, StockData } from './equipment-keep-order-detail';
@@ -149,13 +150,13 @@ export const KeepEqTable: React.FC<KeepEqTableProps> = ({ rows, handleMemoChange
             <TableCell size="small" style={styles.header} />
             <TableCell size="small" style={styles.header} />
             <TableCell align="left" size="small" style={styles.header}>
-              機材名
+              在庫場所
             </TableCell>
             <TableCell align="left" size="small" style={styles.header}>
               キープメモ
             </TableCell>
             <TableCell align="left" size="small" style={styles.header}>
-              在庫場所
+              機材名
             </TableCell>
             <TableCell align="right" size="small" style={styles.header}>
               出庫数
@@ -192,22 +193,24 @@ const KeepEqTableRow = React.memo(
             <Delete fontSize="small" />
           </IconButton>
         </TableCell>
-        <TableCell align="right" size="small" sx={{ bgcolor: 'lightgrey', py: 0, px: 1, border: '1px solid black' }}>
+        <TableCell align="right" size="small" sx={{ bgcolor: grey[200], py: 0, px: 1, border: '1px solid black' }}>
           {rowIndex + 1}
         </TableCell>
-        <TableCell style={styles.row} align="left" size="small" sx={{ bgcolor: 'lightgrey' }}>
-          {row.name}
+        <TableCell style={styles.row} align="left" size="small" sx={{ bgcolor: grey[200] }}>
+          {row.place}
         </TableCell>
         <TableCell style={styles.row} align="center" size="small">
           <MemoTooltip name={row.name} memo={row.memo} handleMemoChange={handleMemoChange} rowIndex={rowIndex} />
         </TableCell>
-        <TableCell style={styles.row} align="left" size="small" sx={{ bgcolor: 'lightgrey' }}>
-          {row.place}
+        <TableCell style={styles.row} align="left" size="small">
+          <Button variant="text" sx={{ p: 0, justifyContent: 'start' }}>
+            {row.name}
+          </Button>
         </TableCell>
-        <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: 'lightgrey' }}>
+        <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
           {row.issue}
         </TableCell>
-        <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: 'lightgrey' }}>
+        <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
           {row.keep}
         </TableCell>
       </TableRow>
