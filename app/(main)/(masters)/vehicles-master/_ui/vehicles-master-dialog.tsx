@@ -37,8 +37,6 @@ export const VehiclesMasterDialog = ({
   editable: boolean;
   setEditable: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
-  const theme = useTheme();
-  const colorOfThis = alpha(theme.palette.primary.main, 0.5);
   const [veh, setVeh] = useState<VehMasterDialogValues>();
   const [isLoading, setIsLoading] = useState(true);
   const handleEditable = () => {
@@ -86,7 +84,6 @@ export const VehiclesMasterDialog = ({
     <>
       <form onSubmit={handleSubmit(onSubmit)}>
         <MasterDialogTitle
-          colorOfThis={colorOfThis}
           editable={editable}
           handleEditable={handleEditable}
           handleCloseDialog={handleCloseDialog}

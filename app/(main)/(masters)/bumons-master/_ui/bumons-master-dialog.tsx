@@ -43,9 +43,6 @@ export const BumonsMasterDialog = ({
   editable: boolean;
   setEditable: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
-  /* useTheme */
-  const theme = useTheme();
-  const colorOfThis = alpha(theme.palette.primary.main, 0.5);
   /* useState -------------------------------------- */
   /* 部門 */
   const [bumon, setBumon] = useState<BumonsMasterDialogValues | undefined>();
@@ -112,7 +109,6 @@ export const BumonsMasterDialog = ({
     <>
       <form onSubmit={handleSubmit(onSubmit)}>
         <MasterDialogTitle
-          colorOfThis={colorOfThis}
           editable={editable}
           handleEditable={handleEditable}
           handleCloseDialog={handleCloseDialog}

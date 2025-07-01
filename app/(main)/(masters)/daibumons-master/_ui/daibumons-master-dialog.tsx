@@ -25,9 +25,6 @@ export const DaibumonsMasterDialog = ({
   editable: boolean;
   setEditable: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
-  /* useTheme */
-  const theme = useTheme();
-  const colorOfThis = alpha(theme.palette.primary.main, 0.5);
   /* useState -------------------------------------- */
   /* 大部門 */
   const [daibumon, setdaibumon] = useState<DaibumonsMasterDialogValues | undefined>();
@@ -92,7 +89,6 @@ export const DaibumonsMasterDialog = ({
     <>
       <form onSubmit={handleSubmit(onSubmit)}>
         <MasterDialogTitle
-          colorOfThis={colorOfThis}
           editable={editable}
           handleEditable={handleEditable}
           handleCloseDialog={handleCloseDialog}

@@ -27,15 +27,17 @@ import { Loading } from '../../../_ui/loading';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { EqptMasterDialogSchema, EqptMasterDialogValues } from '../_lib/types';
 
-export const EqMasterDialog = (props: {
+export const EqMasterDialog = ({
+  eqptId,
+  handleClose,
+  editable,
+  setEditable,
+}: {
   eqptId: number;
   handleClose: () => void;
   editable: boolean;
   setEditable: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
-  const { eqptId, handleClose, editable, setEditable } = props;
-  const theme = useTheme();
-  const colorOfThis = alpha(theme.palette.primary.main, 0.5);
   const [veh, setVeh] = useState<EqptMasterDialogValues>();
   const [isLoading, setIsLoading] = useState(true);
   const handleEditable = () => {
@@ -78,7 +80,6 @@ export const EqMasterDialog = (props: {
     <>
       <form onSubmit={handleSubmit(onSubmit)}>
         <MasterDialogTitle
-          colorOfThis={colorOfThis}
           editable={editable}
           handleEditable={handleEditable}
           handleCloseDialog={handleCloseDialog}

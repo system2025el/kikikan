@@ -26,9 +26,6 @@ export const LocationsMasterDialog = ({
   editable: boolean;
   setEditable: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
-  /* useTheme */
-  const theme = useTheme();
-  const colorOfThis = alpha(theme.palette.primary.main, 0.5);
   /* useState --------------------- */
   /* 公演場所リストの配列 */
   const [location, setLocation] = useState<LocMasterValues>();
@@ -77,7 +74,6 @@ export const LocationsMasterDialog = ({
     <>
       <form onSubmit={handleSubmit(onSubmit)}>
         <MasterDialogTitle
-          colorOfThis={colorOfThis}
           editable={editable}
           handleEditable={handleEditable}
           handleCloseDialog={handleCloseDialog}

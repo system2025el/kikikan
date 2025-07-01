@@ -25,9 +25,6 @@ export const ShukeibumonsMasterDialog = ({
   editable: boolean;
   setEditable: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
-  /* useTheme */
-  const theme = useTheme();
-  const colorOfThis = alpha(theme.palette.primary.main, 0.5);
   /* useState -------------------------------------- */
   /* 集計部門リスト */
   const [shukeibumon, setshukeibumon] = useState<ShukeibumonsMasterDialogValues | undefined>();
@@ -92,7 +89,6 @@ export const ShukeibumonsMasterDialog = ({
     <>
       <form onSubmit={handleSubmit(onSubmit)}>
         <MasterDialogTitle
-          colorOfThis={colorOfThis}
           editable={editable}
           handleEditable={handleEditable}
           handleCloseDialog={handleCloseDialog}

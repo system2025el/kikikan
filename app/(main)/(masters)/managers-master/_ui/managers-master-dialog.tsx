@@ -26,9 +26,6 @@ export const ManagerDialogContents = ({
   editable: boolean;
   setEditable: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
-  /* useTheme */
-  const theme = useTheme();
-  const colorOfThis = alpha(theme.palette.primary.main, 0.5);
   /* useState --------------------- */
   /** 担当者リストの配列 */
   const [manager, setManager] = useState<ManagerMasterDialogDetailsValues>();
@@ -79,7 +76,6 @@ export const ManagerDialogContents = ({
     <>
       <form onSubmit={handleSubmit(onSubmit)}>
         <MasterDialogTitle
-          colorOfThis={colorOfThis}
           editable={editable}
           handleEditable={handleEditable}
           handleCloseDialog={handleCloseDialog}
