@@ -1,10 +1,14 @@
 'use client';
 import SearchIcon from '@mui/icons-material/Search';
 import { Box, Button, Container, Divider, Grid2, Paper, Stack, TextField, Typography } from '@mui/material';
+import { JSX } from 'react';
 
 import { BackButton } from '../../../_ui/buttons';
 import { LocationsMasterTable } from './locations-master-table';
-
+/**
+ * 公演場所マスタ画面
+ * @returns {JSX.Element} 公演場所マスタ画面コンポーネント
+ */
 export const LocationsMaster = () => {
   return (
     <>

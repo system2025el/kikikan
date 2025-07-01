@@ -1,11 +1,15 @@
 'use client';
 import SearchIcon from '@mui/icons-material/Search';
 import { Box, Button, Container, Divider, Grid2, Paper, Stack, TextField, Typography } from '@mui/material';
+import { JSX } from 'react';
 
 import { BackButton } from '../../../_ui/buttons';
 import { CustomerMasterTableValues } from '../_lib/types';
 import { CustomersMasterTable } from './customers-master-table';
-
+/**
+ * 顧客マスタ画面
+ * @returns {JSX.Element} 顧客マスタ画面コンポーネント
+ */
 export const CustomersMaster = (/*{ customers }: { customers: CustomerMasterTableValues[] | undefined }*/) => {
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>

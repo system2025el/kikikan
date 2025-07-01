@@ -20,23 +20,32 @@ import {
   useTheme,
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
-import { SetStateAction, useEffect, useMemo, useState } from 'react';
+import { JSX, SetStateAction, useEffect, useMemo, useState } from 'react';
 
 import { MasterTable } from '../../../_ui/table';
 import { MuiTablePagination } from '../../../_ui/table-pagination';
 import { VehMasterDialogValues, VehMasterTableValues, vMHeader } from '../_lib/datas';
 import { VehiclesMasterDialog } from './vehicles-master-dialog';
 
-/** 車両マスタのテーブルコンポーネント */
+/**
+ * 車両マスタテーブル
+ * @param
+ * @returns {JSX.Element} 車両マスタテーブルコンポーネント
+ */
 export const VehiclesMasterTable = ({ vehs }: { vehs: VehMasterTableValues[] | undefined }) => {
-  const [page, setPage] = useState(1);
+  /* テーブルの1ページのの行数 */
   const rowsPerPage = 50;
-  /* ダイアログ開く顧客のID、閉じるとき、未選択で-100とする */
+  /* useState ------------------------------- */
+  /* 表示してるページ */
+  const [page, setPage] = useState(1);
+  /* ダイアログ開く車両のID、閉じるとき、未選択で-100とする */
   const [openId, setOpenID] = useState<number>(-100);
-  /* 車両詳細ダイアログの開閉状態 */
+  /* 詳細ダイアログの開閉状態 */
   const [dialogOpen, setDialogOpen] = useState(false);
   /* ダイアログでの編集モード */
   const [editable, setEditable] = useState(false);
+  /* methods ------------------------------- */
+  /* ダイアログを開く関数 */
   const handleOpenDialog = (id: number) => {
     if (id === -100) {
       setEditable(true);
@@ -44,6 +53,7 @@ export const VehiclesMasterTable = ({ vehs }: { vehs: VehMasterTableValues[] | u
     setOpenID(id);
     setDialogOpen(true);
   };
+  /* ダイアログを閉じる関数 */
   const handleCloseDialog = () => {
     setDialogOpen(false);
   };
@@ -53,8 +63,6 @@ export const VehiclesMasterTable = ({ vehs }: { vehs: VehMasterTableValues[] | u
     () => (rowsPerPage > 0 ? vehs!.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage) : vehs),
     [page, rowsPerPage, vehs]
   );
-  // テーブル最後のページ用の空データの長さ
-  const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - vehs!.length) : 0;
 
   return (
     <Box>
@@ -62,23 +70,28 @@ export const VehiclesMasterTable = ({ vehs }: { vehs: VehMasterTableValues[] | u
         一覧
       </Typography>
       <Divider />
-      <Grid2 container mt={1} mx={0.5} justifyContent={'space-between'}>
+      <Grid2 container mt={0.5} mx={0.5} justifyContent={'space-between'} alignItems={'center'}>
         <Grid2 spacing={1}>
           <MuiTablePagination arrayList={vehs!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
         </Grid2>
-        <Grid2 container spacing={1}>
-          <Grid2 container spacing={1}>
-            <Grid2>
-              <Button onClick={() => handleOpenDialog(-100)}>
-                <AddIcon fontSize="small" />
-                新規
-              </Button>
-            </Grid2>
+        <Grid2 container spacing={3}>
+          <Grid2>
+            <Typography color="error" variant="body2">
+              ※マスタは削除できません。登録画面で削除フラグを付けてください
+              <br />
+              ※表示順を変更する場合は、検索条件無しで全件表示してください
+            </Typography>
+          </Grid2>
+          <Grid2>
+            <Button onClick={() => handleOpenDialog(-100)}>
+              <AddIcon fontSize="small" />
+              新規
+            </Button>
           </Grid2>
         </Grid2>
       </Grid2>
 
-      <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 1 }}>
+      <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
         <MasterTable
           headers={vMHeader}
           datas={list!.map((l) => ({ id: l.sharyoId, sharyoNam: l.sharyoNam, mem: l.mem! }))}

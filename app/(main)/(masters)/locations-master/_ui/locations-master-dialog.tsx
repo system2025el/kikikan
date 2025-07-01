@@ -2,7 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { alpha, Button, DialogTitle, Grid2, Stack, Typography, useTheme } from '@mui/material';
-import { useState } from 'react';
+import { JSX, useState } from 'react';
 import { CheckboxElement, TextareaAutosizeElement, TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { FormBox, FormItemsType } from '@/app/(main)/_ui/form-box';
@@ -10,25 +10,31 @@ import { FormBox, FormItemsType } from '@/app/(main)/_ui/form-box';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { LocMasterSchema, LocMasterValues } from '../_lib/types';
 
-export const LocationsMasterDialog = (props: {
+/**
+ * 公演場所マスタの詳細ダイアログ
+ * @param
+ * @returns {JSX.Element} 公演場所マスタの詳細ダイアログコンポーネント
+ */
+export const LocationsMasterDialog = ({
+  locationId,
+  handleClose,
+  editable,
+  setEditable,
+}: {
   locationId: number | string;
   handleClose: () => void;
   editable: boolean;
   setEditable: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
+  /* useTheme */
   const theme = useTheme();
   const colorOfThis = alpha(theme.palette.primary.main, 0.5);
-  const { locationId, handleClose, editable, setEditable } = props;
-
-  const handleEditable = () => {
-    setEditable(true);
-  };
-  const handleCloseDialog = () => {
-    setEditable(false);
-    handleClose();
-  };
+  /* useState --------------------- */
+  /* 公演場所リストの配列 */
   const [location, setLocation] = useState<LocMasterValues>();
-
+  /** DBのローディング状態 */
+  const [isLoading, setIsLoading] = useState(true);
+  /* useForm ------------------------- */
   const {
     control,
     handleSubmit,
@@ -40,11 +46,21 @@ export const LocationsMasterDialog = (props: {
     defaultValues: {},
     resolver: zodResolver(LocMasterSchema),
   });
-
+  /* 関数 ---------------------------- */
+  /* フォームを送信 */
   const onSubmit = (data: LocMasterValues) => {
     // handleCloseDialog();
     console.log(isDirty);
     console.log(data);
+  };
+  /* ダイアログ内を編集モードにする */
+  const handleEditable = () => {
+    setEditable(true);
+  };
+  /* ダイアログを閉じる */
+  const handleCloseDialog = () => {
+    setEditable(false);
+    handleClose();
   };
 
   // useEffect(() => {
@@ -76,7 +92,7 @@ export const LocationsMasterDialog = (props: {
                 control={control}
                 label={formItems[0].exsample}
                 fullWidth
-                sx={{ maxWidth: '80%' }}
+                sx={{ maxWidth: '90%' }}
                 disabled={editable ? false : true}
               />
             </FormBox>
@@ -88,7 +104,7 @@ export const LocationsMasterDialog = (props: {
                 control={control}
                 label={formItems[1].exsample}
                 fullWidth
-                sx={{ maxWidth: '80%' }}
+                sx={{ maxWidth: '90%' }}
                 disabled={editable ? false : true}
               />
             </FormBox>
@@ -106,7 +122,7 @@ export const LocationsMasterDialog = (props: {
                 control={control}
                 label={formItems[3].exsample}
                 fullWidth
-                sx={{ maxWidth: '80%' }}
+                sx={{ maxWidth: '90%' }}
                 disabled={editable ? false : true}
               />
             </FormBox>
@@ -118,7 +134,7 @@ export const LocationsMasterDialog = (props: {
                 control={control}
                 label={formItems[4].exsample}
                 fullWidth
-                sx={{ maxWidth: '80%' }}
+                sx={{ maxWidth: '90%' }}
                 disabled={editable ? false : true}
               />
             </FormBox>
@@ -130,7 +146,7 @@ export const LocationsMasterDialog = (props: {
                 control={control}
                 label={formItems[5].exsample}
                 fullWidth
-                sx={{ maxWidth: '80%' }}
+                sx={{ maxWidth: '90%' }}
                 disabled={editable ? false : true}
               />
             </FormBox>
@@ -142,7 +158,7 @@ export const LocationsMasterDialog = (props: {
                 control={control}
                 label={formItems[6].exsample}
                 fullWidth
-                sx={{ maxWidth: '80%' }}
+                sx={{ maxWidth: '90%' }}
                 disabled={editable ? false : true}
               />
             </FormBox>
@@ -154,7 +170,7 @@ export const LocationsMasterDialog = (props: {
                 control={control}
                 label={formItems[7].exsample}
                 fullWidth
-                sx={{ maxWidth: '80%' }}
+                sx={{ maxWidth: '90%' }}
                 disabled={editable ? false : true}
               />
             </FormBox>
@@ -166,7 +182,7 @@ export const LocationsMasterDialog = (props: {
                 control={control}
                 label={formItems[8].exsample}
                 fullWidth
-                sx={{ maxWidth: '80%' }}
+                sx={{ maxWidth: '90%' }}
                 disabled={editable ? false : true}
               />
             </FormBox>
@@ -178,7 +194,7 @@ export const LocationsMasterDialog = (props: {
                 control={control}
                 label={formItems[9].exsample}
                 fullWidth
-                sx={{ maxWidth: '80%' }}
+                sx={{ maxWidth: '90%' }}
                 disabled={editable ? false : true}
               />
             </FormBox>
@@ -190,7 +206,7 @@ export const LocationsMasterDialog = (props: {
                 control={control}
                 label={formItems[10].exsample}
                 fullWidth
-                sx={{ maxWidth: '80%' }}
+                sx={{ maxWidth: '90%' }}
                 disabled={editable ? false : true}
               />
             </FormBox>
@@ -202,7 +218,7 @@ export const LocationsMasterDialog = (props: {
                 control={control}
                 label={formItems[11].exsample}
                 fullWidth
-                sx={{ maxWidth: '80%' }}
+                sx={{ maxWidth: '90%' }}
                 disabled={editable ? false : true}
               />
             </FormBox>

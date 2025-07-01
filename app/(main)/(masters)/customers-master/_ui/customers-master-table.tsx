@@ -18,7 +18,7 @@ import {
   TableSortLabel,
   Typography,
 } from '@mui/material';
-import { useEffect, useMemo, useState } from 'react';
+import { JSX, useEffect, useMemo, useState } from 'react';
 
 import { MasterTable } from '@/app/(main)/_ui/table';
 
@@ -27,8 +27,13 @@ import { MuiTablePagination } from '../../../_ui/table-pagination';
 import { cMHeader, customerMasterDialogDetailsValues, CustomerMasterTableValues, customers } from '../_lib/types';
 import { CustomerDialogContents } from './customers-master-dialog';
 
-/** 顧客マスタのテーブルコンポーネント */
+/**
+ * 顧客マスタのテーブルコンポーネント
+ * @returns {JSX.Element}
+ */
 export const CustomersMasterTable = (/*{ customers }: { customers: CustomerMasterTableValues[] | undefined }*/) => {
+  /* 1ページごとの表示数 */
+  const rowsPerPage = 50;
   /* useState
    * -------------------------------------------------------- */
   /* ダイアログ開く顧客のID、閉じるとき、未選択で-100とする */
@@ -37,8 +42,6 @@ export const CustomersMasterTable = (/*{ customers }: { customers: CustomerMaste
   const [dialogOpen, setDialogOpen] = useState(false);
   /* 今開いてるテーブルのページ数 */
   const [page, setPage] = useState(1);
-  /* 1ページごとの表示数 */
-  const rowsPerPage = 50;
   /* ソート方法 */
   const [order, setOrder] = useState<'desc' | 'asc'>('desc');
   /* ソート対象 */
@@ -47,11 +50,11 @@ export const CustomersMasterTable = (/*{ customers }: { customers: CustomerMaste
   const [customersList, setCustomers] = useState<CustomerMasterTableValues[]>();
   /* ダイアログでの編集モード */
   const [editable, setEditable] = useState(false);
-
+  /* DBのローディング状態 */
   const [loading, setLoading] = useState(true);
 
   /* Methods
-  ------------------------------------------------------------ */
+   *---------------------------------------------------- */
   /**
    * 顧客詳細ダイアログを開く関数
    * @param id 顧客ID
@@ -74,14 +77,10 @@ export const CustomersMasterTable = (/*{ customers }: { customers: CustomerMaste
     setDialogOpen(false);
     setEditable(false);
   };
-  /** */
-  const deleteInfo = (id: number) => {
-    setOpenID(-100);
-    setDialogOpen(false);
-  };
 
   // useEffect(() => {
   //   console.log(customers);
+  // /*  */
   //   const getThatOneCustomer = async () => {
   //     const customersList = await getAllCustomers();
   //     console.log('?????????????????????????????????????????????????????', customersList);
@@ -105,9 +104,7 @@ export const CustomersMasterTable = (/*{ customers }: { customers: CustomerMaste
   const createSortHandler = (property: string) => {
     handleRequestSort(property);
   };
-  /**
-   *  表示する顧客リスト
-   */
+  /* 表示する顧客リスト */
   const list = useMemo(
     () => (rowsPerPage > 0 ? customers!.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage) : customers),
     [page, rowsPerPage]
@@ -116,7 +113,6 @@ export const CustomersMasterTable = (/*{ customers }: { customers: CustomerMaste
   /**
    * テーブル最後のページ用の空データの長さ
    */
-  const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - customers!.length) : 0;
 
   return (
     <Box>
@@ -128,22 +124,27 @@ export const CustomersMasterTable = (/*{ customers }: { customers: CustomerMaste
         一覧
       </Typography>
       <Divider />
-      <Grid2 container mt={1} mx={0.5} justifyContent={'space-between'}>
+      <Grid2 container mt={0.5} mx={0.5} justifyContent={'space-between'} alignItems={'center'}>
         <Grid2 spacing={1}>
           <MuiTablePagination arrayList={customers!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
         </Grid2>
-        <Grid2 container spacing={1}>
-          <Grid2 container spacing={1}>
-            <Grid2>
-              <Button onClick={() => handleOpen(-100)}>
-                <AddIcon fontSize="small" />
-                新規
-              </Button>
-            </Grid2>
+        <Grid2 container spacing={3}>
+          <Grid2>
+            <Typography color="error" variant="body2">
+              ※マスタは削除できません。登録画面で削除フラグを付けてください
+              <br />
+              ※表示順を変更する場合は、検索条件無しで全件表示してください
+            </Typography>
+          </Grid2>
+          <Grid2>
+            <Button onClick={() => handleOpen(-100)}>
+              <AddIcon fontSize="small" />
+              新規
+            </Button>
           </Grid2>
         </Grid2>
       </Grid2>
-      <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 1 }}>
+      <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
         <MasterTable
           headers={cMHeader}
           datas={customers.map((l) => ({

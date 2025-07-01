@@ -31,7 +31,7 @@ export const DaibumonsMasterDialogSchema = DaibumonsMasterTableSchema.omit({
 export type DaibumonsMasterDialogValues = z.infer<typeof DaibumonsMasterDialogSchema>;
 
 // export type daibumonsMasterValues = { daibumonId: number; daibumonNam: string; dspOrdNum: number };
-
+/*モック削除delete */
 export const daibumonsList: DaibumonsMasterDialogValues[] = [
   {
     daibumonId: 1,
@@ -58,7 +58,9 @@ export const daibumonsList: DaibumonsMasterDialogValues[] = [
     delFlg: false,
   },
 ];
-
+/**
+ * 大部門マスタテーブルヘッダー
+ */
 export const daibumonMHeader = [
   { key: 'daibumonNam', label: '名称' },
   { key: 'mem', label: 'メモ' },

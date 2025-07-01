@@ -2,10 +2,14 @@
 
 import SearchIcon from '@mui/icons-material/Search';
 import { Box, Button, Container, Divider, Grid2, Paper, Stack, TextField, Typography } from '@mui/material';
+import { JSX } from 'react';
 
 import { BackButton } from '../../../_ui/buttons';
-import { ManagerssMasterTable } from './managers-table';
-
+import { ManagerssMasterTable } from './managers-master-table';
+/**
+ * 担当者マスタ画面
+ * @returns {JSX.Element} 担当者マスタ画面コンポーネント
+ */
 export const ManagersMaster = () => {
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>

@@ -13,7 +13,7 @@ import {
   Typography,
   useTheme,
 } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { JSX, useEffect, useState } from 'react';
 import { CheckboxElement, TextareaAutosizeElement, TextFieldElement, useForm } from 'react-hook-form-mui';
 
 // import { addNewVehicle, getOneVehicle } from '@/app/_lib/supabase/supabaseFuncs';
@@ -21,14 +21,22 @@ import { FormBox, FormItemsType } from '../../../_ui/form-box';
 import { Loading } from '../../../_ui/loading';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { VehMasterDialogSchema, VehMasterDialogValues } from '../_lib/datas';
-
-export const VehiclesMasterDialog = (props: {
+/**
+ * 車両マスタの詳細ダイアログ
+ * @param
+ * @returns {JSX.Element} 車両マスタの詳細ダイアログのコンポーネント
+ */
+export const VehiclesMasterDialog = ({
+  vehicleId,
+  handleClose,
+  editable,
+  setEditable,
+}: {
   vehicleId: number;
   handleClose: () => void;
   editable: boolean;
   setEditable: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
-  const { vehicleId, handleClose, editable, setEditable } = props;
   const theme = useTheme();
   const colorOfThis = alpha(theme.palette.primary.main, 0.5);
   const [veh, setVeh] = useState<VehMasterDialogValues>();
@@ -96,15 +104,13 @@ export const VehiclesMasterDialog = (props: {
                   control={control}
                   label={formItems[0].exsample}
                   fullWidth
-                  sx={{ maxWidth: '80%' }}
+                  sx={{ maxWidth: '90%' }}
                   disabled={editable ? false : true}
                 />
-                {/* <TextField fullWidth label="100文字まで" sx={{ maxWidth: '80%' }} disabled={editable ? false : true} /> */}
               </FormBox>
             </Grid2>
             <Grid2>
               <FormBox formItem={formItems[1]}>
-                {/* <CheckBox fontSize="medium" color="primary" /> */}
                 <CheckboxElement name="delFlg" control={control} size="medium" disabled={editable ? false : true} />
               </FormBox>
             </Grid2>
@@ -115,15 +121,13 @@ export const VehiclesMasterDialog = (props: {
                   control={control}
                   label={formItems[2].exsample}
                   fullWidth
-                  sx={{ maxWidth: '80%' }}
+                  sx={{ maxWidth: '90%' }}
                   disabled={editable ? false : true}
                 />
-                {/* <TextField fullWidth label="200文字まで" sx={{ maxWidth: '80%' }} disabled={editable ? false : true} /> */}
               </FormBox>
             </Grid2>
             <Grid2>
               <FormBox formItem={formItems[3]}>
-                {/* <CheckBox fontSize="medium" color="primary" /> */}
                 <CheckboxElement name="dspFlg" control={control} size="medium" disabled={editable ? false : true} />
               </FormBox>
             </Grid2>
@@ -153,7 +157,7 @@ const formItems: FormItemsType[] = [
   },
   {
     label: '表示フラグ',
-    exsample: '選択リストへの表示',
-    constraints: '',
+    exsample: '',
+    constraints: '選択リストへの表示',
   },
 ];

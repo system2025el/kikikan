@@ -20,23 +20,31 @@ import {
   useTheme,
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
-import { SetStateAction, useMemo, useState } from 'react';
+import { JSX, SetStateAction, useMemo, useState } from 'react';
 
 import { MasterTable } from '../../../_ui/table';
 import { MuiTablePagination } from '../../../_ui/table-pagination';
 import { lMHeader, locationList } from '../_lib/types';
 import { LocationsMasterDialog } from './locations-master-dialog';
 
-/** 車両マスタのテーブルコンポーネント */
+/**
+ * 車両マスタのテーブル
+ * @returns {JSX.Element} 車両マスタのテーブルコンポーネント
+ */
 export const LocationsMasterTable = () => {
-  const [page, setPage] = useState(1);
+  /* テーブル1ページの行数 */
   const rowsPerPage = 50;
+  /* useState ------------------------------------------------ */
+  /* 今開いてるテーブルのページ数 */
+  const [page, setPage] = useState(1);
   /* ダイアログ開く公演場所のID、閉じるとき、未選択で-100とする */
   const [openId, setOpenID] = useState<string | number>(-100);
   /* 詳細ダイアログの開閉状態 */
   const [dialogOpen, setDialogOpen] = useState(false);
   /* ダイアログでの編集モード */
   const [editable, setEditable] = useState(false);
+  /* methods ------------------------------------------- */
+  /* 詳細ダイアログを開く関数 */
   const handleOpenDialog = (id: number) => {
     if (id === -100) {
       setEditable(true);
@@ -44,6 +52,7 @@ export const LocationsMasterTable = () => {
     setOpenID(id);
     setDialogOpen(true);
   };
+  /* ダイアログを閉じる関数 */
   const handleCloseDialog = () => {
     setDialogOpen(false);
   };
@@ -61,23 +70,27 @@ export const LocationsMasterTable = () => {
         一覧
       </Typography>
       <Divider />
-      <Grid2 container mt={1} mx={0.5} justifyContent={'space-between'}>
+      <Grid2 container mt={0.5} mx={0.5} justifyContent={'space-between'} alignItems={'center'}>
         <Grid2 spacing={1}>
           <MuiTablePagination arrayList={locationList} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
         </Grid2>
-        <Grid2 container spacing={1}>
-          <Grid2 container spacing={1}>
-            <Grid2>
-              <Button onClick={() => handleOpenDialog(-100)}>
-                <AddIcon fontSize="small" />
-                新規
-              </Button>
-            </Grid2>
+        <Grid2 container spacing={3}>
+          <Grid2>
+            <Typography color="error" variant="body2">
+              ※マスタは削除できません。登録画面で削除フラグを付けてください
+              <br />
+              ※表示順を変更する場合は、検索条件無しで全件表示してください
+            </Typography>
+          </Grid2>
+          <Grid2>
+            <Button onClick={() => handleOpenDialog(-100)}>
+              <AddIcon fontSize="small" />
+              新規
+            </Button>
           </Grid2>
         </Grid2>
       </Grid2>
-
-      <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 1 }}>
+      <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
         <MasterTable
           headers={lMHeader}
           datas={list.map((l) => ({

@@ -9,6 +9,11 @@ import { FormBox, FormItemsType } from '@/app/(main)/_ui/form-box';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { daibumonsList, DaibumonsMasterDialogSchema, DaibumonsMasterDialogValues } from '../_lib/types';
 
+/**
+ * 大部門マスタ詳細ダイアログ
+ * @param
+ * @returns {JSX.Element} 大部門マスタ詳細ダイアログコンポーネント
+ */
 export const DaibumonsMasterDialog = ({
   daibumonId,
   handleClose,
@@ -20,28 +25,15 @@ export const DaibumonsMasterDialog = ({
   editable: boolean;
   setEditable: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
-  /**/
+  /* useTheme */
   const theme = useTheme();
-  /**/
   const colorOfThis = alpha(theme.palette.primary.main, 0.5);
-  /**/
+  /* useState -------------------------------------- */
+  /* 大部門 */
   const [daibumon, setdaibumon] = useState<DaibumonsMasterDialogValues | undefined>();
-  /**/
+  /* DBのローディング状態 */
   const [isLoading, setIsLoading] = useState(true);
-  /*  */
-  const handleEditable = () => {
-    setEditable(true);
-  };
-  const handleCloseDialog = () => {
-    setEditable(false);
-    handleClose();
-  };
-
-  const onSubmit = async (data: DaibumonsMasterDialogValues) => {
-    console.log('★★★★★★★★★ ', data);
-    // handleCloseDialog();
-    // await addNewdaibumon(data!);
-  };
+  /* useForm ----------------------------------------- */
   const { control, handleSubmit, reset } = useForm({
     mode: 'onBlur',
     reValidateMode: 'onBlur',
@@ -57,6 +49,22 @@ export const DaibumonsMasterDialog = ({
     },
   });
 
+  /* methods ---------------------------------------- */
+  /* ダイアログ内を編集モードにする */
+  const handleEditable = () => {
+    setEditable(true);
+  };
+  /* ダイアログを閉じる */
+  const handleCloseDialog = () => {
+    setEditable(false);
+    handleClose();
+  };
+  /* フォームを送信 */
+  const onSubmit = async (data: DaibumonsMasterDialogValues) => {
+    console.log('★★★★★★★★★ ', data);
+    // handleCloseDialog();
+    // await addNewdaibumon(data!);
+  };
   //モック
   useEffect(() => {
     console.log('daibumonId : ', daibumonId, ' daibumonList : ', daibumonsList);

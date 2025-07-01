@@ -31,7 +31,7 @@ export const ShukeibumonsMasterDialogSchema = ShukeibumonsMasterTableSchema.omit
 export type ShukeibumonsMasterDialogValues = z.infer<typeof ShukeibumonsMasterDialogSchema>;
 
 // export type ShukeibumonsMasterValues = { shukeibumonId: number; shukeibumonNam: string; dspOrdNum: number };
-
+/*モック削除delete */
 export const shukeibumonsList: ShukeibumonsMasterDialogValues[] = [
   {
     shukeibumonId: 1,
@@ -52,7 +52,9 @@ export const shukeibumonsList: ShukeibumonsMasterDialogValues[] = [
     delFlg: false,
   },
 ];
-
+/**
+ * 集計部門マスタテーブルヘッダー
+ */
 export const shukeibumonMHeader = [
   { key: 'shukeibumonNam', label: '名称' },
   { key: 'mem', label: 'メモ' },

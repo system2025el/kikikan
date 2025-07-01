@@ -1,5 +1,6 @@
 import { ManagerMasterTableValues } from './types';
-
+/* モック削除delete
+ */
 export const managers: ManagerMasterTableValues[] = [
   {
     tantouId: 1,

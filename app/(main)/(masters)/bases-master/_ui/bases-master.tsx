@@ -1,10 +1,16 @@
 'use client';
 import { Box, Button, Container, Divider, Paper, Stack, TextField, Typography } from '@mui/material';
+import { JSX } from 'react';
 
 import { BackButton } from '../../../_ui/buttons';
 import { BasesMasterTableValues } from '../_lib/types';
 import { BasesMasterTable } from './bases-master-table';
 
+/**
+ * 拠点マスタ
+ * @param {bases} 拠点リスト配列
+ * @returns {JSX.Element} 拠点マスタコンポーネント
+ */
 export const BasesMaster = ({ bases }: { bases: BasesMasterTableValues[] | undefined }) => {
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
