@@ -148,7 +148,6 @@ export const KeepEqTable: React.FC<KeepEqTableProps> = ({ rows, handleMemoChange
         <TableHead>
           <TableRow>
             <TableCell size="small" style={styles.header} />
-            <TableCell size="small" style={styles.header} />
             <TableCell align="left" size="small" style={styles.header}>
               在庫場所
             </TableCell>
@@ -188,11 +187,6 @@ const KeepEqTableRow = React.memo(
 
     return (
       <TableRow>
-        <TableCell sx={{ padding: 0, border: '1px solid black' }}>
-          <IconButton sx={{ padding: 0, color: 'red' }}>
-            <Delete fontSize="small" />
-          </IconButton>
-        </TableCell>
         <TableCell align="right" size="small" sx={{ bgcolor: grey[200], py: 0, px: 1, border: '1px solid black' }}>
           {rowIndex + 1}
         </TableCell>
@@ -202,10 +196,8 @@ const KeepEqTableRow = React.memo(
         <TableCell style={styles.row} align="center" size="small">
           <MemoTooltip name={row.name} memo={row.memo} handleMemoChange={handleMemoChange} rowIndex={rowIndex} />
         </TableCell>
-        <TableCell style={styles.row} align="left" size="small">
-          <Button variant="text" sx={{ p: 0, justifyContent: 'start' }}>
-            {row.name}
-          </Button>
+        <TableCell style={styles.row} align="left" size="small" sx={{ bgcolor: grey[200] }}>
+          {row.name}
         </TableCell>
         <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
           {row.issue}
@@ -244,10 +236,10 @@ export const MemoTooltip = (props: MemoTooltipProps) => {
 
   return (
     <>
-      <Tooltip title={equipmentMemo} arrow sx={{ p: 0 }}>
-        <IconButton onClick={handleOpen} sx={{ padding: 0 }} color={equipmentMemo ? 'primary' : 'default'}>
-          <EditNoteIcon fontSize="small" />
-        </IconButton>
+      <Tooltip title={equipmentMemo} arrow sx={{ p: 0 }} color={equipmentMemo ? 'primary' : 'default'}>
+        {/* <IconButton onClick={handleOpen} sx={{ padding: 0 }} color={equipmentMemo ? 'primary' : 'default'}> */}
+        <EditNoteIcon fontSize="small" />
+        {/* </IconButton> */}
       </Tooltip>
 
       <Dialog open={open} onClose={handleClose}>

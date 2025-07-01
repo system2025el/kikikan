@@ -123,7 +123,7 @@ export const EquipmentKeepOrderDetail = () => {
   // 出庫日から入庫日
   const [dateRange, setDateRange] = useState<string[]>(getRange(new Date('2025/11/2'), new Date('2025/11/19')));
   // カレンダー選択日
-  const [selectDate, setSelectDate] = useState<Date>(new Date());
+  const [selectDate, setSelectDate] = useState<Date>(new Date('2025/11/2'));
 
   // ヘッダー用の日付
   const [dateHeader, setDateHeader] = useState<string[]>(getStockHeader(new Date('2025/11/2')));
@@ -398,6 +398,10 @@ export const EquipmentKeepOrderDetail = () => {
             <Typography>受注明細(機材)</Typography>
             <Typography fontSize={'small'}>機材入力</Typography>
           </Grid2>
+          <Button>
+            <CheckIcon fontSize="small" />
+            保存
+          </Button>
         </Box>
         <Divider />
         <Box display="flex" flexDirection="row" width="100%">

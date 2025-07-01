@@ -2,7 +2,7 @@ export const data = [
   {
     id: 1,
     name: 'SHARPY PLUS',
-    memo: '',
+    memo: 'aaaaaaaaaaaaa',
     place: 'K',
     issue: 4,
     keep: 1,
