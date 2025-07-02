@@ -166,13 +166,13 @@ export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({ rows, onChange, ha
             <TableCell size="small" style={styles.header} />
             <TableCell size="small" style={styles.header} />
             <TableCell align="left" size="small" style={styles.header}>
-              機材名
+              在庫場所
             </TableCell>
             <TableCell align="left" size="small" style={styles.header}>
               返却メモ
             </TableCell>
             <TableCell align="left" size="small" style={styles.header}>
-              在庫場所
+              機材名
             </TableCell>
             <TableCell align="right" size="small" style={styles.header}>
               出庫数
@@ -230,16 +230,16 @@ const ReturnEqTableRow = React.memo(
         <TableCell align="right" size="small" sx={{ bgcolor: grey[200], py: 0, px: 1, border: '1px solid black' }}>
           {rowIndex + 1}
         </TableCell>
-        <TableCell style={styles.row} align="left" size="small">
-          <Button variant="text" sx={{ p: 0 }}>
-            {row.name}
-          </Button>
+        <TableCell style={styles.row} align="left" size="small" sx={{ bgcolor: grey[200] }}>
+          {row.place}
         </TableCell>
         <TableCell style={styles.row} align="center" size="small">
           <MemoTooltip name={row.name} memo={row.memo} handleMemoChange={handleMemoChange} rowIndex={rowIndex} />
         </TableCell>
-        <TableCell style={styles.row} align="left" size="small" sx={{ bgcolor: grey[200] }}>
-          {row.place}
+        <TableCell style={styles.row} align="left" size="small">
+          <Button variant="text" sx={{ p: 0 }}>
+            {row.name}
+          </Button>
         </TableCell>
         <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
           {row.issue}
