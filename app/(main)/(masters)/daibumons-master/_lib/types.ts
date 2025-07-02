@@ -62,7 +62,7 @@ export const daibumonsList: DaibumonsMasterDialogValues[] = [
  * 大部門マスタテーブルヘッダー
  */
 export const daibumonMHeader = [
-  { key: 'daibumonNam', label: '名称' },
+  { key: 'name', label: '名称' },
   { key: 'mem', label: 'メモ' },
   { key: 'up', label: '' },
   { key: 'down', label: '' },

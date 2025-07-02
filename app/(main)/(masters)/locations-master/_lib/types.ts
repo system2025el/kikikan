@@ -4,8 +4,8 @@ export const LocMasterSchema = z.object({
   locId: z.number().optional(),
   locNam: z.string(),
   kana: z.string(),
-  delFlg: z.number().optional(),
-  dspOrder: z.number().optional(),
+  delFlg: z.boolean().optional(),
+  dspOrdNum: z.number().optional(),
   adrPost: z.string().optional(),
   adrShozai: z.string().optional(),
   adrTatemono: z.string().optional(),
@@ -15,7 +15,7 @@ export const LocMasterSchema = z.object({
   fax: z.string().optional(),
   mail: z.string().email().optional(),
   mem: z.string().optional(),
-  dspFlg: z.number().optional(),
+  dspFlg: z.boolean().optional(),
   addDate: z.date().optional(),
   addUser: z.string().optional(),
   apdDate: z.date().optional(),
@@ -27,7 +27,7 @@ export type LocMasterValues = z.infer<typeof LocMasterSchema>;
 export const LocMasterTableSchema = z.object({
   locId: z.number(),
   locNam: z.string(),
-  dspOrder: z.number(),
+  dspOrdNum: z.number(),
   adrShozai: z.string(),
   adrTatemono: z.string(),
   adrSonota: z.string(),
@@ -38,19 +38,34 @@ export const LocMasterTableSchema = z.object({
 
 export type LocMasterTableValues = z.infer<typeof LocMasterTableSchema>;
 
+export const LocsMasterDialogSchema = LocMasterSchema.omit({
+  dspOrdNum: true,
+  addDate: true,
+  addUser: true,
+  apdDate: true,
+  updUser: true,
+});
+
+export type LocsMasterDialogValues = z.infer<typeof LocsMasterDialogSchema>;
+
 /** 場所マスタデータ */
 /**
  * 場所マスタテーブルヘッダー
  */
 export const lMHeader = [
-  { key: 'check', label: '' },
-  { key: 'locNam', label: '場所' },
+  { key: 'name', label: '場所' },
   { key: 'address', label: '住所' },
   { key: 'tel', label: 'Tel' },
   { key: 'fax', label: 'Fax' },
   { key: 'up', label: '' },
   { key: 'down', label: '' },
 ];
+/* 検索用スキーマ */
+export const LocsMasterSearchSchema = z.object({
+  query: z.string().optional(),
+});
+export type LocsMasterSearchValues = z.infer<typeof LocsMasterSearchSchema>;
+
 /**モック削除delete */
 export const locationList: LocMasterTableValues[] = [
   {
@@ -58,7 +73,7 @@ export const locationList: LocMasterTableValues[] = [
     tel: '000-000-0000',
     fax: '000-111-2222',
     locId: 1,
-    dspOrder: 0,
+    dspOrdNum: 0,
     adrShozai: '東京都千代田区日比谷公園',
     adrTatemono: '',
     adrSonota: '１－５',
@@ -69,7 +84,7 @@ export const locationList: LocMasterTableValues[] = [
     tel: '',
     fax: '',
     locId: 2,
-    dspOrder: 0,
+    dspOrdNum: 0,
     adrShozai: '',
     adrTatemono: '',
     adrSonota: '',
@@ -80,7 +95,7 @@ export const locationList: LocMasterTableValues[] = [
     tel: '',
     fax: '',
     locId: 3,
-    dspOrder: 0,
+    dspOrdNum: 0,
     adrShozai: '',
     adrTatemono: '',
     adrSonota: '',
@@ -91,7 +106,7 @@ export const locationList: LocMasterTableValues[] = [
     tel: '',
     fax: '',
     locId: 4,
-    dspOrder: 0,
+    dspOrdNum: 0,
     adrShozai: '',
     adrTatemono: '',
     adrSonota: '',
@@ -102,7 +117,7 @@ export const locationList: LocMasterTableValues[] = [
     tel: '',
     fax: '',
     locId: 5,
-    dspOrder: 0,
+    dspOrdNum: 0,
     adrShozai: '',
     adrTatemono: '',
     adrSonota: '',
@@ -113,7 +128,7 @@ export const locationList: LocMasterTableValues[] = [
     tel: '',
     fax: '',
     locId: 6,
-    dspOrder: 0,
+    dspOrdNum: 0,
     adrShozai: '',
     adrTatemono: '',
     adrSonota: '',

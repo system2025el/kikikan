@@ -20,35 +20,43 @@ import {
   useTheme,
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
-import { JSX, SetStateAction, useMemo, useState } from 'react';
+import { JSX, SetStateAction, useEffect, useMemo, useState } from 'react';
+
+import { Loading } from '@/app/(main)/_ui/loading';
 
 import { MasterTable } from '../../../_ui/table';
 import { MuiTablePagination } from '../../../_ui/table-pagination';
-import { lMHeader, locationList } from '../_lib/types';
+import { lMHeader, LocMasterTableValues } from '../_lib/types';
 import { LocationsMasterDialog } from './locations-master-dialog';
 
 /**
  * 車両マスタのテーブル
  * @returns {JSX.Element} 車両マスタのテーブルコンポーネント
  */
-export const LocationsMasterTable = () => {
+export const LocationsMasterTable = ({
+  locs,
+  isLoading,
+  setIsLoading,
+}: {
+  locs: LocMasterTableValues[] | undefined;
+  isLoading: boolean;
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+}) => {
   /* テーブル1ページの行数 */
   const rowsPerPage = 50;
   /* useState ------------------------------------------------ */
   /* 今開いてるテーブルのページ数 */
   const [page, setPage] = useState(1);
   /* ダイアログ開く公演場所のID、閉じるとき、未選択で-100とする */
-  const [openId, setOpenID] = useState<string | number>(-100);
+  const [openId, setOpenID] = useState<number>(-100);
   /* 詳細ダイアログの開閉状態 */
   const [dialogOpen, setDialogOpen] = useState(false);
-  /* ダイアログでの編集モード */
-  const [editable, setEditable] = useState(false);
+
+  const [theLocs, setTheLocs] = useState<LocMasterTableValues[] | undefined>(locs);
+
   /* methods ------------------------------------------- */
   /* 詳細ダイアログを開く関数 */
   const handleOpenDialog = (id: number) => {
-    if (id === -100) {
-      setEditable(true);
-    }
     setOpenID(id);
     setDialogOpen(true);
   };
@@ -57,11 +65,25 @@ export const LocationsMasterTable = () => {
     setDialogOpen(false);
   };
 
+  // // 表示するデータ
+  // const list = useMemo(
+  //   () =>
+  //     rowsPerPage > 0 ? locs.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage) : locs,
+  //   [page, rowsPerPage]
+  // );
+
+  useEffect(() => {
+    setTheLocs(locs); // 親からのlocsが更新された場合に同期
+  }, [locs]);
+
+  useEffect(() => {
+    setIsLoading(false); //theLocsが変わったらローディング終わり
+  }, [theLocs, setIsLoading]);
+
   // 表示するデータ
   const list = useMemo(
-    () =>
-      rowsPerPage > 0 ? locationList.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage) : locationList,
-    [page, rowsPerPage]
+    () => (theLocs && rowsPerPage > 0 ? theLocs.slice((page - 1) * rowsPerPage, page * rowsPerPage) : theLocs),
+    [page, rowsPerPage, theLocs]
   );
 
   return (
@@ -72,7 +94,7 @@ export const LocationsMasterTable = () => {
       <Divider />
       <Grid2 container mt={0.5} mx={0.5} justifyContent={'space-between'} alignItems={'center'}>
         <Grid2 spacing={1}>
-          <MuiTablePagination arrayList={locationList} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
+          <MuiTablePagination arrayList={locs!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
         </Grid2>
         <Grid2 container spacing={3}>
           <Grid2>
@@ -91,18 +113,23 @@ export const LocationsMasterTable = () => {
         </Grid2>
       </Grid2>
       <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
-        <MasterTable
-          headers={lMHeader}
-          datas={list.map((l) => ({
-            ...l,
-            id: l.locId,
-            address: `${l.adrShozai}${l.adrTatemono}${l.adrSonota}`,
-          }))}
-          handleOpenDialog={handleOpenDialog}
-          page={page}
-          rowsPerPage={rowsPerPage}
-        />
-        {/* <Table stickyHeader padding="none">
+        {isLoading ? (
+          <Loading />
+        ) : (
+          <>
+            <MasterTable
+              headers={lMHeader}
+              datas={list!.map((l) => ({
+                ...l,
+                id: l.locId,
+                name: l.locNam,
+                address: `${l.adrShozai}${l.adrTatemono}${l.adrSonota}`,
+              }))}
+              handleOpenDialog={handleOpenDialog}
+              page={page}
+              rowsPerPage={rowsPerPage}
+            />
+            {/* <Table stickyHeader padding="none">
           <TableHead>
             <TableRow>
               <TableCell></TableCell>
@@ -127,14 +154,11 @@ export const LocationsMasterTable = () => {
             )}
           </TableBody>
         </Table> */}
-        <Dialog open={dialogOpen} fullScreen>
-          <LocationsMasterDialog
-            handleClose={handleCloseDialog}
-            locationId={openId}
-            editable={editable}
-            setEditable={setEditable}
-          />
-        </Dialog>
+            <Dialog open={dialogOpen} fullScreen>
+              <LocationsMasterDialog handleClose={handleCloseDialog} locationId={openId} />
+            </Dialog>
+          </>
+        )}
       </TableContainer>
     </Box>
   );

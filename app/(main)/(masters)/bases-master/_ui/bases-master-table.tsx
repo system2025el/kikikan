@@ -95,7 +95,7 @@ export const BasesMasterTable = ({ bases }: { bases: BasesMasterTableValues[] | 
         <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
           <MasterTable
             headers={bMHeader}
-            datas={list!.map((l) => ({ id: l.kyotenId!, kyotenNam: l.kyotenNam, mem: l.mem! }))}
+            datas={list!.map((l) => ({ id: l.kyotenId!, name: l.kyotenNam, mem: l.mem! }))}
             handleOpenDialog={handleOpenDialog}
             page={page}
             rowsPerPage={rowsPerPage}

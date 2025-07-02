@@ -94,7 +94,7 @@ export const VehiclesMasterTable = ({ vehs }: { vehs: VehMasterTableValues[] | u
       <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
         <MasterTable
           headers={vMHeader}
-          datas={list!.map((l) => ({ id: l.sharyoId, sharyoNam: l.sharyoNam, mem: l.mem! }))}
+          datas={list!.map((l) => ({ id: l.sharyoId, name: l.sharyoNam, mem: l.mem! }))}
           handleOpenDialog={handleOpenDialog}
           page={page}
           rowsPerPage={rowsPerPage}

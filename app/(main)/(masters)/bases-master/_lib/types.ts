@@ -70,7 +70,7 @@ export const basesList: BasesMasterDialogValues[] = [
 ];
 /* 拠点マスタテーブルヘッダー */
 export const bMHeader = [
-  { key: 'kyotenNam', label: '名称' },
+  { key: 'name', label: '名称' },
   { key: 'mem', label: 'メモ' },
   { key: 'up', label: '' },
   { key: 'down', label: '' },

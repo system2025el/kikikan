@@ -1,15 +1,59 @@
 'use client';
+import { zodResolver } from '@hookform/resolvers/zod';
+import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
 import SearchIcon from '@mui/icons-material/Search';
-import { Box, Button, Container, Divider, Grid2, Paper, Stack, TextField, Typography } from '@mui/material';
-import { JSX } from 'react';
+import {
+  Box,
+  Button,
+  Container,
+  Dialog,
+  Divider,
+  Grid2,
+  Paper,
+  Stack,
+  TableContainer,
+  TextField,
+  Typography,
+} from '@mui/material';
+import { JSX, SetStateAction, useEffect, useMemo, useState } from 'react';
+import { TextFieldElement, useForm } from 'react-hook-form-mui';
+
+import { Loading } from '@/app/(main)/_ui/loading';
+import { MasterTable } from '@/app/(main)/_ui/table';
+import { MuiTablePagination } from '@/app/(main)/_ui/table-pagination';
 
 import { BackButton } from '../../../_ui/buttons';
+//DB import { GetFilteredLocs } from '../_lib/funcs';
+import { lMHeader, LocMasterTableValues, LocsMasterSearchSchema, LocsMasterSearchValues } from '../_lib/types';
+import page from '../page';
+import { LocationsMasterDialog } from './locations-master-dialog';
 import { LocationsMasterTable } from './locations-master-table';
+
 /**
  * 公演場所マスタ画面
  * @returns {JSX.Element} 公演場所マスタ画面コンポーネント
  */
-export const LocationsMaster = () => {
+export const LocationsMaster = ({ locs }: { locs: LocMasterTableValues[] | undefined }) => {
+  /* useState ------------------ */
+  const [theLocs, setTheLocs] = useState(locs);
+  /* DBのローディング */
+  const [isLoading, setIsLoading] = useState(true);
+  /* useForm ------------------- */
+  const { control, handleSubmit } = useForm({
+    mode: 'onSubmit',
+    defaultValues: { query: '' },
+    resolver: zodResolver(LocsMasterSearchSchema),
+  });
+
+  const onSubmit = async (data: LocsMasterSearchValues) => {
+    setIsLoading(true);
+    console.log('data : ', data, 'locs : ', locs);
+    //DB const newList = await GetFilteredLocs(data.query!);
+    // setTheLocs(newList);
+    console.log('theLocs : ', theLocs);
+  };
+
   return (
     <>
       <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
@@ -25,7 +69,7 @@ export const LocationsMaster = () => {
             <Stack>
               <Typography variant="body2">検索</Typography>
             </Stack>
-            <form>
+            <form onSubmit={handleSubmit(onSubmit)}>
               <Stack justifyContent={'space-between'} alignItems={'start'} mt={1}>
                 <Stack alignItems={'center'}>
                   <Typography noWrap width={100}>
@@ -45,7 +89,7 @@ export const LocationsMaster = () => {
                 <Typography noWrap width={100}>
                   キーワード
                 </Typography>
-                <TextField id="a" />
+                <TextFieldElement name="query" control={control} />
                 <Typography noWrap variant="body2">
                   場所、住所、Tel、Faxから検索
                 </Typography>
@@ -53,7 +97,7 @@ export const LocationsMaster = () => {
             </form>
           </Box>
         </Paper>
-        <LocationsMasterTable />
+        <LocationsMasterTable locs={theLocs} isLoading={isLoading} setIsLoading={setIsLoading} />
       </Container>
     </>
   );

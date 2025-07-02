@@ -3,8 +3,7 @@ import z from 'zod';
  * 車両マスタテーブルのヘッダー
  */
 export const vMHeader = [
-  { key: 'check', label: '' },
-  { key: 'sharyoNam', label: '車両タイプ' },
+  { key: 'name', label: '車両タイプ' },
   { key: 'mem', label: 'メモ' },
   { key: 'up', label: '' },
   { key: 'down', label: '' },

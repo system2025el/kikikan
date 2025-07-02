@@ -59,7 +59,7 @@ export const bumonsList: BumonsMasterDialogValues[] = [
 ];
 /* 部門マスタテーブルヘッダー */
 export const BumonsMHeader = [
-  { key: 'bumonNam', label: '名称' },
+  { key: 'name', label: '名称' },
   { key: 'mem', label: 'メモ' },
   { key: 'up', label: '' },
   { key: 'down', label: '' },

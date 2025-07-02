@@ -8,7 +8,7 @@ export type ManagerMasterDialogDetailsValues = z.infer<typeof managerMaterDialog
 
 export const mMHeader = [
   {
-    key: 'tantouNam',
+    key: 'name',
     label: '担当者名',
   },
 ];
