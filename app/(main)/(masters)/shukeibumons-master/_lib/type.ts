@@ -56,7 +56,7 @@ export const shukeibumonsList: ShukeibumonsMasterDialogValues[] = [
  * 集計部門マスタテーブルヘッダー
  */
 export const shukeibumonMHeader = [
-  { key: 'shukeibumonNam', label: '名称' },
+  { key: 'name', label: '名称' },
   { key: 'mem', label: 'メモ' },
   { key: 'up', label: '' },
   { key: 'down', label: '' },

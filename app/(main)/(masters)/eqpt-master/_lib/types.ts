@@ -2,7 +2,7 @@ import { number, z } from 'zod';
 
 export const eqptMHeader = [
   { key: 'kizaiId', label: '' },
-  { key: 'kizaiNam', label: '機材名' },
+  { key: 'name', label: '機材名' },
   { key: 'defDatQty', label: '保有数' },
   { key: 'bumonId', label: '部門' },
   { key: 'shukeibumonId', label: '大部門' },

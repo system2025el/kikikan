@@ -97,7 +97,7 @@ export const EqptMasterTable = (props: {
           headers={eqptMHeader}
           datas={eqptMasterList.map((l) => ({
             id: l.kizaiId,
-            kizaiNam: l.kizaiNam,
+            name: l.kizaiNam,
             rankAmt1: l.rankAmt1,
             rankAmt2: l.rankAmt2,
             rankAmt3: l.rankAmt3,

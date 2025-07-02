@@ -28,7 +28,7 @@ export type customerMasterDialogDetailsValues = z.infer<typeof customerMaterDial
  */
 export const cMHeader = [
   {
-    key: 'kokyakuNam',
+    key: 'name',
     label: '顧客名',
   },
   {

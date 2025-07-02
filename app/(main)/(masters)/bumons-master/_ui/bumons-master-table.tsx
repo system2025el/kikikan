@@ -96,7 +96,7 @@ export const BumonsMasterTable = ({ bumons }: { bumons: BumonsMasterTableValues[
         <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
           <MasterTable
             headers={BumonsMHeader}
-            datas={list!.map((l) => ({ id: l.bumonId!, bumonNam: l.bumonNam, mem: l.mem! }))}
+            datas={list!.map((l) => ({ id: l.bumonId!, name: l.bumonNam, mem: l.mem! }))}
             handleOpenDialog={handleOpenDialog}
             page={page}
             rowsPerPage={rowsPerPage}

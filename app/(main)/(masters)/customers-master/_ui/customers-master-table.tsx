@@ -150,6 +150,7 @@ export const CustomersMasterTable = (/*{ customers }: { customers: CustomerMaste
           datas={customers.map((l) => ({
             ...l,
             id: l.kokyakuId,
+            name: l.kokyakuNam,
             address: [l.adrShozai, l.adrTatemono, l.adrSonota].filter(Boolean).join(' '),
           }))}
           page={page}

@@ -11,11 +11,13 @@ import { CloseMasterDialogButton, MakeEditModeButton, SubmitButton } from '../..
  */
 export const MasterDialogTitle = ({
   editable,
+  isNew,
   handleCloseDialog,
   handleEditable,
   dialogTitle,
 }: {
   editable: boolean;
+  isNew?: boolean;
   handleEditable: () => void;
   handleCloseDialog: () => void;
   dialogTitle: string;
@@ -26,7 +28,8 @@ export const MasterDialogTitle = ({
   return (
     <DialogTitle display={'flex'} justifyContent={'space-between'} alignItems={'center'} bgcolor={colorOfThis}>
       {dialogTitle}
-      {editable && <Typography>編集モード</Typography>}
+      {editable && !isNew && <Typography>編集モード</Typography>}
+      {isNew && <Typography>新規登録</Typography>}
       <Stack>
         <SubmitButton type="submit" />
         <MakeEditModeButton handleEditable={handleEditable} />
