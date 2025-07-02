@@ -555,12 +555,12 @@ export const EquipmentReturnOrderDetail = () => {
                 <Grid2 width={500}>
                   <Typography>出庫日時</Typography>
                   <Grid2>
-                    <TextField defaultValue={'KICS'} disabled sx={{ width: '10%', minWidth: 150 }} />
+                    <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
                     <TestDate disabled date={startKICSDate} onChange={(newDate) => console.log()} />
                     <Time disabled />
                   </Grid2>
                   <Grid2>
-                    <TextField defaultValue={'YARD'} disabled sx={{ width: '10%', minWidth: 150 }} />
+                    <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
                     <TestDate
                       disabled
                       date={startYARDDate}
@@ -580,7 +580,7 @@ export const EquipmentReturnOrderDetail = () => {
                 <Grid2 width={500}>
                   <Typography>入庫日時</Typography>
                   <Grid2>
-                    <TextField defaultValue={'KICS'} disabled sx={{ width: '10%', minWidth: 150 }} />
+                    <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
                     <TestDate
                       date={endKICSDate}
                       minDate={new Date('2025/11/2')}
@@ -590,7 +590,7 @@ export const EquipmentReturnOrderDetail = () => {
                     <Time />
                   </Grid2>
                   <Grid2>
-                    <TextField defaultValue={'YARD'} disabled sx={{ width: '10%', minWidth: 150 }} />
+                    <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
                     <TestDate
                       date={endYARDDate}
                       minDate={new Date('2025/11/2')}
@@ -609,7 +609,7 @@ export const EquipmentReturnOrderDetail = () => {
               </Box>
               <Typography>再出庫日時</Typography>
               <Grid2>
-                <TextField defaultValue={'KICS'} disabled sx={{ width: '10%', minWidth: 150 }} />
+                <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
                 <TestDate
                   date={againKICSDate}
                   minDate={endDate !== null ? endDate : new Date('2025/11/2')}
@@ -619,7 +619,7 @@ export const EquipmentReturnOrderDetail = () => {
                 <Time />
               </Grid2>
               <Grid2>
-                <TextField defaultValue={'YARD'} disabled sx={{ width: '10%', minWidth: 150 }} />
+                <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
                 <TestDate
                   date={againYARDDate}
                   minDate={endDate !== null ? endDate : new Date('2025/11/2')}
