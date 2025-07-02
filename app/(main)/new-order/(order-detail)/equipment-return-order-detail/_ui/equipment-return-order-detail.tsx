@@ -1,6 +1,8 @@
 'use client';
 
 import AddIcon from '@mui/icons-material/Add';
+import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import CheckIcon from '@mui/icons-material/Check';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
@@ -10,23 +12,25 @@ import {
   Box,
   Button,
   Checkbox,
+  ClickAwayListener,
   Dialog,
   Divider,
   FormControl,
   Grid2,
   MenuItem,
   Paper,
+  Popper,
   Select,
   SelectChangeEvent,
   TextField,
   Typography,
 } from '@mui/material';
 import { addMonths, endOfMonth, subDays, subMonths } from 'date-fns';
-import { Dayjs } from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import { useEffect, useRef, useState } from 'react';
 
 import { BackButton } from '@/app/(main)/_ui/buttons';
-import { TestDate, toISOStringWithTimezoneMonthDay } from '@/app/(main)/_ui/date';
+import { Calendar, TestDate, toISOStringWithTimezoneMonthDay } from '@/app/(main)/_ui/date';
 import Time, { TestTime } from '@/app/(main)/_ui/time';
 
 import { EquipmentSelectionDialog } from '../../equipment-order-detail/_ui/equipment-selection-dailog';
@@ -138,6 +142,8 @@ export const EquipmentReturnOrderDetail = () => {
   const [againYARDDate, setAgainYARDDate] = useState<Date | null>(null);
   // 出庫日から入庫日
   const [dateRange, setDateRange] = useState<string[]>([]);
+  // カレンダー選択日
+  const [selectDate, setSelectDate] = useState<Date>(new Date('2025/11/2'));
 
   // ヘッダー用の日付
   const [dateHeader, setDateHeader] = useState<string[]>(getStockHeader(new Date('2025/11/2')));
@@ -160,6 +166,9 @@ export const EquipmentReturnOrderDetail = () => {
   const [expanded, setExpanded] = useState(false);
   // 機材追加ダイアログ制御
   const [EqSelectionDialogOpen, setEqSelectionDialogOpen] = useState(false);
+  // ポッパー制御
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
 
   /**
    * KICS再度出庫日時変更時
@@ -169,7 +178,7 @@ export const EquipmentReturnOrderDetail = () => {
     if (newDate === null) return;
     setAgainKICSDate(newDate?.toDate());
 
-    if (againYARDDate === null || newDate.toDate() > againYARDDate) {
+    if (againYARDDate === null || newDate.toDate() < againYARDDate) {
       const updatedDateRange = endDate !== null ? getRange(endDate, subDays(newDate?.toDate(), 1)) : [];
       setDateRange(updatedDateRange);
 
@@ -202,7 +211,7 @@ export const EquipmentReturnOrderDetail = () => {
     if (newDate === null) return;
     setAgainYARDDate(newDate?.toDate());
 
-    if (againKICSDate === null || newDate.toDate() > againKICSDate) {
+    if (againKICSDate === null || newDate.toDate() < againKICSDate) {
       const updatedDateRange = endDate !== null ? getRange(endDate, subDays(newDate?.toDate(), 1)) : [];
       setDateRange(updatedDateRange);
 
@@ -293,6 +302,51 @@ export const EquipmentReturnOrderDetail = () => {
       setStockRows(updatedRow);
       setEndDate(newDate.toDate());
     }
+  };
+
+  /**
+   * 日付選択カレンダー選択時
+   * @param date カレンダー選択日付
+   */
+  const handleDateChange = (date: Dayjs | null) => {
+    if (date === null) return;
+    setSelectDate(date.toDate());
+
+    const updatedHeader = getStockHeader(date?.toDate());
+    const updatedRow = getStockRow(equipmentRows, updatedHeader, dateHeaderRange, stock, dateHeaderRef.current.length);
+    setDateHeader(updatedHeader);
+    const targetIndex = updatedHeader
+      .map((date, index) => (dateRangeRef.current.includes(date) ? index : -1))
+      .filter((index) => index !== -1);
+    targetIndex.map((index) => {
+      updatedRow.map((date, i) => {
+        date.data[index] += equipmentRows[i].return;
+      });
+    });
+    setStockRows(updatedRow);
+
+    setAnchorEl(null);
+  };
+  // 3か月前
+  const handleBackDateChange = () => {
+    const date = subMonths(new Date(dateHeader[1]), 3);
+    handleDateChange(dayjs(date));
+  };
+  // 3か月後
+  const handleForwardDateChange = () => {
+    const date = addMonths(new Date(dateHeader[1]), 3);
+    handleDateChange(dayjs(date));
+  };
+
+  /**
+   * ポッパー開閉
+   * @param event マウスイベント
+   */
+  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(anchorEl ? null : event.currentTarget);
+  };
+  const handleClickAway = () => {
+    setAnchorEl(null);
   };
 
   /**
@@ -501,12 +555,12 @@ export const EquipmentReturnOrderDetail = () => {
                 <Grid2 width={500}>
                   <Typography>出庫日時</Typography>
                   <Grid2>
-                    <TextField defaultValue={'KICS'} disabled sx={{ width: '10%', minWidth: 150 }} />
+                    <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
                     <TestDate disabled date={startKICSDate} onChange={(newDate) => console.log()} />
                     <Time disabled />
                   </Grid2>
                   <Grid2>
-                    <TextField defaultValue={'YARD'} disabled sx={{ width: '10%', minWidth: 150 }} />
+                    <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
                     <TestDate
                       disabled
                       date={startYARDDate}
@@ -526,7 +580,7 @@ export const EquipmentReturnOrderDetail = () => {
                 <Grid2 width={500}>
                   <Typography>入庫日時</Typography>
                   <Grid2>
-                    <TextField defaultValue={'KICS'} disabled sx={{ width: '10%', minWidth: 150 }} />
+                    <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
                     <TestDate
                       date={endKICSDate}
                       minDate={new Date('2025/11/2')}
@@ -536,7 +590,7 @@ export const EquipmentReturnOrderDetail = () => {
                     <Time />
                   </Grid2>
                   <Grid2>
-                    <TextField defaultValue={'YARD'} disabled sx={{ width: '10%', minWidth: 150 }} />
+                    <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
                     <TestDate
                       date={endYARDDate}
                       minDate={new Date('2025/11/2')}
@@ -555,7 +609,7 @@ export const EquipmentReturnOrderDetail = () => {
               </Box>
               <Typography>再出庫日時</Typography>
               <Grid2>
-                <TextField defaultValue={'KICS'} disabled sx={{ width: '10%', minWidth: 150 }} />
+                <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
                 <TestDate
                   date={againKICSDate}
                   minDate={endDate !== null ? endDate : new Date('2025/11/2')}
@@ -565,7 +619,7 @@ export const EquipmentReturnOrderDetail = () => {
                 <Time />
               </Grid2>
               <Grid2>
-                <TextField defaultValue={'YARD'} disabled sx={{ width: '10%', minWidth: 150 }} />
+                <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
                 <TestDate
                   date={againYARDDate}
                   minDate={endDate !== null ? endDate : new Date('2025/11/2')}
@@ -594,10 +648,7 @@ export const EquipmentReturnOrderDetail = () => {
         <Dialog open={EqSelectionDialogOpen} fullScreen>
           <EquipmentSelectionDialog handleCloseDialog={handleCloseEqDialog} />
         </Dialog>
-        <Button sx={{ m: 2 }} onClick={() => handleOpenEqDialog()}>
-          <AddIcon fontSize="small" />
-          機材追加
-        </Button>
+
         <Box display="flex" flexDirection="row" width="100%">
           <Box
             sx={{
@@ -609,9 +660,39 @@ export const EquipmentReturnOrderDetail = () => {
               },
             }}
           >
-            <ReturnEqTable rows={equipmentRows} onChange={handleCellChange} handleMemoChange={handleMemoChange} />
+            <Box m={2}>
+              <Button onClick={() => handleOpenEqDialog()}>
+                <AddIcon fontSize="small" />
+                機材追加
+              </Button>
+            </Box>
+            <Box display={Object.keys(equipmentRows).length > 0 ? 'block' : 'none'}>
+              <ReturnEqTable rows={equipmentRows} onChange={handleCellChange} handleMemoChange={handleMemoChange} />
+            </Box>
           </Box>
-          <Box overflow="auto" sx={{ width: { xs: '60%', sm: '60%', md: 'auto' } }}>
+          <Box
+            display={Object.keys(equipmentRows).length > 0 ? 'block' : 'none'}
+            overflow="auto"
+            sx={{ width: { xs: '60%', sm: '60%', md: 'auto' } }}
+          >
+            <Box display="flex" my={2}>
+              <Button onClick={handleBackDateChange}>
+                <ArrowBackIosNewIcon fontSize="small" />
+              </Button>
+              <Button variant="outlined" onClick={handleClick}>
+                日付選択
+              </Button>
+              <Popper open={open} anchorEl={anchorEl} placement="bottom-start">
+                <ClickAwayListener onClickAway={handleClickAway}>
+                  <Paper elevation={3} sx={{ mt: 1 }}>
+                    <Calendar date={selectDate} onChange={handleDateChange} />
+                  </Paper>
+                </ClickAwayListener>
+              </Popper>
+              <Button onClick={handleForwardDateChange}>
+                <ArrowForwardIosIcon fontSize="small" />
+              </Button>
+            </Box>
             <ReturnStockTable
               header={dateHeader}
               rows={stockRows}

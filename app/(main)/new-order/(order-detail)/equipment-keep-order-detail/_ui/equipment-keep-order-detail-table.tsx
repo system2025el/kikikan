@@ -75,7 +75,6 @@ export const KeepStockTable: React.FC<KeepStockTableProps> = ({
               key={rowIndex}
               header={header}
               row={row}
-              dateRange={dateRange}
               startDate={startDate}
               endDate={endDate}
               getRowBackgroundColor={getRowBackgroundColor}
@@ -90,14 +89,13 @@ export const KeepStockTable: React.FC<KeepStockTableProps> = ({
 export type KeepStockTableRowProps = {
   header: string[];
   row: StockData;
-  dateRange: string[];
   startDate: Date | null;
   endDate: Date | null;
   getRowBackgroundColor: (dateHeader: string, startDate: Date | null, endDate: Date | null) => string;
 };
 
 const KeepStockTableRow = React.memo(
-  ({ header, row, dateRange, startDate, endDate, getRowBackgroundColor }: KeepStockTableRowProps) => {
+  ({ header, row, startDate, endDate, getRowBackgroundColor }: KeepStockTableRowProps) => {
     console.log('date側描画', row.id);
     return (
       <TableRow>

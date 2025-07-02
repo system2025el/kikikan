@@ -331,7 +331,7 @@ export const EquipmentKeepOrderDetail = () => {
             <Grid2 width={500}>
               <Typography>出庫日時</Typography>
               <Grid2>
-                <TextField defaultValue={'KICS'} disabled sx={{ width: '10%', minWidth: 150 }} />
+                <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
                 <TestDate
                   date={startKICSDate}
                   minDate={endYARDDate !== null ? endYARDDate : undefined}
@@ -341,7 +341,7 @@ export const EquipmentKeepOrderDetail = () => {
                 <Time />
               </Grid2>
               <Grid2>
-                <TextField defaultValue={'YARD'} disabled sx={{ width: '10%', minWidth: 150 }} />
+                <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
                 <TestDate
                   date={startYARDDate}
                   minDate={endYARDDate !== null ? endYARDDate : undefined}
@@ -354,7 +354,7 @@ export const EquipmentKeepOrderDetail = () => {
             <Grid2 width={500}>
               <Typography>入庫日時</Typography>
               <Grid2>
-                <TextField defaultValue={'KICS'} disabled sx={{ width: '10%', minWidth: 150 }} />
+                <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
                 <TestDate
                   disabled
                   date={endKICSDate}
@@ -367,7 +367,7 @@ export const EquipmentKeepOrderDetail = () => {
                 <Time disabled />
               </Grid2>
               <Grid2>
-                <TextField defaultValue={'YARD'} disabled sx={{ width: '10%', minWidth: 150 }} />
+                <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
                 <TestDate
                   disabled
                   date={endYARDDate}

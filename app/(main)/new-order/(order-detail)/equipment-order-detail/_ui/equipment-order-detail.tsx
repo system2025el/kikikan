@@ -1,5 +1,6 @@
 'use client';
 
+import AddIcon from '@mui/icons-material/Add';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
@@ -707,7 +708,10 @@ const EquipmentOrderDetail = () => {
             }}
           >
             <Box m={2}>
-              <Button onClick={() => handleOpenEqDialog()}>＋ 機材追加</Button>
+              <Button onClick={() => handleOpenEqDialog()}>
+                <AddIcon fontSize="small" />
+                機材追加
+              </Button>
             </Box>
             <Box display={Object.keys(equipmentRows).length > 0 ? 'block' : 'none'}>
               <EqTable
