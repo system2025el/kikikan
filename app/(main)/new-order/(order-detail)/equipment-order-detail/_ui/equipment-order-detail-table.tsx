@@ -321,7 +321,7 @@ const EqTableRow = React.memo(
             <Delete fontSize="small" />
           </IconButton>
         </TableCell>
-        <TableCell align="right" size="small" sx={{ bgcolor: 'lightgrey', py: 0, px: 1, border: '1px solid black' }}>
+        <TableCell align="right" size="small" sx={{ bgcolor: grey[200], py: 0, px: 1, border: '1px solid black' }}>
           {rowIndex + 1}
         </TableCell>
         <TableCell style={styles.row} size="small">
@@ -350,8 +350,10 @@ const EqTableRow = React.memo(
         <TableCell style={styles.row} align="center" size="small">
           <MemoTooltip name={row.name} memo={row.memo} handleMemoChange={handleMemoChange} rowIndex={rowIndex} />
         </TableCell>
-        <TableCell style={styles.row} align="left" size="small" sx={{ bgcolor: grey[200] }}>
-          {row.name}
+        <TableCell style={styles.row} align="left" size="small">
+          <Button variant="text" sx={{ p: 0 }}>
+            {row.name}
+          </Button>
         </TableCell>
         <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
           {row.all}
