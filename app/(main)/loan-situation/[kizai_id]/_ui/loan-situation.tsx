@@ -16,17 +16,17 @@ import {
 import { Dayjs } from 'dayjs';
 import { useState } from 'react';
 
-import { Calendar } from '../../_ui/date';
-import GridTable from '../../_ui/gridtable';
-import {
-  getDateHeaderBackgroundColor,
-  getDateHeaderTextColor,
-  getDateRowBackgroundColor,
-  getLoanHeaderBackgroundColor,
-  getLoanRowBackgroundColor,
-  getLoanTextColor,
-} from '../_lib/colorselect';
-import { dateData, dateHeader, dateWidth, loanData, loanHeader, loanWidth } from '../_lib/data';
+// import { Calendar } from '../../_ui/date';
+// import GridTable from '../../_ui/gridtable';
+// import {
+//   getDateHeaderBackgroundColor,
+//   getDateHeaderTextColor,
+//   getDateRowBackgroundColor,
+//   getLoanHeaderBackgroundColor,
+//   getLoanRowBackgroundColor,
+//   getLoanTextColor,
+// } from '../_lib/colorselect';
+// import { dateData, dateHeader, dateWidth, loanData, loanHeader, loanWidth } from '../_lib/data';
 
 export const LoanSituation = () => {
   const [visible, setVisible] = useState(false);
@@ -86,7 +86,7 @@ export const LoanSituation = () => {
             日付選択
           </Button>
           <Box position="absolute" zIndex={1000} display={visible ? 'block' : 'none'}>
-            <Calendar date={selectDate} onChange={handleDateChange} />
+            {/* <Calendar date={selectDate} onChange={handleDateChange} /> */}
             <Box display="flex" justifyContent="space-between">
               <Button onClick={() => setVisible(false)} sx={{ margin: 1 }}>
                 キャンセル
@@ -101,7 +101,7 @@ export const LoanSituation = () => {
       </Box>
       <Box display="flex" flexDirection="row" width="100%">
         <Box width="30%">
-          <GridTable
+          {/* <GridTable
             header={loanHeader}
             rows={loanData}
             editableColumns={null}
@@ -112,10 +112,10 @@ export const LoanSituation = () => {
             getHeaderTextColor={getLoanTextColor}
             rowColorSelect={true}
             getRowBackgroundColor={getLoanRowBackgroundColor}
-          />
+          /> */}
         </Box>
         <Box width="70%">
-          <GridTable
+          {/* <GridTable
             header={dateHeader}
             rows={dateData}
             editableColumns={null}
@@ -126,7 +126,7 @@ export const LoanSituation = () => {
             getHeaderTextColor={getDateHeaderTextColor}
             rowColorSelect={true}
             getRowBackgroundColor={getDateRowBackgroundColor}
-          />
+          /> */}
         </Box>
       </Box>
     </Paper>
