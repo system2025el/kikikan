@@ -40,7 +40,7 @@ const equipmentList: MenuItem[] = [{ name: '機材マスタ', url: '/eqpt-master
 const masterList: MenuItem[] = [
   { name: '顧客マスタ', url: '/customers-master' },
   { name: '車両マスタ', url: '/vehicles-master' },
-  { name: '場所マスタ', url: '/locations-master' },
+  { name: '公演場所マスタ', url: '/locations-master' },
   { name: '担当者マスタ', url: '/managers-master' },
   { name: '一式マスタ', url: '/' },
   { name: '大部門マスタ', url: '/daibumons-master' },
@@ -196,7 +196,7 @@ export default function NavLinks() {
           <ListItem
             disablePadding
             sx={{
-              backgroundColor: pathname === '/eqpmaster' ? selectedBgColor : '',
+              backgroundColor: pathname === '/eqpt-master' ? selectedBgColor : '',
             }}
           >
             <ListItemButton href="/eqpt-master" dense>
