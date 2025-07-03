@@ -71,7 +71,7 @@ export const BasesMasterDialog = ({
   /* フォームを送信 */
   const onSubmit = async (data: BasesMasterDialogValues) => {
     console.log('★★★★★★★★★ ', data);
-    // handleCloseDialog();
+    handleCloseDialog();
     // await addNewBase(data!);
   };
 

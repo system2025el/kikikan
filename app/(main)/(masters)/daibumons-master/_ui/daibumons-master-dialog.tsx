@@ -59,7 +59,7 @@ export const DaibumonsMasterDialog = ({
   /* フォームを送信 */
   const onSubmit = async (data: DaibumonsMasterDialogValues) => {
     console.log('★★★★★★★★★ ', data);
-    // handleCloseDialog();
+    handleCloseDialog();
     // await addNewdaibumon(data!);
   };
   //モック

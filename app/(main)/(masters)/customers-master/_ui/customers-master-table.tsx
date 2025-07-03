@@ -147,7 +147,7 @@ export const CustomersMasterTable = (/*{ customers }: { customers: CustomerMaste
       <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
         <MasterTable
           headers={cMHeader}
-          datas={customers.map((l) => ({
+          datas={list.map((l) => ({
             ...l,
             id: l.kokyakuId,
             name: l.kokyakuNam,

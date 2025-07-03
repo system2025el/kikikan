@@ -49,7 +49,7 @@ export const VehiclesMasterDialog = ({
 
   const onSubmit = async (data: VehMasterDialogValues) => {
     console.log('★★★★★★★★★ ', data);
-    // handleCloseDialog();
+    handleCloseDialog();
     // await addNewVehicle(data!);
   };
   const { control, handleSubmit, reset } = useForm({

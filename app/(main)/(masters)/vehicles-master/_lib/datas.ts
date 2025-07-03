@@ -5,8 +5,6 @@ import z from 'zod';
 export const vMHeader = [
   { key: 'name', label: '車両タイプ' },
   { key: 'mem', label: 'メモ' },
-  { key: 'up', label: '' },
-  { key: 'down', label: '' },
 ];
 
 /**---------車両データ------------ */

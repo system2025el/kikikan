@@ -57,7 +57,7 @@ export const ManagerDialogContents = ({
   };
   /* フォームを送信 */
   const onSubmit = (data: ManagerMasterDialogDetailsValues) => {
-    // handleCloseDialog();
+    handleCloseDialog();
     console.log(isDirty);
     console.log(data);
   };

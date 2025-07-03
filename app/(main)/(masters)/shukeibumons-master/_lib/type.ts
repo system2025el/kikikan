@@ -58,7 +58,4 @@ export const shukeibumonsList: ShukeibumonsMasterDialogValues[] = [
 export const shukeibumonMHeader = [
   { key: 'name', label: '名称' },
   { key: 'mem', label: 'メモ' },
-  { key: 'up', label: '' },
-  { key: 'down', label: '' },
-  { key: 'description', label: '' },
 ];

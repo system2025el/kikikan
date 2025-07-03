@@ -63,7 +63,4 @@ export const daibumonsList: DaibumonsMasterDialogValues[] = [
 export const daibumonMHeader = [
   { key: 'name', label: '名称' },
   { key: 'mem', label: 'メモ' },
-  { key: 'up', label: '' },
-  { key: 'down', label: '' },
-  { key: 'description', label: '' },
 ];
