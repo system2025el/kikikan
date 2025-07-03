@@ -194,9 +194,10 @@ export const SelectTable: React.FC<TableProps> = ({ headers, datas, onSelectionC
 //   );
 // };
 
+/* マスタ系用テーブル ----------------------------------------------- */
 type MasterRow = {
   id: number;
-  [key: string]: string | number | undefined;
+  [key: string]: string | number | boolean | undefined;
 };
 
 export const MasterTable = (props: {
@@ -206,7 +207,6 @@ export const MasterTable = (props: {
   rowsPerPage: number;
   handleOpenDialog: (id: number) => void;
 }) => {
-  //const [rows, setRows] = useState(test(datas));
   const { headers, datas, page, rowsPerPage, handleOpenDialog } = props;
 
   const [rows, setRows] = useState(datas);
@@ -233,52 +233,61 @@ export const MasterTable = (props: {
               {header.label}
             </TableCell>
           ))}
+          <TableCell>削除</TableCell>
           <TableCell />
           <TableCell />
         </TableRow>
       </TableHead>
       <TableBody>
-        {rows.map((row, index) => (
-          <TableRow hover key={row.id}>
-            <TableCell>
-              <Box width={10} px={1}>
-                {row.id}
-              </Box>
-            </TableCell>
-            {headers.map((header) => (
-              <TableCell key={header.key} align={typeof row[header.key] === 'number' ? 'right' : 'left'}>
-                {header.key === 'name' ? (
-                  <>
-                    <Button
-                      variant="text"
-                      size="medium"
-                      onClick={() => handleOpenDialog(row.id)}
-                      sx={{ p: 0, m: 0, minWidth: 0 }}
-                    >
-                      {row[header.key]}
-                    </Button>
-                  </>
-                ) : header.key === 'mem' ? (
-                  <Typography noWrap maxWidth={50}>
-                    {row[header.key]}
-                  </Typography>
-                ) : (
-                  <>{row[header.key]}</>
-                )}
+        {rows.map((row, index) => {
+          const isDeleted = row.delFlg === 1 || row.delFlg === true;
+          return (
+            <TableRow hover key={row.id}>
+              <TableCell sx={{ bgcolor: isDeleted ? grey[300] : '' }}>
+                <Box width={10} px={1}>
+                  {row.id}
+                </Box>
               </TableCell>
-            ))}
-            <TableCell>
-              <IconButton size="small" onClick={() => moveRow(index, -1)} disabled={index === 0}>
-                <ArrowUpwardIcon fontSize="small" />
-              </IconButton>
-            </TableCell>
-            <TableCell>
-              <IconButton size="small" onClick={() => moveRow(index, 1)} disabled={index === rows.length - 1}>
-                <ArrowDownwardIcon fontSize="small" />
-              </IconButton>
-            </TableCell>
-          </TableRow>
-        ))}
+              {headers.map((header) => (
+                <TableCell
+                  key={header.key}
+                  align={typeof row[header.key] === 'number' ? 'right' : 'left'}
+                  sx={{ bgcolor: isDeleted ? grey[300] : '' }}
+                >
+                  {header.key === 'name' ? (
+                    <>
+                      <Button
+                        variant="text"
+                        size="medium"
+                        onClick={() => handleOpenDialog(row.id)}
+                        sx={{ p: 0, m: 0, minWidth: 0 }}
+                      >
+                        {row[header.key]}
+                      </Button>
+                    </>
+                  ) : header.key === 'mem' ? (
+                    <Typography noWrap maxWidth={50}>
+                      {row[header.key]}
+                    </Typography>
+                  ) : (
+                    <>{row[header.key]}</>
+                  )}
+                </TableCell>
+              ))}
+              <TableCell sx={{ bgcolor: isDeleted ? grey[300] : '' }}>{isDeleted && <>削除</>}</TableCell>
+              <TableCell sx={{ bgcolor: isDeleted ? grey[300] : '' }}>
+                <IconButton size="small" onClick={() => moveRow(index, -1)} disabled={index === 0}>
+                  <ArrowUpwardIcon fontSize="small" />
+                </IconButton>
+              </TableCell>
+              <TableCell sx={{ bgcolor: isDeleted ? grey[300] : '' }}>
+                <IconButton size="small" onClick={() => moveRow(index, 1)} disabled={index === rows.length - 1}>
+                  <ArrowDownwardIcon fontSize="small" />
+                </IconButton>
+              </TableCell>
+            </TableRow>
+          );
+        })}
         {emptyRows > 0 && (
           <TableRow style={{ height: 30 * emptyRows }}>
             <TableCell colSpan={headers.length} />

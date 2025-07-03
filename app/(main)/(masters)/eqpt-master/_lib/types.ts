@@ -229,7 +229,7 @@ export const eqptMasterList: eqptMasterTableValues[] = [
   {
     kizaiId: 4,
     kizaiNam: 'MAC Ultra Wash',
-    delFlg: false,
+    delFlg: true,
     shozokuId: 4,
     bldCod: 'AA14',
     tanaCod: 'A14',
@@ -287,7 +287,7 @@ export const eqptMasterList: eqptMasterTableValues[] = [
   {
     kizaiId: 6,
     kizaiNam: 'ROBIN T3 Profile',
-    delFlg: false,
+    delFlg: true,
     shozokuId: 6,
     bldCod: 'AA16',
     tanaCod: 'A16',

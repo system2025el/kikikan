@@ -27,13 +27,14 @@ export type LocMasterValues = z.infer<typeof LocMasterSchema>;
 export const LocMasterTableSchema = z.object({
   locId: z.number(),
   locNam: z.string(),
-  dspOrdNum: z.number(),
-  adrShozai: z.string(),
-  adrTatemono: z.string(),
-  adrSonota: z.string(),
-  tel: z.string(),
-  fax: z.string(),
-  mem: z.string(),
+  dspOrdNum: z.number().optional(),
+  delFlg: z.boolean().optional(),
+  adrShozai: z.string().optional(),
+  adrTatemono: z.string().optional(),
+  adrSonota: z.string().optional(),
+  tel: z.string().optional(),
+  fax: z.string().optional(),
+  mem: z.string().optional(),
 });
 
 export type LocMasterTableValues = z.infer<typeof LocMasterTableSchema>;

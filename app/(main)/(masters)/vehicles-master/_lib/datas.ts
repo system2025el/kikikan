@@ -58,7 +58,7 @@ export const vehicles: VehicleData[] = [
   {
     sharyoId: 1,
     sharyoNam: '不明',
-    delFlg: false,
+    delFlg: true,
     mem: '',
     dspFlg: true,
   },
