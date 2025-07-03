@@ -79,7 +79,7 @@ export const ShukeibumonsMasterTable = ({ shukeibumons }: { shukeibumons: Shukei
         <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
           <MasterTable
             headers={shukeibumonMHeader}
-            datas={list!.map((l) => ({ id: l.shukeibumonId!, name: l.shukeibumonNam, mem: l.mem! }))}
+            datas={list!.map((l) => ({ id: l.shukeibumonId!, name: l.shukeibumonNam, mem: l.mem!, delFlg: l.delFlg }))}
             handleOpenDialog={handleOpenDialog}
             page={page}
             rowsPerPage={rowsPerPage}

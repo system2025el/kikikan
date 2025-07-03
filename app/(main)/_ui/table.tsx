@@ -236,7 +236,7 @@ export const MasterTable = ({
   const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - datas!.length) : 0;
 
   return (
-    <Table sx={{ minWidth: '100%' }} aria-labelledby="tableTitle" padding="none" stickyHeader>
+    <Table sx={{ minWidth: 1200 }} aria-labelledby="tableTitle" padding="none" stickyHeader>
       <TableHead sx={{ bgcolor: 'primary.light' }}>
         <TableRow sx={{ whiteSpace: 'nowrap' }}>
           <TableCell></TableCell>
@@ -246,7 +246,6 @@ export const MasterTable = ({
             </TableCell>
           ))}
           <TableCell>削除</TableCell>
-          <TableCell />
           <TableCell />
         </TableRow>
       </TableHead>
@@ -272,7 +271,7 @@ export const MasterTable = ({
                         variant="text"
                         size="medium"
                         onClick={() => handleOpenDialog(row.id)}
-                        sx={{ p: 0, m: 0, minWidth: 0 }}
+                        sx={{ p: 0, m: 0, minWidth: 0, textTransform: 'none' }}
                       >
                         {row[header.key]}
                       </Button>
@@ -287,7 +286,7 @@ export const MasterTable = ({
                 </TableCell>
               ))}
               <TableCell sx={{ bgcolor: isDeleted ? grey[300] : '' }}>{isDeleted && <>削除</>}</TableCell>
-              <TableCell sx={{ bgcolor: isDeleted ? grey[300] : '' }}>
+              <TableCell sx={{ bgcolor: isDeleted ? grey[300] : '', width: 100 }} align="center">
                 <IconButton
                   sx={{ bgcolor: 'primary.main', color: 'white' }}
                   size="small"
@@ -296,8 +295,6 @@ export const MasterTable = ({
                 >
                   <ArrowUpwardIcon fontSize="small" />
                 </IconButton>
-              </TableCell>
-              <TableCell sx={{ bgcolor: isDeleted ? grey[300] : '' }}>
                 <IconButton
                   sx={{ bgcolor: 'primary.main', color: 'white' }}
                   size="small"
@@ -312,7 +309,7 @@ export const MasterTable = ({
         })}
         {emptyRows > 0 && (
           <TableRow style={{ height: 30 * emptyRows }}>
-            <TableCell colSpan={headers.length} />
+            <TableCell colSpan={headers.length + 3} />
           </TableRow>
         )}
       </TableBody>
