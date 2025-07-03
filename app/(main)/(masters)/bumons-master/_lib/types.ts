@@ -51,7 +51,7 @@ export const bumonsList: BumonsMasterDialogValues[] = [
   {
     bumonId: 3,
     bumonNam: 'その他',
-    delFlg: false,
+    delFlg: true,
     mem: '',
     daibumonId: 2,
     shukeibumonId: 2,

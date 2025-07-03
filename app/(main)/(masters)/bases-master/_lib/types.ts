@@ -19,7 +19,6 @@ export const BasesMasterTableSchema = basesMasterSchema.omit({
   addUser: true,
   updDat: true,
   updUser: true,
-  dspFlg: true,
 });
 
 export type BasesMasterTableValues = z.infer<typeof BasesMasterTableSchema>;

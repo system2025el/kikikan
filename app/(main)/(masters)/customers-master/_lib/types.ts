@@ -23,33 +23,8 @@ export const customerMaterDialogDetailsSchema = z.object({
   kizaiNebikiFlg: z.number().optional(),
 });
 export type customerMasterDialogDetailsValues = z.infer<typeof customerMaterDialogDetailsSchema>;
-/**
- * 顧客マスタテーブルのヘッダー
- */
-export const cMHeader = [
-  {
-    key: 'name',
-    label: '顧客名',
-  },
-  {
-    key: 'address',
-    label: '住所',
-  },
-  {
-    key: 'tel',
-    label: 'TEL',
-  },
-  {
-    key: 'fax',
-    label: 'FAX',
-  },
-  {
-    key: 'mem',
-    label: 'メモ',
-  },
-];
 
-export const customerMasterTableSchema = z.object({
+export const CustomerMasterTableSchema = z.object({
   kokyakuId: z.number(),
   kokyakuNam: z.string().optional(),
   adrShozai: z.string().optional(),
@@ -58,8 +33,9 @@ export const customerMasterTableSchema = z.object({
   tel: z.string().optional(),
   fax: z.string().optional(),
   mem: z.string().optional(),
+  delFlg: z.boolean().optional(),
 });
-export type CustomerMasterTableValues = z.infer<typeof customerMasterTableSchema>;
+export type CustomerMasterTableValues = z.infer<typeof CustomerMasterTableSchema>;
 
 //モック用削除delete
 export const customers: CustomerMasterTableValues[] = [
@@ -87,6 +63,7 @@ export const customers: CustomerMasterTableValues[] = [
     fax: '03-5292-2382',
     // mail: 'YYYYYYYYYYYYYYYYYYYYYY@DDDDDDDDD',
     // keishou: '御中',
+    delFlg: true,
     mem: 'あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやいゆえよらりるれろわいうえをあいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやいゆえよらりるれろわいうえをあいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやいゆえよらりるれろわいうえをあいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやいゆえよらりるれろわいうえをあいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやいゆえよらりるれろわいうえをあいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやいゆえよらりるれろわいうえを',
   },
   {
@@ -101,5 +78,31 @@ export const customers: CustomerMasterTableValues[] = [
     // mail: 'aaaaaaaaaa@eeeeeeeeeeeeee',
     // keishou: '御中',
     mem: '',
+  },
+];
+
+/**
+ * 顧客マスタテーブルのヘッダー
+ */
+export const cMHeader = [
+  {
+    key: 'name',
+    label: '顧客名',
+  },
+  {
+    key: 'address',
+    label: '住所',
+  },
+  {
+    key: 'tel',
+    label: 'TEL',
+  },
+  {
+    key: 'fax',
+    label: 'FAX',
+  },
+  {
+    key: 'mem',
+    label: 'メモ',
   },
 ];

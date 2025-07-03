@@ -19,7 +19,6 @@ export const DaibumonsMasterTableSchema = daibumonsMasterSchema.omit({
   addUser: true,
   updDat: true,
   updUser: true,
-  dspFlg: true,
 });
 
 export type DaibumonsMasterTableValues = z.infer<typeof DaibumonsMasterTableSchema>;
@@ -43,7 +42,7 @@ export const daibumonsList: DaibumonsMasterDialogValues[] = [
     daibumonId: 2,
     daibumonNam: 'Moving Light',
     mem: 'XXXXXXXX',
-    delFlg: false,
+    delFlg: true,
   },
   {
     daibumonNam: 'ムービング ゴボ',

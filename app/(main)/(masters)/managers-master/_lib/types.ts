@@ -16,5 +16,6 @@ export const mMHeader = [
 export const managerMasterTableSchema = z.object({
   tantouId: z.number(),
   tantouNam: z.string().optional(),
+  delFlg: z.boolean().optional(),
 });
 export type ManagerMasterTableValues = z.infer<typeof managerMasterTableSchema>;

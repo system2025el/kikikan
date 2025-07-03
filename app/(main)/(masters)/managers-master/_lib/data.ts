@@ -13,6 +13,7 @@ export const managers: ManagerMasterTableValues[] = [
   {
     tantouId: 3,
     tantouNam: '佐藤',
+    delFlg: true,
   },
   {
     tantouId: 4,

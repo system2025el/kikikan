@@ -103,6 +103,7 @@ export const EqptMasterTable = (props: {
             rankAmt3: l.rankAmt3,
             rankAmt4: l.rankAmt4,
             rankAmt5: l.rankAmt5,
+            delFlg: l.delFlg,
           }))}
           page={page}
           rowsPerPage={rowsPerPage}
