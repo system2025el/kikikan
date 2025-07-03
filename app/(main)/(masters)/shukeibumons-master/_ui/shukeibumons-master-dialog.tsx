@@ -58,7 +58,7 @@ export const ShukeibumonsMasterDialog = ({
   /* フォームを送信 */
   const onSubmit = async (data: ShukeibumonsMasterDialogValues) => {
     console.log('★★★★★★★★★ ', data);
-    // handleCloseDialog();
+    handleCloseDialog();
     // await addNewshukeibumon(data!);
   };
 

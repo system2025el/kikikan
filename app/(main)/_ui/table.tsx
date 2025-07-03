@@ -114,10 +114,18 @@ export const SelectTable: React.FC<TableProps> = ({ headers, datas, onSelectionC
                 ))}
                 <TableCell>
                   <Box display={'flex'}>
-                    <IconButton onClick={() => moveRow(index, -1)} disabled={index === 0}>
+                    <IconButton
+                      onClick={() => moveRow(index, -1)}
+                      disabled={index === 0}
+                      sx={{ bgcolor: 'primary.main', color: 'white' }}
+                    >
                       <ArrowUpwardIcon fontSize="small" />
                     </IconButton>
-                    <IconButton onClick={() => moveRow(index, 1)} disabled={index === rows.length - 1}>
+                    <IconButton
+                      onClick={() => moveRow(index, 1)}
+                      disabled={index === rows.length - 1}
+                      sx={{ bgcolor: 'primary.main', color: 'white' }}
+                    >
                       <ArrowDownwardIcon fontSize="small" />
                     </IconButton>
                   </Box>
@@ -200,15 +208,19 @@ type MasterRow = {
   [key: string]: string | number | boolean | undefined;
 };
 
-export const MasterTable = (props: {
+export const MasterTable = ({
+  headers,
+  datas,
+  page,
+  rowsPerPage,
+  handleOpenDialog,
+}: {
   headers: Header[];
   datas: MasterRow[];
   page: number;
   rowsPerPage: number;
   handleOpenDialog: (id: number) => void;
 }) => {
-  const { headers, datas, page, rowsPerPage, handleOpenDialog } = props;
-
   const [rows, setRows] = useState(datas);
 
   const moveRow = (index: number, direction: number) => {
@@ -224,7 +236,7 @@ export const MasterTable = (props: {
   const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - datas!.length) : 0;
 
   return (
-    <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle" padding="none" stickyHeader>
+    <Table sx={{ minWidth: '100%' }} aria-labelledby="tableTitle" padding="none" stickyHeader>
       <TableHead sx={{ bgcolor: 'primary.light' }}>
         <TableRow sx={{ whiteSpace: 'nowrap' }}>
           <TableCell></TableCell>
@@ -276,12 +288,22 @@ export const MasterTable = (props: {
               ))}
               <TableCell sx={{ bgcolor: isDeleted ? grey[300] : '' }}>{isDeleted && <>削除</>}</TableCell>
               <TableCell sx={{ bgcolor: isDeleted ? grey[300] : '' }}>
-                <IconButton size="small" onClick={() => moveRow(index, -1)} disabled={index === 0}>
+                <IconButton
+                  sx={{ bgcolor: 'primary.main', color: 'white' }}
+                  size="small"
+                  onClick={() => moveRow(index, -1)}
+                  disabled={index === 0}
+                >
                   <ArrowUpwardIcon fontSize="small" />
                 </IconButton>
               </TableCell>
               <TableCell sx={{ bgcolor: isDeleted ? grey[300] : '' }}>
-                <IconButton size="small" onClick={() => moveRow(index, 1)} disabled={index === rows.length - 1}>
+                <IconButton
+                  sx={{ bgcolor: 'primary.main', color: 'white' }}
+                  size="small"
+                  onClick={() => moveRow(index, 1)}
+                  disabled={index === rows.length - 1}
+                >
                   <ArrowDownwardIcon fontSize="small" />
                 </IconButton>
               </TableCell>

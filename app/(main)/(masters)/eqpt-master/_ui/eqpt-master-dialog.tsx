@@ -50,7 +50,7 @@ export const EqMasterDialog = ({
 
   const onSubmit = async (data: EqptMasterDialogValues) => {
     console.log('★★★★★★★★★ ', data);
-    // handleCloseDialog();
+    handleCloseDialog();
     // await addNewVehicle(data!);
   };
   const { control, handleSubmit, reset } = useForm({

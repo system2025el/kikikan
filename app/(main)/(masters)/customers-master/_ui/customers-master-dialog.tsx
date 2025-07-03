@@ -79,7 +79,7 @@ export const CustomerDialogContents = ({
   };
   /* フォームを送信 */
   const onSubmit = (data: customerMasterDialogDetailsValues) => {
-    // handleCloseDialog();
+    handleCloseDialog();
     console.log(isDirty);
     console.log(data);
   };

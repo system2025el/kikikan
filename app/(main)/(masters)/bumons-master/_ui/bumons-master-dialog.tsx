@@ -78,7 +78,7 @@ export const BumonsMasterDialog = ({
   /* フォームを送信 */
   const onSubmit = async (data: BumonsMasterDialogValues) => {
     console.log('★★★★★★★★★ ', data);
-    // handleCloseDialog();
+    handleCloseDialog();
     // await addNewBumon(data!);
   };
 
