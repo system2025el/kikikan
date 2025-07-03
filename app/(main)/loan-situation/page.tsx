@@ -1,7 +1,7 @@
-import { LoanSituation } from '@/app/(main)/loan-situation/_ui/loan-situation';
+import { LoanList } from '@/app/(main)/loan-situation/_ui/loan-list';
 
 const Page = () => {
-  return <LoanSituation />;
+  return <LoanList />;
 };
 
 export default Page;
