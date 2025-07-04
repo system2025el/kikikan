@@ -20,9 +20,8 @@ import {
 import {} from '@mui/material/colors';
 import { useMemo, useState } from 'react';
 
-import { MasterTable } from '@/app/(main)/_ui/table';
-
 import { MuiTablePagination } from '../../../_ui/table-pagination';
+import { MasterTable } from '../../_ui/table';
 import { managers } from '../_lib/data';
 import { ManagerMasterTableValues, mMHeader } from '../_lib/types';
 import { ManagerDialogContents } from './managers-master-dialog';
