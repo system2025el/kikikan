@@ -57,7 +57,7 @@ export const ShukeibumonsMasterTable = ({ shukeibumons }: { shukeibumons: Shukei
         <Divider />
         <Grid2 container mt={0.5} mx={0.5} justifyContent={'space-between'} alignItems={'center'}>
           <Grid2 spacing={1}>
-            <MuiTablePagination arrayList={shukeibumons!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
+            <MuiTablePagination arrayList={list!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
           </Grid2>
 
           <Grid2 container spacing={3}>
