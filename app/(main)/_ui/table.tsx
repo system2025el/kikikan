@@ -256,7 +256,7 @@ export const MasterTable = ({
             <TableRow hover key={row.id}>
               <TableCell sx={{ bgcolor: isDeleted ? grey[300] : '' }}>
                 <Box width={10} px={1}>
-                  {row.id}
+                  {index + 1}
                 </Box>
               </TableCell>
               {headers.map((header) => (
