@@ -194,8 +194,10 @@ const KeepEqTableRow = React.memo(
         <TableCell style={styles.row} align="center" size="small">
           <MemoTooltip name={row.name} memo={row.memo} handleMemoChange={handleMemoChange} rowIndex={rowIndex} />
         </TableCell>
-        <TableCell style={styles.row} align="left" size="small" sx={{ bgcolor: grey[200] }}>
-          {row.name}
+        <TableCell style={styles.row} align="left" size="small">
+          <Button variant="text" sx={{ p: 0 }} href={`/loan-situation/${row.id}`}>
+            {row.name}
+          </Button>
         </TableCell>
         <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
           {row.issue}
