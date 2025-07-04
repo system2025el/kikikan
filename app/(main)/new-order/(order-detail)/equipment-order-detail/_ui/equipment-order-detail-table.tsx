@@ -351,7 +351,7 @@ const EqTableRow = React.memo(
           <MemoTooltip name={row.name} memo={row.memo} handleMemoChange={handleMemoChange} rowIndex={rowIndex} />
         </TableCell>
         <TableCell style={styles.row} align="left" size="small">
-          <Button variant="text" sx={{ p: 0 }}>
+          <Button variant="text" sx={{ p: 0 }} href={`/loan-situation/${row.id}`}>
             {row.name}
           </Button>
         </TableCell>
