@@ -1,33 +1,13 @@
 'use client';
 import { zodResolver } from '@hookform/resolvers/zod';
-import AddIcon from '@mui/icons-material/Add';
-import DeleteIcon from '@mui/icons-material/Delete';
 import SearchIcon from '@mui/icons-material/Search';
-import {
-  Box,
-  Button,
-  Container,
-  Dialog,
-  Divider,
-  Grid2,
-  Paper,
-  Stack,
-  TableContainer,
-  TextField,
-  Typography,
-} from '@mui/material';
-import { JSX, SetStateAction, useEffect, useMemo, useState } from 'react';
+import { Box, Button, Container, Divider, Paper, Stack, TextField, Typography } from '@mui/material';
+import { JSX, useState } from 'react';
 import { TextFieldElement, useForm } from 'react-hook-form-mui';
-
-import { Loading } from '@/app/(main)/_ui/loading';
-import { MasterTable } from '@/app/(main)/_ui/table';
-import { MuiTablePagination } from '@/app/(main)/_ui/table-pagination';
 
 import { BackButton } from '../../../_ui/buttons';
 //DB import { GetFilteredLocs } from '../_lib/funcs';
-import { lMHeader, LocMasterTableValues, LocsMasterSearchSchema, LocsMasterSearchValues } from '../_lib/types';
-import page from '../page';
-import { LocationsMasterDialog } from './locations-master-dialog';
+import { LocMasterTableValues, LocsMasterSearchSchema, LocsMasterSearchValues } from '../_lib/types';
 import { LocationsMasterTable } from './locations-master-table';
 
 /**

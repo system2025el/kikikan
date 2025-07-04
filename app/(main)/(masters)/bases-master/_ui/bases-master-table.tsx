@@ -20,9 +20,8 @@ import {
 } from '@mui/material';
 import { SetStateAction, useEffect, useMemo, useState } from 'react';
 
-import { MasterTable } from '@/app/(main)/_ui/table';
-
 import { MuiTablePagination } from '../../../_ui/table-pagination';
+import { MasterTable } from '../../_ui/table';
 import { BasesMasterTableValues, bMHeader } from '../_lib/types';
 import { BasesMasterDialog } from './bases-master-dailog';
 

@@ -58,8 +58,6 @@ export const lMHeader = [
   { key: 'address', label: '住所' },
   { key: 'tel', label: 'Tel' },
   { key: 'fax', label: 'Fax' },
-  { key: 'up', label: '' },
-  { key: 'down', label: '' },
 ];
 /* 検索用スキーマ */
 export const LocsMasterSearchSchema = z.object({

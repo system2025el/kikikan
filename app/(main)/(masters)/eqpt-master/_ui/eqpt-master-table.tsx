@@ -22,9 +22,8 @@ import {
 } from '@mui/material';
 import { SetStateAction, useMemo, useState } from 'react';
 
-import { MasterTable } from '@/app/(main)/_ui/table';
-
 import { MuiTablePagination } from '../../../_ui/table-pagination';
+import { MasterTable } from '../../_ui/table';
 import { EqptMasterData, EqptMasterDialogValues, eqptMasterList, eqptMHeader } from '../_lib/types';
 import { EqMasterDialog } from './eqpt-master-dialog';
 

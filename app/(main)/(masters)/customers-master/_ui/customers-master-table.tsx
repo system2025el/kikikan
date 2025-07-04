@@ -20,10 +20,9 @@ import {
 } from '@mui/material';
 import { JSX, useEffect, useMemo, useState } from 'react';
 
-import { MasterTable } from '@/app/(main)/_ui/table';
-
 // import { getAllCustomers } from '@/app/_lib/supabase/supabaseFuncs';
 import { MuiTablePagination } from '../../../_ui/table-pagination';
+import { MasterTable } from '../../_ui/table';
 import { cMHeader, customerMasterDialogDetailsValues, CustomerMasterTableValues, customers } from '../_lib/types';
 import { CustomerDialogContents } from './customers-master-dialog';
 
