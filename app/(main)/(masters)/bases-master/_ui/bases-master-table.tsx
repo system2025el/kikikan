@@ -20,9 +20,8 @@ import {
 } from '@mui/material';
 import { SetStateAction, useEffect, useMemo, useState } from 'react';
 
-import { MasterTable } from '@/app/(main)/_ui/table';
-
 import { MuiTablePagination } from '../../../_ui/table-pagination';
+import { MasterTable } from '../../_ui/table';
 import { BasesMasterTableValues, bMHeader } from '../_lib/types';
 import { BasesMasterDialog } from './bases-master-dailog';
 
@@ -74,7 +73,7 @@ export const BasesMasterTable = ({ bases }: { bases: BasesMasterTableValues[] | 
         <Divider />
         <Grid2 container mt={0.5} mx={0.5} justifyContent={'space-between'} alignItems={'center'}>
           <Grid2 spacing={1}>
-            <MuiTablePagination arrayList={bases!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
+            <MuiTablePagination arrayList={list!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
           </Grid2>
           <Grid2 container spacing={3}>
             <Grid2>

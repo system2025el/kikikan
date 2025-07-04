@@ -24,8 +24,9 @@ import { JSX, SetStateAction, useEffect, useMemo, useState } from 'react';
 
 import { Loading } from '@/app/(main)/_ui/loading';
 
-import { MasterTable } from '../../../_ui/table';
 import { MuiTablePagination } from '../../../_ui/table-pagination';
+import { MasterTable } from '../../_ui/table';
+// import { GetFilteredLocs } from '../_lib/funcs';
 import { lMHeader, LocMasterTableValues } from '../_lib/types';
 import { LocationsMasterDialog } from './locations-master-dialog';
 
@@ -64,13 +65,13 @@ export const LocationsMasterTable = ({
   const handleCloseDialog = () => {
     setDialogOpen(false);
   };
-
-  // // 表示するデータ
-  // const list = useMemo(
-  //   () =>
-  //     rowsPerPage > 0 ? locs.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage) : locs,
-  //   [page, rowsPerPage]
-  // );
+  /* 情報が変わったときに更新される */
+  const refetchLocs = async () => {
+    setIsLoading(true);
+    // const updated = await GetFilteredLocs('');
+    // setTheLocs(updated);
+    setIsLoading(false);
+  };
 
   useEffect(() => {
     setTheLocs(locs); // 親からのlocsが更新された場合に同期
@@ -129,33 +130,11 @@ export const LocationsMasterTable = ({
               page={page}
               rowsPerPage={rowsPerPage}
             />
-            {/* <Table stickyHeader padding="none">
-          <TableHead>
-            <TableRow>
-              <TableCell></TableCell>
-              <TableCell>車種</TableCell>
-              <TableCell>メモ</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {list.map((vehicle) => (
-              <TableRow key={vehicle.id}>
-                <TableCell padding="checkbox">
-                  <CheckBox color="primary" />
-                </TableCell>
-                <TableCell>{vehicle.vehicleType}</TableCell>
-                <TableCell>{vehicle.memo}</TableCell>
-              </TableRow>
-            ))}
-            {emptyRows > 0 && (
-              <TableRow style={{ height: 30 * emptyRows }}>
-                <TableCell colSpan={3} />
-              </TableRow>
-            )}
-          </TableBody>
-        </Table> */}
             <Dialog open={dialogOpen} fullScreen>
-              <LocationsMasterDialog handleClose={handleCloseDialog} locationId={openId} />
+              <LocationsMasterDialog
+                handleClose={handleCloseDialog}
+                locationId={openId} /*refetchLocs={refetchLocs}*/
+              />
             </Dialog>
           </>
         )}

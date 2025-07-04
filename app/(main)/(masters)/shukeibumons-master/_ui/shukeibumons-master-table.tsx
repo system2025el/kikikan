@@ -2,9 +2,9 @@ import AddIcon from '@mui/icons-material/Add';
 import { Box, Button, Dialog, Divider, Grid2, Paper, TableContainer, Typography } from '@mui/material';
 import { useMemo, useState } from 'react';
 
-import { MasterTable } from '@/app/(main)/_ui/table';
 import { MuiTablePagination } from '@/app/(main)/_ui/table-pagination';
 
+import { MasterTable } from '../../_ui/table';
 import { shukeibumonMHeader, ShukeibumonsMasterDialogValues } from '../_lib/type';
 import { ShukeibumonsMasterDialog } from './shukeibumons-master-dialog';
 
@@ -57,7 +57,7 @@ export const ShukeibumonsMasterTable = ({ shukeibumons }: { shukeibumons: Shukei
         <Divider />
         <Grid2 container mt={0.5} mx={0.5} justifyContent={'space-between'} alignItems={'center'}>
           <Grid2 spacing={1}>
-            <MuiTablePagination arrayList={shukeibumons!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
+            <MuiTablePagination arrayList={list!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
           </Grid2>
 
           <Grid2 container spacing={3}>
