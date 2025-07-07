@@ -4,7 +4,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Grid2 } from '@mui/material';
 import { JSX, useEffect, useState } from 'react';
 import { CheckboxElement, TextareaAutosizeElement, TextFieldElement, useForm } from 'react-hook-form-mui';
-import { set } from 'zod';
 
 import { FormBox } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
@@ -67,7 +66,8 @@ export const LocationsMasterDialog = ({
     },
     resolver: zodResolver(LocsMasterDialogSchema),
   });
-  /* 関数 ---------------------------- */
+
+  /* methods ---------------------------- */
   /* フォームを送信 */
   const onSubmit = async (data: LocMasterValues) => {
     console.log('isDarty : ', isDirty);
@@ -87,6 +87,7 @@ export const LocationsMasterDialog = ({
     setIsNew(false);
     handleClose();
   };
+
   /* 未保存ダイアログを閉じる */
   const handleCloseDirty = () => {
     setDirtyOpen(false);
@@ -102,6 +103,7 @@ export const LocationsMasterDialog = ({
     }
   };
 
+  /* useEffect --------------------------------------- */
   /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     console.log('★★★★★★★★★★★★★★★★★★★★★');

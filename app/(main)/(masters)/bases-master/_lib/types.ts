@@ -36,39 +36,3 @@ export const BasesMasterDialogSchema = basesMasterSchema.omit({
 export type BasesMasterDialogValues = z.infer<typeof BasesMasterDialogSchema>;
 
 // export type BasesMasterValues = { kyotenId: number; kyotenNam: string; dspOrdNum: number };
-/**モック削除delete */
-export const basesList: BasesMasterDialogValues[] = [
-  {
-    kyotenNam: 'KICS',
-    mem: '川崎',
-    kyotenId: 1,
-    delFlg: false,
-  },
-  {
-    kyotenNam: 'YARD',
-    mem: '大和',
-    kyotenId: 2,
-    delFlg: false,
-  },
-  {
-    kyotenNam: 'その他',
-    mem: '厚木など',
-    kyotenId: 3,
-    delFlg: false,
-  },
-  //   {
-  //     kyotenId: 3,
-  //     kyotenNam: 'その他',
-  //     dspOrdNum: 3,
-  //     mem: '厚木など',
-  //     addDat: new Date(),
-  //     addUser: '',
-  //     updDat: new Date(''),
-  //     updUser: '',
-  //   },
-];
-/* 拠点マスタテーブルヘッダー */
-export const bMHeader = [
-  { key: 'name', label: '名称' },
-  { key: 'mem', label: 'メモ' },
-];

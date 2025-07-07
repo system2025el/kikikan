@@ -49,16 +49,6 @@ export const LocsMasterDialogSchema = LocMasterSchema.omit({
 
 export type LocsMasterDialogValues = z.infer<typeof LocsMasterDialogSchema>;
 
-/** 場所マスタデータ */
-/**
- * 場所マスタテーブルヘッダー
- */
-export const lMHeader = [
-  { key: 'name', label: '場所' },
-  { key: 'address', label: '住所' },
-  { key: 'tel', label: 'Tel' },
-  { key: 'fax', label: 'Fax' },
-];
 /* 検索用スキーマ */
 export const LocsMasterSearchSchema = z.object({
   query: z.string().optional(),
