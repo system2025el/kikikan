@@ -25,6 +25,7 @@ import {
 import { grey } from '@mui/material/colors';
 import React, { useRef, useState } from 'react';
 
+import { getDateHeaderBackgroundColor, getDateRowBackgroundColor } from '../_lib/colorselect';
 import { KeepEquipment, KeepEquipmentData, StockData } from './equipment-keep-order-detail';
 
 type KeepStockTableProps = {
@@ -33,22 +34,13 @@ type KeepStockTableProps = {
   dateRange: string[];
   startDate: Date | null;
   endDate: Date | null;
-  getHeaderBackgroundColor: (date: string, dateRange: string[]) => string;
-  getRowBackgroundColor: (dateHeader: string, startDate: Date | null, endDate: Date | null) => string;
+  ref: React.RefObject<HTMLDivElement | null>;
 };
 
-export const KeepStockTable: React.FC<KeepStockTableProps> = ({
-  header,
-  rows,
-  dateRange,
-  startDate,
-  endDate,
-  getHeaderBackgroundColor,
-  getRowBackgroundColor,
-}) => {
+export const KeepStockTable: React.FC<KeepStockTableProps> = ({ header, rows, dateRange, startDate, endDate, ref }) => {
   return (
-    <TableContainer component={Paper} style={{ overflowX: 'auto' }}>
-      <Table>
+    <TableContainer ref={ref} component={Paper} style={{ overflow: 'scroll', maxHeight: '80vh' }}>
+      <Table stickyHeader>
         <TableHead>
           <TableRow>
             {header?.map((date, index) => (
@@ -57,10 +49,11 @@ export const KeepStockTable: React.FC<KeepStockTableProps> = ({
                 align={typeof rows[0].data[index] === 'number' ? 'right' : 'left'}
                 size="small"
                 sx={{
-                  border: getHeaderBackgroundColor(date, dateRange) === 'black' ? '1px solid grey' : '1px solid black',
+                  border:
+                    getDateHeaderBackgroundColor(date, dateRange) === 'black' ? '1px solid grey' : '1px solid black',
                   whiteSpace: 'nowrap',
                   color: 'white',
-                  bgcolor: getHeaderBackgroundColor(date, dateRange),
+                  bgcolor: getDateHeaderBackgroundColor(date, dateRange),
                   padding: 0,
                 }}
               >
@@ -77,7 +70,7 @@ export const KeepStockTable: React.FC<KeepStockTableProps> = ({
               row={row}
               startDate={startDate}
               endDate={endDate}
-              getRowBackgroundColor={getRowBackgroundColor}
+              getDateRowBackgroundColor={getDateRowBackgroundColor}
             />
           ))}
         </TableBody>
@@ -91,11 +84,11 @@ export type KeepStockTableRowProps = {
   row: StockData;
   startDate: Date | null;
   endDate: Date | null;
-  getRowBackgroundColor: (dateHeader: string, startDate: Date | null, endDate: Date | null) => string;
+  getDateRowBackgroundColor: (dateHeader: string, startDate: Date | null, endDate: Date | null) => string;
 };
 
 const KeepStockTableRow = React.memo(
-  ({ header, row, startDate, endDate, getRowBackgroundColor }: KeepStockTableRowProps) => {
+  ({ header, row, startDate, endDate, getDateRowBackgroundColor }: KeepStockTableRowProps) => {
     console.log('date側描画', row.id);
     return (
       <TableRow>
@@ -104,13 +97,9 @@ const KeepStockTableRow = React.memo(
             <TableCell
               key={colIndex}
               align={typeof cell === 'number' ? 'right' : 'left'}
+              style={styles.row}
               sx={{
-                border: '1px solid black',
-                whiteSpace: 'nowrap',
-                height: 25,
-                bgcolor: getRowBackgroundColor(header[colIndex], startDate, endDate),
-                py: 0,
-                px: 1,
+                bgcolor: getDateRowBackgroundColor(header[colIndex], startDate, endDate),
                 color: typeof cell === 'number' && cell < 0 ? 'red' : 'black',
               }}
               size="small"
@@ -137,12 +126,13 @@ KeepStockTableRow.displayName = 'KeepStockTableRow';
 type KeepEqTableProps = {
   rows: KeepEquipment[];
   handleMemoChange: (rowIndex: number, memo: string) => void;
+  ref: React.RefObject<HTMLDivElement | null>;
 };
 
-export const KeepEqTable: React.FC<KeepEqTableProps> = ({ rows, handleMemoChange }) => {
+export const KeepEqTable: React.FC<KeepEqTableProps> = ({ rows, handleMemoChange, ref }) => {
   return (
-    <TableContainer component={Paper} style={{ overflowX: 'auto' }}>
-      <Table>
+    <TableContainer ref={ref} component={Paper} style={{ overflow: 'scroll', maxHeight: '80vh' }}>
+      <Table stickyHeader>
         <TableHead>
           <TableRow>
             <TableCell size="small" style={styles.header} />
@@ -278,7 +268,7 @@ const styles: { [key: string]: React.CSSProperties } = {
   row: {
     border: '1px solid black',
     whiteSpace: 'nowrap',
-    height: 25,
+    height: '26px',
     paddingTop: 0,
     paddingBottom: 0,
     paddingLeft: 1,

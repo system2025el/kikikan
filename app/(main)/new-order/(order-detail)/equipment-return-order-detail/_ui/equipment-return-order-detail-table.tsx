@@ -26,6 +26,7 @@ import { grey } from '@mui/material/colors';
 import { Dayjs } from 'dayjs';
 import React, { useRef, useState } from 'react';
 
+import { getDateHeaderBackgroundColor, getDateRowBackgroundColor } from '../_lib/colorselect';
 import { ReturnEquipment, ReturnEquipmentData, StockData } from './equipment-return-order-detail';
 
 type ReturnStockTableProps = {
@@ -34,8 +35,7 @@ type ReturnStockTableProps = {
   dateRange: string[];
   startDate: Date | null;
   endDate: Date | null;
-  getHeaderBackgroundColor: (date: string, dateRange: string[]) => string;
-  getRowBackgroundColor: (dateHeader: string, startDate: Date | null, endDate: Date | null) => string;
+  ref: React.RefObject<HTMLDivElement | null>;
 };
 
 export const ReturnStockTable: React.FC<ReturnStockTableProps> = ({
@@ -44,12 +44,11 @@ export const ReturnStockTable: React.FC<ReturnStockTableProps> = ({
   dateRange,
   startDate,
   endDate,
-  getHeaderBackgroundColor,
-  getRowBackgroundColor,
+  ref,
 }) => {
   return (
-    <TableContainer component={Paper} style={{ overflowX: 'auto' }}>
-      <Table>
+    <TableContainer ref={ref} component={Paper} style={{ overflow: 'scroll', maxHeight: '80vh' }}>
+      <Table stickyHeader>
         <TableHead>
           <TableRow>
             {header?.map((date, index) => (
@@ -58,10 +57,11 @@ export const ReturnStockTable: React.FC<ReturnStockTableProps> = ({
                 align={typeof rows[0].data[index] === 'number' ? 'right' : 'left'}
                 size="small"
                 sx={{
-                  border: getHeaderBackgroundColor(date, dateRange) === 'black' ? '1px solid grey' : '1px solid black',
+                  border:
+                    getDateHeaderBackgroundColor(date, dateRange) === 'black' ? '1px solid grey' : '1px solid black',
                   whiteSpace: 'nowrap',
                   color: 'white',
-                  bgcolor: getHeaderBackgroundColor(date, dateRange),
+                  bgcolor: getDateHeaderBackgroundColor(date, dateRange),
                   padding: 0,
                 }}
               >
@@ -72,14 +72,7 @@ export const ReturnStockTable: React.FC<ReturnStockTableProps> = ({
         </TableHead>
         <TableBody>
           {rows.map((row, rowIndex) => (
-            <ReturnStockTableRow
-              key={rowIndex}
-              header={header}
-              row={row}
-              startDate={startDate}
-              endDate={endDate}
-              getRowBackgroundColor={getRowBackgroundColor}
-            />
+            <ReturnStockTableRow key={rowIndex} header={header} row={row} startDate={startDate} endDate={endDate} />
           ))}
         </TableBody>
       </Table>
@@ -92,11 +85,10 @@ export type ReturnStockTableRowProps = {
   row: StockData;
   startDate: Date | null;
   endDate: Date | null;
-  getRowBackgroundColor: (dateHeader: string, startDate: Date | null, endDate: Date | null) => string;
 };
 
 const ReturnStockTableRow = React.memo(
-  ({ header, row, startDate, endDate, getRowBackgroundColor }: ReturnStockTableRowProps) => {
+  ({ header, row, startDate, endDate }: ReturnStockTableRowProps) => {
     console.log('date側描画', row.id);
     return (
       <TableRow>
@@ -105,13 +97,9 @@ const ReturnStockTableRow = React.memo(
             <TableCell
               key={colIndex}
               align={typeof cell === 'number' ? 'right' : 'left'}
+              style={styles.row}
               sx={{
-                border: '1px solid black',
-                whiteSpace: 'nowrap',
-                height: 25,
-                bgcolor: getRowBackgroundColor(header[colIndex], startDate, endDate),
-                py: 0,
-                px: 1,
+                bgcolor: getDateRowBackgroundColor(header[colIndex], startDate, endDate),
                 color: typeof cell === 'number' && cell < 0 ? 'red' : 'black',
               }}
               size="small"
@@ -138,9 +126,10 @@ type ReturnEqTableProps = {
   rows: ReturnEquipment[];
   onChange: (rowIndex: number, returnValue: number) => void;
   handleMemoChange: (rowIndex: number, memo: string) => void;
+  ref: React.RefObject<HTMLDivElement | null>;
 };
 
-export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({ rows, onChange, handleMemoChange }) => {
+export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({ rows, onChange, handleMemoChange, ref }) => {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const handleReturnCellChange = (rowIndex: number, newValue: number) => {
@@ -159,8 +148,8 @@ export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({ rows, onChange, ha
   };
 
   return (
-    <TableContainer component={Paper} style={{ overflowX: 'auto' }}>
-      <Table>
+    <TableContainer ref={ref} component={Paper} style={{ overflow: 'scroll', maxHeight: '80vh' }}>
+      <Table stickyHeader>
         <TableHead>
           <TableRow>
             <TableCell size="small" style={styles.header} />
@@ -360,7 +349,7 @@ const styles: { [key: string]: React.CSSProperties } = {
   row: {
     border: '1px solid black',
     whiteSpace: 'nowrap',
-    height: 25,
+    height: '26px',
     paddingTop: 0,
     paddingBottom: 0,
     paddingLeft: 1,

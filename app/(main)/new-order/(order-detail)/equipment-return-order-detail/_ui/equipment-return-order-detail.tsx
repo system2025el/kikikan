@@ -123,6 +123,22 @@ const getStockRow = (
   return rows;
 };
 
+// 200件用データ作成
+export const testeqData: ReturnEquipment[] = Array.from({ length: 50 }, (_, i) => {
+  const original = data[i % data.length];
+  return {
+    ...original,
+    id: i + 1,
+    name: `${original.name} (${i + 1})`,
+    memo: original.memo,
+    place: original.place,
+    all: original.issue,
+    order: original.return,
+  };
+});
+// 200件用データ作成
+export const testStock = Array.from({ length: 50 }, (_, i) => stock[i % stock.length]);
+
 export const EquipmentReturnOrderDetail = () => {
   // KICS出庫日
   const [startKICSDate, setStartKICSDate] = useState<Date | null>(null);
@@ -153,10 +169,10 @@ export const EquipmentReturnOrderDetail = () => {
   );
 
   // 機材テーブルの行配列
-  const [equipmentRows, setEquipmentRows] = useState<ReturnEquipment[]>(data);
+  const [equipmentRows, setEquipmentRows] = useState<ReturnEquipment[]>(testeqData);
   // ストックテーブルの行配列
   const [stockRows, setStockRows] = useState<StockData[]>(
-    getStockRow(equipmentRows, dateHeader, dateHeaderRange, stock, dateHeader.length)
+    getStockRow(equipmentRows, dateHeader, dateHeaderRange, testStock, dateHeader.length)
   );
 
   // 内税、外税
@@ -169,6 +185,51 @@ export const EquipmentReturnOrderDetail = () => {
   // ポッパー制御
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
+
+  // ref
+  const leftRef = useRef<HTMLDivElement>(null);
+  const rightRef = useRef<HTMLDivElement>(null);
+  const isSyncing = useRef(false);
+
+  // 同期スクロール処理
+  const syncScroll = (source: 'left' | 'right') => {
+    if (isSyncing.current) return;
+    isSyncing.current = true;
+
+    const left = leftRef.current;
+    const right = rightRef.current;
+
+    if (!left || !right) return;
+
+    if (source === 'left') {
+      const ratio = left.scrollTop / (left.scrollHeight - left.clientHeight);
+      right.scrollTop = ratio * (right.scrollHeight - right.clientHeight);
+    } else {
+      const ratio = right.scrollTop / (right.scrollHeight - right.clientHeight);
+      left.scrollTop = ratio * (left.scrollHeight - left.clientHeight);
+    }
+
+    requestAnimationFrame(() => {
+      isSyncing.current = false;
+    });
+  };
+
+  useEffect(() => {
+    const left = leftRef.current;
+    const right = rightRef.current;
+
+    if (left && right) {
+      left.addEventListener('scroll', () => syncScroll('left'));
+      right.addEventListener('scroll', () => syncScroll('right'));
+    }
+
+    return () => {
+      if (left && right) {
+        left.removeEventListener('scroll', () => syncScroll('left'));
+        right.removeEventListener('scroll', () => syncScroll('right'));
+      }
+    };
+  }, []);
 
   /**
    * KICS再度出庫日時変更時
@@ -186,7 +247,7 @@ export const EquipmentReturnOrderDetail = () => {
         equipmentRows,
         dateHeaderRef.current,
         dateHeaderRange,
-        stock,
+        testStock,
         dateHeaderRef.current.length
       );
 
@@ -219,7 +280,7 @@ export const EquipmentReturnOrderDetail = () => {
         equipmentRows,
         dateHeaderRef.current,
         dateHeaderRange,
-        stock,
+        testStock,
         dateHeaderRef.current.length
       );
 
@@ -253,7 +314,7 @@ export const EquipmentReturnOrderDetail = () => {
         equipmentRows,
         dateHeaderRef.current,
         dateHeaderRange,
-        stock,
+        testStock,
         dateHeaderRef.current.length
       );
       setDateRange(updatedDateRange);
@@ -287,7 +348,7 @@ export const EquipmentReturnOrderDetail = () => {
         equipmentRows,
         dateHeaderRef.current,
         dateHeaderRange,
-        stock,
+        testStock,
         dateHeaderRef.current.length
       );
       setDateRange(updatedDateRange);
@@ -313,7 +374,13 @@ export const EquipmentReturnOrderDetail = () => {
     setSelectDate(date.toDate());
 
     const updatedHeader = getStockHeader(date?.toDate());
-    const updatedRow = getStockRow(equipmentRows, updatedHeader, dateHeaderRange, stock, dateHeaderRef.current.length);
+    const updatedRow = getStockRow(
+      equipmentRows,
+      updatedHeader,
+      dateHeaderRange,
+      testStock,
+      dateHeaderRef.current.length
+    );
     setDateHeader(updatedHeader);
     const targetIndex = updatedHeader
       .map((date, index) => (dateRangeRef.current.includes(date) ? index : -1))
@@ -378,7 +445,7 @@ export const EquipmentReturnOrderDetail = () => {
       equipmentRows,
       dateHeaderRef.current,
       dateHeaderRange,
-      stock,
+      testStock,
       dateHeaderRef.current.length
     );
     const updatedData = updatedRow[rowIndex].data;
@@ -667,7 +734,12 @@ export const EquipmentReturnOrderDetail = () => {
               </Button>
             </Box>
             <Box display={Object.keys(equipmentRows).length > 0 ? 'block' : 'none'}>
-              <ReturnEqTable rows={equipmentRows} onChange={handleCellChange} handleMemoChange={handleMemoChange} />
+              <ReturnEqTable
+                rows={equipmentRows}
+                onChange={handleCellChange}
+                handleMemoChange={handleMemoChange}
+                ref={leftRef}
+              />
             </Box>
           </Box>
           <Box
@@ -699,8 +771,7 @@ export const EquipmentReturnOrderDetail = () => {
               dateRange={dateHeaderRange}
               startDate={startDate}
               endDate={endDate}
-              getHeaderBackgroundColor={getDateHeaderBackgroundColor}
-              getRowBackgroundColor={getDateRowBackgroundColor}
+              ref={rightRef}
             />
           </Box>
         </Box>
