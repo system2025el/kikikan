@@ -24,7 +24,8 @@ import {
 
 import { FormBox, FormItemsType } from '../../../_ui/form-box';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
-import { bumonsList, BumonsMasterDialogSchema, BumonsMasterDialogValues } from '../_lib/types';
+import { bumonsList } from '../_lib/data';
+import { BumonsMasterDialogSchema, BumonsMasterDialogValues } from '../_lib/types';
 // import { Loading } from '../../../_ui/loading';
 
 /**

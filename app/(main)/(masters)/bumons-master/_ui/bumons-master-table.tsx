@@ -22,7 +22,8 @@ import { SetStateAction, useEffect, useMemo, useState } from 'react';
 
 import { MuiTablePagination } from '../../../_ui/table-pagination';
 import { MasterTable } from '../../_ui/table';
-import { BumonsMasterTableValues, BumonsMHeader } from '../_lib/types';
+import { BumonsMHeader } from '../_lib/data';
+import { BumonsMasterDialogValues, BumonsMasterTableValues } from '../_lib/types';
 import { BumonsMasterDialog } from './bumons-master-dialog';
 
 /**
@@ -31,7 +32,7 @@ import { BumonsMasterDialog } from './bumons-master-dialog';
  * @returns {JSX.Element} 部門マスタテーブル
  */
 
-export const BumonsMasterTable = ({ bumons }: { bumons: BumonsMasterTableValues[] | undefined }) => {
+export const BumonsMasterTable = ({ bumons }: { bumons: BumonsMasterDialogValues[] | undefined }) => {
   /* 1ページごとの表示数 */
   const rowsPerPage = 50;
   /* useState --------------------------------------- */
