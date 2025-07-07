@@ -1,9 +1,10 @@
-//DB import { GetAllLoc } from './_lib/funcs';
-import { locationList } from './_lib/types';
+import { locationList } from './_lib/datas';
+// import { GetAllLoc } from './_lib/funcs';
+
 import { LocationsMaster } from './_ui/locations-master';
 
 const Page = async () => {
-  //DB const locs = await GetAllLoc();
+  // const locs = await GetAllLoc();
   const locs = locationList;
   return (
     <>
