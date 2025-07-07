@@ -1,4 +1,4 @@
-import { bumonsList } from './_lib/types';
+import { bumonsList } from './_lib/data';
 import { BumonsMaster } from './_ui/bumons-master';
 
 const Page = async () => {

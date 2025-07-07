@@ -3,7 +3,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import { Box, Button, Container, Divider, Grid2, Paper, Select, Stack, TextField, Typography } from '@mui/material';
 
 import { BackButton } from '../../../_ui/buttons';
-import { BumonsMasterTableValues } from '../_lib/types';
+import { BumonsMasterDialogValues, BumonsMasterTableValues } from '../_lib/types';
 import { BumonsMasterTable } from './bumons-master-table';
 /**
  * 部門マスタ画面
@@ -11,7 +11,7 @@ import { BumonsMasterTable } from './bumons-master-table';
  * @returns {JSX.Element} 部門マスタコンポーネント
  */
 
-export const BumonsMaster = ({ bumons }: { bumons: BumonsMasterTableValues[] | undefined }) => {
+export const BumonsMaster = ({ bumons }: { bumons: BumonsMasterDialogValues[] | undefined }) => {
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
       <Box justifySelf={'end'} mb={0.5}>
