@@ -91,7 +91,7 @@ export const DaibumonsMasterDialog = ({
         <MasterDialogTitle
           editable={editable}
           handleEditable={handleEditable}
-          handleCloseDialog={handleCloseDialog}
+          handleClose={handleCloseDialog}
           dialogTitle="大部門マスタ登録"
         />
         {/* {isLoading ? ( //DB

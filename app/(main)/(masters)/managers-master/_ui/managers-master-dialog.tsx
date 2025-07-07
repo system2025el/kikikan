@@ -78,7 +78,7 @@ export const ManagerDialogContents = ({
         <MasterDialogTitle
           editable={editable}
           handleEditable={handleEditable}
-          handleCloseDialog={handleCloseDialog}
+          handleClose={handleCloseDialog}
           dialogTitle={'担当者情報'}
         />
         <Grid2 container spacing={1} p={5} direction={'column'} justifyContent={'center'} width={'100%'}>

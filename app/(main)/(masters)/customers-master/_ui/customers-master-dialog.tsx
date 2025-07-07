@@ -106,7 +106,7 @@ export const CustomerDialogContents = ({
         <MasterDialogTitle
           editable={editable}
           handleEditable={handleEditable}
-          handleCloseDialog={handleCloseDialog}
+          handleClose={handleCloseDialog}
           dialogTitle="顧客マスタ登録"
         />
         {/* {isLoading ? ( //DB

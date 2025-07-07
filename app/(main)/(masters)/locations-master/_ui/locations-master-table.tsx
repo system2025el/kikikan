@@ -1,26 +1,7 @@
 'use client';
-import { CheckBox, SellTwoTone } from '@mui/icons-material';
 import AddIcon from '@mui/icons-material/Add';
-import DeleteIcon from '@mui/icons-material/Delete';
-import {
-  alpha,
-  Box,
-  Button,
-  Dialog,
-  Divider,
-  Grid2,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
-  useTheme,
-} from '@mui/material';
-import { grey } from '@mui/material/colors';
-import { JSX, SetStateAction, useEffect, useMemo, useState } from 'react';
+import { Box, Button, Dialog, Divider, Grid2, Paper, TableContainer, Typography } from '@mui/material';
+import { useEffect, useMemo, useState } from 'react';
 
 import { Loading } from '@/app/(main)/_ui/loading';
 
@@ -95,7 +76,7 @@ export const LocationsMasterTable = ({
       <Divider />
       <Grid2 container mt={0.5} mx={0.5} justifyContent={'space-between'} alignItems={'center'}>
         <Grid2 spacing={1}>
-          <MuiTablePagination arrayList={locs!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
+          <MuiTablePagination arrayList={list!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
         </Grid2>
         <Grid2 container spacing={3}>
           <Grid2>
@@ -131,10 +112,7 @@ export const LocationsMasterTable = ({
               rowsPerPage={rowsPerPage}
             />
             <Dialog open={dialogOpen} fullScreen>
-              <LocationsMasterDialog
-                handleClose={handleCloseDialog}
-                locationId={openId} /*refetchLocs={refetchLocs}*/
-              />
+              <LocationsMasterDialog handleClose={handleCloseDialog} locationId={openId} refetchLocs={refetchLocs} />
             </Dialog>
           </>
         )}

@@ -2,7 +2,7 @@
 
 import { FormItemsType } from '@/app/(main)/_ui/form-box';
 
-import { LocsMasterDialogValues } from './types';
+import { LocMasterTableValues, LocsMasterDialogValues } from './types';
 
 export const formItems: FormItemsType[] = [
   {
@@ -88,3 +88,73 @@ export const emptyLoc: LocsMasterDialogValues = {
   telMobile: '',
   delFlg: false,
 };
+
+/**モック削除delete */
+export const locationList: LocMasterTableValues[] = [
+  {
+    locNam: '日比谷音楽堂',
+    tel: '000-000-0000',
+    fax: '000-111-2222',
+    locId: 1,
+    dspOrdNum: 0,
+    adrShozai: '東京都千代田区日比谷公園',
+    adrTatemono: '',
+    adrSonota: '１－５',
+    mem: 'ばばばばばばっばばばばっばばばばば',
+  },
+  {
+    locNam: '日本武道館',
+    tel: '',
+    fax: '',
+    locId: 2,
+    dspOrdNum: 0,
+    adrShozai: '',
+    adrTatemono: '',
+    adrSonota: '',
+    mem: '',
+  },
+  {
+    locNam: 'ＮＨＫホール',
+    tel: '',
+    fax: '',
+    locId: 3,
+    dspOrdNum: 0,
+    adrShozai: '',
+    adrTatemono: '',
+    adrSonota: '',
+    mem: '',
+  },
+  {
+    locNam: '東京厚生年金会館ホール',
+    tel: '',
+    fax: '',
+    locId: 4,
+    dspOrdNum: 0,
+    adrShozai: '',
+    adrTatemono: '',
+    adrSonota: '',
+    mem: '',
+  },
+  {
+    locNam: '中野サンプラザ',
+    tel: '',
+    fax: '',
+    locId: 5,
+    dspOrdNum: 0,
+    adrShozai: '',
+    adrTatemono: '',
+    adrSonota: '',
+    mem: '',
+  },
+  {
+    locNam: '渋谷公会堂',
+    tel: '',
+    fax: '',
+    locId: 6,
+    dspOrdNum: 0,
+    adrShozai: '',
+    adrTatemono: '',
+    adrSonota: '',
+    mem: '',
+  },
+];
