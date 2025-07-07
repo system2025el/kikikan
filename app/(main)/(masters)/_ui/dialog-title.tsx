@@ -38,7 +38,7 @@ export const MasterDialogTitle = ({
       {isNew && <Typography>新規登録</Typography>}
       <Stack>
         <SubmitButton type="submit" disabled={isDirty ? false : true} />
-        <MakeEditModeButton handleEditable={handleEditable} />
+        <MakeEditModeButton handleEditable={handleEditable} disabled={editable ? true : false} />
         <CloseMasterDialogButton handleCloseDialog={handleCloseDialog} />
       </Stack>
     </DialogTitle>

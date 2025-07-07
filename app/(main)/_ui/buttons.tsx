@@ -42,9 +42,10 @@ export const CloseMasterDialogButton = ({ handleCloseDialog }: { handleCloseDial
  * @param param0 編集モードを操作する関数
  * @returns {JSXElement} 編集ボタン
  */
-export const MakeEditModeButton = ({ handleEditable }: { handleEditable: () => void }) => {
+export const MakeEditModeButton = ({ disabled, handleEditable }: { disabled: boolean; handleEditable: () => void }) => {
   return (
     <Button
+      disabled={disabled}
       onClick={() => {
         handleEditable();
         console.log('pushEdit');
