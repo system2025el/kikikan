@@ -26,6 +26,10 @@ import { Dayjs } from 'dayjs';
 import React, { useRef, useState } from 'react';
 
 import { TestDate } from '@/app/(main)/_ui/date';
+import {
+  getDateHeaderBackgroundColor,
+  getDateRowBackgroundColor,
+} from '@/app/(main)/new-order/(order-detail)/equipment-order-detail/_lib/colorselect';
 
 import { Equipment, EquipmentData, StockData } from './equipment-order-detail';
 
@@ -39,17 +43,7 @@ type StockTableProps = {
   RH: EquipmentData[];
   GP: EquipmentData[];
   actual: EquipmentData[];
-  getHeaderBackgroundColor: (date: string, dateRange: string[]) => string;
-  getRowBackgroundColor: (
-    dateHeader: string,
-    dateRange: string[],
-    startKICSDate: Date | null,
-    endKICSDate: Date | null,
-    preparation: EquipmentData[],
-    RH: EquipmentData[],
-    GP: EquipmentData[],
-    actual: EquipmentData[]
-  ) => string;
+  ref: React.RefObject<HTMLDivElement | null>;
 };
 
 export const StockTable: React.FC<StockTableProps> = ({
@@ -62,12 +56,11 @@ export const StockTable: React.FC<StockTableProps> = ({
   RH,
   GP,
   actual,
-  getHeaderBackgroundColor,
-  getRowBackgroundColor,
+  ref,
 }) => {
   return (
-    <TableContainer component={Paper} style={{ overflowX: 'auto' }}>
-      <Table>
+    <TableContainer ref={ref} component={Paper} style={{ overflow: 'scroll', maxHeight: '80vh' }}>
+      <Table stickyHeader>
         <TableHead>
           <TableRow>
             {header?.map((date, index) => (
@@ -76,10 +69,11 @@ export const StockTable: React.FC<StockTableProps> = ({
                 align={typeof rows[0].data[index] === 'number' ? 'right' : 'left'}
                 size="small"
                 sx={{
-                  border: getHeaderBackgroundColor(date, dateRange) === 'black' ? '1px solid grey' : '1px solid black',
+                  border:
+                    getDateHeaderBackgroundColor(date, dateRange) === 'black' ? '1px solid grey' : '1px solid black',
                   whiteSpace: 'nowrap',
                   color: 'white',
-                  bgcolor: getHeaderBackgroundColor(date, dateRange),
+                  bgcolor: getDateHeaderBackgroundColor(date, dateRange),
                   padding: 0,
                 }}
               >
@@ -101,7 +95,6 @@ export const StockTable: React.FC<StockTableProps> = ({
               RH={RH}
               GP={GP}
               actual={actual}
-              getRowBackgroundColor={getRowBackgroundColor}
             />
           ))}
         </TableBody>
@@ -120,31 +113,10 @@ export type StockTableRowProps = {
   RH: EquipmentData[];
   GP: EquipmentData[];
   actual: EquipmentData[];
-  getRowBackgroundColor: (
-    dateHeader: string,
-    dateRange: string[],
-    startKICSDate: Date | null,
-    endKICSDate: Date | null,
-    preparation: EquipmentData[],
-    RH: EquipmentData[],
-    GP: EquipmentData[],
-    actual: EquipmentData[]
-  ) => string;
 };
 
 const StockTableRow = React.memo(
-  ({
-    header,
-    row,
-    dateRange,
-    startDate,
-    endDate,
-    preparation,
-    RH,
-    GP,
-    actual,
-    getRowBackgroundColor,
-  }: StockTableRowProps) => {
+  ({ header, row, dateRange, startDate, endDate, preparation, RH, GP, actual }: StockTableRowProps) => {
     console.log('date側描画', row.id);
     return (
       <TableRow>
@@ -153,11 +125,9 @@ const StockTableRow = React.memo(
             <TableCell
               key={colIndex}
               align={typeof cell === 'number' ? 'right' : 'left'}
+              style={styles.row}
               sx={{
-                border: '1px solid black',
-                whiteSpace: 'nowrap',
-                height: 25,
-                bgcolor: getRowBackgroundColor(
+                bgcolor: getDateRowBackgroundColor(
                   header[colIndex],
                   dateRange,
                   startDate,
@@ -167,8 +137,6 @@ const StockTableRow = React.memo(
                   GP,
                   actual
                 ),
-                py: 0,
-                px: 1,
                 color: typeof cell === 'number' && cell < 0 ? 'red' : 'black',
               }}
               size="small"
@@ -184,8 +152,6 @@ const StockTableRow = React.memo(
     return (
       prevProps.header === nextProps.header &&
       prevProps.row === nextProps.row &&
-      // prevProps.startKICSDate === nextProps.startKICSDate &&
-      // prevProps.endKICSDate === nextProps.endKICSDate &&
       prevProps.preparation === nextProps.preparation &&
       prevProps.RH === nextProps.RH &&
       prevProps.GP === nextProps.GP &&
@@ -201,9 +167,10 @@ type EqTableProps = {
   onChange: (rowIndex: number, orderValue: number, spareValue: number, totalValue: number) => void;
   handleCellDateChange: (rowIndex: number, date: Dayjs | null) => void;
   handleMemoChange: (rowIndex: number, memo: string) => void;
+  ref: React.RefObject<HTMLDivElement | null>;
 };
 
-export const EqTable: React.FC<EqTableProps> = ({ rows, onChange, handleCellDateChange, handleMemoChange }) => {
+export const EqTable: React.FC<EqTableProps> = ({ rows, onChange, handleCellDateChange, handleMemoChange, ref }) => {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const handleOrderCellChange = (rowIndex: number, newValue: number) => {
@@ -232,8 +199,8 @@ export const EqTable: React.FC<EqTableProps> = ({ rows, onChange, handleCellDate
   };
 
   return (
-    <TableContainer component={Paper} style={{ overflowX: 'auto' }}>
-      <Table>
+    <TableContainer ref={ref} component={Paper} style={{ overflow: 'scroll', maxHeight: '80vh' }}>
+      <Table stickyHeader>
         <TableHead>
           <TableRow>
             <TableCell size="small" style={styles.header} />
@@ -514,7 +481,7 @@ const styles: { [key: string]: React.CSSProperties } = {
   row: {
     border: '1px solid black',
     whiteSpace: 'nowrap',
-    height: 25,
+    height: '26px',
     paddingTop: 0,
     paddingBottom: 0,
     paddingLeft: 1,

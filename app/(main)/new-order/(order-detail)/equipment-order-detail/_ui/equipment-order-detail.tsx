@@ -119,7 +119,7 @@ const getStockRow = (stock: number[], length: number) => {
 };
 
 // 200件用データ作成
-export const testeqData: Equipment[] = Array.from({ length: 200 }, (_, i) => {
+export const testeqData: Equipment[] = Array.from({ length: 50 }, (_, i) => {
   const original = data[i % data.length];
   return {
     ...original,
@@ -135,7 +135,7 @@ export const testeqData: Equipment[] = Array.from({ length: 200 }, (_, i) => {
   };
 });
 // 200件用データ作成
-export const testStock = Array.from({ length: 200 }, (_, i) => stock[i % stock.length]);
+export const testStock = Array.from({ length: 50 }, (_, i) => stock[i % stock.length]);
 
 const EquipmentOrderDetail = () => {
   // KICS出庫日
@@ -158,9 +158,9 @@ const EquipmentOrderDetail = () => {
   // ヘッダー用の日付
   const [dateHeader, setDateHeader] = useState<string[]>(getStockHeader(startDate));
   // ストックテーブルの行配列
-  const [stockRows, setStockRows] = useState<StockData[]>(getStockRow(stock, dateHeader.length));
+  const [stockRows, setStockRows] = useState<StockData[]>(getStockRow(testStock, dateHeader.length));
   // 機材テーブルの行配列
-  const [equipmentRows, setEquipmentRows] = useState<Equipment[]>(data);
+  const [equipmentRows, setEquipmentRows] = useState<Equipment[]>(testeqData);
 
   // 仕込日
   const [preparation, setPreparation] = useState<EquipmentData[]>([]);
@@ -190,6 +190,49 @@ const EquipmentOrderDetail = () => {
   // ref
   const dateRangeRef = useRef(dateRange);
   const dateHeaderRef = useRef(dateHeader);
+  const leftRef = useRef<HTMLDivElement>(null);
+  const rightRef = useRef<HTMLDivElement>(null);
+  const isSyncing = useRef(false);
+
+  // 同期スクロール処理
+  const syncScroll = (source: 'left' | 'right') => {
+    if (isSyncing.current) return;
+    isSyncing.current = true;
+
+    const left = leftRef.current;
+    const right = rightRef.current;
+
+    if (!left || !right) return;
+
+    if (source === 'left') {
+      const ratio = left.scrollTop / (left.scrollHeight - left.clientHeight);
+      right.scrollTop = ratio * (right.scrollHeight - right.clientHeight);
+    } else {
+      const ratio = right.scrollTop / (right.scrollHeight - right.clientHeight);
+      left.scrollTop = ratio * (left.scrollHeight - left.clientHeight);
+    }
+
+    requestAnimationFrame(() => {
+      isSyncing.current = false;
+    });
+  };
+
+  useEffect(() => {
+    const left = leftRef.current;
+    const right = rightRef.current;
+
+    if (left && right) {
+      left.addEventListener('scroll', () => syncScroll('left'));
+      right.addEventListener('scroll', () => syncScroll('right'));
+    }
+
+    return () => {
+      if (left && right) {
+        left.removeEventListener('scroll', () => syncScroll('left'));
+        right.removeEventListener('scroll', () => syncScroll('right'));
+      }
+    };
+  }, []);
 
   useEffect(() => {
     console.log('dateRange変更');
@@ -209,7 +252,7 @@ const EquipmentOrderDetail = () => {
     if (date !== null) {
       setSelectDate(date.toDate());
       const updatedHeader = getStockHeader(date?.toDate());
-      const updatedRow = getStockRow(stock, updatedHeader.length);
+      const updatedRow = getStockRow(testStock, updatedHeader.length);
       setDateHeader(updatedHeader);
       const targetIndex: number[] = [];
       dateRangeRef.current.map((targetDate) => {
@@ -221,7 +264,7 @@ const EquipmentOrderDetail = () => {
       });
       targetIndex.map((index) => {
         updatedRow.map((date, i) => {
-          date.data[index] = stock[i] - equipmentRows[i].total;
+          date.data[index] = testStock[i] - equipmentRows[i].total;
         });
       });
       setStockRows(updatedRow);
@@ -273,7 +316,7 @@ const EquipmentOrderDetail = () => {
     setEquipmentRows((prev) =>
       prev.map((row, i) => (i === rowIndex ? { ...row, order: orderValue, spare: spareValue, total: totalValue } : row))
     );
-    const updatedRow = getStockRow(stock, dateHeaderRef.current.length);
+    const updatedRow = getStockRow(testStock, dateHeaderRef.current.length);
     const updatedData = updatedRow[rowIndex].data;
     const targetIndex: number[] = [];
     dateRangeRef.current.map((targetDate) => {
@@ -284,7 +327,7 @@ const EquipmentOrderDetail = () => {
       });
     });
     targetIndex.map((index) => {
-      updatedData[index] = stock[rowIndex] - totalValue;
+      updatedData[index] = testStock[rowIndex] - totalValue;
     });
     setStockRows((prev) => prev.map((row, i) => (i === rowIndex ? { ...row, data: updatedData } : row)));
   };
@@ -312,7 +355,7 @@ const EquipmentOrderDetail = () => {
     if (startYARDDate === null || newDate.toDate() < startYARDDate) {
       const updatedHeader = getStockHeader(newDate?.toDate());
       const updatedDateRange = getRange(newDate?.toDate(), endDate);
-      const updatedRow = getStockRow(stock, updatedHeader.length);
+      const updatedRow = getStockRow(testStock, updatedHeader.length);
       setDateHeader(updatedHeader);
       setDateRange(updatedDateRange);
       const targetIndex: number[] = [];
@@ -325,7 +368,7 @@ const EquipmentOrderDetail = () => {
       });
       targetIndex.map((index) => {
         updatedRow.map((date, i) => {
-          date.data[index] = stock[i] - equipmentRows[i].total;
+          date.data[index] = testStock[i] - equipmentRows[i].total;
         });
       });
       setStockRows(updatedRow);
@@ -350,7 +393,7 @@ const EquipmentOrderDetail = () => {
     if (startKICSDate === null || newDate.toDate() < startKICSDate) {
       const updatedHeader = getStockHeader(newDate?.toDate());
       const updatedDateRange = getRange(newDate?.toDate(), endDate);
-      const updatedRow = getStockRow(stock, updatedHeader.length);
+      const updatedRow = getStockRow(testStock, updatedHeader.length);
       setDateHeader(updatedHeader);
       setDateRange(updatedDateRange);
       const targetIndex: number[] = [];
@@ -363,7 +406,7 @@ const EquipmentOrderDetail = () => {
       });
       targetIndex.map((index) => {
         updatedRow.map((date, i) => {
-          date.data[index] = stock[i] - equipmentRows[i].total;
+          date.data[index] = testStock[i] - equipmentRows[i].total;
         });
       });
       setStockRows(updatedRow);
@@ -387,7 +430,7 @@ const EquipmentOrderDetail = () => {
 
     if (endYARDDate === null || newDate.toDate() > endYARDDate) {
       const updatedDateRange = getRange(startDate, newDate?.toDate());
-      const updatedRow = getStockRow(stock, dateHeader.length);
+      const updatedRow = getStockRow(testStock, dateHeader.length);
       setDateRange(updatedDateRange);
       const targetIndex: number[] = [];
       updatedDateRange.map((targetDate) => {
@@ -399,7 +442,7 @@ const EquipmentOrderDetail = () => {
       });
       targetIndex.map((index) => {
         updatedRow.map((date, i) => {
-          date.data[index] = stock[i] - equipmentRows[i].total;
+          date.data[index] = testStock[i] - equipmentRows[i].total;
         });
       });
       setStockRows(updatedRow);
@@ -417,7 +460,7 @@ const EquipmentOrderDetail = () => {
 
     if (endKICSDate === null || newDate.toDate() > endKICSDate) {
       const updatedDateRange = getRange(startDate, newDate?.toDate());
-      const updatedRow = getStockRow(stock, dateHeader.length);
+      const updatedRow = getStockRow(testStock, dateHeader.length);
       setDateRange(updatedDateRange);
       const targetIndex: number[] = [];
       updatedDateRange.map((targetDate) => {
@@ -429,7 +472,7 @@ const EquipmentOrderDetail = () => {
       });
       targetIndex.map((index) => {
         updatedRow.map((date, i) => {
-          date.data[index] = stock[i] - equipmentRows[i].total;
+          date.data[index] = testStock[i] - equipmentRows[i].total;
         });
       });
       setStockRows(updatedRow);
@@ -719,6 +762,7 @@ const EquipmentOrderDetail = () => {
                 onChange={handleCellChange}
                 handleCellDateChange={handleCellDateChange}
                 handleMemoChange={handleMemoChange}
+                ref={leftRef}
               />
             </Box>
           </Box>
@@ -755,8 +799,7 @@ const EquipmentOrderDetail = () => {
               RH={RH}
               GP={GP}
               actual={actual}
-              getHeaderBackgroundColor={getDateHeaderBackgroundColor}
-              getRowBackgroundColor={getDateRowBackgroundColor}
+              ref={rightRef}
             />
           </Box>
         </Box>

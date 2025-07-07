@@ -25,13 +25,12 @@ import {
 } from '@mui/material';
 import { addMonths, endOfMonth, subDays, subMonths } from 'date-fns';
 import dayjs, { Dayjs } from 'dayjs';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { BackButton } from '@/app/(main)/_ui/buttons';
 import { Calendar, TestDate, toISOStringWithTimezoneMonthDay } from '@/app/(main)/_ui/date';
 import Time, { TestTime } from '@/app/(main)/_ui/time';
 
-import { getDateHeaderBackgroundColor, getDateRowBackgroundColor } from '../_lib/colorselect';
 import { data, stock } from '../_lib/data';
 import { KeepEqTable, KeepStockTable } from './equipment-keep-order-detail-table';
 
@@ -109,6 +108,22 @@ const getStockRow = (stock: number[], length: number) => {
   return rows;
 };
 
+// 200件用データ作成
+export const testeqData: KeepEquipment[] = Array.from({ length: 50 }, (_, i) => {
+  const original = data[i % data.length];
+  return {
+    ...original,
+    id: i + 1,
+    name: `${original.name} (${i + 1})`,
+    memo: original.memo,
+    place: original.place,
+    all: original.issue,
+    order: original.keep,
+  };
+});
+// 200件用データ作成
+export const testStock = Array.from({ length: 50 }, (_, i) => stock[i % stock.length]);
+
 export const EquipmentKeepOrderDetail = () => {
   // KICS出庫日
   const [startKICSDate, setStartKICSDate] = useState<Date | null>(null);
@@ -128,15 +143,60 @@ export const EquipmentKeepOrderDetail = () => {
   // ヘッダー用の日付
   const [dateHeader, setDateHeader] = useState<string[]>(getStockHeader(new Date('2025/11/2')));
   // ストックテーブルの行配列
-  const [stockRows, setStockRows] = useState<StockData[]>(getStockRow(stock, dateHeader.length));
+  const [stockRows, setStockRows] = useState<StockData[]>(getStockRow(testStock, dateHeader.length));
   // 機材テーブルの行配列
-  const [equipmentRows, setEquipmentRows] = useState<KeepEquipment[]>(data);
+  const [equipmentRows, setEquipmentRows] = useState<KeepEquipment[]>(testeqData);
 
   // アコーディオン制御
   const [expanded, setExpanded] = useState(false);
   // ポッパー制御
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
+
+  // ref
+  const leftRef = useRef<HTMLDivElement>(null);
+  const rightRef = useRef<HTMLDivElement>(null);
+  const isSyncing = useRef(false);
+
+  // 同期スクロール処理
+  const syncScroll = (source: 'left' | 'right') => {
+    if (isSyncing.current) return;
+    isSyncing.current = true;
+
+    const left = leftRef.current;
+    const right = rightRef.current;
+
+    if (!left || !right) return;
+
+    if (source === 'left') {
+      const ratio = left.scrollTop / (left.scrollHeight - left.clientHeight);
+      right.scrollTop = ratio * (right.scrollHeight - right.clientHeight);
+    } else {
+      const ratio = right.scrollTop / (right.scrollHeight - right.clientHeight);
+      left.scrollTop = ratio * (left.scrollHeight - left.clientHeight);
+    }
+
+    requestAnimationFrame(() => {
+      isSyncing.current = false;
+    });
+  };
+
+  useEffect(() => {
+    const left = leftRef.current;
+    const right = rightRef.current;
+
+    if (left && right) {
+      left.addEventListener('scroll', () => syncScroll('left'));
+      right.addEventListener('scroll', () => syncScroll('right'));
+    }
+
+    return () => {
+      if (left && right) {
+        left.removeEventListener('scroll', () => syncScroll('left'));
+        right.removeEventListener('scroll', () => syncScroll('right'));
+      }
+    };
+  }, []);
 
   /**
    * 機材キープメモ入力時
@@ -157,7 +217,7 @@ export const EquipmentKeepOrderDetail = () => {
     if (date !== null) {
       setSelectDate(date.toDate());
       const updatedHeader = getStockHeader(date?.toDate());
-      const updatedRow = getStockRow(stock, updatedHeader.length);
+      const updatedRow = getStockRow(testStock, updatedHeader.length);
       setDateHeader(updatedHeader);
       const targetIndex: number[] = [];
       dateRange.map((targetDate) => {
@@ -416,7 +476,7 @@ export const EquipmentKeepOrderDetail = () => {
               mt: '62.5px',
             }}
           >
-            <KeepEqTable rows={equipmentRows} handleMemoChange={handleMemoChange} />
+            <KeepEqTable rows={equipmentRows} handleMemoChange={handleMemoChange} ref={leftRef} />
           </Box>
           <Box overflow="auto" sx={{ width: { xs: '60%', sm: '60%', md: 'auto' } }}>
             <Box display="flex" my={2}>
@@ -443,8 +503,7 @@ export const EquipmentKeepOrderDetail = () => {
               dateRange={dateRange}
               startDate={startDate}
               endDate={endYARDDate}
-              getHeaderBackgroundColor={getDateHeaderBackgroundColor}
-              getRowBackgroundColor={getDateRowBackgroundColor}
+              ref={rightRef}
             />
           </Box>
         </Box>
