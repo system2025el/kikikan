@@ -22,7 +22,7 @@ import { grey } from '@mui/material/colors';
 import { useMemo, useState } from 'react';
 
 import { MuiTablePagination } from '../../_ui/table-pagination';
-import { locationList } from '../../(masters)/locations-master/_lib/types';
+import { locationList } from '../../(masters)/locations-master/_lib/datas';
 
 /** 新規受注の場所選択ダイアログ */
 export const LocationSelectDialog = (props: { handleCloseLocationDialog: () => void }) => {
