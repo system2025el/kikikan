@@ -104,7 +104,7 @@ export const BasesMasterDialog = ({
         <MasterDialogTitle
           editable={editable}
           handleEditable={handleEditable}
-          handleCloseDialog={handleCloseDialog}
+          handleClose={handleCloseDialog}
           dialogTitle="所属マスタ登録"
         />
         {/* {isLoading ? ( //DB

@@ -91,7 +91,7 @@ export const ShukeibumonsMasterDialog = ({
         <MasterDialogTitle
           editable={editable}
           handleEditable={handleEditable}
-          handleCloseDialog={handleCloseDialog}
+          handleClose={handleCloseDialog}
           dialogTitle="集計部門マスタ登録"
         />
         {/* {isLoading ? ( //DB

@@ -61,9 +61,9 @@ export const MakeEditModeButton = ({ handleEditable }: { handleEditable: () => v
  * @param param0 フォームのボタン押下されたときの種類
  * @returns 保存ボタン
  */
-export const SubmitButton = ({ type }: { type: 'submit' | undefined }) => {
+export const SubmitButton = ({ type, disabled }: { type: 'submit' | undefined; disabled: boolean }) => {
   return (
-    <Button type={type}>
+    <Button type={type} disabled={disabled}>
       <SaveAsIcon fontSize="small" />
       保存終了
     </Button>

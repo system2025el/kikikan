@@ -86,7 +86,7 @@ export const VehiclesMasterDialog = ({
         <MasterDialogTitle
           editable={editable}
           handleEditable={handleEditable}
-          handleCloseDialog={handleCloseDialog}
+          handleClose={handleCloseDialog}
           dialogTitle={'車両マスタ'}
         />
         {/* {isLoading ? ( //DB

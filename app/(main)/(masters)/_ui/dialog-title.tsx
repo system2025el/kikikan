@@ -12,26 +12,32 @@ import { CloseMasterDialogButton, MakeEditModeButton, SubmitButton } from '../..
 export const MasterDialogTitle = ({
   editable,
   isNew,
-  handleCloseDialog,
+  handleClose,
   handleEditable,
   dialogTitle,
+  isDirty,
 }: {
   editable: boolean;
   isNew?: boolean;
   handleEditable: () => void;
-  handleCloseDialog: () => void;
+  handleClose: () => void;
   dialogTitle: string;
+  isDirty?: boolean;
 }) => {
   /* useTheme */
   const theme = useTheme();
   const colorOfThis = alpha(theme.palette.primary.main, 0.5);
+  /* 閉じるボタン押下 */
+  const handleCloseDialog = () => {
+    handleClose();
+  };
   return (
     <DialogTitle display={'flex'} justifyContent={'space-between'} alignItems={'center'} bgcolor={colorOfThis}>
       {dialogTitle}
       {editable && !isNew && <Typography>編集モード</Typography>}
       {isNew && <Typography>新規登録</Typography>}
       <Stack>
-        <SubmitButton type="submit" />
+        <SubmitButton type="submit" disabled={isDirty ? false : true} />
         <MakeEditModeButton handleEditable={handleEditable} />
         <CloseMasterDialogButton handleCloseDialog={handleCloseDialog} />
       </Stack>
