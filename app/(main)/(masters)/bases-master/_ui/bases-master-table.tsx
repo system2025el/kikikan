@@ -1,28 +1,12 @@
 'use client';
-import { CheckBox, SellTwoTone } from '@mui/icons-material';
 import AddIcon from '@mui/icons-material/Add';
-import {
-  alpha,
-  Box,
-  Button,
-  Dialog,
-  Divider,
-  Grid2,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
-  useTheme,
-} from '@mui/material';
-import { SetStateAction, useEffect, useMemo, useState } from 'react';
+import { Box, Button, Dialog, Divider, Grid2, Paper, TableContainer, Typography } from '@mui/material';
+import { useMemo, useState } from 'react';
 
 import { MuiTablePagination } from '../../../_ui/table-pagination';
 import { MasterTable } from '../../_ui/table';
-import { BasesMasterTableValues, bMHeader } from '../_lib/types';
+import { bMHeader } from '../_lib/data';
+import { BasesMasterTableValues } from '../_lib/types';
 import { BasesMasterDialog } from './bases-master-dailog';
 
 /**
@@ -38,18 +22,13 @@ export const BasesMasterTable = ({ bases }: { bases: BasesMasterTableValues[] | 
   const [page, setPage] = useState(1);
   /* ダイアログ開く顧客のID、閉じるとき、未選択で-100とする */
   const [openId, setOpenID] = useState<number>(-100);
-  /* 車両詳細ダイアログの開閉状態 */
+  /* 詳細ダイアログの開閉状態 */
   const [dialogOpen, setDialogOpen] = useState(false);
-  /* ダイアログでの編集モード */
-  const [editable, setEditable] = useState(false);
-  /* DBのローディング状態 */
-  const [loading, setLoading] = useState(true);
+  /* 拠点リスト */
+  const [theBases, setTheBases] = useState<BasesMasterTableValues[] | undefined>(bases);
   /* methods ---------------------------------------- */
   /* 詳細ダイアログを開く関数 */
   const handleOpenDialog = (id: number) => {
-    if (id === -100) {
-      setEditable(true);
-    }
     setOpenID(id);
     setDialogOpen(true);
   };
@@ -100,12 +79,7 @@ export const BasesMasterTable = ({ bases }: { bases: BasesMasterTableValues[] | 
             rowsPerPage={rowsPerPage}
           />
           <Dialog open={dialogOpen} fullScreen>
-            <BasesMasterDialog
-              handleClose={handleCloseDialog}
-              baseId={openId}
-              editable={editable}
-              setEditable={setEditable}
-            />
+            <BasesMasterDialog handleClose={handleCloseDialog} baseId={openId} />
           </Dialog>
         </TableContainer>
       </Box>

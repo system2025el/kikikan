@@ -1,13 +1,27 @@
 'use client';
 import { zodResolver } from '@hookform/resolvers/zod';
 import SearchIcon from '@mui/icons-material/Search';
-import { Box, Button, Container, Divider, Paper, Stack, TextField, Typography } from '@mui/material';
-import { JSX, useState } from 'react';
+import {
+  Box,
+  Button,
+  Container,
+  Dialog,
+  Divider,
+  Grid2,
+  Paper,
+  Stack,
+  TableContainer,
+  TextField,
+  Typography,
+} from '@mui/material';
+import { JSX, SetStateAction, useEffect, useMemo, useState } from 'react';
 import { TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { BackButton } from '../../../_ui/buttons';
-//DB import { GetFilteredLocs } from '../_lib/funcs';
+// import { GetFilteredLocs } from '../_lib/funcs';
 import { LocMasterTableValues, LocsMasterSearchSchema, LocsMasterSearchValues } from '../_lib/types';
+import page from '../page';
+import { LocationsMasterDialog } from './locations-master-dialog';
 import { LocationsMasterTable } from './locations-master-table';
 
 /**
@@ -29,7 +43,7 @@ export const LocationsMaster = ({ locs }: { locs: LocMasterTableValues[] | undef
   const onSubmit = async (data: LocsMasterSearchValues) => {
     setIsLoading(true);
     console.log('data : ', data, 'locs : ', locs);
-    //DB const newList = await GetFilteredLocs(data.query!);
+    // const newList = await GetFilteredLocs(data.query!);
     // setTheLocs(newList);
     console.log('theLocs : ', theLocs);
   };

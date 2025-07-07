@@ -7,12 +7,14 @@ import { Loading } from '@/app/(main)/_ui/loading';
 
 import { MuiTablePagination } from '../../../_ui/table-pagination';
 import { MasterTable } from '../../_ui/table';
+import { lMHeader } from '../_lib/datas';
 // import { GetFilteredLocs } from '../_lib/funcs';
-import { lMHeader, LocMasterTableValues } from '../_lib/types';
+import { LocMasterTableValues } from '../_lib/types';
 import { LocationsMasterDialog } from './locations-master-dialog';
 
 /**
- * 車両マスタのテーブル
+ * 車両マスタテーブル
+ * @param
  * @returns {JSX.Element} 車両マスタのテーブルコンポーネント
  */
 export const LocationsMasterTable = ({
@@ -33,7 +35,7 @@ export const LocationsMasterTable = ({
   const [openId, setOpenID] = useState<number>(-100);
   /* 詳細ダイアログの開閉状態 */
   const [dialogOpen, setDialogOpen] = useState(false);
-
+  /* 場所リスト */
   const [theLocs, setTheLocs] = useState<LocMasterTableValues[] | undefined>(locs);
 
   /* methods ------------------------------------------- */

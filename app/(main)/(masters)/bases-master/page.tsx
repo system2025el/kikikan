@@ -1,4 +1,4 @@
-import { basesList } from './_lib/types';
+import { basesList } from './_lib/data';
 import { BasesMaster } from './_ui/bases-master';
 
 const Page = async () => {

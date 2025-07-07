@@ -4,6 +4,16 @@ import { FormItemsType } from '@/app/(main)/_ui/form-box';
 
 import { LocMasterTableValues, LocsMasterDialogValues } from './types';
 
+/* 場所マスタデータ */
+/* 場所マスタテーブルヘッダー */
+export const lMHeader = [
+  { key: 'name', label: '場所' },
+  { key: 'address', label: '住所' },
+  { key: 'tel', label: 'Tel' },
+  { key: 'fax', label: 'Fax' },
+];
+
+/* 詳細ダイアログ用データ */
 export const formItems: FormItemsType[] = [
   {
     label: '公演場所名',
