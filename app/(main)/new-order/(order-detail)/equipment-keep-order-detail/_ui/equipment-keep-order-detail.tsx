@@ -219,14 +219,6 @@ export const EquipmentKeepOrderDetail = () => {
       const updatedHeader = getStockHeader(date?.toDate());
       const updatedRow = getStockRow(testStock, updatedHeader.length);
       setDateHeader(updatedHeader);
-      const targetIndex: number[] = [];
-      dateRange.map((targetDate) => {
-        updatedHeader.map((date, index) => {
-          if (targetDate === date) {
-            targetIndex.push(index);
-          }
-        });
-      });
       setStockRows(updatedRow);
 
       setAnchorEl(null);
