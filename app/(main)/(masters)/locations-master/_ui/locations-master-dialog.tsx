@@ -12,7 +12,7 @@ import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyDialog } from '../../_ui/isdirty-dialog';
 import { emptyLoc, formItems } from '../_lib/datas';
 import { addNewLoc, getOneLoc, updateLoc } from '../_lib/funcs';
-import { LocMasterValues, LocsMasterDialogSchema, LocsMasterDialogValues } from '../_lib/types';
+import { LocsMasterDialogSchema, LocsMasterDialogValues,LocsMasterValues } from '../_lib/types';
 
 /**
  * 公演場所マスタの詳細ダイアログ
@@ -69,7 +69,7 @@ export const LocationsMasterDialog = ({
 
   /* methods ---------------------------- */
   /* フォームを送信 */
-  const onSubmit = async (data: LocMasterValues) => {
+  const onSubmit = async (data: LocsMasterValues) => {
     console.log('isDarty : ', isDirty);
     console.log(data);
     if (locationId === -100) {

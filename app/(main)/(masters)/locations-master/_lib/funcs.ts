@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 
 import { supabase } from '@/app/_lib/supabase/supabase';
 
-import { LocMasterTableValues, LocsMasterDialogValues } from './types';
+import { LocsMasterDialogValues,LocsMasterTableValues } from './types';
 
 export const GetAllLoc = async () => {
   try {
@@ -19,7 +19,7 @@ export const GetAllLoc = async () => {
     if (!error) {
       console.log('I got a datalist from db', data);
 
-      const theData: LocMasterTableValues[] = data.map((d) => ({
+      const theData: LocsMasterTableValues[] = data.map((d) => ({
         locId: d.koenbasho_id,
         locNam: d.koenbasho_nam,
         adrShozai: d.adr_shozai,
@@ -40,6 +40,7 @@ export const GetAllLoc = async () => {
   } catch (e) {
     console.log(e);
   }
+  revalidatePath('/locations-master');
 };
 
 export const GetFilteredLocs = async (query: string) => {
@@ -55,7 +56,7 @@ export const GetFilteredLocs = async (query: string) => {
     if (!error) {
       console.log('I got a datalist from db', data);
 
-      const theData: LocMasterTableValues[] = data.map((d) => ({
+      const theData: LocsMasterTableValues[] = data.map((d) => ({
         locId: d.koenbasho_id,
         locNam: d.koenbasho_nam,
         adrShozai: d.adr_shozai,

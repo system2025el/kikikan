@@ -7,14 +7,14 @@ import { TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { BackButton } from '../../../_ui/buttons';
 import { GetFilteredLocs } from '../_lib/funcs';
-import { LocMasterTableValues, LocsMasterSearchSchema, LocsMasterSearchValues } from '../_lib/types';
+import { LocsMasterSearchSchema, LocsMasterSearchValues,LocsMasterTableValues } from '../_lib/types';
 import { LocationsMasterTable } from './locations-master-table';
 
 /**
  * 公演場所マスタ画面
  * @returns {JSX.Element} 公演場所マスタ画面コンポーネント
  */
-export const LocationsMaster = ({ locs }: { locs: LocMasterTableValues[] | undefined }) => {
+export const LocationsMaster = ({ locs }: { locs: LocsMasterTableValues[] | undefined }) => {
   /* useState ------------------ */
   const [theLocs, setTheLocs] = useState(locs);
   /* DBのローディング */
