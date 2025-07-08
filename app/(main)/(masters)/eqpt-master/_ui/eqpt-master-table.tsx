@@ -7,7 +7,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { MuiTablePagination } from '../../../_ui/table-pagination';
-import { MasterTable } from '../../_ui/table';
+import { MasterTableOfEqpt } from '../../_ui/table';
 import { eqptMHeader } from '../_lib/datas';
 import { eqptMasterTableValues } from '../_lib/types';
 import { EqMasterDialog } from './eqpt-master-dialog';
@@ -99,7 +99,7 @@ export const EqptMasterTable = ({
           <Loading />
         ) : (
           <>
-            <MasterTable
+            <MasterTableOfEqpt
               headers={eqptMHeader}
               datas={list!.map((l) => ({
                 id: l.kizaiId,
