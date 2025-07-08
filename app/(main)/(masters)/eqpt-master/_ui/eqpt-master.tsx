@@ -3,17 +3,19 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import SearchIcon from '@mui/icons-material/Search';
 import { Box, Button, Container, Divider, FormControl, Grid2, Paper, Select, Stack, Typography } from '@mui/material';
-import { useState } from 'react';
+import { SetStateAction, useState } from 'react';
 import { TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { BackButton } from '../../../_ui/buttons';
-import { EqptMasterDialogSchema, EqptMasterDialogValues, eqptMasterList } from '../_lib/types';
+import { eqptMasterList } from '../_lib/datas';
+import { EqptMasterDialogSchema, EqptMasterDialogValues, eqptMasterTableValues } from '../_lib/types';
 import { EqptMasterTable } from './eqpt-master-table';
 
-export const EqptMaster = () => {
+export const EqptMaster = ({ eqpts }: { eqpts: eqptMasterTableValues[] | undefined }) => {
   // useState
-  const [displayList, setDisplayList] = useState<EqptMasterDialogValues[]>(eqptMasterList);
-  const [page, setPage] = useState(1);
+  const [displayList, setDisplayList] = useState<eqptMasterTableValues[] | undefined>(eqpts);
+  /* DBのローディング */
+  const [isLoading, setIsLoading] = useState(true);
   // 検索useForm--------------------------
   const { control, handleSubmit } = useForm({
     mode: 'onBlur',
@@ -92,7 +94,7 @@ export const EqptMaster = () => {
           <Typography></Typography>
         </Box>
       </Paper>
-      <EqptMasterTable arrayList={displayList} page={page} setPage={setPage} />
+      <EqptMasterTable eqpts={displayList} isLoading={isLoading} setIsLoading={setIsLoading} />
     </Container>
   );
 };

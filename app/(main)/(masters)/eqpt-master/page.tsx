@@ -1,9 +1,11 @@
+import { eqptMasterList } from './_lib/datas';
 import { EqptMaster } from './_ui/eqpt-master';
 
-const Page = () => {
+const Page = async () => {
+  const eqpts = eqptMasterList;
   return (
     <>
-      <EqptMaster />
+      <EqptMaster eqpts={eqpts} />
     </>
   );
 };

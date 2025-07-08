@@ -67,7 +67,7 @@ export const BasesMasterDialog = ({
     //   await updateBase(data, baseId);
     // }
     handleCloseDialog();
-    // refetchBases();
+    refetchBases();
   };
 
   /* 詳細ダイアログを閉じる */

@@ -90,7 +90,7 @@ export const BumonsMasterDialog = ({
     //   await updatebumon(data, bumonId);
     // }
     handleCloseDialog();
-    // refetchBumons();
+    refetchBumons();
   };
 
   /* 詳細ダイアログを閉じる */
