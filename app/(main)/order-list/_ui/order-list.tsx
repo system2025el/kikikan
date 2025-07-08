@@ -30,7 +30,7 @@ import { DatePickerElement } from 'react-hook-form-mui/date-pickers';
 
 import { BackButton } from '../../_ui/buttons';
 import { TwoDatePickers } from '../../_ui/date';
-import { customers } from '../../(masters)/customers-master/_lib/types';
+import { customers } from '../../(masters)/customers-master/_lib/datas';
 import { OrderSchema, OrderSearchValues } from '../_lib/types';
 import { OrderTable } from './order-table';
 
