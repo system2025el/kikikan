@@ -39,7 +39,7 @@ export const EqptMaster = ({ eqpts }: { eqpts: eqptMasterTableValues[] | undefin
       </Box>
       <Paper variant="outlined">
         <Box width={'100%'} display={'flex'} p={2}>
-          <Typography>機材マスタ検索</Typography>
+          <Typography>機材マスタ一覧</Typography>
         </Box>
         <Divider />
         <Box width={'100%'} p={2}>
