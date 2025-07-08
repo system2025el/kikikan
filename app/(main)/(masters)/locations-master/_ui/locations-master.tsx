@@ -6,7 +6,7 @@ import { JSX, useState } from 'react';
 import { TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { BackButton } from '../../../_ui/buttons';
-// import { GetFilteredLocs } from '../_lib/funcs';
+import { GetFilteredLocs } from '../_lib/funcs';
 import { LocMasterTableValues, LocsMasterSearchSchema, LocsMasterSearchValues } from '../_lib/types';
 import { LocationsMasterTable } from './locations-master-table';
 
@@ -29,8 +29,8 @@ export const LocationsMaster = ({ locs }: { locs: LocMasterTableValues[] | undef
   const onSubmit = async (data: LocsMasterSearchValues) => {
     setIsLoading(true);
     console.log('data : ', data, 'locs : ', locs);
-    // const newList = await GetFilteredLocs(data.query!);
-    // setTheLocs(newList);
+    const newList = await GetFilteredLocs(data.query!);
+    setTheLocs(newList);
     console.log('theLocs : ', theLocs);
   };
 
