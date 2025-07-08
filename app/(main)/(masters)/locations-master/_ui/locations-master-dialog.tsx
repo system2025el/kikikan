@@ -11,7 +11,7 @@ import { Loading } from '@/app/(main)/_ui/loading';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyDialog } from '../../_ui/isdirty-dialog';
 import { emptyLoc, formItems } from '../_lib/datas';
-// import { addNewLoc, getOneLoc, updateLoc } from '../_lib/funcs';
+import { addNewLoc, getOneLoc, updateLoc } from '../_lib/funcs';
 import { LocMasterValues, LocsMasterDialogSchema, LocsMasterDialogValues } from '../_lib/types';
 
 /**
@@ -72,11 +72,11 @@ export const LocationsMasterDialog = ({
   const onSubmit = async (data: LocMasterValues) => {
     console.log('isDarty : ', isDirty);
     console.log(data);
-    // if (locationId === -100) {
-    //   await addNewLoc(data);
-    // } else {
-    //   await updateLoc(data, locationId);
-    // }
+    if (locationId === -100) {
+      await addNewLoc(data);
+    } else {
+      await updateLoc(data, locationId);
+    }
     handleCloseDialog();
     refetchLocs();
   };
@@ -116,11 +116,11 @@ export const LocationsMasterDialog = ({
         setIsLoading(false);
         setIsNew(true);
       } else {
-        // const loc1 = await getOneLoc(locationId);
-        // if (loc1) {
-        //   setLocation(loc1);
-        //   reset(loc1); // 取得したデータでフォーム初期化
-        // }
+        const loc1 = await getOneLoc(locationId);
+        if (loc1) {
+          setLocation(loc1);
+          reset(loc1); // 取得したデータでフォーム初期化
+        }
         setIsLoading(false);
       }
     };

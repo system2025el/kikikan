@@ -8,7 +8,7 @@ import { Loading } from '@/app/(main)/_ui/loading';
 import { MuiTablePagination } from '../../../_ui/table-pagination';
 import { MasterTable } from '../../_ui/table';
 import { lMHeader } from '../_lib/datas';
-// import { GetFilteredLocs } from '../_lib/funcs';
+import { GetFilteredLocs } from '../_lib/funcs';
 import { LocMasterTableValues } from '../_lib/types';
 import { LocationsMasterDialog } from './locations-master-dialog';
 
@@ -51,8 +51,8 @@ export const LocationsMasterTable = ({
   /* 情報が変わったときに更新される */
   const refetchLocs = async () => {
     setIsLoading(true);
-    // const updated = await GetFilteredLocs('');
-    // setTheLocs(updated);
+    const updated = await GetFilteredLocs('');
+    setTheLocs(updated);
     setIsLoading(false);
   };
 
