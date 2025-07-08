@@ -1,6 +1,6 @@
 import { FormItemsType } from '@/app/(main)/_ui/form-box';
 
-import { LocMasterTableValues, LocsMasterDialogValues } from './types';
+import { LocsMasterTableValues, LocsMasterDialogValues } from './types';
 
 /* 場所マスタデータ */
 /* 場所マスタテーブルヘッダー */
@@ -98,7 +98,7 @@ export const emptyLoc: LocsMasterDialogValues = {
 };
 
 /**モック削除delete */
-export const locationList: LocMasterTableValues[] = [
+export const locationList: LocsMasterTableValues[] = [
   {
     locNam: '日比谷音楽堂',
     tel: '000-000-0000',
