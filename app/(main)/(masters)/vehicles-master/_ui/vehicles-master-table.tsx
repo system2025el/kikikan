@@ -22,9 +22,12 @@ import {
 import { grey } from '@mui/material/colors';
 import { JSX, SetStateAction, useEffect, useMemo, useState } from 'react';
 
+import { Loading } from '@/app/(main)/_ui/loading';
+
 import { MuiTablePagination } from '../../../_ui/table-pagination';
 import { MasterTable } from '../../_ui/table';
-import { VehMasterDialogValues, VehMasterTableValues, vMHeader } from '../_lib/datas';
+import { vMHeader } from '../_lib/datas';
+import { VehsMasterTableValues } from '../_lib/types';
 import { VehiclesMasterDialog } from './vehicles-master-dialog';
 
 /**
@@ -32,7 +35,15 @@ import { VehiclesMasterDialog } from './vehicles-master-dialog';
  * @param
  * @returns {JSX.Element} 車両マスタテーブルコンポーネント
  */
-export const VehiclesMasterTable = ({ vehs }: { vehs: VehMasterTableValues[] | undefined }) => {
+export const VehiclesMasterTable = ({
+  vehs,
+  isLoading,
+  setIsLoading,
+}: {
+  vehs: VehsMasterTableValues[] | undefined;
+  isLoading: boolean;
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+}) => {
   /* テーブルの1ページのの行数 */
   const rowsPerPage = 50;
   /* useState ------------------------------- */
@@ -42,14 +53,11 @@ export const VehiclesMasterTable = ({ vehs }: { vehs: VehMasterTableValues[] | u
   const [openId, setOpenID] = useState<number>(-100);
   /* 詳細ダイアログの開閉状態 */
   const [dialogOpen, setDialogOpen] = useState(false);
-  /* ダイアログでの編集モード */
-  const [editable, setEditable] = useState(false);
+  /* 車両リスト */
+  const [theVehs, setTheVehs] = useState<VehsMasterTableValues[] | undefined>(vehs);
   /* methods ------------------------------- */
-  /* ダイアログを開く関数 */
+  /* 詳細ダイアログを開く関数 */
   const handleOpenDialog = (id: number) => {
-    if (id === -100) {
-      setEditable(true);
-    }
     setOpenID(id);
     setDialogOpen(true);
   };
@@ -57,11 +65,26 @@ export const VehiclesMasterTable = ({ vehs }: { vehs: VehMasterTableValues[] | u
   const handleCloseDialog = () => {
     setDialogOpen(false);
   };
+  /* 情報が変わったときに更新される */
+  const refetchVehs = async () => {
+    setIsLoading(true);
+    // const updated = await GetFilteredVehs('');
+    // setTheVehs(updated);
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    setTheVehs(vehs); // 親からのVehsが更新された場合に同期
+  }, [vehs]);
+
+  useEffect(() => {
+    setIsLoading(false); //theVehsが変わったらローディング終わり
+  }, [theVehs, setIsLoading]);
 
   // 表示するデータ
   const list = useMemo(
-    () => (rowsPerPage > 0 ? vehs!.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage) : vehs),
-    [page, rowsPerPage, vehs]
+    () => (rowsPerPage > 0 ? theVehs!.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage) : theVehs),
+    [page, rowsPerPage, theVehs]
   );
 
   return (
@@ -92,46 +115,22 @@ export const VehiclesMasterTable = ({ vehs }: { vehs: VehMasterTableValues[] | u
       </Grid2>
 
       <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
-        <MasterTable
-          headers={vMHeader}
-          datas={list!.map((l) => ({ id: l.sharyoId, name: l.sharyoNam, mem: l.mem!, delFlg: l.delFlg }))}
-          handleOpenDialog={handleOpenDialog}
-          page={page}
-          rowsPerPage={rowsPerPage}
-        />
-        {/* <Table stickyHeader padding="none">
-          <TableHead>
-            <TableRow>
-              <TableCell></TableCell>
-              <TableCell>車種</TableCell>
-              <TableCell>メモ</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {list.map((vehicle) => (
-              <TableRow key={vehicle.id}>
-                <TableCell padding="checkbox">
-                  <CheckBox color="primary" />
-                </TableCell>
-                <TableCell>{vehicle.vehicleType}</TableCell>
-                <TableCell>{vehicle.memo}</TableCell>
-              </TableRow>
-            ))}
-            {emptyRows > 0 && (
-              <TableRow style={{ height: 30 * emptyRows }}>
-                <TableCell colSpan={3} />
-              </TableRow>
-            )}
-          </TableBody>
-        </Table> */}
-        <Dialog open={dialogOpen} fullScreen>
-          <VehiclesMasterDialog
-            handleClose={handleCloseDialog}
-            vehicleId={openId}
-            editable={editable}
-            setEditable={setEditable}
-          />
-        </Dialog>
+        {isLoading ? (
+          <Loading />
+        ) : (
+          <>
+            <MasterTable
+              headers={vMHeader}
+              datas={list!.map((l) => ({ id: l.sharyoId, name: l.sharyoNam, mem: l.mem!, delFlg: l.delFlg }))}
+              handleOpenDialog={handleOpenDialog}
+              page={page}
+              rowsPerPage={rowsPerPage}
+            />
+            <Dialog open={dialogOpen} fullScreen>
+              <VehiclesMasterDialog handleClose={handleCloseDialog} vehicleId={openId} refetchVehs={refetchVehs} />
+            </Dialog>
+          </>
+        )}
       </TableContainer>
     </Box>
   );

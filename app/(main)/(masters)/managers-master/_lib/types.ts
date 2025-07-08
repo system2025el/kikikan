@@ -1,21 +1,14 @@
 import { z } from 'zod';
 
-export const managerMaterDialogDetailsSchema = z.object({
+export const managersMaterDialogSchema = z.object({
   tantouId: z.number().optional(),
   tantouNam: z.string().optional(),
 });
-export type ManagerMasterDialogDetailsValues = z.infer<typeof managerMaterDialogDetailsSchema>;
+export type ManagersMasterDialogValues = z.infer<typeof managersMaterDialogSchema>;
 
-export const mMHeader = [
-  {
-    key: 'name',
-    label: '担当者名',
-  },
-];
-
-export const managerMasterTableSchema = z.object({
+export const managersMasterTableSchema = z.object({
   tantouId: z.number(),
   tantouNam: z.string().optional(),
   delFlg: z.boolean().optional(),
 });
-export type ManagerMasterTableValues = z.infer<typeof managerMasterTableSchema>;
+export type ManagersMasterTableValues = z.infer<typeof managersMasterTableSchema>;

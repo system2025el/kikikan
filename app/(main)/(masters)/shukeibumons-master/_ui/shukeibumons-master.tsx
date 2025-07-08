@@ -1,11 +1,11 @@
 'use client';
 import SearchIcon from '@mui/icons-material/Search';
 import { Box, Button, Container, Divider, Paper, Stack, TextField, Typography } from '@mui/material';
-import { JSX } from 'react';
+import { JSX, useState } from 'react';
 
 import { BackButton } from '@/app/(main)/_ui/buttons';
 
-import { shukeibumonsList, ShukeibumonsMasterDialogValues } from '../_lib/type';
+import { ShukeibumonsMasterDialogValues } from '../_lib/type';
 import { ShukeibumonsMasterTable } from './shukeibumons-master-table';
 
 /**
@@ -14,6 +14,10 @@ import { ShukeibumonsMasterTable } from './shukeibumons-master-table';
  * @returns {JSX.Element} 集計部門マスタコンポーネント
  */
 export const ShukeibumonsMaster = ({ shukeibumons }: { shukeibumons: ShukeibumonsMasterDialogValues[] }) => {
+  /* useState ------------------ */
+  const [theShukeibumons, setTheShukeibumons] = useState(shukeibumons);
+  /* DBのローディング */
+  const [isLoading, setIsLoading] = useState(true);
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
       <Box justifySelf={'end'} mb={0.5}>
@@ -46,7 +50,7 @@ export const ShukeibumonsMaster = ({ shukeibumons }: { shukeibumons: Shukeibumon
           </form>
         </Box>
       </Paper>
-      <ShukeibumonsMasterTable shukeibumons={shukeibumons} />
+      <ShukeibumonsMasterTable shukeibumons={theShukeibumons} isLoading={isLoading} setIsLoading={setIsLoading} />
     </Container>
   );
 };

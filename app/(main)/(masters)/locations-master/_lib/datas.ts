@@ -1,5 +1,3 @@
-/* 移動する予定move */
-
 import { FormItemsType } from '@/app/(main)/_ui/form-box';
 
 import { LocMasterTableValues, LocsMasterDialogValues } from './types';

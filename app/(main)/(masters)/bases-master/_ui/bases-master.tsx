@@ -1,6 +1,6 @@
 'use client';
 import { Box, Button, Container, Divider, Paper, Stack, TextField, Typography } from '@mui/material';
-import { JSX } from 'react';
+import { useState } from 'react';
 
 import { BackButton } from '../../../_ui/buttons';
 import { BasesMasterTableValues } from '../_lib/types';
@@ -12,6 +12,10 @@ import { BasesMasterTable } from './bases-master-table';
  * @returns {JSX.Element} 拠点マスタコンポーネント
  */
 export const BasesMaster = ({ bases }: { bases: BasesMasterTableValues[] | undefined }) => {
+  /* useState ------------------ */
+  const [theBases, setTheBases] = useState(bases);
+  /* DBのローディング */
+  const [isLoading, setIsLoading] = useState(true);
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
       <Box justifySelf={'end'} mb={0.5}>
@@ -22,7 +26,7 @@ export const BasesMaster = ({ bases }: { bases: BasesMasterTableValues[] | undef
           <Typography>拠点マスタ</Typography>
         </Box>
       </Paper>
-      <BasesMasterTable bases={bases} />
+      <BasesMasterTable bases={theBases} isLoading={isLoading} setIsLoading={setIsLoading} />
     </Container>
   );
 };

@@ -18,19 +18,29 @@ import {
   Typography,
 } from '@mui/material';
 import {} from '@mui/material/colors';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+
+import { Loading } from '@/app/(main)/_ui/loading';
 
 import { MuiTablePagination } from '../../../_ui/table-pagination';
 import { MasterTable } from '../../_ui/table';
-import { managers } from '../_lib/data';
-import { ManagerMasterTableValues, mMHeader } from '../_lib/types';
-import { ManagerDialogContents } from './managers-master-dialog';
+import { mMHeader } from '../_lib/data';
+import { ManagersMasterTableValues } from '../_lib/types';
+import { ManagerMasterDialog } from './managers-master-dialog';
 
 /**
  * 担当者マスタのテーブル
  * @returns {JSX.Element} 担当者マスタのテーブルコンポーネント
  */
-export const ManagerssMasterTable = () => {
+export const ManagerssMasterTable = ({
+  managers,
+  isLoading,
+  setIsLoading,
+}: {
+  managers: ManagersMasterTableValues[] | undefined;
+  isLoading: boolean;
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+}) => {
   /* 1ページごとの表示数 */
   const rowsPerPage = 50;
   /* useState
@@ -41,71 +51,51 @@ export const ManagerssMasterTable = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   /* 今開いてるテーブルのページ数 */
   const [page, setPage] = useState(1);
-  /* ソート方法 */
-  const [order, setOrder] = useState<'desc' | 'asc'>('desc');
-  /* ソート対象 */
-  const [orderBy, setOrderBy] = useState<string>('');
-  /* 表示する列 今のところソート、フィルターなし */
-  const [managersList, setManagersList] = useState<ManagerMasterTableValues[]>(managers);
-  /* ダイアログでの編集モード */
-  const [editable, setEditable] = useState(false);
-  /* DBのローディング状態 */
-  const [loading, setLoading] = useState(true);
-
+  /* 担当者リスト */
+  const [theManagers, setTheManagers] = useState(managers);
   /* Methods
   ------------------------------------------------------------ */
-  /**
-   * 担当者詳細ダイアログを開く関数
-   * @param id 担当者ID
-   */
-  const handleOpen = (id: number) => {
-    if (id === -100) {
-      setEditable(true);
-    }
+  /* 詳細ダイアログを開く関数 */
+  const handleOpenDialog = (id: number) => {
     setOpenID(id);
     setDialogOpen(true);
-    console.log(managers[id - 1]);
   };
-  /**
-   * 担当者詳細ダイアログを閉じる関数
-   */
-  const handleClose = () => {
-    setOpenID(-100);
+  /* ダイアログを閉じる関数 */
+  const handleCloseDialog = () => {
     setDialogOpen(false);
   };
+  /* 情報が変わったときに更新される */
+  const refetchManagers = async () => {
+    setIsLoading(true);
+    // const updated = await GetFilteredmanagers('');
+    // setThemanagers(updated);
+    setIsLoading(false);
+  };
 
-  /* ソート対象、方法の変更 */
-  const handleRequestSort = (property: string) => {
-    const isAsc = orderBy === property && order === 'asc';
-    setOrder(isAsc ? 'desc' : 'asc');
-    setOrderBy(property);
-  };
-  const createSortHandler = (property: string) => {
-    handleRequestSort(property);
-  };
-  /**
-   *  表示する担当者リスト
-   */
+  useEffect(() => {
+    setTheManagers(managers); // 親からのManagersが更新された場合に同期
+  }, [managers]);
+
+  useEffect(() => {
+    setIsLoading(false); //theManagersが変わったらローディング終わり
+  }, [theManagers, setIsLoading]);
+
+  /* 表示する担当者リスト */
   const list = useMemo(
     () =>
-      rowsPerPage > 0 ? managersList.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage) : managersList,
-    [page, rowsPerPage, managersList]
+      rowsPerPage > 0 ? theManagers!.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage) : theManagers,
+    [page, rowsPerPage, theManagers]
   );
-  console.log('list is here : ', list);
 
   return (
     <Box>
-      {/* {loading ? (
-        <p>読み込み中...</p>
-      ) : ( */}
-      {/* <> */}
       <Typography pt={2} pl={2}>
         一覧
       </Typography>
       <Divider />
       <Grid2 container mt={0.5} mx={0.5} justifyContent={'space-between'} alignItems={'center'}>
         <Grid2 spacing={1}>
-          <MuiTablePagination arrayList={list} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
+          <MuiTablePagination arrayList={list!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
         </Grid2>
         <Grid2 container spacing={3}>
           <Grid2>
@@ -116,7 +106,7 @@ export const ManagerssMasterTable = () => {
             </Typography>
           </Grid2>
           <Grid2>
-            <Button onClick={() => handleOpen(-100)}>
+            <Button onClick={() => handleOpenDialog(-100)}>
               <AddIcon fontSize="small" />
               新規
             </Button>
@@ -124,24 +114,27 @@ export const ManagerssMasterTable = () => {
         </Grid2>
       </Grid2>
       <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
-        <MasterTable
-          headers={mMHeader}
-          datas={managers.map((l) => ({ ...l, id: l.tantouId, name: l.tantouNam }))}
-          page={page}
-          rowsPerPage={rowsPerPage}
-          handleOpenDialog={handleOpen}
-        />
-        <Dialog open={dialogOpen} fullScreen>
-          <ManagerDialogContents
-            managerId={openId}
-            handleClose={handleClose}
-            editable={editable}
-            setEditable={setEditable}
-          />
-        </Dialog>
+        {isLoading ? (
+          <Loading />
+        ) : (
+          <>
+            <MasterTable
+              headers={mMHeader}
+              datas={list!.map((l) => ({ ...l, id: l.tantouId, name: l.tantouNam }))}
+              page={page}
+              rowsPerPage={rowsPerPage}
+              handleOpenDialog={handleOpenDialog}
+            />
+            <Dialog open={dialogOpen} fullScreen>
+              <ManagerMasterDialog
+                managerId={openId}
+                handleClose={handleCloseDialog}
+                refetchManagers={refetchManagers}
+              />
+            </Dialog>
+          </>
+        )}
       </TableContainer>
-      {/* </>
-      )} */}
     </Box>
   );
 };

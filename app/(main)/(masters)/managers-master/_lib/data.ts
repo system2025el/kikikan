@@ -1,7 +1,25 @@
-import { ManagerMasterTableValues } from './types';
-/* モック削除delete
- */
-export const managers: ManagerMasterTableValues[] = [
+import { FormItemsType } from '@/app/(main)/_ui/form-box';
+
+import { ManagersMasterDialogValues, ManagersMasterTableValues } from './types';
+/* 担当者マスタテーブルヘッダー */
+export const mMHeader = [
+  {
+    key: 'name',
+    label: '担当者名',
+  },
+];
+export const emptyManager: ManagersMasterDialogValues = {};
+
+export const formItems: FormItemsType[] = [
+  {
+    label: '担当者名',
+    constraints: '100文字まで',
+    exsample: 'あいうえお',
+  },
+];
+
+/* モック削除delete */
+export const managers: ManagersMasterTableValues[] = [
   {
     tantouId: 1,
     tantouNam: '田中',

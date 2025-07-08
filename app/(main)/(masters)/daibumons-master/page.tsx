@@ -1,8 +1,8 @@
-import { daibumonsList } from './_lib/types';
+import { daibumonsList } from './_lib/datas';
 import { DaibumonsMaster } from './_ui/daibumons-master';
 
 const Page = async () => {
-  // const daibumon = await getAllDaibumon();
+  // const daibumon = await getAllDaibumons();
   const daibumons = daibumonsList;
   return (
     <>

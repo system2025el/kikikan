@@ -2,15 +2,20 @@
 
 import SearchIcon from '@mui/icons-material/Search';
 import { Box, Button, Container, Divider, Grid2, Paper, Stack, TextField, Typography } from '@mui/material';
-import { JSX } from 'react';
+import { JSX, useState } from 'react';
 
 import { BackButton } from '../../../_ui/buttons';
+import { ManagersMasterDialogValues, ManagersMasterTableValues } from '../_lib/types';
 import { ManagerssMasterTable } from './managers-master-table';
 /**
  * 担当者マスタ画面
  * @returns {JSX.Element} 担当者マスタ画面コンポーネント
  */
-export const ManagersMaster = () => {
+export const ManagersMaster = ({ managers }: { managers: ManagersMasterTableValues[] | undefined }) => {
+  /* useState ------------------ */
+  const [theManagers, setTheManagers] = useState(managers);
+  /* DBのローディング */
+  const [isLoading, setIsLoading] = useState(true);
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
       <Box justifySelf={'end'} mb={0.5}>
@@ -26,44 +31,6 @@ export const ManagersMaster = () => {
             <Typography variant="body2">検索</Typography>
           </Stack>
           <form>
-            {/* <Grid2 container direction={'row'} spacing={3}>
-              <Grid2>
-                <Button>あ</Button>
-              </Grid2>
-              <Grid2>
-                <Button>か</Button>
-              </Grid2>
-              <Grid2>
-                <Button>さ</Button>
-              </Grid2>
-              <Grid2>
-                <Button>た</Button>
-              </Grid2>
-              <Grid2>
-                <Button>な</Button>
-              </Grid2>
-              <Grid2>
-                <Button>は</Button>
-              </Grid2>
-              <Grid2>
-                <Button>ま</Button>
-              </Grid2>
-              <Grid2>
-                <Button>や</Button>
-              </Grid2>
-              <Grid2>
-                <Button>ら</Button>
-              </Grid2>
-              <Grid2>
-                <Button>わ</Button>
-              </Grid2>
-              <Grid2>
-                <Button>英数</Button>
-              </Grid2>
-              <Grid2>
-                <Button>全て</Button>
-              </Grid2>
-            </Grid2> */}
             {/* <Divider sx={{ mt: 1 }} /> */}
             <Stack justifyContent={'space-between'} alignItems={'start'} mt={1}>
               <Stack alignItems={'baseline'}>
@@ -80,7 +47,7 @@ export const ManagersMaster = () => {
           </form>
         </Box>
       </Paper>
-      <ManagerssMasterTable />
+      <ManagerssMasterTable managers={theManagers} isLoading={isLoading} setIsLoading={setIsLoading} />
     </Container>
   );
 };

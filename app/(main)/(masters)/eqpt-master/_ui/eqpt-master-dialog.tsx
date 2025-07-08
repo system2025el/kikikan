@@ -84,6 +84,8 @@ export const EqMasterDialog = ({
           handleEditable={handleEditable}
           handleClose={handleCloseDialog}
           dialogTitle={'機材マスタ登録'}
+          isNew={false}
+          isDirty={false}
         />
         {/* {isLoading ? ( //DB
           <Loading />
