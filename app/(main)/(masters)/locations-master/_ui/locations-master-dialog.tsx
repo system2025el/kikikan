@@ -12,7 +12,7 @@ import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyDialog } from '../../_ui/isdirty-dialog';
 import { emptyLoc, formItems } from '../_lib/datas';
 import { addNewLoc, getOneLoc, updateLoc } from '../_lib/funcs';
-import { LocsMasterDialogSchema, LocsMasterDialogValues,LocsMasterValues } from '../_lib/types';
+import { LocsMasterDialogSchema, LocsMasterDialogValues, LocsMasterValues } from '../_lib/types';
 
 /**
  * 公演場所マスタの詳細ダイアログ

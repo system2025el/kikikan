@@ -7,7 +7,7 @@ import { TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { BackButton } from '../../../_ui/buttons';
 import { GetFilteredLocs } from '../_lib/funcs';
-import { LocsMasterSearchSchema, LocsMasterSearchValues,LocsMasterTableValues } from '../_lib/types';
+import { LocsMasterSearchSchema, LocsMasterSearchValues, LocsMasterTableValues } from '../_lib/types';
 import { LocationsMasterTable } from './locations-master-table';
 
 /**

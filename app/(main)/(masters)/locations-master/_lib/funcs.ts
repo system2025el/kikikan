@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 
 import { supabase } from '@/app/_lib/supabase/supabase';
 
-import { LocsMasterDialogValues,LocsMasterTableValues } from './types';
+import { LocsMasterDialogValues, LocsMasterTableValues } from './types';
 
 export const GetAllLoc = async () => {
   try {
