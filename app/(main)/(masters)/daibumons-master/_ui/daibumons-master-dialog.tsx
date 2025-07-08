@@ -5,9 +5,13 @@ import { useForm } from 'react-hook-form';
 import { CheckboxElement, TextareaAutosizeElement, TextFieldElement } from 'react-hook-form-mui';
 
 import { FormBox, FormItemsType } from '@/app/(main)/_ui/form-box';
+import { Loading } from '@/app/(main)/_ui/loading';
 
 import { MasterDialogTitle } from '../../_ui/dialog-title';
-import { daibumonsList, DaibumonsMasterDialogSchema, DaibumonsMasterDialogValues } from '../_lib/types';
+import { IsDirtyDialog } from '../../_ui/isdirty-dialog';
+import { BumonsMasterDialogValues } from '../../bumons-master/_lib/types';
+import { emptyDaibumon, formItems } from '../_lib/datas';
+import { DaibumonsMasterDialogSchema, DaibumonsMasterDialogValues } from '../_lib/types';
 
 /**
  * 大部門マスタ詳細ダイアログ
@@ -17,21 +21,30 @@ import { daibumonsList, DaibumonsMasterDialogSchema, DaibumonsMasterDialogValues
 export const DaibumonsMasterDialog = ({
   daibumonId,
   handleClose,
-  editable,
-  setEditable,
+  refetchDaibumons,
 }: {
   daibumonId: number;
   handleClose: () => void;
-  editable: boolean;
-  setEditable: React.Dispatch<React.SetStateAction<boolean>>;
+  refetchDaibumons: () => void;
 }) => {
   /* useState -------------------------------------- */
   /* 大部門 */
-  const [daibumon, setdaibumon] = useState<DaibumonsMasterDialogValues | undefined>();
+  const [daibumon, setDaibumon] = useState<DaibumonsMasterDialogValues | undefined>();
   /* DBのローディング状態 */
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true); /* ダイアログでの編集モードかどうか */
+  const [editable, setEditable] = useState(false);
+  /* 新規作成かどうか */
+  const [isNew, setIsNew] = useState(false);
+  /* 未保存ダイアログ出すかどうか */
+  const [dirtyOpen, setDirtyOpen] = useState(false);
+
   /* useForm ----------------------------------------- */
-  const { control, handleSubmit, reset } = useForm({
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { isDirty },
+  } = useForm({
     mode: 'onBlur',
     reValidateMode: 'onBlur',
     resolver: zodResolver(DaibumonsMasterDialogSchema),
@@ -39,117 +52,124 @@ export const DaibumonsMasterDialog = ({
       //DB   kyotenNam: '',
       //   delFlg: false,
       //   mem: '',
-      daibumonNam: daibumon?.daibumonNam,
-      daibumonId: daibumon?.daibumonId,
-      delFlg: daibumon?.delFlg,
-      mem: daibumon?.mem,
+      daibumonNam: '',
+      daibumonId: 0,
+      delFlg: false,
+      mem: '',
     },
   });
 
   /* methods ---------------------------------------- */
-  /* ダイアログ内を編集モードにする */
-  const handleEditable = () => {
-    setEditable(true);
-  };
-  /* ダイアログを閉じる */
-  const handleCloseDialog = () => {
-    setEditable(false);
-    handleClose();
-  };
   /* フォームを送信 */
   const onSubmit = async (data: DaibumonsMasterDialogValues) => {
-    console.log('★★★★★★★★★ ', data);
+    console.log('isDarty : ', isDirty);
+    console.log(data);
+    // if (daibumonId === -100) {
+    //   await addNewDaibumon(data);
+    // } else {
+    //   await updateDaibumon(data, daibumonsationId);
+    // }
     handleCloseDialog();
-    // await addNewdaibumon(data!);
+    refetchDaibumons();
   };
-  //モック
-  useEffect(() => {
-    console.log('daibumonId : ', daibumonId, ' daibumonList : ', daibumonsList);
 
-    setdaibumon(daibumonsList[daibumonId - 1]);
-    console.log('daibumon : ', daibumon);
-  }, [daibumon, daibumonId]);
-  //DB
-  // useEffect(() => {
-  // if (daibumonId === -100) {
-  //   setIsLoading(false);
-  //   return;
-  // } else {
-  //   const getThatOnedaibumon = async () => {
-  //     const daibumon1 = await getOnedaibumon(daibumonId);
-  //     reset(daibumon1);
-  //     console.log('daibumonId : ', daibumonId, ' kyotenId : ', daibumon1?.kyotenNam);
-  //     setdaibumon(veh1!);
-  //     setIsLoading(false);
-  //   };
-  //   getThatOnedaibumon();
-  // }
-  // }, [daibumonId, reset]);
+  /* 詳細ダイアログを閉じる */
+  const handleCloseDialog = () => {
+    setEditable(false);
+    setIsNew(false);
+    handleClose();
+  };
+
+  /* 未保存ダイアログを閉じる */
+  const handleCloseDirty = () => {
+    setDirtyOpen(false);
+  };
+
+  /* ×ぼたんを押したとき */
+  const handleClickClose = () => {
+    console.log('isDirty : ', isDirty);
+    if (isDirty) {
+      setDirtyOpen(true);
+    } else {
+      handleCloseDialog();
+    }
+  };
+  /* useEffect --------------------------------------- */
+  /* eslint-disable react-hooks/exhaustive-deps */
+  useEffect(() => {
+    console.log('★★★★★★★★★★★★★★★★★★★★★');
+    const getThatOneDaibumon = async () => {
+      if (daibumonId === -100) {
+        // 新規追加モード
+        setDaibumon(emptyDaibumon);
+        reset(); // フォーム初期化
+        setEditable(true); // 編集モードにする
+        setIsLoading(false);
+        setIsNew(true);
+      } else {
+        // const daibumon1 = await getOneDaibumon(daibumonId);
+        // if (daibumon1) {
+        //   setDaibumon(daibumon1);
+        //   reset(daibumon1); // 取得したデータでフォーム初期化
+        // }
+        setIsLoading(false);
+      }
+    };
+    getThatOneDaibumon();
+    console.log('chaaaaaage : ', daibumon);
+  }, [daibumonId]);
+  /* eslint-enable react-hooks/exhaustive-deps */
+
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit)}>
         <MasterDialogTitle
           editable={editable}
-          handleEditable={handleEditable}
-          handleClose={handleCloseDialog}
+          handleEditable={() => setEditable(true)}
+          handleClose={handleClickClose}
           dialogTitle="大部門マスタ登録"
+          isNew={isNew}
+          isDirty={isDirty}
         />
-        {/* {isLoading ? ( //DB
-            <Loading />
-          ) : ( */}
-        <>
-          <Grid2 container spacing={1} p={5} direction={'column'} justifyContent={'center'} width={'100%'}>
-            <Grid2>
-              <FormBox formItem={formItems[0]} required={true}>
-                <TextFieldElement
-                  name="daibumonNam"
-                  control={control}
-                  label={formItems[0].exsample}
-                  fullWidth
-                  sx={{ maxWidth: '90%' }}
-                  disabled={editable ? false : true}
-                />
-              </FormBox>
+        {isLoading ? ( //DB
+          <Loading />
+        ) : (
+          <>
+            <Grid2 container spacing={1} p={5} direction={'column'} justifyContent={'center'} width={'100%'}>
+              <Grid2>
+                <FormBox formItem={formItems[0]} required={true}>
+                  <TextFieldElement
+                    name="daibumonNam"
+                    control={control}
+                    label={formItems[0].exsample}
+                    fullWidth
+                    sx={{ maxWidth: '90%' }}
+                    disabled={editable ? false : true}
+                  />
+                </FormBox>
+              </Grid2>
+              <Grid2>
+                <FormBox formItem={formItems[1]}>
+                  <CheckboxElement name="delFlg" control={control} size="medium" disabled={editable ? false : true} />
+                </FormBox>
+              </Grid2>
+              <Grid2>
+                <FormBox formItem={formItems[2]}>
+                  <TextareaAutosizeElement ////////////// 200文字までの設定をしなければならない
+                    name="mem"
+                    control={control}
+                    label={formItems[2].exsample}
+                    fullWidth
+                    sx={{ maxWidth: '90%' }}
+                    disabled={editable ? false : true}
+                  />
+                </FormBox>
+              </Grid2>
             </Grid2>
-            <Grid2>
-              <FormBox formItem={formItems[1]}>
-                <CheckboxElement name="delFlg" control={control} size="medium" disabled={editable ? false : true} />
-              </FormBox>
-            </Grid2>
-            <Grid2>
-              <FormBox formItem={formItems[2]}>
-                <TextareaAutosizeElement ////////////// 200文字までの設定をしなければならない
-                  name="mem"
-                  control={control}
-                  label={formItems[2].exsample}
-                  fullWidth
-                  sx={{ maxWidth: '90%' }}
-                  disabled={editable ? false : true}
-                />
-              </FormBox>
-            </Grid2>
-          </Grid2>
-        </>
-        {/* )} */}
+            <IsDirtyDialog open={dirtyOpen} handleCloseDirty={handleCloseDirty} handleCloseAll={handleCloseDialog} />
+          </>
+        )}
       </form>
     </>
   );
 };
-
-const formItems: FormItemsType[] = [
-  {
-    label: '大部門名',
-    exsample: '例）照明',
-    constraints: '100文字まで',
-  },
-  {
-    label: '削除フラグ',
-    exsample: '',
-    constraints: '論理削除（データは物理削除されません）',
-  },
-  {
-    label: 'メモ',
-    exsample: '',
-    constraints: '200文字まで',
-  },
-];

@@ -18,11 +18,11 @@ export const MasterDialogTitle = ({
   isDirty,
 }: {
   editable: boolean;
-  isNew?: boolean;
+  isNew: boolean;
   handleEditable: () => void;
   handleClose: () => void;
   dialogTitle: string;
-  isDirty?: boolean;
+  isDirty: boolean;
 }) => {
   /* useTheme */
   const theme = useTheme();

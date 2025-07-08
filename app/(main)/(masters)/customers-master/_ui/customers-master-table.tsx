@@ -1,36 +1,30 @@
 'use client';
-import { CheckBox } from '@mui/icons-material';
 import AddIcon from '@mui/icons-material/Add';
-import DeleteIcon from '@mui/icons-material/Delete';
-import {
-  Box,
-  Button,
-  Dialog,
-  Divider,
-  Grid2,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TableSortLabel,
-  Typography,
-} from '@mui/material';
-import { JSX, useEffect, useMemo, useState } from 'react';
+import { Box, Button, Dialog, Divider, Grid2, Paper, TableContainer, Typography } from '@mui/material';
+import { useEffect, useMemo, useState } from 'react';
+
+import { Loading } from '@/app/(main)/_ui/loading';
 
 // import { getAllCustomers } from '@/app/_lib/supabase/supabaseFuncs';
 import { MuiTablePagination } from '../../../_ui/table-pagination';
 import { MasterTable } from '../../_ui/table';
-import { cMHeader, customerMasterDialogDetailsValues, CustomerMasterTableValues, customers } from '../_lib/types';
-import { CustomerDialogContents } from './customers-master-dialog';
+import { cMHeader } from '../_lib/datas';
+import { CustomerMasterTableValues } from '../_lib/types';
+import { CustomersMasterDialog } from './customers-master-dialog';
 
 /**
  * 顧客マスタのテーブルコンポーネント
  * @returns {JSX.Element}
  */
-export const CustomersMasterTable = (/*{ customers }: { customers: CustomerMasterTableValues[] | undefined }*/) => {
+export const CustomersMasterTable = ({
+  customers,
+  isLoading,
+  setIsLoading,
+}: {
+  customers: CustomerMasterTableValues[] | undefined;
+  isLoading: boolean;
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+}) => {
   /* 1ページごとの表示数 */
   const rowsPerPage = 50;
   /* useState
@@ -41,84 +35,44 @@ export const CustomersMasterTable = (/*{ customers }: { customers: CustomerMaste
   const [dialogOpen, setDialogOpen] = useState(false);
   /* 今開いてるテーブルのページ数 */
   const [page, setPage] = useState(1);
-  /* ソート方法 */
-  const [order, setOrder] = useState<'desc' | 'asc'>('desc');
-  /* ソート対象 */
-  const [orderBy, setOrderBy] = useState<string>('');
-  /* 表示する列 今のところソート、フィルターなし */
-  const [customersList, setCustomers] = useState<CustomerMasterTableValues[]>();
-  /* ダイアログでの編集モード */
-  const [editable, setEditable] = useState(false);
-  /* DBのローディング状態 */
-  const [loading, setLoading] = useState(true);
+  /* 顧客リスト */
+  const [theCustomers, setTheCustomers] = useState<CustomerMasterTableValues[] | undefined>(customers);
 
-  /* Methods
-   *---------------------------------------------------- */
-  /**
-   * 顧客詳細ダイアログを開く関数
-   * @param id 顧客ID
-   */
-  const handleOpen = (id: number) => {
-    if (id === -100) {
-      setEditable(true);
-    } else {
-      setOpenID(id);
-      console.log(openId);
-    }
+  /* Methods ---------------------------------------------------- */
+  /* 顧客詳細ダイアログを開く関数 */
+  const handleOpenDialog = (id: number) => {
+    setOpenID(id);
     setDialogOpen(true);
   };
-  /**
-   * 顧客詳細ダイアログを閉じる関数
-   */
-  const handleClose = () => {
-    console.log(openId);
-    setOpenID(-100);
+  /* 顧客詳細ダイアログを閉じる関数 */
+  const handleCloseDialog = () => {
     setDialogOpen(false);
-    setEditable(false);
+  };
+  /* 情報が変わったときに更新される */
+  const refetchCustomers = async () => {
+    setIsLoading(true);
+    // const updated = await GetFilteredCustomers('');
+    // setTheCustomers(updated);
+    setIsLoading(false);
   };
 
-  // useEffect(() => {
-  //   console.log(customers);
-  // /*  */
-  //   const getThatOneCustomer = async () => {
-  //     const customersList = await getAllCustomers();
-  //     console.log('?????????????????????????????????????????????????????', customersList);
-  //     setCustomers(customersList!);
-  //     console.log('chaaaaaaaaaaaaaaaaaaaaaangemi', customers);
-  //     setLoading(false);
-  //   };
-  //   getThatOneCustomer();
-  //   console.log('chaaaaaaaaaaaaaaaaaaaaaangeYO', customers);
-  // }, []);
+  useEffect(() => {
+    setTheCustomers(customers); // 親からのCustomersが更新された場合に同期
+  }, [customers]);
 
-  /**
-   *
-   */
-  /* ソート対象、方法の変更 */
-  const handleRequestSort = (property: string) => {
-    const isAsc = orderBy === property && order === 'asc';
-    setOrder(isAsc ? 'desc' : 'asc');
-    setOrderBy(property);
-  };
-  const createSortHandler = (property: string) => {
-    handleRequestSort(property);
-  };
+  useEffect(() => {
+    setIsLoading(false); //theCustomersが変わったらローディング終わり
+  }, [theCustomers, setIsLoading]);
+
   /* 表示する顧客リスト */
   const list = useMemo(
-    () => (rowsPerPage > 0 ? customers!.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage) : customers),
-    [page, rowsPerPage]
+    () =>
+      rowsPerPage > 0 ? theCustomers!.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage) : theCustomers,
+    [page, rowsPerPage, theCustomers]
   );
-  console.log('list is here : ', list);
-  /**
-   * テーブル最後のページ用の空データの長さ
-   */
 
   return (
     <Box>
-      {/* {loading ? (
-        <Loading>
-      ) : ( */}
-      {/* <> */}
       <Typography pt={2} pl={2}>
         一覧
       </Typography>
@@ -136,7 +90,7 @@ export const CustomersMasterTable = (/*{ customers }: { customers: CustomerMaste
             </Typography>
           </Grid2>
           <Grid2>
-            <Button onClick={() => handleOpen(-100)}>
+            <Button onClick={() => handleOpenDialog(-100)}>
               <AddIcon fontSize="small" />
               新規
             </Button>
@@ -144,29 +98,32 @@ export const CustomersMasterTable = (/*{ customers }: { customers: CustomerMaste
         </Grid2>
       </Grid2>
       <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
-        <MasterTable
-          headers={cMHeader}
-          datas={list.map((l) => ({
-            ...l,
-            id: l.kokyakuId,
-            name: l.kokyakuNam,
-            address: [l.adrShozai, l.adrTatemono, l.adrSonota].filter(Boolean).join(' '),
-          }))}
-          page={page}
-          rowsPerPage={rowsPerPage}
-          handleOpenDialog={handleOpen}
-        />
-        <Dialog open={dialogOpen} fullScreen>
-          <CustomerDialogContents
-            customerId={openId}
-            handleClose={handleClose}
-            editable={editable}
-            setEditable={setEditable}
-          />
-        </Dialog>
+        {isLoading ? (
+          <Loading />
+        ) : (
+          <>
+            <MasterTable
+              headers={cMHeader}
+              datas={list!.map((l) => ({
+                ...l,
+                id: l.kokyakuId,
+                name: l.kokyakuNam,
+                address: [l.adrShozai, l.adrTatemono, l.adrSonota].filter(Boolean).join(' '),
+              }))}
+              page={page}
+              rowsPerPage={rowsPerPage}
+              handleOpenDialog={handleOpenDialog}
+            />
+            <Dialog open={dialogOpen} fullScreen>
+              <CustomersMasterDialog
+                customerId={openId}
+                handleClose={handleCloseDialog}
+                refetchCustomers={refetchCustomers}
+              />
+            </Dialog>
+          </>
+        )}
       </TableContainer>
-      {/* </>
-      )} */}
     </Box>
   );
 };

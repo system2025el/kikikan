@@ -1,6 +1,7 @@
 'use client';
 import SearchIcon from '@mui/icons-material/Search';
 import { Box, Button, Container, Divider, Grid2, Paper, Select, Stack, TextField, Typography } from '@mui/material';
+import { useState } from 'react';
 
 import { BackButton } from '../../../_ui/buttons';
 import { BumonsMasterDialogValues, BumonsMasterTableValues } from '../_lib/types';
@@ -12,6 +13,10 @@ import { BumonsMasterTable } from './bumons-master-table';
  */
 
 export const BumonsMaster = ({ bumons }: { bumons: BumonsMasterDialogValues[] | undefined }) => {
+  /* useState ------------------ */
+  const [theBumons, setTheBumons] = useState(bumons);
+  /* DBのローディング */
+  const [isLoading, setIsLoading] = useState(true);
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
       <Box justifySelf={'end'} mb={0.5}>
@@ -55,7 +60,7 @@ export const BumonsMaster = ({ bumons }: { bumons: BumonsMasterDialogValues[] | 
           </form>
         </Box>
       </Paper>
-      <BumonsMasterTable bumons={bumons} />
+      <BumonsMasterTable bumons={theBumons} isLoading={isLoading} setIsLoading={setIsLoading} />
     </Container>
   );
 };

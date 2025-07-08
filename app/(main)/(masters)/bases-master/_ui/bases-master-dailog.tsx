@@ -7,7 +7,7 @@ import { FormBox, FormItemsType } from '../../../_ui/form-box';
 import { Loading } from '../../../_ui/loading';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyDialog } from '../../_ui/isdirty-dialog';
-import { emptyBase, formItems } from '../_lib/data';
+import { emptyBase, formItems } from '../_lib/datas';
 import { BasesMasterDialogSchema, BasesMasterDialogValues } from '../_lib/types';
 
 /**
@@ -15,7 +15,15 @@ import { BasesMasterDialogSchema, BasesMasterDialogValues } from '../_lib/types'
  * @param
  * @returns {JSX.Element} 拠点マスタ詳細ダイアログコンポーネント
  */
-export const BasesMasterDialog = ({ baseId, handleClose }: { baseId: number; handleClose: () => void }) => {
+export const BasesMasterDialog = ({
+  baseId,
+  handleClose,
+  refetchBases,
+}: {
+  baseId: number;
+  handleClose: () => void;
+  refetchBases: () => void;
+}) => {
   /* useState -------------------------------------- */
   /* 拠点 */
   const [base, setBase] = useState<BasesMasterDialogValues | undefined>();
@@ -120,7 +128,7 @@ export const BasesMasterDialog = ({ baseId, handleClose }: { baseId: number; han
           isDirty={isDirty}
           isNew={isNew}
         />
-        {isLoading ? ( //DB
+        {isLoading ? (
           <Loading />
         ) : (
           <>

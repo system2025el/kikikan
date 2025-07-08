@@ -5,7 +5,7 @@ export const customerMaterDialogDetailsSchema = z.object({
   kokyakuNam: z.string(),
   kana: z.string(),
   kokyakuRank: z.number(),
-  delFlg: z.number().optional(),
+  delFlg: z.boolean().optional(),
   dspOrder: z.number().optional(),
   keisho: z.string().optional(),
   adrPost: z.string().optional(),
@@ -17,10 +17,10 @@ export const customerMaterDialogDetailsSchema = z.object({
   fax: z.string().optional(),
   mail: z.string().optional(),
   mem: z.string().optional(),
-  dspFlg: z.number().optional(),
+  dspFlg: z.boolean().optional(),
   closeDay: z.number().optional(),
   siteDay: z.number().optional(),
-  kizaiNebikiFlg: z.number().optional(),
+  kizaiNebikiFlg: z.boolean().optional(),
 });
 export type customerMasterDialogDetailsValues = z.infer<typeof customerMaterDialogDetailsSchema>;
 
@@ -36,73 +36,3 @@ export const CustomerMasterTableSchema = z.object({
   delFlg: z.boolean().optional(),
 });
 export type CustomerMasterTableValues = z.infer<typeof CustomerMasterTableSchema>;
-
-//モック用削除delete
-export const customers: CustomerMasterTableValues[] = [
-  {
-    kokyakuId: 1,
-    kokyakuNam: 'エンジニアライティング',
-    adrShozai: '東京都世田谷区太子堂1-12-38',
-    adrTatemono: '藤和三軒茶屋コープ205号',
-    // adrPost: '154-0004',
-    adrSonota: '',
-    tel: '03-3413-8441',
-    fax: '03-3413-8466',
-    // mail: 'FFFFFFFFFFFFF@EEEEEEEEEEEEEEEEEE',
-    // keishou: '御中',
-    mem: 'あああああああああああああああああああ',
-  },
-  {
-    kokyakuId: 2,
-    kokyakuNam: '(株)スペースエンジニアリング',
-    adrShozai: '東京都新宿区早稲田鶴巻町５２３',
-    adrTatemono: '',
-    // postnum: '162-0041',
-    adrSonota: '',
-    tel: '03-5292-2380',
-    fax: '03-5292-2382',
-    // mail: 'YYYYYYYYYYYYYYYYYYYYYY@DDDDDDDDD',
-    // keishou: '御中',
-    delFlg: true,
-    mem: 'あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやいゆえよらりるれろわいうえをあいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやいゆえよらりるれろわいうえをあいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやいゆえよらりるれろわいうえをあいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやいゆえよらりるれろわいうえをあいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやいゆえよらりるれろわいうえをあいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやいゆえよらりるれろわいうえを',
-  },
-  {
-    kokyakuId: 3,
-    kokyakuNam: '(株)シアタープレーン',
-    adrShozai: 'XXXXXXXXXXXXXXXXXXXXXXX',
-    // postnum: 'XXX-XXXX',
-    adrTatemono: 'XXXXXXXXXX',
-    adrSonota: '',
-    tel: '999-999-9999',
-    fax: '999-999-9999',
-    // mail: 'aaaaaaaaaa@eeeeeeeeeeeeee',
-    // keishou: '御中',
-    mem: '',
-  },
-];
-
-/**
- * 顧客マスタテーブルのヘッダー
- */
-export const cMHeader = [
-  {
-    key: 'name',
-    label: '顧客名',
-  },
-  {
-    key: 'address',
-    label: '住所',
-  },
-  {
-    key: 'tel',
-    label: 'TEL',
-  },
-  {
-    key: 'fax',
-    label: 'FAX',
-  },
-  {
-    key: 'mem',
-    label: 'メモ',
-  },
-];

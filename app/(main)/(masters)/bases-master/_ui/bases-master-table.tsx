@@ -1,11 +1,13 @@
 'use client';
 import AddIcon from '@mui/icons-material/Add';
 import { Box, Button, Dialog, Divider, Grid2, Paper, TableContainer, Typography } from '@mui/material';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+
+import { Loading } from '@/app/(main)/_ui/loading';
 
 import { MuiTablePagination } from '../../../_ui/table-pagination';
 import { MasterTable } from '../../_ui/table';
-import { bMHeader } from '../_lib/data';
+import { bMHeader } from '../_lib/datas';
 import { BasesMasterTableValues } from '../_lib/types';
 import { BasesMasterDialog } from './bases-master-dailog';
 
@@ -14,7 +16,15 @@ import { BasesMasterDialog } from './bases-master-dailog';
  * @param
  * @returns {JSX.Element} 拠点マスタテーブルコンポーネント
  */
-export const BasesMasterTable = ({ bases }: { bases: BasesMasterTableValues[] | undefined }) => {
+export const BasesMasterTable = ({
+  bases,
+  isLoading,
+  setIsLoading,
+}: {
+  bases: BasesMasterTableValues[] | undefined;
+  isLoading: boolean;
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+}) => {
   /* 1ページごとの表示数 */
   const rowsPerPage = 50;
   /* useState --------------------------------------- */
@@ -36,11 +46,26 @@ export const BasesMasterTable = ({ bases }: { bases: BasesMasterTableValues[] | 
   const handleCloseDialog = () => {
     setDialogOpen(false);
   };
+  /* 情報が変わったときに更新される */
+  const refetchBases = async () => {
+    setIsLoading(true);
+    // const updated = await GetFilteredBases('');
+    // setTheBases(updated);
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    setTheBases(bases); // 親からのBasesが更新された場合に同期
+  }, [bases]);
+
+  useEffect(() => {
+    setIsLoading(false); //theBasesが変わったらローディング終わり
+  }, [theBases, setIsLoading]);
 
   // 表示するデータ
   const list = useMemo(
-    () => (rowsPerPage > 0 ? bases!.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage) : bases),
-    [page, rowsPerPage, bases]
+    () => (rowsPerPage > 0 ? theBases!.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage) : theBases),
+    [page, rowsPerPage, theBases]
   );
 
   return (
@@ -71,16 +96,22 @@ export const BasesMasterTable = ({ bases }: { bases: BasesMasterTableValues[] | 
           </Grid2>
         </Grid2>
         <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
-          <MasterTable
-            headers={bMHeader}
-            datas={list!.map((l) => ({ id: l.kyotenId!, name: l.kyotenNam, mem: l.mem!, delFlg: l.delFlg }))}
-            handleOpenDialog={handleOpenDialog}
-            page={page}
-            rowsPerPage={rowsPerPage}
-          />
-          <Dialog open={dialogOpen} fullScreen>
-            <BasesMasterDialog handleClose={handleCloseDialog} baseId={openId} />
-          </Dialog>
+          {isLoading ? (
+            <Loading />
+          ) : (
+            <>
+              <MasterTable
+                headers={bMHeader}
+                datas={list!.map((l) => ({ id: l.kyotenId!, name: l.kyotenNam, mem: l.mem!, delFlg: l.delFlg }))}
+                handleOpenDialog={handleOpenDialog}
+                page={page}
+                rowsPerPage={rowsPerPage}
+              />
+              <Dialog open={dialogOpen} fullScreen>
+                <BasesMasterDialog handleClose={handleCloseDialog} baseId={openId} refetchBases={refetchBases} />
+              </Dialog>
+            </>
+          )}
         </TableContainer>
       </Box>
     </>

@@ -1,6 +1,7 @@
 'use client';
 import SearchIcon from '@mui/icons-material/Search';
 import { Box, Button, Container, Divider, Paper, Stack, TextField, Typography } from '@mui/material';
+import { useState } from 'react';
 
 import { BackButton } from '@/app/(main)/_ui/buttons';
 
@@ -13,6 +14,10 @@ import { DaibumonsMasterTable } from './daibumons-master-table';
  * @returns {JSX.Element} 大部門マスタコンポーネント
  */
 export const DaibumonsMaster = ({ daibumons }: { daibumons: DaibumonsMasterDialogValues[] }) => {
+  /* useState ------------------ */
+  const [theDaibumons, setTheDaibumons] = useState(daibumons);
+  /* DBのローディング */
+  const [isLoading, setIsLoading] = useState(true);
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
       <Box justifySelf={'end'} mb={0.5}>
@@ -45,7 +50,7 @@ export const DaibumonsMaster = ({ daibumons }: { daibumons: DaibumonsMasterDialo
           </form>
         </Box>
       </Paper>
-      <DaibumonsMasterTable daibumons={daibumons} />
+      <DaibumonsMasterTable daibumons={daibumons} isLoading={isLoading} setIsLoading={setIsLoading} />
     </Container>
   );
 };

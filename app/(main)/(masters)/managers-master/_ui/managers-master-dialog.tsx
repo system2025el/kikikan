@@ -1,36 +1,42 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { alpha, Button, DialogTitle, Grid2, Stack, Typography, useTheme } from '@mui/material';
-import { grey } from '@mui/material/colors';
-import { useState } from 'react';
-import { CheckboxElement, SelectElement, TextFieldElement, useForm } from 'react-hook-form-mui';
+import { Grid2 } from '@mui/material';
+import { useEffect, useState } from 'react';
+import { TextFieldElement, useForm } from 'react-hook-form-mui';
 
-import { FormBox, FormItemsType } from '@/app/(main)/_ui/form-box';
+import { FormBox } from '@/app/(main)/_ui/form-box';
+import { Loading } from '@/app/(main)/_ui/loading';
 
 import { MasterDialogTitle } from '../../_ui/dialog-title';
-import { ManagerMasterDialogDetailsValues, managerMaterDialogDetailsSchema } from '../_lib/types';
+import { IsDirtyDialog } from '../../_ui/isdirty-dialog';
+import { emptyManager, formItems } from '../_lib/data';
+import { ManagersMasterDialogValues, managersMaterDialogSchema } from '../_lib/types';
 /**
  * 担当者マスタの詳細ダイアログ
  * @param
  * @returns {JSX.Element} 担当者マスタの詳細ダイアログコンポーネント
  */
-export const ManagerDialogContents = ({
+export const ManagerMasterDialog = ({
   managerId,
   handleClose,
-  editable,
-  setEditable,
+  refetchManagers,
 }: {
   managerId: number;
   handleClose: () => void;
-  editable: boolean;
-  setEditable: React.Dispatch<React.SetStateAction<boolean>>;
+  refetchManagers: () => void;
 }) => {
   /* useState --------------------- */
   /** 担当者リストの配列 */
-  const [manager, setManager] = useState<ManagerMasterDialogDetailsValues>();
+  const [manager, setManager] = useState<ManagersMasterDialogValues>();
   /** DBのローディング状態 */
   const [isLoading, setIsLoading] = useState(true);
+  /* ダイアログでの編集モードかどうか */
+  const [editable, setEditable] = useState(false);
+  /* 新規作成かどうか */
+  const [isNew, setIsNew] = useState(false);
+  /* 未保存ダイアログ出すかどうか */
+  const [dirtyOpen, setDirtyOpen] = useState(false);
 
   /* useForm ------------------------- */
   const {
@@ -41,101 +47,108 @@ export const ManagerDialogContents = ({
   } = useForm({
     mode: 'onBlur',
     reValidateMode: 'onBlur',
-    defaultValues: manager,
-    resolver: zodResolver(managerMaterDialogDetailsSchema),
+    defaultValues: { tantouId: 0, tantouNam: '' },
+    resolver: zodResolver(managersMaterDialogSchema),
   });
 
-  /* 関数 ---------------------------- */
-  /* ダイアログ内を編集モードにする */
-  const handleEditable = () => {
-    setEditable(true);
-  };
-  /* ダイアログを閉じる */
-  const handleCloseDialog = () => {
-    handleClose();
-    setEditable(false);
-  };
+  /* methods ---------------------------- */
   /* フォームを送信 */
-  const onSubmit = (data: ManagerMasterDialogDetailsValues) => {
-    handleCloseDialog();
-    console.log(isDirty);
+  const onSubmit = async (data: ManagersMasterDialogValues) => {
+    console.log('isDarty : ', isDirty);
     console.log(data);
+    // if (managerId === -100) {
+    //   await addNewmanager(data);
+    // } else {
+    //   await updatemanager(data, managerId);
+    // }
+    handleCloseDialog();
+    refetchManagers();
   };
 
-  // useEffect(() => {
-  //   const getThatOneCustomer = async () => {
-  //     const customer1 = await getOneCustomer(customerId);
-  //     console.log(customerId);
-  //     console.log('?????????????????????????????????????????????????????', customer1);
-  //     setCustomer(customer1!);
-  //   };
-  //   getThatOneCustomer();
-  //   console.log('chaaaaaaaaaaaaaaaaaaaaaange', customer);
-  // }, [customerId]);
+  /* 詳細ダイアログを閉じる */
+  const handleCloseDialog = () => {
+    setEditable(false);
+    setIsNew(false);
+    handleClose();
+  };
+
+  /* 未保存ダイアログを閉じる */
+  const handleCloseDirty = () => {
+    setDirtyOpen(false);
+  };
+
+  /* ×ぼたんを押したとき */
+  const handleClickClose = () => {
+    console.log('isDirty : ', isDirty);
+    if (isDirty) {
+      setDirtyOpen(true);
+    } else {
+      handleCloseDialog();
+    }
+  };
+
+  /* useEffect --------------------------------------- */
+  /* eslint-disable react-hooks/exhaustive-deps */
+  useEffect(() => {
+    console.log('★★★★★★★★★★★★★★★★★★★★★');
+    const getThatOneManager = async () => {
+      if (managerId === -100) {
+        // 新規追加モード
+        setManager(emptyManager);
+        reset(); // フォーム初期化
+        setEditable(true); // 編集モードにする
+        setIsLoading(false);
+        setIsNew(true);
+      } else {
+        // const manager1 = await getOnemanager(managerId);
+        // if (manager1) {
+        //   setmanager(manager1);
+        //   reset(manager1); // 取得したデータでフォーム初期化
+        // }
+        setIsLoading(false);
+      }
+    };
+    getThatOneManager();
+    console.log('chaaaaaage : ', manager);
+  }, [managerId]);
+  /* eslint-enable react-hooks/exhaustive-deps */
+
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit)}>
         <MasterDialogTitle
           editable={editable}
-          handleEditable={handleEditable}
-          handleClose={handleCloseDialog}
+          handleEditable={() => setEditable(true)}
+          handleClose={handleClickClose}
           dialogTitle={'担当者情報'}
+          isNew={isNew}
+          isDirty={isDirty}
         />
-        <Grid2 container spacing={1} p={5} direction={'column'} justifyContent={'center'} width={'100%'}>
-          <Grid2>
-            <FormBox formItem={formItems[0]} required={true}>
-              <TextFieldElement
-                name="tantouNam"
-                control={control}
-                label={formItems[0].exsample}
-                fullWidth
-                sx={{ maxWidth: '90%' }}
-                disabled={editable ? false : true}
-              />
-            </FormBox>
-          </Grid2>
-        </Grid2>
+        {isLoading ? (
+          <Loading />
+        ) : (
+          <>
+            <Grid2 container spacing={1} p={5} direction={'column'} justifyContent={'center'} width={'100%'}>
+              <Grid2>
+                <FormBox formItem={formItems[0]} required={true}>
+                  <TextFieldElement
+                    name="tantouNam"
+                    control={control}
+                    label={formItems[0].exsample}
+                    fullWidth
+                    sx={{ maxWidth: '90%' }}
+                    disabled={editable ? false : true}
+                  />
+                </FormBox>
+              </Grid2>
+            </Grid2>
+            <IsDirtyDialog open={dirtyOpen} handleCloseDirty={handleCloseDirty} handleCloseAll={handleCloseDialog} />
+          </>
+        )}
       </form>
     </>
   );
 };
 
-/* 移動する予定move */
-
-const formItems: FormItemsType[] = [
-  {
-    label: '担当者名',
-    constraints: '100文字まで',
-    exsample: 'あいうえお',
-  },
-];
-
 /** ---------------------------スタイル----------------------------- */
-const styles: { [key: string]: React.CSSProperties } = {
-  greyBox: {
-    border: 1,
-    borderColor: grey[500],
-    backgroundColor: grey[300],
-    paddingLeft: 1,
-    marginLeft: 1,
-    paddingRight: 1,
-    minHeight: '30px',
-    maxHeight: '30px',
-  },
-  greyBoxMemo: {
-    border: 1,
-    borderColor: grey[500],
-    backgroundColor: grey[300],
-    paddingLeft: 1,
-    marginLeft: 1,
-    paddingRight: 1,
-    minHeight: '150px',
-    maxHeight: '150px',
-  },
-  margintop1: {
-    marginTop: 1,
-  },
-  justContentBox: {
-    display: 'flex',
-  },
-};
+const styles: { [key: string]: React.CSSProperties } = {};

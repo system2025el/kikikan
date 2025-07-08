@@ -1,0 +1,55 @@
+import { FormItemsType } from '@/app/(main)/_ui/form-box';
+
+import { ShukeibumonsMasterDialogValues } from './type';
+
+/* 集計部門マスタテーブルヘッダー */
+export const shukeibumonMHeader = [
+  { key: 'name', label: '名称' },
+  { key: 'mem', label: 'メモ' },
+];
+
+/* */
+export const formItems: FormItemsType[] = [
+  {
+    label: '集計部門名',
+    exsample: '例）照明部',
+    constraints: '100文字まで',
+  },
+  {
+    label: '削除フラグ',
+    exsample: '',
+    constraints: '論理削除（データは物理削除されません）',
+  },
+  {
+    label: 'メモ',
+    exsample: '',
+    constraints: '200文字まで',
+  },
+];
+
+/* 新規登録用の初期化値（空の集計部門） */
+export const emptyShukeibumon: ShukeibumonsMasterDialogValues = {
+  shukeibumonNam: '',
+};
+
+/*モック削除delete */
+export const shukeibumonsList: ShukeibumonsMasterDialogValues[] = [
+  {
+    shukeibumonId: 1,
+    shukeibumonNam: '照明部',
+    mem: 'XXXXXXXXXXX',
+    delFlg: false,
+  },
+  {
+    shukeibumonId: 2,
+    shukeibumonNam: 'L課（Control）',
+    mem: 'XXXXXXXX',
+    delFlg: false,
+  },
+  {
+    shukeibumonNam: 'L課（SPOT）',
+    mem: 'XXXXXXX',
+    shukeibumonId: 3,
+    delFlg: false,
+  },
+];

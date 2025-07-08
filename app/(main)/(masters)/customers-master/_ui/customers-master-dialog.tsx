@@ -17,6 +17,8 @@ import { FormBox, FormItemsType } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { MasterDialogTitle } from '../../_ui/dialog-title';
+import { IsDirtyDialog } from '../../_ui/isdirty-dialog';
+import { emptyCustomer, formItems } from '../_lib/datas';
 import { customerMasterDialogDetailsValues, customerMaterDialogDetailsSchema } from '../_lib/types';
 
 /**
@@ -24,22 +26,25 @@ import { customerMasterDialogDetailsValues, customerMaterDialogDetailsSchema } f
  * @param props
  * @returns {JSX.Element} 顧客ダイアログ
  */
-export const CustomerDialogContents = ({
+export const CustomersMasterDialog = ({
   customerId,
   handleClose,
-  editable,
-  setEditable,
+  refetchCustomers,
 }: {
   customerId: number;
   handleClose: () => void;
-  editable: boolean;
-  setEditable: React.Dispatch<React.SetStateAction<boolean>>;
+  refetchCustomers: () => void;
 }) => {
   /* useState --------------------- */
   /** 顧客リスト */
   const [customer, setCustomer] = useState<customerMasterDialogDetailsValues>();
   /** DBのローディング状態 */
   const [isLoading, setIsLoading] = useState(true);
+  const [editable, setEditable] = useState(false);
+  /* 新規作成かどうか */
+  const [isNew, setIsNew] = useState(false);
+  /* 未保存ダイアログ出すかどうか */
+  const [dirtyOpen, setDirtyOpen] = useState(false);
 
   /* useForm ------------------------- */
   const {
@@ -51,403 +56,318 @@ export const CustomerDialogContents = ({
     mode: 'onBlur',
     reValidateMode: 'onBlur',
     defaultValues: {
-      kokyakuNam: customer?.kokyakuNam,
-      kana: customer?.kana,
-      kokyakuRank: customer?.kokyakuRank,
-      keisho: customer?.keisho,
-      adrPost: customer?.adrPost,
-      adrShozai: customer?.adrShozai,
-      adrTatemono: customer?.adrTatemono,
-      adrSonota: customer?.adrSonota,
-      tel: customer?.tel,
-      telMobile: customer?.telMobile,
-      mail: customer?.mail,
-      mem: customer?.mem,
-      delFlg: customer?.delFlg,
-      dspFlg: customer?.dspFlg,
-      closeDay: customer?.closeDay,
-      siteDay: customer?.siteDay,
-      kizaiNebikiFlg: customer?.kizaiNebikiFlg,
+      kokyakuNam: '',
+      kana: '',
+      kokyakuRank: 0,
+      keisho: '',
+      adrPost: '',
+      adrShozai: '',
+      adrTatemono: '',
+      adrSonota: '',
+      tel: '',
+      telMobile: '',
+      mail: '',
+      mem: '',
+      delFlg: false,
+      dspFlg: true,
+      closeDay: 0,
+      siteDay: 0,
+      kizaiNebikiFlg: false,
     }, //DB customer,
     resolver: zodResolver(customerMaterDialogDetailsSchema),
   });
 
   /* 関数 ---------------------------- */
-  /* ダイアログ内を編集モードにする */
-  const handleEditable = () => {
-    setEditable(true);
-  };
   /* フォームを送信 */
   const onSubmit = (data: customerMasterDialogDetailsValues) => {
-    handleCloseDialog();
-    console.log(isDirty);
+    console.log('isDarty : ', isDirty);
     console.log(data);
+    // if (customerId === -100) {
+    //   await addNewCustomer(data);
+    // } else {
+    //   await updateCustomer(data, customerId);
+    // }
+    handleCloseDialog();
+    refetchCustomers();
   };
   /* ダイアログを閉じる */
   const handleCloseDialog = () => {
-    console.log('☆☆☆☆☆☆★★★★', customer);
+    setEditable(false);
+    setIsNew(false);
     handleClose();
   };
+  /* 未保存ダイアログを閉じる */
+  const handleCloseDirty = () => {
+    setDirtyOpen(false);
+  };
 
-  // useEffect(() => {
-  //   const getThatOneCustomer = async () => {
-  //     const customer1 = await getOneCustomer(customerId);
-  //     reset(customer1);
-  //     console.log(customerId);
-  //     console.log('?????????????????????????????????????????????????????', customer1);
-  //     setCustomer(customer1!);
-  //     setIsLoading(false);
-  //   };
-  //   getThatOneCustomer();
-  // }, [customerId, reset]);
+  /* ×ぼたんを押したとき */
+  const handleClickClose = () => {
+    console.log('isDirty : ', isDirty);
+    if (isDirty) {
+      setDirtyOpen(true);
+    } else {
+      handleCloseDialog();
+    }
+  };
+
+  /* useEffect --------------------------------------- */
+  /* eslint-disable react-hooks/exhaustive-deps */
+  useEffect(() => {
+    console.log('★★★★★★★★★★★★★★★★★★★★★');
+    const getThatOneCustomer = async () => {
+      if (customerId === -100) {
+        // 新規追加モード
+        setCustomer(emptyCustomer);
+        reset(); // フォーム初期化
+        setEditable(true); // 編集モードにする
+        setIsLoading(false);
+        setIsNew(true);
+      } else {
+        // const customer1 = await getOnecustomer(customerId);
+        // if (customer1) {
+        //   setcustomer(customer1);
+        //   reset(customer1); // 取得したデータでフォーム初期化
+        // }
+        setIsLoading(false);
+      }
+    };
+    getThatOneCustomer();
+    console.log('chaaaaaage : ', customer);
+  }, [customerId]);
+  /* eslint-enable react-hooks/exhaustive-deps */
+
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit)}>
         <MasterDialogTitle
           editable={editable}
-          handleEditable={handleEditable}
-          handleClose={handleCloseDialog}
+          handleEditable={() => setEditable(true)}
+          handleClose={handleClickClose}
           dialogTitle="顧客マスタ登録"
+          isNew={isNew}
+          isDirty={isDirty}
         />
-        {/* {isLoading ? ( //DB
+        {isLoading ? ( //DB
           <Loading />
-        ) : ( */}
-        <Grid2 container spacing={1} p={5} direction={'column'} justifyContent={'center'} width={'100%'}>
-          <Grid2>
-            <FormBox formItem={formItems[0]} required={true}>
-              <TextFieldElement
-                name="kokyakuNam"
-                control={control}
-                label={formItems[0].exsample}
-                fullWidth
-                sx={{ maxWidth: '90%' }}
-                disabled={editable ? false : true}
-              />
-            </FormBox>
-          </Grid2>
-          <Grid2>
-            <FormBox formItem={formItems[1]} required={true}>
-              <TextFieldElement
-                name="kana"
-                control={control}
-                label={formItems[1].exsample}
-                fullWidth
-                sx={{ maxWidth: '90%' }}
-                disabled={editable ? false : true}
-              />
-            </FormBox>
-          </Grid2>
-          <Grid2>
-            <FormBox formItem={formItems[2]} required={true}>
-              <SelectElement
-                name="kokyakuRank"
-                control={control}
-                label={formItems[2].exsample}
-                options={[
-                  { id: 1, label: 1 },
-                  { id: 2, label: 2 },
-                  { id: 3, label: 3 },
-                  { id: 4, label: 4 },
-                  { id: 5, label: 5 },
-                ]}
-                fullWidth
-                sx={{ maxWidth: '50%' }}
-                disabled={editable ? false : true}
-              />
-            </FormBox>
-          </Grid2>
-          <Grid2>
-            <FormBox formItem={formItems[3]}>
-              <CheckboxElement name="delFlg" control={control} size="medium" disabled={editable ? false : true} />
-            </FormBox>
-          </Grid2>
-          <Grid2>
-            <FormBox formItem={formItems[4]}>
-              <TextFieldElement
-                name="keisho"
-                control={control}
-                label={formItems[4].exsample}
-                fullWidth
-                sx={{ maxWidth: '50%' }}
-                disabled={editable ? false : true}
-              />
-            </FormBox>
-          </Grid2>
-          <Grid2>
-            <FormBox formItem={formItems[5]}>
-              <TextFieldElement
-                name="adrPost"
-                control={control}
-                label={formItems[5].exsample}
-                fullWidth
-                sx={{ maxWidth: '50%' }}
-                disabled={editable ? false : true}
-              />
-            </FormBox>
-          </Grid2>
-          <Grid2>
-            <FormBox formItem={formItems[6]}>
-              <TextFieldElement
-                name="adrShozai"
-                control={control}
-                label={formItems[6].exsample}
-                fullWidth
-                sx={{ maxWidth: '90%' }}
-                disabled={editable ? false : true}
-              />
-            </FormBox>
-          </Grid2>
-          <Grid2>
-            <FormBox formItem={formItems[7]}>
-              <TextFieldElement
-                name="adrTatemono"
-                control={control}
-                label={formItems[7].exsample}
-                fullWidth
-                sx={{ maxWidth: '90%' }}
-                disabled={editable ? false : true}
-              />
-            </FormBox>
-          </Grid2>
-          <Grid2>
-            <FormBox formItem={formItems[8]}>
-              <TextFieldElement
-                name="adrSonota"
-                control={control}
-                label={formItems[8].exsample}
-                fullWidth
-                sx={{ maxWidth: '90%' }}
-                disabled={editable ? false : true}
-              />
-            </FormBox>
-          </Grid2>
-          <Grid2>
-            <FormBox formItem={formItems[9]}>
-              <TextFieldElement
-                name="tel"
-                control={control}
-                label={formItems[9].exsample}
-                fullWidth
-                sx={{ maxWidth: '50%' }}
-                disabled={editable ? false : true}
-              />
-            </FormBox>
-          </Grid2>
-          <Grid2>
-            <FormBox formItem={formItems[10]}>
-              <TextFieldElement
-                name="telMobile"
-                control={control}
-                label={formItems[10].exsample}
-                fullWidth
-                sx={{ maxWidth: '50%' }}
-                disabled={editable ? false : true}
-              />
-            </FormBox>
-          </Grid2>
-          <Grid2>
-            <FormBox formItem={formItems[11]}>
-              <TextFieldElement
-                name="fax"
-                control={control}
-                label={formItems[11].exsample}
-                fullWidth
-                sx={{ maxWidth: '50%' }}
-                disabled={editable ? false : true}
-              />
-            </FormBox>
-          </Grid2>
-          <Grid2>
-            <FormBox formItem={formItems[12]}>
-              <TextFieldElement
-                name="mail"
-                control={control}
-                label={formItems[12].exsample}
-                fullWidth
-                sx={{ maxWidth: '90%' }}
-                disabled={editable ? false : true}
-              />
-            </FormBox>
-          </Grid2>
-          <Grid2>
-            <FormBox formItem={formItems[13]}>
-              <TextareaAutosizeElement ////////////// 200文字までの設定をしなければならない
-                name="mem"
-                control={control}
-                label={formItems[13].exsample}
-                fullWidth
-                sx={{ maxWidth: '90%' }}
-                disabled={editable ? false : true}
-              />
-            </FormBox>
-          </Grid2>
-          <Grid2>
-            <FormBox formItem={formItems[14]}>
-              <CheckboxElement name="dspFlg" control={control} size="medium" disabled={editable ? false : true} />
-            </FormBox>
-          </Grid2>
-          <Grid2>
-            <FormBox formItem={formItems[15]}>
-              <TextFieldElement
-                name="closeDay"
-                control={control}
-                label={formItems[15].exsample}
-                fullWidth
-                sx={{ maxWidth: '50%' }}
-                disabled={editable ? false : true}
-              />
-            </FormBox>
-          </Grid2>
-          <Grid2>
-            <FormBox formItem={formItems[16]}>
-              <TextFieldElement
-                name="siteDay"
-                control={control}
-                label={formItems[16].exsample}
-                fullWidth
-                sx={{ maxWidth: '50%' }}
-                disabled={editable ? false : true}
-              />
-            </FormBox>
-          </Grid2>
-          <Grid2>
-            <FormBox formItem={formItems[17]}>
-              <CheckboxElement
-                name="kizaiNebikiFlg"
-                control={control}
-                size="medium"
-                disabled={editable ? false : true}
-              />
-            </FormBox>
-          </Grid2>
-        </Grid2>
-        {/* )} */}
+        ) : (
+          <>
+            <Grid2 container spacing={1} p={5} direction={'column'} justifyContent={'center'} width={'100%'}>
+              <Grid2>
+                <FormBox formItem={formItems[0]} required={true}>
+                  <TextFieldElement
+                    name="kokyakuNam"
+                    control={control}
+                    label={formItems[0].exsample}
+                    fullWidth
+                    sx={{ maxWidth: '90%' }}
+                    disabled={editable ? false : true}
+                  />
+                </FormBox>
+              </Grid2>
+              <Grid2>
+                <FormBox formItem={formItems[1]} required={true}>
+                  <TextFieldElement
+                    name="kana"
+                    control={control}
+                    label={formItems[1].exsample}
+                    fullWidth
+                    sx={{ maxWidth: '90%' }}
+                    disabled={editable ? false : true}
+                  />
+                </FormBox>
+              </Grid2>
+              <Grid2>
+                <FormBox formItem={formItems[2]} required={true}>
+                  <SelectElement
+                    name="kokyakuRank"
+                    control={control}
+                    label={formItems[2].exsample}
+                    options={[
+                      { id: 1, label: 1 },
+                      { id: 2, label: 2 },
+                      { id: 3, label: 3 },
+                      { id: 4, label: 4 },
+                      { id: 5, label: 5 },
+                    ]}
+                    fullWidth
+                    sx={{ maxWidth: '50%' }}
+                    disabled={editable ? false : true}
+                  />
+                </FormBox>
+              </Grid2>
+              <Grid2>
+                <FormBox formItem={formItems[3]}>
+                  <CheckboxElement name="delFlg" control={control} size="medium" disabled={editable ? false : true} />
+                </FormBox>
+              </Grid2>
+              <Grid2>
+                <FormBox formItem={formItems[4]}>
+                  <TextFieldElement
+                    name="keisho"
+                    control={control}
+                    label={formItems[4].exsample}
+                    fullWidth
+                    sx={{ maxWidth: '50%' }}
+                    disabled={editable ? false : true}
+                  />
+                </FormBox>
+              </Grid2>
+              <Grid2>
+                <FormBox formItem={formItems[5]}>
+                  <TextFieldElement
+                    name="adrPost"
+                    control={control}
+                    label={formItems[5].exsample}
+                    fullWidth
+                    sx={{ maxWidth: '50%' }}
+                    disabled={editable ? false : true}
+                  />
+                </FormBox>
+              </Grid2>
+              <Grid2>
+                <FormBox formItem={formItems[6]}>
+                  <TextFieldElement
+                    name="adrShozai"
+                    control={control}
+                    label={formItems[6].exsample}
+                    fullWidth
+                    sx={{ maxWidth: '90%' }}
+                    disabled={editable ? false : true}
+                  />
+                </FormBox>
+              </Grid2>
+              <Grid2>
+                <FormBox formItem={formItems[7]}>
+                  <TextFieldElement
+                    name="adrTatemono"
+                    control={control}
+                    label={formItems[7].exsample}
+                    fullWidth
+                    sx={{ maxWidth: '90%' }}
+                    disabled={editable ? false : true}
+                  />
+                </FormBox>
+              </Grid2>
+              <Grid2>
+                <FormBox formItem={formItems[8]}>
+                  <TextFieldElement
+                    name="adrSonota"
+                    control={control}
+                    label={formItems[8].exsample}
+                    fullWidth
+                    sx={{ maxWidth: '90%' }}
+                    disabled={editable ? false : true}
+                  />
+                </FormBox>
+              </Grid2>
+              <Grid2>
+                <FormBox formItem={formItems[9]}>
+                  <TextFieldElement
+                    name="tel"
+                    control={control}
+                    label={formItems[9].exsample}
+                    fullWidth
+                    sx={{ maxWidth: '50%' }}
+                    disabled={editable ? false : true}
+                  />
+                </FormBox>
+              </Grid2>
+              <Grid2>
+                <FormBox formItem={formItems[10]}>
+                  <TextFieldElement
+                    name="telMobile"
+                    control={control}
+                    label={formItems[10].exsample}
+                    fullWidth
+                    sx={{ maxWidth: '50%' }}
+                    disabled={editable ? false : true}
+                  />
+                </FormBox>
+              </Grid2>
+              <Grid2>
+                <FormBox formItem={formItems[11]}>
+                  <TextFieldElement
+                    name="fax"
+                    control={control}
+                    label={formItems[11].exsample}
+                    fullWidth
+                    sx={{ maxWidth: '50%' }}
+                    disabled={editable ? false : true}
+                  />
+                </FormBox>
+              </Grid2>
+              <Grid2>
+                <FormBox formItem={formItems[12]}>
+                  <TextFieldElement
+                    name="mail"
+                    control={control}
+                    label={formItems[12].exsample}
+                    fullWidth
+                    sx={{ maxWidth: '90%' }}
+                    disabled={editable ? false : true}
+                  />
+                </FormBox>
+              </Grid2>
+              <Grid2>
+                <FormBox formItem={formItems[13]}>
+                  <TextareaAutosizeElement ////////////// 200文字までの設定をしなければならない
+                    name="mem"
+                    control={control}
+                    label={formItems[13].exsample}
+                    fullWidth
+                    sx={{ maxWidth: '90%' }}
+                    disabled={editable ? false : true}
+                  />
+                </FormBox>
+              </Grid2>
+              <Grid2>
+                <FormBox formItem={formItems[14]}>
+                  <CheckboxElement name="dspFlg" control={control} size="medium" disabled={editable ? false : true} />
+                </FormBox>
+              </Grid2>
+              <Grid2>
+                <FormBox formItem={formItems[15]}>
+                  <TextFieldElement
+                    name="closeDay"
+                    control={control}
+                    label={formItems[15].exsample}
+                    fullWidth
+                    sx={{ maxWidth: '50%' }}
+                    disabled={editable ? false : true}
+                  />
+                </FormBox>
+              </Grid2>
+              <Grid2>
+                <FormBox formItem={formItems[16]}>
+                  <TextFieldElement
+                    name="siteDay"
+                    control={control}
+                    label={formItems[16].exsample}
+                    fullWidth
+                    sx={{ maxWidth: '50%' }}
+                    disabled={editable ? false : true}
+                  />
+                </FormBox>
+              </Grid2>
+              <Grid2>
+                <FormBox formItem={formItems[17]}>
+                  <CheckboxElement
+                    name="kizaiNebikiFlg"
+                    control={control}
+                    size="medium"
+                    disabled={editable ? false : true}
+                  />
+                </FormBox>
+              </Grid2>
+            </Grid2>
+            <IsDirtyDialog open={dirtyOpen} handleCloseDirty={handleCloseDirty} handleCloseAll={handleCloseDialog} />
+          </>
+        )}
       </form>
     </>
   );
 };
 
-/* 移動する予定move */
-
-const formItems: FormItemsType[] = [
-  {
-    label: '顧客名',
-    exsample: '例）㈱エンジニア･ライティング',
-    constraints: '100文字まで',
-  },
-  {
-    label: '顧客かな',
-    exsample: '例）えんじにあ　らいてぃんぐ',
-    constraints: '100文字まで',
-  },
-  {
-    label: '顧客ランク',
-    exsample: '',
-    constraints: '１～５選択',
-  },
-  {
-    label: '削除フラグ',
-    exsample: '',
-    constraints: '論理削除（データは物理削除されません）',
-  },
-  {
-    label: '顧客敬称',
-    exsample: '',
-    constraints: '10文字まで',
-  },
-  {
-    label: '顧客住所（郵便番号）',
-    exsample: '例）242-0018 ',
-    constraints: '20文字まで',
-  },
-  {
-    label: '顧客住所（所在地）',
-    exsample: '例）神奈川県大和市深見西9-99-99',
-    constraints: '100文字まで',
-  },
-  {
-    label: '顧客住所（建物名）',
-    exsample: '例）XXビル 11F',
-    constraints: '100文字まで',
-  },
-  {
-    label: '顧客住所（その他）',
-    exsample: 'その他の住所情報',
-    constraints: '100文字まで',
-  },
-  {
-    label: '電話',
-    exsample: '例）046-999-1234',
-    constraints: '20文字まで',
-  },
-  {
-    label: '携帯',
-    exsample: '例）070-9999-9999',
-    constraints: '20文字まで',
-  },
-  {
-    label: 'FAX',
-    exsample: '例）046-999-1235',
-    constraints: '20文字まで',
-  },
-  {
-    label: 'メールアドレス',
-    exsample: '例）abc@zzz.co.jp',
-    constraints: '100文字まで',
-  },
-  {
-    label: 'メモ',
-    exsample: '',
-    constraints: '200文字まで',
-  },
-  {
-    label: '表示フラグ',
-    exsample: '',
-    constraints: '選択リストへの表示',
-  },
-  {
-    label: '月締日',
-    exsample: '例）31、15　※月末締めの場合31を指定',
-    constraints: '数字',
-  },
-  {
-    label: '支払サイト日数',
-    exsample: '例）月末締め翌月末払いの場合30、翌々月末払いは60を指定',
-    constraints: '数字',
-  },
-  {
-    label: '機材値引き対象フラグ',
-    exsample: '',
-    constraints: '数字',
-  },
-];
-
 /** ---------------------------スタイル----------------------------- */
-const styles: { [key: string]: React.CSSProperties } = {
-  greyBox: {
-    border: 1,
-    borderColor: grey[500],
-    backgroundColor: grey[300],
-    paddingLeft: 1,
-    marginLeft: 1,
-    paddingRight: 1,
-    minHeight: '30px',
-    maxHeight: '30px',
-  },
-  greyBoxMemo: {
-    border: 1,
-    borderColor: grey[500],
-    backgroundColor: grey[300],
-    paddingLeft: 1,
-    marginLeft: 1,
-    paddingRight: 1,
-    minHeight: '150px',
-    maxHeight: '150px',
-  },
-  margintop1: {
-    marginTop: 1,
-  },
-  justContentBox: {
-    display: 'flex',
-  },
-};
+const styles: { [key: string]: React.CSSProperties } = {};

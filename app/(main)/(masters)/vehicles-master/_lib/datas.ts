@@ -1,4 +1,6 @@
-import z from 'zod';
+import { FormItemsType } from '@/app/(main)/_ui/form-box';
+
+import { VehsMasterDialogValues, VehsMasterTableValues } from './types';
 /**
  * 車両マスタテーブルのヘッダー
  */
@@ -7,52 +9,37 @@ export const vMHeader = [
   { key: 'mem', label: 'メモ' },
 ];
 
-/**---------車両データ------------ */
-export const VehMasterTableSchema = z.object({
-  sharyoId: z.number(),
-  sharyoNam: z.string(),
-  delFlg: z.boolean(),
-  mem: z.string(),
-  dspFlg: z.boolean(),
-});
+/*  */
+export const formItems: FormItemsType[] = [
+  {
+    label: '車両名',
+    exsample: '例）ハイエース',
+    constraints: '100文字まで',
+  },
+  {
+    label: '削除フラグ',
+    exsample: '',
+    constraints: '論理削除（データは物理削除されません）',
+  },
+  {
+    label: 'メモ',
+    exsample: '',
+    constraints: '200文字まで',
+  },
+  {
+    label: '表示フラグ',
+    exsample: '',
+    constraints: '選択リストへの表示',
+  },
+];
 
-export type VehMasterTableValues = z.infer<typeof VehMasterTableSchema>;
-
-const vehMasterDialogSchema = z.object({
-  sharyoId: z.number(),
-  sharyoNam: z.string(),
-  delFlg: z.boolean().optional(),
-  mem: z.string().optional(),
-  dspFlg: z.boolean().optional(),
-  dspOrderNum: z.number().optional(),
-  addDate: z.date(),
-  addUser: z.string(),
-  updDate: z.date(),
-  updUser: z.string(),
-});
-
-export const VehMasterDialogSchema = vehMasterDialogSchema.omit({
-  sharyoId: true,
-  dspOrderNum: true,
-  addDate: true,
-  addUser: true,
-  updDate: true,
-  updUser: true,
-});
-
-export type VehAllValues = z.infer<typeof vehMasterDialogSchema>;
-export type VehMasterDialogValues = z.infer<typeof VehMasterDialogSchema>;
-
-type VehicleData = {
-  sharyoId: number;
-  sharyoNam: string;
-  delFlg: boolean;
-  mem: string;
-  dspFlg: boolean;
+/*  */
+export const emptyVeh: VehsMasterDialogValues = {
+  sharyoNam: '',
 };
 
 /* 削除モックdelete */
-export const vehicles: VehicleData[] = [
+export const vehicles: VehsMasterTableValues[] = [
   {
     sharyoId: 1,
     sharyoNam: '不明',

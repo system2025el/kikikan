@@ -30,37 +30,3 @@ export const DaibumonsMasterDialogSchema = DaibumonsMasterTableSchema.omit({
 export type DaibumonsMasterDialogValues = z.infer<typeof DaibumonsMasterDialogSchema>;
 
 // export type daibumonsMasterValues = { daibumonId: number; daibumonNam: string; dspOrdNum: number };
-/*モック削除delete */
-export const daibumonsList: DaibumonsMasterDialogValues[] = [
-  {
-    daibumonId: 1,
-    daibumonNam: '照明',
-    mem: 'XXXXXXXXXXX',
-    delFlg: false,
-  },
-  {
-    daibumonId: 2,
-    daibumonNam: 'Moving Light',
-    mem: 'XXXXXXXX',
-    delFlg: true,
-  },
-  {
-    daibumonNam: 'ムービング ゴボ',
-    mem: 'XXXXXXX',
-    daibumonId: 3,
-    delFlg: false,
-  },
-  {
-    daibumonNam: '空（カラ）ケース',
-    daibumonId: 4,
-    mem: '',
-    delFlg: false,
-  },
-];
-/**
- * 大部門マスタテーブルヘッダー
- */
-export const daibumonMHeader = [
-  { key: 'name', label: '名称' },
-  { key: 'mem', label: 'メモ' },
-];

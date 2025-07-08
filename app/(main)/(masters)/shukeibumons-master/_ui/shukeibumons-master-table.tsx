@@ -1,11 +1,13 @@
 import AddIcon from '@mui/icons-material/Add';
 import { Box, Button, Dialog, Divider, Grid2, Paper, TableContainer, Typography } from '@mui/material';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
+import { Loading } from '@/app/(main)/_ui/loading';
 import { MuiTablePagination } from '@/app/(main)/_ui/table-pagination';
 
 import { MasterTable } from '../../_ui/table';
-import { shukeibumonMHeader, ShukeibumonsMasterDialogValues } from '../_lib/type';
+import { shukeibumonMHeader } from '../_lib/datas';
+import { ShukeibumonsMasterDialogValues } from '../_lib/type';
 import { ShukeibumonsMasterDialog } from './shukeibumons-master-dialog';
 
 /**
@@ -13,7 +15,15 @@ import { ShukeibumonsMasterDialog } from './shukeibumons-master-dialog';
  * @param {shukeibumons}
  * @returns {JSX.Element} 集計部門マスタテーブルコンポーネント
  */
-export const ShukeibumonsMasterTable = ({ shukeibumons }: { shukeibumons: ShukeibumonsMasterDialogValues[] }) => {
+export const ShukeibumonsMasterTable = ({
+  shukeibumons,
+  isLoading,
+  setIsLoading,
+}: {
+  shukeibumons: ShukeibumonsMasterDialogValues[];
+  isLoading: boolean;
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+}) => {
   /* 1ページごとの表示数 */
   const rowsPerPage = 50;
   /* useState --------------------------------------- */
@@ -23,16 +33,11 @@ export const ShukeibumonsMasterTable = ({ shukeibumons }: { shukeibumons: Shukei
   const [openId, setOpenID] = useState<number>(-100);
   /* 詳細ダイアログの開閉状態 */
   const [dialogOpen, setDialogOpen] = useState(false);
-  /* ダイアログでの編集モード管理 */
-  const [editable, setEditable] = useState(false);
-  /* DBのローディング状態 */
-  const [loading, setLoading] = useState(true);
+  /*  */
+  const [theShukeibumons, setTheShukeibumons] = useState(shukeibumons);
   /* methods ---------------------------------------- */
   /* 詳細ダイアログを開く関数 */
   const handleOpenDialog = (id: number) => {
-    if (id === -100) {
-      setEditable(true);
-    }
     setOpenID(id);
     setDialogOpen(true);
   };
@@ -40,12 +45,29 @@ export const ShukeibumonsMasterTable = ({ shukeibumons }: { shukeibumons: Shukei
   const handleCloseDialog = () => {
     setDialogOpen(false);
   };
+  /* 情報が変わったときに更新される */
+  const refetchShukeibumons = async () => {
+    setIsLoading(true);
+    // const updated = await GetFilteredShukeibumons('');
+    // setTheShukeibumons(updated);
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    setTheShukeibumons(shukeibumons); // 親からのShukeiBumonsが更新された場合に同期
+  }, [shukeibumons]);
+
+  useEffect(() => {
+    setIsLoading(false); //theShukeiBumonsが変わったらローディング終わり
+  }, [theShukeibumons, setIsLoading]);
 
   // 表示するデータ
   const list = useMemo(
     () =>
-      rowsPerPage > 0 ? shukeibumons!.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage) : shukeibumons,
-    [page, rowsPerPage, shukeibumons]
+      rowsPerPage > 0
+        ? theShukeibumons!.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage)
+        : theShukeibumons,
+    [page, rowsPerPage, theShukeibumons]
   );
 
   return (
@@ -77,21 +99,31 @@ export const ShukeibumonsMasterTable = ({ shukeibumons }: { shukeibumons: Shukei
           </Grid2>
         </Grid2>
         <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
-          <MasterTable
-            headers={shukeibumonMHeader}
-            datas={list!.map((l) => ({ id: l.shukeibumonId!, name: l.shukeibumonNam, mem: l.mem!, delFlg: l.delFlg }))}
-            handleOpenDialog={handleOpenDialog}
-            page={page}
-            rowsPerPage={rowsPerPage}
-          />
-          <Dialog open={dialogOpen} fullScreen>
-            <ShukeibumonsMasterDialog
-              handleClose={handleCloseDialog}
-              shukeibumonId={openId}
-              editable={editable}
-              setEditable={setEditable}
-            />
-          </Dialog>
+          {isLoading ? (
+            <Loading />
+          ) : (
+            <>
+              <MasterTable
+                headers={shukeibumonMHeader}
+                datas={list!.map((l) => ({
+                  id: l.shukeibumonId!,
+                  name: l.shukeibumonNam,
+                  mem: l.mem!,
+                  delFlg: l.delFlg,
+                }))}
+                handleOpenDialog={handleOpenDialog}
+                page={page}
+                rowsPerPage={rowsPerPage}
+              />
+              <Dialog open={dialogOpen} fullScreen>
+                <ShukeibumonsMasterDialog
+                  handleClose={handleCloseDialog}
+                  shukeibumonId={openId}
+                  refetchShukeibumons={refetchShukeibumons}
+                />
+              </Dialog>
+            </>
+          )}
         </TableContainer>
       </Box>
     </>

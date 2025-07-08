@@ -1,4 +1,4 @@
-import { shukeibumonsList } from './_lib/type';
+import { shukeibumonsList } from './_lib/datas';
 import { ShukeibumonsMaster } from './_ui/shukeibumons-master';
 
 const Page = async () => {
