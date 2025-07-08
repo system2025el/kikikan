@@ -255,7 +255,9 @@ const EquipmentOrderDetail = () => {
       const updatedRow = getStockRow(testStock, updatedHeader.length);
       setDateHeader(updatedHeader);
 
-      const targetIndex = updatedHeader.map((date, index) => (dateRangeRef.current.includes(date) ? index : -1)).filter((index) => index !== -1);
+      const targetIndex = updatedHeader
+        .map((date, index) => (dateRangeRef.current.includes(date) ? index : -1))
+        .filter((index) => index !== -1);
       targetIndex.map((index) => {
         updatedRow.map((date, i) => {
           date.data[index] = testStock[i] - equipmentRows[i].total;
@@ -312,7 +314,9 @@ const EquipmentOrderDetail = () => {
     );
     const updatedRow = getStockRow(testStock, dateHeaderRef.current.length);
     const updatedData = updatedRow[rowIndex].data;
-    const targetIndex = dateHeaderRef.current.map((date, index) => (dateRangeRef.current.includes(date) ? index : -1)).filter((index) => index !== -1);
+    const targetIndex = dateHeaderRef.current
+      .map((date, index) => (dateRangeRef.current.includes(date) ? index : -1))
+      .filter((index) => index !== -1);
     targetIndex.map((index) => {
       updatedData[index] = testStock[rowIndex] - totalValue;
     });
@@ -346,7 +350,9 @@ const EquipmentOrderDetail = () => {
       setDateHeader(updatedHeader);
       setDateRange(updatedDateRange);
 
-      const targetIndex = updatedHeader.map((date, index) => (updatedDateRange.includes(date) ? index : -1)).filter((index) => index !== -1);
+      const targetIndex = updatedHeader
+        .map((date, index) => (updatedDateRange.includes(date) ? index : -1))
+        .filter((index) => index !== -1);
       targetIndex.map((index) => {
         updatedRow.map((date, i) => {
           date.data[index] = testStock[i] - equipmentRows[i].total;
@@ -378,7 +384,9 @@ const EquipmentOrderDetail = () => {
       setDateHeader(updatedHeader);
       setDateRange(updatedDateRange);
 
-      const targetIndex = updatedHeader.map((date, index) => (updatedDateRange.includes(date) ? index : -1)).filter((index) => index !== -1);
+      const targetIndex = updatedHeader
+        .map((date, index) => (updatedDateRange.includes(date) ? index : -1))
+        .filter((index) => index !== -1);
       targetIndex.map((index) => {
         updatedRow.map((date, i) => {
           date.data[index] = testStock[i] - equipmentRows[i].total;
@@ -408,7 +416,9 @@ const EquipmentOrderDetail = () => {
       const updatedRow = getStockRow(testStock, dateHeader.length);
       setDateRange(updatedDateRange);
 
-      const targetIndex = dateHeaderRef.current.map((date, index) => (updatedDateRange.includes(date) ? index : -1)).filter((index) => index !== -1);
+      const targetIndex = dateHeaderRef.current
+        .map((date, index) => (updatedDateRange.includes(date) ? index : -1))
+        .filter((index) => index !== -1);
       targetIndex.map((index) => {
         updatedRow.map((date, i) => {
           date.data[index] = testStock[i] - equipmentRows[i].total;
@@ -431,8 +441,10 @@ const EquipmentOrderDetail = () => {
       const updatedDateRange = getRange(startDate, newDate?.toDate());
       const updatedRow = getStockRow(testStock, dateHeader.length);
       setDateRange(updatedDateRange);
-      
-      const targetIndex = dateHeaderRef.current.map((date, index) => (updatedDateRange.includes(date) ? index : -1)).filter((index) => index !== -1);
+
+      const targetIndex = dateHeaderRef.current
+        .map((date, index) => (updatedDateRange.includes(date) ? index : -1))
+        .filter((index) => index !== -1);
       targetIndex.map((index) => {
         updatedRow.map((date, i) => {
           date.data[index] = testStock[i] - equipmentRows[i].total;
