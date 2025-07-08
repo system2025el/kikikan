@@ -9,7 +9,7 @@ import { MuiTablePagination } from '../../../_ui/table-pagination';
 import { MasterTable } from '../../_ui/table';
 import { lMHeader } from '../_lib/datas';
 import { GetFilteredLocs } from '../_lib/funcs';
-import { LocMasterTableValues } from '../_lib/types';
+import { LocsMasterTableValues } from '../_lib/types';
 import { LocationsMasterDialog } from './locations-master-dialog';
 
 /**
@@ -22,7 +22,7 @@ export const LocationsMasterTable = ({
   isLoading,
   setIsLoading,
 }: {
-  locs: LocMasterTableValues[] | undefined;
+  locs: LocsMasterTableValues[] | undefined;
   isLoading: boolean;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
@@ -36,7 +36,7 @@ export const LocationsMasterTable = ({
   /* 詳細ダイアログの開閉状態 */
   const [dialogOpen, setDialogOpen] = useState(false);
   /* 場所リスト */
-  const [theLocs, setTheLocs] = useState<LocMasterTableValues[] | undefined>(locs);
+  const [theLocs, setTheLocs] = useState<LocsMasterTableValues[] | undefined>(locs);
 
   /* methods ------------------------------------------- */
   /* 詳細ダイアログを開く関数 */

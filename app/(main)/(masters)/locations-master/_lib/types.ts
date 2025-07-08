@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const LocMasterSchema = z.object({
+export const LocsMasterSchema = z.object({
   locId: z.number().optional(),
   locNam: z.string().max(100, { message: '100文字以内で入力してください' }),
   kana: z.string().max(100, { message: '100文字以内で入力してください' }),
@@ -22,9 +22,9 @@ export const LocMasterSchema = z.object({
   updUser: z.string().optional(),
 });
 
-export type LocMasterValues = z.infer<typeof LocMasterSchema>;
+export type LocsMasterValues = z.infer<typeof LocsMasterSchema>;
 
-export const LocMasterTableSchema = z.object({
+export const LocsMasterTableSchema = z.object({
   locId: z.number(),
   locNam: z.string(),
   dspOrdNum: z.number().optional(),
@@ -37,9 +37,9 @@ export const LocMasterTableSchema = z.object({
   mem: z.string().optional(),
 });
 
-export type LocMasterTableValues = z.infer<typeof LocMasterTableSchema>;
+export type LocsMasterTableValues = z.infer<typeof LocsMasterTableSchema>;
 
-export const LocsMasterDialogSchema = LocMasterSchema.omit({
+export const LocsMasterDialogSchema = LocsMasterSchema.omit({
   dspOrdNum: true,
   addDate: true,
   addUser: true,
