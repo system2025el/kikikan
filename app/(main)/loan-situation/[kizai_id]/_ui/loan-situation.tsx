@@ -81,19 +81,8 @@ export const LoanSituation = () => {
       setSelectDate(date.toDate());
       const updatedHeader = getUseHeader(date?.toDate());
       setDateHeader(updatedHeader);
-      // const updatedRow = getStockRow(stock, updatedHeader.length);
-      // setDateHeader(updatedHeader);
-      // const targetIndex: number[] = [];
-      // dateRange.map((targetDate) => {
-      //   updatedHeader.map((date, index) => {
-      //     if (targetDate === date) {
-      //       targetIndex.push(index);
-      //     }
-      //   });
-      // });
-      // setStockRows(updatedRow);
 
-      // setAnchorEl(null);
+      setAnchorEl(null);
     }
   };
 
@@ -193,7 +182,7 @@ export const LoanSituation = () => {
               <Button variant="outlined" onClick={handleClick}>
                 日付選択
               </Button>
-              <Popper open={open} anchorEl={anchorEl} placement="bottom-start">
+              <Popper open={open} anchorEl={anchorEl} placement="bottom-start" sx={{ zIndex: 1000 }}>
                 <ClickAwayListener onClickAway={handleClickAway}>
                   <Paper elevation={3} sx={{ mt: 1 }}>
                     <Calendar date={selectDate} onChange={handleDateChange} />

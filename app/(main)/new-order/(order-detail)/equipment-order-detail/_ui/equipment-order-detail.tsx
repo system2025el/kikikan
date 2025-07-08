@@ -778,7 +778,7 @@ const EquipmentOrderDetail = () => {
               <Button variant="outlined" onClick={handleClick}>
                 日付選択
               </Button>
-              <Popper open={open} anchorEl={anchorEl} placement="bottom-start">
+              <Popper open={open} anchorEl={anchorEl} placement="bottom-start" sx={{ zIndex: 1000 }}>
                 <ClickAwayListener onClickAway={handleClickAway}>
                   <Paper elevation={3} sx={{ mt: 1 }}>
                     <Calendar date={selectDate} onChange={handleDateChange} />
