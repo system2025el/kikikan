@@ -1,4 +1,4 @@
-import NewOrder from '@/app/(main)/new-order/[juchu_head_id]/_ui/new-order';
+import { NewOrder } from '@/app/(main)/new-order/[juchu_head_id]/_ui/new-order';
 
 import { GetOrder } from './_lib/funcs';
 
@@ -9,7 +9,9 @@ const Page = async (props: { params: Promise<{ juchu_head_id: number }> }) => {
   console.log('id : ', id);
   const order = await GetOrder(id);
   console.log('order : ', order);
-
-  return <NewOrder />;
+  if (!order) {
+    return <div>受注情報が見つかりません。</div>;
+  }
+  return <NewOrder {...order} />;
 };
 export default Page;

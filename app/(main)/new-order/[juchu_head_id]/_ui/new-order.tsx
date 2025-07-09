@@ -24,18 +24,19 @@ import {
   Typography,
 } from '@mui/material';
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
+import { TextFieldElement } from 'react-hook-form-mui';
 
-import DateX, { RSuiteDateRangePicker } from '@/app/(main)/_ui/date';
+import DateX, { RSuiteDateRangePicker, TestDate } from '@/app/(main)/_ui/date';
 import { SelectTable } from '@/app/(main)/_ui/table';
 import { equipmentRows, vehicleHeaders, vehicleRows } from '@/app/(main)/new-order/[juchu_head_id]/_lib/data';
 
-import { JuchuHeadSchema } from '../_lib/types';
+import { JuchuHeadSchema, NewOrderSchema, NewOrderValues } from '../_lib/types';
 import { CustomerSelectionDialog } from './customer-selection';
 import { LocationSelectDialog } from './location-selection';
 import { NewOrderTable } from './new-order-table';
 
-const NewOrder = () => {
+export const NewOrder = (order: NewOrderValues) => {
   /* useForm ------------------------- */
   const {
     control,
@@ -45,9 +46,25 @@ const NewOrder = () => {
   } = useForm({
     mode: 'onBlur',
     reValidateMode: 'onBlur',
-    defaultValues: {},
-    resolver: zodResolver(JuchuHeadSchema),
+    defaultValues: {
+      juchuHeadId: order.juchuHeadId,
+      delFlg: order.delFlg,
+      juchuSts: order.juchuSts,
+      juchuDat: order.juchuDat,
+      juchuRange: [new Date(order.juchuRange[0]), new Date(order.juchuRange[1])],
+      nyuryokuUser: order.nyuryokuUser,
+      koenNam: order.koenNam,
+      koenbashoNam: order.koenbashoNam,
+      kokyakuId: order.kokyakuId,
+      kokyakuTantoNam: order.kokyakuTantoNam,
+      mem: order.mem,
+      nebikiAmt: order.nebikiAmt,
+      zeiKbn: order.zeiKbn,
+    },
+    resolver: zodResolver(NewOrderSchema),
   });
+
+  console.log('NewOrder order : ', order);
 
   // 受注開始日/受注終了日
   const [dateRange, setDateRange] = useState<[Date, Date] | null>([new Date(), new Date()]);
@@ -99,7 +116,7 @@ const NewOrder = () => {
     setCustomerDialogOpen(false);
   };
 
-  const handleDateChange = (range: [Date, Date] | null) => {
+  const handleDateChange = (range: [Date, Date]) => {
     setDateRange(range);
   };
 
@@ -136,35 +153,40 @@ const NewOrder = () => {
                   <Typography marginRight={5} whiteSpace="nowrap">
                     受注番号
                   </Typography>
-                  <TextField defaultValue={81694} disabled></TextField>
+                  <TextFieldElement name="juchuHeadId" control={control} disabled></TextFieldElement>
                 </Grid2>
                 <Grid2 display="flex" direction="row" alignItems="center">
                   <Typography mr={2}>受注ステータス</Typography>
                   <FormControl size="small" sx={{ width: 120 }}>
-                    <Select value={selectStatus} onChange={statusChange}>
-                      <MenuItem value="">
-                        <em>None</em>
-                      </MenuItem>
-                      <MenuItem value={'確定'}>確定</MenuItem>
-                      <MenuItem value={'処理中'}>処理中</MenuItem>
-                    </Select>
+                    <Controller
+                      name="juchuSts"
+                      control={control}
+                      render={({ field }) => (
+                        <Select {...field}>
+                          <MenuItem value={0}>入力中</MenuItem>
+                          <MenuItem value={1}>仮受注</MenuItem>
+                          <MenuItem value={2}>処理中</MenuItem>
+                          <MenuItem value={3}>確定</MenuItem>
+                          <MenuItem value={4}>貸出済み</MenuItem>
+                          <MenuItem value={5}>返却済み</MenuItem>
+                          <MenuItem value={9}>受注キャンセル</MenuItem>
+                        </Select>
+                      )}
+                    />
                   </FormControl>
                 </Grid2>
               </Grid2>
               <Box sx={styles.container}>
                 <Typography marginRight={7}>受注日</Typography>
-                <DateX />
+                <Controller
+                  name="juchuDat"
+                  control={control}
+                  render={({ field }) => <TestDate date={field.value} onChange={field.onChange} />}
+                />
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={7}>入力者</Typography>
-                <FormControl disabled size="small" sx={{ width: '25%' }}>
-                  <Select value={selectInputPerson} onChange={inputPersonChange}>
-                    <MenuItem value="">
-                      <em>None</em>
-                    </MenuItem>
-                    <MenuItem value={'田中'}>田中</MenuItem>
-                  </Select>
-                </FormControl>
+                <TextFieldElement name="nyuryokuUser" control={control} disabled></TextFieldElement>
               </Box>
               <Box sx={styles.container}>
                 <Typography mr={2}>
@@ -172,21 +194,27 @@ const NewOrder = () => {
                   <br />
                   受注終了日
                 </Typography>
-                <RSuiteDateRangePicker
-                  //styles={{ background: 'grey' }}
-                  value={dateRange}
-                  onChange={handleDateChange} /*val={rentalPeriod}*/
+                <Controller
+                  name="juchuRange"
+                  control={control}
+                  render={({ field }) => (
+                    <RSuiteDateRangePicker
+                      //styles={{ background: 'grey' }}
+                      value={field.value}
+                      onChange={field.onChange} /*val={rentalPeriod}*/
+                    />
+                  )}
                 />
               </Box>
             </Grid2>
             <Grid2 size={{ xs: 12, sm: 12, md: 5 }}>
               <Box sx={styles.container}>
                 <Typography marginRight={7}>公演名</Typography>
-                <TextField sx={{ width: '50%' }}></TextField>
+                <TextFieldElement name="koenNam" control={control} disabled></TextFieldElement>
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={5}>公演場所</Typography>
-                <TextField sx={{ width: '50%' }}></TextField>
+                <TextFieldElement name="koenbashoNam" control={control} disabled></TextFieldElement>
                 <Button onClick={() => handleOpenLocationDialog()}>検索</Button>
                 <Dialog open={locationDialogOpen} fullScreen>
                   <LocationSelectDialog handleCloseLocationDialog={handleCloseLocationDailog} />
@@ -202,24 +230,30 @@ const NewOrder = () => {
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={3}>相手担当者</Typography>
-                <TextField sx={{ width: '50%' }}></TextField>
+                <TextFieldElement name="kokyakuTantoNam" control={control} disabled></TextFieldElement>
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={9}>メモ</Typography>
-                <TextField sx={{ width: '50%' }}></TextField>
+                <TextFieldElement name="mem" control={control} disabled></TextFieldElement>
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={7}>値引き</Typography>
-                <TextField sx={{ width: '30%' }}></TextField>
+                <TextFieldElement name="nebikiAmt" control={control} disabled></TextFieldElement>
                 <Typography>円</Typography>
                 <Typography ml={4} mr={2}>
                   税区分
                 </Typography>
                 <FormControl size="small" sx={{ width: '8%', minWidth: '80px' }}>
-                  <Select value={selectTax} onChange={selectTaxChange}>
-                    <MenuItem value={'外税'}>外税</MenuItem>
-                    <MenuItem value={'内税'}>内税</MenuItem>
-                  </Select>
+                  <Controller
+                    name="zeiKbn"
+                    control={control}
+                    render={({ field }) => (
+                      <Select {...field}>
+                        <MenuItem value={1}>内税</MenuItem>
+                        <MenuItem value={2}>外税</MenuItem>
+                      </Select>
+                    )}
+                  />
                 </FormControl>
               </Box>
             </Grid2>
@@ -324,8 +358,6 @@ const NewOrder = () => {
     </Box>
   );
 };
-
-export default NewOrder;
 
 /* style
 ---------------------------------------------------------------------------------------------------- */

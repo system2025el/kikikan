@@ -4,9 +4,9 @@ export const JuchuHeadSchema = z.object({
   juchuHeadId: z.number().optional(),
   delFlg: z.boolean().optional(),
   juchuSts: z.number().optional(),
-  juchuDat: z.date().optional(),
-  juchuStrDat: z.date().optional(),
-  juchuEndDat: z.date().optional(),
+  juchuDat: z.date().nullable(),
+  juchuStrDat: z.date().nullable(),
+  juchuEndDat: z.date().nullable(),
   nyuryokuUser: z.string().optional(),
   koenNam: z.string().optional(),
   koenbashoNam: z.string().optional(),
@@ -14,6 +14,7 @@ export const JuchuHeadSchema = z.object({
   kokyakuTantoNam: z.string().optional(),
   mem: z.string().optional(),
   nebikiAmt: z.number().optional(),
+  zeiKbn: z.number().optional(),
   addDat: z.date().optional(),
   addUser: z.string().optional(),
   updDat: z.date().optional(),
@@ -23,12 +24,11 @@ export const JuchuHeadSchema = z.object({
 export type JuchuHeadValues = z.infer<typeof JuchuHeadSchema>;
 
 export const NewOrderSchema = z.object({
-  juchuHeadId: z.number().optional(),
+  juchuHeadId: z.number(),
   delFlg: z.boolean().optional(),
   juchuSts: z.number().optional(),
-  juchuDat: z.date().optional(),
-  juchuStrDat: z.date().optional(),
-  juchuEndDat: z.date().optional(),
+  juchuDat: z.date().nullable(),
+  juchuRange: z.tuple([z.date(), z.date()]),
   nyuryokuUser: z.string().optional(),
   koenNam: z.string().optional(),
   koenbashoNam: z.string().optional(),
@@ -36,6 +36,7 @@ export const NewOrderSchema = z.object({
   kokyakuTantoNam: z.string().optional(),
   mem: z.string().optional(),
   nebikiAmt: z.number().optional(),
+  zeiKbn: z.number().optional(),
 });
 
 export type NewOrderValues = z.infer<typeof NewOrderSchema>;

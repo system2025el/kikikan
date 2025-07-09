@@ -12,6 +12,7 @@ import { DateValidationError } from '@mui/x-date-pickers/models';
 import dayjs, { Dayjs } from 'dayjs';
 import { useMemo, useState } from 'react';
 import { DateRangePicker } from 'rsuite';
+import { DateRange } from 'rsuite/esm/DateRangePicker';
 
 dayjs.locale('ja'); // カレンダーの曜日のフォーマット
 
@@ -234,7 +235,7 @@ export const TwoDatePickers = (props: { sx?: object; disabled?: boolean }) => {
 /**
  * 日付幅を取得する時のデータ型
  */
-type DateRange = [Date, Date] | null;
+//type DateRange = [Date, Date];
 /**
  * RsuiteDateRangePickerのprops
  */
@@ -266,6 +267,7 @@ type Props = {
  */
 export const RSuiteDateRangePicker = (props: Props) => {
   const { value, minDate, maxDate, onChange, styles, disabled } = props;
+  console.log('value : ', value);
   return (
     <>
       <style>
