@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const LocsMasterSchema = z.object({
   locId: z.number().optional(),
-  locNam: z.string().max(100, { message: '100文字以内で入力してください' }),
+  locNam: z.string().max(100, { message: '100文字以内で入力してください' }).min(1, { message: '必須項目です' }),
   kana: z.string().max(100, { message: '100文字以内で入力してください' }),
   delFlg: z.boolean().optional(),
   dspOrdNum: z.number().optional(),
@@ -13,7 +13,11 @@ export const LocsMasterSchema = z.object({
   tel: z.string().max(20, { message: '20文字以内で入力してください' }).optional(),
   telMobile: z.string().max(20, { message: '20文字以内で入力してください' }).optional(),
   fax: z.string().max(20, { message: '20文字以内で入力してください' }).optional(),
-  mail: z.string().max(100, { message: '100文字以内で入力してください' }).email().optional(),
+  mail: z
+    .string()
+    .max(100, { message: '100文字以内で入力してください' })
+    .email({ message: '正しいメールアドレスではありません' })
+    .optional(),
   mem: z.string().max(200, { message: '200文字以内で入力してください' }).optional(),
   dspFlg: z.boolean().optional(),
   addDate: z.date().optional(),

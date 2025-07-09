@@ -21,8 +21,9 @@ import {
   TextFieldElement,
   useForm,
 } from 'react-hook-form-mui';
+import { SelectedElement } from 'rsuite/esm/internals/Picker';
 
-import { FormBox, FormItemsType } from '../../../_ui/form-box';
+import { FormBox } from '../../../_ui/form-box';
 import { Loading } from '../../../_ui/loading';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyDialog } from '../../_ui/isdirty-dialog';
@@ -156,51 +157,51 @@ export const EqMasterDialog = ({
               <Grid2>
                 <FormBox formItem={formItems[1]}>
                   <TextFieldElement
-                    name="shozokuId"
+                    name="kizaiQty"
                     control={control}
                     label={formItems[1].exsample}
                     fullWidth
                     sx={{ maxWidth: '20%' }}
-                    disabled={editable ? false : true}
+                    disabled
                   />
-                  <Typography variant="body2" ml={1}>
-                    {formItems[1].other}
-                  </Typography>
                 </FormBox>
               </Grid2>
               <Grid2>
                 <FormBox formItem={formItems[2]}>
                   <TextFieldElement
-                    name="elNum"
+                    name="sectionNum"
                     control={control}
                     label={formItems[2].exsample}
                     fullWidth
                     sx={{ maxWidth: '20%' }}
                     disabled={editable ? false : true}
                   />
+                  <Typography variant="body2" ml={2}>
+                    {formItems[2].other}
+                  </Typography>
                 </FormBox>
               </Grid2>
               <Grid2>
                 <FormBox formItem={formItems[3]}>
-                  <CheckboxElement name="delFlg" control={control} size="medium" disabled={editable ? false : true} />
-                </FormBox>
-              </Grid2>
-              <Grid2>
-                <FormBox formItem={formItems[4]}>
                   <TextFieldElement
-                    name="bldCod"
+                    name="elNum"
                     control={control}
-                    label={formItems[4].exsample}
+                    label={formItems[3].exsample}
                     fullWidth
-                    sx={{ maxWidth: '50%' }}
+                    sx={{ maxWidth: '20%' }}
                     disabled={editable ? false : true}
                   />
                 </FormBox>
               </Grid2>
               <Grid2>
+                <FormBox formItem={formItems[4]}>
+                  <CheckboxElement name="delFlg" control={control} size="medium" disabled={editable ? false : true} />
+                </FormBox>
+              </Grid2>
+              <Grid2>
                 <FormBox formItem={formItems[5]}>
-                  <TextFieldElement
-                    name="tanaCod"
+                  <SelectElement
+                    name="shozokuNam"
                     control={control}
                     label={formItems[5].exsample}
                     fullWidth
@@ -212,7 +213,7 @@ export const EqMasterDialog = ({
               <Grid2>
                 <FormBox formItem={formItems[6]}>
                   <TextFieldElement
-                    name="edaCod"
+                    name="bldCod"
                     control={control}
                     label={formItems[6].exsample}
                     fullWidth
@@ -224,7 +225,7 @@ export const EqMasterDialog = ({
               <Grid2>
                 <FormBox formItem={formItems[7]}>
                   <TextFieldElement
-                    name="kizaiGrpCod"
+                    name="tanaCod"
                     control={control}
                     label={formItems[7].exsample}
                     fullWidth
@@ -236,9 +237,33 @@ export const EqMasterDialog = ({
               <Grid2>
                 <FormBox formItem={formItems[8]}>
                   <TextFieldElement
-                    name="dspOrdNum"
+                    name="edaCod"
                     control={control}
                     label={formItems[8].exsample}
+                    fullWidth
+                    sx={{ maxWidth: '50%' }}
+                    disabled={editable ? false : true}
+                  />
+                </FormBox>
+              </Grid2>
+              <Grid2>
+                <FormBox formItem={formItems[9]}>
+                  <TextFieldElement
+                    name="kizaiGrpCod"
+                    control={control}
+                    label={formItems[9].exsample}
+                    fullWidth
+                    sx={{ maxWidth: '50%' }}
+                    disabled={editable ? false : true}
+                  />
+                </FormBox>
+              </Grid2>
+              <Grid2>
+                <FormBox formItem={formItems[10]}>
+                  <TextFieldElement
+                    name="dspOrdNum"
+                    control={control}
+                    label={formItems[10].exsample}
                     fullWidth
                     sx={{ maxWidth: '20%' }}
                     disabled={editable ? false : true}
@@ -246,33 +271,9 @@ export const EqMasterDialog = ({
                 </FormBox>
               </Grid2>
               <Grid2>
-                <FormBox formItem={formItems[9]}>
+                <FormBox formItem={formItems[11]}>
                   <TextareaAutosizeElement ////////////// 200文字までの設定をしなければならない
                     name="mem"
-                    control={control}
-                    label={formItems[9].exsample}
-                    fullWidth
-                    sx={{ maxWidth: '90%' }}
-                    disabled={editable ? false : true}
-                  />
-                </FormBox>
-              </Grid2>
-              <Grid2>
-                <FormBox formItem={formItems[10]}>
-                  <SelectElement
-                    name="bumonId"
-                    control={control}
-                    label={formItems[10].exsample}
-                    fullWidth
-                    sx={{ maxWidth: '90%' }}
-                    disabled={editable ? false : true}
-                  />
-                </FormBox>
-              </Grid2>
-              <Grid2>
-                <FormBox formItem={formItems[11]}>
-                  <SelectElement
-                    name="shukeibumonId"
                     control={control}
                     label={formItems[11].exsample}
                     fullWidth
@@ -283,20 +284,44 @@ export const EqMasterDialog = ({
               </Grid2>
               <Grid2>
                 <FormBox formItem={formItems[12]}>
-                  <CheckboxElement name="dspFlg" control={control} size="medium" disabled={editable ? false : true} />
+                  <SelectElement
+                    name="bumonNam"
+                    control={control}
+                    label={formItems[12].exsample}
+                    fullWidth
+                    sx={{ maxWidth: '90%' }}
+                    disabled={editable ? false : true}
+                  />
                 </FormBox>
               </Grid2>
               <Grid2>
                 <FormBox formItem={formItems[13]}>
-                  <CheckboxElement name="ctnFlg" control={control} size="medium" disabled={editable ? false : true} />
+                  <SelectElement
+                    name="shukeibumonNam"
+                    control={control}
+                    label={formItems[13].exsample}
+                    fullWidth
+                    sx={{ maxWidth: '90%' }}
+                    disabled={editable ? false : true}
+                  />
                 </FormBox>
               </Grid2>
               <Grid2>
                 <FormBox formItem={formItems[14]}>
+                  <CheckboxElement name="dspFlg" control={control} size="medium" disabled={editable ? false : true} />
+                </FormBox>
+              </Grid2>
+              <Grid2>
+                <FormBox formItem={formItems[15]}>
+                  <CheckboxElement name="ctnFlg" control={control} size="medium" disabled={editable ? false : true} />
+                </FormBox>
+              </Grid2>
+              <Grid2>
+                <FormBox formItem={formItems[16]}>
                   <TextFieldElement ////////////// 200文字までの設定をしなければならない
                     name="defDatQty"
                     control={control}
-                    label={formItems[14].exsample}
+                    label={formItems[16].exsample}
                     fullWidth
                     sx={{ maxWidth: '20%' }}
                     disabled={editable ? false : true}
@@ -304,33 +329,9 @@ export const EqMasterDialog = ({
                 </FormBox>
               </Grid2>
               <Grid2>
-                <FormBox formItem={formItems[15]} required>
+                <FormBox formItem={formItems[17]} required>
                   <TextFieldElement ////////////// 200文字までの設定をしなければならない
                     name="regAmt"
-                    control={control}
-                    label={formItems[15].exsample}
-                    fullWidth
-                    sx={{ maxWidth: '50%' }}
-                    disabled={editable ? false : true}
-                  />
-                </FormBox>
-              </Grid2>
-              <Grid2>
-                <FormBox formItem={formItems[16]}>
-                  <TextFieldElement ////////////// 200文字までの設定をしなければならない
-                    name="rankAmt1"
-                    control={control}
-                    label={formItems[16].exsample}
-                    fullWidth
-                    sx={{ maxWidth: '50%' }}
-                    disabled={editable ? false : true}
-                  />
-                </FormBox>
-              </Grid2>
-              <Grid2>
-                <FormBox formItem={formItems[17]}>
-                  <TextFieldElement ////////////// 200文字までの設定をしなければならない
-                    name="rankAmt2"
                     control={control}
                     label={formItems[17].exsample}
                     fullWidth
@@ -342,7 +343,7 @@ export const EqMasterDialog = ({
               <Grid2>
                 <FormBox formItem={formItems[18]}>
                   <TextFieldElement ////////////// 200文字までの設定をしなければならない
-                    name="rankAmt3"
+                    name="rankAmt1"
                     control={control}
                     label={formItems[18].exsample}
                     fullWidth
@@ -354,7 +355,7 @@ export const EqMasterDialog = ({
               <Grid2>
                 <FormBox formItem={formItems[19]}>
                   <TextFieldElement ////////////// 200文字までの設定をしなければならない
-                    name="rankAmt4"
+                    name="rankAmt2"
                     control={control}
                     label={formItems[19].exsample}
                     fullWidth
@@ -366,7 +367,7 @@ export const EqMasterDialog = ({
               <Grid2>
                 <FormBox formItem={formItems[20]}>
                   <TextFieldElement ////////////// 200文字までの設定をしなければならない
-                    name="rankAmt5"
+                    name="rankAmt3"
                     control={control}
                     label={formItems[20].exsample}
                     fullWidth
@@ -375,8 +376,32 @@ export const EqMasterDialog = ({
                   />
                 </FormBox>
               </Grid2>
+              <Grid2>
+                <FormBox formItem={formItems[21]}>
+                  <TextFieldElement ////////////// 200文字までの設定をしなければならない
+                    name="rankAmt4"
+                    control={control}
+                    label={formItems[21].exsample}
+                    fullWidth
+                    sx={{ maxWidth: '50%' }}
+                    disabled={editable ? false : true}
+                  />
+                </FormBox>
+              </Grid2>
+              <Grid2>
+                <FormBox formItem={formItems[22]}>
+                  <TextFieldElement ////////////// 200文字までの設定をしなければならない
+                    name="rankAmt5"
+                    control={control}
+                    label={formItems[22].exsample}
+                    fullWidth
+                    sx={{ maxWidth: '50%' }}
+                    disabled={editable ? false : true}
+                  />
+                </FormBox>
+              </Grid2>
             </Grid2>
-            <IsDirtyDialog open={dirtyOpen} handleCloseDirty={handleCloseDirty} handleCloseAll={handleCloseDialog} />
+            <IsDirtyDialog open={dirtyOpen} handleCloseDirty={handleCloseDirty} handleCloseAll={handleClickClose} />
           </>
         )}
       </form>

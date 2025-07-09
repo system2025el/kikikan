@@ -1,6 +1,6 @@
 import { FormItemsType } from '@/app/(main)/_ui/form-box';
 
-import { LocsMasterDialogValues,LocsMasterTableValues } from './types';
+import { LocsMasterDialogValues, LocsMasterTableValues } from './types';
 
 /* 場所マスタデータ */
 /* 場所マスタテーブルヘッダー */

@@ -41,6 +41,7 @@ export const GetAllLoc = async () => {
     console.log(e);
   }
   revalidatePath('/locations-master');
+  redirect('/location-master');
 };
 
 export const GetFilteredLocs = async (query: string) => {
@@ -77,6 +78,7 @@ export const GetFilteredLocs = async (query: string) => {
   } catch (e) {
     console.log(e);
   }
+  revalidatePath('/locations-master');
 };
 
 export const getOneLoc = async (id: number) => {
@@ -185,7 +187,6 @@ export const addNewLoc = async (data: LocsMasterDialogValues) => {
     console.log(error);
   }
   revalidatePath('/locations-master');
-  redirect('/locations-master');
 };
 
 export const updateLoc = async (data: LocsMasterDialogValues, id: number) => {
@@ -229,4 +230,5 @@ export const updateLoc = async (data: LocsMasterDialogValues, id: number) => {
   } catch (error) {
     console.log(error);
   }
+  revalidatePath('/locations-master');
 };

@@ -8,12 +8,12 @@ import { TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { BackButton } from '../../../_ui/buttons';
 import { eqptMasterList } from '../_lib/datas';
-import { EqptMasterDialogSchema, EqptMasterDialogValues, eqptMasterTableValues } from '../_lib/types';
+import { EqptMasterDialogSchema, EqptMasterDialogValues, EqptMasterTableValues } from '../_lib/types';
 import { EqptMasterTable } from './eqpt-master-table';
 
-export const EqptMaster = ({ eqpts }: { eqpts: eqptMasterTableValues[] | undefined }) => {
+export const EqptMaster = ({ eqpts }: { eqpts: EqptMasterTableValues[] | undefined }) => {
   // useState
-  const [displayList, setDisplayList] = useState<eqptMasterTableValues[] | undefined>(eqpts);
+  const [displayList, setDisplayList] = useState<EqptMasterTableValues[] | undefined>(eqpts);
   /* DBのローディング */
   const [isLoading, setIsLoading] = useState(true);
   // 検索useForm--------------------------
