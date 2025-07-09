@@ -72,7 +72,7 @@ export const LoanListTable = (props: { datas: Loan[]; moveRow: (index: number, d
                 <TableCell align="left">
                   <Button
                     variant="text"
-                    href={`/loan-situation/'${loan.kizaiId}`}
+                    href={`/loan-situation/${loan.kizaiId}`}
                     sx={{ justifyContent: 'start', p: 0 }}
                   >
                     {loan.kizaiNam}
