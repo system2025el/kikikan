@@ -3,31 +3,31 @@
 import { QueryResult } from 'pg';
 
 import { EqptMasterTableValues } from '@/app/(main)/(masters)/eqpt-master/_lib/types';
+import { VehsMasterTableValues } from '@/app/(main)/(masters)/vehicles-master/_lib/types';
 
-import client from './postgres';
+import pool from './postgres';
 
 export const shigasan = async () => {
   try {
-    await client.connect();
     console.log('DB Connected');
-    await client.query(` SET search_path TO dev2;`);
-    const result: QueryResult<EqptMasterTableValues> = await client.query(`
+    await pool.query(` SET search_path TO dev2;`);
+    const result: QueryResult<EqptMasterTableValues> = await pool.query(`
     select
-       v_kizai_lst.kizai_nam           as kizaiNam,
-       v_kizai_lst.shozoku_nam         as shozokuNam,
-       v_kizai_lst.kizai_qty           as kizaiQty,
-       v_kizai_lst.bumon_nam           as bumonNam,
-       v_kizai_lst.dai_bumon_nam       as daibumonNam,
-       v_kizai_lst.shukei_bumon_nam    as shukeibumonNam,
-       v_kizai_lst.reg_amt             as regAmt,
-       v_kizai_lst.rank_amt_1          as rankAmt1,
-       v_kizai_lst.rank_amt_2          as rankAmt2,
-       v_kizai_lst.rank_amt_3          as rankAmt3,
-       v_kizai_lst.rank_amt_4          as rankAmt4,
-       v_kizai_lst.rank_amt_5          as rankAmt5,
-       v_kizai_lst.mem                 as mem,
-       v_kizai_lst.kizai_id            as kizaiId,
-       v_kizai_lst.del_flg             as delFlg
+       v_kizai_lst.kizai_nam           as "kizaiNam",
+       v_kizai_lst.shozoku_nam         as "shozokuNam",
+       v_kizai_lst.kizai_qty           as "kizaiQty",
+       v_kizai_lst.bumon_nam           as "bumonNam",
+       v_kizai_lst.dai_bumon_nam       as "daibumonNam",
+       v_kizai_lst.shukei_bumon_nam    as "shukeibumonNam",
+       v_kizai_lst.reg_amt             as "regAmt",
+       v_kizai_lst.rank_amt_1          as "rankAmt1",
+       v_kizai_lst.rank_amt_2          as "rankAmt2",
+       v_kizai_lst.rank_amt_3          as "rankAmt3",
+       v_kizai_lst.rank_amt_4          as "rankAmt4",
+       v_kizai_lst.rank_amt_5          as "rankAmt5",
+       v_kizai_lst.mem                 as "mem",
+       v_kizai_lst.kizai_id            as "kizaiId",
+       v_kizai_lst.del_flg             as "delFlg"
   from
       v_kizai_lst
   where
@@ -52,7 +52,27 @@ export const shigasan = async () => {
   } catch (e) {
     console.error(e);
     return [];
-  } finally {
-    await client.end();
+  }
+};
+
+export const shiori = async () => {
+  try {
+    console.log('DB Connected');
+    await pool.query(` SET search_path TO dev2;`);
+    const res: QueryResult<VehsMasterTableValues> = await pool.query(`
+        select
+            sharyo_id as "sharyoId",
+            sharyo_nam as "sharyoNam",
+            del_flg as "delFlg",
+            dsp_flg as "dspFlg",
+            mem
+        from m_sharyo`);
+    console.log('res : ', res.rows);
+    const data = res.rows;
+    console.log('data : ', data);
+    return data;
+  } catch (e) {
+    console.error('DB Connection Failure', e);
+    return [];
   }
 };
