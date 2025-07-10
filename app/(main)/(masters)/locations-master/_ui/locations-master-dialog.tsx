@@ -12,7 +12,7 @@ import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyDialog } from '../../_ui/isdirty-dialog';
 import { emptyLoc, formItems } from '../_lib/datas';
 import { addNewLoc, getOneLoc, updateLoc } from '../_lib/funcs';
-import { LocsMasterDialogSchema, LocsMasterDialogValues, LocsMasterValues } from '../_lib/types';
+import { LocsMasterDialogSchema, LocsMasterDialogValues } from '../_lib/types';
 
 /**
  * 公演場所マスタの詳細ダイアログ
@@ -69,7 +69,7 @@ export const LocationsMasterDialog = ({
 
   /* methods ---------------------------- */
   /* フォームを送信 */
-  const onSubmit = async (data: LocsMasterValues) => {
+  const onSubmit = async (data: LocsMasterDialogValues) => {
     console.log('isDarty : ', isDirty);
     console.log(data);
     if (locationId === -100) {
@@ -146,7 +146,7 @@ export const LocationsMasterDialog = ({
           <>
             <Grid2 container spacing={1} p={5} direction={'column'} justifyContent={'center'} width={'100%'}>
               <Grid2>
-                <FormBox formItem={formItems[0]}>
+                <FormBox formItem={formItems[0]} required>
                   <TextFieldElement
                     name="locNam"
                     control={control}
@@ -158,7 +158,7 @@ export const LocationsMasterDialog = ({
                 </FormBox>
               </Grid2>
               <Grid2>
-                <FormBox formItem={formItems[1]}>
+                <FormBox formItem={formItems[1]} required>
                   <TextFieldElement
                     name="kana"
                     control={control}

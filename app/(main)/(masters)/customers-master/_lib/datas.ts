@@ -140,6 +140,7 @@ export const customers: CustomerMasterTableValues[] = [
     // mail: 'FFFFFFFFFFFFF@EEEEEEEEEEEEEEEEEE',
     // keishou: '御中',
     mem: 'あああああああああああああああああああ',
+    delFlg: false,
   },
   {
     kokyakuId: 2,
@@ -167,5 +168,6 @@ export const customers: CustomerMasterTableValues[] = [
     // mail: 'aaaaaaaaaa@eeeeeeeeeeeeee',
     // keishou: '御中',
     mem: '',
+    delFlg: false,
   },
 ];

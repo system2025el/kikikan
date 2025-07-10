@@ -1,35 +1,18 @@
 import z from 'zod';
 
-export const VehsMasterTableSchema = z.object({
-  sharyoId: z.number(),
-  sharyoNam: z.string(),
-  delFlg: z.boolean(),
-  mem: z.string(),
-  dspFlg: z.boolean(),
-});
-
-export type VehsMasterTableValues = z.infer<typeof VehsMasterTableSchema>;
-
-const vehsMasterDialogSchema = z.object({
-  sharyoId: z.number().optional(),
-  sharyoNam: z.string(),
+export const VehsMasterDialogSchema = z.object({
+  sharyoNam: z.string().max(100, { message: '100文字以内で入力してください' }).min(1, { message: '必須項目です' }),
   delFlg: z.boolean().optional(),
-  mem: z.string().optional(),
+  mem: z.string().max(200, { message: '200文字以内で入力してください' }).optional(),
   dspFlg: z.boolean().optional(),
-  dspOrderNum: z.number().optional(),
-  addDate: z.date(),
-  addUser: z.string(),
-  updDate: z.date(),
-  updUser: z.string(),
 });
 
-export const VehsMasterDialogSchema = vehsMasterDialogSchema.omit({
-  dspOrderNum: true,
-  addDate: true,
-  addUser: true,
-  updDate: true,
-  updUser: true,
-});
-
-export type VehsAllValues = z.infer<typeof vehsMasterDialogSchema>;
 export type VehsMasterDialogValues = z.infer<typeof VehsMasterDialogSchema>;
+
+export type VehsMasterTableValues = {
+  sharyoId: number;
+  sharyoNam: string;
+  delFlg: boolean;
+  mem: string;
+  dspFlg: boolean;
+};

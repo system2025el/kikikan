@@ -47,7 +47,7 @@ export const ManagerMasterDialog = ({
   } = useForm({
     mode: 'onBlur',
     reValidateMode: 'onBlur',
-    defaultValues: { tantouId: 0, tantouNam: '' },
+    defaultValues: { tantouNam: '' },
     resolver: zodResolver(managersMaterDialogSchema),
   });
 

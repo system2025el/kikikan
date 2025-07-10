@@ -1,11 +1,10 @@
 import { z } from 'zod';
 
-export const LocsMasterSchema = z.object({
-  locId: z.number().optional(),
+export const LocsMasterDialogSchema = z.object({
   locNam: z.string().max(100, { message: '100文字以内で入力してください' }).min(1, { message: '必須項目です' }),
-  kana: z.string().max(100, { message: '100文字以内で入力してください' }),
+  kana: z.string().max(100, { message: '100文字以内で入力してください' }).min(1, { message: '必須項目です' }),
   delFlg: z.boolean().optional(),
-  dspOrdNum: z.number().optional(),
+  dspOrdNum: z.number({ message: '数字で入力してください' }).optional(),
   adrPost: z.string().max(20, { message: '20文字以内で入力してください' }).optional(),
   adrShozai: z.string().max(100, { message: '100文字以内で入力してください' }).optional(),
   adrTatemono: z.string().max(100, { message: '100文字以内で入力してください' }).optional(),
@@ -20,38 +19,22 @@ export const LocsMasterSchema = z.object({
     .optional(),
   mem: z.string().max(200, { message: '200文字以内で入力してください' }).optional(),
   dspFlg: z.boolean().optional(),
-  addDate: z.date().optional(),
-  addUser: z.string().optional(),
-  apdDate: z.date().optional(),
-  updUser: z.string().optional(),
-});
-
-export type LocsMasterValues = z.infer<typeof LocsMasterSchema>;
-
-export const LocsMasterTableSchema = z.object({
-  locId: z.number(),
-  locNam: z.string(),
-  dspOrdNum: z.number().optional(),
-  delFlg: z.boolean().optional(),
-  adrShozai: z.string().optional(),
-  adrTatemono: z.string().optional(),
-  adrSonota: z.string().optional(),
-  tel: z.string().optional(),
-  fax: z.string().optional(),
-  mem: z.string().optional(),
-});
-
-export type LocsMasterTableValues = z.infer<typeof LocsMasterTableSchema>;
-
-export const LocsMasterDialogSchema = LocsMasterSchema.omit({
-  dspOrdNum: true,
-  addDate: true,
-  addUser: true,
-  apdDate: true,
-  updUser: true,
 });
 
 export type LocsMasterDialogValues = z.infer<typeof LocsMasterDialogSchema>;
+
+export type LocsMasterTableValues = {
+  locId: number;
+  locNam: string;
+  dspOrdNum: number;
+  delFlg: boolean;
+  adrShozai: string;
+  adrTatemono: string;
+  adrSonota: string;
+  tel: string;
+  fax: string;
+  mem: string;
+};
 
 /* 検索用スキーマ */
 export const LocsMasterSearchSchema = z.object({

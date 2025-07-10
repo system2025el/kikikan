@@ -352,6 +352,9 @@ export const eqptMasterList: EqptMasterTableValues[] = [
     rankAmt5: 611,
     daibumonNam: '',
     kizaiQty: 0,
+    mem: '',
+    bumonNam: '',
+    shukeibumonNam: '',
   },
   {
     kizaiId: 13,

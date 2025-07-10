@@ -7,7 +7,7 @@ import { MuiTablePagination } from '@/app/(main)/_ui/table-pagination';
 
 import { MasterTable } from '../../_ui/table';
 import { daibumonMHeader } from '../_lib/datas';
-import { DaibumonsMasterDialogValues } from '../_lib/types';
+import { DaibumonsMasterDialogValues, DaibumonsMasterTableValues } from '../_lib/types';
 import { DaibumonsMasterDialog } from './daibumons-master-dialog';
 
 /**
@@ -20,7 +20,7 @@ export const DaibumonsMasterTable = ({
   isLoading,
   setIsLoading,
 }: {
-  daibumons: DaibumonsMasterDialogValues[];
+  daibumons: DaibumonsMasterTableValues[];
   isLoading: boolean;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {

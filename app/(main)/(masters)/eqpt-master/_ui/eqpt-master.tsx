@@ -8,7 +8,12 @@ import { TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { BackButton } from '../../../_ui/buttons';
 import { eqptMasterList } from '../_lib/datas';
-import { EqptMasterDialogSchema, EqptMasterDialogValues, EqptMasterTableValues } from '../_lib/types';
+import {
+  EqptMasterDialogValues,
+  EqptMasterSearchSchema,
+  EqptMasterSearchValues,
+  EqptMasterTableValues,
+} from '../_lib/types';
 import { EqptMasterTable } from './eqpt-master-table';
 
 export const EqptMaster = ({ eqpts }: { eqpts: EqptMasterTableValues[] | undefined }) => {
@@ -20,10 +25,10 @@ export const EqptMaster = ({ eqpts }: { eqpts: EqptMasterTableValues[] | undefin
   const { control, handleSubmit } = useForm({
     mode: 'onBlur',
     reValidateMode: 'onBlur',
-    resolver: zodResolver(EqptMasterDialogSchema),
+    resolver: zodResolver(EqptMasterSearchSchema),
     defaultValues: {},
   });
-  const onSubmit = (data: EqptMasterDialogValues) => {
+  const onSubmit = (data: EqptMasterSearchValues) => {
     if (data.kizaiNam === '') {
       setDisplayList([...eqptMasterList]);
     } else {

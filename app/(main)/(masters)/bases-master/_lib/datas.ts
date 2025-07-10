@@ -1,6 +1,6 @@
 import { FormItemsType } from '@/app/(main)/_ui/form-box';
 
-import { BasesMasterDialogValues } from './types';
+import { BasesMasterDialogValues, BasesMasterTableValues } from './types';
 
 /* 拠点マスタテーブルヘッダー */
 export const bMHeader = [
@@ -35,23 +35,26 @@ export const emptyBase: BasesMasterDialogValues = {
 };
 
 /**モック削除delete */
-export const basesList: BasesMasterDialogValues[] = [
+export const basesList: BasesMasterTableValues[] = [
   {
     kyotenNam: 'KICS',
     mem: '川崎',
     kyotenId: 1,
     delFlg: false,
+    dspFlg: false,
   },
   {
     kyotenNam: 'YARD',
     mem: '大和',
     kyotenId: 2,
     delFlg: false,
+    dspFlg: false,
   },
   {
     kyotenNam: 'その他',
     mem: '厚木など',
     kyotenId: 3,
     delFlg: false,
+    dspFlg: false,
   },
 ];

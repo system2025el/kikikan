@@ -1,6 +1,6 @@
 import { FormItemsType } from '@/app/(main)/_ui/form-box';
 
-import { DaibumonsMasterDialogValues } from './types';
+import { DaibumonsMasterDialogValues, DaibumonsMasterTableValues } from './types';
 
 /* 大部門マスタテーブルヘッダー */
 export const daibumonMHeader = [
@@ -32,29 +32,37 @@ export const formItems: FormItemsType[] = [
 ];
 
 /*モック削除delete */
-export const daibumonsList: DaibumonsMasterDialogValues[] = [
+export const daibumonsList: DaibumonsMasterTableValues[] = [
   {
     daibumonId: 1,
     daibumonNam: '照明',
     mem: 'XXXXXXXXXXX',
     delFlg: false,
+    dspFlg: true,
+    dspOrdNum: 0,
   },
   {
     daibumonId: 2,
     daibumonNam: 'Moving Light',
     mem: 'XXXXXXXX',
     delFlg: true,
+    dspFlg: true,
+    dspOrdNum: 0,
   },
   {
     daibumonNam: 'ムービング ゴボ',
     mem: 'XXXXXXX',
     daibumonId: 3,
     delFlg: false,
+    dspFlg: true,
+    dspOrdNum: 0,
   },
   {
     daibumonNam: '空（カラ）ケース',
     daibumonId: 4,
     mem: '',
     delFlg: false,
+    dspFlg: true,
+    dspOrdNum: 0,
   },
 ];

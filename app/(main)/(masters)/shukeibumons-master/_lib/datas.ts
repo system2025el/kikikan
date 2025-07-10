@@ -1,6 +1,6 @@
 import { FormItemsType } from '@/app/(main)/_ui/form-box';
 
-import { ShukeibumonsMasterDialogValues } from './type';
+import { ShukeibumonsMasterDialogValues, ShukeibumonsMasterTableValues } from './type';
 
 /* 集計部門マスタテーブルヘッダー */
 export const shukeibumonMHeader = [
@@ -33,23 +33,29 @@ export const emptyShukeibumon: ShukeibumonsMasterDialogValues = {
 };
 
 /*モック削除delete */
-export const shukeibumonsList: ShukeibumonsMasterDialogValues[] = [
+export const shukeibumonsList: ShukeibumonsMasterTableValues[] = [
   {
-    shukeibumonId: 1,
     shukeibumonNam: '照明部',
     mem: 'XXXXXXXXXXX',
     delFlg: false,
+    dspFlg: false,
+    dspOrdNum: 0,
+    shukeibumonId: 1,
   },
   {
-    shukeibumonId: 2,
     shukeibumonNam: 'L課（Control）',
     mem: 'XXXXXXXX',
     delFlg: false,
+    dspFlg: false,
+    dspOrdNum: 0,
+    shukeibumonId: 2,
   },
   {
     shukeibumonNam: 'L課（SPOT）',
     mem: 'XXXXXXX',
-    shukeibumonId: 3,
     delFlg: false,
+    dspFlg: false,
+    dspOrdNum: 0,
+    shukeibumonId: 3,
   },
 ];

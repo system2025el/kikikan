@@ -8,7 +8,9 @@ export const mMHeader = [
     label: '担当者名',
   },
 ];
-export const emptyManager: ManagersMasterDialogValues = {};
+export const emptyManager: ManagersMasterDialogValues = {
+  tantouNam: '',
+};
 
 export const formItems: FormItemsType[] = [
   {
@@ -23,10 +25,12 @@ export const managers: ManagersMasterTableValues[] = [
   {
     tantouId: 1,
     tantouNam: '田中',
+    delFlg: false,
   },
   {
     tantouId: 2,
     tantouNam: '鈴木',
+    delFlg: false,
   },
   {
     tantouId: 3,
@@ -36,9 +40,11 @@ export const managers: ManagersMasterTableValues[] = [
   {
     tantouId: 4,
     tantouNam: '山田',
+    delFlg: false,
   },
   {
     tantouId: 5,
     tantouNam: '新規',
+    delFlg: false,
   },
 ];

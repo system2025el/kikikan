@@ -7,7 +7,7 @@ import { MuiTablePagination } from '@/app/(main)/_ui/table-pagination';
 
 import { MasterTable } from '../../_ui/table';
 import { shukeibumonMHeader } from '../_lib/datas';
-import { ShukeibumonsMasterDialogValues } from '../_lib/type';
+import { ShukeibumonsMasterDialogValues, ShukeibumonsMasterTableValues } from '../_lib/type';
 import { ShukeibumonsMasterDialog } from './shukeibumons-master-dialog';
 
 /**
@@ -20,7 +20,7 @@ export const ShukeibumonsMasterTable = ({
   isLoading,
   setIsLoading,
 }: {
-  shukeibumons: ShukeibumonsMasterDialogValues[];
+  shukeibumons: ShukeibumonsMasterTableValues[];
   isLoading: boolean;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
