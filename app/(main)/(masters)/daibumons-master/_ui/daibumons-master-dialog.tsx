@@ -53,7 +53,6 @@ export const DaibumonsMasterDialog = ({
       //   delFlg: false,
       //   mem: '',
       daibumonNam: '',
-      daibumonId: 0,
       delFlg: false,
       mem: '',
     },
@@ -137,7 +136,7 @@ export const DaibumonsMasterDialog = ({
           <>
             <Grid2 container spacing={1} p={5} direction={'column'} justifyContent={'center'} width={'100%'}>
               <Grid2>
-                <FormBox formItem={formItems[0]} required={true}>
+                <FormBox formItem={formItems[0]} required>
                   <TextFieldElement
                     name="daibumonNam"
                     control={control}

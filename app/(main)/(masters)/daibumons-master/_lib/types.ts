@@ -1,32 +1,19 @@
 import { z } from 'zod';
 
-const daibumonsMasterSchema = z.object({
-  daibumonId: z.number().optional(),
-  daibumonNam: z.string(),
+export const DaibumonsMasterDialogSchema = z.object({
+  daibumonNam: z.string().max(100, { message: '100文字以内で入力してください' }).min(1, { message: '必須項目です' }),
   delFlg: z.boolean().optional(),
-  mem: z.string().optional(),
+  mem: z.string().max(200, { message: '200文字以内で入力してください' }).optional(),
   dspFlg: z.boolean().optional(),
-  dspOrdNum: z.number().optional(),
-  addDat: z.date(),
-  addUser: z.string(),
-  updDat: z.date(),
-  updUser: z.string(),
-});
-
-export const DaibumonsMasterTableSchema = daibumonsMasterSchema.omit({
-  dspOrdNum: true,
-  addDat: true,
-  addUser: true,
-  updDat: true,
-  updUser: true,
-});
-
-export type DaibumonsMasterTableValues = z.infer<typeof DaibumonsMasterTableSchema>;
-
-export const DaibumonsMasterDialogSchema = DaibumonsMasterTableSchema.omit({
-  //DB   daibumonId: true,
 });
 
 export type DaibumonsMasterDialogValues = z.infer<typeof DaibumonsMasterDialogSchema>;
 
-// export type daibumonsMasterValues = { daibumonId: number; daibumonNam: string; dspOrdNum: number };
+export type DaibumonsMasterTableValues = {
+  daibumonId: number;
+  daibumonNam: string;
+  delFlg: boolean;
+  mem: string;
+  dspFlg: boolean;
+  dspOrdNum: number;
+};

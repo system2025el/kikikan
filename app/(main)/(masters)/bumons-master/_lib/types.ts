@@ -1,37 +1,21 @@
 import { z } from 'zod';
 
-const bumonsMasterSchema = z.object({
-  bumonId: z.number(),
-  bumonNam: z.string(),
-  delFlg: z.boolean().optional(),
-  dspOrdNum: z.number().optional(),
-  mem: z.string().max(200, '200文字以内で入力してくださいTEST。').optional(),
-  daibumonId: z.number().optional(),
-  shukeibumonId: z.number().optional(),
-  addDat: z.date(),
-  addUser: z.string(),
-  updDat: z.date(),
-  updUser: z.string(),
-});
-
-export const BumonsMasterTableSchema = bumonsMasterSchema.omit({
-  dspOrdNum: true,
-  addDat: true,
-  addUser: true,
-  updDat: true,
-  updUser: true,
-});
-
-export type BumonsMasterTableValues = z.infer<typeof BumonsMasterTableSchema>;
-
 export const BumonsMasterDialogSchema = z.object({
-  bumonId: z.number().optional(),
-  bumonNam: z.string(),
+  bumonNam: z.string().max(100, { message: '100文字以内で入力してください' }).min(1, { message: '必須項目です' }),
   delFlg: z.boolean().optional(),
-  dspOrdNum: z.number().optional(),
-  mem: z.string().max(200, '200文字以内で入力してくださいTEST。').optional(),
-  daibumonId: z.number().optional(),
-  shukeibumonId: z.number().optional(),
+  mem: z.string().max(200, '200文字以内で入力してください').optional(),
+  daibumonId: z.number({ message: '数字を入力してください' }).optional(),
+  shukeibumonId: z.number({ message: '数字を入力してください' }).optional(),
 });
 
 export type BumonsMasterDialogValues = z.infer<typeof BumonsMasterDialogSchema>;
+
+export type BumonsMasterTableValues = {
+  bumonId: number;
+  bumonNam: string;
+  delFlg: boolean;
+  dspOrdNum: number;
+  mem: string;
+  daibumonId: number;
+  shukeibumonId: number;
+};

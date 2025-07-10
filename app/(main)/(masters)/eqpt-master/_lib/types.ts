@@ -1,80 +1,52 @@
 import { number, z } from 'zod';
 
-export type EqptMasterData = {
-  id: number;
-  name: string;
-  quantity: number;
-  bumon: string;
-  daiBumon: string;
-  shuukeibumon: string;
-  isshiki: string;
-  serialnumber: number;
-  price1: number;
-  price2: number;
-  price3: number;
-  price4: number;
-  price5: number;
-  memo: string;
-};
-
-// 全機材Schema
-const eqptMasterSchema = z.object({
-  kizaiId: z.number().optional(),
-  kizaiNam: z.string(),
-  kizaiQty: z.number(),
+// Schema
+export const EqptMasterDialogSchema = z.object({
+  kizaiNam: z.string().max(100, { message: '100文字以内で入力してください' }).min(1, { message: '必須項目です' }),
+  kizaiQty: z.number({ message: '数字を入力してください' }),
+  sectionNum: z.number({ message: '数字を入力してください' }).optional(),
+  elNum: z.number({ message: '数字を入力してください' }).optional(),
   delFlg: z.boolean().optional(),
-  shozokuNam: z.string().optional(),
-  bldCod: z.string().optional(),
-  tanaCod: z.string().optional(),
-  edaCod: z.string().optional(),
-  kizaiGrpCod: z.string().optional(),
-  dspOrdNum: z.number().optional(),
-  mem: z.string().optional(),
-  bumonNam: z.string().optional(),
-  shukeibumonNam: z.string().optional(),
+  shozokuNam: z.string({ message: '選択してください' }).optional(),
+  bldCod: z.string().max(20, { message: '20文字以内で入力してください' }).optional(),
+  tanaCod: z.string().max(20, { message: '20文字以内で入力してください' }).optional(),
+  edaCod: z.string().max(20, { message: '20文字以内で入力してください' }).optional(),
+  kizaiGrpCod: z.string().max(10, { message: '10文字以内で入力してください' }).optional(),
+  dspOrdNum: z.number({ message: '数字を入力してください' }).optional(),
+  mem: z.string().max(200, { message: '200文字以内で入力してください' }).optional(),
+  bumonNam: z.string().max(100, { message: '100文字以内で入力してください' }).optional(),
+  shukeibumonNam: z.string().max(100, { message: '100文字以内で入力してください' }).optional(),
   dspFlg: z.boolean().optional(),
   ctnFlg: z.boolean().optional(),
-  defDatQty: z.number().optional(),
-  regAmt: z.number(),
-  rankAmt1: z.number().optional(),
-  rankAmt2: z.number().optional(),
-  rankAmt3: z.number().optional(),
-  rankAmt4: z.number().optional(),
-  rankAmt5: z.number().optional(),
-  sectionNum: z.number().optional(),
-  elNum: z.number(),
-  addDat: z.date(),
-  addUser: z.string(),
-  updDat: z.date(),
-  updUser: z.string(),
-});
-const EqptMasterTableSchema = z.object({
-  kizaiId: z.number(),
-  kizaiNam: z.string(),
-  kizaiQty: z.number(),
-  delFlg: z.boolean().optional(),
-  shozokuNam: z.string().optional(),
-  mem: z.string().optional(),
-  bumonNam: z.string().optional(),
-  daibumonNam: z.string(),
-  shukeibumonNam: z.string().optional(),
-  regAmt: z.number(),
-  rankAmt1: z.number().optional(),
-  rankAmt2: z.number().optional(),
-  rankAmt3: z.number().optional(),
-  rankAmt4: z.number().optional(),
-  rankAmt5: z.number().optional(),
+  defDatQty: z.number({ message: '数字を入力してください' }).optional(),
+  regAmt: z.number({ message: '数字を入力してください' }),
+  rankAmt1: z.number({ message: '数字を入力してください' }).optional(),
+  rankAmt2: z.number({ message: '数字を入力してください' }).optional(),
+  rankAmt3: z.number({ message: '数字を入力してください' }).optional(),
+  rankAmt4: z.number({ message: '数字を入力してください' }).optional(),
+  rankAmt5: z.number({ message: '数字を入力してください' }).optional(),
 });
 
-export const EqptMasterDialogSchema = eqptMasterSchema.omit({
-  addDat: true,
-  addUser: true,
-  updDat: true,
-  updUser: true,
-});
-
-export type EqptMasterTableValues = z.infer<typeof EqptMasterTableSchema>;
 export type EqptMasterDialogValues = z.infer<typeof EqptMasterDialogSchema>;
+
+export type EqptMasterTableValues = {
+  kizaiId: number;
+  kizaiNam: string;
+  kizaiQty: number;
+  delFlg: boolean;
+  shozokuNam: string;
+  mem: string;
+  bumonNam: string;
+  daibumonNam: string;
+  shukeibumonNam: string;
+  regAmt: number;
+  rankAmt1: number;
+  rankAmt2: number;
+  rankAmt3: number;
+  rankAmt4: number;
+  rankAmt5: number;
+};
+
 // 検索用
 export const EqptMasterSearchSchema = EqptMasterDialogSchema.omit({
   delFlg: true,

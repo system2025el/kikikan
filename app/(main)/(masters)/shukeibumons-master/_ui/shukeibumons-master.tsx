@@ -5,7 +5,7 @@ import { JSX, useState } from 'react';
 
 import { BackButton } from '@/app/(main)/_ui/buttons';
 
-import { ShukeibumonsMasterDialogValues } from '../_lib/type';
+import { ShukeibumonsMasterDialogValues, ShukeibumonsMasterTableValues } from '../_lib/type';
 import { ShukeibumonsMasterTable } from './shukeibumons-master-table';
 
 /**
@@ -13,7 +13,7 @@ import { ShukeibumonsMasterTable } from './shukeibumons-master-table';
  * @param {shukeibumons} 集計部門リスト配列
  * @returns {JSX.Element} 集計部門マスタコンポーネント
  */
-export const ShukeibumonsMaster = ({ shukeibumons }: { shukeibumons: ShukeibumonsMasterDialogValues[] }) => {
+export const ShukeibumonsMaster = ({ shukeibumons }: { shukeibumons: ShukeibumonsMasterTableValues[] }) => {
   /* useState ------------------ */
   const [theShukeibumons, setTheShukeibumons] = useState(shukeibumons);
   /* DBのローディング */

@@ -5,7 +5,7 @@ import { useState } from 'react';
 
 import { BackButton } from '@/app/(main)/_ui/buttons';
 
-import { DaibumonsMasterDialogValues } from '../_lib/types';
+import { DaibumonsMasterDialogValues, DaibumonsMasterTableValues } from '../_lib/types';
 import { DaibumonsMasterTable } from './daibumons-master-table';
 
 /**
@@ -13,7 +13,7 @@ import { DaibumonsMasterTable } from './daibumons-master-table';
  * @param {daibumons} 大部門リスト
  * @returns {JSX.Element} 大部門マスタコンポーネント
  */
-export const DaibumonsMaster = ({ daibumons }: { daibumons: DaibumonsMasterDialogValues[] }) => {
+export const DaibumonsMaster = ({ daibumons }: { daibumons: DaibumonsMasterTableValues[] }) => {
   /* useState ------------------ */
   const [theDaibumons, setTheDaibumons] = useState(daibumons);
   /* DBのローディング */

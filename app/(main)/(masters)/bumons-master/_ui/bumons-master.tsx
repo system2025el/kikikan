@@ -12,7 +12,7 @@ import { BumonsMasterTable } from './bumons-master-table';
  * @returns {JSX.Element} 部門マスタコンポーネント
  */
 
-export const BumonsMaster = ({ bumons }: { bumons: BumonsMasterDialogValues[] | undefined }) => {
+export const BumonsMaster = ({ bumons }: { bumons: BumonsMasterTableValues[] | undefined }) => {
   /* useState ------------------ */
   const [theBumons, setTheBumons] = useState(bumons);
   /* DBのローディング */

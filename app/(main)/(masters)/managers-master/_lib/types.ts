@@ -1,14 +1,8 @@
 import { z } from 'zod';
 
 export const managersMaterDialogSchema = z.object({
-  tantouId: z.number().optional(),
-  tantouNam: z.string().optional(),
+  tantouNam: z.string().max(100, { message: '100文字以内で入力してください' }).min(1, { message: '必須項目です' }),
 });
 export type ManagersMasterDialogValues = z.infer<typeof managersMaterDialogSchema>;
 
-export const managersMasterTableSchema = z.object({
-  tantouId: z.number(),
-  tantouNam: z.string().optional(),
-  delFlg: z.boolean().optional(),
-});
-export type ManagersMasterTableValues = z.infer<typeof managersMasterTableSchema>;
+export type ManagersMasterTableValues = { tantouId: number; tantouNam: string; delFlg: boolean };

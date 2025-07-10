@@ -1,6 +1,6 @@
 import { FormItemsType } from '@/app/(main)/_ui/form-box';
 
-import { BumonsMasterDialogValues } from './types';
+import { BumonsMasterDialogValues, BumonsMasterTableValues } from './types';
 /* 部門マスタテーブルヘッダー */
 export const BumonsMHeader = [
   { key: 'name', label: '名称' },
@@ -40,7 +40,7 @@ export const emptyBumon: BumonsMasterDialogValues = {
 };
 
 /*モック削除delete */
-export const bumonsList: BumonsMasterDialogValues[] = [
+export const bumonsList: BumonsMasterTableValues[] = [
   {
     bumonId: 1,
     bumonNam: 'ムービングライト',
@@ -48,6 +48,7 @@ export const bumonsList: BumonsMasterDialogValues[] = [
     mem: 'あえいうえおあおかけきくけこかこ',
     daibumonId: 1,
     shukeibumonId: 1,
+    dspOrdNum: 0,
   },
   {
     bumonId: 2,
@@ -56,6 +57,7 @@ export const bumonsList: BumonsMasterDialogValues[] = [
     mem: '',
     daibumonId: 1,
     shukeibumonId: 1,
+    dspOrdNum: 0,
   },
   {
     bumonId: 3,
@@ -64,5 +66,6 @@ export const bumonsList: BumonsMasterDialogValues[] = [
     mem: '',
     daibumonId: 2,
     shukeibumonId: 2,
+    dspOrdNum: 0,
   },
 ];

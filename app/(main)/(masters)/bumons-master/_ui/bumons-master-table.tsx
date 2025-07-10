@@ -39,7 +39,7 @@ export const BumonsMasterTable = ({
   isLoading,
   setIsLoading,
 }: {
-  bumons: BumonsMasterDialogValues[] | undefined;
+  bumons: BumonsMasterTableValues[] | undefined;
   isLoading: boolean;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
@@ -52,8 +52,8 @@ export const BumonsMasterTable = ({
   const [openId, setOpenID] = useState<number>(-100);
   /* 詳細ダイアログの開閉状態 */
   const [dialogOpen, setDialogOpen] = useState(false);
-  /* 顧客リスト */
-  const [theBumons, setTheBumons] = useState<BumonsMasterDialogValues[] | undefined>(bumons);
+  /* 部門リスト */
+  const [theBumons, setTheBumons] = useState<BumonsMasterTableValues[] | undefined>(bumons);
 
   /* methods ---------------------------------------- */
   /* 選んだ部門ダイアログを開く関数 */
