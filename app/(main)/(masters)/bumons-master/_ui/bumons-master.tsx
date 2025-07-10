@@ -24,7 +24,7 @@ export const BumonsMaster = ({ bumons }: { bumons: BumonsMasterDialogValues[] | 
       </Box>
       <Paper variant="outlined">
         <Box width={'100%'} display={'flex'} p={2}>
-          <Typography>部門マスタ</Typography>
+          <Typography>部門マスタ検索</Typography>
         </Box>
         <Divider />
         <Box width={'100%'} p={2}>

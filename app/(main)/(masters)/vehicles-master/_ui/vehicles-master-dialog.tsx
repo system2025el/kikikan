@@ -136,7 +136,7 @@ export const VehiclesMasterDialog = ({
           editable={editable}
           handleEditable={() => setEditable(true)}
           handleClose={handleClickClose}
-          dialogTitle={'車両マスタ'}
+          dialogTitle={'車両マスタ登録'}
           isNew={isNew}
           isDirty={isDirty}
         />

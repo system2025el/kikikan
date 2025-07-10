@@ -25,7 +25,7 @@ export const DaibumonsMaster = ({ daibumons }: { daibumons: DaibumonsMasterDialo
       </Box>
       <Paper variant="outlined">
         <Box width={'100%'} display={'flex'} p={2} justifyContent={'space-between'} alignItems={'center'}>
-          <Typography>大部門マスタ</Typography>
+          <Typography>大部門マスタ検索</Typography>
         </Box>
         <Divider />
         <Box width={'100%'} p={2}>

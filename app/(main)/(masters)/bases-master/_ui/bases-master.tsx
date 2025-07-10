@@ -23,7 +23,7 @@ export const BasesMaster = ({ bases }: { bases: BasesMasterTableValues[] | undef
       </Box>
       <Paper variant="outlined">
         <Box width={'100%'} display={'flex'} p={2}>
-          <Typography>拠点マスタ</Typography>
+          <Typography>拠点マスタ検索</Typography>
         </Box>
       </Paper>
       <BasesMasterTable bases={theBases} isLoading={isLoading} setIsLoading={setIsLoading} />

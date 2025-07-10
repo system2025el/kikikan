@@ -25,7 +25,7 @@ export const ShukeibumonsMaster = ({ shukeibumons }: { shukeibumons: Shukeibumon
       </Box>
       <Paper variant="outlined">
         <Box width={'100%'} display={'flex'} p={2}>
-          <Typography>集計部門マスタ</Typography>
+          <Typography>集計部門マスタ検索</Typography>
         </Box>
         <Divider />
         <Box width={'100%'} p={2}>

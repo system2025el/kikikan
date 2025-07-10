@@ -120,7 +120,7 @@ export const ManagerMasterDialog = ({
           editable={editable}
           handleEditable={() => setEditable(true)}
           handleClose={handleClickClose}
-          dialogTitle={'担当者情報'}
+          dialogTitle={'担当者マスタ登録'}
           isNew={isNew}
           isDirty={isDirty}
         />

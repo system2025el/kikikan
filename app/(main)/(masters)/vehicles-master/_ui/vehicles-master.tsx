@@ -24,7 +24,7 @@ export const VehiclesMaster = ({ vehs }: { vehs: VehsMasterTableValues[] | undef
       </Box>
       <Paper variant="outlined">
         <Box width={'100%'} display={'flex'} p={2}>
-          <Typography>車両マスタ</Typography>
+          <Typography>車両マスタ検索</Typography>
         </Box>
       </Paper>
       <VehiclesMasterTable vehs={theVehs} isLoading={isLoading} setIsLoading={setIsLoading} />

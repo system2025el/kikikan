@@ -137,7 +137,7 @@ export const LocationsMasterDialog = ({
           isNew={isNew}
           handleEditable={() => setEditable(true)}
           handleClose={handleClickClose}
-          dialogTitle={'公演場所'}
+          dialogTitle={'公演場所マスタ登録'}
           isDirty={isDirty}
         />
         {isLoading ? (
