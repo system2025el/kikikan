@@ -23,7 +23,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { useState } from 'react';
+import { use, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
@@ -31,6 +31,7 @@ import DateX, { RSuiteDateRangePicker, TestDate } from '@/app/(main)/_ui/date';
 import { SelectTable } from '@/app/(main)/_ui/table';
 import { equipmentRows, vehicleHeaders, vehicleRows } from '@/app/(main)/new-order/[juchu_head_id]/_lib/data';
 
+import { Update } from '../_lib/funcs';
 import { JuchuHeadSchema, NewOrderSchema, NewOrderValues } from '../_lib/types';
 import { CustomerSelectionDialog } from './customer-selection';
 import { LocationSelectDialog } from './location-selection';
@@ -39,10 +40,11 @@ import { NewOrderTable } from './new-order-table';
 export const NewOrder = (order: NewOrderValues) => {
   /* useForm ------------------------- */
   const {
+    watch,
     control,
     handleSubmit,
     reset,
-    formState: { isDirty, dirtyFields },
+    formState: { isDirty, dirtyFields, errors },
   } = useForm({
     mode: 'onBlur',
     reValidateMode: 'onBlur',
@@ -62,6 +64,7 @@ export const NewOrder = (order: NewOrderValues) => {
       koenNam: order.koenNam,
       koenbashoNam: order.koenbashoNam,
       kokyakuId: order.kokyakuId,
+      kokyakuNam: order.kokyakuNam,
       kokyakuTantoNam: order.kokyakuTantoNam,
       mem: order.mem,
       nebikiAmt: order.nebikiAmt,
@@ -70,7 +73,11 @@ export const NewOrder = (order: NewOrderValues) => {
     resolver: zodResolver(NewOrderSchema),
   });
 
-  console.log('NewOrder order : ', order);
+  const onSubmit = async (data: NewOrderValues) => {
+    console.log('update : 開始');
+    const update = await Update(data);
+    console.log('update : ', update);
+  };
 
   // 受注開始日/受注終了日
   const [dateRange, setDateRange] = useState<[Date, Date] | null>([new Date(), new Date()]);
@@ -131,13 +138,13 @@ export const NewOrder = (order: NewOrderValues) => {
     <Box>
       {/* --------------------------------受注ヘッダー------------------------------------- */}
       <Paper>
-        <form>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <Grid2 container display="flex" alignItems="center" justifyContent="space-between" p={2}>
             <Grid2>
               <Typography>受注ヘッダー</Typography>
             </Grid2>
             <Grid2 container spacing={1}>
-              <Button>
+              <Button type="submit">
                 <CheckIcon fontSize="small" />
                 保存
               </Button>
@@ -187,7 +194,9 @@ export const NewOrder = (order: NewOrderValues) => {
                 <Controller
                   name="juchuDat"
                   control={control}
-                  render={({ field }) => <TestDate date={field.value} onChange={field.onChange} />}
+                  render={({ field }) => (
+                    <TestDate date={field.value} message={'受注日は必須です'} onChange={field.onChange} />
+                  )}
                 />
               </Box>
               <Box sx={styles.container}>
@@ -228,7 +237,7 @@ export const NewOrder = (order: NewOrderValues) => {
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={9}>相手</Typography>
-                <TextField sx={{ width: '50%' }}></TextField>
+                <TextFieldElement name="kokyakuNam" control={control}></TextFieldElement>
                 <Button onClick={() => handleOpenCustomerDialog()}>検索</Button>
                 <Dialog open={customerDialogOpen} fullScreen>
                   <CustomerSelectionDialog handleCloseCustDialog={handleCloseCustomerDialog} />

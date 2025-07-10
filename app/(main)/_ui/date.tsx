@@ -120,9 +120,18 @@ export const TestDate = (props: {
   date: Date | null;
   minDate?: Date;
   maxDate?: Date;
+  message?: string;
   onChange: (value: Dayjs | null) => void;
 }) => {
-  const { sx, disabled, date, minDate, maxDate, onChange } = props;
+  const { sx, disabled, date, minDate, maxDate, message, onChange } = props;
+
+  const errorMessage = useMemo(() => {
+    if (date === null) {
+      return message;
+    } else {
+      return '';
+    }
+  }, [date, message]);
 
   console.log('TestDate date : ', date);
 
@@ -141,6 +150,10 @@ export const TestDate = (props: {
         format="YYYY/MM/DD" // テキストエリア内のフォーマット
         slotProps={{
           textField: {
+            helperText: errorMessage,
+            FormHelperTextProps: {
+              sx: { color: 'error.main' },
+            },
             size: 'small',
             sx: {
               bgcolor: disabled ? grey[200] : 'white',

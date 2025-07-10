@@ -6,7 +6,7 @@ import { JuchuHeadValues, NewOrderValues } from './types';
 
 export const GetOrder = async (juchuHeadId: number) => {
   try {
-    const { data, error } = await supabase
+    const { data: juchuData, error: juchuError } = await supabase
       .schema('dev2')
       .from('t_juchu_head')
       .select(
@@ -14,30 +14,59 @@ export const GetOrder = async (juchuHeadId: number) => {
       )
       .eq('juchu_head_id', juchuHeadId)
       .single();
-    if (!error) {
-      console.log('GetOrder data : ', data);
+    if (juchuError) {
+      console.error('GetOrder juchu error : ', juchuError);
+      return null;
+    }
 
+    if (juchuData.kokyaku_id !== null) {
+      const { data: kokyakuData, error: kokyakuError } = await supabase
+        .schema('dev2')
+        .from('m_kokyaku')
+        .select('kokyaku_nam')
+        .eq('kokyaku_id', juchuData.kokyaku_id)
+        .single();
+      if (kokyakuError) {
+        console.error('GetOrder kokyaku error : ', kokyakuError);
+        return null;
+      }
       const order: NewOrderValues = {
-        juchuHeadId: data.juchu_head_id,
-        delFlg: data.del_flg,
-        juchuSts: data.juchu_sts,
-        juchuDat: data.juchu_dat,
-        juchuRange: [data.juchu_str_dat, data.juchu_end_dat],
-        nyuryokuUser: data.nyuryoku_user,
-        koenNam: data.koen_nam,
-        koenbashoNam: data.koenbasho_nam,
-        kokyakuId: data.kokyaku_id,
-        kokyakuTantoNam: data.kokyaku_tanto_nam,
-        mem: data.mem,
-        nebikiAmt: data.nebiki_amt,
-        zeiKbn: data.zei_kbn,
+        juchuHeadId: juchuData.juchu_head_id,
+        delFlg: juchuData.del_flg,
+        juchuSts: juchuData.juchu_sts,
+        juchuDat: juchuData.juchu_dat,
+        juchuRange: [juchuData.juchu_str_dat, juchuData.juchu_end_dat],
+        nyuryokuUser: juchuData.nyuryoku_user,
+        koenNam: juchuData.koen_nam,
+        koenbashoNam: juchuData.koenbasho_nam,
+        kokyakuId: juchuData.kokyaku_id,
+        kokyakuNam: kokyakuData.kokyaku_nam,
+        kokyakuTantoNam: juchuData.kokyaku_tanto_nam,
+        mem: juchuData.mem,
+        nebikiAmt: juchuData.nebiki_amt,
+        zeiKbn: juchuData.zei_kbn,
       };
-      console.log(order);
-
+      console.log('GetOrder order : ', order);
       return order;
     } else {
-      console.error('GetOrder error : ', error);
-      return null;
+      const order: NewOrderValues = {
+        juchuHeadId: juchuData.juchu_head_id,
+        delFlg: juchuData.del_flg,
+        juchuSts: juchuData.juchu_sts,
+        juchuDat: juchuData.juchu_dat,
+        juchuRange: [juchuData.juchu_str_dat, juchuData.juchu_end_dat],
+        nyuryokuUser: juchuData.nyuryoku_user,
+        koenNam: juchuData.koen_nam,
+        koenbashoNam: juchuData.koenbasho_nam,
+        kokyakuId: juchuData.kokyaku_id,
+        kokyakuNam: '',
+        kokyakuTantoNam: juchuData.kokyaku_tanto_nam,
+        mem: juchuData.mem,
+        nebikiAmt: juchuData.nebiki_amt,
+        zeiKbn: juchuData.zei_kbn,
+      };
+      console.log('GetOrder order : ', order);
+      return order;
     }
   } catch (e) {
     console.log(e);
@@ -101,5 +130,44 @@ export const AddNewOrder = async (id: number) => {
     }
   } catch (e) {
     console.error('Exception while adding new order:', e);
+  }
+};
+
+export const Update = async (data: NewOrderValues) => {
+  const updateData = {
+    juchu_head_id: data.juchuHeadId,
+    del_flg: data.delFlg ? 1 : 0,
+    juchu_sts: data.juchuSts,
+    juchu_dat: data.juchuDat,
+    juchu_str_dat: data.juchuRange && data.juchuRange[0],
+    juchu_end_dat: data.juchuRange && data.juchuRange[1],
+    nyuryoku_user: data.nyuryokuUser,
+    koen_nam: data.koenNam,
+    koenbasho_nam: data.koenbashoNam,
+    kokyaku_id: data.kokyakuId,
+    kokyaku_tanto_nam: data.kokyakuTantoNam,
+    mem: data.mem,
+    nebiki_amt: data.nebikiAmt,
+    zei_kbn: data.zeiKbn,
+    upd_dat: new Date(),
+    upd_user: 'test_user',
+  };
+
+  try {
+    const { error } = await supabase
+      .schema('dev2')
+      .from('t_juchu_head')
+      .update(updateData)
+      .eq('juchu_head_id', updateData.juchu_head_id);
+
+    if (error) {
+      console.error('Error updating order:', error.message);
+      return false;
+    }
+    console.log('Order updated successfully:', updateData);
+    return true;
+  } catch (e) {
+    console.error('Exception while updating order:', e);
+    return false;
   }
 };
