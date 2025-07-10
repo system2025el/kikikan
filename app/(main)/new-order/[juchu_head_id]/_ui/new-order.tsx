@@ -51,7 +51,13 @@ export const NewOrder = (order: NewOrderValues) => {
       delFlg: order.delFlg,
       juchuSts: order.juchuSts,
       juchuDat: order.juchuDat,
-      juchuRange: [new Date(order.juchuRange[0]), new Date(order.juchuRange[1])],
+      juchuRange:
+        order.juchuRange !== null
+          ? ([
+              order.juchuRange[0] ? new Date(order.juchuRange[0]) : new Date(''),
+              order.juchuRange[1] ? new Date(order.juchuRange[1]) : new Date(''),
+            ] as [Date, Date])
+          : null,
       nyuryokuUser: order.nyuryokuUser,
       koenNam: order.koenNam,
       koenbashoNam: order.koenbashoNam,
@@ -210,11 +216,11 @@ export const NewOrder = (order: NewOrderValues) => {
             <Grid2 size={{ xs: 12, sm: 12, md: 5 }}>
               <Box sx={styles.container}>
                 <Typography marginRight={7}>公演名</Typography>
-                <TextFieldElement name="koenNam" control={control} disabled></TextFieldElement>
+                <TextFieldElement name="koenNam" control={control}></TextFieldElement>
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={5}>公演場所</Typography>
-                <TextFieldElement name="koenbashoNam" control={control} disabled></TextFieldElement>
+                <TextFieldElement name="koenbashoNam" control={control}></TextFieldElement>
                 <Button onClick={() => handleOpenLocationDialog()}>検索</Button>
                 <Dialog open={locationDialogOpen} fullScreen>
                   <LocationSelectDialog handleCloseLocationDialog={handleCloseLocationDailog} />
@@ -230,15 +236,15 @@ export const NewOrder = (order: NewOrderValues) => {
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={3}>相手担当者</Typography>
-                <TextFieldElement name="kokyakuTantoNam" control={control} disabled></TextFieldElement>
+                <TextFieldElement name="kokyakuTantoNam" control={control}></TextFieldElement>
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={9}>メモ</Typography>
-                <TextFieldElement name="mem" control={control} disabled></TextFieldElement>
+                <TextFieldElement name="mem" control={control}></TextFieldElement>
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={7}>値引き</Typography>
-                <TextFieldElement name="nebikiAmt" control={control} disabled></TextFieldElement>
+                <TextFieldElement name="nebikiAmt" control={control}></TextFieldElement>
                 <Typography>円</Typography>
                 <Typography ml={4} mr={2}>
                   税区分
