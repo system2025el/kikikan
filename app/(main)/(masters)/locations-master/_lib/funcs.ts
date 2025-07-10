@@ -180,7 +180,7 @@ export const addNewLoc = async (data: LocsMasterDialogValues) => {
 
     if (insertError) {
       console.error('登録に失敗しました:', insertError.message);
-      throw insertError; // ★重要
+      throw insertError;
     } else {
       console.log('車両を登録しました : ', theData);
     }
@@ -218,19 +218,21 @@ export const updateLoc = async (data: LocsMasterDialogValues, id: number) => {
   };
   console.log(theData, typeof theData.upd_user);
   try {
-    const { error: insertError } = await supabase
+    const { error: updateError } = await supabase
       .schema('dev2')
       .from('m_koenbasho')
       .update({ ...theData })
       .eq('koenbasho_id', id);
 
-    if (insertError) {
-      console.error('登録に失敗しました:', insertError.message);
+    if (updateError) {
+      console.error('更新に失敗しました:', updateError.message);
+      throw updateError;
     } else {
-      console.log('車両を登録しました : ', theData);
+      console.log('車両を更新しました : ', theData);
     }
   } catch (error) {
     console.log(error);
+    throw error;
   }
   revalidatePath('/locations-master');
 };
