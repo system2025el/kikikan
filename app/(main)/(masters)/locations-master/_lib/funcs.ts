@@ -180,13 +180,15 @@ export const addNewLoc = async (data: LocsMasterDialogValues) => {
 
     if (insertError) {
       console.error('登録に失敗しました:', insertError.message);
+      throw insertError; // ★重要
     } else {
       console.log('車両を登録しました : ', theData);
     }
   } catch (error) {
     console.log(error);
+    throw error;
   }
-  revalidatePath('/locations-master');
+  await revalidatePath('/locations-master');
 };
 
 export const updateLoc = async (data: LocsMasterDialogValues, id: number) => {
