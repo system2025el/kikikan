@@ -27,8 +27,6 @@ export const ShukeibumonsMasterDialog = ({
   refetchShukeibumons: () => void;
 }) => {
   /* useState -------------------------------------- */
-  /* 集計部門リスト */
-  const [shukeibumon, setShukeibumon] = useState<ShukeibumonsMasterDialogValues | undefined>();
   /* DBのローディング状態 */
   const [isLoading, setIsLoading] = useState(true); /* ダイアログでの編集モードかどうか */
   const [editable, setEditable] = useState(false);
@@ -99,8 +97,7 @@ export const ShukeibumonsMasterDialog = ({
     const getThatOneShukeibumon = async () => {
       if (shukeibumonId === -100) {
         // 新規追加モード
-        setShukeibumon(emptyShukeibumon);
-        reset(); // フォーム初期化
+        reset(emptyShukeibumon); // フォーム初期化
         setEditable(true); // 編集モードにする
         setIsLoading(false);
         setIsNew(true);
@@ -114,7 +111,6 @@ export const ShukeibumonsMasterDialog = ({
       }
     };
     getThatOneShukeibumon();
-    console.log('chaaaaaage : ', shukeibumon);
   }, [shukeibumonId]);
   /* eslint-enable react-hooks/exhaustive-deps */
 

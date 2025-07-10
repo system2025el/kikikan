@@ -37,7 +37,6 @@ export const CustomersMasterDialog = ({
 }) => {
   /* useState --------------------- */
   /** 顧客リスト */
-  const [customer, setCustomer] = useState<customerMasterDialogDetailsValues>();
   /** DBのローディング状態 */
   const [isLoading, setIsLoading] = useState(true);
   const [editable, setEditable] = useState(false);
@@ -118,8 +117,7 @@ export const CustomersMasterDialog = ({
     const getThatOneCustomer = async () => {
       if (customerId === -100) {
         // 新規追加モード
-        setCustomer(emptyCustomer);
-        reset(); // フォーム初期化
+        reset(emptyCustomer); // フォーム初期化
         setEditable(true); // 編集モードにする
         setIsLoading(false);
         setIsNew(true);
@@ -133,7 +131,6 @@ export const CustomersMasterDialog = ({
       }
     };
     getThatOneCustomer();
-    console.log('chaaaaaage : ', customer);
   }, [customerId]);
   /* eslint-enable react-hooks/exhaustive-deps */
 

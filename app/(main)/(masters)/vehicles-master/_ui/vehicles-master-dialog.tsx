@@ -38,8 +38,6 @@ export const VehiclesMasterDialog = ({
   refetchVehs: () => void;
 }) => {
   /* useState --------------------- */
-  /* 公演場所リストの配列 */
-  const [vehicle, setVehicle] = useState<VehsMasterDialogValues>();
   /** DBのローディング状態 */
   const [isLoading, setIsLoading] = useState(true);
   /* ダイアログでの編集モードかどうか */
@@ -110,8 +108,7 @@ export const VehiclesMasterDialog = ({
     const getThatOneVeh = async () => {
       if (vehicleId === -100) {
         // 新規追加モード
-        setVehicle(emptyVeh);
-        reset(); // フォーム初期化
+        reset(emptyVeh); // フォーム初期化
         setEditable(true); // 編集モードにする
         setIsLoading(false);
         setIsNew(true);
@@ -125,7 +122,6 @@ export const VehiclesMasterDialog = ({
       }
     };
     getThatOneVeh();
-    console.log('chaaaaaage : ', vehicle);
   }, [vehicleId]);
   /* eslint-enable react-hooks/exhaustive-deps */
 

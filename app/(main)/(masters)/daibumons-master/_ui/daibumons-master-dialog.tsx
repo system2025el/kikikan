@@ -28,8 +28,6 @@ export const DaibumonsMasterDialog = ({
   refetchDaibumons: () => void;
 }) => {
   /* useState -------------------------------------- */
-  /* 大部門 */
-  const [daibumon, setDaibumon] = useState<DaibumonsMasterDialogValues | undefined>();
   /* DBのローディング状態 */
   const [isLoading, setIsLoading] = useState(true); /* ダイアログでの編集モードかどうか */
   const [editable, setEditable] = useState(false);
@@ -100,8 +98,7 @@ export const DaibumonsMasterDialog = ({
     const getThatOneDaibumon = async () => {
       if (daibumonId === -100) {
         // 新規追加モード
-        setDaibumon(emptyDaibumon);
-        reset(); // フォーム初期化
+        reset(emptyDaibumon); // フォーム初期化
         setEditable(true); // 編集モードにする
         setIsLoading(false);
         setIsNew(true);
@@ -115,7 +112,6 @@ export const DaibumonsMasterDialog = ({
       }
     };
     getThatOneDaibumon();
-    console.log('chaaaaaage : ', daibumon);
   }, [daibumonId]);
   /* eslint-enable react-hooks/exhaustive-deps */
 

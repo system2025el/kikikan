@@ -47,7 +47,6 @@ export const BumonsMasterDialog = ({
 }) => {
   /* useState -------------------------------------- */
   /* 部門 */
-  const [bumon, setBumon] = useState<BumonsMasterDialogValues | undefined>();
   /* DBのローディング状態 */
   const [isLoading, setIsLoading] = useState(true);
   /* ダイアログでの編集モードかどうか */
@@ -122,8 +121,7 @@ export const BumonsMasterDialog = ({
     const getThatOnebumon = async () => {
       if (bumonId === -100) {
         // 新規追加モード
-        setBumon(emptyBumon);
-        reset(); // フォーム初期化
+        reset(emptyBumon); // フォーム初期化
         setEditable(true); // 編集モードにする
         setIsLoading(false);
         setIsNew(true);
@@ -137,7 +135,6 @@ export const BumonsMasterDialog = ({
       }
     };
     getThatOnebumon();
-    console.log('chaaaaaage : ', bumon);
   }, [bumonId]);
   /* eslint-enable react-hooks/exhaustive-deps */
 

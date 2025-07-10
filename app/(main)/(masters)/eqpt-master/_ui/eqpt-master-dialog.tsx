@@ -40,8 +40,6 @@ export const EqMasterDialog = ({
   refetchEqpts: () => Promise<void>;
 }) => {
   /* useState --------------------- */
-  /* 機材リストの配列 */
-  const [eqpt, setEqpt] = useState<EqptMasterDialogValues>();
   /** DBのローディング状態 */
   const [isLoading, setIsLoading] = useState(true);
   /* ダイアログでの編集モードかどうか */
@@ -107,8 +105,7 @@ export const EqMasterDialog = ({
     const getThatOneEqpt = async () => {
       if (eqptId === -100) {
         // 新規追加モード
-        setEqpt(emptyEqpt);
-        reset(); // フォーム初期化
+        reset(emptyEqpt); // フォーム初期化
         setEditable(true); // 編集モードにする
         setIsLoading(false);
         setIsNew(true);
@@ -122,7 +119,6 @@ export const EqMasterDialog = ({
       }
     };
     getThatOneEqpt();
-    console.log('chaaaaaage : ', eqpt);
   }, [eqptId]);
   /* eslint-enable react-hooks/exhaustive-deps */
 
