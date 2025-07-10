@@ -1,7 +1,7 @@
-import { shiori } from '@/app/_lib/postgres/funcs';
+// import { shiori } from '@/app/_lib/postgres/funcs';
 import { getAllVehicles } from '@/app/_lib/supabase/funcs';
 
-import { vehicles } from './_lib/datas';
+// import { vehicles } from './_lib/datas';
 import { VehiclesMaster } from './_ui/vehicles-master';
 
 const Page = async () => {
