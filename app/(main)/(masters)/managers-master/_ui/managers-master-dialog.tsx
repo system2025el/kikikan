@@ -27,8 +27,6 @@ export const ManagerMasterDialog = ({
   refetchManagers: () => void;
 }) => {
   /* useState --------------------- */
-  /** 担当者リストの配列 */
-  const [manager, setManager] = useState<ManagersMasterDialogValues>();
   /** DBのローディング状態 */
   const [isLoading, setIsLoading] = useState(true);
   /* ダイアログでの編集モードかどうか */
@@ -94,8 +92,7 @@ export const ManagerMasterDialog = ({
     const getThatOneManager = async () => {
       if (managerId === -100) {
         // 新規追加モード
-        setManager(emptyManager);
-        reset(); // フォーム初期化
+        reset(emptyManager); // フォーム初期化
         setEditable(true); // 編集モードにする
         setIsLoading(false);
         setIsNew(true);
@@ -109,7 +106,6 @@ export const ManagerMasterDialog = ({
       }
     };
     getThatOneManager();
-    console.log('chaaaaaage : ', manager);
   }, [managerId]);
   /* eslint-enable react-hooks/exhaustive-deps */
 

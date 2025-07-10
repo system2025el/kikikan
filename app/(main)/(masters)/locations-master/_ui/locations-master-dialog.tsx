@@ -29,8 +29,6 @@ export const LocationsMasterDialog = ({
   refetchLocs: () => Promise<void>;
 }) => {
   /* useState --------------------- */
-  /* 公演場所リストの配列 */
-  const [location, setLocation] = useState<LocsMasterDialogValues>();
   /** DBのローディング状態 */
   const [isLoading, setIsLoading] = useState(true);
   /* ダイアログでの編集モードかどうか */
@@ -110,22 +108,20 @@ export const LocationsMasterDialog = ({
     const getThatOneloc = async () => {
       if (locationId === -100) {
         // 新規追加モード
-        setLocation(emptyLoc);
-        reset(); // フォーム初期化
+
+        reset(emptyLoc); // フォーム初期化
         setEditable(true); // 編集モードにする
         setIsLoading(false);
         setIsNew(true);
       } else {
         const loc1 = await getOneLoc(locationId);
         if (loc1) {
-          setLocation(loc1);
           reset(loc1); // 取得したデータでフォーム初期化
         }
         setIsLoading(false);
       }
     };
     getThatOneloc();
-    console.log('chaaaaaage : ', location);
   }, [locationId]);
   /* eslint-enable react-hooks/exhaustive-deps */
 

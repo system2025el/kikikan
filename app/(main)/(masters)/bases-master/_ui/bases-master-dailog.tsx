@@ -26,7 +26,6 @@ export const BasesMasterDialog = ({
 }) => {
   /* useState -------------------------------------- */
   /* 拠点 */
-  const [base, setBase] = useState<BasesMasterDialogValues | undefined>();
   /* 新規作成かどうか */
   const [isNew, setIsNew] = useState(false);
   /* 未保存ダイアログ出すかどうか */
@@ -99,8 +98,7 @@ export const BasesMasterDialog = ({
     const getThatOneBase = async () => {
       if (baseId === -100) {
         // 新規追加モード
-        setBase(emptyBase);
-        reset(); // フォーム初期化
+        reset(emptyBase); // フォーム初期化
         setEditable(true); // 編集モードにする
         setIsLoading(false);
         setIsNew(true);
@@ -114,7 +112,6 @@ export const BasesMasterDialog = ({
       }
     };
     getThatOneBase();
-    console.log('chaaaaaage : ', base);
   }, [baseId]);
   /* eslint-enable react-hooks/exhaustive-deps */
   return (
