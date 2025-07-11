@@ -11,6 +11,7 @@ import { PickerValue } from '@mui/x-date-pickers/internals';
 import { DateValidationError } from '@mui/x-date-pickers/models';
 import dayjs, { Dayjs } from 'dayjs';
 import { useMemo, useState } from 'react';
+import { ControllerFieldState, ControllerRenderProps, Noop } from 'react-hook-form';
 import { DateRangePicker } from 'rsuite';
 //import { DateRange } from 'rsuite/esm/DateRangePicker';
 
@@ -120,20 +121,11 @@ export const TestDate = (props: {
   date: Date | null;
   minDate?: Date;
   maxDate?: Date;
-  message?: string;
+  onBlur?: Noop;
+  fieldstate?: ControllerFieldState;
   onChange: (value: Dayjs | null) => void;
 }) => {
-  const { sx, disabled, date, minDate, maxDate, message, onChange } = props;
-
-  const errorMessage = useMemo(() => {
-    if (date === null) {
-      return message;
-    } else {
-      return '';
-    }
-  }, [date, message]);
-
-  console.log('TestDate date : ', date);
+  const { sx, disabled, date, minDate, maxDate, onBlur, fieldstate, onChange } = props;
 
   return (
     <LocalizationProvider
@@ -150,9 +142,9 @@ export const TestDate = (props: {
         format="YYYY/MM/DD" // テキストエリア内のフォーマット
         slotProps={{
           textField: {
-            helperText: errorMessage,
+            helperText: fieldstate?.error?.message,
             FormHelperTextProps: {
-              sx: { color: 'error.main' },
+              sx: { color: 'error.main', fontSize: '0.75rem' },
             },
             size: 'small',
             sx: {
@@ -165,6 +157,8 @@ export const TestDate = (props: {
               },
               ...sx,
             },
+            error: fieldstate?.invalid,
+            onBlur: onBlur,
           },
           calendarHeader: { format: 'YYYY年MM月' },
         }} // カレンダーヘッダーのフォーマット
@@ -174,6 +168,7 @@ export const TestDate = (props: {
         views={['year', 'month', 'day']}
         disabled={disabled ? true : false}
         onChange={onChange}
+        onAccept={onBlur}
       />
     </LocalizationProvider>
   );
@@ -282,7 +277,6 @@ type Props = {
  */
 export const RSuiteDateRangePicker = (props: Props) => {
   const { value, minDate, maxDate, onChange, styles, disabled } = props;
-  console.log('value : ', value);
   return (
     <>
       <style>

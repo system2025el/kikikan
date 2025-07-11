@@ -46,13 +46,13 @@ export const NewOrder = (order: NewOrderValues) => {
     reset,
     formState: { isDirty, dirtyFields, errors },
   } = useForm({
-    mode: 'onBlur',
+    mode: 'onSubmit',
     reValidateMode: 'onBlur',
     defaultValues: {
       juchuHeadId: order.juchuHeadId,
       delFlg: order.delFlg,
       juchuSts: order.juchuSts,
-      juchuDat: order.juchuDat,
+      juchuDat: new Date(order.juchuDat),
       juchuRange:
         order.juchuRange !== null
           ? ([
@@ -63,8 +63,7 @@ export const NewOrder = (order: NewOrderValues) => {
       nyuryokuUser: order.nyuryokuUser,
       koenNam: order.koenNam,
       koenbashoNam: order.koenbashoNam,
-      kokyakuId: order.kokyakuId,
-      kokyakuNam: order.kokyakuNam,
+      kokyaku: order.kokyaku,
       kokyakuTantoNam: order.kokyakuTantoNam,
       mem: order.mem,
       nebikiAmt: order.nebikiAmt,
@@ -166,7 +165,18 @@ export const NewOrder = (order: NewOrderValues) => {
                   <Typography marginRight={5} whiteSpace="nowrap">
                     受注番号
                   </Typography>
-                  <TextFieldElement name="juchuHeadId" control={control} disabled></TextFieldElement>
+                  <TextFieldElement
+                    name="juchuHeadId"
+                    control={control}
+                    type="number"
+                    sx={{
+                      '& input[type=number]::-webkit-inner-spin-button': {
+                        WebkitAppearance: 'none',
+                        margin: 0,
+                      },
+                    }}
+                    slotProps={{ input: { readOnly: true } }}
+                  ></TextFieldElement>
                 </Grid2>
                 <Grid2 display="flex" direction="row" alignItems="center">
                   <Typography mr={2}>受注ステータス</Typography>
@@ -194,14 +204,25 @@ export const NewOrder = (order: NewOrderValues) => {
                 <Controller
                   name="juchuDat"
                   control={control}
-                  render={({ field }) => (
-                    <TestDate date={field.value} message={'受注日は必須です'} onChange={field.onChange} />
+                  render={({ field, fieldState }) => (
+                    <Box>
+                      <TestDate
+                        onBlur={field.onBlur}
+                        date={field.value}
+                        onChange={(newDate) => field.onChange(newDate?.toDate())}
+                        fieldstate={fieldState}
+                      />
+                    </Box>
                   )}
                 />
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={7}>入力者</Typography>
-                <TextFieldElement name="nyuryokuUser" control={control} disabled></TextFieldElement>
+                <TextFieldElement
+                  name="nyuryokuUser"
+                  control={control}
+                  slotProps={{ input: { readOnly: true } }}
+                ></TextFieldElement>
               </Box>
               <Box sx={styles.container}>
                 <Typography mr={2}>
@@ -212,12 +233,15 @@ export const NewOrder = (order: NewOrderValues) => {
                 <Controller
                   name="juchuRange"
                   control={control}
-                  render={({ field }) => (
-                    <RSuiteDateRangePicker
-                      //styles={{ background: 'grey' }}
-                      value={field.value}
-                      onChange={field.onChange} /*val={rentalPeriod}*/
-                    />
+                  render={({ field, fieldState }) => (
+                    <>
+                      <RSuiteDateRangePicker value={field.value} onChange={field.onChange} />
+                      {fieldState.error && (
+                        <Typography color="error" variant="caption">
+                          {fieldState.error.message}
+                        </Typography>
+                      )}
+                    </>
                   )}
                 />
               </Box>
@@ -237,7 +261,11 @@ export const NewOrder = (order: NewOrderValues) => {
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={9}>相手</Typography>
-                <TextFieldElement name="kokyakuNam" control={control}></TextFieldElement>
+                <TextFieldElement
+                  name="kokyaku.kokyakuNam"
+                  control={control}
+                  slotProps={{ input: { readOnly: true } }}
+                ></TextFieldElement>
                 <Button onClick={() => handleOpenCustomerDialog()}>検索</Button>
                 <Dialog open={customerDialogOpen} fullScreen>
                   <CustomerSelectionDialog handleCloseCustDialog={handleCloseCustomerDialog} />
@@ -253,7 +281,20 @@ export const NewOrder = (order: NewOrderValues) => {
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={7}>値引き</Typography>
-                <TextFieldElement name="nebikiAmt" control={control}></TextFieldElement>
+                <TextFieldElement
+                  name="nebikiAmt"
+                  control={control}
+                  type="number"
+                  sx={{
+                    '& .MuiInputBase-input': {
+                      textAlign: 'right',
+                    },
+                    '& input[type=number]::-webkit-inner-spin-button': {
+                      WebkitAppearance: 'none',
+                      margin: 0,
+                    },
+                  }}
+                ></TextFieldElement>
                 <Typography>円</Typography>
                 <Typography ml={4} mr={2}>
                   税区分

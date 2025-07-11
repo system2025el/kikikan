@@ -39,8 +39,7 @@ export const GetOrder = async (juchuHeadId: number) => {
         nyuryokuUser: juchuData.nyuryoku_user,
         koenNam: juchuData.koen_nam,
         koenbashoNam: juchuData.koenbasho_nam,
-        kokyakuId: juchuData.kokyaku_id,
-        kokyakuNam: kokyakuData.kokyaku_nam,
+        kokyaku: { kokyakuId: juchuData.kokyaku_id, kokyakuNam: kokyakuData.kokyaku_nam },
         kokyakuTantoNam: juchuData.kokyaku_tanto_nam,
         mem: juchuData.mem,
         nebikiAmt: juchuData.nebiki_amt,
@@ -54,18 +53,17 @@ export const GetOrder = async (juchuHeadId: number) => {
         delFlg: juchuData.del_flg,
         juchuSts: juchuData.juchu_sts,
         juchuDat: juchuData.juchu_dat,
-        juchuRange: [juchuData.juchu_str_dat, juchuData.juchu_end_dat],
+        juchuRange: juchuData.juchu_str_dat !== null ? [juchuData.juchu_str_dat, juchuData.juchu_end_dat] : null,
         nyuryokuUser: juchuData.nyuryoku_user,
         koenNam: juchuData.koen_nam,
         koenbashoNam: juchuData.koenbasho_nam,
-        kokyakuId: juchuData.kokyaku_id,
-        kokyakuNam: '',
+        kokyaku: { kokyakuId: juchuData.kokyaku_id, kokyakuNam: '' },
         kokyakuTantoNam: juchuData.kokyaku_tanto_nam,
         mem: juchuData.mem,
         nebikiAmt: juchuData.nebiki_amt,
         zeiKbn: juchuData.zei_kbn,
       };
-      console.log('GetOrder order : ', order);
+      console.log('GetOrder No kokyakuId order : ', order);
       return order;
     }
   } catch (e) {
@@ -136,7 +134,7 @@ export const AddNewOrder = async (id: number) => {
 export const Update = async (data: NewOrderValues) => {
   const updateData = {
     juchu_head_id: data.juchuHeadId,
-    del_flg: data.delFlg ? 1 : 0,
+    del_flg: data.delFlg,
     juchu_sts: data.juchuSts,
     juchu_dat: data.juchuDat,
     juchu_str_dat: data.juchuRange && data.juchuRange[0],
@@ -144,7 +142,7 @@ export const Update = async (data: NewOrderValues) => {
     nyuryoku_user: data.nyuryokuUser,
     koen_nam: data.koenNam,
     koenbasho_nam: data.koenbashoNam,
-    kokyaku_id: data.kokyakuId,
+    kokyaku_id: data.kokyaku.kokyakuId,
     kokyaku_tanto_nam: data.kokyakuTantoNam,
     mem: data.mem,
     nebiki_amt: data.nebikiAmt,
