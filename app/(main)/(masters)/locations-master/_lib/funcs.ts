@@ -95,7 +95,6 @@ export const getOneLoc = async (id: number) => {
       console.log('I got a datalist from db', data);
 
       const theData: LocsMasterDialogValues = {
-        locId: data.koenbasho_id,
         locNam: data.koenbasho_nam,
         adrPost: data.adr_post,
         adrShozai: data.adr_shozai,

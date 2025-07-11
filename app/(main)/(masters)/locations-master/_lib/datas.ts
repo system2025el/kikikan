@@ -82,7 +82,6 @@ export const formItems: FormItemsType[] = [
 
 // 新規登録用の初期化値（空の公演場所）
 export const emptyLoc: LocsMasterDialogValues = {
-  locId: -100,
   locNam: '',
   adrPost: '',
   adrShozai: '',
@@ -109,6 +108,7 @@ export const locationList: LocsMasterTableValues[] = [
     adrTatemono: '',
     adrSonota: '１－５',
     mem: 'ばばばばばばっばばばばっばばばばば',
+    delFlg: false,
   },
   {
     locNam: '日本武道館',
@@ -120,6 +120,7 @@ export const locationList: LocsMasterTableValues[] = [
     adrTatemono: '',
     adrSonota: '',
     mem: '',
+    delFlg: false,
   },
   {
     locNam: 'ＮＨＫホール',
@@ -131,6 +132,7 @@ export const locationList: LocsMasterTableValues[] = [
     adrTatemono: '',
     adrSonota: '',
     mem: '',
+    delFlg: false,
   },
   {
     locNam: '東京厚生年金会館ホール',
@@ -142,6 +144,7 @@ export const locationList: LocsMasterTableValues[] = [
     adrTatemono: '',
     adrSonota: '',
     mem: '',
+    delFlg: false,
   },
   {
     locNam: '中野サンプラザ',
@@ -153,6 +156,7 @@ export const locationList: LocsMasterTableValues[] = [
     adrTatemono: '',
     adrSonota: '',
     mem: '',
+    delFlg: false,
   },
   {
     locNam: '渋谷公会堂',
@@ -164,5 +168,6 @@ export const locationList: LocsMasterTableValues[] = [
     adrTatemono: '',
     adrSonota: '',
     mem: '',
+    delFlg: false,
   },
 ];
