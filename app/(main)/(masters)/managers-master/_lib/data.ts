@@ -25,26 +25,26 @@ export const managers: ManagersMasterTableValues[] = [
   {
     tantouId: 1,
     tantouNam: '田中',
-    delFlg: false,
+    dspFlg: true,
   },
   {
     tantouId: 2,
     tantouNam: '鈴木',
-    delFlg: false,
+    dspFlg: true,
   },
   {
     tantouId: 3,
     tantouNam: '佐藤',
-    delFlg: true,
+    dspFlg: true,
   },
   {
     tantouId: 4,
     tantouNam: '山田',
-    delFlg: false,
+    dspFlg: true,
   },
   {
     tantouId: 5,
     tantouNam: '新規',
-    delFlg: false,
+    dspFlg: true,
   },
 ];

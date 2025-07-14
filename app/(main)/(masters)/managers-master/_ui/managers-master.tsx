@@ -27,11 +27,7 @@ export const ManagersMaster = ({ managers }: { managers: ManagersMasterTableValu
         </Box>
         <Divider />
         <Box width={'100%'} p={2}>
-          <Stack>
-            <Typography variant="body2">検索</Typography>
-          </Stack>
           <form>
-            {/* <Divider sx={{ mt: 1 }} /> */}
             <Stack justifyContent={'space-between'} alignItems={'start'} mt={1}>
               <Stack alignItems={'baseline'}>
                 <Typography>担当者キーワード</Typography>

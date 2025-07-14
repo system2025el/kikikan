@@ -104,12 +104,7 @@ export const EqptMasterTable = ({
               datas={list!.map((l) => ({
                 id: l.kizaiId,
                 name: l.kizaiNam,
-                rankAmt1: l.rankAmt1,
-                rankAmt2: l.rankAmt2,
-                rankAmt3: l.rankAmt3,
-                rankAmt4: l.rankAmt4,
-                rankAmt5: l.rankAmt5,
-                delFlg: l.delFlg,
+                ...l,
               }))}
               page={page}
               rowsPerPage={rowsPerPage}

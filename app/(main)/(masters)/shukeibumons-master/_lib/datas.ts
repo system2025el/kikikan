@@ -37,25 +37,25 @@ export const shukeibumonsList: ShukeibumonsMasterTableValues[] = [
   {
     shukeibumonNam: '照明部',
     mem: 'XXXXXXXXXXX',
-    delFlg: false,
+
     dspFlg: false,
-    dspOrdNum: 0,
+
     shukeibumonId: 1,
   },
   {
     shukeibumonNam: 'L課（Control）',
     mem: 'XXXXXXXX',
-    delFlg: false,
+
     dspFlg: false,
-    dspOrdNum: 0,
+
     shukeibumonId: 2,
   },
   {
     shukeibumonNam: 'L課（SPOT）',
     mem: 'XXXXXXX',
-    delFlg: false,
+
     dspFlg: false,
-    dspOrdNum: 0,
+
     shukeibumonId: 3,
   },
 ];

@@ -121,7 +121,7 @@ export const BumonsMasterTable = ({
             <>
               <MasterTable
                 headers={BumonsMHeader}
-                datas={list!.map((l) => ({ id: l.bumonId!, name: l.bumonNam, mem: l.mem!, delFlg: l.delFlg }))}
+                datas={list!.map((l) => ({ id: l.bumonId!, name: l.bumonNam, ...l }))}
                 handleOpenDialog={handleOpenDialog}
                 page={page}
                 rowsPerPage={rowsPerPage}

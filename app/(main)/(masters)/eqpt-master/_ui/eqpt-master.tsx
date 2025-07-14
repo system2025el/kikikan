@@ -48,9 +48,6 @@ export const EqptMaster = ({ eqpts }: { eqpts: EqptMasterTableValues[] | undefin
         </Box>
         <Divider />
         <Box width={'100%'} p={2}>
-          <Stack justifyContent={'space-between'}>
-            <Typography variant="body2">検索</Typography>
-          </Stack>
           <form onSubmit={handleSubmit(onSubmit)}>
             <Stack justifyContent={'space-between'} alignItems={'start'} mt={1}>
               <Stack>

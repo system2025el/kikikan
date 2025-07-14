@@ -12,7 +12,6 @@ export type VehsMasterDialogValues = z.infer<typeof VehsMasterDialogSchema>;
 export type VehsMasterTableValues = {
   sharyoId: number;
   sharyoNam: string;
-  delFlg: boolean;
   mem: string;
   dspFlg: boolean;
 };

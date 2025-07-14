@@ -40,21 +40,18 @@ export const basesList: BasesMasterTableValues[] = [
     kyotenNam: 'KICS',
     mem: '川崎',
     kyotenId: 1,
-    delFlg: false,
     dspFlg: false,
   },
   {
     kyotenNam: 'YARD',
     mem: '大和',
     kyotenId: 2,
-    delFlg: false,
     dspFlg: false,
   },
   {
     kyotenNam: 'その他',
     mem: '厚木など',
     kyotenId: 3,
-    delFlg: false,
     dspFlg: false,
   },
 ];

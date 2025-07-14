@@ -33,7 +33,6 @@ export type EqptMasterTableValues = {
   kizaiId: number;
   kizaiNam: string;
   kizaiQty: number;
-  delFlg: boolean;
   shozokuNam: string;
   mem: string;
   bumonNam: string;
@@ -45,6 +44,7 @@ export type EqptMasterTableValues = {
   rankAmt3: number;
   rankAmt4: number;
   rankAmt5: number;
+  dspFlg: boolean;
 };
 
 // 検索用

@@ -13,8 +13,9 @@ export const GetAllLoc = async () => {
       .schema('dev2')
       .from('m_koenbasho')
       .select(
-        'koenbasho_id , koenbasho_nam, del_flg, adr_shozai, adr_tatemono, adr_sonota, tel,  fax, mem, dsp_ord_num'
+        'koenbasho_id , koenbasho_nam, del_flg, adr_shozai, adr_tatemono, adr_sonota, tel,  fax, mem, dsp_ord_num, dsp_flg'
       )
+      .neq('del_flg', 1)
       .order('dsp_ord_num');
     if (!error) {
       console.log('I got a datalist from db', data);
@@ -30,6 +31,7 @@ export const GetAllLoc = async () => {
         mem: d.mem,
         delFlg: d.del_flg,
         dspOrdNum: d.dsp_ord_num,
+        dspFlg: d.dsp_flg,
       }));
 
       console.log(theData);
@@ -50,9 +52,10 @@ export const GetFilteredLocs = async (query: string) => {
       .schema('dev2')
       .from('m_koenbasho')
       .select(
-        'koenbasho_id , koenbasho_nam, del_flg, adr_shozai, adr_tatemono, adr_sonota, tel,  fax, mem, dsp_ord_num'
+        'koenbasho_id , koenbasho_nam, del_flg, adr_shozai, adr_tatemono, adr_sonota, tel,  fax, mem, dsp_ord_num, dsp_flg'
       )
       .like('koenbasho_nam', `%${query}%`)
+      .neq('del_flg', 1)
       .order('dsp_ord_num');
     if (!error) {
       console.log('I got a datalist from db', data);
@@ -68,6 +71,7 @@ export const GetFilteredLocs = async (query: string) => {
         mem: d.mem,
         dspOrdNum: d.dsp_ord_num,
         delFlg: d.del_flg === 0 ? false : true,
+        dspFlg: d.dsp_flg,
       }));
 
       console.log(theData);

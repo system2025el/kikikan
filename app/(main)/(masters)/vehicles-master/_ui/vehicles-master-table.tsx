@@ -121,7 +121,7 @@ export const VehiclesMasterTable = ({
           <>
             <MasterTable
               headers={vMHeader}
-              datas={list!.map((l) => ({ id: l.sharyoId, name: l.sharyoNam, mem: l.mem!, delFlg: l.delFlg }))}
+              datas={list!.map((l) => ({ id: l.sharyoId, name: l.sharyoNam, ...l }))}
               handleOpenDialog={handleOpenDialog}
               page={page}
               rowsPerPage={rowsPerPage}

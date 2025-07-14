@@ -13,9 +13,8 @@ export type BumonsMasterDialogValues = z.infer<typeof BumonsMasterDialogSchema>;
 export type BumonsMasterTableValues = {
   bumonId: number;
   bumonNam: string;
-  delFlg: boolean;
-  dspOrdNum: number;
   mem: string;
   daibumonId: number;
   shukeibumonId: number;
+  dspFlg: boolean;
 };

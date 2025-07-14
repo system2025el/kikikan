@@ -154,7 +154,7 @@ export const eqptMasterList: EqptMasterTableValues[] = [
   {
     kizaiId: 1,
     kizaiNam: 'SHARPY PLUS',
-    delFlg: false,
+
     shozokuNam: '',
     mem: 'AAAAAAA',
     bumonNam: '',
@@ -167,11 +167,12 @@ export const eqptMasterList: EqptMasterTableValues[] = [
     rankAmt5: 600,
     daibumonNam: '',
     kizaiQty: 0,
+    dspFlg: true,
   },
   {
     kizaiId: 2,
     kizaiNam: 'ROBIN T2 Profile',
-    delFlg: false,
+
     shozokuNam: '',
     mem: 'AAAAAAA',
     bumonNam: '',
@@ -184,11 +185,12 @@ export const eqptMasterList: EqptMasterTableValues[] = [
     rankAmt5: 601,
     daibumonNam: '',
     kizaiQty: 0,
+    dspFlg: true,
   },
   {
     kizaiId: 3,
     kizaiNam: 'ROBIN Pointe_Ω',
-    delFlg: false,
+
     shozokuNam: '',
     mem: 'AAAAAAA',
     bumonNam: '',
@@ -201,13 +203,12 @@ export const eqptMasterList: EqptMasterTableValues[] = [
     rankAmt5: 602,
     daibumonNam: '',
     kizaiQty: 0,
+    dspFlg: true,
   },
   {
     kizaiId: 4,
     kizaiNam: 'MAC Ultra Wash',
-    delFlg: true,
     shozokuNam: '',
-
     mem: 'AAAAAAA',
     bumonNam: '',
     shukeibumonNam: '',
@@ -219,11 +220,11 @@ export const eqptMasterList: EqptMasterTableValues[] = [
     rankAmt5: 603,
     daibumonNam: '',
     kizaiQty: 0,
+    dspFlg: true,
   },
   {
     kizaiId: 5,
     kizaiNam: 'SHARPY PLUS',
-    delFlg: false,
     shozokuNam: '',
     mem: 'AAAAAAA',
     bumonNam: '',
@@ -236,11 +237,11 @@ export const eqptMasterList: EqptMasterTableValues[] = [
     rankAmt5: 604,
     daibumonNam: '',
     kizaiQty: 0,
+    dspFlg: true,
   },
   {
     kizaiId: 6,
     kizaiNam: 'ROBIN T3 Profile',
-    delFlg: true,
     shozokuNam: '',
     mem: 'AAAAAAA',
     bumonNam: '',
@@ -253,11 +254,11 @@ export const eqptMasterList: EqptMasterTableValues[] = [
     rankAmt5: 605,
     daibumonNam: '',
     kizaiQty: 0,
+    dspFlg: true,
   },
   {
     kizaiId: 7,
     kizaiNam: 'ROBIN Pointe_Ω',
-    delFlg: false,
     shozokuNam: '',
     mem: 'AAAAAAA',
     bumonNam: '',
@@ -270,11 +271,12 @@ export const eqptMasterList: EqptMasterTableValues[] = [
     rankAmt5: 606,
     daibumonNam: '',
     kizaiQty: 0,
+    dspFlg: true,
   },
   {
     kizaiId: 8,
     kizaiNam: 'MAC Ultra Wash',
-    delFlg: false,
+
     shozokuNam: '',
     mem: 'AAAAAAA',
     bumonNam: '',
@@ -287,11 +289,12 @@ export const eqptMasterList: EqptMasterTableValues[] = [
     rankAmt5: 607,
     daibumonNam: '',
     kizaiQty: 0,
+    dspFlg: true,
   },
   {
     kizaiId: 9,
     kizaiNam: 'SHARPY PLUS',
-    delFlg: false,
+
     shozokuNam: '',
     mem: 'AAAAAAA',
     bumonNam: '',
@@ -304,11 +307,12 @@ export const eqptMasterList: EqptMasterTableValues[] = [
     rankAmt5: 608,
     daibumonNam: '',
     kizaiQty: 0,
+    dspFlg: true,
   },
   {
     kizaiId: 10,
     kizaiNam: 'ROBIN T4 Profile',
-    delFlg: false,
+
     shozokuNam: '',
     mem: 'AAAAAAA',
     bumonNam: '',
@@ -321,11 +325,12 @@ export const eqptMasterList: EqptMasterTableValues[] = [
     rankAmt5: 609,
     daibumonNam: '',
     kizaiQty: 0,
+    dspFlg: true,
   },
   {
     kizaiId: 11,
     kizaiNam: 'ROBIN Pointe_Ω',
-    delFlg: false,
+
     shozokuNam: '',
     mem: 'AAAAAAA',
     bumonNam: '',
@@ -338,11 +343,12 @@ export const eqptMasterList: EqptMasterTableValues[] = [
     rankAmt5: 610,
     daibumonNam: '',
     kizaiQty: 0,
+    dspFlg: true,
   },
   {
     kizaiId: 12,
     kizaiNam: 'MAC Ultra Wash',
-    delFlg: false,
+
     shozokuNam: '',
     regAmt: 1011,
     rankAmt1: 1011,
@@ -355,11 +361,12 @@ export const eqptMasterList: EqptMasterTableValues[] = [
     mem: '',
     bumonNam: '',
     shukeibumonNam: '',
+    dspFlg: true,
   },
   {
     kizaiId: 13,
     kizaiNam: 'SHARPY PLUS',
-    delFlg: false,
+
     shozokuNam: '',
     mem: 'AAAAAAA',
     bumonNam: '',
@@ -372,11 +379,12 @@ export const eqptMasterList: EqptMasterTableValues[] = [
     rankAmt5: 612,
     daibumonNam: '',
     kizaiQty: 0,
+    dspFlg: true,
   },
   {
     kizaiId: 14,
     kizaiNam: 'ROBIN T5 Profile',
-    delFlg: false,
+
     shozokuNam: '',
     mem: 'AAAAAAA',
     bumonNam: '',
@@ -389,11 +397,12 @@ export const eqptMasterList: EqptMasterTableValues[] = [
     rankAmt5: 613,
     daibumonNam: '',
     kizaiQty: 0,
+    dspFlg: true,
   },
   {
     kizaiId: 15,
     kizaiNam: 'ROBIN Pointe_Ω',
-    delFlg: false,
+
     shozokuNam: '',
     mem: 'AAAAAAA',
     bumonNam: '',
@@ -406,11 +415,12 @@ export const eqptMasterList: EqptMasterTableValues[] = [
     rankAmt5: 614,
     daibumonNam: '',
     kizaiQty: 0,
+    dspFlg: true,
   },
   {
     kizaiId: 16,
     kizaiNam: 'MAC Ultra Wash',
-    delFlg: false,
+
     shozokuNam: '',
     mem: 'AAAAAAA',
     bumonNam: '',
@@ -423,11 +433,12 @@ export const eqptMasterList: EqptMasterTableValues[] = [
     rankAmt5: 615,
     daibumonNam: '',
     kizaiQty: 0,
+    dspFlg: true,
   },
   {
     kizaiId: 17,
     kizaiNam: 'SHARPY PLUS',
-    delFlg: false,
+
     shozokuNam: '',
     mem: 'AAAAAAA',
     bumonNam: '',
@@ -440,11 +451,12 @@ export const eqptMasterList: EqptMasterTableValues[] = [
     rankAmt5: 616,
     daibumonNam: '',
     kizaiQty: 0,
+    dspFlg: true,
   },
   {
     kizaiId: 18,
     kizaiNam: 'ROBIN T6 Profile',
-    delFlg: false,
+
     shozokuNam: '',
     mem: 'AAAAAAA',
     bumonNam: '',
@@ -457,11 +469,12 @@ export const eqptMasterList: EqptMasterTableValues[] = [
     rankAmt5: 617,
     daibumonNam: '',
     kizaiQty: 0,
+    dspFlg: true,
   },
   {
     kizaiId: 19,
     kizaiNam: 'ROBIN Pointe_Ω',
-    delFlg: false,
+
     shozokuNam: '',
     mem: 'AAAAAAA',
     bumonNam: '',
@@ -474,6 +487,7 @@ export const eqptMasterList: EqptMasterTableValues[] = [
     rankAmt5: 618,
     daibumonNam: '',
     kizaiQty: 0,
+    dspFlg: true,
   },
   // {
   //   kizaiId: 20,
