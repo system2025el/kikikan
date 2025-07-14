@@ -5,6 +5,7 @@ import { LocationsMaster } from './_ui/locations-master';
 const Page = async () => {
   const locs = await GetAllLoc();
   // const locs = locationList;
+  console.log('aaaaaaaa');
   return (
     <>
       <LocationsMaster locs={locs} />
