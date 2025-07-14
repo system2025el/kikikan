@@ -4,16 +4,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import SearchIcon from '@mui/icons-material/Search';
 import { Box, Button, Container, Divider, FormControl, Grid2, Paper, Select, Stack, Typography } from '@mui/material';
 import { SetStateAction, useState } from 'react';
-import { TextFieldElement, useForm } from 'react-hook-form-mui';
+import { SelectElement, TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { BackButton } from '../../../_ui/buttons';
 import { eqptMasterList } from '../_lib/datas';
-import {
-  EqptMasterDialogValues,
-  EqptMasterSearchSchema,
-  EqptMasterSearchValues,
-  EqptMasterTableValues,
-} from '../_lib/types';
+import { EqptMasterDialogValues, EqptMasterTableValues } from '../_lib/types';
 import { EqptMasterTable } from './eqpt-master-table';
 
 export const EqptMaster = ({ eqpts }: { eqpts: EqptMasterTableValues[] | undefined }) => {
@@ -25,14 +20,20 @@ export const EqptMaster = ({ eqpts }: { eqpts: EqptMasterTableValues[] | undefin
   const { control, handleSubmit } = useForm({
     mode: 'onBlur',
     reValidateMode: 'onBlur',
-    resolver: zodResolver(EqptMasterSearchSchema),
-    defaultValues: {},
+
+    defaultValues: { query: '', bumonQuery: '', daibumonQuery: '', shukeiQuery: '' },
   });
-  const onSubmit = (data: EqptMasterSearchValues) => {
-    if (data.kizaiNam === '') {
+
+  const onSubmit = (data: {
+    query: string | undefined;
+    bumonQuery: string | undefined;
+    daibumonQuery: string | undefined;
+    shukeiQuery: string | undefined;
+  }) => {
+    if (data.query === '') {
       setDisplayList([...eqptMasterList]);
     } else {
-      const list = eqptMasterList.filter((c) => c.kizaiNam.includes(data.kizaiNam.trim()));
+      const list = eqptMasterList.filter((c) => c.kizaiNam.includes(data.query!.trim()));
       setDisplayList(list);
       console.log(data);
     }
@@ -51,47 +52,30 @@ export const EqptMaster = ({ eqpts }: { eqpts: EqptMasterTableValues[] | undefin
           <form onSubmit={handleSubmit(onSubmit)}>
             <Stack justifyContent={'space-between'} alignItems={'start'} mt={1}>
               <Stack>
-                <Typography noWrap id="name">
-                  機材名キーワード
-                </Typography>
-                <Box>
-                  <TextFieldElement name={'kizaiNam'} control={control} color="primary"></TextFieldElement>
-                </Box>
+                <Typography noWrap>機材名キーワード</Typography>
+                <TextFieldElement name={'query'} control={control} />
               </Stack>
-              <Box>
-                <Button type="submit">
-                  <SearchIcon />
-                  検索
-                </Button>
-              </Box>
             </Stack>
             <Grid2 container justifyContent={'space-between'} alignItems={'start'} mt={1} spacing={1}>
               <Grid2 size={{ sm: 12, md: 4 }} display={'flex'} alignItems={'center'}>
-                <Box width={100} mr={1}>
-                  <Typography>部門</Typography>
-                </Box>
-                <FormControl sx={{ minWidth: '60%' }}>
-                  <Select labelId="search" label="検索条件"></Select>
-                </FormControl>
-                {/* <SelectElement name='bumon' control={control}></SelectElement> */}
+                <Typography width={100}>部門</Typography>
+                <SelectElement name="bumonQuery" control={control} sx={{ minWidth: '60%' }} />
               </Grid2>
               <Grid2 size={{ sm: 12, md: 4 }} display={'flex'} alignItems={'center'}>
-                <Box width={100} mr={1}>
-                  <Typography>大部門</Typography>
-                </Box>
-                <FormControl sx={{ minWidth: '60%' }}>
-                  <Select labelId="search" label="検索条件"></Select>
-                </FormControl>
+                <Typography width={100}>大部門</Typography>
+                <SelectElement name="daibumonQuery" control={control} sx={{ minWidth: '60%' }} />
               </Grid2>
               <Grid2 size={{ sm: 12, md: 4 }} display={'flex'} alignItems={'center'}>
-                <Box width={100} mr={1}>
-                  <Typography>集計部門</Typography>
-                </Box>
-                <FormControl sx={{ minWidth: '60%' }}>
-                  <Select labelId="search" label="検索条件"></Select>
-                </FormControl>
+                <Typography width={100}>集計部門</Typography>
+                <SelectElement name="shukeiQuery" control={control} sx={{ minWidth: '60%' }} />
               </Grid2>
             </Grid2>
+            <Box mt={1} alignSelf={'end'} justifySelf={'end'}>
+              <Button type="submit">
+                <SearchIcon />
+                検索
+              </Button>
+            </Box>
           </form>
           <Typography></Typography>
         </Box>

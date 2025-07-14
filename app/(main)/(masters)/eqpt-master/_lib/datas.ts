@@ -4,7 +4,6 @@ import { EqptMasterDialogValues, EqptMasterTableValues } from './types';
 
 /* 機材マスタヘッダー */
 export const eqptMHeader = [
-  { key: 'kizaiId', label: '' },
   { key: 'name', label: '機材名' },
   { key: 'defDatQty', label: '保有数' },
   { key: 'bumonId', label: '部門' },

@@ -2,6 +2,7 @@
 import SearchIcon from '@mui/icons-material/Search';
 import { Box, Button, Container, Divider, Grid2, Paper, Select, Stack, TextField, Typography } from '@mui/material';
 import { useState } from 'react';
+import { SelectElement, TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { BackButton } from '../../../_ui/buttons';
 import { BumonsMasterDialogValues, BumonsMasterTableValues } from '../_lib/types';
@@ -17,6 +18,26 @@ export const BumonsMaster = ({ bumons }: { bumons: BumonsMasterTableValues[] | u
   const [theBumons, setTheBumons] = useState(bumons);
   /* DBのローディング */
   const [isLoading, setIsLoading] = useState(true);
+
+  /* useForm ------------------- */
+  const { control, handleSubmit } = useForm({
+    mode: 'onSubmit',
+    defaultValues: { query: '', daibumonQuery: '', shukeiQuery: '' },
+  });
+
+  /* 検索ボタン押下 */
+  const onSubmit = async (data: {
+    query: string | undefined;
+    daibumonQuery: string | undefined;
+    shukeiQuery: string | undefined;
+  }) => {
+    setIsLoading(true);
+    console.log('data : ', data);
+    // const newList = await GetFilteredBumons(data.query!);
+    // setTheBumons(newList);
+    console.log('theLocs : ', theBumons);
+  };
+
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
       <Box justifySelf={'end'} mb={0.5}>
@@ -31,26 +52,26 @@ export const BumonsMaster = ({ bumons }: { bumons: BumonsMasterTableValues[] | u
           <Stack>
             <Typography variant="body2">検索</Typography>
           </Stack>
-          <form>
+          <form /*onSubmit={handleSubmit(onSubmit)}*/>
             <Stack alignItems={'center'}>
               <Typography noWrap width={100}>
                 部門名
               </Typography>
-              <TextField />
+              <TextFieldElement name="query" control={control} />
             </Stack>
             <Stack justifyContent={'space-between'} alignItems={'start'} mt={1}>
               <Stack mt={1} spacing={1}>
                 <Typography noWrap width={100}>
                   大部門名
                 </Typography>
-                <Select sx={{ width: 250 }} />
+                <SelectElement name="daibumonQuery" control={control} sx={{ width: 250 }} />
                 <Box width={50}></Box>
                 <Typography noWrap width={100}>
                   集計部門名
                 </Typography>
-                <Select sx={{ width: 250 }} />
+                <SelectElement name="shukeiQuery" control={control} sx={{ width: 250 }} />
               </Stack>
-              <Box>
+              <Box alignSelf={'end'}>
                 <Button type="submit">
                   <SearchIcon />
                   検索

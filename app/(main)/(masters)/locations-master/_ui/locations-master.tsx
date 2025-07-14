@@ -48,16 +48,11 @@ export const LocationsMaster = ({ locs }: { locs: LocsMasterTableValues[] | unde
           <Box width={'100%'} p={2}>
             <form onSubmit={handleSubmit(onSubmit)}>
               <Stack justifyContent={'space-between'} alignItems={'start'} mt={1}>
-                <Stack alignItems={'center'} mt={1}>
-                  <Typography noWrap width={100}>
-                    キーワード
-                  </Typography>
-                  <TextFieldElement name="query" control={control} />
-                  <Typography noWrap variant="body2">
-                    場所、住所、Tel、Faxから検索
-                  </Typography>
+                <Stack alignItems={'baseline'}>
+                  <Typography>キーワード</Typography>
+                  <TextFieldElement name="query" control={control} helperText={'場所、住所、Tel、Faxから検索'} />
                 </Stack>
-                <Box>
+                <Box alignSelf={'end'}>
                   <Button type="submit">
                     <SearchIcon />
                     検索

@@ -3,6 +3,7 @@
 import SearchIcon from '@mui/icons-material/Search';
 import { Box, Button, Container, Divider, Grid2, Paper, Stack, TextField, Typography } from '@mui/material';
 import { JSX, useState } from 'react';
+import { TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { BackButton } from '../../../_ui/buttons';
 import { ManagersMasterDialogValues, ManagersMasterTableValues } from '../_lib/types';
@@ -16,6 +17,22 @@ export const ManagersMaster = ({ managers }: { managers: ManagersMasterTableValu
   const [theManagers, setTheManagers] = useState(managers);
   /* DBのローディング */
   const [isLoading, setIsLoading] = useState(true);
+
+  /* useForm ------------------- */
+  const { control, handleSubmit } = useForm({
+    mode: 'onSubmit',
+    defaultValues: { query: '' },
+  });
+
+  /* 検索ボタン押下 */
+  const onSubmit = async (data: { query: string | undefined }) => {
+    setIsLoading(true);
+    console.log('data : ', data);
+    // const newList = await GetFilteredManagers(data.query!);
+    // setTheManagers(newList);
+    console.log('theLocs : ', theManagers);
+  };
+
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
       <Box justifySelf={'end'} mb={0.5}>
@@ -27,14 +44,14 @@ export const ManagersMaster = ({ managers }: { managers: ManagersMasterTableValu
         </Box>
         <Divider />
         <Box width={'100%'} p={2}>
-          <form>
+          <form /*onSubmit={handleSubmit(onSubmit)}*/>
             <Stack justifyContent={'space-between'} alignItems={'start'} mt={1}>
               <Stack alignItems={'baseline'}>
                 <Typography>担当者キーワード</Typography>
-                <TextField id="a" helperText={'～から部分一致検索'} />
+                <TextFieldElement name="query" control={control} helperText={'～から部分一致検索'} />
               </Stack>
-              <Box>
-                <Button /*type="submit"*/>
+              <Box alignSelf={'end'}>
+                <Button type="submit">
                   <SearchIcon />
                   検索
                 </Button>

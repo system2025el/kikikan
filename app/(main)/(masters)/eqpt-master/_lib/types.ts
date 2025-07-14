@@ -46,27 +46,3 @@ export type EqptMasterTableValues = {
   rankAmt5: number;
   dspFlg: boolean;
 };
-
-// 検索用
-export const EqptMasterSearchSchema = EqptMasterDialogSchema.omit({
-  delFlg: true,
-  shozokuNam: true,
-  bldCod: true,
-  tanaCod: true,
-  edaCod: true,
-  kizaiGrpCod: true,
-  dspOrdNum: true,
-  mem: true,
-  bumonNam: true,
-  shukeibumonNam: true,
-  dspFlg: true,
-  ctnFlg: true,
-  defDatQty: true,
-  regAmt: true,
-  rankAmt1: true,
-  rankAmt2: true,
-  rankAmt3: true,
-  rankAmt4: true,
-  rankAmt5: true,
-});
-export type EqptMasterSearchValues = z.infer<typeof EqptMasterSearchSchema>;
