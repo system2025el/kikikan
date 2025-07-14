@@ -92,8 +92,8 @@ export const emptyLoc: LocsMasterDialogValues = {
   mem: '',
   kana: '',
   dspFlg: true,
-  telMobile: '',
   delFlg: false,
+  telMobile: '',
 };
 
 /**モック削除delete */
@@ -103,71 +103,77 @@ export const locationList: LocsMasterTableValues[] = [
     tel: '000-000-0000',
     fax: '000-111-2222',
     locId: 1,
-    dspOrdNum: 0,
+
     adrShozai: '東京都千代田区日比谷公園',
     adrTatemono: '',
     adrSonota: '１－５',
     mem: 'ばばばばばばっばばばばっばばばばば',
-    delFlg: false,
+
+    dspFlg: true,
   },
   {
     locNam: '日本武道館',
     tel: '',
     fax: '',
     locId: 2,
-    dspOrdNum: 0,
+
     adrShozai: '',
     adrTatemono: '',
     adrSonota: '',
     mem: '',
-    delFlg: false,
+
+    dspFlg: true,
   },
   {
     locNam: 'ＮＨＫホール',
     tel: '',
     fax: '',
     locId: 3,
-    dspOrdNum: 0,
+
     adrShozai: '',
     adrTatemono: '',
     adrSonota: '',
     mem: '',
-    delFlg: false,
+
+    dspFlg: true,
   },
   {
     locNam: '東京厚生年金会館ホール',
     tel: '',
     fax: '',
     locId: 4,
-    dspOrdNum: 0,
+
     adrShozai: '',
     adrTatemono: '',
     adrSonota: '',
     mem: '',
-    delFlg: false,
+
+    dspFlg: true,
   },
   {
     locNam: '中野サンプラザ',
     tel: '',
     fax: '',
     locId: 5,
-    dspOrdNum: 0,
+
     adrShozai: '',
     adrTatemono: '',
     adrSonota: '',
     mem: '',
-    delFlg: false,
+
+    dspFlg: true,
   },
   {
     locNam: '渋谷公会堂',
     tel: '',
     fax: '',
     locId: 6,
-    dspOrdNum: 0,
+
     adrShozai: '',
     adrTatemono: '',
     adrSonota: '',
     mem: '',
-    delFlg: false,
+
+    dspFlg: true,
   },
 ];

@@ -31,6 +31,7 @@ export const emptyCustomer: customerMasterDialogDetailsValues = {
   kokyakuNam: '',
   kana: '',
   kokyakuRank: 0,
+  delFlg: false,
 };
 /*  */
 export const formItems: FormItemsType[] = [
@@ -140,7 +141,7 @@ export const customers: CustomerMasterTableValues[] = [
     // mail: 'FFFFFFFFFFFFF@EEEEEEEEEEEEEEEEEE',
     // keishou: '御中',
     mem: 'あああああああああああああああああああ',
-    delFlg: false,
+    dspFlg: true,
   },
   {
     kokyakuId: 2,
@@ -153,8 +154,8 @@ export const customers: CustomerMasterTableValues[] = [
     fax: '03-5292-2382',
     // mail: 'YYYYYYYYYYYYYYYYYYYYYY@DDDDDDDDD',
     // keishou: '御中',
-    delFlg: true,
     mem: 'あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやいゆえよらりるれろわいうえをあいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやいゆえよらりるれろわいうえをあいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやいゆえよらりるれろわいうえをあいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやいゆえよらりるれろわいうえをあいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやいゆえよらりるれろわいうえをあいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやいゆえよらりるれろわいうえを',
+    dspFlg: true,
   },
   {
     kokyakuId: 3,
@@ -168,6 +169,6 @@ export const customers: CustomerMasterTableValues[] = [
     // mail: 'aaaaaaaaaa@eeeeeeeeeeeeee',
     // keishou: '御中',
     mem: '',
-    delFlg: false,
+    dspFlg: true,
   },
 ];

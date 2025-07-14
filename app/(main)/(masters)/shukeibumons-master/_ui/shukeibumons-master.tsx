@@ -29,9 +29,6 @@ export const ShukeibumonsMaster = ({ shukeibumons }: { shukeibumons: Shukeibumon
         </Box>
         <Divider />
         <Box width={'100%'} p={2}>
-          <Stack>
-            <Typography variant="body2">検索</Typography>
-          </Stack>
           <form>
             <Stack justifyContent={'space-between'} alignItems={'start'} mt={1}>
               <Stack alignItems={'center'}>

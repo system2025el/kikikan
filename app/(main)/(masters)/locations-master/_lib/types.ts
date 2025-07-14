@@ -26,14 +26,13 @@ export type LocsMasterDialogValues = z.infer<typeof LocsMasterDialogSchema>;
 export type LocsMasterTableValues = {
   locId: number;
   locNam: string;
-  dspOrdNum: number;
-  delFlg: boolean;
   adrShozai: string;
   adrTatemono: string;
   adrSonota: string;
   tel: string;
   fax: string;
   mem: string;
+  dspFlg: boolean;
 };
 
 /* 検索用スキーマ */

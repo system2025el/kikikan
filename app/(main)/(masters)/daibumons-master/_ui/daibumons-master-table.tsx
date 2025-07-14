@@ -102,7 +102,7 @@ export const DaibumonsMasterTable = ({
             <>
               <MasterTable
                 headers={daibumonMHeader}
-                datas={list!.map((l) => ({ id: l.daibumonId!, name: l.daibumonNam, mem: l.mem!, delFlg: l.delFlg }))}
+                datas={list!.map((l) => ({ id: l.daibumonId!, name: l.daibumonNam, ...l }))}
                 handleOpenDialog={handleOpenDialog}
                 page={page}
                 rowsPerPage={rowsPerPage}

@@ -32,12 +32,23 @@ export const BumonsMaster = ({ bumons }: { bumons: BumonsMasterTableValues[] | u
             <Typography variant="body2">検索</Typography>
           </Stack>
           <form>
+            <Stack alignItems={'center'}>
+              <Typography noWrap width={100}>
+                部門名
+              </Typography>
+              <TextField />
+            </Stack>
             <Stack justifyContent={'space-between'} alignItems={'start'} mt={1}>
-              <Stack alignItems={'center'}>
+              <Stack mt={1} spacing={1}>
                 <Typography noWrap width={100}>
-                  部門名
+                  大部門名
                 </Typography>
-                <TextField />
+                <Select sx={{ width: 250 }} />
+                <Box width={50}></Box>
+                <Typography noWrap width={100}>
+                  集計部門名
+                </Typography>
+                <Select sx={{ width: 250 }} />
               </Stack>
               <Box>
                 <Button type="submit">
@@ -45,17 +56,6 @@ export const BumonsMaster = ({ bumons }: { bumons: BumonsMasterTableValues[] | u
                   検索
                 </Button>
               </Box>
-            </Stack>
-            <Stack mt={1} spacing={1}>
-              <Typography noWrap width={100}>
-                大部門名
-              </Typography>
-              <Select sx={{ width: 250 }} />
-              <Box width={50}></Box>
-              <Typography noWrap width={100}>
-                集計部門名
-              </Typography>
-              <Select sx={{ width: 250 }} />
             </Stack>
           </form>
         </Box>

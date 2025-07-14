@@ -108,8 +108,7 @@ export const ShukeibumonsMasterTable = ({
                 datas={list!.map((l) => ({
                   id: l.shukeibumonId!,
                   name: l.shukeibumonNam,
-                  mem: l.mem!,
-                  delFlg: l.delFlg,
+                  ...l,
                 }))}
                 handleOpenDialog={handleOpenDialog}
                 page={page}

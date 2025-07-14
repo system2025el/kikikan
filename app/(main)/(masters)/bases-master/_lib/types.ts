@@ -12,7 +12,6 @@ export type BasesMasterDialogValues = z.infer<typeof BasesMasterDialogSchema>;
 export type BasesMasterTableValues = {
   kyotenId: number;
   kyotenNam: string;
-  delFlg: boolean;
   mem: string;
   dspFlg: boolean;
 };

@@ -32,5 +32,5 @@ export type CustomerMasterTableValues = {
   tel: string;
   fax: string;
   mem: string;
-  delFlg: boolean;
+  dspFlg: boolean;
 };

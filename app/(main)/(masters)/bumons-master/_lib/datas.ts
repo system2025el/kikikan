@@ -37,6 +37,7 @@ export const formItems: FormItemsType[] = [
 
 export const emptyBumon: BumonsMasterDialogValues = {
   bumonNam: '',
+  delFlg: false,
 };
 
 /*モック削除delete */
@@ -44,28 +45,25 @@ export const bumonsList: BumonsMasterTableValues[] = [
   {
     bumonId: 1,
     bumonNam: 'ムービングライト',
-    delFlg: false,
     mem: 'あえいうえおあおかけきくけこかこ',
     daibumonId: 1,
     shukeibumonId: 1,
-    dspOrdNum: 0,
+    dspFlg: true,
   },
   {
     bumonId: 2,
     bumonNam: 'スポットライト',
-    delFlg: false,
     mem: '',
     daibumonId: 1,
     shukeibumonId: 1,
-    dspOrdNum: 0,
+    dspFlg: true,
   },
   {
     bumonId: 3,
     bumonNam: 'その他',
-    delFlg: true,
     mem: '',
     daibumonId: 2,
     shukeibumonId: 2,
-    dspOrdNum: 0,
+    dspFlg: true,
   },
 ];

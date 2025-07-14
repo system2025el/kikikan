@@ -102,7 +102,7 @@ export const BasesMasterTable = ({
             <>
               <MasterTable
                 headers={bMHeader}
-                datas={list!.map((l) => ({ id: l.kyotenId!, name: l.kyotenNam, mem: l.mem!, delFlg: l.delFlg }))}
+                datas={list!.map((l) => ({ id: l.kyotenId!, name: l.kyotenNam, ...l }))}
                 handleOpenDialog={handleOpenDialog}
                 page={page}
                 rowsPerPage={rowsPerPage}

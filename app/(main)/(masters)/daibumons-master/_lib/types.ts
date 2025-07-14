@@ -12,8 +12,6 @@ export type DaibumonsMasterDialogValues = z.infer<typeof DaibumonsMasterDialogSc
 export type DaibumonsMasterTableValues = {
   daibumonId: number;
   daibumonNam: string;
-  delFlg: boolean;
   mem: string;
   dspFlg: boolean;
-  dspOrdNum: number;
 };
