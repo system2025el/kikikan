@@ -48,6 +48,8 @@ export const EqMasterDialog = ({
   const [isNew, setIsNew] = useState(false);
   /* 未保存ダイアログ出すかどうか */
   const [dirtyOpen, setDirtyOpen] = useState(false);
+  /* submit時のactions (save,) */
+  const [action, setAction] = useState<'save' | 'delete' | undefined>(undefined);
 
   /* useForm ------------------------- */
   const {
@@ -70,7 +72,11 @@ export const EqMasterDialog = ({
     // if (EqptId === -100) {
     //   await addNewEqpt(data);
     // } else {
-    //   await updateEqpt(data, EqptId);
+    // if (action === 'save') {
+    //   await updateEqpt(data, eqptId);
+    // } else if (action === 'delete') {
+    //   await updateEqpt({ ...data, delFlg: true }, eqptId);
+    // }
     // }
     handleCloseDialog();
     refetchEqpts();
@@ -132,6 +138,7 @@ export const EqMasterDialog = ({
           dialogTitle={'機材マスタ登録'}
           isNew={isNew}
           isDirty={isDirty}
+          setAction={setAction}
         />
         {isLoading ? ( //DB
           <Loading />

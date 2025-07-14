@@ -1,6 +1,7 @@
 'use client';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import CloseIcon from '@mui/icons-material/Close';
+import DeleteIcon from '@mui/icons-material/Delete';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import SaveAsIcon from '@mui/icons-material/SaveAs';
 import { Button, IconButton } from '@mui/material';
@@ -62,11 +63,38 @@ export const MakeEditModeButton = ({ disabled, handleEditable }: { disabled: boo
  * @param param0 フォームのボタン押下されたときの種類
  * @returns 保存ボタン
  */
-export const SubmitButton = ({ type, disabled }: { type: 'submit' | undefined; disabled: boolean }) => {
+export const SubmitButton = ({
+  type,
+  disabled,
+  onClick,
+}: {
+  type: 'submit' | undefined;
+  disabled: boolean;
+  onClick: () => void;
+}) => {
   return (
-    <Button type={type} disabled={disabled}>
+    <Button type={type} disabled={disabled} onClick={onClick}>
       <SaveAsIcon fontSize="small" />
       保存終了
     </Button>
+  );
+};
+
+export const DeleteFlgButton = ({
+  type,
+  disabled,
+  onClick,
+}: {
+  type: 'submit' | undefined;
+  disabled: boolean;
+  onClick: () => void;
+}) => {
+  return (
+    <>
+      <Button type={type} disabled={disabled} color="error" onClick={onClick}>
+        <DeleteIcon fontSize="small" />
+        削除
+      </Button>
+    </>
   );
 };

@@ -2,7 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Grid2 } from '@mui/material';
-import { JSX, useEffect, useState } from 'react';
+import { JSX, SetStateAction, useEffect, useState } from 'react';
 import { CheckboxElement, TextareaAutosizeElement, TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { FormBox } from '@/app/(main)/_ui/form-box';
@@ -37,6 +37,8 @@ export const LocationsMasterDialog = ({
   const [isNew, setIsNew] = useState(false);
   /* 未保存ダイアログ出すかどうか */
   const [dirtyOpen, setDirtyOpen] = useState(false);
+  /* submit時のactions (save,) */
+  const [action, setAction] = useState<'save' | 'delete' | undefined>(undefined);
 
   /* useForm ------------------------- */
   const {
@@ -69,11 +71,16 @@ export const LocationsMasterDialog = ({
   /* フォームを送信 */
   const onSubmit = async (data: LocsMasterDialogValues) => {
     console.log('isDarty : ', isDirty);
+    console.log('action is : ', action);
     console.log(data);
     if (locationId === -100) {
       await addNewLoc(data);
     } else {
-      await updateLoc(data, locationId);
+      if (action === 'save') {
+        await updateLoc(data, locationId);
+      } else if (action === 'delete') {
+        await updateLoc({ ...data, delFlg: true }, locationId);
+      }
     }
     handleCloseDialog();
     refetchLocs();
@@ -135,6 +142,7 @@ export const LocationsMasterDialog = ({
           handleClose={handleClickClose}
           dialogTitle={'公演場所マスタ登録'}
           isDirty={isDirty}
+          setAction={setAction}
         />
         {isLoading ? (
           <Loading />

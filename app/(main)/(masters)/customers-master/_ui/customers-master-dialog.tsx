@@ -3,7 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { alpha, Button, DialogTitle, Grid2, Stack, Typography, useTheme } from '@mui/material';
 import { grey } from '@mui/material/colors';
-import { useEffect, useState } from 'react';
+import { SetStateAction, useEffect, useState } from 'react';
 import {
   CheckboxElement,
   SelectElement,
@@ -44,6 +44,8 @@ export const CustomersMasterDialog = ({
   const [isNew, setIsNew] = useState(false);
   /* 未保存ダイアログ出すかどうか */
   const [dirtyOpen, setDirtyOpen] = useState(false);
+  /* submit時のactions (save,) */
+  const [action, setAction] = useState<'save' | 'delete' | undefined>(undefined);
 
   /* useForm ------------------------- */
   const {
@@ -84,7 +86,11 @@ export const CustomersMasterDialog = ({
     // if (customerId === -100) {
     //   await addNewCustomer(data);
     // } else {
+    // if (action === 'save') {
     //   await updateCustomer(data, customerId);
+    // } else if (action === 'delete') {
+    //   await updateCustomer({ ...data, delFlg: true }, customerId);
+    // }
     // }
     handleCloseDialog();
     refetchCustomers();
@@ -144,6 +150,7 @@ export const CustomersMasterDialog = ({
           dialogTitle="顧客マスタ登録"
           isNew={isNew}
           isDirty={isDirty}
+          setAction={setAction}
         />
         {isLoading ? ( //DB
           <Loading />

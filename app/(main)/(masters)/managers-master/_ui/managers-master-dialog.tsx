@@ -35,6 +35,8 @@ export const ManagerMasterDialog = ({
   const [isNew, setIsNew] = useState(false);
   /* 未保存ダイアログ出すかどうか */
   const [dirtyOpen, setDirtyOpen] = useState(false);
+  /* submit時のactions (save,) */
+  const [action, setAction] = useState<'save' | 'delete' | undefined>(undefined);
 
   /* useForm ------------------------- */
   const {
@@ -57,7 +59,11 @@ export const ManagerMasterDialog = ({
     // if (managerId === -100) {
     //   await addNewmanager(data);
     // } else {
-    //   await updatemanager(data, managerId);
+    // if (action === 'save') {
+    //   await updateManager(data, managerId);
+    // } else if (action === 'delete') {
+    //   await updateManager({ ...data, delFlg: true }, managerId);
+    // }
     // }
     handleCloseDialog();
     refetchManagers();
@@ -119,6 +125,7 @@ export const ManagerMasterDialog = ({
           dialogTitle={'担当者マスタ登録'}
           isNew={isNew}
           isDirty={isDirty}
+          setAction={setAction}
         />
         {isLoading ? (
           <Loading />
