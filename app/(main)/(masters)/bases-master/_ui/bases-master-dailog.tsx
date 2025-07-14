@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Grid2 } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { SetStateAction, useEffect, useState } from 'react';
 import { CheckboxElement, TextareaAutosizeElement, TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { FormBox, FormItemsType } from '../../../_ui/form-box';
@@ -34,6 +34,9 @@ export const BasesMasterDialog = ({
   const [isLoading, setIsLoading] = useState(true);
   /* ダイアログでの編集モードかどうか */
   const [editable, setEditable] = useState(false);
+  /* submit時のactions (save,) */
+  const [action, setAction] = useState<'save' | 'delete' | undefined>(undefined);
+
   /* useForm ----------------------------------------- */
   const {
     control,
@@ -45,10 +48,6 @@ export const BasesMasterDialog = ({
     reValidateMode: 'onBlur',
     resolver: zodResolver(BasesMasterDialogSchema),
     defaultValues: {
-      //DB   kyotenNam: '',
-      //   delFlg: false,
-      //   mem: '',
-
       kyotenNam: '',
       delFlg: false,
       mem: '',
@@ -63,7 +62,11 @@ export const BasesMasterDialog = ({
     // if (baseId === -100) {
     //   await addNewBase(data);
     // } else {
+    // if (action === 'save') {
     //   await updateBase(data, baseId);
+    // } else if (action === 'delete') {
+    //   await updateBase({ ...data, delFlg: true }, baseId);
+    // }
     // }
     handleCloseDialog();
     refetchBases();
@@ -124,6 +127,7 @@ export const BasesMasterDialog = ({
           dialogTitle="所属マスタ登録"
           isDirty={isDirty}
           isNew={isNew}
+          setAction={setAction}
         />
         {isLoading ? (
           <Loading />

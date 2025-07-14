@@ -34,6 +34,8 @@ export const ShukeibumonsMasterDialog = ({
   const [isNew, setIsNew] = useState(false);
   /* 未保存ダイアログ出すかどうか */
   const [dirtyOpen, setDirtyOpen] = useState(false);
+  /* submit時のactions (save,) */
+  const [action, setAction] = useState<'save' | 'delete' | undefined>(undefined);
 
   /* useForm ----------------------------------------- */
   const {
@@ -62,7 +64,11 @@ export const ShukeibumonsMasterDialog = ({
     // if (shukeibumonId === -100) {
     //   await addNewshukeibumon(data);
     // } else {
+    // if (action === 'save') {
     //   await updateshukeibumon(data, shukeibumonId);
+    // } else if (action === 'delete') {
+    //   await updateshukeibumon({ ...data, delFlg: true }, shukeibumonId);
+    // }
     // }
     handleCloseDialog();
     refetchShukeibumons();
@@ -124,6 +130,7 @@ export const ShukeibumonsMasterDialog = ({
           dialogTitle="集計部門マスタ登録"
           isNew={isNew}
           isDirty={isDirty}
+          setAction={setAction}
         />
         {isLoading ? ( //DB
           <Loading />

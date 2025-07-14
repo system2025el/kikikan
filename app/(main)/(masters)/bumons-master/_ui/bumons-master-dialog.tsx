@@ -13,7 +13,7 @@ import {
   Typography,
   useTheme,
 } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { SetStateAction, useEffect, useState } from 'react';
 import {
   CheckboxElement,
   SelectElement,
@@ -55,6 +55,8 @@ export const BumonsMasterDialog = ({
   const [isNew, setIsNew] = useState(false);
   /* 未保存ダイアログ出すかどうか */
   const [dirtyOpen, setDirtyOpen] = useState(false);
+  /* submit時のactions (save,) */
+  const [action, setAction] = useState<'save' | 'delete' | undefined>(undefined);
 
   /* useForm ----------------------------------------- */
   const {
@@ -84,9 +86,13 @@ export const BumonsMasterDialog = ({
     console.log('isDarty : ', isDirty);
     console.log(data);
     // if (bumonId === -100) {
-    //   await addNewbumon(data);
+    //   await addNewBumon(data);
     // } else {
-    //   await updatebumon(data, bumonId);
+    // if (action === 'save') {
+    //   await updateBumon(data, bumonId);
+    // } else if (action === 'delete') {
+    //   await updateBumon({ ...data, delFlg: true }, bumonId);
+    // }
     // }
     handleCloseDialog();
     refetchBumons();
@@ -148,6 +154,7 @@ export const BumonsMasterDialog = ({
           dialogTitle="集計部門マスタ登録"
           isNew={isNew}
           isDirty={isDirty}
+          setAction={setAction}
         />
         {isLoading ? (
           <Loading />

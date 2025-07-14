@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { alpha, Grid2, useTheme } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { SetStateAction, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { CheckboxElement, TextareaAutosizeElement, TextFieldElement } from 'react-hook-form-mui';
 
@@ -35,6 +35,8 @@ export const DaibumonsMasterDialog = ({
   const [isNew, setIsNew] = useState(false);
   /* 未保存ダイアログ出すかどうか */
   const [dirtyOpen, setDirtyOpen] = useState(false);
+  /* submit時のactions (save,) */
+  const [action, setAction] = useState<'save' | 'delete' | undefined>(undefined);
 
   /* useForm ----------------------------------------- */
   const {
@@ -64,7 +66,11 @@ export const DaibumonsMasterDialog = ({
     // if (daibumonId === -100) {
     //   await addNewDaibumon(data);
     // } else {
-    //   await updateDaibumon(data, daibumonsationId);
+    // if (action === 'save') {
+    //   await updateDaibumon(data, daibumonId);
+    // } else if (action === 'delete') {
+    //   await updateDaibumon({ ...data, delFlg: true }, daibumonId);
+    // }
     // }
     handleCloseDialog();
     refetchDaibumons();
@@ -125,6 +131,7 @@ export const DaibumonsMasterDialog = ({
           dialogTitle="大部門マスタ登録"
           isNew={isNew}
           isDirty={isDirty}
+          setAction={setAction}
         />
         {isLoading ? ( //DB
           <Loading />
