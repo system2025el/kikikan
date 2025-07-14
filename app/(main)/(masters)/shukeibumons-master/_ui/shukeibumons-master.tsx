@@ -2,6 +2,7 @@
 import SearchIcon from '@mui/icons-material/Search';
 import { Box, Button, Container, Divider, Paper, Stack, TextField, Typography } from '@mui/material';
 import { JSX, useState } from 'react';
+import { TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { BackButton } from '@/app/(main)/_ui/buttons';
 
@@ -18,6 +19,22 @@ export const ShukeibumonsMaster = ({ shukeibumons }: { shukeibumons: Shukeibumon
   const [theShukeibumons, setTheShukeibumons] = useState(shukeibumons);
   /* DBのローディング */
   const [isLoading, setIsLoading] = useState(true);
+
+  /* useForm ------------------- */
+  const { control, handleSubmit } = useForm({
+    mode: 'onSubmit',
+    defaultValues: { query: '' },
+  });
+
+  /* 検索ボタン押下 */
+  const onSubmit = async (data: { query: string | undefined }) => {
+    setIsLoading(true);
+    console.log('data : ', data);
+    // const newList = await GetFilteredShukeiBumons(data.query!);
+    // setTheShukeiBumons(newList);
+    console.log('theLocs : ', theShukeibumons);
+  };
+
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
       <Box justifySelf={'end'} mb={0.5}>
@@ -31,13 +48,13 @@ export const ShukeibumonsMaster = ({ shukeibumons }: { shukeibumons: Shukeibumon
         <Box width={'100%'} p={2}>
           <form>
             <Stack justifyContent={'space-between'} alignItems={'start'} mt={1}>
-              <Stack alignItems={'center'}>
+              <Stack alignItems={'baseline'}>
                 <Typography noWrap width={100}>
                   集計部門名
                 </Typography>
-                <TextField />
+                <TextFieldElement name="query" control={control} helperText={''} />
               </Stack>
-              <Box>
+              <Box alignSelf={'end'}>
                 <Button type="submit">
                   <SearchIcon />
                   検索
