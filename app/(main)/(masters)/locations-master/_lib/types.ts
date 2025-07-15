@@ -4,7 +4,6 @@ export const LocsMasterDialogSchema = z.object({
   locNam: z.string().max(100, { message: '100文字以内で入力してください' }).min(1, { message: '必須項目です' }),
   kana: z.string().max(100, { message: '100文字以内で入力してください' }).min(1, { message: '必須項目です' }),
   delFlg: z.boolean().optional(),
-  dspOrdNum: z.number({ message: '数字で入力してください' }).optional(),
   adrPost: z.string().max(20, { message: '20文字以内で入力してください' }).optional(),
   adrShozai: z.string().max(100, { message: '100文字以内で入力してください' }).optional(),
   adrTatemono: z.string().max(100, { message: '100文字以内で入力してください' }).optional(),

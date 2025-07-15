@@ -9,7 +9,7 @@ import { FormBox } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { MasterDialogTitle } from '../../_ui/dialog-title';
-import { IsDirtyAlertDialog } from '../../_ui/dialogs';
+import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { emptyLoc, formItems } from '../_lib/datas';
 import { addNewLoc, getOneLoc, updateLoc } from '../_lib/funcs';
 import { LocsMasterDialogSchema, LocsMasterDialogValues } from '../_lib/types';
@@ -47,25 +47,12 @@ export const LocationsMasterDialog = ({
     control,
     handleSubmit,
     reset,
-    formState: { isDirty, dirtyFields },
+    formState: { isDirty },
+    getValues,
   } = useForm({
     mode: 'onBlur',
     reValidateMode: 'onBlur',
-    defaultValues: {
-      // locId: -100,
-      locNam: '',
-      adrPost: '',
-      adrShozai: '',
-      adrTatemono: '',
-      adrSonota: '',
-      tel: '',
-      fax: '',
-      mem: '',
-      kana: '',
-      dspFlg: true,
-      telMobile: '',
-      delFlg: false,
-    },
+    defaultValues: {},
     resolver: zodResolver(LocsMasterDialogSchema),
   });
 
@@ -77,15 +64,18 @@ export const LocationsMasterDialog = ({
     console.log(data);
     if (locationId === -100) {
       await addNewLoc(data);
+      handleCloseDialog();
+      refetchLocs();
     } else {
       if (action === 'save') {
         await updateLoc(data, locationId);
+        handleCloseDialog();
+        refetchLocs();
       } else if (action === 'delete') {
-        await updateLoc({ ...data, delFlg: true }, locationId);
+        setDeleteOpen(true);
+        return;
       }
     }
-    handleCloseDialog();
-    refetchLocs();
   };
 
   /* 詳細ダイアログを閉じる */
@@ -93,11 +83,6 @@ export const LocationsMasterDialog = ({
     setEditable(false);
     setIsNew(false);
     handleClose();
-  };
-
-  /* 未保存ダイアログを閉じる */
-  const handleCloseDirty = () => {
-    setDirtyOpen(false);
   };
 
   /* ×ぼたんを押したとき */
@@ -108,6 +93,15 @@ export const LocationsMasterDialog = ({
     } else {
       handleCloseDialog();
     }
+  };
+
+  /* 削除確認ダイアログで削除選択時 */
+  const handleConfirmDelete = async () => {
+    const values = await getValues();
+    await updateLoc({ ...values, delFlg: true }, locationId);
+    setDeleteOpen(false);
+    handleCloseDialog();
+    await refetchLocs();
   };
 
   /* useEffect --------------------------------------- */
@@ -176,11 +170,11 @@ export const LocationsMasterDialog = ({
                 </FormBox>
               </Grid2>
 
-              <Grid2>
+              {/* <Grid2>
                 <FormBox formItem={formItems[2]}>
                   <CheckboxElement name="delFlg" control={control} size="medium" disabled={editable ? false : true} />
                 </FormBox>
-              </Grid2>
+              </Grid2> */}
               <Grid2>
                 <FormBox formItem={formItems[3]}>
                   <TextFieldElement
@@ -297,8 +291,13 @@ export const LocationsMasterDialog = ({
             </Grid2>
             <IsDirtyAlertDialog
               open={dirtyOpen}
-              handleCloseDirty={handleCloseDirty}
+              handleCloseDirty={() => setDirtyOpen(false)}
               handleCloseAll={handleCloseDialog}
+            />
+            <WillDeleteAlertDialog
+              open={deleteOpen}
+              handleCloseDelete={() => setDeleteOpen(false)}
+              handleCloseAll={handleConfirmDelete}
             />
           </>
         )}
