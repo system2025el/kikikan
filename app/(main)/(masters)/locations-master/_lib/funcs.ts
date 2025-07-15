@@ -7,40 +7,40 @@ import { supabase } from '@/app/_lib/supabase/supabase';
 
 import { LocsMasterDialogValues, LocsMasterTableValues } from './types';
 
-export const GetAllLoc = async () => {
-  try {
-    const { data, error } = await supabase
-      .schema('dev2')
-      .from('m_koenbasho')
-      .select('koenbasho_id , koenbasho_nam, adr_shozai, adr_tatemono, adr_sonota, tel, fax, mem,  dsp_flg')
-      .neq('del_flg', 1)
-      .order('dsp_ord_num');
-    if (!error) {
-      console.log('I got a datalist from db', data.length);
+// export const GetAllLoc = async () => {
+//   try {
+//     const { data, error } = await supabase
+//       .schema('dev2')
+//       .from('m_koenbasho')
+//       .select('koenbasho_id , koenbasho_nam, adr_shozai, adr_tatemono, adr_sonota, tel, fax, mem,  dsp_flg')
+//       .neq('del_flg', 1)
+//       .order('dsp_ord_num');
+//     if (!error) {
+//       console.log('I got a datalist from db', data.length);
 
-      const theData: LocsMasterTableValues[] = data.map((d) => ({
-        locId: d.koenbasho_id,
-        locNam: d.koenbasho_nam,
-        adrShozai: d.adr_shozai,
-        adrTatemono: d.adr_tatemono,
-        adrSonota: d.adr_sonota,
-        tel: d.tel,
-        fax: d.fax,
-        mem: d.mem,
-        dspFlg: d.dsp_flg,
-      }));
+//       const theData: LocsMasterTableValues[] = data.map((d) => ({
+//         locId: d.koenbasho_id,
+//         locNam: d.koenbasho_nam,
+//         adrShozai: d.adr_shozai,
+//         adrTatemono: d.adr_tatemono,
+//         adrSonota: d.adr_sonota,
+//         tel: d.tel,
+//         fax: d.fax,
+//         mem: d.mem,
+//         dspFlg: d.dsp_flg,
+//       }));
 
-      console.log(theData.length);
-      return theData;
-    } else {
-      console.error('DBエラーです', error.message);
-    }
-  } catch (e) {
-    console.log(e);
-  }
-  revalidatePath('/locations-master');
-  redirect('/location-master');
-};
+//       console.log(theData.length);
+//       return theData;
+//     } else {
+//       console.error('DBエラーです', error.message);
+//     }
+//   } catch (e) {
+//     console.log(e);
+//   }
+//   revalidatePath('/locations-master');
+//   redirect('/location-master');
+// };
 
 export const GetFilteredLocs = async (query: string) => {
   try {
@@ -49,7 +49,7 @@ export const GetFilteredLocs = async (query: string) => {
       .from('m_koenbasho')
       .select('koenbasho_id , koenbasho_nam, adr_shozai, adr_tatemono, adr_sonota, tel,  fax, mem, dsp_flg')
       .or(
-        `koenbasho_nam.ilike.%${query}%,kana.ilike.%${query}%,adr_shozai.ilike.%${query}%,adr_tatemono.ilike.%${query}%,adr_sonota.ilike.%${query}%,tel.ilike.%${query}%,fax.ilike.%${query}%`
+        `koenbasho_nam.ilike.%${query}%, kana.ilike.%${query}%, adr_shozai.ilike.%${query}%, adr_tatemono.ilike.%${query}%, adr_sonota.ilike.%${query}%, tel.ilike.%${query}%, fax.ilike.%${query}%`
       )
       .neq('del_flg', 1)
       .order('dsp_ord_num');

@@ -2,7 +2,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import SearchIcon from '@mui/icons-material/Search';
 import { Box, Button, Container, Divider, Paper, Stack, TextField, Typography } from '@mui/material';
-import { JSX, useState } from 'react';
+import { useState } from 'react';
 import { TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { BackButton } from '../../../_ui/buttons';
