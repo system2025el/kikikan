@@ -18,7 +18,7 @@ export const GetAllLoc = async () => {
       .neq('del_flg', 1)
       .order('dsp_ord_num');
     if (!error) {
-      console.log('I got a datalist from db', data);
+      console.log('I got a datalist from db', data.length);
 
       const theData: LocsMasterTableValues[] = data.map((d) => ({
         locId: d.koenbasho_id,
@@ -34,7 +34,7 @@ export const GetAllLoc = async () => {
         dspFlg: d.dsp_flg,
       }));
 
-      console.log(theData);
+      console.log(theData.length);
       return theData;
     } else {
       console.error('DBエラーです', error.message);
@@ -58,7 +58,7 @@ export const GetFilteredLocs = async (query: string) => {
       .neq('del_flg', 1)
       .order('dsp_ord_num');
     if (!error) {
-      console.log('I got a datalist from db', data);
+      console.log('I got a datalist from db', data.length);
 
       const theData: LocsMasterTableValues[] = data.map((d) => ({
         locId: d.koenbasho_id,
@@ -74,7 +74,7 @@ export const GetFilteredLocs = async (query: string) => {
         dspFlg: d.dsp_flg,
       }));
 
-      console.log(theData);
+      console.log(theData.length);
       return theData;
     } else {
       console.error('DBエラーです', error.message);
@@ -96,7 +96,7 @@ export const getOneLoc = async (id: number) => {
       .eq('koenbasho_id', id)
       .single();
     if (!error) {
-      console.log('I got a datalist from db', data);
+      console.log('I got a datalist from db', data.del_flg);
 
       const theData: LocsMasterDialogValues = {
         locNam: data.koenbasho_nam,
@@ -113,7 +113,7 @@ export const getOneLoc = async (id: number) => {
         delFlg: data.del_flg === 0 ? false : true,
       };
 
-      console.log(theData);
+      console.log(theData.delFlg);
       return theData;
     } else {
       console.error('DBエラーです', error.message);
@@ -158,7 +158,7 @@ export const addNewLoc = async (data: LocsMasterDialogValues) => {
     mem: data.mem,
     dsp_flg: data.dspFlg ? 1 : 0,
   };
-  console.log(missingData);
+  console.log(missingData.del_flg);
   const date = new Date();
   const currentMaxId = await maxLocId();
   console.log('CurrentMaxId : ', currentMaxId?.koenbasho_id);
@@ -172,7 +172,7 @@ export const addNewLoc = async (data: LocsMasterDialogValues) => {
     upd_user: 'null',
     dsp_ord_num: newId,
   };
-  console.log(theData, typeof theData.upd_user);
+  console.log(theData.del_flg);
   try {
     const { error: insertError } = await supabase
       .schema('dev2')
@@ -185,7 +185,7 @@ export const addNewLoc = async (data: LocsMasterDialogValues) => {
       console.error('登録に失敗しました:', insertError.message);
       throw insertError;
     } else {
-      console.log('車両を登録しました : ', theData);
+      console.log('車両を登録しました : ', theData.del_flg);
     }
   } catch (error) {
     console.log(error);
@@ -195,7 +195,7 @@ export const addNewLoc = async (data: LocsMasterDialogValues) => {
 };
 
 export const updateLoc = async (data: LocsMasterDialogValues, id: number) => {
-  console.log(data.mem);
+  console.log('Update!!!', data.mem);
   const missingData = {
     koenbasho_nam: data.locNam,
     kana: data.kana,
@@ -211,7 +211,7 @@ export const updateLoc = async (data: LocsMasterDialogValues, id: number) => {
     mem: data.mem,
     dsp_flg: data.dspFlg ? 1 : 0,
   };
-  console.log(missingData);
+  console.log(missingData.del_flg);
   const date = new Date();
 
   const theData = {
@@ -219,7 +219,7 @@ export const updateLoc = async (data: LocsMasterDialogValues, id: number) => {
     upd_dat: date,
     upd_user: 'test_user',
   };
-  console.log(theData, typeof theData.upd_user);
+  console.log(theData.del_flg);
   try {
     const { error: updateError } = await supabase
       .schema('dev2')
@@ -231,7 +231,7 @@ export const updateLoc = async (data: LocsMasterDialogValues, id: number) => {
       console.error('更新に失敗しました:', updateError.message);
       throw updateError;
     } else {
-      console.log('車両を更新しました : ', theData);
+      console.log('車両を更新しました : ', theData.del_flg);
     }
   } catch (error) {
     console.log(error);

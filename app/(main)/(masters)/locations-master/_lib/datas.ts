@@ -91,6 +91,7 @@ export const emptyLoc: LocsMasterDialogValues = {
   fax: '',
   mem: '',
   kana: '',
+  mail: '',
   dspFlg: true,
   delFlg: false,
   telMobile: '',
