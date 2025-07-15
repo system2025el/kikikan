@@ -81,10 +81,10 @@ export const LocationsMasterTable = ({
           <MuiTablePagination arrayList={list!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
         </Grid2>
         <Grid2 container spacing={3}>
-          <Grid2>
+          <Grid2 alignContent={'center'}>
             <Typography color="error" variant="body2">
-              ※マスタは削除できません。登録画面で削除フラグを付けてください
-              <br />
+              {/* ※マスタは削除できません。登録画面で削除フラグを付けてください */}
+              {/* <br /> */}
               ※表示順を変更する場合は、検索条件無しで全件表示してください
             </Typography>
           </Grid2>
@@ -96,11 +96,12 @@ export const LocationsMasterTable = ({
           </Grid2>
         </Grid2>
       </Grid2>
-      <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
-        {isLoading ? (
-          <Loading />
-        ) : (
-          <>
+      {list!.length < 1 && <Typography>該当するデータがありません</Typography>}
+      {list!.length > 0 && (
+        <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
+          {isLoading ? (
+            <Loading />
+          ) : (
             <MasterTable
               headers={lMHeader}
               datas={list!.map((l) => ({
@@ -113,12 +114,13 @@ export const LocationsMasterTable = ({
               page={page}
               rowsPerPage={rowsPerPage}
             />
-            <Dialog open={dialogOpen} fullScreen>
-              <LocationsMasterDialog handleClose={handleCloseDialog} locationId={openId} refetchLocs={refetchLocs} />
-            </Dialog>
-          </>
-        )}
-      </TableContainer>
+          )}
+        </TableContainer>
+      )}
+
+      <Dialog open={dialogOpen} fullScreen>
+        <LocationsMasterDialog handleClose={handleCloseDialog} locationId={openId} refetchLocs={refetchLocs} />
+      </Dialog>
     </Box>
   );
 };

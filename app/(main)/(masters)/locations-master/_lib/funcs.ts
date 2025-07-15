@@ -12,9 +12,7 @@ export const GetAllLoc = async () => {
     const { data, error } = await supabase
       .schema('dev2')
       .from('m_koenbasho')
-      .select(
-        'koenbasho_id , koenbasho_nam, del_flg, adr_shozai, adr_tatemono, adr_sonota, tel,  fax, mem, dsp_ord_num, dsp_flg'
-      )
+      .select('koenbasho_id , koenbasho_nam, adr_shozai, adr_tatemono, adr_sonota, tel, fax, mem,  dsp_flg')
       .neq('del_flg', 1)
       .order('dsp_ord_num');
     if (!error) {
@@ -29,8 +27,6 @@ export const GetAllLoc = async () => {
         tel: d.tel,
         fax: d.fax,
         mem: d.mem,
-        delFlg: d.del_flg,
-        dspOrdNum: d.dsp_ord_num,
         dspFlg: d.dsp_flg,
       }));
 
@@ -51,33 +47,35 @@ export const GetFilteredLocs = async (query: string) => {
     const { data, error } = await supabase
       .schema('dev2')
       .from('m_koenbasho')
-      .select(
-        'koenbasho_id , koenbasho_nam, del_flg, adr_shozai, adr_tatemono, adr_sonota, tel,  fax, mem, dsp_ord_num, dsp_flg'
+      .select('koenbasho_id , koenbasho_nam, adr_shozai, adr_tatemono, adr_sonota, tel,  fax, mem, dsp_flg')
+      .or(
+        `koenbasho_nam.ilike.%${query}%,kana.ilike.%${query}%,adr_shozai.ilike.%${query}%,adr_tatemono.ilike.%${query}%,adr_sonota.ilike.%${query}%,tel.ilike.%${query}%,fax.ilike.%${query}%`
       )
-      .like('koenbasho_nam', `%${query}%`)
       .neq('del_flg', 1)
       .order('dsp_ord_num');
     if (!error) {
       console.log('I got a datalist from db', data.length);
+      if (data.length === 0 || !data) {
+        return [];
+      } else {
+        const theData: LocsMasterTableValues[] = data.map((d) => ({
+          locId: d.koenbasho_id,
+          locNam: d.koenbasho_nam,
+          adrShozai: d.adr_shozai,
+          adrTatemono: d.adr_tatemono,
+          adrSonota: d.adr_sonota,
+          tel: d.tel,
+          fax: d.fax,
+          mem: d.mem,
+          dspFlg: d.dsp_flg,
+        }));
 
-      const theData: LocsMasterTableValues[] = data.map((d) => ({
-        locId: d.koenbasho_id,
-        locNam: d.koenbasho_nam,
-        adrShozai: d.adr_shozai,
-        adrTatemono: d.adr_tatemono,
-        adrSonota: d.adr_sonota,
-        tel: d.tel,
-        fax: d.fax,
-        mem: d.mem,
-        dspOrdNum: d.dsp_ord_num,
-        delFlg: d.del_flg === 0 ? false : true,
-        dspFlg: d.dsp_flg,
-      }));
-
-      console.log(theData.length);
-      return theData;
+        console.log(theData.length);
+        return theData;
+      }
     } else {
       console.error('DBエラーです', error.message);
+      return [];
     }
   } catch (e) {
     console.log(e);
