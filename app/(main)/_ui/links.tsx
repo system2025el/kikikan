@@ -100,6 +100,18 @@ export default function NavLinks() {
     setroginOpen(!loginOpen);
   };
 
+  // const handleNewOrderClick = async () => {
+  //   const maxId = await GetMaxId();
+  //   if (maxId) {
+  //     const newOrderId = maxId.juchu_head_id + 1;
+  //     await AddNewOrder(newOrderId);
+  //     await AddLock(1, newOrderId);
+  //     router.push(`/order/${newOrderId}/${'edit'}`);
+  //   } else {
+  //     console.error('Failed to retrieve max order ID');
+  //   }
+  // };
+
   return (
     <List dense sx={{ pt: 0 }}>
       <ListItemButton

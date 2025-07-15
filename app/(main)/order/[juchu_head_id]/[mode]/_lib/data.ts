@@ -1,4 +1,4 @@
-import { Row } from '../_ui/new-order-table';
+import { Row } from '../_ui/order-table';
 
 const equipmentHeaders = [
   { key: 'name', label: '機材明細名' },

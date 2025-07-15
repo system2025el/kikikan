@@ -14,7 +14,7 @@ import {
   getEquipmentHeaderBackgroundColor,
   getEquipmentRowBackgroundColor,
   getEquipmentTextColor,
-} from '@/app/(main)/new-order/schedule/_lib/colorselect';
+} from '@/app/(main)/order/schedule/_lib/colorselect';
 import {
   dateData,
   dateHeader,
@@ -22,7 +22,7 @@ import {
   equipmentData,
   equipmentHeader,
   equipmentWidths,
-} from '@/app/(main)/new-order/schedule/_lib/data';
+} from '@/app/(main)/order/schedule/_lib/data';
 
 const Schedule = () => {
   const [equipmentRows, setEquipmentRows] = useState(equipmentData);

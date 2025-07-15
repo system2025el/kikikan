@@ -12,7 +12,7 @@ import {
   getEquipmentHeaderBackgroundColor,
   getEquipmentRowBackgroundColor,
   getEquipmentTextColor,
-} from '../../new-order/schedule/_lib/colorselect';
+} from '../../order/schedule/_lib/colorselect';
 import { getBackgroundColor } from '../_lib/colorselect';
 import { dateData, dateHeader, dateWidths, equipmentData, equipmentHeader, equipmentWidths } from '../_lib/data';
 

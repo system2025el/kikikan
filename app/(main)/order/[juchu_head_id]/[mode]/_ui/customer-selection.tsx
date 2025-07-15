@@ -21,8 +21,8 @@ import {
 } from '@mui/material';
 import { useMemo, useState } from 'react';
 
-import { MuiTablePagination } from '../../_ui/table-pagination';
-import { customers } from '../../(masters)/customers-master/_lib/datas';
+import { MuiTablePagination } from '../../../../_ui/table-pagination';
+import { customers } from '../../../../(masters)/customers-master/_lib/datas';
 
 /** 新規受注の相手選択ダイアログ（全画面） */
 export const CustomerSelectionDialog = (props: { handleCloseCustDialog: () => void }) => {

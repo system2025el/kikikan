@@ -132,7 +132,7 @@ export const OrderTable = () => {
                     </Box>
                   </TableCell>
                   <TableCell align="center">
-                    <Button variant="text">
+                    <Button variant="text" href={`/order/${order.orderNumber}/${'view'}`}>
                       <Box minWidth={60} maxWidth={60}>
                         {order.orderNumber}
                       </Box>

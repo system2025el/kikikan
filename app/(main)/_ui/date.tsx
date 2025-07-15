@@ -11,7 +11,9 @@ import { PickerValue } from '@mui/x-date-pickers/internals';
 import { DateValidationError } from '@mui/x-date-pickers/models';
 import dayjs, { Dayjs } from 'dayjs';
 import { useMemo, useState } from 'react';
+import { ControllerFieldState, ControllerRenderProps, Noop } from 'react-hook-form';
 import { DateRangePicker } from 'rsuite';
+//import { DateRange } from 'rsuite/esm/DateRangePicker';
 
 dayjs.locale('ja'); // カレンダーの曜日のフォーマット
 
@@ -119,9 +121,11 @@ export const TestDate = (props: {
   date: Date | null;
   minDate?: Date;
   maxDate?: Date;
+  onBlur?: Noop;
+  fieldstate?: ControllerFieldState;
   onChange: (value: Dayjs | null) => void;
 }) => {
-  const { sx, disabled, date, minDate, maxDate, onChange } = props;
+  const { sx, disabled, date, minDate, maxDate, onBlur, fieldstate, onChange } = props;
 
   return (
     <LocalizationProvider
@@ -138,6 +142,10 @@ export const TestDate = (props: {
         format="YYYY/MM/DD" // テキストエリア内のフォーマット
         slotProps={{
           textField: {
+            helperText: fieldstate?.error?.message,
+            FormHelperTextProps: {
+              sx: { color: 'error.main', fontSize: '0.75rem' },
+            },
             size: 'small',
             sx: {
               bgcolor: disabled ? grey[200] : 'white',
@@ -149,6 +157,8 @@ export const TestDate = (props: {
               },
               ...sx,
             },
+            error: fieldstate?.invalid,
+            onBlur: onBlur,
           },
           calendarHeader: { format: 'YYYY年MM月' },
         }} // カレンダーヘッダーのフォーマット
@@ -158,6 +168,7 @@ export const TestDate = (props: {
         views={['year', 'month', 'day']}
         disabled={disabled ? true : false}
         onChange={onChange}
+        onAccept={onBlur}
       />
     </LocalizationProvider>
   );
@@ -333,6 +344,23 @@ export const toISOStringWithTimezone = (date: Date): string => {
   const tzHour = pad((tz / 60).toString());
   const tzMin = pad((tz % 60).toString());
   return `${year}/${month}/${day}T${hour}:${min}:${sec}${sign}${tzHour}:${tzMin}`;
+};
+
+export const toISOString = (date: Date): string => {
+  const pad = function (str: string): string {
+    return ('0' + str).slice(-2);
+  };
+  const year = date.getFullYear().toString();
+  const month = pad((date.getMonth() + 1).toString());
+  const day = pad(date.getDate().toString());
+  const hour = pad(date.getHours().toString());
+  const min = pad(date.getMinutes().toString());
+  const sec = pad(date.getSeconds().toString());
+  const tz = -date.getTimezoneOffset();
+  const sign = tz >= 0 ? '+' : '-';
+  const tzHour = pad((tz / 60).toString());
+  const tzMin = pad((tz % 60).toString());
+  return `${year}/${month}/${day} ${hour}:${min}:${sec}`;
 };
 
 export const toISOStringWithTimezoneMonthDay = (date: Date): string => {
