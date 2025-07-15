@@ -18,11 +18,11 @@ import { VehsMasterDialogSchema, VehsMasterDialogValues } from '../_lib/types';
 export const VehiclesMasterDialog = ({
   vehicleId,
   handleClose,
-  refetchVeh,
+  refetchVehs,
 }: {
   vehicleId: number;
   handleClose: () => void;
-  refetchVeh: () => void;
+  refetchVehs: () => void;
 }) => {
   /* useState --------------------- */
   /** DBのローディング状態 */
