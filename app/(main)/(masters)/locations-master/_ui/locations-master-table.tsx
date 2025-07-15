@@ -96,28 +96,29 @@ export const LocationsMasterTable = ({
           </Grid2>
         </Grid2>
       </Grid2>
-      {list!.length < 1 && <Typography>該当するデータがありません</Typography>}
-      {list!.length > 0 && (
-        <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
-          {isLoading ? (
-            <Loading />
-          ) : (
-            <MasterTable
-              headers={lMHeader}
-              datas={list!.map((l) => ({
-                ...l,
-                id: l.locId,
-                name: l.locNam,
-                address: `${l.adrShozai}${l.adrTatemono}${l.adrSonota}`,
-              }))}
-              handleOpenDialog={handleOpenDialog}
-              page={page}
-              rowsPerPage={rowsPerPage}
-            />
+      {isLoading ? (
+        <Loading />
+      ) : (
+        <>
+          {list!.length < 1 && <Typography>該当するデータがありません</Typography>}
+          {list!.length > 0 && (
+            <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
+              <MasterTable
+                headers={lMHeader}
+                datas={list!.map((l) => ({
+                  ...l,
+                  id: l.locId,
+                  name: l.locNam,
+                  address: `${l.adrShozai}${l.adrTatemono}${l.adrSonota}`,
+                }))}
+                handleOpenDialog={handleOpenDialog}
+                page={page}
+                rowsPerPage={rowsPerPage}
+              />
+            </TableContainer>
           )}
-        </TableContainer>
+        </>
       )}
-
       <Dialog open={dialogOpen} fullScreen>
         <LocationsMasterDialog handleClose={handleCloseDialog} locationId={openId} refetchLocs={refetchLocs} />
       </Dialog>
