@@ -7,7 +7,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { MuiTablePagination } from '../../../_ui/table-pagination';
-import { MasterTableOfEqpt } from '../../_ui/table';
+import { MasterTableOfEqpt } from '../../_ui/tables';
 import { eqptMHeader } from '../_lib/datas';
 import { EqptMasterTableValues } from '../_lib/types';
 import { EqMasterDialog } from './eqpt-master-dialog';

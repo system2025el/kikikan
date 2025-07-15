@@ -25,7 +25,7 @@ import { JSX, SetStateAction, useEffect, useMemo, useState } from 'react';
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { MuiTablePagination } from '../../../_ui/table-pagination';
-import { MasterTable } from '../../_ui/table';
+import { MasterTable } from '../../_ui/tables';
 import { vMHeader } from '../_lib/datas';
 import { VehsMasterTableValues } from '../_lib/types';
 import { VehiclesMasterDialog } from './vehicles-master-dialog';

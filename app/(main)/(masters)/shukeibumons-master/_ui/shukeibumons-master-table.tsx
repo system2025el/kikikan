@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Loading } from '@/app/(main)/_ui/loading';
 import { MuiTablePagination } from '@/app/(main)/_ui/table-pagination';
 
-import { MasterTable } from '../../_ui/table';
+import { MasterTable } from '../../_ui/tables';
 import { shukeibumonMHeader } from '../_lib/datas';
 import { ShukeibumonsMasterDialogValues, ShukeibumonsMasterTableValues } from '../_lib/type';
 import { ShukeibumonsMasterDialog } from './shukeibumons-master-dialog';

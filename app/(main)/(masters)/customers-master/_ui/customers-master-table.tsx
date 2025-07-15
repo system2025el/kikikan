@@ -7,7 +7,7 @@ import { Loading } from '@/app/(main)/_ui/loading';
 
 // import { getAllCustomers } from '@/app/_lib/supabase/supabaseFuncs';
 import { MuiTablePagination } from '../../../_ui/table-pagination';
-import { MasterTable } from '../../_ui/table';
+import { MasterTable } from '../../_ui/tables';
 import { cMHeader } from '../_lib/datas';
 import { CustomerMasterTableValues } from '../_lib/types';
 import { CustomersMasterDialog } from './customers-master-dialog';

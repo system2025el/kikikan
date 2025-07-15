@@ -6,7 +6,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { MuiTablePagination } from '../../../_ui/table-pagination';
-import { MasterTable } from '../../_ui/table';
+import { MasterTable } from '../../_ui/tables';
 import { lMHeader } from '../_lib/datas';
 import { GetFilteredLocs } from '../_lib/funcs';
 import { LocsMasterTableValues } from '../_lib/types';

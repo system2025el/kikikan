@@ -26,7 +26,7 @@ import { SelectedElement } from 'rsuite/esm/internals/Picker';
 import { FormBox } from '../../../_ui/form-box';
 import { Loading } from '../../../_ui/loading';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
-import { IsDirtyDialog } from '../../_ui/isdirty-dialog';
+import { IsDirtyAlertDialog } from '../../_ui/dialogs';
 import { emptyEqpt, formItems } from '../_lib/datas';
 import { EqptMasterDialogSchema, EqptMasterDialogValues } from '../_lib/types';
 
@@ -404,7 +404,11 @@ export const EqMasterDialog = ({
                 </FormBox>
               </Grid2>
             </Grid2>
-            <IsDirtyDialog open={dirtyOpen} handleCloseDirty={handleCloseDirty} handleCloseAll={handleClickClose} />
+            <IsDirtyAlertDialog
+              open={dirtyOpen}
+              handleCloseDirty={handleCloseDirty}
+              handleCloseAll={handleClickClose}
+            />
           </>
         )}
       </form>
