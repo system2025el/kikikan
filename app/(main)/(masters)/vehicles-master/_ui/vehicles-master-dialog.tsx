@@ -1,26 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CheckBox } from '@mui/icons-material';
-import {
-  alpha,
-  Box,
-  Button,
-  Container,
-  DialogTitle,
-  Grid2,
-  Paper,
-  Stack,
-  TextField,
-  Typography,
-  useTheme,
-} from '@mui/material';
+import { Grid2 } from '@mui/material';
 import { JSX, useEffect, useState } from 'react';
 import { CheckboxElement, TextareaAutosizeElement, TextFieldElement, useForm } from 'react-hook-form-mui';
 
 // import { addNewVehicle, getOneVehicle } from '@/app/_lib/supabase/supabaseFuncs';
-import { FormBox, FormItemsType } from '../../../_ui/form-box';
+import { FormBox } from '../../../_ui/form-box';
 import { Loading } from '../../../_ui/loading';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
-import { IsDirtyAlertDialog } from '../../_ui/dialogs';
+import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { emptyVeh, formItems } from '../_lib/datas';
 import { VehsMasterDialogSchema, VehsMasterDialogValues } from '../_lib/types';
 /**
@@ -31,11 +18,11 @@ import { VehsMasterDialogSchema, VehsMasterDialogValues } from '../_lib/types';
 export const VehiclesMasterDialog = ({
   vehicleId,
   handleClose,
-  refetchVehs,
+  refetchVeh,
 }: {
   vehicleId: number;
   handleClose: () => void;
-  refetchVehs: () => void;
+  refetchVeh: () => void;
 }) => {
   /* useState --------------------- */
   /** DBのローディング状態 */
@@ -46,7 +33,9 @@ export const VehiclesMasterDialog = ({
   const [isNew, setIsNew] = useState(false);
   /* 未保存ダイアログ出すかどうか */
   const [dirtyOpen, setDirtyOpen] = useState(false);
-  /* submit時のactions (save,) */
+  /* 削除フラグ確認ダイアログ出すかどうか */
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  /* submit時のactions (save, delete) */
   const [action, setAction] = useState<'save' | 'delete' | undefined>(undefined);
 
   /* useForm ------------------------ */
@@ -55,16 +44,12 @@ export const VehiclesMasterDialog = ({
     handleSubmit,
     reset,
     formState: { isDirty },
+    getValues,
   } = useForm({
     mode: 'onBlur',
     reValidateMode: 'onBlur',
     resolver: zodResolver(VehsMasterDialogSchema),
-    defaultValues: {
-      sharyoNam: '',
-      delFlg: false,
-      dspFlg: true,
-      mem: '',
-    },
+    defaultValues: {},
   });
 
   /* methods ---------------------- */
@@ -74,15 +59,18 @@ export const VehiclesMasterDialog = ({
     console.log(data);
     // if (VehicleId === -100) {
     //   await addNewVeh(data);
+    // handleCloseDialog();
+    // refetchVeh();
     // } else {
     // if (action === 'save') {
     //   await updateVeh(data, vehicleId);
+    // handleCloseDialog();
+    // refetchVeh();
     // } else if (action === 'delete') {
-    //   await updateVeh({ ...data, delFlg: true }, vehicleId);
+    //   setDeleteOpen(true);
+    //   return;
     // }
     // }
-    handleCloseDialog();
-    refetchVehs();
   };
 
   /* 詳細ダイアログを閉じる */
@@ -90,11 +78,6 @@ export const VehiclesMasterDialog = ({
     setEditable(false);
     setIsNew(false);
     handleClose();
-  };
-
-  /* 未保存ダイアログを閉じる */
-  const handleCloseDirty = () => {
-    setDirtyOpen(false);
   };
 
   /* ×ぼたんを押したとき */
@@ -105,6 +88,15 @@ export const VehiclesMasterDialog = ({
     } else {
       handleCloseDialog();
     }
+  };
+
+  /* 削除確認ダイアログで削除選択時 */
+  const handleConfirmDelete = async () => {
+    // const values = await getValues();
+    // await updateVeh({ ...values, delFlg: true }, vehicleId);
+    setDeleteOpen(false);
+    handleCloseDialog();
+    // await refetchVehs();
   };
 
   /* useEffect --------------------------------------- */
@@ -160,14 +152,14 @@ export const VehiclesMasterDialog = ({
                   />
                 </FormBox>
               </Grid2>
-              <Grid2>
+              {/* <Grid2>
                 <FormBox formItem={formItems[1]}>
                   <CheckboxElement name="delFlg" control={control} size="medium" disabled={editable ? false : true} />
                 </FormBox>
-              </Grid2>
+              </Grid2> */}
               <Grid2>
                 <FormBox formItem={formItems[2]}>
-                  <TextareaAutosizeElement ////////////// 200文字までの設定をしなければならない
+                  <TextareaAutosizeElement
                     name="mem"
                     control={control}
                     label={formItems[2].exsample}
@@ -185,8 +177,13 @@ export const VehiclesMasterDialog = ({
             </Grid2>
             <IsDirtyAlertDialog
               open={dirtyOpen}
-              handleCloseDirty={handleCloseDirty}
+              handleCloseDirty={() => setDirtyOpen(false)}
               handleCloseAll={handleCloseDialog}
+            />
+            <WillDeleteAlertDialog
+              open={deleteOpen}
+              handleCloseDelete={() => setDeleteOpen(false)}
+              handleCloseAll={handleConfirmDelete}
             />
           </>
         )}

@@ -9,7 +9,7 @@ import { FormBox } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { MasterDialogTitle } from '../../_ui/dialog-title';
-import { IsDirtyAlertDialog } from '../../_ui/dialogs';
+import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { emptyManager, formItems } from '../_lib/data';
 import { ManagersMasterDialogValues, managersMaterDialogSchema } from '../_lib/types';
 /**
@@ -35,7 +35,9 @@ export const ManagerMasterDialog = ({
   const [isNew, setIsNew] = useState(false);
   /* 未保存ダイアログ出すかどうか */
   const [dirtyOpen, setDirtyOpen] = useState(false);
-  /* submit時のactions (save,) */
+  /* 削除フラグ確認ダイアログ出すかどうか */
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  /* submit時のactions (save, delete) */
   const [action, setAction] = useState<'save' | 'delete' | undefined>(undefined);
 
   /* useForm ------------------------- */
@@ -44,10 +46,11 @@ export const ManagerMasterDialog = ({
     handleSubmit,
     reset,
     formState: { isDirty },
+    getValues,
   } = useForm({
     mode: 'onBlur',
     reValidateMode: 'onBlur',
-    defaultValues: { tantouNam: '' },
+    defaultValues: {},
     resolver: zodResolver(managersMaterDialogSchema),
   });
 
@@ -58,15 +61,18 @@ export const ManagerMasterDialog = ({
     console.log(data);
     // if (managerId === -100) {
     //   await addNewmanager(data);
+    // handleCloseDialog();
+    // refetchManagers();
     // } else {
     // if (action === 'save') {
     //   await updateManager(data, managerId);
+    // handleCloseDialog();
+    // refetchManagers();
     // } else if (action === 'delete') {
-    //   await updateManager({ ...data, delFlg: true }, managerId);
+    //   setDeleteOpen(true);
+    // return;
     // }
     // }
-    handleCloseDialog();
-    refetchManagers();
   };
 
   /* 詳細ダイアログを閉じる */
@@ -74,11 +80,6 @@ export const ManagerMasterDialog = ({
     setEditable(false);
     setIsNew(false);
     handleClose();
-  };
-
-  /* 未保存ダイアログを閉じる */
-  const handleCloseDirty = () => {
-    setDirtyOpen(false);
   };
 
   /* ×ぼたんを押したとき */
@@ -89,6 +90,15 @@ export const ManagerMasterDialog = ({
     } else {
       handleCloseDialog();
     }
+  };
+
+  /* 削除確認ダイアログで削除選択時 */
+  const handleConfirmDelete = async () => {
+    // const values = await getValues();
+    // await updateManager({ ...values, delFlg: true }, managerId);
+    setDeleteOpen(false);
+    handleCloseDialog();
+    // await refetchManagers();
   };
 
   /* useEffect --------------------------------------- */
@@ -144,11 +154,21 @@ export const ManagerMasterDialog = ({
                   />
                 </FormBox>
               </Grid2>
+              {/* <Grid2>
+                <FormBox formItem={formItems[1]}>
+                  <CheckboxElement name="delFlg" control={control} size="medium" disabled={editable ? false : true} />
+                </FormBox>
+              </Grid2> */}
             </Grid2>
             <IsDirtyAlertDialog
               open={dirtyOpen}
-              handleCloseDirty={handleCloseDirty}
+              handleCloseDirty={() => setDirtyOpen(false)}
               handleCloseAll={handleCloseDialog}
+            />
+            <WillDeleteAlertDialog
+              open={deleteOpen}
+              handleCloseDelete={() => setDeleteOpen(false)}
+              handleCloseAll={handleConfirmDelete}
             />
           </>
         )}

@@ -39,7 +39,7 @@ export const LocationsMasterDialog = ({
   const [dirtyOpen, setDirtyOpen] = useState(false);
   /* 削除フラグ確認ダイアログ出すかどうか */
   const [deleteOpen, setDeleteOpen] = useState(false);
-  /* submit時のactions (save,) */
+  /* submit時のactions (save, delete) */
   const [action, setAction] = useState<'save' | 'delete' | undefined>(undefined);
 
   /* useForm ------------------------- */

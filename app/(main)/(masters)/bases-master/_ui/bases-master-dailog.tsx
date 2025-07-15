@@ -6,7 +6,7 @@ import { CheckboxElement, TextareaAutosizeElement, TextFieldElement, useForm } f
 import { FormBox, FormItemsType } from '../../../_ui/form-box';
 import { Loading } from '../../../_ui/loading';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
-import { IsDirtyAlertDialog } from '../../_ui/dialogs';
+import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { emptyBase, formItems } from '../_lib/datas';
 import { BasesMasterDialogSchema, BasesMasterDialogValues } from '../_lib/types';
 
@@ -34,7 +34,9 @@ export const BasesMasterDialog = ({
   const [isLoading, setIsLoading] = useState(true);
   /* ダイアログでの編集モードかどうか */
   const [editable, setEditable] = useState(false);
-  /* submit時のactions (save,) */
+  /* 削除フラグ確認ダイアログ出すかどうか */
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  /* submit時のactions (save, delete) */
   const [action, setAction] = useState<'save' | 'delete' | undefined>(undefined);
 
   /* useForm ----------------------------------------- */
@@ -42,16 +44,13 @@ export const BasesMasterDialog = ({
     control,
     handleSubmit,
     reset,
-    formState: { isDirty, dirtyFields },
+    formState: { isDirty },
+    getValues,
   } = useForm({
     mode: 'onBlur',
     reValidateMode: 'onBlur',
     resolver: zodResolver(BasesMasterDialogSchema),
-    defaultValues: {
-      kyotenNam: '',
-      delFlg: false,
-      mem: '',
-    },
+    defaultValues: {},
   });
 
   /* methods ---------------------------------------- */
@@ -61,15 +60,18 @@ export const BasesMasterDialog = ({
     console.log(data);
     // if (baseId === -100) {
     //   await addNewBase(data);
+    // handleCloseDialog();
+    // refetchBases();
     // } else {
     // if (action === 'save') {
     //   await updateBase(data, baseId);
+    // handleCloseDialog();
+    // refetchBases();
     // } else if (action === 'delete') {
-    //   await updateBase({ ...data, delFlg: true }, baseId);
+    //   setDeleteOpen(true);
+    //   return;
     // }
     // }
-    handleCloseDialog();
-    refetchBases();
   };
 
   /* 詳細ダイアログを閉じる */
@@ -77,11 +79,6 @@ export const BasesMasterDialog = ({
     setEditable(false);
     setIsNew(false);
     handleClose();
-  };
-
-  /* 未保存ダイアログを閉じる */
-  const handleCloseDirty = () => {
-    setDirtyOpen(false);
   };
 
   /* ×ぼたんを押したとき */
@@ -92,6 +89,15 @@ export const BasesMasterDialog = ({
     } else {
       handleCloseDialog();
     }
+  };
+
+  /* 削除確認ダイアログで削除選択時 */
+  const handleConfirmDelete = async () => {
+    // const values = await getValues();
+    // await updateBase({ ...values, delFlg: true }, baseId);
+    setDeleteOpen(false);
+    handleCloseDialog();
+    // await refetchBases();
   };
 
   /* useEffect --------------------------------------- */
@@ -146,11 +152,11 @@ export const BasesMasterDialog = ({
                   />
                 </FormBox>
               </Grid2>
-              <Grid2>
+              {/* <Grid2>
                 <FormBox formItem={formItems[1]}>
                   <CheckboxElement name="delFlg" control={control} size="medium" disabled={editable ? false : true} />
                 </FormBox>
-              </Grid2>
+              </Grid2> */}
               <Grid2>
                 <FormBox formItem={formItems[2]}>
                   <TextareaAutosizeElement ////////////// 200文字までの設定をしなければならない
@@ -166,8 +172,13 @@ export const BasesMasterDialog = ({
             </Grid2>
             <IsDirtyAlertDialog
               open={dirtyOpen}
-              handleCloseDirty={handleCloseDirty}
+              handleCloseDirty={() => setDirtyOpen(false)}
               handleCloseAll={handleCloseDialog}
+            />
+            <WillDeleteAlertDialog
+              open={deleteOpen}
+              handleCloseDelete={() => setDeleteOpen(false)}
+              handleCloseAll={handleConfirmDelete}
             />
           </>
         )}

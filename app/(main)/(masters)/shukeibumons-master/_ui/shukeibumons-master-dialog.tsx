@@ -1,15 +1,15 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { alpha, Grid2, useTheme } from '@mui/material';
+import { Grid2 } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { CheckboxElement, TextareaAutosizeElement, TextFieldElement } from 'react-hook-form-mui';
+import { TextareaAutosizeElement, TextFieldElement } from 'react-hook-form-mui';
 
-import { FormBox, FormItemsType } from '@/app/(main)/_ui/form-box';
+import { FormBox } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { MasterDialogTitle } from '../../_ui/dialog-title';
-import { IsDirtyAlertDialog } from '../../_ui/dialogs';
-import { emptyShukeibumon, formItems, shukeibumonsList } from '../_lib/datas';
+import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
+import { emptyShukeibumon, formItems } from '../_lib/datas';
 import { ShukeibumonsMasterDialogSchema, ShukeibumonsMasterDialogValues } from '../_lib/type';
 
 /**
@@ -34,7 +34,9 @@ export const ShukeibumonsMasterDialog = ({
   const [isNew, setIsNew] = useState(false);
   /* 未保存ダイアログ出すかどうか */
   const [dirtyOpen, setDirtyOpen] = useState(false);
-  /* submit時のactions (save,) */
+  /* 削除フラグ確認ダイアログ出すかどうか */
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  /* submit時のactions (save, delete) */
   const [action, setAction] = useState<'save' | 'delete' | undefined>(undefined);
 
   /* useForm ----------------------------------------- */
@@ -43,18 +45,12 @@ export const ShukeibumonsMasterDialog = ({
     handleSubmit,
     reset,
     formState: { isDirty },
+    getValues,
   } = useForm({
     mode: 'onBlur',
     reValidateMode: 'onBlur',
     resolver: zodResolver(ShukeibumonsMasterDialogSchema),
-    defaultValues: {
-      //DB   kyotenNam: '',
-      //   delFlg: false,
-      //   mem: '',
-      shukeibumonNam: '',
-      delFlg: false,
-      mem: '',
-    },
+    defaultValues: {},
   });
   /* methods ---------------------------------------- */
   /* フォームを送信 */
@@ -63,15 +59,18 @@ export const ShukeibumonsMasterDialog = ({
     console.log(data);
     // if (shukeibumonId === -100) {
     //   await addNewshukeibumon(data);
+    // handleCloseDialog();
+    // refetchShukeibumons();
     // } else {
     // if (action === 'save') {
     //   await updateshukeibumon(data, shukeibumonId);
+    // handleCloseDialog();
+    // refetchShukeibumons();
     // } else if (action === 'delete') {
-    //   await updateshukeibumon({ ...data, delFlg: true }, shukeibumonId);
+    //   setDeleteOpen(true);
+    //   return;
     // }
     // }
-    handleCloseDialog();
-    refetchShukeibumons();
   };
 
   /* 詳細ダイアログを閉じる */
@@ -79,11 +78,6 @@ export const ShukeibumonsMasterDialog = ({
     setEditable(false);
     setIsNew(false);
     handleClose();
-  };
-
-  /* 未保存ダイアログを閉じる */
-  const handleCloseDirty = () => {
-    setDirtyOpen(false);
   };
 
   /* ×ぼたんを押したとき */
@@ -94,6 +88,15 @@ export const ShukeibumonsMasterDialog = ({
     } else {
       handleCloseDialog();
     }
+  };
+
+  /* 削除確認ダイアログで削除選択時 */
+  const handleConfirmDelete = async () => {
+    // const values = await getValues();
+    // await updateShukeibumon({ ...values, delFlg: true }, shukeibumonId);
+    setDeleteOpen(false);
+    handleCloseDialog();
+    // await refetchShukeibumons();
   };
 
   /* useEffect --------------------------------------- */
@@ -149,14 +152,14 @@ export const ShukeibumonsMasterDialog = ({
                   />
                 </FormBox>
               </Grid2>
-              <Grid2>
+              {/* <Grid2>
                 <FormBox formItem={formItems[1]}>
                   <CheckboxElement name="delFlg" control={control} size="medium" disabled={editable ? false : true} />
                 </FormBox>
-              </Grid2>
+              </Grid2> */}
               <Grid2>
                 <FormBox formItem={formItems[2]}>
-                  <TextareaAutosizeElement ////////////// 200文字までの設定をしなければならない
+                  <TextareaAutosizeElement
                     name="mem"
                     control={control}
                     label={formItems[2].exsample}
@@ -169,8 +172,13 @@ export const ShukeibumonsMasterDialog = ({
             </Grid2>
             <IsDirtyAlertDialog
               open={dirtyOpen}
-              handleCloseDirty={handleCloseDirty}
+              handleCloseDirty={() => setDirtyOpen(false)}
               handleCloseAll={handleCloseDialog}
+            />
+            <WillDeleteAlertDialog
+              open={deleteOpen}
+              handleCloseDelete={() => setDeleteOpen(false)}
+              handleCloseAll={handleConfirmDelete}
             />
           </>
         )}

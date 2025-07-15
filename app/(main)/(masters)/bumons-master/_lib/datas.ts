@@ -38,6 +38,9 @@ export const formItems: FormItemsType[] = [
 export const emptyBumon: BumonsMasterDialogValues = {
   bumonNam: '',
   delFlg: false,
+  mem: '',
+  daibumonId: 0,
+  shukeibumonId: 0,
 };
 
 /*モック削除delete */

@@ -17,9 +17,9 @@ import { FormBox, FormItemsType } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { MasterDialogTitle } from '../../_ui/dialog-title';
-import { IsDirtyAlertDialog } from '../../_ui/dialogs';
+import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { emptyCustomer, formItems } from '../_lib/datas';
-import { customerMasterDialogDetailsValues, customerMaterDialogDetailsSchema } from '../_lib/types';
+import { CustomerMasterDialogDetailsValues, CustomerMaterDialogDetailsSchema } from '../_lib/types';
 
 /**
  * 顧客マスタの顧客詳細ダイアログ
@@ -44,7 +44,9 @@ export const CustomersMasterDialog = ({
   const [isNew, setIsNew] = useState(false);
   /* 未保存ダイアログ出すかどうか */
   const [dirtyOpen, setDirtyOpen] = useState(false);
-  /* submit時のactions (save,) */
+  /* 削除フラグ確認ダイアログ出すかどうか */
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  /* submit時のactions (save, delete) */
   const [action, setAction] = useState<'save' | 'delete' | undefined>(undefined);
 
   /* useForm ------------------------- */
@@ -53,57 +55,39 @@ export const CustomersMasterDialog = ({
     handleSubmit,
     reset,
     formState: { isDirty },
+    getValues,
   } = useForm({
     mode: 'onBlur',
     reValidateMode: 'onBlur',
-    defaultValues: {
-      kokyakuNam: '',
-      kana: '',
-      kokyakuRank: 0,
-      keisho: '',
-      adrPost: '',
-      adrShozai: '',
-      adrTatemono: '',
-      adrSonota: '',
-      tel: '',
-      telMobile: '',
-      mail: '',
-      mem: '',
-      delFlg: false,
-      dspFlg: true,
-      closeDay: 0,
-      siteDay: 0,
-      kizaiNebikiFlg: false,
-    }, //DB customer,
-    resolver: zodResolver(customerMaterDialogDetailsSchema),
+    defaultValues: {},
+    resolver: zodResolver(CustomerMaterDialogDetailsSchema),
   });
 
   /* 関数 ---------------------------- */
   /* フォームを送信 */
-  const onSubmit = (data: customerMasterDialogDetailsValues) => {
+  const onSubmit = (data: CustomerMasterDialogDetailsValues) => {
     console.log('isDarty : ', isDirty);
     console.log(data);
     // if (customerId === -100) {
     //   await addNewCustomer(data);
+    // handleCloseDialog();
+    // refetchCustomers();
     // } else {
     // if (action === 'save') {
     //   await updateCustomer(data, customerId);
+    // handleCloseDialog();
+    // refetchCustomers();
     // } else if (action === 'delete') {
-    //   await updateCustomer({ ...data, delFlg: true }, customerId);
+    //   setDeleteOpen(true);
+    //   return;
     // }
     // }
-    handleCloseDialog();
-    refetchCustomers();
   };
   /* ダイアログを閉じる */
   const handleCloseDialog = () => {
     setEditable(false);
     setIsNew(false);
     handleClose();
-  };
-  /* 未保存ダイアログを閉じる */
-  const handleCloseDirty = () => {
-    setDirtyOpen(false);
   };
 
   /* ×ぼたんを押したとき */
@@ -114,6 +98,15 @@ export const CustomersMasterDialog = ({
     } else {
       handleCloseDialog();
     }
+  };
+
+  /* 削除確認ダイアログで削除選択時 */
+  const handleConfirmDelete = async () => {
+    // const values = await getValues();
+    // await updateCustomer({ ...values, delFlg: true }, CustomerId);
+    setDeleteOpen(false);
+    handleCloseDialog();
+    // await refetchCustomers();
   };
 
   /* useEffect --------------------------------------- */
@@ -197,14 +190,15 @@ export const CustomersMasterDialog = ({
                     fullWidth
                     sx={{ maxWidth: '50%' }}
                     disabled={editable ? false : true}
+                    type="number"
                   />
                 </FormBox>
               </Grid2>
-              <Grid2>
+              {/* <Grid2>
                 <FormBox formItem={formItems[3]}>
                   <CheckboxElement name="delFlg" control={control} size="medium" disabled={editable ? false : true} />
                 </FormBox>
-              </Grid2>
+              </Grid2> */}
               <Grid2>
                 <FormBox formItem={formItems[4]}>
                   <TextFieldElement
@@ -339,6 +333,7 @@ export const CustomersMasterDialog = ({
                     fullWidth
                     sx={{ maxWidth: '50%' }}
                     disabled={editable ? false : true}
+                    type="number"
                   />
                 </FormBox>
               </Grid2>
@@ -351,6 +346,7 @@ export const CustomersMasterDialog = ({
                     fullWidth
                     sx={{ maxWidth: '50%' }}
                     disabled={editable ? false : true}
+                    type="number"
                   />
                 </FormBox>
               </Grid2>
@@ -367,8 +363,13 @@ export const CustomersMasterDialog = ({
             </Grid2>
             <IsDirtyAlertDialog
               open={dirtyOpen}
-              handleCloseDirty={handleCloseDirty}
+              handleCloseDirty={() => setDirtyOpen(false)}
               handleCloseAll={handleCloseDialog}
+            />
+            <WillDeleteAlertDialog
+              open={deleteOpen}
+              handleCloseDelete={() => setDeleteOpen(false)}
+              handleCloseAll={handleConfirmDelete}
             />
           </>
         )}
