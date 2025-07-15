@@ -40,3 +40,12 @@ export const NewOrderSchema = z.object({
 });
 
 export type NewOrderValues = z.infer<typeof NewOrderSchema>;
+
+export const LockSchema = z.object({
+  lockShubetu: z.number(),
+  headId: z.number().nullable(),
+  addDat: z.date().nullable(),
+  addUser: z.string().nullable(),
+});
+
+export type LockValues = z.infer<typeof LockSchema>;

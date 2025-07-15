@@ -33,12 +33,13 @@ export type Row = {
   juchuKizaiHeadKbn: number;
 };
 
-type NewOrderTableProps = {
+type OrderEqTableProps = {
   orderRows: Row[];
+  edit: boolean;
   onSelectionChange?: (selectedIds: (string | number)[]) => void;
 };
 
-export const NewOrderTable: React.FC<NewOrderTableProps> = ({ orderRows, onSelectionChange }) => {
+export const OrderEqTable: React.FC<OrderEqTableProps> = ({ orderRows, edit, onSelectionChange }) => {
   const [rows, setRows] = useState(orderRows);
   const [selected, setSelected] = useState<(string | number)[]>([]);
 
@@ -113,6 +114,7 @@ export const NewOrderTable: React.FC<NewOrderTableProps> = ({ orderRows, onSelec
                       whiteSpace: 'nowrap',
                       justifyContent: 'start',
                     }}
+                    disabled={!edit}
                   >
                     {row.name}
                   </Button>

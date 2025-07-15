@@ -29,7 +29,7 @@ import { TestDate } from '@/app/(main)/_ui/date';
 import {
   getDateHeaderBackgroundColor,
   getDateRowBackgroundColor,
-} from '@/app/(main)/new-order/(order-detail)/equipment-order-detail/_lib/colorselect';
+} from '@/app/(main)/order/(order-detail)/equipment-order-detail/_lib/colorselect';
 
 import { Equipment, EquipmentData, StockData } from './equipment-order-detail';
 

@@ -49,8 +49,6 @@ type TableProps = {
 // };
 
 export const SelectTable: React.FC<TableProps> = ({ headers, datas, onSelectionChange }) => {
-  //const [rows, setRows] = useState(test(datas));
-
   const [rows, setRows] = useState(datas);
   const [selected, setSelected] = useState<(string | number)[]>([]);
 

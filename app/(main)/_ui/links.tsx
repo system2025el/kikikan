@@ -13,10 +13,7 @@ import {
   useTheme,
 } from '@mui/material';
 import { usePathname } from 'next/navigation';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-
-import { AddNewOrder, GetMaxId } from '../new-order/[juchu_head_id]/_lib/funcs';
 
 type MenuItem = {
   name: string;
@@ -65,7 +62,6 @@ export default function NavLinks() {
   const theme = useTheme();
   const selectedBgColor = alpha(theme.palette.primary.light, 0.2);
   const pathname = usePathname();
-  const router = useRouter();
 
   const isSelected = (url: string) => {
     if (pathname === url /*|| pathname.startsWith(url + '/')*/) {
@@ -104,16 +100,17 @@ export default function NavLinks() {
     setroginOpen(!loginOpen);
   };
 
-  const handleNewOrderClick = async () => {
-    const maxId = await GetMaxId();
-    if (maxId) {
-      const newOrderId = maxId.juchu_head_id + 1;
-      await AddNewOrder(newOrderId);
-      router.push(`/new-order/${newOrderId}`);
-    } else {
-      console.error('Failed to retrieve max order ID');
-    }
-  };
+  // const handleNewOrderClick = async () => {
+  //   const maxId = await GetMaxId();
+  //   if (maxId) {
+  //     const newOrderId = maxId.juchu_head_id + 1;
+  //     await AddNewOrder(newOrderId);
+  //     await AddLock(1, newOrderId);
+  //     router.push(`/order/${newOrderId}/${'edit'}`);
+  //   } else {
+  //     console.error('Failed to retrieve max order ID');
+  //   }
+  // };
 
   return (
     <List dense sx={{ pt: 0 }}>
@@ -137,43 +134,19 @@ export default function NavLinks() {
       </ListItemButton>
       <Collapse in={orderOpen} timeout="auto" unmountOnExit>
         <List component="div" disablePadding>
-          {orderList.map((text) => {
-            if (text.url === '/new-order') {
-              return (
-                <ListItem
-                  key={text.name}
-                  disablePadding
-                  sx={{
-                    backgroundColor: pathname === '/new-order' ? selectedBgColor : '',
-                  }}
-                >
-                  <ListItemButton onClick={handleNewOrderClick} dense>
-                    <ListItemText
-                      primary={text.name}
-                      sx={{ color: pathname === '/new-order' ? 'primary.dark' : '', pl: 8 }}
-                    />
-                  </ListItemButton>
-                </ListItem>
-              );
-            } else {
-              return (
-                <ListItem
-                  key={text.name}
-                  disablePadding
-                  sx={{
-                    backgroundColor: isSelected(text.url) ? selectedBgColor : '',
-                  }}
-                >
-                  <ListItemButton href={text.url} dense>
-                    <ListItemText
-                      primary={text.name}
-                      sx={{ color: isSelected(text.url) ? 'primary.dark' : '', pl: 8 }}
-                    />
-                  </ListItemButton>
-                </ListItem>
-              );
-            }
-          })}
+          {orderList.map((text) => (
+            <ListItem
+              key={text.name}
+              disablePadding
+              sx={{
+                backgroundColor: isSelected(text.url) ? selectedBgColor : '',
+              }}
+            >
+              <ListItemButton href={text.url} dense>
+                <ListItemText primary={text.name} sx={{ color: isSelected(text.url) ? 'primary.dark' : '', pl: 8 }} />
+              </ListItemButton>
+            </ListItem>
+          ))}
         </List>
       </Collapse>
       <ListItemButton onClick={printClick}>

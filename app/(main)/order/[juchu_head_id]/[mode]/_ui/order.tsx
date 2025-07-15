@@ -27,17 +27,29 @@ import { use, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
-import DateX, { RSuiteDateRangePicker, TestDate } from '@/app/(main)/_ui/date';
+import DateX, { RSuiteDateRangePicker, TestDate, toISOString, toISOStringWithTimezone } from '@/app/(main)/_ui/date';
 import { SelectTable } from '@/app/(main)/_ui/table';
-import { equipmentRows, vehicleHeaders, vehicleRows } from '@/app/(main)/new-order/[juchu_head_id]/_lib/data';
+import { equipmentRows, vehicleHeaders, vehicleRows } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/data';
 
-import { Update } from '../_lib/funcs';
-import { JuchuHeadSchema, NewOrderSchema, NewOrderValues } from '../_lib/types';
+import { AddLock, DeleteLock, GetLock, Update } from '../_lib/funcs';
+import { JuchuHeadSchema, LockValues, NewOrderSchema, NewOrderValues } from '../_lib/types';
 import { CustomerSelectionDialog } from './customer-selection';
 import { LocationSelectDialog } from './location-selection';
-import { NewOrderTable } from './new-order-table';
+import { OrderEqTable } from './order-table';
 
-export const NewOrder = (order: NewOrderValues) => {
+export const NewOrder = (props: {
+  order: NewOrderValues;
+  edit: boolean;
+  lockData: LockValues | null;
+  userName: string;
+}) => {
+  // 編集モード(true:編集、false:閲覧)
+  const [edit, setEdit] = useState(props.edit);
+  // ロックデータ
+  const [lockData, setLockData] = useState<LockValues | null>(props.lockData);
+  // 合計金額
+  const priceTotal = equipmentRows.reduce((sum, row) => sum + (row.price ?? 0), 0);
+
   /* useForm ------------------------- */
   const {
     watch,
@@ -49,25 +61,25 @@ export const NewOrder = (order: NewOrderValues) => {
     mode: 'onSubmit',
     reValidateMode: 'onBlur',
     defaultValues: {
-      juchuHeadId: order.juchuHeadId,
-      delFlg: order.delFlg,
-      juchuSts: order.juchuSts,
-      juchuDat: new Date(order.juchuDat),
+      juchuHeadId: props.order.juchuHeadId,
+      delFlg: props.order.delFlg,
+      juchuSts: props.order.juchuSts,
+      juchuDat: new Date(props.order.juchuDat),
       juchuRange:
-        order.juchuRange !== null
+        props.order.juchuRange !== null
           ? ([
-              order.juchuRange[0] ? new Date(order.juchuRange[0]) : new Date(''),
-              order.juchuRange[1] ? new Date(order.juchuRange[1]) : new Date(''),
+              props.order.juchuRange[0] ? new Date(props.order.juchuRange[0]) : new Date(''),
+              props.order.juchuRange[1] ? new Date(props.order.juchuRange[1]) : new Date(''),
             ] as [Date, Date])
           : null,
-      nyuryokuUser: order.nyuryokuUser,
-      koenNam: order.koenNam,
-      koenbashoNam: order.koenbashoNam,
-      kokyaku: order.kokyaku,
-      kokyakuTantoNam: order.kokyakuTantoNam,
-      mem: order.mem,
-      nebikiAmt: order.nebikiAmt,
-      zeiKbn: order.zeiKbn,
+      nyuryokuUser: props.order.nyuryokuUser,
+      koenNam: props.order.koenNam,
+      koenbashoNam: props.order.koenbashoNam,
+      kokyaku: props.order.kokyaku,
+      kokyakuTantoNam: props.order.kokyakuTantoNam,
+      mem: props.order.mem,
+      nebikiAmt: props.order.nebikiAmt,
+      zeiKbn: props.order.zeiKbn,
     },
     resolver: zodResolver(NewOrderSchema),
   });
@@ -78,40 +90,26 @@ export const NewOrder = (order: NewOrderValues) => {
     console.log('update : ', update);
   };
 
-  // 受注開始日/受注終了日
-  const [dateRange, setDateRange] = useState<[Date, Date] | null>([new Date(), new Date()]);
-  // 内税、外税
-  const [selectTax, setSelectTax] = useState('外税');
-
-  // 内税、外税変更
-  const selectTaxChange = (event: SelectChangeEvent) => {
-    setSelectTax(event.target.value);
+  // 編集モード変更
+  const handleEdit = async () => {
+    if (edit) {
+      await DeleteLock(1, props.order.juchuHeadId);
+      const newLockData = await GetLock(1, props.order.juchuHeadId);
+      setLockData(newLockData);
+      setEdit(!edit);
+    } else {
+      await AddLock(1, props.order.juchuHeadId);
+      const newLockData = await GetLock(1, props.order.juchuHeadId);
+      setLockData(newLockData);
+      setEdit(!edit);
+    }
   };
 
   const handleSelectionChange = (selectedIds: (string | number)[]) => {
     console.log('選択されたID:', selectedIds);
   };
 
-  const priceTotal = equipmentRows.reduce((sum, row) => sum + (row.price ?? 0), 0);
-
-  const [selectStatus, setSelectStatus] = useState('処理中');
-
-  const statusChange = (event: SelectChangeEvent) => {
-    setSelectStatus(event.target.value);
-  };
-
-  const [selectInputPerson, setselectInputPerson] = useState('');
-
-  const inputPersonChange = (event: SelectChangeEvent) => {
-    setselectInputPerson(event.target.value);
-  };
-
-  const [selectLocation, setSelectLocation] = useState('');
-
-  const locationChange = (event: SelectChangeEvent) => {
-    setSelectLocation(event.target.value);
-  };
-
+  // 公演場所選択ダイアログ
   const [locationDialogOpen, setLocationDialogOpen] = useState(false);
   const handleOpenLocationDialog = () => {
     setLocationDialogOpen(true);
@@ -120,6 +118,7 @@ export const NewOrder = (order: NewOrderValues) => {
     setLocationDialogOpen(false);
   };
 
+  // 相手選択ダイアログ
   const [customerDialogOpen, setCustomerDialogOpen] = useState(false);
   const handleOpenCustomerDialog = () => {
     setCustomerDialogOpen(true);
@@ -128,13 +127,27 @@ export const NewOrder = (order: NewOrderValues) => {
     setCustomerDialogOpen(false);
   };
 
-  const handleDateChange = (range: [Date, Date]) => {
-    setDateRange(range);
-  };
-
-  // const [rentalPeriod, setRentalPeriod] = useState<[Date, Date]>([new Date(), new Date()]);
   return (
     <Box>
+      <Box display={'flex'} justifyContent={'end'}>
+        {lockData !== null && lockData.addUser !== props.userName && (
+          <Grid2 container alignItems={'center'} spacing={2} px={4}>
+            <Typography>{lockData.addDat && toISOString(new Date(lockData.addDat))}</Typography>
+            <Typography>{lockData.addUser}</Typography>
+            <Typography>編集中</Typography>
+          </Grid2>
+        )}
+        <Grid2 container alignItems={'center'} spacing={1}>
+          {(edit && lockData === null) || lockData?.addUser === props.userName ? (
+            <Typography>編集モード</Typography>
+          ) : (
+            <Typography>閲覧モード</Typography>
+          )}
+          <Button disabled={lockData && lockData?.addUser !== props.userName ? true : false} onClick={handleEdit}>
+            変更
+          </Button>
+        </Grid2>
+      </Box>
       {/* --------------------------------受注ヘッダー------------------------------------- */}
       <Paper>
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -143,15 +156,15 @@ export const NewOrder = (order: NewOrderValues) => {
               <Typography>受注ヘッダー</Typography>
             </Grid2>
             <Grid2 container spacing={1}>
-              <Button type="submit">
+              <Button type="submit" disabled={!edit}>
                 <CheckIcon fontSize="small" />
                 保存
               </Button>
-              <Button color="error">
+              <Button color="error" disabled={!edit}>
                 <Delete fontSize="small" />
                 伝票削除
               </Button>
-              <Button>
+              <Button disabled={!edit}>
                 <ContentCopyIcon fontSize="small" />
                 コピー
               </Button>
@@ -185,7 +198,7 @@ export const NewOrder = (order: NewOrderValues) => {
                       name="juchuSts"
                       control={control}
                       render={({ field }) => (
-                        <Select {...field}>
+                        <Select {...field} disabled={!edit}>
                           <MenuItem value={0}>入力中</MenuItem>
                           <MenuItem value={1}>仮受注</MenuItem>
                           <MenuItem value={2}>処理中</MenuItem>
@@ -211,6 +224,7 @@ export const NewOrder = (order: NewOrderValues) => {
                         date={field.value}
                         onChange={(newDate) => field.onChange(newDate?.toDate())}
                         fieldstate={fieldState}
+                        disabled={!edit}
                       />
                     </Box>
                   )}
@@ -218,11 +232,7 @@ export const NewOrder = (order: NewOrderValues) => {
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={7}>入力者</Typography>
-                <TextFieldElement
-                  name="nyuryokuUser"
-                  control={control}
-                  slotProps={{ input: { readOnly: true } }}
-                ></TextFieldElement>
+                <TextFieldElement name="nyuryokuUser" control={control} disabled={!edit}></TextFieldElement>
               </Box>
               <Box sx={styles.container}>
                 <Typography mr={2}>
@@ -235,7 +245,7 @@ export const NewOrder = (order: NewOrderValues) => {
                   control={control}
                   render={({ field, fieldState }) => (
                     <>
-                      <RSuiteDateRangePicker value={field.value} onChange={field.onChange} />
+                      <RSuiteDateRangePicker value={field.value} onChange={field.onChange} disabled={!edit} />
                       {fieldState.error && (
                         <Typography color="error" variant="caption">
                           {fieldState.error.message}
@@ -249,35 +259,48 @@ export const NewOrder = (order: NewOrderValues) => {
             <Grid2 size={{ xs: 12, sm: 12, md: 5 }}>
               <Box sx={styles.container}>
                 <Typography marginRight={7}>公演名</Typography>
-                <TextFieldElement name="koenNam" control={control}></TextFieldElement>
+                <TextFieldElement name="koenNam" control={control} disabled={!edit}></TextFieldElement>
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={5}>公演場所</Typography>
-                <TextFieldElement name="koenbashoNam" control={control}></TextFieldElement>
-                <Button onClick={() => handleOpenLocationDialog()}>検索</Button>
+                <TextFieldElement name="koenbashoNam" control={control} disabled={!edit}></TextFieldElement>
+                <Button onClick={() => handleOpenLocationDialog()} disabled={!edit}>
+                  検索
+                </Button>
                 <Dialog open={locationDialogOpen} fullScreen>
                   <LocationSelectDialog handleCloseLocationDialog={handleCloseLocationDailog} />
                 </Dialog>
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={9}>相手</Typography>
-                <TextFieldElement
-                  name="kokyaku.kokyakuNam"
+                <Controller
+                  name="kokyaku"
                   control={control}
-                  slotProps={{ input: { readOnly: true } }}
-                ></TextFieldElement>
-                <Button onClick={() => handleOpenCustomerDialog()}>検索</Button>
-                <Dialog open={customerDialogOpen} fullScreen>
-                  <CustomerSelectionDialog handleCloseCustDialog={handleCloseCustomerDialog} />
-                </Dialog>
+                  render={({ field }) => (
+                    <>
+                      <TextField
+                        value={field.value.kokyakuNam}
+                        onChange={field.onChange}
+                        slotProps={{ input: { readOnly: true } }}
+                        disabled={!edit}
+                      />
+                      <Button onClick={() => handleOpenCustomerDialog()} disabled={!edit}>
+                        検索
+                      </Button>
+                      <Dialog open={customerDialogOpen} fullScreen>
+                        <CustomerSelectionDialog handleCloseCustDialog={handleCloseCustomerDialog} />
+                      </Dialog>
+                    </>
+                  )}
+                />
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={3}>相手担当者</Typography>
-                <TextFieldElement name="kokyakuTantoNam" control={control}></TextFieldElement>
+                <TextFieldElement name="kokyakuTantoNam" control={control} disabled={!edit}></TextFieldElement>
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={9}>メモ</Typography>
-                <TextFieldElement name="mem" control={control}></TextFieldElement>
+                <TextFieldElement name="mem" control={control} disabled={!edit}></TextFieldElement>
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={7}>値引き</Typography>
@@ -294,6 +317,7 @@ export const NewOrder = (order: NewOrderValues) => {
                       margin: 0,
                     },
                   }}
+                  disabled={!edit}
                 ></TextFieldElement>
                 <Typography>円</Typography>
                 <Typography ml={4} mr={2}>
@@ -304,7 +328,7 @@ export const NewOrder = (order: NewOrderValues) => {
                     name="zeiKbn"
                     control={control}
                     render={({ field }) => (
-                      <Select {...field}>
+                      <Select {...field} disabled={!edit}>
                         <MenuItem value={1}>内税</MenuItem>
                         <MenuItem value={2}>外税</MenuItem>
                       </Select>
@@ -343,20 +367,22 @@ export const NewOrder = (order: NewOrderValues) => {
             </Grid2>
             <Grid2 container spacing={1}>
               <Button
-                href="/new-order/equipment-order-detail"
+                href="/order/equipment-order-detail"
                 onClick={(e) => {
                   e.stopPropagation();
                 }}
+                disabled={!edit}
               >
                 <AddIcon fontSize="small" />
                 機材入力
               </Button>
               <Button
-                href="/new-order/equipment-return-order-detail"
+                href="/order/equipment-return-order-detail"
                 color="error"
                 onClick={(e) => {
                   e.stopPropagation();
                 }}
+                disabled={!edit}
               >
                 <AddIcon fontSize="small" />
                 返却入力
@@ -366,6 +392,7 @@ export const NewOrder = (order: NewOrderValues) => {
                 onClick={(e) => {
                   e.stopPropagation();
                 }}
+                disabled={!edit}
               >
                 <Delete fontSize="small" />
                 受注明細削除
@@ -374,7 +401,7 @@ export const NewOrder = (order: NewOrderValues) => {
           </Grid2>
         </AccordionSummary>
         <AccordionDetails sx={{ padding: 0 }}>
-          <NewOrderTable orderRows={equipmentRows} onSelectionChange={handleSelectionChange} />
+          <OrderEqTable orderRows={equipmentRows} edit={edit} onSelectionChange={handleSelectionChange} />
         </AccordionDetails>
       </Accordion>
       {/* -------------------------車両----------------------------------- */}
@@ -386,10 +413,11 @@ export const NewOrder = (order: NewOrderValues) => {
             </Grid2>
             <Grid2 container spacing={1}>
               <Button
-                href="/new-order/vehicle-order-detail"
+                href="/order/vehicle-order-detail"
                 onClick={(e) => {
                   e.stopPropagation();
                 }}
+                disabled={!edit}
               >
                 <AddIcon fontSize="small" />
                 車両入力
@@ -400,6 +428,7 @@ export const NewOrder = (order: NewOrderValues) => {
                 onClick={(e) => {
                   e.stopPropagation();
                 }}
+                disabled={!edit}
               >
                 <Delete fontSize="small" />
                 受注明細削除

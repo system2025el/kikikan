@@ -42,7 +42,7 @@ type OrderData = {
 export const orderList: OrderData[] = [
   {
     id: 1,
-    orderNumber: '81694',
+    orderNumber: '1',
     status: OrderStatus.processed,
     name: 'A / Zepp Tour',
     location: 'Zepp Osaka',
@@ -54,7 +54,7 @@ export const orderList: OrderData[] = [
   },
   {
     id: 2,
-    orderNumber: '81695',
+    orderNumber: '2',
     status: OrderStatus.processing,
     name: 'A / Zepp Tour',
     location: 'Zepp Nagoya',
@@ -66,7 +66,7 @@ export const orderList: OrderData[] = [
   },
   {
     id: 3,
-    orderNumber: '81696',
+    orderNumber: '3',
     status: OrderStatus.processed,
     name: '公演1',
     location: 'Zepp Nagoya',
@@ -78,7 +78,7 @@ export const orderList: OrderData[] = [
   },
   {
     id: 4,
-    orderNumber: '81697',
+    orderNumber: '4',
     status: OrderStatus.processing,
     name: '公演2',
     location: '東京ドーム',
@@ -90,7 +90,7 @@ export const orderList: OrderData[] = [
   },
   {
     id: 5,
-    orderNumber: '81698',
+    orderNumber: '5',
     status: OrderStatus.processed,
     name: '公演3',
     location: '武道館',

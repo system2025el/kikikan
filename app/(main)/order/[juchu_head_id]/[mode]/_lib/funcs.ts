@@ -2,8 +2,13 @@
 
 import { supabase } from '@/app/_lib/supabase/supabase';
 
-import { JuchuHeadValues, NewOrderValues } from './types';
+import { JuchuHeadValues, LockValues, NewOrderValues } from './types';
 
+/**
+ * 受注ヘッダー取得
+ * @param juchuHeadId 受注ヘッダーID
+ * @returns 受注ヘッダーデータ
+ */
 export const GetOrder = async (juchuHeadId: number) => {
   try {
     const { data: juchuData, error: juchuError } = await supabase
@@ -71,6 +76,10 @@ export const GetOrder = async (juchuHeadId: number) => {
   }
 };
 
+/**
+ * 受注ヘッダーid最大値取得
+ * @returns 受注ヘッダーid最大値
+ */
 export const GetMaxId = async () => {
   try {
     const { data, error } = await supabase
@@ -91,9 +100,84 @@ export const GetMaxId = async () => {
   }
 };
 
-export const AddNewOrder = async (id: number) => {
+/**
+ * ロック情報取得
+ * @param lockShubetu ロック種別
+ * @param headId ヘッダーid
+ * @returns ロックデータ
+ */
+export const GetLock = async (lockShubetu: number, headId: number) => {
+  const { data, error } = await supabase
+    .schema('dev2')
+    .from('t_lock')
+    .select('*')
+    .eq('lock_shubetu', lockShubetu)
+    .eq('head_id', headId)
+    .single();
+
+  console.log('GetLock data : ', data);
+
+  if (error) {
+    console.log(error.code);
+    if (error.code === 'PGRST116') {
+      console.log('ロックデータなし');
+      return null;
+    }
+    console.error('Error lock:', error.message);
+    return null;
+  } else {
+    const lockData: LockValues = {
+      lockShubetu: data.lock_shubetu,
+      headId: data.head_id,
+      addDat: data.add_dat,
+      addUser: data.add_user,
+    };
+    return lockData;
+  }
+};
+
+/**
+ * ロック情報追加
+ * @param lockShubetu ロック種別
+ * @param headId ヘッダーid
+ */
+export const AddLock = async (lockShubetu: number, headId: number) => {
+  const { error } = await supabase.schema('dev2').from('t_lock').insert({
+    lock_shubetu: lockShubetu,
+    head_id: headId,
+    add_dat: new Date(),
+    add_user: 'test_user',
+  });
+  if (error) {
+    console.error('Error adding lock:', error.message);
+  }
+};
+
+/**
+ * ロック情報削除
+ * @param lockShubetu ロック種別
+ * @param headId ヘッダーid
+ */
+export const DeleteLock = async (lockShubetu: number, headId: number) => {
+  const { error } = await supabase
+    .schema('dev2')
+    .from('t_lock')
+    .delete()
+    .eq('lock_shubetu', lockShubetu)
+    .eq('head_id', headId);
+
+  if (error) {
+    console.error('Error delete lock:', error.message);
+  }
+};
+
+/**
+ * 受注ヘッダー情報新規追加
+ * @param juchuHeadId 受注ヘッダーid
+ */
+export const AddNewOrder = async (juchuHeadId: number) => {
   const newData = {
-    juchu_head_id: id,
+    juchu_head_id: juchuHeadId,
     del_flg: 0,
     juchu_sts: 0,
     juchu_dat: new Date(),
@@ -131,6 +215,11 @@ export const AddNewOrder = async (id: number) => {
   }
 };
 
+/**
+ * 受注ヘッダー情報更新
+ * @param data 受注ヘッダーデータ
+ * @returns 正誤
+ */
 export const Update = async (data: NewOrderValues) => {
   const updateData = {
     juchu_head_id: data.juchuHeadId,

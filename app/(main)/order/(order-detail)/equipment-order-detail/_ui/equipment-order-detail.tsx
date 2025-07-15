@@ -37,12 +37,12 @@ import Time from '@/app/(main)/_ui/time';
 import {
   getDateHeaderBackgroundColor,
   getDateRowBackgroundColor,
-} from '@/app/(main)/new-order/(order-detail)/equipment-order-detail/_lib/colorselect';
-import { data, stock } from '@/app/(main)/new-order/(order-detail)/equipment-order-detail/_lib/data';
+} from '@/app/(main)/order/(order-detail)/equipment-order-detail/_lib/colorselect';
+import { data, stock } from '@/app/(main)/order/(order-detail)/equipment-order-detail/_lib/data';
 import {
   EqTable,
   StockTable,
-} from '@/app/(main)/new-order/(order-detail)/equipment-order-detail/_ui/equipment-order-detail-table';
+} from '@/app/(main)/order/(order-detail)/equipment-order-detail/_ui/equipment-order-detail-table';
 
 import { DateSelectDialog } from './date-selection-dialog';
 import { EquipmentSelectionDialog } from './equipment-selection-dailog';

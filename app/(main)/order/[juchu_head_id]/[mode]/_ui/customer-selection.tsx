@@ -23,8 +23,8 @@ import { grey } from '@mui/material/colors';
 import Form from 'next/form';
 import { useMemo, useState } from 'react';
 
-import { MuiTablePagination } from '../../../_ui/table-pagination';
-import { customers } from '../../../(masters)/customers-master/_lib/types';
+import { MuiTablePagination } from '../../../../_ui/table-pagination';
+import { customers } from '../../../../(masters)/customers-master/_lib/types';
 
 /** 新規受注の相手選択ダイアログ（全画面） */
 export const CustomerSelectionDialog = (props: { handleCloseCustDialog: () => void }) => {
