@@ -14,7 +14,7 @@ export const LocsMasterDialogSchema = z.object({
   mail: z
     .string()
     .max(100, { message: '100文字以内で入力してください' })
-    .email({ message: '正しいメールアドレスではありません' })
+    .refine((val) => val === '' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val), { message: '無効なメールアドレスです' })
     .optional(),
   mem: z.string().max(200, { message: '200文字以内で入力してください' }).optional(),
   dspFlg: z.boolean().optional(),
