@@ -23,7 +23,7 @@ import { SetStateAction, useEffect, useMemo, useState } from 'react';
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { MuiTablePagination } from '../../../_ui/table-pagination';
-import { MasterTable } from '../../_ui/table';
+import { MasterTable } from '../../_ui/tables';
 import { BumonsMHeader } from '../_lib/datas';
 import { BumonsMasterDialogValues, BumonsMasterTableValues } from '../_lib/types';
 import { BumonsMasterDialog } from './bumons-master-dialog';

@@ -8,7 +8,7 @@ import { FormBox, FormItemsType } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { MasterDialogTitle } from '../../_ui/dialog-title';
-import { IsDirtyDialog } from '../../_ui/isdirty-dialog';
+import { IsDirtyAlertDialog } from '../../_ui/dialogs';
 import { BumonsMasterDialogValues } from '../../bumons-master/_lib/types';
 import { emptyDaibumon, formItems } from '../_lib/datas';
 import { DaibumonsMasterDialogSchema, DaibumonsMasterDialogValues } from '../_lib/types';
@@ -168,7 +168,11 @@ export const DaibumonsMasterDialog = ({
                 </FormBox>
               </Grid2>
             </Grid2>
-            <IsDirtyDialog open={dirtyOpen} handleCloseDirty={handleCloseDirty} handleCloseAll={handleCloseDialog} />
+            <IsDirtyAlertDialog
+              open={dirtyOpen}
+              handleCloseDirty={handleCloseDirty}
+              handleCloseAll={handleCloseDialog}
+            />
           </>
         )}
       </form>

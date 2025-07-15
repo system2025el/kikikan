@@ -6,7 +6,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { MuiTablePagination } from '../../../_ui/table-pagination';
-import { MasterTable } from '../../_ui/table';
+import { MasterTable } from '../../_ui/tables';
 import { bMHeader } from '../_lib/datas';
 import { BasesMasterTableValues } from '../_lib/types';
 import { BasesMasterDialog } from './bases-master-dailog';

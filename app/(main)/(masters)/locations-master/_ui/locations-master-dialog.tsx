@@ -9,7 +9,7 @@ import { FormBox } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { MasterDialogTitle } from '../../_ui/dialog-title';
-import { IsDirtyDialog } from '../../_ui/isdirty-dialog';
+import { IsDirtyAlertDialog } from '../../_ui/dialogs';
 import { emptyLoc, formItems } from '../_lib/datas';
 import { addNewLoc, getOneLoc, updateLoc } from '../_lib/funcs';
 import { LocsMasterDialogSchema, LocsMasterDialogValues } from '../_lib/types';
@@ -37,6 +37,8 @@ export const LocationsMasterDialog = ({
   const [isNew, setIsNew] = useState(false);
   /* 未保存ダイアログ出すかどうか */
   const [dirtyOpen, setDirtyOpen] = useState(false);
+  /* 削除フラグ確認ダイアログ出すかどうか */
+  const [deleteOpen, setDeleteOpen] = useState(false);
   /* submit時のactions (save,) */
   const [action, setAction] = useState<'save' | 'delete' | undefined>(undefined);
 
@@ -293,7 +295,11 @@ export const LocationsMasterDialog = ({
                 </FormBox>
               </Grid2>
             </Grid2>
-            <IsDirtyDialog open={dirtyOpen} handleCloseDirty={handleCloseDirty} handleCloseAll={handleCloseDialog} />
+            <IsDirtyAlertDialog
+              open={dirtyOpen}
+              handleCloseDirty={handleCloseDirty}
+              handleCloseAll={handleCloseDialog}
+            />
           </>
         )}
       </form>

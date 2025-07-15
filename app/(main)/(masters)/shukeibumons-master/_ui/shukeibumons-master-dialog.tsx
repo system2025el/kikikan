@@ -8,7 +8,7 @@ import { FormBox, FormItemsType } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { MasterDialogTitle } from '../../_ui/dialog-title';
-import { IsDirtyDialog } from '../../_ui/isdirty-dialog';
+import { IsDirtyAlertDialog } from '../../_ui/dialogs';
 import { emptyShukeibumon, formItems, shukeibumonsList } from '../_lib/datas';
 import { ShukeibumonsMasterDialogSchema, ShukeibumonsMasterDialogValues } from '../_lib/type';
 
@@ -167,7 +167,11 @@ export const ShukeibumonsMasterDialog = ({
                 </FormBox>
               </Grid2>
             </Grid2>
-            <IsDirtyDialog open={dirtyOpen} handleCloseDirty={handleCloseDirty} handleCloseAll={handleCloseDialog} />
+            <IsDirtyAlertDialog
+              open={dirtyOpen}
+              handleCloseDirty={handleCloseDirty}
+              handleCloseAll={handleCloseDialog}
+            />
           </>
         )}
       </form>

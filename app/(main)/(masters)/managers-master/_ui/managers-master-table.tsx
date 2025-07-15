@@ -22,7 +22,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { MuiTablePagination } from '../../../_ui/table-pagination';
-import { MasterTable } from '../../_ui/table';
+import { MasterTable } from '../../_ui/tables';
 import { mMHeader } from '../_lib/data';
 import { ManagersMasterTableValues } from '../_lib/types';
 import { ManagerMasterDialog } from './managers-master-dialog';

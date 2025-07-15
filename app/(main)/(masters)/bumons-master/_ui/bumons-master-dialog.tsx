@@ -26,7 +26,7 @@ import { Loading } from '@/app/(main)/_ui/loading';
 
 import { FormBox, FormItemsType } from '../../../_ui/form-box';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
-import { IsDirtyDialog } from '../../_ui/isdirty-dialog';
+import { IsDirtyAlertDialog } from '../../_ui/dialogs';
 import { bumonsList, emptyBumon, formItems } from '../_lib/datas';
 import { BumonsMasterDialogSchema, BumonsMasterDialogValues } from '../_lib/types';
 // import { Loading } from '../../../_ui/loading';
@@ -215,7 +215,11 @@ export const BumonsMasterDialog = ({
                 </FormBox>
               </Grid2>
             </Grid2>
-            <IsDirtyDialog open={dirtyOpen} handleCloseDirty={handleCloseDirty} handleCloseAll={handleCloseDialog} />
+            <IsDirtyAlertDialog
+              open={dirtyOpen}
+              handleCloseDirty={handleCloseDirty}
+              handleCloseAll={handleCloseDialog}
+            />
           </>
         )}
       </form>

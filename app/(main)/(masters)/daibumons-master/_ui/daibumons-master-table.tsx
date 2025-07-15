@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Loading } from '@/app/(main)/_ui/loading';
 import { MuiTablePagination } from '@/app/(main)/_ui/table-pagination';
 
-import { MasterTable } from '../../_ui/table';
+import { MasterTable } from '../../_ui/tables';
 import { daibumonMHeader } from '../_lib/datas';
 import { DaibumonsMasterDialogValues, DaibumonsMasterTableValues } from '../_lib/types';
 import { DaibumonsMasterDialog } from './daibumons-master-dialog';
