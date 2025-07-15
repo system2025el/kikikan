@@ -22,9 +22,28 @@ export const eqptMHeader = [
 /*  */
 export const emptyEqpt: EqptMasterDialogValues = {
   kizaiNam: '',
-  regAmt: 0,
-  elNum: 0,
   kizaiQty: 0,
+  sectionNum: 0,
+  elNum: 0,
+  delFlg: false,
+  shozokuNam: '',
+  bldCod: '',
+  tanaCod: '',
+  edaCod: '',
+  kizaiGrpCod: '',
+  dspOrdNum: 0,
+  mem: '',
+  bumonNam: '',
+  shukeibumonNam: '',
+  dspFlg: true,
+  ctnFlg: false,
+  defDatQty: 0,
+  regAmt: 0,
+  rankAmt1: 0,
+  rankAmt2: 0,
+  rankAmt3: 0,
+  rankAmt4: 0,
+  rankAmt5: 0,
 };
 
 /*  */

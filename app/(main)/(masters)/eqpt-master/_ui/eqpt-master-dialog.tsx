@@ -1,18 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CheckBox } from '@mui/icons-material';
-import {
-  alpha,
-  Box,
-  Button,
-  Container,
-  DialogTitle,
-  Grid2,
-  Paper,
-  Stack,
-  TextField,
-  Typography,
-  useTheme,
-} from '@mui/material';
+import { Grid2, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import {
   CheckboxElement,
@@ -21,12 +8,11 @@ import {
   TextFieldElement,
   useForm,
 } from 'react-hook-form-mui';
-import { SelectedElement } from 'rsuite/esm/internals/Picker';
 
 import { FormBox } from '../../../_ui/form-box';
 import { Loading } from '../../../_ui/loading';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
-import { IsDirtyAlertDialog } from '../../_ui/dialogs';
+import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { emptyEqpt, formItems } from '../_lib/datas';
 import { EqptMasterDialogSchema, EqptMasterDialogValues } from '../_lib/types';
 
@@ -48,7 +34,9 @@ export const EqMasterDialog = ({
   const [isNew, setIsNew] = useState(false);
   /* 未保存ダイアログ出すかどうか */
   const [dirtyOpen, setDirtyOpen] = useState(false);
-  /* submit時のactions (save,) */
+  /* 削除フラグ確認ダイアログ出すかどうか */
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  /* submit時のactions (save, delete) */
   const [action, setAction] = useState<'save' | 'delete' | undefined>(undefined);
 
   /* useForm ------------------------- */
@@ -56,7 +44,8 @@ export const EqMasterDialog = ({
     control,
     handleSubmit,
     reset,
-    formState: { isDirty, dirtyFields },
+    formState: { isDirty },
+    getValues,
   } = useForm({
     mode: 'onBlur',
     reValidateMode: 'onBlur',
@@ -71,15 +60,18 @@ export const EqMasterDialog = ({
     console.log(data);
     // if (EqptId === -100) {
     //   await addNewEqpt(data);
+    // handleCloseDialog();
+    // refetchEqpts();
     // } else {
     // if (action === 'save') {
     //   await updateEqpt(data, eqptId);
+    // handleCloseDialog();
+    // refetchEqpts();
     // } else if (action === 'delete') {
-    //   await updateEqpt({ ...data, delFlg: true }, eqptId);
+    //   setDeleteOpen(true);
+    //   return;
     // }
     // }
-    handleCloseDialog();
-    refetchEqpts();
   };
 
   /* 詳細ダイアログを閉じる */
@@ -87,11 +79,6 @@ export const EqMasterDialog = ({
     setEditable(false);
     setIsNew(false);
     handleClose();
-  };
-
-  /* 未保存ダイアログを閉じる */
-  const handleCloseDirty = () => {
-    setDirtyOpen(false);
   };
 
   /* ×ぼたんを押したとき */
@@ -102,6 +89,15 @@ export const EqMasterDialog = ({
     } else {
       handleCloseDialog();
     }
+  };
+
+  /* 削除確認ダイアログで削除選択時 */
+  const handleConfirmDelete = async () => {
+    // const values = await getValues();
+    // await updateEqpt({ ...values, delFlg: true }, eqptId);
+    setDeleteOpen(false);
+    handleCloseDialog();
+    // await refetchEqpts();
   };
 
   /* useEffect --------------------------------------- */
@@ -178,6 +174,7 @@ export const EqMasterDialog = ({
                     fullWidth
                     sx={{ maxWidth: '20%' }}
                     disabled={editable ? false : true}
+                    type="number"
                   />
                   <Typography variant="body2" ml={2}>
                     {formItems[2].other}
@@ -193,14 +190,15 @@ export const EqMasterDialog = ({
                     fullWidth
                     sx={{ maxWidth: '20%' }}
                     disabled={editable ? false : true}
+                    type="number"
                   />
                 </FormBox>
               </Grid2>
-              <Grid2>
+              {/* <Grid2>
                 <FormBox formItem={formItems[4]}>
                   <CheckboxElement name="delFlg" control={control} size="medium" disabled={editable ? false : true} />
                 </FormBox>
-              </Grid2>
+              </Grid2> */}
               <Grid2>
                 <FormBox formItem={formItems[5]} required>
                   <SelectElement
@@ -270,12 +268,13 @@ export const EqMasterDialog = ({
                     fullWidth
                     sx={{ maxWidth: '20%' }}
                     disabled={editable ? false : true}
+                    type="number"
                   />
                 </FormBox>
               </Grid2>
               <Grid2>
                 <FormBox formItem={formItems[11]}>
-                  <TextareaAutosizeElement ////////////// 200文字までの設定をしなければならない
+                  <TextareaAutosizeElement
                     name="mem"
                     control={control}
                     label={formItems[11].exsample}
@@ -321,93 +320,105 @@ export const EqMasterDialog = ({
               </Grid2>
               <Grid2>
                 <FormBox formItem={formItems[16]}>
-                  <TextFieldElement ////////////// 200文字までの設定をしなければならない
+                  <TextFieldElement
                     name="defDatQty"
                     control={control}
                     label={formItems[16].exsample}
                     fullWidth
                     sx={{ maxWidth: '20%' }}
                     disabled={editable ? false : true}
+                    type="number"
                   />
                 </FormBox>
               </Grid2>
               <Grid2>
                 <FormBox formItem={formItems[17]} required>
-                  <TextFieldElement ////////////// 200文字までの設定をしなければならない
+                  <TextFieldElement
                     name="regAmt"
                     control={control}
                     label={formItems[17].exsample}
                     fullWidth
                     sx={{ maxWidth: '50%' }}
                     disabled={editable ? false : true}
+                    type="number"
                   />
                 </FormBox>
               </Grid2>
               <Grid2>
                 <FormBox formItem={formItems[18]}>
-                  <TextFieldElement ////////////// 200文字までの設定をしなければならない
+                  <TextFieldElement
                     name="rankAmt1"
                     control={control}
                     label={formItems[18].exsample}
                     fullWidth
                     sx={{ maxWidth: '50%' }}
                     disabled={editable ? false : true}
+                    type="number"
                   />
                 </FormBox>
               </Grid2>
               <Grid2>
                 <FormBox formItem={formItems[19]}>
-                  <TextFieldElement ////////////// 200文字までの設定をしなければならない
+                  <TextFieldElement
                     name="rankAmt2"
                     control={control}
                     label={formItems[19].exsample}
                     fullWidth
                     sx={{ maxWidth: '50%' }}
                     disabled={editable ? false : true}
+                    type="number"
                   />
                 </FormBox>
               </Grid2>
               <Grid2>
                 <FormBox formItem={formItems[20]}>
-                  <TextFieldElement ////////////// 200文字までの設定をしなければならない
+                  <TextFieldElement
                     name="rankAmt3"
                     control={control}
                     label={formItems[20].exsample}
                     fullWidth
                     sx={{ maxWidth: '50%' }}
                     disabled={editable ? false : true}
+                    type="number"
                   />
                 </FormBox>
               </Grid2>
               <Grid2>
                 <FormBox formItem={formItems[21]}>
-                  <TextFieldElement ////////////// 200文字までの設定をしなければならない
+                  <TextFieldElement
                     name="rankAmt4"
                     control={control}
                     label={formItems[21].exsample}
                     fullWidth
                     sx={{ maxWidth: '50%' }}
                     disabled={editable ? false : true}
+                    type="number"
                   />
                 </FormBox>
               </Grid2>
               <Grid2>
                 <FormBox formItem={formItems[22]}>
-                  <TextFieldElement ////////////// 200文字までの設定をしなければならない
+                  <TextFieldElement
                     name="rankAmt5"
                     control={control}
                     label={formItems[22].exsample}
                     fullWidth
                     sx={{ maxWidth: '50%' }}
                     disabled={editable ? false : true}
+                    type="number"
                   />
                 </FormBox>
               </Grid2>
             </Grid2>
             <IsDirtyAlertDialog
               open={dirtyOpen}
-              handleCloseDirty={handleCloseDirty}
+              handleCloseDirty={() => setDirtyOpen(false)}
               handleCloseAll={handleClickClose}
+            />
+            <WillDeleteAlertDialog
+              open={deleteOpen}
+              handleCloseDelete={() => setDeleteOpen(false)}
+              handleCloseAll={handleConfirmDelete}
             />
           </>
         )}

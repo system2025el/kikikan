@@ -32,6 +32,7 @@ export const emptyBase: BasesMasterDialogValues = {
   kyotenNam: '',
   delFlg: false,
   mem: '',
+  dspFlg: true,
 };
 
 /**モック削除delete */

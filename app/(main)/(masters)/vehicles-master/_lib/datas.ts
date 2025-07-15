@@ -36,6 +36,9 @@ export const formItems: FormItemsType[] = [
 /*  */
 export const emptyVeh: VehsMasterDialogValues = {
   sharyoNam: '',
+  delFlg: false,
+  mem: '',
+  dspFlg: true,
 };
 
 /* 削除モックdelete */

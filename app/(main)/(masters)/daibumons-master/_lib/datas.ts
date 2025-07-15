@@ -11,6 +11,9 @@ export const daibumonMHeader = [
 /* 新規登録用の初期化値（空の大部門） */
 export const emptyDaibumon: DaibumonsMasterDialogValues = {
   daibumonNam: '',
+  delFlg: false,
+  mem: '',
+  dspFlg: true,
 };
 
 export const formItems: FormItemsType[] = [

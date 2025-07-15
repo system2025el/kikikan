@@ -1,11 +1,10 @@
 import { z } from 'zod';
 
-export const customerMaterDialogDetailsSchema = z.object({
+export const CustomerMaterDialogDetailsSchema = z.object({
   kokyakuNam: z.string().max(100, { message: '100文字以内で入力してください' }).min(1, { message: '必須項目です' }),
   kana: z.string().max(100, { message: '100文字以内で入力してください' }).min(1, { message: '必須項目です' }),
   kokyakuRank: z.number({ message: '数字を入力してください' }),
   delFlg: z.boolean().optional(),
-  dspOrder: z.number({ message: '数字を入力してください' }).optional(),
   keisho: z.string().max(10, { message: '10文字以内で入力してください' }).optional(),
   adrPost: z.string().max(20, { message: '20文字以内で入力してください' }).optional(),
   adrShozai: z.string().max(100, { message: '100文字以内で入力してください' }).optional(),
@@ -21,7 +20,7 @@ export const customerMaterDialogDetailsSchema = z.object({
   siteDay: z.number({ message: '数字を入力してください' }).optional(),
   kizaiNebikiFlg: z.boolean().optional(),
 });
-export type customerMasterDialogDetailsValues = z.infer<typeof customerMaterDialogDetailsSchema>;
+export type CustomerMasterDialogDetailsValues = z.infer<typeof CustomerMaterDialogDetailsSchema>;
 
 export type CustomerMasterTableValues = {
   kokyakuId: number;

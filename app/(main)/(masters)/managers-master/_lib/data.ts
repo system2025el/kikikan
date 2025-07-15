@@ -10,6 +10,7 @@ export const mMHeader = [
 ];
 export const emptyManager: ManagersMasterDialogValues = {
   tantouNam: '',
+  delFlg: false,
 };
 
 export const formItems: FormItemsType[] = [
@@ -17,6 +18,11 @@ export const formItems: FormItemsType[] = [
     label: '担当者名',
     constraints: '100文字まで',
     exsample: 'あいうえお',
+  },
+  {
+    label: '削除フラグ',
+    exsample: '',
+    constraints: '選択',
   },
 ];
 

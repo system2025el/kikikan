@@ -1,6 +1,6 @@
 import { FormItemsType } from '@/app/(main)/_ui/form-box';
 
-import { customerMasterDialogDetailsValues, CustomerMasterTableValues } from './types';
+import { CustomerMasterDialogDetailsValues, CustomerMasterTableValues } from './types';
 
 /* 顧客マスタテーブルのヘッダー */
 export const cMHeader = [
@@ -27,11 +27,25 @@ export const cMHeader = [
 ];
 
 /* 新規登録用の初期化値（空の公演場所） */
-export const emptyCustomer: customerMasterDialogDetailsValues = {
+export const emptyCustomer: CustomerMasterDialogDetailsValues = {
   kokyakuNam: '',
   kana: '',
   kokyakuRank: 0,
   delFlg: false,
+  keisho: '',
+  adrPost: '',
+  adrShozai: '',
+  adrTatemono: '',
+  adrSonota: '',
+  tel: '',
+  telMobile: '',
+  fax: '',
+  mail: '',
+  mem: '',
+  dspFlg: true,
+  closeDay: 0,
+  siteDay: 0,
+  kizaiNebikiFlg: false,
 };
 /*  */
 export const formItems: FormItemsType[] = [
@@ -123,7 +137,7 @@ export const formItems: FormItemsType[] = [
   {
     label: '機材値引き対象フラグ',
     exsample: '',
-    constraints: '数字',
+    constraints: '',
   },
 ];
 

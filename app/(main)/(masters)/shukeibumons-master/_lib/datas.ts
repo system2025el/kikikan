@@ -30,6 +30,8 @@ export const formItems: FormItemsType[] = [
 /* 新規登録用の初期化値（空の集計部門） */
 export const emptyShukeibumon: ShukeibumonsMasterDialogValues = {
   shukeibumonNam: '',
+  delFlg: false,
+  mem: '',
 };
 
 /*モック削除delete */

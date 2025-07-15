@@ -3,11 +3,11 @@ import { number, z } from 'zod';
 // Schema
 export const EqptMasterDialogSchema = z.object({
   kizaiNam: z.string().max(100, { message: '100文字以内で入力してください' }).min(1, { message: '必須項目です' }),
-  kizaiQty: z.number({ message: '数字を入力してください' }),
+  kizaiQty: z.number({ message: '数字を入力してください' }).optional(),
   sectionNum: z.number({ message: '数字を入力してください' }).optional(),
   elNum: z.number({ message: '数字を入力してください' }).optional(),
   delFlg: z.boolean().optional(),
-  shozokuNam: z.string({ message: '選択してください' }).optional(),
+  shozokuNam: z.string({ message: '選択してください' }),
   bldCod: z.string().max(20, { message: '20文字以内で入力してください' }).optional(),
   tanaCod: z.string().max(20, { message: '20文字以内で入力してください' }).optional(),
   edaCod: z.string().max(20, { message: '20文字以内で入力してください' }).optional(),
@@ -19,7 +19,7 @@ export const EqptMasterDialogSchema = z.object({
   dspFlg: z.boolean().optional(),
   ctnFlg: z.boolean().optional(),
   defDatQty: z.number({ message: '数字を入力してください' }).optional(),
-  regAmt: z.number({ message: '数字を入力してください' }),
+  regAmt: z.number(),
   rankAmt1: z.number({ message: '数字を入力してください' }).optional(),
   rankAmt2: z.number({ message: '数字を入力してください' }).optional(),
   rankAmt3: z.number({ message: '数字を入力してください' }).optional(),

@@ -1,19 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CheckBox } from '@mui/icons-material';
-import {
-  alpha,
-  Box,
-  Button,
-  Container,
-  Grid2,
-  IconButton,
-  Paper,
-  Stack,
-  TextField,
-  Typography,
-  useTheme,
-} from '@mui/material';
-import { SetStateAction, useEffect, useState } from 'react';
+import { Grid2 } from '@mui/material';
+import { useEffect, useState } from 'react';
 import {
   CheckboxElement,
   SelectElement,
@@ -24,10 +11,10 @@ import {
 
 import { Loading } from '@/app/(main)/_ui/loading';
 
-import { FormBox, FormItemsType } from '../../../_ui/form-box';
+import { FormBox } from '../../../_ui/form-box';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
-import { IsDirtyAlertDialog } from '../../_ui/dialogs';
-import { bumonsList, emptyBumon, formItems } from '../_lib/datas';
+import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
+import { emptyBumon, formItems } from '../_lib/datas';
 import { BumonsMasterDialogSchema, BumonsMasterDialogValues } from '../_lib/types';
 // import { Loading } from '../../../_ui/loading';
 
@@ -55,7 +42,9 @@ export const BumonsMasterDialog = ({
   const [isNew, setIsNew] = useState(false);
   /* 未保存ダイアログ出すかどうか */
   const [dirtyOpen, setDirtyOpen] = useState(false);
-  /* submit時のactions (save,) */
+  /* 削除フラグ確認ダイアログ出すかどうか */
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  /* submit時のactions (save, delete) */
   const [action, setAction] = useState<'save' | 'delete' | undefined>(undefined);
 
   /* useForm ----------------------------------------- */
@@ -64,20 +53,12 @@ export const BumonsMasterDialog = ({
     handleSubmit,
     reset,
     formState: { isDirty },
+    getValues,
   } = useForm({
     mode: 'onBlur',
     reValidateMode: 'onBlur',
     resolver: zodResolver(BumonsMasterDialogSchema),
-    defaultValues: {
-      //DB   kyotenNam: '',
-      //   delFlg: false,
-      //   mem: '',
-      bumonNam: '',
-      delFlg: false,
-      daibumonId: 0,
-      shukeibumonId: 0,
-      mem: '',
-    },
+    defaultValues: {},
   });
 
   /* methods ---------------------------------------- */
@@ -86,16 +67,18 @@ export const BumonsMasterDialog = ({
     console.log('isDarty : ', isDirty);
     console.log(data);
     // if (bumonId === -100) {
-    //   await addNewBumon(data);
+    //   await addNewBumon(data);  // handleCloseDialog();
+    // refetchBumons();
     // } else {
     // if (action === 'save') {
     //   await updateBumon(data, bumonId);
+    // handleCloseDialog();
+    // refetchBumons();
     // } else if (action === 'delete') {
-    //   await updateBumon({ ...data, delFlg: true }, bumonId);
+    //   setDeleteOpen(true);
+    //   return;
     // }
     // }
-    handleCloseDialog();
-    refetchBumons();
   };
 
   /* 詳細ダイアログを閉じる */
@@ -103,11 +86,6 @@ export const BumonsMasterDialog = ({
     setEditable(false);
     setIsNew(false);
     handleClose();
-  };
-
-  /* 未保存ダイアログを閉じる */
-  const handleCloseDirty = () => {
-    setDirtyOpen(false);
   };
 
   /* ×ぼたんを押したとき */
@@ -118,6 +96,15 @@ export const BumonsMasterDialog = ({
     } else {
       handleCloseDialog();
     }
+  };
+
+  /* 削除確認ダイアログで削除選択時 */
+  const handleConfirmDelete = async () => {
+    // const values = await getValues();
+    // await updateBumon({ ...values, delFlg: true }, bumonId);
+    setDeleteOpen(false);
+    handleCloseDialog();
+    // await refetchBumons();
   };
 
   /* useEffect --------------------------------------- */
@@ -173,11 +160,11 @@ export const BumonsMasterDialog = ({
                   />
                 </FormBox>
               </Grid2>
-              <Grid2>
+              {/* <Grid2>
                 <FormBox formItem={formItems[1]}>
                   <CheckboxElement name="delFlg" control={control} size="medium" disabled={editable ? false : true} />
                 </FormBox>
-              </Grid2>
+              </Grid2> */}
               <Grid2>
                 <FormBox formItem={formItems[2]}>
                   <TextareaAutosizeElement ////////////// 200文字までの設定をしなければならない
@@ -217,8 +204,13 @@ export const BumonsMasterDialog = ({
             </Grid2>
             <IsDirtyAlertDialog
               open={dirtyOpen}
-              handleCloseDirty={handleCloseDirty}
+              handleCloseDirty={() => setDirtyOpen(false)}
               handleCloseAll={handleCloseDialog}
+            />
+            <WillDeleteAlertDialog
+              open={deleteOpen}
+              handleCloseDelete={() => setDeleteOpen(false)}
+              handleCloseAll={handleConfirmDelete}
             />
           </>
         )}
