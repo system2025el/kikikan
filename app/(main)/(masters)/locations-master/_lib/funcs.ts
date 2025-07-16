@@ -135,11 +135,12 @@ export const getOneLoc = async (id: number) => {
 };
 
 /**
- *
- * @param data
+ * 公演場所マスタに新規登録する関数
+ * @param data フォームで取得した公演場所情報
  */
 export const addNewLoc = async (data: LocsMasterDialogValues) => {
   console.log(data.mem);
+  // 今日の日付を日本時間のstring型に
   const date = new Date()
     .toLocaleString('ja-JP', {
       timeZone: 'Asia/Tokyo',
@@ -152,22 +153,32 @@ export const addNewLoc = async (data: LocsMasterDialogValues) => {
     const query = `
       INSERT INTO m_koenbasho (
         koenbasho_id, koenbasho_nam, kana, del_flg, dsp_ord_num,
+        adr_post, adr_shozai, adr_tatemono, adr_sonota,
+        tel, tel_mobile, fax, mail,
         mem, dsp_flg, add_dat, add_user, upd_dat, upd_user
       )
       VALUES (
         (SELECT coalesce(max(koenbasho_id),0) + 1 FROM m_koenbasho),
         $1, $2, $3,
         (SELECT coalesce(max(dsp_ord_num),0) + 1 FROM m_koenbasho),
-        $4, $5, $6, $7, $8, $9
+        $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16
       );
     `;
     await pool.query(query, [
       data.locNam,
       data.kana,
       Number(data.delFlg),
-      'pikmin',
+      data.adrPost,
+      data.adrShozai,
+      data.adrTatemono,
+      data.adrSonota,
+      data.tel,
+      data.telMobile,
+      data.fax,
+      data.mail,
+      data.mem,
       Number(data.dspFlg),
-      date, // ISO形式でもOK
+      date,
       'shigasan',
       null,
       null,
