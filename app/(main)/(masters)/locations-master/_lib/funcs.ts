@@ -161,7 +161,7 @@ export const addNewLoc = async (data: LocsMasterDialogValues) => {
         (SELECT coalesce(max(koenbasho_id),0) + 1 FROM m_koenbasho),
         $1, $2, $3,
         (SELECT coalesce(max(dsp_ord_num),0) + 1 FROM m_koenbasho),
-        $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16
+        $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17
       );
     `;
     await pool.query(query, [
@@ -191,6 +191,11 @@ export const addNewLoc = async (data: LocsMasterDialogValues) => {
   await revalidatePath('/locations-master');
 };
 
+/**
+ * 公演場所マスタの情報を更新する関数
+ * @param data フォームに入力されている情報
+ * @param id 更新する公演場所マスタID
+ */
 export const updateLoc = async (data: LocsMasterDialogValues, id: number) => {
   console.log('Update!!!', data.mem);
   const missingData = {
