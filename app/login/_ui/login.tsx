@@ -6,10 +6,13 @@ import { useRouter } from 'next/navigation';
 import { TextFieldElement, useForm } from 'react-hook-form-mui';
 import Column from 'rsuite/esm/Table/TableColumn';
 
+import { useUserStore } from '@/app/_lib/stores/usestore';
+
 import { UserSchema, UserValues } from '../_lib/types';
 
 const Login = () => {
   const router = useRouter();
+  const setUser = useUserStore((state) => state.setUser);
 
   const { control, handleSubmit } = useForm({
     mode: 'onSubmit',
@@ -27,6 +30,17 @@ const Login = () => {
     //   // NGの場合
     // }
   };
+
+  const handleMockClick = () => {
+    const mockUser = {
+      id: 1,
+      name: 'test_user',
+      email: 'test@example,com',
+    };
+
+    setUser(mockUser);
+    router.push('/dashboard');
+  };
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <Stack direction="column" spacing={4} justifyContent="center" alignItems="center" width="100%" height="100vh">
@@ -41,7 +55,7 @@ const Login = () => {
           <TextField type="password" fullWidth />
         </Box>
         <Box display="flex" width={'30%'} justifyContent="flex-end">
-          <Button /*type="submit"*/ href="/dashboard">次へ</Button>
+          <Button /*type="submit"*/ /*href="/dashboard"*/ onClick={handleMockClick}>次へ</Button>
         </Box>
       </Stack>
     </form>

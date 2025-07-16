@@ -18,6 +18,7 @@ import Typography from '@mui/material/Typography';
 import * as React from 'react';
 import { useState } from 'react';
 
+import { useUserStore } from '@/app/_lib/stores/usestore';
 import { BreadCrumbs } from '@/app/(main)/_lib/breadcrumbs';
 import NavLinks from '@/app/(main)/_ui/links';
 
@@ -83,6 +84,7 @@ type Props = {
 const Sidebar = ({ children }: Props) => {
   const [open, setOpen] = useState(true);
   const theme = useTheme();
+  const user = useUserStore((state) => state.user);
 
   const toggleDrawer = () => {
     setOpen(!open);
@@ -97,12 +99,13 @@ const Sidebar = ({ children }: Props) => {
           <IconButton color="inherit" onClick={toggleDrawer} edge="start" sx={{ mr: 2 }}>
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap>
-            RFID機材管理システム
-          </Typography>
+          <Typography variant="h6">RFID機材管理システム</Typography>
           <Typography margin={2} fontSize="small">
             <BreadCrumbs />
           </Typography>
+          <Box display={'flex'} justifyContent={'end'} width={'100vw'}>
+            <Typography fontSize={'small'}>{user !== null ? `ログイン: ${user?.name}` : ''}</Typography>
+          </Box>
         </Toolbar>
       </AppBar>
       {/**画面隠し */}

@@ -24,7 +24,7 @@ export const GetOrder = async (juchuHeadId: number) => {
       return null;
     }
 
-    if (juchuData.kokyaku_id !== null) {
+    if (juchuData.kokyaku_id) {
       const { data: kokyakuData, error: kokyakuError } = await supabase
         .schema('dev2')
         .from('m_kokyaku')
@@ -141,12 +141,12 @@ export const GetLock = async (lockShubetu: number, headId: number) => {
  * @param lockShubetu ロック種別
  * @param headId ヘッダーid
  */
-export const AddLock = async (lockShubetu: number, headId: number) => {
+export const AddLock = async (lockShubetu: number, headId: number, add_user: string) => {
   const { error } = await supabase.schema('dev2').from('t_lock').insert({
     lock_shubetu: lockShubetu,
     head_id: headId,
     add_dat: new Date(),
-    add_user: 'test_user',
+    add_user: add_user,
   });
   if (error) {
     console.error('Error adding lock:', error.message);
@@ -175,7 +175,7 @@ export const DeleteLock = async (lockShubetu: number, headId: number) => {
  * 受注ヘッダー情報新規追加
  * @param juchuHeadId 受注ヘッダーid
  */
-export const AddNewOrder = async (juchuHeadId: number) => {
+export const AddNewOrder = async (juchuHeadId: number, nyuryokuUser: string | undefined) => {
   const newData = {
     juchu_head_id: juchuHeadId,
     del_flg: 0,
@@ -183,7 +183,7 @@ export const AddNewOrder = async (juchuHeadId: number) => {
     juchu_dat: new Date(),
     juchu_str_dat: null,
     juchu_end_dat: null,
-    nyuryoku_user: 'test_user',
+    nyuryoku_user: nyuryokuUser,
     koen_nam: null,
     koenbasho_nam: null,
     kokyaku_id: null,
@@ -192,7 +192,7 @@ export const AddNewOrder = async (juchuHeadId: number) => {
     nebiki_amt: null,
     zei_kbn: 2,
     add_dat: new Date(),
-    add_user: 'test_user',
+    add_user: nyuryokuUser,
     upd_dat: null,
     upd_user: null,
   };

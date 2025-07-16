@@ -27,22 +27,21 @@ import { use, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
+import { useUserStore } from '@/app/_lib/stores/usestore';
 import DateX, { RSuiteDateRangePicker, TestDate, toISOString, toISOStringWithTimezone } from '@/app/(main)/_ui/date';
+import { Loading } from '@/app/(main)/_ui/loading';
 import { SelectTable } from '@/app/(main)/_ui/table';
 import { equipmentRows, vehicleHeaders, vehicleRows } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/data';
 
 import { AddLock, DeleteLock, GetLock, Update } from '../_lib/funcs';
-import { JuchuHeadSchema, LockValues, NewOrderSchema, NewOrderValues } from '../_lib/types';
+import { JuchuHeadSchema, KokyakuValues, LockValues, NewOrderSchema, NewOrderValues } from '../_lib/types';
 import { CustomerSelectionDialog } from './customer-selection';
 import { LocationSelectDialog } from './location-selection';
 import { OrderEqTable } from './order-table';
 
-export const NewOrder = (props: {
-  order: NewOrderValues;
-  edit: boolean;
-  lockData: LockValues | null;
-  userName: string;
-}) => {
+export const Order = (props: { order: NewOrderValues; edit: boolean; lockData: LockValues | null }) => {
+  // user情報
+  const user = useUserStore((state) => state.user);
   // 編集モード(true:編集、false:閲覧)
   const [edit, setEdit] = useState(props.edit);
   // ロックデータ
@@ -56,6 +55,8 @@ export const NewOrder = (props: {
     control,
     handleSubmit,
     reset,
+    setValue,
+    clearErrors,
     formState: { isDirty, dirtyFields, errors },
   } = useForm({
     mode: 'onSubmit',
@@ -84,6 +85,21 @@ export const NewOrder = (props: {
     resolver: zodResolver(NewOrderSchema),
   });
 
+  useEffect(() => {
+    if (!user) return;
+    setEdit(!props.edit || (props.lockData !== null && props.lockData.addUser !== user.name) ? false : true);
+
+    const asyncProcess = async () => {
+      if (props.edit && props.lockData === null) {
+        await AddLock(1, props.order.juchuHeadId, user.name);
+        const newLockData = await GetLock(1, props.order.juchuHeadId);
+        setLockData(newLockData);
+      }
+    };
+    asyncProcess();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
   const onSubmit = async (data: NewOrderValues) => {
     console.log('update : 開始');
     const update = await Update(data);
@@ -98,7 +114,8 @@ export const NewOrder = (props: {
       setLockData(newLockData);
       setEdit(!edit);
     } else {
-      await AddLock(1, props.order.juchuHeadId);
+      if (!user) return;
+      await AddLock(1, props.order.juchuHeadId, user.name);
       const newLockData = await GetLock(1, props.order.juchuHeadId);
       setLockData(newLockData);
       setEdit(!edit);
@@ -127,10 +144,25 @@ export const NewOrder = (props: {
     setCustomerDialogOpen(false);
   };
 
+  // 相手選択ダイアログで相手選択
+  const handleCustomerSelect = (customer: KokyakuValues) => {
+    setValue('kokyaku.kokyakuId', customer.kokyakuId);
+    setValue('kokyaku.kokyakuNam', customer.kokyakuNam);
+    clearErrors('kokyaku.kokyakuNam');
+    handleCloseCustomerDialog();
+  };
+
+  if (user === null)
+    return (
+      <Box height={'90vh'}>
+        <Loading />
+      </Box>
+    );
+
   return (
     <Box>
       <Box display={'flex'} justifyContent={'end'}>
-        {lockData !== null && lockData.addUser !== props.userName && (
+        {lockData !== null && lockData.addUser !== user?.name && (
           <Grid2 container alignItems={'center'} spacing={2} px={4}>
             <Typography>{lockData.addDat && toISOString(new Date(lockData.addDat))}</Typography>
             <Typography>{lockData.addUser}</Typography>
@@ -138,12 +170,12 @@ export const NewOrder = (props: {
           </Grid2>
         )}
         <Grid2 container alignItems={'center'} spacing={1}>
-          {(edit && lockData === null) || lockData?.addUser === props.userName ? (
-            <Typography>編集モード</Typography>
-          ) : (
+          {!edit || (lockData !== null && lockData?.addUser !== user?.name) ? (
             <Typography>閲覧モード</Typography>
+          ) : (
+            <Typography>編集モード</Typography>
           )}
-          <Button disabled={lockData && lockData?.addUser !== props.userName ? true : false} onClick={handleEdit}>
+          <Button disabled={lockData && lockData?.addUser !== user?.name ? true : false} onClick={handleEdit}>
             変更
           </Button>
         </Grid2>
@@ -172,7 +204,7 @@ export const NewOrder = (props: {
           </Grid2>
           <Divider />
           <Grid2 container spacing={{ xs: 0, sm: 0, md: 2 }}>
-            <Grid2 size={{ xs: 12, sm: 12, md: 7 }}>
+            <Grid2 size={{ xs: 12, sm: 12, md: 6 }}>
               <Grid2 container margin={2} spacing={2}>
                 <Grid2 display="flex" direction="row" alignItems="center">
                   <Typography marginRight={5} whiteSpace="nowrap">
@@ -244,19 +276,19 @@ export const NewOrder = (props: {
                   name="juchuRange"
                   control={control}
                   render={({ field, fieldState }) => (
-                    <>
+                    <Box>
                       <RSuiteDateRangePicker value={field.value} onChange={field.onChange} disabled={!edit} />
-                      {fieldState.error && (
-                        <Typography color="error" variant="caption">
+                      {/* {fieldState.error && (
+                        <Typography color="error" fontSize={'small'} sx={{ ml: 2 }}>
                           {fieldState.error.message}
                         </Typography>
-                      )}
-                    </>
+                      )} */}
+                    </Box>
                   )}
                 />
               </Box>
             </Grid2>
-            <Grid2 size={{ xs: 12, sm: 12, md: 5 }}>
+            <Grid2 size={{ xs: 12, sm: 12, md: 6 }}>
               <Box sx={styles.container}>
                 <Typography marginRight={7}>公演名</Typography>
                 <TextFieldElement name="koenNam" control={control} disabled={!edit}></TextFieldElement>
@@ -274,21 +306,24 @@ export const NewOrder = (props: {
               <Box sx={styles.container}>
                 <Typography marginRight={9}>相手</Typography>
                 <Controller
-                  name="kokyaku"
+                  name="kokyaku.kokyakuNam"
                   control={control}
-                  render={({ field }) => (
+                  render={({ field, fieldState }) => (
                     <>
                       <TextField
-                        value={field.value.kokyakuNam}
-                        onChange={field.onChange}
+                        value={field.value}
                         slotProps={{ input: { readOnly: true } }}
-                        disabled={!edit}
+                        error={!!fieldState.error}
+                        helperText={fieldState.error?.message}
                       />
                       <Button onClick={() => handleOpenCustomerDialog()} disabled={!edit}>
                         検索
                       </Button>
                       <Dialog open={customerDialogOpen} fullScreen>
-                        <CustomerSelectionDialog handleCloseCustDialog={handleCloseCustomerDialog} />
+                        <CustomerSelectionDialog
+                          handleCustomerSelect={handleCustomerSelect}
+                          handleCloseCustDialog={handleCloseCustomerDialog}
+                        />
                       </Dialog>
                     </>
                   )}
