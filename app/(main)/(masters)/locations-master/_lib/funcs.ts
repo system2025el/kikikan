@@ -140,17 +140,8 @@ export const getOneLoc = async (id: number) => {
  */
 export const addNewLoc = async (data: LocsMasterDialogValues) => {
   console.log(data.mem);
-  // 今日の日付を日本時間のstring型に
-  const date = new Date()
-    .toLocaleString('ja-JP', {
-      timeZone: 'Asia/Tokyo',
-      hour12: false,
-    })
-    .replace(/\//g, '-');
-  try {
-    console.log('DB Connected');
-    await pool.query(` SET search_path TO dev2;`);
-    const query = `
+
+  const query = `
       INSERT INTO m_koenbasho (
         koenbasho_id, koenbasho_nam, kana, del_flg, dsp_ord_num,
         adr_post, adr_shozai, adr_tatemono, adr_sonota,
@@ -164,6 +155,17 @@ export const addNewLoc = async (data: LocsMasterDialogValues) => {
         $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17
       );
     `;
+
+  const date = new Date()
+    .toLocaleString('ja-JP', {
+      timeZone: 'Asia/Tokyo',
+      hour12: false,
+    })
+    .replace(/\//g, '-');
+  try {
+    console.log('DB Connected');
+    await pool.query(` SET search_path TO dev2;`);
+
     await pool.query(query, [
       data.locNam,
       data.kana,
@@ -185,7 +187,7 @@ export const addNewLoc = async (data: LocsMasterDialogValues) => {
     ]);
     console.log('data : ', data);
   } catch (error) {
-    console.log(error);
+    console.log('DB接続エラー', error);
     throw error;
   }
   await revalidatePath('/locations-master');
@@ -201,7 +203,7 @@ export const updateLoc = async (data: LocsMasterDialogValues, id: number) => {
   const missingData = {
     koenbasho_nam: data.locNam,
     kana: data.kana,
-    del_flg: data.delFlg ? 1 : 0,
+    del_flg: Number(data.delFlg),
     adr_post: data.adrPost,
     adr_shozai: data.adrShozai,
     adr_tatemono: data.adrTatemono,
@@ -211,17 +213,23 @@ export const updateLoc = async (data: LocsMasterDialogValues, id: number) => {
     fax: data.fax,
     mail: data.mail,
     mem: data.mem,
-    dsp_flg: data.dspFlg ? 1 : 0,
+    dsp_flg: Number(data.dspFlg),
   };
   console.log(missingData.del_flg);
-  const date = new Date();
+  const date = new Date()
+    .toLocaleString('ja-JP', {
+      timeZone: 'Asia/Tokyo',
+      hour12: false,
+    })
+    .replace(/\//g, '-');
 
   const theData = {
     ...missingData,
     upd_dat: date,
     upd_user: 'test_user',
   };
-  console.log(theData.del_flg);
+  console.log(theData.koenbasho_nam);
+
   try {
     const { error: updateError } = await supabase
       .schema('dev2')
@@ -233,10 +241,10 @@ export const updateLoc = async (data: LocsMasterDialogValues, id: number) => {
       console.error('更新に失敗しました:', updateError.message);
       throw updateError;
     } else {
-      console.log('車両を更新しました : ', theData.del_flg);
+      console.log('公演場所を更新しました : ', theData.del_flg);
     }
   } catch (error) {
-    console.log(error);
+    console.log('例外が発生', error);
     throw error;
   }
   revalidatePath('/locations-master');
