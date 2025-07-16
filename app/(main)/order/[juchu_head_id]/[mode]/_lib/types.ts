@@ -23,16 +23,23 @@ export const JuchuHeadSchema = z.object({
 
 export type JuchuHeadValues = z.infer<typeof JuchuHeadSchema>;
 
+export const KokyakuSchema = z.object({
+  kokyakuId: z.number({ message: '相手は必須です' }),
+  kokyakuNam: z.string({ message: '相手は必須です' }).min(1, { message: '相手は必須です' }),
+});
+
+export type KokyakuValues = z.infer<typeof KokyakuSchema>;
+
 export const NewOrderSchema = z.object({
   juchuHeadId: z.number(),
   delFlg: z.number().nullable(),
   juchuSts: z.number().nullable(),
   juchuDat: z.date({ message: '受注日は必須です' }),
   juchuRange: z.tuple([z.date(), z.date()]).nullable(),
-  nyuryokuUser: z.string(),
+  nyuryokuUser: z.string({ message: '入力者は必須です' }).min(1, { message: '入力者は必須です' }),
   koenNam: z.string({ message: '公演名は必須です' }).min(1, { message: '公演名は必須です' }),
   koenbashoNam: z.string().nullable(),
-  kokyaku: z.object({ kokyakuId: z.number(), kokyakuNam: z.string().min(1, { message: '公演名は必須です' }) }),
+  kokyaku: KokyakuSchema,
   kokyakuTantoNam: z.string().nullable(),
   mem: z.string().nullable(),
   nebikiAmt: z.number().nullable(),

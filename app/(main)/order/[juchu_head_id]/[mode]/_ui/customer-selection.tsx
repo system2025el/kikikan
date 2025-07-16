@@ -23,10 +23,14 @@ import { useMemo, useState } from 'react';
 
 import { MuiTablePagination } from '../../../../_ui/table-pagination';
 import { customers } from '../../../../(masters)/customers-master/_lib/datas';
+import { KokyakuValues } from '../_lib/types';
 
 /** 新規受注の相手選択ダイアログ（全画面） */
-export const CustomerSelectionDialog = (props: { handleCloseCustDialog: () => void }) => {
-  const { handleCloseCustDialog } = props;
+export const CustomerSelectionDialog = (props: {
+  handleCustomerSelect: (customer: KokyakuValues) => void;
+  handleCloseCustDialog: () => void;
+}) => {
+  const { handleCustomerSelect, handleCloseCustDialog } = props;
   const [page, setPage] = useState(1);
   const rowsPerPage = 50;
 
@@ -48,50 +52,7 @@ export const CustomerSelectionDialog = (props: { handleCloseCustDialog: () => vo
           </Box>
           <Divider />
           <Box width={'100%'} p={2}>
-            <Stack>
-              <Typography variant="body2">検索</Typography>
-            </Stack>
             <form>
-              <Grid2 container direction={'row'} spacing={3}>
-                <Grid2>
-                  <Button>あ</Button>
-                </Grid2>
-                <Grid2>
-                  <Button>か</Button>
-                </Grid2>
-                <Grid2>
-                  <Button>さ</Button>
-                </Grid2>
-                <Grid2>
-                  <Button>た</Button>
-                </Grid2>
-                <Grid2>
-                  <Button>な</Button>
-                </Grid2>
-                <Grid2>
-                  <Button>は</Button>
-                </Grid2>
-                <Grid2>
-                  <Button>ま</Button>
-                </Grid2>
-                <Grid2>
-                  <Button>や</Button>
-                </Grid2>
-                <Grid2>
-                  <Button>ら</Button>
-                </Grid2>
-                <Grid2>
-                  <Button>わ</Button>
-                </Grid2>
-                <Grid2>
-                  <Button>英数</Button>
-                </Grid2>
-                <Grid2>
-                  <Button>全て</Button>
-                </Grid2>
-              </Grid2>
-
-              <Divider sx={{ mt: 1 }} />
               <Stack justifyContent={'space-between'} mt={1}>
                 <Stack display={'flex'}>
                   <Typography>キーワード</Typography>
@@ -128,7 +89,16 @@ export const CustomerSelectionDialog = (props: { handleCloseCustDialog: () => vo
             <TableBody>
               {list.map((customer) => (
                 <TableRow key={customer.kokyakuId}>
-                  <TableCell>{customer.kokyakuNam}</TableCell>
+                  <TableCell>
+                    <Button
+                      variant="text"
+                      onClick={() =>
+                        handleCustomerSelect({ kokyakuId: 1, kokyakuNam: '㈱スペースエンジニアリングワークス' })
+                      }
+                    >
+                      {customer.kokyakuNam}
+                    </Button>
+                  </TableCell>
                   <TableCell>
                     {customer.adrShozai} {customer.adrTatemono}
                   </TableCell>

@@ -11,7 +11,7 @@ import { PickerValue } from '@mui/x-date-pickers/internals';
 import { DateValidationError } from '@mui/x-date-pickers/models';
 import dayjs, { Dayjs } from 'dayjs';
 import { useMemo, useState } from 'react';
-import { ControllerFieldState, ControllerRenderProps, Noop } from 'react-hook-form';
+import { ControllerFieldState, ControllerRenderProps, FieldErrors, Noop } from 'react-hook-form';
 import { DateRangePicker } from 'rsuite';
 //import { DateRange } from 'rsuite/esm/DateRangePicker';
 
@@ -305,6 +305,11 @@ export const RSuiteDateRangePicker = (props: Props) => {
           .rs-input-group.rs-input-group-inside-disabled .rs-input-group-addon {
             background-color: #eeeeee;
           }
+
+          .error-picker .rs-picker-toggle {
+  border: 1px solid red !important;
+  border-radius: 4px;
+}
         `}
       </style>
       <DateRangePicker

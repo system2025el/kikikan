@@ -114,7 +114,6 @@ export const OrderEqTable: React.FC<OrderEqTableProps> = ({ orderRows, edit, onS
                       whiteSpace: 'nowrap',
                       justifyContent: 'start',
                     }}
-                    disabled={!edit}
                   >
                     {row.name}
                   </Button>
