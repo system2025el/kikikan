@@ -25,7 +25,7 @@ import { useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
 import { Loading } from '@/app/(main)/_ui/loading';
-import { GetFilteredLocs } from '@/app/(main)/(masters)/locations-master/_lib/funcs';
+import { getFilteredLocs } from '@/app/(main)/(masters)/locations-master/_lib/funcs';
 import {
   LocsMasterSearchSchema,
   LocsMasterSearchValues,
@@ -67,7 +67,7 @@ export const LocationSelectDialog = (props: {
   /* 検索ボタン押下 */
   const onSubmit = async (data: LocsMasterSearchValues) => {
     setIsLoading(true);
-    const newList = await GetFilteredLocs(data.query!);
+    const newList = await getFilteredLocs(data.query!);
     setLocs(newList);
     setIsLoading(false);
   };
@@ -76,7 +76,7 @@ export const LocationSelectDialog = (props: {
     // ダイアログが開いた瞬間（ここで最新をとる）
     const getLocs = async () => {
       setIsLoading(true);
-      const data = await GetFilteredLocs('');
+      const data = await getFilteredLocs('');
       setLocs(data);
       setIsLoading(false);
     };
