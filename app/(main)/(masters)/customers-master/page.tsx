@@ -1,12 +1,9 @@
-// import { getAllCustomers } from '@/app/_lib/supabase/supabaseFuncs';
-
-import { customers } from './_lib/datas';
+import { GetFilteredCustomers } from './_lib/funcs';
 import { CustomersMaster } from './_ui/customers-master';
 
 const Page = async () => {
-  // const customersList = await getAllCustomers();
-  const custmersList = customers;
-  return <CustomersMaster customers={custmersList} />;
+  const customersList = await GetFilteredCustomers('');
+  return <CustomersMaster customers={customersList} />;
 };
 
 export default Page;

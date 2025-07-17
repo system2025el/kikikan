@@ -1,6 +1,6 @@
 import { FormItemsType } from '@/app/(main)/_ui/form-box';
 
-import { CustomerMasterDialogDetailsValues, CustomerMasterTableValues } from './types';
+import { CustomersMasterDialogValues, CustomersMasterTableValues } from './types';
 
 /* 顧客マスタテーブルのヘッダー */
 export const cMHeader = [
@@ -27,7 +27,7 @@ export const cMHeader = [
 ];
 
 /* 新規登録用の初期化値（空の公演場所） */
-export const emptyCustomer: CustomerMasterDialogDetailsValues = {
+export const emptyCustomer: CustomersMasterDialogValues = {
   kokyakuNam: '',
   kana: '',
   kokyakuRank: 0,
@@ -138,51 +138,5 @@ export const formItems: FormItemsType[] = [
     label: '機材値引き対象フラグ',
     exsample: '',
     constraints: '',
-  },
-];
-
-//モック用削除delete
-export const customers: CustomerMasterTableValues[] = [
-  {
-    kokyakuId: 1,
-    kokyakuNam: 'エンジニアライティング',
-    adrShozai: '東京都世田谷区太子堂1-12-38',
-    adrTatemono: '藤和三軒茶屋コープ205号',
-    // adrPost: '154-0004',
-    adrSonota: '',
-    tel: '03-3413-8441',
-    fax: '03-3413-8466',
-    // mail: 'FFFFFFFFFFFFF@EEEEEEEEEEEEEEEEEE',
-    // keishou: '御中',
-    mem: 'あああああああああああああああああああ',
-    dspFlg: true,
-  },
-  {
-    kokyakuId: 2,
-    kokyakuNam: '(株)スペースエンジニアリング',
-    adrShozai: '東京都新宿区早稲田鶴巻町５２３',
-    adrTatemono: '',
-    // postnum: '162-0041',
-    adrSonota: '',
-    tel: '03-5292-2380',
-    fax: '03-5292-2382',
-    // mail: 'YYYYYYYYYYYYYYYYYYYYYY@DDDDDDDDD',
-    // keishou: '御中',
-    mem: 'あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやいゆえよらりるれろわいうえをあいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやいゆえよらりるれろわいうえをあいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやいゆえよらりるれろわいうえをあいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやいゆえよらりるれろわいうえをあいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやいゆえよらりるれろわいうえをあいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやいゆえよらりるれろわいうえを',
-    dspFlg: true,
-  },
-  {
-    kokyakuId: 3,
-    kokyakuNam: '(株)シアタープレーン',
-    adrShozai: 'XXXXXXXXXXXXXXXXXXXXXXX',
-    // postnum: 'XXX-XXXX',
-    adrTatemono: 'XXXXXXXXXX',
-    adrSonota: '',
-    tel: '999-999-9999',
-    fax: '999-999-9999',
-    // mail: 'aaaaaaaaaa@eeeeeeeeeeeeee',
-    // keishou: '御中',
-    mem: '',
-    dspFlg: true,
   },
 ];

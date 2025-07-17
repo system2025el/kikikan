@@ -5,13 +5,14 @@ import { JSX, SetStateAction, useState } from 'react';
 import { TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { BackButton } from '../../../_ui/buttons';
-import { CustomerMasterTableValues } from '../_lib/types';
+import { GetFilteredCustomers } from '../_lib/funcs';
+import { CustomersMasterTableValues } from '../_lib/types';
 import { CustomersMasterTable } from './customers-master-table';
 /**
  * 顧客マスタ画面
  * @returns {JSX.Element} 顧客マスタ画面コンポーネント
  */
-export const CustomersMaster = ({ customers }: { customers: CustomerMasterTableValues[] | undefined }) => {
+export const CustomersMaster = ({ customers }: { customers: CustomersMasterTableValues[] | undefined }) => {
   /* useState ------------------ */
   const [theCustomers, setTheCustomers] = useState(customers);
   /* DBのローディング */
@@ -27,8 +28,8 @@ export const CustomersMaster = ({ customers }: { customers: CustomerMasterTableV
   const onSubmit = async (data: { query: string | undefined }) => {
     setIsLoading(true);
     console.log('data : ', data);
-    // const newList = await GetFilteredCustomers(data.query!);
-    // setTheCustomers(newList);
+    const newList = await GetFilteredCustomers(data.query!);
+    setTheCustomers(newList);
     console.log('theLocs : ', theCustomers);
   };
 
@@ -43,7 +44,7 @@ export const CustomersMaster = ({ customers }: { customers: CustomerMasterTableV
         </Box>
         <Divider />
         <Box width={'100%'} p={2}>
-          <form /*onSubmit={handleSubmit(onSubmit)}*/>
+          <form onSubmit={handleSubmit(onSubmit)}>
             <Stack justifyContent={'space-between'} alignItems={'start'} mt={1}>
               <Stack alignItems={'baseline'}>
                 <Typography>顧客キーワード</Typography>

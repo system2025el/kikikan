@@ -1,9 +1,8 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { alpha, Button, DialogTitle, Grid2, Stack, Typography, useTheme } from '@mui/material';
-import { grey } from '@mui/material/colors';
-import { SetStateAction, useEffect, useState } from 'react';
+import { Grid2 } from '@mui/material';
+import { useEffect, useState } from 'react';
 import {
   CheckboxElement,
   SelectElement,
@@ -12,14 +11,14 @@ import {
   useForm,
 } from 'react-hook-form-mui';
 
-// import { getOneCustomer } from '@/app/_lib/supabase/supabaseFuncs';
-import { FormBox, FormItemsType } from '@/app/(main)/_ui/form-box';
+import { FormBox } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { emptyCustomer, formItems } from '../_lib/datas';
-import { CustomerMasterDialogDetailsValues, CustomerMaterDialogDetailsSchema } from '../_lib/types';
+import { addNewCustomer, getOneCustomer, updateCustomer } from '../_lib/funcs';
+import { CustomersMasterDialogValues, CustomersMaterDialogSchema } from '../_lib/types';
 
 /**
  * 顧客マスタの顧客詳細ダイアログ
@@ -39,6 +38,7 @@ export const CustomersMasterDialog = ({
   /** 顧客リスト */
   /** DBのローディング状態 */
   const [isLoading, setIsLoading] = useState(true);
+  /* ダイアログでの編集モードかどうか */
   const [editable, setEditable] = useState(false);
   /* 新規作成かどうか */
   const [isNew, setIsNew] = useState(false);
@@ -60,28 +60,32 @@ export const CustomersMasterDialog = ({
     mode: 'onBlur',
     reValidateMode: 'onBlur',
     defaultValues: {},
-    resolver: zodResolver(CustomerMaterDialogDetailsSchema),
+    resolver: zodResolver(CustomersMaterDialogSchema),
   });
 
   /* 関数 ---------------------------- */
   /* フォームを送信 */
-  const onSubmit = (data: CustomerMasterDialogDetailsValues) => {
+  const onSubmit = async (data: CustomersMasterDialogValues) => {
     console.log('isDarty : ', isDirty);
     console.log(data);
-    // if (customerId === -100) {
-    //   await addNewCustomer(data);
-    // handleCloseDialog();
-    // refetchCustomers();
-    // } else {
-    // if (action === 'save') {
-    //   await updateCustomer(data, customerId);
-    // handleCloseDialog();
-    // refetchCustomers();
-    // } else if (action === 'delete') {
-    //   setDeleteOpen(true);
-    //   return;
-    // }
-    // }
+    if (customerId === -100) {
+      // 新規の時
+      await addNewCustomer(data);
+      handleCloseDialog();
+      refetchCustomers();
+    } else {
+      // 更新の時
+      if (action === 'save') {
+        // 保存終了ボタン押したとき
+        await updateCustomer(data, customerId);
+        handleCloseDialog();
+        refetchCustomers();
+      } else if (action === 'delete') {
+        // 削除ボタン押したとき
+        setDeleteOpen(true);
+        return;
+      }
+    }
   };
   /* ダイアログを閉じる */
   const handleCloseDialog = () => {
@@ -102,11 +106,11 @@ export const CustomersMasterDialog = ({
 
   /* 削除確認ダイアログで削除選択時 */
   const handleConfirmDelete = async () => {
-    // const values = await getValues();
-    // await updateCustomer({ ...values, delFlg: true }, CustomerId);
+    const values = await getValues();
+    await updateCustomer({ ...values, delFlg: true }, customerId);
     setDeleteOpen(false);
     handleCloseDialog();
-    // await refetchCustomers();
+    await refetchCustomers();
   };
 
   /* useEffect --------------------------------------- */
@@ -121,11 +125,10 @@ export const CustomersMasterDialog = ({
         setIsLoading(false);
         setIsNew(true);
       } else {
-        // const customer1 = await getOnecustomer(customerId);
-        // if (customer1) {
-        //   setcustomer(customer1);
-        //   reset(customer1); // 取得したデータでフォーム初期化
-        // }
+        const customer1 = await getOneCustomer(customerId);
+        if (customer1) {
+          reset(customer1); // 取得したデータでフォーム初期化
+        }
         setIsLoading(false);
       }
     };
