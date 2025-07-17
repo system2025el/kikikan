@@ -13,7 +13,6 @@ export const emptyDaibumon: DaibumonsMasterDialogValues = {
   daibumonNam: '',
   delFlg: false,
   mem: '',
-  dspFlg: true,
 };
 
 export const formItems: FormItemsType[] = [
@@ -45,24 +44,20 @@ export const daibumonsList: DaibumonsMasterTableValues[] = [
     daibumonId: 1,
     daibumonNam: '照明',
     mem: 'XXXXXXXXXXX',
-    dspFlg: true,
   },
   {
     daibumonId: 2,
     daibumonNam: 'Moving Light',
     mem: 'XXXXXXXX',
-    dspFlg: true,
   },
   {
     daibumonNam: 'ムービング ゴボ',
     mem: 'XXXXXXX',
     daibumonId: 3,
-    dspFlg: true,
   },
   {
     daibumonNam: '空（カラ）ケース',
     daibumonId: 4,
     mem: '',
-    dspFlg: true,
   },
 ];

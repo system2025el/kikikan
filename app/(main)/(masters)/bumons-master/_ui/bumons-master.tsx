@@ -33,7 +33,7 @@ export const BumonsMaster = ({ bumons }: { bumons: BumonsMasterTableValues[] | u
   }) => {
     setIsLoading(true);
     console.log('data : ', data);
-    // const newList = await GetFilteredBumons(data.query!);
+    // const newList = await getFilteredBumons(data.query!);
     // setTheBumons(newList);
     console.log('theLocs : ', theBumons);
   };

@@ -157,11 +157,6 @@ export const ShukeibumonsMasterDialog = ({
                   />
                 </FormBox>
               </Grid2>
-              {/* <Grid2>
-                <FormBox formItem={formItems[1]}>
-                  <CheckboxElement name="delFlg" control={control} size="medium" disabled={editable ? false : true} />
-                </FormBox>
-              </Grid2> */}
               <Grid2>
                 <FormBox formItem={formItems[2]}>
                   <TextareaAutosizeElement
@@ -172,11 +167,6 @@ export const ShukeibumonsMasterDialog = ({
                     sx={{ maxWidth: '90%' }}
                     disabled={editable ? false : true}
                   />
-                </FormBox>
-              </Grid2>
-              <Grid2>
-                <FormBox formItem={formItems[3]}>
-                  <CheckboxElement name="dspFlg" control={control} size="medium" disabled={editable ? false : true} />
                 </FormBox>
               </Grid2>
             </Grid2>

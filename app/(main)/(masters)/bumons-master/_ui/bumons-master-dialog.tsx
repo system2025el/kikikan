@@ -16,7 +16,6 @@ import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { emptyBumon, formItems } from '../_lib/datas';
 import { BumonsMasterDialogSchema, BumonsMasterDialogValues } from '../_lib/types';
-// import { Loading } from '../../../_ui/loading';
 
 /**
  * 部門マスタ詳細ダイアログ
@@ -160,11 +159,6 @@ export const BumonsMasterDialog = ({
                   />
                 </FormBox>
               </Grid2>
-              {/* <Grid2>
-                <FormBox formItem={formItems[1]}>
-                  <CheckboxElement name="delFlg" control={control} size="medium" disabled={editable ? false : true} />
-                </FormBox>
-              </Grid2> */}
               <Grid2>
                 <FormBox formItem={formItems[2]}>
                   <TextareaAutosizeElement ////////////// 200文字までの設定をしなければならない

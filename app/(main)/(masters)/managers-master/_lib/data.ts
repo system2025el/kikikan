@@ -7,6 +7,10 @@ export const mMHeader = [
     key: 'name',
     label: '担当者名',
   },
+  {
+    key: 'hidden',
+    label: '非表示',
+  },
 ];
 export const emptyManager: ManagersMasterDialogValues = {
   tantouNam: '',

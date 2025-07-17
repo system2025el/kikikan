@@ -11,7 +11,6 @@ import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import * as React from 'react';
@@ -65,7 +64,7 @@ export const MasterTable = ({
               {header.label}
             </TableCell>
           ))}
-          <TableCell>非表示</TableCell>
+          {/* <TableCell>非表示</TableCell> */}
           {/* <TableCell /> */}
         </TableRow>
       </TableHead>
@@ -100,12 +99,14 @@ export const MasterTable = ({
                     <Typography noWrap maxWidth={50}>
                       {row[header.key]}
                     </Typography>
+                  ) : header.key === 'hidden' ? (
+                    <>{isHidden && <>非表示</>}</>
                   ) : (
                     <>{row[header.key]}</>
                   )}
                 </TableCell>
               ))}
-              <TableCell sx={{ bgcolor: isHidden ? grey[300] : '' }}>{isHidden && <>非表示</>}</TableCell>
+              {/* <TableCell sx={{ bgcolor: isHidden ? grey[300] : '' }}>{isHidden && <>非表示</>}</TableCell> */}
               {/* <TableCell sx={{ bgcolor: isHidden ? grey[300] : '', width: 100 }} align="center">
                 <IconButton
                   sx={{ bgcolor: 'primary.main', color: 'white' }}

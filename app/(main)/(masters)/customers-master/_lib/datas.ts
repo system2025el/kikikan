@@ -24,6 +24,10 @@ export const cMHeader = [
     key: 'mem',
     label: 'メモ',
   },
+  {
+    key: 'hidden',
+    label: '非表示',
+  },
 ];
 
 /* 新規登録用の初期化値（空の公演場所） */
