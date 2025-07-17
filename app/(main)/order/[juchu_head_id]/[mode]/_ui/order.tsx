@@ -135,6 +135,12 @@ export const Order = (props: { order: NewOrderValues; edit: boolean; lockData: L
     setLocationDialogOpen(false);
   };
 
+  // 公演場所選択ダイアログで公演場所選択
+  const handleLocSelect = (loc: string) => {
+    setValue('koenbashoNam', loc);
+    handleCloseLocationDailog();
+  };
+
   // 相手選択ダイアログ
   const [customerDialogOpen, setCustomerDialogOpen] = useState(false);
   const handleOpenCustomerDialog = () => {
@@ -145,7 +151,7 @@ export const Order = (props: { order: NewOrderValues; edit: boolean; lockData: L
   };
 
   // 相手選択ダイアログで相手選択
-  const handleCustomerSelect = (customer: KokyakuValues) => {
+  const handleCustSelect = (customer: KokyakuValues) => {
     setValue('kokyaku.kokyakuId', customer.kokyakuId);
     setValue('kokyaku.kokyakuNam', customer.kokyakuNam);
     clearErrors('kokyaku.kokyakuNam');
@@ -299,9 +305,6 @@ export const Order = (props: { order: NewOrderValues; edit: boolean; lockData: L
                 <Button onClick={() => handleOpenLocationDialog()} disabled={!edit}>
                   検索
                 </Button>
-                <Dialog open={locationDialogOpen} fullScreen>
-                  <LocationSelectDialog handleCloseLocationDialog={handleCloseLocationDailog} />
-                </Dialog>
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={9}>相手</Typography>
@@ -319,12 +322,6 @@ export const Order = (props: { order: NewOrderValues; edit: boolean; lockData: L
                       <Button onClick={() => handleOpenCustomerDialog()} disabled={!edit}>
                         検索
                       </Button>
-                      <Dialog open={customerDialogOpen} fullScreen>
-                        <CustomerSelectionDialog
-                          handleCustomerSelect={handleCustomerSelect}
-                          handleCloseCustDialog={handleCloseCustomerDialog}
-                        />
-                      </Dialog>
                     </>
                   )}
                 />
@@ -374,6 +371,20 @@ export const Order = (props: { order: NewOrderValues; edit: boolean; lockData: L
             </Grid2>
           </Grid2>
         </form>
+        {/* 公演場所検索ダイアログ */}
+        <Dialog open={locationDialogOpen} fullScreen>
+          <LocationSelectDialog
+            handleLocSelect={handleLocSelect}
+            handleCloseLocationDialog={handleCloseLocationDailog}
+          />
+        </Dialog>
+        {/* 相手検索ダイアログ */}
+        <Dialog open={customerDialogOpen} fullScreen>
+          <CustomerSelectionDialog
+            handleCustSelect={handleCustSelect}
+            handleCloseCustDialog={handleCloseCustomerDialog}
+          />
+        </Dialog>
       </Paper>
       {/* --------------------------------受注明細（機材）------------------------------------- */}
       <Accordion sx={{ marginTop: 2 }} defaultExpanded>
