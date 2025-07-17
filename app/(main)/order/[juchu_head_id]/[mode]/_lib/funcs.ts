@@ -1,6 +1,7 @@
 'use server';
 
 import { supabase } from '@/app/_lib/supabase/supabase';
+import { CustomerMasterTableValues } from '@/app/(main)/(masters)/customers-master/_lib/types';
 
 import { JuchuHeadValues, LockValues, NewOrderValues } from './types';
 
@@ -256,5 +257,50 @@ export const Update = async (data: NewOrderValues) => {
   } catch (e) {
     console.error('Exception while updating order:', e);
     return false;
+  }
+};
+
+/**
+ * 公演場所マスタテーブルのデータを取得する関数
+ * @param query 検索キーワード
+ * @returns {Promise<CustomerMasterTableValues[]>} 公演場所マスタテーブルに表示するデータ（ 検索キーワードが空の場合は全て ）
+ */
+export const GetFilteredCustomers = async (query: string) => {
+  try {
+    const { data, error } = await supabase
+      .schema('dev2')
+      .from('m_kokyaku')
+      .select('kokyaku_id, kokyaku_nam, adr_shozai, adr_tatemono, adr_sonota, tel,  fax, mem, dsp_flg') // テーブルに表示するカラム
+      // あいまい検索、場所名、場所名かな、住所、電話番号、fax番号
+      .or(
+        `kokyaku_nam.ilike.%${query}%, kana.ilike.%${query}%, adr_shozai.ilike.%${query}%, adr_tatemono.ilike.%${query}%, adr_sonota.ilike.%${query}%, tel.ilike.%${query}%, fax.ilike.%${query}%`
+      )
+      .neq('del_flg', 1) // 削除フラグが立っていない
+      .order('dsp_ord_num'); // 並び順
+    if (!error) {
+      console.log('I got a datalist from db', data.length);
+      if (!data || data.length === 0) {
+        return [];
+      } else {
+        const filteredCustomers: CustomerMasterTableValues[] = data.map((d) => ({
+          kokyakuId: d.kokyaku_id,
+          kokyakuNam: d.kokyaku_nam,
+          adrShozai: d.adr_shozai,
+          adrTatemono: d.adr_tatemono,
+          adrSonota: d.adr_sonota,
+          tel: d.tel,
+          fax: d.fax,
+          mem: d.mem,
+          dspFlg: Boolean(d.dsp_flg),
+        }));
+        console.log(filteredCustomers.length);
+        return filteredCustomers;
+      }
+    } else {
+      console.error('顧客情報取得エラー。', { message: error.message, code: error.code });
+      return [];
+    }
+  } catch (e) {
+    console.error('例外が発生しました:', e);
   }
 };
