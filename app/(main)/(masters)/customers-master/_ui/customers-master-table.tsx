@@ -8,7 +8,7 @@ import { Loading } from '@/app/(main)/_ui/loading';
 import { MuiTablePagination } from '../../../_ui/table-pagination';
 import { MasterTable } from '../../_ui/tables';
 import { cMHeader } from '../_lib/datas';
-import { GetFilteredCustomers } from '../_lib/funcs';
+import { getFilteredCustomers } from '../_lib/funcs';
 import { CustomersMasterTableValues } from '../_lib/types';
 import { CustomersMasterDialog } from './customers-master-dialog';
 
@@ -50,7 +50,7 @@ export const CustomersMasterTable = ({
   /* 情報が変わったときに更新される */
   const refetchCustomers = async () => {
     setIsLoading(true);
-    const updated = await GetFilteredCustomers('');
+    const updated = await getFilteredCustomers('');
     setTheCustomers(updated);
     setIsLoading(false);
   };
@@ -66,7 +66,9 @@ export const CustomersMasterTable = ({
   /* 表示する顧客リスト */
   const list = useMemo(
     () =>
-      rowsPerPage > 0 ? theCustomers!.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage) : theCustomers,
+      theCustomers && rowsPerPage > 0
+        ? theCustomers.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage)
+        : theCustomers,
     [page, rowsPerPage, theCustomers]
   );
 
@@ -81,10 +83,10 @@ export const CustomersMasterTable = ({
           <MuiTablePagination arrayList={list!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
         </Grid2>
         <Grid2 container spacing={3}>
-          <Grid2>
+          <Grid2 alignContent={'center'}>
             <Typography color="error" variant="body2">
-              ※マスタは削除できません。登録画面で削除フラグを付けてください
-              <br />
+              {/* ※マスタは削除できません。登録画面で削除フラグを付けてください */}
+              {/* <br /> */}
               ※表示順を変更する場合は、検索条件無しで全件表示してください
             </Typography>
           </Grid2>
@@ -95,7 +97,7 @@ export const CustomersMasterTable = ({
             </Button>
           </Grid2>
         </Grid2>
-      </Grid2>{' '}
+      </Grid2>
       {isLoading ? (
         <Loading />
       ) : (

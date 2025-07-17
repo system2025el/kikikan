@@ -6,7 +6,8 @@ import { TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { BackButton } from '@/app/(main)/_ui/buttons';
 
-import { ShukeibumonsMasterDialogValues, ShukeibumonsMasterTableValues } from '../_lib/type';
+import { getFilteredShukeibumons } from '../_lib/funcs';
+import { ShukeibumonsMasterTableValues } from '../_lib/types';
 import { ShukeibumonsMasterTable } from './shukeibumons-master-table';
 
 /**
@@ -14,7 +15,7 @@ import { ShukeibumonsMasterTable } from './shukeibumons-master-table';
  * @param {shukeibumons} 集計部門リスト配列
  * @returns {JSX.Element} 集計部門マスタコンポーネント
  */
-export const ShukeibumonsMaster = ({ shukeibumons }: { shukeibumons: ShukeibumonsMasterTableValues[] }) => {
+export const ShukeibumonsMaster = ({ shukeibumons }: { shukeibumons: ShukeibumonsMasterTableValues[] | undefined }) => {
   /* useState ------------------ */
   const [theShukeibumons, setTheShukeibumons] = useState(shukeibumons);
   /* DBのローディング */
@@ -30,8 +31,8 @@ export const ShukeibumonsMaster = ({ shukeibumons }: { shukeibumons: Shukeibumon
   const onSubmit = async (data: { query: string | undefined }) => {
     setIsLoading(true);
     console.log('data : ', data);
-    // const newList = await GetFilteredShukeiBumons(data.query!);
-    // setTheShukeiBumons(newList);
+    const newList = await getFilteredShukeibumons(data.query!);
+    setTheShukeibumons(newList);
     console.log('theLocs : ', theShukeibumons);
   };
 
@@ -46,7 +47,7 @@ export const ShukeibumonsMaster = ({ shukeibumons }: { shukeibumons: Shukeibumon
         </Box>
         <Divider />
         <Box width={'100%'} p={2}>
-          <form>
+          <form onSubmit={handleSubmit(onSubmit)}>
             <Stack justifyContent={'space-between'} alignItems={'start'} mt={1}>
               <Stack alignItems={'baseline'}>
                 <Typography noWrap width={100}>

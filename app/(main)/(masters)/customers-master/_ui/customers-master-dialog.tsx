@@ -87,6 +87,7 @@ export const CustomersMasterDialog = ({
       }
     }
   };
+
   /* ダイアログを閉じる */
   const handleCloseDialog = () => {
     setEditable(false);

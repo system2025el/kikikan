@@ -19,7 +19,7 @@ export const VehiclesMaster = ({ vehs }: { vehs: VehsMasterTableValues[] | undef
   /* DBのローディング */
   const [isLoading, setIsLoading] = useState(true);
 
-  //車両マスタに検索自体必要なのか？
+  // 車両マスタに検索自体必要なのか？
   // /* useForm ------------------- */
   // const { control, handleSubmit } = useForm({
   //   mode: 'onSubmit',
@@ -30,7 +30,7 @@ export const VehiclesMaster = ({ vehs }: { vehs: VehsMasterTableValues[] | undef
   // const onSubmit = async (data: { query: string | undefined }) => {
   //   setIsLoading(true);
   //   console.log('data : ', data);
-  //   // const newList = await GetFilteredVehs(data.query!);
+  //   // const newList = await getFilteredVehs(data.query!);
   //   // setTheVehs(newList);
   //   console.log('theVehs : ', theVehs);
   // };

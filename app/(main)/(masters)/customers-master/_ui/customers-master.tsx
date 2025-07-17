@@ -5,7 +5,7 @@ import { JSX, SetStateAction, useState } from 'react';
 import { TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { BackButton } from '../../../_ui/buttons';
-import { GetFilteredCustomers } from '../_lib/funcs';
+import { getFilteredCustomers } from '../_lib/funcs';
 import { CustomersMasterTableValues } from '../_lib/types';
 import { CustomersMasterTable } from './customers-master-table';
 /**
@@ -28,7 +28,7 @@ export const CustomersMaster = ({ customers }: { customers: CustomersMasterTable
   const onSubmit = async (data: { query: string | undefined }) => {
     setIsLoading(true);
     console.log('data : ', data);
-    const newList = await GetFilteredCustomers(data.query!);
+    const newList = await getFilteredCustomers(data.query!);
     setTheCustomers(newList);
     console.log('theLocs : ', theCustomers);
   };

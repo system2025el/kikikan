@@ -1,32 +1,14 @@
 'use client';
-import { CheckBox, SellTwoTone } from '@mui/icons-material';
 import AddIcon from '@mui/icons-material/Add';
-import DeleteIcon from '@mui/icons-material/Delete';
-import {
-  alpha,
-  Box,
-  Button,
-  Dialog,
-  Divider,
-  Grid2,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
-  useTheme,
-} from '@mui/material';
-import { grey } from '@mui/material/colors';
-import { JSX, SetStateAction, useEffect, useMemo, useState } from 'react';
+import { Box, Button, Dialog, Divider, Grid2, Paper, TableContainer, Typography } from '@mui/material';
+import { JSX, useEffect, useMemo, useState } from 'react';
 
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { MuiTablePagination } from '../../../_ui/table-pagination';
 import { MasterTable } from '../../_ui/tables';
 import { vMHeader } from '../_lib/datas';
+import { getFilteredVehs } from '../_lib/funcs';
 import { VehsMasterTableValues } from '../_lib/types';
 import { VehiclesMasterDialog } from './vehicles-master-dialog';
 
@@ -68,8 +50,8 @@ export const VehiclesMasterTable = ({
   /* 情報が変わったときに更新される */
   const refetchVehs = async () => {
     setIsLoading(true);
-    // const updated = await GetFilteredVehs('');
-    // setTheVehs(updated);
+    const updated = await getFilteredVehs('');
+    setTheVehs(updated);
     setIsLoading(false);
   };
 
@@ -83,7 +65,8 @@ export const VehiclesMasterTable = ({
 
   // 表示するデータ
   const list = useMemo(
-    () => (rowsPerPage > 0 ? theVehs!.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage) : theVehs),
+    () =>
+      theVehs && rowsPerPage > 0 ? theVehs.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage) : theVehs,
     [page, rowsPerPage, theVehs]
   );
 
@@ -98,10 +81,10 @@ export const VehiclesMasterTable = ({
           <MuiTablePagination arrayList={list!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
         </Grid2>
         <Grid2 container spacing={3}>
-          <Grid2>
+          <Grid2 alignContent={'center'}>
             <Typography color="error" variant="body2">
-              ※マスタは削除できません。登録画面で削除フラグを付けてください
-              <br />
+              {/* ※マスタは削除できません。登録画面で削除フラグを付けてください */}
+              {/* <br /> */}
               ※表示順を変更する場合は、検索条件無しで全件表示してください
             </Typography>
           </Grid2>
@@ -113,25 +96,27 @@ export const VehiclesMasterTable = ({
           </Grid2>
         </Grid2>
       </Grid2>
-
-      <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
-        {isLoading ? (
-          <Loading />
-        ) : (
-          <>
-            <MasterTable
-              headers={vMHeader}
-              datas={list!.map((l) => ({ id: l.sharyoId, name: l.sharyoNam, ...l }))}
-              handleOpenDialog={handleOpenDialog}
-              page={page}
-              rowsPerPage={rowsPerPage}
-            />
-            <Dialog open={dialogOpen} fullScreen>
-              <VehiclesMasterDialog handleClose={handleCloseDialog} vehicleId={openId} refetchVehs={refetchVehs} />
-            </Dialog>
-          </>
-        )}
-      </TableContainer>
+      {isLoading ? (
+        <Loading />
+      ) : (
+        <>
+          {list!.length < 1 && <Typography>該当するデータがありません</Typography>}
+          {list!.length > 0 && (
+            <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
+              <MasterTable
+                headers={vMHeader}
+                datas={list!.map((l) => ({ id: l.sharyoId, name: l.sharyoNam, ...l }))}
+                handleOpenDialog={handleOpenDialog}
+                page={page}
+                rowsPerPage={rowsPerPage}
+              />
+            </TableContainer>
+          )}
+        </>
+      )}
+      <Dialog open={dialogOpen} fullScreen>
+        <VehiclesMasterDialog handleClose={handleCloseDialog} vehicleId={openId} refetchVehs={refetchVehs} />
+      </Dialog>
     </Box>
   );
 };

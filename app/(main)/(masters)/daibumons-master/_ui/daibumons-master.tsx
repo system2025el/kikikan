@@ -6,6 +6,7 @@ import { TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { BackButton } from '@/app/(main)/_ui/buttons';
 
+import { getFilteredDaibumons } from '../_lib/funcs';
 import { DaibumonsMasterDialogValues, DaibumonsMasterTableValues } from '../_lib/types';
 import { DaibumonsMasterTable } from './daibumons-master-table';
 
@@ -14,7 +15,7 @@ import { DaibumonsMasterTable } from './daibumons-master-table';
  * @param {daibumons} 大部門リスト
  * @returns {JSX.Element} 大部門マスタコンポーネント
  */
-export const DaibumonsMaster = ({ daibumons }: { daibumons: DaibumonsMasterTableValues[] }) => {
+export const DaibumonsMaster = ({ daibumons }: { daibumons: DaibumonsMasterTableValues[] | undefined }) => {
   /* useState ------------------ */
   const [theDaibumons, setTheDaibumons] = useState(daibumons);
   /* DBのローディング */
@@ -27,12 +28,12 @@ export const DaibumonsMaster = ({ daibumons }: { daibumons: DaibumonsMasterTable
   });
 
   /* 検索ボタン押下 */
-  const onSubmit = async (data: { query: string | undefined }) => {
+  const onSubmit = async (data: { query?: string | undefined }) => {
     setIsLoading(true);
     console.log('data : ', data);
-    // const newList = await GetFilteredDaibumons(data.query!);
-    // setTheDaibumons(newList);
-    console.log('theLocs : ', theDaibumons);
+    const newList = await getFilteredDaibumons(data.query!);
+    setTheDaibumons(newList);
+    console.log('theLocs : ', theDaibumons, '検索終了検索終了');
   };
 
   return (
@@ -46,7 +47,7 @@ export const DaibumonsMaster = ({ daibumons }: { daibumons: DaibumonsMasterTable
         </Box>
         <Divider />
         <Box width={'100%'} p={2}>
-          <form /*onSubmit={handleSubmit(onSubmit)}*/>
+          <form onSubmit={handleSubmit(onSubmit)}>
             <Stack justifyContent={'space-between'} alignItems={'start'} mt={1}>
               <Stack alignItems={'baseline'}>
                 <Typography noWrap width={100}>
@@ -64,7 +65,7 @@ export const DaibumonsMaster = ({ daibumons }: { daibumons: DaibumonsMasterTable
           </form>
         </Box>
       </Paper>
-      <DaibumonsMasterTable daibumons={daibumons} isLoading={isLoading} setIsLoading={setIsLoading} />
+      <DaibumonsMasterTable daibumons={theDaibumons} isLoading={isLoading} setIsLoading={setIsLoading} />
     </Container>
   );
 };

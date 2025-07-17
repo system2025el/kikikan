@@ -7,7 +7,8 @@ import { MuiTablePagination } from '@/app/(main)/_ui/table-pagination';
 
 import { MasterTable } from '../../_ui/tables';
 import { shukeibumonMHeader } from '../_lib/datas';
-import { ShukeibumonsMasterDialogValues, ShukeibumonsMasterTableValues } from '../_lib/type';
+import { getFilteredShukeibumons } from '../_lib/funcs';
+import { ShukeibumonsMasterDialogValues, ShukeibumonsMasterTableValues } from '../_lib/types';
 import { ShukeibumonsMasterDialog } from './shukeibumons-master-dialog';
 
 /**
@@ -20,7 +21,7 @@ export const ShukeibumonsMasterTable = ({
   isLoading,
   setIsLoading,
 }: {
-  shukeibumons: ShukeibumonsMasterTableValues[];
+  shukeibumons: ShukeibumonsMasterTableValues[] | undefined;
   isLoading: boolean;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
@@ -48,8 +49,8 @@ export const ShukeibumonsMasterTable = ({
   /* 情報が変わったときに更新される */
   const refetchShukeibumons = async () => {
     setIsLoading(true);
-    // const updated = await GetFilteredShukeibumons('');
-    // setTheShukeibumons(updated);
+    const updated = await getFilteredShukeibumons('');
+    setTheShukeibumons(updated);
     setIsLoading(false);
   };
 
@@ -64,8 +65,8 @@ export const ShukeibumonsMasterTable = ({
   // 表示するデータ
   const list = useMemo(
     () =>
-      rowsPerPage > 0
-        ? theShukeibumons!.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage)
+      theShukeibumons && rowsPerPage > 0
+        ? theShukeibumons.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage)
         : theShukeibumons,
     [page, rowsPerPage, theShukeibumons]
   );
@@ -83,10 +84,10 @@ export const ShukeibumonsMasterTable = ({
           </Grid2>
 
           <Grid2 container spacing={3}>
-            <Grid2>
+            <Grid2 alignContent={'center'}>
               <Typography color="error" variant="body2">
-                ※マスタは削除できません。登録画面で削除フラグを付けてください
-                <br />
+                {/* ※マスタは削除できません。登録画面で削除フラグを付けてください */}
+                {/* <br /> */}
                 ※表示順を変更する場合は、検索条件無しで全件表示してください
               </Typography>
             </Grid2>
@@ -98,32 +99,35 @@ export const ShukeibumonsMasterTable = ({
             </Grid2>
           </Grid2>
         </Grid2>
-        <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
-          {isLoading ? (
-            <Loading />
-          ) : (
-            <>
-              <MasterTable
-                headers={shukeibumonMHeader}
-                datas={list!.map((l) => ({
-                  id: l.shukeibumonId!,
-                  name: l.shukeibumonNam,
-                  ...l,
-                }))}
-                handleOpenDialog={handleOpenDialog}
-                page={page}
-                rowsPerPage={rowsPerPage}
-              />
-              <Dialog open={dialogOpen} fullScreen>
-                <ShukeibumonsMasterDialog
-                  handleClose={handleCloseDialog}
-                  shukeibumonId={openId}
-                  refetchShukeibumons={refetchShukeibumons}
+        {isLoading ? (
+          <Loading />
+        ) : (
+          <>
+            {list!.length < 1 && <Typography>該当するデータがありません</Typography>}
+            {list!.length > 0 && (
+              <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
+                <MasterTable
+                  headers={shukeibumonMHeader}
+                  datas={list!.map((l) => ({
+                    id: l.shukeibumonId!,
+                    name: l.shukeibumonNam,
+                    ...l,
+                  }))}
+                  handleOpenDialog={handleOpenDialog}
+                  page={page}
+                  rowsPerPage={rowsPerPage}
                 />
-              </Dialog>
-            </>
-          )}
-        </TableContainer>
+              </TableContainer>
+            )}
+          </>
+        )}
+        <Dialog open={dialogOpen} fullScreen>
+          <ShukeibumonsMasterDialog
+            handleClose={handleCloseDialog}
+            shukeibumonId={openId}
+            refetchShukeibumons={refetchShukeibumons}
+          />
+        </Dialog>
       </Box>
     </>
   );

@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { BackButton } from '../../../_ui/buttons';
-import { GetFilteredLocs } from '../_lib/funcs';
+import { getFilteredLocs } from '../_lib/funcs';
 import { LocsMasterSearchSchema, LocsMasterSearchValues, LocsMasterTableValues } from '../_lib/types';
 import { LocationsMasterTable } from './locations-master-table';
 
@@ -19,6 +19,7 @@ export const LocationsMaster = ({ locs }: { locs: LocsMasterTableValues[] | unde
   const [theLocs, setTheLocs] = useState(locs);
   /* DBのローディング */
   const [isLoading, setIsLoading] = useState(true);
+
   /* useForm ------------------- */
   const { control, handleSubmit } = useForm({
     mode: 'onSubmit',
@@ -26,10 +27,11 @@ export const LocationsMaster = ({ locs }: { locs: LocsMasterTableValues[] | unde
     resolver: zodResolver(LocsMasterSearchSchema),
   });
 
+  /* 検索ボタン押下 */
   const onSubmit = async (data: LocsMasterSearchValues) => {
     setIsLoading(true);
     console.log('data : ', data, 'locs : ', locs);
-    const newList = await GetFilteredLocs(data.query!);
+    const newList = await getFilteredLocs(data.query!);
     setTheLocs(newList);
     console.log('theLocs : ', theLocs);
   };

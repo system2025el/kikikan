@@ -32,6 +32,11 @@ export const formItems: FormItemsType[] = [
     exsample: '',
     constraints: '200文字まで',
   },
+  {
+    label: '表示フラグ',
+    exsample: '',
+    constraints: '',
+  },
 ];
 
 /*モック削除delete */

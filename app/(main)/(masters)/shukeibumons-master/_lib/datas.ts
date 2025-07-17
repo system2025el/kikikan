@@ -1,6 +1,6 @@
 import { FormItemsType } from '@/app/(main)/_ui/form-box';
 
-import { ShukeibumonsMasterDialogValues, ShukeibumonsMasterTableValues } from './type';
+import { ShukeibumonsMasterDialogValues, ShukeibumonsMasterTableValues } from './types';
 
 /* 集計部門マスタテーブルヘッダー */
 export const shukeibumonMHeader = [
@@ -25,6 +25,11 @@ export const formItems: FormItemsType[] = [
     exsample: '',
     constraints: '200文字まで',
   },
+  {
+    label: '表示フラグ',
+    exsample: '',
+    constraints: '',
+  },
 ];
 
 /* 新規登録用の初期化値（空の集計部門） */
@@ -32,6 +37,7 @@ export const emptyShukeibumon: ShukeibumonsMasterDialogValues = {
   shukeibumonNam: '',
   delFlg: false,
   mem: '',
+  dspFlg: true,
 };
 
 /*モック削除delete */

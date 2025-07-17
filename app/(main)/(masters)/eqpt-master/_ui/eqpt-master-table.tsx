@@ -47,7 +47,7 @@ export const EqptMasterTable = ({
   /* 情報が変わったときに更新される */
   const refetchEqpts = async () => {
     setIsLoading(true);
-    // const updated = await GetFilteredEqpts('');
+    // const updated = await getFilteredEqpts('');
     // setTheEqpts(updated);
     setIsLoading(false);
   };
@@ -79,10 +79,10 @@ export const EqptMasterTable = ({
           <MuiTablePagination arrayList={list!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
         </Grid2>
         <Grid2 container spacing={3}>
-          <Grid2>
+          <Grid2 alignContent={'center'}>
             <Typography color="error" variant="body2">
-              ※マスタは削除できません。登録画面で削除フラグを付けてください
-              <br />
+              {/* ※マスタは削除できません。登録画面で削除フラグを付けてください */}
+              {/* <br /> */}
               ※表示順を変更する場合は、検索条件無しで全件表示してください
             </Typography>
           </Grid2>

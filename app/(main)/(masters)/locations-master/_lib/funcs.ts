@@ -9,7 +9,7 @@ import { supabase } from '@/app/_lib/supabase/supabase';
 import { emptyLoc } from './datas';
 import { LocsMasterDialogValues, LocsMasterTableValues } from './types';
 
-// export const GetAllLoc = async () => {
+// export const getAllLoc = async () => {
 //   try {
 //     const { data, error } = await supabase
 //       .schema('dev2')
@@ -49,7 +49,7 @@ import { LocsMasterDialogValues, LocsMasterTableValues } from './types';
  * @param query 検索キーワード
  * @returns {Promise<LocsMasterTableValues[]>} 公演場所マスタテーブルに表示するデータ（ 検索キーワードが空の場合は全て ）
  */
-export const GetFilteredLocs = async (query: string) => {
+export const getFilteredLocs = async (query: string) => {
   try {
     const { data, error } = await supabase
       .schema('dev2')

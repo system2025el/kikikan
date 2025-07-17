@@ -28,7 +28,7 @@ export const ManagersMaster = ({ managers }: { managers: ManagersMasterTableValu
   const onSubmit = async (data: { query: string | undefined }) => {
     setIsLoading(true);
     console.log('data : ', data);
-    // const newList = await GetFilteredManagers(data.query!);
+    // const newList = await getFilteredManagers(data.query!);
     // setTheManagers(newList);
     console.log('theLocs : ', theManagers);
   };

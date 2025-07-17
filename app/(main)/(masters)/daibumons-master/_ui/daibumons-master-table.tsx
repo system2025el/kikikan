@@ -7,7 +7,8 @@ import { MuiTablePagination } from '@/app/(main)/_ui/table-pagination';
 
 import { MasterTable } from '../../_ui/tables';
 import { daibumonMHeader } from '../_lib/datas';
-import { DaibumonsMasterDialogValues, DaibumonsMasterTableValues } from '../_lib/types';
+import { getFilteredDaibumons } from '../_lib/funcs';
+import { DaibumonsMasterTableValues } from '../_lib/types';
 import { DaibumonsMasterDialog } from './daibumons-master-dialog';
 
 /**
@@ -20,7 +21,7 @@ export const DaibumonsMasterTable = ({
   isLoading,
   setIsLoading,
 }: {
-  daibumons: DaibumonsMasterTableValues[];
+  daibumons: DaibumonsMasterTableValues[] | undefined;
   isLoading: boolean;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
@@ -34,7 +35,7 @@ export const DaibumonsMasterTable = ({
   /* 詳細ダイアログの開閉状態 */
   const [dialogOpen, setDialogOpen] = useState(false);
   /*  */
-  const [theDaibumons, setTheDaibumons] = useState(daibumons);
+  const [theDaibumons, setTheDaibumons] = useState<DaibumonsMasterTableValues[] | undefined>(daibumons);
   /* methods ---------------------------------------- */
   /* 詳細ダイアログを開く関数 */
   const handleOpenDialog = (id: number) => {
@@ -48,8 +49,8 @@ export const DaibumonsMasterTable = ({
   /* 情報が変わったときに更新される */
   const refetchDaibumons = async () => {
     setIsLoading(true);
-    // const updated = await GetFilteredDaibumons('');
-    // setTheDaibumons(updated);
+    const updated = await getFilteredDaibumons('');
+    setTheDaibumons(updated);
     setIsLoading(false);
   };
 
@@ -64,7 +65,9 @@ export const DaibumonsMasterTable = ({
   // 表示するデータ
   const list = useMemo(
     () =>
-      rowsPerPage > 0 ? theDaibumons!.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage) : theDaibumons,
+      theDaibumons && rowsPerPage > 0
+        ? theDaibumons.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage)
+        : theDaibumons,
     [page, rowsPerPage, theDaibumons]
   );
 
@@ -80,10 +83,10 @@ export const DaibumonsMasterTable = ({
             <MuiTablePagination arrayList={list!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
           </Grid2>
           <Grid2 container spacing={3}>
-            <Grid2>
+            <Grid2 alignContent={'center'}>
               <Typography color="error" variant="body2">
-                ※マスタは削除できません。登録画面で削除フラグを付けてください
-                <br />
+                {/* ※マスタは削除できません。登録画面で削除フラグを付けてください */}
+                {/* <br /> */}
                 ※表示順を変更する場合は、検索条件無しで全件表示してください
               </Typography>
             </Grid2>
@@ -95,28 +98,31 @@ export const DaibumonsMasterTable = ({
             </Grid2>
           </Grid2>
         </Grid2>
-        <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
-          {isLoading ? (
-            <Loading />
-          ) : (
-            <>
-              <MasterTable
-                headers={daibumonMHeader}
-                datas={list!.map((l) => ({ id: l.daibumonId!, name: l.daibumonNam, ...l }))}
-                handleOpenDialog={handleOpenDialog}
-                page={page}
-                rowsPerPage={rowsPerPage}
-              />
-              <Dialog open={dialogOpen} fullScreen>
-                <DaibumonsMasterDialog
-                  handleClose={handleCloseDialog}
-                  daibumonId={openId}
-                  refetchDaibumons={refetchDaibumons}
+        {isLoading ? (
+          <Loading />
+        ) : (
+          <>
+            {list!.length < 1 && <Typography>該当するデータがありません</Typography>}
+            {list!.length > 0 && (
+              <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
+                <MasterTable
+                  headers={daibumonMHeader}
+                  datas={list!.map((l) => ({ id: l.daibumonId!, name: l.daibumonNam, ...l }))}
+                  handleOpenDialog={handleOpenDialog}
+                  page={page}
+                  rowsPerPage={rowsPerPage}
                 />
-              </Dialog>
-            </>
-          )}
-        </TableContainer>
+              </TableContainer>
+            )}
+          </>
+        )}
+        <Dialog open={dialogOpen} fullScreen>
+          <DaibumonsMasterDialog
+            handleClose={handleCloseDialog}
+            daibumonId={openId}
+            refetchDaibumons={refetchDaibumons}
+          />
+        </Dialog>
       </Box>
     </>
   );
