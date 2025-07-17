@@ -2,7 +2,7 @@
 
 import { QueryResult } from 'pg';
 
-import { EqptMasterTableValues } from '@/app/(main)/(masters)/eqpt-master/_lib/types';
+import { EqptsMasterTableValues } from '@/app/(main)/(masters)/eqpt-master/_lib/types';
 import { VehsMasterTableValues } from '@/app/(main)/(masters)/vehicles-master/_lib/types';
 
 import pool from './postgres';
@@ -11,7 +11,7 @@ export const shigasan = async () => {
   try {
     console.log('DB Connected');
     await pool.query(` SET search_path TO dev2;`);
-    const result: QueryResult<EqptMasterTableValues> = await pool.query(`
+    const result: QueryResult<EqptsMasterTableValues> = await pool.query(`
     select
        v_kizai_lst.kizai_nam           as "kizaiNam",
        v_kizai_lst.shozoku_nam         as "shozokuNam",
@@ -46,7 +46,7 @@ export const shigasan = async () => {
       v_kizai_lst.shukei_bumon_nam ilike '%照%'
   `);
     console.log('res : ', result.rows);
-    const data: EqptMasterTableValues[] = result.rows;
+    const data: EqptsMasterTableValues[] = result.rows;
     console.log('data : ', data);
     return data;
   } catch (e) {
