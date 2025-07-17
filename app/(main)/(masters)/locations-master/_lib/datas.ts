@@ -9,6 +9,7 @@ export const lMHeader = [
   { key: 'address', label: '住所' },
   { key: 'tel', label: 'Tel' },
   { key: 'fax', label: 'Fax' },
+  { key: 'hidden', label: '非表示' },
 ];
 
 /* 詳細ダイアログ用データ */

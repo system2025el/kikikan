@@ -1,6 +1,6 @@
 import { FormItemsType } from '@/app/(main)/_ui/form-box';
 
-import { EqptMasterDialogValues, EqptMasterTableValues } from './types';
+import { EqptsMasterDialogValues, EqptsMasterTableValues } from './types';
 
 /* 機材マスタヘッダー */
 export const eqptMHeader = [
@@ -17,10 +17,11 @@ export const eqptMHeader = [
   { key: 'rankAmt4', label: '価格4' },
   { key: 'rankAmt5', label: '価格5' },
   { key: 'mem', label: 'メモ' },
+  { key: 'hidden', label: '非表示' },
 ];
 
 /*  */
-export const emptyEqpt: EqptMasterDialogValues = {
+export const emptyEqpt: EqptsMasterDialogValues = {
   kizaiNam: '',
   kizaiQty: 0,
   sectionNum: 0,
@@ -168,7 +169,7 @@ export const formItems: FormItemsType[] = [
 
 /** 削除データ delete data */
 
-export const eqptMasterList: EqptMasterTableValues[] = [
+export const eqptMasterList: EqptsMasterTableValues[] = [
   {
     kizaiId: 1,
     kizaiNam: 'SHARPY PLUS',

@@ -7,6 +7,7 @@ import { VehsMasterDialogValues, VehsMasterTableValues } from './types';
 export const vMHeader = [
   { key: 'name', label: '車両タイプ' },
   { key: 'mem', label: 'メモ' },
+  { key: 'hidden', label: '非表示' },
 ];
 
 /*  */

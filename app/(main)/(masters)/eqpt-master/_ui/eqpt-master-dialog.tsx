@@ -14,7 +14,7 @@ import { Loading } from '../../../_ui/loading';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { emptyEqpt, formItems } from '../_lib/datas';
-import { EqptMasterDialogSchema, EqptMasterDialogValues } from '../_lib/types';
+import { EqptsMasterDialogSchema, EqptsMasterDialogValues } from '../_lib/types';
 
 export const EqMasterDialog = ({
   eqptId,
@@ -50,12 +50,12 @@ export const EqMasterDialog = ({
     mode: 'onBlur',
     reValidateMode: 'onBlur',
     defaultValues: {},
-    resolver: zodResolver(EqptMasterDialogSchema),
+    resolver: zodResolver(EqptsMasterDialogSchema),
   });
 
   /* methods ---------------------------- */
   /* フォームを送信 */
-  const onSubmit = async (data: EqptMasterDialogValues) => {
+  const onSubmit = async (data: EqptsMasterDialogValues) => {
     console.log('isDarty : ', isDirty);
     console.log(data);
     // if (EqptId === -100) {

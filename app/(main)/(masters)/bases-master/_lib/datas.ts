@@ -6,6 +6,7 @@ import { BasesMasterDialogValues, BasesMasterTableValues } from './types';
 export const bMHeader = [
   { key: 'name', label: '名称' },
   { key: 'mem', label: 'メモ' },
+  { key: 'hidden', label: '非表示' },
 ];
 
 /* 詳細ダイアログ用データ */

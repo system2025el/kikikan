@@ -13,7 +13,7 @@ import { DaibumonsMasterDialogValues, DaibumonsMasterTableValues } from './types
 //     const { data, error } = await supabase
 //       .schema('dev2')
 //       .from('m_daibumon')
-//       .select('daibumon_id , daibumon_nam, adr_shozai, adr_tatemono, adr_sonota, tel, fax, mem,  dsp_flg')
+//       .select('daibumon_id , daibumon_nam, adr_shozai, adr_tatemono, adr_sonota, tel, fax, mem,  ')
 //       .neq('del_flg', 1)
 //       .order('dsp_ord_num');
 //     if (!error) {
@@ -28,7 +28,7 @@ import { DaibumonsMasterDialogValues, DaibumonsMasterTableValues } from './types
 //         tel: d.tel,
 //         fax: d.fax,
 //         mem: d.mem,
-//         dspFlg: d.dsp_flg,
+//         dspFlg: d.,
 //       }));
 
 //       console.log(theData.length);
@@ -53,7 +53,7 @@ export const getFilteredDaibumons = async (query: string) => {
     const { data, error } = await supabase
       .schema('dev2')
       .from('m_dai_bumon')
-      .select('dai_bumon_id, dai_bumon_nam,  mem, dsp_flg') // テーブルに表示するカラム
+      .select('dai_bumon_id, dai_bumon_nam,  mem') // テーブルに表示するカラム
       .ilike('dai_bumon_nam', `%${query}%`)
       //   // あいまい検索、大部門名、大部門名かな、住所、電話番号、fax番号
       //   .or(`dai_bumon_nam.ilike.%${query}%`)
@@ -68,7 +68,6 @@ export const getFilteredDaibumons = async (query: string) => {
           daibumonId: d.dai_bumon_id,
           daibumonNam: d.dai_bumon_nam,
           mem: d.mem,
-          dspFlg: Boolean(d.dsp_flg),
         }));
         console.log(filtereddaibumons.length);
         return filtereddaibumons;
@@ -93,7 +92,7 @@ export const getOneDaibumon = async (id: number) => {
     const { data, error } = await supabase
       .schema('dev2')
       .from('m_dai_bumon')
-      .select('dai_bumon_nam, del_flg, mem, dsp_flg')
+      .select('dai_bumon_nam, del_flg, mem')
       .eq('dai_bumon_id', id)
       .single();
     if (!error) {
@@ -103,7 +102,6 @@ export const getOneDaibumon = async (id: number) => {
         daibumonNam: data.dai_bumon_nam,
         delFlg: Boolean(data.del_flg),
         mem: data.mem,
-        dspFlg: Boolean(data.dsp_flg),
       };
       console.log(daibumonDetails.delFlg);
       return daibumonDetails;
@@ -127,13 +125,13 @@ export const addNewDaibumon = async (data: DaibumonsMasterDialogValues) => {
   const query = `
       INSERT INTO m_dai_bumon (
         dai_bumon_id, dai_bumon_nam, del_flg, dsp_ord_num,
-        mem, dsp_flg, add_dat, add_user, upd_dat, upd_user
+        mem, add_dat, add_user, upd_dat, upd_user
       )
       VALUES (
         (SELECT coalesce(max(dai_bumon_id),0) + 1 FROM m_dai_bumon),
         $1, $2,
         (SELECT coalesce(max(dsp_ord_num),0) + 1 FROM m_dai_bumon),
-        $3, $4, $5, $6, $7, $8
+        $3, $4, $5, $6, $7
       );
     `;
 
@@ -147,16 +145,7 @@ export const addNewDaibumon = async (data: DaibumonsMasterDialogValues) => {
     console.log('DB Connected');
     await pool.query(` SET search_path TO dev2;`);
 
-    await pool.query(query, [
-      data.daibumonNam,
-      Number(data.delFlg),
-      data.mem,
-      Number(data.dspFlg),
-      date,
-      'shigasan',
-      null,
-      null,
-    ]);
+    await pool.query(query, [data.daibumonNam, Number(data.delFlg), data.mem, date, 'shigasan', null, null]);
     console.log('data : ', data);
   } catch (error) {
     console.log('DB接続エラー', error);
@@ -176,7 +165,6 @@ export const updateDaibumon = async (data: DaibumonsMasterDialogValues, id: numb
     dai_bumon_nam: data.daibumonNam,
     del_flg: Number(data.delFlg),
     mem: data.mem,
-    dsp_flg: Number(data.dspFlg),
   };
   console.log(missingData.del_flg);
   const date = new Date()

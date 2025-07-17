@@ -14,7 +14,6 @@ export type BumonsMasterTableValues = {
   bumonId: number;
   bumonNam: string;
   mem: string;
-  daibumonId: number;
-  shukeibumonId: number;
-  dspFlg: boolean;
+  // daibumonId: number;
+  // shukeibumonId: number;
 };

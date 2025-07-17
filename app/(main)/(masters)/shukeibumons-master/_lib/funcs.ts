@@ -13,7 +13,7 @@ import { ShukeibumonsMasterDialogValues, ShukeibumonsMasterTableValues } from '.
 //     const { data, error } = await supabase
 //       .schema('dev2')
 //       .from('m_Shukeibumon')
-//       .select('Shukeibumon_id , Shukeibumon_nam, adr_shozai, adr_tatemono, adr_sonota, tel, fax, mem,  dsp_flg')
+//       .select('Shukeibumon_id , Shukeibumon_nam, adr_shozai, adr_tatemono, adr_sonota, tel, fax, mem,  ')
 //       .neq('del_flg', 1)
 //       .order('dsp_ord_num');
 //     if (!error) {
@@ -28,7 +28,7 @@ import { ShukeibumonsMasterDialogValues, ShukeibumonsMasterTableValues } from '.
 //         tel: d.tel,
 //         fax: d.fax,
 //         mem: d.mem,
-//         dspFlg: d.dsp_flg,
+//         dspFlg: d.,
 //       }));
 
 //       console.log(theData.length);
@@ -53,7 +53,7 @@ export const getFilteredShukeibumons = async (query: string) => {
     const { data, error } = await supabase
       .schema('dev2')
       .from('m_shukei_bumon')
-      .select('shukei_bumon_id, shukei_bumon_nam, mem, dsp_flg') // テーブルに表示するカラム
+      .select('shukei_bumon_id, shukei_bumon_nam, mem') // テーブルに表示するカラム
       .ilike('shukei_bumon_nam', `%${query}%`)
       //   // あいまい検索、集計部門名、集計部門名かな、住所、電話番号、fax番号
       //   .or(`shukei_bumon_nam.ilike.%${query}%`)
@@ -68,7 +68,6 @@ export const getFilteredShukeibumons = async (query: string) => {
           shukeibumonId: d.shukei_bumon_id,
           shukeibumonNam: d.shukei_bumon_nam,
           mem: d.mem,
-          dspFlg: Boolean(d.dsp_flg),
         }));
         console.log(filteredShukeibumons.length);
         return filteredShukeibumons;
@@ -93,7 +92,7 @@ export const getOneShukeibumon = async (id: number) => {
     const { data, error } = await supabase
       .schema('dev2')
       .from('m_shukei_bumon')
-      .select('shukei_bumon_nam, del_flg, mem, dsp_flg')
+      .select('shukei_bumon_nam, del_flg, mem')
       .eq('shukei_bumon_id', id)
       .single();
     if (!error) {
@@ -103,7 +102,6 @@ export const getOneShukeibumon = async (id: number) => {
         shukeibumonNam: data.shukei_bumon_nam,
         delFlg: Boolean(data.del_flg),
         mem: data.mem,
-        dspFlg: Boolean(data.dsp_flg),
       };
       console.log(ShukeibumonDetails.delFlg);
       return ShukeibumonDetails;
@@ -127,13 +125,13 @@ export const addNewShukeibumon = async (data: ShukeibumonsMasterDialogValues) =>
   const query = `
       INSERT INTO m_shukei_bumon (
         shukei_bumon_id, shukei_bumon_nam, del_flg, dsp_ord_num,
-        mem, dsp_flg, add_dat, add_user, upd_dat, upd_user
+        mem, add_dat, add_user, upd_dat, upd_user
       )
       VALUES (
         (SELECT coalesce(max(shukei_bumon_id),0) + 1 FROM m_shukei_bumon),
         $1, $2,
         (SELECT coalesce(max(dsp_ord_num),0) + 1 FROM m_shukei_bumon),
-        $3, $4, $5, $6, $7, $8
+        $3, $4, $5, $6, $7
       );
     `;
 
@@ -147,16 +145,7 @@ export const addNewShukeibumon = async (data: ShukeibumonsMasterDialogValues) =>
     console.log('DB Connected');
     await pool.query(` SET search_path TO dev2;`);
 
-    await pool.query(query, [
-      data.shukeibumonNam,
-      Number(data.delFlg),
-      data.mem,
-      Number(data.dspFlg),
-      date,
-      'shigasan',
-      null,
-      null,
-    ]);
+    await pool.query(query, [data.shukeibumonNam, Number(data.delFlg), data.mem, date, 'shigasan', null, null]);
     console.log('data : ', data);
   } catch (error) {
     console.log('DB接続エラー', error);
@@ -176,7 +165,6 @@ export const updateShukeibumon = async (data: ShukeibumonsMasterDialogValues, id
     shukei_bumon_nam: data.shukeibumonNam,
     del_flg: Number(data.delFlg),
     mem: data.mem,
-    dsp_flg: Number(data.dspFlg),
   };
   console.log(missingData.del_flg);
   const date = new Date()

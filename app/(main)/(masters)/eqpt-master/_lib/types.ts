@@ -1,7 +1,7 @@
 import { number, z } from 'zod';
 
 // Schema
-export const EqptMasterDialogSchema = z.object({
+export const EqptsMasterDialogSchema = z.object({
   kizaiNam: z.string().max(100, { message: '100文字以内で入力してください' }).min(1, { message: '必須項目です' }),
   kizaiQty: z.number({ message: '数字を入力してください' }).optional(),
   sectionNum: z.number({ message: '数字を入力してください' }).optional(),
@@ -27,9 +27,9 @@ export const EqptMasterDialogSchema = z.object({
   rankAmt5: z.number({ message: '数字を入力してください' }).optional(),
 });
 
-export type EqptMasterDialogValues = z.infer<typeof EqptMasterDialogSchema>;
+export type EqptsMasterDialogValues = z.infer<typeof EqptsMasterDialogSchema>;
 
-export type EqptMasterTableValues = {
+export type EqptsMasterTableValues = {
   kizaiId: number;
   kizaiNam: string;
   kizaiQty: number;

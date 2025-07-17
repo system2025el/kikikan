@@ -9,7 +9,7 @@ import { Loading } from '@/app/(main)/_ui/loading';
 import { MuiTablePagination } from '../../../_ui/table-pagination';
 import { MasterTableOfEqpt } from '../../_ui/tables';
 import { eqptMHeader } from '../_lib/datas';
-import { EqptMasterTableValues } from '../_lib/types';
+import { EqptsMasterTableValues } from '../_lib/types';
 import { EqMasterDialog } from './eqpt-master-dialog';
 
 /** 機材マスタのテーブルコンポーネント */
@@ -18,7 +18,7 @@ export const EqptMasterTable = ({
   isLoading,
   setIsLoading,
 }: {
-  eqpts: EqptMasterTableValues[] | undefined;
+  eqpts: EqptsMasterTableValues[] | undefined;
   isLoading: boolean;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
@@ -32,7 +32,7 @@ export const EqptMasterTable = ({
   /* 詳細ダイアログの開閉状態 */
   const [dialogOpen, setDialogOpen] = useState(false);
   /* 場所リスト */
-  const [theEqpts, setTheEqpts] = useState<EqptMasterTableValues[] | undefined>(eqpts);
+  const [theEqpts, setTheEqpts] = useState<EqptsMasterTableValues[] | undefined>(eqpts);
 
   /* methods ------------------------------------------- */
   /* 詳細ダイアログを開く関数 */
