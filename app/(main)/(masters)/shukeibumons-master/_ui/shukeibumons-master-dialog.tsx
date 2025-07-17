@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Grid2 } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { TextareaAutosizeElement, TextFieldElement } from 'react-hook-form-mui';
+import { CheckboxElement, TextareaAutosizeElement, TextFieldElement } from 'react-hook-form-mui';
 
 import { FormBox } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
@@ -10,7 +10,8 @@ import { Loading } from '@/app/(main)/_ui/loading';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { emptyShukeibumon, formItems } from '../_lib/datas';
-import { ShukeibumonsMasterDialogSchema, ShukeibumonsMasterDialogValues } from '../_lib/type';
+import { addNewShukeibumon, getOneShukeibumon, updateShukeibumon } from '../_lib/funcs';
+import { ShukeibumonsMasterDialogSchema, ShukeibumonsMasterDialogValues } from '../_lib/types';
 
 /**
  * 集計部門マスタ詳細ダイアログ
@@ -28,7 +29,8 @@ export const ShukeibumonsMasterDialog = ({
 }) => {
   /* useState -------------------------------------- */
   /* DBのローディング状態 */
-  const [isLoading, setIsLoading] = useState(true); /* ダイアログでの編集モードかどうか */
+  const [isLoading, setIsLoading] = useState(true);
+  /* ダイアログでの編集モードかどうか */
   const [editable, setEditable] = useState(false);
   /* 新規作成かどうか */
   const [isNew, setIsNew] = useState(false);
@@ -57,20 +59,24 @@ export const ShukeibumonsMasterDialog = ({
   const onSubmit = async (data: ShukeibumonsMasterDialogValues) => {
     console.log('isDarty : ', isDirty);
     console.log(data);
-    // if (shukeibumonId === -100) {
-    //   await addNewshukeibumon(data);
-    // handleCloseDialog();
-    // refetchShukeibumons();
-    // } else {
-    // if (action === 'save') {
-    //   await updateshukeibumon(data, shukeibumonId);
-    // handleCloseDialog();
-    // refetchShukeibumons();
-    // } else if (action === 'delete') {
-    //   setDeleteOpen(true);
-    //   return;
-    // }
-    // }
+    if (shukeibumonId === -100) {
+      // 新規の時
+      await addNewShukeibumon(data);
+      handleCloseDialog();
+      refetchShukeibumons();
+    } else {
+      // 更新の時
+      if (action === 'save') {
+        // 保存終了ボタン押したとき
+        await updateShukeibumon(data, shukeibumonId);
+        handleCloseDialog();
+        refetchShukeibumons();
+      } else if (action === 'delete') {
+        // 削除ボタン押したとき
+        setDeleteOpen(true);
+        return;
+      }
+    }
   };
 
   /* 詳細ダイアログを閉じる */
@@ -92,11 +98,11 @@ export const ShukeibumonsMasterDialog = ({
 
   /* 削除確認ダイアログで削除選択時 */
   const handleConfirmDelete = async () => {
-    // const values = await getValues();
-    // await updateShukeibumon({ ...values, delFlg: true }, shukeibumonId);
+    const values = await getValues();
+    await updateShukeibumon({ ...values, delFlg: true }, shukeibumonId);
     setDeleteOpen(false);
     handleCloseDialog();
-    // await refetchShukeibumons();
+    await refetchShukeibumons();
   };
 
   /* useEffect --------------------------------------- */
@@ -111,11 +117,10 @@ export const ShukeibumonsMasterDialog = ({
         setIsLoading(false);
         setIsNew(true);
       } else {
-        // const Shukeibumon1 = await getOneShukeibumon(ShukeibumonId);
-        // if (Shukeibumon1) {
-        //   setShukeibumon(Shukeibumon1);
-        //   reset(Shukeibumon1); // 取得したデータでフォーム初期化
-        // }
+        const shukeibumon1 = await getOneShukeibumon(shukeibumonId);
+        if (shukeibumon1) {
+          reset(shukeibumon1); // 取得したデータでフォーム初期化
+        }
         setIsLoading(false);
       }
     };
@@ -167,6 +172,11 @@ export const ShukeibumonsMasterDialog = ({
                     sx={{ maxWidth: '90%' }}
                     disabled={editable ? false : true}
                   />
+                </FormBox>
+              </Grid2>
+              <Grid2>
+                <FormBox formItem={formItems[3]}>
+                  <CheckboxElement name="dspFlg" control={control} size="medium" disabled={editable ? false : true} />
                 </FormBox>
               </Grid2>
             </Grid2>

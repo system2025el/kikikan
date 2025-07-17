@@ -8,7 +8,7 @@ import { supabase } from '@/app/_lib/supabase/supabase';
 import { emptyCustomer } from './datas';
 import { CustomersMasterDialogValues, CustomersMasterTableValues } from './types';
 
-// export const GetAllCustomer = async () => {
+// export const getAllCustomer = async () => {
 //   try {
 //     const { data, error } = await supabase
 //       .schema('dev2')
@@ -48,7 +48,7 @@ import { CustomersMasterDialogValues, CustomersMasterTableValues } from './types
  * @param query 検索キーワード
  * @returns {Promise<CustomersMasterTableValues[]>} 顧客マスタテーブルに表示するデータ（ 検索キーワードが空の場合は全て ）
  */
-export const GetFilteredCustomers = async (query: string) => {
+export const getFilteredCustomers = async (query: string) => {
   try {
     const { data, error } = await supabase
       .schema('dev2')

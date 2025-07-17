@@ -2,7 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Grid2 } from '@mui/material';
-import { JSX, SetStateAction, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CheckboxElement, TextareaAutosizeElement, TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { FormBox } from '@/app/(main)/_ui/form-box';
@@ -62,16 +62,21 @@ export const LocationsMasterDialog = ({
     console.log('isDarty : ', isDirty);
     console.log('action is : ', action);
     console.log(data);
+
     if (locationId === -100) {
+      // 新規の時
       await addNewLoc(data);
       handleCloseDialog();
       refetchLocs();
     } else {
+      // 更新の時
       if (action === 'save') {
+        // 保存終了ボタン押したとき
         await updateLoc(data, locationId);
         handleCloseDialog();
         refetchLocs();
       } else if (action === 'delete') {
+        // 削除ボタン押したとき
         setDeleteOpen(true);
         return;
       }
@@ -111,7 +116,6 @@ export const LocationsMasterDialog = ({
     const getThatOneloc = async () => {
       if (locationId === -100) {
         // 新規追加モード
-
         reset(emptyLoc); // フォーム初期化
         setEditable(true); // 編集モードにする
         setIsLoading(false);

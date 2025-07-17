@@ -3,12 +3,12 @@ import { Grid2 } from '@mui/material';
 import { JSX, useEffect, useState } from 'react';
 import { CheckboxElement, TextareaAutosizeElement, TextFieldElement, useForm } from 'react-hook-form-mui';
 
-// import { addNewVehicle, getOneVehicle } from '@/app/_lib/supabase/supabaseFuncs';
 import { FormBox } from '../../../_ui/form-box';
 import { Loading } from '../../../_ui/loading';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { emptyVeh, formItems } from '../_lib/datas';
+import { addNewVeh, getOneVeh, updateVeh } from '../_lib/funcs';
 import { VehsMasterDialogSchema, VehsMasterDialogValues } from '../_lib/types';
 /**
  * 車両マスタの詳細ダイアログ
@@ -22,7 +22,7 @@ export const VehiclesMasterDialog = ({
 }: {
   vehicleId: number;
   handleClose: () => void;
-  refetchVehs: () => void;
+  refetchVehs: () => Promise<void>;
 }) => {
   /* useState --------------------- */
   /** DBのローディング状態 */
@@ -57,20 +57,20 @@ export const VehiclesMasterDialog = ({
   const onSubmit = async (data: VehsMasterDialogValues) => {
     console.log('isDarty : ', isDirty);
     console.log(data);
-    // if (VehicleId === -100) {
-    //   await addNewVeh(data);
-    // handleCloseDialog();
-    // refetchVeh();
-    // } else {
-    // if (action === 'save') {
-    //   await updateVeh(data, vehicleId);
-    // handleCloseDialog();
-    // refetchVeh();
-    // } else if (action === 'delete') {
-    //   setDeleteOpen(true);
-    //   return;
-    // }
-    // }
+    if (vehicleId === -100) {
+      await addNewVeh(data);
+      handleCloseDialog();
+      refetchVehs();
+    } else {
+      if (action === 'save') {
+        await updateVeh(data, vehicleId);
+        handleCloseDialog();
+        refetchVehs();
+      } else if (action === 'delete') {
+        setDeleteOpen(true);
+        return;
+      }
+    }
   };
 
   /* 詳細ダイアログを閉じる */
@@ -92,11 +92,11 @@ export const VehiclesMasterDialog = ({
 
   /* 削除確認ダイアログで削除選択時 */
   const handleConfirmDelete = async () => {
-    // const values = await getValues();
-    // await updateVeh({ ...values, delFlg: true }, vehicleId);
+    const values = await getValues();
+    await updateVeh({ ...values, delFlg: true }, vehicleId);
     setDeleteOpen(false);
     handleCloseDialog();
-    // await refetchVehs();
+    await refetchVehs();
   };
 
   /* useEffect --------------------------------------- */
@@ -111,11 +111,10 @@ export const VehiclesMasterDialog = ({
         setIsLoading(false);
         setIsNew(true);
       } else {
-        // const Veh1 = await getOneVeh(VehicleId);
-        // if (Veh1) {
-        //   setVehicle(Veh1);
-        //   reset(Veh1); // 取得したデータでフォーム初期化
-        // }
+        const Veh1 = await getOneVeh(vehicleId);
+        if (Veh1) {
+          reset(Veh1); // 取得したデータでフォーム初期化
+        }
         setIsLoading(false);
       }
     };

@@ -11,6 +11,7 @@ import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { BumonsMasterDialogValues } from '../../bumons-master/_lib/types';
 import { emptyDaibumon, formItems } from '../_lib/datas';
+import { addNewDaibumon, getOneDaibumon, updateDaibumon } from '../_lib/funcs';
 import { DaibumonsMasterDialogSchema, DaibumonsMasterDialogValues } from '../_lib/types';
 
 /**
@@ -29,7 +30,8 @@ export const DaibumonsMasterDialog = ({
 }) => {
   /* useState -------------------------------------- */
   /* DBのローディング状態 */
-  const [isLoading, setIsLoading] = useState(true); /* ダイアログでの編集モードかどうか */
+  const [isLoading, setIsLoading] = useState(true);
+  /* ダイアログでの編集モードかどうか */
   const [editable, setEditable] = useState(false);
   /* 新規作成かどうか */
   const [isNew, setIsNew] = useState(false);
@@ -59,20 +61,20 @@ export const DaibumonsMasterDialog = ({
   const onSubmit = async (data: DaibumonsMasterDialogValues) => {
     console.log('isDarty : ', isDirty);
     console.log(data);
-    // if (daibumonId === -100) {
-    //   await addNewDaibumon(data);
-    // handleCloseDialog();
-    // refetchDaibumons();
-    // } else {
-    // if (action === 'save') {
-    //   await updateDaibumon(data, daibumonId);
-    // handleCloseDialog();
-    // refetchDaibumons();
-    // } else if (action === 'delete') {
-    //   setDeleteOpen(true);
-    //   return;
-    // }
-    // }
+    if (daibumonId === -100) {
+      await addNewDaibumon(data);
+      handleCloseDialog();
+      refetchDaibumons();
+    } else {
+      if (action === 'save') {
+        await updateDaibumon(data, daibumonId);
+        handleCloseDialog();
+        refetchDaibumons();
+      } else if (action === 'delete') {
+        setDeleteOpen(true);
+        return;
+      }
+    }
   };
 
   /* 詳細ダイアログを閉じる */
@@ -94,11 +96,11 @@ export const DaibumonsMasterDialog = ({
 
   /* 削除確認ダイアログで削除選択時 */
   const handleConfirmDelete = async () => {
-    // const values = await getValues();
-    // await updateManager({ ...values, delFlg: true }, managerId);
+    const values = await getValues();
+    await updateDaibumon({ ...values, delFlg: true }, daibumonId);
     setDeleteOpen(false);
     handleCloseDialog();
-    // await refetchManagers();
+    await refetchDaibumons();
   };
 
   /* useEffect --------------------------------------- */
@@ -113,12 +115,12 @@ export const DaibumonsMasterDialog = ({
         setIsLoading(false);
         setIsNew(true);
       } else {
-        // const daibumon1 = await getOneDaibumon(daibumonId);
-        // if (daibumon1) {
-        //   setDaibumon(daibumon1);
-        //   reset(daibumon1); // 取得したデータでフォーム初期化
-        // }
-        setIsLoading(false);
+        const daibumon1 = await getOneDaibumon(daibumonId);
+        if (daibumon1) {
+          reset(daibumon1); // 取得したデータでフォーム初期化
+          // }
+          setIsLoading(false);
+        }
       }
     };
     getThatOneDaibumon();
@@ -169,6 +171,11 @@ export const DaibumonsMasterDialog = ({
                     sx={{ maxWidth: '90%' }}
                     disabled={editable ? false : true}
                   />
+                </FormBox>
+              </Grid2>
+              <Grid2>
+                <FormBox formItem={formItems[3]}>
+                  <CheckboxElement name="dspFlg" control={control} size="medium" disabled={editable ? false : true} />
                 </FormBox>
               </Grid2>
             </Grid2>
