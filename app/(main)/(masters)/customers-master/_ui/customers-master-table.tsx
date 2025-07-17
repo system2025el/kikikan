@@ -5,11 +5,11 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { Loading } from '@/app/(main)/_ui/loading';
 
-// import { getAllCustomers } from '@/app/_lib/supabase/supabaseFuncs';
 import { MuiTablePagination } from '../../../_ui/table-pagination';
 import { MasterTable } from '../../_ui/tables';
 import { cMHeader } from '../_lib/datas';
-import { CustomerMasterTableValues } from '../_lib/types';
+import { GetFilteredCustomers } from '../_lib/funcs';
+import { CustomersMasterTableValues } from '../_lib/types';
 import { CustomersMasterDialog } from './customers-master-dialog';
 
 /**
@@ -21,14 +21,13 @@ export const CustomersMasterTable = ({
   isLoading,
   setIsLoading,
 }: {
-  customers: CustomerMasterTableValues[] | undefined;
+  customers: CustomersMasterTableValues[] | undefined;
   isLoading: boolean;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
   /* 1ページごとの表示数 */
   const rowsPerPage = 50;
-  /* useState
-   * -------------------------------------------------------- */
+  /* useState ----------------------------------- */
   /* ダイアログ開く顧客のID、閉じるとき、未選択で-100とする */
   const [openId, setOpenID] = useState(-100);
   /* 顧客詳細ダイアログの開閉状態 */
@@ -36,9 +35,9 @@ export const CustomersMasterTable = ({
   /* 今開いてるテーブルのページ数 */
   const [page, setPage] = useState(1);
   /* 顧客リスト */
-  const [theCustomers, setTheCustomers] = useState<CustomerMasterTableValues[] | undefined>(customers);
+  const [theCustomers, setTheCustomers] = useState<CustomersMasterTableValues[] | undefined>(customers);
 
-  /* Methods ---------------------------------------------------- */
+  /* methods ------------------------------------------- */
   /* 顧客詳細ダイアログを開く関数 */
   const handleOpenDialog = (id: number) => {
     setOpenID(id);
@@ -51,8 +50,8 @@ export const CustomersMasterTable = ({
   /* 情報が変わったときに更新される */
   const refetchCustomers = async () => {
     setIsLoading(true);
-    // const updated = await GetFilteredCustomers('');
-    // setTheCustomers(updated);
+    const updated = await GetFilteredCustomers('');
+    setTheCustomers(updated);
     setIsLoading(false);
   };
 
@@ -96,34 +95,37 @@ export const CustomersMasterTable = ({
             </Button>
           </Grid2>
         </Grid2>
-      </Grid2>
-      <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
-        {isLoading ? (
-          <Loading />
-        ) : (
-          <>
-            <MasterTable
-              headers={cMHeader}
-              datas={list!.map((l) => ({
-                ...l,
-                id: l.kokyakuId,
-                name: l.kokyakuNam,
-                address: [l.adrShozai, l.adrTatemono, l.adrSonota].filter(Boolean).join(' '),
-              }))}
-              page={page}
-              rowsPerPage={rowsPerPage}
-              handleOpenDialog={handleOpenDialog}
-            />
-            <Dialog open={dialogOpen} fullScreen>
-              <CustomersMasterDialog
-                customerId={openId}
-                handleClose={handleCloseDialog}
-                refetchCustomers={refetchCustomers}
+      </Grid2>{' '}
+      {isLoading ? (
+        <Loading />
+      ) : (
+        <>
+          {list!.length < 1 && <Typography>該当するデータがありません</Typography>}
+          {list!.length > 0 && (
+            <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
+              <MasterTable
+                headers={cMHeader}
+                datas={list!.map((l) => ({
+                  ...l,
+                  id: l.kokyakuId,
+                  name: l.kokyakuNam,
+                  address: [l.adrShozai, l.adrTatemono, l.adrSonota].filter(Boolean).join(' '),
+                }))}
+                page={page}
+                rowsPerPage={rowsPerPage}
+                handleOpenDialog={handleOpenDialog}
               />
-            </Dialog>
-          </>
-        )}
-      </TableContainer>
+            </TableContainer>
+          )}
+        </>
+      )}
+      <Dialog open={dialogOpen} fullScreen>
+        <CustomersMasterDialog
+          customerId={openId}
+          handleClose={handleCloseDialog}
+          refetchCustomers={refetchCustomers}
+        />
+      </Dialog>
     </Box>
   );
 };
