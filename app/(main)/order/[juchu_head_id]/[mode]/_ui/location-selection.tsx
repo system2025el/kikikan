@@ -64,6 +64,7 @@ export const LocationSelectDialog = (props: {
     resolver: zodResolver(LocsMasterSearchSchema),
   });
 
+  /* 検索ボタン押下 */
   const onSubmit = async (data: LocsMasterSearchValues) => {
     setIsLoading(true);
     const newList = await GetFilteredLocs(data.query!);

@@ -56,9 +56,3 @@ export const LockSchema = z.object({
 });
 
 export type LockValues = z.infer<typeof LockSchema>;
-
-/* 検索用スキーマ */
-export const CustomersMasterSearchSchema = z.object({
-  query: z.string().optional(),
-});
-export type CustomersMasterSearchValues = z.infer<typeof CustomersMasterSearchSchema>;

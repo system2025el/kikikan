@@ -26,7 +26,7 @@ import { TextFieldElement } from 'react-hook-form-mui';
 
 import { Loading } from '@/app/(main)/_ui/loading';
 import {
-  CustomerMasterTableValues,
+  CustomersMasterTableValues,
   // CustomersMasterSearchSchema,
   // CustomersMasterSearchValues,
 } from '@/app/(main)/(masters)/customers-master/_lib/types';
@@ -34,7 +34,7 @@ import {
 import { MuiTablePagination } from '../../../../_ui/table-pagination';
 //import { customers } from '../../../../(masters)/customers-master/_lib/datas';
 import { GetFilteredCustomers } from '../_lib/funcs';
-import { CustomersMasterSearchSchema, CustomersMasterSearchValues, KokyakuValues } from '../_lib/types';
+import { KokyakuValues } from '../_lib/types';
 
 /** 新規受注の相手選択ダイアログ（全画面） */
 export const CustomerSelectionDialog = (props: {
@@ -42,7 +42,7 @@ export const CustomerSelectionDialog = (props: {
   handleCloseCustDialog: () => void;
 }) => {
   const { handleCustSelect, handleCloseCustDialog } = props;
-  const [custs, setCusts] = useState<CustomerMasterTableValues[]>();
+  const [custs, setCusts] = useState<CustomersMasterTableValues[]>();
   const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
   const rowsPerPage = 50;
@@ -59,10 +59,10 @@ export const CustomerSelectionDialog = (props: {
   const { control, handleSubmit } = useForm({
     mode: 'onSubmit',
     defaultValues: { query: '' },
-    resolver: zodResolver(CustomersMasterSearchSchema),
   });
 
-  const onSubmit = async (data: CustomersMasterSearchValues) => {
+  /* 検索ボタン押下 */
+  const onSubmit = async (data: { query: string | undefined }) => {
     setIsLoading(true);
     const newList = await GetFilteredCustomers(data.query!);
     setCusts(newList);
