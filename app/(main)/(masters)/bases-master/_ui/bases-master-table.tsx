@@ -49,7 +49,7 @@ export const BasesMasterTable = ({
   /* 情報が変わったときに更新される */
   const refetchBases = async () => {
     setIsLoading(true);
-    // const updated = await GetFilteredBases('');
+    // const updated = await getFilteredBases('');
     // setTheBases(updated);
     setIsLoading(false);
   };
@@ -64,7 +64,10 @@ export const BasesMasterTable = ({
 
   // 表示するデータ
   const list = useMemo(
-    () => (rowsPerPage > 0 ? theBases!.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage) : theBases),
+    () =>
+      theBases && rowsPerPage > 0
+        ? theBases.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage)
+        : theBases,
     [page, rowsPerPage, theBases]
   );
 
@@ -80,10 +83,10 @@ export const BasesMasterTable = ({
             <MuiTablePagination arrayList={list!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
           </Grid2>
           <Grid2 container spacing={3}>
-            <Grid2>
+            <Grid2 alignContent={'center'}>
               <Typography color="error" variant="body2">
-                ※マスタは削除できません。登録画面で削除フラグを付けてください
-                <br />
+                {/* ※マスタは削除できません。登録画面で削除フラグを付けてください */}
+                {/* <br /> */}
                 ※表示順を変更する場合は、検索条件無しで全件表示してください
               </Typography>
             </Grid2>
