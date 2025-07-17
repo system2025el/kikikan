@@ -1,9 +1,9 @@
 'use server';
 
 import { supabase } from '@/app/_lib/supabase/supabase';
-import { CustomerMasterTableValues } from '@/app/(main)/(masters)/customers-master/_lib/types';
+import { CustomersMasterTableValues } from '@/app/(main)/(masters)/customers-master/_lib/types';
 
-import { JuchuHeadValues, LockValues, NewOrderValues } from './types';
+import { JuchuHeadValues, LockValues, OrderValues } from './types';
 
 /**
  * 受注ヘッダー取得
@@ -36,7 +36,7 @@ export const GetOrder = async (juchuHeadId: number) => {
         console.error('GetOrder kokyaku error : ', kokyakuError);
         return null;
       }
-      const order: NewOrderValues = {
+      const order: OrderValues = {
         juchuHeadId: juchuData.juchu_head_id,
         delFlg: juchuData.del_flg,
         juchuSts: juchuData.juchu_sts,
@@ -54,7 +54,7 @@ export const GetOrder = async (juchuHeadId: number) => {
       console.log('GetOrder order : ', order);
       return order;
     } else {
-      const order: NewOrderValues = {
+      const order: OrderValues = {
         juchuHeadId: juchuData.juchu_head_id,
         delFlg: juchuData.del_flg,
         juchuSts: juchuData.juchu_sts,
@@ -221,7 +221,7 @@ export const AddNewOrder = async (juchuHeadId: number, nyuryokuUser: string | un
  * @param data 受注ヘッダーデータ
  * @returns 正誤
  */
-export const Update = async (data: NewOrderValues) => {
+export const Update = async (data: OrderValues) => {
   const updateData = {
     juchu_head_id: data.juchuHeadId,
     del_flg: data.delFlg,
@@ -282,7 +282,7 @@ export const GetFilteredCustomers = async (query: string) => {
       if (!data || data.length === 0) {
         return [];
       } else {
-        const filteredCustomers: CustomerMasterTableValues[] = data.map((d) => ({
+        const filteredCustomers: CustomersMasterTableValues[] = data.map((d) => ({
           kokyakuId: d.kokyaku_id,
           kokyakuNam: d.kokyaku_nam,
           adrShozai: d.adr_shozai,

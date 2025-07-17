@@ -34,12 +34,12 @@ import { SelectTable } from '@/app/(main)/_ui/table';
 import { equipmentRows, vehicleHeaders, vehicleRows } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/data';
 
 import { AddLock, DeleteLock, GetLock, Update } from '../_lib/funcs';
-import { JuchuHeadSchema, KokyakuValues, LockValues, NewOrderSchema, NewOrderValues } from '../_lib/types';
+import { JuchuHeadSchema, KokyakuValues, LockValues, OrderSchema, OrderValues } from '../_lib/types';
 import { CustomerSelectionDialog } from './customer-selection';
 import { LocationSelectDialog } from './location-selection';
 import { OrderEqTable } from './order-table';
 
-export const Order = (props: { order: NewOrderValues; edit: boolean; lockData: LockValues | null }) => {
+export const Order = (props: { order: OrderValues; edit: boolean; lockData: LockValues | null }) => {
   // user情報
   const user = useUserStore((state) => state.user);
   // 編集モード(true:編集、false:閲覧)
@@ -82,7 +82,7 @@ export const Order = (props: { order: NewOrderValues; edit: boolean; lockData: L
       nebikiAmt: props.order.nebikiAmt,
       zeiKbn: props.order.zeiKbn,
     },
-    resolver: zodResolver(NewOrderSchema),
+    resolver: zodResolver(OrderSchema),
   });
 
   useEffect(() => {
@@ -100,7 +100,7 @@ export const Order = (props: { order: NewOrderValues; edit: boolean; lockData: L
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  const onSubmit = async (data: NewOrderValues) => {
+  const onSubmit = async (data: OrderValues) => {
     console.log('update : 開始');
     const update = await Update(data);
     console.log('update : ', update);

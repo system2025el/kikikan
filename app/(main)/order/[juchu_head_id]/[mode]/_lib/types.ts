@@ -30,7 +30,7 @@ export const KokyakuSchema = z.object({
 
 export type KokyakuValues = z.infer<typeof KokyakuSchema>;
 
-export const NewOrderSchema = z.object({
+export const OrderSchema = z.object({
   juchuHeadId: z.number(),
   delFlg: z.number().nullable(),
   juchuSts: z.number().nullable(),
@@ -46,7 +46,7 @@ export const NewOrderSchema = z.object({
   zeiKbn: z.number().nullable(),
 });
 
-export type NewOrderValues = z.infer<typeof NewOrderSchema>;
+export type OrderValues = z.infer<typeof OrderSchema>;
 
 export const LockSchema = z.object({
   lockShubetu: z.number(),

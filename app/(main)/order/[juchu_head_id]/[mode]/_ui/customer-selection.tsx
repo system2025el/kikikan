@@ -25,11 +25,7 @@ import { useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
 import { Loading } from '@/app/(main)/_ui/loading';
-import {
-  CustomersMasterTableValues,
-  // CustomersMasterSearchSchema,
-  // CustomersMasterSearchValues,
-} from '@/app/(main)/(masters)/customers-master/_lib/types';
+import { CustomersMasterTableValues } from '@/app/(main)/(masters)/customers-master/_lib/types';
 
 import { MuiTablePagination } from '../../../../_ui/table-pagination';
 //import { customers } from '../../../../(masters)/customers-master/_lib/datas';
