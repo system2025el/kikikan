@@ -36,6 +36,7 @@ import { SelectTable } from '@/app/(main)/_ui/table';
 import { equipmentRows, vehicleHeaders, vehicleRows } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/data';
 
 import { AddLock, DeleteLock, GetLock, Update } from '../_lib/funcs';
+import { useUnsavedChangesWarning } from '../_lib/hook';
 import { JuchuHeadSchema, KokyakuValues, LockValues, OrderSchema, OrderValues } from '../_lib/types';
 import { PreservationAlertDialog } from './caveat-dialog';
 import { CustomerSelectionDialog } from './customer-selection';
@@ -46,14 +47,12 @@ export const Order = (props: { order: OrderValues; edit: boolean; lockData: Lock
   const router = useRouter();
   // user情報
   const user = useUserStore((state) => state.user);
-  //
+  // ローディング
   const [isLoading, setIsLoading] = useState(false);
   // 編集モード(true:編集、false:閲覧)
   const [edit, setEdit] = useState(props.edit);
   // ロックデータ
   const [lockData, setLockData] = useState<LockValues | null>(props.lockData);
-  // 保存フラグ
-  const [preservationFlag, setPreservationFlag] = useState(false);
   /* 未保存モーダルを出すかどうか */
   const [dirtyOpen, setDirtyOpen] = useState(false);
   // 合計金額
@@ -111,6 +110,9 @@ export const Order = (props: { order: OrderValues; edit: boolean; lockData: Lock
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
+  // ページを離れた際のhook
+  useUnsavedChangesWarning(isDirty);
+
   // 保存ボタン押下
   const onSubmit = async (data: OrderValues) => {
     console.log('update : 開始');
@@ -119,7 +121,6 @@ export const Order = (props: { order: OrderValues; edit: boolean; lockData: Lock
     reset(data);
     setIsLoading(false);
     console.log('update : ', update);
-    setPreservationFlag(true);
   };
 
   // 編集モード変更
