@@ -1,31 +1,15 @@
 'use client';
-import { CheckBox, SellTwoTone } from '@mui/icons-material';
 import AddIcon from '@mui/icons-material/Add';
-import {
-  alpha,
-  Box,
-  Button,
-  Dialog,
-  Divider,
-  Grid2,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
-  useTheme,
-} from '@mui/material';
-import { SetStateAction, useEffect, useMemo, useState } from 'react';
+import { Box, Button, Dialog, Divider, Grid2, Paper, TableContainer, Typography } from '@mui/material';
+import { useEffect, useMemo, useState } from 'react';
 
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { MuiTablePagination } from '../../../_ui/table-pagination';
 import { MasterTable } from '../../_ui/tables';
 import { BumonsMHeader } from '../_lib/datas';
-import { BumonsMasterDialogValues, BumonsMasterTableValues } from '../_lib/types';
+import { getFilteredBumons } from '../_lib/funcs';
+import { BumonsMasterTableValues } from '../_lib/types';
 import { BumonsMasterDialog } from './bumons-master-dialog';
 
 /**
@@ -68,8 +52,12 @@ export const BumonsMasterTable = ({
   /* 情報が変わったときに更新される */
   const refetchBumons = async () => {
     setIsLoading(true);
-    // const updated = await getFilteredBumons('');
-    // setTheBumons(updated);
+    const updated = await getFilteredBumons({
+      q: '',
+      d: 0,
+      s: 0,
+    });
+    setTheBumons(updated);
     setIsLoading(false);
   };
 
@@ -117,24 +105,27 @@ export const BumonsMasterTable = ({
             </Grid2>
           </Grid2>
         </Grid2>
-        <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
-          {isLoading ? (
-            <Loading />
-          ) : (
-            <>
-              <MasterTable
-                headers={BumonsMHeader}
-                datas={list!.map((l) => ({ id: l.bumonId!, name: l.bumonNam, ...l }))}
-                handleOpenDialog={handleOpenDialog}
-                page={page}
-                rowsPerPage={rowsPerPage}
-              />
-              <Dialog open={dialogOpen} fullScreen>
-                <BumonsMasterDialog handleClose={handleCloseDialog} bumonId={openId} refetchBumons={refetchBumons} />
-              </Dialog>
-            </>
-          )}
-        </TableContainer>
+        {isLoading ? (
+          <Loading />
+        ) : (
+          <>
+            {list!.length < 1 && <Typography>該当するデータがありません</Typography>}
+            {list!.length > 0 && (
+              <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
+                <MasterTable
+                  headers={BumonsMHeader}
+                  datas={list!.map((l) => ({ id: l.bumonId!, name: l.bumonNam, ...l }))}
+                  handleOpenDialog={handleOpenDialog}
+                  page={page}
+                  rowsPerPage={rowsPerPage}
+                />
+              </TableContainer>
+            )}
+          </>
+        )}
+        <Dialog open={dialogOpen} fullScreen>
+          <BumonsMasterDialog handleClose={handleCloseDialog} bumonId={openId} refetchBumons={refetchBumons} />
+        </Dialog>
       </Box>
     </>
   );
