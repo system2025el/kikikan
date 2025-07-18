@@ -158,7 +158,6 @@ export const TestDate = (props: {
               ...sx,
             },
             error: fieldstate?.invalid,
-            onBlur: onBlur,
           },
           calendarHeader: { format: 'YYYY年MM月' },
         }} // カレンダーヘッダーのフォーマット

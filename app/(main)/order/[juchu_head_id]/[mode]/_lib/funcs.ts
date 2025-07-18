@@ -41,7 +41,7 @@ export const GetOrder = async (juchuHeadId: number) => {
         delFlg: juchuData.del_flg,
         juchuSts: juchuData.juchu_sts,
         juchuDat: juchuData.juchu_dat,
-        juchuRange: [juchuData.juchu_str_dat, juchuData.juchu_end_dat],
+        juchuRange: juchuData.juchu_str_dat !== null ? [juchuData.juchu_str_dat, juchuData.juchu_end_dat] : null,
         nyuryokuUser: juchuData.nyuryoku_user,
         koenNam: juchuData.koen_nam,
         koenbashoNam: juchuData.koenbasho_nam,

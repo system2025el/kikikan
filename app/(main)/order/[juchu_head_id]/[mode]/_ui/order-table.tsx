@@ -103,10 +103,10 @@ export const OrderEqTable: React.FC<OrderEqTableProps> = ({ orderRows, edit, onS
                   <Button
                     href={
                       row.juchuKizaiHeadKbn === 1
-                        ? '/new-order/equipment-order-detail'
+                        ? '/order/equipment-order-detail'
                         : row.juchuKizaiHeadKbn === 2
-                          ? '/new-order/equipment-return-order-detail'
-                          : '/new-order/equipment-keep-order-detail'
+                          ? '/order/equipment-return-order-detail'
+                          : '/order/equipment-keep-order-detail'
                     }
                     variant="text"
                     sx={{
