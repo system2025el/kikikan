@@ -1,11 +1,27 @@
 'use client';
 import SearchIcon from '@mui/icons-material/Search';
-import { Box, Button, Container, Divider, Grid2, Paper, Select, Stack, TextField, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  Container,
+  Divider,
+  Grid2,
+  MenuItem,
+  Paper,
+  Select,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material';
+import { grey, red } from '@mui/material/colors';
 import { useState } from 'react';
-import { SelectElement, TextFieldElement, useForm } from 'react-hook-form-mui';
+import { Controller, SelectElement, TextFieldElement, useForm } from 'react-hook-form-mui';
+
+import { selectNone, SelectTypes } from '@/app/(main)/_ui/form-box';
 
 import { BackButton } from '../../../_ui/buttons';
-import { BumonsMasterDialogValues, BumonsMasterTableValues } from '../_lib/types';
+import { getFilteredBumons } from '../_lib/funcs';
+import { BumonsMasterTableValues } from '../_lib/types';
 import { BumonsMasterTable } from './bumons-master-table';
 /**
  * 部門マスタ画面
@@ -13,7 +29,13 @@ import { BumonsMasterTable } from './bumons-master-table';
  * @returns {JSX.Element} 部門マスタコンポーネント
  */
 
-export const BumonsMaster = ({ bumons }: { bumons: BumonsMasterTableValues[] | undefined }) => {
+export const BumonsMaster = ({
+  bumons,
+  options,
+}: {
+  bumons: BumonsMasterTableValues[] | undefined;
+  options: (SelectTypes[] | undefined)[];
+}) => {
   /* useState ------------------ */
   const [theBumons, setTheBumons] = useState(bumons);
   /* DBのローディング */
@@ -22,19 +44,23 @@ export const BumonsMaster = ({ bumons }: { bumons: BumonsMasterTableValues[] | u
   /* useForm ------------------- */
   const { control, handleSubmit } = useForm({
     mode: 'onSubmit',
-    defaultValues: { query: '', daibumonQuery: '', shukeiQuery: '' },
+    defaultValues: { query: '', daibumonQuery: 0, shukeiQuery: 0 },
   });
 
   /* 検索ボタン押下 */
   const onSubmit = async (data: {
     query: string | undefined;
-    daibumonQuery: string | undefined;
-    shukeiQuery: string | undefined;
+    daibumonQuery: number | undefined;
+    shukeiQuery: number | undefined;
   }) => {
     setIsLoading(true);
     console.log('data : ', data);
-    // const newList = await getFilteredBumons(data.query!);
-    // setTheBumons(newList);
+    const newList = await getFilteredBumons({
+      q: data.query!,
+      d: data.daibumonQuery!,
+      s: data.shukeiQuery!,
+    });
+    setTheBumons(newList);
     console.log('theLocs : ', theBumons);
   };
 
@@ -52,7 +78,7 @@ export const BumonsMaster = ({ bumons }: { bumons: BumonsMasterTableValues[] | u
           <Stack>
             <Typography variant="body2">検索</Typography>
           </Stack>
-          <form /*onSubmit={handleSubmit(onSubmit)}*/>
+          <form onSubmit={handleSubmit(onSubmit)}>
             <Stack alignItems={'center'}>
               <Typography noWrap width={100}>
                 部門名
@@ -64,12 +90,51 @@ export const BumonsMaster = ({ bumons }: { bumons: BumonsMasterTableValues[] | u
                 <Typography noWrap width={100}>
                   大部門名
                 </Typography>
-                <SelectElement name="daibumonQuery" control={control} sx={{ width: 250 }} />
+                {/* <SelectElement
+                  name="daibumonQuery"
+                  control={control}
+                  sx={{ width: 250 }}
+                  options={[selectNone, ...options[0]!]}
+                /> */}
+                <Controller
+                  name="daibumonQuery"
+                  control={control}
+                  defaultValue={0}
+                  render={({ field }) => (
+                    <Select {...field} sx={{ width: 250 }}>
+                      {[selectNone, ...options[0]!].map((opt) => (
+                        <MenuItem key={opt.id} value={opt.id} sx={opt.id === 0 ? { color: grey[600] } : {}}>
+                          {opt.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  )}
+                />
                 <Box width={50}></Box>
                 <Typography noWrap width={100}>
                   集計部門名
                 </Typography>
-                <SelectElement name="shukeiQuery" control={control} sx={{ width: 250 }} />
+                {/* <SelectElement
+                  name="shukeiQuery"
+                  control={control}
+                  sx={{ width: 250 }}
+                  options={[selectNone, ...options[1]!]}
+                  
+                /> */}
+                <Controller
+                  name="shukeiQuery"
+                  control={control}
+                  defaultValue={0}
+                  render={({ field }) => (
+                    <Select {...field} sx={{ width: 250 }}>
+                      {[selectNone, ...options[1]!].map((opt) => (
+                        <MenuItem key={opt.id} value={opt.id} sx={opt.id === 0 ? { color: grey[600] } : {}}>
+                          {opt.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  )}
+                />
               </Stack>
               <Box alignSelf={'end'}>
                 <Button type="submit">

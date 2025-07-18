@@ -30,7 +30,7 @@ export const formItems: FormItemsType[] = [
   },
   {
     label: '集計部門',
-    exsample: '例）証明部',
+    exsample: '例）照明部',
     constraints: 'リスト選択、または、入力（100文字まで）',
   },
 ];

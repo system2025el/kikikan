@@ -1,8 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Grid2 } from '@mui/material';
+import { Grid2, MenuItem, Select } from '@mui/material';
+import { grey } from '@mui/material/colors';
 import { useEffect, useState } from 'react';
 import {
   CheckboxElement,
+  Controller,
   SelectElement,
   TextareaAutosizeElement,
   TextFieldElement,
@@ -11,10 +13,12 @@ import {
 
 import { Loading } from '@/app/(main)/_ui/loading';
 
-import { FormBox } from '../../../_ui/form-box';
+import { FormBox, selectNone, SelectTypes } from '../../../_ui/form-box';
+import { getDaibumonsSelection, getShukeibumonsSelection } from '../../_lib/funs';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { emptyBumon, formItems } from '../_lib/datas';
+import { addNewBumon, getOnebumon, updateBumon } from '../_lib/funcs';
 import { BumonsMasterDialogSchema, BumonsMasterDialogValues } from '../_lib/types';
 
 /**
@@ -45,6 +49,8 @@ export const BumonsMasterDialog = ({
   const [deleteOpen, setDeleteOpen] = useState(false);
   /* submit時のactions (save, delete) */
   const [action, setAction] = useState<'save' | 'delete' | undefined>(undefined);
+  /* フォーム内のセレクトoptions */
+  const [selectOptions, setSelectOptions] = useState<SelectTypes[][]>([]);
 
   /* useForm ----------------------------------------- */
   const {
@@ -65,19 +71,24 @@ export const BumonsMasterDialog = ({
   const onSubmit = async (data: BumonsMasterDialogValues) => {
     console.log('isDarty : ', isDirty);
     console.log(data);
-    // if (bumonId === -100) {
-    //   await addNewBumon(data);  // handleCloseDialog();
-    // refetchBumons();
-    // } else {
-    // if (action === 'save') {
-    //   await updateBumon(data, bumonId);
-    // handleCloseDialog();
-    // refetchBumons();
-    // } else if (action === 'delete') {
-    //   setDeleteOpen(true);
-    //   return;
-    // }
-    // }
+    if (bumonId === -100) {
+      // 新規の時
+      await addNewBumon(data);
+      handleCloseDialog();
+      refetchBumons();
+    } else {
+      // 更新の時
+      if (action === 'save') {
+        // 保存終了ボタン押したとき
+        await updateBumon(data, bumonId);
+        handleCloseDialog();
+        refetchBumons();
+      } else if (action === 'delete') {
+        // 削除ボタン押したとき
+        setDeleteOpen(true);
+        return;
+      }
+    }
   };
 
   /* 詳細ダイアログを閉じる */
@@ -99,11 +110,11 @@ export const BumonsMasterDialog = ({
 
   /* 削除確認ダイアログで削除選択時 */
   const handleConfirmDelete = async () => {
-    // const values = await getValues();
-    // await updateBumon({ ...values, delFlg: true }, bumonId);
+    const values = await getValues();
+    await updateBumon({ ...values, delFlg: true }, bumonId);
     setDeleteOpen(false);
     handleCloseDialog();
-    // await refetchBumons();
+    await refetchBumons();
   };
 
   /* useEffect --------------------------------------- */
@@ -111,6 +122,9 @@ export const BumonsMasterDialog = ({
   useEffect(() => {
     console.log('★★★★★★★★★★★★★★★★★★★★★');
     const getThatOnebumon = async () => {
+      const a = await getDaibumonsSelection();
+      const b = await getShukeibumonsSelection();
+      setSelectOptions([a!, b!]);
       if (bumonId === -100) {
         // 新規追加モード
         reset(emptyBumon); // フォーム初期化
@@ -118,11 +132,10 @@ export const BumonsMasterDialog = ({
         setIsLoading(false);
         setIsNew(true);
       } else {
-        // const bumon1 = await getOnebumon(bumonId);
-        // if (bumon1) {
-        //   setbumon(bumon1);
-        //   reset(bumon1); // 取得したデータでフォーム初期化
-        // }
+        const bumon1 = await getOnebumon(bumonId);
+        if (bumon1) {
+          reset(bumon1); // 取得したデータでフォーム初期化
+        }
         setIsLoading(false);
       }
     };
@@ -137,7 +150,7 @@ export const BumonsMasterDialog = ({
           editable={editable}
           handleEditable={() => setEditable(true)}
           handleClose={handleClickClose}
-          dialogTitle="集計部門マスタ登録"
+          dialogTitle="部門マスタ登録"
           isNew={isNew}
           isDirty={isDirty}
           setAction={setAction}
@@ -173,25 +186,39 @@ export const BumonsMasterDialog = ({
               </Grid2>
               <Grid2>
                 <FormBox formItem={formItems[3]}>
-                  <SelectElement
+                  <Controller
                     name="daibumonId"
                     control={control}
-                    label={formItems[3].exsample}
-                    fullWidth
-                    sx={{ maxWidth: '90%' }}
+                    defaultValue={0}
                     disabled={editable ? false : true}
+                    render={({ field }) => (
+                      <Select {...field} sx={{ width: 250 }}>
+                        {[selectNone, ...selectOptions[0]!].map((opt) => (
+                          <MenuItem key={opt.id} value={opt.id} sx={opt.id === 0 ? { color: grey[600] } : {}}>
+                            {opt.label}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    )}
                   />
                 </FormBox>
               </Grid2>
               <Grid2>
                 <FormBox formItem={formItems[4]}>
-                  <SelectElement
+                  <Controller
                     name="shukeibumonId"
                     control={control}
-                    label={formItems[4].exsample}
-                    fullWidth
-                    sx={{ maxWidth: '90%' }}
+                    defaultValue={0}
                     disabled={editable ? false : true}
+                    render={({ field }) => (
+                      <Select {...field} sx={{ width: 250 }}>
+                        {[selectNone, ...selectOptions[1]!].map((opt) => (
+                          <MenuItem key={opt.id} value={opt.id} sx={opt.id === 0 ? { color: grey[600] } : {}}>
+                            {opt.label}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    )}
                   />
                 </FormBox>
               </Grid2>
