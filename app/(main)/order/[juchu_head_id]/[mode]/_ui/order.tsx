@@ -17,12 +17,14 @@ import {
   FormControl,
   Grid2,
   MenuItem,
+  Modal,
   Paper,
   Select,
   SelectChangeEvent,
   TextField,
   Typography,
 } from '@mui/material';
+import { useRouter } from 'next/navigation';
 import { use, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
@@ -35,17 +37,25 @@ import { equipmentRows, vehicleHeaders, vehicleRows } from '@/app/(main)/order/[
 
 import { AddLock, DeleteLock, GetLock, Update } from '../_lib/funcs';
 import { JuchuHeadSchema, KokyakuValues, LockValues, OrderSchema, OrderValues } from '../_lib/types';
+import { PreservationAlertDialog } from './caveat-dialog';
 import { CustomerSelectionDialog } from './customer-selection';
 import { LocationSelectDialog } from './location-selection';
 import { OrderEqTable } from './order-table';
 
 export const Order = (props: { order: OrderValues; edit: boolean; lockData: LockValues | null }) => {
+  const router = useRouter();
   // user情報
   const user = useUserStore((state) => state.user);
+  //
+  const [isLoading, setIsLoading] = useState(false);
   // 編集モード(true:編集、false:閲覧)
   const [edit, setEdit] = useState(props.edit);
   // ロックデータ
   const [lockData, setLockData] = useState<LockValues | null>(props.lockData);
+  // 保存フラグ
+  const [preservationFlag, setPreservationFlag] = useState(false);
+  /* 未保存モーダルを出すかどうか */
+  const [dirtyOpen, setDirtyOpen] = useState(false);
   // 合計金額
   const priceTotal = equipmentRows.reduce((sum, row) => sum + (row.price ?? 0), 0);
 
@@ -55,6 +65,7 @@ export const Order = (props: { order: OrderValues; edit: boolean; lockData: Lock
     control,
     handleSubmit,
     reset,
+    getValues,
     setValue,
     clearErrors,
     formState: { isDirty, dirtyFields, errors },
@@ -100,10 +111,15 @@ export const Order = (props: { order: OrderValues; edit: boolean; lockData: Lock
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
+  // 保存ボタン押下
   const onSubmit = async (data: OrderValues) => {
     console.log('update : 開始');
+    setIsLoading(true);
     const update = await Update(data);
+    reset(data);
+    setIsLoading(false);
     console.log('update : ', update);
+    setPreservationFlag(true);
   };
 
   // 編集モード変更
@@ -120,6 +136,59 @@ export const Order = (props: { order: OrderValues; edit: boolean; lockData: Lock
       setLockData(newLockData);
       setEdit(!edit);
     }
+  };
+
+  // コピーボタン押下
+  const handleCopy = () => {
+    const currentValue = getValues();
+    if (
+      !isDirty &&
+      currentValue.juchuDat &&
+      currentValue.nyuryokuUser &&
+      currentValue.koenNam &&
+      currentValue.kokyaku
+    ) {
+      console.log('コピー');
+    } else {
+      setDirtyOpen(true);
+    }
+  };
+
+  // 機材入力ボタン押下
+  const handleAddEq = () => {
+    const currentValue = getValues();
+    if (
+      !isDirty &&
+      currentValue.juchuDat &&
+      currentValue.nyuryokuUser &&
+      currentValue.koenNam &&
+      currentValue.kokyaku
+    ) {
+      router.push('/order/equipment-order-detail');
+    } else {
+      setDirtyOpen(true);
+    }
+  };
+
+  // 車両入力ボタン押下
+  const handleAddVehicle = () => {
+    const currentValue = getValues();
+    if (
+      !isDirty &&
+      currentValue.juchuDat &&
+      currentValue.nyuryokuUser &&
+      currentValue.koenNam &&
+      currentValue.kokyaku
+    ) {
+      router.push('/order/vehicle-order-detail');
+    } else {
+      setDirtyOpen(true);
+    }
+  };
+
+  //
+  const handleCloseDialog = () => {
+    setDirtyOpen(false);
   };
 
   const handleSelectionChange = (selectedIds: (string | number)[]) => {
@@ -158,7 +227,7 @@ export const Order = (props: { order: OrderValues; edit: boolean; lockData: Lock
     handleCloseCustomerDialog();
   };
 
-  if (user === null)
+  if (user === null || isLoading)
     return (
       <Box height={'90vh'}>
         <Loading />
@@ -202,7 +271,7 @@ export const Order = (props: { order: OrderValues; edit: boolean; lockData: Lock
                 <Delete fontSize="small" />
                 伝票削除
               </Button>
-              <Button disabled={!edit}>
+              <Button disabled={!edit} onClick={handleCopy}>
                 <ContentCopyIcon fontSize="small" />
                 コピー
               </Button>
@@ -281,14 +350,14 @@ export const Order = (props: { order: OrderValues; edit: boolean; lockData: Lock
                 <Controller
                   name="juchuRange"
                   control={control}
-                  render={({ field, fieldState }) => (
+                  render={({ field }) => (
                     <Box>
                       <RSuiteDateRangePicker value={field.value} onChange={field.onChange} disabled={!edit} />
-                      {/* {fieldState.error && (
+                      {errors.juchuRange && (
                         <Typography color="error" fontSize={'small'} sx={{ ml: 2 }}>
-                          {fieldState.error.message}
+                          {errors.juchuRange.message}
                         </Typography>
-                      )} */}
+                      )}
                     </Box>
                   )}
                 />
@@ -413,9 +482,9 @@ export const Order = (props: { order: OrderValues; edit: boolean; lockData: Lock
             </Grid2>
             <Grid2 container spacing={1}>
               <Button
-                href="/order/equipment-order-detail"
                 onClick={(e) => {
                   e.stopPropagation();
+                  handleAddEq();
                 }}
                 disabled={!edit}
               >
@@ -459,9 +528,9 @@ export const Order = (props: { order: OrderValues; edit: boolean; lockData: Lock
             </Grid2>
             <Grid2 container spacing={1}>
               <Button
-                href="/order/vehicle-order-detail"
                 onClick={(e) => {
                   e.stopPropagation();
+                  handleAddVehicle();
                 }}
                 disabled={!edit}
               >
@@ -486,6 +555,7 @@ export const Order = (props: { order: OrderValues; edit: boolean; lockData: Lock
           <SelectTable headers={vehicleHeaders} datas={vehicleRows} onSelectionChange={handleSelectionChange} />
         </AccordionDetails>
       </Accordion>
+      <PreservationAlertDialog open={dirtyOpen} onClick={handleCloseDialog} />
     </Box>
   );
 };
