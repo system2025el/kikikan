@@ -9,9 +9,9 @@ const Page = async () => {
     d: 0,
     s: 0,
   });
-  const a = await getDaibumonsSelection();
-  const b = await getShukeibumonsSelection();
-  const c = await getBumonsSelection();
+  const a = await getBumonsSelection();
+  const b = await getDaibumonsSelection();
+  const c = await getShukeibumonsSelection();
   const options = [a, b, c];
   return (
     <>

@@ -5,12 +5,12 @@ import { EqptsMasterDialogValues, EqptsMasterTableValues } from './types';
 /* 機材マスタヘッダー */
 export const eqptMHeader = [
   { key: 'name', label: '機材名' },
-  { key: 'defDatQty', label: '保有数' },
-  { key: 'bumonId', label: '部門' },
-  { key: 'shukeibumonId', label: '大部門' },
-  { key: 'daiBumonId', label: '集計部門' },
+  { key: 'kizaiQty', label: '保有数' },
+  { key: 'bumonNam', label: '部門' },
+  { key: 'daibumonNam', label: '大部門' },
+  { key: 'shukeibumonNam', label: '集計部門' },
   { key: 'kizaiGrpCod', label: '一式' },
-  { key: 'shozokuId', label: 'シリアル' },
+  { key: 'shozokuNam', label: 'シリアル' },
   { key: 'rankAmt1', label: '価格1' },
   { key: 'rankAmt2', label: '価格2' },
   { key: 'rankAmt3', label: '価格3' },
