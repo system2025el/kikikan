@@ -60,14 +60,6 @@ export const EqptMasterTable = ({
     setIsLoading(false); //theEqptsが変わったらローディング終わり
   }, [theEqpts, setIsLoading]);
 
-  // 表示するデータ
-  const list = useMemo(
-    () => (theEqpts && rowsPerPage > 0 ? theEqpts.slice((page - 1) * rowsPerPage, page * rowsPerPage) : theEqpts),
-    [page, rowsPerPage, theEqpts]
-  );
-  // // テーブル最後のページ用の空データの長さ
-  // const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - arrayList.length) : 0;
-
   return (
     <Box>
       <Typography pt={2} pl={2}>
@@ -76,7 +68,7 @@ export const EqptMasterTable = ({
       <Divider />
       <Grid2 container mt={0.5} mx={0.5} justifyContent={'space-between'} alignItems={'center'}>
         <Grid2 spacing={1}>
-          <MuiTablePagination arrayList={list!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
+          <MuiTablePagination arrayList={theEqpts!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
         </Grid2>
         <Grid2 container spacing={3}>
           <Grid2 alignContent={'center'}>
@@ -94,28 +86,31 @@ export const EqptMasterTable = ({
           </Grid2>
         </Grid2>
       </Grid2>
-      <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
-        {isLoading ? (
-          <Loading />
-        ) : (
-          <>
-            <MasterTableOfEqpt
-              headers={eqptMHeader}
-              datas={list!.map((l) => ({
-                id: l.kizaiId,
-                name: l.kizaiNam,
-                ...l,
-              }))}
-              page={page}
-              rowsPerPage={rowsPerPage}
-              handleOpenDialog={handleOpenDialog}
-            />
-            <Dialog open={dialogOpen} fullScreen>
-              <EqMasterDialog handleClose={handleCloseDialog} eqptId={openId} refetchEqpts={refetchEqpts} />
-            </Dialog>
-          </>
-        )}
-      </TableContainer>
+      {isLoading ? (
+        <Loading />
+      ) : (
+        <>
+          {theEqpts!.length < 1 && <Typography>該当するデータがありません</Typography>}
+          {theEqpts!.length > 0 && (
+            <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
+              <MasterTableOfEqpt
+                headers={eqptMHeader}
+                datas={theEqpts!.map((l) => ({
+                  id: l.kizaiId,
+                  name: l.kizaiNam,
+                  ...l,
+                }))}
+                page={page}
+                rowsPerPage={rowsPerPage}
+                handleOpenDialog={handleOpenDialog}
+              />
+            </TableContainer>
+          )}
+        </>
+      )}
+      <Dialog open={dialogOpen} fullScreen>
+        <EqMasterDialog handleClose={handleCloseDialog} eqptId={openId} refetchEqpts={refetchEqpts} />
+      </Dialog>
     </Box>
   );
 };

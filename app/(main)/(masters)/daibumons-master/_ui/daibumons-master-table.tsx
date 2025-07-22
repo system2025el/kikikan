@@ -62,15 +62,6 @@ export const DaibumonsMasterTable = ({
     setIsLoading(false); //theDaibumonsが変わったらローディング終わり
   }, [theDaibumons, setIsLoading]);
 
-  // 表示するデータ
-  const list = useMemo(
-    () =>
-      theDaibumons && rowsPerPage > 0
-        ? theDaibumons.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage)
-        : theDaibumons,
-    [page, rowsPerPage, theDaibumons]
-  );
-
   return (
     <>
       <Box>
@@ -80,7 +71,7 @@ export const DaibumonsMasterTable = ({
         <Divider />
         <Grid2 container mt={0.5} mx={0.5} justifyContent={'space-between'} alignItems={'center'}>
           <Grid2 spacing={1}>
-            <MuiTablePagination arrayList={list!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
+            <MuiTablePagination arrayList={theDaibumons!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
           </Grid2>
           <Grid2 container spacing={3}>
             <Grid2 alignContent={'center'}>
@@ -102,12 +93,12 @@ export const DaibumonsMasterTable = ({
           <Loading />
         ) : (
           <>
-            {list!.length < 1 && <Typography>該当するデータがありません</Typography>}
-            {list!.length > 0 && (
+            {theDaibumons!.length < 1 && <Typography>該当するデータがありません</Typography>}
+            {theDaibumons!.length > 0 && (
               <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
                 <MasterTable
                   headers={daibumonMHeader}
-                  datas={list!.map((l) => ({ id: l.daibumonId!, name: l.daibumonNam, ...l }))}
+                  datas={theDaibumons!.map((l) => ({ id: l.daibumonId!, name: l.daibumonNam, ...l }))}
                   handleOpenDialog={handleOpenDialog}
                   page={page}
                   rowsPerPage={rowsPerPage}

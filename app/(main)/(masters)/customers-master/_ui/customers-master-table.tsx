@@ -63,15 +63,6 @@ export const CustomersMasterTable = ({
     setIsLoading(false); //theCustomersが変わったらローディング終わり
   }, [theCustomers, setIsLoading]);
 
-  /* 表示する顧客リスト */
-  const list = useMemo(
-    () =>
-      theCustomers && rowsPerPage > 0
-        ? theCustomers.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage)
-        : theCustomers,
-    [page, rowsPerPage, theCustomers]
-  );
-
   return (
     <Box>
       <Typography pt={2} pl={2}>
@@ -80,7 +71,7 @@ export const CustomersMasterTable = ({
       <Divider />
       <Grid2 container mt={0.5} mx={0.5} justifyContent={'space-between'} alignItems={'center'}>
         <Grid2 spacing={1}>
-          <MuiTablePagination arrayList={list!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
+          <MuiTablePagination arrayList={theCustomers!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
         </Grid2>
         <Grid2 container spacing={3}>
           <Grid2 alignContent={'center'}>
@@ -102,12 +93,12 @@ export const CustomersMasterTable = ({
         <Loading />
       ) : (
         <>
-          {list!.length < 1 && <Typography>該当するデータがありません</Typography>}
-          {list!.length > 0 && (
+          {theCustomers!.length < 1 && <Typography>該当するデータがありません</Typography>}
+          {theCustomers!.length > 0 && (
             <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
               <MasterTable
                 headers={cMHeader}
-                datas={list!.map((l) => ({
+                datas={theCustomers!.map((l) => ({
                   ...l,
                   id: l.kokyakuId,
                   name: l.kokyakuNam,
