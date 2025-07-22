@@ -24,6 +24,7 @@ type MasterHeader = {
 
 type MasterRow = {
   id: number;
+  dspOrdNum: number;
   [key: string]: string | number | boolean | undefined;
 };
 
@@ -77,7 +78,7 @@ export const MasterTable = ({
         {list.map((row) => {
           const isHidden = row.dspFlg === 0 || row.dspFlg === false;
           return (
-            <TableRow hover key={row.id}>
+            <TableRow hover key={row.dspOrdNum}>
               <TableCell sx={{ bgcolor: isHidden ? grey[300] : '', width: 100 }}>
                 <Box width={32} px={1} fontSize={13} textAlign={'right'}>
                   {row.id}
@@ -177,10 +178,10 @@ export const MasterTableOfEqpt = ({
         </TableRow>
       </TableHead>
       <TableBody>
-        {list.map((row, index) => {
+        {list.map((row) => {
           const isHidden = row.dspFlg === 0 || row.dspFlg === false;
           return (
-            <TableRow hover key={row.id}>
+            <TableRow hover key={row.dspOrdNum}>
               <TableCell sx={{ bgcolor: isHidden ? grey[300] : '' }}>
                 <Box width={32} px={1} fontSize={13} textAlign={'right'}>
                   {row.id}

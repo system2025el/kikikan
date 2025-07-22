@@ -96,7 +96,7 @@ export const EqptMasterTable = ({
               <MasterTableOfEqpt
                 headers={eqptMHeader}
                 datas={theEqpts!.map((l) => ({
-                  id: l.dspOrdNum,
+                  id: l.kizaiId,
                   name: l.kizaiNam,
                   ...l,
                 }))}

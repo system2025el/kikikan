@@ -114,7 +114,7 @@ export const ManagerssMasterTable = ({
             <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
               <MasterTable
                 headers={mMHeader}
-                datas={theManagers!.map((l) => ({ ...l, id: l.dspOrdNum, name: l.tantouNam }))}
+                datas={theManagers!.map((l) => ({ ...l, id: l.tantouId, name: l.tantouNam }))}
                 page={page}
                 rowsPerPage={rowsPerPage}
                 handleOpenDialog={handleOpenDialog}

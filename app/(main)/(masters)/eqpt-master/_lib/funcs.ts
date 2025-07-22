@@ -73,7 +73,7 @@ export const getFilteredEqpts = async (queries: { q: string; b: number; d: numbe
   } catch (e) {
     console.error('例外が発生しました:', e);
   }
-  revalidatePath('/eqpts-master');
+  revalidatePath('/eqpt-master');
 };
 
 /**
@@ -148,7 +148,7 @@ export const addNewEqpt = async (data: EqptsMasterDialogValues) => {
       VALUES (
         (SELECT coalesce(max(kizai_id),0) + 1 FROM m_kizai),
         $1, $2, $3, $4, $5, $6, $7, $8, $9,
-        (SELECT coalesce(max(dsp_ord_num),0) + 1 FROM m_kizai),
+        $24,
         $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23
       );
     `;
@@ -187,6 +187,7 @@ export const addNewEqpt = async (data: EqptsMasterDialogValues) => {
       data.rankAmt5,
       date,
       'shigasan',
+      data.dspOrdNum,
     ]);
     console.log('data : ', data);
   } catch (error) {

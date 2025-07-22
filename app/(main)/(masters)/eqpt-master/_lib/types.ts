@@ -3,8 +3,8 @@ import { number, z } from 'zod';
 // Schema
 export const EqptsMasterDialogSchema = z.object({
   kizaiNam: z.string().max(100, { message: '100文字以内で入力してください' }).min(1, { message: '必須項目です' }),
-  sectionNum: z.number({ message: '数字を入力してください' }).optional(),
-  elNum: z.number({ message: '数字を入力してください' }).optional(),
+  sectionNum: z.number().optional(),
+  elNum: z.number().optional(),
   delFlg: z.boolean().optional(),
   shozokuId: z.number({ message: '選択してください' }).min(1, { message: '選択してください' }),
   bldCod: z.string().max(20, { message: '20文字以内で入力してください' }).optional(),

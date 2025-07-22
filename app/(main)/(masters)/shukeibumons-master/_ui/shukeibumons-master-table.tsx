@@ -100,7 +100,7 @@ export const ShukeibumonsMasterTable = ({
                 <MasterTable
                   headers={shukeibumonMHeader}
                   datas={theShukeibumons!.map((l) => ({
-                    id: l.dspOrdNum!,
+                    id: l.shukeibumonId!,
                     name: l.shukeibumonNam,
                     ...l,
                   }))}

@@ -101,7 +101,7 @@ export const LocationsMasterTable = ({
                 headers={lMHeader}
                 datas={theLocs!.map((l) => ({
                   ...l,
-                  id: l.dspOrdNum,
+                  id: l.locId,
                   name: l.locNam,
                   address: `${l.adrShozai}${l.adrTatemono}${l.adrSonota}`,
                 }))}

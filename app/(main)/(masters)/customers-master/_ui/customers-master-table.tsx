@@ -100,7 +100,7 @@ export const CustomersMasterTable = ({
                 headers={cMHeader}
                 datas={theCustomers!.map((l) => ({
                   ...l,
-                  id: l.dspOrdNum,
+                  id: l.kokyakuId,
                   name: l.kokyakuNam,
                   address: [l.adrShozai, l.adrTatemono, l.adrSonota].filter(Boolean).join(' '),
                 }))}
