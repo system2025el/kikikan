@@ -41,15 +41,18 @@ export const basesList: BasesMasterTableValues[] = [
     shozokuNam: 'KICS',
     mem: '川崎',
     shozokuId: 1,
+    dspOrdNum: 0,
   },
   {
     shozokuNam: 'YARD',
     mem: '大和',
     shozokuId: 2,
+    dspOrdNum: 0,
   },
   {
     shozokuNam: 'その他',
     mem: '厚木など',
     shozokuId: 3,
+    dspOrdNum: 0,
   },
 ];

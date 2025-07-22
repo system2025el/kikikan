@@ -44,20 +44,24 @@ export const daibumonsList: DaibumonsMasterTableValues[] = [
     daibumonId: 1,
     daibumonNam: '照明',
     mem: 'XXXXXXXXXXX',
+    dspOrdNum: 0,
   },
   {
     daibumonId: 2,
     daibumonNam: 'Moving Light',
     mem: 'XXXXXXXX',
+    dspOrdNum: 0,
   },
   {
     daibumonNam: 'ムービング ゴボ',
     mem: 'XXXXXXX',
     daibumonId: 3,
+    dspOrdNum: 0,
   },
   {
     daibumonNam: '空（カラ）ケース',
     daibumonId: 4,
     mem: '',
+    dspOrdNum: 0,
   },
 ];
