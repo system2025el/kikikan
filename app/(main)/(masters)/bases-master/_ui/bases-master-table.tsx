@@ -8,6 +8,7 @@ import { Loading } from '@/app/(main)/_ui/loading';
 import { MuiTablePagination } from '../../../_ui/table-pagination';
 import { MasterTable } from '../../_ui/tables';
 import { bMHeader } from '../_lib/datas';
+import { getFilteredBases } from '../_lib/funcs';
 import { BasesMasterTableValues } from '../_lib/types';
 import { BasesMasterDialog } from './bases-master-dailog';
 
@@ -49,8 +50,8 @@ export const BasesMasterTable = ({
   /* 情報が変わったときに更新される */
   const refetchBases = async () => {
     setIsLoading(true);
-    // const updated = await getFilteredBases('');
-    // setTheBases(updated);
+    const updated = await getFilteredBases('');
+    setTheBases(updated);
     setIsLoading(false);
   };
 
@@ -89,24 +90,27 @@ export const BasesMasterTable = ({
             </Grid2>
           </Grid2>
         </Grid2>
-        <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
-          {isLoading ? (
-            <Loading />
-          ) : (
-            <>
-              <MasterTable
-                headers={bMHeader}
-                datas={theBases!.map((l) => ({ id: l.kyotenId!, name: l.kyotenNam, ...l }))}
-                handleOpenDialog={handleOpenDialog}
-                page={page}
-                rowsPerPage={rowsPerPage}
-              />
-              <Dialog open={dialogOpen} fullScreen>
-                <BasesMasterDialog handleClose={handleCloseDialog} baseId={openId} refetchBases={refetchBases} />
-              </Dialog>
-            </>
-          )}
-        </TableContainer>
+        {isLoading ? (
+          <Loading />
+        ) : (
+          <>
+            {theBases!.length < 1 && <Typography>該当するデータがありません</Typography>}
+            {theBases!.length > 0 && (
+              <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
+                <MasterTable
+                  headers={bMHeader}
+                  datas={theBases!.map((l) => ({ id: l.shozokuId!, name: l.shozokuNam, ...l }))}
+                  handleOpenDialog={handleOpenDialog}
+                  page={page}
+                  rowsPerPage={rowsPerPage}
+                />
+              </TableContainer>
+            )}
+          </>
+        )}
+        <Dialog open={dialogOpen} fullScreen>
+          <BasesMasterDialog handleClose={handleCloseDialog} baseId={openId} refetchBases={refetchBases} />
+        </Dialog>
       </Box>
     </>
   );
