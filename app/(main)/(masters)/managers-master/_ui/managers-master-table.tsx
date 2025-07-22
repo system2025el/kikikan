@@ -105,28 +105,27 @@ export const ManagerssMasterTable = ({
           </Grid2>
         </Grid2>
       </Grid2>
-      <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
-        {isLoading ? (
-          <Loading />
-        ) : (
-          <>
-            <MasterTable
-              headers={mMHeader}
-              datas={theManagers!.map((l) => ({ ...l, id: l.tantouId, name: l.tantouNam }))}
-              page={page}
-              rowsPerPage={rowsPerPage}
-              handleOpenDialog={handleOpenDialog}
-            />
-            <Dialog open={dialogOpen} fullScreen>
-              <ManagerMasterDialog
-                managerId={openId}
-                handleClose={handleCloseDialog}
-                refetchManagers={refetchManagers}
+      {isLoading ? (
+        <Loading />
+      ) : (
+        <>
+          {theManagers!.length < 1 && <Typography>該当するデータがありません</Typography>}
+          {theManagers!.length > 0 && (
+            <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
+              <MasterTable
+                headers={mMHeader}
+                datas={theManagers!.map((l) => ({ ...l, id: l.tantouId, name: l.tantouNam }))}
+                page={page}
+                rowsPerPage={rowsPerPage}
+                handleOpenDialog={handleOpenDialog}
               />
-            </Dialog>
-          </>
-        )}
-      </TableContainer>
+            </TableContainer>
+          )}
+        </>
+      )}
+      <Dialog open={dialogOpen} fullScreen>
+        <ManagerMasterDialog managerId={openId} handleClose={handleCloseDialog} refetchManagers={refetchManagers} />
+      </Dialog>
     </Box>
   );
 };
