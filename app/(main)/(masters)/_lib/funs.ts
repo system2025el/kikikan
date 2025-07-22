@@ -84,3 +84,30 @@ export const getBumonsSelection = async () => {
     console.error('例外が発生しました:', e);
   }
 };
+
+export const getShozokuSelection = async () => {
+  try {
+    const { data, error } = await supabase
+      .schema('dev2')
+      .from('m_shozoku')
+      .select('shozoku_id, shozoku_nam')
+      .neq('del_flg', 1);
+    if (!error) {
+      if (!data || data.length === 0) {
+        return [];
+      } else {
+        const selectElements: SelectTypes[] = data.map((d) => ({
+          id: d.shozoku_id,
+          label: d.shozoku_nam,
+        }));
+        console.log(selectElements.length);
+        return selectElements;
+      }
+    } else {
+      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
+      return [];
+    }
+  } catch (e) {
+    console.error('例外が発生しました:', e);
+  }
+};

@@ -64,10 +64,11 @@ export const getFilteredShukeibumons = async (query: string) => {
       if (!data || data.length === 0) {
         return [];
       } else {
-        const filteredShukeibumons: ShukeibumonsMasterTableValues[] = data.map((d) => ({
+        const filteredShukeibumons: ShukeibumonsMasterTableValues[] = data.map((d, index) => ({
           shukeibumonId: d.shukei_bumon_id,
           shukeibumonNam: d.shukei_bumon_nam,
           mem: d.mem,
+          dspOrdNum: index + 1,
         }));
         console.log(filteredShukeibumons.length);
         return filteredShukeibumons;

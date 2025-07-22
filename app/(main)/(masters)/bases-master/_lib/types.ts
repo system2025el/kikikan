@@ -12,4 +12,5 @@ export type BasesMasterTableValues = {
   shozokuId: number;
   shozokuNam: string;
   mem: string;
+  dspOrdNum: number;
 };

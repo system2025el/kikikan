@@ -39,10 +39,11 @@ export const getFilteredBumons = async (queries: { q: string; d: number; s: numb
       if (!data || data.length === 0) {
         return [];
       } else {
-        const filteredbumons: BumonsMasterTableValues[] = data.map((d) => ({
+        const filteredbumons: BumonsMasterTableValues[] = data.map((d, index) => ({
           bumonId: d.bumon_id,
           bumonNam: d.bumon_nam,
           mem: d.mem,
+          dspOrdNum: index + 1,
         }));
         console.log(filteredbumons.length);
         return filteredbumons;

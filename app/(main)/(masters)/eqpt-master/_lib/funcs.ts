@@ -21,6 +21,7 @@ export const getFilteredEqpts = async (queries: { q: string; b: number; d: numbe
       'kizai_id, kizai_nam, kizai_qty, shozoku_nam, mem, bumon_nam, dai_bumon_nam, shukei_bumon_nam, reg_amt, rank_amt_1, rank_amt_2, rank_amt_3, rank_amt_4, rank_amt_5, dsp_flg'
     )
     .neq('del_flg', 1)
+    .order('kizai_grp_cod')
     .order('dsp_ord_num');
 
   if (queries.q && queries.q.trim() !== '') {
@@ -44,7 +45,7 @@ export const getFilteredEqpts = async (queries: { q: string; b: number; d: numbe
       if (!data || data.length === 0) {
         return [];
       } else {
-        const filteredEqpts: EqptsMasterTableValues[] = data.map((d) => ({
+        const filteredEqpts: EqptsMasterTableValues[] = data.map((d, index) => ({
           kizaiId: d.kizai_id,
           kizaiNam: d.kizai_nam,
           kizaiQty: d.kizai_qty,
@@ -60,6 +61,7 @@ export const getFilteredEqpts = async (queries: { q: string; b: number; d: numbe
           rankAmt4: d.rank_amt_4,
           rankAmt5: d.rank_amt_5,
           dspFlg: d.dsp_flg,
+          dspOrdNum: index + 1,
         }));
         console.log(filteredEqpts.length);
         return filteredEqpts;
@@ -74,90 +76,125 @@ export const getFilteredEqpts = async (queries: { q: string; b: number; d: numbe
   revalidatePath('/eqpts-master');
 };
 
-// /**
-//  * 選択された機材のデータを取得する関数
-//  * @param id 機材マスタID
-//  * @returns {Promise<EqptsMasterDialogValues>} - 機材の詳細情報。取得失敗時は空オブジェクトを返します。
-//  */
-// export const getOneEqpt = async (id: number) => {
-//   try {
-//     const { data, error } = await supabase
-//       .schema('dev2')
-//       .from('m_Eqpt')
-//       .select('Eqpt_nam, del_flg, dai_Eqpt_id, syukei_Eqpt_id, mem ')
-//       .eq('Eqpt_id', id)
-//       .single();
-//     if (!error) {
-//       console.log('I got a datalist from db', data.del_flg);
+/**
+ * 選択された機材のデータを取得する関数
+ * @param id 機材マスタID
+ * @returns {Promise<EqptsMasterDialogValues>} - 機材の詳細情報。取得失敗時は空オブジェクトを返します。
+ */
+export const getOneEqpt = async (id: number) => {
+  try {
+    const { data, error } = await supabase
+      .schema('dev2')
+      .from('m_kizai')
+      .select(
+        'kizai_nam,  section_num, el_num, del_flg, shozoku_id, bld_cod, tana_cod, eda_cod, kizai_grp_cod, dsp_ord_num, mem, bumon_id, shukei_bumon_id, dsp_flg, ctn_flg, def_dat_qty, reg_amt, rank_amt_1, rank_amt_2, rank_amt_3, rank_amt_4, rank_amt_5'
+      )
+      .eq('kizai_id', id)
+      .single();
+    if (!error) {
+      console.log('I got a datalist from db', data.del_flg);
 
-//       const EqptDetails: EqptsMasterDialogValues = {
-//         EqptNam: data.Eqpt_nam,
-//         delFlg: Boolean(data.del_flg),
-//         mem: data.mem,
-//         daiEqptId: data.dai_Eqpt_id,
-//         shukeiEqptId: data.syukei_Eqpt_id,
-//       };
-//       console.log(EqptDetails.delFlg);
-//       return EqptDetails;
-//     } else {
-//       console.error('機材情報取得エラー。', { message: error.message, code: error.code });
-//       return emptyEqpt;
-//     }
-//   } catch (e) {
-//     console.error('例外が発生しました:', e);
-//     return emptyEqpt;
-//   }
-// };
+      const EqptDetails: EqptsMasterDialogValues = {
+        kizaiNam: data.kizai_nam,
+        sectionNum: data.section_num,
+        elNum: data.el_num,
+        delFlg: Boolean(data.del_flg),
+        shozokuId: data.shozoku_id,
+        bldCod: data.bld_cod,
+        tanaCod: data.tana_cod,
+        edaCod: data.eda_cod,
+        kizaiGrpCod: data.kizai_grp_cod,
+        dspOrdNum: data.dsp_ord_num,
+        mem: data.mem,
+        bumonId: data.bumon_id,
+        shukeibumonId: data.shukei_bumon_id,
+        dspFlg: Boolean(data.dsp_flg),
+        ctnFlg: Boolean(data.ctn_flg),
+        defDatQty: data.def_dat_qty,
+        regAmt: data.reg_amt,
+        rankAmt1: data.rank_amt_1,
+        rankAmt2: data.rank_amt_2,
+        rankAmt3: data.rank_amt_3,
+        rankAmt4: data.rank_amt_4,
+        rankAmt5: data.rank_amt_5,
+      };
+      console.log(EqptDetails.delFlg);
+      return EqptDetails;
+    } else {
+      console.error('機材情報取得エラー。', { message: error.message, code: error.code });
+      return emptyEqpt;
+    }
+  } catch (e) {
+    console.error('例外が発生しました:', e);
+    return emptyEqpt;
+  }
+};
 
-// /**
-//  * 機材マスタに新規登録する関数
-//  * @param data フォームで取得した機材情報
-//  */
-// export const addNewEqpt = async (data: EqptsMasterDialogValues) => {
-//   console.log(data.mem);
+/**
+ * 機材マスタに新規登録する関数
+ * @param data フォームで取得した機材情報
+ */
+export const addNewEqpt = async (data: EqptsMasterDialogValues) => {
+  console.log(data.mem);
 
-//   const query = `
-//       INSERT INTO m_Eqpt (
-//         Eqpt_id, Eqpt_nam, del_flg, dsp_ord_num,
-//         dai_Eqpt_id, syukei_Eqpt_id,
-//         mem, add_dat, add_user, upd_dat, upd_user
-//       )
-//       VALUES (
-//         (SELECT coalesce(max(Eqpt_id),0) + 1 FROM m_Eqpt),
-//         $1, $2,
-//         (SELECT coalesce(max(dsp_ord_num),0) + 1 FROM m_Eqpt),
-//         $3, $4, $5, $6, $7, $8, $9
-//       );
-//     `;
+  const query = `
+      INSERT INTO m_kizai (
+        kizai_id, kizai_nam, del_flg, section_num, el_num, shozoku_id,
+        bld_cod, tana_cod, eda_cod, kizai_grp_cod, dsp_ord_num, mem,
+        bumon_id, shukei_bumon_id, dsp_flg, ctn_flg, def_dat_qty,
+        reg_amt, rank_amt_1, rank_amt_2, rank_amt_3, rank_amt_4, rank_amt_5, 
+        add_dat, add_user
+      )
+      VALUES (
+        (SELECT coalesce(max(kizai_id),0) + 1 FROM m_kizai),
+        $1, $2, $3, $4, $5, $6, $7, $8, $9,
+        (SELECT coalesce(max(dsp_ord_num),0) + 1 FROM m_kizai),
+        $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23
+      );
+    `;
 
-//   const date = new Date()
-//     .toLocaleString('ja-JP', {
-//       timeZone: 'Asia/Tokyo',
-//       hour12: false,
-//     })
-//     .replace(/\//g, '-');
-//   try {
-//     console.log('DB Connected');
-//     await pool.query(` SET search_path TO dev2;`);
+  const date = new Date()
+    .toLocaleString('ja-JP', {
+      timeZone: 'Asia/Tokyo',
+      hour12: false,
+    })
+    .replace(/\//g, '-');
+  try {
+    console.log('DB Connected');
+    await pool.query(` SET search_path TO dev2;`);
 
-//     await pool.query(query, [
-//       data.EqptNam,
-//       Number(data.delFlg),
-//       data.daiEqptId,
-//       data.shukeiEqptId,
-//       data.mem,
-//       date,
-//       'shigasan',
-//       null,
-//       null,
-//     ]);
-//     console.log('data : ', data);
-//   } catch (error) {
-//     console.log('DB接続エラー', error);
-//     throw error;
-//   }
-//   await revalidatePath('/Eqpts-master');
-// };
+    await pool.query(query, [
+      data.kizaiNam,
+      Number(data.delFlg),
+      data.sectionNum,
+      data.elNum,
+      data.shozokuId,
+      data.bldCod,
+      data.tanaCod,
+      data.edaCod,
+      data.kizaiGrpCod,
+      data.mem,
+      data.bumonId,
+      data.shukeibumonId,
+      Number(data.dspFlg),
+      Number(data.ctnFlg),
+      data.defDatQty,
+      data.regAmt,
+      data.rankAmt1,
+      data.rankAmt2,
+      data.rankAmt3,
+      data.rankAmt4,
+      data.rankAmt5,
+      date,
+      'shigasan',
+    ]);
+    console.log('data : ', data);
+  } catch (error) {
+    console.log('DB接続エラー', error);
+    throw error;
+  }
+  await revalidatePath('/eqpt-master');
+};
 
 // /**
 //  * 機材マスタの情報を更新する関数
@@ -205,8 +242,35 @@ export const getFilteredEqpts = async (queries: { q: string; b: number; d: numbe
 //     console.log('例外が発生しました', error);
 //     throw error;
 //   }
-//   revalidatePath('/Eqpt-master');
+//   revalidatePath('/eqpt-master');
 // };
+
+export const getEqptsQty = async (id: number) => {
+  try {
+    const { count, error } = await supabase
+      .schema('dev2')
+      .from('m_rfid')
+      .select('*', { count: 'exact', head: true })
+      .eq('kizai_id', id);
+    if (error) {
+      console.error('Error counting filtered rows:', error);
+    } else {
+      console.log('Filtered rows :::::::::::', count);
+    }
+    if (!error) {
+      if (!count || count === 0) {
+        return null;
+      } else {
+        return count;
+      }
+    } else {
+      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
+      return null;
+    }
+  } catch (e) {
+    console.error('例外が発生しました:', e);
+  }
+};
 
 // export const getAllEqpt = async () => {
 //   try {
@@ -239,6 +303,6 @@ export const getFilteredEqpts = async (queries: { q: string; b: number; d: numbe
 //   } catch (e) {
 //     console.log(e);
 //   }
-//   revalidatePath('/Eqpts-master');
-//   redirect('/Eqpts-master');
+//   revalidatePath('/eqpt-master');
+//   redirect('/eqpt-master');
 // };

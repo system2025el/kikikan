@@ -96,10 +96,10 @@ export const BasesMasterTable = ({
           <>
             {theBases!.length < 1 && <Typography>該当するデータがありません</Typography>}
             {theBases!.length > 0 && (
-              <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
+              <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
                 <MasterTable
                   headers={bMHeader}
-                  datas={theBases!.map((l) => ({ id: l.shozokuId!, name: l.shozokuNam, ...l }))}
+                  datas={theBases!.map((l) => ({ id: l.dspOrdNum!, name: l.shozokuNam, ...l }))}
                   handleOpenDialog={handleOpenDialog}
                   page={page}
                   rowsPerPage={rowsPerPage}

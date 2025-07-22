@@ -32,4 +32,5 @@ export type CustomersMasterTableValues = {
   fax: string;
   mem: string;
   dspFlg: boolean;
+  dspOrdNum: number;
 };

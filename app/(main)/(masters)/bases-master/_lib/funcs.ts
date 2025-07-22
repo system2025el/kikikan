@@ -28,10 +28,11 @@ export const getFilteredBases = async (query: string) => {
       if (!data || data.length === 0) {
         return [];
       } else {
-        const filteredBases: BasesMasterTableValues[] = data.map((d) => ({
+        const filteredBases: BasesMasterTableValues[] = data.map((d, index) => ({
           shozokuId: d.shozoku_id,
           shozokuNam: d.shozoku_nam,
           mem: d.mem,
+          dspOrdNum: index + 1,
         }));
         console.log(filteredBases.length, '行');
         return filteredBases;
