@@ -14,7 +14,7 @@ import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import * as React from 'react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 /* マスタ系用テーブル ----------------------------------------------- */
 type MasterHeader = {
@@ -52,13 +52,18 @@ export const MasterTable = ({
   //   setRows(updatedRows);
   // };
 
-  const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - datas!.length) : 0;
+  /* 表示する担当者リスト */
+  const list = useMemo(
+    () => (rows && rowsPerPage > 0 ? rows.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage) : rows),
+    [page, rowsPerPage, rows]
+  );
+  const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - rows!.length) : 0;
 
   return (
     <Table sx={{ minWidth: 1200 }} aria-labelledby="tableTitle" padding="none" stickyHeader>
       <TableHead sx={{ bgcolor: 'primary.light' }}>
         <TableRow sx={{ whiteSpace: 'nowrap' }}>
-          <TableCell />
+          <TableCell width={100} />
           {headers.map((header) => (
             <TableCell key={header.key} align={typeof rows[0][header.key] === 'number' ? 'right' : 'left'}>
               {header.label}
@@ -73,8 +78,8 @@ export const MasterTable = ({
           const isHidden = row.dspFlg === 0 || row.dspFlg === false;
           return (
             <TableRow hover key={row.id}>
-              <TableCell sx={{ bgcolor: isHidden ? grey[300] : '' }}>
-                <Box width={10} px={1}>
+              <TableCell sx={{ bgcolor: isHidden ? grey[300] : '', width: 100 }}>
+                <Box width={20} px={1}>
                   {index + 1}
                 </Box>
               </TableCell>
@@ -151,6 +156,11 @@ export const MasterTableOfEqpt = ({
   rowsPerPage: number;
   handleOpenDialog: (id: number) => void;
 }) => {
+  // 表示するデータ
+  const list = React.useMemo(
+    () => (datas && rowsPerPage > 0 ? datas.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage) : datas),
+    [page, rowsPerPage, datas]
+  );
   const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - datas!.length) : 0;
 
   return (
@@ -167,7 +177,7 @@ export const MasterTableOfEqpt = ({
         </TableRow>
       </TableHead>
       <TableBody>
-        {datas.map((row, index) => {
+        {list.map((row, index) => {
           const isHidden = row.dspFlg === 0 || row.dspFlg === false;
           return (
             <TableRow hover key={row.id}>

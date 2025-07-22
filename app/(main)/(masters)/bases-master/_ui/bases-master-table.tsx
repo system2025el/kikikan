@@ -62,15 +62,6 @@ export const BasesMasterTable = ({
     setIsLoading(false); //theBasesが変わったらローディング終わり
   }, [theBases, setIsLoading]);
 
-  // 表示するデータ
-  const list = useMemo(
-    () =>
-      theBases && rowsPerPage > 0
-        ? theBases.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage)
-        : theBases,
-    [page, rowsPerPage, theBases]
-  );
-
   return (
     <>
       <Box>
@@ -80,7 +71,7 @@ export const BasesMasterTable = ({
         <Divider />
         <Grid2 container mt={0.5} mx={0.5} justifyContent={'space-between'} alignItems={'center'}>
           <Grid2 spacing={1}>
-            <MuiTablePagination arrayList={list!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
+            <MuiTablePagination arrayList={theBases!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
           </Grid2>
           <Grid2 container spacing={3}>
             <Grid2 alignContent={'center'}>
@@ -105,7 +96,7 @@ export const BasesMasterTable = ({
             <>
               <MasterTable
                 headers={bMHeader}
-                datas={list!.map((l) => ({ id: l.kyotenId!, name: l.kyotenNam, ...l }))}
+                datas={theBases!.map((l) => ({ id: l.kyotenId!, name: l.kyotenNam, ...l }))}
                 handleOpenDialog={handleOpenDialog}
                 page={page}
                 rowsPerPage={rowsPerPage}

@@ -79,15 +79,6 @@ export const ManagerssMasterTable = ({
     setIsLoading(false); //theManagersが変わったらローディング終わり
   }, [theManagers, setIsLoading]);
 
-  /* 表示する担当者リスト */
-  const list = useMemo(
-    () =>
-      theManagers && rowsPerPage > 0
-        ? theManagers.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage)
-        : theManagers,
-    [page, rowsPerPage, theManagers]
-  );
-
   return (
     <Box>
       <Typography pt={2} pl={2}>
@@ -96,7 +87,7 @@ export const ManagerssMasterTable = ({
       <Divider />
       <Grid2 container mt={0.5} mx={0.5} justifyContent={'space-between'} alignItems={'center'}>
         <Grid2 spacing={1}>
-          <MuiTablePagination arrayList={list!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
+          <MuiTablePagination arrayList={theManagers!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
         </Grid2>
         <Grid2 container spacing={3}>
           <Grid2 alignContent={'center'}>
@@ -121,7 +112,7 @@ export const ManagerssMasterTable = ({
           <>
             <MasterTable
               headers={mMHeader}
-              datas={list!.map((l) => ({ ...l, id: l.tantouId, name: l.tantouNam }))}
+              datas={theManagers!.map((l) => ({ ...l, id: l.tantouId, name: l.tantouNam }))}
               page={page}
               rowsPerPage={rowsPerPage}
               handleOpenDialog={handleOpenDialog}
