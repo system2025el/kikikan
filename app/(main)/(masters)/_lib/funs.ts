@@ -57,3 +57,30 @@ export const getShukeibumonsSelection = async () => {
     console.error('例外が発生しました:', e);
   }
 };
+
+export const getBumonsSelection = async () => {
+  try {
+    const { data, error } = await supabase
+      .schema('dev2')
+      .from('m_bumon')
+      .select('bumon_id, bumon_nam')
+      .neq('del_flg', 1);
+    if (!error) {
+      if (!data || data.length === 0) {
+        return [];
+      } else {
+        const selectElements: SelectTypes[] = data.map((d) => ({
+          id: d.bumon_id,
+          label: d.bumon_nam,
+        }));
+        console.log(selectElements.length);
+        return selectElements;
+      }
+    } else {
+      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
+      return [];
+    }
+  } catch (e) {
+    console.error('例外が発生しました:', e);
+  }
+};

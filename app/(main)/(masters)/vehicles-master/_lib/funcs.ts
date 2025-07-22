@@ -1,7 +1,6 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { QueryResult } from 'pg';
 
 import pool from '@/app/_lib/postgres/postgres';
 import { supabase } from '@/app/_lib/supabase/supabase';

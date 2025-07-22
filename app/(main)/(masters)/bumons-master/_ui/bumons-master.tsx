@@ -81,7 +81,7 @@ export const BumonsMaster = ({
           <form onSubmit={handleSubmit(onSubmit)}>
             <Stack alignItems={'center'}>
               <Typography noWrap width={100}>
-                部門名
+                部門名キーワード
               </Typography>
               <TextFieldElement name="query" control={control} />
             </Stack>

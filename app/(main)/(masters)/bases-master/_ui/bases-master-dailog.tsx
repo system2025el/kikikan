@@ -8,6 +8,7 @@ import { Loading } from '../../../_ui/loading';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { emptyBase, formItems } from '../_lib/datas';
+import { addNewBase, getOneBase, updateBase } from '../_lib/funcs';
 import { BasesMasterDialogSchema, BasesMasterDialogValues } from '../_lib/types';
 
 /**
@@ -58,20 +59,24 @@ export const BasesMasterDialog = ({
   const onSubmit = async (data: BasesMasterDialogValues) => {
     console.log('isDarty : ', isDirty);
     console.log(data);
-    // if (baseId === -100) {
-    //   await addNewBase(data);
-    // handleCloseDialog();
-    // refetchBases();
-    // } else {
-    // if (action === 'save') {
-    //   await updateBase(data, baseId);
-    // handleCloseDialog();
-    // refetchBases();
-    // } else if (action === 'delete') {
-    //   setDeleteOpen(true);
-    //   return;
-    // }
-    // }
+    if (baseId === -100) {
+      // 新規登録
+      await addNewBase(data);
+      handleCloseDialog();
+      refetchBases();
+    } else {
+      // 更新
+      if (action === 'save') {
+        // 保存ボタン
+        await updateBase(data, baseId);
+        handleCloseDialog();
+        refetchBases();
+      } else if (action === 'delete') {
+        // 削除ボタン
+        setDeleteOpen(true);
+        return;
+      }
+    }
   };
 
   /* 詳細ダイアログを閉じる */
@@ -93,11 +98,11 @@ export const BasesMasterDialog = ({
 
   /* 削除確認ダイアログで削除選択時 */
   const handleConfirmDelete = async () => {
-    // const values = await getValues();
-    // await updateBase({ ...values, delFlg: true }, baseId);
+    const values = await getValues();
+    await updateBase({ ...values, delFlg: true }, baseId);
     setDeleteOpen(false);
     handleCloseDialog();
-    // await refetchBases();
+    await refetchBases();
   };
 
   /* useEffect --------------------------------------- */
@@ -112,11 +117,10 @@ export const BasesMasterDialog = ({
         setIsLoading(false);
         setIsNew(true);
       } else {
-        // const base1 = await getOneBase(baseId);
-        // if (base1) {
-        //   setBase(base1);
-        //   reset(base1); // 取得したデータでフォーム初期化
-        // }
+        const base1 = await getOneBase(baseId);
+        if (base1) {
+          reset(base1); // 取得したデータでフォーム初期化
+        }
         setIsLoading(false);
       }
     };
@@ -143,7 +147,7 @@ export const BasesMasterDialog = ({
               <Grid2>
                 <FormBox formItem={formItems[0]} required={true}>
                   <TextFieldElement
-                    name="kyotenNam"
+                    name="shozokuNam"
                     control={control}
                     label={formItems[0].exsample}
                     fullWidth
@@ -152,14 +156,9 @@ export const BasesMasterDialog = ({
                   />
                 </FormBox>
               </Grid2>
-              {/* <Grid2>
-                <FormBox formItem={formItems[1]}>
-                  <CheckboxElement name="delFlg" control={control} size="medium" disabled={editable ? false : true} />
-                </FormBox>
-              </Grid2> */}
               <Grid2>
                 <FormBox formItem={formItems[2]}>
-                  <TextareaAutosizeElement ////////////// 200文字までの設定をしなければならない
+                  <TextareaAutosizeElement
                     name="mem"
                     control={control}
                     label={formItems[2].exsample}
