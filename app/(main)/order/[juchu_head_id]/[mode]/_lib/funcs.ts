@@ -282,7 +282,7 @@ export const GetFilteredCustomers = async (query: string) => {
       if (!data || data.length === 0) {
         return [];
       } else {
-        const filteredCustomers: CustomersMasterTableValues[] = data.map((d) => ({
+        const filteredCustomers: CustomersMasterTableValues[] = data.map((d, index) => ({
           kokyakuId: d.kokyaku_id,
           kokyakuNam: d.kokyaku_nam,
           adrShozai: d.adr_shozai,
@@ -292,6 +292,7 @@ export const GetFilteredCustomers = async (query: string) => {
           fax: d.fax,
           mem: d.mem,
           dspFlg: Boolean(d.dsp_flg),
+          dspOrdNum: index + 1,
         }));
         console.log(filteredCustomers.length);
         return filteredCustomers;
