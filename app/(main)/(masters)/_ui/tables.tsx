@@ -74,14 +74,13 @@ export const MasterTable = ({
         </TableRow>
       </TableHead>
       <TableBody>
-        {list.map((row, index) => {
-          const globalIndex = (page - 1) * rowsPerPage + index + 1;
+        {list.map((row) => {
           const isHidden = row.dspFlg === 0 || row.dspFlg === false;
           return (
             <TableRow hover key={row.id}>
               <TableCell sx={{ bgcolor: isHidden ? grey[300] : '', width: 100 }}>
                 <Box width={32} px={1} fontSize={13} textAlign={'right'}>
-                  {globalIndex}
+                  {row.id}
                 </Box>
               </TableCell>
               {headers.map((header) => (
@@ -179,13 +178,12 @@ export const MasterTableOfEqpt = ({
       </TableHead>
       <TableBody>
         {list.map((row, index) => {
-          const globalIndex = (page - 1) * rowsPerPage + index + 1;
           const isHidden = row.dspFlg === 0 || row.dspFlg === false;
           return (
             <TableRow hover key={row.id}>
               <TableCell sx={{ bgcolor: isHidden ? grey[300] : '' }}>
                 <Box width={32} px={1} fontSize={13} textAlign={'right'}>
-                  {globalIndex}
+                  {row.id}
                 </Box>
               </TableCell>
               {headers.map((header) => (

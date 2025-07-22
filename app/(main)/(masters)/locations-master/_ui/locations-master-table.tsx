@@ -96,12 +96,12 @@ export const LocationsMasterTable = ({
         <>
           {theLocs!.length < 1 && <Typography>該当するデータがありません</Typography>}
           {theLocs!.length > 0 && (
-            <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
+            <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
               <MasterTable
                 headers={lMHeader}
                 datas={theLocs!.map((l) => ({
                   ...l,
-                  id: l.locId,
+                  id: l.dspOrdNum,
                   name: l.locNam,
                   address: `${l.adrShozai}${l.adrTatemono}${l.adrSonota}`,
                 }))}

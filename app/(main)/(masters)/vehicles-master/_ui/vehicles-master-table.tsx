@@ -95,10 +95,10 @@ export const VehiclesMasterTable = ({
         <>
           {theVehs!.length < 1 && <Typography>該当するデータがありません</Typography>}
           {theVehs!.length > 0 && (
-            <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
+            <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
               <MasterTable
                 headers={vMHeader}
-                datas={theVehs!.map((l) => ({ id: l.sharyoId, name: l.sharyoNam, ...l }))}
+                datas={theVehs!.map((l) => ({ id: l.dspOrdNum, name: l.sharyoNam, ...l }))}
                 handleOpenDialog={handleOpenDialog}
                 page={page}
                 rowsPerPage={rowsPerPage}

@@ -95,10 +95,10 @@ export const DaibumonsMasterTable = ({
           <>
             {theDaibumons!.length < 1 && <Typography>該当するデータがありません</Typography>}
             {theDaibumons!.length > 0 && (
-              <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
+              <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
                 <MasterTable
                   headers={daibumonMHeader}
-                  datas={theDaibumons!.map((l) => ({ id: l.daibumonId!, name: l.daibumonNam, ...l }))}
+                  datas={theDaibumons!.map((l) => ({ id: l.dspOrdNum!, name: l.daibumonNam, ...l }))}
                   handleOpenDialog={handleOpenDialog}
                   page={page}
                   rowsPerPage={rowsPerPage}

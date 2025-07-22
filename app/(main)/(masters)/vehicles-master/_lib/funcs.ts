@@ -63,11 +63,12 @@ export const getFilteredVehs = async (query: string) => {
       if (!data || data.length === 0) {
         return [];
       } else {
-        const filteredVehs: VehsMasterTableValues[] = data.map((d) => ({
+        const filteredVehs: VehsMasterTableValues[] = data.map((d, index) => ({
           sharyoId: d.sharyo_id,
           sharyoNam: d.sharyo_nam,
           mem: d.mem,
           dspFlg: Boolean(d.dsp_flg),
+          dspOrdNum: index + 1,
         }));
         console.log(filteredVehs.length, '行');
         return filteredVehs;

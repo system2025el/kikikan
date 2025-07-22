@@ -96,11 +96,11 @@ export const ShukeibumonsMasterTable = ({
           <>
             {theShukeibumons!.length < 1 && <Typography>該当するデータがありません</Typography>}
             {theShukeibumons!.length > 0 && (
-              <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
+              <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
                 <MasterTable
                   headers={shukeibumonMHeader}
                   datas={theShukeibumons!.map((l) => ({
-                    id: l.shukeibumonId!,
+                    id: l.dspOrdNum!,
                     name: l.shukeibumonNam,
                     ...l,
                   }))}
