@@ -54,7 +54,7 @@ export const MasterTable = ({
 
   /* 表示する担当者リスト */
   const list = useMemo(
-    () => (rows && rowsPerPage > 0 ? rows.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage) : rows),
+    () => (rows && rowsPerPage > 0 ? rows.slice((page - 1) * rowsPerPage, page * rowsPerPage) : rows),
     [page, rowsPerPage, rows]
   );
   const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - rows!.length) : 0;
@@ -74,13 +74,14 @@ export const MasterTable = ({
         </TableRow>
       </TableHead>
       <TableBody>
-        {rows.map((row, index) => {
+        {list.map((row, index) => {
+          const globalIndex = (page - 1) * rowsPerPage + index + 1;
           const isHidden = row.dspFlg === 0 || row.dspFlg === false;
           return (
             <TableRow hover key={row.id}>
               <TableCell sx={{ bgcolor: isHidden ? grey[300] : '', width: 100 }}>
-                <Box width={20} px={1}>
-                  {index + 1}
+                <Box width={32} px={1} fontSize={13} textAlign={'right'}>
+                  {globalIndex}
                 </Box>
               </TableCell>
               {headers.map((header) => (
@@ -158,7 +159,7 @@ export const MasterTableOfEqpt = ({
 }) => {
   // 表示するデータ
   const list = React.useMemo(
-    () => (datas && rowsPerPage > 0 ? datas.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage) : datas),
+    () => (datas && rowsPerPage > 0 ? datas.slice((page - 1) * rowsPerPage, page * rowsPerPage) : datas),
     [page, rowsPerPage, datas]
   );
   const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - datas!.length) : 0;
@@ -178,12 +179,13 @@ export const MasterTableOfEqpt = ({
       </TableHead>
       <TableBody>
         {list.map((row, index) => {
+          const globalIndex = (page - 1) * rowsPerPage + index + 1;
           const isHidden = row.dspFlg === 0 || row.dspFlg === false;
           return (
             <TableRow hover key={row.id}>
               <TableCell sx={{ bgcolor: isHidden ? grey[300] : '' }}>
-                <Box width={10} px={1}>
-                  {index + 1}
+                <Box width={32} px={1} fontSize={13} textAlign={'right'}>
+                  {globalIndex}
                 </Box>
               </TableCell>
               {headers.map((header) => (
