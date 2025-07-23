@@ -51,7 +51,7 @@ export const BasesMasterDialog = ({
     mode: 'onBlur',
     reValidateMode: 'onBlur',
     resolver: zodResolver(BasesMasterDialogSchema),
-    defaultValues: {},
+    defaultValues: emptyBase,
   });
 
   /* methods ---------------------------------------- */

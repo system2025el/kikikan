@@ -19,17 +19,19 @@ import { DaibumonsMasterDialog } from './daibumons-master-dialog';
 export const DaibumonsMasterTable = ({
   daibumons,
   isLoading,
+  page,
   setIsLoading,
+  setPage,
 }: {
   daibumons: DaibumonsMasterTableValues[] | undefined;
   isLoading: boolean;
+  page: number;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setPage: React.Dispatch<React.SetStateAction<number>>;
 }) => {
   /* 1ページごとの表示数 */
   const rowsPerPage = 50;
   /* useState --------------------------------------- */
-  /* 今開いてるテーブルのページ数 */
-  const [page, setPage] = useState(1);
   /* ダイアログ開く大部門のID、閉じるとき、未選択で-100とする */
   const [openId, setOpenID] = useState<number>(-100);
   /* 詳細ダイアログの開閉状態 */

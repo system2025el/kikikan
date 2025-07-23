@@ -22,7 +22,7 @@ import {
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { emptyEqpt, formItems } from '../_lib/datas';
-import { addNewEqpt, getEqptsQty, getOneEqpt } from '../_lib/funcs';
+import { addNewEqpt, getEqptsQty, getOneEqpt, updateEqpt } from '../_lib/funcs';
 import { EqptsMasterDialogSchema, EqptsMasterDialogValues } from '../_lib/types';
 
 export const EqMasterDialog = ({
@@ -50,7 +50,7 @@ export const EqMasterDialog = ({
   /* フォーム内のセレクトoptions */
   const [selectOptions, setSelectOptions] = useState<SelectTypes[][]>([]);
   /* 保有数 */
-  const [kizaiQty, setKizaiQty] = useState<number | undefined>(undefined);
+  const [kizaiQty, setKizaiQty] = useState<number | string>('');
 
   /* useForm ------------------------- */
   const {
@@ -63,12 +63,9 @@ export const EqMasterDialog = ({
   } = useForm({
     mode: 'onBlur',
     reValidateMode: 'onBlur',
-    defaultValues: {},
+    defaultValues: emptyEqpt,
     resolver: zodResolver(EqptsMasterDialogSchema),
   });
-
-  /*  */
-  const regAmt = watch('regAmt'); // React Hook Formの場合
 
   /* methods ---------------------------- */
   /* フォームを送信 */
@@ -81,7 +78,7 @@ export const EqMasterDialog = ({
       refetchEqpts();
     } else {
       if (action === 'save') {
-        // await updateEqpt(data, eqptId);
+        await updateEqpt(data, eqptId);
         handleCloseDialog();
         refetchEqpts();
       } else if (action === 'delete') {
@@ -111,7 +108,7 @@ export const EqMasterDialog = ({
   /* 削除確認ダイアログで削除選択時 */
   const handleConfirmDelete = async () => {
     const values = await getValues();
-    // await updateEqpt({ ...values, delFlg: true }, eqptId);
+    await updateEqpt({ ...values, delFlg: true }, eqptId);
     setDeleteOpen(false);
     handleCloseDialog();
     await refetchEqpts();
@@ -127,7 +124,7 @@ export const EqMasterDialog = ({
       const c = await getShukeibumonsSelection();
       setSelectOptions([a!, b!, c!]);
       const qty = await getEqptsQty(eqptId);
-      setKizaiQty(qty!);
+      setKizaiQty(typeof qty === 'number' ? qty : '');
       console.log('pppppppppppppppppppppppppppppp', kizaiQty, selectOptions);
       if (eqptId === -100) {
         // 新規追加モード
@@ -136,9 +133,9 @@ export const EqMasterDialog = ({
         setIsLoading(false);
         setIsNew(true);
       } else {
-        const Eqpt1 = await getOneEqpt(eqptId);
-        if (Eqpt1) {
-          reset(Eqpt1); // 取得したデータでフォーム初期化
+        const eqpt1 = await getOneEqpt(eqptId);
+        if (eqpt1) {
+          reset(eqpt1); // 取得したデータでフォーム初期化
         }
         setIsLoading(false);
       }
@@ -153,7 +150,7 @@ export const EqMasterDialog = ({
         <MasterDialogTitle
           editable={editable}
           handleEditable={() => setEditable(true)}
-          handleClose={handleCloseDialog}
+          handleClose={handleClickClose}
           dialogTitle={'機材マスタ登録'}
           isNew={isNew}
           isDirty={isDirty}
@@ -178,7 +175,7 @@ export const EqMasterDialog = ({
               </Grid2>
               <Grid2>
                 <FormBox formItem={formItems[1]}>
-                  <TextField value={kizaiQty ?? ''} disabled />
+                  <TextField value={kizaiQty != null ? String(kizaiQty) : ''} disabled />
                 </FormBox>
               </Grid2>
               <Grid2>
@@ -212,25 +209,9 @@ export const EqMasterDialog = ({
               </Grid2>
               <Grid2>
                 <FormBox formItem={formItems[5]} required>
-                  {/* <Controller
-                    name="shozokuId"
-                    control={control}
-                    defaultValue={0}
-                    disabled={editable ? false : true}
-                    render={({ field }) => (
-                      <Select {...field} sx={{ width: 250 }}>
-                        {[selectNone, ...selectOptions[0]!].map((opt) => (
-                          <MenuItem key={opt.id} value={opt.id} sx={opt.id === 0 ? { color: grey[600] } : {}}>
-                            {opt.label}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    )}
-                  /> */}
                   <SelectElement
                     name="shozokuId"
                     control={control}
-                    defaultValue={0}
                     disabled={editable ? false : true}
                     sx={{ width: 250 }}
                     options={selectOptions[0]!}
@@ -315,7 +296,6 @@ export const EqMasterDialog = ({
                   <Controller
                     name="bumonId"
                     control={control}
-                    defaultValue={0}
                     disabled={editable ? false : true}
                     render={({ field }) => (
                       <Select {...field} sx={{ width: 250 }}>
@@ -334,7 +314,6 @@ export const EqMasterDialog = ({
                   <Controller
                     name="shukeibumonId"
                     control={control}
-                    defaultValue={0}
                     disabled={editable ? false : true}
                     render={({ field }) => (
                       <Select {...field} sx={{ width: 250 }}>
@@ -380,7 +359,6 @@ export const EqMasterDialog = ({
                     fullWidth
                     sx={{ maxWidth: '50%' }}
                     disabled={editable ? false : true}
-                    value={regAmt === 0 ? '' : regAmt}
                     type="number"
                   />
                 </FormBox>
@@ -454,7 +432,7 @@ export const EqMasterDialog = ({
             <IsDirtyAlertDialog
               open={dirtyOpen}
               handleCloseDirty={() => setDirtyOpen(false)}
-              handleCloseAll={handleClickClose}
+              handleCloseAll={handleCloseDialog}
             />
             <WillDeleteAlertDialog
               open={deleteOpen}

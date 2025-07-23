@@ -20,17 +20,19 @@ import { VehiclesMasterDialog } from './vehicles-master-dialog';
 export const VehiclesMasterTable = ({
   vehs,
   isLoading,
+  page,
   setIsLoading,
+  setPage,
 }: {
   vehs: VehsMasterTableValues[] | undefined;
   isLoading: boolean;
+  page: number;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setPage: React.Dispatch<React.SetStateAction<number>>;
 }) => {
   /* テーブルの1ページのの行数 */
   const rowsPerPage = 50;
   /* useState ------------------------------- */
-  /* 表示してるページ */
-  const [page, setPage] = useState(1);
   /* ダイアログ開く車両のID、閉じるとき、未選択で-100とする */
   const [openId, setOpenID] = useState<number>(-100);
   /* 詳細ダイアログの開閉状態 */

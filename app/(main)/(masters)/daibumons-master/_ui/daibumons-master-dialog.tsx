@@ -53,7 +53,7 @@ export const DaibumonsMasterDialog = ({
     mode: 'onBlur',
     reValidateMode: 'onBlur',
     resolver: zodResolver(DaibumonsMasterDialogSchema),
-    defaultValues: {},
+    defaultValues: emptyDaibumon,
   });
 
   /* methods ---------------------------------------- */

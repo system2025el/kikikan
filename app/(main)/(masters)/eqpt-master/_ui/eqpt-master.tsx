@@ -22,6 +22,8 @@ export const EqptMaster = ({
 }) => {
   // useState
   const [theEqpts, setTheEqpts] = useState<EqptsMasterTableValues[] | undefined>(eqpts);
+  /* 今開いてるテーブルのページ数 */
+  const [page, setPage] = useState(1);
   /* DBのローディング */
   const [isLoading, setIsLoading] = useState(true);
   // 検索useForm--------------------------
@@ -44,6 +46,7 @@ export const EqptMaster = ({
       s: data.shukeiQuery!,
       b: data.bumonQuery!,
     });
+    setPage(1);
     setTheEqpts(newList);
     console.log('theEqpt : ', theEqpts);
   };
@@ -128,7 +131,13 @@ export const EqptMaster = ({
           <Typography></Typography>
         </Box>
       </Paper>
-      <EqptMasterTable eqpts={theEqpts} isLoading={isLoading} setIsLoading={setIsLoading} />
+      <EqptMasterTable
+        eqpts={theEqpts}
+        page={page}
+        isLoading={isLoading}
+        setPage={setPage}
+        setIsLoading={setIsLoading}
+      />
     </Container>
   );
 };

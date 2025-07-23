@@ -21,17 +21,19 @@ import { BumonsMasterDialog } from './bumons-master-dialog';
 export const BumonsMasterTable = ({
   bumons,
   isLoading,
+  page,
   setIsLoading,
+  setPage,
 }: {
   bumons: BumonsMasterTableValues[] | undefined;
   isLoading: boolean;
+  page: number;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setPage: React.Dispatch<React.SetStateAction<number>>;
 }) => {
   /* 1ページごとの表示数 */
   const rowsPerPage = 50;
   /* useState --------------------------------------- */
-  /* 今開いてるテーブルのページ数 */
-  const [page, setPage] = useState(1);
   /* ダイアログ開く部門のID、閉じるとき、未選択で-100とする */
   const [openId, setOpenID] = useState<number>(-100);
   /* 詳細ダイアログの開閉状態 */

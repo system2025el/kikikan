@@ -17,6 +17,8 @@ import { LocationsMasterTable } from './locations-master-table';
 export const LocationsMaster = ({ locs }: { locs: LocsMasterTableValues[] | undefined }) => {
   /* useState ------------------ */
   const [theLocs, setTheLocs] = useState(locs);
+  /* 今開いてるテーブルのページ数 */
+  const [page, setPage] = useState(1);
   /* DBのローディング */
   const [isLoading, setIsLoading] = useState(true);
 
@@ -32,6 +34,7 @@ export const LocationsMaster = ({ locs }: { locs: LocsMasterTableValues[] | unde
     setIsLoading(true);
     console.log('data : ', data, 'locs : ', locs);
     const newList = await getFilteredLocs(data.query!);
+    setPage(1);
     setTheLocs(newList);
     console.log('theLocs : ', theLocs);
   };
@@ -64,7 +67,13 @@ export const LocationsMaster = ({ locs }: { locs: LocsMasterTableValues[] | unde
             </form>
           </Box>
         </Paper>
-        <LocationsMasterTable locs={theLocs} isLoading={isLoading} setIsLoading={setIsLoading} />
+        <LocationsMasterTable
+          locs={theLocs}
+          page={page}
+          isLoading={isLoading}
+          setPage={setPage}
+          setIsLoading={setIsLoading}
+        />
       </Container>
     </>
   );

@@ -19,11 +19,15 @@ import { CustomersMasterDialog } from './customers-master-dialog';
 export const CustomersMasterTable = ({
   customers,
   isLoading,
+  page,
   setIsLoading,
+  setPage,
 }: {
   customers: CustomersMasterTableValues[] | undefined;
   isLoading: boolean;
+  page: number;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setPage: React.Dispatch<React.SetStateAction<number>>;
 }) => {
   /* 1ページごとの表示数 */
   const rowsPerPage = 50;
@@ -32,8 +36,6 @@ export const CustomersMasterTable = ({
   const [openId, setOpenID] = useState(-100);
   /* 顧客詳細ダイアログの開閉状態 */
   const [dialogOpen, setDialogOpen] = useState(false);
-  /* 今開いてるテーブルのページ数 */
-  const [page, setPage] = useState(1);
   /* 顧客リスト */
   const [theCustomers, setTheCustomers] = useState<CustomersMasterTableValues[] | undefined>(customers);
 

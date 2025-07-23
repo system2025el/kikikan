@@ -52,7 +52,7 @@ export const LocationsMasterDialog = ({
   } = useForm({
     mode: 'onBlur',
     reValidateMode: 'onBlur',
-    defaultValues: {},
+    defaultValues: emptyLoc,
     resolver: zodResolver(LocsMasterDialogSchema),
   });
 
