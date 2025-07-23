@@ -26,7 +26,13 @@ export const EqptsMasterDialogSchema = z.object({
   rankAmt5: z.number().optional(),
 });
 
-export type EqptsMasterDialogValues = z.infer<typeof EqptsMasterDialogSchema>;
+type eqptsMasterDialogValues = z.infer<typeof EqptsMasterDialogSchema>;
+export type EqptsMasterDialogValues = eqptsMasterDialogValues & {
+  addUser?: string;
+  addDat?: string;
+  updUser?: string;
+  updDat?: string;
+};
 
 export type EqptsMasterTableValues = {
   kizaiId: number;

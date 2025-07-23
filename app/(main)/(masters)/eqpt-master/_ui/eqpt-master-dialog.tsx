@@ -22,7 +22,7 @@ import {
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { emptyEqpt, formItems } from '../_lib/datas';
-import { addNewEqpt, getEqptsQty, getOneEqpt, updateEqpt } from '../_lib/funcs';
+import { addNewEqpt, createEqptHistory, getEqptsQty, getOneEqpt, updateEqpt } from '../_lib/funcs';
 import { EqptsMasterDialogSchema, EqptsMasterDialogValues } from '../_lib/types';
 
 export const EqMasterDialog = ({
@@ -35,6 +35,8 @@ export const EqMasterDialog = ({
   refetchEqpts: () => Promise<void>;
 }) => {
   /* useState --------------------- */
+  /* eqpt更新前の */
+  const [currentEqpt, setCurrentEqpt] = useState<EqptsMasterDialogValues>(emptyEqpt);
   /** DBのローディング状態 */
   const [isLoading, setIsLoading] = useState(true);
   /* ダイアログでの編集モードかどうか */
@@ -73,15 +75,20 @@ export const EqMasterDialog = ({
     console.log('isDarty : ', isDirty);
     console.log(data);
     if (eqptId === -100) {
+      // 新規登録
       await addNewEqpt(data);
       handleCloseDialog();
       refetchEqpts();
     } else {
+      // 更新
       if (action === 'save') {
+        // 保存終了ボタン
+        await createEqptHistory(currentEqpt, eqptId);
         await updateEqpt(data, eqptId);
         handleCloseDialog();
         refetchEqpts();
       } else if (action === 'delete') {
+        // 削除ボタン
         setDeleteOpen(true);
         return;
       }
@@ -108,6 +115,7 @@ export const EqMasterDialog = ({
   /* 削除確認ダイアログで削除選択時 */
   const handleConfirmDelete = async () => {
     const values = await getValues();
+    await createEqptHistory(currentEqpt, eqptId);
     await updateEqpt({ ...values, delFlg: true }, eqptId);
     setDeleteOpen(false);
     handleCloseDialog();
@@ -135,6 +143,7 @@ export const EqMasterDialog = ({
       } else {
         const eqpt1 = await getOneEqpt(eqptId);
         if (eqpt1) {
+          setCurrentEqpt(eqpt1);
           reset(eqpt1); // 取得したデータでフォーム初期化
         }
         setIsLoading(false);
