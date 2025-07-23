@@ -174,7 +174,6 @@ export const MasterTableOfEqpt = ({
               {header.label}
             </TableCell>
           ))}
-          <TableCell>非表示</TableCell>
         </TableRow>
       </TableHead>
       <TableBody>
@@ -208,12 +207,13 @@ export const MasterTableOfEqpt = ({
                     <Typography noWrap maxWidth={50}>
                       {row[header.key]}
                     </Typography>
+                  ) : header.key === 'hidden' ? (
+                    <>{isHidden && <>非表示</>}</>
                   ) : (
                     <>{row[header.key]}</>
                   )}
                 </TableCell>
               ))}
-              <TableCell sx={{ bgcolor: isHidden ? grey[300] : '' }}>{isHidden && <>非表示</>}</TableCell>
             </TableRow>
           );
         })}
