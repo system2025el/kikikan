@@ -83,14 +83,7 @@ export const getFilteredEqpts = async (queries: { q: string; b: number; d: numbe
  */
 export const getOneEqpt = async (id: number) => {
   try {
-    const { data, error } = await supabase
-      .schema('dev2')
-      .from('m_kizai')
-      .select(
-        'kizai_nam,  section_num, el_num, del_flg, shozoku_id, bld_cod, tana_cod, eda_cod, kizai_grp_cod, dsp_ord_num, mem, bumon_id, shukei_bumon_id, dsp_flg, ctn_flg, def_dat_qty, reg_amt, rank_amt_1, rank_amt_2, rank_amt_3, rank_amt_4, rank_amt_5'
-      )
-      .eq('kizai_id', id)
-      .single();
+    const { data, error } = await supabase.schema('dev2').from('m_kizai').select('*').eq('kizai_id', id).single();
     if (!error) {
       console.log('I got a datalist from db', data.del_flg);
 
@@ -117,8 +110,12 @@ export const getOneEqpt = async (id: number) => {
         rankAmt3: data.rank_amt_3 === null ? 0 : data.rank_amt_3,
         rankAmt4: data.rank_amt_4 === null ? 0 : data.rank_amt_4,
         rankAmt5: data.rank_amt_5 === null ? 0 : data.rank_amt_5,
+        addUser: data.add_user,
+        addDat: data.add_dat,
+        updUser: data.upd_user,
+        updDat: data.upd_dat,
       };
-      console.log(EqptDetails.delFlg);
+      console.log(EqptDetails.addUser, ' ', EqptDetails.addDat);
       return EqptDetails;
     } else {
       console.error('機材情報取得エラー。', { message: error.message, code: error.code });
@@ -203,7 +200,7 @@ export const addNewEqpt = async (data: EqptsMasterDialogValues) => {
  * @param id 更新する機材マスタID
  */
 export const updateEqpt = async (data: EqptsMasterDialogValues, id: number) => {
-  console.log('Update!!!', data.mem);
+  console.log('Update!!!waaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', data);
   const missingData = {
     kizai_nam: data.kizaiNam,
     del_flg: Number(data.delFlg),
@@ -287,6 +284,70 @@ export const getEqptsQty = async (id: number) => {
     }
   } catch (e) {
     console.error('例外が発生しました:', e);
+  }
+};
+
+export const createEqptHistory = async (data: EqptsMasterDialogValues, id: number) => {
+  // console.log(
+  //   'うわあああああああああああああああああああああああああああああああああああああああああああああああああああ',
+  //   data
+  // );
+  console.log(data.mem);
+  const zeroToNull = <T>(value: T): T | null => (value === 0 ? null : value);
+
+  const query = `
+      INSERT INTO m_kizai_his (
+        kizai_id_his_num, kizai_id, kizai_nam, del_flg, section_num, el_num, shozoku_id,
+        bld_cod, tana_cod, eda_cod, kizai_grp_cod, dsp_ord_num, mem,
+        bumon_id, shukei_bumon_id, dsp_flg, ctn_flg, def_dat_qty,
+        reg_amt, rank_amt_1, rank_amt_2, rank_amt_3, rank_amt_4, rank_amt_5, add_user, add_dat, upd_user, upd_dat
+        
+      )
+      VALUES (
+        (SELECT coalesce(max(kizai_id_his_num),0) + 1 FROM m_kizai_his),
+        $1, $2, $3, $4, $5, $6, $7, $8, $9,
+        $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26 ,$27
+      );
+    `;
+
+  try {
+    console.log('DB Connected');
+    await pool.query(` SET search_path TO dev2;`);
+
+    await pool.query(query, [
+      id,
+      data.kizaiNam,
+      Number(data.delFlg),
+      zeroToNull(data.sectionNum),
+      zeroToNull(data.elNum),
+      data.shozokuId,
+      data.bldCod,
+      data.tanaCod,
+      data.edaCod,
+      data.kizaiGrpCod,
+      zeroToNull(data.dspOrdNum),
+      data.mem,
+      zeroToNull(data.bumonId),
+      zeroToNull(data.shukeibumonId),
+      Number(data.dspFlg),
+      Number(data.ctnFlg),
+      zeroToNull(data.defDatQty),
+      data.regAmt,
+      zeroToNull(data.rankAmt1),
+      zeroToNull(data.rankAmt2),
+      zeroToNull(data.rankAmt3),
+      zeroToNull(data.rankAmt4),
+      zeroToNull(data.rankAmt5),
+      data.addUser,
+      data.addDat,
+      data.updUser,
+      data.updDat,
+    ]);
+    console.log('data : ', data);
+    return { success: true };
+  } catch (error) {
+    console.log('DB接続エラー', error);
+    throw error;
   }
 };
 
