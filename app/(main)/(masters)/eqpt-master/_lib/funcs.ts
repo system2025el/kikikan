@@ -6,7 +6,7 @@ import pool from '@/app/_lib/postgres/postgres';
 import { supabase } from '@/app/_lib/supabase/supabase';
 
 import { emptyEqpt } from './datas';
-import { EqptsMasterDialogValues, EqptsMasterTableValues } from './types';
+import { EqptsMasterDialogValues, EqptsMasterTableValues, zeroToNull } from './types';
 
 /**
  * 機材マスタテーブルのデータを取得する関数
@@ -349,13 +349,6 @@ export const createEqptHistory = async (data: EqptsMasterDialogValues, id: numbe
     throw error;
   }
 };
-
-/**
- * 0であればnullに変換
- * @param value 変換したい値
- * @returns valueが0ならnull, 他はvalueを返す
- */
-export const zeroToNull = <T>(value: T): T | null => (value === 0 ? null : value);
 
 // export const getAllEqpt = async () => {
 //   try {
