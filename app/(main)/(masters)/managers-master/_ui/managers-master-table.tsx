@@ -34,11 +34,15 @@ import { ManagerMasterDialog } from './managers-master-dialog';
 export const ManagerssMasterTable = ({
   managers,
   isLoading,
+  page,
   setIsLoading,
+  setPage,
 }: {
   managers: ManagersMasterTableValues[] | undefined;
   isLoading: boolean;
+  page: number;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setPage: React.Dispatch<React.SetStateAction<number>>;
 }) => {
   /* 1ページごとの表示数 */
   const rowsPerPage = 50;
@@ -48,8 +52,6 @@ export const ManagerssMasterTable = ({
   const [openId, setOpenID] = useState(-100);
   /* 顧客詳細ダイアログの開閉状態 */
   const [dialogOpen, setDialogOpen] = useState(false);
-  /* 今開いてるテーブルのページ数 */
-  const [page, setPage] = useState(1);
   /* 担当者リスト */
   const [theManagers, setTheManagers] = useState(managers);
   /* Methods

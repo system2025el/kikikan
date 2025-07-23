@@ -20,17 +20,19 @@ import { BasesMasterDialog } from './bases-master-dailog';
 export const BasesMasterTable = ({
   bases,
   isLoading,
+  page,
   setIsLoading,
+  setPage,
 }: {
   bases: BasesMasterTableValues[] | undefined;
   isLoading: boolean;
+  page: number;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setPage: React.Dispatch<React.SetStateAction<number>>;
 }) => {
   /* 1ページごとの表示数 */
   const rowsPerPage = 50;
   /* useState --------------------------------------- */
-  /* 今開いてるテーブルのページ数 */
-  const [page, setPage] = useState(1);
   /* ダイアログ開く顧客のID、閉じるとき、未選択で-100とする */
   const [openId, setOpenID] = useState<number>(-100);
   /* 詳細ダイアログの開閉状態 */

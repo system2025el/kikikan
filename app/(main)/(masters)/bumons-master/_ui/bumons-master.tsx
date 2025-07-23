@@ -38,6 +38,8 @@ export const BumonsMaster = ({
 }) => {
   /* useState ------------------ */
   const [theBumons, setTheBumons] = useState(bumons);
+  /* 今開いてるテーブルのページ数 */
+  const [page, setPage] = useState(1);
   /* DBのローディング */
   const [isLoading, setIsLoading] = useState(true);
 
@@ -60,6 +62,7 @@ export const BumonsMaster = ({
       d: data.daibumonQuery!,
       s: data.shukeiQuery!,
     });
+    setPage(1);
     setTheBumons(newList);
     console.log('theLocs : ', theBumons);
   };
@@ -146,7 +149,13 @@ export const BumonsMaster = ({
           </form>
         </Box>
       </Paper>
-      <BumonsMasterTable bumons={theBumons} isLoading={isLoading} setIsLoading={setIsLoading} />
+      <BumonsMasterTable
+        bumons={theBumons}
+        page={page}
+        isLoading={isLoading}
+        setPage={setPage}
+        setIsLoading={setIsLoading}
+      />
     </Container>
   );
 };

@@ -16,6 +16,8 @@ import { VehiclesMasterTable } from './vehicles-master-table';
 export const VehiclesMaster = ({ vehs }: { vehs: VehsMasterTableValues[] | undefined }) => {
   /* useState ------------------ */
   const [theVehs, setTheVehs] = useState(vehs);
+  /* 表示してるページ */
+  const [page, setPage] = useState(1);
   /* DBのローディング */
   const [isLoading, setIsLoading] = useState(true);
 
@@ -45,7 +47,13 @@ export const VehiclesMaster = ({ vehs }: { vehs: VehsMasterTableValues[] | undef
           <Typography>車両マスタ検索</Typography>
         </Box>
       </Paper>
-      <VehiclesMasterTable vehs={theVehs} isLoading={isLoading} setIsLoading={setIsLoading} />
+      <VehiclesMasterTable
+        vehs={theVehs}
+        page={page}
+        isLoading={isLoading}
+        setIsLoading={setIsLoading}
+        setPage={setPage}
+      />
     </Container>
   );
 };

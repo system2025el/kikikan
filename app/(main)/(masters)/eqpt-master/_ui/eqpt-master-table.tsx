@@ -9,6 +9,7 @@ import { Loading } from '@/app/(main)/_ui/loading';
 import { MuiTablePagination } from '../../../_ui/table-pagination';
 import { MasterTableOfEqpt } from '../../_ui/tables';
 import { eqptMHeader } from '../_lib/datas';
+import { getFilteredEqpts } from '../_lib/funcs';
 import { EqptsMasterTableValues } from '../_lib/types';
 import { EqMasterDialog } from './eqpt-master-dialog';
 
@@ -16,17 +17,19 @@ import { EqMasterDialog } from './eqpt-master-dialog';
 export const EqptMasterTable = ({
   eqpts,
   isLoading,
+  page,
   setIsLoading,
+  setPage,
 }: {
   eqpts: EqptsMasterTableValues[] | undefined;
   isLoading: boolean;
+  page: number;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setPage: React.Dispatch<React.SetStateAction<number>>;
 }) => {
   /* テーブル1ページの行数 */
   const rowsPerPage = 50;
   /* useState ------------------------------------------------ */
-  /* 今開いてるテーブルのページ数 */
-  const [page, setPage] = useState(1);
   /* ダイアログ開く機材のID、閉じるとき、未選択で-100とする */
   const [openId, setOpenID] = useState<number>(-100);
   /* 詳細ダイアログの開閉状態 */
@@ -47,8 +50,13 @@ export const EqptMasterTable = ({
   /* 情報が変わったときに更新される */
   const refetchEqpts = async () => {
     setIsLoading(true);
-    // const updated = await getFilteredEqpts('');
-    // setTheEqpts(updated);
+    const updated = await getFilteredEqpts({
+      q: '',
+      b: 0,
+      d: 0,
+      s: 0,
+    });
+    setTheEqpts(updated);
     setIsLoading(false);
   };
 

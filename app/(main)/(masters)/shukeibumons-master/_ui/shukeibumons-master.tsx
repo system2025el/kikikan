@@ -18,6 +18,8 @@ import { ShukeibumonsMasterTable } from './shukeibumons-master-table';
 export const ShukeibumonsMaster = ({ shukeibumons }: { shukeibumons: ShukeibumonsMasterTableValues[] | undefined }) => {
   /* useState ------------------ */
   const [theShukeibumons, setTheShukeibumons] = useState(shukeibumons);
+  /* 今開いてるテーブルのページ数 */
+  const [page, setPage] = useState(1);
   /* DBのローディング */
   const [isLoading, setIsLoading] = useState(true);
 
@@ -32,6 +34,7 @@ export const ShukeibumonsMaster = ({ shukeibumons }: { shukeibumons: Shukeibumon
     setIsLoading(true);
     console.log('data : ', data);
     const newList = await getFilteredShukeibumons(data.query!);
+    setPage(1);
     setTheShukeibumons(newList);
     console.log('theLocs : ', theShukeibumons);
   };
@@ -65,7 +68,13 @@ export const ShukeibumonsMaster = ({ shukeibumons }: { shukeibumons: Shukeibumon
           </form>
         </Box>
       </Paper>
-      <ShukeibumonsMasterTable shukeibumons={theShukeibumons} isLoading={isLoading} setIsLoading={setIsLoading} />
+      <ShukeibumonsMasterTable
+        shukeibumons={theShukeibumons}
+        isLoading={isLoading}
+        page={page}
+        setIsLoading={setIsLoading}
+        setPage={setPage}
+      />
     </Container>
   );
 };

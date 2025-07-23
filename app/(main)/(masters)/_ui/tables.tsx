@@ -81,7 +81,7 @@ export const MasterTable = ({
             <TableRow hover key={row.dspOrdNum}>
               <TableCell sx={{ bgcolor: isHidden ? grey[300] : '', width: 100 }}>
                 <Box width={32} px={1} fontSize={13} textAlign={'right'}>
-                  {row.id}
+                  {row.dspOrdNum}
                 </Box>
               </TableCell>
               {headers.map((header) => (
@@ -184,7 +184,7 @@ export const MasterTableOfEqpt = ({
             <TableRow hover key={row.dspOrdNum}>
               <TableCell sx={{ bgcolor: isHidden ? grey[300] : '' }}>
                 <Box width={32} px={1} fontSize={13} textAlign={'right'}>
-                  {row.id}
+                  {row.dspOrdNum}
                 </Box>
               </TableCell>
               {headers.map((header) => (

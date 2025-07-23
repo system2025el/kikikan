@@ -39,11 +39,11 @@ export const emptyEqpt: EqptsMasterDialogValues = {
   ctnFlg: false,
   defDatQty: 0,
   regAmt: 0,
-  rankAmt1: undefined,
-  rankAmt2: undefined,
-  rankAmt3: undefined,
-  rankAmt4: undefined,
-  rankAmt5: undefined,
+  rankAmt1: 0,
+  rankAmt2: 0,
+  rankAmt3: 0,
+  rankAmt4: 0,
+  rankAmt5: 0,
 };
 
 /*  */

@@ -20,17 +20,19 @@ import { LocationsMasterDialog } from './locations-master-dialog';
 export const LocationsMasterTable = ({
   locs,
   isLoading,
+  page,
   setIsLoading,
+  setPage,
 }: {
   locs: LocsMasterTableValues[] | undefined;
   isLoading: boolean;
+  page: number;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setPage: React.Dispatch<React.SetStateAction<number>>;
 }) => {
   /* テーブル1ページの行数 */
   const rowsPerPage = 50;
   /* useState ------------------------------------------------ */
-  /* 今開いてるテーブルのページ数 */
-  const [page, setPage] = useState(1);
   /* ダイアログ開く公演場所のID、閉じるとき、未選択で-100とする */
   const [openId, setOpenID] = useState<number>(-100);
   /* 詳細ダイアログの開閉状態 */

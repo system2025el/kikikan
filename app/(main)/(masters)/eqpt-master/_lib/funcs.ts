@@ -96,27 +96,27 @@ export const getOneEqpt = async (id: number) => {
 
       const EqptDetails: EqptsMasterDialogValues = {
         kizaiNam: data.kizai_nam,
-        sectionNum: data.section_num,
-        elNum: data.el_num,
+        sectionNum: data.section_num === null ? 0 : data.section_num,
+        elNum: data.el_num === null ? 0 : data.el_num,
         delFlg: Boolean(data.del_flg),
         shozokuId: data.shozoku_id,
         bldCod: data.bld_cod,
         tanaCod: data.tana_cod,
         edaCod: data.eda_cod,
         kizaiGrpCod: data.kizai_grp_cod,
-        dspOrdNum: data.dsp_ord_num,
+        dspOrdNum: data.dsp_ord_num === null ? 0 : data.dsp_ord_num,
         mem: data.mem,
-        bumonId: data.bumon_id,
-        shukeibumonId: data.shukei_bumon_id,
+        bumonId: data.bumon_id === null ? 0 : data.bumon_id,
+        shukeibumonId: data.shukei_bumon_id === null ? 0 : data.shukei_bumon_id,
         dspFlg: Boolean(data.dsp_flg),
         ctnFlg: Boolean(data.ctn_flg),
-        defDatQty: data.def_dat_qty,
+        defDatQty: data.def_dat_qty === null ? 0 : data.def_dat_qty,
         regAmt: data.reg_amt,
-        rankAmt1: data.rank_amt_1,
-        rankAmt2: data.rank_amt_2,
-        rankAmt3: data.rank_amt_3,
-        rankAmt4: data.rank_amt_4,
-        rankAmt5: data.rank_amt_5,
+        rankAmt1: data.rank_amt_1 === null ? 0 : data.rank_amt_1,
+        rankAmt2: data.rank_amt_2 === null ? 0 : data.rank_amt_2,
+        rankAmt3: data.rank_amt_3 === null ? 0 : data.rank_amt_3,
+        rankAmt4: data.rank_amt_4 === null ? 0 : data.rank_amt_4,
+        rankAmt5: data.rank_amt_5 === null ? 0 : data.rank_amt_5,
       };
       console.log(EqptDetails.delFlg);
       return EqptDetails;
@@ -166,28 +166,28 @@ export const addNewEqpt = async (data: EqptsMasterDialogValues) => {
     await pool.query(query, [
       data.kizaiNam,
       Number(data.delFlg),
-      data.sectionNum,
-      data.elNum,
+      data.sectionNum === 0 ? null : data.sectionNum,
+      data.elNum === 0 ? null : data.elNum,
       data.shozokuId,
       data.bldCod,
       data.tanaCod,
       data.edaCod,
       data.kizaiGrpCod,
       data.mem,
-      data.bumonId,
-      data.shukeibumonId,
+      data.bumonId === 0 ? null : data.bumonId,
+      data.shukeibumonId === 0 ? null : data.shukeibumonId,
       Number(data.dspFlg),
       Number(data.ctnFlg),
-      data.defDatQty,
+      data.defDatQty === 0 ? null : data.defDatQty,
       data.regAmt,
-      data.rankAmt1,
-      data.rankAmt2,
-      data.rankAmt3,
-      data.rankAmt4,
-      data.rankAmt5,
+      data.rankAmt1 === 0 ? null : data.rankAmt1,
+      data.rankAmt2 === 0 ? null : data.rankAmt2,
+      data.rankAmt3 === 0 ? null : data.rankAmt3,
+      data.rankAmt4 === 0 ? null : data.rankAmt4,
+      data.rankAmt5 === 0 ? null : data.rankAmt5,
       date,
       'shigasan',
-      data.dspOrdNum,
+      data.dspOrdNum === 0 ? null : data.dspOrdNum,
     ]);
     console.log('data : ', data);
   } catch (error) {
@@ -197,54 +197,71 @@ export const addNewEqpt = async (data: EqptsMasterDialogValues) => {
   await revalidatePath('/eqpt-master');
 };
 
-// /**
-//  * 機材マスタの情報を更新する関数
-//  * @param data フォームに入力されている情報
-//  * @param id 更新する機材マスタID
-//  */
-// export const updateEqpt = async (data: EqptsMasterDialogValues, id: number) => {
-//   console.log('Update!!!', data.mem);
-//   const missingData = {
-//     Eqpt_nam: data.EqptNam,
-//     del_flg: Number(data.delFlg),
-//     mem: data.mem,
-//     dai_Eqpt_id: data.daiEqptId,
-//     syukei_Eqpt_id: data.shukeiEqptId,
-//   };
-//   console.log(missingData.del_flg);
-//   const date = new Date()
-//     .toLocaleString('ja-JP', {
-//       timeZone: 'Asia/Tokyo',
-//       hour12: false,
-//     })
-//     .replace(/\//g, '-');
+/**
+ * 機材マスタの情報を更新する関数
+ * @param data フォームに入力されている情報
+ * @param id 更新する機材マスタID
+ */
+export const updateEqpt = async (data: EqptsMasterDialogValues, id: number) => {
+  console.log('Update!!!', data.mem);
+  const missingData = {
+    kizai_nam: data.kizaiNam,
+    del_flg: Number(data.delFlg),
+    section_num: data.sectionNum === 0 ? null : data.sectionNum,
+    el_num: data.elNum === 0 ? null : data.elNum,
+    shozoku_id: data.shozokuId,
+    bld_cod: data.bldCod,
+    tana_cod: data.tanaCod,
+    eda_cod: data.edaCod,
+    kizai_grp_cod: data.kizaiGrpCod,
+    dsp_ord_num: data.dspOrdNum === 0 ? null : data.dspOrdNum,
+    mem: data.mem,
+    bumon_id: data.bumonId === 0 ? null : data.bumonId,
+    shukei_bumon_id: data.shukeibumonId === 0 ? null : data.shukeibumonId,
+    dsp_flg: Number(data.dspFlg),
+    ctn_flg: Number(data.ctnFlg),
+    def_dat_qty: data.defDatQty === 0 ? null : data.defDatQty,
+    reg_amt: data.regAmt,
+    rank_amt_1: data.rankAmt1 === 0 ? null : data.rankAmt1,
+    rank_amt_2: data.rankAmt2 === 0 ? null : data.rankAmt2,
+    rank_amt_3: data.rankAmt3 === 0 ? null : data.rankAmt3,
+    rank_amt_4: data.rankAmt4 === 0 ? null : data.rankAmt4,
+    rank_amt_5: data.rankAmt5 === 0 ? null : data.rankAmt5,
+  };
+  console.log(missingData.del_flg);
+  const date = new Date()
+    .toLocaleString('ja-JP', {
+      timeZone: 'Asia/Tokyo',
+      hour12: false,
+    })
+    .replace(/\//g, '-');
 
-//   const theData = {
-//     ...missingData,
-//     upd_dat: date,
-//     upd_user: 'test_user',
-//   };
-//   console.log(theData.Eqpt_nam);
+  const theData = {
+    ...missingData,
+    upd_dat: date,
+    upd_user: 'test_user',
+  };
+  console.log(theData.kizai_nam);
 
-//   try {
-//     const { error: updateError } = await supabase
-//       .schema('dev2')
-//       .from('m_Eqpt')
-//       .update({ ...theData })
-//       .eq('Eqpt_id', id);
+  try {
+    const { error: updateError } = await supabase
+      .schema('dev2')
+      .from('m_kizai')
+      .update({ ...theData })
+      .eq('kizai_id', id);
 
-//     if (updateError) {
-//       console.error('更新に失敗しました:', updateError.message);
-//       throw updateError;
-//     } else {
-//       console.log('機材を更新しました : ', theData.del_flg);
-//     }
-//   } catch (error) {
-//     console.log('例外が発生しました', error);
-//     throw error;
-//   }
-//   revalidatePath('/eqpt-master');
-// };
+    if (updateError) {
+      console.error('更新に失敗しました:', updateError.message);
+      throw updateError;
+    } else {
+      console.log('機材を更新しました : ', theData.del_flg);
+    }
+  } catch (error) {
+    console.log('例外が発生しました', error);
+    throw error;
+  }
+  revalidatePath('/eqpt-master');
+};
 
 export const getEqptsQty = async (id: number) => {
   try {
@@ -260,13 +277,13 @@ export const getEqptsQty = async (id: number) => {
     }
     if (!error) {
       if (!count || count === 0) {
-        return null;
+        return undefined;
       } else {
         return count;
       }
     } else {
       console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      return null;
+      return undefined;
     }
   } catch (e) {
     console.error('例外が発生しました:', e);
