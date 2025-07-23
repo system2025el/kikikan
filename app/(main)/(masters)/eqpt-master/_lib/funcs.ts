@@ -163,28 +163,28 @@ export const addNewEqpt = async (data: EqptsMasterDialogValues) => {
     await pool.query(query, [
       data.kizaiNam,
       Number(data.delFlg),
-      data.sectionNum === 0 ? null : data.sectionNum,
-      data.elNum === 0 ? null : data.elNum,
+      zeroToNull(data.sectionNum),
+      zeroToNull(data.elNum),
       data.shozokuId,
       data.bldCod,
       data.tanaCod,
       data.edaCod,
       data.kizaiGrpCod,
       data.mem,
-      data.bumonId === 0 ? null : data.bumonId,
-      data.shukeibumonId === 0 ? null : data.shukeibumonId,
+      zeroToNull(data.bumonId),
+      zeroToNull(data.shukeibumonId),
       Number(data.dspFlg),
       Number(data.ctnFlg),
-      data.defDatQty === 0 ? null : data.defDatQty,
+      zeroToNull(data.defDatQty),
       data.regAmt,
-      data.rankAmt1 === 0 ? null : data.rankAmt1,
-      data.rankAmt2 === 0 ? null : data.rankAmt2,
-      data.rankAmt3 === 0 ? null : data.rankAmt3,
-      data.rankAmt4 === 0 ? null : data.rankAmt4,
-      data.rankAmt5 === 0 ? null : data.rankAmt5,
+      zeroToNull(data.rankAmt1),
+      zeroToNull(data.rankAmt2),
+      zeroToNull(data.rankAmt3),
+      zeroToNull(data.rankAmt4),
+      zeroToNull(data.rankAmt5),
       date,
       'shigasan',
-      data.dspOrdNum === 0 ? null : data.dspOrdNum,
+      zeroToNull(data.dspOrdNum),
     ]);
     console.log('data : ', data);
   } catch (error) {
@@ -204,26 +204,26 @@ export const updateEqpt = async (data: EqptsMasterDialogValues, id: number) => {
   const missingData = {
     kizai_nam: data.kizaiNam,
     del_flg: Number(data.delFlg),
-    section_num: data.sectionNum === 0 ? null : data.sectionNum,
-    el_num: data.elNum === 0 ? null : data.elNum,
+    section_num: zeroToNull(data.sectionNum),
+    el_num: zeroToNull(data.elNum),
     shozoku_id: data.shozokuId,
     bld_cod: data.bldCod,
     tana_cod: data.tanaCod,
     eda_cod: data.edaCod,
     kizai_grp_cod: data.kizaiGrpCod,
-    dsp_ord_num: data.dspOrdNum === 0 ? null : data.dspOrdNum,
+    dsp_ord_num: zeroToNull(data.dspOrdNum),
     mem: data.mem,
-    bumon_id: data.bumonId === 0 ? null : data.bumonId,
-    shukei_bumon_id: data.shukeibumonId === 0 ? null : data.shukeibumonId,
+    bumon_id: zeroToNull(data.bumonId),
+    shukei_bumon_id: zeroToNull(data.shukeibumonId),
     dsp_flg: Number(data.dspFlg),
     ctn_flg: Number(data.ctnFlg),
-    def_dat_qty: data.defDatQty === 0 ? null : data.defDatQty,
+    def_dat_qty: zeroToNull(data.defDatQty),
     reg_amt: data.regAmt,
-    rank_amt_1: data.rankAmt1 === 0 ? null : data.rankAmt1,
-    rank_amt_2: data.rankAmt2 === 0 ? null : data.rankAmt2,
-    rank_amt_3: data.rankAmt3 === 0 ? null : data.rankAmt3,
-    rank_amt_4: data.rankAmt4 === 0 ? null : data.rankAmt4,
-    rank_amt_5: data.rankAmt5 === 0 ? null : data.rankAmt5,
+    rank_amt_1: zeroToNull(data.rankAmt1),
+    rank_amt_2: zeroToNull(data.rankAmt2),
+    rank_amt_3: zeroToNull(data.rankAmt3),
+    rank_amt_4: zeroToNull(data.rankAmt4),
+    rank_amt_5: zeroToNull(data.rankAmt5),
   };
   console.log(missingData.del_flg);
   const date = new Date()
@@ -293,7 +293,6 @@ export const createEqptHistory = async (data: EqptsMasterDialogValues, id: numbe
   //   data
   // );
   console.log(data.mem);
-  const zeroToNull = <T>(value: T): T | null => (value === 0 ? null : value);
 
   const query = `
       INSERT INTO m_kizai_his (
@@ -350,6 +349,13 @@ export const createEqptHistory = async (data: EqptsMasterDialogValues, id: numbe
     throw error;
   }
 };
+
+/**
+ * 0であればnullに変換
+ * @param value 変換したい値
+ * @returns valueが0ならnull, 他はvalueを返す
+ */
+export const zeroToNull = <T>(value: T): T | null => (value === 0 ? null : value);
 
 // export const getAllEqpt = async () => {
 //   try {
