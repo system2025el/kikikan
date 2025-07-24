@@ -48,6 +48,33 @@ export const OrderSchema = z.object({
 
 export type OrderValues = z.infer<typeof OrderSchema>;
 
+export type EqTableValues = {
+  juchuHeadId: number;
+  juchuKizaiHeadId: number;
+  headNam: string;
+  sagyoStaNam: string;
+  shukoDat: Date;
+  nyukoDat: Date;
+  sikomibi: number;
+  rihabi: number;
+  genebi: number;
+  honbanbi: number;
+  juchuHonbanbiqty: number;
+  shokei: number;
+  keikoku: string;
+  oyaJuchuKizaiHeadId: number;
+  htKbn: number;
+};
+
+export type VehicleTableValues = {
+  juchuHeadId: number;
+  juchuSharyoHeadId: number;
+  headNam: string;
+  kbn: string;
+  dat: Date;
+  mem: string;
+};
+
 export const LockSchema = z.object({
   lockShubetu: z.number(),
   headId: z.number().nullable(),

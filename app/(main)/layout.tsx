@@ -11,6 +11,7 @@ import { jaJP } from 'rsuite/esm/locales';
 import { notoSansJp } from '@/app/_ui/fonts';
 import ThemeProvider from '@/app/_ui/theme-provider';
 
+import { DirtyProvider } from './_ui/dirty-context';
 import Sidebar from './_ui/sidebar';
 
 /** @type {Metadata} metadata */
@@ -29,7 +30,9 @@ const Layout = ({ children }: Readonly<{ children: React.ReactNode }>) => {
   ---------------------------------------------------------------------------------------------------- */
   return (
     <CustomProvider locale={jaJP}>
-      <Sidebar>{children}</Sidebar>
+      <DirtyProvider>
+        <Sidebar>{children}</Sidebar>
+      </DirtyProvider>
     </CustomProvider>
   );
 };
