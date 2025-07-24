@@ -160,7 +160,7 @@ export const TestDate = (props: {
             sx: {
               bgcolor: disabled ? grey[200] : 'white',
               width: '25%',
-              minWidth: 200,
+              minWidth: 160,
               padding: 0,
               '.Mui-disabled': {
                 WebkitTextFillColor: 'black',
@@ -172,11 +172,16 @@ export const TestDate = (props: {
               endAdornment: (
                 <>
                   {date && (
-                    <IconButton size="small" onClick={onClear} disabled={disabled ? true : false}>
+                    <IconButton size="small" sx={{ p: 0 }} onClick={onClear} disabled={disabled ? true : false}>
                       <ClearIcon fontSize="small" />
                     </IconButton>
                   )}
-                  <IconButton size="small" onClick={() => setOpen(true)} disabled={disabled ? true : false}>
+                  <IconButton
+                    size="small"
+                    sx={{ p: 0 }}
+                    onClick={() => setOpen(true)}
+                    disabled={disabled ? true : false}
+                  >
                     <CalendarTodayIcon fontSize="small" />
                   </IconButton>
                 </>

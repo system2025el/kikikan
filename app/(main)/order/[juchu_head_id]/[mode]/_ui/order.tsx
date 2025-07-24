@@ -452,16 +452,14 @@ export const Order = (props: {
                   name="juchuDat"
                   control={control}
                   render={({ field, fieldState }) => (
-                    <Box>
-                      <TestDate
-                        onBlur={field.onBlur}
-                        date={field.value}
-                        onChange={(newDate) => field.onChange(newDate?.toDate())}
-                        fieldstate={fieldState}
-                        disabled={!edit}
-                        onClear={() => field.onChange(null)}
-                      />
-                    </Box>
+                    <TestDate
+                      onBlur={field.onBlur}
+                      date={field.value}
+                      onChange={(newDate) => field.onChange(newDate?.toDate())}
+                      fieldstate={fieldState}
+                      disabled={!edit}
+                      onClear={() => field.onChange(null)}
+                    />
                   )}
                 />
               </Box>
