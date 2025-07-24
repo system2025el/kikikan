@@ -20,17 +20,19 @@ import { LocationsMasterDialog } from './locations-master-dialog';
 export const LocationsMasterTable = ({
   locs,
   isLoading,
+  page,
   setIsLoading,
+  setPage,
 }: {
   locs: LocsMasterTableValues[] | undefined;
   isLoading: boolean;
+  page: number;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setPage: React.Dispatch<React.SetStateAction<number>>;
 }) => {
   /* テーブル1ページの行数 */
   const rowsPerPage = 50;
   /* useState ------------------------------------------------ */
-  /* 今開いてるテーブルのページ数 */
-  const [page, setPage] = useState(1);
   /* ダイアログ開く公演場所のID、閉じるとき、未選択で-100とする */
   const [openId, setOpenID] = useState<number>(-100);
   /* 詳細ダイアログの開閉状態 */
@@ -64,12 +66,6 @@ export const LocationsMasterTable = ({
     setIsLoading(false); //theLocsが変わったらローディング終わり
   }, [theLocs, setIsLoading]);
 
-  // 表示するデータ
-  const list = useMemo(
-    () => (theLocs && rowsPerPage > 0 ? theLocs.slice((page - 1) * rowsPerPage, page * rowsPerPage) : theLocs),
-    [page, rowsPerPage, theLocs]
-  );
-
   return (
     <Box>
       <Typography pt={2} pl={2}>
@@ -78,7 +74,7 @@ export const LocationsMasterTable = ({
       <Divider />
       <Grid2 container mt={0.5} mx={0.5} justifyContent={'space-between'} alignItems={'center'}>
         <Grid2 spacing={1}>
-          <MuiTablePagination arrayList={list!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
+          <MuiTablePagination arrayList={theLocs!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
         </Grid2>
         <Grid2 container spacing={3}>
           <Grid2 alignContent={'center'}>
@@ -100,12 +96,12 @@ export const LocationsMasterTable = ({
         <Loading />
       ) : (
         <>
-          {list!.length < 1 && <Typography>該当するデータがありません</Typography>}
-          {list!.length > 0 && (
-            <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
+          {theLocs!.length < 1 && <Typography>該当するデータがありません</Typography>}
+          {theLocs!.length > 0 && (
+            <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
               <MasterTable
                 headers={lMHeader}
-                datas={list!.map((l) => ({
+                datas={theLocs!.map((l) => ({
                   ...l,
                   id: l.locId,
                   name: l.locNam,

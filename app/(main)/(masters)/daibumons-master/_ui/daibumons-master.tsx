@@ -18,6 +18,8 @@ import { DaibumonsMasterTable } from './daibumons-master-table';
 export const DaibumonsMaster = ({ daibumons }: { daibumons: DaibumonsMasterTableValues[] | undefined }) => {
   /* useState ------------------ */
   const [theDaibumons, setTheDaibumons] = useState(daibumons);
+  /* 今開いてるテーブルのページ数 */
+  const [page, setPage] = useState(1);
   /* DBのローディング */
   const [isLoading, setIsLoading] = useState(true);
 
@@ -32,6 +34,7 @@ export const DaibumonsMaster = ({ daibumons }: { daibumons: DaibumonsMasterTable
     setIsLoading(true);
     console.log('data : ', data);
     const newList = await getFilteredDaibumons(data.query!);
+    setPage(1);
     setTheDaibumons(newList);
     console.log('theLocs : ', theDaibumons, '検索終了検索終了');
   };
@@ -65,7 +68,13 @@ export const DaibumonsMaster = ({ daibumons }: { daibumons: DaibumonsMasterTable
           </form>
         </Box>
       </Paper>
-      <DaibumonsMasterTable daibumons={theDaibumons} isLoading={isLoading} setIsLoading={setIsLoading} />
+      <DaibumonsMasterTable
+        daibumons={theDaibumons}
+        page={page}
+        isLoading={isLoading}
+        setPage={setPage}
+        setIsLoading={setIsLoading}
+      />
     </Container>
   );
 };

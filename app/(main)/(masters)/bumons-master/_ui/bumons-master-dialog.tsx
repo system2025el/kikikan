@@ -63,7 +63,7 @@ export const BumonsMasterDialog = ({
     mode: 'onBlur',
     reValidateMode: 'onBlur',
     resolver: zodResolver(BumonsMasterDialogSchema),
-    defaultValues: {},
+    defaultValues: emptyBumon,
   });
 
   /* methods ---------------------------------------- */

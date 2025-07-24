@@ -112,6 +112,7 @@ export const locationList: LocsMasterTableValues[] = [
     mem: 'ばばばばばばっばばばばっばばばばば',
 
     dspFlg: true,
+    dspOrdNum: 0,
   },
   {
     locNam: '日本武道館',
@@ -125,6 +126,7 @@ export const locationList: LocsMasterTableValues[] = [
     mem: '',
 
     dspFlg: true,
+    dspOrdNum: 0,
   },
   {
     locNam: 'ＮＨＫホール',
@@ -138,6 +140,7 @@ export const locationList: LocsMasterTableValues[] = [
     mem: '',
 
     dspFlg: true,
+    dspOrdNum: 0,
   },
   {
     locNam: '東京厚生年金会館ホール',
@@ -151,6 +154,7 @@ export const locationList: LocsMasterTableValues[] = [
     mem: '',
 
     dspFlg: true,
+    dspOrdNum: 0,
   },
   {
     locNam: '中野サンプラザ',
@@ -164,6 +168,7 @@ export const locationList: LocsMasterTableValues[] = [
     mem: '',
 
     dspFlg: true,
+    dspOrdNum: 0,
   },
   {
     locNam: '渋谷公会堂',
@@ -177,5 +182,6 @@ export const locationList: LocsMasterTableValues[] = [
     mem: '',
 
     dspFlg: true,
+    dspOrdNum: 0,
   },
 ];

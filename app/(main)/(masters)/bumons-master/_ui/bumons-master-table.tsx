@@ -21,17 +21,19 @@ import { BumonsMasterDialog } from './bumons-master-dialog';
 export const BumonsMasterTable = ({
   bumons,
   isLoading,
+  page,
   setIsLoading,
+  setPage,
 }: {
   bumons: BumonsMasterTableValues[] | undefined;
   isLoading: boolean;
+  page: number;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setPage: React.Dispatch<React.SetStateAction<number>>;
 }) => {
   /* 1ページごとの表示数 */
   const rowsPerPage = 50;
   /* useState --------------------------------------- */
-  /* 今開いてるテーブルのページ数 */
-  const [page, setPage] = useState(1);
   /* ダイアログ開く部門のID、閉じるとき、未選択で-100とする */
   const [openId, setOpenID] = useState<number>(-100);
   /* 詳細ダイアログの開閉状態 */
@@ -69,15 +71,6 @@ export const BumonsMasterTable = ({
     setIsLoading(false); //theBumonsが変わったらローディング終わり
   }, [theBumons, setIsLoading]);
 
-  // 表示するデータ
-  const list = useMemo(
-    () =>
-      theBumons && rowsPerPage > 0
-        ? theBumons.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage)
-        : theBumons,
-    [page, rowsPerPage, theBumons]
-  );
-
   return (
     <>
       <Box>
@@ -87,7 +80,7 @@ export const BumonsMasterTable = ({
         <Divider />
         <Grid2 container mt={0.5} mx={0.5} justifyContent={'space-between'} alignItems={'center'}>
           <Grid2 spacing={1}>
-            <MuiTablePagination arrayList={list!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
+            <MuiTablePagination arrayList={theBumons!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
           </Grid2>
           <Grid2 container spacing={3}>
             <Grid2 alignContent={'center'}>
@@ -109,12 +102,12 @@ export const BumonsMasterTable = ({
           <Loading />
         ) : (
           <>
-            {list!.length < 1 && <Typography>該当するデータがありません</Typography>}
-            {list!.length > 0 && (
-              <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
+            {theBumons!.length < 1 && <Typography>該当するデータがありません</Typography>}
+            {theBumons!.length > 0 && (
+              <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
                 <MasterTable
                   headers={BumonsMHeader}
-                  datas={list!.map((l) => ({ id: l.bumonId!, name: l.bumonNam, ...l }))}
+                  datas={theBumons!.map((l) => ({ id: l.bumonId!, name: l.bumonNam, ...l }))}
                   handleOpenDialog={handleOpenDialog}
                   page={page}
                   rowsPerPage={rowsPerPage}

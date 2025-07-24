@@ -19,17 +19,19 @@ import { ShukeibumonsMasterDialog } from './shukeibumons-master-dialog';
 export const ShukeibumonsMasterTable = ({
   shukeibumons,
   isLoading,
+  page,
   setIsLoading,
+  setPage,
 }: {
   shukeibumons: ShukeibumonsMasterTableValues[] | undefined;
   isLoading: boolean;
+  page: number;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setPage: React.Dispatch<React.SetStateAction<number>>;
 }) => {
   /* 1ページごとの表示数 */
   const rowsPerPage = 50;
   /* useState --------------------------------------- */
-  /* 今開いてるテーブルのページ数 */
-  const [page, setPage] = useState(1);
   /* ダイアログ開く集計部門のID、閉じるとき、未選択で-100とする */
   const [openId, setOpenID] = useState<number>(-100);
   /* 詳細ダイアログの開閉状態 */
@@ -62,15 +64,6 @@ export const ShukeibumonsMasterTable = ({
     setIsLoading(false); //theShukeiBumonsが変わったらローディング終わり
   }, [theShukeibumons, setIsLoading]);
 
-  // 表示するデータ
-  const list = useMemo(
-    () =>
-      theShukeibumons && rowsPerPage > 0
-        ? theShukeibumons.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage)
-        : theShukeibumons,
-    [page, rowsPerPage, theShukeibumons]
-  );
-
   return (
     <>
       <Box>
@@ -80,7 +73,7 @@ export const ShukeibumonsMasterTable = ({
         <Divider />
         <Grid2 container mt={0.5} mx={0.5} justifyContent={'space-between'} alignItems={'center'}>
           <Grid2 spacing={1}>
-            <MuiTablePagination arrayList={list!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
+            <MuiTablePagination arrayList={theShukeibumons!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
           </Grid2>
 
           <Grid2 container spacing={3}>
@@ -103,12 +96,12 @@ export const ShukeibumonsMasterTable = ({
           <Loading />
         ) : (
           <>
-            {list!.length < 1 && <Typography>該当するデータがありません</Typography>}
-            {list!.length > 0 && (
-              <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
+            {theShukeibumons!.length < 1 && <Typography>該当するデータがありません</Typography>}
+            {theShukeibumons!.length > 0 && (
+              <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
                 <MasterTable
                   headers={shukeibumonMHeader}
-                  datas={list!.map((l) => ({
+                  datas={theShukeibumons!.map((l) => ({
                     id: l.shukeibumonId!,
                     name: l.shukeibumonNam,
                     ...l,

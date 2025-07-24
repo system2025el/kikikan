@@ -34,11 +34,15 @@ import { ManagerMasterDialog } from './managers-master-dialog';
 export const ManagerssMasterTable = ({
   managers,
   isLoading,
+  page,
   setIsLoading,
+  setPage,
 }: {
   managers: ManagersMasterTableValues[] | undefined;
   isLoading: boolean;
+  page: number;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setPage: React.Dispatch<React.SetStateAction<number>>;
 }) => {
   /* 1ページごとの表示数 */
   const rowsPerPage = 50;
@@ -48,8 +52,6 @@ export const ManagerssMasterTable = ({
   const [openId, setOpenID] = useState(-100);
   /* 顧客詳細ダイアログの開閉状態 */
   const [dialogOpen, setDialogOpen] = useState(false);
-  /* 今開いてるテーブルのページ数 */
-  const [page, setPage] = useState(1);
   /* 担当者リスト */
   const [theManagers, setTheManagers] = useState(managers);
   /* Methods
@@ -79,15 +81,6 @@ export const ManagerssMasterTable = ({
     setIsLoading(false); //theManagersが変わったらローディング終わり
   }, [theManagers, setIsLoading]);
 
-  /* 表示する担当者リスト */
-  const list = useMemo(
-    () =>
-      theManagers && rowsPerPage > 0
-        ? theManagers.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage)
-        : theManagers,
-    [page, rowsPerPage, theManagers]
-  );
-
   return (
     <Box>
       <Typography pt={2} pl={2}>
@@ -96,7 +89,7 @@ export const ManagerssMasterTable = ({
       <Divider />
       <Grid2 container mt={0.5} mx={0.5} justifyContent={'space-between'} alignItems={'center'}>
         <Grid2 spacing={1}>
-          <MuiTablePagination arrayList={list!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
+          <MuiTablePagination arrayList={theManagers!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
         </Grid2>
         <Grid2 container spacing={3}>
           <Grid2 alignContent={'center'}>
@@ -114,28 +107,27 @@ export const ManagerssMasterTable = ({
           </Grid2>
         </Grid2>
       </Grid2>
-      <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
-        {isLoading ? (
-          <Loading />
-        ) : (
-          <>
-            <MasterTable
-              headers={mMHeader}
-              datas={list!.map((l) => ({ ...l, id: l.tantouId, name: l.tantouNam }))}
-              page={page}
-              rowsPerPage={rowsPerPage}
-              handleOpenDialog={handleOpenDialog}
-            />
-            <Dialog open={dialogOpen} fullScreen>
-              <ManagerMasterDialog
-                managerId={openId}
-                handleClose={handleCloseDialog}
-                refetchManagers={refetchManagers}
+      {isLoading ? (
+        <Loading />
+      ) : (
+        <>
+          {theManagers!.length < 1 && <Typography>該当するデータがありません</Typography>}
+          {theManagers!.length > 0 && (
+            <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
+              <MasterTable
+                headers={mMHeader}
+                datas={theManagers!.map((l) => ({ ...l, id: l.tantouId, name: l.tantouNam }))}
+                page={page}
+                rowsPerPage={rowsPerPage}
+                handleOpenDialog={handleOpenDialog}
               />
-            </Dialog>
-          </>
-        )}
-      </TableContainer>
+            </TableContainer>
+          )}
+        </>
+      )}
+      <Dialog open={dialogOpen} fullScreen>
+        <ManagerMasterDialog managerId={openId} handleClose={handleCloseDialog} refetchManagers={refetchManagers} />
+      </Dialog>
     </Box>
   );
 };

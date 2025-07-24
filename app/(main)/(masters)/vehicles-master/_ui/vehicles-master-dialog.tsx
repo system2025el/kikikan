@@ -151,11 +151,6 @@ export const VehiclesMasterDialog = ({
                   />
                 </FormBox>
               </Grid2>
-              {/* <Grid2>
-                <FormBox formItem={formItems[1]}>
-                  <CheckboxElement name="delFlg" control={control} size="medium" disabled={editable ? false : true} />
-                </FormBox>
-              </Grid2> */}
               <Grid2>
                 <FormBox formItem={formItems[2]}>
                   <TextareaAutosizeElement

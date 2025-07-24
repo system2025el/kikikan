@@ -9,6 +9,7 @@ import { Loading } from '@/app/(main)/_ui/loading';
 import { MuiTablePagination } from '../../../_ui/table-pagination';
 import { MasterTableOfEqpt } from '../../_ui/tables';
 import { eqptMHeader } from '../_lib/datas';
+import { getFilteredEqpts } from '../_lib/funcs';
 import { EqptsMasterTableValues } from '../_lib/types';
 import { EqMasterDialog } from './eqpt-master-dialog';
 
@@ -16,17 +17,19 @@ import { EqMasterDialog } from './eqpt-master-dialog';
 export const EqptMasterTable = ({
   eqpts,
   isLoading,
+  page,
   setIsLoading,
+  setPage,
 }: {
   eqpts: EqptsMasterTableValues[] | undefined;
   isLoading: boolean;
+  page: number;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setPage: React.Dispatch<React.SetStateAction<number>>;
 }) => {
   /* テーブル1ページの行数 */
   const rowsPerPage = 50;
   /* useState ------------------------------------------------ */
-  /* 今開いてるテーブルのページ数 */
-  const [page, setPage] = useState(1);
   /* ダイアログ開く機材のID、閉じるとき、未選択で-100とする */
   const [openId, setOpenID] = useState<number>(-100);
   /* 詳細ダイアログの開閉状態 */
@@ -47,8 +50,13 @@ export const EqptMasterTable = ({
   /* 情報が変わったときに更新される */
   const refetchEqpts = async () => {
     setIsLoading(true);
-    // const updated = await getFilteredEqpts('');
-    // setTheEqpts(updated);
+    const updated = await getFilteredEqpts({
+      q: '',
+      b: 0,
+      d: 0,
+      s: 0,
+    });
+    setTheEqpts(updated);
     setIsLoading(false);
   };
 
@@ -60,14 +68,6 @@ export const EqptMasterTable = ({
     setIsLoading(false); //theEqptsが変わったらローディング終わり
   }, [theEqpts, setIsLoading]);
 
-  // 表示するデータ
-  const list = useMemo(
-    () => (theEqpts && rowsPerPage > 0 ? theEqpts.slice((page - 1) * rowsPerPage, page * rowsPerPage) : theEqpts),
-    [page, rowsPerPage, theEqpts]
-  );
-  // // テーブル最後のページ用の空データの長さ
-  // const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - arrayList.length) : 0;
-
   return (
     <Box>
       <Typography pt={2} pl={2}>
@@ -76,7 +76,7 @@ export const EqptMasterTable = ({
       <Divider />
       <Grid2 container mt={0.5} mx={0.5} justifyContent={'space-between'} alignItems={'center'}>
         <Grid2 spacing={1}>
-          <MuiTablePagination arrayList={list!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
+          <MuiTablePagination arrayList={theEqpts!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
         </Grid2>
         <Grid2 container spacing={3}>
           <Grid2 alignContent={'center'}>
@@ -94,28 +94,31 @@ export const EqptMasterTable = ({
           </Grid2>
         </Grid2>
       </Grid2>
-      <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
-        {isLoading ? (
-          <Loading />
-        ) : (
-          <>
-            <MasterTableOfEqpt
-              headers={eqptMHeader}
-              datas={list!.map((l) => ({
-                id: l.kizaiId,
-                name: l.kizaiNam,
-                ...l,
-              }))}
-              page={page}
-              rowsPerPage={rowsPerPage}
-              handleOpenDialog={handleOpenDialog}
-            />
-            <Dialog open={dialogOpen} fullScreen>
-              <EqMasterDialog handleClose={handleCloseDialog} eqptId={openId} refetchEqpts={refetchEqpts} />
-            </Dialog>
-          </>
-        )}
-      </TableContainer>
+      {isLoading ? (
+        <Loading />
+      ) : (
+        <>
+          {theEqpts!.length < 1 && <Typography>該当するデータがありません</Typography>}
+          {theEqpts!.length > 0 && (
+            <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
+              <MasterTableOfEqpt
+                headers={eqptMHeader}
+                datas={theEqpts!.map((l) => ({
+                  id: l.kizaiId,
+                  name: l.kizaiNam,
+                  ...l,
+                }))}
+                page={page}
+                rowsPerPage={rowsPerPage}
+                handleOpenDialog={handleOpenDialog}
+              />
+            </TableContainer>
+          )}
+        </>
+      )}
+      <Dialog open={dialogOpen} fullScreen>
+        <EqMasterDialog handleClose={handleCloseDialog} eqptId={openId} refetchEqpts={refetchEqpts} />
+      </Dialog>
     </Box>
   );
 };

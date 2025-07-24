@@ -160,6 +160,7 @@ export const customers: CustomersMasterTableValues[] = [
     // keishou: '御中',
     mem: 'あああああああああああああああああああ',
     dspFlg: true,
+    dspOrdNum: 0,
   },
   {
     kokyakuId: 2,
@@ -174,6 +175,7 @@ export const customers: CustomersMasterTableValues[] = [
     // keishou: '御中',
     mem: 'あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやいゆえよらりるれろわいうえをあいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやいゆえよらりるれろわいうえをあいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやいゆえよらりるれろわいうえをあいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやいゆえよらりるれろわいうえをあいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやいゆえよらりるれろわいうえをあいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやいゆえよらりるれろわいうえを',
     dspFlg: true,
+    dspOrdNum: 0,
   },
   {
     kokyakuId: 3,
@@ -188,5 +190,6 @@ export const customers: CustomersMasterTableValues[] = [
     // keishou: '御中',
     mem: '',
     dspFlg: true,
+    dspOrdNum: 0,
   },
 ];

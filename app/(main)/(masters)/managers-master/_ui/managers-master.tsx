@@ -15,6 +15,8 @@ import { ManagerssMasterTable } from './managers-master-table';
 export const ManagersMaster = ({ managers }: { managers: ManagersMasterTableValues[] | undefined }) => {
   /* useState ------------------ */
   const [theManagers, setTheManagers] = useState(managers);
+  /* 今開いてるテーブルのページ数 */
+  const [page, setPage] = useState(1);
   /* DBのローディング */
   const [isLoading, setIsLoading] = useState(true);
 
@@ -29,6 +31,7 @@ export const ManagersMaster = ({ managers }: { managers: ManagersMasterTableValu
     setIsLoading(true);
     console.log('data : ', data);
     // const newList = await getFilteredManagers(data.query!);
+    setPage(1);
     // setTheManagers(newList);
     console.log('theLocs : ', theManagers);
   };
@@ -60,7 +63,13 @@ export const ManagersMaster = ({ managers }: { managers: ManagersMasterTableValu
           </form>
         </Box>
       </Paper>
-      <ManagerssMasterTable managers={theManagers} isLoading={isLoading} setIsLoading={setIsLoading} />
+      <ManagerssMasterTable
+        managers={theManagers}
+        isLoading={isLoading}
+        page={page}
+        setIsLoading={setIsLoading}
+        setPage={setPage}
+      />
     </Container>
   );
 };

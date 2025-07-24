@@ -1,19 +1,28 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Grid2, Typography } from '@mui/material';
+import { Grid2, MenuItem, Select, TextField, Typography } from '@mui/material';
+import { grey } from '@mui/material/colors';
 import { useEffect, useState } from 'react';
 import {
   CheckboxElement,
+  Controller,
   SelectElement,
   TextareaAutosizeElement,
   TextFieldElement,
   useForm,
 } from 'react-hook-form-mui';
 
-import { FormBox } from '../../../_ui/form-box';
+import { FormBox, selectNone, SelectTypes } from '../../../_ui/form-box';
 import { Loading } from '../../../_ui/loading';
+import {
+  getBumonsSelection,
+  getDaibumonsSelection,
+  getShozokuSelection,
+  getShukeibumonsSelection,
+} from '../../_lib/funs';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { emptyEqpt, formItems } from '../_lib/datas';
+import { addNewEqpt, createEqptHistory, getEqptsQty, getOneEqpt, updateEqpt } from '../_lib/funcs';
 import { EqptsMasterDialogSchema, EqptsMasterDialogValues } from '../_lib/types';
 
 export const EqMasterDialog = ({
@@ -26,6 +35,8 @@ export const EqMasterDialog = ({
   refetchEqpts: () => Promise<void>;
 }) => {
   /* useState --------------------- */
+  /* eqpt更新前の */
+  const [currentEqpt, setCurrentEqpt] = useState<EqptsMasterDialogValues>(emptyEqpt);
   /** DBのローディング状態 */
   const [isLoading, setIsLoading] = useState(true);
   /* ダイアログでの編集モードかどうか */
@@ -38,18 +49,23 @@ export const EqMasterDialog = ({
   const [deleteOpen, setDeleteOpen] = useState(false);
   /* submit時のactions (save, delete) */
   const [action, setAction] = useState<'save' | 'delete' | undefined>(undefined);
+  /* フォーム内のセレクトoptions */
+  const [selectOptions, setSelectOptions] = useState<SelectTypes[][]>([]);
+  /* 保有数 */
+  const [kizaiQty, setKizaiQty] = useState<number | string>('');
 
   /* useForm ------------------------- */
   const {
     control,
     handleSubmit,
     reset,
+    watch,
     formState: { isDirty },
     getValues,
   } = useForm({
     mode: 'onBlur',
     reValidateMode: 'onBlur',
-    defaultValues: {},
+    defaultValues: emptyEqpt,
     resolver: zodResolver(EqptsMasterDialogSchema),
   });
 
@@ -58,20 +74,25 @@ export const EqMasterDialog = ({
   const onSubmit = async (data: EqptsMasterDialogValues) => {
     console.log('isDarty : ', isDirty);
     console.log(data);
-    // if (EqptId === -100) {
-    //   await addNewEqpt(data);
-    // handleCloseDialog();
-    // refetchEqpts();
-    // } else {
-    // if (action === 'save') {
-    //   await updateEqpt(data, eqptId);
-    // handleCloseDialog();
-    // refetchEqpts();
-    // } else if (action === 'delete') {
-    //   setDeleteOpen(true);
-    //   return;
-    // }
-    // }
+    if (eqptId === -100) {
+      // 新規登録
+      await addNewEqpt(data);
+      handleCloseDialog();
+      refetchEqpts();
+    } else {
+      // 更新
+      if (action === 'save') {
+        // 保存終了ボタン
+        await createEqptHistory(currentEqpt, eqptId);
+        await updateEqpt(data, eqptId);
+        handleCloseDialog();
+        refetchEqpts();
+      } else if (action === 'delete') {
+        // 削除ボタン
+        setDeleteOpen(true);
+        return;
+      }
+    }
   };
 
   /* 詳細ダイアログを閉じる */
@@ -93,11 +114,12 @@ export const EqMasterDialog = ({
 
   /* 削除確認ダイアログで削除選択時 */
   const handleConfirmDelete = async () => {
-    // const values = await getValues();
-    // await updateEqpt({ ...values, delFlg: true }, eqptId);
+    const values = await getValues();
+    await createEqptHistory(currentEqpt, eqptId);
+    await updateEqpt({ ...values, delFlg: true }, eqptId);
     setDeleteOpen(false);
     handleCloseDialog();
-    // await refetchEqpts();
+    await refetchEqpts();
   };
 
   /* useEffect --------------------------------------- */
@@ -105,6 +127,13 @@ export const EqMasterDialog = ({
   useEffect(() => {
     console.log('★★★★★★★★★★★★★★★★★★★★★');
     const getThatOneEqpt = async () => {
+      const a = await getShozokuSelection();
+      const b = await getBumonsSelection();
+      const c = await getShukeibumonsSelection();
+      setSelectOptions([a!, b!, c!]);
+      const qty = await getEqptsQty(eqptId);
+      setKizaiQty(typeof qty === 'number' ? qty : '');
+      console.log('pppppppppppppppppppppppppppppp', kizaiQty, selectOptions);
       if (eqptId === -100) {
         // 新規追加モード
         reset(emptyEqpt); // フォーム初期化
@@ -112,11 +141,11 @@ export const EqMasterDialog = ({
         setIsLoading(false);
         setIsNew(true);
       } else {
-        // const Eqpt1 = await getOneEqpt(EqptId);
-        // if (Eqpt1) {
-        //   setEqpt(Eqpt1);
-        //   reset(Eqpt1); // 取得したデータでフォーム初期化
-        // }
+        const eqpt1 = await getOneEqpt(eqptId);
+        if (eqpt1) {
+          setCurrentEqpt(eqpt1);
+          reset(eqpt1); // 取得したデータでフォーム初期化
+        }
         setIsLoading(false);
       }
     };
@@ -130,7 +159,7 @@ export const EqMasterDialog = ({
         <MasterDialogTitle
           editable={editable}
           handleEditable={() => setEditable(true)}
-          handleClose={handleCloseDialog}
+          handleClose={handleClickClose}
           dialogTitle={'機材マスタ登録'}
           isNew={isNew}
           isDirty={isDirty}
@@ -155,14 +184,7 @@ export const EqMasterDialog = ({
               </Grid2>
               <Grid2>
                 <FormBox formItem={formItems[1]}>
-                  <TextFieldElement
-                    name="kizaiQty"
-                    control={control}
-                    label={formItems[1].exsample}
-                    fullWidth
-                    sx={{ maxWidth: '20%' }}
-                    disabled
-                  />
+                  <TextField value={kizaiQty != null ? String(kizaiQty) : ''} disabled />
                 </FormBox>
               </Grid2>
               <Grid2>
@@ -194,20 +216,14 @@ export const EqMasterDialog = ({
                   />
                 </FormBox>
               </Grid2>
-              {/* <Grid2>
-                <FormBox formItem={formItems[4]}>
-                  <CheckboxElement name="delFlg" control={control} size="medium" disabled={editable ? false : true} />
-                </FormBox>
-              </Grid2> */}
               <Grid2>
                 <FormBox formItem={formItems[5]} required>
                   <SelectElement
-                    name="shozokuNam"
+                    name="shozokuId"
                     control={control}
-                    label={formItems[5].exsample}
-                    fullWidth
-                    sx={{ maxWidth: '50%' }}
                     disabled={editable ? false : true}
+                    sx={{ width: 250 }}
+                    options={selectOptions[0]!}
                   />
                 </FormBox>
               </Grid2>
@@ -286,25 +302,37 @@ export const EqMasterDialog = ({
               </Grid2>
               <Grid2>
                 <FormBox formItem={formItems[12]}>
-                  <SelectElement
-                    name="bumonNam"
+                  <Controller
+                    name="bumonId"
                     control={control}
-                    label={formItems[12].exsample}
-                    fullWidth
-                    sx={{ maxWidth: '90%' }}
                     disabled={editable ? false : true}
+                    render={({ field }) => (
+                      <Select {...field} sx={{ width: 250 }}>
+                        {[selectNone, ...selectOptions[1]!].map((opt) => (
+                          <MenuItem key={opt.id} value={opt.id} sx={opt.id === 0 ? { color: grey[600] } : {}}>
+                            {opt.label}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    )}
                   />
                 </FormBox>
               </Grid2>
               <Grid2>
                 <FormBox formItem={formItems[13]}>
-                  <SelectElement
-                    name="shukeibumonNam"
+                  <Controller
+                    name="shukeibumonId"
                     control={control}
-                    label={formItems[13].exsample}
-                    fullWidth
-                    sx={{ maxWidth: '90%' }}
                     disabled={editable ? false : true}
+                    render={({ field }) => (
+                      <Select {...field} sx={{ width: 250 }}>
+                        {[selectNone, ...selectOptions[2]!].map((opt) => (
+                          <MenuItem key={opt.id} value={opt.id} sx={opt.id === 0 ? { color: grey[600] } : {}}>
+                            {opt.label}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    )}
                   />
                 </FormBox>
               </Grid2>
@@ -413,7 +441,7 @@ export const EqMasterDialog = ({
             <IsDirtyAlertDialog
               open={dirtyOpen}
               handleCloseDirty={() => setDirtyOpen(false)}
-              handleCloseAll={handleClickClose}
+              handleCloseAll={handleCloseDialog}
             />
             <WillDeleteAlertDialog
               open={deleteOpen}

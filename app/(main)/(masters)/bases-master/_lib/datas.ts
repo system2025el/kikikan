@@ -30,30 +30,29 @@ export const formItems: FormItemsType[] = [
 
 // 新規登録用の初期化値（空の拠点）
 export const emptyBase: BasesMasterDialogValues = {
-  kyotenNam: '',
+  shozokuNam: '',
   delFlg: false,
   mem: '',
-  dspFlg: true,
 };
 
 /**モック削除delete */
 export const basesList: BasesMasterTableValues[] = [
   {
-    kyotenNam: 'KICS',
+    shozokuNam: 'KICS',
     mem: '川崎',
-    kyotenId: 1,
-    dspFlg: true,
+    shozokuId: 1,
+    dspOrdNum: 0,
   },
   {
-    kyotenNam: 'YARD',
+    shozokuNam: 'YARD',
     mem: '大和',
-    kyotenId: 2,
-    dspFlg: true,
+    shozokuId: 2,
+    dspOrdNum: 0,
   },
   {
-    kyotenNam: 'その他',
+    shozokuNam: 'その他',
     mem: '厚木など',
-    kyotenId: 3,
-    dspFlg: false,
+    shozokuId: 3,
+    dspOrdNum: 0,
   },
 ];

@@ -66,7 +66,7 @@ export const getFilteredLocs = async (query: string) => {
       if (!data || data.length === 0) {
         return [];
       } else {
-        const filteredLocs: LocsMasterTableValues[] = data.map((d) => ({
+        const filteredLocs: LocsMasterTableValues[] = data.map((d, index) => ({
           locId: d.koenbasho_id,
           locNam: d.koenbasho_nam,
           adrShozai: d.adr_shozai,
@@ -76,6 +76,7 @@ export const getFilteredLocs = async (query: string) => {
           fax: d.fax,
           mem: d.mem,
           dspFlg: Boolean(d.dsp_flg),
+          dspOrdNum: index + 1,
         }));
         console.log(filteredLocs.length);
         return filteredLocs;

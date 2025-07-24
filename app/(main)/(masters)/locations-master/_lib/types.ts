@@ -32,6 +32,7 @@ export type LocsMasterTableValues = {
   fax: string;
   mem: string;
   dspFlg: boolean;
+  dspOrdNum: number;
 };
 
 /* 検索用スキーマ */

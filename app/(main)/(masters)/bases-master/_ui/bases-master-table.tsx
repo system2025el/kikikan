@@ -8,6 +8,7 @@ import { Loading } from '@/app/(main)/_ui/loading';
 import { MuiTablePagination } from '../../../_ui/table-pagination';
 import { MasterTable } from '../../_ui/tables';
 import { bMHeader } from '../_lib/datas';
+import { getFilteredBases } from '../_lib/funcs';
 import { BasesMasterTableValues } from '../_lib/types';
 import { BasesMasterDialog } from './bases-master-dailog';
 
@@ -19,17 +20,19 @@ import { BasesMasterDialog } from './bases-master-dailog';
 export const BasesMasterTable = ({
   bases,
   isLoading,
+  page,
   setIsLoading,
+  setPage,
 }: {
   bases: BasesMasterTableValues[] | undefined;
   isLoading: boolean;
+  page: number;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setPage: React.Dispatch<React.SetStateAction<number>>;
 }) => {
   /* 1ページごとの表示数 */
   const rowsPerPage = 50;
   /* useState --------------------------------------- */
-  /* 今開いてるテーブルのページ数 */
-  const [page, setPage] = useState(1);
   /* ダイアログ開く顧客のID、閉じるとき、未選択で-100とする */
   const [openId, setOpenID] = useState<number>(-100);
   /* 詳細ダイアログの開閉状態 */
@@ -49,8 +52,8 @@ export const BasesMasterTable = ({
   /* 情報が変わったときに更新される */
   const refetchBases = async () => {
     setIsLoading(true);
-    // const updated = await getFilteredBases('');
-    // setTheBases(updated);
+    const updated = await getFilteredBases('');
+    setTheBases(updated);
     setIsLoading(false);
   };
 
@@ -62,15 +65,6 @@ export const BasesMasterTable = ({
     setIsLoading(false); //theBasesが変わったらローディング終わり
   }, [theBases, setIsLoading]);
 
-  // 表示するデータ
-  const list = useMemo(
-    () =>
-      theBases && rowsPerPage > 0
-        ? theBases.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage)
-        : theBases,
-    [page, rowsPerPage, theBases]
-  );
-
   return (
     <>
       <Box>
@@ -80,7 +74,7 @@ export const BasesMasterTable = ({
         <Divider />
         <Grid2 container mt={0.5} mx={0.5} justifyContent={'space-between'} alignItems={'center'}>
           <Grid2 spacing={1}>
-            <MuiTablePagination arrayList={list!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
+            <MuiTablePagination arrayList={theBases!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
           </Grid2>
           <Grid2 container spacing={3}>
             <Grid2 alignContent={'center'}>
@@ -98,24 +92,27 @@ export const BasesMasterTable = ({
             </Grid2>
           </Grid2>
         </Grid2>
-        <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
-          {isLoading ? (
-            <Loading />
-          ) : (
-            <>
-              <MasterTable
-                headers={bMHeader}
-                datas={list!.map((l) => ({ id: l.kyotenId!, name: l.kyotenNam, ...l }))}
-                handleOpenDialog={handleOpenDialog}
-                page={page}
-                rowsPerPage={rowsPerPage}
-              />
-              <Dialog open={dialogOpen} fullScreen>
-                <BasesMasterDialog handleClose={handleCloseDialog} baseId={openId} refetchBases={refetchBases} />
-              </Dialog>
-            </>
-          )}
-        </TableContainer>
+        {isLoading ? (
+          <Loading />
+        ) : (
+          <>
+            {theBases!.length < 1 && <Typography>該当するデータがありません</Typography>}
+            {theBases!.length > 0 && (
+              <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
+                <MasterTable
+                  headers={bMHeader}
+                  datas={theBases!.map((l) => ({ id: l.shozokuId!, name: l.shozokuNam, ...l }))}
+                  handleOpenDialog={handleOpenDialog}
+                  page={page}
+                  rowsPerPage={rowsPerPage}
+                />
+              </TableContainer>
+            )}
+          </>
+        )}
+        <Dialog open={dialogOpen} fullScreen>
+          <BasesMasterDialog handleClose={handleCloseDialog} baseId={openId} refetchBases={refetchBases} />
+        </Dialog>
       </Box>
     </>
   );

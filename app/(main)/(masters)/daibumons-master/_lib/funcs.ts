@@ -64,10 +64,11 @@ export const getFilteredDaibumons = async (query: string) => {
       if (!data || data.length === 0) {
         return [];
       } else {
-        const filtereddaibumons: DaibumonsMasterTableValues[] = data.map((d) => ({
+        const filtereddaibumons: DaibumonsMasterTableValues[] = data.map((d, index) => ({
           daibumonId: d.dai_bumon_id,
           daibumonNam: d.dai_bumon_nam,
           mem: d.mem,
+          dspOrdNum: index + 1,
         }));
         console.log(filtereddaibumons.length);
         return filtereddaibumons;

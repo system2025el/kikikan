@@ -20,17 +20,19 @@ import { VehiclesMasterDialog } from './vehicles-master-dialog';
 export const VehiclesMasterTable = ({
   vehs,
   isLoading,
+  page,
   setIsLoading,
+  setPage,
 }: {
   vehs: VehsMasterTableValues[] | undefined;
   isLoading: boolean;
+  page: number;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setPage: React.Dispatch<React.SetStateAction<number>>;
 }) => {
   /* テーブルの1ページのの行数 */
   const rowsPerPage = 50;
   /* useState ------------------------------- */
-  /* 表示してるページ */
-  const [page, setPage] = useState(1);
   /* ダイアログ開く車両のID、閉じるとき、未選択で-100とする */
   const [openId, setOpenID] = useState<number>(-100);
   /* 詳細ダイアログの開閉状態 */
@@ -63,13 +65,6 @@ export const VehiclesMasterTable = ({
     setIsLoading(false); //theVehsが変わったらローディング終わり
   }, [theVehs, setIsLoading]);
 
-  // 表示するデータ
-  const list = useMemo(
-    () =>
-      theVehs && rowsPerPage > 0 ? theVehs.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage) : theVehs,
-    [page, rowsPerPage, theVehs]
-  );
-
   return (
     <Box>
       <Typography pt={2} pl={2}>
@@ -78,7 +73,7 @@ export const VehiclesMasterTable = ({
       <Divider />
       <Grid2 container mt={0.5} mx={0.5} justifyContent={'space-between'} alignItems={'center'}>
         <Grid2 spacing={1}>
-          <MuiTablePagination arrayList={list!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
+          <MuiTablePagination arrayList={theVehs!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
         </Grid2>
         <Grid2 container spacing={3}>
           <Grid2 alignContent={'center'}>
@@ -100,12 +95,12 @@ export const VehiclesMasterTable = ({
         <Loading />
       ) : (
         <>
-          {list!.length < 1 && <Typography>該当するデータがありません</Typography>}
-          {list!.length > 0 && (
-            <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 0.5 }}>
+          {theVehs!.length < 1 && <Typography>該当するデータがありません</Typography>}
+          {theVehs!.length > 0 && (
+            <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
               <MasterTable
                 headers={vMHeader}
-                datas={list!.map((l) => ({ id: l.sharyoId, name: l.sharyoNam, ...l }))}
+                datas={theVehs!.map((l) => ({ id: l.sharyoId, name: l.sharyoNam, ...l }))}
                 handleOpenDialog={handleOpenDialog}
                 page={page}
                 rowsPerPage={rowsPerPage}

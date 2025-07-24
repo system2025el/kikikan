@@ -3,31 +3,36 @@ import { number, z } from 'zod';
 // Schema
 export const EqptsMasterDialogSchema = z.object({
   kizaiNam: z.string().max(100, { message: '100文字以内で入力してください' }).min(1, { message: '必須項目です' }),
-  kizaiQty: z.number({ message: '数字を入力してください' }).optional(),
-  sectionNum: z.number({ message: '数字を入力してください' }).optional(),
-  elNum: z.number({ message: '数字を入力してください' }).optional(),
+  sectionNum: z.number().optional(),
+  elNum: z.number().optional(),
   delFlg: z.boolean().optional(),
-  shozokuNam: z.string({ message: '選択してください' }),
+  shozokuId: z.number({ message: '選択してください' }).min(1, { message: '選択してください' }),
   bldCod: z.string().max(20, { message: '20文字以内で入力してください' }).optional(),
   tanaCod: z.string().max(20, { message: '20文字以内で入力してください' }).optional(),
   edaCod: z.string().max(20, { message: '20文字以内で入力してください' }).optional(),
   kizaiGrpCod: z.string().max(10, { message: '10文字以内で入力してください' }).optional(),
-  dspOrdNum: z.number({ message: '数字を入力してください' }).optional(),
+  dspOrdNum: z.number().optional(),
   mem: z.string().max(200, { message: '200文字以内で入力してください' }).optional(),
-  bumonNam: z.string().max(100, { message: '100文字以内で入力してください' }).optional(),
-  shukeibumonNam: z.string().max(100, { message: '100文字以内で入力してください' }).optional(),
+  bumonId: z.number().max(100, { message: '100文字以内で入力してください' }).optional(),
+  shukeibumonId: z.number().max(100, { message: '100文字以内で入力してください' }).optional(),
   dspFlg: z.boolean().optional(),
   ctnFlg: z.boolean().optional(),
-  defDatQty: z.number({ message: '数字を入力してください' }).optional(),
-  regAmt: z.number(),
-  rankAmt1: z.number({ message: '数字を入力してください' }).optional(),
-  rankAmt2: z.number({ message: '数字を入力してください' }).optional(),
-  rankAmt3: z.number({ message: '数字を入力してください' }).optional(),
-  rankAmt4: z.number({ message: '数字を入力してください' }).optional(),
-  rankAmt5: z.number({ message: '数字を入力してください' }).optional(),
+  defDatQty: z.number().optional(),
+  regAmt: z.number({ message: '定価を入力してください' }).min(1, { message: '定価を入力してください' }),
+  rankAmt1: z.number().optional(),
+  rankAmt2: z.number().optional(),
+  rankAmt3: z.number().optional(),
+  rankAmt4: z.number().optional(),
+  rankAmt5: z.number().optional(),
 });
 
-export type EqptsMasterDialogValues = z.infer<typeof EqptsMasterDialogSchema>;
+type eqptsMasterDialogValues = z.infer<typeof EqptsMasterDialogSchema>;
+export type EqptsMasterDialogValues = eqptsMasterDialogValues & {
+  addUser?: string;
+  addDat?: string;
+  updUser?: string;
+  updDat?: string;
+};
 
 export type EqptsMasterTableValues = {
   kizaiId: number;
@@ -45,4 +50,12 @@ export type EqptsMasterTableValues = {
   rankAmt4: number;
   rankAmt5: number;
   dspFlg: boolean;
+  dspOrdNum: number;
 };
+
+/**
+ * 0であればnullに変換 移動するかも
+ * @param value 変換したい値
+ * @returns valueが0ならnull, 他はvalueを返す
+ */
+export const zeroToNull = <T>(value: T): T | null => (value === 0 ? null : value);

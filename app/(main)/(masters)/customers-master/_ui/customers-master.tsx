@@ -15,6 +15,8 @@ import { CustomersMasterTable } from './customers-master-table';
 export const CustomersMaster = ({ customers }: { customers: CustomersMasterTableValues[] | undefined }) => {
   /* useState ------------------ */
   const [theCustomers, setTheCustomers] = useState(customers);
+  /* 今開いてるテーブルのページ数 */
+  const [page, setPage] = useState(1);
   /* DBのローディング */
   const [isLoading, setIsLoading] = useState(true);
 
@@ -29,6 +31,7 @@ export const CustomersMaster = ({ customers }: { customers: CustomersMasterTable
     setIsLoading(true);
     console.log('data : ', data);
     const newList = await getFilteredCustomers(data.query!);
+    setPage(1);
     setTheCustomers(newList);
     console.log('theLocs : ', theCustomers);
   };
@@ -64,7 +67,13 @@ export const CustomersMaster = ({ customers }: { customers: CustomersMasterTable
           </form>
         </Box>
       </Paper>
-      <CustomersMasterTable customers={theCustomers} isLoading={isLoading} setIsLoading={setIsLoading} />
+      <CustomersMasterTable
+        customers={theCustomers}
+        page={page}
+        isLoading={isLoading}
+        setPage={setPage}
+        setIsLoading={setIsLoading}
+      />
     </Container>
   );
 };
