@@ -100,7 +100,7 @@ export const MasterTable = ({
                       </Button>
                     </>
                   ) : header.key === 'mem' ? (
-                    <Typography noWrap maxWidth={50}>
+                    <Typography noWrap maxWidth={100}>
                       {row[header.key]}
                     </Typography>
                   ) : header.key === 'hidden' ? (
@@ -205,7 +205,7 @@ export const MasterTableOfEqpt = ({
                       </Button>
                     </>
                   ) : header.key === 'mem' ? (
-                    <Typography noWrap maxWidth={50}>
+                    <Typography noWrap maxWidth={100}>
                       {row[header.key]}
                     </Typography>
                   ) : header.key === 'hidden' ? (

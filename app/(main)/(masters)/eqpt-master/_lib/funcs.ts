@@ -6,7 +6,7 @@ import pool from '@/app/_lib/postgres/postgres';
 import { supabase } from '@/app/_lib/supabase/supabase';
 
 import { emptyEqpt } from './datas';
-import { EqptsMasterDialogValues, EqptsMasterTableValues, zeroToNull } from './types';
+import { EqptsMasterDialogValues, EqptsMasterTableValues, nullToZero, zeroToNull } from './types';
 
 /**
  * 機材マスタテーブルのデータを取得する関数
@@ -49,7 +49,7 @@ export const getFilteredEqpts = async (queries: { q: string; b: number; d: numbe
           kizaiId: d.kizai_id,
           kizaiNam: d.kizai_nam,
           kizaiQty: d.kizai_qty,
-          shozokuNam: d.shozoku_nam,
+          shozokuNam: d.shozoku_nam.substring(0, 1),
           mem: d.mem,
           bumonNam: d.bumon_nam,
           daibumonNam: d.dai_bumon_nam,
@@ -89,27 +89,27 @@ export const getOneEqpt = async (id: number) => {
 
       const EqptDetails: EqptsMasterDialogValues = {
         kizaiNam: data.kizai_nam,
-        sectionNum: data.section_num === null ? 0 : data.section_num,
-        elNum: data.el_num === null ? 0 : data.el_num,
+        sectionNum: nullToZero(data.section_num),
+        elNum: nullToZero(data.el_num),
         delFlg: Boolean(data.del_flg),
         shozokuId: data.shozoku_id,
         bldCod: data.bld_cod,
         tanaCod: data.tana_cod,
         edaCod: data.eda_cod,
         kizaiGrpCod: data.kizai_grp_cod,
-        dspOrdNum: data.dsp_ord_num === null ? 0 : data.dsp_ord_num,
+        dspOrdNum: nullToZero(data.dsp_ord_num),
         mem: data.mem,
-        bumonId: data.bumon_id === null ? 0 : data.bumon_id,
-        shukeibumonId: data.shukei_bumon_id === null ? 0 : data.shukei_bumon_id,
+        bumonId: nullToZero(data.bumon_id),
+        shukeibumonId: nullToZero(data.shukei_bumon_id),
         dspFlg: Boolean(data.dsp_flg),
         ctnFlg: Boolean(data.ctn_flg),
-        defDatQty: data.def_dat_qty === null ? 0 : data.def_dat_qty,
+        defDatQty: nullToZero(data.def_dat_qty),
         regAmt: data.reg_amt,
-        rankAmt1: data.rank_amt_1 === null ? 0 : data.rank_amt_1,
-        rankAmt2: data.rank_amt_2 === null ? 0 : data.rank_amt_2,
-        rankAmt3: data.rank_amt_3 === null ? 0 : data.rank_amt_3,
-        rankAmt4: data.rank_amt_4 === null ? 0 : data.rank_amt_4,
-        rankAmt5: data.rank_amt_5 === null ? 0 : data.rank_amt_5,
+        rankAmt1: nullToZero(data.rank_amt_1),
+        rankAmt2: nullToZero(data.rank_amt_2),
+        rankAmt3: nullToZero(data.rank_amt_3),
+        rankAmt4: nullToZero(data.rank_amt_4),
+        rankAmt5: nullToZero(data.rank_amt_5),
         addUser: data.add_user,
         addDat: data.add_dat,
         updUser: data.upd_user,
