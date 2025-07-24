@@ -9,10 +9,45 @@ export const PreservationAlertDialog = ({ open, onClick }: { open: boolean; onCl
         <Box>保存されていません</Box>
       </DialogTitle>
       <DialogContentText m={2} p={2}>
-        受注ヘッダーを保存してください
+        1度保存をしてください
       </DialogContentText>
       <DialogActions>
-        <Button onClick={onClick}>はい</Button>
+        <Button onClick={onClick}>確認</Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
+
+export const IsDirtyAlertDialog = ({ open, onClick }: { open: boolean; onClick: (result: boolean) => void }) => {
+  return (
+    <Dialog open={open}>
+      <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
+        <WarningIcon color="error" />
+        <Box>保存されていません</Box>
+      </DialogTitle>
+      <DialogContentText m={2} p={2}>
+        入力内容を破棄しますか？
+      </DialogContentText>
+      <DialogActions>
+        <Button onClick={() => onClick(true)}>破棄</Button>
+        <Button onClick={() => onClick(false)}>戻る</Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
+
+export const SelectAlertDialog = ({ open, onClick }: { open: boolean; onClick: () => void }) => {
+  return (
+    <Dialog open={open}>
+      <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
+        <WarningIcon color="error" />
+        <Box>選択項目を確認してください</Box>
+      </DialogTitle>
+      <DialogContentText m={2} p={2}>
+        メイン機材を1つ選択してください
+      </DialogContentText>
+      <DialogActions>
+        <Button onClick={onClick}>確認</Button>
       </DialogActions>
     </Dialog>
   );

@@ -12,8 +12,11 @@ import {
   ListItemText,
   useTheme,
 } from '@mui/material';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
+
+import { PreservationAlertDialog } from '../order/[juchu_head_id]/[mode]/_ui/caveat-dialog';
+import { useDirty } from './dirty-context';
 
 type MenuItem = {
   name: string;
@@ -62,6 +65,8 @@ export default function NavLinks() {
   const theme = useTheme();
   const selectedBgColor = alpha(theme.palette.primary.light, 0.2);
   const pathname = usePathname();
+  const router = useRouter();
+  const { isDirty } = useDirty();
 
   const isSelected = (url: string) => {
     if (pathname === url /*|| pathname.startsWith(url + '/')*/) {
@@ -100,6 +105,7 @@ export default function NavLinks() {
     setroginOpen(!loginOpen);
   };
 
+  const { requestNavigation } = useDirty();
   // const handleNewOrderClick = async () => {
   //   const maxId = await GetMaxId();
   //   if (maxId) {
@@ -142,7 +148,7 @@ export default function NavLinks() {
                 backgroundColor: isSelected(text.url) ? selectedBgColor : '',
               }}
             >
-              <ListItemButton href={text.url} dense>
+              <ListItemButton /*href={text.url}*/ onClick={() => requestNavigation(text.url)} dense>
                 <ListItemText primary={text.name} sx={{ color: isSelected(text.url) ? 'primary.dark' : '', pl: 8 }} />
               </ListItemButton>
             </ListItem>

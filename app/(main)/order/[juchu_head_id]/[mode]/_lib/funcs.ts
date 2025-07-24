@@ -3,7 +3,7 @@
 import { supabase } from '@/app/_lib/supabase/supabase';
 import { CustomersMasterTableValues } from '@/app/(main)/(masters)/customers-master/_lib/types';
 
-import { JuchuHeadValues, LockValues, OrderValues } from './types';
+import { EqTableValues, JuchuHeadValues, LockValues, OrderValues } from './types';
 
 /**
  * 受注ヘッダー取得
@@ -257,6 +257,83 @@ export const Update = async (data: OrderValues) => {
   } catch (e) {
     console.error('Exception while updating order:', e);
     return false;
+  }
+};
+
+export const Copy = async (juchuHeadId: number, data: OrderValues, add_user: string) => {
+  const copyData = {
+    juchu_head_id: juchuHeadId,
+    del_flg: data.delFlg,
+    juchu_sts: data.juchuSts,
+    juchu_dat: data.juchuDat,
+    juchu_str_dat: data.juchuRange && data.juchuRange[0],
+    juchu_end_dat: data.juchuRange && data.juchuRange[1],
+    nyuryoku_user: data.nyuryokuUser,
+    koen_nam: data.koenNam,
+    koenbasho_nam: data.koenbashoNam,
+    kokyaku_id: data.kokyaku.kokyakuId,
+    kokyaku_tanto_nam: data.kokyakuTantoNam,
+    mem: data.mem,
+    nebiki_amt: data.nebikiAmt,
+    zei_kbn: data.zeiKbn,
+    upd_dat: new Date(),
+    upd_user: 'test_user',
+  };
+
+  try {
+    const { error: insertError } = await supabase
+      .schema('dev2')
+      .from('t_juchu_head')
+      .insert({
+        ...copyData,
+      });
+
+    if (!insertError) {
+      console.log('New order added successfully:', copyData);
+    } else {
+      console.error('Error adding new order:', insertError.message);
+    }
+  } catch (e) {
+    console.error('Exception while adding new order:', e);
+  }
+};
+
+export const GetEqHeader = async (juchuHeadId: number) => {
+  try {
+    const { data, error } = await supabase
+      .schema('dev2')
+      .from('v_juchu_kizai_head_lst')
+      .select('*')
+      .eq('juchu_head_id', juchuHeadId)
+      .not('juchu_kizai_head_id', 'is', null);
+
+    if (error) {
+      console.error('GetOrder juchu error : ', error);
+      return [];
+    }
+
+    if (!data || data.length === 0) return [];
+
+    const EqTableData: EqTableValues[] = data.map((d) => ({
+      juchuHeadId: d.juchu_head_id,
+      juchuKizaiHeadId: d.juchu_kizai_head_id,
+      headNam: d.head_nam,
+      sagyoStaNam: d.sagyo_sts_nam,
+      shukoDat: d.shuko_dat,
+      nyukoDat: d.nyuko_dat,
+      sikomibi: d.sikomibi,
+      rihabi: d.rihabi,
+      genebi: d.genebi,
+      honbanbi: d.honbanbi,
+      juchuHonbanbiqty: d.juchu_honbanbi_qty,
+      shokei: d.shokei,
+      keikoku: d.keikoku,
+      oyaJuchuKizaiHeadId: d.oya_juchu_kizai_head_id,
+      htKbn: d.ht_kbn,
+    }));
+    return EqTableData;
+  } catch (e) {
+    console.error('Exception while selecting eqlist:', e);
   }
 };
 

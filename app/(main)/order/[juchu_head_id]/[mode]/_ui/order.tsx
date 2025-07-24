@@ -31,32 +31,67 @@ import { TextFieldElement } from 'react-hook-form-mui';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import DateX, { RSuiteDateRangePicker, TestDate, toISOString, toISOStringWithTimezone } from '@/app/(main)/_ui/date';
+import { useDirty } from '@/app/(main)/_ui/dirty-context';
 import { Loading } from '@/app/(main)/_ui/loading';
 import { SelectTable } from '@/app/(main)/_ui/table';
-import { equipmentRows, vehicleHeaders, vehicleRows } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/data';
+import { equipmentRows, users, vehicleHeaders, vehicleRows } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/data';
 
-import { AddLock, DeleteLock, GetLock, Update } from '../_lib/funcs';
+import { AddLock, AddNewOrder, Copy, DeleteLock, GetLock, GetMaxId, GetOrder, Update } from '../_lib/funcs';
 import { useUnsavedChangesWarning } from '../_lib/hook';
-import { JuchuHeadSchema, KokyakuValues, LockValues, OrderSchema, OrderValues } from '../_lib/types';
-import { PreservationAlertDialog } from './caveat-dialog';
+import {
+  EqTableValues,
+  JuchuHeadSchema,
+  KokyakuValues,
+  LockValues,
+  OrderSchema,
+  OrderValues,
+  VehicleTableValues,
+} from '../_lib/types';
+import { IsDirtyAlertDialog, PreservationAlertDialog, SelectAlertDialog } from './caveat-dialog';
 import { CustomerSelectionDialog } from './customer-selection';
 import { LocationSelectDialog } from './location-selection';
-import { OrderEqTable } from './order-table';
+import { OrderEqTable, OrderVehicleTable } from './order-table';
 
-export const Order = (props: { order: OrderValues; edit: boolean; lockData: LockValues | null }) => {
+export const Order = (props: {
+  order: OrderValues;
+  eqList: EqTableValues[] | undefined;
+  edit: boolean;
+  lockData: LockValues | null;
+}) => {
   const router = useRouter();
   // user情報
   const user = useUserStore((state) => state.user);
+  // userList
+  const userList = users;
   // ローディング
   const [isLoading, setIsLoading] = useState(false);
   // 編集モード(true:編集、false:閲覧)
   const [edit, setEdit] = useState(props.edit);
+  // 保存フラグ
+  const [save, setSave] = useState(false);
+  // 機材ヘッダーデータ
+  const [eqHeaderList, setEqHeaderList] = useState<EqTableValues[] | undefined>(props.eqList);
+  // 車両ヘッダーデータ
+  const [vehicleHeaderList, setVehicleHeaderList] = useState<VehicleTableValues[] | undefined>(vehicleRows);
   // ロックデータ
   const [lockData, setLockData] = useState<LockValues | null>(props.lockData);
-  /* 未保存モーダルを出すかどうか */
+  // 未保存ダイアログを出すかどうか
+  const [saveOpen, setSaveOpen] = useState(false);
+  // 編集内容が未保存ダイアログを出すかどうか
   const [dirtyOpen, setDirtyOpen] = useState(false);
+  // 機材選択ダイアログを出すかどうか
+  const [selectOpen, setSelectOpen] = useState(false);
+  // 機材テーブル選択行
+  const [selectEq, setSelectEq] = useState<number[]>([]);
+  // 車両テーブル選択行
+  const [selectVehicle, setSelectVehicle] = useState<number[]>([]);
+  // 遷移先path
+  const [path, setPath] = useState<string | null>(null);
+
+  // context
+  const { setIsDirty, setIsSave, setLock, setLockShubetu, setHeadId } = useDirty();
   // 合計金額
-  const priceTotal = equipmentRows.reduce((sum, row) => sum + (row.price ?? 0), 0);
+  const priceTotal = eqHeaderList!.reduce((sum, row) => sum + (row.shokei ?? 0), 0);
 
   /* useForm ------------------------- */
   const {
@@ -67,7 +102,7 @@ export const Order = (props: { order: OrderValues; edit: boolean; lockData: Lock
     getValues,
     setValue,
     clearErrors,
-    formState: { isDirty, dirtyFields, errors },
+    formState: { isDirty, errors, defaultValues },
   } = useForm({
     mode: 'onSubmit',
     reValidateMode: 'onBlur',
@@ -95,6 +130,12 @@ export const Order = (props: { order: OrderValues; edit: boolean; lockData: Lock
     resolver: zodResolver(OrderSchema),
   });
 
+  // ブラウザバック、F5、×ボタンでページを離れた際のhook
+  useUnsavedChangesWarning(isDirty);
+
+  /**
+   * useEffect
+   */
   useEffect(() => {
     if (!user) return;
     setEdit(!props.edit || (props.lockData !== null && props.lockData.addUser !== user.name) ? false : true);
@@ -110,8 +151,21 @@ export const Order = (props: { order: OrderValues; edit: boolean; lockData: Lock
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  // ページを離れた際のhook
-  useUnsavedChangesWarning(isDirty);
+  useEffect(() => {
+    setIsDirty(isDirty);
+    setIsSave(save);
+  }, [isDirty, save, setIsDirty, setIsSave]);
+
+  useEffect(() => {
+    if (lockData) setLock(lockData);
+  }, [lockData, setLock]);
+
+  useEffect(() => {
+    setLockShubetu(1);
+    setHeadId(props.order.juchuHeadId);
+    if (props.order.juchuDat && props.order.nyuryokuUser && props.order.koenNam && props.order.kokyaku) setSave(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // 保存ボタン押下
   const onSubmit = async (data: OrderValues) => {
@@ -119,6 +173,7 @@ export const Order = (props: { order: OrderValues; edit: boolean; lockData: Lock
     setIsLoading(true);
     const update = await Update(data);
     reset(data);
+    setSave(true);
     setIsLoading(false);
     console.log('update : ', update);
   };
@@ -140,60 +195,131 @@ export const Order = (props: { order: OrderValues; edit: boolean; lockData: Lock
   };
 
   // コピーボタン押下
-  const handleCopy = () => {
-    const currentValue = getValues();
-    if (
-      !isDirty &&
-      currentValue.juchuDat &&
-      currentValue.nyuryokuUser &&
-      currentValue.koenNam &&
-      currentValue.kokyaku
-    ) {
-      console.log('コピー');
+  const handleCopy = async () => {
+    if (!save) {
+      setSaveOpen(true);
+      return;
+    }
+
+    if (!isDirty) {
+      const maxId = await GetMaxId();
+      if (maxId) {
+        const newOrderId = maxId.juchu_head_id + 1;
+        const currentData = await GetOrder(props.order.juchuHeadId);
+        if (user && currentData) {
+          await Copy(newOrderId, currentData, user.name);
+        }
+        window.open(`/order/${newOrderId}/${'edit'}`);
+      } else {
+        console.error('Failed to retrieve max order ID');
+      }
     } else {
       setDirtyOpen(true);
     }
   };
 
   // 機材入力ボタン押下
-  const handleAddEq = () => {
-    const currentValue = getValues();
-    if (
-      !isDirty &&
-      currentValue.juchuDat &&
-      currentValue.nyuryokuUser &&
-      currentValue.koenNam &&
-      currentValue.kokyaku
-    ) {
+  const handleAddEq = async () => {
+    if (!save) {
+      setSaveOpen(true);
+      return;
+    }
+
+    if (!isDirty) {
+      await DeleteLock(1, props.order.juchuHeadId);
       router.push('/order/equipment-order-detail');
     } else {
+      setPath('/order/equipment-order-detail');
       setDirtyOpen(true);
+    }
+  };
+
+  // 返却入力ボタン押下
+  const handleAddReturn = async () => {
+    if (!save) {
+      setSaveOpen(true);
+      return;
+    }
+
+    if (selectEq.length === 1 && eqHeaderList) {
+      const selectData = eqHeaderList.find((d) => d.juchuKizaiHeadId === selectEq[0]);
+      if (selectData && selectData.oyaJuchuKizaiHeadId === 1) {
+        if (!isDirty) {
+          await DeleteLock(1, props.order.juchuHeadId);
+          router.push('/order/equipment-return-order-detail');
+        } else {
+          setPath('/order/equipment-return-order-detail');
+          setDirtyOpen(true);
+        }
+      } else {
+        setSelectOpen(true);
+      }
+    } else {
+      setSelectOpen(true);
+    }
+  };
+
+  // キープ入力ボタン押下
+  const handleAddKeep = async () => {
+    if (!save) {
+      setSaveOpen(true);
+      return;
+    }
+
+    if (selectEq.length === 1 && eqHeaderList) {
+      const selectData = eqHeaderList.find((d) => d.juchuKizaiHeadId === selectEq[0]);
+      if (selectData && selectData.oyaJuchuKizaiHeadId === 1) {
+        if (!isDirty) {
+          await DeleteLock(1, props.order.juchuHeadId);
+          router.push('/order/equipment-keep-order-detail');
+        } else {
+          setPath('/order/equipment-keep-order-detail');
+          setDirtyOpen(true);
+        }
+      } else {
+        setSelectOpen(true);
+      }
+    } else {
+      setSelectOpen(true);
     }
   };
 
   // 車両入力ボタン押下
-  const handleAddVehicle = () => {
-    const currentValue = getValues();
-    if (
-      !isDirty &&
-      currentValue.juchuDat &&
-      currentValue.nyuryokuUser &&
-      currentValue.koenNam &&
-      currentValue.kokyaku
-    ) {
+  const handleAddVehicle = async () => {
+    if (!save) {
+      setSaveOpen(true);
+      return;
+    }
+
+    if (!isDirty) {
+      await DeleteLock(1, props.order.juchuHeadId);
       router.push('/order/vehicle-order-detail');
     } else {
+      setPath('/order/vehicle-order-detail');
       setDirtyOpen(true);
     }
   };
 
-  //
-  const handleCloseDialog = () => {
-    setDirtyOpen(false);
+  // isDirtyDialogの破棄、戻るボタン押下
+  const handleResultDialog = async (result: boolean) => {
+    if (result && path) {
+      await DeleteLock(1, props.order.juchuHeadId);
+      router.push(path);
+      setPath(null);
+      setIsDirty(false);
+      setIsSave(true);
+    } else {
+      setDirtyOpen(false);
+      setPath(null);
+    }
   };
 
-  const handleSelectionChange = (selectedIds: (string | number)[]) => {
-    console.log('選択されたID:', selectedIds);
+  const handleEqSelectionChange = (selectedIds: number[]) => {
+    setSelectEq(selectedIds);
+  };
+
+  const handleVehicleSelectionChange = (selectedIds: number[]) => {
+    setSelectVehicle(selectedIds);
   };
 
   // 公演場所選択ダイアログ
@@ -340,7 +466,22 @@ export const Order = (props: { order: OrderValues; edit: boolean; lockData: Lock
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={7}>入力者</Typography>
-                <TextFieldElement name="nyuryokuUser" control={control} disabled={!edit}></TextFieldElement>
+                <FormControl size="small" sx={{ width: '30%', minWidth: '80px' }}>
+                  <Controller
+                    name="nyuryokuUser"
+                    control={control}
+                    render={({ field }) => (
+                      <Select {...field} defaultValue={props.order.nyuryokuUser} disabled={!edit}>
+                        {userList.map((u) => (
+                          <MenuItem key={u.id} value={u.name}>
+                            {u.name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    )}
+                  />
+                </FormControl>
+                {/*<TextFieldElement name="nyuryokuUser" control={control} disabled={!edit}></TextFieldElement>*/}
               </Box>
               <Box sx={styles.container}>
                 <Typography mr={2}>
@@ -372,7 +513,7 @@ export const Order = (props: { order: OrderValues; edit: boolean; lockData: Lock
               <Box sx={styles.container}>
                 <Typography marginRight={5}>公演場所</Typography>
                 <TextFieldElement name="koenbashoNam" control={control} disabled={!edit}></TextFieldElement>
-                <Button onClick={() => handleOpenLocationDialog()} disabled={!edit}>
+                <Button style={{ marginLeft: 5 }} onClick={() => handleOpenLocationDialog()} disabled={!edit}>
                   検索
                 </Button>
               </Box>
@@ -389,7 +530,7 @@ export const Order = (props: { order: OrderValues; edit: boolean; lockData: Lock
                         error={!!fieldState.error}
                         helperText={fieldState.error?.message}
                       />
-                      <Button onClick={() => handleOpenCustomerDialog()} disabled={!edit}>
+                      <Button style={{ marginLeft: 5 }} onClick={() => handleOpenCustomerDialog()} disabled={!edit}>
                         検索
                       </Button>
                     </>
@@ -421,7 +562,7 @@ export const Order = (props: { order: OrderValues; edit: boolean; lockData: Lock
                   }}
                   disabled={!edit}
                 ></TextFieldElement>
-                <Typography>円</Typography>
+                <Typography marginLeft={1}>円</Typography>
                 <Typography ml={4} mr={2}>
                   税区分
                 </Typography>
@@ -493,10 +634,11 @@ export const Order = (props: { order: OrderValues; edit: boolean; lockData: Lock
                 機材入力
               </Button>
               <Button
-                href="/order/equipment-return-order-detail"
+                //href="/order/equipment-return-order-detail"
                 color="error"
                 onClick={(e) => {
                   e.stopPropagation();
+                  handleAddReturn();
                 }}
                 disabled={!edit}
               >
@@ -504,9 +646,21 @@ export const Order = (props: { order: OrderValues; edit: boolean; lockData: Lock
                 返却入力
               </Button>
               <Button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleAddKeep();
+                }}
+                disabled={!edit}
+                sx={{ bgcolor: 'green' }}
+              >
+                <AddIcon fontSize="small" />
+                キープ入力
+              </Button>
+              <Button
                 color="error"
                 onClick={(e) => {
                   e.stopPropagation();
+                  console.log(selectEq);
                 }}
                 disabled={!edit}
               >
@@ -517,7 +671,7 @@ export const Order = (props: { order: OrderValues; edit: boolean; lockData: Lock
           </Grid2>
         </AccordionSummary>
         <AccordionDetails sx={{ padding: 0 }}>
-          <OrderEqTable orderRows={equipmentRows} edit={edit} onSelectionChange={handleSelectionChange} />
+          <OrderEqTable orderEqRows={eqHeaderList} onEqSelectionChange={handleEqSelectionChange} />
         </AccordionDetails>
       </Accordion>
       {/* -------------------------車両----------------------------------- */}
@@ -543,6 +697,7 @@ export const Order = (props: { order: OrderValues; edit: boolean; lockData: Lock
                 color="error"
                 onClick={(e) => {
                   e.stopPropagation();
+                  console.log(selectVehicle);
                 }}
                 disabled={!edit}
               >
@@ -553,10 +708,15 @@ export const Order = (props: { order: OrderValues; edit: boolean; lockData: Lock
           </Grid2>
         </AccordionSummary>
         <AccordionDetails sx={{ padding: 0 }}>
-          <SelectTable headers={vehicleHeaders} datas={vehicleRows} onSelectionChange={handleSelectionChange} />
+          <OrderVehicleTable
+            orderVehicleRows={vehicleHeaderList}
+            onVehicleSelectionChange={handleVehicleSelectionChange}
+          />
         </AccordionDetails>
       </Accordion>
-      <PreservationAlertDialog open={dirtyOpen} onClick={handleCloseDialog} />
+      <PreservationAlertDialog open={saveOpen} onClick={() => setSaveOpen(false)} />
+      <IsDirtyAlertDialog open={dirtyOpen} onClick={handleResultDialog} />
+      <SelectAlertDialog open={selectOpen} onClick={() => setSelectOpen(false)} />
     </Box>
   );
 };
