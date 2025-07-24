@@ -56,7 +56,13 @@ const lightTheme = createTheme(
           head: ({ theme }) => ({
             backgroundColor: theme.palette.primary.light,
             color: theme.palette.primary.contrastText,
+            paddingLeft: 8,
+            paddingRight: 8,
           }),
+          body: {
+            paddingLeft: 8,
+            paddingRight: 8,
+          },
         },
       },
       MuiSelect: {

@@ -79,10 +79,8 @@ export const MasterTable = ({
           const isHidden = row.dspFlg === 0 || row.dspFlg === false;
           return (
             <TableRow hover key={row.dspOrdNum}>
-              <TableCell sx={{ bgcolor: isHidden ? grey[300] : '', width: 100 }}>
-                <Box width={32} px={1} fontSize={13} textAlign={'right'}>
-                  {row.dspOrdNum}
-                </Box>
+              <TableCell sx={{ bgcolor: isHidden ? grey[300] : '', width: 100, paddingLeft: 1, paddingRight: 1 }}>
+                {row.dspOrdNum}
               </TableCell>
               {headers.map((header) => (
                 <TableCell
@@ -144,6 +142,11 @@ export const MasterTable = ({
   );
 };
 
+/**
+ * 機材マスタ専用テーブルコンポーネント
+ * @param param0
+ * @returns 機材マスタ専用テーブルコンポーネント
+ */
 export const MasterTableOfEqpt = ({
   headers,
   datas,
@@ -165,13 +168,13 @@ export const MasterTableOfEqpt = ({
   const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - datas!.length) : 0;
 
   return (
-    <Table sx={{ minWidth: 1200 }} aria-labelledby="tableTitle" padding="none" stickyHeader>
+    <Table sx={{ minWidth: 1200 }} padding="none" stickyHeader>
       <TableHead sx={{ bgcolor: 'primary.light' }}>
         <TableRow sx={{ whiteSpace: 'nowrap' }}>
           <TableCell></TableCell>
           {headers.map((header) => (
             <TableCell key={header.key} align={typeof datas[0][header.key] === 'number' ? 'right' : 'left'}>
-              {header.label}
+              <Box>{header.label}</Box>
             </TableCell>
           ))}
         </TableRow>
@@ -181,16 +184,14 @@ export const MasterTableOfEqpt = ({
           const isHidden = row.dspFlg === 0 || row.dspFlg === false;
           return (
             <TableRow hover key={row.dspOrdNum}>
-              <TableCell sx={{ bgcolor: isHidden ? grey[300] : '' }}>
-                <Box width={32} px={1} fontSize={13} textAlign={'right'}>
-                  {row.dspOrdNum}
-                </Box>
+              <TableCell sx={{ bgcolor: isHidden ? grey[300] : '', paddingLeft: 1, paddingRight: 1 }}>
+                {row.dspOrdNum}
               </TableCell>
               {headers.map((header) => (
                 <TableCell
                   key={header.key}
                   align={typeof row[header.key] === 'number' ? 'right' : 'left'}
-                  sx={{ bgcolor: isHidden ? grey[300] : '' }}
+                  sx={{ bgcolor: isHidden ? grey[300] : '', whiteSpace: 'nowrap' }}
                 >
                   {header.key === 'name' ? (
                     <>
