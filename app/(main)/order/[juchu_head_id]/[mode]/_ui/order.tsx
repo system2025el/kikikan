@@ -459,6 +459,7 @@ export const Order = (props: {
                         onChange={(newDate) => field.onChange(newDate?.toDate())}
                         fieldstate={fieldState}
                         disabled={!edit}
+                        onClear={() => field.onChange(null)}
                       />
                     </Box>
                   )}
