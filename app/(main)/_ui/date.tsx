@@ -3,6 +3,9 @@
 import 'dayjs/locale/ja';
 import 'rsuite/dist/rsuite.min.css';
 
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import ClearIcon from '@mui/icons-material/Clear';
+import { IconButton } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -124,8 +127,12 @@ export const TestDate = (props: {
   onBlur?: Noop;
   fieldstate?: ControllerFieldState;
   onChange: (value: Dayjs | null) => void;
+  onClear?: () => void;
 }) => {
-  const { sx, disabled, date, minDate, maxDate, onBlur, fieldstate, onChange } = props;
+  const { sx, disabled, date, minDate, maxDate, onBlur, fieldstate, onChange, onClear } = props;
+
+  //カレンダーの表示を制御する
+  const [open, setOpen] = useState(false);
 
   return (
     <LocalizationProvider
@@ -140,6 +147,9 @@ export const TestDate = (props: {
       <DatePicker
         name="date"
         format="YYYY/MM/DD" // テキストエリア内のフォーマット
+        open={open}
+        onOpen={() => setOpen(true)}
+        onClose={() => setOpen(false)}
         slotProps={{
           textField: {
             helperText: fieldstate?.error?.message,
@@ -150,7 +160,7 @@ export const TestDate = (props: {
             sx: {
               bgcolor: disabled ? grey[200] : 'white',
               width: '25%',
-              minWidth: 150,
+              minWidth: 200,
               padding: 0,
               '.Mui-disabled': {
                 WebkitTextFillColor: 'black',
@@ -158,6 +168,20 @@ export const TestDate = (props: {
               ...sx,
             },
             error: fieldstate?.invalid,
+            InputProps: {
+              endAdornment: (
+                <>
+                  {date && (
+                    <IconButton size="small" onClick={onClear} disabled={disabled ? true : false}>
+                      <ClearIcon fontSize="small" />
+                    </IconButton>
+                  )}
+                  <IconButton size="small" onClick={() => setOpen(true)} disabled={disabled ? true : false}>
+                    <CalendarTodayIcon fontSize="small" />
+                  </IconButton>
+                </>
+              ),
+            },
           },
           calendarHeader: { format: 'YYYY年MM月' },
         }} // カレンダーヘッダーのフォーマット
