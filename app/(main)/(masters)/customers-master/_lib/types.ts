@@ -32,6 +32,6 @@ export type CustomersMasterTableValues = {
   fax: string;
   mem: string;
   dspFlg: boolean;
-  dspOrdNum: number;
+  tblDspId: number;
   delFlg?: boolean; // 受注画面のために？つけてるけどいらないのでは
 };

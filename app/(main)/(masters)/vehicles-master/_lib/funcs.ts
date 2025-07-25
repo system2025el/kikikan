@@ -67,7 +67,7 @@ export const getFilteredVehs = async (query: string) => {
           sharyoNam: d.sharyo_nam,
           mem: d.mem,
           dspFlg: Boolean(d.dsp_flg),
-          dspOrdNum: index + 1,
+          tblDspId: index + 1,
           delFlg: Boolean(d.del_flg),
         }));
         console.log(filteredVehs.length, '行');

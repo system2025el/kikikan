@@ -10,6 +10,6 @@ export type ManagersMasterTableValues = {
   tantouId: number;
   tantouNam: string;
   dspFlg: boolean;
-  dspOrdNum: number;
+  tblDspId: number;
   delFlg: boolean;
 };

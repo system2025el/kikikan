@@ -50,7 +50,7 @@ export const vehicles: VehsMasterTableValues[] = [
     sharyoNam: '不明',
     mem: '',
     dspFlg: true,
-    dspOrdNum: 0,
+    tblDspId: 0,
     delFlg: false,
   },
   {
@@ -58,7 +58,7 @@ export const vehicles: VehsMasterTableValues[] = [
     sharyoNam: '1t',
     mem: '',
     dspFlg: true,
-    dspOrdNum: 0,
+    tblDspId: 0,
     delFlg: false,
   },
   {
@@ -66,7 +66,7 @@ export const vehicles: VehsMasterTableValues[] = [
     sharyoNam: '2t',
     mem: '',
     dspFlg: true,
-    dspOrdNum: 0,
+    tblDspId: 0,
     delFlg: false,
   },
   {
@@ -74,7 +74,7 @@ export const vehicles: VehsMasterTableValues[] = [
     sharyoNam: '3t',
     mem: '',
     dspFlg: true,
-    dspOrdNum: 0,
+    tblDspId: 0,
     delFlg: false,
   },
   {
@@ -82,7 +82,7 @@ export const vehicles: VehsMasterTableValues[] = [
     sharyoNam: '4t',
     mem: '',
     dspFlg: true,
-    dspOrdNum: 0,
+    tblDspId: 0,
     delFlg: false,
   },
   {
@@ -90,7 +90,7 @@ export const vehicles: VehsMasterTableValues[] = [
     sharyoNam: '11t',
     mem: '',
     dspFlg: true,
-    dspOrdNum: 0,
+    tblDspId: 0,
     delFlg: false,
   },
   {
@@ -98,7 +98,7 @@ export const vehicles: VehsMasterTableValues[] = [
     sharyoNam: 'ハイエース',
     mem: '',
     dspFlg: true,
-    dspOrdNum: 0,
+    tblDspId: 0,
     delFlg: false,
   },
 ];

@@ -14,6 +14,6 @@ export type VehsMasterTableValues = {
   sharyoNam: string;
   mem: string;
   dspFlg: boolean;
-  dspOrdNum: number;
+  tblDspId: number;
   delFlg: boolean;
 };

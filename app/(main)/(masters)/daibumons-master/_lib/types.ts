@@ -12,6 +12,6 @@ export type DaibumonsMasterTableValues = {
   daibumonId: number;
   daibumonNam: string;
   mem: string;
-  dspOrdNum: number;
+  tblDspId: number;
   delFlg: boolean;
 };

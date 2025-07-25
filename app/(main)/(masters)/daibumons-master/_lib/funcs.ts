@@ -67,7 +67,7 @@ export const getFilteredDaibumons = async (query: string) => {
           daibumonId: d.dai_bumon_id,
           daibumonNam: d.dai_bumon_nam,
           mem: d.mem,
-          dspOrdNum: index + 1,
+          tblDspId: index + 1,
           delFlg: Boolean(d.del_flg),
         }));
         console.log(filtereddaibumons.length);

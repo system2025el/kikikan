@@ -42,7 +42,7 @@ export const getFilteredBumons = async (queries: { q: string; d: number; s: numb
           bumonId: d.bumon_id,
           bumonNam: d.bumon_nam,
           mem: d.mem,
-          dspOrdNum: index + 1,
+          tblDspId: index + 1,
           delFlg: Boolean(d.del_flg),
         }));
         console.log(filteredbumons.length);

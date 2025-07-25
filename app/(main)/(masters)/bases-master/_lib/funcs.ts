@@ -31,7 +31,7 @@ export const getFilteredBases = async (query: string) => {
           shozokuId: d.shozoku_id,
           shozokuNam: d.shozoku_nam,
           mem: d.mem,
-          dspOrdNum: index + 1,
+          tblDspId: index + 1,
           delFlg: Boolean(d.del_flg),
         }));
         console.log(filteredBases.length, '行');

@@ -32,7 +32,7 @@ export type LocsMasterTableValues = {
   fax: string;
   mem: string;
   dspFlg: boolean;
-  dspOrdNum: number;
+  tblDspId: number;
   delFlg: boolean;
 };
 
