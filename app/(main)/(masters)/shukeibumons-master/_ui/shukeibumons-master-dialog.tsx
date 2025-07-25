@@ -39,14 +39,15 @@ export const ShukeibumonsMasterDialog = ({
   /* 削除フラグ確認ダイアログ出すかどうか */
   const [deleteOpen, setDeleteOpen] = useState(false);
   /* submit時のactions (save, delete) */
-  const [action, setAction] = useState<'save' | 'delete' | undefined>(undefined);
+  const [action, setAction] = useState<'save' | 'delete' | 'restore' | undefined>(undefined);
 
   /* useForm ----------------------------------------- */
   const {
     control,
+    formState: { isDirty },
+    watch,
     handleSubmit,
     reset,
-    formState: { isDirty },
     getValues,
   } = useForm({
     mode: 'onBlur',
@@ -54,6 +55,10 @@ export const ShukeibumonsMasterDialog = ({
     resolver: zodResolver(ShukeibumonsMasterDialogSchema),
     defaultValues: {},
   });
+
+  const isDeleted = watch('delFlg');
+  const name = watch('shukeibumonNam');
+
   /* methods ---------------------------------------- */
   /* フォームを送信 */
   const onSubmit = async (data: ShukeibumonsMasterDialogValues) => {
@@ -75,6 +80,12 @@ export const ShukeibumonsMasterDialog = ({
         // 削除ボタン押したとき
         setDeleteOpen(true);
         return;
+      } else if (action === 'restore') {
+        // 有効化ボタン
+        const values = await getValues();
+        await updateShukeibumon({ ...values, delFlg: false }, shukeibumonId);
+        handleCloseDialog();
+        refetchShukeibumons();
       }
     }
   };
@@ -138,6 +149,7 @@ export const ShukeibumonsMasterDialog = ({
           dialogTitle="集計部門マスタ登録"
           isNew={isNew}
           isDirty={isDirty}
+          isDeleted={isDeleted!}
           setAction={setAction}
         />
         {isLoading ? ( //DB
@@ -177,6 +189,7 @@ export const ShukeibumonsMasterDialog = ({
             />
             <WillDeleteAlertDialog
               open={deleteOpen}
+              data={name}
               handleCloseDelete={() => setDeleteOpen(false)}
               handleCloseAll={handleConfirmDelete}
             />

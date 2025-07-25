@@ -28,6 +28,7 @@ export const cMHeader = [
     key: 'hidden',
     label: '非表示',
   },
+  { key: 'deleted', label: '無効' },
 ];
 
 /* 新規登録用の初期化値（空の公演場所） */
@@ -161,6 +162,7 @@ export const customers: CustomersMasterTableValues[] = [
     mem: 'あああああああああああああああああああ',
     dspFlg: true,
     dspOrdNum: 0,
+    delFlg: false,
   },
   {
     kokyakuId: 2,
@@ -176,6 +178,7 @@ export const customers: CustomersMasterTableValues[] = [
     mem: 'あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやいゆえよらりるれろわいうえをあいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやいゆえよらりるれろわいうえをあいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやいゆえよらりるれろわいうえをあいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやいゆえよらりるれろわいうえをあいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやいゆえよらりるれろわいうえをあいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやいゆえよらりるれろわいうえを',
     dspFlg: true,
     dspOrdNum: 0,
+    delFlg: false,
   },
   {
     kokyakuId: 3,
@@ -191,5 +194,6 @@ export const customers: CustomersMasterTableValues[] = [
     mem: '',
     dspFlg: true,
     dspOrdNum: 0,
+    delFlg: false,
   },
 ];

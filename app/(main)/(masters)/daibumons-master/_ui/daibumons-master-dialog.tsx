@@ -40,14 +40,15 @@ export const DaibumonsMasterDialog = ({
   /* 削除フラグ確認ダイアログ出すかどうか */
   const [deleteOpen, setDeleteOpen] = useState(false);
   /* submit時のactions (save, delete) */
-  const [action, setAction] = useState<'save' | 'delete' | undefined>(undefined);
+  const [action, setAction] = useState<'save' | 'delete' | 'restore' | undefined>(undefined);
 
   /* useForm ----------------------------------------- */
   const {
     control,
+    formState: { isDirty },
+    watch,
     handleSubmit,
     reset,
-    formState: { isDirty },
     getValues,
   } = useForm({
     mode: 'onBlur',
@@ -55,6 +56,9 @@ export const DaibumonsMasterDialog = ({
     resolver: zodResolver(DaibumonsMasterDialogSchema),
     defaultValues: emptyDaibumon,
   });
+
+  const isDeleted = watch('delFlg');
+  const name = watch('daibumonNam');
 
   /* methods ---------------------------------------- */
   /* フォームを送信 */
@@ -73,6 +77,12 @@ export const DaibumonsMasterDialog = ({
       } else if (action === 'delete') {
         setDeleteOpen(true);
         return;
+      } else if (action === 'restore') {
+        // 有効化ボタン
+        const values = await getValues();
+        await updateDaibumon({ ...values, delFlg: false }, daibumonId);
+        handleCloseDialog();
+        refetchDaibumons();
       }
     }
   };
@@ -138,6 +148,7 @@ export const DaibumonsMasterDialog = ({
           isNew={isNew}
           isDirty={isDirty}
           setAction={setAction}
+          isDeleted={isDeleted!}
         />
         {isLoading ? (
           <Loading />
@@ -176,6 +187,7 @@ export const DaibumonsMasterDialog = ({
             />
             <WillDeleteAlertDialog
               open={deleteOpen}
+              data={name}
               handleCloseDelete={() => setDeleteOpen(false)}
               handleCloseAll={handleConfirmDelete}
             />

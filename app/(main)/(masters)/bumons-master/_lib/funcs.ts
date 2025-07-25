@@ -17,8 +17,7 @@ export const getFilteredBumons = async (queries: { q: string; d: number; s: numb
   const builder = supabase
     .schema('dev2')
     .from('m_bumon')
-    .select('bumon_id, bumon_nam, mem')
-    .neq('del_flg', 1)
+    .select('bumon_id, bumon_nam, mem, del_flg')
     .order('dsp_ord_num');
 
   if (queries.q && queries.q.trim() !== '') {
@@ -44,6 +43,7 @@ export const getFilteredBumons = async (queries: { q: string; d: number; s: numb
           bumonNam: d.bumon_nam,
           mem: d.mem,
           dspOrdNum: index + 1,
+          delFlg: Boolean(d.del_flg),
         }));
         console.log(filteredbumons.length);
         return filteredbumons;
@@ -198,7 +198,7 @@ export const updateBumon = async (data: BumonsMasterDialogValues, id: number) =>
 //       .schema('dev2')
 //       .from('m_bumon')
 //       .select('bumon_id , bumon_nam, adr_shozai, adr_tatemono, adr_sonota, tel, fax, mem,  ')
-//       .neq('del_flg', 1)
+//
 //       .order('dsp_ord_num');
 //     if (!error) {
 //       console.log('I got a datalist from db', data.length);

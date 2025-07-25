@@ -40,14 +40,15 @@ export const LocationsMasterDialog = ({
   /* 削除フラグ確認ダイアログ出すかどうか */
   const [deleteOpen, setDeleteOpen] = useState(false);
   /* submit時のactions (save, delete) */
-  const [action, setAction] = useState<'save' | 'delete' | undefined>(undefined);
+  const [action, setAction] = useState<'save' | 'delete' | 'restore' | undefined>(undefined);
 
   /* useForm ------------------------- */
   const {
     control,
+    formState: { isDirty },
+    watch,
     handleSubmit,
     reset,
-    formState: { isDirty },
     getValues,
   } = useForm({
     mode: 'onBlur',
@@ -55,6 +56,9 @@ export const LocationsMasterDialog = ({
     defaultValues: emptyLoc,
     resolver: zodResolver(LocsMasterDialogSchema),
   });
+
+  const isDeleted = watch('delFlg');
+  const name = watch('locNam');
 
   /* methods ---------------------------- */
   /* フォームを送信 */
@@ -79,6 +83,12 @@ export const LocationsMasterDialog = ({
         // 削除ボタン押したとき
         setDeleteOpen(true);
         return;
+      } else if (action === 'restore') {
+        // 有効化ボタン
+        const values = await getValues();
+        await updateLoc({ ...values, delFlg: false }, locationId);
+        handleCloseDialog();
+        refetchLocs();
       }
     }
   };
@@ -142,6 +152,7 @@ export const LocationsMasterDialog = ({
           handleClose={handleClickClose}
           dialogTitle={'公演場所マスタ登録'}
           isDirty={isDirty}
+          isDeleted={isDeleted!}
           setAction={setAction}
         />
         {isLoading ? (
@@ -300,6 +311,7 @@ export const LocationsMasterDialog = ({
             />
             <WillDeleteAlertDialog
               open={deleteOpen}
+              data={name}
               handleCloseDelete={() => setDeleteOpen(false)}
               handleCloseAll={handleConfirmDelete}
             />

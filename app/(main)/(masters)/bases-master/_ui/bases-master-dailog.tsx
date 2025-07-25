@@ -38,14 +38,15 @@ export const BasesMasterDialog = ({
   /* 削除フラグ確認ダイアログ出すかどうか */
   const [deleteOpen, setDeleteOpen] = useState(false);
   /* submit時のactions (save, delete) */
-  const [action, setAction] = useState<'save' | 'delete' | undefined>(undefined);
+  const [action, setAction] = useState<'save' | 'delete' | 'restore' | undefined>(undefined);
 
   /* useForm ----------------------------------------- */
   const {
+    formState: { isDirty },
     control,
     handleSubmit,
     reset,
-    formState: { isDirty },
+    watch,
     getValues,
   } = useForm({
     mode: 'onBlur',
@@ -53,6 +54,9 @@ export const BasesMasterDialog = ({
     resolver: zodResolver(BasesMasterDialogSchema),
     defaultValues: emptyBase,
   });
+
+  const isDeleted = watch('delFlg');
+  const name = watch('shozokuNam');
 
   /* methods ---------------------------------------- */
   /* フォームを送信 */
@@ -75,6 +79,12 @@ export const BasesMasterDialog = ({
         // 削除ボタン
         setDeleteOpen(true);
         return;
+      } else if (action === 'restore') {
+        // 有効化ボタン
+        const values = await getValues();
+        await updateBase({ ...values, delFlg: false }, baseId);
+        handleCloseDialog();
+        refetchBases();
       }
     }
   };
@@ -138,6 +148,7 @@ export const BasesMasterDialog = ({
           isDirty={isDirty}
           isNew={isNew}
           setAction={setAction}
+          isDeleted={isDeleted!}
         />
         {isLoading ? (
           <Loading />
@@ -176,6 +187,7 @@ export const BasesMasterDialog = ({
             />
             <WillDeleteAlertDialog
               open={deleteOpen}
+              data={name}
               handleCloseDelete={() => setDeleteOpen(false)}
               handleCloseAll={handleConfirmDelete}
             />

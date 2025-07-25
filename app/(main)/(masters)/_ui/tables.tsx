@@ -76,17 +76,20 @@ export const MasterTable = ({
       </TableHead>
       <TableBody>
         {list.map((row) => {
-          const isHidden = row.dspFlg === 0 || row.dspFlg === false;
+          const isHidden = row.dspFlg === false;
+          const isDeleted = row.delFlg === true;
           return (
             <TableRow hover key={row.dspOrdNum}>
-              <TableCell sx={{ bgcolor: isHidden ? grey[300] : '', width: 100, paddingLeft: 1, paddingRight: 1 }}>
+              <TableCell
+                sx={{ bgcolor: isHidden || isDeleted ? grey[300] : '', width: 100, paddingLeft: 1, paddingRight: 1 }}
+              >
                 {row.dspOrdNum}
               </TableCell>
               {headers.map((header) => (
                 <TableCell
                   key={header.key}
                   align={typeof row[header.key] === 'number' ? 'right' : 'left'}
-                  sx={{ bgcolor: isHidden ? grey[300] : '' }}
+                  sx={{ bgcolor: isHidden || isDeleted ? grey[300] : '' }}
                 >
                   {header.key === 'name' ? (
                     <>
@@ -105,13 +108,15 @@ export const MasterTable = ({
                     </Typography>
                   ) : header.key === 'hidden' ? (
                     <>{isHidden && <>非表示</>}</>
+                  ) : header.key === 'deleted' ? (
+                    <>{isDeleted && <>無効</>}</>
                   ) : (
                     <>{row[header.key]}</>
                   )}
                 </TableCell>
               ))}
-              {/* <TableCell sx={{ bgcolor: isHidden ? grey[300] : '' }}>{isHidden && <>非表示</>}</TableCell> */}
-              {/* <TableCell sx={{ bgcolor: isHidden ? grey[300] : '', width: 100 }} align="center">
+              {/* <TableCell sx={{ bgcolor: isHidden || isDeleted ? grey[300] : '' }}>{isHidden && <>非表示</>}</TableCell> */}
+              {/* <TableCell sx={{ bgcolor: isHidden || isDeleted ? grey[300] : '', width: 100 }} align="center">
                 <IconButton
                   sx={{ bgcolor: 'primary.main', color: 'white' }}
                   size="small"
@@ -182,16 +187,17 @@ export const MasterTableOfEqpt = ({
       <TableBody>
         {list.map((row) => {
           const isHidden = row.dspFlg === 0 || row.dspFlg === false;
+          const isDeleted = row.delFlg === true;
           return (
             <TableRow hover key={row.dspOrdNum}>
-              <TableCell sx={{ bgcolor: isHidden ? grey[300] : '', paddingLeft: 1, paddingRight: 1 }}>
+              <TableCell sx={{ bgcolor: isHidden || isDeleted ? grey[300] : '', paddingLeft: 1, paddingRight: 1 }}>
                 {row.dspOrdNum}
               </TableCell>
               {headers.map((header) => (
                 <TableCell
                   key={header.key}
                   align={typeof row[header.key] === 'number' ? 'right' : 'left'}
-                  sx={{ bgcolor: isHidden ? grey[300] : '', whiteSpace: 'nowrap' }}
+                  sx={{ bgcolor: isHidden || isDeleted ? grey[300] : '', whiteSpace: 'nowrap' }}
                 >
                   {header.key === 'name' ? (
                     <>
@@ -210,6 +216,8 @@ export const MasterTableOfEqpt = ({
                     </Typography>
                   ) : header.key === 'hidden' ? (
                     <>{isHidden && <>非表示</>}</>
+                  ) : header.key === 'deleted' ? (
+                    <>{isDeleted && <>無効</>}</>
                   ) : (
                     <>{row[header.key]}</>
                   )}

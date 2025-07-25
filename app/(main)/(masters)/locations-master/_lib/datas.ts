@@ -10,6 +10,7 @@ export const lMHeader = [
   { key: 'tel', label: 'Tel' },
   { key: 'fax', label: 'Fax' },
   { key: 'hidden', label: '非表示' },
+  { key: 'deleted', label: '無効' },
 ];
 
 /* 詳細ダイアログ用データ */
@@ -113,6 +114,7 @@ export const locationList: LocsMasterTableValues[] = [
 
     dspFlg: true,
     dspOrdNum: 0,
+    delFlg: false,
   },
   {
     locNam: '日本武道館',
@@ -127,6 +129,7 @@ export const locationList: LocsMasterTableValues[] = [
 
     dspFlg: true,
     dspOrdNum: 0,
+    delFlg: false,
   },
   {
     locNam: 'ＮＨＫホール',
@@ -141,6 +144,7 @@ export const locationList: LocsMasterTableValues[] = [
 
     dspFlg: true,
     dspOrdNum: 0,
+    delFlg: false,
   },
   {
     locNam: '東京厚生年金会館ホール',
@@ -155,6 +159,7 @@ export const locationList: LocsMasterTableValues[] = [
 
     dspFlg: true,
     dspOrdNum: 0,
+    delFlg: false,
   },
   {
     locNam: '中野サンプラザ',
@@ -169,6 +174,7 @@ export const locationList: LocsMasterTableValues[] = [
 
     dspFlg: true,
     dspOrdNum: 0,
+    delFlg: false,
   },
   {
     locNam: '渋谷公会堂',
@@ -183,5 +189,6 @@ export const locationList: LocsMasterTableValues[] = [
 
     dspFlg: true,
     dspOrdNum: 0,
+    delFlg: false,
   },
 ];

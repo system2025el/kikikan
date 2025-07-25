@@ -33,6 +33,7 @@ export type LocsMasterTableValues = {
   mem: string;
   dspFlg: boolean;
   dspOrdNum: number;
+  delFlg: boolean;
 };
 
 /* 検索用スキーマ */

@@ -13,4 +13,5 @@ export type BasesMasterTableValues = {
   shozokuNam: string;
   mem: string;
   dspOrdNum: number;
+  delFlg: boolean;
 };
