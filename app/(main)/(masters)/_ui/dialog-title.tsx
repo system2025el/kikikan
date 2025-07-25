@@ -2,13 +2,7 @@
 
 import { alpha, DialogTitle, Stack, Typography, useTheme } from '@mui/material';
 
-import {
-  CloseMasterDialogButton,
-  DeleteButton,
-  MakeEditModeButton,
-  RestoreButton,
-  SubmitButton,
-} from '../../_ui/buttons';
+import { CloseMasterDialogButton, DeleteButton, MakeEditModeButton, SubmitButton } from '../../_ui/buttons';
 
 /**
  * マスタ系統一の詳細ダイアログタイトル
@@ -49,12 +43,16 @@ export const MasterDialogTitle = ({
       {isNew && <Typography>新規登録</Typography>}
       <Stack>
         <SubmitButton type="submit" disabled={isDirty ? false : true} onClick={() => setAction('save')} />
-        {!isNew && <MakeEditModeButton handleEditable={handleEditable} disabled={editable ? true : false} />}
-        {!isDeleted && !isNew && (
-          <DeleteButton disabled={isNew ? true : false} type="submit" onClick={() => setAction('delete')} />
-        )}
-        {isDeleted && !isNew && (
-          <RestoreButton type="submit" disabled={isNew ? true : false} onClick={() => setAction('restore')} />
+        {!isNew && (
+          <>
+            <MakeEditModeButton handleEditable={handleEditable} disabled={editable ? true : false} />
+            <DeleteButton
+              disabled={isNew ? true : false}
+              type="submit"
+              onClick={isDeleted ? () => setAction('restore') : () => setAction('delete')}
+              isDeleted={isDeleted}
+            />
+          </>
         )}
         <CloseMasterDialogButton handleCloseDialog={handleCloseDialog} />
       </Stack>

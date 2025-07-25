@@ -86,36 +86,28 @@ export const SubmitButton = ({
 export const DeleteButton = ({
   type,
   disabled,
+  isDeleted,
   onClick,
 }: {
   type: 'submit' | undefined;
   disabled: boolean;
+  isDeleted: boolean;
   onClick: () => void;
 }) => {
   return (
     <>
       <Button type={type} disabled={disabled} color="error" onClick={onClick} sx={{ alignItems: 'center' }}>
-        <BlockIcon fontSize="small" />
-        無効化
-      </Button>
-    </>
-  );
-};
-
-export const RestoreButton = ({
-  type,
-  disabled,
-  onClick,
-}: {
-  type: 'submit' | undefined;
-  disabled: boolean;
-  onClick: () => void;
-}) => {
-  return (
-    <>
-      <Button type={type} disabled={disabled} color="error" onClick={onClick} sx={{ alignItems: 'center' }}>
-        <CheckIcon fontSize="small" />
-        有効化
+        {isDeleted ? (
+          <>
+            <CheckIcon fontSize="small" />
+            有効化
+          </>
+        ) : (
+          <>
+            <BlockIcon fontSize="small" />
+            無効化
+          </>
+        )}
       </Button>
     </>
   );
