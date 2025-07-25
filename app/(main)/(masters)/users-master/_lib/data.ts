@@ -1,6 +1,6 @@
 import { FormItemsType } from '@/app/(main)/_ui/form-box';
 
-import { ManagersMasterDialogValues, ManagersMasterTableValues } from './types';
+import { UsersMasterDialogValues, UsersMasterTableValues } from './types';
 /* 担当者マスタテーブルヘッダー */
 export const mMHeader = [
   {
@@ -13,7 +13,7 @@ export const mMHeader = [
   },
   { key: 'deleted', label: '無効' },
 ];
-export const emptyManager: ManagersMasterDialogValues = {
+export const emptyUser: UsersMasterDialogValues = {
   tantouNam: '',
   delFlg: false,
 };
@@ -32,39 +32,34 @@ export const formItems: FormItemsType[] = [
 ];
 
 /* モック削除delete */
-export const managers: ManagersMasterTableValues[] = [
+export const users: UsersMasterTableValues[] = [
   {
     tantouId: 1,
     tantouNam: '田中',
-    dspFlg: true,
     tblDspId: 0,
     delFlg: false,
   },
   {
     tantouId: 2,
     tantouNam: '鈴木',
-    dspFlg: true,
     tblDspId: 0,
     delFlg: false,
   },
   {
     tantouId: 3,
     tantouNam: '佐藤',
-    dspFlg: true,
     tblDspId: 0,
     delFlg: false,
   },
   {
     tantouId: 4,
     tantouNam: '山田',
-    dspFlg: true,
     tblDspId: 0,
     delFlg: false,
   },
   {
     tantouId: 5,
     tantouNam: '新規',
-    dspFlg: true,
     tblDspId: 0,
     delFlg: false,
   },

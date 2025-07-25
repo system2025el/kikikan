@@ -10,21 +10,22 @@ import { Loading } from '@/app/(main)/_ui/loading';
 
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
-import { emptyManager, formItems } from '../_lib/data';
-import { ManagersMasterDialogValues, managersMaterDialogSchema } from '../_lib/types';
+import { emptyUser, formItems } from '../_lib/data';
+import { addNewUser, getOneUser, updateUser } from '../_lib/funcs';
+import { UsersMasterDialogValues, UsersMaterDialogSchema } from '../_lib/types';
 /**
  * 担当者マスタの詳細ダイアログ
  * @param
  * @returns {JSX.Element} 担当者マスタの詳細ダイアログコンポーネント
  */
-export const ManagerMasterDialog = ({
-  managerId,
+export const UsersMasterDialog = ({
+  userId,
   handleClose,
-  refetchManagers,
+  refetchUsers,
 }: {
-  managerId: number;
+  userId: number;
   handleClose: () => void;
-  refetchManagers: () => void;
+  refetchUsers: () => void;
 }) => {
   /* useState --------------------- */
   /** DBのローディング状態 */
@@ -52,7 +53,7 @@ export const ManagerMasterDialog = ({
     mode: 'onBlur',
     reValidateMode: 'onBlur',
     defaultValues: {},
-    resolver: zodResolver(managersMaterDialogSchema),
+    resolver: zodResolver(UsersMaterDialogSchema),
   });
 
   const isDeleted = watch('delFlg');
@@ -60,23 +61,29 @@ export const ManagerMasterDialog = ({
 
   /* methods ---------------------------- */
   /* フォームを送信 */
-  const onSubmit = async (data: ManagersMasterDialogValues) => {
+  const onSubmit = async (data: UsersMasterDialogValues) => {
     console.log('isDarty : ', isDirty);
     console.log(data);
-    // if (managerId === -100) {
-    //   await addNewmanager(data);
-    // handleCloseDialog();
-    // refetchManagers();
-    // } else {
-    // if (action === 'save') {
-    //   await updateManager(data, managerId);
-    // handleCloseDialog();
-    // refetchManagers();
-    // } else if (action === 'delete') {
-    //   setDeleteOpen(true);
-    // return;
-    // }
-    // }
+    if (userId === -100) {
+      // await addNewUser(data);
+      handleCloseDialog();
+      refetchUsers();
+    } else {
+      if (action === 'save') {
+        await updateUser(data, userId);
+        handleCloseDialog();
+        refetchUsers();
+      } else if (action === 'delete') {
+        setDeleteOpen(true);
+        return;
+      } else if (action === 'restore') {
+        // 有効化ボタン
+        const values = await getValues();
+        await updateUser({ ...values, delFlg: false }, userId);
+        handleCloseDialog();
+        refetchUsers();
+      }
+    }
   };
 
   /* 詳細ダイアログを閉じる */
@@ -98,35 +105,34 @@ export const ManagerMasterDialog = ({
 
   /* 削除確認ダイアログで削除選択時 */
   const handleConfirmDelete = async () => {
-    // const values = await getValues();
-    // await updateManager({ ...values, delFlg: true }, managerId);
+    const values = await getValues();
+    await updateUser({ ...values, delFlg: true }, userId);
     setDeleteOpen(false);
     handleCloseDialog();
-    // await refetchManagers();
+    await refetchUsers();
   };
 
   /* useEffect --------------------------------------- */
   /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     console.log('★★★★★★★★★★★★★★★★★★★★★');
-    const getThatOneManager = async () => {
-      if (managerId === -100) {
+    const getThatOneUser = async () => {
+      if (userId === -100) {
         // 新規追加モード
-        reset(emptyManager); // フォーム初期化
+        reset(emptyUser); // フォーム初期化
         setEditable(true); // 編集モードにする
         setIsLoading(false);
         setIsNew(true);
       } else {
-        // const manager1 = await getOnemanager(managerId);
-        // if (manager1) {
-        //   setmanager(manager1);
-        //   reset(manager1); // 取得したデータでフォーム初期化
-        // }
+        const user1 = await getOneUser(userId);
+        if (user1) {
+          reset(user1); // 取得したデータでフォーム初期化
+        }
         setIsLoading(false);
       }
     };
-    getThatOneManager();
-  }, [managerId]);
+    getThatOneUser();
+  }, [userId]);
   /* eslint-enable react-hooks/exhaustive-deps */
 
   return (

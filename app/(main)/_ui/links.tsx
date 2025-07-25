@@ -44,7 +44,7 @@ const masterList: MenuItem[] = [
   { name: '顧客マスタ', url: '/customers-master' },
   { name: '車両マスタ', url: '/vehicles-master' },
   { name: '公演場所マスタ', url: '/locations-master' },
-  { name: '担当者マスタ', url: '/managers-master' },
+  { name: '担当者マスタ', url: '/users-master' },
   { name: '一式マスタ', url: '/' },
   { name: '大部門マスタ', url: '/daibumons-master' },
   { name: '集計部門マスタ', url: '/shukeibumons-master' },
