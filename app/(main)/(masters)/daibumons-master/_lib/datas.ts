@@ -6,6 +6,7 @@ import { DaibumonsMasterDialogValues, DaibumonsMasterTableValues } from './types
 export const daibumonMHeader = [
   { key: 'name', label: '名称' },
   { key: 'mem', label: 'メモ' },
+  { key: 'deleted', label: '無効' },
 ];
 
 /* 新規登録用の初期化値（空の大部門） */
@@ -45,23 +46,27 @@ export const daibumonsList: DaibumonsMasterTableValues[] = [
     daibumonNam: '照明',
     mem: 'XXXXXXXXXXX',
     dspOrdNum: 0,
+    delFlg: false,
   },
   {
     daibumonId: 2,
     daibumonNam: 'Moving Light',
     mem: 'XXXXXXXX',
     dspOrdNum: 0,
+    delFlg: false,
   },
   {
     daibumonNam: 'ムービング ゴボ',
     mem: 'XXXXXXX',
     daibumonId: 3,
     dspOrdNum: 0,
+    delFlg: false,
   },
   {
     daibumonNam: '空（カラ）ケース',
     daibumonId: 4,
     mem: '',
     dspOrdNum: 0,
+    delFlg: false,
   },
 ];

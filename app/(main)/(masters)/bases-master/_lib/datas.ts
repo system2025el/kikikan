@@ -7,6 +7,7 @@ export const bMHeader = [
   { key: 'name', label: '名称' },
   { key: 'mem', label: 'メモ' },
   { key: 'hidden', label: '非表示' },
+  { key: 'deleted', label: '無効' },
 ];
 
 /* 詳細ダイアログ用データ */
@@ -42,17 +43,20 @@ export const basesList: BasesMasterTableValues[] = [
     mem: '川崎',
     shozokuId: 1,
     dspOrdNum: 0,
+    delFlg: false,
   },
   {
     shozokuNam: 'YARD',
     mem: '大和',
     shozokuId: 2,
     dspOrdNum: 0,
+    delFlg: false,
   },
   {
     shozokuNam: 'その他',
     mem: '厚木など',
     shozokuId: 3,
     dspOrdNum: 0,
+    delFlg: false,
   },
 ];

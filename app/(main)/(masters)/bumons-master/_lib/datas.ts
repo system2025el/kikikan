@@ -5,6 +5,7 @@ import { BumonsMasterDialogValues, BumonsMasterTableValues } from './types';
 export const BumonsMHeader = [
   { key: 'name', label: '名称' },
   { key: 'mem', label: 'メモ' },
+  { key: 'deleted', label: '無効' },
 ];
 
 export const formItems: FormItemsType[] = [
@@ -50,17 +51,20 @@ export const bumonsList: BumonsMasterTableValues[] = [
     bumonNam: 'ムービングライト',
     mem: 'あえいうえおあおかけきくけこかこ',
     dspOrdNum: 0,
+    delFlg: false,
   },
   {
     bumonId: 2,
     bumonNam: 'スポットライト',
     mem: '',
     dspOrdNum: 0,
+    delFlg: false,
   },
   {
     bumonId: 3,
     bumonNam: 'その他',
     mem: '',
     dspOrdNum: 0,
+    delFlg: false,
   },
 ];

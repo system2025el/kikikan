@@ -14,7 +14,7 @@ import { CustomersMasterDialogValues, CustomersMasterTableValues } from './types
 //       .schema('dev2')
 //       .from('m_kokyaku')
 //       .select('kokyaku_id , kokyaku_nam, adr_shozai, adr_tatemono, adr_sonota, tel, fax, mem,  dsp_flg')
-//       .neq('del_flg', 1)
+
 //       .order('dsp_ord_num');
 //     if (!error) {
 //       console.log('I got a datalist from db', data.length);
@@ -53,12 +53,11 @@ export const getFilteredCustomers = async (query: string) => {
     const { data, error } = await supabase
       .schema('dev2')
       .from('m_kokyaku')
-      .select('kokyaku_id, kokyaku_nam, adr_shozai, adr_tatemono, adr_sonota, tel,  fax, mem, dsp_flg') // テーブルに表示するカラム
+      .select('kokyaku_id, kokyaku_nam, adr_shozai, adr_tatemono, adr_sonota, tel,  fax, mem, dsp_flg, del_flg') // テーブルに表示するカラム
       // あいまい検索、顧客名、顧客名かな、住所、電話番号、fax番号
       .or(
         `kokyaku_nam.ilike.%${query}%, kana.ilike.%${query}%, adr_shozai.ilike.%${query}%, adr_tatemono.ilike.%${query}%, adr_sonota.ilike.%${query}%, tel.ilike.%${query}%, fax.ilike.%${query}%`
       )
-      .neq('del_flg', 1) // 削除フラグが立っていない
       .order('dsp_ord_num'); // 並び順
     if (!error) {
       console.log('I got a datalist from db', data.length);
@@ -76,6 +75,7 @@ export const getFilteredCustomers = async (query: string) => {
           mem: d.mem,
           dspFlg: Boolean(d.dsp_flg),
           dspOrdNum: index + 1,
+          delFlg: Boolean(d.del_flg),
         }));
         console.log(filteredCustomers.length);
         return filteredCustomers;

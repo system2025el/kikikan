@@ -33,4 +33,5 @@ export type CustomersMasterTableValues = {
   mem: string;
   dspFlg: boolean;
   dspOrdNum: number;
+  delFlg?: boolean; // 受注画面のために？つけてるけどいらないのでは
 };

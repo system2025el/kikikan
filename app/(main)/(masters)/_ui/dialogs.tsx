@@ -31,10 +31,12 @@ export const IsDirtyAlertDialog = ({
 
 export const WillDeleteAlertDialog = ({
   open,
+  data,
   handleCloseDelete,
   handleCloseAll,
 }: {
   open: boolean;
+  data: string;
   handleCloseDelete: () => void;
   handleCloseAll: () => void;
 }) => {
@@ -43,12 +45,12 @@ export const WillDeleteAlertDialog = ({
       <Dialog open={open}>
         <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
           <WarningIcon color="error" />
-          <Box>削除</Box>
+          <Box>無効化</Box>
         </DialogTitle>
-        <DialogContentText m={2}>マスタから削除されます。</DialogContentText>
+        <DialogContentText m={2}>{data}が無効化されます。</DialogContentText>
         <DialogActions>
           <Button color="error" onClick={() => handleCloseAll()}>
-            削除
+            無効化
           </Button>
           <Button onClick={() => handleCloseDelete()}>戻る</Button>
         </DialogActions>

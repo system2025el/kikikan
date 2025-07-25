@@ -18,9 +18,8 @@ export const getFilteredEqpts = async (queries: { q: string; b: number; d: numbe
     .schema('dev2')
     .from('v_kizai_lst')
     .select(
-      'kizai_id, kizai_nam, kizai_qty, shozoku_nam, mem, bumon_nam, dai_bumon_nam, shukei_bumon_nam, reg_amt, rank_amt_1, rank_amt_2, rank_amt_3, rank_amt_4, rank_amt_5, dsp_flg'
+      'kizai_id, kizai_nam, kizai_qty, shozoku_nam, mem, bumon_nam, dai_bumon_nam, shukei_bumon_nam, reg_amt, rank_amt_1, rank_amt_2, rank_amt_3, rank_amt_4, rank_amt_5, dsp_flg, del_flg'
     )
-    .neq('del_flg', 1)
     .order('kizai_grp_cod')
     .order('dsp_ord_num');
 
@@ -62,6 +61,7 @@ export const getFilteredEqpts = async (queries: { q: string; b: number; d: numbe
           rankAmt5: d.rank_amt_5,
           dspFlg: d.dsp_flg,
           dspOrdNum: index + 1,
+          delFlg: Boolean(d.del_flg),
         }));
         console.log(filteredEqpts.length);
         return filteredEqpts;
@@ -356,7 +356,7 @@ export const createEqptHistory = async (data: EqptsMasterDialogValues, id: numbe
 //       .schema('dev2')
 //       .from('m_Eqpt')
 //       .select('Eqpt_id , Eqpt_nam, adr_shozai, adr_tatemono, adr_sonota, tel, fax, mem,  ')
-//       .neq('del_flg', 1)
+
 //       .order('dsp_ord_num');
 //     if (!error) {
 //       console.log('I got a datalist from db', data.length);

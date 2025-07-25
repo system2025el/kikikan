@@ -48,7 +48,7 @@ export const EqMasterDialog = ({
   /* 削除フラグ確認ダイアログ出すかどうか */
   const [deleteOpen, setDeleteOpen] = useState(false);
   /* submit時のactions (save, delete) */
-  const [action, setAction] = useState<'save' | 'delete' | undefined>(undefined);
+  const [action, setAction] = useState<'save' | 'delete' | 'restore' | undefined>(undefined);
   /* フォーム内のセレクトoptions */
   const [selectOptions, setSelectOptions] = useState<SelectTypes[][]>([]);
   /* 保有数 */
@@ -57,10 +57,10 @@ export const EqMasterDialog = ({
   /* useForm ------------------------- */
   const {
     control,
+    formState: { isDirty },
     handleSubmit,
     reset,
     watch,
-    formState: { isDirty },
     getValues,
   } = useForm({
     mode: 'onBlur',
@@ -68,6 +68,9 @@ export const EqMasterDialog = ({
     defaultValues: emptyEqpt,
     resolver: zodResolver(EqptsMasterDialogSchema),
   });
+
+  const isDeleted = watch('delFlg');
+  const name = watch('kizaiNam');
 
   /* methods ---------------------------- */
   /* フォームを送信 */
@@ -91,6 +94,12 @@ export const EqMasterDialog = ({
         // 削除ボタン
         setDeleteOpen(true);
         return;
+      } else if (action === 'restore') {
+        // 有効化ボタン
+        const values = await getValues();
+        await updateEqpt({ ...values, delFlg: false }, eqptId);
+        handleCloseDialog();
+        refetchEqpts();
       }
     }
   };
@@ -163,6 +172,7 @@ export const EqMasterDialog = ({
           dialogTitle={'機材マスタ登録'}
           isNew={isNew}
           isDirty={isDirty}
+          isDeleted={isDeleted!}
           setAction={setAction}
         />
         {isLoading ? ( //DB
@@ -445,6 +455,7 @@ export const EqMasterDialog = ({
             />
             <WillDeleteAlertDialog
               open={deleteOpen}
+              data={name}
               handleCloseDelete={() => setDeleteOpen(false)}
               handleCloseAll={handleConfirmDelete}
             />

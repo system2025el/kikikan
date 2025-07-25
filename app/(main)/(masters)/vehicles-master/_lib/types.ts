@@ -15,4 +15,5 @@ export type VehsMasterTableValues = {
   mem: string;
   dspFlg: boolean;
   dspOrdNum: number;
+  delFlg: boolean;
 };

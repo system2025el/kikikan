@@ -13,4 +13,5 @@ export type ShukeibumonsMasterTableValues = {
   shukeibumonNam: string;
   mem: string;
   dspOrdNum: number;
+  delFlg: boolean;
 };

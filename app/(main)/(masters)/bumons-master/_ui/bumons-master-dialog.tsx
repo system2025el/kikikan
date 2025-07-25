@@ -48,16 +48,17 @@ export const BumonsMasterDialog = ({
   /* 削除フラグ確認ダイアログ出すかどうか */
   const [deleteOpen, setDeleteOpen] = useState(false);
   /* submit時のactions (save, delete) */
-  const [action, setAction] = useState<'save' | 'delete' | undefined>(undefined);
+  const [action, setAction] = useState<'save' | 'delete' | 'restore' | undefined>(undefined);
   /* フォーム内のセレクトoptions */
   const [selectOptions, setSelectOptions] = useState<SelectTypes[][]>([]);
 
   /* useForm ----------------------------------------- */
   const {
     control,
+    formState: { isDirty },
+    watch,
     handleSubmit,
     reset,
-    formState: { isDirty },
     getValues,
   } = useForm({
     mode: 'onBlur',
@@ -65,6 +66,9 @@ export const BumonsMasterDialog = ({
     resolver: zodResolver(BumonsMasterDialogSchema),
     defaultValues: emptyBumon,
   });
+
+  const isDeleted = watch('delFlg');
+  const name = watch('bumonNam');
 
   /* methods ---------------------------------------- */
   /* フォームを送信 */
@@ -87,6 +91,12 @@ export const BumonsMasterDialog = ({
         // 削除ボタン押したとき
         setDeleteOpen(true);
         return;
+      } else if (action === 'restore') {
+        // 有効化ボタン
+        const values = await getValues();
+        await updateBumon({ ...values, delFlg: false }, bumonId);
+        handleCloseDialog();
+        refetchBumons();
       }
     }
   };
@@ -154,6 +164,7 @@ export const BumonsMasterDialog = ({
           isNew={isNew}
           isDirty={isDirty}
           setAction={setAction}
+          isDeleted={isDeleted!}
         />
         {isLoading ? (
           <Loading />
@@ -230,6 +241,7 @@ export const BumonsMasterDialog = ({
             />
             <WillDeleteAlertDialog
               open={deleteOpen}
+              data={name}
               handleCloseDelete={() => setDeleteOpen(false)}
               handleCloseAll={handleConfirmDelete}
             />

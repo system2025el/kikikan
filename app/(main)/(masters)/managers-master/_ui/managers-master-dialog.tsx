@@ -38,14 +38,15 @@ export const ManagerMasterDialog = ({
   /* 削除フラグ確認ダイアログ出すかどうか */
   const [deleteOpen, setDeleteOpen] = useState(false);
   /* submit時のactions (save, delete) */
-  const [action, setAction] = useState<'save' | 'delete' | undefined>(undefined);
+  const [action, setAction] = useState<'save' | 'delete' | 'restore' | undefined>(undefined);
 
   /* useForm ------------------------- */
   const {
     control,
+    formState: { isDirty },
+    watch,
     handleSubmit,
     reset,
-    formState: { isDirty },
     getValues,
   } = useForm({
     mode: 'onBlur',
@@ -53,6 +54,9 @@ export const ManagerMasterDialog = ({
     defaultValues: {},
     resolver: zodResolver(managersMaterDialogSchema),
   });
+
+  const isDeleted = watch('delFlg');
+  const name = watch('tantouNam');
 
   /* methods ---------------------------- */
   /* フォームを送信 */
@@ -135,6 +139,7 @@ export const ManagerMasterDialog = ({
           dialogTitle={'担当者マスタ登録'}
           isNew={isNew}
           isDirty={isDirty}
+          isDeleted={isDeleted!}
           setAction={setAction}
         />
         {isLoading ? (
@@ -167,6 +172,7 @@ export const ManagerMasterDialog = ({
             />
             <WillDeleteAlertDialog
               open={deleteOpen}
+              data={name}
               handleCloseDelete={() => setDeleteOpen(false)}
               handleCloseAll={handleConfirmDelete}
             />

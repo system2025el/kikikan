@@ -6,6 +6,7 @@ import { ShukeibumonsMasterDialogValues, ShukeibumonsMasterTableValues } from '.
 export const shukeibumonMHeader = [
   { key: 'name', label: '名称' },
   { key: 'mem', label: 'メモ' },
+  { key: 'deleted', label: '無効' },
 ];
 
 /* */
@@ -46,17 +47,20 @@ export const shukeibumonsList: ShukeibumonsMasterTableValues[] = [
     mem: 'XXXXXXXXXXX',
     shukeibumonId: 1,
     dspOrdNum: 0,
+    delFlg: false,
   },
   {
     shukeibumonNam: 'L課（Control）',
     mem: 'XXXXXXXX',
     shukeibumonId: 2,
     dspOrdNum: 0,
+    delFlg: false,
   },
   {
     shukeibumonNam: 'L課（SPOT）',
     mem: 'XXXXXXX',
     shukeibumonId: 3,
     dspOrdNum: 0,
+    delFlg: false,
   },
 ];

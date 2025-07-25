@@ -18,10 +18,9 @@ export const getFilteredBases = async (query: string) => {
     const { data, error } = await supabase
       .schema('dev2')
       .from('m_shozoku')
-      .select('shozoku_id, shozoku_nam, mem') // テーブルに表示するカラム
+      .select('shozoku_id, shozoku_nam, mem, del_flg') // テーブルに表示するカラム
       // 検索、所属名 いらない気もするdelete
       //   .or(`shozoku_nam.ilike.%${query}%,`)
-      .neq('del_flg', 1) // 削除フラグが立っていない
       .order('dsp_ord_num'); // 並び順
     if (!error) {
       console.log('I got a datalist from db', data.length);
@@ -33,6 +32,7 @@ export const getFilteredBases = async (query: string) => {
           shozokuNam: d.shozoku_nam,
           mem: d.mem,
           dspOrdNum: index + 1,
+          delFlg: Boolean(d.del_flg),
         }));
         console.log(filteredBases.length, '行');
         return filteredBases;
@@ -172,7 +172,7 @@ export const updateBase = async (data: BasesMasterDialogValues, id: number) => {
 //       .schema('dev2')
 //       .from('m_shozoku')
 //       .select('shozoku_id , shozoku_nam, adr_shozai, adr_tatemono, adr_sonota, tel, fax, mem,  ')
-//       .neq('del_flg', 1)
+
 //       .order('dsp_ord_num');
 //     if (!error) {
 //       console.log('I got a datalist from db', data.length);

@@ -20,6 +20,7 @@ export const eqptMHeader = [
   { key: 'rankAmt5', label: '価格5' },
   { key: 'mem', label: 'メモ' },
   { key: 'hidden', label: '非表示' },
+  { key: 'deleted', label: '無効' },
 ];
 
 /*  */
@@ -189,6 +190,7 @@ export const eqptMasterList: EqptsMasterTableValues[] = [
     kizaiQty: 0,
     dspFlg: true,
     dspOrdNum: 0,
+    delFlg: false,
   },
   {
     kizaiId: 2,
@@ -208,6 +210,7 @@ export const eqptMasterList: EqptsMasterTableValues[] = [
     kizaiQty: 0,
     dspFlg: true,
     dspOrdNum: 0,
+    delFlg: false,
   },
   {
     kizaiId: 3,
@@ -227,6 +230,7 @@ export const eqptMasterList: EqptsMasterTableValues[] = [
     kizaiQty: 0,
     dspFlg: true,
     dspOrdNum: 0,
+    delFlg: false,
   },
   {
     kizaiId: 4,
@@ -245,6 +249,7 @@ export const eqptMasterList: EqptsMasterTableValues[] = [
     kizaiQty: 0,
     dspFlg: true,
     dspOrdNum: 0,
+    delFlg: false,
   },
   {
     kizaiId: 5,
@@ -263,6 +268,7 @@ export const eqptMasterList: EqptsMasterTableValues[] = [
     kizaiQty: 0,
     dspFlg: true,
     dspOrdNum: 0,
+    delFlg: false,
   },
   {
     kizaiId: 6,
@@ -281,6 +287,7 @@ export const eqptMasterList: EqptsMasterTableValues[] = [
     kizaiQty: 0,
     dspFlg: true,
     dspOrdNum: 0,
+    delFlg: false,
   },
   {
     kizaiId: 7,
@@ -299,6 +306,7 @@ export const eqptMasterList: EqptsMasterTableValues[] = [
     kizaiQty: 0,
     dspFlg: true,
     dspOrdNum: 0,
+    delFlg: false,
   },
   {
     kizaiId: 8,
@@ -318,6 +326,7 @@ export const eqptMasterList: EqptsMasterTableValues[] = [
     kizaiQty: 0,
     dspFlg: true,
     dspOrdNum: 0,
+    delFlg: false,
   },
   {
     kizaiId: 9,
@@ -337,6 +346,7 @@ export const eqptMasterList: EqptsMasterTableValues[] = [
     kizaiQty: 0,
     dspFlg: true,
     dspOrdNum: 0,
+    delFlg: false,
   },
   {
     kizaiId: 10,
@@ -356,6 +366,7 @@ export const eqptMasterList: EqptsMasterTableValues[] = [
     kizaiQty: 0,
     dspFlg: true,
     dspOrdNum: 0,
+    delFlg: false,
   },
   {
     kizaiId: 11,
@@ -375,6 +386,7 @@ export const eqptMasterList: EqptsMasterTableValues[] = [
     kizaiQty: 0,
     dspFlg: true,
     dspOrdNum: 0,
+    delFlg: false,
   },
   {
     kizaiId: 12,
@@ -394,6 +406,7 @@ export const eqptMasterList: EqptsMasterTableValues[] = [
     shukeibumonNam: '',
     dspFlg: true,
     dspOrdNum: 0,
+    delFlg: false,
   },
   {
     kizaiId: 13,
@@ -413,6 +426,7 @@ export const eqptMasterList: EqptsMasterTableValues[] = [
     kizaiQty: 0,
     dspFlg: true,
     dspOrdNum: 0,
+    delFlg: false,
   },
   {
     kizaiId: 14,
@@ -432,6 +446,7 @@ export const eqptMasterList: EqptsMasterTableValues[] = [
     kizaiQty: 0,
     dspFlg: true,
     dspOrdNum: 0,
+    delFlg: false,
   },
   {
     kizaiId: 15,
@@ -451,6 +466,7 @@ export const eqptMasterList: EqptsMasterTableValues[] = [
     kizaiQty: 0,
     dspFlg: true,
     dspOrdNum: 0,
+    delFlg: false,
   },
   {
     kizaiId: 16,
@@ -470,6 +486,7 @@ export const eqptMasterList: EqptsMasterTableValues[] = [
     kizaiQty: 0,
     dspFlg: true,
     dspOrdNum: 0,
+    delFlg: false,
   },
   {
     kizaiId: 17,
@@ -489,6 +506,7 @@ export const eqptMasterList: EqptsMasterTableValues[] = [
     kizaiQty: 0,
     dspFlg: true,
     dspOrdNum: 0,
+    delFlg: false,
   },
   {
     kizaiId: 18,
@@ -508,6 +526,7 @@ export const eqptMasterList: EqptsMasterTableValues[] = [
     kizaiQty: 0,
     dspFlg: true,
     dspOrdNum: 0,
+    delFlg: false,
   },
   {
     kizaiId: 19,
@@ -527,6 +546,7 @@ export const eqptMasterList: EqptsMasterTableValues[] = [
     kizaiQty: 0,
     dspFlg: true,
     dspOrdNum: 0,
+    delFlg: false,
   },
   // {
   //   kizaiId: 20,

@@ -1,5 +1,7 @@
 'use client';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
+import BlockIcon from '@mui/icons-material/Block';
+import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
@@ -19,7 +21,7 @@ export const BackButton = ({ sx, label }: { sx?: object; label: string }) => {
   };
 
   return (
-    <Button sx={{ ...sx }} onClick={() => handleBack()}>
+    <Button sx={{ ...sx, alignItems: 'center' }} onClick={() => handleBack()}>
       <ArrowBackIosNewIcon fontSize="small" />
       {label}
     </Button>
@@ -51,6 +53,7 @@ export const MakeEditModeButton = ({ disabled, handleEditable }: { disabled: boo
         handleEditable();
         console.log('pushEdit');
       }}
+      sx={{ alignItems: 'center' }}
     >
       <ModeEditIcon fontSize="small" />
       編集
@@ -73,14 +76,14 @@ export const SubmitButton = ({
   onClick: () => void;
 }) => {
   return (
-    <Button type={type} disabled={disabled} onClick={onClick}>
+    <Button type={type} disabled={disabled} onClick={onClick} sx={{ alignItems: 'center' }}>
       <SaveAsIcon fontSize="small" />
       保存終了
     </Button>
   );
 };
 
-export const DeleteFlgButton = ({
+export const DeleteButton = ({
   type,
   disabled,
   onClick,
@@ -91,9 +94,28 @@ export const DeleteFlgButton = ({
 }) => {
   return (
     <>
-      <Button type={type} disabled={disabled} color="error" onClick={onClick}>
-        <DeleteIcon fontSize="small" />
-        削除
+      <Button type={type} disabled={disabled} color="error" onClick={onClick} sx={{ alignItems: 'center' }}>
+        <BlockIcon fontSize="small" />
+        無効化
+      </Button>
+    </>
+  );
+};
+
+export const RestoreButton = ({
+  type,
+  disabled,
+  onClick,
+}: {
+  type: 'submit' | undefined;
+  disabled: boolean;
+  onClick: () => void;
+}) => {
+  return (
+    <>
+      <Button type={type} disabled={disabled} color="error" onClick={onClick} sx={{ alignItems: 'center' }}>
+        <CheckIcon fontSize="small" />
+        有効化
       </Button>
     </>
   );

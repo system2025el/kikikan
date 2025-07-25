@@ -6,4 +6,10 @@ export const managersMaterDialogSchema = z.object({
 });
 export type ManagersMasterDialogValues = z.infer<typeof managersMaterDialogSchema>;
 
-export type ManagersMasterTableValues = { tantouId: number; tantouNam: string; dspFlg: boolean; dspOrdNum: number };
+export type ManagersMasterTableValues = {
+  tantouId: number;
+  tantouNam: string;
+  dspFlg: boolean;
+  dspOrdNum: number;
+  delFlg: boolean;
+};

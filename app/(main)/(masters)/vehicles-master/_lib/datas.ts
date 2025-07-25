@@ -8,6 +8,7 @@ export const vMHeader = [
   { key: 'name', label: '車両タイプ' },
   { key: 'mem', label: 'メモ' },
   { key: 'hidden', label: '非表示' },
+  { key: 'deleted', label: '無効' },
 ];
 
 /*  */
@@ -50,6 +51,7 @@ export const vehicles: VehsMasterTableValues[] = [
     mem: '',
     dspFlg: true,
     dspOrdNum: 0,
+    delFlg: false,
   },
   {
     sharyoId: 2,
@@ -57,6 +59,7 @@ export const vehicles: VehsMasterTableValues[] = [
     mem: '',
     dspFlg: true,
     dspOrdNum: 0,
+    delFlg: false,
   },
   {
     sharyoId: 3,
@@ -64,6 +67,7 @@ export const vehicles: VehsMasterTableValues[] = [
     mem: '',
     dspFlg: true,
     dspOrdNum: 0,
+    delFlg: false,
   },
   {
     sharyoId: 4,
@@ -71,6 +75,7 @@ export const vehicles: VehsMasterTableValues[] = [
     mem: '',
     dspFlg: true,
     dspOrdNum: 0,
+    delFlg: false,
   },
   {
     sharyoId: 5,
@@ -78,6 +83,7 @@ export const vehicles: VehsMasterTableValues[] = [
     mem: '',
     dspFlg: true,
     dspOrdNum: 0,
+    delFlg: false,
   },
   {
     sharyoId: 6,
@@ -85,6 +91,7 @@ export const vehicles: VehsMasterTableValues[] = [
     mem: '',
     dspFlg: true,
     dspOrdNum: 0,
+    delFlg: false,
   },
   {
     sharyoId: 7,
@@ -92,5 +99,6 @@ export const vehicles: VehsMasterTableValues[] = [
     mem: '',
     dspFlg: true,
     dspOrdNum: 0,
+    delFlg: false,
   },
 ];

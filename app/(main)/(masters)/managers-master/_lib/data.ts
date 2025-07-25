@@ -11,6 +11,7 @@ export const mMHeader = [
     key: 'hidden',
     label: '非表示',
   },
+  { key: 'deleted', label: '無効' },
 ];
 export const emptyManager: ManagersMasterDialogValues = {
   tantouNam: '',
@@ -37,29 +38,34 @@ export const managers: ManagersMasterTableValues[] = [
     tantouNam: '田中',
     dspFlg: true,
     dspOrdNum: 0,
+    delFlg: false,
   },
   {
     tantouId: 2,
     tantouNam: '鈴木',
     dspFlg: true,
     dspOrdNum: 0,
+    delFlg: false,
   },
   {
     tantouId: 3,
     tantouNam: '佐藤',
     dspFlg: true,
     dspOrdNum: 0,
+    delFlg: false,
   },
   {
     tantouId: 4,
     tantouNam: '山田',
     dspFlg: true,
     dspOrdNum: 0,
+    delFlg: false,
   },
   {
     tantouId: 5,
     tantouNam: '新規',
     dspFlg: true,
     dspOrdNum: 0,
+    delFlg: false,
   },
 ];

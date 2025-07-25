@@ -51,6 +51,7 @@ export type EqptsMasterTableValues = {
   rankAmt5: number;
   dspFlg: boolean;
   dspOrdNum: number;
+  delFlg: boolean;
 };
 
 /**

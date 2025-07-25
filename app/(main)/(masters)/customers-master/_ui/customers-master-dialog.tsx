@@ -47,14 +47,15 @@ export const CustomersMasterDialog = ({
   /* 削除フラグ確認ダイアログ出すかどうか */
   const [deleteOpen, setDeleteOpen] = useState(false);
   /* submit時のactions (save, delete) */
-  const [action, setAction] = useState<'save' | 'delete' | undefined>(undefined);
+  const [action, setAction] = useState<'save' | 'delete' | 'restore' | undefined>(undefined);
 
   /* useForm ------------------------- */
   const {
     control,
+    formState: { isDirty },
+    watch,
     handleSubmit,
     reset,
-    formState: { isDirty },
     getValues,
   } = useForm({
     mode: 'onBlur',
@@ -62,6 +63,9 @@ export const CustomersMasterDialog = ({
     defaultValues: emptyCustomer,
     resolver: zodResolver(CustomersMaterDialogSchema),
   });
+
+  const isDeleted = watch('delFlg');
+  const name = watch('kokyakuNam');
 
   /* 関数 ---------------------------- */
   /* フォームを送信 */
@@ -84,6 +88,12 @@ export const CustomersMasterDialog = ({
         // 削除ボタン押したとき
         setDeleteOpen(true);
         return;
+      } else if (action === 'restore') {
+        // 有効化ボタン
+        const values = await getValues();
+        await updateCustomer({ ...values, delFlg: false }, customerId);
+        handleCloseDialog();
+        refetchCustomers();
       }
     }
   };
@@ -148,6 +158,7 @@ export const CustomersMasterDialog = ({
           isNew={isNew}
           isDirty={isDirty}
           setAction={setAction}
+          isDeleted={isDeleted!}
         />
         {isLoading ? ( //DB
           <Loading />
@@ -372,6 +383,7 @@ export const CustomersMasterDialog = ({
             />
             <WillDeleteAlertDialog
               open={deleteOpen}
+              data={name}
               handleCloseDelete={() => setDeleteOpen(false)}
               handleCloseAll={handleConfirmDelete}
             />

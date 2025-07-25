@@ -14,7 +14,7 @@ import { DaibumonsMasterDialogValues, DaibumonsMasterTableValues } from './types
 //       .schema('dev2')
 //       .from('m_daibumon')
 //       .select('daibumon_id , daibumon_nam, adr_shozai, adr_tatemono, adr_sonota, tel, fax, mem,  ')
-//       .neq('del_flg', 1)
+
 //       .order('dsp_ord_num');
 //     if (!error) {
 //       console.log('I got a datalist from db', data.length);
@@ -53,11 +53,10 @@ export const getFilteredDaibumons = async (query: string) => {
     const { data, error } = await supabase
       .schema('dev2')
       .from('m_dai_bumon')
-      .select('dai_bumon_id, dai_bumon_nam,  mem') // テーブルに表示するカラム
+      .select('dai_bumon_id, dai_bumon_nam,  mem, del_flg') // テーブルに表示するカラム
       .ilike('dai_bumon_nam', `%${query}%`)
       //   // あいまい検索、大部門名、大部門名かな、住所、電話番号、fax番号
       //   .or(`dai_bumon_nam.ilike.%${query}%`)
-      .neq('del_flg', 1) // 削除フラグが立っていない
       .order('dsp_ord_num'); // 並び順
     if (!error) {
       console.log('I got a datalist from db', data.length);
@@ -69,6 +68,7 @@ export const getFilteredDaibumons = async (query: string) => {
           daibumonNam: d.dai_bumon_nam,
           mem: d.mem,
           dspOrdNum: index + 1,
+          delFlg: Boolean(d.del_flg),
         }));
         console.log(filtereddaibumons.length);
         return filtereddaibumons;
