@@ -24,7 +24,7 @@ type MasterHeader = {
 
 type MasterRow = {
   id: number;
-  dspOrdNum: number;
+  tblDspId: number;
   [key: string]: string | number | boolean | undefined;
 };
 
@@ -79,11 +79,11 @@ export const MasterTable = ({
           const isHidden = row.dspFlg === false;
           const isDeleted = row.delFlg === true;
           return (
-            <TableRow hover key={row.dspOrdNum}>
+            <TableRow hover key={row.tblDspId}>
               <TableCell
                 sx={{ bgcolor: isHidden || isDeleted ? grey[300] : '', width: 100, paddingLeft: 1, paddingRight: 1 }}
               >
-                {row.dspOrdNum}
+                {row.tblDspId}
               </TableCell>
               {headers.map((header) => (
                 <TableCell
@@ -189,9 +189,9 @@ export const MasterTableOfEqpt = ({
           const isHidden = row.dspFlg === 0 || row.dspFlg === false;
           const isDeleted = row.delFlg === true;
           return (
-            <TableRow hover key={row.dspOrdNum}>
+            <TableRow hover key={row.tblDspId}>
               <TableCell sx={{ bgcolor: isHidden || isDeleted ? grey[300] : '', paddingLeft: 1, paddingRight: 1 }}>
-                {row.dspOrdNum}
+                {row.tblDspId}
               </TableCell>
               {headers.map((header) => (
                 <TableCell

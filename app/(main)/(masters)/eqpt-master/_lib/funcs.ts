@@ -60,7 +60,7 @@ export const getFilteredEqpts = async (queries: { q: string; b: number; d: numbe
           rankAmt4: d.rank_amt_4,
           rankAmt5: d.rank_amt_5,
           dspFlg: d.dsp_flg,
-          dspOrdNum: index + 1,
+          tblDspId: index + 1,
           delFlg: Boolean(d.del_flg),
         }));
         console.log(filteredEqpts.length);

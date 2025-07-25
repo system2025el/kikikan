@@ -67,7 +67,7 @@ export const getFilteredShukeibumons = async (query: string) => {
           shukeibumonId: d.shukei_bumon_id,
           shukeibumonNam: d.shukei_bumon_nam,
           mem: d.mem,
-          dspOrdNum: index + 1,
+          tblDspId: index + 1,
           delFlg: Boolean(d.del_flg),
         }));
         console.log(filteredShukeibumons.length);

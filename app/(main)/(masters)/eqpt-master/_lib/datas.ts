@@ -34,7 +34,7 @@ export const emptyEqpt: EqptsMasterDialogValues = {
   tanaCod: '',
   edaCod: '',
   kizaiGrpCod: '',
-  dspOrdNum: 0,
+
   mem: '',
   bumonId: 0,
   shukeibumonId: 0,
@@ -189,8 +189,9 @@ export const eqptMasterList: EqptsMasterTableValues[] = [
     daibumonNam: '',
     kizaiQty: 0,
     dspFlg: true,
-    dspOrdNum: 0,
+
     delFlg: false,
+    tblDspId: 0,
   },
   {
     kizaiId: 2,
@@ -209,8 +210,9 @@ export const eqptMasterList: EqptsMasterTableValues[] = [
     daibumonNam: '',
     kizaiQty: 0,
     dspFlg: true,
-    dspOrdNum: 0,
+
     delFlg: false,
+    tblDspId: 0,
   },
   {
     kizaiId: 3,
@@ -229,8 +231,9 @@ export const eqptMasterList: EqptsMasterTableValues[] = [
     daibumonNam: '',
     kizaiQty: 0,
     dspFlg: true,
-    dspOrdNum: 0,
+
     delFlg: false,
+    tblDspId: 0,
   },
   {
     kizaiId: 4,
@@ -248,8 +251,9 @@ export const eqptMasterList: EqptsMasterTableValues[] = [
     daibumonNam: '',
     kizaiQty: 0,
     dspFlg: true,
-    dspOrdNum: 0,
+
     delFlg: false,
+    tblDspId: 0,
   },
   {
     kizaiId: 5,
@@ -267,8 +271,9 @@ export const eqptMasterList: EqptsMasterTableValues[] = [
     daibumonNam: '',
     kizaiQty: 0,
     dspFlg: true,
-    dspOrdNum: 0,
+
     delFlg: false,
+    tblDspId: 0,
   },
   {
     kizaiId: 6,
@@ -286,8 +291,9 @@ export const eqptMasterList: EqptsMasterTableValues[] = [
     daibumonNam: '',
     kizaiQty: 0,
     dspFlg: true,
-    dspOrdNum: 0,
+
     delFlg: false,
+    tblDspId: 0,
   },
   {
     kizaiId: 7,
@@ -305,8 +311,9 @@ export const eqptMasterList: EqptsMasterTableValues[] = [
     daibumonNam: '',
     kizaiQty: 0,
     dspFlg: true,
-    dspOrdNum: 0,
+
     delFlg: false,
+    tblDspId: 0,
   },
   {
     kizaiId: 8,
@@ -325,8 +332,9 @@ export const eqptMasterList: EqptsMasterTableValues[] = [
     daibumonNam: '',
     kizaiQty: 0,
     dspFlg: true,
-    dspOrdNum: 0,
+
     delFlg: false,
+    tblDspId: 0,
   },
   {
     kizaiId: 9,
@@ -345,8 +353,9 @@ export const eqptMasterList: EqptsMasterTableValues[] = [
     daibumonNam: '',
     kizaiQty: 0,
     dspFlg: true,
-    dspOrdNum: 0,
+
     delFlg: false,
+    tblDspId: 0,
   },
   {
     kizaiId: 10,
@@ -365,8 +374,9 @@ export const eqptMasterList: EqptsMasterTableValues[] = [
     daibumonNam: '',
     kizaiQty: 0,
     dspFlg: true,
-    dspOrdNum: 0,
+
     delFlg: false,
+    tblDspId: 0,
   },
   {
     kizaiId: 11,
@@ -385,8 +395,9 @@ export const eqptMasterList: EqptsMasterTableValues[] = [
     daibumonNam: '',
     kizaiQty: 0,
     dspFlg: true,
-    dspOrdNum: 0,
+
     delFlg: false,
+    tblDspId: 0,
   },
   {
     kizaiId: 12,
@@ -405,8 +416,9 @@ export const eqptMasterList: EqptsMasterTableValues[] = [
     bumonNam: '',
     shukeibumonNam: '',
     dspFlg: true,
-    dspOrdNum: 0,
+
     delFlg: false,
+    tblDspId: 0,
   },
   {
     kizaiId: 13,
@@ -425,8 +437,9 @@ export const eqptMasterList: EqptsMasterTableValues[] = [
     daibumonNam: '',
     kizaiQty: 0,
     dspFlg: true,
-    dspOrdNum: 0,
+
     delFlg: false,
+    tblDspId: 0,
   },
   {
     kizaiId: 14,
@@ -445,8 +458,9 @@ export const eqptMasterList: EqptsMasterTableValues[] = [
     daibumonNam: '',
     kizaiQty: 0,
     dspFlg: true,
-    dspOrdNum: 0,
+
     delFlg: false,
+    tblDspId: 0,
   },
   {
     kizaiId: 15,
@@ -465,8 +479,9 @@ export const eqptMasterList: EqptsMasterTableValues[] = [
     daibumonNam: '',
     kizaiQty: 0,
     dspFlg: true,
-    dspOrdNum: 0,
+
     delFlg: false,
+    tblDspId: 0,
   },
   {
     kizaiId: 16,
@@ -485,8 +500,9 @@ export const eqptMasterList: EqptsMasterTableValues[] = [
     daibumonNam: '',
     kizaiQty: 0,
     dspFlg: true,
-    dspOrdNum: 0,
+
     delFlg: false,
+    tblDspId: 0,
   },
   {
     kizaiId: 17,
@@ -505,8 +521,9 @@ export const eqptMasterList: EqptsMasterTableValues[] = [
     daibumonNam: '',
     kizaiQty: 0,
     dspFlg: true,
-    dspOrdNum: 0,
+
     delFlg: false,
+    tblDspId: 0,
   },
   {
     kizaiId: 18,
@@ -525,8 +542,9 @@ export const eqptMasterList: EqptsMasterTableValues[] = [
     daibumonNam: '',
     kizaiQty: 0,
     dspFlg: true,
-    dspOrdNum: 0,
+
     delFlg: false,
+    tblDspId: 0,
   },
   {
     kizaiId: 19,
@@ -545,8 +563,9 @@ export const eqptMasterList: EqptsMasterTableValues[] = [
     daibumonNam: '',
     kizaiQty: 0,
     dspFlg: true,
-    dspOrdNum: 0,
+
     delFlg: false,
+    tblDspId: 0,
   },
   // {
   //   kizaiId: 20,

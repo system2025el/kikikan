@@ -50,7 +50,7 @@ export type EqptsMasterTableValues = {
   rankAmt4: number;
   rankAmt5: number;
   dspFlg: boolean;
-  dspOrdNum: number;
+  tblDspId: number;
   delFlg: boolean;
 };
 

@@ -113,7 +113,7 @@ export const locationList: LocsMasterTableValues[] = [
     mem: 'ばばばばばばっばばばばっばばばばば',
 
     dspFlg: true,
-    dspOrdNum: 0,
+    tblDspId: 0,
     delFlg: false,
   },
   {
@@ -128,7 +128,7 @@ export const locationList: LocsMasterTableValues[] = [
     mem: '',
 
     dspFlg: true,
-    dspOrdNum: 0,
+    tblDspId: 0,
     delFlg: false,
   },
   {
@@ -143,7 +143,7 @@ export const locationList: LocsMasterTableValues[] = [
     mem: '',
 
     dspFlg: true,
-    dspOrdNum: 0,
+    tblDspId: 0,
     delFlg: false,
   },
   {
@@ -158,7 +158,7 @@ export const locationList: LocsMasterTableValues[] = [
     mem: '',
 
     dspFlg: true,
-    dspOrdNum: 0,
+    tblDspId: 0,
     delFlg: false,
   },
   {
@@ -173,7 +173,7 @@ export const locationList: LocsMasterTableValues[] = [
     mem: '',
 
     dspFlg: true,
-    dspOrdNum: 0,
+    tblDspId: 0,
     delFlg: false,
   },
   {
@@ -188,7 +188,7 @@ export const locationList: LocsMasterTableValues[] = [
     mem: '',
 
     dspFlg: true,
-    dspOrdNum: 0,
+    tblDspId: 0,
     delFlg: false,
   },
 ];
