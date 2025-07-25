@@ -76,7 +76,7 @@ export const formItems: FormItemsType[] = [
   },
   {
     label: '顧客敬称',
-    exsample: '',
+    exsample: '例）御中、様',
     constraints: '10文字まで',
   },
   {
