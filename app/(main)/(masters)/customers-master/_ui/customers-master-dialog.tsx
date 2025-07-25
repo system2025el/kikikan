@@ -159,7 +159,7 @@ export const CustomersMasterDialog = ({
                   <TextFieldElement
                     name="kokyakuNam"
                     control={control}
-                    label={formItems[0].exsample}
+                    label={editable ? formItems[0].exsample : ''}
                     fullWidth
                     sx={{ maxWidth: '90%' }}
                     disabled={editable ? false : true}
@@ -171,7 +171,7 @@ export const CustomersMasterDialog = ({
                   <TextFieldElement
                     name="kana"
                     control={control}
-                    label={formItems[1].exsample}
+                    label={editable ? formItems[1].exsample : ''}
                     fullWidth
                     sx={{ maxWidth: '90%' }}
                     disabled={editable ? false : true}
@@ -183,7 +183,7 @@ export const CustomersMasterDialog = ({
                   <SelectElement
                     name="kokyakuRank"
                     control={control}
-                    label={formItems[2].exsample}
+                    label={editable ? formItems[2].exsample : ''}
                     options={[
                       { id: 1, label: 1 },
                       { id: 2, label: 2 },
@@ -208,7 +208,7 @@ export const CustomersMasterDialog = ({
                   <TextFieldElement
                     name="keisho"
                     control={control}
-                    label={formItems[4].exsample}
+                    label={editable ? formItems[4].exsample : ''}
                     fullWidth
                     sx={{ maxWidth: '50%' }}
                     disabled={editable ? false : true}
@@ -220,7 +220,7 @@ export const CustomersMasterDialog = ({
                   <TextFieldElement
                     name="adrPost"
                     control={control}
-                    label={formItems[5].exsample}
+                    label={editable ? formItems[5].exsample : ''}
                     fullWidth
                     sx={{ maxWidth: '50%' }}
                     disabled={editable ? false : true}
@@ -232,7 +232,7 @@ export const CustomersMasterDialog = ({
                   <TextFieldElement
                     name="adrShozai"
                     control={control}
-                    label={formItems[6].exsample}
+                    label={editable ? formItems[6].exsample : ''}
                     fullWidth
                     sx={{ maxWidth: '90%' }}
                     disabled={editable ? false : true}
@@ -244,7 +244,7 @@ export const CustomersMasterDialog = ({
                   <TextFieldElement
                     name="adrTatemono"
                     control={control}
-                    label={formItems[7].exsample}
+                    label={editable ? formItems[7].exsample : ''}
                     fullWidth
                     sx={{ maxWidth: '90%' }}
                     disabled={editable ? false : true}
@@ -256,7 +256,7 @@ export const CustomersMasterDialog = ({
                   <TextFieldElement
                     name="adrSonota"
                     control={control}
-                    label={formItems[8].exsample}
+                    label={editable ? formItems[8].exsample : ''}
                     fullWidth
                     sx={{ maxWidth: '90%' }}
                     disabled={editable ? false : true}
@@ -268,7 +268,7 @@ export const CustomersMasterDialog = ({
                   <TextFieldElement
                     name="tel"
                     control={control}
-                    label={formItems[9].exsample}
+                    label={editable ? formItems[9].exsample : ''}
                     fullWidth
                     sx={{ maxWidth: '50%' }}
                     disabled={editable ? false : true}
@@ -280,7 +280,7 @@ export const CustomersMasterDialog = ({
                   <TextFieldElement
                     name="telMobile"
                     control={control}
-                    label={formItems[10].exsample}
+                    label={editable ? formItems[10].exsample : ''}
                     fullWidth
                     sx={{ maxWidth: '50%' }}
                     disabled={editable ? false : true}
@@ -292,7 +292,7 @@ export const CustomersMasterDialog = ({
                   <TextFieldElement
                     name="fax"
                     control={control}
-                    label={formItems[11].exsample}
+                    label={editable ? formItems[11].exsample : ''}
                     fullWidth
                     sx={{ maxWidth: '50%' }}
                     disabled={editable ? false : true}
@@ -304,7 +304,7 @@ export const CustomersMasterDialog = ({
                   <TextFieldElement
                     name="mail"
                     control={control}
-                    label={formItems[12].exsample}
+                    label={editable ? formItems[12].exsample : ''}
                     fullWidth
                     sx={{ maxWidth: '90%' }}
                     disabled={editable ? false : true}
@@ -316,7 +316,7 @@ export const CustomersMasterDialog = ({
                   <TextareaAutosizeElement ////////////// 200文字までの設定をしなければならない
                     name="mem"
                     control={control}
-                    label={formItems[13].exsample}
+                    label={editable ? formItems[13].exsample : ''}
                     fullWidth
                     sx={{ maxWidth: '90%' }}
                     disabled={editable ? false : true}
@@ -333,7 +333,7 @@ export const CustomersMasterDialog = ({
                   <TextFieldElement
                     name="closeDay"
                     control={control}
-                    label={formItems[15].exsample}
+                    label={editable ? formItems[15].exsample : ''}
                     fullWidth
                     sx={{ maxWidth: '50%' }}
                     disabled={editable ? false : true}
@@ -346,7 +346,7 @@ export const CustomersMasterDialog = ({
                   <TextFieldElement
                     name="siteDay"
                     control={control}
-                    label={formItems[16].exsample}
+                    label={editable ? formItems[16].exsample : ''}
                     fullWidth
                     sx={{ maxWidth: '50%' }}
                     disabled={editable ? false : true}

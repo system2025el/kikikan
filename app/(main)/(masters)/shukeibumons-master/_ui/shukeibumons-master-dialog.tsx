@@ -150,7 +150,7 @@ export const ShukeibumonsMasterDialog = ({
                   <TextFieldElement
                     name="shukeibumonNam"
                     control={control}
-                    label={formItems[0].exsample}
+                    label={editable ? formItems[0].exsample : ''}
                     fullWidth
                     sx={{ maxWidth: '90%' }}
                     disabled={editable ? false : true}
@@ -162,7 +162,7 @@ export const ShukeibumonsMasterDialog = ({
                   <TextareaAutosizeElement
                     name="mem"
                     control={control}
-                    label={formItems[2].exsample}
+                    label={editable ? formItems[2].exsample : ''}
                     fullWidth
                     sx={{ maxWidth: '90%' }}
                     disabled={editable ? false : true}

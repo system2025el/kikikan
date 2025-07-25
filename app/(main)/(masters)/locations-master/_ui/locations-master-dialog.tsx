@@ -154,7 +154,7 @@ export const LocationsMasterDialog = ({
                   <TextFieldElement
                     name="locNam"
                     control={control}
-                    label={formItems[0].exsample}
+                    label={editable ? formItems[0].exsample : ''}
                     fullWidth
                     sx={{ maxWidth: '90%' }}
                     disabled={editable ? false : true}
@@ -166,7 +166,7 @@ export const LocationsMasterDialog = ({
                   <TextFieldElement
                     name="kana"
                     control={control}
-                    label={formItems[1].exsample}
+                    label={editable ? formItems[1].exsample : ''}
                     fullWidth
                     sx={{ maxWidth: '90%' }}
                     disabled={editable ? false : true}
@@ -184,7 +184,7 @@ export const LocationsMasterDialog = ({
                   <TextFieldElement
                     name="adrPost"
                     control={control}
-                    label={formItems[3].exsample}
+                    label={editable ? formItems[3].exsample : ''}
                     fullWidth
                     sx={{ maxWidth: '90%' }}
                     disabled={editable ? false : true}
@@ -196,7 +196,7 @@ export const LocationsMasterDialog = ({
                   <TextFieldElement
                     name="adrShozai"
                     control={control}
-                    label={formItems[4].exsample}
+                    label={editable ? formItems[4].exsample : ''}
                     fullWidth
                     sx={{ maxWidth: '90%' }}
                     disabled={editable ? false : true}
@@ -208,7 +208,7 @@ export const LocationsMasterDialog = ({
                   <TextFieldElement
                     name="adrTatemono"
                     control={control}
-                    label={formItems[5].exsample}
+                    label={editable ? formItems[5].exsample : ''}
                     fullWidth
                     sx={{ maxWidth: '90%' }}
                     disabled={editable ? false : true}
@@ -220,7 +220,7 @@ export const LocationsMasterDialog = ({
                   <TextFieldElement
                     name="adrSonota"
                     control={control}
-                    label={formItems[6].exsample}
+                    label={editable ? formItems[6].exsample : ''}
                     fullWidth
                     sx={{ maxWidth: '90%' }}
                     disabled={editable ? false : true}
@@ -232,7 +232,7 @@ export const LocationsMasterDialog = ({
                   <TextFieldElement
                     name="tel"
                     control={control}
-                    label={formItems[7].exsample}
+                    label={editable ? formItems[7].exsample : ''}
                     fullWidth
                     sx={{ maxWidth: '90%' }}
                     disabled={editable ? false : true}
@@ -244,7 +244,7 @@ export const LocationsMasterDialog = ({
                   <TextFieldElement
                     name="telMobile"
                     control={control}
-                    label={formItems[8].exsample}
+                    label={editable ? formItems[8].exsample : ''}
                     fullWidth
                     sx={{ maxWidth: '90%' }}
                     disabled={editable ? false : true}
@@ -256,7 +256,7 @@ export const LocationsMasterDialog = ({
                   <TextFieldElement
                     name="fax"
                     control={control}
-                    label={formItems[9].exsample}
+                    label={editable ? formItems[9].exsample : ''}
                     fullWidth
                     sx={{ maxWidth: '90%' }}
                     disabled={editable ? false : true}
@@ -268,7 +268,7 @@ export const LocationsMasterDialog = ({
                   <TextFieldElement
                     name="mail"
                     control={control}
-                    label={formItems[10].exsample}
+                    label={editable ? formItems[10].exsample : ''}
                     fullWidth
                     sx={{ maxWidth: '90%' }}
                     disabled={editable ? false : true}
@@ -280,7 +280,7 @@ export const LocationsMasterDialog = ({
                   <TextareaAutosizeElement ////////////// 200文字までの設定をしなければならない
                     name="mem"
                     control={control}
-                    label={formItems[11].exsample}
+                    label={editable ? formItems[11].exsample : ''}
                     fullWidth
                     sx={{ maxWidth: '90%' }}
                     disabled={editable ? false : true}

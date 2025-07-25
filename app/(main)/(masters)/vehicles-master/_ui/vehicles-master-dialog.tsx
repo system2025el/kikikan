@@ -144,7 +144,7 @@ export const VehiclesMasterDialog = ({
                   <TextFieldElement
                     name="sharyoNam"
                     control={control}
-                    label={formItems[0].exsample}
+                    label={editable ? formItems[0].exsample : ''}
                     fullWidth
                     sx={{ maxWidth: '90%' }}
                     disabled={editable ? false : true}
@@ -156,7 +156,7 @@ export const VehiclesMasterDialog = ({
                   <TextareaAutosizeElement
                     name="mem"
                     control={control}
-                    label={formItems[2].exsample}
+                    label={editable ? formItems[2].exsample : ''}
                     fullWidth
                     sx={{ maxWidth: '90%' }}
                     disabled={editable ? false : true}

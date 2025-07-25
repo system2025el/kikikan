@@ -147,7 +147,7 @@ export const ManagerMasterDialog = ({
                   <TextFieldElement
                     name="tantouNam"
                     control={control}
-                    label={formItems[0].exsample}
+                    label={editable ? formItems[0].exsample : ''}
                     fullWidth
                     sx={{ maxWidth: '90%' }}
                     disabled={editable ? false : true}

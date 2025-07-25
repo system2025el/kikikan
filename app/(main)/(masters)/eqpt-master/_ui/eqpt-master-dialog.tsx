@@ -175,7 +175,7 @@ export const EqMasterDialog = ({
                   <TextFieldElement
                     name="kizaiNam"
                     control={control}
-                    label={formItems[0].exsample}
+                    label={editable ? formItems[0].exsample : ''}
                     fullWidth
                     sx={{ maxWidth: '90%' }}
                     disabled={editable ? false : true}
@@ -192,7 +192,7 @@ export const EqMasterDialog = ({
                   <TextFieldElement
                     name="sectionNum"
                     control={control}
-                    label={formItems[2].exsample}
+                    label={editable ? formItems[2].exsample : ''}
                     fullWidth
                     sx={{ maxWidth: '20%' }}
                     disabled={editable ? false : true}
@@ -208,7 +208,7 @@ export const EqMasterDialog = ({
                   <TextFieldElement
                     name="elNum"
                     control={control}
-                    label={formItems[3].exsample}
+                    label={editable ? formItems[3].exsample : ''}
                     fullWidth
                     sx={{ maxWidth: '20%' }}
                     disabled={editable ? false : true}
@@ -232,7 +232,7 @@ export const EqMasterDialog = ({
                   <TextFieldElement
                     name="bldCod"
                     control={control}
-                    label={formItems[6].exsample}
+                    label={editable ? formItems[6].exsample : ''}
                     fullWidth
                     sx={{ maxWidth: '50%' }}
                     disabled={editable ? false : true}
@@ -244,7 +244,7 @@ export const EqMasterDialog = ({
                   <TextFieldElement
                     name="tanaCod"
                     control={control}
-                    label={formItems[7].exsample}
+                    label={editable ? formItems[7].exsample : ''}
                     fullWidth
                     sx={{ maxWidth: '50%' }}
                     disabled={editable ? false : true}
@@ -256,7 +256,7 @@ export const EqMasterDialog = ({
                   <TextFieldElement
                     name="edaCod"
                     control={control}
-                    label={formItems[8].exsample}
+                    label={editable ? formItems[8].exsample : ''}
                     fullWidth
                     sx={{ maxWidth: '50%' }}
                     disabled={editable ? false : true}
@@ -268,7 +268,7 @@ export const EqMasterDialog = ({
                   <TextFieldElement
                     name="kizaiGrpCod"
                     control={control}
-                    label={formItems[9].exsample}
+                    label={editable ? formItems[9].exsample : ''}
                     fullWidth
                     sx={{ maxWidth: '50%' }}
                     disabled={editable ? false : true}
@@ -280,7 +280,7 @@ export const EqMasterDialog = ({
                   <TextFieldElement
                     name="dspOrdNum"
                     control={control}
-                    label={formItems[10].exsample}
+                    label={editable ? formItems[10].exsample : ''}
                     fullWidth
                     sx={{ maxWidth: '20%' }}
                     disabled={editable ? false : true}
@@ -293,7 +293,7 @@ export const EqMasterDialog = ({
                   <TextareaAutosizeElement
                     name="mem"
                     control={control}
-                    label={formItems[11].exsample}
+                    label={editable ? formItems[11].exsample : ''}
                     fullWidth
                     sx={{ maxWidth: '90%' }}
                     disabled={editable ? false : true}
@@ -351,7 +351,7 @@ export const EqMasterDialog = ({
                   <TextFieldElement
                     name="defDatQty"
                     control={control}
-                    label={formItems[16].exsample}
+                    label={editable ? formItems[16].exsample : ''}
                     fullWidth
                     sx={{ maxWidth: '20%' }}
                     disabled={editable ? false : true}
@@ -364,7 +364,7 @@ export const EqMasterDialog = ({
                   <TextFieldElement
                     name="regAmt"
                     control={control}
-                    label={formItems[17].exsample}
+                    label={editable ? formItems[17].exsample : ''}
                     fullWidth
                     sx={{ maxWidth: '50%' }}
                     disabled={editable ? false : true}
@@ -377,7 +377,7 @@ export const EqMasterDialog = ({
                   <TextFieldElement
                     name="rankAmt1"
                     control={control}
-                    label={formItems[18].exsample}
+                    label={editable ? formItems[18].exsample : ''}
                     fullWidth
                     sx={{ maxWidth: '50%' }}
                     disabled={editable ? false : true}
@@ -390,7 +390,7 @@ export const EqMasterDialog = ({
                   <TextFieldElement
                     name="rankAmt2"
                     control={control}
-                    label={formItems[19].exsample}
+                    label={editable ? formItems[19].exsample : ''}
                     fullWidth
                     sx={{ maxWidth: '50%' }}
                     disabled={editable ? false : true}
@@ -403,7 +403,7 @@ export const EqMasterDialog = ({
                   <TextFieldElement
                     name="rankAmt3"
                     control={control}
-                    label={formItems[20].exsample}
+                    label={editable ? formItems[20].exsample : ''}
                     fullWidth
                     sx={{ maxWidth: '50%' }}
                     disabled={editable ? false : true}
@@ -416,7 +416,7 @@ export const EqMasterDialog = ({
                   <TextFieldElement
                     name="rankAmt4"
                     control={control}
-                    label={formItems[21].exsample}
+                    label={editable ? formItems[21].exsample : ''}
                     fullWidth
                     sx={{ maxWidth: '50%' }}
                     disabled={editable ? false : true}
@@ -429,7 +429,7 @@ export const EqMasterDialog = ({
                   <TextFieldElement
                     name="rankAmt5"
                     control={control}
-                    label={formItems[22].exsample}
+                    label={editable ? formItems[22].exsample : ''}
                     fullWidth
                     sx={{ maxWidth: '50%' }}
                     disabled={editable ? false : true}

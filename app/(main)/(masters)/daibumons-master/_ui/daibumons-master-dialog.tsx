@@ -149,7 +149,7 @@ export const DaibumonsMasterDialog = ({
                   <TextFieldElement
                     name="daibumonNam"
                     control={control}
-                    label={formItems[0].exsample}
+                    label={editable ? formItems[0].exsample : ''}
                     fullWidth
                     sx={{ maxWidth: '90%' }}
                     disabled={editable ? false : true}
@@ -161,7 +161,7 @@ export const DaibumonsMasterDialog = ({
                   <TextareaAutosizeElement ////////////// 200文字までの設定をしなければならない
                     name="mem"
                     control={control}
-                    label={formItems[2].exsample}
+                    label={editable ? formItems[2].exsample : ''}
                     fullWidth
                     sx={{ maxWidth: '90%' }}
                     disabled={editable ? false : true}
