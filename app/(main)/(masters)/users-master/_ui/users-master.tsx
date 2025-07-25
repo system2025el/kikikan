@@ -1,20 +1,21 @@
 'use client';
 
 import SearchIcon from '@mui/icons-material/Search';
-import { Box, Button, Container, Divider, Grid2, Paper, Stack, TextField, Typography } from '@mui/material';
+import { Box, Button, Container, Divider, Paper, Stack, Typography } from '@mui/material';
 import { JSX, useState } from 'react';
 import { TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { BackButton } from '../../../_ui/buttons';
-import { ManagersMasterDialogValues, ManagersMasterTableValues } from '../_lib/types';
-import { ManagerssMasterTable } from './managers-master-table';
+import { getFilteredUsers } from '../_lib/funcs';
+import { UsersMasterTableValues } from '../_lib/types';
+import { UserssMasterTable } from './users-master-table';
 /**
  * 担当者マスタ画面
  * @returns {JSX.Element} 担当者マスタ画面コンポーネント
  */
-export const ManagersMaster = ({ managers }: { managers: ManagersMasterTableValues[] | undefined }) => {
+export const UsersMaster = ({ users }: { users: UsersMasterTableValues[] | undefined }) => {
   /* useState ------------------ */
-  const [theManagers, setTheManagers] = useState(managers);
+  const [theUsers, setTheUsers] = useState(users);
   /* 今開いてるテーブルのページ数 */
   const [page, setPage] = useState(1);
   /* DBのローディング */
@@ -30,10 +31,10 @@ export const ManagersMaster = ({ managers }: { managers: ManagersMasterTableValu
   const onSubmit = async (data: { query: string | undefined }) => {
     setIsLoading(true);
     console.log('data : ', data);
-    // const newList = await getFilteredManagers(data.query!);
+    const newList = await getFilteredUsers(data.query!);
     setPage(1);
-    // setTheManagers(newList);
-    console.log('theLocs : ', theManagers);
+    setTheUsers(newList);
+    console.log('theLocs : ', theUsers);
   };
 
   return (
@@ -47,7 +48,7 @@ export const ManagersMaster = ({ managers }: { managers: ManagersMasterTableValu
         </Box>
         <Divider />
         <Box width={'100%'} p={2}>
-          <form /*onSubmit={handleSubmit(onSubmit)}*/>
+          <form onSubmit={handleSubmit(onSubmit)}>
             <Stack justifyContent={'space-between'} alignItems={'start'} mt={1}>
               <Stack alignItems={'baseline'}>
                 <Typography>担当者キーワード</Typography>
@@ -63,8 +64,8 @@ export const ManagersMaster = ({ managers }: { managers: ManagersMasterTableValu
           </form>
         </Box>
       </Paper>
-      <ManagerssMasterTable
-        managers={theManagers}
+      <UserssMasterTable
+        users={theUsers}
         isLoading={isLoading}
         page={page}
         setIsLoading={setIsLoading}

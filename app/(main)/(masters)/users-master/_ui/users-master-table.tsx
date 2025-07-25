@@ -24,21 +24,22 @@ import { Loading } from '@/app/(main)/_ui/loading';
 import { MuiTablePagination } from '../../../_ui/table-pagination';
 import { MasterTable } from '../../_ui/tables';
 import { mMHeader } from '../_lib/data';
-import { ManagersMasterTableValues } from '../_lib/types';
-import { ManagerMasterDialog } from './managers-master-dialog';
+import { getFilteredUsers } from '../_lib/funcs';
+import { UsersMasterTableValues } from '../_lib/types';
+import { UsersMasterDialog } from './users-master-dialog';
 
 /**
  * 担当者マスタのテーブル
  * @returns {JSX.Element} 担当者マスタのテーブルコンポーネント
  */
-export const ManagerssMasterTable = ({
-  managers,
+export const UserssMasterTable = ({
+  users,
   isLoading,
   page,
   setIsLoading,
   setPage,
 }: {
-  managers: ManagersMasterTableValues[] | undefined;
+  users: UsersMasterTableValues[] | undefined;
   isLoading: boolean;
   page: number;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
@@ -53,7 +54,7 @@ export const ManagerssMasterTable = ({
   /* 顧客詳細ダイアログの開閉状態 */
   const [dialogOpen, setDialogOpen] = useState(false);
   /* 担当者リスト */
-  const [theManagers, setTheManagers] = useState(managers);
+  const [theUsers, setTheUsers] = useState(users);
   /* Methods
   ------------------------------------------------------------ */
   /* 詳細ダイアログを開く関数 */
@@ -66,20 +67,20 @@ export const ManagerssMasterTable = ({
     setDialogOpen(false);
   };
   /* 情報が変わったときに更新される */
-  const refetchManagers = async () => {
+  const refetchUsers = async () => {
     setIsLoading(true);
-    // const updated = await getFilteredmanagers('');
-    // setThemanagers(updated);
+    const updated = await getFilteredUsers('');
+    setTheUsers(updated);
     setIsLoading(false);
   };
 
   useEffect(() => {
-    setTheManagers(managers); // 親からのManagersが更新された場合に同期
-  }, [managers]);
+    setTheUsers(users); // 親からのusersが更新された場合に同期
+  }, [users]);
 
   useEffect(() => {
-    setIsLoading(false); //theManagersが変わったらローディング終わり
-  }, [theManagers, setIsLoading]);
+    setIsLoading(false); //theUsersが変わったらローディング終わり
+  }, [theUsers, setIsLoading]);
 
   return (
     <Box>
@@ -89,7 +90,7 @@ export const ManagerssMasterTable = ({
       <Divider />
       <Grid2 container mt={0.5} mx={0.5} justifyContent={'space-between'} alignItems={'center'}>
         <Grid2 spacing={1}>
-          <MuiTablePagination arrayList={theManagers!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
+          <MuiTablePagination arrayList={theUsers!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
         </Grid2>
         <Grid2 container spacing={3}>
           <Grid2 alignContent={'center'}>
@@ -111,12 +112,12 @@ export const ManagerssMasterTable = ({
         <Loading />
       ) : (
         <>
-          {theManagers!.length < 1 && <Typography>該当するデータがありません</Typography>}
-          {theManagers!.length > 0 && (
+          {theUsers!.length < 1 && <Typography>該当するデータがありません</Typography>}
+          {theUsers!.length > 0 && (
             <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
               <MasterTable
                 headers={mMHeader}
-                datas={theManagers!.map((l) => ({ ...l, id: l.tantouId, name: l.tantouNam }))}
+                datas={theUsers!.map((l) => ({ ...l, id: l.tantouId, name: l.tantouNam }))}
                 page={page}
                 rowsPerPage={rowsPerPage}
                 handleOpenDialog={handleOpenDialog}
@@ -126,7 +127,7 @@ export const ManagerssMasterTable = ({
         </>
       )}
       <Dialog open={dialogOpen} fullScreen>
-        <ManagerMasterDialog managerId={openId} handleClose={handleCloseDialog} refetchManagers={refetchManagers} />
+        <UsersMasterDialog userId={openId} handleClose={handleCloseDialog} refetchUsers={refetchUsers} />
       </Dialog>
     </Box>
   );
