@@ -79,8 +79,10 @@ export const getFilteredEqpts = async (queries: { q: string; b: number; d: numbe
 /**
  * 選択された機材のデータを取得する関数
  * @param id 機材マスタID
- * @returns {Promise<EqptsMasterDialogValues>} - 機材の詳細情報。取得失敗時は空オブジェクトを返します。
- */
+ * @returns {Promise<{data: EqptsMasterDialogValues, qty: number | undefined}>}
+ * - 取得した機材の詳細情報と在庫数量を含むオブジェクトを解決するPromise。
+ * - `data`: 機材マスタのデータ。取得失敗時やエラー発生時は`emptyEqpt`を返します。
+ * - `qty`: `getEqptsQty`関数から取得した在庫数量。取得失敗時は`undefined`を返します。 */
 export const getOneEqpt = async (id: number) => {
   try {
     const { data, error } = await supabase.schema('dev2').from('m_kizai').select('*').eq('kizai_id', id).single();
@@ -116,14 +118,15 @@ export const getOneEqpt = async (id: number) => {
         updDat: data.upd_dat,
       };
       console.log(EqptDetails.addUser, ' ', EqptDetails.addDat);
-      return EqptDetails;
+      const qty = await getEqptsQty(id);
+      return { data: EqptDetails, qty: qty };
     } else {
       console.error('機材情報取得エラー。', { message: error.message, code: error.code });
-      return emptyEqpt;
+      return { data: emptyEqpt, qty: undefined };
     }
   } catch (e) {
     console.error('例外が発生しました:', e);
-    return emptyEqpt;
+    return { data: emptyEqpt, qty: undefined };
   }
 };
 
