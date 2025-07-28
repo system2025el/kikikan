@@ -144,9 +144,7 @@ export const EqMasterDialog = ({
     const getThatOneEqpt = async () => {
       const a = await getAllSelections();
       setSelectOptions(a);
-      const qty = await getEqptsQty(eqptId);
-      setKizaiQty(typeof qty === 'number' ? qty : '');
-      console.log('pppppppppppppppppppppppppppppp', kizaiQty, selectOptions);
+      console.log('pppppppppppppppppppppppppppppp', selectOptions);
       if (eqptId === -100) {
         // 新規追加モード
         reset(emptyEqpt); // フォーム初期化
@@ -156,8 +154,9 @@ export const EqMasterDialog = ({
       } else {
         const eqpt1 = await getOneEqpt(eqptId);
         if (eqpt1) {
-          setCurrentEqpt(eqpt1);
-          reset(eqpt1); // 取得したデータでフォーム初期化
+          setKizaiQty(eqpt1.qty!);
+          setCurrentEqpt(eqpt1.data);
+          reset(eqpt1.data); // 取得したデータでフォーム初期化
         }
         setIsLoading(false);
       }
