@@ -26,7 +26,7 @@ import { grey } from '@mui/material/colors';
 import { Dayjs } from 'dayjs';
 import React, { useRef, useState } from 'react';
 
-import { getDateHeaderBackgroundColor, getDateRowBackgroundColor } from '../../_lib/return/colorselect';
+import { getDateHeaderBackgroundColor, getDateRowBackgroundColor } from '../_lib/colorselect';
 import { ReturnEquipment, ReturnEquipmentData, StockData } from './equipment-return-order-detail';
 
 type ReturnStockTableProps = {

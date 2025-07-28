@@ -25,7 +25,7 @@ import {
 import { grey } from '@mui/material/colors';
 import React, { useRef, useState } from 'react';
 
-import { getDateHeaderBackgroundColor, getDateRowBackgroundColor } from '../../_lib/keep/colorselect';
+import { getDateHeaderBackgroundColor, getDateRowBackgroundColor } from '../_lib/colorselect';
 import { KeepEquipment, KeepEquipmentData, StockData } from './equipment-keep-order-detail';
 
 type KeepStockTableProps = {

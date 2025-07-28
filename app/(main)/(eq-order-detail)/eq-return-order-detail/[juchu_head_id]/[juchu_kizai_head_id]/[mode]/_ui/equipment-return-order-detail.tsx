@@ -33,9 +33,9 @@ import { BackButton } from '@/app/(main)/_ui/buttons';
 import { Calendar, TestDate, toISOStringWithTimezoneMonthDay } from '@/app/(main)/_ui/date';
 import Time, { TestTime } from '@/app/(main)/_ui/time';
 
-import { getDateHeaderBackgroundColor, getDateRowBackgroundColor } from '../../_lib/return/colorselect';
-import { data, stock } from '../../_lib/return/data';
-import { EquipmentSelectionDialog } from '../../_ui/main/equipment-selection-dailog';
+import { EquipmentSelectionDialog } from '../../../../../eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_ui/equipment-selection-dailog';
+import { getDateHeaderBackgroundColor, getDateRowBackgroundColor } from '../_lib/colorselect';
+import { data, stock } from '../_lib/data';
 import { ReturnEqTable, ReturnStockTable } from './equipment-return-order-detail-table';
 
 export type ReturnEquipmentData = {
