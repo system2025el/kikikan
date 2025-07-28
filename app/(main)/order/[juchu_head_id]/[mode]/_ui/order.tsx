@@ -227,9 +227,9 @@ export const Order = (props: {
 
     if (!isDirty) {
       await DeleteLock(1, props.order.juchuHeadId);
-      router.push('/order/equipment-order-detail');
+      router.push(`/eq-main-order-detail/${props.order.juchuHeadId}/0/edit`);
     } else {
-      setPath('/order/equipment-order-detail');
+      setPath(`/eq-main-order-detail/${props.order.juchuHeadId}/0/edit`);
       setDirtyOpen(true);
     }
   };
@@ -246,9 +246,9 @@ export const Order = (props: {
       if (selectData && selectData.oyaJuchuKizaiHeadId === 1) {
         if (!isDirty) {
           await DeleteLock(1, props.order.juchuHeadId);
-          router.push('/order/equipment-return-order-detail');
+          router.push(`/eq-return-order-detail/${props.order.juchuHeadId}/0/edit`);
         } else {
-          setPath('/order/equipment-return-order-detail');
+          setPath(`/eq-return-order-detail/${props.order.juchuHeadId}/0/edit`);
           setDirtyOpen(true);
         }
       } else {
@@ -271,9 +271,9 @@ export const Order = (props: {
       if (selectData && selectData.oyaJuchuKizaiHeadId === 1) {
         if (!isDirty) {
           await DeleteLock(1, props.order.juchuHeadId);
-          router.push('/order/equipment-keep-order-detail');
+          router.push(`/eq-keep-order-detail/${props.order.juchuHeadId}/0/edit`);
         } else {
-          setPath('/order/equipment-keep-order-detail');
+          setPath(`/eq-keep-order-detail/${props.order.juchuHeadId}/0/edit`);
           setDirtyOpen(true);
         }
       } else {
@@ -295,7 +295,7 @@ export const Order = (props: {
       await DeleteLock(1, props.order.juchuHeadId);
       router.push('/order/vehicle-order-detail');
     } else {
-      setPath('/order/vehicle-order-detail');
+      setPath(`/vehicle-order-detail/${props.order.juchuHeadId}/0/edit`);
       setDirtyOpen(true);
     }
   };
@@ -670,7 +670,7 @@ export const Order = (props: {
           </Grid2>
         </AccordionSummary>
         <AccordionDetails sx={{ padding: 0 }}>
-          <OrderEqTable orderEqRows={eqHeaderList} onEqSelectionChange={handleEqSelectionChange} />
+          <OrderEqTable orderEqRows={eqHeaderList} edit={edit} onEqSelectionChange={handleEqSelectionChange} />
         </AccordionDetails>
       </Accordion>
       {/* -------------------------車両----------------------------------- */}
