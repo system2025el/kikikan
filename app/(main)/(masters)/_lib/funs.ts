@@ -1,6 +1,5 @@
 'use server';
 
-import pool from '@/app/_lib/postgres/postgres';
 import { supabase } from '@/app/_lib/supabase/supabase';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 
@@ -109,5 +108,30 @@ export const getShozokuSelection = async () => {
     }
   } catch (e) {
     console.error('例外が発生しました:', e);
+  }
+};
+
+/**
+ * 選択肢のまとめたデータ
+ * @returns {{SelectTypes[]}} 0:daibumon, 1:shukeibumon, 2:bumon, 3:shozoku
+ */
+export const getAllSelections = async (): Promise<{
+  d: SelectTypes[];
+  s: SelectTypes[];
+  b: SelectTypes[];
+  shozoku: SelectTypes[];
+}> => {
+  try {
+    const [daibumons, shukeibumons, bumons, shozoku] = await Promise.all([
+      getDaibumonsSelection(),
+      getShukeibumonsSelection(),
+      getBumonsSelection(),
+      getShozokuSelection(),
+    ]);
+
+    return { d: daibumons!, s: shukeibumons!, b: bumons!, shozoku: shozoku! };
+  } catch (error) {
+    console.error('Error fetching all selections:', error);
+    return { d: [], s: [], b: [], shozoku: [] };
   }
 };
