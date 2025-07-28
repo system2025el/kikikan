@@ -4,7 +4,19 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { Box, Button, Collapse, IconButton, Typography } from '@mui/material';
+import {
+  alpha,
+  Box,
+  Button,
+  Collapse,
+  Fade,
+  IconButton,
+  styled,
+  Tooltip,
+  tooltipClasses,
+  TooltipProps,
+  Typography,
+} from '@mui/material';
 import Checkbox from '@mui/material/Checkbox';
 import { grey } from '@mui/material/colors';
 import Paper from '@mui/material/Paper';
@@ -15,6 +27,17 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import * as React from 'react';
 import { useMemo, useState } from 'react';
+
+const LightTooltip = styled(({ className, ...props }: TooltipProps) => (
+  <Tooltip {...props} classes={{ popper: className }} />
+))(({ theme }) => ({
+  [`& .${tooltipClasses.tooltip}`]: {
+    backgroundColor: theme.palette.common.white,
+    color: 'rgba(0, 0, 0, 0.68)',
+    boxShadow: theme.shadows[1],
+    fontSize: 11,
+  },
+}));
 
 /* マスタ系用テーブル ----------------------------------------------- */
 type MasterHeader = {
@@ -103,18 +126,48 @@ export const MasterTable = ({
                       onClick={() => handleOpenDialog(row.id)}
                       sx={{ p: 0, m: 0, minWidth: 0, textTransform: 'none' }}
                     >
-                      <Typography noWrap maxWidth={300} variant="body2" fontWeight={'medium'}>
-                        {row[header.key]}
-                      </Typography>
+                      <LightTooltip
+                        title={row[header.key]}
+                        slots={{
+                          transition: Fade,
+                        }}
+                        slotProps={{
+                          transition: { timeout: 1000 },
+                        }}
+                      >
+                        <Typography noWrap maxWidth={300} variant="button">
+                          {row[header.key]}
+                        </Typography>
+                      </LightTooltip>
                     </Button>
                   ) : header.key === 'address' ? (
-                    <Typography noWrap maxWidth={300}>
-                      {row[header.key]}
-                    </Typography>
+                    <LightTooltip
+                      title={row[header.key]}
+                      slots={{
+                        transition: Fade,
+                      }}
+                      slotProps={{
+                        transition: { timeout: 1000 },
+                      }}
+                    >
+                      <Typography noWrap maxWidth={300} variant="body2">
+                        {row[header.key]}
+                      </Typography>
+                    </LightTooltip>
                   ) : header.key === 'mem' ? (
-                    <Typography noWrap maxWidth={300}>
-                      {row[header.key]}
-                    </Typography>
+                    <LightTooltip
+                      title={row[header.key]}
+                      slots={{
+                        transition: Fade,
+                      }}
+                      slotProps={{
+                        transition: { timeout: 1000 },
+                      }}
+                    >
+                      <Typography noWrap maxWidth={300} variant="body2">
+                        {row[header.key]}
+                      </Typography>
+                    </LightTooltip>
                   ) : header.key === 'hidden' ? (
                     <>{isHidden && <>非表示</>}</>
                   ) : header.key === 'deleted' ? (
@@ -222,7 +275,7 @@ export const MasterTableOfEqpt = ({
                       onClick={() => handleOpenDialog(row.id)}
                       sx={{ p: 0, m: 0, minWidth: 0, textTransform: 'none' }}
                     >
-                      <Typography noWrap maxWidth={300} variant="body2" fontWeight={'medium'}>
+                      <Typography noWrap maxWidth={300} variant="button">
                         {row[header.key]}
                       </Typography>
                     </Button>
