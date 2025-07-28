@@ -6,13 +6,13 @@ import { useState } from 'react';
 
 import { Calendar } from '../../_ui/date';
 import GridTable from '../../_ui/gridtable';
-import {
-  getDateHeaderBackgroundColor,
-  getDateTextColor,
-  getEquipmentHeaderBackgroundColor,
-  getEquipmentRowBackgroundColor,
-  getEquipmentTextColor,
-} from '../../order/schedule/_lib/colorselect';
+// import {
+//   getDateHeaderBackgroundColor,
+//   getDateTextColor,
+//   getEquipmentHeaderBackgroundColor,
+//   getEquipmentRowBackgroundColor,
+//   getEquipmentTextColor,
+// } from '../../order/schedule/_lib/colorselect';
 import { getBackgroundColor } from '../_lib/colorselect';
 import { dateData, dateHeader, dateWidths, equipmentData, equipmentHeader, equipmentWidths } from '../_lib/data';
 
@@ -70,7 +70,7 @@ export const Stock = () => {
         </Box>
         <Box display="flex" flexDirection="row" width="100%" marginTop={2}>
           <Box width="30%">
-            <GridTable
+            {/* <GridTable
               header={equipmentHeader}
               rows={equipmentRows}
               editableColumns={editableColumns}
@@ -81,10 +81,10 @@ export const Stock = () => {
               getHeaderTextColor={getEquipmentTextColor}
               rowColorSelect={true}
               getRowBackgroundColor={getEquipmentRowBackgroundColor}
-            />
+            /> */}
           </Box>
           <Box width="70%">
-            <GridTable
+            {/* <GridTable
               header={dateHeader}
               rows={dateRows}
               editableColumns={null}
@@ -95,7 +95,7 @@ export const Stock = () => {
               getHeaderTextColor={getDateTextColor}
               rowColorSelect={true}
               getRowBackgroundColor={getBackgroundColor}
-            />
+            /> */}
           </Box>
         </Box>
       </Box>
