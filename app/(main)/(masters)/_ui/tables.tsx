@@ -61,16 +61,15 @@ export const MasterTable = ({
   const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - rows!.length) : 0;
 
   return (
-    <Table sx={{ minWidth: 1200 }} aria-labelledby="tableTitle" padding="none" stickyHeader>
+    <Table sx={{ minWidth: '100%' }} aria-labelledby="tableTitle" padding="none" stickyHeader>
       <TableHead sx={{ bgcolor: 'primary.light' }}>
         <TableRow sx={{ whiteSpace: 'nowrap' }}>
-          <TableCell width={100} />
+          <TableCell width={50} />
           {headers.map((header) => (
             <TableCell key={header.key} align={typeof rows[0][header.key] === 'number' ? 'right' : 'left'}>
               {header.label}
             </TableCell>
           ))}
-          {/* <TableCell>非表示</TableCell> */}
           {/* <TableCell /> */}
         </TableRow>
       </TableHead>
@@ -81,7 +80,13 @@ export const MasterTable = ({
           return (
             <TableRow hover key={row.tblDspId}>
               <TableCell
-                sx={{ bgcolor: isHidden || isDeleted ? grey[300] : '', width: 100, paddingLeft: 1, paddingRight: 1 }}
+                width={50}
+                sx={{
+                  bgcolor: isHidden || isDeleted ? grey[300] : '',
+                  paddingLeft: 1,
+                  paddingRight: 1,
+                  textAlign: 'end',
+                }}
               >
                 {row.tblDspId}
               </TableCell>
@@ -89,21 +94,25 @@ export const MasterTable = ({
                 <TableCell
                   key={header.key}
                   align={typeof row[header.key] === 'number' ? 'right' : 'left'}
-                  sx={{ bgcolor: isHidden || isDeleted ? grey[300] : '' }}
+                  sx={{ bgcolor: isHidden || isDeleted ? grey[300] : '', whiteSpace: 'nowrap' }}
                 >
                   {header.key === 'name' ? (
-                    <>
-                      <Button
-                        variant="text"
-                        size="medium"
-                        onClick={() => handleOpenDialog(row.id)}
-                        sx={{ p: 0, m: 0, minWidth: 0, textTransform: 'none' }}
-                      >
+                    <Button
+                      variant="text"
+                      size="medium"
+                      onClick={() => handleOpenDialog(row.id)}
+                      sx={{ p: 0, m: 0, minWidth: 0, textTransform: 'none' }}
+                    >
+                      <Typography noWrap maxWidth={300} variant="body2" fontWeight={'medium'}>
                         {row[header.key]}
-                      </Button>
-                    </>
+                      </Typography>
+                    </Button>
+                  ) : header.key === 'address' ? (
+                    <Typography noWrap maxWidth={300}>
+                      {row[header.key]}
+                    </Typography>
                   ) : header.key === 'mem' ? (
-                    <Typography noWrap maxWidth={100}>
+                    <Typography noWrap maxWidth={300}>
                       {row[header.key]}
                     </Typography>
                   ) : header.key === 'hidden' ? (
@@ -115,7 +124,6 @@ export const MasterTable = ({
                   )}
                 </TableCell>
               ))}
-              {/* <TableCell sx={{ bgcolor: isHidden || isDeleted ? grey[300] : '' }}>{isHidden && <>非表示</>}</TableCell> */}
               {/* <TableCell sx={{ bgcolor: isHidden || isDeleted ? grey[300] : '', width: 100 }} align="center">
                 <IconButton
                   sx={{ bgcolor: 'primary.main', color: 'white' }}
@@ -138,7 +146,7 @@ export const MasterTable = ({
           );
         })}
         {emptyRows > 0 && (
-          <TableRow style={{ height: 30 * emptyRows }}>
+          <TableRow style={{ height: 25 * emptyRows }}>
             <TableCell colSpan={headers.length + 2} />
           </TableRow>
         )}
@@ -173,24 +181,32 @@ export const MasterTableOfEqpt = ({
   const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - datas!.length) : 0;
 
   return (
-    <Table sx={{ minWidth: 1200 }} padding="none" stickyHeader>
+    <Table sx={{ minWidth: '100%' }} aria-labelledby="tableTitle" padding="none" stickyHeader>
       <TableHead sx={{ bgcolor: 'primary.light' }}>
         <TableRow sx={{ whiteSpace: 'nowrap' }}>
-          <TableCell></TableCell>
+          <TableCell width={50} />
           {headers.map((header) => (
             <TableCell key={header.key} align={typeof datas[0][header.key] === 'number' ? 'right' : 'left'}>
-              <Box>{header.label}</Box>
+              {header.label}
             </TableCell>
           ))}
         </TableRow>
       </TableHead>
       <TableBody>
         {list.map((row) => {
-          const isHidden = row.dspFlg === 0 || row.dspFlg === false;
+          const isHidden = row.dspFlg === false;
           const isDeleted = row.delFlg === true;
           return (
             <TableRow hover key={row.tblDspId}>
-              <TableCell sx={{ bgcolor: isHidden || isDeleted ? grey[300] : '', paddingLeft: 1, paddingRight: 1 }}>
+              <TableCell
+                width={50}
+                sx={{
+                  bgcolor: isHidden || isDeleted ? grey[300] : '',
+                  paddingLeft: 1,
+                  paddingRight: 1,
+                  textAlign: 'end',
+                }}
+              >
                 {row.tblDspId}
               </TableCell>
               {headers.map((header) => (
@@ -200,18 +216,18 @@ export const MasterTableOfEqpt = ({
                   sx={{ bgcolor: isHidden || isDeleted ? grey[300] : '', whiteSpace: 'nowrap' }}
                 >
                   {header.key === 'name' ? (
-                    <>
-                      <Button
-                        variant="text"
-                        size="medium"
-                        onClick={() => handleOpenDialog(row.id)}
-                        sx={{ p: 0, m: 0, minWidth: 0, textTransform: 'none' }}
-                      >
+                    <Button
+                      variant="text"
+                      size="medium"
+                      onClick={() => handleOpenDialog(row.id)}
+                      sx={{ p: 0, m: 0, minWidth: 0, textTransform: 'none' }}
+                    >
+                      <Typography noWrap maxWidth={300} variant="body2" fontWeight={'medium'}>
                         {row[header.key]}
-                      </Button>
-                    </>
+                      </Typography>
+                    </Button>
                   ) : header.key === 'mem' ? (
-                    <Typography noWrap maxWidth={100}>
+                    <Typography noWrap maxWidth={300}>
                       {row[header.key]}
                     </Typography>
                   ) : header.key === 'hidden' ? (
@@ -227,7 +243,7 @@ export const MasterTableOfEqpt = ({
           );
         })}
         {emptyRows > 0 && (
-          <TableRow style={{ height: 30 * emptyRows }}>
+          <TableRow style={{ height: 25 * emptyRows }}>
             <TableCell colSpan={headers.length + 2} />
           </TableRow>
         )}
