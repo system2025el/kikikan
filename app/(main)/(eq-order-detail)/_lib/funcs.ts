@@ -37,7 +37,7 @@ export const GetEqHeader = async (juchuHeadId: number, juchuKizaiHeadId: number)
       juchuKizaiHeadId: juchuKizaiHead.juchu_kizai_head_id,
       juchuKizaiHeadKbn: juchuKizaiHead.juchu_kizai_head_kbn,
       juchuHonbanbiQty: juchuKizaiHead.juchu_honbanbi_qty,
-      zeiKbn: juchuKizaiHead.zei_kbn ? juchuKizaiHead.zei_kbn : undefined,
+      zeiKbn: juchuKizaiHead.zei_kbn,
       nebikiAmt: juchuKizaiHead.nebiki_amt,
       mem: juchuKizaiHead.mem,
       headNam: juchuKizaiHead.head_nam,

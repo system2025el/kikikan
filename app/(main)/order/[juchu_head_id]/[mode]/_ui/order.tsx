@@ -571,6 +571,7 @@ export const Order = (props: {
                     control={control}
                     render={({ field }) => (
                       <Select {...field} disabled={!edit}>
+                        <MenuItem value={0}>無し</MenuItem>
                         <MenuItem value={1}>内税</MenuItem>
                         <MenuItem value={2}>外税</MenuItem>
                       </Select>

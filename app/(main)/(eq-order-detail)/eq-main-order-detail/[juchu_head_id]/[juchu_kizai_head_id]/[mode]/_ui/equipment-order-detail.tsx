@@ -816,7 +816,7 @@ const EquipmentOrderDetail = (props: {
                     control={control}
                     render={({ field }) => (
                       <Select {...field} disabled={!edit}>
-                        <MenuItem value={undefined}>空</MenuItem>
+                        <MenuItem value={0}>無し</MenuItem>
                         <MenuItem value={1}>内税</MenuItem>
                         <MenuItem value={2}>外税</MenuItem>
                       </Select>

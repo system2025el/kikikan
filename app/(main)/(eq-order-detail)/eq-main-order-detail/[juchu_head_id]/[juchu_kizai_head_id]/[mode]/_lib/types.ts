@@ -6,7 +6,7 @@ export const JuchuKizaiHeadSchema = z
     juchuKizaiHeadId: z.number(),
     juchuKizaiHeadKbn: z.number(),
     juchuHonbanbiQty: z.number().nullable(),
-    zeiKbn: z.number().nullable(),
+    zeiKbn: z.number(),
     nebikiAmt: z.number().nullable(),
     mem: z.string().nullable(),
     headNam: z.string().nullable(),
