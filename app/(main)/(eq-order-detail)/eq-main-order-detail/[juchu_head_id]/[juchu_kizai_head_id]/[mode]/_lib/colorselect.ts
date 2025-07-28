@@ -2,7 +2,7 @@ import { Dayjs } from 'dayjs';
 
 import { toISOStringWithTimezoneMonthDay } from '@/app/(main)/_ui/date';
 
-import { EquipmentData } from '../../_ui/main/equipment-order-detail';
+import { EquipmentData } from '../_ui/equipment-order-detail';
 
 export const getDateHeaderBackgroundColor = (date: string, dateRange: string[]): string => {
   const isMatched = dateRange.some((targetDate) => targetDate === date);
