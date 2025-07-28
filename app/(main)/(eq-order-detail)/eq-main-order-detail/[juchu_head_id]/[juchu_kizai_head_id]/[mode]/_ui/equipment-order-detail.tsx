@@ -52,7 +52,7 @@ import { useUnsavedChangesWarning } from '@/app/(main)/order/[juchu_head_id]/[mo
 import { LockValues, OrderValues } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/types';
 
 import { data, stock } from '../_lib/data';
-import { JuchuKizaiHeadSchema, JuchuKizaiHeadValues } from '../_lib/types';
+import { JuchuKizaiHeadSchema, JuchuKizaiHeadValues, JuchuKizaiMeisaiValues } from '../_lib/types';
 import { DateSelectDialog } from './date-selection-dialog';
 import { EqTable, StockTable } from './equipment-order-detail-table';
 import { EquipmentSelectionDialog } from './equipment-selection-dailog';
@@ -150,6 +150,7 @@ export const testStock = Array.from({ length: 50 }, (_, i) => stock[i % stock.le
 const EquipmentOrderDetail = (props: {
   juchuHeadData: OrderValues;
   juchuKizaiHeadData: JuchuKizaiHeadValues;
+  juchuKizaiMeisaiData: JuchuKizaiMeisaiValues[] | undefined;
   edit: boolean;
   lockData: LockValues | null;
 }) => {
@@ -162,6 +163,12 @@ const EquipmentOrderDetail = (props: {
   const [edit, setEdit] = useState(props.edit);
   // ロックデータ
   const [lockData, setLockData] = useState<LockValues | null>(props.lockData);
+  // 受注機材明細リスト
+  const [eqList, setEqList] = useState<JuchuKizaiMeisaiValues[]>(
+    props.juchuKizaiMeisaiData ? props.juchuKizaiMeisaiData : []
+  );
+
+  console.log(eqList);
 
   // context
   const { setIsDirty, setLock, setLockShubetu, setHeadId } = useDirty();
@@ -1000,9 +1007,9 @@ const EquipmentOrderDetail = (props: {
                   機材追加
                 </Button>
               </Box>
-              <Box display={Object.keys(equipmentRows).length > 0 ? 'block' : 'none'}>
+              <Box display={Object.keys(eqList).length > 0 ? 'block' : 'none'}>
                 <EqTable
-                  rows={equipmentRows}
+                  rows={eqList}
                   onChange={handleCellChange}
                   handleCellDateChange={handleCellDateChange}
                   handleMemoChange={handleMemoChange}
@@ -1011,7 +1018,7 @@ const EquipmentOrderDetail = (props: {
               </Box>
             </Box>
             <Box
-              display={Object.keys(equipmentRows).length > 0 ? 'block' : 'none'}
+              display={Object.keys(eqList).length > 0 ? 'block' : 'none'}
               overflow="auto"
               sx={{ width: { xs: '60%', sm: '60%', md: 'auto' } }}
             >

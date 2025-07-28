@@ -2,7 +2,10 @@
 
 import { supabase } from '@/app/_lib/supabase/supabase';
 
-import { JuchuKizaiHeadValues } from '../eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_lib/types';
+import {
+  JuchuKizaiHeadValues,
+  JuchuKizaiMeisaiValues,
+} from '../eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_lib/types';
 
 export const GetEqHeader = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
   try {
@@ -47,6 +50,42 @@ export const GetEqHeader = async (juchuHeadId: number, juchuKizaiHeadId: number)
       yardNyukoDat: juchuDate[0].yard_nyuko_dat,
     };
     return jucuKizaiHeadData;
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+export const GetEqList = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
+  try {
+    const { data: eqList, error: eqListError } = await supabase
+      .schema('dev2')
+      .from('v_juchu_kizai_meisai')
+      .select('*')
+      .eq('juchu_head_id', juchuHeadId)
+      .eq('juchu_kizai_head_id', juchuKizaiHeadId);
+    if (eqListError) {
+      console.error('GetEqHeader juchuDate error : ', eqListError);
+      return [];
+    }
+
+    const juchuKizaiMeisaiData: JuchuKizaiMeisaiValues[] = eqList.map((d) => ({
+      juchuHeadId: d.juchu_head_id,
+      juchuKizaiHeadId: d.juchu_kizai_head_id,
+      juchuKizaiMeisaiId: d.juchu_kizai_meisai_id,
+      idoDenId: d.ido_den_id,
+      idoDenDat: d.ido_den_dat,
+      idoSijiId: d.ido_siji_id,
+      shozokuId: d.shozoku_id,
+      shozokuNam: d.shozoku_nam,
+      mem: d.mem,
+      kizaiId: d.kizai_id,
+      kizaiNam: d.kizai_nam,
+      kizaiQty: d.kizai_qty,
+      planKizaiQty: d.plan_kizai_qty,
+      planYobiQty: d.plan_yobi_qty,
+      planQty: d.plan_qty,
+    }));
+    return juchuKizaiMeisaiData;
   } catch (e) {
     console.log(e);
   }

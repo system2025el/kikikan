@@ -28,6 +28,7 @@ import React, { useRef, useState } from 'react';
 import { TestDate } from '@/app/(main)/_ui/date';
 
 import { getDateHeaderBackgroundColor, getDateRowBackgroundColor } from '../_lib/colorselect';
+import { JuchuKizaiMeisaiValues } from '../_lib/types';
 import { Equipment, EquipmentData, StockData } from './equipment-order-detail';
 
 type StockTableProps = {
@@ -160,7 +161,7 @@ const StockTableRow = React.memo(
 StockTableRow.displayName = 'StockTableRow';
 
 type EqTableProps = {
-  rows: Equipment[];
+  rows: JuchuKizaiMeisaiValues[];
   onChange: (rowIndex: number, orderValue: number, spareValue: number, totalValue: number) => void;
   handleCellDateChange: (rowIndex: number, date: Dayjs | null) => void;
   handleMemoChange: (rowIndex: number, memo: string) => void;
@@ -172,16 +173,22 @@ export const EqTable: React.FC<EqTableProps> = ({ rows, onChange, handleCellDate
 
   const handleOrderCellChange = (rowIndex: number, newValue: number) => {
     const updatedRows = [...rows];
-    updatedRows[rowIndex].order = newValue;
-    updatedRows[rowIndex].total = updatedRows[rowIndex].order + updatedRows[rowIndex].spare;
-    onChange(rowIndex, updatedRows[rowIndex].order, updatedRows[rowIndex].spare, updatedRows[rowIndex].total);
+    const yobi = updatedRows[rowIndex].planYobiQty !== null ? updatedRows[rowIndex].planYobiQty : 0;
+    updatedRows[rowIndex].planKizaiQty = newValue;
+    updatedRows[rowIndex].planQty = updatedRows[rowIndex].planKizaiQty + yobi;
+    onChange(rowIndex, updatedRows[rowIndex].planKizaiQty, yobi, updatedRows[rowIndex].planQty);
   };
 
   const handleSpareCellChange = (rowIndex: number, newValue: number) => {
     const updatedRows = [...rows];
-    updatedRows[rowIndex].spare = newValue;
-    updatedRows[rowIndex].total = updatedRows[rowIndex].order + updatedRows[rowIndex].spare;
-    onChange(rowIndex, updatedRows[rowIndex].order, updatedRows[rowIndex].spare, updatedRows[rowIndex].total);
+    updatedRows[rowIndex].planYobiQty = newValue;
+    updatedRows[rowIndex].planQty = updatedRows[rowIndex].planKizaiQty + updatedRows[rowIndex].planYobiQty;
+    onChange(
+      rowIndex,
+      updatedRows[rowIndex].planKizaiQty,
+      updatedRows[rowIndex].planYobiQty,
+      updatedRows[rowIndex].planQty
+    );
   };
 
   const handleKeyDown = (e: React.KeyboardEvent, rowIndex: number) => {
@@ -249,7 +256,7 @@ export const EqTable: React.FC<EqTableProps> = ({ rows, onChange, handleCellDate
 };
 
 type EqTableRowProps = {
-  row: Equipment;
+  row: JuchuKizaiMeisaiValues;
   rowIndex: number;
   handleOrderRef: (el: HTMLInputElement | null) => void;
   handleCellDateChange: (rowIndex: number, date: Dayjs | null) => void;
@@ -302,30 +309,35 @@ const EqTableRow = React.memo(
                   padding: 0,
                 },
               }}
-              date={row.date}
+              date={row.idoDenDat}
               onChange={handleDateChange}
             />
-            {row.date && <Typography>{row.place === 'K' ? 'K→Y' : 'Y→K'}</Typography>}
+            {row.idoDenDat && <Typography>{row.idoSijiId}</Typography>}
           </Box>
         </TableCell>
         <TableCell style={styles.row} align="left" size="small" sx={{ bgcolor: grey[200] }}>
-          {row.place}
+          {row.shozokuId === 1 ? 'K' : 'Y'}
         </TableCell>
         <TableCell style={styles.row} align="center" size="small">
-          <MemoTooltip name={row.name} memo={row.memo} handleMemoChange={handleMemoChange} rowIndex={rowIndex} />
+          <MemoTooltip
+            name={row.kizaiNam}
+            memo={row.mem ? row.mem : ''}
+            handleMemoChange={handleMemoChange}
+            rowIndex={rowIndex}
+          />
         </TableCell>
         <TableCell style={styles.row} align="left" size="small">
-          <Button variant="text" sx={{ p: 0 }} href={`/loan-situation/${row.id}`}>
-            {row.name}
+          <Button variant="text" sx={{ p: 0 }} href={`/loan-situation/${row.kizaiId}`}>
+            {row.kizaiNam}
           </Button>
         </TableCell>
         <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
-          {row.all}
+          {row.kizaiQty}
         </TableCell>
         <TableCell style={styles.row} align="right" size="small">
           <TextField
             variant="standard"
-            value={row.order}
+            value={row.planKizaiQty}
             type="text"
             onChange={(e) => {
               if (/^\d*$/.test(e.target.value)) {
@@ -367,7 +379,7 @@ const EqTableRow = React.memo(
         <TableCell style={styles.row} align="right" size="small">
           <TextField
             variant="standard"
-            value={row.spare}
+            value={row.planYobiQty}
             type="text"
             onChange={(e) => {
               if (/^\d*$/.test(e.target.value)) {
@@ -403,7 +415,7 @@ const EqTableRow = React.memo(
           />
         </TableCell>
         <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
-          {row.total}
+          {row.planQty}
         </TableCell>
       </TableRow>
     );

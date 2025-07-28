@@ -1,7 +1,7 @@
 import { GetLock, GetOrder } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/funcs';
 
-import { GetEqHeader } from '../../../../_lib/funcs';
-import { JuchuKizaiHeadValues } from './_lib/types';
+import { GetEqHeader, GetEqList } from '../../../../_lib/funcs';
+import { JuchuKizaiHeadValues, JuchuKizaiMeisaiValues } from './_lib/types';
 import EquipmentOrderDetail from './_ui/equipment-order-detail';
 
 const Page = async (props: {
@@ -24,6 +24,8 @@ const Page = async (props: {
   if (juchuKizaiHeadId !== 0) {
     // 受注機材ヘッダーデータ
     const juchuKizaiHeadData = await GetEqHeader(params.juchu_head_id, params.juchu_kizai_head_id);
+    // 受注機材明細データ
+    const juchuKizaiMeisaiData = await GetEqList(params.juchu_head_id, params.juchu_kizai_head_id);
 
     if (!juchuKizaiHeadData) {
       return <div>受注機材情報が見つかりません。</div>;
@@ -33,11 +35,13 @@ const Page = async (props: {
       <EquipmentOrderDetail
         juchuHeadData={juchuHeadData}
         juchuKizaiHeadData={juchuKizaiHeadData}
+        juchuKizaiMeisaiData={juchuKizaiMeisaiData}
         edit={edit}
         lockData={lockData}
       />
     );
   } else {
+    // 受注機材ヘッダーデータ(初期値)
     const newJuchuKizaiHeadData: JuchuKizaiHeadValues = {
       juchuHeadId: Number(params.juchu_head_id),
       juchuKizaiHeadId: Number(params.juchu_kizai_head_id),
@@ -52,11 +56,14 @@ const Page = async (props: {
       yardShukoDat: null,
       yardNyukoDat: null,
     };
+    // 受注機材明細データ(初期値)
+    const newJuchuKizaiMeisaiData: JuchuKizaiMeisaiValues[] = [];
 
     return (
       <EquipmentOrderDetail
         juchuHeadData={juchuHeadData}
         juchuKizaiHeadData={newJuchuKizaiHeadData}
+        juchuKizaiMeisaiData={newJuchuKizaiMeisaiData}
         edit={edit}
         lockData={lockData}
       />
