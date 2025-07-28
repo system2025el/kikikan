@@ -14,6 +14,7 @@ import {
 import { FormBox, selectNone, SelectTypes } from '../../../_ui/form-box';
 import { Loading } from '../../../_ui/loading';
 import {
+  getAllSelections,
   getBumonsSelection,
   getDaibumonsSelection,
   getShozokuSelection,
@@ -50,7 +51,12 @@ export const EqMasterDialog = ({
   /* submit時のactions (save, delete) */
   const [action, setAction] = useState<'save' | 'delete' | 'restore' | undefined>(undefined);
   /* フォーム内のセレクトoptions */
-  const [selectOptions, setSelectOptions] = useState<SelectTypes[][]>([]);
+  const [selectOptions, setSelectOptions] = useState<{
+    d: SelectTypes[];
+    s: SelectTypes[];
+    b: SelectTypes[];
+    shozoku: SelectTypes[];
+  }>({ d: [], s: [], b: [], shozoku: [] });
   /* 保有数 */
   const [kizaiQty, setKizaiQty] = useState<number | string>('');
 
@@ -136,10 +142,8 @@ export const EqMasterDialog = ({
   useEffect(() => {
     console.log('★★★★★★★★★★★★★★★★★★★★★');
     const getThatOneEqpt = async () => {
-      const a = await getShozokuSelection();
-      const b = await getBumonsSelection();
-      const c = await getShukeibumonsSelection();
-      setSelectOptions([a!, b!, c!]);
+      const a = await getAllSelections();
+      setSelectOptions(a);
       const qty = await getEqptsQty(eqptId);
       setKizaiQty(typeof qty === 'number' ? qty : '');
       console.log('pppppppppppppppppppppppppppppp', kizaiQty, selectOptions);
@@ -233,7 +237,7 @@ export const EqMasterDialog = ({
                     control={control}
                     disabled={editable ? false : true}
                     sx={{ width: 250 }}
-                    options={selectOptions[0]!}
+                    options={selectOptions.shozoku!}
                   />
                 </FormBox>
               </Grid2>
@@ -318,7 +322,7 @@ export const EqMasterDialog = ({
                     disabled={editable ? false : true}
                     render={({ field }) => (
                       <Select {...field} sx={{ width: 250 }}>
-                        {[selectNone, ...selectOptions[1]!].map((opt) => (
+                        {[selectNone, ...selectOptions.b!].map((opt) => (
                           <MenuItem key={opt.id} value={opt.id} sx={opt.id === 0 ? { color: grey[600] } : {}}>
                             {opt.label}
                           </MenuItem>
@@ -336,7 +340,7 @@ export const EqMasterDialog = ({
                     disabled={editable ? false : true}
                     render={({ field }) => (
                       <Select {...field} sx={{ width: 250 }}>
-                        {[selectNone, ...selectOptions[2]!].map((opt) => (
+                        {[selectNone, ...selectOptions.s!].map((opt) => (
                           <MenuItem key={opt.id} value={opt.id} sx={opt.id === 0 ? { color: grey[600] } : {}}>
                             {opt.label}
                           </MenuItem>
