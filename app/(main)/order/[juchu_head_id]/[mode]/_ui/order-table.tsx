@@ -39,12 +39,15 @@ export type Row = {
 
 type OrderEqTableProps = {
   orderEqRows: EqTableValues[] | undefined;
+  edit: boolean;
   onEqSelectionChange: (selectedIds: number[]) => void;
 };
 
-export const OrderEqTable: React.FC<OrderEqTableProps> = ({ orderEqRows, onEqSelectionChange }) => {
+export const OrderEqTable: React.FC<OrderEqTableProps> = ({ orderEqRows, edit, onEqSelectionChange }) => {
   const [rows, setRows] = useState(orderEqRows);
   const [selected, setSelected] = useState<number[]>([]);
+
+  const mode = edit ? 'edit' : 'view';
 
   const handleSelect = (id: number) => {
     const newSelected = selected.includes(id) ? selected.filter((item) => item !== id) : [...selected, id];
@@ -109,10 +112,12 @@ export const OrderEqTable: React.FC<OrderEqTableProps> = ({ orderEqRows, onEqSel
                   <Button
                     href={
                       row.oyaJuchuKizaiHeadId === 1
-                        ? '/order/equipment-order-detail'
+                        ? `/eq-main-order-detail/${row.juchuHeadId}/${row.juchuKizaiHeadId}/${mode}`
                         : row.oyaJuchuKizaiHeadId === 2
-                          ? '/order/equipment-return-order-detail'
-                          : '/order/equipment-keep-order-detail'
+                          ? `/eq-return-order-detail/${row.juchuHeadId}/${row.juchuKizaiHeadId}/${mode}`
+                          : row.oyaJuchuKizaiHeadId === 3
+                            ? `/eq-keep-order-detail/${row.juchuHeadId}/${row.juchuKizaiHeadId}/${mode}`
+                            : `/eq-main-order-detail/${row.juchuHeadId}/${row.juchuKizaiHeadId}/${mode}`
                     }
                     variant="text"
                     sx={{

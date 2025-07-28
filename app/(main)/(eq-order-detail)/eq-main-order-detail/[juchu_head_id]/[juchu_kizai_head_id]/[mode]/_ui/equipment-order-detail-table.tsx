@@ -11,7 +11,6 @@ import {
   DialogTitle,
   IconButton,
   Paper,
-  Stack,
   Table,
   TableBody,
   TableCell,
@@ -26,24 +25,34 @@ import { grey } from '@mui/material/colors';
 import { Dayjs } from 'dayjs';
 import React, { useRef, useState } from 'react';
 
-import { getDateHeaderBackgroundColor, getDateRowBackgroundColor } from '../_lib/colorselect';
-import { ReturnEquipment, ReturnEquipmentData, StockData } from './equipment-return-order-detail';
+import { TestDate } from '@/app/(main)/_ui/date';
 
-type ReturnStockTableProps = {
+import { getDateHeaderBackgroundColor, getDateRowBackgroundColor } from '../_lib/colorselect';
+import { Equipment, EquipmentData, StockData } from './equipment-order-detail';
+
+type StockTableProps = {
   header: string[];
   rows: StockData[];
   dateRange: string[];
   startDate: Date | null;
   endDate: Date | null;
+  preparation: EquipmentData[];
+  RH: EquipmentData[];
+  GP: EquipmentData[];
+  actual: EquipmentData[];
   ref: React.RefObject<HTMLDivElement | null>;
 };
 
-export const ReturnStockTable: React.FC<ReturnStockTableProps> = ({
+export const StockTable: React.FC<StockTableProps> = ({
   header,
   rows,
   dateRange,
   startDate,
   endDate,
+  preparation,
+  RH,
+  GP,
+  actual,
   ref,
 }) => {
   return (
@@ -72,7 +81,18 @@ export const ReturnStockTable: React.FC<ReturnStockTableProps> = ({
         </TableHead>
         <TableBody>
           {rows.map((row, rowIndex) => (
-            <ReturnStockTableRow key={rowIndex} header={header} row={row} startDate={startDate} endDate={endDate} />
+            <StockTableRow
+              key={rowIndex}
+              header={header}
+              row={row}
+              dateRange={dateRange}
+              startDate={startDate}
+              endDate={endDate}
+              preparation={preparation}
+              RH={RH}
+              GP={GP}
+              actual={actual}
+            />
           ))}
         </TableBody>
       </Table>
@@ -80,15 +100,20 @@ export const ReturnStockTable: React.FC<ReturnStockTableProps> = ({
   );
 };
 
-export type ReturnStockTableRowProps = {
+export type StockTableRowProps = {
   header: string[];
   row: StockData;
+  dateRange: string[];
   startDate: Date | null;
   endDate: Date | null;
+  preparation: EquipmentData[];
+  RH: EquipmentData[];
+  GP: EquipmentData[];
+  actual: EquipmentData[];
 };
 
-const ReturnStockTableRow = React.memo(
-  ({ header, row, startDate, endDate }: ReturnStockTableRowProps) => {
+const StockTableRow = React.memo(
+  ({ header, row, dateRange, startDate, endDate, preparation, RH, GP, actual }: StockTableRowProps) => {
     console.log('date側描画', row.id);
     return (
       <TableRow>
@@ -99,7 +124,16 @@ const ReturnStockTableRow = React.memo(
               align={typeof cell === 'number' ? 'right' : 'left'}
               style={styles.row}
               sx={{
-                bgcolor: getDateRowBackgroundColor(header[colIndex], startDate, endDate),
+                bgcolor: getDateRowBackgroundColor(
+                  header[colIndex],
+                  dateRange,
+                  startDate,
+                  endDate,
+                  preparation,
+                  RH,
+                  GP,
+                  actual
+                ),
                 color: typeof cell === 'number' && cell < 0 ? 'red' : 'black',
               }}
               size="small"
@@ -115,25 +149,39 @@ const ReturnStockTableRow = React.memo(
     return (
       prevProps.header === nextProps.header &&
       prevProps.row === nextProps.row &&
-      prevProps.endDate === nextProps.endDate
+      prevProps.preparation === nextProps.preparation &&
+      prevProps.RH === nextProps.RH &&
+      prevProps.GP === nextProps.GP &&
+      prevProps.actual === nextProps.actual
     );
   }
 );
 
-ReturnStockTableRow.displayName = 'ReturnStockTableRow';
+StockTableRow.displayName = 'StockTableRow';
 
-type ReturnEqTableProps = {
-  rows: ReturnEquipment[];
-  onChange: (rowIndex: number, returnValue: number) => void;
+type EqTableProps = {
+  rows: Equipment[];
+  onChange: (rowIndex: number, orderValue: number, spareValue: number, totalValue: number) => void;
+  handleCellDateChange: (rowIndex: number, date: Dayjs | null) => void;
   handleMemoChange: (rowIndex: number, memo: string) => void;
   ref: React.RefObject<HTMLDivElement | null>;
 };
 
-export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({ rows, onChange, handleMemoChange, ref }) => {
+export const EqTable: React.FC<EqTableProps> = ({ rows, onChange, handleCellDateChange, handleMemoChange, ref }) => {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  const handleReturnCellChange = (rowIndex: number, newValue: number) => {
-    onChange(rowIndex, newValue);
+  const handleOrderCellChange = (rowIndex: number, newValue: number) => {
+    const updatedRows = [...rows];
+    updatedRows[rowIndex].order = newValue;
+    updatedRows[rowIndex].total = updatedRows[rowIndex].order + updatedRows[rowIndex].spare;
+    onChange(rowIndex, updatedRows[rowIndex].order, updatedRows[rowIndex].spare, updatedRows[rowIndex].total);
+  };
+
+  const handleSpareCellChange = (rowIndex: number, newValue: number) => {
+    const updatedRows = [...rows];
+    updatedRows[rowIndex].spare = newValue;
+    updatedRows[rowIndex].total = updatedRows[rowIndex].order + updatedRows[rowIndex].spare;
+    onChange(rowIndex, updatedRows[rowIndex].order, updatedRows[rowIndex].spare, updatedRows[rowIndex].total);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent, rowIndex: number) => {
@@ -143,7 +191,7 @@ export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({ rows, onChange, ha
     }
   };
 
-  const handleReturnRef = (rowIndex: number) => (el: HTMLInputElement | null) => {
+  const handleOrderRef = (rowIndex: number) => (el: HTMLInputElement | null) => {
     inputRefs.current[rowIndex] = el;
   };
 
@@ -155,32 +203,43 @@ export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({ rows, onChange, ha
             <TableCell size="small" style={styles.header} />
             <TableCell size="small" style={styles.header} />
             <TableCell align="left" size="small" style={styles.header}>
+              移動日時
+            </TableCell>
+            <TableCell align="left" size="small" style={styles.header}>
               在庫場所
             </TableCell>
             <TableCell align="left" size="small" style={styles.header}>
-              返却メモ
+              メモ
             </TableCell>
             <TableCell align="left" size="small" style={styles.header}>
               機材名
             </TableCell>
             <TableCell align="right" size="small" style={styles.header}>
-              出庫数
+              全数
             </TableCell>
-            <TableCell align="right" size="small" style={styles.header} sx={{ bgcolor: 'red' }}>
-              返却数
+            <TableCell align="right" size="small" style={styles.header}>
+              受注数
+            </TableCell>
+            <TableCell align="right" size="small" style={styles.header}>
+              予備数
+            </TableCell>
+            <TableCell align="right" size="small" style={styles.header}>
+              合計数
             </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {rows.map((row, rowIndex) => (
-            <ReturnEqTableRow
+            <EqTableRow
               key={rowIndex}
               row={row}
               rowIndex={rowIndex}
-              handleOrderRef={handleReturnRef(rowIndex)}
+              handleOrderRef={handleOrderRef(rowIndex)}
+              handleCellDateChange={handleCellDateChange}
               handleMemoChange={handleMemoChange}
               handleKeyDown={handleKeyDown}
-              handleReturnCellChange={handleReturnCellChange}
+              handleOrderCellChange={handleOrderCellChange}
+              handleSpareCellChange={handleSpareCellChange}
             />
           ))}
         </TableBody>
@@ -189,25 +248,35 @@ export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({ rows, onChange, ha
   );
 };
 
-type ReturnEqTableRowProps = {
-  row: ReturnEquipment;
+type EqTableRowProps = {
+  row: Equipment;
   rowIndex: number;
   handleOrderRef: (el: HTMLInputElement | null) => void;
+  handleCellDateChange: (rowIndex: number, date: Dayjs | null) => void;
   handleMemoChange: (rowIndex: number, memo: string) => void;
-  handleReturnCellChange: (rowIndex: number, newValue: number) => void;
+  handleOrderCellChange: (rowIndex: number, newValue: number) => void;
+  handleSpareCellChange: (rowIndex: number, newValue: number) => void;
   handleKeyDown: (e: React.KeyboardEvent, rowIndex: number) => void;
 };
 
-const ReturnEqTableRow = React.memo(
+const EqTableRow = React.memo(
   ({
     row,
     rowIndex,
     handleOrderRef,
+    handleCellDateChange,
     handleMemoChange,
-    handleReturnCellChange,
+    handleOrderCellChange,
+    handleSpareCellChange,
     handleKeyDown,
-  }: ReturnEqTableRowProps) => {
+  }: EqTableRowProps) => {
     console.log('描画', rowIndex);
+
+    const handleDateChange = (date: Dayjs | null) => {
+      if (date !== null) {
+        handleCellDateChange(rowIndex, date);
+      }
+    };
 
     return (
       <TableRow>
@@ -218,6 +287,26 @@ const ReturnEqTableRow = React.memo(
         </TableCell>
         <TableCell align="right" size="small" sx={{ bgcolor: grey[200], py: 0, px: 1, border: '1px solid black' }}>
           {rowIndex + 1}
+        </TableCell>
+        <TableCell style={styles.row} size="small">
+          <Box display="flex" width={'200px'}>
+            <TestDate
+              sx={{
+                '& .MuiPickersInputBase-root': {
+                  height: '23px',
+                },
+                '& .MuiPickersSectionList-root': {
+                  padding: 0,
+                },
+                '& .MuiButtonBase-root': {
+                  padding: 0,
+                },
+              }}
+              date={row.date}
+              onChange={handleDateChange}
+            />
+            {row.date && <Typography>{row.place === 'K' ? 'K→Y' : 'Y→K'}</Typography>}
+          </Box>
         </TableCell>
         <TableCell style={styles.row} align="left" size="small" sx={{ bgcolor: grey[200] }}>
           {row.place}
@@ -231,16 +320,16 @@ const ReturnEqTableRow = React.memo(
           </Button>
         </TableCell>
         <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
-          {row.issue}
+          {row.all}
         </TableCell>
         <TableCell style={styles.row} align="right" size="small">
           <TextField
             variant="standard"
-            value={row.return}
+            value={row.order}
             type="text"
             onChange={(e) => {
-              if (/^\d*$/.test(e.target.value) && Number(e.target.value) <= row.issue) {
-                handleReturnCellChange(rowIndex, Number(e.target.value));
+              if (/^\d*$/.test(e.target.value)) {
+                handleOrderCellChange(rowIndex, Number(e.target.value));
               }
             }}
             sx={{
@@ -248,7 +337,6 @@ const ReturnEqTableRow = React.memo(
                 textAlign: 'right',
                 padding: 0,
                 fontSize: 'small',
-                color: 'red',
               },
               '& input[type=number]': {
                 MozAppearance: 'textfield',
@@ -276,6 +364,47 @@ const ReturnEqTableRow = React.memo(
             onFocus={(e) => e.target.select()}
           />
         </TableCell>
+        <TableCell style={styles.row} align="right" size="small">
+          <TextField
+            variant="standard"
+            value={row.spare}
+            type="text"
+            onChange={(e) => {
+              if (/^\d*$/.test(e.target.value)) {
+                handleSpareCellChange(rowIndex, Number(e.target.value));
+              }
+            }}
+            sx={{
+              '& .MuiInputBase-input': {
+                textAlign: 'right',
+                padding: 0,
+                fontSize: 'small',
+              },
+              '& input[type=number]': {
+                MozAppearance: 'textfield',
+              },
+              '& input[type=number]::-webkit-outer-spin-button': {
+                WebkitAppearance: 'none',
+                margin: 0,
+              },
+              '& input[type=number]::-webkit-inner-spin-button': {
+                WebkitAppearance: 'none',
+                margin: 0,
+              },
+            }}
+            slotProps={{
+              input: {
+                style: { textAlign: 'right' },
+                disableUnderline: true,
+                inputMode: 'numeric',
+              },
+            }}
+            onFocus={(e) => e.target.select()}
+          />
+        </TableCell>
+        <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
+          {row.total}
+        </TableCell>
       </TableRow>
     );
   },
@@ -284,7 +413,7 @@ const ReturnEqTableRow = React.memo(
   }
 );
 
-ReturnEqTableRow.displayName = 'ReturnEqTableRow';
+EqTableRow.displayName = 'EqTableRow';
 
 type MemoTooltipProps = {
   name: string;

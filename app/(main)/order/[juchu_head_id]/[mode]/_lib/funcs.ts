@@ -298,7 +298,7 @@ export const Copy = async (juchuHeadId: number, data: OrderValues, add_user: str
   }
 };
 
-export const GetEqHeader = async (juchuHeadId: number) => {
+export const GetEqHeaderList = async (juchuHeadId: number) => {
   try {
     const { data, error } = await supabase
       .schema('dev2')
