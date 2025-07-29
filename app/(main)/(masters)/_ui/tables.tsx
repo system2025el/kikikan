@@ -1,25 +1,7 @@
 'use client';
 
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import {
-  alpha,
-  Box,
-  Button,
-  Collapse,
-  Fade,
-  IconButton,
-  styled,
-  Tooltip,
-  tooltipClasses,
-  TooltipProps,
-  Typography,
-} from '@mui/material';
-import Checkbox from '@mui/material/Checkbox';
+import { Button, styled, Tooltip, tooltipClasses, TooltipProps, Typography } from '@mui/material';
 import { grey } from '@mui/material/colors';
-import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -27,17 +9,6 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import * as React from 'react';
 import { useMemo, useState } from 'react';
-
-const LightTooltip = styled(({ className, ...props }: TooltipProps) => (
-  <Tooltip {...props} classes={{ popper: className }} />
-))(({ theme }) => ({
-  [`& .${tooltipClasses.tooltip}`]: {
-    backgroundColor: theme.palette.common.white,
-    color: 'rgba(0, 0, 0, 0.68)',
-    boxShadow: theme.shadows[1],
-    fontSize: 11,
-  },
-}));
 
 /* マスタ系用テーブル ----------------------------------------------- */
 type MasterHeader = {
@@ -124,50 +95,20 @@ export const MasterTable = ({
                       variant="text"
                       size="medium"
                       onClick={() => handleOpenDialog(row.id)}
-                      sx={{ p: 0, m: 0, minWidth: 0, textTransform: 'none' }}
+                      sx={{ p: 0, m: 0, minWidth: 0 }}
                     >
-                      <LightTooltip
-                        title={row[header.key]}
-                        slots={{
-                          transition: Fade,
-                        }}
-                        slotProps={{
-                          transition: { timeout: 1000 },
-                        }}
-                      >
-                        <Typography noWrap maxWidth={300} variant="button">
-                          {row[header.key]}
-                        </Typography>
-                      </LightTooltip>
+                      <LightTooltipWithText variant={'button'} maxWidth={300}>
+                        {row[header.key]}
+                      </LightTooltipWithText>
                     </Button>
                   ) : header.key === 'address' ? (
-                    <LightTooltip
-                      title={row[header.key]}
-                      slots={{
-                        transition: Fade,
-                      }}
-                      slotProps={{
-                        transition: { timeout: 1000 },
-                      }}
-                    >
-                      <Typography noWrap maxWidth={300} variant="body2">
-                        {row[header.key]}
-                      </Typography>
-                    </LightTooltip>
+                    <LightTooltipWithText variant={'body2'} maxWidth={300}>
+                      {row[header.key]}
+                    </LightTooltipWithText>
                   ) : header.key === 'mem' ? (
-                    <LightTooltip
-                      title={row[header.key]}
-                      slots={{
-                        transition: Fade,
-                      }}
-                      slotProps={{
-                        transition: { timeout: 1000 },
-                      }}
-                    >
-                      <Typography noWrap maxWidth={300} variant="body2">
-                        {row[header.key]}
-                      </Typography>
-                    </LightTooltip>
+                    <LightTooltipWithText variant={'body2'} maxWidth={300}>
+                      {row[header.key]}
+                    </LightTooltipWithText>
                   ) : header.key === 'hidden' ? (
                     <>{isHidden && <>非表示</>}</>
                   ) : header.key === 'deleted' ? (
@@ -273,16 +214,16 @@ export const MasterTableOfEqpt = ({
                       variant="text"
                       size="medium"
                       onClick={() => handleOpenDialog(row.id)}
-                      sx={{ p: 0, m: 0, minWidth: 0, textTransform: 'none' }}
+                      sx={{ p: 0, m: 0, minWidth: 0 }}
                     >
-                      <Typography noWrap maxWidth={300} variant="button">
+                      <LightTooltipWithText variant={'button'} maxWidth={300}>
                         {row[header.key]}
-                      </Typography>
+                      </LightTooltipWithText>
                     </Button>
                   ) : header.key === 'mem' ? (
-                    <Typography noWrap maxWidth={300}>
+                    <LightTooltipWithText variant={'body2'} maxWidth={300}>
                       {row[header.key]}
-                    </Typography>
+                    </LightTooltipWithText>
                   ) : header.key === 'hidden' ? (
                     <>{isHidden && <>非表示</>}</>
                   ) : header.key === 'deleted' ? (
@@ -302,5 +243,96 @@ export const MasterTableOfEqpt = ({
         )}
       </TableBody>
     </Table>
+  );
+};
+
+/**
+ * 背景が白いToolTip
+ */
+const LightTooltip = styled(({ className, ...props }: TooltipProps) => (
+  <Tooltip {...props} classes={{ popper: className }} />
+))(({ theme }) => ({
+  [`& .${tooltipClasses.tooltip}`]: {
+    backgroundColor: theme.palette.common.white,
+    color: 'rgba(0, 0, 0, 0.68)',
+    boxShadow: theme.shadows[1],
+    fontSize: 11,
+  },
+  [`&.${tooltipClasses.popper}[data-popper-placement*="bottom"] .${tooltipClasses.tooltip}`]: {
+    marginTop: '0px',
+  },
+  [`&.${tooltipClasses.popper}[data-popper-placement*="top"] .${tooltipClasses.tooltip}`]: {
+    marginBottom: '0px',
+  },
+  [`&.${tooltipClasses.popper}[data-popper-placement*="left"] .${tooltipClasses.tooltip}`]: {
+    marginRight: '0px',
+  },
+  [`&.${tooltipClasses.popper}[data-popper-placement*="right"] .${tooltipClasses.tooltip}`]: {
+    marginLeft: '0px',
+  },
+}));
+
+/**
+ * テキストがはみ出たらtooltipを表示するコンポーネント
+ * @param param0 param
+ * @returns テキストがはみ出たらtooltipを表示するコンポーネント
+ */
+const LightTooltipWithText = ({
+  children,
+  variant,
+  maxWidth,
+}: {
+  children: React.ReactNode;
+  variant: 'body2' | 'button';
+  maxWidth: number;
+}) => {
+  const textRef = React.useRef<HTMLSpanElement>(null);
+  const [isOverflowed, setIsOverflowed] = useState(false);
+
+  React.useEffect(() => {
+    const el = textRef.current;
+    if (el) {
+      setIsOverflowed(el.scrollWidth > el.clientWidth);
+    }
+  }, [children]);
+
+  return isOverflowed ? (
+    <LightTooltip
+      title={children}
+      slotProps={{
+        transition: { timeout: 1500 },
+      }}
+    >
+      <Typography
+        ref={textRef}
+        noWrap
+        maxWidth={maxWidth}
+        variant={variant}
+        textTransform={'none'}
+        sx={{
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          display: 'inline-block',
+          verticalAlign: 'middle',
+        }}
+      >
+        {children}
+      </Typography>
+    </LightTooltip>
+  ) : (
+    <Typography
+      ref={textRef}
+      noWrap
+      maxWidth={maxWidth}
+      variant={variant}
+      sx={{
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        display: 'inline-block',
+        verticalAlign: 'middle',
+      }}
+    >
+      {children}
+    </Typography>
   );
 };
