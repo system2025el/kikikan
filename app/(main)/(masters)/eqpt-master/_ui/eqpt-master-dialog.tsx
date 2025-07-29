@@ -209,7 +209,6 @@ export const EqMasterDialog = ({
                     fullWidth
                     sx={{ maxWidth: '20%' }}
                     disabled={editable ? false : true}
-                    type="number"
                   />
                   <Typography variant="body2" ml={2}>
                     {formItems[2].other}
@@ -225,7 +224,6 @@ export const EqMasterDialog = ({
                     fullWidth
                     sx={{ maxWidth: '20%' }}
                     disabled={editable ? false : true}
-                    type="number"
                   />
                 </FormBox>
               </Grid2>
@@ -297,7 +295,6 @@ export const EqMasterDialog = ({
                     fullWidth
                     sx={{ maxWidth: '20%' }}
                     disabled={editable ? false : true}
-                    type="number"
                   />
                 </FormBox>
               </Grid2>
@@ -368,7 +365,6 @@ export const EqMasterDialog = ({
                     fullWidth
                     sx={{ maxWidth: '20%' }}
                     disabled={editable ? false : true}
-                    type="number"
                   />
                 </FormBox>
               </Grid2>
@@ -381,7 +377,6 @@ export const EqMasterDialog = ({
                     fullWidth
                     sx={{ maxWidth: '50%' }}
                     disabled={editable ? false : true}
-                    type="number"
                   />
                 </FormBox>
               </Grid2>
@@ -394,7 +389,6 @@ export const EqMasterDialog = ({
                     fullWidth
                     sx={{ maxWidth: '50%' }}
                     disabled={editable ? false : true}
-                    type="number"
                   />
                 </FormBox>
               </Grid2>
@@ -407,7 +401,6 @@ export const EqMasterDialog = ({
                     fullWidth
                     sx={{ maxWidth: '50%' }}
                     disabled={editable ? false : true}
-                    type="number"
                   />
                 </FormBox>
               </Grid2>
@@ -420,7 +413,6 @@ export const EqMasterDialog = ({
                     fullWidth
                     sx={{ maxWidth: '50%' }}
                     disabled={editable ? false : true}
-                    type="number"
                   />
                 </FormBox>
               </Grid2>
@@ -433,7 +425,6 @@ export const EqMasterDialog = ({
                     fullWidth
                     sx={{ maxWidth: '50%' }}
                     disabled={editable ? false : true}
-                    type="number"
                   />
                 </FormBox>
               </Grid2>
@@ -446,7 +437,6 @@ export const EqMasterDialog = ({
                     fullWidth
                     sx={{ maxWidth: '50%' }}
                     disabled={editable ? false : true}
-                    type="number"
                   />
                 </FormBox>
               </Grid2>

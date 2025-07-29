@@ -48,8 +48,8 @@ export const emptyCustomer: CustomersMasterDialogValues = {
   mail: '',
   mem: '',
   dspFlg: true,
-  closeDay: 0,
-  siteDay: 0,
+  closeDay: undefined,
+  siteDay: undefined,
   kizaiNebikiFlg: false,
 };
 /*  */
