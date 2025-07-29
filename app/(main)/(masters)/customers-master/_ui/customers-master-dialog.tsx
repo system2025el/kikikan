@@ -205,7 +205,6 @@ export const CustomersMasterDialog = ({
                     fullWidth
                     sx={{ maxWidth: '50%' }}
                     disabled={editable ? false : true}
-                    type="number"
                   />
                 </FormBox>
               </Grid2>
@@ -348,7 +347,6 @@ export const CustomersMasterDialog = ({
                     fullWidth
                     sx={{ maxWidth: '50%' }}
                     disabled={editable ? false : true}
-                    type="number"
                   />
                 </FormBox>
               </Grid2>
@@ -361,7 +359,6 @@ export const CustomersMasterDialog = ({
                     fullWidth
                     sx={{ maxWidth: '50%' }}
                     disabled={editable ? false : true}
-                    type="number"
                   />
                 </FormBox>
               </Grid2>

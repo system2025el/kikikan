@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { zodNumberText } from '../../_lib/membs';
+
 export const CustomersMaterDialogSchema = z.object({
   kokyakuNam: z.string().max(100, { message: '100文字以内で入力してください' }).min(1, { message: '必須項目です' }),
   kana: z.string().max(100, { message: '100文字以内で入力してください' }).min(1, { message: '必須項目です' }),
@@ -16,8 +18,8 @@ export const CustomersMaterDialogSchema = z.object({
   mail: z.string().max(100, { message: '100文字以内で入力してください' }).optional(),
   mem: z.string().max(200, { message: '200文字以内で入力してください' }).optional(),
   dspFlg: z.boolean().optional(),
-  closeDay: z.number({ message: '数字を入力してください' }).optional(),
-  siteDay: z.number({ message: '数字を入力してください' }).optional(),
+  closeDay: zodNumberText,
+  siteDay: zodNumberText,
   kizaiNebikiFlg: z.boolean().optional(),
 });
 export type CustomersMasterDialogValues = z.infer<typeof CustomersMaterDialogSchema>;

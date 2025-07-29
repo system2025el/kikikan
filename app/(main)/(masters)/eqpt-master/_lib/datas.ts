@@ -26,27 +26,27 @@ export const eqptMHeader = [
 /*  */
 export const emptyEqpt: EqptsMasterDialogValues = {
   kizaiNam: '',
-  sectionNum: 0,
-  elNum: 0,
+  sectionNum: undefined,
+  elNum: undefined,
   delFlg: false,
   shozokuId: 0,
   bldCod: '',
   tanaCod: '',
   edaCod: '',
   kizaiGrpCod: '',
-
+  dspOrdNum: undefined,
   mem: '',
-  bumonId: 0,
-  shukeibumonId: 0,
+  bumonId: undefined,
+  shukeibumonId: undefined,
   dspFlg: true,
   ctnFlg: false,
-  defDatQty: 0,
+  defDatQty: undefined,
   regAmt: 0,
-  rankAmt1: 0,
-  rankAmt2: 0,
-  rankAmt3: 0,
-  rankAmt4: 0,
-  rankAmt5: 0,
+  rankAmt1: undefined,
+  rankAmt2: undefined,
+  rankAmt3: undefined,
+  rankAmt4: undefined,
+  rankAmt5: undefined,
 };
 
 /*  */
