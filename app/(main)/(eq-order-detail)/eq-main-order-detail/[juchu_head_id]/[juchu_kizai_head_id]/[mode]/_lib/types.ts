@@ -45,3 +45,13 @@ export const JuchuKizaiMeisaiSchema = z.object({
 });
 
 export type JuchuKizaiMeisaiValues = z.infer<typeof JuchuKizaiMeisaiSchema>;
+
+export type StockTableValues = {
+  calDat: Date;
+  kizaiId: number;
+  kizaiQty: number;
+  juchuQty: number;
+  zaikoQty: number;
+  juchuHonbanbiShubetuId: number;
+  juchuHonbanbiColor: string;
+};

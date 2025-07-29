@@ -52,7 +52,7 @@ import { useUnsavedChangesWarning } from '@/app/(main)/order/[juchu_head_id]/[mo
 import { LockValues, OrderValues } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/types';
 
 import { data, stock } from '../_lib/data';
-import { JuchuKizaiHeadSchema, JuchuKizaiHeadValues, JuchuKizaiMeisaiValues } from '../_lib/types';
+import { JuchuKizaiHeadSchema, JuchuKizaiHeadValues, JuchuKizaiMeisaiValues, StockTableValues } from '../_lib/types';
 import { DateSelectDialog } from './date-selection-dialog';
 import { EqTable, StockTable } from './equipment-order-detail-table';
 import { EquipmentSelectionDialog } from './equipment-selection-dailog';
@@ -151,6 +151,7 @@ const EquipmentOrderDetail = (props: {
   juchuHeadData: OrderValues;
   juchuKizaiHeadData: JuchuKizaiHeadValues;
   juchuKizaiMeisaiData: JuchuKizaiMeisaiValues[] | undefined;
+  eqStockData: StockTableValues[][] | undefined;
   edit: boolean;
   lockData: LockValues | null;
 }) => {
@@ -167,6 +168,8 @@ const EquipmentOrderDetail = (props: {
   const [eqList, setEqList] = useState<JuchuKizaiMeisaiValues[]>(
     props.juchuKizaiMeisaiData ? props.juchuKizaiMeisaiData : []
   );
+  // 機材在庫リスト
+  const [eqStockList, setEqStockList] = useState<StockTableValues[][]>(props.eqStockData ? props.eqStockData : []);
 
   console.log(eqList);
 
@@ -1043,6 +1046,7 @@ const EquipmentOrderDetail = (props: {
               <StockTable
                 header={dateHeader}
                 rows={stockRows}
+                eqStockList={eqStockList}
                 dateRange={dateRange}
                 startDate={startDate}
                 endDate={endDate}

@@ -25,15 +25,16 @@ import { grey } from '@mui/material/colors';
 import { Dayjs } from 'dayjs';
 import React, { useRef, useState } from 'react';
 
-import { TestDate } from '@/app/(main)/_ui/date';
+import { TestDate, toISOStringWithTimezoneMonthDay } from '@/app/(main)/_ui/date';
 
 import { getDateHeaderBackgroundColor, getDateRowBackgroundColor } from '../_lib/colorselect';
-import { JuchuKizaiMeisaiValues } from '../_lib/types';
+import { JuchuKizaiMeisaiValues, StockTableValues } from '../_lib/types';
 import { Equipment, EquipmentData, StockData } from './equipment-order-detail';
 
 type StockTableProps = {
   header: string[];
   rows: StockData[];
+  eqStockList: StockTableValues[][];
   dateRange: string[];
   startDate: Date | null;
   endDate: Date | null;
@@ -47,6 +48,7 @@ type StockTableProps = {
 export const StockTable: React.FC<StockTableProps> = ({
   header,
   rows,
+  eqStockList,
   dateRange,
   startDate,
   endDate,
@@ -61,7 +63,26 @@ export const StockTable: React.FC<StockTableProps> = ({
       <Table stickyHeader>
         <TableHead>
           <TableRow>
-            {header?.map((date, index) => (
+            {eqStockList[0].map((data, index) => (
+              <TableCell
+                key={index}
+                align={'right'}
+                size="small"
+                sx={{
+                  border:
+                    getDateHeaderBackgroundColor(toISOStringWithTimezoneMonthDay(data.calDat), dateRange) === 'black'
+                      ? '1px solid grey'
+                      : '1px solid black',
+                  whiteSpace: 'nowrap',
+                  color: 'white',
+                  bgcolor: getDateHeaderBackgroundColor(toISOStringWithTimezoneMonthDay(data.calDat), dateRange),
+                  padding: 0,
+                }}
+              >
+                {toISOStringWithTimezoneMonthDay(data.calDat)}
+              </TableCell>
+            ))}
+            {/* {header?.map((date, index) => (
               <TableCell
                 key={index}
                 align={typeof rows[0].data[index] === 'number' ? 'right' : 'left'}
@@ -77,11 +98,11 @@ export const StockTable: React.FC<StockTableProps> = ({
               >
                 {date}
               </TableCell>
-            ))}
+            ))} */}
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map((row, rowIndex) => (
+          {eqStockList.map((row, rowIndex) => (
             <StockTableRow
               key={rowIndex}
               header={header}
@@ -95,6 +116,20 @@ export const StockTable: React.FC<StockTableProps> = ({
               actual={actual}
             />
           ))}
+          {/* {rows.map((row, rowIndex) => (
+            <StockTableRow
+              key={rowIndex}
+              header={header}
+              row={row}
+              dateRange={dateRange}
+              startDate={startDate}
+              endDate={endDate}
+              preparation={preparation}
+              RH={RH}
+              GP={GP}
+              actual={actual}
+            />
+          ))} */}
         </TableBody>
       </Table>
     </TableContainer>
@@ -103,7 +138,7 @@ export const StockTable: React.FC<StockTableProps> = ({
 
 export type StockTableRowProps = {
   header: string[];
-  row: StockData;
+  row: StockTableValues[];
   dateRange: string[];
   startDate: Date | null;
   endDate: Date | null;
@@ -115,10 +150,35 @@ export type StockTableRowProps = {
 
 const StockTableRow = React.memo(
   ({ header, row, dateRange, startDate, endDate, preparation, RH, GP, actual }: StockTableRowProps) => {
-    console.log('date側描画', row.id);
+    console.log('date側描画' /*row.id*/);
     return (
       <TableRow>
-        {row.data.map((cell, colIndex) => {
+        {row.map((cell, colIndex) => {
+          return (
+            <TableCell
+              key={colIndex}
+              align={typeof cell === 'number' ? 'right' : 'left'}
+              style={styles.row}
+              sx={{
+                bgcolor: getDateRowBackgroundColor(
+                  header[colIndex],
+                  dateRange,
+                  startDate,
+                  endDate,
+                  preparation,
+                  RH,
+                  GP,
+                  actual
+                ),
+                color: typeof cell === 'number' && cell < 0 ? 'red' : 'black',
+              }}
+              size="small"
+            >
+              {cell.zaikoQty}
+            </TableCell>
+          );
+        })}
+        {/* {row.data.map((cell, colIndex) => {
           return (
             <TableCell
               key={colIndex}
@@ -142,7 +202,7 @@ const StockTableRow = React.memo(
               {cell}
             </TableCell>
           );
-        })}
+        })} */}
       </TableRow>
     );
   },
