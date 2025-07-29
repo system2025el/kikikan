@@ -325,6 +325,7 @@ const LightTooltipWithText = ({
       noWrap
       maxWidth={maxWidth}
       variant={variant}
+      textTransform={'none'}
       sx={{
         overflow: 'hidden',
         textOverflow: 'ellipsis',
