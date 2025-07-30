@@ -56,7 +56,7 @@ export const EqptMasterTable = ({
       d: 0,
       s: 0,
     });
-    setTheEqpts(updated);
+    setTheEqpts(updated?.data);
     setIsLoading(false);
   };
 
