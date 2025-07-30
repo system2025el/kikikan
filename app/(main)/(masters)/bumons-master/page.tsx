@@ -1,4 +1,3 @@
-import { getDaibumonsSelection, getShukeibumonsSelection } from '../_lib/funs';
 import { getFilteredBumons } from './_lib/funcs';
 import { BumonsMaster } from './_ui/bumons-master';
 
@@ -8,12 +7,11 @@ const Page = async () => {
     d: 0,
     s: 0,
   });
-  const a = await getDaibumonsSelection();
-  const b = await getShukeibumonsSelection();
-  const options = [a, b];
+  const data = bumons?.data;
+  const options = bumons?.options;
   return (
     <>
-      <BumonsMaster bumons={bumons} options={options} />
+      <BumonsMaster bumons={data} options={options} />
     </>
   );
 };

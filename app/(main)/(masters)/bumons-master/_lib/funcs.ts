@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 import pool from '@/app/_lib/postgres/postgres';
 import { supabase } from '@/app/_lib/supabase/supabase';
 
+import { getAllBumonDSSelections, getAllSelections } from '../../_lib/funs';
 import { emptyBumon } from './datas';
 import { BumonsMasterDialogValues, BumonsMasterTableValues } from './types';
 
@@ -32,11 +33,11 @@ export const getFilteredBumons = async (queries: { q: string; d: number; s: numb
 
   try {
     const { data, error } = await builder;
-
+    const options = await getAllBumonDSSelections();
     if (!error) {
       console.log('I got a datalist from db', data.length);
       if (!data || data.length === 0) {
-        return [];
+        return { data: [], options: options };
       } else {
         const filteredbumons: BumonsMasterTableValues[] = data.map((d, index) => ({
           bumonId: d.bumon_id,
@@ -46,11 +47,11 @@ export const getFilteredBumons = async (queries: { q: string; d: number; s: numb
           delFlg: Boolean(d.del_flg),
         }));
         console.log(filteredbumons.length);
-        return filteredbumons;
+        return { data: filteredbumons, options: options };
       }
     } else {
       console.error('部門情報取得エラー。', { message: error.message, code: error.code });
-      return [];
+      return { data: [], options: options };
     }
   } catch (e) {
     console.error('例外が発生しました:', e);

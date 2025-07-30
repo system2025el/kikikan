@@ -158,3 +158,17 @@ export const getAllBumonSelections = async (): Promise<{
     return { d: [], s: [], b: [] };
   }
 };
+
+export const getAllBumonDSSelections = async (): Promise<{
+  d: SelectTypes[];
+  s: SelectTypes[];
+}> => {
+  try {
+    const [daibumons, shukeibumons] = await Promise.all([getDaibumonsSelection(), getShukeibumonsSelection()]);
+
+    return { d: daibumons!, s: shukeibumons! };
+  } catch (error) {
+    console.error('Error fetching all selections:', error);
+    return { d: [], s: [] };
+  }
+};
