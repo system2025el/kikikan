@@ -20,6 +20,7 @@ import {
   getShozokuSelection,
   getShukeibumonsSelection,
 } from '../../_lib/funs';
+import { FormAutoComplete } from '../../_ui/autocomplete';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { emptyEqpt, formItems } from '../_lib/datas';
@@ -82,7 +83,7 @@ export const EqMasterDialog = ({
   /* フォームを送信 */
   const onSubmit = async (data: EqptsMasterDialogValues) => {
     console.log('isDarty : ', isDirty);
-    console.log(data);
+    console.log(data.shukeibumonId, '::::', data.rankAmt1);
     if (eqptId === -100) {
       // 新規登録
       await addNewEqpt(data);
@@ -207,8 +208,18 @@ export const EqMasterDialog = ({
                     control={control}
                     label={editable ? formItems[2].exsample : ''}
                     fullWidth
-                    sx={{ maxWidth: '20%' }}
+                    sx={{
+                      maxWidth: '20%',
+                      '& .MuiInputBase-input': {
+                        textAlign: 'right',
+                      },
+                      '& input[type=number]::-webkit-inner-spin-button': {
+                        WebkitAppearance: 'none',
+                        margin: 0,
+                      },
+                    }}
                     disabled={editable ? false : true}
+                    type="number"
                   />
                   <Typography variant="body2" ml={2}>
                     {formItems[2].other}
@@ -222,8 +233,18 @@ export const EqMasterDialog = ({
                     control={control}
                     label={editable ? formItems[3].exsample : ''}
                     fullWidth
-                    sx={{ maxWidth: '20%' }}
+                    sx={{
+                      maxWidth: '20%',
+                      '& .MuiInputBase-input': {
+                        textAlign: 'right',
+                      },
+                      '& input[type=number]::-webkit-inner-spin-button': {
+                        WebkitAppearance: 'none',
+                        margin: 0,
+                      },
+                    }}
                     disabled={editable ? false : true}
+                    type="number"
                   />
                 </FormBox>
               </Grid2>
@@ -293,7 +314,17 @@ export const EqMasterDialog = ({
                     control={control}
                     label={editable ? formItems[10].exsample : ''}
                     fullWidth
-                    sx={{ maxWidth: '20%' }}
+                    sx={{
+                      maxWidth: '20%',
+                      '& .MuiInputBase-input': {
+                        textAlign: 'right',
+                      },
+                      '& input[type=number]::-webkit-inner-spin-button': {
+                        WebkitAppearance: 'none',
+                        margin: 0,
+                      },
+                    }}
+                    type="number"
                     disabled={editable ? false : true}
                   />
                 </FormBox>
@@ -344,6 +375,12 @@ export const EqMasterDialog = ({
                       </Select>
                     )}
                   />
+                  {/* <FormAutoComplete
+                    name="shukeibumonId"
+                    control={control}
+                    disabled={editable ? false : true}
+                    options={[selectNone, ...selectOptions.s!]}
+                  /> */}
                 </FormBox>
               </Grid2>
               <Grid2>
@@ -363,7 +400,17 @@ export const EqMasterDialog = ({
                     control={control}
                     label={editable ? formItems[16].exsample : ''}
                     fullWidth
-                    sx={{ maxWidth: '20%' }}
+                    sx={{
+                      maxWidth: '20%',
+                      '& .MuiInputBase-input': {
+                        textAlign: 'right',
+                      },
+                      '& input[type=number]::-webkit-inner-spin-button': {
+                        WebkitAppearance: 'none',
+                        margin: 0,
+                      },
+                    }}
+                    type="number"
                     disabled={editable ? false : true}
                   />
                 </FormBox>
@@ -375,7 +422,17 @@ export const EqMasterDialog = ({
                     control={control}
                     label={editable ? formItems[17].exsample : ''}
                     fullWidth
-                    sx={{ maxWidth: '50%' }}
+                    sx={{
+                      maxWidth: '50%',
+                      '& .MuiInputBase-input': {
+                        textAlign: 'right',
+                      },
+                      '& input[type=number]::-webkit-inner-spin-button': {
+                        WebkitAppearance: 'none',
+                        margin: 0,
+                      },
+                    }}
+                    type="number"
                     disabled={editable ? false : true}
                   />
                 </FormBox>
@@ -387,7 +444,17 @@ export const EqMasterDialog = ({
                     control={control}
                     label={editable ? formItems[18].exsample : ''}
                     fullWidth
-                    sx={{ maxWidth: '50%' }}
+                    sx={{
+                      maxWidth: '50%',
+                      '& .MuiInputBase-input': {
+                        textAlign: 'right',
+                      },
+                      '& input[type=number]::-webkit-inner-spin-button': {
+                        WebkitAppearance: 'none',
+                        margin: 0,
+                      },
+                    }}
+                    type="number"
                     disabled={editable ? false : true}
                   />
                 </FormBox>
@@ -399,7 +466,17 @@ export const EqMasterDialog = ({
                     control={control}
                     label={editable ? formItems[19].exsample : ''}
                     fullWidth
-                    sx={{ maxWidth: '50%' }}
+                    sx={{
+                      maxWidth: '50%',
+                      '& .MuiInputBase-input': {
+                        textAlign: 'right',
+                      },
+                      '& input[type=number]::-webkit-inner-spin-button': {
+                        WebkitAppearance: 'none',
+                        margin: 0,
+                      },
+                    }}
+                    type="number"
                     disabled={editable ? false : true}
                   />
                 </FormBox>
@@ -411,7 +488,17 @@ export const EqMasterDialog = ({
                     control={control}
                     label={editable ? formItems[20].exsample : ''}
                     fullWidth
-                    sx={{ maxWidth: '50%' }}
+                    sx={{
+                      maxWidth: '50%',
+                      '& .MuiInputBase-input': {
+                        textAlign: 'right',
+                      },
+                      '& input[type=number]::-webkit-inner-spin-button': {
+                        WebkitAppearance: 'none',
+                        margin: 0,
+                      },
+                    }}
+                    type="number"
                     disabled={editable ? false : true}
                   />
                 </FormBox>
@@ -423,7 +510,17 @@ export const EqMasterDialog = ({
                     control={control}
                     label={editable ? formItems[21].exsample : ''}
                     fullWidth
-                    sx={{ maxWidth: '50%' }}
+                    sx={{
+                      maxWidth: '50%',
+                      '& .MuiInputBase-input': {
+                        textAlign: 'right',
+                      },
+                      '& input[type=number]::-webkit-inner-spin-button': {
+                        WebkitAppearance: 'none',
+                        margin: 0,
+                      },
+                    }}
+                    type="number"
                     disabled={editable ? false : true}
                   />
                 </FormBox>
@@ -435,7 +532,17 @@ export const EqMasterDialog = ({
                     control={control}
                     label={editable ? formItems[22].exsample : ''}
                     fullWidth
-                    sx={{ maxWidth: '50%' }}
+                    sx={{
+                      maxWidth: '50%',
+                      '& .MuiInputBase-input': {
+                        textAlign: 'right',
+                      },
+                      '& input[type=number]::-webkit-inner-spin-button': {
+                        WebkitAppearance: 'none',
+                        margin: 0,
+                      },
+                    }}
+                    type="number"
                     disabled={editable ? false : true}
                   />
                 </FormBox>

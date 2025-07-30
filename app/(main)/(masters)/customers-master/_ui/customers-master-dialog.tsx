@@ -345,7 +345,17 @@ export const CustomersMasterDialog = ({
                     control={control}
                     label={editable ? formItems[15].exsample : ''}
                     fullWidth
-                    sx={{ maxWidth: '50%' }}
+                    sx={{
+                      maxWidth: '50%',
+                      '& .MuiInputBase-input': {
+                        textAlign: 'right',
+                      },
+                      '& input[type=number]::-webkit-inner-spin-button': {
+                        WebkitAppearance: 'none',
+                        margin: 0,
+                      },
+                    }}
+                    type="number"
                     disabled={editable ? false : true}
                   />
                 </FormBox>
@@ -357,7 +367,17 @@ export const CustomersMasterDialog = ({
                     control={control}
                     label={editable ? formItems[16].exsample : ''}
                     fullWidth
-                    sx={{ maxWidth: '50%' }}
+                    sx={{
+                      maxWidth: '50%',
+                      '& .MuiInputBase-input': {
+                        textAlign: 'right',
+                      },
+                      '& input[type=number]::-webkit-inner-spin-button': {
+                        WebkitAppearance: 'none',
+                        margin: 0,
+                      },
+                    }}
+                    type="number"
                     disabled={editable ? false : true}
                   />
                 </FormBox>

@@ -16,8 +16,8 @@ export const CustomersMaterDialogSchema = z.object({
   mail: z.string().max(100, { message: '100文字以内で入力してください' }).optional(),
   mem: z.string().max(200, { message: '200文字以内で入力してください' }).optional(),
   dspFlg: z.boolean().optional(),
-  closeDay: z.number({ message: '数字を入力してください' }).optional(),
-  siteDay: z.number({ message: '数字を入力してください' }).optional(),
+  closeDay: z.number({ message: '数字を入力してください' }).nullable(),
+  siteDay: z.number({ message: '数字を入力してください' }).nullable(),
   kizaiNebikiFlg: z.boolean().optional(),
 });
 export type CustomersMasterDialogValues = z.infer<typeof CustomersMaterDialogSchema>;
