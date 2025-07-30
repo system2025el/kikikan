@@ -83,14 +83,14 @@ export const BumonsMaster = ({
           </Stack>
           <form onSubmit={handleSubmit(onSubmit)}>
             <Stack alignItems={'center'}>
-              <Typography noWrap width={100}>
+              <Typography noWrap width={140}>
                 部門名キーワード
               </Typography>
               <TextFieldElement name="query" control={control} />
             </Stack>
             <Stack justifyContent={'space-between'} alignItems={'start'} mt={1}>
               <Stack mt={1} spacing={1}>
-                <Typography noWrap width={100}>
+                <Typography noWrap width={140}>
                   大部門名
                 </Typography>
                 {/* <SelectElement

@@ -53,8 +53,8 @@ export const DaibumonsMaster = ({ daibumons }: { daibumons: DaibumonsMasterTable
           <form onSubmit={handleSubmit(onSubmit)}>
             <Stack justifyContent={'space-between'} alignItems={'start'} mt={1}>
               <Stack alignItems={'baseline'}>
-                <Typography noWrap width={100}>
-                  大部門名
+                <Typography noWrap width={200}>
+                  大部門名キーワード
                 </Typography>
                 <TextFieldElement name="query" control={control} helperText={''} />
               </Stack>
