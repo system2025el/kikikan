@@ -2,19 +2,12 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Grid2, MenuItem, Select } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import { useEffect, useState } from 'react';
-import {
-  CheckboxElement,
-  Controller,
-  SelectElement,
-  TextareaAutosizeElement,
-  TextFieldElement,
-  useForm,
-} from 'react-hook-form-mui';
+import { Controller, TextareaAutosizeElement, TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { FormBox, selectNone, SelectTypes } from '../../../_ui/form-box';
-import { getDaibumonsSelection, getShukeibumonsSelection } from '../../_lib/funs';
+import { getAllBumonDSSelections } from '../../_lib/funs';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { emptyBumon, formItems } from '../_lib/datas';
@@ -50,7 +43,10 @@ export const BumonsMasterDialog = ({
   /* submit時のactions (save, delete) */
   const [action, setAction] = useState<'save' | 'delete' | 'restore' | undefined>(undefined);
   /* フォーム内のセレクトoptions */
-  const [selectOptions, setSelectOptions] = useState<SelectTypes[][]>([]);
+  const [selectOptions, setSelectOptions] = useState<{
+    d: SelectTypes[];
+    s: SelectTypes[];
+  }>({ d: [], s: [] });
 
   /* useForm ----------------------------------------- */
   const {
@@ -132,9 +128,8 @@ export const BumonsMasterDialog = ({
   useEffect(() => {
     console.log('★★★★★★★★★★★★★★★★★★★★★');
     const getThatOnebumon = async () => {
-      const a = await getDaibumonsSelection();
-      const b = await getShukeibumonsSelection();
-      setSelectOptions([a!, b!]);
+      const a = await getAllBumonDSSelections();
+      setSelectOptions(a!);
       if (bumonId === -100) {
         // 新規追加モード
         reset(emptyBumon); // フォーム初期化
@@ -204,7 +199,7 @@ export const BumonsMasterDialog = ({
                     disabled={editable ? false : true}
                     render={({ field }) => (
                       <Select {...field} sx={{ width: 250 }}>
-                        {[selectNone, ...selectOptions[0]!].map((opt) => (
+                        {[selectNone, ...selectOptions!.d].map((opt) => (
                           <MenuItem key={opt.id} value={opt.id} sx={opt.id === 0 ? { color: grey[600] } : {}}>
                             {opt.label}
                           </MenuItem>
@@ -223,7 +218,7 @@ export const BumonsMasterDialog = ({
                     disabled={editable ? false : true}
                     render={({ field }) => (
                       <Select {...field} sx={{ width: 250 }}>
-                        {[selectNone, ...selectOptions[1]!].map((opt) => (
+                        {[selectNone, ...selectOptions!.s].map((opt) => (
                           <MenuItem key={opt.id} value={opt.id} sx={opt.id === 0 ? { color: grey[600] } : {}}>
                             {opt.label}
                           </MenuItem>

@@ -59,7 +59,7 @@ export const BumonsMasterTable = ({
       d: 0,
       s: 0,
     });
-    setTheBumons(updated);
+    setTheBumons(updated?.data);
     setIsLoading(false);
   };
 

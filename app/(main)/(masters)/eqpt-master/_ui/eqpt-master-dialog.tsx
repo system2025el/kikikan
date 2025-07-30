@@ -13,17 +13,11 @@ import {
 
 import { FormBox, selectNone, SelectTypes } from '../../../_ui/form-box';
 import { Loading } from '../../../_ui/loading';
-import {
-  getAllSelections,
-  getBumonsSelection,
-  getDaibumonsSelection,
-  getShozokuSelection,
-  getShukeibumonsSelection,
-} from '../../_lib/funs';
+import { getAllSelections } from '../../_lib/funs';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { emptyEqpt, formItems } from '../_lib/datas';
-import { addNewEqpt, createEqptHistory, getEqptsQty, getOneEqpt, updateEqpt } from '../_lib/funcs';
+import { addNewEqpt, createEqptHistory, getOneEqpt, updateEqpt } from '../_lib/funcs';
 import { EqptsMasterDialogSchema, EqptsMasterDialogValues } from '../_lib/types';
 
 export const EqMasterDialog = ({

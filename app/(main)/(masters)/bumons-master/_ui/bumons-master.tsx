@@ -1,21 +1,9 @@
 'use client';
 import SearchIcon from '@mui/icons-material/Search';
-import {
-  Box,
-  Button,
-  Container,
-  Divider,
-  Grid2,
-  MenuItem,
-  Paper,
-  Select,
-  Stack,
-  TextField,
-  Typography,
-} from '@mui/material';
-import { grey, red } from '@mui/material/colors';
+import { Box, Button, Container, Divider, MenuItem, Paper, Select, Stack, Typography } from '@mui/material';
+import { grey } from '@mui/material/colors';
 import { useState } from 'react';
-import { Controller, SelectElement, TextFieldElement, useForm } from 'react-hook-form-mui';
+import { Controller, TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { selectNone, SelectTypes } from '@/app/(main)/_ui/form-box';
 
@@ -34,7 +22,12 @@ export const BumonsMaster = ({
   options,
 }: {
   bumons: BumonsMasterTableValues[] | undefined;
-  options: (SelectTypes[] | undefined)[];
+  options:
+    | {
+        d: SelectTypes[];
+        s: SelectTypes[];
+      }
+    | undefined;
 }) => {
   /* useState ------------------ */
   const [theBumons, setTheBumons] = useState(bumons);
@@ -63,7 +56,7 @@ export const BumonsMaster = ({
       s: data.shukeiQuery!,
     });
     setPage(1);
-    setTheBumons(newList);
+    setTheBumons(newList?.data);
     console.log('theLocs : ', theBumons);
   };
 
@@ -93,19 +86,13 @@ export const BumonsMaster = ({
                 <Typography noWrap width={140}>
                   大部門名
                 </Typography>
-                {/* <SelectElement
-                  name="daibumonQuery"
-                  control={control}
-                  sx={{ width: 250 }}
-                  options={[selectNone, ...options[0]!]}
-                /> */}
                 <Controller
                   name="daibumonQuery"
                   control={control}
                   defaultValue={0}
                   render={({ field }) => (
                     <Select {...field} sx={{ width: 250 }}>
-                      {[selectNone, ...options[0]!].map((opt) => (
+                      {[selectNone, ...options!.d].map((opt) => (
                         <MenuItem key={opt.id} value={opt.id} sx={opt.id === 0 ? { color: grey[600] } : {}}>
                           {opt.label}
                         </MenuItem>
@@ -117,20 +104,13 @@ export const BumonsMaster = ({
                 <Typography noWrap width={100}>
                   集計部門名
                 </Typography>
-                {/* <SelectElement
-                  name="shukeiQuery"
-                  control={control}
-                  sx={{ width: 250 }}
-                  options={[selectNone, ...options[1]!]}
-                  
-                /> */}
                 <Controller
                   name="shukeiQuery"
                   control={control}
                   defaultValue={0}
                   render={({ field }) => (
                     <Select {...field} sx={{ width: 250 }}>
-                      {[selectNone, ...options[1]!].map((opt) => (
+                      {[selectNone, ...options!.s].map((opt) => (
                         <MenuItem key={opt.id} value={opt.id} sx={opt.id === 0 ? { color: grey[600] } : {}}>
                           {opt.label}
                         </MenuItem>
