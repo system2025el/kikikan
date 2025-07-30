@@ -53,8 +53,8 @@ export const ShukeibumonsMaster = ({ shukeibumons }: { shukeibumons: Shukeibumon
           <form onSubmit={handleSubmit(onSubmit)}>
             <Stack justifyContent={'space-between'} alignItems={'start'} mt={1}>
               <Stack alignItems={'baseline'}>
-                <Typography noWrap width={100}>
-                  集計部門名
+                <Typography noWrap width={200}>
+                  集計部門名キーワード
                 </Typography>
                 <TextFieldElement name="query" control={control} helperText={''} />
               </Stack>

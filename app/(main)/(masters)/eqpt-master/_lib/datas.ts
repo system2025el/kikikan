@@ -54,7 +54,7 @@ export const formItems: FormItemsType[] = [
   {
     label: '機材名',
     exsample: '例）MagicQ MQ70 Compact Console',
-    constraints: '',
+    constraints: '100文字まで',
   },
   {
     label: '保有数',
