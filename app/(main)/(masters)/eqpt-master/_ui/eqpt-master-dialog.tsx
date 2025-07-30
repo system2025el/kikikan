@@ -20,7 +20,6 @@ import {
   getShozokuSelection,
   getShukeibumonsSelection,
 } from '../../_lib/funs';
-import { FormAutoComplete } from '../../_ui/autocomplete';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { emptyEqpt, formItems } from '../_lib/datas';
@@ -375,12 +374,6 @@ export const EqMasterDialog = ({
                       </Select>
                     )}
                   />
-                  {/* <FormAutoComplete
-                    name="shukeibumonId"
-                    control={control}
-                    disabled={editable ? false : true}
-                    options={[selectNone, ...selectOptions.s!]}
-                  /> */}
                 </FormBox>
               </Grid2>
               <Grid2>
