@@ -18,7 +18,13 @@ export const EqptMaster = ({
   options,
 }: {
   eqpts: EqptsMasterTableValues[] | undefined;
-  options: (SelectTypes[] | undefined)[];
+  options:
+    | {
+        d: SelectTypes[];
+        s: SelectTypes[];
+        b: SelectTypes[];
+      }
+    | undefined;
 }) => {
   // useState
   const [theEqpts, setTheEqpts] = useState<EqptsMasterTableValues[] | undefined>(eqpts);
@@ -47,7 +53,7 @@ export const EqptMaster = ({
       b: data.bumonQuery!,
     });
     setPage(1);
-    setTheEqpts(newList);
+    setTheEqpts(newList?.data);
     console.log('theEqpt : ', theEqpts);
   };
   return (
@@ -77,7 +83,7 @@ export const EqptMaster = ({
                   defaultValue={0}
                   render={({ field }) => (
                     <Select {...field} sx={{ width: 250 }}>
-                      {[selectNone, ...options[0]!].map((opt) => (
+                      {[selectNone, ...options!.b!].map((opt) => (
                         <MenuItem key={opt.id} value={opt.id} sx={opt.id === 0 ? { color: grey[600] } : {}}>
                           {opt.label}
                         </MenuItem>
@@ -94,7 +100,7 @@ export const EqptMaster = ({
                   defaultValue={0}
                   render={({ field }) => (
                     <Select {...field} sx={{ width: 250 }}>
-                      {[selectNone, ...options[1]!].map((opt) => (
+                      {[selectNone, ...options!.d!].map((opt) => (
                         <MenuItem key={opt.id} value={opt.id} sx={opt.id === 0 ? { color: grey[600] } : {}}>
                           {opt.label}
                         </MenuItem>
@@ -111,7 +117,7 @@ export const EqptMaster = ({
                   defaultValue={0}
                   render={({ field }) => (
                     <Select {...field} sx={{ width: 250 }}>
-                      {[selectNone, ...options[2]!].map((opt) => (
+                      {[selectNone, ...options!.s!].map((opt) => (
                         <MenuItem key={opt.id} value={opt.id} sx={opt.id === 0 ? { color: grey[600] } : {}}>
                           {opt.label}
                         </MenuItem>
