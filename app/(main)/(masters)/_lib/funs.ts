@@ -18,7 +18,7 @@ export const getDaibumonsSelection = async () => {
           id: d.dai_bumon_id,
           label: d.dai_bumon_nam,
         }));
-        console.log(selectElements.length);
+        console.log('大部門が', selectElements.length, '件');
         return selectElements;
       }
     } else {
@@ -45,7 +45,7 @@ export const getShukeibumonsSelection = async () => {
           id: d.shukei_bumon_id,
           label: d.shukei_bumon_nam,
         }));
-        console.log(selectElements.length);
+        console.log('集計部門が', selectElements.length, '件');
         return selectElements;
       }
     } else {
@@ -72,7 +72,7 @@ export const getBumonsSelection = async () => {
           id: d.bumon_id,
           label: d.bumon_nam,
         }));
-        console.log(selectElements.length);
+        console.log('部門が', selectElements.length, '件');
         return selectElements;
       }
     } else {
@@ -99,7 +99,7 @@ export const getShozokuSelection = async () => {
           id: d.shozoku_id,
           label: d.shozoku_nam,
         }));
-        console.log(selectElements.length);
+        console.log('所属', selectElements.length, '件');
         return selectElements;
       }
     } else {
@@ -133,5 +133,28 @@ export const getAllSelections = async (): Promise<{
   } catch (error) {
     console.error('Error fetching all selections:', error);
     return { d: [], s: [], b: [], shozoku: [] };
+  }
+};
+
+/**
+ * 全部門の選択肢のまとめたデータ
+ * @returns {{SelectTypes[]}} d:daibumon, s:shukeibumon, b:bumon
+ */
+export const getAllBumonSelections = async (): Promise<{
+  d: SelectTypes[];
+  s: SelectTypes[];
+  b: SelectTypes[];
+}> => {
+  try {
+    const [daibumons, shukeibumons, bumons] = await Promise.all([
+      getDaibumonsSelection(),
+      getShukeibumonsSelection(),
+      getBumonsSelection(),
+    ]);
+
+    return { d: daibumons!, s: shukeibumons!, b: bumons! };
+  } catch (error) {
+    console.error('Error fetching all selections:', error);
+    return { d: [], s: [], b: [] };
   }
 };

@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 import pool from '@/app/_lib/postgres/postgres';
 import { supabase } from '@/app/_lib/supabase/supabase';
 
+import { getAllBumonSelections, getAllSelections } from '../../_lib/funs';
 import { emptyEqpt } from './datas';
 import { EqptsMasterDialogValues, EqptsMasterTableValues, nullToZero, zeroToNull } from './types';
 
@@ -35,14 +36,13 @@ export const getFilteredEqpts = async (queries: { q: string; b: number; d: numbe
   if (queries.s !== 0) {
     builder.eq('shukei_bumon_id', queries.s);
   }
-
   try {
+    const options = await getAllBumonSelections();
     const { data, error } = await builder;
-
     if (!error) {
-      console.log('I got a datalist from db', data.length);
+      console.log('機材マスタDBからデータもらった');
       if (!data || data.length === 0) {
-        return [];
+        return { data: [], options: options };
       } else {
         const filteredEqpts: EqptsMasterTableValues[] = data.map((d, index) => ({
           kizaiId: d.kizai_id,
@@ -63,12 +63,12 @@ export const getFilteredEqpts = async (queries: { q: string; b: number; d: numbe
           tblDspId: index + 1,
           delFlg: Boolean(d.del_flg),
         }));
-        console.log(filteredEqpts.length);
-        return filteredEqpts;
+        console.log('機材マスタリストを取得した');
+        return { data: filteredEqpts, options: options };
       }
     } else {
       console.error('機材情報取得エラー。', { message: error.message, code: error.code });
-      return [];
+      return { data: [], options: options };
     }
   } catch (e) {
     console.error('例外が発生しました:', e);
@@ -79,16 +79,14 @@ export const getFilteredEqpts = async (queries: { q: string; b: number; d: numbe
 /**
  * 選択された機材のデータを取得する関数
  * @param id 機材マスタID
- * @returns {Promise<{data: EqptsMasterDialogValues, qty: number | undefined}>}
- * - 取得した機材の詳細情報と在庫数量を含むオブジェクトを解決するPromise。
- * - `data`: 機材マスタのデータ。取得失敗時やエラー発生時は`emptyEqpt`を返します。
- * - `qty`: `getEqptsQty`関数から取得した在庫数量。取得失敗時は`undefined`を返します。 */
+ * @returns {Promise<{data: EqptsMasterDialogValues, qty: } | undefined>}
+ *  data: 機材情報, qty: 保有数
+ */
 export const getOneEqpt = async (id: number) => {
   try {
     const { data, error } = await supabase.schema('dev2').from('m_kizai').select('*').eq('kizai_id', id).single();
     if (!error) {
       console.log('I got a datalist from db', data.del_flg);
-
       const EqptDetails: EqptsMasterDialogValues = {
         kizaiNam: data.kizai_nam,
         sectionNum: data.section_num,
@@ -135,8 +133,7 @@ export const getOneEqpt = async (id: number) => {
  * @param data フォームで取得した機材情報
  */
 export const addNewEqpt = async (data: EqptsMasterDialogValues) => {
-  console.log(data.mem);
-
+  console.log('機材マスタを追加する');
   const query = `
       INSERT INTO m_kizai (
         kizai_id, kizai_nam, del_flg, section_num, el_num, shozoku_id,
@@ -162,7 +159,6 @@ export const addNewEqpt = async (data: EqptsMasterDialogValues) => {
   try {
     console.log('DB Connected');
     await pool.query(` SET search_path TO dev2;`);
-
     await pool.query(query, [
       data.kizaiNam,
       Number(data.delFlg),
@@ -189,7 +185,7 @@ export const addNewEqpt = async (data: EqptsMasterDialogValues) => {
       'shigasan',
       data.dspOrdNum,
     ]);
-    console.log('data : ', data);
+    console.log('機材マスタを追加した data : ', data);
   } catch (error) {
     console.log('DB接続エラー', error);
     throw error;

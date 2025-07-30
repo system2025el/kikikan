@@ -9,13 +9,11 @@ const Page = async () => {
     d: 0,
     s: 0,
   });
-  const a = await getBumonsSelection();
-  const b = await getDaibumonsSelection();
-  const c = await getShukeibumonsSelection();
-  const options = [a, b, c];
+  const data = eqpts?.data;
+  const options = eqpts?.options;
   return (
     <>
-      <EqptMaster eqpts={eqpts} options={options} />
+      <EqptMaster eqpts={data} options={options} />
     </>
   );
 };
