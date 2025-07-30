@@ -53,8 +53,8 @@ const masterList: MenuItem[] = [
   { name: '権限マスタ', url: '/' },
 ];
 const settingList: MenuItem[] = [
-  { name: 'マスタインポート', url: '/' },
-  { name: 'マスタエクスポート', url: '/' },
+  { name: 'マスタインポート', url: '/import-master' },
+  { name: 'マスタエクスポート', url: '/export-master' },
 ];
 const loginList: MenuItem[] = [
   { name: 'ログアウト', url: '/' },
