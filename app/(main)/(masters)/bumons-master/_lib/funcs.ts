@@ -193,6 +193,35 @@ export const updateBumon = async (data: BumonsMasterDialogValues, id: number) =>
   revalidatePath('/bumon-master');
 };
 
+export const getAllBumon = async () => {
+  try {
+    const { data, error } = await supabase.schema('dev2').from('m_bumon').select('*').order('dsp_ord_num');
+    if (!error) {
+      console.log('I got a datalist from db', data.length);
+      console.log(data.length);
+      const aoaData = data.map((d) => [
+        d.bumon_id,
+        d.bumon_nam,
+        d.del_flg,
+        d.dsp_ord_num,
+        d.mem,
+        d.dai_bumon_id,
+        d.shukei_bumon_id,
+        d.add_dat,
+        d.add_user,
+        d.upd_dat,
+        d.upd_user,
+      ]);
+      return aoaData;
+    } else {
+      console.error('DBエラーです', error.message);
+      return [];
+    }
+  } catch (e) {
+    console.log(e);
+    throw e;
+  }
+};
 // export const getAllbumon = async () => {
 //   try {
 //     const { data, error } = await supabase
