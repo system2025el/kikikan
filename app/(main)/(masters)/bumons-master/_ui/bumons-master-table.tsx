@@ -85,8 +85,8 @@ export const BumonsMasterTable = ({
           <Grid2 container spacing={3}>
             <Grid2 alignContent={'center'}>
               <Typography color="error" variant="body2">
-                {/* ※マスタは削除できません。登録画面で削除フラグを付けてください */}
-                {/* <br /> */}
+                ※マスタは無効にできません。登録画面で無効化してください
+                <br />
                 ※表示順を変更する場合は、検索条件無しで全件表示してください
               </Typography>
             </Grid2>

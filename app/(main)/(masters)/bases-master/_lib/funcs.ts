@@ -165,38 +165,3 @@ export const updateBase = async (data: BasesMasterDialogValues, id: number) => {
   }
   revalidatePath('/bases-master');
 };
-
-// export const getAllBase = async () => {
-//   try {
-//     const { data, error } = await supabase
-//       .schema('dev2')
-//       .from('m_shozoku')
-//       .select('shozoku_id , shozoku_nam, adr_shozai, adr_tatemono, adr_sonota, tel, fax, mem,  ')
-
-//       .order('dsp_ord_num');
-//     if (!error) {
-//       console.log('I got a datalist from db', data.length);
-
-//       const theData: BasesMasterTableValues[] = data.map((d) => ({
-//         BaseId: d.shozoku_id,
-//         BaseNam: d.shozoku_nam,
-//         adrShozai: d.adr_shozai,
-//         adrTatemono: d.adr_tatemono,
-//         adrSonota: d.adr_sonota,
-//         tel: d.tel,
-//         fax: d.fax,
-//         mem: d.mem,
-//         dspFlg: d.,
-//       }));
-
-//       console.log(theData.length);
-//       return theData;
-//     } else {
-//       console.error('DBエラーです', error.message);
-//     }
-//   } catch (e) {
-//     console.log(e);
-//   }
-//   revalidatePath('/bases-master');
-//   redirect('/base-master');
-// };

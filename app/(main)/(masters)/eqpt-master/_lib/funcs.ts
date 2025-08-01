@@ -48,7 +48,7 @@ export const getFilteredEqpts = async (queries: { q: string; b: number; d: numbe
           kizaiId: d.kizai_id,
           kizaiNam: d.kizai_nam,
           kizaiQty: d.kizai_qty,
-          shozokuNam: d.shozoku_nam.substring(0, 1),
+          shozokuNam: d.shozoku_nam,
           mem: d.mem,
           bumonNam: d.bumon_nam,
           daibumonNam: d.dai_bumon_nam,
