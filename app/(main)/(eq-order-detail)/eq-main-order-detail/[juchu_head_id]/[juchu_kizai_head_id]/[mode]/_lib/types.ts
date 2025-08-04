@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { nullable, z } from 'zod';
 
 export const JuchuKizaiHeadSchema = z
   .object({
@@ -6,7 +6,6 @@ export const JuchuKizaiHeadSchema = z
     juchuKizaiHeadId: z.number(),
     juchuKizaiHeadKbn: z.number(),
     juchuHonbanbiQty: z.number().nullable(),
-    zeiKbn: z.number().nullable(),
     nebikiAmt: z.number().nullable(),
     mem: z.string().nullable(),
     headNam: z.string().nullable(),
@@ -25,3 +24,41 @@ export const JuchuKizaiHeadSchema = z
   });
 
 export type JuchuKizaiHeadValues = z.infer<typeof JuchuKizaiHeadSchema>;
+
+export const JuchuKizaiMeisaiSchema = z.object({
+  juchuHeadId: z.number(),
+  juchuKizaiHeadId: z.number(),
+  juchuKizaiMeisaiId: z.number(),
+  idoDenId: z.number().nullable(),
+  idoDenDat: z.date().nullable(),
+  idoSijiId: z.string().nullable(),
+  shozokuId: z.number(),
+  shozokuNam: z.string(),
+  mem: z.string().nullable(),
+  kizaiId: z.number(),
+  kizaiNam: z.string(),
+  kizaiQty: z.number(),
+  planKizaiQty: z.number(),
+  planYobiQty: z.number().nullable(),
+  planQty: z.number(),
+});
+
+export type JuchuKizaiMeisaiValues = z.infer<typeof JuchuKizaiMeisaiSchema>;
+
+export type StockTableValues = {
+  calDat: Date;
+  kizaiId: number;
+  kizaiQty: number;
+  juchuQty: number;
+  zaikoQty: number;
+  juchuHonbanbiShubetuId: number;
+  juchuHonbanbiColor: string;
+};
+
+export type JuchuKizaiHonbanbiValues = {
+  juchuHeadId: number;
+  juchuKizaiHeadId: number;
+  juchuHonbanbiShubetuId: number;
+  juchuHonbanbiDat: Date;
+  mem: string;
+};

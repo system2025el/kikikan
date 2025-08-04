@@ -43,7 +43,7 @@ export const OrderSchema = z.object({
   kokyakuTantoNam: z.string().nullable(),
   mem: z.string().nullable(),
   nebikiAmt: z.number().nullable(),
-  zeiKbn: z.number().nullable(),
+  zeiKbn: z.number(),
 });
 
 export type OrderValues = z.infer<typeof OrderSchema>;

@@ -5,33 +5,33 @@ import { grey } from '@mui/material/colors';
 import { useEffect, useState } from 'react';
 
 import { RSuiteDateRangePicker, toISOStringWithTimezone } from '@/app/(main)/_ui/date';
+import { Loading } from '@/app/(main)/_ui/loading';
+import { toISOStringYearMonthDay } from '@/app/(main)/(eq-order-detail)/_lib/datefuncs';
+import {
+  AddHonbanbi,
+  ConfirmHonbanbi,
+  DeleteHonbanbi,
+  UpdateHonbanbi,
+} from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 
+import { JuchuKizaiHonbanbiValues } from '../_lib/types';
 import { EquipmentData } from './equipment-order-detail';
 
 type TabPanelProps = {
   children?: React.ReactNode;
-  index: string;
-  value: string;
+  index: number;
+  value: number;
 };
 
 type DateDialogProps = {
-  startDate: Date | null;
-  endDate: Date | null;
-  preparation: EquipmentData[];
-  RH: EquipmentData[];
-  GP: EquipmentData[];
-  actual: EquipmentData[];
+  userNam: string;
+  juchuHeadId: number;
+  juchuKizaiHeadId: number;
+  shukoDate: Date | null;
+  nyukoDate: Date | null;
+  juchuHonbanbiList: JuchuKizaiHonbanbiValues[];
   onClose: () => void;
-  onSave: (
-    preparationDates: string[],
-    preparationMemo: string[],
-    RHDates: string[],
-    RHMemo: string[],
-    GPDates: string[],
-    GPMemo: string[],
-    actualDates: string[],
-    actualMemo: string[]
-  ) => void;
+  onSave: () => void;
 };
 
 const TabPanel = (props: TabPanelProps) => {
@@ -45,100 +45,177 @@ const TabPanel = (props: TabPanelProps) => {
 };
 
 export const DateSelectDialog = ({
-  startDate,
-  endDate,
-  preparation,
-  RH,
-  GP,
-  actual,
+  userNam,
+  juchuHeadId,
+  juchuKizaiHeadId,
+  shukoDate,
+  nyukoDate,
+  juchuHonbanbiList,
   onClose,
   onSave,
 }: DateDialogProps) => {
-  const handleSave = () => {
-    onSave(preparationDates, inputPreparation, RHDates, inputRH, GPDates, inputGP, actualDates, inputActual);
-  };
-  const [value, setValue] = useState('仕込');
-  const handleChange = (event: React.SyntheticEvent, newValue: string) => {
+  // ローディング
+  const [isLoading, setIsLoading] = useState(false);
+  const [value, setValue] = useState(10);
+  // 仕込
+  const [sikomi, setSikomi] = useState<JuchuKizaiHonbanbiValues[]>(
+    juchuHonbanbiList.filter((d) => d.juchuHonbanbiShubetuId === 10)
+  );
+  // RH
+  const [rh, setRh] = useState<JuchuKizaiHonbanbiValues[]>(
+    juchuHonbanbiList.filter((d) => d.juchuHonbanbiShubetuId === 20)
+  );
+  // GP
+  const [gp, setGp] = useState<JuchuKizaiHonbanbiValues[]>(
+    juchuHonbanbiList.filter((d) => d.juchuHonbanbiShubetuId === 30)
+  );
+  // 本番
+  const [honban, setHonban] = useState<JuchuKizaiHonbanbiValues[]>(
+    juchuHonbanbiList.filter((d) => d.juchuHonbanbiShubetuId === 40)
+  );
+  // 削除予定リスト
+  const [deleteList, setDeleteList] = useState<JuchuKizaiHonbanbiValues[]>([]);
+  // 選択日付
+  const [dateRange, setDateRange] = useState<[Date, Date] | null>(
+    shukoDate && nyukoDate ? [shukoDate, nyukoDate] : null
+  );
+
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
 
-  const handleAddInput = (value: string) => {
+  const handleSikomiMemChange = (index: number, value: string) => {
+    setSikomi((prev) => prev.map((d, i) => (i === index ? { ...d, mem: value } : d)));
+  };
+  const handleSikomiRemove = (index: number) => {
+    setDeleteList((prev) => [...prev, sikomi[index]]);
+    const updatedSikomi = sikomi.filter((_, i) => i !== index);
+    setSikomi(updatedSikomi);
+  };
+
+  const handleRhMemChange = (index: number, value: string) => {
+    setRh((prev) => prev.map((d, i) => (i === index ? { ...d, mem: value } : d)));
+  };
+  const handleRhRemove = (index: number) => {
+    setDeleteList((prev) => [...prev, rh[index]]);
+    const updatedRh = rh.filter((_, i) => i !== index);
+    setRh(updatedRh);
+  };
+
+  const handleGpMemChange = (index: number, value: string) => {
+    setGp((prev) => prev.map((d, i) => (i === index ? { ...d, mem: value } : d)));
+  };
+  const handleGpRemove = (index: number) => {
+    setDeleteList((prev) => [...prev, gp[index]]);
+    const updatedGp = gp.filter((_, i) => i !== index);
+    setGp(updatedGp);
+  };
+
+  const handleHonbanMemChange = (index: number, value: string) => {
+    setHonban((prev) => prev.map((d, i) => (i === index ? { ...d, mem: value } : d)));
+  };
+  const handleHonbanRemove = (index: number) => {
+    setDeleteList((prev) => [...prev, honban[index]]);
+    const updatedHonban = honban.filter((_, i) => i !== index);
+    setHonban(updatedHonban);
+  };
+
+  const handleSave = async () => {
+    setIsLoading(true);
+    const juchuHonbanbiData: JuchuKizaiHonbanbiValues[] = [...sikomi, ...rh, ...gp, ...honban];
+    console.log('-------------削除データ', deleteList, '--------------');
+
+    if (deleteList.length > 0) {
+      console.log('--------------削除データあり-------------');
+      for (const item of deleteList) {
+        const result = await DeleteHonbanbi(juchuHeadId, juchuKizaiHeadId, item);
+        console.log('----------------', result, '-------------');
+      }
+    }
+    setDeleteList([]);
+
+    for (const item of juchuHonbanbiData) {
+      const confirm = await ConfirmHonbanbi(juchuHeadId, juchuKizaiHeadId, item);
+      if (confirm) {
+        const result = await UpdateHonbanbi(juchuHeadId, juchuKizaiHeadId, item, userNam);
+      } else {
+        const result = await AddHonbanbi(juchuHeadId, juchuKizaiHeadId, item, userNam);
+      }
+    }
+    await onSave();
+    setIsLoading(false);
+  };
+
+  const handleClose = () => {
+    setDeleteList([]);
+    onClose();
+  };
+
+  const handleAddInput = (value: number) => {
     if (dateRange !== null) {
+      // カレンダーで選択された日付
       const newDates = getDateRange(dateRange[0], dateRange[1]);
+
       switch (value) {
-        case '仕込':
-          setPreparationDates((prevDates) => [...new Set([...prevDates, ...newDates])].sort());
+        case 10:
+          const updatedSikomi: JuchuKizaiHonbanbiValues[] = newDates.map((d) => ({
+            juchuHeadId: juchuHonbanbiList[0].juchuHeadId,
+            juchuKizaiHeadId: juchuHonbanbiList[0].juchuKizaiHeadId,
+            juchuHonbanbiShubetuId: 10,
+            juchuHonbanbiDat: new Date(d),
+            mem: '',
+          }));
+          setSikomi((prev) => {
+            const existDate = new Set(prev.map((d) => toISOStringYearMonthDay(d.juchuHonbanbiDat)));
+            const unique = updatedSikomi.filter((d) => !existDate.has(toISOStringYearMonthDay(d.juchuHonbanbiDat)));
+            return [...prev, ...unique].sort((a, b) => a.juchuHonbanbiDat.getTime() - b.juchuHonbanbiDat.getTime());
+          });
           break;
-        case 'RH':
-          setRHDates((prevDates) => [...new Set([...prevDates, ...newDates])].sort());
+        case 20:
+          const updatedRh: JuchuKizaiHonbanbiValues[] = newDates.map((d) => ({
+            juchuHeadId: juchuHonbanbiList[0].juchuHeadId,
+            juchuKizaiHeadId: juchuHonbanbiList[0].juchuKizaiHeadId,
+            juchuHonbanbiShubetuId: 20,
+            juchuHonbanbiDat: new Date(d),
+            mem: '',
+          }));
+          setRh((prev) => {
+            const existDate = new Set(prev.map((d) => toISOStringYearMonthDay(d.juchuHonbanbiDat)));
+            const unique = updatedRh.filter((d) => !existDate.has(toISOStringYearMonthDay(d.juchuHonbanbiDat)));
+            return [...prev, ...unique].sort((a, b) => a.juchuHonbanbiDat.getTime() - b.juchuHonbanbiDat.getTime());
+          });
           break;
-        case 'GP':
-          setGPDates((prevDates) => [...new Set([...prevDates, ...newDates])].sort());
+        case 30:
+          const updatedGp: JuchuKizaiHonbanbiValues[] = newDates.map((d) => ({
+            juchuHeadId: juchuHonbanbiList[0].juchuHeadId,
+            juchuKizaiHeadId: juchuHonbanbiList[0].juchuKizaiHeadId,
+            juchuHonbanbiShubetuId: 30,
+            juchuHonbanbiDat: new Date(d),
+            mem: '',
+          }));
+          setGp((prev) => {
+            const existDate = new Set(prev.map((d) => toISOStringYearMonthDay(d.juchuHonbanbiDat)));
+            const unique = updatedGp.filter((d) => !existDate.has(toISOStringYearMonthDay(d.juchuHonbanbiDat)));
+            return [...prev, ...unique].sort((a, b) => a.juchuHonbanbiDat.getTime() - b.juchuHonbanbiDat.getTime());
+          });
           break;
-        case '本番':
-          setActualDates((prevDates) => [...new Set([...prevDates, ...newDates])].sort());
+        case 40:
+          const updatedHonban: JuchuKizaiHonbanbiValues[] = newDates.map((d) => ({
+            juchuHeadId: juchuHonbanbiList[0].juchuHeadId,
+            juchuKizaiHeadId: juchuHonbanbiList[0].juchuKizaiHeadId,
+            juchuHonbanbiShubetuId: 40,
+            juchuHonbanbiDat: new Date(d),
+            mem: '',
+          }));
+          setHonban((prev) => {
+            const existDate = new Set(prev.map((d) => toISOStringYearMonthDay(d.juchuHonbanbiDat)));
+            const unique = updatedHonban.filter((d) => !existDate.has(toISOStringYearMonthDay(d.juchuHonbanbiDat)));
+            return [...prev, ...unique].sort((a, b) => a.juchuHonbanbiDat.getTime() - b.juchuHonbanbiDat.getTime());
+          });
           break;
       }
     }
   };
-
-  const [preparationDates, setPreparationDates] = useState<string[]>(preparation.map((item) => item.date));
-  const [inputPreparation, setInputPreparation] = useState<string[]>(preparation.map((item) => item.memo));
-  const handleInputPreparationChange = (index: number, value: string) => {
-    const updatedInputs = [...inputPreparation];
-    updatedInputs[index] = value;
-    setInputPreparation(updatedInputs);
-  };
-  const handleRemoveInputPreparation = (index: number) => {
-    const updatedDates = preparationDates.filter((_, i) => i !== index);
-    const updatedInputs = inputPreparation.filter((_, i) => i !== index);
-    setPreparationDates(updatedDates);
-    setInputPreparation(updatedInputs);
-  };
-
-  const [RHDates, setRHDates] = useState<string[]>(RH.map((item) => item.date));
-  const [inputRH, setInputRH] = useState<string[]>(RH.map((item) => item.memo));
-  const handleInputRHChange = (index: number, value: string) => {
-    const updatedInputs = [...inputRH];
-    updatedInputs[index] = value;
-    setInputRH(updatedInputs);
-  };
-  const handleRemoveInputRH = (index: number) => {
-    const updatedDates = RHDates.filter((_, i) => i !== index);
-    const updatedInputs = inputRH.filter((_, i) => i !== index);
-    setRHDates(updatedDates);
-    setInputRH(updatedInputs);
-  };
-
-  const [GPDates, setGPDates] = useState<string[]>(GP.map((item) => item.date));
-  const [inputGP, setInputGP] = useState<string[]>(GP.map((item) => item.memo));
-  const handleInputGPChange = (index: number, value: string) => {
-    const updatedInputs = [...inputGP];
-    updatedInputs[index] = value;
-    setInputGP(updatedInputs);
-  };
-  const handleRemoveInputGP = (index: number) => {
-    const updatedDates = GPDates.filter((_, i) => i !== index);
-    const updatedInputs = inputGP.filter((_, i) => i !== index);
-    setGPDates(updatedDates);
-    setInputGP(updatedInputs);
-  };
-
-  const [actualDates, setActualDates] = useState<string[]>(actual.map((item) => item.date));
-  const [inputActual, setInputActual] = useState<string[]>(actual.map((item) => item.memo));
-  const handleInputActualChange = (index: number, value: string) => {
-    const updatedInputs = [...inputActual];
-    updatedInputs[index] = value;
-    setInputActual(updatedInputs);
-  };
-  const handleRemoveInputActual = (index: number) => {
-    const updatedDates = actualDates.filter((_, i) => i !== index);
-    const updatedInputs = inputActual.filter((_, i) => i !== index);
-    setActualDates(updatedDates);
-    setInputActual(updatedInputs);
-  };
-
-  const [dateRange, setDateRange] = useState<[Date, Date] | null>([new Date(), new Date()]);
 
   const handleDateChange = (range: [Date, Date] | null) => {
     setDateRange(range);
@@ -149,7 +226,7 @@ export const DateSelectDialog = ({
     const current = new Date(start);
 
     while (current <= end) {
-      const dateStr = toISOStringWithTimezone(current).split('T')[0];
+      const dateStr = toISOStringYearMonthDay(current);
       range.push(dateStr);
       current.setDate(current.getDate() + 1);
     }
@@ -157,31 +234,43 @@ export const DateSelectDialog = ({
     return range;
   };
 
+  if (isLoading)
+    return (
+      <Box height={'100vh'}>
+        <Loading />
+      </Box>
+    );
+
   return (
     <Container disableGutters sx={{ minWidth: '100%', p: 3 }} maxWidth={'xl'}>
       <Paper variant="outlined">
         <Box display="flex" justifyContent="space-between" alignItems="center" p={2}>
           <Typography margin={1}>日付選択</Typography>
           <Grid2 container spacing={1}>
-            <Button onClick={handleSave}>保存</Button>
-            <Button>追加</Button>
-            <Button onClick={onClose}>戻る</Button>
+            <Button
+              onClick={() => {
+                handleSave();
+              }}
+            >
+              保存
+            </Button>
+            <Button onClick={handleClose}>戻る</Button>
           </Grid2>
         </Box>
       </Paper>
       <Paper variant="outlined" sx={{ mt: 2 }}>
         <Grid2 container spacing={2} pt={2}>
           <Tabs value={value} onChange={handleChange}>
-            <Tab value="仕込" label="仕込" sx={{ bgcolor: 'mediumpurple' }} />
-            <Tab value="RH" label="RH" sx={{ bgcolor: 'orange' }} />
-            <Tab value="GP" label="GP" sx={{ bgcolor: 'lightgreen' }} />
-            <Tab value="本番" label="本番" sx={{ bgcolor: 'pink' }} />
+            <Tab value={10} label="仕込" sx={{ bgcolor: 'mediumpurple' }} />
+            <Tab value={20} label="RH" sx={{ bgcolor: 'orange' }} />
+            <Tab value={30} label="GP" sx={{ bgcolor: 'lightgreen' }} />
+            <Tab value={40} label="本番" sx={{ bgcolor: 'pink' }} />
           </Tabs>
           <Box ml={20}>
             <RSuiteDateRangePicker
               value={dateRange}
-              minDate={startDate}
-              maxDate={endDate}
+              minDate={shukoDate}
+              maxDate={nyukoDate}
               onChange={handleDateChange}
             />
             <Button sx={{ ml: 2 }} onClick={() => handleAddInput(value)}>
@@ -190,8 +279,23 @@ export const DateSelectDialog = ({
           </Box>
         </Grid2>
         <Divider />
-        <TabPanel value={value} index="仕込">
-          {preparationDates.map((input, index) => (
+        <TabPanel value={value} index={10}>
+          {sikomi.map((data, index) => (
+            <Box display="flex" alignItems="center" margin={2} key={index}>
+              <TextField value={toISOStringYearMonthDay(data.juchuHonbanbiDat)} />
+              <Typography ml={2} mr={1}>
+                メモ
+              </Typography>
+              <TextField
+                value={data.mem ? data.mem : ''}
+                onChange={(e) => handleSikomiMemChange(index, e.target.value)}
+              ></TextField>
+              <Button sx={{ ml: 4, bgcolor: 'red', color: 'white' }} onClick={() => handleSikomiRemove(index)}>
+                削除
+              </Button>
+            </Box>
+          ))}
+          {/* {preparationDates.map((input, index) => (
             <Box display="flex" alignItems="center" margin={2} key={index}>
               <TextField value={input} />
               <Typography ml={2} mr={1}>
@@ -208,10 +312,25 @@ export const DateSelectDialog = ({
                 削除
               </Button>
             </Box>
-          ))}
+          ))} */}
         </TabPanel>
-        <TabPanel value={value} index="RH">
-          {RHDates.map((input, index) => (
+        <TabPanel value={value} index={20}>
+          {rh.map((data, index) => (
+            <Box display="flex" alignItems="center" margin={2} key={index}>
+              <TextField value={toISOStringYearMonthDay(data.juchuHonbanbiDat)} />
+              <Typography ml={2} mr={1}>
+                メモ
+              </Typography>
+              <TextField
+                value={data.mem ? data.mem : ''}
+                onChange={(e) => handleRhMemChange(index, e.target.value)}
+              ></TextField>
+              <Button sx={{ ml: 4, bgcolor: 'red', color: 'white' }} onClick={() => handleRhRemove(index)}>
+                削除
+              </Button>
+            </Box>
+          ))}
+          {/* {RHDates.map((input, index) => (
             <Box display="flex" alignItems="center" margin={2} key={index}>
               <TextField value={input} />
               <Typography ml={2} mr={1}>
@@ -225,10 +344,25 @@ export const DateSelectDialog = ({
                 削除
               </Button>
             </Box>
-          ))}
+          ))} */}
         </TabPanel>
-        <TabPanel value={value} index="GP">
-          {GPDates.map((input, index) => (
+        <TabPanel value={value} index={30}>
+          {gp.map((data, index) => (
+            <Box display="flex" alignItems="center" margin={2} key={index}>
+              <TextField value={toISOStringYearMonthDay(data.juchuHonbanbiDat)} />
+              <Typography ml={2} mr={1}>
+                メモ
+              </Typography>
+              <TextField
+                value={data.mem ? data.mem : ''}
+                onChange={(e) => handleGpMemChange(index, e.target.value)}
+              ></TextField>
+              <Button sx={{ ml: 4, bgcolor: 'red', color: 'white' }} onClick={() => handleGpRemove(index)}>
+                削除
+              </Button>
+            </Box>
+          ))}
+          {/* {GPDates.map((input, index) => (
             <Box display="flex" alignItems="center" margin={2} key={index}>
               <TextField value={input} />
               <Typography ml={2} mr={1}>
@@ -242,10 +376,25 @@ export const DateSelectDialog = ({
                 削除
               </Button>
             </Box>
-          ))}
+          ))} */}
         </TabPanel>
-        <TabPanel value={value} index="本番">
-          {actualDates.map((input, index) => (
+        <TabPanel value={value} index={40}>
+          {honban.map((data, index) => (
+            <Box display="flex" alignItems="center" margin={2} key={index}>
+              <TextField value={toISOStringYearMonthDay(data.juchuHonbanbiDat)} />
+              <Typography ml={2} mr={1}>
+                メモ
+              </Typography>
+              <TextField
+                value={data.mem ? data.mem : ''}
+                onChange={(e) => handleHonbanMemChange(index, e.target.value)}
+              ></TextField>
+              <Button sx={{ ml: 4, bgcolor: 'red', color: 'white' }} onClick={() => handleHonbanRemove(index)}>
+                削除
+              </Button>
+            </Box>
+          ))}
+          {/* {actualDates.map((input, index) => (
             <Box display="flex" alignItems="center" margin={2} key={index}>
               <TextField value={input} />
               <Typography ml={2} mr={1}>
@@ -259,7 +408,7 @@ export const DateSelectDialog = ({
                 削除
               </Button>
             </Box>
-          ))}
+          ))} */}
         </TabPanel>
       </Paper>
     </Container>

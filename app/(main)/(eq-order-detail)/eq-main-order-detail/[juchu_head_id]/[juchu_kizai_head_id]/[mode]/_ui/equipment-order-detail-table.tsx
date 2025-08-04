@@ -25,17 +25,18 @@ import { grey } from '@mui/material/colors';
 import { Dayjs } from 'dayjs';
 import React, { useRef, useState } from 'react';
 
-import { TestDate } from '@/app/(main)/_ui/date';
+import { TestDate, toISOStringWithTimezoneMonthDay } from '@/app/(main)/_ui/date';
+import { toISOStringYearMonthDay } from '@/app/(main)/(eq-order-detail)/_lib/datefuncs';
 
 import { getDateHeaderBackgroundColor, getDateRowBackgroundColor } from '../_lib/colorselect';
+import { JuchuKizaiMeisaiValues, StockTableValues } from '../_lib/types';
 import { Equipment, EquipmentData, StockData } from './equipment-order-detail';
 
 type StockTableProps = {
-  header: string[];
-  rows: StockData[];
+  eqStockList: StockTableValues[][];
   dateRange: string[];
-  startDate: Date | null;
-  endDate: Date | null;
+  shukoDate: Date | null;
+  nyukoDate: Date | null;
   preparation: EquipmentData[];
   RH: EquipmentData[];
   GP: EquipmentData[];
@@ -44,11 +45,10 @@ type StockTableProps = {
 };
 
 export const StockTable: React.FC<StockTableProps> = ({
-  header,
-  rows,
+  eqStockList,
   dateRange,
-  startDate,
-  endDate,
+  shukoDate,
+  nyukoDate,
   preparation,
   RH,
   GP,
@@ -60,40 +60,43 @@ export const StockTable: React.FC<StockTableProps> = ({
       <Table stickyHeader>
         <TableHead>
           <TableRow>
-            {header?.map((date, index) => (
-              <TableCell
-                key={index}
-                align={typeof rows[0].data[index] === 'number' ? 'right' : 'left'}
-                size="small"
-                sx={{
-                  border:
-                    getDateHeaderBackgroundColor(date, dateRange) === 'black' ? '1px solid grey' : '1px solid black',
-                  whiteSpace: 'nowrap',
-                  color: 'white',
-                  bgcolor: getDateHeaderBackgroundColor(date, dateRange),
-                  padding: 0,
-                }}
-              >
-                {date}
-              </TableCell>
-            ))}
+            {eqStockList.length > 0 &&
+              eqStockList[0].map((data, index) => (
+                <TableCell
+                  key={index}
+                  align={'right'}
+                  size="small"
+                  sx={{
+                    border:
+                      getDateHeaderBackgroundColor(toISOStringYearMonthDay(data.calDat), dateRange) === 'black'
+                        ? '1px solid grey'
+                        : '1px solid black',
+                    whiteSpace: 'nowrap',
+                    color: 'white',
+                    bgcolor: getDateHeaderBackgroundColor(toISOStringYearMonthDay(data.calDat), dateRange),
+                    padding: 0,
+                  }}
+                >
+                  {toISOStringWithTimezoneMonthDay(data.calDat)}
+                </TableCell>
+              ))}
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map((row, rowIndex) => (
-            <StockTableRow
-              key={rowIndex}
-              header={header}
-              row={row}
-              dateRange={dateRange}
-              startDate={startDate}
-              endDate={endDate}
-              preparation={preparation}
-              RH={RH}
-              GP={GP}
-              actual={actual}
-            />
-          ))}
+          {eqStockList.length > 0 &&
+            eqStockList.map((row, rowIndex) => (
+              <StockTableRow
+                key={rowIndex}
+                row={row}
+                dateRange={dateRange}
+                shukoDate={shukoDate}
+                nyukoDate={nyukoDate}
+                preparation={preparation}
+                RH={RH}
+                GP={GP}
+                actual={actual}
+              />
+            ))}
         </TableBody>
       </Table>
     </TableContainer>
@@ -101,11 +104,10 @@ export const StockTable: React.FC<StockTableProps> = ({
 };
 
 export type StockTableRowProps = {
-  header: string[];
-  row: StockData;
+  row: StockTableValues[];
   dateRange: string[];
-  startDate: Date | null;
-  endDate: Date | null;
+  shukoDate: Date | null;
+  nyukoDate: Date | null;
   preparation: EquipmentData[];
   RH: EquipmentData[];
   GP: EquipmentData[];
@@ -113,32 +115,23 @@ export type StockTableRowProps = {
 };
 
 const StockTableRow = React.memo(
-  ({ header, row, dateRange, startDate, endDate, preparation, RH, GP, actual }: StockTableRowProps) => {
-    console.log('date側描画', row.id);
+  ({ row, dateRange, shukoDate, nyukoDate, preparation, RH, GP, actual }: StockTableRowProps) => {
+    console.log('date側描画' /*row.id*/);
     return (
       <TableRow>
-        {row.data.map((cell, colIndex) => {
+        {row.map((cell, colIndex) => {
           return (
             <TableCell
               key={colIndex}
               align={typeof cell === 'number' ? 'right' : 'left'}
               style={styles.row}
               sx={{
-                bgcolor: getDateRowBackgroundColor(
-                  header[colIndex],
-                  dateRange,
-                  startDate,
-                  endDate,
-                  preparation,
-                  RH,
-                  GP,
-                  actual
-                ),
-                color: typeof cell === 'number' && cell < 0 ? 'red' : 'black',
+                bgcolor: row[colIndex].juchuHonbanbiColor,
+                color: cell.zaikoQty < 0 ? 'red' : 'black',
               }}
               size="small"
             >
-              {cell}
+              {cell.zaikoQty}
             </TableCell>
           );
         })}
@@ -147,7 +140,6 @@ const StockTableRow = React.memo(
   },
   (prevProps, nextProps) => {
     return (
-      prevProps.header === nextProps.header &&
       prevProps.row === nextProps.row &&
       prevProps.preparation === nextProps.preparation &&
       prevProps.RH === nextProps.RH &&
@@ -160,28 +152,34 @@ const StockTableRow = React.memo(
 StockTableRow.displayName = 'StockTableRow';
 
 type EqTableProps = {
-  rows: Equipment[];
+  rows: JuchuKizaiMeisaiValues[];
   onChange: (rowIndex: number, orderValue: number, spareValue: number, totalValue: number) => void;
   handleCellDateChange: (rowIndex: number, date: Dayjs | null) => void;
+  handleCellDateClear: (rowIndex: number) => void;
   handleMemoChange: (rowIndex: number, memo: string) => void;
   ref: React.RefObject<HTMLDivElement | null>;
 };
 
-export const EqTable: React.FC<EqTableProps> = ({ rows, onChange, handleCellDateChange, handleMemoChange, ref }) => {
+export const EqTable: React.FC<EqTableProps> = ({
+  rows,
+  onChange,
+  handleCellDateChange,
+  handleCellDateClear,
+  handleMemoChange,
+  ref,
+}) => {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  const handleOrderCellChange = (rowIndex: number, newValue: number) => {
-    const updatedRows = [...rows];
-    updatedRows[rowIndex].order = newValue;
-    updatedRows[rowIndex].total = updatedRows[rowIndex].order + updatedRows[rowIndex].spare;
-    onChange(rowIndex, updatedRows[rowIndex].order, updatedRows[rowIndex].spare, updatedRows[rowIndex].total);
+  const handlePlanKizaiQtyChange = (rowIndex: number, newValue: number) => {
+    const planYobiQty = rows[rowIndex].planYobiQty !== null ? rows[rowIndex].planYobiQty : 0;
+    const planQty = planYobiQty + newValue;
+    onChange(rowIndex, newValue, planYobiQty, planQty);
   };
 
-  const handleSpareCellChange = (rowIndex: number, newValue: number) => {
-    const updatedRows = [...rows];
-    updatedRows[rowIndex].spare = newValue;
-    updatedRows[rowIndex].total = updatedRows[rowIndex].order + updatedRows[rowIndex].spare;
-    onChange(rowIndex, updatedRows[rowIndex].order, updatedRows[rowIndex].spare, updatedRows[rowIndex].total);
+  const handlePlanYobiQtyChange = (rowIndex: number, newValue: number) => {
+    const planKizaiQty = rows[rowIndex].planKizaiQty;
+    const planQty = planKizaiQty + newValue;
+    onChange(rowIndex, planKizaiQty, newValue, planQty);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent, rowIndex: number) => {
@@ -236,10 +234,11 @@ export const EqTable: React.FC<EqTableProps> = ({ rows, onChange, handleCellDate
               rowIndex={rowIndex}
               handleOrderRef={handleOrderRef(rowIndex)}
               handleCellDateChange={handleCellDateChange}
+              handleCellDateClear={handleCellDateClear}
               handleMemoChange={handleMemoChange}
               handleKeyDown={handleKeyDown}
-              handleOrderCellChange={handleOrderCellChange}
-              handleSpareCellChange={handleSpareCellChange}
+              handlePlanKizaiQtyChange={handlePlanKizaiQtyChange}
+              handlePlanYobiQtyChange={handlePlanYobiQtyChange}
             />
           ))}
         </TableBody>
@@ -249,13 +248,14 @@ export const EqTable: React.FC<EqTableProps> = ({ rows, onChange, handleCellDate
 };
 
 type EqTableRowProps = {
-  row: Equipment;
+  row: JuchuKizaiMeisaiValues;
   rowIndex: number;
   handleOrderRef: (el: HTMLInputElement | null) => void;
   handleCellDateChange: (rowIndex: number, date: Dayjs | null) => void;
+  handleCellDateClear: (rowIndex: number) => void;
   handleMemoChange: (rowIndex: number, memo: string) => void;
-  handleOrderCellChange: (rowIndex: number, newValue: number) => void;
-  handleSpareCellChange: (rowIndex: number, newValue: number) => void;
+  handlePlanKizaiQtyChange: (rowIndex: number, newValue: number) => void;
+  handlePlanYobiQtyChange: (rowIndex: number, newValue: number) => void;
   handleKeyDown: (e: React.KeyboardEvent, rowIndex: number) => void;
 };
 
@@ -265,9 +265,10 @@ const EqTableRow = React.memo(
     rowIndex,
     handleOrderRef,
     handleCellDateChange,
+    handleCellDateClear,
     handleMemoChange,
-    handleOrderCellChange,
-    handleSpareCellChange,
+    handlePlanKizaiQtyChange,
+    handlePlanYobiQtyChange,
     handleKeyDown,
   }: EqTableRowProps) => {
     console.log('描画', rowIndex);
@@ -302,34 +303,40 @@ const EqTableRow = React.memo(
                   padding: 0,
                 },
               }}
-              date={row.date}
+              date={row.idoDenDat}
               onChange={handleDateChange}
+              onClear={() => handleCellDateClear(rowIndex)}
             />
-            {row.date && <Typography>{row.place === 'K' ? 'K→Y' : 'Y→K'}</Typography>}
+            {row.idoDenDat && <Typography>{row.shozokuId === 1 ? 'K→Y' : 'Y→K'}</Typography>}
           </Box>
         </TableCell>
         <TableCell style={styles.row} align="left" size="small" sx={{ bgcolor: grey[200] }}>
-          {row.place}
+          {row.shozokuId === 1 ? 'K' : 'Y'}
         </TableCell>
         <TableCell style={styles.row} align="center" size="small">
-          <MemoTooltip name={row.name} memo={row.memo} handleMemoChange={handleMemoChange} rowIndex={rowIndex} />
+          <MemoTooltip
+            name={row.kizaiNam}
+            memo={row.mem ? row.mem : ''}
+            handleMemoChange={handleMemoChange}
+            rowIndex={rowIndex}
+          />
         </TableCell>
         <TableCell style={styles.row} align="left" size="small">
-          <Button variant="text" sx={{ p: 0 }} href={`/loan-situation/${row.id}`}>
-            {row.name}
+          <Button variant="text" sx={{ p: 0 }} href={`/loan-situation/${row.kizaiId}`}>
+            {row.kizaiNam}
           </Button>
         </TableCell>
         <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
-          {row.all}
+          {row.kizaiQty}
         </TableCell>
         <TableCell style={styles.row} align="right" size="small">
           <TextField
             variant="standard"
-            value={row.order}
+            value={row.planKizaiQty}
             type="text"
             onChange={(e) => {
               if (/^\d*$/.test(e.target.value)) {
-                handleOrderCellChange(rowIndex, Number(e.target.value));
+                handlePlanKizaiQtyChange(rowIndex, Number(e.target.value));
               }
             }}
             sx={{
@@ -367,11 +374,11 @@ const EqTableRow = React.memo(
         <TableCell style={styles.row} align="right" size="small">
           <TextField
             variant="standard"
-            value={row.spare}
+            value={row.planYobiQty}
             type="text"
             onChange={(e) => {
               if (/^\d*$/.test(e.target.value)) {
-                handleSpareCellChange(rowIndex, Number(e.target.value));
+                handlePlanYobiQtyChange(rowIndex, Number(e.target.value));
               }
             }}
             sx={{
@@ -403,7 +410,7 @@ const EqTableRow = React.memo(
           />
         </TableCell>
         <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
-          {row.total}
+          {row.planQty}
         </TableCell>
       </TableRow>
     );
