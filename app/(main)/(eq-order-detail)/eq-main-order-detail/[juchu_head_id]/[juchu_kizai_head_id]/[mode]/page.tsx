@@ -1,10 +1,10 @@
 import { subDays } from 'date-fns';
 
-import { GetShukoDate } from '@/app/(main)/(eq-order-detail)/_lib/getshukodat';
+import { GetNyukoDate, getRange, GetShukoDate } from '@/app/(main)/(eq-order-detail)/_lib/datefuncs';
 import { GetLock, GetOrder } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/funcs';
 
-import { GetEqHeader, GetEqList, GetStockList } from '../../../../_lib/funcs';
-import { JuchuKizaiHeadValues, JuchuKizaiMeisaiValues, StockTableValues } from './_lib/types';
+import { GetEqHeader, GetEqList, GetHonbanbi, GetStockList } from '../../../../_lib/funcs';
+import { JuchuKizaiHeadValues, JuchuKizaiHonbanbiValues, JuchuKizaiMeisaiValues, StockTableValues } from './_lib/types';
 import EquipmentOrderDetail from './_ui/equipment-order-detail';
 
 const Page = async (props: {
@@ -27,41 +27,56 @@ const Page = async (props: {
   if (juchuKizaiHeadId !== 0) {
     // 受注機材ヘッダーデータ
     const juchuKizaiHeadData = await GetEqHeader(params.juchu_head_id, params.juchu_kizai_head_id);
-    console.log(juchuKizaiHeadData);
+    if (!juchuKizaiHeadData) {
+      return <div>受注機材情報が見つかりません。</div>;
+    }
     // 受注機材明細データ
     const juchuKizaiMeisaiData = await GetEqList(params.juchu_head_id, params.juchu_kizai_head_id);
+    // 出庫日
+    const shukoDate = GetShukoDate(
+      juchuKizaiHeadData.kicsShukoDat && new Date(juchuKizaiHeadData.kicsShukoDat),
+      juchuKizaiHeadData.yardShukoDat && new Date(juchuKizaiHeadData.yardShukoDat)
+    );
+    // 入庫日
+    const nyukoDate = GetNyukoDate(
+      juchuKizaiHeadData.kicsNyukoDat && new Date(juchuKizaiHeadData.kicsNyukoDat),
+      juchuKizaiHeadData.yardNyukoDat && new Date(juchuKizaiHeadData.yardNyukoDat)
+    );
+    // 出庫日から入庫日
+    const dateRange = getRange(shukoDate, nyukoDate);
     // 受注機材idリスト
     const ids = juchuKizaiMeisaiData?.map((data) => data.kizaiId);
-
+    // 受注機材合計数リスト
+    const planQtys = juchuKizaiMeisaiData?.map((data) => data.planQty);
     // 機材在庫データ
     const eqStockData: StockTableValues[][] = [];
-    if (juchuKizaiHeadData && ids) {
-      // 出庫日
-      const shukoDat = GetShukoDate(
-        juchuKizaiHeadData.kicsShukoDat && new Date(juchuKizaiHeadData.kicsShukoDat),
-        juchuKizaiHeadData.yardShukoDat && new Date(juchuKizaiHeadData.yardShukoDat)
-      );
-      for (const id of ids) {
+    if (ids && planQtys) {
+      if (!shukoDate) return <div>データに不備があります。</div>;
+      for (let i = 0; i < ids.length; i++) {
         const stock: StockTableValues[] = await GetStockList(
           juchuKizaiHeadData?.juchuHeadId,
           juchuKizaiHeadData?.juchuKizaiHeadId,
-          id,
-          subDays(shukoDat, 1)
+          ids[i],
+          planQtys[i],
+          subDays(shukoDate, 1)
         );
         eqStockData.push(stock);
       }
     }
-
-    if (!juchuKizaiHeadData) {
-      return <div>受注機材情報が見つかりません。</div>;
-    }
+    // 受注本番日データ
+    const juchuHonbanbiData = await GetHonbanbi(params.juchu_head_id, params.juchu_kizai_head_id);
+    console.log('確認：', juchuHonbanbiData);
 
     return (
       <EquipmentOrderDetail
         juchuHeadData={juchuHeadData}
         juchuKizaiHeadData={juchuKizaiHeadData}
         juchuKizaiMeisaiData={juchuKizaiMeisaiData}
+        shukoDate={shukoDate}
+        nyukoDate={nyukoDate}
+        dateRange={dateRange}
         eqStockData={eqStockData}
+        juchuHonbanbiData={juchuHonbanbiData}
         edit={edit}
         lockData={lockData}
       />
@@ -73,7 +88,6 @@ const Page = async (props: {
       juchuKizaiHeadId: Number(params.juchu_kizai_head_id),
       juchuKizaiHeadKbn: 1,
       juchuHonbanbiQty: null,
-      zeiKbn: 2,
       nebikiAmt: null,
       mem: null,
       headNam: null,
@@ -86,13 +100,25 @@ const Page = async (props: {
     const newJuchuKizaiMeisaiData: JuchuKizaiMeisaiValues[] = [];
     // 機材在庫データ(初期値)
     const newEqStockData: StockTableValues[][] = [];
+    // 出庫日(初期値)
+    const shukoDate = null;
+    // 入庫日(初期値)
+    const nyukoDate = null;
+    // 出庫日から入庫日(初期値)
+    const dateRange: string[] = [];
+    // 受注本番日データ
+    const newJuchuHonbanbiData: JuchuKizaiHonbanbiValues[] = [];
 
     return (
       <EquipmentOrderDetail
         juchuHeadData={juchuHeadData}
         juchuKizaiHeadData={newJuchuKizaiHeadData}
         juchuKizaiMeisaiData={newJuchuKizaiMeisaiData}
+        shukoDate={shukoDate}
+        nyukoDate={nyukoDate}
+        dateRange={dateRange}
         eqStockData={newEqStockData}
+        juchuHonbanbiData={newJuchuHonbanbiData}
         edit={edit}
         lockData={lockData}
       />

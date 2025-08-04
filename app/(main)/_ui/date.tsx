@@ -12,6 +12,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
 import { PickerValue } from '@mui/x-date-pickers/internals';
 import { DateValidationError } from '@mui/x-date-pickers/models';
+import { subDays } from 'date-fns';
 import dayjs, { Dayjs } from 'dayjs';
 import { useMemo, useState } from 'react';
 import { ControllerFieldState, ControllerRenderProps, FieldErrors, Noop } from 'react-hook-form';
@@ -350,7 +351,7 @@ export const RSuiteDateRangePicker = (props: Props) => {
         placement="autoVertical"
         value={value}
         shouldDisableDate={(date) => {
-          if (minDate && date < minDate) return true;
+          if (minDate && date < subDays(minDate, 1)) return true;
           if (maxDate && date > maxDate) return true;
           return false;
         }}

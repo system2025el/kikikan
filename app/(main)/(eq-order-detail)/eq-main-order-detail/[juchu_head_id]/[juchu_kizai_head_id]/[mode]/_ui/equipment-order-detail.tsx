@@ -47,12 +47,26 @@ import {
 import { useDirty } from '@/app/(main)/_ui/dirty-context';
 import { Loading } from '@/app/(main)/_ui/loading';
 import Time, { TestTime } from '@/app/(main)/_ui/time';
+import { GetNyukoDate, GetShukoDate, toISOStringYearMonthDay } from '@/app/(main)/(eq-order-detail)/_lib/datefuncs';
+import {
+  AddHonbanbi,
+  ConfirmHonbanbi,
+  GetHonbanbi,
+  GetStockList,
+  UpdateHonbanbi,
+} from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 import { AddLock, DeleteLock, GetLock } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/funcs';
 import { useUnsavedChangesWarning } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/hook';
 import { LockValues, OrderValues } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/types';
 
 import { data, stock } from '../_lib/data';
-import { JuchuKizaiHeadSchema, JuchuKizaiHeadValues, JuchuKizaiMeisaiValues, StockTableValues } from '../_lib/types';
+import {
+  JuchuKizaiHeadSchema,
+  JuchuKizaiHeadValues,
+  JuchuKizaiHonbanbiValues,
+  JuchuKizaiMeisaiValues,
+  StockTableValues,
+} from '../_lib/types';
 import { DateSelectDialog } from './date-selection-dialog';
 import { EqTable, StockTable } from './equipment-order-detail-table';
 import { EquipmentSelectionDialog } from './equipment-selection-dailog';
@@ -86,72 +100,74 @@ const getRange = (start: Date | null, end: Date | null): string[] => {
     const current = new Date(start);
 
     while (current <= end) {
-      const dateStr = toISOStringWithTimezoneMonthDay(current).split('T')[0];
-      range.push(dateStr);
+      range.push(toISOStringYearMonthDay(new Date(current)));
       current.setDate(current.getDate() + 1);
     }
-
     return range;
   }
   return [];
 };
 
-// ストックテーブルの日付ヘッダーの作成
-const getStockHeader = (date: Date | null) => {
-  const start = date !== null ? subDays(date, 1) : subDays(new Date(), 1);
-  const end = date !== null ? endOfMonth(addMonths(date, 2)) : endOfMonth(addMonths(new Date(), 2));
-  const range: string[] = [];
-  const current = new Date(start);
+// // ストックテーブルの日付ヘッダーの作成
+// const getStockHeader = (date: Date | null) => {
+//   const start = date !== null ? subDays(date, 1) : subDays(new Date(), 1);
+//   const end = date !== null ? endOfMonth(addMonths(date, 2)) : endOfMonth(addMonths(new Date(), 2));
+//   const range: string[] = [];
+//   const current = new Date(start);
 
-  while (current <= end) {
-    const dateStr = toISOStringWithTimezoneMonthDay(current).split('T')[0];
-    range.push(dateStr);
-    current.setDate(current.getDate() + 1);
-  }
+//   while (current <= end) {
+//     const dateStr = toISOStringWithTimezoneMonthDay(current).split('T')[0];
+//     range.push(dateStr);
+//     current.setDate(current.getDate() + 1);
+//   }
 
-  return range;
-};
+//   return range;
+// };
 
-// ストックテーブルの行作成
-const getStockRow = (stock: number[], length: number) => {
-  const rows: StockData[] = [];
+// // ストックテーブルの行作成
+// const getStockRow = (stock: number[], length: number) => {
+//   const rows: StockData[] = [];
 
-  stock.map((num, index) => {
-    const data: number[] = [];
-    for (let i = 0; i < length; i++) {
-      data.push(num);
-    }
-    const row: StockData = { id: index + 1, data: data };
-    rows.push(row);
-  });
+//   stock.map((num, index) => {
+//     const data: number[] = [];
+//     for (let i = 0; i < length; i++) {
+//       data.push(num);
+//     }
+//     const row: StockData = { id: index + 1, data: data };
+//     rows.push(row);
+//   });
 
-  return rows;
-};
+//   return rows;
+// };
 
-// 200件用データ作成
-export const testeqData: Equipment[] = Array.from({ length: 50 }, (_, i) => {
-  const original = data[i % data.length];
-  return {
-    ...original,
-    id: i + 1,
-    name: `${original.name} (${i + 1})`,
-    date: original.date,
-    memo: original.memo,
-    place: original.place,
-    all: original.all,
-    order: original.order,
-    spare: original.spare,
-    total: original.total,
-  };
-});
-// 200件用データ作成
-export const testStock = Array.from({ length: 50 }, (_, i) => stock[i % stock.length]);
+// // 200件用データ作成
+// export const testeqData: Equipment[] = Array.from({ length: 50 }, (_, i) => {
+//   const original = data[i % data.length];
+//   return {
+//     ...original,
+//     id: i + 1,
+//     name: `${original.name} (${i + 1})`,
+//     date: original.date,
+//     memo: original.memo,
+//     place: original.place,
+//     all: original.all,
+//     order: original.order,
+//     spare: original.spare,
+//     total: original.total,
+//   };
+// });
+// // 200件用データ作成
+// export const testStock = Array.from({ length: 50 }, (_, i) => stock[i % stock.length]);
 
 const EquipmentOrderDetail = (props: {
   juchuHeadData: OrderValues;
   juchuKizaiHeadData: JuchuKizaiHeadValues;
   juchuKizaiMeisaiData: JuchuKizaiMeisaiValues[] | undefined;
+  shukoDate: Date | null;
+  nyukoDate: Date | null;
+  dateRange: string[];
   eqStockData: StockTableValues[][] | undefined;
+  juchuHonbanbiData: JuchuKizaiHonbanbiValues[] | undefined;
   edit: boolean;
   lockData: LockValues | null;
 }) => {
@@ -170,35 +186,23 @@ const EquipmentOrderDetail = (props: {
   );
   // 機材在庫リスト
   const [eqStockList, setEqStockList] = useState<StockTableValues[][]>(props.eqStockData ? props.eqStockData : []);
+  // 受注機材明細リスト
+  const [juchuKizaiMeisaiList, setJuchuKizaiMeisaiList] = useState<JuchuKizaiMeisaiValues[]>(
+    props.juchuKizaiMeisaiData ? props.juchuKizaiMeisaiData : []
+  );
+  // 受注本番日リスト
+  const [juchuHonbanbiList, setJuchuHonbanbiList] = useState<JuchuKizaiHonbanbiValues[]>(
+    props.juchuHonbanbiData ? props.juchuHonbanbiData : []
+  );
 
-  console.log(eqList);
-
-  // context
-  const { setIsDirty, setLock, setLockShubetu, setHeadId } = useDirty();
-
-  // KICS出庫日
-  const [startKICSDate, setStartKICSDate] = useState<Date | null>(null);
-  // YARD出庫日
-  const [startYARDDate, setStartYARDDate] = useState<Date | null>(null);
-  // KICS入庫日
-  const [endKICSDate, setEndKICSDate] = useState<Date | null>(null);
-  // YARD入庫日
-  const [endYARDDate, setEndYARDDate] = useState<Date | null>(null);
   // 出庫日
-  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [shukoDate, setShukoDate] = useState<Date | null>(props.shukoDate);
   // 入庫日
-  const [endDate, setEndDate] = useState<Date | null>(null);
+  const [nyukoDate, setNyukoDate] = useState<Date | null>(props.nyukoDate);
   // 出庫日から入庫日
-  const [dateRange, setDateRange] = useState<string[]>(getRange(startDate, endDate));
+  const [dateRange, setDateRange] = useState<string[]>(props.dateRange);
   // カレンダー選択日
-  const [selectDate, setSelectDate] = useState<Date>(new Date());
-
-  // ヘッダー用の日付
-  const [dateHeader, setDateHeader] = useState<string[]>(/*getStockHeader(startDate)*/ []);
-  // ストックテーブルの行配列
-  const [stockRows, setStockRows] = useState<StockData[]>(/*getStockRow(stock, dateHeader.length)*/ []);
-  // 機材テーブルの行配列
-  const [equipmentRows, setEquipmentRows] = useState<Equipment[]>(/*data*/ []);
+  const [selectDate, setSelectDate] = useState<Date>(props.shukoDate ? props.shukoDate : new Date());
 
   // 仕込日
   const [preparation, setPreparation] = useState<EquipmentData[]>([]);
@@ -222,9 +226,12 @@ const EquipmentOrderDetail = (props: {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
+  // context
+  const { setIsDirty, setLock, setLockShubetu, setHeadId } = useDirty();
+
   // ref
   const dateRangeRef = useRef(dateRange);
-  const dateHeaderRef = useRef(dateHeader);
+  const eqStockListRef = useRef(eqStockList);
   const leftRef = useRef<HTMLDivElement>(null);
   const rightRef = useRef<HTMLDivElement>(null);
   const isSyncing = useRef(false);
@@ -247,7 +254,6 @@ const EquipmentOrderDetail = (props: {
       juchuKizaiHeadId: props.juchuKizaiHeadData.juchuKizaiHeadId,
       juchuKizaiHeadKbn: props.juchuKizaiHeadData.juchuKizaiHeadKbn,
       juchuHonbanbiQty: props.juchuKizaiHeadData.juchuHonbanbiQty,
-      zeiKbn: props.juchuKizaiHeadData.zeiKbn,
       nebikiAmt: props.juchuKizaiHeadData.nebikiAmt,
       mem: props.juchuKizaiHeadData.mem,
       headNam: props.juchuKizaiHeadData.headNam,
@@ -265,6 +271,25 @@ const EquipmentOrderDetail = (props: {
   /**
    * useEffect
    */
+  useEffect(() => {
+    setLockShubetu(1);
+    setHeadId(props.juchuHeadData.juchuHeadId);
+
+    if (eqList && eqList.length > 0 && eqStockList && eqStockList.length > 0) {
+      const updatedEqStockData = [...eqStockList];
+      const targetIndex = updatedEqStockData[0]
+        .map((d, index) => (dateRangeRef.current.includes(toISOStringYearMonthDay(d.calDat)) ? index : -1))
+        .filter((index) => index !== -1);
+      targetIndex.map((index) => {
+        updatedEqStockData.map((d, i) => {
+          d[index].zaikoQty = d[index].zaikoQty - eqList[i].planQty;
+        });
+      });
+      setEqStockList(updatedEqStockData);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     if (!user) return;
     setEdit(!props.edit || (props.lockData !== null && props.lockData.addUser !== user.name) ? false : true);
@@ -289,10 +314,31 @@ const EquipmentOrderDetail = (props: {
   }, [lockData, setLock]);
 
   useEffect(() => {
-    setLockShubetu(1);
-    setHeadId(props.juchuHeadData.juchuHeadId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const left = leftRef.current;
+    const right = rightRef.current;
+
+    if (left && right) {
+      left.addEventListener('scroll', () => syncScroll('left'));
+      right.addEventListener('scroll', () => syncScroll('right'));
+    }
+
+    return () => {
+      if (left && right) {
+        left.removeEventListener('scroll', () => syncScroll('left'));
+        right.removeEventListener('scroll', () => syncScroll('right'));
+      }
+    };
   }, []);
+
+  useEffect(() => {
+    console.log('dateRange変更');
+    dateRangeRef.current = dateRange;
+  }, [dateRange]);
+
+  useEffect(() => {
+    console.log('eqStockList変更');
+    eqStockListRef.current = eqStockList;
+  }, [eqStockList]);
 
   // 編集モード変更
   const handleEdit = async () => {
@@ -311,7 +357,7 @@ const EquipmentOrderDetail = (props: {
   };
 
   const onSubmit = async (data: JuchuKizaiHeadValues) => {
-    console.log('保存開始: ', data);
+    console.log('保存開始: ', data, eqStockList);
   };
 
   // 同期スクロール処理
@@ -337,65 +383,56 @@ const EquipmentOrderDetail = (props: {
     });
   };
 
-  useEffect(() => {
-    const left = leftRef.current;
-    const right = rightRef.current;
-
-    if (left && right) {
-      left.addEventListener('scroll', () => syncScroll('left'));
-      right.addEventListener('scroll', () => syncScroll('right'));
-    }
-
-    return () => {
-      if (left && right) {
-        left.removeEventListener('scroll', () => syncScroll('left'));
-        right.removeEventListener('scroll', () => syncScroll('right'));
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    console.log('dateRange変更');
-    dateRangeRef.current = dateRange;
-  }, [dateRange]);
-
-  useEffect(() => {
-    console.log('dateHeader変更');
-    dateHeaderRef.current = dateHeader;
-  }, [dateHeader]);
-
   /**
    * 日付選択カレンダー選択時
    * @param date カレンダー選択日付
    */
-  const handleDateChange = (date: Dayjs | null) => {
+  const handleDateChange = async (date: Dayjs | null) => {
     if (date !== null) {
       setSelectDate(date.toDate());
-      const updatedHeader = getStockHeader(date?.toDate());
-      const updatedRow = getStockRow(stock, updatedHeader.length);
-      setDateHeader(updatedHeader);
 
-      const targetIndex = updatedHeader
-        .map((date, index) => (dateRangeRef.current.includes(date) ? index : -1))
-        .filter((index) => index !== -1);
-      targetIndex.map((index) => {
-        updatedRow.map((date, i) => {
-          date.data[index] = stock[i] - equipmentRows[i].total;
+      // 受注機材idリスト
+      const ids = juchuKizaiMeisaiList?.map((data) => data.kizaiId);
+      // 機材数リスト
+      const planQtyList = props.juchuKizaiMeisaiData ? props.juchuKizaiMeisaiData.map((data) => data.planQty) : [0];
+      // 機材在庫データ
+      const updatedEqStockList: StockTableValues[][] = [];
+      if (ids) {
+        for (let i = 0; i < ids.length; i++) {
+          const stock: StockTableValues[] = await GetStockList(
+            props.juchuHeadData.juchuHeadId,
+            getValues('juchuKizaiHeadId'),
+            ids[i],
+            planQtyList[i],
+            subDays(date.toDate(), 1)
+          );
+          updatedEqStockList.push(stock);
+        }
+      }
+
+      if (eqList && eqList.length > 0 && eqStockList && eqStockList.length > 0) {
+        const targetIndex = updatedEqStockList[0]
+          .map((d, index) => (dateRange.includes(toISOStringYearMonthDay(d.calDat)) ? index : -1))
+          .filter((index) => index !== -1);
+        targetIndex.map((index) => {
+          updatedEqStockList.map((d, i) => {
+            d[index].zaikoQty = d[index].zaikoQty - eqList[i].planQty;
+          });
         });
-      });
-      setStockRows(updatedRow);
+        setEqStockList(updatedEqStockList);
+      }
 
       setAnchorEl(null);
     }
   };
   // 3か月前
   const handleBackDateChange = () => {
-    const date = subMonths(new Date(`2025/${dateHeader[1]}`), 3);
+    const date = subMonths(new Date(selectDate), 3);
     handleDateChange(dayjs(date));
   };
   // 3か月後
   const handleForwardDateChange = () => {
-    const date = addMonths(new Date(`2025/${dateHeader[1]}`), 3);
+    const date = addMonths(new Date(selectDate), 3);
     handleDateChange(dayjs(date));
   };
 
@@ -410,15 +447,19 @@ const EquipmentOrderDetail = (props: {
     setAnchorEl(null);
   };
 
+  const handleCellDateClear = (rowIndex: number) => {
+    setEqList((prev) => prev.map((row, i) => (i === rowIndex ? { ...row, idoDenDat: null } : row)));
+  };
+
   /**
    * 機材メモ入力時
    * @param rowIndex 入力された行番号
    * @param memo メモ内容
    */
   const handleMemoChange = (rowIndex: number, memo: string) => {
-    const updatedRows = [...equipmentRows];
-    updatedRows[rowIndex].memo = memo;
-    setEquipmentRows(updatedRows);
+    const updatedEqList = [...eqList];
+    updatedEqList[rowIndex].mem = memo;
+    setEqList(updatedEqList);
   };
 
   /**
@@ -428,19 +469,23 @@ const EquipmentOrderDetail = (props: {
    * @param spareValue 予備数
    * @param totalValue 合計
    */
-  const handleCellChange = (rowIndex: number, orderValue: number, spareValue: number, totalValue: number) => {
-    setEquipmentRows((prev) =>
-      prev.map((row, i) => (i === rowIndex ? { ...row, order: orderValue, spare: spareValue, total: totalValue } : row))
+  const handleCellChange = (rowIndex: number, planKizaiQty: number, planYobiQty: number, planQty: number) => {
+    const updatedEqStockData = eqStockListRef.current[rowIndex];
+    if (eqList && eqList.length > 0 && eqStockListRef.current && eqStockListRef.current.length > 0) {
+      const targetIndex = updatedEqStockData
+        .map((d, index) => (dateRange.includes(toISOStringYearMonthDay(d.calDat)) ? index : -1))
+        .filter((index) => index !== -1);
+      targetIndex.map((index) => {
+        updatedEqStockData[index].zaikoQty = updatedEqStockData[index].zaikoQty + eqList[rowIndex].planQty - planQty;
+      });
+    }
+    setEqStockList((prev) => prev.map((data, i) => (i === rowIndex ? [...updatedEqStockData] : data)));
+
+    setEqList((prev) =>
+      prev.map((data, i) =>
+        i === rowIndex ? { ...data, planKizaiQty: planKizaiQty, planYobiQty: planYobiQty, planQty: planQty } : data
+      )
     );
-    const updatedRow = getStockRow(stock, dateHeaderRef.current.length);
-    const updatedData = updatedRow[rowIndex].data;
-    const targetIndex = dateHeaderRef.current
-      .map((date, index) => (dateRangeRef.current.includes(date) ? index : -1))
-      .filter((index) => index !== -1);
-    targetIndex.map((index) => {
-      updatedData[index] = stock[rowIndex] - totalValue;
-    });
-    setStockRows((prev) => prev.map((row, i) => (i === rowIndex ? { ...row, data: updatedData } : row)));
   };
 
   /**
@@ -451,7 +496,7 @@ const EquipmentOrderDetail = (props: {
   const handleCellDateChange = (rowIndex: number, date: Dayjs | null) => {
     if (date !== null) {
       const newDate = date.toDate();
-      setEquipmentRows((prev) => prev.map((row, i) => (i === rowIndex ? { ...row, date: newDate } : row)));
+      setEqList((prev) => prev.map((row, i) => (i === rowIndex ? { ...row, idoDenDat: newDate } : row)));
     }
   };
 
@@ -459,34 +504,17 @@ const EquipmentOrderDetail = (props: {
    * KICS出庫日時変更時
    * @param newDate KICS出庫日
    */
-  const handleKICSStartChange = (newDate: Dayjs | null) => {
+  const handleKicsShukoChange = async (newDate: Dayjs | null) => {
     if (newDate === null) return;
-    setStartKICSDate(newDate?.toDate());
     setValue('kicsShukoDat', newDate.toDate());
-    //onChange(newDate.toDate());
+    const yardShukoDat = getValues('yardShukoDat');
 
-    if (startYARDDate === null || newDate.toDate() < startYARDDate) {
-      const updatedHeader = getStockHeader(newDate?.toDate());
-      const updatedDateRange = getRange(newDate?.toDate(), endDate);
-      const updatedRow = getStockRow(stock, updatedHeader.length);
-      setDateHeader(updatedHeader);
-      setDateRange(updatedDateRange);
-
-      const targetIndex = updatedHeader
-        .map((date, index) => (updatedDateRange.includes(date) ? index : -1))
-        .filter((index) => index !== -1);
-      targetIndex.map((index) => {
-        updatedRow.map((date, i) => {
-          date.data[index] = stock[i] - equipmentRows[i].total;
-        });
-      });
-      setStockRows(updatedRow);
-      setStartDate(newDate.toDate());
+    if (yardShukoDat === null || newDate.toDate() <= yardShukoDat) {
+      setShukoDate(newDate.toDate());
     }
-
-    if (Object.keys(equipmentRows).length > 0 && startYARDDate === null) {
-      setEquipmentRows((prev) =>
-        prev.map((row) => (row.place === 'Y' ? { ...row, date: subDays(newDate.toDate(), 2) } : row))
+    if (Object.keys(eqList).length > 0 && yardShukoDat === null) {
+      setEqList((prev) =>
+        prev.map((row) => (row.shozokuId === 2 ? { ...row, idoDenDat: subDays(newDate.toDate(), 2) } : row))
       );
     }
   };
@@ -495,33 +523,17 @@ const EquipmentOrderDetail = (props: {
    * YARD出庫日時変更時
    * @param newDate YARD出庫日
    */
-  const handleYARDStartChange = (newDate: Dayjs | null) => {
+  const handleYardShukoChange = async (newDate: Dayjs | null) => {
     if (newDate === null) return;
-    setStartYARDDate(newDate?.toDate());
     setValue('yardShukoDat', newDate.toDate());
+    const kicsShukoDat = getValues('kicsShukoDat');
 
-    if (startKICSDate === null || newDate.toDate() < startKICSDate) {
-      const updatedHeader = getStockHeader(newDate?.toDate());
-      const updatedDateRange = getRange(newDate?.toDate(), endDate);
-      const updatedRow = getStockRow(stock, updatedHeader.length);
-      setDateHeader(updatedHeader);
-      setDateRange(updatedDateRange);
-
-      const targetIndex = updatedHeader
-        .map((date, index) => (updatedDateRange.includes(date) ? index : -1))
-        .filter((index) => index !== -1);
-      targetIndex.map((index) => {
-        updatedRow.map((date, i) => {
-          date.data[index] = stock[i] - equipmentRows[i].total;
-        });
-      });
-      setStockRows(updatedRow);
-      setStartDate(newDate.toDate());
+    if (kicsShukoDat === null || newDate.toDate() <= kicsShukoDat) {
+      setShukoDate(newDate.toDate());
     }
-
-    if (Object.keys(equipmentRows).length > 0 && startKICSDate === null) {
-      setEquipmentRows((prev) =>
-        prev.map((row) => (row.place === 'Y' ? { ...row, date: subDays(newDate.toDate(), 2) } : row))
+    if (Object.keys(eqList).length > 0 && kicsShukoDat === null) {
+      setEqList((prev) =>
+        prev.map((row) => (row.shozokuId === 1 ? { ...row, idoDenDat: subDays(newDate.toDate(), 2) } : row))
       );
     }
   };
@@ -530,26 +542,14 @@ const EquipmentOrderDetail = (props: {
    * KICS入庫日時変更時
    * @param newDate KICS入庫日
    */
-  const handleKICSEndChange = (newDate: Dayjs | null) => {
+  const handleKicsNyukoChange = async (newDate: Dayjs | null) => {
     if (newDate === null) return;
-    setEndKICSDate(newDate?.toDate());
+    //setEndKICSDate(newDate?.toDate());
     setValue('kicsNyukoDat', newDate.toDate());
+    const yardNyukoDat = getValues('yardNyukoDat');
 
-    if (endYARDDate === null || newDate.toDate() > endYARDDate) {
-      const updatedDateRange = getRange(startDate, newDate?.toDate());
-      const updatedRow = getStockRow(stock, dateHeader.length);
-      setDateRange(updatedDateRange);
-
-      const targetIndex = dateHeaderRef.current
-        .map((date, index) => (updatedDateRange.includes(date) ? index : -1))
-        .filter((index) => index !== -1);
-      targetIndex.map((index) => {
-        updatedRow.map((date, i) => {
-          date.data[index] = stock[i] - equipmentRows[i].total;
-        });
-      });
-      setStockRows(updatedRow);
-      setEndDate(newDate.toDate());
+    if (yardNyukoDat === null || newDate.toDate() >= yardNyukoDat) {
+      setNyukoDate(newDate.toDate());
     }
   };
 
@@ -557,26 +557,14 @@ const EquipmentOrderDetail = (props: {
    * YARD入庫日時変更時
    * @param newDate YARD入庫日
    */
-  const handleYARDEndChange = (newDate: Dayjs | null) => {
+  const handleYardNyukoChange = (newDate: Dayjs | null) => {
     if (newDate === null) return;
-    setEndYARDDate(newDate?.toDate());
+    //setEndYARDDate(newDate?.toDate());
     setValue('yardNyukoDat', newDate.toDate());
+    const kicsNyukoDat = getValues('kicsNyukoDat');
 
-    if (endKICSDate === null || newDate.toDate() > endKICSDate) {
-      const updatedDateRange = getRange(startDate, newDate?.toDate());
-      const updatedRow = getStockRow(stock, dateHeader.length);
-      setDateRange(updatedDateRange);
-
-      const targetIndex = dateHeaderRef.current
-        .map((date, index) => (updatedDateRange.includes(date) ? index : -1))
-        .filter((index) => index !== -1);
-      targetIndex.map((index) => {
-        updatedRow.map((date, i) => {
-          date.data[index] = stock[i] - equipmentRows[i].total;
-        });
-      });
-      setStockRows(updatedRow);
-      setEndDate(newDate.toDate());
+    if (kicsNyukoDat === null || newDate.toDate() >= kicsNyukoDat) {
+      setNyukoDate(newDate.toDate());
     }
   };
 
@@ -591,42 +579,48 @@ const EquipmentOrderDetail = (props: {
    * @param actualDates 本番日
    * @param actualMemo 本番日メモ
    */
-  const handleSave = (
-    preparationDates: string[],
-    preparationMemo: string[],
-    RHDates: string[],
-    RHMemo: string[],
-    GPDates: string[],
-    GPMemo: string[],
-    actualDates: string[],
-    actualMemo: string[]
-  ) => {
-    setPreparation(
-      preparationDates.map((date, index) => ({
-        date: date,
-        memo: preparationMemo[index] ?? '',
-      }))
-    );
-    setRH(
-      RHDates.map((date, index) => ({
-        date: date,
-        memo: RHMemo[index] ?? '',
-      }))
-    );
-    setGP(
-      GPDates.map((date, index) => ({
-        date: date,
-        memo: GPMemo[index] ?? '',
-      }))
-    );
-    setActual(
-      actualDates.map((date, index) => ({
-        date: date,
-        memo: actualMemo[index] ?? '',
-      }))
-    );
-    const range = preparationDates.concat(RHDates, GPDates, actualDates);
-    setActualDateRange(range.sort());
+  const handleSave = async () => {
+    if (!user) return;
+    // 受注ヘッダーid
+    const juchuHeadId = getValues('juchuHeadId');
+    // 受注機材ヘッダーid
+    const juchuKizaiHeadId = getValues('juchuKizaiHeadId');
+    // 受注機材idリスト
+    const ids = juchuKizaiMeisaiList.map((data) => data.kizaiId);
+    // 受注機材合計数リスト
+    const planQtys = juchuKizaiMeisaiList.map((data) => data.planQty);
+
+    // 機材在庫データ
+    const updatedEqStockData: StockTableValues[][] = [];
+    if (ids && planQtys) {
+      if (!shukoDate) return <div>データに不備があります。</div>;
+      for (let i = 0; i < ids.length; i++) {
+        const stock: StockTableValues[] = await GetStockList(
+          juchuHeadId,
+          juchuKizaiHeadId,
+          ids[i],
+          planQtys[i],
+          subDays(shukoDate, 1)
+        );
+        updatedEqStockData.push(stock);
+      }
+    }
+    if (eqList && eqList.length > 0 && eqStockList && eqStockList.length > 0) {
+      const targetIndex = updatedEqStockData[0]
+        .map((d, index) => (dateRangeRef.current.includes(toISOStringYearMonthDay(d.calDat)) ? index : -1))
+        .filter((index) => index !== -1);
+      targetIndex.map((index) => {
+        updatedEqStockData.map((d, i) => {
+          d[index].zaikoQty = d[index].zaikoQty - eqList[i].planQty;
+        });
+      });
+      setEqStockList(updatedEqStockData);
+    }
+    // 受注本番日データ
+    const updateJuchuHonbanbiData = await GetHonbanbi(juchuHeadId, juchuKizaiHeadId);
+    if (updateJuchuHonbanbiData) {
+      setJuchuHonbanbiList(updateJuchuHonbanbiData);
+    }
     setDateSelectionDialogOpne(false);
   };
 
@@ -780,6 +774,7 @@ const EquipmentOrderDetail = (props: {
                 type="submit"
                 onClick={(e) => {
                   e.stopPropagation();
+                  console.log(juchuHonbanbiList);
                 }}
                 disabled={!edit}
               >
@@ -818,22 +813,6 @@ const EquipmentOrderDetail = (props: {
                 ></TextFieldElement>
                 <Typography>円</Typography>
               </Grid2>
-              <Grid2 container alignItems="center">
-                <Typography>税区分</Typography>
-                <FormControl size="small" sx={{ width: '8%', minWidth: '80px' }}>
-                  <Controller
-                    name="zeiKbn"
-                    control={control}
-                    render={({ field }) => (
-                      <Select {...field} disabled={!edit}>
-                        <MenuItem value={0}>無し</MenuItem>
-                        <MenuItem value={1}>内税</MenuItem>
-                        <MenuItem value={2}>外税</MenuItem>
-                      </Select>
-                    )}
-                  />
-                </FormControl>
-              </Grid2>
             </Grid2>
             <Grid2 container p={2} spacing={2}>
               <Grid2 width={400}>
@@ -848,7 +827,7 @@ const EquipmentOrderDetail = (props: {
                         onBlur={field.onBlur}
                         date={field.value}
                         maxDate={new Date(actualDateRange[0])}
-                        onChange={handleKICSStartChange}
+                        onChange={handleKicsShukoChange}
                         fieldstate={fieldState}
                         disabled={!edit}
                         onClear={() => field.onChange(null)}
@@ -879,7 +858,7 @@ const EquipmentOrderDetail = (props: {
                         onBlur={field.onBlur}
                         date={field.value}
                         maxDate={new Date(actualDateRange[0])}
-                        onChange={handleYARDStartChange}
+                        onChange={handleYardShukoChange}
                         fieldstate={fieldState}
                         disabled={!edit}
                         onClear={() => field.onChange(null)}
@@ -913,7 +892,7 @@ const EquipmentOrderDetail = (props: {
                         onBlur={field.onBlur}
                         date={field.value}
                         minDate={new Date(actualDateRange[actualDateRange.length - 1])}
-                        onChange={handleKICSEndChange}
+                        onChange={handleKicsNyukoChange}
                         fieldstate={fieldState}
                         disabled={!edit}
                         onClear={() => field.onChange(null)}
@@ -944,7 +923,7 @@ const EquipmentOrderDetail = (props: {
                         onBlur={field.onBlur}
                         date={field.value}
                         minDate={new Date(actualDateRange[actualDateRange.length - 1])}
-                        onChange={handleYARDEndChange}
+                        onChange={handleYardNyukoChange}
                         fieldstate={fieldState}
                         disabled={!edit}
                         onClear={() => field.onChange(null)}
@@ -969,6 +948,32 @@ const EquipmentOrderDetail = (props: {
               <Grid2 container alignItems="center" py={1}>
                 <Typography>メモ</Typography>
                 <TextFieldElement name="mem" control={control} multiline rows={3} disabled={!edit}></TextFieldElement>
+              </Grid2>
+              <Box display="flex" alignItems="center" p={2}>
+                <Typography>本番日数</Typography>
+                <TextFieldElement
+                  name="juchuHonbanbiQty"
+                  control={control}
+                  type="number"
+                  sx={{
+                    width: '5%',
+                    minWidth: '60px',
+                    ml: 2,
+                    '& .MuiInputBase-input': {
+                      textAlign: 'right',
+                    },
+                    '& input[type=number]::-webkit-inner-spin-button': {
+                      WebkitAppearance: 'none',
+                      margin: 0,
+                    },
+                  }}
+                  disabled={!edit}
+                ></TextFieldElement>
+                <Typography marginLeft={1}>日</Typography>
+              </Box>
+              <Grid2 container alignItems="center" spacing={2}>
+                <Typography>入出庫ステータス</Typography>
+                <TextField disabled defaultValue={'準備中'}></TextField>
               </Grid2>
             </Grid2>
           </AccordionDetails>
@@ -1015,13 +1020,14 @@ const EquipmentOrderDetail = (props: {
                   rows={eqList}
                   onChange={handleCellChange}
                   handleCellDateChange={handleCellDateChange}
+                  handleCellDateClear={handleCellDateClear}
                   handleMemoChange={handleMemoChange}
                   ref={leftRef}
                 />
               </Box>
             </Box>
             <Box
-              display={Object.keys(eqList).length > 0 ? 'block' : 'none'}
+              display={Object.keys(eqStockList).length > 0 ? 'block' : 'none'}
               overflow="auto"
               sx={{ width: { xs: '60%', sm: '60%', md: 'auto' } }}
             >
@@ -1044,12 +1050,10 @@ const EquipmentOrderDetail = (props: {
                 </Button>
               </Box>
               <StockTable
-                header={dateHeader}
-                rows={stockRows}
                 eqStockList={eqStockList}
                 dateRange={dateRange}
-                startDate={startDate}
-                endDate={endDate}
+                shukoDate={shukoDate}
+                nyukoDate={nyukoDate}
                 preparation={preparation}
                 RH={RH}
                 GP={GP}
@@ -1062,28 +1066,6 @@ const EquipmentOrderDetail = (props: {
         {/*本番日*/}
         <Paper variant="outlined" sx={{ mt: 2 }}>
           <Box>
-            <Box display="flex" alignItems="center" p={2}>
-              <Typography>本番日数</Typography>
-              <TextFieldElement
-                name="juchuHonbanbiQty"
-                control={control}
-                type="number"
-                sx={{
-                  width: '5%',
-                  minWidth: '60px',
-                  ml: 2,
-                  '& .MuiInputBase-input': {
-                    textAlign: 'right',
-                  },
-                  '& input[type=number]::-webkit-inner-spin-button': {
-                    WebkitAppearance: 'none',
-                    margin: 0,
-                  },
-                }}
-                disabled={!edit}
-              ></TextFieldElement>
-              <Typography marginLeft={1}>日</Typography>
-            </Box>
             <Box sx={styles.container}>
               <Typography marginRight={{ xs: 2, sm: 9, md: 9, lg: 9 }} whiteSpace="nowrap">
                 本番日
@@ -1093,12 +1075,12 @@ const EquipmentOrderDetail = (props: {
               </Button>
               <Dialog open={dateSelectionDialogOpne} fullScreen sx={{ zIndex: 1201 }}>
                 <DateSelectDialog
-                  startDate={startDate}
-                  endDate={endDate}
-                  preparation={preparation}
-                  RH={RH}
-                  GP={GP}
-                  actual={actual}
+                  userNam={user.name}
+                  juchuHeadId={getValues('juchuHeadId')}
+                  juchuKizaiHeadId={getValues('juchuKizaiHeadId')}
+                  shukoDate={shukoDate}
+                  nyukoDate={nyukoDate}
+                  juchuHonbanbiList={juchuHonbanbiList}
                   onClose={handleCloseDateDialog}
                   onSave={handleSave}
                 />
@@ -1123,7 +1105,21 @@ const EquipmentOrderDetail = (props: {
               ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
               width={{ md: '50%' }}
             >
-              {preparation.map((data, index) => (
+              {juchuHonbanbiList &&
+                juchuHonbanbiList.map(
+                  (data, index) =>
+                    data.juchuHonbanbiShubetuId === 10 && (
+                      <Grid2 key={index} container display="flex" flexDirection="row">
+                        <Grid2 size={5}>
+                          <Typography>{toISOStringYearMonthDay(data.juchuHonbanbiDat)}</Typography>
+                        </Grid2>
+                        <Grid2 size={7}>
+                          <Typography sx={{ wordBreak: 'break-word', whiteSpace: 'wrap' }}>{data.mem}</Typography>
+                        </Grid2>
+                      </Grid2>
+                    )
+                )}
+              {/* {preparation.map((data, index) => (
                 <Grid2 key={index} container display="flex" flexDirection="row">
                   <Grid2 size={5}>
                     <Typography>{data.date}</Typography>
@@ -1132,7 +1128,7 @@ const EquipmentOrderDetail = (props: {
                     <Typography sx={{ wordBreak: 'break-word', whiteSpace: 'wrap' }}>{data.memo}</Typography>
                   </Grid2>
                 </Grid2>
-              ))}
+              ))} */}
             </Grid2>
             <Grid2
               container
@@ -1161,7 +1157,21 @@ const EquipmentOrderDetail = (props: {
               ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
               width={{ md: '50%' }}
             >
-              {RH.map((data, index) => (
+              {juchuHonbanbiList &&
+                juchuHonbanbiList.map(
+                  (data, index) =>
+                    data.juchuHonbanbiShubetuId === 20 && (
+                      <Grid2 key={index} container display="flex" flexDirection="row">
+                        <Grid2 size={5}>
+                          <Typography>{toISOStringYearMonthDay(data.juchuHonbanbiDat)}</Typography>
+                        </Grid2>
+                        <Grid2 size={7}>
+                          <Typography sx={{ wordBreak: 'break-word', whiteSpace: 'wrap' }}>{data.mem}</Typography>
+                        </Grid2>
+                      </Grid2>
+                    )
+                )}
+              {/* {RH.map((data, index) => (
                 <Grid2 key={index} container display="flex" flexDirection="row">
                   <Grid2 size={5}>
                     <Typography>{data.date}</Typography>
@@ -1170,7 +1180,7 @@ const EquipmentOrderDetail = (props: {
                     <Typography sx={{ wordBreak: 'break-word' }}>{data.memo}</Typography>
                   </Grid2>
                 </Grid2>
-              ))}
+              ))} */}
             </Grid2>
             <Grid2
               container
@@ -1199,7 +1209,21 @@ const EquipmentOrderDetail = (props: {
               ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
               width={{ md: '50%' }}
             >
-              {GP.map((data, index) => (
+              {juchuHonbanbiList &&
+                juchuHonbanbiList.map(
+                  (data, index) =>
+                    data.juchuHonbanbiShubetuId === 30 && (
+                      <Grid2 key={index} container display="flex" flexDirection="row">
+                        <Grid2 size={5}>
+                          <Typography>{toISOStringYearMonthDay(data.juchuHonbanbiDat)}</Typography>
+                        </Grid2>
+                        <Grid2 size={7}>
+                          <Typography sx={{ wordBreak: 'break-word', whiteSpace: 'wrap' }}>{data.mem}</Typography>
+                        </Grid2>
+                      </Grid2>
+                    )
+                )}
+              {/* {GP.map((data, index) => (
                 <Grid2 key={index} container display="flex" flexDirection="row">
                   <Grid2 size={5}>
                     <Typography>{data.date}</Typography>
@@ -1208,7 +1232,7 @@ const EquipmentOrderDetail = (props: {
                     <Typography sx={{ wordBreak: 'break-word' }}>{data.memo}</Typography>
                   </Grid2>
                 </Grid2>
-              ))}
+              ))} */}
             </Grid2>
             <Grid2
               container
@@ -1237,7 +1261,21 @@ const EquipmentOrderDetail = (props: {
               ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
               width={{ md: '50%' }}
             >
-              {actual.map((data, index) => (
+              {juchuHonbanbiList &&
+                juchuHonbanbiList.map(
+                  (data, index) =>
+                    data.juchuHonbanbiShubetuId === 40 && (
+                      <Grid2 key={index} container display="flex" flexDirection="row">
+                        <Grid2 size={5}>
+                          <Typography>{toISOStringYearMonthDay(data.juchuHonbanbiDat)}</Typography>
+                        </Grid2>
+                        <Grid2 size={7}>
+                          <Typography sx={{ wordBreak: 'break-word', whiteSpace: 'wrap' }}>{data.mem}</Typography>
+                        </Grid2>
+                      </Grid2>
+                    )
+                )}
+              {/* {actual.map((data, index) => (
                 <Grid2 key={index} container display="flex" flexDirection="row">
                   <Grid2 size={5}>
                     <Typography>{data.date}</Typography>
@@ -1246,11 +1284,7 @@ const EquipmentOrderDetail = (props: {
                     <Typography sx={{ wordBreak: 'break-word' }}>{data.memo}</Typography>
                   </Grid2>
                 </Grid2>
-              ))}
-            </Grid2>
-            <Grid2 container alignItems="center" spacing={2} p={2}>
-              <Typography>入出庫ステータス</Typography>
-              <TextField disabled defaultValue={'準備中'}></TextField>
+              ))} */}
             </Grid2>
           </Box>
         </Paper>

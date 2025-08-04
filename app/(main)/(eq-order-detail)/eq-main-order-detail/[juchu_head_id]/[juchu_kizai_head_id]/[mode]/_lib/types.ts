@@ -6,7 +6,6 @@ export const JuchuKizaiHeadSchema = z
     juchuKizaiHeadId: z.number(),
     juchuKizaiHeadKbn: z.number(),
     juchuHonbanbiQty: z.number().nullable(),
-    zeiKbn: z.number(),
     nebikiAmt: z.number().nullable(),
     mem: z.string().nullable(),
     headNam: z.string().nullable(),
@@ -54,4 +53,12 @@ export type StockTableValues = {
   zaikoQty: number;
   juchuHonbanbiShubetuId: number;
   juchuHonbanbiColor: string;
+};
+
+export type JuchuKizaiHonbanbiValues = {
+  juchuHeadId: number;
+  juchuKizaiHeadId: number;
+  juchuHonbanbiShubetuId: number;
+  juchuHonbanbiDat: Date;
+  mem: string;
 };

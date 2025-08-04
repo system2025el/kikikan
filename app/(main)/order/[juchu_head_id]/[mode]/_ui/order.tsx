@@ -93,6 +93,8 @@ export const Order = (props: {
   // 合計金額
   const priceTotal = eqHeaderList!.reduce((sum, row) => sum + (row.shokei ?? 0), 0);
 
+  console.log('aaaaaaaaaaaaaaaaaaaaaaaa', props.order);
+
   /* useForm ------------------------- */
   const {
     watch,
