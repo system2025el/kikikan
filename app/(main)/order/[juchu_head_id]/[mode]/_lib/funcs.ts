@@ -330,6 +330,7 @@ export const GetEqHeaderList = async (juchuHeadId: number) => {
       keikoku: d.keikoku,
       oyaJuchuKizaiHeadId: d.oya_juchu_kizai_head_id,
       htKbn: d.ht_kbn,
+      juchuKizaiHeadKbn: d.juchu_kizai_head_kbn,
     }));
     return EqTableData;
   } catch (e) {

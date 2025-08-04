@@ -64,6 +64,7 @@ export type EqTableValues = {
   keikoku: string;
   oyaJuchuKizaiHeadId: number;
   htKbn: number;
+  juchuKizaiHeadKbn: number;
 };
 
 export type VehicleTableValues = {

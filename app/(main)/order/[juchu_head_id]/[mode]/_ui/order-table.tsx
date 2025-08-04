@@ -111,22 +111,22 @@ export const OrderEqTable: React.FC<OrderEqTableProps> = ({ orderEqRows, edit, o
                 <TableCell align="left">
                   <Button
                     href={
-                      row.oyaJuchuKizaiHeadId === 1
+                      row.juchuKizaiHeadKbn === 1
                         ? `/eq-main-order-detail/${row.juchuHeadId}/${row.juchuKizaiHeadId}/${mode}`
-                        : row.oyaJuchuKizaiHeadId === 2
+                        : row.juchuKizaiHeadKbn === 2
                           ? `/eq-return-order-detail/${row.juchuHeadId}/${row.juchuKizaiHeadId}/${mode}`
-                          : row.oyaJuchuKizaiHeadId === 3
+                          : row.juchuKizaiHeadKbn === 3
                             ? `/eq-keep-order-detail/${row.juchuHeadId}/${row.juchuKizaiHeadId}/${mode}`
                             : `/eq-main-order-detail/${row.juchuHeadId}/${row.juchuKizaiHeadId}/${mode}`
                     }
                     variant="text"
                     sx={{
                       color:
-                        row.oyaJuchuKizaiHeadId === 1
+                        row.juchuKizaiHeadKbn === 1
                           ? 'primary'
-                          : row.oyaJuchuKizaiHeadId === 2
+                          : row.juchuKizaiHeadKbn === 2
                             ? 'red'
-                            : row.oyaJuchuKizaiHeadId === 3
+                            : row.juchuKizaiHeadKbn === 3
                               ? 'green'
                               : 'primary',
                       whiteSpace: 'nowrap',
