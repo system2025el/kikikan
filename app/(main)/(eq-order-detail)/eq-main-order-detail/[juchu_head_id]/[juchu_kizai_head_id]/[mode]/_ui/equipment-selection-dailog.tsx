@@ -17,26 +17,43 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
   Typography,
 } from '@mui/material';
-import { grey } from '@mui/material/colors';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { TextFieldElement } from 'react-hook-form-mui';
+
+import { BackButton, CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
+import { getFilteredBumons } from '@/app/(main)/(masters)/bumons-master/_lib/funcs';
+import { getEqptsForEqptSelection, getFilteredEqpts } from '@/app/(main)/(masters)/eqpt-master/_lib/funcs';
 
 import { bundleData } from '../_lib/eqdata';
-import { EquipmentCategoriesTable } from './equipment-category-table';
-import { EquipmentTable } from './equipments-table';
+import { EqptBumonsTable } from './equipment-category-table';
+import { EqptTable } from './equipments-table';
 
-export const EquipmentSelectionDialog = (props: { handleCloseDialog: () => void }) => {
-  const { handleCloseDialog } = props;
+export const EqptSelectionDialog = ({ handleCloseDialog }: { handleCloseDialog: () => void }) => {
+  /* useState ------------------------- */
+  /* 選ばれている機材の配列 */
   const [eqSelected, setSelectedEq] = useState<readonly number[]>([]);
-
+  /* セットオプションのダイアログ開閉 */
   const [bundleDialogOpen, setBundleDialogOpen] = useState(false);
+  /* 選択されている部門 */
+  const [selectedBumon, setSelectedBumon] = useState(-100);
+  /*  */
+  const [theEqpts, setTheEqpts] = useState<EqptSelection[]>([]);
+
+  /* useform ------------------------------- */
+  const { handleSubmit, control, watch } = useForm({ defaultValues: { query: '' } });
+  const query = watch('query');
+
+  /* methods ------------------------------ */
+
   const handleClickEqSelected = () => {
     if (eqSelected.length !== 0) {
       setBundleDialogOpen(true);
     }
   };
+
   const handleCloseBundle = () => {
     setBundleDialogOpen(false);
     handleCloseDialog();
@@ -58,32 +75,55 @@ export const EquipmentSelectionDialog = (props: { handleCloseDialog: () => void 
     setSelectedEq(newSelected);
   };
 
-  const [selectedCategory, setSelectedCategory] = useState(-100);
-
-  const handleClickCategory = (id: number) => {
-    setSelectedCategory(id);
+  const handleClickBumon = (id: number) => {
+    setSelectedBumon(id);
   };
+
+  /* 検索押下時処理 */
+  const onSubmit = () => {
+    console.log('Push serch');
+  };
+
+  /* useeffect ------------------------ */
+  useEffect(() => {
+    console.log('★★★★★★★★★★★★★★★★★★★★★');
+    const getEqpts = async () => {
+      if (query === '') {
+        const a = await getEqptsForEqptSelection();
+        setTheEqpts(a!);
+      } else {
+        console.log('what shoud i do here');
+      }
+    };
+    getEqpts();
+  }, [query]);
+
   return (
     <>
-      <Container disableGutters sx={{ p: 3, maxHeight: '100vh' }} maxWidth={'xl'}>
+      <Container disableGutters sx={{ pt: 1, px: 2, maxHeight: '100vh' }} maxWidth={'xl'}>
+        <Box justifySelf={'end'} mb={0.5}>
+          <Button onClick={() => handleCloseDialog()}>戻る</Button>
+        </Box>
         <Paper variant="outlined">
-          <Box width={'100%'} display={'flex'} p={2} justifyContent={'space-between'} alignItems={'center'}>
-            <Typography>機材選択</Typography>
-            <Button onClick={() => handleCloseDialog()}>戻る</Button>
+          <Box width={'100%'} display={'flex'} p={2}>
+            <Typography>顧客マスタ検索</Typography>
           </Box>
           <Divider />
-          <Box width={'100%'} p={2}>
-            <Stack justifyContent={'space-between'}>
-              <Typography variant="body2">検索</Typography>
-              <Button>
-                <SearchIcon />
-                検索
-              </Button>
-            </Stack>
-            <Stack mx={1}>
-              <Typography>機材名キーワード</Typography>
-              <TextField name="eqsearch" />
-            </Stack>
+          <Box width={'100%'} px={2} pb={1}>
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <Stack justifyContent={'space-between'} alignItems={'start'} mt={1}>
+                <Stack alignItems={'baseline'}>
+                  <Typography>キーワード</Typography>
+                  <TextFieldElement name="query" control={control} />
+                </Stack>
+                <Box alignSelf={'end'}>
+                  <Button type="submit">
+                    <SearchIcon />
+                    検索
+                  </Button>
+                </Box>
+              </Stack>
+            </form>
           </Box>
         </Paper>
         <Box display={'flex'} p={2} justifyContent={'end'}>
@@ -95,10 +135,10 @@ export const EquipmentSelectionDialog = (props: { handleCloseDialog: () => void 
 
         <Grid2 container display={'flex'} pb={2} spacing={1} justifyContent={'space-between'}>
           <Grid2 size={5}>
-            <EquipmentCategoriesTable selected={selectedCategory} handleClick={handleClickCategory} />
+            <EqptBumonsTable selected={selectedBumon} handleClick={handleClickBumon} />
           </Grid2>
           <Grid2 size={7}>
-            <EquipmentTable eqSelected={eqSelected} handleSelect={handleClick} categoryID={selectedCategory} />
+            <EqptTable eqSelected={eqSelected} datas={theEqpts} handleSelect={handleClick} bumonId={selectedBumon} />
           </Grid2>
         </Grid2>
       </Container>
@@ -175,4 +215,12 @@ const BundleDialog = (props: { handleClose: () => void }) => {
       </DialogContent>
     </>
   );
+};
+
+export type EqptSelection = {
+  kizaiId: number;
+  kizaiNam: string;
+  shozokuNam: string;
+  bumonId: number;
+  kizaiGrpCod: string;
 };

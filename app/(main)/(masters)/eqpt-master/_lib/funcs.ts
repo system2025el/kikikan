@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 
 import pool from '@/app/_lib/postgres/postgres';
 import { supabase } from '@/app/_lib/supabase/supabase';
+import { EqptSelection } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_ui/equipment-selection-dailog';
 
 import { getAllBumonSelections, getAllSelections } from '../../_lib/funs';
 import { emptyEqpt } from './datas';
@@ -347,6 +348,46 @@ export const createEqptHistory = async (data: EqptsMasterDialogValues, id: numbe
     console.log('DB接続エラー', error);
     throw error;
   }
+};
+
+/**
+ * 機材選択に表示するための機材リスト
+ * @param query 検索キーワード
+ * @returns
+ */
+export const getEqptsForEqptSelection = async (): Promise<EqptSelection[] | undefined> => {
+  try {
+    await pool.query(` SET search_path TO dev2;`);
+
+    const data = await pool.query(`
+      SELECT
+        k.kizai_id as "kizaiId",
+        k.kizai_nam as "kizaiNam",
+        s.shozoku_nam as "shozokuNam",
+        k.bumon_id as "bumonId",
+        k.kizai_grp_cod as "kizaiGrpCod"
+      FROM
+        dev2.m_kizai as k
+      INNER JOIN
+        dev2.m_shozoku as s
+      ON
+        k.shozoku_id = s.shozoku_id
+      WHERE
+        k.del_flg <> 1
+        AND k.dsp_flg <> 0
+      ORDER BY
+        k.kizai_grp_cod,
+        k.dsp_ord_num;
+      `);
+
+    if (data && data.rows) {
+      return data.rows;
+    }
+    return [];
+  } catch (e) {
+    console.error('例外が発生しました:', e);
+  }
+  revalidatePath('/eqpt-master');
 };
 
 // export const getAllEqpt = async () => {

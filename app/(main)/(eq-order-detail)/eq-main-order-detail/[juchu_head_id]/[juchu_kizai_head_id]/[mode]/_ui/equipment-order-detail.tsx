@@ -69,7 +69,7 @@ import {
 } from '../_lib/types';
 import { DateSelectDialog } from './date-selection-dialog';
 import { EqTable, StockTable } from './equipment-order-detail-table';
-import { EquipmentSelectionDialog } from './equipment-selection-dailog';
+import { EqptSelectionDialog } from './equipment-selection-dailog';
 
 export type EquipmentData = {
   date: string;
@@ -995,7 +995,7 @@ const EquipmentOrderDetail = (props: {
           <Divider />
 
           <Dialog open={EqSelectionDialogOpen} fullScreen>
-            <EquipmentSelectionDialog handleCloseDialog={handleCloseEqDialog} />
+            <EqptSelectionDialog handleCloseDialog={handleCloseEqDialog} />
           </Dialog>
 
           <Box display={'flex'} flexDirection="row" width="100%">

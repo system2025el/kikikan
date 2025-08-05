@@ -63,7 +63,8 @@ export const getBumonsSelection = async () => {
       .schema('dev2')
       .from('m_bumon')
       .select('bumon_id, bumon_nam')
-      .neq('del_flg', 1);
+      .neq('del_flg', 1)
+      .order('dsp_ord_num');
     if (!error) {
       if (!data || data.length === 0) {
         return [];
@@ -71,6 +72,39 @@ export const getBumonsSelection = async () => {
         const selectElements: SelectTypes[] = data.map((d) => ({
           id: d.bumon_id,
           label: d.bumon_nam,
+        }));
+        console.log('部門が', selectElements.length, '件');
+        return selectElements;
+      }
+    } else {
+      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
+      return [];
+    }
+  } catch (e) {
+    console.error('例外が発生しました:', e);
+  }
+};
+
+/**
+ * 機材選択用部門取得
+ * @returns
+ */
+export const getBumonsForEqptSelection = async () => {
+  try {
+    const { data, error } = await supabase
+      .schema('dev2')
+      .from('m_bumon')
+      .select('bumon_id, bumon_nam')
+      .neq('del_flg', 1)
+      .order('dsp_ord_num');
+    if (!error) {
+      if (!data || data.length === 0) {
+        return [];
+      } else {
+        const selectElements = data.map((d, index) => ({
+          id: d.bumon_id,
+          label: d.bumon_nam,
+          tblDspNum: index,
         }));
         console.log('部門が', selectElements.length, '件');
         return selectElements;
