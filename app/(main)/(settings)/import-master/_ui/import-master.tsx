@@ -8,13 +8,13 @@ import { BackButton } from '@/app/(main)/_ui/buttons';
 
 import { ImportData } from '../_lib/funcs';
 import { EqptImportRowType, EqptImportType, eqptSchema, parseNumber } from '../_lib/types';
-import { Section } from './section'; // Assuming section.tsx is in the same directory
+import { Section } from './section';
 
 export const ImportMaster = () => {
   const [eqptFileName, setEqptFileName] = useState<string>('ファイルが選ばれていません');
-  const [rfidFileName, setRfidFileName] = useState<string>('ファイルが選ばれていません'); // Initialize RFID filename
+  const [rfidFileName, setRfidFileName] = useState<string>('ファイルが選ばれていません');
   const [eqptData, setEqptData] = useState<EqptImportType[]>([]);
-  // const [rfidData, setRfidData] = useState<RFIDImportType[]>([]); // State for RFID data
+  // const [rfidData, setRfidData] = useState<RFIDImportType[]>([]);
   const [snackBarOpen, setSnackBarOpen] = useState(false);
   const [snackBarMessage, setSnackBarMessage] = useState('');
 
@@ -145,7 +145,6 @@ export const ImportMaster = () => {
 
   const handleImportRfid = () => {
     // console.log('Importing RFID Data:', rfidData);
-    // // Add your logic to send rfidData to the server or process it further
     // alert('RFIDマスタのインポートが実行されました (コンソールを確認)');
   };
 

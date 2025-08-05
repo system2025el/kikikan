@@ -1,6 +1,6 @@
 'use server';
 
-import { EqptImportType } from '../_ui/import-master';
+import { EqptImportType } from './types';
 
 export const ImportData = async (data: EqptImportType[]) => {
   console.log(data);
