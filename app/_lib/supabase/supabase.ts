@@ -3,18 +3,18 @@ import { createClient } from '@supabase/supabase-js';
  * https://supabase.com/docs/guides/api/using-custom-schemas
  * ----------------------------Supabaseで行い済み
  * -- スキーマの使用権を付与
- * GRANT USAGE ON SCHEMA dev3 TO anon;
+ * GRANT USAGE ON SCHEMA dev5 TO anon;
  * -- 未来のテーブルまでアクセス許可する
- * ALTER DEFAULT PRIVILEGES IN SCHEMA dev3
+ * ALTER DEFAULT PRIVILEGES IN SCHEMA dev5
   GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO anon;
  *
  * -- テーブルへのアクセス権（読み取りのみ）を付与（例: SELECT）
- * GRANT SELECT ON ALL TABLES IN SCHEMA dev3 TO anon;
+ * GRANT SELECT ON ALL TABLES IN SCHEMA dev5 TO anon;
  * ---------------------------解除する場合
- * REVOKE USAGE ON SCHEMA dev3 FROM anon;
- * REVOKE SELECT ON ALL TABLES IN SCHEMA dev3 FROM anon;
+ * REVOKE USAGE ON SCHEMA dev5 FROM anon;
+ * REVOKE SELECT ON ALL TABLES IN SCHEMA dev5 FROM anon;
  * -- 未来のテーブルに許可しない
- * ALTER DEFAULT PRIVILEGES IN SCHEMA dev3
+ * ALTER DEFAULT PRIVILEGES IN SCHEMA dev5
  * REVOKE SELECT, INSERT, UPDATE, DELETE ON TABLES FROM your_user_or_role;
  */
 
@@ -22,7 +22,7 @@ import { createClient } from '@supabase/supabase-js';
 // NULLの場合があると警告が出るため、末尾に！マークを付けてエラーを回避する
 // Create a single supabase client for interacting with your database
 export const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_ANON_KEY!, {
-  db: { schema: 'dev2, public, dev3' }, //使うスキーマ指定
+  db: { schema: 'dev2, public, dev5, dev4' }, //使うスキーマ指定
   auth: {
     autoRefreshToken: false,
     persistSession: false,

@@ -46,10 +46,7 @@ export const ImportMaster = () => {
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
       const jsonData: EqptImportRowType[] = utils.sheet_to_json(worksheet, { header: 1 });
-      const dataRows = jsonData.slice(1).map((row) => {
-        row.splice(14, 1); // O列が14番目で空欄なので削除
-        return row;
-      }); // ヘッダー行をスキップ
+      const dataRows = jsonData.slice(1);
       console.log('Excel内容 (生データ):', dataRows);
 
       if (type === 'eqpt') {
@@ -58,39 +55,39 @@ export const ImportMaster = () => {
         dataRows.forEach((row, index) => {
           // 置き換え
           const rowObject = {
-            rfid_tag_id: row[0],
-            kizai_id: row[1],
-            del_flg: row[2],
-            section_num: row[3],
-            kizai_nam: row[4],
-            el_num: row[5],
-            shozoku_id: row[6],
-            bld_cod: row[7],
-            tana_cod: row[8],
-            eda_cod: row[9],
-            kizai_grp_cod: row[10],
-            dsp_ord_num: row[11],
-            mem: row[12],
-            dai_bumon_nam: row[13],
-            shukei_bumon_nam: row[14],
-            dsp_flg: row[15],
-            ctn_flg: row[16],
-            def_dat_qty: row[17],
-            reg_amt: row[18],
-            rank_amt_1: row[19],
-            rank_amt_2: row[20],
-            rank_amt_3: row[21],
-            rank_amt_4: row[22],
-            rank_amt_5: row[23],
+            rfid_tag_id: String(row[0] ?? ''),
+            rfid_kizai_sts: parseNumber(row[1] ?? 0),
+            del_flg: parseNumber(row[2]),
+            section_num: row[3] !== null && row[3] !== undefined ? parseNumber(row[3]) : null,
+            kizai_nam: String(row[4] ?? ''),
+            el_num: row[5] !== null && row[5] !== undefined ? parseNumber(row[5]) : null,
+            shozoku_id: Number(parseNumber(row[6]) ?? 0),
+            bld_cod: String(row[7] ?? ''),
+            tana_cod: String(row[8] ?? ''),
+            eda_cod: String(row[9] ?? ''),
+            kizai_grp_cod: String(row[10] ?? ''),
+            dsp_ord_num: row[11] !== null && row[11] !== undefined ? parseNumber(row[11]) : null,
+            mem: String(row[12] ?? ''),
+            dai_bumon_nam: String(row[13] ?? ''),
+            bumon_nam: String(row[14] ?? ''),
+            shukei_bumon_nam: String(row[15] ?? ''),
+            dsp_flg: row[16] !== null && row[16] !== undefined ? parseNumber(row[16]) : null,
+            ctn_flg: row[17] !== null && row[17] !== undefined ? parseNumber(row[17]) : null,
+            def_dat_qty: row[18] !== null && row[18] !== undefined ? parseNumber(row[18]) : null,
+            reg_amt: parseNumber(row[19]),
+            rank_amt_1: row[20] !== null && row[20] !== undefined ? parseNumber(row[20]) : null,
+            rank_amt_2: row[21] !== null && row[21] !== undefined ? parseNumber(row[21]) : null,
+            rank_amt_3: row[22] !== null && row[22] !== undefined ? parseNumber(row[22]) : null,
+            rank_amt_4: row[23] !== null && row[23] !== undefined ? parseNumber(row[23]) : null,
+            rank_amt_5: row[24] !== null && row[24] !== undefined ? parseNumber(row[24]) : null,
           };
-
-          const result = eqptSchema.safeParse(rowObject); // safeParseで安全に検証
+          const result = eqptSchema.safeParse(rowObject);
           if (result.success) {
             parsedEqptData.push(result.data);
           } else {
             console.error(`機材マスタの行 ${index + 2} でバリデーションエラー:`, result.error.issues);
             hasError = true;
-            // エラーをユーザーに通知するなど、適切なエラーハンドリングをここに追加
+            // エラーハンドリング
           }
         });
         setEqptData(parsedEqptData);
@@ -190,104 +187,36 @@ export type EqptImportType = z.infer<typeof eqptSchema>;
 
 // 機材インポートタイプのZodスキーマ
 const eqptSchema = z.object({
-  rfid_tag_id: z.string().transform((val) => String(val || '')), // stringに変換
-  kizai_id: z.number().transform((val) => Number(val || 0)), // numberに変換
-  del_flg: z
-    .number()
-    .nullable()
-    .optional()
-    .transform((val) => (val === null || val === undefined ? null : Number(val))),
-  section_num: z
-    .number()
-    .nullable()
-    .optional()
-    .transform((val) => (val === null || val === undefined ? null : Number(val))),
-  kizai_nam: z.string().transform((val) => String(val || '')),
-  el_num: z
-    .number()
-    .nullable()
-    .optional()
-    .transform((val) => (val === null || val === undefined ? null : Number(val))),
-  shozoku_id: z.number().transform((val) => Number(val || 0)),
-  bld_cod: z
-    .string()
-    .optional()
-    .transform((val) => (val === null || val === undefined ? '' : String(val))),
-  tana_cod: z
-    .string()
-    .optional()
-    .transform((val) => (val === null || val === undefined ? '' : String(val))),
-  eda_cod: z
-    .string()
-    .optional()
-    .transform((val) => (val === null || val === undefined ? '' : String(val))),
-  kizai_grp_cod: z
-    .string()
-    .optional()
-    .transform((val) => (val === null || val === undefined ? '' : String(val))),
-  dsp_ord_num: z
-    .number()
-    .nullable()
-    .optional()
-    .transform((val) => (val === null || val === undefined ? null : Number(val))),
-  mem: z
-    .string()
-    .optional()
-    .transform((val) => (val === null || val === undefined ? '' : String(val))),
-  dai_bumon_nam: z
-    .string()
-    .optional()
-    .transform((val) => (val === null || val === undefined ? '' : String(val))),
-  shukei_bumon_nam: z
-    .string()
-    .optional()
-    .transform((val) => (val === null || val === undefined ? '' : String(val))),
-  dsp_flg: z
-    .number()
-    .nullable()
-    .optional()
-    .transform((val) => (val === null || val === undefined ? null : Number(val))),
-  ctn_flg: z
-    .number()
-    .nullable()
-    .optional()
-    .transform((val) => (val === null || val === undefined ? null : Number(val))),
-  def_dat_qty: z
-    .number()
-    .nullable()
-    .optional()
-    .transform((val) => (val === null || val === undefined ? null : Number(val))),
-  reg_amt: z.number().transform((val) => Number(val || 0)),
-  rank_amt_1: z
-    .number()
-    .nullable()
-    .optional()
-    .transform((val) => (val === null || val === undefined ? null : Number(val))),
-  rank_amt_2: z
-    .number()
-    .nullable()
-    .optional()
-    .transform((val) => (val === null || val === undefined ? null : Number(val))),
-  rank_amt_3: z
-    .number()
-    .nullable()
-    .optional()
-    .transform((val) => (val === null || val === undefined ? null : Number(val))),
-  rank_amt_4: z
-    .number()
-    .nullable()
-    .optional()
-    .transform((val) => (val === null || val === undefined ? null : Number(val))),
-  rank_amt_5: z
-    .number()
-    .nullable()
-    .optional()
-    .transform((val) => (val === null || val === undefined ? null : Number(val))),
+  rfid_tag_id: z.string(),
+  rfid_kizai_sts: z.number().nullable().optional(),
+  del_flg: z.number().nullable().optional(),
+  section_num: z.number().nullable().optional(),
+  kizai_nam: z.string(),
+  el_num: z.number().nullable().optional(),
+  shozoku_id: z.number().nullable().optional(),
+  bld_cod: z.string().optional(),
+  tana_cod: z.string().optional(),
+  eda_cod: z.string().optional(),
+  kizai_grp_cod: z.string().optional(),
+  dsp_ord_num: z.number().nullable().optional(),
+  mem: z.string().optional(),
+  dai_bumon_nam: z.string().optional(),
+  bumon_nam: z.string().optional(),
+  shukei_bumon_nam: z.string().optional(),
+  dsp_flg: z.number().nullable().optional(),
+  ctn_flg: z.number().nullable().optional(),
+  def_dat_qty: z.number().nullable().optional(),
+  reg_amt: z.number().nullable().optional(),
+  rank_amt_1: z.number().nullable().optional(),
+  rank_amt_2: z.number().nullable().optional(),
+  rank_amt_3: z.number().nullable().optional(),
+  rank_amt_4: z.number().nullable().optional(),
+  rank_amt_5: z.number().nullable().optional(),
 });
 
 type EqptImportRowType = [
   string, // rfid_tag_id
-  number, // kizai_id
+  number, // rfid_kizai_sts
   number | null, // del_flg
   number | null, // section_num
   string, // kizai_nam
@@ -300,6 +229,7 @@ type EqptImportRowType = [
   number | null, // dsp_ord_num
   string | undefined, // mem
   string | undefined, // dai_bumon_nam
+  string | undefined, //bumon_nam
   string | undefined, // shukei_bumon_nam
   number | null, // dsp_flg
   number | null, // ctn_flg
@@ -311,3 +241,15 @@ type EqptImportRowType = [
   number | null, // rank_amt_4
   number | null, // rank_amt_5
 ];
+
+const parseNumber = (input: number | null) => {
+  if (input === null) return null;
+  if (input === undefined) return null;
+  const inputString = String(input);
+  const normalizedString = inputString.replace(/[０-９]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 0xfee0));
+  const cleanString = normalizedString.replace(/[,\.]/g, '');
+  if (cleanString === '') return null;
+
+  const result = Number(cleanString);
+  return isNaN(result) ? null : result;
+};
