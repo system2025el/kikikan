@@ -1,5 +1,6 @@
 'use client';
 
+import { Box, Divider } from '@mui/material';
 import Checkbox from '@mui/material/Checkbox';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
@@ -8,87 +9,55 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
-import { eqData, eqList } from '../_lib/eqdata';
+import { SelectTypes } from '@/app/(main)/_ui/form-box';
 
-function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
-  if (b[orderBy] < a[orderBy]) {
-    return -1;
-  }
-  if (b[orderBy] > a[orderBy]) {
-    return 1;
-  }
-  return 0;
-}
+import { EqptSelection } from './equipment-selection-dailog';
 
-type Order = 'asc' | 'desc';
-
-function getComparator<Key extends keyof number | string>(
-  order: Order,
-  orderBy: Key
-): (a: { [key in Key]: number | string }, b: { [key in Key]: number | string }) => number {
-  return order === 'desc'
-    ? (a, b) => descendingComparator(a, b, orderBy)
-    : (a, b) => -descendingComparator(a, b, orderBy);
-}
-
-type HeadCell = {
-  id: keyof eqData;
-  label: string;
-};
-
-const headCells: readonly HeadCell[] = [
-  {
-    id: 'id',
-    label: '機材名',
-  },
-];
-
-type EnhancedTableProps = {
-  numSelected: number;
-};
-
-const EnhancedTableHead = (props: EnhancedTableProps) => {
-  const { numSelected } = props;
-
-  return (
-    <TableHead>
-      <TableRow>
-        <TableCell padding="checkbox"></TableCell>
-        <TableCell>機材名</TableCell>
-        <TableCell>在庫場所</TableCell>
-      </TableRow>
-    </TableHead>
-  );
-};
-
-export const EquipmentTable = (props: {
+export const EqptTable = ({
+  bumonId,
+  eqSelected,
+  datas,
+  handleSelect,
+}: {
   eqSelected: readonly number[];
-  categoryID: number;
+  bumonId: number;
+  datas: EqptSelection[] | undefined;
   handleSelect: (event: React.MouseEvent<unknown>, id: number) => void;
 }) => {
-  const { eqSelected, handleSelect, categoryID } = props;
+  /* useState ---------------------------------- */
 
-  const list = useMemo(() => eqList.filter((eq) => eq.cateId === categoryID), [categoryID]);
+  //表示するリスト
+  const list = useMemo(() => datas!.filter((eq) => eq.bumonId === bumonId), [bumonId, datas]);
 
   return (
     <TableContainer component={Paper} variant="outlined" square sx={{ height: '65vh' }}>
       <Table stickyHeader padding="none">
-        <EnhancedTableHead numSelected={eqSelected.length} />
+        <TableHead>
+          <TableRow>
+            <TableCell padding="checkbox"></TableCell>
+            <TableCell>機材名</TableCell>
+            <TableCell>在庫場所</TableCell>
+          </TableRow>
+        </TableHead>
         <TableBody>
           {list.map((row, index) => {
-            const isItemSelected = eqSelected.includes(row.id);
+            const isItemSelected = eqSelected.includes(row.kizaiId);
             const labelId = `enhanced-table-checkbox-${index}`;
+            const nextRow = list[index + 1];
 
-            return (
+            const rowsToRender = [];
+
+            // 通常行
+            rowsToRender.push(
               <TableRow
                 hover
-                onClick={(event) => handleSelect(event, row.id)}
+                onClick={(event) => handleSelect(event, row.kizaiId)}
                 role="checkbox"
                 aria-checked={isItemSelected}
                 tabIndex={-1}
-                key={row.id}
+                key={row.kizaiId}
                 selected={isItemSelected}
                 sx={{ cursor: 'pointer' }}
               >
@@ -96,11 +65,26 @@ export const EquipmentTable = (props: {
                   <Checkbox color="primary" checked={isItemSelected} />
                 </TableCell>
                 <TableCell component="th" id={labelId} scope="row" padding="none">
-                  {row.name}
+                  {row.kizaiNam}
                 </TableCell>
-                <TableCell>{row.loc}</TableCell>
+                <TableCell>{row.bumonId}</TableCell>
               </TableRow>
             );
+
+            // 次のグループが異なるなら区切り行を追加
+            if (!nextRow || row.bumonId !== nextRow.bumonId) {
+              rowsToRender.push(
+                <TableRow key={`divider-${index}`}>
+                  <TableCell colSpan={3}>
+                    <Box height={20} width={'100%'} alignContent={'center'}>
+                      <Divider sx={{ borderStyle: 'dashed', borderColor: 'CaptionText' }} />
+                    </Box>
+                  </TableCell>
+                </TableRow>
+              );
+            }
+
+            return rowsToRender;
           })}
         </TableBody>
       </Table>
