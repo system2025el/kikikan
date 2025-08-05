@@ -33,7 +33,7 @@ import { BackButton } from '@/app/(main)/_ui/buttons';
 import { Calendar, TestDate, toISOStringWithTimezoneMonthDay } from '@/app/(main)/_ui/date';
 import Time, { TestTime } from '@/app/(main)/_ui/time';
 
-import { EquipmentSelectionDialog } from '../../../../../eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_ui/equipment-selection-dailog';
+import { EqptSelectionDialog } from '../../../../../eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_ui/equipment-selection-dailog';
 import { getDateHeaderBackgroundColor, getDateRowBackgroundColor } from '../_lib/colorselect';
 import { data, stock } from '../_lib/data';
 import { ReturnEqTable, ReturnStockTable } from './equipment-return-order-detail-table';
@@ -713,7 +713,7 @@ export const EquipmentReturnOrderDetail = () => {
         </Box>
         <Divider />
         <Dialog open={EqSelectionDialogOpen} fullScreen>
-          <EquipmentSelectionDialog handleCloseDialog={handleCloseEqDialog} />
+          <EqptSelectionDialog handleCloseDialog={handleCloseEqDialog} />
         </Dialog>
 
         <Box display="flex" flexDirection="row" width="100%">
