@@ -11,8 +11,6 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import React, { useEffect, useMemo, useState } from 'react';
 
-import { SelectTypes } from '@/app/(main)/_ui/form-box';
-
 import { EqptSelection } from './equipment-selection-dailog';
 
 export const EqptTable = ({

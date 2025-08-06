@@ -28,7 +28,7 @@ import { getFilteredBumons } from '@/app/(main)/(masters)/bumons-master/_lib/fun
 import { getEqptsForEqptSelection, getFilteredEqpts } from '@/app/(main)/(masters)/eqpt-master/_lib/funcs';
 
 import { bundleData } from '../_lib/eqdata';
-import { EqptBumonsTable } from './equipment-category-table';
+import { EqptBumonsTable } from './equipment-bumons-table';
 import { EqptTable } from './equipments-table';
 
 export const EqptSelectionDialog = ({ handleCloseDialog }: { handleCloseDialog: () => void }) => {
@@ -39,7 +39,7 @@ export const EqptSelectionDialog = ({ handleCloseDialog }: { handleCloseDialog: 
   const [bundleDialogOpen, setBundleDialogOpen] = useState(false);
   /* 選択されている部門 */
   const [selectedBumon, setSelectedBumon] = useState(-100);
-  /*  */
+  /* 機材リスト全体 */
   const [theEqpts, setTheEqpts] = useState<EqptSelection[]>([]);
 
   /* useform ------------------------------- */
@@ -98,16 +98,6 @@ export const EqptSelectionDialog = ({ handleCloseDialog }: { handleCloseDialog: 
     };
     getEqpts();
   }, [query]);
-
-  useEffect(() => {
-    console.log('★★★★★★★★★★★★★★★★★★★★★');
-    const getEqpts = async () => {
-      const a = await getEqptsForEqptSelection();
-      console.log('機材リストだあああああああああああああああああ', a![0]);
-      setTheEqpts(a!);
-    };
-    getEqpts();
-  }, []);
 
   return (
     <>
