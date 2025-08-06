@@ -8,57 +8,27 @@ import { supabase } from '@/app/_lib/supabase/supabase';
 import { emptyCustomer } from './datas';
 import { CustomersMasterDialogValues, CustomersMasterTableValues } from './types';
 
-// export const getAllCustomer = async () => {
-//   try {
-//     const { data, error } = await supabase
-//       .schema('dev2')
-//       .from('m_kokyaku')
-//       .select('kokyaku_id , kokyaku_nam, adr_shozai, adr_tatemono, adr_sonota, tel, fax, mem,  dsp_flg')
-
-//       .order('dsp_ord_num');
-//     if (!error) {
-//       console.log('I got a datalist from db', data.length);
-
-//       const theData: CustomersMasterTableValues[] = data.map((d) => ({
-//         CustomerId: d.kokyaku_id,
-//         CustomerNam: d.kokyaku_nam,
-//         adrShozai: d.adr_shozai,
-//         adrTatemono: d.adr_tatemono,
-//         adrSonota: d.adr_sonota,
-//         tel: d.tel,
-//         fax: d.fax,
-//         mem: d.mem,
-//         dspFlg: d.dsp_flg,
-//       }));
-
-//       console.log(theData.length);
-//       return theData;
-//     } else {
-//       console.error('DBエラーです', error.message);
-//     }
-//   } catch (e) {
-//     console.log(e);
-//   }
-//   revalidatePath('/customers-master');
-//   redirect('/customers-master');
-// };
-
 /**
  * 顧客マスタテーブルのデータを取得する関数
  * @param query 検索キーワード
  * @returns {Promise<CustomersMasterTableValues[]>} 顧客マスタテーブルに表示するデータ（ 検索キーワードが空の場合は全て ）
  */
 export const getFilteredCustomers = async (query: string) => {
+  const builder = supabase
+    .schema('dev2')
+    .from('m_kokyaku')
+    .select('kokyaku_id, kokyaku_nam, adr_shozai, adr_tatemono, adr_sonota, tel, fax, mem, dsp_flg, del_flg')
+    .order('dsp_ord_num');
+
+  // queryが存在する場合のみあいまい検索、顧客名、顧客名かな、住所、電話番号、fax番号
+  if (query && query.trim() !== '') {
+    builder.or(
+      `kokyaku_nam.ilike.%${query}%, kana.ilike.%${query}%, adr_shozai.ilike.%${query}%, adr_tatemono.ilike.%${query}%, adr_sonota.ilike.%${query}%, tel.ilike.%${query}%, fax.ilike.%${query}%`
+    );
+  }
+
   try {
-    const { data, error } = await supabase
-      .schema('dev2')
-      .from('m_kokyaku')
-      .select('kokyaku_id, kokyaku_nam, adr_shozai, adr_tatemono, adr_sonota, tel,  fax, mem, dsp_flg, del_flg') // テーブルに表示するカラム
-      // あいまい検索、顧客名、顧客名かな、住所、電話番号、fax番号
-      .or(
-        `kokyaku_nam.ilike.%${query}%, kana.ilike.%${query}%, adr_shozai.ilike.%${query}%, adr_tatemono.ilike.%${query}%, adr_sonota.ilike.%${query}%, tel.ilike.%${query}%, fax.ilike.%${query}%`
-      )
-      .order('dsp_ord_num'); // 並び順
+    const { data, error } = await builder;
     if (!error) {
       console.log('I got a datalist from db', data.length);
       if (!data || data.length === 0) {

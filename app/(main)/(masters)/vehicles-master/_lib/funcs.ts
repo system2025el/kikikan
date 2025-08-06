@@ -8,41 +8,6 @@ import { supabase } from '@/app/_lib/supabase/supabase';
 import { emptyVeh } from './datas';
 import { VehsMasterDialogValues, VehsMasterTableValues } from './types';
 
-// export const getAllVeh = async () => {
-//   try {
-//     const { data, error } = await supabase
-//       .schema('dev2')
-//       .from('m_sharyo')
-//       .select('sharyo_id , sharyo_nam, adr_shozai, adr_tatemono, adr_sonota, tel, fax, mem,  dsp_flg')
-
-//       .order('dsp_ord_num');
-//     if (!error) {
-//       console.log('I got a datalist from db', data.length);
-
-//       const theData: VehsMasterTableValues[] = data.map((d) => ({
-//         VehId: d.sharyo_id,
-//         VehNam: d.sharyo_nam,
-//         adrShozai: d.adr_shozai,
-//         adrTatemono: d.adr_tatemono,
-//         adrSonota: d.adr_sonota,
-//         tel: d.tel,
-//         fax: d.fax,
-//         mem: d.mem,
-//         dspFlg: d.dsp_flg,
-//       }));
-
-//       console.log(theData.length);
-//       return theData;
-//     } else {
-//       console.error('DBエラーです', error.message);
-//     }
-//   } catch (e) {
-//     console.log(e);
-//   }
-//   revalidatePath('/vehicles-master');
-//   redirect('/vehicle-master');
-// };
-
 /**
  * 車両マスタテーブルのデータを取得する関数
  * @param query 検索キーワード
@@ -54,8 +19,6 @@ export const getFilteredVehs = async (query: string) => {
       .schema('dev2')
       .from('m_sharyo')
       .select('sharyo_id, sharyo_nam, mem, dsp_flg, del_flg') // テーブルに表示するカラム
-      // 検索、車両名 いらない気もするdelete
-      //   .or(`sharyo_nam.ilike.%${query}%,`)
       .order('dsp_ord_num'); // 並び順
     if (!error) {
       console.log('I got a datalist from db', data.length);

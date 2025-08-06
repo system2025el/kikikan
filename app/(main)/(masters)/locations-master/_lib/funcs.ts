@@ -8,57 +8,28 @@ import { supabase } from '@/app/_lib/supabase/supabase';
 import { emptyLoc } from './datas';
 import { LocsMasterDialogValues, LocsMasterTableValues } from './types';
 
-// export const getAllLoc = async () => {
-//   try {
-//     const { data, error } = await supabase
-//       .schema('dev2')
-//       .from('m_koenbasho')
-//       .select('koenbasho_id , koenbasho_nam, adr_shozai, adr_tatemono, adr_sonota, tel, fax, mem,  dsp_flg')
-
-//       .order('dsp_ord_num');
-//     if (!error) {
-//       console.log('I got a datalist from db', data.length);
-
-//       const theData: LocsMasterTableValues[] = data.map((d) => ({
-//         locId: d.koenbasho_id,
-//         locNam: d.koenbasho_nam,
-//         adrShozai: d.adr_shozai,
-//         adrTatemono: d.adr_tatemono,
-//         adrSonota: d.adr_sonota,
-//         tel: d.tel,
-//         fax: d.fax,
-//         mem: d.mem,
-//         dspFlg: d.dsp_flg,
-//       }));
-
-//       console.log(theData.length);
-//       return theData;
-//     } else {
-//       console.error('DBエラーです', error.message);
-//     }
-//   } catch (e) {
-//     console.log(e);
-//   }
-//   revalidatePath('/locations-master');
-//   redirect('/location-master');
-// };
-
 /**
  * 公演場所マスタテーブルのデータを取得する関数
  * @param query 検索キーワード
  * @returns {Promise<LocsMasterTableValues[]>} 公演場所マスタテーブルに表示するデータ（ 検索キーワードが空の場合は全て ）
  */
 export const getFilteredLocs = async (query: string) => {
+  const builder = supabase
+    .schema('dev2')
+    .from('m_koenbasho')
+    .select('koenbasho_id, koenbasho_nam, adr_shozai, adr_tatemono, adr_sonota, tel,  fax, mem, dsp_flg, del_flg') // テーブルに表示するカラム
+    // あいまい検索、場所名、場所名かな、住所、電話番号、fax番号
+
+    .order('dsp_ord_num'); // 並び順
+
+  if (query && query.trim() !== '') {
+    builder.or(
+      `koenbasho_nam.ilike.%${query}%, kana.ilike.%${query}%, adr_shozai.ilike.%${query}%, adr_tatemono.ilike.%${query}%, adr_sonota.ilike.%${query}%, tel.ilike.%${query}%, fax.ilike.%${query}%`
+    );
+  }
+
   try {
-    const { data, error } = await supabase
-      .schema('dev2')
-      .from('m_koenbasho')
-      .select('koenbasho_id, koenbasho_nam, adr_shozai, adr_tatemono, adr_sonota, tel,  fax, mem, dsp_flg, del_flg') // テーブルに表示するカラム
-      // あいまい検索、場所名、場所名かな、住所、電話番号、fax番号
-      .or(
-        `koenbasho_nam.ilike.%${query}%, kana.ilike.%${query}%, adr_shozai.ilike.%${query}%, adr_tatemono.ilike.%${query}%, adr_sonota.ilike.%${query}%, tel.ilike.%${query}%, fax.ilike.%${query}%`
-      )
-      .order('dsp_ord_num'); // 並び順
+    const { data, error } = await builder;
     if (!error) {
       console.log('I got a datalist from db', data.length);
       if (!data || data.length === 0) {

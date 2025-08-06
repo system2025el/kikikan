@@ -8,56 +8,24 @@ import { supabase } from '@/app/_lib/supabase/supabase';
 import { emptyDaibumon } from './datas';
 import { DaibumonsMasterDialogValues, DaibumonsMasterTableValues } from './types';
 
-// export const getAlldaibumon = async () => {
-//   try {
-//     const { data, error } = await supabase
-//       .schema('dev2')
-//       .from('m_daibumon')
-//       .select('daibumon_id , daibumon_nam, adr_shozai, adr_tatemono, adr_sonota, tel, fax, mem,  ')
-
-//       .order('dsp_ord_num');
-//     if (!error) {
-//       console.log('I got a datalist from db', data.length);
-
-//       const theData: daibumonsMasterTableValues[] = data.map((d) => ({
-//         daibumonId: d.daibumon_id,
-//         daibumonNam: d.daibumon_nam,
-//         adrShozai: d.adr_shozai,
-//         adrTatemono: d.adr_tatemono,
-//         adrSonota: d.adr_sonota,
-//         tel: d.tel,
-//         fax: d.fax,
-//         mem: d.mem,
-//         dspFlg: d.,
-//       }));
-
-//       console.log(theData.length);
-//       return theData;
-//     } else {
-//       console.error('DBエラーです', error.message);
-//     }
-//   } catch (e) {
-//     console.log(e);
-//   }
-//   revalidatePath('/daibumons-master');
-//   redirect('/daibumons-master');
-// };
-
 /**
  * 大部門マスタテーブルのデータを取得する関数
  * @param query 検索キーワード
  * @returns {Promise<DaibumonsMasterTableValues[]>} 大部門マスタテーブルに表示するデータ（ 検索キーワードが空の場合は全て ）
  */
 export const getFilteredDaibumons = async (query: string) => {
+  const builder = supabase
+    .schema('dev2')
+    .from('m_dai_bumon')
+    .select('dai_bumon_id, dai_bumon_nam,  mem, del_flg') // テーブルに表示するカラム
+    .order('dsp_ord_num'); // 並び順
+
+  if (query && query.trim() !== '') {
+    builder.ilike('dai_bumon_nam', `%${query}%`);
+  }
+
   try {
-    const { data, error } = await supabase
-      .schema('dev2')
-      .from('m_dai_bumon')
-      .select('dai_bumon_id, dai_bumon_nam,  mem, del_flg') // テーブルに表示するカラム
-      .ilike('dai_bumon_nam', `%${query}%`)
-      //   // あいまい検索、大部門名、大部門名かな、住所、電話番号、fax番号
-      //   .or(`dai_bumon_nam.ilike.%${query}%`)
-      .order('dsp_ord_num'); // 並び順
+    const { data, error } = await builder;
     if (!error) {
       console.log('I got a datalist from db', data.length);
       if (!data || data.length === 0) {

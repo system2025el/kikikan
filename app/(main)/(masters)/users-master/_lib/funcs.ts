@@ -8,41 +8,6 @@ import { supabase } from '@/app/_lib/supabase/supabase';
 import { emptyUser } from './data';
 import { UsersMasterDialogValues, UsersMasterTableValues } from './types';
 
-// export const getAllUser = async () => {
-//   try {
-//     const { data, error } = await supabase
-//       .schema('dev2')
-//       .from('m_user')
-//       .select('instance_id , user_nam, adr_shozai, adr_tatemono, adr_sonota, tel, fax, mem,  ')
-
-//       .order('dsp_ord_num');
-//     if (!error) {
-//       console.log('I got a datalist from db', data.length);
-
-//       const theData: UsersMasterTableValues[] = data.map((d) => ({
-//         UserId: d.instance_id,
-//         UserNam: d.user_nam,
-//         adrShozai: d.adr_shozai,
-//         adrTatemono: d.adr_tatemono,
-//         adrSonota: d.adr_sonota,
-//         tel: d.tel,
-//         fax: d.fax,
-//         mem: d.mem,
-//         dspFlg: d.,
-//       }));
-
-//       console.log(theData.length);
-//       return theData;
-//     } else {
-//       console.error('DBエラーです', error.message);
-//     }
-//   } catch (e) {
-//     console.log(e);
-//   }
-//   revalidatePath('/Users-master');
-//   redirect('/Users-master');
-// };
-
 /**
  * 担当者マスタテーブルのデータを取得する関数
  * @param query 検索キーワード
