@@ -47,7 +47,7 @@ import {
   OrderValues,
   VehicleTableValues,
 } from '../_lib/types';
-import { IsDirtyAlertDialog, PreservationAlertDialog, SelectAlertDialog } from './caveat-dialog';
+import { IsDirtyAlertDialog, SaveAlertDialog, SelectAlertDialog } from './caveat-dialog';
 import { CustomerSelectionDialog } from './customer-selection';
 import { LocationSelectDialog } from './location-selection';
 import { OrderEqTable, OrderVehicleTable } from './order-table';
@@ -335,7 +335,7 @@ export const Order = (props: {
 
   // 公演場所選択ダイアログで公演場所選択
   const handleLocSelect = (loc: string) => {
-    setValue('koenbashoNam', loc);
+    setValue('koenbashoNam', loc, { shouldDirty: true });
     handleCloseLocationDailog();
   };
 
@@ -350,8 +350,8 @@ export const Order = (props: {
 
   // 相手選択ダイアログで相手選択
   const handleCustSelect = (customer: KokyakuValues) => {
-    setValue('kokyaku.kokyakuId', customer.kokyakuId);
-    setValue('kokyaku.kokyakuNam', customer.kokyakuNam);
+    setValue('kokyaku.kokyakuId', customer.kokyakuId, { shouldDirty: true });
+    setValue('kokyaku.kokyakuNam', customer.kokyakuNam, { shouldDirty: true });
     clearErrors('kokyaku.kokyakuNam');
     handleCloseCustomerDialog();
   };
@@ -716,7 +716,7 @@ export const Order = (props: {
           />
         </AccordionDetails>
       </Accordion>
-      <PreservationAlertDialog open={saveOpen} onClick={() => setSaveOpen(false)} />
+      <SaveAlertDialog open={saveOpen} onClick={() => setSaveOpen(false)} />
       <IsDirtyAlertDialog open={dirtyOpen} onClick={handleResultDialog} />
       <SelectAlertDialog open={selectOpen} onClick={() => setSelectOpen(false)} />
     </Box>

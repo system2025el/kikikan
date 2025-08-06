@@ -29,11 +29,12 @@ import {
 } from '@mui/material';
 import { addMonths, endOfMonth, subDays, subMonths } from 'date-fns';
 import dayjs, { Dayjs } from 'dayjs';
-import { useRouter } from 'next/navigation';
+import { redirect, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
+import { shouldDisplay } from 'rsuite/esm/internals/Picker';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import { BackButton } from '@/app/(main)/_ui/buttons';
@@ -50,14 +51,21 @@ import Time, { TestTime } from '@/app/(main)/_ui/time';
 import { GetNyukoDate, GetShukoDate, toISOStringYearMonthDay } from '@/app/(main)/(eq-order-detail)/_lib/datefuncs';
 import {
   AddHonbanbi,
+  AddJuchuKizaiHead,
+  AddJuchuKizaiNyushuko,
   ConfirmHonbanbi,
+  GetDspOrdNum,
   GetHonbanbi,
+  GetMaxId,
   GetStockList,
   UpdateHonbanbi,
+  UpdateJuchuKizaiHead,
+  UpdateJuchuKizaiNyushuko,
 } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 import { AddLock, DeleteLock, GetLock } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/funcs';
 import { useUnsavedChangesWarning } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/hook';
 import { LockValues, OrderValues } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/types';
+import { IsDirtyAlertDialog } from '@/app/(main)/order/[juchu_head_id]/[mode]/_ui/caveat-dialog';
 
 import { data, stock } from '../_lib/data';
 import {
@@ -67,6 +75,7 @@ import {
   JuchuKizaiMeisaiValues,
   StockTableValues,
 } from '../_lib/types';
+import { SaveAlertDialog } from './caveat-dialog';
 import { DateSelectDialog } from './date-selection-dialog';
 import { EqTable, StockTable } from './equipment-order-detail-table';
 import { EquipmentSelectionDialog } from './equipment-selection-dailog';
@@ -174,22 +183,29 @@ const EquipmentOrderDetail = (props: {
   const router = useRouter();
   // user情報
   const user = useUserStore((state) => state.user);
+  // 受注機材ヘッダー保存フラグ
+  const juchuKizaiHeadSaveFlag = props.juchuKizaiHeadData.juchuKizaiHeadId !== 0 ? true : false;
+  // 未保存ダイアログを出すかどうか
+  const [saveOpen, setSaveOpen] = useState(false);
+  // 編集内容が未保存ダイアログを出すかどうか
+  const [dirtyOpen, setDirtyOpen] = useState(false);
   // ローディング
   const [isLoading, setIsLoading] = useState(false);
   // 編集モード(true:編集、false:閲覧)
   const [edit, setEdit] = useState(props.edit);
   // ロックデータ
   const [lockData, setLockData] = useState<LockValues | null>(props.lockData);
-  // 受注機材明細リスト
-  const [eqList, setEqList] = useState<JuchuKizaiMeisaiValues[]>(
+  // 受注機材明細元データ
+  const [originJuchuKizaiMeisaiList, setOriginJuchuKizaiMeisaiList] = useState<JuchuKizaiMeisaiValues[]>(
     props.juchuKizaiMeisaiData ? props.juchuKizaiMeisaiData : []
   );
-  // 機材在庫リスト
-  const [eqStockList, setEqStockList] = useState<StockTableValues[][]>(props.eqStockData ? props.eqStockData : []);
   // 受注機材明細リスト
   const [juchuKizaiMeisaiList, setJuchuKizaiMeisaiList] = useState<JuchuKizaiMeisaiValues[]>(
     props.juchuKizaiMeisaiData ? props.juchuKizaiMeisaiData : []
   );
+  // 機材在庫リスト
+  const [eqStockList, setEqStockList] = useState<StockTableValues[][]>(props.eqStockData ? props.eqStockData : []);
+
   // 受注本番日リスト
   const [juchuHonbanbiList, setJuchuHonbanbiList] = useState<JuchuKizaiHonbanbiValues[]>(
     props.juchuHonbanbiData ? props.juchuHonbanbiData : []
@@ -203,17 +219,6 @@ const EquipmentOrderDetail = (props: {
   const [dateRange, setDateRange] = useState<string[]>(props.dateRange);
   // カレンダー選択日
   const [selectDate, setSelectDate] = useState<Date>(props.shukoDate ? props.shukoDate : new Date());
-
-  // 仕込日
-  const [preparation, setPreparation] = useState<EquipmentData[]>([]);
-  // RH日
-  const [RH, setRH] = useState<EquipmentData[]>([]);
-  // GP日
-  const [GP, setGP] = useState<EquipmentData[]>([]);
-  // 本番日
-  const [actual, setActual] = useState<EquipmentData[]>([]);
-  //
-  const [actualDateRange, setActualDateRange] = useState<string[]>([]);
 
   // 機材追加ダイアログ制御
   const [EqSelectionDialogOpen, setEqSelectionDialogOpen] = useState(false);
@@ -275,14 +280,14 @@ const EquipmentOrderDetail = (props: {
     setLockShubetu(1);
     setHeadId(props.juchuHeadData.juchuHeadId);
 
-    if (eqList && eqList.length > 0 && eqStockList && eqStockList.length > 0) {
+    if (juchuKizaiMeisaiList && juchuKizaiMeisaiList.length > 0 && eqStockList && eqStockList.length > 0) {
       const updatedEqStockData = [...eqStockList];
       const targetIndex = updatedEqStockData[0]
         .map((d, index) => (dateRangeRef.current.includes(toISOStringYearMonthDay(d.calDat)) ? index : -1))
         .filter((index) => index !== -1);
       targetIndex.map((index) => {
         updatedEqStockData.map((d, i) => {
-          d[index].zaikoQty = d[index].zaikoQty - eqList[i].planQty;
+          d[index].zaikoQty = d[index].zaikoQty - juchuKizaiMeisaiList[i].planQty;
         });
       });
       setEqStockList(updatedEqStockData);
@@ -358,6 +363,75 @@ const EquipmentOrderDetail = (props: {
 
   const onSubmit = async (data: JuchuKizaiHeadValues) => {
     console.log('保存開始: ', data, eqStockList);
+    if (!user) return;
+    setIsLoading(true);
+    // 新規
+    if (data.juchuKizaiHeadId === 0) {
+      const maxId = await GetMaxId(data.juchuHeadId);
+      const maxDspOrdNum = await GetDspOrdNum();
+      if (maxId && maxDspOrdNum) {
+        const newJuchuKizaiHeadId = maxId.juchu_kizai_head_id + 1;
+        const newDspOrdNum = maxDspOrdNum.dsp_ord_num + 1;
+        const headResult = await AddJuchuKizaiHead(newJuchuKizaiHeadId, data, newDspOrdNum, user.name);
+        const nyushukoResult = await AddJuchuKizaiNyushuko(newJuchuKizaiHeadId, data, user.name);
+        if (headResult && nyushukoResult) {
+          redirect(`/eq-main-order-detail/${data.juchuHeadId}/${newJuchuKizaiHeadId}/${edit ? 'edit' : 'view'}`);
+        }
+      }
+      // 更新
+    } else {
+      const headResult = await UpdateJuchuKizaiHead(data, user.name);
+      const nyushukoResult = await UpdateJuchuKizaiNyushuko(data, user.name);
+      if (headResult && nyushukoResult) {
+        // 出庫日
+        const updateShukoDate = GetShukoDate(
+          data.kicsShukoDat && new Date(data.kicsShukoDat),
+          data.yardShukoDat && new Date(data.yardShukoDat)
+        );
+        setShukoDate(updateShukoDate);
+        // 入庫日
+        const updateNyukoDate = GetNyukoDate(
+          data.kicsNyukoDat && new Date(data.kicsNyukoDat),
+          data.yardNyukoDat && new Date(data.yardNyukoDat)
+        );
+        setNyukoDate(updateNyukoDate);
+        // 出庫日から入庫日
+        const updateDateRange = getRange(updateShukoDate, updateNyukoDate);
+        setDateRange(updateDateRange);
+        // 受注機材idリスト
+        const ids = juchuKizaiMeisaiList.map((data) => data.kizaiId);
+        // 受注機材合計数リスト
+        const planQtys = juchuKizaiMeisaiList.map((data) => data.planQty);
+        // 機材在庫データ
+        const updatedEqStockData: StockTableValues[][] = [];
+        if (ids && planQtys) {
+          if (!shukoDate) return <div>データに不備があります。</div>;
+          for (let i = 0; i < ids.length; i++) {
+            const stock: StockTableValues[] = await GetStockList(
+              data.juchuHeadId,
+              data.juchuKizaiHeadId,
+              ids[i],
+              planQtys[i],
+              subDays(shukoDate, 1)
+            );
+            updatedEqStockData.push(stock);
+          }
+        }
+        if (juchuKizaiMeisaiList && juchuKizaiMeisaiList.length > 0 && eqStockList && eqStockList.length > 0) {
+          const targetIndex = updatedEqStockData[0]
+            .map((d, index) => (dateRangeRef.current.includes(toISOStringYearMonthDay(d.calDat)) ? index : -1))
+            .filter((index) => index !== -1);
+          targetIndex.map((index) => {
+            updatedEqStockData.map((d, i) => {
+              d[index].zaikoQty = d[index].zaikoQty - juchuKizaiMeisaiList[i].planQty;
+            });
+          });
+          setEqStockList(updatedEqStockData);
+        }
+      }
+      reset(data);
+    }
+    setIsLoading(false);
   };
 
   // 同期スクロール処理
@@ -394,7 +468,7 @@ const EquipmentOrderDetail = (props: {
       // 受注機材idリスト
       const ids = juchuKizaiMeisaiList?.map((data) => data.kizaiId);
       // 機材数リスト
-      const planQtyList = props.juchuKizaiMeisaiData ? props.juchuKizaiMeisaiData.map((data) => data.planQty) : [0];
+      const planQtyList = originJuchuKizaiMeisaiList.map((data) => data.planQty);
       // 機材在庫データ
       const updatedEqStockList: StockTableValues[][] = [];
       if (ids) {
@@ -410,13 +484,13 @@ const EquipmentOrderDetail = (props: {
         }
       }
 
-      if (eqList && eqList.length > 0 && eqStockList && eqStockList.length > 0) {
+      if (juchuKizaiMeisaiList && juchuKizaiMeisaiList.length > 0 && eqStockList && eqStockList.length > 0) {
         const targetIndex = updatedEqStockList[0]
           .map((d, index) => (dateRange.includes(toISOStringYearMonthDay(d.calDat)) ? index : -1))
           .filter((index) => index !== -1);
         targetIndex.map((index) => {
           updatedEqStockList.map((d, i) => {
-            d[index].zaikoQty = d[index].zaikoQty - eqList[i].planQty;
+            d[index].zaikoQty = d[index].zaikoQty - juchuKizaiMeisaiList[i].planQty;
           });
         });
         setEqStockList(updatedEqStockList);
@@ -448,7 +522,7 @@ const EquipmentOrderDetail = (props: {
   };
 
   const handleCellDateClear = (rowIndex: number) => {
-    setEqList((prev) => prev.map((row, i) => (i === rowIndex ? { ...row, idoDenDat: null } : row)));
+    setJuchuKizaiMeisaiList((prev) => prev.map((row, i) => (i === rowIndex ? { ...row, idoDenDat: null } : row)));
   };
 
   /**
@@ -457,9 +531,9 @@ const EquipmentOrderDetail = (props: {
    * @param memo メモ内容
    */
   const handleMemoChange = (rowIndex: number, memo: string) => {
-    const updatedEqList = [...eqList];
+    const updatedEqList = [...juchuKizaiMeisaiList];
     updatedEqList[rowIndex].mem = memo;
-    setEqList(updatedEqList);
+    setJuchuKizaiMeisaiList(updatedEqList);
   };
 
   /**
@@ -471,17 +545,23 @@ const EquipmentOrderDetail = (props: {
    */
   const handleCellChange = (rowIndex: number, planKizaiQty: number, planYobiQty: number, planQty: number) => {
     const updatedEqStockData = eqStockListRef.current[rowIndex];
-    if (eqList && eqList.length > 0 && eqStockListRef.current && eqStockListRef.current.length > 0) {
+    if (
+      juchuKizaiMeisaiList &&
+      juchuKizaiMeisaiList.length > 0 &&
+      eqStockListRef.current &&
+      eqStockListRef.current.length > 0
+    ) {
       const targetIndex = updatedEqStockData
         .map((d, index) => (dateRange.includes(toISOStringYearMonthDay(d.calDat)) ? index : -1))
         .filter((index) => index !== -1);
       targetIndex.map((index) => {
-        updatedEqStockData[index].zaikoQty = updatedEqStockData[index].zaikoQty + eqList[rowIndex].planQty - planQty;
+        updatedEqStockData[index].zaikoQty =
+          updatedEqStockData[index].zaikoQty + juchuKizaiMeisaiList[rowIndex].planQty - planQty;
       });
     }
     setEqStockList((prev) => prev.map((data, i) => (i === rowIndex ? [...updatedEqStockData] : data)));
 
-    setEqList((prev) =>
+    setJuchuKizaiMeisaiList((prev) =>
       prev.map((data, i) =>
         i === rowIndex ? { ...data, planKizaiQty: planKizaiQty, planYobiQty: planYobiQty, planQty: planQty } : data
       )
@@ -496,7 +576,7 @@ const EquipmentOrderDetail = (props: {
   const handleCellDateChange = (rowIndex: number, date: Dayjs | null) => {
     if (date !== null) {
       const newDate = date.toDate();
-      setEqList((prev) => prev.map((row, i) => (i === rowIndex ? { ...row, idoDenDat: newDate } : row)));
+      setJuchuKizaiMeisaiList((prev) => prev.map((row, i) => (i === rowIndex ? { ...row, idoDenDat: newDate } : row)));
     }
   };
 
@@ -506,14 +586,14 @@ const EquipmentOrderDetail = (props: {
    */
   const handleKicsShukoChange = async (newDate: Dayjs | null) => {
     if (newDate === null) return;
-    setValue('kicsShukoDat', newDate.toDate());
+    setValue('kicsShukoDat', newDate.toDate(), { shouldDirty: true });
     const yardShukoDat = getValues('yardShukoDat');
 
     if (yardShukoDat === null || newDate.toDate() <= yardShukoDat) {
       setShukoDate(newDate.toDate());
     }
-    if (Object.keys(eqList).length > 0 && yardShukoDat === null) {
-      setEqList((prev) =>
+    if (Object.keys(juchuKizaiMeisaiList).length > 0 && yardShukoDat === null) {
+      setJuchuKizaiMeisaiList((prev) =>
         prev.map((row) => (row.shozokuId === 2 ? { ...row, idoDenDat: subDays(newDate.toDate(), 2) } : row))
       );
     }
@@ -525,14 +605,14 @@ const EquipmentOrderDetail = (props: {
    */
   const handleYardShukoChange = async (newDate: Dayjs | null) => {
     if (newDate === null) return;
-    setValue('yardShukoDat', newDate.toDate());
+    setValue('yardShukoDat', newDate.toDate(), { shouldDirty: true });
     const kicsShukoDat = getValues('kicsShukoDat');
 
     if (kicsShukoDat === null || newDate.toDate() <= kicsShukoDat) {
       setShukoDate(newDate.toDate());
     }
-    if (Object.keys(eqList).length > 0 && kicsShukoDat === null) {
-      setEqList((prev) =>
+    if (Object.keys(juchuKizaiMeisaiList).length > 0 && kicsShukoDat === null) {
+      setJuchuKizaiMeisaiList((prev) =>
         prev.map((row) => (row.shozokuId === 1 ? { ...row, idoDenDat: subDays(newDate.toDate(), 2) } : row))
       );
     }
@@ -544,8 +624,7 @@ const EquipmentOrderDetail = (props: {
    */
   const handleKicsNyukoChange = async (newDate: Dayjs | null) => {
     if (newDate === null) return;
-    //setEndKICSDate(newDate?.toDate());
-    setValue('kicsNyukoDat', newDate.toDate());
+    setValue('kicsNyukoDat', newDate.toDate(), { shouldDirty: true });
     const yardNyukoDat = getValues('yardNyukoDat');
 
     if (yardNyukoDat === null || newDate.toDate() >= yardNyukoDat) {
@@ -559,8 +638,7 @@ const EquipmentOrderDetail = (props: {
    */
   const handleYardNyukoChange = (newDate: Dayjs | null) => {
     if (newDate === null) return;
-    //setEndYARDDate(newDate?.toDate());
-    setValue('yardNyukoDat', newDate.toDate());
+    setValue('yardNyukoDat', newDate.toDate(), { shouldDirty: true });
     const kicsNyukoDat = getValues('kicsNyukoDat');
 
     if (kicsNyukoDat === null || newDate.toDate() >= kicsNyukoDat) {
@@ -570,14 +648,6 @@ const EquipmentOrderDetail = (props: {
 
   /**
    * 本番日入力ダイアログでの入力値反映
-   * @param preparationDates 仕込日
-   * @param preparationMemo 仕込日メモ
-   * @param RHDates RH日
-   * @param RHMemo RH日メモ
-   * @param GPDates GP日
-   * @param GPMemo GP日メモ
-   * @param actualDates 本番日
-   * @param actualMemo 本番日メモ
    */
   const handleSave = async () => {
     if (!user) return;
@@ -605,13 +675,13 @@ const EquipmentOrderDetail = (props: {
         updatedEqStockData.push(stock);
       }
     }
-    if (eqList && eqList.length > 0 && eqStockList && eqStockList.length > 0) {
+    if (juchuKizaiMeisaiList && juchuKizaiMeisaiList.length > 0 && eqStockList && eqStockList.length > 0) {
       const targetIndex = updatedEqStockData[0]
         .map((d, index) => (dateRangeRef.current.includes(toISOStringYearMonthDay(d.calDat)) ? index : -1))
         .filter((index) => index !== -1);
       targetIndex.map((index) => {
         updatedEqStockData.map((d, i) => {
-          d[index].zaikoQty = d[index].zaikoQty - eqList[i].planQty;
+          d[index].zaikoQty = d[index].zaikoQty - juchuKizaiMeisaiList[i].planQty;
         });
       });
       setEqStockList(updatedEqStockData);
@@ -642,10 +712,50 @@ const EquipmentOrderDetail = (props: {
   };
   // 本番日入力ダイアログ開閉
   const handleOpenDateDialog = () => {
-    setDateSelectionDialogOpne(true);
+    if (!juchuKizaiHeadSaveFlag) {
+      setSaveOpen(true);
+    } else if (isDirty || JSON.stringify(originJuchuKizaiMeisaiList) !== JSON.stringify(juchuKizaiMeisaiList)) {
+      setDirtyOpen(true);
+    } else {
+      setDateSelectionDialogOpne(true);
+    }
   };
   const handleCloseDateDialog = () => {
     setDateSelectionDialogOpne(false);
+  };
+
+  // isDirtyDialogの破棄、戻るボタン押下
+  const handleResultDialog = async (result: boolean) => {
+    if (result) {
+      reset();
+      if (
+        originJuchuKizaiMeisaiList &&
+        originJuchuKizaiMeisaiList.length > 0 &&
+        props.eqStockData &&
+        props.eqStockData.length > 0
+      ) {
+        setJuchuKizaiMeisaiList(originJuchuKizaiMeisaiList);
+        console.log('zzzzzzzzzzzzzzzzzzzzzzzzzz', props.eqStockData);
+        const updatedEqStockData = props.eqStockData;
+        console.log('aaaaaaaaaaaaaaaaaaaa', updatedEqStockData);
+        const targetIndex = updatedEqStockData[0]
+          .map((d, index) => (dateRangeRef.current.includes(toISOStringYearMonthDay(d.calDat)) ? index : -1))
+          .filter((index) => index !== -1);
+        console.log('bbbbbbbbbbbbbbbbbbbbbbbb', targetIndex);
+        targetIndex.map((index) => {
+          updatedEqStockData.map((d, i) => {
+            d[index].zaikoQty = d[index].zaikoQty - originJuchuKizaiMeisaiList[i].planQty;
+          });
+        });
+        console.log('ccccccccccccccccccccccc', updatedEqStockData);
+        setEqStockList(updatedEqStockData);
+      }
+      setIsDirty(false);
+      setDirtyOpen(false);
+      setDateSelectionDialogOpne(true);
+    } else {
+      setDirtyOpen(false);
+    }
   };
 
   if (user === null || isLoading)
@@ -744,7 +854,10 @@ const EquipmentOrderDetail = (props: {
                 <Typography marginRight={3} whiteSpace="nowrap">
                   公演場所
                 </Typography>
-                <TextField value={props.juchuHeadData.koenbashoNam} disabled></TextField>
+                <TextField
+                  value={props.juchuHeadData.koenbashoNam ? props.juchuHeadData.koenbashoNam : ''}
+                  disabled
+                ></TextField>
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={7} whiteSpace="nowrap">
@@ -756,7 +869,7 @@ const EquipmentOrderDetail = (props: {
           </Grid2>
         </AccordionDetails>
       </Accordion>
-      {/*受注明細ヘッダー*/}
+      {/*受注機材ヘッダー*/}
       <form onSubmit={handleSubmit(onSubmit)}>
         <Accordion
           sx={{
@@ -826,7 +939,9 @@ const EquipmentOrderDetail = (props: {
                       <TestDate
                         onBlur={field.onBlur}
                         date={field.value}
-                        maxDate={new Date(actualDateRange[0])}
+                        maxDate={
+                          juchuHonbanbiList.length > 0 ? new Date(juchuHonbanbiList[0].juchuHonbanbiDat) : undefined
+                        }
                         onChange={handleKicsShukoChange}
                         fieldstate={fieldState}
                         disabled={!edit}
@@ -857,7 +972,9 @@ const EquipmentOrderDetail = (props: {
                       <TestDate
                         onBlur={field.onBlur}
                         date={field.value}
-                        maxDate={new Date(actualDateRange[0])}
+                        maxDate={
+                          juchuHonbanbiList.length > 0 ? new Date(juchuHonbanbiList[0].juchuHonbanbiDat) : undefined
+                        }
                         onChange={handleYardShukoChange}
                         fieldstate={fieldState}
                         disabled={!edit}
@@ -891,7 +1008,11 @@ const EquipmentOrderDetail = (props: {
                       <TestDate
                         onBlur={field.onBlur}
                         date={field.value}
-                        minDate={new Date(actualDateRange[actualDateRange.length - 1])}
+                        minDate={
+                          juchuHonbanbiList.length > 0
+                            ? new Date(juchuHonbanbiList[juchuHonbanbiList.length - 1].juchuHonbanbiDat)
+                            : undefined
+                        }
                         onChange={handleKicsNyukoChange}
                         fieldstate={fieldState}
                         disabled={!edit}
@@ -922,7 +1043,11 @@ const EquipmentOrderDetail = (props: {
                       <TestDate
                         onBlur={field.onBlur}
                         date={field.value}
-                        minDate={new Date(actualDateRange[actualDateRange.length - 1])}
+                        minDate={
+                          juchuHonbanbiList.length > 0
+                            ? new Date(juchuHonbanbiList[juchuHonbanbiList.length - 1].juchuHonbanbiDat)
+                            : undefined
+                        }
                         onChange={handleYardNyukoChange}
                         fieldstate={fieldState}
                         disabled={!edit}
@@ -978,320 +1103,272 @@ const EquipmentOrderDetail = (props: {
             </Grid2>
           </AccordionDetails>
         </Accordion>
-        {/*受注明細(機材)*/}
-        <Paper variant="outlined" sx={{ mt: 2 }}>
-          <Box display="flex" justifyContent="space-between" alignItems="center" py={1} px={2}>
-            <Grid2 container direction="column" spacing={1}>
-              <Typography>受注明細(機材)</Typography>
-              <Typography fontSize={'small'}>機材入力</Typography>
-            </Grid2>
-            <Grid2>
-              <Button disabled={!edit}>
-                <CheckIcon fontSize="small" />
-                保存
+      </form>
+      {/*受注明細(機材)*/}
+      <Paper variant="outlined" sx={{ mt: 2 }}>
+        <Box display="flex" justifyContent="space-between" alignItems="center" py={1} px={2}>
+          <Grid2 container direction="column" spacing={1}>
+            <Typography>受注明細(機材)</Typography>
+            <Typography fontSize={'small'}>機材入力</Typography>
+          </Grid2>
+          <Grid2>
+            <Button disabled={!edit} onClick={() => console.log(props.eqStockData)}>
+              <CheckIcon fontSize="small" />
+              保存
+            </Button>
+          </Grid2>
+        </Box>
+        <Divider />
+
+        <Dialog open={EqSelectionDialogOpen} fullScreen>
+          <EquipmentSelectionDialog handleCloseDialog={handleCloseEqDialog} />
+        </Dialog>
+
+        <Box display={'flex'} flexDirection="row" width="100%">
+          <Box
+            sx={{
+              width: {
+                xs: '40%',
+                sm: '40%',
+                md: '40%',
+                lg: 'min-content',
+              },
+            }}
+          >
+            <Box m={2}>
+              <Button disabled={!edit} onClick={() => handleOpenEqDialog()}>
+                <AddIcon fontSize="small" />
+                機材追加
               </Button>
-            </Grid2>
-          </Box>
-          <Divider />
-
-          <Dialog open={EqSelectionDialogOpen} fullScreen>
-            <EquipmentSelectionDialog handleCloseDialog={handleCloseEqDialog} />
-          </Dialog>
-
-          <Box display={'flex'} flexDirection="row" width="100%">
-            <Box
-              sx={{
-                width: {
-                  xs: '40%',
-                  sm: '40%',
-                  md: '40%',
-                  lg: 'min-content',
-                },
-              }}
-            >
-              <Box m={2}>
-                <Button disabled={!edit} onClick={() => handleOpenEqDialog()}>
-                  <AddIcon fontSize="small" />
-                  機材追加
-                </Button>
-              </Box>
-              <Box display={Object.keys(eqList).length > 0 ? 'block' : 'none'}>
-                <EqTable
-                  rows={eqList}
-                  onChange={handleCellChange}
-                  handleCellDateChange={handleCellDateChange}
-                  handleCellDateClear={handleCellDateClear}
-                  handleMemoChange={handleMemoChange}
-                  ref={leftRef}
-                />
-              </Box>
             </Box>
-            <Box
-              display={Object.keys(eqStockList).length > 0 ? 'block' : 'none'}
-              overflow="auto"
-              sx={{ width: { xs: '60%', sm: '60%', md: 'auto' } }}
-            >
-              <Box display="flex" my={2}>
-                <Button onClick={handleBackDateChange}>
-                  <ArrowBackIosNewIcon fontSize="small" />
-                </Button>
-                <Button variant="outlined" onClick={handleClick}>
-                  日付選択
-                </Button>
-                <Popper open={open} anchorEl={anchorEl} placement="bottom-start" sx={{ zIndex: 1000 }}>
-                  <ClickAwayListener onClickAway={handleClickAway}>
-                    <Paper elevation={3} sx={{ mt: 1 }}>
-                      <Calendar date={selectDate} onChange={handleDateChange} />
-                    </Paper>
-                  </ClickAwayListener>
-                </Popper>
-                <Button onClick={handleForwardDateChange}>
-                  <ArrowForwardIosIcon fontSize="small" />
-                </Button>
-              </Box>
-              <StockTable
-                eqStockList={eqStockList}
-                dateRange={dateRange}
-                shukoDate={shukoDate}
-                nyukoDate={nyukoDate}
-                preparation={preparation}
-                RH={RH}
-                GP={GP}
-                actual={actual}
-                ref={rightRef}
+            <Box display={Object.keys(juchuKizaiMeisaiList).length > 0 ? 'block' : 'none'}>
+              <EqTable
+                rows={juchuKizaiMeisaiList}
+                onChange={handleCellChange}
+                handleCellDateChange={handleCellDateChange}
+                handleCellDateClear={handleCellDateClear}
+                handleMemoChange={handleMemoChange}
+                ref={leftRef}
               />
             </Box>
           </Box>
-        </Paper>
-        {/*本番日*/}
-        <Paper variant="outlined" sx={{ mt: 2 }}>
-          <Box>
-            <Box sx={styles.container}>
-              <Typography marginRight={{ xs: 2, sm: 9, md: 9, lg: 9 }} whiteSpace="nowrap">
-                本番日
-              </Typography>
-              <Button disabled={!edit} onClick={handleOpenDateDialog}>
-                編集
+          <Box
+            display={Object.keys(eqStockList).length > 0 ? 'block' : 'none'}
+            overflow="auto"
+            sx={{ width: { xs: '60%', sm: '60%', md: 'auto' } }}
+          >
+            <Box display="flex" my={2}>
+              <Button onClick={handleBackDateChange}>
+                <ArrowBackIosNewIcon fontSize="small" />
               </Button>
-              <Dialog open={dateSelectionDialogOpne} fullScreen sx={{ zIndex: 1201 }}>
-                <DateSelectDialog
-                  userNam={user.name}
-                  juchuHeadId={getValues('juchuHeadId')}
-                  juchuKizaiHeadId={getValues('juchuKizaiHeadId')}
-                  shukoDate={shukoDate}
-                  nyukoDate={nyukoDate}
-                  juchuHonbanbiList={juchuHonbanbiList}
-                  onClose={handleCloseDateDialog}
-                  onSave={handleSave}
-                />
-              </Dialog>
+              <Button variant="outlined" onClick={handleClick}>
+                日付選択
+              </Button>
+              <Popper open={open} anchorEl={anchorEl} placement="bottom-start" sx={{ zIndex: 1000 }}>
+                <ClickAwayListener onClickAway={handleClickAway}>
+                  <Paper elevation={3} sx={{ mt: 1 }}>
+                    <Calendar date={selectDate} onChange={handleDateChange} />
+                  </Paper>
+                </ClickAwayListener>
+              </Popper>
+              <Button onClick={handleForwardDateChange}>
+                <ArrowForwardIosIcon fontSize="small" />
+              </Button>
             </Box>
-            <Grid2 container spacing={1} ml={{ xs: 10, sm: 17, md: 17, lg: 17 }} py={2} width={{ md: '50%' }}>
-              <Grid2 size={12}>
-                <Button sx={{ color: 'white', bgcolor: 'mediumpurple' }}>仕込</Button>
-              </Grid2>
-              <Grid2 size={5} display="flex">
-                <Typography>日付</Typography>
-              </Grid2>
-              <Grid2 size={7} display="flex">
-                <Typography>メモ</Typography>
-              </Grid2>
-            </Grid2>
-            <Grid2
-              container
-              display="flex"
-              flexDirection="column"
-              spacing={1}
-              ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
-              width={{ md: '50%' }}
-            >
-              {juchuHonbanbiList &&
-                juchuHonbanbiList.map(
-                  (data, index) =>
-                    data.juchuHonbanbiShubetuId === 10 && (
-                      <Grid2 key={index} container display="flex" flexDirection="row">
-                        <Grid2 size={5}>
-                          <Typography>{toISOStringYearMonthDay(data.juchuHonbanbiDat)}</Typography>
-                        </Grid2>
-                        <Grid2 size={7}>
-                          <Typography sx={{ wordBreak: 'break-word', whiteSpace: 'wrap' }}>{data.mem}</Typography>
-                        </Grid2>
-                      </Grid2>
-                    )
-                )}
-              {/* {preparation.map((data, index) => (
-                <Grid2 key={index} container display="flex" flexDirection="row">
-                  <Grid2 size={5}>
-                    <Typography>{data.date}</Typography>
-                  </Grid2>
-                  <Grid2 size={7}>
-                    <Typography sx={{ wordBreak: 'break-word', whiteSpace: 'wrap' }}>{data.memo}</Typography>
-                  </Grid2>
-                </Grid2>
-              ))} */}
-            </Grid2>
-            <Grid2
-              container
-              display="flex"
-              flexDirection="row"
-              spacing={1}
-              ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
-              py={2}
-              width={{ md: '50%' }}
-            >
-              <Grid2 size={12}>
-                <Button sx={{ color: 'white', bgcolor: 'orange' }}>RH</Button>
-              </Grid2>
-              <Grid2 size={5}>
-                <Typography>日付</Typography>
-              </Grid2>
-              <Grid2 size={7}>
-                <Typography>メモ</Typography>
-              </Grid2>
-            </Grid2>
-            <Grid2
-              container
-              display="flex"
-              flexDirection="column"
-              spacing={1}
-              ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
-              width={{ md: '50%' }}
-            >
-              {juchuHonbanbiList &&
-                juchuHonbanbiList.map(
-                  (data, index) =>
-                    data.juchuHonbanbiShubetuId === 20 && (
-                      <Grid2 key={index} container display="flex" flexDirection="row">
-                        <Grid2 size={5}>
-                          <Typography>{toISOStringYearMonthDay(data.juchuHonbanbiDat)}</Typography>
-                        </Grid2>
-                        <Grid2 size={7}>
-                          <Typography sx={{ wordBreak: 'break-word', whiteSpace: 'wrap' }}>{data.mem}</Typography>
-                        </Grid2>
-                      </Grid2>
-                    )
-                )}
-              {/* {RH.map((data, index) => (
-                <Grid2 key={index} container display="flex" flexDirection="row">
-                  <Grid2 size={5}>
-                    <Typography>{data.date}</Typography>
-                  </Grid2>
-                  <Grid2 size={7}>
-                    <Typography sx={{ wordBreak: 'break-word' }}>{data.memo}</Typography>
-                  </Grid2>
-                </Grid2>
-              ))} */}
-            </Grid2>
-            <Grid2
-              container
-              display="flex"
-              flexDirection="row"
-              spacing={1}
-              ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
-              py={2}
-              width={{ md: '50%' }}
-            >
-              <Grid2 size={12}>
-                <Button sx={{ color: 'white', bgcolor: 'lightgreen' }}>GP</Button>
-              </Grid2>
-              <Grid2 size={5}>
-                <Typography>日付</Typography>
-              </Grid2>
-              <Grid2 size={7}>
-                <Typography>メモ</Typography>
-              </Grid2>
-            </Grid2>
-            <Grid2
-              container
-              display="flex"
-              flexDirection="column"
-              spacing={1}
-              ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
-              width={{ md: '50%' }}
-            >
-              {juchuHonbanbiList &&
-                juchuHonbanbiList.map(
-                  (data, index) =>
-                    data.juchuHonbanbiShubetuId === 30 && (
-                      <Grid2 key={index} container display="flex" flexDirection="row">
-                        <Grid2 size={5}>
-                          <Typography>{toISOStringYearMonthDay(data.juchuHonbanbiDat)}</Typography>
-                        </Grid2>
-                        <Grid2 size={7}>
-                          <Typography sx={{ wordBreak: 'break-word', whiteSpace: 'wrap' }}>{data.mem}</Typography>
-                        </Grid2>
-                      </Grid2>
-                    )
-                )}
-              {/* {GP.map((data, index) => (
-                <Grid2 key={index} container display="flex" flexDirection="row">
-                  <Grid2 size={5}>
-                    <Typography>{data.date}</Typography>
-                  </Grid2>
-                  <Grid2 size={7}>
-                    <Typography sx={{ wordBreak: 'break-word' }}>{data.memo}</Typography>
-                  </Grid2>
-                </Grid2>
-              ))} */}
-            </Grid2>
-            <Grid2
-              container
-              display="flex"
-              flexDirection="row"
-              spacing={1}
-              ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
-              py={2}
-              width={{ md: '50%' }}
-            >
-              <Grid2 size={12}>
-                <Button sx={{ color: 'white', bgcolor: 'pink' }}>本番</Button>
-              </Grid2>
-              <Grid2 size={5}>
-                <Typography>日付</Typography>
-              </Grid2>
-              <Grid2 size={7}>
-                <Typography>メモ</Typography>
-              </Grid2>
-            </Grid2>
-            <Grid2
-              container
-              display="flex"
-              flexDirection="column"
-              spacing={1}
-              ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
-              width={{ md: '50%' }}
-            >
-              {juchuHonbanbiList &&
-                juchuHonbanbiList.map(
-                  (data, index) =>
-                    data.juchuHonbanbiShubetuId === 40 && (
-                      <Grid2 key={index} container display="flex" flexDirection="row">
-                        <Grid2 size={5}>
-                          <Typography>{toISOStringYearMonthDay(data.juchuHonbanbiDat)}</Typography>
-                        </Grid2>
-                        <Grid2 size={7}>
-                          <Typography sx={{ wordBreak: 'break-word', whiteSpace: 'wrap' }}>{data.mem}</Typography>
-                        </Grid2>
-                      </Grid2>
-                    )
-                )}
-              {/* {actual.map((data, index) => (
-                <Grid2 key={index} container display="flex" flexDirection="row">
-                  <Grid2 size={5}>
-                    <Typography>{data.date}</Typography>
-                  </Grid2>
-                  <Grid2 size={7}>
-                    <Typography sx={{ wordBreak: 'break-word' }}>{data.memo}</Typography>
-                  </Grid2>
-                </Grid2>
-              ))} */}
-            </Grid2>
+            <StockTable eqStockList={eqStockList} dateRange={dateRange} ref={rightRef} />
           </Box>
-        </Paper>
-      </form>
+        </Box>
+      </Paper>
+      {/*本番日*/}
+      <Paper variant="outlined" sx={{ mt: 2 }}>
+        <Box>
+          <Box sx={styles.container}>
+            <Typography marginRight={{ xs: 2, sm: 9, md: 9, lg: 9 }} whiteSpace="nowrap">
+              本番日
+            </Typography>
+            <Button disabled={!edit} onClick={handleOpenDateDialog}>
+              編集
+            </Button>
+            <Dialog open={dateSelectionDialogOpne} fullScreen sx={{ zIndex: 1201 }}>
+              <DateSelectDialog
+                userNam={user.name}
+                juchuHeadId={getValues('juchuHeadId')}
+                juchuKizaiHeadId={getValues('juchuKizaiHeadId')}
+                shukoDate={shukoDate}
+                nyukoDate={nyukoDate}
+                juchuHonbanbiList={juchuHonbanbiList}
+                onClose={handleCloseDateDialog}
+                onSave={handleSave}
+              />
+            </Dialog>
+          </Box>
+          <Grid2 container spacing={1} ml={{ xs: 10, sm: 17, md: 17, lg: 17 }} py={2} width={{ md: '50%' }}>
+            <Grid2 size={12}>
+              <Button sx={{ color: 'white', bgcolor: 'mediumpurple' }}>仕込</Button>
+            </Grid2>
+            <Grid2 size={5} display="flex">
+              <Typography>日付</Typography>
+            </Grid2>
+            <Grid2 size={7} display="flex">
+              <Typography>メモ</Typography>
+            </Grid2>
+          </Grid2>
+          <Grid2
+            container
+            display="flex"
+            flexDirection="column"
+            spacing={1}
+            ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
+            width={{ md: '50%' }}
+          >
+            {juchuHonbanbiList &&
+              juchuHonbanbiList.map(
+                (data, index) =>
+                  data.juchuHonbanbiShubetuId === 10 && (
+                    <Grid2 key={index} container display="flex" flexDirection="row">
+                      <Grid2 size={5}>
+                        <Typography>{toISOStringYearMonthDay(data.juchuHonbanbiDat)}</Typography>
+                      </Grid2>
+                      <Grid2 size={7}>
+                        <Typography sx={{ wordBreak: 'break-word', whiteSpace: 'wrap' }}>{data.mem}</Typography>
+                      </Grid2>
+                    </Grid2>
+                  )
+              )}
+          </Grid2>
+          <Grid2
+            container
+            display="flex"
+            flexDirection="row"
+            spacing={1}
+            ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
+            py={2}
+            width={{ md: '50%' }}
+          >
+            <Grid2 size={12}>
+              <Button sx={{ color: 'white', bgcolor: 'orange' }}>RH</Button>
+            </Grid2>
+            <Grid2 size={5}>
+              <Typography>日付</Typography>
+            </Grid2>
+            <Grid2 size={7}>
+              <Typography>メモ</Typography>
+            </Grid2>
+          </Grid2>
+          <Grid2
+            container
+            display="flex"
+            flexDirection="column"
+            spacing={1}
+            ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
+            width={{ md: '50%' }}
+          >
+            {juchuHonbanbiList &&
+              juchuHonbanbiList.map(
+                (data, index) =>
+                  data.juchuHonbanbiShubetuId === 20 && (
+                    <Grid2 key={index} container display="flex" flexDirection="row">
+                      <Grid2 size={5}>
+                        <Typography>{toISOStringYearMonthDay(data.juchuHonbanbiDat)}</Typography>
+                      </Grid2>
+                      <Grid2 size={7}>
+                        <Typography sx={{ wordBreak: 'break-word', whiteSpace: 'wrap' }}>{data.mem}</Typography>
+                      </Grid2>
+                    </Grid2>
+                  )
+              )}
+          </Grid2>
+          <Grid2
+            container
+            display="flex"
+            flexDirection="row"
+            spacing={1}
+            ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
+            py={2}
+            width={{ md: '50%' }}
+          >
+            <Grid2 size={12}>
+              <Button sx={{ color: 'white', bgcolor: 'lightgreen' }}>GP</Button>
+            </Grid2>
+            <Grid2 size={5}>
+              <Typography>日付</Typography>
+            </Grid2>
+            <Grid2 size={7}>
+              <Typography>メモ</Typography>
+            </Grid2>
+          </Grid2>
+          <Grid2
+            container
+            display="flex"
+            flexDirection="column"
+            spacing={1}
+            ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
+            width={{ md: '50%' }}
+          >
+            {juchuHonbanbiList &&
+              juchuHonbanbiList.map(
+                (data, index) =>
+                  data.juchuHonbanbiShubetuId === 30 && (
+                    <Grid2 key={index} container display="flex" flexDirection="row">
+                      <Grid2 size={5}>
+                        <Typography>{toISOStringYearMonthDay(data.juchuHonbanbiDat)}</Typography>
+                      </Grid2>
+                      <Grid2 size={7}>
+                        <Typography sx={{ wordBreak: 'break-word', whiteSpace: 'wrap' }}>{data.mem}</Typography>
+                      </Grid2>
+                    </Grid2>
+                  )
+              )}
+          </Grid2>
+          <Grid2
+            container
+            display="flex"
+            flexDirection="row"
+            spacing={1}
+            ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
+            py={2}
+            width={{ md: '50%' }}
+          >
+            <Grid2 size={12}>
+              <Button sx={{ color: 'white', bgcolor: 'pink' }}>本番</Button>
+            </Grid2>
+            <Grid2 size={5}>
+              <Typography>日付</Typography>
+            </Grid2>
+            <Grid2 size={7}>
+              <Typography>メモ</Typography>
+            </Grid2>
+          </Grid2>
+          <Grid2
+            container
+            display="flex"
+            flexDirection="column"
+            spacing={1}
+            ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
+            width={{ md: '50%' }}
+          >
+            {juchuHonbanbiList &&
+              juchuHonbanbiList.map(
+                (data, index) =>
+                  data.juchuHonbanbiShubetuId === 40 && (
+                    <Grid2 key={index} container display="flex" flexDirection="row">
+                      <Grid2 size={5}>
+                        <Typography>{toISOStringYearMonthDay(data.juchuHonbanbiDat)}</Typography>
+                      </Grid2>
+                      <Grid2 size={7}>
+                        <Typography sx={{ wordBreak: 'break-word', whiteSpace: 'wrap' }}>{data.mem}</Typography>
+                      </Grid2>
+                    </Grid2>
+                  )
+              )}
+          </Grid2>
+        </Box>
+      </Paper>
       <Fab color="primary" onClick={scrollTop} sx={{ position: 'fixed', bottom: 32, right: 32, zIndex: 1000 }}>
         <ArrowUpwardIcon fontSize="small" />
       </Fab>
+      <SaveAlertDialog open={saveOpen} onClick={() => setSaveOpen(false)} />
+      <IsDirtyAlertDialog open={dirtyOpen} onClick={handleResultDialog} />
     </Box>
   );
 };

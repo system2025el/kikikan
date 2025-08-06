@@ -35,26 +35,10 @@ import { Equipment, EquipmentData, StockData } from './equipment-order-detail';
 type StockTableProps = {
   eqStockList: StockTableValues[][];
   dateRange: string[];
-  shukoDate: Date | null;
-  nyukoDate: Date | null;
-  preparation: EquipmentData[];
-  RH: EquipmentData[];
-  GP: EquipmentData[];
-  actual: EquipmentData[];
   ref: React.RefObject<HTMLDivElement | null>;
 };
 
-export const StockTable: React.FC<StockTableProps> = ({
-  eqStockList,
-  dateRange,
-  shukoDate,
-  nyukoDate,
-  preparation,
-  RH,
-  GP,
-  actual,
-  ref,
-}) => {
+export const StockTable: React.FC<StockTableProps> = ({ eqStockList, dateRange, ref }) => {
   return (
     <TableContainer ref={ref} component={Paper} style={{ overflow: 'scroll', maxHeight: '80vh' }}>
       <Table stickyHeader>
@@ -83,20 +67,7 @@ export const StockTable: React.FC<StockTableProps> = ({
           </TableRow>
         </TableHead>
         <TableBody>
-          {eqStockList.length > 0 &&
-            eqStockList.map((row, rowIndex) => (
-              <StockTableRow
-                key={rowIndex}
-                row={row}
-                dateRange={dateRange}
-                shukoDate={shukoDate}
-                nyukoDate={nyukoDate}
-                preparation={preparation}
-                RH={RH}
-                GP={GP}
-                actual={actual}
-              />
-            ))}
+          {eqStockList.length > 0 && eqStockList.map((row, rowIndex) => <StockTableRow key={rowIndex} row={row} />)}
         </TableBody>
       </Table>
     </TableContainer>
@@ -105,17 +76,10 @@ export const StockTable: React.FC<StockTableProps> = ({
 
 export type StockTableRowProps = {
   row: StockTableValues[];
-  dateRange: string[];
-  shukoDate: Date | null;
-  nyukoDate: Date | null;
-  preparation: EquipmentData[];
-  RH: EquipmentData[];
-  GP: EquipmentData[];
-  actual: EquipmentData[];
 };
 
 const StockTableRow = React.memo(
-  ({ row, dateRange, shukoDate, nyukoDate, preparation, RH, GP, actual }: StockTableRowProps) => {
+  ({ row }: StockTableRowProps) => {
     console.log('date側描画' /*row.id*/);
     return (
       <TableRow>
@@ -139,13 +103,7 @@ const StockTableRow = React.memo(
     );
   },
   (prevProps, nextProps) => {
-    return (
-      prevProps.row === nextProps.row &&
-      prevProps.preparation === nextProps.preparation &&
-      prevProps.RH === nextProps.RH &&
-      prevProps.GP === nextProps.GP &&
-      prevProps.actual === nextProps.actual
-    );
+    return prevProps.row === nextProps.row;
   }
 );
 

@@ -1,7 +1,7 @@
 import WarningIcon from '@mui/icons-material/Warning';
 import { Box, Button, Dialog, DialogActions, DialogContentText, DialogTitle } from '@mui/material';
 
-export const PreservationAlertDialog = ({ open, onClick }: { open: boolean; onClick: () => void }) => {
+export const SaveAlertDialog = ({ open, onClick }: { open: boolean; onClick: () => void }) => {
   return (
     <Dialog open={open}>
       <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
