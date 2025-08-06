@@ -355,11 +355,12 @@ export const createEqptHistory = async (data: EqptsMasterDialogValues, id: numbe
  * @param query 検索キーワード
  * @returns
  */
-export const getEqptsForEqptSelection = async (): Promise<EqptSelection[] | undefined> => {
+export const getEqptsForEqptSelection = async (query: string): Promise<EqptSelection[] | undefined> => {
   try {
     await pool.query(` SET search_path TO dev2;`);
 
-    const data = await pool.query(`
+    const data = await pool.query(
+      `
       SELECT
         k.kizai_id as "kizaiId",
         k.kizai_nam as "kizaiNam",
@@ -375,10 +376,13 @@ export const getEqptsForEqptSelection = async (): Promise<EqptSelection[] | unde
       WHERE
         k.del_flg <> 1
         AND k.dsp_flg <> 0
+        AND k.kizai_nam ILIKE $1
       ORDER BY
         k.kizai_grp_cod,
         k.dsp_ord_num;
-      `);
+      `,
+      [`%${query}%`]
+    );
 
     if (data && data.rows) {
       return data.rows;
