@@ -19,7 +19,7 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { SetStateAction, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
@@ -41,10 +41,13 @@ export const EqptSelectionDialog = ({ handleCloseDialog }: { handleCloseDialog: 
   const [selectedBumon, setSelectedBumon] = useState(-100);
   /* 機材リスト全体 */
   const [theEqpts, setTheEqpts] = useState<EqptSelection[]>([]);
+  /* 検索中かどうか */
+  const [searching, setSearching] = useState<boolean>(false);
+  /* Loading */
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   /* useform ------------------------------- */
-  const { handleSubmit, control, watch } = useForm({ defaultValues: { query: '' } });
-  const query = watch('query');
+  const { handleSubmit, control, watch, getValues } = useForm({ defaultValues: { query: '' } });
 
   /* methods ------------------------------ */
 
@@ -77,27 +80,40 @@ export const EqptSelectionDialog = ({ handleCloseDialog }: { handleCloseDialog: 
 
   const handleClickBumon = (id: number) => {
     setSelectedBumon(id);
+    setSearching(false);
   };
 
   /* 検索押下時処理 */
-  const onSubmit = () => {
-    console.log('Push serch');
+  const onSubmit = async (data: { query: string }) => {
+    console.log('Push search', data.query);
+    setIsLoading(true);
+    setSearching(true);
+    setSelectedBumon(-100);
+    if (data.query.trim() === '') {
+      const a = await getEqptsForEqptSelection('');
+      console.log('機材リストだあああああああああああああああああ', a![0]);
+      setTheEqpts(a!);
+    } else {
+      const a = await getEqptsForEqptSelection(data.query);
+      console.log('機材リストだあああああああああああああああああ', a![0]);
+      setTheEqpts(a!);
+    }
+    setIsLoading(false);
   };
 
   /* useeffect ------------------------ */
   useEffect(() => {
+    setIsLoading(true);
+    setSearching(false);
     console.log('★★★★★★★★★★★★★★★★★★★★★');
     const getEqpts = async () => {
-      if (query === '') {
-        const a = await getEqptsForEqptSelection();
-        console.log('機材リストだあああああああああああああああああ', a![0]);
-        setTheEqpts(a!);
-      } else {
-        console.log('what shoud i do here');
-      }
+      const a = await getEqptsForEqptSelection('');
+      console.log('最初の機材リスト＝＝＝＝＝＝＝＝＝1個目→', a![0]);
+      setTheEqpts(a!);
     };
     getEqpts();
-  }, [query]);
+    setIsLoading(false);
+  }, []);
 
   return (
     <>
@@ -139,7 +155,14 @@ export const EqptSelectionDialog = ({ handleCloseDialog }: { handleCloseDialog: 
             <EqptBumonsTable selected={selectedBumon} handleClick={handleClickBumon} />
           </Grid2>
           <Grid2 size={7}>
-            <EqptTable eqSelected={eqSelected} datas={theEqpts} handleSelect={handleClick} bumonId={selectedBumon} />
+            <EqptTable
+              eqSelected={eqSelected}
+              datas={theEqpts}
+              handleSelect={handleClick}
+              bumonId={selectedBumon}
+              searching={searching}
+              isLoading={isLoading}
+            />
           </Grid2>
         </Grid2>
       </Container>
