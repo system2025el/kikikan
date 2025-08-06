@@ -9,7 +9,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import * as React from 'react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import { getBumonsForEqptSelection } from '@/app/(main)/(masters)/_lib/funs';
 
@@ -20,7 +20,7 @@ export const EqptBumonsTable = ({ selected, handleClick }: { selected: number; h
 
   /* useState ---------------------------------------- */
   /* 部門一覧 */
-  const [bumons, setBumons] = React.useState<
+  const [bumons, setBumons] = useState<
     {
       tblDspNum: number;
       id: number;
@@ -30,7 +30,6 @@ export const EqptBumonsTable = ({ selected, handleClick }: { selected: number; h
 
   /* useeffect ------------------------ */
   useEffect(() => {
-    console.log('★★★★★★★★★★★★★★★★★★★★★');
     const getBumons = async () => {
       const abumons = await getBumonsForEqptSelection();
       setBumons(abumons!);
