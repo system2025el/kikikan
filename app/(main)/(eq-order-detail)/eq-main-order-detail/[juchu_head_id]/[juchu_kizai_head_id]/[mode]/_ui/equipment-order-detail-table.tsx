@@ -67,7 +67,8 @@ export const StockTable: React.FC<StockTableProps> = ({ eqStockList, dateRange, 
           </TableRow>
         </TableHead>
         <TableBody>
-          {eqStockList.length > 0 && eqStockList.map((row, rowIndex) => <StockTableRow key={rowIndex} row={row} />)}
+          {eqStockList.length > 0 &&
+            eqStockList.map((row, rowIndex) => <StockTableRow key={rowIndex} row={row} index={rowIndex} />)}
         </TableBody>
       </Table>
     </TableContainer>
@@ -76,14 +77,16 @@ export const StockTable: React.FC<StockTableProps> = ({ eqStockList, dateRange, 
 
 export type StockTableRowProps = {
   row: StockTableValues[];
+  index: number;
 };
 
 const StockTableRow = React.memo(
-  ({ row }: StockTableRowProps) => {
-    console.log('date側描画' /*row.id*/);
+  ({ row, index }: StockTableRowProps) => {
+    console.log('date側描画', index);
     return (
       <TableRow>
         {row.map((cell, colIndex) => {
+          console.log('stock側描写');
           return (
             <TableCell
               key={colIndex}
