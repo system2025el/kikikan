@@ -11,9 +11,7 @@ import TableRow from '@mui/material/TableRow';
 import * as React from 'react';
 import { useEffect } from 'react';
 
-import { getAllBumonSelections, getBumonsForEqptSelection, getBumonsSelection } from '@/app/(main)/(masters)/_lib/funs';
-import { getFilteredBumons } from '@/app/(main)/(masters)/bumons-master/_lib/funcs';
-import { BumonsMasterTableValues } from '@/app/(main)/(masters)/bumons-master/_lib/types';
+import { getBumonsForEqptSelection } from '@/app/(main)/(masters)/_lib/funs';
 
 export const EqptBumonsTable = ({ selected, handleClick }: { selected: number; handleClick: (id: number) => void }) => {
   /*  */

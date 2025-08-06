@@ -90,6 +90,7 @@ export const EqptSelectionDialog = ({ handleCloseDialog }: { handleCloseDialog: 
     const getEqpts = async () => {
       if (query === '') {
         const a = await getEqptsForEqptSelection();
+        console.log('機材リストだあああああああああああああああああ', a![0]);
         setTheEqpts(a!);
       } else {
         console.log('what shoud i do here');
@@ -97,6 +98,16 @@ export const EqptSelectionDialog = ({ handleCloseDialog }: { handleCloseDialog: 
     };
     getEqpts();
   }, [query]);
+
+  useEffect(() => {
+    console.log('★★★★★★★★★★★★★★★★★★★★★');
+    const getEqpts = async () => {
+      const a = await getEqptsForEqptSelection();
+      console.log('機材リストだあああああああああああああああああ', a![0]);
+      setTheEqpts(a!);
+    };
+    getEqpts();
+  }, []);
 
   return (
     <>

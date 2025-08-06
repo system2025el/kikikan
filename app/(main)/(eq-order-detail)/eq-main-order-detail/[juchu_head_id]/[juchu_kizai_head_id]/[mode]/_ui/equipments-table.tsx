@@ -67,12 +67,12 @@ export const EqptTable = ({
                 <TableCell component="th" id={labelId} scope="row" padding="none">
                   {row.kizaiNam}
                 </TableCell>
-                <TableCell>{row.bumonId}</TableCell>
+                <TableCell>{row.shozokuNam}</TableCell>
               </TableRow>
             );
 
             // 次のグループが異なるなら区切り行を追加
-            if (!nextRow || row.bumonId !== nextRow.bumonId) {
+            if (!nextRow || row.kizaiGrpCod !== nextRow.kizaiGrpCod) {
               rowsToRender.push(
                 <TableRow key={`divider-${index}`}>
                   <TableCell colSpan={3}>
