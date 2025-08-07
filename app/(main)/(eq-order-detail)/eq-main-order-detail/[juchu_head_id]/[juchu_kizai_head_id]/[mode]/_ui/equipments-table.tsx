@@ -15,6 +15,11 @@ import { Loading } from '@/app/(main)/_ui/loading';
 
 import { EqptSelection } from './equipment-selection-dailog';
 
+/**
+ * 機材選択の機材テーブル
+ * @param param0
+ * @returns 機材選択の機材テーブルコンポーネント
+ */
 export const EqptTable = ({
   bumonId,
   selectedEqpt,
