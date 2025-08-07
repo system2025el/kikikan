@@ -15,7 +15,6 @@ import {
 } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 
 import { JuchuKizaiHonbanbiValues } from '../_lib/types';
-import { EquipmentData } from './equipment-order-detail';
 
 type TabPanelProps = {
   children?: React.ReactNode;
@@ -295,24 +294,6 @@ export const DateSelectDialog = ({
               </Button>
             </Box>
           ))}
-          {/* {preparationDates.map((input, index) => (
-            <Box display="flex" alignItems="center" margin={2} key={index}>
-              <TextField value={input} />
-              <Typography ml={2} mr={1}>
-                メモ
-              </Typography>
-              <TextField
-                value={inputPreparation[index] ?? ''}
-                onChange={(e) => handleInputPreparationChange(index, e.target.value)}
-              ></TextField>
-              <Button
-                sx={{ ml: 4, bgcolor: 'red', color: 'white' }}
-                onClick={() => handleRemoveInputPreparation(index)}
-              >
-                削除
-              </Button>
-            </Box>
-          ))} */}
         </TabPanel>
         <TabPanel value={value} index={20}>
           {rh.map((data, index) => (
@@ -330,21 +311,6 @@ export const DateSelectDialog = ({
               </Button>
             </Box>
           ))}
-          {/* {RHDates.map((input, index) => (
-            <Box display="flex" alignItems="center" margin={2} key={index}>
-              <TextField value={input} />
-              <Typography ml={2} mr={1}>
-                メモ
-              </Typography>
-              <TextField
-                value={inputRH[index] ?? ''}
-                onChange={(e) => handleInputRHChange(index, e.target.value)}
-              ></TextField>
-              <Button sx={{ ml: 4, bgcolor: 'red', color: 'white' }} onClick={() => handleRemoveInputRH(index)}>
-                削除
-              </Button>
-            </Box>
-          ))} */}
         </TabPanel>
         <TabPanel value={value} index={30}>
           {gp.map((data, index) => (
@@ -362,21 +328,6 @@ export const DateSelectDialog = ({
               </Button>
             </Box>
           ))}
-          {/* {GPDates.map((input, index) => (
-            <Box display="flex" alignItems="center" margin={2} key={index}>
-              <TextField value={input} />
-              <Typography ml={2} mr={1}>
-                メモ
-              </Typography>
-              <TextField
-                value={inputGP[index] ?? ''}
-                onChange={(e) => handleInputGPChange(index, e.target.value)}
-              ></TextField>
-              <Button sx={{ ml: 4, bgcolor: 'red', color: 'white' }} onClick={() => handleRemoveInputGP(index)}>
-                削除
-              </Button>
-            </Box>
-          ))} */}
         </TabPanel>
         <TabPanel value={value} index={40}>
           {honban.map((data, index) => (
@@ -394,21 +345,6 @@ export const DateSelectDialog = ({
               </Button>
             </Box>
           ))}
-          {/* {actualDates.map((input, index) => (
-            <Box display="flex" alignItems="center" margin={2} key={index}>
-              <TextField value={input} />
-              <Typography ml={2} mr={1}>
-                メモ
-              </Typography>
-              <TextField
-                value={inputActual[index] ?? ''}
-                onChange={(e) => handleInputActualChange(index, e.target.value)}
-              ></TextField>
-              <Button sx={{ ml: 4, bgcolor: 'red', color: 'white' }} onClick={() => handleRemoveInputActual(index)}>
-                削除
-              </Button>
-            </Box>
-          ))} */}
         </TabPanel>
       </Paper>
     </Container>
