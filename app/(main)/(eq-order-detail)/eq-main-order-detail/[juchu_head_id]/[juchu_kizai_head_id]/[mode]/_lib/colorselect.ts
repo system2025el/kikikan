@@ -1,50 +1,45 @@
 import { Dayjs } from 'dayjs';
 
 import { toISOStringWithTimezoneMonthDay } from '@/app/(main)/_ui/date';
+import { toISOStringYearMonthDay } from '@/app/(main)/(eq-order-detail)/_lib/datefuncs';
 
-import { EquipmentData } from '../_ui/equipment-order-detail';
+import { JuchuKizaiHonbanbiValues } from './types';
 
 export const getDateHeaderBackgroundColor = (date: string, dateRange: string[]): string => {
   const isMatched = dateRange.some((targetDate) => targetDate === date);
   return isMatched ? 'blue' : 'black';
 };
 
-export const getDateRowBackgroundColor = (
-  date: string,
+export const getStockRowBackgroundColor = (
+  date: Date,
+  shukoDate: Date | null,
+  nyukoDate: Date | null,
   dateRange: string[],
-  startKICSDate: Date | null,
-  endKICSDate: Date | null,
-  preparation: EquipmentData[],
-  RH: EquipmentData[],
-  GP: EquipmentData[],
-  actual: EquipmentData[]
+  juchuHonbanbiList: JuchuKizaiHonbanbiValues[]
 ): string => {
-  const startDate =
-    startKICSDate !== null ? toISOStringWithTimezoneMonthDay(new Date(startKICSDate)).split('T')[0] : '';
-  const endDate = endKICSDate !== null ? toISOStringWithTimezoneMonthDay(new Date(endKICSDate)).split('T')[0] : '';
-  const preparationDate: string[] = [];
-  const RHDate: string[] = [];
-  const GPDate: string[] = [];
-  const actualDate: string[] = [];
+  const cellDate = toISOStringYearMonthDay(date);
+  const startDate = shukoDate && toISOStringYearMonthDay(shukoDate);
+  const endDate = nyukoDate && toISOStringYearMonthDay(nyukoDate);
 
-  preparation.map((prev) => {
-    preparationDate.push(prev.date.slice(5));
-  });
-  RH.map((prev) => {
-    RHDate.push(prev.date.slice(5));
-  });
-  GP.map((prev) => {
-    GPDate.push(prev.date.slice(5));
-  });
-  actual.map((prev) => {
-    actualDate.push(prev.date.slice(5));
-  });
-  if (actualDate.includes(date)) return 'pink';
-  if (GPDate.includes(date)) return 'lightgreen';
-  if (RHDate.includes(date)) return 'orange';
-  if (preparationDate.includes(date)) return 'mediumpurple';
-  if (date === endDate) return 'yellow';
-  if (date === startDate) return 'lightblue';
-  if (dateRange.includes(date)) return '#ACB9CA';
+  if (juchuHonbanbiList.some((date) => toISOStringYearMonthDay(date.juchuHonbanbiDat) === cellDate)) {
+    const shubetuId = juchuHonbanbiList.find(
+      (date) => toISOStringYearMonthDay(date.juchuHonbanbiDat) === cellDate
+    )?.juchuHonbanbiShubetuId;
+    switch (shubetuId) {
+      case 40:
+        return 'pink';
+      case 30:
+        return 'lightgreen';
+      case 20:
+        return 'orange';
+      case 10:
+        return 'mediumpurple';
+      default:
+        return 'white';
+    }
+  }
+  if (cellDate === endDate) return 'yellow';
+  if (cellDate === startDate) return 'lightblue';
+  if (dateRange.includes(cellDate)) return '#ACB9CA';
   return 'white';
 };

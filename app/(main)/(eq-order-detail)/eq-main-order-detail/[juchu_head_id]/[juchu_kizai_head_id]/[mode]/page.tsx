@@ -65,7 +65,6 @@ const Page = async (props: {
     }
     // 受注本番日データ
     const juchuHonbanbiData = await GetHonbanbi(params.juchu_head_id, params.juchu_kizai_head_id);
-    console.log('確認：', juchuHonbanbiData);
 
     return (
       <EquipmentOrderDetail

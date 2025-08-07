@@ -45,7 +45,7 @@ export const GetEqHeader = async (juchuHeadId: number, juchuKizaiHeadId: number)
       juchuKizaiHeadKbn: juchuKizaiHead.juchu_kizai_head_kbn,
       juchuHonbanbiQty: juchuKizaiHead.juchu_honbanbi_qty,
       nebikiAmt: juchuKizaiHead.nebiki_amt,
-      mem: juchuKizaiHead.mem,
+      mem: juchuKizaiHead.mem ? juchuKizaiHead.mem : '',
       headNam: juchuKizaiHead.head_nam,
       kicsShukoDat: juchuDate[0].kics_shuko_dat,
       kicsNyukoDat: juchuDate[0].kics_nyuko_dat,
@@ -58,16 +58,277 @@ export const GetEqHeader = async (juchuHeadId: number, juchuKizaiHeadId: number)
   }
 };
 
+/**
+ * 受注機材ヘッダーid最大値取得
+ * @returns 受注機材ヘッダーid最大値
+ */
+export const GetMaxId = async (juchuHeadId: number) => {
+  try {
+    const { data, error } = await supabase
+      .schema('dev2')
+      .from('t_juchu_kizai_head')
+      .select('juchu_kizai_head_id')
+      .eq('juchu_head_id', juchuHeadId)
+      .order('juchu_kizai_head_id', {
+        ascending: false,
+      })
+      .limit(1)
+      .single();
+    if (!error) {
+      console.log('GetMaxId : ', data);
+      return data;
+    }
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+export const GetDspOrdNum = async () => {
+  try {
+    const { data, error } = await supabase
+      .schema('dev2')
+      .from('t_juchu_kizai_head')
+      .select('dsp_ord_num')
+      .order('dsp_ord_num', {
+        ascending: false,
+      })
+      .limit(1)
+      .single();
+    if (!error) {
+      console.log('GetMaxDspOrdNum : ', data);
+      return data;
+    }
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+export const AddJuchuKizaiHead = async (
+  juchuKizaiHeadId: number,
+  juchuKizaiHeadData: JuchuKizaiHeadValues,
+  dspOrdNum: number,
+  userNam: string
+) => {
+  const newData = {
+    juchu_head_id: juchuKizaiHeadData.juchuHeadId,
+    juchu_kizai_head_id: juchuKizaiHeadId,
+    juchu_kizai_head_kbn: 1,
+    juchu_honbanbi_qty: juchuKizaiHeadData.juchuHonbanbiQty,
+    nebiki_amt: juchuKizaiHeadData.nebikiAmt,
+    mem: juchuKizaiHeadData.mem,
+    head_nam: juchuKizaiHeadData.headNam,
+    dsp_ord_num: dspOrdNum,
+    oya_juchu_kizai_head_id: null,
+    ht_kbn: 0,
+    add_dat: new Date(),
+    add_user: userNam,
+  };
+  try {
+    const { error: insertError } = await supabase
+      .schema('dev2')
+      .from('t_juchu_kizai_head')
+      .insert({
+        ...newData,
+      });
+
+    if (!insertError) {
+      console.log('New juchuKizaiHead added successfully:', newData);
+      return true;
+    } else {
+      console.error('Error adding new juchuKizaiHead:', insertError.message);
+      return false;
+    }
+  } catch (e) {
+    console.error(e);
+    return false;
+  }
+};
+
+export const AddJuchuKizaiNyushuko = async (
+  juchuKizaiHeadId: number,
+  juchuKizaiHeadData: JuchuKizaiHeadValues,
+  userNam: string
+) => {
+  const dates = [
+    juchuKizaiHeadData.kicsShukoDat,
+    juchuKizaiHeadData.yardShukoDat,
+    juchuKizaiHeadData.kicsNyukoDat,
+    juchuKizaiHeadData.yardNyukoDat,
+  ];
+  for (let i = 0; i < dates.length; i++) {
+    if (!dates[i]) continue;
+    const newData = {
+      juchu_head_id: juchuKizaiHeadData.juchuHeadId,
+      juchu_kizai_head_id: juchuKizaiHeadId,
+      nyushuko_shubetu_id: i === 0 || i === 1 ? 1 : 2,
+      nyushuko_basho_id: i === 0 || i === 2 ? 1 : 2,
+      nyushuko_dat: toISOStringYearMonthDay(dates[i] as Date),
+      add_dat: new Date(),
+      add_user: userNam,
+    };
+
+    try {
+      const { error: insertError } = await supabase
+        .schema('dev2')
+        .from('t_juchu_kizai_nyushuko')
+        .insert({
+          ...newData,
+        });
+
+      if (!insertError) {
+        console.log('kizai Nyushuko order added successfully:', newData);
+      } else {
+        console.error('Error adding kizai Nyushuko:', insertError.message);
+        return false;
+      }
+    } catch (e) {
+      console.error('Exception while adding kizai Nyushuko:', e);
+    }
+  }
+  return true;
+};
+
+export const UpdateJuchuKizaiHead = async (juchuKizaiHeadData: JuchuKizaiHeadValues, userNam: string) => {
+  const updateData = {
+    juchu_head_id: juchuKizaiHeadData.juchuHeadId,
+    juchu_kizai_head_id: juchuKizaiHeadData.juchuKizaiHeadId,
+    juchu_kizai_head_kbn: 1,
+    juchu_honbanbi_qty: juchuKizaiHeadData.juchuHonbanbiQty,
+    nebiki_amt: juchuKizaiHeadData.nebikiAmt,
+    mem: juchuKizaiHeadData.mem,
+    head_nam: juchuKizaiHeadData.headNam,
+    oya_juchu_kizai_head_id: null,
+    ht_kbn: 0,
+    upd_dat: new Date(),
+    upd_user: userNam,
+  };
+
+  try {
+    const { error } = await supabase
+      .schema('dev2')
+      .from('t_juchu_kizai_head')
+      .update(updateData)
+      .eq('juchu_head_id', updateData.juchu_head_id)
+      .eq('juchu_kizai_head_id', updateData.juchu_kizai_head_id)
+      .eq('juchu_kizai_head_kbn', updateData.juchu_kizai_head_kbn);
+
+    if (error) {
+      console.error('Error updating juchu kizai head:', error.message);
+      return false;
+    }
+    console.log('juchu kizai head updated successfully:', updateData);
+    return true;
+  } catch (e) {
+    console.error('Exception while updating juchu kizai head:', e);
+    return false;
+  }
+};
+
+export const UpdateJuchuKizaiNyushuko = async (juchuKizaiHeadData: JuchuKizaiHeadValues, userNam: string) => {
+  const dates = [
+    juchuKizaiHeadData.kicsShukoDat,
+    juchuKizaiHeadData.yardShukoDat,
+    juchuKizaiHeadData.kicsNyukoDat,
+    juchuKizaiHeadData.yardNyukoDat,
+  ];
+  for (let i = 0; i < dates.length; i++) {
+    const updateData =
+      dates[i] !== null
+        ? {
+            juchu_head_id: juchuKizaiHeadData.juchuHeadId,
+            juchu_kizai_head_id: juchuKizaiHeadData.juchuKizaiHeadId,
+            nyushuko_shubetu_id: i === 0 || i === 1 ? 1 : 2,
+            nyushuko_basho_id: i === 0 || i === 2 ? 1 : 2,
+            nyushuko_dat: toISOStringYearMonthDay(dates[i] as Date),
+            upd_dat: new Date(),
+            upd_user: userNam,
+          }
+        : null;
+
+    const confirmData = {
+      juchu_head_id: juchuKizaiHeadData.juchuHeadId,
+      juchu_kizai_head_id: juchuKizaiHeadData.juchuKizaiHeadId,
+      nyushuko_shubetu_id: i === 0 || i === 1 ? 1 : 2,
+      nyushuko_basho_id: i === 0 || i === 2 ? 1 : 2,
+    };
+
+    try {
+      const { data: selectData, error: selectError } = await supabase
+        .schema('dev2')
+        .from('t_juchu_kizai_nyushuko')
+        .select('*')
+        .eq('juchu_head_id', confirmData.juchu_head_id)
+        .eq('juchu_kizai_head_id', confirmData.juchu_kizai_head_id)
+        .eq('nyushuko_shubetu_id', confirmData.nyushuko_shubetu_id)
+        .eq('nyushuko_basho_id', confirmData.nyushuko_basho_id)
+        .single();
+
+      if (selectData && updateData) {
+        const { error: updateError } = await supabase
+          .schema('dev2')
+          .from('t_juchu_kizai_nyushuko')
+          .update(updateData)
+          .eq('juchu_head_id', updateData.juchu_head_id)
+          .eq('juchu_kizai_head_id', updateData.juchu_kizai_head_id)
+          .eq('nyushuko_shubetu_id', updateData.nyushuko_shubetu_id)
+          .eq('nyushuko_basho_id', updateData.nyushuko_basho_id);
+        if (updateError) {
+          console.error('Error updating kizai nyushuko:', updateError.message);
+          continue;
+        }
+      } else if (selectData && !updateData) {
+        const { error: deleteError } = await supabase
+          .schema('dev2')
+          .from('t_juchu_kizai_nyushuko')
+          .delete()
+          .eq('juchu_head_id', confirmData.juchu_head_id)
+          .eq('juchu_kizai_head_id', confirmData.juchu_kizai_head_id)
+          .eq('nyushuko_shubetu_id', confirmData.nyushuko_shubetu_id)
+          .eq('nyushuko_basho_id', confirmData.nyushuko_basho_id);
+        if (deleteError) {
+          console.error('Error updating kizai nyushuko:', deleteError.message);
+          continue;
+        }
+      } else if (!selectData && updateData) {
+        const { error: insertError } = await supabase.schema('dev2').from('t_juchu_kizai_nyushuko').insert(updateData);
+        if (insertError) {
+          console.error('Error updating kizai nyushuko:', insertError.message);
+          continue;
+        }
+      }
+      console.log('kizai nyushuko updated successfully:', updateData);
+    } catch (e) {
+      console.error('Exception while updating kizai nyushuko:', e);
+      break;
+    }
+  }
+  return true;
+};
+
 export const GetEqList = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
   try {
     const { data: eqList, error: eqListError } = await supabase
       .schema('dev2')
       .from('v_juchu_kizai_meisai')
-      .select('*')
+      .select(
+        'juchu_head_id, juchu_kizai_head_id, juchu_kizai_meisai_id, ido_den_id, ido_den_dat, ido_siji_id, shozoku_id, shozoku_nam, mem, kizai_id, kizai_nam, kizai_qty, plan_kizai_qty, plan_yobi_qty, plan_qty'
+      )
       .eq('juchu_head_id', juchuHeadId)
-      .eq('juchu_kizai_head_id', juchuKizaiHeadId);
+      .eq('juchu_kizai_head_id', juchuKizaiHeadId)
+      .not('kizai_id', 'is', null);
     if (eqListError) {
       console.error('GetEqHeader juchuDate error : ', eqListError);
+      return [];
+    }
+
+    const { data: eqTanka, error: eqTankaError } = await supabase
+      .schema('dev2')
+      .from('t_juchu_kizai_meisai')
+      .select('kizai_id, kizai_tanka_amt')
+      .eq('juchu_head_id', juchuHeadId)
+      .eq('juchu_kizai_head_id', juchuKizaiHeadId);
+    if (eqTankaError) {
+      console.error('GetEqHeader eqTanka error : ', eqTankaError);
       return [];
     }
 
@@ -82,11 +343,14 @@ export const GetEqList = async (juchuHeadId: number, juchuKizaiHeadId: number) =
       shozokuNam: d.shozoku_nam,
       mem: d.mem,
       kizaiId: d.kizai_id,
+      kizaiTankaAmt: eqTanka.find((t) => t.kizai_id === d.kizai_id)?.kizai_tanka_amt || 0,
       kizaiNam: d.kizai_nam,
       kizaiQty: d.kizai_qty,
       planKizaiQty: d.plan_kizai_qty,
       planYobiQty: d.plan_yobi_qty,
       planQty: d.plan_qty,
+      delFlag: false,
+      saveFlag: true,
     }));
     return juchuKizaiMeisaiData;
   } catch (e) {

@@ -36,11 +36,14 @@ export const JuchuKizaiMeisaiSchema = z.object({
   shozokuNam: z.string(),
   mem: z.string().nullable(),
   kizaiId: z.number(),
+  kizaiTankaAmt: z.number(),
   kizaiNam: z.string(),
   kizaiQty: z.number(),
   planKizaiQty: z.number(),
   planYobiQty: z.number().nullable(),
   planQty: z.number(),
+  delFlag: z.boolean(),
+  saveFlag: z.boolean(),
 });
 
 export type JuchuKizaiMeisaiValues = z.infer<typeof JuchuKizaiMeisaiSchema>;
