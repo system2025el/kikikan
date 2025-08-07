@@ -17,13 +17,13 @@ import { EqptSelection } from './equipment-selection-dailog';
 
 export const EqptTable = ({
   bumonId,
-  eqSelected,
+  selectedEqpt,
   datas,
   searching,
   isLoading,
   handleSelect,
 }: {
-  eqSelected: readonly number[];
+  selectedEqpt: readonly number[];
   bumonId: number;
   datas: EqptSelection[] | undefined;
   searching: boolean;
@@ -44,7 +44,7 @@ export const EqptTable = ({
   }, [datas, searching, bumonId]);
 
   return (
-    <TableContainer component={Paper} variant="outlined" square sx={{ height: '65vh' }}>
+    <TableContainer component={Paper} variant="outlined" square sx={{ height: '75vh' }}>
       {isLoading ? (
         <Loading />
       ) : (
@@ -58,7 +58,7 @@ export const EqptTable = ({
           </TableHead>
           <TableBody>
             {list!.map((row, index) => {
-              const isItemSelected = eqSelected.includes(row.kizaiId);
+              const isItemSelected = selectedEqpt.includes(row.kizaiId);
               const labelId = `enhanced-table-checkbox-${index}`;
               const nextRow = list![index + 1];
 
@@ -84,7 +84,6 @@ export const EqptTable = ({
                   <TableCell>{row.shozokuNam}</TableCell>
                 </TableRow>
               );
-
               // 次のkizaiGrpCodが異なるなら区切り行を追加
               if (!nextRow || row.kizaiGrpCod !== nextRow.kizaiGrpCod) {
                 rowsToRender.push(
@@ -97,7 +96,6 @@ export const EqptTable = ({
                   </TableRow>
                 );
               }
-
               return rowsToRender;
             })}
           </TableBody>
