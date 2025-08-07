@@ -1211,7 +1211,7 @@ const EquipmentOrderDetail = (props: {
         <Divider />
 
         <Dialog open={EqSelectionDialogOpen} fullScreen>
-          <EquipmentSelectionDialog handleCloseDialog={handleCloseEqDialog} />
+          <EqptSelectionDialog handleCloseDialog={handleCloseEqDialog} />
         </Dialog>
 
         <Box display={'flex'} flexDirection="row" width="100%">
@@ -1230,44 +1230,6 @@ const EquipmentOrderDetail = (props: {
                 <AddIcon fontSize="small" />
                 機材追加
               </Button>
-<<<<<<< HEAD
-            </Grid2>
-          </Box>
-          <Divider />
-
-          <Dialog open={EqSelectionDialogOpen} fullScreen>
-            <EqptSelectionDialog handleCloseDialog={handleCloseEqDialog} />
-          </Dialog>
-
-          <Box display={'flex'} flexDirection="row" width="100%">
-            <Box
-              sx={{
-                width: {
-                  xs: '40%',
-                  sm: '40%',
-                  md: '40%',
-                  lg: 'min-content',
-                },
-              }}
-            >
-              <Box m={2}>
-                <Button disabled={!edit} onClick={() => handleOpenEqDialog()}>
-                  <AddIcon fontSize="small" />
-                  機材追加
-                </Button>
-              </Box>
-              <Box display={Object.keys(eqList).length > 0 ? 'block' : 'none'}>
-                <EqTable
-                  rows={eqList}
-                  onChange={handleCellChange}
-                  handleCellDateChange={handleCellDateChange}
-                  handleCellDateClear={handleCellDateClear}
-                  handleMemoChange={handleMemoChange}
-                  ref={leftRef}
-                />
-              </Box>
-=======
->>>>>>> order-detail
             </Box>
             <Box display={Object.keys(juchuKizaiMeisaiList).length > 0 ? 'block' : 'none'}>
               <EqTable
