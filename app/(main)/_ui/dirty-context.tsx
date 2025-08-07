@@ -7,7 +7,7 @@ import { useUserStore } from '@/app/_lib/stores/usestore';
 
 import { DeleteLock } from '../order/[juchu_head_id]/[mode]/_lib/funcs';
 import { LockValues } from '../order/[juchu_head_id]/[mode]/_lib/types';
-import { IsDirtyAlertDialog, PreservationAlertDialog } from '../order/[juchu_head_id]/[mode]/_ui/caveat-dialog';
+import { IsDirtyAlertDialog } from '../order/[juchu_head_id]/[mode]/_ui/caveat-dialog';
 
 type DirtyContextType = {
   isDirty: boolean;

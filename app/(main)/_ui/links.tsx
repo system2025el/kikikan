@@ -15,7 +15,6 @@ import {
 import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-import { PreservationAlertDialog } from '../order/[juchu_head_id]/[mode]/_ui/caveat-dialog';
 import { useDirty } from './dirty-context';
 
 type MenuItem = {
