@@ -9,7 +9,7 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { Loading } from '@/app/(main)/_ui/loading';
 
@@ -30,8 +30,6 @@ export const EqptTable = ({
   isLoading: boolean;
   handleSelect: (event: React.MouseEvent<unknown>, id: number) => void;
 }) => {
-  /* useState ---------------------------------- */
-
   // 表示するリスト
   const list = useMemo(() => {
     if (!datas) {
@@ -92,8 +90,8 @@ export const EqptTable = ({
                 rowsToRender.push(
                   <TableRow key={`divider-${index}`}>
                     <TableCell colSpan={3}>
-                      <Box height={20} width={'100%'} alignContent={'center'}>
-                        <Divider sx={{ borderStyle: 'dashed', borderColor: 'CaptionText' }} />
+                      <Box height={10} width={'100%'} alignContent={'center'}>
+                        <Divider sx={{ borderStyle: 'dashed', borderColor: 'CaptionText', borderBottomWidth: 2 }} />
                       </Box>
                     </TableCell>
                   </TableRow>
