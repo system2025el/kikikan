@@ -29,7 +29,7 @@ export const GetOrder = async (juchuHeadId: number) => {
       const { data: kokyakuData, error: kokyakuError } = await supabase
         .schema('dev2')
         .from('m_kokyaku')
-        .select('kokyaku_nam')
+        .select('kokyaku_nam, kokyaku_rank')
         .eq('kokyaku_id', juchuData.kokyaku_id)
         .single();
       if (kokyakuError) {
@@ -45,7 +45,11 @@ export const GetOrder = async (juchuHeadId: number) => {
         nyuryokuUser: juchuData.nyuryoku_user,
         koenNam: juchuData.koen_nam,
         koenbashoNam: juchuData.koenbasho_nam,
-        kokyaku: { kokyakuId: juchuData.kokyaku_id, kokyakuNam: kokyakuData.kokyaku_nam },
+        kokyaku: {
+          kokyakuId: juchuData.kokyaku_id,
+          kokyakuNam: kokyakuData.kokyaku_nam,
+          kokyakuRank: kokyakuData.kokyaku_rank,
+        },
         kokyakuTantoNam: juchuData.kokyaku_tanto_nam,
         mem: juchuData.mem,
         nebikiAmt: juchuData.nebiki_amt,
@@ -63,7 +67,7 @@ export const GetOrder = async (juchuHeadId: number) => {
         nyuryokuUser: juchuData.nyuryoku_user,
         koenNam: juchuData.koen_nam,
         koenbashoNam: juchuData.koenbasho_nam,
-        kokyaku: { kokyakuId: juchuData.kokyaku_id, kokyakuNam: '' },
+        kokyaku: { kokyakuId: juchuData.kokyaku_id, kokyakuNam: '', kokyakuRank: 0 },
         kokyakuTantoNam: juchuData.kokyaku_tanto_nam,
         mem: juchuData.mem,
         nebikiAmt: juchuData.nebiki_amt,

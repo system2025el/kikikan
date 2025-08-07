@@ -321,6 +321,17 @@ export const GetEqList = async (juchuHeadId: number, juchuKizaiHeadId: number) =
       return [];
     }
 
+    const { data: eqTanka, error: eqTankaError } = await supabase
+      .schema('dev2')
+      .from('t_juchu_kizai_meisai')
+      .select('kizai_id, kizai_tanka_amt')
+      .eq('juchu_head_id', juchuHeadId)
+      .eq('juchu_kizai_head_id', juchuKizaiHeadId);
+    if (eqTankaError) {
+      console.error('GetEqHeader eqTanka error : ', eqTankaError);
+      return [];
+    }
+
     const juchuKizaiMeisaiData: JuchuKizaiMeisaiValues[] = eqList.map((d) => ({
       juchuHeadId: d.juchu_head_id,
       juchuKizaiHeadId: d.juchu_kizai_head_id,
@@ -332,11 +343,14 @@ export const GetEqList = async (juchuHeadId: number, juchuKizaiHeadId: number) =
       shozokuNam: d.shozoku_nam,
       mem: d.mem,
       kizaiId: d.kizai_id,
+      kizaiTankaAmt: eqTanka.find((t) => t.kizai_id === d.kizai_id)?.kizai_tanka_amt || 0,
       kizaiNam: d.kizai_nam,
       kizaiQty: d.kizai_qty,
       planKizaiQty: d.plan_kizai_qty,
       planYobiQty: d.plan_yobi_qty,
       planQty: d.plan_qty,
+      delFlag: false,
+      saveFlag: true,
     }));
     return juchuKizaiMeisaiData;
   } catch (e) {
