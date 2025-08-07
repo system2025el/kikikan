@@ -38,7 +38,7 @@ export const EqptBumonsTable = ({ selected, handleClick }: { selected: number; h
   }, []);
 
   return (
-    <TableContainer component={Paper} variant="outlined" square sx={{ height: '65vh' }}>
+    <TableContainer component={Paper} variant="outlined" square sx={{ height: '75vh' }}>
       <Table stickyHeader padding="none">
         <TableHead>
           <TableRow>

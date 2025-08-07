@@ -19,13 +19,13 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import { SetStateAction, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
-import { BackButton, CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
-import { getFilteredBumons } from '@/app/(main)/(masters)/bumons-master/_lib/funcs';
-import { getEqptsForEqptSelection, getFilteredEqpts } from '@/app/(main)/(masters)/eqpt-master/_lib/funcs';
+import { Loading } from '@/app/(main)/_ui/loading';
+import { CheckSetoptions } from '@/app/(main)/(masters)/_lib/funs';
+import { getEqptsForEqptSelection } from '@/app/(main)/(masters)/eqpt-master/_lib/funcs';
 
 import { bundleData } from '../_lib/eqdata';
 import { EqptBumonsTable } from './equipment-bumons-table';
@@ -34,7 +34,7 @@ import { EqptTable } from './equipments-table';
 export const EqptSelectionDialog = ({ handleCloseDialog }: { handleCloseDialog: () => void }) => {
   /* useState ------------------------- */
   /* 選ばれている機材の配列 */
-  const [eqSelected, setSelectedEq] = useState<readonly number[]>([]);
+  const [selectedEqpt, setSelectedEqpt] = useState<number[]>([]);
   /* セットオプションのダイアログ開閉 */
   const [bundleDialogOpen, setBundleDialogOpen] = useState(false);
   /* 選択されている部門 */
@@ -43,47 +43,58 @@ export const EqptSelectionDialog = ({ handleCloseDialog }: { handleCloseDialog: 
   const [theEqpts, setTheEqpts] = useState<EqptSelection[]>([]);
   /* 検索中かどうか */
   const [searching, setSearching] = useState<boolean>(false);
-  /* Loading */
+  /* Loadingかどうか */
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  /* セットオプションのデータ配列 */
+  const [bundles, setBundles] = useState<EqptSelection[]>([]);
 
   /* useform ------------------------------- */
   const { handleSubmit, control, watch, getValues } = useForm({ defaultValues: { query: '' } });
 
   /* methods ------------------------------ */
-
-  const handleClickEqSelected = () => {
-    if (eqSelected.length !== 0) {
+  /* 確定ボタン押下時 */
+  const handleClickConfirm = async () => {
+    const setList = await CheckSetoptions(selectedEqpt);
+    if (setList.length !== 0) {
+      setBundles(setList);
       setBundleDialogOpen(true);
+    } else {
+      // selectedEqptが今回選んだ全機材であるので、ダイアログを閉じる
+      handleCloseDialog();
     }
   };
 
+  /* セットオプションダイアログを閉じる */
   const handleCloseBundle = () => {
+    setBundles([]);
     setBundleDialogOpen(false);
     handleCloseDialog();
   };
 
+  /* 機材を選択する処理 */
   const handleClick = (event: React.MouseEvent<unknown>, id: number) => {
-    const selectedIndex = eqSelected.indexOf(id);
-    let newSelected: readonly number[] = [];
+    const selectedIndex = selectedEqpt.indexOf(id);
+    let newSelected: number[] = [];
 
     if (selectedIndex === -1) {
-      newSelected = newSelected.concat(eqSelected, id);
+      newSelected = newSelected.concat(selectedEqpt, id);
     } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(eqSelected.slice(1));
-    } else if (selectedIndex === eqSelected.length - 1) {
-      newSelected = newSelected.concat(eqSelected.slice(0, -1));
+      newSelected = newSelected.concat(selectedEqpt.slice(1));
+    } else if (selectedIndex === selectedEqpt.length - 1) {
+      newSelected = newSelected.concat(selectedEqpt.slice(0, -1));
     } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(eqSelected.slice(0, selectedIndex), eqSelected.slice(selectedIndex + 1));
+      newSelected = newSelected.concat(selectedEqpt.slice(0, selectedIndex), selectedEqpt.slice(selectedIndex + 1));
     }
-    setSelectedEq(newSelected);
+    setSelectedEqpt(newSelected);
   };
 
+  /* 部門の行を押下時処理 */
   const handleClickBumon = (id: number) => {
     setSelectedBumon(id);
     setSearching(false);
   };
 
-  /* 検索押下時処理 */
+  /* 検索ボタン押下時処理 */
   const onSubmit = async (data: { query: string }) => {
     console.log('Push search', data.query);
     setIsLoading(true);
@@ -101,7 +112,7 @@ export const EqptSelectionDialog = ({ handleCloseDialog }: { handleCloseDialog: 
     setIsLoading(false);
   };
 
-  /* useeffect ------------------------ */
+  /* useeffect -------------------------------------- */
   useEffect(() => {
     setIsLoading(true);
     setSearching(false);
@@ -143,10 +154,12 @@ export const EqptSelectionDialog = ({ handleCloseDialog }: { handleCloseDialog: 
             </form>
           </Box>
         </Paper>
-        <Box display={'flex'} p={2} justifyContent={'end'}>
-          <Button onClick={() => handleClickEqSelected()}>確定</Button>
+        <Box display={'flex'} p={0.5} justifyContent={'end'}>
+          <Button onClick={() => handleClickConfirm()} disabled={selectedEqpt.length === 0 ? true : false}>
+            確定
+          </Button>
           <Dialog open={bundleDialogOpen} onClose={() => setBundleDialogOpen(false)}>
-            <BundleDialog handleClose={handleCloseBundle} />
+            <BundleDialog handleClose={handleCloseBundle} bundles={bundles} isLoading={isLoading} />
           </Dialog>
         </Box>
 
@@ -156,7 +169,7 @@ export const EqptSelectionDialog = ({ handleCloseDialog }: { handleCloseDialog: 
           </Grid2>
           <Grid2 size={7}>
             <EqptTable
-              eqSelected={eqSelected}
+              selectedEqpt={selectedEqpt}
               datas={theEqpts}
               handleSelect={handleClick}
               bumonId={selectedBumon}
@@ -170,8 +183,20 @@ export const EqptSelectionDialog = ({ handleCloseDialog }: { handleCloseDialog: 
   );
 };
 
-const BundleDialog = (props: { handleClose: () => void }) => {
-  const { handleClose } = props;
+/**
+ * 機材のセットオプションを選ぶダイアログ
+ * @param param0
+ * @returns 機材のセットオプションを選ぶダイアログコンポーネント
+ */
+const BundleDialog = ({
+  bundles,
+  isLoading,
+  handleClose,
+}: {
+  bundles: EqptSelection[];
+  isLoading: boolean;
+  handleClose: () => void;
+}) => {
   const [selected, setSelected] = useState<readonly number[]>([]);
   const handleClick = (event: React.MouseEvent<unknown>, id: number) => {
     const selectedIndex = selected.indexOf(id);
@@ -199,42 +224,62 @@ const BundleDialog = (props: { handleClose: () => void }) => {
       </DialogTitle>
       <DialogContent>
         <TableContainer component={Paper} sx={{ width: 500 }}>
-          <Table stickyHeader padding="none">
-            <TableHead>
-              <TableRow>
-                <TableCell padding="checkbox"></TableCell>
-                <TableCell>機材名</TableCell>
-                <TableCell>在庫場所</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {bundleData.map((row, index) => {
-                const isItemSelected = selected.includes(row.id);
-                const labelId = `enhanced-table-checkbox-${index}`;
+          {isLoading ? (
+            <Loading />
+          ) : (
+            <Table stickyHeader padding="none">
+              <TableHead>
+                <TableRow>
+                  <TableCell padding="checkbox" />
+                  <TableCell>機材名</TableCell>
+                  <TableCell>在庫場所</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {bundles!.map((row, index) => {
+                  const isItemSelected = selected.includes(row.kizaiId);
+                  const labelId = `enhanced-table-checkbox-${index}`;
+                  const nextRow = bundles![index + 1];
 
-                return (
-                  <TableRow
-                    hover
-                    onClick={(event) => handleClick(event, row.id)}
-                    role="checkbox"
-                    aria-checked={isItemSelected}
-                    tabIndex={-1}
-                    key={row.id}
-                    selected={isItemSelected}
-                    sx={{ cursor: 'pointer' }}
-                  >
-                    <TableCell padding="checkbox">
-                      <Checkbox color="primary" checked={isItemSelected} />
-                    </TableCell>
-                    <TableCell component="th" id={labelId} scope="row" padding="none">
-                      {row.name}
-                    </TableCell>
-                    <TableCell>{row.loc}</TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
+                  const rowsToRender = [];
+
+                  rowsToRender.push(
+                    <TableRow
+                      hover
+                      onClick={(event) => handleClick(event, row.kizaiId)}
+                      role="checkbox"
+                      aria-checked={isItemSelected}
+                      tabIndex={-1}
+                      key={row.kizaiId}
+                      selected={isItemSelected}
+                      sx={{ cursor: 'pointer' }}
+                    >
+                      <TableCell padding="checkbox">
+                        <Checkbox color="primary" checked={isItemSelected} />
+                      </TableCell>
+                      <TableCell component="th" id={labelId} scope="row" padding="none">
+                        {row.kizaiNam}
+                      </TableCell>
+                      <TableCell>{row.shozokuNam}</TableCell>
+                    </TableRow>
+                  );
+                  // 次のkizaiGrpCodが異なるなら区切り行を追加
+                  if (!nextRow || row.kizaiGrpCod !== nextRow.kizaiGrpCod) {
+                    rowsToRender.push(
+                      <TableRow key={`divider-${index}`}>
+                        <TableCell colSpan={3}>
+                          <Box height={10} width={'100%'} alignContent={'center'}>
+                            <Divider sx={{ borderStyle: 'dashed', borderColor: 'CaptionText', borderBottomWidth: 2 }} />
+                          </Box>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  }
+                  return rowsToRender;
+                })}
+              </TableBody>
+            </Table>
+          )}
         </TableContainer>
       </DialogContent>
     </>
