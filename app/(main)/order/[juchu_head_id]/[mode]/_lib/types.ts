@@ -26,7 +26,6 @@ export type JuchuHeadValues = z.infer<typeof JuchuHeadSchema>;
 export const KokyakuSchema = z.object({
   kokyakuId: z.number({ message: '相手は必須です' }),
   kokyakuNam: z.string({ message: '相手は必須です' }).min(1, { message: '相手は必須です' }),
-  kokyakuRank: z.number({ message: '相手は必須です' }),
 });
 
 export type KokyakuValues = z.infer<typeof KokyakuSchema>;

@@ -48,7 +48,6 @@ export const GetOrder = async (juchuHeadId: number) => {
         kokyaku: {
           kokyakuId: juchuData.kokyaku_id,
           kokyakuNam: kokyakuData.kokyaku_nam,
-          kokyakuRank: kokyakuData.kokyaku_rank,
         },
         kokyakuTantoNam: juchuData.kokyaku_tanto_nam,
         mem: juchuData.mem,
@@ -67,7 +66,7 @@ export const GetOrder = async (juchuHeadId: number) => {
         nyuryokuUser: juchuData.nyuryoku_user,
         koenNam: juchuData.koen_nam,
         koenbashoNam: juchuData.koenbasho_nam,
-        kokyaku: { kokyakuId: juchuData.kokyaku_id, kokyakuNam: '', kokyakuRank: 0 },
+        kokyaku: { kokyakuId: juchuData.kokyaku_id, kokyakuNam: '' },
         kokyakuTantoNam: juchuData.kokyaku_tanto_nam,
         mem: juchuData.mem,
         nebikiAmt: juchuData.nebiki_amt,
