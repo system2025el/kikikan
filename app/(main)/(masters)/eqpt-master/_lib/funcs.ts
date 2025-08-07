@@ -8,7 +8,7 @@ import { EqptSelection } from '@/app/(main)/(eq-order-detail)/eq-main-order-deta
 
 import { getAllBumonSelections, getAllSelections } from '../../_lib/funs';
 import { emptyEqpt } from './datas';
-import { EqptsMasterDialogValues, EqptsMasterTableValues, nullToZero, zeroToNull } from './types';
+import { EqptsMasterDialogValues, EqptsMasterTableValues, nullToZero, SelectedEqptsValues, zeroToNull } from './types';
 
 /**
  * 機材マスタテーブルのデータを取得する関数
@@ -394,37 +394,46 @@ export const getEqptsForEqptSelection = async (query: string): Promise<EqptSelec
   revalidatePath('/eqpt-master');
 };
 
-// export const getAllEqpt = async () => {
-//   try {
-//     const { data, error } = await supabase
-//       .schema('dev2')
-//       .from('m_Eqpt')
-//       .select('Eqpt_id , Eqpt_nam, adr_shozai, adr_tatemono, adr_sonota, tel, fax, mem,  ')
-
-//       .order('dsp_ord_num');
-//     if (!error) {
-//       console.log('I got a datalist from db', data.length);
-
-//       const theData: EqptsMasterTableValues[] = data.map((d) => ({
-//         EqptId: d.Eqpt_id,
-//         EqptNam: d.Eqpt_nam,
-//         adrShozai: d.adr_shozai,
-//         adrTatemono: d.adr_tatemono,
-//         adrSonota: d.adr_sonota,
-//         tel: d.tel,
-//         fax: d.fax,
-//         mem: d.mem,
-//         dspFlg: d.,
-//       }));
-
-//       console.log(theData.length);
-//       return theData;
-//     } else {
-//       console.error('DBエラーです', error.message);
-//     }
-//   } catch (e) {
-//     console.log(e);
-//   }
-//   revalidatePath('/eqpt-master');
-//   redirect('/eqpt-master');
-// };
+export const getSelectedEqpts = async (idList: number[], rank: number) => {
+  const rankParse = (rank: number) => {};
+  try {
+    const { data, error } = await await supabase
+      .schema('dev2')
+      .from('m_kizai')
+      .select(
+        `kizai_id, kizai_nam, kizai_grp_cod, dsp_ord_num, reg_amt, rank_amt_1, rank_amt_2, rank_amt_3, rank_amt_4, rank_amt_5`
+      )
+      .in('kizai_id', idList)
+      .order('kizai_grp_cod')
+      .order('dsp_ord_num');
+    if (!error) {
+      if (!data) return [];
+      const selectedEqpts: SelectedEqptsValues[] = data.map((d) => ({
+        kizaiId: d.kizai_id,
+        kizaiNam: d.kizai_nam,
+        kizaiGrpCod: d.kizai_grp_cod,
+        dspOrdNum: d.dsp_ord_num,
+        regAmt: d.reg_amt,
+        rankAmt:
+          rank === 1
+            ? d.rank_amt_1
+            : rank === 2
+              ? d.rank_amt_2
+              : rank === 3
+                ? d.rank_amt_3
+                : rank === 4
+                  ? d.rank_amt_4
+                  : rank === 5
+                    ? d.rank_amt_5
+                    : 0,
+      }));
+      return selectedEqpts;
+    } else {
+      console.error('DBエラーだよ', error);
+      return [];
+    }
+  } catch (e) {
+    console.error('例外が発生しました:', e);
+    throw e;
+  }
+};

@@ -1,3 +1,4 @@
+import { strict } from 'assert';
 import { number, z } from 'zod';
 
 // Schema
@@ -62,4 +63,16 @@ export type EqptsMasterTableValues = {
 export const zeroToNull = <T>(value: T): T | null => (value === 0 ? null : value);
 export const nullToZero = (v: number | null): number => {
   return v === null ? 0 : v;
+};
+
+/**
+ * 機材選択ん使うタイプ
+ */
+export type SelectedEqptsValues = {
+  kizaiId: number;
+  kizaiNam: string;
+  kizaiGrpCod: string;
+  dspOrdNum: number;
+  regAmt: number;
+  rankAmt: number;
 };
