@@ -33,14 +33,14 @@ import { EqptBumonsTable } from './equipment-bumons-table';
 import { EqptTable } from './equipments-table';
 
 export const EqptSelectionDialog = ({
-  /* rank,
-  eqpts,
-  setEqpts,*/
+  // rank,
+  // eqpts,
+  // setEqpts,
   handleCloseDialog,
 }: {
-  /* rank: number;
-  eqpts: SelectedEqptsValues[]; //いる？
-  setEqpts: React.Dispatch<React.SetStateAction<SelectedEqptsValues[]>>;*/
+  // rank: number;
+  // eqpts: SelectedEqptsValues[]; // もともとのやつを表示しない処理などは必要だけど別に要らない気もする
+  // setEqpts: React.Dispatch<React.SetStateAction<SelectedEqptsValues[]>>;
   handleCloseDialog: () => void;
 }) => {
   /* useState ------------------------- */
@@ -65,17 +65,14 @@ export const EqptSelectionDialog = ({
   /* methods ------------------------------ */
   /* 確定ボタン押下時 */
   const handleClickConfirm = async () => {
-    console.log('333333333333333333333', selectedEqptIds);
     const setList = await CheckSetoptions(selectedEqptIds);
-    console.log('1000001010010101', setList);
-    console.log('44444444444444444', selectedEqptIds);
     if (setList.length !== 0) {
       setBundles(setList);
       setBundleDialogOpen(true);
     } else {
       // selectedEqptIdsが今回選んだ全機材であるので、idをもとに機材情報を取得しダイアログを閉じたい
       // const data = await getSelectedEqpts(selectedEqptIds, rank);
-      // console.log('最終的に渡される機材の配列データ', data!);
+      // console.log('最終的に渡される機材の配列データ: ', data!);
       // setEqpts(data!);
       handleCloseDialog();
     }
@@ -122,11 +119,11 @@ export const EqptSelectionDialog = ({
     setSelectedBumon(-100);
     if (data.query.trim() === '') {
       const a = await getEqptsForEqptSelection('');
-      console.log('機材リストだあああああああああああああああああ', a![0]);
+      console.log('機材リスト[0]: ', a![0]);
       setTheEqpts(a!);
     } else {
       const a = await getEqptsForEqptSelection(data.query);
-      console.log('機材リストだあああああああああああああああああ', a![0]);
+      console.log('機材リスト[0]: ', a![0]);
       setTheEqpts(a!);
     }
     setIsLoading(false);
@@ -139,7 +136,7 @@ export const EqptSelectionDialog = ({
     console.log('★★★★★★★★★★★★★★★★★★★★★');
     const getEqpts = async () => {
       const a = await getEqptsForEqptSelection('');
-      console.log('最初の機材リスト＝＝＝＝＝＝＝＝＝1個目→', a![0]);
+      console.log('最初の機材リスト[0]: ', a![0]);
       setTheEqpts(a!);
     };
     getEqpts();
@@ -184,7 +181,6 @@ export const EqptSelectionDialog = ({
               bundles={bundles}
               isLoading={isLoading}
               selectedEqpts={selectedEqptIds}
-              setSelectedEqpts={setSelectedEqptIds}
               // rank={rank}
               // setEqpts={setEqpts}
             />
@@ -220,18 +216,16 @@ const BundleDialog = ({
   bundles,
   isLoading,
   selectedEqpts,
-  /* rank,*/
-  setSelectedEqpts,
+  // rank,
   handleClose,
-  /*setEqpts,*/
+  // setEqpts,
 }: {
   bundles: EqptSelection[];
   isLoading: boolean;
   selectedEqpts: number[];
-  /*rank: number;*/
-  setSelectedEqpts: React.Dispatch<React.SetStateAction<number[]>>;
+  // rank: number;
   handleClose: () => void;
-  /* setEqpts: React.Dispatch<React.SetStateAction<SelectedEqptsValues[]>>;*/
+  // setEqpts: React.Dispatch<React.SetStateAction<SelectedEqptsValues[]>>;
 }) => {
   /* useState ------------------------------------------ */
   /* 選択される機材のidのリスト */
@@ -253,14 +247,12 @@ const BundleDialog = ({
       newSelected = newSelected.concat(selected.slice(0, selectedIndex), selected.slice(selectedIndex + 1));
     }
     setSelected(newSelected);
-    console.log('222222222222222222222222s', selectedEqpts);
   };
 
   /* 確定ボタン押下時 */
   const handleClickConfirm = async () => {
-    console.log('999999999999999999', selectedEqpts, selected);
     // const data = await getSelectedEqpts([...selectedEqpts, ...selected], rank);
-    // console.log('最終的に渡される機材の配列データ', data!);
+    // console.log('最終的に渡される機材の配列データ: ', data!);
     // setEqpts(data!);
     handleClose();
   };

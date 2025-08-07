@@ -394,6 +394,12 @@ export const getEqptsForEqptSelection = async (query: string): Promise<EqptSelec
   revalidatePath('/eqpt-master');
 };
 
+/**
+ * 最終的に選ばれたすべの機材IDから、機材の配列を取得する関数
+ * @param idList 最終的に選ばれたすべの機材IDの配列
+ * @param rank 顧客ランク
+ * @returns {SelectedEqptsValues[]} 表に渡す機材の配列
+ */
 export const getSelectedEqpts = async (idList: number[], rank: number) => {
   const rankParse = (rank: number) => {};
   try {

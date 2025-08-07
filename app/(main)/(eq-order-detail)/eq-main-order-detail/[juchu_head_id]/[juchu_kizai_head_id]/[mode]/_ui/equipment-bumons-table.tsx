@@ -13,8 +13,13 @@ import { useEffect, useState } from 'react';
 
 import { getBumonsForEqptSelection } from '@/app/(main)/(masters)/_lib/funs';
 
+/**
+ * 機材選択の部門選択テーブル
+ * @param param0
+ * @returns 機材選択の部門選択テーブルコンポーネント
+ */
 export const EqptBumonsTable = ({ selected, handleClick }: { selected: number; handleClick: (id: number) => void }) => {
-  /*  */
+  /* 選択されているときの背景色 */
   const theme = useTheme();
   const selectedColor = alpha(theme.palette.primary.light, 0.4);
 
