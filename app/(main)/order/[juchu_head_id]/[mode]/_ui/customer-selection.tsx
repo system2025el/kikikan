@@ -30,7 +30,7 @@ import { CustomersMasterTableValues } from '@/app/(main)/(masters)/customers-mas
 import { MuiTablePagination } from '../../../../_ui/table-pagination';
 //import { customers } from '../../../../(masters)/customers-master/_lib/datas';
 import { GetFilteredCustomers } from '../_lib/funcs';
-import { KokyakuValues } from '../_lib/types';
+import { CustomersDialogValues, KokyakuValues } from '../_lib/types';
 
 /** 新規受注の相手選択ダイアログ（全画面） */
 export const CustomerSelectionDialog = (props: {
@@ -38,7 +38,7 @@ export const CustomerSelectionDialog = (props: {
   handleCloseCustDialog: () => void;
 }) => {
   const { handleCustSelect, handleCloseCustDialog } = props;
-  const [custs, setCusts] = useState<CustomersMasterTableValues[]>();
+  const [custs, setCusts] = useState<CustomersDialogValues[]>();
   const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
   const rowsPerPage = 50;
@@ -132,7 +132,11 @@ export const CustomerSelectionDialog = (props: {
                           <Button
                             variant="text"
                             onClick={() =>
-                              handleCustSelect({ kokyakuId: customer.kokyakuId, kokyakuNam: customer.kokyakuNam })
+                              handleCustSelect({
+                                kokyakuId: customer.kokyakuId,
+                                kokyakuNam: customer.kokyakuNam,
+                                kokyakuRank: customer.kokyakuRank,
+                              })
                             }
                           >
                             {customer.kokyakuNam}

@@ -29,8 +29,9 @@ type DateDialogProps = {
   shukoDate: Date | null;
   nyukoDate: Date | null;
   juchuHonbanbiList: JuchuKizaiHonbanbiValues[];
+  juchuHonbanbiDeleteList: JuchuKizaiHonbanbiValues[];
   onClose: () => void;
-  onSave: () => void;
+  onSave: (juchuHonbanbiList: JuchuKizaiHonbanbiValues[], juchuHonbanbiDeleteList: JuchuKizaiHonbanbiValues[]) => void;
 };
 
 const TabPanel = (props: TabPanelProps) => {
@@ -50,6 +51,7 @@ export const DateSelectDialog = ({
   shukoDate,
   nyukoDate,
   juchuHonbanbiList,
+  juchuHonbanbiDeleteList,
   onClose,
   onSave,
 }: DateDialogProps) => {
@@ -73,7 +75,7 @@ export const DateSelectDialog = ({
     juchuHonbanbiList.filter((d) => d.juchuHonbanbiShubetuId === 40)
   );
   // 削除予定リスト
-  const [deleteList, setDeleteList] = useState<JuchuKizaiHonbanbiValues[]>([]);
+  const [deleteList, setDeleteList] = useState<JuchuKizaiHonbanbiValues[]>(juchuHonbanbiDeleteList);
   // 選択日付
   const [dateRange, setDateRange] = useState<[Date, Date] | null>(
     shukoDate && nyukoDate ? [shukoDate, nyukoDate] : null
@@ -120,29 +122,29 @@ export const DateSelectDialog = ({
   };
 
   const handleSave = async () => {
-    setIsLoading(true);
+    //setIsLoading(true);
     const juchuHonbanbiData: JuchuKizaiHonbanbiValues[] = [...sikomi, ...rh, ...gp, ...honban];
-    console.log('-------------削除データ', deleteList, '--------------');
+    // console.log('-------------削除データ', deleteList, '--------------');
 
-    if (deleteList.length > 0) {
-      console.log('--------------削除データあり-------------');
-      for (const item of deleteList) {
-        const result = await DeleteHonbanbi(juchuHeadId, juchuKizaiHeadId, item);
-        console.log('----------------', result, '-------------');
-      }
-    }
-    setDeleteList([]);
+    // if (deleteList.length > 0) {
+    //   console.log('--------------削除データあり-------------');
+    //   for (const item of deleteList) {
+    //     const result = await DeleteHonbanbi(juchuHeadId, juchuKizaiHeadId, item);
+    //     console.log('----------------', result, '-------------');
+    //   }
+    // }
+    // setDeleteList([]);
 
-    for (const item of juchuHonbanbiData) {
-      const confirm = await ConfirmHonbanbi(juchuHeadId, juchuKizaiHeadId, item);
-      if (confirm) {
-        const result = await UpdateHonbanbi(juchuHeadId, juchuKizaiHeadId, item, userNam);
-      } else {
-        const result = await AddHonbanbi(juchuHeadId, juchuKizaiHeadId, item, userNam);
-      }
-    }
-    await onSave();
-    setIsLoading(false);
+    // for (const item of juchuHonbanbiData) {
+    //   const confirm = await ConfirmHonbanbi(juchuHeadId, juchuKizaiHeadId, item);
+    //   if (confirm) {
+    //     const result = await UpdateHonbanbi(juchuHeadId, juchuKizaiHeadId, item, userNam);
+    //   } else {
+    //     const result = await AddHonbanbi(juchuHeadId, juchuKizaiHeadId, item, userNam);
+    //   }
+    // }
+    onSave(juchuHonbanbiData, deleteList);
+    //setIsLoading(false);
   };
 
   const handleClose = () => {

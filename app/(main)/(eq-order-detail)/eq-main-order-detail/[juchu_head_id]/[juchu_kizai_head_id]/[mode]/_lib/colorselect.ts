@@ -12,14 +12,14 @@ export const getDateHeaderBackgroundColor = (date: string, dateRange: string[]):
 
 export const getStockRowBackgroundColor = (
   date: Date,
-  shukoDate: Date | null,
-  nyukoDate: Date | null,
+  // shukoDate: Date | null,
+  // nyukoDate: Date | null,
   dateRange: string[],
   juchuHonbanbiList: JuchuKizaiHonbanbiValues[]
 ): string => {
   const cellDate = toISOStringYearMonthDay(date);
-  const startDate = shukoDate && toISOStringYearMonthDay(shukoDate);
-  const endDate = nyukoDate && toISOStringYearMonthDay(nyukoDate);
+  // const startDate = shukoDate && toISOStringYearMonthDay(shukoDate);
+  // const endDate = nyukoDate && toISOStringYearMonthDay(nyukoDate);
 
   if (juchuHonbanbiList.some((date) => toISOStringYearMonthDay(date.juchuHonbanbiDat) === cellDate)) {
     const shubetuId = juchuHonbanbiList.find(
@@ -38,8 +38,8 @@ export const getStockRowBackgroundColor = (
         return 'white';
     }
   }
-  if (cellDate === endDate) return 'yellow';
-  if (cellDate === startDate) return 'lightblue';
+  if (cellDate === dateRange[dateRange.length - 1]) return 'yellow';
+  if (cellDate === dateRange[0]) return 'lightblue';
   if (dateRange.includes(cellDate)) return '#ACB9CA';
   return 'white';
 };
