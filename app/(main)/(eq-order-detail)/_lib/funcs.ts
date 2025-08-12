@@ -443,7 +443,9 @@ export const GetHonbanbi = async (juchuHeadId: number, juchuKizaiHeadId: number)
     const { data: honbanbi, error: honbanbiError } = await supabase
       .schema('dev2')
       .from('t_juchu_kizai_honbanbi')
-      .select('juchu_head_id, juchu_kizai_head_id, juchu_honbanbi_shubetu_id, juchu_honbanbi_dat, mem')
+      .select(
+        'juchu_head_id, juchu_kizai_head_id, juchu_honbanbi_shubetu_id, juchu_honbanbi_dat, mem, juchu_honbanbi_add_qty'
+      )
       .eq('juchu_head_id', juchuHeadId)
       .eq('juchu_kizai_head_id', juchuKizaiHeadId)
       .in('juchu_honbanbi_shubetu_id', [10, 20, 30, 40])
@@ -459,6 +461,7 @@ export const GetHonbanbi = async (juchuHeadId: number, juchuKizaiHeadId: number)
       juchuHonbanbiShubetuId: d.juchu_honbanbi_shubetu_id,
       juchuHonbanbiDat: new Date(d.juchu_honbanbi_dat),
       mem: d.mem,
+      juchuHonbanbiAddQty: d.juchu_honbanbi_add_qty,
     }));
 
     return juchuKizaiHonbanbiData;

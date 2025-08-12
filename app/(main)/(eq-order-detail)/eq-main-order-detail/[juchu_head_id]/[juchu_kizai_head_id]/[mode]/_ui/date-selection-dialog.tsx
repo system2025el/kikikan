@@ -112,6 +112,9 @@ export const DateSelectDialog = ({
     setGp(updatedGp);
   };
 
+  const handleHonbanAddChange = (index: number, value: number) => {
+    setHonban((prev) => prev.map((d, i) => (i === index ? { ...d, juchuHonbanbiAddQty: value } : d)));
+  };
   const handleHonbanMemChange = (index: number, value: string) => {
     setHonban((prev) => prev.map((d, i) => (i === index ? { ...d, mem: value } : d)));
   };
@@ -165,6 +168,7 @@ export const DateSelectDialog = ({
             juchuHonbanbiShubetuId: 10,
             juchuHonbanbiDat: new Date(d),
             mem: '',
+            juchuHonbanbiAddQty: 0,
           }));
           setSikomi((prev) => {
             const existDate = new Set(prev.map((d) => toISOStringYearMonthDay(d.juchuHonbanbiDat)));
@@ -179,6 +183,7 @@ export const DateSelectDialog = ({
             juchuHonbanbiShubetuId: 20,
             juchuHonbanbiDat: new Date(d),
             mem: '',
+            juchuHonbanbiAddQty: 0,
           }));
           setRh((prev) => {
             const existDate = new Set(prev.map((d) => toISOStringYearMonthDay(d.juchuHonbanbiDat)));
@@ -193,6 +198,7 @@ export const DateSelectDialog = ({
             juchuHonbanbiShubetuId: 30,
             juchuHonbanbiDat: new Date(d),
             mem: '',
+            juchuHonbanbiAddQty: 0,
           }));
           setGp((prev) => {
             const existDate = new Set(prev.map((d) => toISOStringYearMonthDay(d.juchuHonbanbiDat)));
@@ -207,6 +213,7 @@ export const DateSelectDialog = ({
             juchuHonbanbiShubetuId: 40,
             juchuHonbanbiDat: new Date(d),
             mem: '',
+            juchuHonbanbiAddQty: 0,
           }));
           setHonban((prev) => {
             const existDate = new Set(prev.map((d) => toISOStringYearMonthDay(d.juchuHonbanbiDat)));
@@ -335,6 +342,22 @@ export const DateSelectDialog = ({
           {honban.map((data, index) => (
             <Box display="flex" alignItems="center" margin={2} key={index}>
               <TextField value={toISOStringYearMonthDay(data.juchuHonbanbiDat)} />
+              <TextField
+                value={data.juchuHonbanbiAddQty}
+                onChange={(e) => handleHonbanAddChange(index, Number(e.target.value))}
+                type="number"
+                sx={{
+                  width: '50px',
+                  ml: 2,
+                  '& .MuiInputBase-input': {
+                    textAlign: 'right',
+                  },
+                  '& input[type=number]::-webkit-inner-spin-button': {
+                    WebkitAppearance: 'none',
+                    margin: 0,
+                  },
+                }}
+              />
               <Typography ml={2} mr={1}>
                 メモ
               </Typography>

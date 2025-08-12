@@ -388,6 +388,7 @@ const EquipmentOrderDetail = (props: {
             juchuHonbanbiShubetuId: 2,
             juchuHonbanbiDat: shukoDate,
             mem: '',
+            juchuHonbanbiAddQty: 0,
           },
           {
             juchuHeadId: data.juchuHeadId,
@@ -395,6 +396,7 @@ const EquipmentOrderDetail = (props: {
             juchuHonbanbiShubetuId: 3,
             juchuHonbanbiDat: nyukoDate,
             mem: '',
+            juchuHonbanbiAddQty: 0,
           },
         ];
         for (const item of deleteJuchuHonbanbiData) {
@@ -409,6 +411,7 @@ const EquipmentOrderDetail = (props: {
             juchuHonbanbiShubetuId: 2,
             juchuHonbanbiDat: updateShukoDate,
             mem: '',
+            juchuHonbanbiAddQty: 0,
           },
           {
             juchuHeadId: data.juchuHeadId,
@@ -416,6 +419,7 @@ const EquipmentOrderDetail = (props: {
             juchuHonbanbiShubetuId: 3,
             juchuHonbanbiDat: updateNyukoDate,
             mem: '',
+            juchuHonbanbiAddQty: 0,
           },
         ];
         for (const item of updatedjuchuHonbanbiData) {
@@ -785,8 +789,21 @@ const EquipmentOrderDetail = (props: {
     // if (updateJuchuHonbanbiData) {
     //   setJuchuHonbanbiList(updateJuchuHonbanbiData);
     // }
-    const updatedJuchuHonbanbiQty = updatedHonbanbiList.filter((data) => data.juchuHonbanbiShubetuId === 40).length;
+    const honbanbiQty = updatedHonbanbiList.filter((data) => data.juchuHonbanbiShubetuId === 40).length;
+    const addHonbanbiQty = updatedHonbanbiList.reduce((sum, data) => sum + data.juchuHonbanbiAddQty, 0);
+    const updatedJuchuHonbanbiQty = honbanbiQty + addHonbanbiQty;
+    const updatedPriceTotal = juchuKizaiMeisaiList
+      .filter((data) => !data.delFlag)
+      .reduce(
+        (sum, row) =>
+          props.juchuKizaiHeadData.juchuHonbanbiQty !== null
+            ? sum + row.kizaiTankaAmt * row.planKizaiQty * updatedJuchuHonbanbiQty
+            : 0,
+        0
+      );
+
     setValue('juchuHonbanbiQty', updatedJuchuHonbanbiQty);
+    setPriceTotal(updatedPriceTotal);
     setJuchuHonbanbiList(updatedHonbanbiList);
     setJuchuHonbanbiDeleteList(updatedHonbanbiDeleteList);
 
@@ -1555,8 +1572,9 @@ const EquipmentOrderDetail = (props: {
                 (data, index) =>
                   data.juchuHonbanbiShubetuId === 40 && (
                     <Grid2 key={index} container display="flex" flexDirection="row">
-                      <Grid2 size={5}>
+                      <Grid2 display={'flex'} size={5}>
                         <Typography>{toISOStringYearMonthDay(data.juchuHonbanbiDat)}</Typography>
+                        <Typography ml={2}>{data.juchuHonbanbiAddQty}</Typography>
                       </Grid2>
                       <Grid2 size={7}>
                         <Typography sx={{ wordBreak: 'break-word', whiteSpace: 'wrap' }}>{data.mem}</Typography>
