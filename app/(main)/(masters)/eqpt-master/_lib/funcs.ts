@@ -405,9 +405,9 @@ export const getSelectedEqpts = async (idList: number[], rank: number) => {
   try {
     const { data, error } = await await supabase
       .schema('dev2')
-      .from('m_kizai')
+      .from('v_kizai_lst')
       .select(
-        `kizai_id, kizai_nam, kizai_grp_cod, dsp_ord_num, reg_amt, rank_amt_1, rank_amt_2, rank_amt_3, rank_amt_4, rank_amt_5`
+        `kizai_id, kizai_nam, shozoku_id, shozoku_nam, kizai_grp_cod, dsp_ord_num, reg_amt, rank_amt_1, rank_amt_2, rank_amt_3, rank_amt_4, rank_amt_5, kizai_qty`
       )
       .in('kizai_id', idList)
       .order('kizai_grp_cod')
@@ -417,6 +417,8 @@ export const getSelectedEqpts = async (idList: number[], rank: number) => {
       const selectedEqpts: SelectedEqptsValues[] = data.map((d) => ({
         kizaiId: d.kizai_id,
         kizaiNam: d.kizai_nam,
+        shozokuId: d.shozoku_id,
+        shozokuNam: d.shozoku_nam,
         kizaiGrpCod: d.kizai_grp_cod,
         dspOrdNum: d.dsp_ord_num,
         regAmt: d.reg_amt,
@@ -432,6 +434,7 @@ export const getSelectedEqpts = async (idList: number[], rank: number) => {
                   : rank === 5
                     ? d.rank_amt_5
                     : 0,
+        kizaiQty: d.kizai_qty ?? 0,
       }));
       return selectedEqpts;
     } else {

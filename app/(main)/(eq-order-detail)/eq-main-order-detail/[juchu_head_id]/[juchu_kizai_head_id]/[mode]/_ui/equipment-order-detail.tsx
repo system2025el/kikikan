@@ -27,8 +27,9 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { addMonths, endOfMonth, subDays, subMonths } from 'date-fns';
+import { addMonths, endOfMonth, sub, subDays, subMonths } from 'date-fns';
 import dayjs, { Dayjs } from 'dayjs';
+import { get } from 'http';
 import { redirect, useRouter } from 'next/navigation';
 import { use, useEffect, useRef, useState } from 'react';
 import React from 'react';
@@ -68,6 +69,7 @@ import {
   UpdateJuchuKizaiHead,
   UpdateJuchuKizaiNyushuko,
 } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
+import { SelectedEqptsValues } from '@/app/(main)/(masters)/eqpt-master/_lib/types';
 import { AddLock, DeleteLock, GetLock } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/funcs';
 import { useUnsavedChangesWarning } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/hook';
 import { LockValues, OrderValues } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/types';
@@ -166,7 +168,13 @@ const EquipmentOrderDetail = (props: {
 
   // 合計金額
   const [priceTotal, setPriceTotal] = useState(
-    juchuKizaiMeisaiList!.reduce((sum, row) => sum + (row.kizaiTankaAmt ?? 0), 0)
+    juchuKizaiMeisaiList!.reduce(
+      (sum, row) =>
+        props.juchuKizaiHeadData.juchuHonbanbiQty !== null
+          ? sum + row.kizaiTankaAmt * row.planKizaiQty * props.juchuKizaiHeadData.juchuHonbanbiQty
+          : 0,
+      0
+    )
   );
 
   // context
@@ -346,7 +354,7 @@ const EquipmentOrderDetail = (props: {
     setIsLoading(true);
     // 新規
     if (data.juchuKizaiHeadId === 0) {
-      const maxId = await GetMaxId(data.juchuHeadId);
+      const maxId = await GetMaxId();
       const maxDspOrdNum = await GetDspOrdNum();
       if (maxId && maxDspOrdNum) {
         const newJuchuKizaiHeadId = maxId.juchu_kizai_head_id + 1;
@@ -600,7 +608,21 @@ const EquipmentOrderDetail = (props: {
       );
       setEqStockList((prev) => prev.map((data, i) => (i === rowIndex ? [...subUpdatedEqStockList] : data)));
     }
-
+    const updatedJuchukizaiMeisaiData = [...juchuKizaiMeisaiList];
+    const targetJuchukizaiMeisaiData = updatedJuchukizaiMeisaiData
+      .filter((data) => !data.delFlag)
+      .find((data) => data.kizaiId === kizaiId);
+    if (targetJuchukizaiMeisaiData) targetJuchukizaiMeisaiData.planKizaiQty = planKizaiQty;
+    const updatedPriceTotal = updatedJuchukizaiMeisaiData
+      .filter((data) => !data.delFlag)
+      .reduce(
+        (sum, row) =>
+          props.juchuKizaiHeadData.juchuHonbanbiQty !== null
+            ? sum + row.kizaiTankaAmt * row.planKizaiQty * props.juchuKizaiHeadData.juchuHonbanbiQty
+            : 0,
+        0
+      );
+    setPriceTotal(updatedPriceTotal);
     setJuchuKizaiMeisaiList((prev) =>
       prev.map((data) =>
         data.kizaiId === kizaiId
@@ -782,80 +804,73 @@ const EquipmentOrderDetail = (props: {
   };
   // 機材入力ダイアログ開閉
   const handleOpenEqDialog = async () => {
-    const newEq: JuchuKizaiMeisaiValues[] = [
-      {
-        juchuHeadId: juchuKizaiMeisaiList[0].juchuHeadId,
-        juchuKizaiHeadId: juchuKizaiMeisaiList[0].juchuKizaiHeadId,
-        juchuKizaiMeisaiId: 3,
-        idoDenId: null,
-        idoDenDat: null,
-        idoSijiId: null,
-        shozokuId: juchuKizaiMeisaiList[0].shozokuId,
-        shozokuNam: juchuKizaiMeisaiList[0].shozokuNam,
-        mem: '',
-        kizaiId: 3,
-        kizaiTankaAmt: 13000,
-        kizaiNam: 'test1',
-        kizaiQty: 0,
-        planKizaiQty: 0,
-        planYobiQty: 0,
-        planQty: 0,
-        delFlag: false,
-        saveFlag: false,
-      },
-      {
-        juchuHeadId: juchuKizaiMeisaiList[0].juchuHeadId,
-        juchuKizaiHeadId: juchuKizaiMeisaiList[0].juchuKizaiHeadId,
-        juchuKizaiMeisaiId: 4,
-        idoDenId: null,
-        idoDenDat: null,
-        idoSijiId: null,
-        shozokuId: juchuKizaiMeisaiList[0].shozokuId,
-        shozokuNam: juchuKizaiMeisaiList[0].shozokuNam,
-        mem: '',
-        kizaiId: 4,
-        kizaiTankaAmt: 10000,
-        kizaiNam: 'test2',
-        kizaiQty: 0,
-        planKizaiQty: 0,
-        planYobiQty: 0,
-        planQty: 0,
-        delFlag: false,
-        saveFlag: false,
-      },
-    ];
-    // 受注機材idリスト
-    const ids = newEq?.map((data) => data.kizaiId);
-    // 受注機材合計数リスト
-    const planQtys = newEq?.map((data) => data.planQty);
-    // 機材在庫データ
-    const eqStockData: StockTableValues[][] = [];
-    if (ids && planQtys) {
-      if (!shukoDate) return <div>データに不備があります。</div>;
-      for (let i = 0; i < ids.length; i++) {
-        const stock: StockTableValues[] = await GetStockList(
-          newEq[i]?.juchuHeadId,
-          newEq[i]?.juchuKizaiHeadId,
-          ids[i],
-          planQtys[i],
-          subDays(selectDate, 1)
-        );
-        eqStockData.push(stock);
-      }
+    if (!saveKizaiHead) {
+      setSaveOpen(true);
+      return;
     }
-    setJuchuKizaiMeisaiList((prev) => [...prev, ...newEq]);
-    setEqStockList((prev) => [...prev, ...eqStockData]);
-    setOriginPlanQty((prev) => [...prev, ...planQtys]);
-    setPriceTotal((prev) => prev + newEq.reduce((sum, row) => (!row.delFlag ? sum + (row.kizaiTankaAmt ?? 0) : 0), 0));
-    //setEqSelectionDialogOpen(true);
+    setEqSelectionDialogOpen(true);
+  };
+  const setEqpts = async (data: SelectedEqptsValues[]) => {
+    const kicsDat = getValues('kicsShukoDat');
+    const yardDat = getValues('yardShukoDat');
+    const kicsIdoDat = kicsDat === null && yardDat !== null ? subDays(yardDat, 2) : null;
+    const yardIdoDat = yardDat === null && kicsDat !== null ? subDays(kicsDat, 2) : null;
+    const ids = new Set(juchuKizaiMeisaiList.filter((data) => !data.delFlag).map((data) => data.kizaiId));
+    const filterData = data.filter((d) => !ids.has(d.kizaiId));
+    const selectEq: JuchuKizaiMeisaiValues[] = filterData.map((d) => ({
+      juchuHeadId: getValues('juchuHeadId'),
+      juchuKizaiHeadId: getValues('juchuKizaiHeadId'),
+      juchuKizaiMeisaiId: 0,
+      idoDenId: 0,
+      idoDenDat:
+        d.shozokuId === 1 && kicsIdoDat !== null
+          ? kicsIdoDat
+          : d.shozokuId === 2 && yardIdoDat !== null
+            ? yardIdoDat
+            : null,
+      idoSijiId:
+        d.shozokuId === 1 && kicsIdoDat !== null ? 'K→Y' : d.shozokuId === 2 && yardIdoDat !== null ? 'Y→K' : null,
+      shozokuId: d.shozokuId,
+      shozokuNam: d.shozokuNam,
+      mem: '',
+      kizaiId: d.kizaiId,
+      kizaiTankaAmt: d.rankAmt,
+      kizaiNam: d.kizaiNam,
+      kizaiQty: d.kizaiQty,
+      planKizaiQty: 0,
+      planYobiQty: 0,
+      planQty: 0,
+      delFlag: false,
+      saveFlag: false,
+    }));
+    const newIds = selectEq.map((data) => data.kizaiId);
+    const newPlanQtys = selectEq.map((data) => data.planQty);
+    // 機材在庫データ
+    const selectEqStockData: StockTableValues[][] = [];
+    for (let i = 0; i < newIds.length; i++) {
+      const stock: StockTableValues[] = await GetStockList(
+        getValues('juchuHeadId'),
+        getValues('juchuKizaiHeadId'),
+        newIds[i],
+        0,
+        subDays(selectDate, 1)
+      );
+      selectEqStockData.push(stock);
+    }
+    setJuchuKizaiMeisaiList((prev) => [...prev, ...selectEq]);
+    setEqStockList((prev) => [...prev, ...selectEqStockData]);
+    setOriginPlanQty((prev) => [...prev, ...newPlanQtys]);
   };
   const handleCloseEqDialog = () => {
     setEqSelectionDialogOpen(false);
   };
   // 本番日入力ダイアログ開閉
   const handleOpenDateDialog = () => {
+    if (!saveKizaiHead) {
+      setSaveOpen(true);
+      return;
+    }
     setDateSelectionDialogOpne(true);
-    // }
   };
   const handleCloseDateDialog = () => {
     setDateSelectionDialogOpne(false);
@@ -1291,28 +1306,15 @@ const EquipmentOrderDetail = (props: {
             <Typography>受注明細(機材)</Typography>
             <Typography fontSize={'small'}>機材入力</Typography>
           </Grid2>
-          <Grid2>
-            <Button
-              disabled={!edit}
-              onClick={
-                () =>
-                  /*handleButtonClick('kizaiMeisai', () => */ console.log(
-                    'honbanbi: ',
-                    juchuHonbanbiList,
-                    ' deleteHonbanbi: ',
-                    juchuHonbanbiDeleteList
-                  ) /*)*/
-              }
-            >
-              <CheckIcon fontSize="small" />
-              保存
-            </Button>
-          </Grid2>
         </Box>
         <Divider />
 
         <Dialog open={EqSelectionDialogOpen} fullScreen>
-          <EqptSelectionDialog handleCloseDialog={handleCloseEqDialog} />
+          <EqptSelectionDialog
+            rank={props.juchuHeadData.kokyaku.kokyakuRank}
+            setEqpts={setEqpts}
+            handleCloseDialog={handleCloseEqDialog}
+          />
         </Dialog>
 
         <Box display={'flex'} flexDirection="row" width="100%">

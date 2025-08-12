@@ -62,13 +62,12 @@ export const GetEqHeader = async (juchuHeadId: number, juchuKizaiHeadId: number)
  * 受注機材ヘッダーid最大値取得
  * @returns 受注機材ヘッダーid最大値
  */
-export const GetMaxId = async (juchuHeadId: number) => {
+export const GetMaxId = async () => {
   try {
     const { data, error } = await supabase
       .schema('dev2')
       .from('t_juchu_kizai_head')
       .select('juchu_kizai_head_id')
-      .eq('juchu_head_id', juchuHeadId)
       .order('juchu_kizai_head_id', {
         ascending: false,
       })

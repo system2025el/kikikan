@@ -33,14 +33,12 @@ import { EqptBumonsTable } from './equipment-bumons-table';
 import { EqptTable } from './equipments-table';
 
 export const EqptSelectionDialog = ({
-  // rank,
-  // eqpts,
-  // setEqpts,
+  rank,
+  setEqpts,
   handleCloseDialog,
 }: {
-  // rank: number;
-  // eqpts: SelectedEqptsValues[]; // もともとのやつを表示しない処理などは必要だけど別に要らない気もする
-  // setEqpts: React.Dispatch<React.SetStateAction<SelectedEqptsValues[]>>;
+  rank: number;
+  setEqpts: (data: SelectedEqptsValues[]) => void;
   handleCloseDialog: () => void;
 }) => {
   /* useState ------------------------- */
@@ -71,9 +69,9 @@ export const EqptSelectionDialog = ({
       setBundleDialogOpen(true);
     } else {
       // selectedEqptIdsが今回選んだ全機材であるので、idをもとに機材情報を取得しダイアログを閉じたい
-      // const data = await getSelectedEqpts(selectedEqptIds, rank);
-      // console.log('最終的に渡される機材の配列データ: ', data!);
-      // setEqpts(data!);
+      const data = await getSelectedEqpts(selectedEqptIds, rank);
+      console.log('最終的に渡される機材の配列データ: ', data!);
+      setEqpts(data!);
       handleCloseDialog();
     }
   };
@@ -181,8 +179,8 @@ export const EqptSelectionDialog = ({
               bundles={bundles}
               isLoading={isLoading}
               selectedEqpts={selectedEqptIds}
-              // rank={rank}
-              // setEqpts={setEqpts}
+              rank={rank}
+              setEqpts={setEqpts}
             />
           </Dialog>
         </Box>
@@ -216,16 +214,16 @@ const BundleDialog = ({
   bundles,
   isLoading,
   selectedEqpts,
-  // rank,
+  rank,
   handleClose,
-  // setEqpts,
+  setEqpts,
 }: {
   bundles: EqptSelection[];
   isLoading: boolean;
   selectedEqpts: number[];
-  // rank: number;
+  rank: number;
   handleClose: () => void;
-  // setEqpts: React.Dispatch<React.SetStateAction<SelectedEqptsValues[]>>;
+  setEqpts: (data: SelectedEqptsValues[]) => void;
 }) => {
   /* useState ------------------------------------------ */
   /* 選択される機材のidのリスト */
@@ -251,9 +249,9 @@ const BundleDialog = ({
 
   /* 確定ボタン押下時 */
   const handleClickConfirm = async () => {
-    // const data = await getSelectedEqpts([...selectedEqpts, ...selected], rank);
-    // console.log('最終的に渡される機材の配列データ: ', data!);
-    // setEqpts(data!);
+    const data = await getSelectedEqpts([...selectedEqpts, ...selected], rank);
+    console.log('最終的に渡される機材の配列データ: ', data!);
+    setEqpts(data!);
     handleClose();
   };
 
