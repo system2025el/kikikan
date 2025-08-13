@@ -27,7 +27,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { addMonths, endOfMonth, sub, subDays, subMonths } from 'date-fns';
+import { addMonths, endOfMonth, set, sub, subDays, subMonths } from 'date-fns';
 import dayjs, { Dayjs } from 'dayjs';
 import { get } from 'http';
 import { redirect, useRouter } from 'next/navigation';
@@ -83,7 +83,7 @@ import {
   JuchuKizaiMeisaiValues,
   StockTableValues,
 } from '../_lib/types';
-import { SaveAlertDialog } from './caveat-dialog';
+import { MoveAlertDialog, SaveAlertDialog } from './caveat-dialog';
 import { DateSelectDialog } from './date-selection-dialog';
 import { EqTable, StockTable } from './equipment-order-detail-table';
 import { EqptSelectionDialog } from './equipment-selection-dailog';
@@ -146,9 +146,13 @@ const EquipmentOrderDetail = (props: {
   const [dateRange, setDateRange] = useState<string[]>(props.dateRange);
   // カレンダー選択日
   const [selectDate, setSelectDate] = useState<Date>(props.shukoDate ? props.shukoDate : new Date());
+  // 移動日
+  const [idoDat, setIdoDat] = useState<Date | null>(null);
 
   // 未保存ダイアログを出すかどうか
   const [saveOpen, setSaveOpen] = useState(false);
+  // 移動日更新ダイアログを出すかどうか
+  const [moveOpen, setMoveOpen] = useState(false);
   // 編集内容が未保存ダイアログを出すかどうか
   const [dirtyOpen, setDirtyOpen] = useState(false);
   // どのボタン処理をするか
@@ -574,6 +578,10 @@ const EquipmentOrderDetail = (props: {
     setAnchorEl(null);
   };
 
+  /**
+   * 機材テーブルの移動日時の×ボタン押下時
+   * @param kizaiId 機材id
+   */
   const handleCellDateClear = (kizaiId: number) => {
     setJuchuKizaiMeisaiList((prev) => prev.map((row) => (row.kizaiId === kizaiId ? { ...row, idoDenDat: null } : row)));
   };
@@ -676,13 +684,12 @@ const EquipmentOrderDetail = (props: {
     setValue('kicsShukoDat', newDate.toDate(), { shouldDirty: true });
     const yardShukoDat = getValues('yardShukoDat');
 
-    // if (yardShukoDat === null || newDate.toDate() <= yardShukoDat) {
-    //   setShukoDate(newDate.toDate());
-    // }
-    if (Object.keys(juchuKizaiMeisaiList).length > 0 && yardShukoDat === null) {
-      setJuchuKizaiMeisaiList((prev) =>
-        prev.map((row) => (row.shozokuId === 2 ? { ...row, idoDenDat: subDays(newDate.toDate(), 2) } : row))
-      );
+    if (juchuKizaiMeisaiList.length > 0 && yardShukoDat === null) {
+      setIdoDat(subDays(newDate.toDate(), 2));
+      setMoveOpen(true);
+    } else if (juchuKizaiMeisaiList.length > 0 && yardShukoDat !== null) {
+      setIdoDat(null);
+      setMoveOpen(true);
     }
   };
 
@@ -695,13 +702,12 @@ const EquipmentOrderDetail = (props: {
     setValue('yardShukoDat', newDate.toDate(), { shouldDirty: true });
     const kicsShukoDat = getValues('kicsShukoDat');
 
-    // if (kicsShukoDat === null || newDate.toDate() <= kicsShukoDat) {
-    //   setShukoDate(newDate.toDate());
-    // }
-    if (Object.keys(juchuKizaiMeisaiList).length > 0 && kicsShukoDat === null) {
-      setJuchuKizaiMeisaiList((prev) =>
-        prev.map((row) => (row.shozokuId === 1 ? { ...row, idoDenDat: subDays(newDate.toDate(), 2) } : row))
-      );
+    if (juchuKizaiMeisaiList.length > 0 && kicsShukoDat === null) {
+      setIdoDat(subDays(newDate.toDate(), 2));
+      setMoveOpen(true);
+    } else if (juchuKizaiMeisaiList.length > 0 && kicsShukoDat !== null) {
+      setIdoDat(null);
+      setMoveOpen(true);
     }
   };
 
@@ -733,6 +739,57 @@ const EquipmentOrderDetail = (props: {
     // if (kicsNyukoDat === null || newDate.toDate() >= kicsNyukoDat) {
     //   setNyukoDate(newDate.toDate());
     // }
+  };
+
+  /**
+   * KICS出庫日時クリアボタン押下時
+   */
+  const handleKicsClear = () => {
+    setValue('kicsShukoDat', null, { shouldDirty: true });
+    const yardDat = getValues('yardShukoDat');
+    if (juchuKizaiMeisaiList.length > 0 && yardDat !== null) {
+      setIdoDat(subDays(yardDat, 2));
+      setMoveOpen(true);
+    }
+  };
+
+  /**
+   * YARD出庫日時クリアボタン押下時
+   */
+  const handleYardClear = () => {
+    setValue('yardShukoDat', null, { shouldDirty: true });
+    const kicsDat = getValues('kicsShukoDat');
+    if (juchuKizaiMeisaiList.length > 0 && kicsDat !== null) {
+      setIdoDat(subDays(kicsDat, 2));
+      setMoveOpen(true);
+    }
+  };
+
+  /**
+   * MoveAlertDialogの更新、戻るボタン押下
+   * @param result 結果(true: 更新、false: 戻る)
+   */
+  const handleMoveDialog = (result: boolean) => {
+    if (result) {
+      if (idoDat !== null && getValues('yardShukoDat') === null) {
+        setJuchuKizaiMeisaiList((prev) =>
+          prev.map((row) => (row.shozokuId === 2 ? { ...row, idoDenDat: idoDat } : row))
+        );
+        setIdoDat(null);
+        setMoveOpen(false);
+      } else if (idoDat !== null && getValues('kicsShukoDat') === null) {
+        setJuchuKizaiMeisaiList((prev) =>
+          prev.map((row) => (row.shozokuId === 1 ? { ...row, idoDenDat: idoDat } : row))
+        );
+        setIdoDat(null);
+        setMoveOpen(false);
+      } else {
+        setJuchuKizaiMeisaiList((prev) => prev.map((row) => ({ ...row, idoDenDat: idoDat })));
+        setMoveOpen(false);
+      }
+    } else {
+      setMoveOpen(false);
+    }
   };
 
   /**
@@ -827,6 +884,11 @@ const EquipmentOrderDetail = (props: {
     }
     setEqSelectionDialogOpen(true);
   };
+
+  /**
+   * 機材追加時
+   * @param data 選択された機材データ
+   */
   const setEqpts = async (data: SelectedEqptsValues[]) => {
     const kicsDat = getValues('kicsShukoDat');
     const yardDat = getValues('yardShukoDat');
@@ -1149,7 +1211,7 @@ const EquipmentOrderDetail = (props: {
                         onChange={handleKicsShukoChange}
                         fieldstate={fieldState}
                         disabled={!edit}
-                        onClear={() => field.onChange(null)}
+                        onClear={handleKicsClear}
                       />
                     )}
                   />
@@ -1186,7 +1248,7 @@ const EquipmentOrderDetail = (props: {
                         onChange={handleYardShukoChange}
                         fieldstate={fieldState}
                         disabled={!edit}
-                        onClear={() => field.onChange(null)}
+                        onClear={handleYardClear}
                       />
                     )}
                   />
@@ -1589,7 +1651,7 @@ const EquipmentOrderDetail = (props: {
         <ArrowUpwardIcon fontSize="small" />
       </Fab>
       <SaveAlertDialog open={saveOpen} onClick={() => setSaveOpen(false)} />
-      {/* <IsDirtyAlertDialog open={dirtyOpen} onClick={handleResultDialog} /> */}
+      <MoveAlertDialog open={moveOpen} onClick={handleMoveDialog} />
     </Box>
   );
 };

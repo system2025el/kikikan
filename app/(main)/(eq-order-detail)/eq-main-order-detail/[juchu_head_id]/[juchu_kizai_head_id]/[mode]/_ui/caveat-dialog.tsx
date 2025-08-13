@@ -17,3 +17,21 @@ export const SaveAlertDialog = ({ open, onClick }: { open: boolean; onClick: () 
     </Dialog>
   );
 };
+
+export const MoveAlertDialog = ({ open, onClick }: { open: boolean; onClick: (result: boolean) => void }) => {
+  return (
+    <Dialog open={open}>
+      <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
+        <WarningIcon color="error" />
+        <Box>出庫日時が更新されました</Box>
+      </DialogTitle>
+      <DialogContentText m={2} p={2}>
+        移動日を更新しますか？
+      </DialogContentText>
+      <DialogActions>
+        <Button onClick={() => onClick(true)}>更新</Button>
+        <Button onClick={() => onClick(false)}>戻る</Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
