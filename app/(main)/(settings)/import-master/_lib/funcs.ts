@@ -73,8 +73,7 @@ export const ImportData = async (data: EqptImportType[]) => {
     console.log('部門', bumons.length, '件追加');
     const kizais = await checkKizai(kizaiMasterList);
     console.log('機材マスタ', kizais.length, '件追加');
-    const rfids = await checkRfid(rfidList);
-    console.log('RFID', rfids.length, '件追加');
+    await checkRfid(rfidList);
   } catch (e) {
     console.error('例外が発生', e);
     throw e;
@@ -84,7 +83,7 @@ export const ImportData = async (data: EqptImportType[]) => {
 /**
  * RFIDマスタ確認
  * @param list
- * @returns 新規登録されたRFIDマスタの情報
+ * @returns
  */
 const checkRfid = async (list: RfidImportTypes[]) => {
   // listが空の場合離脱
@@ -231,8 +230,7 @@ const checkRfid = async (list: RfidImportTypes[]) => {
     }
 
     await pool.query('COMMIT;');
-    console.log('とりあえずRFIDマスタの確認を終えた');
-    return [];
+    console.log('RFIDマスタ処理した');
   } catch (e) {
     await pool.query('ROLLBACK;');
     throw e;
