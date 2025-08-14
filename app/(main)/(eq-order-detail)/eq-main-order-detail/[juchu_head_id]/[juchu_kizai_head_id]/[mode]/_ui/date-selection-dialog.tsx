@@ -163,8 +163,8 @@ export const DateSelectDialog = ({
       switch (value) {
         case 10:
           const updatedSikomi: JuchuKizaiHonbanbiValues[] = newDates.map((d) => ({
-            juchuHeadId: juchuHonbanbiList[0].juchuHeadId,
-            juchuKizaiHeadId: juchuHonbanbiList[0].juchuKizaiHeadId,
+            juchuHeadId: juchuHeadId,
+            juchuKizaiHeadId: juchuKizaiHeadId,
             juchuHonbanbiShubetuId: 10,
             juchuHonbanbiDat: new Date(d),
             mem: '',
@@ -178,8 +178,8 @@ export const DateSelectDialog = ({
           break;
         case 20:
           const updatedRh: JuchuKizaiHonbanbiValues[] = newDates.map((d) => ({
-            juchuHeadId: juchuHonbanbiList[0].juchuHeadId,
-            juchuKizaiHeadId: juchuHonbanbiList[0].juchuKizaiHeadId,
+            juchuHeadId: juchuHeadId,
+            juchuKizaiHeadId: juchuKizaiHeadId,
             juchuHonbanbiShubetuId: 20,
             juchuHonbanbiDat: new Date(d),
             mem: '',
@@ -193,8 +193,8 @@ export const DateSelectDialog = ({
           break;
         case 30:
           const updatedGp: JuchuKizaiHonbanbiValues[] = newDates.map((d) => ({
-            juchuHeadId: juchuHonbanbiList[0].juchuHeadId,
-            juchuKizaiHeadId: juchuHonbanbiList[0].juchuKizaiHeadId,
+            juchuHeadId: juchuHeadId,
+            juchuKizaiHeadId: juchuKizaiHeadId,
             juchuHonbanbiShubetuId: 30,
             juchuHonbanbiDat: new Date(d),
             mem: '',
@@ -208,8 +208,8 @@ export const DateSelectDialog = ({
           break;
         case 40:
           const updatedHonban: JuchuKizaiHonbanbiValues[] = newDates.map((d) => ({
-            juchuHeadId: juchuHonbanbiList[0].juchuHeadId,
-            juchuKizaiHeadId: juchuHonbanbiList[0].juchuKizaiHeadId,
+            juchuHeadId: juchuHeadId,
+            juchuKizaiHeadId: juchuKizaiHeadId,
             juchuHonbanbiShubetuId: 40,
             juchuHonbanbiDat: new Date(d),
             mem: '',

@@ -171,7 +171,7 @@ export const EqTable: React.FC<EqTableProps> = ({
   };
 
   const handlePlanYobiQtyChange = (kizaiId: number, newValue: number) => {
-    const planKizaiQty = rows.find((row) => row.kizaiId === kizaiId)?.planYobiQty || 0;
+    const planKizaiQty = rows.find((row) => row.kizaiId === kizaiId)?.planKizaiQty || 0;
     const planQty = planKizaiQty + newValue;
     onChange(kizaiId, planKizaiQty, newValue, planQty);
   };

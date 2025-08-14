@@ -3,7 +3,7 @@ import { subDays } from 'date-fns';
 import { GetNyukoDate, getRange, GetShukoDate } from '@/app/(main)/(eq-order-detail)/_lib/datefuncs';
 import { GetLock, GetOrder } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/funcs';
 
-import { GetEqHeader, GetEqList, GetHonbanbi, GetStockList } from '../../../../_lib/funcs';
+import { GetHonbanbi, GetJuchuKizaiHead, GetJuchuKizaiMeisai, GetStockList } from '../../../../_lib/funcs';
 import { JuchuKizaiHeadValues, JuchuKizaiHonbanbiValues, JuchuKizaiMeisaiValues, StockTableValues } from './_lib/types';
 import EquipmentOrderDetail from './_ui/equipment-order-detail';
 
@@ -26,12 +26,12 @@ const Page = async (props: {
 
   if (juchuKizaiHeadId !== 0) {
     // 受注機材ヘッダーデータ
-    const juchuKizaiHeadData = await GetEqHeader(params.juchu_head_id, params.juchu_kizai_head_id);
+    const juchuKizaiHeadData = await GetJuchuKizaiHead(params.juchu_head_id, params.juchu_kizai_head_id);
     if (!juchuKizaiHeadData) {
       return <div>受注機材情報が見つかりません。</div>;
     }
     // 受注機材明細データ
-    const juchuKizaiMeisaiData = await GetEqList(params.juchu_head_id, params.juchu_kizai_head_id);
+    const juchuKizaiMeisaiData = await GetJuchuKizaiMeisai(params.juchu_head_id, params.juchu_kizai_head_id);
     // 出庫日
     const shukoDate = GetShukoDate(
       juchuKizaiHeadData.kicsShukoDat && new Date(juchuKizaiHeadData.kicsShukoDat),
@@ -66,6 +66,7 @@ const Page = async (props: {
     // 受注本番日データ
     const juchuHonbanbiData = await GetHonbanbi(params.juchu_head_id, params.juchu_kizai_head_id);
 
+    console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
     return (
       <EquipmentOrderDetail
         juchuHeadData={juchuHeadData}
