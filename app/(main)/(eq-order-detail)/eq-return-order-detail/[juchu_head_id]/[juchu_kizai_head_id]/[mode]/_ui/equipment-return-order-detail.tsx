@@ -32,6 +32,7 @@ import { useEffect, useRef, useState } from 'react';
 import { BackButton } from '@/app/(main)/_ui/buttons';
 import { Calendar, TestDate, toISOStringWithTimezoneMonthDay } from '@/app/(main)/_ui/date';
 import Time, { TestTime } from '@/app/(main)/_ui/time';
+import { SelectedEqptsValues } from '@/app/(main)/(masters)/eqpt-master/_lib/types';
 
 import { EqptSelectionDialog } from '../../../../../eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_ui/equipment-selection-dailog';
 import { getDateHeaderBackgroundColor, getDateRowBackgroundColor } from '../_lib/colorselect';
@@ -472,6 +473,8 @@ export const EquipmentReturnOrderDetail = () => {
     setEqSelectionDialogOpen(false);
   };
 
+  const setEqpts = async (data: SelectedEqptsValues[]) => {};
+
   // ref
   const dateRangeRef = useRef(dateRange);
   const dateHeaderRef = useRef(dateHeader);
@@ -712,9 +715,9 @@ export const EquipmentReturnOrderDetail = () => {
           </Button>
         </Box>
         <Divider />
-        <Dialog open={EqSelectionDialogOpen} fullScreen>
-          <EqptSelectionDialog handleCloseDialog={handleCloseEqDialog} />
-        </Dialog>
+        {/* <Dialog open={EqSelectionDialogOpen} fullScreen>
+          <EqptSelectionDialog rank={props.juchuHeadData.kokyaku.kokyakuRank} setEqpts={setEqpts} handleCloseDialog={handleCloseEqDialog} />
+        </Dialog> */}
 
         <Box display="flex" flexDirection="row" width="100%">
           <Box

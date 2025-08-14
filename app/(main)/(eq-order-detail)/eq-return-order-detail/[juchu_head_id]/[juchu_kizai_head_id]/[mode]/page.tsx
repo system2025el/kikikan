@@ -1,6 +1,6 @@
 import { GetOrder } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/funcs';
 
-import { GetEqHeader } from '../../../../_lib/funcs';
+import { GetJuchuKizaiHead } from '../../../../_lib/funcs';
 import { EquipmentReturnOrderDetail } from './_ui/equipment-return-order-detail';
 
 const Page = async (props: {
@@ -13,7 +13,7 @@ const Page = async (props: {
   const juchuHeadData = await GetOrder(params.juchu_head_id);
   // 受注機材ヘッダーデータ
   const juchuKizaiHeadData =
-    params.juchu_kizai_head_id !== 0 ? await GetEqHeader(params.juchu_head_id, params.juchu_kizai_head_id) : null;
+    params.juchu_kizai_head_id !== 0 ? await GetJuchuKizaiHead(params.juchu_head_id, params.juchu_kizai_head_id) : null;
 
   return <EquipmentReturnOrderDetail />;
   return <div>ページが見つかりません。</div>;
