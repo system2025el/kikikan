@@ -1,6 +1,11 @@
-// --- Section.tsx ---
+'use client';
 import { Box, Button, Divider, Grid2, Paper, Typography } from '@mui/material';
 
+/**
+ * マスタインポートで使う画面部品
+ * @param param0
+ * @returns マスタインポートで使う画面部品コンポーネント
+ */
 export const Section = ({
   masterName,
   fileName,

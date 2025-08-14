@@ -1,14 +1,18 @@
 import z from 'zod';
 
-// 機材インポートタイプ
+/**
+ * エクセルインポートの型
+ */
 export type EqptImportType = z.infer<typeof eqptSchema>;
 
-// 機材インポートタイプのZodスキーマ
+/**
+ * エクセルインポートのzod Schema
+ */
 export const eqptSchema = z.object({
   rfid_tag_id: z.string(),
   rfid_kizai_sts: z.number().nullable().optional(),
   del_flg: z.number().nullable().optional(),
-  section_num: z.number().nullable().optional(),
+  section_nam: z.string().optional(),
   kizai_nam: z.string(),
   el_num: z.number().nullable().optional(),
   shozoku_id: z.number().nullable().optional(),
@@ -32,6 +36,9 @@ export const eqptSchema = z.object({
   rank_amt_5: z.number().nullable().optional(),
 });
 
+/**
+ * エクセルインポート時の配列の型
+ */
 export type EqptImportRowType = [
   string, // rfid_tag_id
   number, // rfid_kizai_sts
@@ -60,6 +67,9 @@ export type EqptImportRowType = [
   number | null, // rank_amt_5
 ];
 
+/**
+ * エクセルから取得したデータをnumber | null型に変換
+ */
 export const parseNumber = (input: number | null) => {
   if (input === null) return null;
   if (input === undefined) return null;
@@ -71,3 +81,48 @@ export const parseNumber = (input: number | null) => {
   const result = Number(cleanString);
   return isNaN(result) ? null : result;
 };
+
+/**
+ * エクセルインポートで使うRFIDの型
+ */
+export type RfidImportTypes = {
+  rfid_tag_id: string;
+  kizai_nam: string;
+  rfid_kizai_sts: number | null | undefined;
+  del_flg: number | null | undefined;
+  shozoku_id: number | null | undefined;
+  mem?: string;
+};
+
+/**
+ * エクセルインポートで使う機材マスタの型
+ */
+export type KizaiImportTypes = {
+  kizai_nam: string;
+  section_nam?: string;
+  el_num?: number | null | undefined;
+  shozoku_id: number | null | undefined;
+  bld_cod?: string;
+  tana_cod?: string;
+  eda_cod?: string;
+  kizai_grp_cod?: string;
+  dsp_ord_num?: number | null | undefined;
+  mem?: string;
+  dai_bumon_nam?: string;
+  bumon_nam?: string;
+  shukei_bumon_nam?: string;
+  dsp_flg?: number | null | undefined;
+  ctn_flg?: number | null | undefined;
+  def_dat_qty?: number | null | undefined;
+  reg_amt?: number | null | undefined;
+  rank_amt_1?: number | null | undefined;
+  rank_amt_2?: number | null | undefined;
+  rank_amt_3?: number | null | undefined;
+  rank_amt_4?: number | null | undefined;
+  rank_amt_5?: number | null | undefined;
+};
+
+/**
+ * エクセルインポートで使う棚番マスタの型
+ */
+export type TanabanImportTypes = { bld_cod?: string; tana_cod?: string; eda_cod?: string };

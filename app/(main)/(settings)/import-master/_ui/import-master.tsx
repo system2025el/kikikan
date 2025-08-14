@@ -10,27 +10,35 @@ import { ImportData } from '../_lib/funcs';
 import { EqptImportRowType, EqptImportType, eqptSchema, parseNumber } from '../_lib/types';
 import { Section } from './section';
 
+/**
+ * マスタインポート画面
+ * @returns {JSX.Element} マスタインポート画面のコンポーネント
+ */
 export const ImportMaster = () => {
-  const [eqptFileName, setEqptFileName] = useState<string>('ファイルが選ばれていません');
-  const [rfidFileName, setRfidFileName] = useState<string>('ファイルが選ばれていません');
+  /* useState ----------------------------------------------------- */
+  /* インポートしたファイル名 */
+  const [eqptFileName, setEqptFileName] = useState<string>('ファイルが選択されていません');
+  /* インポートしたファイル名 */
+  const [rfidFileName, setRfidFileName] = useState<string>('ファイルが選択されていません');
+  /* 機材データ */
   const [eqptData, setEqptData] = useState<EqptImportType[]>([]);
+  /* RFIDデータ */
   // const [rfidData, setRfidData] = useState<RFIDImportType[]>([]);
+  /* スナックバーの表示するかしないか */
   const [snackBarOpen, setSnackBarOpen] = useState(false);
-  const [snackBarMessage, setSnackBarMessage] = useState('');
+  /* スナックバーのメッセージ */
+  const [snackBarMessage, setSnackBarMessage] = useState('ファイルが選択されていません');
 
   /* ファイルを選んでデータをオブジェクト化 */
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, type: 'eqpt' | 'rfid') => {
     const file = event.target.files?.[0];
-    if (!file) return;
-
-    if (type === 'eqpt') {
-      setEqptFileName(file.name);
-    } else {
-      setRfidFileName(file.name);
+    if (!file) {
+      setSnackBarMessage('ファイルが選択されていません。');
+      setSnackBarOpen(true);
+      return;
     }
 
     const reader = new FileReader();
-
     reader.onload = (e) => {
       console.log('ファイル読み込み成功');
 
@@ -50,6 +58,7 @@ export const ImportMaster = () => {
       console.log('Excel内容 (生データ):', dataRows);
 
       if (type === 'eqpt') {
+        setEqptFileName(file.name);
         const parsedEqptData: EqptImportType[] = [];
         let hasError = false;
         dataRows.forEach((row, index) => {
@@ -58,7 +67,7 @@ export const ImportMaster = () => {
             rfid_tag_id: String(row[0] ?? ''),
             rfid_kizai_sts: parseNumber(row[1] ?? 0),
             del_flg: parseNumber(row[2]),
-            section_num: parseNumber(row[3]),
+            section_nam: String(row[3] ?? ''),
             kizai_nam: String(row[4] ?? ''),
             el_num: parseNumber(row[5]),
             shozoku_id: Number(parseNumber(row[6]) ?? 0),
@@ -85,21 +94,21 @@ export const ImportMaster = () => {
           if (result.success) {
             parsedEqptData.push(result.data);
           } else {
-            console.error(`機材マスタの行 ${index + 2} でバリデーションエラー:`, result.error.issues);
+            console.error(`${file.name}の行 ${index + 2} でバリデーションエラー:`, result.error.issues);
             hasError = true;
           }
         });
         setEqptData(parsedEqptData);
         if (hasError) {
+          setSnackBarMessage(`${file.name}にエラーのある行がありました。コンソールを確認してください。`);
           setSnackBarOpen(true);
-          setSnackBarMessage('機材マスタファイルにエラーのある行がありました。コンソールを確認してください。');
         } else {
+          setSnackBarMessage(`${file.name}を読み込みました。`);
           setSnackBarOpen(true);
-          setSnackBarMessage('機材マスタファイルを読み込みました。');
         }
-        setSnackBarOpen(true);
       } else {
         // // type === 'rfid'
+        setRfidFileName(file.name);
         // const parsedRfidData: RFIDImportType[] = [];
         // let hasError = false;
         // dataRows.forEach((row, index) => {
@@ -125,22 +134,23 @@ export const ImportMaster = () => {
         // setSnackBarOpen(true);
       }
     };
-
     reader.readAsArrayBuffer(file);
   };
 
-  useEffect(() => {
-    console.log('eqptData更新:', eqptData, eqptFileName);
-  }, [eqptData, eqptFileName]);
-
-  // useEffect(() => {
-  //   console.log('rfidData更新:', rfidData, rfidFileName);
-  // }, [rfidData, rfidFileName]);
-
+  /* 機材インポートの登録ボタン押下時 */
   const handleImportEqpt = async () => {
-    console.log('Importing Equipment Data:', eqptData);
-    await ImportData(eqptData);
-    setSnackBarOpen(true);
+    console.log('RFID機材マスタデータをインポート:', eqptData);
+    if (eqptData.length !== 0) {
+      try {
+        await ImportData(eqptData);
+        setSnackBarMessage(`${eqptFileName}を登録しました`);
+        setSnackBarOpen(true);
+      } catch (error) {
+        console.error('データの登録中にエラーが発生しました:', error);
+        setSnackBarMessage('データの登録中にエラーが発生しました。');
+        setSnackBarOpen(true);
+      }
+    }
   };
 
   const handleImportRfid = () => {
@@ -159,14 +169,14 @@ export const ImportMaster = () => {
           fileName={eqptFileName}
           handleFileUpload={handleFileUpload}
           handleImport={handleImportEqpt}
-          fileInputId="eqpt-excel-file" // Unique ID for equipment file input
+          fileInputId="eqpt-excel-file"
         />
         <Section
           masterName={'RFID'}
           fileName={rfidFileName}
           handleFileUpload={handleFileUpload}
           handleImport={handleImportRfid}
-          fileInputId="rfid-excel-file" // Unique ID for RFID file input
+          fileInputId="rfid-excel-file"
         />
       </Stack>
       <Snackbar
