@@ -2,7 +2,7 @@ import { toISOStringWithTimezoneMonthDay } from '../../_ui/date';
 
 export const GetShukoDate = (kicsShukoDat: Date | null, yardShukoDat: Date | null) => {
   if (kicsShukoDat && yardShukoDat) {
-    return kicsShukoDat < yardShukoDat ? kicsShukoDat : yardShukoDat;
+    return kicsShukoDat <= yardShukoDat ? kicsShukoDat : yardShukoDat;
   }
 
   if (kicsShukoDat && !yardShukoDat) {
@@ -18,7 +18,7 @@ export const GetShukoDate = (kicsShukoDat: Date | null, yardShukoDat: Date | nul
 
 export const GetNyukoDate = (kicsNyukoDat: Date | null, yardNyukoDat: Date | null) => {
   if (kicsNyukoDat && yardNyukoDat) {
-    return kicsNyukoDat < yardNyukoDat ? yardNyukoDat : kicsNyukoDat;
+    return kicsNyukoDat <= yardNyukoDat ? yardNyukoDat : kicsNyukoDat;
   }
 
   if (kicsNyukoDat && !yardNyukoDat) {

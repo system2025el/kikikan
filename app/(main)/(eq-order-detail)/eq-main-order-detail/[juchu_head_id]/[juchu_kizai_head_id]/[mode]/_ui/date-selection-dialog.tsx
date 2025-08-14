@@ -29,8 +29,9 @@ type DateDialogProps = {
   shukoDate: Date | null;
   nyukoDate: Date | null;
   juchuHonbanbiList: JuchuKizaiHonbanbiValues[];
+  juchuHonbanbiDeleteList: JuchuKizaiHonbanbiValues[];
   onClose: () => void;
-  onSave: () => void;
+  onSave: (juchuHonbanbiList: JuchuKizaiHonbanbiValues[], juchuHonbanbiDeleteList: JuchuKizaiHonbanbiValues[]) => void;
 };
 
 const TabPanel = (props: TabPanelProps) => {
@@ -50,6 +51,7 @@ export const DateSelectDialog = ({
   shukoDate,
   nyukoDate,
   juchuHonbanbiList,
+  juchuHonbanbiDeleteList,
   onClose,
   onSave,
 }: DateDialogProps) => {
@@ -73,7 +75,7 @@ export const DateSelectDialog = ({
     juchuHonbanbiList.filter((d) => d.juchuHonbanbiShubetuId === 40)
   );
   // 削除予定リスト
-  const [deleteList, setDeleteList] = useState<JuchuKizaiHonbanbiValues[]>([]);
+  const [deleteList, setDeleteList] = useState<JuchuKizaiHonbanbiValues[]>(juchuHonbanbiDeleteList);
   // 選択日付
   const [dateRange, setDateRange] = useState<[Date, Date] | null>(
     shukoDate && nyukoDate ? [shukoDate, nyukoDate] : null
@@ -110,6 +112,9 @@ export const DateSelectDialog = ({
     setGp(updatedGp);
   };
 
+  const handleHonbanAddChange = (index: number, value: number) => {
+    setHonban((prev) => prev.map((d, i) => (i === index ? { ...d, juchuHonbanbiAddQty: value } : d)));
+  };
   const handleHonbanMemChange = (index: number, value: string) => {
     setHonban((prev) => prev.map((d, i) => (i === index ? { ...d, mem: value } : d)));
   };
@@ -120,29 +125,29 @@ export const DateSelectDialog = ({
   };
 
   const handleSave = async () => {
-    setIsLoading(true);
+    //setIsLoading(true);
     const juchuHonbanbiData: JuchuKizaiHonbanbiValues[] = [...sikomi, ...rh, ...gp, ...honban];
-    console.log('-------------削除データ', deleteList, '--------------');
+    // console.log('-------------削除データ', deleteList, '--------------');
 
-    if (deleteList.length > 0) {
-      console.log('--------------削除データあり-------------');
-      for (const item of deleteList) {
-        const result = await DeleteHonbanbi(juchuHeadId, juchuKizaiHeadId, item);
-        console.log('----------------', result, '-------------');
-      }
-    }
-    setDeleteList([]);
+    // if (deleteList.length > 0) {
+    //   console.log('--------------削除データあり-------------');
+    //   for (const item of deleteList) {
+    //     const result = await DeleteHonbanbi(juchuHeadId, juchuKizaiHeadId, item);
+    //     console.log('----------------', result, '-------------');
+    //   }
+    // }
+    // setDeleteList([]);
 
-    for (const item of juchuHonbanbiData) {
-      const confirm = await ConfirmHonbanbi(juchuHeadId, juchuKizaiHeadId, item);
-      if (confirm) {
-        const result = await UpdateHonbanbi(juchuHeadId, juchuKizaiHeadId, item, userNam);
-      } else {
-        const result = await AddHonbanbi(juchuHeadId, juchuKizaiHeadId, item, userNam);
-      }
-    }
-    await onSave();
-    setIsLoading(false);
+    // for (const item of juchuHonbanbiData) {
+    //   const confirm = await ConfirmHonbanbi(juchuHeadId, juchuKizaiHeadId, item);
+    //   if (confirm) {
+    //     const result = await UpdateHonbanbi(juchuHeadId, juchuKizaiHeadId, item, userNam);
+    //   } else {
+    //     const result = await AddHonbanbi(juchuHeadId, juchuKizaiHeadId, item, userNam);
+    //   }
+    // }
+    onSave(juchuHonbanbiData, deleteList);
+    //setIsLoading(false);
   };
 
   const handleClose = () => {
@@ -158,11 +163,12 @@ export const DateSelectDialog = ({
       switch (value) {
         case 10:
           const updatedSikomi: JuchuKizaiHonbanbiValues[] = newDates.map((d) => ({
-            juchuHeadId: juchuHonbanbiList[0].juchuHeadId,
-            juchuKizaiHeadId: juchuHonbanbiList[0].juchuKizaiHeadId,
+            juchuHeadId: juchuHeadId,
+            juchuKizaiHeadId: juchuKizaiHeadId,
             juchuHonbanbiShubetuId: 10,
             juchuHonbanbiDat: new Date(d),
             mem: '',
+            juchuHonbanbiAddQty: 0,
           }));
           setSikomi((prev) => {
             const existDate = new Set(prev.map((d) => toISOStringYearMonthDay(d.juchuHonbanbiDat)));
@@ -172,11 +178,12 @@ export const DateSelectDialog = ({
           break;
         case 20:
           const updatedRh: JuchuKizaiHonbanbiValues[] = newDates.map((d) => ({
-            juchuHeadId: juchuHonbanbiList[0].juchuHeadId,
-            juchuKizaiHeadId: juchuHonbanbiList[0].juchuKizaiHeadId,
+            juchuHeadId: juchuHeadId,
+            juchuKizaiHeadId: juchuKizaiHeadId,
             juchuHonbanbiShubetuId: 20,
             juchuHonbanbiDat: new Date(d),
             mem: '',
+            juchuHonbanbiAddQty: 0,
           }));
           setRh((prev) => {
             const existDate = new Set(prev.map((d) => toISOStringYearMonthDay(d.juchuHonbanbiDat)));
@@ -186,11 +193,12 @@ export const DateSelectDialog = ({
           break;
         case 30:
           const updatedGp: JuchuKizaiHonbanbiValues[] = newDates.map((d) => ({
-            juchuHeadId: juchuHonbanbiList[0].juchuHeadId,
-            juchuKizaiHeadId: juchuHonbanbiList[0].juchuKizaiHeadId,
+            juchuHeadId: juchuHeadId,
+            juchuKizaiHeadId: juchuKizaiHeadId,
             juchuHonbanbiShubetuId: 30,
             juchuHonbanbiDat: new Date(d),
             mem: '',
+            juchuHonbanbiAddQty: 0,
           }));
           setGp((prev) => {
             const existDate = new Set(prev.map((d) => toISOStringYearMonthDay(d.juchuHonbanbiDat)));
@@ -200,11 +208,12 @@ export const DateSelectDialog = ({
           break;
         case 40:
           const updatedHonban: JuchuKizaiHonbanbiValues[] = newDates.map((d) => ({
-            juchuHeadId: juchuHonbanbiList[0].juchuHeadId,
-            juchuKizaiHeadId: juchuHonbanbiList[0].juchuKizaiHeadId,
+            juchuHeadId: juchuHeadId,
+            juchuKizaiHeadId: juchuKizaiHeadId,
             juchuHonbanbiShubetuId: 40,
             juchuHonbanbiDat: new Date(d),
             mem: '',
+            juchuHonbanbiAddQty: 0,
           }));
           setHonban((prev) => {
             const existDate = new Set(prev.map((d) => toISOStringYearMonthDay(d.juchuHonbanbiDat)));
@@ -333,6 +342,22 @@ export const DateSelectDialog = ({
           {honban.map((data, index) => (
             <Box display="flex" alignItems="center" margin={2} key={index}>
               <TextField value={toISOStringYearMonthDay(data.juchuHonbanbiDat)} />
+              <TextField
+                value={data.juchuHonbanbiAddQty}
+                onChange={(e) => handleHonbanAddChange(index, Number(e.target.value))}
+                type="number"
+                sx={{
+                  width: '50px',
+                  ml: 2,
+                  '& .MuiInputBase-input': {
+                    textAlign: 'right',
+                  },
+                  '& input[type=number]::-webkit-inner-spin-button': {
+                    WebkitAppearance: 'none',
+                    margin: 0,
+                  },
+                }}
+              />
               <Typography ml={2} mr={1}>
                 メモ
               </Typography>

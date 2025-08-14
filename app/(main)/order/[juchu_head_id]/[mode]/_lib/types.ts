@@ -23,9 +23,25 @@ export const JuchuHeadSchema = z.object({
 
 export type JuchuHeadValues = z.infer<typeof JuchuHeadSchema>;
 
+export type CustomersDialogValues = {
+  kokyakuId: number;
+  kokyakuNam: string;
+  kokyakuRank: number;
+  adrShozai: string;
+  adrTatemono: string;
+  adrSonota: string;
+  tel: string;
+  fax: string;
+  mem: string;
+  dspFlg: boolean;
+  tblDspId: number;
+  delFlg?: boolean;
+};
+
 export const KokyakuSchema = z.object({
   kokyakuId: z.number({ message: '相手は必須です' }),
   kokyakuNam: z.string({ message: '相手は必須です' }).min(1, { message: '相手は必須です' }),
+  kokyakuRank: z.number(),
 });
 
 export type KokyakuValues = z.infer<typeof KokyakuSchema>;

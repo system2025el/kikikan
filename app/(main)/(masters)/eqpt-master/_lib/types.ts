@@ -71,8 +71,11 @@ export const nullToZero = (v: number | null): number => {
 export type SelectedEqptsValues = {
   kizaiId: number;
   kizaiNam: string;
+  shozokuId: number;
+  shozokuNam: string;
   kizaiGrpCod: string;
   dspOrdNum: number;
   regAmt: number;
   rankAmt: number;
+  kizaiQty: number;
 };

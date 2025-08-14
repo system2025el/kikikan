@@ -5,10 +5,10 @@ import { useEffect, useRef, useState } from 'react';
 
 import { DeleteLock } from './funcs';
 
-export const useUnsavedChangesWarning = (isDirty: boolean) => {
+export const useUnsavedChangesWarning = (isDirty: boolean, isSave: boolean) => {
   useEffect(() => {
     const handleBeforeUnload = async (e: BeforeUnloadEvent) => {
-      if (!isDirty) {
+      if (!isDirty && isSave) {
         return;
       }
       e.preventDefault();
@@ -19,5 +19,5 @@ export const useUnsavedChangesWarning = (isDirty: boolean) => {
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [isDirty]);
+  }, [isDirty, isSave]);
 };

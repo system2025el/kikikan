@@ -3,7 +3,7 @@
 import { supabase } from '@/app/_lib/supabase/supabase';
 import { CustomersMasterTableValues } from '@/app/(main)/(masters)/customers-master/_lib/types';
 
-import { EqTableValues, JuchuHeadValues, LockValues, OrderValues } from './types';
+import { CustomersDialogValues, EqTableValues, JuchuHeadValues, LockValues, OrderValues } from './types';
 
 /**
  * 受注ヘッダー取得
@@ -48,6 +48,7 @@ export const GetOrder = async (juchuHeadId: number) => {
         kokyaku: {
           kokyakuId: juchuData.kokyaku_id,
           kokyakuNam: kokyakuData.kokyaku_nam,
+          kokyakuRank: kokyakuData.kokyaku_rank,
         },
         kokyakuTantoNam: juchuData.kokyaku_tanto_nam,
         mem: juchuData.mem,
@@ -66,7 +67,7 @@ export const GetOrder = async (juchuHeadId: number) => {
         nyuryokuUser: juchuData.nyuryoku_user,
         koenNam: juchuData.koen_nam,
         koenbashoNam: juchuData.koenbasho_nam,
-        kokyaku: { kokyakuId: juchuData.kokyaku_id, kokyakuNam: '' },
+        kokyaku: { kokyakuId: juchuData.kokyaku_id, kokyakuNam: '', kokyakuRank: 0 },
         kokyakuTantoNam: juchuData.kokyaku_tanto_nam,
         mem: juchuData.mem,
         nebikiAmt: juchuData.nebiki_amt,
@@ -344,14 +345,14 @@ export const GetEqHeaderList = async (juchuHeadId: number) => {
 /**
  * 公演場所マスタテーブルのデータを取得する関数
  * @param query 検索キーワード
- * @returns {Promise<CustomerMasterTableValues[]>} 公演場所マスタテーブルに表示するデータ（ 検索キーワードが空の場合は全て ）
+ * @returns {Promise<CustomersDialogValues[]>} 公演場所マスタテーブルに表示するデータ（ 検索キーワードが空の場合は全て ）
  */
 export const GetFilteredCustomers = async (query: string) => {
   try {
     const { data, error } = await supabase
       .schema('dev2')
       .from('m_kokyaku')
-      .select('kokyaku_id, kokyaku_nam, adr_shozai, adr_tatemono, adr_sonota, tel,  fax, mem, dsp_flg') // テーブルに表示するカラム
+      .select('kokyaku_id, kokyaku_nam, kokyaku_rank, adr_shozai, adr_tatemono, adr_sonota, tel,  fax, mem, dsp_flg') // テーブルに表示するカラム
       // あいまい検索、場所名、場所名かな、住所、電話番号、fax番号
       .or(
         `kokyaku_nam.ilike.%${query}%, kana.ilike.%${query}%, adr_shozai.ilike.%${query}%, adr_tatemono.ilike.%${query}%, adr_sonota.ilike.%${query}%, tel.ilike.%${query}%, fax.ilike.%${query}%`
@@ -363,9 +364,10 @@ export const GetFilteredCustomers = async (query: string) => {
       if (!data || data.length === 0) {
         return [];
       } else {
-        const filteredCustomers: CustomersMasterTableValues[] = data.map((d, index) => ({
+        const filteredCustomers: CustomersDialogValues[] = data.map((d, index) => ({
           kokyakuId: d.kokyaku_id,
           kokyakuNam: d.kokyaku_nam,
+          kokyakuRank: d.kokyaku_rank,
           adrShozai: d.adr_shozai,
           adrTatemono: d.adr_tatemono,
           adrSonota: d.adr_sonota,
