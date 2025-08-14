@@ -165,18 +165,18 @@ export const ImportMaster = () => {
       </Box>
       <Stack direction={'column'} spacing={5} sx={{ minWidth: '100%' }}>
         <Section
-          masterName={'機材'}
+          masterName={'機材RFID'}
           fileName={eqptFileName}
           handleFileUpload={handleFileUpload}
           handleImport={handleImportEqpt}
-          fileInputId="eqpt-excel-file"
+          fileInputId="eqpts-excel-file"
         />
         <Section
-          masterName={'RFID'}
+          masterName={'顧客'}
           fileName={rfidFileName}
           handleFileUpload={handleFileUpload}
           handleImport={handleImportRfid}
-          fileInputId="rfid-excel-file"
+          fileInputId="customers-excel-file"
         />
       </Stack>
       <Snackbar

@@ -34,7 +34,7 @@ export const Section = ({
               id={fileInputId}
               type="file"
               style={{ display: 'none' }}
-              onChange={(e) => handleFileUpload(e, masterName === '機材' ? 'eqpt' : 'rfid')}
+              onChange={(e) => handleFileUpload(e, masterName === '機材RFID' ? 'eqpt' : 'rfid')}
             />
             <label htmlFor={fileInputId}>
               <Button component="span">Excelファイルを選択</Button>
