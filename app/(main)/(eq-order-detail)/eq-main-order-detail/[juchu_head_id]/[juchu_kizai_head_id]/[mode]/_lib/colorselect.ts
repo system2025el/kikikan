@@ -1,7 +1,6 @@
 import { Dayjs } from 'dayjs';
 
-import { toISOStringWithTimezoneMonthDay } from '@/app/(main)/_ui/date';
-import { toISOStringYearMonthDay } from '@/app/(main)/(eq-order-detail)/_lib/datefuncs';
+import { toISOStringYearMonthDay } from '@/app/(main)/_lib/date-conversion';
 
 import { JuchuKizaiHonbanbiValues } from './types';
 
@@ -12,14 +11,10 @@ export const getDateHeaderBackgroundColor = (date: string, dateRange: string[]):
 
 export const getStockRowBackgroundColor = (
   date: Date,
-  // shukoDate: Date | null,
-  // nyukoDate: Date | null,
   dateRange: string[],
   juchuHonbanbiList: JuchuKizaiHonbanbiValues[]
 ): string => {
   const cellDate = toISOStringYearMonthDay(date);
-  // const startDate = shukoDate && toISOStringYearMonthDay(shukoDate);
-  // const endDate = nyukoDate && toISOStringYearMonthDay(nyukoDate);
 
   if (juchuHonbanbiList.some((date) => toISOStringYearMonthDay(date.juchuHonbanbiDat) === cellDate)) {
     const shubetuId = juchuHonbanbiList.find(

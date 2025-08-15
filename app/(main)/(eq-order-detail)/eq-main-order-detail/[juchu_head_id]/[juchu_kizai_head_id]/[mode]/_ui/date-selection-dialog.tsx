@@ -4,15 +4,10 @@ import { Box, Button, Container, Divider, Grid2, Paper, Tab, Tabs, TextField, Ty
 import { grey } from '@mui/material/colors';
 import { useEffect, useState } from 'react';
 
-import { RSuiteDateRangePicker, toISOStringWithTimezone } from '@/app/(main)/_ui/date';
+import { toISOStringYearMonthDay } from '@/app/(main)/_lib/date-conversion';
+import { RSuiteDateRangePicker } from '@/app/(main)/_ui/date';
 import { Loading } from '@/app/(main)/_ui/loading';
-import { toISOStringYearMonthDay } from '@/app/(main)/(eq-order-detail)/_lib/datefuncs';
-import {
-  AddHonbanbi,
-  ConfirmHonbanbi,
-  DeleteHonbanbi,
-  UpdateHonbanbi,
-} from '@/app/(main)/(eq-order-detail)/_lib/funcs';
+import { getRange } from '@/app/(main)/(eq-order-detail)/_lib/datefuncs';
 
 import { JuchuKizaiHonbanbiValues } from '../_lib/types';
 
@@ -45,7 +40,6 @@ const TabPanel = (props: TabPanelProps) => {
 };
 
 export const DateSelectDialog = ({
-  userNam,
   juchuHeadId,
   juchuKizaiHeadId,
   shukoDate,
@@ -55,8 +49,7 @@ export const DateSelectDialog = ({
   onClose,
   onSave,
 }: DateDialogProps) => {
-  // ローディング
-  const [isLoading, setIsLoading] = useState(false);
+  // タブ
   const [value, setValue] = useState(10);
   // 仕込
   const [sikomi, setSikomi] = useState<JuchuKizaiHonbanbiValues[]>(
@@ -81,86 +74,122 @@ export const DateSelectDialog = ({
     shukoDate && nyukoDate ? [shukoDate, nyukoDate] : null
   );
 
+  /**
+   * タブ切り替え
+   * @param event イベント
+   * @param newValue 指定タブ
+   */
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
 
+  /**
+   * 仕込メモ更新
+   * @param index index
+   * @param value 仕込メモ内容
+   */
   const handleSikomiMemChange = (index: number, value: string) => {
     setSikomi((prev) => prev.map((d, i) => (i === index ? { ...d, mem: value } : d)));
   };
+  /**
+   * 仕込指定日削除
+   * @param index index
+   */
   const handleSikomiRemove = (index: number) => {
     setDeleteList((prev) => [...prev, sikomi[index]]);
     const updatedSikomi = sikomi.filter((_, i) => i !== index);
     setSikomi(updatedSikomi);
   };
 
+  /**
+   * rhメモ更新
+   * @param index index
+   * @param value rhメモ内容
+   */
   const handleRhMemChange = (index: number, value: string) => {
     setRh((prev) => prev.map((d, i) => (i === index ? { ...d, mem: value } : d)));
   };
+  /**
+   * rh指定日削除
+   * @param index index
+   */
   const handleRhRemove = (index: number) => {
     setDeleteList((prev) => [...prev, rh[index]]);
     const updatedRh = rh.filter((_, i) => i !== index);
     setRh(updatedRh);
   };
 
+  /**
+   * gpメモ更新
+   * @param index index
+   * @param value gpメモ内容
+   */
   const handleGpMemChange = (index: number, value: string) => {
     setGp((prev) => prev.map((d, i) => (i === index ? { ...d, mem: value } : d)));
   };
+  /**
+   * gp指定日削除
+   * @param index index
+   */
   const handleGpRemove = (index: number) => {
     setDeleteList((prev) => [...prev, gp[index]]);
     const updatedGp = gp.filter((_, i) => i !== index);
     setGp(updatedGp);
   };
 
+  /**
+   * 本番追加日数更新
+   * @param index index
+   * @param value 本番追加日数
+   */
   const handleHonbanAddChange = (index: number, value: number) => {
     setHonban((prev) => prev.map((d, i) => (i === index ? { ...d, juchuHonbanbiAddQty: value } : d)));
   };
+  /**
+   * 本番メモ更新
+   * @param index index
+   * @param value 本番メモ内容
+   */
   const handleHonbanMemChange = (index: number, value: string) => {
     setHonban((prev) => prev.map((d, i) => (i === index ? { ...d, mem: value } : d)));
   };
+  /**
+   * 本番指定日削除
+   * @param index index
+   */
   const handleHonbanRemove = (index: number) => {
     setDeleteList((prev) => [...prev, honban[index]]);
     const updatedHonban = honban.filter((_, i) => i !== index);
     setHonban(updatedHonban);
   };
 
+  /**
+   * 保存ボタン押下
+   */
   const handleSave = async () => {
-    //setIsLoading(true);
     const juchuHonbanbiData: JuchuKizaiHonbanbiValues[] = [...sikomi, ...rh, ...gp, ...honban];
-    // console.log('-------------削除データ', deleteList, '--------------');
-
-    // if (deleteList.length > 0) {
-    //   console.log('--------------削除データあり-------------');
-    //   for (const item of deleteList) {
-    //     const result = await DeleteHonbanbi(juchuHeadId, juchuKizaiHeadId, item);
-    //     console.log('----------------', result, '-------------');
-    //   }
-    // }
-    // setDeleteList([]);
-
-    // for (const item of juchuHonbanbiData) {
-    //   const confirm = await ConfirmHonbanbi(juchuHeadId, juchuKizaiHeadId, item);
-    //   if (confirm) {
-    //     const result = await UpdateHonbanbi(juchuHeadId, juchuKizaiHeadId, item, userNam);
-    //   } else {
-    //     const result = await AddHonbanbi(juchuHeadId, juchuKizaiHeadId, item, userNam);
-    //   }
-    // }
     onSave(juchuHonbanbiData, deleteList);
-    //setIsLoading(false);
   };
 
+  /**
+   * 戻るボタン押下
+   */
   const handleClose = () => {
     setDeleteList([]);
     onClose();
   };
 
+  /**
+   * 追加ボタン押下
+   * @param value タブ値
+   */
   const handleAddInput = (value: number) => {
     if (dateRange !== null) {
       // カレンダーで選択された日付
-      const newDates = getDateRange(dateRange[0], dateRange[1]);
+      const newDates = getRange(dateRange[0], dateRange[1]);
 
       switch (value) {
+        // 仕込
         case 10:
           const updatedSikomi: JuchuKizaiHonbanbiValues[] = newDates.map((d) => ({
             juchuHeadId: juchuHeadId,
@@ -176,6 +205,7 @@ export const DateSelectDialog = ({
             return [...prev, ...unique].sort((a, b) => a.juchuHonbanbiDat.getTime() - b.juchuHonbanbiDat.getTime());
           });
           break;
+        // rh
         case 20:
           const updatedRh: JuchuKizaiHonbanbiValues[] = newDates.map((d) => ({
             juchuHeadId: juchuHeadId,
@@ -191,6 +221,7 @@ export const DateSelectDialog = ({
             return [...prev, ...unique].sort((a, b) => a.juchuHonbanbiDat.getTime() - b.juchuHonbanbiDat.getTime());
           });
           break;
+        // gp
         case 30:
           const updatedGp: JuchuKizaiHonbanbiValues[] = newDates.map((d) => ({
             juchuHeadId: juchuHeadId,
@@ -206,6 +237,7 @@ export const DateSelectDialog = ({
             return [...prev, ...unique].sort((a, b) => a.juchuHonbanbiDat.getTime() - b.juchuHonbanbiDat.getTime());
           });
           break;
+        // 本番
         case 40:
           const updatedHonban: JuchuKizaiHonbanbiValues[] = newDates.map((d) => ({
             juchuHeadId: juchuHeadId,
@@ -225,29 +257,13 @@ export const DateSelectDialog = ({
     }
   };
 
+  /**
+   * 選択日更新
+   * @param range 指定日付
+   */
   const handleDateChange = (range: [Date, Date] | null) => {
     setDateRange(range);
   };
-
-  const getDateRange = (start: Date, end: Date): string[] => {
-    const range: string[] = [];
-    const current = new Date(start);
-
-    while (current <= end) {
-      const dateStr = toISOStringYearMonthDay(current);
-      range.push(dateStr);
-      current.setDate(current.getDate() + 1);
-    }
-
-    return range;
-  };
-
-  if (isLoading)
-    return (
-      <Box height={'100vh'}>
-        <Loading />
-      </Box>
-    );
 
   return (
     <Container disableGutters sx={{ minWidth: '100%', p: 3 }} maxWidth={'xl'}>

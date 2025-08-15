@@ -27,8 +27,9 @@ import { addMonths, endOfMonth, subDays, subMonths } from 'date-fns';
 import dayjs, { Dayjs } from 'dayjs';
 import { useEffect, useRef, useState } from 'react';
 
+import { toISOStringMonthDay } from '@/app/(main)/_lib/date-conversion';
 import { BackButton } from '@/app/(main)/_ui/buttons';
-import { Calendar, TestDate, toISOStringWithTimezoneMonthDay } from '@/app/(main)/_ui/date';
+import { Calendar, TestDate } from '@/app/(main)/_ui/date';
 import Time, { TestTime } from '@/app/(main)/_ui/time';
 
 import { data, stock } from '../_lib/data';
@@ -60,7 +61,7 @@ const getRange = (start: Date | null, end: Date | null): string[] => {
     const current = new Date(start);
 
     while (current <= end) {
-      const dateStr = toISOStringWithTimezoneMonthDay(current).split('T')[0];
+      const dateStr = toISOStringMonthDay(current);
       range.push(dateStr);
       current.setDate(current.getDate() + 1);
     }
@@ -78,7 +79,7 @@ const getStockHeader = (date: Date | null) => {
     const current = new Date(start);
 
     while (current <= end) {
-      const dateStr = toISOStringWithTimezoneMonthDay(current).split('T')[0];
+      const dateStr = toISOStringMonthDay(current);
       range.push(dateStr);
       current.setDate(current.getDate() + 1);
     }

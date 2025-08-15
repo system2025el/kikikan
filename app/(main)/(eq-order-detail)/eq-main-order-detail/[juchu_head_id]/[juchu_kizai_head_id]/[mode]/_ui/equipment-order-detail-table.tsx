@@ -25,8 +25,8 @@ import { grey } from '@mui/material/colors';
 import { Dayjs } from 'dayjs';
 import React, { useRef, useState } from 'react';
 
-import { TestDate, toISOStringWithTimezoneMonthDay } from '@/app/(main)/_ui/date';
-import { toISOStringYearMonthDay } from '@/app/(main)/(eq-order-detail)/_lib/datefuncs';
+import { toISOStringMonthDay, toISOStringYearMonthDay } from '@/app/(main)/_lib/date-conversion';
+import { TestDate } from '@/app/(main)/_ui/date';
 
 import { getDateHeaderBackgroundColor, getStockRowBackgroundColor } from '../_lib/colorselect';
 import { JuchuKizaiHonbanbiValues, JuchuKizaiMeisaiValues, StockTableValues } from '../_lib/types';
@@ -70,7 +70,7 @@ export const StockTable: React.FC<StockTableProps> = ({
                     padding: 0,
                   }}
                 >
-                  {toISOStringWithTimezoneMonthDay(data.calDat)}
+                  {toISOStringMonthDay(data.calDat)}
                 </TableCell>
               ))}
           </TableRow>

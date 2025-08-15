@@ -1,5 +1,7 @@
 'use client';
 
+import WarningIcon from '@mui/icons-material/Warning';
+import { Box, Button, Dialog, DialogActions, DialogContentText, DialogTitle } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { createContext, useContext, useState } from 'react';
 
@@ -7,7 +9,7 @@ import { useUserStore } from '@/app/_lib/stores/usestore';
 
 import { DeleteLock } from '../order/[juchu_head_id]/[mode]/_lib/funcs';
 import { LockValues } from '../order/[juchu_head_id]/[mode]/_lib/types';
-import { IsDirtyAlertDialog } from '../order/[juchu_head_id]/[mode]/_ui/caveat-dialog';
+//import { IsDirtyAlertDialog } from '../order/[juchu_head_id]/[mode]/_ui/caveat-dialog';
 
 type DirtyContextType = {
   isDirty: boolean;
@@ -92,4 +94,22 @@ export const useDirty = () => {
     throw new Error('useDirty must be used within DirtyProvider');
   }
   return context;
+};
+
+export const IsDirtyAlertDialog = ({ open, onClick }: { open: boolean; onClick: (result: boolean) => void }) => {
+  return (
+    <Dialog open={open}>
+      <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
+        <WarningIcon color="error" />
+        <Box>保存されていません</Box>
+      </DialogTitle>
+      <DialogContentText m={2} p={2}>
+        入力内容を破棄しますか？
+      </DialogContentText>
+      <DialogActions>
+        <Button onClick={() => onClick(true)}>破棄</Button>
+        <Button onClick={() => onClick(false)}>戻る</Button>
+      </DialogActions>
+    </Dialog>
+  );
 };

@@ -5,14 +5,20 @@ import { QueryResult } from 'pg';
 import pool from '@/app/_lib/postgres/postgres';
 import { supabase } from '@/app/_lib/supabase/supabase';
 
+import { toISOStringYearMonthDay } from '../../_lib/date-conversion';
 import {
   JuchuKizaiHeadValues,
   JuchuKizaiHonbanbiValues,
   JuchuKizaiMeisaiValues,
   StockTableValues,
 } from '../eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_lib/types';
-import { toISOStringYearMonthDay } from './datefuncs';
 
+/**
+ * 受注機材ヘッダー取得
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @returns 受注機材ヘッダーデータ
+ */
 export const GetJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
   try {
     const { data: juchuKizaiHead, error: juchuKizaiHeadError } = await supabase
@@ -82,6 +88,10 @@ export const GetJuchuKizaiHeadMaxId = async (juchuHeadId: number) => {
   }
 };
 
+/**
+ * 表示順最大値取得
+ * @returns 表示順最大値
+ */
 export const GetJuchuKizaiHeadDspOrdNum = async () => {
   try {
     const { data, error } = await supabase
@@ -102,16 +112,25 @@ export const GetJuchuKizaiHeadDspOrdNum = async () => {
   }
 };
 
+/**
+ * 受注機材ヘッダー新規追加
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param juchuKizaiHeadData 受注機材ヘッダーデータ
+ * @param dspOrdNum 表示順
+ * @param userNam ユーザー名
+ * @returns
+ */
 export const AddJuchuKizaiHead = async (
   juchuKizaiHeadId: number,
   juchuKizaiHeadData: JuchuKizaiHeadValues,
+  juchuKizaiHeadKbn: number,
   dspOrdNum: number,
   userNam: string
 ) => {
   const newData = {
     juchu_head_id: juchuKizaiHeadData.juchuHeadId,
     juchu_kizai_head_id: juchuKizaiHeadId,
-    juchu_kizai_head_kbn: 1,
+    juchu_kizai_head_kbn: juchuKizaiHeadKbn,
     juchu_honbanbi_qty: juchuKizaiHeadData.juchuHonbanbiQty,
     nebiki_amt: juchuKizaiHeadData.nebikiAmt,
     mem: juchuKizaiHeadData.mem,
@@ -138,6 +157,13 @@ export const AddJuchuKizaiHead = async (
   }
 };
 
+/**
+ * 受注機材入出庫新規追加
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param juchuKizaiHeadData 受注機材ヘッダーデータ
+ * @param userNam ユーザー名
+ * @returns
+ */
 export const AddJuchuKizaiNyushuko = async (
   juchuKizaiHeadId: number,
   juchuKizaiHeadData: JuchuKizaiHeadValues,
@@ -177,11 +203,17 @@ export const AddJuchuKizaiNyushuko = async (
   return true;
 };
 
+/**
+ * 受注機材ヘッダー更新
+ * @param juchuKizaiHeadData 受注機材ヘッダーデータ
+ * @param userNam ユーザー名
+ * @returns
+ */
 export const UpdateJuchuKizaiHead = async (juchuKizaiHeadData: JuchuKizaiHeadValues, userNam: string) => {
   const updateData = {
     juchu_head_id: juchuKizaiHeadData.juchuHeadId,
     juchu_kizai_head_id: juchuKizaiHeadData.juchuKizaiHeadId,
-    juchu_kizai_head_kbn: 1,
+    juchu_kizai_head_kbn: juchuKizaiHeadData.juchuKizaiHeadKbn,
     juchu_honbanbi_qty: juchuKizaiHeadData.juchuHonbanbiQty,
     nebiki_amt: juchuKizaiHeadData.nebikiAmt,
     mem: juchuKizaiHeadData.mem,
@@ -213,6 +245,12 @@ export const UpdateJuchuKizaiHead = async (juchuKizaiHeadData: JuchuKizaiHeadVal
   }
 };
 
+/**
+ * 受注機材入出庫更新
+ * @param juchuKizaiHeadData 受注機材ヘッダーデータ
+ * @param userNam ユーザー名
+ * @returns
+ */
 export const UpdateJuchuKizaiNyushuko = async (juchuKizaiHeadData: JuchuKizaiHeadValues, userNam: string) => {
   const dates = [
     juchuKizaiHeadData.kicsShukoDat,
@@ -295,6 +333,12 @@ export const UpdateJuchuKizaiNyushuko = async (juchuKizaiHeadData: JuchuKizaiHea
   return true;
 };
 
+/**
+ * 受注機材明細リスト取得
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @returns 受注機材明細リスト
+ */
 export const GetJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
   try {
     const { data: eqList, error: eqListError } = await supabase
@@ -327,7 +371,7 @@ export const GetJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId:
       juchuKizaiHeadId: d.juchu_kizai_head_id,
       juchuKizaiMeisaiId: d.juchu_kizai_meisai_id,
       idoDenId: d.ido_den_id,
-      idoDenDat: d.ido_den_dat,
+      idoDenDat: d.ido_den_dat ? new Date(d.ido_den_dat) : null,
       idoSijiId: d.ido_siji_id,
       shozokuId: d.shozoku_id,
       shozokuNam: d.shozoku_nam,
@@ -348,6 +392,12 @@ export const GetJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId:
   }
 };
 
+/**
+ * 受注機材明細id最大値取得
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @returns 受注機材明細id最大値
+ */
 export const GetJuchuKizaiMeisaiMaxId = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
   try {
     const { data, error } = await supabase
@@ -370,6 +420,12 @@ export const GetJuchuKizaiMeisaiMaxId = async (juchuHeadId: number, juchuKizaiHe
   }
 };
 
+/**
+ * 受注機材明細新規追加
+ * @param juchuKizaiMeisaiData 受注機材明細データ
+ * @param userNam ユーザー名
+ * @returns
+ */
 export const AddJuchuKizaiMeisai = async (juchuKizaiMeisaiData: JuchuKizaiMeisaiValues[], userNam: string) => {
   const newData = juchuKizaiMeisaiData.map((d) => ({
     juchu_head_id: d.juchuHeadId,
@@ -402,6 +458,12 @@ export const AddJuchuKizaiMeisai = async (juchuKizaiMeisaiData: JuchuKizaiMeisai
   }
 };
 
+/**
+ * 受注機材明細更新
+ * @param juchuKizaiMeisaiData 受注機材明細データ
+ * @param userNam ユーザー名
+ * @returns
+ */
 export const UpdateJuchuKizaiMeisai = async (juchuKizaiMeisaiData: JuchuKizaiMeisaiValues[], userNam: string) => {
   const updateData = juchuKizaiMeisaiData.map((d) => ({
     juchu_head_id: d.juchuHeadId,
@@ -441,6 +503,12 @@ export const UpdateJuchuKizaiMeisai = async (juchuKizaiMeisaiData: JuchuKizaiMei
   }
 };
 
+/**
+ * 受注機材明細削除
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param juchuKizaiMeisaiIds 受注機材明細id
+ */
 export const DeleteJuchuKizaiMeisai = async (
   juchuHeadId: number,
   juchuKizaiHeadId: number,
@@ -463,6 +531,10 @@ export const DeleteJuchuKizaiMeisai = async (
   }
 };
 
+/**
+ * 移動伝票id最大値取得
+ * @returns 移動伝票id最大値
+ */
 export const GetIdoDenMaxId = async () => {
   try {
     const { data, error } = await supabase
@@ -483,6 +555,13 @@ export const GetIdoDenMaxId = async () => {
   }
 };
 
+/**
+ * 移動伝票新規追加
+ * @param newIdoDenId 新規移動伝票id
+ * @param idoKizaiData 移動伝票データ
+ * @param userNam ユーザー名
+ * @returns
+ */
 export const AddIdoDen = async (newIdoDenId: number, idoKizaiData: JuchuKizaiMeisaiValues[], userNam: string) => {
   const newData = idoKizaiData.map((d, index) => ({
     ido_den_id: newIdoDenId + index,
@@ -516,6 +595,12 @@ export const AddIdoDen = async (newIdoDenId: number, idoKizaiData: JuchuKizaiMei
   }
 };
 
+/**
+ * 移動伝票更新
+ * @param idoKizaiData 移動伝票データ
+ * @param userNam ユーザー名
+ * @returns
+ */
 export const UpdateIdoDen = async (idoKizaiData: JuchuKizaiMeisaiValues[], userNam: string) => {
   const updateData = idoKizaiData.map((d) => ({
     ido_den_id: d.idoDenId,
@@ -550,6 +635,10 @@ export const UpdateIdoDen = async (idoKizaiData: JuchuKizaiMeisaiValues[], userN
   }
 };
 
+/**
+ * 移動伝票削除
+ * @param idoDenIds 移動伝票id
+ */
 export const DeleteIdoDen = async (idoDenIds: number[]) => {
   try {
     const { error } = await supabase.schema('dev2').from('t_ido_den').delete().in('ido_den_id', idoDenIds);
@@ -562,6 +651,15 @@ export const DeleteIdoDen = async (idoDenIds: number[]) => {
   }
 };
 
+/**
+ * 機材在庫テーブル用データ取得
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param kizaiId 機材id
+ * @param planQty 使用数
+ * @param date 開始日
+ * @returns 機材在庫テーブル用データ
+ */
 export const GetStockList = async (
   juchuHeadId: number,
   juchuKizaiHeadId: number,
@@ -643,6 +741,12 @@ order by cal_dat;
   }
 };
 
+/**
+ * 受注機材本番日取得
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @returns 受注機材本番日
+ */
 export const GetHonbanbi = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
   try {
     const { data: honbanbi, error: honbanbiError } = await supabase
@@ -675,6 +779,13 @@ export const GetHonbanbi = async (juchuHeadId: number, juchuKizaiHeadId: number)
   }
 };
 
+/**
+ * 受注機材本番日データの存在確認
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param juchuHonbanbiData 受注機材本番日データ
+ * @returns あり：true　なし：false
+ */
 export const ConfirmHonbanbi = async (
   juchuHeadId: number,
   juchuKizaiHeadId: number,
@@ -701,6 +812,14 @@ export const ConfirmHonbanbi = async (
   }
 };
 
+/**
+ * 受注機材本番日新規追加
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param juchuHonbanbiData 受注機材本番日データ
+ * @param userNam ユーザー名
+ * @returns
+ */
 export const AddHonbanbi = async (
   juchuHeadId: number,
   juchuKizaiHeadId: number,
@@ -731,6 +850,14 @@ export const AddHonbanbi = async (
   }
 };
 
+/**
+ * 受注機材本番日更新
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param juchuHonbanbiData 受注機材本番日データ
+ * @param userNam ユーザー名
+ * @returns
+ */
 export const UpdateHonbanbi = async (
   juchuHeadId: number,
   juchuKizaiHeadId: number,
@@ -769,6 +896,12 @@ export const UpdateHonbanbi = async (
   }
 };
 
+/**
+ * 受注機材本番日削除
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param juchuHonbanbiData 受注機材本番日データ
+ */
 export const DeleteHonbanbi = async (
   juchuHeadId: number,
   juchuKizaiHeadId: number,

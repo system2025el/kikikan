@@ -18,24 +18,6 @@ export const SaveAlertDialog = ({ open, onClick }: { open: boolean; onClick: () 
   );
 };
 
-export const IsDirtyAlertDialog = ({ open, onClick }: { open: boolean; onClick: (result: boolean) => void }) => {
-  return (
-    <Dialog open={open}>
-      <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
-        <WarningIcon color="error" />
-        <Box>保存されていません</Box>
-      </DialogTitle>
-      <DialogContentText m={2} p={2}>
-        入力内容を破棄しますか？
-      </DialogContentText>
-      <DialogActions>
-        <Button onClick={() => onClick(true)}>破棄</Button>
-        <Button onClick={() => onClick(false)}>戻る</Button>
-      </DialogActions>
-    </Dialog>
-  );
-};
-
 export const SelectAlertDialog = ({ open, onClick }: { open: boolean; onClick: () => void }) => {
   return (
     <Dialog open={open}>
