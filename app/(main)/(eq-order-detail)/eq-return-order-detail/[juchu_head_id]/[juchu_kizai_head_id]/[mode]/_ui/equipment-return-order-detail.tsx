@@ -731,7 +731,7 @@ export const EquipmentReturnOrderDetail = () => {
               },
             }}
           >
-            <Box m={2}>
+            <Box mx={2} my={1}>
               <Button onClick={() => handleOpenEqDialog()}>
                 <AddIcon fontSize="small" />
                 機材追加
@@ -751,7 +751,10 @@ export const EquipmentReturnOrderDetail = () => {
             overflow="auto"
             sx={{ width: { xs: '60%', sm: '60%', md: 'auto' } }}
           >
-            <Box display="flex" my={2}>
+            <Box display="flex" my={1}>
+              <Box display={'flex'} alignItems={'end'} mr={2}>
+                <Typography fontSize={'small'}>在庫数</Typography>
+              </Box>
               <Button onClick={handleBackDateChange}>
                 <ArrowBackIosNewIcon fontSize="small" />
               </Button>
