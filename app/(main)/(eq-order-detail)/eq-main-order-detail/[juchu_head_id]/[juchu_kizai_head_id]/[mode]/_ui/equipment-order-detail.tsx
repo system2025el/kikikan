@@ -38,23 +38,14 @@ import { TextFieldElement } from 'react-hook-form-mui';
 import { shouldDisplay } from 'rsuite/esm/internals/Picker';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
+import { toISOString, toISOStringYearMonthDay } from '@/app/(main)/_lib/date-conversion';
+import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
 import { BackButton } from '@/app/(main)/_ui/buttons';
-import {
-  Calendar,
-  TestDate,
-  toISOString,
-  toISOStringWithTimezone,
-  toISOStringWithTimezoneMonthDay,
-} from '@/app/(main)/_ui/date';
+import { Calendar, TestDate } from '@/app/(main)/_ui/date';
 import { useDirty } from '@/app/(main)/_ui/dirty-context';
 import { Loading } from '@/app/(main)/_ui/loading';
 import Time, { TestTime } from '@/app/(main)/_ui/time';
-import {
-  GetNyukoDate,
-  getRange,
-  GetShukoDate,
-  toISOStringYearMonthDay,
-} from '@/app/(main)/(eq-order-detail)/_lib/datefuncs';
+import { GetNyukoDate, getRange, GetShukoDate } from '@/app/(main)/(eq-order-detail)/_lib/datefuncs';
 import {
   AddHonbanbi,
   AddIdoDen,
@@ -80,11 +71,8 @@ import {
 } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 import { SelectedEqptsValues } from '@/app/(main)/(masters)/eqpt-master/_lib/types';
 import { AddLock, DeleteLock, GetLock } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/funcs';
-import { useUnsavedChangesWarning } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/hook';
 import { LockValues, OrderValues } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/types';
-import { IsDirtyAlertDialog } from '@/app/(main)/order/[juchu_head_id]/[mode]/_ui/caveat-dialog';
 
-import { data, stock } from '../_lib/data';
 import {
   JuchuKizaiHeadSchema,
   JuchuKizaiHeadValues,
@@ -351,7 +339,7 @@ const EquipmentOrderDetail = (props: {
       const maxDspOrdNum = await GetJuchuKizaiHeadDspOrdNum();
       const newJuchuKizaiHeadId = maxId ? maxId.juchu_kizai_head_id + 1 : 1;
       const newDspOrdNum = maxDspOrdNum ? maxDspOrdNum.dsp_ord_num + 1 : 1;
-      const headResult = await AddJuchuKizaiHead(newJuchuKizaiHeadId, data, newDspOrdNum, user.name);
+      const headResult = await AddJuchuKizaiHead(newJuchuKizaiHeadId, data, 1, newDspOrdNum, user.name);
       const nyushukoResult = await AddJuchuKizaiNyushuko(newJuchuKizaiHeadId, data, user.name);
       if (headResult && nyushukoResult) {
         redirect(`/eq-main-order-detail/${data.juchuHeadId}/${newJuchuKizaiHeadId}/edit`);
@@ -856,7 +844,7 @@ const EquipmentOrderDetail = (props: {
   /**
    * 本番日入力ダイアログでの入力値反映
    */
-  const handleSave = /*async*/ (
+  const handleSave = (
     updatedHonbanbiList: JuchuKizaiHonbanbiValues[],
     updatedHonbanbiDeleteList: JuchuKizaiHonbanbiValues[]
   ) => {
@@ -883,14 +871,6 @@ const EquipmentOrderDetail = (props: {
   // アコーディオン開閉
   const handleExpansion = () => {
     setExpanded((prevExpanded) => !prevExpanded);
-  };
-  // 機材入力ダイアログ開閉
-  const handleOpenEqDialog = async () => {
-    if (!saveKizaiHead) {
-      setSaveOpen(true);
-      return;
-    }
-    setEqSelectionDialogOpen(true);
   };
 
   /**
@@ -948,9 +928,19 @@ const EquipmentOrderDetail = (props: {
     setEqStockList((prev) => [...prev, ...selectEqStockData]);
     setOriginPlanQty((prev) => [...prev, ...newPlanQtys]);
   };
+
+  // 機材入力ダイアログ開閉
+  const handleOpenEqDialog = async () => {
+    if (!saveKizaiHead) {
+      setSaveOpen(true);
+      return;
+    }
+    setEqSelectionDialogOpen(true);
+  };
   const handleCloseEqDialog = () => {
     setEqSelectionDialogOpen(false);
   };
+
   // 本番日入力ダイアログ開閉
   const handleOpenDateDialog = () => {
     if (!saveKizaiHead) {
@@ -994,7 +984,7 @@ const EquipmentOrderDetail = (props: {
           <BackButton label={'戻る'} />
         </Grid2>
       </Box>
-      {/*受注ヘッダー*/}
+      {/*-------受注ヘッダー-------*/}
       <Accordion expanded={expanded} onChange={handleExpansion}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />} component="div">
           <Box display="flex" justifyContent="space-between" alignItems="center" py={1} width="100%">
@@ -1074,7 +1064,7 @@ const EquipmentOrderDetail = (props: {
           </Grid2>
         </AccordionDetails>
       </Accordion>
-      {/*受注機材ヘッダー*/}
+      {/*-------受注機材ヘッダー-------*/}
       <form onSubmit={handleSubmit(onSubmit)}>
         <Accordion
           sx={{
@@ -1335,7 +1325,7 @@ const EquipmentOrderDetail = (props: {
           </AccordionDetails>
         </Accordion>
       </form>
-      {/*受注明細(機材)*/}
+      {/*-------受注明細(機材)-------*/}
       <Paper variant="outlined" sx={{ mt: 2 }}>
         <Box display="flex" justifyContent="space-between" alignItems="center" py={1} px={2}>
           <Grid2 container direction="column" spacing={1}>
@@ -1408,8 +1398,6 @@ const EquipmentOrderDetail = (props: {
             </Box>
             <StockTable
               eqStockList={eqStockList}
-              // shukoDate={shukoDate}
-              // nyukoDate={nyukoDate}
               dateRange={dateRange}
               juchuHonbanbiList={juchuHonbanbiList}
               ref={rightRef}
@@ -1417,14 +1405,14 @@ const EquipmentOrderDetail = (props: {
           </Box>
         </Box>
       </Paper>
-      {/*本番日*/}
+      {/*-------本番日-------*/}
       <Paper variant="outlined" sx={{ mt: 2 }}>
         <Box>
           <Box sx={styles.container}>
             <Typography marginRight={{ xs: 2, sm: 9, md: 9, lg: 9 }} whiteSpace="nowrap">
               本番日
             </Typography>
-            <Button disabled={!edit} onClick={/*() => handleButtonClick('honbanbi', */ handleOpenDateDialog /*)*/}>
+            <Button disabled={!edit} onClick={handleOpenDateDialog}>
               編集
             </Button>
             <Dialog open={dateSelectionDialogOpne} fullScreen sx={{ zIndex: 1201 }}>

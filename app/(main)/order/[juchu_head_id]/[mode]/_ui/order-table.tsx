@@ -17,7 +17,7 @@ import TableRow from '@mui/material/TableRow';
 import * as React from 'react';
 import { useState } from 'react';
 
-import { toISOString } from '@/app/(main)/_ui/date';
+import { toISOString } from '@/app/(main)/_lib/date-conversion';
 
 import { EqTableValues, VehicleTableValues } from '../_lib/types';
 

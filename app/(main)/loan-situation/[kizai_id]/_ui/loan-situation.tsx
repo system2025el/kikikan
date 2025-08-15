@@ -22,8 +22,9 @@ import { addMonths, endOfMonth, subDays, subMonths } from 'date-fns';
 import dayjs, { Dayjs } from 'dayjs';
 import { useState } from 'react';
 
+import { toISOStringMonthDay } from '@/app/(main)/_lib/date-conversion';
 import { BackButton } from '@/app/(main)/_ui/buttons';
-import { Calendar, toISOStringWithTimezoneMonthDay } from '@/app/(main)/_ui/date';
+import { Calendar } from '@/app/(main)/_ui/date';
 
 import { loanData, useData } from '../_lib/data';
 import { LoanSituationTable, UseTable } from './loan-situation-table';
@@ -47,7 +48,7 @@ const getUseHeader = (date: Date | null) => {
   const current = new Date(start);
 
   while (current <= end) {
-    const dateStr = toISOStringWithTimezoneMonthDay(current).split('T')[0];
+    const dateStr = toISOStringMonthDay(current);
     range.push(dateStr);
     current.setDate(current.getDate() + 1);
   }

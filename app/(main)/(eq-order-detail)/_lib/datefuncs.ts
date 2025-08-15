@@ -1,4 +1,4 @@
-import { toISOStringWithTimezoneMonthDay } from '../../_ui/date';
+import { toISOStringYearMonthDay } from '../../_lib/date-conversion';
 
 export const GetShukoDate = (kicsShukoDat: Date | null, yardShukoDat: Date | null) => {
   if (kicsShukoDat && yardShukoDat) {
@@ -39,21 +39,12 @@ export const getRange = (start: Date | null, end: Date | null): string[] => {
     const current = new Date(start);
 
     while (current <= end) {
-      range.push(toISOStringYearMonthDay(current));
+      const dateStr = toISOStringYearMonthDay(current);
+      range.push(dateStr);
       current.setDate(current.getDate() + 1);
     }
 
     return range;
   }
   return [];
-};
-
-export const toISOStringYearMonthDay = (date: Date) => {
-  const pad = function (str: string): string {
-    return ('0' + str).slice(-2);
-  };
-  const year = date.getFullYear().toString();
-  const month = pad((date.getMonth() + 1).toString());
-  const day = pad(date.getDate().toString());
-  return `${year}/${month}/${day}`;
 };

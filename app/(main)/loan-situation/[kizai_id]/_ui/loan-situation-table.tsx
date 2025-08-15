@@ -2,8 +2,6 @@
 
 import { Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 
-import { toISOStringWithTimezoneMonthDay } from '@/app/(main)/_ui/date';
-
 import { getDateRowBackgroundColor } from '../_lib/colorselect';
 import { Loan, UseData } from './loan-situation';
 
@@ -13,6 +11,10 @@ type LoanSituationTableProps = {
 
 export const LoanSituationTable = (props: LoanSituationTableProps) => {
   const { rows } = props;
+
+  function toISOStringMonthDay(date: Date): import('react').ReactNode {
+    throw new Error('Function not implemented.');
+  }
 
   return (
     <TableContainer component={Paper} style={{ overflowX: 'auto' }}>
@@ -37,7 +39,7 @@ export const LoanSituationTable = (props: LoanSituationTableProps) => {
                 </Button>
               </TableCell>
               <TableCell style={styles.row}>{row.koenNam}</TableCell>
-              <TableCell style={styles.row}>{row.date && toISOStringWithTimezoneMonthDay(row.date)}</TableCell>
+              <TableCell style={styles.row}>{row.date && toISOStringMonthDay(row.date)}</TableCell>
             </TableRow>
           ))}
         </TableBody>

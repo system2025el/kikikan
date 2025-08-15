@@ -1,4 +1,4 @@
-import { toISOStringWithTimezoneMonthDay } from '@/app/(main)/_ui/date';
+import { toISOStringMonthDay } from '@/app/(main)/_lib/date-conversion';
 
 export const getDateHeaderBackgroundColor = (date: string, dateRange: string[]): string => {
   const isMatched = dateRange.some((targetDate) => targetDate === date);
@@ -6,8 +6,8 @@ export const getDateHeaderBackgroundColor = (date: string, dateRange: string[]):
 };
 
 export const getDateRowBackgroundColor = (date: string, startDate: Date | null, endDate: Date | null): string => {
-  const issueDate = startDate !== null ? toISOStringWithTimezoneMonthDay(new Date(startDate)).split('T')[0] : '';
-  const returnDate = endDate !== null ? toISOStringWithTimezoneMonthDay(new Date(endDate)).split('T')[0] : '';
+  const issueDate = startDate !== null ? toISOStringMonthDay(new Date(startDate)) : '';
+  const returnDate = endDate !== null ? toISOStringMonthDay(new Date(endDate)) : '';
 
   if (date === returnDate) return 'yellow';
   if (date === issueDate) return 'lightblue';
