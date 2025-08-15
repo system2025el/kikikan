@@ -244,7 +244,7 @@ export const Order = (props: {
 
     if (selectEq.length === 1 && eqHeaderList) {
       const selectData = eqHeaderList.find((d) => d.juchuKizaiHeadId === selectEq[0]);
-      if (selectData && selectData.oyaJuchuKizaiHeadId === 1) {
+      if (selectData && selectData.juchuKizaiHeadKbn === 1) {
         if (!isDirty) {
           await DeleteLock(1, props.order.juchuHeadId);
           router.push(`/eq-return-order-detail/${props.order.juchuHeadId}/0/edit`);
@@ -269,7 +269,7 @@ export const Order = (props: {
 
     if (selectEq.length === 1 && eqHeaderList) {
       const selectData = eqHeaderList.find((d) => d.juchuKizaiHeadId === selectEq[0]);
-      if (selectData && selectData.oyaJuchuKizaiHeadId === 1) {
+      if (selectData && selectData.juchuKizaiHeadKbn === 1) {
         if (!isDirty) {
           await DeleteLock(1, props.order.juchuHeadId);
           router.push(`/eq-keep-order-detail/${props.order.juchuHeadId}/0/edit`);
