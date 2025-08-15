@@ -29,13 +29,18 @@ import { addMonths, endOfMonth, subDays, subMonths } from 'date-fns';
 import dayjs, { Dayjs } from 'dayjs';
 import { useEffect, useRef, useState } from 'react';
 
+import { useUserStore } from '@/app/_lib/stores/usestore';
 import { toISOStringMonthDay } from '@/app/(main)/_lib/date-conversion';
+import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
 import { BackButton } from '@/app/(main)/_ui/buttons';
 import { Calendar, TestDate } from '@/app/(main)/_ui/date';
+import { useDirty } from '@/app/(main)/_ui/dirty-context';
 import Time, { TestTime } from '@/app/(main)/_ui/time';
 import { SelectedEqptsValues } from '@/app/(main)/(masters)/eqpt-master/_lib/types';
+import { AddLock, DeleteLock, GetLock } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/funcs';
+import { LockValues, OrderValues } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/types';
 
-import { EqptSelectionDialog } from '../../../../../eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_ui/equipment-selection-dailog';
+import { EqptSelectionDialog } from '../../../../../../eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_ui/equipment-selection-dailog';
 import { getDateHeaderBackgroundColor, getDateRowBackgroundColor } from '../_lib/colorselect';
 import { data, stock } from '../_lib/data';
 import { ReturnEqTable, ReturnStockTable } from './equipment-return-order-detail-table';
@@ -141,7 +146,18 @@ export const testeqData: ReturnEquipment[] = Array.from({ length: 50 }, (_, i) =
 // 200件用データ作成
 export const testStock = Array.from({ length: 50 }, (_, i) => stock[i % stock.length]);
 
-export const EquipmentReturnOrderDetail = () => {
+export const EquipmentReturnOrderDetail = (props: { juchuHeadData: OrderValues; edit: boolean }) => {
+  // user情報
+  const user = useUserStore((state) => state.user);
+  // ロックデータ
+  const [lockData, setLockData] = useState<LockValues | null>(null);
+  // 全体の保存フラグ
+  const [save, setSave] = useState(false);
+  // ローディング
+  const [isLoading, setIsLoading] = useState(false);
+  // 編集モード(true:編集、false:閲覧)
+  const [edit, setEdit] = useState(props.edit);
+
   // KICS出庫日
   const [startKICSDate, setStartKICSDate] = useState<Date | null>(null);
   // YARD出庫日
@@ -188,10 +204,82 @@ export const EquipmentReturnOrderDetail = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
+  // context
+  const { setIsDirty, setIsSave, setLock } = useDirty();
+
   // ref
   const leftRef = useRef<HTMLDivElement>(null);
   const rightRef = useRef<HTMLDivElement>(null);
   const isSyncing = useRef(false);
+
+  // ブラウザバック、F5、×ボタンでページを離れた際のhook
+  // useUnsavedChangesWarning(isDirty, save);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const asyncProcess = async () => {
+      setIsLoading(true);
+      const lockData = await GetLock(1, props.juchuHeadData.juchuHeadId);
+      setLockData(lockData);
+      if (props.edit && lockData === null) {
+        await AddLock(1, props.juchuHeadData.juchuHeadId, user.name);
+        const newLockData = await GetLock(1, props.juchuHeadData.juchuHeadId);
+        setLockData(newLockData);
+      } else if (props.edit && lockData !== null && lockData.addUser !== user.name) {
+        setEdit(false);
+      }
+      setIsLoading(false);
+    };
+    asyncProcess();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  useEffect(() => {
+    setLock(lockData);
+  }, [lockData, setLock]);
+
+  useEffect(() => {
+    const left = leftRef.current;
+    const right = rightRef.current;
+
+    if (left && right) {
+      left.addEventListener('scroll', () => syncScroll('left'));
+      right.addEventListener('scroll', () => syncScroll('right'));
+    }
+
+    return () => {
+      if (left && right) {
+        left.removeEventListener('scroll', () => syncScroll('left'));
+        right.removeEventListener('scroll', () => syncScroll('right'));
+      }
+    };
+  }, []);
+
+  /**
+   * 編集モード変更
+   */
+  const handleEdit = async () => {
+    // 編集→閲覧
+    if (edit) {
+      await DeleteLock(1, props.juchuHeadData.juchuHeadId);
+      setLockData(null);
+      setEdit(false);
+      // 閲覧→編集
+    } else {
+      if (!user) return;
+      const lockData = await GetLock(1, props.juchuHeadData.juchuHeadId);
+      setLockData(lockData);
+      if (lockData === null) {
+        await AddLock(1, props.juchuHeadData.juchuHeadId, user.name);
+        const newLockData = await GetLock(1, props.juchuHeadData.juchuHeadId);
+        setLockData(newLockData);
+        setEdit(true);
+      } else if (lockData !== null && lockData.addUser === user.name) {
+        setEdit(true);
+      }
+    }
+  };
 
   // 同期スクロール処理
   const syncScroll = (source: 'left' | 'right') => {
@@ -215,23 +303,6 @@ export const EquipmentReturnOrderDetail = () => {
       isSyncing.current = false;
     });
   };
-
-  useEffect(() => {
-    const left = leftRef.current;
-    const right = rightRef.current;
-
-    if (left && right) {
-      left.addEventListener('scroll', () => syncScroll('left'));
-      right.addEventListener('scroll', () => syncScroll('right'));
-    }
-
-    return () => {
-      if (left && right) {
-        left.removeEventListener('scroll', () => syncScroll('left'));
-        right.removeEventListener('scroll', () => syncScroll('right'));
-      }
-    };
-  }, []);
 
   /**
    * KICS再度出庫日時変更時

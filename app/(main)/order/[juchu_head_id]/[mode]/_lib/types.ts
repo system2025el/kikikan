@@ -94,7 +94,7 @@ export type VehicleTableValues = {
 
 export const LockSchema = z.object({
   lockShubetu: z.number(),
-  headId: z.number().nullable(),
+  headId: z.number(),
   addDat: z.date().nullable(),
   addUser: z.string().nullable(),
 });

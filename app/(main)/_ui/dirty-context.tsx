@@ -15,9 +15,7 @@ type DirtyContextType = {
   isDirty: boolean;
   setIsDirty: (val: boolean) => void;
   setIsSave: (val: boolean) => void;
-  setLock: (val: LockValues) => void;
-  setLockShubetu: (val: number) => void;
-  setHeadId: (val: number) => void;
+  setLock: (val: LockValues | null) => void;
   requestNavigation: (path: string) => void;
 };
 
@@ -29,8 +27,6 @@ export const DirtyProvider = ({ children }: { children: React.ReactNode }) => {
   const [isDirty, setIsDirty] = useState(false);
   const [isSave, setIsSave] = useState(true);
   const [lock, setLock] = useState<LockValues | null>(null);
-  const [lockShubetu, setLockShubetu] = useState<number | null>(null);
-  const [headId, setHeadId] = useState<number | null>(null);
   const [pendingPath, setPendingPath] = useState<string | null>(null);
   const [showDialog, setShowDialog] = useState(false);
 
@@ -39,22 +35,18 @@ export const DirtyProvider = ({ children }: { children: React.ReactNode }) => {
       setPendingPath(path);
       setShowDialog(true);
     } else {
-      if (lockShubetu && headId && lock && lock.addUser === user?.name) {
-        await DeleteLock(lockShubetu, headId);
+      if (lock && lock.addUser === user?.name) {
+        await DeleteLock(lock.lockShubetu, lock.headId);
         setLock(null);
-        setLockShubetu(null);
-        setHeadId(null);
       }
       router.push(path);
     }
   };
 
   const confirmNavigation = async () => {
-    if (lockShubetu && headId && lock && lock.addUser === user?.name) {
-      await DeleteLock(lockShubetu, headId);
+    if (lock && lock.addUser === user?.name) {
+      await DeleteLock(lock.lockShubetu, lock.headId);
       setLock(null);
-      setLockShubetu(null);
-      setHeadId(null);
     }
     if (pendingPath) {
       setShowDialog(false);
@@ -79,9 +71,7 @@ export const DirtyProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <DirtyContext.Provider
-      value={{ isDirty, setIsDirty, setIsSave, setLock, setLockShubetu, setHeadId, requestNavigation }}
-    >
+    <DirtyContext.Provider value={{ isDirty, setIsDirty, setIsSave, setLock, requestNavigation }}>
       {children}
       <IsDirtyAlertDialog open={showDialog} onClick={handleResult} />
     </DirtyContext.Provider>

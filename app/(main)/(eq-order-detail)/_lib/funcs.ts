@@ -38,6 +38,7 @@ export const GetJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHeadId: n
       .from('v_juchu_kizai_den')
       .select('kics_shuko_dat, kics_nyuko_dat, yard_shuko_dat, yard_nyuko_dat')
       .eq('juchu_head_id', juchuHeadId)
+      .eq('juchu_kizai_head_id', juchuKizaiHeadId)
       .limit(1);
     if (juchuDateError) {
       console.error('GetEqHeader juchuDate error: ', juchuDateError);
@@ -158,6 +159,74 @@ export const AddJuchuKizaiHead = async (
 };
 
 /**
+ * 受注機材ヘッダー更新
+ * @param juchuKizaiHeadData 受注機材ヘッダーデータ
+ * @param userNam ユーザー名
+ * @returns
+ */
+export const UpdateJuchuKizaiHead = async (juchuKizaiHeadData: JuchuKizaiHeadValues, userNam: string) => {
+  const updateData = {
+    juchu_head_id: juchuKizaiHeadData.juchuHeadId,
+    juchu_kizai_head_id: juchuKizaiHeadData.juchuKizaiHeadId,
+    juchu_kizai_head_kbn: juchuKizaiHeadData.juchuKizaiHeadKbn,
+    juchu_honbanbi_qty: juchuKizaiHeadData.juchuHonbanbiQty,
+    nebiki_amt: juchuKizaiHeadData.nebikiAmt,
+    mem: juchuKizaiHeadData.mem,
+    head_nam: juchuKizaiHeadData.headNam,
+    oya_juchu_kizai_head_id: null,
+    ht_kbn: 0,
+    upd_dat: new Date(),
+    upd_user: userNam,
+  };
+
+  try {
+    const { error } = await supabase
+      .schema('dev2')
+      .from('t_juchu_kizai_head')
+      .update(updateData)
+      .eq('juchu_head_id', updateData.juchu_head_id)
+      .eq('juchu_kizai_head_id', updateData.juchu_kizai_head_id)
+      .eq('juchu_kizai_head_kbn', updateData.juchu_kizai_head_kbn);
+
+    if (error) {
+      console.error('Error updating juchu kizai head:', error.message);
+      return false;
+    }
+    console.log('juchu kizai head updated successfully:', updateData);
+    return true;
+  } catch (e) {
+    console.error('Exception while updating juchu kizai head:', e);
+    return false;
+  }
+};
+
+export const GetJuchuKizaiNyushuko = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
+  try {
+    const { data, error } = await supabase
+      .schema('dev2')
+      .from('t_juchu_kizai_nyushuko')
+      .select('nyushuko_shubetu_id, nyushuko_basho_id, nyushuko_dat')
+      .eq('juchu_head_id', juchuHeadId)
+      .eq('juchu_kizai_head_id', juchuKizaiHeadId);
+    if (error) {
+      console.error('GetEqHeader juchuDate error: ', error);
+      return null;
+    }
+
+    const juchuKizaiNyushukoData = {
+      kicsShukoDat: data.find((d) => d.nyushuko_shubetu_id === 1 && d.nyushuko_basho_id === 1)?.nyushuko_dat ?? null,
+      kicsNyukoDat: data.find((d) => d.nyushuko_shubetu_id === 2 && d.nyushuko_basho_id === 1)?.nyushuko_dat ?? null,
+      yardShukoDat: data.find((d) => d.nyushuko_shubetu_id === 1 && d.nyushuko_basho_id === 2)?.nyushuko_dat ?? null,
+      yardNyukoDat: data.find((d) => d.nyushuko_shubetu_id === 2 && d.nyushuko_basho_id === 2)?.nyushuko_dat ?? null,
+    };
+
+    return juchuKizaiNyushukoData;
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+/**
  * 受注機材入出庫新規追加
  * @param juchuKizaiHeadId 受注機材ヘッダーid
  * @param juchuKizaiHeadData 受注機材ヘッダーデータ
@@ -201,48 +270,6 @@ export const AddJuchuKizaiNyushuko = async (
     }
   }
   return true;
-};
-
-/**
- * 受注機材ヘッダー更新
- * @param juchuKizaiHeadData 受注機材ヘッダーデータ
- * @param userNam ユーザー名
- * @returns
- */
-export const UpdateJuchuKizaiHead = async (juchuKizaiHeadData: JuchuKizaiHeadValues, userNam: string) => {
-  const updateData = {
-    juchu_head_id: juchuKizaiHeadData.juchuHeadId,
-    juchu_kizai_head_id: juchuKizaiHeadData.juchuKizaiHeadId,
-    juchu_kizai_head_kbn: juchuKizaiHeadData.juchuKizaiHeadKbn,
-    juchu_honbanbi_qty: juchuKizaiHeadData.juchuHonbanbiQty,
-    nebiki_amt: juchuKizaiHeadData.nebikiAmt,
-    mem: juchuKizaiHeadData.mem,
-    head_nam: juchuKizaiHeadData.headNam,
-    oya_juchu_kizai_head_id: null,
-    ht_kbn: 0,
-    upd_dat: new Date(),
-    upd_user: userNam,
-  };
-
-  try {
-    const { error } = await supabase
-      .schema('dev2')
-      .from('t_juchu_kizai_head')
-      .update(updateData)
-      .eq('juchu_head_id', updateData.juchu_head_id)
-      .eq('juchu_kizai_head_id', updateData.juchu_kizai_head_id)
-      .eq('juchu_kizai_head_kbn', updateData.juchu_kizai_head_kbn);
-
-    if (error) {
-      console.error('Error updating juchu kizai head:', error.message);
-      return false;
-    }
-    console.log('juchu kizai head updated successfully:', updateData);
-    return true;
-  } catch (e) {
-    console.error('Exception while updating juchu kizai head:', e);
-    return false;
-  }
 };
 
 /**

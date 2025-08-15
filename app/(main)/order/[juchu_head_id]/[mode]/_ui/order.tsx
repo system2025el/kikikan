@@ -57,7 +57,7 @@ export const Order = (props: {
   order: OrderValues;
   eqList: EqTableValues[] | undefined;
   edit: boolean;
-  lockData: LockValues | null;
+  //lockData: LockValues | null;
 }) => {
   const router = useRouter();
   // user情報
@@ -75,7 +75,7 @@ export const Order = (props: {
   // 車両ヘッダーデータ
   const [vehicleHeaderList, setVehicleHeaderList] = useState<VehicleTableValues[] | undefined>(vehicleRows);
   // ロックデータ
-  const [lockData, setLockData] = useState<LockValues | null>(props.lockData);
+  const [lockData, setLockData] = useState<LockValues | null>(null);
   // 未保存ダイアログを出すかどうか
   const [saveOpen, setSaveOpen] = useState(false);
   // 編集内容が未保存ダイアログを出すかどうか
@@ -90,7 +90,7 @@ export const Order = (props: {
   const [path, setPath] = useState<string | null>(null);
 
   // context
-  const { setIsDirty, setIsSave, setLock, setLockShubetu, setHeadId } = useDirty();
+  const { setIsDirty, setIsSave, setLock } = useDirty();
   // 合計金額
   const priceTotal = eqHeaderList!.reduce((sum, row) => sum + (row.shokei ?? 0), 0);
 
@@ -139,14 +139,19 @@ export const Order = (props: {
    */
   useEffect(() => {
     if (!user) return;
-    setEdit(!props.edit || (props.lockData !== null && props.lockData.addUser !== user.name) ? false : true);
 
     const asyncProcess = async () => {
-      if (props.edit && props.lockData === null) {
+      setIsLoading(true);
+      const lockData = await GetLock(1, props.order.juchuHeadId);
+      setLockData(lockData);
+      if (props.edit && lockData === null) {
         await AddLock(1, props.order.juchuHeadId, user.name);
         const newLockData = await GetLock(1, props.order.juchuHeadId);
         setLockData(newLockData);
+      } else if (props.edit && lockData !== null && lockData.addUser !== user.name) {
+        setEdit(false);
       }
+      setIsLoading(false);
     };
     asyncProcess();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -158,12 +163,10 @@ export const Order = (props: {
   }, [isDirty, save, setIsDirty, setIsSave]);
 
   useEffect(() => {
-    if (lockData) setLock(lockData);
+    setLock(lockData);
   }, [lockData, setLock]);
 
   useEffect(() => {
-    setLockShubetu(1);
-    setHeadId(props.order.juchuHeadId);
     if (props.order.juchuDat && props.order.nyuryokuUser && props.order.koenNam && props.order.kokyaku) setSave(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -181,17 +184,24 @@ export const Order = (props: {
 
   // 編集モード変更
   const handleEdit = async () => {
+    // 編集→閲覧
     if (edit) {
       await DeleteLock(1, props.order.juchuHeadId);
-      const newLockData = await GetLock(1, props.order.juchuHeadId);
-      setLockData(newLockData);
-      setEdit(!edit);
+      setLockData(null);
+      setEdit(false);
+      // 閲覧→編集
     } else {
       if (!user) return;
-      await AddLock(1, props.order.juchuHeadId, user.name);
-      const newLockData = await GetLock(1, props.order.juchuHeadId);
-      setLockData(newLockData);
-      setEdit(!edit);
+      const lockData = await GetLock(1, props.order.juchuHeadId);
+      setLockData(lockData);
+      if (lockData === null) {
+        await AddLock(1, props.order.juchuHeadId, user.name);
+        const newLockData = await GetLock(1, props.order.juchuHeadId);
+        setLockData(newLockData);
+        setEdit(true);
+      } else if (lockData !== null && lockData.addUser === user.name) {
+        setEdit(true);
+      }
     }
   };
 
@@ -247,9 +257,9 @@ export const Order = (props: {
       if (selectData && selectData.juchuKizaiHeadKbn === 1) {
         if (!isDirty) {
           await DeleteLock(1, props.order.juchuHeadId);
-          router.push(`/eq-return-order-detail/${props.order.juchuHeadId}/0/edit`);
+          router.push(`/eq-return-order-detail/${props.order.juchuHeadId}/0/${selectData.juchuKizaiHeadId}/edit`);
         } else {
-          setPath(`/eq-return-order-detail/${props.order.juchuHeadId}/0/edit`);
+          setPath(`/eq-return-order-detail/${props.order.juchuHeadId}/0/${selectData.juchuKizaiHeadId}/edit`);
           setDirtyOpen(true);
         }
       } else {
