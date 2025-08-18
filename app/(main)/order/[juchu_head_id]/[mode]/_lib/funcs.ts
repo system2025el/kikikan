@@ -1,9 +1,10 @@
 'use server';
 
 import { supabase } from '@/app/_lib/supabase/supabase';
+import { toISOStringYearMonthDay } from '@/app/(main)/_lib/date-conversion';
 import { CustomersMasterTableValues } from '@/app/(main)/(masters)/customers-master/_lib/types';
 
-import { CustomersDialogValues, EqTableValues, JuchuHeadValues, LockValues, OrderValues } from './types';
+import { CustomersDialogValues, EqTableValues, LockValues, OrderValues } from './types';
 
 /**
  * 受注ヘッダー取得
@@ -180,26 +181,24 @@ export const DeleteLock = async (lockShubetu: number, headId: number) => {
  * 受注ヘッダー情報新規追加
  * @param juchuHeadId 受注ヘッダーid
  */
-export const AddNewOrder = async (juchuHeadId: number, nyuryokuUser: string | undefined) => {
+export const AddNewOrder = async (juchuHeadId: number, juchuHeadData: OrderValues, userNam: string) => {
   const newData = {
     juchu_head_id: juchuHeadId,
-    del_flg: 0,
-    juchu_sts: 0,
-    juchu_dat: new Date(),
-    juchu_str_dat: null,
-    juchu_end_dat: null,
-    nyuryoku_user: nyuryokuUser,
-    koen_nam: null,
-    koenbasho_nam: null,
-    kokyaku_id: null,
-    kokyaku_tanto_nam: null,
-    mem: null,
-    nebiki_amt: null,
-    zei_kbn: 2,
+    del_flg: juchuHeadData.delFlg,
+    juchu_sts: juchuHeadData.juchuSts,
+    juchu_dat: juchuHeadData.juchuDat,
+    juchu_str_dat: juchuHeadData.juchuRange && toISOStringYearMonthDay(juchuHeadData.juchuRange[0]),
+    juchu_end_dat: juchuHeadData.juchuRange && toISOStringYearMonthDay(juchuHeadData.juchuRange[1]),
+    nyuryoku_user: juchuHeadData.nyuryokuUser,
+    koen_nam: juchuHeadData.koenNam,
+    koenbasho_nam: juchuHeadData.koenbashoNam,
+    kokyaku_id: juchuHeadData.kokyaku.kokyakuId,
+    kokyaku_tanto_nam: juchuHeadData.kokyakuTantoNam,
+    mem: juchuHeadData.mem,
+    nebiki_amt: juchuHeadData.nebikiAmt,
+    zei_kbn: juchuHeadData.zeiKbn,
     add_dat: new Date(),
-    add_user: nyuryokuUser,
-    upd_dat: null,
-    upd_user: null,
+    add_user: userNam,
   };
 
   try {
@@ -231,8 +230,8 @@ export const Update = async (data: OrderValues) => {
     del_flg: data.delFlg,
     juchu_sts: data.juchuSts,
     juchu_dat: data.juchuDat,
-    juchu_str_dat: data.juchuRange && data.juchuRange[0],
-    juchu_end_dat: data.juchuRange && data.juchuRange[1],
+    juchu_str_dat: data.juchuRange && toISOStringYearMonthDay(data.juchuRange[0]),
+    juchu_end_dat: data.juchuRange && toISOStringYearMonthDay(data.juchuRange[1]),
     nyuryoku_user: data.nyuryokuUser,
     koen_nam: data.koenNam,
     koenbasho_nam: data.koenbashoNam,
