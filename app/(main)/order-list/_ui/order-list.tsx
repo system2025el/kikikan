@@ -31,11 +31,15 @@ import { DatePickerElement } from 'react-hook-form-mui/date-pickers';
 import { BackButton } from '../../_ui/buttons';
 import { TwoDatePickers } from '../../_ui/date';
 import { customers } from '../../(masters)/customers-master/_lib/datas';
-import { OrderSchema, OrderSearchValues } from '../_lib/types';
+import { OrderListTableValues, OrderSchema, OrderSearchValues } from '../_lib/types';
 import { OrderTable } from './order-table';
 
 /** 受注一覧画面 */
-export const OrderList = () => {
+export const OrderList = (props: { orderList: OrderListTableValues[] | undefined }) => {
+  const [orderList, setOrderList] = useState<OrderListTableValues[]>(props.orderList ? props.orderList : []);
+  const [page, setPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(true);
+
   const [criteria, setCriteria] = useState('');
   const handleSelect = (event: SelectChangeEvent) => {
     setCriteria(event.target.value);
@@ -229,7 +233,13 @@ export const OrderList = () => {
           </Grid2>
         </form>
       </Paper>
-      <OrderTable />
+      <OrderTable
+        orderList={orderList}
+        isLoading={isLoading}
+        page={page}
+        setIsLoading={setIsLoading}
+        setPage={setPage}
+      />
     </Container>
   );
 };

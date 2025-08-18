@@ -1,4 +1,17 @@
 import z from 'zod';
+
+export type OrderListTableValues = {
+  juchuHeadId: number;
+  juchuStsNam: string;
+  koenNam: string;
+  koenbashoNam: string;
+  kokyakuNam: string;
+  juchuDat: Date;
+  juchuStrDat: Date;
+  juchuEndDat: Date;
+  nyushukoStsNam: string;
+};
+
 /** 検索用型、ヴァリデーション */
 export const OrderSchema = z.object({
   criteria: z.string(),
