@@ -21,25 +21,43 @@ import {
   Typography,
   useTheme,
 } from '@mui/material';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
+import { toISOStringYearMonthDay } from '../../_lib/date-conversion';
 import { MuiTablePagination } from '../../_ui/table-pagination';
-import { orderList } from '../_lib/types';
+import { orderList, OrderListTableValues } from '../_lib/types';
 
 /** 受注一覧テーブルのコンポーネント */
-export const OrderTable = () => {
+export const OrderTable = ({
+  orderList,
+  isLoading,
+  page,
+  setIsLoading,
+  setPage,
+}: {
+  orderList: OrderListTableValues[];
+  isLoading: boolean;
+  page: number;
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setPage: React.Dispatch<React.SetStateAction<number>>;
+}) => {
   const theme = useTheme();
 
-  const [page, setPage] = useState(1);
+  //const [page, setPage] = useState(1);
   const rowsPerPage = 50;
 
   // 表示するデータ
   const list = useMemo(
-    () => (rowsPerPage > 0 ? orderList.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage) : orderList),
-    [page, rowsPerPage]
+    () => (rowsPerPage > 0 ? orderList.slice((page - 1) * rowsPerPage, page * rowsPerPage) : orderList),
+    [orderList, page]
   );
+
   // テーブル最後のページ用の空データの長さ
   const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - orderList.length) : 0;
+
+  useEffect(() => {
+    setIsLoading(false); //theLocsが変わったらローディング終わり
+  }, [orderList, setIsLoading]);
 
   return (
     <>
@@ -77,11 +95,12 @@ export const OrderTable = () => {
             </Grid2>
           </Grid2>
         </Grid2>
-        <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 1 }}>
+        <TableContainer component={Paper} square sx={{ maxHeight: '80vh', mt: 1 }}>
           <Table stickyHeader size="small" padding="none" sx={{ width: '100vw' }}>
             <TableHead>
               <TableRow>
                 <TableCell></TableCell>
+                <TableCell padding="none"></TableCell>
                 <TableCell align="center">受注番号</TableCell>
                 <TableCell>
                   <Box minWidth={100} maxWidth={100}>
@@ -115,7 +134,7 @@ export const OrderTable = () => {
                 </TableCell>
                 <TableCell>
                   <Box minWidth={100} maxWidth={100}>
-                    終了日
+                    受注終了日
                   </Box>
                 </TableCell>
                 <TableCell>
@@ -124,28 +143,29 @@ export const OrderTable = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {list.map((order) => (
-                <TableRow key={order.id}>
+              {list.map((order, index) => (
+                <TableRow key={index}>
                   <TableCell padding="checkbox">
-                    <Box minWidth={10} maxWidth={10}>
-                      <Checkbox color="primary" />
-                    </Box>
+                    {/* <Box minWidth={10} maxWidth={10}> */}
+                    <Checkbox color="primary" />
+                    {/* </Box> */}
                   </TableCell>
+                  <TableCell padding="none">{index + 1}</TableCell>
                   <TableCell align="center">
-                    <Button variant="text" href={`/order/${order.orderNumber}/${'view'}`}>
+                    <Button variant="text" href={`/order/${order.juchuHeadId}/${'view'}`}>
                       <Box minWidth={60} maxWidth={60}>
-                        {order.orderNumber}
+                        {order.juchuHeadId}
                       </Box>
                     </Button>
                   </TableCell>
-                  <TableCell>{order.status}</TableCell>
-                  <TableCell>{order.name}</TableCell>
-                  <TableCell>{order.location}</TableCell>
-                  <TableCell>{order.customerName}</TableCell>
-                  <TableCell>{order.orderedDate}</TableCell>
-                  <TableCell>{order.issueDate}</TableCell>
-                  <TableCell>{order.returnDate}</TableCell>
-                  <TableCell>{order.inventoryStatus}</TableCell>
+                  <TableCell>{order.juchuStsNam}</TableCell>
+                  <TableCell>{order.koenNam}</TableCell>
+                  <TableCell>{order.koenbashoNam}</TableCell>
+                  <TableCell>{order.kokyakuNam}</TableCell>
+                  <TableCell>{toISOStringYearMonthDay(new Date(order.juchuDat))}</TableCell>
+                  <TableCell>{order.juchuStrDat && toISOStringYearMonthDay(new Date(order.juchuStrDat))}</TableCell>
+                  <TableCell>{order.juchuEndDat && toISOStringYearMonthDay(new Date(order.juchuEndDat))}</TableCell>
+                  <TableCell>{order.nyushukoStsNam}</TableCell>
                 </TableRow>
               ))}
               {emptyRows > 0 && (
