@@ -73,7 +73,7 @@ export const OrderTable = ({
           <Grid2 container spacing={1}>
             <Grid2 container spacing={1}>
               <Grid2>
-                <Button href="/new-order">
+                <Button href="/order/0/edit">
                   <AddIcon fontSize="small" />
                   新規受注
                 </Button>

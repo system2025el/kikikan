@@ -24,7 +24,7 @@ type MenuItem = {
 
 const dashboardList: MenuItem[] = [{ name: 'ダッシュボード', url: '/dashboard' }];
 const orderList: MenuItem[] = [
-  { name: '新規受注', url: '/new-order' },
+  { name: '新規受注', url: '/order/0/edit' },
   { name: '受注一覧', url: '/order-list' },
   { name: '見積一覧', url: '/quotation-list' },
   { name: '在庫確認', url: '/stock' },
@@ -105,17 +105,6 @@ export default function NavLinks() {
   };
 
   const { requestNavigation } = useDirty();
-  // const handleNewOrderClick = async () => {
-  //   const maxId = await GetMaxId();
-  //   if (maxId) {
-  //     const newOrderId = maxId.juchu_head_id + 1;
-  //     await AddNewOrder(newOrderId);
-  //     await AddLock(1, newOrderId);
-  //     router.push(`/order/${newOrderId}/${'edit'}`);
-  //   } else {
-  //     console.error('Failed to retrieve max order ID');
-  //   }
-  // };
 
   return (
     <List dense sx={{ pt: 0 }}>

@@ -24,7 +24,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { useRouter } from 'next/navigation';
+import { redirect, useRouter } from 'next/navigation';
 import { use, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
@@ -39,23 +39,15 @@ import { equipmentRows, users, vehicleHeaders, vehicleRows } from '@/app/(main)/
 
 import { useUnsavedChangesWarning } from '../../../../_lib/hook';
 import { AddLock, AddNewOrder, Copy, DeleteLock, GetLock, GetMaxId, GetOrder, Update } from '../_lib/funcs';
-import {
-  EqTableValues,
-  JuchuHeadSchema,
-  KokyakuValues,
-  LockValues,
-  OrderSchema,
-  OrderValues,
-  VehicleTableValues,
-} from '../_lib/types';
+import { EqTableValues, KokyakuValues, LockValues, OrderSchema, OrderValues, VehicleTableValues } from '../_lib/types';
 import { SaveAlertDialog, SelectAlertDialog } from './caveat-dialog';
 import { CustomerSelectionDialog } from './customer-selection';
 import { LocationSelectDialog } from './location-selection';
 import { OrderEqTable, OrderVehicleTable } from './order-table';
 
 export const Order = (props: {
-  order: OrderValues;
-  eqList: EqTableValues[] | undefined;
+  juchuHeadData: OrderValues;
+  juchuKizaiHeadDatas: EqTableValues[] | undefined;
   edit: boolean;
   //lockData: LockValues | null;
 }) => {
@@ -71,7 +63,7 @@ export const Order = (props: {
   // 保存フラグ
   const [save, setSave] = useState(false);
   // 機材ヘッダーデータ
-  const [eqHeaderList, setEqHeaderList] = useState<EqTableValues[] | undefined>(props.eqList);
+  const [eqHeaderList, setEqHeaderList] = useState<EqTableValues[] | undefined>(props.juchuKizaiHeadDatas);
   // 車両ヘッダーデータ
   const [vehicleHeaderList, setVehicleHeaderList] = useState<VehicleTableValues[] | undefined>(vehicleRows);
   // ロックデータ
@@ -108,25 +100,25 @@ export const Order = (props: {
     mode: 'onSubmit',
     reValidateMode: 'onBlur',
     defaultValues: {
-      juchuHeadId: props.order.juchuHeadId,
-      delFlg: props.order.delFlg,
-      juchuSts: props.order.juchuSts,
-      juchuDat: new Date(props.order.juchuDat),
+      juchuHeadId: props.juchuHeadData.juchuHeadId,
+      delFlg: props.juchuHeadData.delFlg,
+      juchuSts: props.juchuHeadData.juchuSts,
+      juchuDat: new Date(props.juchuHeadData.juchuDat),
       juchuRange:
-        props.order.juchuRange !== null
+        props.juchuHeadData.juchuRange !== null
           ? ([
-              props.order.juchuRange[0] ? new Date(props.order.juchuRange[0]) : new Date(''),
-              props.order.juchuRange[1] ? new Date(props.order.juchuRange[1]) : new Date(''),
+              props.juchuHeadData.juchuRange[0] ? new Date(props.juchuHeadData.juchuRange[0]) : new Date(''),
+              props.juchuHeadData.juchuRange[1] ? new Date(props.juchuHeadData.juchuRange[1]) : new Date(''),
             ] as [Date, Date])
           : null,
-      nyuryokuUser: props.order.nyuryokuUser,
-      koenNam: props.order.koenNam,
-      koenbashoNam: props.order.koenbashoNam,
-      kokyaku: props.order.kokyaku,
-      kokyakuTantoNam: props.order.kokyakuTantoNam,
-      mem: props.order.mem,
-      nebikiAmt: props.order.nebikiAmt,
-      zeiKbn: props.order.zeiKbn,
+      nyuryokuUser: props.juchuHeadData.nyuryokuUser,
+      koenNam: props.juchuHeadData.koenNam,
+      koenbashoNam: props.juchuHeadData.koenbashoNam,
+      kokyaku: props.juchuHeadData.kokyaku,
+      kokyakuTantoNam: props.juchuHeadData.kokyakuTantoNam,
+      mem: props.juchuHeadData.mem,
+      nebikiAmt: props.juchuHeadData.nebikiAmt,
+      zeiKbn: props.juchuHeadData.zeiKbn,
     },
     resolver: zodResolver(OrderSchema),
   });
@@ -140,13 +132,15 @@ export const Order = (props: {
   useEffect(() => {
     if (!user) return;
 
+    setValue('nyuryokuUser', user.name);
+    if (getValues('juchuHeadId') === 0) return;
     const asyncProcess = async () => {
       setIsLoading(true);
-      const lockData = await GetLock(1, props.order.juchuHeadId);
+      const lockData = await GetLock(1, props.juchuHeadData.juchuHeadId);
       setLockData(lockData);
       if (props.edit && lockData === null) {
-        await AddLock(1, props.order.juchuHeadId, user.name);
-        const newLockData = await GetLock(1, props.order.juchuHeadId);
+        await AddLock(1, props.juchuHeadData.juchuHeadId, user.name);
+        const newLockData = await GetLock(1, props.juchuHeadData.juchuHeadId);
         setLockData(newLockData);
       } else if (props.edit && lockData !== null && lockData.addUser !== user.name) {
         setEdit(false);
@@ -167,36 +161,47 @@ export const Order = (props: {
   }, [lockData, setLock]);
 
   useEffect(() => {
-    if (props.order.juchuDat && props.order.nyuryokuUser && props.order.koenNam && props.order.kokyaku) setSave(true);
+    if (props.juchuHeadData.juchuHeadId !== 0) setSave(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // 保存ボタン押下
   const onSubmit = async (data: OrderValues) => {
     console.log('update : 開始');
+    if (!user) return;
     setIsLoading(true);
-    const update = await Update(data);
-    reset(data);
-    setSave(true);
-    setIsLoading(false);
-    console.log('update : ', update);
+
+    // 新規
+    if (data.juchuHeadId === 0) {
+      const maxId = await GetMaxId();
+      const newOrderId = maxId ? maxId.juchu_head_id + 1 : 1;
+      await AddNewOrder(newOrderId, data, user.name);
+      redirect(`/order/${newOrderId}/edit`);
+      // 更新
+    } else {
+      const update = await Update(data);
+      reset(data);
+      setSave(true);
+      setIsLoading(false);
+      console.log('update : ', update);
+    }
   };
 
   // 編集モード変更
   const handleEdit = async () => {
     // 編集→閲覧
     if (edit) {
-      await DeleteLock(1, props.order.juchuHeadId);
+      await DeleteLock(1, props.juchuHeadData.juchuHeadId);
       setLockData(null);
       setEdit(false);
       // 閲覧→編集
     } else {
       if (!user) return;
-      const lockData = await GetLock(1, props.order.juchuHeadId);
+      const lockData = await GetLock(1, props.juchuHeadData.juchuHeadId);
       setLockData(lockData);
       if (lockData === null) {
-        await AddLock(1, props.order.juchuHeadId, user.name);
-        const newLockData = await GetLock(1, props.order.juchuHeadId);
+        await AddLock(1, props.juchuHeadData.juchuHeadId, user.name);
+        const newLockData = await GetLock(1, props.juchuHeadData.juchuHeadId);
         setLockData(newLockData);
         setEdit(true);
       } else if (lockData !== null && lockData.addUser === user.name) {
@@ -216,7 +221,7 @@ export const Order = (props: {
       const maxId = await GetMaxId();
       if (maxId) {
         const newOrderId = maxId.juchu_head_id + 1;
-        const currentData = await GetOrder(props.order.juchuHeadId);
+        const currentData = await GetOrder(props.juchuHeadData.juchuHeadId);
         if (user && currentData) {
           await Copy(newOrderId, currentData, user.name);
         }
@@ -237,10 +242,10 @@ export const Order = (props: {
     }
 
     if (!isDirty) {
-      await DeleteLock(1, props.order.juchuHeadId);
-      router.push(`/eq-main-order-detail/${props.order.juchuHeadId}/0/edit`);
+      await DeleteLock(1, props.juchuHeadData.juchuHeadId);
+      router.push(`/eq-main-order-detail/${props.juchuHeadData.juchuHeadId}/0/edit`);
     } else {
-      setPath(`/eq-main-order-detail/${props.order.juchuHeadId}/0/edit`);
+      setPath(`/eq-main-order-detail/${props.juchuHeadData.juchuHeadId}/0/edit`);
       setDirtyOpen(true);
     }
   };
@@ -256,10 +261,12 @@ export const Order = (props: {
       const selectData = eqHeaderList.find((d) => d.juchuKizaiHeadId === selectEq[0]);
       if (selectData && selectData.juchuKizaiHeadKbn === 1) {
         if (!isDirty) {
-          await DeleteLock(1, props.order.juchuHeadId);
-          router.push(`/eq-return-order-detail/${props.order.juchuHeadId}/0/${selectData.juchuKizaiHeadId}/edit`);
+          await DeleteLock(1, props.juchuHeadData.juchuHeadId);
+          router.push(
+            `/eq-return-order-detail/${props.juchuHeadData.juchuHeadId}/0/${selectData.juchuKizaiHeadId}/edit`
+          );
         } else {
-          setPath(`/eq-return-order-detail/${props.order.juchuHeadId}/0/${selectData.juchuKizaiHeadId}/edit`);
+          setPath(`/eq-return-order-detail/${props.juchuHeadData.juchuHeadId}/0/${selectData.juchuKizaiHeadId}/edit`);
           setDirtyOpen(true);
         }
       } else {
@@ -281,10 +288,10 @@ export const Order = (props: {
       const selectData = eqHeaderList.find((d) => d.juchuKizaiHeadId === selectEq[0]);
       if (selectData && selectData.juchuKizaiHeadKbn === 1) {
         if (!isDirty) {
-          await DeleteLock(1, props.order.juchuHeadId);
-          router.push(`/eq-keep-order-detail/${props.order.juchuHeadId}/0/edit`);
+          await DeleteLock(1, props.juchuHeadData.juchuHeadId);
+          router.push(`/eq-keep-order-detail/${props.juchuHeadData.juchuHeadId}/0/edit`);
         } else {
-          setPath(`/eq-keep-order-detail/${props.order.juchuHeadId}/0/edit`);
+          setPath(`/eq-keep-order-detail/${props.juchuHeadData.juchuHeadId}/0/edit`);
           setDirtyOpen(true);
         }
       } else {
@@ -303,10 +310,10 @@ export const Order = (props: {
     }
 
     if (!isDirty) {
-      await DeleteLock(1, props.order.juchuHeadId);
+      await DeleteLock(1, props.juchuHeadData.juchuHeadId);
       router.push('/order/vehicle-order-detail');
     } else {
-      setPath(`/vehicle-order-detail/${props.order.juchuHeadId}/0/edit`);
+      setPath(`/vehicle-order-detail/${props.juchuHeadData.juchuHeadId}/0/edit`);
       setDirtyOpen(true);
     }
   };
@@ -314,7 +321,7 @@ export const Order = (props: {
   // isDirtyDialogの破棄、戻るボタン押下
   const handleResultDialog = async (result: boolean) => {
     if (result && path) {
-      await DeleteLock(1, props.order.juchuHeadId);
+      await DeleteLock(1, props.juchuHeadData.juchuHeadId);
       router.push(path);
       setPath(null);
       setIsDirty(false);
@@ -423,18 +430,22 @@ export const Order = (props: {
                   <Typography marginRight={5} whiteSpace="nowrap">
                     受注番号
                   </Typography>
-                  <TextFieldElement
-                    name="juchuHeadId"
-                    control={control}
-                    type="number"
-                    sx={{
-                      '& input[type=number]::-webkit-inner-spin-button': {
-                        WebkitAppearance: 'none',
-                        margin: 0,
-                      },
-                    }}
-                    slotProps={{ input: { readOnly: true } }}
-                  ></TextFieldElement>
+                  {getValues('juchuHeadId') === 0 ? (
+                    <TextField slotProps={{ input: { readOnly: true } }}></TextField>
+                  ) : (
+                    <TextFieldElement
+                      name="juchuHeadId"
+                      control={control}
+                      type="number"
+                      sx={{
+                        '& input[type=number]::-webkit-inner-spin-button': {
+                          WebkitAppearance: 'none',
+                          margin: 0,
+                        },
+                      }}
+                      slotProps={{ input: { readOnly: true } }}
+                    ></TextFieldElement>
+                  )}
                 </Grid2>
                 <Grid2 display="flex" direction="row" alignItems="center">
                   <Typography mr={2}>受注ステータス</Typography>
@@ -481,7 +492,7 @@ export const Order = (props: {
                     name="nyuryokuUser"
                     control={control}
                     render={({ field }) => (
-                      <Select {...field} defaultValue={props.order.nyuryokuUser} disabled={!edit}>
+                      <Select {...field} defaultValue={props.juchuHeadData.nyuryokuUser} disabled={!edit}>
                         {userList.map((u) => (
                           <MenuItem key={u.id} value={u.name}>
                             {u.name}
@@ -682,7 +693,9 @@ export const Order = (props: {
           </Grid2>
         </AccordionSummary>
         <AccordionDetails sx={{ padding: 0 }}>
-          <OrderEqTable orderEqRows={eqHeaderList} edit={edit} onEqSelectionChange={handleEqSelectionChange} />
+          {eqHeaderList && eqHeaderList?.length > 0 && (
+            <OrderEqTable orderEqRows={eqHeaderList} edit={edit} onEqSelectionChange={handleEqSelectionChange} />
+          )}
         </AccordionDetails>
       </Accordion>
       {/* -------------------------車両----------------------------------- */}
@@ -719,10 +732,12 @@ export const Order = (props: {
           </Grid2>
         </AccordionSummary>
         <AccordionDetails sx={{ padding: 0 }}>
-          <OrderVehicleTable
-            orderVehicleRows={vehicleHeaderList}
-            onVehicleSelectionChange={handleVehicleSelectionChange}
-          />
+          {vehicleHeaderList && vehicleHeaderList?.length > 0 && (
+            <OrderVehicleTable
+              orderVehicleRows={vehicleHeaderList}
+              onVehicleSelectionChange={handleVehicleSelectionChange}
+            />
+          )}
         </AccordionDetails>
       </Accordion>
       <SaveAlertDialog open={saveOpen} onClick={() => setSaveOpen(false)} />

@@ -32,6 +32,7 @@ export const DirtyProvider = ({ children }: { children: React.ReactNode }) => {
 
   const requestNavigation = async (path: string) => {
     if (isDirty || !isSave) {
+      console.log(isDirty, isSave);
       setPendingPath(path);
       setShowDialog(true);
     } else {
@@ -51,7 +52,7 @@ export const DirtyProvider = ({ children }: { children: React.ReactNode }) => {
     if (pendingPath) {
       setShowDialog(false);
       setIsDirty(false);
-      setIsSave(false);
+      setIsSave(true);
       router.push(pendingPath);
       setPendingPath(null);
     }
