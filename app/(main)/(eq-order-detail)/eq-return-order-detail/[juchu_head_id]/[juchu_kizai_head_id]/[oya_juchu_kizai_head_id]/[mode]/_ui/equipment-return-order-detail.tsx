@@ -30,7 +30,7 @@ import dayjs, { Dayjs } from 'dayjs';
 import { useEffect, useRef, useState } from 'react';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
-import { toISOStringMonthDay } from '@/app/(main)/_lib/date-conversion';
+import { toISOString, toISOStringMonthDay } from '@/app/(main)/_lib/date-conversion';
 import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
 import { BackButton } from '@/app/(main)/_ui/buttons';
 import { Calendar, TestDate } from '@/app/(main)/_ui/date';
@@ -564,7 +564,26 @@ export const EquipmentReturnOrderDetail = (props: { juchuHeadData: OrderValues; 
   return (
     <Box>
       <Box display={'flex'} justifyContent={'end'}>
-        <BackButton label={'戻る'} />
+        <Grid2 container spacing={4}>
+          {lockData !== null && lockData.addUser !== user?.name && (
+            <Grid2 container alignItems={'center'} spacing={2}>
+              <Typography>{lockData.addDat && toISOString(new Date(lockData.addDat))}</Typography>
+              <Typography>{lockData.addUser}</Typography>
+              <Typography>編集中</Typography>
+            </Grid2>
+          )}
+          <Grid2 container alignItems={'center'} spacing={1}>
+            {!edit || (lockData !== null && lockData?.addUser !== user?.name) ? (
+              <Typography>閲覧モード</Typography>
+            ) : (
+              <Typography>編集モード</Typography>
+            )}
+            <Button disabled={lockData && lockData?.addUser !== user?.name ? true : false} onClick={handleEdit}>
+              変更
+            </Button>
+          </Grid2>
+          <BackButton label={'戻る'} />
+        </Grid2>
       </Box>
       {/*受注ヘッダー*/}
       <Accordion expanded={expanded} onChange={handleExpansion}>

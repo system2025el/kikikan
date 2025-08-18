@@ -1,7 +1,7 @@
-import { GetLock, GetOrder } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/funcs';
+import { GetOrder } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/funcs';
 
 import { GetJuchuKizaiHead } from '../../../../../_lib/funcs';
-import { EquipmentReturnOrderDetail } from './_ui/equipment-return-order-detail';
+import { EquipmentKeepOrderDetail } from './_ui/equipment-keep-order-detail';
 
 const Page = async (props: {
   params: Promise<{
@@ -31,6 +31,6 @@ const Page = async (props: {
   } else {
   }
 
-  return <EquipmentReturnOrderDetail juchuHeadData={juchuHeadData} edit={edit} />;
+  return <EquipmentKeepOrderDetail juchuHeadData={juchuHeadData} edit={edit} />;
 };
 export default Page;

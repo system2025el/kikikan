@@ -114,9 +114,9 @@ export const OrderEqTable: React.FC<OrderEqTableProps> = ({ orderEqRows, edit, o
                       row.juchuKizaiHeadKbn === 1
                         ? `/eq-main-order-detail/${row.juchuHeadId}/${row.juchuKizaiHeadId}/${mode}`
                         : row.juchuKizaiHeadKbn === 2
-                          ? `/eq-return-order-detail/${row.juchuHeadId}/${row.juchuKizaiHeadId}/${mode}`
+                          ? `/eq-return-order-detail/${row.juchuHeadId}/${row.juchuKizaiHeadId}/${row.oyaJuchuKizaiHeadId}/${mode}`
                           : row.juchuKizaiHeadKbn === 3
-                            ? `/eq-keep-order-detail/${row.juchuHeadId}/${row.juchuKizaiHeadId}/${mode}`
+                            ? `/eq-keep-order-detail/${row.juchuHeadId}/${row.juchuKizaiHeadId}/${row.oyaJuchuKizaiHeadId}/${mode}`
                             : `/eq-main-order-detail/${row.juchuHeadId}/${row.juchuKizaiHeadId}/${mode}`
                     }
                     variant="text"
