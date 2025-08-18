@@ -69,11 +69,13 @@ const Page = async (props: {
   } else {
     // 受注機材ヘッダーデータ
     const juchuKizaiHeadData = await GetJuchuKizaiHead(params.juchu_head_id, params.juchu_kizai_head_id);
+    console.log('受注機材ヘッダー');
     if (!juchuKizaiHeadData) {
       return <div>受注機材情報が見つかりません。</div>;
     }
     // 受注機材明細データ
     const juchuKizaiMeisaiData = await GetJuchuKizaiMeisai(params.juchu_head_id, params.juchu_kizai_head_id);
+    console.log('受注機材明細');
     // 出庫日
     const shukoDate = GetShukoDate(
       juchuKizaiHeadData.kicsShukoDat && new Date(juchuKizaiHeadData.kicsShukoDat),
@@ -105,8 +107,10 @@ const Page = async (props: {
         eqStockData.push(stock);
       }
     }
+    console.log('在庫リスト');
     // 受注本番日データ
     const juchuHonbanbiData = await GetHonbanbi(params.juchu_head_id, params.juchu_kizai_head_id);
+    console.log('受注機材本番日');
 
     return (
       <EquipmentOrderDetail
