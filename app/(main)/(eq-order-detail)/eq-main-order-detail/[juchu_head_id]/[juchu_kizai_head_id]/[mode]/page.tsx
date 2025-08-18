@@ -17,14 +17,56 @@ const Page = async (props: {
   const edit = params.mode === 'edit' ? true : false;
   // 受注ヘッダーデータ
   const juchuHeadData = await GetOrder(params.juchu_head_id);
-  // ロックデータ
-  const lockData = await GetLock(1, params.juchu_head_id);
 
   if (!juchuHeadData) {
     return <div>受注情報が見つかりません。</div>;
   }
 
-  if (juchuKizaiHeadId !== 0) {
+  // 新規
+  if (juchuKizaiHeadId === 0) {
+    // 受注機材ヘッダーデータ(初期値)
+    const newJuchuKizaiHeadData: JuchuKizaiHeadValues = {
+      juchuHeadId: Number(params.juchu_head_id),
+      juchuKizaiHeadId: Number(params.juchu_kizai_head_id),
+      juchuKizaiHeadKbn: 1,
+      juchuHonbanbiQty: null,
+      nebikiAmt: null,
+      mem: null,
+      headNam: null,
+      kicsShukoDat: null,
+      kicsNyukoDat: null,
+      yardShukoDat: null,
+      yardNyukoDat: null,
+    };
+    // 受注機材明細データ(初期値)
+    const newJuchuKizaiMeisaiData: JuchuKizaiMeisaiValues[] = [];
+    // 機材在庫データ(初期値)
+    const newEqStockData: StockTableValues[][] = [];
+    // 出庫日(初期値)
+    const shukoDate = null;
+    // 入庫日(初期値)
+    const nyukoDate = null;
+    // 出庫日から入庫日(初期値)
+    const dateRange: string[] = [];
+    // 受注本番日データ
+    const newJuchuHonbanbiData: JuchuKizaiHonbanbiValues[] = [];
+
+    return (
+      <EquipmentOrderDetail
+        juchuHeadData={juchuHeadData}
+        juchuKizaiHeadData={newJuchuKizaiHeadData}
+        juchuKizaiMeisaiData={newJuchuKizaiMeisaiData}
+        shukoDate={shukoDate}
+        nyukoDate={nyukoDate}
+        dateRange={dateRange}
+        eqStockData={newEqStockData}
+        juchuHonbanbiData={newJuchuHonbanbiData}
+        edit={edit}
+      />
+    );
+
+    // 既存
+  } else {
     // 受注機材ヘッダーデータ
     const juchuKizaiHeadData = await GetJuchuKizaiHead(params.juchu_head_id, params.juchu_kizai_head_id);
     if (!juchuKizaiHeadData) {
@@ -66,7 +108,6 @@ const Page = async (props: {
     // 受注本番日データ
     const juchuHonbanbiData = await GetHonbanbi(params.juchu_head_id, params.juchu_kizai_head_id);
 
-    console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
     return (
       <EquipmentOrderDetail
         juchuHeadData={juchuHeadData}
@@ -78,49 +119,6 @@ const Page = async (props: {
         eqStockData={eqStockData}
         juchuHonbanbiData={juchuHonbanbiData}
         edit={edit}
-        lockData={lockData}
-      />
-    );
-  } else {
-    // 受注機材ヘッダーデータ(初期値)
-    const newJuchuKizaiHeadData: JuchuKizaiHeadValues = {
-      juchuHeadId: Number(params.juchu_head_id),
-      juchuKizaiHeadId: Number(params.juchu_kizai_head_id),
-      juchuKizaiHeadKbn: 1,
-      juchuHonbanbiQty: null,
-      nebikiAmt: null,
-      mem: null,
-      headNam: null,
-      kicsShukoDat: null,
-      kicsNyukoDat: null,
-      yardShukoDat: null,
-      yardNyukoDat: null,
-    };
-    // 受注機材明細データ(初期値)
-    const newJuchuKizaiMeisaiData: JuchuKizaiMeisaiValues[] = [];
-    // 機材在庫データ(初期値)
-    const newEqStockData: StockTableValues[][] = [];
-    // 出庫日(初期値)
-    const shukoDate = null;
-    // 入庫日(初期値)
-    const nyukoDate = null;
-    // 出庫日から入庫日(初期値)
-    const dateRange: string[] = [];
-    // 受注本番日データ
-    const newJuchuHonbanbiData: JuchuKizaiHonbanbiValues[] = [];
-
-    return (
-      <EquipmentOrderDetail
-        juchuHeadData={juchuHeadData}
-        juchuKizaiHeadData={newJuchuKizaiHeadData}
-        juchuKizaiMeisaiData={newJuchuKizaiMeisaiData}
-        shukoDate={shukoDate}
-        nyukoDate={nyukoDate}
-        dateRange={dateRange}
-        eqStockData={newEqStockData}
-        juchuHonbanbiData={newJuchuHonbanbiData}
-        edit={edit}
-        lockData={lockData}
       />
     );
   }

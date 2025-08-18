@@ -108,15 +108,15 @@ export const OrderEqTable: React.FC<OrderEqTableProps> = ({ orderEqRows, edit, o
                   />
                 </TableCell>
                 <TableCell padding="none">{index + 1}</TableCell>
-                <TableCell align="left">
+                <TableCell align={'left'}>
                   <Button
                     href={
                       row.juchuKizaiHeadKbn === 1
                         ? `/eq-main-order-detail/${row.juchuHeadId}/${row.juchuKizaiHeadId}/${mode}`
                         : row.juchuKizaiHeadKbn === 2
-                          ? `/eq-return-order-detail/${row.juchuHeadId}/${row.juchuKizaiHeadId}/${mode}`
+                          ? `/eq-return-order-detail/${row.juchuHeadId}/${row.juchuKizaiHeadId}/${row.oyaJuchuKizaiHeadId}/${mode}`
                           : row.juchuKizaiHeadKbn === 3
-                            ? `/eq-keep-order-detail/${row.juchuHeadId}/${row.juchuKizaiHeadId}/${mode}`
+                            ? `/eq-keep-order-detail/${row.juchuHeadId}/${row.juchuKizaiHeadId}/${row.oyaJuchuKizaiHeadId}/${mode}`
                             : `/eq-main-order-detail/${row.juchuHeadId}/${row.juchuKizaiHeadId}/${mode}`
                     }
                     variant="text"
@@ -131,6 +131,7 @@ export const OrderEqTable: React.FC<OrderEqTableProps> = ({ orderEqRows, edit, o
                               : 'primary',
                       whiteSpace: 'nowrap',
                       justifyContent: 'start',
+                      ...(row.juchuKizaiHeadKbn !== 1 && { pl: 2 }),
                     }}
                   >
                     {row.headNam}

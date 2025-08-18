@@ -33,16 +33,7 @@ export const GetJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHeadId: n
       return null;
     }
 
-    const { data: juchuDate, error: juchuDateError } = await supabase
-      .schema('dev2')
-      .from('v_juchu_kizai_den')
-      .select('kics_shuko_dat, kics_nyuko_dat, yard_shuko_dat, yard_nyuko_dat')
-      .eq('juchu_head_id', juchuHeadId)
-      .limit(1);
-    if (juchuDateError) {
-      console.error('GetEqHeader juchuDate error: ', juchuDateError);
-      return null;
-    }
+    const juchuDate = await GetJuchuKizaiNyushuko(juchuHeadId, juchuKizaiHeadId);
 
     const jucuKizaiHeadData: JuchuKizaiHeadValues = {
       juchuHeadId: juchuKizaiHead.juchu_head_id,
@@ -52,10 +43,10 @@ export const GetJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHeadId: n
       nebikiAmt: juchuKizaiHead.nebiki_amt,
       mem: juchuKizaiHead.mem ? juchuKizaiHead.mem : '',
       headNam: juchuKizaiHead.head_nam,
-      kicsShukoDat: juchuDate[0].kics_shuko_dat,
-      kicsNyukoDat: juchuDate[0].kics_nyuko_dat,
-      yardShukoDat: juchuDate[0].yard_shuko_dat,
-      yardNyukoDat: juchuDate[0].yard_nyuko_dat,
+      kicsShukoDat: juchuDate && juchuDate.kicsShukoDat,
+      kicsNyukoDat: juchuDate && juchuDate.kicsNyukoDat,
+      yardShukoDat: juchuDate && juchuDate.yardShukoDat,
+      yardNyukoDat: juchuDate && juchuDate.yardNyukoDat,
     };
     return jucuKizaiHeadData;
   } catch (e) {
@@ -158,52 +149,6 @@ export const AddJuchuKizaiHead = async (
 };
 
 /**
- * 受注機材入出庫新規追加
- * @param juchuKizaiHeadId 受注機材ヘッダーid
- * @param juchuKizaiHeadData 受注機材ヘッダーデータ
- * @param userNam ユーザー名
- * @returns
- */
-export const AddJuchuKizaiNyushuko = async (
-  juchuKizaiHeadId: number,
-  juchuKizaiHeadData: JuchuKizaiHeadValues,
-  userNam: string
-) => {
-  const dates = [
-    juchuKizaiHeadData.kicsShukoDat,
-    juchuKizaiHeadData.yardShukoDat,
-    juchuKizaiHeadData.kicsNyukoDat,
-    juchuKizaiHeadData.yardNyukoDat,
-  ];
-  for (let i = 0; i < dates.length; i++) {
-    if (!dates[i]) continue;
-    const newData = {
-      juchu_head_id: juchuKizaiHeadData.juchuHeadId,
-      juchu_kizai_head_id: juchuKizaiHeadId,
-      nyushuko_shubetu_id: i === 0 || i === 1 ? 1 : 2,
-      nyushuko_basho_id: i === 0 || i === 2 ? 1 : 2,
-      nyushuko_dat: toISOStringYearMonthDay(dates[i] as Date),
-      add_dat: new Date(),
-      add_user: userNam,
-    };
-
-    try {
-      const { error: insertError } = await supabase.schema('dev2').from('t_juchu_kizai_nyushuko').insert(newData);
-
-      if (!insertError) {
-        console.log('kizai Nyushuko added successfully:', newData);
-      } else {
-        console.error('Error adding kizai Nyushuko:', insertError.message);
-        return false;
-      }
-    } catch (e) {
-      console.error('Exception while adding kizai Nyushuko:', e);
-    }
-  }
-  return true;
-};
-
-/**
  * 受注機材ヘッダー更新
  * @param juchuKizaiHeadData 受注機材ヘッダーデータ
  * @param userNam ユーザー名
@@ -245,6 +190,79 @@ export const UpdateJuchuKizaiHead = async (juchuKizaiHeadData: JuchuKizaiHeadVal
   }
 };
 
+export const GetJuchuKizaiNyushuko = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
+  try {
+    const { data, error } = await supabase
+      .schema('dev2')
+      .from('t_juchu_kizai_nyushuko')
+      .select('nyushuko_shubetu_id, nyushuko_basho_id, nyushuko_dat')
+      .eq('juchu_head_id', juchuHeadId)
+      .eq('juchu_kizai_head_id', juchuKizaiHeadId);
+    if (error) {
+      console.error('GetEqHeader juchuDate error: ', error);
+      return null;
+    }
+
+    const juchuKizaiNyushukoData = {
+      kicsShukoDat: data.find((d) => d.nyushuko_shubetu_id === 1 && d.nyushuko_basho_id === 1)?.nyushuko_dat ?? null,
+      kicsNyukoDat: data.find((d) => d.nyushuko_shubetu_id === 2 && d.nyushuko_basho_id === 1)?.nyushuko_dat ?? null,
+      yardShukoDat: data.find((d) => d.nyushuko_shubetu_id === 1 && d.nyushuko_basho_id === 2)?.nyushuko_dat ?? null,
+      yardNyukoDat: data.find((d) => d.nyushuko_shubetu_id === 2 && d.nyushuko_basho_id === 2)?.nyushuko_dat ?? null,
+    };
+
+    return juchuKizaiNyushukoData;
+  } catch (e) {
+    console.error(e);
+    return null;
+  }
+};
+
+/**
+ * 受注機材入出庫新規追加
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param juchuKizaiHeadData 受注機材ヘッダーデータ
+ * @param userNam ユーザー名
+ * @returns
+ */
+export const AddJuchuKizaiNyushuko = async (
+  juchuKizaiHeadId: number,
+  juchuKizaiHeadData: JuchuKizaiHeadValues,
+  userNam: string
+) => {
+  const dates = [
+    juchuKizaiHeadData.kicsShukoDat,
+    juchuKizaiHeadData.yardShukoDat,
+    juchuKizaiHeadData.kicsNyukoDat,
+    juchuKizaiHeadData.yardNyukoDat,
+  ];
+  for (let i = 0; i < dates.length; i++) {
+    if (!dates[i]) continue;
+    const newData = {
+      juchu_head_id: juchuKizaiHeadData.juchuHeadId,
+      juchu_kizai_head_id: juchuKizaiHeadId,
+      nyushuko_shubetu_id: i === 0 || i === 1 ? 1 : 2,
+      nyushuko_basho_id: i === 0 || i === 2 ? 1 : 2,
+      nyushuko_dat: dates[i],
+      add_dat: new Date(),
+      add_user: userNam,
+    };
+
+    try {
+      const { error: insertError } = await supabase.schema('dev2').from('t_juchu_kizai_nyushuko').insert(newData);
+
+      if (!insertError) {
+        console.log('kizai Nyushuko added successfully:', newData);
+      } else {
+        console.error('Error adding kizai Nyushuko:', insertError.message);
+        return false;
+      }
+    } catch (e) {
+      console.error('Exception while adding kizai Nyushuko:', e);
+    }
+  }
+  return true;
+};
+
 /**
  * 受注機材入出庫更新
  * @param juchuKizaiHeadData 受注機材ヘッダーデータ
@@ -266,7 +284,7 @@ export const UpdateJuchuKizaiNyushuko = async (juchuKizaiHeadData: JuchuKizaiHea
             juchu_kizai_head_id: juchuKizaiHeadData.juchuKizaiHeadId,
             nyushuko_shubetu_id: i === 0 || i === 1 ? 1 : 2,
             nyushuko_basho_id: i === 0 || i === 2 ? 1 : 2,
-            nyushuko_dat: toISOStringYearMonthDay(dates[i] as Date),
+            nyushuko_dat: dates[i],
           }
         : null;
 

@@ -13,13 +13,10 @@ const Page = async (props: { params: Promise<{ juchu_head_id: number; mode: stri
   const order = await GetOrder(id);
   // 受注機材ヘッダーデータ
   const eqHeader = await GetEqHeaderList(id);
-  // ロックデータ
-  const lockData = await GetLock(1, id);
-  // ユーザーデータ
-  // const userData = await GetUser();
+
   if (!order) {
     return <div>受注情報が見つかりません。</div>;
   }
-  return <Order order={order} eqList={eqHeader} edit={edit} lockData={lockData} />;
+  return <Order order={order} eqList={eqHeader} edit={edit} />;
 };
 export default Page;

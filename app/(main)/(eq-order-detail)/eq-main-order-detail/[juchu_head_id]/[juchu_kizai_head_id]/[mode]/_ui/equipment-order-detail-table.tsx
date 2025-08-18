@@ -33,21 +33,12 @@ import { JuchuKizaiHonbanbiValues, JuchuKizaiMeisaiValues, StockTableValues } fr
 
 type StockTableProps = {
   eqStockList: StockTableValues[][];
-  // shukoDate: Date | null;
-  // nyukoDate: Date | null;
   dateRange: string[];
   juchuHonbanbiList: JuchuKizaiHonbanbiValues[];
   ref: React.RefObject<HTMLDivElement | null>;
 };
 
-export const StockTable: React.FC<StockTableProps> = ({
-  eqStockList,
-  // shukoDate,
-  // nyukoDate,
-  dateRange,
-  juchuHonbanbiList,
-  ref,
-}) => {
+export const StockTable: React.FC<StockTableProps> = ({ eqStockList, dateRange, juchuHonbanbiList, ref }) => {
   return (
     <TableContainer ref={ref} component={Paper} style={{ overflow: 'scroll', maxHeight: '80vh' }}>
       <Table stickyHeader>
@@ -82,8 +73,6 @@ export const StockTable: React.FC<StockTableProps> = ({
                 key={rowIndex}
                 row={row}
                 index={rowIndex}
-                // shukoDate={shukoDate}
-                // nyukoDate={nyukoDate}
                 dateRange={dateRange}
                 juchuHonbanbiList={juchuHonbanbiList}
               />
@@ -97,14 +86,12 @@ export const StockTable: React.FC<StockTableProps> = ({
 export type StockTableRowProps = {
   row: StockTableValues[];
   index: number;
-  // shukoDate: Date | null;
-  // nyukoDate: Date | null;
   dateRange: string[];
   juchuHonbanbiList: JuchuKizaiHonbanbiValues[];
 };
 
 const StockTableRow = React.memo(
-  ({ row, index, /*shukoDate, nyukoDate,*/ dateRange, juchuHonbanbiList }: StockTableRowProps) => {
+  ({ row, index, dateRange, juchuHonbanbiList }: StockTableRowProps) => {
     console.log('date側描画', index);
     return (
       <TableRow>
@@ -116,11 +103,7 @@ const StockTableRow = React.memo(
               align={typeof cell === 'number' ? 'right' : 'left'}
               style={styles.row}
               sx={{
-                bgcolor: getStockRowBackgroundColor(
-                  cell.calDat,
-                  /*shukoDate, nyukoDate,*/ dateRange,
-                  juchuHonbanbiList
-                ),
+                bgcolor: getStockRowBackgroundColor(cell.calDat, dateRange, juchuHonbanbiList),
                 color: cell.zaikoQty < 0 ? 'red' : 'black',
               }}
               size="small"

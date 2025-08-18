@@ -95,7 +95,6 @@ const EquipmentOrderDetail = (props: {
   eqStockData: StockTableValues[][] | undefined;
   juchuHonbanbiData: JuchuKizaiHonbanbiValues[] | undefined;
   edit: boolean;
-  lockData: LockValues | null;
 }) => {
   const router = useRouter();
   // user情報
@@ -111,7 +110,7 @@ const EquipmentOrderDetail = (props: {
   const [edit, setEdit] = useState(props.edit);
 
   // ロックデータ
-  const [lockData, setLockData] = useState<LockValues | null>(props.lockData);
+  const [lockData, setLockData] = useState<LockValues | null>(null);
   // 受注機材明細元データ
   const [originJuchuKizaiMeisaiList, setOriginJuchuKizaiMeisaiList] = useState<JuchuKizaiMeisaiValues[]>(
     props.juchuKizaiMeisaiData ? props.juchuKizaiMeisaiData : []
@@ -173,7 +172,7 @@ const EquipmentOrderDetail = (props: {
   );
 
   // context
-  const { setIsDirty, setIsSave, setLock, setLockShubetu, setHeadId } = useDirty();
+  const { setIsDirty, setIsSave, setLock } = useDirty();
 
   // ref
   const dateRangeRef = useRef(dateRange);
@@ -218,8 +217,6 @@ const EquipmentOrderDetail = (props: {
    * useEffect
    */
   useEffect(() => {
-    setLockShubetu(1);
-    setHeadId(props.juchuHeadData.juchuHeadId);
     setSave(saveKizaiHead);
     setIsSave(saveKizaiHead);
 
@@ -242,14 +239,19 @@ const EquipmentOrderDetail = (props: {
 
   useEffect(() => {
     if (!user) return;
-    setEdit(!props.edit || (props.lockData !== null && props.lockData.addUser !== user.name) ? false : true);
 
     const asyncProcess = async () => {
-      if (props.edit && props.lockData === null) {
+      setIsLoading(true);
+      const lockData = await GetLock(1, props.juchuHeadData.juchuHeadId);
+      setLockData(lockData);
+      if (props.edit && lockData === null) {
         await AddLock(1, props.juchuHeadData.juchuHeadId, user.name);
         const newLockData = await GetLock(1, props.juchuHeadData.juchuHeadId);
         setLockData(newLockData);
+      } else if (props.edit && lockData !== null && lockData.addUser !== user.name) {
+        setEdit(false);
       }
+      setIsLoading(false);
     };
     asyncProcess();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -276,7 +278,7 @@ const EquipmentOrderDetail = (props: {
   }, [juchuKizaiMeisaiList, juchuHonbanbiList]);
 
   useEffect(() => {
-    if (lockData) setLock(lockData);
+    setLock(lockData);
   }, [lockData, setLock]);
 
   useEffect(() => {
@@ -310,17 +312,24 @@ const EquipmentOrderDetail = (props: {
    * 編集モード変更
    */
   const handleEdit = async () => {
+    // 編集→閲覧
     if (edit) {
       await DeleteLock(1, props.juchuHeadData.juchuHeadId);
-      const newLockData = await GetLock(1, props.juchuHeadData.juchuHeadId);
-      setLockData(newLockData);
-      setEdit(!edit);
+      setLockData(null);
+      setEdit(false);
+      // 閲覧→編集
     } else {
       if (!user) return;
-      await AddLock(1, props.juchuHeadData.juchuHeadId, user.name);
-      const newLockData = await GetLock(1, props.juchuHeadData.juchuHeadId);
-      setLockData(newLockData);
-      setEdit(!edit);
+      const lockData = await GetLock(1, props.juchuHeadData.juchuHeadId);
+      setLockData(lockData);
+      if (lockData === null) {
+        await AddLock(1, props.juchuHeadData.juchuHeadId, user.name);
+        const newLockData = await GetLock(1, props.juchuHeadData.juchuHeadId);
+        setLockData(newLockData);
+        setEdit(true);
+      } else if (lockData !== null && lockData.addUser === user.name) {
+        setEdit(true);
+      }
     }
   };
 
@@ -572,6 +581,7 @@ const EquipmentOrderDetail = (props: {
    * @param date カレンダー選択日付
    */
   const handleDateChange = async (date: Dayjs | null) => {
+    console.log(new Date());
     if (date !== null) {
       setSelectDate(date.toDate());
       const filterJuchuKizaiMeisaiList = juchuKizaiMeisaiList.filter((data) => !data.delFlag);
@@ -1354,7 +1364,7 @@ const EquipmentOrderDetail = (props: {
               },
             }}
           >
-            <Box m={2}>
+            <Box my={1} mx={2}>
               <Button disabled={!edit} onClick={() => handleOpenEqDialog()}>
                 <AddIcon fontSize="small" />
                 機材追加
@@ -1378,7 +1388,10 @@ const EquipmentOrderDetail = (props: {
             overflow="auto"
             sx={{ width: { xs: '60%', sm: '60%', md: 'auto' } }}
           >
-            <Box display="flex" my={2}>
+            <Box display="flex" my={1}>
+              <Box display={'flex'} alignItems={'end'} mr={2}>
+                <Typography fontSize={'small'}>在庫数</Typography>
+              </Box>
               <Button onClick={handleBackDateChange}>
                 <ArrowBackIosNewIcon fontSize="small" />
               </Button>
