@@ -581,6 +581,7 @@ const EquipmentOrderDetail = (props: {
    * @param date カレンダー選択日付
    */
   const handleDateChange = async (date: Dayjs | null) => {
+    console.log(new Date());
     if (date !== null) {
       setSelectDate(date.toDate());
       const filterJuchuKizaiMeisaiList = juchuKizaiMeisaiList.filter((data) => !data.delFlag);

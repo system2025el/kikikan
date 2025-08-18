@@ -51,6 +51,14 @@ export const ReturnStockTable: React.FC<ReturnStockTableProps> = ({
       <Table stickyHeader>
         <TableHead>
           <TableRow>
+            <TableCell
+              size="small"
+              sx={{ bgcolor: 'white', whiteSpace: 'nowrap', padding: 0, height: '25px' }}
+            ></TableCell>
+          </TableRow>
+        </TableHead>
+        <TableHead>
+          <TableRow>
             {header?.map((date, index) => (
               <TableCell
                 key={index}
@@ -152,6 +160,21 @@ export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({ rows, onChange, ha
       <Table stickyHeader>
         <TableHead>
           <TableRow>
+            <TableCell size="small" sx={{ bgcolor: 'white' }}></TableCell>
+            <TableCell size="small" sx={{ bgcolor: 'white' }}></TableCell>
+            <TableCell size="small" sx={{ bgcolor: 'white' }}></TableCell>
+            <TableCell size="small" sx={{ bgcolor: 'white' }}></TableCell>
+            <TableCell size="small" sx={{ bgcolor: 'white' }}></TableCell>
+            <TableCell align="left" size="small" style={styles.header} colSpan={2}>
+              親伝票
+            </TableCell>
+            <TableCell align="left" size="small" style={styles.header} colSpan={3}>
+              返却数(マイナス入力)
+            </TableCell>
+          </TableRow>
+        </TableHead>
+        <TableHead>
+          <TableRow>
             <TableCell size="small" style={styles.header} />
             <TableCell size="small" style={styles.header} />
             <TableCell align="left" size="small" style={styles.header}>
@@ -164,10 +187,19 @@ export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({ rows, onChange, ha
               機材名
             </TableCell>
             <TableCell align="right" size="small" style={styles.header}>
-              出庫数
+              受注数
             </TableCell>
-            <TableCell align="right" size="small" style={styles.header} sx={{ bgcolor: 'red' }}>
-              返却数
+            <TableCell align="right" size="small" style={styles.header}>
+              予備数
+            </TableCell>
+            <TableCell align="right" size="small" style={styles.header}>
+              受注返却数
+            </TableCell>
+            <TableCell align="right" size="small" style={styles.header}>
+              予備返却数
+            </TableCell>
+            <TableCell align="right" size="small" style={styles.header}>
+              返却合計数
             </TableCell>
           </TableRow>
         </TableHead>

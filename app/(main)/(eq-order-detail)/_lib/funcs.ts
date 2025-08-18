@@ -33,17 +33,7 @@ export const GetJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHeadId: n
       return null;
     }
 
-    const { data: juchuDate, error: juchuDateError } = await supabase
-      .schema('dev2')
-      .from('v_juchu_kizai_den')
-      .select('kics_shuko_dat, kics_nyuko_dat, yard_shuko_dat, yard_nyuko_dat')
-      .eq('juchu_head_id', juchuHeadId)
-      .eq('juchu_kizai_head_id', juchuKizaiHeadId)
-      .limit(1);
-    if (juchuDateError) {
-      console.error('GetEqHeader juchuDate error: ', juchuDateError);
-      return null;
-    }
+    const juchuDate = await GetJuchuKizaiNyushuko(juchuHeadId, juchuKizaiHeadId);
 
     const jucuKizaiHeadData: JuchuKizaiHeadValues = {
       juchuHeadId: juchuKizaiHead.juchu_head_id,
@@ -53,10 +43,10 @@ export const GetJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHeadId: n
       nebikiAmt: juchuKizaiHead.nebiki_amt,
       mem: juchuKizaiHead.mem ? juchuKizaiHead.mem : '',
       headNam: juchuKizaiHead.head_nam,
-      kicsShukoDat: juchuDate[0].kics_shuko_dat,
-      kicsNyukoDat: juchuDate[0].kics_nyuko_dat,
-      yardShukoDat: juchuDate[0].yard_shuko_dat,
-      yardNyukoDat: juchuDate[0].yard_nyuko_dat,
+      kicsShukoDat: juchuDate && juchuDate.kicsShukoDat,
+      kicsNyukoDat: juchuDate && juchuDate.kicsNyukoDat,
+      yardShukoDat: juchuDate && juchuDate.yardShukoDat,
+      yardNyukoDat: juchuDate && juchuDate.yardNyukoDat,
     };
     return jucuKizaiHeadData;
   } catch (e) {
@@ -223,6 +213,7 @@ export const GetJuchuKizaiNyushuko = async (juchuHeadId: number, juchuKizaiHeadI
     return juchuKizaiNyushukoData;
   } catch (e) {
     console.error(e);
+    return null;
   }
 };
 
@@ -251,7 +242,7 @@ export const AddJuchuKizaiNyushuko = async (
       juchu_kizai_head_id: juchuKizaiHeadId,
       nyushuko_shubetu_id: i === 0 || i === 1 ? 1 : 2,
       nyushuko_basho_id: i === 0 || i === 2 ? 1 : 2,
-      nyushuko_dat: toISOStringYearMonthDay(dates[i] as Date),
+      nyushuko_dat: dates[i],
       add_dat: new Date(),
       add_user: userNam,
     };
@@ -293,7 +284,7 @@ export const UpdateJuchuKizaiNyushuko = async (juchuKizaiHeadData: JuchuKizaiHea
             juchu_kizai_head_id: juchuKizaiHeadData.juchuKizaiHeadId,
             nyushuko_shubetu_id: i === 0 || i === 1 ? 1 : 2,
             nyushuko_basho_id: i === 0 || i === 2 ? 1 : 2,
-            nyushuko_dat: toISOStringYearMonthDay(dates[i] as Date),
+            nyushuko_dat: dates[i],
           }
         : null;
 
