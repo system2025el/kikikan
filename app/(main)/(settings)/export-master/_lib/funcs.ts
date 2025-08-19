@@ -1,5 +1,7 @@
 'use server';
 
+import { utils, writeFile } from 'xlsx';
+
 import pool from '@/app/_lib/postgres/postgres';
 
 export const getAllEqptAndRfid = async () => {
@@ -74,13 +76,73 @@ export const getAllEqptAndRfid = async () => {
         row.rank_amt_4,
         row.rank_amt_5,
       ]);
-      return aoaData;
-    }
+      // ヘッダーの日本語名
+      const header = [
+        'RFIDタグID ※必須',
+        'RFID機材ステータス ※必須',
+        '無効化フラグ ※必須',
+        '[0]所属無、[1]Ⅰ課、[2]Ⅱ課、[3]Ⅲ課、[4]Ⅳ課、[5]Ⅴ課',
+        '機材名 ※必須',
+        'EL No.',
+        '機材所属ID ※必須',
+        '棟フロアコード',
+        '棚コード',
+        '枝コード',
+        '機材グループコード',
+        '機材グループ内表示順',
+        '機材マスタメモ',
+        '大部門名',
+        '部門名',
+        '集計部門名',
+        '表示フラグ',
+        'コンテナフラグ',
+        'デフォルト日数',
+        '定価',
+        'ランク価格１',
+        'ランク価格２',
+        'ランク価格３',
+        'ランク価格４',
+        'ランク価格５',
+      ];
 
-    return [];
+      //  AOA (Array of Arrays) 形式でワークシートを作成
+      const worksheet = utils.aoa_to_sheet([header, ...aoaData]);
+
+      const range = utils.decode_range(worksheet['!ref'] || '');
+      // セルが文字列でいてほしいカラムのインデックス
+      const targetCols = [0, 4, 7, 8, 9, 10, 11, 12, 13, 14, 19, 20, 21, 22, 23, 24];
+
+      for (let row = 1; row <= range.e.r; ++row) {
+        for (const colIndex of targetCols) {
+          if (colIndex > range.e.c) continue;
+
+          const cellAddress = utils.encode_cell({ r: row, c: colIndex });
+          const cell = worksheet[cellAddress];
+
+          if (cell) {
+            cell.t = 's';
+            cell.z = '@';
+          }
+        }
+      }
+
+      const workbook = utils.book_new();
+      utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+      // 現在の日付を東京タイムゾーンで取得
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = (now.getMonth() + 1).toString().padStart(2, '0'); // 月は0から始まるため+1
+      const day = now.getDate().toString().padStart(2, '0');
+      const hour = now.getHours().toString().padStart(2, '0');
+      const minute = now.getMinutes().toString().padStart(2, '0');
+      const second = now.getSeconds().toString().padStart(2, '0');
+      // 各部分を結合
+      const date = `${year}${month}${day}${hour}${minute}${second}`;
+
+      return { workbook, date };
+    }
   } catch (e) {
     console.error('例外が発生', e);
-    // エラーハンドリングのベストプラクティスとして、エラーをそのまま再スローする
     throw e;
   }
 };
