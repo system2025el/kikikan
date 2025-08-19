@@ -282,8 +282,22 @@ const EquipmentOrderDetail = (props: {
   }, [lockData, setLock]);
 
   useEffect(() => {
+    console.log('-------------------スクロール同期更新---------------------');
     const left = leftRef.current;
     const right = rightRef.current;
+
+    // if (!left || !right) return;
+
+    // const onLeftScroll = () => syncScroll('left');
+    // const onRightScroll = () => syncScroll('right');
+
+    // left.addEventListener('scroll', onLeftScroll);
+    // right.addEventListener('scroll', onRightScroll);
+
+    // return () => {
+    //   left.removeEventListener('scroll', onLeftScroll);
+    //   right.removeEventListener('scroll', onRightScroll);
+    // };
 
     if (left && right) {
       left.addEventListener('scroll', () => syncScroll('left'));
@@ -296,7 +310,7 @@ const EquipmentOrderDetail = (props: {
         right.removeEventListener('scroll', () => syncScroll('right'));
       }
     };
-  }, []);
+  }, [juchuKizaiMeisaiList]);
 
   useEffect(() => {
     console.log('dateRange変更');

@@ -68,14 +68,20 @@ const Page = async (props: {
     // 既存
   } else {
     // 受注機材ヘッダーデータ
+    console.time();
     const juchuKizaiHeadData = await GetJuchuKizaiHead(params.juchu_head_id, params.juchu_kizai_head_id);
-    console.log('受注機材ヘッダー');
+    console.log('---------------------受注機材ヘッダー---------------------');
+    console.timeEnd();
+
     if (!juchuKizaiHeadData) {
       return <div>受注機材情報が見つかりません。</div>;
     }
     // 受注機材明細データ
+    console.time();
     const juchuKizaiMeisaiData = await GetJuchuKizaiMeisai(params.juchu_head_id, params.juchu_kizai_head_id);
-    console.log('受注機材明細');
+    console.log('----------------------------受注機材明細---------------------------------');
+    console.timeEnd();
+
     // 出庫日
     const shukoDate = GetShukoDate(
       juchuKizaiHeadData.kicsShukoDat && new Date(juchuKizaiHeadData.kicsShukoDat),
@@ -86,14 +92,17 @@ const Page = async (props: {
       juchuKizaiHeadData.kicsNyukoDat && new Date(juchuKizaiHeadData.kicsNyukoDat),
       juchuKizaiHeadData.yardNyukoDat && new Date(juchuKizaiHeadData.yardNyukoDat)
     );
+    console.log(shukoDate, nyukoDate);
     // 出庫日から入庫日
     const dateRange = getRange(shukoDate, nyukoDate);
+    console.log(dateRange);
     // 受注機材idリスト
     const ids = juchuKizaiMeisaiData?.map((data) => data.kizaiId);
     // 受注機材合計数リスト
     const planQtys = juchuKizaiMeisaiData?.map((data) => data.planQty);
     // 機材在庫データ
     const eqStockData: StockTableValues[][] = [];
+    console.time();
     if (ids && planQtys) {
       if (!shukoDate) return <div>データに不備があります。</div>;
       for (let i = 0; i < ids.length; i++) {
@@ -107,10 +116,14 @@ const Page = async (props: {
         eqStockData.push(stock);
       }
     }
-    console.log('在庫リスト');
+    console.log('--------------------------在庫リスト----------------------------');
+    console.timeEnd();
+
     // 受注本番日データ
+    console.time();
     const juchuHonbanbiData = await GetHonbanbi(params.juchu_head_id, params.juchu_kizai_head_id);
-    console.log('受注機材本番日');
+    console.log('-----------------------------受注機材本番日--------------------------');
+    console.timeEnd();
 
     return (
       <EquipmentOrderDetail
