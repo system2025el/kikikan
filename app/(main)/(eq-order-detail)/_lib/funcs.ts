@@ -681,7 +681,7 @@ export const DeleteIdoDen = async (idoDenIds: number[]) => {
 export const GetStockList = async (juchuHeadId: number, juchuKizaiHeadId: number, kizaiId: number, date: Date) => {
   const stringDate = toISOStringYearMonthDay(date);
   try {
-    console.log('DB Connected');
+    //console.log('DB Connected');
     await pool.query(` SET search_path TO dev2;`);
     const result: QueryResult<StockTableValues> = await pool.query(`
       select   
