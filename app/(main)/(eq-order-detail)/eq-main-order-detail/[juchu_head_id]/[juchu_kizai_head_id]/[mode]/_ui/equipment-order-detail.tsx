@@ -363,7 +363,7 @@ const EquipmentOrderDetail = (props: {
       // 受注機材入出庫追加
       const nyushukoResult = await AddJuchuKizaiNyushuko(newJuchuKizaiHeadId, data, user.name);
       console.log('受注機材入出庫追加', nyushukoResult);
-      // 受注機材本番日(入出庫、使用日)追加
+      // 受注機材本番日(入出庫、使用中)追加
       const addJuchuSIyouHonbanbiData: JuchuKizaiHonbanbiValues[] = updateDateRange.map((d) => ({
         juchuHeadId: data.juchuHeadId,
         juchuKizaiHeadId: data.juchuKizaiHeadId,
@@ -412,7 +412,7 @@ const EquipmentOrderDetail = (props: {
       const nyushukoResult = await UpdateJuchuKizaiNyushuko(data, user.name);
       console.log('受注機材入出庫更新', nyushukoResult);
 
-      // 受注機材本番日(使用日)更新
+      // 受注機材本番日(使用中)更新
       const addJuchuSiyouHonbanbiData: JuchuKizaiHonbanbiValues[] = updateDateRange.map((d) => ({
         juchuHeadId: data.juchuHeadId,
         juchuKizaiHeadId: data.juchuKizaiHeadId,

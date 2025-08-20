@@ -1019,7 +1019,7 @@ export const DeleteHonbanbi = async (
 };
 
 /**
- * 受注機材本番日(使用日)削除
+ * 受注機材本番日(使用中)削除
  * @param juchuHeadId 受注ヘッダーid
  * @param juchuKizaiHeadId 受注機材ヘッダーid
  * @param juchuHonbanbiData 受注機材本番日データ
