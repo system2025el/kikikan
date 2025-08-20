@@ -30,7 +30,7 @@ export const toISOString = (date: Date): string => {
   return `${year}/${month}/${day} ${hour}:${min}:${sec}`;
 };
 
-// yyyy/MM/dd
+// yyyy-MM-dd
 export const toISOStringYearMonthDay = (date: Date) => {
   const pad = function (str: string): string {
     return ('0' + str).slice(-2);
@@ -38,7 +38,7 @@ export const toISOStringYearMonthDay = (date: Date) => {
   const year = date.getFullYear().toString();
   const month = pad((date.getMonth() + 1).toString());
   const day = pad(date.getDate().toString());
-  return `${year}/${month}/${day}`;
+  return `${year}-${month}-${day}`;
 };
 
 // MM/dd

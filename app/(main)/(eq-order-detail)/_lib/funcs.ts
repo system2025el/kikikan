@@ -838,24 +838,23 @@ export const AddHonbanbi = async (
   juchuHonbanbiData: JuchuKizaiHonbanbiValues,
   userNam: string
 ) => {
+  const newData = {
+    juchu_head_id: juchuHeadId,
+    juchu_kizai_head_id: juchuKizaiHeadId,
+    juchu_honbanbi_shubetu_id: juchuHonbanbiData.juchuHonbanbiShubetuId,
+    juchu_honbanbi_dat: toISOStringYearMonthDay(juchuHonbanbiData.juchuHonbanbiDat),
+    mem: juchuHonbanbiData.mem ? juchuHonbanbiData.mem : null,
+    juchu_honbanbi_add_qty: juchuHonbanbiData.juchuHonbanbiAddQty,
+    add_dat: new Date(),
+    add_user: userNam,
+  };
   try {
-    const { error } = await supabase
-      .schema('dev2')
-      .from('t_juchu_kizai_honbanbi')
-      .insert({
-        juchu_head_id: juchuHeadId,
-        juchu_kizai_head_id: juchuKizaiHeadId,
-        juchu_honbanbi_shubetu_id: juchuHonbanbiData.juchuHonbanbiShubetuId,
-        juchu_honbanbi_dat: toISOStringYearMonthDay(juchuHonbanbiData.juchuHonbanbiDat),
-        mem: juchuHonbanbiData.mem ? juchuHonbanbiData.mem : null,
-        juchu_honbanbi_add_qty: juchuHonbanbiData.juchuHonbanbiAddQty,
-        add_dat: new Date(),
-        add_user: userNam,
-      });
+    const { error } = await supabase.schema('dev2').from('t_juchu_kizai_honbanbi').insert(newData);
     if (error) {
       console.log('Error Add honbanbi:', error.message);
       return false;
     }
+    console.log('honbanbi add successfully:', newData);
     return true;
   } catch (e) {
     console.log(e);
@@ -889,9 +888,10 @@ export const AddAllHonbanbi = async (
   try {
     const { error } = await supabase.schema('dev2').from('t_juchu_kizai_honbanbi').insert(newData);
     if (error) {
-      console.log('Error Add honbanbi:', error.message);
+      console.error('Error Add honbanbi:', error.message);
       return false;
     }
+    console.log('honbanbi addall successfully:', newData);
     return true;
   } catch (e) {
     console.log(e);
