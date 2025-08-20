@@ -62,7 +62,7 @@ export type JuchuKizaiHonbanbiValues = {
   juchuHeadId: number;
   juchuKizaiHeadId: number;
   juchuHonbanbiShubetuId: number;
-  juchuHonbanbiDat: Date;
+  juchuHonbanbiDat: string;
   mem: string;
   juchuHonbanbiAddQty: number;
 };
