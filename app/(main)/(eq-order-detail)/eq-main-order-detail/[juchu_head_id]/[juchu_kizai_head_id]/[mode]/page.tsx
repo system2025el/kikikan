@@ -110,7 +110,6 @@ const Page = async (props: {
           juchuKizaiHeadData?.juchuHeadId,
           juchuKizaiHeadData?.juchuKizaiHeadId,
           ids[i],
-          planQtys[i],
           subDays(shukoDate, 1)
         );
         eqStockData.push(stock);

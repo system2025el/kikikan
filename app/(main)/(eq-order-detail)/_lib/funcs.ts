@@ -512,9 +512,9 @@ export const UpdateJuchuKizaiMeisai = async (juchuKizaiMeisaiData: JuchuKizaiMei
         console.error('Error updating juchu kizai meisai:', error.message);
         return false;
       }
-      console.log('juchu kizai meisai updated successfully:', updateData);
-      return true;
+      console.log('juchu kizai meisai updated successfully:', data);
     }
+    return true;
   } catch (e) {
     console.error('Exception while updating juchu kizai meisai:', e);
     return false;
@@ -678,13 +678,7 @@ export const DeleteIdoDen = async (idoDenIds: number[]) => {
  * @param date 開始日
  * @returns 機材在庫テーブル用データ
  */
-export const GetStockList = async (
-  juchuHeadId: number,
-  juchuKizaiHeadId: number,
-  kizaiId: number,
-  planQty: number,
-  date: Date
-) => {
+export const GetStockList = async (juchuHeadId: number, juchuKizaiHeadId: number, kizaiId: number, date: Date) => {
   const stringDate = toISOStringYearMonthDay(date);
   try {
     console.log('DB Connected');
@@ -699,7 +693,7 @@ export const GetStockList = async (
 --     ,coalesce(zaiko_kizai.yobi_qty,0) as yobi_qty   --予備数 NULL時0固定  
 --     ,coalesce(zaiko_kizai.plan_qty,0) as plan_qty   --合計数 NULL時0固定  
 
-    ,coalesce(zaiko_kizai.zaiko_qty+${planQty},(select v_kizai_qty.kizai_qty from v_kizai_qty where v_kizai_qty.kizai_id = ${kizaiId} /*■変数箇所■*/)) as "zaikoQty"     --在庫数   /*受注機材明細スケジュール、在庫状況スケジュール*/
+    ,coalesce(zaiko_kizai.zaiko_qty,(select v_kizai_qty.kizai_qty from v_kizai_qty where v_kizai_qty.kizai_id = ${kizaiId} /*■変数箇所■*/)) as "zaikoQty"     --在庫数   /*受注機材明細スケジュール、在庫状況スケジュール*/
     ,coalesce(zaiko_kizai.juchu_honbanbi_shubetu_id,0) as "juchuHonbanbiShubetuId" --受注本番日種別
     ,coalesce(zaiko_kizai.juchu_honbanbi_shubetu_color,'white') as "juchuHonbanbiColor" --受注本番日種別カラー
 from 
@@ -831,7 +825,7 @@ export const ConfirmHonbanbi = async (
 };
 
 /**
- * 受注機材本番日新規追加
+ * 受注機材本番日新規追加(1件)
  * @param juchuHeadId 受注ヘッダーid
  * @param juchuKizaiHeadId 受注機材ヘッダーid
  * @param juchuHonbanbiData 受注機材本番日データ
@@ -865,6 +859,87 @@ export const AddHonbanbi = async (
     return true;
   } catch (e) {
     console.log(e);
+  }
+};
+
+/**
+ * 受注機材本番日新規追加(複数件)
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param juchuHonbanbiData 受注機材本番日データ
+ * @param userNam ユーザー名
+ * @returns
+ */
+export const AddAllHonbanbi = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  juchuHonbanbiData: JuchuKizaiHonbanbiValues[],
+  userNam: string
+) => {
+  const newData = juchuHonbanbiData.map((d) => ({
+    juchu_head_id: juchuHeadId,
+    juchu_kizai_head_id: juchuKizaiHeadId,
+    juchu_honbanbi_shubetu_id: d.juchuHonbanbiShubetuId,
+    juchu_honbanbi_dat: toISOStringYearMonthDay(d.juchuHonbanbiDat),
+    mem: d.mem ? d.mem : null,
+    juchu_honbanbi_add_qty: d.juchuHonbanbiAddQty,
+    add_dat: new Date(),
+    add_user: userNam,
+  }));
+  try {
+    const { error } = await supabase.schema('dev2').from('t_juchu_kizai_honbanbi').insert(newData);
+    if (error) {
+      console.log('Error Add honbanbi:', error.message);
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+/**
+ * 受注機材入出庫本番日更新
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param juchuHonbanbiData 受注機材本番日データ
+ * @param userNam ユーザー名
+ * @returns
+ */
+export const UpdateNyushukoHonbanbi = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  juchuHonbanbiData: JuchuKizaiHonbanbiValues,
+  userNam: string
+) => {
+  const updateData = {
+    juchu_head_id: juchuHeadId,
+    juchu_kizai_head_id: juchuKizaiHeadId,
+    juchu_honbanbi_shubetu_id: juchuHonbanbiData.juchuHonbanbiShubetuId,
+    juchu_honbanbi_dat: toISOStringYearMonthDay(juchuHonbanbiData.juchuHonbanbiDat),
+    mem: juchuHonbanbiData.mem ? juchuHonbanbiData.mem : null,
+    juchu_honbanbi_add_qty: juchuHonbanbiData.juchuHonbanbiAddQty,
+    upd_dat: new Date(),
+    upd_user: userNam,
+  };
+
+  try {
+    const { error } = await supabase
+      .schema('dev2')
+      .from('t_juchu_kizai_honbanbi')
+      .update(updateData)
+      .eq('juchu_head_id', juchuHeadId)
+      .eq('juchu_kizai_head_id', juchuKizaiHeadId)
+      .eq('juchu_honbanbi_shubetu_id', juchuHonbanbiData.juchuHonbanbiShubetuId);
+    if (error) {
+      console.error('Error updating honbanbi:', error.message);
+      return false;
+    }
+    console.log('honbanbi updated successfully:', updateData);
+    return true;
+  } catch (e) {
+    console.error(e);
+    return false;
   }
 };
 
@@ -934,6 +1009,30 @@ export const DeleteHonbanbi = async (
       .eq('juchu_kizai_head_id', juchuKizaiHeadId)
       .eq('juchu_honbanbi_shubetu_id', juchuHonbanbiData.juchuHonbanbiShubetuId)
       .eq('juchu_honbanbi_dat', toISOStringYearMonthDay(juchuHonbanbiData.juchuHonbanbiDat));
+
+    if (error) {
+      console.error('Error delete honbanbi:', error.message);
+    }
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+/**
+ * 受注機材本番日(使用中)削除
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param juchuHonbanbiData 受注機材本番日データ
+ */
+export const DeleteSiyouHonbanbi = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
+  try {
+    const { error } = await supabase
+      .schema('dev2')
+      .from('t_juchu_kizai_honbanbi')
+      .delete()
+      .eq('juchu_head_id', juchuHeadId)
+      .eq('juchu_kizai_head_id', juchuKizaiHeadId)
+      .eq('juchu_honbanbi_shubetu_id', 1);
 
     if (error) {
       console.error('Error delete honbanbi:', error.message);

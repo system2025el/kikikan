@@ -31,7 +31,7 @@ import { add, addMonths, endOfMonth, set, sub, subDays, subMonths } from 'date-f
 import dayjs, { Dayjs } from 'dayjs';
 import { get } from 'http';
 import { redirect, useRouter } from 'next/navigation';
-import { use, useEffect, useRef, useState } from 'react';
+import { use, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
@@ -47,6 +47,7 @@ import { Loading } from '@/app/(main)/_ui/loading';
 import Time, { TestTime } from '@/app/(main)/_ui/time';
 import { GetNyukoDate, getRange, GetShukoDate } from '@/app/(main)/(eq-order-detail)/_lib/datefuncs';
 import {
+  AddAllHonbanbi,
   AddHonbanbi,
   AddIdoDen,
   AddJuchuKizaiHead,
@@ -56,6 +57,7 @@ import {
   DeleteHonbanbi,
   DeleteIdoDen,
   DeleteJuchuKizaiMeisai,
+  DeleteSiyouHonbanbi,
   GetHonbanbi,
   GetIdoDenMaxId,
   GetJuchuKizaiHeadDspOrdNum,
@@ -68,6 +70,7 @@ import {
   UpdateJuchuKizaiHead,
   UpdateJuchuKizaiMeisai,
   UpdateJuchuKizaiNyushuko,
+  UpdateNyushukoHonbanbi,
 } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 import { SelectedEqptsValues } from '@/app/(main)/(masters)/eqpt-master/_lib/types';
 import { AddLock, DeleteLock, GetLock } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/funcs';
@@ -121,12 +124,12 @@ const EquipmentOrderDetail = (props: {
   );
   // 機材在庫リスト
   const [eqStockList, setEqStockList] = useState<StockTableValues[][]>(props.eqStockData ? props.eqStockData : []);
-  // 受注本番日リスト
-  const [juchuHonbanbiList, setJuchuHonbanbiList] = useState<JuchuKizaiHonbanbiValues[]>(
-    props.juchuHonbanbiData ? props.juchuHonbanbiData : []
-  );
   // 受注本番日元データ
   const [originJuchuHonbanbiList, setOriginJuchuHonbanbiList] = useState<JuchuKizaiHonbanbiValues[]>(
+    props.juchuHonbanbiData ? props.juchuHonbanbiData : []
+  );
+  // 受注本番日リスト
+  const [juchuHonbanbiList, setJuchuHonbanbiList] = useState<JuchuKizaiHonbanbiValues[]>(
     props.juchuHonbanbiData ? props.juchuHonbanbiData : []
   );
   // 受注本番日削除リスト
@@ -219,28 +222,13 @@ const EquipmentOrderDetail = (props: {
   useEffect(() => {
     setSave(saveKizaiHead);
     setIsSave(saveKizaiHead);
-
-    if (juchuKizaiMeisaiList && juchuKizaiMeisaiList.length > 0 && eqStockList && eqStockList.length > 0) {
-      const updatedEqStockData = eqStockList;
-      const targetIndex = updatedEqStockData[0]
-        .map((d, index) => (dateRangeRef.current.includes(toISOStringYearMonthDay(d.calDat)) ? index : -1))
-        .filter((index) => index !== -1);
-
-      const subUpdatedEqStockList = updatedEqStockData.map((data, index) =>
-        data.map((d, i) =>
-          targetIndex.includes(i) ? { ...d, zaikoQty: d.zaikoQty - juchuKizaiMeisaiList[index].planQty } : d
-        )
-      );
-
-      setEqStockList(subUpdatedEqStockList);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [saveKizaiHead, setIsSave]);
 
   useEffect(() => {
     if (!user) return;
 
     const asyncProcess = async () => {
+      console.log('--------------ロック確認------------------');
       setIsLoading(true);
       const lockData = await GetLock(1, props.juchuHeadData.juchuHeadId);
       setLockData(lockData);
@@ -278,26 +266,24 @@ const EquipmentOrderDetail = (props: {
   }, [juchuKizaiMeisaiList, juchuHonbanbiList]);
 
   useEffect(() => {
+    console.log('-------------------ロックセット--------------------');
     setLock(lockData);
   }, [lockData, setLock]);
 
   useEffect(() => {
-    console.log('-------------------スクロール同期更新---------------------');
+    console.log('dateRange変更');
+    dateRangeRef.current = dateRange;
+  }, [dateRange]);
+
+  useEffect(() => {
+    console.log('eqStockList変更');
+    eqStockListRef.current = eqStockList;
+  }, [eqStockList]);
+
+  useEffect(() => {
+    console.log('------------------------同期スクロール更新--------------------------');
     const left = leftRef.current;
     const right = rightRef.current;
-
-    // if (!left || !right) return;
-
-    // const onLeftScroll = () => syncScroll('left');
-    // const onRightScroll = () => syncScroll('right');
-
-    // left.addEventListener('scroll', onLeftScroll);
-    // right.addEventListener('scroll', onRightScroll);
-
-    // return () => {
-    //   left.removeEventListener('scroll', onLeftScroll);
-    //   right.removeEventListener('scroll', onRightScroll);
-    // };
 
     if (left && right) {
       left.addEventListener('scroll', () => syncScroll('left'));
@@ -310,17 +296,7 @@ const EquipmentOrderDetail = (props: {
         right.removeEventListener('scroll', () => syncScroll('right'));
       }
     };
-  }, [juchuKizaiMeisaiList]);
-
-  useEffect(() => {
-    console.log('dateRange変更');
-    dateRangeRef.current = dateRange;
-  }, [dateRange]);
-
-  useEffect(() => {
-    console.log('eqStockList変更');
-    eqStockListRef.current = eqStockList;
-  }, [eqStockList]);
+  }, [juchuKizaiMeisaiList, isLoading]);
 
   /**
    * 編集モード変更
@@ -353,212 +329,264 @@ const EquipmentOrderDetail = (props: {
    * @returns
    */
   const onSubmit = async (data: JuchuKizaiHeadValues) => {
-    console.log('保存開始: ', data, eqStockList);
+    console.log('保存開始');
     if (!user) return;
     setIsLoading(true);
+
+    // 出庫日
+    const updateShukoDate = GetShukoDate(
+      data.kicsShukoDat && new Date(data.kicsShukoDat),
+      data.yardShukoDat && new Date(data.yardShukoDat)
+    );
+    // 入庫日
+    const updateNyukoDate = GetNyukoDate(
+      data.kicsNyukoDat && new Date(data.kicsNyukoDat),
+      data.yardNyukoDat && new Date(data.yardNyukoDat)
+    );
+    // 出庫日から入庫日
+    const updateDateRange = getRange(updateShukoDate, updateNyukoDate);
+
+    if (!updateShukoDate || !updateNyukoDate) {
+      setIsLoading(false);
+      return;
+    }
+
     // 新規
     if (data.juchuKizaiHeadId === 0) {
       const maxId = await GetJuchuKizaiHeadMaxId(data.juchuHeadId);
       const maxDspOrdNum = await GetJuchuKizaiHeadDspOrdNum();
       const newJuchuKizaiHeadId = maxId ? maxId.juchu_kizai_head_id + 1 : 1;
       const newDspOrdNum = maxDspOrdNum ? maxDspOrdNum.dsp_ord_num + 1 : 1;
+      // 受注機材ヘッダー追加
       const headResult = await AddJuchuKizaiHead(newJuchuKizaiHeadId, data, 1, newDspOrdNum, user.name);
+      console.log('受注機材ヘッダー追加', headResult);
+      // 受注機材入出庫追加
       const nyushukoResult = await AddJuchuKizaiNyushuko(newJuchuKizaiHeadId, data, user.name);
-      if (headResult && nyushukoResult) {
-        redirect(`/eq-main-order-detail/${data.juchuHeadId}/${newJuchuKizaiHeadId}/edit`);
-      }
+      console.log('受注機材入出庫追加', nyushukoResult);
+      // 受注機材本番日(入出庫、使用中)追加
+      const addJuchuSIyouHonbanbiData: JuchuKizaiHonbanbiValues[] = updateDateRange.map((d) => ({
+        juchuHeadId: data.juchuHeadId,
+        juchuKizaiHeadId: data.juchuKizaiHeadId,
+        juchuHonbanbiShubetuId: 1,
+        juchuHonbanbiDat: updateShukoDate,
+        mem: '',
+        juchuHonbanbiAddQty: 0,
+      }));
+      const addJuchuHonbanbiData: JuchuKizaiHonbanbiValues[] = [
+        {
+          juchuHeadId: data.juchuHeadId,
+          juchuKizaiHeadId: data.juchuKizaiHeadId,
+          juchuHonbanbiShubetuId: 2,
+          juchuHonbanbiDat: updateShukoDate,
+          mem: '',
+          juchuHonbanbiAddQty: 0,
+        },
+        {
+          juchuHeadId: data.juchuHeadId,
+          juchuKizaiHeadId: data.juchuKizaiHeadId,
+          juchuHonbanbiShubetuId: 3,
+          juchuHonbanbiDat: updateNyukoDate,
+          mem: '',
+          juchuHonbanbiAddQty: 0,
+        },
+      ];
+      const mergeHonbanbiData: JuchuKizaiHonbanbiValues[] = [...addJuchuSIyouHonbanbiData, ...addJuchuHonbanbiData];
+      const addHonbanbiResult = await AddAllHonbanbi(
+        data.juchuHeadId,
+        data.juchuKizaiHeadId,
+        mergeHonbanbiData,
+        user.name
+      );
+      console.log('入出庫、使用本番日追加', addHonbanbiResult);
+
+      redirect(`/eq-main-order-detail/${data.juchuHeadId}/${newJuchuKizaiHeadId}/edit`);
 
       // 更新
     } else {
+      // if (isDirty) {
       // 受注機材ヘッド更新
       const headResult = await UpdateJuchuKizaiHead(data, user.name);
+      console.log('受注機材ヘッダー更新', headResult);
+
       // 受注機材入出庫更新
       const nyushukoResult = await UpdateJuchuKizaiNyushuko(data, user.name);
+      console.log('受注機材入出庫更新', nyushukoResult);
 
-      // 受注機材本番日更新
-      // 出庫日
-      const updateShukoDate = GetShukoDate(
-        data.kicsShukoDat && new Date(data.kicsShukoDat),
-        data.yardShukoDat && new Date(data.yardShukoDat)
+      // 受注機材本番日(使用中)更新
+      const addJuchuSiyouHonbanbiData: JuchuKizaiHonbanbiValues[] = updateDateRange.map((d) => ({
+        juchuHeadId: data.juchuHeadId,
+        juchuKizaiHeadId: data.juchuKizaiHeadId,
+        juchuHonbanbiShubetuId: 1,
+        juchuHonbanbiDat: new Date(d),
+        mem: '',
+        juchuHonbanbiAddQty: 0,
+      }));
+      const deleteSiyouHonbanbiResult = await DeleteSiyouHonbanbi(data.juchuHeadId, data.juchuKizaiHeadId);
+      console.log('受注機材本番日(使用日)削除', deleteSiyouHonbanbiResult);
+      const addSiyouHonbanbiResult = await AddAllHonbanbi(
+        data.juchuHeadId,
+        data.juchuKizaiHeadId,
+        addJuchuSiyouHonbanbiData,
+        user.name
       );
-      // 入庫日
-      const updateNyukoDate = GetNyukoDate(
-        data.kicsNyukoDat && new Date(data.kicsNyukoDat),
-        data.yardNyukoDat && new Date(data.yardNyukoDat)
-      );
+      console.log('受注機材本番日(使用日)更新', addSiyouHonbanbiResult);
 
-      if (shukoDate && nyukoDate) {
-        const deleteJuchuHonbanbiData: JuchuKizaiHonbanbiValues[] = [
-          {
-            juchuHeadId: data.juchuHeadId,
-            juchuKizaiHeadId: data.juchuKizaiHeadId,
-            juchuHonbanbiShubetuId: 2,
-            juchuHonbanbiDat: shukoDate,
-            mem: '',
-            juchuHonbanbiAddQty: 0,
-          },
-          {
-            juchuHeadId: data.juchuHeadId,
-            juchuKizaiHeadId: data.juchuKizaiHeadId,
-            juchuHonbanbiShubetuId: 3,
-            juchuHonbanbiDat: nyukoDate,
-            mem: '',
-            juchuHonbanbiAddQty: 0,
-          },
-        ];
-        const margeDeleteJuchuHonbanbiData: JuchuKizaiHonbanbiValues[] = [
-          ...deleteJuchuHonbanbiData,
-          ...juchuHonbanbiDeleteList,
-        ];
-        for (const item of margeDeleteJuchuHonbanbiData) {
-          const result = await DeleteHonbanbi(data.juchuHeadId, data.juchuKizaiHeadId, item);
-        }
+      // 受注機材本番日(出庫、入庫)更新
+      const updateNyushukoHonbanbiData: JuchuKizaiHonbanbiValues[] = [
+        {
+          juchuHeadId: data.juchuHeadId,
+          juchuKizaiHeadId: data.juchuKizaiHeadId,
+          juchuHonbanbiShubetuId: 2,
+          juchuHonbanbiDat: updateShukoDate,
+          mem: '',
+          juchuHonbanbiAddQty: 0,
+        },
+        {
+          juchuHeadId: data.juchuHeadId,
+          juchuKizaiHeadId: data.juchuKizaiHeadId,
+          juchuHonbanbiShubetuId: 3,
+          juchuHonbanbiDat: updateNyukoDate,
+          mem: '',
+          juchuHonbanbiAddQty: 0,
+        },
+      ];
+      for (const item of updateNyushukoHonbanbiData) {
+        const nyushukoHonbanbiResult = await UpdateNyushukoHonbanbi(
+          data.juchuHeadId,
+          data.juchuKizaiHeadId,
+          item,
+          user.name
+        );
+        console.log('入出庫本番日更新', nyushukoHonbanbiResult);
       }
-      if (updateShukoDate && updateNyukoDate) {
-        const updatedjuchuHonbanbiData: JuchuKizaiHonbanbiValues[] = [
-          {
-            juchuHeadId: data.juchuHeadId,
-            juchuKizaiHeadId: data.juchuKizaiHeadId,
-            juchuHonbanbiShubetuId: 2,
-            juchuHonbanbiDat: updateShukoDate,
-            mem: '',
-            juchuHonbanbiAddQty: 0,
-          },
-          {
-            juchuHeadId: data.juchuHeadId,
-            juchuKizaiHeadId: data.juchuKizaiHeadId,
-            juchuHonbanbiShubetuId: 3,
-            juchuHonbanbiDat: updateNyukoDate,
-            mem: '',
-            juchuHonbanbiAddQty: 0,
-          },
-        ];
-        const margeJuchuHonbanbiData = [...updatedjuchuHonbanbiData, ...juchuHonbanbiList];
-        for (const item of margeJuchuHonbanbiData) {
-          const confirm = await ConfirmHonbanbi(data.juchuHeadId, data.juchuKizaiHeadId, item);
-          if (confirm) {
-            const result = await UpdateHonbanbi(data.juchuHeadId, data.juchuKizaiHeadId, item, user.name);
-          } else {
-            const result = await AddHonbanbi(data.juchuHeadId, data.juchuKizaiHeadId, item, user.name);
-          }
-        }
-      }
-
-      if (juchuKizaiMeisaiList.length > 0) {
-        const copyJuchuKizaiMeisaiData = [...juchuKizaiMeisaiList];
-        const juchuKizaiMeisaiMaxId = await GetJuchuKizaiMeisaiMaxId(data.juchuHeadId, data.juchuKizaiHeadId);
-        const newJuchuKizaiMeisaiId = juchuKizaiMeisaiMaxId ? juchuKizaiMeisaiMaxId.juchu_kizai_meisai_id + 1 : 1;
-        const newJuchuKizaiMeisaiData = copyJuchuKizaiMeisaiData.map((data, index) =>
-          data.juchuKizaiMeisaiId === 0
-            ? {
-                ...data,
-                juchuKizaiMeisaiId: newJuchuKizaiMeisaiId + index,
-              }
-            : data
-        );
-
-        // 受注機材明細更新
-        const addJuchuKizaiMeisaiData = newJuchuKizaiMeisaiData.filter((data) => !data.delFlag && !data.saveFlag);
-        const updateJuchuKizaiMeisaiData = newJuchuKizaiMeisaiData.filter((data) => !data.delFlag && data.saveFlag);
-        const deleteJuchuKizaiMeisaiData = newJuchuKizaiMeisaiData.filter((data) => data.delFlag && data.saveFlag);
-        if (deleteJuchuKizaiMeisaiData.length > 0) {
-          const deleteJuchuKizaiMeisaiIds = deleteJuchuKizaiMeisaiData.map((data) => data.juchuKizaiMeisaiId);
-          const result = await DeleteJuchuKizaiMeisai(
-            data.juchuHeadId,
-            data.juchuKizaiHeadId,
-            deleteJuchuKizaiMeisaiIds
-          );
-        }
-
-        if (addJuchuKizaiMeisaiData.length > 0) {
-          const result = AddJuchuKizaiMeisai(addJuchuKizaiMeisaiData, user.name);
-        }
-
-        if (updateJuchuKizaiMeisaiData.length > 0) {
-          const result = await UpdateJuchuKizaiMeisai(updateJuchuKizaiMeisaiData, user.name);
-          console.log('UPD Result :', result);
-        }
-
-        // 移動伝票更新
-        const addIdoKizaiData = newJuchuKizaiMeisaiData.filter(
-          (data) => !data.idoDenId && data.idoDenDat && !data.delFlag
-        );
-        const updateIdoKizaiData = newJuchuKizaiMeisaiData.filter(
-          (data) => data.idoDenId && data.idoDenDat && !data.delFlag
-        );
-        const deleteIdoKizaiData = newJuchuKizaiMeisaiData.filter(
-          (data) => data.idoDenId && (!data.idoDenDat || data.delFlag)
-        );
-        if (deleteIdoKizaiData.length > 0) {
-          const deleteIdoDenIds = deleteIdoKizaiData.map((data) => data.idoDenId);
-          const result = await DeleteIdoDen(deleteIdoDenIds as number[]);
-        }
-
-        if (addIdoKizaiData.length > 0) {
-          const idoDenMaxId = await GetIdoDenMaxId();
-          const newIdoDenId = idoDenMaxId ? idoDenMaxId.ido_den_id + 1 : 1;
-          const result = await AddIdoDen(newIdoDenId, addIdoKizaiData, user.name);
-        }
-
-        if (updateIdoKizaiData.length > 0) {
-          const result = await UpdateIdoDen(updateIdoKizaiData, user.name);
-        }
-      }
-
-      // データ更新
+      // 受注機材ヘッダーデータ更新
       reset(data);
 
       setShukoDate(updateShukoDate);
       setSelectDate(updateShukoDate ? updateShukoDate : new Date());
       setNyukoDate(updateNyukoDate);
 
+      // 出庫日から入庫日更新
+      setDateRange(updateDateRange);
+      // }
+
+      // 受注機材本番日更新
+      // if (JSON.stringify(originJuchuHonbanbiList) !== JSON.stringify(juchuHonbanbiList)) {
+      for (const item of juchuHonbanbiDeleteList) {
+        const deleteHonbanbiResult = await DeleteHonbanbi(data.juchuHeadId, data.juchuKizaiHeadId, item);
+        console.log('受注機材本番日削除', deleteHonbanbiResult);
+      }
+
+      for (const item of juchuHonbanbiList) {
+        const confirm = await ConfirmHonbanbi(data.juchuHeadId, data.juchuKizaiHeadId, item);
+        if (confirm) {
+          const updateHonbanbiResult = await UpdateHonbanbi(data.juchuHeadId, data.juchuKizaiHeadId, item, user.name);
+          console.log('受注機材本番日更新', updateHonbanbiResult);
+        } else {
+          const addHonbanbiResult = await AddHonbanbi(data.juchuHeadId, data.juchuKizaiHeadId, item, user.name);
+          console.log('受注機材本番日追加', addHonbanbiResult);
+        }
+      }
+
+      // 受注機材本番日データ更新
       setOriginJuchuHonbanbiList(juchuHonbanbiList);
       setJuchuHonbanbiDeleteList([]);
+      // }
 
+      // 受注機材明細更新
+      // const filterJuchuKizaiMeisaiList = juchuKizaiMeisaiList.filter((data) => !data.delFlag);
+      // if (JSON.stringify(originJuchuKizaiMeisaiList) !== JSON.stringify(filterJuchuKizaiMeisaiList)) {
+      const copyJuchuKizaiMeisaiData = [...juchuKizaiMeisaiList];
+      console.log(copyJuchuKizaiMeisaiData);
+      const juchuKizaiMeisaiMaxId = await GetJuchuKizaiMeisaiMaxId(data.juchuHeadId, data.juchuKizaiHeadId);
+      const newJuchuKizaiMeisaiId = juchuKizaiMeisaiMaxId ? juchuKizaiMeisaiMaxId.juchu_kizai_meisai_id + 1 : 1;
+      const newJuchuKizaiMeisaiData = copyJuchuKizaiMeisaiData.map((data, index) =>
+        data.juchuKizaiMeisaiId === 0
+          ? {
+              ...data,
+              juchuKizaiMeisaiId: newJuchuKizaiMeisaiId + index,
+            }
+          : data
+      );
+
+      // 受注機材明細更新
+      const addJuchuKizaiMeisaiData = newJuchuKizaiMeisaiData.filter((data) => !data.delFlag && !data.saveFlag);
+      const updateJuchuKizaiMeisaiData = newJuchuKizaiMeisaiData.filter((data) => !data.delFlag && data.saveFlag);
+      const deleteJuchuKizaiMeisaiData = newJuchuKizaiMeisaiData.filter((data) => data.delFlag && data.saveFlag);
+      if (deleteJuchuKizaiMeisaiData.length > 0) {
+        const deleteJuchuKizaiMeisaiIds = deleteJuchuKizaiMeisaiData.map((data) => data.juchuKizaiMeisaiId);
+        const deleteMeisaiResult = await DeleteJuchuKizaiMeisai(
+          data.juchuHeadId,
+          data.juchuKizaiHeadId,
+          deleteJuchuKizaiMeisaiIds
+        );
+        console.log('受注機材明細削除', deleteMeisaiResult);
+      }
+
+      if (addJuchuKizaiMeisaiData.length > 0) {
+        const addMeisaiResult = AddJuchuKizaiMeisai(addJuchuKizaiMeisaiData, user.name);
+        console.log('受注機材明細追加', addMeisaiResult);
+      }
+
+      if (updateJuchuKizaiMeisaiData.length > 0) {
+        const updateMeisaiResult = await UpdateJuchuKizaiMeisai(updateJuchuKizaiMeisaiData, user.name);
+        console.log('受注機材明細更新', updateMeisaiResult);
+      }
+
+      // 移動伝票更新
+      const addIdoKizaiData = newJuchuKizaiMeisaiData.filter(
+        (data) => !data.idoDenId && data.idoDenDat && !data.delFlag
+      );
+      const updateIdoKizaiData = newJuchuKizaiMeisaiData.filter(
+        (data) => data.idoDenId && data.idoDenDat && !data.delFlag
+      );
+      const deleteIdoKizaiData = newJuchuKizaiMeisaiData.filter(
+        (data) => data.idoDenId && (!data.idoDenDat || data.delFlag)
+      );
+      if (deleteIdoKizaiData.length > 0) {
+        const deleteIdoDenIds = deleteIdoKizaiData.map((data) => data.idoDenId);
+        const deleteIdoDenResult = await DeleteIdoDen(deleteIdoDenIds as number[]);
+        console.log('移動伝票削除', deleteIdoDenResult);
+      }
+
+      if (addIdoKizaiData.length > 0) {
+        const idoDenMaxId = await GetIdoDenMaxId();
+        const newIdoDenId = idoDenMaxId ? idoDenMaxId.ido_den_id + 1 : 1;
+        const addIdoDenResult = await AddIdoDen(newIdoDenId, addIdoKizaiData, user.name);
+        console.log('移動伝票追加', addIdoDenResult);
+      }
+
+      if (updateIdoKizaiData.length > 0) {
+        const updateIdoDenResult = await UpdateIdoDen(updateIdoKizaiData, user.name);
+        console.log('移動伝票更新', updateIdoDenResult);
+      }
+
+      // 受注機材明細データ更新
       const juchuKizaiMeisaiData = await GetJuchuKizaiMeisai(data.juchuHeadId, data.juchuKizaiHeadId);
       if (juchuKizaiMeisaiData) {
         setJuchuKizaiMeisaiList(juchuKizaiMeisaiData);
         setOriginJuchuKizaiMeisaiList(juchuKizaiMeisaiData);
         setOriginPlanQty(juchuKizaiMeisaiData.map((data) => data.planQty));
-        // 出庫日から入庫日
-        const updateDateRange = getRange(updateShukoDate, updateNyukoDate);
-        setDateRange(updateDateRange);
         // 受注機材idリスト
         const ids = juchuKizaiMeisaiData.map((data) => data.kizaiId);
-        // 受注機材合計数リスト
-        const planQtys = juchuKizaiMeisaiData.map((data) => data.planQty);
         // 機材在庫データ
         const updatedEqStockData: StockTableValues[][] = [];
-        if (ids && planQtys) {
-          if (!updateShukoDate) return <div>データに不備があります。</div>;
+        if (ids) {
           for (let i = 0; i < ids.length; i++) {
             const stock: StockTableValues[] = await GetStockList(
               data.juchuHeadId,
               data.juchuKizaiHeadId,
               ids[i],
-              planQtys[i],
               subDays(updateShukoDate, 1)
             );
             updatedEqStockData.push(stock);
           }
         }
-        if (
-          juchuKizaiMeisaiData &&
-          juchuKizaiMeisaiData.length > 0 &&
-          updatedEqStockData &&
-          updatedEqStockData.length > 0
-        ) {
-          const targetIndex = updatedEqStockData[0]
-            .map((d, index) => (dateRangeRef.current.includes(toISOStringYearMonthDay(d.calDat)) ? index : -1))
-            .filter((index) => index !== -1);
-          const subUpdatedEqStockData = updatedEqStockData.map((data, index) =>
-            data.map((d, i) =>
-              targetIndex.includes(i) ? { ...d, zaikoQty: d.zaikoQty - juchuKizaiMeisaiData[index].planQty } : d
-            )
-          );
-          setEqStockList(subUpdatedEqStockData);
-        }
+
+        setEqStockList(updatedEqStockData);
       }
+      // }
+
       setIsLoading(false);
     }
   };
@@ -595,7 +623,6 @@ const EquipmentOrderDetail = (props: {
    * @param date カレンダー選択日付
    */
   const handleDateChange = async (date: Dayjs | null) => {
-    console.log(new Date());
     if (date !== null) {
       setSelectDate(date.toDate());
       const filterJuchuKizaiMeisaiList = juchuKizaiMeisaiList.filter((data) => !data.delFlag);
@@ -611,7 +638,6 @@ const EquipmentOrderDetail = (props: {
             props.juchuHeadData.juchuHeadId,
             getValues('juchuKizaiHeadId'),
             ids[i],
-            originPlanQty[i],
             subDays(date.toDate(), 1)
           );
           updatedEqStockData.push(stock);
@@ -630,7 +656,12 @@ const EquipmentOrderDetail = (props: {
 
         const subUpdatedEqStockData = updatedEqStockData.map((data, index) =>
           data.map((d, i) =>
-            targetIndex.includes(i) ? { ...d, zaikoQty: d.zaikoQty - filterJuchuKizaiMeisaiList[index].planQty } : d
+            targetIndex.includes(i)
+              ? {
+                  ...d,
+                  zaikoQty: Number(d.zaikoQty) + originPlanQty[index] - filterJuchuKizaiMeisaiList[index].planQty,
+                }
+              : d
           )
         );
 
@@ -689,8 +720,8 @@ const EquipmentOrderDetail = (props: {
   const handleCellChange = (kizaiId: number, planKizaiQty: number, planYobiQty: number, planQty: number) => {
     const rowIndex = eqStockListRef.current.findIndex((data) => data.some((d) => d.kizaiId === kizaiId));
     const updatedEqStockData = eqStockListRef.current[rowIndex];
-    const kizaiQty = juchuKizaiMeisaiList.find((data) => data.kizaiId === kizaiId)?.planQty || 0;
-    console.log(juchuKizaiMeisaiList);
+    const filterJuchuKizaiMeisaiList = juchuKizaiMeisaiList.filter((data) => !data.delFlag);
+    const kizaiQty = filterJuchuKizaiMeisaiList.find((data) => data.kizaiId === kizaiId)?.planQty || 0;
     if (
       juchuKizaiMeisaiList &&
       juchuKizaiMeisaiList.length > 0 &&
@@ -722,7 +753,7 @@ const EquipmentOrderDetail = (props: {
     setPriceTotal(updatedPriceTotal);
     setJuchuKizaiMeisaiList((prev) =>
       prev.map((data) =>
-        data.kizaiId === kizaiId
+        data.kizaiId === kizaiId && !data.delFlag
           ? { ...data, planKizaiQty: planKizaiQty, planYobiQty: planYobiQty, planQty: planQty }
           : data
       )
@@ -734,16 +765,15 @@ const EquipmentOrderDetail = (props: {
    * @param kizaiId 機材id
    */
   const handleDelete = (kizaiId: number) => {
-    const rowIndex = juchuKizaiMeisaiList.findIndex((data) => data.kizaiId === kizaiId);
-    const updatedJuchuKizaiMeisaiList = juchuKizaiMeisaiList.filter((data) => data.kizaiId !== kizaiId);
+    const filterJuchuKizaiMeisaiList = juchuKizaiMeisaiList.filter((data) => !data.delFlag);
+    const rowIndex = filterJuchuKizaiMeisaiList.findIndex((data) => data.kizaiId === kizaiId);
+    const updatedJuchuKizaiMeisaiList = filterJuchuKizaiMeisaiList.filter((data) => data.kizaiId !== kizaiId);
     setJuchuKizaiMeisaiList((prev) =>
-      prev.map((data) => (data.kizaiId === kizaiId ? { ...data, delFlag: true } : data))
+      prev.map((data) => (data.kizaiId === kizaiId && !data.delFlag ? { ...data, delFlag: true } : data))
     );
     setEqStockList((prev) => prev.map((data) => data.filter((d) => d.kizaiId !== kizaiId)));
     setOriginPlanQty((prev) => prev.filter((_, index) => index !== rowIndex));
-    setPriceTotal(
-      updatedJuchuKizaiMeisaiList.reduce((sum, row) => (!row.delFlag ? sum + (row.kizaiTankaAmt ?? 0) : 0), 0)
-    );
+    setPriceTotal(updatedJuchuKizaiMeisaiList.reduce((sum, row) => sum + (row.kizaiTankaAmt ?? 0), 0));
   };
 
   /**
@@ -755,7 +785,7 @@ const EquipmentOrderDetail = (props: {
     if (date !== null) {
       const newDate = date.toDate();
       setJuchuKizaiMeisaiList((prev) =>
-        prev.map((row) => (row.kizaiId === kizaiId ? { ...row, idoDenDat: newDate } : row))
+        prev.map((row) => (row.kizaiId === kizaiId && !row.delFlag ? { ...row, idoDenDat: newDate } : row))
       );
     }
   };
@@ -846,18 +876,18 @@ const EquipmentOrderDetail = (props: {
     if (result) {
       if (idoDat !== null && getValues('yardShukoDat') === null) {
         setJuchuKizaiMeisaiList((prev) =>
-          prev.map((row) => (row.shozokuId === 2 ? { ...row, idoDenDat: idoDat } : row))
+          prev.map((row) => (row.shozokuId === 2 && !row.delFlag ? { ...row, idoDenDat: idoDat } : row))
         );
         setIdoDat(null);
         setMoveOpen(false);
       } else if (idoDat !== null && getValues('kicsShukoDat') === null) {
         setJuchuKizaiMeisaiList((prev) =>
-          prev.map((row) => (row.shozokuId === 1 ? { ...row, idoDenDat: idoDat } : row))
+          prev.map((row) => (row.shozokuId === 1 && !row.delFlag ? { ...row, idoDenDat: idoDat } : row))
         );
         setIdoDat(null);
         setMoveOpen(false);
       } else {
-        setJuchuKizaiMeisaiList((prev) => prev.map((row) => ({ ...row, idoDenDat: idoDat })));
+        setJuchuKizaiMeisaiList((prev) => prev.map((row) => (row.idoDenDat ? { ...row, idoDenDat: idoDat } : row)));
         setMoveOpen(false);
       }
     } else {
@@ -879,7 +909,9 @@ const EquipmentOrderDetail = (props: {
       .filter((data) => !data.delFlag)
       .reduce((sum, row) => sum + row.kizaiTankaAmt * row.planKizaiQty * updatedJuchuHonbanbiQty, 0);
 
-    setValue('juchuHonbanbiQty', updatedJuchuHonbanbiQty);
+    if (getValues('juchuHonbanbiQty') !== updatedJuchuHonbanbiQty) {
+      setValue('juchuHonbanbiQty', updatedJuchuHonbanbiQty, { shouldDirty: true });
+    }
     setPriceTotal(updatedPriceTotal);
     setJuchuHonbanbiList(updatedHonbanbiList);
     setJuchuHonbanbiDeleteList(updatedHonbanbiDeleteList);
@@ -943,7 +975,6 @@ const EquipmentOrderDetail = (props: {
         getValues('juchuHeadId'),
         getValues('juchuKizaiHeadId'),
         newIds[i],
-        0,
         subDays(selectDate, 1)
       );
       selectEqStockData.push(stock);
@@ -1173,11 +1204,7 @@ const EquipmentOrderDetail = (props: {
                         onBlur={field.onBlur}
                         date={field.value}
                         maxDate={
-                          juchuHonbanbiList.length > 0
-                            ? new Date(juchuHonbanbiList[0].juchuHonbanbiDat)
-                            : nyukoDate
-                              ? nyukoDate
-                              : undefined
+                          juchuHonbanbiList.length > 0 ? new Date(juchuHonbanbiList[0].juchuHonbanbiDat) : undefined
                         }
                         onChange={handleKicsShukoChange}
                         fieldstate={fieldState}
@@ -1210,11 +1237,7 @@ const EquipmentOrderDetail = (props: {
                         onBlur={field.onBlur}
                         date={field.value}
                         maxDate={
-                          juchuHonbanbiList.length > 0
-                            ? new Date(juchuHonbanbiList[0].juchuHonbanbiDat)
-                            : nyukoDate
-                              ? nyukoDate
-                              : undefined
+                          juchuHonbanbiList.length > 0 ? new Date(juchuHonbanbiList[0].juchuHonbanbiDat) : undefined
                         }
                         onChange={handleYardShukoChange}
                         fieldstate={fieldState}
@@ -1252,9 +1275,7 @@ const EquipmentOrderDetail = (props: {
                         minDate={
                           juchuHonbanbiList.length > 0
                             ? new Date(juchuHonbanbiList[juchuHonbanbiList.length - 1].juchuHonbanbiDat)
-                            : shukoDate
-                              ? shukoDate
-                              : undefined
+                            : undefined
                         }
                         onChange={handleKicsNyukoChange}
                         fieldstate={fieldState}
@@ -1289,9 +1310,7 @@ const EquipmentOrderDetail = (props: {
                         minDate={
                           juchuHonbanbiList.length > 0
                             ? new Date(juchuHonbanbiList[juchuHonbanbiList.length - 1].juchuHonbanbiDat)
-                            : shukoDate
-                              ? shukoDate
-                              : undefined
+                            : undefined
                         }
                         onChange={handleYardNyukoChange}
                         fieldstate={fieldState}
