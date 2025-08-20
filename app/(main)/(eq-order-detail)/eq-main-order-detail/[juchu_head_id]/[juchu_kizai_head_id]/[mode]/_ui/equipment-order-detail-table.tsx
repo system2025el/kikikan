@@ -59,6 +59,7 @@ export const StockTable: React.FC<StockTableProps> = ({ eqStockList, dateRange, 
                     color: 'white',
                     bgcolor: getDateHeaderBackgroundColor(toISOStringYearMonthDay(data.calDat), dateRange),
                     padding: 0,
+                    height: '26px',
                   }}
                 >
                   {toISOStringMonthDay(data.calDat)}
@@ -148,7 +149,7 @@ export const EqTable: React.FC<EqTableProps> = ({
   const visibleRows = rows.filter((row) => !row.delFlag);
 
   const handlePlanKizaiQtyChange = (kizaiId: number, newValue: number) => {
-    const planYobiQty = rows.find((row) => row.kizaiId === kizaiId)?.planYobiQty || 0;
+    const planYobiQty = rows.find((row) => row.kizaiId === kizaiId && !row.delFlag)?.planYobiQty || 0;
     const planQty = planYobiQty + newValue;
     onChange(kizaiId, newValue, planYobiQty, planQty);
   };
