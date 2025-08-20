@@ -149,14 +149,14 @@ export const EqptSelectionDialog = ({
         </Box>
         <Paper variant="outlined">
           <Box width={'100%'} display={'flex'} p={2}>
-            <Typography>顧客マスタ検索</Typography>
+            <Typography>機材選択</Typography>
           </Box>
           <Divider />
           <Box width={'100%'} px={2} pb={1}>
             <form onSubmit={handleSubmit(onSubmit)}>
               <Stack justifyContent={'space-between'} alignItems={'start'} mt={1}>
                 <Stack alignItems={'baseline'}>
-                  <Typography>キーワード</Typography>
+                  <Typography>機材名キーワード</Typography>
                   <TextFieldElement name="query" control={control} />
                 </Stack>
                 <Box alignSelf={'end'}>
