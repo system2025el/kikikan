@@ -369,7 +369,7 @@ const EquipmentOrderDetail = (props: {
         juchuHeadId: data.juchuHeadId,
         juchuKizaiHeadId: data.juchuKizaiHeadId,
         juchuHonbanbiShubetuId: 1,
-        juchuHonbanbiDat: updateShukoDate,
+        juchuHonbanbiDat: new Date(d),
         mem: '',
         juchuHonbanbiAddQty: 0,
       }));
@@ -422,6 +422,7 @@ const EquipmentOrderDetail = (props: {
         mem: '',
         juchuHonbanbiAddQty: 0,
       }));
+      console.log('------------------------------------', addJuchuSiyouHonbanbiData);
       const deleteSiyouHonbanbiResult = await DeleteSiyouHonbanbi(data.juchuHeadId, data.juchuKizaiHeadId);
       console.log('受注機材本番日(使用日)削除', deleteSiyouHonbanbiResult);
       const addSiyouHonbanbiResult = await AddAllHonbanbi(
