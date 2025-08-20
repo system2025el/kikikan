@@ -678,8 +678,7 @@ export const DeleteIdoDen = async (idoDenIds: number[]) => {
  * @param date 開始日
  * @returns 機材在庫テーブル用データ
  */
-export const GetStockList = async (juchuHeadId: number, juchuKizaiHeadId: number, kizaiId: number, date: Date) => {
-  const stringDate = toISOStringYearMonthDay(date);
+export const GetStockList = async (juchuHeadId: number, juchuKizaiHeadId: number, kizaiId: number, date: string) => {
   try {
     //console.log('DB Connected');
     await pool.query(` SET search_path TO dev2;`);
@@ -736,7 +735,7 @@ right outer join
     /* スケジュール生成して外部結合 */
     (
         -- スケジュールの生成範囲 /*■変数箇所■*/
-        select '${stringDate}'::date + g.i as cal_dat from generate_series(0, 90) as g(i)
+        select '${date}'::date + g.i as cal_dat from generate_series(0, 90) as g(i)
     ) as cal on 
     zaiko_kizai.plan_dat = cal.cal_dat    
 

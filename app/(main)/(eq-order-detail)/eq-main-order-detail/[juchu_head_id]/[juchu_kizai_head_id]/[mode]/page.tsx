@@ -1,5 +1,6 @@
 import { subDays } from 'date-fns';
 
+import { toISOStringYearMonthDay } from '@/app/(main)/_lib/date-conversion';
 import { GetNyukoDate, getRange, GetShukoDate } from '@/app/(main)/(eq-order-detail)/_lib/datefuncs';
 import { GetLock, GetOrder } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/funcs';
 
@@ -110,7 +111,7 @@ const Page = async (props: {
           juchuKizaiHeadData?.juchuHeadId,
           juchuKizaiHeadData?.juchuKizaiHeadId,
           ids[i],
-          subDays(shukoDate, 1)
+          toISOStringYearMonthDay(subDays(shukoDate, 1))
         );
         eqStockData.push(stock);
       }

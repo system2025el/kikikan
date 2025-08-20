@@ -579,7 +579,7 @@ const EquipmentOrderDetail = (props: {
               data.juchuHeadId,
               data.juchuKizaiHeadId,
               ids[i],
-              subDays(updateShukoDate, 1)
+              toISOStringYearMonthDay(subDays(updateShukoDate, 1))
             );
             updatedEqStockData.push(stock);
           }
@@ -640,7 +640,7 @@ const EquipmentOrderDetail = (props: {
             props.juchuHeadData.juchuHeadId,
             getValues('juchuKizaiHeadId'),
             ids[i],
-            subDays(date.toDate(), 1)
+            toISOStringYearMonthDay(subDays(date.toDate(), 1))
           );
           updatedEqStockData.push(stock);
         }
@@ -977,7 +977,7 @@ const EquipmentOrderDetail = (props: {
         getValues('juchuHeadId'),
         getValues('juchuKizaiHeadId'),
         newIds[i],
-        subDays(selectDate, 1)
+        toISOStringYearMonthDay(subDays(selectDate, 1))
       );
       selectEqStockData.push(stock);
     }
