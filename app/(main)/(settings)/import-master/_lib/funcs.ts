@@ -6,6 +6,10 @@ import { supabase } from '@/app/_lib/supabase/supabase';
 import { EqptImportType, KizaiImportTypes, RfidImportTypes, TanabanImportTypes } from './types';
 
 /**
+ * 機材RFIDマスタ表インポート
+ */
+
+/**
  * エクセルインポートしたものをDBに収納する処理
  * @param data エクセルから取得したデータの配列
  */

@@ -2,7 +2,7 @@
 
 import { Box, Button, Container, Divider, Grid2, Paper, Snackbar, Stack, Typography } from '@mui/material';
 import { useState } from 'react';
-import { utils, writeFile, writeFileXLSX } from 'xlsx';
+import { writeFileXLSX } from 'xlsx';
 
 import { BackButton } from '@/app/(main)/_ui/buttons';
 
@@ -26,7 +26,7 @@ export const ExportMaster = () => {
       setSnackBarMessage(`機材RFIDマスタ_${data.date}.xlsxをエクスポートしました`);
       setSnackBarOpen(true);
     } else {
-      setSnackBarMessage(`エクスポートエラー:データがありません`);
+      setSnackBarMessage(`エクスポートエラー: データがありません`);
       setSnackBarOpen(true);
     }
   };

@@ -1,21 +1,21 @@
 import z from 'zod';
 
 /**
- * エクセルインポートの型
+ * 機材RFIDマスタ表エクセルインポートの型
  */
 export type EqptImportType = z.infer<typeof eqptSchema>;
 
 /**
- * エクセルインポートのzod Schema
+ * 機材RFIDマスタ表エクセルインポートのzod Schema
  */
 export const eqptSchema = z.object({
   rfid_tag_id: z.string(),
-  rfid_kizai_sts: z.number().nullable().optional(),
-  del_flg: z.number().nullable().optional(),
+  rfid_kizai_sts: z.number(),
+  del_flg: z.number(),
   section_nam: z.string().optional(),
   kizai_nam: z.string(),
   el_num: z.number().nullable().optional(),
-  shozoku_id: z.number().nullable().optional(),
+  shozoku_id: z.number(),
   bld_cod: z.string().optional(),
   tana_cod: z.string().optional(),
   eda_cod: z.string().optional(),
@@ -37,12 +37,12 @@ export const eqptSchema = z.object({
 });
 
 /**
- * エクセルインポート時の配列の型
+ * 機材RFIDマスタ表エクセルインポート時の配列の型
  */
 export type EqptImportRowType = [
   string, // rfid_tag_id
   number, // rfid_kizai_sts
-  number | null, // del_flg
+  number, // del_flg
   number | null, // section_num
   string, // kizai_nam
   number | null, // el_num
@@ -68,22 +68,20 @@ export type EqptImportRowType = [
 ];
 
 /**
- * エクセルから取得したデータをnumber | null型に変換
+ * 機材RFIDマスタ表エクセルから取得したデータをnumber | null型に変換
  */
 export const parseNumber = (input: number | null) => {
-  if (input === null) return null;
-  if (input === undefined) return null;
+  if (input === null || input === undefined) return null;
   const inputString = String(input);
   const normalizedString = inputString.replace(/[０-９]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 0xfee0));
   const cleanString = normalizedString.replace(/[,\.]/g, '');
   if (cleanString === '') return null;
-
   const result = Number(cleanString);
   return isNaN(result) ? null : result;
 };
 
 /**
- * エクセルインポートで使うRFIDの型
+ * 機材RFIDマスタ表エクセルインポートで使うRFIDの型
  */
 export type RfidImportTypes = {
   rfid_tag_id: string;
@@ -95,7 +93,7 @@ export type RfidImportTypes = {
 };
 
 /**
- * エクセルインポートで使う機材マスタの型
+ * 機材RFIDマスタ表エクセルインポートで使う機材マスタの型
  */
 export type KizaiImportTypes = {
   kizai_nam: string;
@@ -123,6 +121,36 @@ export type KizaiImportTypes = {
 };
 
 /**
- * エクセルインポートで使う棚番マスタの型
+ * 機材RFIDマスタ表エクセルインポートで使う棚番マスタの型
  */
 export type TanabanImportTypes = { bld_cod?: string; tana_cod?: string; eda_cod?: string };
+
+/**
+ * 顧客マスタ表インポートの型
+ */
+
+/**
+ * 機材RFIDマスタ表エクセルインポートのzod Schema
+ */
+export const customerSchema = z.object({
+  kokyaku_nam: z.string(),
+  kana: z.string(),
+  kokyaku_rank: z.number(),
+  del_flg: z.number().nullable().optional(),
+  dsp_ord_num: z.number().nullable().optional(),
+  keisho: z.string().optional(),
+  adr_post: z.string().optional(),
+  mem: z.string().optional(),
+  dai_bumon_nam: z.string().optional(),
+  bumon_nam: z.string().optional(),
+  shukei_bumon_nam: z.string().optional(),
+  dsp_flg: z.number().nullable().optional(),
+  ctn_flg: z.number().nullable().optional(),
+  def_dat_qty: z.number().nullable().optional(),
+  reg_amt: z.number().nullable().optional(),
+  rank_amt_1: z.number().nullable().optional(),
+  rank_amt_2: z.number().nullable().optional(),
+  rank_amt_3: z.number().nullable().optional(),
+  rank_amt_4: z.number().nullable().optional(),
+  rank_amt_5: z.number().nullable().optional(),
+});

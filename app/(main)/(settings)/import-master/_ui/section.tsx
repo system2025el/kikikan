@@ -16,7 +16,7 @@ export const Section = ({
   masterName: string;
   fileName: string;
   fileInputId: string;
-  handleFileUpload: (event: React.ChangeEvent<HTMLInputElement>, type: 'eqpt' | 'rfid') => void;
+  handleFileUpload: (event: React.ChangeEvent<HTMLInputElement>, type: 'eqpt' | 'customer' | '') => void;
   handleImport: () => void;
 }) => {
   return (
@@ -34,7 +34,9 @@ export const Section = ({
               id={fileInputId}
               type="file"
               style={{ display: 'none' }}
-              onChange={(e) => handleFileUpload(e, masterName === '機材RFID' ? 'eqpt' : 'rfid')}
+              onChange={(e) =>
+                handleFileUpload(e, masterName === '機材RFID' ? 'eqpt' : masterName === '顧客' ? 'customer' : '')
+              }
             />
             <label htmlFor={fileInputId}>
               <Button component="span">Excelファイルを選択</Button>
