@@ -1,6 +1,6 @@
 'use server';
 
-import { utils, writeFile } from 'xlsx';
+import { utils } from 'xlsx';
 
 import pool from '@/app/_lib/postgres/postgres';
 
@@ -108,17 +108,15 @@ export const getAllEqptAndRfid = async () => {
       //  AOA (Array of Arrays) 形式でワークシートを作成
       const worksheet = utils.aoa_to_sheet([header, ...aoaData]);
 
+      // ループ処理のためにセル範囲を出す
       const range = utils.decode_range(worksheet['!ref'] || '');
       // セルが文字列でいてほしいカラムのインデックス
       const targetCols = [0, 4, 7, 8, 9, 10, 11, 12, 13, 14, 19, 20, 21, 22, 23, 24];
-
       for (let row = 1; row <= range.e.r; ++row) {
         for (const colIndex of targetCols) {
           if (colIndex > range.e.c) continue;
-
           const cellAddress = utils.encode_cell({ r: row, c: colIndex });
           const cell = worksheet[cellAddress];
-
           if (cell) {
             cell.t = 's';
             cell.z = '@';

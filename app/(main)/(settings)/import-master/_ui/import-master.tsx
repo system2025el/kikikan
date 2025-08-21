@@ -6,7 +6,7 @@ import { read, utils } from 'xlsx';
 
 import { BackButton } from '@/app/(main)/_ui/buttons';
 
-import { ImportData } from '../_lib/funcs';
+import { ImportEqptRfidData } from '../_lib/funcs';
 import { EqptImportRowType, EqptImportType, eqptSchema, parseNumber } from '../_lib/types';
 import { Section } from './section';
 
@@ -16,28 +16,28 @@ import { Section } from './section';
  */
 export const ImportMaster = () => {
   /* useState ----------------------------------------------------- */
-  /* インポートしたファイル名 */
+  /* インポートした機材RFIDマスタファイル名 */
   const [eqptFileName, setEqptFileName] = useState<string>('ファイルが選択されていません');
-  /* インポートしたファイル名 */
-  const [rfidFileName, setRfidFileName] = useState<string>('ファイルが選択されていません');
-  /* 機材データ */
+  /* インポートした顧客マスタファイル名 */
+  const [customerFileName, setCustomerFileName] = useState<string>('ファイルが選択されていません');
+  /* 機材RFIDデータ */
   const [eqptData, setEqptData] = useState<EqptImportType[]>([]);
-  /* RFIDデータ */
-  // const [rfidData, setRfidData] = useState<RFIDImportType[]>([]);
+  /* 顧客データ */
+  // const [customerData, setCustomerData] = useState<RFIDImportType[]>([]);
   /* スナックバーの表示するかしないか */
   const [snackBarOpen, setSnackBarOpen] = useState(false);
   /* スナックバーのメッセージ */
   const [snackBarMessage, setSnackBarMessage] = useState('ファイルが選択されていません');
 
   /* ファイルを選んでデータをオブジェクト化 */
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, type: 'eqpt' | 'rfid') => {
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, type: 'eqpt' | 'customer' | '') => {
     const file = event.target.files?.[0];
     if (!file) {
       setSnackBarMessage('ファイルが選択されていません。');
       setSnackBarOpen(true);
       return;
     }
-
+    // ファイル読み込み
     const reader = new FileReader();
     reader.onload = (e) => {
       console.log('ファイル読み込み成功');
@@ -49,7 +49,6 @@ export const ImportMaster = () => {
         setSnackBarOpen(true);
         return;
       }
-
       const workbook = read(arrayBuffer, { type: 'array' });
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
@@ -64,13 +63,13 @@ export const ImportMaster = () => {
         dataRows.forEach((row, index) => {
           // 置き換え
           const rowObject = {
-            rfid_tag_id: String(row[0] ?? ''),
-            rfid_kizai_sts: parseNumber(row[1] ?? 0),
+            rfid_tag_id: String(row[0]),
+            rfid_kizai_sts: parseNumber(row[1]),
             del_flg: parseNumber(row[2]),
             section_nam: String(row[3] ?? ''),
-            kizai_nam: String(row[4] ?? ''),
+            kizai_nam: String(row[4]),
             el_num: parseNumber(row[5]),
-            shozoku_id: Number(parseNumber(row[6]) ?? 0),
+            shozoku_id: parseNumber(row[6]),
             bld_cod: String(row[7] ?? ''),
             tana_cod: String(row[8] ?? ''),
             eda_cod: String(row[9] ?? ''),
@@ -100,15 +99,15 @@ export const ImportMaster = () => {
         });
         setEqptData(parsedEqptData);
         if (hasError) {
-          setSnackBarMessage(`${file.name}にエラーのある行がありました。コンソールを確認してください。`);
+          setSnackBarMessage(`${file.name}にエラーのある行がありました。`);
           setSnackBarOpen(true);
         } else {
           setSnackBarMessage(`${file.name}を読み込みました。`);
           setSnackBarOpen(true);
         }
       } else {
-        // // type === 'rfid'
-        setRfidFileName(file.name);
+        // // type === 'customer'
+        setCustomerFileName(file.name);
         // const parsedRfidData: RFIDImportType[] = [];
         // let hasError = false;
         // dataRows.forEach((row, index) => {
@@ -142,7 +141,7 @@ export const ImportMaster = () => {
     console.log('RFID機材マスタデータをインポート:', eqptData);
     if (eqptData.length !== 0) {
       try {
-        await ImportData(eqptData);
+        await ImportEqptRfidData(eqptData);
         setSnackBarMessage(`${eqptFileName}を登録しました`);
         setSnackBarOpen(true);
       } catch (error) {
@@ -173,7 +172,7 @@ export const ImportMaster = () => {
         />
         <Section
           masterName={'顧客'}
-          fileName={rfidFileName}
+          fileName={customerFileName}
           handleFileUpload={handleFileUpload}
           handleImport={handleImportRfid}
           fileInputId="customers-excel-file"
