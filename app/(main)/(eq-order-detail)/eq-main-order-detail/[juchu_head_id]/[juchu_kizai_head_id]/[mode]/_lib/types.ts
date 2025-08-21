@@ -15,8 +15,16 @@ export const JuchuKizaiHeadSchema = z
     yardNyukoDat: z.date().nullable(),
   })
   .refine((data) => data.kicsShukoDat || data.yardShukoDat, {
+    message: '',
+    path: ['kicsShukoDat'],
+  })
+  .refine((data) => data.kicsShukoDat || data.yardShukoDat, {
     message: '出庫日時をいずれか一方入力してください',
     path: ['yardShukoDat'],
+  })
+  .refine((data) => data.kicsNyukoDat || data.yardNyukoDat, {
+    message: '',
+    path: ['kicsNyukoDat'],
   })
   .refine((data) => data.kicsNyukoDat || data.yardNyukoDat, {
     message: '入庫日時をいずれか一方入力してください',

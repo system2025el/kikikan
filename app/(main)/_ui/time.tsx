@@ -89,7 +89,7 @@ export const TestTime = (props: {
         onChange={onChange}
         slotProps={{
           textField: {
-            helperText: fieldstate?.error?.message,
+            //helperText: fieldstate?.error?.message,
             FormHelperTextProps: {
               sx: { color: 'error.main', fontSize: '0.75rem' },
             },
@@ -104,25 +104,6 @@ export const TestTime = (props: {
               ...sx,
             },
             error: fieldstate?.invalid,
-            // InputProps: {
-            //   endAdornment: (
-            //     <>
-            //       {time && (
-            //         <IconButton size="small" sx={{ p: 0 }} onClick={onClear} disabled={disabled ? true : false}>
-            //           <ClearIcon fontSize="small" />
-            //         </IconButton>
-            //       )}
-            //       <IconButton
-            //         size="small"
-            //         sx={{ p: 0 }}
-            //         onClick={() => setOpen(true)}
-            //         disabled={disabled ? true : false}
-            //       >
-            //         <AccessTimeIcon fontSize="small" />
-            //       </IconButton>
-            //     </>
-            //   ),
-            // },
           },
         }}
         views={['hours', 'minutes']}

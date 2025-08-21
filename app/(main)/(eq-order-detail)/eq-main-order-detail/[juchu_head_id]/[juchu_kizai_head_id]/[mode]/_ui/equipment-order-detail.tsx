@@ -799,7 +799,12 @@ const EquipmentOrderDetail = (props: {
   const handleKicsShukoChange = async (newDate: Dayjs | null) => {
     if (newDate === null) return;
     setValue('kicsShukoDat', newDate.toDate(), { shouldDirty: true });
+
     const yardShukoDat = getValues('yardShukoDat');
+
+    if (yardShukoDat === null) {
+      clearErrors('yardShukoDat');
+    }
 
     if (juchuKizaiMeisaiList.length > 0 && yardShukoDat === null) {
       setIdoDat(subDays(newDate.toDate(), 2));
@@ -817,7 +822,12 @@ const EquipmentOrderDetail = (props: {
   const handleYardShukoChange = async (newDate: Dayjs | null) => {
     if (newDate === null) return;
     setValue('yardShukoDat', newDate.toDate(), { shouldDirty: true });
+
     const kicsShukoDat = getValues('kicsShukoDat');
+
+    if (kicsShukoDat === null) {
+      clearErrors('kicsShukoDat');
+    }
 
     if (juchuKizaiMeisaiList.length > 0 && kicsShukoDat === null) {
       setIdoDat(subDays(newDate.toDate(), 2));
@@ -835,6 +845,12 @@ const EquipmentOrderDetail = (props: {
   const handleKicsNyukoChange = async (newDate: Dayjs | null) => {
     if (newDate === null) return;
     setValue('kicsNyukoDat', newDate.toDate(), { shouldDirty: true });
+
+    const yardNyukoDat = getValues('yardNyukoDat');
+
+    if (yardNyukoDat === null) {
+      clearErrors('yardNyukoDat');
+    }
   };
 
   /**
@@ -844,6 +860,12 @@ const EquipmentOrderDetail = (props: {
   const handleYardNyukoChange = (newDate: Dayjs | null) => {
     if (newDate === null) return;
     setValue('yardNyukoDat', newDate.toDate(), { shouldDirty: true });
+
+    const kicsNyukoDat = getValues('kicsNyukoDat');
+
+    if (kicsNyukoDat === null) {
+      clearErrors('kicsNyukoDat');
+    }
   };
 
   /**
@@ -1222,7 +1244,13 @@ const EquipmentOrderDetail = (props: {
                       <TestTime
                         onBlur={field.onBlur}
                         time={field.value}
-                        onChange={(newTime) => field.onChange(newTime?.toDate())}
+                        onChange={(newTime) => {
+                          field.onChange(newTime?.toDate());
+                          const yardShukoDat = getValues('yardShukoDat');
+                          if (yardShukoDat === null) {
+                            clearErrors('yardShukoDat');
+                          }
+                        }}
                         fieldstate={fieldState}
                         disabled={!edit}
                       />
@@ -1255,7 +1283,13 @@ const EquipmentOrderDetail = (props: {
                       <TestTime
                         onBlur={field.onBlur}
                         time={field.value}
-                        onChange={(newTime) => field.onChange(newTime?.toDate())}
+                        onChange={(newTime) => {
+                          field.onChange(newTime?.toDate());
+                          const kicsShukoDat = getValues('kicsShukoDat');
+                          if (kicsShukoDat === null) {
+                            clearErrors('kicsShukoDat');
+                          }
+                        }}
                         fieldstate={fieldState}
                         disabled={!edit}
                       />
@@ -1293,7 +1327,13 @@ const EquipmentOrderDetail = (props: {
                       <TestTime
                         onBlur={field.onBlur}
                         time={field.value}
-                        onChange={(newTime) => field.onChange(newTime?.toDate())}
+                        onChange={(newTime) => {
+                          field.onChange(newTime?.toDate());
+                          const yardNyukoDat = getValues('yardNyukoDat');
+                          if (yardNyukoDat === null) {
+                            clearErrors('yardNyukoDat');
+                          }
+                        }}
                         fieldstate={fieldState}
                         disabled={!edit}
                       />
@@ -1328,7 +1368,13 @@ const EquipmentOrderDetail = (props: {
                       <TestTime
                         onBlur={field.onBlur}
                         time={field.value}
-                        onChange={(newTime) => field.onChange(newTime?.toDate())}
+                        onChange={(newTime) => {
+                          field.onChange(newTime?.toDate());
+                          const kicsNyukoDat = getValues('kicsNyukoDat');
+                          if (kicsNyukoDat === null) {
+                            clearErrors('kicsNyukoDat');
+                          }
+                        }}
                         fieldstate={fieldState}
                         disabled={!edit}
                       />
