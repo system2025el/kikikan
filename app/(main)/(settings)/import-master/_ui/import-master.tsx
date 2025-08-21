@@ -6,7 +6,7 @@ import { read, utils } from 'xlsx';
 
 import { BackButton } from '@/app/(main)/_ui/buttons';
 
-import { ImportData } from '../_lib/funcs';
+import { ImportEqptRfidData } from '../_lib/funcs';
 import { EqptImportRowType, EqptImportType, eqptSchema, parseNumber } from '../_lib/types';
 import { Section } from './section';
 
@@ -141,7 +141,7 @@ export const ImportMaster = () => {
     console.log('RFID機材マスタデータをインポート:', eqptData);
     if (eqptData.length !== 0) {
       try {
-        await ImportData(eqptData);
+        await ImportEqptRfidData(eqptData);
         setSnackBarMessage(`${eqptFileName}を登録しました`);
         setSnackBarOpen(true);
       } catch (error) {

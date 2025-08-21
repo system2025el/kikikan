@@ -13,7 +13,7 @@ import { EqptImportType, KizaiImportTypes, RfidImportTypes, TanabanImportTypes }
  * エクセルインポートしたものをDBに収納する処理
  * @param data エクセルから取得したデータの配列
  */
-export const ImportData = async (data: EqptImportType[]) => {
+export const ImportEqptRfidData = async (data: EqptImportType[]) => {
   console.log(data);
   /* 棚番用データ */
   const tanabanList: TanabanImportTypes[] = data
@@ -95,22 +95,24 @@ const checkRfid = async (list: RfidImportTypes[]) => {
     return [];
   }
   // 重複を削除したリスト
-  const uniqueList = Array.from(new Map(list.map((item) => [item.rfid_tag_id, item])).values());
-
+  const uniqueList = Array.from(new Map(list.map((v) => [v.rfid_tag_id, v])).values());
+  // トランザクション
+  const client = await pool.connect();
   try {
-    await pool.query(`SET search_path TO dev5;`);
-    await pool.query('BEGIN;');
+    await client.query('BEGIN;');
+    await client.query(`SET search_path TO dev5;`);
 
     // インポートしたRFIDタグID
-    const rfidTagIds = uniqueList.map((item) => item.rfid_tag_id);
+    const rfidTagIds = uniqueList.map((v) => v.rfid_tag_id);
     // m_rfidから既存のRFIDタグIDを取得
-    const existingTagsResult = await pool.query(`SELECT rfid_tag_id FROM m_rfid WHERE rfid_tag_id = ANY($1::text[]);`, [
-      rfidTagIds,
-    ]);
+    const existingTagsResult = await client.query(
+      `SELECT rfid_tag_id FROM m_rfid WHERE rfid_tag_id = ANY($1::text[]);`,
+      [rfidTagIds]
+    );
     // 既存のRFIDタグIDを取得
     const existingRfidTags = new Set(existingTagsResult.rows.map((row) => row.rfid_tag_id));
     // 新規登録するデータ
-    const insertList = uniqueList.filter((item) => !existingRfidTags.has(item.rfid_tag_id));
+    const insertList = uniqueList.filter((v) => !existingRfidTags.has(v.rfid_tag_id));
 
     // 新規登録するデータがあれば新規登録処理
     if (insertList.length > 0) {
@@ -132,13 +134,13 @@ const checkRfid = async (list: RfidImportTypes[]) => {
           )`;
         })
         .join(',');
-      const insertValues = insertList.flatMap((item) => [
-        item.rfid_tag_id,
-        item.kizai_nam,
-        item.rfid_kizai_sts,
-        item.del_flg,
-        item.shozoku_id,
-        item.mem,
+      const insertValues = insertList.flatMap((v) => [
+        v.rfid_tag_id,
+        v.kizai_nam,
+        v.rfid_kizai_sts,
+        v.del_flg,
+        v.shozoku_id,
+        v.mem,
       ]);
       const insertQuery = `
         INSERT INTO m_rfid (
@@ -153,7 +155,7 @@ const checkRfid = async (list: RfidImportTypes[]) => {
         ) VALUES ${insertPlaceholders};
       `;
       // INSERT実行
-      await pool.query(insertQuery, [...insertValues, addDat, addUser]);
+      await client.query(insertQuery, [...insertValues, addDat, addUser]);
     }
 
     // 更新処理
@@ -165,7 +167,7 @@ const checkRfid = async (list: RfidImportTypes[]) => {
       })
       .join(',');
     // 差異があるデータ群の取得
-    const differnces = await pool.query(
+    const differnces = await client.query(
       `
       WITH imported_data(rfid_tag_id, kizai_nam, rfid_kizai_sts, del_flg, shozoku_id, mem) AS (
         VALUES ${placeholders}
@@ -185,14 +187,7 @@ const checkRfid = async (list: RfidImportTypes[]) => {
       )
       SELECT rfid_tag_id, kizai_id, rfid_kizai_sts, del_flg, shozoku_id, mem FROM imported_only
       `,
-      uniqueList.flatMap((item) => [
-        item.rfid_tag_id,
-        item.kizai_nam,
-        item.rfid_kizai_sts,
-        item.del_flg,
-        item.shozoku_id,
-        item.mem,
-      ])
+      uniqueList.flatMap((v) => [v.rfid_tag_id, v.kizai_nam, v.rfid_kizai_sts, v.del_flg, v.shozoku_id, v.mem])
     );
     console.log(differnces.rows);
     const updateList = differnces.rows;
@@ -206,13 +201,13 @@ const checkRfid = async (list: RfidImportTypes[]) => {
           return `($${start}, $${start + 1}, $${start + 2}, $${start + 3}, $${start + 4}, $${start + 5})`;
         })
         .join(',');
-      const updateValues = updateList.flatMap((item) => [
-        item.rfid_tag_id,
-        item.kizai_id,
-        item.rfid_kizai_sts,
-        item.del_flg,
-        item.shozoku_id,
-        item.mem,
+      const updateValues = updateList.flatMap((v) => [
+        v.rfid_tag_id,
+        v.kizai_id,
+        v.rfid_kizai_sts,
+        v.del_flg,
+        v.shozoku_id,
+        v.mem,
       ]);
       const updateQuery = `
         UPDATE m_rfid AS mr
@@ -230,14 +225,16 @@ const checkRfid = async (list: RfidImportTypes[]) => {
         WHERE mr.rfid_tag_id = d.rfid_tag_id;`;
 
       //更新実行
-      await pool.query(updateQuery, [...updateValues, updDat, updUser]);
+      await client.query(updateQuery, [...updateValues, updDat, updUser]);
     }
 
-    await pool.query('COMMIT;');
+    await client.query('COMMIT;');
     console.log('RFIDマスタ処理した');
   } catch (e) {
-    await pool.query('ROLLBACK;');
+    await client.query('ROLLBACK;');
     throw e;
+  } finally {
+    client.release(); // 接続をpoolに返却
   }
 };
 
@@ -252,7 +249,7 @@ const checkKizai = async (list: KizaiImportTypes[]) => {
     return [];
   }
   // 重複を削除したリスト
-  const uniqueList = Array.from(new Map(list.map((item) => [item.kizai_nam, item])).values());
+  const uniqueList = Array.from(new Map(list.map((v) => [v.kizai_nam, v])).values());
 
   // 一時テーブル用のインポートしたデータ準備
   const allColumns = [
@@ -285,9 +282,9 @@ const checkKizai = async (list: KizaiImportTypes[]) => {
       return `(${allColumns.map((_, i) => `$${start + i}`).join(',')})`;
     })
     .join(',');
-  const kizaiValues = uniqueList.flatMap((item) =>
+  const kizaiValues = uniqueList.flatMap((v) =>
     allColumns.map((col) => {
-      const value = item[col as keyof KizaiImportTypes];
+      const value = v[col as keyof KizaiImportTypes];
       return value === undefined ? null : value;
     })
   );
@@ -504,7 +501,7 @@ const checkBumon = async (list: { bumon_nam: string; dai_bumon_nam: string; shuk
     return [];
   }
   // 重複を削除したリスト
-  const uniqueList = Array.from(new Map(list.map((item) => [item.bumon_nam, item])).values());
+  const uniqueList = Array.from(new Map(list.map((v) => [v.bumon_nam, v])).values());
 
   // 一時テーブル用のインポートしたデータ準備
   const allColumns = ['bumon_nam', 'dai_bumon_nam', 'shukei_bumon_nam'];
@@ -514,9 +511,9 @@ const checkBumon = async (list: { bumon_nam: string; dai_bumon_nam: string; shuk
       return `(${allColumns.map((_, i) => `$${start + i}`).join(',')})`;
     })
     .join(',');
-  const bumonValues = uniqueList.flatMap((item) =>
+  const bumonValues = uniqueList.flatMap((v) =>
     allColumns.map((col) => {
-      const value = item[col as keyof { bumon_nam: string; dai_bumon_nam: string; shukei_bumon_nam: string }];
+      const value = v[col as keyof { bumon_nam: string; dai_bumon_nam: string; shukei_bumon_nam: string }];
       return value === undefined ? null : value;
     })
   );
