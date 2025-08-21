@@ -195,16 +195,14 @@ export const DateSelectDialog = ({
             juchuHeadId: juchuHeadId,
             juchuKizaiHeadId: juchuKizaiHeadId,
             juchuHonbanbiShubetuId: 10,
-            juchuHonbanbiDat: d,
+            juchuHonbanbiDat: new Date(d),
             mem: '',
             juchuHonbanbiAddQty: 0,
           }));
           setSikomi((prev) => {
-            const existDate = new Set(prev.map((d) => d.juchuHonbanbiDat));
-            const unique = updatedSikomi.filter((d) => !existDate.has(d.juchuHonbanbiDat));
-            return [...prev, ...unique].sort(
-              (a, b) => new Date(a.juchuHonbanbiDat).getTime() - new Date(b.juchuHonbanbiDat).getTime()
-            );
+            const existDate = new Set(prev.map((d) => toISOStringYearMonthDay(d.juchuHonbanbiDat)));
+            const unique = updatedSikomi.filter((d) => !existDate.has(toISOStringYearMonthDay(d.juchuHonbanbiDat)));
+            return [...prev, ...unique].sort((a, b) => a.juchuHonbanbiDat.getTime() - b.juchuHonbanbiDat.getTime());
           });
           break;
         // rh
@@ -213,16 +211,14 @@ export const DateSelectDialog = ({
             juchuHeadId: juchuHeadId,
             juchuKizaiHeadId: juchuKizaiHeadId,
             juchuHonbanbiShubetuId: 20,
-            juchuHonbanbiDat: d,
+            juchuHonbanbiDat: new Date(d),
             mem: '',
             juchuHonbanbiAddQty: 0,
           }));
           setRh((prev) => {
-            const existDate = new Set(prev.map((d) => d.juchuHonbanbiDat));
-            const unique = updatedRh.filter((d) => !existDate.has(d.juchuHonbanbiDat));
-            return [...prev, ...unique].sort(
-              (a, b) => new Date(a.juchuHonbanbiDat).getTime() - new Date(b.juchuHonbanbiDat).getTime()
-            );
+            const existDate = new Set(prev.map((d) => toISOStringYearMonthDay(d.juchuHonbanbiDat)));
+            const unique = updatedRh.filter((d) => !existDate.has(toISOStringYearMonthDay(d.juchuHonbanbiDat)));
+            return [...prev, ...unique].sort((a, b) => a.juchuHonbanbiDat.getTime() - b.juchuHonbanbiDat.getTime());
           });
           break;
         // gp
@@ -231,16 +227,14 @@ export const DateSelectDialog = ({
             juchuHeadId: juchuHeadId,
             juchuKizaiHeadId: juchuKizaiHeadId,
             juchuHonbanbiShubetuId: 30,
-            juchuHonbanbiDat: d,
+            juchuHonbanbiDat: new Date(d),
             mem: '',
             juchuHonbanbiAddQty: 0,
           }));
           setGp((prev) => {
-            const existDate = new Set(prev.map((d) => d.juchuHonbanbiDat));
-            const unique = updatedGp.filter((d) => !existDate.has(d.juchuHonbanbiDat));
-            return [...prev, ...unique].sort(
-              (a, b) => new Date(a.juchuHonbanbiDat).getTime() - new Date(b.juchuHonbanbiDat).getTime()
-            );
+            const existDate = new Set(prev.map((d) => toISOStringYearMonthDay(d.juchuHonbanbiDat)));
+            const unique = updatedGp.filter((d) => !existDate.has(toISOStringYearMonthDay(d.juchuHonbanbiDat)));
+            return [...prev, ...unique].sort((a, b) => a.juchuHonbanbiDat.getTime() - b.juchuHonbanbiDat.getTime());
           });
           break;
         // 本番
@@ -249,16 +243,14 @@ export const DateSelectDialog = ({
             juchuHeadId: juchuHeadId,
             juchuKizaiHeadId: juchuKizaiHeadId,
             juchuHonbanbiShubetuId: 40,
-            juchuHonbanbiDat: d,
+            juchuHonbanbiDat: new Date(d),
             mem: '',
             juchuHonbanbiAddQty: 0,
           }));
           setHonban((prev) => {
-            const existDate = new Set(prev.map((d) => d.juchuHonbanbiDat));
-            const unique = updatedHonban.filter((d) => !existDate.has(d.juchuHonbanbiDat));
-            return [...prev, ...unique].sort(
-              (a, b) => new Date(a.juchuHonbanbiDat).getTime() - new Date(b.juchuHonbanbiDat).getTime()
-            );
+            const existDate = new Set(prev.map((d) => toISOStringYearMonthDay(d.juchuHonbanbiDat)));
+            const unique = updatedHonban.filter((d) => !existDate.has(toISOStringYearMonthDay(d.juchuHonbanbiDat)));
+            return [...prev, ...unique].sort((a, b) => a.juchuHonbanbiDat.getTime() - b.juchuHonbanbiDat.getTime());
           });
           break;
       }
@@ -314,7 +306,7 @@ export const DateSelectDialog = ({
         <TabPanel value={value} index={10}>
           {sikomi.map((data, index) => (
             <Box display="flex" alignItems="center" margin={2} key={index}>
-              <TextField value={data.juchuHonbanbiDat} />
+              <TextField value={toISOStringYearMonthDay(data.juchuHonbanbiDat)} />
               <Typography ml={2} mr={1}>
                 メモ
               </Typography>
@@ -331,7 +323,7 @@ export const DateSelectDialog = ({
         <TabPanel value={value} index={20}>
           {rh.map((data, index) => (
             <Box display="flex" alignItems="center" margin={2} key={index}>
-              <TextField value={data.juchuHonbanbiDat} />
+              <TextField value={toISOStringYearMonthDay(data.juchuHonbanbiDat)} />
               <Typography ml={2} mr={1}>
                 メモ
               </Typography>
@@ -348,7 +340,7 @@ export const DateSelectDialog = ({
         <TabPanel value={value} index={30}>
           {gp.map((data, index) => (
             <Box display="flex" alignItems="center" margin={2} key={index}>
-              <TextField value={data.juchuHonbanbiDat} />
+              <TextField value={toISOStringYearMonthDay(data.juchuHonbanbiDat)} />
               <Typography ml={2} mr={1}>
                 メモ
               </Typography>
@@ -365,7 +357,7 @@ export const DateSelectDialog = ({
         <TabPanel value={value} index={40}>
           {honban.map((data, index) => (
             <Box display="flex" alignItems="center" margin={2} key={index}>
-              <TextField value={data.juchuHonbanbiDat} />
+              <TextField value={toISOStringYearMonthDay(data.juchuHonbanbiDat)} />
               <TextField
                 value={data.juchuHonbanbiAddQty}
                 onChange={(e) => handleHonbanAddChange(index, Number(e.target.value))}

@@ -18,35 +18,41 @@ export const toISOStringWithTimezone = (date: Date): string => {
 
 // yyyy/MM/dd HH:mm:ss
 export const toISOString = (date: Date): string => {
+  const jstDate = new Date(date.getTime() + 9 * 60 * 60 * 1000);
+
   const pad = function (str: string): string {
     return ('0' + str).slice(-2);
   };
-  const year = date.getFullYear().toString();
-  const month = pad((date.getMonth() + 1).toString());
-  const day = pad(date.getDate().toString());
-  const hour = pad(date.getHours().toString());
-  const min = pad(date.getMinutes().toString());
-  const sec = pad(date.getSeconds().toString());
+  const year = jstDate.getFullYear().toString();
+  const month = pad((jstDate.getMonth() + 1).toString());
+  const day = pad(jstDate.getDate().toString());
+  const hour = pad(jstDate.getHours().toString());
+  const min = pad(jstDate.getMinutes().toString());
+  const sec = pad(jstDate.getSeconds().toString());
   return `${year}/${month}/${day} ${hour}:${min}:${sec}`;
 };
 
-// yyyy-MM-dd
+// yyyy/MM/dd
 export const toISOStringYearMonthDay = (date: Date) => {
+  const jstDate = new Date(date.getTime() + 9 * 60 * 60 * 1000);
+
   const pad = function (str: string): string {
     return ('0' + str).slice(-2);
   };
-  const year = date.getFullYear().toString();
-  const month = pad((date.getMonth() + 1).toString());
-  const day = pad(date.getDate().toString());
+  const year = jstDate.getFullYear().toString();
+  const month = pad((jstDate.getMonth() + 1).toString());
+  const day = pad(jstDate.getDate().toString());
   return `${year}/${month}/${day}`;
 };
 
 // MM/dd
 export const toISOStringMonthDay = (date: Date): string => {
+  const jstDate = new Date(date.getTime() + 9 * 60 * 60 * 1000);
+
   const pad = function (str: string): string {
     return ('0' + str).slice(-2);
   };
-  const month = pad((date.getMonth() + 1).toString());
-  const day = pad(date.getDate().toString());
+  const month = pad((jstDate.getMonth() + 1).toString());
+  const day = pad(jstDate.getDate().toString());
   return `${month}/${day}`;
 };

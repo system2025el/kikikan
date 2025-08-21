@@ -678,7 +678,8 @@ export const DeleteIdoDen = async (idoDenIds: number[]) => {
  * @param date 開始日
  * @returns 機材在庫テーブル用データ
  */
-export const GetStockList = async (juchuHeadId: number, juchuKizaiHeadId: number, kizaiId: number, date: string) => {
+export const GetStockList = async (juchuHeadId: number, juchuKizaiHeadId: number, kizaiId: number, date: Date) => {
+  const stringDate = toISOStringYearMonthDay(date);
   try {
     //console.log('DB Connected');
     await pool.query(` SET search_path TO dev2;`);
@@ -735,7 +736,7 @@ right outer join
     /* スケジュール生成して外部結合 */
     (
         -- スケジュールの生成範囲 /*■変数箇所■*/
-        select '${date}'::date + g.i as cal_dat from generate_series(0, 90) as g(i)
+        select '${stringDate}'::date + g.i as cal_dat from generate_series(0, 90) as g(i)
     ) as cal on 
     zaiko_kizai.plan_dat = cal.cal_dat    
 
@@ -779,7 +780,7 @@ export const GetHonbanbi = async (juchuHeadId: number, juchuKizaiHeadId: number)
       juchuHeadId: d.juchu_head_id,
       juchuKizaiHeadId: d.juchu_kizai_head_id,
       juchuHonbanbiShubetuId: d.juchu_honbanbi_shubetu_id,
-      juchuHonbanbiDat: d.juchu_honbanbi_dat,
+      juchuHonbanbiDat: new Date(d.juchu_honbanbi_dat),
       mem: d.mem,
       juchuHonbanbiAddQty: d.juchu_honbanbi_add_qty,
     }));
@@ -810,7 +811,7 @@ export const ConfirmHonbanbi = async (
       .eq('juchu_head_id', juchuHeadId)
       .eq('juchu_kizai_head_id', juchuKizaiHeadId)
       .eq('juchu_honbanbi_shubetu_id', juchuHonbanbiData.juchuHonbanbiShubetuId)
-      .eq('juchu_honbanbi_dat', juchuHonbanbiData.juchuHonbanbiDat)
+      .eq('juchu_honbanbi_dat', toISOStringYearMonthDay(juchuHonbanbiData.juchuHonbanbiDat))
       .single();
     if (honbanbiError) {
       console.error('ConfirmHonbanbi error : ', honbanbiError);
@@ -841,7 +842,7 @@ export const AddHonbanbi = async (
     juchu_head_id: juchuHeadId,
     juchu_kizai_head_id: juchuKizaiHeadId,
     juchu_honbanbi_shubetu_id: juchuHonbanbiData.juchuHonbanbiShubetuId,
-    juchu_honbanbi_dat: juchuHonbanbiData.juchuHonbanbiDat,
+    juchu_honbanbi_dat: toISOStringYearMonthDay(juchuHonbanbiData.juchuHonbanbiDat),
     mem: juchuHonbanbiData.mem ? juchuHonbanbiData.mem : null,
     juchu_honbanbi_add_qty: juchuHonbanbiData.juchuHonbanbiAddQty,
     add_dat: new Date(),
@@ -878,7 +879,7 @@ export const AddAllHonbanbi = async (
     juchu_head_id: juchuHeadId,
     juchu_kizai_head_id: juchuKizaiHeadId,
     juchu_honbanbi_shubetu_id: d.juchuHonbanbiShubetuId,
-    juchu_honbanbi_dat: d.juchuHonbanbiDat,
+    juchu_honbanbi_dat: toISOStringYearMonthDay(d.juchuHonbanbiDat),
     mem: d.mem ? d.mem : null,
     juchu_honbanbi_add_qty: d.juchuHonbanbiAddQty,
     add_dat: new Date(),
@@ -915,7 +916,7 @@ export const UpdateNyushukoHonbanbi = async (
     juchu_head_id: juchuHeadId,
     juchu_kizai_head_id: juchuKizaiHeadId,
     juchu_honbanbi_shubetu_id: juchuHonbanbiData.juchuHonbanbiShubetuId,
-    juchu_honbanbi_dat: juchuHonbanbiData.juchuHonbanbiDat,
+    juchu_honbanbi_dat: toISOStringYearMonthDay(juchuHonbanbiData.juchuHonbanbiDat),
     mem: juchuHonbanbiData.mem ? juchuHonbanbiData.mem : null,
     juchu_honbanbi_add_qty: juchuHonbanbiData.juchuHonbanbiAddQty,
     upd_dat: new Date(),
@@ -960,7 +961,7 @@ export const UpdateHonbanbi = async (
     juchu_head_id: juchuHeadId,
     juchu_kizai_head_id: juchuKizaiHeadId,
     juchu_honbanbi_shubetu_id: juchuHonbanbiData.juchuHonbanbiShubetuId,
-    juchu_honbanbi_dat: juchuHonbanbiData.juchuHonbanbiDat,
+    juchu_honbanbi_dat: toISOStringYearMonthDay(juchuHonbanbiData.juchuHonbanbiDat),
     mem: juchuHonbanbiData.mem ? juchuHonbanbiData.mem : null,
     juchu_honbanbi_add_qty: juchuHonbanbiData.juchuHonbanbiAddQty,
     upd_dat: new Date(),
@@ -975,7 +976,7 @@ export const UpdateHonbanbi = async (
       .eq('juchu_head_id', juchuHeadId)
       .eq('juchu_kizai_head_id', juchuKizaiHeadId)
       .eq('juchu_honbanbi_shubetu_id', juchuHonbanbiData.juchuHonbanbiShubetuId)
-      .eq('juchu_honbanbi_dat', juchuHonbanbiData.juchuHonbanbiDat);
+      .eq('juchu_honbanbi_dat', toISOStringYearMonthDay(juchuHonbanbiData.juchuHonbanbiDat));
     if (error) {
       console.error('Error updating honbanbi:', error.message);
       return false;
@@ -1007,7 +1008,7 @@ export const DeleteHonbanbi = async (
       .eq('juchu_head_id', juchuHeadId)
       .eq('juchu_kizai_head_id', juchuKizaiHeadId)
       .eq('juchu_honbanbi_shubetu_id', juchuHonbanbiData.juchuHonbanbiShubetuId)
-      .eq('juchu_honbanbi_dat', juchuHonbanbiData.juchuHonbanbiDat);
+      .eq('juchu_honbanbi_dat', toISOStringYearMonthDay(juchuHonbanbiData.juchuHonbanbiDat));
 
     if (error) {
       console.error('Error delete honbanbi:', error.message);

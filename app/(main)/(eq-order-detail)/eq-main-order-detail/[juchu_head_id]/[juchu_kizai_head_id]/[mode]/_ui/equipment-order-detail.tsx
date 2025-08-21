@@ -369,7 +369,7 @@ const EquipmentOrderDetail = (props: {
         juchuHeadId: data.juchuHeadId,
         juchuKizaiHeadId: data.juchuKizaiHeadId,
         juchuHonbanbiShubetuId: 1,
-        juchuHonbanbiDat: d,
+        juchuHonbanbiDat: new Date(d),
         mem: '',
         juchuHonbanbiAddQty: 0,
       }));
@@ -378,7 +378,7 @@ const EquipmentOrderDetail = (props: {
           juchuHeadId: data.juchuHeadId,
           juchuKizaiHeadId: data.juchuKizaiHeadId,
           juchuHonbanbiShubetuId: 2,
-          juchuHonbanbiDat: toISOStringYearMonthDay(updateShukoDate),
+          juchuHonbanbiDat: updateShukoDate,
           mem: '',
           juchuHonbanbiAddQty: 0,
         },
@@ -386,7 +386,7 @@ const EquipmentOrderDetail = (props: {
           juchuHeadId: data.juchuHeadId,
           juchuKizaiHeadId: data.juchuKizaiHeadId,
           juchuHonbanbiShubetuId: 3,
-          juchuHonbanbiDat: toISOStringYearMonthDay(updateNyukoDate),
+          juchuHonbanbiDat: updateNyukoDate,
           mem: '',
           juchuHonbanbiAddQty: 0,
         },
@@ -418,7 +418,7 @@ const EquipmentOrderDetail = (props: {
         juchuHeadId: data.juchuHeadId,
         juchuKizaiHeadId: data.juchuKizaiHeadId,
         juchuHonbanbiShubetuId: 1,
-        juchuHonbanbiDat: d,
+        juchuHonbanbiDat: new Date(d),
         mem: '',
         juchuHonbanbiAddQty: 0,
       }));
@@ -439,7 +439,7 @@ const EquipmentOrderDetail = (props: {
           juchuHeadId: data.juchuHeadId,
           juchuKizaiHeadId: data.juchuKizaiHeadId,
           juchuHonbanbiShubetuId: 2,
-          juchuHonbanbiDat: toISOStringYearMonthDay(updateShukoDate),
+          juchuHonbanbiDat: updateShukoDate,
           mem: '',
           juchuHonbanbiAddQty: 0,
         },
@@ -447,7 +447,7 @@ const EquipmentOrderDetail = (props: {
           juchuHeadId: data.juchuHeadId,
           juchuKizaiHeadId: data.juchuKizaiHeadId,
           juchuHonbanbiShubetuId: 3,
-          juchuHonbanbiDat: toISOStringYearMonthDay(updateNyukoDate),
+          juchuHonbanbiDat: updateNyukoDate,
           mem: '',
           juchuHonbanbiAddQty: 0,
         },
@@ -579,7 +579,7 @@ const EquipmentOrderDetail = (props: {
               data.juchuHeadId,
               data.juchuKizaiHeadId,
               ids[i],
-              toISOStringYearMonthDay(subDays(updateShukoDate, 1))
+              subDays(updateShukoDate, 1)
             );
             updatedEqStockData.push(stock);
           }
@@ -640,7 +640,7 @@ const EquipmentOrderDetail = (props: {
             props.juchuHeadData.juchuHeadId,
             getValues('juchuKizaiHeadId'),
             ids[i],
-            toISOStringYearMonthDay(subDays(date.toDate(), 1))
+            subDays(date.toDate(), 1)
           );
           updatedEqStockData.push(stock);
         }
@@ -977,7 +977,7 @@ const EquipmentOrderDetail = (props: {
         getValues('juchuHeadId'),
         getValues('juchuKizaiHeadId'),
         newIds[i],
-        toISOStringYearMonthDay(subDays(selectDate, 1))
+        subDays(selectDate, 1)
       );
       selectEqStockData.push(stock);
     }
@@ -1502,7 +1502,7 @@ const EquipmentOrderDetail = (props: {
                   data.juchuHonbanbiShubetuId === 10 && (
                     <Grid2 key={index} container display="flex" flexDirection="row">
                       <Grid2 size={5}>
-                        <Typography>{data.juchuHonbanbiDat}</Typography>
+                        <Typography>{toISOStringYearMonthDay(data.juchuHonbanbiDat)}</Typography>
                       </Grid2>
                       <Grid2 size={7}>
                         <Typography sx={{ wordBreak: 'break-word', whiteSpace: 'wrap' }}>{data.mem}</Typography>
@@ -1544,7 +1544,7 @@ const EquipmentOrderDetail = (props: {
                   data.juchuHonbanbiShubetuId === 20 && (
                     <Grid2 key={index} container display="flex" flexDirection="row">
                       <Grid2 size={5}>
-                        <Typography>{data.juchuHonbanbiDat}</Typography>
+                        <Typography>{toISOStringYearMonthDay(data.juchuHonbanbiDat)}</Typography>
                       </Grid2>
                       <Grid2 size={7}>
                         <Typography sx={{ wordBreak: 'break-word', whiteSpace: 'wrap' }}>{data.mem}</Typography>
@@ -1586,7 +1586,7 @@ const EquipmentOrderDetail = (props: {
                   data.juchuHonbanbiShubetuId === 30 && (
                     <Grid2 key={index} container display="flex" flexDirection="row">
                       <Grid2 size={5}>
-                        <Typography>{data.juchuHonbanbiDat}</Typography>
+                        <Typography>{toISOStringYearMonthDay(data.juchuHonbanbiDat)}</Typography>
                       </Grid2>
                       <Grid2 size={7}>
                         <Typography sx={{ wordBreak: 'break-word', whiteSpace: 'wrap' }}>{data.mem}</Typography>
@@ -1628,7 +1628,7 @@ const EquipmentOrderDetail = (props: {
                   data.juchuHonbanbiShubetuId === 40 && (
                     <Grid2 key={index} container display="flex" flexDirection="row">
                       <Grid2 display={'flex'} size={5}>
-                        <Typography>{data.juchuHonbanbiDat}</Typography>
+                        <Typography>{toISOStringYearMonthDay(data.juchuHonbanbiDat)}</Typography>
                         <Typography ml={2}>{data.juchuHonbanbiAddQty}</Typography>
                       </Grid2>
                       <Grid2 size={7}>

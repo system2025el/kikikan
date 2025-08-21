@@ -93,10 +93,8 @@ const Page = async (props: {
       juchuKizaiHeadData.kicsNyukoDat && new Date(juchuKizaiHeadData.kicsNyukoDat),
       juchuKizaiHeadData.yardNyukoDat && new Date(juchuKizaiHeadData.yardNyukoDat)
     );
-    console.log(shukoDate, nyukoDate);
     // 出庫日から入庫日
     const dateRange = getRange(shukoDate, nyukoDate);
-    console.log(dateRange);
     // 受注機材idリスト
     const ids = juchuKizaiMeisaiData?.map((data) => data.kizaiId);
     // 受注機材合計数リスト
@@ -111,7 +109,7 @@ const Page = async (props: {
           juchuKizaiHeadData?.juchuHeadId,
           juchuKizaiHeadData?.juchuKizaiHeadId,
           ids[i],
-          toISOStringYearMonthDay(subDays(shukoDate, 1))
+          subDays(shukoDate, 1)
         );
         eqStockData.push(stock);
       }

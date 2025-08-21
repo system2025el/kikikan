@@ -37,6 +37,7 @@ export const getRange = (start: Date | null, end: Date | null): string[] => {
   if (start !== null && end !== null) {
     const range: string[] = [];
     const current = new Date(start);
+    console.log('---------------current-----------', current);
 
     while (current <= end) {
       const dateStr = toISOStringYearMonthDay(current);

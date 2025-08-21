@@ -16,8 +16,10 @@ export const getStockRowBackgroundColor = (
 ): string => {
   const cellDate = toISOStringYearMonthDay(date);
 
-  if (juchuHonbanbiList.some((date) => date.juchuHonbanbiDat === cellDate)) {
-    const shubetuId = juchuHonbanbiList.find((date) => date.juchuHonbanbiDat === cellDate)?.juchuHonbanbiShubetuId;
+  if (juchuHonbanbiList.some((date) => toISOStringYearMonthDay(date.juchuHonbanbiDat) === cellDate)) {
+    const shubetuId = juchuHonbanbiList.find(
+      (date) => toISOStringYearMonthDay(date.juchuHonbanbiDat) === cellDate
+    )?.juchuHonbanbiShubetuId;
     switch (shubetuId) {
       case 40:
         return 'pink';
