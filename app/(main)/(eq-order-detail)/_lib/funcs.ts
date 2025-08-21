@@ -510,7 +510,7 @@ export const UpdateJuchuKizaiMeisai = async (juchuKizaiMeisaiData: JuchuKizaiMei
 
       if (error) {
         console.error('Error updating juchu kizai meisai:', error.message);
-        return false;
+        continue;
       }
       console.log('juchu kizai meisai updated successfully:', data);
     }
@@ -642,11 +642,11 @@ export const UpdateIdoDen = async (idoKizaiData: JuchuKizaiMeisaiValues[], userN
 
       if (error) {
         console.error('Error updating ido den:', error.message);
-        return false;
+        continue;
       }
-      console.log('ido den updated successfully:', updateData);
-      return true;
+      console.log('ido den updated successfully:', data);
     }
+    return true;
   } catch (e) {
     console.error('Exception while updating ido den:', e);
     return false;
