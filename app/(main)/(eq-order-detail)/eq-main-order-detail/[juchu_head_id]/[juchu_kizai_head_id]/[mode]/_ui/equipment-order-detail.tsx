@@ -1523,10 +1523,18 @@ const EquipmentOrderDetail = (props: {
               />
             </Dialog>
           </Box>
+          <Box
+            display={'flex'}
+            justifyContent={'center'}
+            ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
+            width={75}
+            bgcolor={'mediumpurple'}
+          >
+            <Typography fontSize={'small'} py={1} px={3} sx={{ color: 'white' }}>
+              仕込
+            </Typography>
+          </Box>
           <Grid2 container spacing={1} ml={{ xs: 10, sm: 17, md: 17, lg: 17 }} py={2} width={{ md: '50%' }}>
-            <Grid2 size={12}>
-              <Button sx={{ color: 'white', bgcolor: 'mediumpurple' }}>仕込</Button>
-            </Grid2>
             <Grid2 size={6} maxWidth={408}>
               <Typography>日付</Typography>
             </Grid2>
@@ -1557,6 +1565,18 @@ const EquipmentOrderDetail = (props: {
                   )
               )}
           </Grid2>
+          <Box
+            display={'flex'}
+            justifyContent={'center'}
+            ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
+            mt={4}
+            width={75}
+            bgcolor={'orange'}
+          >
+            <Typography fontSize={'small'} py={1} px={3} sx={{ color: 'white' }}>
+              RH
+            </Typography>
+          </Box>
           <Grid2
             container
             display="flex"
@@ -1566,9 +1586,6 @@ const EquipmentOrderDetail = (props: {
             py={2}
             width={{ md: '50%' }}
           >
-            <Grid2 size={12}>
-              <Button sx={{ color: 'white', bgcolor: 'orange' }}>RH</Button>
-            </Grid2>
             <Grid2 size={6} maxWidth={408}>
               <Typography>日付</Typography>
             </Grid2>
@@ -1599,6 +1616,18 @@ const EquipmentOrderDetail = (props: {
                   )
               )}
           </Grid2>
+          <Box
+            display={'flex'}
+            justifyContent={'center'}
+            ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
+            mt={4}
+            width={75}
+            bgcolor={'lightgreen'}
+          >
+            <Typography fontSize={'small'} py={1} px={3} sx={{ color: 'white' }}>
+              GP
+            </Typography>
+          </Box>
           <Grid2
             container
             display="flex"
@@ -1608,9 +1637,6 @@ const EquipmentOrderDetail = (props: {
             py={2}
             width={{ md: '50%' }}
           >
-            <Grid2 size={12}>
-              <Button sx={{ color: 'white', bgcolor: 'lightgreen' }}>GP</Button>
-            </Grid2>
             <Grid2 size={6} maxWidth={408}>
               <Typography>日付</Typography>
             </Grid2>
@@ -1641,6 +1667,18 @@ const EquipmentOrderDetail = (props: {
                   )
               )}
           </Grid2>
+          <Box
+            display={'flex'}
+            justifyContent={'center'}
+            ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
+            mt={4}
+            width={75}
+            bgcolor={'pink'}
+          >
+            <Typography fontSize={'small'} py={1} px={3} sx={{ color: 'white' }}>
+              本番
+            </Typography>
+          </Box>
           <Grid2
             container
             display="flex"
@@ -1650,9 +1688,6 @@ const EquipmentOrderDetail = (props: {
             py={2}
             width={{ md: '50%' }}
           >
-            <Grid2 size={12}>
-              <Button sx={{ color: 'white', bgcolor: 'pink' }}>本番</Button>
-            </Grid2>
             <Grid2 size={3} maxWidth={200}>
               <Typography>日付</Typography>
             </Grid2>
@@ -1669,6 +1704,7 @@ const EquipmentOrderDetail = (props: {
             flexDirection="column"
             spacing={1}
             ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
+            pb={2}
             width={{ md: '50%' }}
           >
             {juchuHonbanbiList &&
