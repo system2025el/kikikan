@@ -144,7 +144,7 @@ export const OrderEqTable: React.FC<OrderEqTableProps> = ({ orderEqRows, edit, o
                 <TableCell align="right">{row.rihabi}</TableCell>
                 <TableCell align="right">{row.genebi}</TableCell>
                 <TableCell align="right">{row.honbanbi}</TableCell>
-                <TableCell align="right">{row.juchuHonbanbiqty}</TableCell>
+                <TableCell align="right">{row.juchuHonbanbiCalcQty}</TableCell>
                 <TableCell align="right">{row.shokei}</TableCell>
                 <TableCell align="left" color="red">
                   {row.keikoku}

@@ -37,7 +37,7 @@ export type EqTableValues = {
   rihabi: number;
   genebi: number;
   honbanbi: number;
-  juchuHonbanbiqty: number;
+  juchuHonbanbiCalcQty: number;
   shokei: number;
   keikoku: string;
   oyaJuchuKizaiHeadId: number;
