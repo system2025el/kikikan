@@ -1500,7 +1500,7 @@ const EquipmentOrderDetail = (props: {
         </Box>
       </Paper>
       {/*-------本番日-------*/}
-      <Paper variant="outlined" sx={{ mt: 2 }}>
+      <Paper variant="outlined" sx={{ my: 2 }}>
         <Box>
           <Box sx={styles.container}>
             <Typography marginRight={{ xs: 2, sm: 9, md: 9, lg: 9 }} whiteSpace="nowrap">
@@ -1527,10 +1527,10 @@ const EquipmentOrderDetail = (props: {
             <Grid2 size={12}>
               <Button sx={{ color: 'white', bgcolor: 'mediumpurple' }}>仕込</Button>
             </Grid2>
-            <Grid2 size={5} display="flex">
+            <Grid2 size={6} maxWidth={408}>
               <Typography>日付</Typography>
             </Grid2>
-            <Grid2 size={7} display="flex">
+            <Grid2 size={6}>
               <Typography>メモ</Typography>
             </Grid2>
           </Grid2>
@@ -1547,10 +1547,10 @@ const EquipmentOrderDetail = (props: {
                 (data, index) =>
                   data.juchuHonbanbiShubetuId === 10 && (
                     <Grid2 key={index} container display="flex" flexDirection="row">
-                      <Grid2 size={5}>
+                      <Grid2 size={6} maxWidth={408}>
                         <Typography>{toISOStringYearMonthDay(data.juchuHonbanbiDat)}</Typography>
                       </Grid2>
-                      <Grid2 size={7}>
+                      <Grid2 size={6}>
                         <Typography sx={{ wordBreak: 'break-word', whiteSpace: 'wrap' }}>{data.mem}</Typography>
                       </Grid2>
                     </Grid2>
@@ -1569,10 +1569,10 @@ const EquipmentOrderDetail = (props: {
             <Grid2 size={12}>
               <Button sx={{ color: 'white', bgcolor: 'orange' }}>RH</Button>
             </Grid2>
-            <Grid2 size={5}>
+            <Grid2 size={6} maxWidth={408}>
               <Typography>日付</Typography>
             </Grid2>
-            <Grid2 size={7}>
+            <Grid2 size={6}>
               <Typography>メモ</Typography>
             </Grid2>
           </Grid2>
@@ -1589,10 +1589,10 @@ const EquipmentOrderDetail = (props: {
                 (data, index) =>
                   data.juchuHonbanbiShubetuId === 20 && (
                     <Grid2 key={index} container display="flex" flexDirection="row">
-                      <Grid2 size={5}>
+                      <Grid2 size={6} maxWidth={408}>
                         <Typography>{toISOStringYearMonthDay(data.juchuHonbanbiDat)}</Typography>
                       </Grid2>
-                      <Grid2 size={7}>
+                      <Grid2 size={6}>
                         <Typography sx={{ wordBreak: 'break-word', whiteSpace: 'wrap' }}>{data.mem}</Typography>
                       </Grid2>
                     </Grid2>
@@ -1611,10 +1611,10 @@ const EquipmentOrderDetail = (props: {
             <Grid2 size={12}>
               <Button sx={{ color: 'white', bgcolor: 'lightgreen' }}>GP</Button>
             </Grid2>
-            <Grid2 size={5}>
+            <Grid2 size={6} maxWidth={408}>
               <Typography>日付</Typography>
             </Grid2>
-            <Grid2 size={7}>
+            <Grid2 size={6}>
               <Typography>メモ</Typography>
             </Grid2>
           </Grid2>
@@ -1631,10 +1631,10 @@ const EquipmentOrderDetail = (props: {
                 (data, index) =>
                   data.juchuHonbanbiShubetuId === 30 && (
                     <Grid2 key={index} container display="flex" flexDirection="row">
-                      <Grid2 size={5}>
+                      <Grid2 size={6} maxWidth={408}>
                         <Typography>{toISOStringYearMonthDay(data.juchuHonbanbiDat)}</Typography>
                       </Grid2>
-                      <Grid2 size={7}>
+                      <Grid2 size={6}>
                         <Typography sx={{ wordBreak: 'break-word', whiteSpace: 'wrap' }}>{data.mem}</Typography>
                       </Grid2>
                     </Grid2>
@@ -1653,10 +1653,13 @@ const EquipmentOrderDetail = (props: {
             <Grid2 size={12}>
               <Button sx={{ color: 'white', bgcolor: 'pink' }}>本番</Button>
             </Grid2>
-            <Grid2 size={5}>
+            <Grid2 size={3} maxWidth={200}>
               <Typography>日付</Typography>
             </Grid2>
-            <Grid2 size={7}>
+            <Grid2 size={3} maxWidth={200}>
+              <Typography>追加日数</Typography>
+            </Grid2>
+            <Grid2 size={6}>
               <Typography>メモ</Typography>
             </Grid2>
           </Grid2>
@@ -1673,11 +1676,13 @@ const EquipmentOrderDetail = (props: {
                 (data, index) =>
                   data.juchuHonbanbiShubetuId === 40 && (
                     <Grid2 key={index} container display="flex" flexDirection="row">
-                      <Grid2 display={'flex'} size={5}>
+                      <Grid2 size={3} maxWidth={200}>
                         <Typography>{toISOStringYearMonthDay(data.juchuHonbanbiDat)}</Typography>
-                        <Typography ml={2}>{data.juchuHonbanbiAddQty}</Typography>
                       </Grid2>
-                      <Grid2 size={7}>
+                      <Grid2 size={3} maxWidth={200}>
+                        <Typography>{data.juchuHonbanbiAddQty}</Typography>
+                      </Grid2>
+                      <Grid2 size={6}>
                         <Typography sx={{ wordBreak: 'break-word', whiteSpace: 'wrap' }}>{data.mem}</Typography>
                       </Grid2>
                     </Grid2>
