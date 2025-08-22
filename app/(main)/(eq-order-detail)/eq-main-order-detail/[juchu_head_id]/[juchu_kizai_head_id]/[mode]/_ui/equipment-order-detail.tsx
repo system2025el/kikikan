@@ -135,7 +135,9 @@ const EquipmentOrderDetail = (props: {
   // 受注本番日削除リスト
   const [juchuHonbanbiDeleteList, setJuchuHonbanbiDeleteList] = useState<JuchuKizaiHonbanbiValues[]>([]);
   // 受注機材明細元合計数
-  const [originPlanQty, setOriginPlanQty] = useState<number[]>(originJuchuKizaiMeisaiList.map((data) => data.planQty));
+  const [originPlanQty, setOriginPlanQty] = useState<number[]>(
+    props.juchuKizaiMeisaiData ? props.juchuKizaiMeisaiData.map((data) => data.planQty) : []
+  );
 
   // 出庫日
   const [shukoDate, setShukoDate] = useState<Date | null>(props.shukoDate);
@@ -304,6 +306,18 @@ const EquipmentOrderDetail = (props: {
   const handleEdit = async () => {
     // 編集→閲覧
     if (edit) {
+      const filterJuchuKizaiMeisaiList = juchuKizaiMeisaiList.filter((data) => !data.delFlag);
+      console.log(JSON.stringify(originJuchuKizaiMeisaiList));
+      console.log(JSON.stringify(filterJuchuKizaiMeisaiList));
+      if (
+        isDirty ||
+        JSON.stringify(originJuchuHonbanbiList) !== JSON.stringify(juchuHonbanbiList) ||
+        JSON.stringify(originJuchuKizaiMeisaiList) !== JSON.stringify(filterJuchuKizaiMeisaiList)
+      ) {
+        setSaveOpen(true);
+        return;
+      }
+
       await DeleteLock(1, props.juchuHeadData.juchuHeadId);
       setLockData(null);
       setEdit(false);
@@ -738,18 +752,15 @@ const EquipmentOrderDetail = (props: {
       );
       setEqStockList((prev) => prev.map((data, i) => (i === rowIndex ? [...subUpdatedEqStockList] : data)));
     }
-    const updatedJuchukizaiMeisaiData = [...juchuKizaiMeisaiList];
-    const targetJuchukizaiMeisaiData = updatedJuchukizaiMeisaiData
-      .filter((data) => !data.delFlag)
-      .find((data) => data.kizaiId === kizaiId);
-    if (targetJuchukizaiMeisaiData) targetJuchukizaiMeisaiData.planKizaiQty = planKizaiQty;
-    const updatedPriceTotal = updatedJuchukizaiMeisaiData
+    const updatedPriceTotal = juchuKizaiMeisaiList
       .filter((data) => !data.delFlag)
       .reduce(
         (sum, row) =>
-          getValues('juchuHonbanbiQty') !== null
-            ? sum + row.kizaiTankaAmt * row.planKizaiQty * (getValues('juchuHonbanbiQty') ?? 0)
-            : 0,
+          getValues('juchuHonbanbiQty') !== null && row.kizaiId === kizaiId
+            ? sum + row.kizaiTankaAmt * planKizaiQty * (getValues('juchuHonbanbiQty') ?? 0)
+            : getValues('juchuHonbanbiQty') !== null && row.kizaiId !== kizaiId
+              ? sum + row.kizaiTankaAmt * row.planKizaiQty * (getValues('juchuHonbanbiQty') ?? 0)
+              : 0,
         0
       );
     setPriceTotal(updatedPriceTotal);

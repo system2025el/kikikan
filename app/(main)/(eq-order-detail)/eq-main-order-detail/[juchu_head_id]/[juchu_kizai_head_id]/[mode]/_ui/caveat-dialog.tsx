@@ -9,7 +9,7 @@ export const SaveAlertDialog = ({ open, onClick }: { open: boolean; onClick: () 
         <Box>保存されていません</Box>
       </DialogTitle>
       <DialogContentText m={2} p={2}>
-        受注機材ヘッダーを保存してください
+        1度保存をしてください
       </DialogContentText>
       <DialogActions>
         <Button onClick={onClick}>確認</Button>
