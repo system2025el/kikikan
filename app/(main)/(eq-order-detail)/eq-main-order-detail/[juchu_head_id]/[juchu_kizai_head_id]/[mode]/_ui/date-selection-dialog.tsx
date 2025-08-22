@@ -304,87 +304,175 @@ export const DateSelectDialog = ({
         </Grid2>
         <Divider />
         <TabPanel value={value} index={10}>
+          <Grid2 container display="flex" flexDirection="row" spacing={2} ml={2} width={{ md: '50%' }}>
+            <Grid2 size={3} maxWidth={120}>
+              <Typography>日付</Typography>
+            </Grid2>
+            <Grid2 size={5} maxWidth={200}>
+              <Typography>メモ</Typography>
+            </Grid2>
+          </Grid2>
           {sikomi.map((data, index) => (
-            <Box display="flex" alignItems="center" margin={2} key={index}>
-              <TextField value={toISOStringYearMonthDay(data.juchuHonbanbiDat)} />
-              <Typography ml={2} mr={1}>
-                メモ
-              </Typography>
-              <TextField
-                value={data.mem ? data.mem : ''}
-                onChange={(e) => handleSikomiMemChange(index, e.target.value)}
-              ></TextField>
-              <Button sx={{ ml: 4, bgcolor: 'red', color: 'white' }} onClick={() => handleSikomiRemove(index)}>
-                削除
-              </Button>
-            </Box>
+            <Grid2
+              key={index}
+              container
+              display="flex"
+              flexDirection="row"
+              alignItems={'center'}
+              spacing={2}
+              ml={2}
+              py={1}
+              width={{ md: '50%' }}
+            >
+              <Grid2 size={3} maxWidth={120}>
+                <Typography>{toISOStringYearMonthDay(data.juchuHonbanbiDat)}</Typography>
+              </Grid2>
+              <Grid2 size={5} maxWidth={250}>
+                <TextField
+                  value={data.mem ? data.mem : ''}
+                  onChange={(e) => handleSikomiMemChange(index, e.target.value)}
+                ></TextField>
+              </Grid2>
+              <Grid2 size={4}>
+                <Button sx={{ ml: 2, bgcolor: 'red', color: 'white' }} onClick={() => handleSikomiRemove(index)}>
+                  削除
+                </Button>
+              </Grid2>
+            </Grid2>
           ))}
         </TabPanel>
         <TabPanel value={value} index={20}>
+          <Grid2 container display="flex" flexDirection="row" spacing={2} ml={2} width={{ md: '50%' }}>
+            <Grid2 size={3} maxWidth={120}>
+              <Typography>日付</Typography>
+            </Grid2>
+            <Grid2 size={5} maxWidth={200}>
+              <Typography>メモ</Typography>
+            </Grid2>
+          </Grid2>
           {rh.map((data, index) => (
-            <Box display="flex" alignItems="center" margin={2} key={index}>
-              <TextField value={toISOStringYearMonthDay(data.juchuHonbanbiDat)} />
-              <Typography ml={2} mr={1}>
-                メモ
-              </Typography>
-              <TextField
-                value={data.mem ? data.mem : ''}
-                onChange={(e) => handleRhMemChange(index, e.target.value)}
-              ></TextField>
-              <Button sx={{ ml: 4, bgcolor: 'red', color: 'white' }} onClick={() => handleRhRemove(index)}>
-                削除
-              </Button>
-            </Box>
+            <Grid2
+              key={index}
+              container
+              display="flex"
+              flexDirection="row"
+              alignItems={'center'}
+              spacing={2}
+              ml={2}
+              py={1}
+              width={{ md: '50%' }}
+            >
+              <Grid2 size={3} maxWidth={120}>
+                <Typography>{toISOStringYearMonthDay(data.juchuHonbanbiDat)}</Typography>
+              </Grid2>
+              <Grid2 size={5} maxWidth={250}>
+                <TextField
+                  value={data.mem ? data.mem : ''}
+                  onChange={(e) => handleSikomiMemChange(index, e.target.value)}
+                ></TextField>
+              </Grid2>
+              <Grid2 size={4}>
+                <Button sx={{ ml: 2, bgcolor: 'red', color: 'white' }} onClick={() => handleRhRemove(index)}>
+                  削除
+                </Button>
+              </Grid2>
+            </Grid2>
           ))}
         </TabPanel>
         <TabPanel value={value} index={30}>
+          <Grid2 container display="flex" flexDirection="row" spacing={2} ml={2} width={{ md: '50%' }}>
+            <Grid2 size={3} maxWidth={120}>
+              <Typography>日付</Typography>
+            </Grid2>
+            <Grid2 size={5} maxWidth={200}>
+              <Typography>メモ</Typography>
+            </Grid2>
+          </Grid2>
           {gp.map((data, index) => (
-            <Box display="flex" alignItems="center" margin={2} key={index}>
-              <TextField value={toISOStringYearMonthDay(data.juchuHonbanbiDat)} />
-              <Typography ml={2} mr={1}>
-                メモ
-              </Typography>
-              <TextField
-                value={data.mem ? data.mem : ''}
-                onChange={(e) => handleGpMemChange(index, e.target.value)}
-              ></TextField>
-              <Button sx={{ ml: 4, bgcolor: 'red', color: 'white' }} onClick={() => handleGpRemove(index)}>
-                削除
-              </Button>
-            </Box>
+            <Grid2
+              key={index}
+              container
+              display="flex"
+              flexDirection="row"
+              alignItems={'center'}
+              spacing={2}
+              ml={2}
+              py={1}
+              width={{ md: '50%' }}
+            >
+              <Grid2 size={3} maxWidth={120}>
+                <Typography>{toISOStringYearMonthDay(data.juchuHonbanbiDat)}</Typography>
+              </Grid2>
+              <Grid2 size={5} maxWidth={250}>
+                <TextField
+                  value={data.mem ? data.mem : ''}
+                  onChange={(e) => handleSikomiMemChange(index, e.target.value)}
+                ></TextField>
+              </Grid2>
+              <Grid2 size={4}>
+                <Button sx={{ ml: 2, bgcolor: 'red', color: 'white' }} onClick={() => handleGpRemove(index)}>
+                  削除
+                </Button>
+              </Grid2>
+            </Grid2>
           ))}
         </TabPanel>
         <TabPanel value={value} index={40}>
+          <Grid2 container display="flex" flexDirection="row" spacing={2} ml={2} width={{ md: '50%' }}>
+            <Grid2 size={3} maxWidth={120}>
+              <Typography>日付</Typography>
+            </Grid2>
+            <Grid2 size={3} maxWidth={100}>
+              <Typography>追加日数</Typography>
+            </Grid2>
+            <Grid2 size={5} maxWidth={250}>
+              <Typography>メモ</Typography>
+            </Grid2>
+          </Grid2>
           {honban.map((data, index) => (
-            <Box display="flex" alignItems="center" margin={2} key={index}>
-              <TextField value={toISOStringYearMonthDay(data.juchuHonbanbiDat)} />
-              <TextField
-                value={data.juchuHonbanbiAddQty}
-                onChange={(e) => handleHonbanAddChange(index, Number(e.target.value))}
-                type="number"
-                sx={{
-                  width: '50px',
-                  ml: 2,
-                  '& .MuiInputBase-input': {
-                    textAlign: 'right',
-                  },
-                  '& input[type=number]::-webkit-inner-spin-button': {
-                    WebkitAppearance: 'none',
-                    margin: 0,
-                  },
-                }}
-              />
-              <Typography ml={2} mr={1}>
-                メモ
-              </Typography>
-              <TextField
-                value={data.mem ? data.mem : ''}
-                onChange={(e) => handleHonbanMemChange(index, e.target.value)}
-              ></TextField>
-              <Button sx={{ ml: 4, bgcolor: 'red', color: 'white' }} onClick={() => handleHonbanRemove(index)}>
-                削除
-              </Button>
-            </Box>
+            <Grid2
+              key={index}
+              container
+              display="flex"
+              flexDirection="row"
+              alignItems={'center'}
+              spacing={2}
+              ml={2}
+              py={1}
+              width={{ md: '50%' }}
+            >
+              <Grid2 size={3} maxWidth={120}>
+                <Typography>{toISOStringYearMonthDay(data.juchuHonbanbiDat)}</Typography>
+              </Grid2>
+              <Grid2 size={3} display={'flex'} alignItems={'center'} maxWidth={100}>
+                <TextField
+                  value={data.juchuHonbanbiAddQty}
+                  onChange={(e) => handleHonbanAddChange(index, Number(e.target.value))}
+                  type="number"
+                  sx={{
+                    width: '50px',
+                    '& .MuiInputBase-input': {
+                      textAlign: 'right',
+                    },
+                    '& input[type=number]::-webkit-inner-spin-button': {
+                      WebkitAppearance: 'none',
+                      margin: 0,
+                    },
+                  }}
+                />
+              </Grid2>
+              <Grid2 size={4} maxWidth={250}>
+                <TextField
+                  value={data.mem ? data.mem : ''}
+                  onChange={(e) => handleSikomiMemChange(index, e.target.value)}
+                ></TextField>
+              </Grid2>
+              <Grid2 size={2}>
+                <Button sx={{ ml: 2, bgcolor: 'red', color: 'white' }} onClick={() => handleHonbanRemove(index)}>
+                  削除
+                </Button>
+              </Grid2>
+            </Grid2>
           ))}
         </TabPanel>
       </Paper>

@@ -191,6 +191,11 @@ export const Order = (props: {
   const handleEdit = async () => {
     // 編集→閲覧
     if (edit) {
+      if (isDirty) {
+        setSaveOpen(true);
+        return;
+      }
+
       await DeleteLock(1, props.juchuHeadData.juchuHeadId);
       setLockData(null);
       setEdit(false);
