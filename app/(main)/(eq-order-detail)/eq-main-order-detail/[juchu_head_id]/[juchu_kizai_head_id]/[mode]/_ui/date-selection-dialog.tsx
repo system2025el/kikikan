@@ -18,7 +18,6 @@ type TabPanelProps = {
 };
 
 type DateDialogProps = {
-  userNam: string;
   juchuHeadId: number;
   juchuKizaiHeadId: number;
   shukoDate: Date | null;
