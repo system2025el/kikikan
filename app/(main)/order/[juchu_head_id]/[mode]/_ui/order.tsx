@@ -85,6 +85,8 @@ export const Order = (props: {
   const { setIsDirty, setIsSave, setLock } = useDirty();
   // 合計金額
   const priceTotal = eqHeaderList!.reduce((sum, row) => sum + (row.shokei ?? 0), 0);
+  // 編集中かどうか
+  const [isEditing, setIsEditing] = useState(false);
 
   /* useForm ------------------------- */
   const {
@@ -170,6 +172,7 @@ export const Order = (props: {
     console.log('update : 開始');
     if (!user) return;
     setIsLoading(true);
+    setIsEditing(false);
 
     // 新規
     if (data.juchuHeadId === 0) {
@@ -192,7 +195,7 @@ export const Order = (props: {
     // 編集→閲覧
     if (edit) {
       if (isDirty) {
-        setSaveOpen(true);
+        setDirtyOpen(true);
         return;
       }
 
@@ -327,10 +330,17 @@ export const Order = (props: {
   const handleResultDialog = async (result: boolean) => {
     if (result && path) {
       await DeleteLock(1, props.juchuHeadData.juchuHeadId);
-      router.push(path);
-      setPath(null);
+      setLockData(null);
       setIsDirty(false);
       setIsSave(true);
+      router.push(path);
+      setPath(null);
+    } else if (result && !path) {
+      await DeleteLock(1, props.juchuHeadData.juchuHeadId);
+      setLockData(null);
+      setEdit(false);
+      reset();
+      setDirtyOpen(false);
     } else {
       setDirtyOpen(false);
       setPath(null);
@@ -573,22 +583,47 @@ export const Order = (props: {
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={7}>値引き</Typography>
-                <TextFieldElement
+                <Controller
                   name="nebikiAmt"
                   control={control}
-                  type="number"
-                  sx={{
-                    '& .MuiInputBase-input': {
-                      textAlign: 'right',
-                    },
-                    '& input[type=number]::-webkit-inner-spin-button': {
-                      WebkitAppearance: 'none',
-                      margin: 0,
-                    },
-                  }}
-                  disabled={!edit}
-                ></TextFieldElement>
-                <Typography marginLeft={1}>円</Typography>
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      value={
+                        isEditing
+                          ? (field.value ?? '')
+                          : field.value !== null && !isNaN(field.value)
+                            ? `¥${Number(field.value).toLocaleString()}`
+                            : '¥0'
+                      }
+                      type="text"
+                      onFocus={(e) => {
+                        setIsEditing(true);
+                        const rawValue = e.target.value.replace(/[¥,]/g, '');
+                        e.target.value = rawValue;
+                      }}
+                      onBlur={(e) => {
+                        const rawValue = e.target.value.replace(/[¥,]/g, '');
+                        const numericValue = Number(rawValue);
+                        field.onChange(numericValue);
+                        setIsEditing(false);
+                      }}
+                      onChange={(e) => {
+                        const raw = e.target.value.replace(/[^\d]/g, '');
+                        if (/^\d*$/.test(raw)) {
+                          field.onChange(Number(raw));
+                          e.target.value = raw;
+                        }
+                      }}
+                      sx={{
+                        '& .MuiInputBase-input': {
+                          textAlign: 'right',
+                        },
+                      }}
+                      disabled={!edit}
+                    />
+                  )}
+                />
                 <Typography ml={4} mr={2}>
                   税区分
                 </Typography>
@@ -642,7 +677,7 @@ export const Order = (props: {
                     padding: 1,
                   },
                 }}
-                value={'¥' + priceTotal}
+                value={`¥${priceTotal.toLocaleString()}`}
                 onClick={(e) => {
                   e.stopPropagation();
                 }}

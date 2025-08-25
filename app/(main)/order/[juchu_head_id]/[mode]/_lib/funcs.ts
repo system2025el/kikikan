@@ -328,7 +328,7 @@ export const GetEqHeaderList = async (juchuHeadId: number) => {
       rihabi: d.rihabi,
       genebi: d.genebi,
       honbanbi: d.honbanbi,
-      juchuHonbanbiqty: d.juchu_honbanbi_qty,
+      juchuHonbanbiCalcQty: d.juchu_honbanbi_calc_qty,
       shokei: d.shokei,
       keikoku: d.keikoku,
       oyaJuchuKizaiHeadId: d.oya_juchu_kizai_head_id,
