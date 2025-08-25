@@ -33,7 +33,7 @@ const Page = async (props: {
       juchuHonbanbiQty: null,
       nebikiAmt: null,
       mem: null,
-      headNam: null,
+      headNam: '',
       kicsShukoDat: null,
       kicsNyukoDat: null,
       yardShukoDat: null,
