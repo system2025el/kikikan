@@ -8,7 +8,7 @@ export const JuchuKizaiHeadSchema = z
     juchuHonbanbiQty: z.number().nullable(),
     nebikiAmt: z.number().nullable(),
     mem: z.string().nullable(),
-    headNam: z.string().nullable(),
+    headNam: z.string({ message: '機材明細名は必須です' }).min(1, { message: '機材明細名は必須です' }),
     kicsShukoDat: z.date().nullable(),
     kicsNyukoDat: z.date().nullable(),
     yardShukoDat: z.date().nullable(),

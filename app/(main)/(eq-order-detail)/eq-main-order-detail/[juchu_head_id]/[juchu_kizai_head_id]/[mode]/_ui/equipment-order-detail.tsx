@@ -42,7 +42,7 @@ import { toISOString, toISOStringYearMonthDay } from '@/app/(main)/_lib/date-con
 import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
 import { BackButton } from '@/app/(main)/_ui/buttons';
 import { Calendar, TestDate } from '@/app/(main)/_ui/date';
-import { useDirty } from '@/app/(main)/_ui/dirty-context';
+import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
 import { Loading } from '@/app/(main)/_ui/loading';
 import Time, { TestTime } from '@/app/(main)/_ui/time';
 import { GetNyukoDate, getRange, GetShukoDate } from '@/app/(main)/(eq-order-detail)/_lib/datefuncs';
@@ -122,6 +122,10 @@ const EquipmentOrderDetail = (props: {
   const [juchuKizaiMeisaiList, setJuchuKizaiMeisaiList] = useState<JuchuKizaiMeisaiValues[]>(
     props.juchuKizaiMeisaiData ? props.juchuKizaiMeisaiData : []
   );
+  // 機材在庫元データ
+  const [originEqStockList, setOriginEqStockList] = useState<StockTableValues[][]>(
+    props.eqStockData ? props.eqStockData : []
+  );
   // 機材在庫リスト
   const [eqStockList, setEqStockList] = useState<StockTableValues[][]>(props.eqStockData ? props.eqStockData : []);
   // 受注本番日元データ
@@ -152,6 +156,8 @@ const EquipmentOrderDetail = (props: {
 
   // 未保存ダイアログを出すかどうか
   const [saveOpen, setSaveOpen] = useState(false);
+  // 編集内容が未保存ダイアログを出すかどうか
+  const [dirtyOpen, setDirtyOpen] = useState(false);
   // 移動日更新ダイアログを出すかどうか
   const [moveOpen, setMoveOpen] = useState(false);
   // 機材追加ダイアログ制御
@@ -175,6 +181,9 @@ const EquipmentOrderDetail = (props: {
       0
     )
   );
+
+  // 編集中かどうか
+  const [isEditing, setIsEditing] = useState(false);
 
   // context
   const { setIsDirty, setIsSave, setLock } = useDirty();
@@ -307,14 +316,12 @@ const EquipmentOrderDetail = (props: {
     // 編集→閲覧
     if (edit) {
       const filterJuchuKizaiMeisaiList = juchuKizaiMeisaiList.filter((data) => !data.delFlag);
-      console.log(JSON.stringify(originJuchuKizaiMeisaiList));
-      console.log(JSON.stringify(filterJuchuKizaiMeisaiList));
       if (
         isDirty ||
         JSON.stringify(originJuchuHonbanbiList) !== JSON.stringify(juchuHonbanbiList) ||
         JSON.stringify(originJuchuKizaiMeisaiList) !== JSON.stringify(filterJuchuKizaiMeisaiList)
       ) {
-        setSaveOpen(true);
+        setDirtyOpen(true);
         return;
       }
 
@@ -346,6 +353,7 @@ const EquipmentOrderDetail = (props: {
     console.log('保存開始');
     if (!user) return;
     setIsLoading(true);
+    setIsEditing(false);
 
     // ユーザー名
     const userNam = user.name;
@@ -409,6 +417,7 @@ const EquipmentOrderDetail = (props: {
             updateShukoDate,
             juchuKizaiMeisaiData
           );
+          setOriginEqStockList(updatedEqStockData);
         }
       } else if (isDirty) {
         // 受注機材ヘッダー状態管理更新
@@ -420,6 +429,7 @@ const EquipmentOrderDetail = (props: {
           updateShukoDate,
           juchuKizaiMeisaiList
         );
+        setOriginEqStockList(updatedEqStockData);
       } else if (JSON.stringify(originJuchuKizaiMeisaiList) !== JSON.stringify(filterJuchuKizaiMeisaiList)) {
         // 受注機材明細、機材在庫テーブル更新
         const juchuKizaiMeisaiData = await GetJuchuKizaiMeisai(data.juchuHeadId, data.juchuKizaiHeadId);
@@ -433,6 +443,7 @@ const EquipmentOrderDetail = (props: {
             updateShukoDate,
             juchuKizaiMeisaiData
           );
+          setOriginEqStockList(updatedEqStockData);
         }
       }
     }
@@ -1018,6 +1029,24 @@ const EquipmentOrderDetail = (props: {
     }
   };
 
+  const handleResultDialog = async (result: boolean) => {
+    if (result) {
+      await DeleteLock(1, props.juchuHeadData.juchuHeadId);
+      setLockData(null);
+      setEdit(false);
+      reset();
+      setSelectDate(shukoDate ? shukoDate : new Date());
+      setJuchuHonbanbiList(originJuchuHonbanbiList);
+      setJuchuHonbanbiDeleteList([]);
+      setJuchuKizaiMeisaiList(originJuchuKizaiMeisaiList);
+      setOriginPlanQty(originJuchuKizaiMeisaiList.map((data) => data.planQty));
+      setEqStockList(originEqStockList);
+      setDirtyOpen(false);
+    } else {
+      setDirtyOpen(false);
+    }
+  };
+
   /**
    * 本番日入力ダイアログでの入力値反映
    */
@@ -1279,39 +1308,59 @@ const EquipmentOrderDetail = (props: {
               <Grid2 container alignItems="center">
                 <Typography>小計金額</Typography>
                 <TextField
-                  value={priceTotal}
-                  type="number"
+                  value={`¥${priceTotal.toLocaleString()}`}
+                  type="text"
                   sx={{
                     '& .MuiInputBase-input': {
                       textAlign: 'right',
-                    },
-                    '& input[type=number]::-webkit-inner-spin-button': {
-                      WebkitAppearance: 'none',
-                      margin: 0,
                     },
                   }}
                   disabled
                 />
-                <Typography>円</Typography>
               </Grid2>
               <Grid2 container alignItems="center">
                 <Typography>値引き</Typography>
-                <TextFieldElement
+                <Controller
                   name="nebikiAmt"
                   control={control}
-                  type="number"
-                  sx={{
-                    '& .MuiInputBase-input': {
-                      textAlign: 'right',
-                    },
-                    '& input[type=number]::-webkit-inner-spin-button': {
-                      WebkitAppearance: 'none',
-                      margin: 0,
-                    },
-                  }}
-                  disabled={!edit}
-                ></TextFieldElement>
-                <Typography>円</Typography>
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      value={
+                        isEditing
+                          ? (field.value ?? '')
+                          : field.value !== null && !isNaN(field.value)
+                            ? `¥${Number(field.value).toLocaleString()}`
+                            : '¥0'
+                      }
+                      type="text"
+                      onFocus={(e) => {
+                        setIsEditing(true);
+                        const rawValue = e.target.value.replace(/[¥,]/g, '');
+                        e.target.value = rawValue;
+                      }}
+                      onBlur={(e) => {
+                        const rawValue = e.target.value.replace(/[¥,]/g, '');
+                        const numericValue = Number(rawValue);
+                        field.onChange(numericValue);
+                        setIsEditing(false);
+                      }}
+                      onChange={(e) => {
+                        const raw = e.target.value.replace(/[^\d]/g, '');
+                        if (/^\d*$/.test(raw)) {
+                          field.onChange(Number(raw));
+                          e.target.value = raw;
+                        }
+                      }}
+                      sx={{
+                        '& .MuiInputBase-input': {
+                          textAlign: 'right',
+                        },
+                      }}
+                      disabled={!edit}
+                    />
+                  )}
+                />
               </Grid2>
             </Grid2>
             <Grid2 container p={2} spacing={2}>
@@ -1829,6 +1878,7 @@ const EquipmentOrderDetail = (props: {
         <ArrowUpwardIcon fontSize="small" />
       </Fab>
       <SaveAlertDialog open={saveOpen} onClick={() => setSaveOpen(false)} />
+      <IsDirtyAlertDialog open={dirtyOpen} onClick={handleResultDialog} />
       <MoveAlertDialog open={moveOpen} onClick={handleMoveDialog} />
     </Box>
   );
