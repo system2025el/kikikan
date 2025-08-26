@@ -174,8 +174,6 @@ export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({ rows, onChange, ha
               返却数(マイナス入力)
             </TableCell>
           </TableRow>
-        </TableHead>
-        <TableHead>
           <TableRow>
             <TableCell size="small" style={styles.header} />
             <TableCell size="small" style={styles.header} />
@@ -195,13 +193,13 @@ export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({ rows, onChange, ha
               予備数
             </TableCell>
             <TableCell align="right" size="small" style={styles.header}>
-              受注返却数
+              受注数
             </TableCell>
             <TableCell align="right" size="small" style={styles.header}>
-              予備返却数
+              予備数
             </TableCell>
             <TableCell align="right" size="small" style={styles.header}>
-              返却合計数
+              合計数
             </TableCell>
           </TableRow>
         </TableHead>
@@ -260,7 +258,7 @@ const ReturnEqTableRow = React.memo(
           <MemoTooltip name={row.kizaiNam} memo={row.mem} handleMemoChange={handleMemoChange} rowIndex={rowIndex} />
         </TableCell>
         <TableCell style={styles.row} align="left" size="small">
-          <Button variant="text" sx={{ p: 0 }} href={`/loan-situation/${row.kizaiId}`}>
+          <Button variant="text" sx={{ p: 0, justifyContent: 'start' }} href={`/loan-situation/${row.kizaiId}`}>
             {row.kizaiNam}
           </Button>
         </TableCell>

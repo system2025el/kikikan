@@ -1,7 +1,6 @@
 'use client';
 
-import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
-import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import AddIcon from '@mui/icons-material/Add';
 import CheckIcon from '@mui/icons-material/Check';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
@@ -33,10 +32,16 @@ import { BackButton } from '@/app/(main)/_ui/buttons';
 import { Calendar, TestDate } from '@/app/(main)/_ui/date';
 import { useDirty } from '@/app/(main)/_ui/dirty-context';
 import Time, { TestTime } from '@/app/(main)/_ui/time';
+import { OyaEqSelectionDialog } from '@/app/(main)/(eq-order-detail)/_ui/equipment-selection-dialog';
+import {
+  JuchuKizaiHeadValues,
+  JuchuKizaiMeisaiValues,
+} from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_lib/types';
 import { AddLock, DeleteLock, GetLock } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/funcs';
 import { LockValues, OrderValues } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/types';
 
 import { data, stock } from '../_lib/data';
+import { KeepJuchuKizaiMeisaiValues } from '../_lib/types';
 import { KeepEqTable, KeepStockTable } from './equipment-keep-order-detail-table';
 
 export type KeepEquipmentData = {
@@ -129,7 +134,11 @@ export const testeqData: KeepEquipment[] = Array.from({ length: 50 }, (_, i) => 
 // 200件用データ作成
 export const testStock = Array.from({ length: 50 }, (_, i) => stock[i % stock.length]);
 
-export const EquipmentKeepOrderDetail = (props: { juchuHeadData: OrderValues; edit: boolean }) => {
+export const EquipmentKeepOrderDetail = (props: {
+  juchuHeadData: OrderValues;
+  oyaJuchuKizaiHeadData: JuchuKizaiHeadValues;
+  edit: boolean;
+}) => {
   // user情報
   const user = useUserStore((state) => state.user);
   // ロックデータ
@@ -140,6 +149,8 @@ export const EquipmentKeepOrderDetail = (props: { juchuHeadData: OrderValues; ed
   const [isLoading, setIsLoading] = useState(false);
   // 編集モード(true:編集、false:閲覧)
   const [edit, setEdit] = useState(props.edit);
+  // 受注機材明細リスト
+  const [oyaJuchuKizaiMeisaiList, setOyaJuchuKizaiMeisaiList] = useState<KeepJuchuKizaiMeisaiValues[]>([]);
 
   // KICS出庫日
   const [startKICSDate, setStartKICSDate] = useState<Date | null>(null);
@@ -165,6 +176,8 @@ export const EquipmentKeepOrderDetail = (props: { juchuHeadData: OrderValues; ed
 
   // アコーディオン制御
   const [expanded, setExpanded] = useState(false);
+  // 機材追加ダイアログ制御
+  const [EqSelectionDialogOpen, setEqSelectionDialogOpen] = useState(false);
   // ポッパー制御
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -348,6 +361,43 @@ export const EquipmentKeepOrderDetail = (props: { juchuHeadData: OrderValues; ed
   const handleExpansion = () => {
     setExpanded((prevExpanded) => !prevExpanded);
   };
+  // 機材入力ダイアログ開閉
+  const handleOpenEqDialog = () => {
+    setEqSelectionDialogOpen(true);
+  };
+
+  /**
+   * 機材テーブルのキープ数入力時
+   * @param kizaiId 機材id
+   * @param keepValue キープ数
+   */
+  const handleCellChange = (kizaiId: number, keepValue: number) => {
+    setOyaJuchuKizaiMeisaiList((prev) =>
+      prev.map((data) => (data.kizaiId === kizaiId && !data.delFlag ? { ...data, plankeepQty: keepValue } : data))
+    );
+  };
+
+  const setEqpts = async (data: JuchuKizaiMeisaiValues[]) => {
+    const ids = new Set(oyaJuchuKizaiMeisaiList.filter((d) => !d.delFlag).map((d) => d.kizaiId));
+    const filterData = data.filter((d) => !ids.has(d.kizaiId));
+    const newOyaJuchuKizaiMeisaiData: KeepJuchuKizaiMeisaiValues[] = filterData.map((d) => ({
+      juchuHeadId: d.juchuHeadId,
+      juchuKizaiHeadId: 0,
+      juchuKizaiMeisaiId: 0,
+      shozokuId: d.shozokuId,
+      shozokuNam: d.shozokuNam,
+      mem: '',
+      kizaiId: d.kizaiId,
+      kizaiTankaAmt: d.kizaiTankaAmt,
+      kizaiNam: d.kizaiNam,
+      oyaPlanKizaiQty: d.planKizaiQty,
+      oyaPlanYobiQty: d.planYobiQty ?? 0,
+      plankeepQty: 0,
+      delFlag: false,
+      saveFlag: false,
+    }));
+    setOyaJuchuKizaiMeisaiList((prev) => [...prev, ...newOyaJuchuKizaiMeisaiData]);
+  };
 
   return (
     <Box>
@@ -470,8 +520,8 @@ export const EquipmentKeepOrderDetail = (props: { juchuHeadData: OrderValues; ed
             </Grid2>
           </Grid2>
           <Grid2 container p={2} spacing={2}>
-            <Grid2 width={500}>
-              <Typography>出庫日時</Typography>
+            <Grid2 order={{ xl: 1 }} width={380}>
+              <Typography>親伝票出庫日時</Typography>
               <Grid2>
                 <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
                 <TestDate
@@ -479,8 +529,9 @@ export const EquipmentKeepOrderDetail = (props: { juchuHeadData: OrderValues; ed
                   minDate={endYARDDate !== null ? endYARDDate : undefined}
                   maxDate={new Date('2025/11/19')}
                   onChange={handleKICSStartChange}
+                  disabled
                 />
-                <Time />
+                <Time disabled />
               </Grid2>
               <Grid2>
                 <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
@@ -489,12 +540,13 @@ export const EquipmentKeepOrderDetail = (props: { juchuHeadData: OrderValues; ed
                   minDate={endYARDDate !== null ? endYARDDate : undefined}
                   maxDate={new Date('2025/11/19')}
                   onChange={handleYARDStartChange}
+                  disabled
                 />
-                <Time />
+                <Time disabled />
               </Grid2>
             </Grid2>
-            <Grid2 width={500}>
-              <Typography>入庫日時</Typography>
+            <Grid2 width={380} order={{ xl: 4 }}>
+              <Typography>親伝票入庫日時</Typography>
               <Grid2>
                 <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
                 <TestDate
@@ -526,9 +578,62 @@ export const EquipmentKeepOrderDetail = (props: { juchuHeadData: OrderValues; ed
                 />
               </Grid2>
             </Grid2>
-            <Grid2 container alignItems="center" py={1}>
+            <Grid2 width={380} order={{ xl: 2 }}>
+              <Typography>キープ出庫日時</Typography>
+              <Grid2>
+                <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
+                <TestDate
+                  date={startKICSDate}
+                  minDate={endYARDDate !== null ? endYARDDate : undefined}
+                  maxDate={new Date('2025/11/19')}
+                  onChange={handleKICSStartChange}
+                />
+                <Time />
+              </Grid2>
+              <Grid2>
+                <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
+                <TestDate
+                  date={startYARDDate}
+                  minDate={endYARDDate !== null ? endYARDDate : undefined}
+                  maxDate={new Date('2025/11/19')}
+                  onChange={handleYARDStartChange}
+                />
+                <Time />
+              </Grid2>
+            </Grid2>
+            <Grid2 width={380} order={{ xl: 3 }}>
+              <Typography>キープ入庫日時</Typography>
+              <Grid2>
+                <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
+                <TestDate
+                  date={startKICSDate}
+                  minDate={endYARDDate !== null ? endYARDDate : undefined}
+                  maxDate={new Date('2025/11/19')}
+                  onChange={handleKICSStartChange}
+                />
+                <Time />
+              </Grid2>
+              <Grid2>
+                <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
+                <TestDate
+                  date={startYARDDate}
+                  minDate={endYARDDate !== null ? endYARDDate : undefined}
+                  maxDate={new Date('2025/11/19')}
+                  onChange={handleYARDStartChange}
+                />
+                <Time />
+              </Grid2>
+            </Grid2>
+          </Grid2>
+          <Grid2 container alignItems="center" p={2} spacing={2}>
+            <Grid2 container alignItems="center">
               <Typography>メモ</Typography>
               <TextField multiline rows={3} />
+              {/* <TextFieldElement name="mem" control={control} multiline rows={3} disabled={!edit}></TextFieldElement> */}
+            </Grid2>
+            <Grid2 container alignItems="center">
+              <Typography>入出庫ステータス</Typography>
+              <TextField disabled defaultValue={'準備中'}></TextField>
             </Grid2>
           </Grid2>
         </AccordionDetails>
@@ -546,56 +651,32 @@ export const EquipmentKeepOrderDetail = (props: { juchuHeadData: OrderValues; ed
           </Button>
         </Box>
         <Divider />
-        <Box display="flex" flexDirection="row" width="100%">
-          <Box
-            sx={{
-              width: {
-                xs: '40%',
-                sm: '40%',
-                md: '40%',
-                lg: 'min-content',
-              },
-              mt: '62.5px',
-            }}
-          >
-            <KeepEqTable rows={equipmentRows} handleMemoChange={handleMemoChange} ref={leftRef} />
+
+        <Dialog open={EqSelectionDialogOpen} maxWidth="sm" fullWidth>
+          <OyaEqSelectionDialog
+            juchuHeadId={props.juchuHeadData.juchuHeadId}
+            oyaJuchuKizaiHeadId={props.oyaJuchuKizaiHeadData.juchuKizaiHeadId}
+            setEqpts={setEqpts}
+            onClose={setEqSelectionDialogOpen}
+          />
+        </Dialog>
+
+        <Box width="100%">
+          <Box my={1} mx={2}>
+            <Button disabled={!edit} onClick={() => handleOpenEqDialog()}>
+              <AddIcon fontSize="small" />
+              機材追加
+            </Button>
           </Box>
-          <Box overflow="auto" sx={{ width: { xs: '60%', sm: '60%', md: 'auto' } }}>
-            <Box display="flex" my={2}>
-              <Button onClick={handleBackDateChange}>
-                <ArrowBackIosNewIcon fontSize="small" />
-              </Button>
-              <Button variant="outlined" onClick={handleClick}>
-                日付選択
-              </Button>
-              <Popper open={open} anchorEl={anchorEl} placement="bottom-start" sx={{ zIndex: 1000 }}>
-                <ClickAwayListener onClickAway={handleClickAway}>
-                  <Paper elevation={3} sx={{ mt: 1 }}>
-                    <Calendar date={selectDate} onChange={handleDateChange} />
-                  </Paper>
-                </ClickAwayListener>
-              </Popper>
-              <Button onClick={handleForwardDateChange}>
-                <ArrowForwardIosIcon fontSize="small" />
-              </Button>
-            </Box>
-            <KeepStockTable
-              header={dateHeader}
-              rows={stockRows}
-              dateRange={dateRange}
-              startDate={startDate}
-              endDate={endYARDDate}
-              ref={rightRef}
+          <Box width={'min-content'} display={Object.keys(oyaJuchuKizaiMeisaiList).length > 0 ? 'block' : 'none'}>
+            <KeepEqTable
+              rows={oyaJuchuKizaiMeisaiList}
+              handleMemoChange={handleMemoChange}
+              ref={leftRef}
+              onChange={handleCellChange}
             />
           </Box>
         </Box>
-      </Paper>
-      {/*本番日*/}
-      <Paper variant="outlined" sx={{ mt: 2 }}>
-        <Grid2 container alignItems="center" spacing={2} p={2}>
-          <Typography>入出庫ステータス</Typography>
-          <TextField disabled defaultValue={'準備中'}></TextField>
-        </Grid2>
       </Paper>
     </Box>
   );
