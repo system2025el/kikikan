@@ -1529,7 +1529,9 @@ const EquipmentOrderDetail = (props: {
                   />
                 </Grid2>
               </Grid2>
-              <Grid2 container alignItems="center" py={1}>
+            </Grid2>
+            <Grid2 container p={2} spacing={2}>
+              <Grid2 container alignItems="center">
                 <Typography>メモ</Typography>
                 <TextFieldElement name="mem" control={control} multiline rows={3} disabled={!edit}></TextFieldElement>
               </Grid2>
@@ -1555,10 +1557,10 @@ const EquipmentOrderDetail = (props: {
                 ></TextFieldElement>
                 <Typography>日</Typography>
               </Grid2>
-              <Grid2 container alignItems="center">
-                <Typography>入出庫ステータス</Typography>
-                <TextField disabled defaultValue={'準備中'}></TextField>
-              </Grid2>
+            </Grid2>
+            <Grid2 container alignItems="center" p={2} spacing={2}>
+              <Typography>入出庫ステータス</Typography>
+              <TextField disabled defaultValue={'準備中'}></TextField>
             </Grid2>
           </AccordionDetails>
         </Accordion>
