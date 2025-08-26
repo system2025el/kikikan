@@ -293,3 +293,34 @@ export const CheckSetoptions = async (idList: number[]) => {
     throw e;
   }
 };
+
+/* 選択肢に使う顧客リスト */
+export const getCustomerSelection = async (): Promise<{ kokyakuId: number; kokyakuNam: string }[]> => {
+  try {
+    const { data, error } = await supabase
+      .schema('dev2')
+      .from('m_kokyaku')
+      .select('kokyaku_id, kokyaku_nam')
+      .neq('dsp_flg', 0)
+      .neq('del_flg', 1);
+
+    if (!error) {
+      if (!data || data.length === 0) {
+        return [];
+      } else {
+        const selectElements = data.map((d) => ({
+          kokyakuId: d.kokyaku_id,
+          kokyakuNam: d.kokyaku_nam,
+        }));
+        console.log('顧客が', selectElements.length, '件');
+        return selectElements;
+      }
+    } else {
+      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
+      return [];
+    }
+  } catch (e) {
+    console.error('例外が発生', e);
+    throw e;
+  }
+};
