@@ -1289,7 +1289,6 @@ const EquipmentOrderDetail = (props: {
                 type="submit"
                 onClick={(e) => {
                   e.stopPropagation();
-                  console.log(juchuHonbanbiList);
                 }}
                 disabled={!edit}
               >

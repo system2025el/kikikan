@@ -13,10 +13,17 @@ import {
   Button,
   Checkbox,
   ClickAwayListener,
+  Container,
   Dialog,
   Divider,
   FormControl,
   Grid2,
+  IconButton,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
   MenuItem,
   Paper,
   Popper,
@@ -28,6 +35,8 @@ import {
 import { addMonths, endOfMonth, subDays, subMonths } from 'date-fns';
 import dayjs, { Dayjs } from 'dayjs';
 import { useEffect, useRef, useState } from 'react';
+import { Controller } from 'react-hook-form';
+import { TextFieldElement } from 'react-hook-form-mui';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import { toISOString, toISOStringMonthDay } from '@/app/(main)/_lib/date-conversion';
@@ -36,6 +45,11 @@ import { BackButton } from '@/app/(main)/_ui/buttons';
 import { Calendar, TestDate } from '@/app/(main)/_ui/date';
 import { useDirty } from '@/app/(main)/_ui/dirty-context';
 import Time, { TestTime } from '@/app/(main)/_ui/time';
+import { OyaEqSelectionDialog } from '@/app/(main)/(eq-order-detail)/_ui/equipment-selection-dialog';
+import {
+  JuchuKizaiHeadValues,
+  JuchuKizaiMeisaiValues,
+} from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_lib/types';
 import { SelectedEqptsValues } from '@/app/(main)/(masters)/eqpt-master/_lib/types';
 import { AddLock, DeleteLock, GetLock } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/funcs';
 import { LockValues, OrderValues } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/types';
@@ -43,6 +57,7 @@ import { LockValues, OrderValues } from '@/app/(main)/order/[juchu_head_id]/[mod
 import { EqptSelectionDialog } from '../../../../../../eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_ui/equipment-selection-dailog';
 import { getDateHeaderBackgroundColor, getDateRowBackgroundColor } from '../_lib/colorselect';
 import { data, stock } from '../_lib/data';
+import { ReturnJuchuKizaiMeisaiValues } from '../_lib/types';
 import { ReturnEqTable, ReturnStockTable } from './equipment-return-order-detail-table';
 
 export type ReturnEquipmentData = {
@@ -146,7 +161,11 @@ export const testeqData: ReturnEquipment[] = Array.from({ length: 50 }, (_, i) =
 // 200件用データ作成
 export const testStock = Array.from({ length: 50 }, (_, i) => stock[i % stock.length]);
 
-export const EquipmentReturnOrderDetail = (props: { juchuHeadData: OrderValues; edit: boolean }) => {
+export const EquipmentReturnOrderDetail = (props: {
+  juchuHeadData: OrderValues;
+  oyaJuchuKizaiHeadData: JuchuKizaiHeadValues;
+  edit: boolean;
+}) => {
   // user情報
   const user = useUserStore((state) => state.user);
   // ロックデータ
@@ -157,6 +176,8 @@ export const EquipmentReturnOrderDetail = (props: { juchuHeadData: OrderValues; 
   const [isLoading, setIsLoading] = useState(false);
   // 編集モード(true:編集、false:閲覧)
   const [edit, setEdit] = useState(props.edit);
+  // 受注機材明細リスト
+  const [oyaJuchuKizaiMeisaiList, setOyaJuchuKizaiMeisaiList] = useState<ReturnJuchuKizaiMeisaiValues[]>([]);
 
   // KICS出庫日
   const [startKICSDate, setStartKICSDate] = useState<Date | null>(null);
@@ -187,10 +208,10 @@ export const EquipmentReturnOrderDetail = (props: { juchuHeadData: OrderValues; 
   );
 
   // 機材テーブルの行配列
-  const [equipmentRows, setEquipmentRows] = useState<ReturnEquipment[]>(testeqData);
+  const [equipmentRows, setEquipmentRows] = useState<ReturnEquipment[]>(data);
   // ストックテーブルの行配列
   const [stockRows, setStockRows] = useState<StockData[]>(
-    getStockRow(equipmentRows, dateHeader, dateHeaderRange, testStock, dateHeader.length)
+    getStockRow(equipmentRows, dateHeader, dateHeaderRange, stock, dateHeader.length)
   );
 
   // 内税、外税
@@ -320,7 +341,7 @@ export const EquipmentReturnOrderDetail = (props: { juchuHeadData: OrderValues; 
         equipmentRows,
         dateHeaderRef.current,
         dateHeaderRange,
-        testStock,
+        stock,
         dateHeaderRef.current.length
       );
 
@@ -353,7 +374,7 @@ export const EquipmentReturnOrderDetail = (props: { juchuHeadData: OrderValues; 
         equipmentRows,
         dateHeaderRef.current,
         dateHeaderRange,
-        testStock,
+        stock,
         dateHeaderRef.current.length
       );
 
@@ -387,7 +408,7 @@ export const EquipmentReturnOrderDetail = (props: { juchuHeadData: OrderValues; 
         equipmentRows,
         dateHeaderRef.current,
         dateHeaderRange,
-        testStock,
+        stock,
         dateHeaderRef.current.length
       );
       setDateRange(updatedDateRange);
@@ -421,7 +442,7 @@ export const EquipmentReturnOrderDetail = (props: { juchuHeadData: OrderValues; 
         equipmentRows,
         dateHeaderRef.current,
         dateHeaderRange,
-        testStock,
+        stock,
         dateHeaderRef.current.length
       );
       setDateRange(updatedDateRange);
@@ -447,13 +468,7 @@ export const EquipmentReturnOrderDetail = (props: { juchuHeadData: OrderValues; 
     setSelectDate(date.toDate());
 
     const updatedHeader = getStockHeader(date?.toDate());
-    const updatedRow = getStockRow(
-      equipmentRows,
-      updatedHeader,
-      dateHeaderRange,
-      testStock,
-      dateHeaderRef.current.length
-    );
+    const updatedRow = getStockRow(equipmentRows, updatedHeader, dateHeaderRange, stock, dateHeaderRef.current.length);
     setDateHeader(updatedHeader);
     const targetIndex = updatedHeader
       .map((date, index) => (dateRangeRef.current.includes(date) ? index : -1))
@@ -518,7 +533,7 @@ export const EquipmentReturnOrderDetail = (props: { juchuHeadData: OrderValues; 
       equipmentRows,
       dateHeaderRef.current,
       dateHeaderRange,
-      testStock,
+      stock,
       dateHeaderRef.current.length
     );
     const updatedData = updatedRow[rowIndex].data;
@@ -526,11 +541,6 @@ export const EquipmentReturnOrderDetail = (props: { juchuHeadData: OrderValues; 
       updatedData[index] += returnValue;
     });
     setStockRows((prev) => prev.map((row, i) => (i === rowIndex ? { ...row, data: updatedData } : row)));
-  };
-
-  // 内税、外税変更
-  const selectTaxChange = (event: SelectChangeEvent) => {
-    setSelectTax(event.target.value);
   };
 
   // アコーディオン開閉
@@ -545,7 +555,29 @@ export const EquipmentReturnOrderDetail = (props: { juchuHeadData: OrderValues; 
     setEqSelectionDialogOpen(false);
   };
 
-  const setEqpts = async (data: SelectedEqptsValues[]) => {};
+  const setEqpts = async (data: JuchuKizaiMeisaiValues[]) => {
+    const ids = new Set(oyaJuchuKizaiMeisaiList.filter((d) => !d.delFlag).map((d) => d.kizaiId));
+    const filterData = data.filter((d) => !ids.has(d.kizaiId));
+    const newOyaJuchuKizaiMeisaiData: ReturnJuchuKizaiMeisaiValues[] = filterData.map((d) => ({
+      juchuHeadId: d.juchuHeadId,
+      juchuKizaiHeadId: 0,
+      juchuKizaiMeisaiId: 0,
+      shozokuId: d.shozokuId,
+      shozokuNam: d.shozokuNam,
+      mem: '',
+      kizaiId: d.kizaiId,
+      kizaiTankaAmt: d.kizaiTankaAmt,
+      kizaiNam: d.kizaiNam,
+      oyaPlanKizaiQty: d.planKizaiQty,
+      oyaPlanYobiQty: d.planYobiQty ?? 0,
+      planKizaiQty: 0,
+      planYobiQty: 0,
+      planQty: 0,
+      delFlag: false,
+      saveFlag: false,
+    }));
+    setOyaJuchuKizaiMeisaiList((prev) => [...prev, ...newOyaJuchuKizaiMeisaiData]);
+  };
 
   // ref
   const dateRangeRef = useRef(dateRange);
@@ -659,7 +691,12 @@ export const EquipmentReturnOrderDetail = (props: { juchuHeadData: OrderValues; 
         <AccordionSummary expandIcon={<ExpandMoreIcon />} component="div" sx={{ bgcolor: 'red', color: 'white' }}>
           <Box display="flex" alignItems="center" justifyContent="space-between" py={1} width={'100%'}>
             <Typography>受注機材ヘッダー(返却)</Typography>
-            <Button>
+            <Button
+              onClick={(e) => {
+                e.stopPropagation();
+                console.log(oyaJuchuKizaiMeisaiList);
+              }}
+            >
               <CheckIcon fontSize="small" />
               保存
             </Button>
@@ -682,39 +719,80 @@ export const EquipmentReturnOrderDetail = (props: { juchuHeadData: OrderValues; 
             <Grid2 container alignItems="center">
               <Typography>小計金額</Typography>
               <TextField
-                value={'-¥400000'}
+                value={'-¥400,000'}
+                type="text"
                 sx={{
                   '& .MuiInputBase-input': {
                     textAlign: 'right',
                     color: 'red',
                   },
-                  '& input[type=number]::-webkit-outer-spin-button': {
-                    WebkitAppearance: 'none',
-                    margin: 0,
-                  },
-                  '& input[type=number]::-webkit-inner-spin-button': {
-                    WebkitAppearance: 'none',
-                    margin: 0,
+                  '.Mui-disabled': {
+                    WebkitTextFillColor: 'red',
                   },
                 }}
+                disabled
               />
             </Grid2>
             <Grid2 container alignItems="center">
-              <Typography>税区分</Typography>
-              <FormControl size="small" sx={{ width: '8%', minWidth: '80px' }}>
-                <Select value={selectTax} onChange={selectTaxChange}>
-                  <MenuItem value={'外税'}>外税</MenuItem>
-                  <MenuItem value={'内税'}>内税</MenuItem>
-                </Select>
-              </FormControl>
+              <Typography>値引き</Typography>
+              <TextField
+                value={'¥10,000'}
+                type="text"
+                sx={{
+                  '& .MuiInputBase-input': {
+                    textAlign: 'right',
+                    color: 'red',
+                  },
+                }}
+              />
+              {/* <Controller
+                name="nebikiAmt"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    value={
+                      isEditing
+                        ? (field.value ?? '')
+                        : field.value !== null && !isNaN(field.value)
+                          ? `¥${Number(field.value).toLocaleString()}`
+                          : '¥0'
+                    }
+                    type="text"
+                    onFocus={(e) => {
+                      setIsEditing(true);
+                      const rawValue = e.target.value.replace(/[¥,]/g, '');
+                      e.target.value = rawValue;
+                    }}
+                    onBlur={(e) => {
+                      const rawValue = e.target.value.replace(/[¥,]/g, '');
+                      const numericValue = Number(rawValue);
+                      field.onChange(numericValue);
+                      setIsEditing(false);
+                    }}
+                    onChange={(e) => {
+                      const raw = e.target.value.replace(/[^\d]/g, '');
+                      if (/^\d*$/.test(raw)) {
+                        field.onChange(Number(raw));
+                        e.target.value = raw;
+                      }
+                    }}
+                    sx={{
+                      '& .MuiInputBase-input': {
+                        textAlign: 'right',
+                      },
+                    }}
+                    disabled={!edit}
+                  />
+                )}
+              /> */}
             </Grid2>
           </Grid2>
           <Grid2 container p={2} spacing={2}>
             <Grid2>
-              <Typography>元伝票</Typography>
               <Grid2 container spacing={2}>
                 <Grid2 width={500}>
-                  <Typography>出庫日時</Typography>
+                  <Typography>元伝票出庫日時</Typography>
                   <Grid2>
                     <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
                     <TestDate disabled date={startKICSDate} onChange={(newDate) => console.log()} />
@@ -739,7 +817,7 @@ export const EquipmentReturnOrderDetail = (props: { juchuHeadData: OrderValues; 
                   </Grid2>
                 </Grid2>
                 <Grid2 width={500}>
-                  <Typography>入庫日時</Typography>
+                  <Typography>返却入庫日時</Typography>
                   <Grid2>
                     <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
                     <TestDate
@@ -764,11 +842,7 @@ export const EquipmentReturnOrderDetail = (props: { juchuHeadData: OrderValues; 
               </Grid2>
             </Grid2>
             <Grid2 width={500}>
-              <Box display={'flex'} alignItems={'center'}>
-                <Checkbox sx={{ p: 0 }} />
-                <Typography>再出庫指示（出庫伝票自動作成）</Typography>
-              </Box>
-              <Typography>再出庫日時</Typography>
+              <Typography>元伝票入庫日時</Typography>
               <Grid2>
                 <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
                 <TestDate
@@ -776,8 +850,9 @@ export const EquipmentReturnOrderDetail = (props: { juchuHeadData: OrderValues; 
                   minDate={endDate !== null ? endDate : new Date('2025/11/2')}
                   maxDate={new Date('2025/11/19')}
                   onChange={handleKICSAgainChange}
+                  disabled
                 />
-                <Time />
+                <Time disabled />
               </Grid2>
               <Grid2>
                 <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
@@ -786,9 +861,57 @@ export const EquipmentReturnOrderDetail = (props: { juchuHeadData: OrderValues; 
                   minDate={endDate !== null ? endDate : new Date('2025/11/2')}
                   maxDate={new Date('2025/11/19')}
                   onChange={handleYARDAgainChange}
+                  disabled
                 />
-                <Time />
+                <Time disabled />
               </Grid2>
+            </Grid2>
+          </Grid2>
+          <Grid2 container alignItems="center" p={2} spacing={2}>
+            <Grid2 container alignItems="center">
+              <Typography>メモ</Typography>
+              <TextField multiline rows={3} />
+              {/* <TextFieldElement name="mem" control={control} multiline rows={3} disabled={!edit}></TextFieldElement> */}
+            </Grid2>
+            <Grid2 container alignItems="center">
+              <Typography>入出庫ステータス</Typography>
+              <TextField disabled defaultValue={'準備中'}></TextField>
+            </Grid2>
+            <Grid2 container alignItems="center">
+              <Typography>本番日数</Typography>
+              <TextField
+                type="number"
+                sx={{
+                  width: '5%',
+                  minWidth: '60px',
+                  '& .MuiInputBase-input': {
+                    textAlign: 'right',
+                  },
+                  '& input[type=number]::-webkit-inner-spin-button': {
+                    WebkitAppearance: 'none',
+                    margin: 0,
+                  },
+                }}
+              />
+              {/* <TextFieldElement
+              name="juchuHonbanbiQty"
+              control={control}
+              type="number"
+              sx={{
+                width: '5%',
+                minWidth: '60px',
+                '& .MuiInputBase-input': {
+                  textAlign: 'right',
+                },
+                '& input[type=number]::-webkit-inner-spin-button': {
+                  WebkitAppearance: 'none',
+                  margin: 0,
+                },
+              }}
+              slotProps={{ input: { readOnly: true } }}
+              disabled={!edit}
+            ></TextFieldElement> */}
+              <Typography>日</Typography>
             </Grid2>
           </Grid2>
         </AccordionDetails>
@@ -800,15 +923,16 @@ export const EquipmentReturnOrderDetail = (props: { juchuHeadData: OrderValues; 
             <Typography>受注明細(機材)</Typography>
             <Typography fontSize={'small'}>機材入力</Typography>
           </Grid2>
-          <Button>
-            <CheckIcon fontSize="small" />
-            保存
-          </Button>
         </Box>
         <Divider />
-        {/* <Dialog open={EqSelectionDialogOpen} fullScreen>
-          <EqptSelectionDialog rank={props.juchuHeadData.kokyaku.kokyakuRank} setEqpts={setEqpts} handleCloseDialog={handleCloseEqDialog} />
-        </Dialog> */}
+        <Dialog open={EqSelectionDialogOpen} maxWidth="sm" fullWidth>
+          <OyaEqSelectionDialog
+            juchuHeadId={props.juchuHeadData.juchuHeadId}
+            oyaJuchuKizaiHeadId={props.oyaJuchuKizaiHeadData.juchuKizaiHeadId}
+            setEqpts={setEqpts}
+            onClose={setEqSelectionDialogOpen}
+          />
+        </Dialog>
 
         <Box display="flex" flexDirection="row" width="100%">
           <Box
@@ -827,9 +951,9 @@ export const EquipmentReturnOrderDetail = (props: { juchuHeadData: OrderValues; 
                 機材追加
               </Button>
             </Box>
-            <Box display={Object.keys(equipmentRows).length > 0 ? 'block' : 'none'}>
+            <Box display={Object.keys(oyaJuchuKizaiMeisaiList).length > 0 ? 'block' : 'none'}>
               <ReturnEqTable
-                rows={equipmentRows}
+                rows={oyaJuchuKizaiMeisaiList}
                 onChange={handleCellChange}
                 handleMemoChange={handleMemoChange}
                 ref={leftRef}
@@ -837,7 +961,7 @@ export const EquipmentReturnOrderDetail = (props: { juchuHeadData: OrderValues; 
             </Box>
           </Box>
           <Box
-            display={Object.keys(equipmentRows).length > 0 ? 'block' : 'none'}
+            display={Object.keys(oyaJuchuKizaiMeisaiList).length > 0 ? 'block' : 'none'}
             overflow="auto"
             sx={{ width: { xs: '60%', sm: '60%', md: 'auto' } }}
           >
@@ -872,38 +996,6 @@ export const EquipmentReturnOrderDetail = (props: { juchuHeadData: OrderValues; 
             />
           </Box>
         </Box>
-      </Paper>
-      {/*本番日*/}
-      <Paper variant="outlined" sx={{ mt: 2 }}>
-        <Box>
-          <Box display="flex" alignItems="center" p={2}>
-            <Typography>本番日数</Typography>
-            <TextField
-              type="number"
-              sx={{
-                width: '5%',
-                minWidth: '60px',
-                ml: 2,
-                '& .MuiInputBase-input': {
-                  textAlign: 'right',
-                },
-                '& input[type=number]::-webkit-outer-spin-button': {
-                  WebkitAppearance: 'none',
-                  margin: 0,
-                },
-                '& input[type=number]::-webkit-inner-spin-button': {
-                  WebkitAppearance: 'none',
-                  margin: 0,
-                },
-              }}
-            />
-            日
-          </Box>
-        </Box>
-        <Grid2 container alignItems="center" spacing={2} p={2}>
-          <Typography>入出庫ステータス</Typography>
-          <TextField disabled defaultValue={'準備中'}></TextField>
-        </Grid2>
       </Paper>
     </Box>
   );
