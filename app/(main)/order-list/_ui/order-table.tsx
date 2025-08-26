@@ -97,11 +97,13 @@ export const OrderTable = ({
               </Grid2>
             </Grid2>
           </Grid2>
-        </Grid2>
-        <TableContainer component={Paper} square sx={{ maxHeight: '80vh', mt: 1 }}>
-          {isLoading ? (
-            <Loading />
-          ) : (
+        </Grid2>{' '}
+        {isLoading ? (
+          <Loading />
+        ) : list.length === 0 ? (
+          <Typography justifySelf={'center'}>該当する受注がありません</Typography>
+        ) : (
+          <TableContainer component={Paper} square sx={{ maxHeight: '80vh', mt: 1 }}>
             <Table stickyHeader size="small" padding="none" sx={{ width: '100vw' }}>
               <TableHead>
                 <TableRow>
@@ -181,8 +183,8 @@ export const OrderTable = ({
                 )}
               </TableBody>
             </Table>
-          )}
-        </TableContainer>
+          </TableContainer>
+        )}
       </Box>
     </>
   );
