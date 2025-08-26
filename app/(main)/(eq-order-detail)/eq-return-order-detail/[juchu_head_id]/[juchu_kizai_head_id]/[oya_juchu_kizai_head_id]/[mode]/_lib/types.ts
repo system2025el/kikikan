@@ -7,7 +7,7 @@ export const ReturnJuchuKizaiHeadSchema = z
     juchuKizaiHeadKbn: z.number(),
     juchuHonbanbiQty: z.number().nullable(),
     mem: z.string().nullable(),
-    headNam: z.string().nullable(),
+    headNam: z.string({ message: '機材明細名は必須です' }).min(1, { message: '機材明細名は必須です' }),
     kicsNyukoDat: z.date().nullable(),
     yardNyukoDat: z.date().nullable(),
   })
@@ -22,6 +22,8 @@ export type ReturnJuchuKizaiMeisaiValues = {
   juchuHeadId: number;
   juchuKizaiHeadId: number;
   juchuKizaiMeisaiId: number;
+  shozokuId: number;
+  shozokuNam: string;
   mem: string;
   kizaiId: number;
   kizaiTankaAmt: number;

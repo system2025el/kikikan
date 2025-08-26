@@ -27,6 +27,7 @@ import { Dayjs } from 'dayjs';
 import React, { useRef, useState } from 'react';
 
 import { getDateHeaderBackgroundColor, getDateRowBackgroundColor } from '../_lib/colorselect';
+import { ReturnJuchuKizaiMeisaiValues } from '../_lib/types';
 import { ReturnEquipment, ReturnEquipmentData, StockData } from './equipment-return-order-detail';
 
 type ReturnStockTableProps = {
@@ -71,6 +72,7 @@ export const ReturnStockTable: React.FC<ReturnStockTableProps> = ({
                   color: 'white',
                   bgcolor: getDateHeaderBackgroundColor(date, dateRange),
                   padding: 0,
+                  height: '26px',
                 }}
               >
                 {date}
@@ -131,7 +133,7 @@ const ReturnStockTableRow = React.memo(
 ReturnStockTableRow.displayName = 'ReturnStockTableRow';
 
 type ReturnEqTableProps = {
-  rows: ReturnEquipment[];
+  rows: ReturnJuchuKizaiMeisaiValues[];
   onChange: (rowIndex: number, returnValue: number) => void;
   handleMemoChange: (rowIndex: number, memo: string) => void;
   ref: React.RefObject<HTMLDivElement | null>;
@@ -165,10 +167,10 @@ export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({ rows, onChange, ha
             <TableCell size="small" sx={{ bgcolor: 'white' }}></TableCell>
             <TableCell size="small" sx={{ bgcolor: 'white' }}></TableCell>
             <TableCell size="small" sx={{ bgcolor: 'white' }}></TableCell>
-            <TableCell align="left" size="small" style={styles.header} colSpan={2}>
+            <TableCell align="center" size="small" style={styles.header} colSpan={2}>
               親伝票
             </TableCell>
-            <TableCell align="left" size="small" style={styles.header} colSpan={3}>
+            <TableCell align="center" size="small" style={styles.header} sx={{ bgcolor: 'red' }} colSpan={3}>
               返却数(マイナス入力)
             </TableCell>
           </TableRow>
@@ -222,7 +224,7 @@ export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({ rows, onChange, ha
 };
 
 type ReturnEqTableRowProps = {
-  row: ReturnEquipment;
+  row: ReturnJuchuKizaiMeisaiValues;
   rowIndex: number;
   handleOrderRef: (el: HTMLInputElement | null) => void;
   handleMemoChange: (rowIndex: number, memo: string) => void;
@@ -252,26 +254,29 @@ const ReturnEqTableRow = React.memo(
           {rowIndex + 1}
         </TableCell>
         <TableCell style={styles.row} align="left" size="small" sx={{ bgcolor: grey[200] }}>
-          {row.place}
+          {row.shozokuId === 1 ? 'K' : 'Y'}
         </TableCell>
         <TableCell style={styles.row} align="center" size="small">
-          <MemoTooltip name={row.name} memo={row.memo} handleMemoChange={handleMemoChange} rowIndex={rowIndex} />
+          <MemoTooltip name={row.kizaiNam} memo={row.mem} handleMemoChange={handleMemoChange} rowIndex={rowIndex} />
         </TableCell>
         <TableCell style={styles.row} align="left" size="small">
-          <Button variant="text" sx={{ p: 0 }} href={`/loan-situation/${row.id}`}>
-            {row.name}
+          <Button variant="text" sx={{ p: 0 }} href={`/loan-situation/${row.kizaiId}`}>
+            {row.kizaiNam}
           </Button>
         </TableCell>
         <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
-          {row.issue}
+          {row.oyaPlanKizaiQty}
+        </TableCell>
+        <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
+          {row.oyaPlanYobiQty}
         </TableCell>
         <TableCell style={styles.row} align="right" size="small">
           <TextField
             variant="standard"
-            value={row.return}
+            value={row.planKizaiQty}
             type="text"
             onChange={(e) => {
-              if (/^\d*$/.test(e.target.value) && Number(e.target.value) <= row.issue) {
+              if (/^\d*$/.test(e.target.value) && Number(e.target.value) <= row.oyaPlanKizaiQty) {
                 handleReturnCellChange(rowIndex, Number(e.target.value));
               }
             }}
@@ -307,6 +312,48 @@ const ReturnEqTableRow = React.memo(
             }}
             onFocus={(e) => e.target.select()}
           />
+        </TableCell>
+        <TableCell style={styles.row} align="right" size="small">
+          <TextField
+            variant="standard"
+            value={row.planYobiQty}
+            type="text"
+            onChange={(e) => {
+              if (/^\d*$/.test(e.target.value) && Number(e.target.value) <= row.oyaPlanYobiQty) {
+                handleReturnCellChange(rowIndex, Number(e.target.value));
+              }
+            }}
+            sx={{
+              '& .MuiInputBase-input': {
+                textAlign: 'right',
+                padding: 0,
+                fontSize: 'small',
+                color: 'red',
+              },
+              '& input[type=number]': {
+                MozAppearance: 'textfield',
+              },
+              '& input[type=number]::-webkit-outer-spin-button': {
+                WebkitAppearance: 'none',
+                margin: 0,
+              },
+              '& input[type=number]::-webkit-inner-spin-button': {
+                WebkitAppearance: 'none',
+                margin: 0,
+              },
+            }}
+            slotProps={{
+              input: {
+                style: { textAlign: 'right' },
+                disableUnderline: true,
+                inputMode: 'numeric',
+              },
+            }}
+            onFocus={(e) => e.target.select()}
+          />
+        </TableCell>
+        <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
+          {row.planQty}
         </TableCell>
       </TableRow>
     );
