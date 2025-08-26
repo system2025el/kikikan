@@ -32,12 +32,15 @@ export const EqptMaster = ({
   const [page, setPage] = useState(1);
   /* DBのローディング */
   const [isLoading, setIsLoading] = useState(true);
-  // 検索useForm--------------------------
+
+  /* 検索useForm-------------------------- */
   const { control, handleSubmit } = useForm({
     mode: 'onSubmit',
     defaultValues: { query: '', bumonQuery: 0, daibumonQuery: 0, shukeiQuery: 0 },
   });
 
+  /* methods ------------------------------------------ */
+  /* 検索ボタン押下時 */
   const onSubmit = async (data: {
     query: string | undefined;
     bumonQuery: number | undefined;

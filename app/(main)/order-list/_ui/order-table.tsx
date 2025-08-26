@@ -24,6 +24,7 @@ import {
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { toISOStringYearMonthDay } from '../../_lib/date-conversion';
+import { Loading } from '../../_ui/loading';
 import { MuiTablePagination } from '../../_ui/table-pagination';
 import { orderList, OrderListTableValues } from '../_lib/types';
 
@@ -96,85 +97,89 @@ export const OrderTable = ({
           </Grid2>
         </Grid2>
         <TableContainer component={Paper} square sx={{ maxHeight: '80vh', mt: 1 }}>
-          <Table stickyHeader size="small" padding="none" sx={{ width: '100vw' }}>
-            <TableHead>
-              <TableRow>
-                <TableCell></TableCell>
-                <TableCell padding="none"></TableCell>
-                <TableCell align="center">受注番号</TableCell>
-                <TableCell>
-                  <Box minWidth={100} maxWidth={100}>
-                    受注ステータス
-                  </Box>
-                </TableCell>
-                <TableCell>
-                  <Box minWidth={100} maxWidth={100}>
-                    公演名
-                  </Box>
-                </TableCell>
-                <TableCell>
-                  <Box minWidth={100} maxWidth={100}>
-                    公演場所
-                  </Box>
-                </TableCell>
-                <TableCell>
-                  <Box minWidth={200} maxWidth={200}>
-                    顧客名
-                  </Box>
-                </TableCell>
-                <TableCell>
-                  <Box minWidth={100} maxWidth={100}>
-                    受注日
-                  </Box>
-                </TableCell>
-                <TableCell>
-                  <Box minWidth={100} maxWidth={100}>
-                    受注開始日
-                  </Box>
-                </TableCell>
-                <TableCell>
-                  <Box minWidth={100} maxWidth={100}>
-                    受注終了日
-                  </Box>
-                </TableCell>
-                <TableCell>
-                  <Typography noWrap>入出庫ステータス</Typography>
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {list.map((order, index) => (
-                <TableRow key={index}>
-                  <TableCell padding="checkbox">
-                    {/* <Box minWidth={10} maxWidth={10}> */}
-                    <Checkbox color="primary" />
-                    {/* </Box> */}
+          {isLoading ? (
+            <Loading />
+          ) : (
+            <Table stickyHeader size="small" padding="none" sx={{ width: '100vw' }}>
+              <TableHead>
+                <TableRow>
+                  <TableCell></TableCell>
+                  <TableCell padding="none"></TableCell>
+                  <TableCell align="center">受注番号</TableCell>
+                  <TableCell>
+                    <Box minWidth={100} maxWidth={100}>
+                      受注ステータス
+                    </Box>
                   </TableCell>
-                  <TableCell padding="none">{index + 1}</TableCell>
-                  <TableCell align="center">
-                    <Button variant="text" href={`/order/${order.juchuHeadId}/${'view'}`}>
-                      <Box minWidth={60} maxWidth={60}>
-                        {order.juchuHeadId}
-                      </Box>
-                    </Button>
+                  <TableCell>
+                    <Box minWidth={100} maxWidth={100}>
+                      公演名
+                    </Box>
                   </TableCell>
-                  <TableCell>{order.juchuStsNam}</TableCell>
-                  <TableCell>{order.koenNam}</TableCell>
-                  <TableCell>{order.koenbashoNam}</TableCell>
-                  <TableCell>{order.kokyakuNam}</TableCell>
-                  <TableCell>{toISOStringYearMonthDay(new Date(order.juchuDat))}</TableCell>
-                  <TableCell>{order.juchuStrDat && toISOStringYearMonthDay(new Date(order.juchuStrDat))}</TableCell>
-                  <TableCell>{order.juchuEndDat && toISOStringYearMonthDay(new Date(order.juchuEndDat))}</TableCell>
-                  <TableCell>{order.nyushukoStsNam}</TableCell>
+                  <TableCell>
+                    <Box minWidth={100} maxWidth={100}>
+                      公演場所
+                    </Box>
+                  </TableCell>
+                  <TableCell>
+                    <Box minWidth={200} maxWidth={200}>
+                      顧客名
+                    </Box>
+                  </TableCell>
+                  <TableCell>
+                    <Box minWidth={100} maxWidth={100}>
+                      受注日
+                    </Box>
+                  </TableCell>
+                  <TableCell>
+                    <Box minWidth={100} maxWidth={100}>
+                      受注開始日
+                    </Box>
+                  </TableCell>
+                  <TableCell>
+                    <Box minWidth={100} maxWidth={100}>
+                      受注終了日
+                    </Box>
+                  </TableCell>
+                  <TableCell>
+                    <Typography noWrap>入出庫ステータス</Typography>
+                  </TableCell>
                 </TableRow>
-              ))}
-              {emptyRows > 0 && (
-                <TableRow style={{ height: 30 * emptyRows }}>
-                  <TableCell colSpan={8} />
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+              </TableHead>
+              <TableBody>
+                {list.map((order, index) => (
+                  <TableRow key={index}>
+                    <TableCell padding="checkbox">
+                      {/* <Box minWidth={10} maxWidth={10}> */}
+                      <Checkbox color="primary" />
+                      {/* </Box> */}
+                    </TableCell>
+                    <TableCell padding="none">{index + 1}</TableCell>
+                    <TableCell align="center">
+                      <Button variant="text" href={`/order/${order.juchuHeadId}/${'view'}`}>
+                        <Box minWidth={60} maxWidth={60}>
+                          {order.juchuHeadId}
+                        </Box>
+                      </Button>
+                    </TableCell>
+                    <TableCell>{order.juchuStsNam}</TableCell>
+                    <TableCell>{order.koenNam}</TableCell>
+                    <TableCell>{order.koenbashoNam}</TableCell>
+                    <TableCell>{order.kokyakuNam}</TableCell>
+                    <TableCell>{toISOStringYearMonthDay(new Date(order.juchuDat))}</TableCell>
+                    <TableCell>{order.juchuStrDat && toISOStringYearMonthDay(new Date(order.juchuStrDat))}</TableCell>
+                    <TableCell>{order.juchuEndDat && toISOStringYearMonthDay(new Date(order.juchuEndDat))}</TableCell>
+                    <TableCell>{order.nyushukoStsNam}</TableCell>
+                  </TableRow>
+                ))}
+                {emptyRows > 0 && (
+                  <TableRow style={{ height: 30 * emptyRows }}>
+                    <TableCell colSpan={8} />
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          )}
         </TableContainer>
       </Box>
     </>

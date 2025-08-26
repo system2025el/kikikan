@@ -23,7 +23,21 @@ export const OrderSchema = z.object({
   orderFinishDate: z.string(),
 });
 /** 検索用タイプ */
-export type OrderSearchValues = z.infer<typeof OrderSchema>;
+export type OrderSearchValues = {
+  criteria?: number;
+  selectedDate?: {
+    value: string;
+    range?: {
+      from: Date | null;
+      to: Date | null;
+    };
+  };
+  customer?: number;
+  customerSort?: string;
+  stageName?: string;
+  orderStartDate?: Date | null;
+  orderFinishDate?: Date | null;
+};
 
 /** --------------------受注一覧表示用------------------------- */
 const enum OrderStatus {
