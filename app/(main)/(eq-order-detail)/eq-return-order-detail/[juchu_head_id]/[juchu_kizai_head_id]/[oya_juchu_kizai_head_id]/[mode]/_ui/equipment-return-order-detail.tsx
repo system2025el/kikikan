@@ -790,7 +790,7 @@ export const EquipmentReturnOrderDetail = (props: {
           </Grid2>
           <Grid2 container p={2} spacing={2}>
             <Grid2 container spacing={2}>
-              <Grid2 width={380} order={{ lx: 1 }}>
+              <Grid2 width={380} order={{ xl: 1 }}>
                 <Typography>元伝票出庫日時</Typography>
                 <Grid2>
                   <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
@@ -815,7 +815,7 @@ export const EquipmentReturnOrderDetail = (props: {
                   />
                 </Grid2>
               </Grid2>
-              <Grid2 width={380} order={{ lx: 3 }}>
+              <Grid2 width={380} order={{ xl: 3 }}>
                 <Typography>元伝票入庫日時</Typography>
                 <Grid2>
                   <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
@@ -840,7 +840,7 @@ export const EquipmentReturnOrderDetail = (props: {
                   <Time disabled />
                 </Grid2>
               </Grid2>
-              <Grid2 width={380} order={{ lx: 2 }}>
+              <Grid2 width={380} order={{ xl: 2 }}>
                 <Typography>返却入庫日時</Typography>
                 <Grid2>
                   <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />

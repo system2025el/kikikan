@@ -162,43 +162,55 @@ export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({ rows, onChange, ha
       <Table stickyHeader>
         <TableHead>
           <TableRow>
-            <TableCell size="small" sx={{ bgcolor: 'white' }}></TableCell>
-            <TableCell size="small" sx={{ bgcolor: 'white' }}></TableCell>
-            <TableCell size="small" sx={{ bgcolor: 'white' }}></TableCell>
-            <TableCell size="small" sx={{ bgcolor: 'white' }}></TableCell>
-            <TableCell size="small" sx={{ bgcolor: 'white' }}></TableCell>
-            <TableCell align="center" size="small" style={styles.header} colSpan={2}>
+            <TableCell size="small" sx={{ bgcolor: 'white', position: 'sticky', top: 0, zIndex: 2 }}></TableCell>
+            <TableCell size="small" sx={{ bgcolor: 'white', position: 'sticky', top: 0, zIndex: 2 }}></TableCell>
+            <TableCell size="small" sx={{ bgcolor: 'white', position: 'sticky', top: 0, zIndex: 2 }}></TableCell>
+            <TableCell size="small" sx={{ bgcolor: 'white', position: 'sticky', top: 0, zIndex: 2 }}></TableCell>
+            <TableCell size="small" sx={{ bgcolor: 'white', position: 'sticky', top: 0, zIndex: 2 }}></TableCell>
+            <TableCell
+              align="center"
+              size="small"
+              style={styles.header}
+              sx={{ position: 'sticky', top: 0, zIndex: 2 }}
+              colSpan={2}
+            >
               親伝票
             </TableCell>
-            <TableCell align="center" size="small" style={styles.header} sx={{ bgcolor: 'red' }} colSpan={3}>
+            <TableCell
+              align="center"
+              size="small"
+              style={styles.header}
+              sx={{ position: 'sticky', top: 0, zIndex: 2, bgcolor: 'red' }}
+              colSpan={3}
+            >
               返却数(マイナス入力)
             </TableCell>
           </TableRow>
           <TableRow>
-            <TableCell size="small" style={styles.header} />
-            <TableCell size="small" style={styles.header} />
-            <TableCell align="left" size="small" style={styles.header}>
+            <TableCell size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }} />
+            <TableCell size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }} />
+            <TableCell align="left" size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
               在庫場所
             </TableCell>
-            <TableCell align="left" size="small" style={styles.header}>
+            <TableCell align="left" size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
               返却メモ
             </TableCell>
-            <TableCell align="left" size="small" style={styles.header}>
+            <TableCell align="left" size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
               機材名
             </TableCell>
-            <TableCell align="right" size="small" style={styles.header}>
+            <TableCell align="right" size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
               受注数
             </TableCell>
-            <TableCell align="right" size="small" style={styles.header}>
+            <TableCell align="right" size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
               予備数
             </TableCell>
-            <TableCell align="right" size="small" style={styles.header}>
+            <TableCell align="right" size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
               受注数
             </TableCell>
-            <TableCell align="right" size="small" style={styles.header}>
+            <TableCell align="right" size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
               予備数
             </TableCell>
-            <TableCell align="right" size="small" style={styles.header}>
+            <TableCell align="right" size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
               合計数
             </TableCell>
           </TableRow>
