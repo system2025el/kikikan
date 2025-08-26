@@ -42,16 +42,18 @@ export const OrderTable = ({
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setPage: React.Dispatch<React.SetStateAction<number>>;
 }) => {
-  const theme = useTheme();
-
   //const [page, setPage] = useState(1);
   const rowsPerPage = 50;
 
   // 表示するデータ
-  const list = useMemo(
-    () => (rowsPerPage > 0 ? orderList.slice((page - 1) * rowsPerPage, page * rowsPerPage) : orderList),
-    [orderList, page]
-  );
+  const list = useMemo(() => {
+    const pagedList = rowsPerPage > 0 ? orderList.slice((page - 1) * rowsPerPage, page * rowsPerPage) : orderList;
+
+    return pagedList.map((item, index) => ({
+      ...item,
+      ordNum: (page - 1) * rowsPerPage + index + 1, // ← ここで表示順を計算！
+    }));
+  }, [orderList, page]);
 
   // テーブル最後のページ用の空データの長さ
   const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - orderList.length) : 0;
@@ -154,7 +156,7 @@ export const OrderTable = ({
                       <Checkbox color="primary" />
                       {/* </Box> */}
                     </TableCell>
-                    <TableCell padding="none">{index + 1}</TableCell>
+                    <TableCell padding="none">{order.ordNum}</TableCell>
                     <TableCell align="center">
                       <Button variant="text" href={`/order/${order.juchuHeadId}/${'view'}`}>
                         <Box minWidth={60} maxWidth={60}>

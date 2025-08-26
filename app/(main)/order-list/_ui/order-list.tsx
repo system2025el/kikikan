@@ -13,10 +13,10 @@ import { Controller, useForm } from 'react-hook-form';
 import { RadioButtonGroup, SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
 import { BackButton } from '../../_ui/buttons';
+import { selectNone } from '../../_ui/form-box';
 import { getFilteredOrderList } from '../_lib/funcs';
 import { OrderListTableValues, OrderSearchValues } from '../_lib/types';
 import { OrderTable } from './order-table';
-import { selectNone } from '../../_ui/form-box';
 
 /** 受注一覧画面 */
 export const OrderList = ({
@@ -51,6 +51,7 @@ export const OrderList = ({
 
   const onSubmit = async (data: OrderSearchValues) => {
     setIsLoading(true);
+    setPage(1);
     const orders = await getFilteredOrderList(data);
     if (orders) {
       setOrderList(orders);
