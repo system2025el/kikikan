@@ -6,7 +6,7 @@ import { revalidatePath } from 'next/cache';
 import pool from '@/app/_lib/postgres/postgres';
 import { supabase } from '@/app/_lib/supabase/supabase';
 
-import { OrderListTableValues, OrderSearchValues } from './types';
+import { OrderSearchValues } from './types';
 
 /**
  * 受注一覧情報取得
@@ -54,7 +54,6 @@ export const getFilteredOrderList = async (query: OrderSearchValues) => {
       dateColumn = 'juchu_dat';
       break;
   }
-
   if (dateColumn) {
     switch (selectedDate?.value) {
       case '1': // '先月全て'
@@ -115,6 +114,18 @@ export const getFilteredOrderList = async (query: OrderSearchValues) => {
         break;
     }
   }
+
+  // 受注開始日
+  if (orderStartDate) {
+    queryParams.push(orderStartDate);
+    whereClauses.push(`juchu_str_dat = $${queryParams.length}`);
+  }
+  // 受注終了日
+  if (orderFinishDate) {
+    queryParams.push(orderFinishDate);
+    whereClauses.push(`juchu_end_dat = $${queryParams.length}`);
+  }
+
   if (whereClauses.length > 0) {
     sqlQuery += ` WHERE ${whereClauses.join(' AND ')}`;
   }

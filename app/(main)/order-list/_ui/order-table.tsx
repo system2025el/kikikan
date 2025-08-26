@@ -97,7 +97,7 @@ export const OrderTable = ({
               </Grid2>
             </Grid2>
           </Grid2>
-        </Grid2>{' '}
+        </Grid2>
         {isLoading ? (
           <Loading />
         ) : list.length === 0 ? (
