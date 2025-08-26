@@ -297,9 +297,9 @@ export const Order = (props: {
       if (selectData && selectData.juchuKizaiHeadKbn === 1) {
         if (!isDirty) {
           await DeleteLock(1, props.juchuHeadData.juchuHeadId);
-          router.push(`/eq-keep-order-detail/${props.juchuHeadData.juchuHeadId}/0/edit`);
+          router.push(`/eq-keep-order-detail/${props.juchuHeadData.juchuHeadId}/0/${selectData.juchuKizaiHeadId}/edit`);
         } else {
-          setPath(`/eq-keep-order-detail/${props.juchuHeadData.juchuHeadId}/0/edit`);
+          setPath(`/eq-keep-order-detail/${props.juchuHeadData.juchuHeadId}/0/${selectData.juchuKizaiHeadId}/edit`);
           setDirtyOpen(true);
         }
       } else {

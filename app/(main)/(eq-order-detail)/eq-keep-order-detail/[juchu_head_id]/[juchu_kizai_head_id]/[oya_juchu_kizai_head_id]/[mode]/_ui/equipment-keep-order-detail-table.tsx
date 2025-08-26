@@ -11,7 +11,6 @@ import {
   DialogTitle,
   IconButton,
   Paper,
-  Stack,
   Table,
   TableBody,
   TableCell,
@@ -26,6 +25,7 @@ import { grey } from '@mui/material/colors';
 import React, { useRef, useState } from 'react';
 
 import { getDateHeaderBackgroundColor, getDateRowBackgroundColor } from '../_lib/colorselect';
+import { KeepJuchuKizaiMeisaiValues } from '../_lib/types';
 import { KeepEquipment, KeepEquipmentData, StockData } from './equipment-keep-order-detail';
 
 type KeepStockTableProps = {
@@ -124,38 +124,90 @@ const KeepStockTableRow = React.memo(
 KeepStockTableRow.displayName = 'KeepStockTableRow';
 
 type KeepEqTableProps = {
-  rows: KeepEquipment[];
+  rows: KeepJuchuKizaiMeisaiValues[];
   handleMemoChange: (rowIndex: number, memo: string) => void;
   ref: React.RefObject<HTMLDivElement | null>;
+  onChange: (rowIndex: number, returnValue: number) => void;
 };
 
-export const KeepEqTable: React.FC<KeepEqTableProps> = ({ rows, handleMemoChange, ref }) => {
+export const KeepEqTable: React.FC<KeepEqTableProps> = ({ rows, handleMemoChange, ref, onChange }) => {
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  const handleKeepCellChange = (rowIndex: number, newValue: number) => {
+    onChange(rowIndex, newValue);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent, rowIndex: number) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      inputRefs.current[rowIndex + 1]?.focus();
+    }
+  };
+
+  const handleKeepRef = (rowIndex: number) => (el: HTMLInputElement | null) => {
+    inputRefs.current[rowIndex] = el;
+  };
+
   return (
     <TableContainer ref={ref} component={Paper} style={{ overflow: 'scroll', maxHeight: '80vh' }}>
-      <Table stickyHeader>
+      <Table>
         <TableHead>
           <TableRow>
-            <TableCell size="small" style={styles.header} />
-            <TableCell align="left" size="small" style={styles.header}>
+            <TableCell size="small" sx={{ bgcolor: 'white', position: 'sticky', top: 0, zIndex: 2 }}></TableCell>
+            <TableCell size="small" sx={{ bgcolor: 'white', position: 'sticky', top: 0, zIndex: 2 }}></TableCell>
+            <TableCell size="small" sx={{ bgcolor: 'white', position: 'sticky', top: 0, zIndex: 2 }}></TableCell>
+            <TableCell size="small" sx={{ bgcolor: 'white', position: 'sticky', top: 0, zIndex: 2 }}></TableCell>
+            <TableCell size="small" sx={{ bgcolor: 'white', position: 'sticky', top: 0, zIndex: 2 }}></TableCell>
+            <TableCell
+              align="center"
+              size="small"
+              style={styles.header}
+              sx={{ position: 'sticky', top: 0, zIndex: 2 }}
+              colSpan={2}
+            >
+              親伝票
+            </TableCell>
+            <TableCell
+              align="center"
+              size="small"
+              style={styles.header}
+              sx={{ position: 'sticky', top: 0, zIndex: 2, bgcolor: 'green' }}
+              rowSpan={2}
+            >
+              キープ数
+            </TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }} />
+            <TableCell size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }} />
+            <TableCell align="left" size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
               在庫場所
             </TableCell>
-            <TableCell align="left" size="small" style={styles.header}>
+            <TableCell align="left" size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
               キープメモ
             </TableCell>
-            <TableCell align="left" size="small" style={styles.header}>
+            <TableCell align="left" size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
               機材名
             </TableCell>
-            <TableCell align="right" size="small" style={styles.header}>
-              出庫数
+            <TableCell align="right" size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
+              受注数
             </TableCell>
-            <TableCell align="right" size="small" style={styles.header} sx={{ bgcolor: 'green' }}>
-              キープ数
+            <TableCell align="right" size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
+              予備数
             </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {rows.map((row, rowIndex) => (
-            <KeepEqTableRow key={rowIndex} row={row} rowIndex={rowIndex} handleMemoChange={handleMemoChange} />
+            <KeepEqTableRow
+              key={rowIndex}
+              row={row}
+              rowIndex={rowIndex}
+              handleKeepRef={handleKeepRef(rowIndex)}
+              handleMemoChange={handleMemoChange}
+              handleKeyDown={handleKeyDown}
+              handleKeepCellChange={handleKeepCellChange}
+            />
           ))}
         </TableBody>
       </Table>
@@ -164,36 +216,86 @@ export const KeepEqTable: React.FC<KeepEqTableProps> = ({ rows, handleMemoChange
 };
 
 type KeepEqTableRowProps = {
-  row: KeepEquipment;
+  row: KeepJuchuKizaiMeisaiValues;
   rowIndex: number;
+  handleKeepRef: (el: HTMLInputElement | null) => void;
   handleMemoChange: (rowIndex: number, memo: string) => void;
+  handleKeepCellChange: (kizaiId: number, newValue: number) => void;
+  handleKeyDown: (e: React.KeyboardEvent, rowIndex: number) => void;
 };
 
 const KeepEqTableRow = React.memo(
-  ({ row, rowIndex, handleMemoChange }: KeepEqTableRowProps) => {
+  ({ row, rowIndex, handleMemoChange, handleKeepCellChange, handleKeepRef, handleKeyDown }: KeepEqTableRowProps) => {
     console.log('描画', rowIndex);
 
     return (
       <TableRow>
+        <TableCell sx={{ padding: 0, border: '1px solid black' }}>
+          <IconButton sx={{ padding: 0, color: 'red' }}>
+            <Delete fontSize="small" />
+          </IconButton>
+        </TableCell>
         <TableCell align="right" size="small" sx={{ bgcolor: grey[200], py: 0, px: 1, border: '1px solid black' }}>
           {rowIndex + 1}
         </TableCell>
         <TableCell style={styles.row} align="left" size="small" sx={{ bgcolor: grey[200] }}>
-          {row.place}
+          {row.shozokuId === 1 ? 'K' : 'Y'}
         </TableCell>
         <TableCell style={styles.row} align="center" size="small">
-          <MemoTooltip name={row.name} memo={row.memo} handleMemoChange={handleMemoChange} rowIndex={rowIndex} />
+          <MemoTooltip name={row.kizaiNam} memo={row.mem} handleMemoChange={handleMemoChange} rowIndex={rowIndex} />
         </TableCell>
         <TableCell style={styles.row} align="left" size="small">
-          <Button variant="text" sx={{ p: 0 }} href={`/loan-situation/${row.id}`}>
-            {row.name}
+          <Button variant="text" sx={{ p: 0, justifyContent: 'start' }} href={`/loan-situation/${row.kizaiId}`}>
+            {row.kizaiNam}
           </Button>
         </TableCell>
         <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
-          {row.issue}
+          {row.oyaPlanKizaiQty}
         </TableCell>
         <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
-          {row.keep}
+          {row.oyaPlanYobiQty}
+        </TableCell>
+        <TableCell style={styles.row} align="right" size="small">
+          <TextField
+            variant="standard"
+            value={row.plankeepQty}
+            type="text"
+            onChange={(e) => {
+              if (/^\d*$/.test(e.target.value) && Number(e.target.value) <= row.oyaPlanKizaiQty + row.oyaPlanYobiQty) {
+                handleKeepCellChange(row.kizaiId, Number(e.target.value));
+              }
+            }}
+            sx={{
+              '& .MuiInputBase-input': {
+                textAlign: 'right',
+                padding: 0,
+                fontSize: 'small',
+              },
+              '& input[type=number]': {
+                MozAppearance: 'textfield',
+              },
+              '& input[type=number]::-webkit-outer-spin-button': {
+                WebkitAppearance: 'none',
+                margin: 0,
+              },
+              '& input[type=number]::-webkit-inner-spin-button': {
+                WebkitAppearance: 'none',
+                margin: 0,
+              },
+            }}
+            slotProps={{
+              input: {
+                style: { textAlign: 'right' },
+                disableUnderline: true,
+                inputMode: 'numeric',
+              },
+            }}
+            inputRef={handleKeepRef}
+            onKeyDown={(e) => {
+              handleKeyDown(e, rowIndex);
+            }}
+            onFocus={(e) => e.target.select()}
+          />
         </TableCell>
       </TableRow>
     );
@@ -227,9 +329,9 @@ export const MemoTooltip = (props: MemoTooltipProps) => {
   return (
     <>
       <Tooltip title={equipmentMemo} arrow sx={{ p: 0 }} color={equipmentMemo ? 'primary' : 'default'}>
-        {/* <IconButton onClick={handleOpen} sx={{ padding: 0 }} color={equipmentMemo ? 'primary' : 'default'}> */}
-        <EditNoteIcon fontSize="small" />
-        {/* </IconButton> */}
+        <IconButton onClick={handleOpen} sx={{ padding: 0 }} color={equipmentMemo ? 'primary' : 'default'}>
+          <EditNoteIcon fontSize="small" />
+        </IconButton>
       </Tooltip>
 
       <Dialog open={open} onClose={handleClose}>

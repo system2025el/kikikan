@@ -23,10 +23,12 @@ export const KeepJuchuKizaiHeadSchema = z
 
 export type KeepJuchuKizaiHeadValues = z.infer<typeof KeepJuchuKizaiHeadSchema>;
 
-export type ReturnJuchuKizaiMeisaiValues = {
+export type KeepJuchuKizaiMeisaiValues = {
   juchuHeadId: number;
   juchuKizaiHeadId: number;
   juchuKizaiMeisaiId: number;
+  shozokuId: number;
+  shozokuNam: string;
   mem: string;
   kizaiId: number;
   kizaiTankaAmt: number;

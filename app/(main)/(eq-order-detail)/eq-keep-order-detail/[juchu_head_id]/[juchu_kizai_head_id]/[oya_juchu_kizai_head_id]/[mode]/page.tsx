@@ -21,7 +21,7 @@ const Page = async (props: {
   // 親受注機材ヘッダーデータ
   const oyaJuchuKizaiHeadData = await GetJuchuKizaiHead(params.juchu_head_id, params.oya_juchu_kizai_head_id);
 
-  if (!juchuHeadData) {
+  if (!juchuHeadData || !oyaJuchuKizaiHeadData) {
     return <div>受注情報が見つかりません。</div>;
   }
 
@@ -31,6 +31,8 @@ const Page = async (props: {
   } else {
   }
 
-  return <EquipmentKeepOrderDetail juchuHeadData={juchuHeadData} edit={edit} />;
+  return (
+    <EquipmentKeepOrderDetail juchuHeadData={juchuHeadData} oyaJuchuKizaiHeadData={oyaJuchuKizaiHeadData} edit={edit} />
+  );
 };
 export default Page;

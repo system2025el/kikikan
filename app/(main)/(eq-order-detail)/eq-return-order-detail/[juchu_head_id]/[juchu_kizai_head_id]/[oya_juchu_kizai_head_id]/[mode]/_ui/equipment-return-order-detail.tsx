@@ -789,93 +789,88 @@ export const EquipmentReturnOrderDetail = (props: {
             </Grid2>
           </Grid2>
           <Grid2 container p={2} spacing={2}>
-            <Grid2>
-              <Grid2 container spacing={2}>
-                <Grid2 width={500}>
-                  <Typography>元伝票出庫日時</Typography>
-                  <Grid2>
-                    <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                    <TestDate disabled date={startKICSDate} onChange={(newDate) => console.log()} />
-                    <Time disabled />
-                  </Grid2>
-                  <Grid2>
-                    <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                    <TestDate
-                      disabled
-                      date={startYARDDate}
-                      onChange={(newDate) => {
-                        if (newDate !== null) {
-                          setStartYARDDate(newDate?.toDate());
-                        }
-                      }}
-                    />
-                    <TestTime
-                      disabled
-                      time={startYARDDate && startYARDDate}
-                      onChange={(newDate) => newDate && setStartYARDDate(newDate.toDate())}
-                    />
-                  </Grid2>
+            <Grid2 container spacing={2}>
+              <Grid2 width={380} order={{ lx: 1 }}>
+                <Typography>元伝票出庫日時</Typography>
+                <Grid2>
+                  <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
+                  <TestDate disabled date={startKICSDate} onChange={(newDate) => console.log()} />
+                  <Time disabled />
                 </Grid2>
-                <Grid2 width={500}>
-                  <Typography>返却入庫日時</Typography>
-                  <Grid2>
-                    <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                    <TestDate
-                      date={endKICSDate}
-                      minDate={new Date('2025/11/2')}
-                      maxDate={startDate !== null ? startDate : new Date('2025/11/19')}
-                      onChange={handleKICSEndChange}
-                    />
-                    <Time />
-                  </Grid2>
-                  <Grid2>
-                    <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                    <TestDate
-                      date={endYARDDate}
-                      minDate={new Date('2025/11/2')}
-                      maxDate={startDate !== null ? startDate : new Date('2025/11/19')}
-                      onChange={handleYARDEndChange}
-                    />
-                    <Time />
-                  </Grid2>
+                <Grid2>
+                  <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
+                  <TestDate
+                    disabled
+                    date={startYARDDate}
+                    onChange={(newDate) => {
+                      if (newDate !== null) {
+                        setStartYARDDate(newDate?.toDate());
+                      }
+                    }}
+                  />
+                  <TestTime
+                    disabled
+                    time={startYARDDate && startYARDDate}
+                    onChange={(newDate) => newDate && setStartYARDDate(newDate.toDate())}
+                  />
                 </Grid2>
               </Grid2>
-            </Grid2>
-            <Grid2 width={500}>
-              <Typography>元伝票入庫日時</Typography>
-              <Grid2>
-                <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                <TestDate
-                  date={againKICSDate}
-                  minDate={endDate !== null ? endDate : new Date('2025/11/2')}
-                  maxDate={new Date('2025/11/19')}
-                  onChange={handleKICSAgainChange}
-                  disabled
-                />
-                <Time disabled />
+              <Grid2 width={380} order={{ lx: 3 }}>
+                <Typography>元伝票入庫日時</Typography>
+                <Grid2>
+                  <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
+                  <TestDate
+                    date={againKICSDate}
+                    minDate={endDate !== null ? endDate : new Date('2025/11/2')}
+                    maxDate={new Date('2025/11/19')}
+                    onChange={handleKICSAgainChange}
+                    disabled
+                  />
+                  <Time disabled />
+                </Grid2>
+                <Grid2>
+                  <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
+                  <TestDate
+                    date={againYARDDate}
+                    minDate={endDate !== null ? endDate : new Date('2025/11/2')}
+                    maxDate={new Date('2025/11/19')}
+                    onChange={handleYARDAgainChange}
+                    disabled
+                  />
+                  <Time disabled />
+                </Grid2>
               </Grid2>
-              <Grid2>
-                <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                <TestDate
-                  date={againYARDDate}
-                  minDate={endDate !== null ? endDate : new Date('2025/11/2')}
-                  maxDate={new Date('2025/11/19')}
-                  onChange={handleYARDAgainChange}
-                  disabled
-                />
-                <Time disabled />
+              <Grid2 width={380} order={{ lx: 2 }}>
+                <Typography>返却入庫日時</Typography>
+                <Grid2>
+                  <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
+                  <TestDate
+                    date={endKICSDate}
+                    minDate={new Date('2025/11/2')}
+                    maxDate={startDate !== null ? startDate : new Date('2025/11/19')}
+                    onChange={handleKICSEndChange}
+                  />
+                  <Time />
+                </Grid2>
+                <Grid2>
+                  <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
+                  <TestDate
+                    date={endYARDDate}
+                    minDate={new Date('2025/11/2')}
+                    maxDate={startDate !== null ? startDate : new Date('2025/11/19')}
+                    onChange={handleYARDEndChange}
+                  />
+                  <Time />
+                </Grid2>
               </Grid2>
             </Grid2>
           </Grid2>
+
           <Grid2 container alignItems="center" p={2} spacing={2}>
             <Grid2 container alignItems="center">
               <Typography>メモ</Typography>
               <TextField multiline rows={3} />
               {/* <TextFieldElement name="mem" control={control} multiline rows={3} disabled={!edit}></TextFieldElement> */}
-            </Grid2>
-            <Grid2 container alignItems="center">
-              <Typography>入出庫ステータス</Typography>
-              <TextField disabled defaultValue={'準備中'}></TextField>
             </Grid2>
             <Grid2 container alignItems="center">
               <Typography>本番日数</Typography>
@@ -913,6 +908,10 @@ export const EquipmentReturnOrderDetail = (props: {
             ></TextFieldElement> */}
               <Typography>日</Typography>
             </Grid2>
+          </Grid2>
+          <Grid2 container alignItems="center" p={2} spacing={2}>
+            <Typography>入出庫ステータス</Typography>
+            <TextField disabled defaultValue={'準備中'}></TextField>
           </Grid2>
         </AccordionDetails>
       </Accordion>
