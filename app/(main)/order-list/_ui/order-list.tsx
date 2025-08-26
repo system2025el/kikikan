@@ -3,7 +3,7 @@
 import 'dayjs/locale/ja';
 
 import SearchIcon from '@mui/icons-material/Search';
-import { Box, Button, Container, Divider, Grid2, Paper, Stack, Typography } from '@mui/material';
+import { Box, Button, Container, Divider, Grid2, MenuItem, Paper, Select, Stack, Typography } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import { DatePicker, DateValidationError, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -16,6 +16,7 @@ import { BackButton } from '../../_ui/buttons';
 import { getFilteredOrderList } from '../_lib/funcs';
 import { OrderListTableValues, OrderSearchValues } from '../_lib/types';
 import { OrderTable } from './order-table';
+import { selectNone } from '../../_ui/form-box';
 
 /** 受注一覧画面 */
 export const OrderList = ({
@@ -39,7 +40,7 @@ export const OrderList = ({
     defaultValues: {
       criteria: 1,
       selectedDate: { value: '4', range: { from: null, to: null } },
-      customer: undefined,
+      customer: 0,
       customerSort: '1',
       stageName: '',
       orderStartDate: null,
@@ -148,11 +149,18 @@ export const OrderList = ({
                     <Typography noWrap minWidth={110}>
                       顧客
                     </Typography>
-                    <SelectElement
+                    <Controller
                       name="customer"
                       control={control}
-                      options={[{ id: 0, label: '  ' }, ...customerOptions]}
-                      sx={{ minWidth: 250 }}
+                      render={({ field }) => (
+                        <Select {...field} sx={{ width: 250 }}>
+                          {[selectNone, ...customerOptions].map((opt) => (
+                            <MenuItem key={opt.id} value={opt.id} sx={opt.id === 0 ? { color: grey[600] } : {}}>
+                              {opt.label}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      )}
                     />
                   </Grid2>
                   <Grid2 container display={'flex'} alignItems={'center'} size={{ md: 'grow' }}>
