@@ -35,11 +35,11 @@ export const OrderList = ({
   const [isLoading, setIsLoading] = useState(true);
 
   /* useForm ------------------------------------------ */
-  const { control, getValues, handleSubmit, watch } = useForm<OrderSearchValues>({
+  const { control, handleSubmit, watch } = useForm<OrderSearchValues>({
     mode: 'onBlur',
     defaultValues: {
       criteria: 1,
-      selectedDate: { value: '4', range: { from: null, to: null } },
+      selectedDate: { value: '1', range: { from: null, to: null } },
       customer: 0,
       customerSort: '1',
       stageName: '',
