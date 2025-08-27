@@ -47,8 +47,8 @@ export const VehiclesMasterDialog = ({
     reset,
     getValues,
   } = useForm({
-    mode: 'onBlur',
-    reValidateMode: 'onBlur',
+    mode: 'onChange',
+    reValidateMode: 'onChange',
     resolver: zodResolver(VehsMasterDialogSchema),
     defaultValues: {},
   });

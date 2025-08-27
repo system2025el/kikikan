@@ -57,8 +57,8 @@ export const BumonsMasterDialog = ({
     reset,
     getValues,
   } = useForm({
-    mode: 'onBlur',
-    reValidateMode: 'onBlur',
+    mode: 'onChange',
+    reValidateMode: 'onChange',
     resolver: zodResolver(BumonsMasterDialogSchema),
     defaultValues: emptyBumon,
   });

@@ -51,8 +51,8 @@ export const DaibumonsMasterDialog = ({
     reset,
     getValues,
   } = useForm({
-    mode: 'onBlur',
-    reValidateMode: 'onBlur',
+    mode: 'onChange',
+    reValidateMode: 'onChange',
     resolver: zodResolver(DaibumonsMasterDialogSchema),
     defaultValues: emptyDaibumon,
   });

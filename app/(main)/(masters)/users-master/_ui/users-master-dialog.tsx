@@ -50,8 +50,8 @@ export const UsersMasterDialog = ({
     reset,
     getValues,
   } = useForm({
-    mode: 'onBlur',
-    reValidateMode: 'onBlur',
+    mode: 'onChange',
+    reValidateMode: 'onChange',
     defaultValues: {},
     resolver: zodResolver(UsersMaterDialogSchema),
   });

@@ -49,8 +49,8 @@ export const BasesMasterDialog = ({
     watch,
     getValues,
   } = useForm({
-    mode: 'onBlur',
-    reValidateMode: 'onBlur',
+    mode: 'onChange',
+    reValidateMode: 'onChange',
     resolver: zodResolver(BasesMasterDialogSchema),
     defaultValues: emptyBase,
   });

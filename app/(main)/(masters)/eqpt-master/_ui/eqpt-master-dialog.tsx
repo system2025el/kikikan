@@ -63,8 +63,8 @@ export const EqMasterDialog = ({
     watch,
     getValues,
   } = useForm({
-    mode: 'onBlur',
-    reValidateMode: 'onBlur',
+    mode: 'onChange',
+    reValidateMode: 'onChange',
     defaultValues: emptyEqpt,
     resolver: zodResolver(EqptsMasterDialogSchema),
   });

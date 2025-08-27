@@ -50,8 +50,8 @@ export const ShukeibumonsMasterDialog = ({
     reset,
     getValues,
   } = useForm({
-    mode: 'onBlur',
-    reValidateMode: 'onBlur',
+    mode: 'onChange',
+    reValidateMode: 'onChange',
     resolver: zodResolver(ShukeibumonsMasterDialogSchema),
     defaultValues: {},
   });

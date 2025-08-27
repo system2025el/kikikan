@@ -58,8 +58,8 @@ export const CustomersMasterDialog = ({
     reset,
     getValues,
   } = useForm({
-    mode: 'onBlur',
-    reValidateMode: 'onBlur',
+    mode: 'onChange',
+    reValidateMode: 'onChange',
     defaultValues: emptyCustomer,
     resolver: zodResolver(CustomersMaterDialogSchema),
   });

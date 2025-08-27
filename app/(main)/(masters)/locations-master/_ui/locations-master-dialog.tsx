@@ -51,8 +51,8 @@ export const LocationsMasterDialog = ({
     reset,
     getValues,
   } = useForm({
-    mode: 'onBlur',
-    reValidateMode: 'onBlur',
+    mode: 'onChange',
+    reValidateMode: 'onChange',
     defaultValues: emptyLoc,
     resolver: zodResolver(LocsMasterDialogSchema),
   });
