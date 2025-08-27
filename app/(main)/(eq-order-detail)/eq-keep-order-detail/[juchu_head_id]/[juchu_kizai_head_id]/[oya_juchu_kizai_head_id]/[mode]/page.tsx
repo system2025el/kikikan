@@ -1,6 +1,6 @@
 import { GetOrder } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/funcs';
 
-import { GetJuchuKizaiHead } from '../../../../../_lib/funcs';
+import { GetJuchuKizaiHead, GetJuchuKizaiNyushuko } from '../../../../../_lib/funcs';
 import { EquipmentKeepOrderDetail } from './_ui/equipment-keep-order-detail';
 
 const Page = async (props: {
@@ -19,9 +19,10 @@ const Page = async (props: {
   // 受注ヘッダーデータ
   const juchuHeadData = await GetOrder(params.juchu_head_id);
   // 親受注機材ヘッダーデータ
-  const oyaJuchuKizaiHeadData = await GetJuchuKizaiHead(params.juchu_head_id, params.oya_juchu_kizai_head_id);
+  const oyaJuchuKizaiNyushukoData = await GetJuchuKizaiNyushuko(params.juchu_head_id, params.oya_juchu_kizai_head_id);
+  console.log('oyaJuchuKizaiNyushukoData', oyaJuchuKizaiNyushukoData);
 
-  if (!juchuHeadData || !oyaJuchuKizaiHeadData) {
+  if (!juchuHeadData || !oyaJuchuKizaiNyushukoData) {
     return <div>受注情報が見つかりません。</div>;
   }
 
@@ -32,7 +33,11 @@ const Page = async (props: {
   }
 
   return (
-    <EquipmentKeepOrderDetail juchuHeadData={juchuHeadData} oyaJuchuKizaiHeadData={oyaJuchuKizaiHeadData} edit={edit} />
+    <EquipmentKeepOrderDetail
+      juchuHeadData={juchuHeadData}
+      oyaJuchuKizaiHeadData={oyaJuchuKizaiNyushukoData}
+      edit={edit}
+    />
   );
 };
 export default Page;

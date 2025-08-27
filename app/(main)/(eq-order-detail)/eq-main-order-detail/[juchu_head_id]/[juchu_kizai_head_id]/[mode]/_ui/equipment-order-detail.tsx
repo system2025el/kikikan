@@ -1029,6 +1029,10 @@ const EquipmentOrderDetail = (props: {
     }
   };
 
+  /**
+   * 警告ダイアログの押下ボタンによる処理
+   * @param result 結果
+   */
   const handleResultDialog = async (result: boolean) => {
     if (result) {
       await DeleteLock(1, props.juchuHeadData.juchuHeadId);
