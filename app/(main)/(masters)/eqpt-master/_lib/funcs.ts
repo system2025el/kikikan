@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 
 import pool from '@/app/_lib/postgres/postgres';
 import { supabase } from '@/app/_lib/supabase/supabase';
+import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { EqptSelection } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_ui/equipment-selection-dailog';
 
 import { getAllBumonSelections, getAllSelections } from '../../_lib/funs';
@@ -151,12 +152,7 @@ export const addNewEqpt = async (data: EqptsMasterDialogValues) => {
       );
     `;
 
-  const date = new Date()
-    .toLocaleString('ja-JP', {
-      timeZone: 'Asia/Tokyo',
-      hour12: false,
-    })
-    .replace(/\//g, '-');
+  const date = toJapanTimeString(new Date());
   try {
     console.log('DB Connected');
     await pool.query(` SET search_path TO dev2;`);
@@ -226,12 +222,7 @@ export const updateEqpt = async (data: EqptsMasterDialogValues, id: number) => {
     rank_amt_5: data.rankAmt5,
   };
   console.log(missingData.del_flg);
-  const date = new Date()
-    .toLocaleString('ja-JP', {
-      timeZone: 'Asia/Tokyo',
-      hour12: false,
-    })
-    .replace(/\//g, '-');
+  const date = toJapanTimeString(new Date());
 
   const theData = {
     ...missingData,

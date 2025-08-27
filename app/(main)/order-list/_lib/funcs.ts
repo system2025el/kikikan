@@ -1,12 +1,17 @@
 'use server';
 
 import dayjs from 'dayjs';
-import { revalidatePath } from 'next/cache';
+import timezone from 'dayjs/plugin/timezone';
+import utc from 'dayjs/plugin/utc';
 
 import pool from '@/app/_lib/postgres/postgres';
-import { supabase } from '@/app/_lib/supabase/supabase';
 
+import { toJapanTimeString } from '../../_lib/date-conversion';
 import { OrderSearchValues } from './types';
+
+// .tz()を使う準備
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 /**
  * 受注一覧情報取得
@@ -57,55 +62,55 @@ export const getFilteredOrderList = async (query: OrderSearchValues) => {
   if (dateColumn) {
     switch (selectedDate?.value) {
       case '1': // '先月全て'
-        const lastMonthStart = dayjs().subtract(1, 'month').startOf('month').toDate();
-        const lastMonthEnd = dayjs().subtract(1, 'month').endOf('month').toDate();
-        queryParams.push(lastMonthStart);
+        const lastMonthStart = dayjs().tz('Asia/Tokyo').subtract(1, 'month').startOf('month').toDate();
+        const lastMonthEnd = dayjs().tz('Asia/Tokyo').subtract(1, 'month').endOf('month').toDate();
+        queryParams.push(toJapanTimeString(lastMonthStart));
         whereClauses.push(`${dateColumn} >= $${queryParams.length}`);
-        queryParams.push(lastMonthEnd);
+        queryParams.push(toJapanTimeString(lastMonthEnd));
         whereClauses.push(`${dateColumn} <= $${queryParams.length}`);
         break;
 
       case '2': // '今月全て'
-        const thisMonthStart = dayjs().startOf('month').toDate();
-        const thisMonthEnd = dayjs().endOf('month').toDate();
-        queryParams.push(thisMonthStart);
+        const thisMonthStart = dayjs().tz('Asia/Tokyo').startOf('month').toDate();
+        const thisMonthEnd = dayjs().tz('Asia/Tokyo').endOf('month').toDate();
+        queryParams.push(toJapanTimeString(thisMonthStart));
         whereClauses.push(`${dateColumn} >= $${queryParams.length}`);
-        queryParams.push(thisMonthEnd);
+        queryParams.push(toJapanTimeString(thisMonthEnd));
         whereClauses.push(`${dateColumn} <= $${queryParams.length}`);
         break;
 
       case '3': // '昨日'
-        const yesterday = dayjs().subtract(1, 'day').format('YYYY-MM-DD');
-        queryParams.push(yesterday);
+        const yesterday = dayjs().tz('Asia/Tokyo').subtract(1, 'day').format('YYYY-MM-DD');
+        queryParams.push(toJapanTimeString(yesterday));
         whereClauses.push(`${dateColumn} = $${queryParams.length}`);
         break;
 
       case '4': // '今日'
-        const today = dayjs().format('YYYY-MM-DD');
-        queryParams.push(today);
+        const today = dayjs().tz('Asia/Tokyo').format('YYYY-MM-DD');
+        queryParams.push(toJapanTimeString(today));
         whereClauses.push(`${dateColumn} = $${queryParams.length}`);
         break;
 
       case '5': // '明日'
-        const tomorrow = dayjs().add(1, 'day').format('YYYY-MM-DD');
-        queryParams.push(tomorrow);
+        const tomorrow = dayjs().tz('Asia/Tokyo').add(1, 'day').format('YYYY-MM-DD');
+        queryParams.push(toJapanTimeString(tomorrow));
         whereClauses.push(`${dateColumn} = $${queryParams.length}`);
         break;
 
       case '6': // '明日以降'
-        const tomorrowAndAfter = dayjs().add(1, 'day').startOf('day').toDate();
-        queryParams.push(tomorrowAndAfter);
+        const tomorrowAndAfter = dayjs().tz('Asia/Tokyo').add(1, 'day').startOf('day').toDate();
+        queryParams.push(toJapanTimeString(tomorrowAndAfter));
         whereClauses.push(`${dateColumn} >= $${queryParams.length}`);
         break;
 
       case '7': // '指定期間'
         if (selectedDate.range?.from) {
-          queryParams.push(selectedDate.range.from);
+          queryParams.push(toJapanTimeString(selectedDate.range.from));
           whereClauses.push(`${dateColumn} >= $${queryParams.length}`);
         }
         if (selectedDate.range?.to) {
           const nextDay = dayjs(selectedDate.range.to).add(1, 'day').startOf('day').toDate();
-          queryParams.push(nextDay);
+          queryParams.push(toJapanTimeString(nextDay));
           whereClauses.push(`${dateColumn} < $${queryParams.length}`);
         }
         break;
@@ -117,19 +122,12 @@ export const getFilteredOrderList = async (query: OrderSearchValues) => {
 
   // 受注開始日
   if (orderStartDate) {
-    queryParams.push(
-      orderStartDate
-        .toLocaleString('ja-JP', {
-          timeZone: 'Asia/Tokyo',
-          hour12: false,
-        })
-        .replace(/\//g, '-')
-    );
+    queryParams.push(toJapanTimeString(orderStartDate));
     whereClauses.push(`juchu_str_dat = $${queryParams.length}`);
   }
   // 受注終了日
   if (orderFinishDate) {
-    queryParams.push(orderFinishDate);
+    queryParams.push(toJapanTimeString(orderFinishDate));
     whereClauses.push(`juchu_end_dat = $${queryParams.length}`);
   }
 

@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 
 import pool from '@/app/_lib/postgres/postgres';
 import { supabase } from '@/app/_lib/supabase/supabase';
+import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { emptyLoc } from './datas';
 import { LocsMasterDialogValues, LocsMasterTableValues } from './types';
@@ -127,12 +128,7 @@ export const addNewLoc = async (data: LocsMasterDialogValues) => {
       );
     `;
 
-  const date = new Date()
-    .toLocaleString('ja-JP', {
-      timeZone: 'Asia/Tokyo',
-      hour12: false,
-    })
-    .replace(/\//g, '-');
+  const date = toJapanTimeString(new Date());
   try {
     console.log('DB Connected');
     await pool.query(` SET search_path TO dev2;`);
@@ -187,12 +183,7 @@ export const updateLoc = async (data: LocsMasterDialogValues, id: number) => {
     dsp_flg: Number(data.dspFlg),
   };
   console.log(missingData.del_flg);
-  const date = new Date()
-    .toLocaleString('ja-JP', {
-      timeZone: 'Asia/Tokyo',
-      hour12: false,
-    })
-    .replace(/\//g, '-');
+  const date = toJapanTimeString(new Date());
 
   const theData = {
     ...missingData,

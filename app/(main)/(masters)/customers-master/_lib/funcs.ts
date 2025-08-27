@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 
 import pool from '@/app/_lib/postgres/postgres';
 import { supabase } from '@/app/_lib/supabase/supabase';
+import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { emptyCustomer } from './datas';
 import { CustomersMasterDialogValues, CustomersMasterTableValues } from './types';
@@ -133,12 +134,8 @@ export const addNewCustomer = async (data: CustomersMasterDialogValues) => {
       );
     `;
 
-  const date = new Date()
-    .toLocaleString('ja-JP', {
-      timeZone: 'Asia/Tokyo',
-      hour12: false,
-    })
-    .replace(/\//g, '-');
+  const date = toJapanTimeString(new Date());
+
   try {
     console.log('DB Connected');
     await pool.query(` SET search_path TO dev2;`);
@@ -202,12 +199,7 @@ export const updateCustomer = async (data: CustomersMasterDialogValues, id: numb
     kizai_nebiki_flg: Number(data.kizaiNebikiFlg),
   };
   console.log(missingData.del_flg);
-  const date = new Date()
-    .toLocaleString('ja-JP', {
-      timeZone: 'Asia/Tokyo',
-      hour12: false,
-    })
-    .replace(/\//g, '-');
+  const date = toJapanTimeString(new Date());
 
   const theData = {
     ...missingData,

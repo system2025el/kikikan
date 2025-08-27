@@ -1,8 +1,15 @@
 'use server';
 
+import dayjs from 'dayjs';
+import timezone from 'dayjs/plugin/timezone';
+import utc from 'dayjs/plugin/utc';
 import { utils } from 'xlsx';
 
 import pool from '@/app/_lib/postgres/postgres';
+
+// .tz()を使う準備
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 export const getAllEqptAndRfid = async () => {
   try {
@@ -127,15 +134,8 @@ export const getAllEqptAndRfid = async () => {
       const workbook = utils.book_new();
       utils.book_append_sheet(workbook, worksheet, 'Sheet1');
       // 現在の日付を東京タイムゾーンで取得
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = (now.getMonth() + 1).toString().padStart(2, '0'); // 月は0から始まるため+1
-      const day = now.getDate().toString().padStart(2, '0');
-      const hour = now.getHours().toString().padStart(2, '0');
-      const minute = now.getMinutes().toString().padStart(2, '0');
-      const second = now.getSeconds().toString().padStart(2, '0');
-      // 各部分を結合
-      const date = `${year}${month}${day}${hour}${minute}${second}`;
+      const now = dayjs().tz('Asia/Tokyo');
+      const date = now.format('YYYYMMDDHHmmss');
 
       return { workbook, date };
     }

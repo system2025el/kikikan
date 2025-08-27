@@ -1,3 +1,11 @@
+import dayjs from 'dayjs';
+import timezone from 'dayjs/plugin/timezone';
+import utc from 'dayjs/plugin/utc';
+
+// .tz()を使う準備
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
 // yyyy/MM/dd HH:mm:ss Timezone
 export const toISOStringWithTimezone = (date: Date): string => {
   const pad = function (str: string): string {
@@ -55,4 +63,9 @@ export const toISOStringMonthDay = (date: Date): string => {
   const month = pad((jstDate.getMonth() + 1).toString());
   const day = pad(jstDate.getDate().toString());
   return `${month}/${day}`;
+};
+
+// 日本時間にするやつ
+export const toJapanTimeString = (input: Date | string | number): string => {
+  return dayjs(input).tz('Asia/Tokyo').format('YYYY-MM-DD HH:mm:ss');
 };

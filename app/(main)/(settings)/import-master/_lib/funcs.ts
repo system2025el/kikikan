@@ -2,6 +2,7 @@
 
 import pool from '@/app/_lib/postgres/postgres';
 import { supabase } from '@/app/_lib/supabase/supabase';
+import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { EqptImportType, KizaiImportTypes, RfidImportTypes, TanabanImportTypes } from './types';
 
@@ -117,7 +118,7 @@ const checkRfid = async (list: RfidImportTypes[]) => {
     // 新規登録するデータがあれば新規登録処理
     if (insertList.length > 0) {
       // INSERT用のデータ準備
-      const addDat = new Date();
+      const addDat = toJapanTimeString(new Date());
       const addUser = 'excel_import';
       const insertPlaceholders = insertList
         .map((_, index) => {
@@ -193,7 +194,7 @@ const checkRfid = async (list: RfidImportTypes[]) => {
     const updateList = differnces.rows;
     // 差異がある場合
     if (differnces.rowCount && differnces.rowCount > 0) {
-      const updDat = new Date();
+      const updDat = toJapanTimeString(new Date());
       const updUser = 'excel_import';
       const updatePlaceholders = updateList
         .map((_, index) => {
