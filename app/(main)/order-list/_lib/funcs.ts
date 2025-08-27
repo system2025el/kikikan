@@ -117,7 +117,14 @@ export const getFilteredOrderList = async (query: OrderSearchValues) => {
 
   // 受注開始日
   if (orderStartDate) {
-    queryParams.push(orderStartDate);
+    queryParams.push(
+      orderStartDate
+        .toLocaleString('ja-JP', {
+          timeZone: 'Asia/Tokyo',
+          hour12: false,
+        })
+        .replace(/\//g, '-')
+    );
     whereClauses.push(`juchu_str_dat = $${queryParams.length}`);
   }
   // 受注終了日
