@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { MuiTablePagination } from '../../../_ui/table-pagination';
+import { NEW_MASTER_ID, ROWS_PER_MASTER_TABLE_PAGE } from '../../_lib/constants';
 import { MasterTable } from '../../_ui/tables';
 import { BumonsMHeader } from '../_lib/datas';
 import { getFilteredBumons } from '../_lib/funcs';
@@ -32,10 +33,10 @@ export const BumonsMasterTable = ({
   setPage: React.Dispatch<React.SetStateAction<number>>;
 }) => {
   /* 1ページごとの表示数 */
-  const rowsPerPage = 50;
+  const rowsPerPage = ROWS_PER_MASTER_TABLE_PAGE;
   /* useState --------------------------------------- */
-  /* ダイアログ開く部門のID、閉じるとき、未選択で-100とする */
-  const [openId, setOpenID] = useState<number>(-100);
+  /* ダイアログ開く部門のID、閉じるとき、未選択でNEW_MASTER_IDとする */
+  const [openId, setOpenID] = useState<number>(NEW_MASTER_ID);
   /* 詳細ダイアログの開閉状態 */
   const [dialogOpen, setDialogOpen] = useState(false);
   /* 部門リスト */
@@ -91,7 +92,7 @@ export const BumonsMasterTable = ({
               </Typography>
             </Grid2>
             <Grid2>
-              <Button onClick={() => handleOpenDialog(-100)}>
+              <Button onClick={() => handleOpenDialog(NEW_MASTER_ID)}>
                 <AddIcon fontSize="small" />
                 新規
               </Button>

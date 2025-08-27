@@ -7,6 +7,7 @@ import { Controller, TextareaAutosizeElement, TextFieldElement, useForm } from '
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { FormBox, selectNone, SelectTypes } from '../../../_ui/form-box';
+import { NEW_MASTER_ID } from '../../_lib/constants';
 import { getAllBumonDSSelections } from '../../_lib/funs';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
@@ -71,7 +72,7 @@ export const BumonsMasterDialog = ({
   const onSubmit = async (data: BumonsMasterDialogValues) => {
     console.log('isDarty : ', isDirty);
     console.log(data);
-    if (bumonId === -100) {
+    if (bumonId === NEW_MASTER_ID) {
       // 新規の時
       await addNewBumon(data);
       handleCloseDialog();
@@ -130,7 +131,7 @@ export const BumonsMasterDialog = ({
     const getThatOnebumon = async () => {
       const a = await getAllBumonDSSelections();
       setSelectOptions(a!);
-      if (bumonId === -100) {
+      if (bumonId === NEW_MASTER_ID) {
         // 新規追加モード
         reset(emptyBumon); // フォーム初期化
         setEditable(true); // 編集モードにする
