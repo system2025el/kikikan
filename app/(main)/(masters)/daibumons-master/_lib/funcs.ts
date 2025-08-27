@@ -105,7 +105,7 @@ export const addNewDaibumon = async (data: DaibumonsMasterDialogValues) => {
       );
     `;
 
-  const date = toJapanTimeString(new Date());
+  const date = toJapanTimeString();
 
   try {
     console.log('DB Connected');
@@ -133,7 +133,7 @@ export const updateDaibumon = async (data: DaibumonsMasterDialogValues, id: numb
     mem: data.mem,
   };
   console.log(missingData.del_flg);
-  const date = toJapanTimeString(new Date());
+  const date = toJapanTimeString();
 
   const theData = {
     ...missingData,

@@ -99,7 +99,7 @@ export const addNewUser = async (data: UsersMasterDialogValues) => {
       );
     `;
 
-  const date = toJapanTimeString(new Date());
+  const date = toJapanTimeString();
   try {
     console.log('DB Connected');
     await pool.query(` SET search_path TO dev2;`);
@@ -125,7 +125,7 @@ export const updateUser = async (data: UsersMasterDialogValues, id: number) => {
     del_flg: Number(data.delFlg),
   };
   console.log(missingData.del_flg);
-  const date = toJapanTimeString(new Date());
+  const date = toJapanTimeString();
 
   const theData = {
     ...missingData,

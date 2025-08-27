@@ -101,7 +101,7 @@ export const addNewVeh = async (data: VehsMasterDialogValues) => {
       );
     `;
 
-  const date = toJapanTimeString(new Date());
+  const date = toJapanTimeString();
   try {
     console.log('DB Connected');
     await pool.query(` SET search_path TO dev2;`);
@@ -138,7 +138,7 @@ export const updateVeh = async (data: VehsMasterDialogValues, id: number) => {
     dsp_flg: Number(data.dspFlg),
   };
   console.log(missingData.del_flg);
-  const date = toJapanTimeString(new Date());
+  const date = toJapanTimeString();
 
   const theData = {
     ...missingData,
