@@ -204,6 +204,8 @@ export const GetJuchuKizaiNyushuko = async (juchuHeadId: number, juchuKizaiHeadI
     }
 
     const juchuKizaiNyushukoData = {
+      juchuHeadId: juchuHeadId,
+      juchuKizaiHeadId: juchuKizaiHeadId,
       kicsShukoDat: data.find((d) => d.nyushuko_shubetu_id === 1 && d.nyushuko_basho_id === 1)?.nyushuko_dat ?? null,
       kicsNyukoDat: data.find((d) => d.nyushuko_shubetu_id === 2 && d.nyushuko_basho_id === 1)?.nyushuko_dat ?? null,
       yardShukoDat: data.find((d) => d.nyushuko_shubetu_id === 1 && d.nyushuko_basho_id === 2)?.nyushuko_dat ?? null,

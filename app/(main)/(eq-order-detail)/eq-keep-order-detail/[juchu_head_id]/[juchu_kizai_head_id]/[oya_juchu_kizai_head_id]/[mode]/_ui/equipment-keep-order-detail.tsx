@@ -32,6 +32,7 @@ import { BackButton } from '@/app/(main)/_ui/buttons';
 import { Calendar, TestDate } from '@/app/(main)/_ui/date';
 import { useDirty } from '@/app/(main)/_ui/dirty-context';
 import Time, { TestTime } from '@/app/(main)/_ui/time';
+import { OyaJuchuKizaiHeadValues } from '@/app/(main)/(eq-order-detail)/_lib/types';
 import { OyaEqSelectionDialog } from '@/app/(main)/(eq-order-detail)/_ui/equipment-selection-dialog';
 import {
   JuchuKizaiHeadValues,
@@ -136,7 +137,7 @@ export const testStock = Array.from({ length: 50 }, (_, i) => stock[i % stock.le
 
 export const EquipmentKeepOrderDetail = (props: {
   juchuHeadData: OrderValues;
-  oyaJuchuKizaiHeadData: JuchuKizaiHeadValues;
+  oyaJuchuKizaiHeadData: OyaJuchuKizaiHeadValues;
   edit: boolean;
 }) => {
   // user情報
@@ -185,11 +186,6 @@ export const EquipmentKeepOrderDetail = (props: {
   // context
   const { setIsDirty, setIsSave, setLock } = useDirty();
 
-  // ref
-  const leftRef = useRef<HTMLDivElement>(null);
-  const rightRef = useRef<HTMLDivElement>(null);
-  const isSyncing = useRef(false);
-
   // ブラウザバック、F5、×ボタンでページを離れた際のhook
   // useUnsavedChangesWarning(isDirty, save);
 
@@ -217,23 +213,6 @@ export const EquipmentKeepOrderDetail = (props: {
     setLock(lockData);
   }, [lockData, setLock]);
 
-  useEffect(() => {
-    const left = leftRef.current;
-    const right = rightRef.current;
-
-    if (left && right) {
-      left.addEventListener('scroll', () => syncScroll('left'));
-      right.addEventListener('scroll', () => syncScroll('right'));
-    }
-
-    return () => {
-      if (left && right) {
-        left.removeEventListener('scroll', () => syncScroll('left'));
-        right.removeEventListener('scroll', () => syncScroll('right'));
-      }
-    };
-  }, []);
-
   /**
    * 編集モード変更
    */
@@ -257,29 +236,6 @@ export const EquipmentKeepOrderDetail = (props: {
         setEdit(true);
       }
     }
-  };
-
-  // 同期スクロール処理
-  const syncScroll = (source: 'left' | 'right') => {
-    if (isSyncing.current) return;
-    isSyncing.current = true;
-
-    const left = leftRef.current;
-    const right = rightRef.current;
-
-    if (!left || !right) return;
-
-    if (source === 'left') {
-      const ratio = left.scrollTop / (left.scrollHeight - left.clientHeight);
-      right.scrollTop = ratio * (right.scrollHeight - right.clientHeight);
-    } else {
-      const ratio = right.scrollTop / (right.scrollHeight - right.clientHeight);
-      left.scrollTop = ratio * (left.scrollHeight - left.clientHeight);
-    }
-
-    requestAnimationFrame(() => {
-      isSyncing.current = false;
-    });
   };
 
   /**
@@ -431,7 +387,7 @@ export const EquipmentKeepOrderDetail = (props: {
               <Typography>受注ヘッダー</Typography>
               <Grid2 container display={expanded ? 'none' : 'flex'} spacing={2}>
                 <Typography>公演名</Typography>
-                <Typography>A/Zepp Tour</Typography>
+                <Typography>{props.juchuHeadData.koenNam}</Typography>
               </Grid2>
             </Grid2>
           </Box>
@@ -446,13 +402,19 @@ export const EquipmentKeepOrderDetail = (props: {
                     <Typography marginRight={3} whiteSpace="nowrap">
                       受注番号
                     </Typography>
-                    <TextField defaultValue="81694" disabled></TextField>
+                    <TextField defaultValue={props.juchuHeadData.juchuHeadId} disabled></TextField>
                   </Grid2>
                   <Grid2 display="flex" direction="row" alignItems="center">
                     <Typography mr={2}>受注ステータス</Typography>
-                    <TextField defaultValue="確定" disabled sx={{ width: 120 }}>
-                      確定
-                    </TextField>
+                    <Select value={props.juchuHeadData.juchuSts} disabled>
+                      <MenuItem value={0}>入力中</MenuItem>
+                      <MenuItem value={1}>仮受注</MenuItem>
+                      <MenuItem value={2}>処理中</MenuItem>
+                      <MenuItem value={3}>確定</MenuItem>
+                      <MenuItem value={4}>貸出済み</MenuItem>
+                      <MenuItem value={5}>返却済み</MenuItem>
+                      <MenuItem value={9}>受注キャンセル</MenuItem>
+                    </Select>
                   </Grid2>
                 </Grid2>
               </Grid2>
@@ -460,13 +422,13 @@ export const EquipmentKeepOrderDetail = (props: {
                 <Typography marginRight={5} whiteSpace="nowrap">
                   受注日
                 </Typography>
-                <TextField defaultValue="2025/10/01" disabled></TextField>
+                <TestDate date={props.juchuHeadData.juchuDat} onChange={() => {}} disabled />
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={5} whiteSpace="nowrap">
                   入力者
                 </Typography>
-                <TextField defaultValue="XXXXXXXX" disabled></TextField>
+                <TextField defaultValue={props.juchuHeadData.nyuryokuUser} disabled></TextField>
               </Box>
             </Grid2>
             <Grid2>
@@ -474,19 +436,19 @@ export const EquipmentKeepOrderDetail = (props: {
                 <Typography marginRight={5} whiteSpace="nowrap">
                   公演名
                 </Typography>
-                <TextField defaultValue="A/Zepp Tour" disabled></TextField>
+                <TextField defaultValue={props.juchuHeadData.koenNam} disabled></TextField>
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={3} whiteSpace="nowrap">
                   公演場所
                 </Typography>
-                <TextField defaultValue="Zepp Osaka" disabled></TextField>
+                <TextField defaultValue={props.juchuHeadData.koenbashoNam} disabled></TextField>
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={7} whiteSpace="nowrap">
                   相手
                 </Typography>
-                <TextField defaultValue="(株)シアターブレーン" disabled></TextField>
+                <TextField defaultValue={props.juchuHeadData.kokyaku.kokyakuNam} disabled></TextField>
               </Box>
             </Grid2>
           </Grid2>
@@ -524,58 +486,26 @@ export const EquipmentKeepOrderDetail = (props: {
               <Typography>親伝票出庫日時</Typography>
               <Grid2>
                 <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                <TestDate
-                  date={startKICSDate}
-                  minDate={endYARDDate !== null ? endYARDDate : undefined}
-                  maxDate={new Date('2025/11/19')}
-                  onChange={handleKICSStartChange}
-                  disabled
-                />
-                <Time disabled />
+                <TestDate date={new Date(props.oyaJuchuKizaiHeadData.kicsShukoDat)} onChange={() => {}} disabled />
+                <TestTime time={new Date(props.oyaJuchuKizaiHeadData.kicsShukoDat)} onChange={() => {}} disabled />
               </Grid2>
               <Grid2>
                 <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                <TestDate
-                  date={startYARDDate}
-                  minDate={endYARDDate !== null ? endYARDDate : undefined}
-                  maxDate={new Date('2025/11/19')}
-                  onChange={handleYARDStartChange}
-                  disabled
-                />
-                <Time disabled />
+                <TestDate date={new Date(props.oyaJuchuKizaiHeadData.yardShukoDat)} onChange={() => {}} disabled />
+                <TestTime time={new Date(props.oyaJuchuKizaiHeadData.yardShukoDat)} onChange={() => {}} disabled />
               </Grid2>
             </Grid2>
             <Grid2 width={380} order={{ xl: 4 }}>
               <Typography>親伝票入庫日時</Typography>
               <Grid2>
                 <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                <TestDate
-                  disabled
-                  date={endKICSDate}
-                  onChange={(newDate) => {
-                    if (newDate !== null) {
-                      setEndKICSDate(newDate.toDate());
-                    }
-                  }}
-                />
-                <Time disabled />
+                <TestDate date={new Date(props.oyaJuchuKizaiHeadData.kicsNyukoDat)} onChange={() => {}} disabled />
+                <TestTime time={new Date(props.oyaJuchuKizaiHeadData.kicsNyukoDat)} onChange={() => {}} disabled />
               </Grid2>
               <Grid2>
                 <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                <TestDate
-                  disabled
-                  date={endYARDDate}
-                  onChange={(newDate) => {
-                    if (newDate !== null) {
-                      setEndYARDDate(newDate?.toDate());
-                    }
-                  }}
-                />
-                <TestTime
-                  disabled
-                  time={endYARDDate}
-                  onChange={(newDate) => newDate && setEndYARDDate(newDate?.toDate())}
-                />
+                <TestDate date={new Date(props.oyaJuchuKizaiHeadData.yardNyukoDat)} onChange={() => {}} disabled />
+                <TestTime time={new Date(props.oyaJuchuKizaiHeadData.yardNyukoDat)} onChange={() => {}} disabled />
               </Grid2>
             </Grid2>
             <Grid2 width={380} order={{ xl: 2 }}>
@@ -640,15 +570,11 @@ export const EquipmentKeepOrderDetail = (props: {
       </Accordion>
       {/*受注明細(機材)*/}
       <Paper variant="outlined" sx={{ mt: 2 }}>
-        <Box display="flex" justifyContent="space-between" alignItems="center" py={1} px={2}>
+        <Box display="flex" alignItems="center" py={1} px={2}>
           <Grid2 container direction="column" spacing={1}>
             <Typography>受注明細(機材)</Typography>
             <Typography fontSize={'small'}>機材入力</Typography>
           </Grid2>
-          <Button>
-            <CheckIcon fontSize="small" />
-            保存
-          </Button>
         </Box>
         <Divider />
 
@@ -672,7 +598,6 @@ export const EquipmentKeepOrderDetail = (props: {
             <KeepEqTable
               rows={oyaJuchuKizaiMeisaiList}
               handleMemoChange={handleMemoChange}
-              ref={leftRef}
               onChange={handleCellChange}
             />
           </Box>
