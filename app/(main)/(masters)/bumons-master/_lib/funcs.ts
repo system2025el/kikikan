@@ -116,7 +116,7 @@ export const addNewBumon = async (data: BumonsMasterDialogValues) => {
       );
     `;
 
-  const date = toJapanTimeString(new Date());
+  const date = toJapanTimeString();
 
   try {
     console.log('DB Connected');
@@ -156,7 +156,7 @@ export const updateBumon = async (data: BumonsMasterDialogValues, id: number) =>
     syukei_bumon_id: data.shukeibumonId,
   };
   console.log(missingData.del_flg);
-  const date = toJapanTimeString(new Date());
+  const date = toJapanTimeString();
 
   const theData = {
     ...missingData,

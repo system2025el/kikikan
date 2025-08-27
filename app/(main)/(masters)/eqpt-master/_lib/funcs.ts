@@ -152,7 +152,7 @@ export const addNewEqpt = async (data: EqptsMasterDialogValues) => {
       );
     `;
 
-  const date = toJapanTimeString(new Date());
+  const date = toJapanTimeString();
   try {
     console.log('DB Connected');
     await pool.query(` SET search_path TO dev2;`);
@@ -222,7 +222,7 @@ export const updateEqpt = async (data: EqptsMasterDialogValues, id: number) => {
     rank_amt_5: data.rankAmt5,
   };
   console.log(missingData.del_flg);
-  const date = toJapanTimeString(new Date());
+  const date = toJapanTimeString();
 
   const theData = {
     ...missingData,

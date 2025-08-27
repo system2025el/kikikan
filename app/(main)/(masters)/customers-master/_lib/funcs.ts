@@ -134,7 +134,7 @@ export const addNewCustomer = async (data: CustomersMasterDialogValues) => {
       );
     `;
 
-  const date = toJapanTimeString(new Date());
+  const date = toJapanTimeString();
 
   try {
     console.log('DB Connected');
@@ -199,7 +199,7 @@ export const updateCustomer = async (data: CustomersMasterDialogValues, id: numb
     kizai_nebiki_flg: Number(data.kizaiNebikiFlg),
   };
   console.log(missingData.del_flg);
-  const date = toJapanTimeString(new Date());
+  const date = toJapanTimeString();
 
   const theData = {
     ...missingData,

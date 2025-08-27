@@ -101,7 +101,7 @@ export const addNewBase = async (data: BasesMasterDialogValues) => {
       );
     `;
 
-  const date = toJapanTimeString(new Date());
+  const date = toJapanTimeString();
 
   try {
     console.log('DB Connected');
@@ -129,7 +129,7 @@ export const updateBase = async (data: BasesMasterDialogValues, id: number) => {
     mem: data.mem,
   };
   console.log(missingData.del_flg);
-  const date = toJapanTimeString(new Date());
+  const date = toJapanTimeString();
 
   const theData = {
     ...missingData,

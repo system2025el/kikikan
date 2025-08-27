@@ -131,21 +131,19 @@ const checkRfid = async (list: RfidImportTypes[], connection: PoolClient) => {
     // 新規登録するデータがあれば新規登録処理
     if (insertList.length > 0) {
       // 現材の時刻取得
-      const addDat = toJapanTimeString(new Date());
+      const addDat = toJapanTimeString();
       const addUser = 'excel_import';
 
       // 一時テーブルとして扱うインポートデータのカラムを定義
       const insertColumns = ['rfid_tag_id', 'kizai_nam', 'rfid_kizai_sts', 'del_flg', 'shozoku_id', 'mem'];
 
-      // VALUES句のプレースホルダーを生成: ($1, $2, ...), ($7, $8, ...)
       const insertPlaceholders = insertList
         .map((_, index) => {
           const start = index * insertColumns.length + 1;
           return `(${insertColumns.map((_, i) => `$${start + i}`).join(',')})`;
         })
         .join(',');
-
-      // クエリに渡す値をフラットな配列に変換
+      // 挿入する値
       const values = insertList.flatMap((v) => [
         v.rfid_tag_id,
         v.kizai_nam,
@@ -222,7 +220,7 @@ const checkRfid = async (list: RfidImportTypes[], connection: PoolClient) => {
     const updateList = differnces.rows;
     // 差異がある場合
     if (differnces.rowCount && differnces.rowCount > 0) {
-      const updDat = toJapanTimeString(new Date());
+      const updDat = toJapanTimeString();
       const updUser = 'excel_import';
       const updatePlaceholders = updateList
         .map((_, index) => {
@@ -315,7 +313,7 @@ const checkKizai = async (list: KizaiImportTypes[], connection: PoolClient) => {
     })
   );
   // 現在の日付とユーザー情報を取得
-  const addDat = toJapanTimeString(new Date());
+  const addDat = toJapanTimeString();
   const addUser = 'excel_import';
 
   try {
@@ -420,7 +418,7 @@ const checkDaibumon = async (list: string[], connection: PoolClient) => {
   const uniqueList = [...new Set(list)];
   const placeholders = uniqueList.map((_, index) => `($${index + 1})`).join(',');
   // 現在の日付とユーザー情報
-  const addDat = toJapanTimeString(new Date());
+  const addDat = toJapanTimeString();
   const addUser = 'excel_import';
   try {
     //  既存の大部門マスタの最大ID
@@ -476,7 +474,7 @@ const checkShukeibumon = async (list: string[], connection: PoolClient) => {
 
   const placeholders = uniqueList.map((_, index) => `($${index + 1})`).join(',');
   // 現在の日付とユーザー情報
-  const addDat = toJapanTimeString(new Date());
+  const addDat = toJapanTimeString();
   const addUser = 'excel_import';
 
   try {
@@ -549,7 +547,7 @@ const checkBumon = async (
     })
   );
   // 現在の日付とユーザー情報を取得
-  const addDat = toJapanTimeString(new Date());
+  const addDat = toJapanTimeString();
   const addUser = 'excel_import';
 
   try {
@@ -625,7 +623,7 @@ const checkTanaban = async (list: TanabanImportTypes[], connection: PoolClient) 
   const values = uniqueList.flatMap((item) => [item.bld_cod, item.tana_cod, item.eda_cod]);
 
   // 現日時取得
-  const addDate = toJapanTimeString(new Date());
+  const addDate = toJapanTimeString();
   const addUser = 'excel_import';
 
   try {

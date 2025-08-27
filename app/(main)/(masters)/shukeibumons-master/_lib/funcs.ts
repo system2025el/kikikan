@@ -104,7 +104,7 @@ export const addNewShukeibumon = async (data: ShukeibumonsMasterDialogValues) =>
       );
     `;
 
-  const date = toJapanTimeString(new Date());
+  const date = toJapanTimeString();
   try {
     console.log('DB Connected');
     await pool.query(` SET search_path TO dev2;`);
@@ -131,7 +131,7 @@ export const updateShukeibumon = async (data: ShukeibumonsMasterDialogValues, id
     mem: data.mem,
   };
   console.log(missingData.del_flg);
-  const date = toJapanTimeString(new Date());
+  const date = toJapanTimeString();
 
   const theData = {
     ...missingData,
