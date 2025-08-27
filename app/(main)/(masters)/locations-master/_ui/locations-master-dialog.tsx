@@ -8,6 +8,7 @@ import { CheckboxElement, TextareaAutosizeElement, TextFieldElement, useForm } f
 import { FormBox } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 
+import { NEW_MASTER_ID } from '../../_lib/constants';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { emptyLoc, formItems } from '../_lib/datas';
@@ -67,7 +68,7 @@ export const LocationsMasterDialog = ({
     console.log('action is : ', action);
     console.log(data);
 
-    if (locationId === -100) {
+    if (locationId === NEW_MASTER_ID) {
       // 新規の時
       await addNewLoc(data);
       handleCloseDialog();
@@ -124,7 +125,7 @@ export const LocationsMasterDialog = ({
   useEffect(() => {
     console.log('★★★★★★★★★★★★★★★★★★★★★');
     const getThatOneloc = async () => {
-      if (locationId === -100) {
+      if (locationId === NEW_MASTER_ID) {
         // 新規追加モード
         reset(emptyLoc); // フォーム初期化
         setEditable(true); // 編集モードにする

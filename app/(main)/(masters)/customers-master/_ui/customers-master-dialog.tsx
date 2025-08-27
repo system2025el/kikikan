@@ -14,6 +14,7 @@ import {
 import { FormBox } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 
+import { NEW_MASTER_ID } from '../../_lib/constants';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { emptyCustomer, formItems } from '../_lib/datas';
@@ -72,7 +73,7 @@ export const CustomersMasterDialog = ({
   const onSubmit = async (data: CustomersMasterDialogValues) => {
     console.log('isDarty : ', isDirty);
     console.log(data);
-    if (customerId === -100) {
+    if (customerId === NEW_MASTER_ID) {
       // 新規の時
       await addNewCustomer(data);
       handleCloseDialog();
@@ -129,7 +130,7 @@ export const CustomersMasterDialog = ({
   useEffect(() => {
     console.log('★★★★★★★★★★★★★★★★★★★★★');
     const getThatOneCustomer = async () => {
-      if (customerId === -100) {
+      if (customerId === NEW_MASTER_ID) {
         // 新規追加モード
         reset(emptyCustomer); // フォーム初期化
         setEditable(true); // 編集モードにする

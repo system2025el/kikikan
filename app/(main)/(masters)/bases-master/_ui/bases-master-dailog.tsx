@@ -5,6 +5,7 @@ import { CheckboxElement, TextareaAutosizeElement, TextFieldElement, useForm } f
 
 import { FormBox, FormItemsType } from '../../../_ui/form-box';
 import { Loading } from '../../../_ui/loading';
+import { NEW_MASTER_ID } from '../../_lib/constants';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { emptyBase, formItems } from '../_lib/datas';
@@ -63,7 +64,7 @@ export const BasesMasterDialog = ({
   const onSubmit = async (data: BasesMasterDialogValues) => {
     console.log('isDarty : ', isDirty);
     console.log(data);
-    if (baseId === -100) {
+    if (baseId === NEW_MASTER_ID) {
       // 新規登録
       await addNewBase(data);
       handleCloseDialog();
@@ -120,7 +121,7 @@ export const BasesMasterDialog = ({
   useEffect(() => {
     console.log('★★★★★★★★★★★★★★★★★★★★★');
     const getThatOneBase = async () => {
-      if (baseId === -100) {
+      if (baseId === NEW_MASTER_ID) {
         // 新規追加モード
         reset(emptyBase); // フォーム初期化
         setEditable(true); // 編集モードにする
