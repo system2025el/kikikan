@@ -190,6 +190,12 @@ export const UpdateJuchuKizaiHead = async (juchuKizaiHeadData: JuchuKizaiHeadVal
   }
 };
 
+/**
+ * 受注機材入出庫データ取得
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @returns 受注機材入出庫データ
+ */
 export const GetJuchuKizaiNyushuko = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
   try {
     const { data, error } = await supabase
