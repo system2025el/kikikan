@@ -106,7 +106,7 @@ const DateX = (props: { sx?: object; disabled?: boolean }) => {
         defaultValue={today}
         onError={(newError: DateValidationError) => setError(newError)}
         views={['year', 'month', 'day']}
-        disabled={disabled ? true : false}
+        disabled={disabled}
       />
     </LocalizationProvider>
   );
@@ -173,16 +173,11 @@ export const TestDate = (props: {
               endAdornment: (
                 <>
                   {date && (
-                    <IconButton size="small" sx={{ p: 0 }} onClick={onClear} disabled={disabled ? true : false}>
+                    <IconButton size="small" sx={{ p: 0 }} onClick={onClear} disabled={disabled}>
                       <ClearIcon fontSize="small" />
                     </IconButton>
                   )}
-                  <IconButton
-                    size="small"
-                    sx={{ p: 0 }}
-                    onClick={() => setOpen(true)}
-                    disabled={disabled ? true : false}
-                  >
+                  <IconButton size="small" sx={{ p: 0 }} onClick={() => setOpen(true)} disabled={disabled}>
                     <CalendarTodayIcon fontSize="small" />
                   </IconButton>
                 </>
@@ -195,7 +190,7 @@ export const TestDate = (props: {
         minDate={minDate && dayjs(minDate)}
         maxDate={maxDate && dayjs(maxDate)}
         views={['year', 'month', 'day']}
-        disabled={disabled ? true : false}
+        disabled={disabled}
         onChange={onChange}
         onAccept={onBlur}
       />
@@ -356,7 +351,7 @@ export const RSuiteDateRangePicker = (props: Props) => {
           return false;
         }}
         onOk={onChange}
-        disabled={disabled ? true : false}
+        disabled={disabled}
         /*calendarSnapping*/
       />
     </>
