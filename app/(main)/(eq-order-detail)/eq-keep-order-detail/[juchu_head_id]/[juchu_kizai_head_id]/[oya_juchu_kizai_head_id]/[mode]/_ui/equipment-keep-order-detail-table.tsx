@@ -126,11 +126,10 @@ KeepStockTableRow.displayName = 'KeepStockTableRow';
 type KeepEqTableProps = {
   rows: KeepJuchuKizaiMeisaiValues[];
   handleMemoChange: (rowIndex: number, memo: string) => void;
-  ref: React.RefObject<HTMLDivElement | null>;
   onChange: (rowIndex: number, returnValue: number) => void;
 };
 
-export const KeepEqTable: React.FC<KeepEqTableProps> = ({ rows, handleMemoChange, ref, onChange }) => {
+export const KeepEqTable: React.FC<KeepEqTableProps> = ({ rows, handleMemoChange, onChange }) => {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const handleKeepCellChange = (rowIndex: number, newValue: number) => {
@@ -149,7 +148,7 @@ export const KeepEqTable: React.FC<KeepEqTableProps> = ({ rows, handleMemoChange
   };
 
   return (
-    <TableContainer ref={ref} component={Paper} style={{ overflow: 'scroll', maxHeight: '80vh' }}>
+    <TableContainer component={Paper} style={{ overflow: 'scroll', maxHeight: '80vh' }}>
       <Table>
         <TableHead>
           <TableRow>
