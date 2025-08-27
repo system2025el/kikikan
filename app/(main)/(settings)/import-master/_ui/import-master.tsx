@@ -142,6 +142,7 @@ export const ImportMaster = () => {
     if (eqptData.length !== 0) {
       try {
         await ImportEqptRfidData(eqptData);
+        setEqptFileName('ファイルが選択されていません');
         setSnackBarMessage(`${eqptFileName}を登録しました`);
         setSnackBarOpen(true);
       } catch (error) {

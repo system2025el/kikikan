@@ -311,8 +311,7 @@ const SearchDateX = ({
           size: 'small',
           sx: {
             bgcolor: disabled ? grey[200] : 'white',
-            width: '25%',
-            minWidth: 200,
+            width: 200,
             padding: 0,
             '.Mui-disabled': {
               WebkitTextFillColor: 'black',
