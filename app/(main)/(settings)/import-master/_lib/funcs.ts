@@ -1,7 +1,8 @@
 'use server';
 
+import { PoolClient } from 'pg';
+
 import pool from '@/app/_lib/postgres/postgres';
-import { supabase } from '@/app/_lib/supabase/supabase';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { EqptImportType, KizaiImportTypes, RfidImportTypes, TanabanImportTypes } from './types';
@@ -67,46 +68,58 @@ export const ImportEqptRfidData = async (data: EqptImportType[]) => {
     mem: d.mem,
   }));
 
+  /* トランザクション */
+  const connection = await pool.connect();
+
   try {
-    const tanabans = await checkTanaban(tanabanList);
+    // トランザクション開始
+    await connection.query('BEGIN');
+    // スキーマ指定
+    await connection.query(`SET search_path TO dev5;`);
+
+    const tanabans = await checkTanaban(tanabanList, connection);
     console.log('棚番', tanabans.length, '件追加');
-    const daibumons = await checkDaibumon(daibumonNamList);
+    const daibumons = await checkDaibumon(daibumonNamList, connection);
     console.log('大部門', daibumons.length, '件追加');
-    const shukeibumons = await checkShukeibumon(shukeibumonNamList);
+    const shukeibumons = await checkShukeibumon(shukeibumonNamList, connection);
     console.log('集計部門', shukeibumons.length, '件追加');
-    const bumons = await checkBumon(bumonNamList);
+    const bumons = await checkBumon(bumonNamList, connection);
     console.log('部門', bumons.length, '件追加');
-    const kizais = await checkKizai(kizaiMasterList);
+    const kizais = await checkKizai(kizaiMasterList, connection);
     console.log('機材マスタ', kizais.length, '件追加');
-    await checkRfid(rfidList);
+    await checkRfid(rfidList, connection);
+    // すべて成功でコミット
+    await connection.query('COMMIT');
   } catch (e) {
     console.error('例外が発生', e);
-    throw e;
+    // エラーでロールバック
+    await connection.query('ROLLBACK');
+    throw new Error('例外が発生：DBエラー,ROLLBACK');
+  } finally {
+    // なんにしてもpool解放
+    connection.release();
   }
 };
 
 /**
  * RFIDマスタ確認
  * @param list
+ * @param connection
  * @returns
  */
-const checkRfid = async (list: RfidImportTypes[]) => {
-  // listが空の場合離脱
-  if (list.length === 0) {
+const checkRfid = async (list: RfidImportTypes[], connection: PoolClient) => {
+  // 有効なデータがない場合は離脱
+  if (!Array.isArray(list) || list.length === 0) {
     return [];
   }
   // 重複を削除したリスト
   const uniqueList = Array.from(new Map(list.map((v) => [v.rfid_tag_id, v])).values());
-  // トランザクション
-  const client = await pool.connect();
-  try {
-    await client.query('BEGIN;');
-    await client.query(`SET search_path TO dev5;`);
 
+  try {
     // インポートしたRFIDタグID
     const rfidTagIds = uniqueList.map((v) => v.rfid_tag_id);
     // m_rfidから既存のRFIDタグIDを取得
-    const existingTagsResult = await client.query(
+    const existingTagsResult = await connection.query(
       `SELECT rfid_tag_id FROM m_rfid WHERE rfid_tag_id = ANY($1::text[]);`,
       [rfidTagIds]
     );
@@ -117,25 +130,23 @@ const checkRfid = async (list: RfidImportTypes[]) => {
 
     // 新規登録するデータがあれば新規登録処理
     if (insertList.length > 0) {
-      // INSERT用のデータ準備
+      // 現材の時刻取得
       const addDat = toJapanTimeString(new Date());
       const addUser = 'excel_import';
+
+      // 一時テーブルとして扱うインポートデータのカラムを定義
+      const insertColumns = ['rfid_tag_id', 'kizai_nam', 'rfid_kizai_sts', 'del_flg', 'shozoku_id', 'mem'];
+
+      // VALUES句のプレースホルダーを生成: ($1, $2, ...), ($7, $8, ...)
       const insertPlaceholders = insertList
         .map((_, index) => {
-          const start = index * 6 + 1;
-          return `(
-            $${start},
-            (SELECT kizai_id FROM m_kizai WHERE kizai_nam = $${start + 1}),
-            $${start + 2},
-            $${start + 3},
-            $${start + 4},
-            $${start + 5},
-            $${insertList.length * 6 + 1}::timestamp,
-            $${insertList.length * 6 + 2}
-          )`;
+          const start = index * insertColumns.length + 1;
+          return `(${insertColumns.map((_, i) => `$${start + i}`).join(',')})`;
         })
         .join(',');
-      const insertValues = insertList.flatMap((v) => [
+
+      // クエリに渡す値をフラットな配列に変換
+      const values = insertList.flatMap((v) => [
         v.rfid_tag_id,
         v.kizai_nam,
         v.rfid_kizai_sts,
@@ -144,6 +155,9 @@ const checkRfid = async (list: RfidImportTypes[]) => {
         v.mem,
       ]);
       const insertQuery = `
+        WITH imported_data(${insertColumns.join(',')}) AS (
+          VALUES ${insertPlaceholders}
+        )
         INSERT INTO m_rfid (
           rfid_tag_id,
           kizai_id,
@@ -153,10 +167,24 @@ const checkRfid = async (list: RfidImportTypes[]) => {
           mem,
           add_dat,
           add_user
-        ) VALUES ${insertPlaceholders};
+        )
+        SELECT
+          id.rfid_tag_id,
+          mk.kizai_id, -- JOINして取得したkizai_id
+          CAST(id.rfid_kizai_sts AS integer),
+          CAST(id.del_flg AS integer),
+          CAST(id.shozoku_id AS integer),
+          id.mem,
+          $${values.length + 1}::timestamp, -- add_dat
+          $${values.length + 2}  -- add_user
+        FROM
+          imported_data AS id
+        LEFT JOIN
+          m_kizai AS mk ON id.kizai_nam = mk.kizai_nam;
       `;
+
       // INSERT実行
-      await client.query(insertQuery, [...insertValues, addDat, addUser]);
+      await connection.query(insertQuery, [...values, addDat, addUser]);
     }
 
     // 更新処理
@@ -168,7 +196,7 @@ const checkRfid = async (list: RfidImportTypes[]) => {
       })
       .join(',');
     // 差異があるデータ群の取得
-    const differnces = await client.query(
+    const differnces = await connection.query(
       `
       WITH imported_data(rfid_tag_id, kizai_nam, rfid_kizai_sts, del_flg, shozoku_id, mem) AS (
         VALUES ${placeholders}
@@ -226,27 +254,24 @@ const checkRfid = async (list: RfidImportTypes[]) => {
         WHERE mr.rfid_tag_id = d.rfid_tag_id;`;
 
       //更新実行
-      await client.query(updateQuery, [...updateValues, updDat, updUser]);
+      await connection.query(updateQuery, [...updateValues, updDat, updUser]);
     }
 
-    await client.query('COMMIT;');
     console.log('RFIDマスタ処理した');
   } catch (e) {
-    await client.query('ROLLBACK;');
-    throw e;
-  } finally {
-    client.release(); // 接続をpoolに返却
+    throw new Error('例外が発生：DBエラーrfid');
   }
 };
 
 /**
  * 機材マスタ確認
  * @param list
+ * @param connection
  * @returns 新規登録された機材マスタの情報
  */
-const checkKizai = async (list: KizaiImportTypes[]) => {
-  // listが空の場合離脱
-  if (list.length === 0) {
+const checkKizai = async (list: KizaiImportTypes[], connection: PoolClient) => {
+  // 有効なデータがない場合は離脱
+  if (!Array.isArray(list) || list.length === 0) {
     return [];
   }
   // 重複を削除したリスト
@@ -289,17 +314,17 @@ const checkKizai = async (list: KizaiImportTypes[]) => {
       return value === undefined ? null : value;
     })
   );
+  // 現在の日付とユーザー情報を取得
+  const addDat = toJapanTimeString(new Date());
+  const addUser = 'excel_import';
 
   try {
-    await pool.query(`SET search_path TO dev5;`);
     // 既存の機材マスタの最大ID
-    const maxKizaiIdResult = await pool.query(`SELECT COALESCE(MAX(kizai_id), 0) FROM m_kizai;`);
+    const maxKizaiIdResult = await connection.query(`SELECT COALESCE(MAX(kizai_id), 0) FROM m_kizai;`);
     const maxKizaiId = maxKizaiIdResult.rows[0].coalesce;
-    // 現在の日付とユーザー情報を取得
-    const addDat = new Date();
-    const addUser = 'excel_import';
+
     // データ比較、新規登録、取得
-    const data = await pool.query(
+    const data = await connection.query(
       `
       WITH imported_data(${allColumns.join(',')}) AS (
         VALUES ${kizaiPlaceholders}
@@ -377,35 +402,34 @@ const checkKizai = async (list: KizaiImportTypes[]) => {
     }
     return [];
   } catch (e) {
-    throw e;
+    throw new Error('例外が発生：DBエラーkizai');
   }
 };
 /**
  * 大部門マスタ確認
  * @param list
+ * @param connection
  * @returns 新規登録された大部門マスタの情報
  */
-const checkDaibumon = async (list: string[]) => {
-  // listが空の場合離脱
-  if (list.length === 0) {
+const checkDaibumon = async (list: string[], connection: PoolClient) => {
+  // 有効なデータがない場合は離脱
+  if (!Array.isArray(list) || list.length === 0) {
     return [];
   }
   // 重複を削除したリスト
   const uniqueList = [...new Set(list)];
   const placeholders = uniqueList.map((_, index) => `($${index + 1})`).join(',');
-
+  // 現在の日付とユーザー情報
+  const addDat = toJapanTimeString(new Date());
+  const addUser = 'excel_import';
   try {
-    await pool.query(`SET search_path TO dev5;`);
-    // 現在の日付とユーザー情報
-    const addDat = new Date();
-    const addUser = 'excel_import';
     //  既存の大部門マスタの最大ID
-    const maxIdResult = await pool.query(`
+    const maxIdResult = await connection.query(`
       SELECT COALESCE(MAX(dai_bumon_id), 0) FROM m_dai_bumon;
     `);
     const maxId = maxIdResult.rows[0].coalesce;
     // データ比較、新規登録、取得
-    const data = await pool.query(
+    const data = await connection.query(
       `
       WITH imported_data(dai_bumon_nam) AS (
         VALUES ${placeholders}
@@ -432,35 +456,37 @@ const checkDaibumon = async (list: string[]) => {
     }
     return [];
   } catch (e) {
-    throw e;
+    throw new Error('例外が発生：DBエラーdaibumon');
   }
 };
 
 /**
  * 集計部門マスタ確認
  * @param list
+ * @param connection
  * @returns 新規登録された集計部門マスタの情報
  */
-const checkShukeibumon = async (list: string[]) => {
-  // listが空の場合離脱
-  if (list.length === 0) {
+const checkShukeibumon = async (list: string[], connection: PoolClient) => {
+  // 有効なデータがない場合は離脱
+  if (!Array.isArray(list) || list.length === 0) {
     return [];
   }
   // 重複を削除したリスト
   const uniqueList = [...new Set(list)];
+
   const placeholders = uniqueList.map((_, index) => `($${index + 1})`).join(',');
+  // 現在の日付とユーザー情報
+  const addDat = toJapanTimeString(new Date());
+  const addUser = 'excel_import';
+
   try {
-    await pool.query(`SET search_path TO dev5;`);
-    // 現在の日付とユーザー情報
-    const addDat = new Date();
-    const addUser = 'excel_import';
     //  既存の集計部門マスタの最大ID
-    const maxIdResult = await pool.query(`
+    const maxIdResult = await connection.query(`
       SELECT COALESCE(MAX(shukei_bumon_id), 0) FROM m_shukei_bumon;
     `);
     const maxId = maxIdResult.rows[0].coalesce;
     // データ比較、新規登録、取得
-    const data = await pool.query(
+    const data = await connection.query(
       `
       WITH imported_data(shukei_bumon_nam) AS (
         VALUES ${placeholders}
@@ -487,18 +513,22 @@ const checkShukeibumon = async (list: string[]) => {
     }
     return [];
   } catch (e) {
-    throw e;
+    throw new Error('例外が発生：DBエラーshukeibumon');
   }
 };
 
 /**
  * 部門マスタ確認
  * @param list
+ * @param connection
  * @returns 新規登録された部門マスタの情報
  */
-const checkBumon = async (list: { bumon_nam: string; dai_bumon_nam: string; shukei_bumon_nam: string }[]) => {
-  // listが空の場合離脱
-  if (list.length === 0) {
+const checkBumon = async (
+  list: { bumon_nam: string; dai_bumon_nam: string; shukei_bumon_nam: string }[],
+  connection: PoolClient
+) => {
+  // 有効なデータがない場合は離脱
+  if (!Array.isArray(list) || list.length === 0) {
     return [];
   }
   // 重複を削除したリスト
@@ -518,18 +548,16 @@ const checkBumon = async (list: { bumon_nam: string; dai_bumon_nam: string; shuk
       return value === undefined ? null : value;
     })
   );
+  // 現在の日付とユーザー情報を取得
+  const addDat = toJapanTimeString(new Date());
+  const addUser = 'excel_import';
 
   try {
-    await pool.query(`SET search_path TO dev5;`);
-
-    // 現在の日付とユーザー情報を取得
-    const addDat = new Date();
-    const addUser = 'excel_import';
     // 既存の部門マスタIDの最大値
-    const maxBumonIdResult = await pool.query(`SELECT COALESCE(MAX(bumon_id), 0) FROM m_bumon;`);
+    const maxBumonIdResult = await connection.query(`SELECT COALESCE(MAX(bumon_id), 0) FROM m_bumon;`);
     const maxBumonId = maxBumonIdResult.rows[0].coalesce;
     // データ比較、新規登録、取得
-    const data = await pool.query(
+    const data = await connection.query(
       `
       WITH imported_data(${allColumns.join(',')}) AS (
         VALUES ${bumonPlaceholders}
@@ -567,32 +595,62 @@ const checkBumon = async (list: { bumon_nam: string; dai_bumon_nam: string; shuk
     }
     return [];
   } catch (e) {
-    throw e;
+    throw new Error('例外が発生：DBエラーbumon');
   }
 };
 
 /**
  * 棚番マスタ確認
  * @param list
+ * @param connection
  * @returns 新規登録された棚番マスタの情報
  */
-const checkTanaban = async (list: TanabanImportTypes[]) => {
-  try {
-    // データ比較、新規登録、取得
-    const { data, error } = await supabase
-      .schema('dev5')
-      .from('m_tanaban')
-      .upsert(list, {
-        onConflict: 'bld_cod, tana_cod, eda_cod',
-        ignoreDuplicates: true,
-        // 既存のレコードは無視
-      })
-      .select('bld_cod, tana_cod, eda_cod');
-    if (!error) {
-      return data;
-    }
+const checkTanaban = async (list: TanabanImportTypes[], connection: PoolClient) => {
+  // 有効なデータがない場合は離脱
+  if (!Array.isArray(list) || list.length === 0) {
     return [];
+  }
+  // 重複を削除したリスト
+  const uniqueList = list.filter((d) => d.bld_cod && d.tana_cod && d.eda_cod);
+
+  // プレースホルダーを動的に生成 e.g., ($1, $2, $3), ($4, $5, $6), ...
+  const placeholders = uniqueList
+    .map((_, index) => {
+      const start = index * 3 + 1;
+      return `($${start}, $${start + 1}, $${start + 2})`;
+    })
+    .join(',');
+
+  // プレースホルダーに渡す値をフラットな配列に変換
+  const values = uniqueList.flatMap((item) => [item.bld_cod, item.tana_cod, item.eda_cod]);
+
+  // 現日時取得
+  const addDate = toJapanTimeString(new Date());
+  const addUser = 'excel_import';
+
+  try {
+    const result = await connection.query(
+      `
+      INSERT INTO dev5.m_tanaban (bld_cod, tana_cod, eda_cod, add_dat, add_user)
+      SELECT
+        t.bld_cod,
+        t.tana_cod,
+        t.eda_cod,
+        $${values.length + 1}::timestamp,
+        $${values.length + 2}
+      FROM (
+        VALUES ${placeholders}
+      ) AS t(bld_cod, tana_cod, eda_cod)
+      ON CONFLICT (bld_cod, tana_cod, eda_cod)
+      DO NOTHING
+      RETURNING bld_cod, tana_cod, eda_cod
+      `,
+      [...values, addDate, addUser]
+    );
+
+    return result.rows;
   } catch (e) {
-    throw e;
+    console.error('棚番マスタでエラー', e);
+    throw new Error('例外が発生：DBエラーtanaban');
   }
 };
