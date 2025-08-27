@@ -41,6 +41,8 @@ export const GetKeepJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHeadI
       yardShukoDat: juchuDate && juchuDate.yardShukoDat,
       yardNyukoDat: juchuDate && juchuDate.yardNyukoDat,
     };
+
+    console.log('keepJucuKizaiHeadData', keepJucuKizaiHeadData);
     return keepJucuKizaiHeadData;
   } catch (e) {
     console.log(e);

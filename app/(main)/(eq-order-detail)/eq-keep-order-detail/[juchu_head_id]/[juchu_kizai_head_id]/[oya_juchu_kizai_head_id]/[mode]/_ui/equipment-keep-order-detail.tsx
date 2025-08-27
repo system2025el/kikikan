@@ -225,7 +225,11 @@ export const EquipmentKeepOrderDetail = (props: {
    * @param data 受注機材ヘッダーデータ
    * @returns
    */
-  const onSubmit = async (data: KeepJuchuKizaiHeadValues) => {};
+  const onSubmit = async (data: KeepJuchuKizaiHeadValues) => {
+    console.log('保存開始');
+    if (!user) return;
+    setIsLoading(true);
+  };
 
   /**
    * 機材キープメモ入力時
@@ -512,6 +516,85 @@ export const EquipmentKeepOrderDetail = (props: {
                 </Grid2>
               </Grid2>
               <Grid2 width={380} order={{ xl: 2 }}>
+                <Typography>キープ入庫日時</Typography>
+                <Grid2>
+                  <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
+                  <Controller
+                    name="kicsNyukoDat"
+                    control={control}
+                    render={({ field, fieldState }) => (
+                      <TestDate
+                        onBlur={field.onBlur}
+                        date={field.value}
+                        // maxDate={keepShukoDate ? keepShukoDate : (oyaShukoDate ?? undefined)}
+                        // minDate={oyaShukoDate ?? undefined}
+                        onChange={handleKicsNyukoChange}
+                        fieldstate={fieldState}
+                        disabled={!edit}
+                        onClear={() => field.onChange(null)}
+                      />
+                    )}
+                  />
+                  <Controller
+                    name="kicsNyukoDat"
+                    control={control}
+                    render={({ field, fieldState }) => (
+                      <TestTime
+                        onBlur={field.onBlur}
+                        time={field.value}
+                        onChange={(newTime) => {
+                          field.onChange(newTime?.toDate());
+                          const yardShukoDat = getValues('yardShukoDat');
+                          if (yardShukoDat === null) {
+                            clearErrors('yardShukoDat');
+                          }
+                        }}
+                        fieldstate={fieldState}
+                        disabled={!edit}
+                      />
+                    )}
+                  />
+                </Grid2>
+                <Grid2>
+                  <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
+                  <Controller
+                    name="yardNyukoDat"
+                    control={control}
+                    render={({ field, fieldState }) => (
+                      <TestDate
+                        onBlur={field.onBlur}
+                        date={field.value}
+                        // maxDate={keepShukoDate ? keepShukoDate : (oyaShukoDate ?? undefined)}
+                        // minDate={oyaNyukoDate ?? undefined}
+                        onChange={handleYardNyukoChange}
+                        fieldstate={fieldState}
+                        disabled={!edit}
+                        onClear={() => field.onChange(null)}
+                      />
+                    )}
+                  />
+                  <Controller
+                    name="yardNyukoDat"
+                    control={control}
+                    render={({ field, fieldState }) => (
+                      <TestTime
+                        onBlur={field.onBlur}
+                        time={field.value}
+                        onChange={(newTime) => {
+                          field.onChange(newTime?.toDate());
+                          const yardShukoDat = getValues('yardShukoDat');
+                          if (yardShukoDat === null) {
+                            clearErrors('yardShukoDat');
+                          }
+                        }}
+                        fieldstate={fieldState}
+                        disabled={!edit}
+                      />
+                    )}
+                  />
+                </Grid2>
+              </Grid2>
+              <Grid2 width={380} order={{ xl: 3 }}>
                 <Typography>キープ出庫日時</Typography>
                 <Grid2>
                   <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
@@ -522,8 +605,8 @@ export const EquipmentKeepOrderDetail = (props: {
                       <TestDate
                         onBlur={field.onBlur}
                         date={field.value}
-                        maxDate={keepNyukoDate ? keepNyukoDate : (oyaNyukoDate ?? undefined)}
-                        minDate={oyaShukoDate ?? undefined}
+                        // maxDate={oyaShukoDate ?? undefined}
+                        // minDate={keepNyukoDate ? keepNyukoDate : (oyaNyukoDate ?? undefined)}
                         onChange={handleKicsShukoChange}
                         fieldstate={fieldState}
                         disabled={!edit}
@@ -560,88 +643,9 @@ export const EquipmentKeepOrderDetail = (props: {
                       <TestDate
                         onBlur={field.onBlur}
                         date={field.value}
-                        maxDate={keepNyukoDate ? keepNyukoDate : (oyaNyukoDate ?? undefined)}
-                        minDate={oyaShukoDate ?? undefined}
+                        // maxDate={oyaShukoDate ?? undefined}
+                        // minDate={keepNyukoDate ? keepNyukoDate : (oyaNyukoDate ?? undefined)}
                         onChange={handleYardShukoChange}
-                        fieldstate={fieldState}
-                        disabled={!edit}
-                        onClear={() => field.onChange(null)}
-                      />
-                    )}
-                  />
-                  <Controller
-                    name="yardShukoDat"
-                    control={control}
-                    render={({ field, fieldState }) => (
-                      <TestTime
-                        onBlur={field.onBlur}
-                        time={field.value}
-                        onChange={(newTime) => {
-                          field.onChange(newTime?.toDate());
-                          const yardShukoDat = getValues('yardShukoDat');
-                          if (yardShukoDat === null) {
-                            clearErrors('yardShukoDat');
-                          }
-                        }}
-                        fieldstate={fieldState}
-                        disabled={!edit}
-                      />
-                    )}
-                  />
-                </Grid2>
-              </Grid2>
-              <Grid2 width={380} order={{ xl: 3 }}>
-                <Typography>キープ入庫日時</Typography>
-                <Grid2>
-                  <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                  <Controller
-                    name="kicsNyukoDat"
-                    control={control}
-                    render={({ field, fieldState }) => (
-                      <TestDate
-                        onBlur={field.onBlur}
-                        date={field.value}
-                        maxDate={oyaNyukoDate ?? undefined}
-                        minDate={keepShukoDate ? keepShukoDate : (oyaShukoDate ?? undefined)}
-                        onChange={handleKicsNyukoChange}
-                        fieldstate={fieldState}
-                        disabled={!edit}
-                        onClear={() => field.onChange(null)}
-                      />
-                    )}
-                  />
-                  <Controller
-                    name="kicsShukoDat"
-                    control={control}
-                    render={({ field, fieldState }) => (
-                      <TestTime
-                        onBlur={field.onBlur}
-                        time={field.value}
-                        onChange={(newTime) => {
-                          field.onChange(newTime?.toDate());
-                          const yardShukoDat = getValues('yardShukoDat');
-                          if (yardShukoDat === null) {
-                            clearErrors('yardShukoDat');
-                          }
-                        }}
-                        fieldstate={fieldState}
-                        disabled={!edit}
-                      />
-                    )}
-                  />
-                </Grid2>
-                <Grid2>
-                  <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                  <Controller
-                    name="yardShukoDat"
-                    control={control}
-                    render={({ field, fieldState }) => (
-                      <TestDate
-                        onBlur={field.onBlur}
-                        date={field.value}
-                        maxDate={oyaNyukoDate ?? undefined}
-                        minDate={keepShukoDate ? keepShukoDate : (oyaShukoDate ?? undefined)}
-                        onChange={handleYardNyukoChange}
                         fieldstate={fieldState}
                         disabled={!edit}
                         onClear={() => field.onChange(null)}
