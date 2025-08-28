@@ -1,5 +1,6 @@
 'use client';
 
+import { zodResolver } from '@hookform/resolvers/zod';
 import AddIcon from '@mui/icons-material/Add';
 import CheckIcon from '@mui/icons-material/Check';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -24,124 +25,65 @@ import {
 } from '@mui/material';
 import { addMonths, endOfMonth, subDays, subMonths } from 'date-fns';
 import dayjs, { Dayjs } from 'dayjs';
+import { redirect } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { TextFieldElement } from 'react-hook-form-mui';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import { toISOString, toISOStringMonthDay } from '@/app/(main)/_lib/date-conversion';
+import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
 import { BackButton } from '@/app/(main)/_ui/buttons';
 import { Calendar, TestDate } from '@/app/(main)/_ui/date';
-import { useDirty } from '@/app/(main)/_ui/dirty-context';
+import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
+import { Loading } from '@/app/(main)/_ui/loading';
 import Time, { TestTime } from '@/app/(main)/_ui/time';
+import { GetNyukoDate, GetShukoDate } from '@/app/(main)/(eq-order-detail)/_lib/datefuncs';
+import {
+  AddJuchuKizaiHead,
+  AddJuchuKizaiNyushuko,
+  GetJuchuKizaiHeadMaxId,
+  GetJuchuKizaiMeisaiMaxId,
+  UpdateJuchuKizaiNyushuko,
+} from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 import { OyaJuchuKizaiHeadValues } from '@/app/(main)/(eq-order-detail)/_lib/types';
 import { OyaEqSelectionDialog } from '@/app/(main)/(eq-order-detail)/_ui/equipment-selection-dialog';
 import {
   JuchuKizaiHeadValues,
   JuchuKizaiMeisaiValues,
 } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_lib/types';
+import { SaveAlertDialog } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_ui/caveat-dialog';
 import { AddLock, DeleteLock, GetLock } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/funcs';
 import { LockValues, OrderValues } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/types';
 
 import { data, stock } from '../_lib/data';
-import { KeepJuchuKizaiMeisaiValues } from '../_lib/types';
-import { KeepEqTable, KeepStockTable } from './equipment-keep-order-detail-table';
-
-export type KeepEquipmentData = {
-  date: string;
-  memo: string;
-};
-
-export type StockData = {
-  id: number;
-  data: number[];
-};
-
-export type KeepEquipment = {
-  id: number;
-  name: string;
-  memo: string;
-  place: string;
-  issue: number;
-  keep: number;
-};
-
-// 開始日から終了日までの日付配列の作成
-const getRange = (start: Date | null, end: Date | null): string[] => {
-  if (start !== null && end !== null) {
-    const range: string[] = [];
-    const current = new Date(start);
-
-    while (current <= end) {
-      const dateStr = toISOStringMonthDay(current);
-      range.push(dateStr);
-      current.setDate(current.getDate() + 1);
-    }
-    return range;
-  }
-  return [];
-};
-
-// ストックテーブルの日付ヘッダーの作成
-const getStockHeader = (date: Date | null) => {
-  if (date !== null) {
-    const start = subDays(date, 1);
-    const end = endOfMonth(addMonths(date, 2));
-    const range: string[] = [];
-    const current = new Date(start);
-
-    while (current <= end) {
-      const dateStr = toISOStringMonthDay(current);
-      range.push(dateStr);
-      current.setDate(current.getDate() + 1);
-    }
-
-    return range;
-  }
-  return [];
-};
-
-// ストックテーブルの行作成
-const getStockRow = (stock: number[], length: number) => {
-  const rows: StockData[] = [];
-
-  stock.map((num, index) => {
-    const data: number[] = [];
-    for (let i = 0; i < length; i++) {
-      if (i === 0 || i === 1 || i === 2) {
-        data.push(num - 1);
-      } else {
-        data.push(num);
-      }
-    }
-    const row: StockData = { id: index + 1, data: data };
-    rows.push(row);
-  });
-
-  return rows;
-};
-
-// 200件用データ作成
-export const testeqData: KeepEquipment[] = Array.from({ length: 50 }, (_, i) => {
-  const original = data[i % data.length];
-  return {
-    ...original,
-    id: i + 1,
-    name: `${original.name} (${i + 1})`,
-    memo: original.memo,
-    place: original.place,
-    all: original.issue,
-    order: original.keep,
-  };
-});
-// 200件用データ作成
-export const testStock = Array.from({ length: 50 }, (_, i) => stock[i % stock.length]);
+import {
+  AddKeepJuchuKizaiHead,
+  AddKeepJuchuKizaiMeisai,
+  DeleteKeepJuchuKizaiMeisai,
+  GetKeepJuchuKizaiMeisai,
+  UpdateKeepJuchuKizaiHead,
+  UpdateKeepJuchuKizaiMeisai,
+} from '../_lib/funcs';
+import { KeepJuchuKizaiHeadSchema, KeepJuchuKizaiHeadValues, KeepJuchuKizaiMeisaiValues } from '../_lib/types';
+import { KeepEqTable } from './equipment-keep-order-detail-table';
 
 export const EquipmentKeepOrderDetail = (props: {
   juchuHeadData: OrderValues;
   oyaJuchuKizaiHeadData: OyaJuchuKizaiHeadValues;
+  keepJuchuKizaiHeadData: KeepJuchuKizaiHeadValues;
+  keepJuchuKizaiMeisaiData: KeepJuchuKizaiMeisaiValues[] | undefined;
+  oyaShukoDate: Date;
+  oyaNyukoDate: Date;
+  keepShukoDate: Date | null;
+  keepNyukoDate: Date | null;
   edit: boolean;
 }) => {
   // user情報
   const user = useUserStore((state) => state.user);
+  // 受注機材ヘッダー保存フラグ
+  const saveKizaiHead = props.keepJuchuKizaiHeadData.juchuKizaiHeadId !== 0 ? true : false;
+
   // ロックデータ
   const [lockData, setLockData] = useState<LockValues | null>(null);
   // 全体の保存フラグ
@@ -150,44 +92,76 @@ export const EquipmentKeepOrderDetail = (props: {
   const [isLoading, setIsLoading] = useState(false);
   // 編集モード(true:編集、false:閲覧)
   const [edit, setEdit] = useState(props.edit);
-  // 受注機材明細リスト
-  const [oyaJuchuKizaiMeisaiList, setOyaJuchuKizaiMeisaiList] = useState<KeepJuchuKizaiMeisaiValues[]>([]);
 
-  // KICS出庫日
-  const [startKICSDate, setStartKICSDate] = useState<Date | null>(null);
-  // YARD出庫日
-  const [startYARDDate, setStartYARDDate] = useState<Date | null>(null);
-  // KICS入庫日
-  const [endKICSDate, setEndKICSDate] = useState<Date | null>(null);
-  // YARD入庫日
-  const [endYARDDate, setEndYARDDate] = useState<Date | null>(new Date('2025/11/9 15:00'));
-  // 出庫日
-  const [startDate, setStartDate] = useState<Date | null>(null);
-  // 出庫日から入庫日
-  const [dateRange, setDateRange] = useState<string[]>(getRange(new Date('2025/11/2'), new Date('2025/11/19')));
-  // カレンダー選択日
-  const [selectDate, setSelectDate] = useState<Date>(new Date('2025/11/2'));
+  // キープ受注機材明細元リスト
+  const [originKeepJuchuKizaiMeisaiList, setOriginKeepJuchuKizaiMeisaiList] = useState<KeepJuchuKizaiMeisaiValues[]>(
+    props.keepJuchuKizaiMeisaiData ? props.keepJuchuKizaiMeisaiData : []
+  );
+  // キープ受注機材明細リスト
+  const [keepJuchuKizaiMeisaiList, setKeepJuchuKizaiMeisaiList] = useState<KeepJuchuKizaiMeisaiValues[]>(
+    props.keepJuchuKizaiMeisaiData ? props.keepJuchuKizaiMeisaiData : []
+  );
 
-  // ヘッダー用の日付
-  const [dateHeader, setDateHeader] = useState<string[]>(getStockHeader(new Date('2025/11/2')));
-  // ストックテーブルの行配列
-  const [stockRows, setStockRows] = useState<StockData[]>(getStockRow(testStock, dateHeader.length));
-  // 機材テーブルの行配列
-  const [equipmentRows, setEquipmentRows] = useState<KeepEquipment[]>(testeqData);
+  // 親出庫日
+  const [oyaShukoDate, setShukoDate] = useState<Date | null>(props.oyaShukoDate);
+  // 親入庫日
+  const [oyaNyukoDate, setNyukoDate] = useState<Date | null>(props.oyaNyukoDate);
+  // キープ出庫日
+  const [keepShukoDate, setKeepShukoDate] = useState<Date | null>(props.keepShukoDate);
+  // キープ入庫日
+  const [keepNyukoDate, setKeepNyukoDate] = useState<Date | null>(props.keepNyukoDate);
+
+  // 未保存ダイアログを出すかどうか
+  const [saveOpen, setSaveOpen] = useState(false);
+  // 編集内容が未保存ダイアログを出すかどうか
+  const [dirtyOpen, setDirtyOpen] = useState(false);
+  // 機材追加ダイアログ制御
+  const [EqSelectionDialogOpen, setEqSelectionDialogOpen] = useState(false);
 
   // アコーディオン制御
   const [expanded, setExpanded] = useState(false);
-  // 機材追加ダイアログ制御
-  const [EqSelectionDialogOpen, setEqSelectionDialogOpen] = useState(false);
-  // ポッパー制御
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const open = Boolean(anchorEl);
 
   // context
   const { setIsDirty, setIsSave, setLock } = useDirty();
 
+  /* useForm ------------------------- */
+  const {
+    watch,
+    control,
+    handleSubmit,
+    reset,
+    getValues,
+    setValue,
+    clearErrors,
+    formState: { isDirty, errors, defaultValues },
+  } = useForm({
+    mode: 'onSubmit',
+    reValidateMode: 'onBlur',
+    defaultValues: {
+      juchuHeadId: props.keepJuchuKizaiHeadData.juchuHeadId,
+      juchuKizaiHeadId: props.keepJuchuKizaiHeadData.juchuKizaiHeadId,
+      juchuKizaiHeadKbn: props.keepJuchuKizaiHeadData.juchuKizaiHeadKbn,
+      mem: props.keepJuchuKizaiHeadData.mem,
+      headNam: props.keepJuchuKizaiHeadData.headNam,
+      oyaJuchuKizaiHeadId: props.keepJuchuKizaiHeadData.oyaJuchuKizaiHeadId,
+      kicsShukoDat: props.keepJuchuKizaiHeadData.kicsShukoDat
+        ? new Date(props.keepJuchuKizaiHeadData.kicsShukoDat)
+        : null,
+      kicsNyukoDat: props.keepJuchuKizaiHeadData.kicsNyukoDat
+        ? new Date(props.keepJuchuKizaiHeadData.kicsNyukoDat)
+        : null,
+      yardShukoDat: props.keepJuchuKizaiHeadData.yardShukoDat
+        ? new Date(props.keepJuchuKizaiHeadData.yardShukoDat)
+        : null,
+      yardNyukoDat: props.keepJuchuKizaiHeadData.yardNyukoDat
+        ? new Date(props.keepJuchuKizaiHeadData.yardNyukoDat)
+        : null,
+    },
+    resolver: zodResolver(KeepJuchuKizaiHeadSchema),
+  });
+
   // ブラウザバック、F5、×ボタンでページを離れた際のhook
-  // useUnsavedChangesWarning(isDirty, save);
+  useUnsavedChangesWarning(isDirty, save);
 
   useEffect(() => {
     if (!user) return;
@@ -210,6 +184,25 @@ export const EquipmentKeepOrderDetail = (props: {
   }, [user]);
 
   useEffect(() => {
+    setIsDirty(isDirty);
+  }, [isDirty, setIsDirty]);
+
+  useEffect(() => {
+    const filterJuchuKizaiMeisaiList = keepJuchuKizaiMeisaiList.filter((data) => !data.delFlag);
+    if (
+      saveKizaiHead &&
+      JSON.stringify(originKeepJuchuKizaiMeisaiList) === JSON.stringify(filterJuchuKizaiMeisaiList)
+    ) {
+      setSave(true);
+      setIsSave(true);
+    } else {
+      setSave(false);
+      setIsSave(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [keepJuchuKizaiMeisaiList]);
+
+  useEffect(() => {
     setLock(lockData);
   }, [lockData, setLock]);
 
@@ -219,6 +212,12 @@ export const EquipmentKeepOrderDetail = (props: {
   const handleEdit = async () => {
     // 編集→閲覧
     if (edit) {
+      const filterJuchuKizaiMeisaiList = keepJuchuKizaiMeisaiList.filter((data) => !data.delFlag);
+      if (isDirty || JSON.stringify(originKeepJuchuKizaiMeisaiList) !== JSON.stringify(filterJuchuKizaiMeisaiList)) {
+        setDirtyOpen(true);
+        return;
+      }
+
       await DeleteLock(1, props.juchuHeadData.juchuHeadId);
       setLockData(null);
       setEdit(false);
@@ -239,53 +238,197 @@ export const EquipmentKeepOrderDetail = (props: {
   };
 
   /**
+   * 保存ボタン押下時
+   * @param data 受注機材ヘッダーデータ
+   * @returns
+   */
+  const onSubmit = async (data: KeepJuchuKizaiHeadValues) => {
+    console.log('保存開始', data);
+    if (!user) return;
+    setIsLoading(true);
+
+    // ユーザー名
+    const userNam = user.name;
+
+    // 出庫日
+    const updateShukoDate = GetShukoDate(
+      data.kicsShukoDat && new Date(data.kicsShukoDat),
+      data.yardShukoDat && new Date(data.yardShukoDat)
+    );
+    // 入庫日
+    const updateNyukoDate = GetNyukoDate(
+      data.kicsNyukoDat && new Date(data.kicsNyukoDat),
+      data.yardNyukoDat && new Date(data.yardNyukoDat)
+    );
+
+    if (!updateShukoDate || !updateNyukoDate) {
+      setIsLoading(false);
+      return;
+    }
+
+    // 新規
+    if (data.juchuKizaiHeadId === 0) {
+      // 新規受注機材ヘッダー追加
+      await saveNewKeepJuchuKizaiHead(data, userNam);
+
+      // 更新
+    } else {
+      // 受注機材ヘッダー関係更新
+      if (isDirty) {
+        await saveKeepJuchuKizaiHead(data, updateShukoDate, updateNyukoDate, userNam);
+      }
+
+      // 受注機材明細関係更新
+      const filterKeepJuchuKizaiMeisaiList = keepJuchuKizaiMeisaiList.filter((data) => !data.delFlag);
+      if (JSON.stringify(originKeepJuchuKizaiMeisaiList) !== JSON.stringify(filterKeepJuchuKizaiMeisaiList)) {
+        await saveKeepJuchuKizaiMeisai(data.juchuHeadId, data.juchuKizaiHeadId, userNam);
+      }
+    }
+    setIsLoading(false);
+  };
+
+  /**
+   *キープ新規受注機材ヘッダー追加
+   * @param data 受注機材ヘッダーデータ
+   * @param updateShukoDate 更新後出庫日
+   * @param updateNyukoDate 更新後入庫日
+   * @param updateDateRange 更新後出庫日から入庫日
+   * @param userNam ユーザー名
+   */
+  const saveNewKeepJuchuKizaiHead = async (data: KeepJuchuKizaiHeadValues, userNam: string) => {
+    const maxId = await GetJuchuKizaiHeadMaxId(data.juchuHeadId);
+    const newJuchuKizaiHeadId = maxId ? maxId.juchu_kizai_head_id + 1 : 1;
+    // 受注機材ヘッダー追加
+    const headResult = await AddKeepJuchuKizaiHead(newJuchuKizaiHeadId, data, userNam);
+    console.log('受注機材ヘッダー追加', headResult);
+    // 受注機材入出庫追加
+    const nyushukoResult = await AddJuchuKizaiNyushuko(
+      data.juchuHeadId,
+      newJuchuKizaiHeadId,
+      data.kicsShukoDat,
+      data.yardShukoDat,
+      data.kicsNyukoDat,
+      data.yardNyukoDat,
+      userNam
+    );
+    console.log('キープ受注機材入出庫追加', nyushukoResult);
+
+    redirect(
+      `/eq-keep-order-detail/${data.juchuHeadId}/${newJuchuKizaiHeadId}/${props.oyaJuchuKizaiHeadData.juchuKizaiHeadId}/edit`
+    );
+  };
+
+  /**
+   * キープ受注機材ヘッダー関係更新
+   * @param data 受注機材ヘッダーデータ
+   * @param updateShukoDate 更新後出庫日
+   * @param updateNyukoDate 更新後入庫日
+   * @param updateDateRange 更新後出庫日から入庫日
+   * @param userNam ユーザー名
+   */
+  const saveKeepJuchuKizaiHead = async (
+    data: KeepJuchuKizaiHeadValues,
+    updateShukoDate: Date,
+    updateNyukoDate: Date,
+    userNam: string
+  ) => {
+    // 受注機材ヘッド更新
+    const headResult = await UpdateKeepJuchuKizaiHead(data, userNam);
+    console.log('キープ受注機材ヘッダー更新', headResult);
+
+    // 受注機材入出庫更新
+    const nyushukoResult = await UpdateJuchuKizaiNyushuko(
+      data.juchuHeadId,
+      data.juchuKizaiHeadId,
+      data.kicsShukoDat,
+      data.yardShukoDat,
+      data.kicsNyukoDat,
+      data.yardNyukoDat,
+      userNam
+    );
+    console.log('キープ受注機材入出庫更新', nyushukoResult);
+
+    reset(data);
+    // 出庫日更新
+    setKeepShukoDate(updateShukoDate);
+    // 入庫日更新
+    setKeepNyukoDate(updateNyukoDate);
+  };
+
+  /**
+   * キープ受注機材明細関係更新
+   * @param juchuHeadId 受注ヘッダーid
+   * @param juchuKizaiHeadId 受注機材ヘッダーid
+   * @param userNam ユーザー名
+   */
+  const saveKeepJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number, userNam: string) => {
+    const copyKeepJuchuKizaiMeisaiData = [...keepJuchuKizaiMeisaiList];
+    const juchuKizaiMeisaiMaxId = await GetJuchuKizaiMeisaiMaxId(juchuHeadId, juchuKizaiHeadId);
+    const newKeepJuchuKizaiMeisaiId = juchuKizaiMeisaiMaxId ? juchuKizaiMeisaiMaxId.juchu_kizai_meisai_id + 1 : 1;
+    const newKeepJuchuKizaiMeisaiData = copyKeepJuchuKizaiMeisaiData.map((data, index) =>
+      data.juchuKizaiMeisaiId === 0
+        ? {
+            ...data,
+            juchuKizaiMeisaiId: newKeepJuchuKizaiMeisaiId + index,
+          }
+        : data
+    );
+
+    // 受注機材明細更新
+    const addKeepJuchuKizaiMeisaiData = newKeepJuchuKizaiMeisaiData.filter((data) => !data.delFlag && !data.saveFlag);
+    const updateKeepJuchuKizaiMeisaiData = newKeepJuchuKizaiMeisaiData.filter((data) => !data.delFlag && data.saveFlag);
+    const deleteKeepJuchuKizaiMeisaiData = newKeepJuchuKizaiMeisaiData.filter((data) => data.delFlag && data.saveFlag);
+    if (deleteKeepJuchuKizaiMeisaiData.length > 0) {
+      const deleteKeepJuchuKizaiMeisaiIds = deleteKeepJuchuKizaiMeisaiData.map((data) => data.juchuKizaiMeisaiId);
+      const deleteMeisaiResult = await DeleteKeepJuchuKizaiMeisai(
+        juchuHeadId,
+        juchuKizaiHeadId,
+        deleteKeepJuchuKizaiMeisaiIds
+      );
+      console.log('キープ受注機材明細削除', deleteMeisaiResult);
+    }
+
+    if (addKeepJuchuKizaiMeisaiData.length > 0) {
+      const addMeisaiResult = AddKeepJuchuKizaiMeisai(addKeepJuchuKizaiMeisaiData, userNam);
+      console.log('キープ受注機材明細追加', addMeisaiResult);
+    }
+
+    if (updateKeepJuchuKizaiMeisaiData.length > 0) {
+      const updateMeisaiResult = await UpdateKeepJuchuKizaiMeisai(updateKeepJuchuKizaiMeisaiData, userNam);
+      console.log('キープ受注機材明細更新', updateMeisaiResult);
+    }
+
+    // 受注機材明細、機材在庫テーブル更新
+    const keepJuchuKizaiMeisaiData = await GetKeepJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId);
+    if (keepJuchuKizaiMeisaiData) {
+      setKeepJuchuKizaiMeisaiList(keepJuchuKizaiMeisaiData);
+      setOriginKeepJuchuKizaiMeisaiList(keepJuchuKizaiMeisaiData);
+    }
+  };
+
+  /**
    * 機材キープメモ入力時
    * @param rowIndex 入力された行番号
    * @param memo キープメモ内容
    */
-  const handleMemoChange = (rowIndex: number, memo: string) => {
-    const updatedRows = [...equipmentRows];
-    updatedRows[rowIndex].memo = memo;
-    setEquipmentRows(updatedRows);
-  };
-
-  /**
-   * 日付選択カレンダー選択時
-   * @param date カレンダー選択日付
-   */
-  const handleDateChange = (date: Dayjs | null) => {
-    if (date !== null) {
-      setSelectDate(date.toDate());
-      const updatedHeader = getStockHeader(date?.toDate());
-      const updatedRow = getStockRow(testStock, updatedHeader.length);
-      setDateHeader(updatedHeader);
-      setStockRows(updatedRow);
-
-      setAnchorEl(null);
-    }
-  };
-
-  // 3か月前
-  const handleBackDateChange = () => {
-    const date = subMonths(new Date(dateHeader[1]), 3);
-    handleDateChange(dayjs(date));
-  };
-  // 3か月後
-  const handleForwardDateChange = () => {
-    const date = addMonths(new Date(dateHeader[1]), 3);
-    handleDateChange(dayjs(date));
+  const handleMemoChange = (kizaiId: number, memo: string) => {
+    setKeepJuchuKizaiMeisaiList((prev) =>
+      prev.map((data) => (data.kizaiId === kizaiId ? { ...data, mem: memo } : data))
+    );
   };
 
   /**
    * KICS出庫日時変更時
    * @param newDate KICS出庫日
    */
-  const handleKICSStartChange = (newDate: Dayjs | null) => {
+  const handleKicsShukoChange = async (newDate: Dayjs | null) => {
     if (newDate === null) return;
-    setStartKICSDate(newDate?.toDate());
+    setValue('kicsShukoDat', newDate.toDate(), { shouldDirty: true });
 
-    if (startYARDDate === null || newDate.toDate() < startYARDDate) {
-      setStartDate(newDate.toDate());
+    const yardShukoDat = getValues('yardShukoDat');
+
+    if (yardShukoDat === null) {
+      clearErrors('yardShukoDat');
     }
   };
 
@@ -293,33 +436,45 @@ export const EquipmentKeepOrderDetail = (props: {
    * YARD出庫日時変更時
    * @param newDate YARD出庫日
    */
-  const handleYARDStartChange = (newDate: Dayjs | null) => {
+  const handleYardShukoChange = async (newDate: Dayjs | null) => {
     if (newDate === null) return;
-    setStartYARDDate(newDate?.toDate());
+    setValue('yardShukoDat', newDate.toDate(), { shouldDirty: true });
 
-    if (startKICSDate === null || newDate.toDate() < startKICSDate) {
-      setStartDate(newDate.toDate());
+    const kicsShukoDat = getValues('kicsShukoDat');
+
+    if (kicsShukoDat === null) {
+      clearErrors('kicsShukoDat');
     }
   };
 
   /**
-   * ポッパー開閉
-   * @param event マウスイベント
+   * KICS入庫日時変更時
+   * @param newDate KICS入庫日
    */
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(anchorEl ? null : event.currentTarget);
-  };
-  const handleClickAway = () => {
-    setAnchorEl(null);
+  const handleKicsNyukoChange = async (newDate: Dayjs | null) => {
+    if (newDate === null) return;
+    setValue('kicsNyukoDat', newDate.toDate(), { shouldDirty: true });
+
+    const yardNyukoDat = getValues('yardNyukoDat');
+
+    if (yardNyukoDat === null) {
+      clearErrors('yardNyukoDat');
+    }
   };
 
-  // アコーディオン開閉
-  const handleExpansion = () => {
-    setExpanded((prevExpanded) => !prevExpanded);
-  };
-  // 機材入力ダイアログ開閉
-  const handleOpenEqDialog = () => {
-    setEqSelectionDialogOpen(true);
+  /**
+   * YARD入庫日時変更時
+   * @param newDate YARD入庫日
+   */
+  const handleYardNyukoChange = (newDate: Dayjs | null) => {
+    if (newDate === null) return;
+    setValue('yardNyukoDat', newDate.toDate(), { shouldDirty: true });
+
+    const kicsNyukoDat = getValues('kicsNyukoDat');
+
+    if (kicsNyukoDat === null) {
+      clearErrors('kicsNyukoDat');
+    }
   };
 
   /**
@@ -328,32 +483,82 @@ export const EquipmentKeepOrderDetail = (props: {
    * @param keepValue キープ数
    */
   const handleCellChange = (kizaiId: number, keepValue: number) => {
-    setOyaJuchuKizaiMeisaiList((prev) =>
-      prev.map((data) => (data.kizaiId === kizaiId && !data.delFlag ? { ...data, plankeepQty: keepValue } : data))
+    setKeepJuchuKizaiMeisaiList((prev) =>
+      prev.map((data) => (data.kizaiId === kizaiId && !data.delFlag ? { ...data, keepQty: keepValue } : data))
     );
   };
 
+  /**
+   * 機材テーブルの削除ボタン押下時
+   * @param kizaiId 機材id
+   */
+  const handleDelete = (kizaiId: number) => {
+    setKeepJuchuKizaiMeisaiList((prev) =>
+      prev.map((data) => (data.kizaiId === kizaiId && !data.delFlag ? { ...data, delFlag: true } : data))
+    );
+  };
+
+  /**
+   * 機材追加時
+   * @param data 選択された機材データ
+   */
   const setEqpts = async (data: JuchuKizaiMeisaiValues[]) => {
-    const ids = new Set(oyaJuchuKizaiMeisaiList.filter((d) => !d.delFlag).map((d) => d.kizaiId));
+    const ids = new Set(keepJuchuKizaiMeisaiList.filter((d) => !d.delFlag).map((d) => d.kizaiId));
     const filterData = data.filter((d) => !ids.has(d.kizaiId));
     const newOyaJuchuKizaiMeisaiData: KeepJuchuKizaiMeisaiValues[] = filterData.map((d) => ({
-      juchuHeadId: d.juchuHeadId,
-      juchuKizaiHeadId: 0,
+      juchuHeadId: getValues('juchuHeadId'),
+      juchuKizaiHeadId: getValues('juchuKizaiHeadId'),
       juchuKizaiMeisaiId: 0,
       shozokuId: d.shozokuId,
       shozokuNam: d.shozokuNam,
       mem: '',
       kizaiId: d.kizaiId,
-      kizaiTankaAmt: d.kizaiTankaAmt,
       kizaiNam: d.kizaiNam,
       oyaPlanKizaiQty: d.planKizaiQty,
       oyaPlanYobiQty: d.planYobiQty ?? 0,
-      plankeepQty: 0,
+      keepQty: 0,
       delFlag: false,
       saveFlag: false,
     }));
-    setOyaJuchuKizaiMeisaiList((prev) => [...prev, ...newOyaJuchuKizaiMeisaiData]);
+    setKeepJuchuKizaiMeisaiList((prev) => [...prev, ...newOyaJuchuKizaiMeisaiData]);
   };
+
+  /**
+   * 警告ダイアログの押下ボタンによる処理
+   * @param result 結果
+   */
+  const handleResultDialog = async (result: boolean) => {
+    if (result) {
+      await DeleteLock(1, props.juchuHeadData.juchuHeadId);
+      setLockData(null);
+      setEdit(false);
+      reset();
+      setKeepJuchuKizaiMeisaiList(originKeepJuchuKizaiMeisaiList);
+      setDirtyOpen(false);
+    } else {
+      setDirtyOpen(false);
+    }
+  };
+
+  // アコーディオン開閉
+  const handleExpansion = () => {
+    setExpanded((prevExpanded) => !prevExpanded);
+  };
+  // 機材入力ダイアログ開閉
+  const handleOpenEqDialog = () => {
+    if (!saveKizaiHead) {
+      setSaveOpen(true);
+      return;
+    }
+    setEqSelectionDialogOpen(true);
+  };
+
+  if (user === null || isLoading)
+    return (
+      <Box height={'90vh'}>
+        <Loading />
+      </Box>
+    );
 
   return (
     <Box>
@@ -455,119 +660,294 @@ export const EquipmentKeepOrderDetail = (props: {
         </AccordionDetails>
       </Accordion>
       {/*受注明細ヘッダー(キープ)*/}
-      <Accordion sx={{ mt: 2 }} defaultExpanded>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />} component="div" sx={{ bgcolor: 'green', color: 'white' }}>
-          <Grid2
-            container
-            display="flex"
-            alignItems={'center'}
-            justifyContent="space-between"
-            spacing={2}
-            py={1}
-            width={'100%'}
-          >
-            <Typography>受注機材ヘッダー(キープ)</Typography>
-            <Button>
-              <CheckIcon fontSize="small" />
-              保存
-            </Button>
-          </Grid2>
-        </AccordionSummary>
-        <AccordionDetails sx={{ padding: 0 }}>
-          <Divider />
-          <Grid2 container alignItems="center" spacing={2} p={2}>
-            <Grid2 container alignItems="center">
-              <Typography>機材明細名</Typography>
-              <TextField value={'キープ分（YARD/HT）'} />
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <Accordion
+          sx={{
+            mt: 2,
+            '& .Mui-expanded': {
+              mt: 2,
+            },
+          }}
+          defaultExpanded
+        >
+          <AccordionSummary expandIcon={<ExpandMoreIcon />} component="div" sx={{ bgcolor: 'green', color: 'white' }}>
+            <Grid2
+              container
+              display="flex"
+              alignItems={'center'}
+              justifyContent="space-between"
+              spacing={2}
+              py={1}
+              width={'100%'}
+            >
+              <Typography>受注機材ヘッダー(キープ)</Typography>
+              <Button
+                type="submit"
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+                disabled={!edit}
+              >
+                <CheckIcon fontSize="small" />
+                保存
+              </Button>
             </Grid2>
-          </Grid2>
-          <Grid2 container p={2} spacing={2}>
-            <Grid2 order={{ xl: 1 }} width={380}>
-              <Typography>親伝票出庫日時</Typography>
-              <Grid2>
-                <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                <TestDate date={new Date(props.oyaJuchuKizaiHeadData.kicsShukoDat)} onChange={() => {}} disabled />
-                <TestTime time={new Date(props.oyaJuchuKizaiHeadData.kicsShukoDat)} onChange={() => {}} disabled />
-              </Grid2>
-              <Grid2>
-                <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                <TestDate date={new Date(props.oyaJuchuKizaiHeadData.yardShukoDat)} onChange={() => {}} disabled />
-                <TestTime time={new Date(props.oyaJuchuKizaiHeadData.yardShukoDat)} onChange={() => {}} disabled />
-              </Grid2>
-            </Grid2>
-            <Grid2 width={380} order={{ xl: 4 }}>
-              <Typography>親伝票入庫日時</Typography>
-              <Grid2>
-                <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                <TestDate date={new Date(props.oyaJuchuKizaiHeadData.kicsNyukoDat)} onChange={() => {}} disabled />
-                <TestTime time={new Date(props.oyaJuchuKizaiHeadData.kicsNyukoDat)} onChange={() => {}} disabled />
-              </Grid2>
-              <Grid2>
-                <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                <TestDate date={new Date(props.oyaJuchuKizaiHeadData.yardNyukoDat)} onChange={() => {}} disabled />
-                <TestTime time={new Date(props.oyaJuchuKizaiHeadData.yardNyukoDat)} onChange={() => {}} disabled />
+          </AccordionSummary>
+          <AccordionDetails sx={{ padding: 0 }}>
+            <Divider />
+            <Grid2 container alignItems="center" spacing={2} p={2}>
+              <Grid2 container alignItems="center">
+                <Typography>機材明細名</Typography>
+                <TextFieldElement name="headNam" control={control} disabled={!edit}></TextFieldElement>
               </Grid2>
             </Grid2>
-            <Grid2 width={380} order={{ xl: 2 }}>
-              <Typography>キープ出庫日時</Typography>
-              <Grid2>
-                <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                <TestDate
-                  date={startKICSDate}
-                  minDate={endYARDDate !== null ? endYARDDate : undefined}
-                  maxDate={new Date('2025/11/19')}
-                  onChange={handleKICSStartChange}
-                />
-                <Time />
+            <Grid2 container p={2} spacing={2}>
+              <Grid2 order={{ xl: 1 }} width={380}>
+                <Typography>親伝票出庫日時</Typography>
+                <Grid2>
+                  <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
+                  <TestDate
+                    date={
+                      props.oyaJuchuKizaiHeadData.kicsShukoDat && new Date(props.oyaJuchuKizaiHeadData.kicsShukoDat)
+                    }
+                    onChange={() => {}}
+                    disabled
+                  />
+                  <TestTime
+                    time={
+                      props.oyaJuchuKizaiHeadData.kicsShukoDat && new Date(props.oyaJuchuKizaiHeadData.kicsShukoDat)
+                    }
+                    onChange={() => {}}
+                    disabled
+                  />
+                </Grid2>
+                <Grid2>
+                  <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
+                  <TestDate
+                    date={
+                      props.oyaJuchuKizaiHeadData.yardShukoDat && new Date(props.oyaJuchuKizaiHeadData.yardShukoDat)
+                    }
+                    onChange={() => {}}
+                    disabled
+                  />
+                  <TestTime
+                    time={
+                      props.oyaJuchuKizaiHeadData.yardShukoDat && new Date(props.oyaJuchuKizaiHeadData.yardShukoDat)
+                    }
+                    onChange={() => {}}
+                    disabled
+                  />
+                </Grid2>
               </Grid2>
-              <Grid2>
-                <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                <TestDate
-                  date={startYARDDate}
-                  minDate={endYARDDate !== null ? endYARDDate : undefined}
-                  maxDate={new Date('2025/11/19')}
-                  onChange={handleYARDStartChange}
-                />
-                <Time />
+              <Grid2 width={380} order={{ xl: 4 }}>
+                <Typography>親伝票入庫日時</Typography>
+                <Grid2>
+                  <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
+                  <TestDate
+                    date={
+                      props.oyaJuchuKizaiHeadData.kicsNyukoDat && new Date(props.oyaJuchuKizaiHeadData.kicsNyukoDat)
+                    }
+                    onChange={() => {}}
+                    disabled
+                  />
+                  <TestTime
+                    time={
+                      props.oyaJuchuKizaiHeadData.kicsNyukoDat && new Date(props.oyaJuchuKizaiHeadData.kicsNyukoDat)
+                    }
+                    onChange={() => {}}
+                    disabled
+                  />
+                </Grid2>
+                <Grid2>
+                  <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
+                  <TestDate
+                    date={
+                      props.oyaJuchuKizaiHeadData.yardNyukoDat && new Date(props.oyaJuchuKizaiHeadData.yardNyukoDat)
+                    }
+                    onChange={() => {}}
+                    disabled
+                  />
+                  <TestTime
+                    time={
+                      props.oyaJuchuKizaiHeadData.yardNyukoDat && new Date(props.oyaJuchuKizaiHeadData.yardNyukoDat)
+                    }
+                    onChange={() => {}}
+                    disabled
+                  />
+                </Grid2>
+              </Grid2>
+              <Grid2 width={380} order={{ xl: 2 }}>
+                <Typography>キープ入庫日時</Typography>
+                <Grid2>
+                  <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
+                  <Controller
+                    name="kicsNyukoDat"
+                    control={control}
+                    render={({ field, fieldState }) => (
+                      <TestDate
+                        onBlur={field.onBlur}
+                        date={field.value}
+                        // maxDate={keepShukoDate ? keepShukoDate : (oyaShukoDate ?? undefined)}
+                        // minDate={oyaShukoDate ?? undefined}
+                        onChange={handleKicsNyukoChange}
+                        fieldstate={fieldState}
+                        disabled={!edit}
+                        onClear={() => field.onChange(null)}
+                      />
+                    )}
+                  />
+                  <Controller
+                    name="kicsNyukoDat"
+                    control={control}
+                    render={({ field, fieldState }) => (
+                      <TestTime
+                        onBlur={field.onBlur}
+                        time={field.value}
+                        onChange={(newTime) => {
+                          field.onChange(newTime?.toDate());
+                          const yardShukoDat = getValues('yardShukoDat');
+                          if (yardShukoDat === null) {
+                            clearErrors('yardShukoDat');
+                          }
+                        }}
+                        fieldstate={fieldState}
+                        disabled={!edit}
+                      />
+                    )}
+                  />
+                </Grid2>
+                <Grid2>
+                  <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
+                  <Controller
+                    name="yardNyukoDat"
+                    control={control}
+                    render={({ field, fieldState }) => (
+                      <TestDate
+                        onBlur={field.onBlur}
+                        date={field.value}
+                        // maxDate={keepShukoDate ? keepShukoDate : (oyaShukoDate ?? undefined)}
+                        // minDate={oyaNyukoDate ?? undefined}
+                        onChange={handleYardNyukoChange}
+                        fieldstate={fieldState}
+                        disabled={!edit}
+                        onClear={() => field.onChange(null)}
+                      />
+                    )}
+                  />
+                  <Controller
+                    name="yardNyukoDat"
+                    control={control}
+                    render={({ field, fieldState }) => (
+                      <TestTime
+                        onBlur={field.onBlur}
+                        time={field.value}
+                        onChange={(newTime) => {
+                          field.onChange(newTime?.toDate());
+                          const kicsNyukoDat = getValues('kicsNyukoDat');
+                          if (kicsNyukoDat === null) {
+                            clearErrors('kicsNyukoDat');
+                          }
+                        }}
+                        fieldstate={fieldState}
+                        disabled={!edit}
+                      />
+                    )}
+                  />
+                </Grid2>
+              </Grid2>
+              <Grid2 width={380} order={{ xl: 3 }}>
+                <Typography>キープ出庫日時</Typography>
+                <Grid2>
+                  <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
+                  <Controller
+                    name="kicsShukoDat"
+                    control={control}
+                    render={({ field, fieldState }) => (
+                      <TestDate
+                        onBlur={field.onBlur}
+                        date={field.value}
+                        // maxDate={oyaShukoDate ?? undefined}
+                        // minDate={keepNyukoDate ? keepNyukoDate : (oyaNyukoDate ?? undefined)}
+                        onChange={handleKicsShukoChange}
+                        fieldstate={fieldState}
+                        disabled={!edit}
+                        onClear={() => field.onChange(null)}
+                      />
+                    )}
+                  />
+                  <Controller
+                    name="kicsShukoDat"
+                    control={control}
+                    render={({ field, fieldState }) => (
+                      <TestTime
+                        onBlur={field.onBlur}
+                        time={field.value}
+                        onChange={(newTime) => {
+                          field.onChange(newTime?.toDate());
+                          const yardShukoDat = getValues('yardShukoDat');
+                          if (yardShukoDat === null) {
+                            clearErrors('yardShukoDat');
+                          }
+                        }}
+                        fieldstate={fieldState}
+                        disabled={!edit}
+                      />
+                    )}
+                  />
+                </Grid2>
+                <Grid2>
+                  <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
+                  <Controller
+                    name="yardShukoDat"
+                    control={control}
+                    render={({ field, fieldState }) => (
+                      <TestDate
+                        onBlur={field.onBlur}
+                        date={field.value}
+                        // maxDate={oyaShukoDate ?? undefined}
+                        // minDate={keepNyukoDate ? keepNyukoDate : (oyaNyukoDate ?? undefined)}
+                        onChange={handleYardShukoChange}
+                        fieldstate={fieldState}
+                        disabled={!edit}
+                        onClear={() => field.onChange(null)}
+                      />
+                    )}
+                  />
+                  <Controller
+                    name="yardShukoDat"
+                    control={control}
+                    render={({ field, fieldState }) => (
+                      <TestTime
+                        onBlur={field.onBlur}
+                        time={field.value}
+                        onChange={(newTime) => {
+                          field.onChange(newTime?.toDate());
+                          const kicsShukoDat = getValues('kicsShukoDat');
+                          if (kicsShukoDat === null) {
+                            clearErrors('kicsShukoDat');
+                          }
+                        }}
+                        fieldstate={fieldState}
+                        disabled={!edit}
+                      />
+                    )}
+                  />
+                </Grid2>
               </Grid2>
             </Grid2>
-            <Grid2 width={380} order={{ xl: 3 }}>
-              <Typography>キープ入庫日時</Typography>
-              <Grid2>
-                <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                <TestDate
-                  date={startKICSDate}
-                  minDate={endYARDDate !== null ? endYARDDate : undefined}
-                  maxDate={new Date('2025/11/19')}
-                  onChange={handleKICSStartChange}
-                />
-                <Time />
+            <Grid2 container alignItems="center" p={2} spacing={2}>
+              <Grid2 container alignItems="center">
+                <Typography>メモ</Typography>
+                <TextFieldElement name="mem" control={control} multiline rows={3} disabled={!edit}></TextFieldElement>
               </Grid2>
-              <Grid2>
-                <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                <TestDate
-                  date={startYARDDate}
-                  minDate={endYARDDate !== null ? endYARDDate : undefined}
-                  maxDate={new Date('2025/11/19')}
-                  onChange={handleYARDStartChange}
-                />
-                <Time />
+              <Grid2 container alignItems="center">
+                <Typography>入出庫ステータス</Typography>
+                <TextField disabled defaultValue={'準備中'}></TextField>
               </Grid2>
             </Grid2>
-          </Grid2>
-          <Grid2 container alignItems="center" p={2} spacing={2}>
-            <Grid2 container alignItems="center">
-              <Typography>メモ</Typography>
-              <TextField multiline rows={3} />
-              {/* <TextFieldElement name="mem" control={control} multiline rows={3} disabled={!edit}></TextFieldElement> */}
-            </Grid2>
-            <Grid2 container alignItems="center">
-              <Typography>入出庫ステータス</Typography>
-              <TextField disabled defaultValue={'準備中'}></TextField>
-            </Grid2>
-          </Grid2>
-        </AccordionDetails>
-      </Accordion>
+          </AccordionDetails>
+        </Accordion>
+      </form>
       {/*受注明細(機材)*/}
       <Paper variant="outlined" sx={{ mt: 2 }}>
         <Box display="flex" alignItems="center" py={1} px={2}>
@@ -594,15 +974,19 @@ export const EquipmentKeepOrderDetail = (props: {
               機材追加
             </Button>
           </Box>
-          <Box width={'min-content'} display={Object.keys(oyaJuchuKizaiMeisaiList).length > 0 ? 'block' : 'none'}>
+          <Box width={'min-content'} display={Object.keys(keepJuchuKizaiMeisaiList).length > 0 ? 'block' : 'none'}>
             <KeepEqTable
-              rows={oyaJuchuKizaiMeisaiList}
+              rows={keepJuchuKizaiMeisaiList}
+              edit={edit}
+              handleDelete={handleDelete}
               handleMemoChange={handleMemoChange}
               onChange={handleCellChange}
             />
           </Box>
         </Box>
       </Paper>
+      <SaveAlertDialog open={saveOpen} onClick={() => setSaveOpen(false)} />
+      <IsDirtyAlertDialog open={dirtyOpen} onClick={handleResultDialog} />
     </Box>
   );
 };
