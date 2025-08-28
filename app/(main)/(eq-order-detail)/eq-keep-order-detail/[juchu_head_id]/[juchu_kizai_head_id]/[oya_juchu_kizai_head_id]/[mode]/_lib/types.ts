@@ -7,14 +7,23 @@ export const KeepJuchuKizaiHeadSchema = z
     juchuKizaiHeadKbn: z.number(),
     mem: z.string().nullable(),
     headNam: z.string({ message: '機材明細名は必須です' }).min(1, { message: '機材明細名は必須です' }),
+    oyaJuchuKizaiHeadId: z.number(),
     kicsShukoDat: z.date().nullable(),
     kicsNyukoDat: z.date().nullable(),
     yardShukoDat: z.date().nullable(),
     yardNyukoDat: z.date().nullable(),
   })
   .refine((data) => data.kicsShukoDat || data.yardShukoDat, {
+    message: '',
+    path: ['kicsShukoDat'],
+  })
+  .refine((data) => data.kicsShukoDat || data.yardShukoDat, {
     message: '出庫日時をいずれか一方入力してください',
     path: ['yardShukoDat'],
+  })
+  .refine((data) => data.kicsNyukoDat || data.yardNyukoDat, {
+    message: '',
+    path: ['kicsNyukoDat'],
   })
   .refine((data) => data.kicsNyukoDat || data.yardNyukoDat, {
     message: '入庫日時をいずれか一方入力してください',
@@ -34,7 +43,7 @@ export type KeepJuchuKizaiMeisaiValues = {
   kizaiNam: string;
   oyaPlanKizaiQty: number;
   oyaPlanYobiQty: number;
-  plankeepQty: number;
+  keepQty: number;
   delFlag: boolean;
   saveFlag: boolean;
 };

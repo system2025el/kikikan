@@ -51,13 +51,15 @@ const Page = async (props: {
       juchuHeadId: Number(params.juchu_head_id),
       juchuKizaiHeadId: Number(params.juchu_kizai_head_id),
       juchuKizaiHeadKbn: 3,
-      mem: '',
+      mem: null,
       headNam: '',
+      oyaJuchuKizaiHeadId: Number(params.oya_juchu_kizai_head_id),
       kicsShukoDat: null,
       kicsNyukoDat: null,
       yardShukoDat: null,
       yardNyukoDat: null,
     };
+    console.log('newKeepJuchuKizaiHeadData', newKeepJuchuKizaiHeadData);
     // 受注機材明細キープデータ(初期値)
     const newKeepJuchuKizaiMeisaiData: KeepJuchuKizaiMeisaiValues[] = [];
 

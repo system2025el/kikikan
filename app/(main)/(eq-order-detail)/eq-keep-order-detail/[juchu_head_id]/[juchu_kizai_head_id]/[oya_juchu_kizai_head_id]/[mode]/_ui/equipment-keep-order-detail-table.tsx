@@ -30,12 +30,15 @@ import { KeepJuchuKizaiMeisaiValues } from '../_lib/types';
 type KeepEqTableProps = {
   rows: KeepJuchuKizaiMeisaiValues[];
   edit: boolean;
+  handleDelete: (kizaiId: number) => void;
   handleMemoChange: (kizaiId: number, memo: string) => void;
   onChange: (rowIndex: number, returnValue: number) => void;
 };
 
-export const KeepEqTable: React.FC<KeepEqTableProps> = ({ rows, edit, handleMemoChange, onChange }) => {
+export const KeepEqTable: React.FC<KeepEqTableProps> = ({ rows, edit, handleDelete, handleMemoChange, onChange }) => {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  const visibleRows = rows.filter((row) => !row.delFlag);
 
   const handleKeepCellChange = (rowIndex: number, newValue: number) => {
     onChange(rowIndex, newValue);
@@ -102,12 +105,13 @@ export const KeepEqTable: React.FC<KeepEqTableProps> = ({ rows, edit, handleMemo
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map((row, rowIndex) => (
+          {visibleRows.map((row, rowIndex) => (
             <KeepEqTableRow
               key={rowIndex}
               row={row}
               rowIndex={rowIndex}
               edit={edit}
+              handleDelete={handleDelete}
               handleKeepRef={handleKeepRef(rowIndex)}
               handleMemoChange={handleMemoChange}
               handleKeyDown={handleKeyDown}
@@ -124,6 +128,7 @@ type KeepEqTableRowProps = {
   row: KeepJuchuKizaiMeisaiValues;
   rowIndex: number;
   edit: boolean;
+  handleDelete: (kizaiId: number) => void;
   handleKeepRef: (el: HTMLInputElement | null) => void;
   handleMemoChange: (kizaiId: number, memo: string) => void;
   handleKeepCellChange: (kizaiId: number, newValue: number) => void;
@@ -135,6 +140,7 @@ const KeepEqTableRow = React.memo(
     row,
     rowIndex,
     edit,
+    handleDelete,
     handleMemoChange,
     handleKeepCellChange,
     handleKeepRef,
@@ -145,7 +151,7 @@ const KeepEqTableRow = React.memo(
     return (
       <TableRow>
         <TableCell sx={{ padding: 0, border: '1px solid black' }}>
-          <IconButton sx={{ padding: 0, color: 'red' }} disabled={!edit}>
+          <IconButton onClick={() => handleDelete(row.kizaiId)} sx={{ padding: 0, color: 'red' }} disabled={!edit}>
             <Delete fontSize="small" />
           </IconButton>
         </TableCell>
@@ -178,7 +184,7 @@ const KeepEqTableRow = React.memo(
         <TableCell style={styles.row} align="right" size="small">
           <TextField
             variant="standard"
-            value={row.plankeepQty}
+            value={row.keepQty}
             type="text"
             onChange={(e) => {
               if (/^\d*$/.test(e.target.value) && Number(e.target.value) <= row.oyaPlanKizaiQty + row.oyaPlanYobiQty) {
