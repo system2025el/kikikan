@@ -26,9 +26,14 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { toISOStringYearMonthDay } from '../../_lib/date-conversion';
 import { Loading } from '../../_ui/loading';
 import { MuiTablePagination } from '../../_ui/table-pagination';
-import { orderList, OrderListTableValues } from '../_lib/types';
+import { LightTooltipWithText } from '../../(masters)/_ui/tables';
+import { OrderListTableValues } from '../_lib/types';
 
-/** 受注一覧テーブルのコンポーネント */
+/**
+ * 受注一覧用テーブル
+ * @param param0
+ * @returns 受注一覧用テーブルコンポーネント
+ */
 export const OrderTable = ({
   orderList,
   isLoading,
@@ -42,7 +47,6 @@ export const OrderTable = ({
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setPage: React.Dispatch<React.SetStateAction<number>>;
 }) => {
-  //const [page, setPage] = useState(1);
   const rowsPerPage = 50;
 
   // 表示するデータ
@@ -54,12 +58,11 @@ export const OrderTable = ({
       ordNum: (page - 1) * rowsPerPage + index + 1, // ← ここで表示順を計算！
     }));
   }, [orderList, page]);
-
   // テーブル最後のページ用の空データの長さ
   const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - orderList.length) : 0;
 
   useEffect(() => {
-    setIsLoading(false); //theLocsが変わったらローディング終わり
+    setIsLoading(false);
   }, [orderList, setIsLoading]);
 
   return (
@@ -69,7 +72,7 @@ export const OrderTable = ({
           受注一覧
         </Typography>
         <Divider />
-        <Grid2 container mt={1} mx={0.5} justifyContent={'space-between'}>
+        <Grid2 container mt={0.5} mx={0.5} justifyContent={'space-between'}>
           <Grid2 spacing={1}>
             <MuiTablePagination arrayList={orderList} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
           </Grid2>
@@ -100,52 +103,24 @@ export const OrderTable = ({
         </Grid2>
         {isLoading ? (
           <Loading />
-        ) : list.length === 0 ? (
+        ) : !list || list.length === 0 ? (
           <Typography justifySelf={'center'}>該当する受注がありません</Typography>
         ) : (
-          <TableContainer component={Paper} square sx={{ maxHeight: '80vh', mt: 1 }}>
-            <Table stickyHeader size="small" padding="none" sx={{ width: '100vw' }}>
+          <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
+            <Table stickyHeader size="small" padding="none">
               <TableHead>
                 <TableRow>
                   <TableCell></TableCell>
                   <TableCell padding="none"></TableCell>
-                  <TableCell align="center">受注番号</TableCell>
-                  <TableCell>
-                    <Box minWidth={100} maxWidth={100}>
-                      受注ステータス
-                    </Box>
-                  </TableCell>
-                  <TableCell>
-                    <Box minWidth={100} maxWidth={100}>
-                      公演名
-                    </Box>
-                  </TableCell>
-                  <TableCell>
-                    <Box minWidth={100} maxWidth={100}>
-                      公演場所
-                    </Box>
-                  </TableCell>
-                  <TableCell>
-                    <Box minWidth={200} maxWidth={200}>
-                      顧客名
-                    </Box>
-                  </TableCell>
-                  <TableCell>
-                    <Box minWidth={100} maxWidth={100}>
-                      受注日
-                    </Box>
-                  </TableCell>
-                  <TableCell>
-                    <Box minWidth={100} maxWidth={100}>
-                      受注開始日
-                    </Box>
-                  </TableCell>
-                  <TableCell>
-                    <Box minWidth={100} maxWidth={100}>
-                      受注終了日
-                    </Box>
-                  </TableCell>
-                  <TableCell>
+                  <TableCell align="right">受注番号</TableCell>
+                  <TableCell align="left">受注ステータス</TableCell>
+                  <TableCell align="left">公演名</TableCell>
+                  <TableCell align="left">公演場所</TableCell>
+                  <TableCell align="left">顧客名</TableCell>
+                  <TableCell align="left">受注日</TableCell>
+                  <TableCell align="left">受注開始日</TableCell>
+                  <TableCell align="left">受注終了日</TableCell>
+                  <TableCell align="left">
                     <Typography noWrap>入出庫ステータス</Typography>
                   </TableCell>
                 </TableRow>
@@ -154,31 +129,70 @@ export const OrderTable = ({
                 {list.map((order, index) => (
                   <TableRow key={index}>
                     <TableCell padding="checkbox">
-                      {/* <Box minWidth={10} maxWidth={10}> */}
                       <Checkbox color="primary" />
-                      {/* </Box> */}
                     </TableCell>
-                    <TableCell padding="none">{order.ordNum}</TableCell>
-                    <TableCell align="center">
+                    <TableCell
+                      width={50}
+                      sx={{
+                        paddingLeft: 1,
+                        paddingRight: 1,
+                        textAlign: 'end',
+                      }}
+                    >
+                      {order.ordNum}
+                    </TableCell>
+                    <TableCell align="right">
                       <Button variant="text" href={`/order/${order.juchuHeadId}/${'view'}`}>
                         <Box minWidth={60} maxWidth={60}>
                           {order.juchuHeadId}
                         </Box>
                       </Button>
                     </TableCell>
-                    <TableCell>{order.juchuStsNam}</TableCell>
-                    <TableCell>{order.koenNam}</TableCell>
-                    <TableCell>{order.koenbashoNam}</TableCell>
-                    <TableCell>{order.kokyakuNam}</TableCell>
-                    <TableCell>{toISOStringYearMonthDay(new Date(order.juchuDat))}</TableCell>
-                    <TableCell>{order.juchuStrDat && toISOStringYearMonthDay(new Date(order.juchuStrDat))}</TableCell>
-                    <TableCell>{order.juchuEndDat && toISOStringYearMonthDay(new Date(order.juchuEndDat))}</TableCell>
-                    <TableCell>{order.nyushukoStsNam}</TableCell>
+                    <TableCell>
+                      <LightTooltipWithText variant={'body2'} maxWidth={100}>
+                        {order.juchuStsNam}
+                      </LightTooltipWithText>
+                    </TableCell>
+                    <TableCell>
+                      <LightTooltipWithText variant={'body2'} maxWidth={200}>
+                        {order.koenNam}
+                      </LightTooltipWithText>
+                    </TableCell>
+                    <TableCell>
+                      <LightTooltipWithText variant={'body2'} maxWidth={150}>
+                        {order.koenbashoNam}
+                      </LightTooltipWithText>
+                    </TableCell>
+                    <TableCell>
+                      <LightTooltipWithText variant={'body2'} maxWidth={300}>
+                        {order.kokyakuNam}
+                      </LightTooltipWithText>
+                    </TableCell>
+                    <TableCell>
+                      <LightTooltipWithText variant={'body2'} maxWidth={100}>
+                        {toISOStringYearMonthDay(new Date(order.juchuDat))}
+                      </LightTooltipWithText>
+                    </TableCell>
+                    <TableCell>
+                      <LightTooltipWithText variant={'body2'} maxWidth={100}>
+                        {order.juchuStrDat && toISOStringYearMonthDay(new Date(order.juchuStrDat))}
+                      </LightTooltipWithText>
+                    </TableCell>
+                    <TableCell>
+                      <LightTooltipWithText variant={'body2'} maxWidth={100}>
+                        {order.juchuEndDat && toISOStringYearMonthDay(new Date(order.juchuEndDat))}
+                      </LightTooltipWithText>
+                    </TableCell>
+                    <TableCell>
+                      <LightTooltipWithText variant={'body2'} maxWidth={100}>
+                        {order.nyushukoStsNam}
+                      </LightTooltipWithText>
+                    </TableCell>
                   </TableRow>
                 ))}
                 {emptyRows > 0 && (
-                  <TableRow style={{ height: 30 * emptyRows }}>
-                    <TableCell colSpan={8} />
+                  <TableRow style={{ height: 31 * emptyRows }}>
+                    <TableCell colSpan={11} />
                   </TableRow>
                 )}
               </TableBody>

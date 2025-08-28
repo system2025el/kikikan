@@ -65,7 +65,11 @@ export const toISOStringMonthDay = (date: Date): string => {
   return `${month}/${day}`;
 };
 
-// 日本時間にするやつ
+/**
+ * 日本時間の文字列に変換する関数
+ * @param input 引数無なら現在時刻 Date string number
+ * @returns {string} 日本時間の文字列
+ */
 export const toJapanTimeString = (input: Date | string | number = new Date()): string => {
   return dayjs(input).tz('Asia/Tokyo').format('YYYY/MM/DD HH:mm:ss');
 };
