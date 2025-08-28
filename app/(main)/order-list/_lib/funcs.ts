@@ -123,12 +123,12 @@ export const getFilteredOrderList = async (query: OrderSearchValues) => {
   // 受注開始日
   if (orderStartDate) {
     queryParams.push(toJapanTimeString(orderStartDate));
-    whereClauses.push(`juchu_str_dat = $${queryParams.length}`);
+    whereClauses.push(`juchu_str_dat >= $${queryParams.length}`);
   }
   // 受注終了日
   if (orderFinishDate) {
     queryParams.push(toJapanTimeString(orderFinishDate));
-    whereClauses.push(`juchu_end_dat = $${queryParams.length}`);
+    whereClauses.push(`juchu_end_dat <= $${queryParams.length}`);
   }
 
   if (whereClauses.length > 0) {
