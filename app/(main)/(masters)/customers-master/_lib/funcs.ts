@@ -2,8 +2,8 @@
 
 import { revalidatePath } from 'next/cache';
 
-import pool from '@/app/_lib/postgres/postgres';
-import { supabase } from '@/app/_lib/supabase/supabase';
+import pool from '@/app/_lib/db/postgres';
+import { supabase } from '@/app/_lib/db/supabase';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { emptyCustomer } from './datas';
@@ -16,7 +16,7 @@ import { CustomersMasterDialogValues, CustomersMasterTableValues } from './types
  */
 export const getFilteredCustomers = async (query: string) => {
   const builder = supabase
-    .schema('dev2')
+    .schema(SCHEMA)
     .from('m_kokyaku')
     .select('kokyaku_id, kokyaku_nam, adr_shozai, adr_tatemono, adr_sonota, tel, fax, mem, dsp_flg, del_flg')
     .order('dsp_ord_num');
@@ -69,7 +69,7 @@ export const getFilteredCustomers = async (query: string) => {
 export const getOneCustomer = async (id: number) => {
   try {
     const { data, error } = await supabase
-      .schema('dev2')
+      .schema(SCHEMA)
       .from('m_kokyaku')
       .select(
         'kokyaku_id, kokyaku_nam, kana, kokyaku_rank, keisho, del_flg, adr_post, adr_shozai, adr_tatemono, adr_sonota, tel, tel_mobile, fax, mail, mem, dsp_flg, close_day, site_day, kizai_nebiki_flg'
@@ -210,7 +210,7 @@ export const updateCustomer = async (data: CustomersMasterDialogValues, id: numb
 
   try {
     const { error: updateError } = await supabase
-      .schema('dev2')
+      .schema(SCHEMA)
       .from('m_kokyaku')
       .update({ ...theData })
       .eq('kokyaku_id', id);

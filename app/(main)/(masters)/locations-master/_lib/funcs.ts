@@ -2,8 +2,8 @@
 
 import { revalidatePath } from 'next/cache';
 
-import pool from '@/app/_lib/postgres/postgres';
-import { supabase } from '@/app/_lib/supabase/supabase';
+import pool from '@/app/_lib/db/postgres';
+import { SCHEMA, supabase } from '@/app/_lib/db/supabase';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { emptyLoc } from './datas';
@@ -16,7 +16,7 @@ import { LocsMasterDialogValues, LocsMasterTableValues } from './types';
  */
 export const getFilteredLocs = async (query: string) => {
   const builder = supabase
-    .schema('dev2')
+    .schema(SCHEMA)
     .from('m_koenbasho')
     .select('koenbasho_id, koenbasho_nam, adr_shozai, adr_tatemono, adr_sonota, tel,  fax, mem, dsp_flg, del_flg') // テーブルに表示するカラム
     // あいまい検索、場所名、場所名かな、住所、電話番号、fax番号
@@ -70,7 +70,7 @@ export const getFilteredLocs = async (query: string) => {
 export const getOneLoc = async (id: number) => {
   try {
     const { data, error } = await supabase
-      .schema('dev2')
+      .schema(SCHEMA)
       .from('m_koenbasho')
       .select(
         'koenbasho_id, koenbasho_nam, kana, del_flg, adr_post, adr_shozai, adr_tatemono, adr_sonota, tel, tel_mobile, fax, mail,  mem, dsp_flg'
@@ -194,7 +194,7 @@ export const updateLoc = async (data: LocsMasterDialogValues, id: number) => {
 
   try {
     const { error: updateError } = await supabase
-      .schema('dev2')
+      .schema(SCHEMA)
       .from('m_koenbasho')
       .update({ ...theData })
       .eq('koenbasho_id', id);

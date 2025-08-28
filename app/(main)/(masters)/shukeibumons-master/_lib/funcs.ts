@@ -2,8 +2,8 @@
 
 import { revalidatePath } from 'next/cache';
 
-import pool from '@/app/_lib/postgres/postgres';
-import { supabase } from '@/app/_lib/supabase/supabase';
+import pool from '@/app/_lib/db/postgres';
+import { SCHEMA, supabase } from '@/app/_lib/db/supabase';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { emptyShukeibumon } from './datas';
@@ -16,7 +16,7 @@ import { ShukeibumonsMasterDialogValues, ShukeibumonsMasterTableValues } from '.
  */
 export const getFilteredShukeibumons = async (query: string) => {
   const builder = supabase
-    .schema('dev2')
+    .schema(SCHEMA)
     .from('m_shukei_bumon')
     .select('shukei_bumon_id, shukei_bumon_nam, mem, del_flg') // テーブルに表示するカラム
     .order('dsp_ord_num'); // 並び順
@@ -59,7 +59,7 @@ export const getFilteredShukeibumons = async (query: string) => {
 export const getOneShukeibumon = async (id: number) => {
   try {
     const { data, error } = await supabase
-      .schema('dev2')
+      .schema(SCHEMA)
       .from('m_shukei_bumon')
       .select('shukei_bumon_nam, del_flg, mem')
       .eq('shukei_bumon_id', id)
@@ -142,7 +142,7 @@ export const updateShukeibumon = async (data: ShukeibumonsMasterDialogValues, id
 
   try {
     const { error: updateError } = await supabase
-      .schema('dev2')
+      .schema(SCHEMA)
       .from('m_shukei_bumon')
       .update({ ...theData })
       .eq('shukei_bumon_id', id);
