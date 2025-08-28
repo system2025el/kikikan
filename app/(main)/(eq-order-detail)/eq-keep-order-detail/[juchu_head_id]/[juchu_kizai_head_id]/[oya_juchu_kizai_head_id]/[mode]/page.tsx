@@ -1,6 +1,9 @@
+import { GetNyukoDate, GetShukoDate } from '@/app/(main)/(eq-order-detail)/_lib/datefuncs';
 import { GetOrder } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/funcs';
 
-import { GetJuchuKizaiHead, GetJuchuKizaiNyushuko } from '../../../../../_lib/funcs';
+import { GetJuchuKizaiNyushuko } from '../../../../../_lib/funcs';
+import { GetKeepJuchuKizaiHead, GetKeepJuchuKizaiMeisai } from './_lib/funcs';
+import { KeepJuchuKizaiHeadValues, KeepJuchuKizaiMeisaiValues } from './_lib/types';
 import { EquipmentKeepOrderDetail } from './_ui/equipment-keep-order-detail';
 
 const Page = async (props: {
@@ -26,18 +29,100 @@ const Page = async (props: {
     return <div>受注情報が見つかりません。</div>;
   }
 
-  // 新規
-  if (juchuKizaiHeadId === 0) {
-    // 既存
-  } else {
+  // 出庫日
+  const oyaShukoDate = GetShukoDate(
+    oyaJuchuKizaiNyushukoData.kicsShukoDat && new Date(oyaJuchuKizaiNyushukoData.kicsShukoDat),
+    oyaJuchuKizaiNyushukoData.yardShukoDat && new Date(oyaJuchuKizaiNyushukoData.yardShukoDat)
+  );
+  // 入庫日
+  const oyaNyukoDate = GetNyukoDate(
+    oyaJuchuKizaiNyushukoData.kicsNyukoDat && new Date(oyaJuchuKizaiNyushukoData.kicsNyukoDat),
+    oyaJuchuKizaiNyushukoData.yardNyukoDat && new Date(oyaJuchuKizaiNyushukoData.yardNyukoDat)
+  );
+
+  if (!oyaShukoDate || !oyaNyukoDate) {
+    return <div>受注情報が見つかりません。</div>;
   }
 
-  return (
-    <EquipmentKeepOrderDetail
-      juchuHeadData={juchuHeadData}
-      oyaJuchuKizaiHeadData={oyaJuchuKizaiNyushukoData}
-      edit={edit}
-    />
-  );
+  // 新規
+  if (juchuKizaiHeadId === 0) {
+    // 受注機材ヘッダーキープデータ(初期値)
+    const newKeepJuchuKizaiHeadData: KeepJuchuKizaiHeadValues = {
+      juchuHeadId: Number(params.juchu_head_id),
+      juchuKizaiHeadId: Number(params.juchu_kizai_head_id),
+      juchuKizaiHeadKbn: 3,
+      mem: null,
+      headNam: '',
+      oyaJuchuKizaiHeadId: Number(params.oya_juchu_kizai_head_id),
+      kicsShukoDat: null,
+      kicsNyukoDat: null,
+      yardShukoDat: null,
+      yardNyukoDat: null,
+    };
+    console.log('newKeepJuchuKizaiHeadData', newKeepJuchuKizaiHeadData);
+    // 受注機材明細キープデータ(初期値)
+    const newKeepJuchuKizaiMeisaiData: KeepJuchuKizaiMeisaiValues[] = [];
+
+    // キープ出庫日(初期値)
+    const keepShukoDate = null;
+    // キープ入庫日(初期値)
+    const keepNyukoDate = null;
+
+    return (
+      <EquipmentKeepOrderDetail
+        juchuHeadData={juchuHeadData}
+        oyaJuchuKizaiHeadData={oyaJuchuKizaiNyushukoData}
+        keepJuchuKizaiHeadData={newKeepJuchuKizaiHeadData}
+        keepJuchuKizaiMeisaiData={newKeepJuchuKizaiMeisaiData}
+        oyaShukoDate={oyaShukoDate}
+        oyaNyukoDate={oyaNyukoDate}
+        keepShukoDate={keepShukoDate}
+        keepNyukoDate={keepNyukoDate}
+        edit={edit}
+      />
+    );
+    // 既存
+  } else {
+    // 受注機材ヘッダーキープデータ
+    console.time();
+    const keepJuchuKizaiHeadData = await GetKeepJuchuKizaiHead(params.juchu_head_id, params.juchu_kizai_head_id);
+    console.log('---------------------受注機材ヘッダーキープ---------------------');
+    console.timeEnd();
+
+    if (!keepJuchuKizaiHeadData) {
+      return <div>受注機材情報が見つかりません。</div>;
+    }
+
+    // 受注機材明細データ
+    console.time();
+    const juchuKizaiMeisaiData = await GetKeepJuchuKizaiMeisai(params.juchu_head_id, params.juchu_kizai_head_id);
+    console.log('----------------------------受注機材明細---------------------------------');
+    console.timeEnd();
+
+    // 出庫日
+    const keepShukoDate = GetShukoDate(
+      keepJuchuKizaiHeadData.kicsShukoDat && new Date(keepJuchuKizaiHeadData.kicsShukoDat),
+      keepJuchuKizaiHeadData.yardShukoDat && new Date(keepJuchuKizaiHeadData.yardShukoDat)
+    );
+    // 入庫日
+    const keepNyukoDate = GetNyukoDate(
+      keepJuchuKizaiHeadData.kicsNyukoDat && new Date(keepJuchuKizaiHeadData.kicsNyukoDat),
+      keepJuchuKizaiHeadData.yardNyukoDat && new Date(keepJuchuKizaiHeadData.yardNyukoDat)
+    );
+
+    return (
+      <EquipmentKeepOrderDetail
+        juchuHeadData={juchuHeadData}
+        oyaJuchuKizaiHeadData={oyaJuchuKizaiNyushukoData}
+        keepJuchuKizaiHeadData={keepJuchuKizaiHeadData}
+        keepJuchuKizaiMeisaiData={juchuKizaiMeisaiData}
+        oyaShukoDate={oyaShukoDate}
+        oyaNyukoDate={oyaNyukoDate}
+        keepShukoDate={keepShukoDate}
+        keepNyukoDate={keepNyukoDate}
+        edit={edit}
+      />
+    );
+  }
 };
 export default Page;

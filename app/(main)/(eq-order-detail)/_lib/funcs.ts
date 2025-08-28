@@ -115,7 +115,6 @@ export const AddJuchuKizaiHead = async (
   juchuKizaiHeadId: number,
   juchuKizaiHeadData: JuchuKizaiHeadValues,
   juchuKizaiHeadKbn: number,
-  dspOrdNum: number,
   userNam: string
 ) => {
   const newData = {
@@ -126,7 +125,6 @@ export const AddJuchuKizaiHead = async (
     nebiki_amt: juchuKizaiHeadData.nebikiAmt,
     mem: juchuKizaiHeadData.mem,
     head_nam: juchuKizaiHeadData.headNam,
-    dsp_ord_num: dspOrdNum,
     oya_juchu_kizai_head_id: null,
     ht_kbn: 0,
     add_dat: new Date(),
@@ -233,20 +231,19 @@ export const GetJuchuKizaiNyushuko = async (juchuHeadId: number, juchuKizaiHeadI
  * @returns
  */
 export const AddJuchuKizaiNyushuko = async (
+  juchuHeadId: number,
   juchuKizaiHeadId: number,
-  juchuKizaiHeadData: JuchuKizaiHeadValues,
+  kicsShukoDat: Date | null,
+  yardShukoDat: Date | null,
+  kicsNyukoDat: Date | null,
+  yardNyukoDat: Date | null,
   userNam: string
 ) => {
-  const dates = [
-    juchuKizaiHeadData.kicsShukoDat,
-    juchuKizaiHeadData.yardShukoDat,
-    juchuKizaiHeadData.kicsNyukoDat,
-    juchuKizaiHeadData.yardNyukoDat,
-  ];
+  const dates = [kicsShukoDat, yardShukoDat, kicsNyukoDat, yardNyukoDat];
   for (let i = 0; i < dates.length; i++) {
     if (!dates[i]) continue;
     const newData = {
-      juchu_head_id: juchuKizaiHeadData.juchuHeadId,
+      juchu_head_id: juchuHeadId,
       juchu_kizai_head_id: juchuKizaiHeadId,
       nyushuko_shubetu_id: i === 0 || i === 1 ? 1 : 2,
       nyushuko_basho_id: i === 0 || i === 2 ? 1 : 2,
@@ -277,19 +274,22 @@ export const AddJuchuKizaiNyushuko = async (
  * @param userNam ユーザー名
  * @returns
  */
-export const UpdateJuchuKizaiNyushuko = async (juchuKizaiHeadData: JuchuKizaiHeadValues, userNam: string) => {
-  const dates = [
-    juchuKizaiHeadData.kicsShukoDat,
-    juchuKizaiHeadData.yardShukoDat,
-    juchuKizaiHeadData.kicsNyukoDat,
-    juchuKizaiHeadData.yardNyukoDat,
-  ];
+export const UpdateJuchuKizaiNyushuko = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  kicsShukoDat: Date | null,
+  yardShukoDat: Date | null,
+  kicsNyukoDat: Date | null,
+  yardNyukoDat: Date | null,
+  userNam: string
+) => {
+  const dates = [kicsShukoDat, yardShukoDat, kicsNyukoDat, yardNyukoDat];
   for (let i = 0; i < dates.length; i++) {
     const updateData =
       dates[i] !== null
         ? {
-            juchu_head_id: juchuKizaiHeadData.juchuHeadId,
-            juchu_kizai_head_id: juchuKizaiHeadData.juchuKizaiHeadId,
+            juchu_head_id: juchuHeadId,
+            juchu_kizai_head_id: juchuKizaiHeadId,
             nyushuko_shubetu_id: i === 0 || i === 1 ? 1 : 2,
             nyushuko_basho_id: i === 0 || i === 2 ? 1 : 2,
             nyushuko_dat: dates[i],
@@ -297,8 +297,8 @@ export const UpdateJuchuKizaiNyushuko = async (juchuKizaiHeadData: JuchuKizaiHea
         : null;
 
     const confirmData = {
-      juchu_head_id: juchuKizaiHeadData.juchuHeadId,
-      juchu_kizai_head_id: juchuKizaiHeadData.juchuKizaiHeadId,
+      juchu_head_id: juchuHeadId,
+      juchu_kizai_head_id: juchuKizaiHeadId,
       nyushuko_shubetu_id: i === 0 || i === 1 ? 1 : 2,
       nyushuko_basho_id: i === 0 || i === 2 ? 1 : 2,
     };

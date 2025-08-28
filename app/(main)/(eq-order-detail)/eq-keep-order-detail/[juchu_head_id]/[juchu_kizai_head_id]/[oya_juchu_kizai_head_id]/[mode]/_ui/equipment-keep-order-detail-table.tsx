@@ -26,111 +26,19 @@ import React, { useRef, useState } from 'react';
 
 import { getDateHeaderBackgroundColor, getDateRowBackgroundColor } from '../_lib/colorselect';
 import { KeepJuchuKizaiMeisaiValues } from '../_lib/types';
-import { KeepEquipment, KeepEquipmentData, StockData } from './equipment-keep-order-detail';
-
-type KeepStockTableProps = {
-  header: string[];
-  rows: StockData[];
-  dateRange: string[];
-  startDate: Date | null;
-  endDate: Date | null;
-  ref: React.RefObject<HTMLDivElement | null>;
-};
-
-export const KeepStockTable: React.FC<KeepStockTableProps> = ({ header, rows, dateRange, startDate, endDate, ref }) => {
-  return (
-    <TableContainer ref={ref} component={Paper} style={{ overflow: 'scroll', maxHeight: '80vh' }}>
-      <Table stickyHeader>
-        <TableHead>
-          <TableRow>
-            {header?.map((date, index) => (
-              <TableCell
-                key={index}
-                align={typeof rows[0].data[index] === 'number' ? 'right' : 'left'}
-                size="small"
-                sx={{
-                  border:
-                    getDateHeaderBackgroundColor(date, dateRange) === 'black' ? '1px solid grey' : '1px solid black',
-                  whiteSpace: 'nowrap',
-                  color: 'white',
-                  bgcolor: getDateHeaderBackgroundColor(date, dateRange),
-                  padding: 0,
-                }}
-              >
-                {date}
-              </TableCell>
-            ))}
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {rows.map((row, rowIndex) => (
-            <KeepStockTableRow
-              key={rowIndex}
-              header={header}
-              row={row}
-              startDate={startDate}
-              endDate={endDate}
-              getDateRowBackgroundColor={getDateRowBackgroundColor}
-            />
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
-  );
-};
-
-export type KeepStockTableRowProps = {
-  header: string[];
-  row: StockData;
-  startDate: Date | null;
-  endDate: Date | null;
-  getDateRowBackgroundColor: (dateHeader: string, startDate: Date | null, endDate: Date | null) => string;
-};
-
-const KeepStockTableRow = React.memo(
-  ({ header, row, startDate, endDate, getDateRowBackgroundColor }: KeepStockTableRowProps) => {
-    console.log('date側描画', row.id);
-    return (
-      <TableRow>
-        {row.data.map((cell, colIndex) => {
-          return (
-            <TableCell
-              key={colIndex}
-              align={typeof cell === 'number' ? 'right' : 'left'}
-              style={styles.row}
-              sx={{
-                bgcolor: getDateRowBackgroundColor(header[colIndex], startDate, endDate),
-                color: typeof cell === 'number' && cell < 0 ? 'red' : 'black',
-              }}
-              size="small"
-            >
-              {cell}
-            </TableCell>
-          );
-        })}
-      </TableRow>
-    );
-  },
-  (prevProps, nextProps) => {
-    return (
-      prevProps.header === nextProps.header &&
-      prevProps.row === nextProps.row &&
-      prevProps.startDate === nextProps.startDate &&
-      prevProps.endDate === nextProps.endDate
-    );
-  }
-);
-
-KeepStockTableRow.displayName = 'KeepStockTableRow';
 
 type KeepEqTableProps = {
   rows: KeepJuchuKizaiMeisaiValues[];
-  handleMemoChange: (rowIndex: number, memo: string) => void;
+  edit: boolean;
+  handleDelete: (kizaiId: number) => void;
+  handleMemoChange: (kizaiId: number, memo: string) => void;
   onChange: (rowIndex: number, returnValue: number) => void;
 };
 
-export const KeepEqTable: React.FC<KeepEqTableProps> = ({ rows, handleMemoChange, onChange }) => {
+export const KeepEqTable: React.FC<KeepEqTableProps> = ({ rows, edit, handleDelete, handleMemoChange, onChange }) => {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  const visibleRows = rows.filter((row) => !row.delFlag);
 
   const handleKeepCellChange = (rowIndex: number, newValue: number) => {
     onChange(rowIndex, newValue);
@@ -197,11 +105,13 @@ export const KeepEqTable: React.FC<KeepEqTableProps> = ({ rows, handleMemoChange
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map((row, rowIndex) => (
+          {visibleRows.map((row, rowIndex) => (
             <KeepEqTableRow
               key={rowIndex}
               row={row}
               rowIndex={rowIndex}
+              edit={edit}
+              handleDelete={handleDelete}
               handleKeepRef={handleKeepRef(rowIndex)}
               handleMemoChange={handleMemoChange}
               handleKeyDown={handleKeyDown}
@@ -217,20 +127,31 @@ export const KeepEqTable: React.FC<KeepEqTableProps> = ({ rows, handleMemoChange
 type KeepEqTableRowProps = {
   row: KeepJuchuKizaiMeisaiValues;
   rowIndex: number;
+  edit: boolean;
+  handleDelete: (kizaiId: number) => void;
   handleKeepRef: (el: HTMLInputElement | null) => void;
-  handleMemoChange: (rowIndex: number, memo: string) => void;
+  handleMemoChange: (kizaiId: number, memo: string) => void;
   handleKeepCellChange: (kizaiId: number, newValue: number) => void;
   handleKeyDown: (e: React.KeyboardEvent, rowIndex: number) => void;
 };
 
 const KeepEqTableRow = React.memo(
-  ({ row, rowIndex, handleMemoChange, handleKeepCellChange, handleKeepRef, handleKeyDown }: KeepEqTableRowProps) => {
+  ({
+    row,
+    rowIndex,
+    edit,
+    handleDelete,
+    handleMemoChange,
+    handleKeepCellChange,
+    handleKeepRef,
+    handleKeyDown,
+  }: KeepEqTableRowProps) => {
     console.log('描画', rowIndex);
 
     return (
       <TableRow>
         <TableCell sx={{ padding: 0, border: '1px solid black' }}>
-          <IconButton sx={{ padding: 0, color: 'red' }}>
+          <IconButton onClick={() => handleDelete(row.kizaiId)} sx={{ padding: 0, color: 'red' }} disabled={!edit}>
             <Delete fontSize="small" />
           </IconButton>
         </TableCell>
@@ -241,7 +162,13 @@ const KeepEqTableRow = React.memo(
           {row.shozokuId === 1 ? 'K' : 'Y'}
         </TableCell>
         <TableCell style={styles.row} align="center" size="small">
-          <MemoTooltip name={row.kizaiNam} memo={row.mem} handleMemoChange={handleMemoChange} rowIndex={rowIndex} />
+          <MemoTooltip
+            name={row.kizaiNam}
+            memo={row.mem ? row.mem : ''}
+            handleMemoChange={handleMemoChange}
+            kizaiId={row.kizaiId}
+            disabled={!edit}
+          />
         </TableCell>
         <TableCell style={styles.row} align="left" size="small">
           <Button variant="text" sx={{ p: 0, justifyContent: 'start' }} href={`/loan-situation/${row.kizaiId}`}>
@@ -257,7 +184,7 @@ const KeepEqTableRow = React.memo(
         <TableCell style={styles.row} align="right" size="small">
           <TextField
             variant="standard"
-            value={row.plankeepQty}
+            value={row.keepQty}
             type="text"
             onChange={(e) => {
               if (/^\d*$/.test(e.target.value) && Number(e.target.value) <= row.oyaPlanKizaiQty + row.oyaPlanYobiQty) {
@@ -294,6 +221,7 @@ const KeepEqTableRow = React.memo(
               handleKeyDown(e, rowIndex);
             }}
             onFocus={(e) => e.target.select()}
+            disabled={!edit}
           />
         </TableCell>
       </TableRow>
@@ -309,8 +237,9 @@ KeepEqTableRow.displayName = 'KeepEqTableRow';
 type MemoTooltipProps = {
   name: string;
   memo: string;
-  rowIndex: number;
-  handleMemoChange: (rowIndex: number, memo: string) => void;
+  kizaiId: number;
+  handleMemoChange: (kizaiId: number, memo: string) => void;
+  disabled: boolean;
 };
 
 export const MemoTooltip = (props: MemoTooltipProps) => {
@@ -321,7 +250,7 @@ export const MemoTooltip = (props: MemoTooltipProps) => {
   const handleClose = () => setOpen(false);
 
   const handleSave = () => {
-    props.handleMemoChange(props.rowIndex, equipmentMemo);
+    props.handleMemoChange(props.kizaiId, equipmentMemo);
     handleClose();
   };
 
@@ -342,11 +271,12 @@ export const MemoTooltip = (props: MemoTooltipProps) => {
             fullWidth
             multiline
             minRows={3}
+            disabled={props.disabled}
           />
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>キャンセル</Button>
-          <Button onClick={handleSave} variant="contained">
+          <Button onClick={handleSave} variant="contained" disabled={props.disabled}>
             保存
           </Button>
         </DialogActions>

@@ -466,14 +466,20 @@ const EquipmentOrderDetail = (props: {
     userNam: string
   ) => {
     const maxId = await GetJuchuKizaiHeadMaxId(data.juchuHeadId);
-    const maxDspOrdNum = await GetJuchuKizaiHeadDspOrdNum();
     const newJuchuKizaiHeadId = maxId ? maxId.juchu_kizai_head_id + 1 : 1;
-    const newDspOrdNum = maxDspOrdNum ? maxDspOrdNum.dsp_ord_num + 1 : 1;
     // 受注機材ヘッダー追加
-    const headResult = await AddJuchuKizaiHead(newJuchuKizaiHeadId, data, 1, newDspOrdNum, userNam);
+    const headResult = await AddJuchuKizaiHead(newJuchuKizaiHeadId, data, 1, userNam);
     console.log('受注機材ヘッダー追加', headResult);
     // 受注機材入出庫追加
-    const nyushukoResult = await AddJuchuKizaiNyushuko(newJuchuKizaiHeadId, data, userNam);
+    const nyushukoResult = await AddJuchuKizaiNyushuko(
+      data.juchuHeadId,
+      newJuchuKizaiHeadId,
+      data.kicsShukoDat,
+      data.yardShukoDat,
+      data.kicsNyukoDat,
+      data.yardNyukoDat,
+      userNam
+    );
     console.log('受注機材入出庫追加', nyushukoResult);
     // 受注機材本番日(入出庫、使用中)追加
     const addJuchuSIyouHonbanbiData: JuchuKizaiHonbanbiValues[] = updateDateRange.map((d) => ({
@@ -529,7 +535,15 @@ const EquipmentOrderDetail = (props: {
     console.log('受注機材ヘッダー更新', headResult);
 
     // 受注機材入出庫更新
-    const nyushukoResult = await UpdateJuchuKizaiNyushuko(data, userNam);
+    const nyushukoResult = await UpdateJuchuKizaiNyushuko(
+      data.juchuHeadId,
+      data.juchuKizaiHeadId,
+      data.kicsShukoDat,
+      data.yardShukoDat,
+      data.kicsNyukoDat,
+      data.yardNyukoDat,
+      userNam
+    );
     console.log('受注機材入出庫更新', nyushukoResult);
 
     // 受注機材本番日(使用中)更新
