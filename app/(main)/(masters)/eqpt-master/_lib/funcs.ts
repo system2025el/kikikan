@@ -2,8 +2,8 @@
 
 import { revalidatePath } from 'next/cache';
 
-import pool from '@/app/_lib/db/postgres';
-import { SCHEMA, supabase } from '@/app/_lib/db/supabase';
+import pool from '@/app/_lib/postgres/postgres';
+import { supabase } from '@/app/_lib/supabase/supabase';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { EqptSelection } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_ui/equipment-selection-dailog';
 
@@ -18,7 +18,7 @@ import { EqptsMasterDialogValues, EqptsMasterTableValues, nullToZero, SelectedEq
  */
 export const getFilteredEqpts = async (queries: { q: string; b: number; d: number; s: number }) => {
   const builder = supabase
-    .schema(SCHEMA)
+    .schema('dev2')
     .from('v_kizai_lst')
     .select(
       'kizai_id, kizai_nam, kizai_qty, shozoku_nam, mem, bumon_nam, dai_bumon_nam, shukei_bumon_nam, reg_amt, rank_amt_1, rank_amt_2, rank_amt_3, rank_amt_4, rank_amt_5, dsp_flg, del_flg'
@@ -86,7 +86,7 @@ export const getFilteredEqpts = async (queries: { q: string; b: number; d: numbe
  */
 export const getOneEqpt = async (id: number) => {
   try {
-    const { data, error } = await supabase.schema(SCHEMA).from('m_kizai').select('*').eq('kizai_id', id).single();
+    const { data, error } = await supabase.schema('dev2').from('m_kizai').select('*').eq('kizai_id', id).single();
     if (!error) {
       console.log('I got a datalist from db', data.del_flg);
       const EqptDetails: EqptsMasterDialogValues = {
@@ -233,7 +233,7 @@ export const updateEqpt = async (data: EqptsMasterDialogValues, id: number) => {
 
   try {
     const { error: updateError } = await supabase
-      .schema(SCHEMA)
+      .schema('dev2')
       .from('m_kizai')
       .update({ ...theData })
       .eq('kizai_id', id);
@@ -254,7 +254,7 @@ export const updateEqpt = async (data: EqptsMasterDialogValues, id: number) => {
 export const getEqptsQty = async (id: number) => {
   try {
     const { count, error } = await supabase
-      .schema(SCHEMA)
+      .schema('dev2')
       .from('m_rfid')
       .select('*', { count: 'exact', head: true })
       .eq('kizai_id', id);
@@ -395,7 +395,7 @@ export const getSelectedEqpts = async (idList: number[], rank: number) => {
   const rankParse = (rank: number) => {};
   try {
     const { data, error } = await await supabase
-      .schema(SCHEMA)
+      .schema('dev2')
       .from('v_kizai_lst')
       .select(
         `kizai_id, kizai_nam, shozoku_id, shozoku_nam, kizai_grp_cod, dsp_ord_num, reg_amt, rank_amt_1, rank_amt_2, rank_amt_3, rank_amt_4, rank_amt_5, kizai_qty`

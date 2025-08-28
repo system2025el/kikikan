@@ -2,8 +2,8 @@
 
 import { revalidatePath } from 'next/cache';
 
-import pool from '@/app/_lib/db/postgres';
-import { SCHEMA, supabase } from '@/app/_lib/db/supabase';
+import pool from '@/app/_lib/postgres/postgres';
+import { supabase } from '@/app/_lib/supabase/supabase';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { getAllBumonDSSelections, getAllSelections } from '../../_lib/funs';
@@ -17,7 +17,7 @@ import { BumonsMasterDialogValues, BumonsMasterTableValues } from './types';
  */
 export const getFilteredBumons = async (queries: { q: string; d: number; s: number }) => {
   const builder = supabase
-    .schema(SCHEMA)
+    .schema('dev2')
     .from('m_bumon')
     .select('bumon_id, bumon_nam, mem, del_flg')
     .order('dsp_ord_num');
@@ -68,7 +68,7 @@ export const getFilteredBumons = async (queries: { q: string; d: number; s: numb
 export const getOnebumon = async (id: number) => {
   try {
     const { data, error } = await supabase
-      .schema(SCHEMA)
+      .schema('dev2')
       .from('m_bumon')
       .select('bumon_nam, del_flg, dai_bumon_id, syukei_bumon_id, mem ')
       .eq('bumon_id', id)
@@ -167,7 +167,7 @@ export const updateBumon = async (data: BumonsMasterDialogValues, id: number) =>
 
   try {
     const { error: updateError } = await supabase
-      .schema(SCHEMA)
+      .schema('dev2')
       .from('m_bumon')
       .update({ ...theData })
       .eq('bumon_id', id);

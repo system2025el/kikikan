@@ -29,5 +29,3 @@ export const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPA
     detectSessionInUrl: false,
   },
 });
-
-export const SCHEMA: string = 'dev2';

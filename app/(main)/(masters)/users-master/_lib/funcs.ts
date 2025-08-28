@@ -2,8 +2,8 @@
 
 import { revalidatePath } from 'next/cache';
 
-import pool from '@/app/_lib/db/postgres';
-import { SCHEMA, supabase } from '@/app/_lib/db/supabase';
+import pool from '@/app/_lib/postgres/postgres';
+import { supabase } from '@/app/_lib/supabase/supabase';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { emptyUser } from './data';
@@ -17,7 +17,7 @@ import { UsersMasterDialogValues, UsersMasterTableValues } from './types';
 export const getFilteredUsers = async (query: string) => {
   try {
     const { data, error } = await supabase
-      .schema(SCHEMA)
+      .schema('dev2')
       .from('m_user')
       .select('instance_id, user_nam, del_flg') // テーブルに表示するカラム
       .ilike('user_nam', `%${query}%`)
@@ -56,7 +56,7 @@ export const getFilteredUsers = async (query: string) => {
 export const getOneUser = async (id: number) => {
   try {
     const { data, error } = await supabase
-      .schema(SCHEMA)
+      .schema('dev2')
       .from('m_user')
       .select('user_nam, del_flg, mem')
       .eq('instance_id', id)
@@ -136,7 +136,7 @@ export const updateUser = async (data: UsersMasterDialogValues, id: number) => {
 
   try {
     const { error: updateError } = await supabase
-      .schema(SCHEMA)
+      .schema('dev2')
       .from('m_user')
       .update({ ...theData })
       .eq('instance_id', id);

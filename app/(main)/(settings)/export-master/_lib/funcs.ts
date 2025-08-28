@@ -5,7 +5,7 @@ import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
 import { utils } from 'xlsx';
 
-import pool from '@/app/_lib/db/postgres';
+import pool from '@/app/_lib/postgres/postgres';
 
 // .tz()を使う準備
 dayjs.extend(utc);

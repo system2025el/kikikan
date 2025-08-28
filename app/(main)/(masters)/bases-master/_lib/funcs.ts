@@ -2,8 +2,8 @@
 
 import { revalidatePath } from 'next/cache';
 
-import pool from '@/app/_lib/db/postgres';
-import { supabase } from '@/app/_lib/db/supabase';
+import pool from '@/app/_lib/postgres/postgres';
+import { supabase } from '@/app/_lib/supabase/supabase';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { emptyBase } from './datas';
@@ -17,7 +17,7 @@ import { BasesMasterDialogValues, BasesMasterTableValues } from './types';
 export const getFilteredBases = async (query: string) => {
   try {
     const { data, error } = await supabase
-      .schema(SCHEMA)
+      .schema('dev2')
       .from('m_shozoku')
       .select('shozoku_id, shozoku_nam, mem, del_flg') // テーブルに表示するカラム
       // 検索、所属名 いらない気もするdelete
@@ -56,7 +56,7 @@ export const getFilteredBases = async (query: string) => {
 export const getOneBase = async (id: number) => {
   try {
     const { data, error } = await supabase
-      .schema(SCHEMA)
+      .schema('dev2')
       .from('m_shozoku')
       .select('shozoku_nam, mem, del_flg')
       .eq('shozoku_id', id)
@@ -140,7 +140,7 @@ export const updateBase = async (data: BasesMasterDialogValues, id: number) => {
 
   try {
     const { error: updateError } = await supabase
-      .schema(SCHEMA)
+      .schema('dev2')
       .from('m_shozoku')
       .update({ ...theData })
       .eq('shozoku_id', id);

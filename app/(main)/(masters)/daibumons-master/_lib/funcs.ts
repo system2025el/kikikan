@@ -2,47 +2,54 @@
 
 import { revalidatePath } from 'next/cache';
 
-import pool from '@/app/_lib/db/postgres';
-import { SCHEMA, supabase } from '@/app/_lib/db/supabase';
-import {
-  insertNewDaibumon,
-  selectActiveDaibumons,
-  selectFilteredDaibumons,
-  selectOneDaibumon,
-} from '@/app/_lib/db/tables/m-daibumon';
+import pool from '@/app/_lib/postgres/postgres';
+import { supabase } from '@/app/_lib/supabase/supabase';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { emptyDaibumon } from './datas';
 import { DaibumonsMasterDialogValues, DaibumonsMasterTableValues } from './types';
 
 /**
- * 大部門マスタのデータを取得する関数、引数無は全取得
- * @param query 大部門名検索キーワード
- * @returns {Promise<DaibumonsMasterTableValues[]>} 大部門マスタテーブルに表示するデータ配列（ 検索キーワードが空の場合は全て ）
+ * 大部門マスタテーブルのデータを取得する関数
+ * @param query 検索キーワード
+ * @returns {Promise<DaibumonsMasterTableValues[]>} 大部門マスタテーブルに表示するデータ（ 検索キーワードが空の場合は全て ）
  */
-export const getFilteredDaibumons = async (query: string = '') => {
-  try {
-    const { data, error } = await selectFilteredDaibumons(query);
+export const getFilteredDaibumons = async (query: string) => {
+  const builder = supabase
+    .schema('dev2')
+    .from('m_dai_bumon')
+    .select('dai_bumon_id, dai_bumon_nam,  mem, del_flg') // テーブルに表示するカラム
+    .order('dsp_ord_num'); // 並び順
 
-    if (error || !data || data.length === 0) {
-      if (error) {
-        console.error('DB情報取得エラー:', error);
+  if (query && query.trim() !== '') {
+    builder.ilike('dai_bumon_nam', `%${query}%`);
+  }
+
+  try {
+    const { data, error } = await builder;
+    if (!error) {
+      console.log('I got a datalist from db', data.length);
+      if (!data || data.length === 0) {
+        return [];
+      } else {
+        const filtereddaibumons: DaibumonsMasterTableValues[] = data.map((d, index) => ({
+          daibumonId: d.dai_bumon_id,
+          daibumonNam: d.dai_bumon_nam,
+          mem: d.mem,
+          tblDspId: index + 1,
+          delFlg: Boolean(d.del_flg),
+        }));
+        console.log(filtereddaibumons.length);
+        return filtereddaibumons;
       }
+    } else {
+      console.error('大部門情報取得エラー。', { message: error.message, code: error.code });
       return [];
     }
-    const filtereddaibumons: DaibumonsMasterTableValues[] = data.map((d, index) => ({
-      daibumonId: d.dai_bumon_id,
-      daibumonNam: d.dai_bumon_nam,
-      mem: d.mem,
-      tblDspId: index + 1,
-      delFlg: Boolean(d.del_flg),
-    }));
-    console.log('大部門マスタ', filtereddaibumons.length, '件');
-    return filtereddaibumons;
   } catch (e) {
     console.error('例外が発生しました:', e);
-    return [];
   }
+  revalidatePath('/daibumons-master');
 };
 
 /**
@@ -52,20 +59,28 @@ export const getFilteredDaibumons = async (query: string = '') => {
  */
 export const getOneDaibumon = async (id: number) => {
   try {
-    const { data, error } = await selectOneDaibumon(id);
+    const { data, error } = await supabase
+      .schema('dev2')
+      .from('m_dai_bumon')
+      .select('dai_bumon_nam, del_flg, mem')
+      .eq('dai_bumon_id', id)
+      .single();
+    if (!error) {
+      console.log('I got a datalist from db', data.del_flg);
 
-    if (error || !data) {
-      console.error('DB情報取得エラー、またはデータが見つかりません', error);
+      const daibumonDetails: DaibumonsMasterDialogValues = {
+        daibumonNam: data.dai_bumon_nam,
+        delFlg: Boolean(data.del_flg),
+        mem: data.mem,
+      };
+      console.log(daibumonDetails.delFlg);
+      return daibumonDetails;
+    } else {
+      console.error('大部門情報取得エラー。', { message: error.message, code: error.code });
       return emptyDaibumon;
     }
-    const daibumonDetails: DaibumonsMasterDialogValues = {
-      daibumonNam: data.dai_bumon_nam,
-      delFlg: Boolean(data.del_flg),
-      mem: data.mem,
-    };
-    return daibumonDetails;
   } catch (e) {
-    console.error('予期せぬ例外が発生しました:', e);
+    console.error('例外が発生しました:', e);
     return emptyDaibumon;
   }
 };
@@ -75,15 +90,34 @@ export const getOneDaibumon = async (id: number) => {
  * @param data フォームで取得した大部門情報
  */
 export const addNewDaibumon = async (data: DaibumonsMasterDialogValues) => {
-  try {
-    await insertNewDaibumon(data);
+  console.log(data.mem);
 
+  const query = `
+      INSERT INTO m_dai_bumon (
+        dai_bumon_id, dai_bumon_nam, del_flg, dsp_ord_num,
+        mem, add_dat, add_user, upd_dat, upd_user
+      )
+      VALUES (
+        (SELECT coalesce(max(dai_bumon_id),0) + 1 FROM m_dai_bumon),
+        $1, $2,
+        (SELECT coalesce(max(dsp_ord_num),0) + 1 FROM m_dai_bumon),
+        $3, $4, $5, $6, $7
+      );
+    `;
+
+  const date = toJapanTimeString();
+
+  try {
+    console.log('DB Connected');
+    await pool.query(` SET search_path TO dev2;`);
+
+    await pool.query(query, [data.daibumonNam, Number(data.delFlg), data.mem, date, 'shigasan', null, null]);
     console.log('data : ', data);
-    revalidatePath('/daibumons-master');
   } catch (error) {
-    console.log('DB接続エラー: insertDaibumon', error);
+    console.log('DB接続エラー', error);
     throw error;
   }
+  await revalidatePath('/daibumons-master');
 };
 
 /**
@@ -93,19 +127,27 @@ export const addNewDaibumon = async (data: DaibumonsMasterDialogValues) => {
  */
 export const updateDaibumon = async (data: DaibumonsMasterDialogValues, id: number) => {
   console.log('Update!!!', data.mem);
-  const date = toJapanTimeString();
-  const updateData = {
+  const missingData = {
     dai_bumon_nam: data.daibumonNam,
     del_flg: Number(data.delFlg),
     mem: data.mem,
+  };
+  console.log(missingData.del_flg);
+  const date = toJapanTimeString();
+
+  const theData = {
+    ...missingData,
     upd_dat: date,
     upd_user: 'test_user',
   };
-
-  console.log(updateData.dai_bumon_nam);
+  console.log(theData.dai_bumon_nam);
 
   try {
-    await updateDaibumon(updateData);
+    const { error: updateError } = await supabase
+      .schema('dev2')
+      .from('m_dai_bumon')
+      .update({ ...theData })
+      .eq('dai_bumon_id', id);
 
     if (updateError) {
       console.error('更新に失敗しました:', updateError.message);
@@ -113,9 +155,9 @@ export const updateDaibumon = async (data: DaibumonsMasterDialogValues, id: numb
     } else {
       console.log('大部門を更新しました : ', theData.del_flg);
     }
-    await revalidatePath('/daibumons-master');
   } catch (error) {
     console.log('例外が発生', error);
     throw error;
   }
+  revalidatePath('/daibumon-master');
 };
