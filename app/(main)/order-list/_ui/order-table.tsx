@@ -121,7 +121,9 @@ export const OrderTable = ({
                   <TableCell align="left">受注開始日</TableCell>
                   <TableCell align="left">受注終了日</TableCell>
                   <TableCell align="left">
-                    <Typography noWrap>入出庫ステータス</Typography>
+                    <Typography noWrap variant={'body2'} fontWeight={500}>
+                      入出庫ステータス
+                    </Typography>
                   </TableCell>
                 </TableRow>
               </TableHead>
@@ -142,10 +144,13 @@ export const OrderTable = ({
                       {order.ordNum}
                     </TableCell>
                     <TableCell align="right">
-                      <Button variant="text" href={`/order/${order.juchuHeadId}/${'view'}`}>
-                        <Box minWidth={60} maxWidth={60}>
-                          {order.juchuHeadId}
-                        </Box>
+                      <Button
+                        variant="text"
+                        size="small"
+                        href={`/order/${order.juchuHeadId}/${'view'}`}
+                        sx={{ p: 0, m: 0, minWidth: 60, justifyContent: 'flex-end' }}
+                      >
+                        {order.juchuHeadId}
                       </Button>
                     </TableCell>
                     <TableCell>
