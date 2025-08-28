@@ -14,6 +14,7 @@ import { RadioButtonGroup, SelectElement, TextFieldElement } from 'react-hook-fo
 
 import { BackButton } from '../../_ui/buttons';
 import { selectNone } from '../../_ui/form-box';
+import { radioData } from '../_lib/datas';
 import { getFilteredOrderList } from '../_lib/funcs';
 import { OrderListTableValues, OrderSearchValues } from '../_lib/types';
 import { OrderTable } from './order-table';
@@ -36,7 +37,6 @@ export const OrderList = ({
 
   /* useForm ------------------------------------------ */
   const { control, handleSubmit, watch } = useForm<OrderSearchValues>({
-    mode: 'onBlur',
     defaultValues: {
       criteria: 1,
       selectedDate: { value: '1', range: { from: null, to: null } },
@@ -48,7 +48,10 @@ export const OrderList = ({
     },
   });
   const sortOrder = watch('customerSort');
+  const selectedDateValue = watch('selectedDate.value');
 
+  /* methods ---------------------------------------- */
+  /* 検索押下時の処理 */
   const onSubmit = async (data: OrderSearchValues) => {
     setIsLoading(true);
     setPage(1);
@@ -60,15 +63,12 @@ export const OrderList = ({
     setIsLoading(false);
   };
 
-  // 検索条件のラジオボタンとdatepickerを制御
-  const selectedDateValue = watch('selectedDate.value');
+  /* useEffect --------------------------------------- */
   useEffect(() => {
-    if (selectedDateValue !== undefined) {
-      console.log('selectedDateが変わった:', selectedDateValue);
-    }
-  }, [selectedDateValue]);
+    setIsLoading(false);
+  }, []);
 
-  //
+  // 顧客選択のソート制御
   const customerList = useMemo(() => {
     if (!customers) return [];
 
@@ -86,10 +86,6 @@ export const OrderList = ({
       label: kokyakuNam,
     }));
   }, [customerList]);
-
-  useEffect(() => {
-    setIsLoading(false);
-  }, []);
 
   return (
     <LocalizationProvider
@@ -241,27 +237,6 @@ export const OrderList = ({
     </LocalizationProvider>
   );
 };
-
-/** ラヂオボタン用データ */
-const radioData = [
-  {
-    id: '1',
-    label: '先月全て',
-    FormControlLabelProps: {
-      sx: {
-        '& .MuiFormControlLabel-label': {
-          fontSize: '0.5rem',
-        },
-      },
-    },
-  },
-  { id: '2', label: '今月全て' },
-  { id: '3', label: '昨日' },
-  { id: '4', label: '今日' },
-  { id: '5', label: '明日' },
-  { id: '6', label: '明日以降' },
-  { id: '7', label: '指定期間' },
-];
 
 /**
  * 日付を選択し取得するコンポーネント

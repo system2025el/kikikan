@@ -97,26 +97,24 @@ export const EqptMasterTable = ({
       </Grid2>
       {isLoading ? (
         <Loading />
+      ) : !theEqpts || theEqpts!.length === 0 ? (
+        <Typography>該当するデータがありません</Typography>
       ) : (
-        <>
-          {theEqpts!.length < 1 && <Typography>該当するデータがありません</Typography>}
-          {theEqpts!.length > 0 && (
-            <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
-              <MasterTableOfEqpt
-                headers={eqptMHeader}
-                datas={theEqpts!.map((l) => ({
-                  id: l.kizaiId,
-                  name: l.kizaiNam,
-                  ...l,
-                }))}
-                page={page}
-                rowsPerPage={rowsPerPage}
-                handleOpenDialog={handleOpenDialog}
-              />
-            </TableContainer>
-          )}
-        </>
+        <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
+          <MasterTableOfEqpt
+            headers={eqptMHeader}
+            datas={theEqpts!.map((l) => ({
+              id: l.kizaiId,
+              name: l.kizaiNam,
+              ...l,
+            }))}
+            page={page}
+            rowsPerPage={rowsPerPage}
+            handleOpenDialog={handleOpenDialog}
+          />
+        </TableContainer>
       )}
+
       <Dialog open={dialogOpen} fullScreen>
         <EqMasterDialog handleClose={handleCloseDialog} eqptId={openId} refetchEqpts={refetchEqpts} />
       </Dialog>

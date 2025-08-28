@@ -277,7 +277,7 @@ const LightTooltip = styled(({ className, ...props }: TooltipProps) => (
  * @param param0 param
  * @returns テキストがはみ出たらtooltipを表示するコンポーネント
  */
-const LightTooltipWithText = ({
+export const LightTooltipWithText = ({
   children,
   variant,
   maxWidth,

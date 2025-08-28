@@ -14,13 +14,13 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 
 /**
- * 受注一覧情報取得
+ * 受注一覧情報取得する関数
  * @param query 検索キーワード
  * @returns 受注情報リスト
  */
 export const getFilteredOrderList = async (query: OrderSearchValues) => {
   console.log(query);
-  const { criteria, selectedDate, customer, stageName, orderStartDate, orderFinishDate } = query;
+  const { criteria, selectedDate, customer, customerSort, stageName, orderStartDate, orderFinishDate } = query;
   // 基本のクエリ
   let sqlQuery = `
     SELECT
@@ -134,9 +134,13 @@ export const getFilteredOrderList = async (query: OrderSearchValues) => {
   if (whereClauses.length > 0) {
     sqlQuery += ` WHERE ${whereClauses.join(' AND ')}`;
   }
-  sqlQuery += ` ORDER BY "juchuHeadId";`;
-  console.log('Executing SQL:', sqlQuery);
+
+  if (customerSort === '1') sqlQuery += ` ORDER BY kokyaku_id, "juchuHeadId";`;
+  else if (customerSort === '2') sqlQuery += ` ORDER BY kokyaku_nam, "juchuHeadId";`;
+  else sqlQuery += ` ORDER BY "juchuHeadId";`;
+
   console.log('With Parameters:', queryParams);
+
   try {
     await pool.query(`SET search_path TO dev2;`);
     // 処理実行
