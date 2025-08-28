@@ -2,7 +2,7 @@
 
 import { PoolClient } from 'pg';
 
-import pool from '@/app/_lib/postgres/postgres';
+import pool from '@/app/_lib/db/postgres';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { EqptImportType, KizaiImportTypes, RfidImportTypes, TanabanImportTypes } from './types';

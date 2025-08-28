@@ -4,7 +4,7 @@ import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
 
-import pool from '@/app/_lib/postgres/postgres';
+import pool from '@/app/_lib/db/postgres';
 
 import { toJapanTimeString } from '../../_lib/date-conversion';
 import { OrderSearchValues } from './types';

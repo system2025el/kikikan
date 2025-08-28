@@ -1,6 +1,6 @@
 'use server';
 
-import { supabase } from '@/app/_lib/supabase/supabase';
+import { supabase } from '@/app/_lib/db/supabase';
 import { toISOStringYearMonthDay } from '@/app/(main)/_lib/date-conversion';
 import { CustomersMasterTableValues } from '@/app/(main)/(masters)/customers-master/_lib/types';
 

@@ -2,8 +2,8 @@
 
 import { QueryResult } from 'pg';
 
-import pool from '@/app/_lib/postgres/postgres';
-import { supabase } from '@/app/_lib/supabase/supabase';
+import pool from '@/app/_lib/db/postgres';
+import { supabase } from '@/app/_lib/db/supabase';
 import { GetJuchuKizaiNyushuko } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 
 import { KeepJuchuKizaiHeadValues, KeepJuchuKizaiMeisaiValues } from './types';

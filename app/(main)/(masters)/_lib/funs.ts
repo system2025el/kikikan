@@ -1,7 +1,7 @@
 'use server';
 
-import pool from '@/app/_lib/postgres/postgres';
-import { supabase } from '@/app/_lib/supabase/supabase';
+import pool from '@/app/_lib/db/postgres';
+import { supabase } from '@/app/_lib/db/supabase';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 
 /**
