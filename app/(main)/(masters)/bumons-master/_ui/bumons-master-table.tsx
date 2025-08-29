@@ -55,11 +55,7 @@ export const BumonsMasterTable = ({
   /* 情報が変わったときに更新される */
   const refetchBumons = async () => {
     setIsLoading(true);
-    const updated = await getFilteredBumons({
-      q: '',
-      d: 0,
-      s: 0,
-    });
+    const updated = await getFilteredBumons();
     setTheBumons(updated?.data);
     setIsLoading(false);
   };

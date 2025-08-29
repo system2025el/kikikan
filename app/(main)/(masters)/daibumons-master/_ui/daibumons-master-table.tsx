@@ -52,7 +52,7 @@ export const DaibumonsMasterTable = ({
   /* 情報が変わったときに更新される */
   const refetchDaibumons = async () => {
     setIsLoading(true);
-    const updated = await getFilteredDaibumons('');
+    const updated = await getFilteredDaibumons();
     setTheDaibumons(updated);
     setIsLoading(false);
   };

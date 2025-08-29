@@ -53,7 +53,7 @@ export const CustomersMasterTable = ({
   /* 情報が変わったときに更新される */
   const refetchCustomers = async () => {
     setIsLoading(true);
-    const updated = await getFilteredCustomers('');
+    const updated = await getFilteredCustomers();
     setTheCustomers(updated);
     setIsLoading(false);
   };

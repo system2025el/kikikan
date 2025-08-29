@@ -14,7 +14,7 @@ import { BumonsMasterDialogValues, BumonsMasterTableValues } from './types';
  * @param query 検索キーワード
  * @returns {Promise<bumonsMasterTableValues[]>} 部門マスタテーブルに表示するデータ（ 検索キーワードが空の場合は全て ）
  */
-export const getFilteredBumons = async (queries: { q: string; d: number; s: number }) => {
+export const getFilteredBumons = async (queries: { q: string; d: number; s: number } = { q: '', d: 0, s: 0 }) => {
   try {
     const [bumons, doptions, soptions] = await Promise.all([
       selectFilteredBumons(queries),

@@ -51,12 +51,7 @@ export const EqptMasterTable = ({
   /* 情報が変わったときに更新される */
   const refetchEqpts = async () => {
     setIsLoading(true);
-    const updated = await getFilteredEqpts({
-      q: '',
-      b: 0,
-      d: 0,
-      s: 0,
-    });
+    const updated = await getFilteredEqpts();
     setTheEqpts(updated?.data);
     setIsLoading(false);
   };

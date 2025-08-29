@@ -31,7 +31,9 @@ export const SelectFilteredCustomers = async (query: string) => {
   const builder = supabase
     .schema(SCHEMA)
     .from('m_kokyaku')
-    .select('kokyaku_id, kokyaku_nam, adr_shozai, adr_tatemono, adr_sonota, tel, fax, mem, dsp_flg, del_flg')
+    .select(
+      'kokyaku_id, kokyaku_nam, adr_shozai, adr_tatemono, adr_sonota, tel, fax, mem, dsp_flg, del_flg, kokyaku_rank'
+    )
     .order('dsp_ord_num');
 
   // queryが存在する場合のみあいまい検索、顧客名、顧客名かな、住所、電話番号、fax番号

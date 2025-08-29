@@ -26,7 +26,9 @@ import { EqptsMasterDialogValues, EqptsMasterTableValues, nullToZero, SelectedEq
  * @param query 検索キーワード
  * @returns {Promise<EqptsMasterTableValues[]>} 機材マスタテーブルに表示するデータ（ 検索キーワードが空の場合は全て ）
  */
-export const getFilteredEqpts = async (queries: { q: string; b: number; d: number; s: number }) => {
+export const getFilteredEqpts = async (
+  queries: { q: string; b: number; d: number; s: number } = { q: '', b: 0, d: 0, s: 0 }
+) => {
   try {
     const [kizai, doptions, soptions, boption] = await Promise.all([
       selectFilteredEqpts(queries),

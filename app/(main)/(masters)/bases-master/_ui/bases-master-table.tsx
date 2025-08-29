@@ -53,7 +53,7 @@ export const BasesMasterTable = ({
   /* 情報が変わったときに更新される */
   const refetchBases = async () => {
     setIsLoading(true);
-    const updated = await getFilteredBases('');
+    const updated = await getFilteredBases();
     setTheBases(updated);
     setIsLoading(false);
   };

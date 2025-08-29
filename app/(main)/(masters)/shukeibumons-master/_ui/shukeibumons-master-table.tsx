@@ -52,7 +52,7 @@ export const ShukeibumonsMasterTable = ({
   /* 情報が変わったときに更新される */
   const refetchShukeibumons = async () => {
     setIsLoading(true);
-    const updated = await getFilteredShukeibumons('');
+    const updated = await getFilteredShukeibumons();
     setTheShukeibumons(updated);
     setIsLoading(false);
   };
