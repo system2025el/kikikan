@@ -18,7 +18,7 @@ import { NEW_MASTER_ID } from '../../_lib/constants';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { emptyCustomer, formItems } from '../_lib/datas';
-import { addNewCustomer, getOneCustomer, updateCustomer } from '../_lib/funcs';
+import { addNewCustomer, getChosenCustomer, updateCustomer } from '../_lib/funcs';
 import { CustomersMasterDialogValues, CustomersMaterDialogSchema } from '../_lib/types';
 
 /**
@@ -137,7 +137,7 @@ export const CustomersMasterDialog = ({
         setIsLoading(false);
         setIsNew(true);
       } else {
-        const customer1 = await getOneCustomer(customerId);
+        const customer1 = await getChosenCustomer(customerId);
         if (customer1) {
           reset(customer1); // 取得したデータでフォーム初期化
         }

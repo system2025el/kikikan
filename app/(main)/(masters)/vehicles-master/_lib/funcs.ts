@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 
 import pool from '@/app/_lib/db/postgres';
-import { supabase } from '@/app/_lib/db/supabase';
+import { SCHEMA, supabase } from '@/app/_lib/db/supabase';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { emptyVeh } from './datas';
@@ -17,7 +17,7 @@ import { VehsMasterDialogValues, VehsMasterTableValues } from './types';
 export const getFilteredVehs = async (query: string) => {
   try {
     const { data, error } = await supabase
-      .schema('dev2')
+      .schema(SCHEMA)
       .from('m_sharyo')
       .select('sharyo_id, sharyo_nam, mem, dsp_flg, del_flg') // テーブルに表示するカラム
       .order('dsp_ord_num'); // 並び順
@@ -52,10 +52,10 @@ export const getFilteredVehs = async (query: string) => {
  * @param id 車両マスタID
  * @returns {Promise<VehsMasterDialogValues>} - 車両の詳細情報。取得失敗時は空オブジェクトを返します。
  */
-export const getOneVeh = async (id: number) => {
+export const getChosenVeh = async (id: number) => {
   try {
     const { data, error } = await supabase
-      .schema('dev2')
+      .schema(SCHEMA)
       .from('m_sharyo')
       .select('sharyo_nam, mem, del_flg, dsp_flg')
       .eq('sharyo_id', id)
@@ -149,7 +149,7 @@ export const updateVeh = async (data: VehsMasterDialogValues, id: number) => {
 
   try {
     const { error: updateError } = await supabase
-      .schema('dev2')
+      .schema(SCHEMA)
       .from('m_sharyo')
       .update({ ...theData })
       .eq('sharyo_id', id);

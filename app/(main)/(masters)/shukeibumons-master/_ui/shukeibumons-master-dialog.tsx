@@ -11,7 +11,7 @@ import { NEW_MASTER_ID } from '../../_lib/constants';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { emptyShukeibumon, formItems } from '../_lib/datas';
-import { addNewShukeibumon, getOneShukeibumon, updateShukeibumon } from '../_lib/funcs';
+import { addNewShukeibumon, getChosenShukeibumon, updateShukeibumon } from '../_lib/funcs';
 import { ShukeibumonsMasterDialogSchema, ShukeibumonsMasterDialogValues } from '../_lib/types';
 
 /**
@@ -129,7 +129,7 @@ export const ShukeibumonsMasterDialog = ({
         setIsLoading(false);
         setIsNew(true);
       } else {
-        const shukeibumon1 = await getOneShukeibumon(shukeibumonId);
+        const shukeibumon1 = await getChosenShukeibumon(shukeibumonId);
         if (shukeibumon1) {
           reset(shukeibumon1); // 取得したデータでフォーム初期化
         }
