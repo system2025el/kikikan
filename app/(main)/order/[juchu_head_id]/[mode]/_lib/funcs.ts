@@ -1,6 +1,8 @@
 'use server';
 
 import { supabase } from '@/app/_lib/db/supabase';
+import { SelectFilteredCustomers, SelectKokyaku } from '@/app/_lib/db/tables/m-kokyaku';
+import { SelectJuchuHead } from '@/app/_lib/db/tables/t-juchu-head';
 import { toISOStringYearMonthDay } from '@/app/(main)/_lib/date-conversion';
 import { CustomersMasterTableValues } from '@/app/(main)/(masters)/customers-master/_lib/types';
 
@@ -13,70 +15,41 @@ import { CustomersDialogValues, EqTableValues, LockValues, OrderValues } from '.
  */
 export const GetOrder = async (juchuHeadId: number) => {
   try {
-    const { data: juchuData, error: juchuError } = await supabase
-      .schema('dev2')
-      .from('t_juchu_head')
-      .select(
-        'juchu_head_id, del_flg, juchu_sts, juchu_dat, juchu_str_dat, juchu_end_dat, nyuryoku_user, koen_nam, koenbasho_nam, kokyaku_id, kokyaku_tanto_nam, mem, nebiki_amt, zei_kbn'
-      )
-      .eq('juchu_head_id', juchuHeadId)
-      .single();
-    if (juchuError) {
-      console.error('GetOrder juchu error : ', juchuError);
-      return null;
+    const juchuData = await SelectJuchuHead(juchuHeadId);
+
+    if (juchuData.error || !juchuData.data) {
+      console.error('GetOrder juchu error : ', juchuData.error);
+      throw new Error('受注ヘッダーが存在しません');
     }
 
-    if (juchuData.kokyaku_id) {
-      const { data: kokyakuData, error: kokyakuError } = await supabase
-        .schema('dev2')
-        .from('m_kokyaku')
-        .select('kokyaku_nam, kokyaku_rank')
-        .eq('kokyaku_id', juchuData.kokyaku_id)
-        .single();
-      if (kokyakuError) {
-        console.error('GetOrder kokyaku error : ', kokyakuError);
-        return null;
-      }
-      const order: OrderValues = {
-        juchuHeadId: juchuData.juchu_head_id,
-        delFlg: juchuData.del_flg,
-        juchuSts: juchuData.juchu_sts,
-        juchuDat: juchuData.juchu_dat,
-        juchuRange: juchuData.juchu_str_dat !== null ? [juchuData.juchu_str_dat, juchuData.juchu_end_dat] : null,
-        nyuryokuUser: juchuData.nyuryoku_user,
-        koenNam: juchuData.koen_nam,
-        koenbashoNam: juchuData.koenbasho_nam,
-        kokyaku: {
-          kokyakuId: juchuData.kokyaku_id,
-          kokyakuNam: kokyakuData.kokyaku_nam,
-          kokyakuRank: kokyakuData.kokyaku_rank,
-        },
-        kokyakuTantoNam: juchuData.kokyaku_tanto_nam,
-        mem: juchuData.mem,
-        nebikiAmt: juchuData.nebiki_amt,
-        zeiKbn: juchuData.zei_kbn,
-      };
-      console.log('GetOrder order : ', order);
-      return order;
-    } else {
-      const order: OrderValues = {
-        juchuHeadId: juchuData.juchu_head_id,
-        delFlg: juchuData.del_flg,
-        juchuSts: juchuData.juchu_sts,
-        juchuDat: juchuData.juchu_dat,
-        juchuRange: juchuData.juchu_str_dat !== null ? [juchuData.juchu_str_dat, juchuData.juchu_end_dat] : null,
-        nyuryokuUser: juchuData.nyuryoku_user,
-        koenNam: juchuData.koen_nam,
-        koenbashoNam: juchuData.koenbasho_nam,
-        kokyaku: { kokyakuId: juchuData.kokyaku_id, kokyakuNam: '', kokyakuRank: 0 },
-        kokyakuTantoNam: juchuData.kokyaku_tanto_nam,
-        mem: juchuData.mem,
-        nebikiAmt: juchuData.nebiki_amt,
-        zeiKbn: juchuData.zei_kbn,
-      };
-      console.log('GetOrder No kokyakuId order : ', order);
-      return order;
+    const kokyakuData = await SelectKokyaku(juchuData.data.kokyaku_id);
+
+    if (kokyakuData.error || !kokyakuData.data) {
+      console.error('GetOrder kokyaku error : ', kokyakuData.error);
+      throw new Error('顧客が存在しません');
     }
+    const order: OrderValues = {
+      juchuHeadId: juchuData.data.juchu_head_id,
+      delFlg: juchuData.data.del_flg,
+      juchuSts: juchuData.data.juchu_sts,
+      juchuDat: juchuData.data.juchu_dat,
+      juchuRange:
+        juchuData.data.juchu_str_dat !== null ? [juchuData.data.juchu_str_dat, juchuData.data.juchu_end_dat] : null,
+      nyuryokuUser: juchuData.data.nyuryoku_user,
+      koenNam: juchuData.data.koen_nam,
+      koenbashoNam: juchuData.data.koenbasho_nam,
+      kokyaku: {
+        kokyakuId: juchuData.data.kokyaku_id,
+        kokyakuNam: kokyakuData.data.kokyaku_nam,
+        kokyakuRank: kokyakuData.data.kokyaku_rank,
+      },
+      kokyakuTantoNam: juchuData.data.kokyaku_tanto_nam,
+      mem: juchuData.data.mem,
+      nebikiAmt: juchuData.data.nebiki_amt,
+      zeiKbn: juchuData.data.zei_kbn,
+    };
+    console.log('GetOrder order : ', order);
+    return order;
   } catch (e) {
     console.log(e);
   }
@@ -342,22 +315,13 @@ export const GetEqHeaderList = async (juchuHeadId: number) => {
 };
 
 /**
- * 公演場所マスタテーブルのデータを取得する関数
+ * 顧客マスタテーブルのデータを取得する関数
  * @param query 検索キーワード
  * @returns {Promise<CustomersDialogValues[]>} 公演場所マスタテーブルに表示するデータ（ 検索キーワードが空の場合は全て ）
  */
 export const GetFilteredCustomers = async (query: string) => {
   try {
-    const { data, error } = await supabase
-      .schema('dev2')
-      .from('m_kokyaku')
-      .select('kokyaku_id, kokyaku_nam, kokyaku_rank, adr_shozai, adr_tatemono, adr_sonota, tel,  fax, mem, dsp_flg') // テーブルに表示するカラム
-      // あいまい検索、場所名、場所名かな、住所、電話番号、fax番号
-      .or(
-        `kokyaku_nam.ilike.%${query}%, kana.ilike.%${query}%, adr_shozai.ilike.%${query}%, adr_tatemono.ilike.%${query}%, adr_sonota.ilike.%${query}%, tel.ilike.%${query}%, fax.ilike.%${query}%`
-      )
-      .neq('del_flg', 1) // 削除フラグが立っていない
-      .order('dsp_ord_num'); // 並び順
+    const { data, error } = await SelectFilteredCustomers(query);
     if (!error) {
       console.log('I got a datalist from db', data.length);
       if (!data || data.length === 0) {
