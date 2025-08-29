@@ -109,7 +109,7 @@ export const OrderTable = ({
           <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
             <Table stickyHeader size="small" padding="none">
               <TableHead>
-                <TableRow>
+                <TableRow sx={{ whiteSpace: 'nowrap' }}>
                   <TableCell></TableCell>
                   <TableCell padding="none"></TableCell>
                   <TableCell align="right">受注番号</TableCell>
@@ -121,7 +121,9 @@ export const OrderTable = ({
                   <TableCell align="left">受注開始日</TableCell>
                   <TableCell align="left">受注終了日</TableCell>
                   <TableCell align="left">
-                    <Typography noWrap>入出庫ステータス</Typography>
+                    <Typography noWrap variant={'body2'} fontWeight={500}>
+                      入出庫ステータス
+                    </Typography>
                   </TableCell>
                 </TableRow>
               </TableHead>
@@ -142,10 +144,13 @@ export const OrderTable = ({
                       {order.ordNum}
                     </TableCell>
                     <TableCell align="right">
-                      <Button variant="text" href={`/order/${order.juchuHeadId}/${'view'}`}>
-                        <Box minWidth={60} maxWidth={60}>
-                          {order.juchuHeadId}
-                        </Box>
+                      <Button
+                        variant="text"
+                        size="small"
+                        sx={{ py: 0.2, px: 0, m: 0, minWidth: 0 }}
+                        href={`/order/${order.juchuHeadId}/${'view'}`}
+                      >
+                        <Box minWidth={60}>{order.juchuHeadId}</Box>
                       </Button>
                     </TableCell>
                     <TableCell>

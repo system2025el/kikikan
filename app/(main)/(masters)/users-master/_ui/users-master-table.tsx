@@ -111,22 +111,20 @@ export const UserssMasterTable = ({
       </Grid2>
       {isLoading ? (
         <Loading />
+      ) : !theUsers || theUsers!.length === 0 ? (
+        <Typography>該当するデータがありません</Typography>
       ) : (
-        <>
-          {theUsers!.length < 1 && <Typography>該当するデータがありません</Typography>}
-          {theUsers!.length > 0 && (
-            <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
-              <MasterTable
-                headers={mMHeader}
-                datas={theUsers!.map((l) => ({ ...l, id: l.tantouId, name: l.tantouNam }))}
-                page={page}
-                rowsPerPage={rowsPerPage}
-                handleOpenDialog={handleOpenDialog}
-              />
-            </TableContainer>
-          )}
-        </>
+        <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
+          <MasterTable
+            headers={mMHeader}
+            datas={theUsers!.map((l) => ({ ...l, id: l.tantouId, name: l.tantouNam }))}
+            page={page}
+            rowsPerPage={rowsPerPage}
+            handleOpenDialog={handleOpenDialog}
+          />
+        </TableContainer>
       )}
+
       <Dialog open={dialogOpen} fullScreen>
         <UsersMasterDialog userId={openId} handleClose={handleCloseDialog} refetchUsers={refetchUsers} />
       </Dialog>

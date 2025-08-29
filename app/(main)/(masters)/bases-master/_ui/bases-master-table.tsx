@@ -95,21 +95,18 @@ export const BasesMasterTable = ({
         </Grid2>
         {isLoading ? (
           <Loading />
+        ) : !theBases || theBases!.length === 0 ? (
+          <Typography>該当するデータがありません</Typography>
         ) : (
-          <>
-            {theBases!.length < 1 && <Typography>該当するデータがありません</Typography>}
-            {theBases!.length > 0 && (
-              <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
-                <MasterTable
-                  headers={bMHeader}
-                  datas={theBases!.map((l) => ({ id: l.shozokuId!, name: l.shozokuNam, ...l }))}
-                  handleOpenDialog={handleOpenDialog}
-                  page={page}
-                  rowsPerPage={rowsPerPage}
-                />
-              </TableContainer>
-            )}
-          </>
+          <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
+            <MasterTable
+              headers={bMHeader}
+              datas={theBases!.map((l) => ({ id: l.shozokuId!, name: l.shozokuNam, ...l }))}
+              handleOpenDialog={handleOpenDialog}
+              page={page}
+              rowsPerPage={rowsPerPage}
+            />
+          </TableContainer>
         )}
         <Dialog open={dialogOpen} fullScreen>
           <BasesMasterDialog handleClose={handleCloseDialog} baseId={openId} refetchBases={refetchBases} />

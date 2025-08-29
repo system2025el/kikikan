@@ -110,58 +110,55 @@ export const CustomerSelectionDialog = (props: {
         </Stack>
         {isLoading ? (
           <Loading />
+        ) : !list || list!.length === 0 ? (
+          <Typography>該当するデータがありません</Typography>
         ) : (
-          <>
-            {list!.length < 1 && <Typography>該当するデータがありません</Typography>}
-            {list!.length > 0 && (
-              <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 1 }}>
-                <Table stickyHeader padding="none">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>場所</TableCell>
-                      <TableCell>住所</TableCell>
-                      <TableCell>TEL</TableCell>
-                      <TableCell>FAX</TableCell>
-                      <TableCell>メモ</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {list!.map((customer) => (
-                      <TableRow key={customer.kokyakuId}>
-                        <TableCell>
-                          <Button
-                            variant="text"
-                            onClick={() =>
-                              handleCustSelect({
-                                kokyakuId: customer.kokyakuId,
-                                kokyakuNam: customer.kokyakuNam,
-                                kokyakuRank: customer.kokyakuRank,
-                              })
-                            }
-                          >
-                            {customer.kokyakuNam}
-                          </Button>
-                        </TableCell>
-                        <TableCell>
-                          {customer.adrShozai} {customer.adrTatemono}
-                        </TableCell>
-                        <TableCell>{customer.tel}</TableCell>
-                        <TableCell>{customer.fax}</TableCell>
-                        <TableCell sx={{ maxWidth: 20 }}>
-                          <Typography noWrap>{customer.mem}</Typography>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                    {emptyRows > 0 && (
-                      <TableRow style={{ height: 30 * emptyRows }}>
-                        <TableCell colSpan={8} />
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            )}
-          </>
+          <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 1 }}>
+            <Table stickyHeader padding="none">
+              <TableHead>
+                <TableRow>
+                  <TableCell>場所</TableCell>
+                  <TableCell>住所</TableCell>
+                  <TableCell>TEL</TableCell>
+                  <TableCell>FAX</TableCell>
+                  <TableCell>メモ</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {list!.map((customer) => (
+                  <TableRow key={customer.kokyakuId}>
+                    <TableCell>
+                      <Button
+                        variant="text"
+                        onClick={() =>
+                          handleCustSelect({
+                            kokyakuId: customer.kokyakuId,
+                            kokyakuNam: customer.kokyakuNam,
+                            kokyakuRank: customer.kokyakuRank,
+                          })
+                        }
+                      >
+                        {customer.kokyakuNam}
+                      </Button>
+                    </TableCell>
+                    <TableCell>
+                      {customer.adrShozai} {customer.adrTatemono}
+                    </TableCell>
+                    <TableCell>{customer.tel}</TableCell>
+                    <TableCell>{customer.fax}</TableCell>
+                    <TableCell sx={{ maxWidth: 20 }}>
+                      <Typography noWrap>{customer.mem}</Typography>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {emptyRows > 0 && (
+                  <TableRow style={{ height: 30 * emptyRows }}>
+                    <TableCell colSpan={8} />
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
         )}
       </Container>
     </>

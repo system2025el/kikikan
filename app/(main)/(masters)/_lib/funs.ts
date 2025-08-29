@@ -2,6 +2,7 @@
 
 import pool from '@/app/_lib/db/postgres';
 import { supabase } from '@/app/_lib/db/supabase';
+import { selectActiveDaibumons } from '@/app/_lib/db/tables/m-daibumon';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 
 /**
@@ -10,26 +11,20 @@ import { SelectTypes } from '@/app/(main)/_ui/form-box';
  */
 export const getDaibumonsSelection = async () => {
   try {
-    const { data, error } = await supabase
-      .schema('dev2')
-      .from('m_dai_bumon')
-      .select('dai_bumon_id, dai_bumon_nam')
-      .neq('del_flg', 1);
-    if (!error) {
-      if (!data || data.length === 0) {
-        return [];
-      } else {
-        const selectElements: SelectTypes[] = data.map((d) => ({
-          id: d.dai_bumon_id,
-          label: d.dai_bumon_nam,
-        }));
-        console.log('大部門が', selectElements.length, '件');
-        return selectElements;
+    const { data, error } = await selectActiveDaibumons();
+    if (error || !data || data.length === 0) {
+      if (error) {
+        console.error('DB情報取得エラー', error.message, error.cause, error.hint);
       }
-    } else {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
       return [];
     }
+    // 選択肢の型に成型する
+    const selectElements: SelectTypes[] = data.map((d) => ({
+      id: d.dai_bumon_id,
+      label: d.dai_bumon_nam,
+    }));
+    console.log('大部門が', selectElements.length, '件');
+    return selectElements;
   } catch (e) {
     console.error('例外が発生しました:', e);
     throw e;

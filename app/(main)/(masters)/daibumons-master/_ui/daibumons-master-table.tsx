@@ -94,21 +94,18 @@ export const DaibumonsMasterTable = ({
         </Grid2>
         {isLoading ? (
           <Loading />
+        ) : !theDaibumons || theDaibumons!.length === 0 ? (
+          <Typography>該当するデータがありません</Typography>
         ) : (
-          <>
-            {theDaibumons!.length < 1 && <Typography>該当するデータがありません</Typography>}
-            {theDaibumons!.length > 0 && (
-              <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
-                <MasterTable
-                  headers={daibumonMHeader}
-                  datas={theDaibumons!.map((l) => ({ id: l.daibumonId!, name: l.daibumonNam, ...l }))}
-                  handleOpenDialog={handleOpenDialog}
-                  page={page}
-                  rowsPerPage={rowsPerPage}
-                />
-              </TableContainer>
-            )}
-          </>
+          <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
+            <MasterTable
+              headers={daibumonMHeader}
+              datas={theDaibumons!.map((l) => ({ id: l.daibumonId!, name: l.daibumonNam, ...l }))}
+              handleOpenDialog={handleOpenDialog}
+              page={page}
+              rowsPerPage={rowsPerPage}
+            />
+          </TableContainer>
         )}
         <Dialog open={dialogOpen} fullScreen>
           <DaibumonsMasterDialog

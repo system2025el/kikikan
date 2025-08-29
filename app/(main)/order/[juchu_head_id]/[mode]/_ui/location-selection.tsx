@@ -116,45 +116,42 @@ export const LocationSelectDialog = (props: {
         </Stack>
         {isLoading ? (
           <Loading />
+        ) : !list || list!.length === 0 ? (
+          <Typography>該当するデータがありません</Typography>
         ) : (
-          <>
-            {list!.length < 1 && <Typography>該当するデータがありません</Typography>}
-            {list!.length > 0 && (
-              <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 1 }}>
-                <Table stickyHeader padding="none">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>場所</TableCell>
-                      <TableCell>住所</TableCell>
-                      <TableCell>TEL</TableCell>
-                      <TableCell>FAX</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {list!.map((location) => (
-                      <TableRow key={location.locId}>
-                        <TableCell>
-                          <Button variant="text" onClick={() => handleLocSelect(location.locNam)}>
-                            {location.locNam}
-                          </Button>
-                        </TableCell>
-                        <TableCell>
-                          {location.adrShozai} {location.adrTatemono} {location.adrSonota}
-                        </TableCell>
-                        <TableCell>{location.tel}</TableCell>
-                        <TableCell>{location.fax}</TableCell>
-                      </TableRow>
-                    ))}
-                    {emptyRows > 0 && (
-                      <TableRow style={{ height: 30 * emptyRows }}>
-                        <TableCell colSpan={8} />
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            )}
-          </>
+          <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 1 }}>
+            <Table stickyHeader padding="none">
+              <TableHead>
+                <TableRow>
+                  <TableCell>場所</TableCell>
+                  <TableCell>住所</TableCell>
+                  <TableCell>TEL</TableCell>
+                  <TableCell>FAX</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {list!.map((location) => (
+                  <TableRow key={location.locId}>
+                    <TableCell>
+                      <Button variant="text" onClick={() => handleLocSelect(location.locNam)}>
+                        {location.locNam}
+                      </Button>
+                    </TableCell>
+                    <TableCell>
+                      {location.adrShozai} {location.adrTatemono} {location.adrSonota}
+                    </TableCell>
+                    <TableCell>{location.tel}</TableCell>
+                    <TableCell>{location.fax}</TableCell>
+                  </TableRow>
+                ))}
+                {emptyRows > 0 && (
+                  <TableRow style={{ height: 30 * emptyRows }}>
+                    <TableCell colSpan={8} />
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
         )}
       </Container>
     </>
