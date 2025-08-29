@@ -9,7 +9,7 @@ import { NEW_MASTER_ID } from '../../_lib/constants';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { emptyVeh, formItems } from '../_lib/datas';
-import { addNewVeh, getOneVeh, updateVeh } from '../_lib/funcs';
+import { addNewVeh, getChosenVeh, updateVeh } from '../_lib/funcs';
 import { VehsMasterDialogSchema, VehsMasterDialogValues } from '../_lib/types';
 /**
  * 車両マスタの詳細ダイアログ
@@ -122,7 +122,7 @@ export const VehiclesMasterDialog = ({
         setIsLoading(false);
         setIsNew(true);
       } else {
-        const Veh1 = await getOneVeh(vehicleId);
+        const Veh1 = await getChosenVeh(vehicleId);
         if (Veh1) {
           reset(Veh1); // 取得したデータでフォーム初期化
         }

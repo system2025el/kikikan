@@ -12,7 +12,7 @@ import { NEW_MASTER_ID } from '../../_lib/constants';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { emptyUser, formItems } from '../_lib/data';
-import { addNewUser, getOneUser, updateUser } from '../_lib/funcs';
+import { addNewUser, getChosenUser, updateUser } from '../_lib/funcs';
 import { UsersMasterDialogValues, UsersMaterDialogSchema } from '../_lib/types';
 /**
  * 担当者マスタの詳細ダイアログ
@@ -125,7 +125,7 @@ export const UsersMasterDialog = ({
         setIsLoading(false);
         setIsNew(true);
       } else {
-        const user1 = await getOneUser(userId);
+        const user1 = await getChosenUser(userId);
         if (user1) {
           reset(user1); // 取得したデータでフォーム初期化
         }

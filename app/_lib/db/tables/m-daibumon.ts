@@ -12,7 +12,7 @@ import { SCHEMA, supabase } from '../supabase';
  */
 export const selectActiveDaibumons = async () => {
   try {
-    return await supabase.schema('dev2').from('m_dai_bumon').select('dai_bumon_id, dai_bumon_nam').neq('del_flg', 1);
+    return await supabase.schema(SCHEMA).from('m_dai_bumon').select('dai_bumon_id, dai_bumon_nam').neq('del_flg', 1);
   } catch (e) {
     throw e;
   }
@@ -25,7 +25,7 @@ export const selectActiveDaibumons = async () => {
  */
 export const selectFilteredDaibumons = async (query: string) => {
   const builder = supabase
-    .schema('dev2')
+    .schema(SCHEMA)
     .from('m_dai_bumon')
     .select('dai_bumon_id, dai_bumon_nam,  mem, del_flg') // テーブルに表示するカラム
     .order('dsp_ord_num'); // 並び順
@@ -49,7 +49,7 @@ export const selectFilteredDaibumons = async (query: string) => {
 export const selectOneDaibumon = async (id: number) => {
   try {
     return await supabase
-      .schema('dev2')
+      .schema(SCHEMA)
       .from('m_dai_bumon')
       .select('dai_bumon_nam, del_flg, mem')
       .eq('dai_bumon_id', id)
@@ -92,7 +92,7 @@ export const insertNewDaibumon = async (data: DaibumonsMasterDialogValues) => {
  * @param data 更新するデータ
  * @param id 更新する大部門のdai_bumon_id
  */
-export const upDateDaibumonDB = async (
+export const updateDaibumonDB = async (
   data: {
     dai_bumon_nam: string;
     del_flg: number;

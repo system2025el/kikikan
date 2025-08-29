@@ -2,11 +2,10 @@
 
 import { revalidatePath } from 'next/cache';
 
-import pool from '@/app/_lib/db/postgres';
-import { supabase } from '@/app/_lib/db/supabase';
+import { insertNewBumon, selectFilteredBumons, selectOneBumon, upDateBumonDB } from '@/app/_lib/db/tables/m-bumon';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
-import { getAllBumonDSSelections, getAllSelections } from '../../_lib/funs';
+import { getDaibumonsSelection, getShukeibumonsSelection } from '../../_lib/funs';
 import { emptyBumon } from './datas';
 import { BumonsMasterDialogValues, BumonsMasterTableValues } from './types';
 
@@ -16,48 +15,34 @@ import { BumonsMasterDialogValues, BumonsMasterTableValues } from './types';
  * @returns {Promise<bumonsMasterTableValues[]>} 部門マスタテーブルに表示するデータ（ 検索キーワードが空の場合は全て ）
  */
 export const getFilteredBumons = async (queries: { q: string; d: number; s: number }) => {
-  const builder = supabase
-    .schema('dev2')
-    .from('m_bumon')
-    .select('bumon_id, bumon_nam, mem, del_flg')
-    .order('dsp_ord_num');
-
-  if (queries.q && queries.q.trim() !== '') {
-    builder.ilike('bumon_nam', `%${queries.q}%`);
-  }
-  if (queries.d !== 0) {
-    builder.eq('dai_bumon_id', queries.d);
-  }
-  if (queries.s !== 0) {
-    builder.eq('syukei_bumon_id', queries.s);
-  }
-
   try {
-    const { data, error } = await builder;
-    const options = await getAllBumonDSSelections();
-    if (!error) {
-      console.log('I got a datalist from db', data.length);
-      if (!data || data.length === 0) {
-        return { data: [], options: options };
-      } else {
-        const filteredbumons: BumonsMasterTableValues[] = data.map((d, index) => ({
-          bumonId: d.bumon_id,
-          bumonNam: d.bumon_nam,
-          mem: d.mem,
-          tblDspId: index + 1,
-          delFlg: Boolean(d.del_flg),
-        }));
-        console.log(filteredbumons.length);
-        return { data: filteredbumons, options: options };
-      }
-    } else {
-      console.error('部門情報取得エラー。', { message: error.message, code: error.code });
+    const [bumons, doptions, soptions] = await Promise.all([
+      selectFilteredBumons(queries),
+      getDaibumonsSelection(),
+      getShukeibumonsSelection(),
+    ]);
+    const { data, error } = bumons;
+    const options = { d: doptions, s: soptions };
+    if (error) {
+      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
+      throw error;
+    }
+    if (!data || data.length === 0) {
       return { data: [], options: options };
     }
+    const filteredbumons: BumonsMasterTableValues[] = data.map((d, index) => ({
+      bumonId: d.bumon_id,
+      bumonNam: d.bumon_nam,
+      mem: d.mem,
+      tblDspId: index + 1,
+      delFlg: Boolean(d.del_flg),
+    }));
+    console.log(filteredbumons.length);
+    return { data: filteredbumons, options: options };
   } catch (e) {
     console.error('例外が発生しました:', e);
+    throw e;
   }
-  revalidatePath('/bumons-master');
 };
 
 /**
@@ -65,33 +50,27 @@ export const getFilteredBumons = async (queries: { q: string; d: number; s: numb
  * @param id 部門マスタID
  * @returns {Promise<bumonsMasterDialogValues>} - 部門の詳細情報。取得失敗時は空オブジェクトを返します。
  */
-export const getOnebumon = async (id: number) => {
+export const getChosenbumon = async (id: number) => {
   try {
-    const { data, error } = await supabase
-      .schema('dev2')
-      .from('m_bumon')
-      .select('bumon_nam, del_flg, dai_bumon_id, syukei_bumon_id, mem ')
-      .eq('bumon_id', id)
-      .single();
-    if (!error) {
-      console.log('I got a datalist from db', data.del_flg);
-
-      const bumonDetails: BumonsMasterDialogValues = {
-        bumonNam: data.bumon_nam,
-        delFlg: Boolean(data.del_flg),
-        mem: data.mem,
-        daibumonId: data.dai_bumon_id,
-        shukeibumonId: data.syukei_bumon_id,
-      };
-      console.log(bumonDetails.delFlg);
-      return bumonDetails;
-    } else {
-      console.error('部門情報取得エラー。', { message: error.message, code: error.code });
+    const { data, error } = await selectOneBumon(id);
+    if (error) {
+      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
+      throw error;
+    }
+    if (!data) {
       return emptyBumon;
     }
+    const bumonDetails: BumonsMasterDialogValues = {
+      bumonNam: data.bumon_nam,
+      delFlg: Boolean(data.del_flg),
+      mem: data.mem,
+      daibumonId: data.dai_bumon_id,
+      shukeibumonId: data.syukei_bumon_id,
+    };
+    return bumonDetails;
   } catch (e) {
     console.error('例外が発生しました:', e);
-    return emptyBumon;
+    throw e;
   }
 };
 
@@ -100,45 +79,13 @@ export const getOnebumon = async (id: number) => {
  * @param data フォームで取得した部門情報
  */
 export const addNewBumon = async (data: BumonsMasterDialogValues) => {
-  console.log(data.mem);
-
-  const query = `
-      INSERT INTO m_bumon (
-        bumon_id, bumon_nam, del_flg, dsp_ord_num,
-        dai_bumon_id, syukei_bumon_id,
-        mem, add_dat, add_user, upd_dat, upd_user
-      )
-      VALUES (
-        (SELECT coalesce(max(bumon_id),0) + 1 FROM m_bumon),
-        $1, $2,
-        (SELECT coalesce(max(dsp_ord_num),0) + 1 FROM m_bumon),
-        $3, $4, $5, $6, $7, $8, $9
-      );
-    `;
-
-  const date = toJapanTimeString();
-
   try {
-    console.log('DB Connected');
-    await pool.query(` SET search_path TO dev2;`);
-
-    await pool.query(query, [
-      data.bumonNam,
-      Number(data.delFlg),
-      data.daibumonId,
-      data.shukeibumonId,
-      data.mem,
-      date,
-      'shigasan',
-      null,
-      null,
-    ]);
-    console.log('data : ', data);
+    await insertNewBumon(data);
+    await revalidatePath('/shukeibumon-master');
   } catch (error) {
     console.log('DB接続エラー', error);
     throw error;
   }
-  await revalidatePath('/bumons-master');
 };
 
 /**
@@ -146,41 +93,23 @@ export const addNewBumon = async (data: BumonsMasterDialogValues) => {
  * @param data フォームに入力されている情報
  * @param id 更新する部門マスタID
  */
-export const updateBumon = async (data: BumonsMasterDialogValues, id: number) => {
-  console.log('Update!!!', data.mem);
-  const missingData = {
-    bumon_nam: data.bumonNam,
-    del_flg: Number(data.delFlg),
-    mem: data.mem,
-    dai_bumon_id: data.daibumonId,
-    syukei_bumon_id: data.shukeibumonId,
-  };
-  console.log(missingData.del_flg);
+export const updateBumon = async (rawData: BumonsMasterDialogValues, id: number) => {
   const date = toJapanTimeString();
-
-  const theData = {
-    ...missingData,
+  const updateDate = {
+    bumon_nam: rawData.bumonNam,
+    del_flg: Number(rawData.delFlg),
+    mem: rawData.mem,
+    dai_bumon_id: rawData.daibumonId,
+    syukei_bumon_id: rawData.shukeibumonId,
     upd_dat: date,
     upd_user: 'test_user',
   };
-  console.log(theData.bumon_nam);
 
   try {
-    const { error: updateError } = await supabase
-      .schema('dev2')
-      .from('m_bumon')
-      .update({ ...theData })
-      .eq('bumon_id', id);
-
-    if (updateError) {
-      console.error('更新に失敗しました:', updateError.message);
-      throw updateError;
-    } else {
-      console.log('部門を更新しました : ', theData.del_flg);
-    }
+    await upDateBumonDB(updateDate, id);
+    await revalidatePath('/bumon-master');
   } catch (error) {
     console.log('例外が発生しました', error);
     throw error;
   }
-  revalidatePath('/bumon-master');
 };

@@ -9,7 +9,7 @@ import { NEW_MASTER_ID } from '../../_lib/constants';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { emptyBase, formItems } from '../_lib/datas';
-import { addNewBase, getOneBase, updateBase } from '../_lib/funcs';
+import { addNewBase, getChosenBase, updateBase } from '../_lib/funcs';
 import { BasesMasterDialogSchema, BasesMasterDialogValues } from '../_lib/types';
 
 /**
@@ -128,7 +128,7 @@ export const BasesMasterDialog = ({
         setIsLoading(false);
         setIsNew(true);
       } else {
-        const base1 = await getOneBase(baseId);
+        const base1 = await getChosenBase(baseId);
         if (base1) {
           reset(base1); // 取得したデータでフォーム初期化
         }

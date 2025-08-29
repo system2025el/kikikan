@@ -1,8 +1,11 @@
 'use server';
 
 import pool from '@/app/_lib/db/postgres';
-import { supabase } from '@/app/_lib/db/supabase';
+import { SCHEMA, supabase } from '@/app/_lib/db/supabase';
+import { selectActiveBumons } from '@/app/_lib/db/tables/m-bumon';
 import { selectActiveDaibumons } from '@/app/_lib/db/tables/m-daibumon';
+import { selectActiveShozokus } from '@/app/_lib/db/tables/m-shozoku';
+import { selectActiveShukeibumons } from '@/app/_lib/db/tables/m-shukeibumon';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 
 /**
@@ -12,10 +15,11 @@ import { SelectTypes } from '@/app/(main)/_ui/form-box';
 export const getDaibumonsSelection = async () => {
   try {
     const { data, error } = await selectActiveDaibumons();
-    if (error || !data || data.length === 0) {
-      if (error) {
-        console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      }
+    if (error) {
+      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
+      throw error;
+    }
+    if (!data || data.length === 0) {
       return [];
     }
     // 選択肢の型に成型する
@@ -37,26 +41,21 @@ export const getDaibumonsSelection = async () => {
  */
 export const getShukeibumonsSelection = async () => {
   try {
-    const { data, error } = await supabase
-      .schema('dev2')
-      .from('m_shukei_bumon')
-      .select('shukei_bumon_id, shukei_bumon_nam')
-      .neq('del_flg', 1);
-    if (!error) {
-      if (!data || data.length === 0) {
-        return [];
-      } else {
-        const selectElements: SelectTypes[] = data.map((d) => ({
-          id: d.shukei_bumon_id,
-          label: d.shukei_bumon_nam,
-        }));
-        console.log('集計部門が', selectElements.length, '件');
-        return selectElements;
-      }
-    } else {
+    const { data, error } = await selectActiveShukeibumons();
+    if (error) {
       console.error('DB情報取得エラー', error.message, error.cause, error.hint);
+      throw error;
+    }
+    if (!data || data.length === 0) {
       return [];
     }
+    // 選択肢の型に成型
+    const selectElements: SelectTypes[] = data.map((d) => ({
+      id: d.shukei_bumon_id,
+      label: d.shukei_bumon_nam,
+    }));
+    console.log('集計部門が', selectElements.length, '件');
+    return selectElements;
   } catch (e) {
     console.error('例外が発生しました:', e);
     throw e;
@@ -69,27 +68,21 @@ export const getShukeibumonsSelection = async () => {
  */
 export const getBumonsSelection = async () => {
   try {
-    const { data, error } = await supabase
-      .schema('dev2')
-      .from('m_bumon')
-      .select('bumon_id, bumon_nam')
-      .neq('del_flg', 1)
-      .order('dsp_ord_num');
-    if (!error) {
-      if (!data || data.length === 0) {
-        return [];
-      } else {
-        const selectElements: SelectTypes[] = data.map((d) => ({
-          id: d.bumon_id,
-          label: d.bumon_nam,
-        }));
-        console.log('部門が', selectElements.length, '件');
-        return selectElements;
-      }
-    } else {
+    const { data, error } = await selectActiveBumons();
+    if (error) {
       console.error('DB情報取得エラー', error.message, error.cause, error.hint);
+      throw error;
+    }
+    if (!data || data.length === 0) {
       return [];
     }
+    // 選択肢の型に成型
+    const selectElements: SelectTypes[] = data.map((d) => ({
+      id: d.bumon_id,
+      label: d.bumon_nam,
+    }));
+    console.log('部門が', selectElements.length, '件');
+    return selectElements;
   } catch (e) {
     console.error('例外が発生しました:', e);
     throw e;
@@ -102,26 +95,20 @@ export const getBumonsSelection = async () => {
  */
 export const getShozokuSelection = async () => {
   try {
-    const { data, error } = await supabase
-      .schema('dev2')
-      .from('m_shozoku')
-      .select('shozoku_id, shozoku_nam')
-      .neq('del_flg', 1);
-    if (!error) {
-      if (!data || data.length === 0) {
-        return [];
-      } else {
-        const selectElements: SelectTypes[] = data.map((d) => ({
-          id: d.shozoku_id,
-          label: d.shozoku_nam,
-        }));
-        console.log('所属', selectElements.length, '件');
-        return selectElements;
-      }
-    } else {
+    const { data, error } = await selectActiveShozokus();
+    if (error) {
       console.error('DB情報取得エラー', error.message, error.cause, error.hint);
+      throw error;
+    }
+    if (!data || data.length === 0) {
       return [];
     }
+    const selectElements: SelectTypes[] = data.map((d) => ({
+      id: d.shozoku_id,
+      label: d.shozoku_nam,
+    }));
+    console.log('所属', selectElements.length, '件');
+    return selectElements;
   } catch (e) {
     console.error('例外が発生しました:', e);
     throw e;
@@ -200,7 +187,7 @@ export const getAllBumonDSSelections = async (): Promise<{
 export const getBumonsForEqptSelection = async () => {
   try {
     const { data, error } = await supabase
-      .schema('dev2')
+      .schema(SCHEMA)
       .from('m_bumon')
       .select('bumon_id, bumon_nam')
       .neq('del_flg', 1)
@@ -293,7 +280,7 @@ export const CheckSetoptions = async (idList: number[]) => {
 export const getCustomerSelection = async (): Promise<{ kokyakuId: number; kokyakuNam: string }[]> => {
   try {
     const { data, error } = await supabase
-      .schema('dev2')
+      .schema(SCHEMA)
       .from('m_kokyaku')
       .select('kokyaku_id, kokyaku_nam')
       .neq('dsp_flg', 0)

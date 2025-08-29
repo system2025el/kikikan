@@ -12,7 +12,7 @@ import { NEW_MASTER_ID } from '../../_lib/constants';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { emptyLoc, formItems } from '../_lib/datas';
-import { addNewLoc, getOneLoc, updateLoc } from '../_lib/funcs';
+import { addNewLoc, getChosenLoc, updateLoc } from '../_lib/funcs';
 import { LocsMasterDialogSchema, LocsMasterDialogValues } from '../_lib/types';
 
 /**
@@ -132,7 +132,7 @@ export const LocationsMasterDialog = ({
         setIsLoading(false);
         setIsNew(true);
       } else {
-        const loc1 = await getOneLoc(locationId);
+        const loc1 = await getChosenLoc(locationId);
         if (loc1) {
           reset(loc1); // 取得したデータでフォーム初期化
         }

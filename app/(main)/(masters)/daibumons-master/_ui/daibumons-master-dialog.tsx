@@ -12,7 +12,7 @@ import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { BumonsMasterDialogValues } from '../../bumons-master/_lib/types';
 import { emptyDaibumon, formItems } from '../_lib/datas';
-import { addNewDaibumon, getOneDaibumon, updateDaibumon } from '../_lib/funcs';
+import { addNewDaibumon, getChosenDaibumon, updateDaibumon } from '../_lib/funcs';
 import { DaibumonsMasterDialogSchema, DaibumonsMasterDialogValues } from '../_lib/types';
 
 /**
@@ -126,7 +126,7 @@ export const DaibumonsMasterDialog = ({
         setIsLoading(false);
         setIsNew(true);
       } else {
-        const daibumon1 = await getOneDaibumon(daibumonId);
+        const daibumon1 = await getChosenDaibumon(daibumonId);
         if (daibumon1) {
           reset(daibumon1); // 取得したデータでフォーム初期化
           // }

@@ -12,7 +12,7 @@ import { getAllBumonDSSelections } from '../../_lib/funs';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { emptyBumon, formItems } from '../_lib/datas';
-import { addNewBumon, getOnebumon, updateBumon } from '../_lib/funcs';
+import { addNewBumon, getChosenbumon, updateBumon } from '../_lib/funcs';
 import { BumonsMasterDialogSchema, BumonsMasterDialogValues } from '../_lib/types';
 
 /**
@@ -138,7 +138,7 @@ export const BumonsMasterDialog = ({
         setIsLoading(false);
         setIsNew(true);
       } else {
-        const bumon1 = await getOnebumon(bumonId);
+        const bumon1 = await getChosenbumon(bumonId);
         if (bumon1) {
           reset(bumon1); // 取得したデータでフォーム初期化
         }

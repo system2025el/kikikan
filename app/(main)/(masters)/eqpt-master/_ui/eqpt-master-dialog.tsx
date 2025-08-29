@@ -18,7 +18,7 @@ import { getAllSelections } from '../../_lib/funs';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { emptyEqpt, formItems } from '../_lib/datas';
-import { addNewEqpt, createEqptHistory, getOneEqpt, updateEqpt } from '../_lib/funcs';
+import { addNewEqpt, createEqptHistory, getChosenEqpt, updateEqpt } from '../_lib/funcs';
 import { EqptsMasterDialogSchema, EqptsMasterDialogValues } from '../_lib/types';
 
 export const EqMasterDialog = ({
@@ -147,7 +147,7 @@ export const EqMasterDialog = ({
         setIsLoading(false);
         setIsNew(true);
       } else {
-        const eqpt1 = await getOneEqpt(eqptId);
+        const eqpt1 = await getChosenEqpt(eqptId);
         if (eqpt1) {
           setKizaiQty(eqpt1.qty!);
           setCurrentEqpt(eqpt1.data);
