@@ -95,25 +95,22 @@ export const ShukeibumonsMasterTable = ({
         </Grid2>
         {isLoading ? (
           <Loading />
+        ) : !theShukeibumons || theShukeibumons!.length === 0 ? (
+          <Typography>該当するデータがありません</Typography>
         ) : (
-          <>
-            {theShukeibumons!.length < 1 && <Typography>該当するデータがありません</Typography>}
-            {theShukeibumons!.length > 0 && (
-              <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
-                <MasterTable
-                  headers={shukeibumonMHeader}
-                  datas={theShukeibumons!.map((l) => ({
-                    id: l.shukeibumonId!,
-                    name: l.shukeibumonNam,
-                    ...l,
-                  }))}
-                  handleOpenDialog={handleOpenDialog}
-                  page={page}
-                  rowsPerPage={rowsPerPage}
-                />
-              </TableContainer>
-            )}
-          </>
+          <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
+            <MasterTable
+              headers={shukeibumonMHeader}
+              datas={theShukeibumons!.map((l) => ({
+                id: l.shukeibumonId!,
+                name: l.shukeibumonNam,
+                ...l,
+              }))}
+              handleOpenDialog={handleOpenDialog}
+              page={page}
+              rowsPerPage={rowsPerPage}
+            />
+          </TableContainer>
         )}
         <Dialog open={dialogOpen} fullScreen>
           <ShukeibumonsMasterDialog

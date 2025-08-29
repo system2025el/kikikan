@@ -101,21 +101,18 @@ export const BumonsMasterTable = ({
         </Grid2>
         {isLoading ? (
           <Loading />
+        ) : !theBumons || theBumons!.length === 0 ? (
+          <Typography>該当するデータがありません</Typography>
         ) : (
-          <>
-            {theBumons!.length < 1 && <Typography>該当するデータがありません</Typography>}
-            {theBumons!.length > 0 && (
-              <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
-                <MasterTable
-                  headers={BumonsMHeader}
-                  datas={theBumons!.map((l) => ({ id: l.bumonId!, name: l.bumonNam, ...l }))}
-                  handleOpenDialog={handleOpenDialog}
-                  page={page}
-                  rowsPerPage={rowsPerPage}
-                />
-              </TableContainer>
-            )}
-          </>
+          <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
+            <MasterTable
+              headers={BumonsMHeader}
+              datas={theBumons!.map((l) => ({ id: l.bumonId!, name: l.bumonNam, ...l }))}
+              handleOpenDialog={handleOpenDialog}
+              page={page}
+              rowsPerPage={rowsPerPage}
+            />
+          </TableContainer>
         )}
         <Dialog open={dialogOpen} fullScreen>
           <BumonsMasterDialog handleClose={handleCloseDialog} bumonId={openId} refetchBumons={refetchBumons} />

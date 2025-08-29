@@ -94,26 +94,23 @@ export const CustomersMasterTable = ({
       </Grid2>
       {isLoading ? (
         <Loading />
+      ) : !theCustomers || theCustomers!.length === 0 ? (
+        <Typography>該当するデータがありません</Typography>
       ) : (
-        <>
-          {theCustomers!.length < 1 && <Typography>該当するデータがありません</Typography>}
-          {theCustomers!.length > 0 && (
-            <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
-              <MasterTable
-                headers={cMHeader}
-                datas={theCustomers!.map((l) => ({
-                  ...l,
-                  id: l.kokyakuId,
-                  name: l.kokyakuNam,
-                  address: [l.adrShozai, l.adrTatemono, l.adrSonota].filter(Boolean).join(' '),
-                }))}
-                page={page}
-                rowsPerPage={rowsPerPage}
-                handleOpenDialog={handleOpenDialog}
-              />
-            </TableContainer>
-          )}
-        </>
+        <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
+          <MasterTable
+            headers={cMHeader}
+            datas={theCustomers!.map((l) => ({
+              ...l,
+              id: l.kokyakuId,
+              name: l.kokyakuNam,
+              address: [l.adrShozai, l.adrTatemono, l.adrSonota].filter(Boolean).join(' '),
+            }))}
+            page={page}
+            rowsPerPage={rowsPerPage}
+            handleOpenDialog={handleOpenDialog}
+          />
+        </TableContainer>
       )}
       <Dialog open={dialogOpen} fullScreen>
         <CustomersMasterDialog

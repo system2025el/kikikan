@@ -94,21 +94,18 @@ export const VehiclesMasterTable = ({
       </Grid2>
       {isLoading ? (
         <Loading />
+      ) : !theVehs || theVehs!.length === 0 ? (
+        <Typography>該当するデータがありません</Typography>
       ) : (
-        <>
-          {theVehs!.length < 1 && <Typography>該当するデータがありません</Typography>}
-          {theVehs!.length > 0 && (
-            <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
-              <MasterTable
-                headers={vMHeader}
-                datas={theVehs!.map((l) => ({ id: l.sharyoId, name: l.sharyoNam, ...l }))}
-                handleOpenDialog={handleOpenDialog}
-                page={page}
-                rowsPerPage={rowsPerPage}
-              />
-            </TableContainer>
-          )}
-        </>
+        <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
+          <MasterTable
+            headers={vMHeader}
+            datas={theVehs!.map((l) => ({ id: l.sharyoId, name: l.sharyoNam, ...l }))}
+            handleOpenDialog={handleOpenDialog}
+            page={page}
+            rowsPerPage={rowsPerPage}
+          />
+        </TableContainer>
       )}
       <Dialog open={dialogOpen} fullScreen>
         <VehiclesMasterDialog handleClose={handleCloseDialog} vehicleId={openId} refetchVehs={refetchVehs} />
