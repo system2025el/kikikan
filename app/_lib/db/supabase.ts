@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 
-import { Database } from './types';
+import { Database } from './types/types';
 /**
  * https://supabase.com/docs/guides/api/using-custom-schemas
  * ----------------------------Supabaseで行い済み

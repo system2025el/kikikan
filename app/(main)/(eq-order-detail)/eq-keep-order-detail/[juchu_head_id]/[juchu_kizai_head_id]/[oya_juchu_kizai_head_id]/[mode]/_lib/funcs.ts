@@ -11,7 +11,7 @@ import {
   UpdateKeepJuchuKizaiMeisai,
 } from '@/app/_lib/db/tables/t-juchu-kizai-meisai';
 import { SelectKeepJuchuKizaiMeisai } from '@/app/_lib/db/tables/v-juchu-kizai-meisai';
-import { Database } from '@/app/_lib/db/types';
+import { Database } from '@/app/_lib/db/types/types';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { GetJuchuKizaiNyushuko } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 
