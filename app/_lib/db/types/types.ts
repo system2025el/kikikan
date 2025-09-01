@@ -2506,6 +2506,307 @@ export type Database = {
       [_ in never]: never;
     };
   };
+  dev5: {
+    Tables: {
+      m_bumon: {
+        Row: {
+          add_dat: string | null;
+          add_user: string | null;
+          bumon_id: number;
+          bumon_nam: string;
+          dai_bumon_id: number | null;
+          del_flg: number | null;
+          dsp_ord_num: number | null;
+          mem: string | null;
+          shukei_bumon_id: number | null;
+          upd_dat: string | null;
+          upd_user: string | null;
+        };
+        Insert: {
+          add_dat?: string | null;
+          add_user?: string | null;
+          bumon_id: number;
+          bumon_nam: string;
+          dai_bumon_id?: number | null;
+          del_flg?: number | null;
+          dsp_ord_num?: number | null;
+          mem?: string | null;
+          shukei_bumon_id?: number | null;
+          upd_dat?: string | null;
+          upd_user?: string | null;
+        };
+        Update: {
+          add_dat?: string | null;
+          add_user?: string | null;
+          bumon_id?: number;
+          bumon_nam?: string;
+          dai_bumon_id?: number | null;
+          del_flg?: number | null;
+          dsp_ord_num?: number | null;
+          mem?: string | null;
+          shukei_bumon_id?: number | null;
+          upd_dat?: string | null;
+          upd_user?: string | null;
+        };
+        Relationships: [];
+      };
+      m_dai_bumon: {
+        Row: {
+          add_dat: string | null;
+          add_user: string | null;
+          dai_bumon_id: number;
+          dai_bumon_nam: string;
+          del_flg: number | null;
+          dsp_ord_num: number | null;
+          mem: string | null;
+          upd_dat: string | null;
+          upd_user: string | null;
+        };
+        Insert: {
+          add_dat?: string | null;
+          add_user?: string | null;
+          dai_bumon_id: number;
+          dai_bumon_nam: string;
+          del_flg?: number | null;
+          dsp_ord_num?: number | null;
+          mem?: string | null;
+          upd_dat?: string | null;
+          upd_user?: string | null;
+        };
+        Update: {
+          add_dat?: string | null;
+          add_user?: string | null;
+          dai_bumon_id?: number;
+          dai_bumon_nam?: string;
+          del_flg?: number | null;
+          dsp_ord_num?: number | null;
+          mem?: string | null;
+          upd_dat?: string | null;
+          upd_user?: string | null;
+        };
+        Relationships: [];
+      };
+      m_kizai: {
+        Row: {
+          add_dat: string | null;
+          add_user: string | null;
+          bld_cod: string | null;
+          bumon_id: number | null;
+          ctn_flg: number | null;
+          dai_bumon_id: number | null;
+          def_dat_qty: number | null;
+          del_flg: number | null;
+          dsp_flg: number | null;
+          dsp_ord_num: number | null;
+          eda_cod: string | null;
+          el_num: number | null;
+          kizai_grp_cod: string | null;
+          kizai_id: number;
+          kizai_nam: string;
+          mem: string | null;
+          rank_amt_1: number | null;
+          rank_amt_2: number | null;
+          rank_amt_3: number | null;
+          rank_amt_4: number | null;
+          rank_amt_5: number | null;
+          reg_amt: number | null;
+          section_num: number | null;
+          shozoku_id: number;
+          shukei_bumon_id: number | null;
+          tana_cod: string | null;
+          upd_dat: string | null;
+          upd_user: string | null;
+        };
+        Insert: {
+          add_dat?: string | null;
+          add_user?: string | null;
+          bld_cod?: string | null;
+          bumon_id?: number | null;
+          ctn_flg?: number | null;
+          dai_bumon_id?: number | null;
+          def_dat_qty?: number | null;
+          del_flg?: number | null;
+          dsp_flg?: number | null;
+          dsp_ord_num?: number | null;
+          eda_cod?: string | null;
+          el_num?: number | null;
+          kizai_grp_cod?: string | null;
+          kizai_id: number;
+          kizai_nam: string;
+          mem?: string | null;
+          rank_amt_1?: number | null;
+          rank_amt_2?: number | null;
+          rank_amt_3?: number | null;
+          rank_amt_4?: number | null;
+          rank_amt_5?: number | null;
+          reg_amt?: number | null;
+          section_num?: number | null;
+          shozoku_id: number;
+          shukei_bumon_id?: number | null;
+          tana_cod?: string | null;
+          upd_dat?: string | null;
+          upd_user?: string | null;
+        };
+        Update: {
+          add_dat?: string | null;
+          add_user?: string | null;
+          bld_cod?: string | null;
+          bumon_id?: number | null;
+          ctn_flg?: number | null;
+          dai_bumon_id?: number | null;
+          def_dat_qty?: number | null;
+          del_flg?: number | null;
+          dsp_flg?: number | null;
+          dsp_ord_num?: number | null;
+          eda_cod?: string | null;
+          el_num?: number | null;
+          kizai_grp_cod?: string | null;
+          kizai_id?: number;
+          kizai_nam?: string;
+          mem?: string | null;
+          rank_amt_1?: number | null;
+          rank_amt_2?: number | null;
+          rank_amt_3?: number | null;
+          rank_amt_4?: number | null;
+          rank_amt_5?: number | null;
+          reg_amt?: number | null;
+          section_num?: number | null;
+          shozoku_id?: number;
+          shukei_bumon_id?: number | null;
+          tana_cod?: string | null;
+          upd_dat?: string | null;
+          upd_user?: string | null;
+        };
+        Relationships: [];
+      };
+      m_rfid: {
+        Row: {
+          add_dat: string | null;
+          add_user: string | null;
+          del_flg: number | null;
+          kizai_id: number;
+          mem: string | null;
+          rfid_kizai_sts: number | null;
+          rfid_tag_id: string;
+          shozoku_id: number | null;
+          upd_dat: string | null;
+          upd_user: string | null;
+        };
+        Insert: {
+          add_dat?: string | null;
+          add_user?: string | null;
+          del_flg?: number | null;
+          kizai_id: number;
+          mem?: string | null;
+          rfid_kizai_sts?: number | null;
+          rfid_tag_id: string;
+          shozoku_id?: number | null;
+          upd_dat?: string | null;
+          upd_user?: string | null;
+        };
+        Update: {
+          add_dat?: string | null;
+          add_user?: string | null;
+          del_flg?: number | null;
+          kizai_id?: number;
+          mem?: string | null;
+          rfid_kizai_sts?: number | null;
+          rfid_tag_id?: string;
+          shozoku_id?: number | null;
+          upd_dat?: string | null;
+          upd_user?: string | null;
+        };
+        Relationships: [];
+      };
+      m_shukei_bumon: {
+        Row: {
+          add_dat: string | null;
+          add_user: string | null;
+          del_flg: number | null;
+          dsp_ord_num: number | null;
+          mem: string | null;
+          shukei_bumon_id: number;
+          shukei_bumon_nam: string;
+          upd_dat: string | null;
+          upd_user: string | null;
+        };
+        Insert: {
+          add_dat?: string | null;
+          add_user?: string | null;
+          del_flg?: number | null;
+          dsp_ord_num?: number | null;
+          mem?: string | null;
+          shukei_bumon_id: number;
+          shukei_bumon_nam: string;
+          upd_dat?: string | null;
+          upd_user?: string | null;
+        };
+        Update: {
+          add_dat?: string | null;
+          add_user?: string | null;
+          del_flg?: number | null;
+          dsp_ord_num?: number | null;
+          mem?: string | null;
+          shukei_bumon_id?: number;
+          shukei_bumon_nam?: string;
+          upd_dat?: string | null;
+          upd_user?: string | null;
+        };
+        Relationships: [];
+      };
+      m_tanaban: {
+        Row: {
+          add_dat: string | null;
+          add_user: string | null;
+          bld_cod: string;
+          del_flg: number | null;
+          dsp_ord_num: number | null;
+          eda_cod: string;
+          mem: string | null;
+          tana_cod: string;
+          upd_dat: string | null;
+          upd_user: string | null;
+        };
+        Insert: {
+          add_dat?: string | null;
+          add_user?: string | null;
+          bld_cod: string;
+          del_flg?: number | null;
+          dsp_ord_num?: number | null;
+          eda_cod: string;
+          mem?: string | null;
+          tana_cod: string;
+          upd_dat?: string | null;
+          upd_user?: string | null;
+        };
+        Update: {
+          add_dat?: string | null;
+          add_user?: string | null;
+          bld_cod?: string;
+          del_flg?: number | null;
+          dsp_ord_num?: number | null;
+          eda_cod?: string;
+          mem?: string | null;
+          tana_cod?: string;
+          upd_dat?: string | null;
+          upd_user?: string | null;
+        };
+        Relationships: [];
+      };
+    };
+    Views: {
+      [_ in never]: never;
+    };
+    Functions: {
+      [_ in never]: never;
+    };
+    Enums: {
+      [_ in never]: never;
+    };
+    CompositeTypes: {
+      [_ in never]: never;
+    };
+  };
 };
 
 type DatabaseWithoutInternals = Omit<Database, '__InternalSupabase'>;
