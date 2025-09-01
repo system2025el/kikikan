@@ -1,4 +1,4 @@
-import { GetLock, GetOrder } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/funcs';
+import { GetJuchuHead } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/funcs';
 
 import { GetJuchuKizaiHead } from '../../../../../_lib/funcs';
 import { EquipmentReturnOrderDetail } from './_ui/equipment-return-order-detail';
@@ -17,7 +17,7 @@ const Page = async (props: {
   // 編集モード(edit:編集、view:閲覧)
   const edit = params.mode === 'edit' ? true : false;
   // 受注ヘッダーデータ
-  const juchuHeadData = await GetOrder(params.juchu_head_id);
+  const juchuHeadData = await GetJuchuHead(params.juchu_head_id);
   // 親受注機材ヘッダーデータ
   const oyaJuchuKizaiHeadData = await GetJuchuKizaiHead(params.juchu_head_id, params.oya_juchu_kizai_head_id);
 
