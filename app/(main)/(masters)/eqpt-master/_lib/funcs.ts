@@ -87,7 +87,7 @@ export const getChosenEqpt = async (id: number) => {
       throw error;
     }
     if (!data) {
-      return emptyEqpt;
+      return { data: emptyEqpt, qty: qty };
     }
     const EqptDetails: EqptsMasterDialogValues = {
       kizaiNam: data.kizai_nam,
