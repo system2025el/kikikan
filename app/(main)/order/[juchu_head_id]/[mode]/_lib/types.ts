@@ -10,8 +10,8 @@ export type KokyakuValues = z.infer<typeof KokyakuSchema>;
 
 export const OrderSchema = z.object({
   juchuHeadId: z.number(),
-  delFlg: z.number().nullable(),
-  juchuSts: z.number().nullable(),
+  delFlg: z.number(),
+  juchuSts: z.number(),
   juchuDat: z.date({ message: '受注日は必須です' }),
   juchuRange: z.tuple([z.date(), z.date()]).nullable(),
   nyuryokuUser: z.string({ message: '入力者は必須です' }).min(1, { message: '入力者は必須です' }),
@@ -68,12 +68,3 @@ export type CustomersDialogValues = {
   tblDspId: number;
   delFlg?: boolean;
 };
-
-export const LockSchema = z.object({
-  lockShubetu: z.number(),
-  headId: z.number(),
-  addDat: z.date().nullable(),
-  addUser: z.string().nullable(),
-});
-
-export type LockValues = z.infer<typeof LockSchema>;

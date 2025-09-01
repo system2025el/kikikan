@@ -32,7 +32,9 @@ import { TextFieldElement } from 'react-hook-form-mui';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import { toISOString, toISOStringMonthDay } from '@/app/(main)/_lib/date-conversion';
+import { AddLock, DelLock, GetLock } from '@/app/(main)/_lib/funcs';
 import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
+import { LockValues } from '@/app/(main)/_lib/types';
 import { BackButton } from '@/app/(main)/_ui/buttons';
 import { Calendar, TestDate } from '@/app/(main)/_ui/date';
 import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
@@ -44,7 +46,7 @@ import {
   AddJuchuKizaiNyushuko,
   GetJuchuKizaiHeadMaxId,
   GetJuchuKizaiMeisaiMaxId,
-  UpdateJuchuKizaiNyushuko,
+  UpdJuchuKizaiNyushuko,
 } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 import { OyaJuchuKizaiHeadValues } from '@/app/(main)/(eq-order-detail)/_lib/types';
 import { OyaEqSelectionDialog } from '@/app/(main)/(eq-order-detail)/_ui/equipment-selection-dialog';
@@ -53,17 +55,16 @@ import {
   JuchuKizaiMeisaiValues,
 } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_lib/types';
 import { SaveAlertDialog } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_ui/caveat-dialog';
-import { AddLock, DeleteLock, GetLock } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/funcs';
-import { LockValues, OrderValues } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/types';
+import { OrderValues } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/types';
 
 import { data, stock } from '../_lib/data';
 import {
   AddKeepJuchuKizaiHead,
   AddKeepJuchuKizaiMeisai,
-  DeleteKeepJuchuKizaiMeisai,
+  DelKeepJuchuKizaiMeisai,
   GetKeepJuchuKizaiMeisai,
-  UpdateKeepJuchuKizaiHead,
-  UpdateKeepJuchuKizaiMeisai,
+  UpdKeepJuchuKizaiHead,
+  UpdKeepJuchuKizaiMeisai,
 } from '../_lib/funcs';
 import { KeepJuchuKizaiHeadSchema, KeepJuchuKizaiHeadValues, KeepJuchuKizaiMeisaiValues } from '../_lib/types';
 import { KeepEqTable } from './equipment-keep-order-detail-table';
@@ -218,7 +219,7 @@ export const EquipmentKeepOrderDetail = (props: {
         return;
       }
 
-      await DeleteLock(1, props.juchuHeadData.juchuHeadId);
+      await DelLock(1, props.juchuHeadData.juchuHeadId);
       setLockData(null);
       setEdit(false);
       // 閲覧→編集
@@ -333,11 +334,11 @@ export const EquipmentKeepOrderDetail = (props: {
     userNam: string
   ) => {
     // 受注機材ヘッド更新
-    const headResult = await UpdateKeepJuchuKizaiHead(data, userNam);
+    const headResult = await UpdKeepJuchuKizaiHead(data, userNam);
     console.log('キープ受注機材ヘッダー更新', headResult);
 
     // 受注機材入出庫更新
-    const nyushukoResult = await UpdateJuchuKizaiNyushuko(
+    const nyushukoResult = await UpdJuchuKizaiNyushuko(
       data.juchuHeadId,
       data.juchuKizaiHeadId,
       data.kicsShukoDat,
@@ -380,7 +381,7 @@ export const EquipmentKeepOrderDetail = (props: {
     const deleteKeepJuchuKizaiMeisaiData = newKeepJuchuKizaiMeisaiData.filter((data) => data.delFlag && data.saveFlag);
     if (deleteKeepJuchuKizaiMeisaiData.length > 0) {
       const deleteKeepJuchuKizaiMeisaiIds = deleteKeepJuchuKizaiMeisaiData.map((data) => data.juchuKizaiMeisaiId);
-      const deleteMeisaiResult = await DeleteKeepJuchuKizaiMeisai(
+      const deleteMeisaiResult = await DelKeepJuchuKizaiMeisai(
         juchuHeadId,
         juchuKizaiHeadId,
         deleteKeepJuchuKizaiMeisaiIds
@@ -394,7 +395,7 @@ export const EquipmentKeepOrderDetail = (props: {
     }
 
     if (updateKeepJuchuKizaiMeisaiData.length > 0) {
-      const updateMeisaiResult = await UpdateKeepJuchuKizaiMeisai(updateKeepJuchuKizaiMeisaiData, userNam);
+      const updateMeisaiResult = await UpdKeepJuchuKizaiMeisai(updateKeepJuchuKizaiMeisaiData, userNam);
       console.log('キープ受注機材明細更新', updateMeisaiResult);
     }
 
@@ -529,7 +530,7 @@ export const EquipmentKeepOrderDetail = (props: {
    */
   const handleResultDialog = async (result: boolean) => {
     if (result) {
-      await DeleteLock(1, props.juchuHeadData.juchuHeadId);
+      await DelLock(1, props.juchuHeadData.juchuHeadId);
       setLockData(null);
       setEdit(false);
       reset();

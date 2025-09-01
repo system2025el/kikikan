@@ -1,42 +1,43 @@
 'use server';
 
-import { QueryResult } from 'pg';
-
-import pool from '@/app/_lib/db/postgres';
-import { supabase } from '@/app/_lib/db/supabase';
+import {
+  InsertKeepJuchuKizaiHead,
+  SelectKeepJuchuKizaiHead,
+  UpdateKeepJuchuKizaiHead,
+} from '@/app/_lib/db/tables/t-juchu-kizai-head';
+import {
+  DeleteKeepJuchuKizaiMeisai,
+  InsertKeepJuchuKizaiMeisai,
+  UpdateKeepJuchuKizaiMeisai,
+} from '@/app/_lib/db/tables/t-juchu-kizai-meisai';
+import { SelectKeepJuchuKizaiMeisai } from '@/app/_lib/db/tables/v-juchu-kizai-meisai';
 import { GetJuchuKizaiNyushuko } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 
 import { KeepJuchuKizaiHeadValues, KeepJuchuKizaiMeisaiValues } from './types';
 
 /**
- * 受注機材ヘッダー取得
+ * キープ受注機材ヘッダー取得
  * @param juchuHeadId 受注ヘッダーid
  * @param juchuKizaiHeadId 受注機材ヘッダーid
  * @returns 受注機材ヘッダーデータ
  */
 export const GetKeepJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
   try {
-    const { data: juchuKizaiHead, error: juchuKizaiHeadError } = await supabase
-      .schema('dev2')
-      .from('t_juchu_kizai_head')
-      .select('juchu_head_id, juchu_kizai_head_id, juchu_kizai_head_kbn, mem, head_nam, oya_juchu_kizai_head_id')
-      .eq('juchu_head_id', juchuHeadId)
-      .eq('juchu_kizai_head_id', juchuKizaiHeadId)
-      .single();
-    if (juchuKizaiHeadError) {
-      console.error('GetEqHeader juchuKizaiHead error : ', juchuKizaiHeadError);
+    const { data, error } = await SelectKeepJuchuKizaiHead(juchuHeadId, juchuKizaiHeadId);
+    if (error) {
+      console.error('GetEqHeader juchuKizaiHead error : ', error);
       return null;
     }
 
     const juchuDate = await GetJuchuKizaiNyushuko(juchuHeadId, juchuKizaiHeadId);
 
     const keepJucuKizaiHeadData: KeepJuchuKizaiHeadValues = {
-      juchuHeadId: juchuKizaiHead.juchu_head_id,
-      juchuKizaiHeadId: juchuKizaiHead.juchu_kizai_head_id,
-      juchuKizaiHeadKbn: juchuKizaiHead.juchu_kizai_head_kbn,
-      mem: juchuKizaiHead.mem ? juchuKizaiHead.mem : '',
-      headNam: juchuKizaiHead.head_nam,
-      oyaJuchuKizaiHeadId: juchuKizaiHead.oya_juchu_kizai_head_id,
+      juchuHeadId: data.juchu_head_id,
+      juchuKizaiHeadId: data.juchu_kizai_head_id,
+      juchuKizaiHeadKbn: data.juchu_kizai_head_kbn,
+      mem: data.mem ? data.mem : '',
+      headNam: data.head_nam,
+      oyaJuchuKizaiHeadId: data.oya_juchu_kizai_head_id,
       kicsShukoDat: juchuDate && juchuDate.kicsShukoDat,
       kicsNyukoDat: juchuDate && juchuDate.kicsNyukoDat,
       yardShukoDat: juchuDate && juchuDate.yardShukoDat,
@@ -75,14 +76,14 @@ export const AddKeepJuchuKizaiHead = async (
     add_user: userNam,
   };
   try {
-    const { error: insertError } = await supabase.schema('dev2').from('t_juchu_kizai_head').insert(newData);
+    const { error } = await InsertKeepJuchuKizaiHead(newData);
 
-    if (!insertError) {
+    if (error) {
+      console.error('Error adding new juchuKizaiHead:', error.message);
+      return false;
+    } else {
       console.log('New juchuKizaiHead added successfully:', newData);
       return true;
-    } else {
-      console.error('Error adding new juchuKizaiHead:', insertError.message);
-      return false;
     }
   } catch (e) {
     console.error(e);
@@ -91,12 +92,12 @@ export const AddKeepJuchuKizaiHead = async (
 };
 
 /**
- * 受注機材ヘッダー更新
+ * キープ受注機材ヘッダー更新
  * @param juchuKizaiHeadData 受注機材ヘッダーデータ
  * @param userNam ユーザー名
  * @returns
  */
-export const UpdateKeepJuchuKizaiHead = async (juchuKizaiHeadData: KeepJuchuKizaiHeadValues, userNam: string) => {
+export const UpdKeepJuchuKizaiHead = async (juchuKizaiHeadData: KeepJuchuKizaiHeadValues, userNam: string) => {
   const updateData = {
     juchu_head_id: juchuKizaiHeadData.juchuHeadId,
     juchu_kizai_head_id: juchuKizaiHeadData.juchuKizaiHeadId,
@@ -110,13 +111,7 @@ export const UpdateKeepJuchuKizaiHead = async (juchuKizaiHeadData: KeepJuchuKiza
   };
 
   try {
-    const { error } = await supabase
-      .schema('dev2')
-      .from('t_juchu_kizai_head')
-      .update(updateData)
-      .eq('juchu_head_id', updateData.juchu_head_id)
-      .eq('juchu_kizai_head_id', updateData.juchu_kizai_head_id)
-      .eq('juchu_kizai_head_kbn', updateData.juchu_kizai_head_kbn);
+    const { error } = await UpdateKeepJuchuKizaiHead(updateData);
 
     if (error) {
       console.error('Error updating juchu kizai head:', error.message);
@@ -130,17 +125,15 @@ export const UpdateKeepJuchuKizaiHead = async (juchuKizaiHeadData: KeepJuchuKiza
   }
 };
 
+/**
+ * キープ受注機材明細リスト取得
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @returns キープ受注機材明細
+ */
 export const GetKeepJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
   try {
-    const { data, error } = await supabase
-      .schema('dev2')
-      .from('v_juchu_kizai_meisai')
-      .select(
-        'juchu_head_id, juchu_kizai_head_id, juchu_kizai_meisai_id, shozoku_id, shozoku_nam, mem, kizai_id, kizai_nam, plan_kizai_qty, plan_yobi_qty, keep_qty'
-      )
-      .eq('juchu_head_id', juchuHeadId)
-      .eq('juchu_kizai_head_id', juchuKizaiHeadId)
-      .not('kizai_id', 'is', null);
+    const { data, error } = await SelectKeepJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId);
     if (error) {
       console.error('GetKeeoEqList keep eqList error : ', error);
       return [];
@@ -190,14 +183,14 @@ export const AddKeepJuchuKizaiMeisai = async (
   }));
 
   try {
-    const { error: insertError } = await supabase.schema('dev2').from('t_juchu_kizai_meisai').insert(newData);
+    const { error } = await InsertKeepJuchuKizaiMeisai(newData);
 
-    if (!insertError) {
+    if (error) {
+      console.error('Error adding keep kizai meisai:', error.message);
+      return false;
+    } else {
       console.log('keep kizai meisai added successfully:', newData);
       return true;
-    } else {
-      console.error('Error adding keep kizai meisai:', insertError.message);
-      return false;
     }
   } catch (e) {
     console.error('Exception while adding keep kizai meisai:', e);
@@ -211,10 +204,7 @@ export const AddKeepJuchuKizaiMeisai = async (
  * @param userNam ユーザー名
  * @returns
  */
-export const UpdateKeepJuchuKizaiMeisai = async (
-  juchuKizaiMeisaiData: KeepJuchuKizaiMeisaiValues[],
-  userNam: string
-) => {
+export const UpdKeepJuchuKizaiMeisai = async (juchuKizaiMeisaiData: KeepJuchuKizaiMeisaiValues[], userNam: string) => {
   const updateData = juchuKizaiMeisaiData.map((d) => ({
     juchu_head_id: d.juchuHeadId,
     juchu_kizai_head_id: d.juchuKizaiHeadId,
@@ -229,13 +219,7 @@ export const UpdateKeepJuchuKizaiMeisai = async (
 
   try {
     for (const data of updateData) {
-      const { error } = await supabase
-        .schema('dev2')
-        .from('t_juchu_kizai_meisai')
-        .update(data)
-        .eq('juchu_head_id', data.juchu_head_id)
-        .eq('juchu_kizai_head_id', data.juchu_kizai_head_id)
-        .eq('juchu_kizai_meisai_id', data.juchu_kizai_meisai_id);
+      const { error } = await UpdateKeepJuchuKizaiMeisai(data);
 
       if (error) {
         console.error('Error updating keep juchu kizai meisai:', error.message);
@@ -256,19 +240,13 @@ export const UpdateKeepJuchuKizaiMeisai = async (
  * @param juchuKizaiHeadId 受注機材ヘッダーid
  * @param juchuKizaiMeisaiIds 受注機材明細id
  */
-export const DeleteKeepJuchuKizaiMeisai = async (
+export const DelKeepJuchuKizaiMeisai = async (
   juchuHeadId: number,
   juchuKizaiHeadId: number,
   juchuKizaiMeisaiIds: number[]
 ) => {
   try {
-    const { error } = await supabase
-      .schema('dev2')
-      .from('t_juchu_kizai_meisai')
-      .delete()
-      .eq('juchu_head_id', juchuHeadId)
-      .eq('juchu_kizai_head_id', juchuKizaiHeadId)
-      .in('juchu_kizai_meisai_id', juchuKizaiMeisaiIds);
+    const { error } = await DeleteKeepJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId, juchuKizaiMeisaiIds);
 
     if (error) {
       console.error('Error delete keep kizai meisai:', error.message);

@@ -29,8 +29,11 @@ import { use, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
+import { DeleteLock } from '@/app/_lib/db/tables/t-lock';
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import { toISOString } from '@/app/(main)/_lib/date-conversion';
+import { AddLock, GetLock } from '@/app/(main)/_lib/funcs';
+import { LockValues } from '@/app/(main)/_lib/types';
 import DateX, { RSuiteDateRangePicker, TestDate } from '@/app/(main)/_ui/date';
 import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
 import { Loading } from '@/app/(main)/_ui/loading';
@@ -38,8 +41,8 @@ import { SelectTable } from '@/app/(main)/_ui/table';
 import { equipmentRows, users, vehicleHeaders, vehicleRows } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/data';
 
 import { useUnsavedChangesWarning } from '../../../../_lib/hook';
-import { AddLock, AddNewOrder, Copy, DeleteLock, GetLock, GetMaxId, GetOrder, Update } from '../_lib/funcs';
-import { EqTableValues, KokyakuValues, LockValues, OrderSchema, OrderValues, VehicleTableValues } from '../_lib/types';
+import { AddJuchuHead, CopyJuchuHead, GetJuchuHead, GetMaxId, UpdJuchuHead } from '../_lib/funcs';
+import { EqTableValues, KokyakuValues, OrderSchema, OrderValues, VehicleTableValues } from '../_lib/types';
 import { SaveAlertDialog, SelectAlertDialog } from './caveat-dialog';
 import { CustomerSelectionDialog } from './customer-selection';
 import { LocationSelectDialog } from './location-selection';
@@ -178,11 +181,11 @@ export const Order = (props: {
     if (data.juchuHeadId === 0) {
       const maxId = await GetMaxId();
       const newOrderId = maxId ? maxId.juchu_head_id + 1 : 1;
-      await AddNewOrder(newOrderId, data, user.name);
+      await AddJuchuHead(newOrderId, data, user.name);
       redirect(`/order/${newOrderId}/edit`);
       // 更新
     } else {
-      const update = await Update(data);
+      const update = await UpdJuchuHead(data);
       reset(data);
       setSave(true);
       setIsLoading(false);
@@ -229,9 +232,9 @@ export const Order = (props: {
       const maxId = await GetMaxId();
       if (maxId) {
         const newOrderId = maxId.juchu_head_id + 1;
-        const currentData = await GetOrder(props.juchuHeadData.juchuHeadId);
+        const currentData = await GetJuchuHead(props.juchuHeadData.juchuHeadId);
         if (user && currentData) {
-          await Copy(newOrderId, currentData, user.name);
+          await CopyJuchuHead(newOrderId, currentData, user.name);
         }
         window.open(`/order/${newOrderId}/${'edit'}`);
       } else {

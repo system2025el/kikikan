@@ -3,8 +3,6 @@
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
-import { DeleteLock } from '../order/[juchu_head_id]/[mode]/_lib/funcs';
-
 export const useUnsavedChangesWarning = (isDirty: boolean, isSave: boolean) => {
   useEffect(() => {
     const handleBeforeUnload = async (e: BeforeUnloadEvent) => {
