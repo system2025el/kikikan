@@ -1,9 +1,15 @@
 'use server';
 
-import { EqptsMasterDialogValues, zeroToNull } from '@/app/(main)/(masters)/eqpt-master/_lib/types';
+import { zeroToNull } from '@/app/(main)/(masters)/_lib/value-converters';
+import { EqptsMasterDialogValues } from '@/app/(main)/(masters)/eqpt-master/_lib/types';
 
 import pool from '../postgres';
 
+/**
+ * 機材履歴マスタに挿入する関数
+ * @param data 更新前の機材データ
+ * @param id 更新された機材の機材ID
+ */
 export const insertEqptHistory = async (data: EqptsMasterDialogValues, id: number) => {
   const query = `
           INSERT INTO m_kizai_his (

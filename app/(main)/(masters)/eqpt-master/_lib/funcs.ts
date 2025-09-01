@@ -18,8 +18,9 @@ import {
   getDaibumonsSelection,
   getShukeibumonsSelection,
 } from '../../_lib/funs';
+import { nullToZero, zeroToNull } from '../../_lib/value-converters';
 import { emptyEqpt } from './datas';
-import { EqptsMasterDialogValues, EqptsMasterTableValues, nullToZero, SelectedEqptsValues, zeroToNull } from './types';
+import { EqptsMasterDialogValues, EqptsMasterTableValues, SelectedEqptsValues } from './types';
 
 /**
  * 機材マスタテーブルのデータを取得する関数
