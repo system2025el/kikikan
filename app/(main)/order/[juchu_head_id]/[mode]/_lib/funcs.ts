@@ -24,7 +24,7 @@ export const GetJuchuHead = async (juchuHeadId: number) => {
       throw new Error('受注ヘッダーが存在しません');
     }
 
-    const kokyakuData = await SelectKokyaku(juchuData.data.kokyaku_id);
+    const kokyakuData = await selectKokyaku(juchuData.data.kokyaku_id);
 
     if (kokyakuData.error || !kokyakuData.data) {
       console.error('GetOrder kokyaku error : ', kokyakuData.error);
@@ -231,7 +231,7 @@ export const GetJuchuKizaiHeadList = async (juchuHeadId: number) => {
  */
 export const GetFilteredCustomers = async (query: string) => {
   try {
-    const { data, error } = await SelectFilteredCustomers(query);
+    const { data, error } = await selectFilteredCustomers(query);
     if (!error) {
       console.log('I got a datalist from db', data.length);
       if (!data || data.length === 0) {
