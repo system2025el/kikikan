@@ -11,6 +11,8 @@ import {
   UpdateKeepJuchuKizaiMeisai,
 } from '@/app/_lib/db/tables/t-juchu-kizai-meisai';
 import { SelectKeepJuchuKizaiMeisai } from '@/app/_lib/db/tables/v-juchu-kizai-meisai';
+import { Database } from '@/app/_lib/db/types';
+import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { GetJuchuKizaiNyushuko } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 
 import { KeepJuchuKizaiHeadValues, KeepJuchuKizaiMeisaiValues } from './types';
@@ -24,7 +26,7 @@ import { KeepJuchuKizaiHeadValues, KeepJuchuKizaiMeisaiValues } from './types';
 export const GetKeepJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
   try {
     const { data, error } = await SelectKeepJuchuKizaiHead(juchuHeadId, juchuKizaiHeadId);
-    if (error) {
+    if (error || data?.oya_juchu_kizai_head_id === null) {
       console.error('GetEqHeader juchuKizaiHead error : ', error);
       return null;
     }
@@ -36,7 +38,7 @@ export const GetKeepJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHeadI
       juchuKizaiHeadId: data.juchu_kizai_head_id,
       juchuKizaiHeadKbn: data.juchu_kizai_head_kbn,
       mem: data.mem ? data.mem : '',
-      headNam: data.head_nam,
+      headNam: data.head_nam ?? '',
       oyaJuchuKizaiHeadId: data.oya_juchu_kizai_head_id,
       kicsShukoDat: juchuDate && juchuDate.kicsShukoDat,
       kicsNyukoDat: juchuDate && juchuDate.kicsNyukoDat,

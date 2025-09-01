@@ -1,4 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
+
+import { Database } from './types';
 /**
  * https://supabase.com/docs/guides/api/using-custom-schemas
  * ----------------------------Supabaseで行い済み
@@ -22,7 +24,7 @@ import { createClient } from '@supabase/supabase-js';
 // NULLの場合があると警告が出るため、末尾に！マークを付けてエラーを回避する
 // Create a single supabase client for interacting with your database
 export const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_ANON_KEY!, {
-  db: { schema: 'dev2, public, dev5, dev4' }, //使うスキーマ指定
+  db: { schema: 'dev2' }, //使うスキーマ指定
   auth: {
     autoRefreshToken: false,
     persistSession: false,
