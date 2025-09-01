@@ -13,7 +13,7 @@ export const SelectFilteredUsers = async (query: string) => {
   const builder = supabase
     .schema(SCHEMA)
     .from('m_user')
-    .select('instance_id, user_nam, del_flg') // テーブルに表示するカラム
+    .select('user_nam, del_flg') // テーブルに表示するカラム
     .ilike('user_nam', `%${query}%`)
     //   // あいまい検索、担当者名、担当者名かな、住所、電話番号、fax番号
     //   .or(`user_nam.ilike.%${query}%`)
