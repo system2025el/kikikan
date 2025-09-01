@@ -39,7 +39,9 @@ import { shouldDisplay } from 'rsuite/esm/internals/Picker';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import { toISOString, toISOStringYearMonthDay } from '@/app/(main)/_lib/date-conversion';
+import { AddLock, DelLock, GetLock } from '@/app/(main)/_lib/funcs';
 import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
+import { LockValues } from '@/app/(main)/_lib/types';
 import { BackButton } from '@/app/(main)/_ui/buttons';
 import { Calendar, TestDate } from '@/app/(main)/_ui/date';
 import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
@@ -54,27 +56,25 @@ import {
   AddJuchuKizaiMeisai,
   AddJuchuKizaiNyushuko,
   ConfirmHonbanbi,
-  DeleteHonbanbi,
-  DeleteIdoDen,
-  DeleteJuchuKizaiMeisai,
-  DeleteSiyouHonbanbi,
+  DelHonbanbi,
+  DelIdoDen,
+  DelJuchuKizaiMeisai,
+  DelSiyouHonbanbi,
   GetHonbanbi,
   GetIdoDenMaxId,
-  GetJuchuKizaiHeadDspOrdNum,
   GetJuchuKizaiHeadMaxId,
   GetJuchuKizaiMeisai,
   GetJuchuKizaiMeisaiMaxId,
   GetStockList,
-  UpdateHonbanbi,
-  UpdateIdoDen,
-  UpdateJuchuKizaiHead,
-  UpdateJuchuKizaiMeisai,
-  UpdateJuchuKizaiNyushuko,
-  UpdateNyushukoHonbanbi,
+  UpdHonbanbi,
+  UpdIdoDen,
+  UpdJuchuKizaiHead,
+  UpdJuchuKizaiMeisai,
+  UpdJuchuKizaiNyushuko,
+  UpdNyushukoHonbanbi,
 } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 import { SelectedEqptsValues } from '@/app/(main)/(masters)/eqpt-master/_lib/types';
-import { AddLock, DeleteLock, GetLock } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/funcs';
-import { LockValues, OrderValues } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/types';
+import { OrderValues } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/types';
 
 import {
   JuchuKizaiHeadSchema,
@@ -325,7 +325,7 @@ const EquipmentOrderDetail = (props: {
         return;
       }
 
-      await DeleteLock(1, props.juchuHeadData.juchuHeadId);
+      await DelLock(1, props.juchuHeadData.juchuHeadId);
       setLockData(null);
       setEdit(false);
       // 閲覧→編集
@@ -531,11 +531,11 @@ const EquipmentOrderDetail = (props: {
     userNam: string
   ) => {
     // 受注機材ヘッド更新
-    const headResult = await UpdateJuchuKizaiHead(data, userNam);
+    const headResult = await UpdJuchuKizaiHead(data, userNam);
     console.log('受注機材ヘッダー更新', headResult);
 
     // 受注機材入出庫更新
-    const nyushukoResult = await UpdateJuchuKizaiNyushuko(
+    const nyushukoResult = await UpdJuchuKizaiNyushuko(
       data.juchuHeadId,
       data.juchuKizaiHeadId,
       data.kicsShukoDat,
@@ -556,7 +556,7 @@ const EquipmentOrderDetail = (props: {
       juchuHonbanbiAddQty: 0,
     }));
     console.log('受注機材本番日(使用中)更新データ', addJuchuSiyouHonbanbiData);
-    const deleteSiyouHonbanbiResult = await DeleteSiyouHonbanbi(data.juchuHeadId, data.juchuKizaiHeadId);
+    const deleteSiyouHonbanbiResult = await DelSiyouHonbanbi(data.juchuHeadId, data.juchuKizaiHeadId);
     console.log('受注機材本番日(使用日)削除', deleteSiyouHonbanbiResult);
     const addSiyouHonbanbiResult = await AddAllHonbanbi(
       data.juchuHeadId,
@@ -586,12 +586,7 @@ const EquipmentOrderDetail = (props: {
       },
     ];
     for (const item of updateNyushukoHonbanbiData) {
-      const nyushukoHonbanbiResult = await UpdateNyushukoHonbanbi(
-        data.juchuHeadId,
-        data.juchuKizaiHeadId,
-        item,
-        userNam
-      );
+      const nyushukoHonbanbiResult = await UpdNyushukoHonbanbi(data.juchuHeadId, data.juchuKizaiHeadId, item, userNam);
       console.log('入出庫本番日更新', nyushukoHonbanbiResult);
     }
 
@@ -613,14 +608,24 @@ const EquipmentOrderDetail = (props: {
    */
   const saveJuchuKizaiHonbanbi = async (juchuHeadId: number, juchuKizaiHeadId: number, userNam: string) => {
     for (const item of juchuHonbanbiDeleteList) {
-      const deleteHonbanbiResult = await DeleteHonbanbi(juchuHeadId, juchuKizaiHeadId, item);
+      const deleteHonbanbiResult = await DelHonbanbi(
+        juchuHeadId,
+        juchuKizaiHeadId,
+        item.juchuHonbanbiShubetuId,
+        item.juchuHonbanbiDat
+      );
       console.log('受注機材本番日削除', deleteHonbanbiResult);
     }
 
     for (const item of juchuHonbanbiList) {
-      const confirm = await ConfirmHonbanbi(juchuHeadId, juchuKizaiHeadId, item);
+      const confirm = await ConfirmHonbanbi(
+        juchuHeadId,
+        juchuKizaiHeadId,
+        item.juchuHonbanbiShubetuId,
+        item.juchuHonbanbiDat
+      );
       if (confirm) {
-        const updateHonbanbiResult = await UpdateHonbanbi(juchuHeadId, juchuKizaiHeadId, item, userNam);
+        const updateHonbanbiResult = await UpdHonbanbi(juchuHeadId, juchuKizaiHeadId, item, userNam);
         console.log('受注機材本番日更新', updateHonbanbiResult);
       } else {
         const addHonbanbiResult = await AddHonbanbi(juchuHeadId, juchuKizaiHeadId, item, userNam);
@@ -658,7 +663,7 @@ const EquipmentOrderDetail = (props: {
     const deleteJuchuKizaiMeisaiData = newJuchuKizaiMeisaiData.filter((data) => data.delFlag && data.saveFlag);
     if (deleteJuchuKizaiMeisaiData.length > 0) {
       const deleteJuchuKizaiMeisaiIds = deleteJuchuKizaiMeisaiData.map((data) => data.juchuKizaiMeisaiId);
-      const deleteMeisaiResult = await DeleteJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId, deleteJuchuKizaiMeisaiIds);
+      const deleteMeisaiResult = await DelJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId, deleteJuchuKizaiMeisaiIds);
       console.log('受注機材明細削除', deleteMeisaiResult);
     }
 
@@ -668,7 +673,7 @@ const EquipmentOrderDetail = (props: {
     }
 
     if (updateJuchuKizaiMeisaiData.length > 0) {
-      const updateMeisaiResult = await UpdateJuchuKizaiMeisai(updateJuchuKizaiMeisaiData, userNam);
+      const updateMeisaiResult = await UpdJuchuKizaiMeisai(updateJuchuKizaiMeisaiData, userNam);
       console.log('受注機材明細更新', updateMeisaiResult);
     }
 
@@ -682,7 +687,7 @@ const EquipmentOrderDetail = (props: {
     );
     if (deleteIdoKizaiData.length > 0) {
       const deleteIdoDenIds = deleteIdoKizaiData.map((data) => data.idoDenId);
-      const deleteIdoDenResult = await DeleteIdoDen(deleteIdoDenIds as number[]);
+      const deleteIdoDenResult = await DelIdoDen(deleteIdoDenIds as number[]);
       console.log('移動伝票削除', deleteIdoDenResult);
     }
 
@@ -694,7 +699,7 @@ const EquipmentOrderDetail = (props: {
     }
 
     if (updateIdoKizaiData.length > 0) {
-      const updateIdoDenResult = await UpdateIdoDen(updateIdoKizaiData, userNam);
+      const updateIdoDenResult = await UpdIdoDen(updateIdoKizaiData, userNam);
       console.log('移動伝票更新', updateIdoDenResult);
     }
   };
@@ -1049,7 +1054,7 @@ const EquipmentOrderDetail = (props: {
    */
   const handleResultDialog = async (result: boolean) => {
     if (result) {
-      await DeleteLock(1, props.juchuHeadData.juchuHeadId);
+      await DelLock(1, props.juchuHeadData.juchuHeadId);
       setLockData(null);
       setEdit(false);
       reset();

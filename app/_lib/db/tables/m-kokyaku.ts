@@ -1,3 +1,5 @@
+'use server';
+
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { CustomersMasterDialogValues } from '@/app/(main)/(masters)/customers-master/_lib/types';
 

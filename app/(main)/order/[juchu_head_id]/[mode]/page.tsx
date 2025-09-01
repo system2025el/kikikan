@@ -1,7 +1,7 @@
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import { Order } from '@/app/(main)/order/[juchu_head_id]/[mode]/_ui/order';
 
-import { AddLock, GetEqHeaderList, GetLock, GetOrder } from './_lib/funcs';
+import { GetJuchuHead, GetJuchuKizaiHeadList } from './_lib/funcs';
 import { EqTableValues, OrderValues } from './_lib/types';
 
 const Page = async (props: { params: Promise<{ juchu_head_id: number; mode: string }> }) => {
@@ -37,9 +37,9 @@ const Page = async (props: { params: Promise<{ juchu_head_id: number; mode: stri
     // 既存
   } else {
     // 受注ヘッダーデータ
-    const juchuHeadData = await GetOrder(juchuHeadId);
+    const juchuHeadData = await GetJuchuHead(juchuHeadId);
     // 受注機材ヘッダーデータ
-    const juchuKizaiHeadDatas = await GetEqHeaderList(juchuHeadId);
+    const juchuKizaiHeadDatas = await GetJuchuKizaiHeadList(juchuHeadId);
 
     if (!juchuHeadData) {
       return <div>受注情報が見つかりません。</div>;

@@ -1,19 +1,21 @@
 'use server';
 
 import { supabase } from '@/app/_lib/db/supabase';
-import { SelectFilteredCustomers, SelectKokyaku } from '@/app/_lib/db/tables/m-kokyaku';
-import { SelectJuchuHead } from '@/app/_lib/db/tables/t-juchu-head';
+import { selectFilteredCustomers, selectKokyaku } from '@/app/_lib/db/tables/m-kokyaku';
+import { InsertJuchuHead, SelectJuchuHead, SelectMaxId, UpdateJuchuHead } from '@/app/_lib/db/tables/t-juchu-head';
+import { DeleteLock, InsertLock, SelectLock } from '@/app/_lib/db/tables/t-lock';
+import { SelectJuchuKizaiHeadList } from '@/app/_lib/db/tables/v-juchu-kizai-head-lst';
 import { toISOStringYearMonthDay } from '@/app/(main)/_lib/date-conversion';
-import { CustomersMasterTableValues } from '@/app/(main)/(masters)/customers-master/_lib/types';
+import { LockValues } from '@/app/(main)/_lib/types';
 
-import { CustomersDialogValues, EqTableValues, LockValues, OrderValues } from './types';
+import { CustomersDialogValues, EqTableValues, OrderValues } from './types';
 
 /**
  * 受注ヘッダー取得
  * @param juchuHeadId 受注ヘッダーID
  * @returns 受注ヘッダーデータ
  */
-export const GetOrder = async (juchuHeadId: number) => {
+export const GetJuchuHead = async (juchuHeadId: number) => {
   try {
     const juchuData = await SelectJuchuHead(juchuHeadId);
 
@@ -22,7 +24,7 @@ export const GetOrder = async (juchuHeadId: number) => {
       throw new Error('受注ヘッダーが存在しません');
     }
 
-    const kokyakuData = await SelectKokyaku(juchuData.data.kokyaku_id);
+    const kokyakuData = await selectKokyaku(juchuData.data.kokyaku_id);
 
     if (kokyakuData.error || !kokyakuData.data) {
       console.error('GetOrder kokyaku error : ', kokyakuData.error);
@@ -61,92 +63,14 @@ export const GetOrder = async (juchuHeadId: number) => {
  */
 export const GetMaxId = async () => {
   try {
-    const { data, error } = await supabase
-      .schema('dev2')
-      .from('t_juchu_head')
-      .select('juchu_head_id')
-      .order('juchu_head_id', {
-        ascending: false,
-      })
-      .limit(1)
-      .single();
-    if (!error) {
-      console.log('GetMaxId data : ', data);
-      return data;
-    }
-  } catch (e) {
-    console.error(e);
-  }
-};
-
-/**
- * ロック情報取得
- * @param lockShubetu ロック種別
- * @param headId ヘッダーid
- * @returns ロックデータ
- */
-export const GetLock = async (lockShubetu: number, headId: number) => {
-  const { data, error } = await supabase
-    .schema('dev2')
-    .from('t_lock')
-    .select('*')
-    .eq('lock_shubetu', lockShubetu)
-    .eq('head_id', headId)
-    .single();
-
-  console.log('GetLock data : ', data);
-
-  if (error) {
-    console.log(error.code);
-    if (error.code === 'PGRST116') {
-      console.log('ロックデータなし');
+    const { data, error } = await SelectMaxId();
+    if (error || !data) {
       return null;
     }
-    console.error('Error lock:', error.message);
-    return null;
-  } else {
-    const lockData: LockValues = {
-      lockShubetu: data.lock_shubetu,
-      headId: data.head_id,
-      addDat: data.add_dat,
-      addUser: data.add_user,
-    };
-    return lockData;
-  }
-};
-
-/**
- * ロック情報追加
- * @param lockShubetu ロック種別
- * @param headId ヘッダーid
- */
-export const AddLock = async (lockShubetu: number, headId: number, add_user: string) => {
-  const { error } = await supabase.schema('dev2').from('t_lock').insert({
-    lock_shubetu: lockShubetu,
-    head_id: headId,
-    add_dat: new Date(),
-    add_user: add_user,
-  });
-  if (error) {
-    console.error('Error adding lock:', error.message);
-  }
-};
-
-/**
- * ロック情報削除
- * @param lockShubetu ロック種別
- * @param headId ヘッダーid
- */
-export const DeleteLock = async (lockShubetu: number, headId: number) => {
-  const { error } = await supabase
-    .schema('dev2')
-    .from('t_lock')
-    .delete()
-    .eq('lock_shubetu', lockShubetu)
-    .eq('head_id', headId);
-
-  if (error) {
-    console.error('Error delete lock:', error.message);
+    console.log('GetMaxId data : ', data);
+    return data;
+  } catch (e) {
+    console.error(e);
   }
 };
 
@@ -154,7 +78,7 @@ export const DeleteLock = async (lockShubetu: number, headId: number) => {
  * 受注ヘッダー情報新規追加
  * @param juchuHeadId 受注ヘッダーid
  */
-export const AddNewOrder = async (juchuHeadId: number, juchuHeadData: OrderValues, userNam: string) => {
+export const AddJuchuHead = async (juchuHeadId: number, juchuHeadData: OrderValues, userNam: string) => {
   const newData = {
     juchu_head_id: juchuHeadId,
     del_flg: juchuHeadData.delFlg,
@@ -175,17 +99,12 @@ export const AddNewOrder = async (juchuHeadId: number, juchuHeadData: OrderValue
   };
 
   try {
-    const { error: insertError } = await supabase
-      .schema('dev2')
-      .from('t_juchu_head')
-      .insert({
-        ...newData,
-      });
+    const { error } = await InsertJuchuHead(newData);
 
-    if (!insertError) {
-      console.log('New order added successfully:', newData);
+    if (error) {
+      console.error('Error adding new order:', error.message);
     } else {
-      console.error('Error adding new order:', insertError.message);
+      console.log('New order added successfully:', newData);
     }
   } catch (e) {
     console.error('Exception while adding new order:', e);
@@ -197,7 +116,7 @@ export const AddNewOrder = async (juchuHeadId: number, juchuHeadData: OrderValue
  * @param data 受注ヘッダーデータ
  * @returns 正誤
  */
-export const Update = async (data: OrderValues) => {
+export const UpdJuchuHead = async (data: OrderValues) => {
   const updateData = {
     juchu_head_id: data.juchuHeadId,
     del_flg: data.delFlg,
@@ -218,11 +137,7 @@ export const Update = async (data: OrderValues) => {
   };
 
   try {
-    const { error } = await supabase
-      .schema('dev2')
-      .from('t_juchu_head')
-      .update(updateData)
-      .eq('juchu_head_id', updateData.juchu_head_id);
+    const { error } = await UpdateJuchuHead(updateData);
 
     if (error) {
       console.error('Error updating order:', error.message);
@@ -236,7 +151,7 @@ export const Update = async (data: OrderValues) => {
   }
 };
 
-export const Copy = async (juchuHeadId: number, data: OrderValues, add_user: string) => {
+export const CopyJuchuHead = async (juchuHeadId: number, data: OrderValues, userNam: string) => {
   const copyData = {
     juchu_head_id: juchuHeadId,
     del_flg: data.delFlg,
@@ -252,40 +167,35 @@ export const Copy = async (juchuHeadId: number, data: OrderValues, add_user: str
     mem: data.mem,
     nebiki_amt: data.nebikiAmt,
     zei_kbn: data.zeiKbn,
-    upd_dat: new Date(),
-    upd_user: 'test_user',
+    add_dat: new Date(),
+    add_user: userNam,
   };
 
   try {
-    const { error: insertError } = await supabase
-      .schema('dev2')
-      .from('t_juchu_head')
-      .insert({
-        ...copyData,
-      });
+    const { error } = await InsertJuchuHead(copyData);
 
-    if (!insertError) {
-      console.log('New order added successfully:', copyData);
+    if (error) {
+      console.error('Error adding new order:', error.message);
     } else {
-      console.error('Error adding new order:', insertError.message);
+      console.log('New order added successfully:', copyData);
     }
   } catch (e) {
     console.error('Exception while adding new order:', e);
   }
 };
 
-export const GetEqHeaderList = async (juchuHeadId: number) => {
+/**
+ * 受注機材ヘッダーリスト取得
+ * @param juchuHeadId 受注機材ヘッダーid
+ * @returns
+ */
+export const GetJuchuKizaiHeadList = async (juchuHeadId: number) => {
   try {
-    const { data, error } = await supabase
-      .schema('dev2')
-      .from('v_juchu_kizai_head_lst')
-      .select('*')
-      .eq('juchu_head_id', juchuHeadId)
-      .not('juchu_kizai_head_id', 'is', null);
+    const { data, error } = await SelectJuchuKizaiHeadList(juchuHeadId);
 
     if (error) {
       console.error('GetOrder juchu error : ', error);
-      return [];
+      throw new Error(error.message);
     }
 
     if (!data || data.length === 0) return [];
@@ -321,7 +231,7 @@ export const GetEqHeaderList = async (juchuHeadId: number) => {
  */
 export const GetFilteredCustomers = async (query: string) => {
   try {
-    const { data, error } = await SelectFilteredCustomers(query);
+    const { data, error } = await selectFilteredCustomers(query);
     if (!error) {
       console.log('I got a datalist from db', data.length);
       if (!data || data.length === 0) {
