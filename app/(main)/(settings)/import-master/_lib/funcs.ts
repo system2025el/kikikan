@@ -17,56 +17,80 @@ import { EqptImportType, KizaiImportTypes, RfidImportTypes, TanabanImportTypes }
  */
 export const ImportEqptRfidData = async (data: EqptImportType[]) => {
   console.log(data);
-  /* 棚番用データ */
-  const tanabanList: TanabanImportTypes[] = data
-    .map((d) => ({
-      bld_cod: d.bld_cod,
-      tana_cod: d.tana_cod,
-      eda_cod: d.eda_cod,
-    }))
-    .filter((d) => d.bld_cod || d.bld_cod !== '');
-  /* 大部門用データ */
-  const daibumonNamList = data.map((d) => d.dai_bumon_nam!).filter((d) => d || d !== '');
-  /* 集計部門用データ */
-  const shukeibumonNamList = data.map((d) => d.shukei_bumon_nam!).filter((d) => d || d !== '');
-  /* 部門用データ */
-  const bumonNamList = data
-    .map((d) => ({ bumon_nam: d.bumon_nam!, dai_bumon_nam: d.dai_bumon_nam!, shukei_bumon_nam: d.shukei_bumon_nam! }))
-    .filter((d) => d.bumon_nam || d.bumon_nam !== '');
-  /* 機材マスタ用データ */
-  const kizaiMasterList: KizaiImportTypes[] = data.map((d) => ({
-    kizai_nam: d.kizai_nam,
-    section_nam: d.section_nam,
-    el_num: d.el_num,
-    shozoku_id: d.shozoku_id,
-    bld_cod: d.bld_cod,
-    tana_cod: d.tana_cod,
-    eda_cod: d.eda_cod,
-    kizai_grp_cod: d.kizai_grp_cod,
-    dsp_ord_num: d.dsp_ord_num,
-    mem: d.mem,
-    dai_bumon_nam: d.dai_bumon_nam,
-    bumon_nam: d.bumon_nam,
-    shukei_bumon_nam: d.shukei_bumon_nam,
-    dsp_flg: d.dsp_flg,
-    ctn_flg: d.ctn_flg,
-    def_dat_qty: d.def_dat_qty,
-    reg_amt: d.reg_amt,
-    rank_amt_1: d.rank_amt_1,
-    rank_amt_2: d.rank_amt_2,
-    rank_amt_3: d.rank_amt_3,
-    rank_amt_4: d.rank_amt_4,
-    rank_amt_5: d.rank_amt_5,
-  }));
-  /* RFID用データ */
-  const rfidList: RfidImportTypes[] = data.map((d) => ({
-    rfid_tag_id: d.rfid_tag_id,
-    kizai_nam: d.kizai_nam,
-    rfid_kizai_sts: d.rfid_kizai_sts,
-    del_flg: d.del_flg,
-    shozoku_id: d.shozoku_id,
-    mem: d.mem,
-  }));
+  /* 重複のない棚番用データ */
+  const tanabanList: TanabanImportTypes[] = Array.from(
+    new Map(
+      data
+        .map(({ bld_cod, tana_cod, eda_cod }) => ({ bld_cod, tana_cod, eda_cod }))
+        .filter(({ bld_cod }) => bld_cod && bld_cod.trim() !== '')
+        .map((d) => [`${d.bld_cod}-${d.tana_cod}-${d.eda_cod}`, d])
+    ).values()
+  );
+  /* 重複のない大部門用データ */
+  const daibumonNamList = [...new Set(data.map((d) => d.dai_bumon_nam!).filter((d) => d && d.trim() !== ''))];
+  /* 重複のない集計部門用データ */
+  const shukeibumonNamList = [...new Set(data.map((d) => d.shukei_bumon_nam!).filter((d) => d && d.trim() !== ''))];
+  /* 重複のない部門用データ */
+  const bumonNamList = Array.from(
+    new Map(
+      data
+        .map((d) => ({
+          bumon_nam: d.bumon_nam!,
+          dai_bumon_nam: d.dai_bumon_nam!,
+          shukei_bumon_nam: d.shukei_bumon_nam!,
+        }))
+        .filter((d) => d.bumon_nam && d.bumon_nam.trim() !== '')
+        .map((v) => [v.bumon_nam, v])
+    ).values()
+  );
+  /* 重複のない機材マスタ用データ */
+  const kizaiMasterList: KizaiImportTypes[] = Array.from(
+    new Map(
+      data
+        .map((d) => ({
+          kizai_nam: d.kizai_nam,
+          section_nam: d.section_nam,
+          el_num: d.el_num,
+          shozoku_id: d.shozoku_id,
+          bld_cod: d.bld_cod,
+          tana_cod: d.tana_cod,
+          eda_cod: d.eda_cod,
+          kizai_grp_cod: d.kizai_grp_cod,
+          dsp_ord_num: d.dsp_ord_num,
+          mem: d.mem,
+          dai_bumon_nam: d.dai_bumon_nam,
+          bumon_nam: d.bumon_nam,
+          shukei_bumon_nam: d.shukei_bumon_nam,
+          dsp_flg: d.dsp_flg,
+          ctn_flg: d.ctn_flg,
+          def_dat_qty: d.def_dat_qty,
+          reg_amt: d.reg_amt,
+          rank_amt_1: d.rank_amt_1,
+          rank_amt_2: d.rank_amt_2,
+          rank_amt_3: d.rank_amt_3,
+          rank_amt_4: d.rank_amt_4,
+          rank_amt_5: d.rank_amt_5,
+        }))
+        .filter((d) => d.kizai_nam && d.kizai_nam.trim() !== '')
+        .map((v) => [v.kizai_nam, v])
+    ).values()
+  );
+  /* 重複のないRFID用データ */
+  const rfidList: RfidImportTypes[] = Array.from(
+    new Map(
+      data
+        .map((d) => ({
+          rfid_tag_id: d.rfid_tag_id,
+          kizai_nam: d.kizai_nam,
+          rfid_kizai_sts: d.rfid_kizai_sts,
+          del_flg: d.del_flg,
+          shozoku_id: d.shozoku_id,
+          mem: d.mem,
+        }))
+        .filter((d) => d.rfid_tag_id && d.rfid_tag_id.trim() !== '')
+        .map((v) => [v.rfid_tag_id, v])
+    ).values()
+  );
 
   /* トランザクション */
   const connection = await pool.connect();
@@ -112,12 +136,9 @@ const checkRfid = async (list: RfidImportTypes[], connection: PoolClient) => {
   if (!Array.isArray(list) || list.length === 0) {
     return [];
   }
-  // 重複を削除したリスト
-  const uniqueList = Array.from(new Map(list.map((v) => [v.rfid_tag_id, v])).values());
-
   try {
     // インポートしたRFIDタグID
-    const rfidTagIds = uniqueList.map((v) => v.rfid_tag_id);
+    const rfidTagIds = list.map((v) => v.rfid_tag_id);
     // m_rfidから既存のRFIDタグIDを取得
     const existingTagsResult = await connection.query(
       `SELECT rfid_tag_id FROM m_rfid WHERE rfid_tag_id = ANY($1::text[]);`,
@@ -126,7 +147,7 @@ const checkRfid = async (list: RfidImportTypes[], connection: PoolClient) => {
     // 既存のRFIDタグIDを取得
     const existingRfidTags = new Set(existingTagsResult.rows.map((row) => row.rfid_tag_id));
     // 新規登録するデータ
-    const insertList = uniqueList.filter((v) => !existingRfidTags.has(v.rfid_tag_id));
+    const insertList = list.filter((v) => !existingRfidTags.has(v.rfid_tag_id));
 
     // 新規登録するデータがあれば新規登録処理
     if (insertList.length > 0) {
@@ -187,7 +208,7 @@ const checkRfid = async (list: RfidImportTypes[], connection: PoolClient) => {
 
     // 更新処理
     // 全データ比較準備
-    const placeholders = uniqueList
+    const placeholders = list
       .map((_, index) => {
         const start = index * 6 + 1;
         return `($${start}, $${start + 1}, $${start + 2}, $${start + 3}, $${start + 4}, $${start + 5})`;
@@ -214,7 +235,7 @@ const checkRfid = async (list: RfidImportTypes[], connection: PoolClient) => {
       )
       SELECT rfid_tag_id, kizai_id, rfid_kizai_sts, del_flg, shozoku_id, mem FROM imported_only
       `,
-      uniqueList.flatMap((v) => [v.rfid_tag_id, v.kizai_nam, v.rfid_kizai_sts, v.del_flg, v.shozoku_id, v.mem])
+      list.flatMap((v) => [v.rfid_tag_id, v.kizai_nam, v.rfid_kizai_sts, v.del_flg, v.shozoku_id, v.mem])
     );
     console.log(differnces.rows);
     const updateList = differnces.rows;
@@ -272,9 +293,6 @@ const checkKizai = async (list: KizaiImportTypes[], connection: PoolClient) => {
   if (!Array.isArray(list) || list.length === 0) {
     return [];
   }
-  // 重複を削除したリスト
-  const uniqueList = Array.from(new Map(list.map((v) => [v.kizai_nam, v])).values());
-
   // 一時テーブル用のインポートしたデータ準備
   const allColumns = [
     'kizai_nam',
@@ -300,13 +318,13 @@ const checkKizai = async (list: KizaiImportTypes[], connection: PoolClient) => {
     'rank_amt_4',
     'rank_amt_5',
   ];
-  const kizaiPlaceholders = uniqueList
+  const kizaiPlaceholders = list
     .map((_, index) => {
       const start = index * allColumns.length + 1;
       return `(${allColumns.map((_, i) => `$${start + i}`).join(',')})`;
     })
     .join(',');
-  const kizaiValues = uniqueList.flatMap((v) =>
+  const kizaiValues = list.flatMap((v) =>
     allColumns.map((col) => {
       const value = v[col as keyof KizaiImportTypes];
       return value === undefined ? null : value;
@@ -414,9 +432,7 @@ const checkDaibumon = async (list: string[], connection: PoolClient) => {
   if (!Array.isArray(list) || list.length === 0) {
     return [];
   }
-  // 重複を削除したリスト
-  const uniqueList = [...new Set(list)];
-  const placeholders = uniqueList.map((_, index) => `($${index + 1})`).join(',');
+  const placeholders = list.map((_, index) => `($${index + 1})`).join(',');
   // 現在の日付とユーザー情報
   const addDat = toJapanTimeString();
   const addUser = 'excel_import';
@@ -439,15 +455,15 @@ const checkDaibumon = async (list: string[], connection: PoolClient) => {
       SELECT
         ${maxId} + ROW_NUMBER() OVER (ORDER BY id.dai_bumon_nam),
         id.dai_bumon_nam,
-        $${uniqueList.length + 1}::timestamp,
-        $${uniqueList.length + 2}
+        $${list.length + 1}::timestamp,
+        $${list.length + 2}
       FROM
         imported_data id
       WHERE
         id.dai_bumon_nam NOT IN (SELECT dai_bumon_nam FROM existing_data)
       RETURNING *;
     `,
-      [...uniqueList, addDat, addUser]
+      [...list, addDat, addUser]
     );
     if (data) {
       return data.rows;
@@ -469,10 +485,7 @@ const checkShukeibumon = async (list: string[], connection: PoolClient) => {
   if (!Array.isArray(list) || list.length === 0) {
     return [];
   }
-  // 重複を削除したリスト
-  const uniqueList = [...new Set(list)];
-
-  const placeholders = uniqueList.map((_, index) => `($${index + 1})`).join(',');
+  const placeholders = list.map((_, index) => `($${index + 1})`).join(',');
   // 現在の日付とユーザー情報
   const addDat = toJapanTimeString();
   const addUser = 'excel_import';
@@ -496,15 +509,15 @@ const checkShukeibumon = async (list: string[], connection: PoolClient) => {
       SELECT
         ${maxId} + ROW_NUMBER() OVER (ORDER BY id.shukei_bumon_nam),
         id.shukei_bumon_nam,
-        $${uniqueList.length + 1}::timestamp,
-        $${uniqueList.length + 2}
+        $${list.length + 1}::timestamp,
+        $${list.length + 2}
       FROM
         imported_data id
       WHERE
         id.shukei_bumon_nam NOT IN (SELECT shukei_bumon_nam FROM existing_data)
       RETURNING *;
     `,
-      [...uniqueList, addDat, addUser]
+      [...list, addDat, addUser]
     );
     if (data) {
       return data.rows;
@@ -529,18 +542,15 @@ const checkBumon = async (
   if (!Array.isArray(list) || list.length === 0) {
     return [];
   }
-  // 重複を削除したリスト
-  const uniqueList = Array.from(new Map(list.map((v) => [v.bumon_nam, v])).values());
-
   // 一時テーブル用のインポートしたデータ準備
   const allColumns = ['bumon_nam', 'dai_bumon_nam', 'shukei_bumon_nam'];
-  const bumonPlaceholders = uniqueList
+  const bumonPlaceholders = list
     .map((_, index) => {
       const start = index * allColumns.length + 1;
       return `(${allColumns.map((_, i) => `$${start + i}`).join(',')})`;
     })
     .join(',');
-  const bumonValues = uniqueList.flatMap((v) =>
+  const bumonValues = list.flatMap((v) =>
     allColumns.map((col) => {
       const value = v[col as keyof { bumon_nam: string; dai_bumon_nam: string; shukei_bumon_nam: string }];
       return value === undefined ? null : value;
@@ -608,11 +618,8 @@ const checkTanaban = async (list: TanabanImportTypes[], connection: PoolClient) 
   if (!Array.isArray(list) || list.length === 0) {
     return [];
   }
-  // 重複を削除したリスト
-  const uniqueList = list.filter((d) => d.bld_cod && d.tana_cod && d.eda_cod);
-
   // プレースホルダーを動的に生成 e.g., ($1, $2, $3), ($4, $5, $6), ...
-  const placeholders = uniqueList
+  const placeholders = list
     .map((_, index) => {
       const start = index * 3 + 1;
       return `($${start}, $${start + 1}, $${start + 2})`;
@@ -620,7 +627,7 @@ const checkTanaban = async (list: TanabanImportTypes[], connection: PoolClient) 
     .join(',');
 
   // プレースホルダーに渡す値をフラットな配列に変換
-  const values = uniqueList.flatMap((item) => [item.bld_cod, item.tana_cod, item.eda_cod]);
+  const values = list.flatMap((item) => [item.bld_cod, item.tana_cod, item.eda_cod]);
 
   // 現日時取得
   const addDate = toJapanTimeString();

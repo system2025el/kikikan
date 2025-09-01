@@ -5,7 +5,6 @@ import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
 import { utils } from 'xlsx';
 
-import pool from '@/app/_lib/db/postgres';
 import { selectAllRfidWithKizai } from '@/app/_lib/db/tables/m-rfid';
 
 // .tz()を使う準備
