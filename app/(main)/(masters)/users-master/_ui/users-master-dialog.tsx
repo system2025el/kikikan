@@ -71,7 +71,7 @@ export const UsersMasterDialog = ({
       refetchUsers();
     } else {
       if (action === 'save') {
-        await updateUser(data, userId);
+        // await updateUser(data, userId);
         handleCloseDialog();
         refetchUsers();
       } else if (action === 'delete') {
@@ -80,7 +80,7 @@ export const UsersMasterDialog = ({
       } else if (action === 'restore') {
         // 有効化ボタン
         const values = await getValues();
-        await updateUser({ ...values, delFlg: false }, userId);
+        // await updateUser({ ...values, delFlg: false }, userId);
         handleCloseDialog();
         refetchUsers();
       }
@@ -107,7 +107,7 @@ export const UsersMasterDialog = ({
   /* 削除確認ダイアログで削除選択時 */
   const handleConfirmDelete = async () => {
     const values = await getValues();
-    await updateUser({ ...values, delFlg: true }, userId);
+    // await updateUser({ ...values, delFlg: true }, userId);
     setDeleteOpen(false);
     handleCloseDialog();
     await refetchUsers();

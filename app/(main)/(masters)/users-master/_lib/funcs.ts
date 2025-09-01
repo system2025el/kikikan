@@ -12,7 +12,7 @@ import { UsersMasterDialogValues, UsersMasterTableValues } from './types';
 
 /**
  * 担当者マスタテーブルのデータを取得する関数
- * @param query 検索キーワード
+ * @param query 検索キーワード モック修正が必要、IDの部分
  * @returns {Promise<UsersMasterTableValues[]>} 担当者マスタテーブルに表示するデータ（ 検索キーワードが空の場合は全て ）
  */
 export const getFilteredUsers = async (query: string = '') => {
@@ -26,7 +26,7 @@ export const getFilteredUsers = async (query: string = '') => {
       return [];
     }
     const filteredUsers: UsersMasterTableValues[] = data.map((d, index) => ({
-      tantouId: d.instance_id,
+      tantouId: index,
       tantouNam: d.user_nam,
       tblDspId: index + 1,
       delFlg: Boolean(d.del_flg),
@@ -74,8 +74,8 @@ export const getChosenUser = async (id: number) => {
 export const addNewUser = async (data: UsersMasterDialogValues) => {
   console.log(data.tantouNam);
   try {
-    await insertNewUser(data);
-    await revalidatePath('/users-master');
+    // await insertNewUser(data);
+    // await revalidatePath('/users-master');
   } catch (error) {
     console.log('DB接続エラー', error);
     throw error;
