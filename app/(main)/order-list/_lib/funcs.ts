@@ -28,7 +28,7 @@ export const getFilteredOrderList = async (query: OrderSearchValues) => {
       koenbasho_nam as "koenbashoNam", kokyaku_nam as "kokyakuNam", juchu_dat as "juchuDat", 
       juchu_str_dat as "juchuStrDat", juchu_end_dat as "juchuEndDat", nyushuko_sts_nam as "nyushukoStsNam"
     FROM
-      v_juchu_lst 
+      dev2.v_juchu_lst 
   `;
   const queryParams = [];
   const whereClauses = [];
@@ -142,7 +142,6 @@ export const getFilteredOrderList = async (query: OrderSearchValues) => {
   console.log('With Parameters:', queryParams);
 
   try {
-    await pool.query(`SET search_path TO dev2;`);
     // 処理実行
     const data = await pool.query(sqlQuery, queryParams);
     if (data) {
