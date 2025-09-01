@@ -53,7 +53,7 @@ export const VehiclesMasterTable = ({
   /* 情報が変わったときに更新される */
   const refetchVehs = async () => {
     setIsLoading(true);
-    const updated = await getFilteredVehs('');
+    const updated = await getFilteredVehs();
     setTheVehs(updated);
     setIsLoading(false);
   };

@@ -1,7 +1,8 @@
 'use server';
 
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
-import { EqptsMasterDialogValues, zeroToNull } from '@/app/(main)/(masters)/eqpt-master/_lib/types';
+import { zeroToNull } from '@/app/(main)/(masters)/_lib/value-converters';
+import { EqptsMasterDialogValues } from '@/app/(main)/(masters)/eqpt-master/_lib/types';
 
 import pool from '../postgres';
 import { SCHEMA, supabase } from '../supabase';
@@ -158,6 +159,41 @@ export const selectActiveEqpts = async (query: string) => {
   try {
     await pool.query(` SET search_path TO dev2;`);
     return await pool.query(sqlQuery, values);
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
+ * セットになっている機材リストを取得する関数
+ * @param setIds 選択された機材のセットになってる機材IDリスト
+ * @returns 機材IDが一致する機材リスト
+ */
+export const selectBundledEqpts = async (setIds: number[]) => {
+  const placeholders = setIds.map((_, i) => `$${i + 1}`).join(',');
+  const query = `
+          SELECT
+            k.kizai_id as "kizaiId",
+            k.kizai_nam as "kizaiNam",
+            s.shozoku_nam as "shozokuNam",
+            k.bumon_id as "bumonId",
+            k.kizai_grp_cod as "kizaiGrpCod"
+          FROM
+            dev2.m_kizai as k
+          INNER JOIN
+            dev2.m_shozoku as s
+          ON
+            k.shozoku_id = s.shozoku_id
+          WHERE
+            k.del_flg <> 1
+            AND k.dsp_flg <> 0
+            AND k.kizai_id IN (${placeholders})
+          ORDER BY
+            k.kizai_grp_cod,
+            k.dsp_ord_num;
+        `;
+  try {
+    return await pool.query(query, setIds);
   } catch (e) {
     throw e;
   }

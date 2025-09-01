@@ -2,8 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 
-import pool from '@/app/_lib/db/postgres';
-import { SCHEMA, supabase } from '@/app/_lib/db/supabase';
+import { insertNewLoc, SelectFilteredLocs, selectOneLoc, upDateLocDB } from '@/app/_lib/db/tables/m-koenbasho';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { emptyLoc } from './datas';
@@ -14,52 +13,35 @@ import { LocsMasterDialogValues, LocsMasterTableValues } from './types';
  * @param query 検索キーワード
  * @returns {Promise<LocsMasterTableValues[]>} 公演場所マスタテーブルに表示するデータ（ 検索キーワードが空の場合は全て ）
  */
-export const getFilteredLocs = async (query: string) => {
-  const builder = supabase
-    .schema(SCHEMA)
-    .from('m_koenbasho')
-    .select('koenbasho_id, koenbasho_nam, adr_shozai, adr_tatemono, adr_sonota, tel,  fax, mem, dsp_flg, del_flg') // テーブルに表示するカラム
-    // あいまい検索、場所名、場所名かな、住所、電話番号、fax番号
-
-    .order('dsp_ord_num'); // 並び順
-
-  if (query && query.trim() !== '') {
-    builder.or(
-      `koenbasho_nam.ilike.%${query}%, kana.ilike.%${query}%, adr_shozai.ilike.%${query}%, adr_tatemono.ilike.%${query}%, adr_sonota.ilike.%${query}%, tel.ilike.%${query}%, fax.ilike.%${query}%`
-    );
-  }
-
+export const getFilteredLocs = async (query: string = '') => {
   try {
-    const { data, error } = await builder;
-    if (!error) {
-      console.log('I got a datalist from db', data.length);
-      if (!data || data.length === 0) {
-        return [];
-      } else {
-        const filteredLocs: LocsMasterTableValues[] = data.map((d, index) => ({
-          locId: d.koenbasho_id,
-          locNam: d.koenbasho_nam,
-          adrShozai: d.adr_shozai,
-          adrTatemono: d.adr_tatemono,
-          adrSonota: d.adr_sonota,
-          tel: d.tel,
-          fax: d.fax,
-          mem: d.mem,
-          dspFlg: Boolean(d.dsp_flg),
-          tblDspId: index + 1,
-          delFlg: Boolean(d.del_flg),
-        }));
-        console.log(filteredLocs.length);
-        return filteredLocs;
-      }
-    } else {
-      console.error('公演場所情報取得エラー。', { message: error.message, code: error.code });
+    const { data, error } = await SelectFilteredLocs(query);
+    if (error) {
+      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
+      throw error;
+    }
+    if (!data || data.length === 0) {
       return [];
     }
+    const filteredLocs: LocsMasterTableValues[] = data.map((d, index) => ({
+      locId: d.koenbasho_id,
+      locNam: d.koenbasho_nam,
+      adrShozai: d.adr_shozai,
+      adrTatemono: d.adr_tatemono,
+      adrSonota: d.adr_sonota,
+      tel: d.tel,
+      fax: d.fax,
+      mem: d.mem,
+      dspFlg: Boolean(d.dsp_flg),
+      tblDspId: index + 1,
+      delFlg: Boolean(d.del_flg),
+    }));
+    console.log(filteredLocs.length);
+    return filteredLocs;
   } catch (e) {
     console.error('例外が発生しました:', e);
+    throw e;
   }
-  revalidatePath('/locations-master');
 };
 
 /**
@@ -69,40 +51,33 @@ export const getFilteredLocs = async (query: string) => {
  */
 export const getChosenLoc = async (id: number) => {
   try {
-    const { data, error } = await supabase
-      .schema(SCHEMA)
-      .from('m_koenbasho')
-      .select(
-        'koenbasho_id, koenbasho_nam, kana, del_flg, adr_post, adr_shozai, adr_tatemono, adr_sonota, tel, tel_mobile, fax, mail,  mem, dsp_flg'
-      )
-      .eq('koenbasho_id', id)
-      .single();
-    if (!error) {
-      console.log('I got a datalist from db', data.del_flg);
-
-      const locDetails: LocsMasterDialogValues = {
-        locNam: data.koenbasho_nam,
-        adrPost: data.adr_post,
-        adrShozai: data.adr_shozai,
-        adrTatemono: data.adr_tatemono,
-        adrSonota: data.adr_sonota,
-        tel: data.tel,
-        fax: data.fax,
-        mem: data.mem,
-        kana: data.kana,
-        dspFlg: Boolean(data.dsp_flg),
-        telMobile: data.tel_mobile,
-        delFlg: Boolean(data.del_flg),
-      };
-      console.log(locDetails.delFlg);
-      return locDetails;
-    } else {
-      console.error('公演場所情報取得エラー。', { message: error.message, code: error.code });
+    const { data, error } = await selectOneLoc(id);
+    if (error) {
+      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
+      throw error;
+    }
+    if (!data) {
       return emptyLoc;
     }
+    const locDetails: LocsMasterDialogValues = {
+      locNam: data.koenbasho_nam,
+      adrPost: data.adr_post,
+      adrShozai: data.adr_shozai,
+      adrTatemono: data.adr_tatemono,
+      adrSonota: data.adr_sonota,
+      tel: data.tel,
+      fax: data.fax,
+      mem: data.mem,
+      kana: data.kana,
+      dspFlg: Boolean(data.dsp_flg),
+      telMobile: data.tel_mobile,
+      delFlg: Boolean(data.del_flg),
+    };
+    console.log(locDetails.delFlg);
+    return locDetails;
   } catch (e) {
     console.error('例外が発生しました:', e);
-    return emptyLoc;
+    throw e;
   }
 };
 
@@ -111,53 +86,14 @@ export const getChosenLoc = async (id: number) => {
  * @param data フォームで取得した公演場所情報
  */
 export const addNewLoc = async (data: LocsMasterDialogValues) => {
-  console.log(data.mem);
-
-  const query = `
-      INSERT INTO m_koenbasho (
-        koenbasho_id, koenbasho_nam, kana, del_flg, dsp_ord_num,
-        adr_post, adr_shozai, adr_tatemono, adr_sonota,
-        tel, tel_mobile, fax, mail,
-        mem, dsp_flg, add_dat, add_user, upd_dat, upd_user
-      )
-      VALUES (
-        (SELECT coalesce(max(koenbasho_id),0) + 1 FROM m_koenbasho),
-        $1, $2, $3,
-        (SELECT coalesce(max(dsp_ord_num),0) + 1 FROM m_koenbasho),
-        $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17
-      );
-    `;
-
-  const date = toJapanTimeString();
+  console.log(data.locNam);
   try {
-    console.log('DB Connected');
-    await pool.query(` SET search_path TO dev2;`);
-
-    await pool.query(query, [
-      data.locNam,
-      data.kana,
-      Number(data.delFlg),
-      data.adrPost,
-      data.adrShozai,
-      data.adrTatemono,
-      data.adrSonota,
-      data.tel,
-      data.telMobile,
-      data.fax,
-      data.mail,
-      data.mem,
-      Number(data.dspFlg),
-      date,
-      'shigasan',
-      null,
-      null,
-    ]);
-    console.log('data : ', data);
+    await insertNewLoc(data);
+    await revalidatePath('/locations-master');
   } catch (error) {
     console.log('DB接続エラー', error);
     throw error;
   }
-  await revalidatePath('/locations-master');
 };
 
 /**
@@ -166,8 +102,8 @@ export const addNewLoc = async (data: LocsMasterDialogValues) => {
  * @param id 更新する公演場所マスタID
  */
 export const updateLoc = async (data: LocsMasterDialogValues, id: number) => {
-  console.log('Update!!!', data.mem);
-  const missingData = {
+  const date = toJapanTimeString();
+  const updateData = {
     koenbasho_nam: data.locNam,
     kana: data.kana,
     del_flg: Number(data.delFlg),
@@ -181,33 +117,15 @@ export const updateLoc = async (data: LocsMasterDialogValues, id: number) => {
     mail: data.mail,
     mem: data.mem,
     dsp_flg: Number(data.dspFlg),
-  };
-  console.log(missingData.del_flg);
-  const date = toJapanTimeString();
-
-  const theData = {
-    ...missingData,
     upd_dat: date,
     upd_user: 'test_user',
   };
-  console.log(theData.koenbasho_nam);
-
+  console.log(updateData.koenbasho_nam);
   try {
-    const { error: updateError } = await supabase
-      .schema(SCHEMA)
-      .from('m_koenbasho')
-      .update({ ...theData })
-      .eq('koenbasho_id', id);
-
-    if (updateError) {
-      console.error('更新に失敗しました:', updateError.message);
-      throw updateError;
-    } else {
-      console.log('公演場所を更新しました : ', theData.del_flg);
-    }
+    await upDateLocDB(updateData, id);
+    revalidatePath('/locations-master');
   } catch (error) {
     console.log('例外が発生', error);
     throw error;
   }
-  revalidatePath('/locations-master');
 };

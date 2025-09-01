@@ -4,6 +4,9 @@ import pool from '@/app/_lib/db/postgres';
 import { SCHEMA, supabase } from '@/app/_lib/db/supabase';
 import { selectActiveBumons } from '@/app/_lib/db/tables/m-bumon';
 import { selectActiveDaibumons } from '@/app/_lib/db/tables/m-daibumon';
+import { selectBundledEqpts } from '@/app/_lib/db/tables/m-kizai';
+import { selectBundledEqptIds } from '@/app/_lib/db/tables/m-kizai-set';
+import { selectActiveCustomer } from '@/app/_lib/db/tables/m-kokyaku';
 import { selectActiveShozokus } from '@/app/_lib/db/tables/m-shozoku';
 import { selectActiveShukeibumons } from '@/app/_lib/db/tables/m-shukeibumon';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
@@ -186,28 +189,21 @@ export const getAllBumonDSSelections = async (): Promise<{
  */
 export const getBumonsForEqptSelection = async () => {
   try {
-    const { data, error } = await supabase
-      .schema(SCHEMA)
-      .from('m_bumon')
-      .select('bumon_id, bumon_nam')
-      .neq('del_flg', 1)
-      .order('dsp_ord_num');
-    if (!error) {
-      if (!data || data.length === 0) {
-        return [];
-      } else {
-        const selectElements = data.map((d, index) => ({
-          id: d.bumon_id,
-          label: d.bumon_nam,
-          tblDspNum: index,
-        }));
-        console.log('部門が', selectElements.length, '件');
-        return selectElements;
-      }
-    } else {
+    const { data, error } = await selectActiveBumons();
+    if (error) {
       console.error('DB情報取得エラー', error.message, error.cause, error.hint);
+      throw error;
+    }
+    if (!data || data.length === 0) {
       return [];
     }
+    const selectElements = data.map((d, index) => ({
+      id: d.bumon_id,
+      label: d.bumon_nam,
+      tblDspNum: index,
+    }));
+    console.log('部門が', selectElements.length, '件');
+    return selectElements;
   } catch (e) {
     console.error('例外が発生しました:', e);
     throw e;
@@ -220,87 +216,46 @@ export const getBumonsForEqptSelection = async () => {
  * @returns セットオプションの機材の配列、もともと選ばれていたり、なかった場合はから配列を返す
  */
 export const CheckSetoptions = async (idList: number[]) => {
-  // 選ばれた機材たちのIDのリストをカンマ区切りの文字列にする
-  const idListString = idList.join(',');
   try {
-    await pool.query(` SET search_path TO dev2;`);
-    const setIdList = await pool.query(
-      `
-      SELECT
-        kizai_id
-      FROM
-        m_kizai_set
-      WHERE
-        set_kizai_id IN (${idListString})
-      GROUP BY
-        kizai_id
-      `
-    );
-    console.log('setIdList : ', setIdList.rows);
-    const setIdListArray = setIdList.rows.map((l) => l.kizai_id).filter((kizai_id) => !idList.includes(kizai_id));
+    const setIdList = await selectBundledEqptIds(idList);
+    console.log('setId List : ', setIdList.rows);
+    const setIdListSet = new Set(setIdList.rows);
+    const setIdListArray = [...setIdListSet].map((l) => l.kizai_id).filter((kizai_id) => !idList.includes(kizai_id));
     console.log('setIdListArray : ', setIdListArray);
     // セットオプションリストが空なら空配列を返して終了
     if (setIdListArray.length === 0) return [];
-    const idListArrayString = setIdListArray.join(',');
-    const data = await pool.query(
-      `
-      SELECT
-        k.kizai_id as "kizaiId",
-        k.kizai_nam as "kizaiNam",
-        s.shozoku_nam as "shozokuNam",
-        k.bumon_id as "bumonId",
-        k.kizai_grp_cod as "kizaiGrpCod"
-      FROM
-        dev2.m_kizai as k
-      INNER JOIN
-        dev2.m_shozoku as s
-      ON
-        k.shozoku_id = s.shozoku_id
-      WHERE
-        k.del_flg <> 1
-        AND k.dsp_flg <> 0
-        AND k.kizai_id IN (${idListArrayString})
-      ORDER BY
-        k.kizai_grp_cod,
-        k.dsp_ord_num;
-      `
-    );
+    const data = await selectBundledEqpts(setIdListArray);
     console.log('set options : ', data.rows);
-    if (data && data.rows) {
-      return data.rows;
+    if (!data || data.rowCount === 0) {
+      return [];
     }
-    return [];
+    return data.rows;
   } catch (e) {
     console.error('例外が発生しました:', e);
     throw e;
   }
 };
 
-/* 選択肢に使う顧客リスト */
+/**
+ * 選択肢に使う顧客リストを取得する関数
+ * @returns 選択肢に使う顧客リスト
+ */
 export const getCustomerSelection = async (): Promise<{ kokyakuId: number; kokyakuNam: string }[]> => {
   try {
-    const { data, error } = await supabase
-      .schema(SCHEMA)
-      .from('m_kokyaku')
-      .select('kokyaku_id, kokyaku_nam')
-      .neq('dsp_flg', 0)
-      .neq('del_flg', 1);
-
-    if (!error) {
-      if (!data || data.length === 0) {
-        return [];
-      } else {
-        const selectElements = data.map((d) => ({
-          kokyakuId: d.kokyaku_id,
-          kokyakuNam: d.kokyaku_nam,
-        }));
-        console.log('顧客が', selectElements.length, '件');
-        return selectElements;
-      }
-    } else {
+    const { data, error } = await selectActiveCustomer();
+    if (error) {
       console.error('DB情報取得エラー', error.message, error.cause, error.hint);
+      throw error;
+    }
+    if (!data || data.length === 0) {
       return [];
     }
+    const selectElements = data.map((d) => ({
+      kokyakuId: d.kokyaku_id,
+      kokyakuNam: d.kokyaku_nam,
+    }));
+    console.log('顧客が', selectElements.length, '件');
+    return selectElements;
   } catch (e) {
     console.error('例外が発生', e);
     throw e;

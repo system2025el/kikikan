@@ -2,11 +2,9 @@
 
 import { revalidatePath } from 'next/cache';
 
-import pool from '@/app/_lib/db/postgres';
-import { SCHEMA, supabase } from '@/app/_lib/db/supabase';
 import {
   insertNewCustomer,
-  SelectFilteredCustomers,
+  selectFilteredCustomers,
   selectOneCustomer,
   upDateCustomerDB,
 } from '@/app/_lib/db/tables/m-kokyaku';
@@ -22,7 +20,7 @@ import { CustomersMasterDialogValues, CustomersMasterTableValues } from './types
  */
 export const getFilteredCustomers = async (query: string = '') => {
   try {
-    const { data, error } = await SelectFilteredCustomers(query);
+    const { data, error } = await selectFilteredCustomers(query);
     if (error) {
       console.error('DB情報取得エラー', error.message, error.cause, error.hint);
       throw error;
@@ -99,8 +97,7 @@ export const getChosenCustomer = async (id: number) => {
  * @param data フォームで取得した顧客情報
  */
 export const addNewCustomer = async (data: CustomersMasterDialogValues) => {
-  console.log(data.mem);
-
+  console.log(data.kokyakuNam);
   try {
     await insertNewCustomer(data);
     await revalidatePath('/customers-master');

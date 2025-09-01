@@ -54,7 +54,7 @@ export const LocationsMasterTable = ({
   /* 情報が変わったときに更新される */
   const refetchLocs = async () => {
     setIsLoading(true);
-    const updated = await getFilteredLocs('');
+    const updated = await getFilteredLocs();
     setTheLocs(updated);
     setIsLoading(false);
   };

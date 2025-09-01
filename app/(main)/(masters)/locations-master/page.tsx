@@ -2,7 +2,7 @@ import { getFilteredLocs } from './_lib/funcs';
 import { LocationsMaster } from './_ui/locations-master';
 
 const Page = async () => {
-  const locs = await getFilteredLocs('');
+  const locs = await getFilteredLocs();
   console.log('aaaaaaaa');
   return (
     <>

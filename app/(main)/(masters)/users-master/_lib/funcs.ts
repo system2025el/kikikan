@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 
 import pool from '@/app/_lib/db/postgres';
 import { SCHEMA, supabase } from '@/app/_lib/db/supabase';
+import { insertNewUser, SelectFilteredUsers, selectOneUser, upDateUserDB } from '@/app/_lib/db/tables/m-user';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { emptyUser } from './data';
@@ -14,38 +15,28 @@ import { UsersMasterDialogValues, UsersMasterTableValues } from './types';
  * @param query 検索キーワード
  * @returns {Promise<UsersMasterTableValues[]>} 担当者マスタテーブルに表示するデータ（ 検索キーワードが空の場合は全て ）
  */
-export const getFilteredUsers = async (query: string) => {
+export const getFilteredUsers = async (query: string = '') => {
   try {
-    const { data, error } = await supabase
-      .schema(SCHEMA)
-      .from('m_user')
-      .select('instance_id, user_nam, del_flg') // テーブルに表示するカラム
-      .ilike('user_nam', `%${query}%`)
-      //   // あいまい検索、担当者名、担当者名かな、住所、電話番号、fax番号
-      //   .or(`user_nam.ilike.%${query}%`)
-      .order('dsp_ord_num'); // 並び順
-    if (!error) {
-      console.log('I got a datalist from db', data.length);
-      if (!data || data.length === 0) {
-        return [];
-      } else {
-        const filteredUsers: UsersMasterTableValues[] = data.map((d, index) => ({
-          tantouId: d.instance_id,
-          tantouNam: d.user_nam,
-          tblDspId: index + 1,
-          delFlg: Boolean(d.del_flg),
-        }));
-        console.log(filteredUsers.length);
-        return filteredUsers;
-      }
-    } else {
-      console.error('担当者情報取得エラー。', { message: error.message, code: error.code });
+    const { data, error } = await SelectFilteredUsers(query);
+    if (error) {
+      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
+      throw error;
+    }
+    if (!data || data.length === 0) {
       return [];
     }
+    const filteredUsers: UsersMasterTableValues[] = data.map((d, index) => ({
+      tantouId: d.instance_id,
+      tantouNam: d.user_nam,
+      tblDspId: index + 1,
+      delFlg: Boolean(d.del_flg),
+    }));
+    console.log(filteredUsers.length);
+    return filteredUsers;
   } catch (e) {
     console.error('例外が発生しました:', e);
+    throw e;
   }
-  revalidatePath('/users-master');
 };
 
 /**
@@ -55,28 +46,24 @@ export const getFilteredUsers = async (query: string) => {
  */
 export const getChosenUser = async (id: number) => {
   try {
-    const { data, error } = await supabase
-      .schema(SCHEMA)
-      .from('m_user')
-      .select('user_nam, del_flg, mem')
-      .eq('instance_id', id)
-      .single();
-    if (!error) {
-      console.log('I got a datalist from db', data.del_flg);
+    const { data, error } = await selectOneUser(id);
 
-      const UserDetails: UsersMasterDialogValues = {
-        tantouNam: data.user_nam,
-        delFlg: Boolean(data.del_flg),
-      };
-      console.log(UserDetails.delFlg);
-      return UserDetails;
-    } else {
-      console.error('担当者情報取得エラー。', { message: error.message, code: error.code });
+    if (error) {
+      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
+      throw error;
+    }
+    if (!data) {
       return emptyUser;
     }
+    const UserDetails: UsersMasterDialogValues = {
+      tantouNam: data.user_nam,
+      delFlg: Boolean(data.del_flg),
+    };
+    console.log(UserDetails.delFlg);
+    return UserDetails;
   } catch (e) {
     console.error('例外が発生しました:', e);
-    return emptyUser;
+    throw e;
   }
 };
 
@@ -86,31 +73,13 @@ export const getChosenUser = async (id: number) => {
  */
 export const addNewUser = async (data: UsersMasterDialogValues) => {
   console.log(data.tantouNam);
-
-  const query = `
-      INSERT INTO m_user (
-        user_nam, del_flg, dsp_ord_num,
-        add_dat, add_user, upd_dat, upd_user
-      )
-      VALUES (
-        $1, $2,
-        (SELECT coalesce(max(dsp_ord_num),0) + 1 FROM m_user),
-        $3, $4, $5, $6
-      );
-    `;
-
-  const date = toJapanTimeString();
   try {
-    console.log('DB Connected');
-    await pool.query(` SET search_path TO dev2;`);
-
-    await pool.query(query, [data.tantouNam, Number(data.delFlg), date, 'shigasan', null, null]);
-    console.log('data : ', data);
+    await insertNewUser(data);
+    await revalidatePath('/users-master');
   } catch (error) {
     console.log('DB接続エラー', error);
     throw error;
   }
-  await revalidatePath('/users-master');
 };
 
 /**
@@ -119,37 +88,19 @@ export const addNewUser = async (data: UsersMasterDialogValues) => {
  * @param id 更新する担当者マスタID
  */
 export const updateUser = async (data: UsersMasterDialogValues, id: number) => {
-  console.log('Update!!!', data.tantouNam);
-  const missingData = {
+  const date = toJapanTimeString();
+  const updateData = {
     user_nam: data.tantouNam,
     del_flg: Number(data.delFlg),
-  };
-  console.log(missingData.del_flg);
-  const date = toJapanTimeString();
-
-  const theData = {
-    ...missingData,
     upd_dat: date,
     upd_user: 'test_user',
   };
-  console.log(theData.user_nam);
-
+  console.log(updateData.user_nam);
   try {
-    const { error: updateError } = await supabase
-      .schema(SCHEMA)
-      .from('m_user')
-      .update({ ...theData })
-      .eq('instance_id', id);
-
-    if (updateError) {
-      console.error('更新に失敗しました:', updateError.message);
-      throw updateError;
-    } else {
-      console.log('担当者を更新しました : ', theData.del_flg);
-    }
+    await upDateUserDB(updateData, id);
+    revalidatePath('/users-master');
   } catch (error) {
     console.log('例外が発生', error);
     throw error;
   }
-  revalidatePath('/users-master');
 };

@@ -9,10 +9,10 @@ import { SCHEMA, supabase } from '../supabase';
  * @param kokyaku_id 顧客id
  * @returns
  */
-export const SelectKokyaku = async (kokyaku_id: number) => {
+export const selectKokyaku = async (kokyaku_id: number) => {
   try {
     return await supabase
-      .schema('dev2')
+      .schema(SCHEMA)
       .from('m_kokyaku')
       .select('kokyaku_nam, kokyaku_rank')
       .eq('kokyaku_id', kokyaku_id)
@@ -23,11 +23,28 @@ export const SelectKokyaku = async (kokyaku_id: number) => {
 };
 
 /**
+ * 顧客マスタから有効な顧客リストを取得する関数
+ * @returns 有効な顧客のリスト
+ */
+export const selectActiveCustomer = async () => {
+  try {
+    return await supabase
+      .schema(SCHEMA)
+      .from('m_kokyaku')
+      .select('kokyaku_id, kokyaku_nam')
+      .neq('dsp_flg', 0)
+      .neq('del_flg', 1);
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
  * 顧客マスタテーブルのデータを取得する関数
  * @param query 検索キーワード
  * @returns {Promise<CustomersDialogValues[]>} 公演場所マスタテーブルに表示するデータ（ 検索キーワードが空の場合は全て ）
  */
-export const SelectFilteredCustomers = async (query: string) => {
+export const selectFilteredCustomers = async (query: string) => {
   const builder = supabase
     .schema(SCHEMA)
     .from('m_kokyaku')

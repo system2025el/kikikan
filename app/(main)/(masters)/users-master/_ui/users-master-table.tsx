@@ -70,7 +70,7 @@ export const UserssMasterTable = ({
   /* 情報が変わったときに更新される */
   const refetchUsers = async () => {
     setIsLoading(true);
-    const updated = await getFilteredUsers('');
+    const updated = await getFilteredUsers();
     setTheUsers(updated);
     setIsLoading(false);
   };
