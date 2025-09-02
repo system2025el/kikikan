@@ -2,6 +2,7 @@
 
 import { DeleteLock, InsertLock, SelectLock } from '@/app/_lib/db/tables/t-lock';
 
+import { toJapanTimeString } from './date-conversion';
 import { LockValues } from './types';
 
 /**
@@ -28,8 +29,8 @@ export const GetLock = async (lockShubetu: number, headId: number) => {
     const lockData: LockValues = {
       lockShubetu: data.lock_shubetu,
       headId: data.head_id,
-      addDat: data.add_dat,
-      addUser: data.add_user,
+      addDat: data.add_dat ? new Date(data.add_dat) : new Date(),
+      addUser: data.add_user ?? '',
     };
     return lockData;
   } catch (e) {
@@ -47,7 +48,7 @@ export const AddLock = async (lockShubetu: number, headId: number, userNam: stri
   const lockData = {
     lock_shubetu: lockShubetu,
     head_id: headId,
-    add_dat: new Date(),
+    add_dat: toJapanTimeString(),
     add_user: userNam,
   };
   const { error } = await InsertLock(lockData);

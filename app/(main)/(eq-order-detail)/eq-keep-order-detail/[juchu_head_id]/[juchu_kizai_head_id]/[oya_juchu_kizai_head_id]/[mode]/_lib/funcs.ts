@@ -11,6 +11,8 @@ import {
   UpdateKeepJuchuKizaiMeisai,
 } from '@/app/_lib/db/tables/t-juchu-kizai-meisai';
 import { SelectKeepJuchuKizaiMeisai } from '@/app/_lib/db/tables/v-juchu-kizai-meisai';
+import { JuchuKizaiHead } from '@/app/_lib/db/types/t-juchu-kizai-head-type';
+import { JuchuKizaiMeisai } from '@/app/_lib/db/types/t-juchu-kizai-meisai-type';
 import { Database } from '@/app/_lib/db/types/types';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { GetJuchuKizaiNyushuko } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
@@ -33,6 +35,8 @@ export const GetKeepJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHeadI
 
     const juchuDate = await GetJuchuKizaiNyushuko(juchuHeadId, juchuKizaiHeadId);
 
+    if (!juchuDate) throw new Error('受注機材入出庫日が存在しません');
+
     const keepJucuKizaiHeadData: KeepJuchuKizaiHeadValues = {
       juchuHeadId: data.juchu_head_id,
       juchuKizaiHeadId: data.juchu_kizai_head_id,
@@ -40,10 +44,10 @@ export const GetKeepJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHeadI
       mem: data.mem ? data.mem : '',
       headNam: data.head_nam ?? '',
       oyaJuchuKizaiHeadId: data.oya_juchu_kizai_head_id,
-      kicsShukoDat: juchuDate && juchuDate.kicsShukoDat,
-      kicsNyukoDat: juchuDate && juchuDate.kicsNyukoDat,
-      yardShukoDat: juchuDate && juchuDate.yardShukoDat,
-      yardNyukoDat: juchuDate && juchuDate.yardNyukoDat,
+      kicsShukoDat: juchuDate.kicsShukoDat ? new Date(juchuDate.kicsShukoDat) : null,
+      kicsNyukoDat: juchuDate.kicsNyukoDat ? new Date(juchuDate.kicsNyukoDat) : null,
+      yardShukoDat: juchuDate.yardShukoDat ? new Date(juchuDate.yardShukoDat) : null,
+      yardNyukoDat: juchuDate.yardNyukoDat ? new Date(juchuDate.yardNyukoDat) : null,
     };
 
     console.log('keepJucuKizaiHeadData', keepJucuKizaiHeadData);
@@ -66,7 +70,7 @@ export const AddKeepJuchuKizaiHead = async (
   keepJuchuKizaiHeadData: KeepJuchuKizaiHeadValues,
   userNam: string
 ) => {
-  const newData = {
+  const newData: JuchuKizaiHead = {
     juchu_head_id: keepJuchuKizaiHeadData.juchuHeadId,
     juchu_kizai_head_id: keepJuchuKizaiHeadId,
     juchu_kizai_head_kbn: 3,
@@ -74,7 +78,7 @@ export const AddKeepJuchuKizaiHead = async (
     head_nam: keepJuchuKizaiHeadData.headNam,
     oya_juchu_kizai_head_id: keepJuchuKizaiHeadData.oyaJuchuKizaiHeadId,
     ht_kbn: 0,
-    add_dat: new Date(),
+    add_dat: toJapanTimeString(),
     add_user: userNam,
   };
   try {
@@ -100,7 +104,7 @@ export const AddKeepJuchuKizaiHead = async (
  * @returns
  */
 export const UpdKeepJuchuKizaiHead = async (juchuKizaiHeadData: KeepJuchuKizaiHeadValues, userNam: string) => {
-  const updateData = {
+  const updateData: JuchuKizaiHead = {
     juchu_head_id: juchuKizaiHeadData.juchuHeadId,
     juchu_kizai_head_id: juchuKizaiHeadData.juchuKizaiHeadId,
     juchu_kizai_head_kbn: juchuKizaiHeadData.juchuKizaiHeadKbn,
@@ -108,7 +112,7 @@ export const UpdKeepJuchuKizaiHead = async (juchuKizaiHeadData: KeepJuchuKizaiHe
     head_nam: juchuKizaiHeadData.headNam,
     oya_juchu_kizai_head_id: juchuKizaiHeadData.oyaJuchuKizaiHeadId,
     ht_kbn: 0,
-    upd_dat: new Date(),
+    upd_dat: toJapanTimeString(),
     upd_user: userNam,
   };
 
@@ -146,10 +150,10 @@ export const GetKeepJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHea
       juchuKizaiHeadId: d.juchu_kizai_head_id,
       juchuKizaiMeisaiId: d.juchu_kizai_meisai_id,
       shozokuId: d.shozoku_id,
-      shozokuNam: d.shozoku_nam,
+      shozokuNam: d.shozoku_nam ?? '',
       mem: d.mem,
       kizaiId: d.kizai_id,
-      kizaiNam: d.kizai_nam,
+      kizaiNam: d.kizai_nam ?? '',
       oyaPlanKizaiQty: d.plan_kizai_qty,
       oyaPlanYobiQty: d.plan_yobi_qty,
       keepQty: d.keep_qty,
@@ -172,14 +176,14 @@ export const AddKeepJuchuKizaiMeisai = async (
   keepJuchuKizaiMeisaiData: KeepJuchuKizaiMeisaiValues[],
   userNam: string
 ) => {
-  const newData = keepJuchuKizaiMeisaiData.map((d) => ({
+  const newData: JuchuKizaiMeisai[] = keepJuchuKizaiMeisaiData.map((d) => ({
     juchu_head_id: d.juchuHeadId,
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
     kizai_id: d.kizaiId,
     mem: d.mem,
     keep_qty: d.keepQty,
-    add_dat: new Date(),
+    add_dat: toJapanTimeString(),
     add_user: userNam,
     shozoku_id: d.shozokuId,
   }));
@@ -207,14 +211,14 @@ export const AddKeepJuchuKizaiMeisai = async (
  * @returns
  */
 export const UpdKeepJuchuKizaiMeisai = async (juchuKizaiMeisaiData: KeepJuchuKizaiMeisaiValues[], userNam: string) => {
-  const updateData = juchuKizaiMeisaiData.map((d) => ({
+  const updateData: JuchuKizaiMeisai[] = juchuKizaiMeisaiData.map((d) => ({
     juchu_head_id: d.juchuHeadId,
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
     kizai_id: d.kizaiId,
     mem: d.mem,
     keep_qty: d.keepQty,
-    upd_dat: new Date(),
+    upd_dat: toJapanTimeString(),
     upd_user: userNam,
     shozoku_id: d.shozokuId,
   }));

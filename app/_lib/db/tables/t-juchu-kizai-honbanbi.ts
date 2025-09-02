@@ -1,6 +1,7 @@
 'use server';
 
 import { SCHEMA, supabase } from '../supabase';
+import { JuchuKizaiHonbanbi } from '../types/t-juchu-kizai-honbanbi-type';
 
 /**
  * 受注機材本番日取得
@@ -61,16 +62,7 @@ export const SelectHonbanbiConfirm = async (
  * @param userNam ユーザー名
  * @returns
  */
-export const InsertHonbanbi = async (data: {
-  juchu_head_id: number;
-  juchu_kizai_head_id: number;
-  juchu_honbanbi_shubetu_id: number;
-  juchu_honbanbi_dat: string;
-  mem: string | null;
-  juchu_honbanbi_add_qty: number | null;
-  add_dat: Date;
-  add_user: string;
-}) => {
+export const InsertHonbanbi = async (data: JuchuKizaiHonbanbi) => {
   try {
     return await supabase.schema(SCHEMA).from('t_juchu_kizai_honbanbi').insert(data);
   } catch (e) {
@@ -86,18 +78,7 @@ export const InsertHonbanbi = async (data: {
  * @param userNam ユーザー名
  * @returns
  */
-export const InsertAllHonbanbi = async (
-  data: {
-    juchu_head_id: number;
-    juchu_kizai_head_id: number;
-    juchu_honbanbi_shubetu_id: number;
-    juchu_honbanbi_dat: string;
-    mem: string | null;
-    juchu_honbanbi_add_qty: number | null;
-    add_dat: Date;
-    add_user: string;
-  }[]
-) => {
+export const InsertAllHonbanbi = async (data: JuchuKizaiHonbanbi[]) => {
   try {
     return await supabase.schema(SCHEMA).from('t_juchu_kizai_honbanbi').insert(data);
   } catch (e) {
@@ -113,16 +94,7 @@ export const InsertAllHonbanbi = async (
  * @param userNam ユーザー名
  * @returns
  */
-export const UpdateNyushukoHonbanbi = async (data: {
-  juchu_head_id: number;
-  juchu_kizai_head_id: number;
-  juchu_honbanbi_shubetu_id: number;
-  juchu_honbanbi_dat: string;
-  mem: string | null;
-  juchu_honbanbi_add_qty: number | null;
-  upd_dat: Date;
-  upd_user: string;
-}) => {
+export const UpdateNyushukoHonbanbi = async (data: JuchuKizaiHonbanbi) => {
   try {
     return await supabase
       .schema(SCHEMA)
@@ -144,16 +116,7 @@ export const UpdateNyushukoHonbanbi = async (data: {
  * @param userNam ユーザー名
  * @returns
  */
-export const UpdateHonbanbi = async (data: {
-  juchu_head_id: number;
-  juchu_kizai_head_id: number;
-  juchu_honbanbi_shubetu_id: number;
-  juchu_honbanbi_dat: string;
-  mem: string | null;
-  juchu_honbanbi_add_qty: number | null;
-  upd_dat: Date;
-  upd_user: string;
-}) => {
+export const UpdateHonbanbi = async (data: JuchuKizaiHonbanbi) => {
   try {
     return await supabase
       .schema(SCHEMA)

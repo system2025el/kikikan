@@ -4,6 +4,7 @@ import { KeepJuchuKizaiHeadValues } from '@/app/(main)/(eq-order-detail)/eq-keep
 import { JuchuKizaiHeadValues } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_lib/types';
 
 import { SCHEMA, supabase } from '../supabase';
+import { JuchuKizaiHead } from '../types/t-juchu-kizai-head-type';
 
 /**
  * 受注機材ヘッダーid最大値取得
@@ -74,19 +75,7 @@ export const SelectKeepJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHe
  * @param userNam ユーザー名
  * @returns
  */
-export const InsertJuchuKizaiHead = async (data: {
-  juchu_head_id: number;
-  juchu_kizai_head_id: number;
-  juchu_kizai_head_kbn: number;
-  juchu_honbanbi_qty: number | null;
-  nebiki_amt: number | null;
-  mem: string | null;
-  head_nam: string;
-  oya_juchu_kizai_head_id: number | null;
-  ht_kbn: number;
-  add_dat: Date;
-  add_user: string;
-}) => {
+export const InsertJuchuKizaiHead = async (data: JuchuKizaiHead) => {
   try {
     return await supabase.schema(SCHEMA).from('t_juchu_kizai_head').insert(data);
   } catch (e) {
@@ -102,17 +91,7 @@ export const InsertJuchuKizaiHead = async (data: {
  * @param userNam ユーザー名
  * @returns
  */
-export const InsertKeepJuchuKizaiHead = async (data: {
-  juchu_head_id: number;
-  juchu_kizai_head_id: number;
-  juchu_kizai_head_kbn: number;
-  mem: string | null;
-  head_nam: string;
-  oya_juchu_kizai_head_id: number;
-  ht_kbn: number;
-  add_dat: Date;
-  add_user: string;
-}) => {
+export const InsertKeepJuchuKizaiHead = async (data: JuchuKizaiHead) => {
   try {
     return await supabase.schema(SCHEMA).from('t_juchu_kizai_head').insert(data);
   } catch (e) {
@@ -126,19 +105,7 @@ export const InsertKeepJuchuKizaiHead = async (data: {
  * @param userNam ユーザー名
  * @returns
  */
-export const UpdateJuchuKizaiHead = async (data: {
-  juchu_head_id: number;
-  juchu_kizai_head_id: number;
-  juchu_kizai_head_kbn: number;
-  juchu_honbanbi_qty: number | null;
-  nebiki_amt: number | null;
-  mem: string | null;
-  head_nam: string;
-  oya_juchu_kizai_head_id: number | null;
-  ht_kbn: number;
-  upd_dat: Date;
-  upd_user: string;
-}) => {
+export const UpdateJuchuKizaiHead = async (data: JuchuKizaiHead) => {
   try {
     return await supabase
       .schema(SCHEMA)
@@ -157,17 +124,7 @@ export const UpdateJuchuKizaiHead = async (data: {
  * @param userNam ユーザー名
  * @returns
  */
-export const UpdateKeepJuchuKizaiHead = async (data: {
-  juchu_head_id: number;
-  juchu_kizai_head_id: number;
-  juchu_kizai_head_kbn: number;
-  mem: string | null;
-  head_nam: string;
-  oya_juchu_kizai_head_id: number;
-  ht_kbn: number;
-  upd_dat: Date;
-  upd_user: string;
-}) => {
+export const UpdateKeepJuchuKizaiHead = async (data: JuchuKizaiHead) => {
   try {
     return await supabase
       .schema(SCHEMA)

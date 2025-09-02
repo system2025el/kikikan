@@ -33,3 +33,5 @@ export const supabase = createClient<Database>(process.env.SUPABASE_URL!, proces
 });
 
 export const SCHEMA = 'dev2';
+
+export type schema = 'dev2';

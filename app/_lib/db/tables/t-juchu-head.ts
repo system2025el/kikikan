@@ -1,6 +1,7 @@
 'use server';
 
 import { SCHEMA, supabase } from '../supabase';
+import { JuchuHead } from '../types/t-juchu-head-type';
 
 /**
  * 受注ヘッダーid最大値取得
@@ -46,24 +47,7 @@ export const SelectJuchuHead = async (juchuHeadId: number) => {
  * 受注ヘッダー情報新規追加
  * @param juchuHeadId 受注ヘッダーid
  */
-export const InsertJuchuHead = async (data: {
-  juchu_head_id: number;
-  del_flg: number;
-  juchu_sts: number;
-  juchu_dat: Date;
-  juchu_str_dat: Date | string | null;
-  juchu_end_dat: Date | string | null;
-  nyuryoku_user: string;
-  koen_nam: string;
-  koenbasho_nam: string | null;
-  kokyaku_id: number;
-  kokyaku_tanto_nam: string | null;
-  mem: string | null;
-  nebiki_amt: number | null;
-  zei_kbn: number;
-  add_dat: Date;
-  add_user: string;
-}) => {
+export const InsertJuchuHead = async (data: JuchuHead) => {
   try {
     return await supabase.schema(SCHEMA).from('t_juchu_head').insert(data);
   } catch (e) {
@@ -76,24 +60,7 @@ export const InsertJuchuHead = async (data: {
  * @param data 受注ヘッダーデータ
  * @returns 正誤
  */
-export const UpdateJuchuHead = async (data: {
-  juchu_head_id: number;
-  del_flg: number;
-  juchu_sts: number;
-  juchu_dat: Date;
-  juchu_str_dat: Date | string | null;
-  juchu_end_dat: Date | string | null;
-  nyuryoku_user: string;
-  koen_nam: string;
-  koenbasho_nam: string | null;
-  kokyaku_id: number;
-  kokyaku_tanto_nam: string | null;
-  mem: string | null;
-  nebiki_amt: number | null;
-  zei_kbn: number;
-  upd_dat: Date;
-  upd_user: string;
-}) => {
+export const UpdateJuchuHead = async (data: JuchuHead) => {
   try {
     return await supabase.schema(SCHEMA).from('t_juchu_head').update(data).eq('juchu_head_id', data.juchu_head_id);
   } catch (e) {

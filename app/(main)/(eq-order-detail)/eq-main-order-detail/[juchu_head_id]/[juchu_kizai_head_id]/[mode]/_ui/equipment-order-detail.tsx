@@ -140,7 +140,7 @@ const EquipmentOrderDetail = (props: {
   const [juchuHonbanbiDeleteList, setJuchuHonbanbiDeleteList] = useState<JuchuKizaiHonbanbiValues[]>([]);
   // 受注機材明細元合計数
   const [originPlanQty, setOriginPlanQty] = useState<number[]>(
-    props.juchuKizaiMeisaiData ? props.juchuKizaiMeisaiData.map((data) => data.planQty) : []
+    props.juchuKizaiMeisaiData ? props.juchuKizaiMeisaiData.map((data) => data.planQty ?? 0) : []
   );
 
   // 出庫日
@@ -175,7 +175,7 @@ const EquipmentOrderDetail = (props: {
   const [priceTotal, setPriceTotal] = useState(
     juchuKizaiMeisaiList!.reduce(
       (sum, row) =>
-        props.juchuKizaiHeadData.juchuHonbanbiQty !== null
+        props.juchuKizaiHeadData.juchuHonbanbiQty && row.planKizaiQty
           ? sum + row.kizaiTankaAmt * row.planKizaiQty * props.juchuKizaiHeadData.juchuHonbanbiQty
           : 0,
       0
@@ -410,7 +410,7 @@ const EquipmentOrderDetail = (props: {
         if (juchuKizaiMeisaiData) {
           setJuchuKizaiMeisaiList(juchuKizaiMeisaiData);
           setOriginJuchuKizaiMeisaiList(juchuKizaiMeisaiData);
-          setOriginPlanQty(juchuKizaiMeisaiData.map((data) => data.planQty));
+          setOriginPlanQty(juchuKizaiMeisaiData.map((data) => data.planQty ?? 0));
           const updatedEqStockData = await updateEqStock(
             data.juchuHeadId,
             data.juchuKizaiHeadId,
@@ -436,7 +436,7 @@ const EquipmentOrderDetail = (props: {
         if (juchuKizaiMeisaiData) {
           setJuchuKizaiMeisaiList(juchuKizaiMeisaiData);
           setOriginJuchuKizaiMeisaiList(juchuKizaiMeisaiData);
-          setOriginPlanQty(juchuKizaiMeisaiData.map((data) => data.planQty));
+          setOriginPlanQty(juchuKizaiMeisaiData.map((data) => data.planQty ?? 0));
           const updatedEqStockData = await updateEqStock(
             data.juchuHeadId,
             data.juchuKizaiHeadId,
@@ -793,7 +793,8 @@ const EquipmentOrderDetail = (props: {
             targetIndex.includes(i)
               ? {
                   ...d,
-                  zaikoQty: Number(d.zaikoQty) + originPlanQty[index] - filterJuchuKizaiMeisaiList[index].planQty,
+                  zaikoQty:
+                    Number(d.zaikoQty) + originPlanQty[index] - (filterJuchuKizaiMeisaiList[index].planQty ?? 0),
                 }
               : d
           )
@@ -877,7 +878,7 @@ const EquipmentOrderDetail = (props: {
           getValues('juchuHonbanbiQty') !== null && row.kizaiId === kizaiId
             ? sum + row.kizaiTankaAmt * planKizaiQty * (getValues('juchuHonbanbiQty') ?? 0)
             : getValues('juchuHonbanbiQty') !== null && row.kizaiId !== kizaiId
-              ? sum + row.kizaiTankaAmt * row.planKizaiQty * (getValues('juchuHonbanbiQty') ?? 0)
+              ? sum + row.kizaiTankaAmt * (row.planKizaiQty ?? 0) * (getValues('juchuHonbanbiQty') ?? 0)
               : 0,
         0
       );
@@ -1062,7 +1063,7 @@ const EquipmentOrderDetail = (props: {
       setJuchuHonbanbiList(originJuchuHonbanbiList);
       setJuchuHonbanbiDeleteList([]);
       setJuchuKizaiMeisaiList(originJuchuKizaiMeisaiList);
-      setOriginPlanQty(originJuchuKizaiMeisaiList.map((data) => data.planQty));
+      setOriginPlanQty(originJuchuKizaiMeisaiList.map((data) => data.planQty ?? 0));
       setEqStockList(originEqStockList);
       setDirtyOpen(false);
     } else {
@@ -1078,11 +1079,11 @@ const EquipmentOrderDetail = (props: {
     updatedHonbanbiDeleteList: JuchuKizaiHonbanbiValues[]
   ) => {
     const honbanbiQty = updatedHonbanbiList.filter((data) => data.juchuHonbanbiShubetuId === 40).length;
-    const addHonbanbiQty = updatedHonbanbiList.reduce((sum, data) => sum + data.juchuHonbanbiAddQty, 0);
+    const addHonbanbiQty = updatedHonbanbiList.reduce((sum, data) => sum + (data.juchuHonbanbiAddQty ?? 0), 0);
     const updatedJuchuHonbanbiQty = honbanbiQty + addHonbanbiQty;
     const updatedPriceTotal = juchuKizaiMeisaiList
       .filter((data) => !data.delFlag)
-      .reduce((sum, row) => sum + row.kizaiTankaAmt * row.planKizaiQty * updatedJuchuHonbanbiQty, 0);
+      .reduce((sum, row) => sum + row.kizaiTankaAmt * (row.planKizaiQty ?? 0) * updatedJuchuHonbanbiQty, 0);
 
     if (getValues('juchuHonbanbiQty') !== updatedJuchuHonbanbiQty) {
       setValue('juchuHonbanbiQty', updatedJuchuHonbanbiQty, { shouldDirty: true });
@@ -1142,7 +1143,7 @@ const EquipmentOrderDetail = (props: {
       saveFlag: false,
     }));
     const newIds = selectEq.map((data) => data.kizaiId);
-    const newPlanQtys = selectEq.map((data) => data.planQty);
+    const newPlanQtys = selectEq.map((data) => data.planQty ?? 0);
     // 機材在庫データ
     const selectEqStockData: StockTableValues[][] = [];
     for (let i = 0; i < newIds.length; i++) {

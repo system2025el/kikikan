@@ -12,7 +12,9 @@ export const SelectJuchuKizaiHeadList = async (juchuHeadId: number) => {
     return await supabase
       .schema(SCHEMA)
       .from('v_juchu_kizai_head_lst')
-      .select('*')
+      .select(
+        'juchu_head_id, juchu_kizai_head_id, head_nam, sagyo_sts_nam, shuko_dat, nyuko_dat, sikomibi, rihabi, genebi, honbanbi, juchu_honbanbi_calc_qty, shokei, nebiki_amt, keikoku, oya_juchu_kizai_head_id, ht_kbn, juchu_kizai_head_kbn'
+      )
       .eq('juchu_head_id', juchuHeadId)
       .not('juchu_kizai_head_id', 'is', null);
   } catch (e) {
