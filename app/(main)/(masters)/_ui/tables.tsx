@@ -19,7 +19,7 @@ type MasterHeader = {
 type MasterRow = {
   id: number;
   tblDspId: number;
-  [key: string]: string | number | boolean | undefined;
+  [key: string]: string | number | boolean | undefined | null;
 };
 
 export const MasterTable = ({
