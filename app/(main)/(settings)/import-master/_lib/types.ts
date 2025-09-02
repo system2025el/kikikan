@@ -89,7 +89,7 @@ export type RfidImportTypes = {
   rfid_kizai_sts: number | null | undefined;
   del_flg: number | null | undefined;
   shozoku_id: number | null | undefined;
-  mem?: string;
+  mem?: string | null;
 };
 
 /**
@@ -97,18 +97,17 @@ export type RfidImportTypes = {
  */
 export type KizaiImportTypes = {
   kizai_nam: string;
-  section_nam?: string;
+  section_nam?: string | null;
   el_num?: number | null | undefined;
   shozoku_id: number | null | undefined;
-  bld_cod?: string;
-  tana_cod?: string;
-  eda_cod?: string;
-  kizai_grp_cod?: string;
+  bld_cod?: string | null;
+  tana_cod?: string | null;
+  eda_cod?: string | null;
+  kizai_grp_cod?: string | null;
   dsp_ord_num?: number | null | undefined;
-  mem?: string;
-  dai_bumon_nam?: string;
-  bumon_nam?: string;
-  shukei_bumon_nam?: string;
+  mem?: string | null;
+  bumon_nam?: string | null;
+  shukei_bumon_nam?: string | null;
   dsp_flg?: number | null | undefined;
   ctn_flg?: number | null | undefined;
   def_dat_qty?: number | null | undefined;
