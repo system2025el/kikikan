@@ -1,12 +1,10 @@
 'use server';
 
-import { supabase } from '@/app/_lib/db/supabase';
 import { selectFilteredCustomers, selectKokyaku } from '@/app/_lib/db/tables/m-kokyaku';
 import { InsertJuchuHead, SelectJuchuHead, SelectMaxId, UpdateJuchuHead } from '@/app/_lib/db/tables/t-juchu-head';
-import { DeleteLock, InsertLock, SelectLock } from '@/app/_lib/db/tables/t-lock';
 import { SelectJuchuKizaiHeadList } from '@/app/_lib/db/tables/v-juchu-kizai-head-lst';
-import { toISOStringYearMonthDay } from '@/app/(main)/_lib/date-conversion';
-import { LockValues } from '@/app/(main)/_lib/types';
+import { JuchuHead } from '@/app/_lib/db/types/t-juchu-head-type';
+import { toISOStringYearMonthDay, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { CustomersDialogValues, EqTableValues, OrderValues } from './types';
 
@@ -24,6 +22,11 @@ export const GetJuchuHead = async (juchuHeadId: number) => {
       throw new Error('受注ヘッダーが存在しません');
     }
 
+    if (!juchuData.data.kokyaku_id) {
+      console.error('GetOrder juchu error : ', juchuData.error);
+      throw new Error('不正な受注ヘッダーです');
+    }
+
     const kokyakuData = await selectKokyaku(juchuData.data.kokyaku_id);
 
     if (kokyakuData.error || !kokyakuData.data) {
@@ -32,13 +35,15 @@ export const GetJuchuHead = async (juchuHeadId: number) => {
     }
     const order: OrderValues = {
       juchuHeadId: juchuData.data.juchu_head_id,
-      delFlg: juchuData.data.del_flg,
-      juchuSts: juchuData.data.juchu_sts,
-      juchuDat: juchuData.data.juchu_dat,
+      delFlg: juchuData.data.del_flg ?? 0,
+      juchuSts: juchuData.data.juchu_sts ?? 0,
+      juchuDat: juchuData.data.juchu_dat ? new Date(juchuData.data.juchu_dat) : new Date(),
       juchuRange:
-        juchuData.data.juchu_str_dat !== null ? [juchuData.data.juchu_str_dat, juchuData.data.juchu_end_dat] : null,
-      nyuryokuUser: juchuData.data.nyuryoku_user,
-      koenNam: juchuData.data.koen_nam,
+        juchuData.data.juchu_str_dat && juchuData.data.juchu_end_dat
+          ? [new Date(juchuData.data.juchu_str_dat), new Date(juchuData.data.juchu_end_dat)]
+          : null,
+      nyuryokuUser: juchuData.data.nyuryoku_user ?? '',
+      koenNam: juchuData.data.koen_nam ?? '',
       koenbashoNam: juchuData.data.koenbasho_nam,
       kokyaku: {
         kokyakuId: juchuData.data.kokyaku_id,
@@ -48,7 +53,7 @@ export const GetJuchuHead = async (juchuHeadId: number) => {
       kokyakuTantoNam: juchuData.data.kokyaku_tanto_nam,
       mem: juchuData.data.mem,
       nebikiAmt: juchuData.data.nebiki_amt,
-      zeiKbn: juchuData.data.zei_kbn,
+      zeiKbn: juchuData.data.zei_kbn ?? 2,
     };
     console.log('GetOrder order : ', order);
     return order;
@@ -79,11 +84,11 @@ export const GetMaxId = async () => {
  * @param juchuHeadId 受注ヘッダーid
  */
 export const AddJuchuHead = async (juchuHeadId: number, juchuHeadData: OrderValues, userNam: string) => {
-  const newData = {
+  const newData: JuchuHead = {
     juchu_head_id: juchuHeadId,
     del_flg: juchuHeadData.delFlg,
     juchu_sts: juchuHeadData.juchuSts,
-    juchu_dat: juchuHeadData.juchuDat,
+    juchu_dat: toISOStringYearMonthDay(juchuHeadData.juchuDat),
     juchu_str_dat: juchuHeadData.juchuRange && toISOStringYearMonthDay(juchuHeadData.juchuRange[0]),
     juchu_end_dat: juchuHeadData.juchuRange && toISOStringYearMonthDay(juchuHeadData.juchuRange[1]),
     nyuryoku_user: juchuHeadData.nyuryokuUser,
@@ -94,7 +99,7 @@ export const AddJuchuHead = async (juchuHeadId: number, juchuHeadData: OrderValu
     mem: juchuHeadData.mem,
     nebiki_amt: juchuHeadData.nebikiAmt,
     zei_kbn: juchuHeadData.zeiKbn,
-    add_dat: new Date(),
+    add_dat: toJapanTimeString(),
     add_user: userNam,
   };
 
@@ -117,11 +122,11 @@ export const AddJuchuHead = async (juchuHeadId: number, juchuHeadData: OrderValu
  * @returns 正誤
  */
 export const UpdJuchuHead = async (data: OrderValues) => {
-  const updateData = {
+  const updateData: JuchuHead = {
     juchu_head_id: data.juchuHeadId,
     del_flg: data.delFlg,
     juchu_sts: data.juchuSts,
-    juchu_dat: data.juchuDat,
+    juchu_dat: toISOStringYearMonthDay(data.juchuDat),
     juchu_str_dat: data.juchuRange && toISOStringYearMonthDay(data.juchuRange[0]),
     juchu_end_dat: data.juchuRange && toISOStringYearMonthDay(data.juchuRange[1]),
     nyuryoku_user: data.nyuryokuUser,
@@ -132,7 +137,7 @@ export const UpdJuchuHead = async (data: OrderValues) => {
     mem: data.mem,
     nebiki_amt: data.nebikiAmt,
     zei_kbn: data.zeiKbn,
-    upd_dat: new Date(),
+    upd_dat: toJapanTimeString(),
     upd_user: 'test_user',
   };
 
@@ -152,13 +157,13 @@ export const UpdJuchuHead = async (data: OrderValues) => {
 };
 
 export const CopyJuchuHead = async (juchuHeadId: number, data: OrderValues, userNam: string) => {
-  const copyData = {
+  const copyData: JuchuHead = {
     juchu_head_id: juchuHeadId,
     del_flg: data.delFlg,
     juchu_sts: data.juchuSts,
-    juchu_dat: data.juchuDat,
-    juchu_str_dat: data.juchuRange && data.juchuRange[0],
-    juchu_end_dat: data.juchuRange && data.juchuRange[1],
+    juchu_dat: toISOStringYearMonthDay(data.juchuDat),
+    juchu_str_dat: data.juchuRange && toISOStringYearMonthDay(data.juchuRange[0]),
+    juchu_end_dat: data.juchuRange && toISOStringYearMonthDay(data.juchuRange[1]),
     nyuryoku_user: data.nyuryokuUser,
     koen_nam: data.koenNam,
     koenbasho_nam: data.koenbashoNam,
@@ -167,7 +172,7 @@ export const CopyJuchuHead = async (juchuHeadId: number, data: OrderValues, user
     mem: data.mem,
     nebiki_amt: data.nebikiAmt,
     zei_kbn: data.zeiKbn,
-    add_dat: new Date(),
+    add_dat: toJapanTimeString(),
     add_user: userNam,
   };
 
@@ -204,7 +209,7 @@ export const GetJuchuKizaiHeadList = async (juchuHeadId: number) => {
       juchuHeadId: d.juchu_head_id,
       juchuKizaiHeadId: d.juchu_kizai_head_id,
       headNam: d.head_nam,
-      sagyoStaNam: d.sagyo_sts_nam,
+      sagyoStaNam: d.sagyo_sts_nam ?? '',
       shukoDat: d.shuko_dat,
       nyukoDat: d.nyuko_dat,
       sikomibi: d.sikomibi,
@@ -213,9 +218,10 @@ export const GetJuchuKizaiHeadList = async (juchuHeadId: number) => {
       honbanbi: d.honbanbi,
       juchuHonbanbiCalcQty: d.juchu_honbanbi_calc_qty,
       shokei: d.shokei,
+      nebikiAmt: d.nebiki_amt,
       keikoku: d.keikoku,
       oyaJuchuKizaiHeadId: d.oya_juchu_kizai_head_id,
-      htKbn: d.ht_kbn,
+      htKbn: d.ht_kbn ?? 0,
       juchuKizaiHeadKbn: d.juchu_kizai_head_kbn,
     }));
     return EqTableData;
@@ -241,12 +247,12 @@ export const GetFilteredCustomers = async (query: string) => {
           kokyakuId: d.kokyaku_id,
           kokyakuNam: d.kokyaku_nam,
           kokyakuRank: d.kokyaku_rank,
-          adrShozai: d.adr_shozai,
-          adrTatemono: d.adr_tatemono,
-          adrSonota: d.adr_sonota,
-          tel: d.tel,
-          fax: d.fax,
-          mem: d.mem,
+          adrShozai: d.adr_shozai ?? '',
+          adrTatemono: d.adr_tatemono ?? '',
+          adrSonota: d.adr_sonota ?? '',
+          tel: d.tel ?? '',
+          fax: d.fax ?? '',
+          mem: d.mem ?? '',
           dspFlg: Boolean(d.dsp_flg),
           tblDspId: index + 1,
         }));

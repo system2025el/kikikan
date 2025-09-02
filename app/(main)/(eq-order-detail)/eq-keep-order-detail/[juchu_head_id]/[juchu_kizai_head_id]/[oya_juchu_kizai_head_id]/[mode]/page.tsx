@@ -31,13 +31,13 @@ const Page = async (props: {
 
   // 出庫日
   const oyaShukoDate = GetShukoDate(
-    oyaJuchuKizaiNyushukoData.kicsShukoDat && new Date(oyaJuchuKizaiNyushukoData.kicsShukoDat),
-    oyaJuchuKizaiNyushukoData.yardShukoDat && new Date(oyaJuchuKizaiNyushukoData.yardShukoDat)
+    oyaJuchuKizaiNyushukoData.kicsShukoDat ? new Date(oyaJuchuKizaiNyushukoData.kicsShukoDat) : null,
+    oyaJuchuKizaiNyushukoData.yardShukoDat ? new Date(oyaJuchuKizaiNyushukoData.yardShukoDat) : null
   );
   // 入庫日
   const oyaNyukoDate = GetNyukoDate(
-    oyaJuchuKizaiNyushukoData.kicsNyukoDat && new Date(oyaJuchuKizaiNyushukoData.kicsNyukoDat),
-    oyaJuchuKizaiNyushukoData.yardNyukoDat && new Date(oyaJuchuKizaiNyushukoData.yardNyukoDat)
+    oyaJuchuKizaiNyushukoData.kicsNyukoDat ? new Date(oyaJuchuKizaiNyushukoData.kicsNyukoDat) : null,
+    oyaJuchuKizaiNyushukoData.yardNyukoDat ? new Date(oyaJuchuKizaiNyushukoData.yardNyukoDat) : null
   );
 
   if (!oyaShukoDate || !oyaNyukoDate) {

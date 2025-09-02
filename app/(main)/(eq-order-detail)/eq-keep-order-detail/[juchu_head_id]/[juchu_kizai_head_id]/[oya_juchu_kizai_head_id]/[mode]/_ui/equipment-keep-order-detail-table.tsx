@@ -187,7 +187,10 @@ const KeepEqTableRow = React.memo(
             value={row.keepQty}
             type="text"
             onChange={(e) => {
-              if (/^\d*$/.test(e.target.value) && Number(e.target.value) <= row.oyaPlanKizaiQty + row.oyaPlanYobiQty) {
+              if (
+                /^\d*$/.test(e.target.value) &&
+                Number(e.target.value) <= (row.oyaPlanKizaiQty ?? 0) + (row.oyaPlanYobiQty ?? 0)
+              ) {
                 handleKeepCellChange(row.kizaiId, Number(e.target.value));
               }
             }}
@@ -228,7 +231,7 @@ const KeepEqTableRow = React.memo(
     );
   },
   (prevProps, nextProps) => {
-    return prevProps.row === nextProps.row;
+    return prevProps.row === nextProps.row && prevProps.edit === nextProps.edit;
   }
 );
 

@@ -35,8 +35,13 @@ import {
   UpdateJuchuKizaiNyushuko,
 } from '@/app/_lib/db/tables/t-juchu-kizai-nyushuko';
 import { SelectJuchuKizaiMeisai } from '@/app/_lib/db/tables/v-juchu-kizai-meisai';
+import { IdoDen } from '@/app/_lib/db/types/t-ido-den-type';
+import { JuchuKizaiHead } from '@/app/_lib/db/types/t-juchu-kizai-head-type';
+import { JuchuKizaiHonbanbi } from '@/app/_lib/db/types/t-juchu-kizai-honbanbi-type';
+import { JuchuKizaiMeisai } from '@/app/_lib/db/types/t-juchu-kizai-meisai-type';
+import { JuchuKizaiNyushuko } from '@/app/_lib/db/types/t-juchu-kizai-nyushuko-type';
 
-import { toISOStringYearMonthDay } from '../../_lib/date-conversion';
+import { toISOStringYearMonthDay, toJapanTimeString } from '../../_lib/date-conversion';
 import {
   JuchuKizaiHeadValues,
   JuchuKizaiHonbanbiValues,
@@ -78,6 +83,8 @@ export const GetJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHeadId: n
 
     const juchuDate = await GetJuchuKizaiNyushuko(juchuHeadId, juchuKizaiHeadId);
 
+    if (!juchuDate) throw new Error('受注機材入出庫日が存在しません');
+
     const jucuKizaiHeadData: JuchuKizaiHeadValues = {
       juchuHeadId: juchuKizaiHeadData.data.juchu_head_id,
       juchuKizaiHeadId: juchuKizaiHeadData.data.juchu_kizai_head_id,
@@ -85,11 +92,11 @@ export const GetJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHeadId: n
       juchuHonbanbiQty: juchuKizaiHeadData.data.juchu_honbanbi_qty,
       nebikiAmt: juchuKizaiHeadData.data.nebiki_amt,
       mem: juchuKizaiHeadData.data.mem ? juchuKizaiHeadData.data.mem : '',
-      headNam: juchuKizaiHeadData.data.head_nam,
-      kicsShukoDat: juchuDate && juchuDate.kicsShukoDat,
-      kicsNyukoDat: juchuDate && juchuDate.kicsNyukoDat,
-      yardShukoDat: juchuDate && juchuDate.yardShukoDat,
-      yardNyukoDat: juchuDate && juchuDate.yardNyukoDat,
+      headNam: juchuKizaiHeadData.data.head_nam ?? '',
+      kicsShukoDat: juchuDate.kicsShukoDat ? new Date(juchuDate.kicsShukoDat) : null,
+      kicsNyukoDat: juchuDate.kicsNyukoDat ? new Date(juchuDate.kicsNyukoDat) : null,
+      yardShukoDat: juchuDate.yardShukoDat ? new Date(juchuDate.yardShukoDat) : null,
+      yardNyukoDat: juchuDate.yardNyukoDat ? new Date(juchuDate.yardNyukoDat) : null,
     };
     return jucuKizaiHeadData;
   } catch (e) {
@@ -111,7 +118,7 @@ export const AddJuchuKizaiHead = async (
   juchuKizaiHeadKbn: number,
   userNam: string
 ) => {
-  const newData = {
+  const newData: JuchuKizaiHead = {
     juchu_head_id: juchuKizaiHeadData.juchuHeadId,
     juchu_kizai_head_id: juchuKizaiHeadId,
     juchu_kizai_head_kbn: juchuKizaiHeadKbn,
@@ -121,7 +128,7 @@ export const AddJuchuKizaiHead = async (
     head_nam: juchuKizaiHeadData.headNam,
     oya_juchu_kizai_head_id: null,
     ht_kbn: 0,
-    add_dat: new Date(),
+    add_dat: toJapanTimeString(),
     add_user: userNam,
   };
   try {
@@ -147,7 +154,7 @@ export const AddJuchuKizaiHead = async (
  * @returns
  */
 export const UpdJuchuKizaiHead = async (juchuKizaiHeadData: JuchuKizaiHeadValues, userNam: string) => {
-  const updateData = {
+  const updateData: JuchuKizaiHead = {
     juchu_head_id: juchuKizaiHeadData.juchuHeadId,
     juchu_kizai_head_id: juchuKizaiHeadData.juchuKizaiHeadId,
     juchu_kizai_head_kbn: juchuKizaiHeadData.juchuKizaiHeadKbn,
@@ -157,7 +164,7 @@ export const UpdJuchuKizaiHead = async (juchuKizaiHeadData: JuchuKizaiHeadValues
     head_nam: juchuKizaiHeadData.headNam,
     oya_juchu_kizai_head_id: null,
     ht_kbn: 0,
-    upd_dat: new Date(),
+    upd_dat: toJapanTimeString(),
     upd_user: userNam,
   };
 
@@ -190,13 +197,22 @@ export const GetJuchuKizaiNyushuko = async (juchuHeadId: number, juchuKizaiHeadI
       return null;
     }
 
+    const kicsShukoDat =
+      data.find((d) => d.nyushuko_shubetu_id === 1 && d.nyushuko_basho_id === 1)?.nyushuko_dat ?? null;
+    const kicsNyukoDat =
+      data.find((d) => d.nyushuko_shubetu_id === 2 && d.nyushuko_basho_id === 1)?.nyushuko_dat ?? null;
+    const yardShukoDat =
+      data.find((d) => d.nyushuko_shubetu_id === 1 && d.nyushuko_basho_id === 2)?.nyushuko_dat ?? null;
+    const yardNyukoDat =
+      data.find((d) => d.nyushuko_shubetu_id === 2 && d.nyushuko_basho_id === 2)?.nyushuko_dat ?? null;
+
     const juchuKizaiNyushukoData = {
       juchuHeadId: juchuHeadId,
       juchuKizaiHeadId: juchuKizaiHeadId,
-      kicsShukoDat: data.find((d) => d.nyushuko_shubetu_id === 1 && d.nyushuko_basho_id === 1)?.nyushuko_dat ?? null,
-      kicsNyukoDat: data.find((d) => d.nyushuko_shubetu_id === 2 && d.nyushuko_basho_id === 1)?.nyushuko_dat ?? null,
-      yardShukoDat: data.find((d) => d.nyushuko_shubetu_id === 1 && d.nyushuko_basho_id === 2)?.nyushuko_dat ?? null,
-      yardNyukoDat: data.find((d) => d.nyushuko_shubetu_id === 2 && d.nyushuko_basho_id === 2)?.nyushuko_dat ?? null,
+      kicsShukoDat: kicsShukoDat ? new Date(kicsShukoDat) : null,
+      kicsNyukoDat: kicsNyukoDat ? new Date(kicsNyukoDat) : null,
+      yardShukoDat: yardShukoDat ? new Date(yardShukoDat) : null,
+      yardNyukoDat: yardNyukoDat ? new Date(yardNyukoDat) : null,
     };
 
     return juchuKizaiNyushukoData;
@@ -224,14 +240,15 @@ export const AddJuchuKizaiNyushuko = async (
 ) => {
   const dates = [kicsShukoDat, yardShukoDat, kicsNyukoDat, yardNyukoDat];
   for (let i = 0; i < dates.length; i++) {
-    if (!dates[i]) continue;
-    const newData = {
+    const currentDate = dates[i];
+    if (!currentDate) continue;
+    const newData: JuchuKizaiNyushuko = {
       juchu_head_id: juchuHeadId,
       juchu_kizai_head_id: juchuKizaiHeadId,
       nyushuko_shubetu_id: i === 0 || i === 1 ? 1 : 2,
       nyushuko_basho_id: i === 0 || i === 2 ? 1 : 2,
-      nyushuko_dat: dates[i],
-      add_dat: new Date(),
+      nyushuko_dat: toJapanTimeString(currentDate),
+      add_dat: toJapanTimeString(),
       add_user: userNam,
     };
 
@@ -268,14 +285,15 @@ export const UpdJuchuKizaiNyushuko = async (
 ) => {
   const dates = [kicsShukoDat, yardShukoDat, kicsNyukoDat, yardNyukoDat];
   for (let i = 0; i < dates.length; i++) {
+    const currentDate = dates[i];
     const data =
-      dates[i] !== null
+      currentDate !== null
         ? {
             juchu_head_id: juchuHeadId,
             juchu_kizai_head_id: juchuKizaiHeadId,
             nyushuko_shubetu_id: i === 0 || i === 1 ? 1 : 2,
             nyushuko_basho_id: i === 0 || i === 2 ? 1 : 2,
-            nyushuko_dat: dates[i],
+            nyushuko_dat: toJapanTimeString(currentDate),
           }
         : null;
 
@@ -292,7 +310,7 @@ export const UpdJuchuKizaiNyushuko = async (
       if (selectData.data && data) {
         const { error: updateError } = await UpdateJuchuKizaiNyushuko({
           ...data,
-          upd_dat: new Date(),
+          upd_dat: toJapanTimeString(),
           upd_user: userNam,
         });
         if (updateError) {
@@ -308,7 +326,7 @@ export const UpdJuchuKizaiNyushuko = async (
       } else if (!selectData && data) {
         const { error: insertError } = await InsertJuchuKizaiNyushuko({
           ...data,
-          add_dat: new Date(),
+          add_dat: toJapanTimeString(),
           add_user: userNam,
         });
         if (insertError) {
@@ -356,12 +374,12 @@ export const GetJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId:
       idoDenDat: d.ido_den_dat ? new Date(d.ido_den_dat) : null,
       idoSijiId: d.ido_siji_id,
       shozokuId: d.shozoku_id,
-      shozokuNam: d.shozoku_nam,
+      shozokuNam: d.shozoku_nam ?? '',
       mem: d.mem,
       kizaiId: d.kizai_id,
       kizaiTankaAmt: eqTanka.find((t) => t.kizai_id === d.kizai_id)?.kizai_tanka_amt || 0,
-      kizaiNam: d.kizai_nam,
-      kizaiQty: d.kizai_qty,
+      kizaiNam: d.kizai_nam ?? '',
+      kizaiQty: d.kizai_qty ?? 0,
       planKizaiQty: d.plan_kizai_qty,
       planYobiQty: d.plan_yobi_qty,
       planQty: d.plan_qty,
@@ -399,7 +417,7 @@ export const GetJuchuKizaiMeisaiMaxId = async (juchuHeadId: number, juchuKizaiHe
  * @returns
  */
 export const AddJuchuKizaiMeisai = async (juchuKizaiMeisaiData: JuchuKizaiMeisaiValues[], userNam: string) => {
-  const newData = juchuKizaiMeisaiData.map((d) => ({
+  const newData: JuchuKizaiMeisai[] = juchuKizaiMeisaiData.map((d) => ({
     juchu_head_id: d.juchuHeadId,
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
@@ -409,7 +427,7 @@ export const AddJuchuKizaiMeisai = async (juchuKizaiMeisaiData: JuchuKizaiMeisai
     plan_yobi_qty: d.planYobiQty,
     mem: d.mem,
     keep_qty: null,
-    add_dat: new Date(),
+    add_dat: toJapanTimeString(),
     add_user: userNam,
     shozoku_id: d.shozokuId,
   }));
@@ -437,7 +455,7 @@ export const AddJuchuKizaiMeisai = async (juchuKizaiMeisaiData: JuchuKizaiMeisai
  * @returns
  */
 export const UpdJuchuKizaiMeisai = async (juchuKizaiMeisaiData: JuchuKizaiMeisaiValues[], userNam: string) => {
-  const updateData = juchuKizaiMeisaiData.map((d) => ({
+  const updateData: JuchuKizaiMeisai[] = juchuKizaiMeisaiData.map((d) => ({
     juchu_head_id: d.juchuHeadId,
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
@@ -447,7 +465,7 @@ export const UpdJuchuKizaiMeisai = async (juchuKizaiMeisaiData: JuchuKizaiMeisai
     plan_yobi_qty: d.planYobiQty,
     mem: d.mem,
     keep_qty: null,
-    upd_dat: new Date(),
+    upd_dat: toJapanTimeString(),
     upd_user: userNam,
     shozoku_id: d.shozokuId,
   }));
@@ -516,7 +534,7 @@ export const GetIdoDenMaxId = async () => {
  * @returns
  */
 export const AddIdoDen = async (newIdoDenId: number, idoKizaiData: JuchuKizaiMeisaiValues[], userNam: string) => {
-  const newData = idoKizaiData.map((d, index) => ({
+  const newData: IdoDen[] = idoKizaiData.map((d, index) => ({
     ido_den_id: newIdoDenId + index,
     ido_den_dat: toISOStringYearMonthDay(d.idoDenDat as Date),
     ido_siji_id: d.shozokuId,
@@ -528,7 +546,7 @@ export const AddIdoDen = async (newIdoDenId: number, idoKizaiData: JuchuKizaiMei
     juchu_head_id: d.juchuHeadId,
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-    add_dat: new Date(),
+    add_dat: toJapanTimeString(),
     add_user: userNam,
   }));
 
@@ -555,21 +573,26 @@ export const AddIdoDen = async (newIdoDenId: number, idoKizaiData: JuchuKizaiMei
  * @returns
  */
 export const UpdIdoDen = async (idoKizaiData: JuchuKizaiMeisaiValues[], userNam: string) => {
-  const updateData = idoKizaiData.map((d) => ({
-    ido_den_id: d.idoDenId,
-    ido_den_dat: toISOStringYearMonthDay(d.idoDenDat as Date),
-    ido_siji_id: d.shozokuId,
-    ido_sagyo_id: d.shozokuId,
-    ido_sagyo_nam: d.shozokuNam,
-    kizai_id: d.kizaiId,
-    plan_qty: d.planQty,
-    result_qty: null,
-    juchu_head_id: d.juchuHeadId,
-    juchu_kizai_head_id: d.juchuKizaiHeadId,
-    juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-    upd_dat: new Date(),
-    upd_user: userNam,
-  }));
+  const updateData: IdoDen[] = idoKizaiData.map((d) => {
+    if (!d.idoDenId) {
+      throw new Error();
+    }
+    return {
+      ido_den_id: d.idoDenId,
+      ido_den_dat: toISOStringYearMonthDay(d.idoDenDat as Date),
+      ido_siji_id: d.shozokuId,
+      ido_sagyo_id: d.shozokuId,
+      ido_sagyo_nam: d.shozokuNam,
+      kizai_id: d.kizaiId,
+      plan_qty: d.planQty,
+      result_qty: null,
+      juchu_head_id: d.juchuHeadId,
+      juchu_kizai_head_id: d.juchuKizaiHeadId,
+      juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
+      upd_dat: toJapanTimeString(),
+      upd_user: userNam,
+    };
+  });
 
   try {
     for (const data of updateData) {
@@ -704,14 +727,14 @@ export const AddHonbanbi = async (
   juchuHonbanbiData: JuchuKizaiHonbanbiValues,
   userNam: string
 ) => {
-  const newData = {
+  const newData: JuchuKizaiHonbanbi = {
     juchu_head_id: juchuHeadId,
     juchu_kizai_head_id: juchuKizaiHeadId,
     juchu_honbanbi_shubetu_id: juchuHonbanbiData.juchuHonbanbiShubetuId,
     juchu_honbanbi_dat: toISOStringYearMonthDay(juchuHonbanbiData.juchuHonbanbiDat),
     mem: juchuHonbanbiData.mem ? juchuHonbanbiData.mem : null,
     juchu_honbanbi_add_qty: juchuHonbanbiData.juchuHonbanbiAddQty,
-    add_dat: new Date(),
+    add_dat: toJapanTimeString(),
     add_user: userNam,
   };
   try {
@@ -741,14 +764,14 @@ export const AddAllHonbanbi = async (
   juchuHonbanbiData: JuchuKizaiHonbanbiValues[],
   userNam: string
 ) => {
-  const newData = juchuHonbanbiData.map((d) => ({
+  const newData: JuchuKizaiHonbanbi[] = juchuHonbanbiData.map((d) => ({
     juchu_head_id: juchuHeadId,
     juchu_kizai_head_id: juchuKizaiHeadId,
     juchu_honbanbi_shubetu_id: d.juchuHonbanbiShubetuId,
     juchu_honbanbi_dat: toISOStringYearMonthDay(d.juchuHonbanbiDat),
     mem: d.mem ? d.mem : null,
     juchu_honbanbi_add_qty: d.juchuHonbanbiAddQty,
-    add_dat: new Date(),
+    add_dat: toJapanTimeString(),
     add_user: userNam,
   }));
   try {
@@ -778,14 +801,14 @@ export const UpdNyushukoHonbanbi = async (
   juchuHonbanbiData: JuchuKizaiHonbanbiValues,
   userNam: string
 ) => {
-  const updateData = {
+  const updateData: JuchuKizaiHonbanbi = {
     juchu_head_id: juchuHeadId,
     juchu_kizai_head_id: juchuKizaiHeadId,
     juchu_honbanbi_shubetu_id: juchuHonbanbiData.juchuHonbanbiShubetuId,
     juchu_honbanbi_dat: toISOStringYearMonthDay(juchuHonbanbiData.juchuHonbanbiDat),
     mem: juchuHonbanbiData.mem ? juchuHonbanbiData.mem : null,
     juchu_honbanbi_add_qty: juchuHonbanbiData.juchuHonbanbiAddQty,
-    upd_dat: new Date(),
+    upd_dat: toJapanTimeString(),
     upd_user: userNam,
   };
 
@@ -817,14 +840,14 @@ export const UpdHonbanbi = async (
   juchuHonbanbiData: JuchuKizaiHonbanbiValues,
   userNam: string
 ) => {
-  const updateData = {
+  const updateData: JuchuKizaiHonbanbi = {
     juchu_head_id: juchuHeadId,
     juchu_kizai_head_id: juchuKizaiHeadId,
     juchu_honbanbi_shubetu_id: juchuHonbanbiData.juchuHonbanbiShubetuId,
     juchu_honbanbi_dat: toISOStringYearMonthDay(juchuHonbanbiData.juchuHonbanbiDat),
     mem: juchuHonbanbiData.mem ? juchuHonbanbiData.mem : null,
     juchu_honbanbi_add_qty: juchuHonbanbiData.juchuHonbanbiAddQty,
-    upd_dat: new Date(),
+    upd_dat: toJapanTimeString(),
     upd_user: userNam,
   };
 

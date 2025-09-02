@@ -515,7 +515,7 @@ export const EquipmentKeepOrderDetail = (props: {
       mem: '',
       kizaiId: d.kizaiId,
       kizaiNam: d.kizaiNam,
-      oyaPlanKizaiQty: d.planKizaiQty,
+      oyaPlanKizaiQty: d.planKizaiQty ?? 0,
       oyaPlanYobiQty: d.planYobiQty ?? 0,
       keepQty: 0,
       delFlag: false,
@@ -975,7 +975,10 @@ export const EquipmentKeepOrderDetail = (props: {
               機材追加
             </Button>
           </Box>
-          <Box width={'min-content'} display={Object.keys(keepJuchuKizaiMeisaiList).length > 0 ? 'block' : 'none'}>
+          <Box
+            width={'min-content'}
+            display={Object.keys(keepJuchuKizaiMeisaiList.filter((d) => !d.delFlag)).length > 0 ? 'block' : 'none'}
+          >
             <KeepEqTable
               rows={keepJuchuKizaiMeisaiList}
               edit={edit}
