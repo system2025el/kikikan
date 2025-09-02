@@ -30,6 +30,7 @@ export const checkRfid = async (list: RfidImportTypes[], connection: PoolClient)
     const existingRfidTags = new Set(existingTagsResult.rows.map((row) => row.rfid_tag_id));
     // 新規登録するデータ
     const insertList = list.filter((v) => !existingRfidTags.has(v.rfid_tag_id));
+    console.log('新規登録対象', insertList.length, '件');
 
     // 新規登録するデータがあれば新規登録処理
     if (insertList.length > 0) {

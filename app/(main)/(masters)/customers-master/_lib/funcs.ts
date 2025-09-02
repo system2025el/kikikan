@@ -8,6 +8,7 @@ import {
   selectOneCustomer,
   upDateCustomerDB,
 } from '@/app/_lib/db/tables/m-kokyaku';
+import { insertMasterUpdates } from '@/app/_lib/db/tables/m-master-update';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { emptyCustomer } from './datas';
@@ -139,8 +140,8 @@ export const updateCustomer = async (rawData: CustomersMasterDialogValues, id: n
   };
   console.log(updateData.kokyaku_nam);
   try {
-    await upDateCustomerDB(updateData);
-    revalidatePath('/customer-master');
+    await Promise.all([upDateCustomerDB(updateData), insertMasterUpdates('m_kokyaku')]);
+    await revalidatePath('/customer-master');
   } catch (error) {
     console.log('例外が発生', error);
     throw error;

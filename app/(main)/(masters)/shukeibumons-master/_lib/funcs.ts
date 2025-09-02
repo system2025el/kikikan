@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 
 import pool from '@/app/_lib/db/postgres';
 import { supabase } from '@/app/_lib/db/supabase';
+import { insertMasterUpdates } from '@/app/_lib/db/tables/m-master-update';
 import {
   insertNewShukeibumon,
   selectFilteredShukeibumons,
@@ -106,7 +107,7 @@ export const updateShukeibumon = async (rawData: ShukeibumonsMasterDialogValues,
   };
   console.log(updateData.shukei_bumon_nam);
   try {
-    await upDateShukeibumonDB(updateData);
+    await Promise.all([upDateShukeibumonDB(updateData), insertMasterUpdates('m_shukei_bumon')]);
     await revalidatePath('/shukeibumon-master');
   } catch (error) {
     console.log('例外が発生', error);

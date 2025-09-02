@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 
 import { insertNewLoc, SelectFilteredLocs, selectOneLoc, upDateLocDB } from '@/app/_lib/db/tables/m-koenbasho';
+import { insertMasterUpdates } from '@/app/_lib/db/tables/m-master-update';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { emptyLoc } from './datas';
@@ -123,8 +124,8 @@ export const updateLoc = async (data: LocsMasterDialogValues, id: number) => {
   };
   console.log(updateData.koenbasho_nam);
   try {
-    await upDateLocDB(updateData);
-    revalidatePath('/locations-master');
+    await Promise.all([upDateLocDB(updateData), insertMasterUpdates('m_koenbasho')]);
+    await revalidatePath('/locations-master');
   } catch (error) {
     console.log('例外が発生', error);
     throw error;
