@@ -231,7 +231,7 @@ const KeepEqTableRow = React.memo(
     );
   },
   (prevProps, nextProps) => {
-    return prevProps.row === nextProps.row;
+    return prevProps.row === nextProps.row && prevProps.edit === nextProps.edit;
   }
 );
 
