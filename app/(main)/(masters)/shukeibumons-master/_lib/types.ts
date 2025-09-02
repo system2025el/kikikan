@@ -10,7 +10,7 @@ export type ShukeibumonsMasterDialogValues = z.infer<typeof ShukeibumonsMasterDi
 
 export type ShukeibumonsMasterTableValues = {
   delFlg: boolean | null;
-  tblDspId: number | null;
+  tblDspId: number;
   mem: string | null;
   shukeibumonId: number;
   shukeibumonNam: string;

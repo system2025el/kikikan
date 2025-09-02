@@ -47,7 +47,7 @@ export const MasterTable = ({
   //   setRows(updatedRows);
   // };
 
-  /* 表示する担当者リスト */
+  /* 表示するリスト */
   const list = useMemo(
     () => (rows && rowsPerPage > 0 ? rows.slice((page - 1) * rowsPerPage, page * rowsPerPage) : rows),
     [page, rowsPerPage, rows]
