@@ -57,7 +57,6 @@ export const ImportMaster = () => {
       console.log('Excel内容 (生データ):', dataRows);
 
       if (type === 'eqpt') {
-        setEqptFileName(file.name);
         const parsedEqptData: EqptImportType[] = [];
         let hasError = false;
         dataRows.forEach((row, index) => {
@@ -91,6 +90,7 @@ export const ImportMaster = () => {
           };
           const result = eqptSchema.safeParse(rowObject);
           if (result.success) {
+            setEqptFileName(file.name);
             parsedEqptData.push(result.data);
           } else {
             console.error(`${file.name}の行 ${index + 2} でバリデーションエラー:`, result.error.issues);

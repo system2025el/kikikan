@@ -5,7 +5,7 @@ import {
   KizaiImportTypes,
   RfidImportTypes,
   TanabanImportTypes,
-} from '@/app/(main)/(settings)/export-master/_lib/types';
+} from '@/app/(main)/(settings)/import-master/_lib/types';
 
 /**
  * RFIDマスタ確認
@@ -119,7 +119,7 @@ export const checkRfid = async (list: RfidImportTypes[], connection: PoolClient)
         `,
       list.flatMap((v) => [v.rfid_tag_id, v.kizai_nam, v.rfid_kizai_sts, v.del_flg, v.shozoku_id, v.mem])
     );
-    console.log(differnces.rows);
+    console.log('更新対象', differnces.rows);
     const updateList = differnces.rows;
     // 差異がある場合
     if (differnces.rowCount && differnces.rowCount > 0) {
@@ -137,7 +137,7 @@ export const checkRfid = async (list: RfidImportTypes[], connection: PoolClient)
         v.rfid_kizai_sts,
         v.del_flg,
         v.shozoku_id,
-        v.mem,
+        v.del_flg === 1 ? v.mem : null,
       ]);
       const updateQuery = `
           UPDATE m_rfid AS mr
@@ -187,7 +187,6 @@ export const checkKizai = async (list: KizaiImportTypes[], connection: PoolClien
     'kizai_grp_cod',
     'dsp_ord_num',
     'mem',
-    'dai_bumon_nam',
     'bumon_nam',
     'shukei_bumon_nam',
     'dsp_flg',
@@ -239,7 +238,6 @@ export const checkKizai = async (list: KizaiImportTypes[], connection: PoolClien
           kizai_grp_cod,
           dsp_ord_num,
           mem,
-          dai_bumon_id,
           bumon_id,
           shukei_bumon_id,
           dsp_flg,
@@ -266,7 +264,6 @@ export const checkKizai = async (list: KizaiImportTypes[], connection: PoolClien
           id.kizai_grp_cod,
           CAST(NULLIF(id.dsp_ord_num, '') AS integer),
           id.mem,
-          md.dai_bumon_id,
           mb.bumon_id,
           ms.shukei_bumon_id,
           CAST(NULLIF(id.dsp_flg, '') AS integer),
@@ -284,8 +281,6 @@ export const checkKizai = async (list: KizaiImportTypes[], connection: PoolClien
           imported_data AS id
         LEFT JOIN
           m_bumon AS mb ON id.bumon_nam = mb.bumon_nam
-        LEFT JOIN
-          m_dai_bumon AS md ON id.dai_bumon_nam = md.dai_bumon_nam
         LEFT JOIN
           m_shukei_bumon AS ms ON id.shukei_bumon_nam = ms.shukei_bumon_nam
         WHERE

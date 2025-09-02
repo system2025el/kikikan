@@ -6,6 +6,9 @@ import {
   Box,
   Button,
   Checkbox,
+  Dialog,
+  DialogActions,
+  DialogTitle,
   Divider,
   Grid2,
   Paper,
@@ -28,6 +31,11 @@ import { MuiTablePagination } from '../../_ui/table-pagination';
 export const QuotaionListTable = () => {
   const [page, setPage] = useState(1);
   const rowsPerPage = 50;
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  const cliclAddQuotation = () => {
+    setDialogOpen(true);
+  };
 
   // 表示するデータ
   const list = useMemo(
@@ -41,7 +49,7 @@ export const QuotaionListTable = () => {
   return (
     <>
       <Box>
-        <Typography pt={2} pl={2}>
+        <Typography pt={0.5} pl={2}>
           見積一覧
         </Typography>
         <Divider />
@@ -52,7 +60,7 @@ export const QuotaionListTable = () => {
           <Grid2 container spacing={1}>
             <Grid2 container spacing={1}>
               <Grid2>
-                <Button href="/quotation-list/quotation">
+                <Button onClick={() => cliclAddQuotation()} /*href="/quotation-list/quotation"*/>
                   <AddIcon fontSize="small" />
                   新規見積
                 </Button>
@@ -74,6 +82,12 @@ export const QuotaionListTable = () => {
             </Grid2>
           </Grid2>
         </Grid2>
+        <Dialog open={dialogOpen}>
+          <DialogTitle>jidouseisei</DialogTitle>
+          <DialogActions>
+            <Button href="/quotation-list/quotation">hai</Button>
+          </DialogActions>
+        </Dialog>
         <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 1 }}>
           <Table stickyHeader padding="none">
             <TableHead>

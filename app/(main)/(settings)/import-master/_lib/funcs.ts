@@ -1,7 +1,5 @@
 'use server';
 
-import { PoolClient } from 'pg';
-
 import pool from '@/app/_lib/db/postgres';
 import {
   checkBumon,
@@ -11,7 +9,6 @@ import {
   checkShukeibumon,
   checkTanaban,
 } from '@/app/_lib/db/tables/master-import';
-import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { EqptImportType, KizaiImportTypes, RfidImportTypes, TanabanImportTypes } from './types';
 
@@ -66,7 +63,6 @@ export const ImportEqptRfidData = async (data: EqptImportType[]) => {
           kizai_grp_cod: d.kizai_grp_cod,
           dsp_ord_num: d.dsp_ord_num,
           mem: d.mem,
-          dai_bumon_nam: d.dai_bumon_nam,
           bumon_nam: d.bumon_nam,
           shukei_bumon_nam: d.shukei_bumon_nam,
           dsp_flg: d.dsp_flg,
@@ -93,7 +89,7 @@ export const ImportEqptRfidData = async (data: EqptImportType[]) => {
           rfid_kizai_sts: d.rfid_kizai_sts,
           del_flg: d.del_flg,
           shozoku_id: d.shozoku_id,
-          mem: d.mem,
+          mem: d.del_flg === 1 ? d.mem : null,
         }))
         .filter((d) => d.rfid_tag_id && d.rfid_tag_id.trim() !== '')
         .map((v) => [v.rfid_tag_id, v])
