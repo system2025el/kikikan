@@ -5,6 +5,7 @@ import { ShukeibumonsMasterDialogValues } from '@/app/(main)/(masters)/shukeibum
 
 import pool from '../postgres';
 import { SCHEMA, supabase } from '../supabase';
+import { MShukeibumonDBValues } from '../types/m-shukeibumon-type';
 
 /**
  * DBから有効な集計部門を取得する関数
@@ -96,22 +97,13 @@ export const insertNewShukeibumon = async (data: ShukeibumonsMasterDialogValues)
  * @param data 更新するデータ
  * @param id 更新する集計部門のshukei_bumon_id
  */
-export const upDateShukeibumonDB = async (
-  data: {
-    shukei_bumon_nam: string;
-    del_flg: number;
-    mem: string | undefined;
-    upd_dat: string;
-    upd_user: string;
-  },
-  id: number
-) => {
+export const upDateShukeibumonDB = async (data: MShukeibumonDBValues) => {
   try {
     await supabase
       .schema(SCHEMA)
       .from('m_shukei_bumon')
       .update({ ...data })
-      .eq('shukei_bumon_id', id);
+      .eq('shukei_bumon_id', data.shukei_bumon_id);
   } catch (e) {
     throw e;
   }

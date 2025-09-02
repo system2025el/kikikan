@@ -5,6 +5,7 @@ import { BasesMasterDialogValues } from '@/app/(main)/(masters)/bases-master/_li
 
 import pool from '../postgres';
 import { SCHEMA, supabase } from '../supabase';
+import { MShozokuDBValues } from '../types/m-shozoku-type';
 
 /**
  * DBから有効な所属を取得する関数
@@ -90,22 +91,13 @@ export const insertNewShozoku = async (data: BasesMasterDialogValues) => {
  * @param data 更新するデータ
  * @param id 更新する所属のshozoku_id
  */
-export const upDateShozokuDB = async (
-  data: {
-    shozoku_nam: string;
-    del_flg: number;
-    mem: string | undefined;
-    upd_dat: string;
-    upd_user: string;
-  },
-  id: number
-) => {
+export const upDateShozokuDB = async (data: MShozokuDBValues) => {
   try {
     await supabase
       .schema(SCHEMA)
       .from('m_shozoku')
       .update({ ...data })
-      .eq('shozoku_id', id);
+      .eq('shozoku_id', data.shozoku_id);
   } catch (e) {
     throw e;
   }

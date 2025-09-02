@@ -97,6 +97,7 @@ export const addNewShukeibumon = async (data: ShukeibumonsMasterDialogValues) =>
 export const updateShukeibumon = async (rawData: ShukeibumonsMasterDialogValues, id: number) => {
   const date = toJapanTimeString();
   const updateData = {
+    shukei_bumon_id: id,
     shukei_bumon_nam: rawData.shukeibumonNam,
     del_flg: Number(rawData.delFlg),
     mem: rawData.mem,
@@ -105,7 +106,7 @@ export const updateShukeibumon = async (rawData: ShukeibumonsMasterDialogValues,
   };
   console.log(updateData.shukei_bumon_nam);
   try {
-    await upDateShukeibumonDB(updateData, id);
+    await upDateShukeibumonDB(updateData);
     await revalidatePath('/shukeibumon-master');
   } catch (error) {
     console.log('例外が発生', error);

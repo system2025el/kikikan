@@ -94,6 +94,7 @@ export const addNewVeh = async (data: VehsMasterDialogValues) => {
 export const updateVeh = async (data: VehsMasterDialogValues, id: number) => {
   const date = toJapanTimeString();
   const updateData = {
+    sharyo_id: id,
     sharyo_nam: data.sharyoNam,
     del_flg: Number(data.delFlg),
     mem: data.mem,
@@ -102,7 +103,7 @@ export const updateVeh = async (data: VehsMasterDialogValues, id: number) => {
     upd_user: 'test_user',
   };
   try {
-    await upDateVehDB(updateData, id);
+    await upDateVehDB(updateData);
     revalidatePath('/vehicles-master');
   } catch (error) {
     console.log('例外が発生', error);

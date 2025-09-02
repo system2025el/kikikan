@@ -5,6 +5,7 @@ import { DaibumonsMasterDialogValues } from '@/app/(main)/(masters)/daibumons-ma
 
 import pool from '../postgres';
 import { SCHEMA, supabase } from '../supabase';
+import { MDaibumonDBValues } from '../types/m-daibumon-type';
 
 /**
  * DBから有効な大部門を取得する関数
@@ -92,22 +93,13 @@ export const insertNewDaibumon = async (data: DaibumonsMasterDialogValues) => {
  * @param data 更新するデータ
  * @param id 更新する大部門のdai_bumon_id
  */
-export const updateDaibumonDB = async (
-  data: {
-    dai_bumon_nam: string;
-    del_flg: number;
-    mem: string | undefined;
-    upd_dat: string;
-    upd_user: string;
-  },
-  id: number
-) => {
+export const updateDaibumonDB = async (data: MDaibumonDBValues) => {
   try {
     await supabase
       .schema(SCHEMA)
       .from('m_dai_bumon')
       .update({ ...data })
-      .eq('dai_bumon_id', id);
+      .eq('dai_bumon_id', data.dai_bumon_id);
   } catch (e) {
     throw e;
   }

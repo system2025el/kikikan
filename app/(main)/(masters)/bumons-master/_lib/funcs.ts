@@ -96,6 +96,7 @@ export const addNewBumon = async (data: BumonsMasterDialogValues) => {
 export const updateBumon = async (rawData: BumonsMasterDialogValues, id: number) => {
   const date = toJapanTimeString();
   const updateDate = {
+    bumon_id: id,
     bumon_nam: rawData.bumonNam,
     del_flg: Number(rawData.delFlg),
     mem: rawData.mem,
@@ -106,7 +107,7 @@ export const updateBumon = async (rawData: BumonsMasterDialogValues, id: number)
   };
 
   try {
-    await upDateBumonDB(updateDate, id);
+    await upDateBumonDB(updateDate);
     await revalidatePath('/bumon-master');
   } catch (error) {
     console.log('例外が発生しました', error);

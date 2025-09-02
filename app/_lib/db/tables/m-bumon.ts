@@ -5,6 +5,8 @@ import { BumonsMasterDialogValues } from '@/app/(main)/(masters)/bumons-master/_
 
 import pool from '../postgres';
 import { SCHEMA, supabase } from '../supabase';
+import { MBumonDBValues } from '../types/m-bumon-type';
+import { MDaibumonDBValues } from '../types/m-daibumon-type';
 
 /**
  * DBから有効な部門を取得する関数
@@ -104,24 +106,13 @@ export const insertNewBumon = async (data: BumonsMasterDialogValues) => {
  * @param data 更新するデータ
  * @param id 更新する部門のbumon_id
  */
-export const upDateBumonDB = async (
-  data: {
-    bumon_nam: string;
-    del_flg: number;
-    mem: string | undefined;
-    dai_bumon_id: number | undefined;
-    syukei_bumon_id: number | undefined;
-    upd_dat: string;
-    upd_user: string;
-  },
-  id: number
-) => {
+export const upDateBumonDB = async (data: MBumonDBValues) => {
   try {
     await supabase
       .schema(SCHEMA)
       .from('m_bumon')
       .update({ ...data })
-      .eq('bumon_id', id);
+      .eq('bumon_id', data.bumon_id);
   } catch (e) {
     throw e;
   }
