@@ -104,6 +104,7 @@ export const addNewLoc = async (data: LocsMasterDialogValues) => {
 export const updateLoc = async (data: LocsMasterDialogValues, id: number) => {
   const date = toJapanTimeString();
   const updateData = {
+    koenbasho_id: id,
     koenbasho_nam: data.locNam,
     kana: data.kana,
     del_flg: Number(data.delFlg),
@@ -122,7 +123,7 @@ export const updateLoc = async (data: LocsMasterDialogValues, id: number) => {
   };
   console.log(updateData.koenbasho_nam);
   try {
-    await upDateLocDB(updateData, id);
+    await upDateLocDB(updateData);
     revalidatePath('/locations-master');
   } catch (error) {
     console.log('例外が発生', error);

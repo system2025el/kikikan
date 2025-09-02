@@ -3,6 +3,7 @@ import { LocsMasterDialogValues } from '@/app/(main)/(masters)/locations-master/
 
 import pool from '../postgres';
 import { SCHEMA, supabase } from '../supabase';
+import { MKoenbashoDBValues } from '../types/m-koenbasho-type';
 
 /**
  * 公演場所マスタテーブルのデータを取得する関数
@@ -98,32 +99,13 @@ export const insertNewLoc = async (data: LocsMasterDialogValues) => {
  * @param data 更新するデータ
  * @param id 更新する公演場所のkoenbasho_id
  */
-export const upDateLocDB = async (
-  data: {
-    koenbasho_nam: string;
-    kana: string;
-    del_flg: number;
-    adr_post: string | undefined;
-    adr_shozai: string | undefined;
-    adr_tatemono: string | undefined;
-    adr_sonota: string | undefined;
-    tel: string | undefined;
-    tel_mobile: string | undefined;
-    fax: string | undefined;
-    mail: string | undefined;
-    mem: string | undefined;
-    dsp_flg: number;
-    upd_dat: string;
-    upd_user: string;
-  },
-  id: number
-) => {
+export const upDateLocDB = async (data: MKoenbashoDBValues) => {
   try {
     await supabase
       .schema(SCHEMA)
       .from('m_koenbasho')
       .update({ ...data })
-      .eq('koenbasho_id', id);
+      .eq('koenbasho_id', data.koenbasho_id);
   } catch (e) {
     throw e;
   }

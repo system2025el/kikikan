@@ -95,6 +95,7 @@ export const addNewDaibumon = async (data: DaibumonsMasterDialogValues) => {
 export const updateDaibumon = async (rawData: DaibumonsMasterDialogValues, id: number) => {
   const date = toJapanTimeString();
   const updateData = {
+    dai_bumon_id: id,
     dai_bumon_nam: rawData.daibumonNam,
     del_flg: Number(rawData.delFlg),
     mem: rawData.mem,
@@ -103,7 +104,7 @@ export const updateDaibumon = async (rawData: DaibumonsMasterDialogValues, id: n
   };
   console.log(updateData.dai_bumon_nam);
   try {
-    await updateDaibumonDB(updateData, id);
+    await updateDaibumonDB(updateData);
     await revalidatePath('/daibumons-master');
   } catch (error) {
     console.log('例外が発生', error);

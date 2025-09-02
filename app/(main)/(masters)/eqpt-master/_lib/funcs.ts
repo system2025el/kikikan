@@ -61,7 +61,7 @@ export const getFilteredEqpts = async (
       rankAmt3: d.rank_amt_3,
       rankAmt4: d.rank_amt_4,
       rankAmt5: d.rank_amt_5,
-      dspFlg: d.dsp_flg,
+      dspFlg: Boolean(d.dsp_flg),
       tblDspId: index + 1,
       delFlg: Boolean(d.del_flg),
     }));
@@ -107,7 +107,7 @@ export const getChosenEqpt = async (id: number) => {
       dspFlg: Boolean(data.dsp_flg),
       ctnFlg: Boolean(data.ctn_flg),
       defDatQty: data.def_dat_qty,
-      regAmt: data.reg_amt,
+      regAmt: data.reg_amt ?? 0,
       rankAmt1: data.rank_amt_1,
       rankAmt2: data.rank_amt_2,
       rankAmt3: data.rank_amt_3,
@@ -150,11 +150,12 @@ export const addNewEqpt = async (data: EqptsMasterDialogValues) => {
 export const updateEqpt = async (rawData: EqptsMasterDialogValues, id: number) => {
   const date = toJapanTimeString();
   const updateData = {
+    kizai_id: id,
     kizai_nam: rawData.kizaiNam,
     del_flg: Number(rawData.delFlg),
     section_num: rawData.sectionNum,
     el_num: rawData.elNum,
-    shozoku_id: zeroToNull(rawData.shozokuId),
+    shozoku_id: Number(rawData.shozokuId),
     bld_cod: rawData.bldCod,
     tana_cod: rawData.tanaCod,
     eda_cod: rawData.edaCod,
@@ -178,7 +179,7 @@ export const updateEqpt = async (rawData: EqptsMasterDialogValues, id: number) =
   console.log(updateData.kizai_nam);
 
   try {
-    await upDateEqptDB(updateData, id);
+    await upDateEqptDB(updateData);
     await revalidatePath('/eqpt-master');
   } catch (error) {
     console.log('例外が発生しました', error);
@@ -257,24 +258,24 @@ export const getSelectedEqpts = async (idList: number[], rank: number) => {
     }
     if (!data) return [];
     const selectedEqpts: SelectedEqptsValues[] = data.map((d) => ({
-      kizaiId: d.kizai_id,
-      kizaiNam: d.kizai_nam,
-      shozokuId: d.shozoku_id,
-      shozokuNam: d.shozoku_nam,
-      kizaiGrpCod: d.kizai_grp_cod,
-      dspOrdNum: d.dsp_ord_num,
-      regAmt: d.reg_amt,
+      kizaiId: d.kizai_id ?? 0,
+      kizaiNam: d.kizai_nam ?? '',
+      shozokuId: d.shozoku_id ?? 0,
+      shozokuNam: d.shozoku_nam ?? '',
+      kizaiGrpCod: d.kizai_grp_cod ?? '',
+      dspOrdNum: d.dsp_ord_num ?? 0,
+      regAmt: d.reg_amt ?? 0,
       rankAmt:
         rank === 1
-          ? d.rank_amt_1
+          ? (d.rank_amt_1 ?? 0)
           : rank === 2
-            ? d.rank_amt_2
+            ? (d.rank_amt_2 ?? 0)
             : rank === 3
-              ? d.rank_amt_3
+              ? (d.rank_amt_3 ?? 0)
               : rank === 4
-                ? d.rank_amt_4
+                ? (d.rank_amt_4 ?? 0)
                 : rank === 5
-                  ? d.rank_amt_5
+                  ? (d.rank_amt_5 ?? 0)
                   : 0,
       kizaiQty: d.kizai_qty ?? 0,
     }));

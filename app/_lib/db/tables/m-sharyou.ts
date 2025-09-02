@@ -3,6 +3,7 @@ import { VehsMasterDialogValues } from '@/app/(main)/(masters)/vehicles-master/_
 
 import pool from '../postgres';
 import { SCHEMA, supabase } from '../supabase';
+import { MSharyoDBValues } from '../types/m-sharyo-type';
 
 /**
  * 車両マスタテーブルのデータを取得する関数
@@ -72,23 +73,13 @@ export const insertNewVeh = async (data: VehsMasterDialogValues) => {
  * @param data 更新するデータ
  * @param id 更新する車両のsharyo_id
  */
-export const upDateVehDB = async (
-  data: {
-    sharyo_nam: string;
-    del_flg: number;
-    mem: string | undefined;
-    dsp_flg: number;
-    upd_dat: string;
-    upd_user: string;
-  },
-  id: number
-) => {
+export const upDateVehDB = async (data: MSharyoDBValues) => {
   try {
     await supabase
       .schema(SCHEMA)
       .from('m_sharyo')
       .update({ ...data })
-      .eq('sharyo_id', id);
+      .eq('sharyo_id', data.sharyo_id);
   } catch (e) {
     throw e;
   }

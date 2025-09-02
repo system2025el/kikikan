@@ -6,6 +6,7 @@ import { EqptsMasterDialogValues } from '@/app/(main)/(masters)/eqpt-master/_lib
 
 import pool from '../postgres';
 import { SCHEMA, supabase } from '../supabase';
+import { MKizaiDBValues } from '../types/m-kizai-type';
 
 /**
  * kizai_idが一致する機材を取得する関数
@@ -80,41 +81,13 @@ export const insertNewEqpt = async (data: EqptsMasterDialogValues) => {
  * @param data 更新するデータ
  * @param id 更新する機材のkizai_id
  */
-export const upDateEqptDB = async (
-  data: {
-    kizai_nam: string;
-    del_flg: number;
-    section_num: number | null;
-    el_num: number | null;
-    shozoku_id: number | null;
-    bld_cod: string | undefined;
-    tana_cod: string | undefined;
-    eda_cod: string | undefined;
-    kizai_grp_cod: string | undefined;
-    dsp_ord_num: number | null;
-    mem: string | undefined;
-    bumon_id: number | null | undefined;
-    shukei_bumon_id: number | null | undefined;
-    dsp_flg: number;
-    ctn_flg: number;
-    def_dat_qty: number | null;
-    reg_amt: number | null;
-    rank_amt_1: number | null;
-    rank_amt_2: number | null;
-    rank_amt_3: number | null;
-    rank_amt_4: number | null;
-    rank_amt_5: number | null;
-    upd_dat: string;
-    upd_user: string;
-  },
-  id: number
-) => {
+export const upDateEqptDB = async (data: MKizaiDBValues) => {
   try {
     await supabase
       .schema(SCHEMA)
       .from('m_kizai')
       .update({ ...data })
-      .eq('kizai_id', id);
+      .eq('kizai_id', data.kizai_id);
   } catch (e) {
     throw e;
   }

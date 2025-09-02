@@ -94,6 +94,7 @@ export const addNewBase = async (data: BasesMasterDialogValues) => {
 export const updateBase = async (rawData: BasesMasterDialogValues, id: number) => {
   const date = toJapanTimeString();
   const updateData = {
+    shozoku_id: id,
     shozoku_nam: rawData.shozokuNam,
     del_flg: Number(rawData.delFlg),
     mem: rawData.mem,
@@ -103,7 +104,7 @@ export const updateBase = async (rawData: BasesMasterDialogValues, id: number) =
   console.log(updateData.shozoku_nam);
 
   try {
-    await upDateShozokuDB(updateData, id);
+    await upDateShozokuDB(updateData);
     revalidatePath('/bases-master');
   } catch (error) {
     console.log('例外が発生', error);

@@ -5,6 +5,7 @@ import { CustomersMasterDialogValues } from '@/app/(main)/(masters)/customers-ma
 
 import pool from '../postgres';
 import { SCHEMA, supabase } from '../supabase';
+import { MKokyakuDBValues } from '../types/m-kokyaku-type';
 
 /**
  * 受注ヘッダー用顧客データ取得
@@ -145,36 +146,13 @@ export const insertNewCustomer = async (data: CustomersMasterDialogValues) => {
  * @param data 更新するデータ
  * @param id 更新する顧客のkokyaku_id
  */
-export const upDateCustomerDB = async (
-  data: {
-    kokyaku_nam: string;
-    kana: string;
-    del_flg: number;
-    keisho: string | undefined;
-    adr_post: string | undefined;
-    adr_shozai: string | undefined;
-    adr_tatemono: string | undefined;
-    adr_sonota: string | undefined;
-    tel: string | undefined;
-    tel_mobile: string | undefined;
-    fax: string | undefined;
-    mail: string | undefined;
-    mem: string | undefined;
-    dsp_flg: number;
-    close_day: number | null;
-    site_day: number | null;
-    kizai_nebiki_flg: number;
-    upd_dat: string;
-    upd_user: string;
-  },
-  id: number
-) => {
+export const upDateCustomerDB = async (data: MKokyakuDBValues) => {
   try {
     await supabase
       .schema(SCHEMA)
       .from('m_kokyaku')
       .update({ ...data })
-      .eq('kokyaku_id', id);
+      .eq('kokyaku_id', data.kokyaku_id);
   } catch (e) {
     throw e;
   }

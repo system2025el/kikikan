@@ -8,12 +8,12 @@ export const EqptsMasterDialogSchema = z.object({
   elNum: z.number().nullable(),
   delFlg: z.boolean().optional(),
   shozokuId: z.number({ message: '選択してください' }).min(1, { message: '選択してください' }),
-  bldCod: z.string().max(20, { message: '20文字以内で入力してください' }).optional(),
-  tanaCod: z.string().max(20, { message: '20文字以内で入力してください' }).optional(),
-  edaCod: z.string().max(20, { message: '20文字以内で入力してください' }).optional(),
-  kizaiGrpCod: z.string().max(10, { message: '10文字以内で入力してください' }).optional(),
+  bldCod: z.string().max(20, { message: '20文字以内で入力してください' }).optional().nullable(),
+  tanaCod: z.string().max(20, { message: '20文字以内で入力してください' }).optional().nullable(),
+  edaCod: z.string().max(20, { message: '20文字以内で入力してください' }).optional().nullable(),
+  kizaiGrpCod: z.string().max(10, { message: '10文字以内で入力してください' }).optional().nullable(),
   dspOrdNum: z.number().nullable(),
-  mem: z.string().max(200, { message: '200文字以内で入力してください' }).optional(),
+  mem: z.string().max(200, { message: '200文字以内で入力してください' }).optional().nullable(),
   bumonId: z.number().max(100, { message: '100文字以内で入力してください' }).optional(),
   shukeibumonId: z.number().max(100, { message: '100文字以内で入力してください' }).optional(),
   dspFlg: z.boolean().optional(),
@@ -29,31 +29,50 @@ export const EqptsMasterDialogSchema = z.object({
 
 type eqptsMasterDialogValues = z.infer<typeof EqptsMasterDialogSchema>;
 export type EqptsMasterDialogValues = eqptsMasterDialogValues & {
-  addUser?: string;
-  addDat?: string;
-  updUser?: string;
-  updDat?: string;
+  addUser?: string | null;
+  addDat?: string | null;
+  updUser?: string | null;
+  updDat?: string | null;
 };
 
 export type EqptsMasterTableValues = {
-  kizaiId: number;
-  kizaiNam: string;
-  kizaiQty: number;
-  shozokuNam: string;
-  mem: string;
-  bumonNam: string;
-  daibumonNam: string;
-  shukeibumonNam: string;
-  regAmt: number;
-  rankAmt1: number;
-  rankAmt2: number;
-  rankAmt3: number;
-  rankAmt4: number;
-  rankAmt5: number;
-  dspFlg: boolean;
+  kizaiId: number | null;
+  kizaiNam: string | null;
+  kizaiQty: number | null;
+  bumonNam: string | null;
+  daibumonNam: string | null;
+  delFlg: boolean | null;
+  dspFlg: boolean | null;
+  mem: string | null;
+  rankAmt1: number | null;
+  rankAmt2: number | null;
+  rankAmt3: number | null;
+  rankAmt4: number | null;
+  rankAmt5: number | null;
+  regAmt: number | null;
+  shozokuNam: string | null;
+  shukeibumonNam: string | null;
   tblDspId: number;
-  delFlg: boolean;
 };
+//{
+//   kizaiId: number | null;
+//   kizaiNam: string;
+//   kizaiQty: number;
+//   shozokuNam: string;
+//   mem: string;
+//   bumonNam: string;
+//   daibumonNam: string;
+//   shukeibumonNam: string;
+//   regAmt: number | null;
+//   rankAmt1: number | null;
+//   rankAmt2: number | null;
+//   rankAmt3: number | null;
+//   rankAmt4: number | null;
+//   rankAmt5: number | null;
+//   dspFlg: boolean;
+//   tblDspId: number;
+//   delFlg: boolean;
+// };
 
 /**
  * 機材選択ん使うタイプ

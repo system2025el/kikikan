@@ -115,8 +115,10 @@ export const addNewCustomer = async (data: CustomersMasterDialogValues) => {
 export const updateCustomer = async (rawData: CustomersMasterDialogValues, id: number) => {
   const date = toJapanTimeString();
   const updateData = {
+    kokyaku_id: id,
     kokyaku_nam: rawData.kokyakuNam,
     kana: rawData.kana,
+    kokyaku_rank: rawData.kokyakuRank,
     del_flg: Number(rawData.delFlg),
     keisho: rawData.keisho,
     adr_post: rawData.adrPost,
@@ -137,7 +139,7 @@ export const updateCustomer = async (rawData: CustomersMasterDialogValues, id: n
   };
   console.log(updateData.kokyaku_nam);
   try {
-    await upDateCustomerDB(updateData, id);
+    await upDateCustomerDB(updateData);
     revalidatePath('/customer-master');
   } catch (error) {
     console.log('例外が発生', error);
