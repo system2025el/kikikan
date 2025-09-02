@@ -903,7 +903,7 @@ const EquipmentOrderDetail = (props: {
     setJuchuKizaiMeisaiList((prev) =>
       prev.map((data) => (data.kizaiId === kizaiId && !data.delFlag ? { ...data, delFlag: true } : data))
     );
-    setEqStockList((prev) => prev.map((data) => data.filter((d) => d.kizaiId !== kizaiId)));
+    setEqStockList((prev) => prev.filter((data) => !data.every((d) => d.kizaiId === kizaiId)));
     setOriginPlanQty((prev) => prev.filter((_, index) => index !== rowIndex));
     setPriceTotal(updatedJuchuKizaiMeisaiList.reduce((sum, row) => sum + (row.kizaiTankaAmt ?? 0), 0));
   };
@@ -1213,6 +1213,7 @@ const EquipmentOrderDetail = (props: {
             </Button>
           </Grid2>
           <BackButton label={'戻る'} />
+          <Button onClick={() => console.log(eqStockList)}>確認</Button>
         </Grid2>
       </Box>
       {/*-------受注ヘッダー-------*/}
@@ -1624,7 +1625,7 @@ const EquipmentOrderDetail = (props: {
                 機材追加
               </Button>
             </Box>
-            <Box display={Object.keys(juchuKizaiMeisaiList).length > 0 ? 'block' : 'none'}>
+            <Box display={Object.keys(juchuKizaiMeisaiList.filter((d) => !d.delFlag)).length > 0 ? 'block' : 'none'}>
               <EqTable
                 rows={juchuKizaiMeisaiList}
                 edit={edit}
@@ -1642,7 +1643,7 @@ const EquipmentOrderDetail = (props: {
             overflow="auto"
             sx={{ width: { xs: '60%', sm: '60%', md: 'auto' } }}
           >
-            <Box display="flex" my={1}>
+            <Box display={Object.keys(eqStockList).length > 0 ? 'flex' : 'none'} my={1}>
               <Box display={'flex'} alignItems={'end'} mr={2}>
                 <Typography fontSize={'small'}>在庫数</Typography>
               </Box>
