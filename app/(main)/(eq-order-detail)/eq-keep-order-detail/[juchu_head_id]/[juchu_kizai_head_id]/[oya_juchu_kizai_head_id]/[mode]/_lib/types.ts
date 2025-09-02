@@ -38,12 +38,12 @@ export type KeepJuchuKizaiMeisaiValues = {
   juchuKizaiMeisaiId: number;
   shozokuId: number;
   shozokuNam: string;
-  mem: string;
+  mem: string | null;
   kizaiId: number;
   kizaiNam: string;
-  oyaPlanKizaiQty: number;
-  oyaPlanYobiQty: number;
-  keepQty: number;
+  oyaPlanKizaiQty: number | null;
+  oyaPlanYobiQty: number | null;
+  keepQty: number | null;
   delFlag: boolean;
   saveFlag: boolean;
 };

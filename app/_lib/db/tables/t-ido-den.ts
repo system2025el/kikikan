@@ -1,6 +1,7 @@
 'use server';
 
 import { SCHEMA, supabase } from '../supabase';
+import { IdoDen } from '../types/t-ido-den-type';
 
 /**
  * 移動伝票id最大値取得
@@ -29,23 +30,7 @@ export const SelectIdoDenMaxId = async () => {
  * @param userNam ユーザー名
  * @returns
  */
-export const InsertIdoDen = async (
-  data: {
-    ido_den_id: number;
-    ido_den_dat: Date | string;
-    ido_siji_id: number;
-    ido_sagyo_id: number;
-    ido_sagyo_nam: string;
-    kizai_id: number;
-    plan_qty: number;
-    result_qty: number | null;
-    juchu_head_id: number;
-    juchu_kizai_head_id: number;
-    juchu_kizai_meisai_id: number;
-    add_dat: Date;
-    add_user: string;
-  }[]
-) => {
+export const InsertIdoDen = async (data: IdoDen[]) => {
   try {
     return await supabase.schema(SCHEMA).from('t_ido_den').insert(data);
   } catch (e) {
@@ -59,21 +44,7 @@ export const InsertIdoDen = async (
  * @param userNam ユーザー名
  * @returns
  */
-export const UpdateIdoDen = async (data: {
-  ido_den_id: number | null;
-  ido_den_dat: Date | string;
-  ido_siji_id: number;
-  ido_sagyo_id: number;
-  ido_sagyo_nam: string;
-  kizai_id: number;
-  plan_qty: number;
-  result_qty: number | null;
-  juchu_head_id: number;
-  juchu_kizai_head_id: number;
-  juchu_kizai_meisai_id: number;
-  upd_dat: Date;
-  upd_user: string;
-}) => {
+export const UpdateIdoDen = async (data: IdoDen) => {
   try {
     return await supabase.schema(SCHEMA).from('t_ido_den').update(data).eq('ido_den_id', data.ido_den_id);
   } catch (e) {

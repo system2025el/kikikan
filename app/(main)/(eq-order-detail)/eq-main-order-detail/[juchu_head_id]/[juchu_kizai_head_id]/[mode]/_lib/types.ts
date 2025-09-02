@@ -33,28 +33,26 @@ export const JuchuKizaiHeadSchema = z
 
 export type JuchuKizaiHeadValues = z.infer<typeof JuchuKizaiHeadSchema>;
 
-export const JuchuKizaiMeisaiSchema = z.object({
-  juchuHeadId: z.number(),
-  juchuKizaiHeadId: z.number(),
-  juchuKizaiMeisaiId: z.number(),
-  idoDenId: z.number().nullable(),
-  idoDenDat: z.date().nullable(),
-  idoSijiId: z.string().nullable(),
-  shozokuId: z.number(),
-  shozokuNam: z.string(),
-  mem: z.string().nullable(),
-  kizaiId: z.number(),
-  kizaiTankaAmt: z.number(),
-  kizaiNam: z.string(),
-  kizaiQty: z.number(),
-  planKizaiQty: z.number(),
-  planYobiQty: z.number().nullable(),
-  planQty: z.number(),
-  delFlag: z.boolean(),
-  saveFlag: z.boolean(),
-});
-
-export type JuchuKizaiMeisaiValues = z.infer<typeof JuchuKizaiMeisaiSchema>;
+export type JuchuKizaiMeisaiValues = {
+  juchuHeadId: number;
+  juchuKizaiHeadId: number;
+  juchuKizaiMeisaiId: number;
+  idoDenId: number | null;
+  idoDenDat: Date | null;
+  idoSijiId: string | null;
+  shozokuId: number;
+  shozokuNam: string;
+  mem: string | null;
+  kizaiId: number;
+  kizaiTankaAmt: number;
+  kizaiNam: string;
+  kizaiQty: number;
+  planKizaiQty: number | null;
+  planYobiQty: number | null;
+  planQty: number | null;
+  delFlag: boolean;
+  saveFlag: boolean;
+};
 
 export type StockTableValues = {
   calDat: Date;
@@ -71,6 +69,6 @@ export type JuchuKizaiHonbanbiValues = {
   juchuKizaiHeadId: number;
   juchuHonbanbiShubetuId: number;
   juchuHonbanbiDat: Date;
-  mem: string;
-  juchuHonbanbiAddQty: number;
+  mem: string | null;
+  juchuHonbanbiAddQty: number | null;
 };

@@ -46,6 +46,7 @@ type OrderEqTableProps = {
 export const OrderEqTable: React.FC<OrderEqTableProps> = ({ orderEqRows, edit, onEqSelectionChange }) => {
   const [rows, setRows] = useState(orderEqRows);
   const [selected, setSelected] = useState<number[]>([]);
+  console.log('-------------------------------------', rows);
 
   const mode = edit ? 'edit' : 'view';
 
@@ -131,6 +132,7 @@ export const OrderEqTable: React.FC<OrderEqTableProps> = ({ orderEqRows, edit, o
                               : 'primary',
                       whiteSpace: 'nowrap',
                       justifyContent: 'start',
+                      textTransform: 'none',
                       ...(row.juchuKizaiHeadKbn !== 1 && { pl: 2 }),
                     }}
                   >

@@ -1,3 +1,4 @@
+import { schema } from '../supabase';
 import { Database } from './types';
 
-export type JuchuHead = Database['dev2']['Tables']['t_juchu_head']['Insert'];
+export type JuchuHead = Database[schema]['Tables']['t_juchu_head']['Insert'];

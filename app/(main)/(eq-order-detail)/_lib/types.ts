@@ -1,8 +1,8 @@
 export type OyaJuchuKizaiHeadValues = {
   juchuHeadId: number;
   juchuKizaiHeadId: number;
-  kicsShukoDat: Date;
-  kicsNyukoDat: Date;
-  yardShukoDat: Date;
-  yardNyukoDat: Date;
+  kicsShukoDat: Date | null;
+  kicsNyukoDat: Date | null;
+  yardShukoDat: Date | null;
+  yardNyukoDat: Date | null;
 };

@@ -569,7 +569,7 @@ export const EquipmentReturnOrderDetail = (props: {
       kizaiId: d.kizaiId,
       kizaiTankaAmt: d.kizaiTankaAmt,
       kizaiNam: d.kizaiNam,
-      oyaPlanKizaiQty: d.planKizaiQty,
+      oyaPlanKizaiQty: d.planKizaiQty ?? 0,
       oyaPlanYobiQty: d.planYobiQty ?? 0,
       planKizaiQty: 0,
       planYobiQty: 0,

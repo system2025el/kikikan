@@ -1,6 +1,7 @@
 'use server';
 
 import { SCHEMA, supabase } from '../supabase';
+import { JuchuKizaiNyushuko } from '../types/t-juchu-kizai-nyushuko-type';
 
 /**
  * 受注機材入出庫データ取得
@@ -54,15 +55,7 @@ export const SelectJuchuKizaiNyushukoConfirm = async (data: {
  * @param userNam ユーザー名
  * @returns
  */
-export const InsertJuchuKizaiNyushuko = async (data: {
-  juchu_head_id: number;
-  juchu_kizai_head_id: number;
-  nyushuko_shubetu_id: number;
-  nyushuko_basho_id: number;
-  nyushuko_dat: Date | null;
-  add_dat: Date;
-  add_user: string;
-}) => {
+export const InsertJuchuKizaiNyushuko = async (data: JuchuKizaiNyushuko) => {
   try {
     return await supabase.schema(SCHEMA).from('t_juchu_kizai_nyushuko').insert(data);
   } catch (e) {
@@ -76,15 +69,7 @@ export const InsertJuchuKizaiNyushuko = async (data: {
  * @param userNam ユーザー名
  * @returns
  */
-export const UpdateJuchuKizaiNyushuko = async (data: {
-  juchu_head_id: number;
-  juchu_kizai_head_id: number;
-  nyushuko_shubetu_id: number;
-  nyushuko_basho_id: number;
-  nyushuko_dat: Date | null;
-  upd_dat: Date;
-  upd_user: string;
-}) => {
+export const UpdateJuchuKizaiNyushuko = async (data: JuchuKizaiNyushuko) => {
   try {
     return await supabase
       .schema(SCHEMA)

@@ -1,6 +1,7 @@
 'use server';
 
 import { SCHEMA, supabase } from '../supabase';
+import { Lock } from '../types/t-lock-type';
 
 /**
  * ロック情報取得
@@ -27,7 +28,7 @@ export const SelectLock = async (lockShubetu: number, headId: number) => {
  * @param lockShubetu ロック種別
  * @param headId ヘッダーid
  */
-export const InsertLock = async (data: { lock_shubetu: number; head_id: number; add_dat: Date; add_user: string }) => {
+export const InsertLock = async (data: Lock) => {
   try {
     return await supabase.schema(SCHEMA).from('t_lock').insert(data);
   } catch (e) {
