@@ -29,7 +29,7 @@ export type LocsMasterTableValues = {
   adrTatemono: string | null;
   delFlg: boolean | null;
   dspFlg: boolean | null;
-  tblDspId: number | null;
+  tblDspId: number;
   fax: string | null;
   locId: number;
   locNam: string;
