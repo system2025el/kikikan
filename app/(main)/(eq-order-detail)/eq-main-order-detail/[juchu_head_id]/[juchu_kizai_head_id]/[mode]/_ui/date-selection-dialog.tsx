@@ -367,7 +367,7 @@ export const DateSelectDialog = ({
               <Grid2 size={5} maxWidth={250}>
                 <TextField
                   value={data.mem ? data.mem : ''}
-                  onChange={(e) => handleSikomiMemChange(index, e.target.value)}
+                  onChange={(e) => handleRhMemChange(index, e.target.value)}
                 ></TextField>
               </Grid2>
               <Grid2 size={4}>
@@ -405,7 +405,7 @@ export const DateSelectDialog = ({
               <Grid2 size={5} maxWidth={250}>
                 <TextField
                   value={data.mem ? data.mem : ''}
-                  onChange={(e) => handleSikomiMemChange(index, e.target.value)}
+                  onChange={(e) => handleGpMemChange(index, e.target.value)}
                 ></TextField>
               </Grid2>
               <Grid2 size={4}>
@@ -463,7 +463,7 @@ export const DateSelectDialog = ({
               <Grid2 size={4} maxWidth={250}>
                 <TextField
                   value={data.mem ? data.mem : ''}
-                  onChange={(e) => handleSikomiMemChange(index, e.target.value)}
+                  onChange={(e) => handleHonbanMemChange(index, e.target.value)}
                 ></TextField>
               </Grid2>
               <Grid2 size={2}>
