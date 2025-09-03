@@ -32,15 +32,9 @@ const Page = async (props: {
   }
 
   // 親出庫日
-  const oyaShukoDate = GetShukoDate(
-    oyaJuchuKizaiNyushukoData.kicsShukoDat ? new Date(oyaJuchuKizaiNyushukoData.kicsShukoDat) : null,
-    oyaJuchuKizaiNyushukoData.yardShukoDat ? new Date(oyaJuchuKizaiNyushukoData.yardShukoDat) : null
-  );
+  const oyaShukoDate = GetShukoDate(oyaJuchuKizaiNyushukoData.kicsShukoDat, oyaJuchuKizaiNyushukoData.yardShukoDat);
   // 親入庫日
-  const oyaNyukoDate = GetNyukoDate(
-    oyaJuchuKizaiNyushukoData.kicsNyukoDat ? new Date(oyaJuchuKizaiNyushukoData.kicsNyukoDat) : null,
-    oyaJuchuKizaiNyushukoData.yardNyukoDat ? new Date(oyaJuchuKizaiNyushukoData.yardNyukoDat) : null
-  );
+  const oyaNyukoDate = GetNyukoDate(oyaJuchuKizaiNyushukoData.kicsNyukoDat, oyaJuchuKizaiNyushukoData.yardNyukoDat);
 
   if (!oyaShukoDate || !oyaNyukoDate) {
     return <div>受注情報が見つかりません。</div>;
@@ -123,13 +117,13 @@ const Page = async (props: {
     const eqStockData: StockTableValues[][] = [];
     console.time();
     if (ids) {
-      if (!oyaShukoDate) return <div>データに不備があります。</div>;
+      if (!returnNyukoDate) return <div>データに不備があります。</div>;
       for (let i = 0; i < ids.length; i++) {
         const stock: StockTableValues[] = await GetStockList(
           returnJuchuKizaiHeadData?.juchuHeadId,
           returnJuchuKizaiHeadData?.juchuKizaiHeadId,
           ids[i],
-          subDays(oyaShukoDate, 1)
+          subDays(returnNyukoDate, 1)
         );
         eqStockData.push(stock);
       }

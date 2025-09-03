@@ -38,8 +38,8 @@ export type JuchuKizaiMeisaiValues = {
   juchuKizaiHeadId: number;
   juchuKizaiMeisaiId: number;
   idoDenId: number | null;
-  idoDenDat: Date | null;
-  idoSijiId: string | null;
+  sagyoDenDat: Date | null;
+  sagyoSijiId: string | null;
   shozokuId: number;
   shozokuNam: string;
   mem: string | null;

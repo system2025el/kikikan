@@ -8,7 +8,7 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: '12.2.3 (519615d)';
   };
-  dev2: {
+  dev6: {
     Tables: {
       m_bumon: {
         Row: {
@@ -20,7 +20,7 @@ export type Database = {
           del_flg: number | null;
           dsp_ord_num: number | null;
           mem: string | null;
-          syukei_bumon_id: number | null;
+          shukei_bumon_id: number | null;
           upd_dat: string | null;
           upd_user: string | null;
         };
@@ -33,7 +33,7 @@ export type Database = {
           del_flg?: number | null;
           dsp_ord_num?: number | null;
           mem?: string | null;
-          syukei_bumon_id?: number | null;
+          shukei_bumon_id?: number | null;
           upd_dat?: string | null;
           upd_user?: string | null;
         };
@@ -46,7 +46,7 @@ export type Database = {
           del_flg?: number | null;
           dsp_ord_num?: number | null;
           mem?: string | null;
-          syukei_bumon_id?: number | null;
+          shukei_bumon_id?: number | null;
           upd_dat?: string | null;
           upd_user?: string | null;
         };
@@ -127,6 +127,7 @@ export type Database = {
           issiki_id: number;
           issiki_nam: string | null;
           mem: string | null;
+          reg_amt: number | null;
           upd_dat: string | null;
           upd_user: string | null;
         };
@@ -138,6 +139,7 @@ export type Database = {
           issiki_id: number;
           issiki_nam?: string | null;
           mem?: string | null;
+          reg_amt?: number | null;
           upd_dat?: string | null;
           upd_user?: string | null;
         };
@@ -149,6 +151,7 @@ export type Database = {
           issiki_id?: number;
           issiki_nam?: string | null;
           mem?: string | null;
+          reg_amt?: number | null;
           upd_dat?: string | null;
           upd_user?: string | null;
         };
@@ -634,45 +637,6 @@ export type Database = {
         };
         Relationships: [];
       };
-      m_role: {
-        Row: {
-          add_dat: string | null;
-          add_user: string | null;
-          del_flg: number;
-          dsp_ord_num: number | null;
-          mem: string | null;
-          role_id: number;
-          role_nam: string;
-          role_val: number;
-          upd_dat: string | null;
-          upd_user: string | null;
-        };
-        Insert: {
-          add_dat?: string | null;
-          add_user?: string | null;
-          del_flg: number;
-          dsp_ord_num?: number | null;
-          mem?: string | null;
-          role_id: number;
-          role_nam: string;
-          role_val: number;
-          upd_dat?: string | null;
-          upd_user?: string | null;
-        };
-        Update: {
-          add_dat?: string | null;
-          add_user?: string | null;
-          del_flg?: number;
-          dsp_ord_num?: number | null;
-          mem?: string | null;
-          role_id?: number;
-          role_nam?: string;
-          role_val?: number;
-          upd_dat?: string | null;
-          upd_user?: string | null;
-        };
-        Relationships: [];
-      };
       m_sagyo_kbn: {
         Row: {
           add_dat: string | null;
@@ -811,6 +775,7 @@ export type Database = {
           mem: string | null;
           shozoku_id: number;
           shozoku_nam: string;
+          shozoku_nam_short: string;
           upd_dat: string | null;
           upd_user: string | null;
         };
@@ -822,6 +787,7 @@ export type Database = {
           mem?: string | null;
           shozoku_id: number;
           shozoku_nam: string;
+          shozoku_nam_short: string;
           upd_dat?: string | null;
           upd_user?: string | null;
         };
@@ -833,6 +799,7 @@ export type Database = {
           mem?: string | null;
           shozoku_id?: number;
           shozoku_nam?: string;
+          shozoku_nam_short?: string;
           upd_dat?: string | null;
           upd_user?: string | null;
         };
@@ -922,6 +889,7 @@ export type Database = {
           mail_adr: string;
           mem: string | null;
           permission: number;
+          shain_cod: string | null;
           upd_dat: string | null;
           upd_user: string | null;
           user_nam: string;
@@ -934,6 +902,7 @@ export type Database = {
           mail_adr: string;
           mem?: string | null;
           permission: number;
+          shain_cod?: string | null;
           upd_dat?: string | null;
           upd_user?: string | null;
           user_nam: string;
@@ -946,6 +915,7 @@ export type Database = {
           mail_adr?: string;
           mem?: string | null;
           permission?: number;
+          shain_cod?: string | null;
           upd_dat?: string | null;
           upd_user?: string | null;
           user_nam?: string;
@@ -956,28 +926,34 @@ export type Database = {
         Row: {
           add_dat: string | null;
           add_user: string | null;
+          mem: string | null;
           upd_dat: string | null;
           upd_user: string | null;
           zei_frac: number | null;
           zei_kbn: number;
+          zei_nam: string | null;
           zei_rat: number;
         };
         Insert: {
           add_dat?: string | null;
           add_user?: string | null;
+          mem?: string | null;
           upd_dat?: string | null;
           upd_user?: string | null;
           zei_frac?: number | null;
           zei_kbn: number;
+          zei_nam?: string | null;
           zei_rat: number;
         };
         Update: {
           add_dat?: string | null;
           add_user?: string | null;
+          mem?: string | null;
           upd_dat?: string | null;
           upd_user?: string | null;
           zei_frac?: number | null;
           zei_kbn?: number;
+          zei_nam?: string | null;
           zei_rat?: number;
         };
         Relationships: [];
@@ -986,89 +962,89 @@ export type Database = {
         Row: {
           add_dat: string | null;
           add_user: string | null;
-          ido_den_dat: string;
           ido_den_id: number;
-          ido_sagyo_id: number;
-          ido_sagyo_nam: string;
-          ido_siji_id: number;
           juchu_head_id: number | null;
           juchu_kizai_head_id: number | null;
           juchu_kizai_meisai_id: number | null;
           kizai_id: number;
           plan_qty: number | null;
+          result_adj_qty: number | null;
           result_qty: number | null;
+          sagyo_den_dat: string;
+          sagyo_id: number;
+          sagyo_kbn_id: number;
+          sagyo_siji_id: number;
           upd_dat: string | null;
           upd_user: string | null;
         };
         Insert: {
           add_dat?: string | null;
           add_user?: string | null;
-          ido_den_dat: string;
           ido_den_id: number;
-          ido_sagyo_id: number;
-          ido_sagyo_nam: string;
-          ido_siji_id: number;
           juchu_head_id?: number | null;
           juchu_kizai_head_id?: number | null;
           juchu_kizai_meisai_id?: number | null;
           kizai_id: number;
           plan_qty?: number | null;
+          result_adj_qty?: number | null;
           result_qty?: number | null;
+          sagyo_den_dat: string;
+          sagyo_id: number;
+          sagyo_kbn_id: number;
+          sagyo_siji_id: number;
           upd_dat?: string | null;
           upd_user?: string | null;
         };
         Update: {
           add_dat?: string | null;
           add_user?: string | null;
-          ido_den_dat?: string;
           ido_den_id?: number;
-          ido_sagyo_id?: number;
-          ido_sagyo_nam?: string;
-          ido_siji_id?: number;
           juchu_head_id?: number | null;
           juchu_kizai_head_id?: number | null;
           juchu_kizai_meisai_id?: number | null;
           kizai_id?: number;
           plan_qty?: number | null;
+          result_adj_qty?: number | null;
           result_qty?: number | null;
+          sagyo_den_dat?: string;
+          sagyo_id?: number;
+          sagyo_kbn_id?: number;
+          sagyo_siji_id?: number;
           upd_dat?: string | null;
           upd_user?: string | null;
         };
         Relationships: [];
       };
-      t_ido_rfid: {
+      t_ido_result: {
         Row: {
           ido_den_id: number;
+          ido_den_meisai_id: number;
           juchu_head_id: number | null;
           juchu_kizai_head_id: number | null;
           juchu_kizai_meisai_id: number | null;
-          rfid_kizai_sts: number | null;
-          rfid_tag_id: string;
-          sagyo_kbn_id: number;
+          rfid_tag_id: string | null;
           shozoku_id: number | null;
           upd_dat: string | null;
           upd_user: string | null;
         };
         Insert: {
           ido_den_id: number;
+          ido_den_meisai_id: number;
           juchu_head_id?: number | null;
           juchu_kizai_head_id?: number | null;
           juchu_kizai_meisai_id?: number | null;
-          rfid_kizai_sts?: number | null;
-          rfid_tag_id: string;
-          sagyo_kbn_id: number;
+          rfid_tag_id?: string | null;
           shozoku_id?: number | null;
           upd_dat?: string | null;
           upd_user?: string | null;
         };
         Update: {
           ido_den_id?: number;
+          ido_den_meisai_id?: number;
           juchu_head_id?: number | null;
           juchu_kizai_head_id?: number | null;
           juchu_kizai_meisai_id?: number | null;
-          rfid_kizai_sts?: number | null;
-          rfid_tag_id?: string;
-          sagyo_kbn_id?: number;
+          rfid_tag_id?: string | null;
           shozoku_id?: number | null;
           upd_dat?: string | null;
           upd_user?: string | null;
@@ -1154,7 +1130,6 @@ export type Database = {
           oya_juchu_kizai_head_id: number | null;
           upd_dat: string | null;
           upd_user: string | null;
-          zei_kbn: number | null;
         };
         Insert: {
           add_dat?: string | null;
@@ -1171,7 +1146,6 @@ export type Database = {
           oya_juchu_kizai_head_id?: number | null;
           upd_dat?: string | null;
           upd_user?: string | null;
-          zei_kbn?: number | null;
         };
         Update: {
           add_dat?: string | null;
@@ -1188,7 +1162,6 @@ export type Database = {
           oya_juchu_kizai_head_id?: number | null;
           upd_dat?: string | null;
           upd_user?: string | null;
-          zei_kbn?: number | null;
         };
         Relationships: [];
       };
@@ -1375,42 +1348,6 @@ export type Database = {
         };
         Relationships: [];
       };
-      t_juchu_kizai_nyusyuko: {
-        Row: {
-          add_dat: string | null;
-          add_user: string | null;
-          juchu_head_id: number;
-          juchu_kizai_head_id: number;
-          nyusyuko_basyo_id: number;
-          nyusyuko_dat: string;
-          nyusyuko_syubetu_id: number;
-          upd_dat: string | null;
-          upd_user: string | null;
-        };
-        Insert: {
-          add_dat?: string | null;
-          add_user?: string | null;
-          juchu_head_id: number;
-          juchu_kizai_head_id: number;
-          nyusyuko_basyo_id: number;
-          nyusyuko_dat: string;
-          nyusyuko_syubetu_id: number;
-          upd_dat?: string | null;
-          upd_user?: string | null;
-        };
-        Update: {
-          add_dat?: string | null;
-          add_user?: string | null;
-          juchu_head_id?: number;
-          juchu_kizai_head_id?: number;
-          nyusyuko_basyo_id?: number;
-          nyusyuko_dat?: string;
-          nyusyuko_syubetu_id?: number;
-          upd_dat?: string | null;
-          upd_user?: string | null;
-        };
-        Relationships: [];
-      };
       t_juchu_sharyo_head: {
         Row: {
           add_dat: string | null;
@@ -1487,156 +1424,6 @@ export type Database = {
           nyushuko_dat?: string;
           nyushuko_shubetu_id?: number | null;
           sharyo_id?: number | null;
-          upd_dat?: string | null;
-          upd_user?: string | null;
-        };
-        Relationships: [];
-      };
-      t_juchu_shift_head: {
-        Row: {
-          add_dat: string | null;
-          add_user: string | null;
-          dsp_ord_num: number | null;
-          head_nam: string | null;
-          juchu_head_id: number;
-          juchu_shift_head_id: number;
-          mem: string | null;
-          upd_dat: string | null;
-          upd_user: string | null;
-        };
-        Insert: {
-          add_dat?: string | null;
-          add_user?: string | null;
-          dsp_ord_num?: number | null;
-          head_nam?: string | null;
-          juchu_head_id: number;
-          juchu_shift_head_id: number;
-          mem?: string | null;
-          upd_dat?: string | null;
-          upd_user?: string | null;
-        };
-        Update: {
-          add_dat?: string | null;
-          add_user?: string | null;
-          dsp_ord_num?: number | null;
-          head_nam?: string | null;
-          juchu_head_id?: number;
-          juchu_shift_head_id?: number;
-          mem?: string | null;
-          upd_dat?: string | null;
-          upd_user?: string | null;
-        };
-        Relationships: [];
-      };
-      t_juchu_shift_meisai: {
-        Row: {
-          add_dat: string | null;
-          add_user: string | null;
-          juchu_head_id: number;
-          juchu_shift_head_id: number;
-          juchu_shift_meisai_id: number;
-          mem: string | null;
-          nyushuko_dat: string;
-          nyushuko_shubetu_id: number | null;
-          shift_qty: number | null;
-          upd_dat: string | null;
-          upd_user: string | null;
-        };
-        Insert: {
-          add_dat?: string | null;
-          add_user?: string | null;
-          juchu_head_id: number;
-          juchu_shift_head_id: number;
-          juchu_shift_meisai_id: number;
-          mem?: string | null;
-          nyushuko_dat: string;
-          nyushuko_shubetu_id?: number | null;
-          shift_qty?: number | null;
-          upd_dat?: string | null;
-          upd_user?: string | null;
-        };
-        Update: {
-          add_dat?: string | null;
-          add_user?: string | null;
-          juchu_head_id?: number;
-          juchu_shift_head_id?: number;
-          juchu_shift_meisai_id?: number;
-          mem?: string | null;
-          nyushuko_dat?: string;
-          nyushuko_shubetu_id?: number | null;
-          shift_qty?: number | null;
-          upd_dat?: string | null;
-          upd_user?: string | null;
-        };
-        Relationships: [];
-      };
-      t_juchu_syaryo_head: {
-        Row: {
-          add_dat: string | null;
-          add_user: string | null;
-          juchu_head_id: number;
-          juchu_syaryo_head_id: number;
-          upd_dat: string | null;
-          upd_user: string | null;
-        };
-        Insert: {
-          add_dat?: string | null;
-          add_user?: string | null;
-          juchu_head_id: number;
-          juchu_syaryo_head_id: number;
-          upd_dat?: string | null;
-          upd_user?: string | null;
-        };
-        Update: {
-          add_dat?: string | null;
-          add_user?: string | null;
-          juchu_head_id?: number;
-          juchu_syaryo_head_id?: number;
-          upd_dat?: string | null;
-          upd_user?: string | null;
-        };
-        Relationships: [];
-      };
-      t_juchu_syaryo_meisai: {
-        Row: {
-          add_dat: string | null;
-          add_user: string | null;
-          juchu_head_id: number;
-          juchu_syaryo_head_id: number;
-          juchu_syaryo_meisai_id: number;
-          mem: string | null;
-          nyusyuko_basyo_id: number;
-          nyusyuko_dat: string;
-          nyusyuko_syubetu_id: number | null;
-          syaryo_id: number | null;
-          upd_dat: string | null;
-          upd_user: string | null;
-        };
-        Insert: {
-          add_dat?: string | null;
-          add_user?: string | null;
-          juchu_head_id: number;
-          juchu_syaryo_head_id: number;
-          juchu_syaryo_meisai_id: number;
-          mem?: string | null;
-          nyusyuko_basyo_id: number;
-          nyusyuko_dat: string;
-          nyusyuko_syubetu_id?: number | null;
-          syaryo_id?: number | null;
-          upd_dat?: string | null;
-          upd_user?: string | null;
-        };
-        Update: {
-          add_dat?: string | null;
-          add_user?: string | null;
-          juchu_head_id?: number;
-          juchu_syaryo_head_id?: number;
-          juchu_syaryo_meisai_id?: number;
-          mem?: string | null;
-          nyusyuko_basyo_id?: number;
-          nyusyuko_dat?: string;
-          nyusyuko_syubetu_id?: number | null;
-          syaryo_id?: number | null;
           upd_dat?: string | null;
           upd_user?: string | null;
         };
@@ -1906,6 +1693,7 @@ export type Database = {
           juchu_kizai_meisai_id: number;
           kizai_id: number;
           plan_qty: number | null;
+          result_adj_qty: number | null;
           result_qty: number | null;
           sagyo_den_dat: string;
           sagyo_id: number;
@@ -1921,6 +1709,7 @@ export type Database = {
           juchu_kizai_meisai_id: number;
           kizai_id: number;
           plan_qty?: number | null;
+          result_adj_qty?: number | null;
           result_qty?: number | null;
           sagyo_den_dat: string;
           sagyo_id: number;
@@ -1936,6 +1725,7 @@ export type Database = {
           juchu_kizai_meisai_id?: number;
           kizai_id?: number;
           plan_qty?: number | null;
+          result_adj_qty?: number | null;
           result_qty?: number | null;
           sagyo_den_dat?: string;
           sagyo_id?: number;
@@ -1945,13 +1735,11 @@ export type Database = {
         };
         Relationships: [];
       };
-      t_nyushuko_rfid: {
+      t_nyushuko_result: {
         Row: {
           juchu_head_id: number;
           juchu_kizai_head_id: number;
           juchu_kizai_meisai_id: number;
-          kizai_id: number;
-          rfid_kizai_sts: number | null;
           rfid_tag_id: string;
           sagyo_kbn_id: number;
           shozoku_id: number | null;
@@ -1962,8 +1750,6 @@ export type Database = {
           juchu_head_id: number;
           juchu_kizai_head_id: number;
           juchu_kizai_meisai_id: number;
-          kizai_id: number;
-          rfid_kizai_sts?: number | null;
           rfid_tag_id: string;
           sagyo_kbn_id: number;
           shozoku_id?: number | null;
@@ -1974,50 +1760,9 @@ export type Database = {
           juchu_head_id?: number;
           juchu_kizai_head_id?: number;
           juchu_kizai_meisai_id?: number;
-          kizai_id?: number;
-          rfid_kizai_sts?: number | null;
           rfid_tag_id?: string;
           sagyo_kbn_id?: number;
           shozoku_id?: number | null;
-          upd_dat?: string | null;
-          upd_user?: string | null;
-        };
-        Relationships: [];
-      };
-      t_nyusyuko_rfid: {
-        Row: {
-          ht_sagyo_kbn: number;
-          juchu_head_id: number;
-          juchu_kizai_head_id: number;
-          juchu_kizai_meisai_id: number;
-          kizai_id: number;
-          rfid_kizai_sts: number | null;
-          rfid_tag_id: string;
-          syozoku_id: number | null;
-          upd_dat: string | null;
-          upd_user: string | null;
-        };
-        Insert: {
-          ht_sagyo_kbn: number;
-          juchu_head_id: number;
-          juchu_kizai_head_id: number;
-          juchu_kizai_meisai_id: number;
-          kizai_id: number;
-          rfid_kizai_sts?: number | null;
-          rfid_tag_id: string;
-          syozoku_id?: number | null;
-          upd_dat?: string | null;
-          upd_user?: string | null;
-        };
-        Update: {
-          ht_sagyo_kbn?: number;
-          juchu_head_id?: number;
-          juchu_kizai_head_id?: number;
-          juchu_kizai_meisai_id?: number;
-          kizai_id?: number;
-          rfid_kizai_sts?: number | null;
-          rfid_tag_id?: string;
-          syozoku_id?: number | null;
           upd_dat?: string | null;
           upd_user?: string | null;
         };
@@ -2330,9 +2075,7 @@ export type Database = {
       };
       v_juchu_kizai_meisai: {
         Row: {
-          ido_den_dat: string | null;
           ido_den_id: number | null;
-          ido_siji_id: string | null;
           juchu_head_id: number;
           juchu_kizai_head_id: number;
           juchu_kizai_meisai_id: number;
@@ -2344,6 +2087,8 @@ export type Database = {
           plan_kizai_qty: number | null;
           plan_qty: number | null;
           plan_yobi_qty: number | null;
+          sagyo_den_dat: string | null;
+          sagyo_siji_id: string | null;
           shozoku_id: number;
           shozoku_nam: string | null;
         };
@@ -2377,17 +2122,6 @@ export type Database = {
           nyushuko_sts: string | null;
           nyushuko_sts_nam: string | null;
           shuko_dat: string | null;
-        };
-        Relationships: [];
-      };
-      v_juchu_sagyo_kbn: {
-        Row: {
-          juchu_head_id: number | null;
-          juchu_kizai_head_id: number | null;
-          nyushuko_basho_id: number | null;
-          nyushuko_dat: string | null;
-          nyushuko_shubetu_id: number | null;
-          sagyo_kbn_id: number | null;
         };
         Relationships: [];
       };
@@ -2488,16 +2222,7 @@ export type Database = {
       };
     };
     Functions: {
-      get_eqpt: {
-        Args: Record<PropertyKey, never>;
-        Returns: {
-          cal_dat: string;
-          kizai_id: number;
-          kizai_qty: number;
-          plan_qty: number;
-          zaiko_qty: number;
-        }[];
-      };
+      [_ in never]: never;
     };
     Enums: {
       [_ in never]: never;

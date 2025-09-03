@@ -46,7 +46,7 @@ import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
 import { LockValues } from '@/app/(main)/_lib/types';
 import { BackButton } from '@/app/(main)/_ui/buttons';
 import { Calendar, TestDate } from '@/app/(main)/_ui/date';
-import { useDirty } from '@/app/(main)/_ui/dirty-context';
+import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
 import Time, { TestTime } from '@/app/(main)/_ui/time';
 import { GetStockList } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 import { OyaJuchuKizaiNyushukoValues } from '@/app/(main)/(eq-order-detail)/_lib/types';
@@ -56,6 +56,7 @@ import {
   JuchuKizaiMeisaiValues,
   StockTableValues,
 } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_lib/types';
+import { SaveAlertDialog } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_ui/caveat-dialog';
 import { SelectedEqptsValues } from '@/app/(main)/(masters)/eqpt-master/_lib/types';
 import { OrderValues } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/types';
 
@@ -623,6 +624,7 @@ export const EquipmentReturnOrderDetail = (props: {
             </Button>
           </Grid2>
           <BackButton label={'戻る'} />
+          <Button onClick={() => console.log(dateRange)}>確認</Button>
         </Grid2>
       </Box>
       {/*受注ヘッダー*/}
@@ -1021,6 +1023,8 @@ export const EquipmentReturnOrderDetail = (props: {
           </Box>
         </Box>
       </Paper>
+      <SaveAlertDialog open={saveOpen} onClick={() => setSaveOpen(false)} />
+      <IsDirtyAlertDialog open={dirtyOpen} onClick={handleResultDialog} />
     </Box>
   );
 };

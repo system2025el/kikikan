@@ -106,12 +106,11 @@ export type ReturnStockTableRowProps = {
 
 const ReturnStockTableRow = React.memo(
   ({ row, index, dateRange }: ReturnStockTableRowProps) => {
-    console.log('date側描画', index);
+    console.log('stock側描画', index);
     const test: JuchuKizaiHonbanbiValues[] = [];
     return (
       <TableRow>
         {row.map((cell, colIndex) => {
-          console.log('stock側描写');
           return (
             <TableCell
               key={colIndex}

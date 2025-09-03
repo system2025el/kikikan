@@ -231,6 +231,7 @@ const EquipmentOrderDetail = (props: {
    * useEffect
    */
   useEffect(() => {
+    console.log('---------------------', saveKizaiHead);
     setSave(saveKizaiHead);
     setIsSave(saveKizaiHead);
   }, [saveKizaiHead, setIsSave]);
@@ -678,12 +679,14 @@ const EquipmentOrderDetail = (props: {
     }
 
     // 移動伝票更新
-    const addIdoKizaiData = newJuchuKizaiMeisaiData.filter((data) => !data.idoDenId && data.idoDenDat && !data.delFlag);
+    const addIdoKizaiData = newJuchuKizaiMeisaiData.filter(
+      (data) => !data.idoDenId && data.sagyoDenDat && !data.delFlag
+    );
     const updateIdoKizaiData = newJuchuKizaiMeisaiData.filter(
-      (data) => data.idoDenId && data.idoDenDat && !data.delFlag
+      (data) => data.idoDenId && data.sagyoDenDat && !data.delFlag
     );
     const deleteIdoKizaiData = newJuchuKizaiMeisaiData.filter(
-      (data) => data.idoDenId && (!data.idoDenDat || data.delFlag)
+      (data) => data.idoDenId && (!data.sagyoDenDat || data.delFlag)
     );
     if (deleteIdoKizaiData.length > 0) {
       const deleteIdoDenIds = deleteIdoKizaiData.map((data) => data.idoDenId);
@@ -1041,7 +1044,7 @@ const EquipmentOrderDetail = (props: {
         setIdoDat(null);
         setMoveOpen(false);
       } else {
-        setJuchuKizaiMeisaiList((prev) => prev.map((row) => (row.idoDenDat ? { ...row, idoDenDat: idoDat } : row)));
+        setJuchuKizaiMeisaiList((prev) => prev.map((row) => (row.sagyoDenDat ? { ...row, idoDenDat: idoDat } : row)));
         setMoveOpen(false);
       }
     } else {
@@ -1121,13 +1124,13 @@ const EquipmentOrderDetail = (props: {
       juchuKizaiHeadId: getValues('juchuKizaiHeadId'),
       juchuKizaiMeisaiId: 0,
       idoDenId: null,
-      idoDenDat:
+      sagyoDenDat:
         d.shozokuId === 1 && kicsIdoDat !== null
           ? kicsIdoDat
           : d.shozokuId === 2 && yardIdoDat !== null
             ? yardIdoDat
             : null,
-      idoSijiId:
+      sagyoSijiId:
         d.shozokuId === 1 && kicsIdoDat !== null ? 'K→Y' : d.shozokuId === 2 && yardIdoDat !== null ? 'Y→K' : null,
       shozokuId: d.shozokuId,
       shozokuNam: d.shozokuNam,
@@ -1213,7 +1216,6 @@ const EquipmentOrderDetail = (props: {
             </Button>
           </Grid2>
           <BackButton label={'戻る'} />
-          <Button onClick={() => console.log(eqStockList)}>確認</Button>
         </Grid2>
       </Box>
       {/*-------受注ヘッダー-------*/}

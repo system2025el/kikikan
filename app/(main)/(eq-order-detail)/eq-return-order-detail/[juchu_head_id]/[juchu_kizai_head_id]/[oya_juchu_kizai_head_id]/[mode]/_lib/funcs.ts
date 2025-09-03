@@ -36,7 +36,7 @@ export const GetReturnJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHea
       yardNyukoDat: juchuDate.yardNyukoDat ? new Date(juchuDate.yardNyukoDat) : null,
     };
 
-    console.log('keepJucuKizaiHeadData', returnJucuKizaiHeadData);
+    console.log('returnJucuKizaiHeadData', returnJucuKizaiHeadData);
     return returnJucuKizaiHeadData;
   } catch (e) {
     console.log(e);
@@ -70,8 +70,8 @@ export const GetReturnJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiH
       kizaiId: d.kizai_id,
       kizaiTankaAmt: eqTanka.find((t) => t.kizai_id === d.kizai_id)?.kizai_tanka_amt || 0,
       kizaiNam: d.kizai_nam ?? '',
-      oyaPlanKizaiQty: d.plan_kizai_qty,
-      oyaPlanYobiQty: d.plan_yobi_qty,
+      oyaPlanKizaiQty: /*d.plan_kizai_qty*/ 5,
+      oyaPlanYobiQty: /*d.plan_yobi_qty*/ 5,
       planKizaiQty: d.plan_kizai_qty ? -1 * d.plan_kizai_qty : d.plan_kizai_qty,
       planYobiQty: d.plan_yobi_qty ? -1 * d.plan_yobi_qty : d.plan_yobi_qty,
       planQty: d.plan_qty ? -1 * d.plan_qty : d.plan_qty,

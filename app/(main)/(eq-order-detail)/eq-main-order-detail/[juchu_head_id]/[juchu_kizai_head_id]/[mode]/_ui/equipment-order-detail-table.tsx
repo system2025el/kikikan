@@ -287,12 +287,12 @@ const EqTableRow = React.memo(
                   padding: 0,
                 },
               }}
-              date={row.idoDenDat}
+              date={row.sagyoDenDat}
               onChange={handleDateChange}
               onClear={() => handleCellDateClear(row.kizaiId)}
               disabled={!edit}
             />
-            {row.idoDenDat && <Typography>{row.shozokuId === 1 ? 'K→Y' : 'Y→K'}</Typography>}
+            {row.sagyoDenDat && <Typography>{row.shozokuId === 1 ? 'K→Y' : 'Y→K'}</Typography>}
           </Box>
         </TableCell>
         <TableCell style={styles.row} align="left" size="small" sx={{ bgcolor: grey[200] }}>
