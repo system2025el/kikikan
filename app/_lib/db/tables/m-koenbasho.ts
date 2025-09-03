@@ -87,7 +87,7 @@ export const insertNewLoc = async (data: LocsMasterDialogValues) => {
     'shigasan',
   ];
   try {
-    await pool.query(` SET search_path TO dev2;`);
+    await pool.query(` SET search_path TO ${SCHEMA};`);
     await pool.query(query, values);
   } catch (e) {
     throw e;

@@ -64,7 +64,7 @@ export const insertNewUser = async (data: UsersMasterDialogValues) => {
   const date = toJapanTimeString();
   const values = [data.tantouNam, Number(data.delFlg), date, 'shigasan'];
   try {
-    await pool.query(` SET search_path TO dev2;`);
+    await pool.query(` SET search_path TO ${SCHEMA};`);
     await pool.query(query, values);
   } catch (e) {
     throw e;

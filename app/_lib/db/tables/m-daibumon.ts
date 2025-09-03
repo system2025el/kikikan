@@ -81,7 +81,7 @@ export const insertNewDaibumon = async (data: DaibumonsMasterDialogValues) => {
   const values = [data.daibumonNam, Number(data.delFlg), data.mem, date, 'shigasan'];
 
   try {
-    await pool.query(` SET search_path TO dev2;`);
+    await pool.query(` SET search_path TO ${SCHEMA};`);
     await pool.query(query, values);
   } catch (e) {
     throw e;

@@ -79,7 +79,7 @@ export const insertNewShozoku = async (data: BasesMasterDialogValues) => {
   const date = toJapanTimeString();
   const values = [data.shozokuNam, Number(data.delFlg), data.mem, date, 'shigasan'];
   try {
-    await pool.query(` SET search_path TO dev2;`);
+    await pool.query(` SET search_path TO ${SCHEMA};`);
     await pool.query(query, values);
   } catch (e) {
     throw e;

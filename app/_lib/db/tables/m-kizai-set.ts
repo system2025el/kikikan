@@ -1,6 +1,7 @@
 'use server';
 
 import pool from '../postgres';
+import { SCHEMA } from '../supabase';
 
 /**
  * 選択された機材のセット機材のIDリストを取得する関数
@@ -18,6 +19,7 @@ export const selectBundledEqptIds = async (idList: number[]) => {
       set_kizai_id IN (${placeholders})
   `;
   try {
+    await pool.query(` SET search_path TO ${SCHEMA};`);
     return await pool.query(query, idList);
   } catch (e) {
     throw e;

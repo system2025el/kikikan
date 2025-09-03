@@ -73,3 +73,6 @@ export const toISOStringMonthDay = (date: Date): string => {
 export const toJapanTimeString = (input: Date | string | number = new Date()): string => {
   return dayjs(input).tz('Asia/Tokyo').format('YYYY/MM/DD HH:mm:ss');
 };
+export const toJapanDateString = (input: Date | string | number = new Date()): string => {
+  return dayjs(input).tz('Asia/Tokyo').format('YYYY/MM/DD');
+};
