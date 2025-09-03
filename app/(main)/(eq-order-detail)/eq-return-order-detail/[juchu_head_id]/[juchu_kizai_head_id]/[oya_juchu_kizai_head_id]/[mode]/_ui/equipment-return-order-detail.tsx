@@ -1,5 +1,6 @@
 'use client';
 
+import { zodResolver } from '@hookform/resolvers/zod';
 import AddIcon from '@mui/icons-material/Add';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
@@ -35,11 +36,11 @@ import {
 import { addMonths, endOfMonth, subDays, subMonths } from 'date-fns';
 import dayjs, { Dayjs } from 'dayjs';
 import { useEffect, useRef, useState } from 'react';
-import { Controller } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
-import { toISOString, toISOStringMonthDay } from '@/app/(main)/_lib/date-conversion';
+import { toISOString, toISOStringMonthDay, toISOStringYearMonthDay } from '@/app/(main)/_lib/date-conversion';
 import { AddLock, DelLock, GetLock } from '@/app/(main)/_lib/funcs';
 import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
 import { LockValues } from '@/app/(main)/_lib/types';
@@ -47,10 +48,13 @@ import { BackButton } from '@/app/(main)/_ui/buttons';
 import { Calendar, TestDate } from '@/app/(main)/_ui/date';
 import { useDirty } from '@/app/(main)/_ui/dirty-context';
 import Time, { TestTime } from '@/app/(main)/_ui/time';
+import { GetStockList } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
+import { OyaJuchuKizaiNyushukoValues } from '@/app/(main)/(eq-order-detail)/_lib/types';
 import { OyaEqSelectionDialog } from '@/app/(main)/(eq-order-detail)/_ui/equipment-selection-dialog';
 import {
   JuchuKizaiHeadValues,
   JuchuKizaiMeisaiValues,
+  StockTableValues,
 } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_lib/types';
 import { SelectedEqptsValues } from '@/app/(main)/(masters)/eqpt-master/_lib/types';
 import { OrderValues } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/types';
@@ -58,184 +62,146 @@ import { OrderValues } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/type
 import { EqptSelectionDialog } from '../../../../../../eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_ui/equipment-selection-dailog';
 import { getDateHeaderBackgroundColor, getDateRowBackgroundColor } from '../_lib/colorselect';
 import { data, stock } from '../_lib/data';
-import { ReturnJuchuKizaiMeisaiValues } from '../_lib/types';
+import { ReturnJuchuKizaiHeadSchema, ReturnJuchuKizaiHeadValues, ReturnJuchuKizaiMeisaiValues } from '../_lib/types';
 import { ReturnEqTable, ReturnStockTable } from './equipment-return-order-detail-table';
-
-export type ReturnEquipmentData = {
-  date: string;
-  memo: string;
-};
-
-export type StockData = {
-  id: number;
-  data: number[];
-};
-
-export type ReturnEquipment = {
-  id: number;
-  name: string;
-  memo: string;
-  place: string;
-  issue: number;
-  return: number;
-};
-
-// 開始日から終了日までの日付配列の作成
-const getRange = (start: Date, end: Date): string[] => {
-  if (start !== null && end !== null) {
-    const range: string[] = [];
-    const current = new Date(start);
-
-    while (current <= end) {
-      const dateStr = toISOStringMonthDay(current).split('T')[0];
-      range.push(dateStr);
-      current.setDate(current.getDate() + 1);
-    }
-
-    return range;
-  }
-  return [];
-};
-
-// ストックテーブルの日付ヘッダーの作成
-const getStockHeader = (date: Date | null) => {
-  if (date !== null) {
-    const start = subDays(date, 1);
-    const end = endOfMonth(addMonths(date, 2));
-    const range: string[] = [];
-    const current = new Date(start);
-
-    while (current <= end) {
-      const dateStr = toISOStringMonthDay(current).split('T')[0];
-      range.push(dateStr);
-      current.setDate(current.getDate() + 1);
-    }
-
-    return range;
-  }
-  return [];
-};
-
-// ストックテーブルの行作成
-const getStockRow = (
-  eq: ReturnEquipment[],
-  dateHeader: string[],
-  dateRange: string[],
-  stock: number[],
-  length: number
-) => {
-  const rows: StockData[] = [];
-
-  stock.map((num, index) => {
-    const data: number[] = [];
-    const targetIndex = dateHeader
-      .map((date, index) => (dateRange.includes(date) ? index : -1))
-      .filter((index) => index !== -1);
-
-    for (let i = 0; i < length; i++) {
-      if (targetIndex.includes(i)) {
-        data.push(num - eq[index].issue);
-      } else {
-        data.push(num);
-      }
-    }
-    const row: StockData = { id: index + 1, data: data };
-    rows.push(row);
-  });
-
-  return rows;
-};
-
-// 200件用データ作成
-export const testeqData: ReturnEquipment[] = Array.from({ length: 50 }, (_, i) => {
-  const original = data[i % data.length];
-  return {
-    ...original,
-    id: i + 1,
-    name: `${original.name} (${i + 1})`,
-    memo: original.memo,
-    place: original.place,
-    all: original.issue,
-    order: original.return,
-  };
-});
-// 200件用データ作成
-export const testStock = Array.from({ length: 50 }, (_, i) => stock[i % stock.length]);
 
 export const EquipmentReturnOrderDetail = (props: {
   juchuHeadData: OrderValues;
-  oyaJuchuKizaiHeadData: JuchuKizaiHeadValues;
+  oyaJuchuKizaiNyushukoData: OyaJuchuKizaiNyushukoValues;
+  returnJuchuKizaiHeadData: ReturnJuchuKizaiHeadValues;
+  returnJuchuKizaiMeisaiData: ReturnJuchuKizaiMeisaiValues[] | undefined;
+  eqStockData: StockTableValues[][] | undefined;
+  oyaShukoDate: Date;
+  oyaNyukoDate: Date;
+  stockTableHeaderDateRange: string[];
+  returnNyukoDate: Date | null;
+  dateRange: string[];
   edit: boolean;
 }) => {
   // user情報
   const user = useUserStore((state) => state.user);
-  // ロックデータ
-  const [lockData, setLockData] = useState<LockValues | null>(null);
+  // 受注機材ヘッダー保存フラグ
+  const saveKizaiHead = props.returnJuchuKizaiHeadData.juchuKizaiHeadId !== 0 ? true : false;
   // 全体の保存フラグ
   const [save, setSave] = useState(false);
+
   // ローディング
   const [isLoading, setIsLoading] = useState(false);
   // 編集モード(true:編集、false:閲覧)
   const [edit, setEdit] = useState(props.edit);
-  // 受注機材明細リスト
-  const [oyaJuchuKizaiMeisaiList, setOyaJuchuKizaiMeisaiList] = useState<ReturnJuchuKizaiMeisaiValues[]>([]);
 
-  // KICS出庫日
-  const [startKICSDate, setStartKICSDate] = useState<Date | null>(null);
-  // YARD出庫日
-  const [startYARDDate, setStartYARDDate] = useState<Date | null>(new Date('2025/11/2 10:00'));
-  // KICS入庫日
-  const [endKICSDate, setEndKICSDate] = useState<Date | null>(null);
-  // YARD入庫日
-  const [endYARDDate, setEndYARDDate] = useState<Date | null>(null);
-  // 出庫日
-  const [startDate, setStartDate] = useState<Date | null>(null);
+  // ロックデータ
+  const [lockData, setLockData] = useState<LockValues | null>(null);
+  // 返却受注機材明細元データ
+  const [originReturnJuchuKizaiMeisaiList, setOriginReturnJuchuKizaiMeisaiList] = useState<
+    ReturnJuchuKizaiMeisaiValues[]
+  >(props.returnJuchuKizaiMeisaiData ?? []);
+  // 返却受注機材明細リスト
+  const [returnJuchuKizaiMeisaiList, setReturnJuchuKizaiMeisaiList] = useState<ReturnJuchuKizaiMeisaiValues[]>(
+    props.returnJuchuKizaiMeisaiData ?? []
+  );
+  // 機材在庫元データ
+  const [originEqStockList, setOriginEqStockList] = useState<StockTableValues[][]>(props.eqStockData ?? []);
+  // 機材在庫リスト
+  const [eqStockList, setEqStockList] = useState<StockTableValues[][]>(props.eqStockData ?? []);
+  // 返却受注機材明細元合計数
+  const [originReturnPlanQty, setOriginReturnPlanQty] = useState<number[]>(
+    props.returnJuchuKizaiMeisaiData ? props.returnJuchuKizaiMeisaiData.map((data) => data.planQty ?? 0) : []
+  );
+
+  // 親出庫日
+  const [oyaShukoDate, setShukoDate] = useState<Date | null>(props.oyaShukoDate);
+  // 親入庫日
+  const [oyaNyukoDate, setNyukoDate] = useState<Date | null>(props.oyaNyukoDate);
   // 入庫日
-  const [endDate, setEndDate] = useState<Date | null>(null);
-  // KICS再度出庫日
-  const [againKICSDate, setAgainKICSDate] = useState<Date | null>(null);
-  // YARD再度出庫日
-  const [againYARDDate, setAgainYARDDate] = useState<Date | null>(null);
-  // 出庫日から入庫日
-  const [dateRange, setDateRange] = useState<string[]>([]);
+  const [endDate, setEndDate] = useState<Date | null>(props.returnNyukoDate);
+  // 返却入庫日から親入庫日
+  const [dateRange, setDateRange] = useState<string[]>(props.dateRange);
   // カレンダー選択日
-  const [selectDate, setSelectDate] = useState<Date>(new Date('2025/11/2'));
+  const [selectDate, setSelectDate] = useState<Date>(props.oyaShukoDate);
 
-  // ヘッダー用の日付
-  const [dateHeader, setDateHeader] = useState<string[]>(getStockHeader(new Date('2025/11/2')));
-  // ヘッダー用出庫日から入庫日
-  const [dateHeaderRange, setDateHeaderRange] = useState<string[]>(
-    getRange(new Date('2025/11/2'), new Date('2025/11/19'))
-  );
-
-  // 機材テーブルの行配列
-  const [equipmentRows, setEquipmentRows] = useState<ReturnEquipment[]>(data);
-  // ストックテーブルの行配列
-  const [stockRows, setStockRows] = useState<StockData[]>(
-    getStockRow(equipmentRows, dateHeader, dateHeaderRange, stock, dateHeader.length)
-  );
-
-  // 内税、外税
-  const [selectTax, setSelectTax] = useState('外税');
+  // 未保存ダイアログを出すかどうか
+  const [saveOpen, setSaveOpen] = useState(false);
+  // 編集内容が未保存ダイアログを出すかどうか
+  const [dirtyOpen, setDirtyOpen] = useState(false);
+  // 機材追加ダイアログ制御
+  const [EqSelectionDialogOpen, setEqSelectionDialogOpen] = useState(false);
 
   // アコーディオン制御
   const [expanded, setExpanded] = useState(false);
-  // 機材追加ダイアログ制御
-  const [EqSelectionDialogOpen, setEqSelectionDialogOpen] = useState(false);
   // ポッパー制御
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
+
+  // 合計金額
+  const [priceTotal, setPriceTotal] = useState(
+    returnJuchuKizaiMeisaiList!.reduce(
+      (sum, row) =>
+        props.returnJuchuKizaiHeadData.juchuHonbanbiQty && row.planKizaiQty
+          ? sum + row.kizaiTankaAmt * row.planKizaiQty * props.returnJuchuKizaiHeadData.juchuHonbanbiQty
+          : 0,
+      0
+    )
+  );
+
+  // 編集中かどうか
+  const [isEditing, setIsEditing] = useState(false);
 
   // context
   const { setIsDirty, setIsSave, setLock } = useDirty();
 
   // ref
+  const dateRangeRef = useRef(dateRange);
+  const eqStockListRef = useRef(eqStockList);
   const leftRef = useRef<HTMLDivElement>(null);
   const rightRef = useRef<HTMLDivElement>(null);
   const isSyncing = useRef(false);
 
+  /* useForm ------------------------- */
+  const {
+    watch,
+    control,
+    handleSubmit,
+    reset,
+    getValues,
+    setValue,
+    clearErrors,
+    formState: { isDirty, errors, defaultValues },
+  } = useForm({
+    mode: 'onSubmit',
+    reValidateMode: 'onBlur',
+    defaultValues: {
+      juchuHeadId: props.returnJuchuKizaiHeadData.juchuHeadId,
+      juchuKizaiHeadId: props.returnJuchuKizaiHeadData.juchuKizaiHeadId,
+      juchuKizaiHeadKbn: props.returnJuchuKizaiHeadData.juchuKizaiHeadKbn,
+      juchuHonbanbiQty: props.returnJuchuKizaiHeadData.juchuHonbanbiQty,
+      nebikiAmt: props.returnJuchuKizaiHeadData.nebikiAmt,
+      mem: props.returnJuchuKizaiHeadData.mem,
+      headNam: props.returnJuchuKizaiHeadData.headNam,
+      kicsNyukoDat: props.returnJuchuKizaiHeadData.kicsNyukoDat
+        ? new Date(props.returnJuchuKizaiHeadData.kicsNyukoDat)
+        : null,
+      yardNyukoDat: props.returnJuchuKizaiHeadData.yardNyukoDat
+        ? new Date(props.returnJuchuKizaiHeadData.yardNyukoDat)
+        : null,
+    },
+    resolver: zodResolver(ReturnJuchuKizaiHeadSchema),
+  });
+
   // ブラウザバック、F5、×ボタンでページを離れた際のhook
-  // useUnsavedChangesWarning(isDirty, save);
+  useUnsavedChangesWarning(isDirty, save);
+
+  /**
+   * useEffect
+   */
+  useEffect(() => {
+    setSave(saveKizaiHead);
+    setIsSave(saveKizaiHead);
+  }, [saveKizaiHead, setIsSave]);
+
+  useEffect(() => {
+    setIsDirty(isDirty);
+  }, [isDirty, setIsDirty]);
 
   useEffect(() => {
     if (!user) return;
@@ -258,8 +224,37 @@ export const EquipmentReturnOrderDetail = (props: {
   }, [user]);
 
   useEffect(() => {
+    setIsDirty(isDirty);
+  }, [isDirty, setIsDirty]);
+
+  useEffect(() => {
+    const filterJuchuKizaiMeisaiList = returnJuchuKizaiMeisaiList.filter((data) => !data.delFlag);
+    if (
+      saveKizaiHead &&
+      JSON.stringify(originReturnJuchuKizaiMeisaiList) === JSON.stringify(filterJuchuKizaiMeisaiList)
+    ) {
+      setSave(true);
+      setIsSave(true);
+    } else {
+      setSave(false);
+      setIsSave(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [returnJuchuKizaiMeisaiList]);
+
+  useEffect(() => {
     setLock(lockData);
   }, [lockData, setLock]);
+
+  useEffect(() => {
+    console.log('dateRange変更');
+    dateRangeRef.current = dateRange;
+  }, [dateRange]);
+
+  useEffect(() => {
+    console.log('eqStockList変更');
+    eqStockListRef.current = eqStockList;
+  }, [eqStockList]);
 
   useEffect(() => {
     const left = leftRef.current;
@@ -284,6 +279,12 @@ export const EquipmentReturnOrderDetail = (props: {
   const handleEdit = async () => {
     // 編集→閲覧
     if (edit) {
+      const filterJuchuKizaiMeisaiList = returnJuchuKizaiMeisaiList.filter((data) => !data.delFlag);
+      if (isDirty || JSON.stringify(originReturnJuchuKizaiMeisaiList) !== JSON.stringify(filterJuchuKizaiMeisaiList)) {
+        setDirtyOpen(true);
+        return;
+      }
+
       await DelLock(1, props.juchuHeadData.juchuHeadId);
       setLockData(null);
       setEdit(false);
@@ -327,170 +328,88 @@ export const EquipmentReturnOrderDetail = (props: {
   };
 
   /**
-   * KICS再度出庫日時変更時
-   * @param newDate 入庫日
+   * 機材在庫テーブル更新
+   * @param juchuHeadId 受注ヘッダーid
+   * @param juchuKizaiHeadId 受注機材ヘッダーid
+   * @param shukoDate 出庫日
+   * @param juchuKizaiMeisaiData 受注機材明細データ
    */
-  const handleKICSAgainChange = (newDate: Dayjs | null) => {
-    if (newDate === null) return;
-    setAgainKICSDate(newDate?.toDate());
-
-    if (againYARDDate === null || newDate.toDate() < againYARDDate) {
-      const updatedDateRange = endDate !== null ? getRange(endDate, subDays(newDate?.toDate(), 1)) : [];
-      setDateRange(updatedDateRange);
-
-      const updatedRow = getStockRow(
-        equipmentRows,
-        dateHeaderRef.current,
-        dateHeaderRange,
-        stock,
-        dateHeaderRef.current.length
-      );
-
-      const targetIndex = dateHeaderRef.current
-        .map((date, index) => (updatedDateRange.includes(date) ? index : -1))
-        .filter((index) => index !== -1);
-      targetIndex.map((index) => {
-        updatedRow.map((date, i) => {
-          date.data[index] += equipmentRows[i].return;
-        });
-      });
-      setStockRows(updatedRow);
-      setStartDate(newDate.toDate());
+  const updateEqStock = async (
+    juchuHeadId: number,
+    juchuKizaiHeadId: number,
+    shukoDate: Date,
+    juchuKizaiMeisaiData: ReturnJuchuKizaiMeisaiValues[]
+  ) => {
+    // 受注機材idリスト
+    const ids = juchuKizaiMeisaiData.map((data) => data.kizaiId);
+    // 機材在庫データ
+    const updatedEqStockData: StockTableValues[][] = [];
+    if (ids) {
+      for (let i = 0; i < ids.length; i++) {
+        const stock: StockTableValues[] = await GetStockList(
+          juchuHeadId,
+          juchuKizaiHeadId,
+          ids[i],
+          subDays(shukoDate, 1)
+        );
+        updatedEqStockData.push(stock);
+      }
     }
-  };
-
-  /**
-   * YARD再度出庫日時変更時
-   * @param newDate 入庫日
-   */
-  const handleYARDAgainChange = (newDate: Dayjs | null) => {
-    if (newDate === null) return;
-    setAgainYARDDate(newDate?.toDate());
-
-    if (againKICSDate === null || newDate.toDate() < againKICSDate) {
-      const updatedDateRange = endDate !== null ? getRange(endDate, subDays(newDate?.toDate(), 1)) : [];
-      setDateRange(updatedDateRange);
-
-      const updatedRow = getStockRow(
-        equipmentRows,
-        dateHeaderRef.current,
-        dateHeaderRange,
-        stock,
-        dateHeaderRef.current.length
-      );
-
-      const targetIndex = dateHeaderRef.current
-        .map((date, index) => (updatedDateRange.includes(date) ? index : -1))
-        .filter((index) => index !== -1);
-      targetIndex.map((index) => {
-        updatedRow.map((date, i) => {
-          date.data[index] += equipmentRows[i].return;
-        });
-      });
-      setStockRows(updatedRow);
-      setStartDate(newDate.toDate());
-    }
-  };
-
-  /**
-   * KICS入庫日時変更時
-   * @param newDate KICS入庫日
-   */
-  const handleKICSEndChange = (newDate: Dayjs | null) => {
-    if (newDate === null) return;
-    setEndKICSDate(newDate?.toDate());
-
-    if (endYARDDate === null || newDate.toDate() > endYARDDate) {
-      const updatedDateRange = getRange(
-        newDate?.toDate(),
-        startDate !== null ? subDays(startDate, 1) : new Date('2025/11/19')
-      );
-      const updatedRow = getStockRow(
-        equipmentRows,
-        dateHeaderRef.current,
-        dateHeaderRange,
-        stock,
-        dateHeaderRef.current.length
-      );
-      setDateRange(updatedDateRange);
-      const targetIndex = dateHeaderRef.current
-        .map((date, index) => (updatedDateRange.includes(date) ? index : -1))
-        .filter((index) => index !== -1);
-      targetIndex.map((index) => {
-        updatedRow.map((date, i) => {
-          date.data[index] += equipmentRows[i].return;
-        });
-      });
-      setStockRows(updatedRow);
-      setEndDate(newDate.toDate());
-    }
-  };
-
-  /**
-   * YARD入庫日時変更時
-   * @param newDate YARD入庫日
-   */
-  const handleYARDEndChange = (newDate: Dayjs | null) => {
-    if (newDate === null) return;
-    setEndYARDDate(newDate?.toDate());
-
-    if (endKICSDate === null || newDate.toDate() > endKICSDate) {
-      const updatedDateRange = getRange(
-        newDate?.toDate(),
-        startDate !== null ? subDays(startDate, 1) : new Date('2025/11/19')
-      );
-      const updatedRow = getStockRow(
-        equipmentRows,
-        dateHeaderRef.current,
-        dateHeaderRange,
-        stock,
-        dateHeaderRef.current.length
-      );
-      setDateRange(updatedDateRange);
-      const targetIndex = dateHeaderRef.current
-        .map((date, index) => (updatedDateRange.includes(date) ? index : -1))
-        .filter((index) => index !== -1);
-      targetIndex.map((index) => {
-        updatedRow.map((date, i) => {
-          date.data[index] += equipmentRows[i].return;
-        });
-      });
-      setStockRows(updatedRow);
-      setEndDate(newDate.toDate());
-    }
+    setEqStockList(updatedEqStockData);
+    return updatedEqStockData;
   };
 
   /**
    * 日付選択カレンダー選択時
    * @param date カレンダー選択日付
    */
-  const handleDateChange = (date: Dayjs | null) => {
-    if (date === null) return;
-    setSelectDate(date.toDate());
+  const handleDateChange = async (date: Dayjs | null) => {
+    if (date !== null) {
+      setSelectDate(date.toDate());
+      const filterJuchuKizaiMeisaiList = returnJuchuKizaiMeisaiList.filter((data) => !data.delFlag);
+      const updatedEqStockData = await updateEqStock(
+        getValues('juchuHeadId'),
+        getValues('juchuKizaiHeadId'),
+        date.toDate(),
+        filterJuchuKizaiMeisaiList
+      );
 
-    const updatedHeader = getStockHeader(date?.toDate());
-    const updatedRow = getStockRow(equipmentRows, updatedHeader, dateHeaderRange, stock, dateHeaderRef.current.length);
-    setDateHeader(updatedHeader);
-    const targetIndex = updatedHeader
-      .map((date, index) => (dateRangeRef.current.includes(date) ? index : -1))
-      .filter((index) => index !== -1);
-    targetIndex.map((index) => {
-      updatedRow.map((date, i) => {
-        date.data[index] += equipmentRows[i].return;
-      });
-    });
-    setStockRows(updatedRow);
+      if (
+        returnJuchuKizaiMeisaiList &&
+        returnJuchuKizaiMeisaiList.length > 0 &&
+        updatedEqStockData &&
+        updatedEqStockData.length > 0
+      ) {
+        const targetIndex = updatedEqStockData[0]
+          .map((d, index) => (dateRange.includes(toISOStringYearMonthDay(d.calDat)) ? index : -1))
+          .filter((index) => index !== -1);
 
-    setAnchorEl(null);
+        const subUpdatedEqStockData = updatedEqStockData.map((data, index) =>
+          data.map((d, i) =>
+            targetIndex.includes(i)
+              ? {
+                  ...d,
+                  zaikoQty:
+                    Number(d.zaikoQty) + originReturnPlanQty[index] - (filterJuchuKizaiMeisaiList[index].planQty ?? 0),
+                }
+              : d
+          )
+        );
+
+        setEqStockList(subUpdatedEqStockData);
+      }
+
+      setAnchorEl(null);
+    }
   };
   // 3か月前
   const handleBackDateChange = () => {
-    const date = subMonths(new Date(dateHeader[1]), 3);
+    const date = subMonths(new Date(selectDate), 3);
     handleDateChange(dayjs(date));
   };
   // 3か月後
   const handleForwardDateChange = () => {
-    const date = addMonths(new Date(dateHeader[1]), 3);
+    const date = addMonths(new Date(selectDate), 3);
     handleDateChange(dayjs(date));
   };
 
@@ -507,59 +426,132 @@ export const EquipmentReturnOrderDetail = (props: {
 
   /**
    * 機材メモ入力時
-   * @param rowIndex 入力された行番号
+   * @param kizaiId 機材id
    * @param memo メモ内容
    */
-  const handleMemoChange = (rowIndex: number, memo: string) => {
-    const updatedRows = [...equipmentRows];
-    updatedRows[rowIndex].memo = memo;
-    setEquipmentRows(updatedRows);
+  const handleMemoChange = (kizaiId: number, memo: string) => {
+    setReturnJuchuKizaiMeisaiList((prev) =>
+      prev.map((data) => (data.kizaiId === kizaiId ? { ...data, mem: memo } : data))
+    );
   };
 
   /**
-   * 機材テーブルの返却数入力時
-   * @param rowIndex 入力された行番号
-   * @param orderValue 返却数
+   * 機材テーブルの受注数、予備数入力時
+   * @param kizaiId 機材id
+   * @param planKizaiQty 受注数
+   * @param planYobiQty 予備数
+   * @param planQty 合計
    */
-  const handleCellChange = (rowIndex: number, returnValue: number) => {
-    setEquipmentRows((prev) => prev.map((row, i) => (i === rowIndex ? { ...row, return: returnValue } : row)));
-
-    const targetIndex = dateHeaderRef.current
-      .map((date, index) => (dateRangeRef.current.includes(date) ? index : -1))
-      .filter((index) => index !== -1);
-
-    if (targetIndex.length === 0) return;
-
-    const updatedRow = getStockRow(
-      equipmentRows,
-      dateHeaderRef.current,
-      dateHeaderRange,
-      stock,
-      dateHeaderRef.current.length
+  const handleCellChange = (kizaiId: number, planKizaiQty: number, planYobiQty: number, planQty: number) => {
+    const rowIndex = eqStockListRef.current.findIndex((data) => data.some((d) => d.kizaiId === kizaiId));
+    const updatedEqStockData = eqStockListRef.current[rowIndex];
+    const filterJuchuKizaiMeisaiList = returnJuchuKizaiMeisaiList.filter((data) => !data.delFlag);
+    const kizaiQty = filterJuchuKizaiMeisaiList.find((data) => data.kizaiId === kizaiId)?.planQty || 0;
+    if (
+      returnJuchuKizaiMeisaiList &&
+      returnJuchuKizaiMeisaiList.length > 0 &&
+      eqStockListRef.current &&
+      eqStockListRef.current.length > 0
+    ) {
+      const targetIndex = updatedEqStockData
+        .map((d, index) => (dateRange.includes(toISOStringYearMonthDay(d.calDat)) ? index : -1))
+        .filter((index) => index !== -1);
+      const subUpdatedEqStockList = updatedEqStockData.map((data, index) =>
+        targetIndex.includes(index) ? { ...data, zaikoQty: Number(data.zaikoQty) - kizaiQty + planQty } : data
+      );
+      setEqStockList((prev) => prev.map((data, i) => (i === rowIndex ? [...subUpdatedEqStockList] : data)));
+    }
+    const updatedPriceTotal = returnJuchuKizaiMeisaiList
+      .filter((data) => !data.delFlag)
+      .reduce(
+        (sum, row) =>
+          getValues('juchuHonbanbiQty') !== null && row.kizaiId === kizaiId
+            ? sum + row.kizaiTankaAmt * planKizaiQty * (getValues('juchuHonbanbiQty') ?? 0)
+            : getValues('juchuHonbanbiQty') !== null && row.kizaiId !== kizaiId
+              ? sum + row.kizaiTankaAmt * (row.planKizaiQty ?? 0) * (getValues('juchuHonbanbiQty') ?? 0)
+              : 0,
+        0
+      );
+    setPriceTotal(updatedPriceTotal);
+    setReturnJuchuKizaiMeisaiList((prev) =>
+      prev.map((data) =>
+        data.kizaiId === kizaiId && !data.delFlag
+          ? { ...data, planKizaiQty: planKizaiQty, planYobiQty: planYobiQty, planQty: planQty }
+          : data
+      )
     );
-    const updatedData = updatedRow[rowIndex].data;
-    targetIndex.map((index) => {
-      updatedData[index] += returnValue;
-    });
-    setStockRows((prev) => prev.map((row, i) => (i === rowIndex ? { ...row, data: updatedData } : row)));
   };
 
-  // アコーディオン開閉
-  const handleExpansion = () => {
-    setExpanded((prevExpanded) => !prevExpanded);
+  /**
+   * 機材テーブルの削除ボタン押下時
+   * @param kizaiId 機材id
+   */
+  const handleDelete = (kizaiId: number) => {
+    const filterJuchuKizaiMeisaiList = returnJuchuKizaiMeisaiList.filter((data) => !data.delFlag);
+    const rowIndex = filterJuchuKizaiMeisaiList.findIndex((data) => data.kizaiId === kizaiId);
+    const updatedJuchuKizaiMeisaiList = filterJuchuKizaiMeisaiList.filter((data) => data.kizaiId !== kizaiId);
+    setReturnJuchuKizaiMeisaiList((prev) =>
+      prev.map((data) => (data.kizaiId === kizaiId && !data.delFlag ? { ...data, delFlag: true } : data))
+    );
+    setEqStockList((prev) => prev.filter((data) => !data.every((d) => d.kizaiId === kizaiId)));
+    setOriginReturnPlanQty((prev) => prev.filter((_, index) => index !== rowIndex));
+    setPriceTotal(updatedJuchuKizaiMeisaiList.reduce((sum, row) => sum + (row.kizaiTankaAmt ?? 0), 0));
   };
-  // 機材入力ダイアログ開閉
-  const handleOpenEqDialog = () => {
-    setEqSelectionDialogOpen(true);
+
+  /**
+   * KICS入庫日時変更時
+   * @param newDate KICS入庫日
+   */
+  const handleKicsNyukoChange = async (newDate: Dayjs | null) => {
+    if (newDate === null) return;
+    setValue('kicsNyukoDat', newDate.toDate(), { shouldDirty: true });
+
+    const yardNyukoDat = getValues('yardNyukoDat');
+
+    if (yardNyukoDat === null) {
+      clearErrors('yardNyukoDat');
+    }
   };
-  const handleCloseEqDialog = () => {
-    setEqSelectionDialogOpen(false);
+
+  /**
+   * YARD入庫日時変更時
+   * @param newDate YARD入庫日
+   */
+  const handleYardNyukoChange = (newDate: Dayjs | null) => {
+    if (newDate === null) return;
+    setValue('yardNyukoDat', newDate.toDate(), { shouldDirty: true });
+
+    const kicsNyukoDat = getValues('kicsNyukoDat');
+
+    if (kicsNyukoDat === null) {
+      clearErrors('kicsNyukoDat');
+    }
+  };
+
+  /**
+   * 警告ダイアログの押下ボタンによる処理
+   * @param result 結果
+   */
+  const handleResultDialog = async (result: boolean) => {
+    if (result) {
+      await DelLock(1, props.juchuHeadData.juchuHeadId);
+      setLockData(null);
+      setEdit(false);
+      reset();
+      setSelectDate(oyaShukoDate ?? new Date());
+      setReturnJuchuKizaiMeisaiList(originReturnJuchuKizaiMeisaiList);
+      setOriginReturnPlanQty(originReturnJuchuKizaiMeisaiList.map((data) => data.planQty ?? 0));
+      setEqStockList(originEqStockList);
+      setDirtyOpen(false);
+    } else {
+      setDirtyOpen(false);
+    }
   };
 
   const setEqpts = async (data: JuchuKizaiMeisaiValues[]) => {
-    const ids = new Set(oyaJuchuKizaiMeisaiList.filter((d) => !d.delFlag).map((d) => d.kizaiId));
+    const ids = new Set(returnJuchuKizaiMeisaiList.filter((d) => !d.delFlag).map((d) => d.kizaiId));
     const filterData = data.filter((d) => !ids.has(d.kizaiId));
-    const newOyaJuchuKizaiMeisaiData: ReturnJuchuKizaiMeisaiValues[] = filterData.map((d) => ({
+    const newReturnJuchuKizaiMeisaiData: ReturnJuchuKizaiMeisaiValues[] = filterData.map((d) => ({
       juchuHeadId: d.juchuHeadId,
       juchuKizaiHeadId: 0,
       juchuKizaiMeisaiId: 0,
@@ -577,22 +569,37 @@ export const EquipmentReturnOrderDetail = (props: {
       delFlag: false,
       saveFlag: false,
     }));
-    setOyaJuchuKizaiMeisaiList((prev) => [...prev, ...newOyaJuchuKizaiMeisaiData]);
+    const newIds = newReturnJuchuKizaiMeisaiData.map((data) => data.kizaiId);
+    const newPlanQtys = newReturnJuchuKizaiMeisaiData.map((data) => data.planQty ?? 0);
+    // 機材在庫データ
+    const selectEqStockData: StockTableValues[][] = [];
+    for (let i = 0; i < newIds.length; i++) {
+      const stock: StockTableValues[] = await GetStockList(
+        getValues('juchuHeadId'),
+        getValues('juchuKizaiHeadId'),
+        newIds[i],
+        subDays(selectDate, 1)
+      );
+      selectEqStockData.push(stock);
+    }
+    setReturnJuchuKizaiMeisaiList((prev) => [...prev, ...newReturnJuchuKizaiMeisaiData]);
+    setEqStockList((prev) => [...prev, ...selectEqStockData]);
+    setOriginReturnPlanQty((prev) => [...prev, ...newPlanQtys]);
   };
 
-  // ref
-  const dateRangeRef = useRef(dateRange);
-  const dateHeaderRef = useRef(dateHeader);
+  // 機材入力ダイアログ開閉
+  const handleOpenEqDialog = async () => {
+    if (!saveKizaiHead) {
+      setSaveOpen(true);
+      return;
+    }
+    setEqSelectionDialogOpen(true);
+  };
 
-  useEffect(() => {
-    console.log('dateRange変更');
-    dateRangeRef.current = dateRange;
-  }, [dateRange]);
-
-  useEffect(() => {
-    console.log('dateHeader変更');
-    dateHeaderRef.current = dateHeader;
-  }, [dateHeader]);
+  // アコーディオン開閉
+  const handleExpansion = () => {
+    setExpanded((prevExpanded) => !prevExpanded);
+  };
 
   return (
     <Box>
@@ -626,7 +633,7 @@ export const EquipmentReturnOrderDetail = (props: {
               <Typography>受注ヘッダー</Typography>
               <Grid2 container display={expanded ? 'none' : 'flex'} spacing={2}>
                 <Typography>公演名</Typography>
-                <Typography>A/Zepp Tour</Typography>
+                <Typography>{props.juchuHeadData.koenNam}</Typography>
               </Grid2>
             </Grid2>
           </Box>
@@ -641,13 +648,21 @@ export const EquipmentReturnOrderDetail = (props: {
                     <Typography marginRight={3} whiteSpace="nowrap">
                       受注番号
                     </Typography>
-                    <TextField defaultValue="81694" disabled></TextField>
+                    <TextField value={props.juchuHeadData.juchuHeadId} disabled></TextField>
                   </Grid2>
                   <Grid2 display="flex" direction="row" alignItems="center">
                     <Typography mr={2}>受注ステータス</Typography>
-                    <TextField defaultValue="確定" disabled sx={{ width: 120 }}>
-                      確定
-                    </TextField>
+                    <FormControl size="small" sx={{ width: 120 }}>
+                      <Select value={props.juchuHeadData.juchuSts} disabled>
+                        <MenuItem value={0}>入力中</MenuItem>
+                        <MenuItem value={1}>仮受注</MenuItem>
+                        <MenuItem value={2}>処理中</MenuItem>
+                        <MenuItem value={3}>確定</MenuItem>
+                        <MenuItem value={4}>貸出済み</MenuItem>
+                        <MenuItem value={5}>返却済み</MenuItem>
+                        <MenuItem value={9}>受注キャンセル</MenuItem>
+                      </Select>
+                    </FormControl>
                   </Grid2>
                 </Grid2>
               </Grid2>
@@ -655,13 +670,13 @@ export const EquipmentReturnOrderDetail = (props: {
                 <Typography marginRight={5} whiteSpace="nowrap">
                   受注日
                 </Typography>
-                <TextField defaultValue="2025/10/01" disabled></TextField>
+                <TextField value={props.juchuHeadData.juchuDat} disabled></TextField>
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={5} whiteSpace="nowrap">
                   入力者
                 </Typography>
-                <TextField defaultValue="XXXXXXXX" disabled></TextField>
+                <TextField value={props.juchuHeadData.nyuryokuUser} disabled></TextField>
               </Box>
             </Grid2>
             <Grid2>
@@ -669,34 +684,47 @@ export const EquipmentReturnOrderDetail = (props: {
                 <Typography marginRight={5} whiteSpace="nowrap">
                   公演名
                 </Typography>
-                <TextField defaultValue="A/Zepp Tour" disabled></TextField>
+                <TextField value={props.juchuHeadData.koenNam} disabled></TextField>
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={3} whiteSpace="nowrap">
                   公演場所
                 </Typography>
-                <TextField defaultValue="Zepp Osaka" disabled></TextField>
+                <TextField
+                  value={props.juchuHeadData.koenbashoNam ? props.juchuHeadData.koenbashoNam : ''}
+                  disabled
+                ></TextField>
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={7} whiteSpace="nowrap">
                   相手
                 </Typography>
-                <TextField defaultValue="(株)シアターブレーン" disabled></TextField>
+                <TextField value={props.juchuHeadData.kokyaku.kokyakuNam} disabled></TextField>
               </Box>
             </Grid2>
           </Grid2>
         </AccordionDetails>
       </Accordion>
-      {/*受注明細ヘッダー(返却)*/}
-      <Accordion sx={{ mt: 2 }} defaultExpanded>
+      {/*返却受注明細ヘッダー*/}
+      {/* <form onSubmit={handleSubmit(onSubmit)}> */}
+      <Accordion
+        sx={{
+          mt: 2,
+          '& .Mui-expanded': {
+            mt: 2,
+          },
+        }}
+        defaultExpanded
+      >
         <AccordionSummary expandIcon={<ExpandMoreIcon />} component="div" sx={{ bgcolor: 'red', color: 'white' }}>
           <Box display="flex" alignItems="center" justifyContent="space-between" py={1} width={'100%'}>
             <Typography>受注機材ヘッダー(返却)</Typography>
             <Button
+              type="submit"
               onClick={(e) => {
                 e.stopPropagation();
-                console.log(oyaJuchuKizaiMeisaiList);
               }}
+              disabled={!edit}
             >
               <CheckIcon fontSize="small" />
               保存
@@ -708,19 +736,12 @@ export const EquipmentReturnOrderDetail = (props: {
           <Grid2 container alignItems="center" spacing={2} p={2}>
             <Grid2 container alignItems="center">
               <Typography>機材明細名</Typography>
-              <TextField
-                value={'キープ一部返却'}
-                sx={{
-                  '& .MuiInputBase-input': {
-                    color: 'red',
-                  },
-                }}
-              />
+              <TextFieldElement name="headNam" control={control} disabled={!edit}></TextFieldElement>
             </Grid2>
             <Grid2 container alignItems="center">
               <Typography>小計金額</Typography>
               <TextField
-                value={'-¥400,000'}
+                value={`¥${priceTotal.toLocaleString()}`}
                 type="text"
                 sx={{
                   '& .MuiInputBase-input': {
@@ -736,17 +757,7 @@ export const EquipmentReturnOrderDetail = (props: {
             </Grid2>
             <Grid2 container alignItems="center">
               <Typography>値引き</Typography>
-              <TextField
-                value={'¥10,000'}
-                type="text"
-                sx={{
-                  '& .MuiInputBase-input': {
-                    textAlign: 'right',
-                    color: 'red',
-                  },
-                }}
-              />
-              {/* <Controller
+              <Controller
                 name="nebikiAmt"
                 control={control}
                 render={({ field }) => (
@@ -786,7 +797,7 @@ export const EquipmentReturnOrderDetail = (props: {
                     disabled={!edit}
                   />
                 )}
-              /> */}
+              />
             </Grid2>
           </Grid2>
           <Grid2 container p={2} spacing={2}>
@@ -795,87 +806,115 @@ export const EquipmentReturnOrderDetail = (props: {
                 <Typography>元伝票出庫日時</Typography>
                 <Grid2>
                   <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                  <TestDate disabled date={startKICSDate} onChange={(newDate) => console.log()} />
-                  <Time disabled />
+                  <TestDate date={props.oyaJuchuKizaiNyushukoData.kicsShukoDat} onChange={() => {}} disabled />
+                  <TestTime time={props.oyaJuchuKizaiNyushukoData.kicsShukoDat} onChange={() => {}} disabled />
                 </Grid2>
                 <Grid2>
                   <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                  <TestDate
-                    disabled
-                    date={startYARDDate}
-                    onChange={(newDate) => {
-                      if (newDate !== null) {
-                        setStartYARDDate(newDate?.toDate());
-                      }
-                    }}
-                  />
-                  <TestTime
-                    disabled
-                    time={startYARDDate && startYARDDate}
-                    onChange={(newDate) => newDate && setStartYARDDate(newDate.toDate())}
-                  />
+                  <TestDate date={props.oyaJuchuKizaiNyushukoData.yardShukoDat} onChange={() => {}} disabled />
+                  <TestTime time={props.oyaJuchuKizaiNyushukoData.yardShukoDat} onChange={() => {}} disabled />
                 </Grid2>
               </Grid2>
               <Grid2 width={380} order={{ xl: 3 }}>
                 <Typography>元伝票入庫日時</Typography>
                 <Grid2>
                   <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                  <TestDate
-                    date={againKICSDate}
-                    minDate={endDate !== null ? endDate : new Date('2025/11/2')}
-                    maxDate={new Date('2025/11/19')}
-                    onChange={handleKICSAgainChange}
-                    disabled
-                  />
-                  <Time disabled />
+                  <TestDate date={props.oyaJuchuKizaiNyushukoData.kicsNyukoDat} onChange={() => {}} disabled />
+                  <TestTime time={props.oyaJuchuKizaiNyushukoData.kicsNyukoDat} onChange={() => {}} disabled />
                 </Grid2>
                 <Grid2>
                   <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                  <TestDate
-                    date={againYARDDate}
-                    minDate={endDate !== null ? endDate : new Date('2025/11/2')}
-                    maxDate={new Date('2025/11/19')}
-                    onChange={handleYARDAgainChange}
-                    disabled
-                  />
-                  <Time disabled />
+                  <TestDate date={props.oyaJuchuKizaiNyushukoData.yardNyukoDat} onChange={() => {}} disabled />
+                  <TestTime time={props.oyaJuchuKizaiNyushukoData.yardNyukoDat} onChange={() => {}} disabled />
                 </Grid2>
               </Grid2>
               <Grid2 width={380} order={{ xl: 2 }}>
                 <Typography>返却入庫日時</Typography>
                 <Grid2>
                   <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                  <TestDate
-                    date={endKICSDate}
-                    minDate={new Date('2025/11/2')}
-                    maxDate={startDate !== null ? startDate : new Date('2025/11/19')}
-                    onChange={handleKICSEndChange}
+                  <Controller
+                    name="kicsNyukoDat"
+                    control={control}
+                    render={({ field, fieldState }) => (
+                      <TestDate
+                        onBlur={field.onBlur}
+                        date={field.value}
+                        onChange={handleKicsNyukoChange}
+                        fieldstate={fieldState}
+                        disabled={!edit}
+                        onClear={() => field.onChange(null)}
+                      />
+                    )}
                   />
-                  <Time />
+                  <Controller
+                    name="kicsNyukoDat"
+                    control={control}
+                    render={({ field, fieldState }) => (
+                      <TestTime
+                        onBlur={field.onBlur}
+                        time={field.value}
+                        onChange={(newTime) => {
+                          field.onChange(newTime?.toDate());
+                          const yardNyukoDat = getValues('yardNyukoDat');
+                          if (yardNyukoDat === null) {
+                            clearErrors('yardNyukoDat');
+                          }
+                        }}
+                        fieldstate={fieldState}
+                        disabled={!edit}
+                      />
+                    )}
+                  />
                 </Grid2>
                 <Grid2>
                   <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                  <TestDate
-                    date={endYARDDate}
-                    minDate={new Date('2025/11/2')}
-                    maxDate={startDate !== null ? startDate : new Date('2025/11/19')}
-                    onChange={handleYARDEndChange}
+                  <Controller
+                    name="yardNyukoDat"
+                    control={control}
+                    render={({ field, fieldState }) => (
+                      <TestDate
+                        onBlur={field.onBlur}
+                        date={field.value}
+                        onChange={handleYardNyukoChange}
+                        fieldstate={fieldState}
+                        disabled={!edit}
+                        onClear={() => field.onChange(null)}
+                      />
+                    )}
                   />
-                  <Time />
+                  <Controller
+                    name="yardNyukoDat"
+                    control={control}
+                    render={({ field, fieldState }) => (
+                      <TestTime
+                        onBlur={field.onBlur}
+                        time={field.value}
+                        onChange={(newTime) => {
+                          field.onChange(newTime?.toDate());
+                          const kicsNyukoDat = getValues('kicsNyukoDat');
+                          if (kicsNyukoDat === null) {
+                            clearErrors('kicsNyukoDat');
+                          }
+                        }}
+                        fieldstate={fieldState}
+                        disabled={!edit}
+                      />
+                    )}
+                  />
                 </Grid2>
               </Grid2>
             </Grid2>
           </Grid2>
-
           <Grid2 container alignItems="center" p={2} spacing={2}>
             <Grid2 container alignItems="center">
               <Typography>メモ</Typography>
-              <TextField multiline rows={3} />
-              {/* <TextFieldElement name="mem" control={control} multiline rows={3} disabled={!edit}></TextFieldElement> */}
+              <TextFieldElement name="mem" control={control} multiline rows={3} disabled={!edit}></TextFieldElement>
             </Grid2>
             <Grid2 container alignItems="center">
               <Typography>本番日数</Typography>
-              <TextField
+              <TextFieldElement
+                name="juchuHonbanbiQty"
+                control={control}
                 type="number"
                 sx={{
                   width: '5%',
@@ -888,25 +927,9 @@ export const EquipmentReturnOrderDetail = (props: {
                     margin: 0,
                   },
                 }}
-              />
-              {/* <TextFieldElement
-              name="juchuHonbanbiQty"
-              control={control}
-              type="number"
-              sx={{
-                width: '5%',
-                minWidth: '60px',
-                '& .MuiInputBase-input': {
-                  textAlign: 'right',
-                },
-                '& input[type=number]::-webkit-inner-spin-button': {
-                  WebkitAppearance: 'none',
-                  margin: 0,
-                },
-              }}
-              slotProps={{ input: { readOnly: true } }}
-              disabled={!edit}
-            ></TextFieldElement> */}
+                slotProps={{ input: { readOnly: true } }}
+                disabled={!edit}
+              ></TextFieldElement>
               <Typography>日</Typography>
             </Grid2>
           </Grid2>
@@ -916,7 +939,8 @@ export const EquipmentReturnOrderDetail = (props: {
           </Grid2>
         </AccordionDetails>
       </Accordion>
-      {/*受注明細(機材)*/}
+      {/* </form> */}
+      {/*返却受注明細(機材)*/}
       <Paper variant="outlined" sx={{ mt: 2 }}>
         <Box display="flex" justifyContent="space-between" alignItems="center" py={1} px={2}>
           <Grid2 container direction="column" spacing={1}>
@@ -928,7 +952,7 @@ export const EquipmentReturnOrderDetail = (props: {
         <Dialog open={EqSelectionDialogOpen} maxWidth="sm" fullWidth>
           <OyaEqSelectionDialog
             juchuHeadId={props.juchuHeadData.juchuHeadId}
-            oyaJuchuKizaiHeadId={props.oyaJuchuKizaiHeadData.juchuKizaiHeadId}
+            oyaJuchuKizaiHeadId={props.oyaJuchuKizaiNyushukoData.juchuKizaiHeadId}
             setEqpts={setEqpts}
             onClose={setEqSelectionDialogOpen}
           />
@@ -951,9 +975,11 @@ export const EquipmentReturnOrderDetail = (props: {
                 機材追加
               </Button>
             </Box>
-            <Box display={Object.keys(oyaJuchuKizaiMeisaiList).length > 0 ? 'block' : 'none'}>
+            <Box
+              display={Object.keys(returnJuchuKizaiMeisaiList.filter((d) => !d.delFlag)).length > 0 ? 'block' : 'none'}
+            >
               <ReturnEqTable
-                rows={oyaJuchuKizaiMeisaiList}
+                rows={returnJuchuKizaiMeisaiList}
                 onChange={handleCellChange}
                 handleMemoChange={handleMemoChange}
                 ref={leftRef}
@@ -961,7 +987,7 @@ export const EquipmentReturnOrderDetail = (props: {
             </Box>
           </Box>
           <Box
-            display={Object.keys(oyaJuchuKizaiMeisaiList).length > 0 ? 'block' : 'none'}
+            display={Object.keys(eqStockList).length > 0 ? 'block' : 'none'}
             overflow="auto"
             sx={{ width: { xs: '60%', sm: '60%', md: 'auto' } }}
           >
@@ -987,11 +1013,9 @@ export const EquipmentReturnOrderDetail = (props: {
               </Button>
             </Box>
             <ReturnStockTable
-              header={dateHeader}
-              rows={stockRows}
-              dateRange={dateHeaderRange}
-              startDate={startDate}
-              endDate={endDate}
+              eqStockList={eqStockList}
+              dateRange={dateRange}
+              stockTableHeaderDateRange={props.stockTableHeaderDateRange}
               ref={rightRef}
             />
           </Box>

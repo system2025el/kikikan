@@ -48,7 +48,7 @@ import {
   GetJuchuKizaiMeisaiMaxId,
   UpdJuchuKizaiNyushuko,
 } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
-import { OyaJuchuKizaiHeadValues } from '@/app/(main)/(eq-order-detail)/_lib/types';
+import { OyaJuchuKizaiNyushukoValues } from '@/app/(main)/(eq-order-detail)/_lib/types';
 import { OyaEqSelectionDialog } from '@/app/(main)/(eq-order-detail)/_ui/equipment-selection-dialog';
 import {
   JuchuKizaiHeadValues,
@@ -71,7 +71,7 @@ import { KeepEqTable } from './equipment-keep-order-detail-table';
 
 export const EquipmentKeepOrderDetail = (props: {
   juchuHeadData: OrderValues;
-  oyaJuchuKizaiHeadData: OyaJuchuKizaiHeadValues;
+  oyaJuchuKizaiHeadData: OyaJuchuKizaiNyushukoValues;
   keepJuchuKizaiHeadData: KeepJuchuKizaiHeadValues;
   keepJuchuKizaiMeisaiData: KeepJuchuKizaiMeisaiValues[] | undefined;
   oyaShukoDate: Date;

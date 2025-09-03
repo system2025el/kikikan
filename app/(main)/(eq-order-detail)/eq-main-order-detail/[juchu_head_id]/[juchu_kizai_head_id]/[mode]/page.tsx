@@ -97,12 +97,10 @@ const Page = async (props: {
     const dateRange = getRange(shukoDate, nyukoDate);
     // 受注機材idリスト
     const ids = juchuKizaiMeisaiData?.map((data) => data.kizaiId);
-    // 受注機材合計数リスト
-    const planQtys = juchuKizaiMeisaiData?.map((data) => data.planQty);
     // 機材在庫データ
     const eqStockData: StockTableValues[][] = [];
     console.time();
-    if (ids && planQtys) {
+    if (ids) {
       if (!shukoDate) return <div>データに不備があります。</div>;
       for (let i = 0; i < ids.length; i++) {
         const stock: StockTableValues[] = await GetStockList(

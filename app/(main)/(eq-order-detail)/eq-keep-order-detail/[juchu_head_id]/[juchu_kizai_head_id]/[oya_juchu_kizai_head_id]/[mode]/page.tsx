@@ -21,7 +21,7 @@ const Page = async (props: {
   const edit = params.mode === 'edit' ? true : false;
   // 受注ヘッダーデータ
   const juchuHeadData = await GetJuchuHead(params.juchu_head_id);
-  // 親受注機材ヘッダーデータ
+  // 親受注機材入出庫データ
   const oyaJuchuKizaiNyushukoData = await GetJuchuKizaiNyushuko(params.juchu_head_id, params.oya_juchu_kizai_head_id);
   console.log('oyaJuchuKizaiNyushukoData', oyaJuchuKizaiNyushukoData);
 
@@ -46,7 +46,7 @@ const Page = async (props: {
 
   // 新規
   if (juchuKizaiHeadId === 0) {
-    // 受注機材ヘッダーキープデータ(初期値)
+    // キープ受注機材ヘッダーデータ(初期値)
     const newKeepJuchuKizaiHeadData: KeepJuchuKizaiHeadValues = {
       juchuHeadId: Number(params.juchu_head_id),
       juchuKizaiHeadId: Number(params.juchu_kizai_head_id),
@@ -59,8 +59,7 @@ const Page = async (props: {
       yardShukoDat: null,
       yardNyukoDat: null,
     };
-    console.log('newKeepJuchuKizaiHeadData', newKeepJuchuKizaiHeadData);
-    // 受注機材明細キープデータ(初期値)
+    // キープ受注機材明細データ(初期値)
     const newKeepJuchuKizaiMeisaiData: KeepJuchuKizaiMeisaiValues[] = [];
 
     // キープ出庫日(初期値)
@@ -83,7 +82,7 @@ const Page = async (props: {
     );
     // 既存
   } else {
-    // 受注機材ヘッダーキープデータ
+    // キープ受注機材ヘッダーデータ
     console.time();
     const keepJuchuKizaiHeadData = await GetKeepJuchuKizaiHead(params.juchu_head_id, params.juchu_kizai_head_id);
     console.log('---------------------受注機材ヘッダーキープ---------------------');
@@ -93,18 +92,18 @@ const Page = async (props: {
       return <div>受注機材情報が見つかりません。</div>;
     }
 
-    // 受注機材明細データ
+    // キープ受注機材明細データ
     console.time();
     const juchuKizaiMeisaiData = await GetKeepJuchuKizaiMeisai(params.juchu_head_id, params.juchu_kizai_head_id);
     console.log('----------------------------受注機材明細---------------------------------');
     console.timeEnd();
 
-    // 出庫日
+    // キープ出庫日
     const keepShukoDate = GetShukoDate(
       keepJuchuKizaiHeadData.kicsShukoDat && new Date(keepJuchuKizaiHeadData.kicsShukoDat),
       keepJuchuKizaiHeadData.yardShukoDat && new Date(keepJuchuKizaiHeadData.yardShukoDat)
     );
-    // 入庫日
+    // キープ入庫日
     const keepNyukoDate = GetNyukoDate(
       keepJuchuKizaiHeadData.kicsNyukoDat && new Date(keepJuchuKizaiHeadData.kicsNyukoDat),
       keepJuchuKizaiHeadData.yardNyukoDat && new Date(keepJuchuKizaiHeadData.yardNyukoDat)

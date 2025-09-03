@@ -6,10 +6,16 @@ export const ReturnJuchuKizaiHeadSchema = z
     juchuKizaiHeadId: z.number(),
     juchuKizaiHeadKbn: z.number(),
     juchuHonbanbiQty: z.number().nullable(),
+    nebikiAmt: z.number().nullable(),
     mem: z.string().nullable(),
     headNam: z.string({ message: '機材明細名は必須です' }).min(1, { message: '機材明細名は必須です' }),
+    oyaJuchuKizaiHeadId: z.number(),
     kicsNyukoDat: z.date().nullable(),
     yardNyukoDat: z.date().nullable(),
+  })
+  .refine((data) => data.kicsNyukoDat || data.yardNyukoDat, {
+    message: '',
+    path: ['kicsNyukoDat'],
   })
   .refine((data) => data.kicsNyukoDat || data.yardNyukoDat, {
     message: '入庫日時をいずれか一方入力してください',
@@ -24,15 +30,15 @@ export type ReturnJuchuKizaiMeisaiValues = {
   juchuKizaiMeisaiId: number;
   shozokuId: number;
   shozokuNam: string;
-  mem: string;
+  mem: string | null;
   kizaiId: number;
   kizaiTankaAmt: number;
   kizaiNam: string;
-  oyaPlanKizaiQty: number;
-  oyaPlanYobiQty: number;
-  planKizaiQty: number;
-  planYobiQty: number;
-  planQty: number;
+  oyaPlanKizaiQty: number | null;
+  oyaPlanYobiQty: number | null;
+  planKizaiQty: number | null;
+  planYobiQty: number | null;
+  planQty: number | null;
   delFlag: boolean;
   saveFlag: boolean;
 };
