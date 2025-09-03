@@ -26,64 +26,87 @@ import { grey } from '@mui/material/colors';
 import { Dayjs } from 'dayjs';
 import React, { useRef, useState } from 'react';
 
+import { toISOStringMonthDay, toISOStringYearMonthDay } from '@/app/(main)/_lib/date-conversion';
+import { getStockRowBackgroundColor } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_lib/colorselect';
+import {
+  JuchuKizaiHonbanbiValues,
+  StockTableValues,
+} from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_lib/types';
+
 import { getDateHeaderBackgroundColor, getDateRowBackgroundColor } from '../_lib/colorselect';
 import { ReturnJuchuKizaiMeisaiValues } from '../_lib/types';
-import { ReturnEquipment, ReturnEquipmentData, StockData } from './equipment-return-order-detail';
 
 type ReturnStockTableProps = {
-  header: string[];
-  rows: StockData[];
+  eqStockList: StockTableValues[][];
   dateRange: string[];
-  startDate: Date | null;
-  endDate: Date | null;
+  stockTableHeaderDateRange: string[];
   ref: React.RefObject<HTMLDivElement | null>;
 };
 
 export const ReturnStockTable: React.FC<ReturnStockTableProps> = ({
-  header,
-  rows,
+  eqStockList,
   dateRange,
-  startDate,
-  endDate,
+  stockTableHeaderDateRange,
   ref,
 }) => {
   return (
     <TableContainer ref={ref} component={Paper} style={{ overflow: 'scroll', maxHeight: '80vh' }}>
-      <Table stickyHeader>
+      <Table>
         <TableHead>
           <TableRow>
-            <TableCell
-              size="small"
-              sx={{ bgcolor: 'white', whiteSpace: 'nowrap', padding: 0, height: '25px' }}
-            ></TableCell>
+            {eqStockList.length > 0 &&
+              eqStockList[0].map((data, index) => (
+                <TableCell
+                  key={index}
+                  size="small"
+                  sx={{
+                    bgcolor: 'white',
+                    whiteSpace: 'nowrap',
+                    padding: 0,
+                    height: '25px',
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 2,
+                  }}
+                ></TableCell>
+              ))}
           </TableRow>
-        </TableHead>
-        <TableHead>
           <TableRow>
-            {header?.map((date, index) => (
-              <TableCell
-                key={index}
-                align={typeof rows[0].data[index] === 'number' ? 'right' : 'left'}
-                size="small"
-                sx={{
-                  border:
-                    getDateHeaderBackgroundColor(date, dateRange) === 'black' ? '1px solid grey' : '1px solid black',
-                  whiteSpace: 'nowrap',
-                  color: 'white',
-                  bgcolor: getDateHeaderBackgroundColor(date, dateRange),
-                  padding: 0,
-                  height: '26px',
-                }}
-              >
-                {date}
-              </TableCell>
-            ))}
+            {eqStockList.length > 0 &&
+              eqStockList[0].map((data, index) => (
+                <TableCell
+                  key={index}
+                  align={'right'}
+                  size="small"
+                  sx={{
+                    border:
+                      getDateHeaderBackgroundColor(toISOStringYearMonthDay(data.calDat), stockTableHeaderDateRange) ===
+                      'black'
+                        ? '1px solid grey'
+                        : '1px solid black',
+                    whiteSpace: 'nowrap',
+                    color: 'white',
+                    bgcolor: getDateHeaderBackgroundColor(
+                      toISOStringYearMonthDay(data.calDat),
+                      stockTableHeaderDateRange
+                    ),
+                    padding: 0,
+                    height: '26px',
+                    position: 'sticky',
+                    top: 24,
+                    zIndex: 2,
+                  }}
+                >
+                  {toISOStringMonthDay(data.calDat)}
+                </TableCell>
+              ))}
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map((row, rowIndex) => (
-            <ReturnStockTableRow key={rowIndex} header={header} row={row} startDate={startDate} endDate={endDate} />
-          ))}
+          {eqStockList.length > 0 &&
+            eqStockList.map((row, rowIndex) => (
+              <ReturnStockTableRow key={rowIndex} row={row} index={rowIndex} dateRange={dateRange} />
+            ))}
         </TableBody>
       </Table>
     </TableContainer>
@@ -91,30 +114,30 @@ export const ReturnStockTable: React.FC<ReturnStockTableProps> = ({
 };
 
 export type ReturnStockTableRowProps = {
-  header: string[];
-  row: StockData;
-  startDate: Date | null;
-  endDate: Date | null;
+  row: StockTableValues[];
+  index: number;
+  dateRange: string[];
 };
 
 const ReturnStockTableRow = React.memo(
-  ({ header, row, startDate, endDate }: ReturnStockTableRowProps) => {
-    console.log('date側描画', row.id);
+  ({ row, index, dateRange }: ReturnStockTableRowProps) => {
+    console.log('stock側描画', index);
+    const test: JuchuKizaiHonbanbiValues[] = [];
     return (
       <TableRow>
-        {row.data.map((cell, colIndex) => {
+        {row.map((cell, colIndex) => {
           return (
             <TableCell
               key={colIndex}
               align={typeof cell === 'number' ? 'right' : 'left'}
               style={styles.row}
               sx={{
-                bgcolor: getDateRowBackgroundColor(header[colIndex], startDate, endDate),
-                color: typeof cell === 'number' && cell < 0 ? 'red' : 'black',
+                bgcolor: getStockRowBackgroundColor(cell.calDat, dateRange, test),
+                color: cell.zaikoQty < 0 ? 'red' : 'black',
               }}
               size="small"
             >
-              {cell}
+              {cell.zaikoQty}
             </TableCell>
           );
         })}
@@ -122,11 +145,7 @@ const ReturnStockTableRow = React.memo(
     );
   },
   (prevProps, nextProps) => {
-    return (
-      prevProps.header === nextProps.header &&
-      prevProps.row === nextProps.row &&
-      prevProps.endDate === nextProps.endDate
-    );
+    return prevProps.row === nextProps.row;
   }
 );
 
@@ -134,16 +153,35 @@ ReturnStockTableRow.displayName = 'ReturnStockTableRow';
 
 type ReturnEqTableProps = {
   rows: ReturnJuchuKizaiMeisaiValues[];
-  onChange: (rowIndex: number, returnValue: number) => void;
-  handleMemoChange: (rowIndex: number, memo: string) => void;
+  edit: boolean;
+  onChange: (kizaiId: number, returnOrderValue: number, returnSpareValue: number, returnTotalValue: number) => void;
+  handleDelete: (kizaiId: number) => void;
+  handleMemoChange: (kizaiId: number, memo: string) => void;
   ref: React.RefObject<HTMLDivElement | null>;
 };
 
-export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({ rows, onChange, handleMemoChange, ref }) => {
+export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({
+  rows,
+  edit,
+  onChange,
+  handleDelete,
+  handleMemoChange,
+  ref,
+}) => {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  const handleReturnCellChange = (rowIndex: number, newValue: number) => {
-    onChange(rowIndex, newValue);
+  const visibleRows = rows.filter((row) => !row.delFlag);
+
+  const handlePlanKizaiQtyChange = (kizaiId: number, newValue: number) => {
+    const planYobiQty = rows.find((row) => row.kizaiId === kizaiId && !row.delFlag)?.planYobiQty || 0;
+    const planQty = planYobiQty + newValue;
+    onChange(kizaiId, newValue, planYobiQty, planQty);
+  };
+
+  const handlePlanYobiQtyChange = (kizaiId: number, newValue: number) => {
+    const planKizaiQty = rows.find((row) => row.kizaiId === kizaiId)?.planKizaiQty || 0;
+    const planQty = planKizaiQty + newValue;
+    onChange(kizaiId, planKizaiQty, newValue, planQty);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent, rowIndex: number) => {
@@ -216,15 +254,18 @@ export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({ rows, onChange, ha
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map((row, rowIndex) => (
+          {visibleRows.map((row, rowIndex) => (
             <ReturnEqTableRow
               key={rowIndex}
               row={row}
               rowIndex={rowIndex}
+              edit={edit}
               handleOrderRef={handleReturnRef(rowIndex)}
+              handleDelete={handleDelete}
               handleMemoChange={handleMemoChange}
               handleKeyDown={handleKeyDown}
-              handleReturnCellChange={handleReturnCellChange}
+              handlePlanKizaiQtyChange={handlePlanKizaiQtyChange}
+              handlePlanYobiQtyChange={handlePlanYobiQtyChange}
             />
           ))}
         </TableBody>
@@ -236,9 +277,12 @@ export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({ rows, onChange, ha
 type ReturnEqTableRowProps = {
   row: ReturnJuchuKizaiMeisaiValues;
   rowIndex: number;
+  edit: boolean;
   handleOrderRef: (el: HTMLInputElement | null) => void;
+  handleDelete: (kizaiId: number) => void;
   handleMemoChange: (rowIndex: number, memo: string) => void;
-  handleReturnCellChange: (rowIndex: number, newValue: number) => void;
+  handlePlanKizaiQtyChange: (kizaiId: number, newValue: number) => void;
+  handlePlanYobiQtyChange: (kizaiId: number, newValue: number) => void;
   handleKeyDown: (e: React.KeyboardEvent, rowIndex: number) => void;
 };
 
@@ -246,9 +290,12 @@ const ReturnEqTableRow = React.memo(
   ({
     row,
     rowIndex,
+    edit,
     handleOrderRef,
+    handleDelete,
     handleMemoChange,
-    handleReturnCellChange,
+    handlePlanKizaiQtyChange,
+    handlePlanYobiQtyChange,
     handleKeyDown,
   }: ReturnEqTableRowProps) => {
     console.log('描画', rowIndex);
@@ -256,7 +303,7 @@ const ReturnEqTableRow = React.memo(
     return (
       <TableRow>
         <TableCell sx={{ padding: 0, border: '1px solid black' }}>
-          <IconButton sx={{ padding: 0, color: 'red' }}>
+          <IconButton onClick={() => handleDelete(row.kizaiId)} sx={{ padding: 0, color: 'red' }} disabled={!edit}>
             <Delete fontSize="small" />
           </IconButton>
         </TableCell>
@@ -267,7 +314,13 @@ const ReturnEqTableRow = React.memo(
           {row.shozokuId === 1 ? 'K' : 'Y'}
         </TableCell>
         <TableCell style={styles.row} align="center" size="small">
-          <MemoTooltip name={row.kizaiNam} memo={row.mem} handleMemoChange={handleMemoChange} rowIndex={rowIndex} />
+          <MemoTooltip
+            name={row.kizaiNam}
+            memo={row.mem ? row.mem : ''}
+            handleMemoChange={handleMemoChange}
+            kizaiId={row.kizaiId}
+            disabled={!edit}
+          />
         </TableCell>
         <TableCell style={styles.row} align="left" size="small">
           <Button variant="text" sx={{ p: 0, justifyContent: 'start' }} href={`/loan-situation/${row.kizaiId}`}>
@@ -286,8 +339,8 @@ const ReturnEqTableRow = React.memo(
             value={row.planKizaiQty}
             type="text"
             onChange={(e) => {
-              if (/^\d*$/.test(e.target.value) && Number(e.target.value) <= row.oyaPlanKizaiQty) {
-                handleReturnCellChange(rowIndex, Number(e.target.value));
+              if (/^\d*$/.test(e.target.value) && Number(e.target.value) <= (row.oyaPlanKizaiQty ?? 0)) {
+                handlePlanKizaiQtyChange(row.kizaiId, Number(e.target.value));
               }
             }}
             sx={{
@@ -307,6 +360,9 @@ const ReturnEqTableRow = React.memo(
               '& input[type=number]::-webkit-inner-spin-button': {
                 WebkitAppearance: 'none',
                 margin: 0,
+              },
+              '.Mui-disabled': {
+                WebkitTextFillColor: 'red',
               },
             }}
             slotProps={{
@@ -321,6 +377,7 @@ const ReturnEqTableRow = React.memo(
               handleKeyDown(e, rowIndex);
             }}
             onFocus={(e) => e.target.select()}
+            disabled={!edit}
           />
         </TableCell>
         <TableCell style={styles.row} align="right" size="small">
@@ -329,8 +386,8 @@ const ReturnEqTableRow = React.memo(
             value={row.planYobiQty}
             type="text"
             onChange={(e) => {
-              if (/^\d*$/.test(e.target.value) && Number(e.target.value) <= row.oyaPlanYobiQty) {
-                handleReturnCellChange(rowIndex, Number(e.target.value));
+              if (/^\d*$/.test(e.target.value) && Number(e.target.value) <= (row.oyaPlanYobiQty ?? 0)) {
+                handlePlanYobiQtyChange(row.kizaiId, Number(e.target.value));
               }
             }}
             sx={{
@@ -351,6 +408,9 @@ const ReturnEqTableRow = React.memo(
                 WebkitAppearance: 'none',
                 margin: 0,
               },
+              '.Mui-disabled': {
+                WebkitTextFillColor: 'red',
+              },
             }}
             slotProps={{
               input: {
@@ -360,16 +420,17 @@ const ReturnEqTableRow = React.memo(
               },
             }}
             onFocus={(e) => e.target.select()}
+            disabled={!edit}
           />
         </TableCell>
-        <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
+        <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200], color: 'red' }}>
           {row.planQty}
         </TableCell>
       </TableRow>
     );
   },
   (prevProps, nextProps) => {
-    return prevProps.row === nextProps.row;
+    return prevProps.row === nextProps.row && prevProps.edit === nextProps.edit;
   }
 );
 
@@ -378,8 +439,9 @@ ReturnEqTableRow.displayName = 'ReturnEqTableRow';
 type MemoTooltipProps = {
   name: string;
   memo: string;
-  rowIndex: number;
+  kizaiId: number;
   handleMemoChange: (rowIndex: number, memo: string) => void;
+  disabled: boolean;
 };
 
 export const MemoTooltip = (props: MemoTooltipProps) => {
@@ -390,7 +452,7 @@ export const MemoTooltip = (props: MemoTooltipProps) => {
   const handleClose = () => setOpen(false);
 
   const handleSave = () => {
-    props.handleMemoChange(props.rowIndex, equipmentMemo);
+    props.handleMemoChange(props.kizaiId, equipmentMemo);
     handleClose();
   };
 
@@ -411,11 +473,12 @@ export const MemoTooltip = (props: MemoTooltipProps) => {
             fullWidth
             multiline
             minRows={3}
+            disabled={props.disabled}
           />
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>キャンセル</Button>
-          <Button onClick={handleSave} variant="contained">
+          <Button onClick={handleSave} variant="contained" disabled={props.disabled}>
             保存
           </Button>
         </DialogActions>

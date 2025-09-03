@@ -166,7 +166,9 @@ export const Order = (props: {
   }, [lockData, setLock]);
 
   useEffect(() => {
-    if (props.juchuHeadData.juchuHeadId !== 0) setSave(true);
+    if (props.juchuHeadData.juchuHeadId !== 0) {
+      setSave(true);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
