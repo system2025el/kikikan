@@ -35,6 +35,7 @@ import {
 } from '@mui/material';
 import { addMonths, endOfMonth, subDays, subMonths } from 'date-fns';
 import dayjs, { Dayjs } from 'dayjs';
+import { redirect } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
@@ -47,12 +48,23 @@ import { LockValues } from '@/app/(main)/_lib/types';
 import { BackButton } from '@/app/(main)/_ui/buttons';
 import { Calendar, TestDate } from '@/app/(main)/_ui/date';
 import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
+import { Loading } from '@/app/(main)/_ui/loading';
 import Time, { TestTime } from '@/app/(main)/_ui/time';
-import { GetStockList } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
+import { GetNyukoDate, getRange } from '@/app/(main)/(eq-order-detail)/_lib/datefuncs';
+import {
+  AddAllHonbanbi,
+  AddJuchuKizaiNyushuko,
+  DelSiyouHonbanbi,
+  GetJuchuKizaiHeadMaxId,
+  GetJuchuKizaiMeisaiMaxId,
+  GetStockList,
+  UpdJuchuKizaiNyushuko,
+} from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 import { OyaJuchuKizaiNyushukoValues } from '@/app/(main)/(eq-order-detail)/_lib/types';
 import { OyaEqSelectionDialog } from '@/app/(main)/(eq-order-detail)/_ui/equipment-selection-dialog';
 import {
   JuchuKizaiHeadValues,
+  JuchuKizaiHonbanbiValues,
   JuchuKizaiMeisaiValues,
   StockTableValues,
 } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_lib/types';
@@ -63,6 +75,14 @@ import { OrderValues } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/type
 import { EqptSelectionDialog } from '../../../../../../eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_ui/equipment-selection-dailog';
 import { getDateHeaderBackgroundColor, getDateRowBackgroundColor } from '../_lib/colorselect';
 import { data, stock } from '../_lib/data';
+import {
+  AddReturnJuchuKizaiHead,
+  AddReturnJuchuKizaiMeisai,
+  DelReturnJuchuKizaiMeisai,
+  GetReturnJuchuKizaiMeisai,
+  UpdReturnJuchuKizaiHead,
+  UpdReturnJuchuKizaiMeisai,
+} from '../_lib/funcs';
 import { ReturnJuchuKizaiHeadSchema, ReturnJuchuKizaiHeadValues, ReturnJuchuKizaiMeisaiValues } from '../_lib/types';
 import { ReturnEqTable, ReturnStockTable } from './equipment-return-order-detail-table';
 
@@ -119,7 +139,7 @@ export const EquipmentReturnOrderDetail = (props: {
   // 返却入庫日から親入庫日
   const [dateRange, setDateRange] = useState<string[]>(props.dateRange);
   // カレンダー選択日
-  const [selectDate, setSelectDate] = useState<Date>(props.oyaShukoDate);
+  const [selectDate, setSelectDate] = useState<Date>(props.returnNyukoDate ?? props.oyaShukoDate);
 
   // 未保存ダイアログを出すかどうか
   const [saveOpen, setSaveOpen] = useState(false);
@@ -179,6 +199,7 @@ export const EquipmentReturnOrderDetail = (props: {
       nebikiAmt: props.returnJuchuKizaiHeadData.nebikiAmt,
       mem: props.returnJuchuKizaiHeadData.mem,
       headNam: props.returnJuchuKizaiHeadData.headNam,
+      oyaJuchuKizaiHeadId: props.returnJuchuKizaiHeadData.oyaJuchuKizaiHeadId,
       kicsNyukoDat: props.returnJuchuKizaiHeadData.kicsNyukoDat
         ? new Date(props.returnJuchuKizaiHeadData.kicsNyukoDat)
         : null,
@@ -272,7 +293,7 @@ export const EquipmentReturnOrderDetail = (props: {
         right.removeEventListener('scroll', () => syncScroll('right'));
       }
     };
-  }, []);
+  }, [returnJuchuKizaiMeisaiList, isLoading]);
 
   /**
    * 編集モード変更
@@ -326,6 +347,265 @@ export const EquipmentReturnOrderDetail = (props: {
     requestAnimationFrame(() => {
       isSyncing.current = false;
     });
+  };
+
+  /**
+   * 保存ボタン押下時
+   * @param data 受注機材ヘッダーデータ
+   * @returns
+   */
+  const onSubmit = async (data: ReturnJuchuKizaiHeadValues) => {
+    console.log('保存開始');
+    if (!user) return;
+    setIsLoading(true);
+    setIsEditing(false);
+
+    // ユーザー名
+    const userNam = user.name;
+
+    // 返却入庫日
+    const updateNyukoDate = GetNyukoDate(data.kicsNyukoDat, data.yardNyukoDat);
+    // 返却入庫日から親入庫日
+    const updateDateRange = getRange(updateNyukoDate, oyaNyukoDate);
+    console.log('返却入庫日から親入庫日', updateDateRange);
+
+    if (!updateNyukoDate) {
+      setIsLoading(false);
+      return;
+    }
+
+    // 新規
+    if (data.juchuKizaiHeadId === 0) {
+      // 新規受注機材ヘッダー追加
+      await saveNewReturnJuchuKizaiHead(data, updateDateRange, userNam);
+
+      // 更新
+    } else {
+      // 受注機材ヘッダー関係更新
+      if (isDirty) {
+        await saveReturnJuchuKizaiHead(data, updateNyukoDate, updateDateRange, userNam);
+      }
+
+      // 受注機材明細関係更新
+      const filterReturnJuchuKizaiMeisaiList = returnJuchuKizaiMeisaiList.filter((data) => !data.delFlag);
+      if (JSON.stringify(originReturnJuchuKizaiMeisaiList) !== JSON.stringify(filterReturnJuchuKizaiMeisaiList)) {
+        await saveReturnJuchuKizaiMeisai(data.juchuHeadId, data.juchuKizaiHeadId, userNam);
+      }
+
+      //
+      if (
+        isDirty &&
+        JSON.stringify(originReturnJuchuKizaiMeisaiList) !== JSON.stringify(filterReturnJuchuKizaiMeisaiList)
+      ) {
+        // 受注機材ヘッダー状態管理更新
+        reset(data);
+
+        // 受注機材明細、機材在庫テーブル更新
+        const juchuKizaiMeisaiData = await GetReturnJuchuKizaiMeisai(data.juchuHeadId, data.juchuKizaiHeadId);
+        if (juchuKizaiMeisaiData) {
+          setReturnJuchuKizaiMeisaiList(juchuKizaiMeisaiData);
+          setOriginReturnJuchuKizaiMeisaiList(juchuKizaiMeisaiData);
+          setOriginReturnPlanQty(juchuKizaiMeisaiData.map((data) => data.planQty ?? 0));
+          const updatedEqStockData = await updateEqStock(
+            data.juchuHeadId,
+            data.juchuKizaiHeadId,
+            updateNyukoDate,
+            juchuKizaiMeisaiData
+          );
+          setOriginEqStockList(updatedEqStockData);
+        }
+      } else if (isDirty) {
+        // 受注機材ヘッダー状態管理更新
+        reset(data);
+        // 機材在庫テーブル更新
+        const updatedEqStockData = await updateEqStock(
+          data.juchuHeadId,
+          data.juchuKizaiHeadId,
+          updateNyukoDate,
+          returnJuchuKizaiMeisaiList
+        );
+        setOriginEqStockList(updatedEqStockData);
+      } else if (
+        JSON.stringify(originReturnJuchuKizaiMeisaiList) !== JSON.stringify(filterReturnJuchuKizaiMeisaiList)
+      ) {
+        // 受注機材明細、機材在庫テーブル更新
+        const juchuKizaiMeisaiData = await GetReturnJuchuKizaiMeisai(data.juchuHeadId, data.juchuKizaiHeadId);
+        if (juchuKizaiMeisaiData) {
+          setReturnJuchuKizaiMeisaiList(juchuKizaiMeisaiData);
+          setOriginReturnJuchuKizaiMeisaiList(juchuKizaiMeisaiData);
+          setOriginReturnPlanQty(juchuKizaiMeisaiData.map((data) => data.planQty ?? 0));
+          const updatedEqStockData = await updateEqStock(
+            data.juchuHeadId,
+            data.juchuKizaiHeadId,
+            updateNyukoDate,
+            juchuKizaiMeisaiData
+          );
+          setOriginEqStockList(updatedEqStockData);
+        }
+      }
+    }
+    setIsLoading(false);
+  };
+
+  /**
+   * 新規返却受注機材ヘッダー追加
+   * @param data 受注機材ヘッダーデータ
+   * @param updateDateRange 更新後返却入庫日から親入庫日
+   * @param userNam ユーザー名
+   */
+  const saveNewReturnJuchuKizaiHead = async (
+    data: ReturnJuchuKizaiHeadValues,
+    updateDateRange: string[],
+    userNam: string
+  ) => {
+    const maxId = await GetJuchuKizaiHeadMaxId(data.juchuHeadId);
+    const newJuchuKizaiHeadId = maxId ? maxId.juchu_kizai_head_id + 1 : 1;
+    // 受注機材ヘッダー追加
+    const headResult = await AddReturnJuchuKizaiHead(newJuchuKizaiHeadId, data, userNam);
+    console.log('返却受注機材ヘッダー追加', headResult);
+    // 受注機材入出庫追加
+    const nyushukoResult = await AddJuchuKizaiNyushuko(
+      data.juchuHeadId,
+      newJuchuKizaiHeadId,
+      null,
+      null,
+      data.kicsNyukoDat,
+      data.yardNyukoDat,
+      userNam
+    );
+    console.log('返却受注機材入出庫追加', nyushukoResult);
+
+    // 返却受注機材本番日(使用中)追加
+    const addReturnJuchuSiyouHonbanbiData: JuchuKizaiHonbanbiValues[] = updateDateRange.map((d) => ({
+      juchuHeadId: data.juchuHeadId,
+      juchuKizaiHeadId: newJuchuKizaiHeadId,
+      juchuHonbanbiShubetuId: 1,
+      juchuHonbanbiDat: new Date(d),
+      mem: '',
+      juchuHonbanbiAddQty: 0,
+    }));
+    const addReturnHonbanbiResult = await AddAllHonbanbi(
+      data.juchuHeadId,
+      newJuchuKizaiHeadId,
+      addReturnJuchuSiyouHonbanbiData,
+      userNam
+    );
+    console.log('使用中本番日追加', addReturnHonbanbiResult);
+
+    redirect(
+      `/eq-return-order-detail/${data.juchuHeadId}/${newJuchuKizaiHeadId}/${props.oyaJuchuKizaiNyushukoData.juchuKizaiHeadId}/edit`
+    );
+  };
+
+  /**
+   * 返却受注機材ヘッダー関係更新
+   * @param data 受注機材ヘッダーデータ
+   * @param updateShukoDate 更新後出庫日
+   * @param updateNyukoDate 更新後入庫日
+   * @param updateDateRange 更新後出庫日から入庫日
+   * @param userNam ユーザー名
+   */
+  const saveReturnJuchuKizaiHead = async (
+    data: ReturnJuchuKizaiHeadValues,
+    updateNyukoDate: Date,
+    updateDateRange: string[],
+    userNam: string
+  ) => {
+    // 受注機材ヘッド更新
+    const headResult = await UpdReturnJuchuKizaiHead(data, userNam);
+    console.log('受注機材ヘッダー更新', headResult);
+
+    // 受注機材入出庫更新
+    const nyushukoResult = await UpdJuchuKizaiNyushuko(
+      data.juchuHeadId,
+      data.juchuKizaiHeadId,
+      null,
+      null,
+      data.kicsNyukoDat,
+      data.yardNyukoDat,
+      userNam
+    );
+    console.log('返却受注機材入出庫更新', nyushukoResult);
+
+    // 受注機材本番日(使用中)更新
+    const addReturnJuchuSiyouHonbanbiData: JuchuKizaiHonbanbiValues[] = updateDateRange.map((d) => ({
+      juchuHeadId: data.juchuHeadId,
+      juchuKizaiHeadId: data.juchuKizaiHeadId,
+      juchuHonbanbiShubetuId: 1,
+      juchuHonbanbiDat: new Date(d),
+      mem: '',
+      juchuHonbanbiAddQty: 0,
+    }));
+    console.log('受注機材本番日(使用中)更新データ', addReturnJuchuSiyouHonbanbiData);
+    const deleteReturnSiyouHonbanbiResult = await DelSiyouHonbanbi(data.juchuHeadId, data.juchuKizaiHeadId);
+    console.log('受注機材本番日(使用日)削除', deleteReturnSiyouHonbanbiResult);
+    const addReturnSiyouHonbanbiResult = await AddAllHonbanbi(
+      data.juchuHeadId,
+      data.juchuKizaiHeadId,
+      addReturnJuchuSiyouHonbanbiData,
+      userNam
+    );
+    console.log('受注機材本番日(使用日)更新', addReturnSiyouHonbanbiResult);
+
+    // 返却入庫日更新
+    setNyukoDate(updateNyukoDate);
+    // カレンダー選択日更新
+    setSelectDate(updateNyukoDate);
+    // 出庫日から入庫日更新
+    setDateRange(updateDateRange);
+  };
+
+  /**
+   * 返却受注機材明細関係更新
+   * @param juchuHeadId 受注ヘッダーid
+   * @param juchuKizaiHeadId 受注機材ヘッダーid
+   * @param userNam ユーザー名
+   */
+  const saveReturnJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number, userNam: string) => {
+    const copyJuchuKizaiMeisaiData = [...returnJuchuKizaiMeisaiList];
+    const juchuKizaiMeisaiMaxId = await GetJuchuKizaiMeisaiMaxId(juchuHeadId, juchuKizaiHeadId);
+    const newReturnJuchuKizaiMeisaiId = juchuKizaiMeisaiMaxId ? juchuKizaiMeisaiMaxId.juchu_kizai_meisai_id + 1 : 1;
+    const newReturnJuchuKizaiMeisaiData = copyJuchuKizaiMeisaiData.map((data, index) =>
+      data.juchuKizaiMeisaiId === 0
+        ? {
+            ...data,
+            juchuKizaiMeisaiId: newReturnJuchuKizaiMeisaiId + index,
+          }
+        : data
+    );
+
+    // 受注機材明細更新
+    const addReturnJuchuKizaiMeisaiData = newReturnJuchuKizaiMeisaiData.filter(
+      (data) => !data.delFlag && !data.saveFlag
+    );
+    const updateReturnJuchuKizaiMeisaiData = newReturnJuchuKizaiMeisaiData.filter(
+      (data) => !data.delFlag && data.saveFlag
+    );
+    const deleteReturnJuchuKizaiMeisaiData = newReturnJuchuKizaiMeisaiData.filter(
+      (data) => data.delFlag && data.saveFlag
+    );
+    if (deleteReturnJuchuKizaiMeisaiData.length > 0) {
+      console.log('明細削除');
+      const deleteJuchuKizaiMeisaiIds = deleteReturnJuchuKizaiMeisaiData.map((data) => data.juchuKizaiMeisaiId);
+      const deleteMeisaiResult = await DelReturnJuchuKizaiMeisai(
+        juchuHeadId,
+        juchuKizaiHeadId,
+        deleteJuchuKizaiMeisaiIds
+      );
+      console.log('受注機材明細削除', deleteMeisaiResult);
+    }
+
+    if (addReturnJuchuKizaiMeisaiData.length > 0) {
+      console.log('明細追加');
+      const addMeisaiResult = AddReturnJuchuKizaiMeisai(addReturnJuchuKizaiMeisaiData, userNam);
+      console.log('受注機材明細追加', addMeisaiResult);
+    }
+
+    if (updateReturnJuchuKizaiMeisaiData.length > 0) {
+      console.log('明細更新');
+      const updateMeisaiResult = await UpdReturnJuchuKizaiMeisai(updateReturnJuchuKizaiMeisaiData, userNam);
+      console.log('受注機材明細更新', updateMeisaiResult);
+    }
   };
 
   /**
@@ -549,12 +829,16 @@ export const EquipmentReturnOrderDetail = (props: {
     }
   };
 
+  /**
+   * 機材追加時
+   * @param data 親受注機材明細データ
+   */
   const setEqpts = async (data: JuchuKizaiMeisaiValues[]) => {
     const ids = new Set(returnJuchuKizaiMeisaiList.filter((d) => !d.delFlag).map((d) => d.kizaiId));
     const filterData = data.filter((d) => !ids.has(d.kizaiId));
     const newReturnJuchuKizaiMeisaiData: ReturnJuchuKizaiMeisaiValues[] = filterData.map((d) => ({
-      juchuHeadId: d.juchuHeadId,
-      juchuKizaiHeadId: 0,
+      juchuHeadId: getValues('juchuHeadId'),
+      juchuKizaiHeadId: getValues('juchuKizaiHeadId'),
       juchuKizaiMeisaiId: 0,
       shozokuId: d.shozokuId,
       shozokuNam: d.shozokuNam,
@@ -602,6 +886,13 @@ export const EquipmentReturnOrderDetail = (props: {
     setExpanded((prevExpanded) => !prevExpanded);
   };
 
+  if (user === null || isLoading)
+    return (
+      <Box height={'90vh'}>
+        <Loading />
+      </Box>
+    );
+
   return (
     <Box>
       <Box display={'flex'} justifyContent={'end'}>
@@ -624,7 +915,6 @@ export const EquipmentReturnOrderDetail = (props: {
             </Button>
           </Grid2>
           <BackButton label={'戻る'} />
-          <Button onClick={() => console.log(dateRange)}>確認</Button>
         </Grid2>
       </Box>
       {/*受注ヘッダー*/}
@@ -708,240 +998,240 @@ export const EquipmentReturnOrderDetail = (props: {
         </AccordionDetails>
       </Accordion>
       {/*返却受注明細ヘッダー*/}
-      {/* <form onSubmit={handleSubmit(onSubmit)}> */}
-      <Accordion
-        sx={{
-          mt: 2,
-          '& .Mui-expanded': {
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <Accordion
+          sx={{
             mt: 2,
-          },
-        }}
-        defaultExpanded
-      >
-        <AccordionSummary expandIcon={<ExpandMoreIcon />} component="div" sx={{ bgcolor: 'red', color: 'white' }}>
-          <Box display="flex" alignItems="center" justifyContent="space-between" py={1} width={'100%'}>
-            <Typography>受注機材ヘッダー(返却)</Typography>
-            <Button
-              type="submit"
-              onClick={(e) => {
-                e.stopPropagation();
-              }}
-              disabled={!edit}
-            >
-              <CheckIcon fontSize="small" />
-              保存
-            </Button>
-          </Box>
-        </AccordionSummary>
-        <AccordionDetails sx={{ padding: 0 }}>
-          <Divider />
-          <Grid2 container alignItems="center" spacing={2} p={2}>
-            <Grid2 container alignItems="center">
-              <Typography>機材明細名</Typography>
-              <TextFieldElement name="headNam" control={control} disabled={!edit}></TextFieldElement>
-            </Grid2>
-            <Grid2 container alignItems="center">
-              <Typography>小計金額</Typography>
-              <TextField
-                value={`¥${priceTotal.toLocaleString()}`}
-                type="text"
-                sx={{
-                  '& .MuiInputBase-input': {
-                    textAlign: 'right',
-                    color: 'red',
-                  },
-                  '.Mui-disabled': {
-                    WebkitTextFillColor: 'red',
-                  },
+            '& .Mui-expanded': {
+              mt: 2,
+            },
+          }}
+          defaultExpanded
+        >
+          <AccordionSummary expandIcon={<ExpandMoreIcon />} component="div" sx={{ bgcolor: 'red', color: 'white' }}>
+            <Box display="flex" alignItems="center" justifyContent="space-between" py={1} width={'100%'}>
+              <Typography>受注機材ヘッダー(返却)</Typography>
+              <Button
+                type="submit"
+                onClick={(e) => {
+                  e.stopPropagation();
                 }}
-                disabled
-              />
-            </Grid2>
-            <Grid2 container alignItems="center">
-              <Typography>値引き</Typography>
-              <Controller
-                name="nebikiAmt"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    value={
-                      isEditing
-                        ? (field.value ?? '')
-                        : field.value !== null && !isNaN(field.value)
-                          ? `¥${Number(field.value).toLocaleString()}`
-                          : '¥0'
-                    }
-                    type="text"
-                    onFocus={(e) => {
-                      setIsEditing(true);
-                      const rawValue = e.target.value.replace(/[¥,]/g, '');
-                      e.target.value = rawValue;
-                    }}
-                    onBlur={(e) => {
-                      const rawValue = e.target.value.replace(/[¥,]/g, '');
-                      const numericValue = Number(rawValue);
-                      field.onChange(numericValue);
-                      setIsEditing(false);
-                    }}
-                    onChange={(e) => {
-                      const raw = e.target.value.replace(/[^\d]/g, '');
-                      if (/^\d*$/.test(raw)) {
-                        field.onChange(Number(raw));
-                        e.target.value = raw;
-                      }
-                    }}
-                    sx={{
-                      '& .MuiInputBase-input': {
-                        textAlign: 'right',
-                      },
-                    }}
-                    disabled={!edit}
-                  />
-                )}
-              />
-            </Grid2>
-          </Grid2>
-          <Grid2 container p={2} spacing={2}>
-            <Grid2 container spacing={2}>
-              <Grid2 width={380} order={{ xl: 1 }}>
-                <Typography>元伝票出庫日時</Typography>
-                <Grid2>
-                  <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                  <TestDate date={props.oyaJuchuKizaiNyushukoData.kicsShukoDat} onChange={() => {}} disabled />
-                  <TestTime time={props.oyaJuchuKizaiNyushukoData.kicsShukoDat} onChange={() => {}} disabled />
-                </Grid2>
-                <Grid2>
-                  <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                  <TestDate date={props.oyaJuchuKizaiNyushukoData.yardShukoDat} onChange={() => {}} disabled />
-                  <TestTime time={props.oyaJuchuKizaiNyushukoData.yardShukoDat} onChange={() => {}} disabled />
-                </Grid2>
-              </Grid2>
-              <Grid2 width={380} order={{ xl: 3 }}>
-                <Typography>元伝票入庫日時</Typography>
-                <Grid2>
-                  <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                  <TestDate date={props.oyaJuchuKizaiNyushukoData.kicsNyukoDat} onChange={() => {}} disabled />
-                  <TestTime time={props.oyaJuchuKizaiNyushukoData.kicsNyukoDat} onChange={() => {}} disabled />
-                </Grid2>
-                <Grid2>
-                  <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                  <TestDate date={props.oyaJuchuKizaiNyushukoData.yardNyukoDat} onChange={() => {}} disabled />
-                  <TestTime time={props.oyaJuchuKizaiNyushukoData.yardNyukoDat} onChange={() => {}} disabled />
-                </Grid2>
-              </Grid2>
-              <Grid2 width={380} order={{ xl: 2 }}>
-                <Typography>返却入庫日時</Typography>
-                <Grid2>
-                  <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                  <Controller
-                    name="kicsNyukoDat"
-                    control={control}
-                    render={({ field, fieldState }) => (
-                      <TestDate
-                        onBlur={field.onBlur}
-                        date={field.value}
-                        onChange={handleKicsNyukoChange}
-                        fieldstate={fieldState}
-                        disabled={!edit}
-                        onClear={() => field.onChange(null)}
-                      />
-                    )}
-                  />
-                  <Controller
-                    name="kicsNyukoDat"
-                    control={control}
-                    render={({ field, fieldState }) => (
-                      <TestTime
-                        onBlur={field.onBlur}
-                        time={field.value}
-                        onChange={(newTime) => {
-                          field.onChange(newTime?.toDate());
-                          const yardNyukoDat = getValues('yardNyukoDat');
-                          if (yardNyukoDat === null) {
-                            clearErrors('yardNyukoDat');
-                          }
-                        }}
-                        fieldstate={fieldState}
-                        disabled={!edit}
-                      />
-                    )}
-                  />
-                </Grid2>
-                <Grid2>
-                  <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                  <Controller
-                    name="yardNyukoDat"
-                    control={control}
-                    render={({ field, fieldState }) => (
-                      <TestDate
-                        onBlur={field.onBlur}
-                        date={field.value}
-                        onChange={handleYardNyukoChange}
-                        fieldstate={fieldState}
-                        disabled={!edit}
-                        onClear={() => field.onChange(null)}
-                      />
-                    )}
-                  />
-                  <Controller
-                    name="yardNyukoDat"
-                    control={control}
-                    render={({ field, fieldState }) => (
-                      <TestTime
-                        onBlur={field.onBlur}
-                        time={field.value}
-                        onChange={(newTime) => {
-                          field.onChange(newTime?.toDate());
-                          const kicsNyukoDat = getValues('kicsNyukoDat');
-                          if (kicsNyukoDat === null) {
-                            clearErrors('kicsNyukoDat');
-                          }
-                        }}
-                        fieldstate={fieldState}
-                        disabled={!edit}
-                      />
-                    )}
-                  />
-                </Grid2>
-              </Grid2>
-            </Grid2>
-          </Grid2>
-          <Grid2 container alignItems="center" p={2} spacing={2}>
-            <Grid2 container alignItems="center">
-              <Typography>メモ</Typography>
-              <TextFieldElement name="mem" control={control} multiline rows={3} disabled={!edit}></TextFieldElement>
-            </Grid2>
-            <Grid2 container alignItems="center">
-              <Typography>本番日数</Typography>
-              <TextFieldElement
-                name="juchuHonbanbiQty"
-                control={control}
-                type="number"
-                sx={{
-                  width: '5%',
-                  minWidth: '60px',
-                  '& .MuiInputBase-input': {
-                    textAlign: 'right',
-                  },
-                  '& input[type=number]::-webkit-inner-spin-button': {
-                    WebkitAppearance: 'none',
-                    margin: 0,
-                  },
-                }}
-                slotProps={{ input: { readOnly: true } }}
                 disabled={!edit}
-              ></TextFieldElement>
-              <Typography>日</Typography>
+              >
+                <CheckIcon fontSize="small" />
+                保存
+              </Button>
+            </Box>
+          </AccordionSummary>
+          <AccordionDetails sx={{ padding: 0 }}>
+            <Divider />
+            <Grid2 container alignItems="center" spacing={2} p={2}>
+              <Grid2 container alignItems="center">
+                <Typography>機材明細名</Typography>
+                <TextFieldElement name="headNam" control={control} disabled={!edit}></TextFieldElement>
+              </Grid2>
+              <Grid2 container alignItems="center">
+                <Typography>小計金額</Typography>
+                <TextField
+                  value={`¥${priceTotal.toLocaleString()}`}
+                  type="text"
+                  sx={{
+                    '& .MuiInputBase-input': {
+                      textAlign: 'right',
+                      color: 'red',
+                    },
+                    '.Mui-disabled': {
+                      WebkitTextFillColor: 'red',
+                    },
+                  }}
+                  disabled
+                />
+              </Grid2>
+              <Grid2 container alignItems="center">
+                <Typography>値引き</Typography>
+                <Controller
+                  name="nebikiAmt"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      value={
+                        isEditing
+                          ? (field.value ?? '')
+                          : field.value !== null && !isNaN(field.value)
+                            ? `¥${Number(field.value).toLocaleString()}`
+                            : '¥0'
+                      }
+                      type="text"
+                      onFocus={(e) => {
+                        setIsEditing(true);
+                        const rawValue = e.target.value.replace(/[¥,]/g, '');
+                        e.target.value = rawValue;
+                      }}
+                      onBlur={(e) => {
+                        const rawValue = e.target.value.replace(/[¥,]/g, '');
+                        const numericValue = Number(rawValue);
+                        field.onChange(numericValue);
+                        setIsEditing(false);
+                      }}
+                      onChange={(e) => {
+                        const raw = e.target.value.replace(/[^\d]/g, '');
+                        if (/^\d*$/.test(raw)) {
+                          field.onChange(Number(raw));
+                          e.target.value = raw;
+                        }
+                      }}
+                      sx={{
+                        '& .MuiInputBase-input': {
+                          textAlign: 'right',
+                        },
+                      }}
+                      disabled={!edit}
+                    />
+                  )}
+                />
+              </Grid2>
             </Grid2>
-          </Grid2>
-          <Grid2 container alignItems="center" p={2} spacing={2}>
-            <Typography>入出庫ステータス</Typography>
-            <TextField disabled defaultValue={'準備中'}></TextField>
-          </Grid2>
-        </AccordionDetails>
-      </Accordion>
-      {/* </form> */}
+            <Grid2 container p={2} spacing={2}>
+              <Grid2 container spacing={2}>
+                <Grid2 width={380} order={{ xl: 1 }}>
+                  <Typography>元伝票出庫日時</Typography>
+                  <Grid2>
+                    <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
+                    <TestDate date={props.oyaJuchuKizaiNyushukoData.kicsShukoDat} onChange={() => {}} disabled />
+                    <TestTime time={props.oyaJuchuKizaiNyushukoData.kicsShukoDat} onChange={() => {}} disabled />
+                  </Grid2>
+                  <Grid2>
+                    <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
+                    <TestDate date={props.oyaJuchuKizaiNyushukoData.yardShukoDat} onChange={() => {}} disabled />
+                    <TestTime time={props.oyaJuchuKizaiNyushukoData.yardShukoDat} onChange={() => {}} disabled />
+                  </Grid2>
+                </Grid2>
+                <Grid2 width={380} order={{ xl: 3 }}>
+                  <Typography>元伝票入庫日時</Typography>
+                  <Grid2>
+                    <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
+                    <TestDate date={props.oyaJuchuKizaiNyushukoData.kicsNyukoDat} onChange={() => {}} disabled />
+                    <TestTime time={props.oyaJuchuKizaiNyushukoData.kicsNyukoDat} onChange={() => {}} disabled />
+                  </Grid2>
+                  <Grid2>
+                    <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
+                    <TestDate date={props.oyaJuchuKizaiNyushukoData.yardNyukoDat} onChange={() => {}} disabled />
+                    <TestTime time={props.oyaJuchuKizaiNyushukoData.yardNyukoDat} onChange={() => {}} disabled />
+                  </Grid2>
+                </Grid2>
+                <Grid2 width={380} order={{ xl: 2 }}>
+                  <Typography>返却入庫日時</Typography>
+                  <Grid2>
+                    <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
+                    <Controller
+                      name="kicsNyukoDat"
+                      control={control}
+                      render={({ field, fieldState }) => (
+                        <TestDate
+                          onBlur={field.onBlur}
+                          date={field.value}
+                          onChange={handleKicsNyukoChange}
+                          fieldstate={fieldState}
+                          disabled={!edit}
+                          onClear={() => field.onChange(null)}
+                        />
+                      )}
+                    />
+                    <Controller
+                      name="kicsNyukoDat"
+                      control={control}
+                      render={({ field, fieldState }) => (
+                        <TestTime
+                          onBlur={field.onBlur}
+                          time={field.value}
+                          onChange={(newTime) => {
+                            field.onChange(newTime?.toDate());
+                            const yardNyukoDat = getValues('yardNyukoDat');
+                            if (yardNyukoDat === null) {
+                              clearErrors('yardNyukoDat');
+                            }
+                          }}
+                          fieldstate={fieldState}
+                          disabled={!edit}
+                        />
+                      )}
+                    />
+                  </Grid2>
+                  <Grid2>
+                    <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
+                    <Controller
+                      name="yardNyukoDat"
+                      control={control}
+                      render={({ field, fieldState }) => (
+                        <TestDate
+                          onBlur={field.onBlur}
+                          date={field.value}
+                          onChange={handleYardNyukoChange}
+                          fieldstate={fieldState}
+                          disabled={!edit}
+                          onClear={() => field.onChange(null)}
+                        />
+                      )}
+                    />
+                    <Controller
+                      name="yardNyukoDat"
+                      control={control}
+                      render={({ field, fieldState }) => (
+                        <TestTime
+                          onBlur={field.onBlur}
+                          time={field.value}
+                          onChange={(newTime) => {
+                            field.onChange(newTime?.toDate());
+                            const kicsNyukoDat = getValues('kicsNyukoDat');
+                            if (kicsNyukoDat === null) {
+                              clearErrors('kicsNyukoDat');
+                            }
+                          }}
+                          fieldstate={fieldState}
+                          disabled={!edit}
+                        />
+                      )}
+                    />
+                  </Grid2>
+                </Grid2>
+              </Grid2>
+            </Grid2>
+            <Grid2 container alignItems="center" p={2} spacing={2}>
+              <Grid2 container alignItems="center">
+                <Typography>メモ</Typography>
+                <TextFieldElement name="mem" control={control} multiline rows={3} disabled={!edit}></TextFieldElement>
+              </Grid2>
+              <Grid2 container alignItems="center">
+                <Typography>本番日数</Typography>
+                <TextFieldElement
+                  name="juchuHonbanbiQty"
+                  control={control}
+                  type="number"
+                  sx={{
+                    width: '5%',
+                    minWidth: '60px',
+                    '& .MuiInputBase-input': {
+                      textAlign: 'right',
+                    },
+                    '& input[type=number]::-webkit-inner-spin-button': {
+                      WebkitAppearance: 'none',
+                      margin: 0,
+                    },
+                  }}
+                  slotProps={{ input: { readOnly: true } }}
+                  disabled={!edit}
+                ></TextFieldElement>
+                <Typography>日</Typography>
+              </Grid2>
+            </Grid2>
+            <Grid2 container alignItems="center" p={2} spacing={2}>
+              <Typography>入出庫ステータス</Typography>
+              <TextField disabled defaultValue={'準備中'}></TextField>
+            </Grid2>
+          </AccordionDetails>
+        </Accordion>
+      </form>
       {/*返却受注明細(機材)*/}
       <Paper variant="outlined" sx={{ mt: 2 }}>
         <Box display="flex" justifyContent="space-between" alignItems="center" py={1} px={2}>
@@ -982,7 +1272,9 @@ export const EquipmentReturnOrderDetail = (props: {
             >
               <ReturnEqTable
                 rows={returnJuchuKizaiMeisaiList}
+                edit={edit}
                 onChange={handleCellChange}
+                handleDelete={handleDelete}
                 handleMemoChange={handleMemoChange}
                 ref={leftRef}
               />

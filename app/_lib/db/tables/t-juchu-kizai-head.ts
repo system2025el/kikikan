@@ -107,13 +107,23 @@ export const InsertJuchuKizaiHead = async (data: JuchuKizaiHead) => {
 
 /**
  * キープ受注機材ヘッダー新規追加
- * @param juchuKizaiHeadId 受注機材ヘッダーid
- * @param juchuKizaiHeadData 受注機材ヘッダーデータ
- * @param dspOrdNum 表示順
- * @param userNam ユーザー名
+ * @param data キープ受注機材ヘッダーデータ
  * @returns
  */
 export const InsertKeepJuchuKizaiHead = async (data: JuchuKizaiHead) => {
+  try {
+    return await supabase.schema(SCHEMA).from('t_juchu_kizai_head').insert(data);
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
+ * 返却受注機材ヘッダー新規追加
+ * @param data 返却受注機材ヘッダーデータ
+ * @returns
+ */
+export const InsertReturnJuchuKizaiHead = async (data: JuchuKizaiHead) => {
   try {
     return await supabase.schema(SCHEMA).from('t_juchu_kizai_head').insert(data);
   } catch (e) {
@@ -147,6 +157,26 @@ export const UpdateJuchuKizaiHead = async (data: JuchuKizaiHead) => {
  * @returns
  */
 export const UpdateKeepJuchuKizaiHead = async (data: JuchuKizaiHead) => {
+  try {
+    return await supabase
+      .schema(SCHEMA)
+      .from('t_juchu_kizai_head')
+      .update(data)
+      .eq('juchu_head_id', data.juchu_head_id)
+      .eq('juchu_kizai_head_id', data.juchu_kizai_head_id)
+      .eq('juchu_kizai_head_kbn', data.juchu_kizai_head_kbn);
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
+ * 返却受注機材ヘッダー更新
+ * @param juchuKizaiHeadData 受注機材ヘッダーデータ
+ * @param userNam ユーザー名
+ * @returns
+ */
+export const UpdateReturnJuchuKizaiHead = async (data: JuchuKizaiHead) => {
   try {
     return await supabase
       .schema(SCHEMA)

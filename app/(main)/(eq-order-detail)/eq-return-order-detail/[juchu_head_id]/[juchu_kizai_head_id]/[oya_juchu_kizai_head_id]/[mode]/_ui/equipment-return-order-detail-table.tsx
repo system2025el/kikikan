@@ -51,13 +51,25 @@ export const ReturnStockTable: React.FC<ReturnStockTableProps> = ({
 }) => {
   return (
     <TableContainer ref={ref} component={Paper} style={{ overflow: 'scroll', maxHeight: '80vh' }}>
-      <Table stickyHeader>
+      <Table>
         <TableHead>
           <TableRow>
-            <TableCell
-              size="small"
-              sx={{ bgcolor: 'white', whiteSpace: 'nowrap', padding: 0, height: '25px' }}
-            ></TableCell>
+            {eqStockList.length > 0 &&
+              eqStockList[0].map((data, index) => (
+                <TableCell
+                  key={index}
+                  size="small"
+                  sx={{
+                    bgcolor: 'white',
+                    whiteSpace: 'nowrap',
+                    padding: 0,
+                    height: '25px',
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 2,
+                  }}
+                ></TableCell>
+              ))}
           </TableRow>
           <TableRow>
             {eqStockList.length > 0 &&
@@ -80,6 +92,9 @@ export const ReturnStockTable: React.FC<ReturnStockTableProps> = ({
                     ),
                     padding: 0,
                     height: '26px',
+                    position: 'sticky',
+                    top: 24,
+                    zIndex: 2,
                   }}
                 >
                   {toISOStringMonthDay(data.calDat)}
@@ -138,12 +153,21 @@ ReturnStockTableRow.displayName = 'ReturnStockTableRow';
 
 type ReturnEqTableProps = {
   rows: ReturnJuchuKizaiMeisaiValues[];
+  edit: boolean;
   onChange: (kizaiId: number, returnOrderValue: number, returnSpareValue: number, returnTotalValue: number) => void;
+  handleDelete: (kizaiId: number) => void;
   handleMemoChange: (kizaiId: number, memo: string) => void;
   ref: React.RefObject<HTMLDivElement | null>;
 };
 
-export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({ rows, onChange, handleMemoChange, ref }) => {
+export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({
+  rows,
+  edit,
+  onChange,
+  handleDelete,
+  handleMemoChange,
+  ref,
+}) => {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const visibleRows = rows.filter((row) => !row.delFlag);
@@ -235,7 +259,9 @@ export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({ rows, onChange, ha
               key={rowIndex}
               row={row}
               rowIndex={rowIndex}
+              edit={edit}
               handleOrderRef={handleReturnRef(rowIndex)}
+              handleDelete={handleDelete}
               handleMemoChange={handleMemoChange}
               handleKeyDown={handleKeyDown}
               handlePlanKizaiQtyChange={handlePlanKizaiQtyChange}
@@ -251,7 +277,9 @@ export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({ rows, onChange, ha
 type ReturnEqTableRowProps = {
   row: ReturnJuchuKizaiMeisaiValues;
   rowIndex: number;
+  edit: boolean;
   handleOrderRef: (el: HTMLInputElement | null) => void;
+  handleDelete: (kizaiId: number) => void;
   handleMemoChange: (rowIndex: number, memo: string) => void;
   handlePlanKizaiQtyChange: (kizaiId: number, newValue: number) => void;
   handlePlanYobiQtyChange: (kizaiId: number, newValue: number) => void;
@@ -262,7 +290,9 @@ const ReturnEqTableRow = React.memo(
   ({
     row,
     rowIndex,
+    edit,
     handleOrderRef,
+    handleDelete,
     handleMemoChange,
     handlePlanKizaiQtyChange,
     handlePlanYobiQtyChange,
@@ -273,7 +303,7 @@ const ReturnEqTableRow = React.memo(
     return (
       <TableRow>
         <TableCell sx={{ padding: 0, border: '1px solid black' }}>
-          <IconButton sx={{ padding: 0, color: 'red' }}>
+          <IconButton onClick={() => handleDelete(row.kizaiId)} sx={{ padding: 0, color: 'red' }} disabled={!edit}>
             <Delete fontSize="small" />
           </IconButton>
         </TableCell>
@@ -288,7 +318,8 @@ const ReturnEqTableRow = React.memo(
             name={row.kizaiNam}
             memo={row.mem ? row.mem : ''}
             handleMemoChange={handleMemoChange}
-            rowIndex={rowIndex}
+            kizaiId={row.kizaiId}
+            disabled={!edit}
           />
         </TableCell>
         <TableCell style={styles.row} align="left" size="small">
@@ -330,6 +361,9 @@ const ReturnEqTableRow = React.memo(
                 WebkitAppearance: 'none',
                 margin: 0,
               },
+              '.Mui-disabled': {
+                WebkitTextFillColor: 'red',
+              },
             }}
             slotProps={{
               input: {
@@ -343,6 +377,7 @@ const ReturnEqTableRow = React.memo(
               handleKeyDown(e, rowIndex);
             }}
             onFocus={(e) => e.target.select()}
+            disabled={!edit}
           />
         </TableCell>
         <TableCell style={styles.row} align="right" size="small">
@@ -373,6 +408,9 @@ const ReturnEqTableRow = React.memo(
                 WebkitAppearance: 'none',
                 margin: 0,
               },
+              '.Mui-disabled': {
+                WebkitTextFillColor: 'red',
+              },
             }}
             slotProps={{
               input: {
@@ -382,6 +420,7 @@ const ReturnEqTableRow = React.memo(
               },
             }}
             onFocus={(e) => e.target.select()}
+            disabled={!edit}
           />
         </TableCell>
         <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200], color: 'red' }}>
@@ -391,7 +430,7 @@ const ReturnEqTableRow = React.memo(
     );
   },
   (prevProps, nextProps) => {
-    return prevProps.row === nextProps.row;
+    return prevProps.row === nextProps.row && prevProps.edit === nextProps.edit;
   }
 );
 
@@ -400,8 +439,9 @@ ReturnEqTableRow.displayName = 'ReturnEqTableRow';
 type MemoTooltipProps = {
   name: string;
   memo: string;
-  rowIndex: number;
+  kizaiId: number;
   handleMemoChange: (rowIndex: number, memo: string) => void;
+  disabled: boolean;
 };
 
 export const MemoTooltip = (props: MemoTooltipProps) => {
@@ -412,7 +452,7 @@ export const MemoTooltip = (props: MemoTooltipProps) => {
   const handleClose = () => setOpen(false);
 
   const handleSave = () => {
-    props.handleMemoChange(props.rowIndex, equipmentMemo);
+    props.handleMemoChange(props.kizaiId, equipmentMemo);
     handleClose();
   };
 
@@ -433,11 +473,12 @@ export const MemoTooltip = (props: MemoTooltipProps) => {
             fullWidth
             multiline
             minRows={3}
+            disabled={props.disabled}
           />
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>キャンセル</Button>
-          <Button onClick={handleSave} variant="contained">
+          <Button onClick={handleSave} variant="contained" disabled={props.disabled}>
             保存
           </Button>
         </DialogActions>

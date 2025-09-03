@@ -483,9 +483,9 @@ const EquipmentOrderDetail = (props: {
     );
     console.log('受注機材入出庫追加', nyushukoResult);
     // 受注機材本番日(入出庫、使用中)追加
-    const addJuchuSIyouHonbanbiData: JuchuKizaiHonbanbiValues[] = updateDateRange.map((d) => ({
+    const addJuchuSiyouHonbanbiData: JuchuKizaiHonbanbiValues[] = updateDateRange.map((d) => ({
       juchuHeadId: data.juchuHeadId,
-      juchuKizaiHeadId: data.juchuKizaiHeadId,
+      juchuKizaiHeadId: newJuchuKizaiHeadId,
       juchuHonbanbiShubetuId: 1,
       juchuHonbanbiDat: new Date(d),
       mem: '',
@@ -494,7 +494,7 @@ const EquipmentOrderDetail = (props: {
     const addJuchuHonbanbiData: JuchuKizaiHonbanbiValues[] = [
       {
         juchuHeadId: data.juchuHeadId,
-        juchuKizaiHeadId: data.juchuKizaiHeadId,
+        juchuKizaiHeadId: newJuchuKizaiHeadId,
         juchuHonbanbiShubetuId: 2,
         juchuHonbanbiDat: updateShukoDate,
         mem: '',
@@ -502,15 +502,15 @@ const EquipmentOrderDetail = (props: {
       },
       {
         juchuHeadId: data.juchuHeadId,
-        juchuKizaiHeadId: data.juchuKizaiHeadId,
+        juchuKizaiHeadId: newJuchuKizaiHeadId,
         juchuHonbanbiShubetuId: 3,
         juchuHonbanbiDat: updateNyukoDate,
         mem: '',
         juchuHonbanbiAddQty: 0,
       },
     ];
-    const mergeHonbanbiData: JuchuKizaiHonbanbiValues[] = [...addJuchuSIyouHonbanbiData, ...addJuchuHonbanbiData];
-    const addHonbanbiResult = await AddAllHonbanbi(data.juchuHeadId, data.juchuKizaiHeadId, mergeHonbanbiData, userNam);
+    const mergeHonbanbiData: JuchuKizaiHonbanbiValues[] = [...addJuchuSiyouHonbanbiData, ...addJuchuHonbanbiData];
+    const addHonbanbiResult = await AddAllHonbanbi(data.juchuHeadId, newJuchuKizaiHeadId, mergeHonbanbiData, userNam);
     console.log('入出庫、使用本番日追加', addHonbanbiResult);
 
     redirect(`/eq-main-order-detail/${data.juchuHeadId}/${newJuchuKizaiHeadId}/edit`);
@@ -1033,18 +1033,18 @@ const EquipmentOrderDetail = (props: {
     if (result) {
       if (idoDat !== null && getValues('yardShukoDat') === null) {
         setJuchuKizaiMeisaiList((prev) =>
-          prev.map((row) => (row.shozokuId === 2 && !row.delFlag ? { ...row, idoDenDat: idoDat } : row))
+          prev.map((row) => (row.shozokuId === 2 && !row.delFlag ? { ...row, sagyoDenDat: idoDat } : row))
         );
         setIdoDat(null);
         setMoveOpen(false);
       } else if (idoDat !== null && getValues('kicsShukoDat') === null) {
         setJuchuKizaiMeisaiList((prev) =>
-          prev.map((row) => (row.shozokuId === 1 && !row.delFlag ? { ...row, idoDenDat: idoDat } : row))
+          prev.map((row) => (row.shozokuId === 1 && !row.delFlag ? { ...row, sagyoDenDat: idoDat } : row))
         );
         setIdoDat(null);
         setMoveOpen(false);
       } else {
-        setJuchuKizaiMeisaiList((prev) => prev.map((row) => (row.sagyoDenDat ? { ...row, idoDenDat: idoDat } : row)));
+        setJuchuKizaiMeisaiList((prev) => prev.map((row) => (row.sagyoDenDat ? { ...row, sagyoDenDat: idoDat } : row)));
         setMoveOpen(false);
       }
     } else {
