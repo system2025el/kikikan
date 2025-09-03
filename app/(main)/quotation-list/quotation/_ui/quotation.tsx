@@ -48,7 +48,7 @@ export type JuchuValues = {
   kokyakuTantoNam?: string | undefined | null;
   mem: string | undefined | null;
   nebikiAmt: number | undefined | null;
-  zeiKbn?: number | undefined | null;
+  zeiKbn?: string | undefined | null;
 };
 
 export const Quotation = () => {
@@ -70,6 +70,7 @@ export const Quotation = () => {
     kokyaku: '',
     mem: '',
     nebikiAmt: null,
+    zeiKbn: '',
   });
 
   const priceTotal = quotationRows.reduce((sum, row) => sum + row.price, 0);
@@ -122,6 +123,7 @@ export const Quotation = () => {
           kokyaku: data?.kokyaku ?? '',
           mem: data?.mem ?? '',
           nebikiAmt: data?.nebikiAmt ?? null,
+          zeiKbn: data?.zeiKbn ?? '',
         };
         console.log('DB', orderData);
         setOrder(orderData);
@@ -223,6 +225,10 @@ export const Quotation = () => {
               <Box sx={styles.container}>
                 <Typography marginRight={3}>受注値引き</Typography>
                 <TextField value={order.nebikiAmt} disabled sx={{ width: 300 }} />
+              </Box>
+              <Box sx={styles.container}>
+                <Typography marginRight={7}>税区分</Typography>
+                <TextField value={order.zeiKbn} disabled />
               </Box>
             </Grid2>
           </Grid2>
