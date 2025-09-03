@@ -12,6 +12,7 @@ import {
   Divider,
   Grid2,
   Paper,
+  Stack,
   Table,
   TableBody,
   TableCell,
@@ -21,7 +22,9 @@ import {
   Typography,
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
+import { useRouter } from 'next/navigation';
 import React, { useMemo, useState } from 'react';
+import { TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { quotaionList } from '@/app/_lib/mock-data';
 
@@ -33,9 +36,21 @@ export const QuotaionListTable = () => {
   const rowsPerPage = 50;
   const [dialogOpen, setDialogOpen] = useState(false);
 
+  const router = useRouter();
+
   const cliclAddQuotation = () => {
     setDialogOpen(true);
   };
+
+  const onSubmit = (data: { juchuHeadId: number | null }) => {
+    console.log(data.juchuHeadId, 'の見積もりを自動生成');
+    sessionStorage.setItem('juchuHeadId', String(data.juchuHeadId ?? ''));
+    router.push('/quotation-list/quotation');
+  };
+
+  const { control, handleSubmit } = useForm<{ juchuHeadId: number | null }>({
+    defaultValues: { juchuHeadId: null },
+  });
 
   // 表示するデータ
   const list = useMemo(
@@ -83,10 +98,24 @@ export const QuotaionListTable = () => {
           </Grid2>
         </Grid2>
         <Dialog open={dialogOpen}>
-          <DialogTitle>jidouseisei</DialogTitle>
-          <DialogActions>
-            <Button href="/quotation-list/quotation">hai</Button>
-          </DialogActions>
+          <DialogTitle>受注番号から自動生成</DialogTitle>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <Stack p={4}>
+              <Typography>受注番号</Typography>
+              <TextFieldElement name={'juchuHeadId'} control={control} />
+            </Stack>
+            <DialogActions>
+              <Button type="submit">自動生成</Button>
+              <Button
+                onClick={() => {
+                  setDialogOpen(false);
+                  router.push('/quotation-list/quotation');
+                }}
+              >
+                いいえ
+              </Button>
+            </DialogActions>
+          </form>
         </Dialog>
         <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 1 }}>
           <Table stickyHeader padding="none">
@@ -109,7 +138,15 @@ export const QuotaionListTable = () => {
                     <Checkbox color="primary" />
                   </TableCell>
                   <TableCell>
-                    <Button variant="text">{quotation.quoteNumber}</Button>
+                    <Button
+                      variant="text"
+                      onClick={() => {
+                        sessionStorage.setItem('juchuHeadId', quotation.quoteNumber);
+                        router.push('/quotation-list/quotation');
+                      }}
+                    >
+                      {quotation.quoteNumber}
+                    </Button>
                   </TableCell>
                   <TableCell>{quotation.status}</TableCell>
                   <TableCell>{quotation.name}</TableCell>

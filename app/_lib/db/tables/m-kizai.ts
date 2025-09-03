@@ -69,7 +69,7 @@ export const insertNewEqpt = async (data: EqptsMasterDialogValues) => {
     data.dspOrdNum,
   ];
   try {
-    await pool.query(` SET search_path TO dev2;`);
+    await pool.query(` SET search_path TO ${SCHEMA};`);
     await pool.query(query, values);
   } catch (e) {
     throw e;
@@ -130,7 +130,7 @@ export const selectActiveEqpts = async (query: string) => {
   `;
 
   try {
-    await pool.query(` SET search_path TO dev2;`);
+    await pool.query(` SET search_path TO ${SCHEMA};`);
     return await pool.query(sqlQuery, values);
   } catch (e) {
     throw e;

@@ -4,6 +4,7 @@ import { zeroToNull } from '@/app/(main)/(masters)/_lib/value-converters';
 import { EqptsMasterDialogValues } from '@/app/(main)/(masters)/eqpt-master/_lib/types';
 
 import pool from '../postgres';
+import { SCHEMA } from '../supabase';
 
 /**
  * 機材履歴マスタに挿入する関数
@@ -55,8 +56,7 @@ export const insertEqptHistory = async (data: EqptsMasterDialogValues, id: numbe
     data.updDat,
   ];
   try {
-    await pool.query(` SET search_path TO dev2;`);
-
+    await pool.query(` SET search_path TO ${SCHEMA};`);
     await pool.query(query, values);
   } catch (e) {
     throw e;

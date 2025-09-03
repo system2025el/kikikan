@@ -85,7 +85,7 @@ export const insertNewShukeibumon = async (data: ShukeibumonsMasterDialogValues)
   const values = [data.shukeibumonNam, Number(data.delFlg), data.mem, date, 'shigasan'];
 
   try {
-    await pool.query(` SET search_path TO dev2;`);
+    await pool.query(` SET search_path TO ${SCHEMA};`);
     await pool.query(query, values);
   } catch (e) {
     throw e;

@@ -94,7 +94,7 @@ export const insertNewBumon = async (data: BumonsMasterDialogValues) => {
   const values = [data.bumonNam, Number(data.delFlg), data.daibumonId, data.shukeibumonId, data.mem, date, 'shigasan'];
 
   try {
-    await pool.query(` SET search_path TO dev2;`);
+    await pool.query(` SET search_path TO ${SCHEMA};`);
     await pool.query(query, values);
   } catch (e) {
     throw e;

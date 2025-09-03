@@ -135,13 +135,15 @@ export default function NavLinks() {
       <ListItemButton
         href="/dashboard"
         sx={{
-          backgroundColor: pathname === '/dashboard' ? currentPgColor : '',
+          backgroundColor: pathname === '/dashboard' ? currentPgColor : undefined,
         }}
       >
         <ListItemIcon>
           <StopSharpIcon />
         </ListItemIcon>
-        <ListItemText sx={{ color: pathname === '/dashboard' ? 'primary.dark' : '' }}>ダッシュボード</ListItemText>
+        <ListItemText sx={{ color: pathname === '/dashboard' ? 'primary.dark' : undefined }}>
+          ダッシュボード
+        </ListItemText>
       </ListItemButton>
       {/* 受注管理 */}
       <ListItemButton onClick={orderClick}>
@@ -158,11 +160,14 @@ export default function NavLinks() {
               key={text.name}
               disablePadding
               sx={{
-                backgroundColor: isSelected(text.url) ? currentPgColor : '',
+                backgroundColor: isSelected(text.url) ? currentPgColor : undefined,
               }}
             >
               <ListItemButton /*href={text.url}*/ onClick={() => requestNavigation(text.url)} dense>
-                <ListItemText primary={text.name} sx={{ color: isSelected(text.url) ? 'primary.dark' : '', pl: 8 }} />
+                <ListItemText
+                  primary={text.name}
+                  sx={{ color: isSelected(text.url) ? 'primary.dark' : undefined, pl: 8 }}
+                />
               </ListItemButton>
             </ListItem>
           ))}
@@ -183,11 +188,14 @@ export default function NavLinks() {
               key={text.name}
               disablePadding
               sx={{
-                backgroundColor: isSelected(text.url) ? currentPgColor : '',
+                backgroundColor: isSelected(text.url) ? currentPgColor : undefined,
               }}
             >
               <ListItemButton href={text.url} dense>
-                <ListItemText primary={text.name} sx={{ color: isSelected(text.url) ? 'primary.dark' : '', pl: 8 }} />
+                <ListItemText
+                  primary={text.name}
+                  sx={{ color: isSelected(text.url) ? 'primary.dark' : undefined, pl: 8 }}
+                />
               </ListItemButton>
             </ListItem>
           ))}
@@ -209,11 +217,14 @@ export default function NavLinks() {
                 key={text.name}
                 disablePadding
                 sx={{
-                  backgroundColor: isSelected(text.url) ? currentPgColor : '',
+                  backgroundColor: isSelected(text.url) ? currentPgColor : undefined,
                 }}
               >
                 <ListItemButton href={text.url} dense>
-                  <ListItemText primary={text.name} sx={{ color: isSelected(text.url) ? 'primary.dark' : '', pl: 8 }} />
+                  <ListItemText
+                    primary={text.name}
+                    sx={{ color: isSelected(text.url) ? 'primary.dark' : undefined, pl: 8 }}
+                  />
                 </ListItemButton>
               </ListItem>
               {index === 11 && <Divider sx={{ ml: 8 }} />}
@@ -236,11 +247,14 @@ export default function NavLinks() {
               key={text.name}
               disablePadding
               sx={{
-                backgroundColor: isSelected(text.url) ? currentPgColor : '',
+                backgroundColor: isSelected(text.url) ? currentPgColor : undefined,
               }}
             >
               <ListItemButton href={text.url} dense>
-                <ListItemText primary={text.name} sx={{ color: isSelected(text.url) ? 'primary.dark' : '', pl: 8 }} />
+                <ListItemText
+                  primary={text.name}
+                  sx={{ color: isSelected(text.url) ? 'primary.dark' : undefined, pl: 8 }}
+                />
               </ListItemButton>
             </ListItem>
           ))}
@@ -264,11 +278,11 @@ export default function NavLinks() {
               key={text.name}
               disablePadding
               sx={{
-                backgroundColor: isSelected(text.url) ? currentPgColor : '',
+                backgroundColor: isSelected(text.url) ? currentPgColor : undefined,
               }}
             >
               <ListItemButton href={text.url} dense>
-                <ListItemText primary={text.name} sx={{ color: isSelected(text.url) ? 'primary.dark' : '', pl: 8 }} />
+                <ListItemText primary={text.name} sx={{ color: isSelected(text.url) ? 'primary.dark' : undefined, pl: 8 }} />
               </ListItemButton>
             </ListItem>
           ))}
@@ -289,11 +303,11 @@ export default function NavLinks() {
               key={text.name}
               disablePadding
               sx={{
-                backgroundColor: isSelected(text.url) ? currentPgColor : '',
+                backgroundColor: isSelected(text.url) ? currentPgColor : undefined,
               }}
             >
               <ListItemButton href={text.url} dense>
-                <ListItemText primary={text.name} sx={{ color: isSelected(text.url) ? 'primary.dark' : '', pl: 8 }} />
+                <ListItemText primary={text.name} sx={{ color: isSelected(text.url) ? 'primary.dark' : undefined, pl: 8 }} />
               </ListItemButton>
             </ListItem>
           ))}
@@ -316,6 +330,6 @@ export default function NavLinks() {
 /** ------------------------スタイル----------------------------------- */
 const styles: { [key: string]: React.CSSProperties } = {
   colorWhite: {
-    color: '',
+    color: undefined,
   },
 };

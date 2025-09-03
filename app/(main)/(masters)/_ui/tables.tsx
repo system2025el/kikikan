@@ -76,7 +76,7 @@ export const MasterTable = ({
               <TableCell
                 width={50}
                 sx={{
-                  bgcolor: isHidden || isDeleted ? grey[300] : '',
+                  bgcolor: isHidden || isDeleted ? grey[300] : undefined,
                   paddingLeft: 1,
                   paddingRight: 1,
                   textAlign: 'end',
@@ -88,7 +88,7 @@ export const MasterTable = ({
                 <TableCell
                   key={header.key}
                   align={typeof row[header.key] === 'number' ? 'right' : 'left'}
-                  sx={{ bgcolor: isHidden || isDeleted ? grey[300] : '', whiteSpace: 'nowrap' }}
+                  sx={{ bgcolor: isHidden || isDeleted ? grey[300] : undefined, whiteSpace: 'nowrap' }}
                 >
                   {header.key === 'name' ? (
                     <Button
@@ -118,7 +118,7 @@ export const MasterTable = ({
                   )}
                 </TableCell>
               ))}
-              {/* <TableCell sx={{ bgcolor: isHidden || isDeleted ? grey[300] : '', width: 100 }} align="center">
+              {/* <TableCell sx={{ bgcolor: isHidden || isDeleted ? grey[300] : undefined, width: 100 }} align="center">
                 <IconButton
                   sx={{ bgcolor: 'primary.main', color: 'white' }}
                   size="small"
@@ -195,7 +195,7 @@ export const MasterTableOfEqpt = ({
               <TableCell
                 width={50}
                 sx={{
-                  bgcolor: isHidden || isDeleted ? grey[300] : '',
+                  bgcolor: isHidden || isDeleted ? grey[300] : undefined,
                   paddingLeft: 1,
                   paddingRight: 1,
                   textAlign: 'end',
@@ -207,7 +207,7 @@ export const MasterTableOfEqpt = ({
                 <TableCell
                   key={header.key}
                   align={typeof row[header.key] === 'number' ? 'right' : 'left'}
-                  sx={{ bgcolor: isHidden || isDeleted ? grey[300] : '', whiteSpace: 'nowrap' }}
+                  sx={{ bgcolor: isHidden || isDeleted ? grey[300] : undefined, whiteSpace: 'nowrap' }}
                 >
                   {header.key === 'name' ? (
                     <Button

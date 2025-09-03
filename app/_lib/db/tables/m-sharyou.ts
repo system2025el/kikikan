@@ -61,7 +61,7 @@ export const insertNewVeh = async (data: VehsMasterDialogValues) => {
   const date = toJapanTimeString();
   const values = [data.sharyoNam, Number(data.delFlg), data.mem, Number(data.dspFlg), date, 'shigasan'];
   try {
-    await pool.query(` SET search_path TO dev2;`);
+    await pool.query(` SET search_path TO ${SCHEMA};`);
     await pool.query(query, values);
   } catch (e) {
     throw e;

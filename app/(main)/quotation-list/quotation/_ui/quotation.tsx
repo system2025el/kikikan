@@ -9,6 +9,7 @@ import {
   Box,
   Button,
   Checkbox,
+  Container,
   Divider,
   FormControl,
   FormControlLabel,
@@ -18,15 +19,37 @@ import {
   Paper,
   Select,
   SelectChangeEvent,
+  Stack,
   TextField,
   Typography,
 } from '@mui/material';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
+import { toJapanDateString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
+import { BackButton } from '@/app/(main)/_ui/buttons';
 import DateX from '@/app/(main)/_ui/date';
 import { SelectTable } from '@/app/(main)/_ui/table';
+import { GetJuchuHead } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/funcs';
+import { OrderValues } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/types';
 
 import { quotation, quotationHeaders, quotationRows, terms } from '../_lib/data';
+import { getOrderForQuotation } from '../_lib/func';
+
+export type JuchuValues = {
+  juchuHeadId: number | undefined | null;
+  delFlg?: number;
+  juchuSts: string | undefined | null;
+  juchuDat: Date | undefined | null;
+  juchuRange: { strt: Date | undefined | null; end: Date | undefined | null };
+  nyuryokuUser: string | undefined | null;
+  koenNam: string | undefined | null;
+  koenbashoNam: string | undefined | null;
+  kokyaku: string | undefined | null;
+  kokyakuTantoNam?: string | undefined | null;
+  mem: string | undefined | null;
+  nebikiAmt: number | undefined | null;
+  zeiKbn?: number | undefined | null;
+};
 
 export const Quotation = () => {
   const [selectInputPerson, setSelectInputPerson] = useState('XXXXXXXX');
@@ -35,6 +58,19 @@ export const Quotation = () => {
   const [selectOrderStatus, setSelectOrderStatus] = useState('確定');
   const [selectQuotationStatus, setSelectQuotationStatus] = useState('処理中');
   const [selectRequestStatus, setSelectRequestStatus] = useState('処理中');
+
+  const [order, setOrder] = useState<JuchuValues>({
+    juchuHeadId: null,
+    juchuSts: '',
+    juchuDat: null,
+    juchuRange: { strt: null, end: null },
+    nyuryokuUser: '',
+    koenNam: '',
+    koenbashoNam: '',
+    kokyaku: '',
+    mem: '',
+    nebikiAmt: null,
+  });
 
   const priceTotal = quotationRows.reduce((sum, row) => sum + row.price, 0);
 
@@ -60,100 +96,139 @@ export const Quotation = () => {
   const handleSelectionChange = (selectedIds: (string | number)[]) => {
     console.log('選択されたID:', selectedIds);
   };
+  const hasRun = useRef(false);
+  useEffect(() => {
+    if (!hasRun.current) {
+      hasRun.current = true;
+      const id = sessionStorage.getItem('juchuHeadId');
+      console.log('ダイアログで選んだID', id);
+      if (!id) {
+        console.log('null');
+        return;
+      }
+      const getjuchu = async (id: number) => {
+        const data = await getOrderForQuotation(id);
+        const orderData: JuchuValues = {
+          juchuHeadId: data?.juchuHeadId,
+          juchuSts: data?.juchuSts ?? '',
+          juchuDat: data?.juchuDat ?? null,
+          juchuRange: {
+            strt: data?.juchuRange!.strt ?? null,
+            end: data?.juchuRange!.end ?? null,
+          },
+          nyuryokuUser: data?.nyuryokuUser ?? '',
+          koenNam: data?.koenNam ?? '',
+          koenbashoNam: data?.koenbashoNam ?? '',
+          kokyaku: data?.kokyaku ?? '',
+          mem: data?.mem ?? '',
+          nebikiAmt: data?.nebikiAmt ?? null,
+        };
+        console.log('DB', orderData);
+        setOrder(orderData);
+      };
+      getjuchu(Number(id));
+      sessionStorage.clear();
+    }
+  }, []);
+
+  // アコーディオン制御
+  const [expanded, setExpanded] = useState(false);
+  // アコーディオン開閉
+  const handleExpansion = () => {
+    setExpanded((prevExpanded) => !prevExpanded);
+  };
 
   return (
-    <>
+    <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
+      <Box justifySelf={'end'} mb={0.5}>
+        <BackButton label={'戻る'} />
+      </Box>
       <Paper variant="outlined">
         <Grid2 container display="flex" alignItems="center" justifyContent="space-between" p={1}>
           <Typography margin={1}>見積書</Typography>
           <Box>
-            <Button sx={{ margin: 1 }}>編集</Button>
+            {/* <Button sx={{ margin: 1 }}>編集</Button> */}
+            <Button sx={{ margin: 1 }}>見積書印刷</Button>
+            {/* <Button sx={{ margin: 1 }}>複製</Button> */}
             <Button sx={{ margin: 1 }}>保存</Button>
-            <Button sx={{ margin: 1 }}>複製</Button>
           </Box>
         </Grid2>
       </Paper>
+
       {/* 受注選択
       ----------------------------------------------------------------------------------*/}
-      <Accordion sx={{ marginTop: 2 }}>
+      <Accordion expanded={expanded} onChange={handleExpansion} sx={{ marginTop: 2 }}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography component="span">受注選択</Typography>
+          <Grid2 container alignItems={'center'} width={'100%'}>
+            <Grid2 size={3}>
+              <Typography component="span">受注選択</Typography>
+            </Grid2>
+            <Grid2 size={'grow'} alignItems={'center'} display={expanded ? 'none' : 'flex'}>
+              <Typography marginRight={2}>公演名</Typography>
+              <Typography>{order.koenNam}</Typography>
+            </Grid2>
+          </Grid2>
         </AccordionSummary>
-        <AccordionDetails sx={{ padding: 0 }}>
+        <AccordionDetails sx={{ padding: 0, pb: 1 }}>
           <Divider />
           <Box pt={2} pl={2}>
-            <Button href="/order-list">受注選択</Button>
+            <Button /*href="/order-list"*/>受注選択</Button>
           </Box>
           <Grid2 container>
-            <Grid2>
-              <Grid2 container margin={2} spacing={2}>
-                <Grid2 display="flex" direction="row" alignItems="center">
+            <Grid2 size={6}>
+              <Grid2 container mx={2} my={1} spacing={6}>
+                <Grid2 display="flex" alignItems="center">
                   <Typography marginRight={5}>受注番号</Typography>
-                  <TextField disabled></TextField>
+                  <TextField value={order.juchuHeadId ?? ''} disabled sx={{ width: 120 }} />
                 </Grid2>
-                <Grid2 display="flex" direction="row" alignItems="center">
-                  <Typography marginRight={1}>受注ステータス</Typography>
-                  <FormControl disabled size="small" sx={{ width: 120 }}>
-                    <Select value={selectOrderStatus} onChange={orderStatusChange}>
-                      <MenuItem value={'確定'}>確定</MenuItem>
-                    </Select>
-                  </FormControl>
+                <Grid2 display="flex" alignItems="center">
+                  <Typography marginRight={3}>受注ステータス</Typography>
+                  <TextField value={order.juchuSts ?? ''} disabled sx={{ width: 120 }} />
                 </Grid2>
               </Grid2>
               <Box sx={styles.container}>
                 <Typography marginRight={7}>受注日</Typography>
-                <DateX disabled />
+                <TextField value={order.juchuDat ? toJapanDateString(order.juchuDat) : ''} disabled />
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={7}>入力者</Typography>
-                <FormControl disabled size="small" sx={{ width: '25%' }}>
-                  <Select value={selectInputPerson} onChange={inputPersonChange}>
-                    <MenuItem value={'XXXXXXXX'}>XXXXXXXX</MenuItem>
-                  </Select>
-                </FormControl>
+                <TextField value={order.nyuryokuUser ?? ''} disabled />
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={5}>受注開始</Typography>
-                <DateX disabled />
+                <TextField value={order.juchuRange.strt ? toJapanDateString(order.juchuRange.strt) : ''} disabled />
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={5}>受注終了</Typography>
-                <DateX disabled />
+                <TextField value={order.juchuRange.end ? toJapanDateString(order.juchuRange.end) : ''} disabled />
               </Box>
             </Grid2>
-            <Grid2>
+            <Grid2 size={6}>
               <Box sx={styles.container}>
                 <Typography marginRight={7}>公演名</Typography>
-                <TextField disabled defaultValue="A/Zepp Tour" sx={{ width: '50%' }}></TextField>
+                <TextField value={order.koenNam} disabled sx={{ width: 300 }} />
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={5}>公演場所</Typography>
-                <FormControl disabled size="small" sx={{ width: '50%' }}>
-                  <Select value={selectPlace} onChange={placeChange}>
-                    <MenuItem value={'Zepp Osaka'}>Zepp Osaka</MenuItem>
-                  </Select>
-                </FormControl>
+                <TextField value={order.koenbashoNam} disabled sx={{ width: 300 }} />
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={9}>相手</Typography>
-                <FormControl disabled size="small" sx={{ width: '50%' }}>
-                  <Select value={selectPartner} onChange={partnerChange}>
-                    <MenuItem value={'（株）シアターブレーン'}>（株）シアターブレーン</MenuItem>
-                  </Select>
-                </FormControl>
+                <TextField value={order.kokyaku} disabled sx={{ width: 300 }} />
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={5}>受注メモ</Typography>
-                <TextField disabled defaultValue="XXXXXXXXX" sx={{ width: '50%' }}></TextField>
+                <TextField multiline value={order.mem} disabled sx={{ width: 300 }} />
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={3}>受注値引き</Typography>
-                <TextField disabled></TextField>
+                <TextField value={order.nebikiAmt} disabled sx={{ width: 300 }} />
               </Box>
             </Grid2>
           </Grid2>
         </AccordionDetails>
       </Accordion>
+
       {/* 見積ヘッダー
       ----------------------------------------------------------------------------------*/}
       <Accordion sx={{ marginTop: 2 }}>
@@ -361,7 +436,7 @@ export const Quotation = () => {
           <SelectTable headers={quotationHeaders} datas={quotationRows} onSelectionChange={handleSelectionChange} />
         </AccordionDetails>
       </Accordion>
-    </>
+    </Container>
   );
 };
 
@@ -373,7 +448,7 @@ const styles: { [key: string]: React.CSSProperties } = {
   container: {
     display: 'flex',
     alignItems: 'center',
-    margin: 2,
+    margin: 1,
     marginLeft: 2,
   },
 };
