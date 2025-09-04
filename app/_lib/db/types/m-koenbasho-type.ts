@@ -1,3 +1,4 @@
+import { schema } from '../supabase';
 import { Database } from './types';
 
-export type MKoenbashoDBValues = Database['dev2']['Tables']['m_koenbasho']['Insert'];
+export type MKoenbashoDBValues = Database[schema]['Tables']['m_koenbasho']['Insert'];

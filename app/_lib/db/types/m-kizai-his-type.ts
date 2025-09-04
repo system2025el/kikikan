@@ -1,3 +1,4 @@
+import { schema } from '../supabase';
 import { Database } from './types';
 
-export type MKizaiHisDBValues = Database['dev2']['Tables']['m_kizai_his']['Insert'];
+export type MKizaiHisDBValues = Database[schema]['Tables']['m_kizai_his']['Insert'];

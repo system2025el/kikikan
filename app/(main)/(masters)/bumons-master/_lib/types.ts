@@ -16,7 +16,7 @@ export type BumonsMasterTableValues = {
   delFlg: boolean | null;
   mem: string | null;
   tblDspId: number;
-  // syukei_bumon_id: number | null;
+  // shukei_bumon_id: number | null;
   // daibumonId: number;
   // shukeibumonId: number;
 };

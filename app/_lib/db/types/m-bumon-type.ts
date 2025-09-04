@@ -1,3 +1,4 @@
+import { schema } from '../supabase';
 import { Database } from './types';
 
-export type MBumonDBValues = Database['dev2']['Tables']['m_bumon']['Insert'];
+export type MBumonDBValues = Database[schema]['Tables']['m_bumon']['Insert'];

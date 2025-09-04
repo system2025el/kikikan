@@ -1,3 +1,4 @@
+import { schema } from '../supabase';
 import { Database } from './types';
 
-export type MRfidDBValues = Database['dev2']['Tables']['m_rfid']['Insert'];
+export type MRfidDBValues = Database[schema]['Tables']['m_rfid']['Insert'];

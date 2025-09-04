@@ -44,7 +44,7 @@ export const selectFilteredBumons = async (queries: { q: string; d: number; s: n
     builder.eq('dai_bumon_id', queries.d);
   }
   if (queries.s !== 0) {
-    builder.eq('syukei_bumon_id', queries.s);
+    builder.eq('shukei_bumon_id', queries.s);
   }
   try {
     return await builder;
@@ -63,7 +63,7 @@ export const selectOneBumon = async (id: number) => {
     return await supabase
       .schema(SCHEMA)
       .from('m_bumon')
-      .select('bumon_nam, del_flg, dai_bumon_id, syukei_bumon_id, mem ')
+      .select('bumon_nam, del_flg, dai_bumon_id, shukei_bumon_id, mem ')
       .eq('bumon_id', id)
       .single();
   } catch (e) {
@@ -79,7 +79,7 @@ export const insertNewBumon = async (data: BumonsMasterDialogValues) => {
   const query = `
     INSERT INTO m_bumon (
       bumon_id, bumon_nam, del_flg, dsp_ord_num,
-      dai_bumon_id, syukei_bumon_id,
+      dai_bumon_id, shukei_bumon_id,
       mem, add_dat, add_user
     )
     VALUES (

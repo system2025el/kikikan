@@ -107,9 +107,9 @@ export const selectActiveEqpts = async (query: string) => {
       k.bumon_id as "bumonId",
       k.kizai_grp_cod as "kizaiGrpCod"
     FROM
-      dev2.m_kizai as k
+      dev6.m_kizai as k
     INNER JOIN
-      dev2.m_shozoku as s
+      dev6.m_shozoku as s
     ON
       k.shozoku_id = s.shozoku_id
     WHERE
@@ -152,9 +152,9 @@ export const selectBundledEqpts = async (setIds: number[]) => {
             k.bumon_id as "bumonId",
             k.kizai_grp_cod as "kizaiGrpCod"
           FROM
-            dev2.m_kizai as k
+            dev6.m_kizai as k
           INNER JOIN
-            dev2.m_shozoku as s
+            dev6.m_shozoku as s
           ON
             k.shozoku_id = s.shozoku_id
           WHERE

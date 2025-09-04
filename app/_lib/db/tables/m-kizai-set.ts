@@ -14,7 +14,7 @@ export const selectBundledEqptIds = async (idList: number[]) => {
     SELECT DISTINCT
       kizai_id
     FROM
-      dev2.m_kizai_set
+      dev6.m_kizai_set
     WHERE
       set_kizai_id IN (${placeholders})
   `;
