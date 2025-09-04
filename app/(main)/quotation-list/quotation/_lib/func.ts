@@ -3,8 +3,13 @@
 import { selectJuchu } from '@/app/_lib/db/tables/v-juchu-lst';
 import { JuchuHead } from '@/app/_lib/db/types/t-juchu-head-type';
 
-import { JuchuValues } from '../_ui/quotation';
+import { JuchuValues } from './types';
 
+/**
+ * 受注ヘッダIDが等しい受注ヘッダを取得する
+ * @param id 受注ヘッダID
+ * @returns 見積画面で表示される受注ヘッダ
+ */
 export const getOrderForQuotation = async (id: number) => {
   try {
     const { data: juchuData, error } = await selectJuchu(id);
@@ -25,7 +30,7 @@ export const getOrderForQuotation = async (id: number) => {
       koenNam: juchuData.koen_nam,
       koenbashoNam: juchuData.koenbasho_nam,
       kokyaku: juchuData.kokyaku_nam,
-      kokyakuTantoNam: juchuData.kokyaku_nam,
+      kokyakuTantoNam: juchuData.kokyaku_tanto_nam,
       mem: juchuData.mem,
       nebikiAmt: juchuData.nebiki_amt,
       zeiKbn: juchuData.zei_nam,
