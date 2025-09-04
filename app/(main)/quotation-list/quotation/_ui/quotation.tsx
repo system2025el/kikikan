@@ -185,7 +185,7 @@ export const Quotation = () => {
                 </Grid2>
                 <Grid2 display="flex" alignItems="center">
                   <Typography marginRight={3}>受注ステータス</Typography>
-                  <TextField value={order.juchuSts ?? ''} disabled sx={{ width: 120 }} />
+                  <TextField value={order.juchuSts} disabled sx={{ width: 120 }} />
                 </Grid2>
               </Grid2>
               <Box sx={styles.container}>
@@ -194,7 +194,7 @@ export const Quotation = () => {
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={7}>入力者</Typography>
-                <TextField value={order.nyuryokuUser ?? ''} disabled />
+                <TextField value={order.nyuryokuUser} disabled />
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={5}>受注開始</Typography>
@@ -224,7 +224,7 @@ export const Quotation = () => {
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={3}>受注値引き</Typography>
-                <TextField value={order.nebikiAmt} disabled sx={{ width: 300 }} />
+                <TextField value={order.nebikiAmt ?? ''} disabled sx={{ width: 300 }} />
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={7}>税区分</Typography>

@@ -141,7 +141,7 @@ export const QuotaionListTable = () => {
                     <Button
                       variant="text"
                       onClick={() => {
-                        sessionStorage.setItem('juchuHeadId', quotation.quoteNumber);
+                        sessionStorage.setItem('mitsumotiId', quotation.quoteNumber);
                         router.push('/quotation-list/quotation');
                       }}
                     >
