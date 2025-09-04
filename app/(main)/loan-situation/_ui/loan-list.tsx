@@ -9,7 +9,6 @@ import { TextFieldElement } from 'react-hook-form-mui';
 import { BackButton } from '../../_ui/buttons';
 import { MuiTablePagination } from '../../_ui/table-pagination';
 import { EqptsMasterTableValues } from '../../(masters)/eqpt-master/_lib/types';
-import { loanList } from '../_lib/data';
 import { getFilteredEqpts } from '../_lib/funcs';
 import { LoanListTable } from './loan-list-table';
 
