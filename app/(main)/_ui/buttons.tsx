@@ -1,12 +1,12 @@
 'use client';
-import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
+import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 import BlockIcon from '@mui/icons-material/Block';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import SaveAsIcon from '@mui/icons-material/SaveAs';
-import { Button, IconButton } from '@mui/material';
+import { Box, Button, IconButton } from '@mui/material';
 import { useRouter } from 'next/navigation';
 
 /**
@@ -21,9 +21,11 @@ export const BackButton = ({ sx, label }: { sx?: object; label: string }) => {
   };
 
   return (
-    <Button sx={{ ...sx, alignItems: 'center' }} onClick={() => handleBack()}>
-      <ArrowBackIosNewIcon fontSize="small" />
-      {label}
+    <Button sx={{ ...sx }} onClick={() => handleBack()}>
+      <Box display={'flex'} alignItems={'center'}>
+        <ArrowLeftIcon fontSize="small" />
+        {label}
+      </Box>
     </Button>
   );
 };

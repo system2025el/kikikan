@@ -2118,10 +2118,16 @@ export type Database = {
           koenbasho_nam: string | null;
           kokyaku_id: number | null;
           kokyaku_nam: string | null;
+          kokyaku_tanto_nam: string | null;
+          mem: string | null;
+          nebiki_amt: number | null;
           nyuko_dat: string | null;
+          nyuryoku_user: string | null;
           nyushuko_sts: string | null;
           nyushuko_sts_nam: string | null;
           shuko_dat: string | null;
+          zei_kbn: number | null;
+          zei_nam: string | null;
         };
         Relationships: [];
       };
