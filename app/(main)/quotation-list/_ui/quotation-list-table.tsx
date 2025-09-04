@@ -21,42 +21,67 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import { grey } from '@mui/material/colors';
 import { useRouter } from 'next/navigation';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { quotaionList } from '@/app/_lib/mock-data';
 
+import { CloseMasterDialogButton } from '../../_ui/buttons';
 import { MuiTablePagination } from '../../_ui/table-pagination';
 
-/** 見積一覧テーブルのコンポーネント */
+/**
+ * 見積一覧テーブル
+ * @returns 見積一覧テーブルのコンポーネント
+ */
 export const QuotaionListTable = () => {
-  const [page, setPage] = useState(1);
   const rowsPerPage = 50;
+  const router = useRouter();
+  const inputRef = useRef<HTMLInputElement>(null);
+  /* useState ------------------------------------- */
+  /* テーブルのページ数 */
+  const [page, setPage] = useState(1);
+  /* ダイアログの開閉 */
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const router = useRouter();
-
-  const cliclAddQuotation = () => {
+  /* methods ------------------------------------- */
+  /* 新規見積ボタン押下 */
+  const clickCreateQuotation = () => {
     setDialogOpen(true);
   };
-
+  /* 自動生成ボタン押下 */
   const onSubmit = (data: { juchuHeadId: number | null }) => {
     console.log(data.juchuHeadId, 'の見積もりを自動生成');
+    initJuchuMitsu();
     sessionStorage.setItem('juchuHeadId', String(data.juchuHeadId ?? ''));
     router.push('/quotation-list/quotation');
   };
+  /* 見積系に使っているストレージを開放 */
+  const initJuchuMitsu = () => {
+    sessionStorage.removeItem('currentOrder');
+    sessionStorage.removeItem('juchuHeadId');
+    sessionStorage.removeItem('mitsumoriId');
+  };
 
+  /* useForm ------------------------------------- */
   const { control, handleSubmit } = useForm<{ juchuHeadId: number | null }>({
     defaultValues: { juchuHeadId: null },
   });
 
+  useEffect(() => {
+    if (dialogOpen) {
+      // Dialogが開いた後にフォーカスを当てる（非同期マウント対策）
+      const timer = setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100); // 50〜150msくらいが安定しやすい
+      return () => clearTimeout(timer);
+    }
+  }, [dialogOpen]);
+
   // 表示するデータ
   const list = useMemo(
-    () =>
-      rowsPerPage > 0 ? quotaionList.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage) : quotaionList,
-    [page, rowsPerPage]
+    () => (rowsPerPage > 0 ? quotaionList.slice((page - 1) * rowsPerPage, page * rowsPerPage) : quotaionList),
+    [page, rowsPerPage /*, quotaionList*/]
   );
   // テーブル最後のページ用の空データの長さ
   const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - quotaionList.length) : 0;
@@ -75,7 +100,11 @@ export const QuotaionListTable = () => {
           <Grid2 container spacing={1}>
             <Grid2 container spacing={1}>
               <Grid2>
-                <Button onClick={() => cliclAddQuotation()} /*href="/quotation-list/quotation"*/>
+                <Button
+                  onClick={() => {
+                    clickCreateQuotation();
+                  }} /*href="/quotation-list/quotation"*/
+                >
                   <AddIcon fontSize="small" />
                   新規見積
                 </Button>
@@ -97,26 +126,7 @@ export const QuotaionListTable = () => {
             </Grid2>
           </Grid2>
         </Grid2>
-        <Dialog open={dialogOpen}>
-          <DialogTitle>受注番号から自動生成</DialogTitle>
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <Stack p={4}>
-              <Typography>受注番号</Typography>
-              <TextFieldElement name={'juchuHeadId'} control={control} />
-            </Stack>
-            <DialogActions>
-              <Button type="submit">自動生成</Button>
-              <Button
-                onClick={() => {
-                  setDialogOpen(false);
-                  router.push('/quotation-list/quotation');
-                }}
-              >
-                いいえ
-              </Button>
-            </DialogActions>
-          </form>
-        </Dialog>
+
         <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 1 }}>
           <Table stickyHeader padding="none">
             <TableHead>
@@ -141,7 +151,9 @@ export const QuotaionListTable = () => {
                     <Button
                       variant="text"
                       onClick={() => {
-                        sessionStorage.setItem('mitsumotiId', quotation.quoteNumber);
+                        console.log('テーブルで見積番号', quotation.quoteNumber, 'をクリック');
+                        initJuchuMitsu();
+                        sessionStorage.setItem('mitsumoriId', String(quotation.quoteNumber ?? ''));
                         router.push('/quotation-list/quotation');
                       }}
                     >
@@ -164,6 +176,31 @@ export const QuotaionListTable = () => {
             </TableBody>
           </Table>
         </TableContainer>
+
+        <Dialog open={dialogOpen}>
+          <DialogTitle display={'flex'} justifyContent={'space-between'}>
+            受注番号から自動生成
+            <CloseMasterDialogButton handleCloseDialog={() => setDialogOpen(false)} />
+          </DialogTitle>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <Stack p={4}>
+              <Typography>受注番号</Typography>
+              <TextFieldElement name={'juchuHeadId'} control={control} inputRef={inputRef} />
+            </Stack>
+            <DialogActions>
+              <Button type="submit">自動生成</Button>
+              <Button
+                onClick={() => {
+                  initJuchuMitsu();
+                  setDialogOpen(false);
+                  router.push('/quotation-list/quotation');
+                }}
+              >
+                いいえ
+              </Button>
+            </DialogActions>
+          </form>
+        </Dialog>
       </Box>
     </>
   );

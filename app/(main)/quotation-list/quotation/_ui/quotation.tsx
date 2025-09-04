@@ -23,11 +23,13 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import Loadable from 'next/dist/shared/lib/loadable.shared-runtime';
 import { useEffect, useRef, useState } from 'react';
 
 import { toJapanDateString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { BackButton } from '@/app/(main)/_ui/buttons';
 import DateX from '@/app/(main)/_ui/date';
+import { Loading, LoadingOverlay } from '@/app/(main)/_ui/loading';
 import { SelectTable } from '@/app/(main)/_ui/table';
 import { GetJuchuHead } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/funcs';
 import { OrderValues } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/types';
@@ -58,7 +60,7 @@ export const Quotation = () => {
   const [selectOrderStatus, setSelectOrderStatus] = useState('確定');
   const [selectQuotationStatus, setSelectQuotationStatus] = useState('処理中');
   const [selectRequestStatus, setSelectRequestStatus] = useState('処理中');
-
+  const [isLoading, setIsLoading] = useState(true);
   const [order, setOrder] = useState<JuchuValues>({
     juchuHeadId: null,
     juchuSts: '',
@@ -98,38 +100,63 @@ export const Quotation = () => {
     console.log('選択されたID:', selectedIds);
   };
   const hasRun = useRef(false);
+
+  /*  */
   useEffect(() => {
+    const savedOrderData = sessionStorage.getItem('currentOrder');
+    if (savedOrderData) {
+      setOrder(JSON.parse(savedOrderData));
+      setIsLoading(false);
+      return; // 保存されたデータがあれば、それで処理を終了
+    }
     if (!hasRun.current) {
       hasRun.current = true;
-      const id = sessionStorage.getItem('juchuHeadId');
-      console.log('ダイアログで選んだID', id);
-      if (!id) {
+      const juchuId = sessionStorage.getItem('juchuHeadId');
+      const quotId = sessionStorage.getItem('mitsumoriId');
+      console.log('ダイアログで選んだID', juchuId);
+      console.log('テーブルで選んだID', quotId);
+      if (!juchuId && !quotId) {
         console.log('null');
+        setIsLoading(false);
         return;
+      } else {
+        if (juchuId && juchuId !== '') {
+          const getjuchu = async (id: number) => {
+            const data = await getOrderForQuotation(id);
+            const orderData: JuchuValues = {
+              juchuHeadId: data?.juchuHeadId,
+              juchuSts: data?.juchuSts ?? '',
+              juchuDat: data?.juchuDat ?? null,
+              juchuRange: {
+                strt: data?.juchuRange!.strt ?? null,
+                end: data?.juchuRange!.end ?? null,
+              },
+              nyuryokuUser: data?.nyuryokuUser ?? '',
+              koenNam: data?.koenNam ?? '',
+              koenbashoNam: data?.koenbashoNam ?? '',
+              kokyaku: data?.kokyaku ?? '',
+              mem: data?.mem ?? '',
+              nebikiAmt: data?.nebikiAmt ?? null,
+              zeiKbn: data?.zeiKbn ?? '',
+            };
+            console.log('DB', orderData);
+            setOrder(orderData);
+            sessionStorage.setItem('currentOrder', JSON.stringify(orderData));
+            sessionStorage.removeItem('juchuHeadId');
+            await setIsLoading(false);
+          };
+          getjuchu(Number(juchuId));
+        } else if (quotId && quotId !== '') {
+          const getMitsumori = async (id: number) => {
+            console.log('DB, the QuoteId is ', id);
+            // setOrder(orderData);
+            // sessionStorage.setItem('currentOrder', JSON.stringify(orderData));
+            sessionStorage.removeItem('juchuHeadId');
+            setIsLoading(false);
+          };
+          getMitsumori(Number(quotId));
+        }
       }
-      const getjuchu = async (id: number) => {
-        const data = await getOrderForQuotation(id);
-        const orderData: JuchuValues = {
-          juchuHeadId: data?.juchuHeadId,
-          juchuSts: data?.juchuSts ?? '',
-          juchuDat: data?.juchuDat ?? null,
-          juchuRange: {
-            strt: data?.juchuRange!.strt ?? null,
-            end: data?.juchuRange!.end ?? null,
-          },
-          nyuryokuUser: data?.nyuryokuUser ?? '',
-          koenNam: data?.koenNam ?? '',
-          koenbashoNam: data?.koenbashoNam ?? '',
-          kokyaku: data?.kokyaku ?? '',
-          mem: data?.mem ?? '',
-          nebikiAmt: data?.nebikiAmt ?? null,
-          zeiKbn: data?.zeiKbn ?? '',
-        };
-        console.log('DB', orderData);
-        setOrder(orderData);
-      };
-      getjuchu(Number(id));
-      sessionStorage.clear();
     }
   }, []);
 
@@ -157,6 +184,7 @@ export const Quotation = () => {
         </Grid2>
       </Paper>
 
+      {isLoading && <LoadingOverlay />}
       {/* 受注選択
       ----------------------------------------------------------------------------------*/}
       <Accordion expanded={expanded} onChange={handleExpansion} sx={{ marginTop: 2 }}>
