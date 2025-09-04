@@ -2017,7 +2017,7 @@ export type Database = {
       v_juchu_kizai_dat_qty: {
         Row: {
           juchu_qty: number | null;
-          kizai_id: number | null;
+          kizai_id: number;
           plan_dat: string | null;
           plan_qty: number | null;
           yobi_qty: number | null;
@@ -2118,10 +2118,16 @@ export type Database = {
           koenbasho_nam: string | null;
           kokyaku_id: number | null;
           kokyaku_nam: string | null;
+          kokyaku_tanto_nam: string | null;
+          mem: string | null;
+          nebiki_amt: number | null;
           nyuko_dat: string | null;
+          nyuryoku_user: string | null;
           nyushuko_sts: string | null;
           nyushuko_sts_nam: string | null;
           shuko_dat: string | null;
+          zei_kbn: number | null;
+          zei_nam: string | null;
         };
         Relationships: [];
       };
@@ -2154,7 +2160,7 @@ export type Database = {
           eda_cod: string | null;
           el_num: number | null;
           kizai_grp_cod: string | null;
-          kizai_id: number | null;
+          kizai_id: number;
           kizai_nam: string | null;
           kizai_qty: number | null;
           mem: string | null;

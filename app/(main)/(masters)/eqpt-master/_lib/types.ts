@@ -36,7 +36,7 @@ export type EqptsMasterDialogValues = eqptsMasterDialogValues & {
 };
 
 export type EqptsMasterTableValues = {
-  kizaiId: number | null;
+  kizaiId: number;
   kizaiNam: string | null;
   kizaiQty: number | null;
   bumonNam: string | null;

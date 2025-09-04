@@ -98,8 +98,8 @@ export const EqptMasterTable = ({
         <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
           <MasterTableOfEqpt
             headers={eqptMHeader}
-            datas={theEqpts!.map((l) => ({
-              id: l.kizaiId ?? 0,
+            datas={theEqpts.map((l) => ({
+              id: l.kizaiId,
               name: l.kizaiNam,
               ...l,
             }))}

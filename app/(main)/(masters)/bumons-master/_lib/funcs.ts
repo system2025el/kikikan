@@ -65,7 +65,7 @@ export const getChosenbumon = async (id: number) => {
       delFlg: Boolean(data.del_flg),
       mem: data.mem,
       daibumonId: data.dai_bumon_id,
-      shukeibumonId: data.syukei_bumon_id,
+      shukeibumonId: data.shukei_bumon_id,
     };
     return bumonDetails;
   } catch (e) {
@@ -101,7 +101,7 @@ export const updateBumon = async (rawData: BumonsMasterDialogValues, id: number)
     del_flg: Number(rawData.delFlg),
     mem: rawData.mem,
     dai_bumon_id: rawData.daibumonId,
-    syukei_bumon_id: rawData.shukeibumonId,
+    shukei_bumon_id: rawData.shukeibumonId,
     upd_dat: date,
     upd_user: 'test_user',
   };

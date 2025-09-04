@@ -28,7 +28,7 @@ export const getFilteredOrderList = async (query: OrderSearchValues) => {
       koenbasho_nam as "koenbashoNam", kokyaku_nam as "kokyakuNam", juchu_dat as "juchuDat", 
       juchu_str_dat as "juchuStrDat", juchu_end_dat as "juchuEndDat", nyushuko_sts_nam as "nyushukoStsNam"
     FROM
-      dev2.v_juchu_lst 
+      dev6.v_juchu_lst 
   `;
   const queryParams = [];
   const whereClauses = [];
