@@ -132,7 +132,7 @@ const ReturnStockTableRow = React.memo(
               align={typeof cell === 'number' ? 'right' : 'left'}
               style={styles.row}
               sx={{
-                bgcolor: getStockRowBackgroundColor(cell.calDat, dateRange, test),
+                //bgcolor: getStockRowBackgroundColor(cell.calDat, dateRange, test),
                 color: cell.zaikoQty < 0 ? 'red' : 'black',
               }}
               size="small"

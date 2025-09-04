@@ -89,6 +89,20 @@ export const SelectReturnJuchuKizaiHead = async (juchuHeadId: number, juchuKizai
   }
 };
 
+export const selectJuchuHonbanbiQty = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
+  try {
+    return await supabase
+      .schema(SCHEMA)
+      .from('t_juchu_kizai_head')
+      .select('juchu_honbanbi_qty')
+      .eq('juchu_head_id', juchuHeadId)
+      .eq('juchu_kizai_head_id', juchuKizaiHeadId)
+      .single();
+  } catch (e) {
+    throw e;
+  }
+};
+
 /**
  * 受注機材ヘッダー新規追加
  * @param juchuKizaiHeadId 受注機材ヘッダーid

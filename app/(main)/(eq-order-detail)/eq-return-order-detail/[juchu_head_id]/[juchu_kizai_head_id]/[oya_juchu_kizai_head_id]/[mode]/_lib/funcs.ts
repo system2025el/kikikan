@@ -1,5 +1,6 @@
 import {
   InsertReturnJuchuKizaiHead,
+  selectJuchuHonbanbiQty,
   SelectReturnJuchuKizaiHead,
   UpdateReturnJuchuKizaiHead,
 } from '@/app/_lib/db/tables/t-juchu-kizai-head';
@@ -16,6 +17,21 @@ import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { GetJuchuKizaiNyushuko } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 
 import { ReturnJuchuKizaiHeadValues, ReturnJuchuKizaiMeisaiValues } from './types';
+
+export const getJuchuHonbanbiQty = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
+  try {
+    const { data, error } = await selectJuchuHonbanbiQty(juchuHeadId, juchuKizaiHeadId);
+    if (error) {
+      console.error('getJuchuHonbanbiQty error : ', error);
+      return null;
+    }
+
+    return data.juchu_honbanbi_qty;
+  } catch (e) {
+    console.error(e);
+    return null;
+  }
+};
 
 /**
  * 返却受注機材ヘッダー取得

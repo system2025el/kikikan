@@ -131,11 +131,11 @@ export const EquipmentReturnOrderDetail = (props: {
   );
 
   // 親出庫日
-  const [oyaShukoDate, setShukoDate] = useState<Date | null>(props.oyaShukoDate);
+  const [oyaShukoDate, setoyaShukoDate] = useState<Date | null>(props.oyaShukoDate);
   // 親入庫日
-  const [oyaNyukoDate, setNyukoDate] = useState<Date | null>(props.oyaNyukoDate);
-  // 入庫日
-  const [endDate, setEndDate] = useState<Date | null>(props.returnNyukoDate);
+  const [oyaNyukoDate, setoyaNyukoDate] = useState<Date | null>(props.oyaNyukoDate);
+  // 返却入庫日
+  const [returnNyukoDate, setReturnNyukoDate] = useState<Date | null>(props.returnNyukoDate);
   // 返却入庫日から親入庫日
   const [dateRange, setDateRange] = useState<string[]>(props.dateRange);
   // カレンダー選択日
@@ -365,6 +365,7 @@ export const EquipmentReturnOrderDetail = (props: {
 
     // 返却入庫日
     const updateNyukoDate = GetNyukoDate(data.kicsNyukoDat, data.yardNyukoDat);
+    console.log(updateNyukoDate, oyaNyukoDate);
     // 返却入庫日から親入庫日
     const updateDateRange = getRange(updateNyukoDate, oyaNyukoDate);
     console.log('返却入庫日から親入庫日', updateDateRange);
@@ -548,7 +549,7 @@ export const EquipmentReturnOrderDetail = (props: {
     console.log('受注機材本番日(使用日)更新', addReturnSiyouHonbanbiResult);
 
     // 返却入庫日更新
-    setNyukoDate(updateNyukoDate);
+    setReturnNyukoDate(updateNyukoDate);
     // カレンダー選択日更新
     setSelectDate(updateNyukoDate);
     // 出庫日から入庫日更新
@@ -807,6 +808,14 @@ export const EquipmentReturnOrderDetail = (props: {
     if (kicsNyukoDat === null) {
       clearErrors('kicsNyukoDat');
     }
+  };
+
+  const handleHonbanbiChange = (value: number | null) => {
+    setValue('juchuHonbanbiQty', value, { shouldDirty: true });
+    const updatedPriceTotal = returnJuchuKizaiMeisaiList
+      .filter((data) => !data.delFlag)
+      .reduce((sum, row) => sum + row.kizaiTankaAmt * (row.planKizaiQty ?? 0) * (value ?? 0), 0);
+    setPriceTotal(updatedPriceTotal);
   };
 
   /**
@@ -1204,24 +1213,29 @@ export const EquipmentReturnOrderDetail = (props: {
               </Grid2>
               <Grid2 container alignItems="center">
                 <Typography>本番日数</Typography>
-                <TextFieldElement
+                <Controller
                   name="juchuHonbanbiQty"
                   control={control}
-                  type="number"
-                  sx={{
-                    width: '5%',
-                    minWidth: '60px',
-                    '& .MuiInputBase-input': {
-                      textAlign: 'right',
-                    },
-                    '& input[type=number]::-webkit-inner-spin-button': {
-                      WebkitAppearance: 'none',
-                      margin: 0,
-                    },
-                  }}
-                  slotProps={{ input: { readOnly: true } }}
-                  disabled={!edit}
-                ></TextFieldElement>
+                  render={({ field }) => (
+                    <TextField
+                      value={field.value}
+                      type="number"
+                      onChange={(e) => handleHonbanbiChange(Number(e.target.value))}
+                      sx={{
+                        width: '5%',
+                        minWidth: '60px',
+                        '& .MuiInputBase-input': {
+                          textAlign: 'right',
+                        },
+                        '& input[type=number]::-webkit-inner-spin-button': {
+                          WebkitAppearance: 'none',
+                          margin: 0,
+                        },
+                      }}
+                      disabled={!edit}
+                    />
+                  )}
+                />
                 <Typography>日</Typography>
               </Grid2>
             </Grid2>

@@ -5,7 +5,7 @@ import { StockTableValues } from '@/app/(main)/(eq-order-detail)/eq-main-order-d
 import { GetJuchuHead } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/funcs';
 
 import { GetJuchuKizaiHead, GetJuchuKizaiNyushuko, GetStockList } from '../../../../../_lib/funcs';
-import { GetReturnJuchuKizaiHead, GetReturnJuchuKizaiMeisai } from './_lib/funcs';
+import { getJuchuHonbanbiQty, GetReturnJuchuKizaiHead, GetReturnJuchuKizaiMeisai } from './_lib/funcs';
 import { ReturnJuchuKizaiHeadValues, ReturnJuchuKizaiMeisaiValues } from './_lib/types';
 import { EquipmentReturnOrderDetail } from './_ui/equipment-return-order-detail';
 
@@ -45,12 +45,14 @@ const Page = async (props: {
 
   // 新規
   if (juchuKizaiHeadId === 0) {
+    // 親本番日数
+    const oyaJuchuHonbanbiQty = await getJuchuHonbanbiQty(params.juchu_head_id, params.oya_juchu_kizai_head_id);
     // 返却受注機材ヘッダーデータ(初期値)
     const newReturnJuchuKizaiHeadData: ReturnJuchuKizaiHeadValues = {
       juchuHeadId: Number(params.juchu_head_id),
       juchuKizaiHeadId: Number(params.juchu_kizai_head_id),
       juchuKizaiHeadKbn: 2,
-      juchuHonbanbiQty: null,
+      juchuHonbanbiQty: oyaJuchuHonbanbiQty,
       nebikiAmt: null,
       mem: null,
       headNam: '',
