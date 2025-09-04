@@ -2017,7 +2017,7 @@ export type Database = {
       v_juchu_kizai_dat_qty: {
         Row: {
           juchu_qty: number | null;
-          kizai_id: number | null;
+          kizai_id: number;
           plan_dat: string | null;
           plan_qty: number | null;
           yobi_qty: number | null;
@@ -2160,7 +2160,7 @@ export type Database = {
           eda_cod: string | null;
           el_num: number | null;
           kizai_grp_cod: string | null;
-          kizai_id: number | null;
+          kizai_id: number;
           kizai_nam: string | null;
           kizai_qty: number | null;
           mem: string | null;

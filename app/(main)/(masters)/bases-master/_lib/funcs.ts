@@ -97,6 +97,7 @@ export const updateBase = async (rawData: BasesMasterDialogValues, id: number) =
   const updateData = {
     shozoku_id: id,
     shozoku_nam: rawData.shozokuNam,
+    shozoku_nam_short: rawData.shozokuNam.slice(0, 1),
     del_flg: Number(rawData.delFlg),
     mem: rawData.mem,
     upd_dat: date,
