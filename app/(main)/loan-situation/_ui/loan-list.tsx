@@ -3,67 +3,52 @@
 import SearchIcon from '@mui/icons-material/Search';
 import { Box, Button, Container, Divider, Grid2, Paper, TextField, Typography } from '@mui/material';
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { TextFieldElement } from 'react-hook-form-mui';
 
 import { BackButton } from '../../_ui/buttons';
 import { MuiTablePagination } from '../../_ui/table-pagination';
+import { EqptsMasterTableValues } from '../../(masters)/eqpt-master/_lib/types';
 import { loanList } from '../_lib/data';
+import { getFilteredEqpts } from '../_lib/funcs';
 import { LoanListTable } from './loan-list-table';
 
-export type Loan = {
-  kizaiId: number;
-  kizaiNam: string;
-  shozokuId: number;
-  stock: number;
-  bumonId: number;
-  daibumonId: number;
-  shukeiBumonId: number;
-  regAmt: number;
-  rankAmt1: number;
-  rankAmt2: number;
-  rankAmt3: number;
-  rankAmt4: number;
-  rankAmt5: number;
-  mem: string;
-};
+export const LoanList = ({ eqpts }: { eqpts: EqptsMasterTableValues[] | undefined }) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [rows, setRows] = useState<EqptsMasterTableValues[]>(eqpts ?? []);
 
-const testData: Loan[] = Array.from({ length: 100 }, (_, i) => {
-  const original = loanList[i % loanList.length];
-  return {
-    ...original,
-    kizaiId: i + 1,
-    kizaiNam: `${original.kizaiNam} (${i + 1})`,
-    shozokuId: original.shozokuId,
-    stock: original.stock,
-    bumonId: original.bumonId,
-    daibumonId: original.daibumonId,
-    shukeiBumonId: original.shukeiBumonId,
-    regAmt: original.regAmt,
-    rankAmt1: original.rankAmt1,
-    rankAmt2: original.rankAmt2,
-    rankAmt3: original.rankAmt3,
-    rankAmt4: original.rankAmt4,
-    rankAmt5: original.rankAmt5,
-    mem: original.mem,
+  /* useForm ------------------- */
+  const { control, handleSubmit } = useForm({
+    mode: 'onSubmit',
+    defaultValues: { query: '' },
+  });
+
+  /* 検索ボタン押下時 */
+  const onSubmit = async (data: { query: string | undefined }) => {
+    setIsLoading(true);
+    console.log('data : ', data);
+    const newList = await getFilteredEqpts(data.query!);
+    setPage(1);
+    setRows(newList);
+    console.log('newList : ', newList);
+    setIsLoading(false);
   };
-});
-
-export const LoanList = () => {
-  const [rows, setRows] = useState(loanList);
 
   // 行移動
-  const moveRow = (index: number, direction: number) => {
-    console.log(index);
-    const newIndex = index + direction;
-    if (newIndex < 0 || newIndex >= rows.length) return;
+  // const moveRow = (index: number, direction: number) => {
+  //   console.log(index);
+  //   const newIndex = index + direction;
+  //   if (newIndex < 0 || newIndex >= rows.length) return;
 
-    const updatedRows = [...rows];
-    [updatedRows[index], updatedRows[newIndex]] = [updatedRows[newIndex], updatedRows[index]];
-    setRows(updatedRows);
-  };
+  //   const updatedRows = [...rows];
+  //   [updatedRows[index], updatedRows[newIndex]] = [updatedRows[newIndex], updatedRows[index]];
+  //   setRows(updatedRows);
+  // };
 
   return (
     <Box>
-      <Box display={'flex'} justifyContent={'end'}>
+      <Box display={'flex'} justifyContent={'end'} mb={0.5}>
         <BackButton label={'戻る'} />
       </Box>
       {/*貸出状況検索*/}
@@ -73,19 +58,26 @@ export const LoanList = () => {
           <Typography>機材検索</Typography>
         </Grid2>
         <Divider />
-        <Box p={2}>
-          <Typography variant="body2">検索</Typography>
-        </Box>
-        <Grid2 container alignItems={'center'} p={2} spacing={2}>
-          <Typography>受注機材名キーワード</Typography>
-          <TextField />
-          <Button>
-            <SearchIcon fontSize="small" />
-            検索
-          </Button>
-        </Grid2>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <Grid2 container justifyContent={'space-between'} alignItems={'center'} p={2} spacing={2}>
+            <Grid2 container display={'flex'} alignItems={'center'}>
+              <Typography>受注機材名キーワード</Typography>
+              <TextFieldElement name="query" control={control} />
+            </Grid2>
+            <Button type="submit">
+              <SearchIcon fontSize="small" />
+              検索
+            </Button>
+          </Grid2>
+        </form>
       </Paper>
-      <LoanListTable datas={rows} moveRow={moveRow} />
+      <LoanListTable
+        datas={rows}
+        page={page}
+        isLoading={isLoading}
+        setPage={setPage}
+        /*moveRow={moveRow}*/
+      />
     </Box>
   );
 };

@@ -57,3 +57,24 @@ export const selectChosenEqptsDetails = async (idList: number[]) => {
     throw e;
   }
 };
+
+export const selectFilteredEqptName = async (query: string) => {
+  const builder = supabase
+    .schema(SCHEMA)
+    .from('v_kizai_lst')
+    .select(
+      'kizai_id, kizai_nam, kizai_qty, shozoku_nam, mem, bumon_nam, dai_bumon_nam, shukei_bumon_nam, reg_amt, rank_amt_1, rank_amt_2, rank_amt_3, rank_amt_4, rank_amt_5, dsp_flg, del_flg'
+    )
+    .order('kizai_grp_cod')
+    .order('dsp_ord_num');
+
+  if (query && query.trim() !== '') {
+    builder.ilike('kizai_nam', `%${query}%`);
+  }
+
+  try {
+    return await builder;
+  } catch (e) {
+    throw e;
+  }
+};
