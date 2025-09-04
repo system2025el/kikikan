@@ -2110,7 +2110,7 @@ export type Database = {
         Row: {
           juchu_dat: string | null;
           juchu_end_dat: string | null;
-          juchu_head_id: number | null;
+          juchu_head_id: number;
           juchu_str_dat: string | null;
           juchu_sts: number | null;
           juchu_sts_nam: string | null;

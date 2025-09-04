@@ -176,8 +176,8 @@ export const QuotaionListTable = () => {
             </TableBody>
           </Table>
         </TableContainer>
-
-        <Dialog open={dialogOpen}>
+        {/* 見積作成方法確認ダイアログ */}
+        <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
           <DialogTitle display={'flex'} justifyContent={'space-between'}>
             受注番号から自動生成
             <CloseMasterDialogButton handleCloseDialog={() => setDialogOpen(false)} />
@@ -196,7 +196,7 @@ export const QuotaionListTable = () => {
                   router.push('/quotation-list/quotation');
                 }}
               >
-                いいえ
+                手動生成
               </Button>
             </DialogActions>
           </form>

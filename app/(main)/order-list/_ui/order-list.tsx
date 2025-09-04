@@ -243,7 +243,7 @@ export const OrderList = ({
  * @param props sx スタイル disbled disabledかどうか
  * @returns {JSX.Element} MUIX DatePickerコンポーネント
  */
-const SearchDateX = ({
+export const SearchDateX = ({
   sx,
   disabled,
   value,
