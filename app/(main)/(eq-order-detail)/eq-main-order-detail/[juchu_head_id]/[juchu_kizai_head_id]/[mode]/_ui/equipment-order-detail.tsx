@@ -836,7 +836,9 @@ const EquipmentOrderDetail = (props: {
    * @param kizaiId 機材id
    */
   const handleCellDateClear = (kizaiId: number) => {
-    setJuchuKizaiMeisaiList((prev) => prev.map((row) => (row.kizaiId === kizaiId ? { ...row, idoDenDat: null } : row)));
+    setJuchuKizaiMeisaiList((prev) =>
+      prev.map((row) => (row.kizaiId === kizaiId ? { ...row, sagyoDenDat: null } : row))
+    );
   };
 
   /**
@@ -920,7 +922,7 @@ const EquipmentOrderDetail = (props: {
     if (date !== null) {
       const newDate = date.toDate();
       setJuchuKizaiMeisaiList((prev) =>
-        prev.map((row) => (row.kizaiId === kizaiId && !row.delFlag ? { ...row, idoDenDat: newDate } : row))
+        prev.map((row) => (row.kizaiId === kizaiId && !row.delFlag ? { ...row, sagyoDenDat: newDate } : row))
       );
     }
   };
