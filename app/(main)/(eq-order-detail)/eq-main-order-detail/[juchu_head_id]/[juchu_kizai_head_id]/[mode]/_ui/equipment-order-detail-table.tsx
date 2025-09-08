@@ -308,7 +308,11 @@ const EqTableRow = React.memo(
           />
         </TableCell>
         <TableCell style={styles.row} align="left" size="small">
-          <Button variant="text" sx={{ p: 0, justifyContent: 'start' }} href={`/loan-situation/${row.kizaiId}`}>
+          <Button
+            variant="text"
+            sx={{ p: 0, justifyContent: 'start' }}
+            onClick={() => window.open(`/loan-situation/${row.kizaiId}`)}
+          >
             {row.kizaiNam}
           </Button>
         </TableCell>

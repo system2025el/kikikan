@@ -445,6 +445,8 @@ export const EquipmentReturnOrderDetail = (props: {
         }
       }
     }
+    setSave(true);
+    setIsSave(true);
     setIsLoading(false);
   };
 
@@ -645,9 +647,11 @@ export const EquipmentReturnOrderDetail = (props: {
    * 日付選択カレンダー選択時
    * @param date カレンダー選択日付
    */
-  const handleDateChange = async (date: Dayjs | null) => {
-    if (date !== null) {
-      setSelectDate(date.toDate());
+  const handleDateChange = async (date: Dayjs | null, view: string) => {
+    if (!date) return;
+    setSelectDate(date.toDate());
+
+    if (view === 'day') {
       const filterJuchuKizaiMeisaiList = returnJuchuKizaiMeisaiList.filter((data) => !data.delFlag);
       const updatedEqStockData = await updateEqStock(
         getValues('juchuHeadId'),
@@ -687,12 +691,12 @@ export const EquipmentReturnOrderDetail = (props: {
   // 3か月前
   const handleBackDateChange = () => {
     const date = subMonths(new Date(selectDate), 3);
-    handleDateChange(dayjs(date));
+    handleDateChange(dayjs(date), 'day');
   };
   // 3か月後
   const handleForwardDateChange = () => {
     const date = addMonths(new Date(selectDate), 3);
-    handleDateChange(dayjs(date));
+    handleDateChange(dayjs(date), 'day');
   };
 
   /**

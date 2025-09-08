@@ -23,8 +23,9 @@ dayjs.locale('ja'); // カレンダーの曜日のフォーマット
 
 const today = dayjs();
 
-export const Calendar = (props: { date: Date; onChange: (value: Dayjs | null) => void }) => {
+export const Calendar = (props: { date: Date; onChange: (value: Dayjs | null, view: string) => void }) => {
   const { date, onChange } = props;
+  const [view, setView] = useState<'year' | 'month' | 'day'>('day');
 
   return (
     <LocalizationProvider
@@ -42,7 +43,8 @@ export const Calendar = (props: { date: Date; onChange: (value: Dayjs | null) =>
         }} // カレンダーヘッダーのフォーマット
         value={dayjs(date)}
         views={['year', 'month', 'day']}
-        onChange={onChange}
+        onChange={(value) => onChange(value, view)}
+        onViewChange={(newView) => setView(newView)}
       ></DateCalendar>
     </LocalizationProvider>
   );

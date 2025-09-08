@@ -285,6 +285,8 @@ export const EquipmentKeepOrderDetail = (props: {
         await saveKeepJuchuKizaiMeisai(data.juchuHeadId, data.juchuKizaiHeadId, userNam);
       }
     }
+    setSave(true);
+    setIsSave(true);
     setIsLoading(false);
   };
 

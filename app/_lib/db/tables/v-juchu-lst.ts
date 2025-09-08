@@ -1,5 +1,6 @@
 'use server';
 
+import pool from '../postgres';
 import { SCHEMA, supabase } from '../supabase';
 
 /**
@@ -17,6 +18,26 @@ export const selectJuchu = async (id: number) => {
       )
       .eq('juchu_head_id', id)
       .single();
+  } catch (e) {
+    throw e;
+  }
+};
+
+export const selectJuchuHeadIds = async (strDat: string) => {
+  try {
+    await pool.query(` SET search_path TO ${SCHEMA};`);
+    return await pool.query(`
+      select 
+          v_juchu_lst.juchu_head_id as "juchuHeadId"
+      from 
+          v_juchu_lst
+      where
+          -- ①出庫日がスケジュール終了日より小さい、且つ、
+          v_juchu_lst.shuko_dat <= cast('${strDat}' as date) + cast( '90 days' as INTERVAL ) --【変数】
+          and
+          -- ②入庫日がスケジュール開始日より大きい
+          v_juchu_lst.nyuko_dat >= '${strDat}'   --【変数】
+      `);
   } catch (e) {
     throw e;
   }
