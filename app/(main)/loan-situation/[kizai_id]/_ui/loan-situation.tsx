@@ -27,7 +27,6 @@ import { BackButton } from '@/app/(main)/_ui/buttons';
 import { Calendar } from '@/app/(main)/_ui/date';
 import { Loading } from '@/app/(main)/_ui/loading';
 
-import { loanData, useData } from '../_lib/data';
 import { confirmJuchuHeadId, getLoanJuchuData, getLoanStockData, getLoanUseData } from '../_lib/funcs';
 import { LoanJuchu, LoanKizai, LoanStockTableValues, LoanUseTableValues } from '../_lib/types';
 import { LoanSituationTable, UseTable } from './loan-situation-table';
