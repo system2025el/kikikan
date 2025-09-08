@@ -137,12 +137,18 @@ export const getFilteredOrderList = async (query: OrderSearchValues) => {
 
   // ソート処理
   const { sort, order } = listSort;
-  if (sort === 'shuko') sqlQuery += ` ORDER BY shuko_dat`;
-  if (sort === 'nyuko') sqlQuery += ` ORDER BY nyuko_dat`;
-  if (sort === 'juchuId') sqlQuery += ` ORDER BY juchu_head_id`;
-  if (sort === 'juchuDat') sqlQuery += ` ORDER BY juchu_dat`;
-  if (sort === 'koenNam') sqlQuery += ` ORDER BY koen_nam`;
-  if (sort === 'kokyakuNam') sqlQuery += ` ORDER BY kokyaku_nam`;
+  // ソート項目をMap化
+  const sortMap: Record<string, string> = {
+    shuko: 'shuko_dat',
+    nyuko: 'nyuko_dat',
+    juchuId: 'juchu_head_id',
+    juchuDat: 'juchu_dat',
+    koenNam: 'koen_nam',
+    kokyakuNam: 'kokyaku_nam',
+  };
+  // キーでソート基準のカラムを指定
+  const sortCOlumn = sortMap[sort];
+  if (sortCOlumn) sqlQuery += ` ORDER BY ${sortCOlumn}`;
   // 昇降
   if (order === 'asc') sqlQuery += `, "juchuHeadId";`;
   if (order === 'desc') sqlQuery += ` Desc, "juchuHeadId";`;
