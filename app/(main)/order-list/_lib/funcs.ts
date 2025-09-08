@@ -20,7 +20,7 @@ dayjs.extend(timezone);
  */
 export const getFilteredOrderList = async (query: OrderSearchValues) => {
   console.log(query);
-  const { criteria, selectedDate, customer, customerSort, stageName, orderStartDate, orderFinishDate } = query;
+  const { criteria, selectedDate, customer, listSort, stageName, orderStartDate, orderFinishDate } = query;
   // 基本のクエリ
   let sqlQuery = `
     SELECT
@@ -135,11 +135,20 @@ export const getFilteredOrderList = async (query: OrderSearchValues) => {
     sqlQuery += ` WHERE ${whereClauses.join(' AND ')}`;
   }
 
-  if (customerSort === '1') sqlQuery += ` ORDER BY kokyaku_id, "juchuHeadId";`;
-  else if (customerSort === '2') sqlQuery += ` ORDER BY kokyaku_nam, "juchuHeadId";`;
-  else sqlQuery += ` ORDER BY "juchuHeadId";`;
+  // ソート処理
+  const { sort, order } = listSort;
+  if (sort === 'shuko') sqlQuery += ` ORDER BY shuko_dat`;
+  if (sort === 'nyuko') sqlQuery += ` ORDER BY nyuko_dat`;
+  if (sort === 'juchuId') sqlQuery += ` ORDER BY juchu_head_id`;
+  if (sort === 'juchuDat') sqlQuery += ` ORDER BY juchu_dat`;
+  if (sort === 'koenNam') sqlQuery += ` ORDER BY koen_nam`;
+  if (sort === 'kokyakuNam') sqlQuery += ` ORDER BY kokyaku_nam`;
+  // 昇降
+  if (order === 'asc') sqlQuery += `, "juchuHeadId";`;
+  if (order === 'desc') sqlQuery += ` Desc, "juchuHeadId";`;
 
   console.log('With Parameters:', queryParams);
+  console.log('SQL=== ', sqlQuery);
 
   try {
     // 処理実行
