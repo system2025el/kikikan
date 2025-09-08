@@ -2,19 +2,16 @@
 
 import { Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 
-import { getDateRowBackgroundColor } from '../_lib/colorselect';
-import { Loan, UseData } from './loan-situation';
+import { toISOStringMonthDay } from '@/app/(main)/_lib/date-conversion';
+
+import { LoanJuchu, LoanStockTableValues, LoanUseTableValues } from '../_lib/types';
 
 type LoanSituationTableProps = {
-  rows: Loan[];
+  rows: LoanJuchu[];
 };
 
 export const LoanSituationTable = (props: LoanSituationTableProps) => {
   const { rows } = props;
-
-  function toISOStringMonthDay(date: Date): import('react').ReactNode {
-    throw new Error('Function not implemented.');
-  }
 
   return (
     <TableContainer component={Paper} style={{ overflowX: 'auto' }}>
@@ -27,19 +24,25 @@ export const LoanSituationTable = (props: LoanSituationTableProps) => {
             <TableCell align="left" size="small" style={styles.header}>
               公演名
             </TableCell>
-            <TableCell size="small" style={styles.header} />
+            <TableCell align="left" size="small" style={styles.header}>
+              出庫日
+            </TableCell>
+            <TableCell align="left" size="small" style={styles.header}>
+              入庫日
+            </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {rows.map((row) => (
             <TableRow key={row.juchuHeadId}>
               <TableCell style={styles.row}>
-                <Button variant="text" sx={{ p: 0 }}>
+                <Button variant="text" href={`/order/${row.juchuHeadId}/${'view'}`} sx={{ p: 0 }}>
                   {row.juchuHeadId}
                 </Button>
               </TableCell>
               <TableCell style={styles.row}>{row.koenNam}</TableCell>
-              <TableCell style={styles.row}>{row.date && toISOStringMonthDay(row.date)}</TableCell>
+              <TableCell style={styles.row}>{row.shukoDat ? toISOStringMonthDay(row.shukoDat) : ''}</TableCell>
+              <TableCell style={styles.row}>{row.nyukoDat ? toISOStringMonthDay(row.nyukoDat) : ''}</TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -49,66 +52,70 @@ export const LoanSituationTable = (props: LoanSituationTableProps) => {
 };
 
 type UseTableProps = {
-  header: string[];
-  rows: UseData[];
-  possessions: number;
+  eqUseList: LoanUseTableValues[][];
+  eqStockList: LoanStockTableValues[];
 };
 
 export const UseTable = (props: UseTableProps) => {
-  const { header, rows, possessions } = props;
-
-  const columnCount = rows[0]?.juchuHonbanbiShubetuId.length || 0;
-  const columnSums = Array(columnCount).fill(0);
-
-  for (const item of rows) {
-    item.juchuHonbanbiShubetuId.forEach((value, index) => {
-      columnSums[index] += value !== 0 ? 10 : 0;
-    });
-  }
+  const { eqUseList, eqStockList } = props;
 
   return (
     <TableContainer component={Paper} style={{ overflowX: 'auto' }}>
       <Table>
         <TableHead>
           <TableRow>
-            {header?.map((date, index) => (
-              <TableCell
-                key={index}
-                align="right"
-                size="small"
-                sx={{
-                  border: '1px solid grey',
-                  whiteSpace: 'nowrap',
-                  color: 'white',
-                  bgcolor: 'black',
-                  padding: 0,
-                }}
-              >
-                {date}
-              </TableCell>
-            ))}
+            {eqStockList.length > 0 &&
+              eqStockList.map((cell, index) => (
+                <TableCell
+                  key={index}
+                  align="right"
+                  size="small"
+                  sx={{
+                    border: '1px solid grey',
+                    whiteSpace: 'nowrap',
+                    color: 'white',
+                    bgcolor: 'black',
+                    padding: 0,
+                    height: '25px',
+                  }}
+                >
+                  {toISOStringMonthDay(cell.calDat)}
+                </TableCell>
+              ))}
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map((row, rowIndex) => (
-            <TableRow key={rowIndex}>
-              {row.juchuHonbanbiShubetuId.map((cell, colIndex) => (
+          {eqUseList.length > 0 &&
+            eqUseList.map((row, rowIndex) => (
+              <TableRow key={rowIndex}>
+                {row.map((cell, colIndex) => (
+                  <TableCell
+                    key={colIndex}
+                    align="right"
+                    sx={{ bgcolor: cell.juchuHonbanbiColor, border: '1px solid black', height: '25px', py: 0, px: 1 }}
+                  >
+                    {cell.planQty}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          <TableRow>
+            {eqStockList.length > 0 &&
+              eqStockList.map((cell, colIndex) => (
                 <TableCell
                   key={colIndex}
                   align="right"
-                  sx={{ bgcolor: getDateRowBackgroundColor(cell), border: '1px solid black', height: 25, py: 0, px: 1 }}
+                  sx={{
+                    border: '1px solid black',
+                    height: 25,
+                    py: 0,
+                    px: 1,
+                    color: cell.zaikoQty < 0 ? 'red' : 'black',
+                  }}
                 >
-                  {cell !== 0 ? 10 : ''}
+                  {cell.zaikoQty}
                 </TableCell>
               ))}
-            </TableRow>
-          ))}
-          <TableRow>
-            {columnSums.map((cell, colIndex) => (
-              <TableCell key={colIndex} align="right" sx={{ border: '1px solid black', height: 25, py: 0, px: 1 }}>
-                {possessions - cell}
-              </TableCell>
-            ))}
           </TableRow>
         </TableBody>
       </Table>

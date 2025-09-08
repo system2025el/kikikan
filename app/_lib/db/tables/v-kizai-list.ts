@@ -58,22 +58,19 @@ export const selectChosenEqptsDetails = async (idList: number[]) => {
   }
 };
 
-export const selectFilteredEqptName = async (query: string) => {
-  const builder = supabase
-    .schema(SCHEMA)
-    .from('v_kizai_lst')
-    .select(
-      'kizai_id, kizai_nam, kizai_qty, shozoku_nam, mem, bumon_nam, dai_bumon_nam, shukei_bumon_nam, reg_amt, rank_amt_1, rank_amt_2, rank_amt_3, rank_amt_4, rank_amt_5, dsp_flg, del_flg'
-    )
-    .order('kizai_grp_cod')
-    .order('dsp_ord_num');
-
-  if (query && query.trim() !== '') {
-    builder.ilike('kizai_nam', `%${query}%`);
-  }
-
+/**
+ * 貸出状況用機材情報取得
+ * @param kizaiId 機材id
+ * @returns 機材id,機材名,定価,保有数
+ */
+export const selectLoanKizai = async (kizaiId: number) => {
   try {
-    return await builder;
+    return await supabase
+      .schema(SCHEMA)
+      .from('v_kizai_lst')
+      .select('kizai_id, kizai_nam, reg_amt, kizai_qty')
+      .eq('kizai_id', kizaiId)
+      .single();
   } catch (e) {
     throw e;
   }

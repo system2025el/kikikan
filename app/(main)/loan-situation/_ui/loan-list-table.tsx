@@ -106,7 +106,7 @@ export const LoanListTable = (props: {
                   <TableCell align="left" style={styles.style}>
                     <Button
                       variant="text"
-                      href={`/loan-situation/${loan.kizaiId}`}
+                      onClick={() => window.open(`/loan-situation/${loan.kizaiId}`)}
                       sx={{ justifyContent: 'start', p: 0 }}
                     >
                       {loan.kizaiNam}

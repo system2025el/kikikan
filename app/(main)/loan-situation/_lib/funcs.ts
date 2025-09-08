@@ -1,4 +1,4 @@
-import { selectFilteredEqptName, selectFilteredEqpts } from '@/app/_lib/db/tables/v-kizai-list';
+import { selectFilteredEqpts } from '@/app/_lib/db/tables/v-kizai-list';
 
 import { EqptsMasterTableValues } from '../../(masters)/eqpt-master/_lib/types';
 
@@ -9,7 +9,7 @@ import { EqptsMasterTableValues } from '../../(masters)/eqpt-master/_lib/types';
  */
 export const getFilteredEqpts = async (query: string) => {
   try {
-    const { data, error } = await selectFilteredEqptName(query);
+    const { data, error } = await selectFilteredEqpts({ q: query, d: 0, s: 0, b: 0 });
 
     if (error) {
       console.error('DB情報取得エラー', error.message, error.cause, error.hint);

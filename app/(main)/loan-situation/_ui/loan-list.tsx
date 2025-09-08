@@ -58,7 +58,7 @@ export const LoanList = ({ eqpts }: { eqpts: EqptsMasterTableValues[] | undefine
         </Grid2>
         <Divider />
         <form onSubmit={handleSubmit(onSubmit)}>
-          <Grid2 container justifyContent={'space-between'} alignItems={'center'} p={2} spacing={2}>
+          <Grid2 container alignItems={'center'} p={2} spacing={2}>
             <Grid2 container display={'flex'} alignItems={'center'}>
               <Typography>受注機材名キーワード</Typography>
               <TextFieldElement name="query" control={control} />
