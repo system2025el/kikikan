@@ -41,7 +41,7 @@ export const OrderList = ({
       criteria: 1,
       selectedDate: { value: '1', range: { from: null, to: null } },
       customer: 0,
-      customerSort: '1',
+      listSort: { sort: 'shuko', order: 'asc' },
       stageName: '',
       orderStartDate: null,
       orderFinishDate: null,
@@ -146,15 +146,30 @@ export const OrderList = ({
                         ソート
                       </Typography>
                     </Grid2>
-                    <Grid2 size={{ sm: 12, md: 'grow' }}>
+                    <Grid2 size={{ sm: 12, md: 3 }}>
                       <SelectElement
-                        name="customerSort"
+                        name="listSort.sort"
                         control={control}
                         options={[
-                          { id: '1', label: '顧客名簿' },
-                          { id: '2', label: '顧客名' },
+                          { id: 'shuko', label: '出庫日' },
+                          { id: 'nyuko', label: '入庫日' },
+                          { id: 'juchuId', label: '受注番号' },
+                          { id: 'juchuDat', label: '受注日' },
+                          { id: 'koenNam', label: '作品名 (公演名)' },
+                          { id: 'kokyakuNam', label: '顧客名' },
                         ]}
                         sx={{ minWidth: 150 }}
+                      />
+                    </Grid2>
+                    <Grid2 size={{ sm: 12, md: 'grow' }}>
+                      <RadioButtonGroup
+                        control={control}
+                        name="listSort.order"
+                        options={[
+                          { id: 'asc', label: '昇順' },
+                          { id: 'desc', label: '降順' },
+                        ]}
+                        row
                       />
                     </Grid2>
                   </Grid2>

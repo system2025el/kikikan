@@ -26,7 +26,7 @@ export type OrderSearchValues = {
     };
   };
   customer?: number;
-  customerSort?: string;
+  listSort: { sort: string; order: string };
   stageName?: string;
   orderStartDate?: Date | null;
   orderFinishDate?: Date | null;
