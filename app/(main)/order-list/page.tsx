@@ -11,6 +11,7 @@ const Page = async () => {
     getFilteredOrderList({
       criteria: 1,
       selectedDate: { value: '1', range: { from: null, to: null } },
+      listSort: { sort: 'shuko', order: 'asc' },
     }),
     getCustomerSelection(),
   ]);
