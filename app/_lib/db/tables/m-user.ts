@@ -5,6 +5,18 @@ import pool from '../postgres';
 import { SCHEMA, supabase } from '../supabase';
 
 /**
+ * 要修正・確認 m_userから有効な担当者リストを取得する関数 viewを作って社員コードではなくすべきか？
+ * @returns {{user_nam, shain_cod}[]} 有効な担当者リスト
+ */
+export const selectActiveUsers = async () => {
+  try {
+    return await supabase.schema('dev6').from('m_user').select('user_nam, shain_cod').neq('del_flg', 1);
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
  * 担当者マスタテーブルのデータを取得する関数
  * @param query 検索キーワード
  * @returns {Promise<UsersDialogValues[]>} 公演場所マスタテーブルに表示するデータ（ 検索キーワードが空の場合は全て ）

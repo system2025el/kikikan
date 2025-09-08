@@ -170,7 +170,8 @@ export const DaibumonsMasterDialog = ({
               </Grid2>
               <Grid2>
                 <FormBox formItem={formItems[2]}>
-                  <TextareaAutosizeElement ////////////// 200文字までの設定をしなければならない
+                  <TextFieldElement
+                    multiline
                     name="mem"
                     control={control}
                     label={editable ? formItems[2].exsample : ''}

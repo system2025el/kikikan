@@ -29,7 +29,7 @@ export const selectKokyaku = async (kokyaku_id: number) => {
  * 顧客マスタから有効な顧客リストを取得する関数
  * @returns 有効な顧客のリスト
  */
-export const selectActiveCustomer = async () => {
+export const selectActiveCustomers = async () => {
   try {
     return await supabase
       .schema(SCHEMA)

@@ -325,7 +325,8 @@ export const EqMasterDialog = ({
               </Grid2>
               <Grid2>
                 <FormBox formItem={formItems[11]}>
-                  <TextareaAutosizeElement
+                  <TextFieldElement
+                    multiline
                     name="mem"
                     control={control}
                     label={editable ? formItems[11].exsample : ''}

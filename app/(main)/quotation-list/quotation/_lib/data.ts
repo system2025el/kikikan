@@ -1,3 +1,5 @@
+import { SelectTypes } from '@/app/(main)/_ui/form-box';
+
 export const quotation = [
   { label: '（株）シアターブレーン', id: 1 },
   { label: '（株）リファクト', id: 2 },

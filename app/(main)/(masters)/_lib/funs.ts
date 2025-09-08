@@ -6,7 +6,7 @@ import { selectActiveBumons } from '@/app/_lib/db/tables/m-bumon';
 import { selectActiveDaibumons } from '@/app/_lib/db/tables/m-daibumon';
 import { selectBundledEqpts } from '@/app/_lib/db/tables/m-kizai';
 import { selectBundledEqptIds } from '@/app/_lib/db/tables/m-kizai-set';
-import { selectActiveCustomer } from '@/app/_lib/db/tables/m-kokyaku';
+import { selectActiveCustomers } from '@/app/_lib/db/tables/m-kokyaku';
 import { selectActiveShozokus } from '@/app/_lib/db/tables/m-shozoku';
 import { selectActiveShukeibumons } from '@/app/_lib/db/tables/m-shukeibumon';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
@@ -240,9 +240,9 @@ export const CheckSetoptions = async (idList: number[]) => {
  * 選択肢に使う顧客リストを取得する関数
  * @returns 選択肢に使う顧客リスト
  */
-export const getCustomerSelection = async (): Promise<{ kokyakuId: number; kokyakuNam: string }[]> => {
+export const getCustomerSelection = async (): Promise<SelectTypes[]> => {
   try {
-    const { data, error } = await selectActiveCustomer();
+    const { data, error } = await selectActiveCustomers();
     if (error) {
       console.error('DB情報取得エラー', error.message, error.cause, error.hint);
       throw error;
@@ -250,9 +250,9 @@ export const getCustomerSelection = async (): Promise<{ kokyakuId: number; kokya
     if (!data || data.length === 0) {
       return [];
     }
-    const selectElements = data.map((d) => ({
-      kokyakuId: d.kokyaku_id,
-      kokyakuNam: d.kokyaku_nam,
+    const selectElements: SelectTypes[] = data.map((d) => ({
+      id: d.kokyaku_id,
+      label: d.kokyaku_nam,
     }));
     console.log('顧客が', selectElements.length, '件');
     return selectElements;

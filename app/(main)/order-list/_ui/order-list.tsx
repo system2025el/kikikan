@@ -13,7 +13,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { RadioButtonGroup, SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
 import { BackButton } from '../../_ui/buttons';
-import { selectNone } from '../../_ui/form-box';
+import { selectNone, SelectTypes } from '../../_ui/form-box';
 import { radioData } from '../_lib/datas';
 import { getFilteredOrderList } from '../_lib/funcs';
 import { OrderListTableValues, OrderSearchValues } from '../_lib/types';
@@ -25,7 +25,7 @@ export const OrderList = ({
   customers,
 }: {
   orders: OrderListTableValues[] | undefined;
-  customers: { kokyakuId: number; kokyakuNam: string }[] | undefined;
+  customers: SelectTypes[] | undefined;
 }) => {
   /* useState -------------------------------------------- */
   /* 受注一覧 */
@@ -47,7 +47,6 @@ export const OrderList = ({
       orderFinishDate: null,
     },
   });
-  const sortOrder = watch('customerSort');
   const selectedDateValue = watch('selectedDate.value');
 
   /* methods ---------------------------------------- */
@@ -67,25 +66,6 @@ export const OrderList = ({
   useEffect(() => {
     setIsLoading(false);
   }, []);
-
-  // 顧客選択のソート制御
-  const customerList = useMemo(() => {
-    if (!customers) return [];
-
-    if (sortOrder === '1') {
-      return customers.toSorted((a, b) => a.kokyakuId - b.kokyakuId);
-    } else if (sortOrder === '2') {
-      return customers.toSorted((a, b) => a.kokyakuNam.localeCompare(b.kokyakuNam, 'ja'));
-    } else {
-      return customers;
-    }
-  }, [sortOrder, customers]);
-  const customerOptions = useMemo(() => {
-    return customerList.map(({ kokyakuId, kokyakuNam }) => ({
-      id: kokyakuId,
-      label: kokyakuNam,
-    }));
-  }, [customerList]);
 
   return (
     <LocalizationProvider
@@ -129,13 +109,13 @@ export const OrderList = ({
                       <Controller
                         control={control}
                         name="selectedDate.range.from"
-                        render={({ field }) => <SearchDateX value={field.value} onChange={field.onChange} />}
+                        render={({ field }) => <FormDateX value={field.value} onChange={field.onChange} />}
                       />
                       <span>～</span>
                       <Controller
                         control={control}
                         name="selectedDate.range.to"
-                        render={({ field }) => <SearchDateX value={field.value} onChange={field.onChange} />}
+                        render={({ field }) => <FormDateX value={field.value} onChange={field.onChange} />}
                       />
                     </Stack>
                   )}
@@ -151,7 +131,7 @@ export const OrderList = ({
                       control={control}
                       render={({ field }) => (
                         <Select {...field} sx={{ width: 250 }}>
-                          {[selectNone, ...customerOptions].map((opt) => (
+                          {[selectNone, ...(customers ?? [])].map((opt) => (
                             <MenuItem key={opt.id} value={opt.id} sx={opt.id === 0 ? { color: grey[600] } : {}}>
                               {opt.label}
                             </MenuItem>
@@ -200,7 +180,7 @@ export const OrderList = ({
                             return value === null || value instanceof Date || '日付が正しくありません';
                           },
                         }}
-                        render={({ field }) => <SearchDateX value={field.value} onChange={field.onChange} />}
+                        render={({ field }) => <FormDateX value={field.value} onChange={field.onChange} />}
                       />
                       ～
                       <Controller
@@ -211,7 +191,7 @@ export const OrderList = ({
                             return value === null || value instanceof Date || '日付が正しくありません';
                           },
                         }}
-                        render={({ field }) => <SearchDateX value={field.value} onChange={field.onChange} />}
+                        render={({ field }) => <FormDateX value={field.value} onChange={field.onChange} />}
                       />
                     </Grid2>
                   </Grid2>
@@ -243,7 +223,7 @@ export const OrderList = ({
  * @param props sx スタイル disbled disabledかどうか
  * @returns {JSX.Element} MUIX DatePickerコンポーネント
  */
-export const SearchDateX = ({
+export const FormDateX = ({
   sx,
   disabled,
   value,

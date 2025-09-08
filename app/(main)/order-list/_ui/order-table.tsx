@@ -143,7 +143,7 @@ export const OrderTable = ({
                     >
                       {order.ordNum}
                     </TableCell>
-                    <TableCell align="right">
+                    <TableCell align="center">
                       <Button
                         variant="text"
                         size="small"

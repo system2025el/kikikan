@@ -165,7 +165,8 @@ export const VehiclesMasterDialog = ({
               </Grid2>
               <Grid2>
                 <FormBox formItem={formItems[2]}>
-                  <TextareaAutosizeElement
+                  <TextFieldElement
+                    multiline
                     name="mem"
                     control={control}
                     label={editable ? formItems[2].exsample : ''}

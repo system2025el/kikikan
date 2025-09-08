@@ -324,7 +324,8 @@ export const CustomersMasterDialog = ({
               </Grid2>
               <Grid2>
                 <FormBox formItem={formItems[13]}>
-                  <TextareaAutosizeElement ////////////// 200文字までの設定をしなければならない
+                  <TextFieldElement
+                    multiline
                     name="mem"
                     control={control}
                     label={editable ? formItems[13].exsample : ''}
