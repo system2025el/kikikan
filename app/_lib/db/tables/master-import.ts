@@ -7,7 +7,7 @@ import {
   TanabanImportTypes,
 } from '@/app/(main)/(settings)/import-master/_lib/types';
 
-import { insertMasterUpdates } from './m-master-update';
+import { updateMasterUpdates } from './m-master-update';
 
 /**
  * RFIDマスタ確認
@@ -88,7 +88,7 @@ export const checkRfid = async (list: RfidImportTypes[], connection: PoolClient)
         `;
 
       // INSERT実行
-      await Promise.all([connection.query(insertQuery, [...values, addDat, addUser]), insertMasterUpdates('m_rfid')]);
+      await Promise.all([connection.query(insertQuery, [...values, addDat, addUser]), updateMasterUpdates('m_rfid')]);
     }
 
     // 更新処理
@@ -160,7 +160,7 @@ export const checkRfid = async (list: RfidImportTypes[], connection: PoolClient)
       //更新実行
       await Promise.all([
         connection.query(updateQuery, [...updateValues, updDat, updUser]),
-        insertMasterUpdates('m_rfid'),
+        updateMasterUpdates('m_rfid'),
       ]);
     }
 
@@ -298,7 +298,7 @@ export const checkKizai = async (list: KizaiImportTypes[], connection: PoolClien
 
     if (data) {
       if (data.rowCount && data.rowCount > 0) {
-        await insertMasterUpdates('m_kizai');
+        await updateMasterUpdates('m_kizai');
       }
       return data.rows;
     }

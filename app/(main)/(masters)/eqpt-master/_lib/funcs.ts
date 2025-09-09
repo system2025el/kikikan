@@ -6,7 +6,7 @@ import pool from '@/app/_lib/db/postgres';
 import { SCHEMA, supabase } from '@/app/_lib/db/supabase';
 import { insertNewEqpt, selectActiveEqpts, selectOneEqpt, upDateEqptDB } from '@/app/_lib/db/tables/m-kizai';
 import { insertEqptHistory } from '@/app/_lib/db/tables/m-kizai-his';
-import { insertMasterUpdates } from '@/app/_lib/db/tables/m-master-update';
+import { updateMasterUpdates } from '@/app/_lib/db/tables/m-master-update';
 import { selectCountOfTheEqpt } from '@/app/_lib/db/tables/m-rfid';
 import { selectChosenEqptsDetails, selectFilteredEqpts } from '@/app/_lib/db/tables/v-kizai-list';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
@@ -135,7 +135,7 @@ export const addNewEqpt = async (data: EqptsMasterDialogValues) => {
   console.log('機材マスタを追加する');
 
   try {
-    await Promise.all([insertNewEqpt(data), insertMasterUpdates('m_kizai')]);
+    await Promise.all([insertNewEqpt(data), updateMasterUpdates('m_kizai')]);
     await revalidatePath('/eqpt-master');
   } catch (error) {
     console.log('DB接続エラー', error);
@@ -180,7 +180,7 @@ export const updateEqpt = async (rawData: EqptsMasterDialogValues, id: number) =
   console.log(updateData.kizai_nam);
 
   try {
-    await Promise.all([upDateEqptDB(updateData), insertMasterUpdates('m_kizai')]);
+    await Promise.all([upDateEqptDB(updateData), updateMasterUpdates('m_kizai')]);
     await revalidatePath('/eqpt-master');
   } catch (error) {
     console.log('例外が発生しました', error);
