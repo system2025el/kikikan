@@ -8,13 +8,14 @@ import { LoanJuchu, LoanStockTableValues, LoanUseTableValues } from '../_lib/typ
 
 type LoanSituationTableProps = {
   rows: LoanJuchu[];
+  ref: React.RefObject<HTMLDivElement | null>;
 };
 
 export const LoanSituationTable = (props: LoanSituationTableProps) => {
-  const { rows } = props;
+  const { rows, ref } = props;
 
   return (
-    <TableContainer component={Paper} style={{ overflowX: 'auto' }}>
+    <TableContainer ref={ref} component={Paper} style={{ overflowX: 'auto' }}>
       <Table>
         <TableHead>
           <TableRow>
@@ -54,13 +55,14 @@ export const LoanSituationTable = (props: LoanSituationTableProps) => {
 type UseTableProps = {
   eqUseList: LoanUseTableValues[][];
   eqStockList: LoanStockTableValues[];
+  ref: React.RefObject<HTMLDivElement | null>;
 };
 
 export const UseTable = (props: UseTableProps) => {
-  const { eqUseList, eqStockList } = props;
+  const { eqUseList, eqStockList, ref } = props;
 
   return (
-    <TableContainer component={Paper} style={{ overflowX: 'auto' }}>
+    <TableContainer ref={ref} component={Paper} style={{ overflowX: 'auto' }}>
       <Table>
         <TableHead>
           <TableRow>

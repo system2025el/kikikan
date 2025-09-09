@@ -59,7 +59,7 @@ export const selectChosenEqptsDetails = async (idList: number[]) => {
 };
 
 /**
- * 貸出状況用機材情報取得
+ * 貸出状況用機材データ取得
  * @param kizaiId 機材id
  * @returns 機材id,機材名,定価,保有数
  */
@@ -71,6 +71,26 @@ export const selectLoanKizai = async (kizaiId: number) => {
       .select('kizai_id, kizai_nam, reg_amt, kizai_qty')
       .eq('kizai_id', kizaiId)
       .single();
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
+ * 在庫確認用機材データ取得
+ * @param bumonId 部門id
+ * @returns 機材id,機材名,保有数,部門id,部門名
+ */
+export const selectStockKizai = async (bumonId: number) => {
+  try {
+    return await supabase
+      .schema(SCHEMA)
+      .from('v_kizai_lst')
+      .select(`kizai_id, kizai_nam, kizai_qty, bumon_id, bumon_nam`)
+      .eq('bumon_id', bumonId)
+      .eq('del_flg', 0)
+      .eq('dsp_flg', 1)
+      .order('dsp_ord_num');
   } catch (e) {
     throw e;
   }

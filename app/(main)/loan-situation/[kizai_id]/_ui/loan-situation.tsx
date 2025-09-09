@@ -20,7 +20,7 @@ import {
 } from '@mui/material';
 import { addDays, addMonths, set, subDays, subMonths } from 'date-fns';
 import dayjs, { Dayjs } from 'dayjs';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { toISOStringMonthDay } from '@/app/(main)/_lib/date-conversion';
 import { BackButton } from '@/app/(main)/_ui/buttons';
@@ -39,6 +39,7 @@ export const LoanSituation = (props: {
 }) => {
   const { kizaiData } = props;
 
+  // ローディング
   const [isLoading, setIsLoading] = useState(false);
   // 貸出受注データリスト
   const [loanJuchuList, setLoanJuchuList] = useState<LoanJuchu[]>(props.loanJuchuData);
@@ -54,6 +55,55 @@ export const LoanSituation = (props: {
   // ポッパー制御
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
+
+  // ref
+  const leftRef = useRef<HTMLDivElement>(null);
+  const rightRef = useRef<HTMLDivElement>(null);
+  const isSyncing = useRef(false);
+
+  useEffect(() => {
+    const left = leftRef.current;
+    const right = rightRef.current;
+
+    if (left && right) {
+      left.addEventListener('scroll', () => syncScroll('left'));
+      right.addEventListener('scroll', () => syncScroll('right'));
+    }
+
+    return () => {
+      if (left && right) {
+        left.removeEventListener('scroll', () => syncScroll('left'));
+        right.removeEventListener('scroll', () => syncScroll('right'));
+      }
+    };
+  }, [loanJuchuList, eqUseList, isLoading]);
+
+  /**
+   * 同期スクロール処理
+   * @param source
+   * @returns
+   */
+  const syncScroll = (source: 'left' | 'right') => {
+    if (isSyncing.current) return;
+    isSyncing.current = true;
+
+    const left = leftRef.current;
+    const right = rightRef.current;
+
+    if (!left || !right) return;
+
+    if (source === 'left') {
+      const ratio = left.scrollTop / (left.scrollHeight - left.clientHeight);
+      right.scrollTop = ratio * (right.scrollHeight - right.clientHeight);
+    } else {
+      const ratio = right.scrollTop / (right.scrollHeight - right.clientHeight);
+      left.scrollTop = ratio * (left.scrollHeight - left.clientHeight);
+    }
+
+    requestAnimationFrame(() => {
+      isSyncing.current = false;
+    });
+  };
 
   /**
    * 日付選択カレンダー選択時
@@ -273,7 +323,7 @@ export const LoanSituation = (props: {
               mt: '62.5px',
             }}
           >
-            <LoanSituationTable rows={loanJuchuList} />
+            <LoanSituationTable rows={loanJuchuList} ref={leftRef} />
             <Box display={'flex'} justifyContent={'end'} p={0.5}>
               <Typography fontSize={'small'}>在庫数</Typography>
             </Box>
@@ -300,7 +350,7 @@ export const LoanSituation = (props: {
                 <ArrowForwardIosIcon fontSize="small" />
               </Button>
             </Box>
-            <UseTable eqUseList={eqUseList} eqStockList={eqStockList} />
+            <UseTable eqUseList={eqUseList} eqStockList={eqStockList} ref={rightRef} />
           </Box>
         </Box>
       </Paper>
