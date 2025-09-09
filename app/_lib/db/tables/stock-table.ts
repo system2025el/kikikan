@@ -4,7 +4,7 @@ import pool from '../postgres';
 import { SCHEMA } from '../supabase';
 
 /**
- * 機材在庫テーブル用データ取得
+ * 機材明細用在庫データ取得
  * @param juchuHeadId 受注ヘッダーid
  * @param juchuKizaiHeadId 受注機材ヘッダーid
  * @param kizaiId 機材id
@@ -159,18 +159,24 @@ order by cal_dat;
   }
 };
 
-export const selectLoanStockList = async (kizaiId: number, date: string) => {
+/**
+ * 機材在庫データ取得
+ * @param kizaiId 機材id
+ * @param date 日付
+ * @returns 機材在庫データ
+ */
+export const selectStockList = async (kizaiId: number, date: string) => {
   try {
     await pool.query(` SET search_path TO ${SCHEMA};`);
     return await pool.query(`
       select   
-    cal.cal_dat as "calDat" --スケジュール日
-    ,coalesce(zaiko_kizai.kizai_id,${kizaiId} /*■変数箇所■*/) as "kizaiId"   -- 機材ID
-    ,coalesce(zaiko_kizai.zaiko_qty,(select v_kizai_qty.kizai_qty from v_kizai_qty where v_kizai_qty.kizai_id = ${kizaiId} /*■変数箇所■*/)) as "zaikoQty"     --在庫数   /*受注機材明細スケジュール、在庫状況スケジュール*/
-from 
-    (
+        cal.cal_dat as "calDat" --スケジュール日
+        ,coalesce(zaiko_kizai.kizai_id,${kizaiId} /*■変数箇所■*/) as "kizaiId"   -- 機材ID
+        ,coalesce(zaiko_kizai.zaiko_qty,(select v_kizai_qty.kizai_qty from v_kizai_qty where v_kizai_qty.kizai_id = ${kizaiId} /*■変数箇所■*/)) as "zaikoQty"     --在庫数   /*受注機材明細スケジュール、在庫状況スケジュール*/
+      from 
+      (
         select 
-             v_zaiko_qty.plan_dat   --機材の使用日
+            v_zaiko_qty.plan_dat   --機材の使用日
             ,v_zaiko_qty.kizai_id   --機材ID
             ,v_zaiko_qty.zaiko_qty  --機材の在庫数
         from
@@ -178,16 +184,16 @@ from
         where
             --指定した１機材
             v_zaiko_qty.kizai_id = ${kizaiId} /*■変数箇所■*/
-    ) as zaiko_kizai
-right outer join 
-    /* スケジュール生成して外部結合 */
-    (
-        -- スケジュールの生成範囲 /*■変数箇所■*/
-        select '${date}'::date + g.i as cal_dat from generate_series(0, 90) as g(i)
-    ) as cal on 
-    zaiko_kizai.plan_dat = cal.cal_dat    
+      ) as zaiko_kizai
+      right outer join 
+        /* スケジュール生成して外部結合 */
+        (
+            -- スケジュールの生成範囲 /*■変数箇所■*/
+            select '${date}'::date + g.i as cal_dat from generate_series(0, 90) as g(i)
+        ) as cal on 
+        zaiko_kizai.plan_dat = cal.cal_dat    
 
-order by cal_dat;
+      order by cal_dat;
 
     `);
   } catch (e) {

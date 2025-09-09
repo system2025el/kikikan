@@ -2,7 +2,7 @@
 
 import { QueryResult } from 'pg';
 
-import { selectLoanStockList, selectUseList } from '@/app/_lib/db/tables/stock-table';
+import { selectStockList, selectUseList } from '@/app/_lib/db/tables/stock-table';
 import { selectLoanJuchuData } from '@/app/_lib/db/tables/v-juchu-kizai-den';
 import { selectJuchuHeadIds } from '@/app/_lib/db/tables/v-juchu-lst';
 import { selectLoanKizai } from '@/app/_lib/db/tables/v-kizai-list';
@@ -107,7 +107,7 @@ export const getLoanUseData = async (juchuHeadId: number, kizaiId: number, date:
 export const getLoanStockData = async (kizaiId: number, date: Date) => {
   const stringDate = toISOStringYearMonthDay(date);
   try {
-    const result: QueryResult<LoanStockTableValues> = await selectLoanStockList(kizaiId, stringDate);
+    const result: QueryResult<LoanStockTableValues> = await selectStockList(kizaiId, stringDate);
     const data: LoanStockTableValues[] = result.rows;
     return data;
   } catch (e) {

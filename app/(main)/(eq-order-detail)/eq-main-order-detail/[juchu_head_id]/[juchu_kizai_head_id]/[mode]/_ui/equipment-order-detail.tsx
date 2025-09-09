@@ -293,7 +293,6 @@ const EquipmentOrderDetail = (props: {
   }, [eqStockList]);
 
   useEffect(() => {
-    console.log('------------------------同期スクロール更新--------------------------');
     const left = leftRef.current;
     const right = rightRef.current;
 

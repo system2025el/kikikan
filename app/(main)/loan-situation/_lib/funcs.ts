@@ -1,3 +1,5 @@
+'use server';
+
 import { selectFilteredEqpts } from '@/app/_lib/db/tables/v-kizai-list';
 
 import { EqptsMasterTableValues } from '../../(masters)/eqpt-master/_lib/types';
