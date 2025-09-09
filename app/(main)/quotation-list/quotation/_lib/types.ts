@@ -17,10 +17,17 @@ export type JuchuValues = {
 };
 
 export const quotMeisaiHeadSchema = z.object({
-  mituHeadId: z.number().int(),
-  mituMeisaiHeadId: z.number().int(),
+  mituHeadId: z.number().int().nullish(),
+  mituMeisaiHeadId: z.number().int().nullish(),
   mituMeisaiHeadNam: z.string().nullish(),
   headNamDspFlg: z.boolean().nullable(),
+  meisai: z
+    .array(
+      z.object({
+        nam: z.string().max(50).nullish(),
+      })
+    )
+    .nullish(),
 });
 
 // ZodスキーマからTypeScriptの型を生成 (元の型と一致することを確認)
