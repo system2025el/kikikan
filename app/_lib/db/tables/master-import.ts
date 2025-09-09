@@ -88,7 +88,7 @@ export const checkRfid = async (list: RfidImportTypes[], connection: PoolClient)
         `;
 
       // INSERT実行
-      await connection.query(insertQuery, [...values, addDat, addUser]);
+      await Promise.all([connection.query(insertQuery, [...values, addDat, addUser]), insertMasterUpdates('m_rfid')]);
     }
 
     // 更新処理
@@ -125,7 +125,7 @@ export const checkRfid = async (list: RfidImportTypes[], connection: PoolClient)
     console.log('更新対象', differnces.rows);
     const updateList = differnces.rows;
     // 差異がある場合
-    if (differnces.rowCount && differnces.rowCount > 0) {
+    if (updateList && updateList.length > 0) {
       const updDat = toJapanTimeString();
       const updUser = 'excel_import';
       const updatePlaceholders = updateList
