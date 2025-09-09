@@ -2,7 +2,6 @@
 
 import { revalidatePath } from 'next/cache';
 
-import { insertMasterUpdates } from '@/app/_lib/db/tables/m-master-update';
 import {
   insertNewShozoku,
   selectFilteredShozokus,
@@ -106,7 +105,7 @@ export const updateBase = async (rawData: BasesMasterDialogValues, id: number) =
   console.log(updateData.shozoku_nam);
 
   try {
-    await Promise.all([upDateShozokuDB(updateData), insertMasterUpdates('m_shozoku')]);
+    await upDateShozokuDB(updateData);
     await revalidatePath('/bases-master');
   } catch (error) {
     console.log('例外が発生', error);

@@ -2,9 +2,6 @@
 
 import { revalidatePath } from 'next/cache';
 
-import pool from '@/app/_lib/db/postgres';
-import { SCHEMA, supabase } from '@/app/_lib/db/supabase';
-import { insertMasterUpdates } from '@/app/_lib/db/tables/m-master-update';
 import { insertNewVeh, SelectFilteredVehs, selectOneVeh, upDateVehDB } from '@/app/_lib/db/tables/m-sharyou';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
@@ -105,7 +102,6 @@ export const updateVeh = async (data: VehsMasterDialogValues, id: number) => {
   };
   try {
     await upDateVehDB(updateData);
-    await Promise.all([upDateVehDB(updateData), insertMasterUpdates('m_sharyo')]);
     await revalidatePath('/vehicles-master');
   } catch (error) {
     console.log('例外が発生', error);
