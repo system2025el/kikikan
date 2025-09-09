@@ -2,9 +2,6 @@
 
 import { revalidatePath } from 'next/cache';
 
-import pool from '@/app/_lib/db/postgres';
-import { SCHEMA, supabase } from '@/app/_lib/db/supabase';
-import { insertMasterUpdates } from '@/app/_lib/db/tables/m-master-update';
 import { insertNewUser, SelectFilteredUsers, selectOneUser, upDateUserDB } from '@/app/_lib/db/tables/m-user';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
@@ -99,7 +96,7 @@ export const updateUser = async (data: UsersMasterDialogValues, id: number) => {
   console.log(updateData.user_nam);
   try {
     await upDateUserDB(updateData, id);
-    // await Promise.all([upDateUserDB(updateData, id), insertMasterUpdates('m_user')]);
+    // await upDateUserDB(updateData, id);
     await revalidatePath('/users-master');
   } catch (error) {
     console.log('例外が発生', error);

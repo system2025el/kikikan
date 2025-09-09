@@ -8,7 +8,6 @@ import {
   selectOneDaibumon,
   updateDaibumonDB,
 } from '@/app/_lib/db/tables/m-daibumon';
-import { insertMasterUpdates } from '@/app/_lib/db/tables/m-master-update';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { emptyDaibumon } from './datas';
@@ -105,7 +104,7 @@ export const updateDaibumon = async (rawData: DaibumonsMasterDialogValues, id: n
   };
   console.log(updateData.dai_bumon_nam);
   try {
-    await Promise.all([updateDaibumonDB(updateData), insertMasterUpdates('m_dai_bumon')]);
+    await updateDaibumonDB(updateData);
     await revalidatePath('/daibumons-master');
   } catch (error) {
     console.log('例外が発生', error);

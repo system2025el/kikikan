@@ -16,28 +16,46 @@ export type JuchuValues = {
   zeiKbn?: string | undefined | null;
 };
 
+export const quotMeisaiHeadSchema = z.object({
+  mituHeadId: z.number().int(),
+  mituMeisaiHeadId: z.number().int(),
+  mituMeisaiHeadNam: z.string().nullish(),
+  headNamDspFlg: z.boolean().nullable(),
+});
+
+// ZodスキーマからTypeScriptの型を生成 (元の型と一致することを確認)
+export type QuotMaisaiHeadValues = z.infer<typeof quotMeisaiHeadSchema>;
+
 export const QuotHeadSchema = z.object({
-  mituHeadId: z.number().nullable().optional(),
-  juchuHeadId: z.number().nullable().optional(),
-  mituSts: z.number().nullable().optional(),
-  mituDat: z.date().nullable().optional(),
-  mituYukoDat: z.date().nullable().optional(),
-  mituHeadNam: z.string().nullable().optional(),
-  kokyaku: z.object({
-    id: z.number().nullable().optional(),
-    name: z.string().nullable().optional(),
+  mituHeadId: z.number().nullish(),
+  juchuHeadId: z.number().nullish(),
+  mituSts: z.number().nullish(),
+  mituDat: z.date().nullish(),
+  mituYukoDat: z.date().nullish(),
+  mituHeadNam: z.string().max(50).nullish(),
+  kokyaku: z.string().max(50).nullish(),
+  nyuryokuUser: z.object({
+    id: z.string().max(20).nullish(),
+    name: z.string().max(20).nullish(),
   }),
-  nyuryokuUser: z.string().nullable().optional(),
   lendRange: z.object({
-    strt: z.date().nullable().optional(),
-    end: z.date().nullable().optional(),
+    strt: z.date().nullish(),
+    end: z.date().nullish(),
   }),
-  kokyakuTantoNam: z.string().nullable().optional(),
-  koenNam: z.string().nullable().optional(),
-  koenbashoNam: z.string().nullable().optional(),
-  torihikiHoho: z.string().nullable().optional(),
-  mituHonbanbiQty: z.number().nullable().optional(),
-  biko: z.string().nullable().optional(),
+  kokyakuTantoNam: z.string().max(20).nullish(),
+  koenNam: z.string().max(50).nullish(),
+  koenbashoNam: z.string().max(100).nullish(),
+  torihikiHoho: z.string().nullish(),
+  mituHonbanbiQty: z
+    .string()
+    .regex(/^[0-9]+$/)
+    .max(2, { message: '2桁以下で入力してください。' })
+    .nullable()
+    .optional(),
+  biko: z.string().max(100).nullish(),
+  meisaiHeads: z.object({
+    kizai: z.array(quotMeisaiHeadSchema),
+  }),
 });
 
 export type QuotHeadValues = z.infer<typeof QuotHeadSchema>;

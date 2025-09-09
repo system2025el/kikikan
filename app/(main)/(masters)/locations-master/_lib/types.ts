@@ -4,20 +4,20 @@ export const LocsMasterDialogSchema = z.object({
   locNam: z.string().max(100, { message: '100文字以内で入力してください' }).min(1, { message: '必須項目です' }),
   kana: z.string().max(100, { message: '100文字以内で入力してください' }).min(1, { message: '必須項目です' }),
   delFlg: z.boolean().optional(),
-  adrPost: z.string().max(20, { message: '20文字以内で入力してください' }).optional().nullable(),
-  adrShozai: z.string().max(100, { message: '100文字以内で入力してください' }).optional().nullable(),
-  adrTatemono: z.string().max(100, { message: '100文字以内で入力してください' }).optional().nullable(),
-  adrSonota: z.string().max(100, { message: '100文字以内で入力してください' }).optional().nullable(),
-  tel: z.string().max(20, { message: '20文字以内で入力してください' }).optional().nullable(),
-  telMobile: z.string().max(20, { message: '20文字以内で入力してください' }).optional().nullable(),
-  fax: z.string().max(20, { message: '20文字以内で入力してください' }).optional().nullable(),
+  adrPost: z.string().max(20, { message: '20文字以内で入力してください' }).nullish(),
+  adrShozai: z.string().max(100, { message: '100文字以内で入力してください' }).nullish(),
+  adrTatemono: z.string().max(100, { message: '100文字以内で入力してください' }).nullish(),
+  adrSonota: z.string().max(100, { message: '100文字以内で入力してください' }).nullish(),
+  tel: z.string().max(20, { message: '20文字以内で入力してください' }).nullish(),
+  telMobile: z.string().max(20, { message: '20文字以内で入力してください' }).nullish(),
+  fax: z.string().max(20, { message: '20文字以内で入力してください' }).nullish(),
   mail: z
     .string()
     .max(100, { message: '100文字以内で入力してください' })
     .refine((val) => val === '' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val), { message: '無効なメールアドレスです' })
     .optional()
     .nullable(),
-  mem: z.string().max(200, { message: '200文字以内で入力してください' }).optional().nullable(),
+  mem: z.string().max(200, { message: '200文字以内で入力してください' }).nullish(),
   dspFlg: z.boolean().optional(),
 });
 
