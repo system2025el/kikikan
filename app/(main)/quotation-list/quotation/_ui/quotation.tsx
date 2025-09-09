@@ -1,6 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import AddIcon from '@mui/icons-material/Add';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
   Accordion,
@@ -12,6 +13,8 @@ import {
   Button,
   Checkbox,
   Container,
+  Dialog,
+  DialogActions,
   Divider,
   FormControl,
   FormControlLabel,
@@ -25,13 +28,14 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import { blueGrey } from '@mui/material/colors';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs, { Dayjs } from 'dayjs';
 import Loadable from 'next/dist/shared/lib/loadable.shared-runtime';
 import { useEffect, useRef, useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
-import { AutocompleteElement, SelectElement, TextFieldElement } from 'react-hook-form-mui';
+import { Controller, useFieldArray, useForm } from 'react-hook-form';
+import { AutocompleteElement, CheckboxElement, SelectElement, TextFieldElement } from 'react-hook-form-mui';
 import { ZodSchema } from 'zod';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
@@ -52,17 +56,16 @@ import { JuchuValues, QuotHeadSchema, QuotHeadValues } from '../_lib/types';
 export const Quotation = () => {
   /* ログイン中のユーザー */
   const user = useUserStore((state) => state.user);
-  // const [selectInputPerson, setSelectInputPerson] = useState('XXXXXXXX');
-  // const [selectPlace, setSelectPlace] = useState('Zepp Osaka');
-  // const [selectPartner, setSelectPartner] = useState('（株）シアターブレーン');
-  // const [selectOrderStatus, setSelectOrderStatus] = useState('確定');
-  const [selectQuotationStatus, setSelectQuotationStatus] = useState('処理中');
-  // const [selectRequestStatus, setSelectRequestStatus] = useState('処理中');
+  /* debug用、レンダリング回数取得に使用 */
+  const hasRun = useRef(false);
+  /* ローディング中かどうか */
   const [isLoading, setIsLoading] = useState(true);
+  /* フォーム内の選択肢 */
   const [selectOptions, setSelectOptions] = useState<{ user: SelectTypes[]; mituSts: SelectTypes[] }>({
     user: [],
     mituSts: [],
   });
+  /* 受注選択に表示する受注情報 */
   const [order, setOrder] = useState<JuchuValues>({
     juchuHeadId: null,
     juchuSts: null,
@@ -78,51 +81,15 @@ export const Quotation = () => {
     zeiKbn: null,
   });
 
-  const priceTotal = quotationRows.reduce((sum, row) => sum + row.price, 0);
-
-  // const inputPersonChange = (event: SelectChangeEvent) => {
-  //   setSelectInputPerson(event.target.value);
-  // };
-  // const placeChange = (event: SelectChangeEvent) => {
-  //   setSelectPlace(event.target.value);
-  // };
-  // const partnerChange = (event: SelectChangeEvent) => {
-  //   setSelectPartner(event.target.value);
-  // };
-  // const orderStatusChange = (event: SelectChangeEvent) => {
-  //   setSelectOrderStatus(event.target.value);
-  // };
-  const quotationStatusChange = (event: SelectChangeEvent) => {
-    setSelectQuotationStatus(event.target.value);
-  };
-  // const requestStatusChange = (event: SelectChangeEvent) => {
-  //   setSelectRequestStatus(event.target.value);
-  // };
-  const handleSelectionChange = (selectedIds: (string | number)[]) => {
-    console.log('選択されたID:', selectedIds);
-  };
-  const hasRun = useRef(false);
-
   // 受注選択アコーディオン制御
   const [juchuExpanded, setJuchuExpanded] = useState(false);
-  // 受注選択アコーディオン開閉
-  const handleJuchuExpansion = () => {
-    setJuchuExpanded(!juchuExpanded);
-  };
-
   // 見積ヘッダアコーディオン制御
   const [mitsuExpanded, setMitsuExpanded] = useState(false);
-  // 見積ヘッダアコーディオン開閉
-  const handleMitsuExpansion = () => {
-    setMitsuExpanded(!mitsuExpanded);
-  };
-
   // 明細アコーディオン制御
   const [meisaiExpanded, setMeisaiExpanded] = useState(false);
-  // 明細アコーディオン開閉
-  const handleMeisaiExpansion = () => {
-    setMeisaiExpanded(!meisaiExpanded);
-  };
+
+  // ダイアログ開閉
+  const [kizaiMeisaiaddDialogOpen, setKizaimeisaiaddDialogOpen] = useState(false);
 
   /* useForm -------------------------------------------------------------- */
   const { control, handleSubmit, reset, getValues } = useForm<QuotHeadValues>({
@@ -145,13 +112,35 @@ export const Quotation = () => {
       torihikiHoho: null,
       mituHonbanbiQty: null,
       biko: null,
+      meisaiHeads: {
+        kizai: [{ mituMeisaiHeadNam: '', headNamDspFlg: false }],
+      },
     },
   });
 
+  const kizaiFields = useFieldArray({ control, name: 'meisaiHeads.kizai' });
+
+  /* methods ------------------------------------------------------ */
+  /* 保存ボタン押下 */
   const onSubmit = async (data: QuotHeadValues) => {
     console.log(data);
   };
 
+  // 受注選択アコーディオン開閉
+  const handleJuchuExpansion = () => {
+    setJuchuExpanded(!juchuExpanded);
+  };
+  // 見積ヘッダアコーディオン開閉
+  const handleMitsuExpansion = () => {
+    setMitsuExpanded(!mitsuExpanded);
+  };
+  // 明細アコーディオン開閉
+  const handleMeisaiExpansion = () => {
+    setMeisaiExpanded(!meisaiExpanded);
+  };
+  const handleSelectionChange = (selectedIds: (string | number)[]) => {
+    console.log('選択されたID:', selectedIds);
+  };
   /* eslint-disable react-hooks/exhaustive-deps */
   /* useEffect ------------------------------------------------------------ */
   /* 画面初期 */
@@ -459,56 +448,121 @@ export const Quotation = () => {
                 機材費
               </Typography>
               {/**・・・・・・・・・・・ field.mapで動的なフォーム作る予定・・・・・・・・ */}
-              <TextFieldElement name="meisaiHeads.kizai.0.mituHeadId" control={control} />
-              <Grid2 container>
-                <Grid2 size={6.5}>
-                  <Grid2 container margin={2} spacing={6}>
-                    <Grid2 display="flex" direction="row" alignItems="center">
-                      <Typography marginRight={5}>請求番号</Typography>
-                      <TextField disabled />
+              {kizaiFields.fields.map((field, index) => (
+                <Box key={field.id}>
+                  <Grid2 container alignItems={'end'}>
+                    <Grid2 size={1} />
+                    <Grid2 size={5} display={'flex'} alignItems={'base-line'}>
+                      <TextFieldElement name={`meisaiHeads.kizai.${index}.mituMeisaiHeadNam`} control={control} />
+                      <CheckboxElement
+                        name={`meisaiHeads.kizai.${index}.headNamDspFlg`}
+                        control={control}
+                        sx={{ ml: 1 }}
+                        label="タイトルを見積書に出力する"
+                        labelProps={{
+                          sx: { typography: 'caption', textAlign: 'start' },
+                        }}
+                      />
                     </Grid2>
-                    <Grid2 display="flex" direction="row" alignItems="center">
-                      <Typography marginRight={3}>請求ステータス</Typography>
-                      {/* <FormControl size="small" sx={{ width: 180 }}>
-                      <Select value={selectRequestStatus} onChange={requestStatusChange}>
-                        <MenuItem value={'処理中'}>処理中</MenuItem>
-                      </Select>
-                    </FormControl> */}
+                    <Grid2 size={'grow'} justifyItems={'end'}>
+                      <Box>
+                        <Button
+                          color="error"
+                          onClick={() => {
+                            kizaiFields.remove(index);
+                          }}
+                        >
+                          削除
+                        </Button>
+                      </Box>
                     </Grid2>
+                    <Grid2 size={1} />
                   </Grid2>
-                  <Box sx={styles.container}>
-                    <Typography marginRight={7}>請求日</Typography>
-                    <FormDateX />
-                  </Box>
-                  <Box sx={styles.container}>
-                    <Typography marginRight={7}>入力者</Typography>
-                    <TextField disabled />
-                  </Box>
-                  <Box sx={styles.container}>
-                    <Typography marginRight={1}>請求有効期限</Typography>
-                    <FormDateX />
-                  </Box>
-                </Grid2>
-                <Grid2 size={5.5}>
-                  <Box sx={styles.container}>
-                    <Typography marginRight={5}>請求件名</Typography>
-                    <TextField defaultValue="A/Zepp Tour" sx={{ width: '50%' }} />
-                  </Box>
-                  <Box sx={styles.container}>
-                    <Typography marginRight={7}>請求先</Typography>
-                    <Autocomplete
-                      freeSolo
-                      options={quotation}
-                      sx={{ width: '50%' }}
-                      renderInput={(params) => <TextField {...params} />}
-                    />
-                  </Box>
-                  <Box sx={styles.container}>
-                    <Typography marginRight={5}>請求メモ</Typography>
-                    <TextField sx={{ width: '50%' }} />
-                  </Box>
-                </Grid2>
-              </Grid2>
+                  <Grid2
+                    container
+                    px={2}
+                    sx={{ backgroundColor: 'primary.light', color: 'primary.contrastText' }}
+                    alignItems={'end'}
+                  >
+                    <Grid2 size={0.5} />
+                    <Grid2 size={6}>
+                      <Typography variant="body2" fontWeight={500}>
+                        名称
+                      </Typography>
+                    </Grid2>
+                    <Grid2 size={1}>
+                      <Typography variant="body2" fontWeight={500}>
+                        数量
+                      </Typography>
+                    </Grid2>
+                    <Grid2 size={1}>
+                      <Typography variant="body2" fontWeight={500}>
+                        仕様日
+                      </Typography>
+                    </Grid2>
+                    <Grid2 size={1}>
+                      <Typography variant="body2" fontWeight={500}>
+                        単価
+                      </Typography>
+                    </Grid2>
+                    <Grid2 size={1}>
+                      <Typography variant="body2" fontWeight={500}>
+                        小計
+                      </Typography>
+                    </Grid2>
+                    <Grid2 size={1}></Grid2>
+                  </Grid2>
+                  {/*kizaiMeisaiFields.fields.map((f, i) => (
+                    <Box key={f.id}>
+                      <Grid2 container px={2} alignItems={'center'}>
+                        <Grid2 size={0.5}>
+                          <Button onClick={() => kizaiMeisaiFields.remove(i)}>削除</Button>
+                        </Grid2>
+                        <Grid2 size={6}>
+                          <TextFieldElement name={`meisaiHeads.kizai.${index}.meisai.${i}.nam`} control={control} />
+                        </Grid2>
+                        <Grid2 size={1}>
+                          <Typography variant="body2" fontWeight={500}>
+                            <TextField />
+                          </Typography>
+                        </Grid2>
+                        <Grid2 size={1}>
+                          <TextField />
+                        </Grid2>
+                        <Grid2 size={1}>
+                          <TextField />
+                        </Grid2>
+                        <Grid2 size={1}>
+                          <TextField />
+                        </Grid2>
+                        <Grid2 size={1}></Grid2>
+                      </Grid2>
+                    </Box>
+                  ))*/}
+                  <Button size="small" /*onClick={() => kizaiMeisaiFields.append({ nam: null })}*/>
+                    <AddIcon fontSize="small" />
+                    項目
+                  </Button>
+                  <Button size="small" onClick={() => setKizaimeisaiaddDialogOpen(true)}>
+                    <AddIcon fontSize="small" />
+                    テーブル
+                  </Button>
+                </Box>
+              ))}
+              <Dialog open={kizaiMeisaiaddDialogOpen} onClose={() => setKizaimeisaiaddDialogOpen(false)}>
+                <Box>機材明細から自動生成しますか</Box>
+                <DialogActions>
+                  <Button>はい</Button>
+                  <Button
+                    onClick={() => {
+                      kizaiFields.append({ mituMeisaiHeadNam: null, headNamDspFlg: false });
+                      setKizaimeisaiaddDialogOpen(false);
+                    }}
+                  >
+                    いいえ
+                  </Button>
+                </DialogActions>
+              </Dialog>
             </AccordionDetails>
           </Accordion>
           {/* 見積明細
@@ -535,7 +589,7 @@ export const Quotation = () => {
                         padding: 1,
                       },
                     }}
-                    value={'¥' + priceTotal}
+                    value={'¥' /*+ priceTotal*/}
                     onClick={(e) => {
                       e.stopPropagation();
                     }}
