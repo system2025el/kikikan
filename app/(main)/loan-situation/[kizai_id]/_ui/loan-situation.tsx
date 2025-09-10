@@ -251,19 +251,10 @@ export const LoanSituation = (props: {
     setAnchorEl(null);
   };
 
-  if (isLoading) {
-    return (
-      <Box height={'90vh'}>
-        <Loading />
-      </Box>
-    );
-  }
-
   return (
     <Box>
-      <Box display={'flex'} justifyContent={'end'}>
+      <Box display={'flex'} justifyContent={'end'} mb={1}>
         <BackButton label={'戻る'} />
-        <Button onClick={() => console.log(eqUseList)}>確認</Button>
       </Box>
       <Paper variant="outlined">
         <Box display="flex" justifyContent="space-between" alignItems="center" p={2} width="100%">
@@ -311,48 +302,52 @@ export const LoanSituation = (props: {
             <Button onClick={handleReload}>再表示</Button>
           </Box>
         </Grid2>
-        <Box display={'flex'} flexDirection="row" width="100%">
-          <Box
-            sx={{
-              width: {
-                xs: '40%',
-                sm: '40%',
-                md: '40%',
-                lg: 'min-content',
-              },
-              mt: '62.5px',
-            }}
-          >
-            <LoanSituationTable rows={loanJuchuList} ref={leftRef} />
-            <Box display={'flex'} justifyContent={'end'} p={0.5}>
-              <Typography fontSize={'small'}>在庫数</Typography>
-            </Box>
-          </Box>
-          <Box overflow="auto" sx={{ width: { xs: '60%', sm: '60%', md: 'auto' } }}>
-            <Box display="flex" my={2}>
-              <Box display={loanJuchuList.length > 0 ? 'flex' : 'none'} alignItems={'end'} mr={2}>
-                <Typography fontSize={'small'}>使用数</Typography>
+        {isLoading ? (
+          <Loading />
+        ) : (
+          <Box display={'flex'} flexDirection="row" width="100%">
+            <Box
+              sx={{
+                width: {
+                  xs: '40%',
+                  sm: '40%',
+                  md: '40%',
+                  lg: 'min-content',
+                },
+                mt: 5.8,
+              }}
+            >
+              <LoanSituationTable rows={loanJuchuList} ref={leftRef} />
+              <Box display={'flex'} justifyContent={'end'} p={0.5}>
+                <Typography fontSize={'small'}>在庫数</Typography>
               </Box>
-              <Button onClick={handleBackDateChange}>
-                <ArrowBackIosNewIcon fontSize="small" />
-              </Button>
-              <Button variant="outlined" onClick={handleClick}>
-                日付選択
-              </Button>
-              <Popper open={open} anchorEl={anchorEl} placement="bottom-start" sx={{ zIndex: 1202 }}>
-                <ClickAwayListener onClickAway={handleClickAway}>
-                  <Paper elevation={3} sx={{ mt: 1 }}>
-                    <Calendar date={selectDate} onChange={handleDateChange} />
-                  </Paper>
-                </ClickAwayListener>
-              </Popper>
-              <Button onClick={handleForwardDateChange}>
-                <ArrowForwardIosIcon fontSize="small" />
-              </Button>
             </Box>
-            <UseTable eqUseList={eqUseList} eqStockList={eqStockList} ref={rightRef} />
+            <Box overflow="auto" sx={{ width: { xs: '60%', sm: '60%', md: 'auto' } }}>
+              <Box display="flex" my={1}>
+                <Box display={loanJuchuList.length > 0 ? 'flex' : 'none'} alignItems={'end'} mr={2}>
+                  <Typography fontSize={'small'}>使用数</Typography>
+                </Box>
+                <Button onClick={handleBackDateChange}>
+                  <ArrowBackIosNewIcon fontSize="small" />
+                </Button>
+                <Button variant="outlined" onClick={handleClick}>
+                  日付選択
+                </Button>
+                <Popper open={open} anchorEl={anchorEl} placement="bottom-start" sx={{ zIndex: 1202 }}>
+                  <ClickAwayListener onClickAway={handleClickAway}>
+                    <Paper elevation={3} sx={{ mt: 1 }}>
+                      <Calendar date={selectDate} onChange={handleDateChange} />
+                    </Paper>
+                  </ClickAwayListener>
+                </Popper>
+                <Button onClick={handleForwardDateChange}>
+                  <ArrowForwardIosIcon fontSize="small" />
+                </Button>
+              </Box>
+              <UseTable eqUseList={eqUseList} eqStockList={eqStockList} ref={rightRef} />
+            </Box>
           </Box>
-        </Box>
+        )}
       </Paper>
     </Box>
   );
