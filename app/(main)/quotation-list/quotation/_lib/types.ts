@@ -20,7 +20,7 @@ export const quotMeisaiHeadSchema = z.object({
   mituHeadId: z.number().int().nullish(),
   mituMeisaiHeadId: z.number().int().nullish(),
   mituMeisaiHeadNam: z.string().nullish(),
-  headNamDspFlg: z.boolean().nullable(),
+  headNamDspFlg: z.boolean(),
   meisai: z
     .array(
       z.object({
@@ -62,6 +62,8 @@ export const QuotHeadSchema = z.object({
   biko: z.string().max(100).nullish(),
   meisaiHeads: z.object({
     kizai: z.array(quotMeisaiHeadSchema),
+    labor: z.array(quotMeisaiHeadSchema),
+    other: z.array(quotMeisaiHeadSchema),
   }),
 });
 
