@@ -198,13 +198,13 @@ export const Stock = (props: { bumons: Bumon[] }) => {
                 md: '40%',
                 lg: 'min-content',
               },
-              mt: '62.5px',
+              mt: 5.8,
             }}
           >
             <EqTable eqList={eqList} ref={leftRef} />
           </Box>
           <Box overflow="auto" sx={{ width: { xs: '60%', sm: '60%', md: 'auto' } }}>
-            <Box display="flex" my={2}>
+            <Box display="flex" my={1}>
               <Box display={'flex'} alignItems={'end'} mr={2}>
                 <Typography fontSize={'small'}>在庫数</Typography>
               </Box>
