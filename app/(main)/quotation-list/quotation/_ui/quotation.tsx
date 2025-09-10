@@ -45,7 +45,7 @@ import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { Loading, LoadingOverlay } from '@/app/(main)/_ui/loading';
 import { SelectTable } from '@/app/(main)/_ui/table';
 import { getCustomerSelection } from '@/app/(main)/(masters)/_lib/funs';
-import { GetJuchuHead } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/funcs';
+import { getJuchuHead } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/funcs';
 import { OrderValues } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/types';
 import { FormDateX } from '@/app/(main)/order-list/_ui/order-list';
 
