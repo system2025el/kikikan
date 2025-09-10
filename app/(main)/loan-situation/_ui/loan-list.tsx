@@ -7,15 +7,14 @@ import { useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
 import { BackButton } from '../../_ui/buttons';
-import { MuiTablePagination } from '../../_ui/table-pagination';
-import { EqptsMasterTableValues } from '../../(masters)/eqpt-master/_lib/types';
 import { getFilteredEqpts } from '../_lib/funcs';
+import { LoanEqTableValues } from '../_lib/types';
 import { LoanListTable } from './loan-list-table';
 
-export const LoanList = ({ eqpts }: { eqpts: EqptsMasterTableValues[] | undefined }) => {
+export const LoanList = ({ eqpts }: { eqpts: LoanEqTableValues[] | undefined }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [page, setPage] = useState(1);
-  const [rows, setRows] = useState<EqptsMasterTableValues[]>(eqpts ?? []);
+  const [rows, setRows] = useState<LoanEqTableValues[]>(eqpts ?? []);
 
   /* useForm ------------------- */
   const { control, handleSubmit } = useForm({

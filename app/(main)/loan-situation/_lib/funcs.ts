@@ -2,12 +2,12 @@
 
 import { selectFilteredEqpts } from '@/app/_lib/db/tables/v-kizai-list';
 
-import { EqptsMasterTableValues } from '../../(masters)/eqpt-master/_lib/types';
+import { LoanEqTableValues } from './types';
 
 /**
  * 機材マスタテーブルのデータを取得する関数
  * @param query 検索キーワード
- * @returns {Promise<EqptsMasterTableValues[]>} 機材マスタテーブルに表示するデータ（ 検索キーワードが空の場合は全て ）
+ * @returns {Promise<LoanEqTableValues[]>} 機材マスタテーブルに表示するデータ（ 検索キーワードが空の場合は全て ）
  */
 export const getFilteredEqpts = async (query: string) => {
   try {
@@ -20,7 +20,7 @@ export const getFilteredEqpts = async (query: string) => {
     if (!data || data.length === 0) {
       return [];
     }
-    const filteredEqpts: EqptsMasterTableValues[] = data.map((d, index) => ({
+    const filteredEqpts: LoanEqTableValues[] = data.map((d, index) => ({
       kizaiId: d.kizai_id,
       kizaiNam: d.kizai_nam,
       kizaiQty: d.kizai_qty,
@@ -36,7 +36,6 @@ export const getFilteredEqpts = async (query: string) => {
       rankAmt4: d.rank_amt_4,
       rankAmt5: d.rank_amt_5,
       dspFlg: Boolean(d.dsp_flg),
-      tblDspId: index + 1,
       delFlg: Boolean(d.del_flg),
     }));
     console.log('機材マスタリストを取得した');

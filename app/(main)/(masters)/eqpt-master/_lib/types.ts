@@ -73,18 +73,3 @@ export type EqptsMasterTableValues = {
 //   tblDspId: number;
 //   delFlg: boolean;
 // };
-
-/**
- * 機材選択ん使うタイプ
- */
-export type SelectedEqptsValues = {
-  kizaiId: number;
-  kizaiNam: string;
-  shozokuId: number;
-  shozokuNam: string;
-  kizaiGrpCod: string;
-  dspOrdNum: number;
-  regAmt: number;
-  rankAmt: number;
-  kizaiQty: number;
-};

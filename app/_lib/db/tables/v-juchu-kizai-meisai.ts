@@ -3,12 +3,12 @@
 import { SCHEMA, supabase } from '../supabase';
 
 /**
- * 受注機材明細リスト取得
+ * メイン受注機材明細リスト取得
  * @param juchuHeadId 受注ヘッダーid
  * @param juchuKizaiHeadId 受注機材ヘッダーid
  * @returns 受注機材明細リスト
  */
-export const SelectJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
+export const selectJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
   try {
     return await supabase
       .schema(SCHEMA)
@@ -25,12 +25,34 @@ export const SelectJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHead
 };
 
 /**
+ * 親受注機材明細リスト取得
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @returns 受注機材明細リスト
+ */
+export const selectOyaJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
+  try {
+    return await supabase
+      .schema(SCHEMA)
+      .from('v_juchu_kizai_meisai')
+      .select(
+        'juchu_head_id, juchu_kizai_head_id, juchu_kizai_meisai_id, shozoku_id, shozoku_nam, kizai_id, kizai_nam, plan_kizai_qty, plan_yobi_qty'
+      )
+      .eq('juchu_head_id', juchuHeadId)
+      .eq('juchu_kizai_head_id', juchuKizaiHeadId)
+      .not('kizai_id', 'is', null);
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
  * キープ受注機材明細リスト取得
  * @param juchuHeadId 受注ヘッダーid
  * @param juchuKizaiHeadId 受注機材ヘッダーid
  * @returns キープ受注機材明細
  */
-export const SelectKeepJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
+export const selectKeepJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
   try {
     return await supabase
       .schema(SCHEMA)
@@ -52,7 +74,7 @@ export const SelectKeepJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizai
  * @param juchuKizaiHeadId 受注機材ヘッダーid
  * @returns キープ受注機材明細
  */
-export const SelectReturnJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
+export const selectReturnJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
   try {
     return await supabase
       .schema(SCHEMA)

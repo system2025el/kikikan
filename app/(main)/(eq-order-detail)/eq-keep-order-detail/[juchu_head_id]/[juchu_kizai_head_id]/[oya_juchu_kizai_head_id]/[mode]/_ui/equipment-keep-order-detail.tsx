@@ -32,7 +32,8 @@ import { TextFieldElement } from 'react-hook-form-mui';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import { toISOString, toISOStringMonthDay } from '@/app/(main)/_lib/date-conversion';
-import { AddLock, DelLock, GetLock } from '@/app/(main)/_lib/funcs';
+import { getNyukoDate, getShukoDate } from '@/app/(main)/_lib/date-funcs';
+import { addLock, delLock, getLock } from '@/app/(main)/_lib/funcs';
 import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
 import { LockValues } from '@/app/(main)/_lib/types';
 import { BackButton } from '@/app/(main)/_ui/buttons';
@@ -40,37 +41,37 @@ import { Calendar, TestDate } from '@/app/(main)/_ui/date';
 import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
 import { Loading } from '@/app/(main)/_ui/loading';
 import Time, { TestTime } from '@/app/(main)/_ui/time';
-import { GetNyukoDate, GetShukoDate } from '@/app/(main)/(eq-order-detail)/_lib/datefuncs';
 import {
-  AddJuchuKizaiHead,
-  AddJuchuKizaiNyushuko,
-  GetJuchuKizaiHeadMaxId,
-  GetJuchuKizaiMeisaiMaxId,
-  UpdJuchuKizaiNyushuko,
+  addJuchuKizaiNyushuko,
+  getJuchuKizaiHeadMaxId,
+  getJuchuKizaiMeisaiMaxId,
+  updJuchuKizaiNyushuko,
 } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
-import { OyaJuchuKizaiNyushukoValues } from '@/app/(main)/(eq-order-detail)/_lib/types';
+import {
+  DetailOerValues,
+  OyaJuchuKizaiMeisaiValues,
+  OyaJuchuKizaiNyushukoValues,
+} from '@/app/(main)/(eq-order-detail)/_lib/types';
 import { OyaEqSelectionDialog } from '@/app/(main)/(eq-order-detail)/_ui/equipment-selection-dialog';
 import {
   JuchuKizaiHeadValues,
   JuchuKizaiMeisaiValues,
 } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_lib/types';
 import { SaveAlertDialog } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_ui/caveat-dialog';
-import { OrderValues } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/types';
 
-import { data, stock } from '../_lib/data';
 import {
-  AddKeepJuchuKizaiHead,
-  AddKeepJuchuKizaiMeisai,
-  DelKeepJuchuKizaiMeisai,
-  GetKeepJuchuKizaiMeisai,
-  UpdKeepJuchuKizaiHead,
-  UpdKeepJuchuKizaiMeisai,
+  addKeepJuchuKizaiHead,
+  addKeepJuchuKizaiMeisai,
+  delKeepJuchuKizaiMeisai,
+  getKeepJuchuKizaiMeisai,
+  updKeepJuchuKizaiHead,
+  updKeepJuchuKizaiMeisai,
 } from '../_lib/funcs';
 import { KeepJuchuKizaiHeadSchema, KeepJuchuKizaiHeadValues, KeepJuchuKizaiMeisaiValues } from '../_lib/types';
 import { KeepEqTable } from './equipment-keep-order-detail-table';
 
 export const EquipmentKeepOrderDetail = (props: {
-  juchuHeadData: OrderValues;
+  juchuHeadData: DetailOerValues;
   oyaJuchuKizaiHeadData: OyaJuchuKizaiNyushukoValues;
   keepJuchuKizaiHeadData: KeepJuchuKizaiHeadValues;
   keepJuchuKizaiMeisaiData: KeepJuchuKizaiMeisaiValues[] | undefined;
@@ -169,11 +170,11 @@ export const EquipmentKeepOrderDetail = (props: {
 
     const asyncProcess = async () => {
       setIsLoading(true);
-      const lockData = await GetLock(1, props.juchuHeadData.juchuHeadId);
+      const lockData = await getLock(1, props.juchuHeadData.juchuHeadId);
       setLockData(lockData);
       if (props.edit && lockData === null) {
-        await AddLock(1, props.juchuHeadData.juchuHeadId, user.name);
-        const newLockData = await GetLock(1, props.juchuHeadData.juchuHeadId);
+        await addLock(1, props.juchuHeadData.juchuHeadId, user.name);
+        const newLockData = await getLock(1, props.juchuHeadData.juchuHeadId);
         setLockData(newLockData);
       } else if (props.edit && lockData !== null && lockData.addUser !== user.name) {
         setEdit(false);
@@ -219,17 +220,17 @@ export const EquipmentKeepOrderDetail = (props: {
         return;
       }
 
-      await DelLock(1, props.juchuHeadData.juchuHeadId);
+      await delLock(1, props.juchuHeadData.juchuHeadId);
       setLockData(null);
       setEdit(false);
       // 閲覧→編集
     } else {
       if (!user) return;
-      const lockData = await GetLock(1, props.juchuHeadData.juchuHeadId);
+      const lockData = await getLock(1, props.juchuHeadData.juchuHeadId);
       setLockData(lockData);
       if (lockData === null) {
-        await AddLock(1, props.juchuHeadData.juchuHeadId, user.name);
-        const newLockData = await GetLock(1, props.juchuHeadData.juchuHeadId);
+        await addLock(1, props.juchuHeadData.juchuHeadId, user.name);
+        const newLockData = await getLock(1, props.juchuHeadData.juchuHeadId);
         setLockData(newLockData);
         setEdit(true);
       } else if (lockData !== null && lockData.addUser === user.name) {
@@ -252,12 +253,12 @@ export const EquipmentKeepOrderDetail = (props: {
     const userNam = user.name;
 
     // 出庫日
-    const updateShukoDate = GetShukoDate(
+    const updateShukoDate = getShukoDate(
       data.kicsShukoDat && new Date(data.kicsShukoDat),
       data.yardShukoDat && new Date(data.yardShukoDat)
     );
     // 入庫日
-    const updateNyukoDate = GetNyukoDate(
+    const updateNyukoDate = getNyukoDate(
       data.kicsNyukoDat && new Date(data.kicsNyukoDat),
       data.yardNyukoDat && new Date(data.yardNyukoDat)
     );
@@ -299,13 +300,13 @@ export const EquipmentKeepOrderDetail = (props: {
    * @param userNam ユーザー名
    */
   const saveNewKeepJuchuKizaiHead = async (data: KeepJuchuKizaiHeadValues, userNam: string) => {
-    const maxId = await GetJuchuKizaiHeadMaxId(data.juchuHeadId);
+    const maxId = await getJuchuKizaiHeadMaxId(data.juchuHeadId);
     const newJuchuKizaiHeadId = maxId ? maxId.juchu_kizai_head_id + 1 : 1;
     // 受注機材ヘッダー追加
-    const headResult = await AddKeepJuchuKizaiHead(newJuchuKizaiHeadId, data, userNam);
+    const headResult = await addKeepJuchuKizaiHead(newJuchuKizaiHeadId, data, userNam);
     console.log('受注機材ヘッダー追加', headResult);
     // 受注機材入出庫追加
-    const nyushukoResult = await AddJuchuKizaiNyushuko(
+    const nyushukoResult = await addJuchuKizaiNyushuko(
       data.juchuHeadId,
       newJuchuKizaiHeadId,
       data.kicsShukoDat,
@@ -336,11 +337,11 @@ export const EquipmentKeepOrderDetail = (props: {
     userNam: string
   ) => {
     // 受注機材ヘッド更新
-    const headResult = await UpdKeepJuchuKizaiHead(data, userNam);
+    const headResult = await updKeepJuchuKizaiHead(data, userNam);
     console.log('キープ受注機材ヘッダー更新', headResult);
 
     // 受注機材入出庫更新
-    const nyushukoResult = await UpdJuchuKizaiNyushuko(
+    const nyushukoResult = await updJuchuKizaiNyushuko(
       data.juchuHeadId,
       data.juchuKizaiHeadId,
       data.kicsShukoDat,
@@ -366,7 +367,7 @@ export const EquipmentKeepOrderDetail = (props: {
    */
   const saveKeepJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number, userNam: string) => {
     const copyKeepJuchuKizaiMeisaiData = [...keepJuchuKizaiMeisaiList];
-    const juchuKizaiMeisaiMaxId = await GetJuchuKizaiMeisaiMaxId(juchuHeadId, juchuKizaiHeadId);
+    const juchuKizaiMeisaiMaxId = await getJuchuKizaiMeisaiMaxId(juchuHeadId, juchuKizaiHeadId);
     const newKeepJuchuKizaiMeisaiId = juchuKizaiMeisaiMaxId ? juchuKizaiMeisaiMaxId.juchu_kizai_meisai_id + 1 : 1;
     const newKeepJuchuKizaiMeisaiData = copyKeepJuchuKizaiMeisaiData.map((data, index) =>
       data.juchuKizaiMeisaiId === 0
@@ -383,7 +384,7 @@ export const EquipmentKeepOrderDetail = (props: {
     const deleteKeepJuchuKizaiMeisaiData = newKeepJuchuKizaiMeisaiData.filter((data) => data.delFlag && data.saveFlag);
     if (deleteKeepJuchuKizaiMeisaiData.length > 0) {
       const deleteKeepJuchuKizaiMeisaiIds = deleteKeepJuchuKizaiMeisaiData.map((data) => data.juchuKizaiMeisaiId);
-      const deleteMeisaiResult = await DelKeepJuchuKizaiMeisai(
+      const deleteMeisaiResult = await delKeepJuchuKizaiMeisai(
         juchuHeadId,
         juchuKizaiHeadId,
         deleteKeepJuchuKizaiMeisaiIds
@@ -392,17 +393,17 @@ export const EquipmentKeepOrderDetail = (props: {
     }
 
     if (addKeepJuchuKizaiMeisaiData.length > 0) {
-      const addMeisaiResult = AddKeepJuchuKizaiMeisai(addKeepJuchuKizaiMeisaiData, userNam);
+      const addMeisaiResult = addKeepJuchuKizaiMeisai(addKeepJuchuKizaiMeisaiData, userNam);
       console.log('キープ受注機材明細追加', addMeisaiResult);
     }
 
     if (updateKeepJuchuKizaiMeisaiData.length > 0) {
-      const updateMeisaiResult = await UpdKeepJuchuKizaiMeisai(updateKeepJuchuKizaiMeisaiData, userNam);
+      const updateMeisaiResult = await updKeepJuchuKizaiMeisai(updateKeepJuchuKizaiMeisaiData, userNam);
       console.log('キープ受注機材明細更新', updateMeisaiResult);
     }
 
     // 受注機材明細、機材在庫テーブル更新
-    const keepJuchuKizaiMeisaiData = await GetKeepJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId);
+    const keepJuchuKizaiMeisaiData = await getKeepJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId);
     if (keepJuchuKizaiMeisaiData) {
       setKeepJuchuKizaiMeisaiList(keepJuchuKizaiMeisaiData);
       setOriginKeepJuchuKizaiMeisaiList(keepJuchuKizaiMeisaiData);
@@ -505,7 +506,7 @@ export const EquipmentKeepOrderDetail = (props: {
    * 機材追加時
    * @param data 選択された機材データ
    */
-  const setEqpts = async (data: JuchuKizaiMeisaiValues[]) => {
+  const setEqpts = async (data: OyaJuchuKizaiMeisaiValues[]) => {
     const ids = new Set(keepJuchuKizaiMeisaiList.filter((d) => !d.delFlag).map((d) => d.kizaiId));
     const filterData = data.filter((d) => !ids.has(d.kizaiId));
     const newOyaJuchuKizaiMeisaiData: KeepJuchuKizaiMeisaiValues[] = filterData.map((d) => ({
@@ -532,7 +533,7 @@ export const EquipmentKeepOrderDetail = (props: {
    */
   const handleResultDialog = async (result: boolean) => {
     if (result) {
-      await DelLock(1, props.juchuHeadData.juchuHeadId);
+      await delLock(1, props.juchuHeadData.juchuHeadId);
       setLockData(null);
       setEdit(false);
       reset();

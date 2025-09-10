@@ -1,21 +1,21 @@
 'use server';
 
 import {
-  InsertKeepJuchuKizaiHead,
-  SelectKeepJuchuKizaiHead,
-  UpdateKeepJuchuKizaiHead,
+  insertKeepJuchuKizaiHead,
+  selectKeepJuchuKizaiHead,
+  updateKeepJuchuKizaiHead,
 } from '@/app/_lib/db/tables/t-juchu-kizai-head';
 import {
-  DeleteKeepJuchuKizaiMeisai,
-  InsertKeepJuchuKizaiMeisai,
-  UpdateKeepJuchuKizaiMeisai,
+  deleteKeepJuchuKizaiMeisai,
+  insertKeepJuchuKizaiMeisai,
+  updateKeepJuchuKizaiMeisai,
 } from '@/app/_lib/db/tables/t-juchu-kizai-meisai';
-import { SelectKeepJuchuKizaiMeisai } from '@/app/_lib/db/tables/v-juchu-kizai-meisai';
+import { selectKeepJuchuKizaiMeisai } from '@/app/_lib/db/tables/v-juchu-kizai-meisai';
 import { JuchuKizaiHead } from '@/app/_lib/db/types/t-juchu-kizai-head-type';
 import { JuchuKizaiMeisai } from '@/app/_lib/db/types/t-juchu-kizai-meisai-type';
 import { Database } from '@/app/_lib/db/types/types';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
-import { GetJuchuKizaiNyushuko } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
+import { getJuchuKizaiNyushuko } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 
 import { KeepJuchuKizaiHeadValues, KeepJuchuKizaiMeisaiValues } from './types';
 
@@ -25,15 +25,15 @@ import { KeepJuchuKizaiHeadValues, KeepJuchuKizaiMeisaiValues } from './types';
  * @param juchuKizaiHeadId 受注機材ヘッダーid
  * @returns 受注機材ヘッダーデータ
  */
-export const GetKeepJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
+export const getKeepJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
   try {
-    const { data, error } = await SelectKeepJuchuKizaiHead(juchuHeadId, juchuKizaiHeadId);
+    const { data, error } = await selectKeepJuchuKizaiHead(juchuHeadId, juchuKizaiHeadId);
     if (error || data?.oya_juchu_kizai_head_id === null) {
       console.error('GetEqHeader juchuKizaiHead error : ', error);
       return null;
     }
 
-    const juchuDate = await GetJuchuKizaiNyushuko(juchuHeadId, juchuKizaiHeadId);
+    const juchuDate = await getJuchuKizaiNyushuko(juchuHeadId, juchuKizaiHeadId);
 
     if (!juchuDate) throw new Error('受注機材入出庫日が存在しません');
 
@@ -65,7 +65,7 @@ export const GetKeepJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHeadI
  * @param userNam ユーザー名
  * @returns
  */
-export const AddKeepJuchuKizaiHead = async (
+export const addKeepJuchuKizaiHead = async (
   keepJuchuKizaiHeadId: number,
   keepJuchuKizaiHeadData: KeepJuchuKizaiHeadValues,
   userNam: string
@@ -82,7 +82,7 @@ export const AddKeepJuchuKizaiHead = async (
     add_user: userNam,
   };
   try {
-    const { error } = await InsertKeepJuchuKizaiHead(newData);
+    const { error } = await insertKeepJuchuKizaiHead(newData);
 
     if (error) {
       console.error('Error adding new juchuKizaiHead:', error.message);
@@ -103,7 +103,7 @@ export const AddKeepJuchuKizaiHead = async (
  * @param userNam ユーザー名
  * @returns
  */
-export const UpdKeepJuchuKizaiHead = async (juchuKizaiHeadData: KeepJuchuKizaiHeadValues, userNam: string) => {
+export const updKeepJuchuKizaiHead = async (juchuKizaiHeadData: KeepJuchuKizaiHeadValues, userNam: string) => {
   const updateData: JuchuKizaiHead = {
     juchu_head_id: juchuKizaiHeadData.juchuHeadId,
     juchu_kizai_head_id: juchuKizaiHeadData.juchuKizaiHeadId,
@@ -117,7 +117,7 @@ export const UpdKeepJuchuKizaiHead = async (juchuKizaiHeadData: KeepJuchuKizaiHe
   };
 
   try {
-    const { error } = await UpdateKeepJuchuKizaiHead(updateData);
+    const { error } = await updateKeepJuchuKizaiHead(updateData);
 
     if (error) {
       console.error('Error updating juchu kizai head:', error.message);
@@ -137,9 +137,9 @@ export const UpdKeepJuchuKizaiHead = async (juchuKizaiHeadData: KeepJuchuKizaiHe
  * @param juchuKizaiHeadId 受注機材ヘッダーid
  * @returns キープ受注機材明細
  */
-export const GetKeepJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
+export const getKeepJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
   try {
-    const { data, error } = await SelectKeepJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId);
+    const { data, error } = await selectKeepJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId);
     if (error) {
       console.error('GetKeeoEqList keep eqList error : ', error);
       return [];
@@ -172,7 +172,7 @@ export const GetKeepJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHea
  * @param userNam ユーザー名
  * @returns
  */
-export const AddKeepJuchuKizaiMeisai = async (
+export const addKeepJuchuKizaiMeisai = async (
   keepJuchuKizaiMeisaiData: KeepJuchuKizaiMeisaiValues[],
   userNam: string
 ) => {
@@ -189,7 +189,7 @@ export const AddKeepJuchuKizaiMeisai = async (
   }));
 
   try {
-    const { error } = await InsertKeepJuchuKizaiMeisai(newData);
+    const { error } = await insertKeepJuchuKizaiMeisai(newData);
 
     if (error) {
       console.error('Error adding keep kizai meisai:', error.message);
@@ -210,7 +210,7 @@ export const AddKeepJuchuKizaiMeisai = async (
  * @param userNam ユーザー名
  * @returns
  */
-export const UpdKeepJuchuKizaiMeisai = async (juchuKizaiMeisaiData: KeepJuchuKizaiMeisaiValues[], userNam: string) => {
+export const updKeepJuchuKizaiMeisai = async (juchuKizaiMeisaiData: KeepJuchuKizaiMeisaiValues[], userNam: string) => {
   const updateData: JuchuKizaiMeisai[] = juchuKizaiMeisaiData.map((d) => ({
     juchu_head_id: d.juchuHeadId,
     juchu_kizai_head_id: d.juchuKizaiHeadId,
@@ -225,7 +225,7 @@ export const UpdKeepJuchuKizaiMeisai = async (juchuKizaiMeisaiData: KeepJuchuKiz
 
   try {
     for (const data of updateData) {
-      const { error } = await UpdateKeepJuchuKizaiMeisai(data);
+      const { error } = await updateKeepJuchuKizaiMeisai(data);
 
       if (error) {
         console.error('Error updating keep juchu kizai meisai:', error.message);
@@ -246,13 +246,13 @@ export const UpdKeepJuchuKizaiMeisai = async (juchuKizaiMeisaiData: KeepJuchuKiz
  * @param juchuKizaiHeadId 受注機材ヘッダーid
  * @param juchuKizaiMeisaiIds 受注機材明細id
  */
-export const DelKeepJuchuKizaiMeisai = async (
+export const delKeepJuchuKizaiMeisai = async (
   juchuHeadId: number,
   juchuKizaiHeadId: number,
   juchuKizaiMeisaiIds: number[]
 ) => {
   try {
-    const { error } = await DeleteKeepJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId, juchuKizaiMeisaiIds);
+    const { error } = await deleteKeepJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId, juchuKizaiMeisaiIds);
 
     if (error) {
       console.error('Error delete keep kizai meisai:', error.message);

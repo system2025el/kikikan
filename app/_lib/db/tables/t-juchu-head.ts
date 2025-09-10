@@ -7,7 +7,7 @@ import { JuchuHead } from '../types/t-juchu-head-type';
  * 受注ヘッダーid最大値取得
  * @returns 受注ヘッダーid最大値
  */
-export const SelectMaxId = async () => {
+export const selectMaxId = async () => {
   try {
     return await supabase
       .schema(SCHEMA)
@@ -28,7 +28,7 @@ export const SelectMaxId = async () => {
  * @param juchuHeadId 受注ヘッダーID
  * @returns 受注ヘッダーデータ
  */
-export const SelectJuchuHead = async (juchuHeadId: number) => {
+export const selectJuchuHead = async (juchuHeadId: number) => {
   try {
     return await supabase
       .schema(SCHEMA)
@@ -47,7 +47,7 @@ export const SelectJuchuHead = async (juchuHeadId: number) => {
  * 受注ヘッダー情報新規追加
  * @param juchuHeadId 受注ヘッダーid
  */
-export const InsertJuchuHead = async (data: JuchuHead) => {
+export const insertJuchuHead = async (data: JuchuHead) => {
   try {
     return await supabase.schema(SCHEMA).from('t_juchu_head').insert(data);
   } catch (e) {
@@ -60,7 +60,7 @@ export const InsertJuchuHead = async (data: JuchuHead) => {
  * @param data 受注ヘッダーデータ
  * @returns 正誤
  */
-export const UpdateJuchuHead = async (data: JuchuHead) => {
+export const updateJuchuHead = async (data: JuchuHead) => {
   try {
     return await supabase.schema(SCHEMA).from('t_juchu_head').update(data).eq('juchu_head_id', data.juchu_head_id);
   } catch (e) {

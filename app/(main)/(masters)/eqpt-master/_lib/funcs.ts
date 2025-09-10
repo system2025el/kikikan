@@ -9,7 +9,7 @@ import { insertEqptHistory } from '@/app/_lib/db/tables/m-kizai-his';
 import { selectCountOfTheEqpt } from '@/app/_lib/db/tables/m-rfid';
 import { selectChosenEqptsDetails, selectFilteredEqpts } from '@/app/_lib/db/tables/v-kizai-list';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
-import { EqptSelection } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_ui/equipment-selection-dailog';
+import { EqptSelection } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_lib/types';
 
 import {
   getAllBumonSelections,
@@ -20,7 +20,7 @@ import {
 } from '../../_lib/funs';
 import { nullToZero, zeroToNull } from '../../_lib/value-converters';
 import { emptyEqpt } from './datas';
-import { EqptsMasterDialogValues, EqptsMasterTableValues, SelectedEqptsValues } from './types';
+import { EqptsMasterDialogValues, EqptsMasterTableValues } from './types';
 
 /**
  * 機材マスタテーブルのデータを取得する関数
@@ -221,67 +221,5 @@ export const createEqptHistory = async (data: EqptsMasterDialogValues, id: numbe
   } catch (error) {
     console.log('DB接続エラー', error);
     throw error;
-  }
-};
-
-/**
- * 機材選択に表示するための機材リスト
- * @param query 検索キーワード
- * @returns
- */
-export const getEqptsForEqptSelection = async (query: string = ''): Promise<EqptSelection[] | undefined> => {
-  try {
-    const data = await selectActiveEqpts(query);
-    if (!data || data.rowCount === 0) {
-      return [];
-    }
-    return data.rows;
-  } catch (e) {
-    console.error('例外が発生しました:', e);
-    throw e;
-  }
-};
-
-/**
- * 最終的に選ばれたすべの機材IDから、機材の配列を取得する関数
- * @param idList 最終的に選ばれたすべの機材IDの配列
- * @param rank 顧客ランク
- * @returns {SelectedEqptsValues[]} 表に渡す機材の配列
- */
-export const getSelectedEqpts = async (idList: number[], rank: number) => {
-  // const rankParse = (rank: number) => {};
-  try {
-    const { data, error } = await selectChosenEqptsDetails(idList);
-    if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
-    }
-    if (!data) return [];
-    const selectedEqpts: SelectedEqptsValues[] = data.map((d) => ({
-      kizaiId: d.kizai_id ?? 0,
-      kizaiNam: d.kizai_nam ?? '',
-      shozokuId: d.shozoku_id ?? 0,
-      shozokuNam: d.shozoku_nam ?? '',
-      kizaiGrpCod: d.kizai_grp_cod ?? '',
-      dspOrdNum: d.dsp_ord_num ?? 0,
-      regAmt: d.reg_amt ?? 0,
-      rankAmt:
-        rank === 1
-          ? (d.rank_amt_1 ?? 0)
-          : rank === 2
-            ? (d.rank_amt_2 ?? 0)
-            : rank === 3
-              ? (d.rank_amt_3 ?? 0)
-              : rank === 4
-                ? (d.rank_amt_4 ?? 0)
-                : rank === 5
-                  ? (d.rank_amt_5 ?? 0)
-                  : 0,
-      kizaiQty: d.kizai_qty ?? 0,
-    }));
-    return selectedEqpts;
-  } catch (e) {
-    console.error('例外が発生しました:', e);
-    throw e;
   }
 };

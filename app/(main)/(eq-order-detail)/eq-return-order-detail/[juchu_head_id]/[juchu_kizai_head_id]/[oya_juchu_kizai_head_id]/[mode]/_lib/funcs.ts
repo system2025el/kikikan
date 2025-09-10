@@ -1,20 +1,20 @@
 import {
-  InsertReturnJuchuKizaiHead,
+  insertReturnJuchuKizaiHead,
   selectJuchuHonbanbiQty,
-  SelectReturnJuchuKizaiHead,
-  UpdateReturnJuchuKizaiHead,
+  selectReturnJuchuKizaiHead,
+  updateReturnJuchuKizaiHead,
 } from '@/app/_lib/db/tables/t-juchu-kizai-head';
 import {
-  DeleteReturnJuchuKizaiMeisai,
-  InsertReturnJuchuKizaiMeisai,
-  SelectJuchuKizaiMeisaiKizaiTanka,
-  UpdateReturnJuchuKizaiMeisai,
+  deleteReturnJuchuKizaiMeisai,
+  insertReturnJuchuKizaiMeisai,
+  selectJuchuKizaiMeisaiKizaiTanka,
+  updateReturnJuchuKizaiMeisai,
 } from '@/app/_lib/db/tables/t-juchu-kizai-meisai';
-import { SelectReturnJuchuKizaiMeisai } from '@/app/_lib/db/tables/v-juchu-kizai-meisai';
+import { selectReturnJuchuKizaiMeisai } from '@/app/_lib/db/tables/v-juchu-kizai-meisai';
 import { JuchuKizaiHead } from '@/app/_lib/db/types/t-juchu-kizai-head-type';
 import { JuchuKizaiMeisai } from '@/app/_lib/db/types/t-juchu-kizai-meisai-type';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
-import { GetJuchuKizaiNyushuko } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
+import { getJuchuKizaiNyushuko } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 
 import { ReturnJuchuKizaiHeadValues, ReturnJuchuKizaiMeisaiValues } from './types';
 
@@ -39,15 +39,15 @@ export const getJuchuHonbanbiQty = async (juchuHeadId: number, juchuKizaiHeadId:
  * @param juchuKizaiHeadId 受注機材ヘッダーid
  * @returns 受注機材ヘッダーデータ
  */
-export const GetReturnJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
+export const getReturnJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
   try {
-    const { data, error } = await SelectReturnJuchuKizaiHead(juchuHeadId, juchuKizaiHeadId);
+    const { data, error } = await selectReturnJuchuKizaiHead(juchuHeadId, juchuKizaiHeadId);
     if (error || data?.oya_juchu_kizai_head_id === null) {
       console.error('GetEqHeader juchuKizaiHead error : ', error);
       return null;
     }
 
-    const juchuDate = await GetJuchuKizaiNyushuko(juchuHeadId, juchuKizaiHeadId);
+    const juchuDate = await getJuchuKizaiNyushuko(juchuHeadId, juchuKizaiHeadId);
 
     if (!juchuDate) throw new Error('受注機材入出庫日が存在しません');
 
@@ -78,7 +78,7 @@ export const GetReturnJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHea
  * @param userNam ユーザー名
  * @returns
  */
-export const AddReturnJuchuKizaiHead = async (
+export const addReturnJuchuKizaiHead = async (
   returnJuchuKizaiHeadId: number,
   returnJuchuKizaiHeadData: ReturnJuchuKizaiHeadValues,
   userNam: string
@@ -97,7 +97,7 @@ export const AddReturnJuchuKizaiHead = async (
     add_user: userNam,
   };
   try {
-    const { error } = await InsertReturnJuchuKizaiHead(newData);
+    const { error } = await insertReturnJuchuKizaiHead(newData);
 
     if (error) {
       console.error('Error adding new juchuKizaiHead:', error.message);
@@ -118,7 +118,7 @@ export const AddReturnJuchuKizaiHead = async (
  * @param userNam ユーザー名
  * @returns
  */
-export const UpdReturnJuchuKizaiHead = async (juchuKizaiHeadData: ReturnJuchuKizaiHeadValues, userNam: string) => {
+export const updReturnJuchuKizaiHead = async (juchuKizaiHeadData: ReturnJuchuKizaiHeadValues, userNam: string) => {
   const updateData: JuchuKizaiHead = {
     juchu_head_id: juchuKizaiHeadData.juchuHeadId,
     juchu_kizai_head_id: juchuKizaiHeadData.juchuKizaiHeadId,
@@ -134,7 +134,7 @@ export const UpdReturnJuchuKizaiHead = async (juchuKizaiHeadData: ReturnJuchuKiz
   };
 
   try {
-    const { error } = await UpdateReturnJuchuKizaiHead(updateData);
+    const { error } = await updateReturnJuchuKizaiHead(updateData);
 
     if (error) {
       console.error('Error updating juchu kizai head:', error.message);
@@ -154,15 +154,15 @@ export const UpdReturnJuchuKizaiHead = async (juchuKizaiHeadData: ReturnJuchuKiz
  * @param juchuKizaiHeadId 受注機材ヘッダーid
  * @returns 返却受注機材明細
  */
-export const GetReturnJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
+export const getReturnJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
   try {
-    const { data: eqList, error: eqListError } = await SelectReturnJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId);
+    const { data: eqList, error: eqListError } = await selectReturnJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId);
     if (eqListError) {
       console.error('GetKeeoEqList keep eqList error : ', eqListError);
       return [];
     }
 
-    const { data: eqTanka, error: eqTankaError } = await SelectJuchuKizaiMeisaiKizaiTanka(
+    const { data: eqTanka, error: eqTankaError } = await selectJuchuKizaiMeisaiKizaiTanka(
       juchuHeadId,
       juchuKizaiHeadId
     );
@@ -201,7 +201,7 @@ export const GetReturnJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiH
  * @param userNam ユーザー名
  * @returns
  */
-export const AddReturnJuchuKizaiMeisai = async (
+export const addReturnJuchuKizaiMeisai = async (
   returnJuchuKizaiMeisaiData: ReturnJuchuKizaiMeisaiValues[],
   userNam: string
 ) => {
@@ -220,7 +220,7 @@ export const AddReturnJuchuKizaiMeisai = async (
   }));
   try {
     try {
-      const { error } = await InsertReturnJuchuKizaiMeisai(newData);
+      const { error } = await insertReturnJuchuKizaiMeisai(newData);
 
       if (error) {
         console.error('Error adding return kizai meisai:', error.message);
@@ -244,7 +244,7 @@ export const AddReturnJuchuKizaiMeisai = async (
  * @param userNam ユーザー名
  * @returns
  */
-export const UpdReturnJuchuKizaiMeisai = async (
+export const updReturnJuchuKizaiMeisai = async (
   juchuKizaiMeisaiData: ReturnJuchuKizaiMeisaiValues[],
   userNam: string
 ) => {
@@ -264,7 +264,7 @@ export const UpdReturnJuchuKizaiMeisai = async (
 
   try {
     for (const data of updateData) {
-      const { error } = await UpdateReturnJuchuKizaiMeisai(data);
+      const { error } = await updateReturnJuchuKizaiMeisai(data);
 
       if (error) {
         console.error('Error updating keep juchu kizai meisai:', error.message);
@@ -285,13 +285,13 @@ export const UpdReturnJuchuKizaiMeisai = async (
  * @param juchuKizaiHeadId 受注機材ヘッダーid
  * @param juchuKizaiMeisaiIds 受注機材明細id
  */
-export const DelReturnJuchuKizaiMeisai = async (
+export const delReturnJuchuKizaiMeisai = async (
   juchuHeadId: number,
   juchuKizaiHeadId: number,
   juchuKizaiMeisaiIds: number[]
 ) => {
   try {
-    const { error } = await DeleteReturnJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId, juchuKizaiMeisaiIds);
+    const { error } = await deleteReturnJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId, juchuKizaiMeisaiIds);
 
     if (error) {
       console.error('Error delete keep kizai meisai:', error.message);

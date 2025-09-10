@@ -11,7 +11,7 @@ import TableRow from '@mui/material/TableRow';
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 
-import { getBumonsForEqptSelection } from '@/app/(main)/(masters)/_lib/funs';
+import { getBumonsForEqptSelection } from '../_lib/funcs';
 
 /**
  * 機材選択の部門選択テーブル

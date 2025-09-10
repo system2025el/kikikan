@@ -7,7 +7,7 @@ import { SCHEMA, supabase } from '../supabase';
  * @param juchuHeadId 受注機材ヘッダーid
  * @returns
  */
-export const SelectJuchuKizaiHeadList = async (juchuHeadId: number) => {
+export const selectJuchuKizaiHeadList = async (juchuHeadId: number) => {
   try {
     return await supabase
       .schema(SCHEMA)

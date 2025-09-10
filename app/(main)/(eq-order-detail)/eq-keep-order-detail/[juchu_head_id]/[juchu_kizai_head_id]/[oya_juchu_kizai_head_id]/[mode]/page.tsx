@@ -1,8 +1,7 @@
-import { GetNyukoDate, GetShukoDate } from '@/app/(main)/(eq-order-detail)/_lib/datefuncs';
-import { GetJuchuHead } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/funcs';
+import { getNyukoDate, getShukoDate } from '@/app/(main)/_lib/date-funcs';
 
-import { GetJuchuKizaiNyushuko } from '../../../../../_lib/funcs';
-import { GetKeepJuchuKizaiHead, GetKeepJuchuKizaiMeisai } from './_lib/funcs';
+import { getDetailJuchuHead, getJuchuKizaiNyushuko } from '../../../../../_lib/funcs';
+import { getKeepJuchuKizaiHead, getKeepJuchuKizaiMeisai } from './_lib/funcs';
 import { KeepJuchuKizaiHeadValues, KeepJuchuKizaiMeisaiValues } from './_lib/types';
 import { EquipmentKeepOrderDetail } from './_ui/equipment-keep-order-detail';
 
@@ -20,9 +19,9 @@ const Page = async (props: {
   // 編集モード(edit:編集、view:閲覧)
   const edit = params.mode === 'edit' ? true : false;
   // 受注ヘッダーデータ
-  const juchuHeadData = await GetJuchuHead(params.juchu_head_id);
+  const juchuHeadData = await getDetailJuchuHead(params.juchu_head_id);
   // 親受注機材入出庫データ
-  const oyaJuchuKizaiNyushukoData = await GetJuchuKizaiNyushuko(params.juchu_head_id, params.oya_juchu_kizai_head_id);
+  const oyaJuchuKizaiNyushukoData = await getJuchuKizaiNyushuko(params.juchu_head_id, params.oya_juchu_kizai_head_id);
   console.log('oyaJuchuKizaiNyushukoData', oyaJuchuKizaiNyushukoData);
 
   if (!juchuHeadData || !oyaJuchuKizaiNyushukoData) {
@@ -30,12 +29,12 @@ const Page = async (props: {
   }
 
   // 出庫日
-  const oyaShukoDate = GetShukoDate(
+  const oyaShukoDate = getShukoDate(
     oyaJuchuKizaiNyushukoData.kicsShukoDat ? new Date(oyaJuchuKizaiNyushukoData.kicsShukoDat) : null,
     oyaJuchuKizaiNyushukoData.yardShukoDat ? new Date(oyaJuchuKizaiNyushukoData.yardShukoDat) : null
   );
   // 入庫日
-  const oyaNyukoDate = GetNyukoDate(
+  const oyaNyukoDate = getNyukoDate(
     oyaJuchuKizaiNyushukoData.kicsNyukoDat ? new Date(oyaJuchuKizaiNyushukoData.kicsNyukoDat) : null,
     oyaJuchuKizaiNyushukoData.yardNyukoDat ? new Date(oyaJuchuKizaiNyushukoData.yardNyukoDat) : null
   );
@@ -84,7 +83,7 @@ const Page = async (props: {
   } else {
     // キープ受注機材ヘッダーデータ
     console.time();
-    const keepJuchuKizaiHeadData = await GetKeepJuchuKizaiHead(params.juchu_head_id, params.juchu_kizai_head_id);
+    const keepJuchuKizaiHeadData = await getKeepJuchuKizaiHead(params.juchu_head_id, params.juchu_kizai_head_id);
     console.log('---------------------受注機材ヘッダーキープ---------------------');
     console.timeEnd();
 
@@ -94,17 +93,17 @@ const Page = async (props: {
 
     // キープ受注機材明細データ
     console.time();
-    const juchuKizaiMeisaiData = await GetKeepJuchuKizaiMeisai(params.juchu_head_id, params.juchu_kizai_head_id);
+    const juchuKizaiMeisaiData = await getKeepJuchuKizaiMeisai(params.juchu_head_id, params.juchu_kizai_head_id);
     console.log('----------------------------受注機材明細---------------------------------');
     console.timeEnd();
 
     // キープ出庫日
-    const keepShukoDate = GetShukoDate(
+    const keepShukoDate = getShukoDate(
       keepJuchuKizaiHeadData.kicsShukoDat && new Date(keepJuchuKizaiHeadData.kicsShukoDat),
       keepJuchuKizaiHeadData.yardShukoDat && new Date(keepJuchuKizaiHeadData.yardShukoDat)
     );
     // キープ入庫日
-    const keepNyukoDate = GetNyukoDate(
+    const keepNyukoDate = getNyukoDate(
       keepJuchuKizaiHeadData.kicsNyukoDat && new Date(keepJuchuKizaiHeadData.kicsNyukoDat),
       keepJuchuKizaiHeadData.yardNyukoDat && new Date(keepJuchuKizaiHeadData.yardNyukoDat)
     );

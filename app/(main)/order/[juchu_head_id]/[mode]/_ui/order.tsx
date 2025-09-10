@@ -29,10 +29,10 @@ import { use, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
-import { DeleteLock } from '@/app/_lib/db/tables/t-lock';
+import { deleteLock } from '@/app/_lib/db/tables/t-lock';
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import { toISOString } from '@/app/(main)/_lib/date-conversion';
-import { AddLock, GetLock } from '@/app/(main)/_lib/funcs';
+import { addLock, getLock } from '@/app/(main)/_lib/funcs';
 import { LockValues } from '@/app/(main)/_lib/types';
 import DateX, { RSuiteDateRangePicker, TestDate } from '@/app/(main)/_ui/date';
 import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
@@ -41,7 +41,7 @@ import { SelectTable } from '@/app/(main)/_ui/table';
 import { equipmentRows, users, vehicleHeaders, vehicleRows } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/data';
 
 import { useUnsavedChangesWarning } from '../../../../_lib/hook';
-import { AddJuchuHead, CopyJuchuHead, GetJuchuHead, GetMaxId, UpdJuchuHead } from '../_lib/funcs';
+import { addJuchuHead, copyJuchuHead, getJuchuHead, getMaxId, updJuchuHead } from '../_lib/funcs';
 import { EqTableValues, KokyakuValues, OrderSchema, OrderValues, VehicleTableValues } from '../_lib/types';
 import { SaveAlertDialog, SelectAlertDialog } from './caveat-dialog';
 import { CustomerSelectionDialog } from './customer-selection';
@@ -141,11 +141,11 @@ export const Order = (props: {
     if (getValues('juchuHeadId') === 0) return;
     const asyncProcess = async () => {
       setIsLoading(true);
-      const lockData = await GetLock(1, props.juchuHeadData.juchuHeadId);
+      const lockData = await getLock(1, props.juchuHeadData.juchuHeadId);
       setLockData(lockData);
       if (props.edit && lockData === null) {
-        await AddLock(1, props.juchuHeadData.juchuHeadId, user.name);
-        const newLockData = await GetLock(1, props.juchuHeadData.juchuHeadId);
+        await addLock(1, props.juchuHeadData.juchuHeadId, user.name);
+        const newLockData = await getLock(1, props.juchuHeadData.juchuHeadId);
         setLockData(newLockData);
       } else if (props.edit && lockData !== null && lockData.addUser !== user.name) {
         setEdit(false);
@@ -181,13 +181,13 @@ export const Order = (props: {
 
     // 新規
     if (data.juchuHeadId === 0) {
-      const maxId = await GetMaxId();
+      const maxId = await getMaxId();
       const newOrderId = maxId ? maxId.juchu_head_id + 1 : 1;
-      await AddJuchuHead(newOrderId, data, user.name);
+      await addJuchuHead(newOrderId, data, user.name);
       redirect(`/order/${newOrderId}/edit`);
       // 更新
     } else {
-      const update = await UpdJuchuHead(data);
+      const update = await updJuchuHead(data);
       reset(data);
       setSave(true);
       setIsLoading(false);
@@ -204,17 +204,17 @@ export const Order = (props: {
         return;
       }
 
-      await DeleteLock(1, props.juchuHeadData.juchuHeadId);
+      await deleteLock(1, props.juchuHeadData.juchuHeadId);
       setLockData(null);
       setEdit(false);
       // 閲覧→編集
     } else {
       if (!user) return;
-      const lockData = await GetLock(1, props.juchuHeadData.juchuHeadId);
+      const lockData = await getLock(1, props.juchuHeadData.juchuHeadId);
       setLockData(lockData);
       if (lockData === null) {
-        await AddLock(1, props.juchuHeadData.juchuHeadId, user.name);
-        const newLockData = await GetLock(1, props.juchuHeadData.juchuHeadId);
+        await addLock(1, props.juchuHeadData.juchuHeadId, user.name);
+        const newLockData = await getLock(1, props.juchuHeadData.juchuHeadId);
         setLockData(newLockData);
         setEdit(true);
       } else if (lockData !== null && lockData.addUser === user.name) {
@@ -231,12 +231,12 @@ export const Order = (props: {
     }
 
     if (!isDirty) {
-      const maxId = await GetMaxId();
+      const maxId = await getMaxId();
       if (maxId) {
         const newOrderId = maxId.juchu_head_id + 1;
-        const currentData = await GetJuchuHead(props.juchuHeadData.juchuHeadId);
+        const currentData = await getJuchuHead(props.juchuHeadData.juchuHeadId);
         if (user && currentData) {
-          await CopyJuchuHead(newOrderId, currentData, user.name);
+          await copyJuchuHead(newOrderId, currentData, user.name);
         }
         window.open(`/order/${newOrderId}/${'edit'}`);
       } else {
@@ -255,7 +255,7 @@ export const Order = (props: {
     }
 
     if (!isDirty) {
-      await DeleteLock(1, props.juchuHeadData.juchuHeadId);
+      await deleteLock(1, props.juchuHeadData.juchuHeadId);
       router.push(`/eq-main-order-detail/${props.juchuHeadData.juchuHeadId}/0/edit`);
     } else {
       setPath(`/eq-main-order-detail/${props.juchuHeadData.juchuHeadId}/0/edit`);
@@ -274,7 +274,7 @@ export const Order = (props: {
       const selectData = eqHeaderList.find((d) => d.juchuKizaiHeadId === selectEq[0]);
       if (selectData && selectData.juchuKizaiHeadKbn === 1) {
         if (!isDirty) {
-          await DeleteLock(1, props.juchuHeadData.juchuHeadId);
+          await deleteLock(1, props.juchuHeadData.juchuHeadId);
           router.push(
             `/eq-return-order-detail/${props.juchuHeadData.juchuHeadId}/0/${selectData.juchuKizaiHeadId}/edit`
           );
@@ -301,7 +301,7 @@ export const Order = (props: {
       const selectData = eqHeaderList.find((d) => d.juchuKizaiHeadId === selectEq[0]);
       if (selectData && selectData.juchuKizaiHeadKbn === 1) {
         if (!isDirty) {
-          await DeleteLock(1, props.juchuHeadData.juchuHeadId);
+          await deleteLock(1, props.juchuHeadData.juchuHeadId);
           router.push(`/eq-keep-order-detail/${props.juchuHeadData.juchuHeadId}/0/${selectData.juchuKizaiHeadId}/edit`);
         } else {
           setPath(`/eq-keep-order-detail/${props.juchuHeadData.juchuHeadId}/0/${selectData.juchuKizaiHeadId}/edit`);
@@ -323,7 +323,7 @@ export const Order = (props: {
     }
 
     if (!isDirty) {
-      await DeleteLock(1, props.juchuHeadData.juchuHeadId);
+      await deleteLock(1, props.juchuHeadData.juchuHeadId);
       router.push('/order/vehicle-order-detail');
     } else {
       setPath(`/vehicle-order-detail/${props.juchuHeadData.juchuHeadId}/0/edit`);
@@ -334,14 +334,14 @@ export const Order = (props: {
   // isDirtyDialogの破棄、戻るボタン押下
   const handleResultDialog = async (result: boolean) => {
     if (result && path) {
-      await DeleteLock(1, props.juchuHeadData.juchuHeadId);
+      await deleteLock(1, props.juchuHeadData.juchuHeadId);
       setLockData(null);
       setIsDirty(false);
       setIsSave(true);
       router.push(path);
       setPath(null);
     } else if (result && !path) {
-      await DeleteLock(1, props.juchuHeadData.juchuHeadId);
+      await deleteLock(1, props.juchuHeadData.juchuHeadId);
       setLockData(null);
       setEdit(false);
       reset();

@@ -184,59 +184,6 @@ export const getAllBumonDSSelections = async (): Promise<{
 };
 
 /**
- * 機材選択で使う部門リストを取得する関数
- * @returns 無効化フラグなし、表示順部門の配列
- */
-export const getBumonsForEqptSelection = async () => {
-  try {
-    const { data, error } = await selectActiveBumons();
-    if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
-    }
-    if (!data || data.length === 0) {
-      return [];
-    }
-    const selectElements = data.map((d, index) => ({
-      id: d.bumon_id,
-      label: d.bumon_nam,
-      tblDspNum: index,
-    }));
-    console.log('部門が', selectElements.length, '件');
-    return selectElements;
-  } catch (e) {
-    console.error('例外が発生しました:', e);
-    throw e;
-  }
-};
-
-/**
- * 選ばれた機材に対するセットオプションを確認する関数
- * @param idList 選ばれた機材たちの機材IDリスト
- * @returns セットオプションの機材の配列、もともと選ばれていたり、なかった場合はから配列を返す
- */
-export const CheckSetoptions = async (idList: number[]) => {
-  try {
-    const setIdList = await selectBundledEqptIds(idList);
-    console.log('setId List : ', setIdList.rows);
-    const setIdListSet = new Set(setIdList.rows);
-    const setIdListArray = [...setIdListSet].map((l) => l.kizai_id).filter((kizai_id) => !idList.includes(kizai_id));
-    console.log('setIdListArray : ', setIdListArray);
-    // セットオプションリストが空なら空配列を返して終了
-    if (setIdListArray.length === 0) return [];
-    const data = await selectBundledEqpts(setIdListArray);
-    console.log('set options : ', data.rows);
-    if (!data || data.rowCount === 0) {
-      return [];
-    }
-    return data.rows;
-  } catch (e) {
-    console.error('例外が発生しました:', e);
-    throw e;
-  }
-};
-
-/**
  * 選択肢に使う顧客リストを取得する関数
  * @returns 選択肢に使う顧客リスト
  */

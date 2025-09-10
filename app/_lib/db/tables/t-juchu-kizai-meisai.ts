@@ -9,7 +9,7 @@ import { JuchuKizaiMeisai } from '../types/t-juchu-kizai-meisai-type';
  * @param juchuKizaiHeadId 受注機材ヘッダーid
  * @returns 受注機材明細id最大値
  */
-export const SelectJuchuKizaiMeisaiMaxId = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
+export const selectJuchuKizaiMeisaiMaxId = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
   try {
     return await supabase
       .schema(SCHEMA)
@@ -33,7 +33,7 @@ export const SelectJuchuKizaiMeisaiMaxId = async (juchuHeadId: number, juchuKiza
  * @param juchuKizaiHeadId 受注機材ヘッダーid
  * @returns
  */
-export const SelectJuchuKizaiMeisaiKizaiTanka = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
+export const selectJuchuKizaiMeisaiKizaiTanka = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
   try {
     return await supabase
       .schema(SCHEMA)
@@ -52,7 +52,7 @@ export const SelectJuchuKizaiMeisaiKizaiTanka = async (juchuHeadId: number, juch
  * @param userNam ユーザー名
  * @returns
  */
-export const InsertJuchuKizaiMeisai = async (data: JuchuKizaiMeisai[]) => {
+export const insertJuchuKizaiMeisai = async (data: JuchuKizaiMeisai[]) => {
   try {
     return await supabase.schema(SCHEMA).from('t_juchu_kizai_meisai').insert(data);
   } catch (e) {
@@ -66,7 +66,7 @@ export const InsertJuchuKizaiMeisai = async (data: JuchuKizaiMeisai[]) => {
  * @param userNam ユーザー名
  * @returns
  */
-export const InsertKeepJuchuKizaiMeisai = async (data: JuchuKizaiMeisai[]) => {
+export const insertKeepJuchuKizaiMeisai = async (data: JuchuKizaiMeisai[]) => {
   try {
     return await supabase.schema(SCHEMA).from('t_juchu_kizai_meisai').insert(data);
   } catch (e) {
@@ -80,7 +80,7 @@ export const InsertKeepJuchuKizaiMeisai = async (data: JuchuKizaiMeisai[]) => {
  * @param userNam ユーザー名
  * @returns
  */
-export const InsertReturnJuchuKizaiMeisai = async (data: JuchuKizaiMeisai[]) => {
+export const insertReturnJuchuKizaiMeisai = async (data: JuchuKizaiMeisai[]) => {
   try {
     return await supabase.schema(SCHEMA).from('t_juchu_kizai_meisai').insert(data);
   } catch (e) {
@@ -94,7 +94,7 @@ export const InsertReturnJuchuKizaiMeisai = async (data: JuchuKizaiMeisai[]) => 
  * @param userNam ユーザー名
  * @returns
  */
-export const UpdateJuchuKizaiMeisai = async (data: JuchuKizaiMeisai) => {
+export const updateJuchuKizaiMeisai = async (data: JuchuKizaiMeisai) => {
   try {
     return await supabase
       .schema(SCHEMA)
@@ -114,7 +114,7 @@ export const UpdateJuchuKizaiMeisai = async (data: JuchuKizaiMeisai) => {
  * @param userNam ユーザー名
  * @returns
  */
-export const UpdateKeepJuchuKizaiMeisai = async (data: JuchuKizaiMeisai) => {
+export const updateKeepJuchuKizaiMeisai = async (data: JuchuKizaiMeisai) => {
   try {
     return await supabase
       .schema(SCHEMA)
@@ -134,7 +134,7 @@ export const UpdateKeepJuchuKizaiMeisai = async (data: JuchuKizaiMeisai) => {
  * @param userNam ユーザー名
  * @returns
  */
-export const UpdateReturnJuchuKizaiMeisai = async (data: JuchuKizaiMeisai) => {
+export const updateReturnJuchuKizaiMeisai = async (data: JuchuKizaiMeisai) => {
   try {
     return await supabase
       .schema(SCHEMA)
@@ -154,7 +154,7 @@ export const UpdateReturnJuchuKizaiMeisai = async (data: JuchuKizaiMeisai) => {
  * @param juchuKizaiHeadId 受注機材ヘッダーid
  * @param juchuKizaiMeisaiIds 受注機材明細id
  */
-export const DeleteJuchuKizaiMeisai = async (
+export const deleteJuchuKizaiMeisai = async (
   juchuHeadId: number,
   juchuKizaiHeadId: number,
   juchuKizaiMeisaiIds: number[]
@@ -178,7 +178,7 @@ export const DeleteJuchuKizaiMeisai = async (
  * @param juchuKizaiHeadId 受注機材ヘッダーid
  * @param juchuKizaiMeisaiIds 受注機材明細id
  */
-export const DeleteKeepJuchuKizaiMeisai = async (
+export const deleteKeepJuchuKizaiMeisai = async (
   juchuHeadId: number,
   juchuKizaiHeadId: number,
   juchuKizaiMeisaiIds: number[]
@@ -202,7 +202,7 @@ export const DeleteKeepJuchuKizaiMeisai = async (
  * @param juchuKizaiHeadId 受注機材ヘッダーid
  * @param juchuKizaiMeisaiIds 受注機材明細id
  */
-export const DeleteReturnJuchuKizaiMeisai = async (
+export const deleteReturnJuchuKizaiMeisai = async (
   juchuHeadId: number,
   juchuKizaiHeadId: number,
   juchuKizaiMeisaiIds: number[]
