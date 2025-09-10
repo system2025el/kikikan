@@ -441,8 +441,8 @@ export const Quotation = () => {
             </Box>
             <Box sx={{ padding: 0, pb: 1 }}>
               <Divider />
-              {/* 機材費テーブル */}
-              <Box margin={0.5} border={1}>
+              {/* 機材費テーブル ------------------------------------------------------------ */}
+              <Box margin={0.5} padding={0.8} borderBottom={1}>
                 <Typography variant="h6" pt={1} pl={2}>
                   機材費
                 </Typography>
@@ -540,194 +540,196 @@ export const Quotation = () => {
                   <Grid2 size={1} />
                 </Grid2>
               </Box>
-              {/* 人権費テーブル */}
-              <Typography variant="h6" pt={1} pl={2}>
-                人権費
-              </Typography>
-              {laborFields.fields.map((field, index) => (
-                <Box key={field.id} p={1}>
-                  {/* {index > 0 && <Divider sx={{ mx: 5 }} />} */}
-                  <MeisaiTblHeader index={index} control={control} sectionNam="labor" sectionFields={laborFields} />
-                  <MeisaiLines control={control} index={index} sectionNam="labor" />
-                  <Grid2 container px={2} my={0.5} alignItems={'center'} spacing={0.5}>
-                    <Grid2 size={'grow'} />
-                    <Grid2 size={3}>
-                      <TextField />
+              {/* 人権費テーブル ------------------------------------------------------------ */}{' '}
+              <Box margin={0.5} padding={0.8} borderTop={1} borderBottom={1}>
+                <Typography variant="h6" pt={1} pl={2}>
+                  人権費
+                </Typography>
+                {laborFields.fields.map((field, index) => (
+                  <Box key={field.id} p={1}>
+                    {/* {index > 0 && <Divider sx={{ mx: 5 }} />} */}
+                    <MeisaiTblHeader index={index} control={control} sectionNam="labor" sectionFields={laborFields} />
+                    <MeisaiLines control={control} index={index} sectionNam="labor" />
+                    <Grid2 container px={2} my={0.5} alignItems={'center'} spacing={0.5}>
+                      <Grid2 size={'grow'} />
+                      <Grid2 size={3}>
+                        <TextField />
+                      </Grid2>
+                      <Grid2 size={1.5}>
+                        <Typography textAlign="end">小計</Typography>
+                      </Grid2>
+                      <Grid2 size={2}>
+                        <TextField />
+                      </Grid2>
+                      <Grid2 size={1} />
                     </Grid2>
-                    <Grid2 size={1.5}>
-                      <Typography textAlign="end">小計</Typography>
+                    <Grid2 container px={2} my={0.5} alignItems={'center'} spacing={0.5}>
+                      <Grid2 size={'grow'} />
+                      <Grid2 size={3}>
+                        <TextField />
+                      </Grid2>
+                      <Grid2 size={1.5}>
+                        <TextField />
+                      </Grid2>
+                      <Grid2 size={2}>
+                        <TextField />
+                      </Grid2>
+                      <Grid2 size={1} />
                     </Grid2>
-                    <Grid2 size={2}>
-                      <TextField />
+                    <Grid2 container px={2} my={0.5} alignItems={'center'} spacing={0.5}>
+                      <Grid2 size={'grow'} />
+                      <Grid2 size={3}>
+                        <TextField />
+                      </Grid2>
+                      <Grid2 size={1.5}>
+                        <TextField />
+                      </Grid2>
+                      <Grid2 size={2}>
+                        <TextField />
+                      </Grid2>
+                      <Grid2 size={1} />
                     </Grid2>
-                    <Grid2 size={1} />
-                  </Grid2>
-                  <Grid2 container px={2} my={0.5} alignItems={'center'} spacing={0.5}>
-                    <Grid2 size={'grow'} />
-                    <Grid2 size={3}>
-                      <TextField />
-                    </Grid2>
-                    <Grid2 size={1.5}>
-                      <TextField />
-                    </Grid2>
-                    <Grid2 size={2}>
-                      <TextField />
-                    </Grid2>
-                    <Grid2 size={1} />
-                  </Grid2>
-                  <Grid2 container px={2} my={0.5} alignItems={'center'} spacing={0.5}>
-                    <Grid2 size={'grow'} />
-                    <Grid2 size={3}>
-                      <TextField />
-                    </Grid2>
-                    <Grid2 size={1.5}>
-                      <TextField />
-                    </Grid2>
-                    <Grid2 size={2}>
-                      <TextField />
-                    </Grid2>
-                    <Grid2 size={1} />
-                  </Grid2>
+                  </Box>
+                ))}
+                <Box m={1}>
+                  <Button
+                    size="small"
+                    onClick={() => laborFields.append({ headNamDspFlg: false, mituMeisaiHeadNam: null })}
+                  >
+                    <AddIcon fontSize="small" />
+                    テーブル
+                  </Button>
                 </Box>
-              ))}
-              <Box m={1}>
-                <Button
-                  size="small"
-                  onClick={() => laborFields.append({ headNamDspFlg: false, mituMeisaiHeadNam: null })}
-                >
-                  <AddIcon fontSize="small" />
-                  テーブル
-                </Button>
               </Box>
-              {/* その他テーブル */}
-              <Typography variant="h6" pt={1} pl={2}>
-                その他
-              </Typography>
-              {otherFields.fields.map((field, index) => (
-                <Box key={field.id} p={1}>
-                  {/* {index > 0 && <Divider sx={{ mx: 5 }} />} */}
-                  <MeisaiTblHeader index={index} control={control} sectionNam="other" sectionFields={otherFields} />
-                  <MeisaiLines control={control} index={index} sectionNam="other" />
-                  <Grid2 container px={2} my={0.5} alignItems={'center'} spacing={0.5}>
-                    <Grid2 size={'grow'} />
-                    <Grid2 size={3}>
-                      <TextField />
+              {/* その他テーブル ------------------------------------------------------------ */}
+              <Box margin={0.5} padding={0.8} borderTop={1} borderBottom={1}>
+                <Typography variant="h6" pt={1} pl={2}>
+                  その他
+                </Typography>
+                {otherFields.fields.map((field, index) => (
+                  <Box key={field.id} p={1}>
+                    {/* {index > 0 && <Divider sx={{ mx: 5 }} />} */}
+                    <MeisaiTblHeader index={index} control={control} sectionNam="other" sectionFields={otherFields} />
+                    <MeisaiLines control={control} index={index} sectionNam="other" />
+                    <Grid2 container px={2} my={0.5} alignItems={'center'} spacing={0.5}>
+                      <Grid2 size={'grow'} />
+                      <Grid2 size={3}>
+                        <TextField />
+                      </Grid2>
+                      <Grid2 size={1.5}>
+                        <Typography textAlign="end">小計</Typography>
+                      </Grid2>
+                      <Grid2 size={2}>
+                        <TextField />
+                      </Grid2>
+                      <Grid2 size={1} />
                     </Grid2>
-                    <Grid2 size={1.5}>
-                      <Typography textAlign="end">小計</Typography>
+                    <Grid2 container px={2} my={0.5} alignItems={'center'} spacing={0.5}>
+                      <Grid2 size={'grow'} />
+                      <Grid2 size={3}>
+                        <TextField />
+                      </Grid2>
+                      <Grid2 size={1.5}>
+                        <TextField />
+                      </Grid2>
+                      <Grid2 size={2}>
+                        <TextField />
+                      </Grid2>
+                      <Grid2 size={1} />
                     </Grid2>
-                    <Grid2 size={2}>
-                      <TextField />
+                    <Grid2 container px={2} my={0.5} alignItems={'center'} spacing={0.5}>
+                      <Grid2 size={'grow'} />
+                      <Grid2 size={3}>
+                        <TextField />
+                      </Grid2>
+                      <Grid2 size={1.5}>
+                        <TextField />
+                      </Grid2>
+                      <Grid2 size={2}>
+                        <TextField />
+                      </Grid2>
+                      <Grid2 size={1} />
                     </Grid2>
-                    <Grid2 size={1} />
-                  </Grid2>
-                  <Grid2 container px={2} my={0.5} alignItems={'center'} spacing={0.5}>
-                    <Grid2 size={'grow'} />
-                    <Grid2 size={3}>
-                      <TextField />
-                    </Grid2>
-                    <Grid2 size={1.5}>
-                      <TextField />
-                    </Grid2>
-                    <Grid2 size={2}>
-                      <TextField />
-                    </Grid2>
-                    <Grid2 size={1} />
-                  </Grid2>
-                  <Grid2 container px={2} my={0.5} alignItems={'center'} spacing={0.5}>
-                    <Grid2 size={'grow'} />
-                    <Grid2 size={3}>
-                      <TextField />
-                    </Grid2>
-                    <Grid2 size={1.5}>
-                      <TextField />
-                    </Grid2>
-                    <Grid2 size={2}>
-                      <TextField />
-                    </Grid2>
-                    <Grid2 size={1} />
-                  </Grid2>
+                  </Box>
+                ))}
+                <Box m={1}>
+                  <Button
+                    size="small"
+                    onClick={() => otherFields.append({ headNamDspFlg: false, mituMeisaiHeadNam: null })}
+                  >
+                    <AddIcon fontSize="small" />
+                    テーブル
+                  </Button>
                 </Box>
-              ))}
-              <Box m={1}>
-                <Button
-                  size="small"
-                  onClick={() => otherFields.append({ headNamDspFlg: false, mituMeisaiHeadNam: null })}
-                >
-                  <AddIcon fontSize="small" />
-                  テーブル
-                </Button>
+              </Box>
+              <Box margin={0.5} padding={0.8} borderTop={1}>
+                <Grid2 container display={'flex'} alignItems={'baseline'} spacing={0.5}>
+                  <Grid2 size={1} alignContent={'baseline'}>
+                    <Box>
+                      <Typography textAlign={'center'}>コメント</Typography>
+                    </Box>
+                  </Grid2>
+                  <Grid2 size={6}>
+                    <TextFieldElement name="meisaiHeads.comment" control={control} multiline fullWidth />
+                  </Grid2>
+                  <Grid2 size={'grow'} />
+                </Grid2>
+                <Grid2 container display={'flex'} alignItems={'center'} spacing={0.5} my={0.5}>
+                  <Grid2 size={'grow'} />
+                  <Grid2 size={1.5}>
+                    <TextField />
+                  </Grid2>
+                  <Grid2 size={2}>
+                    <TextField disabled />
+                  </Grid2>
+                  <Grid2 size={1} />
+                </Grid2>
+                <Grid2 container display={'flex'} alignItems={'center'} spacing={0.5} my={0.5}>
+                  <Grid2 size={'grow'} />
+                  <Grid2 size={1.5}>
+                    <TextField />
+                  </Grid2>
+                  <Grid2 size={2}>
+                    <TextField />
+                  </Grid2>
+                  <Grid2 size={1} />
+                </Grid2>
+                <Grid2 container display={'flex'} alignItems={'center'} spacing={0.5} my={0.5}>
+                  <Grid2 size={'grow'} />
+                  <Grid2 size={1.5} justifyItems={'end'}>
+                    <Typography>合計</Typography>
+                  </Grid2>
+                  <Grid2 size={2}>
+                    <TextField disabled />
+                  </Grid2>
+                  <Grid2 size={1} />
+                </Grid2>
+                <Grid2 container display={'flex'} alignItems={'center'} spacing={0.5} my={0.5}>
+                  <Grid2 size={'grow'} />
+                  <Grid2 size={1.5} justifyItems={'end'}>
+                    <Typography>消費税</Typography>
+                  </Grid2>
+                  <Grid2 size={2}>
+                    <TextField />
+                  </Grid2>
+                  <Grid2 size={1} display={'flex'}>
+                    <TextField />
+                    <Typography alignSelf={'center'}>%</Typography>
+                  </Grid2>
+                </Grid2>
+                <Grid2 container display={'flex'} alignItems={'center'} spacing={0.5} my={0.5}>
+                  <Grid2 size={'grow'} />
+                  <Grid2 size={1.5} justifyItems={'end'}>
+                    <Typography>合計金額</Typography>
+                  </Grid2>
+                  <Grid2 size={2}>
+                    <TextField disabled />
+                  </Grid2>
+                  <Grid2 size={1} />
+                </Grid2>
               </Box>
             </Box>
           </Paper>
-          {/* 見積明細
-      ----------------------------------------------------------------------------------*/}
-          <Accordion sx={{ marginTop: 1 }} variant="outlined">
-            <AccordionSummary expandIcon={<ExpandMoreIcon />} component="div">
-              <Grid2
-                container
-                alignItems="center"
-                justifyContent="space-between"
-                pt={2}
-                sx={{ width: '100%' }}
-                spacing={1}
-              >
-                <Grid2>
-                  <Typography>見積明細</Typography>
-                </Grid2>
-                <Grid2 container display="flex" alignItems="center" spacing={1}>
-                  <Typography>合計金額</Typography>
-                  <TextField
-                    sx={{
-                      '& .MuiInputBase-input': {
-                        textAlign: 'right',
-                        padding: 1,
-                      },
-                    }}
-                    value={'¥' /*+ priceTotal*/}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                    }}
-                  />
-                </Grid2>
-                <Grid2 container spacing={1}>
-                  <Button
-                    href="/new-order/equipment-order-detail"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                    }}
-                  >
-                    機材入力
-                  </Button>
-                  <Button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                    }}
-                  >
-                    受注からコピー
-                  </Button>
-                  <Button
-                    sx={{ bgcolor: 'red' }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                    }}
-                  >
-                    削除
-                  </Button>
-                  <Button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                    }}
-                  >
-                    見積書印刷
-                  </Button>
-                </Grid2>
-              </Grid2>
-            </AccordionSummary>
-            <AccordionDetails sx={{ padding: 0 }}>
-              <SelectTable headers={quotationHeaders} datas={quotationRows} onSelectionChange={handleSelectionChange} />
-            </AccordionDetails>
-          </Accordion>
         </LocalizationProvider>
       </form>
     </Container>
