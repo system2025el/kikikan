@@ -1,6 +1,6 @@
-import { toISOStringYearMonthDay } from '../../_lib/date-conversion';
+import { toISOStringYearMonthDay } from './date-conversion';
 
-export const GetShukoDate = (kicsShukoDat: Date | null, yardShukoDat: Date | null) => {
+export const getShukoDate = (kicsShukoDat: Date | null, yardShukoDat: Date | null) => {
   if (kicsShukoDat && yardShukoDat) {
     return kicsShukoDat <= yardShukoDat ? kicsShukoDat : yardShukoDat;
   }
@@ -16,7 +16,7 @@ export const GetShukoDate = (kicsShukoDat: Date | null, yardShukoDat: Date | nul
   //return new Date();
 };
 
-export const GetNyukoDate = (kicsNyukoDat: Date | null, yardNyukoDat: Date | null) => {
+export const getNyukoDate = (kicsNyukoDat: Date | null, yardNyukoDat: Date | null) => {
   if (kicsNyukoDat && yardNyukoDat) {
     return kicsNyukoDat <= yardNyukoDat ? yardNyukoDat : kicsNyukoDat;
   }

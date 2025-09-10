@@ -11,7 +11,12 @@ import { SCHEMA } from '../supabase';
  * @param date 開始日
  * @returns 機材在庫テーブル用データ
  */
-export const SelectStockList = async (juchuHeadId: number, juchuKizaiHeadId: number, kizaiId: number, date: string) => {
+export const selectDetailStockList = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  kizaiId: number,
+  date: string
+) => {
   try {
     await pool.query(` SET search_path TO ${SCHEMA};`);
     return await pool.query(`

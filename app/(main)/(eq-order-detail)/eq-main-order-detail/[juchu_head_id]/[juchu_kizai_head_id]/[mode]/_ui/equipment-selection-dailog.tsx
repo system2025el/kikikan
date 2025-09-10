@@ -24,11 +24,10 @@ import { useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
 import { Loading } from '@/app/(main)/_ui/loading';
-import { CheckSetoptions } from '@/app/(main)/(masters)/_lib/funs';
-import { getEqptsForEqptSelection, getSelectedEqpts } from '@/app/(main)/(masters)/eqpt-master/_lib/funcs';
-import { SelectedEqptsValues } from '@/app/(main)/(masters)/eqpt-master/_lib/types';
 
 import { bundleData } from '../_lib/eqdata';
+import { checkSetoptions, getEqptsForEqptSelection, getSelectedEqpts } from '../_lib/funcs';
+import { EqptSelection, SelectedEqptsValues } from '../_lib/types';
 import { EqptBumonsTable } from './equipment-bumons-table';
 import { EqptTable } from './equipments-table';
 
@@ -63,7 +62,7 @@ export const EqptSelectionDialog = ({
   /* methods ------------------------------ */
   /* 確定ボタン押下時 */
   const handleClickConfirm = async () => {
-    const setList = await CheckSetoptions(selectedEqptIds);
+    const setList = await checkSetoptions(selectedEqptIds);
     if (setList.length !== 0) {
       setBundles(setList);
       setBundleDialogOpen(true);
@@ -325,12 +324,4 @@ const BundleDialog = ({
       </DialogContent>
     </>
   );
-};
-
-export type EqptSelection = {
-  kizaiId: number;
-  kizaiNam: string;
-  shozokuNam: string;
-  bumonId: number;
-  kizaiGrpCod: string;
 };

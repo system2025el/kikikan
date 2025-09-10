@@ -25,11 +25,10 @@ import { useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
 import { Loading } from '@/app/(main)/_ui/loading';
-import { CustomersMasterTableValues } from '@/app/(main)/(masters)/customers-master/_lib/types';
 
 import { MuiTablePagination } from '../../../../_ui/table-pagination';
 //import { customers } from '../../../../(masters)/customers-master/_lib/datas';
-import { GetFilteredCustomers } from '../_lib/funcs';
+import { getFilteredOrderCustomers } from '../_lib/funcs';
 import { CustomersDialogValues, KokyakuValues } from '../_lib/types';
 
 /** 新規受注の相手選択ダイアログ（全画面） */
@@ -60,7 +59,7 @@ export const CustomerSelectionDialog = (props: {
   /* 検索ボタン押下 */
   const onSubmit = async (data: { query: string | undefined }) => {
     setIsLoading(true);
-    const newList = await GetFilteredCustomers(data.query!);
+    const newList = await getFilteredOrderCustomers(data.query!);
     setCusts(newList);
     setIsLoading(false);
   };
@@ -69,7 +68,7 @@ export const CustomerSelectionDialog = (props: {
     // ダイアログが開いた瞬間に fetch（ここで最新をとる）
     const getCusts = async () => {
       setIsLoading(true);
-      const data = await GetFilteredCustomers('');
+      const data = await getFilteredOrderCustomers('');
       setCusts(data);
       setIsLoading(false);
     };

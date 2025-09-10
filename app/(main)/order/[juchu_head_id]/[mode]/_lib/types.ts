@@ -69,3 +69,17 @@ export type CustomersDialogValues = {
   tblDspId: number;
   delFlg?: boolean;
 };
+
+export type LocsDialogValues = {
+  adrShozai: string | null;
+  adrSonota: string | null;
+  adrTatemono: string | null;
+  delFlg: boolean | null;
+  dspFlg: boolean | null;
+  tblDspId: number;
+  fax: string | null;
+  locId: number;
+  locNam: string;
+  mem: string | null;
+  tel: string | null;
+};

@@ -25,14 +25,10 @@ import { useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
 import { Loading } from '@/app/(main)/_ui/loading';
-import { getFilteredLocs } from '@/app/(main)/(masters)/locations-master/_lib/funcs';
-import {
-  LocsMasterSearchSchema,
-  LocsMasterSearchValues,
-  LocsMasterTableValues,
-} from '@/app/(main)/(masters)/locations-master/_lib/types';
 
 import { MuiTablePagination } from '../../../../_ui/table-pagination';
+import { getFilteredOrderLocs } from '../_lib/funcs';
+import { LocsDialogValues } from '../_lib/types';
 //import { locationList } from '../../../../(masters)/locations-master/_lib/datas';
 
 /** 新規受注の場所選択ダイアログ */
@@ -42,7 +38,7 @@ export const LocationSelectDialog = (props: {
 }) => {
   const { handleLocSelect, handleCloseLocationDialog } = props;
   /* useState ------------------ */
-  const [locs, setLocs] = useState<LocsMasterTableValues[]>();
+  const [locs, setLocs] = useState<LocsDialogValues[]>();
   /* DBのローディング */
   const [isLoading, setIsLoading] = useState(true);
 
@@ -61,13 +57,12 @@ export const LocationSelectDialog = (props: {
   const { control, handleSubmit } = useForm({
     mode: 'onSubmit',
     defaultValues: { query: '' },
-    resolver: zodResolver(LocsMasterSearchSchema),
   });
 
   /* 検索ボタン押下 */
-  const onSubmit = async (data: LocsMasterSearchValues) => {
+  const onSubmit = async (data: { query: string | undefined }) => {
     setIsLoading(true);
-    const newList = await getFilteredLocs(data.query!);
+    const newList = await getFilteredOrderLocs(data.query!);
     setLocs(newList);
     setIsLoading(false);
   };
@@ -76,7 +71,7 @@ export const LocationSelectDialog = (props: {
     // ダイアログが開いた瞬間（ここで最新をとる）
     const getLocs = async () => {
       setIsLoading(true);
-      const data = await getFilteredLocs('');
+      const data = await getFilteredOrderLocs('');
       setLocs(data);
       setIsLoading(false);
     };

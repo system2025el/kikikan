@@ -10,7 +10,7 @@ import { MKoenbashoDBValues } from '../types/m-koenbasho-type';
  * @param query 検索キーワード
  * @returns {Promise<LocsDialogValues[]>} 公演場所マスタテーブルに表示するデータ（ 検索キーワードが空の場合は全て ）
  */
-export const SelectFilteredLocs = async (query: string) => {
+export const selectFilteredLocs = async (query: string) => {
   const builder = supabase
     .schema(SCHEMA)
     .from('m_koenbasho')

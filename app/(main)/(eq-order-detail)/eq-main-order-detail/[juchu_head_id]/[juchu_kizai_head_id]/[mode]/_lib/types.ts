@@ -72,3 +72,23 @@ export type JuchuKizaiHonbanbiValues = {
   mem: string | null;
   juchuHonbanbiAddQty: number | null;
 };
+
+export type EqptSelection = {
+  kizaiId: number;
+  kizaiNam: string;
+  shozokuNam: string;
+  bumonId: number;
+  kizaiGrpCod: string;
+};
+
+export type SelectedEqptsValues = {
+  kizaiId: number;
+  kizaiNam: string;
+  shozokuId: number;
+  shozokuNam: string;
+  kizaiGrpCod: string;
+  dspOrdNum: number;
+  regAmt: number;
+  rankAmt: number;
+  kizaiQty: number;
+};

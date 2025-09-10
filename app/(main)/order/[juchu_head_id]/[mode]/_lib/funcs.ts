@@ -1,21 +1,22 @@
 'use server';
 
+import { selectFilteredLocs } from '@/app/_lib/db/tables/m-koenbasho';
 import { selectFilteredCustomers, selectKokyaku } from '@/app/_lib/db/tables/m-kokyaku';
-import { InsertJuchuHead, SelectJuchuHead, SelectMaxId, UpdateJuchuHead } from '@/app/_lib/db/tables/t-juchu-head';
-import { SelectJuchuKizaiHeadList } from '@/app/_lib/db/tables/v-juchu-kizai-head-lst';
+import { insertJuchuHead, selectJuchuHead, selectMaxId, updateJuchuHead } from '@/app/_lib/db/tables/t-juchu-head';
+import { selectJuchuKizaiHeadList } from '@/app/_lib/db/tables/v-juchu-kizai-head-lst';
 import { JuchuHead } from '@/app/_lib/db/types/t-juchu-head-type';
 import { toISOStringYearMonthDay, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
-import { CustomersDialogValues, EqTableValues, OrderValues } from './types';
+import { CustomersDialogValues, EqTableValues, LocsDialogValues, OrderValues } from './types';
 
 /**
  * 受注ヘッダー取得
  * @param juchuHeadId 受注ヘッダーID
  * @returns 受注ヘッダーデータ
  */
-export const GetJuchuHead = async (juchuHeadId: number) => {
+export const getJuchuHead = async (juchuHeadId: number) => {
   try {
-    const juchuData = await SelectJuchuHead(juchuHeadId);
+    const juchuData = await selectJuchuHead(juchuHeadId);
 
     if (juchuData.error || !juchuData.data) {
       console.error('GetOrder juchu error : ', juchuData.error);
@@ -66,9 +67,9 @@ export const GetJuchuHead = async (juchuHeadId: number) => {
  * 受注ヘッダーid最大値取得
  * @returns 受注ヘッダーid最大値
  */
-export const GetMaxId = async () => {
+export const getMaxId = async () => {
   try {
-    const { data, error } = await SelectMaxId();
+    const { data, error } = await selectMaxId();
     if (error || !data) {
       return null;
     }
@@ -83,7 +84,7 @@ export const GetMaxId = async () => {
  * 受注ヘッダー情報新規追加
  * @param juchuHeadId 受注ヘッダーid
  */
-export const AddJuchuHead = async (juchuHeadId: number, juchuHeadData: OrderValues, userNam: string) => {
+export const addJuchuHead = async (juchuHeadId: number, juchuHeadData: OrderValues, userNam: string) => {
   const newData: JuchuHead = {
     juchu_head_id: juchuHeadId,
     del_flg: juchuHeadData.delFlg,
@@ -104,7 +105,7 @@ export const AddJuchuHead = async (juchuHeadId: number, juchuHeadData: OrderValu
   };
 
   try {
-    const { error } = await InsertJuchuHead(newData);
+    const { error } = await insertJuchuHead(newData);
 
     if (error) {
       console.error('Error adding new order:', error.message);
@@ -121,7 +122,7 @@ export const AddJuchuHead = async (juchuHeadId: number, juchuHeadData: OrderValu
  * @param data 受注ヘッダーデータ
  * @returns 正誤
  */
-export const UpdJuchuHead = async (data: OrderValues) => {
+export const updJuchuHead = async (data: OrderValues) => {
   const updateData: JuchuHead = {
     juchu_head_id: data.juchuHeadId,
     del_flg: data.delFlg,
@@ -142,7 +143,7 @@ export const UpdJuchuHead = async (data: OrderValues) => {
   };
 
   try {
-    const { error } = await UpdateJuchuHead(updateData);
+    const { error } = await updateJuchuHead(updateData);
 
     if (error) {
       console.error('Error updating order:', error.message);
@@ -156,7 +157,7 @@ export const UpdJuchuHead = async (data: OrderValues) => {
   }
 };
 
-export const CopyJuchuHead = async (juchuHeadId: number, data: OrderValues, userNam: string) => {
+export const copyJuchuHead = async (juchuHeadId: number, data: OrderValues, userNam: string) => {
   const copyData: JuchuHead = {
     juchu_head_id: juchuHeadId,
     del_flg: data.delFlg,
@@ -177,7 +178,7 @@ export const CopyJuchuHead = async (juchuHeadId: number, data: OrderValues, user
   };
 
   try {
-    const { error } = await InsertJuchuHead(copyData);
+    const { error } = await insertJuchuHead(copyData);
 
     if (error) {
       console.error('Error adding new order:', error.message);
@@ -194,9 +195,9 @@ export const CopyJuchuHead = async (juchuHeadId: number, data: OrderValues, user
  * @param juchuHeadId 受注機材ヘッダーid
  * @returns
  */
-export const GetJuchuKizaiHeadList = async (juchuHeadId: number) => {
+export const getJuchuKizaiHeadList = async (juchuHeadId: number) => {
   try {
-    const { data, error } = await SelectJuchuKizaiHeadList(juchuHeadId);
+    const { data, error } = await selectJuchuKizaiHeadList(juchuHeadId);
 
     if (error) {
       console.error('GetOrder juchu error : ', error);
@@ -231,11 +232,11 @@ export const GetJuchuKizaiHeadList = async (juchuHeadId: number) => {
 };
 
 /**
- * 顧客マスタテーブルのデータを取得する関数
+ * 新規受注用顧客データを取得する関数
  * @param query 検索キーワード
  * @returns {Promise<CustomersDialogValues[]>} 公演場所マスタテーブルに表示するデータ（ 検索キーワードが空の場合は全て ）
  */
-export const GetFilteredCustomers = async (query: string) => {
+export const getFilteredOrderCustomers = async (query: string) => {
   try {
     const { data, error } = await selectFilteredCustomers(query);
     if (!error) {
@@ -265,5 +266,41 @@ export const GetFilteredCustomers = async (query: string) => {
     }
   } catch (e) {
     console.error('例外が発生しました:', e);
+  }
+};
+
+/**
+ * 新規受注用公演場所データ取得
+ * @param query 検索キーワード
+ * @returns
+ */
+export const getFilteredOrderLocs = async (query: string = '') => {
+  try {
+    const { data, error } = await selectFilteredLocs(query);
+    if (error) {
+      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
+      throw error;
+    }
+    if (!data || data.length === 0) {
+      return [];
+    }
+    const filteredLocs: LocsDialogValues[] = data.map((d, index) => ({
+      locId: d.koenbasho_id,
+      locNam: d.koenbasho_nam,
+      adrShozai: d.adr_shozai,
+      adrTatemono: d.adr_tatemono,
+      adrSonota: d.adr_sonota,
+      tel: d.tel,
+      fax: d.fax,
+      mem: d.mem,
+      dspFlg: Boolean(d.dsp_flg),
+      tblDspId: index + 1,
+      delFlg: Boolean(d.del_flg),
+    }));
+    console.log(filteredLocs.length);
+    return filteredLocs;
+  } catch (e) {
+    console.error('例外が発生しました:', e);
+    throw e;
   }
 };

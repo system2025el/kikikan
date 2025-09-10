@@ -7,7 +7,7 @@ import { createContext, useContext, useState } from 'react';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
 
-import { DelLock } from '../_lib/funcs';
+import { delLock } from '../_lib/funcs';
 import { LockValues } from '../_lib/types';
 
 //import { IsDirtyAlertDialog } from '../order/[juchu_head_id]/[mode]/_ui/caveat-dialog';
@@ -38,7 +38,7 @@ export const DirtyProvider = ({ children }: { children: React.ReactNode }) => {
       setShowDialog(true);
     } else {
       if (lock && lock.addUser === user?.name) {
-        await DelLock(lock.lockShubetu, lock.headId);
+        await delLock(lock.lockShubetu, lock.headId);
         setLock(null);
       }
       router.push(path);
@@ -47,7 +47,7 @@ export const DirtyProvider = ({ children }: { children: React.ReactNode }) => {
 
   const confirmNavigation = async () => {
     if (lock && lock.addUser === user?.name) {
-      await DelLock(lock.lockShubetu, lock.headId);
+      await delLock(lock.lockShubetu, lock.headId);
       setLock(null);
     }
     if (pendingPath) {
