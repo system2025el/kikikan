@@ -93,7 +93,11 @@ const Page = async (props: {
 
     // キープ受注機材明細データ
     console.time();
-    const juchuKizaiMeisaiData = await getKeepJuchuKizaiMeisai(params.juchu_head_id, params.juchu_kizai_head_id);
+    const juchuKizaiMeisaiData = await getKeepJuchuKizaiMeisai(
+      params.juchu_head_id,
+      params.juchu_kizai_head_id,
+      params.oya_juchu_kizai_head_id
+    );
     console.log('----------------------------受注機材明細---------------------------------');
     console.timeEnd();
 

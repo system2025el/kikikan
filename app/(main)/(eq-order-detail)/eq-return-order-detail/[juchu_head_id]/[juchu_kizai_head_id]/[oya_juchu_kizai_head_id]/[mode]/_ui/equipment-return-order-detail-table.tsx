@@ -365,7 +365,7 @@ const ReturnEqTableRow = React.memo(
                 WebkitAppearance: 'none',
                 margin: 0,
               },
-              '.Mui-disabled': {
+              '.MuiInput-input.Mui-disabled': {
                 WebkitTextFillColor: 'red',
               },
             }}
@@ -412,7 +412,7 @@ const ReturnEqTableRow = React.memo(
                 WebkitAppearance: 'none',
                 margin: 0,
               },
-              '.Mui-disabled': {
+              '.MuiInput-input.Mui-disabled': {
                 WebkitTextFillColor: 'red',
               },
             }}

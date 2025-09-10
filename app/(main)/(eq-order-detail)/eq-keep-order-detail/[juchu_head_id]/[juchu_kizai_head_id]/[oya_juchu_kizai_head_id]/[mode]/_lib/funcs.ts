@@ -10,7 +10,7 @@ import {
   insertKeepJuchuKizaiMeisai,
   updateKeepJuchuKizaiMeisai,
 } from '@/app/_lib/db/tables/t-juchu-kizai-meisai';
-import { selectKeepJuchuKizaiMeisai } from '@/app/_lib/db/tables/v-juchu-kizai-meisai';
+import { selectKeepJuchuKizaiMeisai, selectOyaJuchuKizaiMeisai } from '@/app/_lib/db/tables/v-juchu-kizai-meisai';
 import { JuchuKizaiHead } from '@/app/_lib/db/types/t-juchu-kizai-head-type';
 import { JuchuKizaiMeisai } from '@/app/_lib/db/types/t-juchu-kizai-meisai-type';
 import { Database } from '@/app/_lib/db/types/types';
@@ -137,15 +137,25 @@ export const updKeepJuchuKizaiHead = async (juchuKizaiHeadData: KeepJuchuKizaiHe
  * @param juchuKizaiHeadId 受注機材ヘッダーid
  * @returns キープ受注機材明細
  */
-export const getKeepJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
+export const getKeepJuchuKizaiMeisai = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  oyaJuchuKizaiHeadId: number
+) => {
   try {
-    const { data, error } = await selectKeepJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId);
-    if (error) {
-      console.error('GetKeeoEqList keep eqList error : ', error);
+    const { data: keepData, error: keepError } = await selectKeepJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId);
+    if (keepError) {
+      console.error('GetKeeoEqList keep eqList error : ', keepError);
       return [];
     }
 
-    const keepJuchuKizaiMeisaiData: KeepJuchuKizaiMeisaiValues[] = data.map((d) => ({
+    const { data: oyaData, error: oyaError } = await selectOyaJuchuKizaiMeisai(juchuHeadId, oyaJuchuKizaiHeadId);
+    if (oyaError) {
+      console.error('GetKeeoEqList oya eqList error : ', oyaError);
+      return [];
+    }
+
+    const keepJuchuKizaiMeisaiData: KeepJuchuKizaiMeisaiValues[] = keepData.map((d) => ({
       juchuHeadId: d.juchu_head_id,
       juchuKizaiHeadId: d.juchu_kizai_head_id,
       juchuKizaiMeisaiId: d.juchu_kizai_meisai_id,
@@ -154,8 +164,8 @@ export const getKeepJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHea
       mem: d.mem,
       kizaiId: d.kizai_id,
       kizaiNam: d.kizai_nam ?? '',
-      oyaPlanKizaiQty: d.plan_kizai_qty,
-      oyaPlanYobiQty: d.plan_yobi_qty,
+      oyaPlanKizaiQty: oyaData.find((oya) => oya.kizai_id === d.kizai_id)?.plan_kizai_qty ?? 0,
+      oyaPlanYobiQty: oyaData.find((oya) => oya.kizai_id === d.kizai_id)?.plan_yobi_qty ?? 0,
       keepQty: d.keep_qty,
       delFlag: false,
       saveFlag: true,
