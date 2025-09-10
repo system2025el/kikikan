@@ -46,7 +46,7 @@ export const LoanList = ({ eqpts }: { eqpts: LoanEqTableValues[] | undefined }) 
 
   return (
     <Box>
-      <Box display={'flex'} justifyContent={'end'} mb={0.5}>
+      <Box display={'flex'} justifyContent={'end'} mb={1}>
         <BackButton label={'戻る'} />
       </Box>
       {/*貸出状況検索*/}

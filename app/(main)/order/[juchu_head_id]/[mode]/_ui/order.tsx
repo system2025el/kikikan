@@ -401,7 +401,7 @@ export const Order = (props: {
 
   return (
     <Box>
-      <Box display={'flex'} justifyContent={'end'}>
+      <Box display={'flex'} justifyContent={'end'} mb={1}>
         {lockData !== null && lockData.addUser !== user?.name && (
           <Grid2 container alignItems={'center'} spacing={2} px={4}>
             <Typography>{lockData.addDat && toISOString(new Date(lockData.addDat))}</Typography>
