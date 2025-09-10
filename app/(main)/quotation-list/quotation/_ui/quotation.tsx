@@ -15,6 +15,7 @@ import {
   Container,
   Dialog,
   DialogActions,
+  DialogTitle,
   Divider,
   FormControl,
   FormControlLabel,
@@ -36,11 +37,10 @@ import Loadable from 'next/dist/shared/lib/loadable.shared-runtime';
 import { useEffect, useRef, useState } from 'react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import { AutocompleteElement, CheckboxElement, SelectElement, TextFieldElement } from 'react-hook-form-mui';
-import { ZodSchema } from 'zod';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import { toJapanDateString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
-import { BackButton } from '@/app/(main)/_ui/buttons';
+import { BackButton, CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { Loading, LoadingOverlay } from '@/app/(main)/_ui/loading';
 import { SelectTable } from '@/app/(main)/_ui/table';
@@ -52,6 +52,9 @@ import { FormDateX } from '@/app/(main)/order-list/_ui/order-list';
 import { quotation, quotationHeaders, quotationRows, terms } from '../_lib/data';
 import { getMituStsSelection, getOrderForQuotation, getUsersSelection } from '../_lib/func';
 import { JuchuValues, QuotHeadSchema, QuotHeadValues } from '../_lib/types';
+import { FirstDialogPage, SecondDialogPage } from './dialogs';
+import { MeisaiLines } from './meisai';
+import { MeisaiTblHeader } from './meisai-tbl-header';
 
 export const Quotation = () => {
   /* ログイン中のユーザー */
@@ -90,6 +93,7 @@ export const Quotation = () => {
 
   // ダイアログ開閉
   const [kizaiMeisaiaddDialogOpen, setKizaimeisaiaddDialogOpen] = useState(false);
+  const [showSecond, setShowSecond] = useState(false);
 
   /* useForm -------------------------------------------------------------- */
   const { control, handleSubmit, reset, getValues } = useForm<QuotHeadValues>({
@@ -113,12 +117,14 @@ export const Quotation = () => {
       mituHonbanbiQty: null,
       biko: null,
       meisaiHeads: {
-        kizai: [{ mituMeisaiHeadNam: '', headNamDspFlg: false }],
+        kizai: [{ mituMeisaiHeadNam: '', headNamDspFlg: false, meisai: [{ nam: null }] }],
       },
     },
   });
 
   const kizaiFields = useFieldArray({ control, name: 'meisaiHeads.kizai' });
+  const laborFields = useFieldArray({ control, name: 'meisaiHeads.labor' });
+  const otherFields = useFieldArray({ control, name: 'meisaiHeads.other' });
 
   /* methods ------------------------------------------------------ */
   /* 保存ボタン押下 */
@@ -134,10 +140,7 @@ export const Quotation = () => {
   const handleMitsuExpansion = () => {
     setMitsuExpanded(!mitsuExpanded);
   };
-  // 明細アコーディオン開閉
-  const handleMeisaiExpansion = () => {
-    setMeisaiExpanded(!meisaiExpanded);
-  };
+
   const handleSelectionChange = (selectedIds: (string | number)[]) => {
     console.log('選択されたID:', selectedIds);
   };
@@ -380,7 +383,6 @@ export const Quotation = () => {
                       control={control}
                       options={selectOptions.user}
                       autocompleteProps={{ sx: { width: 242.5 } }}
-                      matchId
                     />
                   </Box>
                   <Box sx={styles.container}>
@@ -433,138 +435,231 @@ export const Quotation = () => {
           </Accordion>
 
           {/* 見積明細 ----------------------------------------------------------------------------------*/}
-          <Accordion
-            expanded={meisaiExpanded}
-            onChange={handleMeisaiExpansion}
-            sx={{ marginTop: 1 }}
-            variant="outlined"
-          >
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <Typography component="span">見積明細</Typography>
-            </AccordionSummary>
-            <AccordionDetails sx={{ padding: 0, pb: 1 }}>
+          <Paper sx={{ marginTop: 1 }} variant="outlined">
+            <Box p={1}>
+              <Typography margin={1}>見積明細</Typography>
+            </Box>
+            <Box sx={{ padding: 0, pb: 1 }}>
               <Divider />
-              <Typography variant="body1" pt={1} pl={2}>
-                機材費
-              </Typography>
-              {/**・・・・・・・・・・・ field.mapで動的なフォーム作る予定・・・・・・・・ */}
-              {kizaiFields.fields.map((field, index) => (
-                <Box key={field.id}>
-                  <Grid2 container alignItems={'end'}>
-                    <Grid2 size={1} />
-                    <Grid2 size={5} display={'flex'} alignItems={'base-line'}>
-                      <TextFieldElement name={`meisaiHeads.kizai.${index}.mituMeisaiHeadNam`} control={control} />
-                      <CheckboxElement
-                        name={`meisaiHeads.kizai.${index}.headNamDspFlg`}
-                        control={control}
-                        sx={{ ml: 1 }}
-                        label="タイトルを見積書に出力する"
-                        labelProps={{
-                          sx: { typography: 'caption', textAlign: 'start' },
-                        }}
-                      />
-                    </Grid2>
-                    <Grid2 size={'grow'} justifyItems={'end'}>
-                      <Box>
-                        <Button
-                          color="error"
-                          onClick={() => {
-                            kizaiFields.remove(index);
-                          }}
-                        >
-                          削除
-                        </Button>
-                      </Box>
-                    </Grid2>
-                    <Grid2 size={1} />
-                  </Grid2>
-                  <Grid2
-                    container
-                    px={2}
-                    sx={{ backgroundColor: 'primary.light', color: 'primary.contrastText' }}
-                    alignItems={'end'}
-                  >
-                    <Grid2 size={0.5} />
-                    <Grid2 size={6}>
-                      <Typography variant="body2" fontWeight={500}>
-                        名称
-                      </Typography>
-                    </Grid2>
-                    <Grid2 size={1}>
-                      <Typography variant="body2" fontWeight={500}>
-                        数量
-                      </Typography>
-                    </Grid2>
-                    <Grid2 size={1}>
-                      <Typography variant="body2" fontWeight={500}>
-                        仕様日
-                      </Typography>
-                    </Grid2>
-                    <Grid2 size={1}>
-                      <Typography variant="body2" fontWeight={500}>
-                        単価
-                      </Typography>
-                    </Grid2>
-                    <Grid2 size={1}>
-                      <Typography variant="body2" fontWeight={500}>
-                        小計
-                      </Typography>
-                    </Grid2>
-                    <Grid2 size={1}></Grid2>
-                  </Grid2>
-                  {/*kizaiMeisaiFields.fields.map((f, i) => (
-                    <Box key={f.id}>
-                      <Grid2 container px={2} alignItems={'center'}>
-                        <Grid2 size={0.5}>
-                          <Button onClick={() => kizaiMeisaiFields.remove(i)}>削除</Button>
-                        </Grid2>
-                        <Grid2 size={6}>
-                          <TextFieldElement name={`meisaiHeads.kizai.${index}.meisai.${i}.nam`} control={control} />
-                        </Grid2>
-                        <Grid2 size={1}>
-                          <Typography variant="body2" fontWeight={500}>
-                            <TextField />
-                          </Typography>
-                        </Grid2>
-                        <Grid2 size={1}>
-                          <TextField />
-                        </Grid2>
-                        <Grid2 size={1}>
-                          <TextField />
-                        </Grid2>
-                        <Grid2 size={1}>
-                          <TextField />
-                        </Grid2>
-                        <Grid2 size={1}></Grid2>
+              {/* 機材費テーブル */}
+              <Box margin={0.5} border={1}>
+                <Typography variant="h6" pt={1} pl={2}>
+                  機材費
+                </Typography>
+                {kizaiFields.fields.map((field, index) => (
+                  <Box key={field.id} p={1}>
+                    {/* {index > 0 && <Divider sx={{ mx: 5 }} />} */}
+                    <MeisaiTblHeader index={index} control={control} sectionNam="kizai" sectionFields={kizaiFields} />
+                    <MeisaiLines control={control} index={index} sectionNam="kizai" />
+                    <Grid2 container px={2} my={0.5} alignItems={'center'} spacing={0.5}>
+                      <Grid2 size={'grow'} />
+                      <Grid2 size={3}>
+                        <TextField />
                       </Grid2>
-                    </Box>
-                  ))*/}
-                  <Button size="small" /*onClick={() => kizaiMeisaiFields.append({ nam: null })}*/>
-                    <AddIcon fontSize="small" />
-                    項目
-                  </Button>
+                      <Grid2 size={1.5}>
+                        <Typography textAlign="end">小計</Typography>
+                      </Grid2>
+                      <Grid2 size={2}>
+                        <TextField disabled />
+                      </Grid2>
+                      <Grid2 size={1} />
+                    </Grid2>
+                    <Grid2 container px={2} my={0.5} alignItems={'center'} spacing={0.5}>
+                      <Grid2 size={'grow'} />
+                      <Grid2 size={3}>
+                        <TextField />
+                      </Grid2>
+                      <Grid2 size={1.5}>
+                        <TextField />
+                      </Grid2>
+                      <Grid2 size={2}>
+                        <TextField />
+                      </Grid2>
+                      <Grid2 size={1} />
+                    </Grid2>
+                    <Grid2 container px={2} my={0.5} alignItems={'center'} spacing={0.5}>
+                      <Grid2 size={'grow'} />
+                      <Grid2 size={3}>
+                        <TextField />
+                      </Grid2>
+                      <Grid2 size={1.5}>
+                        <TextField />
+                      </Grid2>
+                      <Grid2 size={2}>
+                        <TextField disabled />
+                      </Grid2>
+                      <Grid2 size={1} />
+                    </Grid2>
+                  </Box>
+                ))}
+                <Box m={1}>
                   <Button size="small" onClick={() => setKizaimeisaiaddDialogOpen(true)}>
                     <AddIcon fontSize="small" />
                     テーブル
                   </Button>
                 </Box>
+                <Dialog
+                  open={kizaiMeisaiaddDialogOpen}
+                  onClose={() => {
+                    setKizaimeisaiaddDialogOpen(false);
+                    setShowSecond(false);
+                  }}
+                  slotProps={{
+                    transition: {
+                      onExited: () => {
+                        setShowSecond(false);
+                      },
+                    },
+                  }}
+                >
+                  {!showSecond && (
+                    <FirstDialogPage
+                      handleClose={() => setKizaimeisaiaddDialogOpen(false)}
+                      addKizaiTbl={() => kizaiFields.append({ mituMeisaiHeadNam: null, headNamDspFlg: false })}
+                      toSecondPage={setShowSecond}
+                    />
+                  )}
+                  {showSecond && (
+                    <SecondDialogPage
+                      handleClose={() => setKizaimeisaiaddDialogOpen(false)}
+                      addKizaiTbl={() => kizaiFields.append({ mituMeisaiHeadNam: null, headNamDspFlg: false })}
+                    />
+                  )}
+                </Dialog>
+                <Grid2 container px={2} alignItems={'center'} spacing={0.5}>
+                  <Grid2 size={'grow'} />
+                  <Grid2 size={1} textAlign={'end'}>
+                    機材費
+                  </Grid2>
+                  <Grid2 size={1.5}>
+                    <TextField />
+                  </Grid2>
+                  <Grid2 size={2}>
+                    <TextField disabled />
+                  </Grid2>
+                  <Grid2 size={1} />
+                </Grid2>
+              </Box>
+              {/* 人権費テーブル */}
+              <Typography variant="h6" pt={1} pl={2}>
+                人権費
+              </Typography>
+              {laborFields.fields.map((field, index) => (
+                <Box key={field.id} p={1}>
+                  {/* {index > 0 && <Divider sx={{ mx: 5 }} />} */}
+                  <MeisaiTblHeader index={index} control={control} sectionNam="labor" sectionFields={laborFields} />
+                  <MeisaiLines control={control} index={index} sectionNam="labor" />
+                  <Grid2 container px={2} my={0.5} alignItems={'center'} spacing={0.5}>
+                    <Grid2 size={'grow'} />
+                    <Grid2 size={3}>
+                      <TextField />
+                    </Grid2>
+                    <Grid2 size={1.5}>
+                      <Typography textAlign="end">小計</Typography>
+                    </Grid2>
+                    <Grid2 size={2}>
+                      <TextField />
+                    </Grid2>
+                    <Grid2 size={1} />
+                  </Grid2>
+                  <Grid2 container px={2} my={0.5} alignItems={'center'} spacing={0.5}>
+                    <Grid2 size={'grow'} />
+                    <Grid2 size={3}>
+                      <TextField />
+                    </Grid2>
+                    <Grid2 size={1.5}>
+                      <TextField />
+                    </Grid2>
+                    <Grid2 size={2}>
+                      <TextField />
+                    </Grid2>
+                    <Grid2 size={1} />
+                  </Grid2>
+                  <Grid2 container px={2} my={0.5} alignItems={'center'} spacing={0.5}>
+                    <Grid2 size={'grow'} />
+                    <Grid2 size={3}>
+                      <TextField />
+                    </Grid2>
+                    <Grid2 size={1.5}>
+                      <TextField />
+                    </Grid2>
+                    <Grid2 size={2}>
+                      <TextField />
+                    </Grid2>
+                    <Grid2 size={1} />
+                  </Grid2>
+                </Box>
               ))}
-              <Dialog open={kizaiMeisaiaddDialogOpen} onClose={() => setKizaimeisaiaddDialogOpen(false)}>
-                <Box>機材明細から自動生成しますか</Box>
-                <DialogActions>
-                  <Button>はい</Button>
-                  <Button
-                    onClick={() => {
-                      kizaiFields.append({ mituMeisaiHeadNam: null, headNamDspFlg: false });
-                      setKizaimeisaiaddDialogOpen(false);
-                    }}
-                  >
-                    いいえ
-                  </Button>
-                </DialogActions>
-              </Dialog>
-            </AccordionDetails>
-          </Accordion>
+              <Box m={1}>
+                <Button
+                  size="small"
+                  onClick={() => laborFields.append({ headNamDspFlg: false, mituMeisaiHeadNam: null })}
+                >
+                  <AddIcon fontSize="small" />
+                  テーブル
+                </Button>
+              </Box>
+              {/* その他テーブル */}
+              <Typography variant="h6" pt={1} pl={2}>
+                その他
+              </Typography>
+              {otherFields.fields.map((field, index) => (
+                <Box key={field.id} p={1}>
+                  {/* {index > 0 && <Divider sx={{ mx: 5 }} />} */}
+                  <MeisaiTblHeader index={index} control={control} sectionNam="other" sectionFields={otherFields} />
+                  <MeisaiLines control={control} index={index} sectionNam="other" />
+                  <Grid2 container px={2} my={0.5} alignItems={'center'} spacing={0.5}>
+                    <Grid2 size={'grow'} />
+                    <Grid2 size={3}>
+                      <TextField />
+                    </Grid2>
+                    <Grid2 size={1.5}>
+                      <Typography textAlign="end">小計</Typography>
+                    </Grid2>
+                    <Grid2 size={2}>
+                      <TextField />
+                    </Grid2>
+                    <Grid2 size={1} />
+                  </Grid2>
+                  <Grid2 container px={2} my={0.5} alignItems={'center'} spacing={0.5}>
+                    <Grid2 size={'grow'} />
+                    <Grid2 size={3}>
+                      <TextField />
+                    </Grid2>
+                    <Grid2 size={1.5}>
+                      <TextField />
+                    </Grid2>
+                    <Grid2 size={2}>
+                      <TextField />
+                    </Grid2>
+                    <Grid2 size={1} />
+                  </Grid2>
+                  <Grid2 container px={2} my={0.5} alignItems={'center'} spacing={0.5}>
+                    <Grid2 size={'grow'} />
+                    <Grid2 size={3}>
+                      <TextField />
+                    </Grid2>
+                    <Grid2 size={1.5}>
+                      <TextField />
+                    </Grid2>
+                    <Grid2 size={2}>
+                      <TextField />
+                    </Grid2>
+                    <Grid2 size={1} />
+                  </Grid2>
+                </Box>
+              ))}
+              <Box m={1}>
+                <Button
+                  size="small"
+                  onClick={() => otherFields.append({ headNamDspFlg: false, mituMeisaiHeadNam: null })}
+                >
+                  <AddIcon fontSize="small" />
+                  テーブル
+                </Button>
+              </Box>
+            </Box>
+          </Paper>
           {/* 見積明細
       ----------------------------------------------------------------------------------*/}
           <Accordion sx={{ marginTop: 1 }} variant="outlined">

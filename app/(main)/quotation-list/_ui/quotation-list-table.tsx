@@ -65,6 +65,8 @@ export const QuotaionListTable = () => {
 
   /* useForm ------------------------------------- */
   const { control, handleSubmit } = useForm<{ juchuHeadId: number | null }>({
+    mode: 'onSubmit',
+    reValidateMode: 'onSubmit',
     defaultValues: { juchuHeadId: null },
   });
 
@@ -185,7 +187,14 @@ export const QuotaionListTable = () => {
           <form onSubmit={handleSubmit(onSubmit)}>
             <Stack p={4}>
               <Typography>受注番号</Typography>
-              <TextFieldElement name={'juchuHeadId'} control={control} inputRef={inputRef} />
+              <TextFieldElement
+                name={'juchuHeadId'}
+                control={control}
+                inputRef={inputRef}
+                rules={{
+                  required: '数字を入力してください',
+                }}
+              />
             </Stack>
             <DialogActions>
               <Button type="submit">自動生成</Button>
