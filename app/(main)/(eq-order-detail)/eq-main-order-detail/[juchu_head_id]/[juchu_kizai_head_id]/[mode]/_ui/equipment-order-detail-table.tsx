@@ -1,7 +1,6 @@
 'use client';
 
 import Delete from '@mui/icons-material/Delete';
-import EditNoteIcon from '@mui/icons-material/EditNote';
 import {
   Box,
   Button,
@@ -27,6 +26,7 @@ import React, { useRef, useState } from 'react';
 
 import { toISOStringMonthDay, toISOStringYearMonthDay } from '@/app/(main)/_lib/date-conversion';
 import { TestDate } from '@/app/(main)/_ui/date';
+import { MemoTooltip } from '@/app/(main)/(eq-order-detail)/_ui/memo-tooltip';
 
 import { getDateHeaderBackgroundColor, getStockRowBackgroundColor } from '../_lib/colorselect';
 import { JuchuKizaiHonbanbiValues, JuchuKizaiMeisaiValues, StockTableValues } from '../_lib/types';
@@ -413,57 +413,6 @@ const EqTableRow = React.memo(
 );
 
 EqTableRow.displayName = 'EqTableRow';
-
-type MemoTooltipProps = {
-  name: string;
-  memo: string;
-  kizaiId: number;
-  handleMemoChange: (kizaiId: number, memo: string) => void;
-  disabled: boolean;
-};
-
-export const MemoTooltip = (props: MemoTooltipProps) => {
-  const [open, setOpen] = useState(false);
-  const [equipmentMemo, setEquipmentMemo] = useState(props.memo);
-
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
-
-  const handleSave = () => {
-    props.handleMemoChange(props.kizaiId, equipmentMemo);
-    handleClose();
-  };
-
-  return (
-    <>
-      <Tooltip title={equipmentMemo} arrow sx={{ p: 0 }}>
-        <IconButton onClick={handleOpen} sx={{ padding: 0 }} color={equipmentMemo ? 'primary' : 'default'}>
-          <EditNoteIcon fontSize="small" />
-        </IconButton>
-      </Tooltip>
-
-      <Dialog open={open} onClose={handleClose}>
-        <DialogTitle fontSize="medium">{props.name}</DialogTitle>
-        <DialogContent>
-          <TextField
-            value={equipmentMemo}
-            onChange={(e) => setEquipmentMemo(e.target.value)}
-            fullWidth
-            multiline
-            minRows={3}
-            disabled={props.disabled}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleSave} variant="contained" disabled={props.disabled}>
-            保存
-          </Button>
-          <Button onClick={handleClose}>キャンセル</Button>
-        </DialogActions>
-      </Dialog>
-    </>
-  );
-};
 
 /* style
 ---------------------------------------------------------------------------------------------------- */
