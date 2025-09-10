@@ -401,7 +401,11 @@ export const EquipmentReturnOrderDetail = (props: {
         reset(data);
 
         // 受注機材明細、機材在庫テーブル更新
-        const juchuKizaiMeisaiData = await getReturnJuchuKizaiMeisai(data.juchuHeadId, data.juchuKizaiHeadId);
+        const juchuKizaiMeisaiData = await getReturnJuchuKizaiMeisai(
+          data.juchuHeadId,
+          data.juchuKizaiHeadId,
+          props.oyaJuchuKizaiNyushukoData.juchuKizaiHeadId
+        );
         if (juchuKizaiMeisaiData) {
           setReturnJuchuKizaiMeisaiList(juchuKizaiMeisaiData);
           setOriginReturnJuchuKizaiMeisaiList(juchuKizaiMeisaiData);
@@ -429,7 +433,11 @@ export const EquipmentReturnOrderDetail = (props: {
         JSON.stringify(originReturnJuchuKizaiMeisaiList) !== JSON.stringify(filterReturnJuchuKizaiMeisaiList)
       ) {
         // 受注機材明細、機材在庫テーブル更新
-        const juchuKizaiMeisaiData = await getReturnJuchuKizaiMeisai(data.juchuHeadId, data.juchuKizaiHeadId);
+        const juchuKizaiMeisaiData = await getReturnJuchuKizaiMeisai(
+          data.juchuHeadId,
+          data.juchuKizaiHeadId,
+          props.oyaJuchuKizaiNyushukoData.juchuKizaiHeadId
+        );
         if (juchuKizaiMeisaiData) {
           setReturnJuchuKizaiMeisaiList(juchuKizaiMeisaiData);
           setOriginReturnJuchuKizaiMeisaiList(juchuKizaiMeisaiData);

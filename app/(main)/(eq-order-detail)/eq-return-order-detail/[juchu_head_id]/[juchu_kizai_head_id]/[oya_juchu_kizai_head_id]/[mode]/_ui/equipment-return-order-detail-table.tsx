@@ -365,7 +365,7 @@ const ReturnEqTableRow = React.memo(
                 WebkitAppearance: 'none',
                 margin: 0,
               },
-              '.Mui-disabled': {
+              '.MuiInput-input.Mui-disabled': {
                 WebkitTextFillColor: 'red',
               },
             }}
@@ -412,7 +412,7 @@ const ReturnEqTableRow = React.memo(
                 WebkitAppearance: 'none',
                 margin: 0,
               },
-              '.Mui-disabled': {
+              '.MuiInput-input.Mui-disabled': {
                 WebkitTextFillColor: 'red',
               },
             }}
@@ -481,10 +481,10 @@ export const MemoTooltip = (props: MemoTooltipProps) => {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose}>キャンセル</Button>
           <Button onClick={handleSave} variant="contained" disabled={props.disabled}>
             保存
           </Button>
+          <Button onClick={handleClose}>キャンセル</Button>
         </DialogActions>
       </Dialog>
     </>

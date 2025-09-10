@@ -403,7 +403,11 @@ export const EquipmentKeepOrderDetail = (props: {
     }
 
     // 受注機材明細、機材在庫テーブル更新
-    const keepJuchuKizaiMeisaiData = await getKeepJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId);
+    const keepJuchuKizaiMeisaiData = await getKeepJuchuKizaiMeisai(
+      juchuHeadId,
+      juchuKizaiHeadId,
+      props.oyaJuchuKizaiHeadData.juchuKizaiHeadId
+    );
     if (keepJuchuKizaiMeisaiData) {
       setKeepJuchuKizaiMeisaiList(keepJuchuKizaiMeisaiData);
       setOriginKeepJuchuKizaiMeisaiList(keepJuchuKizaiMeisaiData);

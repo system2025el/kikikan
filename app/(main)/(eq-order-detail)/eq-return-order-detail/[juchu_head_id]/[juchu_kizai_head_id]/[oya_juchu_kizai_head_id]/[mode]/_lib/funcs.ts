@@ -10,7 +10,7 @@ import {
   selectJuchuKizaiMeisaiKizaiTanka,
   updateReturnJuchuKizaiMeisai,
 } from '@/app/_lib/db/tables/t-juchu-kizai-meisai';
-import { selectReturnJuchuKizaiMeisai } from '@/app/_lib/db/tables/v-juchu-kizai-meisai';
+import { selectOyaJuchuKizaiMeisai, selectReturnJuchuKizaiMeisai } from '@/app/_lib/db/tables/v-juchu-kizai-meisai';
 import { JuchuKizaiHead } from '@/app/_lib/db/types/t-juchu-kizai-head-type';
 import { JuchuKizaiMeisai } from '@/app/_lib/db/types/t-juchu-kizai-meisai-type';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
@@ -154,11 +154,15 @@ export const updReturnJuchuKizaiHead = async (juchuKizaiHeadData: ReturnJuchuKiz
  * @param juchuKizaiHeadId 受注機材ヘッダーid
  * @returns 返却受注機材明細
  */
-export const getReturnJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
+export const getReturnJuchuKizaiMeisai = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  oyaJuchuKizaiHeadId: number
+) => {
   try {
-    const { data: eqList, error: eqListError } = await selectReturnJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId);
-    if (eqListError) {
-      console.error('GetKeeoEqList keep eqList error : ', eqListError);
+    const { data: returnData, error: returnError } = await selectReturnJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId);
+    if (returnError) {
+      console.error('GetKeeoEqList keep eqList error : ', returnError);
       return [];
     }
 
@@ -171,7 +175,13 @@ export const getReturnJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiH
       return [];
     }
 
-    const returnJuchuKizaiMeisaiData: ReturnJuchuKizaiMeisaiValues[] = eqList.map((d) => ({
+    const { data: oyaData, error: oyaError } = await selectOyaJuchuKizaiMeisai(juchuHeadId, oyaJuchuKizaiHeadId);
+    if (oyaError) {
+      console.error('GetKeeoEqList oya eqList error : ', oyaError);
+      return [];
+    }
+
+    const returnJuchuKizaiMeisaiData: ReturnJuchuKizaiMeisaiValues[] = returnData.map((d) => ({
       juchuHeadId: d.juchu_head_id,
       juchuKizaiHeadId: d.juchu_kizai_head_id,
       juchuKizaiMeisaiId: d.juchu_kizai_meisai_id,
@@ -181,8 +191,8 @@ export const getReturnJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiH
       kizaiId: d.kizai_id,
       kizaiTankaAmt: eqTanka.find((t) => t.kizai_id === d.kizai_id)?.kizai_tanka_amt || 0,
       kizaiNam: d.kizai_nam ?? '',
-      oyaPlanKizaiQty: /*d.plan_kizai_qty*/ 5,
-      oyaPlanYobiQty: /*d.plan_yobi_qty*/ 5,
+      oyaPlanKizaiQty: oyaData.find((oya) => oya.kizai_id === d.kizai_id)?.plan_kizai_qty ?? 0,
+      oyaPlanYobiQty: oyaData.find((oya) => oya.kizai_id === d.kizai_id)?.plan_yobi_qty ?? 0,
       planKizaiQty: d.plan_kizai_qty ? -1 * d.plan_kizai_qty : d.plan_kizai_qty,
       planYobiQty: d.plan_yobi_qty ? -1 * d.plan_yobi_qty : d.plan_yobi_qty,
       planQty: d.plan_qty ? -1 * d.plan_qty : d.plan_qty,
