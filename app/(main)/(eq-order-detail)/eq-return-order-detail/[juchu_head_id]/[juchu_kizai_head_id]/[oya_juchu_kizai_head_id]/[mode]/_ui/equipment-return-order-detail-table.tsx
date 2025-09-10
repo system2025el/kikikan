@@ -481,10 +481,10 @@ export const MemoTooltip = (props: MemoTooltipProps) => {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose}>キャンセル</Button>
           <Button onClick={handleSave} variant="contained" disabled={props.disabled}>
             保存
           </Button>
+          <Button onClick={handleClose}>キャンセル</Button>
         </DialogActions>
       </Dialog>
     </>
