@@ -1,3 +1,5 @@
+'use server';
+
 import { selectActiveBumons } from '@/app/_lib/db/tables/m-bumon';
 import { selectActiveEqpts, selectBundledEqpts } from '@/app/_lib/db/tables/m-kizai';
 import { selectBundledEqptIds } from '@/app/_lib/db/tables/m-kizai-set';
