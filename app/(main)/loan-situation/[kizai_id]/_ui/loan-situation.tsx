@@ -253,9 +253,6 @@ export const LoanSituation = (props: {
 
   return (
     <Box>
-      <Box display={'flex'} justifyContent={'end'} mb={1}>
-        <BackButton label={'戻る'} />
-      </Box>
       <Paper variant="outlined">
         <Box display="flex" justifyContent="space-between" alignItems="center" p={2} width="100%">
           <Typography>貸出状況</Typography>
