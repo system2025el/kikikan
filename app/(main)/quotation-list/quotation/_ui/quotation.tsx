@@ -25,6 +25,7 @@ import {
   Paper,
   Select,
   SelectChangeEvent,
+  Snackbar,
   Stack,
   TextField,
   Typography,
@@ -61,6 +62,7 @@ export const Quotation = () => {
   const user = useUserStore((state) => state.user);
   /* debug用、レンダリング回数取得に使用 */
   const hasRun = useRef(false);
+  /* useState ----------------------------------------------------------------- */
   /* ローディング中かどうか */
   const [isLoading, setIsLoading] = useState(true);
   /* フォーム内の選択肢 */
@@ -88,15 +90,24 @@ export const Quotation = () => {
   const [juchuExpanded, setJuchuExpanded] = useState(false);
   // 見積ヘッダアコーディオン制御
   const [mitsuExpanded, setMitsuExpanded] = useState(false);
-  // 明細アコーディオン制御
-  const [meisaiExpanded, setMeisaiExpanded] = useState(false);
 
   // ダイアログ開閉
   const [kizaiMeisaiaddDialogOpen, setKizaimeisaiaddDialogOpen] = useState(false);
   const [showSecond, setShowSecond] = useState(false);
 
+  /* スナックバーの表示するかしないか */
+  const [snackBarOpen, setSnackBarOpen] = useState(false);
+  /* スナックバーのメッセージ */
+  const [snackBarMessage, setSnackBarMessage] = useState('');
+
   /* useForm -------------------------------------------------------------- */
-  const { control, handleSubmit, reset, getValues } = useForm<QuotHeadValues>({
+  const {
+    control,
+    handleSubmit,
+    reset,
+    getValues,
+    formState: { errors },
+  } = useForm<QuotHeadValues>({
     mode: 'onChange',
     reValidateMode: 'onChange',
     resolver: zodResolver(QuotHeadSchema),
@@ -105,15 +116,13 @@ export const Quotation = () => {
       juchuHeadId: null,
       mituSts: null,
       mituDat: new Date(),
-      mituYukoDat: null,
       mituHeadNam: '',
       kokyaku: null,
       nyuryokuUser: { id: String(user?.id), name: user?.name },
-      lendRange: { strt: null, end: null },
+      mituRange: { strt: null, end: null },
       kokyakuTantoNam: null,
       koenNam: null,
       koenbashoNam: null,
-      torihikiHoho: null,
       mituHonbanbiQty: null,
       biko: null,
       meisaiHeads: {
@@ -141,9 +150,6 @@ export const Quotation = () => {
     setMitsuExpanded(!mitsuExpanded);
   };
 
-  const handleSelectionChange = (selectedIds: (string | number)[]) => {
-    console.log('選択されたID:', selectedIds);
-  };
   /* eslint-disable react-hooks/exhaustive-deps */
   /* useEffect ------------------------------------------------------------ */
   /* 画面初期 */
@@ -158,7 +164,7 @@ export const Quotation = () => {
       const savedData = JSON.parse(savedOrderData);
       setOrder(savedData);
       // 画面更新後維持？ reset({
-      //   lendRange: { strt: savedData.juchuRange.strt, end: savedData.juchuRange.end },
+      //   mituRange: { strt: savedData.juchuRange.strt, end: savedData.juchuRange.end },
       //   ...savedData,
       // });
       setIsLoading(false);
@@ -181,33 +187,24 @@ export const Quotation = () => {
           // 受注ヘッド番号から自動生成時
           const getjuchu = async (id: number) => {
             const data = await getOrderForQuotation(id);
-            const orderData: JuchuValues = {
-              juchuHeadId: data?.juchuHeadId,
-              juchuSts: data?.juchuSts,
-              juchuDat: data?.juchuDat,
-              juchuRange: {
-                strt: data?.juchuRange!.strt,
-                end: data?.juchuRange!.end,
-              },
-              nyuryokuUser: data?.nyuryokuUser,
-              koenNam: data?.koenNam,
-              koenbashoNam: data?.koenbashoNam,
-              kokyaku: data?.kokyaku ?? { id: null, name: null },
-              kokyakuTantoNam: data?.kokyakuTantoNam,
-              mem: data?.mem,
-              nebikiAmt: data?.nebikiAmt,
-              zeiKbn: data?.zeiKbn,
-            };
+            if (!data) {
+              setSnackBarMessage(`受注番号${juchuId}はありません`);
+              setSnackBarOpen(true);
+              setIsLoading(false);
+              return;
+            }
             reset({
-              kokyakuTantoNam: orderData.kokyakuTantoNam,
-              kokyaku: orderData.kokyaku.name,
-              koenNam: orderData.koenNam,
-              koenbashoNam: orderData.koenbashoNam,
-              lendRange: { strt: orderData.juchuRange.strt, end: orderData.juchuRange.end },
+              juchuHeadId: data.juchuHeadId,
+              kokyakuTantoNam: data.kokyakuTantoNam,
+              kokyaku: data.kokyaku.name,
+              koenNam: data.koenNam,
+              koenbashoNam: data.koenbashoNam,
+              nyuryokuUser: { id: String(user?.id), name: user?.name },
+              mituRange: { strt: data.juchuRange.strt, end: data.juchuRange.end },
             });
-            console.log('DB', orderData);
-            setOrder(orderData);
-            sessionStorage.setItem('currentOrder', JSON.stringify(orderData));
+            console.log('DB', data);
+            setOrder(data);
+            sessionStorage.setItem('currentOrder', JSON.stringify(data));
             sessionStorage.removeItem('juchuHeadId');
             await setIsLoading(false);
           };
@@ -227,6 +224,12 @@ export const Quotation = () => {
     }
   }, []);
   /* eslint-enable react-hooks/exhaustive-deps */
+
+  useEffect(() => {
+    if (Object.keys(errors).length > 0) {
+      console.log('入力エラー', Object.entries(errors));
+    }
+  }, [errors]);
 
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
@@ -406,7 +409,7 @@ export const Quotation = () => {
                   <Box sx={styles.container}>
                     <Typography marginRight={5}>貸出期間</Typography>
                     <Controller
-                      name="lendRange.strt"
+                      name="mituRange.strt"
                       control={control}
                       render={({ field }) => (
                         <FormDateX value={field.value} onChange={field.onChange} sx={{ width: 242.5 }} />
@@ -414,7 +417,7 @@ export const Quotation = () => {
                     />
                     ～
                     <Controller
-                      name="lendRange.end"
+                      name="mituRange.end"
                       control={control}
                       render={({ field }) => (
                         <FormDateX value={field.value} onChange={field.onChange} sx={{ width: 242.5 }} />
@@ -442,7 +445,7 @@ export const Quotation = () => {
             <Box sx={{ padding: 0, pb: 1 }}>
               <Divider />
               {/* 機材費テーブル ------------------------------------------------------------ */}
-              <Box margin={0.5} padding={0.8} borderBottom={1}>
+              <Box margin={0.5} padding={0.8} borderBottom={1} borderColor={'InactiveBorder'}>
                 <Typography variant="h6" pt={1} pl={2}>
                   機材費
                 </Typography>
@@ -541,7 +544,7 @@ export const Quotation = () => {
                 </Grid2>
               </Box>
               {/* 人権費テーブル ------------------------------------------------------------ */}{' '}
-              <Box margin={0.5} padding={0.8} borderTop={1} borderBottom={1}>
+              <Box margin={0.5} padding={0.8} borderTop={1} borderBottom={1} borderColor={'InactiveBorder'}>
                 <Typography variant="h6" pt={1} pl={2}>
                   人権費
                 </Typography>
@@ -602,7 +605,7 @@ export const Quotation = () => {
                 </Box>
               </Box>
               {/* その他テーブル ------------------------------------------------------------ */}
-              <Box margin={0.5} padding={0.8} borderTop={1} borderBottom={1}>
+              <Box margin={0.5} padding={0.8} borderTop={1} borderBottom={1} borderColor={'InactiveBorder'}>
                 <Typography variant="h6" pt={1} pl={2}>
                   その他
                 </Typography>
@@ -662,7 +665,7 @@ export const Quotation = () => {
                   </Button>
                 </Box>
               </Box>
-              <Box margin={0.5} padding={0.8} borderTop={1}>
+              <Box margin={0.5} padding={0.8} borderTop={1} borderColor={'InactiveBorder'}>
                 <Grid2 container display={'flex'} alignItems={'baseline'} spacing={0.5}>
                   <Grid2 size={1} alignContent={'baseline'}>
                     <Box>
@@ -670,7 +673,7 @@ export const Quotation = () => {
                     </Box>
                   </Grid2>
                   <Grid2 size={6}>
-                    <TextFieldElement name="meisaiHeads.comment" control={control} multiline fullWidth />
+                    <TextFieldElement name="comment" control={control} multiline fullWidth />
                   </Grid2>
                   <Grid2 size={'grow'} />
                 </Grid2>
@@ -732,6 +735,13 @@ export const Quotation = () => {
           </Paper>
         </LocalizationProvider>
       </form>
+      <Snackbar
+        open={snackBarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackBarOpen(false)}
+        message={snackBarMessage}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      />
     </Container>
   );
 };
