@@ -1,17 +1,18 @@
+import { Label } from '@mui/icons-material';
 import AddIcon from '@mui/icons-material/Add';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { Box, Button, Grid2, IconButton, TextField, Typography } from '@mui/material';
+import { Box, Button, Grid2, IconButton, Select, TextField, Typography } from '@mui/material';
 import { Control, useFieldArray } from 'react-hook-form';
-import { TextFieldElement } from 'react-hook-form-mui';
+import { SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
 import { QuotHeadValues, QuotMaisaiHeadValues } from '../_lib/types';
 
 /**
- *
+ * 動的フォーム（見積の明細項目部分）
  * @param param0
- * @returns
+ * @returns 見積の明細項目のUIコンポーネント
  */
 export const MeisaiLines = ({
   control,
@@ -31,65 +32,79 @@ export const MeisaiLines = ({
 
   return (
     <Box>
-      {sectionNam !== 'labor' &&
-        meisaiFields.fields.map((f, i) => (
-          <Box key={f.id}>
-            <Grid2 container px={2} my={0.5} alignItems={'center'} spacing={0.5}>
-              <Grid2 size={0.5} justifyItems={'end'}>
-                <Box>
-                  <IconButton size="small" onClick={() => meisaiFields.remove(i)}>
-                    <DeleteIcon fontSize="small" color="error" />
-                  </IconButton>
-                </Box>
-              </Grid2>
-              <Grid2 size={'grow'}>
-                <TextFieldElement name={`meisaiHeads.${sectionNam}.${index}.meisai.${i}.nam`} control={control} />
-              </Grid2>
-              <Grid2 size={1}>
-                <TextField />
-              </Grid2>
-              <Grid2 size={0.8}>
-                <TextField />
-              </Grid2>
-              <Grid2 size={1.5}>
-                <TextField />
-              </Grid2>
-              <Grid2 size={2}>
-                <TextField />
-              </Grid2>
-              <Grid2 size={1}>
-                <IconButton
-                  sx={{
-                    bgcolor: 'primary.main',
-                    color: 'white',
-                    '&:hover': {
-                      backgroundColor: 'primary.dark',
-                    },
-                  }}
-                  size="small"
-                  onClick={() => moveRow(i, -1)}
-                  disabled={i === 0}
-                >
-                  <ArrowUpwardIcon fontSize="small" />
+      {meisaiFields.fields.map((f, i) => (
+        <Box key={f.id}>
+          <Grid2 container px={2} my={0.5} alignItems={'center'} spacing={0.5}>
+            <Grid2 size={0.5} justifyItems={'end'}>
+              <Box>
+                <IconButton size="small" onClick={() => meisaiFields.remove(i)}>
+                  <DeleteIcon fontSize="small" color="error" />
                 </IconButton>
-                <IconButton
-                  sx={{
-                    bgcolor: 'primary.main',
-                    color: 'white',
-                    '&:hover': {
-                      backgroundColor: 'primary.dark',
-                    },
-                  }}
-                  size="small"
-                  onClick={() => moveRow(i, 1)}
-                  disabled={i === meisaiFields.fields.length - 1}
-                >
-                  <ArrowDownwardIcon fontSize="small" />
-                </IconButton>
-              </Grid2>
+              </Box>
             </Grid2>
-          </Box>
-        ))}
+            <Grid2 size={'grow'}>
+              {sectionNam !== 'labor' ? (
+                <TextFieldElement name={`meisaiHeads.${sectionNam}.${index}.meisai.${i}.nam`} control={control} />
+              ) : (
+                <SelectElement
+                  name={`meisaiHeads.${sectionNam}.${index}.meisai.${i}.nam`}
+                  control={control}
+                  options={[
+                    { id: 'チーフ', label: 'チーフ' },
+                    { id: 'サブチーフ', label: 'サブチーフ' },
+                    { id: 'システム', label: 'システム' },
+                    { id: '機材テク', label: '機材テク' },
+                    { id: '...', label: '...' },
+                  ]}
+                  sx={{ width: 242.5 }}
+                />
+              )}
+            </Grid2>
+            <Grid2 size={1}>
+              <TextField />
+            </Grid2>
+            <Grid2 size={0.8}>
+              <TextField />
+            </Grid2>
+            <Grid2 size={1.5}>
+              <TextField />
+            </Grid2>
+            <Grid2 size={2}>
+              <TextField />
+            </Grid2>
+            <Grid2 size={1}>
+              <IconButton
+                sx={{
+                  bgcolor: 'primary.main',
+                  color: 'white',
+                  '&:hover': {
+                    backgroundColor: 'primary.dark',
+                  },
+                }}
+                size="small"
+                onClick={() => moveRow(i, -1)}
+                disabled={i === 0}
+              >
+                <ArrowUpwardIcon fontSize="small" />
+              </IconButton>
+              <IconButton
+                sx={{
+                  bgcolor: 'primary.main',
+                  color: 'white',
+                  '&:hover': {
+                    backgroundColor: 'primary.dark',
+                  },
+                }}
+                size="small"
+                onClick={() => moveRow(i, 1)}
+                disabled={i === meisaiFields.fields.length - 1}
+              >
+                <ArrowDownwardIcon fontSize="small" />
+              </IconButton>
+            </Grid2>
+          </Grid2>
+        </Box>
+      ))}
       <Grid2 container px={2} alignItems={'center'}>
         <Grid2 size={0.5} />
         <Button size="small" onClick={() => meisaiFields.append({ nam: null })}>

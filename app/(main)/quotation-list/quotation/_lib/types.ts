@@ -64,6 +64,7 @@ export const QuotHeadSchema = z.object({
     kizai: z.array(quotMeisaiHeadSchema),
     labor: z.array(quotMeisaiHeadSchema),
     other: z.array(quotMeisaiHeadSchema),
+    comment: z.string().max(100).nullish(),
   }),
 });
 
