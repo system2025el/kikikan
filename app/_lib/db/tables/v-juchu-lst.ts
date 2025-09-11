@@ -1,5 +1,8 @@
 'use server';
 
+import { toISOString } from '@/app/(main)/_lib/date-conversion';
+import { ShukoListSearchValues } from '@/app/(main)/shuko-list/_lib/types';
+
 import pool from '../postgres';
 import { SCHEMA, supabase } from '../supabase';
 
@@ -18,6 +21,28 @@ export const selectJuchu = async (id: number) => {
       )
       .eq('juchu_head_id', id)
       .single();
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
+ *
+ * @param queries 検索クエリ(受注ヘッダーid、出庫日時、出庫場所)
+ * @returns
+ */
+export const selectFilteredJuchuList = async (queries: ShukoListSearchValues) => {
+  const builder = supabase.schema(SCHEMA).from('v_juchu_lst').select('juchu_head_id, koen_nam, kokyaku_nam, shuko_dat');
+
+  if (queries.juchuHeadId) {
+    builder.eq('juchu_head_id', queries.juchuHeadId);
+  }
+  if (queries.shukoDat) {
+    builder.eq('shuko_dat', toISOString(queries.shukoDat));
+  }
+
+  try {
+    return await builder;
   } catch (e) {
     throw e;
   }
