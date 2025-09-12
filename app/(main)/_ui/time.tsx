@@ -35,31 +35,29 @@ const Time = (props: { sx?: object; disabled?: boolean }) => {
   }, [error]);
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="ja">
-      <TimePicker
-        name="time"
-        slotProps={{
-          textField: {
-            helperText: errorMessage,
-            size: 'small',
-            sx: {
-              bgcolor: disabled ? grey[200] : 'white',
-              '.Mui-disabled': {
-                WebkitTextFillColor: 'black',
-              },
-              width: '25%',
-              minWidth: 150,
-              ...sx,
+    <TimePicker
+      name="time"
+      slotProps={{
+        textField: {
+          helperText: errorMessage,
+          size: 'small',
+          sx: {
+            bgcolor: disabled ? grey[200] : 'white',
+            '.Mui-disabled': {
+              WebkitTextFillColor: 'black',
             },
+            width: '25%',
+            minWidth: 150,
+            ...sx,
           },
-        }}
-        onError={(newError) => setError(newError)}
-        views={['hours', 'minutes']}
-        format="HH:mm"
-        timeSteps={{ minutes: 15 }}
-        disabled={disabled ? true : false}
-      />
-    </LocalizationProvider>
+        },
+      }}
+      onError={(newError) => setError(newError)}
+      views={['hours', 'minutes']}
+      format="HH:mm"
+      timeSteps={{ minutes: 15 }}
+      disabled={disabled ? true : false}
+    />
   );
 };
 
@@ -79,39 +77,37 @@ export const TestTime = (props: {
   const [open, setOpen] = useState(false);
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="ja">
-      <TimePicker
-        name="time"
-        value={time && dayjs(time)}
-        open={open}
-        onOpen={() => setOpen(true)}
-        onClose={() => setOpen(false)}
-        onChange={onChange}
-        slotProps={{
-          textField: {
-            //helperText: fieldstate?.error?.message,
-            FormHelperTextProps: {
-              sx: { color: 'error.main', fontSize: '0.75rem' },
-            },
-            size: 'small',
-            sx: {
-              bgcolor: disabled ? grey[200] : 'white',
-              '.Mui-disabled': {
-                WebkitTextFillColor: 'black',
-              },
-              width: '25%',
-              minWidth: 150,
-              ...sx,
-            },
-            error: fieldstate?.invalid,
+    <TimePicker
+      name="time"
+      value={time && dayjs(time)}
+      open={open}
+      onOpen={() => setOpen(true)}
+      onClose={() => setOpen(false)}
+      onChange={onChange}
+      slotProps={{
+        textField: {
+          //helperText: fieldstate?.error?.message,
+          FormHelperTextProps: {
+            sx: { color: 'error.main', fontSize: '0.75rem' },
           },
-        }}
-        views={['hours', 'minutes']}
-        format="HH:mm"
-        timeSteps={{ minutes: 15 }}
-        disabled={disabled ? true : false}
-        onAccept={onBlur}
-      />
-    </LocalizationProvider>
+          size: 'small',
+          sx: {
+            bgcolor: disabled ? grey[200] : 'white',
+            '.Mui-disabled': {
+              WebkitTextFillColor: 'black',
+            },
+            width: '25%',
+            minWidth: 150,
+            ...sx,
+          },
+          error: fieldstate?.invalid,
+        },
+      }}
+      views={['hours', 'minutes']}
+      format="HH:mm"
+      timeSteps={{ minutes: 15 }}
+      disabled={disabled ? true : false}
+      onAccept={onBlur}
+    />
   );
 };
