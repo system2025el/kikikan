@@ -7,6 +7,9 @@ import type { Palette } from '@mui/material/styles';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
 import { createTheme } from '@mui/material/styles';
 import type { TypographyOptions } from '@mui/material/styles/createTypography';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+
 // import { useMediaQuery } from '@mui/material';
 
 /** @type {TypographyOptions | ((palette: Palette) = TypographyOptions)} typography */
@@ -147,8 +150,19 @@ const ThemeProvider = ({ children }: Readonly<{ children: React.ReactNode }>) =>
   return (
     // <MuiThemeProvider theme={mode === 'dark' ? darkTheme : lightTheme}>
     <MuiThemeProvider theme={lightTheme}>
-      <CssBaseline />
-      {children}
+      {' '}
+      <LocalizationProvider
+        dateAdapter={AdapterDayjs}
+        dateFormats={{ year: 'YYYY年', month: 'MM' }} // カレンダー内の年一覧のフォーマット
+        adapterLocale="ja"
+        localeText={{
+          previousMonth: '前月を表示',
+          nextMonth: '翌月を表示',
+        }}
+      >
+        <CssBaseline />
+        {children}
+      </LocalizationProvider>
     </MuiThemeProvider>
   );
 };

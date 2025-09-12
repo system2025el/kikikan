@@ -25,7 +25,10 @@ export type JuchuValues = {
  */
 export const quotMeisaiHeadSchema = z.object({
   mituMeisaiHeadId: z.number().int().nullish(),
-  mituMeisaiHeadNam: z.string().max(50).nullish(),
+  mituMeisaiHeadNam: z
+    .string()
+    .max(50, { message: validationMessages.maxStringLength(50) })
+    .nullish(),
   headNamDspFlg: z.boolean(),
   meisai: z
     .array(
@@ -53,6 +56,18 @@ export const quotMeisaiHeadSchema = z.object({
           .nullish(),
       })
     )
+    .nullish(),
+  biko1: z
+    .string()
+    .max(100, { message: validationMessages.maxStringLength(100) })
+    .nullish(),
+  biko2: z
+    .string()
+    .max(100, { message: validationMessages.maxStringLength(100) })
+    .nullish(),
+  biko3: z
+    .string()
+    .max(100, { message: validationMessages.maxStringLength(100) })
     .nullish(),
 });
 
@@ -90,9 +105,9 @@ export const QuotHeadSchema = z.object({
   biko: z.string().max(100).nullish(),
   meisaiHeads: z
     .object({
-      kizai: z.array(quotMeisaiHeadSchema),
-      labor: z.array(quotMeisaiHeadSchema),
-      other: z.array(quotMeisaiHeadSchema),
+      kizai: z.array(quotMeisaiHeadSchema).nullish(),
+      labor: z.array(quotMeisaiHeadSchema).nullish(),
+      other: z.array(quotMeisaiHeadSchema).nullish(),
     })
     .nullish(),
   comment: z.string().max(100).nullish(),
