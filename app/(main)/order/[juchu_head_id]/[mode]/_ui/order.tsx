@@ -102,8 +102,8 @@ export const Order = (props: {
     clearErrors,
     formState: { isDirty, errors, defaultValues },
   } = useForm({
-    mode: 'onSubmit',
-    reValidateMode: 'onBlur',
+    mode: 'onChange',
+    reValidateMode: 'onChange',
     defaultValues: {
       juchuHeadId: props.juchuHeadData.juchuHeadId,
       delFlg: props.juchuHeadData.delFlg,
@@ -591,17 +591,16 @@ export const Order = (props: {
                 <Controller
                   name="nebikiAmt"
                   control={control}
-                  render={({ field }) => (
+                  render={({ field, fieldState }) => (
                     <TextField
                       {...field}
                       value={
                         isEditing
                           ? (field.value ?? '')
-                          : field.value !== null && !isNaN(field.value)
+                          : field.value !== null && !isNaN(Number(field.value))
                             ? `¥${Number(field.value).toLocaleString()}`
                             : '¥0'
                       }
-                      type="text"
                       onFocus={(e) => {
                         setIsEditing(true);
                         const rawValue = e.target.value.replace(/[¥,]/g, '');
@@ -610,21 +609,34 @@ export const Order = (props: {
                       onBlur={(e) => {
                         const rawValue = e.target.value.replace(/[¥,]/g, '');
                         const numericValue = Number(rawValue);
-                        field.onChange(numericValue);
+                        field.onChange(rawValue);
                         setIsEditing(false);
                       }}
                       onChange={(e) => {
                         const raw = e.target.value.replace(/[^\d]/g, '');
                         if (/^\d*$/.test(raw)) {
-                          field.onChange(Number(raw));
+                          field.onChange(raw);
                           e.target.value = raw;
                         }
                       }}
                       sx={{
+                        '.MuiOutlinedInput-notchedOutline': {
+                          borderColor: fieldState.error?.message && 'red',
+                        },
+                        '.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                          borderColor: fieldState.error?.message && 'red',
+                        },
+                        '&:hover .MuiOutlinedInput-notchedOutline': {
+                          borderColor: fieldState.error?.message && 'red',
+                        },
                         '& .MuiInputBase-input': {
                           textAlign: 'right',
                         },
+                        '.MuiFormHelperText-root': {
+                          color: 'red',
+                        },
                       }}
+                      helperText={fieldState.error?.message}
                       disabled={!edit}
                     />
                   )}
