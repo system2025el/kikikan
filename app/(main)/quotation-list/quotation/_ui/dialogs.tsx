@@ -87,7 +87,11 @@ export const SecondDialogPage = ({
     console.log(kizaiHeadId, checked);
     if (checked) {
       const data = await getJuchuMeisaiSum(juchuId, kizaiHeadId);
-      field.append({ mituMeisaiHeadNam: null, headNamDspFlg: false, meisai: [{ nam: headNam, ...data }] });
+      field.append({
+        mituMeisaiHeadNam: null,
+        headNamDspFlg: false,
+        meisai: [{ nam: headNam, tankaAmt: data[0].tankaAmt, qty: null, honbanbiQty: null, shokeiAmt: null }],
+      });
     } else {
       /* ここでDB処理 */
       const data = await getJuchuKizaiMeisaiList(juchuId, kizaiHeadId);
@@ -97,6 +101,7 @@ export const SecondDialogPage = ({
     }
     handleClose();
   };
+
   /* eslint-disable react-hooks/exhaustive-deps */
   /* useEffect ---------------------------------------------- */
   useEffect(() => {

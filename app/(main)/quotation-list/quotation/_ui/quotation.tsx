@@ -134,11 +134,11 @@ export const Quotation = () => {
             headNamDspFlg: false,
             meisai: [
               {
-                nam: null,
-                qty: null,
-                honbanbiQty: null,
-                tankaAmt: null,
-                shokeiAmt: null,
+                nam: '',
+                qty: '',
+                honbanbiQty: '',
+                tankaAmt: '',
+                shokeiAmt: '',
               },
             ],
           },
@@ -215,6 +215,7 @@ export const Quotation = () => {
               setIsLoading(false);
               return;
             }
+            const current = getValues('meisaiHeads');
             reset({
               juchuHeadId: data.juchuHeadId,
               kokyakuTantoNam: data.kokyakuTantoNam,
@@ -223,6 +224,7 @@ export const Quotation = () => {
               koenbashoNam: data.koenbashoNam,
               nyuryokuUser: { id: String(user?.id), name: user?.name },
               mituRange: { strt: data.juchuRange.strt, end: data.juchuRange.end },
+              meisaiHeads: current,
             });
             console.log('DB', data);
             setOrder(data);
