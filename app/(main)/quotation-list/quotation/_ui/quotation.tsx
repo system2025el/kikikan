@@ -35,7 +35,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs, { Dayjs } from 'dayjs';
 import Loadable from 'next/dist/shared/lib/loadable.shared-runtime';
-import { useEffect, useRef, useState } from 'react';
+import { SetStateAction, useEffect, useRef, useState } from 'react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import { AutocompleteElement, CheckboxElement, SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
@@ -65,6 +65,8 @@ export const Quotation = () => {
   /* useState ----------------------------------------------------------------- */
   /* ローディング中かどうか */
   const [isLoading, setIsLoading] = useState(true);
+  /* 新規かどうか */
+  const [isNew, setIsNew] = useState(true);
   /* フォーム内の選択肢 */
   const [selectOptions, setSelectOptions] = useState<{ user: SelectTypes[]; mituSts: SelectTypes[] }>({
     user: [],
@@ -138,7 +140,9 @@ export const Quotation = () => {
   /* methods ------------------------------------------------------ */
   /* 保存ボタン押下 */
   const onSubmit = async (data: QuotHeadValues) => {
-    console.log(data);
+    console.log('新規？', isNew);
+    console.log('取得した', data);
+    setIsNew(false);
   };
 
   // 受注選択アコーディオン開閉
@@ -167,6 +171,7 @@ export const Quotation = () => {
       //   mituRange: { strt: savedData.juchuRange.strt, end: savedData.juchuRange.end },
       //   ...savedData,
       // });
+      setIsNew(false); // 新規じゃない
       setIsLoading(false);
       return; // 保存されたデータがあれば、それで処理を終了
     }
@@ -188,7 +193,7 @@ export const Quotation = () => {
           const getjuchu = async (id: number) => {
             const data = await getOrderForQuotation(id);
             if (!data) {
-              setSnackBarMessage(`受注番号${juchuId}はありません`);
+              setSnackBarMessage(`受注番号${juchuId}の受注はありません`);
               setSnackBarOpen(true);
               setIsLoading(false);
               return;
@@ -211,6 +216,7 @@ export const Quotation = () => {
           getjuchu(Number(juchuId));
         } else if (quotId && quotId !== '') {
           // 見積一覧テーブルから選択して開いている
+          setIsNew(false); // 新規じゃない
           const getMitsumori = async (id: number) => {
             console.log('DB, the QuoteId is ', id);
             // setOrder(orderData);
@@ -514,6 +520,7 @@ export const Quotation = () => {
                       },
                     },
                   }}
+                  fullWidth
                 >
                   {!showSecond && (
                     <FirstDialogPage
@@ -524,8 +531,11 @@ export const Quotation = () => {
                   )}
                   {showSecond && (
                     <SecondDialogPage
+                      field={kizaiFields}
                       handleClose={() => setKizaimeisaiaddDialogOpen(false)}
-                      addKizaiTbl={() => kizaiFields.append({ mituMeisaiHeadNam: null, headNamDspFlg: false })}
+                      juchuId={order.juchuHeadId}
+                      setSnackBarOpen={() => setSnackBarOpen(true)}
+                      setSnackBarMessage={setSnackBarMessage}
                     />
                   )}
                 </Dialog>
@@ -543,7 +553,7 @@ export const Quotation = () => {
                   <Grid2 size={1} />
                 </Grid2>
               </Box>
-              {/* 人権費テーブル ------------------------------------------------------------ */}{' '}
+              {/* 人権費テーブル ------------------------------------------------------------ */}
               <Box margin={0.5} padding={0.8} borderTop={1} borderBottom={1} borderColor={'InactiveBorder'}>
                 <Typography variant="h6" pt={1} pl={2}>
                   人権費
@@ -741,6 +751,7 @@ export const Quotation = () => {
         onClose={() => setSnackBarOpen(false)}
         message={snackBarMessage}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={{ marginTop: '65px' }}
       />
     </Container>
   );

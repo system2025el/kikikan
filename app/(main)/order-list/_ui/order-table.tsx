@@ -68,7 +68,7 @@ export const OrderTable = ({
   return (
     <>
       <Box>
-        <Typography pt={2} pl={2}>
+        <Typography pt={1} pl={2}>
           受注一覧
         </Typography>
         <Divider />
