@@ -12,7 +12,7 @@ import { selectJuchu } from '@/app/_lib/db/tables/v-juchu-lst';
 import { JuchuHead } from '@/app/_lib/db/types/t-juchu-head-type';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 
-import { JuchuValues } from './types';
+import { JuchuValues, QuotHeadValues } from './types';
 
 /**
  * 担当者の選択肢リスト取得関数
@@ -152,6 +152,14 @@ export const getJuchuKizaiMeisaiList = async (juchuId: number, kizaiHeadId: numb
     }));
   } catch (e) {
     console.error('例外が発生しました', e);
+    throw e;
+  }
+};
+
+export const addNewQuot = async (data: QuotHeadValues) => {
+  try {
+    console.log(data);
+  } catch (e) {
     throw e;
   }
 };

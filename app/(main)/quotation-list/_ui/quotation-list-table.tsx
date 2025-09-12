@@ -53,7 +53,10 @@ export const QuotaionListTable = () => {
   const onSubmit = (data: { juchuHeadId: number | null }) => {
     console.log(data.juchuHeadId, 'の見積もりを自動生成');
     initJuchuMitsu();
-    sessionStorage.setItem('juchuHeadId', String(data.juchuHeadId ?? ''));
+    sessionStorage.setItem(
+      'juchuHeadId',
+      String(data.juchuHeadId ?? '').replace(/[０-９]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 0xfee0))
+    );
     router.push('/quotation-list/quotation');
   };
   /* 見積系に使っているストレージを開放 */
