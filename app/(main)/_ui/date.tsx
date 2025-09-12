@@ -28,25 +28,15 @@ export const Calendar = (props: { date: Date; onChange: (value: Dayjs | null, vi
   const [view, setView] = useState<'year' | 'month' | 'day'>('day');
 
   return (
-    <LocalizationProvider
-      dateAdapter={AdapterDayjs}
-      dateFormats={{ year: 'YYYY年', month: 'MM' }} // カレンダー内の年一覧のフォーマット
-      adapterLocale="ja"
-      localeText={{
-        previousMonth: '前月を表示',
-        nextMonth: '翌月を表示',
-      }}
-    >
-      <DateCalendar
-        slotProps={{
-          calendarHeader: { format: 'YYYY年MM月' },
-        }} // カレンダーヘッダーのフォーマット
-        value={dayjs(date)}
-        views={['year', 'month', 'day']}
-        onChange={(value) => onChange(value, view)}
-        onViewChange={(newView) => setView(newView)}
-      ></DateCalendar>
-    </LocalizationProvider>
+    <DateCalendar
+      slotProps={{
+        calendarHeader: { format: 'YYYY年MM月' },
+      }} // カレンダーヘッダーのフォーマット
+      value={dayjs(date)}
+      views={['year', 'month', 'day']}
+      onChange={(value) => onChange(value, view)}
+      onViewChange={(newView) => setView(newView)}
+    ></DateCalendar>
   );
 };
 
@@ -76,41 +66,31 @@ const DateX = (props: { sx?: object; disabled?: boolean }) => {
   }, [error]);
 
   return (
-    <LocalizationProvider
-      dateAdapter={AdapterDayjs}
-      dateFormats={{ year: 'YYYY年', month: 'MM' }} // カレンダー内の年一覧のフォーマット
-      adapterLocale="ja"
-      localeText={{
-        previousMonth: '前月を表示',
-        nextMonth: '翌月を表示',
-      }}
-    >
-      <DatePicker
-        name="date"
-        format="YYYY/MM/DD" // テキストエリア内のフォーマット
-        slotProps={{
-          textField: {
-            helperText: errorMessage,
-            size: 'small',
-            sx: {
-              bgcolor: disabled ? grey[200] : 'white',
-              width: '25%',
-              minWidth: 150,
-              padding: 0,
-              '.Mui-disabled': {
-                WebkitTextFillColor: 'black',
-              },
-              ...sx,
+    <DatePicker
+      name="date"
+      format="YYYY/MM/DD" // テキストエリア内のフォーマット
+      slotProps={{
+        textField: {
+          helperText: errorMessage,
+          size: 'small',
+          sx: {
+            bgcolor: disabled ? grey[200] : 'white',
+            width: '25%',
+            minWidth: 150,
+            padding: 0,
+            '.Mui-disabled': {
+              WebkitTextFillColor: 'black',
             },
+            ...sx,
           },
-          calendarHeader: { format: 'YYYY年MM月' },
-        }} // カレンダーヘッダーのフォーマット
-        defaultValue={today}
-        onError={(newError: DateValidationError) => setError(newError)}
-        views={['year', 'month', 'day']}
-        disabled={disabled}
-      />
-    </LocalizationProvider>
+        },
+        calendarHeader: { format: 'YYYY年MM月' },
+      }} // カレンダーヘッダーのフォーマット
+      defaultValue={today}
+      onError={(newError: DateValidationError) => setError(newError)}
+      views={['year', 'month', 'day']}
+      disabled={disabled}
+    />
   );
 };
 
@@ -138,64 +118,54 @@ export const TestDate = (props: {
   const [open, setOpen] = useState(false);
 
   return (
-    <LocalizationProvider
-      dateAdapter={AdapterDayjs}
-      dateFormats={{ year: 'YYYY年', month: 'MM' }} // カレンダー内の年一覧のフォーマット
-      adapterLocale="ja"
-      localeText={{
-        previousMonth: '前月を表示',
-        nextMonth: '翌月を表示',
-      }}
-    >
-      <DatePicker
-        name="date"
-        format="YYYY/MM/DD" // テキストエリア内のフォーマット
-        open={open}
-        onOpen={() => setOpen(true)}
-        onClose={() => setOpen(false)}
-        slotProps={{
-          textField: {
-            helperText: fieldstate?.error?.message,
-            FormHelperTextProps: {
-              sx: { color: 'error.main', fontSize: '0.75rem' },
-            },
-            size: 'small',
-            sx: {
-              bgcolor: disabled ? grey[200] : 'white',
-              width: 160,
-              padding: 0,
-              '.Mui-disabled': {
-                WebkitTextFillColor: 'black',
-              },
-              ...sx,
-            },
-            error: fieldstate?.invalid,
-            InputProps: {
-              endAdornment: (
-                <>
-                  {date && (
-                    <IconButton size="small" sx={{ p: 0 }} onClick={onClear} disabled={disabled}>
-                      <ClearIcon fontSize="small" />
-                    </IconButton>
-                  )}
-                  <IconButton size="small" sx={{ p: 0 }} onClick={() => setOpen(true)} disabled={disabled}>
-                    <CalendarTodayIcon fontSize="small" />
-                  </IconButton>
-                </>
-              ),
-            },
+    <DatePicker
+      name="date"
+      format="YYYY/MM/DD" // テキストエリア内のフォーマット
+      open={open}
+      onOpen={() => setOpen(true)}
+      onClose={() => setOpen(false)}
+      slotProps={{
+        textField: {
+          helperText: fieldstate?.error?.message,
+          FormHelperTextProps: {
+            sx: { color: 'error.main', fontSize: '0.75rem' },
           },
-          calendarHeader: { format: 'YYYY年MM月' },
-        }} // カレンダーヘッダーのフォーマット
-        value={date && dayjs(date)}
-        minDate={minDate && dayjs(minDate)}
-        maxDate={maxDate && dayjs(maxDate)}
-        views={['year', 'month', 'day']}
-        disabled={disabled}
-        onChange={onChange}
-        onAccept={onBlur}
-      />
-    </LocalizationProvider>
+          size: 'small',
+          sx: {
+            bgcolor: disabled ? grey[200] : 'white',
+            width: 160,
+            padding: 0,
+            '.Mui-disabled': {
+              WebkitTextFillColor: 'black',
+            },
+            ...sx,
+          },
+          error: fieldstate?.invalid,
+          InputProps: {
+            endAdornment: (
+              <>
+                {date && (
+                  <IconButton size="small" sx={{ p: 0 }} onClick={onClear} disabled={disabled}>
+                    <ClearIcon fontSize="small" />
+                  </IconButton>
+                )}
+                <IconButton size="small" sx={{ p: 0 }} onClick={() => setOpen(true)} disabled={disabled}>
+                  <CalendarTodayIcon fontSize="small" />
+                </IconButton>
+              </>
+            ),
+          },
+        },
+        calendarHeader: { format: 'YYYY年MM月' },
+      }} // カレンダーヘッダーのフォーマット
+      value={date && dayjs(date)}
+      minDate={minDate && dayjs(minDate)}
+      maxDate={maxDate && dayjs(maxDate)}
+      views={['year', 'month', 'day']}
+      disabled={disabled}
+      onChange={onChange}
+      onAccept={onBlur}
+    />
   );
 };
 
@@ -208,62 +178,52 @@ export const TwoDatePickers = (props: { sx?: object; disabled?: boolean }) => {
   const { sx, disabled } = props;
   return (
     <>
-      <LocalizationProvider
-        dateAdapter={AdapterDayjs}
-        dateFormats={{ year: 'YYYY年', month: 'MM' }} // カレンダー内の年一覧のフォーマット
-        adapterLocale="ja"
-        localeText={{
-          previousMonth: '前月を表示',
-          nextMonth: '翌月を表示',
-        }}
-      >
-        <DatePicker
-          name="date"
-          format="YYYY/MM/DD" // テキストエリア内のフォーマット
-          slotProps={{
-            textField: {
-              size: 'small',
-              sx: {
-                width: '15%',
-                minWidth: 150,
-                ...sx,
-                bgcolor: disabled ? grey[200] : 'white',
-                '.Mui-disabled': {
-                  WebkitTextFillColor: 'black',
-                },
-                ...sx,
+      <DatePicker
+        name="date"
+        format="YYYY/MM/DD" // テキストエリア内のフォーマット
+        slotProps={{
+          textField: {
+            size: 'small',
+            sx: {
+              width: '15%',
+              minWidth: 150,
+              ...sx,
+              bgcolor: disabled ? grey[200] : 'white',
+              '.Mui-disabled': {
+                WebkitTextFillColor: 'black',
               },
+              ...sx,
             },
-            calendarHeader: { format: 'YYYY年MM月' },
-          }} // カレンダーヘッダーのフォーマット
-          defaultValue={today}
-          views={['year', 'month', 'day']}
-          className="MuiDateText"
-        />
-        ～
-        <DatePicker
-          name="date"
-          format="YYYY/MM/DD" // テキストエリア内のフォーマット
-          slotProps={{
-            textField: {
-              size: 'small',
-              sx: {
-                width: '15%',
-                minWidth: 150,
-                ...sx,
-                bgcolor: disabled ? grey[300] : 'white',
-                '.Mui-disabled': {
-                  WebkitTextFillColor: 'black',
-                },
-                ...sx,
+          },
+          calendarHeader: { format: 'YYYY年MM月' },
+        }} // カレンダーヘッダーのフォーマット
+        defaultValue={today}
+        views={['year', 'month', 'day']}
+        className="MuiDateText"
+      />
+      ～
+      <DatePicker
+        name="date"
+        format="YYYY/MM/DD" // テキストエリア内のフォーマット
+        slotProps={{
+          textField: {
+            size: 'small',
+            sx: {
+              width: '15%',
+              minWidth: 150,
+              ...sx,
+              bgcolor: disabled ? grey[300] : 'white',
+              '.Mui-disabled': {
+                WebkitTextFillColor: 'black',
               },
+              ...sx,
             },
-            calendarHeader: { format: 'YYYY年MM月' },
-          }} // カレンダーヘッダーのフォーマット
-          defaultValue={today}
-          views={['year', 'month', 'day']}
-        />
-      </LocalizationProvider>
+          },
+          calendarHeader: { format: 'YYYY年MM月' },
+        }} // カレンダーヘッダーのフォーマット
+        defaultValue={today}
+        views={['year', 'month', 'day']}
+      />
     </>
   );
 };
