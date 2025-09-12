@@ -14,7 +14,7 @@ export const Dashboard = () => {
   return (
     <>
       <Typography variant="h5">ダッシュボード</Typography>
-      <Accordion defaultExpanded>
+      {/* <Accordion defaultExpanded>
         <AccordionSummary expandIcon={<ExpandMoreIcon />} id="info" sx={{ bgcolor: selectedBgColor }}>
           <Typography variant="body1">お知らせ</Typography>
         </AccordionSummary>
@@ -51,7 +51,7 @@ export const Dashboard = () => {
           <br />
           <Link href={'/'}>JDC</Link>
         </AccordionDetails>
-      </Accordion>
+      </Accordion> */}
     </>
   );
 };
