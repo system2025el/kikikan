@@ -103,13 +103,6 @@ export const QuotHeadSchema = z.object({
     .max(2, { message: validationMessages.maxNumberLength(2) })
     .nullish(),
   biko: z.string().max(100).nullish(),
-  meisaiHeads: z
-    .object({
-      kizai: z.array(quotMeisaiHeadSchema).nullish(),
-      labor: z.array(quotMeisaiHeadSchema).nullish(),
-      other: z.array(quotMeisaiHeadSchema).nullish(),
-    })
-    .nullish(),
   comment: z.string().max(100).nullish(),
   chukeiMei: z.string().max(10).nullish(),
   tokuNebikiMei: z.string().max(10).nullish(),
@@ -129,6 +122,13 @@ export const QuotHeadSchema = z.object({
     .max(3, { message: validationMessages.maxNumberLength(3) })
     .nullish(),
   gokeiAmt: z.number().nullish(),
+  meisaiHeads: z
+    .object({
+      kizai: z.array(quotMeisaiHeadSchema).nullish(),
+      labor: z.array(quotMeisaiHeadSchema).nullish(),
+      other: z.array(quotMeisaiHeadSchema).nullish(),
+    })
+    .nullish(),
 });
 
 /**

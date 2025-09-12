@@ -20,7 +20,7 @@ import { boolean, number } from 'zod';
 import { CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
 import { Loading } from '@/app/(main)/_ui/loading';
 
-import { getJuchuKizaiHeadNamList, getJuchuKizaiMeisaiList } from '../_lib/func';
+import { getJuchuKizaiHeadNamList, getJuchuKizaiMeisaiList, getJuchuMeisaiSum } from '../_lib/func';
 import { QuotHeadValues } from '../_lib/types';
 
 export const FirstDialogPage = ({
@@ -85,11 +85,16 @@ export const SecondDialogPage = ({
   /* ヘッダが選ばれたときの処理 */
   const handleClickHeadNam = async (juchuId: number, kizaiHeadId: number, headNam: string, checked: boolean) => {
     console.log(kizaiHeadId, checked);
-    /* ここでDB処理 */
-    const data = await getJuchuKizaiMeisaiList(juchuId, kizaiHeadId);
-    console.log(data);
-    // 取得した内容をテーブル内の明細に入れる
-    field.append({ mituMeisaiHeadNam: null, headNamDspFlg: false, meisai: data });
+    if (checked) {
+      const data = await getJuchuMeisaiSum(juchuId, kizaiHeadId);
+      field.append({ mituMeisaiHeadNam: null, headNamDspFlg: false, meisai: [{ nam: headNam, ...data }] });
+    } else {
+      /* ここでDB処理 */
+      const data = await getJuchuKizaiMeisaiList(juchuId, kizaiHeadId);
+      console.log(data);
+      // 取得した内容をテーブル内の明細に入れる
+      field.append({ mituMeisaiHeadNam: null, headNamDspFlg: false, meisai: data });
+    }
     handleClose();
   };
   /* eslint-disable react-hooks/exhaustive-deps */
