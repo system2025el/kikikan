@@ -162,8 +162,7 @@ export const TestDate = (props: {
             size: 'small',
             sx: {
               bgcolor: disabled ? grey[200] : 'white',
-              width: '25%',
-              minWidth: 160,
+              width: 160,
               padding: 0,
               '.Mui-disabled': {
                 WebkitTextFillColor: 'black',

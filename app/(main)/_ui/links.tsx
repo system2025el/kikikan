@@ -59,9 +59,9 @@ const masterList: MenuItem[] = [
 const settingList: MenuItem[] = [];
 /* 入出庫管理リスト */
 const stockIOList: MenuItem[] = [
-  { name: '出庫一覧', url: '/' },
-  { name: '入庫一覧', url: '/' },
-  { name: '移動一覧', url: '/' },
+  { name: '出庫', url: '/shuko-list' },
+  { name: '入庫', url: '/nyuko' },
+  { name: '移動', url: '/' },
   { name: 'Weeklyスケジュール', url: '/' },
 ];
 /* ログアウトリスト */
@@ -268,11 +268,8 @@ export default function NavLinks() {
         <ListItemText>入出庫管理</ListItemText>
         {stockIOOpen ? <ExpandLess /> : <ExpandMore />}
       </ListItemButton>
-      {/* <Collapse in={stockIOOpen} timeout="auto" unmountOnExit>
+      <Collapse in={stockIOOpen} timeout="auto" unmountOnExit>
         <List disablePadding>
-          <ListSubheader>
-            <Box>出庫</Box>
-          </ListSubheader>
           {stockIOList.map((text) => (
             <ListItem
               key={text.name}
@@ -282,12 +279,15 @@ export default function NavLinks() {
               }}
             >
               <ListItemButton href={text.url} dense>
-                <ListItemText primary={text.name} sx={{ color: isSelected(text.url) ? 'primary.dark' : undefined, pl: 8 }} />
+                <ListItemText
+                  primary={text.name}
+                  sx={{ color: isSelected(text.url) ? 'primary.dark' : undefined, pl: 8 }}
+                />
               </ListItemButton>
             </ListItem>
           ))}
         </List>
-      </Collapse> */}
+      </Collapse>
       {/* ログアウト */}
       {/* <ListItemButton onClick={loginClick}>
         <ListItemIcon>
