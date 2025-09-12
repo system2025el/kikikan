@@ -71,7 +71,7 @@ export const BumonsMasterTable = ({
   return (
     <>
       <Box>
-        <Typography pt={2} pl={2}>
+        <Typography pt={1} pl={2}>
           一覧
         </Typography>
         <Divider />

@@ -333,9 +333,9 @@ export const RSuiteDateRangePicker = (props: Props) => {
           }
 
           .error-picker .rs-picker-toggle {
-  border: 1px solid red !important;
-  border-radius: 4px;
-}
+            border: 1px solid red !important;
+            border-radius: 4px;
+          }
         `}
       </style>
       <DateRangePicker
@@ -354,6 +354,7 @@ export const RSuiteDateRangePicker = (props: Props) => {
         }}
         onOk={onChange}
         disabled={disabled}
+        cleanable
         /*calendarSnapping*/
       />
     </>

@@ -57,6 +57,7 @@ export const ExportMaster = () => {
         onClose={() => setSnackBarOpen(false)}
         message={snackBarMessage}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={{ marginTop: '65px' }}
       />
     </Container>
   );

@@ -91,7 +91,7 @@ export const QuotaionListTable = () => {
   return (
     <>
       <Box>
-        <Typography pt={0.5} pl={2}>
+        <Typography pt={1} pl={2}>
           見積一覧
         </Typography>
         <Divider />

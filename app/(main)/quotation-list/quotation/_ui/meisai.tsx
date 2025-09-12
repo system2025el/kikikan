@@ -61,16 +61,16 @@ export const MeisaiLines = ({
               )}
             </Grid2>
             <Grid2 size={1}>
-              <TextField />
+              <TextFieldElement name={`meisaiHeads.${sectionNam}.${index}.meisai.${i}.qty`} control={control} />
             </Grid2>
             <Grid2 size={0.8}>
-              <TextField />
+              <TextFieldElement name={`meisaiHeads.${sectionNam}.${index}.meisai.${i}.honbanbiQty`} control={control} />
             </Grid2>
             <Grid2 size={1.5}>
-              <TextField />
+              <TextFieldElement name={`meisaiHeads.${sectionNam}.${index}.meisai.${i}.tankaAmt`} control={control} />
             </Grid2>
             <Grid2 size={2}>
-              <TextField />
+              <TextFieldElement name={`meisaiHeads.${sectionNam}.${index}.meisai.${i}.shokeiAmt`} control={control} />
             </Grid2>
             <Grid2 size={1}>
               <IconButton

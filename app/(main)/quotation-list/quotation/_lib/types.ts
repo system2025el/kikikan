@@ -108,6 +108,12 @@ export const QuotHeadSchema = z.object({
     .regex(/^[0-9]+$/)
     .max(12, { message: validationMessages.maxNumberLength(12) })
     .nullish(),
+  zeiRat: z
+    .string()
+    .regex(/^[0-9]+$/)
+    .max(3, { message: validationMessages.maxNumberLength(3) })
+    .nullish(),
+  gokeiAmt: z.number().nullish(),
 });
 
 /**
