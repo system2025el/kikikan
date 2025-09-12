@@ -1,3 +1,5 @@
+import { getShukoList } from '../../../_lib/funcs';
+import { ShukoListSearchValues } from '../../../_lib/types';
 import { ShukoDetail } from './_ui/shuko-detail';
 
 const Page = async (props: { params: Promise<{ juchu_head_id: number; mode: string }> }) => {

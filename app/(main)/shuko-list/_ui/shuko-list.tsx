@@ -19,13 +19,13 @@ import { Controller, TextFieldElement, useForm } from 'react-hook-form-mui';
 import { TestDate } from '../../_ui/date';
 import { Loading } from '../../_ui/loading';
 import { getShukoList } from '../_lib/funcs';
-import { ShukoTableValues } from '../_lib/types';
+import { ShukoListSearchValues, ShukoTableValues } from '../_lib/types';
 import { ShukoListTable } from './shuko-list-table';
 
-export const ShukoList = () => {
+export const ShukoList = (props: { shukoData: ShukoTableValues[] }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [selected, setSelected] = useState<number[]>([]);
-  const [shukoList, setShukoList] = useState<ShukoTableValues[]>([]);
+  const [shukoList, setShukoList] = useState<ShukoTableValues[]>(props.shukoData);
 
   /* useForm ------------------- */
   const { control, handleSubmit } = useForm({
@@ -37,7 +37,7 @@ export const ShukoList = () => {
     },
   });
 
-  const onSubmit = async (data: { juchuHeadId: number | null; shukoDat: Date | null; shukoBasho: number }) => {
+  const onSubmit = async (data: ShukoListSearchValues) => {
     setIsLoading(true);
     const newShukoList = await getShukoList(data);
     setShukoList(newShukoList);
@@ -126,7 +126,11 @@ export const ShukoList = () => {
                 <Button onClick={handleOutput}>納品書出力</Button>
               </Box>
             </Box>
-            <ShukoListTable datas={shukoList} onSelectionChange={setSelected} />
+            {shukoList.length > 0 ? (
+              <ShukoListTable datas={shukoList} onSelectionChange={setSelected} />
+            ) : (
+              <Typography p={1}>該当するデータがありません</Typography>
+            )}
           </Box>
         )}
       </Paper>
