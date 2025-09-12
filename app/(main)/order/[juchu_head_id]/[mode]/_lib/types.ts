@@ -35,8 +35,8 @@ export const OrderSchema = z.object({
     .nullable(),
   mem: z.string().nullable(),
   nebikiAmt: z
-    .string()
-    .max(8, { message: validationMessages.maxNumberLength(8) })
+    .number()
+    .max(99999999, { message: validationMessages.maxNumberLength(8) })
     .nullable(),
   zeiKbn: z.number(),
 });

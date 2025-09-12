@@ -609,13 +609,13 @@ export const Order = (props: {
                       onBlur={(e) => {
                         const rawValue = e.target.value.replace(/[¥,]/g, '');
                         const numericValue = Number(rawValue);
-                        field.onChange(rawValue);
+                        field.onChange(numericValue);
                         setIsEditing(false);
                       }}
                       onChange={(e) => {
                         const raw = e.target.value.replace(/[^\d]/g, '');
                         if (/^\d*$/.test(raw)) {
-                          field.onChange(raw);
+                          field.onChange(Number(raw));
                           e.target.value = raw;
                         }
                       }}
