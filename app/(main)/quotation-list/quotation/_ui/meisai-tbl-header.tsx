@@ -80,7 +80,7 @@ export const MeisaiTblHeader = ({
         </Grid2>
         <Grid2 size={0.8}>
           <Typography variant="body2" fontWeight={500}>
-            仕様日
+            使用日
           </Typography>
         </Grid2>
         <Grid2 size={1.5}>

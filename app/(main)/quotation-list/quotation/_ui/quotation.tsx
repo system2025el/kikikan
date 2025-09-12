@@ -128,7 +128,21 @@ export const Quotation = () => {
       mituHonbanbiQty: null,
       biko: null,
       meisaiHeads: {
-        kizai: [{ mituMeisaiHeadNam: '', headNamDspFlg: false, meisai: [{ nam: null }] }],
+        kizai: [
+          {
+            mituMeisaiHeadNam: '',
+            headNamDspFlg: false,
+            meisai: [
+              {
+                nam: null,
+                qty: null,
+                honbanbiQty: null,
+                tankaAmt: null,
+                shokeiAmt: null,
+              },
+            ],
+          },
+        ],
       },
     },
   });
@@ -446,19 +460,18 @@ export const Quotation = () => {
           <Box sx={{ padding: 0, pb: 1 }}>
             <Divider />
             {/* 機材費テーブル ------------------------------------------------------------ */}
-            <Box margin={0.5} padding={0.8} borderBottom={1} borderColor={'InactiveBorder'}>
+            <Box margin={0.5} padding={0.8} borderBottom={1} borderColor={'divider'}>
               <Typography variant="h6" pt={1} pl={2}>
                 機材費
               </Typography>
               {kizaiFields.fields.map((field, index) => (
                 <Box key={field.id} p={1}>
-                  {/* {index > 0 && <Divider sx={{ mx: 5 }} />} */}
                   <MeisaiTblHeader index={index} control={control} sectionNam="kizai" sectionFields={kizaiFields} />
                   <MeisaiLines control={control} index={index} sectionNam="kizai" />
                   <Grid2 container px={2} my={0.5} alignItems={'center'} spacing={0.5}>
                     <Grid2 size={'grow'} />
                     <Grid2 size={3}>
-                      <TextField />
+                      <TextFieldElement name={`meisaiHeads.kizai.${index}.biko1`} control={control} />
                     </Grid2>
                     <Grid2 size={1.5}>
                       <Typography textAlign="end">小計</Typography>
@@ -471,7 +484,7 @@ export const Quotation = () => {
                   <Grid2 container px={2} my={0.5} alignItems={'center'} spacing={0.5}>
                     <Grid2 size={'grow'} />
                     <Grid2 size={3}>
-                      <TextField />
+                      <TextFieldElement name={`meisaiHeads.kizai.${index}.biko2`} control={control} />
                     </Grid2>
                     <Grid2 size={1.5}>
                       <TextField />
@@ -484,7 +497,7 @@ export const Quotation = () => {
                   <Grid2 container px={2} my={0.5} alignItems={'center'} spacing={0.5}>
                     <Grid2 size={'grow'} />
                     <Grid2 size={3}>
-                      <TextField />
+                      <TextFieldElement name={`meisaiHeads.kizai.${index}.biko3`} control={control} />
                     </Grid2>
                     <Grid2 size={1.5}>
                       <TextField />
@@ -549,7 +562,7 @@ export const Quotation = () => {
               </Grid2>
             </Box>
             {/* 人権費テーブル ------------------------------------------------------------ */}
-            <Box margin={0.5} padding={0.8} borderTop={1} borderBottom={1} borderColor={'InactiveBorder'}>
+            <Box margin={0.5} padding={0.8} borderTop={1} borderBottom={1} borderColor={'divider'}>
               <Typography variant="h6" pt={1} pl={2}>
                 人権費
               </Typography>
@@ -561,7 +574,7 @@ export const Quotation = () => {
                   <Grid2 container px={2} my={0.5} alignItems={'center'} spacing={0.5}>
                     <Grid2 size={'grow'} />
                     <Grid2 size={3}>
-                      <TextField />
+                      <TextFieldElement name={`meisaiHeads.labor.${index}.biko1`} control={control} />
                     </Grid2>
                     <Grid2 size={1.5}>
                       <Typography textAlign="end">小計</Typography>
@@ -574,7 +587,7 @@ export const Quotation = () => {
                   <Grid2 container px={2} my={0.5} alignItems={'center'} spacing={0.5}>
                     <Grid2 size={'grow'} />
                     <Grid2 size={3}>
-                      <TextField />
+                      <TextFieldElement name={`meisaiHeads.labor.${index}.biko2`} control={control} />
                     </Grid2>
                     <Grid2 size={1.5}>
                       <TextField />
@@ -587,7 +600,7 @@ export const Quotation = () => {
                   <Grid2 container px={2} my={0.5} alignItems={'center'} spacing={0.5}>
                     <Grid2 size={'grow'} />
                     <Grid2 size={3}>
-                      <TextField />
+                      <TextFieldElement name={`meisaiHeads.labor.${index}.biko3`} control={control} />
                     </Grid2>
                     <Grid2 size={1.5}>
                       <TextField />
@@ -610,7 +623,7 @@ export const Quotation = () => {
               </Box>
             </Box>
             {/* その他テーブル ------------------------------------------------------------ */}
-            <Box margin={0.5} padding={0.8} borderTop={1} borderBottom={1} borderColor={'InactiveBorder'}>
+            <Box margin={0.5} padding={0.8} borderTop={1} borderBottom={1} borderColor={'divider'}>
               <Typography variant="h6" pt={1} pl={2}>
                 その他
               </Typography>
@@ -622,7 +635,7 @@ export const Quotation = () => {
                   <Grid2 container px={2} my={0.5} alignItems={'center'} spacing={0.5}>
                     <Grid2 size={'grow'} />
                     <Grid2 size={3}>
-                      <TextField />
+                      <TextFieldElement name={`meisaiHeads.other.${index}.biko1`} control={control} />
                     </Grid2>
                     <Grid2 size={1.5}>
                       <Typography textAlign="end">小計</Typography>
@@ -635,7 +648,7 @@ export const Quotation = () => {
                   <Grid2 container px={2} my={0.5} alignItems={'center'} spacing={0.5}>
                     <Grid2 size={'grow'} />
                     <Grid2 size={3}>
-                      <TextField />
+                      <TextFieldElement name={`meisaiHeads.other.${index}.biko2`} control={control} />
                     </Grid2>
                     <Grid2 size={1.5}>
                       <TextField />
@@ -648,7 +661,7 @@ export const Quotation = () => {
                   <Grid2 container px={2} my={0.5} alignItems={'center'} spacing={0.5}>
                     <Grid2 size={'grow'} />
                     <Grid2 size={3}>
-                      <TextField />
+                      <TextFieldElement name={`meisaiHeads.other.${index}.biko3`} control={control} />
                     </Grid2>
                     <Grid2 size={1.5}>
                       <TextField />
@@ -670,7 +683,7 @@ export const Quotation = () => {
                 </Button>
               </Box>
             </Box>
-            <Box margin={0.5} padding={0.8} borderTop={1} borderColor={'InactiveBorder'}>
+            <Box margin={0.5} padding={0.8} borderTop={1} borderColor={'divider'}>
               <Grid2 container display={'flex'} alignItems={'baseline'} spacing={0.5}>
                 <Grid2 size={1} alignContent={'baseline'}>
                   <Box>

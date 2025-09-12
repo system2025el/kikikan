@@ -129,7 +129,7 @@ export const getJuchuKizaiHeadNamList = async (juchuId: number) => {
 
 export const getJuchuKizaiMeisaiList = async (juchuId: number, kizaiHeadId: number) => {
   try {
-    const { data, error } = await selectOyaJuchuKizaiMeisai(juchuId, kizaiHeadId);
+    const { data, error } = await selectOyaJuchuKizaiMeisai(juchuId, kizaiHeadId); // ビューが欲しい
     const { data: honbanbi, error: honbanbiError } = await selectJuchuHonbanbiQty(juchuId, kizaiHeadId);
     if (error) {
       console.error('DB情報取得エラー', error.message, error.cause, error.hint);
@@ -156,6 +156,21 @@ export const getJuchuKizaiMeisaiList = async (juchuId: number, kizaiHeadId: numb
   }
 };
 
+export const getJuchuMeisaiSum = async (juchuId: number, kizaiHeadId: number) => {
+  try {
+    const data = await getJuchuKizaiMeisaiList(juchuId, kizaiHeadId);
+    const qtySum = data.reduce((sum, item) => sum + Number(item.tankaAmt), 0);
+    return [{ tankaAmt: String(qtySum) }];
+  } catch (e) {
+    console.error('例外が発生しました', e);
+    throw e;
+  }
+};
+
+/**
+ * 見積を保存する関数
+ * @param data 見積書フォーム内容
+ */
 export const addNewQuot = async (data: QuotHeadValues) => {
   try {
     console.log(data);
