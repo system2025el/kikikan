@@ -2,6 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import AddIcon from '@mui/icons-material/Add';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import CheckIcon from '@mui/icons-material/Check';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
@@ -14,6 +15,7 @@ import {
   ClickAwayListener,
   Dialog,
   Divider,
+  Fab,
   FormControl,
   Grid2,
   MenuItem,
@@ -548,6 +550,11 @@ export const EquipmentKeepOrderDetail = (props: {
     }
   };
 
+  // ぺージトップへ戻る
+  const scrollTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   // アコーディオン開閉
   const handleExpansion = () => {
     setExpanded((prevExpanded) => !prevExpanded);
@@ -947,21 +954,31 @@ export const EquipmentKeepOrderDetail = (props: {
                   </Grid2>
                 </Grid2>
                 <Grid2 container alignItems="center" p={2} spacing={2}>
-                  <Grid2 container alignItems="center">
-                    <Typography>メモ</Typography>
-                    <TextFieldElement
-                      name="mem"
-                      control={control}
-                      multiline
-                      rows={3}
-                      disabled={!edit}
-                    ></TextFieldElement>
-                  </Grid2>
-                  <Grid2 container alignItems="center">
-                    <Typography>入出庫ステータス</Typography>
-                    <TextField disabled defaultValue={'準備中'}></TextField>
-                  </Grid2>
+                  <Typography>入出庫ステータス</Typography>
+                  <TextField disabled defaultValue={'準備中'}></TextField>
                 </Grid2>
+                <Box display={'flex'} alignItems="center" p={2}>
+                  <Typography mr={2}>メモ</Typography>
+                  <TextFieldElement
+                    name="mem"
+                    control={control}
+                    multiline
+                    rows={3}
+                    fullWidth
+                    disabled={!edit}
+                    // sx={{
+                    //   '& .MuiInputBase-root': {
+                    //     resize: 'both',
+                    //     overflow: 'auto',
+                    //     alignItems: 'flex-start',
+                    //   },
+                    //   '& .MuiInputBase-inputMultiline': {
+                    //     textAlign: 'left',
+                    //     paddingTop: '8px',
+                    //   },
+                    // }}
+                  ></TextFieldElement>
+                </Box>
               </AccordionDetails>
             </Accordion>
           </form>
@@ -1004,6 +1021,9 @@ export const EquipmentKeepOrderDetail = (props: {
               </Box>
             </Box>
           </Paper>
+          <Fab color="primary" onClick={scrollTop} sx={{ position: 'fixed', bottom: 32, right: 32, zIndex: 1000 }}>
+            <ArrowUpwardIcon fontSize="small" />
+          </Fab>
           <SaveAlertDialog open={saveOpen} onClick={() => setSaveOpen(false)} />
           <IsDirtyAlertDialog open={dirtyOpen} onClick={handleResultDialog} />
         </Box>

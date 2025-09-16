@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import AddIcon from '@mui/icons-material/Add';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import CheckIcon from '@mui/icons-material/Check';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
@@ -17,6 +18,7 @@ import {
   Container,
   Dialog,
   Divider,
+  Fab,
   FormControl,
   Grid2,
   IconButton,
@@ -910,6 +912,11 @@ export const EquipmentReturnOrderDetail = (props: {
     setEqSelectionDialogOpen(true);
   };
 
+  // ぺージトップへ戻る
+  const scrollTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   // アコーディオン開閉
   const handleExpansion = () => {
     setExpanded((prevExpanded) => !prevExpanded);
@@ -1238,49 +1245,56 @@ export const EquipmentReturnOrderDetail = (props: {
                     </Grid2>
                   </Grid2>
                 </Grid2>
-                <Grid2 container alignItems="center" p={2} spacing={2}>
-                  <Grid2 container alignItems="center">
-                    <Typography>メモ</Typography>
-                    <TextFieldElement
-                      name="mem"
-                      control={control}
-                      multiline
-                      rows={3}
-                      disabled={!edit}
-                    ></TextFieldElement>
-                  </Grid2>
-                  <Grid2 container alignItems="center">
+                <Box display={'flex'} p={2}>
+                  <Grid2 container alignItems="center" spacing={1}>
                     <Typography>本番日数</Typography>
-                    <Controller
+                    <TextFieldElement
                       name="juchuHonbanbiQty"
                       control={control}
-                      render={({ field }) => (
-                        <TextField
-                          value={field.value}
-                          type="number"
-                          onChange={(e) => handleHonbanbiChange(Number(e.target.value))}
-                          sx={{
-                            width: '5%',
-                            minWidth: '60px',
-                            '& .MuiInputBase-input': {
-                              textAlign: 'right',
-                            },
-                            '& input[type=number]::-webkit-inner-spin-button': {
-                              WebkitAppearance: 'none',
-                              margin: 0,
-                            },
-                          }}
-                          disabled={!edit}
-                        />
-                      )}
-                    />
+                      type="number"
+                      sx={{
+                        minWidth: '60px',
+                        maxWidth: '80px',
+                        '& .MuiInputBase-input': {
+                          textAlign: 'right',
+                        },
+                        '& input[type=number]::-webkit-inner-spin-button': {
+                          WebkitAppearance: 'none',
+                          margin: 0,
+                        },
+                      }}
+                      slotProps={{ input: { readOnly: true } }}
+                      disabled={!edit}
+                    ></TextFieldElement>
                     <Typography>日</Typography>
                   </Grid2>
-                </Grid2>
-                <Grid2 container alignItems="center" p={2} spacing={2}>
-                  <Typography>入出庫ステータス</Typography>
-                  <TextField disabled defaultValue={'準備中'}></TextField>
-                </Grid2>
+                  <Grid2 container alignItems="center" spacing={1} ml={3}>
+                    <Typography>入出庫ステータス</Typography>
+                    <TextField disabled defaultValue={'準備中'}></TextField>
+                  </Grid2>
+                </Box>
+                <Box display={'flex'} alignItems="center" p={2}>
+                  <Typography mr={2}>メモ</Typography>
+                  <TextFieldElement
+                    name="mem"
+                    control={control}
+                    multiline
+                    rows={3}
+                    fullWidth
+                    disabled={!edit}
+                    // sx={{
+                    //   '& .MuiInputBase-root': {
+                    //     resize: 'both',
+                    //     overflow: 'auto',
+                    //     alignItems: 'flex-start',
+                    //   },
+                    //   '& .MuiInputBase-inputMultiline': {
+                    //     textAlign: 'left',
+                    //     paddingTop: '8px',
+                    //   },
+                    // }}
+                  ></TextFieldElement>
+                </Box>
               </AccordionDetails>
             </Accordion>
           </form>
@@ -1372,6 +1386,9 @@ export const EquipmentReturnOrderDetail = (props: {
               </Box>
             )}
           </Paper>
+          <Fab color="primary" onClick={scrollTop} sx={{ position: 'fixed', bottom: 32, right: 32, zIndex: 1000 }}>
+            <ArrowUpwardIcon fontSize="small" />
+          </Fab>
           <SaveAlertDialog open={saveOpen} onClick={() => setSaveOpen(false)} />
           <IsDirtyAlertDialog open={dirtyOpen} onClick={handleResultDialog} />
         </Box>
