@@ -445,49 +445,47 @@ export const Order = (props: {
           <Divider />
           <Grid2 container spacing={{ xs: 0, sm: 0, md: 2 }}>
             <Grid2 size={{ xs: 12, sm: 12, md: 6 }}>
-              <Grid2 container margin={2} spacing={2}>
-                <Grid2 display="flex" direction="row" alignItems="center">
-                  <Typography marginRight={5} whiteSpace="nowrap">
-                    受注番号
-                  </Typography>
-                  {getValues('juchuHeadId') === 0 ? (
-                    <TextField slotProps={{ input: { readOnly: true } }}></TextField>
-                  ) : (
-                    <TextFieldElement
-                      name="juchuHeadId"
-                      control={control}
-                      type="number"
-                      sx={{
-                        '& input[type=number]::-webkit-inner-spin-button': {
-                          WebkitAppearance: 'none',
-                          margin: 0,
-                        },
-                      }}
-                      slotProps={{ input: { readOnly: true } }}
-                    ></TextFieldElement>
-                  )}
-                </Grid2>
-                <Grid2 display="flex" direction="row" alignItems="center">
-                  <Typography mr={2}>受注ステータス</Typography>
-                  <FormControl size="small" sx={{ width: 120 }}>
-                    <Controller
-                      name="juchuSts"
-                      control={control}
-                      render={({ field }) => (
-                        <Select {...field} disabled={!edit}>
-                          <MenuItem value={0}>入力中</MenuItem>
-                          <MenuItem value={1}>仮受注</MenuItem>
-                          <MenuItem value={2}>処理中</MenuItem>
-                          <MenuItem value={3}>確定</MenuItem>
-                          <MenuItem value={4}>貸出済み</MenuItem>
-                          <MenuItem value={5}>返却済み</MenuItem>
-                          <MenuItem value={9}>受注キャンセル</MenuItem>
-                        </Select>
-                      )}
-                    />
-                  </FormControl>
-                </Grid2>
-              </Grid2>
+              <Box sx={styles.container}>
+                <Typography marginRight={5} whiteSpace="nowrap">
+                  受注番号
+                </Typography>
+                {getValues('juchuHeadId') === 0 ? (
+                  <TextField slotProps={{ input: { readOnly: true } }}></TextField>
+                ) : (
+                  <TextFieldElement
+                    name="juchuHeadId"
+                    control={control}
+                    type="number"
+                    sx={{
+                      '& input[type=number]::-webkit-inner-spin-button': {
+                        WebkitAppearance: 'none',
+                        margin: 0,
+                      },
+                    }}
+                    slotProps={{ input: { readOnly: true } }}
+                  ></TextFieldElement>
+                )}
+              </Box>
+              <Box sx={styles.container}>
+                <Typography mr={2}>受注ステータス</Typography>
+                <FormControl size="small" sx={{ width: 150 }}>
+                  <Controller
+                    name="juchuSts"
+                    control={control}
+                    render={({ field }) => (
+                      <Select {...field} disabled={!edit}>
+                        <MenuItem value={0}>入力中</MenuItem>
+                        <MenuItem value={1}>仮受注</MenuItem>
+                        <MenuItem value={2}>処理中</MenuItem>
+                        <MenuItem value={3}>確定</MenuItem>
+                        <MenuItem value={4}>貸出済み</MenuItem>
+                        <MenuItem value={5}>返却済み</MenuItem>
+                        <MenuItem value={9}>受注キャンセル</MenuItem>
+                      </Select>
+                    )}
+                  />
+                </FormControl>
+              </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={7}>受注日</Typography>
                 <Controller
@@ -583,10 +581,6 @@ export const Order = (props: {
                 <TextFieldElement name="kokyakuTantoNam" control={control} disabled={!edit}></TextFieldElement>
               </Box>
               <Box sx={styles.container}>
-                <Typography marginRight={9}>メモ</Typography>
-                <TextFieldElement name="mem" control={control} disabled={!edit}></TextFieldElement>
-              </Box>
-              <Box sx={styles.container}>
                 <Typography marginRight={7}>値引き</Typography>
                 <Controller
                   name="nebikiAmt"
@@ -660,6 +654,28 @@ export const Order = (props: {
               </Box>
             </Grid2>
           </Grid2>
+          <Box display={'flex'} alignItems={'center'} p={2}>
+            <Typography marginRight={2}>メモ</Typography>
+            <TextFieldElement
+              name="mem"
+              control={control}
+              multiline
+              rows={3}
+              fullWidth
+              disabled={!edit}
+              // sx={{
+              //   '& .MuiInputBase-root': {
+              //     resize: 'both',
+              //     overflow: 'auto',
+              //     alignItems: 'flex-start',
+              //   },
+              //   '& .MuiInputBase-inputMultiline': {
+              //     textAlign: 'left',
+              //     paddingTop: '8px',
+              //   },
+              // }}
+            ></TextFieldElement>
+          </Box>
         </form>
         {/* 公演場所検索ダイアログ */}
         <Dialog open={locationDialogOpen} fullScreen>
