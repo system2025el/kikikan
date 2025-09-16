@@ -92,12 +92,12 @@ export const OrderTable = ({
                   受注マージ
                 </Button>
               </Grid2>
-              <Grid2>
+              {/* <Grid2>
                 <Button>
                   <ContentCopyIcon fontSize="small" />
                   受注コピー
                 </Button>
-              </Grid2>
+              </Grid2> */}
             </Grid2>
           </Grid2>
         </Grid2>

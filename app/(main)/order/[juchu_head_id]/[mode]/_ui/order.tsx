@@ -450,10 +450,10 @@ export const Order = (props: {
                 <Delete fontSize="small" />
                 伝票削除
               </Button>
-              <Button disabled={!edit} onClick={handleCopy}>
+              {/* <Button disabled={!edit} onClick={handleCopy}>
                 <ContentCopyIcon fontSize="small" />
                 コピー
-              </Button>
+              </Button> */}
             </Grid2>
           </Grid2>
           <Divider />
@@ -764,6 +764,10 @@ export const Order = (props: {
               >
                 <AddIcon fontSize="small" />
                 キープ入力
+              </Button>
+              <Button disabled={!edit}>
+                <ContentCopyIcon fontSize="small" />
+                コピー
               </Button>
               <Button
                 color="error"

@@ -1588,26 +1588,16 @@ const EquipmentOrderDetail = (props: {
                     </Grid2>
                   </Grid2>
                 </Grid2>
-                <Grid2 container p={2} spacing={2}>
-                  <Grid2 container alignItems="center">
-                    <Typography>メモ</Typography>
-                    <TextFieldElement
-                      name="mem"
-                      control={control}
-                      multiline
-                      rows={3}
-                      disabled={!edit}
-                    ></TextFieldElement>
-                  </Grid2>
-                  <Grid2 container alignItems="center" py={1}>
+                <Box display={'flex'} p={2}>
+                  <Grid2 container alignItems="center" spacing={1}>
                     <Typography>本番日数</Typography>
                     <TextFieldElement
                       name="juchuHonbanbiQty"
                       control={control}
                       type="number"
                       sx={{
-                        width: '5%',
                         minWidth: '60px',
+                        maxWidth: '80px',
                         '& .MuiInputBase-input': {
                           textAlign: 'right',
                         },
@@ -1621,11 +1611,33 @@ const EquipmentOrderDetail = (props: {
                     ></TextFieldElement>
                     <Typography>日</Typography>
                   </Grid2>
-                </Grid2>
-                <Grid2 container alignItems="center" p={2} spacing={2}>
-                  <Typography>入出庫ステータス</Typography>
-                  <TextField disabled defaultValue={'準備中'}></TextField>
-                </Grid2>
+                  <Grid2 container alignItems="center" spacing={1} ml={3}>
+                    <Typography>入出庫ステータス</Typography>
+                    <TextField disabled defaultValue={'準備中'}></TextField>
+                  </Grid2>
+                </Box>
+                <Box display={'flex'} alignItems="center" p={2}>
+                  <Typography mr={2}>メモ</Typography>
+                  <TextFieldElement
+                    name="mem"
+                    control={control}
+                    multiline
+                    rows={3}
+                    fullWidth
+                    disabled={!edit}
+                    // sx={{
+                    //   '& .MuiInputBase-root': {
+                    //     resize: 'both',
+                    //     overflow: 'auto',
+                    //     alignItems: 'flex-start',
+                    //   },
+                    //   '& .MuiInputBase-inputMultiline': {
+                    //     textAlign: 'left',
+                    //     paddingTop: '8px',
+                    //   },
+                    // }}
+                  ></TextFieldElement>
+                </Box>
               </AccordionDetails>
             </Accordion>
           </form>
