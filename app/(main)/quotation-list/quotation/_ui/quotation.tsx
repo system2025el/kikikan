@@ -7,56 +7,38 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
-  Autocomplete,
-  AutocompleteRenderInputParams,
   Box,
   Button,
-  Checkbox,
   Container,
   Dialog,
-  DialogActions,
-  DialogTitle,
   Divider,
-  FormControl,
-  FormControlLabel,
-  FormGroup,
   Grid2,
-  MenuItem,
   Paper,
-  Select,
-  SelectChangeEvent,
   Snackbar,
-  Stack,
   TextField,
   Typography,
 } from '@mui/material';
-import { blueGrey } from '@mui/material/colors';
-import { LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import dayjs, { Dayjs } from 'dayjs';
-import Loadable from 'next/dist/shared/lib/loadable.shared-runtime';
-import { SetStateAction, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
-import { AutocompleteElement, CheckboxElement, SelectElement, TextFieldElement } from 'react-hook-form-mui';
+import { AutocompleteElement, SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
-import { toJapanDateString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
-import { BackButton, CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
+import { toJapanDateString } from '@/app/(main)/_lib/date-conversion';
+import { BackButton } from '@/app/(main)/_ui/buttons';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
-import { Loading, LoadingOverlay } from '@/app/(main)/_ui/loading';
-import { SelectTable } from '@/app/(main)/_ui/table';
-import { getCustomerSelection } from '@/app/(main)/(masters)/_lib/funs';
-import { getJuchuHead } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/funcs';
-import { OrderValues } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/types';
+import { LoadingOverlay } from '@/app/(main)/_ui/loading';
 import { FormDateX } from '@/app/(main)/order-list/_ui/order-list';
 
-import { quotation, quotationHeaders, quotationRows, terms } from '../_lib/data';
-import { addNewQuot, getMituStsSelection, getOrderForQuotation, getUsersSelection } from '../_lib/func';
+import { addNewQuot, getMituStsSelection, getOrderForQuotation, getUsersSelection, updateQuot } from '../_lib/func';
 import { JuchuValues, QuotHeadSchema, QuotHeadValues } from '../_lib/types';
 import { FirstDialogPage, SecondDialogPage } from './dialogs';
 import { MeisaiLines } from './meisai';
 import { MeisaiTblHeader } from './meisai-tbl-header';
 
+/**
+ * 見積書作成画面
+ * @returns {JSX.Element} 見積書作成ページ
+ */
 export const Quotation = () => {
   /* ログイン中のユーザー */
   const user = useUserStore((state) => state.user);
@@ -91,7 +73,7 @@ export const Quotation = () => {
   // 受注選択アコーディオン制御
   const [juchuExpanded, setJuchuExpanded] = useState(false);
   // 見積ヘッダアコーディオン制御
-  const [mitsuExpanded, setMitsuExpanded] = useState(false);
+  const [mitsuExpanded, setMitsuExpanded] = useState(true);
 
   // ダイアログ開閉
   const [kizaiMeisaiaddDialogOpen, setKizaimeisaiaddDialogOpen] = useState(false);
@@ -108,6 +90,7 @@ export const Quotation = () => {
     handleSubmit,
     reset,
     getValues,
+    watch,
     formState: { errors },
   } = useForm<QuotHeadValues>({
     mode: 'onChange',
@@ -130,15 +113,16 @@ export const Quotation = () => {
       meisaiHeads: {
         kizai: [
           {
-            mituMeisaiHeadNam: '',
+            mituMeisaiHeadNam: null,
             headNamDspFlg: false,
+            mituMeisaiKbn: 0,
             meisai: [
               {
-                nam: '',
-                qty: '',
-                honbanbiQty: '',
-                tankaAmt: '',
-                shokeiAmt: '',
+                nam: null,
+                qty: null,
+                honbanbiQty: null,
+                tankaAmt: null,
+                shokeiAmt: null,
               },
             ],
           },
@@ -155,9 +139,12 @@ export const Quotation = () => {
   /* 保存ボタン押下 */
   const onSubmit = async (data: QuotHeadValues) => {
     if (isNew) {
+      console.log('新規？', isNew);
       await addNewQuot(data);
+    } else {
+      console.log('新規？', isNew);
+      await updateQuot(data);
     }
-    console.log('新規？', isNew);
     console.log('取得した', data);
     setIsNew(false);
   };
@@ -202,6 +189,7 @@ export const Quotation = () => {
       if (!juchuId && !quotId) {
         // 手動入力で入ってきている -------------------
         console.log('null');
+        setIsNew(true);
         setIsLoading(false);
         return;
       } else {
@@ -230,6 +218,7 @@ export const Quotation = () => {
             setOrder(data);
             sessionStorage.setItem('currentOrder', JSON.stringify(data));
             sessionStorage.removeItem('juchuHeadId');
+            setIsNew(true);
             await setIsLoading(false);
           };
           getjuchu(Number(juchuId));
@@ -443,7 +432,21 @@ export const Quotation = () => {
                 </Box>
                 <Box sx={styles.container}>
                   <Typography marginRight={5}>本番日数</Typography>
-                  <TextFieldElement name="mituHonbanbiQty" control={control} sx={{ width: 120 }} />
+                  <TextFieldElement
+                    name="mituHonbanbiQty"
+                    control={control}
+                    sx={{
+                      width: 120,
+                      '& .MuiInputBase-input': {
+                        textAlign: 'right',
+                      },
+                      '& input[type=number]::-webkit-inner-spin-button': {
+                        WebkitAppearance: 'none',
+                        margin: 0,
+                      },
+                    }}
+                    type="number"
+                  />
                 </Box>
                 <Box sx={styles.container}>
                   <Typography marginRight={9}>備考</Typography>
@@ -479,7 +482,19 @@ export const Quotation = () => {
                       <Typography textAlign="end">小計</Typography>
                     </Grid2>
                     <Grid2 size={2}>
-                      <TextField disabled />
+                      <TextField
+                        disabled
+                        sx={{
+                          '& .MuiInputBase-input': {
+                            textAlign: 'right',
+                          },
+                          '& input[type=number]::-webkit-inner-spin-button': {
+                            WebkitAppearance: 'none',
+                            margin: 0,
+                          },
+                        }}
+                        type="number"
+                      />
                     </Grid2>
                     <Grid2 size={1} />
                   </Grid2>
@@ -535,7 +550,9 @@ export const Quotation = () => {
                 {!showSecond && (
                   <FirstDialogPage
                     handleClose={() => setKizaimeisaiaddDialogOpen(false)}
-                    addKizaiTbl={() => kizaiFields.append({ mituMeisaiHeadNam: null, headNamDspFlg: false })}
+                    addKizaiTbl={() =>
+                      kizaiFields.append({ mituMeisaiHeadNam: null, headNamDspFlg: false, mituMeisaiKbn: 0 })
+                    }
                     toSecondPage={setShowSecond}
                   />
                 )}
@@ -617,7 +634,9 @@ export const Quotation = () => {
               <Box m={1}>
                 <Button
                   size="small"
-                  onClick={() => laborFields.append({ headNamDspFlg: false, mituMeisaiHeadNam: null })}
+                  onClick={() =>
+                    laborFields.append({ headNamDspFlg: false, mituMeisaiHeadNam: null, mituMeisaiKbn: 1 })
+                  }
                 >
                   <AddIcon fontSize="small" />
                   テーブル
@@ -678,7 +697,9 @@ export const Quotation = () => {
               <Box m={1}>
                 <Button
                   size="small"
-                  onClick={() => otherFields.append({ headNamDspFlg: false, mituMeisaiHeadNam: null })}
+                  onClick={() =>
+                    otherFields.append({ headNamDspFlg: false, mituMeisaiHeadNam: null, mituMeisaiKbn: 2 })
+                  }
                 >
                   <AddIcon fontSize="small" />
                   テーブル

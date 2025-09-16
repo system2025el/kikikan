@@ -15,7 +15,6 @@ import {
 } from '@mui/material';
 import { useEffect, useRef, useState } from 'react';
 import { UseFieldArrayReturn } from 'react-hook-form-mui';
-import { boolean, number } from 'zod';
 
 import { CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
 import { Loading } from '@/app/(main)/_ui/loading';
@@ -23,6 +22,11 @@ import { Loading } from '@/app/(main)/_ui/loading';
 import { getJuchuKizaiHeadNamList, getJuchuKizaiMeisaiList, getJuchuMeisaiSum } from '../_lib/func';
 import { QuotHeadValues } from '../_lib/types';
 
+/**
+ * 明細を機材明細から作成するか確認するダイアログ
+ * @param param0
+ * @returns  {JSX.Element} 明細を機材明細から作成するか確認するダイアログコンポーネント
+ */
 export const FirstDialogPage = ({
   handleClose,
   addKizaiTbl,
@@ -56,7 +60,7 @@ export const FirstDialogPage = ({
 /**
  * 明細作成する受注機材ヘッダを選択するダイアログ
  * @param param0
- * @returns
+ * @returns  {JSX.Element}
  */
 export const SecondDialogPage = ({
   juchuId,
@@ -90,6 +94,7 @@ export const SecondDialogPage = ({
       field.append({
         mituMeisaiHeadNam: null,
         headNamDspFlg: false,
+        mituMeisaiKbn: 0,
         meisai: [{ nam: headNam, tankaAmt: data[0].tankaAmt, qty: null, honbanbiQty: null, shokeiAmt: null }],
       });
     } else {
@@ -97,7 +102,7 @@ export const SecondDialogPage = ({
       const data = await getJuchuKizaiMeisaiList(juchuId, kizaiHeadId);
       console.log(data);
       // 取得した内容をテーブル内の明細に入れる
-      field.append({ mituMeisaiHeadNam: null, headNamDspFlg: false, meisai: data });
+      field.append({ mituMeisaiHeadNam: null, headNamDspFlg: false, mituMeisaiKbn: 0, meisai: data });
     }
     handleClose();
   };

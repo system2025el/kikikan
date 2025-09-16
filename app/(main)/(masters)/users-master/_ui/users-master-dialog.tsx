@@ -8,7 +8,7 @@ import { TextFieldElement, useForm } from 'react-hook-form-mui';
 import { FormBox } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 
-import { NEW_MASTER_ID } from '../../_lib/constants';
+import { FAKE_NEW_ID } from '../../_lib/constants';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { emptyUser, formItems } from '../_lib/data';
@@ -65,7 +65,7 @@ export const UsersMasterDialog = ({
   const onSubmit = async (data: UsersMasterDialogValues) => {
     console.log('isDarty : ', isDirty);
     console.log(data);
-    if (userId === NEW_MASTER_ID) {
+    if (userId === FAKE_NEW_ID) {
       // await addNewUser(data);
       handleCloseDialog();
       refetchUsers();
@@ -118,7 +118,7 @@ export const UsersMasterDialog = ({
   useEffect(() => {
     console.log('★★★★★★★★★★★★★★★★★★★★★');
     const getThatOneUser = async () => {
-      if (userId === NEW_MASTER_ID) {
+      if (userId === FAKE_NEW_ID) {
         // 新規追加モード
         reset(emptyUser); // フォーム初期化
         setEditable(true); // 編集モードにする

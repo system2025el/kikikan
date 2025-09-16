@@ -7,7 +7,7 @@ import { CheckboxElement, TextareaAutosizeElement, TextFieldElement } from 'reac
 import { FormBox, FormItemsType } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 
-import { NEW_MASTER_ID } from '../../_lib/constants';
+import { FAKE_NEW_ID } from '../../_lib/constants';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { BumonsMasterDialogValues } from '../../bumons-master/_lib/types';
@@ -66,7 +66,7 @@ export const DaibumonsMasterDialog = ({
   const onSubmit = async (data: DaibumonsMasterDialogValues) => {
     console.log('isDarty : ', isDirty);
     console.log(data);
-    if (daibumonId === NEW_MASTER_ID) {
+    if (daibumonId === FAKE_NEW_ID) {
       await addNewDaibumon(data);
       handleCloseDialog();
       refetchDaibumons();
@@ -119,7 +119,7 @@ export const DaibumonsMasterDialog = ({
   useEffect(() => {
     console.log('★★★★★★★★★★★★★★★★★★★★★');
     const getThatOneDaibumon = async () => {
-      if (daibumonId === NEW_MASTER_ID) {
+      if (daibumonId === FAKE_NEW_ID) {
         // 新規追加モード
         reset(emptyDaibumon); // フォーム初期化
         setEditable(true); // 編集モードにする

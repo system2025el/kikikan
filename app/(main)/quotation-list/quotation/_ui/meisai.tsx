@@ -61,16 +61,68 @@ export const MeisaiLines = ({
               )}
             </Grid2>
             <Grid2 size={1}>
-              <TextFieldElement name={`meisaiHeads.${sectionNam}.${index}.meisai.${i}.qty`} control={control} />
+              <TextFieldElement
+                name={`meisaiHeads.${sectionNam}.${index}.meisai.${i}.qty`}
+                control={control}
+                sx={{
+                  '& .MuiInputBase-input': {
+                    textAlign: 'right',
+                  },
+                  '& input[type=number]::-webkit-inner-spin-button': {
+                    WebkitAppearance: 'none',
+                    margin: 0,
+                  },
+                }}
+                type="number"
+              />
             </Grid2>
             <Grid2 size={0.8}>
-              <TextFieldElement name={`meisaiHeads.${sectionNam}.${index}.meisai.${i}.honbanbiQty`} control={control} />
+              <TextFieldElement
+                name={`meisaiHeads.${sectionNam}.${index}.meisai.${i}.honbanbiQty`}
+                control={control}
+                sx={{
+                  '& .MuiInputBase-input': {
+                    textAlign: 'right',
+                  },
+                  '& input[type=number]::-webkit-inner-spin-button': {
+                    WebkitAppearance: 'none',
+                    margin: 0,
+                  },
+                }}
+                type="number"
+              />
             </Grid2>
             <Grid2 size={1.5}>
-              <TextFieldElement name={`meisaiHeads.${sectionNam}.${index}.meisai.${i}.tankaAmt`} control={control} />
+              <TextFieldElement
+                name={`meisaiHeads.${sectionNam}.${index}.meisai.${i}.tankaAmt`}
+                control={control}
+                sx={{
+                  '& .MuiInputBase-input': {
+                    textAlign: 'right',
+                  },
+                  '& input[type=number]::-webkit-inner-spin-button': {
+                    WebkitAppearance: 'none',
+                    margin: 0,
+                  },
+                }}
+                type="number"
+              />
             </Grid2>
             <Grid2 size={2}>
-              <TextFieldElement name={`meisaiHeads.${sectionNam}.${index}.meisai.${i}.shokeiAmt`} control={control} />
+              <TextFieldElement
+                name={`meisaiHeads.${sectionNam}.${index}.meisai.${i}.shokeiAmt`}
+                control={control}
+                sx={{
+                  '& .MuiInputBase-input': {
+                    textAlign: 'right',
+                  },
+                  '& input[type=number]::-webkit-inner-spin-button': {
+                    WebkitAppearance: 'none',
+                    margin: 0,
+                  },
+                }}
+                type="number"
+              />
             </Grid2>
             <Grid2 size={1}>
               <IconButton
