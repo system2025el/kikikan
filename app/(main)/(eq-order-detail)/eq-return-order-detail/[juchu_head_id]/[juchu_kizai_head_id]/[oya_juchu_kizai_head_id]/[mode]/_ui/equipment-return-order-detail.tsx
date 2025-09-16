@@ -190,8 +190,8 @@ export const EquipmentReturnOrderDetail = (props: {
     clearErrors,
     formState: { isDirty, errors, defaultValues },
   } = useForm({
-    mode: 'onSubmit',
-    reValidateMode: 'onBlur',
+    mode: 'onChange',
+    reValidateMode: 'onChange',
     defaultValues: {
       juchuHeadId: props.returnJuchuKizaiHeadData.juchuHeadId,
       juchuKizaiHeadId: props.returnJuchuKizaiHeadData.juchuKizaiHeadId,
@@ -990,7 +990,7 @@ export const EquipmentReturnOrderDetail = (props: {
                     <Typography marginRight={5} whiteSpace="nowrap">
                       受注日
                     </Typography>
-                    <TextField value={props.juchuHeadData.juchuDat} disabled></TextField>
+                    <TestDate date={props.juchuHeadData.juchuDat} onChange={() => {}} disabled />
                   </Box>
                   <Box sx={styles.container}>
                     <Typography marginRight={5} whiteSpace="nowrap">
@@ -1080,7 +1080,7 @@ export const EquipmentReturnOrderDetail = (props: {
                     <Controller
                       name="nebikiAmt"
                       control={control}
-                      render={({ field }) => (
+                      render={({ field, fieldState }) => (
                         <TextField
                           {...field}
                           value={
@@ -1110,10 +1110,23 @@ export const EquipmentReturnOrderDetail = (props: {
                             }
                           }}
                           sx={{
+                            '.MuiOutlinedInput-notchedOutline': {
+                              borderColor: fieldState.error?.message && 'red',
+                            },
+                            '.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                              borderColor: fieldState.error?.message && 'red',
+                            },
+                            '&:hover .MuiOutlinedInput-notchedOutline': {
+                              borderColor: fieldState.error?.message && 'red',
+                            },
                             '& .MuiInputBase-input': {
                               textAlign: 'right',
                             },
+                            '.MuiFormHelperText-root': {
+                              color: 'red',
+                            },
                           }}
+                          helperText={fieldState.error?.message}
                           disabled={!edit}
                         />
                       )}
