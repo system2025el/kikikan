@@ -29,30 +29,39 @@ export const quotMeisaiHeadSchema = z.object({
     .string()
     .max(50, { message: validationMessages.maxStringLength(50) })
     .nullish(),
+  mituMeisaiKbn: z.number(),
   headNamDspFlg: z.boolean(),
+  nebikiNam: z.string().nullish(),
+  nebikiAmt: z
+    .number()
+    .max(999999999, { message: validationMessages.maxNumberLength(9) })
+    .nullish(),
+  nebikiAftNam: z.string().nullish(),
+  shokeiMei: z.string().nullish(),
+  nebikiAftAmt: z
+    .number()
+    .max(999999999, { message: validationMessages.maxNumberLength(9) })
+    .nullish(),
   meisai: z
     .array(
       z.object({
+        id: z.number().nullish(),
         nam: z.string().max(50).nullish(),
         qty: z
-          .string()
-          .regex(/^[0-9]+$/)
-          .max(4, { message: validationMessages.maxNumberLength(4) })
+          .number({ message: validationMessages.number() })
+          .max(9999, { message: validationMessages.maxNumberLength(4) })
           .nullish(),
         honbanbiQty: z
-          .string()
-          .regex(/^[0-9]+$/)
-          .max(3, { message: validationMessages.maxNumberLength(3) })
+          .number({ message: validationMessages.number() })
+          .max(999, { message: validationMessages.maxNumberLength(3) })
           .nullish(),
         tankaAmt: z
-          .string()
-          .regex(/^[0-9]+$/)
-          .max(9, { message: validationMessages.maxNumberLength(9) })
+          .number({ message: validationMessages.number() })
+          .max(999999999, { message: validationMessages.maxNumberLength(9) })
           .nullish(),
         shokeiAmt: z
-          .string()
-          .regex(/^[0-9]+$/)
-          .max(12, { message: validationMessages.maxNumberLength(12) })
+          .number({ message: validationMessages.number() })
+          .max(999999999999, { message: validationMessages.maxNumberLength(12) })
           .nullish(),
       })
     )
@@ -98,30 +107,27 @@ export const QuotHeadSchema = z.object({
   koenNam: z.string().max(50).nullish(),
   koenbashoNam: z.string().max(100).nullish(),
   mituHonbanbiQty: z
-    .string()
-    .regex(/^[0-9]+$/)
-    .max(2, { message: validationMessages.maxNumberLength(2) })
+    .number()
+    .max(99, { message: validationMessages.maxNumberLength(2) })
     .nullish(),
   biko: z.string().max(100).nullish(),
   comment: z.string().max(100).nullish(),
   chukeiMei: z.string().max(10).nullish(),
   tokuNebikiMei: z.string().max(10).nullish(),
   tokuNebikiAmt: z
-    .string()
-    .regex(/^[0-9]+$/)
-    .max(9, { message: validationMessages.maxNumberLength(9) })
+    .number({ message: validationMessages.number() })
+    .max(999999999, { message: validationMessages.maxNumberLength(9) })
     .nullish(),
   zeiAmt: z
-    .string()
-    .regex(/^[0-9]+$/)
-    .max(12, { message: validationMessages.maxNumberLength(12) })
+    .number({ message: validationMessages.number() })
+    .max(999999999999, { message: validationMessages.maxNumberLength(12) })
     .nullish(),
   zeiRat: z
-    .string()
-    .regex(/^[0-9]+$/)
-    .max(3, { message: validationMessages.maxNumberLength(3) })
+    .number({ message: validationMessages.number() })
+    .max(999, { message: validationMessages.maxNumberLength(3) })
     .nullish(),
-  gokeiAmt: z.number().nullish(),
+  gokeiMei: z.string().max(10).nullish(),
+  gokeiAmt: z.number({ message: validationMessages.number() }).nullish(),
   meisaiHeads: z
     .object({
       kizai: z.array(quotMeisaiHeadSchema).nullish(),

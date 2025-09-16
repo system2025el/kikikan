@@ -13,7 +13,7 @@ import {
 
 import { FormBox, selectNone, SelectTypes } from '../../../_ui/form-box';
 import { Loading } from '../../../_ui/loading';
-import { NEW_MASTER_ID } from '../../_lib/constants';
+import { FAKE_NEW_ID } from '../../_lib/constants';
 import { getAllSelections } from '../../_lib/funs';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
@@ -78,7 +78,7 @@ export const EqMasterDialog = ({
   const onSubmit = async (data: EqptsMasterDialogValues) => {
     console.log('isDarty : ', isDirty);
     console.log(data.shukeibumonId, '::::', data.rankAmt1);
-    if (eqptId === NEW_MASTER_ID) {
+    if (eqptId === FAKE_NEW_ID) {
       // 新規登録
       await addNewEqpt(data);
       handleCloseDialog();
@@ -140,7 +140,7 @@ export const EqMasterDialog = ({
       const a = await getAllSelections();
       setSelectOptions(a);
       console.log('pppppppppppppppppppppppppppppp', selectOptions);
-      if (eqptId === NEW_MASTER_ID) {
+      if (eqptId === FAKE_NEW_ID) {
         // 新規追加モード
         reset(emptyEqpt); // フォーム初期化
         setEditable(true); // 編集モードにする

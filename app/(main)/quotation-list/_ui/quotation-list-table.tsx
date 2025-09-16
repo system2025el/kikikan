@@ -197,6 +197,16 @@ export const QuotaionListTable = () => {
                 rules={{
                   required: '数字を入力してください',
                 }}
+                sx={{
+                  '& .MuiInputBase-input': {
+                    textAlign: 'right',
+                  },
+                  '& input[type=number]::-webkit-inner-spin-button': {
+                    WebkitAppearance: 'none',
+                    margin: 0,
+                  },
+                }}
+                type="number"
               />
             </Stack>
             <DialogActions>

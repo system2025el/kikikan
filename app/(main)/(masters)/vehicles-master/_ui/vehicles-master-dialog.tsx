@@ -5,7 +5,7 @@ import { CheckboxElement, TextareaAutosizeElement, TextFieldElement, useForm } f
 
 import { FormBox } from '../../../_ui/form-box';
 import { Loading } from '../../../_ui/loading';
-import { NEW_MASTER_ID } from '../../_lib/constants';
+import { FAKE_NEW_ID } from '../../_lib/constants';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { emptyVeh, formItems } from '../_lib/datas';
@@ -62,7 +62,7 @@ export const VehiclesMasterDialog = ({
   const onSubmit = async (data: VehsMasterDialogValues) => {
     console.log('isDarty : ', isDirty);
     console.log(data);
-    if (vehicleId === NEW_MASTER_ID) {
+    if (vehicleId === FAKE_NEW_ID) {
       await addNewVeh(data);
       handleCloseDialog();
       refetchVehs();
@@ -115,7 +115,7 @@ export const VehiclesMasterDialog = ({
   useEffect(() => {
     console.log('★★★★★★★★★★★★★★★★★★★★★');
     const getThatOneVeh = async () => {
-      if (vehicleId === NEW_MASTER_ID) {
+      if (vehicleId === FAKE_NEW_ID) {
         // 新規追加モード
         reset(emptyVeh); // フォーム初期化
         setEditable(true); // 編集モードにする
