@@ -43,7 +43,7 @@ import { equipmentRows, users, vehicleHeaders, vehicleRows } from '@/app/(main)/
 import { useUnsavedChangesWarning } from '../../../../_lib/hook';
 import { addJuchuHead, copyJuchuHead, getJuchuHead, getMaxId, updJuchuHead } from '../_lib/funcs';
 import { EqTableValues, KokyakuValues, OrderSchema, OrderValues, VehicleTableValues } from '../_lib/types';
-import { SaveAlertDialog, SelectAlertDialog } from './caveat-dialog';
+import { CopyConfirmDialog, SaveAlertDialog, SelectAlertDialog } from './caveat-dialog';
 import { CustomerSelectionDialog } from './customer-selection';
 import { LocationSelectDialog } from './location-selection';
 import { OrderEqTable, OrderVehicleTable } from './order-table';
@@ -77,6 +77,8 @@ export const Order = (props: {
   const [dirtyOpen, setDirtyOpen] = useState(false);
   // 機材選択ダイアログを出すかどうか
   const [selectOpen, setSelectOpen] = useState(false);
+  // コピーダイアログ
+  const [copyOpen, setCopyOpen] = useState(false);
   // 機材テーブル選択行
   const [selectEq, setSelectEq] = useState<number[]>([]);
   // 車両テーブル選択行
@@ -225,26 +227,12 @@ export const Order = (props: {
 
   // コピーボタン押下
   const handleCopy = async () => {
-    if (!save) {
+    if (!save || isDirty) {
       setSaveOpen(true);
       return;
     }
 
-    if (!isDirty) {
-      const maxId = await getMaxId();
-      if (maxId) {
-        const newOrderId = maxId.juchu_head_id + 1;
-        const currentData = await getJuchuHead(props.juchuHeadData.juchuHeadId);
-        if (user && currentData) {
-          await copyJuchuHead(newOrderId, currentData, user.name);
-        }
-        window.open(`/order/${newOrderId}/${'edit'}`);
-      } else {
-        console.error('Failed to retrieve max order ID');
-      }
-    } else {
-      setDirtyOpen(true);
-    }
+    setCopyOpen(true);
   };
 
   // 機材入力ボタン押下
@@ -331,7 +319,10 @@ export const Order = (props: {
     }
   };
 
-  // isDirtyDialogの破棄、戻るボタン押下
+  /**
+   * 破棄ダイアログボタン押下
+   * @param result ボタン押下結果
+   */
   const handleResultDialog = async (result: boolean) => {
     if (result && path) {
       await deleteLock(1, props.juchuHeadData.juchuHeadId);
@@ -349,6 +340,29 @@ export const Order = (props: {
     } else {
       setDirtyOpen(false);
       setPath(null);
+    }
+  };
+
+  /**
+   * コピーダイアログボタン押下
+   * @param result ボタン押下結果
+   */
+  const handleCopyResultDialog = async (result: boolean) => {
+    if (result) {
+      const maxId = await getMaxId();
+      if (maxId) {
+        const newOrderId = maxId.juchu_head_id + 1;
+        const currentData = await getJuchuHead(props.juchuHeadData.juchuHeadId);
+        if (user && currentData) {
+          await copyJuchuHead(newOrderId, currentData, user.name);
+        }
+        window.open(`/order/${newOrderId}/${'edit'}`);
+        setCopyOpen(false);
+      } else {
+        console.error('Failed to retrieve max order ID');
+      }
+    } else {
+      setCopyOpen(false);
     }
   };
 
@@ -816,6 +830,7 @@ export const Order = (props: {
       <SaveAlertDialog open={saveOpen} onClick={() => setSaveOpen(false)} />
       <IsDirtyAlertDialog open={dirtyOpen} onClick={handleResultDialog} />
       <SelectAlertDialog open={selectOpen} onClick={() => setSelectOpen(false)} />
+      <CopyConfirmDialog open={copyOpen} onClick={handleCopyResultDialog} />
     </Box>
   );
 };

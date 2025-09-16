@@ -34,3 +34,21 @@ export const SelectAlertDialog = ({ open, onClick }: { open: boolean; onClick: (
     </Dialog>
   );
 };
+
+export const CopyConfirmDialog = ({ open, onClick }: { open: boolean; onClick: (result: boolean) => void }) => {
+  return (
+    <Dialog open={open}>
+      <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
+        <WarningIcon color="error" />
+        <Box>受注ヘッダー内容を確認してください</Box>
+      </DialogTitle>
+      <DialogContentText m={2} p={2}>
+        受注ヘッダーをコピーしますか？
+      </DialogContentText>
+      <DialogActions>
+        <Button onClick={() => onClick(true)}>コピー</Button>
+        <Button onClick={() => onClick(false)}>戻る</Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
