@@ -209,8 +209,8 @@ const EquipmentOrderDetail = (props: {
     clearErrors,
     formState: { isDirty, errors, defaultValues },
   } = useForm({
-    mode: 'onSubmit',
-    reValidateMode: 'onBlur',
+    mode: 'onChange',
+    reValidateMode: 'onChange',
     defaultValues: {
       juchuHeadId: props.juchuKizaiHeadData.juchuHeadId,
       juchuKizaiHeadId: props.juchuKizaiHeadData.juchuKizaiHeadId,
@@ -938,6 +938,7 @@ const EquipmentOrderDetail = (props: {
   const handleKicsShukoChange = async (newDate: Dayjs | null) => {
     if (newDate === null) return;
     setValue('kicsShukoDat', newDate.toDate(), { shouldDirty: true });
+    clearErrors('kicsShukoDat');
 
     const yardShukoDat = getValues('yardShukoDat');
 
@@ -961,6 +962,7 @@ const EquipmentOrderDetail = (props: {
   const handleYardShukoChange = async (newDate: Dayjs | null) => {
     if (newDate === null) return;
     setValue('yardShukoDat', newDate.toDate(), { shouldDirty: true });
+    clearErrors('yardShukoDat');
 
     const kicsShukoDat = getValues('kicsShukoDat');
 
@@ -984,6 +986,7 @@ const EquipmentOrderDetail = (props: {
   const handleKicsNyukoChange = async (newDate: Dayjs | null) => {
     if (newDate === null) return;
     setValue('kicsNyukoDat', newDate.toDate(), { shouldDirty: true });
+    clearErrors('kicsNyukoDat');
 
     const yardNyukoDat = getValues('yardNyukoDat');
 
@@ -999,6 +1002,7 @@ const EquipmentOrderDetail = (props: {
   const handleYardNyukoChange = (newDate: Dayjs | null) => {
     if (newDate === null) return;
     setValue('yardNyukoDat', newDate.toDate(), { shouldDirty: true });
+    clearErrors('yardNyukoDat');
 
     const kicsNyukoDat = getValues('kicsNyukoDat');
 
@@ -1277,7 +1281,7 @@ const EquipmentOrderDetail = (props: {
                     <Typography marginRight={5} whiteSpace="nowrap">
                       受注日
                     </Typography>
-                    <TextField value={props.juchuHeadData.juchuDat} disabled></TextField>
+                    <TestDate date={props.juchuHeadData.juchuDat} onChange={() => {}} disabled />
                   </Box>
                   <Box sx={styles.container}>
                     <Typography marginRight={5} whiteSpace="nowrap">
@@ -1363,7 +1367,7 @@ const EquipmentOrderDetail = (props: {
                     <Controller
                       name="nebikiAmt"
                       control={control}
-                      render={({ field }) => (
+                      render={({ field, fieldState }) => (
                         <TextField
                           {...field}
                           value={
@@ -1393,10 +1397,23 @@ const EquipmentOrderDetail = (props: {
                             }
                           }}
                           sx={{
+                            '.MuiOutlinedInput-notchedOutline': {
+                              borderColor: fieldState.error?.message && 'red',
+                            },
+                            '.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                              borderColor: fieldState.error?.message && 'red',
+                            },
+                            '&:hover .MuiOutlinedInput-notchedOutline': {
+                              borderColor: fieldState.error?.message && 'red',
+                            },
                             '& .MuiInputBase-input': {
                               textAlign: 'right',
                             },
+                            '.MuiFormHelperText-root': {
+                              color: 'red',
+                            },
                           }}
+                          helperText={fieldState.error?.message}
                           disabled={!edit}
                         />
                       )}
