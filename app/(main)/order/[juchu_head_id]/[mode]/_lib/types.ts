@@ -57,7 +57,6 @@ export type EqTableValues = {
   juchuHonbanbiCalcQty: number | null;
   shokei: number | null;
   nebikiAmt: number | null;
-  keikoku: string | null;
   oyaJuchuKizaiHeadId: number | null;
   htKbn: number;
   juchuKizaiHeadKbn: number;

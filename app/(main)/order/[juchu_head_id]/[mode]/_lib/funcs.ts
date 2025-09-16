@@ -220,12 +220,36 @@ export const getJuchuKizaiHeadList = async (juchuHeadId: number) => {
       juchuHonbanbiCalcQty: d.juchu_honbanbi_calc_qty,
       shokei: d.shokei,
       nebikiAmt: d.nebiki_amt,
-      keikoku: d.keikoku,
       oyaJuchuKizaiHeadId: d.oya_juchu_kizai_head_id,
       htKbn: d.ht_kbn ?? 0,
       juchuKizaiHeadKbn: d.juchu_kizai_head_kbn,
     }));
-    return EqTableData;
+
+    const childrenMap: { [key: number]: EqTableValues[] } = {};
+    const parents = [];
+
+    for (const data of EqTableData) {
+      if (data.oyaJuchuKizaiHeadId === null) {
+        parents.push(data);
+      } else {
+        if (!childrenMap[data.oyaJuchuKizaiHeadId]) {
+          childrenMap[data.oyaJuchuKizaiHeadId] = [];
+        }
+        childrenMap[data.oyaJuchuKizaiHeadId].push(data);
+      }
+    }
+
+    const result = [];
+
+    for (const parent of parents) {
+      result.push(parent);
+      const children = childrenMap[parent.juchuKizaiHeadId];
+      if (children) {
+        result.push(...children);
+      }
+    }
+
+    return result;
   } catch (e) {
     console.error('Exception while selecting eqlist:', e);
   }
