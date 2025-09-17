@@ -29,7 +29,7 @@ import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { LoadingOverlay } from '@/app/(main)/_ui/loading';
 import { FormDateX } from '@/app/(main)/order-list/_ui/order-list';
 
-import { addNewQuot, getMituStsSelection, getOrderForQuotation, getUsersSelection, updateQuot } from '../_lib/func';
+import { getMituStsSelection, getOrderForQuotation, getUsersSelection, saveQuot, updateQuot } from '../_lib/func';
 import { JuchuValues, QuotHeadSchema, QuotHeadValues } from '../_lib/types';
 import { FirstDialogPage, SecondDialogPage } from './dialogs';
 import { MeisaiLines } from './meisai';
@@ -91,6 +91,7 @@ export const Quotation = () => {
     reset,
     getValues,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<QuotHeadValues>({
     mode: 'onChange',
@@ -138,14 +139,16 @@ export const Quotation = () => {
   /* methods ------------------------------------------------------ */
   /* 保存ボタン押下 */
   const onSubmit = async (data: QuotHeadValues) => {
+    console.log('新規？', isNew);
     if (isNew) {
-      console.log('新規？', isNew);
-      await addNewQuot(data);
+      const result = await saveQuot(data);
+      setValue('mituHeadId', result);
+      console.log('挿入した', result, '番の見積');
     } else {
-      console.log('新規？', isNew);
-      await updateQuot(data);
+      const result = await updateQuot(data);
+      console.log('更新したのは', result, '番の見積');
     }
-    console.log('取得した', data);
+
     setIsNew(false);
   };
 
@@ -212,6 +215,7 @@ export const Quotation = () => {
               koenbashoNam: data.koenbashoNam,
               nyuryokuUser: { id: String(user?.id), name: user?.name },
               mituRange: { strt: data.juchuRange.strt, end: data.juchuRange.end },
+              mituDat: new Date(),
               meisaiHeads: current,
             });
             console.log('DB', data);
@@ -359,7 +363,17 @@ export const Quotation = () => {
                 <Grid2 container mx={2} my={1} spacing={6}>
                   <Grid2 display="flex" alignItems="center">
                     <Typography marginRight={5}>見積番号</Typography>
-                    <TextField disabled value={getValues('mituHeadId') ?? ''} sx={{ width: 120 }} />
+                    <TextFieldElement
+                      name="mituHeadId"
+                      control={control}
+                      sx={{
+                        width: 120,
+                        pointerEvents: 'none', // クリック不可にする
+                        backgroundColor: '#f5f5f5', // グレー背景で無効っぽく
+                        color: '#888',
+                      }}
+                      slotProps={{ input: { readOnly: true, onFocus: (e) => e.target.blur() } }}
+                    />
                   </Grid2>
                   <Grid2 display="flex" direction="row" alignItems="center">
                     <Typography marginRight={3}>見積ステータス</Typography>
@@ -399,7 +413,7 @@ export const Quotation = () => {
                   <TextFieldElement name="kokyaku" control={control} sx={{ width: 300 }} />
                 </Box>
                 <Box sx={styles.container}>
-                  <Typography marginRight={3}>見積担当者</Typography>
+                  <Typography marginRight={1}>見積先担当者</Typography>
                   <TextFieldElement name="kokyakuTantoNam" control={control} />
                 </Box>
               </Grid2>

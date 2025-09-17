@@ -1,6 +1,7 @@
 'use server';
 
 import dayjs from 'dayjs';
+import { revalidatePath } from 'next/cache';
 
 import pool from '@/app/_lib/db/postgres';
 import { SCHEMA, supabase } from '@/app/_lib/db/supabase';
@@ -9,7 +10,7 @@ import { selectActiveUsers } from '@/app/_lib/db/tables/m-user';
 import { selectJuchuHead } from '@/app/_lib/db/tables/t-juchu-head';
 import { selectJuchuHonbanbiQty } from '@/app/_lib/db/tables/t-juchu-kizai-head';
 import { selectHonbanbi } from '@/app/_lib/db/tables/t-juchu-kizai-honbanbi';
-import { insertQuotHead } from '@/app/_lib/db/tables/t-mitu-head';
+import { insertQuotHead, updateQuotHead } from '@/app/_lib/db/tables/t-mitu-head';
 import { insertQuotMeisai } from '@/app/_lib/db/tables/t-mitu-meisai';
 import { insertQuotMeisaiHead } from '@/app/_lib/db/tables/t-mitu-meisai-head';
 import { selectJuchuKizaiHeadList } from '@/app/_lib/db/tables/v-juchu-kizai-head-lst';
@@ -198,12 +199,22 @@ export const getJuchuMeisaiSum = async (juchuId: number, kizaiHeadId: number) =>
  * 見積を保存する関数
  * @param data 見積書フォーム内容
  */
-export const addNewQuot = async (data: QuotHeadValues) => {
-  /* トランザクション */
+export const saveQuot = async (data: QuotHeadValues): Promise<number | null> => {
+  /* トランザクション準備 */
   const connection = await pool.connect();
   // 見積明細ヘッド準備
   const keys = ['kizai', 'labor', 'other'];
-  const meisaiheadList = keys.flatMap((key) => data.meisaiHeads?.[key as keyof typeof data.meisaiHeads] ?? []);
+  // 明細ヘッドIDと明細IDの発番
+  const meisaiheadList = keys
+    .flatMap((key) => data.meisaiHeads?.[key as keyof typeof data.meisaiHeads] ?? [])
+    .map((l, index) => ({
+      ...l,
+      mituMeisaiHeadId: index + 1,
+      meisai: l.meisai?.map((m, i) => ({
+        ...m,
+        id: i + 1,
+      })),
+    }));
   // 見積明細準備
   const meisaiList = meisaiheadList.flatMap((l) =>
     l.meisai!.map((m) => ({
@@ -220,11 +231,12 @@ export const addNewQuot = async (data: QuotHeadValues) => {
     await connection.query(`SET search_path TO ${SCHEMA};`);
     // 新見積ヘッドID
     const newMituHeadId = await connection.query(`
-       SELECT coalesce(max(mitu_head_id),0) + 1 FROM t_mitu_head
+       SELECT coalesce(max(mitu_head_id),0) + 1 as newid FROM t_mitu_head
       `);
+    console.log(newMituHeadId.rows[0].newid);
     // 見積ヘッド
     const quotHead: MituHead = {
-      mitu_head_id: newMituHeadId.rows[0].coalesce,
+      mitu_head_id: newMituHeadId.rows[0].newid,
       juchu_head_id: data.juchuHeadId,
       mitu_sts: data.mituSts,
       mitu_dat: data.mituDat ? toJapanTimeString(data.mituDat) : null,
@@ -250,7 +262,7 @@ export const addNewQuot = async (data: QuotHeadValues) => {
     };
     // 明細ヘッド
     const meisaiHeads: MituMeisaiHead[] = meisaiheadList.map((l) => ({
-      mitu_head_id: newMituHeadId.rows[0].coalesce,
+      mitu_head_id: newMituHeadId.rows[0].newid,
       mitu_meisai_head_id: l.mituMeisaiHeadId ?? FAKE_NEW_ID,
       mitu_meisai_head_kbn: l.mituMeisaiKbn,
       mitu_meisai_head_nam: l.mituMeisaiHeadNam,
@@ -262,7 +274,7 @@ export const addNewQuot = async (data: QuotHeadValues) => {
     }));
     // 明細
     const meisais: MituMeisai[] = meisaiList.map((l) => ({
-      mitu_head_id: newMituHeadId.rows[0].coalesce,
+      mitu_head_id: newMituHeadId.rows[0].newid,
       mitu_meisai_head_id: l.mituMeisaiHeadId ?? FAKE_NEW_ID,
       mitu_meisai_id: l.id ?? FAKE_NEW_ID,
       mitu_meisai_nam: l.nam,
@@ -271,10 +283,15 @@ export const addNewQuot = async (data: QuotHeadValues) => {
       meisai_tanka_amt: l.tankaAmt ?? 0,
       shokei_amt: l.shokeiAmt,
     }));
-    await insertQuotHead(quotHead, connection);
-    await insertQuotMeisaiHead(meisaiHeads, connection);
-    await insertQuotMeisai(meisais, connection);
-    await connection.query('COMMIT');
+    if (quotHead) {
+      const id = await insertQuotHead(quotHead, connection);
+      await insertQuotMeisaiHead(meisaiHeads, connection);
+      await insertQuotMeisai(meisais, connection);
+      await revalidatePath('/quotation-list/quotation');
+      await connection.query('COMMIT');
+      return id.rows[0].mitu_head_id;
+    }
+    return null;
   } catch (e) {
     console.error('例外が発生', e);
     // エラーでロールバック
@@ -287,14 +304,108 @@ export const addNewQuot = async (data: QuotHeadValues) => {
 };
 
 /**
- * 見積を更新する関数
- * @param data 見積書フォーム内容
+ * 見積ヘッドを更新する関数
+ * @param data 見積ヘッドのデータ
+ * @returns 見積ヘッドID
  */
-export const updateQuot = async (data: QuotHeadValues) => {
+export const updateQuot = async (data: QuotHeadValues): Promise<number | null> => {
+  /* トランザクション準備 */
+  const connection = await pool.connect();
+  // 見積明細ヘッド準備
+  const keys = ['kizai', 'labor', 'other'];
+  // 明細ヘッドIDと明細IDの発番
+  const meisaiheadList = keys
+    .flatMap((key) => data.meisaiHeads?.[key as keyof typeof data.meisaiHeads] ?? [])
+    .map((l, index) => ({
+      ...l,
+      mituMeisaiHeadId: index + 1,
+      meisai: l.meisai?.map((m, i) => ({
+        ...m,
+        id: i + 1,
+      })),
+    }));
+  // 見積明細準備
+  const meisaiList = meisaiheadList.flatMap((l) =>
+    l.meisai!.map((m) => ({
+      ...m,
+      mituMeisaiHeadId: l.mituMeisaiHeadId,
+    }))
+  );
+
+  // 見積ヘッド
+  const quotHead: MituHead = {
+    mitu_head_id: data.mituHeadId!,
+    juchu_head_id: data.juchuHeadId,
+    mitu_sts: data.mituSts,
+    mitu_dat: data.mituDat ? toJapanTimeString(data.mituDat) : null,
+    mitu_head_nam: data.mituHeadNam,
+    // kokyaku_nam????
+    kokyaku_nam: data.kokyaku,
+    nyuryoku_user: data.nyuryokuUser.name,
+    mitu_str_dat: data.mituRange.strt ? toJapanTimeString(data.mituRange.strt) : null,
+    mitu_end_dat: data.mituRange.end ? toJapanTimeString(data.mituRange.end) : null,
+    kokyaku_tanto_nam: data.kokyakuTantoNam,
+    koen_nam: data.koenNam,
+    koenbasho_nam: data.koenbashoNam,
+    mitu_honbanbi_qty: data.mituHonbanbiQty,
+    biko: data.biko,
+    comment: data.comment,
+    chukei_mei: data.chukeiMei,
+    toku_nebiki_mei: data.tokuNebikiMei,
+    toku_nebiki_amt: data.tokuNebikiAmt,
+    zei_amt: data.zeiAmt,
+    zei_rat: data.zeiRat,
+    gokei_mei: data.gokeiMei,
+    gokei_amt: data.gokeiAmt,
+  };
+  // 明細ヘッド
+  const meisaiHeads: MituMeisaiHead[] = meisaiheadList.map((l) => ({
+    mitu_head_id: data.mituHeadId!,
+    mitu_meisai_head_id: l.mituMeisaiHeadId ?? FAKE_NEW_ID,
+    mitu_meisai_head_kbn: l.mituMeisaiKbn,
+    mitu_meisai_head_nam: l.mituMeisaiHeadNam,
+    head_nam_dsp_flg: Number(l.headNamDspFlg),
+    nebiki_nam: l.nebikiNam,
+    nebiki_amt: l.nebikiAmt,
+    nebiki_aft_nam: l.nebikiAftNam,
+    nebiki_aft_amt: l.nebikiAftAmt,
+  }));
+  // 明細
+  const meisais: MituMeisai[] = meisaiList.map((l) => ({
+    mitu_head_id: data.mituHeadId!,
+    mitu_meisai_head_id: l.mituMeisaiHeadId ?? FAKE_NEW_ID,
+    mitu_meisai_id: l.id ?? FAKE_NEW_ID,
+    mitu_meisai_nam: l.nam,
+    meisai_qty: l.qty ?? 0,
+    meisai_honbanbi_qty: l.honbanbiQty ?? 0,
+    meisai_tanka_amt: l.tankaAmt ?? 0,
+    shokei_amt: l.shokeiAmt,
+  }));
+
   try {
     console.log('更新START');
-    console.log(data!.meisaiHeads!.kizai?.map((k) => k.biko1));
+    // トランザクション開始
+    await connection.query('BEGIN');
+    // スキーマ指定
+    await connection.query(`SET search_path TO ${SCHEMA};`);
+    if (quotHead) {
+      // 更新処理
+      const id = await updateQuotHead(quotHead, connection);
+      // await upsertQuoteMeisaiHead(meisaiHeads, connection);
+      // await upsertQuoteMeisai(meisais, connection);
+      await revalidatePath('/quotation-list/quotation');
+      await connection.query('COMMIT');
+      // return id.rows[0].mitu_head_id;
+      return null;
+    }
+    return null;
   } catch (e) {
+    console.error('例外が発生', e);
+    // エラーでロールバック
+    await connection.query('ROLLBACK');
     throw e;
+  } finally {
+    // なんにしてもpool解放
+    connection.release();
   }
 };
