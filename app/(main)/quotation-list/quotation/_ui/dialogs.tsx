@@ -95,10 +95,9 @@ export const SecondDialogPage = ({
         mituMeisaiHeadNam: null,
         headNamDspFlg: false,
         mituMeisaiKbn: 0,
-        meisai: [{ nam: headNam, tankaAmt: data[0].tankaAmt, qty: null, honbanbiQty: null, shokeiAmt: null }],
+        meisai: data,
       });
     } else {
-      /* ここでDB処理 */
       const data = await getJuchuKizaiMeisaiList(juchuId, kizaiHeadId);
       console.log(data);
       // 取得した内容をテーブル内の明細に入れる
@@ -143,7 +142,7 @@ export const SecondDialogPage = ({
       <Box p={4}>
         <Stack>
           <Checkbox value={checked} onChange={() => setChecked(!checked)} />
-          機材をまとめて表示する
+          一式表示を有効にする
         </Stack>
         <Card variant="outlined">
           {isLoading ? (

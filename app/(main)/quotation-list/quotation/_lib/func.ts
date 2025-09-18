@@ -16,6 +16,8 @@ import { insertQuotMeisaiHead } from '@/app/_lib/db/tables/t-mitu-meisai-head';
 import { selectJuchuKizaiHeadList } from '@/app/_lib/db/tables/v-juchu-kizai-head-lst';
 import { selectOyaJuchuKizaiMeisai } from '@/app/_lib/db/tables/v-juchu-kizai-meisai';
 import { selectJuchu } from '@/app/_lib/db/tables/v-juchu-lst';
+import { selectKizaiHeadListForMitu } from '@/app/_lib/db/tables/v-mitu-kizai';
+import { selectKizaiHeadListWithIsshikiForMitu } from '@/app/_lib/db/tables/v-mitu-kizai-isshiki';
 import { JuchuHead } from '@/app/_lib/db/types/t-juchu-head-type';
 import { MituHead } from '@/app/_lib/db/types/t-mitu-head-types';
 import { MituMeisaiHead } from '@/app/_lib/db/types/t-mitu-meisai-head-type';
@@ -151,26 +153,21 @@ export const getJuchuKizaiHeadNamList = async (juchuId: number) => {
  */
 export const getJuchuKizaiMeisaiList = async (juchuId: number, kizaiHeadId: number) => {
   try {
-    const { data, error } = await selectOyaJuchuKizaiMeisai(juchuId, kizaiHeadId); // ビューが欲しい
-    const { data: honbanbi, error: honbanbiError } = await selectJuchuHonbanbiQty(juchuId, kizaiHeadId);
+    const { data, error } = await selectKizaiHeadListForMitu(juchuId, kizaiHeadId); // ビューが欲しい
     if (error) {
       console.error('DB情報取得エラー', error.message, error.cause, error.hint);
       throw error;
     }
-    if (honbanbiError) {
-      console.error('DB情報取得エラー', honbanbiError.message, honbanbiError.cause, honbanbiError.hint);
-      throw honbanbiError;
-    }
     if (!data || data.length === 0) {
       return [];
     }
-    console.log('dataだよ☆☆☆☆☆☆☆☆', data);
+    console.log('明細だよ☆☆☆☆☆☆☆☆', data);
     return data.map((d) => ({
       nam: d.kizai_nam,
-      qty: d.plan_kizai_qty! + d.plan_yobi_qty!,
-      honbanbiQty: honbanbi.juchu_honbanbi_qty!,
-      tankaAmt: 1000, // ビューが欲しい
-      shokeiAmt: (d.plan_kizai_qty! + d.plan_yobi_qty!) * honbanbi.juchu_honbanbi_qty! * 1000,
+      qty: d.plan_kizai_qty,
+      honbanbiQty: d.juchu_honbanbi_calc_qty,
+      tankaAmt: d.kizai_tanka_amt,
+      shokeiAmt: (d.plan_kizai_qty ?? 0) * (d.juchu_honbanbi_calc_qty ?? 0) * (d.kizai_tanka_amt ?? 0),
     }));
   } catch (e) {
     console.error('例外が発生しました', e);
@@ -179,16 +176,29 @@ export const getJuchuKizaiMeisaiList = async (juchuId: number, kizaiHeadId: numb
 };
 
 /**
- *
- * @param juchuId
- * @param kizaiHeadId
- * @returns
+ * 選択された機材明細ヘッダの明細を一式でまとめて取得する関数
+ * @param juchuId 受注ヘッダID
+ * @param kizaiHeadId 機材ヘッダID
+ * @returns 一式でまとめた機材明細の配列
  */
 export const getJuchuMeisaiSum = async (juchuId: number, kizaiHeadId: number) => {
   try {
-    const data = await getJuchuKizaiMeisaiList(juchuId, kizaiHeadId);
-    const qtySum = data.reduce((sum, item) => sum + Number(item.tankaAmt), 0);
-    return [{ tankaAmt: qtySum }];
+    const { data, error } = await selectKizaiHeadListWithIsshikiForMitu(juchuId, kizaiHeadId);
+    if (error) {
+      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
+      throw error;
+    }
+    if (!data || data.length === 0) {
+      return [];
+    }
+    console.log('一式有効明細だよ☆☆☆☆☆☆☆☆', data);
+    return data.map((d) => ({
+      nam: d.kizai_nam,
+      qty: d.plan_kizai_qty,
+      honbanbiQty: d.juchu_honbanbi_calc_qty,
+      tankaAmt: d.kizai_tanka_amt,
+      shokeiAmt: (d.plan_kizai_qty ?? 0) * (d.juchu_honbanbi_calc_qty ?? 0) * (d.kizai_tanka_amt ?? 0),
+    }));
   } catch (e) {
     console.error('例外が発生しました', e);
     throw e;

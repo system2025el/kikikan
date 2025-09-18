@@ -2187,6 +2187,42 @@ export type Database = {
         };
         Relationships: [];
       };
+      v_mitu_kizai: {
+        Row: {
+          juchu_head_id: number | null;
+          juchu_honbanbi_calc_qty: number | null;
+          juchu_kizai_head_id: number | null;
+          kizai_nam: string | null;
+          kizai_tanka_amt: number | null;
+          plan_kizai_qty: number | null;
+        };
+        Relationships: [];
+      };
+      v_mitu_kizai_issiki: {
+        Row: {
+          juchu_head_id: number | null;
+          juchu_honbanbi_calc_qty: number | null;
+          juchu_kizai_head_id: number | null;
+          kizai_nam: string | null;
+          kizai_tanka_amt: number | null;
+          plan_kizai_qty: number | null;
+        };
+        Relationships: [];
+      };
+      v_mitu_lst: {
+        Row: {
+          juchu_head_id: number | null;
+          koen_nam: string | null;
+          kokyaku_nam: string | null;
+          mitu_dat: string | null;
+          mitu_head_id: number | null;
+          mitu_head_nam: string | null;
+          mitu_sts: number | null;
+          nyuryoku_user: string | null;
+          sts_nam: string | null;
+        };
+        Relationships: [];
+      };
       v_nyushuko_den2: {
         Row: {
           bld_cod: string | null;

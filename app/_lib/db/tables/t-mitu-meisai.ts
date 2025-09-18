@@ -1,3 +1,4 @@
+'use server';
 import { PoolClient } from 'pg';
 
 import { MituMeisai } from '../types/t-mitu-meisai-type';
