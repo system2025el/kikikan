@@ -1,6 +1,7 @@
 'use server';
 import { PoolClient } from 'pg';
 
+import { SCHEMA } from '../supabase';
 import { MituMeisaiHead } from '../types/t-mitu-meisai-head-type';
 
 export const insertQuotMeisaiHead = async (data: MituMeisaiHead[], connection: PoolClient) => {
@@ -20,7 +21,7 @@ export const insertQuotMeisaiHead = async (data: MituMeisaiHead[], connection: P
 
   const query = `
       INSERT INTO
-        t_mitu_meisai_head (${quotHeadCols.join(',')})
+        ${SCHEMA}.t_mitu_meisai_head (${quotHeadCols.join(',')})
       VALUES 
         ${placeholders}
     `;

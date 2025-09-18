@@ -1,6 +1,7 @@
 'use server';
 import { PoolClient } from 'pg';
 
+import { SCHEMA } from '../supabase';
 import { MituHead } from '../types/t-mitu-head-types';
 
 export const insertQuotHead = async (data: MituHead, connection: PoolClient) => {
@@ -14,7 +15,7 @@ export const insertQuotHead = async (data: MituHead, connection: PoolClient) => 
 
   const query = `
       INSERT INTO
-        t_mitu_head (${quotHeadCols.join(',')})
+        ${SCHEMA}.t_mitu_head (${quotHeadCols.join(',')})
       VALUES 
         (${placeholders})
       RETURNING mitu_head_id;
@@ -38,7 +39,7 @@ export const updateQuotHead = async (data: MituHead, connection: PoolClient) => 
   const upsetValues = quotHeadCols.filter((i) => i !== 'mitu_head_id').map((col) => `${col} = EXCLUDED.${col}`);
 
   const updateQuery = `
-    INSERT INTO t_mitu_head (${quotHeadCols.join(',')})
+    INSERT INTO ${SCHEMA}.t_mitu_head (${quotHeadCols.join(',')})
     VALUES (${placeholders})
     ON CONFLICT (mitu_head_id)
     DO UPDATE SET ${upsetValues}

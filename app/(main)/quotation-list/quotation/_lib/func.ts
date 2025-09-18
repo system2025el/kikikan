@@ -237,11 +237,9 @@ export const saveQuot = async (data: QuotHeadValues): Promise<number | null> => 
     console.log('新規START');
     // トランザクション開始
     await connection.query('BEGIN');
-    // スキーマ指定
-    await connection.query(`SET search_path TO ${SCHEMA};`);
     // 新見積ヘッドID
     const newMituHeadId = await connection.query(`
-       SELECT coalesce(max(mitu_head_id),0) + 1 as newid FROM t_mitu_head
+       SELECT coalesce(max(mitu_head_id),0) + 1 as newid FROM ${SCHEMA}.t_mitu_head
       `);
     console.log(newMituHeadId.rows[0].newid);
     // 見積ヘッド
@@ -396,8 +394,6 @@ export const updateQuot = async (data: QuotHeadValues): Promise<number | null> =
     console.log('更新START');
     // トランザクション開始
     await connection.query('BEGIN');
-    // スキーマ指定
-    await connection.query(`SET search_path TO ${SCHEMA};`);
     if (quotHead) {
       // 更新処理
       const id = await updateQuotHead(quotHead, connection);

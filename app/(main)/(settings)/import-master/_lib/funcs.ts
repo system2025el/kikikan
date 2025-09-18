@@ -102,8 +102,6 @@ export const ImportEqptRfidData = async (data: EqptImportType[]) => {
   try {
     // トランザクション開始
     await connection.query('BEGIN');
-    // スキーマ指定
-    await connection.query(`SET search_path TO dev5;`);
 
     const tanabans = await checkTanaban(tanabanList, connection);
     console.log('棚番', tanabans.length, '件追加');

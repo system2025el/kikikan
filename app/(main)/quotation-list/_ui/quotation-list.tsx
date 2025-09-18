@@ -14,13 +14,13 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { grey } from '@mui/material/colors';
 
 import { BackButton } from '../../_ui/buttons';
 import { TwoDatePickers } from '../../_ui/date';
-import { QuotaionListTable } from './quotation-list-table';
+import { QuotTableValues } from '../_lib/type';
+import { QuotationListTable } from './quotation-list-table';
 
-export const QuotationList = () => {
+export const QuotationList = ({ quots }: { quots: QuotTableValues[] }) => {
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
       <Box justifySelf={'end'} mb={0.5}>
@@ -78,7 +78,7 @@ export const QuotationList = () => {
           </form>
         </Box>
       </Paper>
-      <QuotaionListTable />
+      <QuotationListTable quots={quots} />
     </Container>
   );
 };

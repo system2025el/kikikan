@@ -14,12 +14,11 @@ export const selectBundledEqptIds = async (idList: number[]) => {
     SELECT DISTINCT
       kizai_id
     FROM
-      dev6.m_kizai_set
+      ${SCHEMA}.m_kizai_set
     WHERE
       set_kizai_id IN (${placeholders})
   `;
   try {
-    await pool.query(` SET search_path TO ${SCHEMA};`);
     return await pool.query(query, idList);
   } catch (e) {
     throw e;

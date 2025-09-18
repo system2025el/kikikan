@@ -47,21 +47,20 @@ export const selectOneVeh = async (id: number) => {
  */
 export const insertNewVeh = async (data: VehsMasterDialogValues) => {
   const query = `
-    INSERT INTO m_sharyo (
+    INSERT INTO ${SCHEMA}.m_sharyo (
       sharyo_id, sharyo_nam, del_flg, dsp_ord_num,
       mem, dsp_flg, add_dat, add_user
     )
     VALUES (
-      (SELECT coalesce(max(sharyo_id),0) + 1 FROM m_sharyo),
+      (SELECT coalesce(max(sharyo_id),0) + 1 FROM ${SCHEMA}.m_sharyo),
       $1, $2, 
-      (SELECT coalesce(max(dsp_ord_num),0) + 1 FROM m_sharyo),
+      (SELECT coalesce(max(dsp_ord_num),0) + 1 FROM ${SCHEMA}.m_sharyo),
       $3, $4, $5, $6
     );
   `;
   const date = toJapanTimeString();
   const values = [data.sharyoNam, Number(data.delFlg), data.mem, Number(data.dspFlg), date, 'shigasan'];
   try {
-    await pool.query(` SET search_path TO ${SCHEMA};`);
     await pool.query(query, values);
   } catch (e) {
     throw e;

@@ -27,7 +27,7 @@ export const selectOneEqpt = async (id: number) => {
  */
 export const insertNewEqpt = async (data: EqptsMasterDialogValues) => {
   const query = `
-    INSERT INTO m_kizai (
+    INSERT INTO ${SCHEMA}.m_kizai (
       kizai_id, kizai_nam, del_flg, section_num, el_num, shozoku_id,
       bld_cod, tana_cod, eda_cod, kizai_grp_cod, dsp_ord_num, mem,
       bumon_id, shukei_bumon_id, dsp_flg, ctn_flg, def_dat_qty,
@@ -35,7 +35,7 @@ export const insertNewEqpt = async (data: EqptsMasterDialogValues) => {
       add_dat, add_user
     )
     VALUES (
-      (SELECT coalesce(max(kizai_id),0) + 1 FROM m_kizai),
+      (SELECT coalesce(max(kizai_id),0) + 1 FROM ${SCHEMA}.m_kizai),
       $1, $2, $3, $4, $5, $6, $7, $8, $9,
       $24,
       $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23
@@ -69,7 +69,6 @@ export const insertNewEqpt = async (data: EqptsMasterDialogValues) => {
     data.dspOrdNum,
   ];
   try {
-    await pool.query(` SET search_path TO ${SCHEMA};`);
     await pool.query(query, values);
   } catch (e) {
     throw e;
@@ -107,9 +106,9 @@ export const selectActiveEqpts = async (query: string) => {
       k.bumon_id as "bumonId",
       k.kizai_grp_cod as "kizaiGrpCod"
     FROM
-      dev6.m_kizai as k
+      ${SCHEMA}.m_kizai as k
     INNER JOIN
-      dev6.m_shozoku as s
+      ${SCHEMA}.m_shozoku as s
     ON
       k.shozoku_id = s.shozoku_id
     WHERE
@@ -130,7 +129,6 @@ export const selectActiveEqpts = async (query: string) => {
   `;
 
   try {
-    await pool.query(` SET search_path TO ${SCHEMA};`);
     return await pool.query(sqlQuery, values);
   } catch (e) {
     throw e;

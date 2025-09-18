@@ -25,16 +25,15 @@ import { useRouter } from 'next/navigation';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { TextFieldElement, useForm } from 'react-hook-form-mui';
 
-import { quotaionList } from '@/app/_lib/mock-data';
-
 import { CloseMasterDialogButton } from '../../_ui/buttons';
 import { MuiTablePagination } from '../../_ui/table-pagination';
+import { QuotTableValues } from '../_lib/type';
 
 /**
  * 見積一覧テーブル
  * @returns 見積一覧テーブルのコンポーネント
  */
-export const QuotaionListTable = () => {
+export const QuotationListTable = ({ quots }: { quots: QuotTableValues[] }) => {
   const rowsPerPage = 50;
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -85,11 +84,14 @@ export const QuotaionListTable = () => {
 
   // 表示するデータ
   const list = useMemo(
-    () => (rowsPerPage > 0 ? quotaionList.slice((page - 1) * rowsPerPage, page * rowsPerPage) : quotaionList),
-    [page, rowsPerPage /*, quotaionList*/]
+    () =>
+      rowsPerPage > 0
+        ? quots.map((l, index) => ({ ...l, ordNum: index + 1 })).slice((page - 1) * rowsPerPage, page * rowsPerPage)
+        : quots.map((l, index) => ({ ...l, ordNum: index + 1 })),
+    [page, rowsPerPage, quots]
   );
   // テーブル最後のページ用の空データの長さ
-  const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - quotaionList.length) : 0;
+  const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - quots.length) : 0;
 
   return (
     <>
@@ -100,16 +102,12 @@ export const QuotaionListTable = () => {
         <Divider />
         <Grid2 container mt={1} mx={0.5} justifyContent={'space-between'}>
           <Grid2 spacing={1}>
-            <MuiTablePagination arrayList={quotaionList} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
+            <MuiTablePagination arrayList={quots} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
           </Grid2>
           <Grid2 container spacing={1}>
             <Grid2 container spacing={1}>
               <Grid2>
-                <Button
-                  onClick={() => {
-                    clickCreateQuotation();
-                  }} /*href="/quotation-list/quotation"*/
-                >
+                <Button onClick={() => clickCreateQuotation()}>
                   <AddIcon fontSize="small" />
                   新規見積
                 </Button>
@@ -135,42 +133,61 @@ export const QuotaionListTable = () => {
         <TableContainer component={Paper} square sx={{ maxHeight: '90vh', mt: 1 }}>
           <Table stickyHeader padding="none">
             <TableHead>
-              <TableRow>
-                <TableCell sx={{ width: 50, maxWidth: 50 }}></TableCell>
-                <TableCell>見積番号</TableCell>
-                <TableCell>見積ステータス</TableCell>
-                <TableCell sx={{ minWidth: '20%' }}>見積件名</TableCell>
-                <TableCell sx={{ minWidth: '20%' }}>見積相手</TableCell>
-                <TableCell sx={{ minWidth: 100 }}>見積日</TableCell>
-                <TableCell sx={{ minWidth: 100 }}>請求番号</TableCell>
-                <TableCell sx={{ minWidth: 100 }}>見積メモ</TableCell>
+              <TableRow sx={{ whiteSpace: 'nowrap' }}>
+                <TableCell />
+                <TableCell padding="none" />
+                <TableCell align="right">見積番号</TableCell>
+                <TableCell align="right">受注番号</TableCell>
+                <TableCell>
+                  <Typography noWrap variant={'body2'} fontWeight={500}>
+                    見積ステータス
+                  </Typography>
+                </TableCell>
+                <TableCell>見積件名</TableCell>
+                <TableCell>見積相手</TableCell>
+                <TableCell>見積日</TableCell>
+                <TableCell>請求番号</TableCell>
+                <TableCell>見積メモ</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {list.map((quotation) => (
-                <TableRow key={quotation.id}>
+              {list.map((quotation, index) => (
+                <TableRow key={index}>
                   <TableCell padding="checkbox">
                     <Checkbox color="primary" />
+                  </TableCell>
+                  <TableCell
+                    width={50}
+                    sx={{
+                      paddingLeft: 1,
+                      paddingRight: 1,
+                      textAlign: 'end',
+                    }}
+                  >
+                    {quotation.ordNum}
                   </TableCell>
                   <TableCell>
                     <Button
                       variant="text"
+                      size="small"
+                      sx={{ py: 0.2, px: 0, m: 0, minWidth: 0 }}
                       onClick={() => {
-                        console.log('テーブルで見積番号', quotation.quoteNumber, 'をクリック');
+                        console.log('テーブルで見積番号', quotation.mituHeadId, 'をクリック');
                         initJuchuMitsu();
-                        sessionStorage.setItem('mitsumoriId', String(quotation.quoteNumber ?? ''));
+                        sessionStorage.setItem('mitsumoriId', String(quotation.mituHeadId ?? ''));
                         router.push('/quotation-list/quotation');
                       }}
                     >
-                      {quotation.quoteNumber}
+                      {quotation.mituHeadId}
                     </Button>
                   </TableCell>
-                  <TableCell>{quotation.status}</TableCell>
-                  <TableCell>{quotation.name}</TableCell>
-                  <TableCell>{quotation.customerName}</TableCell>
-                  <TableCell>{quotation.quotationDate}</TableCell>
-                  <TableCell>{quotation.invoiceNumber}</TableCell>
-                  <TableCell>{quotation.quotationmemo}</TableCell>
+                  <TableCell>{quotation.juchuHeadId}</TableCell>
+                  <TableCell>{quotation.mituStsNam}</TableCell>
+                  <TableCell>{quotation.mituHeadNam}</TableCell>
+                  <TableCell>{quotation.kokyakuNam}</TableCell>
+                  <TableCell>{quotation.koenNam}</TableCell>
+                  <TableCell>{quotation.mituDat}</TableCell>
+                  <TableCell>{quotation.nyuryokuUser}</TableCell>
                 </TableRow>
               ))}
               {emptyRows > 0 && (

@@ -13,7 +13,7 @@ import { SCHEMA } from '../supabase';
  */
 export const insertEqptHistory = async (data: EqptsMasterDialogValues, id: number) => {
   const query = `
-          INSERT INTO m_kizai_his (
+          INSERT INTO ${SCHEMA}.m_kizai_his (
             kizai_id_his_num, kizai_id, kizai_nam, del_flg, section_num, el_num, shozoku_id,
             bld_cod, tana_cod, eda_cod, kizai_grp_cod, dsp_ord_num, mem,
             bumon_id, shukei_bumon_id, dsp_flg, ctn_flg, def_dat_qty,
@@ -21,7 +21,7 @@ export const insertEqptHistory = async (data: EqptsMasterDialogValues, id: numbe
             
           )
           VALUES (
-            (SELECT coalesce(max(kizai_id_his_num),0) + 1 FROM m_kizai_his),
+            (SELECT coalesce(max(kizai_id_his_num),0) + 1 FROM ${SCHEMA}.m_kizai_his),
             $1, $2, $3, $4, $5, $6, $7, $8, $9,
             $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26 ,$27
           );
@@ -56,7 +56,6 @@ export const insertEqptHistory = async (data: EqptsMasterDialogValues, id: numbe
     data.updDat,
   ];
   try {
-    await pool.query(` SET search_path TO ${SCHEMA};`);
     await pool.query(query, values);
   } catch (e) {
     throw e;
