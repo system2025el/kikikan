@@ -7,7 +7,7 @@ import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import ClearIcon from '@mui/icons-material/Clear';
 import { IconButton } from '@mui/material';
 import { grey } from '@mui/material/colors';
-import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
+import { DatePicker, DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
 import { PickerValue } from '@mui/x-date-pickers/internals';
@@ -227,6 +227,76 @@ export const TwoDatePickers = (props: { sx?: object; disabled?: boolean }) => {
     </>
   );
 };
+
+export const DateTime = (props: {
+  sx?: object;
+  disabled?: boolean;
+  date: Date | null;
+  minDate?: Date;
+  maxDate?: Date;
+  fieldstate?: ControllerFieldState;
+  onChange: (value: Dayjs | null) => void;
+  onAccept: (value: Dayjs | null) => void;
+  onClear?: () => void;
+}) => {
+  const { sx, disabled, date, minDate, maxDate, fieldstate, onChange, onAccept, onClear } = props;
+
+  //カレンダーの表示を制御する
+  const [open, setOpen] = useState(false);
+
+  return (
+    <DateTimePicker
+      name="date"
+      format="YYYY/MM/DD HH:mm"
+      open={open}
+      onOpen={() => setOpen(true)}
+      onClose={() => setOpen(false)}
+      slotProps={{
+        actionBar: { actions: ['accept', 'cancel'] },
+        textField: {
+          helperText: fieldstate?.error?.message,
+          FormHelperTextProps: {
+            sx: { color: 'error.main', fontSize: '0.75rem' },
+          },
+          size: 'small',
+          sx: {
+            bgcolor: disabled ? grey[200] : 'white',
+            width: 220,
+            padding: 0,
+            '.Mui-disabled': {
+              WebkitTextFillColor: 'black',
+            },
+            ...sx,
+          },
+          error: fieldstate?.invalid,
+          InputProps: {
+            endAdornment: (
+              <>
+                {date && (
+                  <IconButton size="small" sx={{ p: 0 }} onClick={onClear} disabled={disabled}>
+                    <ClearIcon fontSize="small" />
+                  </IconButton>
+                )}
+                <IconButton size="small" sx={{ p: 0 }} onClick={() => setOpen(true)} disabled={disabled}>
+                  <CalendarTodayIcon fontSize="small" />
+                </IconButton>
+              </>
+            ),
+          },
+        },
+        calendarHeader: { format: 'YYYY年MM月' },
+      }} // カレンダーヘッダーのフォーマット
+      value={date && dayjs(date)}
+      minDate={minDate && dayjs(minDate)}
+      maxDate={maxDate && dayjs(maxDate)}
+      views={['year', 'month', 'day', 'hours', 'minutes']}
+      disabled={disabled}
+      onChange={onChange}
+      onAccept={onAccept}
+    />
+  );
+};
+
 /**
  * 日付幅を取得する時のデータ型
  */

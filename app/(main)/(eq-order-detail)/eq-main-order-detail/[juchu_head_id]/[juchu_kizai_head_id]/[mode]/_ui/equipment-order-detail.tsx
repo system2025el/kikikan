@@ -33,7 +33,7 @@ import { get } from 'http';
 import { redirect, useRouter } from 'next/navigation';
 import { use, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import React from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, ControllerRenderProps, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 import { shouldDisplay } from 'rsuite/esm/internals/Picker';
 
@@ -44,10 +44,9 @@ import { addLock, delLock, getLock } from '@/app/(main)/_lib/funcs';
 import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
 import { LockValues } from '@/app/(main)/_lib/types';
 import { BackButton } from '@/app/(main)/_ui/buttons';
-import { Calendar, TestDate } from '@/app/(main)/_ui/date';
+import { Calendar, DateTime, TestDate } from '@/app/(main)/_ui/date';
 import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
 import { Loading } from '@/app/(main)/_ui/loading';
-import Time, { TestTime } from '@/app/(main)/_ui/time';
 import {
   addAllHonbanbi,
   addJuchuKizaiNyushuko,
@@ -206,6 +205,7 @@ const EquipmentOrderDetail = (props: {
     reset,
     getValues,
     setValue,
+    trigger,
     clearErrors,
     formState: { isDirty, errors, defaultValues },
   } = useForm({
@@ -932,19 +932,24 @@ const EquipmentOrderDetail = (props: {
   };
 
   /**
-   * KICS出庫日時変更時
+   * KICS出庫日変更時
    * @param newDate KICS出庫日
    */
-  const handleKicsShukoChange = async (newDate: Dayjs | null) => {
+  const handleKicsShukoChange = (newDate: Dayjs | null) => {
     if (newDate === null) return;
     setValue('kicsShukoDat', newDate.toDate(), { shouldDirty: true });
-    clearErrors('kicsShukoDat');
+  };
+
+  /**
+   * KICS出庫日確定時
+   * @param newDate KICS出庫日
+   * @returns
+   */
+  const handleKicsShukoAccept = async (newDate: Dayjs | null) => {
+    if (newDate === null) return;
+    trigger(['kicsShukoDat', 'yardShukoDat']);
 
     const yardShukoDat = getValues('yardShukoDat');
-
-    if (yardShukoDat === null) {
-      clearErrors('yardShukoDat');
-    }
 
     if (juchuKizaiMeisaiList.length > 0 && yardShukoDat === null) {
       setIdoDat(subDays(newDate.toDate(), 2));
@@ -956,13 +961,21 @@ const EquipmentOrderDetail = (props: {
   };
 
   /**
-   * YARD出庫日時変更時
+   * YARD出庫日変更時
    * @param newDate YARD出庫日
    */
   const handleYardShukoChange = async (newDate: Dayjs | null) => {
     if (newDate === null) return;
     setValue('yardShukoDat', newDate.toDate(), { shouldDirty: true });
-    clearErrors('yardShukoDat');
+  };
+
+  /**
+   * YARD出庫日確定時
+   * @param newDate YARD出庫日
+   */
+  const handleYardShukoAccept = async (newDate: Dayjs | null) => {
+    if (newDate === null) return;
+    trigger(['kicsShukoDat', 'yardShukoDat']);
 
     const kicsShukoDat = getValues('kicsShukoDat');
 
@@ -980,13 +993,21 @@ const EquipmentOrderDetail = (props: {
   };
 
   /**
-   * KICS入庫日時変更時
+   * KICS入庫日変更時
    * @param newDate KICS入庫日
    */
   const handleKicsNyukoChange = async (newDate: Dayjs | null) => {
     if (newDate === null) return;
     setValue('kicsNyukoDat', newDate.toDate(), { shouldDirty: true });
-    clearErrors('kicsNyukoDat');
+  };
+
+  /**
+   * KICS入庫日確定時
+   * @param newDate KICS入庫日
+   */
+  const handleKicsNyukoAccept = async (newDate: Dayjs | null) => {
+    if (newDate === null) return;
+    trigger(['kicsNyukoDat', 'yardNyukoDat']);
 
     const yardNyukoDat = getValues('yardNyukoDat');
 
@@ -1002,7 +1023,15 @@ const EquipmentOrderDetail = (props: {
   const handleYardNyukoChange = (newDate: Dayjs | null) => {
     if (newDate === null) return;
     setValue('yardNyukoDat', newDate.toDate(), { shouldDirty: true });
-    clearErrors('yardNyukoDat');
+  };
+
+  /**
+   * YARD入庫日時確定時
+   * @param newDate YARD入庫日
+   */
+  const handleYardNyukoAccept = (newDate: Dayjs | null) => {
+    if (newDate === null) return;
+    trigger(['kicsNyukoDat', 'yardNyukoDat']);
 
     const kicsNyukoDat = getValues('kicsNyukoDat');
 
@@ -1016,7 +1045,9 @@ const EquipmentOrderDetail = (props: {
    */
   const handleKicsClear = () => {
     setValue('kicsShukoDat', null, { shouldDirty: true });
+    trigger(['kicsShukoDat', 'yardShukoDat']);
     const yardDat = getValues('yardShukoDat');
+
     if (juchuKizaiMeisaiList.length > 0 && yardDat !== null) {
       setIdoDat(subDays(yardDat, 2));
       setMoveOpen(true);
@@ -1028,6 +1059,7 @@ const EquipmentOrderDetail = (props: {
    */
   const handleYardClear = () => {
     setValue('yardShukoDat', null, { shouldDirty: true });
+    trigger(['kicsShukoDat', 'yardShukoDat']);
     const kicsDat = getValues('kicsShukoDat');
     if (juchuKizaiMeisaiList.length > 0 && kicsDat !== null) {
       setIdoDat(subDays(kicsDat, 2));
@@ -1421,7 +1453,7 @@ const EquipmentOrderDetail = (props: {
                   </Grid2>
                 </Grid2>
                 <Grid2 container p={2} spacing={2}>
-                  <Grid2 width={400}>
+                  <Grid2 width={300}>
                     <Typography>出庫日時</Typography>
                     <Grid2>
                       <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
@@ -1429,35 +1461,16 @@ const EquipmentOrderDetail = (props: {
                         name="kicsShukoDat"
                         control={control}
                         render={({ field, fieldState }) => (
-                          <TestDate
-                            onBlur={field.onBlur}
+                          <DateTime
                             date={field.value}
                             maxDate={
                               juchuHonbanbiList.length > 0 ? new Date(juchuHonbanbiList[0].juchuHonbanbiDat) : undefined
                             }
                             onChange={handleKicsShukoChange}
+                            onAccept={handleKicsShukoAccept}
                             fieldstate={fieldState}
                             disabled={!edit}
                             onClear={handleKicsClear}
-                          />
-                        )}
-                      />
-                      <Controller
-                        name="kicsShukoDat"
-                        control={control}
-                        render={({ field, fieldState }) => (
-                          <TestTime
-                            onBlur={field.onBlur}
-                            time={field.value}
-                            onChange={(newTime) => {
-                              field.onChange(newTime?.toDate());
-                              const yardShukoDat = getValues('yardShukoDat');
-                              if (yardShukoDat === null) {
-                                clearErrors('yardShukoDat');
-                              }
-                            }}
-                            fieldstate={fieldState}
-                            disabled={!edit}
                           />
                         )}
                       />
@@ -1468,41 +1481,22 @@ const EquipmentOrderDetail = (props: {
                         name="yardShukoDat"
                         control={control}
                         render={({ field, fieldState }) => (
-                          <TestDate
-                            onBlur={field.onBlur}
+                          <DateTime
                             date={field.value}
                             maxDate={
                               juchuHonbanbiList.length > 0 ? new Date(juchuHonbanbiList[0].juchuHonbanbiDat) : undefined
                             }
                             onChange={handleYardShukoChange}
+                            onAccept={handleYardShukoAccept}
                             fieldstate={fieldState}
                             disabled={!edit}
                             onClear={handleYardClear}
                           />
                         )}
                       />
-                      <Controller
-                        name="yardShukoDat"
-                        control={control}
-                        render={({ field, fieldState }) => (
-                          <TestTime
-                            onBlur={field.onBlur}
-                            time={field.value}
-                            onChange={(newTime) => {
-                              field.onChange(newTime?.toDate());
-                              const kicsShukoDat = getValues('kicsShukoDat');
-                              if (kicsShukoDat === null) {
-                                clearErrors('kicsShukoDat');
-                              }
-                            }}
-                            fieldstate={fieldState}
-                            disabled={!edit}
-                          />
-                        )}
-                      />
                     </Grid2>
                   </Grid2>
-                  <Grid2 width={400}>
+                  <Grid2 width={300}>
                     <Typography>入庫日時</Typography>
                     <Grid2>
                       <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
@@ -1510,8 +1504,7 @@ const EquipmentOrderDetail = (props: {
                         name="kicsNyukoDat"
                         control={control}
                         render={({ field, fieldState }) => (
-                          <TestDate
-                            onBlur={field.onBlur}
+                          <DateTime
                             date={field.value}
                             minDate={
                               juchuHonbanbiList.length > 0
@@ -1519,28 +1512,13 @@ const EquipmentOrderDetail = (props: {
                                 : undefined
                             }
                             onChange={handleKicsNyukoChange}
+                            onAccept={handleKicsNyukoAccept}
                             fieldstate={fieldState}
                             disabled={!edit}
-                            onClear={() => field.onChange(null)}
-                          />
-                        )}
-                      />
-                      <Controller
-                        name="kicsNyukoDat"
-                        control={control}
-                        render={({ field, fieldState }) => (
-                          <TestTime
-                            onBlur={field.onBlur}
-                            time={field.value}
-                            onChange={(newTime) => {
-                              field.onChange(newTime?.toDate());
-                              const yardNyukoDat = getValues('yardNyukoDat');
-                              if (yardNyukoDat === null) {
-                                clearErrors('yardNyukoDat');
-                              }
+                            onClear={() => {
+                              field.onChange(null);
+                              trigger(['kicsNyukoDat', 'yardNyukoDat']);
                             }}
-                            fieldstate={fieldState}
-                            disabled={!edit}
                           />
                         )}
                       />
@@ -1551,8 +1529,7 @@ const EquipmentOrderDetail = (props: {
                         name="yardNyukoDat"
                         control={control}
                         render={({ field, fieldState }) => (
-                          <TestDate
-                            onBlur={field.onBlur}
+                          <DateTime
                             date={field.value}
                             minDate={
                               juchuHonbanbiList.length > 0
@@ -1560,28 +1537,13 @@ const EquipmentOrderDetail = (props: {
                                 : undefined
                             }
                             onChange={handleYardNyukoChange}
+                            onAccept={handleYardNyukoAccept}
                             fieldstate={fieldState}
                             disabled={!edit}
-                            onClear={() => field.onChange(null)}
-                          />
-                        )}
-                      />
-                      <Controller
-                        name="yardNyukoDat"
-                        control={control}
-                        render={({ field, fieldState }) => (
-                          <TestTime
-                            onBlur={field.onBlur}
-                            time={field.value}
-                            onChange={(newTime) => {
-                              field.onChange(newTime?.toDate());
-                              const kicsNyukoDat = getValues('kicsNyukoDat');
-                              if (kicsNyukoDat === null) {
-                                clearErrors('kicsNyukoDat');
-                              }
+                            onClear={() => {
+                              field.onChange(null);
+                              trigger(['kicsNyukoDat', 'yardNyukoDat']);
                             }}
-                            fieldstate={fieldState}
-                            disabled={!edit}
                           />
                         )}
                       />

@@ -21,8 +21,7 @@ import { useState } from 'react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 
 import { BackButton } from '@/app/(main)/_ui/buttons';
-import DateX from '@/app/(main)/_ui/date';
-import Time from '@/app/(main)/_ui/time';
+import { DateTime } from '@/app/(main)/_ui/date';
 
 const VehicleOrderDetail = () => {
   const [selectStatus, setSelectStatus] = useState('入力中');
@@ -210,13 +209,13 @@ const VehicleOrderDetail = () => {
                   日時
                 </Typography>
               </Box>
-              <Controller name="date" control={control} render={({ field }) => <DateX sx={{ bgcolor: 'white' }} />} />
-            </Grid2>
-            <Grid2 size={{ sm: 12, md: 'grow' }} display={'flex'} alignItems={'center'}>
-              <Typography marginLeft={5} marginRight={2} whiteSpace="nowrap">
-                時刻
-              </Typography>
-              <Controller name="time" control={control} render={({ field }) => <Time sx={{ bgcolor: 'white' }} />} />
+              <Controller
+                name="date"
+                control={control}
+                render={({ field }) => (
+                  <DateTime date={new Date()} onChange={() => {}} onAccept={() => {}} sx={{ bgcolor: 'white' }} />
+                )}
+              />
             </Grid2>
             <Grid2 size={{ sm: 12, md: 4 }} display={'flex'} alignItems={'center'}>
               <Typography marginLeft={5} marginRight={2} whiteSpace="nowrap">

@@ -49,10 +49,9 @@ import { addLock, delLock, getLock } from '@/app/(main)/_lib/funcs';
 import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
 import { LockValues } from '@/app/(main)/_lib/types';
 import { BackButton } from '@/app/(main)/_ui/buttons';
-import { Calendar, TestDate } from '@/app/(main)/_ui/date';
+import { Calendar, DateTime, TestDate } from '@/app/(main)/_ui/date';
 import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
 import { Loading } from '@/app/(main)/_ui/loading';
-import Time, { TestTime } from '@/app/(main)/_ui/time';
 import {
   addAllHonbanbi,
   addJuchuKizaiNyushuko,
@@ -189,6 +188,7 @@ export const EquipmentReturnOrderDetail = (props: {
     reset,
     getValues,
     setValue,
+    trigger,
     clearErrors,
     formState: { isDirty, errors, defaultValues },
   } = useForm({
@@ -797,12 +797,21 @@ export const EquipmentReturnOrderDetail = (props: {
   };
 
   /**
-   * KICS入庫日時変更時
+   * KICS入庫日変更時
    * @param newDate KICS入庫日
    */
   const handleKicsNyukoChange = async (newDate: Dayjs | null) => {
     if (newDate === null) return;
     setValue('kicsNyukoDat', newDate.toDate(), { shouldDirty: true });
+  };
+
+  /**
+   * KICS入庫日確定時
+   * @param newDate KICS入庫日
+   */
+  const handleKicsNyukoAccept = async (newDate: Dayjs | null) => {
+    if (newDate === null) return;
+    trigger(['kicsNyukoDat', 'yardNyukoDat']);
 
     const yardNyukoDat = getValues('yardNyukoDat');
 
@@ -812,12 +821,21 @@ export const EquipmentReturnOrderDetail = (props: {
   };
 
   /**
-   * YARD入庫日時変更時
+   * YARD入庫日変更時
    * @param newDate YARD入庫日
    */
   const handleYardNyukoChange = (newDate: Dayjs | null) => {
     if (newDate === null) return;
     setValue('yardNyukoDat', newDate.toDate(), { shouldDirty: true });
+  };
+
+  /**
+   * YARD入庫日確定時
+   * @param newDate YARD入庫日
+   */
+  const handleYardNyukoAccept = (newDate: Dayjs | null) => {
+    if (newDate === null) return;
+    trigger(['kicsNyukoDat', 'yardNyukoDat']);
 
     const kicsNyukoDat = getValues('kicsNyukoDat');
 
@@ -1068,15 +1086,11 @@ export const EquipmentReturnOrderDetail = (props: {
                   <Grid2 container alignItems="center">
                     <Typography>小計金額</Typography>
                     <TextField
-                      value={`¥${priceTotal.toLocaleString()}`}
+                      value={`¥-${priceTotal.toLocaleString()}`}
                       type="text"
                       sx={{
                         '& .MuiInputBase-input': {
                           textAlign: 'right',
-                          color: 'red',
-                        },
-                        '.Mui-disabled': {
-                          WebkitTextFillColor: 'red',
                         },
                       }}
                       disabled
@@ -1142,33 +1156,49 @@ export const EquipmentReturnOrderDetail = (props: {
                 </Grid2>
                 <Grid2 container p={2} spacing={2}>
                   <Grid2 container spacing={2}>
-                    <Grid2 width={380} order={{ xl: 1 }}>
-                      <Typography>元伝票出庫日時</Typography>
+                    <Grid2 width={300} order={{ xl: 1 }}>
+                      <Typography>親伝票出庫日時</Typography>
                       <Grid2>
                         <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                        <TestDate date={props.oyaJuchuKizaiNyushukoData.kicsShukoDat} onChange={() => {}} disabled />
-                        <TestTime time={props.oyaJuchuKizaiNyushukoData.kicsShukoDat} onChange={() => {}} disabled />
+                        <DateTime
+                          date={props.oyaJuchuKizaiNyushukoData.kicsShukoDat}
+                          onChange={() => {}}
+                          disabled
+                          onAccept={() => {}}
+                        />
                       </Grid2>
                       <Grid2>
                         <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                        <TestDate date={props.oyaJuchuKizaiNyushukoData.yardShukoDat} onChange={() => {}} disabled />
-                        <TestTime time={props.oyaJuchuKizaiNyushukoData.yardShukoDat} onChange={() => {}} disabled />
+                        <DateTime
+                          date={props.oyaJuchuKizaiNyushukoData.yardShukoDat}
+                          onChange={() => {}}
+                          disabled
+                          onAccept={() => {}}
+                        />
                       </Grid2>
                     </Grid2>
-                    <Grid2 width={380} order={{ xl: 3 }}>
-                      <Typography>元伝票入庫日時</Typography>
+                    <Grid2 width={300} order={{ xl: 3 }}>
+                      <Typography>親伝票入庫日時</Typography>
                       <Grid2>
                         <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                        <TestDate date={props.oyaJuchuKizaiNyushukoData.kicsNyukoDat} onChange={() => {}} disabled />
-                        <TestTime time={props.oyaJuchuKizaiNyushukoData.kicsNyukoDat} onChange={() => {}} disabled />
+                        <DateTime
+                          date={props.oyaJuchuKizaiNyushukoData.kicsNyukoDat}
+                          onChange={() => {}}
+                          onAccept={() => {}}
+                          disabled
+                        />
                       </Grid2>
                       <Grid2>
                         <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                        <TestDate date={props.oyaJuchuKizaiNyushukoData.yardNyukoDat} onChange={() => {}} disabled />
-                        <TestTime time={props.oyaJuchuKizaiNyushukoData.yardNyukoDat} onChange={() => {}} disabled />
+                        <DateTime
+                          date={props.oyaJuchuKizaiNyushukoData.yardNyukoDat}
+                          onChange={() => {}}
+                          onAccept={() => {}}
+                          disabled
+                        />
                       </Grid2>
                     </Grid2>
-                    <Grid2 width={380} order={{ xl: 2 }}>
+                    <Grid2 width={300} order={{ xl: 2 }}>
                       <Typography>返却入庫日時</Typography>
                       <Grid2>
                         <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
@@ -1176,32 +1206,16 @@ export const EquipmentReturnOrderDetail = (props: {
                           name="kicsNyukoDat"
                           control={control}
                           render={({ field, fieldState }) => (
-                            <TestDate
-                              onBlur={field.onBlur}
+                            <DateTime
                               date={field.value}
                               onChange={handleKicsNyukoChange}
+                              onAccept={handleKicsNyukoAccept}
                               fieldstate={fieldState}
                               disabled={!edit}
-                              onClear={() => field.onChange(null)}
-                            />
-                          )}
-                        />
-                        <Controller
-                          name="kicsNyukoDat"
-                          control={control}
-                          render={({ field, fieldState }) => (
-                            <TestTime
-                              onBlur={field.onBlur}
-                              time={field.value}
-                              onChange={(newTime) => {
-                                field.onChange(newTime?.toDate());
-                                const yardNyukoDat = getValues('yardNyukoDat');
-                                if (yardNyukoDat === null) {
-                                  clearErrors('yardNyukoDat');
-                                }
+                              onClear={() => {
+                                field.onChange(null);
+                                trigger(['kicsNyukoDat', 'yardNyukoDat']);
                               }}
-                              fieldstate={fieldState}
-                              disabled={!edit}
                             />
                           )}
                         />
@@ -1212,32 +1226,16 @@ export const EquipmentReturnOrderDetail = (props: {
                           name="yardNyukoDat"
                           control={control}
                           render={({ field, fieldState }) => (
-                            <TestDate
-                              onBlur={field.onBlur}
+                            <DateTime
                               date={field.value}
                               onChange={handleYardNyukoChange}
+                              onAccept={handleYardNyukoAccept}
                               fieldstate={fieldState}
                               disabled={!edit}
-                              onClear={() => field.onChange(null)}
-                            />
-                          )}
-                        />
-                        <Controller
-                          name="yardNyukoDat"
-                          control={control}
-                          render={({ field, fieldState }) => (
-                            <TestTime
-                              onBlur={field.onBlur}
-                              time={field.value}
-                              onChange={(newTime) => {
-                                field.onChange(newTime?.toDate());
-                                const kicsNyukoDat = getValues('kicsNyukoDat');
-                                if (kicsNyukoDat === null) {
-                                  clearErrors('kicsNyukoDat');
-                                }
+                              onClear={() => {
+                                field.onChange(null);
+                                trigger(['kicsNyukoDat', 'yardNyukoDat']);
                               }}
-                              fieldstate={fieldState}
-                              disabled={!edit}
                             />
                           )}
                         />
@@ -1263,7 +1261,8 @@ export const EquipmentReturnOrderDetail = (props: {
                           margin: 0,
                         },
                       }}
-                      slotProps={{ input: { readOnly: true } }}
+                      onChange={(value) => handleHonbanbiChange(Number(value.target.value))}
+                      //slotProps={{ input: { readOnly: true } }}
                       disabled={!edit}
                     ></TextFieldElement>
                     <Typography>日</Typography>

@@ -444,7 +444,7 @@ export const DateSelectDialog = ({
               </Grid2>
               <Grid2 size={3} display={'flex'} alignItems={'center'} maxWidth={100}>
                 <TextField
-                  value={data.juchuHonbanbiAddQty}
+                  value={data.juchuHonbanbiAddQty ?? 0}
                   onChange={(e) => handleHonbanAddChange(index, Number(e.target.value))}
                   type="number"
                   sx={{

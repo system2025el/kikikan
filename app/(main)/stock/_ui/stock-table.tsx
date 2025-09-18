@@ -28,7 +28,18 @@ export const EqTable = (props: EqTableProps) => {
         <TableBody>
           {eqList.map((row, index) => (
             <TableRow key={row.kizaiId}>
-              <TableCell align="right" style={styles.row} padding="checkbox">
+              <TableCell
+                align="right"
+                sx={{
+                  border: '1px solid black',
+                  whiteSpace: 'nowrap',
+                  height: 25,
+                  paddingTop: 0,
+                  paddingBottom: 0,
+                  paddingLeft: 1,
+                  paddingRight: 1,
+                }}
+              >
                 {index + 1}
               </TableCell>
               <TableCell align="left" style={styles.row}>
