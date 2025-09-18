@@ -39,10 +39,9 @@ import { addLock, delLock, getLock } from '@/app/(main)/_lib/funcs';
 import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
 import { LockValues } from '@/app/(main)/_lib/types';
 import { BackButton } from '@/app/(main)/_ui/buttons';
-import { Calendar, TestDate } from '@/app/(main)/_ui/date';
+import { Calendar, DateTime, TestDate } from '@/app/(main)/_ui/date';
 import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
 import { Loading } from '@/app/(main)/_ui/loading';
-import Time, { TestTime } from '@/app/(main)/_ui/time';
 import {
   addJuchuKizaiNyushuko,
   getJuchuKizaiHeadMaxId,
@@ -136,11 +135,12 @@ export const EquipmentKeepOrderDetail = (props: {
     reset,
     getValues,
     setValue,
+    trigger,
     clearErrors,
     formState: { isDirty, errors, defaultValues },
   } = useForm({
-    mode: 'onSubmit',
-    reValidateMode: 'onBlur',
+    mode: 'onChange',
+    reValidateMode: 'onChange',
     defaultValues: {
       juchuHeadId: props.keepJuchuKizaiHeadData.juchuHeadId,
       juchuKizaiHeadId: props.keepJuchuKizaiHeadData.juchuKizaiHeadId,
@@ -428,12 +428,21 @@ export const EquipmentKeepOrderDetail = (props: {
   };
 
   /**
-   * KICS出庫日時変更時
+   * KICS出庫日変更時
    * @param newDate KICS出庫日
    */
   const handleKicsShukoChange = async (newDate: Dayjs | null) => {
     if (newDate === null) return;
     setValue('kicsShukoDat', newDate.toDate(), { shouldDirty: true });
+  };
+
+  /**
+   * KICS出庫日確定時
+   * @param newDate KICS出庫日
+   */
+  const handleKicsShukoAccept = async (newDate: Dayjs | null) => {
+    if (newDate === null) return;
+    trigger(['kicsShukoDat', 'yardShukoDat']);
 
     const yardShukoDat = getValues('yardShukoDat');
 
@@ -443,12 +452,21 @@ export const EquipmentKeepOrderDetail = (props: {
   };
 
   /**
-   * YARD出庫日時変更時
+   * YARD出庫日変更時
    * @param newDate YARD出庫日
    */
   const handleYardShukoChange = async (newDate: Dayjs | null) => {
     if (newDate === null) return;
     setValue('yardShukoDat', newDate.toDate(), { shouldDirty: true });
+  };
+
+  /**
+   * YARD出庫日確定時
+   * @param newDate YARD出庫日
+   */
+  const handleYardShukoAccept = async (newDate: Dayjs | null) => {
+    if (newDate === null) return;
+    trigger(['kicsShukoDat', 'yardShukoDat']);
 
     const kicsShukoDat = getValues('kicsShukoDat');
 
@@ -458,12 +476,21 @@ export const EquipmentKeepOrderDetail = (props: {
   };
 
   /**
-   * KICS入庫日時変更時
+   * KICS入庫日変更時
    * @param newDate KICS入庫日
    */
   const handleKicsNyukoChange = async (newDate: Dayjs | null) => {
     if (newDate === null) return;
     setValue('kicsNyukoDat', newDate.toDate(), { shouldDirty: true });
+  };
+
+  /**
+   * KICS入庫日確定時
+   * @param newDate KICS入庫日
+   */
+  const handleKicsNyukoAccept = async (newDate: Dayjs | null) => {
+    if (newDate === null) return;
+    trigger(['kicsNyukoDat', 'yardNyukoDat']);
 
     const yardNyukoDat = getValues('yardNyukoDat');
 
@@ -473,12 +500,21 @@ export const EquipmentKeepOrderDetail = (props: {
   };
 
   /**
-   * YARD入庫日時変更時
+   * YARD入庫日変更時
    * @param newDate YARD入庫日
    */
   const handleYardNyukoChange = (newDate: Dayjs | null) => {
     if (newDate === null) return;
     setValue('yardNyukoDat', newDate.toDate(), { shouldDirty: true });
+  };
+
+  /**
+   * YARD入庫日確定時
+   * @param newDate YARD入庫日
+   */
+  const handleYardNyukoAccept = (newDate: Dayjs | null) => {
+    if (newDate === null) return;
+    trigger(['kicsNyukoDat', 'yardNyukoDat']);
 
     const kicsNyukoDat = getValues('kicsNyukoDat');
 
@@ -720,81 +756,57 @@ export const EquipmentKeepOrderDetail = (props: {
                   </Grid2>
                 </Grid2>
                 <Grid2 container p={2} spacing={2}>
-                  <Grid2 order={{ xl: 1 }} width={380}>
+                  <Grid2 order={{ xl: 1 }} width={300}>
                     <Typography>親伝票出庫日時</Typography>
                     <Grid2>
                       <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                      <TestDate
+                      <DateTime
                         date={
                           props.oyaJuchuKizaiHeadData.kicsShukoDat && new Date(props.oyaJuchuKizaiHeadData.kicsShukoDat)
                         }
                         onChange={() => {}}
-                        disabled
-                      />
-                      <TestTime
-                        time={
-                          props.oyaJuchuKizaiHeadData.kicsShukoDat && new Date(props.oyaJuchuKizaiHeadData.kicsShukoDat)
-                        }
-                        onChange={() => {}}
+                        onAccept={() => {}}
                         disabled
                       />
                     </Grid2>
                     <Grid2>
                       <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                      <TestDate
+                      <DateTime
                         date={
                           props.oyaJuchuKizaiHeadData.yardShukoDat && new Date(props.oyaJuchuKizaiHeadData.yardShukoDat)
                         }
                         onChange={() => {}}
-                        disabled
-                      />
-                      <TestTime
-                        time={
-                          props.oyaJuchuKizaiHeadData.yardShukoDat && new Date(props.oyaJuchuKizaiHeadData.yardShukoDat)
-                        }
-                        onChange={() => {}}
+                        onAccept={() => {}}
                         disabled
                       />
                     </Grid2>
                   </Grid2>
-                  <Grid2 width={380} order={{ xl: 4 }}>
+                  <Grid2 width={300} order={{ xl: 4 }}>
                     <Typography>親伝票入庫日時</Typography>
                     <Grid2>
                       <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                      <TestDate
+                      <DateTime
                         date={
                           props.oyaJuchuKizaiHeadData.kicsNyukoDat && new Date(props.oyaJuchuKizaiHeadData.kicsNyukoDat)
                         }
                         onChange={() => {}}
-                        disabled
-                      />
-                      <TestTime
-                        time={
-                          props.oyaJuchuKizaiHeadData.kicsNyukoDat && new Date(props.oyaJuchuKizaiHeadData.kicsNyukoDat)
-                        }
-                        onChange={() => {}}
+                        onAccept={() => {}}
                         disabled
                       />
                     </Grid2>
                     <Grid2>
                       <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
-                      <TestDate
+                      <DateTime
                         date={
                           props.oyaJuchuKizaiHeadData.yardNyukoDat && new Date(props.oyaJuchuKizaiHeadData.yardNyukoDat)
                         }
                         onChange={() => {}}
-                        disabled
-                      />
-                      <TestTime
-                        time={
-                          props.oyaJuchuKizaiHeadData.yardNyukoDat && new Date(props.oyaJuchuKizaiHeadData.yardNyukoDat)
-                        }
-                        onChange={() => {}}
+                        onAccept={() => {}}
                         disabled
                       />
                     </Grid2>
                   </Grid2>
-                  <Grid2 width={380} order={{ xl: 2 }}>
+                  <Grid2 width={300} order={{ xl: 2 }}>
                     <Typography>キープ入庫日時</Typography>
                     <Grid2>
                       <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
@@ -802,34 +814,18 @@ export const EquipmentKeepOrderDetail = (props: {
                         name="kicsNyukoDat"
                         control={control}
                         render={({ field, fieldState }) => (
-                          <TestDate
-                            onBlur={field.onBlur}
+                          <DateTime
                             date={field.value}
                             // maxDate={keepShukoDate ? keepShukoDate : (oyaShukoDate ?? undefined)}
                             // minDate={oyaShukoDate ?? undefined}
                             onChange={handleKicsNyukoChange}
+                            onAccept={handleKicsNyukoAccept}
                             fieldstate={fieldState}
                             disabled={!edit}
-                            onClear={() => field.onChange(null)}
-                          />
-                        )}
-                      />
-                      <Controller
-                        name="kicsNyukoDat"
-                        control={control}
-                        render={({ field, fieldState }) => (
-                          <TestTime
-                            onBlur={field.onBlur}
-                            time={field.value}
-                            onChange={(newTime) => {
-                              field.onChange(newTime?.toDate());
-                              const yardShukoDat = getValues('yardShukoDat');
-                              if (yardShukoDat === null) {
-                                clearErrors('yardShukoDat');
-                              }
+                            onClear={() => {
+                              field.onChange(null);
+                              trigger(['kicsNyukoDat', 'yardNyukoDat']);
                             }}
-                            fieldstate={fieldState}
-                            disabled={!edit}
                           />
                         )}
                       />
@@ -840,40 +836,24 @@ export const EquipmentKeepOrderDetail = (props: {
                         name="yardNyukoDat"
                         control={control}
                         render={({ field, fieldState }) => (
-                          <TestDate
-                            onBlur={field.onBlur}
+                          <DateTime
                             date={field.value}
                             // maxDate={keepShukoDate ? keepShukoDate : (oyaShukoDate ?? undefined)}
                             // minDate={oyaNyukoDate ?? undefined}
                             onChange={handleYardNyukoChange}
+                            onAccept={handleYardNyukoAccept}
                             fieldstate={fieldState}
                             disabled={!edit}
-                            onClear={() => field.onChange(null)}
-                          />
-                        )}
-                      />
-                      <Controller
-                        name="yardNyukoDat"
-                        control={control}
-                        render={({ field, fieldState }) => (
-                          <TestTime
-                            onBlur={field.onBlur}
-                            time={field.value}
-                            onChange={(newTime) => {
-                              field.onChange(newTime?.toDate());
-                              const kicsNyukoDat = getValues('kicsNyukoDat');
-                              if (kicsNyukoDat === null) {
-                                clearErrors('kicsNyukoDat');
-                              }
+                            onClear={() => {
+                              field.onChange(null);
+                              trigger(['kicsNyukoDat', 'yardNyukoDat']);
                             }}
-                            fieldstate={fieldState}
-                            disabled={!edit}
                           />
                         )}
                       />
                     </Grid2>
                   </Grid2>
-                  <Grid2 width={380} order={{ xl: 3 }}>
+                  <Grid2 width={300} order={{ xl: 3 }}>
                     <Typography>キープ出庫日時</Typography>
                     <Grid2>
                       <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
@@ -881,34 +861,18 @@ export const EquipmentKeepOrderDetail = (props: {
                         name="kicsShukoDat"
                         control={control}
                         render={({ field, fieldState }) => (
-                          <TestDate
-                            onBlur={field.onBlur}
+                          <DateTime
                             date={field.value}
                             // maxDate={oyaShukoDate ?? undefined}
                             // minDate={keepNyukoDate ? keepNyukoDate : (oyaNyukoDate ?? undefined)}
                             onChange={handleKicsShukoChange}
+                            onAccept={handleKicsShukoAccept}
                             fieldstate={fieldState}
                             disabled={!edit}
-                            onClear={() => field.onChange(null)}
-                          />
-                        )}
-                      />
-                      <Controller
-                        name="kicsShukoDat"
-                        control={control}
-                        render={({ field, fieldState }) => (
-                          <TestTime
-                            onBlur={field.onBlur}
-                            time={field.value}
-                            onChange={(newTime) => {
-                              field.onChange(newTime?.toDate());
-                              const yardShukoDat = getValues('yardShukoDat');
-                              if (yardShukoDat === null) {
-                                clearErrors('yardShukoDat');
-                              }
+                            onClear={() => {
+                              field.onChange(null);
+                              trigger(['kicsShukoDat', 'yardShukoDat']);
                             }}
-                            fieldstate={fieldState}
-                            disabled={!edit}
                           />
                         )}
                       />
@@ -919,34 +883,18 @@ export const EquipmentKeepOrderDetail = (props: {
                         name="yardShukoDat"
                         control={control}
                         render={({ field, fieldState }) => (
-                          <TestDate
-                            onBlur={field.onBlur}
+                          <DateTime
                             date={field.value}
                             // maxDate={oyaShukoDate ?? undefined}
                             // minDate={keepNyukoDate ? keepNyukoDate : (oyaNyukoDate ?? undefined)}
                             onChange={handleYardShukoChange}
+                            onAccept={handleYardShukoAccept}
                             fieldstate={fieldState}
                             disabled={!edit}
-                            onClear={() => field.onChange(null)}
-                          />
-                        )}
-                      />
-                      <Controller
-                        name="yardShukoDat"
-                        control={control}
-                        render={({ field, fieldState }) => (
-                          <TestTime
-                            onBlur={field.onBlur}
-                            time={field.value}
-                            onChange={(newTime) => {
-                              field.onChange(newTime?.toDate());
-                              const kicsShukoDat = getValues('kicsShukoDat');
-                              if (kicsShukoDat === null) {
-                                clearErrors('kicsShukoDat');
-                              }
+                            onClear={() => {
+                              field.onChange(null);
+                              trigger(['kicsShukoDat', 'yardShukoDat']);
                             }}
-                            fieldstate={fieldState}
-                            disabled={!edit}
                           />
                         )}
                       />

@@ -221,7 +221,7 @@ export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({
               sx={{ position: 'sticky', top: 0, zIndex: 2, bgcolor: 'red' }}
               colSpan={3}
             >
-              返却数(マイナス入力)
+              返却数
             </TableCell>
           </TableRow>
           <TableRow>
