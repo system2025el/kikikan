@@ -63,20 +63,19 @@ export const selectOneUser = async (id: number) => {
  */
 export const insertNewUser = async (data: UsersMasterDialogValues) => {
   const query = `
-    INSERT INTO m_user (
+    INSERT INTO ${SCHEMA}.m_user (
       user_nam, del_flg, dsp_ord_num,
       add_dat, add_user
     )
     VALUES (
       $1, $2,
-      (SELECT coalesce(max(dsp_ord_num),0) + 1 FROM m_user),
+      (SELECT coalesce(max(dsp_ord_num),0) + 1 FROM ${SCHEMA}.m_user),
       $3, $4
     );
   `;
   const date = toJapanTimeString();
   const values = [data.tantouNam, Number(data.delFlg), date, 'shigasan'];
   try {
-    await pool.query(` SET search_path TO ${SCHEMA};`);
     await pool.query(query, values);
   } catch (e) {
     throw e;

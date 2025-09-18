@@ -7,14 +7,7 @@ import { OrderList } from './_ui/order-list';
  * @returns 受注一覧画面
  */
 const Page = async () => {
-  const [orderList, customers] = await Promise.all([
-    getFilteredOrderList({
-      criteria: 1,
-      selectedDate: { value: '1', range: { from: null, to: null } },
-      listSort: { sort: 'shuko', order: 'asc' },
-    }),
-    getCustomerSelection(),
-  ]);
+  const [orderList, customers] = await Promise.all([getFilteredOrderList(), getCustomerSelection()]);
   return <OrderList orders={orderList} customers={customers} />;
 };
 

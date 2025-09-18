@@ -16,6 +16,10 @@ export const selectCountOfTheEqpt = async (id: number) => {
   }
 };
 
+/**
+ * 機材表エクセルに表示するすべての情報
+ * @returns {{}[]}機材・RFID・部門・大部門・集計部門マスタから取得した情報
+ */
 export const selectAllRfidWithKizai = async () => {
   const query = `
   SELECT
@@ -44,15 +48,14 @@ export const selectAllRfidWithKizai = async () => {
     mk.rank_amt_3, 
     mk.rank_amt_4, 
     mk.rank_amt_5 
-  FROM m_rfid AS mr
-  LEFT JOIN m_kizai AS mk ON mr.kizai_id = mk.kizai_id
-  LEFT JOIN m_bumon AS mb ON mk.bumon_id = mb.bumon_id
-  LEFT JOIN m_dai_bumon AS md ON mb.dai_bumon_id = md.dai_bumon_id
-  LEFT JOIN m_shukei_bumon AS ms ON mk.shukei_bumon_id = ms.shukei_bumon_id
+  FROM ${SCHEMA}.m_rfid AS mr
+  LEFT JOIN ${SCHEMA}.m_kizai AS mk ON mr.kizai_id = mk.kizai_id
+  LEFT JOIN ${SCHEMA}.m_bumon AS mb ON mk.bumon_id = mb.bumon_id
+  LEFT JOIN ${SCHEMA}.m_dai_bumon AS md ON mb.dai_bumon_id = md.dai_bumon_id
+  LEFT JOIN ${SCHEMA}.m_shukei_bumon AS ms ON mk.shukei_bumon_id = ms.shukei_bumon_id
   ORDER BY mr.rfid_tag_id
 `;
   try {
-    await pool.query(`SET search_path TO dev5;`);
     return await pool.query(query);
   } catch (e) {
     throw e;

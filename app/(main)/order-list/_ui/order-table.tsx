@@ -1,11 +1,8 @@
 'use client';
 
 import AddIcon from '@mui/icons-material/Add';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import DeleteIcon from '@mui/icons-material/Delete';
 import MergeIcon from '@mui/icons-material/Merge';
 import {
-  alpha,
   Box,
   Button,
   Checkbox,
@@ -19,9 +16,8 @@ import {
   TableHead,
   TableRow,
   Typography,
-  useTheme,
 } from '@mui/material';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 
 import { toISOStringYearMonthDay } from '../../_lib/date-conversion';
 import { Loading } from '../../_ui/loading';
@@ -51,12 +47,9 @@ export const OrderTable = ({
 
   // 表示するデータ
   const list = useMemo(() => {
-    const pagedList = rowsPerPage > 0 ? orderList.slice((page - 1) * rowsPerPage, page * rowsPerPage) : orderList;
-
-    return pagedList.map((item, index) => ({
-      ...item,
-      ordNum: (page - 1) * rowsPerPage + index + 1, // ← ここで表示順を計算！
-    }));
+    return rowsPerPage > 0
+      ? orderList.map((l, index) => ({ ...l, ordNum: index + 1 })).slice((page - 1) * rowsPerPage, page * rowsPerPage)
+      : orderList.map((l, index) => ({ ...l, ordNum: index + 1 }));
   }, [orderList, page]);
   // テーブル最後のページ用の空データの長さ
   const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - orderList.length) : 0;
@@ -110,10 +103,14 @@ export const OrderTable = ({
             <Table stickyHeader size="small" padding="none">
               <TableHead>
                 <TableRow sx={{ whiteSpace: 'nowrap' }}>
-                  <TableCell></TableCell>
-                  <TableCell padding="none"></TableCell>
+                  <TableCell />
+                  <TableCell padding="none" />
                   <TableCell align="right">受注番号</TableCell>
-                  <TableCell align="left">受注ステータス</TableCell>
+                  <TableCell align="left">
+                    <Typography noWrap variant={'body2'} fontWeight={500}>
+                      受注ステータス
+                    </Typography>
+                  </TableCell>
                   <TableCell align="left">公演名</TableCell>
                   <TableCell align="left">公演場所</TableCell>
                   <TableCell align="left">顧客名</TableCell>

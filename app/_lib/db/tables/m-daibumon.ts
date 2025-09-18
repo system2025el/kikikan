@@ -66,14 +66,14 @@ export const selectOneDaibumon = async (id: number) => {
  */
 export const insertNewDaibumon = async (data: DaibumonsMasterDialogValues) => {
   const query = `
-          INSERT INTO m_dai_bumon (
+          INSERT INTO ${SCHEMA}.m_dai_bumon (
             dai_bumon_id, dai_bumon_nam, del_flg, dsp_ord_num,
             mem, add_dat, add_user
           )
           VALUES (
-            (SELECT coalesce(max(dai_bumon_id),0) + 1 FROM m_dai_bumon),
+            (SELECT coalesce(max(dai_bumon_id),0) + 1 FROM ${SCHEMA}.m_dai_bumon),
             $1, $2,
-            (SELECT coalesce(max(dsp_ord_num),0) + 1 FROM m_dai_bumon),
+            (SELECT coalesce(max(dsp_ord_num),0) + 1 FROM ${SCHEMA}.m_dai_bumon),
             $3, $4, $5
           );
         `;
@@ -81,7 +81,6 @@ export const insertNewDaibumon = async (data: DaibumonsMasterDialogValues) => {
   const values = [data.daibumonNam, Number(data.delFlg), data.mem, date, 'shigasan'];
 
   try {
-    await pool.query(` SET search_path TO ${SCHEMA};`);
     await pool.query(query, values);
   } catch (e) {
     throw e;

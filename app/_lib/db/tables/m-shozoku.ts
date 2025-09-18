@@ -65,21 +65,20 @@ export const selectOneShozoku = async (id: number) => {
  */
 export const insertNewShozoku = async (data: BasesMasterDialogValues) => {
   const query = `
-        INSERT INTO m_shozoku (
+        INSERT INTO ${SCHEMA}.m_shozoku (
           shozoku_id, shozoku_nam, del_flg, dsp_ord_num,
           mem, add_dat, add_user
         )
         VALUES (
-          (SELECT coalesce(max(shozoku_id),0) + 1 FROM m_shozoku),
+          (SELECT coalesce(max(shozoku_id),0) + 1 FROM ${SCHEMA}.m_shozoku),
           $1, $2, 
-          (SELECT coalesce(max(dsp_ord_num),0) + 1 FROM m_shozoku),
+          (SELECT coalesce(max(dsp_ord_num),0) + 1 FROM ${SCHEMA}.m_shozoku),
           $3, $4, $5
         );
       `;
   const date = toJapanTimeString();
   const values = [data.shozokuNam, Number(data.delFlg), data.mem, date, 'shigasan'];
   try {
-    await pool.query(` SET search_path TO ${SCHEMA};`);
     await pool.query(query, values);
   } catch (e) {
     throw e;

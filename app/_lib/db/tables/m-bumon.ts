@@ -77,15 +77,15 @@ export const selectOneBumon = async (id: number) => {
  */
 export const insertNewBumon = async (data: BumonsMasterDialogValues) => {
   const query = `
-    INSERT INTO m_bumon (
+    INSERT INTO ${SCHEMA}.m_bumon (
       bumon_id, bumon_nam, del_flg, dsp_ord_num,
       dai_bumon_id, shukei_bumon_id,
       mem, add_dat, add_user
     )
     VALUES (
-      (SELECT coalesce(max(bumon_id),0) + 1 FROM m_bumon),
+      (SELECT coalesce(max(bumon_id),0) + 1 FROM ${SCHEMA}.m_bumon),
       $1, $2,
-      (SELECT coalesce(max(dsp_ord_num),0) + 1 FROM m_bumon),
+      (SELECT coalesce(max(dsp_ord_num),0) + 1 FROM ${SCHEMA}.m_bumon),
       $3, $4, $5, $6, $7
     );
   `;
@@ -94,7 +94,6 @@ export const insertNewBumon = async (data: BumonsMasterDialogValues) => {
   const values = [data.bumonNam, Number(data.delFlg), data.daibumonId, data.shukeibumonId, data.mem, date, 'shigasan'];
 
   try {
-    await pool.query(` SET search_path TO ${SCHEMA};`);
     await pool.query(query, values);
   } catch (e) {
     throw e;

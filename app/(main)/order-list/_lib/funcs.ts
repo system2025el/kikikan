@@ -5,6 +5,7 @@ import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
 
 import pool from '@/app/_lib/db/postgres';
+import { SCHEMA } from '@/app/_lib/db/supabase';
 
 import { toJapanTimeString } from '../../_lib/date-conversion';
 import { OrderSearchValues } from './types';
@@ -18,7 +19,13 @@ dayjs.extend(timezone);
  * @param query 検索キーワード
  * @returns 受注情報リスト
  */
-export const getFilteredOrderList = async (query: OrderSearchValues) => {
+export const getFilteredOrderList = async (
+  query: OrderSearchValues = {
+    criteria: 1,
+    selectedDate: { value: '1', range: { from: null, to: null } },
+    listSort: { sort: 'shuko', order: 'asc' },
+  }
+) => {
   console.log(query);
   const { criteria, selectedDate, customer, listSort, stageName, orderStartDate, orderFinishDate } = query;
   // 基本のクエリ
@@ -28,7 +35,7 @@ export const getFilteredOrderList = async (query: OrderSearchValues) => {
       koenbasho_nam as "koenbashoNam", kokyaku_nam as "kokyakuNam", juchu_dat as "juchuDat", 
       juchu_str_dat as "juchuStrDat", juchu_end_dat as "juchuEndDat", nyushuko_sts_nam as "nyushukoStsNam"
     FROM
-      dev6.v_juchu_lst 
+      ${SCHEMA}.v_juchu_lst 
   `;
   const queryParams = [];
   const whereClauses = [];
