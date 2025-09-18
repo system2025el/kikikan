@@ -7,6 +7,8 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
+  Autocomplete,
+  AutocompleteRenderInputParams,
   Box,
   Button,
   Container,
@@ -27,6 +29,7 @@ import { toJapanDateString } from '@/app/(main)/_lib/date-conversion';
 import { BackButton } from '@/app/(main)/_ui/buttons';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { LoadingOverlay } from '@/app/(main)/_ui/loading';
+import { getCustomerSelection } from '@/app/(main)/(masters)/_lib/funs';
 import { FormDateX } from '@/app/(main)/order-list/_ui/order-list';
 
 import { getMituStsSelection, getOrderForQuotation, getUsersSelection, saveQuot, updateQuot } from '../_lib/func';
@@ -50,9 +53,14 @@ export const Quotation = () => {
   /* 新規かどうか */
   const [isNew, setIsNew] = useState(true);
   /* フォーム内の選択肢 */
-  const [selectOptions, setSelectOptions] = useState<{ user: SelectTypes[]; mituSts: SelectTypes[] }>({
+  const [selectOptions, setSelectOptions] = useState<{
+    user: SelectTypes[];
+    mituSts: SelectTypes[];
+    custs: SelectTypes[];
+  }>({
     user: [],
     mituSts: [],
+    custs: [],
   });
   /* 受注選択に表示する受注情報 */
   const [order, setOrder] = useState<JuchuValues>({
@@ -166,8 +174,12 @@ export const Quotation = () => {
   /* 画面初期 */
   useEffect(() => {
     const getOptions = async () => {
-      const [users, mituSts] = await Promise.all([getUsersSelection(), getMituStsSelection()]);
-      setSelectOptions({ user: users, mituSts: mituSts });
+      const [users, mituSts, custs] = await Promise.all([
+        getUsersSelection(),
+        getMituStsSelection(),
+        getCustomerSelection(),
+      ]);
+      setSelectOptions({ user: users, mituSts: mituSts, custs: custs });
     };
     getOptions();
     const savedOrderData = sessionStorage.getItem('currentOrder');
@@ -242,7 +254,7 @@ export const Quotation = () => {
     }
   }, []);
   /* eslint-enable react-hooks/exhaustive-deps */
-
+  // デバッグ用
   useEffect(() => {
     if (Object.keys(errors).length > 0) {
       console.log('入力エラー', Object.entries(errors));
@@ -410,7 +422,25 @@ export const Quotation = () => {
                 </Box>
                 <Box sx={styles.container}>
                   <Typography marginRight={7}>見積先</Typography>
-                  <TextFieldElement name="kokyaku" control={control} sx={{ width: 300 }} />
+                  <Controller
+                    name="kokyaku"
+                    control={control}
+                    render={({ field }) => (
+                      <Autocomplete
+                        {...field}
+                        onChange={(_, value) => {
+                          const label = typeof value === 'string' ? value : (value?.label ?? '');
+                          field.onChange(label);
+                        }}
+                        freeSolo
+                        autoSelect
+                        sx={{ width: 300 }}
+                        renderInput={(params) => <TextField {...params} />}
+                        options={selectOptions.custs}
+                        getOptionLabel={(option) => (typeof option === 'string' ? option : option.label)}
+                      />
+                    )}
+                  />
                 </Box>
                 <Box sx={styles.container}>
                   <Typography marginRight={1}>見積先担当者</Typography>

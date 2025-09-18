@@ -1,3 +1,4 @@
+'use server';
 import { PoolClient } from 'pg';
 
 import { MituHead } from '../types/t-mitu-head-types';
