@@ -48,7 +48,7 @@ export const selectQuotMeisaiHead = async (id: number) => {
       .schema(SCHEMA)
       .from('t_mitu_meisai_head')
       .select(
-        'mitu_meisai_head_id, mitu_meisai_head_nam, mitu_meisai_head_kbn, head_nam_dsp_flg, nebiki_nam, nebiki_amt,nebiki_aft_amt, biko_1, biko_2, biko_3'
+        'mitu_meisai_head_id, mitu_head_id, mitu_meisai_head_nam, mitu_meisai_head_kbn, head_nam_dsp_flg, nebiki_nam, nebiki_amt, nebiki_aft_nam, shokei_mei, nebiki_aft_amt, biko_1, biko_2, biko_3'
       )
       .eq('mitu_head_id', id);
   } catch (e) {
@@ -67,7 +67,7 @@ export const selectQuotMeisai = async (id: number) => {
       .schema(SCHEMA)
       .from('t_mitu_meisai')
       .select(
-        'mitu_meisai_id, mitu_meisai_head_id, mitu_meisai_nam, meisai_qty, meisai_honbanbi_qty, meisai_tanka_amt, shokei_amt'
+        'mitu_meisai_id, mitu_meisai_head_id, mitu_head_id, mitu_meisai_nam, meisai_qty, meisai_honbanbi_qty, meisai_tanka_amt, shokei_amt'
       )
       .eq('mitu_head_id', id);
   } catch (e) {

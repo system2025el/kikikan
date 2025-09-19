@@ -26,7 +26,7 @@ import { toJapanDateString, toJapanTimeString } from '@/app/(main)/_lib/date-con
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 
-import { JuchuValues, QuotHeadValues } from './types';
+import { JuchuValues, QuotHeadValues, QuotMaisaiHeadValues } from './types';
 
 /**
  * 担当者の選択肢リスト取得関数
@@ -123,39 +123,105 @@ export const getOrderForQuotation = async (id: number): Promise<JuchuValues | nu
  * @param mituId 選択された見積ヘッドID
  */
 export const getChosenQuot = async (mituId: number) => {
+  // 明細のデータ変換をする
+  const transformMeisaiHead = (head: MituMeisaiHead, meisais: MituMeisai[]) => ({
+    mituMeisaiHeadId: head.mitu_meisai_head_id,
+    mituMeisaiHeadNam: head.mitu_meisai_head_nam,
+    mituMeisaiKbn: head.mitu_meisai_head_kbn,
+    headNamDspFlg: Boolean(head.head_nam_dsp_flg),
+    nebikiNam: head.nebiki_nam,
+    nebikiAmt: head.nebiki_amt,
+    nebikiAftAmt: head.nebiki_aft_amt,
+    nebikiAftNam: head.nebiki_aft_nam,
+    shokeiMei: head.shokei_mei,
+    biko1: head.biko_1,
+    biko2: head.biko_2,
+    biko3: head.biko_3,
+    meisai: meisais.map((m) => ({
+      id: m.mitu_meisai_id,
+      nam: m.mitu_meisai_nam,
+      qty: m.meisai_qty,
+      honbanbiQty: m.meisai_honbanbi_qty,
+      tankaAmt: m.meisai_tanka_amt,
+      shokei_amt: m.shokei_amt,
+    })),
+  });
   try {
     // 見積ヘッドの取得
     const { data: mituData, error: mituError } = await selectChosenMitu(mituId);
     if (mituError) throw new Error('DBエラー：t_mitu_head');
     console.log(mituData);
-    // 受注ヘッドIDがあれば受注情報の取得
-    let juchus: JuchuValues | null;
-    if (!mituData.juchu_head_id) {
-      juchus = null;
-    } else {
-      const { data: juchuData, error: juchuError } = await selectJuchu(mituData.juchu_head_id);
-      if (juchuError) throw new Error('DBエラー：v_juchu_lst');
-      juchus = {
-        juchuHeadId: juchuData.juchu_head_id,
-        juchuSts: juchuData.juchu_sts_nam,
-        juchuDat: juchuData.juchu_dat ? new Date(juchuData.juchu_dat) : null,
-        juchuRange:
-          juchuData.juchu_str_dat && juchuData.juchu_end_dat
-            ? { strt: new Date(juchuData.juchu_str_dat), end: new Date(juchuData.juchu_end_dat) }
-            : { strt: null, end: null },
-        nyuryokuUser: juchuData.nyuryoku_user,
-        koenNam: juchuData.koen_nam,
-        koenbashoNam: juchuData.koenbasho_nam,
-        kokyaku: { id: juchuData.kokyaku_id, name: juchuData.kokyaku_nam },
-        kokyakuTantoNam: juchuData.kokyaku_tanto_nam,
-        mem: juchuData.mem,
-        nebikiAmt: juchuData.nebiki_amt,
-        zeiKbn: juchuData.zei_nam,
-      };
-    }
-    const { data: meisaiHeads, error: meisaiHeadError } = await selectQuotMeisaiHead(mituData.mitu_head_id);
-    const { data: meisais, error: meisaiError } = await selectQuotMeisai(mituData.mitu_head_id);
+
+    // 受注情報と明細情報を並列を取得
+    const [juchuResult, meisaiHeadResult, meisaiResult] = await Promise.all([
+      mituData.juchu_head_id ? selectJuchu(mituData.juchu_head_id) : Promise.resolve({ data: null, error: null }),
+      selectQuotMeisaiHead(mituData.mitu_head_id),
+      selectQuotMeisai(mituData.mitu_head_id),
+    ]);
+
+    const { data: juchuData, error: juchuError } = juchuResult;
+    if (juchuError) throw new Error('DBエラー：v_juchu_lst');
+    const { data: meisaiHeads, error: meisaiHeadError } = meisaiHeadResult;
+    const { data: meisais, error: meisaiError } = meisaiResult;
     if (meisaiHeadError || meisaiError) throw new Error('DBエラー：明細取得時');
+
+    // 受注情報の整形
+    const juchus: JuchuValues | null = juchuData
+      ? {
+          juchuHeadId: juchuData.juchu_head_id,
+          juchuSts: juchuData.juchu_sts_nam,
+          juchuDat: juchuData.juchu_dat ? new Date(juchuData.juchu_dat) : null,
+          juchuRange:
+            juchuData.juchu_str_dat && juchuData.juchu_end_dat
+              ? { strt: new Date(juchuData.juchu_str_dat), end: new Date(juchuData.juchu_end_dat) }
+              : { strt: null, end: null },
+          nyuryokuUser: juchuData.nyuryoku_user,
+          koenNam: juchuData.koen_nam,
+          koenbashoNam: juchuData.koenbasho_nam,
+          kokyaku: { id: juchuData.kokyaku_id, name: juchuData.kokyaku_nam },
+          kokyakuTantoNam: juchuData.kokyaku_tanto_nam,
+          mem: juchuData.mem,
+          nebikiAmt: juchuData.nebiki_amt,
+          zeiKbn: juchuData.zei_nam,
+        }
+      : null;
+
+    // 明細をヘッダIDごとにグループ化
+    const meisaisByHeadId = meisais.reduce((acc: Record<number, MituMeisai[]>, current: MituMeisai) => {
+      const headId = current.mitu_meisai_head_id; // 明細データにヘッダーIDがあると仮定
+      if (!acc[headId]) {
+        acc[headId] = [];
+      }
+      acc[headId].push(current);
+      return acc;
+    }, {});
+
+    // ヘッダを区分ごとに分類・整形
+    // 初期値
+    const initialKbnMeisais: {
+      kizai: QuotMaisaiHeadValues[];
+      labor: QuotMaisaiHeadValues[];
+      other: QuotMaisaiHeadValues[];
+    } = { kizai: [], labor: [], other: [] };
+    const kbnMeisais = meisaiHeads.reduce((acc, head) => {
+      const associatedMeisais = meisaisByHeadId[head.mitu_meisai_head_id] || [];
+      const transformedHead = transformMeisaiHead(head, associatedMeisais);
+
+      switch (head.mitu_meisai_head_kbn) {
+        case 0: // kizai
+          acc.kizai.push(transformedHead);
+          break;
+        case 1: // labor
+          acc.labor.push(transformedHead);
+          break;
+        case 2: // other
+          acc.other.push(transformedHead);
+          break;
+      }
+      return acc;
+    }, initialKbnMeisais);
+
+    // 見積の全情報
     const allData: QuotHeadValues = {
       mituHeadId: mituData.mitu_head_id,
       juchuHeadId: mituData.juchu_head_id,
@@ -181,23 +247,7 @@ export const getChosenQuot = async (mituId: number) => {
       zeiRat: mituData.zei_rat,
       gokeiMei: mituData.gokei_mei,
       gokeiAmt: mituData.gokei_amt,
-      // meisaiHeads: {
-      //   kizai: meisaiHeads
-      //     .filter((h) => h.mitu_meisai_head_kbn === 0)
-      //     .map((h) => ({
-      //       mituMeisaiHeadId:h.mitu_meisai_head_id,
-      //       mituMeisaiHeadNam:h.mitu_meisai_head_nam,
-      //       mituMeisaiKbn:h.mitu_meisai_head_kbn,
-      //       headNamDspFlg:h.head_nam_dsp_flg,
-
-      //       ...h, meisai: meisais.map((meisai) => ({ ...meisai })) })),
-      //   labor: meisaiHeads
-      //     .filter((m) => m.mitu_meisai_head_kbn === 1)
-      //     .map((d) => ({ ...d, meisai: meisais.map((meisai) => ({ ...meisai })) })),
-      //   other: meisaiHeads
-      //     .filter((m) => m.mitu_meisai_head_kbn === 2)
-      //     .map((d) => ({ ...d, meisai: meisais.map((meisai) => ({ ...meisai })) })),
-      // },
+      meisaiHeads: kbnMeisais, // 整形済みのデータを代入
     };
     console.log(juchus);
     console.log({ m: allData, j: juchus });
