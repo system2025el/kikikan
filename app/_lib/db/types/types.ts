@@ -2104,12 +2104,14 @@ export type Database = {
           keikoku: string | null;
           mem: string | null;
           nebiki_amt: number | null;
-          nyuko_dat: string | null;
+          kics_nyuko_dat: string | null;
+          yard_nyuko_dat: string | null;
           oya_juchu_kizai_head_id: number | null;
           rihabi: number | null;
           sagyo_sts_nam: string | null;
           shokei: number | null;
-          shuko_dat: string | null;
+          kics_shuko_dat: string | null;
+          yard_shuko_dat: string | null;
           sikomibi: number | null;
         };
         Relationships: [];

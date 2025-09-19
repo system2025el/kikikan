@@ -140,11 +140,15 @@ export const OrderEqTable: React.FC<OrderEqTableProps> = ({ orderEqRows, edit, o
                 </TableCell>
                 <TableCell align="left">{row.sagyoStaNam}</TableCell>
                 <TableCell align="left">
-                  {`K ${row.shukoDat ? toISOString(new Date(row.shukoDat)) : 'ー'}`}
+                  {`K ${row.kicsShukoDat ? toISOString(new Date(row.kicsShukoDat)) : 'ー'}`}
                   <br />
-                  {`Y ${row.shukoDat ? toISOString(new Date(row.shukoDat)) : 'ー'}`}
+                  {`Y ${row.yardShukoDat ? toISOString(new Date(row.yardShukoDat)) : 'ー'}`}
                 </TableCell>
-                <TableCell align="left">{row.nyukoDat && toISOString(new Date(row.nyukoDat))}</TableCell>
+                <TableCell align="left">
+                  {`K ${row.kicsNyukoDat ? toISOString(new Date(row.kicsNyukoDat)) : 'ー'}`}
+                  <br />
+                  {`Y ${row.yardNyukoDat ? toISOString(new Date(row.yardNyukoDat)) : 'ー'}`}
+                </TableCell>
                 <TableCell align="right">{row.sikomibi}</TableCell>
                 <TableCell align="right">{row.rihabi}</TableCell>
                 <TableCell align="right">{row.genebi}</TableCell>

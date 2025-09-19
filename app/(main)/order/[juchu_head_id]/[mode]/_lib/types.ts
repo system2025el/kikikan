@@ -48,8 +48,10 @@ export type EqTableValues = {
   juchuKizaiHeadId: number;
   headNam: string;
   sagyoStaNam: string;
-  shukoDat: string | null;
-  nyukoDat: string | null;
+  kicsShukoDat: string | null;
+  kicsNyukoDat: string | null;
+  yardShukoDat: string | null;
+  yardNyukoDat: string | null;
   sikomibi: number | null;
   rihabi: number | null;
   genebi: number | null;
