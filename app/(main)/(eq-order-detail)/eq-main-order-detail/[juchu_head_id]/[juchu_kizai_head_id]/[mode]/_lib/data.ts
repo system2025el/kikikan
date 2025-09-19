@@ -76,17 +76,6 @@ const data = [
     spare: 0,
     total: 0,
   },
-  {
-    id: 8,
-    name: 'XXXXXXXXXXXX',
-    date: null,
-    memo: '',
-    place: 'Y',
-    all: 45,
-    order: 0,
-    spare: 0,
-    total: 0,
-  },
 ];
 
 const stock = [148, 55, 26, 27, 28, 44, 45];
