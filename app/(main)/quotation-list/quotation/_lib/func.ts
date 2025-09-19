@@ -10,9 +10,9 @@ import { selectActiveUsers } from '@/app/_lib/db/tables/m-user';
 import { selectJuchuHead } from '@/app/_lib/db/tables/t-juchu-head';
 import { selectJuchuHonbanbiQty } from '@/app/_lib/db/tables/t-juchu-kizai-head';
 import { selectHonbanbi } from '@/app/_lib/db/tables/t-juchu-kizai-honbanbi';
-import { insertQuotHead, updateQuotHead } from '@/app/_lib/db/tables/t-mitu-head';
+import { insertQuotHead, selectChosenMitu, updateQuotHead } from '@/app/_lib/db/tables/t-mitu-head';
 import { insertQuotMeisai } from '@/app/_lib/db/tables/t-mitu-meisai';
-import { insertQuotMeisaiHead } from '@/app/_lib/db/tables/t-mitu-meisai-head';
+import { insertQuotMeisaiHead, selectQuotMeisai, selectQuotMeisaiHead } from '@/app/_lib/db/tables/t-mitu-meisai-head';
 import { selectJuchuKizaiHeadList } from '@/app/_lib/db/tables/v-juchu-kizai-head-lst';
 import { selectOyaJuchuKizaiMeisai } from '@/app/_lib/db/tables/v-juchu-kizai-meisai';
 import { selectJuchu } from '@/app/_lib/db/tables/v-juchu-lst';
@@ -22,7 +22,7 @@ import { JuchuHead } from '@/app/_lib/db/types/t-juchu-head-type';
 import { MituHead } from '@/app/_lib/db/types/t-mitu-head-types';
 import { MituMeisaiHead } from '@/app/_lib/db/types/t-mitu-meisai-head-type';
 import { MituMeisai } from '@/app/_lib/db/types/t-mitu-meisai-type';
-import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanDateString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 
@@ -119,6 +119,96 @@ export const getOrderForQuotation = async (id: number): Promise<JuchuValues | nu
 };
 
 /**
+ * 選択された見積IDの見積書情報を取得する関数
+ * @param mituId 選択された見積ヘッドID
+ */
+export const getChosenQuot = async (mituId: number) => {
+  try {
+    // 見積ヘッドの取得
+    const { data: mituData, error: mituError } = await selectChosenMitu(mituId);
+    if (mituError) throw new Error('DBエラー：t_mitu_head');
+    console.log(mituData);
+    // 受注ヘッドIDがあれば受注情報の取得
+    let juchus: JuchuValues | null;
+    if (!mituData.juchu_head_id) {
+      juchus = null;
+    } else {
+      const { data: juchuData, error: juchuError } = await selectJuchu(mituData.juchu_head_id);
+      if (juchuError) throw new Error('DBエラー：v_juchu_lst');
+      juchus = {
+        juchuHeadId: juchuData.juchu_head_id,
+        juchuSts: juchuData.juchu_sts_nam,
+        juchuDat: juchuData.juchu_dat ? new Date(juchuData.juchu_dat) : null,
+        juchuRange:
+          juchuData.juchu_str_dat && juchuData.juchu_end_dat
+            ? { strt: new Date(juchuData.juchu_str_dat), end: new Date(juchuData.juchu_end_dat) }
+            : { strt: null, end: null },
+        nyuryokuUser: juchuData.nyuryoku_user,
+        koenNam: juchuData.koen_nam,
+        koenbashoNam: juchuData.koenbasho_nam,
+        kokyaku: { id: juchuData.kokyaku_id, name: juchuData.kokyaku_nam },
+        kokyakuTantoNam: juchuData.kokyaku_tanto_nam,
+        mem: juchuData.mem,
+        nebikiAmt: juchuData.nebiki_amt,
+        zeiKbn: juchuData.zei_nam,
+      };
+    }
+    const { data: meisaiHeads, error: meisaiHeadError } = await selectQuotMeisaiHead(mituData.mitu_head_id);
+    const { data: meisais, error: meisaiError } = await selectQuotMeisai(mituData.mitu_head_id);
+    if (meisaiHeadError || meisaiError) throw new Error('DBエラー：明細取得時');
+    const allData: QuotHeadValues = {
+      mituHeadId: mituData.mitu_head_id,
+      juchuHeadId: mituData.juchu_head_id,
+      mituSts: mituData.mitu_sts,
+      mituDat: mituData.mitu_dat ? new Date(mituData.mitu_dat) : null,
+      mituHeadNam: mituData.mitu_head_nam,
+      kokyaku: mituData.kokyaku_nam,
+      nyuryokuUser: { name: mituData.nyuryoku_user, id: null },
+      mituRange:
+        mituData.mitu_str_dat && mituData.mitu_end_dat
+          ? { strt: new Date(mituData.mitu_str_dat), end: new Date(mituData.mitu_end_dat) }
+          : { strt: null, end: null },
+      kokyakuTantoNam: mituData.kokyaku_tanto_nam,
+      koenNam: mituData.koen_nam,
+      koenbashoNam: mituData.koenbasho_nam,
+      mituHonbanbiQty: mituData.mitu_honbanbi_qty,
+      biko: mituData.biko,
+      comment: mituData.comment,
+      chukeiMei: mituData.chukei_mei,
+      tokuNebikiMei: mituData.toku_nebiki_mei,
+      tokuNebikiAmt: mituData.toku_nebiki_amt,
+      zeiAmt: mituData.zei_amt,
+      zeiRat: mituData.zei_rat,
+      gokeiMei: mituData.gokei_mei,
+      gokeiAmt: mituData.gokei_amt,
+      // meisaiHeads: {
+      //   kizai: meisaiHeads
+      //     .filter((h) => h.mitu_meisai_head_kbn === 0)
+      //     .map((h) => ({
+      //       mituMeisaiHeadId:h.mitu_meisai_head_id,
+      //       mituMeisaiHeadNam:h.mitu_meisai_head_nam,
+      //       mituMeisaiKbn:h.mitu_meisai_head_kbn,
+      //       headNamDspFlg:h.head_nam_dsp_flg,
+
+      //       ...h, meisai: meisais.map((meisai) => ({ ...meisai })) })),
+      //   labor: meisaiHeads
+      //     .filter((m) => m.mitu_meisai_head_kbn === 1)
+      //     .map((d) => ({ ...d, meisai: meisais.map((meisai) => ({ ...meisai })) })),
+      //   other: meisaiHeads
+      //     .filter((m) => m.mitu_meisai_head_kbn === 2)
+      //     .map((d) => ({ ...d, meisai: meisais.map((meisai) => ({ ...meisai })) })),
+      // },
+    };
+    console.log(juchus);
+    console.log({ m: allData, j: juchus });
+    return { m: allData, j: juchus };
+  } catch (e) {
+    console.error('例外が発生しました', e);
+    throw e;
+  }
+};
+
+/**
  * 選択用の機材ヘッダ名、受注ヘッドID、機材明細ヘッドIDを取得する関数
  * @param juchuId 受注ヘッドID
  * @returns 選択用の機材ヘッダ名、受注ヘッドID、機材明細ヘッドIDの配列
@@ -161,7 +251,7 @@ export const getJuchuKizaiMeisaiList = async (juchuId: number, kizaiHeadId: numb
     if (!data || data.length === 0) {
       return [];
     }
-    console.log('明細だよ☆☆☆☆☆☆☆☆', data);
+    console.log('明細☆☆☆☆☆☆☆☆', data);
     return data.map((d) => ({
       nam: d.kizai_nam,
       qty: d.plan_kizai_qty,
@@ -191,7 +281,7 @@ export const getJuchuMeisaiSum = async (juchuId: number, kizaiHeadId: number) =>
     if (!data || data.length === 0) {
       return [];
     }
-    console.log('一式有効明細だよ☆☆☆☆☆☆☆☆', data);
+    console.log('一式有効明細☆☆☆☆☆☆☆☆', data);
     return data.map((d) => ({
       nam: d.kizai_nam,
       qty: d.plan_kizai_qty,

@@ -42,6 +42,18 @@ export const quotMeisaiHeadSchema = z.object({
     .number()
     .max(999999999, { message: validationMessages.maxNumberLength(9) })
     .nullish(),
+  biko1: z
+    .string()
+    .max(100, { message: validationMessages.maxStringLength(100) })
+    .nullish(),
+  biko2: z
+    .string()
+    .max(100, { message: validationMessages.maxStringLength(100) })
+    .nullish(),
+  biko3: z
+    .string()
+    .max(100, { message: validationMessages.maxStringLength(100) })
+    .nullish(),
   meisai: z
     .array(
       z.object({
@@ -65,18 +77,6 @@ export const quotMeisaiHeadSchema = z.object({
           .nullish(),
       })
     )
-    .nullish(),
-  biko1: z
-    .string()
-    .max(100, { message: validationMessages.maxStringLength(100) })
-    .nullish(),
-  biko2: z
-    .string()
-    .max(100, { message: validationMessages.maxStringLength(100) })
-    .nullish(),
-  biko3: z
-    .string()
-    .max(100, { message: validationMessages.maxStringLength(100) })
     .nullish(),
 });
 

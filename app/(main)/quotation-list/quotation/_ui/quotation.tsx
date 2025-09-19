@@ -27,12 +27,19 @@ import { AutocompleteElement, SelectElement, TextFieldElement } from 'react-hook
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import { toJapanDateString } from '@/app/(main)/_lib/date-conversion';
 import { BackButton } from '@/app/(main)/_ui/buttons';
+import { FormDateX } from '@/app/(main)/_ui/date';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { LoadingOverlay } from '@/app/(main)/_ui/loading';
 import { getCustomerSelection } from '@/app/(main)/(masters)/_lib/funs';
-import { FormDateX } from '@/app/(main)/order-list/_ui/order-list';
 
-import { getMituStsSelection, getOrderForQuotation, getUsersSelection, saveQuot, updateQuot } from '../_lib/func';
+import {
+  getChosenQuot,
+  getMituStsSelection,
+  getOrderForQuotation,
+  getUsersSelection,
+  saveQuot,
+  updateQuot,
+} from '../_lib/func';
 import { JuchuValues, QuotHeadSchema, QuotHeadValues } from '../_lib/types';
 import { FirstDialogPage, SecondDialogPage } from './dialogs';
 import { MeisaiLines } from './meisai';
@@ -243,7 +250,10 @@ export const Quotation = () => {
           setIsNew(false); // 新規じゃない
           const getMitsumori = async (id: number) => {
             console.log('DB, the QuoteId is ', id);
+            // DB処理
+            await getChosenQuot(id);
             // setOrder(orderData);
+            // reset(data)
             // sessionStorage.setItem('currentOrder', JSON.stringify(orderData));
             sessionStorage.removeItem('mitsuHeadId');
             setIsLoading(false);
