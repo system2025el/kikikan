@@ -251,12 +251,12 @@ export const Quotation = () => {
           const getMitsumori = async (id: number) => {
             console.log('DB, the QuoteId is ', id);
             // DB処理
-            await getChosenQuot(id);
-            // setOrder(orderData);
-            // reset(data)
-            // sessionStorage.setItem('currentOrder', JSON.stringify(orderData));
+            const data = await getChosenQuot(id);
+            if (data.j) setOrder(data.j);
+            reset(data.m);
+            sessionStorage.setItem('currentOrder', JSON.stringify(data.j));
             sessionStorage.removeItem('mitsuHeadId');
-            setIsLoading(false);
+            await setIsLoading(false);
           };
           getMitsumori(Number(quotId));
         }
