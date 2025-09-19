@@ -13,6 +13,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { RadioButtonGroup, SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
 import { BackButton } from '../../_ui/buttons';
+import { FormDateX } from '../../_ui/date';
 import { selectNone, SelectTypes } from '../../_ui/form-box';
 import { radioData } from '../_lib/datas';
 import { getFilteredOrderList } from '../_lib/funcs';
@@ -29,7 +30,7 @@ export const OrderList = ({
 }) => {
   /* useState -------------------------------------------- */
   /* 受注一覧 */
-  const [orderList, setOrderList] = useState<OrderListTableValues[]>(orders ? orders : []);
+  const [orderList, setOrderList] = useState<OrderListTableValues[]>(orders ?? []);
   /* テーブルのページ */
   const [page, setPage] = useState(1);
   /* ローディングかどうか */
@@ -220,74 +221,5 @@ export const OrderList = ({
         setPage={setPage}
       />
     </Container>
-  );
-};
-
-/**
- * 日付を選択し取得するコンポーネント
- * @param props sx スタイル disbled disabledかどうか
- * @returns {JSX.Element} MUIX DatePickerコンポーネント
- */
-export const FormDateX = ({
-  sx,
-  disabled,
-  value,
-  onChange,
-}: {
-  sx?: object;
-  disabled?: boolean;
-  value?: Date | null;
-  onChange?: (date: Date | null) => void;
-}) => {
-  const [error, setError] = useState<DateValidationError | null>(null);
-
-  const errorMessage = useMemo(() => {
-    switch (error) {
-      case 'maxDate':
-      case 'minDate': {
-        return 'Please select a date';
-      }
-
-      case 'invalidDate': {
-        return 'Your date is not valid';
-      }
-
-      default: {
-        return '';
-      }
-    }
-  }, [error]);
-
-  return (
-    <DatePicker
-      name="date"
-      format="YYYY/MM/DD" // テキストエリア内のフォーマット
-      slotProps={{
-        field: {
-          clearable: true,
-        },
-        textField: {
-          helperText: errorMessage,
-          size: 'small',
-          sx: {
-            bgcolor: disabled ? grey[200] : 'white',
-            width: 200,
-            padding: 0,
-            '.Mui-disabled': {
-              WebkitTextFillColor: 'black',
-            },
-            ...sx,
-          },
-        },
-        calendarHeader: { format: 'YYYY年MM月' },
-      }} // カレンダーヘッダーのフォーマット
-      onError={(newError: DateValidationError) => setError(newError)}
-      views={['year', 'month', 'day']}
-      disabled={disabled}
-      value={value ? dayjs(value) : null}
-      onChange={(newValue: Dayjs | null) => {
-        onChange!(newValue ? newValue.toDate() : null);
-      }}
-    />
   );
 };

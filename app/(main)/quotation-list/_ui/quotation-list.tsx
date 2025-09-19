@@ -14,6 +14,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import { useEffect, useState } from 'react';
 
 import { BackButton } from '../../_ui/buttons';
 import { TwoDatePickers } from '../../_ui/date';
@@ -21,6 +22,18 @@ import { QuotTableValues } from '../_lib/type';
 import { QuotationListTable } from './quotation-list-table';
 
 export const QuotationList = ({ quots }: { quots: QuotTableValues[] }) => {
+  /* useState -------------------------------------------- */
+  /* 受注一覧 */
+  const [quotList, setQuotList] = useState<QuotTableValues[]>(quots ?? []);
+  /* テーブルのページ */
+  const [page, setPage] = useState(1);
+  /* ローディングかどうか */
+  const [isLoading, setIsLoading] = useState(true);
+
+  /* useEffect --------------------------------------- */
+  useEffect(() => {
+    setIsLoading(false);
+  }, []);
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
       <Box justifySelf={'end'} mb={0.5}>
@@ -78,7 +91,13 @@ export const QuotationList = ({ quots }: { quots: QuotTableValues[] }) => {
           </form>
         </Box>
       </Paper>
-      <QuotationListTable quots={quots} />
+      <QuotationListTable
+        quots={quotList}
+        isLoading={isLoading}
+        page={page}
+        setIsLoading={setIsLoading}
+        setPage={setPage}
+      />
     </Container>
   );
 };

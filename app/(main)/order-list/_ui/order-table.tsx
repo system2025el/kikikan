@@ -54,6 +54,7 @@ export const OrderTable = ({
   // テーブル最後のページ用の空データの長さ
   const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - orderList.length) : 0;
 
+  /* useEffect -------------------------------------------- */
   useEffect(() => {
     setIsLoading(false);
   }, [orderList, setIsLoading]);

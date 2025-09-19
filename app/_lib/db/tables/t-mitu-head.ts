@@ -1,7 +1,7 @@
 'use server';
 import { PoolClient } from 'pg';
 
-import { SCHEMA } from '../supabase';
+import { SCHEMA, supabase } from '../supabase';
 import { MituHead } from '../types/t-mitu-head-types';
 
 export const insertQuotHead = async (data: MituHead, connection: PoolClient) => {
@@ -47,6 +47,21 @@ export const updateQuotHead = async (data: MituHead, connection: PoolClient) => 
   `;
   try {
     return await connection.query(updateQuery, quotValues);
+  } catch (e) {
+    throw e;
+  }
+};
+
+export const selectChosenMitu = async (id: number) => {
+  try {
+    return await supabase
+      .schema(SCHEMA)
+      .from('t_mitu_head')
+      .select(
+        'mitu_head_id, juchu_head_id, mitu_sts, mitu_dat, mitu_head_nam, kokyaku_nam, nyuryoku_user, mitu_str_dat, mitu_end_dat, kokyaku_tanto_nam, koen_nam, koenbasho_nam, mitu_honbanbi_qty, biko, comment, chukei_mei, toku_nebiki_amt, toku_nebiki_mei, zei_amt, zei_rat, gokei_mei, gokei_amt'
+      )
+      .eq('mitu_head_id', id)
+      .single();
   } catch (e) {
     throw e;
   }
