@@ -34,6 +34,7 @@ import { getJuchuKizaiNyushuko } from '@/app/(main)/(eq-order-detail)/_lib/funcs
 
 import {
   EqptSelection,
+  JuchuContainerMeisaiValues,
   JuchuKizaiHeadValues,
   JuchuKizaiHonbanbiValues,
   JuchuKizaiMeisaiValues,
@@ -732,6 +733,7 @@ export const getSelectedEqpts = async (idList: number[], rank: number) => {
                   ? (d.rank_amt_5 ?? 0)
                   : 0,
       kizaiQty: d.kizai_qty ?? 0,
+      ctnFlg: d.ctn_flg,
     }));
     return selectedEqpts;
   } catch (e) {

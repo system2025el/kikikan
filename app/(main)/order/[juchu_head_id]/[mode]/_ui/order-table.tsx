@@ -139,7 +139,11 @@ export const OrderEqTable: React.FC<OrderEqTableProps> = ({ orderEqRows, edit, o
                   </Button>
                 </TableCell>
                 <TableCell align="left">{row.sagyoStaNam}</TableCell>
-                <TableCell align="left">{row.shukoDat && toISOString(new Date(row.shukoDat))}</TableCell>
+                <TableCell align="left">
+                  {`K ${row.shukoDat ? toISOString(new Date(row.shukoDat)) : 'ー'}`}
+                  <br />
+                  {`Y ${row.shukoDat ? toISOString(new Date(row.shukoDat)) : 'ー'}`}
+                </TableCell>
                 <TableCell align="left">{row.nyukoDat && toISOString(new Date(row.nyukoDat))}</TableCell>
                 <TableCell align="right">{row.sikomibi}</TableCell>
                 <TableCell align="right">{row.rihabi}</TableCell>

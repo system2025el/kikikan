@@ -1051,6 +1051,47 @@ export type Database = {
         };
         Relationships: [];
       };
+      t_juchu_ctn_meisai: {
+        Row: {
+          juchu_head_id: number;
+          juchu_kizai_head_id: number;
+          juchu_kizai_meisai_id: number;
+          kizai_id: number;
+          plan_kizai_qty: number | null;
+          shozoku_id: number | null;
+          mem: string | null;
+          add_dat: string | null;
+          add_user: string | null;
+          upd_dat: string | null;
+          upd_user: string | null;
+        };
+        Insert: {
+          juchu_head_id: number;
+          juchu_kizai_head_id: number;
+          juchu_kizai_meisai_id: number;
+          kizai_id: number;
+          plan_kizai_qty?: number | null;
+          shozoku_id?: number | null;
+          mem?: string | null;
+          add_dat?: string | null;
+          add_user?: string | null;
+          upd_dat?: string | null;
+          upd_user?: string | null;
+        };
+        Update: {
+          juchu_head_id?: number;
+          juchu_kizai_head_id?: number;
+          juchu_kizai_meisai_id?: number;
+          kizai_id?: number;
+          plan_kizai_qty?: number | null;
+          shozoku_id?: number | null;
+          mem?: string | null;
+          add_dat?: string | null;
+          add_user?: string | null;
+          upd_dat?: string | null;
+          upd_user?: string | null;
+        };
+      };
       t_juchu_head: {
         Row: {
           add_dat: string | null;

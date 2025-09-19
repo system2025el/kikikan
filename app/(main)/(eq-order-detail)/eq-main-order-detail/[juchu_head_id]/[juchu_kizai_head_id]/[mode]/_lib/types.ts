@@ -62,6 +62,20 @@ export type JuchuKizaiMeisaiValues = {
   saveFlag: boolean;
 };
 
+export type JuchuContainerMeisaiValues = {
+  juchuHeadId: number;
+  juchuKizaiHeadId: number;
+  juchuKizaiMeisaiId: number;
+  kizaiId: number;
+  kizaiNam: string;
+  planKicsKizaiQty: number | null;
+  planYardKizaiQty: number | null;
+  planQty: number | null;
+  mem: string | null;
+  delFlag: boolean;
+  saveFlag: boolean;
+};
+
 export type StockTableValues = {
   calDat: Date;
   kizaiId: number;
@@ -87,6 +101,7 @@ export type EqptSelection = {
   shozokuNam: string;
   bumonId: number;
   kizaiGrpCod: string;
+  ctnFlg: boolean;
 };
 
 export type SelectedEqptsValues = {
@@ -99,4 +114,5 @@ export type SelectedEqptsValues = {
   regAmt: number;
   rankAmt: number;
   kizaiQty: number;
+  ctnFlg: boolean;
 };

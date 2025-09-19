@@ -49,11 +49,16 @@ import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
 import { Loading } from '@/app/(main)/_ui/loading';
 import {
   addAllHonbanbi,
+  addJuchuContainerMeisai,
   addJuchuKizaiNyushuko,
+  delJuchuContainerMeisai,
   delSiyouHonbanbi,
+  getJuchuContainerMeisai,
+  getJuchuContainerMeisaiMaxId,
   getJuchuKizaiHeadMaxId,
   getJuchuKizaiMeisaiMaxId,
   getStockList,
+  updJuchuContainerMeisai,
   updJuchuKizaiNyushuko,
 } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 import { DetailOerValues } from '@/app/(main)/(eq-order-detail)/_lib/types';
@@ -76,6 +81,7 @@ import {
   updNyushukoHonbanbi,
 } from '../_lib/funcs';
 import {
+  JuchuContainerMeisaiValues,
   JuchuKizaiHeadSchema,
   JuchuKizaiHeadValues,
   JuchuKizaiHonbanbiValues,
@@ -85,13 +91,14 @@ import {
 } from '../_lib/types';
 import { MoveAlertDialog, SaveAlertDialog } from './caveat-dialog';
 import { DateSelectDialog } from './date-selection-dialog';
-import { EqTable, StockTable } from './equipment-order-detail-table';
+import { ContainerTable, EqTable, StockTable } from './equipment-order-detail-table';
 import { EqptSelectionDialog } from './equipment-selection-dailog';
 
 const EquipmentOrderDetail = (props: {
   juchuHeadData: DetailOerValues;
   juchuKizaiHeadData: JuchuKizaiHeadValues;
   juchuKizaiMeisaiData: JuchuKizaiMeisaiValues[] | undefined;
+  juchuContainerMeisaiData: JuchuContainerMeisaiValues[];
   shukoDate: Date | null;
   nyukoDate: Date | null;
   dateRange: string[];
@@ -123,6 +130,14 @@ const EquipmentOrderDetail = (props: {
   // 受注機材明細リスト
   const [juchuKizaiMeisaiList, setJuchuKizaiMeisaiList] = useState<JuchuKizaiMeisaiValues[]>(
     props.juchuKizaiMeisaiData ? props.juchuKizaiMeisaiData : []
+  );
+  // 受注コンテナ明細元データ
+  const [originJuchuContainerMeisaiList, setOriginJuchuContainerMeisaiList] = useState<JuchuContainerMeisaiValues[]>(
+    props.juchuContainerMeisaiData ?? []
+  );
+  // 受注コンテナ明細リスト
+  const [juchuContainerMeisaiList, setJuchuContainerMeisaiList] = useState<JuchuContainerMeisaiValues[]>(
+    props.juchuContainerMeisaiData ?? []
   );
   // 機材在庫元データ
   const [originEqStockList, setOriginEqStockList] = useState<StockTableValues[][]>(
@@ -264,9 +279,11 @@ const EquipmentOrderDetail = (props: {
 
   useEffect(() => {
     const filterJuchuKizaiMeisaiList = juchuKizaiMeisaiList.filter((data) => !data.delFlag);
+    const filterJuchuContainerMeisaiList = juchuContainerMeisaiList.filter((data) => !data.delFlag);
     if (
       saveKizaiHead &&
       JSON.stringify(originJuchuKizaiMeisaiList) === JSON.stringify(filterJuchuKizaiMeisaiList) &&
+      JSON.stringify(originJuchuContainerMeisaiList) === JSON.stringify(filterJuchuContainerMeisaiList) &&
       JSON.stringify(originJuchuHonbanbiList) === JSON.stringify(juchuHonbanbiList)
     ) {
       setSave(true);
@@ -276,7 +293,7 @@ const EquipmentOrderDetail = (props: {
       setIsSave(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [juchuKizaiMeisaiList, juchuHonbanbiList]);
+  }, [juchuKizaiMeisaiList, juchuContainerMeisaiList, juchuHonbanbiList]);
 
   useEffect(() => {
     setLock(lockData);
@@ -319,6 +336,7 @@ const EquipmentOrderDetail = (props: {
       if (
         isDirty ||
         JSON.stringify(originJuchuHonbanbiList) !== JSON.stringify(juchuHonbanbiList) ||
+        JSON.stringify(originJuchuContainerMeisaiList) !== JSON.stringify(juchuContainerMeisaiList) ||
         JSON.stringify(originJuchuKizaiMeisaiList) !== JSON.stringify(filterJuchuKizaiMeisaiList)
       ) {
         setDirtyOpen(true);
@@ -398,6 +416,12 @@ const EquipmentOrderDetail = (props: {
       const filterJuchuKizaiMeisaiList = juchuKizaiMeisaiList.filter((data) => !data.delFlag);
       if (JSON.stringify(originJuchuKizaiMeisaiList) !== JSON.stringify(filterJuchuKizaiMeisaiList)) {
         await saveJuchuKizaiMeisai(data.juchuHeadId, data.juchuKizaiHeadId, userNam);
+      }
+
+      // 受注コンテナ明細更新
+      const filterJuchuContainerMeisaiList = juchuContainerMeisaiList.filter((data) => !data.delFlag);
+      if (JSON.stringify(originJuchuContainerMeisaiList) !== JSON.stringify(juchuContainerMeisaiList)) {
+        await saveJuchuContainerMeisai(data.juchuHeadId, data.juchuKizaiHeadId, userNam);
       }
 
       //
@@ -709,6 +733,56 @@ const EquipmentOrderDetail = (props: {
   };
 
   /**
+   * 受注コンテナ明細更新
+   * @param juchuHeadId 受注ヘッダーid
+   * @param juchuKizaiHeadId 受注機材ヘッダーid
+   * @param userNam ユーザ名
+   */
+  const saveJuchuContainerMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number, userNam: string) => {
+    const copyJuchuContainerMeisaiData = [...juchuContainerMeisaiList];
+    const juchuContainerMeisaiMaxId = await getJuchuContainerMeisaiMaxId(juchuHeadId, juchuKizaiHeadId);
+    const newJuchuContainerMeisaiId = juchuContainerMeisaiMaxId
+      ? juchuContainerMeisaiMaxId.juchu_kizai_meisai_id + 1
+      : 1;
+    const newJuchuContainerMeisaiData = copyJuchuContainerMeisaiData.map((data, index) =>
+      data.juchuKizaiMeisaiId === 0
+        ? {
+            ...data,
+            juchuKizaiMeisaiId: newJuchuContainerMeisaiId + index,
+          }
+        : data
+    );
+
+    // 受注コンテナ明細更新
+    const addJuchuContainerMeisaiData = newJuchuContainerMeisaiData.filter((data) => !data.delFlag && !data.saveFlag);
+    const updateJuchuContainerMeisaiData = newJuchuContainerMeisaiData.filter((data) => !data.delFlag && data.saveFlag);
+    const deleteJuchuContainerMeisaiData = newJuchuContainerMeisaiData.filter((data) => data.delFlag && data.saveFlag);
+    if (deleteJuchuContainerMeisaiData.length > 0) {
+      const deleteJuchuContainerMeisaiIds = deleteJuchuContainerMeisaiData.map((data) => data.juchuKizaiMeisaiId);
+      const deleteContainerMeisaiResult = await delJuchuContainerMeisai(
+        juchuHeadId,
+        juchuKizaiHeadId,
+        deleteJuchuContainerMeisaiIds
+      );
+      console.log('受注機材明細削除', deleteContainerMeisaiResult);
+    }
+
+    if (addJuchuContainerMeisaiData.length > 0) {
+      const addContainerMeisaiResult = addJuchuContainerMeisai(addJuchuContainerMeisaiData, userNam);
+      console.log('受注機材明細追加', addContainerMeisaiResult);
+    }
+
+    if (updateJuchuContainerMeisaiData.length > 0) {
+      const updateContainerMeisaiResult = await updJuchuContainerMeisai(updateJuchuContainerMeisaiData, userNam);
+      console.log('受注機材明細更新', updateContainerMeisaiResult);
+    }
+
+    const juchuContainerMeisaiData = await getJuchuContainerMeisai(juchuHeadId, juchuKizaiHeadId);
+    setOriginJuchuContainerMeisaiList(juchuContainerMeisaiData);
+    setJuchuContainerMeisaiList(juchuContainerMeisaiData);
+  };
+
+  /**
    * 機材在庫テーブル更新
    * @param juchuHeadId 受注ヘッダーid
    * @param juchuKizaiHeadId 受注機材ヘッダーid
@@ -929,6 +1003,49 @@ const EquipmentOrderDetail = (props: {
         prev.map((row) => (row.kizaiId === kizaiId && !row.delFlag ? { ...row, sagyoDenDat: newDate } : row))
       );
     }
+  };
+
+  /**
+   * コンテナメモ入力時
+   * @param kizaiId 機材id
+   * @param memo コンテナメモ内容
+   */
+  const handleContainerMemoChange = (kizaiId: number, memo: string) => {
+    setJuchuContainerMeisaiList((prev) =>
+      prev.map((data) => (data.kizaiId === kizaiId && !data.delFlag ? { ...data, mem: memo } : data))
+    );
+  };
+
+  /**
+   * コンテナテーブル使用数入力時
+   * @param kizaiId 機材id
+   * @param planKicsKizaiQty KICSコンテナ数
+   * @param planYardKizaiQty YARDコンテナ数
+   * @param planQty コンテナ合計数
+   */
+  const handleContainerCellChange = (
+    kizaiId: number,
+    planKicsKizaiQty: number,
+    planYardKizaiQty: number,
+    planQty: number
+  ) => {
+    setJuchuContainerMeisaiList((prev) =>
+      prev.map((data) =>
+        data.kizaiId === kizaiId && !data.delFlag
+          ? { ...data, planKicsKizaiQty: planKicsKizaiQty, planYardKizaiQty: planYardKizaiQty, planQty: planQty }
+          : data
+      )
+    );
+  };
+
+  /**
+   * コンテナテーブル削除ボタン押下時
+   * @param kizaiId 機材id
+   */
+  const handleContainerDelete = (kizaiId: number) => {
+    setJuchuContainerMeisaiList((prev) =>
+      prev.map((data) => (data.kizaiId === kizaiId && !data.delFlag ? { ...data, delFlag: true } : data))
+    );
   };
 
   /**
@@ -1160,9 +1277,11 @@ const EquipmentOrderDetail = (props: {
     const yardDat = getValues('yardShukoDat');
     const kicsIdoDat = kicsDat === null && yardDat !== null ? subDays(yardDat, 2) : null;
     const yardIdoDat = yardDat === null && kicsDat !== null ? subDays(kicsDat, 2) : null;
-    const ids = new Set(juchuKizaiMeisaiList.filter((data) => !data.delFlag).map((data) => data.kizaiId));
-    const filterData = data.filter((d) => !ids.has(d.kizaiId));
-    const selectEq: JuchuKizaiMeisaiValues[] = filterData.map((d) => ({
+
+    const kizaiData = data.filter((d) => !d.ctnFlg);
+    const kizaiIds = new Set(juchuKizaiMeisaiList.filter((data) => !data.delFlag).map((data) => data.kizaiId));
+    const filterKizaiData = kizaiData.filter((d) => !kizaiIds.has(d.kizaiId));
+    const selectEq: JuchuKizaiMeisaiValues[] = filterKizaiData.map((d) => ({
       juchuHeadId: getValues('juchuHeadId'),
       juchuKizaiHeadId: getValues('juchuKizaiHeadId'),
       juchuKizaiMeisaiId: 0,
@@ -1201,7 +1320,26 @@ const EquipmentOrderDetail = (props: {
       );
       selectEqStockData.push(stock);
     }
+
+    const containerData = data.filter((d) => d.ctnFlg);
+    const containerIds = new Set(juchuContainerMeisaiList.filter((data) => !data.delFlag).map((data) => data.kizaiId));
+    const filterContainerData = containerData.filter((d) => !containerIds.has(d.kizaiId));
+    const selectContainer: JuchuContainerMeisaiValues[] = filterContainerData.map((d) => ({
+      juchuHeadId: getValues('juchuHeadId'),
+      juchuKizaiHeadId: getValues('juchuKizaiHeadId'),
+      juchuKizaiMeisaiId: 0,
+      kizaiId: d.kizaiId,
+      kizaiNam: d.kizaiNam,
+      planKicsKizaiQty: 0,
+      planYardKizaiQty: 0,
+      planQty: 0,
+      mem: '',
+      delFlag: false,
+      saveFlag: false,
+    }));
+
     setJuchuKizaiMeisaiList((prev) => [...prev, ...selectEq]);
+    setJuchuContainerMeisaiList((prev) => [...prev, ...selectContainer]);
     setEqStockList((prev) => [...prev, ...selectEqStockData]);
     setOriginPlanQty((prev) => [...prev, ...newPlanQtys]);
     setIsDetailLoading(false);
@@ -1623,72 +1761,85 @@ const EquipmentOrderDetail = (props: {
             {isDetailLoading ? (
               <Loading />
             ) : (
-              <Box display={'flex'} flexDirection="row" width="100%">
-                <Box
-                  sx={{
-                    width: {
-                      xs: '40%',
-                      sm: '40%',
-                      md: '40%',
-                      lg: 'min-content',
-                    },
-                  }}
-                >
-                  <Box my={1} mx={2}>
-                    <Button disabled={!edit} onClick={() => handleOpenEqDialog()}>
-                      <AddIcon fontSize="small" />
-                      機材追加
-                    </Button>
+              <>
+                <Box display={'flex'} flexDirection="row" width="100%">
+                  <Box
+                    sx={{
+                      width: {
+                        xs: '40%',
+                        sm: '40%',
+                        md: '40%',
+                        lg: 'min-content',
+                      },
+                    }}
+                  >
+                    <Box my={1} mx={2}>
+                      <Button disabled={!edit} onClick={() => handleOpenEqDialog()}>
+                        <AddIcon fontSize="small" />
+                        機材追加
+                      </Button>
+                    </Box>
+                    <Box
+                      display={
+                        Object.keys(juchuKizaiMeisaiList.filter((d) => !d.delFlag)).length > 0 ? 'block' : 'none'
+                      }
+                    >
+                      <EqTable
+                        rows={juchuKizaiMeisaiList}
+                        edit={edit}
+                        onChange={handleCellChange}
+                        handleDelete={handleDelete}
+                        handleCellDateChange={handleCellDateChange}
+                        handleCellDateClear={handleCellDateClear}
+                        handleMemoChange={handleMemoChange}
+                        ref={leftRef}
+                      />
+                    </Box>
                   </Box>
                   <Box
-                    display={Object.keys(juchuKizaiMeisaiList.filter((d) => !d.delFlag)).length > 0 ? 'block' : 'none'}
+                    display={Object.keys(eqStockList).length > 0 ? 'block' : 'none'}
+                    overflow="auto"
+                    sx={{ width: { xs: '60%', sm: '60%', md: 'auto' } }}
                   >
-                    <EqTable
-                      rows={juchuKizaiMeisaiList}
-                      edit={edit}
-                      onChange={handleCellChange}
-                      handleDelete={handleDelete}
-                      handleCellDateChange={handleCellDateChange}
-                      handleCellDateClear={handleCellDateClear}
-                      handleMemoChange={handleMemoChange}
-                      ref={leftRef}
+                    <Box display={Object.keys(eqStockList).length > 0 ? 'flex' : 'none'} my={1}>
+                      <Box display={'flex'} alignItems={'end'} mr={2}>
+                        <Typography fontSize={'small'}>在庫数</Typography>
+                      </Box>
+                      <Button onClick={handleBackDateChange}>
+                        <ArrowBackIosNewIcon fontSize="small" />
+                      </Button>
+                      <Button variant="outlined" onClick={handleClick}>
+                        日付選択
+                      </Button>
+                      <Popper open={open} anchorEl={anchorEl} placement="bottom-start" sx={{ zIndex: 1000 }}>
+                        <ClickAwayListener onClickAway={handleClickAway}>
+                          <Paper elevation={3} sx={{ mt: 1 }}>
+                            <Calendar date={selectDate} onChange={handleDateChange} />
+                          </Paper>
+                        </ClickAwayListener>
+                      </Popper>
+                      <Button onClick={handleForwardDateChange}>
+                        <ArrowForwardIosIcon fontSize="small" />
+                      </Button>
+                    </Box>
+                    <StockTable
+                      eqStockList={eqStockList}
+                      dateRange={dateRange}
+                      juchuHonbanbiList={juchuHonbanbiList}
+                      ref={rightRef}
                     />
                   </Box>
                 </Box>
-                <Box
-                  display={Object.keys(eqStockList).length > 0 ? 'block' : 'none'}
-                  overflow="auto"
-                  sx={{ width: { xs: '60%', sm: '60%', md: 'auto' } }}
-                >
-                  <Box display={Object.keys(eqStockList).length > 0 ? 'flex' : 'none'} my={1}>
-                    <Box display={'flex'} alignItems={'end'} mr={2}>
-                      <Typography fontSize={'small'}>在庫数</Typography>
-                    </Box>
-                    <Button onClick={handleBackDateChange}>
-                      <ArrowBackIosNewIcon fontSize="small" />
-                    </Button>
-                    <Button variant="outlined" onClick={handleClick}>
-                      日付選択
-                    </Button>
-                    <Popper open={open} anchorEl={anchorEl} placement="bottom-start" sx={{ zIndex: 1000 }}>
-                      <ClickAwayListener onClickAway={handleClickAway}>
-                        <Paper elevation={3} sx={{ mt: 1 }}>
-                          <Calendar date={selectDate} onChange={handleDateChange} />
-                        </Paper>
-                      </ClickAwayListener>
-                    </Popper>
-                    <Button onClick={handleForwardDateChange}>
-                      <ArrowForwardIosIcon fontSize="small" />
-                    </Button>
-                  </Box>
-                  <StockTable
-                    eqStockList={eqStockList}
-                    dateRange={dateRange}
-                    juchuHonbanbiList={juchuHonbanbiList}
-                    ref={rightRef}
+                <Box py={2} width={'fit-content'}>
+                  <ContainerTable
+                    rows={juchuContainerMeisaiList}
+                    edit={edit}
+                    handleContainerMemoChange={handleContainerMemoChange}
+                    onChange={handleContainerCellChange}
+                    handleContainerDelete={handleContainerDelete}
                   />
                 </Box>
-              </Box>
+              </>
             )}
           </Paper>
           {/*-------本番日-------*/}

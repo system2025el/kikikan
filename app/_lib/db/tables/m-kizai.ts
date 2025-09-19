@@ -105,7 +105,8 @@ export const selectActiveEqpts = async (query: string) => {
       k.kizai_nam as "kizaiNam",
       s.shozoku_nam as "shozokuNam",
       k.bumon_id as "bumonId",
-      k.kizai_grp_cod as "kizaiGrpCod"
+      k.kizai_grp_cod as "kizaiGrpCod",
+      k.ctn_flg as "ctnFlg"
     FROM
       dev6.m_kizai as k
     INNER JOIN

@@ -48,7 +48,7 @@ export const selectChosenEqptsDetails = async (idList: number[]) => {
       .schema(SCHEMA)
       .from('v_kizai_lst')
       .select(
-        `kizai_id, kizai_nam, shozoku_id, shozoku_nam, kizai_grp_cod, dsp_ord_num, reg_amt, rank_amt_1, rank_amt_2, rank_amt_3, rank_amt_4, rank_amt_5, kizai_qty`
+        `kizai_id, kizai_nam, shozoku_id, shozoku_nam, kizai_grp_cod, dsp_ord_num, ctn_flg, reg_amt, rank_amt_1, rank_amt_2, rank_amt_3, rank_amt_4, rank_amt_5, kizai_qty`
       )
       .in('kizai_id', idList)
       .order('kizai_grp_cod')
