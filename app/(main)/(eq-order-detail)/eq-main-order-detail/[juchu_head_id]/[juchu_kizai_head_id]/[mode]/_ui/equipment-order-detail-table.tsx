@@ -29,7 +29,12 @@ import { TestDate } from '@/app/(main)/_ui/date';
 import { MemoTooltip } from '@/app/(main)/(eq-order-detail)/_ui/memo-tooltip';
 
 import { getDateHeaderBackgroundColor, getStockRowBackgroundColor } from '../_lib/colorselect';
-import { JuchuKizaiHonbanbiValues, JuchuKizaiMeisaiValues, StockTableValues } from '../_lib/types';
+import {
+  JuchuContainerMeisaiValues,
+  JuchuKizaiHonbanbiValues,
+  JuchuKizaiMeisaiValues,
+  StockTableValues,
+} from '../_lib/types';
 
 type StockTableProps = {
   eqStockList: StockTableValues[][];
@@ -238,7 +243,7 @@ type EqTableRowProps = {
   handleMemoChange: (kizaiId: number, memo: string) => void;
   handlePlanKizaiQtyChange: (kizaiId: number, newValue: number) => void;
   handlePlanYobiQtyChange: (kizaiId: number, newValue: number) => void;
-  handleKeyDown: (e: React.KeyboardEvent, kizaiId: number) => void;
+  handleKeyDown: (e: React.KeyboardEvent, rowIndex: number) => void;
 };
 
 const EqTableRow = React.memo(
@@ -413,6 +418,200 @@ const EqTableRow = React.memo(
 );
 
 EqTableRow.displayName = 'EqTableRow';
+
+export const ContainerTable = (props: {
+  rows: JuchuContainerMeisaiValues[];
+  edit: boolean;
+  handleContainerMemoChange: (kizaiId: number, memo: string) => void;
+  onChange: (kizaiId: number, kicsValue: number, yardValue: number, totalValue: number) => void;
+  handleContainerDelete: (kizaiId: number) => void;
+}) => {
+  const { rows, edit, handleContainerMemoChange, onChange, handleContainerDelete } = props;
+
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  const visibleRows = rows.filter((row) => !row.delFlag);
+
+  const handlePlanKicsKizaiQtyChange = (kizaiId: number, newValue: number) => {
+    const planYardKizaiQty = rows.find((row) => row.kizaiId === kizaiId && !row.delFlag)?.planYardKizaiQty || 0;
+    const planQty = planYardKizaiQty + newValue;
+    onChange(kizaiId, newValue, planYardKizaiQty, planQty);
+  };
+
+  const handlePlanYardKizaiQtyChange = (kizaiId: number, newValue: number) => {
+    const planKicsKizaiQty = rows.find((row) => row.kizaiId === kizaiId)?.planKicsKizaiQty || 0;
+    const planQty = planKicsKizaiQty + newValue;
+    onChange(kizaiId, planKicsKizaiQty, newValue, planQty);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent, rowIndex: number, cellNum: number) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      inputRefs.current[2 * rowIndex + cellNum + 1]?.focus();
+    }
+  };
+
+  const handleContainerRef = (el: HTMLInputElement | null, rowIndex: number, cellNum: number) => {
+    inputRefs.current[2 * rowIndex + cellNum] = el;
+  };
+
+  return (
+    <TableContainer component={Paper} style={{ overflow: 'auto', maxHeight: '80vh' }}>
+      <Table stickyHeader>
+        <TableHead>
+          <TableRow>
+            <TableCell size="small" style={styles.header} />
+            <TableCell size="small" style={styles.header} />
+            <TableCell align="left" size="small" style={styles.header}>
+              メモ
+            </TableCell>
+            <TableCell align="left" size="small" style={styles.header}>
+              機材名
+            </TableCell>
+            <TableCell align="right" size="small" style={styles.header}>
+              K
+            </TableCell>
+            <TableCell align="right" size="small" style={styles.header}>
+              Y
+            </TableCell>
+            <TableCell align="right" size="small" style={styles.header}>
+              合計数
+            </TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {visibleRows.map((row, rowIndex) => (
+            <TableRow key={rowIndex}>
+              <TableCell align="center" width={'min-content'} sx={{ padding: 0, border: '1px solid black' }}>
+                <IconButton
+                  onClick={() => handleContainerDelete(row.kizaiId)}
+                  sx={{ padding: 0, color: 'red' }}
+                  disabled={!edit}
+                >
+                  <Delete fontSize="small" />
+                </IconButton>
+              </TableCell>
+              <TableCell
+                align="right"
+                size="small"
+                sx={{ bgcolor: grey[200], py: 0, px: 1, border: '1px solid black' }}
+              >
+                {rowIndex + 1}
+              </TableCell>
+              <TableCell style={styles.row} align="center" size="small">
+                <MemoTooltip
+                  name={row.kizaiNam}
+                  memo={row.mem ? row.mem : ''}
+                  handleMemoChange={handleContainerMemoChange}
+                  kizaiId={row.kizaiId}
+                  disabled={!edit}
+                />
+              </TableCell>
+              <TableCell style={styles.row} align="left" size="small">
+                <Button
+                  variant="text"
+                  sx={{ p: 0, justifyContent: 'start' }}
+                  onClick={() => window.open(`/loan-situation/${row.kizaiId}`)}
+                >
+                  {row.kizaiNam}
+                </Button>
+              </TableCell>
+              <TableCell style={styles.row} align="right" size="small">
+                <TextField
+                  variant="standard"
+                  value={row.planKicsKizaiQty}
+                  type="text"
+                  onChange={(e) => {
+                    if (/^\d*$/.test(e.target.value)) {
+                      handlePlanKicsKizaiQtyChange(row.kizaiId, Number(e.target.value));
+                    }
+                  }}
+                  sx={{
+                    '& .MuiInputBase-input': {
+                      textAlign: 'right',
+                      padding: 0,
+                      fontSize: 'small',
+                    },
+                    '& input[type=number]': {
+                      MozAppearance: 'textfield',
+                    },
+                    '& input[type=number]::-webkit-outer-spin-button': {
+                      WebkitAppearance: 'none',
+                      margin: 0,
+                    },
+                    '& input[type=number]::-webkit-inner-spin-button': {
+                      WebkitAppearance: 'none',
+                      margin: 0,
+                    },
+                  }}
+                  slotProps={{
+                    input: {
+                      style: { textAlign: 'right' },
+                      disableUnderline: true,
+                      inputMode: 'numeric',
+                    },
+                  }}
+                  inputRef={(el) => handleContainerRef(el, rowIndex, 0)}
+                  onKeyDown={(e) => {
+                    handleKeyDown(e, rowIndex, 0);
+                  }}
+                  onFocus={(e) => e.target.select()}
+                  disabled={!edit}
+                />
+              </TableCell>
+              <TableCell style={styles.row} align="right" size="small">
+                <TextField
+                  variant="standard"
+                  value={row.planYardKizaiQty}
+                  type="text"
+                  onChange={(e) => {
+                    if (/^\d*$/.test(e.target.value)) {
+                      handlePlanYardKizaiQtyChange(row.kizaiId, Number(e.target.value));
+                    }
+                  }}
+                  sx={{
+                    '& .MuiInputBase-input': {
+                      textAlign: 'right',
+                      padding: 0,
+                      fontSize: 'small',
+                    },
+                    '& input[type=number]': {
+                      MozAppearance: 'textfield',
+                    },
+                    '& input[type=number]::-webkit-outer-spin-button': {
+                      WebkitAppearance: 'none',
+                      margin: 0,
+                    },
+                    '& input[type=number]::-webkit-inner-spin-button': {
+                      WebkitAppearance: 'none',
+                      margin: 0,
+                    },
+                  }}
+                  slotProps={{
+                    input: {
+                      style: { textAlign: 'right' },
+                      disableUnderline: true,
+                      inputMode: 'numeric',
+                    },
+                  }}
+                  inputRef={(el) => handleContainerRef(el, rowIndex, 1)}
+                  onKeyDown={(e) => {
+                    handleKeyDown(e, rowIndex, 1);
+                  }}
+                  onFocus={(e) => e.target.select()}
+                  disabled={!edit}
+                />
+              </TableCell>
+              <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
+                {row.planQty}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+};
 
 /* style
 ---------------------------------------------------------------------------------------------------- */

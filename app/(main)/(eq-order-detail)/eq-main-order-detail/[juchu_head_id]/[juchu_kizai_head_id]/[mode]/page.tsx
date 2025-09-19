@@ -3,9 +3,15 @@ import { subDays } from 'date-fns';
 import { toISOStringYearMonthDay } from '@/app/(main)/_lib/date-conversion';
 import { getNyukoDate, getRange, getShukoDate } from '@/app/(main)/_lib/date-funcs';
 
-import { getDetailJuchuHead, getStockList } from '../../../../_lib/funcs';
+import { getDetailJuchuHead, getJuchuContainerMeisai, getStockList } from '../../../../_lib/funcs';
 import { getHonbanbi, getJuchuKizaiHead, getJuchuKizaiMeisai } from './_lib/funcs';
-import { JuchuKizaiHeadValues, JuchuKizaiHonbanbiValues, JuchuKizaiMeisaiValues, StockTableValues } from './_lib/types';
+import {
+  JuchuContainerMeisaiValues,
+  JuchuKizaiHeadValues,
+  JuchuKizaiHonbanbiValues,
+  JuchuKizaiMeisaiValues,
+  StockTableValues,
+} from './_lib/types';
 import EquipmentOrderDetail from './_ui/equipment-order-detail';
 
 const Page = async (props: {
@@ -41,6 +47,8 @@ const Page = async (props: {
     };
     // 受注機材明細データ(初期値)
     const newJuchuKizaiMeisaiData: JuchuKizaiMeisaiValues[] = [];
+    // 受注コンテナ明細データ(初期値)
+    const newJuchuContainerMeisaiData: JuchuContainerMeisaiValues[] = [];
     // 機材在庫データ(初期値)
     const newEqStockData: StockTableValues[][] = [];
     // 出庫日(初期値)
@@ -57,6 +65,7 @@ const Page = async (props: {
         juchuHeadData={juchuHeadData}
         juchuKizaiHeadData={newJuchuKizaiHeadData}
         juchuKizaiMeisaiData={newJuchuKizaiMeisaiData}
+        juchuContainerMeisaiData={newJuchuContainerMeisaiData}
         shukoDate={shukoDate}
         nyukoDate={nyukoDate}
         dateRange={dateRange}
@@ -81,6 +90,12 @@ const Page = async (props: {
     console.time();
     const juchuKizaiMeisaiData = await getJuchuKizaiMeisai(params.juchu_head_id, params.juchu_kizai_head_id);
     console.log('----------------------------受注機材明細---------------------------------');
+    console.timeEnd();
+
+    // 受注コンテナ明細データ
+    console.time();
+    const juchuContainerMeisaiData = await getJuchuContainerMeisai(params.juchu_head_id, params.juchu_kizai_head_id);
+    console.log('----------------------------受注コンテナ明細---------------------------------');
     console.timeEnd();
 
     // 出庫日
@@ -126,6 +141,7 @@ const Page = async (props: {
         juchuHeadData={juchuHeadData}
         juchuKizaiHeadData={juchuKizaiHeadData}
         juchuKizaiMeisaiData={juchuKizaiMeisaiData}
+        juchuContainerMeisaiData={juchuContainerMeisaiData}
         shukoDate={shukoDate}
         nyukoDate={nyukoDate}
         dateRange={dateRange}
