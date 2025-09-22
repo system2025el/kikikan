@@ -17,7 +17,7 @@ export const MeisaiTblHeader = ({
   control: Control<QuotHeadValues>;
   sectionFields: UseFieldArrayReturn<QuotHeadValues>;
 }) => {
-  /* 明細テーブルの順番を帰るボタン押下時 */
+  /* 明細テーブルの順番を変えるボタン押下時 */
   const moveRow = (index: number, direction: number) => {
     sectionFields.move(index, index + direction);
   };

@@ -8,7 +8,6 @@ import {
   AccordionDetails,
   AccordionSummary,
   Autocomplete,
-  AutocompleteRenderInputParams,
   Box,
   Button,
   Container,
@@ -33,11 +32,11 @@ import { LoadingOverlay } from '@/app/(main)/_ui/loading';
 import { getCustomerSelection } from '@/app/(main)/(masters)/_lib/funs';
 
 import {
+  addQuot,
   getChosenQuot,
   getMituStsSelection,
   getOrderForQuotation,
   getUsersSelection,
-  saveQuot,
   updateQuot,
 } from '../_lib/func';
 import { JuchuValues, QuotHeadSchema, QuotHeadValues } from '../_lib/types';
@@ -119,7 +118,7 @@ export const Quotation = () => {
       mituDat: new Date(),
       mituHeadNam: '',
       kokyaku: null,
-      nyuryokuUser: { id: String(user?.id), name: user?.name },
+      nyuryokuUser: user?.name,
       mituRange: { strt: null, end: null },
       kokyakuTantoNam: null,
       koenNam: null,
@@ -156,14 +155,15 @@ export const Quotation = () => {
   const onSubmit = async (data: QuotHeadValues) => {
     console.log('新規？', isNew);
     if (isNew) {
-      const result = await saveQuot(data);
+      const result = await addQuot(data, user?.name ?? '');
       setValue('mituHeadId', result);
       console.log('挿入した', result, '番の見積');
     } else {
-      const result = await updateQuot(data);
+      const result = await updateQuot(data, user?.name ?? '');
       console.log('更新したのは', result, '番の見積');
     }
-
+    setSnackBarMessage('保存しました');
+    setSnackBarOpen(true);
     setIsNew(false);
   };
 
@@ -232,7 +232,7 @@ export const Quotation = () => {
               kokyaku: data.kokyaku.name,
               koenNam: data.koenNam,
               koenbashoNam: data.koenbashoNam,
-              nyuryokuUser: { id: String(user?.id), name: user?.name },
+              nyuryokuUser: user?.name,
               mituRange: { strt: data.juchuRange.strt, end: data.juchuRange.end },
               mituDat: new Date(),
               meisaiHeads: current,
@@ -423,11 +423,20 @@ export const Quotation = () => {
                 </Box>
                 <Box sx={styles.container}>
                   <Typography marginRight={3}>見積作成者</Typography>
-                  <AutocompleteElement
+                  <Controller
                     name="nyuryokuUser"
                     control={control}
-                    options={selectOptions.user}
-                    autocompleteProps={{ sx: { width: 242.5 } }}
+                    render={({ field }) => (
+                      <Autocomplete
+                        {...field}
+                        options={selectOptions.user}
+                        getOptionLabel={(option) => option.label}
+                        value={selectOptions.user.find((opt: SelectTypes) => opt.label === field.value) || null}
+                        onChange={(_, value) => field.onChange(value?.label ?? '')}
+                        renderInput={(params) => <TextField {...params} />}
+                        sx={{ width: 242.5 }}
+                      />
+                    )}
                   />
                 </Box>
                 <Box sx={styles.container}>

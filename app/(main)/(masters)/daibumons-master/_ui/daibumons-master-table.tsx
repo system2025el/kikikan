@@ -100,7 +100,7 @@ export const DaibumonsMasterTable = ({
           <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
             <MasterTable
               headers={daibumonMHeader}
-              datas={theDaibumons!.map((l) => ({ id: l.daibumonId, name: l.daibumonNam, ...l }))}
+              datas={theDaibumons!.map((l) => ({ ...l, id: l.daibumonId, name: l.daibumonNam }))}
               handleOpenDialog={handleOpenDialog}
               page={page}
               rowsPerPage={rowsPerPage}

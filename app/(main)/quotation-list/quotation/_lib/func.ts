@@ -11,8 +11,12 @@ import { selectJuchuHead } from '@/app/_lib/db/tables/t-juchu-head';
 import { selectJuchuHonbanbiQty } from '@/app/_lib/db/tables/t-juchu-kizai-head';
 import { selectHonbanbi } from '@/app/_lib/db/tables/t-juchu-kizai-honbanbi';
 import { insertQuotHead, selectChosenMitu, updateQuotHead } from '@/app/_lib/db/tables/t-mitu-head';
-import { insertQuotMeisai } from '@/app/_lib/db/tables/t-mitu-meisai';
-import { insertQuotMeisaiHead, selectQuotMeisai, selectQuotMeisaiHead } from '@/app/_lib/db/tables/t-mitu-meisai-head';
+import { insertQuotMeisai, selectQuotMeisai, updateQuotMeisai } from '@/app/_lib/db/tables/t-mitu-meisai';
+import {
+  insertQuotMeisaiHead,
+  selectQuotMeisaiHead,
+  updateQuoteMeisaiHead,
+} from '@/app/_lib/db/tables/t-mitu-meisai-head';
 import { selectJuchuKizaiHeadList } from '@/app/_lib/db/tables/v-juchu-kizai-head-lst';
 import { selectOyaJuchuKizaiMeisai } from '@/app/_lib/db/tables/v-juchu-kizai-meisai';
 import { selectJuchu } from '@/app/_lib/db/tables/v-juchu-lst';
@@ -44,7 +48,7 @@ export const getUsersSelection = async () => {
     }
     // 選択肢の型に成型する
     const selectElements: SelectTypes[] = data.map((d) => ({
-      id: d.shain_cod!,
+      id: d.user_nam!,
       label: d.user_nam,
     }));
     console.log('担当者が', selectElements.length, '件');
@@ -188,7 +192,7 @@ export const getChosenQuot = async (mituId: number) => {
 
     // 明細をヘッダIDごとにグループ化
     const meisaisByHeadId = meisais.reduce((acc: Record<number, MituMeisai[]>, current: MituMeisai) => {
-      const headId = current.mitu_meisai_head_id; // 明細データにヘッダーIDがあると仮定
+      const headId = current.mitu_meisai_head_id;
       if (!acc[headId]) {
         acc[headId] = [];
       }
@@ -229,7 +233,7 @@ export const getChosenQuot = async (mituId: number) => {
       mituDat: mituData.mitu_dat ? new Date(mituData.mitu_dat) : null,
       mituHeadNam: mituData.mitu_head_nam,
       kokyaku: mituData.kokyaku_nam,
-      nyuryokuUser: { name: mituData.nyuryoku_user, id: null },
+      nyuryokuUser: mituData.nyuryoku_user,
       mituRange:
         mituData.mitu_str_dat && mituData.mitu_end_dat
           ? { strt: new Date(mituData.mitu_str_dat), end: new Date(mituData.mitu_end_dat) }
@@ -349,7 +353,7 @@ export const getJuchuMeisaiSum = async (juchuId: number, kizaiHeadId: number) =>
  * 見積を保存する関数
  * @param data 見積書フォーム内容
  */
-export const saveQuot = async (data: QuotHeadValues): Promise<number | null> => {
+export const addQuot = async (data: QuotHeadValues, user: string): Promise<number | null> => {
   /* トランザクション準備 */
   const connection = await pool.connect();
   // 見積明細ヘッド準備
@@ -389,9 +393,8 @@ export const saveQuot = async (data: QuotHeadValues): Promise<number | null> => 
       mitu_sts: data.mituSts,
       mitu_dat: data.mituDat ? toJapanTimeString(data.mituDat) : null,
       mitu_head_nam: data.mituHeadNam,
-      // kokyaku_nam????
       kokyaku_nam: data.kokyaku,
-      nyuryoku_user: data.nyuryokuUser.name,
+      nyuryoku_user: data.nyuryokuUser,
       mitu_str_dat: data.mituRange.strt ? toJapanTimeString(data.mituRange.strt) : null,
       mitu_end_dat: data.mituRange.end ? toJapanTimeString(data.mituRange.end) : null,
       kokyaku_tanto_nam: data.kokyakuTantoNam,
@@ -407,9 +410,11 @@ export const saveQuot = async (data: QuotHeadValues): Promise<number | null> => 
       zei_rat: data.zeiRat,
       gokei_mei: data.gokeiMei,
       gokei_amt: data.gokeiAmt,
+      add_dat: toJapanTimeString(),
+      add_user: user,
     };
     // 明細ヘッド
-    const meisaiHeads: MituMeisaiHead[] = meisaiheadList.map((l) => ({
+    const meisaiHeads: MituMeisaiHead[] = meisaiheadList.map((l, index) => ({
       mitu_head_id: newMituHeadId.rows[0].newid,
       mitu_meisai_head_id: l.mituMeisaiHeadId ?? FAKE_NEW_ID,
       mitu_meisai_head_kbn: l.mituMeisaiKbn,
@@ -419,9 +424,12 @@ export const saveQuot = async (data: QuotHeadValues): Promise<number | null> => 
       nebiki_amt: l.nebikiAmt,
       nebiki_aft_nam: l.nebikiAftNam,
       nebiki_aft_amt: l.nebikiAftAmt,
+      dsp_ord_num: index + 1,
+      add_dat: toJapanTimeString(),
+      add_user: user,
     }));
     // 明細
-    const meisais: MituMeisai[] = meisaiList.map((l) => ({
+    const meisais: MituMeisai[] = meisaiList.map((l, index) => ({
       mitu_head_id: newMituHeadId.rows[0].newid,
       mitu_meisai_head_id: l.mituMeisaiHeadId ?? FAKE_NEW_ID,
       mitu_meisai_id: l.id ?? FAKE_NEW_ID,
@@ -430,6 +438,9 @@ export const saveQuot = async (data: QuotHeadValues): Promise<number | null> => 
       meisai_honbanbi_qty: l.honbanbiQty ?? 0,
       meisai_tanka_amt: l.tankaAmt ?? 0,
       shokei_amt: l.shokeiAmt,
+      dsp_ord_num: index + 1,
+      add_dat: toJapanTimeString(),
+      add_user: user,
     }));
     if (quotHead) {
       const id = await insertQuotHead(quotHead, connection);
@@ -456,7 +467,7 @@ export const saveQuot = async (data: QuotHeadValues): Promise<number | null> => 
  * @param data 見積ヘッドのデータ
  * @returns 見積ヘッドID
  */
-export const updateQuot = async (data: QuotHeadValues): Promise<number | null> => {
+export const updateQuot = async (data: QuotHeadValues, user: string): Promise<number | null> => {
   /* トランザクション準備 */
   const connection = await pool.connect();
   // 見積明細ヘッド準備
@@ -464,12 +475,12 @@ export const updateQuot = async (data: QuotHeadValues): Promise<number | null> =
   // 明細ヘッドIDと明細IDの発番
   const meisaiheadList = keys
     .flatMap((key) => data.meisaiHeads?.[key as keyof typeof data.meisaiHeads] ?? [])
-    .map((l, index) => ({
+    .map((l) => ({
       ...l,
-      mituMeisaiHeadId: index + 1,
-      meisai: l.meisai?.map((m, i) => ({
+      mituMeisaiHeadId: l.mituMeisaiHeadId ?? FAKE_NEW_ID,
+      meisai: l.meisai?.map((m) => ({
         ...m,
-        id: i + 1,
+        id: m.id ?? FAKE_NEW_ID,
       })),
     }));
   // 見積明細準備
@@ -487,9 +498,8 @@ export const updateQuot = async (data: QuotHeadValues): Promise<number | null> =
     mitu_sts: data.mituSts,
     mitu_dat: data.mituDat ? toJapanTimeString(data.mituDat) : null,
     mitu_head_nam: data.mituHeadNam,
-    // kokyaku_nam????
     kokyaku_nam: data.kokyaku,
-    nyuryoku_user: data.nyuryokuUser.name,
+    nyuryoku_user: data.nyuryokuUser,
     mitu_str_dat: data.mituRange.strt ? toJapanTimeString(data.mituRange.strt) : null,
     mitu_end_dat: data.mituRange.end ? toJapanTimeString(data.mituRange.end) : null,
     kokyaku_tanto_nam: data.kokyakuTantoNam,
@@ -505,40 +515,169 @@ export const updateQuot = async (data: QuotHeadValues): Promise<number | null> =
     zei_rat: data.zeiRat,
     gokei_mei: data.gokeiMei,
     gokei_amt: data.gokeiAmt,
+    upd_dat: toJapanTimeString(),
+    upd_user: user,
   };
   // 明細ヘッド
-  const meisaiHeads: MituMeisaiHead[] = meisaiheadList.map((l) => ({
+  console.log(`======================================${meisaiheadList}`);
+  const meisaiHeads = meisaiheadList.map((l, index) => ({
     mitu_head_id: data.mituHeadId!,
-    mitu_meisai_head_id: l.mituMeisaiHeadId ?? FAKE_NEW_ID,
+    mitu_meisai_head_id: l.mituMeisaiHeadId,
     mitu_meisai_head_kbn: l.mituMeisaiKbn,
-    mitu_meisai_head_nam: l.mituMeisaiHeadNam,
+    mitu_meisai_head_nam: l.mituMeisaiHeadNam ?? null,
     head_nam_dsp_flg: Number(l.headNamDspFlg),
-    nebiki_nam: l.nebikiNam,
-    nebiki_amt: l.nebikiAmt,
-    nebiki_aft_nam: l.nebikiAftNam,
-    nebiki_aft_amt: l.nebikiAftAmt,
+    nebiki_nam: l.nebikiNam ?? null,
+    nebiki_amt: l.nebikiAmt ?? null,
+    nebiki_aft_nam: l.nebikiAftNam ?? null,
+    nebiki_aft_amt: l.nebikiAftAmt ?? null,
+    dsp_ord_num: index + 1,
+    add_dat: toJapanTimeString(),
+    add_user: user,
+    upd_dat: toJapanTimeString(),
+    upd_user: user,
+    meisai: l.meisai?.map((m) => ({
+      mitu_head_id: data.mituHeadId!,
+      mitu_meisai_head_id: l.mituMeisaiHeadId,
+      mitu_meisai_id: m.id,
+      mitu_meisai_nam: m.nam ?? null,
+      meisai_qty: m.qty ?? 0,
+      meisai_honbanbi_qty: m.honbanbiQty ?? 0,
+      meisai_tanka_amt: m.tankaAmt ?? 0,
+      shokei_amt: m.shokeiAmt ?? null,
+      dsp_ord_num: index + 1,
+      add_dat: toJapanTimeString(),
+      add_user: user,
+      upd_dat: toJapanTimeString(),
+      upd_user: user,
+    })),
   }));
-  // 明細
-  const meisais: MituMeisai[] = meisaiList.map((l) => ({
-    mitu_head_id: data.mituHeadId!,
-    mitu_meisai_head_id: l.mituMeisaiHeadId ?? FAKE_NEW_ID,
-    mitu_meisai_id: l.id ?? FAKE_NEW_ID,
-    mitu_meisai_nam: l.nam,
-    meisai_qty: l.qty ?? 0,
-    meisai_honbanbi_qty: l.honbanbiQty ?? 0,
-    meisai_tanka_amt: l.tankaAmt ?? 0,
-    shokei_amt: l.shokeiAmt,
-  }));
+  // // 明細
+  // const meisais: MituMeisai[] = meisaiList.map((l, index) => ({
+  //   mitu_head_id: data.mituHeadId!,
+  //   mitu_meisai_head_id: l.mituMeisaiHeadId,
+  //   mitu_meisai_id: l.id,
+  //   mitu_meisai_nam: l.nam ?? null,
+  //   meisai_qty: l.qty ?? 0,
+  //   meisai_honbanbi_qty: l.honbanbiQty ?? 0,
+  //   meisai_tanka_amt: l.tankaAmt ?? 0,
+  //   shokei_amt: l.shokeiAmt ?? null,
+  //   dsp_ord_num: index + 1,
+  //   add_dat: toJapanTimeString(),
+  //   add_user: user,
+  //   upd_dat: toJapanTimeString(),
+  //   upd_user: user,
+  // }));
 
   try {
     console.log('更新START');
     // トランザクション開始
     await connection.query('BEGIN');
     if (quotHead) {
-      // 更新処理
-      const id = await updateQuotHead(quotHead, connection);
-      // await upsertQuoteMeisaiHead(meisaiHeads, connection);
-      // await upsertQuoteMeisai(meisais, connection);
+      // 見積ヘッダ更新処理
+      await updateQuotHead(quotHead, connection);
+
+      // 明細ヘッドの最大IDを取得
+      const headMaxIdResult = await connection.query(
+        `SELECT MAX(mitu_meisai_head_id) as max_id FROM ${SCHEMA}.t_mitu_meisai_head WHERE mitu_head_id = $1`,
+        [data.mituHeadId]
+      );
+      let currentHeadMaxId = headMaxIdResult.rows[0].max_id || 0;
+
+      // idがFAKE_NEW_IDなら新規の見積ヘッダ
+      const insertMHeadList = meisaiHeads
+        .filter((d) => d.mitu_meisai_head_id === FAKE_NEW_ID)
+        .map(({ upd_dat, upd_user, ...rest }) => rest)
+        .map((h) => {
+          currentHeadMaxId++;
+          return {
+            ...h, // ネストされた meisai 配列も維持
+            mituMeisaiHeadId: currentHeadMaxId, // 新しいID
+          };
+        });
+      const updateMHeadList = meisaiHeads
+        .filter((d) => d.mitu_meisai_head_id !== FAKE_NEW_ID)
+        .map(({ add_dat, add_user, ...rest }) => rest);
+
+      // 見積ヘッダ新規挿入
+      if (insertMHeadList.length > 0) {
+        console.log('-------------------', insertMHeadList, '----------------------');
+        // 新規処理実行
+        await insertQuotMeisaiHead(
+          insertMHeadList.map(({ meisai, ...rest }) => rest),
+          connection
+        );
+      }
+      // 見積ヘッダ更新処理
+      if (updateMHeadList.length > 0) {
+        // 更新処理実行
+        await updateQuoteMeisaiHead(
+          updateMHeadList.map(({ meisai, ...rest }) => rest),
+          connection
+        );
+      }
+
+      // すべての採番済みの明細ヘッドリスト（明細込み）
+      const allMeisaiHeads = [...insertMHeadList, ...updateMHeadList];
+
+      // 明細ヘッダIDのリスト
+      const headIds = allMeisaiHeads.map((p) => p.mitu_meisai_head_id);
+      // mitu_meisai_head_idと最大mitu_meisai_idのmap化
+      const maxIdMap = new Map<number, number>();
+      if (headIds.length > 0) {
+        // 明細ヘッドごとの最大明細IDを取得
+        const maxMeisaiIdQuery = `
+        SELECT mitu_meisai_head_id, MAX(mitu_meisai_id) as max_id
+        FROM ${SCHEMA}.t_mitu_meisai
+        WHERE mitu_meisai_head_id = ANY($1::bigint[]) AND mitu_head_id = $2
+        GROUP BY mitu_meisai_head_id;
+      `;
+        const maxMeisaiIdResult = await connection.query(maxMeisaiIdQuery, [headIds, allMeisaiHeads[0].mitu_head_id]);
+        maxMeisaiIdResult.rows.forEach((row) => {
+          maxIdMap.set(row.mitu_meisai_head_id, row.max_id);
+        });
+      }
+      const insertMeisaiList: MituMeisai[] = [];
+      const updateMeisaiList: MituMeisai[] = [];
+
+      allMeisaiHeads.forEach((head) => {
+        // 明細無ければreturn
+        if (!head.meisai) {
+          return;
+        }
+
+        // 親ごとに子の最大IDカウンターを初期化
+        let currentMeisaiMaxId = maxIdMap.get(head.mitu_meisai_head_id) || 0;
+
+        head.meisai.forEach((meisai, i) => {
+          const isNewMeisai = meisai.mitu_meisai_id === FAKE_NEW_ID;
+
+          const meisaiList = { ...meisai, mitu_meisai_head_id: head.mitu_meisai_head_id, dsp_ord_num: i + 1 };
+
+          if (isNewMeisai) {
+            currentMeisaiMaxId++;
+            insertMeisaiList.push({
+              ...meisaiList,
+              mitu_meisai_id: currentMeisaiMaxId,
+            });
+          } else {
+            updateMeisaiList.push({
+              ...meisaiList,
+            });
+          }
+        });
+      });
+      if (insertMeisaiList.length > 0) {
+        await insertQuotMeisai(
+          insertMeisaiList.map(({ upd_dat, upd_user, ...rest }) => rest),
+          connection
+        );
+      }
+      if (updateMeisaiList.length > 0) {
+        await updateQuotMeisai(
+          updateMeisaiList.map(({ add_dat, add_user, ...rest }) => rest),
+          connection
+        );
+      }
       await revalidatePath('/quotation-list/quotation');
       await connection.query('COMMIT');
       // return id.rows[0].mitu_head_id;
