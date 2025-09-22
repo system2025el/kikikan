@@ -99,9 +99,9 @@ export const EqptMasterTable = ({
           <MasterTableOfEqpt
             headers={eqptMHeader}
             datas={theEqpts.map((l) => ({
+              ...l,
               id: l.kizaiId,
               name: l.kizaiNam,
-              ...l,
             }))}
             page={page}
             rowsPerPage={rowsPerPage}

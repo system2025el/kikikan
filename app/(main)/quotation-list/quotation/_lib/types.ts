@@ -95,10 +95,7 @@ export const QuotHeadSchema = z.object({
   mituDat: z.date().nullish(),
   mituHeadNam: z.string().max(50).nullish(),
   kokyaku: z.string().max(50).nullish(),
-  nyuryokuUser: z.object({
-    id: z.string().max(20).nullish(),
-    name: z.string().max(20).nullish(),
-  }),
+  nyuryokuUser: z.string().max(20).nullish(),
   mituRange: z.object({
     strt: z.date().nullish(),
     end: z.date().nullish(),

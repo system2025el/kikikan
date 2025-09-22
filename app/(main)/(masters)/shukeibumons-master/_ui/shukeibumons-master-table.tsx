@@ -102,9 +102,9 @@ export const ShukeibumonsMasterTable = ({
             <MasterTable
               headers={shukeibumonMHeader}
               datas={theShukeibumons!.map((l) => ({
+                ...l,
                 id: l.shukeibumonId,
                 name: l.shukeibumonNam,
-                ...l,
               }))}
               handleOpenDialog={handleOpenDialog}
               page={page}
