@@ -29,7 +29,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs, { Dayjs } from 'dayjs';
 import Loadable from 'next/dist/shared/lib/loadable.shared-runtime';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { AutocompleteElement, SelectElement, TextFieldElement } from 'react-hook-form-mui';
 import { ZodSchema } from 'zod';
@@ -48,6 +48,7 @@ import { FormDateX } from '@/app/(main)/order-list/_ui/order-list';
 import { quotation, quotationHeaders, quotationRows, terms } from '../_lib/data';
 import { getMituStsSelection, getOrderForQuotation, getUsersSelection } from '../_lib/func';
 import { JuchuValues, QuotHeadSchema, QuotHeadValues } from '../_lib/types';
+import { PdfModel, useCounter, usePdf } from '../_lib/hooks/usePdf';
 
 export const Quotation = () => {
   /* ログイン中のユーザー */
@@ -236,6 +237,49 @@ export const Quotation = () => {
   }, []);
   /* eslint-enable react-hooks/exhaustive-deps */
 
+  /* print pdf ------------------------------------------------------------ */
+
+  // PDF出力用のモデル(初期表示)
+  const initPdfModel: PdfModel = {
+    item1: 100,
+    item2: 'Test',
+    item3: true,
+  };
+
+  // PDF出力用のモデル
+  const [pdfModel, setPdfModel] = useState(initPdfModel);
+  // PDFデータ生成フック
+  const [printQuotation] = usePdf();
+
+  // ボタン押下
+  const hundlePrintPdf = async () => {
+    // PDFデータ生成
+    const blob = await printQuotation(pdfModel);
+    // ダウンロードもしくはブラウザ表示するためのURL
+    const url = URL.createObjectURL(blob);
+
+    // ダウンロードの場合
+    // const a = document.createElement('a');
+    // a.download = 'data.pdf';
+    // a.href = url;
+    // a.click();
+
+    // 別タブ表示の場合
+    window.open(url);
+  };
+
+  useEffect(() => {
+    // PDF出力用のモデル(画面表示上で変更があった場合)
+    const newPdfModel: PdfModel = {
+      item1: 200,
+      item2: 'Test2',
+      item3: false,
+    };
+    setPdfModel(newPdfModel);
+  }, []); // <- 変更の契機
+
+  /* ---------------------------------------------------------------------- */
+
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
       <Box justifySelf={'end'} mb={0.5}>
@@ -247,7 +291,9 @@ export const Quotation = () => {
             <Typography margin={1}>見積書</Typography>
             <Box>
               {/* <Button sx={{ margin: 1 }}>編集</Button> */}
-              <Button sx={{ margin: 1 }}>見積書印刷</Button>
+              <Button sx={{ margin: 1 }} onClick={hundlePrintPdf}>
+                見積書印刷
+              </Button>
               {/* <Button sx={{ margin: 1 }}>複製</Button> */}
               <Button sx={{ margin: 1 }} type="submit">
                 保存
