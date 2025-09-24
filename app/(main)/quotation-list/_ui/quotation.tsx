@@ -81,12 +81,12 @@ export const Quotation = ({
     getValues,
     watch,
     setValue,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<QuotHeadValues>({
     mode: 'onChange',
     reValidateMode: 'onChange',
     resolver: zodResolver(QuotHeadSchema),
-    defaultValues: { ...quot, nyuryokuUser: user?.name ?? null },
+    defaultValues: { ...quot },
   });
 
   const kizaiFields = useFieldArray({ control, name: 'meisaiHeads.kizai' });
@@ -96,7 +96,7 @@ export const Quotation = ({
   /* methods ------------------------------------------------------ */
   /* 保存ボタン押下 */
   const onSubmit = async (data: QuotHeadValues) => {
-    console.log('新規？', isNew);
+    console.log('新規？', isNew, 'isDirty', isDirty);
     if (isNew) {
       await addQuot(data, user?.name ?? '');
     } else {
@@ -105,10 +105,22 @@ export const Quotation = ({
     }
     setSnackBarMessage('保存しました');
     setSnackBarOpen(true);
-    isNew = false;
   };
 
   /* useEffect ------------------------------------------------------------ */
+  /* eslint-disable react-hooks/exhaustive-deps */
+  useEffect(() => {
+    if (isNew) {
+      // 新規なら入力者をログインアカウントから取得する
+      if (user?.name) {
+        reset({ ...quot, nyuryokuUser: user.name });
+      }
+    } else {
+      reset(quot);
+    }
+  }, []);
+  /* eslint-enable react-hooks/exhaustive-deps */
+
   // デバッグ用
   useEffect(() => {
     if (Object.keys(errors).length > 0) {
@@ -129,7 +141,7 @@ export const Quotation = ({
               {/* <Button sx={{ margin: 1 }}>編集</Button> */}
               <Button sx={{ margin: 1 }}>見積書印刷</Button>
               {/* <Button sx={{ margin: 1 }}>複製</Button> */}
-              <Button sx={{ margin: 1 }} type="submit">
+              <Button sx={{ margin: 1 }} type="submit" disabled={!isNew && !isDirty}>
                 保存
               </Button>
             </Box>
@@ -390,7 +402,7 @@ export const Quotation = ({
               {kizaiFields.fields.map((field, index) => (
                 <Box key={field.id} p={1}>
                   <MeisaiTblHeader index={index} control={control} sectionNam="kizai" sectionFields={kizaiFields} />
-                  <MeisaiLines control={control} index={index} sectionNam="kizai" />
+                  <MeisaiLines control={control} index={index} sectionNam="kizai" setValue={setValue} />
                   <Grid2 container px={2} my={0.5} alignItems={'center'} spacing={0.5}>
                     <Grid2 size={'grow'} />
                     <Grid2 size={3}>
@@ -507,7 +519,7 @@ export const Quotation = ({
                 <Box key={field.id} p={1}>
                   {/* {index > 0 && <Divider sx={{ mx: 5 }} />} */}
                   <MeisaiTblHeader index={index} control={control} sectionNam="labor" sectionFields={laborFields} />
-                  <MeisaiLines control={control} index={index} sectionNam="labor" />
+                  <MeisaiLines control={control} index={index} sectionNam="labor" setValue={setValue} />
                   <Grid2 container px={2} my={0.5} alignItems={'center'} spacing={0.5}>
                     <Grid2 size={'grow'} />
                     <Grid2 size={3}>
@@ -570,7 +582,7 @@ export const Quotation = ({
                 <Box key={field.id} p={1}>
                   {/* {index > 0 && <Divider sx={{ mx: 5 }} />} */}
                   <MeisaiTblHeader index={index} control={control} sectionNam="other" sectionFields={otherFields} />
-                  <MeisaiLines control={control} index={index} sectionNam="other" />
+                  <MeisaiLines control={control} index={index} sectionNam="other" setValue={setValue} />
                   <Grid2 container px={2} my={0.5} alignItems={'center'} spacing={0.5}>
                     <Grid2 size={'grow'} />
                     <Grid2 size={3}>
