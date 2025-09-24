@@ -23,6 +23,7 @@ export const MeisaiLines = ({
   index: number;
   sectionNam: 'kizai' | 'labor' | 'other';
 }) => {
+  // フォームのフィールド（明細）
   const meisaiFields = useFieldArray({ control, name: `meisaiHeads.${sectionNam}.${index}.meisai` });
 
   /* 明細項目の順番を帰るボタン押下時 */

@@ -3,7 +3,7 @@ import { getMituStsSelection, getOrderForQuotation, getUsersSelection } from '..
 import { JuchuValues } from '../_lib/types';
 import { Quotation } from '../_ui/quotation';
 
-const Page = async ({ searchParams }: { searchParams: { [key: string]: string | undefined } }) => {
+const Page = async ({ searchParams }: { searchParams: Promise<{ [key: string]: string | undefined }> }) => {
   const searchParam = await searchParams;
   const juchuId = Number(searchParam.juchuId);
   // 選択肢取得
