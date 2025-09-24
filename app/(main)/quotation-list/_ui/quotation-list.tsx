@@ -18,7 +18,7 @@ import { useEffect, useState } from 'react';
 
 import { BackButton } from '../../_ui/buttons';
 import { TwoDatePickers } from '../../_ui/date';
-import { QuotTableValues } from '../_lib/type';
+import { QuotTableValues } from '../_lib/types';
 import { QuotationListTable } from './quotation-list-table';
 
 export const QuotationList = ({ quots }: { quots: QuotTableValues[] }) => {

@@ -1,5 +1,3 @@
-// export const dynamic = 'force-dynamic';
-
 import { getFilteredQuotList } from './_lib/func';
 import { QuotationList } from './_ui/quotation-list';
 

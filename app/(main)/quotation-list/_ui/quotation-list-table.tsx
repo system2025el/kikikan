@@ -29,7 +29,7 @@ import { CloseMasterDialogButton } from '../../_ui/buttons';
 import { Loading } from '../../_ui/loading';
 import { MuiTablePagination } from '../../_ui/table-pagination';
 import { LightTooltipWithText } from '../../(masters)/_ui/tables';
-import { QuotTableValues } from '../_lib/type';
+import { QuotTableValues } from '../_lib/types';
 
 /**
  * 見積一覧テーブル
@@ -74,18 +74,7 @@ export const QuotationListTable = ({
   /* 自動生成ボタン押下 */
   const onSubmit = (data: { juchuHeadId: number | null }) => {
     console.log(data.juchuHeadId, 'の見積もりを自動生成');
-    initJuchuMitsu();
-    sessionStorage.setItem(
-      'juchuHeadId',
-      String(data.juchuHeadId ?? '').replace(/[０-９]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 0xfee0))
-    );
-    router.push('/quotation-list/quotation');
-  };
-  /* 見積系に使っているストレージを開放 */
-  const initJuchuMitsu = () => {
-    sessionStorage.removeItem('currentOrder');
-    sessionStorage.removeItem('juchuHeadId');
-    sessionStorage.removeItem('mitsumoriId');
+    router.push(`/quotation-list/create?juchuId=${data.juchuHeadId}`);
   };
 
   /* useForm ------------------------------------- */
@@ -194,9 +183,7 @@ export const QuotationListTable = ({
                         sx={{ py: 0.2, px: 0, m: 0, minWidth: 0 }}
                         onClick={() => {
                           console.log('テーブルで見積番号', quotation.mituHeadId, 'をクリック');
-                          initJuchuMitsu();
-                          sessionStorage.setItem('mitsumoriId', String(quotation.mituHeadId ?? ''));
-                          router.push('/quotation-list/quotation');
+                          router.push(`/quotation-list/edit/${quotation.mituHeadId}`);
                         }}
                       >
                         <Box minWidth={60}>{quotation.mituHeadId}</Box>
@@ -264,9 +251,8 @@ export const QuotationListTable = ({
               <Button type="submit">自動生成</Button>
               <Button
                 onClick={() => {
-                  initJuchuMitsu();
                   setDialogOpen(false);
-                  router.push('/quotation-list/quotation');
+                  router.push('/quotation-list/create');
                 }}
               >
                 手動生成
