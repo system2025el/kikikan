@@ -446,8 +446,8 @@ export const addQuot = async (data: QuotHeadValues, user: string): Promise<numbe
       const id = await insertQuotHead(quotHead, connection);
       await insertQuotMeisaiHead(meisaiHeads, connection);
       await insertQuotMeisai(meisais, connection);
-      await revalidatePath('/quotation-list/quotation');
       await connection.query('COMMIT');
+      await revalidatePath('/quotation-list');
       return id.rows[0].mitu_head_id;
     }
     return null;
@@ -551,22 +551,6 @@ export const updateQuot = async (data: QuotHeadValues, user: string): Promise<nu
       upd_user: user,
     })),
   }));
-  // // 明細
-  // const meisais: MituMeisai[] = meisaiList.map((l, index) => ({
-  //   mitu_head_id: data.mituHeadId!,
-  //   mitu_meisai_head_id: l.mituMeisaiHeadId,
-  //   mitu_meisai_id: l.id,
-  //   mitu_meisai_nam: l.nam ?? null,
-  //   meisai_qty: l.qty ?? 0,
-  //   meisai_honbanbi_qty: l.honbanbiQty ?? 0,
-  //   meisai_tanka_amt: l.tankaAmt ?? 0,
-  //   shokei_amt: l.shokeiAmt ?? null,
-  //   dsp_ord_num: index + 1,
-  //   add_dat: toJapanTimeString(),
-  //   add_user: user,
-  //   upd_dat: toJapanTimeString(),
-  //   upd_user: user,
-  // }));
 
   try {
     console.log('更新START');
@@ -678,8 +662,8 @@ export const updateQuot = async (data: QuotHeadValues, user: string): Promise<nu
           connection
         );
       }
-      await revalidatePath('/quotation-list/quotation');
       await connection.query('COMMIT');
+      await revalidatePath('/quotation-list');
       // return id.rows[0].mitu_head_id;
       return null;
     }
