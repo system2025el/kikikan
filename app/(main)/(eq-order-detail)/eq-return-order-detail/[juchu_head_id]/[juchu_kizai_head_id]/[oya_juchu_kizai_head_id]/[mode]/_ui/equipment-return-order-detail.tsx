@@ -274,9 +274,11 @@ export const EquipmentReturnOrderDetail = (props: {
 
   useEffect(() => {
     const filterJuchuKizaiMeisaiList = returnJuchuKizaiMeisaiList.filter((data) => !data.delFlag);
+    const filterJuchuContainerMeisaiList = returnJuchuContainerMeisaiList.filter((data) => !data.delFlag);
     if (
       saveKizaiHead &&
-      JSON.stringify(originReturnJuchuKizaiMeisaiList) === JSON.stringify(filterJuchuKizaiMeisaiList)
+      JSON.stringify(originReturnJuchuKizaiMeisaiList) === JSON.stringify(filterJuchuKizaiMeisaiList) &&
+      JSON.stringify(originReturnJuchuContainerMeisaiList) === JSON.stringify(filterJuchuContainerMeisaiList)
     ) {
       setSave(true);
       setIsSave(true);
@@ -285,7 +287,7 @@ export const EquipmentReturnOrderDetail = (props: {
       setIsSave(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [returnJuchuKizaiMeisaiList]);
+  }, [returnJuchuKizaiMeisaiList, returnJuchuContainerMeisaiList]);
 
   useEffect(() => {
     setLock(lockData);
@@ -325,7 +327,12 @@ export const EquipmentReturnOrderDetail = (props: {
     // 編集→閲覧
     if (edit) {
       const filterJuchuKizaiMeisaiList = returnJuchuKizaiMeisaiList.filter((data) => !data.delFlag);
-      if (isDirty || JSON.stringify(originReturnJuchuKizaiMeisaiList) !== JSON.stringify(filterJuchuKizaiMeisaiList)) {
+      const filterJuchuContainerMeisaiList = returnJuchuContainerMeisaiList.filter((data) => !data.delFlag);
+      if (
+        isDirty ||
+        JSON.stringify(originReturnJuchuKizaiMeisaiList) !== JSON.stringify(filterJuchuKizaiMeisaiList) ||
+        JSON.stringify(originReturnJuchuContainerMeisaiList) !== JSON.stringify(filterJuchuContainerMeisaiList)
+      ) {
         setDirtyOpen(true);
         return;
       }
