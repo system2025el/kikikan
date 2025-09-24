@@ -19,9 +19,10 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
-import { AutocompleteElement, SelectElement, TextFieldElement } from 'react-hook-form-mui';
+import { SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import { toJapanDateString } from '@/app/(main)/_lib/date-conversion';
@@ -29,17 +30,10 @@ import { BackButton } from '@/app/(main)/_ui/buttons';
 import { FormDateX } from '@/app/(main)/_ui/date';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { LoadingOverlay } from '@/app/(main)/_ui/loading';
-import { getCustomerSelection } from '@/app/(main)/(masters)/_lib/funs';
 
-import {
-  addQuot,
-  getChosenQuot,
-  getMituStsSelection,
-  getOrderForQuotation,
-  getUsersSelection,
-  updateQuot,
-} from '../_lib/func';
 import { JuchuValues, QuotHeadSchema, QuotHeadValues } from '../_lib/types';
+import { addQuot } from '../create/_lib/func';
+import { updateQuot } from '../edit/[id]/_lib/func';
 import { FirstDialogPage, SecondDialogPage } from './dialogs';
 import { MeisaiLines } from './meisai';
 import { MeisaiTblHeader } from './meisai-tbl-header';
@@ -48,42 +42,23 @@ import { MeisaiTblHeader } from './meisai-tbl-header';
  * 見積書作成画面
  * @returns {JSX.Element} 見積書作成ページ
  */
-export const Quotation = () => {
+export const Quotation = ({
+  selectOptions,
+  order,
+  isNew,
+  quot,
+}: {
+  selectOptions: { users: SelectTypes[]; mituSts: SelectTypes[]; custs: SelectTypes[] };
+  order: JuchuValues;
+  isNew: boolean;
+  quot: QuotHeadValues;
+}) => {
   /* ログイン中のユーザー */
   const user = useUserStore((state) => state.user);
-  /* debug用、レンダリング回数取得に使用 */
-  const hasRun = useRef(false);
+  const router = useRouter();
   /* useState ----------------------------------------------------------------- */
   /* ローディング中かどうか */
-  const [isLoading, setIsLoading] = useState(true);
-  /* 新規かどうか */
-  const [isNew, setIsNew] = useState(true);
-  /* フォーム内の選択肢 */
-  const [selectOptions, setSelectOptions] = useState<{
-    user: SelectTypes[];
-    mituSts: SelectTypes[];
-    custs: SelectTypes[];
-  }>({
-    user: [],
-    mituSts: [],
-    custs: [],
-  });
-  /* 受注選択に表示する受注情報 */
-  const [order, setOrder] = useState<JuchuValues>({
-    juchuHeadId: null,
-    juchuSts: null,
-    juchuDat: null,
-    juchuRange: { strt: null, end: null },
-    nyuryokuUser: null,
-    koenNam: null,
-    koenbashoNam: null,
-    kokyaku: { id: null, name: null },
-    kokyakuTantoNam: null,
-    mem: null,
-    nebikiAmt: null,
-    zeiKbn: null,
-  });
-
+  const [isLoading, setIsLoading] = useState(false);
   // 受注選択アコーディオン制御
   const [juchuExpanded, setJuchuExpanded] = useState(false);
   // 見積ヘッダアコーディオン制御
@@ -111,39 +86,7 @@ export const Quotation = () => {
     mode: 'onChange',
     reValidateMode: 'onChange',
     resolver: zodResolver(QuotHeadSchema),
-    defaultValues: {
-      mituHeadId: null,
-      juchuHeadId: null,
-      mituSts: null,
-      mituDat: new Date(),
-      mituHeadNam: '',
-      kokyaku: null,
-      nyuryokuUser: user?.name,
-      mituRange: { strt: null, end: null },
-      kokyakuTantoNam: null,
-      koenNam: null,
-      koenbashoNam: null,
-      mituHonbanbiQty: null,
-      biko: null,
-      meisaiHeads: {
-        kizai: [
-          {
-            mituMeisaiHeadNam: null,
-            headNamDspFlg: false,
-            mituMeisaiKbn: 0,
-            meisai: [
-              {
-                nam: null,
-                qty: null,
-                honbanbiQty: null,
-                tankaAmt: null,
-                shokeiAmt: null,
-              },
-            ],
-          },
-        ],
-      },
-    },
+    defaultValues: { ...quot, nyuryokuUser: user?.name ?? null },
   });
 
   const kizaiFields = useFieldArray({ control, name: 'meisaiHeads.kizai' });
@@ -155,115 +98,17 @@ export const Quotation = () => {
   const onSubmit = async (data: QuotHeadValues) => {
     console.log('新規？', isNew);
     if (isNew) {
-      const result = await addQuot(data, user?.name ?? '');
-      setValue('mituHeadId', result);
-      console.log('挿入した', result, '番の見積');
+      await addQuot(data, user?.name ?? '');
     } else {
       const result = await updateQuot(data, user?.name ?? '');
       console.log('更新したのは', result, '番の見積');
     }
     setSnackBarMessage('保存しました');
     setSnackBarOpen(true);
-    setIsNew(false);
+    isNew = false;
   };
 
-  // 受注選択アコーディオン開閉
-  const handleJuchuExpansion = () => {
-    setJuchuExpanded(!juchuExpanded);
-  };
-  // 見積ヘッダアコーディオン開閉
-  const handleMitsuExpansion = () => {
-    setMitsuExpanded(!mitsuExpanded);
-  };
-
-  /* eslint-disable react-hooks/exhaustive-deps */
   /* useEffect ------------------------------------------------------------ */
-  /* 画面初期 */
-  useEffect(() => {
-    const getOptions = async () => {
-      const [users, mituSts, custs] = await Promise.all([
-        getUsersSelection(),
-        getMituStsSelection(),
-        getCustomerSelection(),
-      ]);
-      setSelectOptions({ user: users, mituSts: mituSts, custs: custs });
-    };
-    getOptions();
-    const savedOrderData = sessionStorage.getItem('currentOrder');
-    if (savedOrderData) {
-      const savedData = JSON.parse(savedOrderData);
-      setOrder(savedData);
-      // 画面更新後維持？ reset({
-      //   mituRange: { strt: savedData.juchuRange.strt, end: savedData.juchuRange.end },
-      //   ...savedData,
-      // });
-      setIsNew(false); // 新規じゃない
-      setIsLoading(false);
-      return; // 保存されたデータがあれば、それで処理を終了
-    }
-    if (!hasRun.current) {
-      // デバッグ用のレンダリング二回目を避ける処理
-      hasRun.current = true;
-      const juchuId = sessionStorage.getItem('juchuHeadId');
-      const quotId = sessionStorage.getItem('mitsumoriId');
-      console.log('ダイアログで選んだID', juchuId);
-      console.log('テーブルで選んだID', quotId);
-      if (!juchuId && !quotId) {
-        // 手動入力で入ってきている -------------------
-        console.log('null');
-        setIsNew(true);
-        setIsLoading(false);
-        return;
-      } else {
-        if (juchuId && juchuId !== '') {
-          // 受注ヘッド番号から自動生成時 -----------------
-          const getjuchu = async (id: number) => {
-            const data = await getOrderForQuotation(id);
-            if (!data) {
-              setSnackBarMessage(`受注番号${juchuId}の受注はありません`);
-              setSnackBarOpen(true);
-              setIsLoading(false);
-              return;
-            }
-            const current = getValues('meisaiHeads');
-            reset({
-              juchuHeadId: data.juchuHeadId,
-              kokyakuTantoNam: data.kokyakuTantoNam,
-              kokyaku: data.kokyaku.name,
-              koenNam: data.koenNam,
-              koenbashoNam: data.koenbashoNam,
-              nyuryokuUser: user?.name,
-              mituRange: { strt: data.juchuRange.strt, end: data.juchuRange.end },
-              mituDat: new Date(),
-              meisaiHeads: current,
-            });
-            console.log('DB', data);
-            setOrder(data);
-            sessionStorage.setItem('currentOrder', JSON.stringify(data));
-            sessionStorage.removeItem('juchuHeadId');
-            setIsNew(true);
-            await setIsLoading(false);
-          };
-          getjuchu(Number(juchuId));
-        } else if (quotId && quotId !== '') {
-          // 見積一覧テーブルから選択して開いている --------------------
-          setIsNew(false); // 新規じゃない
-          const getMitsumori = async (id: number) => {
-            console.log('DB, the QuoteId is ', id);
-            // DB処理
-            const data = await getChosenQuot(id);
-            if (data.j) setOrder(data.j);
-            reset(data.m);
-            sessionStorage.setItem('currentOrder', JSON.stringify(data.j));
-            sessionStorage.removeItem('mitsuHeadId');
-            await setIsLoading(false);
-          };
-          getMitsumori(Number(quotId));
-        }
-      }
-    }
-  }, []);
-  /* eslint-enable react-hooks/exhaustive-deps */
   // デバッグ用
   useEffect(() => {
     if (Object.keys(errors).length > 0) {
@@ -274,7 +119,7 @@ export const Quotation = () => {
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
       <Box justifySelf={'end'} mb={0.5}>
-        <BackButton label={'戻る'} />
+        <Button onClick={() => router.push('/quotation-list')}>戻る</Button>
       </Box>
       <form onSubmit={handleSubmit(onSubmit)}>
         <Paper variant="outlined">
@@ -294,7 +139,12 @@ export const Quotation = () => {
         {isLoading && <LoadingOverlay />}
 
         {/* 受注選択 ---------------------------------------------------------------------------------- */}
-        <Accordion expanded={juchuExpanded} onChange={handleJuchuExpansion} sx={{ marginTop: 1 }} variant="outlined">
+        <Accordion
+          expanded={juchuExpanded}
+          onChange={() => setJuchuExpanded(!juchuExpanded)}
+          sx={{ marginTop: 1 }}
+          variant="outlined"
+        >
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Grid2 container alignItems={'center'} width={'100%'}>
               <Grid2 size={3}>
@@ -374,7 +224,12 @@ export const Quotation = () => {
         </Accordion>
 
         {/* 見積ヘッダー ----------------------------------------------------------------------------------*/}
-        <Accordion expanded={mitsuExpanded} onChange={handleMitsuExpansion} sx={{ marginTop: 1 }} variant="outlined">
+        <Accordion
+          expanded={mitsuExpanded}
+          onChange={() => setMitsuExpanded(!mitsuExpanded)}
+          sx={{ marginTop: 1 }}
+          variant="outlined"
+        >
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Typography component="span">見積ヘッダー</Typography>
           </AccordionSummary>
@@ -429,9 +284,9 @@ export const Quotation = () => {
                     render={({ field }) => (
                       <Autocomplete
                         {...field}
-                        options={selectOptions.user}
+                        options={selectOptions.users}
                         getOptionLabel={(option) => option.label}
-                        value={selectOptions.user.find((opt: SelectTypes) => opt.label === field.value) || null}
+                        value={selectOptions.users.find((opt: SelectTypes) => opt.label === field.value) || null}
                         onChange={(_, value) => field.onChange(value?.label ?? '')}
                         renderInput={(params) => <TextField {...params} />}
                         sx={{ width: 242.5 }}

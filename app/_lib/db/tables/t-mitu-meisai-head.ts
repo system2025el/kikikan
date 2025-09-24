@@ -1,8 +1,6 @@
 'use server';
 import { PoolClient } from 'pg';
 
-import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
-
 import { SCHEMA, supabase } from '../supabase';
 import { MituMeisaiHead } from '../types/t-mitu-meisai-head-type';
 

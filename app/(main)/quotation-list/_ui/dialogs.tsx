@@ -19,7 +19,7 @@ import { UseFieldArrayReturn } from 'react-hook-form-mui';
 import { CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
 import { Loading } from '@/app/(main)/_ui/loading';
 
-import { getJuchuKizaiHeadNamList, getJuchuKizaiMeisaiList, getJuchuMeisaiSum } from '../_lib/func';
+import { getJuchuIsshikiMeisai,getJuchuKizaiHeadNamList, getJuchuKizaiMeisaiList } from '../_lib/func';
 import { QuotHeadValues } from '../_lib/types';
 
 /**
@@ -90,7 +90,7 @@ export const SecondDialogPage = ({
   const handleClickHeadNam = async (juchuId: number, kizaiHeadId: number, headNam: string, checked: boolean) => {
     console.log(kizaiHeadId, checked);
     if (checked) {
-      const data = await getJuchuMeisaiSum(juchuId, kizaiHeadId);
+      const data = await getJuchuIsshikiMeisai(juchuId, kizaiHeadId);
       field.append({
         mituMeisaiHeadNam: null,
         headNamDspFlg: false,

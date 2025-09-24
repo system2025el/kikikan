@@ -1,6 +1,21 @@
 import z from 'zod';
 
 import { validationMessages } from '@/app/(main)/_lib/validation-messages';
+
+/**
+ * 見積一覧表示テーブルのタイプ
+ */
+export type QuotTableValues = {
+  mituHeadId: number;
+  juchuHeadId: number;
+  mituStsNam: string;
+  mituHeadNam: string;
+  koenNam: string;
+  kokyakuNam: string;
+  mituDat: string;
+  nyuryokuUser: string;
+};
+
 /**
  * 見積書画面に表示する受注のタイプ
  */
