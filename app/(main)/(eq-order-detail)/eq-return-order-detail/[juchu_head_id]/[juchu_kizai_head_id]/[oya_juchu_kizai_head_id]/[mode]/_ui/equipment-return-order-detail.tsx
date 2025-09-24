@@ -579,25 +579,16 @@ export const EquipmentReturnOrderDetail = (props: {
     const copyJuchuKizaiMeisaiData = [...returnJuchuKizaiMeisaiList];
     const juchuKizaiMeisaiMaxId = await getJuchuKizaiMeisaiMaxId(juchuHeadId, juchuKizaiHeadId);
     const newReturnJuchuKizaiMeisaiId = juchuKizaiMeisaiMaxId ? juchuKizaiMeisaiMaxId.juchu_kizai_meisai_id + 1 : 1;
-    const newReturnJuchuKizaiMeisaiData = copyJuchuKizaiMeisaiData.map((data, index) =>
-      data.juchuKizaiMeisaiId === 0
-        ? {
-            ...data,
-            juchuKizaiMeisaiId: newReturnJuchuKizaiMeisaiId + index,
-          }
-        : data
-    );
+    const newReturnJuchuKizaiMeisaiData = copyJuchuKizaiMeisaiData
+      .filter((data) => data.juchuKizaiMeisaiId === 0 && !data.delFlag)
+      .map((data, index) => ({ ...data, juchuKizaiMeisaiId: newReturnJuchuKizaiMeisaiId + index }));
 
     // 受注機材明細更新
     const addReturnJuchuKizaiMeisaiData = newReturnJuchuKizaiMeisaiData.filter(
       (data) => !data.delFlag && !data.saveFlag
     );
-    const updateReturnJuchuKizaiMeisaiData = newReturnJuchuKizaiMeisaiData.filter(
-      (data) => !data.delFlag && data.saveFlag
-    );
-    const deleteReturnJuchuKizaiMeisaiData = newReturnJuchuKizaiMeisaiData.filter(
-      (data) => data.delFlag && data.saveFlag
-    );
+    const updateReturnJuchuKizaiMeisaiData = copyJuchuKizaiMeisaiData.filter((data) => !data.delFlag && data.saveFlag);
+    const deleteReturnJuchuKizaiMeisaiData = copyJuchuKizaiMeisaiData.filter((data) => data.delFlag && data.saveFlag);
     if (deleteReturnJuchuKizaiMeisaiData.length > 0) {
       console.log('明細削除');
       const deleteJuchuKizaiMeisaiIds = deleteReturnJuchuKizaiMeisaiData.map((data) => data.juchuKizaiMeisaiId);
