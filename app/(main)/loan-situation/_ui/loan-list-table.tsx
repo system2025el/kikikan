@@ -21,10 +21,10 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { Loading } from '../../_ui/loading';
 import { MuiTablePagination } from '../../_ui/table-pagination';
-import { EqptsMasterTableValues } from '../../(masters)/eqpt-master/_lib/types';
+import { LoanEqTableValues } from '../_lib/types';
 
 export const LoanListTable = (props: {
-  datas: EqptsMasterTableValues[];
+  datas: LoanEqTableValues[];
   page: number;
   setPage: React.Dispatch<React.SetStateAction<number>>;
   isLoading: boolean;

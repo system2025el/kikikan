@@ -7,12 +7,12 @@ import { selectLoanJuchuData } from '@/app/_lib/db/tables/v-juchu-kizai-den';
 import { selectJuchuHeadIds } from '@/app/_lib/db/tables/v-juchu-lst';
 import { selectLoanKizai } from '@/app/_lib/db/tables/v-kizai-list';
 import { toISOStringYearMonthDay } from '@/app/(main)/_lib/date-conversion';
-import { GetNyukoDate, GetShukoDate } from '@/app/(main)/(eq-order-detail)/_lib/datefuncs';
+import { getNyukoDate, getShukoDate } from '@/app/(main)/_lib/date-funcs';
 
 import { LoanConfirmJuchuHeadId, LoanJuchu, LoanKizai, LoanStockTableValues, LoanUseTableValues } from './types';
 
 /**
- * 貸出状況用機材情報取得
+ * 貸出状況用機材データ取得
  * @param kizaiId 機材id
  * @returns LoanKizai
  */
@@ -38,6 +38,11 @@ export const getLoanKizaiData = async (kizaiId: number) => {
   }
 };
 
+/**
+ * 貸出状況用受注データ取得
+ * @param kizaiId 機材id
+ * @returns 受注データ
+ */
 export const getLoanJuchuData = async (kizaiId: number) => {
   try {
     const { data, error } = await selectLoanJuchuData(kizaiId);
@@ -58,11 +63,11 @@ export const getLoanJuchuData = async (kizaiId: number) => {
       juchuHeadId: d.juchu_head_id,
       kizaiId: kizaiId,
       koenNam: d.koen_nam,
-      shukoDat: GetShukoDate(
+      shukoDat: getShukoDate(
         d.kics_shuko_dat ? new Date(d.kics_shuko_dat) : null,
         d.yard_shuko_dat ? new Date(d.yard_shuko_dat) : null
       ),
-      nyukoDat: GetNyukoDate(
+      nyukoDat: getNyukoDate(
         d.kics_nyuko_dat ? new Date(d.kics_nyuko_dat) : null,
         d.yard_nyuko_dat ? new Date(d.yard_nyuko_dat) : null
       ),
@@ -75,6 +80,11 @@ export const getLoanJuchuData = async (kizaiId: number) => {
   }
 };
 
+/**
+ * 貸出状況確認用受注ヘッダーidリスト取得
+ * @param strDat 日付
+ * @returns 貸出状況確認用受注ヘッダーidリスト
+ */
 export const confirmJuchuHeadId = async (strDat: Date) => {
   const stringStrDat = toISOStringYearMonthDay(strDat);
   try {
@@ -91,6 +101,13 @@ export const confirmJuchuHeadId = async (strDat: Date) => {
   }
 };
 
+/**
+ * 貸出状況用使用データ取得
+ * @param juchuHeadId 受注ヘッダーid
+ * @param kizaiId 機材id
+ * @param date 日付
+ * @returns 貸出状況用使用データ
+ */
 export const getLoanUseData = async (juchuHeadId: number, kizaiId: number, date: Date) => {
   const stringDate = toISOStringYearMonthDay(date);
   try {
@@ -104,6 +121,12 @@ export const getLoanUseData = async (juchuHeadId: number, kizaiId: number, date:
   }
 };
 
+/**
+ * 貸出状況用在庫データ取得
+ * @param kizaiId 機材id
+ * @param date 日付
+ * @returns 貸出状況用在庫データ
+ */
 export const getLoanStockData = async (kizaiId: number, date: Date) => {
   const stringDate = toISOStringYearMonthDay(date);
   try {

@@ -1,14 +1,22 @@
 import { nullable, z } from 'zod';
 
+import { validationMessages } from '@/app/(main)/_lib/validation-messages';
+
 export const JuchuKizaiHeadSchema = z
   .object({
     juchuHeadId: z.number(),
     juchuKizaiHeadId: z.number(),
     juchuKizaiHeadKbn: z.number(),
     juchuHonbanbiQty: z.number().nullable(),
-    nebikiAmt: z.number().nullable(),
+    nebikiAmt: z
+      .number()
+      .max(99999999, { message: validationMessages.maxNumberLength(8) })
+      .nullable(),
     mem: z.string().nullable(),
-    headNam: z.string({ message: '機材明細名は必須です' }).min(1, { message: '機材明細名は必須です' }),
+    headNam: z
+      .string({ message: validationMessages.required() })
+      .min(1, { message: validationMessages.required() })
+      .max(20, { message: validationMessages.maxStringLength(20) }),
     kicsShukoDat: z.date().nullable(),
     kicsNyukoDat: z.date().nullable(),
     yardShukoDat: z.date().nullable(),
@@ -19,7 +27,7 @@ export const JuchuKizaiHeadSchema = z
     path: ['kicsShukoDat'],
   })
   .refine((data) => data.kicsShukoDat || data.yardShukoDat, {
-    message: '出庫日時をいずれか一方入力してください',
+    message: validationMessages.required(),
     path: ['yardShukoDat'],
   })
   .refine((data) => data.kicsNyukoDat || data.yardNyukoDat, {
@@ -27,7 +35,7 @@ export const JuchuKizaiHeadSchema = z
     path: ['kicsNyukoDat'],
   })
   .refine((data) => data.kicsNyukoDat || data.yardNyukoDat, {
-    message: '入庫日時をいずれか一方入力してください',
+    message: validationMessages.required(),
     path: ['yardNyukoDat'],
   });
 
@@ -54,6 +62,20 @@ export type JuchuKizaiMeisaiValues = {
   saveFlag: boolean;
 };
 
+export type JuchuContainerMeisaiValues = {
+  juchuHeadId: number;
+  juchuKizaiHeadId: number;
+  juchuKizaiMeisaiId: number;
+  kizaiId: number;
+  kizaiNam: string;
+  planKicsKizaiQty: number | null;
+  planYardKizaiQty: number | null;
+  planQty: number | null;
+  mem: string | null;
+  delFlag: boolean;
+  saveFlag: boolean;
+};
+
 export type StockTableValues = {
   calDat: Date;
   kizaiId: number;
@@ -71,4 +93,26 @@ export type JuchuKizaiHonbanbiValues = {
   juchuHonbanbiDat: Date;
   mem: string | null;
   juchuHonbanbiAddQty: number | null;
+};
+
+export type EqptSelection = {
+  kizaiId: number;
+  kizaiNam: string;
+  shozokuNam: string;
+  bumonId: number;
+  kizaiGrpCod: string;
+  ctnFlg: boolean;
+};
+
+export type SelectedEqptsValues = {
+  kizaiId: number;
+  kizaiNam: string;
+  shozokuId: number;
+  shozokuNam: string;
+  kizaiGrpCod: string;
+  dspOrdNum: number;
+  regAmt: number;
+  rankAmt: number;
+  kizaiQty: number;
+  ctnFlg: boolean;
 };

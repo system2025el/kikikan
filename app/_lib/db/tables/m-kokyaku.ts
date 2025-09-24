@@ -96,7 +96,7 @@ export const selectOneCustomer = async (id: number) => {
  */
 export const insertNewCustomer = async (data: CustomersMasterDialogValues) => {
   const query = `
-  INSERT INTO m_kokyaku (
+  INSERT INTO ${SCHEMA}.m_kokyaku (
     kokyaku_id, kokyaku_nam, kana, kokyaku_rank, keisho, del_flg, dsp_ord_num,
     adr_post, adr_shozai, adr_tatemono, adr_sonota,
     tel, tel_mobile, fax, mail,
@@ -104,9 +104,9 @@ export const insertNewCustomer = async (data: CustomersMasterDialogValues) => {
     add_dat, add_user
   )
   VALUES (
-    (SELECT coalesce(max(kokyaku_id),0) + 1 FROM m_kokyaku),
+    (SELECT coalesce(max(kokyaku_id),0) + 1 FROM ${SCHEMA}.m_kokyaku),
     $1, $2, $3, $4, $5,
-    (SELECT coalesce(max(dsp_ord_num),0) + 1 FROM m_kokyaku),
+    (SELECT coalesce(max(dsp_ord_num),0) + 1 FROM ${SCHEMA}.m_kokyaku),
     $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20
   );
 `;
@@ -134,7 +134,6 @@ export const insertNewCustomer = async (data: CustomersMasterDialogValues) => {
     'shigasan',
   ];
   try {
-    await pool.query(` SET search_path TO ${SCHEMA};`);
     await pool.query(query, values);
   } catch (e) {
     throw e;

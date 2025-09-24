@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 
-import { insertNewLoc, SelectFilteredLocs, selectOneLoc, upDateLocDB } from '@/app/_lib/db/tables/m-koenbasho';
+import { insertNewLoc, selectFilteredLocs, selectOneLoc, upDateLocDB } from '@/app/_lib/db/tables/m-koenbasho';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { emptyLoc } from './datas';
@@ -15,7 +15,7 @@ import { LocsMasterDialogValues, LocsMasterTableValues } from './types';
  */
 export const getFilteredLocs = async (query: string = '') => {
   try {
-    const { data, error } = await SelectFilteredLocs(query);
+    const { data, error } = await selectFilteredLocs(query);
     if (error) {
       console.error('DB情報取得エラー', error.message, error.cause, error.hint);
       throw error;

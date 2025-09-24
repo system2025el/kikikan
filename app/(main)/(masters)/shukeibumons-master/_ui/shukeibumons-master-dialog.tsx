@@ -7,7 +7,7 @@ import { CheckboxElement, TextareaAutosizeElement, TextFieldElement } from 'reac
 import { FormBox } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 
-import { NEW_MASTER_ID } from '../../_lib/constants';
+import { FAKE_NEW_ID } from '../../_lib/constants';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { emptyShukeibumon, formItems } from '../_lib/datas';
@@ -65,7 +65,7 @@ export const ShukeibumonsMasterDialog = ({
   const onSubmit = async (data: ShukeibumonsMasterDialogValues) => {
     console.log('isDarty : ', isDirty);
     console.log(data);
-    if (shukeibumonId === NEW_MASTER_ID) {
+    if (shukeibumonId === FAKE_NEW_ID) {
       // 新規の時
       await addNewShukeibumon(data);
       handleCloseDialog();
@@ -122,7 +122,7 @@ export const ShukeibumonsMasterDialog = ({
   useEffect(() => {
     console.log('★★★★★★★★★★★★★★★★★★★★★');
     const getThatOneShukeibumon = async () => {
-      if (shukeibumonId === NEW_MASTER_ID) {
+      if (shukeibumonId === FAKE_NEW_ID) {
         // 新規追加モード
         reset(emptyShukeibumon); // フォーム初期化
         setEditable(true); // 編集モードにする

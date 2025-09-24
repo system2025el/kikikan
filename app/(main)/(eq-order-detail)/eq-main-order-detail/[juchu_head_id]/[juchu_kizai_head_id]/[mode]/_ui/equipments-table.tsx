@@ -13,7 +13,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { Loading } from '@/app/(main)/_ui/loading';
 
-import { EqptSelection } from './equipment-selection-dailog';
+import { EqptSelection } from '../_lib/types';
 
 /**
  * 機材選択の機材テーブル

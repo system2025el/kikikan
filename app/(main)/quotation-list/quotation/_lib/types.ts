@@ -1,5 +1,9 @@
 import z from 'zod';
 
+import { validationMessages } from '@/app/(main)/_lib/validation-messages';
+/**
+ * 見積書画面に表示する受注のタイプ
+ */
 export type JuchuValues = {
   juchuHeadId: number | undefined | null;
   delFlg?: number;
@@ -16,46 +20,121 @@ export type JuchuValues = {
   zeiKbn?: string | undefined | null;
 };
 
+/**
+ * 見積明細ヘッドのzodSchema
+ */
 export const quotMeisaiHeadSchema = z.object({
-  mituHeadId: z.number().int(),
-  mituMeisaiHeadId: z.number().int(),
-  mituMeisaiHeadNam: z.string().nullish(),
-  headNamDspFlg: z.boolean().nullable(),
+  mituMeisaiHeadId: z.number().int().nullish(),
+  mituMeisaiHeadNam: z
+    .string()
+    .max(50, { message: validationMessages.maxStringLength(50) })
+    .nullish(),
+  mituMeisaiKbn: z.number(),
+  headNamDspFlg: z.boolean(),
+  nebikiNam: z.string().nullish(),
+  nebikiAmt: z
+    .number()
+    .max(999999999, { message: validationMessages.maxNumberLength(9) })
+    .nullish(),
+  nebikiAftNam: z.string().nullish(),
+  shokeiMei: z.string().nullish(),
+  nebikiAftAmt: z
+    .number()
+    .max(999999999, { message: validationMessages.maxNumberLength(9) })
+    .nullish(),
+  biko1: z
+    .string()
+    .max(100, { message: validationMessages.maxStringLength(100) })
+    .nullish(),
+  biko2: z
+    .string()
+    .max(100, { message: validationMessages.maxStringLength(100) })
+    .nullish(),
+  biko3: z
+    .string()
+    .max(100, { message: validationMessages.maxStringLength(100) })
+    .nullish(),
+  meisai: z
+    .array(
+      z.object({
+        id: z.number().nullish(),
+        nam: z.string().max(50).nullish(),
+        qty: z
+          .number({ message: validationMessages.number() })
+          .max(9999, { message: validationMessages.maxNumberLength(4) })
+          .nullish(),
+        honbanbiQty: z
+          .number({ message: validationMessages.number() })
+          .max(999, { message: validationMessages.maxNumberLength(3) })
+          .nullish(),
+        tankaAmt: z
+          .number({ message: validationMessages.number() })
+          .max(999999999, { message: validationMessages.maxNumberLength(9) })
+          .nullish(),
+        shokeiAmt: z
+          .number({ message: validationMessages.number() })
+          .max(999999999999, { message: validationMessages.maxNumberLength(12) })
+          .nullish(),
+      })
+    )
+    .nullish(),
 });
 
-// ZodスキーマからTypeScriptの型を生成 (元の型と一致することを確認)
+/**
+ * 明細ヘッドのタイプ
+ */
 export type QuotMaisaiHeadValues = z.infer<typeof quotMeisaiHeadSchema>;
 
+/**
+ * 明細書全体のzodSchema
+ */
 export const QuotHeadSchema = z.object({
   mituHeadId: z.number().nullish(),
   juchuHeadId: z.number().nullish(),
   mituSts: z.number().nullish(),
   mituDat: z.date().nullish(),
-  mituYukoDat: z.date().nullish(),
   mituHeadNam: z.string().max(50).nullish(),
   kokyaku: z.string().max(50).nullish(),
-  nyuryokuUser: z.object({
-    id: z.string().max(20).nullish(),
-    name: z.string().max(20).nullish(),
-  }),
-  lendRange: z.object({
+  nyuryokuUser: z.string().max(20).nullish(),
+  mituRange: z.object({
     strt: z.date().nullish(),
     end: z.date().nullish(),
   }),
   kokyakuTantoNam: z.string().max(20).nullish(),
   koenNam: z.string().max(50).nullish(),
   koenbashoNam: z.string().max(100).nullish(),
-  torihikiHoho: z.string().nullish(),
   mituHonbanbiQty: z
-    .string()
-    .regex(/^[0-9]+$/)
-    .max(2, { message: '2桁以下で入力してください。' })
-    .nullable()
-    .optional(),
+    .number()
+    .max(99, { message: validationMessages.maxNumberLength(2) })
+    .nullish(),
   biko: z.string().max(100).nullish(),
-  meisaiHeads: z.object({
-    kizai: z.array(quotMeisaiHeadSchema),
-  }),
+  comment: z.string().max(100).nullish(),
+  chukeiMei: z.string().max(10).nullish(),
+  tokuNebikiMei: z.string().max(10).nullish(),
+  tokuNebikiAmt: z
+    .number({ message: validationMessages.number() })
+    .max(999999999, { message: validationMessages.maxNumberLength(9) })
+    .nullish(),
+  zeiAmt: z
+    .number({ message: validationMessages.number() })
+    .max(999999999999, { message: validationMessages.maxNumberLength(12) })
+    .nullish(),
+  zeiRat: z
+    .number({ message: validationMessages.number() })
+    .max(999, { message: validationMessages.maxNumberLength(3) })
+    .nullish(),
+  gokeiMei: z.string().max(10).nullish(),
+  gokeiAmt: z.number({ message: validationMessages.number() }).nullish(),
+  meisaiHeads: z
+    .object({
+      kizai: z.array(quotMeisaiHeadSchema).nullish(),
+      labor: z.array(quotMeisaiHeadSchema).nullish(),
+      other: z.array(quotMeisaiHeadSchema).nullish(),
+    })
+    .nullish(),
 });
 
+/**
+ * 明細書全体のタイプ
+ */
 export type QuotHeadValues = z.infer<typeof QuotHeadSchema>;

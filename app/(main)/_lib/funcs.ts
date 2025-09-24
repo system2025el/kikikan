@@ -1,6 +1,6 @@
 'use server';
 
-import { DeleteLock, InsertLock, SelectLock } from '@/app/_lib/db/tables/t-lock';
+import { deleteLock, insertLock, selectLock } from '@/app/_lib/db/tables/t-lock';
 
 import { toJapanTimeString } from './date-conversion';
 import { LockValues } from './types';
@@ -11,9 +11,9 @@ import { LockValues } from './types';
  * @param headId ヘッダーid
  * @returns ロックデータ
  */
-export const GetLock = async (lockShubetu: number, headId: number) => {
+export const getLock = async (lockShubetu: number, headId: number) => {
   try {
-    const { data, error } = await SelectLock(lockShubetu, headId);
+    const { data, error } = await selectLock(lockShubetu, headId);
 
     console.log('GetLock data : ', data);
 
@@ -44,14 +44,14 @@ export const GetLock = async (lockShubetu: number, headId: number) => {
  * @param lockShubetu ロック種別
  * @param headId ヘッダーid
  */
-export const AddLock = async (lockShubetu: number, headId: number, userNam: string) => {
+export const addLock = async (lockShubetu: number, headId: number, userNam: string) => {
   const lockData = {
     lock_shubetu: lockShubetu,
     head_id: headId,
     add_dat: toJapanTimeString(),
     add_user: userNam,
   };
-  const { error } = await InsertLock(lockData);
+  const { error } = await insertLock(lockData);
   if (error) {
     console.error('Error adding lock:', error.message);
   }
@@ -62,8 +62,8 @@ export const AddLock = async (lockShubetu: number, headId: number, userNam: stri
  * @param lockShubetu ロック種別
  * @param headId ヘッダーid
  */
-export const DelLock = async (lockShubetu: number, headId: number) => {
-  const { error } = await DeleteLock(lockShubetu, headId);
+export const delLock = async (lockShubetu: number, headId: number) => {
+  const { error } = await deleteLock(lockShubetu, headId);
 
   if (error) {
     console.error('Error delete lock:', error.message);

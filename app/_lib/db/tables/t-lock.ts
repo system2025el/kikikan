@@ -9,7 +9,7 @@ import { Lock } from '../types/t-lock-type';
  * @param headId ヘッダーid
  * @returns ロックデータ
  */
-export const SelectLock = async (lockShubetu: number, headId: number) => {
+export const selectLock = async (lockShubetu: number, headId: number) => {
   try {
     return await supabase
       .schema(SCHEMA)
@@ -28,7 +28,7 @@ export const SelectLock = async (lockShubetu: number, headId: number) => {
  * @param lockShubetu ロック種別
  * @param headId ヘッダーid
  */
-export const InsertLock = async (data: Lock) => {
+export const insertLock = async (data: Lock) => {
   try {
     return await supabase.schema(SCHEMA).from('t_lock').insert(data);
   } catch (e) {
@@ -41,7 +41,7 @@ export const InsertLock = async (data: Lock) => {
  * @param lockShubetu ロック種別
  * @param headId ヘッダーid
  */
-export const DeleteLock = async (lockShubetu: number, headId: number) => {
+export const deleteLock = async (lockShubetu: number, headId: number) => {
   try {
     return await supabase.schema(SCHEMA).from('t_lock').delete().eq('lock_shubetu', lockShubetu).eq('head_id', headId);
   } catch (e) {

@@ -95,7 +95,6 @@ export const OrderEqTable: React.FC<OrderEqTableProps> = ({ orderEqRows, edit, o
               <TableCell align="right">本番</TableCell>
               <TableCell align="right">日数</TableCell>
               <TableCell align="right">小計金額</TableCell>
-              <TableCell align="left">警告</TableCell>
               {/* <TableCell /> */}
             </TableRow>
           </TableHead>
@@ -140,17 +139,22 @@ export const OrderEqTable: React.FC<OrderEqTableProps> = ({ orderEqRows, edit, o
                   </Button>
                 </TableCell>
                 <TableCell align="left">{row.sagyoStaNam}</TableCell>
-                <TableCell align="left">{row.shukoDat && toISOString(new Date(row.shukoDat))}</TableCell>
-                <TableCell align="left">{row.nyukoDat && toISOString(new Date(row.nyukoDat))}</TableCell>
+                <TableCell align="left">
+                  {`K ${row.kicsShukoDat ? toISOString(new Date(row.kicsShukoDat)) : 'ー'}`}
+                  <br />
+                  {`Y ${row.yardShukoDat ? toISOString(new Date(row.yardShukoDat)) : 'ー'}`}
+                </TableCell>
+                <TableCell align="left">
+                  {`K ${row.kicsNyukoDat ? toISOString(new Date(row.kicsNyukoDat)) : 'ー'}`}
+                  <br />
+                  {`Y ${row.yardNyukoDat ? toISOString(new Date(row.yardNyukoDat)) : 'ー'}`}
+                </TableCell>
                 <TableCell align="right">{row.sikomibi}</TableCell>
                 <TableCell align="right">{row.rihabi}</TableCell>
                 <TableCell align="right">{row.genebi}</TableCell>
                 <TableCell align="right">{row.honbanbi}</TableCell>
                 <TableCell align="right">{row.juchuHonbanbiCalcQty}</TableCell>
                 <TableCell align="right">{row.shokei && `¥${row.shokei.toLocaleString()}`}</TableCell>
-                <TableCell align="left" color="red">
-                  {row.keikoku}
-                </TableCell>
                 {/* <TableCell>
                   <Box display={'flex'}>
                     <IconButton onClick={() => moveRow(index, -1)} disabled={index === 0}>

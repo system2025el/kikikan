@@ -9,7 +9,7 @@ import { JuchuKizaiNyushuko } from '../types/t-juchu-kizai-nyushuko-type';
  * @param juchuKizaiHeadId 受注機材ヘッダーid
  * @returns 受注機材入出庫データ
  */
-export const SelectJuchuKizaiNyushuko = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
+export const selectJuchuKizaiNyushuko = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
   try {
     return await supabase
       .schema(SCHEMA)
@@ -27,7 +27,7 @@ export const SelectJuchuKizaiNyushuko = async (juchuHeadId: number, juchuKizaiHe
  * @param confirmData 受注機材入出庫確認データ
  * @returns
  */
-export const SelectJuchuKizaiNyushukoConfirm = async (data: {
+export const selectJuchuKizaiNyushukoConfirm = async (data: {
   juchu_head_id: number;
   juchu_kizai_head_id: number;
   nyushuko_shubetu_id: number;
@@ -55,7 +55,7 @@ export const SelectJuchuKizaiNyushukoConfirm = async (data: {
  * @param userNam ユーザー名
  * @returns
  */
-export const InsertJuchuKizaiNyushuko = async (data: JuchuKizaiNyushuko) => {
+export const insertJuchuKizaiNyushuko = async (data: JuchuKizaiNyushuko) => {
   try {
     return await supabase.schema(SCHEMA).from('t_juchu_kizai_nyushuko').insert(data);
   } catch (e) {
@@ -69,7 +69,7 @@ export const InsertJuchuKizaiNyushuko = async (data: JuchuKizaiNyushuko) => {
  * @param userNam ユーザー名
  * @returns
  */
-export const UpdateJuchuKizaiNyushuko = async (data: JuchuKizaiNyushuko) => {
+export const updateJuchuKizaiNyushuko = async (data: JuchuKizaiNyushuko) => {
   try {
     return await supabase
       .schema(SCHEMA)
@@ -84,7 +84,7 @@ export const UpdateJuchuKizaiNyushuko = async (data: JuchuKizaiNyushuko) => {
   }
 };
 
-export const DeleteJchuKizaiNyushuko = async (data: {
+export const deleteJchuKizaiNyushuko = async (data: {
   juchu_head_id: number;
   juchu_kizai_head_id: number;
   nyushuko_shubetu_id: number;

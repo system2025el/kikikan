@@ -19,7 +19,7 @@ import {
 import { addDays, addMonths, set, subDays, subMonths } from 'date-fns';
 import dayjs, { Dayjs } from 'dayjs';
 import { useEffect, useRef, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 
 import { Calendar } from '../../_ui/date';
 import { Loading } from '../../_ui/loading';
@@ -104,7 +104,9 @@ export const Stock = (props: { bumons: Bumon[] }) => {
    */
   const onSubmit = async (data: { bumonId: number }) => {
     setIsLoading(true);
+    console.log(data.bumonId);
     const newEqList = await getEqData(data.bumonId);
+    console.log(newEqList);
     const kizaiIds = newEqList.map((data) => data.kizaiId);
     const newEqStockList: StockTableValues[][] = [];
     for (const kizaiId of kizaiIds) {
@@ -172,13 +174,19 @@ export const Stock = (props: { bumons: Bumon[] }) => {
         <form onSubmit={handleSubmit(onSubmit)}>
           <Grid2 container alignItems="center" p={2} spacing={2}>
             <Typography>部門</Typography>
-            <Select defaultValue={props.bumons[0].bumonId} sx={{ minWidth: 250 }}>
-              {props.bumons.map((d) => (
-                <MenuItem key={d.bumonId} value={d.bumonId}>
-                  {d.bumonNam}
-                </MenuItem>
-              ))}
-            </Select>
+            <Controller
+              name="bumonId"
+              control={control}
+              render={({ field }) => (
+                <Select {...field} defaultValue={props.bumons[0].bumonId} sx={{ minWidth: 250 }}>
+                  {props.bumons.map((d) => (
+                    <MenuItem key={d.bumonId} value={d.bumonId}>
+                      {d.bumonNam}
+                    </MenuItem>
+                  ))}
+                </Select>
+              )}
+            />
             <Button type="submit">
               <SearchIcon fontSize="small" />
               検索
@@ -198,13 +206,13 @@ export const Stock = (props: { bumons: Bumon[] }) => {
                 md: '40%',
                 lg: 'min-content',
               },
-              mt: '62.5px',
+              mt: 5.8,
             }}
           >
             <EqTable eqList={eqList} ref={leftRef} />
           </Box>
           <Box overflow="auto" sx={{ width: { xs: '60%', sm: '60%', md: 'auto' } }}>
-            <Box display="flex" my={2}>
+            <Box display="flex" my={1}>
               <Box display={'flex'} alignItems={'end'} mr={2}>
                 <Typography fontSize={'small'}>在庫数</Typography>
               </Box>

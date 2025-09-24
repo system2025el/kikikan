@@ -37,7 +37,16 @@ export const BackButton = ({ sx, label }: { sx?: object; label: string }) => {
  */
 export const CloseMasterDialogButton = ({ handleCloseDialog }: { handleCloseDialog: () => void }) => {
   return (
-    <IconButton sx={{ bgcolor: 'primary.main', color: 'white' }} onClick={() => handleCloseDialog()}>
+    <IconButton
+      sx={{
+        bgcolor: 'primary.main',
+        color: 'white',
+        '&:hover': {
+          backgroundColor: 'primary.dark',
+        },
+      }}
+      onClick={() => handleCloseDialog()}
+    >
       <CloseIcon fontSize="small" />
     </IconButton>
   );

@@ -5,9 +5,8 @@ import { grey } from '@mui/material/colors';
 import { useEffect, useState } from 'react';
 
 import { toISOStringYearMonthDay } from '@/app/(main)/_lib/date-conversion';
+import { getRange } from '@/app/(main)/_lib/date-funcs';
 import { RSuiteDateRangePicker } from '@/app/(main)/_ui/date';
-import { Loading } from '@/app/(main)/_ui/loading';
-import { getRange } from '@/app/(main)/(eq-order-detail)/_lib/datefuncs';
 
 import { JuchuKizaiHonbanbiValues } from '../_lib/types';
 
@@ -445,7 +444,7 @@ export const DateSelectDialog = ({
               </Grid2>
               <Grid2 size={3} display={'flex'} alignItems={'center'} maxWidth={100}>
                 <TextField
-                  value={data.juchuHonbanbiAddQty}
+                  value={data.juchuHonbanbiAddQty ?? 0}
                   onChange={(e) => handleHonbanAddChange(index, Number(e.target.value))}
                   type="number"
                   sx={{

@@ -29,10 +29,10 @@ import { use, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
-import { DeleteLock } from '@/app/_lib/db/tables/t-lock';
+import { deleteLock } from '@/app/_lib/db/tables/t-lock';
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import { toISOString } from '@/app/(main)/_lib/date-conversion';
-import { AddLock, GetLock } from '@/app/(main)/_lib/funcs';
+import { addLock, getLock } from '@/app/(main)/_lib/funcs';
 import { LockValues } from '@/app/(main)/_lib/types';
 import DateX, { RSuiteDateRangePicker, TestDate } from '@/app/(main)/_ui/date';
 import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
@@ -41,9 +41,9 @@ import { SelectTable } from '@/app/(main)/_ui/table';
 import { equipmentRows, users, vehicleHeaders, vehicleRows } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/data';
 
 import { useUnsavedChangesWarning } from '../../../../_lib/hook';
-import { AddJuchuHead, CopyJuchuHead, GetJuchuHead, GetMaxId, UpdJuchuHead } from '../_lib/funcs';
+import { addJuchuHead, copyJuchuHead, getJuchuHead, getMaxId, updJuchuHead } from '../_lib/funcs';
 import { EqTableValues, KokyakuValues, OrderSchema, OrderValues, VehicleTableValues } from '../_lib/types';
-import { SaveAlertDialog, SelectAlertDialog } from './caveat-dialog';
+import { CopyConfirmDialog, SaveAlertDialog, SelectAlertDialog } from './caveat-dialog';
 import { CustomerSelectionDialog } from './customer-selection';
 import { LocationSelectDialog } from './location-selection';
 import { OrderEqTable, OrderVehicleTable } from './order-table';
@@ -77,6 +77,8 @@ export const Order = (props: {
   const [dirtyOpen, setDirtyOpen] = useState(false);
   // 機材選択ダイアログを出すかどうか
   const [selectOpen, setSelectOpen] = useState(false);
+  // コピーダイアログ
+  const [copyOpen, setCopyOpen] = useState(false);
   // 機材テーブル選択行
   const [selectEq, setSelectEq] = useState<number[]>([]);
   // 車両テーブル選択行
@@ -102,8 +104,8 @@ export const Order = (props: {
     clearErrors,
     formState: { isDirty, errors, defaultValues },
   } = useForm({
-    mode: 'onSubmit',
-    reValidateMode: 'onBlur',
+    mode: 'onChange',
+    reValidateMode: 'onChange',
     defaultValues: {
       juchuHeadId: props.juchuHeadData.juchuHeadId,
       delFlg: props.juchuHeadData.delFlg,
@@ -141,11 +143,11 @@ export const Order = (props: {
     if (getValues('juchuHeadId') === 0) return;
     const asyncProcess = async () => {
       setIsLoading(true);
-      const lockData = await GetLock(1, props.juchuHeadData.juchuHeadId);
+      const lockData = await getLock(1, props.juchuHeadData.juchuHeadId);
       setLockData(lockData);
       if (props.edit && lockData === null) {
-        await AddLock(1, props.juchuHeadData.juchuHeadId, user.name);
-        const newLockData = await GetLock(1, props.juchuHeadData.juchuHeadId);
+        await addLock(1, props.juchuHeadData.juchuHeadId, user.name);
+        const newLockData = await getLock(1, props.juchuHeadData.juchuHeadId);
         setLockData(newLockData);
       } else if (props.edit && lockData !== null && lockData.addUser !== user.name) {
         setEdit(false);
@@ -181,13 +183,13 @@ export const Order = (props: {
 
     // 新規
     if (data.juchuHeadId === 0) {
-      const maxId = await GetMaxId();
+      const maxId = await getMaxId();
       const newOrderId = maxId ? maxId.juchu_head_id + 1 : 1;
-      await AddJuchuHead(newOrderId, data, user.name);
+      await addJuchuHead(newOrderId, data, user.name);
       redirect(`/order/${newOrderId}/edit`);
       // 更新
     } else {
-      const update = await UpdJuchuHead(data);
+      const update = await updJuchuHead(data);
       reset(data);
       setSave(true);
       setIsLoading(false);
@@ -204,17 +206,17 @@ export const Order = (props: {
         return;
       }
 
-      await DeleteLock(1, props.juchuHeadData.juchuHeadId);
+      await deleteLock(1, props.juchuHeadData.juchuHeadId);
       setLockData(null);
       setEdit(false);
       // 閲覧→編集
     } else {
       if (!user) return;
-      const lockData = await GetLock(1, props.juchuHeadData.juchuHeadId);
+      const lockData = await getLock(1, props.juchuHeadData.juchuHeadId);
       setLockData(lockData);
       if (lockData === null) {
-        await AddLock(1, props.juchuHeadData.juchuHeadId, user.name);
-        const newLockData = await GetLock(1, props.juchuHeadData.juchuHeadId);
+        await addLock(1, props.juchuHeadData.juchuHeadId, user.name);
+        const newLockData = await getLock(1, props.juchuHeadData.juchuHeadId);
         setLockData(newLockData);
         setEdit(true);
       } else if (lockData !== null && lockData.addUser === user.name) {
@@ -225,26 +227,12 @@ export const Order = (props: {
 
   // コピーボタン押下
   const handleCopy = async () => {
-    if (!save) {
+    if (!save || isDirty) {
       setSaveOpen(true);
       return;
     }
 
-    if (!isDirty) {
-      const maxId = await GetMaxId();
-      if (maxId) {
-        const newOrderId = maxId.juchu_head_id + 1;
-        const currentData = await GetJuchuHead(props.juchuHeadData.juchuHeadId);
-        if (user && currentData) {
-          await CopyJuchuHead(newOrderId, currentData, user.name);
-        }
-        window.open(`/order/${newOrderId}/${'edit'}`);
-      } else {
-        console.error('Failed to retrieve max order ID');
-      }
-    } else {
-      setDirtyOpen(true);
-    }
+    setCopyOpen(true);
   };
 
   // 機材入力ボタン押下
@@ -255,7 +243,7 @@ export const Order = (props: {
     }
 
     if (!isDirty) {
-      await DeleteLock(1, props.juchuHeadData.juchuHeadId);
+      await deleteLock(1, props.juchuHeadData.juchuHeadId);
       router.push(`/eq-main-order-detail/${props.juchuHeadData.juchuHeadId}/0/edit`);
     } else {
       setPath(`/eq-main-order-detail/${props.juchuHeadData.juchuHeadId}/0/edit`);
@@ -274,7 +262,7 @@ export const Order = (props: {
       const selectData = eqHeaderList.find((d) => d.juchuKizaiHeadId === selectEq[0]);
       if (selectData && selectData.juchuKizaiHeadKbn === 1) {
         if (!isDirty) {
-          await DeleteLock(1, props.juchuHeadData.juchuHeadId);
+          await deleteLock(1, props.juchuHeadData.juchuHeadId);
           router.push(
             `/eq-return-order-detail/${props.juchuHeadData.juchuHeadId}/0/${selectData.juchuKizaiHeadId}/edit`
           );
@@ -301,7 +289,7 @@ export const Order = (props: {
       const selectData = eqHeaderList.find((d) => d.juchuKizaiHeadId === selectEq[0]);
       if (selectData && selectData.juchuKizaiHeadKbn === 1) {
         if (!isDirty) {
-          await DeleteLock(1, props.juchuHeadData.juchuHeadId);
+          await deleteLock(1, props.juchuHeadData.juchuHeadId);
           router.push(`/eq-keep-order-detail/${props.juchuHeadData.juchuHeadId}/0/${selectData.juchuKizaiHeadId}/edit`);
         } else {
           setPath(`/eq-keep-order-detail/${props.juchuHeadData.juchuHeadId}/0/${selectData.juchuKizaiHeadId}/edit`);
@@ -323,7 +311,7 @@ export const Order = (props: {
     }
 
     if (!isDirty) {
-      await DeleteLock(1, props.juchuHeadData.juchuHeadId);
+      await deleteLock(1, props.juchuHeadData.juchuHeadId);
       router.push('/order/vehicle-order-detail');
     } else {
       setPath(`/vehicle-order-detail/${props.juchuHeadData.juchuHeadId}/0/edit`);
@@ -331,17 +319,20 @@ export const Order = (props: {
     }
   };
 
-  // isDirtyDialogの破棄、戻るボタン押下
+  /**
+   * 破棄ダイアログボタン押下
+   * @param result ボタン押下結果
+   */
   const handleResultDialog = async (result: boolean) => {
     if (result && path) {
-      await DeleteLock(1, props.juchuHeadData.juchuHeadId);
+      await deleteLock(1, props.juchuHeadData.juchuHeadId);
       setLockData(null);
       setIsDirty(false);
       setIsSave(true);
       router.push(path);
       setPath(null);
     } else if (result && !path) {
-      await DeleteLock(1, props.juchuHeadData.juchuHeadId);
+      await deleteLock(1, props.juchuHeadData.juchuHeadId);
       setLockData(null);
       setEdit(false);
       reset();
@@ -349,6 +340,29 @@ export const Order = (props: {
     } else {
       setDirtyOpen(false);
       setPath(null);
+    }
+  };
+
+  /**
+   * コピーダイアログボタン押下
+   * @param result ボタン押下結果
+   */
+  const handleCopyResultDialog = async (result: boolean) => {
+    if (result) {
+      const maxId = await getMaxId();
+      if (maxId) {
+        const newOrderId = maxId.juchu_head_id + 1;
+        const currentData = await getJuchuHead(props.juchuHeadData.juchuHeadId);
+        if (user && currentData) {
+          await copyJuchuHead(newOrderId, currentData, user.name);
+        }
+        window.open(`/order/${newOrderId}/${'edit'}`);
+        setCopyOpen(false);
+      } else {
+        console.error('Failed to retrieve max order ID');
+      }
+    } else {
+      setCopyOpen(false);
     }
   };
 
@@ -401,7 +415,7 @@ export const Order = (props: {
 
   return (
     <Box>
-      <Box display={'flex'} justifyContent={'end'}>
+      <Box display={'flex'} justifyContent={'end'} mb={1}>
         {lockData !== null && lockData.addUser !== user?.name && (
           <Grid2 container alignItems={'center'} spacing={2} px={4}>
             <Typography>{lockData.addDat && toISOString(new Date(lockData.addDat))}</Typography>
@@ -436,58 +450,56 @@ export const Order = (props: {
                 <Delete fontSize="small" />
                 伝票削除
               </Button>
-              <Button disabled={!edit} onClick={handleCopy}>
+              {/* <Button disabled={!edit} onClick={handleCopy}>
                 <ContentCopyIcon fontSize="small" />
                 コピー
-              </Button>
+              </Button> */}
             </Grid2>
           </Grid2>
           <Divider />
           <Grid2 container spacing={{ xs: 0, sm: 0, md: 2 }}>
             <Grid2 size={{ xs: 12, sm: 12, md: 6 }}>
-              <Grid2 container margin={2} spacing={2}>
-                <Grid2 display="flex" direction="row" alignItems="center">
-                  <Typography marginRight={5} whiteSpace="nowrap">
-                    受注番号
-                  </Typography>
-                  {getValues('juchuHeadId') === 0 ? (
-                    <TextField slotProps={{ input: { readOnly: true } }}></TextField>
-                  ) : (
-                    <TextFieldElement
-                      name="juchuHeadId"
-                      control={control}
-                      type="number"
-                      sx={{
-                        '& input[type=number]::-webkit-inner-spin-button': {
-                          WebkitAppearance: 'none',
-                          margin: 0,
-                        },
-                      }}
-                      slotProps={{ input: { readOnly: true } }}
-                    ></TextFieldElement>
-                  )}
-                </Grid2>
-                <Grid2 display="flex" direction="row" alignItems="center">
-                  <Typography mr={2}>受注ステータス</Typography>
-                  <FormControl size="small" sx={{ width: 120 }}>
-                    <Controller
-                      name="juchuSts"
-                      control={control}
-                      render={({ field }) => (
-                        <Select {...field} disabled={!edit}>
-                          <MenuItem value={0}>入力中</MenuItem>
-                          <MenuItem value={1}>仮受注</MenuItem>
-                          <MenuItem value={2}>処理中</MenuItem>
-                          <MenuItem value={3}>確定</MenuItem>
-                          <MenuItem value={4}>貸出済み</MenuItem>
-                          <MenuItem value={5}>返却済み</MenuItem>
-                          <MenuItem value={9}>受注キャンセル</MenuItem>
-                        </Select>
-                      )}
-                    />
-                  </FormControl>
-                </Grid2>
-              </Grid2>
+              <Box sx={styles.container}>
+                <Typography marginRight={5} whiteSpace="nowrap">
+                  受注番号
+                </Typography>
+                {getValues('juchuHeadId') === 0 ? (
+                  <TextField slotProps={{ input: { readOnly: true } }}></TextField>
+                ) : (
+                  <TextFieldElement
+                    name="juchuHeadId"
+                    control={control}
+                    type="number"
+                    sx={{
+                      '& input[type=number]::-webkit-inner-spin-button': {
+                        WebkitAppearance: 'none',
+                        margin: 0,
+                      },
+                    }}
+                    slotProps={{ input: { readOnly: true } }}
+                  ></TextFieldElement>
+                )}
+              </Box>
+              <Box sx={styles.container}>
+                <Typography mr={2}>受注ステータス</Typography>
+                <FormControl size="small" sx={{ width: 150 }}>
+                  <Controller
+                    name="juchuSts"
+                    control={control}
+                    render={({ field }) => (
+                      <Select {...field} disabled={!edit}>
+                        <MenuItem value={0}>入力中</MenuItem>
+                        <MenuItem value={1}>仮受注</MenuItem>
+                        <MenuItem value={2}>処理中</MenuItem>
+                        <MenuItem value={3}>確定</MenuItem>
+                        <MenuItem value={4}>貸出済み</MenuItem>
+                        <MenuItem value={5}>返却済み</MenuItem>
+                        <MenuItem value={9}>受注キャンセル</MenuItem>
+                      </Select>
+                    )}
+                  />
+                </FormControl>
+              </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={7}>受注日</Typography>
                 <Controller
@@ -583,25 +595,20 @@ export const Order = (props: {
                 <TextFieldElement name="kokyakuTantoNam" control={control} disabled={!edit}></TextFieldElement>
               </Box>
               <Box sx={styles.container}>
-                <Typography marginRight={9}>メモ</Typography>
-                <TextFieldElement name="mem" control={control} disabled={!edit}></TextFieldElement>
-              </Box>
-              <Box sx={styles.container}>
                 <Typography marginRight={7}>値引き</Typography>
                 <Controller
                   name="nebikiAmt"
                   control={control}
-                  render={({ field }) => (
+                  render={({ field, fieldState }) => (
                     <TextField
                       {...field}
                       value={
                         isEditing
                           ? (field.value ?? '')
-                          : field.value !== null && !isNaN(field.value)
+                          : field.value !== null && !isNaN(Number(field.value))
                             ? `¥${Number(field.value).toLocaleString()}`
                             : '¥0'
                       }
-                      type="text"
                       onFocus={(e) => {
                         setIsEditing(true);
                         const rawValue = e.target.value.replace(/[¥,]/g, '');
@@ -621,10 +628,23 @@ export const Order = (props: {
                         }
                       }}
                       sx={{
+                        '.MuiOutlinedInput-notchedOutline': {
+                          borderColor: fieldState.error?.message && 'red',
+                        },
+                        '.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                          borderColor: fieldState.error?.message && 'red',
+                        },
+                        '&:hover .MuiOutlinedInput-notchedOutline': {
+                          borderColor: fieldState.error?.message && 'red',
+                        },
                         '& .MuiInputBase-input': {
                           textAlign: 'right',
                         },
+                        '.MuiFormHelperText-root': {
+                          color: 'red',
+                        },
                       }}
+                      helperText={fieldState.error?.message}
                       disabled={!edit}
                     />
                   )}
@@ -648,6 +668,28 @@ export const Order = (props: {
               </Box>
             </Grid2>
           </Grid2>
+          <Box display={'flex'} alignItems={'center'} p={2}>
+            <Typography marginRight={2}>メモ</Typography>
+            <TextFieldElement
+              name="mem"
+              control={control}
+              multiline
+              rows={3}
+              fullWidth
+              disabled={!edit}
+              // sx={{
+              //   '& .MuiInputBase-root': {
+              //     resize: 'both',
+              //     overflow: 'auto',
+              //     alignItems: 'flex-start',
+              //   },
+              //   '& .MuiInputBase-inputMultiline': {
+              //     textAlign: 'left',
+              //     paddingTop: '8px',
+              //   },
+              // }}
+            ></TextFieldElement>
+          </Box>
         </form>
         {/* 公演場所検索ダイアログ */}
         <Dialog open={locationDialogOpen} fullScreen>
@@ -723,6 +765,10 @@ export const Order = (props: {
                 <AddIcon fontSize="small" />
                 キープ入力
               </Button>
+              <Button disabled={!edit}>
+                <ContentCopyIcon fontSize="small" />
+                コピー
+              </Button>
               <Button
                 color="error"
                 onClick={(e) => {
@@ -788,6 +834,7 @@ export const Order = (props: {
       <SaveAlertDialog open={saveOpen} onClick={() => setSaveOpen(false)} />
       <IsDirtyAlertDialog open={dirtyOpen} onClick={handleResultDialog} />
       <SelectAlertDialog open={selectOpen} onClick={() => setSelectOpen(false)} />
+      <CopyConfirmDialog open={copyOpen} onClick={handleCopyResultDialog} />
     </Box>
   );
 };

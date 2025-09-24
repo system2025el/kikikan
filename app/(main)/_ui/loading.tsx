@@ -10,17 +10,21 @@ export const Loading = () => {
   );
 };
 
+/**
+ *
+ * @returns サイドバー以外の上にローディングを表示するコンポーネント
+ */
 export const LoadingOverlay = () => {
   return (
     <Box
       sx={{
-        position: 'absolute',
+        position: 'fixed',
         top: 0,
         left: 0,
-        width: '100%',
-        height: '100%',
+        width: '100vw',
+        height: '100vh',
         backgroundColor: 'rgba(255,255,255,0.6)',
-        zIndex: 10,
+        zIndex: 1200, // drawer以上appbar未満
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',

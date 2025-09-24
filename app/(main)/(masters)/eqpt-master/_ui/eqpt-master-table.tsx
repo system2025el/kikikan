@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { MuiTablePagination } from '../../../_ui/table-pagination';
-import { NEW_MASTER_ID, ROWS_PER_MASTER_TABLE_PAGE } from '../../_lib/constants';
+import { FAKE_NEW_ID, ROWS_PER_MASTER_TABLE_PAGE } from '../../_lib/constants';
 import { MasterTableOfEqpt } from '../../_ui/tables';
 import { eqptMHeader } from '../_lib/datas';
 import { getFilteredEqpts } from '../_lib/funcs';
@@ -31,8 +31,8 @@ export const EqptMasterTable = ({
   /* テーブル1ページの行数 */
   const rowsPerPage = ROWS_PER_MASTER_TABLE_PAGE;
   /* useState ------------------------------------------------ */
-  /* ダイアログ開く機材のID、閉じるとき、未選択でNEW_MASTER_IDとする */
-  const [openId, setOpenID] = useState<number>(NEW_MASTER_ID);
+  /* ダイアログ開く機材のID、閉じるとき、未選択でFAKE_NEW_IDとする */
+  const [openId, setOpenID] = useState<number>(FAKE_NEW_ID);
   /* 詳細ダイアログの開閉状態 */
   const [dialogOpen, setDialogOpen] = useState(false);
   /* 場所リスト */
@@ -66,7 +66,7 @@ export const EqptMasterTable = ({
 
   return (
     <Box>
-      <Typography pt={2} pl={2}>
+      <Typography pt={1} pl={2}>
         一覧
       </Typography>
       <Divider />
@@ -83,7 +83,7 @@ export const EqptMasterTable = ({
             </Typography>
           </Grid2>
           <Grid2>
-            <Button onClick={() => handleOpenDialog(NEW_MASTER_ID)}>
+            <Button onClick={() => handleOpenDialog(FAKE_NEW_ID)}>
               <AddIcon fontSize="small" />
               新規
             </Button>
@@ -99,9 +99,9 @@ export const EqptMasterTable = ({
           <MasterTableOfEqpt
             headers={eqptMHeader}
             datas={theEqpts.map((l) => ({
+              ...l,
               id: l.kizaiId,
               name: l.kizaiNam,
-              ...l,
             }))}
             page={page}
             rowsPerPage={rowsPerPage}

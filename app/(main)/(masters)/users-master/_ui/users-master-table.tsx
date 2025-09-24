@@ -22,7 +22,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { MuiTablePagination } from '../../../_ui/table-pagination';
-import { NEW_MASTER_ID, ROWS_PER_MASTER_TABLE_PAGE } from '../../_lib/constants';
+import { FAKE_NEW_ID, ROWS_PER_MASTER_TABLE_PAGE } from '../../_lib/constants';
 import { MasterTable } from '../../_ui/tables';
 import { mMHeader } from '../_lib/data';
 import { getFilteredUsers } from '../_lib/funcs';
@@ -50,8 +50,8 @@ export const UserssMasterTable = ({
   const rowsPerPage = ROWS_PER_MASTER_TABLE_PAGE;
   /* useState
    * -------------------------------------------------------- */
-  /* ダイアログ開く顧客のID、閉じるとき、未選択でNEW_MASTER_IDとする */
-  const [openId, setOpenID] = useState(NEW_MASTER_ID);
+  /* ダイアログ開く顧客のID、閉じるとき、未選択でFAKE_NEW_IDとする */
+  const [openId, setOpenID] = useState(FAKE_NEW_ID);
   /* 顧客詳細ダイアログの開閉状態 */
   const [dialogOpen, setDialogOpen] = useState(false);
   /* 担当者リスト */
@@ -85,7 +85,7 @@ export const UserssMasterTable = ({
 
   return (
     <Box>
-      <Typography pt={2} pl={2}>
+      <Typography pt={1} pl={2}>
         一覧
       </Typography>
       <Divider />
@@ -102,7 +102,7 @@ export const UserssMasterTable = ({
             </Typography>
           </Grid2>
           <Grid2>
-            <Button onClick={() => handleOpenDialog(NEW_MASTER_ID)}>
+            <Button onClick={() => handleOpenDialog(FAKE_NEW_ID)}>
               <AddIcon fontSize="small" />
               新規
             </Button>

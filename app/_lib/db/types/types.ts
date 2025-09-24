@@ -1051,6 +1051,47 @@ export type Database = {
         };
         Relationships: [];
       };
+      t_juchu_ctn_meisai: {
+        Row: {
+          juchu_head_id: number;
+          juchu_kizai_head_id: number;
+          juchu_kizai_meisai_id: number;
+          kizai_id: number;
+          plan_kizai_qty: number | null;
+          shozoku_id: number | null;
+          mem: string | null;
+          add_dat: string | null;
+          add_user: string | null;
+          upd_dat: string | null;
+          upd_user: string | null;
+        };
+        Insert: {
+          juchu_head_id: number;
+          juchu_kizai_head_id: number;
+          juchu_kizai_meisai_id: number;
+          kizai_id: number;
+          plan_kizai_qty?: number | null;
+          shozoku_id?: number | null;
+          mem?: string | null;
+          add_dat?: string | null;
+          add_user?: string | null;
+          upd_dat?: string | null;
+          upd_user?: string | null;
+        };
+        Update: {
+          juchu_head_id?: number;
+          juchu_kizai_head_id?: number;
+          juchu_kizai_meisai_id?: number;
+          kizai_id?: number;
+          plan_kizai_qty?: number | null;
+          shozoku_id?: number | null;
+          mem?: string | null;
+          add_dat?: string | null;
+          add_user?: string | null;
+          upd_dat?: string | null;
+          upd_user?: string | null;
+        };
+      };
       t_juchu_head: {
         Row: {
           add_dat: string | null;
@@ -2063,12 +2104,14 @@ export type Database = {
           keikoku: string | null;
           mem: string | null;
           nebiki_amt: number | null;
-          nyuko_dat: string | null;
+          kics_nyuko_dat: string | null;
+          yard_nyuko_dat: string | null;
           oya_juchu_kizai_head_id: number | null;
           rihabi: number | null;
           sagyo_sts_nam: string | null;
           shokei: number | null;
-          shuko_dat: string | null;
+          kics_shuko_dat: string | null;
+          yard_shuko_dat: string | null;
           sikomibi: number | null;
         };
         Relationships: [];
@@ -2184,6 +2227,42 @@ export type Database = {
           kizai_id: number | null;
           kizai_nam: string | null;
           kizai_qty: number | null;
+        };
+        Relationships: [];
+      };
+      v_mitu_kizai: {
+        Row: {
+          juchu_head_id: number | null;
+          juchu_honbanbi_calc_qty: number | null;
+          juchu_kizai_head_id: number | null;
+          kizai_nam: string | null;
+          kizai_tanka_amt: number | null;
+          plan_kizai_qty: number | null;
+        };
+        Relationships: [];
+      };
+      v_mitu_kizai_issiki: {
+        Row: {
+          juchu_head_id: number | null;
+          juchu_honbanbi_calc_qty: number | null;
+          juchu_kizai_head_id: number | null;
+          kizai_nam: string | null;
+          kizai_tanka_amt: number | null;
+          plan_kizai_qty: number | null;
+        };
+        Relationships: [];
+      };
+      v_mitu_lst: {
+        Row: {
+          juchu_head_id: number | null;
+          koen_nam: string | null;
+          kokyaku_nam: string | null;
+          mitu_dat: string | null;
+          mitu_head_id: number | null;
+          mitu_head_nam: string | null;
+          mitu_sts: number | null;
+          nyuryoku_user: string | null;
+          sts_nam: string | null;
         };
         Relationships: [];
       };

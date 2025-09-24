@@ -10,7 +10,7 @@ import { MKoenbashoDBValues } from '../types/m-koenbasho-type';
  * @param query 検索キーワード
  * @returns {Promise<LocsDialogValues[]>} 公演場所マスタテーブルに表示するデータ（ 検索キーワードが空の場合は全て ）
  */
-export const SelectFilteredLocs = async (query: string) => {
+export const selectFilteredLocs = async (query: string) => {
   const builder = supabase
     .schema(SCHEMA)
     .from('m_koenbasho')
@@ -55,16 +55,16 @@ export const selectOneLoc = async (id: number) => {
  */
 export const insertNewLoc = async (data: LocsMasterDialogValues) => {
   const query = `
-    INSERT INTO m_koenbasho (
+    INSERT INTO ${SCHEMA}.m_koenbasho (
       koenbasho_id, koenbasho_nam, kana, del_flg, dsp_ord_num,
       adr_post, adr_shozai, adr_tatemono, adr_sonota,
       tel, tel_mobile, fax, mail,
       mem, dsp_flg, add_dat, add_user
     )
     VALUES (
-      (SELECT coalesce(max(koenbasho_id),0) + 1 FROM m_koenbasho),
+      (SELECT coalesce(max(koenbasho_id),0) + 1 FROM ${SCHEMA}.m_koenbasho),
       $1, $2, $3,
-      (SELECT coalesce(max(dsp_ord_num),0) + 1 FROM m_koenbasho),
+      (SELECT coalesce(max(dsp_ord_num),0) + 1 FROM ${SCHEMA}.m_koenbasho),
       $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15
     );
   `;
@@ -87,7 +87,6 @@ export const insertNewLoc = async (data: LocsMasterDialogValues) => {
     'shigasan',
   ];
   try {
-    await pool.query(` SET search_path TO ${SCHEMA};`);
     await pool.query(query, values);
   } catch (e) {
     throw e;

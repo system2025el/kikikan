@@ -1,7 +1,6 @@
 'use client';
 
 import Delete from '@mui/icons-material/Delete';
-import EditNoteIcon from '@mui/icons-material/EditNote';
 import {
   Box,
   Button,
@@ -27,6 +26,7 @@ import { Dayjs } from 'dayjs';
 import React, { useRef, useState } from 'react';
 
 import { toISOStringMonthDay, toISOStringYearMonthDay } from '@/app/(main)/_lib/date-conversion';
+import { MemoTooltip } from '@/app/(main)/(eq-order-detail)/_ui/memo-tooltip';
 import { getStockRowBackgroundColor } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_lib/colorselect';
 import {
   JuchuKizaiHonbanbiValues,
@@ -221,7 +221,7 @@ export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({
               sx={{ position: 'sticky', top: 0, zIndex: 2, bgcolor: 'red' }}
               colSpan={3}
             >
-              返却数(マイナス入力)
+              返却数
             </TableCell>
           </TableRow>
           <TableRow>
@@ -365,7 +365,7 @@ const ReturnEqTableRow = React.memo(
                 WebkitAppearance: 'none',
                 margin: 0,
               },
-              '.Mui-disabled': {
+              '.MuiInput-input.Mui-disabled': {
                 WebkitTextFillColor: 'red',
               },
             }}
@@ -412,7 +412,7 @@ const ReturnEqTableRow = React.memo(
                 WebkitAppearance: 'none',
                 margin: 0,
               },
-              '.Mui-disabled': {
+              '.MuiInput-input.Mui-disabled': {
                 WebkitTextFillColor: 'red',
               },
             }}
@@ -439,57 +439,6 @@ const ReturnEqTableRow = React.memo(
 );
 
 ReturnEqTableRow.displayName = 'ReturnEqTableRow';
-
-type MemoTooltipProps = {
-  name: string;
-  memo: string;
-  kizaiId: number;
-  handleMemoChange: (rowIndex: number, memo: string) => void;
-  disabled: boolean;
-};
-
-export const MemoTooltip = (props: MemoTooltipProps) => {
-  const [open, setOpen] = useState(false);
-  const [equipmentMemo, setEquipmentMemo] = useState(props.memo);
-
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
-
-  const handleSave = () => {
-    props.handleMemoChange(props.kizaiId, equipmentMemo);
-    handleClose();
-  };
-
-  return (
-    <>
-      <Tooltip title={equipmentMemo} arrow sx={{ p: 0 }}>
-        <IconButton onClick={handleOpen} sx={{ padding: 0 }} color={equipmentMemo ? 'primary' : 'default'}>
-          <EditNoteIcon fontSize="small" />
-        </IconButton>
-      </Tooltip>
-
-      <Dialog open={open} onClose={handleClose}>
-        <DialogTitle fontSize="medium">{props.name}</DialogTitle>
-        <DialogContent>
-          <TextField
-            value={equipmentMemo}
-            onChange={(e) => setEquipmentMemo(e.target.value)}
-            fullWidth
-            multiline
-            minRows={3}
-            disabled={props.disabled}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose}>キャンセル</Button>
-          <Button onClick={handleSave} variant="contained" disabled={props.disabled}>
-            保存
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </>
-  );
-};
 
 /* style
 ---------------------------------------------------------------------------------------------------- */

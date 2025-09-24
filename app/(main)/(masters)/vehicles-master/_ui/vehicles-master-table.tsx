@@ -6,7 +6,7 @@ import { JSX, useEffect, useMemo, useState } from 'react';
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { MuiTablePagination } from '../../../_ui/table-pagination';
-import { NEW_MASTER_ID, ROWS_PER_MASTER_TABLE_PAGE } from '../../_lib/constants';
+import { FAKE_NEW_ID, ROWS_PER_MASTER_TABLE_PAGE } from '../../_lib/constants';
 import { MasterTable } from '../../_ui/tables';
 import { vMHeader } from '../_lib/datas';
 import { getFilteredVehs } from '../_lib/funcs';
@@ -34,8 +34,8 @@ export const VehiclesMasterTable = ({
   /* テーブルの1ページのの行数 */
   const rowsPerPage = ROWS_PER_MASTER_TABLE_PAGE;
   /* useState ------------------------------- */
-  /* ダイアログ開く車両のID、閉じるとき、未選択でNEW_MASTER_IDとする */
-  const [openId, setOpenID] = useState<number>(NEW_MASTER_ID);
+  /* ダイアログ開く車両のID、閉じるとき、未選択でFAKE_NEW_IDとする */
+  const [openId, setOpenID] = useState<number>(FAKE_NEW_ID);
   /* 詳細ダイアログの開閉状態 */
   const [dialogOpen, setDialogOpen] = useState(false);
   /* 車両リスト */
@@ -68,7 +68,7 @@ export const VehiclesMasterTable = ({
 
   return (
     <Box>
-      <Typography pt={2} pl={2}>
+      <Typography pt={1} pl={2}>
         一覧
       </Typography>
       <Divider />
@@ -85,7 +85,7 @@ export const VehiclesMasterTable = ({
             </Typography>
           </Grid2>
           <Grid2>
-            <Button onClick={() => handleOpenDialog(NEW_MASTER_ID)}>
+            <Button onClick={() => handleOpenDialog(FAKE_NEW_ID)}>
               <AddIcon fontSize="small" />
               新規
             </Button>
@@ -100,7 +100,7 @@ export const VehiclesMasterTable = ({
         <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
           <MasterTable
             headers={vMHeader}
-            datas={theVehs!.map((l) => ({ id: l.sharyoId, name: l.sharyoNam, ...l }))}
+            datas={theVehs!.map((l) => ({ ...l, id: l.sharyoId, name: l.sharyoNam }))}
             handleOpenDialog={handleOpenDialog}
             page={page}
             rowsPerPage={rowsPerPage}

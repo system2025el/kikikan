@@ -29,14 +29,11 @@ type MenuItem = {
 const orderList: MenuItem[] = [
   { name: '新規受注', url: '/order/0/edit' },
   { name: '受注一覧', url: '/order-list' },
-  { name: '見積一覧', url: '/quotation-list' },
   { name: '在庫確認', url: '/stock' },
-  { name: '貸出状況', url: '/loan-situation' },
-];
-/* プリントアウトリスト */
-const printList: MenuItem[] = [
-  { name: '納品書', url: '/' },
-  { name: '請求書', url: '/' },
+  { name: '機材一覧', url: '/loan-situation' },
+  { name: '見積一覧', url: '/quotation-list' },
+  { name: '請求一覧', url: '/' },
+  { name: '請求状況一覧', url: '/' },
 ];
 /* マスタ管理リスト */
 const masterList: MenuItem[] = [
@@ -59,9 +56,9 @@ const masterList: MenuItem[] = [
 const settingList: MenuItem[] = [];
 /* 入出庫管理リスト */
 const stockIOList: MenuItem[] = [
-  { name: '出庫一覧', url: '/' },
-  { name: '入庫一覧', url: '/' },
-  { name: '移動一覧', url: '/' },
+  { name: '出庫', url: '/shuko-list' },
+  { name: '入庫', url: '/nyuko' },
+  { name: '移動', url: '/' },
   { name: 'Weeklyスケジュール', url: '/' },
 ];
 /* ログアウトリスト */
@@ -173,17 +170,17 @@ export default function NavLinks() {
           ))}
         </List>
       </Collapse>
-      {/* プリントアウト */}
-      <ListItemButton onClick={printClick}>
+      {/* 入出庫管理 */}
+      <ListItemButton onClick={stockIOClick}>
         <ListItemIcon>
           <StopSharpIcon />
         </ListItemIcon>
-        <ListItemText>プリントアウト</ListItemText>
-        {printOpen ? <ExpandLess /> : <ExpandMore />}
+        <ListItemText>入出庫管理</ListItemText>
+        {stockIOOpen ? <ExpandLess /> : <ExpandMore />}
       </ListItemButton>
-      <Collapse in={printOpen} timeout="auto" unmountOnExit>
-        <List component="div" disablePadding>
-          {printList.map((text) => (
+      <Collapse in={stockIOOpen} timeout="auto" unmountOnExit>
+        <List disablePadding>
+          {stockIOList.map((text) => (
             <ListItem
               key={text.name}
               disablePadding
@@ -260,34 +257,7 @@ export default function NavLinks() {
           ))}
         </List>
       </Collapse>
-      {/* 入出庫管理 */}
-      <ListItemButton onClick={stockIOClick}>
-        <ListItemIcon>
-          <StopSharpIcon />
-        </ListItemIcon>
-        <ListItemText>入出庫管理</ListItemText>
-        {stockIOOpen ? <ExpandLess /> : <ExpandMore />}
-      </ListItemButton>
-      {/* <Collapse in={stockIOOpen} timeout="auto" unmountOnExit>
-        <List disablePadding>
-          <ListSubheader>
-            <Box>出庫</Box>
-          </ListSubheader>
-          {stockIOList.map((text) => (
-            <ListItem
-              key={text.name}
-              disablePadding
-              sx={{
-                backgroundColor: isSelected(text.url) ? currentPgColor : undefined,
-              }}
-            >
-              <ListItemButton href={text.url} dense>
-                <ListItemText primary={text.name} sx={{ color: isSelected(text.url) ? 'primary.dark' : undefined, pl: 8 }} />
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </List>
-      </Collapse> */}
+
       {/* ログアウト */}
       {/* <ListItemButton onClick={loginClick}>
         <ListItemIcon>

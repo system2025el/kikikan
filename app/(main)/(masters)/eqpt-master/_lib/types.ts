@@ -1,21 +1,47 @@
 import { strict } from 'assert';
 import { number, z } from 'zod';
 
+import { validationMessages } from '@/app/(main)/_lib/validation-messages';
+
 // Schema
 export const EqptsMasterDialogSchema = z.object({
-  kizaiNam: z.string().max(100, { message: '100文字以内で入力してください' }).min(1, { message: '必須項目です' }),
+  kizaiNam: z
+    .string()
+    .max(100, { message: validationMessages.maxStringLength(100) })
+    .min(1, { message: validationMessages.required() }),
   sectionNum: z.number().nullable(),
   elNum: z.number().nullable(),
   delFlg: z.boolean().optional(),
   shozokuId: z.number({ message: '選択してください' }).min(1, { message: '選択してください' }),
-  bldCod: z.string().max(20, { message: '20文字以内で入力してください' }).nullish(),
-  tanaCod: z.string().max(20, { message: '20文字以内で入力してください' }).nullish(),
-  edaCod: z.string().max(20, { message: '20文字以内で入力してください' }).nullish(),
-  kizaiGrpCod: z.string().max(10, { message: '10文字以内で入力してください' }).nullish(),
+  bldCod: z
+    .string()
+    .max(20, { message: validationMessages.maxStringLength(20) })
+    .nullish(),
+  tanaCod: z
+    .string()
+    .max(20, { message: validationMessages.maxStringLength(20) })
+    .nullish(),
+  edaCod: z
+    .string()
+    .max(20, { message: validationMessages.maxStringLength(20) })
+    .nullish(),
+  kizaiGrpCod: z
+    .string()
+    .max(10, { message: validationMessages.maxStringLength(10) })
+    .nullish(),
   dspOrdNum: z.number().nullable(),
-  mem: z.string().max(200, { message: '200文字以内で入力してください' }).nullish(),
-  bumonId: z.number().max(100, { message: '100文字以内で入力してください' }).optional(),
-  shukeibumonId: z.number().max(100, { message: '100文字以内で入力してください' }).optional(),
+  mem: z
+    .string()
+    .max(200, { message: validationMessages.maxStringLength(200) })
+    .nullish(),
+  bumonId: z
+    .number()
+    .max(100, { message: validationMessages.maxStringLength(100) })
+    .optional(),
+  shukeibumonId: z
+    .number()
+    .max(100, { message: validationMessages.maxStringLength(100) })
+    .optional(),
   dspFlg: z.boolean().optional(),
   ctnFlg: z.boolean().optional(),
   defDatQty: z.number().nullable(),
@@ -73,18 +99,3 @@ export type EqptsMasterTableValues = {
 //   tblDspId: number;
 //   delFlg: boolean;
 // };
-
-/**
- * 機材選択ん使うタイプ
- */
-export type SelectedEqptsValues = {
-  kizaiId: number;
-  kizaiNam: string;
-  shozokuId: number;
-  shozokuNam: string;
-  kizaiGrpCod: string;
-  dspOrdNum: number;
-  regAmt: number;
-  rankAmt: number;
-  kizaiQty: number;
-};

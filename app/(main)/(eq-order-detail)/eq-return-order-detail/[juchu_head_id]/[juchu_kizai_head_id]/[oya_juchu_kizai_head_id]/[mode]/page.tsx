@@ -1,11 +1,10 @@
 import { subDays } from 'date-fns';
 
-import { GetNyukoDate, getRange, GetShukoDate } from '@/app/(main)/(eq-order-detail)/_lib/datefuncs';
+import { getNyukoDate, getRange, getShukoDate } from '@/app/(main)/_lib/date-funcs';
 import { StockTableValues } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_lib/types';
-import { GetJuchuHead } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/funcs';
 
-import { GetJuchuKizaiHead, GetJuchuKizaiNyushuko, GetStockList } from '../../../../../_lib/funcs';
-import { getJuchuHonbanbiQty, GetReturnJuchuKizaiHead, GetReturnJuchuKizaiMeisai } from './_lib/funcs';
+import { getDetailJuchuHead, getJuchuKizaiNyushuko, getStockList } from '../../../../../_lib/funcs';
+import { getJuchuHonbanbiQty, getReturnJuchuKizaiHead, getReturnJuchuKizaiMeisai } from './_lib/funcs';
 import { ReturnJuchuKizaiHeadValues, ReturnJuchuKizaiMeisaiValues } from './_lib/types';
 import { EquipmentReturnOrderDetail } from './_ui/equipment-return-order-detail';
 
@@ -23,18 +22,18 @@ const Page = async (props: {
   // 編集モード(edit:編集、view:閲覧)
   const edit = params.mode === 'edit' ? true : false;
   // 受注ヘッダーデータ
-  const juchuHeadData = await GetJuchuHead(params.juchu_head_id);
+  const juchuHeadData = await getDetailJuchuHead(params.juchu_head_id);
   // 親受注機材入出庫データ
-  const oyaJuchuKizaiNyushukoData = await GetJuchuKizaiNyushuko(params.juchu_head_id, params.oya_juchu_kizai_head_id);
+  const oyaJuchuKizaiNyushukoData = await getJuchuKizaiNyushuko(params.juchu_head_id, params.oya_juchu_kizai_head_id);
 
   if (!juchuHeadData || !oyaJuchuKizaiNyushukoData) {
     return <div>受注情報が見つかりません。</div>;
   }
 
   // 親出庫日
-  const oyaShukoDate = GetShukoDate(oyaJuchuKizaiNyushukoData.kicsShukoDat, oyaJuchuKizaiNyushukoData.yardShukoDat);
+  const oyaShukoDate = getShukoDate(oyaJuchuKizaiNyushukoData.kicsShukoDat, oyaJuchuKizaiNyushukoData.yardShukoDat);
   // 親入庫日
-  const oyaNyukoDate = GetNyukoDate(oyaJuchuKizaiNyushukoData.kicsNyukoDat, oyaJuchuKizaiNyushukoData.yardNyukoDat);
+  const oyaNyukoDate = getNyukoDate(oyaJuchuKizaiNyushukoData.kicsNyukoDat, oyaJuchuKizaiNyushukoData.yardNyukoDat);
 
   if (!oyaShukoDate || !oyaNyukoDate) {
     return <div>受注情報が見つかりません。</div>;
@@ -90,7 +89,7 @@ const Page = async (props: {
   } else {
     // 返却受注機材ヘッダーデータ
     console.time();
-    const returnJuchuKizaiHeadData = await GetReturnJuchuKizaiHead(params.juchu_head_id, params.juchu_kizai_head_id);
+    const returnJuchuKizaiHeadData = await getReturnJuchuKizaiHead(params.juchu_head_id, params.juchu_kizai_head_id);
     console.log('---------------------受注機材ヘッダー---------------------');
     console.timeEnd();
 
@@ -99,15 +98,16 @@ const Page = async (props: {
     }
     // 返却受注機材明細データ
     console.time();
-    const returnJuchuKizaiMeisaiData = await GetReturnJuchuKizaiMeisai(
+    const returnJuchuKizaiMeisaiData = await getReturnJuchuKizaiMeisai(
       params.juchu_head_id,
-      params.juchu_kizai_head_id
+      params.juchu_kizai_head_id,
+      params.oya_juchu_kizai_head_id
     );
     console.log('----------------------------受注機材明細---------------------------------');
     console.timeEnd();
 
     // 返却入庫日
-    const returnNyukoDate = GetNyukoDate(
+    const returnNyukoDate = getNyukoDate(
       returnJuchuKizaiHeadData.kicsNyukoDat && new Date(returnJuchuKizaiHeadData.kicsNyukoDat),
       returnJuchuKizaiHeadData.yardNyukoDat && new Date(returnJuchuKizaiHeadData.yardNyukoDat)
     );
@@ -121,7 +121,7 @@ const Page = async (props: {
     if (ids) {
       if (!returnNyukoDate) return <div>データに不備があります。</div>;
       for (let i = 0; i < ids.length; i++) {
-        const stock: StockTableValues[] = await GetStockList(
+        const stock: StockTableValues[] = await getStockList(
           returnJuchuKizaiHeadData?.juchuHeadId,
           returnJuchuKizaiHeadData?.juchuKizaiHeadId,
           ids[i],
