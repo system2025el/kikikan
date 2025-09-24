@@ -209,18 +209,6 @@ export const updateQuot = async (data: QuotHeadValues, user: string): Promise<nu
           }
         });
       });
-      if (insertMeisaiList.length > 0) {
-        await insertQuotMeisai(
-          insertMeisaiList.map(({ upd_dat, upd_user, ...rest }) => rest),
-          connection
-        );
-      }
-      if (updateMeisaiList.length > 0) {
-        await updateQuotMeisai(
-          updateMeisaiList.map(({ add_dat, add_user, ...rest }) => rest),
-          connection
-        );
-      }
 
       // 削除 ---------------------------------------------
       // meisaiのIDの組み合わせ比較
@@ -235,23 +223,23 @@ export const updateQuot = async (data: QuotHeadValues, user: string): Promise<nu
       }));
       console.log('フォームから来たやつ', formedMeisai);
 
-      const meisaisToDelete: {
+      const meisaiToDelete: {
         mitu_head_id: number;
         mitu_meisai_head_id: number;
         mitu_meisai_id: number;
       }[] = existingMeisaiIds.rows.filter(
-        (existing) =>
+        (ex) =>
           // incomingItemsの中に、existingとキーが完全一致するものが「一つも無い」(`!some`)場合にtrueを返す
           !formedMeisai.some(
-            (incoming) =>
-              existing.mitu_head_id === incoming.mitu_head_id &&
-              existing.mitu_meisai_head_id === incoming.mitu_meisai_head_id &&
-              existing.mitu_meisai_id === incoming.mitu_meisai_id
+            (f) =>
+              ex.mitu_head_id === f.mitu_head_id &&
+              ex.mitu_meisai_head_id === f.mitu_meisai_head_id &&
+              f.mitu_meisai_id === ex.mitu_meisai_id
           )
       );
       // 削除明細リストがあれば削除処理
-      if (meisaisToDelete.length > 0) {
-        await deleteQuotMeisai(meisaisToDelete, connection);
+      if (meisaiToDelete.length > 0) {
+        await deleteQuotMeisai(meisaiToDelete, connection);
       }
       // meisaiHeads
       const exHeads = Array.from(
@@ -274,6 +262,18 @@ export const updateQuot = async (data: QuotHeadValues, user: string): Promise<nu
       // 明細ヘッド削除処理
       if (HeadsToDelete.length > 0) {
         await deleteQuotMeisaiHeads(HeadsToDelete, connection);
+      }
+      if (insertMeisaiList.length > 0) {
+        await insertQuotMeisai(
+          insertMeisaiList.map(({ upd_dat, upd_user, ...rest }) => rest),
+          connection
+        );
+      }
+      if (updateMeisaiList.length > 0) {
+        await updateQuotMeisai(
+          updateMeisaiList.map(({ add_dat, add_user, ...rest }) => rest),
+          connection
+        );
       }
 
       await connection.query('COMMIT');
