@@ -90,3 +90,27 @@ export const selectQuotMeisaiHead = async (id: number) => {
     throw e;
   }
 };
+
+/**
+ * 明細ID合致するものをt_mitu_meisai_headから削除する関数
+ * @param ids 削除する明細ヘッダのIDの組み合わせの配列
+ */
+export const deleteQuotMeisaiHeads = async (
+  ids: {
+    mitu_head_id: number;
+    mitu_meisai_head_id: number;
+  }[],
+  connection: PoolClient
+) => {
+  const placeholders = ids.map((_, i) => `($${i * 2 + 1}, $${i * 2 + 2})`).join(', ');
+  const values = ids.flatMap((d) => [d.mitu_head_id, d.mitu_meisai_head_id]);
+
+  const query = `DELETE FROM ${SCHEMA}.t_mitu_meisai_head WHERE (mitu_head_id, mitu_meisai_head_id) IN (${placeholders})`;
+  console.log('☆☆☆☆☆', query, values);
+  try {
+    console.log('消したいやつ', ids);
+    await connection.query(query, values);
+  } catch (e) {
+    throw e;
+  }
+};

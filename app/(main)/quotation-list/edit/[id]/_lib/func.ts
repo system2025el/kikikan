@@ -5,8 +5,12 @@ import { revalidatePath } from 'next/cache';
 import pool from '@/app/_lib/db/postgres';
 import { SCHEMA } from '@/app/_lib/db/supabase';
 import { updateQuotHead } from '@/app/_lib/db/tables/t-mitu-head';
-import { insertQuotMeisai, updateQuotMeisai } from '@/app/_lib/db/tables/t-mitu-meisai';
-import { insertQuotMeisaiHead, updateQuoteMeisaiHead } from '@/app/_lib/db/tables/t-mitu-meisai-head';
+import { deleteQuotMeisai, insertQuotMeisai, updateQuotMeisai } from '@/app/_lib/db/tables/t-mitu-meisai';
+import {
+  deleteQuotMeisaiHeads,
+  insertQuotMeisaiHead,
+  updateQuoteMeisaiHead,
+} from '@/app/_lib/db/tables/t-mitu-meisai-head';
 import { MituHead } from '@/app/_lib/db/types/t-mitu-head-types';
 import { MituMeisai } from '@/app/_lib/db/types/t-mitu-meisai-type';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
@@ -113,6 +117,7 @@ export const updateQuot = async (data: QuotHeadValues, user: string): Promise<nu
       // 見積ヘッダ更新処理
       await updateQuotHead(quotHead, connection);
 
+      // 明細ヘッダ ------------------------------------------------
       // 明細ヘッドの最大IDを取得
       const headMaxIdResult = await connection.query(
         `SELECT MAX(mitu_meisai_head_id) as max_id FROM ${SCHEMA}.t_mitu_meisai_head WHERE mitu_head_id = $1`,
@@ -128,7 +133,7 @@ export const updateQuot = async (data: QuotHeadValues, user: string): Promise<nu
           currentHeadMaxId++;
           return {
             ...h, // ネストされた meisai 配列も維持
-            mituMeisaiHeadId: currentHeadMaxId, // 新しいID
+            mitu_meisai_head_id: currentHeadMaxId, // 新しいID
           };
         });
       const updateMHeadList = meisaiHeads
@@ -153,6 +158,7 @@ export const updateQuot = async (data: QuotHeadValues, user: string): Promise<nu
         );
       }
 
+      // 明細 ------------------------------------------------
       // すべての採番済みの明細ヘッドリスト（明細込み）
       const allMeisaiHeads = [...insertMHeadList, ...updateMHeadList];
 
@@ -215,6 +221,61 @@ export const updateQuot = async (data: QuotHeadValues, user: string): Promise<nu
           connection
         );
       }
+
+      // 削除 ---------------------------------------------
+      // meisaiのIDの組み合わせ比較
+      const existingMeisaiIds = await connection.query(
+        `SELECT mitu_head_id, mitu_meisai_head_id, mitu_meisai_id FROM ${SCHEMA}.t_mitu_meisai WHERE mitu_head_id = ${data.mituHeadId}`
+      );
+      console.log('今あるやつ', existingMeisaiIds.rows);
+      const formedMeisai = updateMeisaiList.map((d) => ({
+        mitu_head_id: d.mitu_head_id,
+        mitu_meisai_head_id: d.mitu_meisai_head_id,
+        mitu_meisai_id: d.mitu_meisai_id,
+      }));
+      console.log('フォームから来たやつ', formedMeisai);
+
+      const meisaisToDelete: {
+        mitu_head_id: number;
+        mitu_meisai_head_id: number;
+        mitu_meisai_id: number;
+      }[] = existingMeisaiIds.rows.filter(
+        (existing) =>
+          // incomingItemsの中に、existingとキーが完全一致するものが「一つも無い」(`!some`)場合にtrueを返す
+          !formedMeisai.some(
+            (incoming) =>
+              existing.mitu_head_id === incoming.mitu_head_id &&
+              existing.mitu_meisai_head_id === incoming.mitu_meisai_head_id &&
+              existing.mitu_meisai_id === incoming.mitu_meisai_id
+          )
+      );
+      // 削除明細リストがあれば削除処理
+      if (meisaisToDelete.length > 0) {
+        await deleteQuotMeisai(meisaisToDelete, connection);
+      }
+      // meisaiHeads
+      const exHeads = Array.from(
+        new Set(existingMeisaiIds.rows.map(({ mitu_meisai_id, ...rest }) => JSON.stringify(rest)))
+      ).map((str) => JSON.parse(str));
+      const formedHeads = Array.from(
+        new Set(formedMeisai.map(({ mitu_meisai_id, ...rest }) => JSON.stringify(rest)))
+      ).map((str) => JSON.parse(str));
+
+      const HeadsToDelete: {
+        mitu_head_id: number;
+        mitu_meisai_head_id: number;
+      }[] = exHeads.filter(
+        (ex) =>
+          // incomingItemsの中に、existingとキーが完全一致するものが「一つも無い」(`!some`)場合にtrueを返す
+          !formedHeads.some(
+            (f) => ex.mitu_head_id === f.mitu_head_id && ex.mitu_meisai_head_id === f.mitu_meisai_head_id
+          )
+      );
+      // 明細ヘッド削除処理
+      if (HeadsToDelete.length > 0) {
+        await deleteQuotMeisaiHeads(HeadsToDelete, connection);
+      }
+
       await connection.query('COMMIT');
       await revalidatePath('/quotation-list');
       // return id.rows[0].mitu_head_id;

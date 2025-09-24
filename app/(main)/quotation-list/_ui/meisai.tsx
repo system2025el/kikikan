@@ -4,7 +4,8 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Box, Button, Grid2, IconButton, Select, TextField, Typography } from '@mui/material';
-import { Control, useFieldArray } from 'react-hook-form';
+import { useEffect } from 'react';
+import { Control, useFieldArray, UseFormSetValue, UseFormWatch, useWatch } from 'react-hook-form';
 import { SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
 import { QuotHeadValues, QuotMaisaiHeadValues } from '../_lib/types';
@@ -18,10 +19,13 @@ export const MeisaiLines = ({
   control,
   index,
   sectionNam,
+
+  setValue,
 }: {
   control: Control<QuotHeadValues>;
   index: number;
   sectionNam: 'kizai' | 'labor' | 'other';
+  setValue: UseFormSetValue<QuotHeadValues>;
 }) => {
   // フォームのフィールド（明細）
   const meisaiFields = useFieldArray({ control, name: `meisaiHeads.${sectionNam}.${index}.meisai` });
@@ -30,6 +34,32 @@ export const MeisaiLines = ({
   const moveRow = (i: number, direction: number) => {
     meisaiFields.move(i, i + direction);
   };
+
+  // 明細行の監視
+  const watchedMeisai = useWatch({
+    control,
+    name: `meisaiHeads.${sectionNam}.${index}.meisai`,
+  });
+
+  useEffect(() => {
+    console.log('useEffectが実行されました！監視している値:', watchedMeisai); // 👈 追加
+
+    watchedMeisai?.forEach((item, i) => {
+      const qty = Number(item.qty) || 0;
+      const honbanbiQty = Number(item.honbanbiQty) || 0;
+      const tankaAmt = Number(item.tankaAmt) || 0;
+
+      // 小計を計算
+      const theShokei = qty * honbanbiQty * tankaAmt;
+      console.log(`${i}行目の計算結果: ${theShokei}`); // 👈 追加
+      // 現在の小計の値と比較し、異なっていればフォームの値を更新する
+      // (無限ループを防ぐため、値が違う場合のみsetValueを実行)
+      if (theShokei !== (Number(item.shokeiAmt) || 0)) {
+        console.log(`${i}行目のshokeiAmtを更新します`); // 👈 追加
+        setValue(`meisaiHeads.${sectionNam}.${index}.meisai.${i}.shokeiAmt`, theShokei);
+      }
+    });
+  }, [watchedMeisai, sectionNam, index, setValue]); // 依存配列に監視対象などを設定
 
   return (
     <Box>
