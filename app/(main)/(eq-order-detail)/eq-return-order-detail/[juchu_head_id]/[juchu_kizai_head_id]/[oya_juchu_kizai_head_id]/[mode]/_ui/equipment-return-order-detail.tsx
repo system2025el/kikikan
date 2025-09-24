@@ -56,6 +56,7 @@ import {
   addAllHonbanbi,
   addJuchuKizaiNyushuko,
   delSiyouHonbanbi,
+  getJuchuContainerMeisaiMaxId,
   getJuchuKizaiHeadMaxId,
   getJuchuKizaiMeisaiMaxId,
   getStockList,
@@ -68,6 +69,7 @@ import {
 } from '@/app/(main)/(eq-order-detail)/_lib/types';
 import { OyaEqSelectionDialog } from '@/app/(main)/(eq-order-detail)/_ui/equipment-selection-dialog';
 import {
+  JuchuContainerMeisaiValues,
   JuchuKizaiHeadValues,
   JuchuKizaiHonbanbiValues,
   JuchuKizaiMeisaiValues,
@@ -76,21 +78,31 @@ import {
 import { SaveAlertDialog } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_ui/caveat-dialog';
 
 import {
+  addReturnJuchuContainerMeisai,
   addReturnJuchuKizaiHead,
   addReturnJuchuKizaiMeisai,
+  delReturnJuchuContainerMeisai,
   delReturnJuchuKizaiMeisai,
+  getReturnJuchuContainerMeisai,
   getReturnJuchuKizaiMeisai,
+  updReturnJuchuContainerMeisai,
   updReturnJuchuKizaiHead,
   updReturnJuchuKizaiMeisai,
 } from '../_lib/funcs';
-import { ReturnJuchuKizaiHeadSchema, ReturnJuchuKizaiHeadValues, ReturnJuchuKizaiMeisaiValues } from '../_lib/types';
-import { ReturnEqTable, ReturnStockTable } from './equipment-return-order-detail-table';
+import {
+  ReturnJuchuContainerMeisaiValues,
+  ReturnJuchuKizaiHeadSchema,
+  ReturnJuchuKizaiHeadValues,
+  ReturnJuchuKizaiMeisaiValues,
+} from '../_lib/types';
+import { ReturnContainerTable, ReturnEqTable, ReturnStockTable } from './equipment-return-order-detail-table';
 
 export const EquipmentReturnOrderDetail = (props: {
   juchuHeadData: DetailOerValues;
   oyaJuchuKizaiNyushukoData: OyaJuchuKizaiNyushukoValues;
   returnJuchuKizaiHeadData: ReturnJuchuKizaiHeadValues;
   returnJuchuKizaiMeisaiData: ReturnJuchuKizaiMeisaiValues[] | undefined;
+  returnJuchuContainerMeisaiData: ReturnJuchuContainerMeisaiValues[] | undefined;
   eqStockData: StockTableValues[][] | undefined;
   oyaShukoDate: Date;
   oyaNyukoDate: Date;
@@ -123,6 +135,14 @@ export const EquipmentReturnOrderDetail = (props: {
   const [returnJuchuKizaiMeisaiList, setReturnJuchuKizaiMeisaiList] = useState<ReturnJuchuKizaiMeisaiValues[]>(
     props.returnJuchuKizaiMeisaiData ?? []
   );
+  // 返却受注コンテナ明細元データ
+  const [originReturnJuchuContainerMeisaiList, setOriginReturnJuchuContainerMeisaiList] = useState<
+    ReturnJuchuContainerMeisaiValues[]
+  >(props.returnJuchuContainerMeisaiData ?? []);
+  // 返却受注コンテナ明細データ
+  const [returnJuchuContainerMeisaiList, setReturnJuchuContainerMeisaiList] = useState<
+    ReturnJuchuContainerMeisaiValues[]
+  >(props.returnJuchuContainerMeisaiData ?? []);
   // 機材在庫元データ
   const [originEqStockList, setOriginEqStockList] = useState<StockTableValues[][]>(props.eqStockData ?? []);
   // 機材在庫リスト
@@ -396,6 +416,19 @@ export const EquipmentReturnOrderDetail = (props: {
         await saveReturnJuchuKizaiMeisai(data.juchuHeadId, data.juchuKizaiHeadId, userNam);
       }
 
+      // 受注コンテナ明細更新
+      const filterReturnJuchuContainerMeisaiList = returnJuchuContainerMeisaiList.filter((data) => !data.delFlag);
+      if (
+        JSON.stringify(originReturnJuchuContainerMeisaiList) !== JSON.stringify(filterReturnJuchuContainerMeisaiList)
+      ) {
+        await saveReturnJuchuContainerMeisai(
+          data.juchuHeadId,
+          data.juchuKizaiHeadId,
+          data.oyaJuchuKizaiHeadId,
+          userNam
+        );
+      }
+
       //
       if (
         isDirty &&
@@ -440,7 +473,7 @@ export const EquipmentReturnOrderDetail = (props: {
         const juchuKizaiMeisaiData = await getReturnJuchuKizaiMeisai(
           data.juchuHeadId,
           data.juchuKizaiHeadId,
-          props.oyaJuchuKizaiNyushukoData.juchuKizaiHeadId
+          data.oyaJuchuKizaiHeadId
         );
         if (juchuKizaiMeisaiData) {
           setReturnJuchuKizaiMeisaiList(juchuKizaiMeisaiData);
@@ -576,10 +609,10 @@ export const EquipmentReturnOrderDetail = (props: {
    * @param userNam ユーザー名
    */
   const saveReturnJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number, userNam: string) => {
-    const copyJuchuKizaiMeisaiData = [...returnJuchuKizaiMeisaiList];
+    const copyReturnJuchuKizaiMeisaiData = [...returnJuchuKizaiMeisaiList];
     const juchuKizaiMeisaiMaxId = await getJuchuKizaiMeisaiMaxId(juchuHeadId, juchuKizaiHeadId);
     const newReturnJuchuKizaiMeisaiId = juchuKizaiMeisaiMaxId ? juchuKizaiMeisaiMaxId.juchu_kizai_meisai_id + 1 : 1;
-    const newReturnJuchuKizaiMeisaiData = copyJuchuKizaiMeisaiData
+    const newReturnJuchuKizaiMeisaiData = copyReturnJuchuKizaiMeisaiData
       .filter((data) => data.juchuKizaiMeisaiId === 0 && !data.delFlag)
       .map((data, index) => ({ ...data, juchuKizaiMeisaiId: newReturnJuchuKizaiMeisaiId + index }));
 
@@ -587,8 +620,12 @@ export const EquipmentReturnOrderDetail = (props: {
     const addReturnJuchuKizaiMeisaiData = newReturnJuchuKizaiMeisaiData.filter(
       (data) => !data.delFlag && !data.saveFlag
     );
-    const updateReturnJuchuKizaiMeisaiData = copyJuchuKizaiMeisaiData.filter((data) => !data.delFlag && data.saveFlag);
-    const deleteReturnJuchuKizaiMeisaiData = copyJuchuKizaiMeisaiData.filter((data) => data.delFlag && data.saveFlag);
+    const updateReturnJuchuKizaiMeisaiData = copyReturnJuchuKizaiMeisaiData.filter(
+      (data) => !data.delFlag && data.saveFlag
+    );
+    const deleteReturnJuchuKizaiMeisaiData = copyReturnJuchuKizaiMeisaiData.filter(
+      (data) => data.delFlag && data.saveFlag
+    );
     if (deleteReturnJuchuKizaiMeisaiData.length > 0) {
       console.log('明細削除');
       const deleteJuchuKizaiMeisaiIds = deleteReturnJuchuKizaiMeisaiData.map((data) => data.juchuKizaiMeisaiId);
@@ -611,6 +648,71 @@ export const EquipmentReturnOrderDetail = (props: {
       const updateMeisaiResult = await updReturnJuchuKizaiMeisai(updateReturnJuchuKizaiMeisaiData, userNam);
       console.log('受注機材明細更新', updateMeisaiResult);
     }
+  };
+
+  /**
+   * 返却受注コンテナ明細更新
+   * @param juchuHeadId 受注ヘッダーid
+   * @param juchuKizaiHeadId 受注機材ヘッダーid
+   * @param userNam ユーザー名
+   */
+  const saveReturnJuchuContainerMeisai = async (
+    juchuHeadId: number,
+    juchuKizaiHeadId: number,
+    oyaJuchuKizaiHeadId: number,
+    userNam: string
+  ) => {
+    const copyReturnJuchuContainerMeisaiData = [...returnJuchuContainerMeisaiList];
+    const juchuContainerMeisaiMaxId = await getJuchuContainerMeisaiMaxId(juchuHeadId, juchuKizaiHeadId);
+    const newReturnJuchuContainerMeisaiId = juchuContainerMeisaiMaxId
+      ? juchuContainerMeisaiMaxId.juchu_kizai_meisai_id + 1
+      : 1;
+    const newReturnJuchuContainerMeisaiData = copyReturnJuchuContainerMeisaiData
+      .filter((data) => data.juchuKizaiMeisaiId === 0 && !data.delFlag)
+      .map((data, index) => ({ ...data, juchuKizaiMeisaiId: newReturnJuchuContainerMeisaiId + index }));
+
+    // 受注コンテナ明細更新
+    const addReturnJuchuContainerMeisaiData = newReturnJuchuContainerMeisaiData.filter(
+      (data) => !data.delFlag && !data.saveFlag
+    );
+    const updateReturnJuchuContainerMeisaiData = copyReturnJuchuContainerMeisaiData.filter(
+      (data) => !data.delFlag && data.saveFlag
+    );
+    const deleteReturnJuchuContainerMeisaiData = copyReturnJuchuContainerMeisaiData.filter(
+      (data) => data.delFlag && data.saveFlag
+    );
+    if (deleteReturnJuchuContainerMeisaiData.length > 0) {
+      const deleteReturnJuchuContainerMeisaiIds = deleteReturnJuchuContainerMeisaiData.map(
+        (data) => data.juchuKizaiMeisaiId
+      );
+      const deleteContainerMeisaiResult = await delReturnJuchuContainerMeisai(
+        juchuHeadId,
+        juchuKizaiHeadId,
+        deleteReturnJuchuContainerMeisaiIds
+      );
+      console.log('返却受注コンテナ明細削除', deleteContainerMeisaiResult);
+    }
+
+    if (addReturnJuchuContainerMeisaiData.length > 0) {
+      const addContainerMeisaiResult = addReturnJuchuContainerMeisai(addReturnJuchuContainerMeisaiData, userNam);
+      console.log('返却受注コンテナ明細追加', addContainerMeisaiResult);
+    }
+
+    if (updateReturnJuchuContainerMeisaiData.length > 0) {
+      const updateContainerMeisaiResult = await updReturnJuchuContainerMeisai(
+        updateReturnJuchuContainerMeisaiData,
+        userNam
+      );
+      console.log('返却受注コンテナ明細更新', updateContainerMeisaiResult);
+    }
+
+    const returnJuchuContainerMeisaiData = await getReturnJuchuContainerMeisai(
+      juchuHeadId,
+      juchuKizaiHeadId,
+      oyaJuchuKizaiHeadId
+    );
+    setOriginReturnJuchuContainerMeisaiList(returnJuchuContainerMeisaiData ?? []);
+    setReturnJuchuContainerMeisaiList(returnJuchuContainerMeisaiData ?? []);
   };
 
   /**
@@ -788,6 +890,49 @@ export const EquipmentReturnOrderDetail = (props: {
   };
 
   /**
+   * コンテナメモ入力時
+   * @param kizaiId 機材id
+   * @param memo コンテナメモ内容
+   */
+  const handleReturnContainerMemoChange = (kizaiId: number, memo: string) => {
+    setReturnJuchuContainerMeisaiList((prev) =>
+      prev.map((data) => (data.kizaiId === kizaiId && !data.delFlag ? { ...data, mem: memo } : data))
+    );
+  };
+
+  /**
+   * コンテナテーブル使用数入力時
+   * @param kizaiId 機材id
+   * @param planKicsKizaiQty KICSコンテナ数
+   * @param planYardKizaiQty YARDコンテナ数
+   * @param planQty コンテナ合計数
+   */
+  const handleReturnContainerCellChange = (
+    kizaiId: number,
+    planKicsKizaiQty: number,
+    planYardKizaiQty: number,
+    planQty: number
+  ) => {
+    setReturnJuchuContainerMeisaiList((prev) =>
+      prev.map((data) =>
+        data.kizaiId === kizaiId && !data.delFlag
+          ? { ...data, planKicsKizaiQty: planKicsKizaiQty, planYardKizaiQty: planYardKizaiQty, planQty: planQty }
+          : data
+      )
+    );
+  };
+
+  /**
+   * コンテナテーブル削除ボタン押下時
+   * @param kizaiId 機材id
+   */
+  const handleReturnContainerDelete = (kizaiId: number) => {
+    setReturnJuchuContainerMeisaiList((prev) =>
+      prev.map((data) => (data.kizaiId === kizaiId && !data.delFlag ? { ...data, delFlag: true } : data))
+    );
+  };
+
+  /**
    * KICS入庫日変更時
    * @param newDate KICS入庫日
    */
@@ -871,11 +1016,11 @@ export const EquipmentReturnOrderDetail = (props: {
    * 機材追加時
    * @param data 親受注機材明細データ
    */
-  const setEqpts = async (data: OyaJuchuKizaiMeisaiValues[]) => {
+  const setEqpts = async (eqData: OyaJuchuKizaiMeisaiValues[], containerData: JuchuContainerMeisaiValues[]) => {
     setIsDetailLoading(true);
-    const ids = new Set(returnJuchuKizaiMeisaiList.filter((d) => !d.delFlag).map((d) => d.kizaiId));
-    const filterData = data.filter((d) => !ids.has(d.kizaiId));
-    const newReturnJuchuKizaiMeisaiData: ReturnJuchuKizaiMeisaiValues[] = filterData.map((d) => ({
+    const eqIds = new Set(returnJuchuKizaiMeisaiList.filter((d) => !d.delFlag).map((d) => d.kizaiId));
+    const filterEqData = eqData.filter((d) => !eqIds.has(d.kizaiId));
+    const newReturnJuchuKizaiMeisaiData: ReturnJuchuKizaiMeisaiValues[] = filterEqData.map((d) => ({
       juchuHeadId: getValues('juchuHeadId'),
       juchuKizaiHeadId: getValues('juchuKizaiHeadId'),
       juchuKizaiMeisaiId: 0,
@@ -906,9 +1051,29 @@ export const EquipmentReturnOrderDetail = (props: {
       );
       selectEqStockData.push(stock);
     }
+
+    const containerIds = new Set(returnJuchuContainerMeisaiList.filter((d) => !d.delFlag).map((d) => d.kizaiId));
+    const filterContainerData = containerData.filter((d) => !containerIds.has(d.kizaiId));
+    const newReturnJuchuContainerMeisaiData: ReturnJuchuContainerMeisaiValues[] = filterContainerData.map((d) => ({
+      juchuHeadId: getValues('juchuHeadId'),
+      juchuKizaiHeadId: getValues('juchuKizaiHeadId'),
+      juchuKizaiMeisaiId: 0,
+      mem: '',
+      kizaiId: d.kizaiId,
+      kizaiNam: d.kizaiNam,
+      oyaPlanKicsKizaiQty: d.planKicsKizaiQty ?? 0,
+      oyaPlanYardKizaiQty: d.planYardKizaiQty ?? 0,
+      planKicsKizaiQty: 0,
+      planYardKizaiQty: 0,
+      planQty: 0,
+      delFlag: false,
+      saveFlag: false,
+    }));
+
     setReturnJuchuKizaiMeisaiList((prev) => [...prev, ...newReturnJuchuKizaiMeisaiData]);
     setEqStockList((prev) => [...prev, ...selectEqStockData]);
     setOriginReturnPlanQty((prev) => [...prev, ...newPlanQtys]);
+    setReturnJuchuContainerMeisaiList((prev) => [...prev, ...newReturnJuchuContainerMeisaiData]);
     setIsDetailLoading(false);
   };
 
@@ -1308,72 +1473,87 @@ export const EquipmentReturnOrderDetail = (props: {
             {isDetailLoading ? (
               <Loading />
             ) : (
-              <Box display="flex" flexDirection="row" width="100%">
-                <Box
-                  sx={{
-                    width: {
-                      xs: '40%',
-                      sm: '40%',
-                      md: '40%',
-                      lg: 'min-content',
-                    },
-                  }}
-                >
-                  <Box mx={2} my={1}>
-                    <Button onClick={() => handleOpenEqDialog()}>
-                      <AddIcon fontSize="small" />
-                      機材追加
-                    </Button>
+              <>
+                <Box display="flex" flexDirection="row" width="100%">
+                  <Box
+                    sx={{
+                      width: {
+                        xs: '40%',
+                        sm: '40%',
+                        md: '40%',
+                        lg: 'min-content',
+                      },
+                    }}
+                  >
+                    <Box mx={2} my={1}>
+                      <Button disabled={!edit} onClick={() => handleOpenEqDialog()}>
+                        <AddIcon fontSize="small" />
+                        機材追加
+                      </Button>
+                    </Box>
+                    <Box
+                      display={
+                        Object.keys(returnJuchuKizaiMeisaiList.filter((d) => !d.delFlag)).length > 0 ? 'block' : 'none'
+                      }
+                    >
+                      <ReturnEqTable
+                        rows={returnJuchuKizaiMeisaiList}
+                        edit={edit}
+                        onChange={handleCellChange}
+                        handleDelete={handleDelete}
+                        handleMemoChange={handleMemoChange}
+                        ref={leftRef}
+                      />
+                    </Box>
                   </Box>
                   <Box
-                    display={
-                      Object.keys(returnJuchuKizaiMeisaiList.filter((d) => !d.delFlag)).length > 0 ? 'block' : 'none'
-                    }
+                    display={Object.keys(eqStockList).length > 0 ? 'block' : 'none'}
+                    overflow="auto"
+                    sx={{ width: { xs: '60%', sm: '60%', md: 'auto' } }}
                   >
-                    <ReturnEqTable
-                      rows={returnJuchuKizaiMeisaiList}
-                      edit={edit}
-                      onChange={handleCellChange}
-                      handleDelete={handleDelete}
-                      handleMemoChange={handleMemoChange}
-                      ref={leftRef}
+                    <Box display="flex" my={1}>
+                      <Box display={'flex'} alignItems={'end'} mr={2}>
+                        <Typography fontSize={'small'}>在庫数</Typography>
+                      </Box>
+                      <Button onClick={handleBackDateChange}>
+                        <ArrowBackIosNewIcon fontSize="small" />
+                      </Button>
+                      <Button variant="outlined" onClick={handleClick}>
+                        日付選択
+                      </Button>
+                      <Popper open={open} anchorEl={anchorEl} placement="bottom-start" sx={{ zIndex: 1000 }}>
+                        <ClickAwayListener onClickAway={handleClickAway}>
+                          <Paper elevation={3} sx={{ mt: 1 }}>
+                            <Calendar date={selectDate} onChange={handleDateChange} />
+                          </Paper>
+                        </ClickAwayListener>
+                      </Popper>
+                      <Button onClick={handleForwardDateChange}>
+                        <ArrowForwardIosIcon fontSize="small" />
+                      </Button>
+                    </Box>
+                    <ReturnStockTable
+                      eqStockList={eqStockList}
+                      dateRange={dateRange}
+                      stockTableHeaderDateRange={props.stockTableHeaderDateRange}
+                      ref={rightRef}
                     />
                   </Box>
                 </Box>
                 <Box
-                  display={Object.keys(eqStockList).length > 0 ? 'block' : 'none'}
-                  overflow="auto"
-                  sx={{ width: { xs: '60%', sm: '60%', md: 'auto' } }}
+                  display={returnJuchuContainerMeisaiList.filter((d) => !d.delFlag).length > 0 ? 'block' : 'none'}
+                  py={2}
+                  width={'fit-content'}
                 >
-                  <Box display="flex" my={1}>
-                    <Box display={'flex'} alignItems={'end'} mr={2}>
-                      <Typography fontSize={'small'}>在庫数</Typography>
-                    </Box>
-                    <Button onClick={handleBackDateChange}>
-                      <ArrowBackIosNewIcon fontSize="small" />
-                    </Button>
-                    <Button variant="outlined" onClick={handleClick}>
-                      日付選択
-                    </Button>
-                    <Popper open={open} anchorEl={anchorEl} placement="bottom-start" sx={{ zIndex: 1000 }}>
-                      <ClickAwayListener onClickAway={handleClickAway}>
-                        <Paper elevation={3} sx={{ mt: 1 }}>
-                          <Calendar date={selectDate} onChange={handleDateChange} />
-                        </Paper>
-                      </ClickAwayListener>
-                    </Popper>
-                    <Button onClick={handleForwardDateChange}>
-                      <ArrowForwardIosIcon fontSize="small" />
-                    </Button>
-                  </Box>
-                  <ReturnStockTable
-                    eqStockList={eqStockList}
-                    dateRange={dateRange}
-                    stockTableHeaderDateRange={props.stockTableHeaderDateRange}
-                    ref={rightRef}
+                  <ReturnContainerTable
+                    rows={returnJuchuContainerMeisaiList}
+                    edit={edit}
+                    handleContainerMemoChange={handleReturnContainerMemoChange}
+                    onChange={handleReturnContainerCellChange}
+                    handleContainerDelete={handleReturnContainerDelete}
                   />
                 </Box>
-              </Box>
+              </>
             )}
           </Paper>
           <Fab color="primary" onClick={scrollTop} sx={{ position: 'fixed', bottom: 32, right: 32, zIndex: 1000 }}>

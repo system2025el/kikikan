@@ -16,8 +16,9 @@ import {
 import { useEffect, useState } from 'react';
 
 import { Loading } from '../../_ui/loading';
-import { getOyaJuchuKizaiMeisai } from '../_lib/funcs';
+import { getJuchuContainerMeisai, getOyaJuchuKizaiMeisai } from '../_lib/funcs';
 import { OyaJuchuKizaiMeisaiValues } from '../_lib/types';
+import { JuchuContainerMeisaiValues } from '../eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_lib/types';
 
 export const OyaEqSelectionDialog = ({
   juchuHeadId,
@@ -27,11 +28,13 @@ export const OyaEqSelectionDialog = ({
 }: {
   juchuHeadId: number;
   oyaJuchuKizaiHeadId: number;
-  setEqpts: (data: OyaJuchuKizaiMeisaiValues[]) => void;
+  setEqpts: (eqData: OyaJuchuKizaiMeisaiValues[], containerData: JuchuContainerMeisaiValues[]) => void;
   onClose: (result: boolean) => void;
 }) => {
   // 親機材リスト
   const [oyaEqList, setOyaEqList] = useState<OyaJuchuKizaiMeisaiValues[]>([]);
+  // 親コンテナリスト
+  const [oyaContainerList, setOyaContainerList] = useState<JuchuContainerMeisaiValues[]>([]);
   // 選択機材id
   const [selected, setSelected] = useState<number[]>([]);
   // Loadingかどうか
@@ -44,8 +47,9 @@ export const OyaEqSelectionDialog = ({
 
   /* 確定ボタン押下時 */
   const handleClickConfirm = () => {
-    const selectData = oyaEqList.filter((data) => selected.includes(data.kizaiId));
-    setEqpts(selectData);
+    const selectEqData = oyaEqList.filter((data) => selected.includes(data.kizaiId));
+    const selectContainerData = oyaContainerList.filter((data) => selected.includes(data.kizaiId));
+    setEqpts(selectEqData, selectContainerData);
     onClose(false);
   };
 
@@ -53,8 +57,10 @@ export const OyaEqSelectionDialog = ({
   useEffect(() => {
     const getOyaEqpts = async () => {
       const oyaEq = await getOyaJuchuKizaiMeisai(juchuHeadId, oyaJuchuKizaiHeadId);
+      const oyaContainer = await getJuchuContainerMeisai(juchuHeadId, oyaJuchuKizaiHeadId);
       console.log('親機材リスト: ', oyaEq);
       setOyaEqList(oyaEq ?? []);
+      setOyaContainerList(oyaContainer ?? []);
       setIsLoading(false);
     };
     getOyaEqpts();
@@ -87,6 +93,18 @@ export const OyaEqSelectionDialog = ({
             }}
           >
             {oyaEqList.map((value) => {
+              return (
+                <ListItem key={value.kizaiId} disablePadding>
+                  <ListItemButton onClick={() => handleToggle(value.kizaiId)} dense>
+                    <ListItemIcon>
+                      <Checkbox edge="start" checked={selected.includes(value.kizaiId)} tabIndex={-1} disableRipple />
+                    </ListItemIcon>
+                    <ListItemText primary={value.kizaiNam} />
+                  </ListItemButton>
+                </ListItem>
+              );
+            })}
+            {oyaContainerList.map((value) => {
               return (
                 <ListItem key={value.kizaiId} disablePadding>
                   <ListItemButton onClick={() => handleToggle(value.kizaiId)} dense>

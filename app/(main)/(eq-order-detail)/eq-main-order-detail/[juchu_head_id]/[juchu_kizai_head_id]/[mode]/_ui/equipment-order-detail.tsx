@@ -1822,7 +1822,11 @@ const EquipmentOrderDetail = (props: {
                     />
                   </Box>
                 </Box>
-                <Box py={2} width={'fit-content'}>
+                <Box
+                  display={juchuContainerMeisaiList.filter((d) => !d.delFlag).length > 0 ? 'block' : 'none'}
+                  py={2}
+                  width={'fit-content'}
+                >
                   <ContainerTable
                     rows={juchuContainerMeisaiList}
                     edit={edit}
