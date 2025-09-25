@@ -44,6 +44,7 @@ import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
 import { Loading } from '@/app/(main)/_ui/loading';
 import {
   addJuchuKizaiNyushuko,
+  getJuchuContainerMeisaiMaxId,
   getJuchuKizaiHeadMaxId,
   getJuchuKizaiMeisaiMaxId,
   updJuchuKizaiNyushuko,
@@ -55,27 +56,38 @@ import {
 } from '@/app/(main)/(eq-order-detail)/_lib/types';
 import { OyaEqSelectionDialog } from '@/app/(main)/(eq-order-detail)/_ui/equipment-selection-dialog';
 import {
+  JuchuContainerMeisaiValues,
   JuchuKizaiHeadValues,
   JuchuKizaiMeisaiValues,
 } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_lib/types';
 import { SaveAlertDialog } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_ui/caveat-dialog';
 
 import {
+  addKeepJuchuContainerMeisai,
   addKeepJuchuKizaiHead,
   addKeepJuchuKizaiMeisai,
+  delKeepJuchuContainerMeisai,
   delKeepJuchuKizaiMeisai,
+  getKeepJuchuContainerMeisai,
   getKeepJuchuKizaiMeisai,
+  updKeepJuchuContainerMeisai,
   updKeepJuchuKizaiHead,
   updKeepJuchuKizaiMeisai,
 } from '../_lib/funcs';
-import { KeepJuchuKizaiHeadSchema, KeepJuchuKizaiHeadValues, KeepJuchuKizaiMeisaiValues } from '../_lib/types';
-import { KeepEqTable } from './equipment-keep-order-detail-table';
+import {
+  KeepJuchuContainerMeisaiValues,
+  KeepJuchuKizaiHeadSchema,
+  KeepJuchuKizaiHeadValues,
+  KeepJuchuKizaiMeisaiValues,
+} from '../_lib/types';
+import { KeepContainerTable, KeepEqTable } from './equipment-keep-order-detail-table';
 
 export const EquipmentKeepOrderDetail = (props: {
   juchuHeadData: DetailOerValues;
   oyaJuchuKizaiHeadData: OyaJuchuKizaiNyushukoValues;
   keepJuchuKizaiHeadData: KeepJuchuKizaiHeadValues;
   keepJuchuKizaiMeisaiData: KeepJuchuKizaiMeisaiValues[] | undefined;
+  keepJuchuContainerMeisaiData: KeepJuchuContainerMeisaiValues[] | undefined;
   oyaShukoDate: Date;
   oyaNyukoDate: Date;
   keepShukoDate: Date | null;
@@ -103,6 +115,14 @@ export const EquipmentKeepOrderDetail = (props: {
   // キープ受注機材明細リスト
   const [keepJuchuKizaiMeisaiList, setKeepJuchuKizaiMeisaiList] = useState<KeepJuchuKizaiMeisaiValues[]>(
     props.keepJuchuKizaiMeisaiData ? props.keepJuchuKizaiMeisaiData : []
+  );
+  // キープ受注コンテナ明細元リスト
+  const [originKeepJuchuContainerMeisaiList, setOriginKeepJuchuContainerMeisaiList] = useState<
+    KeepJuchuContainerMeisaiValues[]
+  >(props.keepJuchuContainerMeisaiData ?? []);
+  // キープ受注コンテナ明細リスト
+  const [keepJuchuContainerMeisaiList, setKeepJuchuContainerMeisaiList] = useState<KeepJuchuContainerMeisaiValues[]>(
+    props.keepJuchuContainerMeisaiData ?? []
   );
 
   // 親出庫日
@@ -193,9 +213,11 @@ export const EquipmentKeepOrderDetail = (props: {
 
   useEffect(() => {
     const filterJuchuKizaiMeisaiList = keepJuchuKizaiMeisaiList.filter((data) => !data.delFlag);
+    const filterJuchuContainerMeisaiList = keepJuchuContainerMeisaiList.filter((data) => !data.delFlag);
     if (
       saveKizaiHead &&
-      JSON.stringify(originKeepJuchuKizaiMeisaiList) === JSON.stringify(filterJuchuKizaiMeisaiList)
+      JSON.stringify(originKeepJuchuKizaiMeisaiList) === JSON.stringify(filterJuchuKizaiMeisaiList) &&
+      JSON.stringify(originKeepJuchuContainerMeisaiList) === JSON.stringify(filterJuchuContainerMeisaiList)
     ) {
       setSave(true);
       setIsSave(true);
@@ -204,7 +226,7 @@ export const EquipmentKeepOrderDetail = (props: {
       setIsSave(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [keepJuchuKizaiMeisaiList]);
+  }, [keepJuchuKizaiMeisaiList, keepJuchuContainerMeisaiList]);
 
   useEffect(() => {
     setLock(lockData);
@@ -217,7 +239,12 @@ export const EquipmentKeepOrderDetail = (props: {
     // 編集→閲覧
     if (edit) {
       const filterJuchuKizaiMeisaiList = keepJuchuKizaiMeisaiList.filter((data) => !data.delFlag);
-      if (isDirty || JSON.stringify(originKeepJuchuKizaiMeisaiList) !== JSON.stringify(filterJuchuKizaiMeisaiList)) {
+      const filterJuchuContainerMeisaiList = keepJuchuContainerMeisaiList.filter((data) => !data.delFlag);
+      if (
+        isDirty ||
+        JSON.stringify(originKeepJuchuKizaiMeisaiList) !== JSON.stringify(filterJuchuKizaiMeisaiList) ||
+        JSON.stringify(originKeepJuchuContainerMeisaiList) !== JSON.stringify(filterJuchuContainerMeisaiList)
+      ) {
         setDirtyOpen(true);
         return;
       }
@@ -371,19 +398,16 @@ export const EquipmentKeepOrderDetail = (props: {
     const copyKeepJuchuKizaiMeisaiData = [...keepJuchuKizaiMeisaiList];
     const juchuKizaiMeisaiMaxId = await getJuchuKizaiMeisaiMaxId(juchuHeadId, juchuKizaiHeadId);
     const newKeepJuchuKizaiMeisaiId = juchuKizaiMeisaiMaxId ? juchuKizaiMeisaiMaxId.juchu_kizai_meisai_id + 1 : 1;
-    const newKeepJuchuKizaiMeisaiData = copyKeepJuchuKizaiMeisaiData.map((data, index) =>
-      data.juchuKizaiMeisaiId === 0
-        ? {
-            ...data,
-            juchuKizaiMeisaiId: newKeepJuchuKizaiMeisaiId + index,
-          }
-        : data
-    );
+    const newKeepJuchuKizaiMeisaiData = copyKeepJuchuKizaiMeisaiData
+      .filter((data) => data.juchuKizaiMeisaiId === 0 && !data.delFlag)
+      .map((data, index) => ({ ...data, juchuKizaiMeisaiId: newKeepJuchuKizaiMeisaiId + index }));
 
     // 受注機材明細更新
     const addKeepJuchuKizaiMeisaiData = newKeepJuchuKizaiMeisaiData.filter((data) => !data.delFlag && !data.saveFlag);
-    const updateKeepJuchuKizaiMeisaiData = newKeepJuchuKizaiMeisaiData.filter((data) => !data.delFlag && data.saveFlag);
-    const deleteKeepJuchuKizaiMeisaiData = newKeepJuchuKizaiMeisaiData.filter((data) => data.delFlag && data.saveFlag);
+    const updateKeepJuchuKizaiMeisaiData = copyKeepJuchuKizaiMeisaiData.filter(
+      (data) => !data.delFlag && data.saveFlag
+    );
+    const deleteKeepJuchuKizaiMeisaiData = copyKeepJuchuKizaiMeisaiData.filter((data) => data.delFlag && data.saveFlag);
     if (deleteKeepJuchuKizaiMeisaiData.length > 0) {
       const deleteKeepJuchuKizaiMeisaiIds = deleteKeepJuchuKizaiMeisaiData.map((data) => data.juchuKizaiMeisaiId);
       const deleteMeisaiResult = await delKeepJuchuKizaiMeisai(
@@ -414,6 +438,71 @@ export const EquipmentKeepOrderDetail = (props: {
       setKeepJuchuKizaiMeisaiList(keepJuchuKizaiMeisaiData);
       setOriginKeepJuchuKizaiMeisaiList(keepJuchuKizaiMeisaiData);
     }
+  };
+
+  /**
+   * キープ受注コンテナ明細更新
+   * @param juchuHeadId 受注ヘッダーid
+   * @param juchuKizaiHeadId 受注機材ヘッダーid
+   * @param userNam ユーザー名
+   */
+  const saveKeepJuchuContainerMeisai = async (
+    juchuHeadId: number,
+    juchuKizaiHeadId: number,
+    oyaJuchuKizaiHeadId: number,
+    userNam: string
+  ) => {
+    const copyKeepJuchuContainerMeisaiData = [...keepJuchuContainerMeisaiList];
+    const juchuContainerMeisaiMaxId = await getJuchuContainerMeisaiMaxId(juchuHeadId, juchuKizaiHeadId);
+    const newKeepJuchuContainerMeisaiId = juchuContainerMeisaiMaxId
+      ? juchuContainerMeisaiMaxId.juchu_kizai_meisai_id + 1
+      : 1;
+    const newKeepJuchuContainerMeisaiData = copyKeepJuchuContainerMeisaiData
+      .filter((data) => data.juchuKizaiMeisaiId === 0 && !data.delFlag)
+      .map((data, index) => ({ ...data, juchuKizaiMeisaiId: newKeepJuchuContainerMeisaiId + index }));
+
+    // 受注コンテナ明細更新
+    const addKeepJuchuContainerMeisaiData = newKeepJuchuContainerMeisaiData.filter(
+      (data) => !data.delFlag && !data.saveFlag
+    );
+    const updateKeepJuchuContainerMeisaiData = copyKeepJuchuContainerMeisaiData.filter(
+      (data) => !data.delFlag && data.saveFlag
+    );
+    const deleteKeepJuchuContainerMeisaiData = copyKeepJuchuContainerMeisaiData.filter(
+      (data) => data.delFlag && data.saveFlag
+    );
+    if (deleteKeepJuchuContainerMeisaiData.length > 0) {
+      const deleteKeepJuchuContainerMeisaiIds = deleteKeepJuchuContainerMeisaiData.map(
+        (data) => data.juchuKizaiMeisaiId
+      );
+      const deleteContainerMeisaiResult = await delKeepJuchuContainerMeisai(
+        juchuHeadId,
+        juchuKizaiHeadId,
+        deleteKeepJuchuContainerMeisaiIds
+      );
+      console.log('返却受注コンテナ明細削除', deleteContainerMeisaiResult);
+    }
+
+    if (addKeepJuchuContainerMeisaiData.length > 0) {
+      const addContainerMeisaiResult = addKeepJuchuContainerMeisai(addKeepJuchuContainerMeisaiData, userNam);
+      console.log('返却受注コンテナ明細追加', addContainerMeisaiResult);
+    }
+
+    if (updateKeepJuchuContainerMeisaiData.length > 0) {
+      const updateContainerMeisaiResult = await updKeepJuchuContainerMeisai(
+        updateKeepJuchuContainerMeisaiData,
+        userNam
+      );
+      console.log('返却受注コンテナ明細更新', updateContainerMeisaiResult);
+    }
+
+    const keepJuchuContainerMeisaiData = await getKeepJuchuContainerMeisai(
+      juchuHeadId,
+      juchuKizaiHeadId,
+      oyaJuchuKizaiHeadId
+    );
+    setOriginKeepJuchuContainerMeisaiList(keepJuchuContainerMeisaiData ?? []);
+    setKeepJuchuContainerMeisaiList(keepJuchuContainerMeisaiData ?? []);
   };
 
   /**
@@ -545,13 +634,50 @@ export const EquipmentKeepOrderDetail = (props: {
   };
 
   /**
+   * コンテナメモ入力時
+   * @param kizaiId 機材id
+   * @param memo コンテナメモ内容
+   */
+  const handleKeepContainerMemoChange = (kizaiId: number, memo: string) => {
+    setKeepJuchuContainerMeisaiList((prev) =>
+      prev.map((data) => (data.kizaiId === kizaiId && !data.delFlag ? { ...data, mem: memo } : data))
+    );
+  };
+
+  /**
+   * コンテナテーブル使用数入力時
+   * @param kizaiId 機材id
+   * @param kicsKeepQty KICSコンテナ数
+   * @param yardKeepQty YARDコンテナ数
+   */
+  const handleKeepContainerCellChange = (kizaiId: number, kicsKeepQty: number, yardKeepQty: number) => {
+    setKeepJuchuContainerMeisaiList((prev) =>
+      prev.map((data) =>
+        data.kizaiId === kizaiId && !data.delFlag
+          ? { ...data, kicsKeepQty: kicsKeepQty, yardKeepQty: yardKeepQty }
+          : data
+      )
+    );
+  };
+
+  /**
+   * コンテナテーブル削除ボタン押下時
+   * @param kizaiId 機材id
+   */
+  const handleKeepContainerDelete = (kizaiId: number) => {
+    setKeepJuchuContainerMeisaiList((prev) =>
+      prev.map((data) => (data.kizaiId === kizaiId && !data.delFlag ? { ...data, delFlag: true } : data))
+    );
+  };
+
+  /**
    * 機材追加時
    * @param data 選択された機材データ
    */
-  const setEqpts = async (data: OyaJuchuKizaiMeisaiValues[]) => {
-    const ids = new Set(keepJuchuKizaiMeisaiList.filter((d) => !d.delFlag).map((d) => d.kizaiId));
-    const filterData = data.filter((d) => !ids.has(d.kizaiId));
-    const newOyaJuchuKizaiMeisaiData: KeepJuchuKizaiMeisaiValues[] = filterData.map((d) => ({
+  const setEqpts = async (eqData: OyaJuchuKizaiMeisaiValues[], containerData: JuchuContainerMeisaiValues[]) => {
+    const eqIds = new Set(keepJuchuKizaiMeisaiList.filter((d) => !d.delFlag).map((d) => d.kizaiId));
+    const filterEqData = eqData.filter((d) => !eqIds.has(d.kizaiId));
+    const newOyaJuchuKizaiMeisaiData: KeepJuchuKizaiMeisaiValues[] = filterEqData.map((d) => ({
       juchuHeadId: getValues('juchuHeadId'),
       juchuKizaiHeadId: getValues('juchuKizaiHeadId'),
       juchuKizaiMeisaiId: 0,
@@ -566,7 +692,26 @@ export const EquipmentKeepOrderDetail = (props: {
       delFlag: false,
       saveFlag: false,
     }));
+
+    const containerIds = new Set(keepJuchuContainerMeisaiList.filter((d) => !d.delFlag).map((d) => d.kizaiId));
+    const filterContainerData = containerData.filter((d) => !containerIds.has(d.kizaiId));
+    const newKeepJuchuContainerMeisaiData: KeepJuchuContainerMeisaiValues[] = filterContainerData.map((d) => ({
+      juchuHeadId: getValues('juchuHeadId'),
+      juchuKizaiHeadId: getValues('juchuKizaiHeadId'),
+      juchuKizaiMeisaiId: 0,
+      mem: '',
+      kizaiId: d.kizaiId,
+      kizaiNam: d.kizaiNam,
+      oyaPlanKicsKizaiQty: d.planKicsKizaiQty ?? 0,
+      oyaPlanYardKizaiQty: d.planYardKizaiQty ?? 0,
+      kicsKeepQty: 0,
+      yardKeepQty: 0,
+      delFlag: false,
+      saveFlag: false,
+    }));
+
     setKeepJuchuKizaiMeisaiList((prev) => [...prev, ...newOyaJuchuKizaiMeisaiData]);
+    setKeepJuchuContainerMeisaiList((prev) => [...prev, ...newKeepJuchuContainerMeisaiData]);
   };
 
   /**
@@ -580,6 +725,7 @@ export const EquipmentKeepOrderDetail = (props: {
       setEdit(false);
       reset();
       setKeepJuchuKizaiMeisaiList(originKeepJuchuKizaiMeisaiList);
+      setKeepJuchuContainerMeisaiList(originKeepJuchuContainerMeisaiList);
       setDirtyOpen(false);
     } else {
       setDirtyOpen(false);
@@ -967,6 +1113,19 @@ export const EquipmentKeepOrderDetail = (props: {
                   onChange={handleCellChange}
                 />
               </Box>
+            </Box>
+            <Box
+              display={keepJuchuContainerMeisaiList.filter((d) => !d.delFlag).length > 0 ? 'block' : 'none'}
+              py={2}
+              width={'fit-content'}
+            >
+              <KeepContainerTable
+                rows={keepJuchuContainerMeisaiList}
+                edit={edit}
+                handleContainerMemoChange={handleKeepContainerMemoChange}
+                onChange={handleKeepContainerCellChange}
+                handleContainerDelete={handleKeepContainerDelete}
+              />
             </Box>
           </Paper>
           <Fab color="primary" onClick={scrollTop} sx={{ position: 'fixed', bottom: 32, right: 32, zIndex: 1000 }}>

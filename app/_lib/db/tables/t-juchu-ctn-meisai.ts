@@ -77,7 +77,7 @@ export const deleteJuchuContainerMeisai = async (
   try {
     return await supabase
       .schema(SCHEMA)
-      .from('t_juchu_kizai_meisai')
+      .from('t_juchu_ctn_meisai')
       .delete()
       .eq('juchu_head_id', juchuHeadId)
       .eq('juchu_kizai_head_id', juchuKizaiHeadId)

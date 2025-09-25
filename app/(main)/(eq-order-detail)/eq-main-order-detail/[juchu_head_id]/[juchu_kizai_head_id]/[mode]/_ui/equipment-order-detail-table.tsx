@@ -187,7 +187,7 @@ export const EqTable: React.FC<EqTableProps> = ({
               移動日時
             </TableCell>
             <TableCell align="left" size="small" style={styles.header}>
-              在庫場所
+              入出庫場所
             </TableCell>
             <TableCell align="left" size="small" style={styles.header}>
               メモ
@@ -297,7 +297,7 @@ const EqTableRow = React.memo(
               onClear={() => handleCellDateClear(row.kizaiId)}
               disabled={!edit}
             />
-            {row.sagyoDenDat && <Typography>{row.shozokuId === 1 ? 'K→Y' : 'Y→K'}</Typography>}
+            {row.sagyoSijiId && <Typography>{row.sagyoSijiId}</Typography>}
           </Box>
         </TableCell>
         <TableCell style={styles.row} align="left" size="small" sx={{ bgcolor: grey[200] }}>
