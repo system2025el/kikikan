@@ -618,19 +618,22 @@ export const EquipmentReturnOrderDetail = (props: {
   const saveReturnJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number, userNam: string) => {
     const copyReturnJuchuKizaiMeisaiData = [...returnJuchuKizaiMeisaiList];
     const juchuKizaiMeisaiMaxId = await getJuchuKizaiMeisaiMaxId(juchuHeadId, juchuKizaiHeadId);
-    const newReturnJuchuKizaiMeisaiId = juchuKizaiMeisaiMaxId ? juchuKizaiMeisaiMaxId.juchu_kizai_meisai_id + 1 : 1;
-    const newReturnJuchuKizaiMeisaiData = copyReturnJuchuKizaiMeisaiData
-      .filter((data) => data.juchuKizaiMeisaiId === 0 && !data.delFlag)
-      .map((data, index) => ({ ...data, juchuKizaiMeisaiId: newReturnJuchuKizaiMeisaiId + index }));
+    let newReturnJuchuKizaiMeisaiId = juchuKizaiMeisaiMaxId ? juchuKizaiMeisaiMaxId.juchu_kizai_meisai_id + 1 : 1;
+
+    const newReturnJuchuKizaiMeisaiData = copyReturnJuchuKizaiMeisaiData.map((data) =>
+      data.juchuKizaiMeisaiId === 0 && !data.delFlag
+        ? { ...data, juchuKizaiMeisaiId: newReturnJuchuKizaiMeisaiId++ }
+        : data
+    );
 
     // 受注機材明細更新
     const addReturnJuchuKizaiMeisaiData = newReturnJuchuKizaiMeisaiData.filter(
       (data) => !data.delFlag && !data.saveFlag
     );
-    const updateReturnJuchuKizaiMeisaiData = copyReturnJuchuKizaiMeisaiData.filter(
+    const updateReturnJuchuKizaiMeisaiData = newReturnJuchuKizaiMeisaiData.filter(
       (data) => !data.delFlag && data.saveFlag
     );
-    const deleteReturnJuchuKizaiMeisaiData = copyReturnJuchuKizaiMeisaiData.filter(
+    const deleteReturnJuchuKizaiMeisaiData = newReturnJuchuKizaiMeisaiData.filter(
       (data) => data.delFlag && data.saveFlag
     );
     if (deleteReturnJuchuKizaiMeisaiData.length > 0) {
@@ -671,21 +674,24 @@ export const EquipmentReturnOrderDetail = (props: {
   ) => {
     const copyReturnJuchuContainerMeisaiData = [...returnJuchuContainerMeisaiList];
     const juchuContainerMeisaiMaxId = await getJuchuContainerMeisaiMaxId(juchuHeadId, juchuKizaiHeadId);
-    const newReturnJuchuContainerMeisaiId = juchuContainerMeisaiMaxId
+    let newReturnJuchuContainerMeisaiId = juchuContainerMeisaiMaxId
       ? juchuContainerMeisaiMaxId.juchu_kizai_meisai_id + 1
       : 1;
-    const newReturnJuchuContainerMeisaiData = copyReturnJuchuContainerMeisaiData
-      .filter((data) => data.juchuKizaiMeisaiId === 0 && !data.delFlag)
-      .map((data, index) => ({ ...data, juchuKizaiMeisaiId: newReturnJuchuContainerMeisaiId + index }));
+
+    const newReturnJuchuContainerMeisaiData = copyReturnJuchuContainerMeisaiData.map((data) =>
+      data.juchuKizaiMeisaiId === 0 && !data.delFlag
+        ? { ...data, juchuKizaiMeisaiId: newReturnJuchuContainerMeisaiId++ }
+        : data
+    );
 
     // 受注コンテナ明細更新
     const addReturnJuchuContainerMeisaiData = newReturnJuchuContainerMeisaiData.filter(
       (data) => !data.delFlag && !data.saveFlag
     );
-    const updateReturnJuchuContainerMeisaiData = copyReturnJuchuContainerMeisaiData.filter(
+    const updateReturnJuchuContainerMeisaiData = newReturnJuchuContainerMeisaiData.filter(
       (data) => !data.delFlag && data.saveFlag
     );
-    const deleteReturnJuchuContainerMeisaiData = copyReturnJuchuContainerMeisaiData.filter(
+    const deleteReturnJuchuContainerMeisaiData = newReturnJuchuContainerMeisaiData.filter(
       (data) => data.delFlag && data.saveFlag
     );
     if (deleteReturnJuchuContainerMeisaiData.length > 0) {

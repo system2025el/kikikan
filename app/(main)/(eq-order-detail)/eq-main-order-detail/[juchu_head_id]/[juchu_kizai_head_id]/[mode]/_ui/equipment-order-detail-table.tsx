@@ -297,7 +297,7 @@ const EqTableRow = React.memo(
               onClear={() => handleCellDateClear(row.kizaiId)}
               disabled={!edit}
             />
-            {row.sagyoSijiId && <Typography>{row.sagyoSijiId}</Typography>}
+            {row.sagyoSijiId && <Typography>{row.sagyoSijiId === 1 ? 'K→Y' : 'Y→K'}</Typography>}
           </Box>
         </TableCell>
         <TableCell style={styles.row} align="left" size="small" sx={{ bgcolor: grey[200] }}>
