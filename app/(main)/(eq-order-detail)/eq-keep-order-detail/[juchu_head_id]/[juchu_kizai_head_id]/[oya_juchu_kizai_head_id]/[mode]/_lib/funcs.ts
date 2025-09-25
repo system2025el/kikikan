@@ -1,6 +1,11 @@
 'use server';
 
 import {
+  deleteJuchuContainerMeisai,
+  insertJuchuContainerMeisai,
+  updateJuchuContainerMeisai,
+} from '@/app/_lib/db/tables/t-juchu-ctn-meisai';
+import {
   insertKeepJuchuKizaiHead,
   selectKeepJuchuKizaiHead,
   updateKeepJuchuKizaiHead,
@@ -10,14 +15,16 @@ import {
   insertKeepJuchuKizaiMeisai,
   updateKeepJuchuKizaiMeisai,
 } from '@/app/_lib/db/tables/t-juchu-kizai-meisai';
+import { selectJuchuContainerMeisai } from '@/app/_lib/db/tables/v-juchu-ctn-meisai';
 import { selectKeepJuchuKizaiMeisai, selectOyaJuchuKizaiMeisai } from '@/app/_lib/db/tables/v-juchu-kizai-meisai';
+import { JuchuCtnMeisai } from '@/app/_lib/db/types/t_juchu_ctn_meisai-type';
 import { JuchuKizaiHead } from '@/app/_lib/db/types/t-juchu-kizai-head-type';
 import { JuchuKizaiMeisai } from '@/app/_lib/db/types/t-juchu-kizai-meisai-type';
 import { Database } from '@/app/_lib/db/types/types';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { getJuchuKizaiNyushuko } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 
-import { KeepJuchuKizaiHeadValues, KeepJuchuKizaiMeisaiValues } from './types';
+import { KeepJuchuContainerMeisaiValues, KeepJuchuKizaiHeadValues, KeepJuchuKizaiMeisaiValues } from './types';
 
 /**
  * キープ受注機材ヘッダー取得
@@ -266,6 +273,181 @@ export const delKeepJuchuKizaiMeisai = async (
 
     if (error) {
       console.error('Error delete keep kizai meisai:', error.message);
+    }
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+/**
+ * キープ受注コンテナ明細取得
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param oyaJuchuKizaiHeadId 親受注機材ヘッダーid
+ * @returns
+ */
+export const getKeepJuchuContainerMeisai = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  oyaJuchuKizaiHeadId: number
+) => {
+  try {
+    const { data: containerData, error: containerError } = await selectJuchuContainerMeisai(
+      juchuHeadId,
+      juchuKizaiHeadId
+    );
+    if (containerError) {
+      console.error('GetKeepContainerList keep containerList error : ', containerError);
+      return [];
+    }
+
+    const { data: oyaData, error: oyaError } = await selectJuchuContainerMeisai(juchuHeadId, oyaJuchuKizaiHeadId);
+    if (oyaError) {
+      console.error('GetKeepCOntainerList oya containerList error : ', oyaError);
+      return [];
+    }
+
+    const keepJuchuContainerMeisaiData: KeepJuchuContainerMeisaiValues[] = containerData.map((d) => ({
+      juchuHeadId: d.juchu_head_id,
+      juchuKizaiHeadId: d.juchu_kizai_head_id,
+      juchuKizaiMeisaiId: d.juchu_kizai_meisai_id,
+      mem: d.mem,
+      kizaiId: d.kizai_id,
+      kizaiNam: d.kizai_nam ?? '',
+      oyaPlanKicsKizaiQty: oyaData.find((oya) => oya.kizai_id === d.kizai_id)?.kics_plan_kizai_qty ?? 0,
+      oyaPlanYardKizaiQty: oyaData.find((oya) => oya.kizai_id === d.kizai_id)?.yard_plan_kizai_qty ?? 0,
+      kicsKeepQty: d.kics_keep_qty,
+      yardKeepQty: d.yard_keep_qty,
+      delFlag: false,
+      saveFlag: true,
+    }));
+    return keepJuchuContainerMeisaiData;
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+/**
+ * キープ受注コンテナ明細新規追加
+ * @param juchuKizaiMeisaiData 受注機材明細データ
+ * @param userNam ユーザー名
+ * @returns
+ */
+export const addKeepJuchuContainerMeisai = async (
+  juchuContainerMeisaiData: KeepJuchuContainerMeisaiValues[],
+  userNam: string
+) => {
+  const newKicsData: JuchuCtnMeisai[] = juchuContainerMeisaiData.map((d) => ({
+    juchu_head_id: d.juchuHeadId,
+    juchu_kizai_head_id: d.juchuKizaiHeadId,
+    juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
+    kizai_id: d.kizaiId,
+    keep_qty: d.kicsKeepQty,
+    shozoku_id: 1,
+    mem: d.mem,
+    add_dat: toJapanTimeString(),
+    add_user: userNam,
+  }));
+
+  const newYardData: JuchuCtnMeisai[] = juchuContainerMeisaiData.map((d) => ({
+    juchu_head_id: d.juchuHeadId,
+    juchu_kizai_head_id: d.juchuKizaiHeadId,
+    juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
+    kizai_id: d.kizaiId,
+    keep_qty: d.yardKeepQty,
+    shozoku_id: 2,
+    mem: d.mem,
+    add_dat: toJapanTimeString(),
+    add_user: userNam,
+  }));
+
+  const mergeData = [...newKicsData, ...newYardData];
+
+  try {
+    const { error } = await insertJuchuContainerMeisai(mergeData);
+
+    if (error) {
+      console.error('Error adding keep container meisai:', error.message);
+      return false;
+    } else {
+      console.log('keep container meisai added successfully:', mergeData);
+      return true;
+    }
+  } catch (e) {
+    console.error('Exception while adding keep container meisai:', e);
+    return false;
+  }
+};
+
+/**
+ * キープ受注コンテナ明細更新
+ * @param juchuContainerMeisaiData 受注コンテナ明細データ
+ * @param userNam ユーザー名
+ * @returns
+ */
+export const updKeepJuchuContainerMeisai = async (
+  juchuContainerMeisaiData: KeepJuchuContainerMeisaiValues[],
+  userNam: string
+) => {
+  const updateKicsData: JuchuCtnMeisai[] = juchuContainerMeisaiData.map((d) => ({
+    juchu_head_id: d.juchuHeadId,
+    juchu_kizai_head_id: d.juchuKizaiHeadId,
+    juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
+    kizai_id: d.kizaiId,
+    keep_qty: d.kicsKeepQty,
+    shozoku_id: 1,
+    mem: d.mem,
+    upd_dat: toJapanTimeString(),
+    upd_user: userNam,
+  }));
+
+  const updateYardData: JuchuCtnMeisai[] = juchuContainerMeisaiData.map((d) => ({
+    juchu_head_id: d.juchuHeadId,
+    juchu_kizai_head_id: d.juchuKizaiHeadId,
+    juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
+    kizai_id: d.kizaiId,
+    keep_qty: d.yardKeepQty,
+    shozoku_id: 2,
+    mem: d.mem,
+    upd_dat: toJapanTimeString(),
+    upd_user: userNam,
+  }));
+
+  const mergeData = [...updateKicsData, ...updateYardData];
+
+  try {
+    for (const data of mergeData) {
+      const { error } = await updateJuchuContainerMeisai(data);
+
+      if (error) {
+        console.error('Error updating keep juchu container meisai:', error.message);
+        continue;
+      }
+      console.log('keep juchu container meisai updated successfully:', data);
+    }
+    return true;
+  } catch (e) {
+    console.error('Exception while updating keep juchu container meisai:', e);
+    return false;
+  }
+};
+
+/**
+ * キープ受注コンテナ明細削除
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param deleteJuchuContainerMeisaiIds 受注コンテナ明細id
+ */
+export const delKeepJuchuContainerMeisai = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  deleteJuchuContainerMeisaiIds: number[]
+) => {
+  try {
+    const { error } = await deleteJuchuContainerMeisai(juchuHeadId, juchuKizaiHeadId, deleteJuchuContainerMeisaiIds);
+
+    if (error) {
+      console.error('Error delete keep container meisai:', error.message);
     }
   } catch (e) {
     console.error(e);

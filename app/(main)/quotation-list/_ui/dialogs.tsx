@@ -5,6 +5,8 @@ import {
   Checkbox,
   DialogActions,
   DialogTitle,
+  FormControlLabel,
+  FormGroup,
   List,
   ListItem,
   ListItemButton,
@@ -19,7 +21,7 @@ import { UseFieldArrayReturn } from 'react-hook-form-mui';
 import { CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
 import { Loading } from '@/app/(main)/_ui/loading';
 
-import { getJuchuKizaiHeadNamList, getJuchuKizaiMeisaiList, getJuchuMeisaiSum } from '../_lib/func';
+import { getJuchuIsshikiMeisai, getJuchuKizaiHeadNamList, getJuchuKizaiMeisaiList } from '../_lib/func';
 import { QuotHeadValues } from '../_lib/types';
 
 /**
@@ -90,18 +92,27 @@ export const SecondDialogPage = ({
   const handleClickHeadNam = async (juchuId: number, kizaiHeadId: number, headNam: string, checked: boolean) => {
     console.log(kizaiHeadId, checked);
     if (checked) {
-      const data = await getJuchuMeisaiSum(juchuId, kizaiHeadId);
+      const data = await getJuchuIsshikiMeisai(juchuId, kizaiHeadId);
       field.append({
         mituMeisaiHeadNam: null,
         headNamDspFlg: false,
         mituMeisaiKbn: 0,
+        nebikiNam: '値引き',
+        nebikiAftNam: '機材費',
         meisai: data,
       });
     } else {
       const data = await getJuchuKizaiMeisaiList(juchuId, kizaiHeadId);
       console.log(data);
       // 取得した内容をテーブル内の明細に入れる
-      field.append({ mituMeisaiHeadNam: null, headNamDspFlg: false, mituMeisaiKbn: 0, meisai: data });
+      field.append({
+        mituMeisaiHeadNam: null,
+        headNamDspFlg: false,
+        mituMeisaiKbn: 0,
+        nebikiNam: '値引き',
+        nebikiAftNam: '機材費',
+        meisai: data,
+      });
     }
     handleClose();
   };
@@ -141,8 +152,12 @@ export const SecondDialogPage = ({
       </DialogTitle>
       <Box p={4}>
         <Stack>
-          <Checkbox value={checked} onChange={() => setChecked(!checked)} />
-          一式表示を有効にする
+          <FormGroup>
+            <FormControlLabel
+              control={<Checkbox value={checked} onChange={() => setChecked(!checked)} />}
+              label=" 一式表示を有効にする"
+            />
+          </FormGroup>
         </Stack>
         <Card variant="outlined">
           {isLoading ? (

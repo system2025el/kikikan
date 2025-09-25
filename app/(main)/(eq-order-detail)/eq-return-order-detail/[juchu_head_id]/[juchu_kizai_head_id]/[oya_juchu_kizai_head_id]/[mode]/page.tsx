@@ -4,8 +4,17 @@ import { getNyukoDate, getRange, getShukoDate } from '@/app/(main)/_lib/date-fun
 import { StockTableValues } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_lib/types';
 
 import { getDetailJuchuHead, getJuchuKizaiNyushuko, getStockList } from '../../../../../_lib/funcs';
-import { getJuchuHonbanbiQty, getReturnJuchuKizaiHead, getReturnJuchuKizaiMeisai } from './_lib/funcs';
-import { ReturnJuchuKizaiHeadValues, ReturnJuchuKizaiMeisaiValues } from './_lib/types';
+import {
+  getJuchuHonbanbiQty,
+  getReturnJuchuContainerMeisai,
+  getReturnJuchuKizaiHead,
+  getReturnJuchuKizaiMeisai,
+} from './_lib/funcs';
+import {
+  ReturnJuchuContainerMeisaiValues,
+  ReturnJuchuKizaiHeadValues,
+  ReturnJuchuKizaiMeisaiValues,
+} from './_lib/types';
 import { EquipmentReturnOrderDetail } from './_ui/equipment-return-order-detail';
 
 const Page = async (props: {
@@ -59,8 +68,10 @@ const Page = async (props: {
       kicsNyukoDat: null,
       yardNyukoDat: null,
     };
-    // 返却受注機材明細キープデータ(初期値)
+    // 返却受注機材明細データ(初期値)
     const newReturnJuchuKizaiMeisaiData: ReturnJuchuKizaiMeisaiValues[] = [];
+    // 返却受注コンテナ明細データ(初期値)
+    const newReturnJuchuContainerMeisaiData: ReturnJuchuContainerMeisaiValues[] = [];
     // 機材在庫データ(初期値)
     const newEqStockData: StockTableValues[][] = [];
 
@@ -75,6 +86,7 @@ const Page = async (props: {
         oyaJuchuKizaiNyushukoData={oyaJuchuKizaiNyushukoData}
         returnJuchuKizaiHeadData={newReturnJuchuKizaiHeadData}
         returnJuchuKizaiMeisaiData={newReturnJuchuKizaiMeisaiData}
+        returnJuchuContainerMeisaiData={newReturnJuchuContainerMeisaiData}
         eqStockData={newEqStockData}
         oyaShukoDate={oyaShukoDate}
         oyaNyukoDate={oyaNyukoDate}
@@ -104,6 +116,16 @@ const Page = async (props: {
       params.oya_juchu_kizai_head_id
     );
     console.log('----------------------------受注機材明細---------------------------------');
+    console.timeEnd();
+
+    // 返却受注コンテナ明細データ
+    console.time();
+    const returnJuchuContainerMeisaiData = await getReturnJuchuContainerMeisai(
+      params.juchu_head_id,
+      params.juchu_kizai_head_id,
+      params.oya_juchu_kizai_head_id
+    );
+    console.log('----------------------------受注コンテナ明細---------------------------------');
     console.timeEnd();
 
     // 返却入庫日
@@ -139,6 +161,7 @@ const Page = async (props: {
         oyaJuchuKizaiNyushukoData={oyaJuchuKizaiNyushukoData}
         returnJuchuKizaiHeadData={returnJuchuKizaiHeadData}
         returnJuchuKizaiMeisaiData={returnJuchuKizaiMeisaiData}
+        returnJuchuContainerMeisaiData={returnJuchuContainerMeisaiData}
         eqStockData={eqStockData}
         oyaShukoDate={oyaShukoDate}
         oyaNyukoDate={oyaNyukoDate}

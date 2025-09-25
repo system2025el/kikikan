@@ -420,7 +420,7 @@ const EquipmentOrderDetail = (props: {
 
       // 受注コンテナ明細更新
       const filterJuchuContainerMeisaiList = juchuContainerMeisaiList.filter((data) => !data.delFlag);
-      if (JSON.stringify(originJuchuContainerMeisaiList) !== JSON.stringify(juchuContainerMeisaiList)) {
+      if (JSON.stringify(originJuchuContainerMeisaiList) !== JSON.stringify(filterJuchuContainerMeisaiList)) {
         await saveJuchuContainerMeisai(data.juchuHeadId, data.juchuKizaiHeadId, userNam);
       }
 
@@ -674,19 +674,14 @@ const EquipmentOrderDetail = (props: {
     const copyJuchuKizaiMeisaiData = [...juchuKizaiMeisaiList];
     const juchuKizaiMeisaiMaxId = await getJuchuKizaiMeisaiMaxId(juchuHeadId, juchuKizaiHeadId);
     const newJuchuKizaiMeisaiId = juchuKizaiMeisaiMaxId ? juchuKizaiMeisaiMaxId.juchu_kizai_meisai_id + 1 : 1;
-    const newJuchuKizaiMeisaiData = copyJuchuKizaiMeisaiData.map((data, index) =>
-      data.juchuKizaiMeisaiId === 0
-        ? {
-            ...data,
-            juchuKizaiMeisaiId: newJuchuKizaiMeisaiId + index,
-          }
-        : data
-    );
+    const newJuchuKizaiMeisaiData = copyJuchuKizaiMeisaiData
+      .filter((data) => data.juchuKizaiMeisaiId === 0 && !data.delFlag)
+      .map((data, index) => ({ ...data, juchuKizaiMeisaiId: newJuchuKizaiMeisaiId + index }));
 
     // 受注機材明細更新
     const addJuchuKizaiMeisaiData = newJuchuKizaiMeisaiData.filter((data) => !data.delFlag && !data.saveFlag);
-    const updateJuchuKizaiMeisaiData = newJuchuKizaiMeisaiData.filter((data) => !data.delFlag && data.saveFlag);
-    const deleteJuchuKizaiMeisaiData = newJuchuKizaiMeisaiData.filter((data) => data.delFlag && data.saveFlag);
+    const updateJuchuKizaiMeisaiData = copyJuchuKizaiMeisaiData.filter((data) => !data.delFlag && data.saveFlag);
+    const deleteJuchuKizaiMeisaiData = copyJuchuKizaiMeisaiData.filter((data) => data.delFlag && data.saveFlag);
     if (deleteJuchuKizaiMeisaiData.length > 0) {
       const deleteJuchuKizaiMeisaiIds = deleteJuchuKizaiMeisaiData.map((data) => data.juchuKizaiMeisaiId);
       const deleteMeisaiResult = await delJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId, deleteJuchuKizaiMeisaiIds);
@@ -744,19 +739,16 @@ const EquipmentOrderDetail = (props: {
     const newJuchuContainerMeisaiId = juchuContainerMeisaiMaxId
       ? juchuContainerMeisaiMaxId.juchu_kizai_meisai_id + 1
       : 1;
-    const newJuchuContainerMeisaiData = copyJuchuContainerMeisaiData.map((data, index) =>
-      data.juchuKizaiMeisaiId === 0
-        ? {
-            ...data,
-            juchuKizaiMeisaiId: newJuchuContainerMeisaiId + index,
-          }
-        : data
-    );
+    const newJuchuContainerMeisaiData = copyJuchuContainerMeisaiData
+      .filter((data) => data.juchuKizaiMeisaiId === 0 && !data.delFlag)
+      .map((data, index) => ({ ...data, juchuKizaiMeisaiId: newJuchuContainerMeisaiId + index }));
 
     // 受注コンテナ明細更新
     const addJuchuContainerMeisaiData = newJuchuContainerMeisaiData.filter((data) => !data.delFlag && !data.saveFlag);
-    const updateJuchuContainerMeisaiData = newJuchuContainerMeisaiData.filter((data) => !data.delFlag && data.saveFlag);
-    const deleteJuchuContainerMeisaiData = newJuchuContainerMeisaiData.filter((data) => data.delFlag && data.saveFlag);
+    const updateJuchuContainerMeisaiData = copyJuchuContainerMeisaiData.filter(
+      (data) => !data.delFlag && data.saveFlag
+    );
+    const deleteJuchuContainerMeisaiData = copyJuchuContainerMeisaiData.filter((data) => data.delFlag && data.saveFlag);
     if (deleteJuchuContainerMeisaiData.length > 0) {
       const deleteJuchuContainerMeisaiIds = deleteJuchuContainerMeisaiData.map((data) => data.juchuKizaiMeisaiId);
       const deleteContainerMeisaiResult = await delJuchuContainerMeisai(
@@ -915,7 +907,11 @@ const EquipmentOrderDetail = (props: {
    */
   const handleCellDateClear = (kizaiId: number) => {
     setJuchuKizaiMeisaiList((prev) =>
-      prev.map((row) => (row.kizaiId === kizaiId ? { ...row, sagyoDenDat: null } : row))
+      prev.map((row) =>
+        row.kizaiId === kizaiId
+          ? { ...row, sagyoDenDat: null, sagyoSijiId: null, shozokuId: row.shozokuId === 1 ? 2 : 1 }
+          : row
+      )
     );
   };
 
@@ -1000,7 +996,16 @@ const EquipmentOrderDetail = (props: {
     if (date !== null) {
       const newDate = date.toDate();
       setJuchuKizaiMeisaiList((prev) =>
-        prev.map((row) => (row.kizaiId === kizaiId && !row.delFlag ? { ...row, sagyoDenDat: newDate } : row))
+        prev.map((row) =>
+          row.kizaiId === kizaiId && !row.delFlag
+            ? {
+                ...row,
+                sagyoDenDat: newDate,
+                sagyoSijiId: row.sagyoDenDat ? row.sagyoSijiId : row.shozokuId === 1 ? 'Y→K' : 'K→Y',
+                shozokuId: row.sagyoDenDat ? row.shozokuId : row.shozokuId === 1 ? 2 : 1,
+              }
+            : row
+        )
       );
     }
   };
@@ -1091,14 +1096,11 @@ const EquipmentOrderDetail = (props: {
    * @param newDate YARD出庫日
    */
   const handleYardShukoAccept = async (newDate: Dayjs | null) => {
+    console.log('-------------------------------------------------');
     if (newDate === null) return;
     trigger(['kicsShukoDat', 'yardShukoDat']);
 
     const kicsShukoDat = getValues('kicsShukoDat');
-
-    if (kicsShukoDat === null) {
-      clearErrors('kicsShukoDat');
-    }
 
     if (juchuKizaiMeisaiList.length > 0 && kicsShukoDat === null) {
       setIdoDat(subDays(newDate.toDate(), 2));
@@ -1168,6 +1170,9 @@ const EquipmentOrderDetail = (props: {
     if (juchuKizaiMeisaiList.length > 0 && yardDat !== null) {
       setIdoDat(subDays(yardDat, 2));
       setMoveOpen(true);
+    } else if (juchuKizaiMeisaiList.length > 0 && yardDat === null) {
+      setIdoDat(null);
+      setMoveOpen(true);
     }
   };
 
@@ -1178,8 +1183,12 @@ const EquipmentOrderDetail = (props: {
     setValue('yardShukoDat', null, { shouldDirty: true });
     trigger(['kicsShukoDat', 'yardShukoDat']);
     const kicsDat = getValues('kicsShukoDat');
+
     if (juchuKizaiMeisaiList.length > 0 && kicsDat !== null) {
       setIdoDat(subDays(kicsDat, 2));
+      setMoveOpen(true);
+    } else if (juchuKizaiMeisaiList.length > 0 && kicsDat === null) {
+      setIdoDat(null);
       setMoveOpen(true);
     }
   };
@@ -1192,21 +1201,47 @@ const EquipmentOrderDetail = (props: {
     if (result) {
       if (idoDat !== null && getValues('yardShukoDat') === null) {
         setJuchuKizaiMeisaiList((prev) =>
-          prev.map((row) => (row.shozokuId === 2 && !row.delFlag ? { ...row, sagyoDenDat: idoDat } : row))
+          prev.map((row) =>
+            row.shozokuId === 2 && !row.delFlag
+              ? {
+                  ...row,
+                  sagyoDenDat: row.sagyoDenDat ? null : idoDat,
+                  sagyoSijiId: row.sagyoDenDat ? null : 'Y→K',
+                  shozokuId: 1,
+                }
+              : row
+          )
         );
         setIdoDat(null);
         setMoveOpen(false);
       } else if (idoDat !== null && getValues('kicsShukoDat') === null) {
         setJuchuKizaiMeisaiList((prev) =>
-          prev.map((row) => (row.shozokuId === 1 && !row.delFlag ? { ...row, sagyoDenDat: idoDat } : row))
+          prev.map((row) =>
+            row.shozokuId === 1 && !row.delFlag
+              ? {
+                  ...row,
+                  sagyoDenDat: row.sagyoDenDat ? null : idoDat,
+                  sagyoSijiId: row.sagyoDenDat ? null : 'K→Y',
+                  shozokuId: 2,
+                }
+              : row
+          )
         );
         setIdoDat(null);
         setMoveOpen(false);
       } else {
-        setJuchuKizaiMeisaiList((prev) => prev.map((row) => (row.sagyoDenDat ? { ...row, sagyoDenDat: idoDat } : row)));
+        setJuchuKizaiMeisaiList((prev) =>
+          prev.map((row) =>
+            row.sagyoDenDat
+              ? { ...row, sagyoDenDat: idoDat, sagyoSijiId: null, shozokuId: row.shozokuId === 1 ? 2 : 1 }
+              : row
+          )
+        );
+        setIdoDat(null);
         setMoveOpen(false);
       }
     } else {
+      setIdoDat(null);
       setMoveOpen(false);
     }
   };
@@ -1294,7 +1329,8 @@ const EquipmentOrderDetail = (props: {
             : null,
       sagyoSijiId:
         d.shozokuId === 1 && kicsIdoDat !== null ? 'K→Y' : d.shozokuId === 2 && yardIdoDat !== null ? 'Y→K' : null,
-      shozokuId: d.shozokuId,
+      shozokuId:
+        d.shozokuId === 1 && kicsIdoDat !== null ? 2 : d.shozokuId === 2 && yardIdoDat !== null ? 1 : d.shozokuId,
       shozokuNam: d.shozokuNam,
       mem: '',
       kizaiId: d.kizaiId,
@@ -1830,7 +1866,11 @@ const EquipmentOrderDetail = (props: {
                     />
                   </Box>
                 </Box>
-                <Box py={2} width={'fit-content'}>
+                <Box
+                  display={juchuContainerMeisaiList.filter((d) => !d.delFlag).length > 0 ? 'block' : 'none'}
+                  py={2}
+                  width={'fit-content'}
+                >
                   <ContainerTable
                     rows={juchuContainerMeisaiList}
                     edit={edit}

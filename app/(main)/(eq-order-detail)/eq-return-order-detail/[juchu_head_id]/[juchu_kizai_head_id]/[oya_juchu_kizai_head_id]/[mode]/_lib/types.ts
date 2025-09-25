@@ -50,3 +50,19 @@ export type ReturnJuchuKizaiMeisaiValues = {
   delFlag: boolean;
   saveFlag: boolean;
 };
+
+export type ReturnJuchuContainerMeisaiValues = {
+  juchuHeadId: number;
+  juchuKizaiHeadId: number;
+  juchuKizaiMeisaiId: number;
+  mem: string | null;
+  kizaiId: number;
+  kizaiNam: string;
+  oyaPlanKicsKizaiQty: number | null;
+  oyaPlanYardKizaiQty: number | null;
+  planKicsKizaiQty: number | null;
+  planYardKizaiQty: number | null;
+  planQty: number | null;
+  delFlag: boolean;
+  saveFlag: boolean;
+};

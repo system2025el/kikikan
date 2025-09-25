@@ -1,8 +1,6 @@
 'use server';
 import { PoolClient } from 'pg';
 
-import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
-
 import { SCHEMA, supabase } from '../supabase';
 import { MituMeisaiHead } from '../types/t-mitu-meisai-head-type';
 
@@ -88,6 +86,30 @@ export const selectQuotMeisaiHead = async (id: number) => {
       )
       .eq('mitu_head_id', id)
       .order('dsp_ord_num');
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
+ * 明細ID合致するものをt_mitu_meisai_headから削除する関数
+ * @param ids 削除する明細ヘッダのIDの組み合わせの配列
+ */
+export const deleteQuotMeisaiHeads = async (
+  ids: {
+    mitu_head_id: number;
+    mitu_meisai_head_id: number;
+  }[],
+  connection: PoolClient
+) => {
+  const placeholders = ids.map((_, i) => `($${i * 2 + 1}, $${i * 2 + 2})`).join(', ');
+  const values = ids.flatMap((d) => [d.mitu_head_id, d.mitu_meisai_head_id]);
+
+  const query = `DELETE FROM ${SCHEMA}.t_mitu_meisai_head WHERE (mitu_head_id, mitu_meisai_head_id) IN (${placeholders})`;
+  console.log('☆☆☆☆☆', query, values);
+  try {
+    console.log('消したいやつ', ids);
+    await connection.query(query, values);
   } catch (e) {
     throw e;
   }

@@ -266,13 +266,13 @@ export const updJuchuKizaiNyushuko = async (
           console.error('Error updating kizai nyushuko:', updateError.message);
           continue;
         }
-      } else if (selectData && !data) {
+      } else if (selectData.data && !data) {
         const { error: deleteError } = await deleteJchuKizaiNyushuko(confirmData);
         if (deleteError) {
           console.error('Error delete kizai nyushuko:', deleteError.message);
           continue;
         }
-      } else if (!selectData && data) {
+      } else if (!selectData.data && data) {
         const { error: insertError } = await insertJuchuKizaiNyushuko({
           ...data,
           add_dat: toJapanTimeString(),

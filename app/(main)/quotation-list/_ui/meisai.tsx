@@ -4,7 +4,8 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Box, Button, Grid2, IconButton, Select, TextField, Typography } from '@mui/material';
-import { Control, useFieldArray } from 'react-hook-form';
+import { useEffect } from 'react';
+import { Control, useFieldArray, useFormContext, UseFormSetValue, UseFormWatch, useWatch } from 'react-hook-form';
 import { SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
 import { QuotHeadValues, QuotMaisaiHeadValues } from '../_lib/types';
@@ -14,21 +15,36 @@ import { QuotHeadValues, QuotMaisaiHeadValues } from '../_lib/types';
  * @param param0
  * @returns 見積の明細項目のUIコンポーネント
  */
-export const MeisaiLines = ({
-  control,
-  index,
-  sectionNam,
-}: {
-  control: Control<QuotHeadValues>;
-  index: number;
-  sectionNam: 'kizai' | 'labor' | 'other';
-}) => {
+export const MeisaiLines = ({ index, sectionNam }: { index: number; sectionNam: 'kizai' | 'labor' | 'other' }) => {
+  const { control, setValue } = useFormContext<QuotHeadValues>();
+  // フォームのフィールド（明細）
   const meisaiFields = useFieldArray({ control, name: `meisaiHeads.${sectionNam}.${index}.meisai` });
 
   /* 明細項目の順番を帰るボタン押下時 */
   const moveRow = (i: number, direction: number) => {
     meisaiFields.move(i, i + direction);
   };
+
+  // 明細行の監視
+  const watchedMeisai = useWatch({
+    control,
+    name: `meisaiHeads.${sectionNam}.${index}.meisai`,
+  });
+
+  useEffect(() => {
+    watchedMeisai?.forEach((m, i) => {
+      const qty = Number(m.qty) || 0;
+      const honbanbiQty = Number(m.honbanbiQty) || 0;
+      const tankaAmt = Number(m.tankaAmt) || 0;
+      // 小計を計算
+      const theShokei = (qty * (honbanbiQty * 1000) * tankaAmt) / 1000;
+      // 現在の小計の値と比較し、異なっていればフォームの値を更新する
+      // (無限ループを防ぐため、値が違う場合のみsetValueを実行)
+      if (theShokei !== (Number(m.shokeiAmt) || 0)) {
+        setValue(`meisaiHeads.${sectionNam}.${index}.meisai.${i}.shokeiAmt`, theShokei);
+      }
+    });
+  }, [watchedMeisai, sectionNam, index, setValue]); // 依存配列に監視対象などを設定
 
   return (
     <Box>
