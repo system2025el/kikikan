@@ -5,7 +5,7 @@ import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Box, Button, Grid2, IconButton, Select, TextField, Typography } from '@mui/material';
 import { useEffect } from 'react';
-import { Control, useFieldArray, UseFormSetValue, UseFormWatch, useWatch } from 'react-hook-form';
+import { Control, useFieldArray, useFormContext, UseFormSetValue, UseFormWatch, useWatch } from 'react-hook-form';
 import { SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
 import { QuotHeadValues, QuotMaisaiHeadValues } from '../_lib/types';
@@ -15,18 +15,8 @@ import { QuotHeadValues, QuotMaisaiHeadValues } from '../_lib/types';
  * @param param0
  * @returns 見積の明細項目のUIコンポーネント
  */
-export const MeisaiLines = ({
-  control,
-  index,
-  sectionNam,
-
-  setValue,
-}: {
-  control: Control<QuotHeadValues>;
-  index: number;
-  sectionNam: 'kizai' | 'labor' | 'other';
-  setValue: UseFormSetValue<QuotHeadValues>;
-}) => {
+export const MeisaiLines = ({ index, sectionNam }: { index: number; sectionNam: 'kizai' | 'labor' | 'other' }) => {
+  const { control, setValue } = useFormContext<QuotHeadValues>();
   // フォームのフィールド（明細）
   const meisaiFields = useFieldArray({ control, name: `meisaiHeads.${sectionNam}.${index}.meisai` });
 
@@ -42,20 +32,15 @@ export const MeisaiLines = ({
   });
 
   useEffect(() => {
-    console.log('useEffectが実行されました！監視している値:', watchedMeisai); // 👈 追加
-
-    watchedMeisai?.forEach((item, i) => {
-      const qty = Number(item.qty) || 0;
-      const honbanbiQty = Number(item.honbanbiQty) || 0;
-      const tankaAmt = Number(item.tankaAmt) || 0;
-
+    watchedMeisai?.forEach((m, i) => {
+      const qty = Number(m.qty) || 0;
+      const honbanbiQty = Number(m.honbanbiQty) || 0;
+      const tankaAmt = Number(m.tankaAmt) || 0;
       // 小計を計算
       const theShokei = qty * honbanbiQty * tankaAmt;
-      console.log(`${i}行目の計算結果: ${theShokei}`); // 👈 追加
       // 現在の小計の値と比較し、異なっていればフォームの値を更新する
       // (無限ループを防ぐため、値が違う場合のみsetValueを実行)
-      if (theShokei !== (Number(item.shokeiAmt) || 0)) {
-        console.log(`${i}行目のshokeiAmtを更新します`); // 👈 追加
+      if (theShokei !== (Number(m.shokeiAmt) || 0)) {
         setValue(`meisaiHeads.${sectionNam}.${index}.meisai.${i}.shokeiAmt`, theShokei);
       }
     });

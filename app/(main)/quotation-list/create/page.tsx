@@ -21,6 +21,83 @@ const Page = async ({ searchParams }: { searchParams: Promise<{ [key: string]: s
     // もし受注IDがあれば、DBから関連データを取得して初期値とする
     order = await getOrderForQuotation(juchuId);
   }
+
+  const quot = order
+    ? {
+        mituHeadId: null,
+        juchuHeadId: order.juchuHeadId,
+        mituSts: null,
+        mituDat: new Date(),
+        mituHeadNam: null,
+        kokyaku: order.kokyaku.name,
+        nyuryokuUser: null,
+        mituRange: { strt: order.juchuRange.strt, end: order.juchuRange.end },
+        kokyakuTantoNam: order.kokyakuTantoNam,
+        koenNam: order.koenNam,
+        koenbashoNam: order.koenbashoNam,
+        mituHonbanbiQty: null,
+        biko: null,
+        kizaiChukeiMei: '中計',
+        chukeiMei: '中計',
+        tokuNebikiMei: '特別値引き',
+        meisaiHeads: {
+          kizai: [
+            {
+              mituMeisaiHeadNam: null,
+              headNamDspFlg: false,
+              mituMeisaiKbn: 0,
+              nebikiNam: '値引き',
+              nebikiAftNam: '機材費',
+              meisai: [
+                {
+                  nam: null,
+                  qty: null,
+                  honbanbiQty: null,
+                  tankaAmt: null,
+                  shokeiAmt: null,
+                },
+              ],
+            },
+          ],
+        },
+      }
+    : {
+        mituHeadId: null,
+        juchuHeadId: null,
+        mituSts: null,
+        mituDat: new Date(),
+        mituHeadNam: '',
+        kokyaku: null,
+        nyuryokuUser: null,
+        mituRange: { strt: null, end: null },
+        kokyakuTantoNam: null,
+        koenNam: null,
+        koenbashoNam: null,
+        mituHonbanbiQty: null,
+        biko: null,
+        chukeiMei: '中計',
+        meisaiHeads: {
+          kizai: [
+            {
+              mituMeisaiHeadNam: null,
+              headNamDspFlg: false,
+              mituMeisaiKbn: 0,
+              nebikiNam: '値引き',
+              nebikiAftNam: '機材費',
+              meisai: [
+                {
+                  nam: null,
+                  qty: null,
+                  honbanbiQty: null,
+                  tankaAmt: null,
+                  shokeiAmt: null,
+                },
+              ],
+            },
+          ],
+        },
+      };
+
   return (
     <Quotation
       selectOptions={options}
@@ -41,75 +118,7 @@ const Page = async ({ searchParams }: { searchParams: Promise<{ [key: string]: s
           zeiKbn: null,
         }
       }
-      quot={
-        order
-          ? {
-              mituHeadId: null,
-              juchuHeadId: order.juchuHeadId,
-              mituSts: null,
-              mituDat: new Date(),
-              mituHeadNam: null,
-              kokyaku: order.kokyaku.name,
-              nyuryokuUser: null,
-              mituRange: { strt: order.juchuRange.strt, end: order.juchuRange.end },
-              kokyakuTantoNam: order.kokyakuTantoNam,
-              koenNam: order.koenNam,
-              koenbashoNam: order.koenbashoNam,
-              mituHonbanbiQty: null,
-              biko: null,
-              meisaiHeads: {
-                kizai: [
-                  {
-                    mituMeisaiHeadNam: null,
-                    headNamDspFlg: false,
-                    mituMeisaiKbn: 0,
-                    meisai: [
-                      {
-                        nam: null,
-                        qty: null,
-                        honbanbiQty: null,
-                        tankaAmt: null,
-                        shokeiAmt: null,
-                      },
-                    ],
-                  },
-                ],
-              },
-            }
-          : {
-              mituHeadId: null,
-              juchuHeadId: null,
-              mituSts: null,
-              mituDat: new Date(),
-              mituHeadNam: '',
-              kokyaku: null,
-              nyuryokuUser: null,
-              mituRange: { strt: null, end: null },
-              kokyakuTantoNam: null,
-              koenNam: null,
-              koenbashoNam: null,
-              mituHonbanbiQty: null,
-              biko: null,
-              meisaiHeads: {
-                kizai: [
-                  {
-                    mituMeisaiHeadNam: null,
-                    headNamDspFlg: false,
-                    mituMeisaiKbn: 0,
-                    meisai: [
-                      {
-                        nam: null,
-                        qty: null,
-                        honbanbiQty: null,
-                        tankaAmt: null,
-                        shokeiAmt: null,
-                      },
-                    ],
-                  },
-                ],
-              },
-            }
-      }
+      quot={quot}
     />
   );
 };
