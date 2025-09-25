@@ -5,6 +5,8 @@ import {
   Checkbox,
   DialogActions,
   DialogTitle,
+  FormControlLabel,
+  FormGroup,
   List,
   ListItem,
   ListItemButton,
@@ -95,13 +97,22 @@ export const SecondDialogPage = ({
         mituMeisaiHeadNam: null,
         headNamDspFlg: false,
         mituMeisaiKbn: 0,
+        nebikiNam: '値引き',
+        nebikiAftNam: '機材費',
         meisai: data,
       });
     } else {
       const data = await getJuchuKizaiMeisaiList(juchuId, kizaiHeadId);
       console.log(data);
       // 取得した内容をテーブル内の明細に入れる
-      field.append({ mituMeisaiHeadNam: null, headNamDspFlg: false, mituMeisaiKbn: 0, meisai: data });
+      field.append({
+        mituMeisaiHeadNam: null,
+        headNamDspFlg: false,
+        mituMeisaiKbn: 0,
+        nebikiNam: '値引き',
+        nebikiAftNam: '機材費',
+        meisai: data,
+      });
     }
     handleClose();
   };
@@ -141,8 +152,12 @@ export const SecondDialogPage = ({
       </DialogTitle>
       <Box p={4}>
         <Stack>
-          <Checkbox value={checked} onChange={() => setChecked(!checked)} />
-          一式表示を有効にする
+          <FormGroup>
+            <FormControlLabel
+              control={<Checkbox value={checked} onChange={() => setChecked(!checked)} />}
+              label=" 一式表示を有効にする"
+            />
+          </FormGroup>
         </Stack>
         <Card variant="outlined">
           {isLoading ? (

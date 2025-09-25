@@ -135,12 +135,19 @@ export const MeisaiTblHeader = ({
         </Grid2>
         <Grid2 size={1} />
       </Grid2>
+      {/* 明細  */}
       {children}
+      {/* 明細ヘッダ下部 */}
       <Grid2 container px={2} my={0.5} alignItems={'center'} spacing={0.5}>
-        <Grid2 size={'grow'} />
         <Grid2 size={3}>
-          <TextFieldElement name={`meisaiHeads.${sectionNam}.${index}.biko1`} control={control} sx={{ width: 300 }} />
+          <TextFieldElement
+            name={`meisaiHeads.${sectionNam}.${index}.biko1`}
+            control={control}
+            fullWidth
+            placeholder="備考１"
+          />
         </Grid2>
+        <Grid2 size={'grow'} />
         <Grid2 size={1.5}>
           <Typography textAlign="end">小計</Typography>
         </Grid2>
@@ -167,10 +174,15 @@ export const MeisaiTblHeader = ({
         <Grid2 size={1} />
       </Grid2>
       <Grid2 container px={2} my={0.5} alignItems={'center'} spacing={0.5}>
-        <Grid2 size={'grow'} />
         <Grid2 size={3}>
-          <TextFieldElement name={`meisaiHeads.${sectionNam}.${index}.biko2`} control={control} sx={{ width: 300 }} />
+          <TextFieldElement
+            name={`meisaiHeads.${sectionNam}.${index}.biko2`}
+            control={control}
+            fullWidth
+            placeholder="備考２"
+          />
         </Grid2>
+        <Grid2 size={'grow'} />
         <Grid2 size={1.5}>
           <TextFieldElement name={`meisaiHeads.${sectionNam}.${index}.nebikiNam`} control={control} />
         </Grid2>
@@ -204,10 +216,15 @@ export const MeisaiTblHeader = ({
         <Grid2 size={1} />
       </Grid2>
       <Grid2 container px={2} my={0.5} alignItems={'center'} spacing={0.5}>
-        <Grid2 size={'grow'} />
         <Grid2 size={3}>
-          <TextFieldElement name={`meisaiHeads.${sectionNam}.${index}.biko3`} control={control} sx={{ width: 300 }} />
+          <TextFieldElement
+            name={`meisaiHeads.${sectionNam}.${index}.biko3`}
+            control={control}
+            fullWidth
+            placeholder="備考３"
+          />
         </Grid2>
+        <Grid2 size={'grow'} />
         <Grid2 size={1.5}>
           <TextFieldElement name={`meisaiHeads.${sectionNam}.${index}.nebikiAftNam`} control={control} />
         </Grid2>

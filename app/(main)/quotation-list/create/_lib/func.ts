@@ -93,6 +93,9 @@ export const addQuot = async (data: QuotHeadValues, user: string): Promise<numbe
       nebiki_aft_nam: l.nebikiAftNam,
       nebiki_aft_amt: l.nebikiAftAmt,
       dsp_ord_num: index + 1,
+      biko_1: l.biko1,
+      biko_2: l.biko2,
+      biko_3: l.biko3,
       add_dat: toJapanTimeString(),
       add_user: user,
     }));
