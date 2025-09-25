@@ -1,3 +1,4 @@
+import { toJapanDateString } from '../../_lib/date-conversion';
 import { getCustomerSelection } from '../../(masters)/_lib/funs';
 import { getMituStsSelection, getOrderForQuotation, getUsersSelection } from '../_lib/func';
 import { JuchuValues } from '../_lib/types';
@@ -40,39 +41,75 @@ const Page = async ({ searchParams }: { searchParams: Promise<{ [key: string]: s
           zeiKbn: null,
         }
       }
-      quot={{
-        mituHeadId: null,
-        juchuHeadId: null,
-        mituSts: null,
-        mituDat: new Date(),
-        mituHeadNam: '',
-        kokyaku: null,
-        nyuryokuUser: null,
-        mituRange: { strt: null, end: null },
-        kokyakuTantoNam: null,
-        koenNam: null,
-        koenbashoNam: null,
-        mituHonbanbiQty: null,
-        biko: null,
-        meisaiHeads: {
-          kizai: [
-            {
-              mituMeisaiHeadNam: null,
-              headNamDspFlg: false,
-              mituMeisaiKbn: 0,
-              meisai: [
-                {
-                  nam: null,
-                  qty: null,
-                  honbanbiQty: null,
-                  tankaAmt: null,
-                  shokeiAmt: null,
-                },
-              ],
-            },
-          ],
-        },
-      }}
+      quot={
+        order
+          ? {
+              mituHeadId: null,
+              juchuHeadId: order.juchuHeadId,
+              mituSts: null,
+              mituDat: new Date(),
+              mituHeadNam: null,
+              kokyaku: order.kokyaku.name,
+              nyuryokuUser: null,
+              mituRange: { strt: order.juchuRange.strt, end: order.juchuRange.end },
+              kokyakuTantoNam: order.kokyakuTantoNam,
+              koenNam: order.koenNam,
+              koenbashoNam: order.koenbashoNam,
+              mituHonbanbiQty: null,
+              biko: null,
+              meisaiHeads: {
+                kizai: [
+                  {
+                    mituMeisaiHeadNam: null,
+                    headNamDspFlg: false,
+                    mituMeisaiKbn: 0,
+                    meisai: [
+                      {
+                        nam: null,
+                        qty: null,
+                        honbanbiQty: null,
+                        tankaAmt: null,
+                        shokeiAmt: null,
+                      },
+                    ],
+                  },
+                ],
+              },
+            }
+          : {
+              mituHeadId: null,
+              juchuHeadId: null,
+              mituSts: null,
+              mituDat: new Date(),
+              mituHeadNam: '',
+              kokyaku: null,
+              nyuryokuUser: null,
+              mituRange: { strt: null, end: null },
+              kokyakuTantoNam: null,
+              koenNam: null,
+              koenbashoNam: null,
+              mituHonbanbiQty: null,
+              biko: null,
+              meisaiHeads: {
+                kizai: [
+                  {
+                    mituMeisaiHeadNam: null,
+                    headNamDspFlg: false,
+                    mituMeisaiKbn: 0,
+                    meisai: [
+                      {
+                        nam: null,
+                        qty: null,
+                        honbanbiQty: null,
+                        tankaAmt: null,
+                        shokeiAmt: null,
+                      },
+                    ],
+                  },
+                ],
+              },
+            }
+      }
     />
   );
 };
