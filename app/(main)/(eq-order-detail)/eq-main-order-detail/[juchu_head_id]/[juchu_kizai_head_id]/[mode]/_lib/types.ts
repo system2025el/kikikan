@@ -47,7 +47,7 @@ export type JuchuKizaiMeisaiValues = {
   juchuKizaiMeisaiId: number;
   idoDenId: number | null;
   sagyoDenDat: Date | null;
-  sagyoSijiId: string | null;
+  sagyoSijiId: number | null;
   shozokuId: number;
   shozokuNam: string;
   mem: string | null;
