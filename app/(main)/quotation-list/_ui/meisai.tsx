@@ -37,7 +37,7 @@ export const MeisaiLines = ({ index, sectionNam }: { index: number; sectionNam: 
       const honbanbiQty = Number(m.honbanbiQty) || 0;
       const tankaAmt = Number(m.tankaAmt) || 0;
       // 小計を計算
-      const theShokei = qty * honbanbiQty * tankaAmt;
+      const theShokei = (qty * (honbanbiQty * 1000) * tankaAmt) / 1000;
       // 現在の小計の値と比較し、異なっていればフォームの値を更新する
       // (無限ループを防ぐため、値が違う場合のみsetValueを実行)
       if (theShokei !== (Number(m.shokeiAmt) || 0)) {

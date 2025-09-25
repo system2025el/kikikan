@@ -161,7 +161,7 @@ export const Quotation = ({
     const sum = chukeiSum - (tokuNebikiAmt ?? 0);
     setPreTaxGokei(sum);
 
-    const zei = sum * ((zeiRat ?? 0) * 0.01);
+    const zei = (sum * (zeiRat ?? 0)) / 100;
     if (zei !== currentZeiAmt) {
       setValue('zeiAmt', zei === 0 ? null : zei);
     }
@@ -719,7 +719,20 @@ export const Quotation = ({
                     />
                   </Grid2>
                   <Grid2 size={1} display={'flex'}>
-                    <TextFieldElement name="zeiRat" control={control} />
+                    <TextFieldElement
+                      name="zeiRat"
+                      control={control}
+                      sx={{
+                        '& .MuiInputBase-input': {
+                          textAlign: 'right',
+                        },
+                        '& input[type=number]::-webkit-inner-spin-button': {
+                          WebkitAppearance: 'none',
+                          margin: 0,
+                        },
+                      }}
+                      type="number"
+                    />
                     <Typography alignSelf={'center'}>%</Typography>
                   </Grid2>
                 </Grid2>
