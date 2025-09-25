@@ -314,6 +314,12 @@ export const EquipmentKeepOrderDetail = (props: {
       if (JSON.stringify(originKeepJuchuKizaiMeisaiList) !== JSON.stringify(filterKeepJuchuKizaiMeisaiList)) {
         await saveKeepJuchuKizaiMeisai(data.juchuHeadId, data.juchuKizaiHeadId, userNam);
       }
+
+      // 受注コンテナ明細更新
+      const filterKeepJuchuContainerMeisaiList = keepJuchuContainerMeisaiList.filter((data) => !data.delFlag);
+      if (JSON.stringify(originKeepJuchuContainerMeisaiList) !== JSON.stringify(filterKeepJuchuContainerMeisaiList)) {
+        await saveKeepJuchuContainerMeisai(data.juchuHeadId, data.juchuKizaiHeadId, data.oyaJuchuKizaiHeadId, userNam);
+      }
     }
     setSave(true);
     setIsSave(true);
@@ -480,12 +486,12 @@ export const EquipmentKeepOrderDetail = (props: {
         juchuKizaiHeadId,
         deleteKeepJuchuContainerMeisaiIds
       );
-      console.log('返却受注コンテナ明細削除', deleteContainerMeisaiResult);
+      console.log('キープ受注コンテナ明細削除', deleteContainerMeisaiResult);
     }
 
     if (addKeepJuchuContainerMeisaiData.length > 0) {
       const addContainerMeisaiResult = addKeepJuchuContainerMeisai(addKeepJuchuContainerMeisaiData, userNam);
-      console.log('返却受注コンテナ明細追加', addContainerMeisaiResult);
+      console.log('キープ受注コンテナ明細追加', addContainerMeisaiResult);
     }
 
     if (updateKeepJuchuContainerMeisaiData.length > 0) {
@@ -493,7 +499,7 @@ export const EquipmentKeepOrderDetail = (props: {
         updateKeepJuchuContainerMeisaiData,
         userNam
       );
-      console.log('返却受注コンテナ明細更新', updateContainerMeisaiResult);
+      console.log('キープ受注コンテナ明細更新', updateContainerMeisaiResult);
     }
 
     const keepJuchuContainerMeisaiData = await getKeepJuchuContainerMeisai(
