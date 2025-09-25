@@ -26,7 +26,7 @@ import React, { useRef, useState } from 'react';
 import { MemoTooltip } from '@/app/(main)/(eq-order-detail)/_ui/memo-tooltip';
 
 import { getDateHeaderBackgroundColor, getDateRowBackgroundColor } from '../_lib/colorselect';
-import { KeepJuchuKizaiMeisaiValues } from '../_lib/types';
+import { KeepJuchuContainerMeisaiValues, KeepJuchuKizaiMeisaiValues } from '../_lib/types';
 
 type KeepEqTableProps = {
   rows: KeepJuchuKizaiMeisaiValues[];
@@ -241,6 +241,230 @@ const KeepEqTableRow = React.memo(
 );
 
 KeepEqTableRow.displayName = 'KeepEqTableRow';
+
+export const KeepContainerTable = (props: {
+  rows: KeepJuchuContainerMeisaiValues[];
+  edit: boolean;
+  handleContainerMemoChange: (kizaiId: number, memo: string) => void;
+  onChange: (kizaiId: number, kicsValue: number, yardValue: number) => void;
+  handleContainerDelete: (kizaiId: number) => void;
+}) => {
+  const { rows, edit, handleContainerMemoChange, onChange, handleContainerDelete } = props;
+
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  const visibleRows = rows.filter((row) => !row.delFlag);
+
+  const handlePlanKicsKizaiQtyChange = (kizaiId: number, newValue: number) => {
+    const yardKeepQty = rows.find((row) => row.kizaiId === kizaiId && !row.delFlag)?.yardKeepQty || 0;
+    onChange(kizaiId, newValue, yardKeepQty);
+  };
+
+  const handlePlanYardKizaiQtyChange = (kizaiId: number, newValue: number) => {
+    const kicsKeepQty = rows.find((row) => row.kizaiId === kizaiId)?.kicsKeepQty || 0;
+    onChange(kizaiId, kicsKeepQty, newValue);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent, rowIndex: number, cellNum: number) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      inputRefs.current[2 * rowIndex + cellNum + 1]?.focus();
+    }
+  };
+
+  const handleContainerRef = (el: HTMLInputElement | null, rowIndex: number, cellNum: number) => {
+    inputRefs.current[2 * rowIndex + cellNum] = el;
+  };
+
+  return (
+    <TableContainer component={Paper} style={{ overflow: 'auto', maxHeight: '80vh' }}>
+      <Table stickyHeader>
+        <TableHead>
+          <TableRow>
+            <TableCell size="small" sx={{ bgcolor: 'white', position: 'sticky', top: 0, zIndex: 2 }}></TableCell>
+            <TableCell size="small" sx={{ bgcolor: 'white', position: 'sticky', top: 0, zIndex: 2 }}></TableCell>
+            <TableCell size="small" sx={{ bgcolor: 'white', position: 'sticky', top: 0, zIndex: 2 }}></TableCell>
+            <TableCell size="small" sx={{ bgcolor: 'white', position: 'sticky', top: 0, zIndex: 2 }}></TableCell>
+            <TableCell
+              align="center"
+              size="small"
+              style={styles.header}
+              sx={{ position: 'sticky', top: 0, zIndex: 2 }}
+              colSpan={2}
+            >
+              親伝票
+            </TableCell>
+            <TableCell
+              align="center"
+              size="small"
+              style={styles.header}
+              sx={{ position: 'sticky', top: 0, zIndex: 2, bgcolor: 'green' }}
+              colSpan={2}
+            >
+              キープ数
+            </TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }} />
+            <TableCell size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }} />
+            <TableCell align="left" size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
+              キープメモ
+            </TableCell>
+            <TableCell align="left" size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
+              機材名
+            </TableCell>
+            <TableCell align="right" size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
+              K
+            </TableCell>
+            <TableCell align="right" size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
+              Y
+            </TableCell>
+            <TableCell align="right" size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
+              K
+            </TableCell>
+            <TableCell align="right" size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
+              Y
+            </TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {visibleRows.map((row, rowIndex) => (
+            <TableRow key={rowIndex}>
+              <TableCell align="center" width={'min-content'} sx={{ padding: 0, border: '1px solid black' }}>
+                <IconButton
+                  onClick={() => handleContainerDelete(row.kizaiId)}
+                  sx={{ padding: 0, color: 'red' }}
+                  disabled={!edit}
+                >
+                  <Delete fontSize="small" />
+                </IconButton>
+              </TableCell>
+              <TableCell
+                align="right"
+                size="small"
+                sx={{ bgcolor: grey[200], py: 0, px: 1, border: '1px solid black' }}
+              >
+                {rowIndex + 1}
+              </TableCell>
+              <TableCell style={styles.row} align="center" size="small">
+                <MemoTooltip
+                  name={row.kizaiNam}
+                  memo={row.mem ? row.mem : ''}
+                  handleMemoChange={handleContainerMemoChange}
+                  kizaiId={row.kizaiId}
+                  disabled={!edit}
+                />
+              </TableCell>
+              <TableCell style={styles.row} align="left" size="small">
+                <Button
+                  variant="text"
+                  sx={{ p: 0, justifyContent: 'start' }}
+                  onClick={() => window.open(`/loan-situation/${row.kizaiId}`)}
+                >
+                  {row.kizaiNam}
+                </Button>
+              </TableCell>
+              <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
+                {row.oyaPlanKicsKizaiQty}
+              </TableCell>
+              <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
+                {row.oyaPlanYardKizaiQty}
+              </TableCell>
+              <TableCell style={styles.row} align="right" size="small">
+                <TextField
+                  variant="standard"
+                  value={row.kicsKeepQty}
+                  type="text"
+                  onChange={(e) => {
+                    if (/^\d*$/.test(e.target.value) && Number(e.target.value) <= (row.oyaPlanKicsKizaiQty ?? 0)) {
+                      handlePlanKicsKizaiQtyChange(row.kizaiId, Number(e.target.value));
+                    }
+                  }}
+                  sx={{
+                    '& .MuiInputBase-input': {
+                      textAlign: 'right',
+                      padding: 0,
+                      fontSize: 'small',
+                      width: 60,
+                    },
+                    '& input[type=number]': {
+                      MozAppearance: 'textfield',
+                    },
+                    '& input[type=number]::-webkit-outer-spin-button': {
+                      WebkitAppearance: 'none',
+                      margin: 0,
+                    },
+                    '& input[type=number]::-webkit-inner-spin-button': {
+                      WebkitAppearance: 'none',
+                      margin: 0,
+                    },
+                  }}
+                  slotProps={{
+                    input: {
+                      style: { textAlign: 'right' },
+                      disableUnderline: true,
+                      inputMode: 'numeric',
+                    },
+                  }}
+                  inputRef={(el) => handleContainerRef(el, rowIndex, 0)}
+                  onKeyDown={(e) => {
+                    handleKeyDown(e, rowIndex, 0);
+                  }}
+                  onFocus={(e) => e.target.select()}
+                  disabled={!edit}
+                />
+              </TableCell>
+              <TableCell style={styles.row} align="right" size="small">
+                <TextField
+                  variant="standard"
+                  value={row.yardKeepQty}
+                  type="text"
+                  onChange={(e) => {
+                    if (/^\d*$/.test(e.target.value) && Number(e.target.value) <= (row.oyaPlanYardKizaiQty ?? 0)) {
+                      handlePlanYardKizaiQtyChange(row.kizaiId, Number(e.target.value));
+                    }
+                  }}
+                  sx={{
+                    '& .MuiInputBase-input': {
+                      textAlign: 'right',
+                      padding: 0,
+                      fontSize: 'small',
+                      width: 60,
+                    },
+                    '& input[type=number]': {
+                      MozAppearance: 'textfield',
+                    },
+                    '& input[type=number]::-webkit-outer-spin-button': {
+                      WebkitAppearance: 'none',
+                      margin: 0,
+                    },
+                    '& input[type=number]::-webkit-inner-spin-button': {
+                      WebkitAppearance: 'none',
+                      margin: 0,
+                    },
+                  }}
+                  slotProps={{
+                    input: {
+                      style: { textAlign: 'right' },
+                      disableUnderline: true,
+                      inputMode: 'numeric',
+                    },
+                  }}
+                  inputRef={(el) => handleContainerRef(el, rowIndex, 1)}
+                  onKeyDown={(e) => {
+                    handleKeyDown(e, rowIndex, 1);
+                  }}
+                  onFocus={(e) => e.target.select()}
+                  disabled={!edit}
+                />
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+};
 
 /* style
 ---------------------------------------------------------------------------------------------------- */

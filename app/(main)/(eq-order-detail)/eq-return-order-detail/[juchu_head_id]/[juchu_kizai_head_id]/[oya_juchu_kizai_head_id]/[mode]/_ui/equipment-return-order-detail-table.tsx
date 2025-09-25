@@ -508,7 +508,7 @@ export const ReturnContainerTable = (props: {
             <TableCell size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }} />
             <TableCell size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }} />
             <TableCell align="left" size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
-              メモ
+              返却メモ
             </TableCell>
             <TableCell align="left" size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
               機材名
@@ -588,6 +588,7 @@ export const ReturnContainerTable = (props: {
                       textAlign: 'right',
                       padding: 0,
                       fontSize: 'small',
+                      width: 60,
                       color: 'red',
                     },
                     '& input[type=number]': {
@@ -635,6 +636,7 @@ export const ReturnContainerTable = (props: {
                       textAlign: 'right',
                       padding: 0,
                       fontSize: 'small',
+                      width: 60,
                       color: 'red',
                     },
                     '& input[type=number]': {

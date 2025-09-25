@@ -52,3 +52,18 @@ export type KeepJuchuKizaiMeisaiValues = {
   delFlag: boolean;
   saveFlag: boolean;
 };
+
+export type KeepJuchuContainerMeisaiValues = {
+  juchuHeadId: number;
+  juchuKizaiHeadId: number;
+  juchuKizaiMeisaiId: number;
+  mem: string | null;
+  kizaiId: number;
+  kizaiNam: string;
+  oyaPlanKicsKizaiQty: number | null;
+  oyaPlanYardKizaiQty: number | null;
+  kicsKeepQty: number | null;
+  yardKeepQty: number | null;
+  delFlag: boolean;
+  saveFlag: boolean;
+};

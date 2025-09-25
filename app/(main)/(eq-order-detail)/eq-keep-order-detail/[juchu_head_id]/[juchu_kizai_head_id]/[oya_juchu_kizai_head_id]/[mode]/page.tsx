@@ -1,8 +1,8 @@
 import { getNyukoDate, getShukoDate } from '@/app/(main)/_lib/date-funcs';
 
 import { getDetailJuchuHead, getJuchuKizaiNyushuko } from '../../../../../_lib/funcs';
-import { getKeepJuchuKizaiHead, getKeepJuchuKizaiMeisai } from './_lib/funcs';
-import { KeepJuchuKizaiHeadValues, KeepJuchuKizaiMeisaiValues } from './_lib/types';
+import { getKeepJuchuContainerMeisai, getKeepJuchuKizaiHead, getKeepJuchuKizaiMeisai } from './_lib/funcs';
+import { KeepJuchuContainerMeisaiValues, KeepJuchuKizaiHeadValues, KeepJuchuKizaiMeisaiValues } from './_lib/types';
 import { EquipmentKeepOrderDetail } from './_ui/equipment-keep-order-detail';
 
 const Page = async (props: {
@@ -61,6 +61,9 @@ const Page = async (props: {
     // キープ受注機材明細データ(初期値)
     const newKeepJuchuKizaiMeisaiData: KeepJuchuKizaiMeisaiValues[] = [];
 
+    // キープ受注コンテナ明細データ(初期値)
+    const newKeepJuchuContainerMeisaiData: KeepJuchuContainerMeisaiValues[] = [];
+
     // キープ出庫日(初期値)
     const keepShukoDate = null;
     // キープ入庫日(初期値)
@@ -72,6 +75,7 @@ const Page = async (props: {
         oyaJuchuKizaiHeadData={oyaJuchuKizaiNyushukoData}
         keepJuchuKizaiHeadData={newKeepJuchuKizaiHeadData}
         keepJuchuKizaiMeisaiData={newKeepJuchuKizaiMeisaiData}
+        keepJuchuContainerMeisaiData={newKeepJuchuContainerMeisaiData}
         oyaShukoDate={oyaShukoDate}
         oyaNyukoDate={oyaNyukoDate}
         keepShukoDate={keepShukoDate}
@@ -101,6 +105,16 @@ const Page = async (props: {
     console.log('----------------------------受注機材明細---------------------------------');
     console.timeEnd();
 
+    // キープ受注コンテナ明細データ
+    console.time();
+    const keepJuchuContainerMeisaiData = await getKeepJuchuContainerMeisai(
+      params.juchu_head_id,
+      params.juchu_kizai_head_id,
+      params.oya_juchu_kizai_head_id
+    );
+    console.log('----------------------------受注コンテナ明細---------------------------------');
+    console.timeEnd();
+
     // キープ出庫日
     const keepShukoDate = getShukoDate(
       keepJuchuKizaiHeadData.kicsShukoDat && new Date(keepJuchuKizaiHeadData.kicsShukoDat),
@@ -118,6 +132,7 @@ const Page = async (props: {
         oyaJuchuKizaiHeadData={oyaJuchuKizaiNyushukoData}
         keepJuchuKizaiHeadData={keepJuchuKizaiHeadData}
         keepJuchuKizaiMeisaiData={juchuKizaiMeisaiData}
+        keepJuchuContainerMeisaiData={keepJuchuContainerMeisaiData}
         oyaShukoDate={oyaShukoDate}
         oyaNyukoDate={oyaNyukoDate}
         keepShukoDate={keepShukoDate}

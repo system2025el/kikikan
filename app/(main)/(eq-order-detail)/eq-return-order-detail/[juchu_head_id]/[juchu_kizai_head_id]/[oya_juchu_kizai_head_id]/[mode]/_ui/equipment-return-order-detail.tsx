@@ -1011,6 +1011,7 @@ export const EquipmentReturnOrderDetail = (props: {
       reset();
       setSelectDate(oyaShukoDate ?? new Date());
       setReturnJuchuKizaiMeisaiList(originReturnJuchuKizaiMeisaiList);
+      setReturnJuchuContainerMeisaiList(originReturnJuchuContainerMeisaiList);
       setOriginReturnPlanQty(originReturnJuchuKizaiMeisaiList.map((data) => data.planQty ?? 0));
       setEqStockList(originEqStockList);
       setDirtyOpen(false);
