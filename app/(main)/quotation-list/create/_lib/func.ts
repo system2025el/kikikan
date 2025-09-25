@@ -79,6 +79,7 @@ export const addQuot = async (data: QuotHeadValues, user: string): Promise<numbe
       gokei_amt: data.gokeiAmt,
       add_dat: toJapanTimeString(),
       add_user: user,
+      kizai_chukei_mei: data.kizaiChukeiMei,
     };
     // 明細ヘッド
     const meisaiHeads: MituMeisaiHead[] = meisaiheadList.map((l, index) => ({

@@ -1550,6 +1550,7 @@ export type Database = {
           upd_user: string | null;
           zei_amt: number | null;
           zei_rat: number | null;
+          kizai_chukei_mei?: string | null;
         };
         Insert: {
           add_dat?: string | null;
@@ -1582,6 +1583,7 @@ export type Database = {
           upd_user?: string | null;
           zei_amt?: number | null;
           zei_rat?: number | null;
+          kizai_chukei_mei?: string | null;
         };
         Update: {
           add_dat?: string | null;

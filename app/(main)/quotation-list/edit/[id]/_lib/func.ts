@@ -74,6 +74,7 @@ export const updateQuot = async (data: QuotHeadValues, user: string): Promise<nu
     gokei_amt: data.gokeiAmt,
     upd_dat: toJapanTimeString(),
     upd_user: user,
+    kizai_chukei_mei: data.kizaiChukeiMei,
   };
   // 明細ヘッド
   console.log(`======================================${meisaiheadList}`);
