@@ -1,7 +1,7 @@
 'use client';
 
 import SearchIcon from '@mui/icons-material/Search';
-import { Autocomplete,Box, Button, Container, Divider, Grid2, Paper, TextField, Typography } from '@mui/material';
+import { Autocomplete, Box, Button, Container, Divider, Grid2, Paper, TextField, Typography } from '@mui/material';
 import { SetStateAction, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { CheckboxButtonGroup, SelectElement, TextFieldElement } from 'react-hook-form-mui';
@@ -96,7 +96,13 @@ export const BillingStsList = ({ custs }: { custs: SelectTypes[] }) => {
           </form>
         </Box>
       </Paper>
-      <BillingStsListTable isLoading={isLoading} page={page} setIsLoading={setIsLoading} setPage={setPage} />
+      <BillingStsListTable
+        isLoading={isLoading}
+        page={page}
+        custs={custs}
+        setIsLoading={setIsLoading}
+        setPage={setPage}
+      />
     </Container>
   );
 };

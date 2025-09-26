@@ -67,10 +67,6 @@ export const QuotationListTable = ({
   const [dialogOpen, setDialogOpen] = useState(false);
 
   /* methods ------------------------------------- */
-  /* 新規見積ボタン押下 */
-  const clickCreateQuotation = () => {
-    setDialogOpen(true);
-  };
   /* 自動生成ボタン押下 */
   const onSubmit = (data: { juchuHeadId: number | null }) => {
     console.log(data.juchuHeadId, 'の見積もりを自動生成');
@@ -113,7 +109,7 @@ export const QuotationListTable = ({
           <Grid2 container spacing={1}>
             <Grid2 container spacing={1}>
               <Grid2>
-                <Button onClick={() => clickCreateQuotation()}>
+                <Button onClick={() => setDialogOpen(true)}>
                   <AddIcon fontSize="small" />
                   新規見積
                 </Button>
