@@ -159,6 +159,7 @@ export const QuotHeadSchema = z.object({
     .string()
     .max(10, { message: validationMessages.maxStringLength(10) })
     .nullish(),
+  kizaiChukeiAmt: z.number().nullish(),
   chukeiMei: z
     .string()
     .max(10, { message: validationMessages.maxStringLength(10) })
@@ -172,6 +173,7 @@ export const QuotHeadSchema = z.object({
     .number({ message: validationMessages.number() })
     .max(999999999, { message: validationMessages.maxNumberLength(9) })
     .nullish(),
+  preTaxGokeiAmt: z.number().nullish(),
   zeiAmt: z
     .number({ message: validationMessages.number() })
     .max(999999999999, { message: validationMessages.maxNumberLength(12) })

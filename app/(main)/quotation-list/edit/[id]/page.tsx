@@ -2,43 +2,20 @@ import { getCustomerSelection } from '@/app/(main)/(masters)/_lib/funs';
 
 import { getChosenQuot, getMituStsSelection, getUsersSelection } from '../../_lib/func';
 import { Quotation } from '../../_ui/quotation';
+import { QuotHeadValues } from '../../_lib/types';
 
 const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
   const param = await params;
   const quotId = Number(param.id);
   const data = await getChosenQuot(quotId);
-  const quot = data.m ?? {
-    mituHeadId: null,
-    juchuHeadId: null,
-    mituSts: null,
-    mituDat: new Date(),
-    mituHeadNam: '',
-    kokyaku: null,
-    nyuryokuUser: null,
-    mituRange: { strt: null, end: null },
-    kokyakuTantoNam: null,
-    koenNam: null,
-    koenbashoNam: null,
-    mituHonbanbiQty: null,
-    biko: null,
-    meisaiHeads: {
-      kizai: [
-        {
-          mituMeisaiHeadNam: null,
-          headNamDspFlg: false,
-          mituMeisaiKbn: 0,
-          meisai: [
-            {
-              nam: null,
-              qty: null,
-              honbanbiQty: null,
-              tankaAmt: null,
-              shokeiAmt: null,
-            },
-          ],
-        },
-      ],
-    },
+  const quot: QuotHeadValues = {
+    ...data.m,
+    kizaiChukeiAmt: (data.m.meisaiHeads?.kizai ?? []).reduce((acc, item) => acc + (item.nebikiAftAmt ?? 0), 0),
+    preTaxGokeiAmt:
+      (data.m.meisaiHeads?.kizai ?? []).reduce((acc, item) => acc + (item.nebikiAftAmt ?? 0), 0) +
+      (data.m.meisaiHeads?.labor ?? []).reduce((acc, item) => acc + (item.nebikiAftAmt ?? 0), 0) +
+      (data.m.meisaiHeads?.other ?? []).reduce((acc, item) => acc + (item.nebikiAftAmt ?? 0), 0) -
+      (data.m.tokuNebikiAmt ?? 0),
   };
   const order = data.j ?? {
     juchuHeadId: null,

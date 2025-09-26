@@ -4,8 +4,16 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Box, Button, Grid2, IconButton, Select, TextField, Typography } from '@mui/material';
-import { useEffect } from 'react';
-import { Control, useFieldArray, useFormContext, UseFormSetValue, UseFormWatch, useWatch } from 'react-hook-form';
+import { useEffect, useState } from 'react';
+import {
+  Control,
+  Controller,
+  useFieldArray,
+  useFormContext,
+  UseFormSetValue,
+  UseFormWatch,
+  useWatch,
+} from 'react-hook-form';
 import { SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
 import { QuotHeadValues, QuotMaisaiHeadValues } from '../_lib/types';
@@ -16,6 +24,7 @@ import { QuotHeadValues, QuotMaisaiHeadValues } from '../_lib/types';
  * @returns 見積の明細項目のUIコンポーネント
  */
 export const MeisaiLines = ({ index, sectionNam }: { index: number; sectionNam: 'kizai' | 'labor' | 'other' }) => {
+  const [isEditing, setIsEditing] = useState(false);
   const { control, setValue } = useFormContext<QuotHeadValues>();
   // フォームのフィールド（明細）
   const meisaiFields = useFieldArray({ control, name: `meisaiHeads.${sectionNam}.${index}.meisai` });
@@ -109,35 +118,121 @@ export const MeisaiLines = ({ index, sectionNam }: { index: number; sectionNam: 
               />
             </Grid2>
             <Grid2 size={1.5}>
-              <TextFieldElement
+              <Controller
                 name={`meisaiHeads.${sectionNam}.${index}.meisai.${i}.tankaAmt`}
                 control={control}
-                sx={{
-                  '& .MuiInputBase-input': {
-                    textAlign: 'right',
-                  },
-                  '& input[type=number]::-webkit-inner-spin-button': {
-                    WebkitAppearance: 'none',
-                    margin: 0,
-                  },
-                }}
-                type="number"
+                render={({ field, fieldState }) => (
+                  <TextField
+                    {...field}
+                    value={
+                      isEditing
+                        ? (field.value ?? '')
+                        : typeof field.value === 'number' && !isNaN(field.value)
+                          ? `¥${Math.abs(field.value).toLocaleString()}`
+                          : `¥0`
+                    }
+                    type="text"
+                    onFocus={(e) => {
+                      setIsEditing(true);
+                      const rawValue = String(field.value ?? '');
+                      e.target.value = rawValue;
+                    }}
+                    onBlur={(e) => {
+                      const rawValue = e.target.value.replace(/[¥,]/g, '');
+                      const numericValue = Math.abs(Number(rawValue));
+                      field.onChange(numericValue);
+                      setIsEditing(false);
+                    }}
+                    onChange={(e) => {
+                      const raw = e.target.value.replace(/[^\d]/g, '');
+                      if (/^\d*$/.test(raw)) {
+                        field.onChange(Number(raw));
+                        e.target.value = raw;
+                      }
+                    }}
+                    sx={{
+                      '.MuiOutlinedInput-notchedOutline': {
+                        borderColor: fieldState.error?.message && 'red',
+                      },
+                      '.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                        borderColor: fieldState.error?.message && 'red',
+                      },
+                      '&:hover .MuiOutlinedInput-notchedOutline': {
+                        borderColor: fieldState.error?.message && 'red',
+                      },
+                      '& .MuiInputBase-input': {
+                        textAlign: 'right',
+                      },
+                      '.MuiFormHelperText-root': {
+                        color: 'red',
+                      },
+                      '& input[type=number]::-webkit-inner-spin-button': {
+                        WebkitAppearance: 'none',
+                        margin: 0,
+                      },
+                    }}
+                    helperText={fieldState.error?.message}
+                  />
+                )}
               />
             </Grid2>
             <Grid2 size={2}>
-              <TextFieldElement
+              <Controller
                 name={`meisaiHeads.${sectionNam}.${index}.meisai.${i}.shokeiAmt`}
                 control={control}
-                sx={{
-                  '& .MuiInputBase-input': {
-                    textAlign: 'right',
-                  },
-                  '& input[type=number]::-webkit-inner-spin-button': {
-                    WebkitAppearance: 'none',
-                    margin: 0,
-                  },
-                }}
-                type="number"
+                render={({ field, fieldState }) => (
+                  <TextField
+                    {...field}
+                    value={
+                      isEditing
+                        ? (field.value ?? '')
+                        : typeof field.value === 'number' && !isNaN(field.value)
+                          ? `¥${Math.abs(field.value).toLocaleString()}`
+                          : `¥0`
+                    }
+                    type="text"
+                    onFocus={(e) => {
+                      setIsEditing(true);
+                      const rawValue = String(field.value ?? '');
+                      e.target.value = rawValue;
+                    }}
+                    onBlur={(e) => {
+                      const rawValue = e.target.value.replace(/[¥,]/g, '');
+                      const numericValue = Math.abs(Number(rawValue));
+                      field.onChange(numericValue);
+                      setIsEditing(false);
+                    }}
+                    onChange={(e) => {
+                      const raw = e.target.value.replace(/[^\d]/g, '');
+                      if (/^\d*$/.test(raw)) {
+                        field.onChange(Number(raw));
+                        e.target.value = raw;
+                      }
+                    }}
+                    sx={{
+                      '.MuiOutlinedInput-notchedOutline': {
+                        borderColor: fieldState.error?.message && 'red',
+                      },
+                      '.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                        borderColor: fieldState.error?.message && 'red',
+                      },
+                      '&:hover .MuiOutlinedInput-notchedOutline': {
+                        borderColor: fieldState.error?.message && 'red',
+                      },
+                      '& .MuiInputBase-input': {
+                        textAlign: 'right',
+                      },
+                      '.MuiFormHelperText-root': {
+                        color: 'red',
+                      },
+                      '& input[type=number]::-webkit-inner-spin-button': {
+                        WebkitAppearance: 'none',
+                        margin: 0,
+                      },
+                    }}
+                    helperText={fieldState.error?.message}
+                  />
+                )}
               />
             </Grid2>
             <Grid2 size={1}>
