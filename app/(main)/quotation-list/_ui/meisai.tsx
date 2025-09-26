@@ -17,6 +17,7 @@ import {
 import { SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
 import { QuotHeadValues, QuotMaisaiHeadValues } from '../_lib/types';
+import { ReadOnlyYenNumberElement } from './quotation';
 
 /**
  * 動的フォーム（見積の明細項目部分）
@@ -177,63 +178,7 @@ export const MeisaiLines = ({ index, sectionNam }: { index: number; sectionNam: 
               />
             </Grid2>
             <Grid2 size={2}>
-              <Controller
-                name={`meisaiHeads.${sectionNam}.${index}.meisai.${i}.shokeiAmt`}
-                control={control}
-                render={({ field, fieldState }) => (
-                  <TextField
-                    {...field}
-                    value={
-                      isEditing
-                        ? (field.value ?? '')
-                        : typeof field.value === 'number' && !isNaN(field.value)
-                          ? `¥${Math.abs(field.value).toLocaleString()}`
-                          : `¥0`
-                    }
-                    type="text"
-                    onFocus={(e) => {
-                      setIsEditing(true);
-                      const rawValue = String(field.value ?? '');
-                      e.target.value = rawValue;
-                    }}
-                    onBlur={(e) => {
-                      const rawValue = e.target.value.replace(/[¥,]/g, '');
-                      const numericValue = Math.abs(Number(rawValue));
-                      field.onChange(numericValue);
-                      setIsEditing(false);
-                    }}
-                    onChange={(e) => {
-                      const raw = e.target.value.replace(/[^\d]/g, '');
-                      if (/^\d*$/.test(raw)) {
-                        field.onChange(Number(raw));
-                        e.target.value = raw;
-                      }
-                    }}
-                    sx={{
-                      '.MuiOutlinedInput-notchedOutline': {
-                        borderColor: fieldState.error?.message && 'red',
-                      },
-                      '.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                        borderColor: fieldState.error?.message && 'red',
-                      },
-                      '&:hover .MuiOutlinedInput-notchedOutline': {
-                        borderColor: fieldState.error?.message && 'red',
-                      },
-                      '& .MuiInputBase-input': {
-                        textAlign: 'right',
-                      },
-                      '.MuiFormHelperText-root': {
-                        color: 'red',
-                      },
-                      '& input[type=number]::-webkit-inner-spin-button': {
-                        WebkitAppearance: 'none',
-                        margin: 0,
-                      },
-                    }}
-                    helperText={fieldState.error?.message}
-                  />
-                )}
-              />
+              <ReadOnlyYenNumberElement name={`meisaiHeads.${sectionNam}.${index}.meisai.${i}.shokeiAmt`} />
             </Grid2>
             <Grid2 size={1}>
               <IconButton

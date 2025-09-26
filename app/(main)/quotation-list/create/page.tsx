@@ -40,26 +40,7 @@ const Page = async ({ searchParams }: { searchParams: Promise<{ [key: string]: s
         kizaiChukeiMei: '中計',
         chukeiMei: '中計',
         tokuNebikiMei: '特別値引き',
-        meisaiHeads: {
-          kizai: [
-            {
-              mituMeisaiHeadNam: null,
-              headNamDspFlg: false,
-              mituMeisaiKbn: 0,
-              nebikiNam: '値引き',
-              nebikiAftNam: '機材費',
-              meisai: [
-                {
-                  nam: null,
-                  qty: null,
-                  honbanbiQty: null,
-                  tankaAmt: null,
-                  shokeiAmt: null,
-                },
-              ],
-            },
-          ],
-        },
+        meisaiHeads: {},
       }
     : {
         mituHeadId: null,
@@ -76,26 +57,7 @@ const Page = async ({ searchParams }: { searchParams: Promise<{ [key: string]: s
         mituHonbanbiQty: null,
         biko: null,
         chukeiMei: '中計',
-        meisaiHeads: {
-          kizai: [
-            {
-              mituMeisaiHeadNam: null,
-              headNamDspFlg: false,
-              mituMeisaiKbn: 0,
-              nebikiNam: '値引き',
-              nebikiAftNam: '機材費',
-              meisai: [
-                {
-                  nam: null,
-                  qty: null,
-                  honbanbiQty: null,
-                  tankaAmt: null,
-                  shokeiAmt: null,
-                },
-              ],
-            },
-          ],
-        },
+        meisaiHeads: {},
       };
 
   return (
