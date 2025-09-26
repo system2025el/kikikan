@@ -170,3 +170,17 @@ export const selectBundledEqpts = async (setIds: number[]) => {
     throw e;
   }
 };
+
+export const selectMeisaiEqts = async (ids: number[]) => {
+  try {
+    return await supabase
+      .schema(SCHEMA)
+      .from('m_kizai')
+      .select('kizai_id, shozoku_id')
+      .in('kizai_id', ids)
+      .eq('del_flg', 0)
+      .eq('dsp_flg', 1);
+  } catch (e) {
+    throw e;
+  }
+};
