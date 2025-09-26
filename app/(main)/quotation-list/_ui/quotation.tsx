@@ -427,50 +427,18 @@ export const Quotation = ({
                   </Box>
                   <Box sx={styles.container}>
                     <Typography marginRight={5}>本番日数</Typography>
-                    <Controller
-                      name="mituHonbanbiQty" // TextFieldElementと同じnameを指定
+                    <TextFieldElement
+                      name="mituHonbanbiQty"
                       control={control}
-                      render={({ field, fieldState: { error } }) => {
-                        // フォームの状態から来た値
-                        const valueAsNumber = Number(field.value);
-
-                        // ユーザーへの表示用の値を作成
-                        const displayValue =
-                          !isNaN(valueAsNumber) && valueAsNumber !== 0
-                            ? valueAsNumber.toLocaleString() // 3桁区切り
-                            : ''; // 0やNaNの場合は空文字にする（入力しやすくするため）
-
-                        return (
-                          <TextField
-                            {...field} // onBlur, ref などを展開
-                            type="text" // numberではなくtextにすることで、カンマの入力を許容
-                            fullWidth // 必要に応じて
-                            sx={{
-                              width: 120,
-                              '& .MuiInputBase-input': {
-                                textAlign: 'right',
-                              },
-                            }}
-                            // 表示する値をフォーマット済みのものに上書き
-                            value={displayValue}
-                            // 入力が変更されたときの処理
-                            onChange={(e) => {
-                              // 入力から数字とマイナス記号以外を取り除く
-                              const rawValue = e.target.value;
-                              const numValue = parseInt(rawValue.replace(/[^0-9-]/g, ''), 10);
-
-                              // 数字に変換できればフォームの状態を更新、できなければ何もしない( or 0をセット)
-                              field.onChange(isNaN(numValue) ? '' : numValue);
-                            }}
-                            // エラー表示
-                            error={!!error}
-                            helperText={error?.message}
-                            // 「¥」マークを先頭に付ける
-                            InputProps={{
-                              startAdornment: <InputAdornment position="start">¥</InputAdornment>,
-                            }}
-                          />
-                        );
+                      sx={{
+                        width: 120,
+                        '& .MuiInputBase-input': {
+                          textAlign: 'right',
+                        },
+                        '& input[type=number]::-webkit-inner-spin-button': {
+                          WebkitAppearance: 'none',
+                          margin: 0,
+                        },
                       }}
                     />
                   </Box>
