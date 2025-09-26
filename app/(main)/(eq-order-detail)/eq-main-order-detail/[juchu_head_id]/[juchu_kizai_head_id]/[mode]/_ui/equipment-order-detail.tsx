@@ -68,16 +68,19 @@ import {
   addIdoDen,
   addJuchuKizaiHead,
   addJuchuKizaiMeisai,
+  addNyushukoDen,
   confirmHonbanbi,
   delHonbanbi,
   delIdoDen,
   delJuchuKizaiMeisai,
+  delNyushukoDen,
   getIdoDenMaxId,
   getJuchuKizaiMeisai,
   updHonbanbi,
   updIdoDen,
   updJuchuKizaiHead,
   updJuchuKizaiMeisai,
+  updNyushukoDen,
   updNyushukoHonbanbi,
 } from '../_lib/funcs';
 import {
@@ -89,7 +92,7 @@ import {
   SelectedEqptsValues,
   StockTableValues,
 } from '../_lib/types';
-import { MoveAlertDialog, SaveAlertDialog } from './caveat-dialog';
+import { MoveAlertDialog, NyushukoAlertDialog, SaveAlertDialog } from './caveat-dialog';
 import { DateSelectDialog } from './date-selection-dialog';
 import { ContainerTable, EqTable, StockTable } from './equipment-order-detail-table';
 import { EqptSelectionDialog } from './equipment-selection-dailog';
@@ -171,12 +174,14 @@ const EquipmentOrderDetail = (props: {
   // 移動日
   const [idoDat, setIdoDat] = useState<Date | null>(null);
 
-  // 未保存ダイアログを出すかどうか
+  // 未保存ダイアログ制御
   const [saveOpen, setSaveOpen] = useState(false);
-  // 編集内容が未保存ダイアログを出すかどうか
+  // 編集内容が未保存ダイアログ制御
   const [dirtyOpen, setDirtyOpen] = useState(false);
-  // 移動日更新ダイアログを出すかどうか
+  // 移動日更新ダイアログ制御
   const [moveOpen, setMoveOpen] = useState(false);
+  // 入出庫日時ダイアログ制御
+  const [nyushukoOpen, setNyushukoOpen] = useState(false);
   // 機材追加ダイアログ制御
   const [EqSelectionDialogOpen, setEqSelectionDialogOpen] = useState(false);
   // 日付選択カレンダーダイアログ制御
@@ -220,6 +225,7 @@ const EquipmentOrderDetail = (props: {
     reset,
     getValues,
     setValue,
+    setError,
     trigger,
     clearErrors,
     formState: { isDirty, errors, defaultValues },
@@ -402,6 +408,60 @@ const EquipmentOrderDetail = (props: {
 
       // 更新
     } else {
+      const kicsMeisai = juchuKizaiMeisaiList.filter((d) => d.shozokuId === 1);
+      const yardMeisai = juchuKizaiMeisaiList.filter((d) => d.shozokuId === 2);
+
+      if (
+        (kicsMeisai.length > 0 && (!data.kicsShukoDat || !data.kicsNyukoDat)) ||
+        (yardMeisai.length > 0 && (!data.yardShukoDat || !data.yardNyukoDat))
+      ) {
+        if (kicsMeisai.length > 0 && !data.kicsShukoDat) {
+          setError('kicsShukoDat', {
+            type: 'manual',
+            message: '',
+          });
+        }
+        if (kicsMeisai.length > 0 && !data.kicsNyukoDat) {
+          setError('kicsNyukoDat', {
+            type: 'manual',
+            message: '',
+          });
+        }
+        if (yardMeisai.length > 0 && !data.yardShukoDat) {
+          setError('yardShukoDat', {
+            type: 'manual',
+            message: '',
+          });
+        }
+        if (yardMeisai.length > 0 && !data.yardNyukoDat) {
+          setError('yardNyukoDat', {
+            type: 'manual',
+            message: '',
+          });
+        }
+        setNyushukoOpen(true);
+        setIsLoading(false);
+        return;
+      }
+      // if (yardMeisai && (!data.yardShukoDat || !data.yardNyukoDat)) {
+      //   console.log('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb');
+      //   if (!data.yardShukoDat) {
+      //     setError('yardShukoDat', {
+      //       type: 'manual',
+      //       message: '',
+      //     });
+      //   }
+      //   if (!data.yardNyukoDat) {
+      //     setError('yardNyukoDat', {
+      //       type: 'manual',
+      //       message: '',
+      //     });
+      //   }
+      //   setNyushukoOpen(true);
+      //   setIsLoading(false);
+      //   return;
+      // }
+
       // 受注機材ヘッダー関係更新
       if (isDirty) {
         await saveJuchuKizaiHead(data, updateShukoDate, updateNyukoDate, updateDateRange, userNam);
@@ -415,7 +475,7 @@ const EquipmentOrderDetail = (props: {
       // 受注機材明細関係更新
       const filterJuchuKizaiMeisaiList = juchuKizaiMeisaiList.filter((data) => !data.delFlag);
       if (JSON.stringify(originJuchuKizaiMeisaiList) !== JSON.stringify(filterJuchuKizaiMeisaiList)) {
-        await saveJuchuKizaiMeisai(data.juchuHeadId, data.juchuKizaiHeadId, userNam);
+        await saveJuchuKizaiMeisai(data, userNam);
       }
 
       // 受注コンテナ明細更新
@@ -670,33 +730,44 @@ const EquipmentOrderDetail = (props: {
    * @param juchuKizaiHeadId 受注機材ヘッダーid
    * @param userNam ユーザー名
    */
-  const saveJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number, userNam: string) => {
+  const saveJuchuKizaiMeisai = async (data: JuchuKizaiHeadValues, userNam: string) => {
     const copyJuchuKizaiMeisaiData = [...juchuKizaiMeisaiList];
-    const juchuKizaiMeisaiMaxId = await getJuchuKizaiMeisaiMaxId(juchuHeadId, juchuKizaiHeadId);
+    const juchuKizaiMeisaiMaxId = await getJuchuKizaiMeisaiMaxId(data.juchuHeadId, data.juchuKizaiHeadId);
     let newJuchuKizaiMeisaiId = juchuKizaiMeisaiMaxId ? juchuKizaiMeisaiMaxId.juchu_kizai_meisai_id + 1 : 1;
 
     const newJuchuKizaiMeisaiData = copyJuchuKizaiMeisaiData.map((data) =>
       data.juchuKizaiMeisaiId === 0 && !data.delFlag ? { ...data, juchuKizaiMeisaiId: newJuchuKizaiMeisaiId++ } : data
     );
 
-    // 受注機材明細更新
+    // 受注機材明細、入出庫伝票更新
     const addJuchuKizaiMeisaiData = newJuchuKizaiMeisaiData.filter((data) => !data.delFlag && !data.saveFlag);
     const updateJuchuKizaiMeisaiData = newJuchuKizaiMeisaiData.filter((data) => !data.delFlag && data.saveFlag);
     const deleteJuchuKizaiMeisaiData = newJuchuKizaiMeisaiData.filter((data) => data.delFlag && data.saveFlag);
+    // 削除
     if (deleteJuchuKizaiMeisaiData.length > 0) {
-      const deleteJuchuKizaiMeisaiIds = deleteJuchuKizaiMeisaiData.map((data) => data.juchuKizaiMeisaiId);
-      const deleteMeisaiResult = await delJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId, deleteJuchuKizaiMeisaiIds);
-      console.log('受注機材明細削除', deleteMeisaiResult);
-    }
+      const deleteIds = deleteJuchuKizaiMeisaiData.map((data) => data.juchuKizaiMeisaiId);
 
+      const deleteMeisaiResult = await delJuchuKizaiMeisai(data.juchuHeadId, data.juchuKizaiHeadId, deleteIds);
+      console.log('受注機材明細削除', deleteMeisaiResult);
+
+      const deleteNyushukoDenResult = await delNyushukoDen(data.juchuHeadId, data.juchuKizaiHeadId, deleteIds);
+      console.log('入出庫伝票削除', deleteNyushukoDenResult);
+    }
+    // 追加
     if (addJuchuKizaiMeisaiData.length > 0) {
       const addMeisaiResult = addJuchuKizaiMeisai(addJuchuKizaiMeisaiData, userNam);
       console.log('受注機材明細追加', addMeisaiResult);
-    }
 
+      const addNyushukoDenResult = await addNyushukoDen(data, addJuchuKizaiMeisaiData, userNam);
+      console.log('入出庫伝票追加', addNyushukoDenResult);
+    }
+    // 更新
     if (updateJuchuKizaiMeisaiData.length > 0) {
       const updateMeisaiResult = await updJuchuKizaiMeisai(updateJuchuKizaiMeisaiData, userNam);
       console.log('受注機材明細更新', updateMeisaiResult);
+
+      const updateNyushukoDenResult = await updNyushukoDen(data, updateJuchuKizaiMeisaiData, userNam);
+      console.log('入出庫伝票更新', updateNyushukoDenResult);
     }
 
     // 移動伝票更新
@@ -709,19 +780,20 @@ const EquipmentOrderDetail = (props: {
     const deleteIdoKizaiData = newJuchuKizaiMeisaiData.filter(
       (data) => data.idoDenId && (!data.sagyoDenDat || data.delFlag)
     );
+    // 削除
     if (deleteIdoKizaiData.length > 0) {
       const deleteIdoDenIds = deleteIdoKizaiData.map((data) => data.idoDenId);
       const deleteIdoDenResult = await delIdoDen(deleteIdoDenIds as number[]);
       console.log('移動伝票削除', deleteIdoDenResult);
     }
-
+    // 追加
     if (addIdoKizaiData.length > 0) {
       const idoDenMaxId = await getIdoDenMaxId();
       const newIdoDenId = idoDenMaxId ? idoDenMaxId.ido_den_id + 1 : 1;
       const addIdoDenResult = await addIdoDen(newIdoDenId, addIdoKizaiData, userNam);
       console.log('移動伝票追加', addIdoDenResult);
     }
-
+    // 更新
     if (updateIdoKizaiData.length > 0) {
       const updateIdoDenResult = await updIdoDen(updateIdoKizaiData, userNam);
       console.log('移動伝票更新', updateIdoDenResult);
@@ -2119,6 +2191,7 @@ const EquipmentOrderDetail = (props: {
           <SaveAlertDialog open={saveOpen} onClick={() => setSaveOpen(false)} />
           <IsDirtyAlertDialog open={dirtyOpen} onClick={handleResultDialog} />
           <MoveAlertDialog open={moveOpen} onClick={handleMoveDialog} />
+          <NyushukoAlertDialog open={nyushukoOpen} onClick={() => setNyushukoOpen(false)} />
         </Box>
       )}
     </>
