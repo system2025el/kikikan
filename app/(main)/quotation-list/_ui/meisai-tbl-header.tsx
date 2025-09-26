@@ -74,7 +74,6 @@ export const MeisaiTblHeader = ({
             control={control}
             sx={{ ml: 1 }}
             label="タイトルを見積書に出力する"
-            rules={{}}
           />
         </Grid2>
         <Grid2 size={'grow'} justifyItems={'end'}>
