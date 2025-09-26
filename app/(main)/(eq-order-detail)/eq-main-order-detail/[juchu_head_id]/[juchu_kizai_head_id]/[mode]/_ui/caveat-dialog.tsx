@@ -35,3 +35,20 @@ export const MoveAlertDialog = ({ open, onClick }: { open: boolean; onClick: (re
     </Dialog>
   );
 };
+
+export const NyushukoAlertDialog = ({ open, onClick }: { open: boolean; onClick: () => void }) => {
+  return (
+    <Dialog open={open}>
+      <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
+        <WarningIcon color="error" />
+        <Box>入出庫日時が入力されていません</Box>
+      </DialogTitle>
+      <DialogContentText m={2} p={2}>
+        入出庫日時を入力してください
+      </DialogContentText>
+      <DialogActions>
+        <Button onClick={onClick}>確認</Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
