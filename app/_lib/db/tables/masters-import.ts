@@ -5,7 +5,7 @@ import {
   KizaiImportTypes,
   RfidImportTypes,
   TanabanImportTypes,
-} from '@/app/(main)/(settings)/import-master/_lib/types';
+} from '@/app/(main)/(masters)/masters-import/_lib/types';
 
 import { updateMasterUpdates } from './m-master-update';
 
