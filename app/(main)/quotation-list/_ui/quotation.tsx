@@ -444,7 +444,7 @@ export const Quotation = ({
                   </Box>
                   <Box sx={styles.container}>
                     <Typography marginRight={9}>備考</Typography>
-                    <TextFieldElement name="biko" control={control} multiline sx={{ width: 300 }} />
+                    <TextFieldElement name="biko" control={control} sx={{ width: 300 }} />
                   </Box>
                 </Grid2>
               </Grid2>
