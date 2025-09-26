@@ -814,7 +814,11 @@ export const ReadOnlyYenNumberElement = <TFieldName extends FieldPath<QuotHeadVa
         <TextField
           {...field}
           value={
-            typeof field.value === 'number' && !isNaN(field.value) ? `¥${Math.abs(field.value).toLocaleString()}` : `¥0`
+            typeof field.value === 'number' && !isNaN(field.value)
+              ? field.value >= 0
+                ? `¥${Math.abs(field.value).toLocaleString()}`
+                : `-¥${Math.abs(field.value).toLocaleString()}`
+              : `¥0`
           }
           type="text"
           onFocus={(e) => {
