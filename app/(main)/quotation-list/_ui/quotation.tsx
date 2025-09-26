@@ -14,6 +14,7 @@ import {
   Dialog,
   Divider,
   Grid2,
+  InputAdornment,
   Paper,
   Snackbar,
   TextField,
@@ -21,7 +22,7 @@ import {
 } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
-import { Controller, FormProvider, useFieldArray, useForm, useFormContext, useWatch } from 'react-hook-form';
+import { Controller, FieldPath, FormProvider, useFieldArray, useForm, useFormContext, useWatch } from 'react-hook-form';
 import { SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
@@ -68,16 +69,12 @@ export const Quotation = ({
   const [kizaiMeisaiaddDialogOpen, setKizaimeisaiaddDialogOpen] = useState(false);
   const [showSecond, setShowSecond] = useState(false);
 
-  /* 機材中計 */
-  const [kizaiChukeiAmt, setKizaiChukeiAmt] = useState<number | null>(null);
-  /* 税抜き合計 */
-  const [preTaxGokei, setPreTaxGokei] = useState<number | null>(null);
-
   /* スナックバーの表示するかしないか */
   const [snackBarOpen, setSnackBarOpen] = useState(false);
   /* スナックバーのメッセージ */
   const [snackBarMessage, setSnackBarMessage] = useState('');
 
+  const [isEditing, setIsEditing] = useState(false);
   /* useForm -------------------------------------------------------------- */
   const quotForm = useForm<QuotHeadValues>({
     mode: 'onChange',
@@ -104,8 +101,10 @@ export const Quotation = ({
   const kizaiHeads = useWatch({ control, name: 'meisaiHeads.kizai' });
   const laborHeads = useWatch({ control, name: 'meisaiHeads.labor' });
   const otherHeads = useWatch({ control, name: 'meisaiHeads.other' });
+  const currentKizaiChukei = useWatch({ control, name: 'kizaiChukeiAmt' });
   const currentChukei = useWatch({ control, name: 'chukeiAmt' });
   const tokuNebikiAmt = useWatch({ control, name: 'tokuNebikiAmt' });
+  const currentPreTaxGokei = useWatch({ control, name: 'preTaxGokeiAmt' });
   const currentZeiAmt = useWatch({ control, name: 'zeiAmt' });
   const zeiRat = useWatch({ control, name: 'zeiRat' });
   const currentGokeiAmt = useWatch({ control, name: 'gokeiAmt' });
@@ -141,10 +140,10 @@ export const Quotation = ({
   // 機材中計計算
   useEffect(() => {
     const kChukei = (kizaiHeads ?? []).reduce((acc, item) => acc + (item.nebikiAftAmt ?? 0), 0);
-    if (kizaiChukeiAmt !== kChukei) {
-      setKizaiChukeiAmt(kChukei);
+    if (currentKizaiChukei !== kChukei) {
+      setValue('kizaiChukeiAmt', kChukei);
     }
-  }, [kizaiHeads, kizaiChukeiAmt, setValue]);
+  }, [kizaiHeads, currentKizaiChukei, setValue]);
 
   // 見積全体計算
   useEffect(() => {
@@ -159,7 +158,9 @@ export const Quotation = ({
     }
 
     const sum = chukeiSum - (tokuNebikiAmt ?? 0);
-    setPreTaxGokei(sum);
+    if (sum !== currentPreTaxGokei) {
+      setValue('preTaxGokeiAmt', sum);
+    }
 
     const zei = (sum * (zeiRat ?? 0)) / 100;
     if (zei !== currentZeiAmt) {
@@ -177,6 +178,7 @@ export const Quotation = ({
     otherHeads,
     currentChukei,
     tokuNebikiAmt,
+    currentPreTaxGokei,
     zeiRat,
     currentZeiAmt,
     currentGokeiAmt,
@@ -204,7 +206,7 @@ export const Quotation = ({
                 {/* <Button sx={{ margin: 1 }}>編集</Button> */}
                 <Button sx={{ margin: 1 }}>見積書印刷</Button>
                 {/* <Button sx={{ margin: 1 }}>複製</Button> */}
-                <Button sx={{ margin: 1 }} type="submit" disabled={!isNew && !isDirty}>
+                <Button sx={{ margin: 1 }} type="submit">
                   保存
                 </Button>
               </Box>
@@ -425,20 +427,51 @@ export const Quotation = ({
                   </Box>
                   <Box sx={styles.container}>
                     <Typography marginRight={5}>本番日数</Typography>
-                    <TextFieldElement
-                      name="mituHonbanbiQty"
+                    <Controller
+                      name="mituHonbanbiQty" // TextFieldElementと同じnameを指定
                       control={control}
-                      sx={{
-                        width: 120,
-                        '& .MuiInputBase-input': {
-                          textAlign: 'right',
-                        },
-                        '& input[type=number]::-webkit-inner-spin-button': {
-                          WebkitAppearance: 'none',
-                          margin: 0,
-                        },
+                      render={({ field, fieldState: { error } }) => {
+                        // フォームの状態から来た値
+                        const valueAsNumber = Number(field.value);
+
+                        // ユーザーへの表示用の値を作成
+                        const displayValue =
+                          !isNaN(valueAsNumber) && valueAsNumber !== 0
+                            ? valueAsNumber.toLocaleString() // 3桁区切り
+                            : ''; // 0やNaNの場合は空文字にする（入力しやすくするため）
+
+                        return (
+                          <TextField
+                            {...field} // onBlur, ref などを展開
+                            type="text" // numberではなくtextにすることで、カンマの入力を許容
+                            fullWidth // 必要に応じて
+                            sx={{
+                              width: 120,
+                              '& .MuiInputBase-input': {
+                                textAlign: 'right',
+                              },
+                            }}
+                            // 表示する値をフォーマット済みのものに上書き
+                            value={displayValue}
+                            // 入力が変更されたときの処理
+                            onChange={(e) => {
+                              // 入力から数字とマイナス記号以外を取り除く
+                              const rawValue = e.target.value;
+                              const numValue = parseInt(rawValue.replace(/[^0-9-]/g, ''), 10);
+
+                              // 数字に変換できればフォームの状態を更新、できなければ何もしない( or 0をセット)
+                              field.onChange(isNaN(numValue) ? '' : numValue);
+                            }}
+                            // エラー表示
+                            error={!!error}
+                            helperText={error?.message}
+                            // 「¥」マークを先頭に付ける
+                            InputProps={{
+                              startAdornment: <InputAdornment position="start">¥</InputAdornment>,
+                            }}
+                          />
+                        );
                       }}
-                      type="number"
                     />
                   </Box>
                   <Box sx={styles.container}>
@@ -524,15 +557,7 @@ export const Quotation = ({
                     <TextFieldElement name="kizaiChukeiMei" control={control} />
                   </Grid2>
                   <Grid2 size={2}>
-                    <TextField
-                      value={kizaiChukeiAmt ?? ''}
-                      sx={{
-                        pointerEvents: 'none', // クリック不可にする
-                        backgroundColor: '#f5f5f5', // グレー背景で無効っぽく
-                        color: '#888',
-                      }}
-                      slotProps={{ input: { readOnly: true, onFocus: (e) => e.target.blur() } }}
-                    />
+                    <ReadOnlyYenNumberElement name="kizaiChukeiAmt" />
                   </Grid2>
                   <Grid2 size={1} />
                 </Grid2>
@@ -616,24 +641,7 @@ export const Quotation = ({
                     <TextFieldElement name="chukeiMei" control={control} />
                   </Grid2>
                   <Grid2 size={2}>
-                    <TextFieldElement
-                      name="chukeiAmt"
-                      control={control}
-                      sx={{
-                        '& .MuiInputBase-input': {
-                          textAlign: 'right',
-                        },
-                        '& input[type=number]::-webkit-inner-spin-button': {
-                          WebkitAppearance: 'none',
-                          margin: 0,
-                        },
-                        pointerEvents: 'none', // クリック不可にする
-                        backgroundColor: '#f5f5f5', // グレー背景で無効っぽく
-                        color: '#888',
-                      }}
-                      type="number"
-                      slotProps={{ input: { readOnly: true, onFocus: (e) => e.target.blur() } }}
-                    />
+                    <ReadOnlyYenNumberElement name="chukeiAmt" />
                   </Grid2>
                   <Grid2 size={1} />
                 </Grid2>
@@ -644,27 +652,61 @@ export const Quotation = ({
                   </Grid2>
                   <Grid2 size={2}>
                     <Controller
-                      name="tokuNebikiAmt"
+                      name={'tokuNebikiAmt'}
                       control={control}
-                      render={({ field }) => (
+                      render={({ field, fieldState }) => (
                         <TextField
                           {...field}
-                          type="number"
-                          value={field.value != null ? `-${field.value}` : ''}
+                          value={
+                            isEditing
+                              ? (field.value ?? '')
+                              : typeof field.value === 'number' && !isNaN(field.value)
+                                ? `${'-'}¥${Math.abs(field.value).toLocaleString()}`
+                                : `${'-'}¥0`
+                          }
+                          type="text"
+                          onFocus={(e) => {
+                            setIsEditing(true);
+                            const rawValue = String(field.value ?? '');
+                            setTimeout(() => {
+                              e.target.value = rawValue;
+                            }, 1);
+                          }}
+                          onBlur={(e) => {
+                            const rawValue = e.target.value.replace(/[¥,]/g, '');
+                            const numericValue = Math.abs(Number(rawValue));
+                            field.onChange(numericValue);
+                            setIsEditing(false);
+                          }}
                           onChange={(e) => {
-                            const raw = e.target.value;
-                            const num = raw.startsWith('-') ? raw.slice(1) : raw;
-                            field.onChange(Number(num));
+                            const raw = e.target.value.replace(/[^\d]/g, '');
+                            if (/^\d*$/.test(raw)) {
+                              field.onChange(Number(raw));
+                              e.target.value = raw;
+                            }
                           }}
                           sx={{
+                            '.MuiOutlinedInput-notchedOutline': {
+                              borderColor: fieldState.error?.message && 'red',
+                            },
+                            '.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                              borderColor: fieldState.error?.message && 'red',
+                            },
+                            '&:hover .MuiOutlinedInput-notchedOutline': {
+                              borderColor: fieldState.error?.message && 'red',
+                            },
                             '& .MuiInputBase-input': {
                               textAlign: 'right',
+                            },
+                            '.MuiFormHelperText-root': {
+                              color: 'red',
                             },
                             '& input[type=number]::-webkit-inner-spin-button': {
                               WebkitAppearance: 'none',
                               margin: 0,
                             },
                           }}
+                          helperText={fieldState.error?.message}
                         />
                       )}
                     />
@@ -677,23 +719,7 @@ export const Quotation = ({
                     <Typography>合計</Typography>
                   </Grid2>
                   <Grid2 size={2}>
-                    <TextField
-                      value={preTaxGokei ?? ''}
-                      sx={{
-                        '& .MuiInputBase-input': {
-                          textAlign: 'right',
-                        },
-                        '& input[type=number]::-webkit-inner-spin-button': {
-                          WebkitAppearance: 'none',
-                          margin: 0,
-                        },
-                        pointerEvents: 'none', // クリック不可にする
-                        backgroundColor: '#f5f5f5', // グレー背景で無効っぽく
-                        color: '#888',
-                      }}
-                      type="number"
-                      slotProps={{ input: { readOnly: true, onFocus: (e) => e.target.blur() } }}
-                    />
+                    <ReadOnlyYenNumberElement name="preTaxGokeiAmt" />
                   </Grid2>
                   <Grid2 size={1} />
                 </Grid2>
@@ -703,19 +729,62 @@ export const Quotation = ({
                     <Typography>消費税</Typography>
                   </Grid2>
                   <Grid2 size={2}>
-                    <TextFieldElement
+                    <Controller
                       name="zeiAmt"
                       control={control}
-                      sx={{
-                        '& .MuiInputBase-input': {
-                          textAlign: 'right',
-                        },
-                        '& input[type=number]::-webkit-inner-spin-button': {
-                          WebkitAppearance: 'none',
-                          margin: 0,
-                        },
-                      }}
-                      type="number"
+                      render={({ field, fieldState }) => (
+                        <TextField
+                          {...field}
+                          value={
+                            isEditing
+                              ? (field.value ?? '')
+                              : typeof field.value === 'number' && !isNaN(field.value)
+                                ? `¥${Math.abs(field.value).toLocaleString()}`
+                                : `¥0`
+                          }
+                          type="text"
+                          onFocus={(e) => {
+                            setIsEditing(true);
+                            const rawValue = String(field.value ?? '');
+                            e.target.value = rawValue;
+                          }}
+                          onBlur={(e) => {
+                            const rawValue = e.target.value.replace(/[¥,]/g, '');
+                            const numericValue = Math.abs(Number(rawValue));
+                            field.onChange(numericValue);
+                            setIsEditing(false);
+                          }}
+                          onChange={(e) => {
+                            const raw = e.target.value.replace(/[^\d]/g, '');
+                            if (/^\d*$/.test(raw)) {
+                              field.onChange(Number(raw));
+                              e.target.value = raw;
+                            }
+                          }}
+                          sx={{
+                            '.MuiOutlinedInput-notchedOutline': {
+                              borderColor: fieldState.error?.message && 'red',
+                            },
+                            '.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                              borderColor: fieldState.error?.message && 'red',
+                            },
+                            '&:hover .MuiOutlinedInput-notchedOutline': {
+                              borderColor: fieldState.error?.message && 'red',
+                            },
+                            '& .MuiInputBase-input': {
+                              textAlign: 'right',
+                            },
+                            '.MuiFormHelperText-root': {
+                              color: 'red',
+                            },
+                            '& input[type=number]::-webkit-inner-spin-button': {
+                              WebkitAppearance: 'none',
+                              margin: 0,
+                            },
+                          }}
+                          helperText={fieldState.error?.message}
+                        />
+                      )}
                     />
                   </Grid2>
                   <Grid2 size={1} display={'flex'}>
@@ -742,24 +811,7 @@ export const Quotation = ({
                     <Typography>合計金額</Typography>
                   </Grid2>
                   <Grid2 size={2}>
-                    <TextFieldElement
-                      name="gokeiAmt"
-                      control={control}
-                      sx={{
-                        '& .MuiInputBase-input': {
-                          textAlign: 'right',
-                        },
-                        '& input[type=number]::-webkit-inner-spin-button': {
-                          WebkitAppearance: 'none',
-                          margin: 0,
-                        },
-                        pointerEvents: 'none', // クリック不可にする
-                        backgroundColor: '#f5f5f5', // グレー背景で無効っぽく
-                        color: '#888',
-                      }}
-                      type="number"
-                      slotProps={{ input: { readOnly: true, onFocus: (e) => e.target.blur() } }}
-                    />
+                    <ReadOnlyYenNumberElement name="gokeiAmt" />
                   </Grid2>
                   <Grid2 size={1} />
                 </Grid2>
@@ -777,6 +829,74 @@ export const Quotation = ({
         sx={{ marginTop: '65px' }}
       />
     </Container>
+  );
+};
+
+export const ReadOnlyYenNumberElement = <TFieldName extends FieldPath<QuotHeadValues>>({
+  name,
+}: {
+  name: TFieldName;
+}) => {
+  const { control } = useFormContext<QuotHeadValues>();
+  return (
+    <Controller
+      name={name}
+      control={control}
+      render={({ field, fieldState }) => (
+        <TextField
+          {...field}
+          value={
+            typeof field.value === 'number' && !isNaN(field.value) ? `¥${Math.abs(field.value).toLocaleString()}` : `¥0`
+          }
+          type="text"
+          onFocus={(e) => {
+            const rawValue = String(field.value ?? '');
+            setTimeout(() => {
+              e.target.value = rawValue;
+            }, 1);
+          }}
+          onBlur={(e) => {
+            const rawValue = e.target.value.replace(/[¥,]/g, '');
+            const numericValue = Number(rawValue);
+            field.onChange(numericValue);
+          }}
+          onChange={(e) => {
+            const raw = e.target.value.replace(/[^\d]/g, '');
+            if (/^\d*$/.test(raw)) {
+              field.onChange(Number(raw));
+              e.target.value = raw;
+            }
+          }}
+          sx={{
+            '.MuiOutlinedInput-notchedOutline': {
+              borderColor: fieldState.error?.message && 'red',
+            },
+            '.Mui-focused .MuiOutlinedInput-notchedOutline': {
+              borderColor: fieldState.error?.message && 'red',
+            },
+            '&:hover .MuiOutlinedInput-notchedOutline': {
+              borderColor: fieldState.error?.message && 'red',
+            },
+            '& .MuiInputBase-input': {
+              textAlign: 'right',
+            },
+            '.MuiFormHelperText-root': {
+              color: 'red',
+            },
+            '& input[type=number]::-webkit-inner-spin-button': {
+              WebkitAppearance: 'none',
+              margin: 0,
+            },
+
+            pointerEvents: 'none', // クリック不可にする
+            backgroundColor: '#f5f5f5', // グレー背景で無効っぽく
+            color: '#888',
+          }}
+          slotProps={{ input: { readOnly: true, onFocus: (e) => e.target.blur() } }}
+          helperText={fieldState.error?.message}
+        />
+      )}
+    />
   );
 };
 

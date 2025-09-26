@@ -2,7 +2,7 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Box, Button, Grid2, Stack, TextField, Typography } from '@mui/material';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
   CheckboxElement,
   Control,
@@ -14,6 +14,7 @@ import {
 } from 'react-hook-form-mui';
 
 import { QuotHeadValues } from '../_lib/types';
+import { ReadOnlyYenNumberElement } from './quotation';
 
 export const MeisaiTblHeader = ({
   index,
@@ -26,6 +27,7 @@ export const MeisaiTblHeader = ({
   sectionFields: UseFieldArrayReturn<QuotHeadValues>;
   children: React.ReactNode;
 }) => {
+  const [isEditing, setIsEditing] = useState(false);
   /* 明細テーブルの順番を変えるボタン押下時 */
   const moveRow = (index: number, direction: number) => {
     sectionFields.move(index, index + direction);
@@ -152,24 +154,7 @@ export const MeisaiTblHeader = ({
           <Typography textAlign="end">小計</Typography>
         </Grid2>
         <Grid2 size={2}>
-          <TextFieldElement
-            name={`meisaiHeads.${sectionNam}.${index}.shokeiAmt`}
-            control={control}
-            sx={{
-              '& .MuiInputBase-input': {
-                textAlign: 'right',
-              },
-              '& input[type=number]::-webkit-inner-spin-button': {
-                WebkitAppearance: 'none',
-                margin: 0,
-              },
-              pointerEvents: 'none', // クリック不可にする
-              backgroundColor: '#f5f5f5', // グレー背景で無効っぽく
-              color: '#888',
-            }}
-            type="number"
-            slotProps={{ input: { readOnly: true, onFocus: (e) => e.target.blur() } }}
-          />
+          <ReadOnlyYenNumberElement name={`meisaiHeads.${sectionNam}.${index}.shokeiAmt`} />
         </Grid2>
         <Grid2 size={1} />
       </Grid2>
@@ -190,25 +175,59 @@ export const MeisaiTblHeader = ({
           <Controller
             name={`meisaiHeads.${sectionNam}.${index}.nebikiAmt`}
             control={control}
-            render={({ field }) => (
+            render={({ field, fieldState }) => (
               <TextField
                 {...field}
-                type="number"
-                value={field.value != null ? `-${field.value}` : ''}
+                value={
+                  isEditing
+                    ? (field.value ?? '')
+                    : typeof field.value === 'number' && !isNaN(field.value)
+                      ? `${'-'}¥${Math.abs(field.value).toLocaleString()}`
+                      : `${'-'}¥0`
+                }
+                type="text"
+                onFocus={(e) => {
+                  setIsEditing(true);
+                  const rawValue = String(field.value ?? '');
+                  setTimeout(() => {
+                    e.target.value = rawValue;
+                  }, 1);
+                }}
+                onBlur={(e) => {
+                  const rawValue = e.target.value.replace(/[¥,]/g, '');
+                  const numericValue = Math.abs(Number(rawValue));
+                  field.onChange(numericValue);
+                  setIsEditing(false);
+                }}
                 onChange={(e) => {
-                  const raw = e.target.value;
-                  const num = raw.startsWith('-') ? raw.slice(1) : raw;
-                  field.onChange(Number(num));
+                  const raw = e.target.value.replace(/[^\d]/g, '');
+                  if (/^\d*$/.test(raw)) {
+                    field.onChange(Number(raw));
+                    e.target.value = raw;
+                  }
                 }}
                 sx={{
+                  '.MuiOutlinedInput-notchedOutline': {
+                    borderColor: fieldState.error?.message && 'red',
+                  },
+                  '.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                    borderColor: fieldState.error?.message && 'red',
+                  },
+                  '&:hover .MuiOutlinedInput-notchedOutline': {
+                    borderColor: fieldState.error?.message && 'red',
+                  },
                   '& .MuiInputBase-input': {
                     textAlign: 'right',
+                  },
+                  '.MuiFormHelperText-root': {
+                    color: 'red',
                   },
                   '& input[type=number]::-webkit-inner-spin-button': {
                     WebkitAppearance: 'none',
                     margin: 0,
                   },
                 }}
+                helperText={fieldState.error?.message}
               />
             )}
           />
@@ -229,24 +248,7 @@ export const MeisaiTblHeader = ({
           <TextFieldElement name={`meisaiHeads.${sectionNam}.${index}.nebikiAftNam`} control={control} />
         </Grid2>
         <Grid2 size={2}>
-          <TextFieldElement
-            name={`meisaiHeads.${sectionNam}.${index}.nebikiAftAmt`}
-            control={control}
-            sx={{
-              '& .MuiInputBase-input': {
-                textAlign: 'right',
-              },
-              '& input[type=number]::-webkit-inner-spin-button': {
-                WebkitAppearance: 'none',
-                margin: 0,
-              },
-              pointerEvents: 'none', // クリック不可にする
-              backgroundColor: '#f5f5f5', // グレー背景で無効っぽく
-              color: '#888',
-            }}
-            type="number"
-            slotProps={{ input: { readOnly: true, onFocus: (e) => e.target.blur() } }}
-          />
+          <ReadOnlyYenNumberElement name={`meisaiHeads.${sectionNam}.${index}.nebikiAftAmt`} />
         </Grid2>
         <Grid2 size={1} />
       </Grid2>

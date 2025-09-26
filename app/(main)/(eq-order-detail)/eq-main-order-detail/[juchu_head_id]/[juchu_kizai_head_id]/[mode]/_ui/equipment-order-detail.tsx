@@ -673,15 +673,16 @@ const EquipmentOrderDetail = (props: {
   const saveJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number, userNam: string) => {
     const copyJuchuKizaiMeisaiData = [...juchuKizaiMeisaiList];
     const juchuKizaiMeisaiMaxId = await getJuchuKizaiMeisaiMaxId(juchuHeadId, juchuKizaiHeadId);
-    const newJuchuKizaiMeisaiId = juchuKizaiMeisaiMaxId ? juchuKizaiMeisaiMaxId.juchu_kizai_meisai_id + 1 : 1;
-    const newJuchuKizaiMeisaiData = copyJuchuKizaiMeisaiData
-      .filter((data) => data.juchuKizaiMeisaiId === 0 && !data.delFlag)
-      .map((data, index) => ({ ...data, juchuKizaiMeisaiId: newJuchuKizaiMeisaiId + index }));
+    let newJuchuKizaiMeisaiId = juchuKizaiMeisaiMaxId ? juchuKizaiMeisaiMaxId.juchu_kizai_meisai_id + 1 : 1;
+
+    const newJuchuKizaiMeisaiData = copyJuchuKizaiMeisaiData.map((data) =>
+      data.juchuKizaiMeisaiId === 0 && !data.delFlag ? { ...data, juchuKizaiMeisaiId: newJuchuKizaiMeisaiId++ } : data
+    );
 
     // 受注機材明細更新
     const addJuchuKizaiMeisaiData = newJuchuKizaiMeisaiData.filter((data) => !data.delFlag && !data.saveFlag);
-    const updateJuchuKizaiMeisaiData = copyJuchuKizaiMeisaiData.filter((data) => !data.delFlag && data.saveFlag);
-    const deleteJuchuKizaiMeisaiData = copyJuchuKizaiMeisaiData.filter((data) => data.delFlag && data.saveFlag);
+    const updateJuchuKizaiMeisaiData = newJuchuKizaiMeisaiData.filter((data) => !data.delFlag && data.saveFlag);
+    const deleteJuchuKizaiMeisaiData = newJuchuKizaiMeisaiData.filter((data) => data.delFlag && data.saveFlag);
     if (deleteJuchuKizaiMeisaiData.length > 0) {
       const deleteJuchuKizaiMeisaiIds = deleteJuchuKizaiMeisaiData.map((data) => data.juchuKizaiMeisaiId);
       const deleteMeisaiResult = await delJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId, deleteJuchuKizaiMeisaiIds);
@@ -736,19 +737,18 @@ const EquipmentOrderDetail = (props: {
   const saveJuchuContainerMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number, userNam: string) => {
     const copyJuchuContainerMeisaiData = [...juchuContainerMeisaiList];
     const juchuContainerMeisaiMaxId = await getJuchuContainerMeisaiMaxId(juchuHeadId, juchuKizaiHeadId);
-    const newJuchuContainerMeisaiId = juchuContainerMeisaiMaxId
-      ? juchuContainerMeisaiMaxId.juchu_kizai_meisai_id + 1
-      : 1;
-    const newJuchuContainerMeisaiData = copyJuchuContainerMeisaiData
-      .filter((data) => data.juchuKizaiMeisaiId === 0 && !data.delFlag)
-      .map((data, index) => ({ ...data, juchuKizaiMeisaiId: newJuchuContainerMeisaiId + index }));
+    let newJuchuContainerMeisaiId = juchuContainerMeisaiMaxId ? juchuContainerMeisaiMaxId.juchu_kizai_meisai_id + 1 : 1;
+
+    const newJuchuContainerMeisaiData = copyJuchuContainerMeisaiData.map((data) =>
+      data.juchuKizaiMeisaiId === 0 && !data.delFlag
+        ? { ...data, juchuKizaiMeisaiId: newJuchuContainerMeisaiId++ }
+        : data
+    );
 
     // 受注コンテナ明細更新
     const addJuchuContainerMeisaiData = newJuchuContainerMeisaiData.filter((data) => !data.delFlag && !data.saveFlag);
-    const updateJuchuContainerMeisaiData = copyJuchuContainerMeisaiData.filter(
-      (data) => !data.delFlag && data.saveFlag
-    );
-    const deleteJuchuContainerMeisaiData = copyJuchuContainerMeisaiData.filter((data) => data.delFlag && data.saveFlag);
+    const updateJuchuContainerMeisaiData = newJuchuContainerMeisaiData.filter((data) => !data.delFlag && data.saveFlag);
+    const deleteJuchuContainerMeisaiData = newJuchuContainerMeisaiData.filter((data) => data.delFlag && data.saveFlag);
     if (deleteJuchuContainerMeisaiData.length > 0) {
       const deleteJuchuContainerMeisaiIds = deleteJuchuContainerMeisaiData.map((data) => data.juchuKizaiMeisaiId);
       const deleteContainerMeisaiResult = await delJuchuContainerMeisai(
@@ -1001,7 +1001,7 @@ const EquipmentOrderDetail = (props: {
             ? {
                 ...row,
                 sagyoDenDat: newDate,
-                sagyoSijiId: row.sagyoDenDat ? row.sagyoSijiId : row.shozokuId === 1 ? 'Y→K' : 'K→Y',
+                sagyoSijiId: row.sagyoDenDat ? row.sagyoSijiId : row.shozokuId === 1 ? 2 : 1,
                 shozokuId: row.sagyoDenDat ? row.shozokuId : row.shozokuId === 1 ? 2 : 1,
               }
             : row
@@ -1206,7 +1206,7 @@ const EquipmentOrderDetail = (props: {
               ? {
                   ...row,
                   sagyoDenDat: row.sagyoDenDat ? null : idoDat,
-                  sagyoSijiId: row.sagyoDenDat ? null : 'Y→K',
+                  sagyoSijiId: row.sagyoDenDat ? null : 2,
                   shozokuId: 1,
                 }
               : row
@@ -1221,7 +1221,7 @@ const EquipmentOrderDetail = (props: {
               ? {
                   ...row,
                   sagyoDenDat: row.sagyoDenDat ? null : idoDat,
-                  sagyoSijiId: row.sagyoDenDat ? null : 'K→Y',
+                  sagyoSijiId: row.sagyoDenDat ? null : 1,
                   shozokuId: 2,
                 }
               : row
@@ -1327,8 +1327,7 @@ const EquipmentOrderDetail = (props: {
           : d.shozokuId === 2 && yardIdoDat !== null
             ? yardIdoDat
             : null,
-      sagyoSijiId:
-        d.shozokuId === 1 && kicsIdoDat !== null ? 'K→Y' : d.shozokuId === 2 && yardIdoDat !== null ? 'Y→K' : null,
+      sagyoSijiId: d.shozokuId === 1 && kicsIdoDat !== null ? 1 : d.shozokuId === 2 && yardIdoDat !== null ? 2 : null,
       shozokuId:
         d.shozokuId === 1 && kicsIdoDat !== null ? 2 : d.shozokuId === 2 && yardIdoDat !== null ? 1 : d.shozokuId,
       shozokuNam: d.shozokuNam,
