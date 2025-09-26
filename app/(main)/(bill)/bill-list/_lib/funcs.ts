@@ -4,7 +4,7 @@ import { selectActiveSeikyuSts } from '@/app/_lib/db/tables/m-seikyu-sts';
 import { selectFilteredBills } from '@/app/_lib/db/tables/v-seikyu-lst';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 
-import { BillSearchValues } from './types';
+import { BillSearchValues, BillsListTableValues } from './types';
 
 export const getBillingStsSelection = async (): Promise<SelectTypes[]> => {
   try {
@@ -33,7 +33,7 @@ export const getFilteredBills = async (
     kokyaku: undefined,
     kokyakuTantoNam: undefined,
   }
-) => {
+): Promise<BillsListTableValues[]> => {
   try {
     const { data, error } = await selectFilteredBills(queries);
     if (error) {
@@ -43,7 +43,7 @@ export const getFilteredBills = async (
     if (!data || data.length === 0) {
       return [];
     }
-    return data.map((d) => ({
+    return data.map((d, index) => ({
       billHeadId: d.seikyu_head_id,
       billingSts: d.sts_nam,
       billHeadNam: d.seikyu_head_nam,

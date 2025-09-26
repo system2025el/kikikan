@@ -5,6 +5,9 @@ import {
   Box,
   Button,
   Checkbox,
+  Dialog,
+  DialogActions,
+  DialogTitle,
   Divider,
   Grid2,
   Paper,
@@ -18,7 +21,12 @@ import {
 } from '@mui/material';
 import router from 'next/router';
 import { useMemo, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { CheckboxElement, SelectElement } from 'react-hook-form-mui';
 
+import { CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
+import { FormMonthX } from '@/app/(main)/_ui/date';
+import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 import { MuiTablePagination } from '@/app/(main)/_ui/table-pagination';
 import { LightTooltipWithText } from '@/app/(main)/(masters)/_ui/tables';
@@ -26,11 +34,13 @@ import { LightTooltipWithText } from '@/app/(main)/(masters)/_ui/tables';
 export const BillingStsListTable = ({
   isLoading,
   page,
+  custs,
   setIsLoading,
   setPage,
 }: {
   isLoading: boolean;
   page: number;
+  custs: SelectTypes[];
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setPage: React.Dispatch<React.SetStateAction<number>>;
 }) => {
@@ -46,10 +56,28 @@ export const BillingStsListTable = ({
             .map((l, index) => ({ /* ...l,*/ ordNum: index + 1 }))
             .slice((page - 1) * rowsPerPage, page * rowsPerPage)
         : billSts.map((l, index) => ({ /* ...l,:*/ ordNum: index + 1 })),
-    [page, rowsPerPage, billSts]
+    [page, rowsPerPage /* billSts*/]
   );
   // テーブル最後のページ用の空データの長さ
   const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - billSts.length) : 0;
+  /* useState ----------------------------------------------------------- */
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  /* useForm ------------------------------------------------------------ */
+  const { control, handleSubmit, reset } = useForm<{
+    kokyaku: number | null;
+    dat: Date | null;
+    showDetailFlg: boolean;
+  }>({
+    mode: 'onSubmit',
+    reValidateMode: 'onChange',
+    defaultValues: { showDetailFlg: false },
+  });
+
+  /* methods ------------------------------------------------------------- */
+  const onSubmit = async (data: { kokyaku: number | null; dat: Date | null; showDetailFlg: boolean }) => {
+    console.log(data);
+  };
 
   return (
     <Box>
@@ -64,7 +92,7 @@ export const BillingStsListTable = ({
         <Grid2 container spacing={1}>
           <Grid2 container spacing={1}>
             <Grid2>
-              <Button /*onClick={() => clickCreateBill()}*/>
+              <Button onClick={() => setDialogOpen(true)}>
                 <AddIcon fontSize="small" />
                 新規
               </Button>
@@ -164,47 +192,63 @@ export const BillingStsListTable = ({
           </Table>
         </TableContainer>
       )}
-      {/* 受注請求状況作成方法確認ダイアログ */}
-      {/* <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
-            <DialogTitle display={'flex'} justifyContent={'space-between'}>
-              受注番号から自動生成
-              <CloseMasterDialogButton handleCloseDialog={() => setDialogOpen(false)} />
-            </DialogTitle>
-            <form onSubmit={handleSubmit(onSubmit)}>
-              <Stack p={4}>
-                <Typography>受注番号</Typography>
-                <TextFieldElement
-                  name={'juchuHeadId'}
-                  control={control}
-                  inputRef={inputRef}
-                  rules={{
-                    required: '数字を入力してください',
-                  }}
-                  sx={{
-                    '& .MuiInputBase-input': {
-                      textAlign: 'right',
-                    },
-                    '& input[type=number]::-webkit-inner-spin-button': {
-                      WebkitAppearance: 'none',
-                      margin: 0,
-                    },
-                  }}
-                  type="number"
-                />
-              </Stack>
-              <DialogActions>
-                <Button type="submit">自動生成</Button>
-                <Button
-                  onClick={() => {
-                    setDialogOpen(false);
-                    router.push('/Bill-list/create');
-                  }}
-                >
-                  手動生成
-                </Button>
-              </DialogActions>
-            </form>
-          </Dialog> */}
+      {/* 請求作成方法確認ダイアログ */}
+      <Dialog
+        open={dialogOpen}
+        onClose={() => {
+          reset();
+          setDialogOpen(false);
+        }}
+      >
+        <DialogTitle display={'flex'} justifyContent={'end'}>
+          <CloseMasterDialogButton
+            handleCloseDialog={() => {
+              reset();
+              setDialogOpen(false);
+            }}
+          />
+        </DialogTitle>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <Grid2 container direction={'column'} px={4} pt={4} spacing={2}>
+            <Grid2 display={'flex'} alignItems={'baseline'}>
+              <Typography mr={9}>相手</Typography>
+              <SelectElement
+                name="kokyaku"
+                control={control}
+                options={custs}
+                sx={{ width: 400 }}
+                rules={{ required: '選択してください' }}
+              />
+            </Grid2>
+            <Grid2 display={'flex'} alignItems={'baseline'}>
+              <Typography mr={9}>年月</Typography>
+              <Controller
+                control={control}
+                name="dat"
+                rules={{ required: '選択してください' }}
+                render={({ field, fieldState }) => (
+                  <FormMonthX
+                    value={field.value}
+                    onChange={field.onChange}
+                    sx={{
+                      mr: 1,
+                    }}
+                    error={!!fieldState.error}
+                    helperText={fieldState.error?.message}
+                  />
+                )}
+              />
+            </Grid2>
+            <Grid2 display={'flex'} alignItems={'center'}>
+              <Typography mr={5}>詳細表示</Typography>
+              <CheckboxElement size="medium" name={'showDetailFlg'} control={control} />
+            </Grid2>
+          </Grid2>
+          <DialogActions>
+            <Button type="submit">自動生成</Button>
+          </DialogActions>
+        </form>
+      </Dialog>
     </Box>
   );
 };

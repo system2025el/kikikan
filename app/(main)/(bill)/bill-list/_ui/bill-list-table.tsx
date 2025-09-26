@@ -5,9 +5,13 @@ import {
   Box,
   Button,
   Checkbox,
+  Dialog,
+  DialogActions,
+  DialogTitle,
   Divider,
   Grid2,
   Paper,
+  Stack,
   Table,
   TableBody,
   TableCell,
@@ -16,10 +20,16 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
+import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
+import { CheckboxElement, Controller, SelectElement, TextFieldElement, useForm } from 'react-hook-form-mui';
 
+import { CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
+import { FormMonthX } from '@/app/(main)/_ui/date';
+import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 import { MuiTablePagination } from '@/app/(main)/_ui/table-pagination';
+import { LightTooltipWithText } from '@/app/(main)/(masters)/_ui/tables';
 
 import { BillsListTableValues } from '../_lib/types';
 
@@ -27,28 +37,48 @@ export const BillListTable = ({
   bills,
   isLoading,
   page,
+  custs,
   setIsLoading,
   setPage,
 }: {
   bills: BillsListTableValues[];
   isLoading: boolean;
   page: number;
+  custs: SelectTypes[];
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setPage: React.Dispatch<React.SetStateAction<number>>;
 }) => {
   const rowsPerPage = 50;
+  const router = useRouter();
 
   const list = useMemo(
     () =>
       rowsPerPage > 0
-        ? bills
-            .map((l, index) => ({ /* ...l,*/ ordNum: index + 1 }))
-            .slice((page - 1) * rowsPerPage, page * rowsPerPage)
-        : bills.map((l, index) => ({ /* ...l,:*/ ordNum: index + 1 })),
+        ? bills.map((l, index) => ({ ...l, ordNum: index + 1 })).slice((page - 1) * rowsPerPage, page * rowsPerPage)
+        : bills.map((l, index) => ({ ...l, ordNum: index + 1 })),
     [page, rowsPerPage, bills]
   );
   // テーブル最後のページ用の空データの長さ
   const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - bills.length) : 0;
+
+  /* useState ----------------------------------------------------------- */
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  /* useForm ------------------------------------------------------------ */
+  const { control, handleSubmit, reset } = useForm<{
+    kokyaku: number | null;
+    dat: Date | null;
+    showDetailFlg: boolean;
+  }>({
+    mode: 'onSubmit',
+    reValidateMode: 'onChange',
+    defaultValues: { showDetailFlg: false },
+  });
+
+  /* methods ------------------------------------------------------------- */
+  const onSubmit = async (data: { kokyaku: number | null; dat: Date | null; showDetailFlg: boolean }) => {
+    console.log(data);
+  };
 
   return (
     <Box>
@@ -63,7 +93,7 @@ export const BillListTable = ({
         <Grid2 container spacing={1}>
           <Grid2 container spacing={1}>
             <Grid2>
-              <Button /*onClick={() => clickCreateBill()}*/>
+              <Button onClick={() => setDialogOpen(true)}>
                 <AddIcon fontSize="small" />
                 新規
               </Button>
@@ -96,12 +126,11 @@ export const BillListTable = ({
               <TableRow sx={{ whiteSpace: 'nowrap' }}>
                 <TableCell />
                 <TableCell padding="none" />
-                <TableCell align="right">受注番号</TableCell>
-                <TableCell>請求件名</TableCell>
-                <TableCell>相手</TableCell>
-                <TableCell>相手担当者</TableCell>
-                <TableCell>公演名</TableCell>
-                <TableCell>請求状況</TableCell>
+                <TableCell align="right">請求番号</TableCell>
+                <TableCell>請求ステータス</TableCell>
+                <TableCell>請求書名</TableCell>
+                <TableCell>請求相手</TableCell>
+                <TableCell>請求発行日</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -120,43 +149,41 @@ export const BillListTable = ({
                   >
                     {bill.ordNum}
                   </TableCell>
-                  {/* <TableCell align="right">
-                <Button
-                  variant="text"
-                  size="small"
-                  sx={{ py: 0.2, px: 0, m: 0, minWidth: 0 }}
-                  onClick={() => {
-                    console.log('テーブルで請求番号', bill.mituHeadId, 'をクリック');
-                    router.push(`/Bill-list/edit/${bill.mituHeadId}`);
-                  }}
-                >
-                  <Box minWidth={60}>{bill.mituHeadId}</Box>
-                </Button>
-              </TableCell>
-              <TableCell align="right">{bill.juchuHeadId}</TableCell>
-              <TableCell>{bill.mituStsNam}</TableCell>
-              <TableCell>
-                <LightTooltipWithText variant={'body2'} maxWidth={200}>
-                  {bill.mituHeadNam}
-                </LightTooltipWithText>
-              </TableCell>
-              <TableCell>
-                <LightTooltipWithText variant={'body2'} maxWidth={300}>
-                  {bill.kokyakuNam}
-                </LightTooltipWithText>
-              </TableCell>
-              <TableCell>
-                <LightTooltipWithText variant={'body2'} maxWidth={200}>
-                  {bill.koenNam}
-                </LightTooltipWithText>
-              </TableCell>
-              <TableCell>{bill.mituDat}</TableCell>
-              <TableCell>{bill.nyuryokuUser}</TableCell> */}
+                  <TableCell align="right">
+                    <Button
+                      variant="text"
+                      size="small"
+                      sx={{ py: 0.2, px: 0, m: 0, minWidth: 0 }}
+                      onClick={() => {
+                        console.log('テーブルで請求番号', bill.billHeadId, 'をクリック');
+                        router.push(`/bill-list/edit/${bill.billHeadId}`);
+                      }}
+                    >
+                      <Box minWidth={60}>{bill.billHeadId}</Box>
+                    </Button>
+                  </TableCell>
+                  <TableCell align="right">{bill.billingSts}</TableCell>
+
+                  <TableCell>
+                    <LightTooltipWithText variant={'body2'} maxWidth={300}>
+                      {bill.billHeadNam}
+                    </LightTooltipWithText>
+                  </TableCell>
+                  <TableCell>
+                    <LightTooltipWithText variant={'body2'} maxWidth={300}>
+                      {bill.kokyaku}
+                    </LightTooltipWithText>
+                  </TableCell>
+                  <TableCell>
+                    <LightTooltipWithText variant={'body2'} maxWidth={200}>
+                      {bill.seikyuDat}
+                    </LightTooltipWithText>
+                  </TableCell>
                 </TableRow>
               ))}
               {emptyRows > 0 && (
                 <TableRow style={{ height: 30 * emptyRows }}>
-                  <TableCell colSpan={10} />
+                  <TableCell colSpan={Object.keys(list).length + 1} />
                 </TableRow>
               )}
             </TableBody>
@@ -164,46 +191,62 @@ export const BillListTable = ({
         </TableContainer>
       )}
       {/* 請求作成方法確認ダイアログ */}
-      {/* <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
-        <DialogTitle display={'flex'} justifyContent={'space-between'}>
-          受注番号から自動生成
-          <CloseMasterDialogButton handleCloseDialog={() => setDialogOpen(false)} />
+      <Dialog
+        open={dialogOpen}
+        onClose={() => {
+          reset();
+          setDialogOpen(false);
+        }}
+      >
+        <DialogTitle display={'flex'} justifyContent={'end'}>
+          <CloseMasterDialogButton
+            handleCloseDialog={() => {
+              reset();
+              setDialogOpen(false);
+            }}
+          />
         </DialogTitle>
         <form onSubmit={handleSubmit(onSubmit)}>
-          <Stack p={4}>
-            <Typography>受注番号</Typography>
-            <TextFieldElement
-              name={'juchuHeadId'}
-              control={control}
-              inputRef={inputRef}
-              rules={{
-                required: '数字を入力してください',
-              }}
-              sx={{
-                '& .MuiInputBase-input': {
-                  textAlign: 'right',
-                },
-                '& input[type=number]::-webkit-inner-spin-button': {
-                  WebkitAppearance: 'none',
-                  margin: 0,
-                },
-              }}
-              type="number"
-            />
-          </Stack>
+          <Grid2 container direction={'column'} px={4} pt={4} spacing={2}>
+            <Grid2 display={'flex'} alignItems={'baseline'}>
+              <Typography mr={9}>相手</Typography>
+              <SelectElement
+                name="kokyaku"
+                control={control}
+                options={custs}
+                sx={{ width: 400 }}
+                rules={{ required: '選択してください' }}
+              />
+            </Grid2>
+            <Grid2 display={'flex'} alignItems={'baseline'}>
+              <Typography mr={9}>年月</Typography>
+              <Controller
+                control={control}
+                name="dat"
+                rules={{ required: '選択してください' }}
+                render={({ field, fieldState }) => (
+                  <FormMonthX
+                    value={field.value}
+                    onChange={field.onChange}
+                    sx={{
+                      mr: 1,
+                    }}
+                    error={!!fieldState.error}
+                    helperText={fieldState.error?.message}
+                  />
+                )}
+              />
+            </Grid2>
+            <Grid2 display={'flex'} alignItems={'center'}>
+              <Typography mr={5}>詳細表示</Typography>
+              <CheckboxElement size="medium" name={'showDetailFlg'} control={control} />
+            </Grid2>
+          </Grid2>
           <DialogActions>
             <Button type="submit">自動生成</Button>
-            <Button
-              onClick={() => {
-                setDialogOpen(false);
-                router.push('/Bill-list/create');
-              }}
-            >
-              手動生成
-            </Button>
           </DialogActions>
         </form>
-      </Dialog> */}
+      </Dialog>
     </Box>
   );
 };
