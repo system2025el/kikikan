@@ -13,20 +13,97 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Controller, TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { TestDate } from '../../_ui/date';
 import { Loading } from '../../_ui/loading';
 import { getShukoList } from '../_lib/funcs';
-import { ShukoListSearchValues, ShukoTableValues } from '../_lib/types';
+import { ShukoListSearchValues } from '../_lib/types';
+import { PdfModel, usePdf } from '../shuko/_lib/hooks/usePdf';
 import { ShukoListTable } from './shuko-list-table';
+
+/* 型定義 ------------------- */
+export type ShukoTableValues = {
+  juchuHeadId: number;
+  shukoDat: Date;
+  koenNam: string;
+  kokyakuNam: string;
+  //追加↓
+  kashidashiDat?: Date; // 貸出日
+  henkyakuDat?: Date; // 返却日
+  honbanNissu?: number; // 本番日数
+  koenbasho?: string; // 公演場所
+  tanto?: string; // 担当
+  mem?: string; // 備考
+  gotantosha?: string; // ご担当者様
+  honbanDat?: Date[]; // 本番日
+  //詳細
+  kizaiData?: ShukoKizai[];
+};
+//型定義（詳細）
+export type ShukoKizai = {
+  kizai?: string[]; //機材名
+  kizaiQty?: (number | undefined)[]; //個数
+  kizaiMem?: string[]; //備考
+};
+
+/* モックデータ ------------------- */
+const mockShukoData: ShukoTableValues[] = [
+  {
+    juchuHeadId: 12345,
+    shukoDat: new Date('2025-09-22'),
+    koenNam: '秋の音楽フェスティバル',
+    kokyakuNam: '株式会社サンプル',
+    kashidashiDat: new Date('2025-09-25'), // 貸出日
+    henkyakuDat: new Date('2025-09-28'), // 返却日
+    honbanNissu: 1, // 本番日数
+    koenbasho: 'Kitara', // 公演場所
+    tanto: '佐藤太郎', // 担当
+    mem: '', // 備考
+    gotantosha: '田中', // ご担当者様
+    honbanDat: [new Date('2025-09-27')], // 本番日
+  },
+  {
+    juchuHeadId: 12346,
+    shukoDat: new Date('2025-10-22'),
+    koenNam: 'アーティストA単独ライブ',
+    kokyakuNam: 'イベント企画B',
+    kashidashiDat: new Date('2025-10-22'), // 貸出日
+    henkyakuDat: new Date('2025-10-27'), // 返却日
+    honbanNissu: 3, // 本番日数
+    koenbasho: 'Kitara', // 公演場所
+    tanto: '佐藤太郎', // 担当
+    mem: '', // 備考
+    gotantosha: '田中', // ご担当者様
+    honbanDat: [new Date('2025-10-24'), new Date('2025-10-25'), new Date('2025-10-26')], // 本番日
+    //下から詳細テーブル
+    kizaiData: [
+      {
+        kizai: ['■A', '***(内予備*1)', '***ハンガー'],
+        kizaiQty: [12, , 3],
+        kizaiMem: [''],
+      },
+      {
+        kizai: ['■B', '***予備B1'],
+        kizaiQty: [5],
+        kizaiMem: [''],
+      },
+      {
+        kizai: ['■C', '*C1'],
+        kizaiQty: [1],
+        kizaiMem: [],
+      },
+    ],
+    //
+  },
+];
 
 export const ShukoList = (props: { shukoData: ShukoTableValues[] }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [selected, setSelected] = useState<number[]>([]);
-  const [shukoList, setShukoList] = useState<ShukoTableValues[]>(props.shukoData);
-
+  // const [shukoList, setShukoList] = useState<ShukoTableValues[]>(props.shukoData);
+  const [shukoList, setShukoList] = useState<ShukoTableValues[]>(mockShukoData);
   /* useForm ------------------- */
   const { control, handleSubmit } = useForm({
     mode: 'onSubmit',
@@ -38,15 +115,58 @@ export const ShukoList = (props: { shukoData: ShukoTableValues[] }) => {
   });
 
   const onSubmit = async (data: ShukoListSearchValues) => {
-    setIsLoading(true);
-    const newShukoList = await getShukoList(data);
-    setShukoList(newShukoList);
-    setIsLoading(false);
+    // setIsLoading(true);
+    // const newShukoList = await getShukoList(data);
+    // setShukoList(newShukoList);
+    // setIsLoading(false);
+    console.log('検索実行:', data);
   };
 
-  const handleOutput = () => {
+  /* 納品書出力(PDF) ------------------- */
+  // PDFデータ生成フック
+  const [printShuko] = usePdf();
+
+  // ボタン押下
+  const handleOutput = async () => {
+    // チェックされた行を取り出し
     const selectList = selected.map((index) => shukoList[index]);
-    console.log(selectList);
+    console.log('selectList', selectList);
+
+    if (selectList.length === 0) return;
+
+    // PdfModelの配列を作成
+    const pdfModels: PdfModel[] = selectList.map((row) => ({
+      item1: row.juchuHeadId,
+      item2: row.shukoDat,
+      item3: row.kokyakuNam,
+      item4: row.koenNam,
+      item5: row.kashidashiDat ?? new Date(),
+      item6: row.henkyakuDat ?? new Date(),
+      item7: row.koenbasho ?? '',
+      item8: row.honbanNissu ?? 0,
+      item9: row.tanto ?? '',
+      item10: row.mem ?? '',
+      item11: row.gotantosha ?? '',
+      item12: (() => {
+        const dates = Array.isArray(row.honbanDat) ? row.honbanDat : row.honbanDat ? [row.honbanDat] : [new Date()];
+        return dates
+          .map((d) => {
+            const date = new Date(d);
+            return `${date.getMonth() + 1}/${date.getDate()}`;
+          })
+          .join(', ');
+      })(),
+      item13: row.kizaiData ?? [],
+    }));
+
+    console.log('pdfModels', pdfModels);
+
+    // PDF生成
+    const blob = await printShuko(pdfModels);
+
+    // ブラウザ表示
+    const url = URL.createObjectURL(blob);
+    window.open(url);
   };
 
   return (
