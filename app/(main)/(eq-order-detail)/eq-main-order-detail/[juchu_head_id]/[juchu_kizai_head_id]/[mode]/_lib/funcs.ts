@@ -1,7 +1,7 @@
 'use server';
 
 import { selectActiveBumons } from '@/app/_lib/db/tables/m-bumon';
-import { selectActiveEqpts, selectBundledEqpts } from '@/app/_lib/db/tables/m-kizai';
+import { selectActiveEqpts, selectBundledEqpts, selectMeisaiEqts } from '@/app/_lib/db/tables/m-kizai';
 import { selectBundledEqptIds } from '@/app/_lib/db/tables/m-kizai-set';
 import { deleteIdoDen, insertIdoDen, selectIdoDenMaxId, updateIdoDen } from '@/app/_lib/db/tables/t-ido-den';
 import {
@@ -172,6 +172,15 @@ export const getJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId:
       return [];
     }
 
+    const eqIds = eqList.map((data) => data.kizai_id);
+
+    const { data: mKizai, error: mKizaiError } = await selectMeisaiEqts(eqIds);
+
+    if (mKizaiError) {
+      console.error('GetEqList eqShozokuId error : ', mKizaiError);
+      return [];
+    }
+
     const { data: eqTanka, error: eqTankaError } = await selectJuchuKizaiMeisaiKizaiTanka(
       juchuHeadId,
       juchuKizaiHeadId
@@ -188,6 +197,7 @@ export const getJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId:
       idoDenId: d.ido_den_id,
       sagyoDenDat: d.sagyo_den_dat ? new Date(d.sagyo_den_dat) : null,
       sagyoSijiId: d.sagyo_siji_id === 'K→Y' ? 1 : d.sagyo_siji_id === 'Y→K' ? 2 : null,
+      mShozokuId: mKizai.find((data) => data.kizai_id === d.kizai_id)?.shozoku_id,
       shozokuId: d.shozoku_id,
       shozokuNam: d.shozoku_nam ?? '',
       mem: d.mem,

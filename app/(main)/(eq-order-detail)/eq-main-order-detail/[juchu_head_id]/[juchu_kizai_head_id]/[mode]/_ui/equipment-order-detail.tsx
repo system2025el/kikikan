@@ -908,9 +908,7 @@ const EquipmentOrderDetail = (props: {
   const handleCellDateClear = (kizaiId: number) => {
     setJuchuKizaiMeisaiList((prev) =>
       prev.map((row) =>
-        row.kizaiId === kizaiId
-          ? { ...row, sagyoDenDat: null, sagyoSijiId: null, shozokuId: row.shozokuId === 1 ? 2 : 1 }
-          : row
+        row.kizaiId === kizaiId ? { ...row, sagyoDenDat: null, sagyoSijiId: null, shozokuId: row.mShozokuId } : row
       )
     );
   };
@@ -1001,8 +999,8 @@ const EquipmentOrderDetail = (props: {
             ? {
                 ...row,
                 sagyoDenDat: newDate,
-                sagyoSijiId: row.sagyoDenDat ? row.sagyoSijiId : row.shozokuId === 1 ? 2 : 1,
-                shozokuId: row.sagyoDenDat ? row.shozokuId : row.shozokuId === 1 ? 2 : 1,
+                sagyoSijiId: row.mShozokuId === 1 ? 1 : 2,
+                shozokuId: row.mShozokuId === 1 ? 2 : 1,
               }
             : row
         )
@@ -1074,7 +1072,7 @@ const EquipmentOrderDetail = (props: {
     const yardShukoDat = getValues('yardShukoDat');
 
     if (juchuKizaiMeisaiList.length > 0 && yardShukoDat === null) {
-      setIdoDat(subDays(newDate.toDate(), 2));
+      setIdoDat(subDays(newDate.toDate(), 1));
       setMoveOpen(true);
     } else if (juchuKizaiMeisaiList.length > 0 && yardShukoDat !== null) {
       setIdoDat(null);
@@ -1096,14 +1094,16 @@ const EquipmentOrderDetail = (props: {
    * @param newDate YARD出庫日
    */
   const handleYardShukoAccept = async (newDate: Dayjs | null) => {
-    console.log('-------------------------------------------------');
     if (newDate === null) return;
     trigger(['kicsShukoDat', 'yardShukoDat']);
 
     const kicsShukoDat = getValues('kicsShukoDat');
 
-    if (juchuKizaiMeisaiList.length > 0 && kicsShukoDat === null) {
-      setIdoDat(subDays(newDate.toDate(), 2));
+    if (juchuKizaiMeisaiList.length > 0 && kicsShukoDat === null && newDate.hour() < 12) {
+      setIdoDat(subDays(newDate.toDate(), 1));
+      setMoveOpen(true);
+    } else if (juchuKizaiMeisaiList.length > 0 && kicsShukoDat === null && newDate.hour() >= 12) {
+      setIdoDat(newDate.toDate());
       setMoveOpen(true);
     } else if (juchuKizaiMeisaiList.length > 0 && kicsShukoDat !== null) {
       setIdoDat(null);
@@ -1168,7 +1168,7 @@ const EquipmentOrderDetail = (props: {
     const yardDat = getValues('yardShukoDat');
 
     if (juchuKizaiMeisaiList.length > 0 && yardDat !== null) {
-      setIdoDat(subDays(yardDat, 2));
+      setIdoDat(subDays(yardDat, 1));
       setMoveOpen(true);
     } else if (juchuKizaiMeisaiList.length > 0 && yardDat === null) {
       setIdoDat(null);
@@ -1185,7 +1185,7 @@ const EquipmentOrderDetail = (props: {
     const kicsDat = getValues('kicsShukoDat');
 
     if (juchuKizaiMeisaiList.length > 0 && kicsDat !== null) {
-      setIdoDat(subDays(kicsDat, 2));
+      setIdoDat(subDays(kicsDat, 1));
       setMoveOpen(true);
     } else if (juchuKizaiMeisaiList.length > 0 && kicsDat === null) {
       setIdoDat(null);
@@ -1202,11 +1202,11 @@ const EquipmentOrderDetail = (props: {
       if (idoDat !== null && getValues('yardShukoDat') === null) {
         setJuchuKizaiMeisaiList((prev) =>
           prev.map((row) =>
-            row.shozokuId === 2 && !row.delFlag
+            row.mShozokuId === 2 && !row.delFlag
               ? {
                   ...row,
-                  sagyoDenDat: row.sagyoDenDat ? null : idoDat,
-                  sagyoSijiId: row.sagyoDenDat ? null : 2,
+                  sagyoDenDat: idoDat,
+                  sagyoSijiId: 2,
                   shozokuId: 1,
                 }
               : row
@@ -1217,11 +1217,11 @@ const EquipmentOrderDetail = (props: {
       } else if (idoDat !== null && getValues('kicsShukoDat') === null) {
         setJuchuKizaiMeisaiList((prev) =>
           prev.map((row) =>
-            row.shozokuId === 1 && !row.delFlag
+            row.mShozokuId === 1 && !row.delFlag
               ? {
                   ...row,
-                  sagyoDenDat: row.sagyoDenDat ? null : idoDat,
-                  sagyoSijiId: row.sagyoDenDat ? null : 1,
+                  sagyoDenDat: idoDat,
+                  sagyoSijiId: 1,
                   shozokuId: 2,
                 }
               : row
@@ -1232,9 +1232,7 @@ const EquipmentOrderDetail = (props: {
       } else {
         setJuchuKizaiMeisaiList((prev) =>
           prev.map((row) =>
-            row.sagyoDenDat
-              ? { ...row, sagyoDenDat: idoDat, sagyoSijiId: null, shozokuId: row.shozokuId === 1 ? 2 : 1 }
-              : row
+            row.sagyoDenDat ? { ...row, sagyoDenDat: idoDat, sagyoSijiId: null, shozokuId: row.mShozokuId } : row
           )
         );
         setIdoDat(null);
@@ -1260,6 +1258,7 @@ const EquipmentOrderDetail = (props: {
       setJuchuHonbanbiList(originJuchuHonbanbiList);
       setJuchuHonbanbiDeleteList([]);
       setJuchuKizaiMeisaiList(originJuchuKizaiMeisaiList);
+      setJuchuContainerMeisaiList(originJuchuContainerMeisaiList);
       setOriginPlanQty(originJuchuKizaiMeisaiList.map((data) => data.planQty ?? 0));
       setEqStockList(originEqStockList);
       setDirtyOpen(false);
@@ -1310,8 +1309,13 @@ const EquipmentOrderDetail = (props: {
     setIsDetailLoading(true);
     const kicsDat = getValues('kicsShukoDat');
     const yardDat = getValues('yardShukoDat');
-    const kicsIdoDat = kicsDat === null && yardDat !== null ? subDays(yardDat, 2) : null;
-    const yardIdoDat = yardDat === null && kicsDat !== null ? subDays(kicsDat, 2) : null;
+    const kicsIdoDat =
+      kicsDat === null && yardDat !== null && yardDat.getHours() < 12
+        ? subDays(yardDat, 1)
+        : kicsDat === null && yardDat !== null && yardDat.getHours() >= 12
+          ? yardDat
+          : null;
+    const yardIdoDat = yardDat === null && kicsDat !== null ? subDays(kicsDat, 1) : null;
 
     const kizaiData = data.filter((d) => !d.ctnFlg);
     const kizaiIds = new Set(juchuKizaiMeisaiList.filter((data) => !data.delFlag).map((data) => data.kizaiId));
@@ -1328,6 +1332,7 @@ const EquipmentOrderDetail = (props: {
             ? yardIdoDat
             : null,
       sagyoSijiId: d.shozokuId === 1 && kicsIdoDat !== null ? 1 : d.shozokuId === 2 && yardIdoDat !== null ? 2 : null,
+      mShozokuId: d.shozokuId,
       shozokuId:
         d.shozokuId === 1 && kicsIdoDat !== null ? 2 : d.shozokuId === 2 && yardIdoDat !== null ? 1 : d.shozokuId,
       shozokuNam: d.shozokuNam,
