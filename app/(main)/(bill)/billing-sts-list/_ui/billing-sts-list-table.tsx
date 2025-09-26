@@ -123,7 +123,6 @@ export const BillingStsListTable = ({
           <Table stickyHeader size="small" padding="none">
             <TableHead>
               <TableRow sx={{ whiteSpace: 'nowrap' }}>
-                <TableCell />
                 <TableCell padding="none" />
                 <TableCell align="right">受注番号</TableCell>
                 <TableCell>受注請求状況件名</TableCell>
@@ -136,9 +135,6 @@ export const BillingStsListTable = ({
             <TableBody>
               {list.map((bill, index) => (
                 <TableRow key={index}>
-                  <TableCell padding="checkbox">
-                    <Checkbox color="primary" />
-                  </TableCell>
                   <TableCell
                     width={50}
                     sx={{
