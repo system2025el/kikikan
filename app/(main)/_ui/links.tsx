@@ -32,8 +32,8 @@ const orderList: MenuItem[] = [
   { name: '在庫確認', url: '/stock' },
   { name: '機材一覧', url: '/loan-situation' },
   { name: '見積一覧', url: '/quotation-list' },
-  { name: '請求一覧', url: '/' },
-  { name: '請求状況一覧', url: '/' },
+  { name: '請求一覧', url: '/bill-list' },
+  { name: '請求状況一覧', url: '/billing-sts-list' },
 ];
 /* マスタ管理リスト */
 const masterList: MenuItem[] = [
@@ -49,8 +49,8 @@ const masterList: MenuItem[] = [
   { name: '一式マスタ', url: '/' },
   { name: '担当者マスタ', url: '/users-master' },
   { name: '機材セットマスタ', url: '/eqpt-bundle-master' },
-  { name: 'マスタインポート', url: '/import-master' },
-  { name: 'マスタエクスポート', url: '/export-master' },
+  { name: 'マスタインポート', url: '/masters-import' },
+  { name: 'マスタエクスポート', url: '/masters-export' },
 ];
 /* 設定リスト */
 const settingList: MenuItem[] = [];

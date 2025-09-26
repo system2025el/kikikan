@@ -8,7 +8,7 @@ import {
   checkRfid,
   checkShukeibumon,
   checkTanaban,
-} from '@/app/_lib/db/tables/master-import';
+} from '@/app/_lib/db/tables/masters-import';
 
 import { EqptImportType, KizaiImportTypes, RfidImportTypes, TanabanImportTypes } from './types';
 
