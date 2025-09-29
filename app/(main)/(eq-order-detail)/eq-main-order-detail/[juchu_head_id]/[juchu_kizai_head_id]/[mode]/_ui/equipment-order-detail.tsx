@@ -818,28 +818,32 @@ const EquipmentOrderDetail = (props: {
       );
       console.log('受注コンテナ明細削除', deleteContainerMeisaiResult);
 
-      const deleteNyushukoDenResult = await delNyushukoDen(
+      const deleteContainerNyushukoDenResult = await delNyushukoDen(
         data.juchuHeadId,
         data.juchuKizaiHeadId,
         deleteJuchuContainerMeisaiIds
       );
-      console.log('コンテナ入出庫伝票削除', deleteNyushukoDenResult);
+      console.log('コンテナ入出庫伝票削除', deleteContainerNyushukoDenResult);
     }
     // 追加
     if (addJuchuContainerMeisaiData.length > 0) {
       const addContainerMeisaiResult = addJuchuContainerMeisai(addJuchuContainerMeisaiData, userNam);
       console.log('受注コンテナ明細追加', addContainerMeisaiResult);
 
-      const addNyushukoDenResult = await addContainerNyushukoDen(data, addJuchuContainerMeisaiData, userNam);
-      console.log('コンテナ入出庫伝票追加', addNyushukoDenResult);
+      const addContainerNyushukoDenResult = await addContainerNyushukoDen(data, addJuchuContainerMeisaiData, userNam);
+      console.log('コンテナ入出庫伝票追加', addContainerNyushukoDenResult);
     }
     // 更新
     if (updateJuchuContainerMeisaiData.length > 0) {
       const updateContainerMeisaiResult = await updJuchuContainerMeisai(updateJuchuContainerMeisaiData, userNam);
       console.log('受注コンテナ明細更新', updateContainerMeisaiResult);
 
-      const updateNyushukoDenResult = await updContainerNyushukoDen(data, updateJuchuContainerMeisaiData, userNam);
-      console.log('コンテナ入出庫伝票更新', updateNyushukoDenResult);
+      const updateContainerNyushukoDenResult = await updContainerNyushukoDen(
+        data,
+        updateJuchuContainerMeisaiData,
+        userNam
+      );
+      console.log('コンテナ入出庫伝票更新', updateContainerNyushukoDenResult);
     }
 
     const juchuContainerMeisaiData = await getJuchuContainerMeisai(data.juchuHeadId, data.juchuKizaiHeadId);

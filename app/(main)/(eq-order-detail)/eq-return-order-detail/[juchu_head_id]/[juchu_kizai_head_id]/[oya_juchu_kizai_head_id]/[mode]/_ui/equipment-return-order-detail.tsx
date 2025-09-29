@@ -68,6 +68,7 @@ import {
   OyaJuchuKizaiNyushukoValues,
 } from '@/app/(main)/(eq-order-detail)/_lib/types';
 import { OyaEqSelectionDialog } from '@/app/(main)/(eq-order-detail)/_ui/equipment-selection-dialog';
+import { delNyushukoDen } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_lib/funcs';
 import {
   JuchuContainerMeisaiValues,
   JuchuKizaiHeadValues,
@@ -78,16 +79,21 @@ import {
 import { SaveAlertDialog } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_ui/caveat-dialog';
 
 import {
+  addReturnContainerNyushukoDen,
   addReturnJuchuContainerMeisai,
   addReturnJuchuKizaiHead,
   addReturnJuchuKizaiMeisai,
+  addReturnNyushukoDen,
   delReturnJuchuContainerMeisai,
   delReturnJuchuKizaiMeisai,
+  delReturnNyushukoDen,
   getReturnJuchuContainerMeisai,
   getReturnJuchuKizaiMeisai,
+  updReturnContainerNyushukoDen,
   updReturnJuchuContainerMeisai,
   updReturnJuchuKizaiHead,
   updReturnJuchuKizaiMeisai,
+  updReturnNyushukoDen,
 } from '../_lib/funcs';
 import {
   ReturnJuchuContainerMeisaiValues,
@@ -419,21 +425,20 @@ export const EquipmentReturnOrderDetail = (props: {
 
       // 受注機材明細関係更新
       const filterReturnJuchuKizaiMeisaiList = returnJuchuKizaiMeisaiList.filter((data) => !data.delFlag);
-      if (JSON.stringify(originReturnJuchuKizaiMeisaiList) !== JSON.stringify(filterReturnJuchuKizaiMeisaiList)) {
-        await saveReturnJuchuKizaiMeisai(data.juchuHeadId, data.juchuKizaiHeadId, userNam);
+      if (
+        isDirty ||
+        JSON.stringify(originReturnJuchuKizaiMeisaiList) !== JSON.stringify(filterReturnJuchuKizaiMeisaiList)
+      ) {
+        await saveReturnJuchuKizaiMeisai(data, userNam);
       }
 
       // 受注コンテナ明細更新
       const filterReturnJuchuContainerMeisaiList = returnJuchuContainerMeisaiList.filter((data) => !data.delFlag);
       if (
+        isDirty ||
         JSON.stringify(originReturnJuchuContainerMeisaiList) !== JSON.stringify(filterReturnJuchuContainerMeisaiList)
       ) {
-        await saveReturnJuchuContainerMeisai(
-          data.juchuHeadId,
-          data.juchuKizaiHeadId,
-          data.oyaJuchuKizaiHeadId,
-          userNam
-        );
+        await saveReturnJuchuContainerMeisai(data, userNam);
       }
 
       //
@@ -615,9 +620,9 @@ export const EquipmentReturnOrderDetail = (props: {
    * @param juchuKizaiHeadId 受注機材ヘッダーid
    * @param userNam ユーザー名
    */
-  const saveReturnJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number, userNam: string) => {
+  const saveReturnJuchuKizaiMeisai = async (data: ReturnJuchuKizaiHeadValues, userNam: string) => {
     const copyReturnJuchuKizaiMeisaiData = [...returnJuchuKizaiMeisaiList];
-    const juchuKizaiMeisaiMaxId = await getJuchuKizaiMeisaiMaxId(juchuHeadId, juchuKizaiHeadId);
+    const juchuKizaiMeisaiMaxId = await getJuchuKizaiMeisaiMaxId(data.juchuHeadId, data.juchuKizaiHeadId);
     let newReturnJuchuKizaiMeisaiId = juchuKizaiMeisaiMaxId ? juchuKizaiMeisaiMaxId.juchu_kizai_meisai_id + 1 : 1;
 
     const newReturnJuchuKizaiMeisaiData = copyReturnJuchuKizaiMeisaiData.map((data) =>
@@ -636,27 +641,38 @@ export const EquipmentReturnOrderDetail = (props: {
     const deleteReturnJuchuKizaiMeisaiData = newReturnJuchuKizaiMeisaiData.filter(
       (data) => data.delFlag && data.saveFlag
     );
+    // 削除
     if (deleteReturnJuchuKizaiMeisaiData.length > 0) {
-      console.log('明細削除');
-      const deleteJuchuKizaiMeisaiIds = deleteReturnJuchuKizaiMeisaiData.map((data) => data.juchuKizaiMeisaiId);
+      const deleteReturnIds = deleteReturnJuchuKizaiMeisaiData.map((data) => data.juchuKizaiMeisaiId);
       const deleteMeisaiResult = await delReturnJuchuKizaiMeisai(
-        juchuHeadId,
-        juchuKizaiHeadId,
-        deleteJuchuKizaiMeisaiIds
+        data.juchuHeadId,
+        data.juchuKizaiHeadId,
+        deleteReturnIds
       );
       console.log('受注機材明細削除', deleteMeisaiResult);
-    }
 
+      const deleteNyushukoDenResult = await delReturnNyushukoDen(
+        data.juchuHeadId,
+        data.juchuKizaiHeadId,
+        deleteReturnIds
+      );
+      console.log('返却入出庫伝票削除', deleteNyushukoDenResult);
+    }
+    // 追加
     if (addReturnJuchuKizaiMeisaiData.length > 0) {
-      console.log('明細追加');
       const addMeisaiResult = addReturnJuchuKizaiMeisai(addReturnJuchuKizaiMeisaiData, userNam);
       console.log('受注機材明細追加', addMeisaiResult);
-    }
 
+      const addNyushukoDenResult = await addReturnNyushukoDen(data, addReturnJuchuKizaiMeisaiData, userNam);
+      console.log('返却入出庫伝票追加', addNyushukoDenResult);
+    }
+    // 更新
     if (updateReturnJuchuKizaiMeisaiData.length > 0) {
-      console.log('明細更新');
       const updateMeisaiResult = await updReturnJuchuKizaiMeisai(updateReturnJuchuKizaiMeisaiData, userNam);
       console.log('受注機材明細更新', updateMeisaiResult);
+
+      const updateNyushukoDenResult = await updReturnNyushukoDen(data, updateReturnJuchuKizaiMeisaiData, userNam);
+      console.log('返却入出庫伝票更新', updateNyushukoDenResult);
     }
   };
 
@@ -666,14 +682,9 @@ export const EquipmentReturnOrderDetail = (props: {
    * @param juchuKizaiHeadId 受注機材ヘッダーid
    * @param userNam ユーザー名
    */
-  const saveReturnJuchuContainerMeisai = async (
-    juchuHeadId: number,
-    juchuKizaiHeadId: number,
-    oyaJuchuKizaiHeadId: number,
-    userNam: string
-  ) => {
+  const saveReturnJuchuContainerMeisai = async (data: ReturnJuchuKizaiHeadValues, userNam: string) => {
     const copyReturnJuchuContainerMeisaiData = [...returnJuchuContainerMeisaiList];
-    const juchuContainerMeisaiMaxId = await getJuchuContainerMeisaiMaxId(juchuHeadId, juchuKizaiHeadId);
+    const juchuContainerMeisaiMaxId = await getJuchuContainerMeisaiMaxId(data.juchuHeadId, data.juchuKizaiHeadId);
     let newReturnJuchuContainerMeisaiId = juchuContainerMeisaiMaxId
       ? juchuContainerMeisaiMaxId.juchu_kizai_meisai_id + 1
       : 1;
@@ -694,35 +705,57 @@ export const EquipmentReturnOrderDetail = (props: {
     const deleteReturnJuchuContainerMeisaiData = newReturnJuchuContainerMeisaiData.filter(
       (data) => data.delFlag && data.saveFlag
     );
+    // 削除
     if (deleteReturnJuchuContainerMeisaiData.length > 0) {
       const deleteReturnJuchuContainerMeisaiIds = deleteReturnJuchuContainerMeisaiData.map(
         (data) => data.juchuKizaiMeisaiId
       );
       const deleteContainerMeisaiResult = await delReturnJuchuContainerMeisai(
-        juchuHeadId,
-        juchuKizaiHeadId,
+        data.juchuHeadId,
+        data.juchuKizaiHeadId,
         deleteReturnJuchuContainerMeisaiIds
       );
       console.log('返却受注コンテナ明細削除', deleteContainerMeisaiResult);
-    }
 
+      const deleteContainerNyushukoDenResult = await delReturnNyushukoDen(
+        data.juchuHeadId,
+        data.juchuKizaiHeadId,
+        deleteReturnJuchuContainerMeisaiIds
+      );
+      console.log('返却コンテナ入出庫伝票削除', deleteContainerNyushukoDenResult);
+    }
+    // 追加
     if (addReturnJuchuContainerMeisaiData.length > 0) {
       const addContainerMeisaiResult = addReturnJuchuContainerMeisai(addReturnJuchuContainerMeisaiData, userNam);
       console.log('返却受注コンテナ明細追加', addContainerMeisaiResult);
-    }
 
+      const addContainerNyushukoDenResult = await addReturnContainerNyushukoDen(
+        data,
+        addReturnJuchuContainerMeisaiData,
+        userNam
+      );
+      console.log('返却コンテナ入出庫伝票追加', addContainerNyushukoDenResult);
+    }
+    // 更新
     if (updateReturnJuchuContainerMeisaiData.length > 0) {
       const updateContainerMeisaiResult = await updReturnJuchuContainerMeisai(
         updateReturnJuchuContainerMeisaiData,
         userNam
       );
       console.log('返却受注コンテナ明細更新', updateContainerMeisaiResult);
+
+      const updateContainerNyushukoDenResult = await updReturnContainerNyushukoDen(
+        data,
+        updateReturnJuchuContainerMeisaiData,
+        userNam
+      );
+      console.log('返却コンテナ入出庫伝票更新', updateContainerNyushukoDenResult);
     }
 
     const returnJuchuContainerMeisaiData = await getReturnJuchuContainerMeisai(
-      juchuHeadId,
-      juchuKizaiHeadId,
-      oyaJuchuKizaiHeadId
+      data.juchuHeadId,
+      data.juchuKizaiHeadId,
+      data.oyaJuchuKizaiHeadId
     );
     setOriginReturnJuchuContainerMeisaiList(returnJuchuContainerMeisaiData ?? []);
     setReturnJuchuContainerMeisaiList(returnJuchuContainerMeisaiData ?? []);
