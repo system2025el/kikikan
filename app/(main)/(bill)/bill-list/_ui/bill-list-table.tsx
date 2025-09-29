@@ -92,26 +92,16 @@ export const BillListTable = ({
         </Grid2>
         <Grid2 container spacing={1}>
           <Grid2 container spacing={1}>
-            <Grid2>
-              <Button onClick={() => setDialogOpen(true)}>
-                <AddIcon fontSize="small" />
-                新規
-              </Button>
-            </Grid2>
-            <Grid2>
-              <Button color="error">
-                <DeleteIcon fontSize="small" />
-                削除
-              </Button>
-            </Grid2>
+            <Button color="error">
+              <DeleteIcon fontSize="small" />
+              削除
+            </Button>
           </Grid2>
           <Grid2 container spacing={1}>
-            <Grid2>
-              <Button>
-                <ContentCopyIcon fontSize="small" />
-                コピー
-              </Button>
-            </Grid2>
+            <Button>
+              <ContentCopyIcon fontSize="small" />
+              コピー
+            </Button>
           </Grid2>
         </Grid2>
       </Grid2>
@@ -190,63 +180,6 @@ export const BillListTable = ({
           </Table>
         </TableContainer>
       )}
-      {/* 請求作成方法確認ダイアログ */}
-      <Dialog
-        open={dialogOpen}
-        onClose={() => {
-          reset();
-          setDialogOpen(false);
-        }}
-      >
-        <DialogTitle display={'flex'} justifyContent={'end'}>
-          <CloseMasterDialogButton
-            handleCloseDialog={() => {
-              reset();
-              setDialogOpen(false);
-            }}
-          />
-        </DialogTitle>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <Grid2 container direction={'column'} px={4} pt={4} spacing={2}>
-            <Grid2 display={'flex'} alignItems={'baseline'}>
-              <Typography mr={9}>相手</Typography>
-              <SelectElement
-                name="kokyaku"
-                control={control}
-                options={custs}
-                sx={{ width: 400 }}
-                rules={{ required: '選択してください' }}
-              />
-            </Grid2>
-            <Grid2 display={'flex'} alignItems={'baseline'}>
-              <Typography mr={9}>年月</Typography>
-              <Controller
-                control={control}
-                name="dat"
-                rules={{ required: '選択してください' }}
-                render={({ field, fieldState }) => (
-                  <FormMonthX
-                    value={field.value}
-                    onChange={field.onChange}
-                    sx={{
-                      mr: 1,
-                    }}
-                    error={!!fieldState.error}
-                    helperText={fieldState.error?.message}
-                  />
-                )}
-              />
-            </Grid2>
-            <Grid2 display={'flex'} alignItems={'center'}>
-              <Typography mr={5}>詳細表示</Typography>
-              <CheckboxElement size="medium" name={'showDetailFlg'} control={control} />
-            </Grid2>
-          </Grid2>
-          <DialogActions>
-            <Button type="submit">自動生成</Button>
-          </DialogActions>
-        </form>
-      </Dialog>
     </Box>
   );
 };
