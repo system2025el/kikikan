@@ -707,20 +707,18 @@ export const EquipmentReturnOrderDetail = (props: {
     );
     // 削除
     if (deleteReturnJuchuContainerMeisaiData.length > 0) {
-      const deleteReturnJuchuContainerMeisaiIds = deleteReturnJuchuContainerMeisaiData.map(
-        (data) => data.juchuKizaiMeisaiId
-      );
+      const deleteReturnContainerIds = deleteReturnJuchuContainerMeisaiData.map((data) => data.juchuKizaiMeisaiId);
       const deleteContainerMeisaiResult = await delReturnJuchuContainerMeisai(
         data.juchuHeadId,
         data.juchuKizaiHeadId,
-        deleteReturnJuchuContainerMeisaiIds
+        deleteReturnContainerIds
       );
       console.log('返却受注コンテナ明細削除', deleteContainerMeisaiResult);
 
       const deleteContainerNyushukoDenResult = await delReturnNyushukoDen(
         data.juchuHeadId,
         data.juchuKizaiHeadId,
-        deleteReturnJuchuContainerMeisaiIds
+        deleteReturnContainerIds
       );
       console.log('返却コンテナ入出庫伝票削除', deleteContainerNyushukoDenResult);
     }
