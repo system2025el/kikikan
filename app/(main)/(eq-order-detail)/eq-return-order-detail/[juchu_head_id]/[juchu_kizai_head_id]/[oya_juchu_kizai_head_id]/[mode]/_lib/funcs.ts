@@ -587,6 +587,13 @@ export const updReturnNyushukoDen = async (
   }
 };
 
+/**
+ * 返却コンテナ入出庫伝票新規追加
+ * @param returnJuchuKizaiHeadData 返却受注機材ヘッダーデータ
+ * @param returnJuchuContainerMeisaiData 返却受注コンテナ明細データ
+ * @param userNam ユーザー名
+ * @returns
+ */
 export const addReturnContainerNyushukoDen = async (
   returnJuchuKizaiHeadData: ReturnJuchuKizaiHeadValues,
   returnJuchuContainerMeisaiData: ReturnJuchuContainerMeisaiValues[],
@@ -636,6 +643,13 @@ export const addReturnContainerNyushukoDen = async (
   }
 };
 
+/**
+ * 返却コンテナ入出庫伝票更新
+ * @param returnJuchuKizaiHeadData 返却受注機材ヘッダーデータ
+ * @param returnJuchuContainerMeisaiData 返却受注コンテナ明細データ
+ * @param userNam ユーザー名
+ * @returns
+ */
 export const updReturnContainerNyushukoDen = async (
   returnJuchuKizaiHeadData: ReturnJuchuKizaiHeadValues,
   returnJuchuContainerMeisaiData: ReturnJuchuContainerMeisaiValues[],
