@@ -531,6 +531,7 @@ export const ContainerTable = (props: {
                       textAlign: 'right',
                       padding: 0,
                       fontSize: 'small',
+                      width: 60,
                     },
                     '& input[type=number]': {
                       MozAppearance: 'textfield',
@@ -574,6 +575,7 @@ export const ContainerTable = (props: {
                       textAlign: 'right',
                       padding: 0,
                       fontSize: 'small',
+                      width: 60,
                     },
                     '& input[type=number]': {
                       MozAppearance: 'textfield',
