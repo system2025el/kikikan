@@ -134,7 +134,7 @@ export const Quotation = ({
     } else {
       reset(quot);
     }
-  }, []);
+  }, [user]);
   /* eslint-enable react-hooks/exhaustive-deps */
 
   // 機材中計計算
@@ -212,14 +212,16 @@ export const Quotation = ({
               </Box>
             </Grid2>
           </Paper>
-
           {isLoading && <LoadingOverlay />}
-
           {/* 受注選択 ---------------------------------------------------------------------------------- */}
           <Accordion
             expanded={juchuExpanded}
             onChange={() => setJuchuExpanded(!juchuExpanded)}
-            sx={{ marginTop: 1 }}
+            sx={{
+              borderRadius: 1,
+              overflow: 'hidden',
+              marginTop: 1,
+            }}
             variant="outlined"
           >
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -299,12 +301,15 @@ export const Quotation = ({
               </Grid2>
             </AccordionDetails>
           </Accordion>
-
           {/* 見積ヘッダー ----------------------------------------------------------------------------------*/}
           <Accordion
             expanded={mitsuExpanded}
             onChange={() => setMitsuExpanded(!mitsuExpanded)}
-            sx={{ marginTop: 1 }}
+            sx={{
+              borderRadius: 1,
+              overflow: 'hidden',
+              marginTop: 1,
+            }}
             variant="outlined"
           >
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -450,7 +455,6 @@ export const Quotation = ({
               </Grid2>
             </AccordionDetails>
           </Accordion>
-
           {/* 見積明細 ----------------------------------------------------------------------------------*/}
           <Paper sx={{ marginTop: 1 }} variant="outlined">
             <Box p={1}>
@@ -562,7 +566,7 @@ export const Quotation = ({
                 </Box>
               </Box>
               {/* その他テーブル ------------------------------------------------------------ */}
-              <Box margin={0.5} padding={0.8} borderTop={1} borderBottom={1} borderColor={'divider'}>
+              <Box margin={0.5} padding={0.8} borderTop={1} borderColor={'divider'}>
                 <Typography variant="h6" pt={1} pl={2}>
                   その他
                 </Typography>
@@ -591,199 +595,201 @@ export const Quotation = ({
                   </Button>
                 </Box>
               </Box>
-              <Box margin={0.5} padding={0.8} borderTop={1} borderColor={'divider'}>
-                <Grid2 container display={'flex'} alignItems={'baseline'} spacing={0.5}>
-                  <Grid2 size={1} alignContent={'baseline'}>
-                    <Box>
-                      <Typography textAlign={'center'}>コメント</Typography>
-                    </Box>
-                  </Grid2>
-                  <Grid2 size={6}>
-                    <TextFieldElement name="comment" control={control} multiline fullWidth />
-                  </Grid2>
-                  <Grid2 size={'grow'} />
+            </Box>
+          </Paper>
+
+          {/* まとめ ------------------------------------------------------------------------------------ */}
+          <Paper sx={{ marginTop: 2, pt: 1 }} variant="outlined">
+            <Box margin={0.5} padding={0.8}>
+              <Grid2 container display={'flex'} alignItems={'baseline'} spacing={0.5}>
+                <Grid2 size={1} alignItems={'baseline'}>
+                  <Typography textAlign={'center'}>コメント</Typography>
                 </Grid2>
-                <Grid2 container display={'flex'} alignItems={'center'} spacing={0.5} my={0.5}>
-                  <Grid2 size={'grow'} />
-                  <Grid2 size={1.5}>
-                    <TextFieldElement name="chukeiMei" control={control} />
-                  </Grid2>
-                  <Grid2 size={2}>
-                    <ReadOnlyYenNumberElement name="chukeiAmt" />
-                  </Grid2>
-                  <Grid2 size={1} />
+                <Grid2 size={6}>
+                  <TextFieldElement name="comment" control={control} multiline fullWidth />
                 </Grid2>
-                <Grid2 container display={'flex'} alignItems={'center'} spacing={0.5} my={0.5}>
-                  <Grid2 size={'grow'} />
-                  <Grid2 size={1.5}>
-                    <TextFieldElement name="tokuNebikiMei" control={control} />
-                  </Grid2>
-                  <Grid2 size={2}>
-                    <Controller
-                      name={'tokuNebikiAmt'}
-                      control={control}
-                      render={({ field, fieldState }) => (
-                        <TextField
-                          {...field}
-                          value={
-                            isEditing
-                              ? (field.value ?? '')
-                              : typeof field.value === 'number' && !isNaN(field.value)
-                                ? `${'-'}¥${Math.abs(field.value).toLocaleString()}`
-                                : `${'-'}¥0`
-                          }
-                          type="text"
-                          onFocus={(e) => {
-                            setIsEditing(true);
-                            const rawValue = String(field.value ?? '');
-                            setTimeout(() => {
-                              e.target.value = rawValue;
-                            }, 1);
-                          }}
-                          onBlur={(e) => {
-                            const rawValue = e.target.value.replace(/[¥,]/g, '');
-                            const numericValue = Math.abs(Number(rawValue));
-                            field.onChange(numericValue);
-                            setIsEditing(false);
-                          }}
-                          onChange={(e) => {
-                            const raw = e.target.value.replace(/[^\d]/g, '');
-                            if (/^\d*$/.test(raw)) {
-                              field.onChange(Number(raw));
-                              e.target.value = raw;
-                            }
-                          }}
-                          sx={{
-                            '.MuiOutlinedInput-notchedOutline': {
-                              borderColor: fieldState.error?.message && 'red',
-                            },
-                            '.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                              borderColor: fieldState.error?.message && 'red',
-                            },
-                            '&:hover .MuiOutlinedInput-notchedOutline': {
-                              borderColor: fieldState.error?.message && 'red',
-                            },
-                            '& .MuiInputBase-input': {
-                              textAlign: 'right',
-                            },
-                            '.MuiFormHelperText-root': {
-                              color: 'red',
-                            },
-                            '& input[type=number]::-webkit-inner-spin-button': {
-                              WebkitAppearance: 'none',
-                              margin: 0,
-                            },
-                          }}
-                          helperText={fieldState.error?.message}
-                        />
-                      )}
-                    />
-                  </Grid2>
-                  <Grid2 size={1} />
+                <Grid2 size={'grow'} />
+              </Grid2>
+              <Grid2 container display={'flex'} alignItems={'center'} spacing={0.5} my={0.5}>
+                <Grid2 size={'grow'} />
+                <Grid2 size={1.5}>
+                  <TextFieldElement name="chukeiMei" control={control} />
                 </Grid2>
-                <Grid2 container display={'flex'} alignItems={'center'} spacing={0.5} my={0.5}>
-                  <Grid2 size={'grow'} />
-                  <Grid2 size={1.5} justifyItems={'end'}>
-                    <Typography>合計</Typography>
-                  </Grid2>
-                  <Grid2 size={2}>
-                    <ReadOnlyYenNumberElement name="preTaxGokeiAmt" />
-                  </Grid2>
-                  <Grid2 size={1} />
+                <Grid2 size={2}>
+                  <ReadOnlyYenNumberElement name="chukeiAmt" />
                 </Grid2>
-                <Grid2 container display={'flex'} alignItems={'center'} spacing={0.5} my={0.5}>
-                  <Grid2 size={'grow'} />
-                  <Grid2 size={1.5} justifyItems={'end'}>
-                    <Typography>消費税</Typography>
-                  </Grid2>
-                  <Grid2 size={2}>
-                    <Controller
-                      name="zeiAmt"
-                      control={control}
-                      render={({ field, fieldState }) => (
-                        <TextField
-                          {...field}
-                          value={
-                            isEditing
-                              ? (field.value ?? '')
-                              : typeof field.value === 'number' && !isNaN(field.value)
-                                ? `¥${Math.abs(field.value).toLocaleString()}`
-                                : `¥0`
-                          }
-                          type="text"
-                          onFocus={(e) => {
-                            setIsEditing(true);
-                            const rawValue = String(field.value ?? '');
+                <Grid2 size={1} />
+              </Grid2>
+              <Grid2 container display={'flex'} alignItems={'center'} spacing={0.5} my={0.5}>
+                <Grid2 size={'grow'} />
+                <Grid2 size={1.5}>
+                  <TextFieldElement name="tokuNebikiMei" control={control} />
+                </Grid2>
+                <Grid2 size={2}>
+                  <Controller
+                    name={'tokuNebikiAmt'}
+                    control={control}
+                    render={({ field, fieldState }) => (
+                      <TextField
+                        {...field}
+                        value={
+                          isEditing
+                            ? (field.value ?? '')
+                            : typeof field.value === 'number' && !isNaN(field.value)
+                              ? `${'-'}¥${Math.abs(field.value).toLocaleString()}`
+                              : `${'-'}¥0`
+                        }
+                        type="text"
+                        onFocus={(e) => {
+                          setIsEditing(true);
+                          const rawValue = String(field.value ?? '');
+                          setTimeout(() => {
                             e.target.value = rawValue;
-                          }}
-                          onBlur={(e) => {
-                            const rawValue = e.target.value.replace(/[¥,]/g, '');
-                            const numericValue = Math.abs(Number(rawValue));
-                            field.onChange(numericValue);
-                            setIsEditing(false);
-                          }}
-                          onChange={(e) => {
-                            const raw = e.target.value.replace(/[^\d]/g, '');
-                            if (/^\d*$/.test(raw)) {
-                              field.onChange(Number(raw));
-                              e.target.value = raw;
-                            }
-                          }}
-                          sx={{
-                            '.MuiOutlinedInput-notchedOutline': {
-                              borderColor: fieldState.error?.message && 'red',
-                            },
-                            '.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                              borderColor: fieldState.error?.message && 'red',
-                            },
-                            '&:hover .MuiOutlinedInput-notchedOutline': {
-                              borderColor: fieldState.error?.message && 'red',
-                            },
-                            '& .MuiInputBase-input': {
-                              textAlign: 'right',
-                            },
-                            '.MuiFormHelperText-root': {
-                              color: 'red',
-                            },
-                            '& input[type=number]::-webkit-inner-spin-button': {
-                              WebkitAppearance: 'none',
-                              margin: 0,
-                            },
-                          }}
-                          helperText={fieldState.error?.message}
-                        />
-                      )}
-                    />
-                  </Grid2>
-                  <Grid2 size={1} display={'flex'}>
-                    <TextFieldElement
-                      name="zeiRat"
-                      control={control}
-                      sx={{
-                        '& .MuiInputBase-input': {
-                          textAlign: 'right',
-                        },
-                        '& input[type=number]::-webkit-inner-spin-button': {
-                          WebkitAppearance: 'none',
-                          margin: 0,
-                        },
-                      }}
-                      type="number"
-                    />
-                    <Typography alignSelf={'center'}>%</Typography>
-                  </Grid2>
+                          }, 1);
+                        }}
+                        onBlur={(e) => {
+                          const rawValue = e.target.value.replace(/[¥,]/g, '');
+                          const numericValue = Math.abs(Number(rawValue));
+                          field.onChange(numericValue);
+                          setIsEditing(false);
+                        }}
+                        onChange={(e) => {
+                          const raw = e.target.value.replace(/[^\d]/g, '');
+                          if (/^\d*$/.test(raw)) {
+                            field.onChange(Number(raw));
+                            e.target.value = raw;
+                          }
+                        }}
+                        sx={(theme) => ({
+                          '.MuiOutlinedInput-notchedOutline': {
+                            borderColor: fieldState.error?.message && theme.palette.error.main,
+                          },
+                          '.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                            borderColor: fieldState.error?.message && theme.palette.error.main,
+                          },
+                          '&:hover .MuiOutlinedInput-notchedOutline': {
+                            borderColor: fieldState.error?.message && theme.palette.error.main,
+                          },
+                          '& .MuiInputBase-input': {
+                            textAlign: 'right',
+                          },
+                          '.MuiFormHelperText-root': {
+                            color: theme.palette.error.main,
+                          },
+                          '& input[type=number]::-webkit-inner-spin-button': {
+                            WebkitAppearance: 'none',
+                            margin: 0,
+                          },
+                        })}
+                        helperText={fieldState.error?.message}
+                      />
+                    )}
+                  />
                 </Grid2>
-                <Grid2 container display={'flex'} alignItems={'center'} spacing={0.5} my={0.5}>
-                  <Grid2 size={'grow'} />
-                  <Grid2 size={1.5} justifyItems={'end'}>
-                    <Typography>合計金額</Typography>
-                  </Grid2>
-                  <Grid2 size={2}>
-                    <ReadOnlyYenNumberElement name="gokeiAmt" />
-                  </Grid2>
-                  <Grid2 size={1} />
+                <Grid2 size={1} />
+              </Grid2>
+              <Grid2 container display={'flex'} alignItems={'center'} spacing={0.5} my={0.5}>
+                <Grid2 size={'grow'} />
+                <Grid2 size={1.5} justifyItems={'end'}>
+                  <Typography>合計</Typography>
                 </Grid2>
-              </Box>
+                <Grid2 size={2}>
+                  <ReadOnlyYenNumberElement name="preTaxGokeiAmt" />
+                </Grid2>
+                <Grid2 size={1} />
+              </Grid2>
+              <Grid2 container display={'flex'} alignItems={'center'} spacing={0.5} my={0.5}>
+                <Grid2 size={'grow'} />
+                <Grid2 size={1.5} justifyItems={'end'}>
+                  <Typography>消費税</Typography>
+                </Grid2>
+                <Grid2 size={2}>
+                  <Controller
+                    name="zeiAmt"
+                    control={control}
+                    render={({ field, fieldState }) => (
+                      <TextField
+                        {...field}
+                        value={
+                          isEditing
+                            ? (field.value ?? '')
+                            : typeof field.value === 'number' && !isNaN(field.value)
+                              ? `¥${Math.abs(field.value).toLocaleString()}`
+                              : `¥0`
+                        }
+                        type="text"
+                        onFocus={(e) => {
+                          setIsEditing(true);
+                          const rawValue = String(field.value ?? '');
+                          e.target.value = rawValue;
+                        }}
+                        onBlur={(e) => {
+                          const rawValue = e.target.value.replace(/[¥,]/g, '');
+                          const numericValue = Math.abs(Number(rawValue));
+                          field.onChange(numericValue);
+                          setIsEditing(false);
+                        }}
+                        onChange={(e) => {
+                          const raw = e.target.value.replace(/[^\d]/g, '');
+                          if (/^\d*$/.test(raw)) {
+                            field.onChange(Number(raw));
+                            e.target.value = raw;
+                          }
+                        }}
+                        sx={(theme) => ({
+                          '.MuiOutlinedInput-notchedOutline': {
+                            borderColor: fieldState.error?.message && theme.palette.error.main,
+                          },
+                          '.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                            borderColor: fieldState.error?.message && theme.palette.error.main,
+                          },
+                          '&:hover .MuiOutlinedInput-notchedOutline': {
+                            borderColor: fieldState.error?.message && theme.palette.error.main,
+                          },
+                          '& .MuiInputBase-input': {
+                            textAlign: 'right',
+                          },
+                          '.MuiFormHelperText-root': {
+                            color: theme.palette.error.main,
+                          },
+                          '& input[type=number]::-webkit-inner-spin-button': {
+                            WebkitAppearance: 'none',
+                            margin: 0,
+                          },
+                        })}
+                        helperText={fieldState.error?.message}
+                      />
+                    )}
+                  />
+                </Grid2>
+                <Grid2 size={1} display={'flex'}>
+                  <TextFieldElement
+                    name="zeiRat"
+                    control={control}
+                    sx={{
+                      '& .MuiInputBase-input': {
+                        textAlign: 'right',
+                      },
+                      '& input[type=number]::-webkit-inner-spin-button': {
+                        WebkitAppearance: 'none',
+                        margin: 0,
+                      },
+                    }}
+                    type="number"
+                  />
+                  <Typography alignSelf={'center'}>%</Typography>
+                </Grid2>
+              </Grid2>
+              <Grid2 container display={'flex'} alignItems={'center'} spacing={0.5} my={0.5}>
+                <Grid2 size={'grow'} />
+                <Grid2 size={1.5} justifyItems={'end'}>
+                  <Typography>合計金額</Typography>
+                </Grid2>
+                <Grid2 size={2}>
+                  <ReadOnlyYenNumberElement name="gokeiAmt" />
+                </Grid2>
+                <Grid2 size={1} />
+              </Grid2>
             </Box>
           </Paper>
         </form>
@@ -839,31 +845,30 @@ export const ReadOnlyYenNumberElement = <TFieldName extends FieldPath<QuotHeadVa
               e.target.value = raw;
             }
           }}
-          sx={{
+          sx={(theme) => ({
             '.MuiOutlinedInput-notchedOutline': {
-              borderColor: fieldState.error?.message && 'red',
+              borderColor: fieldState.error?.message && theme.palette.error.main,
             },
             '.Mui-focused .MuiOutlinedInput-notchedOutline': {
-              borderColor: fieldState.error?.message && 'red',
+              borderColor: fieldState.error?.message && theme.palette.error.main,
             },
             '&:hover .MuiOutlinedInput-notchedOutline': {
-              borderColor: fieldState.error?.message && 'red',
+              borderColor: fieldState.error?.message && theme.palette.error.main,
             },
             '& .MuiInputBase-input': {
               textAlign: 'right',
             },
             '.MuiFormHelperText-root': {
-              color: 'red',
+              color: theme.palette.error.main,
             },
             '& input[type=number]::-webkit-inner-spin-button': {
               WebkitAppearance: 'none',
               margin: 0,
             },
-
             pointerEvents: 'none', // クリック不可にする
             backgroundColor: '#f5f5f5', // グレー背景で無効っぽく
             color: '#888',
-          }}
+          })}
           slotProps={{ input: { readOnly: true, onFocus: (e) => e.target.blur() } }}
           helperText={fieldState.error?.message}
         />

@@ -82,3 +82,6 @@ export const toJapanTimeString = (input: Date | string | number = new Date()): s
 export const toJapanDateString = (input: Date | string | number = new Date()): string => {
   return dayjs(input).tz('Asia/Tokyo').format('YYYY/MM/DD');
 };
+export const toJapanMonthString = (input: Date | string | number = new Date()): string => {
+  return dayjs(input).tz('Asia/Tokyo').format('YYYY/MM');
+};

@@ -1,16 +1,16 @@
+'use client';
+
 import AddIcon from '@mui/icons-material/Add';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DeleteIcon from '@mui/icons-material/Delete';
 import {
   Box,
   Button,
-  Checkbox,
   Dialog,
-  DialogActions,
-  DialogTitle,
   Divider,
   Grid2,
   Paper,
+  Snackbar,
   Table,
   TableBody,
   TableCell,
@@ -19,33 +19,30 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import router from 'next/router';
+import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
-import { CheckboxElement, SelectElement } from 'react-hook-form-mui';
 
-import { CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
-import { FormMonthX } from '@/app/(main)/_ui/date';
-import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 import { MuiTablePagination } from '@/app/(main)/_ui/table-pagination';
-import { LightTooltipWithText } from '@/app/(main)/(masters)/_ui/tables';
+
+import { CreateBillDialog } from '../../bill-list/_ui/create-bill-dialog';
 
 export const BillingStsListTable = ({
   isLoading,
   page,
-  custs,
+  kokyakuId,
   setIsLoading,
   setPage,
 }: {
   isLoading: boolean;
   page: number;
-  custs: SelectTypes[];
+  kokyakuId: number;
+
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setPage: React.Dispatch<React.SetStateAction<number>>;
 }) => {
   const rowsPerPage = 50;
-
+  const router = useRouter();
   // モック仮
   const billSts: [] = [];
 
@@ -56,28 +53,18 @@ export const BillingStsListTable = ({
             .map((l, index) => ({ /* ...l,*/ ordNum: index + 1 }))
             .slice((page - 1) * rowsPerPage, page * rowsPerPage)
         : billSts.map((l, index) => ({ /* ...l,:*/ ordNum: index + 1 })),
-    [page, rowsPerPage /* billSts*/]
+    [page, rowsPerPage, billSts]
   );
   // テーブル最後のページ用の空データの長さ
   const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - billSts.length) : 0;
-  /* useState ----------------------------------------------------------- */
-  const [dialogOpen, setDialogOpen] = useState(false);
 
-  /* useForm ------------------------------------------------------------ */
-  const { control, handleSubmit, reset } = useForm<{
-    kokyaku: number | null;
-    dat: Date | null;
-    showDetailFlg: boolean;
-  }>({
-    mode: 'onSubmit',
-    reValidateMode: 'onChange',
-    defaultValues: { showDetailFlg: false },
-  });
-
-  /* methods ------------------------------------------------------------- */
-  const onSubmit = async (data: { kokyaku: number | null; dat: Date | null; showDetailFlg: boolean }) => {
-    console.log(data);
-  };
+  /* useState --------------------------------------------------------- */
+  /* 請求新規作成ダイアログ開閉 */
+  const [createOpen, setCreateOpen] = useState(false);
+  /* スナックバーの表示するかしないか */
+  const [snackBarOpen, setSnackBarOpen] = useState(false);
+  /* スナックバーのメッセージ */
+  const [snackBarMessage, setSnackBarMessage] = useState('');
 
   return (
     <Box>
@@ -92,7 +79,16 @@ export const BillingStsListTable = ({
         <Grid2 container spacing={1}>
           <Grid2 container spacing={1}>
             <Grid2>
-              <Button onClick={() => setDialogOpen(true)}>
+              <Button
+                onClick={() => {
+                  if (!kokyakuId || kokyakuId === 0) {
+                    setSnackBarMessage('検索で請求相手を選択してください');
+                    setSnackBarOpen(true);
+                  } else {
+                    setCreateOpen(true);
+                  }
+                }}
+              >
                 <AddIcon fontSize="small" />
                 新規
               </Button>
@@ -188,63 +184,17 @@ export const BillingStsListTable = ({
           </Table>
         </TableContainer>
       )}
-      {/* 請求作成方法確認ダイアログ */}
-      <Dialog
-        open={dialogOpen}
-        onClose={() => {
-          reset();
-          setDialogOpen(false);
-        }}
-      >
-        <DialogTitle display={'flex'} justifyContent={'end'}>
-          <CloseMasterDialogButton
-            handleCloseDialog={() => {
-              reset();
-              setDialogOpen(false);
-            }}
-          />
-        </DialogTitle>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <Grid2 container direction={'column'} px={4} pt={4} spacing={2}>
-            <Grid2 display={'flex'} alignItems={'baseline'}>
-              <Typography mr={9}>相手</Typography>
-              <SelectElement
-                name="kokyaku"
-                control={control}
-                options={custs}
-                sx={{ width: 400 }}
-                rules={{ required: '選択してください' }}
-              />
-            </Grid2>
-            <Grid2 display={'flex'} alignItems={'baseline'}>
-              <Typography mr={9}>年月</Typography>
-              <Controller
-                control={control}
-                name="dat"
-                rules={{ required: '選択してください' }}
-                render={({ field, fieldState }) => (
-                  <FormMonthX
-                    value={field.value}
-                    onChange={field.onChange}
-                    sx={{
-                      mr: 1,
-                    }}
-                    error={!!fieldState.error}
-                    helperText={fieldState.error?.message}
-                  />
-                )}
-              />
-            </Grid2>
-            <Grid2 display={'flex'} alignItems={'center'}>
-              <Typography mr={5}>詳細表示</Typography>
-              <CheckboxElement size="medium" name={'showDetailFlg'} control={control} />
-            </Grid2>
-          </Grid2>
-          <DialogActions>
-            <Button type="submit">自動生成</Button>
-          </DialogActions>
-        </form>
+      <Dialog open={createOpen}>
+        <CreateBillDialog kokyakuId={kokyakuId} setDialogOpen={setCreateOpen} />
       </Dialog>
+      <Snackbar
+        open={snackBarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackBarOpen(false)}
+        message={snackBarMessage}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={{ marginTop: '65px' }}
+      />
     </Box>
   );
 };

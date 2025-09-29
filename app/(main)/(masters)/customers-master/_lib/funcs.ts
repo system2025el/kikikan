@@ -146,3 +146,27 @@ export const updateCustomer = async (rawData: CustomersMasterDialogValues, id: n
     throw error;
   }
 };
+
+/**
+ * 選択された顧客の名前を取得する関数
+ * @param id 顧客ID
+ * @returns {string} 顧客名
+ */
+export const getChosenCustomerName = async (id: number) => {
+  try {
+    const { data, error } = await selectOneCustomer(id);
+    if (error) {
+      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
+      throw error;
+    }
+    if (!data) {
+      return null;
+    }
+    const CustomerNam: string = data.kokyaku_nam;
+    console.log(CustomerNam);
+    return CustomerNam;
+  } catch (e) {
+    console.error('例外が発生しました:', e);
+    throw e;
+  }
+};
