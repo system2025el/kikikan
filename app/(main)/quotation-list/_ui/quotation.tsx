@@ -32,6 +32,7 @@ import { FormDateX } from '@/app/(main)/_ui/date';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { LoadingOverlay } from '@/app/(main)/_ui/loading';
 
+import { usePdf } from '../_lib/hooks/usePdf';
 import { JuchuValues, QuotHeadSchema, QuotHeadValues } from '../_lib/types';
 import { addQuot } from '../create/_lib/func';
 import { updateQuot } from '../edit/[id]/_lib/func';
@@ -192,6 +193,36 @@ export const Quotation = ({
     }
   }, [errors]);
 
+  /* print pdf ------------------------------------------------------------ */
+
+  // PDF出力用のモデル
+  const [pdfModel, setPdfModel] = useState(quot);
+  // PDFデータ生成フック
+  const [printQuotation] = usePdf();
+
+  // ボタン押下
+  const hundlePrintPdf = async () => {
+    // PDFデータ生成
+    const blob = await printQuotation(pdfModel);
+    // ダウンロードもしくはブラウザ表示するためのURL
+    const url = URL.createObjectURL(blob);
+
+    // ダウンロードの場合
+    // const a = document.createElement('a');
+    // a.download = 'data.pdf';
+    // a.href = url;
+    // a.click();
+
+    // 別タブ表示の場合
+    window.open(url);
+  };
+
+  useEffect(() => {
+    setPdfModel(quot);
+  }, [quot]); // <- 変更の契機
+
+  /* ---------------------------------------------------------------------- */
+
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
       <Box justifySelf={'end'} mb={0.5}>
@@ -204,7 +235,9 @@ export const Quotation = ({
               <Typography margin={1}>見積書</Typography>
               <Box>
                 {/* <Button sx={{ margin: 1 }}>編集</Button> */}
-                <Button sx={{ margin: 1 }}>見積書印刷</Button>
+                <Button sx={{ margin: 1 }} onClick={hundlePrintPdf}>
+                  見積書印刷
+                </Button>
                 {/* <Button sx={{ margin: 1 }}>複製</Button> */}
                 <Button sx={{ margin: 1 }} type="submit">
                   保存
