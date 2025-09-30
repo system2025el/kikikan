@@ -30,11 +30,11 @@ import { FormDateX } from '@/app/(main)/_ui/date';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { LoadingOverlay } from '@/app/(main)/_ui/loading';
 import { FirstDialogPage, SecondDialogPage } from '@/app/(main)/quotation-list/_ui/dialogs';
-import { ReadOnlyYenNumberElement } from '@/app/(main)/quotation-list/_ui/quotation';
 
 import { BillHeadSchema, BillHeadValues } from '../_lib/types';
 import { MeisaiLines } from './meisai';
 import { MeisaiTblHeader } from './meisai-tbl-header';
+import { ReadOnlyYenNumberElement } from './yen';
 
 export const Bill = ({
   isNew,
@@ -278,7 +278,7 @@ export const Bill = ({
                 <Divider />
                 <Box margin={0.5} padding={0.8}>
                   {meisaiHeadFields.fields.map((field, index) => (
-                    <Box key={field.id} p={1}>
+                    <Box key={field.id}>
                       <MeisaiTblHeader index={index} fields={meisaiHeadFields}>
                         <MeisaiLines index={index} />
                       </MeisaiTblHeader>
@@ -328,7 +328,7 @@ export const Bill = ({
                   <Grid2 size={2}>
                     <ReadOnlyYenNumberElement name="chukeiAmt" />
                   </Grid2>
-                  <Grid2 size={1} justifyItems={'end'}>
+                  <Grid2 size={1.5} justifyItems={'end'}>
                     <Typography>消費税対象合計</Typography>
                   </Grid2>
                   <Grid2 size={2}>
@@ -337,7 +337,7 @@ export const Bill = ({
                 </Grid2>
                 <Grid2 container display={'flex'} alignItems={'center'} spacing={1} my={0.5}>
                   <Grid2 size={2.5} />
-                  <Grid2 size={1} justifyItems={'end'}>
+                  <Grid2 size={1.5} justifyItems={'end'}>
                     <Typography>消費税</Typography>
                   </Grid2>
                   <Grid2 size={2}>

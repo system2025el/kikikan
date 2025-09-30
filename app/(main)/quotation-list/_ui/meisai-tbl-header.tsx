@@ -16,7 +16,7 @@ import {
 } from 'react-hook-form-mui';
 
 import { QuotHeadValues } from '../_lib/types';
-import { ReadOnlyYenNumberElement } from './quotation';
+import { ReadOnlyYenNumberElement } from './yen';
 
 export const MeisaiTblHeader = ({
   index,

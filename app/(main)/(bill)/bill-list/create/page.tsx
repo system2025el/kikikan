@@ -21,6 +21,14 @@ const Page = async ({ searchParams }: { searchParams: Promise<{ [key: string]: s
     adr1: custs.adrPost,
     adr2: { shozai: custs.adrShozai, tatemono: custs.adrTatemono, sonota: custs.adrSonota },
     kokyaku: custs.kokyakuNam,
+    meisaiHeads: [
+      {
+        seikyuMeisaiHeadId: null,
+        zeiFlg: false,
+        seikyuMeisaiHeadNam: null,
+        meisai: [{ id: null }],
+      },
+    ],
   };
 
   return <Bill isNew={true} bill={bill} options={{ users: users, sts: sts }} />;

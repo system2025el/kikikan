@@ -30,6 +30,7 @@ import { Loading } from '../../_ui/loading';
 import { MuiTablePagination } from '../../_ui/table-pagination';
 import { LightTooltipWithText } from '../../(masters)/_ui/tables';
 import { QuotTableValues } from '../_lib/types';
+import { CreateQuotDialog } from './create-quot-dialog';
 
 /**
  * 見積一覧テーブル
@@ -65,20 +66,6 @@ export const QuotationListTable = ({
   /* useState ------------------------------------- */
   /* ダイアログの開閉 */
   const [dialogOpen, setDialogOpen] = useState(false);
-
-  /* methods ------------------------------------- */
-  /* 自動生成ボタン押下 */
-  const onSubmit = (data: { juchuHeadId: number | null }) => {
-    console.log(data.juchuHeadId, 'の見積もりを自動生成');
-    router.push(`/quotation-list/create?juchuId=${data.juchuHeadId}`);
-  };
-
-  /* useForm ------------------------------------- */
-  const { control, handleSubmit } = useForm<{ juchuHeadId: number | null }>({
-    mode: 'onSubmit',
-    reValidateMode: 'onSubmit',
-    defaultValues: { juchuHeadId: null },
-  });
 
   /* useEffect -------------------------------------------- */
   useEffect(() => {
@@ -217,44 +204,7 @@ export const QuotationListTable = ({
         )}
         {/* 見積作成方法確認ダイアログ */}
         <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
-          <DialogTitle display={'flex'} justifyContent={'space-between'}>
-            受注番号から自動生成
-            <CloseMasterDialogButton handleCloseDialog={() => setDialogOpen(false)} />
-          </DialogTitle>
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <Stack p={4}>
-              <Typography>受注番号</Typography>
-              <TextFieldElement
-                name={'juchuHeadId'}
-                control={control}
-                inputRef={inputRef}
-                rules={{
-                  required: '数字を入力してください',
-                }}
-                sx={{
-                  '& .MuiInputBase-input': {
-                    textAlign: 'right',
-                  },
-                  '& input[type=number]::-webkit-inner-spin-button': {
-                    WebkitAppearance: 'none',
-                    margin: 0,
-                  },
-                }}
-                type="number"
-              />
-            </Stack>
-            <DialogActions>
-              <Button type="submit">自動生成</Button>
-              <Button
-                onClick={() => {
-                  setDialogOpen(false);
-                  router.push('/quotation-list/create');
-                }}
-              >
-                手動生成
-              </Button>
-            </DialogActions>
-          </form>
+          <CreateQuotDialog setDialogOpen={setDialogOpen} />
         </Dialog>
       </Box>
     </>

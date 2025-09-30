@@ -1,23 +1,14 @@
-import { Label } from '@mui/icons-material';
 import AddIcon from '@mui/icons-material/Add';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { Box, Button, Grid2, IconButton, Select, TextField, Typography } from '@mui/material';
+import { Box, Button, Grid2, IconButton, TextField } from '@mui/material';
 import { useEffect, useState } from 'react';
-import {
-  Control,
-  Controller,
-  useFieldArray,
-  useFormContext,
-  UseFormSetValue,
-  UseFormWatch,
-  useWatch,
-} from 'react-hook-form';
-import { SelectElement, TextFieldElement } from 'react-hook-form-mui';
+import { Controller, useFieldArray, useFormContext, useWatch } from 'react-hook-form';
+import { TextFieldElement } from 'react-hook-form-mui';
 
 import { BillHeadValues } from '../_lib/types';
-import { ReadOnlyYenNumberElement } from './meisai-tbl-header';
+import { ReadOnlyYenNumberElement } from './yen';
 
 /**
  * 動的フォーム（請求の明細項目部分）
@@ -74,22 +65,6 @@ export const MeisaiLines = ({ index }: { index: number }) => {
             <Grid2 size={1}>
               <TextFieldElement
                 name={`meisaiHeads.${index}.meisai.${i}.qty`}
-                control={control}
-                sx={{
-                  '& .MuiInputBase-input': {
-                    textAlign: 'right',
-                  },
-                  '& input[type=number]::-webkit-inner-spin-button': {
-                    WebkitAppearance: 'none',
-                    margin: 0,
-                  },
-                }}
-                type="number"
-              />
-            </Grid2>
-            <Grid2 size={0.8}>
-              <TextFieldElement
-                name={`meisaiHeads.${index}.meisai.${i}.honbanbiQty`}
                 control={control}
                 sx={{
                   '& .MuiInputBase-input': {
@@ -164,6 +139,22 @@ export const MeisaiLines = ({ index }: { index: number }) => {
             </Grid2>
             <Grid2 size={2}>
               <ReadOnlyYenNumberElement name={`meisaiHeads.${index}.meisai.${i}.shokeiAmt`} />
+            </Grid2>
+            <Grid2 size={0.8}>
+              <TextFieldElement
+                name={`meisaiHeads.${index}.meisai.${i}.honbanbiQty`}
+                control={control}
+                sx={{
+                  '& .MuiInputBase-input': {
+                    textAlign: 'right',
+                  },
+                  '& input[type=number]::-webkit-inner-spin-button': {
+                    WebkitAppearance: 'none',
+                    margin: 0,
+                  },
+                }}
+                type="number"
+              />
             </Grid2>
             <Grid2 size={1}>
               <IconButton
