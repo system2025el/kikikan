@@ -529,7 +529,7 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
       //opacity: 1,
     });
 
-    page.drawText('TODO:(税込み)', {
+    page.drawText('(税込み)', {
       x: 390,
       y: y_totalAmount,
       font: customFont, // カスタムフォントの設定
