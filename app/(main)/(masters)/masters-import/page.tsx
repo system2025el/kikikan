@@ -1,4 +1,4 @@
-import { ImportMaster } from './_ui/import-master';
+import { ImportMaster } from './_ui/masters-import';
 
 const Page = () => {
   return <ImportMaster />;

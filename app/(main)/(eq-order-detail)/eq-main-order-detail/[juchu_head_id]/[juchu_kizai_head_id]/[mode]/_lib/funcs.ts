@@ -1,7 +1,7 @@
 'use server';
 
 import { selectActiveBumons } from '@/app/_lib/db/tables/m-bumon';
-import { selectActiveEqpts, selectBundledEqpts } from '@/app/_lib/db/tables/m-kizai';
+import { selectActiveEqpts, selectBundledEqpts, selectMeisaiEqts } from '@/app/_lib/db/tables/m-kizai';
 import { selectBundledEqptIds } from '@/app/_lib/db/tables/m-kizai-set';
 import { deleteIdoDen, insertIdoDen, selectIdoDenMaxId, updateIdoDen } from '@/app/_lib/db/tables/t-ido-den';
 import {
@@ -23,12 +23,14 @@ import {
   selectJuchuKizaiMeisaiKizaiTanka,
   updateJuchuKizaiMeisai,
 } from '@/app/_lib/db/tables/t-juchu-kizai-meisai';
+import { deleteNyushukoDen, insertNyushukoDen, updateNyushukoDen } from '@/app/_lib/db/tables/t-nyushuko-den';
 import { selectJuchuKizaiMeisai } from '@/app/_lib/db/tables/v-juchu-kizai-meisai';
 import { selectChosenEqptsDetails } from '@/app/_lib/db/tables/v-kizai-list';
 import { IdoDen } from '@/app/_lib/db/types/t-ido-den-type';
 import { JuchuKizaiHead } from '@/app/_lib/db/types/t-juchu-kizai-head-type';
 import { JuchuKizaiHonbanbi } from '@/app/_lib/db/types/t-juchu-kizai-honbanbi-type';
 import { JuchuKizaiMeisai } from '@/app/_lib/db/types/t-juchu-kizai-meisai-type';
+import { NyushukoDen } from '@/app/_lib/db/types/t-nyushuko-den-type';
 import { toISOStringYearMonthDay, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { getJuchuKizaiNyushuko } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 
@@ -172,6 +174,15 @@ export const getJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId:
       return [];
     }
 
+    const eqIds = eqList.map((data) => data.kizai_id);
+
+    const { data: mKizai, error: mKizaiError } = await selectMeisaiEqts(eqIds);
+
+    if (mKizaiError) {
+      console.error('GetEqList eqShozokuId error : ', mKizaiError);
+      return [];
+    }
+
     const { data: eqTanka, error: eqTankaError } = await selectJuchuKizaiMeisaiKizaiTanka(
       juchuHeadId,
       juchuKizaiHeadId
@@ -188,6 +199,7 @@ export const getJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId:
       idoDenId: d.ido_den_id,
       sagyoDenDat: d.sagyo_den_dat ? new Date(d.sagyo_den_dat) : null,
       sagyoSijiId: d.sagyo_siji_id === 'K→Y' ? 1 : d.sagyo_siji_id === 'Y→K' ? 2 : null,
+      mShozokuId: mKizai.find((data) => data.kizai_id === d.kizai_id)?.shozoku_id,
       shozokuId: d.shozoku_id,
       shozokuNam: d.shozoku_nam ?? '',
       mem: d.mem,
@@ -307,6 +319,181 @@ export const delJuchuKizaiMeisai = async (
 };
 
 /**
+ * 入出庫伝票新規追加
+ * @param juchuKizaiHeadData 受注機材ヘッダーデータ
+ * @param juchuKizaiMeisaiData 受注機材明細データ
+ * @param userNam ユーザー名
+ * @returns
+ */
+export const addNyushukoDen = async (
+  juchuKizaiHeadData: JuchuKizaiHeadValues,
+  juchuKizaiMeisaiData: JuchuKizaiMeisaiValues[],
+  userNam: string
+) => {
+  const newShukoStandbyData: NyushukoDen[] = juchuKizaiMeisaiData.map((d) => ({
+    juchu_head_id: d.juchuHeadId,
+    juchu_kizai_head_id: d.juchuKizaiHeadId,
+    juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
+    sagyo_kbn_id: 10,
+    sagyo_den_dat:
+      d.shozokuId === 1
+        ? toISOStringYearMonthDay(juchuKizaiHeadData.kicsShukoDat as Date)
+        : toISOStringYearMonthDay(juchuKizaiHeadData.yardShukoDat as Date),
+    sagyo_id: d.shozokuId,
+    kizai_id: d.kizaiId,
+    plan_qty: d.planQty,
+    add_dat: toJapanTimeString(),
+    add_user: userNam,
+  }));
+
+  const newShukoCheckData: NyushukoDen[] = juchuKizaiMeisaiData.map((d) => ({
+    juchu_head_id: d.juchuHeadId,
+    juchu_kizai_head_id: d.juchuKizaiHeadId,
+    juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
+    sagyo_kbn_id: 20,
+    sagyo_den_dat:
+      d.shozokuId === 1
+        ? toISOStringYearMonthDay(juchuKizaiHeadData.kicsShukoDat as Date)
+        : toISOStringYearMonthDay(juchuKizaiHeadData.yardShukoDat as Date),
+    sagyo_id: d.shozokuId,
+    kizai_id: d.kizaiId,
+    plan_qty: d.planQty,
+    add_dat: toJapanTimeString(),
+    add_user: userNam,
+  }));
+
+  const newNyukoCheckData: NyushukoDen[] = juchuKizaiMeisaiData.map((d) => ({
+    juchu_head_id: d.juchuHeadId,
+    juchu_kizai_head_id: d.juchuKizaiHeadId,
+    juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
+    sagyo_kbn_id: 30,
+    sagyo_den_dat:
+      d.shozokuId === 1
+        ? toISOStringYearMonthDay(juchuKizaiHeadData.kicsNyukoDat as Date)
+        : toISOStringYearMonthDay(juchuKizaiHeadData.yardNyukoDat as Date),
+    sagyo_id: d.shozokuId,
+    kizai_id: d.kizaiId,
+    plan_qty: d.planQty,
+    add_dat: toJapanTimeString(),
+    add_user: userNam,
+  }));
+
+  const mergeData = [...newShukoStandbyData, ...newShukoCheckData, ...newNyukoCheckData];
+
+  try {
+    const { error } = await insertNyushukoDen(mergeData);
+
+    if (error) {
+      console.error('Error adding nyushuko den:', error.message);
+      return false;
+    } else {
+      console.log('nyushuko den added successfully:', mergeData);
+      return true;
+    }
+  } catch (e) {
+    console.error('Exception while adding nyushuko den:', e);
+    return false;
+  }
+};
+
+/**
+ * 入出庫伝票更新
+ * @param juchuKizaiHeadData 受注機材ヘッダーデータ
+ * @param juchuKizaiMeisaiData 受注機材明細データ
+ * @param userNam ユーザー名
+ * @returns
+ */
+export const updNyushukoDen = async (
+  juchuKizaiHeadData: JuchuKizaiHeadValues,
+  juchuKizaiMeisaiData: JuchuKizaiMeisaiValues[],
+  userNam: string
+) => {
+  const updateShukoStandbyData: NyushukoDen[] = juchuKizaiMeisaiData.map((d) => ({
+    juchu_head_id: d.juchuHeadId,
+    juchu_kizai_head_id: d.juchuKizaiHeadId,
+    juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
+    sagyo_kbn_id: 10,
+    sagyo_den_dat:
+      d.shozokuId === 1
+        ? toISOStringYearMonthDay(juchuKizaiHeadData.kicsShukoDat as Date)
+        : toISOStringYearMonthDay(juchuKizaiHeadData.yardShukoDat as Date),
+    sagyo_id: d.shozokuId,
+    kizai_id: d.kizaiId,
+    plan_qty: d.planQty,
+    add_dat: toJapanTimeString(),
+    add_user: userNam,
+  }));
+
+  const updateShukoCheckData: NyushukoDen[] = juchuKizaiMeisaiData.map((d) => ({
+    juchu_head_id: d.juchuHeadId,
+    juchu_kizai_head_id: d.juchuKizaiHeadId,
+    juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
+    sagyo_kbn_id: 20,
+    sagyo_den_dat:
+      d.shozokuId === 1
+        ? toISOStringYearMonthDay(juchuKizaiHeadData.kicsShukoDat as Date)
+        : toISOStringYearMonthDay(juchuKizaiHeadData.yardShukoDat as Date),
+    sagyo_id: d.shozokuId,
+    kizai_id: d.kizaiId,
+    plan_qty: d.planQty,
+    add_dat: toJapanTimeString(),
+    add_user: userNam,
+  }));
+
+  const updateNyukoCheckData: NyushukoDen[] = juchuKizaiMeisaiData.map((d) => ({
+    juchu_head_id: d.juchuHeadId,
+    juchu_kizai_head_id: d.juchuKizaiHeadId,
+    juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
+    sagyo_kbn_id: 30,
+    sagyo_den_dat:
+      d.shozokuId === 1
+        ? toISOStringYearMonthDay(juchuKizaiHeadData.kicsNyukoDat as Date)
+        : toISOStringYearMonthDay(juchuKizaiHeadData.yardNyukoDat as Date),
+    sagyo_id: d.shozokuId,
+    kizai_id: d.kizaiId,
+    plan_qty: d.planQty,
+    add_dat: toJapanTimeString(),
+    add_user: userNam,
+  }));
+
+  const mergeData = [...updateShukoStandbyData, ...updateShukoCheckData, ...updateNyukoCheckData];
+
+  try {
+    for (const data of mergeData) {
+      const { error } = await updateNyushukoDen(data);
+
+      if (error) {
+        console.error('Error updating nyushuko den:', error.message);
+        continue;
+      }
+    }
+    console.log('nyushuko den updated successfully:', mergeData);
+    return true;
+  } catch (e) {
+    console.error('Exception while updating nyushuko den:', e);
+    return false;
+  }
+};
+
+/**
+ * 入出庫伝票削除
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param juchuKizaiMeisaiIds 受注機材明細id
+ */
+export const delNyushukoDen = async (juchuHeadId: number, juchuKizaiHeadId: number, juchuKizaiMeisaiIds: number[]) => {
+  try {
+    const { error } = await deleteNyushukoDen(juchuHeadId, juchuKizaiHeadId, juchuKizaiMeisaiIds);
+
+    if (error) {
+      console.error('Error delete nyushuko den:', error.message);
+    }
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+/**
  * 移動伝票id最大値取得
  * @returns 移動伝票id最大値
  */
@@ -398,8 +585,8 @@ export const updIdoDen = async (idoKizaiData: JuchuKizaiMeisaiValues[], userNam:
         console.error('Error updating ido den:', error.message);
         continue;
       }
-      console.log('ido den updated successfully:', data);
     }
+    console.log('ido den updated successfully:', updateData);
     return true;
   } catch (e) {
     console.error('Exception while updating ido den:', e);

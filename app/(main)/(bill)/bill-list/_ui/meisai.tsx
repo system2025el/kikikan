@@ -16,19 +16,19 @@ import {
 } from 'react-hook-form';
 import { SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
-import { QuotHeadValues, QuotMaisaiHeadValues } from '../_lib/types';
-import { ReadOnlyYenNumberElement } from './quotation';
+import { BillHeadValues } from '../_lib/types';
+import { ReadOnlyYenNumberElement } from './meisai-tbl-header';
 
 /**
- * 動的フォーム（見積の明細項目部分）
+ * 動的フォーム（請求の明細項目部分）
  * @param param0
- * @returns 見積の明細項目のUIコンポーネント
+ * @returns 請求の明細項目のUIコンポーネント
  */
-export const MeisaiLines = ({ index, sectionNam }: { index: number; sectionNam: 'kizai' | 'labor' | 'other' }) => {
+export const MeisaiLines = ({ index }: { index: number }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const { control, setValue } = useFormContext<QuotHeadValues>();
+  const { control, setValue } = useFormContext<BillHeadValues>();
   // フォームのフィールド（明細）
-  const meisaiFields = useFieldArray({ control, name: `meisaiHeads.${sectionNam}.${index}.meisai` });
+  const meisaiFields = useFieldArray({ control, name: `meisaiHeads.${index}.meisai` });
 
   /* 明細項目の順番を帰るボタン押下時 */
   const moveRow = (i: number, direction: number) => {
@@ -38,7 +38,7 @@ export const MeisaiLines = ({ index, sectionNam }: { index: number; sectionNam: 
   // 明細行の監視
   const watchedMeisai = useWatch({
     control,
-    name: `meisaiHeads.${sectionNam}.${index}.meisai`,
+    name: `meisaiHeads.${index}.meisai`,
   });
 
   useEffect(() => {
@@ -51,10 +51,10 @@ export const MeisaiLines = ({ index, sectionNam }: { index: number; sectionNam: 
       // 現在の小計の値と比較し、異なっていればフォームの値を更新する
       // (無限ループを防ぐため、値が違う場合のみsetValueを実行)
       if (theShokei !== (Number(m.shokeiAmt) || 0)) {
-        setValue(`meisaiHeads.${sectionNam}.${index}.meisai.${i}.shokeiAmt`, theShokei);
+        setValue(`meisaiHeads.${index}.meisai.${i}.shokeiAmt`, theShokei);
       }
     });
-  }, [watchedMeisai, sectionNam, index, setValue]); // 依存配列に監視対象などを設定
+  }, [watchedMeisai, index, setValue]); // 依存配列に監視対象などを設定
 
   return (
     <Box>
@@ -69,26 +69,11 @@ export const MeisaiLines = ({ index, sectionNam }: { index: number; sectionNam: 
               </Box>
             </Grid2>
             <Grid2 size={'grow'}>
-              {sectionNam !== 'labor' ? (
-                <TextFieldElement name={`meisaiHeads.${sectionNam}.${index}.meisai.${i}.nam`} control={control} />
-              ) : (
-                <SelectElement
-                  name={`meisaiHeads.${sectionNam}.${index}.meisai.${i}.nam`}
-                  control={control}
-                  options={[
-                    { id: 'チーフ', label: 'チーフ' },
-                    { id: 'サブチーフ', label: 'サブチーフ' },
-                    { id: 'システム', label: 'システム' },
-                    { id: '機材テク', label: '機材テク' },
-                    { id: '...', label: '...' },
-                  ]}
-                  sx={{ width: 242.5 }}
-                />
-              )}
+              <TextFieldElement name={`meisaiHeads.${index}.meisai.${i}.nam`} control={control} />
             </Grid2>
             <Grid2 size={1}>
               <TextFieldElement
-                name={`meisaiHeads.${sectionNam}.${index}.meisai.${i}.qty`}
+                name={`meisaiHeads.${index}.meisai.${i}.qty`}
                 control={control}
                 sx={{
                   '& .MuiInputBase-input': {
@@ -104,7 +89,7 @@ export const MeisaiLines = ({ index, sectionNam }: { index: number; sectionNam: 
             </Grid2>
             <Grid2 size={0.8}>
               <TextFieldElement
-                name={`meisaiHeads.${sectionNam}.${index}.meisai.${i}.honbanbiQty`}
+                name={`meisaiHeads.${index}.meisai.${i}.honbanbiQty`}
                 control={control}
                 sx={{
                   '& .MuiInputBase-input': {
@@ -120,7 +105,7 @@ export const MeisaiLines = ({ index, sectionNam }: { index: number; sectionNam: 
             </Grid2>
             <Grid2 size={1.5}>
               <Controller
-                name={`meisaiHeads.${sectionNam}.${index}.meisai.${i}.tankaAmt`}
+                name={`meisaiHeads.${index}.meisai.${i}.tankaAmt`}
                 control={control}
                 render={({ field, fieldState }) => (
                   <TextField
@@ -178,7 +163,7 @@ export const MeisaiLines = ({ index, sectionNam }: { index: number; sectionNam: 
               />
             </Grid2>
             <Grid2 size={2}>
-              <ReadOnlyYenNumberElement name={`meisaiHeads.${sectionNam}.${index}.meisai.${i}.shokeiAmt`} />
+              <ReadOnlyYenNumberElement name={`meisaiHeads.${index}.meisai.${i}.shokeiAmt`} />
             </Grid2>
             <Grid2 size={1}>
               <IconButton

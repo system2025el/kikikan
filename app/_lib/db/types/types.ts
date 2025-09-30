@@ -697,6 +697,36 @@ export type Database = {
         };
         Relationships: [];
       };
+      m_seikyu_jokyo_sts: {
+        Row: {
+          add_dat: string | null;
+          add_user: string | null;
+          del_flg: number | null;
+          sts_id: number;
+          sts_nam: string;
+          upd_dat: string | null;
+          upd_user: string | null;
+        };
+        Insert: {
+          add_dat?: string | null;
+          add_user?: string | null;
+          del_flg?: number | null;
+          sts_id: number;
+          sts_nam: string;
+          upd_dat?: string | null;
+          upd_user?: string | null;
+        };
+        Update: {
+          add_dat?: string | null;
+          add_user?: string | null;
+          del_flg?: number | null;
+          sts_id?: number;
+          sts_nam?: string;
+          upd_dat?: string | null;
+          upd_user?: string | null;
+        };
+        Relationships: [];
+      };
       m_seikyu_sts: {
         Row: {
           add_dat: string | null;
@@ -2295,6 +2325,37 @@ export type Database = {
           tana_cod: string | null;
           yard_nyuko_dat: string | null;
           yard_shuko_dat: string | null;
+        };
+        Relationships: [];
+      };
+      v_seikyu_date_lst: {
+        Row: {
+          head_nam: string | null;
+          juchu_head_id: number | null;
+          juchu_kizai_head_id: number | null;
+          koen_nam: string | null;
+          kokyaku_id: number | null;
+          kokyaku_nam: string | null;
+          kokyaku_tanto_nam: string | null;
+          nyuko_dat: string | null;
+          nyuko_fix_flg: number | null;
+          seikyu_dat: string | null;
+          seikyu_head_jokyo_sts_nam: string | null;
+          seikyu_jokyo_sts_nam: string | null;
+          shuko_dat: string | null;
+          shuko_fix_flg: number | null;
+        };
+        Relationships: [];
+      };
+      v_seikyu_lst: {
+        Row: {
+          kokyaku_nam: string | null;
+          kokyaku_tanto_nam: string | null;
+          seikyu_dat: string | null;
+          seikyu_head_id: number | null;
+          seikyu_head_nam: string | null;
+          seikyu_sts: number | null;
+          sts_nam: string | null;
         };
         Relationships: [];
       };

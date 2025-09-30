@@ -458,3 +458,52 @@ export const FormDateX = ({
     />
   );
 };
+
+/**
+ * 日付を選択し取得するコンポーネント
+ * @param props sx スタイル disbled disabledかどうか
+ * @returns {JSX.Element} MUIX DatePickerコンポーネント
+ */
+export const FormMonthX = ({
+  sx,
+  disabled,
+  value,
+  error,
+  helperText,
+  onChange,
+}: {
+  sx?: object;
+  disabled?: boolean;
+  value?: Date | null;
+  error?: boolean;
+  helperText?: string;
+  onChange?: (date: Date | null) => void;
+}) => {
+  return (
+    <DatePicker
+      format="YYYY/MM"
+      views={['year', 'month']}
+      disabled={disabled}
+      value={value ? dayjs(value) : null}
+      onChange={(newValue: Dayjs | null) => {
+        onChange?.(newValue ? newValue.toDate() : null);
+      }}
+      slotProps={{
+        textField: {
+          error,
+          helperText,
+          size: 'small',
+          sx: {
+            bgcolor: disabled ? grey[200] : 'white',
+            width: 200,
+            padding: 0,
+            '.Mui-disabled': {
+              WebkitTextFillColor: 'black',
+            },
+            ...sx,
+          },
+        },
+      }}
+    />
+  );
+};

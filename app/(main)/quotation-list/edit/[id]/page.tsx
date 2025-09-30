@@ -1,8 +1,8 @@
 import { getCustomerSelection } from '@/app/(main)/(masters)/_lib/funs';
 
 import { getChosenQuot, getMituStsSelection, getUsersSelection } from '../../_lib/func';
-import { Quotation } from '../../_ui/quotation';
 import { QuotHeadValues } from '../../_lib/types';
+import { Quotation } from '../../_ui/quotation';
 
 const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
   const param = await params;

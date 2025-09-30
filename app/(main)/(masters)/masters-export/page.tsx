@@ -1,4 +1,4 @@
-import { ExportMaster } from './_ui/export-master';
+import { ExportMaster } from './_ui/masters-export';
 
 const Page = () => {
   return <ExportMaster />;
