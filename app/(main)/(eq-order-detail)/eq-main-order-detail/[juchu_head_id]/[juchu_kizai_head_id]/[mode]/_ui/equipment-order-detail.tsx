@@ -64,6 +64,7 @@ import { MoveAlertDialog, NyushukoAlertDialog, SaveAlertDialog } from '../../../
 import {
   addHonbanbi,
   addIdoDen,
+  addIdoFix,
   addJuchuContainerMeisai,
   addJuchuKizaiHead,
   addJuchuKizaiMeisai,
@@ -71,6 +72,7 @@ import {
   confirmHonbanbi,
   delHonbanbi,
   delIdoDen,
+  delIdoFix,
   delJuchuContainerMeisai,
   delJuchuKizaiMeisai,
   delNyushukoDen,
@@ -773,6 +775,9 @@ const EquipmentOrderDetail = (props: {
       const deleteIdoDenIds = deleteIdoKizaiData.map((data) => data.idoDenId);
       const deleteIdoDenResult = await delIdoDen(deleteIdoDenIds as number[]);
       console.log('移動伝票削除', deleteIdoDenResult);
+
+      const deleteIdoFixResult = await delIdoFix(deleteIdoDenIds as number[]);
+      console.log('移動確定削除', deleteIdoFixResult);
     }
     // 追加
     if (addIdoKizaiData.length > 0) {
@@ -780,6 +785,9 @@ const EquipmentOrderDetail = (props: {
       const newIdoDenId = idoDenMaxId ? idoDenMaxId.ido_den_id + 1 : 1;
       const addIdoDenResult = await addIdoDen(newIdoDenId, addIdoKizaiData, userNam);
       console.log('移動伝票追加', addIdoDenResult);
+
+      const addIdoFixResult = await addIdoFix(newIdoDenId, addIdoKizaiData, userNam);
+      console.log('移動確定追加', addIdoFixResult);
     }
     // 更新
     if (updateIdoKizaiData.length > 0) {

@@ -4,6 +4,7 @@ import { selectActiveBumons } from '@/app/_lib/db/tables/m-bumon';
 import { selectActiveEqpts, selectBundledEqpts, selectMeisaiEqts } from '@/app/_lib/db/tables/m-kizai';
 import { selectBundledEqptIds } from '@/app/_lib/db/tables/m-kizai-set';
 import { deleteIdoDen, insertIdoDen, selectIdoDenMaxId, updateIdoDen } from '@/app/_lib/db/tables/t-ido-den';
+import { deleteIdoFix, insertIdoFix } from '@/app/_lib/db/tables/t-ido-fix';
 import {
   deleteJuchuContainerMeisai,
   insertJuchuContainerMeisai,
@@ -39,6 +40,7 @@ import { selectJuchuKizaiMeisai } from '@/app/_lib/db/tables/v-juchu-kizai-meisa
 import { selectChosenEqptsDetails } from '@/app/_lib/db/tables/v-kizai-list';
 import { JuchuCtnMeisai } from '@/app/_lib/db/types/t_juchu_ctn_meisai-type';
 import { IdoDen } from '@/app/_lib/db/types/t-ido-den-type';
+import { IdoFix } from '@/app/_lib/db/types/t-ido-fix-type';
 import { JuchuKizaiHead } from '@/app/_lib/db/types/t-juchu-kizai-head-type';
 import { JuchuKizaiHonbanbi } from '@/app/_lib/db/types/t-juchu-kizai-honbanbi-type';
 import { JuchuKizaiMeisai } from '@/app/_lib/db/types/t-juchu-kizai-meisai-type';
@@ -923,6 +925,59 @@ export const delIdoDen = async (idoDenIds: number[]) => {
 
     if (error) {
       console.error('Error delete ido den:', error.message);
+    }
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+export const addIdoFix = async (newIdoDenId: number, idoKizaiData: JuchuKizaiMeisaiValues[], userNam: string) => {
+  const newDepartureData: IdoFix[] = idoKizaiData.map((d, index) => ({
+    ido_den_id: newIdoDenId + index,
+    sagyo_den_dat: toISOStringYearMonthDay(d.sagyoDenDat as Date),
+    sagyo_siji_id: d.sagyoSijiId,
+    sagyo_id: d.sagyoSijiId,
+    sagyo_kbn_id: 60,
+    sagyo_fix_flg: 0,
+    add_dat: toJapanTimeString(),
+    add_user: userNam,
+  }));
+
+  const newArrivalData: IdoFix[] = idoKizaiData.map((d, index) => ({
+    ido_den_id: newIdoDenId + index,
+    sagyo_den_dat: toISOStringYearMonthDay(d.sagyoDenDat as Date),
+    sagyo_siji_id: d.sagyoSijiId,
+    sagyo_id: d.sagyoSijiId === 1 ? 2 : 1,
+    sagyo_kbn_id: 70,
+    sagyo_fix_flg: 0,
+    add_dat: toJapanTimeString(),
+    add_user: userNam,
+  }));
+
+  const mergeData = [...newDepartureData, ...newArrivalData];
+
+  try {
+    const { error } = await insertIdoFix(mergeData);
+
+    if (error) {
+      console.error('Error adding ido fix:', error.message);
+      return false;
+    } else {
+      console.log('ido fix added successfully:', mergeData);
+      return true;
+    }
+  } catch (e) {
+    console.error('Exception while adding ido fix:', e);
+    return false;
+  }
+};
+
+export const delIdoFix = async (idoDenIds: number[]) => {
+  try {
+    const { error } = await deleteIdoFix(idoDenIds);
+
+    if (error) {
+      console.error('Error delete ido fix:', error.message);
     }
   } catch (e) {
     console.error(e);
