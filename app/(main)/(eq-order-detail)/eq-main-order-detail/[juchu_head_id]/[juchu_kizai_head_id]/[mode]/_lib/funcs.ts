@@ -185,8 +185,16 @@ export const getJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId:
       console.error('GetEqList eqList error : ', eqListError);
       return [];
     }
+    const uniqueIds = new Set();
+    const uniqueEqList = eqList.filter((item) => {
+      if (uniqueIds.has(item.juchu_kizai_meisai_id)) {
+        return false;
+      }
+      uniqueIds.add(item.juchu_kizai_meisai_id);
+      return true;
+    });
 
-    const eqIds = eqList.map((data) => data.kizai_id);
+    const eqIds = uniqueEqList.map((data) => data.kizai_id);
 
     const { data: mKizai, error: mKizaiError } = await selectMeisaiEqts(eqIds);
 
@@ -204,7 +212,7 @@ export const getJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId:
       return [];
     }
 
-    const juchuKizaiMeisaiData: JuchuKizaiMeisaiValues[] = eqList.map((d) => ({
+    const juchuKizaiMeisaiData: JuchuKizaiMeisaiValues[] = uniqueEqList.map((d) => ({
       juchuHeadId: d.juchu_head_id,
       juchuKizaiHeadId: d.juchu_kizai_head_id,
       juchuKizaiMeisaiId: d.juchu_kizai_meisai_id,
@@ -819,7 +827,7 @@ export const getIdoDenMaxId = async () => {
  * @returns
  */
 export const addIdoDen = async (newIdoDenId: number, idoKizaiData: JuchuKizaiMeisaiValues[], userNam: string) => {
-  const newData: IdoDen[] = idoKizaiData.map((d, index) => ({
+  const newLoadData: IdoDen[] = idoKizaiData.map((d, index) => ({
     ido_den_id: newIdoDenId + index,
     sagyo_den_dat: toISOStringYearMonthDay(d.sagyoDenDat as Date),
     sagyo_siji_id: d.sagyoSijiId,
@@ -835,14 +843,32 @@ export const addIdoDen = async (newIdoDenId: number, idoKizaiData: JuchuKizaiMei
     add_user: userNam,
   }));
 
+  const newUnloadData: IdoDen[] = idoKizaiData.map((d, index) => ({
+    ido_den_id: newIdoDenId + index,
+    sagyo_den_dat: toISOStringYearMonthDay(d.sagyoDenDat as Date),
+    sagyo_siji_id: d.sagyoSijiId,
+    sagyo_id: d.sagyoSijiId === 1 ? 2 : 1,
+    sagyo_kbn_id: 50,
+    kizai_id: d.kizaiId,
+    plan_qty: d.planQty,
+    result_qty: null,
+    juchu_head_id: d.juchuHeadId,
+    juchu_kizai_head_id: d.juchuKizaiHeadId,
+    juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
+    add_dat: toJapanTimeString(),
+    add_user: userNam,
+  }));
+
+  const mergeData = [...newLoadData, ...newUnloadData];
+
   try {
-    const { error } = await insertIdoDen(newData);
+    const { error } = await insertIdoDen(mergeData);
 
     if (error) {
       console.error('Error adding ido den:', error.message);
       return false;
     } else {
-      console.log('ido den added successfully:', newData);
+      console.log('ido den added successfully:', mergeData);
       return true;
     }
   } catch (e) {
@@ -865,15 +891,7 @@ export const updIdoDen = async (idoKizaiData: JuchuKizaiMeisaiValues[], userNam:
     return {
       ido_den_id: d.idoDenId,
       sagyo_den_dat: toISOStringYearMonthDay(d.sagyoDenDat as Date),
-      sagyo_siji_id: d.sagyoSijiId,
-      sagyo_id: d.sagyoSijiId,
-      sagyo_kbn_id: 40,
-      kizai_id: d.kizaiId,
       plan_qty: d.planQty,
-      result_qty: null,
-      juchu_head_id: d.juchuHeadId,
-      juchu_kizai_head_id: d.juchuKizaiHeadId,
-      juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
       upd_dat: toJapanTimeString(),
       upd_user: userNam,
     };

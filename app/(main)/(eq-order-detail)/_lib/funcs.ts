@@ -306,6 +306,15 @@ export const getOyaJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHead
       return [];
     }
 
+    const uniqueIds = new Set();
+    const uniqueEqList = eqList.filter((item) => {
+      if (uniqueIds.has(item.juchu_kizai_meisai_id)) {
+        return false;
+      }
+      uniqueIds.add(item.juchu_kizai_meisai_id);
+      return true;
+    });
+
     const { data: eqTanka, error: eqTankaError } = await selectJuchuKizaiMeisaiKizaiTanka(
       juchuHeadId,
       juchuKizaiHeadId
@@ -315,7 +324,7 @@ export const getOyaJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHead
       return [];
     }
 
-    const juchuKizaiMeisaiData: OyaJuchuKizaiMeisaiValues[] = eqList.map((d) => ({
+    const juchuKizaiMeisaiData: OyaJuchuKizaiMeisaiValues[] = uniqueEqList.map((d) => ({
       juchuHeadId: d.juchu_head_id,
       juchuKizaiHeadId: d.juchu_kizai_head_id,
       juchuKizaiMeisaiId: d.juchu_kizai_meisai_id,
