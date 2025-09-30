@@ -199,7 +199,6 @@ export type Database = {
           dsp_flg: number | null;
           dsp_ord_num: number | null;
           eda_cod: string | null;
-          el_num: number | null;
           kizai_grp_cod: string | null;
           kizai_id: number;
           kizai_nam: string;
@@ -228,7 +227,6 @@ export type Database = {
           dsp_flg?: number | null;
           dsp_ord_num?: number | null;
           eda_cod?: string | null;
-          el_num?: number | null;
           kizai_grp_cod?: string | null;
           kizai_id: number;
           kizai_nam: string;
@@ -257,7 +255,6 @@ export type Database = {
           dsp_flg?: number | null;
           dsp_ord_num?: number | null;
           eda_cod?: string | null;
-          el_num?: number | null;
           kizai_grp_cod?: string | null;
           kizai_id?: number;
           kizai_nam?: string;
@@ -289,7 +286,6 @@ export type Database = {
           dsp_flg: number | null;
           dsp_ord_num: number | null;
           eda_cod: string | null;
-          el_num: number | null;
           kizai_grp_cod: string | null;
           kizai_id: number;
           kizai_id_his_num: number;
@@ -319,7 +315,6 @@ export type Database = {
           dsp_flg?: number | null;
           dsp_ord_num?: number | null;
           eda_cod?: string | null;
-          el_num?: number | null;
           kizai_grp_cod?: string | null;
           kizai_id: number;
           kizai_id_his_num: number;
@@ -349,7 +344,6 @@ export type Database = {
           dsp_flg?: number | null;
           dsp_ord_num?: number | null;
           eda_cod?: string | null;
-          el_num?: number | null;
           kizai_grp_cod?: string | null;
           kizai_id?: number;
           kizai_id_his_num?: number;
@@ -602,6 +596,7 @@ export type Database = {
         Row: {
           add_dat: string | null;
           add_user: string | null;
+          el_num?: number | null;
           del_flg: number | null;
           kizai_id: number;
           mem: string | null;
@@ -614,6 +609,7 @@ export type Database = {
         Insert: {
           add_dat?: string | null;
           add_user?: string | null;
+          el_num?: number | null;
           del_flg?: number | null;
           kizai_id: number;
           mem?: string | null;
@@ -626,6 +622,7 @@ export type Database = {
         Update: {
           add_dat?: string | null;
           add_user?: string | null;
+          el_num?: number | null;
           del_flg?: number | null;
           kizai_id?: number;
           mem?: string | null;
@@ -2236,7 +2233,6 @@ export type Database = {
           dsp_flg: number | null;
           dsp_ord_num: number | null;
           eda_cod: string | null;
-          el_num: number | null;
           kizai_grp_cod: string | null;
           kizai_id: number;
           kizai_nam: string | null;
@@ -2559,6 +2555,7 @@ export type Database = {
         Row: {
           add_dat: string | null;
           add_user: string | null;
+          el_num?: number | null;
           del_flg: number | null;
           kizai_id: number;
           mem: string | null;
@@ -2571,6 +2568,7 @@ export type Database = {
         Insert: {
           add_dat?: string | null;
           add_user?: string | null;
+          el_num?: number | null;
           del_flg?: number | null;
           kizai_id: number;
           mem?: string | null;
@@ -2583,6 +2581,7 @@ export type Database = {
         Update: {
           add_dat?: string | null;
           add_user?: string | null;
+          el_num?: number | null;
           del_flg?: number | null;
           kizai_id?: number;
           mem?: string | null;
