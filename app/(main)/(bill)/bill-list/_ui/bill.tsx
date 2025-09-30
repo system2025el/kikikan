@@ -22,7 +22,7 @@ import {
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Controller, FormProvider, useFieldArray, useForm } from 'react-hook-form';
-import { SelectElement,TextFieldElement } from 'react-hook-form-mui';
+import { SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import { validationMessages } from '@/app/(main)/_lib/validation-messages';
@@ -32,6 +32,7 @@ import { LoadingOverlay } from '@/app/(main)/_ui/loading';
 import { FirstDialogPage, SecondDialogPage } from '@/app/(main)/quotation-list/_ui/dialogs';
 import { ReadOnlyYenNumberElement } from '@/app/(main)/quotation-list/_ui/quotation';
 
+import { usePdf } from '../_lib/hooks/usePdf';
 import { BillHeadSchema, BillHeadValues } from '../_lib/types';
 import { MeisaiLines } from './meisai';
 import { MeisaiTblHeader } from './meisai-tbl-header';
@@ -127,6 +128,36 @@ export const Bill = ({
   }, [user]);
   /* eslint-enable react-hooks/exhaustive-deps */
 
+  /* print pdf ------------------------------------------------------------ */
+
+  // PDF出力用のモデル
+  const [pdfModel, setPdfModel] = useState(bill);
+  // PDFデータ生成フック
+  const [printBill] = usePdf();
+
+  // ボタン押下
+  const hundlePrintPdf = async () => {
+    // PDFデータ生成
+    const blob = await printBill(pdfModel);
+    // ダウンロードもしくはブラウザ表示するためのURL
+    const url = URL.createObjectURL(blob);
+
+    // ダウンロードの場合
+    // const a = document.createElement('a');
+    // a.download = 'data.pdf';
+    // a.href = url;
+    // a.click();
+
+    // 別タブ表示の場合
+    window.open(url);
+  };
+
+  useEffect(() => {
+    setPdfModel(bill);
+  }, [bill]); // <- 変更の契機
+
+  /* ---------------------------------------------------------------------- */
+
   return (
     <>
       <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
@@ -139,7 +170,9 @@ export const Bill = ({
               <Grid2 container display="flex" alignItems="center" justifyContent="space-between" p={1}>
                 <Typography margin={1}>請求書</Typography>
                 <Box>
-                  <Button sx={{ margin: 1 }}>請求書印刷</Button>
+                  <Button sx={{ margin: 1 }} onClick={hundlePrintPdf}>
+                    請求書印刷
+                  </Button>
                   <Button sx={{ margin: 1 }} type="submit">
                     保存
                   </Button>

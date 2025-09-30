@@ -639,7 +639,7 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
     /* 詳細
      * -----------------------------------------------------------------*/
 
-    let workPage = page;
+    const workPage = page;
 
     const startY = y_detail_2;
     const rowHeight = 20;
