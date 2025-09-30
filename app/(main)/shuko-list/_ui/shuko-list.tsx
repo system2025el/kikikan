@@ -24,7 +24,7 @@ import { ShukoListTable } from './shuko-list-table';
 
 export const ShukoList = (props: { shukoData: ShukoTableValues[] }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [selected, setSelected] = useState<number[]>([]);
+  const [selected, setSelected] = useState<ShukoTableValues[]>([]);
   const [shukoList, setShukoList] = useState<ShukoTableValues[]>(props.shukoData);
 
   /* useForm ------------------- */
@@ -45,8 +45,7 @@ export const ShukoList = (props: { shukoData: ShukoTableValues[] }) => {
   };
 
   const handleOutput = () => {
-    const selectList = selected.map((index) => shukoList[index]);
-    console.log(selectList);
+    console.log(selected);
   };
 
   return (

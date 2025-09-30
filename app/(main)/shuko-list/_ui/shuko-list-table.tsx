@@ -8,14 +8,14 @@ import { ShukoTableValues } from '../_lib/types';
 
 export const ShukoListTable = (props: {
   datas: ShukoTableValues[];
-  onSelectionChange: Dispatch<SetStateAction<number[]>>;
+  onSelectionChange: Dispatch<SetStateAction<ShukoTableValues[]>>;
 }) => {
   const { datas, onSelectionChange } = props;
 
-  const [selected, setSelected] = useState<number[]>([]);
+  const [selected, setSelected] = useState<ShukoTableValues[]>([]);
 
-  const handleSelect = (index: number) => {
-    const newSelected = selected.includes(index) ? selected.filter((item) => item !== index) : [...selected, index];
+  const handleSelect = (row: ShukoTableValues) => {
+    const newSelected = selected.includes(row) ? selected.filter((item) => item !== row) : [...selected, row];
 
     setSelected(newSelected);
     onSelectionChange(newSelected);
@@ -31,7 +31,7 @@ export const ShukoListTable = (props: {
                 indeterminate={datas && selected.length > 0 && selected.length < datas.length}
                 checked={datas && datas.length > 0 && selected.length === datas.length}
                 onChange={(e) => {
-                  const newSelected = e.target.checked && datas ? datas.map((row, index) => index) : [];
+                  const newSelected = e.target.checked && datas ? datas.map((row) => row) : [];
                   setSelected(newSelected);
                   onSelectionChange(newSelected);
                 }}
@@ -51,7 +51,7 @@ export const ShukoListTable = (props: {
           {datas.map((row, index) => (
             <TableRow key={index}>
               <TableCell padding="checkbox">
-                <Checkbox checked={selected.includes(index)} onChange={() => handleSelect(index)} />
+                <Checkbox checked={selected.includes(row)} onChange={() => handleSelect(row)} />
               </TableCell>
               <TableCell align="center">{row.juchuHeadId}</TableCell>
               <TableCell align="left"></TableCell>

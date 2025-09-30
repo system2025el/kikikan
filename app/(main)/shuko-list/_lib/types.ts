@@ -6,6 +6,7 @@ export type ShukoListSearchValues = {
 
 export type ShukoTableValues = {
   juchuHeadId: number;
+  juchuKizaiHeadId: number;
   shukoDat: Date;
   koenNam: string;
   kokyakuNam: string;
