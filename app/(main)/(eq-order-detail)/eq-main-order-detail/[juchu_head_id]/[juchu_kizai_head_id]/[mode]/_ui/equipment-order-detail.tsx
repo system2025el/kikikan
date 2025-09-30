@@ -60,6 +60,7 @@ import {
 } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 import { DetailOerValues } from '@/app/(main)/(eq-order-detail)/_lib/types';
 
+import { MoveAlertDialog, NyushukoAlertDialog, SaveAlertDialog } from '../../../../../_ui/caveat-dialog';
 import {
   addHonbanbi,
   addIdoDen,
@@ -93,7 +94,6 @@ import {
   SelectedEqptsValues,
   StockTableValues,
 } from '../_lib/types';
-import { MoveAlertDialog, NyushukoAlertDialog, SaveAlertDialog } from './caveat-dialog';
 import { DateSelectDialog } from './date-selection-dialog';
 import { ContainerTable, EqTable, StockTable } from './equipment-order-detail-table';
 import { EqptSelectionDialog } from './equipment-selection-dailog';
