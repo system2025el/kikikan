@@ -22,8 +22,8 @@ export const ExportMaster = () => {
   const exportFile = async () => {
     const data = await getAllEqptAndRfid();
     if (data) {
-      writeFileXLSX(data.workbook, `機材RFIDマスタ_${data.date}.xlsx`);
-      setSnackBarMessage(`機材RFIDマスタ_${data.date}.xlsxをエクスポートしました`);
+      writeFileXLSX(data.workbook, `RFID機材表_${data.date}.xlsx`);
+      setSnackBarMessage(`RFID機材表_${data.date}.xlsxをエクスポートしました`);
       setSnackBarOpen(true);
     } else {
       setSnackBarMessage(`エクスポートエラー: データがありません`);
