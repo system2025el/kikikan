@@ -68,7 +68,6 @@ import {
   OyaJuchuKizaiNyushukoValues,
 } from '@/app/(main)/(eq-order-detail)/_lib/types';
 import { OyaEqSelectionDialog } from '@/app/(main)/(eq-order-detail)/_ui/equipment-selection-dialog';
-import { delNyushukoDen } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_lib/funcs';
 import {
   JuchuContainerMeisaiValues,
   JuchuKizaiHeadValues,
@@ -76,10 +75,12 @@ import {
   JuchuKizaiMeisaiValues,
   StockTableValues,
 } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_lib/types';
-import { SaveAlertDialog } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_ui/caveat-dialog';
+import {
+  NyushukoAlertDialog,
+  SaveAlertDialog,
+} from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_ui/caveat-dialog';
 
 import {
-  addReturnContainerNyushukoDen,
   addReturnJuchuContainerMeisai,
   addReturnJuchuKizaiHead,
   addReturnJuchuKizaiMeisai,
@@ -169,10 +170,12 @@ export const EquipmentReturnOrderDetail = (props: {
   // カレンダー選択日
   const [selectDate, setSelectDate] = useState<Date>(props.returnNyukoDate ?? props.oyaShukoDate);
 
-  // 未保存ダイアログを出すかどうか
+  // 未保存ダイアログ制御
   const [saveOpen, setSaveOpen] = useState(false);
-  // 編集内容が未保存ダイアログを出すかどうか
+  // 編集内容が未保存ダイアログ制御
   const [dirtyOpen, setDirtyOpen] = useState(false);
+  // 入出庫日時ダイアログ制御
+  const [nyushukoOpen, setNyushukoOpen] = useState(false);
   // 機材追加ダイアログ制御
   const [EqSelectionDialogOpen, setEqSelectionDialogOpen] = useState(false);
 
@@ -214,6 +217,7 @@ export const EquipmentReturnOrderDetail = (props: {
     reset,
     getValues,
     setValue,
+    setError,
     trigger,
     clearErrors,
     formState: { isDirty, errors, defaultValues },
@@ -418,6 +422,32 @@ export const EquipmentReturnOrderDetail = (props: {
 
       // 更新
     } else {
+      const kicsMeisai = returnJuchuKizaiMeisaiList.filter((d) => d.shozokuId === 1);
+      const yardMeisai = returnJuchuKizaiMeisaiList.filter((d) => d.shozokuId === 2);
+      const kicsContainer = returnJuchuContainerMeisaiList.filter((d) => d.planKicsKizaiQty);
+      const yardContainer = returnJuchuContainerMeisaiList.filter((d) => d.planYardKizaiQty);
+
+      if (
+        ((kicsMeisai.length > 0 || kicsContainer.length > 0) && !data.kicsNyukoDat) ||
+        ((yardMeisai.length > 0 || yardContainer.length > 0) && !data.yardNyukoDat)
+      ) {
+        if ((kicsMeisai.length > 0 || kicsContainer.length > 0) && !data.kicsNyukoDat) {
+          setError('kicsNyukoDat', {
+            type: 'manual',
+            message: '',
+          });
+        }
+        if ((yardMeisai.length > 0 || yardContainer.length > 0) && !data.yardNyukoDat) {
+          setError('yardNyukoDat', {
+            type: 'manual',
+            message: '',
+          });
+        }
+        setNyushukoOpen(true);
+        setIsLoading(false);
+        return;
+      }
+
       // 受注機材ヘッダー関係更新
       if (isDirty) {
         await saveReturnJuchuKizaiHead(data, updateNyukoDate, updateDateRange, userNam);
@@ -643,18 +673,18 @@ export const EquipmentReturnOrderDetail = (props: {
     );
     // 削除
     if (deleteReturnJuchuKizaiMeisaiData.length > 0) {
-      const deleteReturnIds = deleteReturnJuchuKizaiMeisaiData.map((data) => data.juchuKizaiMeisaiId);
+      const deleteKizaiIds = deleteReturnJuchuKizaiMeisaiData.map((data) => data.kizaiId);
       const deleteMeisaiResult = await delReturnJuchuKizaiMeisai(
         data.juchuHeadId,
         data.juchuKizaiHeadId,
-        deleteReturnIds
+        deleteKizaiIds
       );
       console.log('受注機材明細削除', deleteMeisaiResult);
 
       const deleteNyushukoDenResult = await delReturnNyushukoDen(
         data.juchuHeadId,
         data.juchuKizaiHeadId,
-        deleteReturnIds
+        deleteKizaiIds
       );
       console.log('返却入出庫伝票削除', deleteNyushukoDenResult);
     }
@@ -707,32 +737,18 @@ export const EquipmentReturnOrderDetail = (props: {
     );
     // 削除
     if (deleteReturnJuchuContainerMeisaiData.length > 0) {
-      const deleteReturnContainerIds = deleteReturnJuchuContainerMeisaiData.map((data) => data.juchuKizaiMeisaiId);
+      const deleteKizaiIds = deleteReturnJuchuContainerMeisaiData.map((data) => data.kizaiId);
       const deleteContainerMeisaiResult = await delReturnJuchuContainerMeisai(
         data.juchuHeadId,
         data.juchuKizaiHeadId,
-        deleteReturnContainerIds
+        deleteKizaiIds
       );
       console.log('返却受注コンテナ明細削除', deleteContainerMeisaiResult);
-
-      const deleteContainerNyushukoDenResult = await delReturnNyushukoDen(
-        data.juchuHeadId,
-        data.juchuKizaiHeadId,
-        deleteReturnContainerIds
-      );
-      console.log('返却コンテナ入出庫伝票削除', deleteContainerNyushukoDenResult);
     }
     // 追加
     if (addReturnJuchuContainerMeisaiData.length > 0) {
       const addContainerMeisaiResult = addReturnJuchuContainerMeisai(addReturnJuchuContainerMeisaiData, userNam);
       console.log('返却受注コンテナ明細追加', addContainerMeisaiResult);
-
-      const addContainerNyushukoDenResult = await addReturnContainerNyushukoDen(
-        data,
-        addReturnJuchuContainerMeisaiData,
-        userNam
-      );
-      console.log('返却コンテナ入出庫伝票追加', addContainerNyushukoDenResult);
     }
     // 更新
     if (updateReturnJuchuContainerMeisaiData.length > 0) {
@@ -741,14 +757,15 @@ export const EquipmentReturnOrderDetail = (props: {
         userNam
       );
       console.log('返却受注コンテナ明細更新', updateContainerMeisaiResult);
-
-      const updateContainerNyushukoDenResult = await updReturnContainerNyushukoDen(
-        data,
-        updateReturnJuchuContainerMeisaiData,
-        userNam
-      );
-      console.log('返却コンテナ入出庫伝票更新', updateContainerNyushukoDenResult);
     }
+
+    // 返却コンテナ入出庫伝票更新
+    const containerNyushukoDenResult = await updReturnContainerNyushukoDen(
+      data,
+      newReturnJuchuContainerMeisaiData,
+      userNam
+    );
+    console.log('返却コンテナ入出庫伝票更新', containerNyushukoDenResult);
 
     const returnJuchuContainerMeisaiData = await getReturnJuchuContainerMeisai(
       data.juchuHeadId,
@@ -1606,6 +1623,7 @@ export const EquipmentReturnOrderDetail = (props: {
           </Fab>
           <SaveAlertDialog open={saveOpen} onClick={() => setSaveOpen(false)} />
           <IsDirtyAlertDialog open={dirtyOpen} onClick={handleResultDialog} />
+          <NyushukoAlertDialog open={nyushukoOpen} onClick={() => setNyushukoOpen(false)} />
         </Box>
       )}
     </>
