@@ -5,6 +5,11 @@ import { selectActiveEqpts, selectBundledEqpts, selectMeisaiEqts } from '@/app/_
 import { selectBundledEqptIds } from '@/app/_lib/db/tables/m-kizai-set';
 import { deleteIdoDen, insertIdoDen, selectIdoDenMaxId, updateIdoDen } from '@/app/_lib/db/tables/t-ido-den';
 import {
+  deleteJuchuContainerMeisai,
+  insertJuchuContainerMeisai,
+  updateJuchuContainerMeisai,
+} from '@/app/_lib/db/tables/t-juchu-ctn-meisai';
+import {
   insertJuchuKizaiHead,
   selectJuchuKizaiHead,
   updateJuchuKizaiHead,
@@ -23,15 +28,22 @@ import {
   selectJuchuKizaiMeisaiKizaiTanka,
   updateJuchuKizaiMeisai,
 } from '@/app/_lib/db/tables/t-juchu-kizai-meisai';
-import { deleteNyushukoDen, insertNyushukoDen, updateNyushukoDen } from '@/app/_lib/db/tables/t-nyushuko-den';
+import {
+  deleteContainerNyushukoDen,
+  deleteNyushukoDen,
+  insertNyushukoDen,
+  selectContainerNyushukoDenConfirm,
+  updateNyushukoDen,
+} from '@/app/_lib/db/tables/t-nyushuko-den';
 import { selectJuchuKizaiMeisai } from '@/app/_lib/db/tables/v-juchu-kizai-meisai';
 import { selectChosenEqptsDetails } from '@/app/_lib/db/tables/v-kizai-list';
+import { JuchuCtnMeisai } from '@/app/_lib/db/types/t_juchu_ctn_meisai-type';
 import { IdoDen } from '@/app/_lib/db/types/t-ido-den-type';
 import { JuchuKizaiHead } from '@/app/_lib/db/types/t-juchu-kizai-head-type';
 import { JuchuKizaiHonbanbi } from '@/app/_lib/db/types/t-juchu-kizai-honbanbi-type';
 import { JuchuKizaiMeisai } from '@/app/_lib/db/types/t-juchu-kizai-meisai-type';
 import { NyushukoDen } from '@/app/_lib/db/types/t-nyushuko-den-type';
-import { toISOStringYearMonthDay, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
+import { toISOString, toISOStringYearMonthDay, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { getJuchuKizaiNyushuko } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 
 import {
@@ -302,16 +314,135 @@ export const updJuchuKizaiMeisai = async (juchuKizaiMeisaiData: JuchuKizaiMeisai
  * @param juchuKizaiHeadId 受注機材ヘッダーid
  * @param juchuKizaiMeisaiIds 受注機材明細id
  */
-export const delJuchuKizaiMeisai = async (
-  juchuHeadId: number,
-  juchuKizaiHeadId: number,
-  juchuKizaiMeisaiIds: number[]
-) => {
+export const delJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number, kizaiId: number[]) => {
   try {
-    const { error } = await deleteJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId, juchuKizaiMeisaiIds);
+    const { error } = await deleteJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId, kizaiId);
 
     if (error) {
       console.error('Error delete kizai meisai:', error.message);
+    }
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+/**
+ * 受注コンテナ明細新規追加
+ * @param juchuContainerMeisaiData 受注コンテナ明細データ
+ * @param userNam ユーザー名
+ * @returns
+ */
+export const addJuchuContainerMeisai = async (
+  juchuContainerMeisaiData: JuchuContainerMeisaiValues[],
+  userNam: string
+) => {
+  const newKicsData: JuchuCtnMeisai[] = juchuContainerMeisaiData.map((d) => ({
+    juchu_head_id: d.juchuHeadId,
+    juchu_kizai_head_id: d.juchuKizaiHeadId,
+    juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
+    kizai_id: d.kizaiId,
+    plan_kizai_qty: d.planKicsKizaiQty,
+    shozoku_id: 1,
+    mem: d.mem,
+    add_dat: toJapanTimeString(),
+    add_user: userNam,
+  }));
+
+  const newYardData: JuchuCtnMeisai[] = juchuContainerMeisaiData.map((d) => ({
+    juchu_head_id: d.juchuHeadId,
+    juchu_kizai_head_id: d.juchuKizaiHeadId,
+    juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
+    kizai_id: d.kizaiId,
+    plan_kizai_qty: d.planYardKizaiQty,
+    shozoku_id: 2,
+    mem: d.mem,
+    add_dat: toJapanTimeString(),
+    add_user: userNam,
+  }));
+
+  const mergeData = [...newKicsData, ...newYardData];
+
+  try {
+    const { error } = await insertJuchuContainerMeisai(mergeData);
+
+    if (error) {
+      console.error('Error adding container meisai:', error.message);
+      return false;
+    } else {
+      console.log('container meisai added successfully:', mergeData);
+      return true;
+    }
+  } catch (e) {
+    console.error('Exception while adding container meisai:', e);
+    return false;
+  }
+};
+
+/**
+ * 受注コンテナ明細更新
+ * @param juchuContainerMeisaiData 受注コンテナ明細データ
+ * @param userNam ユーザー名
+ * @returns
+ */
+export const updJuchuContainerMeisai = async (
+  juchuContainerMeisaiData: JuchuContainerMeisaiValues[],
+  userNam: string
+) => {
+  const updateKicsData: JuchuCtnMeisai[] = juchuContainerMeisaiData.map((d) => ({
+    juchu_head_id: d.juchuHeadId,
+    juchu_kizai_head_id: d.juchuKizaiHeadId,
+    juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
+    kizai_id: d.kizaiId,
+    plan_kizai_qty: d.planKicsKizaiQty,
+    shozoku_id: 1,
+    mem: d.mem,
+    upd_dat: toJapanTimeString(),
+    upd_user: userNam,
+  }));
+
+  const updateYardData: JuchuCtnMeisai[] = juchuContainerMeisaiData.map((d) => ({
+    juchu_head_id: d.juchuHeadId,
+    juchu_kizai_head_id: d.juchuKizaiHeadId,
+    juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
+    kizai_id: d.kizaiId,
+    plan_kizai_qty: d.planYardKizaiQty,
+    shozoku_id: 2,
+    mem: d.mem,
+    upd_dat: toJapanTimeString(),
+    upd_user: userNam,
+  }));
+
+  const mergeData = [...updateKicsData, ...updateYardData];
+
+  try {
+    for (const data of mergeData) {
+      const { error } = await updateJuchuContainerMeisai(data);
+
+      if (error) {
+        console.error('Error updating juchu container meisai:', error.message);
+        continue;
+      }
+      console.log('juchu container meisai updated successfully:', data);
+    }
+    return true;
+  } catch (e) {
+    console.error('Exception while updating juchu container meisai:', e);
+    return false;
+  }
+};
+
+/**
+ * 受注コンテナ明細削除
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param kizaiId 機材id
+ */
+export const delJuchuContainerMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number, kizaiId: number[]) => {
+  try {
+    const { error } = await deleteJuchuContainerMeisai(juchuHeadId, juchuKizaiHeadId, kizaiId);
+
+    if (error) {
+      console.error('Error delete container meisai:', error.message);
     }
   } catch (e) {
     console.error(e);
@@ -337,8 +468,8 @@ export const addNyushukoDen = async (
     sagyo_kbn_id: 10,
     sagyo_den_dat:
       d.shozokuId === 1
-        ? toISOStringYearMonthDay(juchuKizaiHeadData.kicsShukoDat as Date)
-        : toISOStringYearMonthDay(juchuKizaiHeadData.yardShukoDat as Date),
+        ? toISOString(juchuKizaiHeadData.kicsShukoDat as Date)
+        : toISOString(juchuKizaiHeadData.yardShukoDat as Date),
     sagyo_id: d.shozokuId,
     kizai_id: d.kizaiId,
     plan_qty: d.planQty,
@@ -353,8 +484,8 @@ export const addNyushukoDen = async (
     sagyo_kbn_id: 20,
     sagyo_den_dat:
       d.shozokuId === 1
-        ? toISOStringYearMonthDay(juchuKizaiHeadData.kicsShukoDat as Date)
-        : toISOStringYearMonthDay(juchuKizaiHeadData.yardShukoDat as Date),
+        ? toISOString(juchuKizaiHeadData.kicsShukoDat as Date)
+        : toISOString(juchuKizaiHeadData.yardShukoDat as Date),
     sagyo_id: d.shozokuId,
     kizai_id: d.kizaiId,
     plan_qty: d.planQty,
@@ -369,8 +500,8 @@ export const addNyushukoDen = async (
     sagyo_kbn_id: 30,
     sagyo_den_dat:
       d.shozokuId === 1
-        ? toISOStringYearMonthDay(juchuKizaiHeadData.kicsNyukoDat as Date)
-        : toISOStringYearMonthDay(juchuKizaiHeadData.yardNyukoDat as Date),
+        ? toISOString(juchuKizaiHeadData.kicsNyukoDat as Date)
+        : toISOString(juchuKizaiHeadData.yardNyukoDat as Date),
     sagyo_id: d.shozokuId,
     kizai_id: d.kizaiId,
     plan_qty: d.planQty,
@@ -415,8 +546,8 @@ export const updNyushukoDen = async (
     sagyo_kbn_id: 10,
     sagyo_den_dat:
       d.shozokuId === 1
-        ? toISOStringYearMonthDay(juchuKizaiHeadData.kicsShukoDat as Date)
-        : toISOStringYearMonthDay(juchuKizaiHeadData.yardShukoDat as Date),
+        ? toISOString(juchuKizaiHeadData.kicsShukoDat as Date)
+        : toISOString(juchuKizaiHeadData.yardShukoDat as Date),
     sagyo_id: d.shozokuId,
     kizai_id: d.kizaiId,
     plan_qty: d.planQty,
@@ -431,8 +562,8 @@ export const updNyushukoDen = async (
     sagyo_kbn_id: 20,
     sagyo_den_dat:
       d.shozokuId === 1
-        ? toISOStringYearMonthDay(juchuKizaiHeadData.kicsShukoDat as Date)
-        : toISOStringYearMonthDay(juchuKizaiHeadData.yardShukoDat as Date),
+        ? toISOString(juchuKizaiHeadData.kicsShukoDat as Date)
+        : toISOString(juchuKizaiHeadData.yardShukoDat as Date),
     sagyo_id: d.shozokuId,
     kizai_id: d.kizaiId,
     plan_qty: d.planQty,
@@ -447,8 +578,8 @@ export const updNyushukoDen = async (
     sagyo_kbn_id: 30,
     sagyo_den_dat:
       d.shozokuId === 1
-        ? toISOStringYearMonthDay(juchuKizaiHeadData.kicsNyukoDat as Date)
-        : toISOStringYearMonthDay(juchuKizaiHeadData.yardNyukoDat as Date),
+        ? toISOString(juchuKizaiHeadData.kicsNyukoDat as Date)
+        : toISOString(juchuKizaiHeadData.yardNyukoDat as Date),
     sagyo_id: d.shozokuId,
     kizai_id: d.kizaiId,
     plan_qty: d.planQty,
@@ -479,17 +610,187 @@ export const updNyushukoDen = async (
  * 入出庫伝票削除
  * @param juchuHeadId 受注ヘッダーid
  * @param juchuKizaiHeadId 受注機材ヘッダーid
- * @param juchuKizaiMeisaiIds 受注機材明細id
+ * @param kizaiId 機材id
  */
-export const delNyushukoDen = async (juchuHeadId: number, juchuKizaiHeadId: number, juchuKizaiMeisaiIds: number[]) => {
+export const delNyushukoDen = async (juchuHeadId: number, juchuKizaiHeadId: number, kizaiId: number[]) => {
   try {
-    const { error } = await deleteNyushukoDen(juchuHeadId, juchuKizaiHeadId, juchuKizaiMeisaiIds);
+    const { error } = await deleteNyushukoDen(juchuHeadId, juchuKizaiHeadId, kizaiId);
 
     if (error) {
       console.error('Error delete nyushuko den:', error.message);
     }
   } catch (e) {
     console.error(e);
+  }
+};
+
+/**
+ * コンテナ入出庫伝票更新
+ * @param juchuKizaiHeadData 受注機材ヘッダーデータ
+ * @param juchuContainerMeisaiData 受注コンテナ明細データ
+ * @param userNam ユーザー名
+ */
+export const updContainerNyushukoDen = async (
+  juchuKizaiHeadData: JuchuKizaiHeadValues,
+  juchuContainerMeisaiData: JuchuContainerMeisaiValues[],
+  userNam: string
+) => {
+  for (const data of juchuContainerMeisaiData) {
+    const kicsData =
+      !data.delFlag && data.planKicsKizaiQty
+        ? [
+            {
+              juchu_head_id: data.juchuHeadId,
+              juchu_kizai_head_id: data.juchuKizaiHeadId,
+              juchu_kizai_meisai_id: data.juchuKizaiMeisaiId,
+              sagyo_kbn_id: 10,
+              sagyo_den_dat: toISOString(juchuKizaiHeadData.kicsShukoDat as Date),
+              sagyo_id: 1,
+              kizai_id: data.kizaiId,
+              plan_qty: data.planKicsKizaiQty,
+            },
+            {
+              juchu_head_id: data.juchuHeadId,
+              juchu_kizai_head_id: data.juchuKizaiHeadId,
+              juchu_kizai_meisai_id: data.juchuKizaiMeisaiId,
+              sagyo_kbn_id: 20,
+              sagyo_den_dat: toISOString(juchuKizaiHeadData.kicsShukoDat as Date),
+              sagyo_id: 1,
+              kizai_id: data.kizaiId,
+              plan_qty: data.planKicsKizaiQty,
+            },
+            {
+              juchu_head_id: data.juchuHeadId,
+              juchu_kizai_head_id: data.juchuKizaiHeadId,
+              juchu_kizai_meisai_id: data.juchuKizaiMeisaiId,
+              sagyo_kbn_id: 30,
+              sagyo_den_dat: toISOString(juchuKizaiHeadData.kicsNyukoDat as Date),
+              sagyo_id: 1,
+              kizai_id: data.kizaiId,
+              plan_qty: data.planKicsKizaiQty,
+            },
+          ]
+        : null;
+    const yardData =
+      !data.delFlag && data.planYardKizaiQty
+        ? [
+            {
+              juchu_head_id: data.juchuHeadId,
+              juchu_kizai_head_id: data.juchuKizaiHeadId,
+              juchu_kizai_meisai_id: data.juchuKizaiMeisaiId,
+              sagyo_kbn_id: 10,
+              sagyo_den_dat: toISOString(juchuKizaiHeadData.yardShukoDat as Date),
+              sagyo_id: 2,
+              kizai_id: data.kizaiId,
+              plan_qty: data.planYardKizaiQty,
+            },
+            {
+              juchu_head_id: data.juchuHeadId,
+              juchu_kizai_head_id: data.juchuKizaiHeadId,
+              juchu_kizai_meisai_id: data.juchuKizaiMeisaiId,
+              sagyo_kbn_id: 20,
+              sagyo_den_dat: toISOString(juchuKizaiHeadData.yardShukoDat as Date),
+              sagyo_id: 2,
+              kizai_id: data.kizaiId,
+              plan_qty: data.planYardKizaiQty,
+            },
+            {
+              juchu_head_id: data.juchuHeadId,
+              juchu_kizai_head_id: data.juchuKizaiHeadId,
+              juchu_kizai_meisai_id: data.juchuKizaiMeisaiId,
+              sagyo_kbn_id: 30,
+              sagyo_den_dat: toISOString(juchuKizaiHeadData.yardNyukoDat as Date),
+              sagyo_id: 2,
+              kizai_id: data.kizaiId,
+              plan_qty: data.planYardKizaiQty,
+            },
+          ]
+        : null;
+    const kicsConfirmData = {
+      juchu_head_id: data.juchuHeadId,
+      juchu_kizai_head_id: data.juchuKizaiHeadId,
+      juchu_kizai_meisai_id: data.juchuKizaiMeisaiId,
+      kizai_id: data.kizaiId,
+      sagyo_id: 1,
+    };
+    const yardConfirmData = {
+      juchu_head_id: data.juchuHeadId,
+      juchu_kizai_head_id: data.juchuKizaiHeadId,
+      juchu_kizai_meisai_id: data.juchuKizaiMeisaiId,
+      kizai_id: data.kizaiId,
+      sagyo_id: 2,
+    };
+
+    try {
+      const kicsConfirmResult = await selectContainerNyushukoDenConfirm(kicsConfirmData);
+      const yardConfirmResult = await selectContainerNyushukoDenConfirm(yardConfirmData);
+
+      if (kicsConfirmResult.data && kicsConfirmResult.data.length > 0 && kicsData) {
+        for (const data of kicsData) {
+          const { error: updateError } = await updateNyushukoDen({
+            ...data,
+            upd_dat: toJapanTimeString(),
+            upd_user: userNam,
+          });
+          if (updateError) {
+            console.error('Error updating kics container nyushuko den:', updateError.message);
+            continue;
+          }
+        }
+      } else if (kicsConfirmResult.data && kicsConfirmResult.data.length > 0 && !kicsData) {
+        const { error: deleteError } = await deleteContainerNyushukoDen(kicsConfirmData);
+        if (deleteError) {
+          console.error('Error delete kics container nyushuko den:', deleteError.message);
+          continue;
+        }
+      } else if (kicsConfirmResult!.data && kicsData) {
+        const { error: insertError } = await insertNyushukoDen(
+          kicsData.map((d) => ({
+            ...d,
+            add_dat: toJapanTimeString(),
+            add_user: userNam,
+          }))
+        );
+        if (insertError) {
+          console.error('Error insert kics container nyushuko den:', insertError.message);
+          continue;
+        }
+      }
+      if (yardConfirmResult.data && yardConfirmResult.data.length > 0 && yardData) {
+        for (const data of yardData) {
+          const { error: updateError } = await updateNyushukoDen({
+            ...data,
+            upd_dat: toJapanTimeString(),
+            upd_user: userNam,
+          });
+          if (updateError) {
+            console.error('Error updating yard container nyushuko den:', updateError.message);
+            continue;
+          }
+        }
+      } else if (yardConfirmResult.data && yardConfirmResult.data.length > 0 && !yardData) {
+        const { error: deleteError } = await deleteContainerNyushukoDen(yardConfirmData);
+        if (deleteError) {
+          console.error('Error delete yard container nyushuko den:', deleteError.message);
+          continue;
+        }
+      } else if (yardConfirmResult!.data && yardData) {
+        const { error: insertError } = await insertNyushukoDen(
+          yardData.map((d) => ({
+            ...d,
+            add_dat: toJapanTimeString(),
+            add_user: userNam,
+          }))
+        );
+        if (insertError) {
+          console.error('Error updating yard container nyushuko den:', insertError.message);
+          continue;
+        }
+      }
+      console.log('container nyushuko den updated successfully:', data);
+    } catch (e) {
+      console.error(e);
+    }
   }
 };
 

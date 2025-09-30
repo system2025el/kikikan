@@ -55,7 +55,7 @@ export const updateJuchuContainerMeisai = async (data: JuchuCtnMeisai) => {
       .update(data)
       .eq('juchu_head_id', data.juchu_head_id)
       .eq('juchu_kizai_head_id', data.juchu_kizai_head_id)
-      .eq('juchu_kizai_meisai_id', data.juchu_kizai_meisai_id)
+      .eq('kizai_id', data.kizai_id)
       .eq('shozoku_id', data.shozoku_id);
   } catch (e) {
     throw e;
@@ -66,14 +66,10 @@ export const updateJuchuContainerMeisai = async (data: JuchuCtnMeisai) => {
  * 受注コンテナ明細削除
  * @param juchuHeadId 受注ヘッダーid
  * @param juchuKizaiHeadId 受注機材ヘッダーid
- * @param deleteJuchuContainerMeisaiIds 受注コンテナ明細id
+ * @param kizaiId 機材id
  * @returns
  */
-export const deleteJuchuContainerMeisai = async (
-  juchuHeadId: number,
-  juchuKizaiHeadId: number,
-  deleteJuchuContainerMeisaiIds: number[]
-) => {
+export const deleteJuchuContainerMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number, kizaiId: number[]) => {
   try {
     return await supabase
       .schema(SCHEMA)
@@ -81,7 +77,7 @@ export const deleteJuchuContainerMeisai = async (
       .delete()
       .eq('juchu_head_id', juchuHeadId)
       .eq('juchu_kizai_head_id', juchuKizaiHeadId)
-      .in('juchu_kizai_meisai_id', deleteJuchuContainerMeisaiIds);
+      .in('kizai_id', kizaiId);
   } catch (e) {
     throw e;
   }
