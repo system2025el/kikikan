@@ -1042,6 +1042,45 @@ export type Database = {
         };
         Relationships: [];
       };
+      t_ido_fix: {
+        Row: {
+          add_dat: string | null;
+          add_user: string | null;
+          ido_den_id: number;
+          sagyo_den_dat: string | null;
+          sagyo_fix_flg: number | null;
+          sagyo_id: number | null;
+          sagyo_kbn_id: number | null;
+          sagyo_siji_id: number | null;
+          upd_dat: string | null;
+          upd_user: string | null;
+        };
+        Insert: {
+          add_dat?: string | null;
+          add_user?: string | null;
+          ido_den_id: number;
+          sagyo_den_dat?: string | null;
+          sagyo_fix_flg?: number | null;
+          sagyo_id?: number | null;
+          sagyo_kbn_id?: number | null;
+          sagyo_siji_id?: number | null;
+          upd_dat?: string | null;
+          upd_user?: string | null;
+        };
+        Update: {
+          add_dat?: string | null;
+          add_user?: string | null;
+          ido_den_id?: number;
+          sagyo_den_dat?: string | null;
+          sagyo_fix_flg?: number | null;
+          sagyo_id?: number | null;
+          sagyo_kbn_id?: number | null;
+          sagyo_siji_id?: number | null;
+          upd_dat?: string | null;
+          upd_user?: string | null;
+        };
+        Relationships: [];
+      };
       t_ido_result: {
         Row: {
           ido_den_id: number;
@@ -1802,6 +1841,45 @@ export type Database = {
           result_qty?: number | null;
           sagyo_den_dat?: string;
           sagyo_id?: number;
+          sagyo_kbn_id?: number;
+          upd_dat?: string | null;
+          upd_user?: string | null;
+        };
+        Relationships: [];
+      };
+      t_nyushuko_fix: {
+        Row: {
+          add_dat: string | null;
+          add_user: string | null;
+          juchu_head_id: number;
+          juchu_kizai_head_id: number;
+          sagyo_den_dat: string | null;
+          sagyo_fix_flg: number | null;
+          sagyo_id: number | null;
+          sagyo_kbn_id: number;
+          upd_dat: string | null;
+          upd_user: string | null;
+        };
+        Insert: {
+          add_dat?: string | null;
+          add_user?: string | null;
+          juchu_head_id: number;
+          juchu_kizai_head_id: number;
+          sagyo_den_dat?: string | null;
+          sagyo_fix_flg?: number | null;
+          sagyo_id?: number | null;
+          sagyo_kbn_id: number;
+          upd_dat?: string | null;
+          upd_user?: string | null;
+        };
+        Update: {
+          add_dat?: string | null;
+          add_user?: string | null;
+          juchu_head_id?: number;
+          juchu_kizai_head_id?: number;
+          sagyo_den_dat?: string | null;
+          sagyo_fix_flg?: number | null;
+          sagyo_id?: number | null;
           sagyo_kbn_id?: number;
           upd_dat?: string | null;
           upd_user?: string | null;
