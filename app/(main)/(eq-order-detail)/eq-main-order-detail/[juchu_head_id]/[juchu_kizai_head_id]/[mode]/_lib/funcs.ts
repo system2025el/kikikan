@@ -931,6 +931,13 @@ export const delIdoDen = async (idoDenIds: number[]) => {
   }
 };
 
+/**
+ * 移動確定新規追加
+ * @param newIdoDenId 新規移動確定id
+ * @param idoKizaiData 移動伝票データ
+ * @param userNam ユーザー名
+ * @returns
+ */
 export const addIdoFix = async (newIdoDenId: number, idoKizaiData: JuchuKizaiMeisaiValues[], userNam: string) => {
   const newDepartureData: IdoFix[] = idoKizaiData.map((d, index) => ({
     ido_den_id: newIdoDenId + index,
@@ -972,6 +979,12 @@ export const addIdoFix = async (newIdoDenId: number, idoKizaiData: JuchuKizaiMei
   }
 };
 
+/**
+ * 移動確定更新
+ * @param idoKizaiData 移動伝票データ
+ * @param userNam ユーザー名
+ * @returns
+ */
 export const updIdoFix = async (idoKizaiData: JuchuKizaiMeisaiValues[], userNam: string) => {
   const updateData: IdoFix[] = idoKizaiData.map((d) => {
     if (!d.idoDenId) {
@@ -1001,6 +1014,10 @@ export const updIdoFix = async (idoKizaiData: JuchuKizaiMeisaiValues[], userNam:
   }
 };
 
+/**
+ * 移動確定削除
+ * @param idoDenIds 移動確定id
+ */
 export const delIdoFix = async (idoDenIds: number[]) => {
   try {
     const { error } = await deleteIdoFix(idoDenIds);
