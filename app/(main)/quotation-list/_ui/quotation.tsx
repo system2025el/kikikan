@@ -14,27 +14,25 @@ import {
   Dialog,
   Divider,
   Grid2,
-  InputAdornment,
   Paper,
   Snackbar,
   TextField,
   Typography,
 } from '@mui/material';
 import { useRouter } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
-import { Controller, FieldPath, FormProvider, useFieldArray, useForm, useFormContext, useWatch } from 'react-hook-form';
+import { useEffect, useState } from 'react';
+import { Controller, FieldPath, FormProvider, useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import { toJapanDateString } from '@/app/(main)/_lib/date-conversion';
-import { BackButton } from '@/app/(main)/_ui/buttons';
 import { FormDateX } from '@/app/(main)/_ui/date';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { LoadingOverlay } from '@/app/(main)/_ui/loading';
 
 import { JuchuValues, QuotHeadSchema, QuotHeadValues } from '../_lib/types';
-import { addQuot } from '../create/_lib/func';
-import { updateQuot } from '../edit/[id]/_lib/func';
+import { addQuot } from '../create/_lib/funcs';
+import { updateQuot } from '../edit/[id]/_lib/funcs';
 import { FirstDialogPage, SecondDialogPage } from './create-tbl-dialogs';
 import { MeisaiLines } from './meisai';
 import { MeisaiTblHeader } from './meisai-tbl-header';

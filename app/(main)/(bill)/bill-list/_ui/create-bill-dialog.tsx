@@ -6,7 +6,7 @@ import { CheckboxElement, TextFieldElement } from 'react-hook-form-mui';
 
 import { toJapanMonthString } from '@/app/(main)/_lib/date-conversion';
 import { CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
-import { FormMonthX } from '@/app/(main)/_ui/date';
+import { FormDateX, FormMonthX } from '@/app/(main)/_ui/date';
 import { Loading } from '@/app/(main)/_ui/loading';
 import { getChosenCustomerName } from '@/app/(main)/(masters)/customers-master/_lib/funcs';
 
@@ -40,7 +40,7 @@ export const CreateBillDialog = ({
   }) => {
     console.log(data);
     router.push(
-      `bill-list/create?kokyakuId=${data.kokyaku.id}&month=${toJapanMonthString(data.month ?? undefined)}&flg=${data.showDetailFlg}`
+      `bill-list/create?kokyakuId=${data.kokyaku.id}&date=${toJapanMonthString(data.month ?? undefined)}&flg=${data.showDetailFlg}`
     );
   };
 
@@ -84,14 +84,14 @@ export const CreateBillDialog = ({
               />
             </Grid2>
             <Grid2 display={'flex'} alignItems={'baseline'}>
-              <Typography mr={9}>年月</Typography>
+              <Typography mr={9}>年月日</Typography>
               <Typography mr={1}>～</Typography>
               <Controller
                 control={control}
                 name="month"
                 rules={{ required: '選択してください' }}
                 render={({ field, fieldState }) => (
-                  <FormMonthX
+                  <FormDateX
                     value={field.value}
                     onChange={field.onChange}
                     sx={{

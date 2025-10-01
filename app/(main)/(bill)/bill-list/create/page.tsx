@@ -1,5 +1,5 @@
 import { getChosenCustomer, getChosenCustomerIdAndName } from '@/app/(main)/(masters)/customers-master/_lib/funcs';
-import { getUsersSelection } from '@/app/(main)/quotation-list/_lib/func';
+import { getUsersSelection } from '@/app/(main)/quotation-list/_lib/funcs';
 
 import { getBillingStsSelection } from '../_lib/funcs';
 import { BillHeadValues } from '../_lib/types';
@@ -8,12 +8,10 @@ import { Bill } from '../_ui/bill';
 const Page = async ({ searchParams }: { searchParams: Promise<{ [key: string]: string | undefined }> }) => {
   const searchParam = await searchParams;
   console.log(searchParam);
-  const { kokyakuId, month, flg } = searchParam;
-  const [users, sts, custs] = await Promise.all([
-    getUsersSelection(),
-    getBillingStsSelection(),
-    getChosenCustomerIdAndName(Number(kokyakuId)),
-  ]);
+  const { kokyakuId, date, flg } = searchParam;
+  const [users, sts] = await Promise.all([getUsersSelection(), getBillingStsSelection()]);
+
+  const custs = await getChosenCustomerIdAndName(Number(kokyakuId));
 
   const bill: BillHeadValues = {
     aite: { id: custs.kokyakuId, nam: custs.kokyakuNam },

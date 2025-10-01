@@ -21,7 +21,7 @@ import { UseFieldArrayReturn } from 'react-hook-form-mui';
 import { CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
 import { Loading } from '@/app/(main)/_ui/loading';
 
-import { getJuchuIsshikiMeisai, getJuchuKizaiHeadNamList, getJuchuKizaiMeisaiList } from '../_lib/func';
+import { getJuchuIsshikiMeisai, getJuchuKizaiHeadNamList, getJuchuKizaiMeisaiList } from '../_lib/funcs';
 import { QuotHeadValues } from '../_lib/types';
 
 /**

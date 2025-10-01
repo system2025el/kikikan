@@ -1,6 +1,6 @@
 import { toJapanDateString } from '../../_lib/date-conversion';
 import { getCustomerSelection } from '../../(masters)/_lib/funs';
-import { getMituStsSelection, getOrderForQuotation, getUsersSelection } from '../_lib/func';
+import { getMituStsSelection, getOrderForQuotation, getUsersSelection } from '../_lib/funcs';
 import { JuchuValues } from '../_lib/types';
 import { Quotation } from '../_ui/quotation';
 

@@ -32,7 +32,7 @@ import {
   getJuchuIsshikiMeisai,
   getJuchuKizaiHeadNamList,
   getJuchuKizaiMeisaiList,
-} from '@/app/(main)/quotation-list/_lib/func';
+} from '@/app/(main)/quotation-list/_lib/funcs';
 
 import { BillHeadValues } from '../_lib/types';
 
