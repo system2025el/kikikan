@@ -81,6 +81,7 @@ import {
   updContainerNyushukoDen,
   updHonbanbi,
   updIdoDen,
+  updIdoFix,
   updJuchuContainerMeisai,
   updJuchuKizaiHead,
   updJuchuKizaiMeisai,
@@ -793,6 +794,9 @@ const EquipmentOrderDetail = (props: {
     if (updateIdoKizaiData.length > 0) {
       const updateIdoDenResult = await updIdoDen(updateIdoKizaiData, userNam);
       console.log('移動伝票更新', updateIdoDenResult);
+
+      const updateIdoFixResult = await updIdoFix(updateIdoKizaiData, userNam);
+      console.log('移動確定更新', updateIdoFixResult);
     }
   };
 

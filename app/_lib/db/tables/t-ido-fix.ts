@@ -11,6 +11,14 @@ export const insertIdoFix = async (data: IdoFix[]) => {
   }
 };
 
+export const updateIdoFix = async (data: IdoFix) => {
+  try {
+    return await supabase.schema(SCHEMA).from('t_ido_fix').update(data).eq('ido_den_id', data.ido_den_id);
+  } catch (e) {
+    throw e;
+  }
+};
+
 export const deleteIdoFix = async (idoDenIds: number[]) => {
   try {
     return await supabase.schema(SCHEMA).from('t_ido_fix').delete().in('ido_den_id', idoDenIds);

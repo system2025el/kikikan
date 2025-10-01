@@ -4,7 +4,7 @@ import { selectActiveBumons } from '@/app/_lib/db/tables/m-bumon';
 import { selectActiveEqpts, selectBundledEqpts, selectMeisaiEqts } from '@/app/_lib/db/tables/m-kizai';
 import { selectBundledEqptIds } from '@/app/_lib/db/tables/m-kizai-set';
 import { deleteIdoDen, insertIdoDen, selectIdoDenMaxId, updateIdoDen } from '@/app/_lib/db/tables/t-ido-den';
-import { deleteIdoFix, insertIdoFix } from '@/app/_lib/db/tables/t-ido-fix';
+import { deleteIdoFix, insertIdoFix, updateIdoFix } from '@/app/_lib/db/tables/t-ido-fix';
 import {
   deleteJuchuContainerMeisai,
   insertJuchuContainerMeisai,
@@ -968,6 +968,35 @@ export const addIdoFix = async (newIdoDenId: number, idoKizaiData: JuchuKizaiMei
     }
   } catch (e) {
     console.error('Exception while adding ido fix:', e);
+    return false;
+  }
+};
+
+export const updIdoFix = async (idoKizaiData: JuchuKizaiMeisaiValues[], userNam: string) => {
+  const updateData: IdoFix[] = idoKizaiData.map((d) => {
+    if (!d.idoDenId) {
+      throw new Error();
+    }
+    return {
+      ido_den_id: d.idoDenId,
+      sagyo_den_dat: toISOStringYearMonthDay(d.sagyoDenDat as Date),
+      upd_dat: toJapanTimeString(),
+      upd_user: userNam,
+    };
+  });
+
+  try {
+    for (const data of updateData) {
+      const { error } = await updateIdoFix(data);
+      if (error) {
+        console.error('Error updating ido fix:', error.message);
+        continue;
+      }
+    }
+    console.log('ido fix updated successfully:', updateData);
+    return true;
+  } catch (e) {
+    console.error('Exception while updating ido fix:', e);
     return false;
   }
 };
