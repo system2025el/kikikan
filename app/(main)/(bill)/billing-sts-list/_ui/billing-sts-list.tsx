@@ -29,7 +29,8 @@ export const BillingStsList = ({ custs }: { custs: SelectTypes[] }) => {
     defaultValues: { kokyaku: null, kokyakuTantoNam: null, sts: ['1'] },
   });
 
-  const kokyakuId = getValues('kokyaku');
+  // const kokyakuId = getValues('kokyaku');
+  const kokyakuId = useWatch({ control, name: 'kokyaku' });
 
   /* method --------------------------------------------------------------- */
   const onSubmit = async (data: BillingStsSearchValues) => {
