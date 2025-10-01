@@ -30,6 +30,7 @@ export const updateNyushukoDen = async (data: NyushukoDen) => {
       .eq('juchu_head_id', data.juchu_head_id)
       .eq('juchu_kizai_head_id', data.juchu_kizai_head_id)
       .eq('kizai_id', data.kizai_id)
+      .eq('sagyo_id', data.sagyo_id)
       .eq('sagyo_kbn_id', data.sagyo_kbn_id);
   } catch (e) {
     throw e;
