@@ -78,6 +78,22 @@ export const MeisaiLines = ({ index }: { index: number }) => {
                 type="number"
               />
             </Grid2>
+            <Grid2 size={0.8}>
+              <TextFieldElement
+                name={`meisaiHeads.${index}.meisai.${i}.honbanbiQty`}
+                control={control}
+                sx={{
+                  '& .MuiInputBase-input': {
+                    textAlign: 'right',
+                  },
+                  '& input[type=number]::-webkit-inner-spin-button': {
+                    WebkitAppearance: 'none',
+                    margin: 0,
+                  },
+                }}
+                type="number"
+              />
+            </Grid2>
             <Grid2 size={1.5}>
               <Controller
                 name={`meisaiHeads.${index}.meisai.${i}.tankaAmt`}
@@ -139,22 +155,6 @@ export const MeisaiLines = ({ index }: { index: number }) => {
             </Grid2>
             <Grid2 size={2}>
               <ReadOnlyYenNumberElement name={`meisaiHeads.${index}.meisai.${i}.shokeiAmt`} />
-            </Grid2>
-            <Grid2 size={0.8}>
-              <TextFieldElement
-                name={`meisaiHeads.${index}.meisai.${i}.honbanbiQty`}
-                control={control}
-                sx={{
-                  '& .MuiInputBase-input': {
-                    textAlign: 'right',
-                  },
-                  '& input[type=number]::-webkit-inner-spin-button': {
-                    WebkitAppearance: 'none',
-                    margin: 0,
-                  },
-                }}
-                type="number"
-              />
             </Grid2>
             <Grid2 size={1}>
               <IconButton

@@ -19,9 +19,10 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import { watch } from 'fs';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { Controller, FormProvider, useFieldArray, useForm } from 'react-hook-form';
+import { SetStateAction, useEffect, useState } from 'react';
+import { Controller, FieldArrayMethodProps, FormProvider, useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
@@ -29,9 +30,9 @@ import { validationMessages } from '@/app/(main)/_lib/validation-messages';
 import { FormDateX } from '@/app/(main)/_ui/date';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { LoadingOverlay } from '@/app/(main)/_ui/loading';
-import { FirstDialogPage, SecondDialogPage } from '@/app/(main)/quotation-list/_ui/dialogs';
 
 import { BillHeadSchema, BillHeadValues } from '../_lib/types';
+import { FirstDialogPage, SecondDialogPage } from './create-tbl-dialogs';
 import { MeisaiLines } from './meisai';
 import { MeisaiTblHeader } from './meisai-tbl-header';
 import { ReadOnlyYenNumberElement } from './yen';
@@ -83,6 +84,7 @@ export const Bill = ({
   } = billForm;
 
   const meisaiHeadFields = useFieldArray({ control, name: 'meisaiHeads' });
+  const kokyaku = useWatch({ control, name: 'aite' });
 
   /* methods ------------------------------------------------------ */
   /* 保存ボタン押下 */
@@ -184,7 +186,7 @@ export const Bill = ({
                     <Grid2 sx={styles.container}>
                       <Typography marginRight={1}>相手</Typography>
                       <TextFieldElement
-                        name="aite"
+                        name="aite.nam"
                         control={control}
                         sx={{
                           width: 400,
@@ -305,14 +307,28 @@ export const Bill = ({
                     }}
                     fullWidth
                   >
-                    {/* {showSecond && (
+                    {!showSecond && (
+                      <FirstDialogPage
+                        handleClose={() => setKizaimeisaiaddDialogOpen(false)}
+                        addTbl={() =>
+                          meisaiHeadFields.append({
+                            seikyuMeisaiHeadNam: null,
+                            zeiFlg: false,
+                          })
+                        }
+                        toSecondPage={setShowSecond}
+                      />
+                    )}
+                    {showSecond && (
                       <SecondDialogPage
-                        field={meisaiHeadFields}
                         handleClose={() => setKizaimeisaiaddDialogOpen(false)}
                         setSnackBarOpen={() => setSnackBarOpen(true)}
                         setSnackBarMessage={setSnackBarMessage}
+                        kokyakuId={kokyaku.id}
+                        kokyakuNam={kokyaku.nam}
+                        headsField={meisaiHeadFields}
                       />
-                    )} */}
+                    )}
                   </Dialog>
                 </Box>
               </Box>

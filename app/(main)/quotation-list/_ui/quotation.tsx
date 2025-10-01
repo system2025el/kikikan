@@ -35,7 +35,7 @@ import { LoadingOverlay } from '@/app/(main)/_ui/loading';
 import { JuchuValues, QuotHeadSchema, QuotHeadValues } from '../_lib/types';
 import { addQuot } from '../create/_lib/func';
 import { updateQuot } from '../edit/[id]/_lib/func';
-import { FirstDialogPage, SecondDialogPage } from './dialogs';
+import { FirstDialogPage, SecondDialogPage } from './create-tbl-dialogs';
 import { MeisaiLines } from './meisai';
 import { MeisaiTblHeader } from './meisai-tbl-header';
 import { ReadOnlyYenNumberElement } from './yen';
