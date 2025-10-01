@@ -668,6 +668,7 @@ const EquipmentOrderDetail = (props: {
       console.log('入出庫本番日更新', nyushukoHonbanbiResult);
     }
 
+    // 入出庫確定更新
     if (juchuKizaiMeisaiList.length > 0 || juchuContainerMeisaiList.length > 0) {
       const kics =
         juchuKizaiMeisaiList.filter((d) => d.shozokuId === 1 && !d.delFlag) &&

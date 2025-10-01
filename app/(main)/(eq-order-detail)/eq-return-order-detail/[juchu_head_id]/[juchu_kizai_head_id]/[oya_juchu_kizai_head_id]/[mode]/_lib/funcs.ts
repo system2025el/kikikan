@@ -24,12 +24,19 @@ import {
   selectContainerNyushukoDenConfirm,
   updateNyushukoDen,
 } from '@/app/_lib/db/tables/t-nyushuko-den';
+import {
+  deleteNyushukoFix,
+  insertNyushukoFix,
+  selectNyushukoFixConfirm,
+  updateNyushukoFix,
+} from '@/app/_lib/db/tables/t-nyushuko-fix';
 import { selectJuchuContainerMeisai } from '@/app/_lib/db/tables/v-juchu-ctn-meisai';
 import { selectOyaJuchuKizaiMeisai, selectReturnJuchuKizaiMeisai } from '@/app/_lib/db/tables/v-juchu-kizai-meisai';
 import { JuchuCtnMeisai } from '@/app/_lib/db/types/t_juchu_ctn_meisai-type';
 import { JuchuKizaiHead } from '@/app/_lib/db/types/t-juchu-kizai-head-type';
 import { JuchuKizaiMeisai } from '@/app/_lib/db/types/t-juchu-kizai-meisai-type';
 import { NyushukoDen } from '@/app/_lib/db/types/t-nyushuko-den-type';
+import { NyushukoFix } from '@/app/_lib/db/types/t-nyushuko-fix-type';
 import { toISOString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { getJuchuKizaiNyushuko } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 
@@ -726,5 +733,125 @@ export const updReturnContainerNyushukoDen = async (
     } catch (e) {
       console.error(e);
     }
+  }
+};
+
+/**
+ * 返却入出庫確定更新
+ * @param data 返却受注機材ヘッダーデータ
+ * @param kics KICS機材判定
+ * @param yard YARD機材判定
+ * @param userNam ユーザー名
+ * @returns
+ */
+export const updReturnNyushukoFix = async (
+  data: ReturnJuchuKizaiHeadValues,
+  kics: boolean,
+  yard: boolean,
+  userNam: string
+) => {
+  const kicsData: NyushukoFix = {
+    juchu_head_id: data.juchuHeadId,
+    juchu_kizai_head_id: data.juchuKizaiHeadId,
+    sagyo_kbn_id: 70,
+    sagyo_den_dat: toISOString(data.kicsNyukoDat as Date),
+    sagyo_id: 1,
+  };
+  const yardData: NyushukoFix = {
+    juchu_head_id: data.juchuHeadId,
+    juchu_kizai_head_id: data.juchuKizaiHeadId,
+    sagyo_kbn_id: 70,
+    sagyo_den_dat: toISOString(data.yardNyukoDat as Date),
+    sagyo_id: 2,
+  };
+  const kicsConfirmData = {
+    juchu_head_id: data.juchuHeadId,
+    juchu_kizai_head_id: data.juchuKizaiHeadId,
+    sagyo_id: 1,
+  };
+  const yardConfirmData = {
+    juchu_head_id: data.juchuHeadId,
+    juchu_kizai_head_id: data.juchuKizaiHeadId,
+    sagyo_id: 2,
+  };
+
+  try {
+    const kicsConfirmResult = await selectNyushukoFixConfirm(kicsConfirmData);
+    const yardConfirmResult = await selectNyushukoFixConfirm(yardConfirmData);
+
+    // KICS更新
+    if (kicsConfirmResult.data && kicsConfirmResult.data.length > 0 && kics) {
+      const { error: updateError } = await updateNyushukoFix({
+        ...kicsData,
+        upd_dat: toJapanTimeString(),
+        upd_user: userNam,
+      });
+      if (updateError) {
+        console.error('Error updating kics return nyushuko fix:', updateError.message);
+        throw new Error();
+      }
+
+      // KICS削除
+    } else if (kicsConfirmResult.data && kicsConfirmResult.data.length > 0 && !kics) {
+      const { error: deleteError } = await deleteNyushukoFix(kicsConfirmData);
+      if (deleteError) {
+        console.error('Error delete kics return nyushuko fix:', deleteError.message);
+        throw new Error();
+      }
+      // KICS追加
+    } else if (kicsConfirmResult!.data && kics) {
+      const { error: insertError } = await insertNyushukoFix([
+        {
+          ...kicsData,
+          sagyo_fix_flg: 0,
+          add_dat: toJapanTimeString(),
+          add_user: userNam,
+        },
+      ]);
+      if (insertError) {
+        console.error('Error insert kics return nyushuko fix:', insertError.message);
+        throw new Error();
+      }
+    }
+
+    // YARD更新
+    if (yardConfirmResult.data && yardConfirmResult.data.length > 0 && yard) {
+      const { error: updateError } = await updateNyushukoFix({
+        ...yardData,
+        upd_dat: toJapanTimeString(),
+        upd_user: userNam,
+      });
+      if (updateError) {
+        console.error('Error updating yard return nyushuko fix:', updateError.message);
+        throw new Error();
+      }
+
+      // YARD削除
+    } else if (yardConfirmResult.data && yardConfirmResult.data.length > 0 && !yard) {
+      const { error: deleteError } = await deleteNyushukoFix(yardConfirmData);
+      if (deleteError) {
+        console.error('Error delete yard return nyushuko fix:', deleteError.message);
+        throw new Error();
+      }
+      // YARD追加
+    } else if (yardConfirmResult!.data && yard) {
+      const { error: insertError } = await insertNyushukoFix([
+        {
+          ...yardData,
+          sagyo_fix_flg: 0,
+          add_dat: toJapanTimeString(),
+          add_user: userNam,
+        },
+      ]);
+      if (insertError) {
+        console.error('Error insert yard return nyushuko fix:', insertError.message);
+        throw new Error();
+      }
+    }
+    console.log('return nyushuko fix updated successfully:', data);
+    return true;
+  } catch (e) {
+    console.error(e);
+    return false;
   }
 };

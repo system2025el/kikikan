@@ -811,6 +811,14 @@ export const updContainerNyushukoDen = async (
   }
 };
 
+/**
+ * 入出庫確定更新
+ * @param data 受注機材ヘッダーデータ
+ * @param kics KICS機材判定
+ * @param yard YARD機材判定
+ * @param userNam ユーザー名
+ * @returns
+ */
 export const updNyushukoFix = async (data: JuchuKizaiHeadValues, kics: boolean, yard: boolean, userNam: string) => {
   const kicsData: NyushukoFix[] = [
     {

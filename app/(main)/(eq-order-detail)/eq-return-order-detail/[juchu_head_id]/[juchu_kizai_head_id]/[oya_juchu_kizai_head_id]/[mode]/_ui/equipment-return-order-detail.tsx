@@ -92,6 +92,7 @@ import {
   updReturnJuchuKizaiHead,
   updReturnJuchuKizaiMeisai,
   updReturnNyushukoDen,
+  updReturnNyushukoFix,
 } from '../_lib/funcs';
 import {
   ReturnJuchuContainerMeisaiValues,
@@ -632,6 +633,23 @@ export const EquipmentReturnOrderDetail = (props: {
       userNam
     );
     console.log('受注機材本番日(使用日)更新', addReturnSiyouHonbanbiResult);
+
+    // 入出庫確定更新
+    if (returnJuchuKizaiMeisaiList.length > 0 || returnJuchuContainerMeisaiList.length > 0) {
+      const kics =
+        returnJuchuKizaiMeisaiList.filter((d) => d.shozokuId === 1 && !d.delFlag) &&
+        returnJuchuContainerMeisaiList.filter((d) => d.planKicsKizaiQty && !d.delFlag)
+          ? true
+          : false;
+      const yard =
+        returnJuchuKizaiMeisaiList.filter((d) => d.shozokuId === 2 && !d.delFlag) &&
+        returnJuchuContainerMeisaiList.filter((d) => d.planYardKizaiQty && !d.delFlag)
+          ? true
+          : false;
+
+      const nyushukoFixResult = await updReturnNyushukoFix(data, kics, yard, userNam);
+      console.log('返却入出庫確定更新', nyushukoFixResult);
+    }
 
     // 返却入庫日更新
     setReturnNyukoDate(updateNyukoDate);
