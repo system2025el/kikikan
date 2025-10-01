@@ -22,12 +22,19 @@ import {
   selectContainerNyushukoDenConfirm,
   updateNyushukoDen,
 } from '@/app/_lib/db/tables/t-nyushuko-den';
+import {
+  deleteNyushukoFix,
+  insertNyushukoFix,
+  selectNyushukoFixConfirm,
+  updateNyushukoFix,
+} from '@/app/_lib/db/tables/t-nyushuko-fix';
 import { selectJuchuContainerMeisai } from '@/app/_lib/db/tables/v-juchu-ctn-meisai';
 import { selectKeepJuchuKizaiMeisai, selectOyaJuchuKizaiMeisai } from '@/app/_lib/db/tables/v-juchu-kizai-meisai';
 import { JuchuCtnMeisai } from '@/app/_lib/db/types/t_juchu_ctn_meisai-type';
 import { JuchuKizaiHead } from '@/app/_lib/db/types/t-juchu-kizai-head-type';
 import { JuchuKizaiMeisai } from '@/app/_lib/db/types/t-juchu-kizai-meisai-type';
 import { NyushukoDen } from '@/app/_lib/db/types/t-nyushuko-den-type';
+import { NyushukoFix } from '@/app/_lib/db/types/t-nyushuko-fix-type';
 import { Database } from '@/app/_lib/db/types/types';
 import { toISOString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { getJuchuKizaiNyushuko } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
@@ -615,237 +622,6 @@ export const updKeepNyushukoDen = async (
   }
 };
 
-// /**
-//  * キープコンテナ入出庫伝票新規追加
-//  * @param keepJuchuKizaiHeadData キープ受注機材ヘッダーデータ
-//  * @param keepJuchuContainerMeisaiData キープ受注コンテナ明細データ
-//  * @param userNam ユーザー名
-//  * @returns
-//  */
-// export const addKeepContainerNyushukoDen = async (
-//   keepJuchuKizaiHeadData: KeepJuchuKizaiHeadValues,
-//   keepJuchuContainerMeisaiData: KeepJuchuContainerMeisaiValues[],
-//   userNam: string
-// ) => {
-//   const newKeepKicsShukoStandbyData: NyushukoDen[] = keepJuchuContainerMeisaiData.map((d) => ({
-//     juchu_head_id: d.juchuHeadId,
-//     juchu_kizai_head_id: d.juchuKizaiHeadId,
-//     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-//     sagyo_kbn_id: 10,
-//     sagyo_den_dat: toISOString(keepJuchuKizaiHeadData.kicsShukoDat as Date),
-//     sagyo_id: 1,
-//     kizai_id: d.kizaiId,
-//     plan_qty: d.kicsKeepQty,
-//     add_dat: toJapanTimeString(),
-//     add_user: userNam,
-//   }));
-
-//   const newKeepYardShukoStandbyData: NyushukoDen[] = keepJuchuContainerMeisaiData.map((d) => ({
-//     juchu_head_id: d.juchuHeadId,
-//     juchu_kizai_head_id: d.juchuKizaiHeadId,
-//     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-//     sagyo_kbn_id: 10,
-//     sagyo_den_dat: toISOString(keepJuchuKizaiHeadData.yardShukoDat as Date),
-//     sagyo_id: 2,
-//     kizai_id: d.kizaiId,
-//     plan_qty: d.yardKeepQty,
-//     add_dat: toJapanTimeString(),
-//     add_user: userNam,
-//   }));
-
-//   const newKeepKicsShukoCheckData: NyushukoDen[] = keepJuchuContainerMeisaiData.map((d) => ({
-//     juchu_head_id: d.juchuHeadId,
-//     juchu_kizai_head_id: d.juchuKizaiHeadId,
-//     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-//     sagyo_kbn_id: 20,
-//     sagyo_den_dat: toISOString(keepJuchuKizaiHeadData.kicsShukoDat as Date),
-//     sagyo_id: 1,
-//     kizai_id: d.kizaiId,
-//     plan_qty: d.kicsKeepQty,
-//     add_dat: toJapanTimeString(),
-//     add_user: userNam,
-//   }));
-
-//   const newKeepYardShukoCheckData: NyushukoDen[] = keepJuchuContainerMeisaiData.map((d) => ({
-//     juchu_head_id: d.juchuHeadId,
-//     juchu_kizai_head_id: d.juchuKizaiHeadId,
-//     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-//     sagyo_kbn_id: 20,
-//     sagyo_den_dat: toISOString(keepJuchuKizaiHeadData.yardShukoDat as Date),
-//     sagyo_id: 2,
-//     kizai_id: d.kizaiId,
-//     plan_qty: d.yardKeepQty,
-//     add_dat: toJapanTimeString(),
-//     add_user: userNam,
-//   }));
-
-//   const newKeepKicsNyukoCheckData: NyushukoDen[] = keepJuchuContainerMeisaiData.map((d) => ({
-//     juchu_head_id: d.juchuHeadId,
-//     juchu_kizai_head_id: d.juchuKizaiHeadId,
-//     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-//     sagyo_kbn_id: 30,
-//     sagyo_den_dat: toISOString(keepJuchuKizaiHeadData.kicsNyukoDat as Date),
-//     sagyo_id: 1,
-//     kizai_id: d.kizaiId,
-//     plan_qty: d.kicsKeepQty,
-//     add_dat: toJapanTimeString(),
-//     add_user: userNam,
-//   }));
-
-//   const newKeepYardNyukoCheckData: NyushukoDen[] = keepJuchuContainerMeisaiData.map((d) => ({
-//     juchu_head_id: d.juchuHeadId,
-//     juchu_kizai_head_id: d.juchuKizaiHeadId,
-//     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-//     sagyo_kbn_id: 30,
-//     sagyo_den_dat: toISOString(keepJuchuKizaiHeadData.yardNyukoDat as Date),
-//     sagyo_id: 2,
-//     kizai_id: d.kizaiId,
-//     plan_qty: d.yardKeepQty,
-//     add_dat: toJapanTimeString(),
-//     add_user: userNam,
-//   }));
-
-//   const mergeData = [
-//     ...newKeepKicsShukoStandbyData,
-//     ...newKeepYardShukoStandbyData,
-//     ...newKeepKicsShukoCheckData,
-//     ...newKeepYardShukoCheckData,
-//     ...newKeepKicsNyukoCheckData,
-//     ...newKeepYardNyukoCheckData,
-//   ];
-
-//   try {
-//     const { error } = await insertNyushukoDen(mergeData);
-
-//     if (error) {
-//       console.error('Error adding keep container nyushuko den:', error.message);
-//       return false;
-//     } else {
-//       console.log('keep container nyushuko den added successfully:', mergeData);
-//       return true;
-//     }
-//   } catch (e) {
-//     console.error('Exception while adding keep container nyushuko den:', e);
-//     return false;
-//   }
-// };
-
-// /**
-//  * キープコンテナ入出庫伝票更新
-//  * @param keepJuchuKizaiHeadData キープ受注機材ヘッダーデータ
-//  * @param keepJuchuContainerMeisaiData キープ受注コンテナ明細データ
-//  * @param userNam ユーザー名
-//  * @returns
-//  */
-// export const updKeepContainerNyushukoDen = async (
-//   keepJuchuKizaiHeadData: KeepJuchuKizaiHeadValues,
-//   keepJuchuContainerMeisaiData: KeepJuchuContainerMeisaiValues[],
-//   userNam: string
-// ) => {
-//   const updateKeepKicsShukoStandbyData: NyushukoDen[] = keepJuchuContainerMeisaiData.map((d) => ({
-//     juchu_head_id: d.juchuHeadId,
-//     juchu_kizai_head_id: d.juchuKizaiHeadId,
-//     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-//     sagyo_kbn_id: 10,
-//     sagyo_den_dat: toISOString(keepJuchuKizaiHeadData.kicsShukoDat as Date),
-//     sagyo_id: 1,
-//     kizai_id: d.kizaiId,
-//     plan_qty: d.kicsKeepQty,
-//     add_dat: toJapanTimeString(),
-//     add_user: userNam,
-//   }));
-
-//   const updateKeepYardShukoStandbyData: NyushukoDen[] = keepJuchuContainerMeisaiData.map((d) => ({
-//     juchu_head_id: d.juchuHeadId,
-//     juchu_kizai_head_id: d.juchuKizaiHeadId,
-//     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-//     sagyo_kbn_id: 10,
-//     sagyo_den_dat: toISOString(keepJuchuKizaiHeadData.yardShukoDat as Date),
-//     sagyo_id: 2,
-//     kizai_id: d.kizaiId,
-//     plan_qty: d.yardKeepQty,
-//     add_dat: toJapanTimeString(),
-//     add_user: userNam,
-//   }));
-
-//   const updateKeepKicsShukoCheckData: NyushukoDen[] = keepJuchuContainerMeisaiData.map((d) => ({
-//     juchu_head_id: d.juchuHeadId,
-//     juchu_kizai_head_id: d.juchuKizaiHeadId,
-//     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-//     sagyo_kbn_id: 20,
-//     sagyo_den_dat: toISOString(keepJuchuKizaiHeadData.kicsShukoDat as Date),
-//     sagyo_id: 1,
-//     kizai_id: d.kizaiId,
-//     plan_qty: d.kicsKeepQty,
-//     add_dat: toJapanTimeString(),
-//     add_user: userNam,
-//   }));
-
-//   const updateKeepYardShukoCheckData: NyushukoDen[] = keepJuchuContainerMeisaiData.map((d) => ({
-//     juchu_head_id: d.juchuHeadId,
-//     juchu_kizai_head_id: d.juchuKizaiHeadId,
-//     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-//     sagyo_kbn_id: 20,
-//     sagyo_den_dat: toISOString(keepJuchuKizaiHeadData.yardShukoDat as Date),
-//     sagyo_id: 2,
-//     kizai_id: d.kizaiId,
-//     plan_qty: d.yardKeepQty,
-//     add_dat: toJapanTimeString(),
-//     add_user: userNam,
-//   }));
-
-//   const updateKeepKicsNyukoCheckData: NyushukoDen[] = keepJuchuContainerMeisaiData.map((d) => ({
-//     juchu_head_id: d.juchuHeadId,
-//     juchu_kizai_head_id: d.juchuKizaiHeadId,
-//     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-//     sagyo_kbn_id: 30,
-//     sagyo_den_dat: toISOString(keepJuchuKizaiHeadData.kicsNyukoDat as Date),
-//     sagyo_id: 1,
-//     kizai_id: d.kizaiId,
-//     plan_qty: d.kicsKeepQty,
-//     add_dat: toJapanTimeString(),
-//     add_user: userNam,
-//   }));
-
-//   const updateKeepYardNyukoCheckData: NyushukoDen[] = keepJuchuContainerMeisaiData.map((d) => ({
-//     juchu_head_id: d.juchuHeadId,
-//     juchu_kizai_head_id: d.juchuKizaiHeadId,
-//     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-//     sagyo_kbn_id: 30,
-//     sagyo_den_dat: toISOString(keepJuchuKizaiHeadData.yardNyukoDat as Date),
-//     sagyo_id: 2,
-//     kizai_id: d.kizaiId,
-//     plan_qty: d.yardKeepQty,
-//     add_dat: toJapanTimeString(),
-//     add_user: userNam,
-//   }));
-
-//   const mergeData = [
-//     ...updateKeepKicsShukoStandbyData,
-//     ...updateKeepYardShukoStandbyData,
-//     ...updateKeepKicsShukoCheckData,
-//     ...updateKeepYardShukoCheckData,
-//     ...updateKeepKicsNyukoCheckData,
-//     ...updateKeepYardNyukoCheckData,
-//   ];
-
-//   try {
-//     for (const data of mergeData) {
-//       const { error } = await updateNyushukoDen(data);
-
-//       if (error) {
-//         console.error('Error updating keep container nyushuko den:', error.message);
-//         continue;
-//       }
-//     }
-//     console.log('keep container nyushuko den updated successfully:', mergeData);
-//     return true;
-//   } catch (e) {
-//     console.error('Exception while updating keep container nyushuko den:', e);
-//     return false;
-//   }
-// };
-
 /**
  * キープ入出庫伝票削除
  * @param juchuHeadId 受注ヘッダーid
@@ -868,6 +644,12 @@ export const delKeepNyushukoDen = async (
   }
 };
 
+/**
+ * キープコンテナ入出庫伝票更新
+ * @param keepJuchuKizaiHeadData キープ受注機材ヘッダーデータ
+ * @param keepJuchuContainerMeisaiData キープ受注コンテナ明細データ
+ * @param userNam ユーザー名
+ */
 export const updKeepContainerNyushukoDen = async (
   keepJuchuKizaiHeadData: KeepJuchuKizaiHeadValues,
   keepJuchuContainerMeisaiData: KeepJuchuContainerMeisaiValues[],
@@ -1029,5 +811,146 @@ export const updKeepContainerNyushukoDen = async (
     } catch (e) {
       console.error(e);
     }
+  }
+};
+
+/**
+ * キープ入出庫確定更新
+ * @param data キープ受注機材ヘッダーデータ
+ * @param kics KICS機材判定
+ * @param yard YARD機材判定
+ * @param userNam ユーザー名
+ * @returns
+ */
+export const updKeepNyushukoFix = async (
+  data: KeepJuchuKizaiHeadValues,
+  kics: boolean,
+  yard: boolean,
+  userNam: string
+) => {
+  const kicsData: NyushukoFix[] = [
+    {
+      juchu_head_id: data.juchuHeadId,
+      juchu_kizai_head_id: data.juchuKizaiHeadId,
+      sagyo_kbn_id: 60,
+      sagyo_den_dat: toISOString(data.kicsShukoDat as Date),
+      sagyo_id: 1,
+    },
+    {
+      juchu_head_id: data.juchuHeadId,
+      juchu_kizai_head_id: data.juchuKizaiHeadId,
+      sagyo_kbn_id: 70,
+      sagyo_den_dat: toISOString(data.kicsNyukoDat as Date),
+      sagyo_id: 1,
+    },
+  ];
+  const yardData: NyushukoFix[] = [
+    {
+      juchu_head_id: data.juchuHeadId,
+      juchu_kizai_head_id: data.juchuKizaiHeadId,
+      sagyo_kbn_id: 60,
+      sagyo_den_dat: toISOString(data.yardShukoDat as Date),
+      sagyo_id: 2,
+    },
+    {
+      juchu_head_id: data.juchuHeadId,
+      juchu_kizai_head_id: data.juchuKizaiHeadId,
+      sagyo_kbn_id: 70,
+      sagyo_den_dat: toISOString(data.yardNyukoDat as Date),
+      sagyo_id: 2,
+    },
+  ];
+
+  const kicsConfirmData = {
+    juchu_head_id: data.juchuHeadId,
+    juchu_kizai_head_id: data.juchuKizaiHeadId,
+    sagyo_id: 1,
+  };
+  const yardConfirmData = {
+    juchu_head_id: data.juchuHeadId,
+    juchu_kizai_head_id: data.juchuKizaiHeadId,
+    sagyo_id: 2,
+  };
+
+  try {
+    const kicsConfirmResult = await selectNyushukoFixConfirm(kicsConfirmData);
+    const yardConfirmResult = await selectNyushukoFixConfirm(yardConfirmData);
+
+    // KICS更新
+    if (kicsConfirmResult.data && kicsConfirmResult.data.length > 0 && kics) {
+      for (const data of kicsData) {
+        const { error: updateError } = await updateNyushukoFix({
+          ...data,
+          upd_dat: toJapanTimeString(),
+          upd_user: userNam,
+        });
+        if (updateError) {
+          console.error('Error updating kics keep nyushuko fix:', updateError.message);
+          throw new Error();
+        }
+      }
+      // KICS削除
+    } else if (kicsConfirmResult.data && kicsConfirmResult.data.length > 0 && !kics) {
+      const { error: deleteError } = await deleteNyushukoFix(kicsConfirmData);
+      if (deleteError) {
+        console.error('Error delete kics keep nyushuko fix:', deleteError.message);
+        throw new Error();
+      }
+      // KICS追加
+    } else if (kicsConfirmResult!.data && kics) {
+      const { error: insertError } = await insertNyushukoFix(
+        kicsData.map((d) => ({
+          ...d,
+          sagyo_fix_flg: 0,
+          add_dat: toJapanTimeString(),
+          add_user: userNam,
+        }))
+      );
+      if (insertError) {
+        console.error('Error insert kics keep nyushuko fix:', insertError.message);
+        throw new Error();
+      }
+    }
+
+    // YARD更新
+    if (yardConfirmResult.data && yardConfirmResult.data.length > 0 && yard) {
+      for (const data of yardData) {
+        const { error: updateError } = await updateNyushukoFix({
+          ...data,
+          upd_dat: toJapanTimeString(),
+          upd_user: userNam,
+        });
+        if (updateError) {
+          console.error('Error updating yard keep nyushuko fix:', updateError.message);
+          throw new Error();
+        }
+      }
+      // YARD削除
+    } else if (yardConfirmResult.data && yardConfirmResult.data.length > 0 && !yard) {
+      const { error: deleteError } = await deleteNyushukoFix(yardConfirmData);
+      if (deleteError) {
+        console.error('Error delete yard keep nyushuko fix:', deleteError.message);
+        throw new Error();
+      }
+      // YARD追加
+    } else if (yardConfirmResult!.data && yard) {
+      const { error: insertError } = await insertNyushukoFix(
+        yardData.map((d) => ({
+          ...d,
+          sagyo_fix_flg: 0,
+          add_dat: toJapanTimeString(),
+          add_user: userNam,
+        }))
+      );
+      if (insertError) {
+        console.error('Error insert yard keep nyushuko fix:', insertError.message);
+        throw new Error();
+      }
+    }
+    console.log('keep nyushuko fix updated successfully:', data);
+    return true;
+  } catch (e) {
+    console.error(e);
+    return false;
   }
 };
