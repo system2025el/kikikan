@@ -20,11 +20,12 @@ import { QuotHeadValues } from '../../_lib/types';
  * 見積を保存する関数
  * @param data 見積書フォーム内容
  */
-export const addQuot = async (data: QuotHeadValues, user: string): Promise<number | null> => {
+const addQuottation = async (data: QuotHeadValues, user: string): Promise<number | null> => {
   /* トランザクション準備 */
   const connection = await pool.connect();
   // 見積明細ヘッド準備
   const keys = ['kizai', 'labor', 'other'];
+  let mId: number;
   // 明細ヘッドIDと明細IDの発番
   const meisaiheadList = keys
     .flatMap((key) => data.meisaiHeads?.[key as keyof typeof data.meisaiHeads] ?? [])
@@ -52,7 +53,9 @@ export const addQuot = async (data: QuotHeadValues, user: string): Promise<numbe
     const newMituHeadId = await connection.query(`
        SELECT coalesce(max(mitu_head_id),0) + 1 as newid FROM ${SCHEMA}.t_mitu_head
       `);
-    const kokyakuId = await connection.query(`SELECT kokyaku_id from m_kokyaku WHERE kokyaku_nam = ${data.kokyaku}`);
+    const kokyakuId = await connection.query(
+      `SELECT kokyaku_id from ${SCHEMA}.m_kokyaku WHERE kokyaku_nam = '${data.kokyaku}'`
+    );
     console.log(newMituHeadId.rows[0].newid);
     // 見積ヘッド
     const quotHead: MituHead = {
@@ -117,11 +120,15 @@ export const addQuot = async (data: QuotHeadValues, user: string): Promise<numbe
     }));
     if (quotHead) {
       const id = await insertQuotHead(quotHead, connection);
-      await insertQuotMeisaiHead(meisaiHeads, connection);
-      await insertQuotMeisai(meisais, connection);
+      if (meisaiHeads && Object.keys(meisaiHeads).length !== 0) {
+        await insertQuotMeisaiHead(meisaiHeads, connection);
+      }
+      if (meisais && Object.keys(meisais).length !== 0) {
+        await insertQuotMeisai(meisais, connection);
+      }
+
       await connection.query('COMMIT');
-      await revalidatePath('/quotation-list');
-      redirect(`/quotation-list/edit/${id.rows[0].mitu_head_id}`);
+      return id.rows[0].mitu_head_id;
     }
     return null;
   } catch (e) {
@@ -133,4 +140,15 @@ export const addQuot = async (data: QuotHeadValues, user: string): Promise<numbe
     // なんにしてもpool解放
     connection.release();
   }
+};
+
+/**
+ * 見積を保存する関数を保存してリダイレクトする関数
+ * @param data
+ * @param user
+ */
+export const addQuot = async (data: QuotHeadValues, user: string) => {
+  const id = await addQuottation(data, user);
+  await revalidatePath('/quotation-list');
+  await redirect(`/quotation-list/edit/${id}`);
 };
