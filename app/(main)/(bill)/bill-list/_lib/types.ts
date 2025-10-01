@@ -42,7 +42,7 @@ export const BillHeadSchema = z.object({
   seikyuHeadId: z.number().nullish(),
   seikyuSts: z.number().nullish(),
   seikyuDat: z.date().nullish(),
-  aite: z.string().max(50, { message: validationMessages.maxStringLength(50) }),
+  aite: z.object({ id: z.number(), nam: z.string().max(50, { message: validationMessages.maxStringLength(50) }) }),
   seikyuHeadNam: z
     .string()
     .max(50, { message: validationMessages.maxStringLength(50) })

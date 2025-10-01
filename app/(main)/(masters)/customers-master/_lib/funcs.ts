@@ -93,6 +93,70 @@ export const getChosenCustomer = async (id: number) => {
 };
 
 /**
+ * 選択された顧客のIDと名前を取得する関数
+ * @param id 顧客マスタID
+ * @returns {Promise<CustomersMasterDialogValues>} - 顧客の詳細情報。取得失敗時は空オブジェクトを返します。
+ */
+export const getChosenCustomerIdAndName = async (id: number) => {
+  try {
+    const { data, error } = await selectOneCustomer(id);
+    if (error) {
+      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
+      throw error;
+    }
+    if (!data) {
+      return {
+        kokyakuId: null,
+        kokyakuNam: '',
+        kana: '',
+        kokyakuRank: 0,
+        delFlg: false,
+        keisho: '',
+        adrPost: '',
+        adrShozai: '',
+        adrTatemono: '',
+        adrSonota: '',
+        tel: '',
+        telMobile: '',
+        fax: '',
+        mail: '',
+        mem: '',
+        dspFlg: true,
+        closeDay: null,
+        siteDay: null,
+        kizaiNebikiFlg: false,
+      };
+    }
+    const CustomerDetails = {
+      kokyakuId: data.kokyaku_id,
+      kokyakuNam: data.kokyaku_nam,
+      kana: data.kana,
+      kokyakuRank: data.kokyaku_rank,
+      delFlg: Boolean(data.del_flg),
+      keisho: data.keisho,
+      adrPost: data.adr_post,
+      adrShozai: data.adr_shozai,
+      adrTatemono: data.adr_tatemono,
+      adrSonota: data.adr_sonota,
+      tel: data.tel,
+      telMobile: data.tel_mobile,
+      fax: data.fax,
+      mail: data.mail,
+      mem: data.mem,
+      dspFlg: Boolean(data.dsp_flg),
+      closeDay: data.close_day,
+      siteDay: data.site_day,
+      kizaiNebikiFlg: Boolean(data.kizai_nebiki_flg),
+    };
+    console.log(CustomerDetails.delFlg);
+    return CustomerDetails;
+  } catch (e) {
+    console.error('例外が発生しました:', e);
+    throw e;
+  }
+};
+
+/**
  * 顧客マスタに新規登録する関数
  * @param data フォームで取得した顧客情報
  */

@@ -1,4 +1,4 @@
-import { getChosenCustomer } from '@/app/(main)/(masters)/customers-master/_lib/funcs';
+import { getChosenCustomer, getChosenCustomerIdAndName } from '@/app/(main)/(masters)/customers-master/_lib/funcs';
 import { getUsersSelection } from '@/app/(main)/quotation-list/_lib/func';
 
 import { getBillingStsSelection } from '../_lib/funcs';
@@ -12,11 +12,11 @@ const Page = async ({ searchParams }: { searchParams: Promise<{ [key: string]: s
   const [users, sts, custs] = await Promise.all([
     getUsersSelection(),
     getBillingStsSelection(),
-    getChosenCustomer(Number(kokyakuId)),
+    getChosenCustomerIdAndName(Number(kokyakuId)),
   ]);
 
   const bill: BillHeadValues = {
-    aite: custs.kokyakuNam,
+    aite: { id: custs.kokyakuId, nam: custs.kokyakuNam },
     seikyuDat: new Date(),
     adr1: custs.adrPost,
     adr2: { shozai: custs.adrShozai, tatemono: custs.adrTatemono, sonota: custs.adrSonota },

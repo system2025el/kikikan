@@ -399,32 +399,17 @@ export const FormDateX = ({
   sx,
   disabled,
   value,
+  error,
+  helperText,
   onChange,
 }: {
   sx?: object;
   disabled?: boolean;
   value?: Date | null;
+  error?: boolean;
+  helperText?: string;
   onChange?: (date: Date | null) => void;
 }) => {
-  const [error, setError] = useState<DateValidationError | null>(null);
-
-  const errorMessage = useMemo(() => {
-    switch (error) {
-      case 'maxDate':
-      case 'minDate': {
-        return 'Please select a date';
-      }
-
-      case 'invalidDate': {
-        return 'Your date is not valid';
-      }
-
-      default: {
-        return '';
-      }
-    }
-  }, [error]);
-
   return (
     <DatePicker
       name="date"
@@ -434,7 +419,8 @@ export const FormDateX = ({
           clearable: true,
         },
         textField: {
-          helperText: errorMessage,
+          error,
+          helperText,
           size: 'small',
           sx: {
             bgcolor: disabled ? grey[200] : 'white',
@@ -448,7 +434,6 @@ export const FormDateX = ({
         },
         calendarHeader: { format: 'YYYY年MM月' },
       }} // カレンダーヘッダーのフォーマット
-      onError={(newError: DateValidationError) => setError(newError)}
       views={['year', 'month', 'day']}
       disabled={disabled}
       value={value ? dayjs(value) : null}

@@ -154,6 +154,11 @@ export const MeisaiTblHeader = ({
             数量
           </Typography>
         </Grid2>
+        <Grid2 size={0.8}>
+          <Typography variant="body2" fontWeight={500}>
+            本番日数
+          </Typography>
+        </Grid2>
         <Grid2 size={1.5}>
           <Typography variant="body2" fontWeight={500}>
             単価
@@ -164,11 +169,7 @@ export const MeisaiTblHeader = ({
             金額
           </Typography>
         </Grid2>
-        <Grid2 size={0.8}>
-          <Typography variant="body2" fontWeight={500}>
-            本番日数
-          </Typography>
-        </Grid2>
+
         <Grid2 size={1} />
       </Grid2>
       {/* 明細  */}
