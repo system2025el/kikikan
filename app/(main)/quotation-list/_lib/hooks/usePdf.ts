@@ -4,6 +4,10 @@ import { useEffect, useState } from 'react';
 
 import { QuotHeadValues } from '../types';
 
+const numberFormat = (num: number): string => {
+  return new Intl.NumberFormat().format(num);
+};
+
 // PDFデータ生成フック
 export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
   // フォント
@@ -99,8 +103,11 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
       //opacity: 1,
     });
 
-    page.drawText(`No. ${param.mituHeadId ?? ''}`, {
-      x: 490,
+    const no = `No. ${param.mituHeadId ?? ''}`;
+    const noWidth = customFont.widthOfTextAtSize(no, 10);
+
+    page.drawText(no, {
+      x: 530 - noWidth,
       y: 786,
       font: customFont, // カスタムフォントの設定
       size: 10,
@@ -111,9 +118,12 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
 
     const date = new Intl.DateTimeFormat('ja-JP-u-ca-japanese', { era: 'long' }).format(param.mituDat ?? new Date());
     const dateItems = date.split('/');
+    const dateStr = `${dateItems[0]}年${dateItems[1]}月${dateItems[2]}日`;
+    const dateWidth = customFont.widthOfTextAtSize(dateStr, 10);
+
     if (2 < dateItems.length) {
-      page.drawText(`${dateItems[0]}年${dateItems[1]}月${dateItems[2]}日`, {
-        x: 452,
+      page.drawText(dateStr, {
+        x: 530 - dateWidth,
         y: 774,
         font: customFont, // カスタムフォントの設定
         size: 10,
@@ -854,8 +864,11 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
       if (item2 !== undefined && item2 != null) {
         qty = item2.toLocaleString();
       }
+
+      const qtyWidth = customFont.widthOfTextAtSize(qty, fontSize);
+
       workPage.drawText(qty, {
-        x: 355,
+        x: 385 - qtyWidth,
         y: startY - 20 * (index + 1) + 3,
         font: customFont, // カスタムフォントの設定
         size: fontSize,
@@ -868,8 +881,11 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
       if (item3 !== undefined && item3 != null) {
         honbanbiQty = item3.toLocaleString();
       }
+
+      const honbanbiQtyWidth = customFont.widthOfTextAtSize(honbanbiQty, fontSize);
+
       workPage.drawText(honbanbiQty, {
-        x: 395,
+        x: 425 - honbanbiQtyWidth,
         y: startY - 20 * (index + 1) + 3,
         font: customFont, // カスタムフォントの設定
         size: fontSize,
@@ -880,10 +896,13 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
 
       let tankaAmt = '';
       if (item4 !== undefined && item4 != null) {
-        tankaAmt = item4.toLocaleString();
+        tankaAmt = numberFormat(item4);
       }
+
+      const tankaAmtWidth = customFont.widthOfTextAtSize(tankaAmt, fontSize);
+
       workPage.drawText(tankaAmt ?? '', {
-        x: 435,
+        x: 485 - tankaAmtWidth,
         y: startY - 20 * (index + 1) + 3,
         font: customFont, // カスタムフォントの設定
         size: fontSize,
@@ -894,10 +913,13 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
 
       let shokeiAmt = '';
       if (item5 !== undefined && item5 != null) {
-        shokeiAmt = item5.toLocaleString();
+        shokeiAmt = numberFormat(item5);
       }
+
+      const shokeiAmtWidth = customFont.widthOfTextAtSize(shokeiAmt, fontSize);
+
       workPage.drawText(shokeiAmt ?? '', {
-        x: 495,
+        x: 555 - shokeiAmtWidth,
         y: startY - 20 * (index + 1) + 3,
         font: customFont, // カスタムフォントの設定
         size: fontSize,
@@ -933,10 +955,13 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
 
       let shokeiAmt = '';
       if (item3 !== undefined && item3 != null) {
-        shokeiAmt = item3.toLocaleString();
+        shokeiAmt = numberFormat(item3);
       }
+
+      const shokeiAmtWidth = customFont.widthOfTextAtSize(shokeiAmt, fontSize);
+
       workPage.drawText(shokeiAmt ?? '', {
-        x: 495,
+        x: 555 - shokeiAmtWidth,
         y: startY - 20 * (index + 1) + 3,
         font: customFont, // カスタムフォントの設定
         size: fontSize,
@@ -949,12 +974,12 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
     // ------------------------------------------------------------------/
 
     drawColumnLine2();
-    drawRow2('中計(機材費+人件費+諸経費)', '17,128,000');
+    drawRow2('中計(機材費+人件費+諸経費)', 17128000);
     drawUnderLine();
     index++;
 
     drawColumnLine2();
-    drawRow2('特別調整値引き', '-228,000');
+    drawRow2('特別調整値引き', -228000);
     drawUnderLine();
     index++;
 
@@ -963,17 +988,17 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
     index++;
 
     drawColumnLine2();
-    drawRow2('合計', '16,9000,000');
+    drawRow2('合計', 169000000);
     drawUnderLine();
     index++;
 
     drawColumnLine2();
-    drawRow2('消費税（10%）', '1,690,000');
+    drawRow2('消費税（10%）', 1690000);
     drawUnderLine();
     index++;
 
     drawColumnLine2();
-    drawRow2('合計金額', '¥18,590,000');
+    drawRow2('合計金額', 18590000);
     drawUnderLine();
     index++;
 
@@ -985,10 +1010,13 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
       });
     }
 
-    function drawRow2(item1: string, item2: string) {
+    function drawRow2(item1: string, item2: number) {
       fontSize = 8;
+
+      const item1Width = customFont.widthOfTextAtSize(item1, fontSize);
+
       workPage.drawText(item1, {
-        x: 290,
+        x: 410 - item1Width,
         y: startY - 20 * (index + 1) + 3,
         font: customFont, // カスタムフォントの設定
         size: fontSize,
@@ -997,8 +1025,10 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
         // opacity: 1,
       });
 
-      workPage.drawText(item2, {
-        x: 480,
+      const item2Width = customFont.widthOfTextAtSize(numberFormat(item2), fontSize);
+
+      workPage.drawText(numberFormat(item2), {
+        x: 555 - item2Width,
         y: startY - 20 * (index + 1) + 3,
         font: customFont, // カスタムフォントの設定
         size: fontSize,
