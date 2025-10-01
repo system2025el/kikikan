@@ -86,6 +86,7 @@ import {
   updJuchuKizaiHead,
   updJuchuKizaiMeisai,
   updNyushukoDen,
+  updNyushukoFix,
   updNyushukoHonbanbi,
 } from '../_lib/funcs';
 import {
@@ -665,6 +666,22 @@ const EquipmentOrderDetail = (props: {
     for (const item of updateNyushukoHonbanbiData) {
       const nyushukoHonbanbiResult = await updNyushukoHonbanbi(data.juchuHeadId, data.juchuKizaiHeadId, item, userNam);
       console.log('入出庫本番日更新', nyushukoHonbanbiResult);
+    }
+
+    if (juchuKizaiMeisaiList.length > 0 || juchuContainerMeisaiList.length > 0) {
+      const kics =
+        juchuKizaiMeisaiList.filter((d) => d.shozokuId === 1 && !d.delFlag) &&
+        juchuContainerMeisaiList.filter((d) => d.planKicsKizaiQty && !d.delFlag)
+          ? true
+          : false;
+      const yard =
+        juchuKizaiMeisaiList.filter((d) => d.shozokuId === 2 && !d.delFlag) &&
+        juchuContainerMeisaiList.filter((d) => d.planYardKizaiQty && !d.delFlag)
+          ? true
+          : false;
+
+      const nyushukoFixResult = await updNyushukoFix(data, kics, yard, userNam);
+      console.log('入出庫確定更新', nyushukoFixResult);
     }
 
     // 出庫日更新
