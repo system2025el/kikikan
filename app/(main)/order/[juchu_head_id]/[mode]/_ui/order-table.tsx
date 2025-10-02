@@ -86,7 +86,6 @@ export const OrderEqTable: React.FC<OrderEqTableProps> = ({ orderEqRows, edit, o
               </TableCell>
               <TableCell padding="none" />
               <TableCell align="left">機材明細名</TableCell>
-              <TableCell align="left">作業ステータス</TableCell>
               <TableCell align="left">出庫</TableCell>
               <TableCell align="left">入庫</TableCell>
               <TableCell align="right">仕込</TableCell>
@@ -138,7 +137,6 @@ export const OrderEqTable: React.FC<OrderEqTableProps> = ({ orderEqRows, edit, o
                     {row.headNam}
                   </Button>
                 </TableCell>
-                <TableCell align="left">{row.sagyoStaNam}</TableCell>
                 <TableCell align="left">
                   {`K ${row.kicsShukoDat ? toISOString(new Date(row.kicsShukoDat)) : 'ー'}`}
                   <br />

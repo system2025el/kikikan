@@ -210,7 +210,6 @@ export const getJuchuKizaiHeadList = async (juchuHeadId: number) => {
       juchuHeadId: d.juchu_head_id,
       juchuKizaiHeadId: d.juchu_kizai_head_id,
       headNam: d.head_nam,
-      sagyoStaNam: d.sagyo_sts_nam ?? '',
       kicsShukoDat: d.kics_shuko_dat,
       kicsNyukoDat: d.kics_nyuko_dat,
       yardShukoDat: d.yard_shuko_dat,

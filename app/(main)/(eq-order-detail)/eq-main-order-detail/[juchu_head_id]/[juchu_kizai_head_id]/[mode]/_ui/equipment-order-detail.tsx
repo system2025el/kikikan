@@ -1846,10 +1846,6 @@ const EquipmentOrderDetail = (props: {
                     ></TextFieldElement>
                     <Typography>日</Typography>
                   </Grid2>
-                  <Grid2 container alignItems="center" spacing={1} ml={3}>
-                    <Typography>入出庫ステータス</Typography>
-                    <TextField disabled defaultValue={'準備中'}></TextField>
-                  </Grid2>
                 </Box>
                 <Box display={'flex'} alignItems="center" p={2}>
                   <Typography mr={2}>メモ</Typography>
