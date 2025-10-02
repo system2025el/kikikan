@@ -10,7 +10,6 @@ export type OrderListTableValues = {
   juchuDat: Date;
   juchuStrDat: Date;
   juchuEndDat: Date;
-  nyushukoStsNam: string;
 };
 
 /**
