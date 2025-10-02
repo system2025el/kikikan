@@ -1132,10 +1132,6 @@ export const EquipmentKeepOrderDetail = (props: {
                     </Grid2>
                   </Grid2>
                 </Grid2>
-                <Grid2 container alignItems="center" p={2} spacing={2}>
-                  <Typography>入出庫ステータス</Typography>
-                  <TextField disabled defaultValue={'準備中'}></TextField>
-                </Grid2>
                 <Box display={'flex'} alignItems="center" p={2}>
                   <Typography mr={2}>メモ</Typography>
                   <TextFieldElement

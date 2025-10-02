@@ -47,7 +47,6 @@ export type EqTableValues = {
   juchuHeadId: number;
   juchuKizaiHeadId: number;
   headNam: string;
-  sagyoStaNam: string;
   kicsShukoDat: string | null;
   kicsNyukoDat: string | null;
   yardShukoDat: string | null;
