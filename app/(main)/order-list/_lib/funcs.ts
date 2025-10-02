@@ -33,7 +33,7 @@ export const getFilteredOrderList = async (
     SELECT
       juchu_head_id as "juchuHeadId", juchu_sts_nam as "juchuStsNam", koen_nam as "koenNam", 
       koenbasho_nam as "koenbashoNam", kokyaku_nam as "kokyakuNam", juchu_dat as "juchuDat", 
-      juchu_str_dat as "juchuStrDat", juchu_end_dat as "juchuEndDat", nyushuko_sts_nam as "nyushukoStsNam"
+      juchu_str_dat as "juchuStrDat", juchu_end_dat as "juchuEndDat"
     FROM
       ${SCHEMA}.v_juchu_lst 
   `;

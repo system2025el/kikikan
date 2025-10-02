@@ -118,11 +118,6 @@ export const OrderTable = ({
                   <TableCell align="left">受注日</TableCell>
                   <TableCell align="left">受注開始日</TableCell>
                   <TableCell align="left">受注終了日</TableCell>
-                  <TableCell align="left">
-                    <Typography noWrap variant={'body2'} fontWeight={500}>
-                      入出庫ステータス
-                    </Typography>
-                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -184,11 +179,6 @@ export const OrderTable = ({
                     <TableCell>
                       <LightTooltipWithText variant={'body2'} maxWidth={100}>
                         {order.juchuEndDat && toISOStringYearMonthDay(new Date(order.juchuEndDat))}
-                      </LightTooltipWithText>
-                    </TableCell>
-                    <TableCell>
-                      <LightTooltipWithText variant={'body2'} maxWidth={100}>
-                        {order.nyushukoStsNam}
                       </LightTooltipWithText>
                     </TableCell>
                   </TableRow>
