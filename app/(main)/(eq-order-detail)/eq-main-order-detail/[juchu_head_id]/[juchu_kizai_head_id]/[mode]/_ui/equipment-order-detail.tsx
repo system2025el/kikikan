@@ -668,23 +668,6 @@ const EquipmentOrderDetail = (props: {
       console.log('入出庫本番日更新', nyushukoHonbanbiResult);
     }
 
-    // 入出庫確定更新
-    if (juchuKizaiMeisaiList.length > 0 || juchuContainerMeisaiList.length > 0) {
-      const kics =
-        juchuKizaiMeisaiList.filter((d) => d.shozokuId === 1 && !d.delFlag) &&
-        juchuContainerMeisaiList.filter((d) => d.planKicsKizaiQty && !d.delFlag)
-          ? true
-          : false;
-      const yard =
-        juchuKizaiMeisaiList.filter((d) => d.shozokuId === 2 && !d.delFlag) &&
-        juchuContainerMeisaiList.filter((d) => d.planYardKizaiQty && !d.delFlag)
-          ? true
-          : false;
-
-      const nyushukoFixResult = await updNyushukoFix(data, kics, yard, userNam);
-      console.log('入出庫確定更新', nyushukoFixResult);
-    }
-
     // 出庫日更新
     setShukoDate(updateShukoDate);
     // 入庫日更新
@@ -816,6 +799,21 @@ const EquipmentOrderDetail = (props: {
       const updateIdoFixResult = await updIdoFix(updateIdoKizaiData, userNam);
       console.log('移動確定更新', updateIdoFixResult);
     }
+
+    // 入出庫確定更新
+    const kics =
+      juchuKizaiMeisaiList.filter((d) => d.shozokuId === 1 && !d.delFlag) &&
+      juchuContainerMeisaiList.filter((d) => d.planKicsKizaiQty && !d.delFlag)
+        ? true
+        : false;
+    const yard =
+      juchuKizaiMeisaiList.filter((d) => d.shozokuId === 2 && !d.delFlag) &&
+      juchuContainerMeisaiList.filter((d) => d.planYardKizaiQty && !d.delFlag)
+        ? true
+        : false;
+
+    const nyushukoFixResult = await updNyushukoFix(data, kics, yard, userNam);
+    console.log('入出庫確定更新', nyushukoFixResult);
   };
 
   /**
