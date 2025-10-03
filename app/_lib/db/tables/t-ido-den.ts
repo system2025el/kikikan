@@ -1,5 +1,7 @@
 'use server';
 
+import { PoolClient } from 'pg';
+
 import { SCHEMA, supabase } from '../supabase';
 import { IdoDen } from '../types/t-ido-den-type';
 
@@ -30,9 +32,26 @@ export const selectIdoDenMaxId = async () => {
  * @param userNam ユーザー名
  * @returns
  */
-export const insertIdoDen = async (data: IdoDen[]) => {
+export const insertIdoDen = async (data: IdoDen[], connection: PoolClient) => {
+  const cols = Object.keys(data[0]) as (keyof (typeof data)[0])[];
+  const values = data.flatMap((obj) => cols.map((col) => obj[col] ?? null));
+  let placeholderIndex = 1;
+  const placeholders = data
+    .map(() => {
+      const rowPlaceholders = cols.map(() => `$${placeholderIndex++}`);
+      return `(${rowPlaceholders.join(', ')})`;
+    })
+    .join(', ');
+
+  const query = `
+    INSERT INTO
+      ${SCHEMA}.t_ido_den (${cols.join(',')})
+    VALUES 
+      ${placeholders}
+  `;
+
   try {
-    return await supabase.schema(SCHEMA).from('t_ido_den').insert(data);
+    await connection.query(query, values);
   } catch (e) {
     throw e;
   }
@@ -44,9 +63,44 @@ export const insertIdoDen = async (data: IdoDen[]) => {
  * @param userNam ユーザー名
  * @returns
  */
-export const updateIdoDen = async (data: IdoDen) => {
+export const updateIdoDen = async (data: IdoDen, connection: PoolClient) => {
+  const whereKeys = ['ido_den_id'] as const;
+
+  const allKeys = Object.keys(data) as (keyof typeof data)[];
+
+  const updateKeys = allKeys.filter((key) => !(whereKeys as readonly string[]).includes(key));
+
+  if (updateKeys.length === 0) {
+    throw new Error('No columns to update.');
+  }
+
+  const allValues: (string | number | null | undefined)[] = [];
+  let placeholderIndex = 1;
+
+  const setClause = updateKeys
+    .map((key) => {
+      allValues.push(data[key]);
+      return `${key} = $${placeholderIndex++}`;
+    })
+    .join(', ');
+
+  const whereClause = whereKeys
+    .map((key) => {
+      allValues.push(data[key]);
+      return `${key} = $${placeholderIndex++}`;
+    })
+    .join(' AND ');
+
+  const query = `
+      UPDATE
+        ${SCHEMA}.t_ido_den
+      SET
+        ${setClause}
+      WHERE
+        ${whereClause}
+    `;
   try {
-    return await supabase.schema(SCHEMA).from('t_ido_den').update(data).eq('ido_den_id', data.ido_den_id);
+    await connection.query(query, allValues);
   } catch (e) {
     throw e;
   }
@@ -56,9 +110,18 @@ export const updateIdoDen = async (data: IdoDen) => {
  * 移動伝票削除
  * @param idoDenIds 移動伝票id
  */
-export const deleteIdoDen = async (idoDenIds: number[]) => {
+export const deleteIdoDen = async (idoDenIds: number[], connection: PoolClient) => {
+  const query = `
+    DELETE FROM
+      ${SCHEMA}.t_ido_den
+    WHERE
+      ido_den_id = ANY($1)
+  `;
+
+  const values = [idoDenIds];
+
   try {
-    return await supabase.schema(SCHEMA).from('t_ido_den').delete().in('ido_den_id', idoDenIds);
+    await connection.query(query, values);
   } catch (e) {
     throw e;
   }

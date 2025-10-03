@@ -1,5 +1,7 @@
 'use server';
 
+import { PoolClient } from 'pg';
+
 import { SCHEMA, supabase } from '../supabase';
 import { NyushukoDen } from '../types/t-nyushuko-den-type';
 
@@ -8,9 +10,31 @@ import { NyushukoDen } from '../types/t-nyushuko-den-type';
  * @param data 入出庫伝票データ
  * @returns
  */
-export const insertNyushukoDen = async (data: NyushukoDen[]) => {
+export const insertNyushukoDen = async (data: NyushukoDen[], connection: PoolClient) => {
+  if (!data || data.length === 0) {
+    console.log('入出庫伝票データがありません。');
+    return;
+  }
+
+  const cols = Object.keys(data[0]) as (keyof (typeof data)[0])[];
+  const values = data.flatMap((obj) => cols.map((col) => obj[col] ?? null));
+  let placeholderIndex = 1;
+  const placeholders = data
+    .map(() => {
+      const rowPlaceholders = cols.map(() => `$${placeholderIndex++}`);
+      return `(${rowPlaceholders.join(', ')})`;
+    })
+    .join(', ');
+
+  const query = `
+    INSERT INTO
+      ${SCHEMA}.t_nyushuko_den (${cols.join(',')})
+    VALUES 
+      ${placeholders}
+  `;
+
   try {
-    return await supabase.schema(SCHEMA).from('t_nyushuko_den').insert(data);
+    await connection.query(query, values);
   } catch (e) {
     throw e;
   }
@@ -21,17 +45,44 @@ export const insertNyushukoDen = async (data: NyushukoDen[]) => {
  * @param data 入出庫伝票データ
  * @returns
  */
-export const updateNyushukoDen = async (data: NyushukoDen) => {
+export const updateNyushukoDen = async (data: NyushukoDen, connection: PoolClient) => {
+  const whereKeys = ['juchu_head_id', 'juchu_kizai_head_id', 'kizai_id', 'sagyo_id', 'sagyo_kbn_id'] as const;
+
+  const allKeys = Object.keys(data) as (keyof typeof data)[];
+
+  const updateKeys = allKeys.filter((key) => !(whereKeys as readonly string[]).includes(key));
+
+  if (updateKeys.length === 0) {
+    throw new Error('No columns to update.');
+  }
+
+  const allValues: (string | number | null | undefined)[] = [];
+  let placeholderIndex = 1;
+
+  const setClause = updateKeys
+    .map((key) => {
+      allValues.push(data[key]);
+      return `${key} = $${placeholderIndex++}`;
+    })
+    .join(', ');
+
+  const whereClause = whereKeys
+    .map((key) => {
+      allValues.push(data[key]);
+      return `${key} = $${placeholderIndex++}`;
+    })
+    .join(' AND ');
+
+  const query = `
+      UPDATE
+        ${SCHEMA}.t_nyushuko_den
+      SET
+        ${setClause}
+      WHERE
+        ${whereClause}
+    `;
   try {
-    return await supabase
-      .schema(SCHEMA)
-      .from('t_nyushuko_den')
-      .update(data)
-      .eq('juchu_head_id', data.juchu_head_id)
-      .eq('juchu_kizai_head_id', data.juchu_kizai_head_id)
-      .eq('kizai_id', data.kizai_id)
-      .eq('sagyo_id', data.sagyo_id)
-      .eq('sagyo_kbn_id', data.sagyo_kbn_id);
+    await connection.query(query, allValues);
   } catch (e) {
     throw e;
   }
@@ -44,15 +95,25 @@ export const updateNyushukoDen = async (data: NyushukoDen) => {
  * @param juchuKizaiMeisaiIds 受注機材ヘッダーid
  * @returns
  */
-export const deleteNyushukoDen = async (juchuHeadId: number, juchuKizaiHeadId: number, kizaiId: number[]) => {
+export const deleteNyushukoDen = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  kizaiId: number[],
+  connection: PoolClient
+) => {
+  const query = `
+    DELETE FROM
+      ${SCHEMA}.t_nyushuko_den
+    WHERE
+      juchu_head_id = $1
+      AND juchu_kizai_head_id = $2
+      AND kizai_id = ANY($3)
+  `;
+
+  const values = [juchuHeadId, juchuKizaiHeadId, kizaiId];
+
   try {
-    return await supabase
-      .schema(SCHEMA)
-      .from('t_nyushuko_den')
-      .delete()
-      .eq('juchu_head_id', juchuHeadId)
-      .eq('juchu_kizai_head_id', juchuKizaiHeadId)
-      .in('kizai_id', kizaiId);
+    await connection.query(query, values);
   } catch (e) {
     throw e;
   }
@@ -90,23 +151,35 @@ export const selectContainerNyushukoDenConfirm = async (data: {
  * @param data コンテナ入出庫伝票削除データ
  * @returns
  */
-export const deleteContainerNyushukoDen = async (data: {
-  juchu_head_id: number;
-  juchu_kizai_head_id: number;
-  juchu_kizai_meisai_id: number;
-  kizai_id: number;
-  sagyo_id: number;
-}) => {
+export const deleteContainerNyushukoDen = async (
+  data: {
+    juchu_head_id: number;
+    juchu_kizai_head_id: number;
+    juchu_kizai_meisai_id: number;
+    kizai_id: number;
+    sagyo_id: number;
+  },
+  connection: PoolClient
+) => {
+  const whereKeys = Object.keys(data) as (keyof typeof data)[];
+
+  if (whereKeys.length === 0) {
+    throw new Error('DELETE conditions cannot be empty.');
+  }
+
+  const whereClause = whereKeys.map((key, index) => `${key} = $${index + 1}`).join(' AND ');
+
+  const values = whereKeys.map((key) => data[key]);
+
+  const query = `
+    DELETE FROM
+      ${SCHEMA}.t_nyushuko_den
+    WHERE
+      ${whereClause}
+  `;
+
   try {
-    return await supabase
-      .schema(SCHEMA)
-      .from('t_nyushuko_den')
-      .delete()
-      .eq('juchu_head_id', data.juchu_head_id)
-      .eq('juchu_kizai_head_id', data.juchu_kizai_head_id)
-      .eq('juchu_kizai_meisai_id', data.juchu_kizai_meisai_id)
-      .eq('kizai_id', data.kizai_id)
-      .eq('sagyo_id', data.sagyo_id);
+    await connection.query(query, values);
   } catch (e) {
     throw e;
   }

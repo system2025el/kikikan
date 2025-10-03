@@ -1,5 +1,8 @@
 'use server';
 
+import { PoolClient } from 'pg';
+
+import pool from '@/app/_lib/db/postgres';
 import { selectActiveBumons } from '@/app/_lib/db/tables/m-bumon';
 import { selectActiveEqpts, selectBundledEqpts, selectMeisaiEqts } from '@/app/_lib/db/tables/m-kizai';
 import { selectBundledEqptIds } from '@/app/_lib/db/tables/m-kizai-set';
@@ -53,7 +56,16 @@ import { JuchuKizaiMeisai } from '@/app/_lib/db/types/t-juchu-kizai-meisai-type'
 import { NyushukoDen } from '@/app/_lib/db/types/t-nyushuko-den-type';
 import { NyushukoFix } from '@/app/_lib/db/types/t-nyushuko-fix-type';
 import { toISOString, toISOStringYearMonthDay, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
-import { getJuchuKizaiNyushuko } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
+import {
+  addAllHonbanbi,
+  addJuchuKizaiNyushuko,
+  delSiyouHonbanbi,
+  getJuchuContainerMeisaiMaxId,
+  getJuchuKizaiHeadMaxId,
+  getJuchuKizaiMeisaiMaxId,
+  getJuchuKizaiNyushuko,
+  updJuchuKizaiNyushuko,
+} from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 
 import {
   EqptSelection,
@@ -63,6 +75,424 @@ import {
   JuchuKizaiMeisaiValues,
   SelectedEqptsValues,
 } from './types';
+
+/**
+ * 新規受注機材ヘッダー保存
+ * @param data 受注機材ヘッダーデータ
+ * @param updateShukoDate 更新後出庫日
+ * @param updateNyukoDate 更新後入庫日
+ * @param updateDateRange 更新後出庫日から入庫日
+ * @param userNam ユーザー名
+ */
+export const saveNewJuchuKizaiHead = async (
+  data: JuchuKizaiHeadValues,
+  updateShukoDate: Date,
+  updateNyukoDate: Date,
+  updateDateRange: string[],
+  userNam: string
+) => {
+  const connection = await pool.connect();
+
+  const maxId = await getJuchuKizaiHeadMaxId(data.juchuHeadId);
+  const newJuchuKizaiHeadId = maxId ? maxId.juchu_kizai_head_id + 1 : 1;
+
+  try {
+    await connection.query('BEGIN');
+
+    // 受注機材ヘッダー追加
+    const headResult = await addJuchuKizaiHead(newJuchuKizaiHeadId, data, 1, userNam, connection);
+    console.log('受注機材ヘッダー追加', headResult);
+    // 受注機材入出庫追加
+    const nyushukoResult = await addJuchuKizaiNyushuko(
+      data.juchuHeadId,
+      newJuchuKizaiHeadId,
+      data.kicsShukoDat,
+      data.yardShukoDat,
+      data.kicsNyukoDat,
+      data.yardNyukoDat,
+      userNam,
+      connection
+    );
+    console.log('受注機材入出庫追加', nyushukoResult);
+    // 受注機材本番日(入出庫、使用中)追加
+    const addJuchuSiyouHonbanbiData: JuchuKizaiHonbanbiValues[] = updateDateRange.map((d) => ({
+      juchuHeadId: data.juchuHeadId,
+      juchuKizaiHeadId: newJuchuKizaiHeadId,
+      juchuHonbanbiShubetuId: 1,
+      juchuHonbanbiDat: new Date(d),
+      mem: '',
+      juchuHonbanbiAddQty: 0,
+    }));
+    const addJuchuHonbanbiData: JuchuKizaiHonbanbiValues[] = [
+      {
+        juchuHeadId: data.juchuHeadId,
+        juchuKizaiHeadId: newJuchuKizaiHeadId,
+        juchuHonbanbiShubetuId: 2,
+        juchuHonbanbiDat: updateShukoDate,
+        mem: '',
+        juchuHonbanbiAddQty: 0,
+      },
+      {
+        juchuHeadId: data.juchuHeadId,
+        juchuKizaiHeadId: newJuchuKizaiHeadId,
+        juchuHonbanbiShubetuId: 3,
+        juchuHonbanbiDat: updateNyukoDate,
+        mem: '',
+        juchuHonbanbiAddQty: 0,
+      },
+    ];
+    const mergeHonbanbiData: JuchuKizaiHonbanbiValues[] = [...addJuchuSiyouHonbanbiData, ...addJuchuHonbanbiData];
+    const addHonbanbiResult = await addAllHonbanbi(
+      data.juchuHeadId,
+      newJuchuKizaiHeadId,
+      mergeHonbanbiData,
+      userNam,
+      connection
+    );
+    console.log('入出庫、使用本番日追加', addHonbanbiResult);
+
+    await connection.query('COMMIT');
+    return newJuchuKizaiHeadId;
+  } catch (e) {
+    console.error(e);
+    await connection.query('ROLLBACK');
+    return null;
+  } finally {
+    connection.release();
+  }
+};
+
+/**
+ * 受注機材ヘッダー保存
+ * @param checkJuchuKizaiHead
+ * @param checkJuchuHonbanbi
+ * @param checkJuchuKizaiMeisai
+ * @param checkJuchuContainerMeisai
+ * @param data
+ * @param updateShukoDate
+ * @param updateNyukoDate
+ * @param updateDateRange
+ * @param juchuHonbanbiList
+ * @param juchuHonbanbiDeleteList
+ * @param juchuKizaiMeisaiList
+ * @param juchuContainerMeisaiList
+ * @param userNam
+ * @returns
+ */
+export const saveJuchuKizai = async (
+  checkJuchuKizaiHead: boolean,
+  checkJuchuHonbanbi: boolean,
+  checkJuchuKizaiMeisai: boolean,
+  checkJuchuContainerMeisai: boolean,
+  data: JuchuKizaiHeadValues,
+  updateShukoDate: Date,
+  updateNyukoDate: Date,
+  updateDateRange: string[],
+  juchuHonbanbiList: JuchuKizaiHonbanbiValues[],
+  juchuHonbanbiDeleteList: JuchuKizaiHonbanbiValues[],
+  juchuKizaiMeisaiList: JuchuKizaiMeisaiValues[],
+  juchuContainerMeisaiList: JuchuContainerMeisaiValues[],
+  userNam: string
+) => {
+  const connection = await pool.connect();
+
+  try {
+    await connection.query('BEGIN');
+
+    // 受注機材ヘッダー関係更新
+    if (checkJuchuKizaiHead) {
+      // 受注機材ヘッダー更新
+      const headResult = await updJuchuKizaiHead(data, userNam, connection);
+      console.log('受注機材ヘッダー更新', headResult);
+
+      // 受注機材入出庫更新
+      const nyushukoResult = await updJuchuKizaiNyushuko(
+        data.juchuHeadId,
+        data.juchuKizaiHeadId,
+        data.kicsShukoDat,
+        data.yardShukoDat,
+        data.kicsNyukoDat,
+        data.yardNyukoDat,
+        userNam,
+        connection
+      );
+      console.log('受注機材入出庫更新', nyushukoResult);
+
+      // 受注機材本番日(使用中)更新
+      const addJuchuSiyouHonbanbiData: JuchuKizaiHonbanbiValues[] = updateDateRange.map((d) => ({
+        juchuHeadId: data.juchuHeadId,
+        juchuKizaiHeadId: data.juchuKizaiHeadId,
+        juchuHonbanbiShubetuId: 1,
+        juchuHonbanbiDat: new Date(d),
+        mem: '',
+        juchuHonbanbiAddQty: 0,
+      }));
+      console.log('受注機材本番日(使用中)更新データ', addJuchuSiyouHonbanbiData);
+      const deleteSiyouHonbanbiResult = await delSiyouHonbanbi(data.juchuHeadId, data.juchuKizaiHeadId, connection);
+      console.log('受注機材本番日(使用日)削除', deleteSiyouHonbanbiResult);
+      const addSiyouHonbanbiResult = await addAllHonbanbi(
+        data.juchuHeadId,
+        data.juchuKizaiHeadId,
+        addJuchuSiyouHonbanbiData,
+        userNam,
+        connection
+      );
+      console.log('受注機材本番日(使用日)更新', addSiyouHonbanbiResult);
+
+      // 受注機材本番日(出庫、入庫)更新
+      const updateNyushukoHonbanbiData: JuchuKizaiHonbanbiValues[] = [
+        {
+          juchuHeadId: data.juchuHeadId,
+          juchuKizaiHeadId: data.juchuKizaiHeadId,
+          juchuHonbanbiShubetuId: 2,
+          juchuHonbanbiDat: updateShukoDate,
+          mem: '',
+          juchuHonbanbiAddQty: 0,
+        },
+        {
+          juchuHeadId: data.juchuHeadId,
+          juchuKizaiHeadId: data.juchuKizaiHeadId,
+          juchuHonbanbiShubetuId: 3,
+          juchuHonbanbiDat: updateNyukoDate,
+          mem: '',
+          juchuHonbanbiAddQty: 0,
+        },
+      ];
+      for (const item of updateNyushukoHonbanbiData) {
+        const nyushukoHonbanbiResult = await updNyushukoHonbanbi(
+          data.juchuHeadId,
+          data.juchuKizaiHeadId,
+          item,
+          userNam,
+          connection
+        );
+        console.log('入出庫本番日更新', nyushukoHonbanbiResult);
+      }
+    }
+
+    // 受注機材本番日更新
+    if (checkJuchuHonbanbi) {
+      for (const item of juchuHonbanbiDeleteList) {
+        const deleteHonbanbiResult = await delHonbanbi(
+          data.juchuHeadId,
+          data.juchuKizaiHeadId,
+          item.juchuHonbanbiShubetuId,
+          item.juchuHonbanbiDat,
+          connection
+        );
+        console.log('受注機材本番日削除', deleteHonbanbiResult);
+      }
+
+      for (const item of juchuHonbanbiList) {
+        const confirm = await confirmHonbanbi(
+          data.juchuHeadId,
+          data.juchuKizaiHeadId,
+          item.juchuHonbanbiShubetuId,
+          item.juchuHonbanbiDat
+        );
+        if (confirm) {
+          const updateHonbanbiResult = await updHonbanbi(
+            data.juchuHeadId,
+            data.juchuKizaiHeadId,
+            item,
+            userNam,
+            connection
+          );
+          console.log('受注機材本番日更新', updateHonbanbiResult);
+        } else {
+          const addHonbanbiResult = await addHonbanbi(
+            data.juchuHeadId,
+            data.juchuKizaiHeadId,
+            item,
+            userNam,
+            connection
+          );
+          console.log('受注機材本番日追加', addHonbanbiResult);
+        }
+      }
+    }
+
+    // 受注機材明細関係更新
+    if (checkJuchuKizaiHead || checkJuchuKizaiMeisai) {
+      //const copyJuchuKizaiMeisaiData = [...juchuKizaiMeisaiList];
+      const juchuKizaiMeisaiMaxId = await getJuchuKizaiMeisaiMaxId(data.juchuHeadId, data.juchuKizaiHeadId);
+      let newJuchuKizaiMeisaiId = juchuKizaiMeisaiMaxId ? juchuKizaiMeisaiMaxId.juchu_kizai_meisai_id + 1 : 1;
+
+      const newJuchuKizaiMeisaiData = juchuKizaiMeisaiList.map((data) =>
+        data.juchuKizaiMeisaiId === 0 && !data.delFlag ? { ...data, juchuKizaiMeisaiId: newJuchuKizaiMeisaiId++ } : data
+      );
+
+      // 受注機材明細、入出庫伝票更新
+      const addJuchuKizaiMeisaiData = newJuchuKizaiMeisaiData.filter((data) => !data.delFlag && !data.saveFlag);
+      const updateJuchuKizaiMeisaiData = newJuchuKizaiMeisaiData.filter((data) => !data.delFlag && data.saveFlag);
+      const deleteJuchuKizaiMeisaiData = newJuchuKizaiMeisaiData.filter((data) => data.delFlag && data.saveFlag);
+      // 削除
+      if (deleteJuchuKizaiMeisaiData.length > 0) {
+        const deleteKizaiIds = deleteJuchuKizaiMeisaiData.map((data) => data.kizaiId);
+
+        const deleteMeisaiResult = await delJuchuKizaiMeisai(
+          data.juchuHeadId,
+          data.juchuKizaiHeadId,
+          deleteKizaiIds,
+          connection
+        );
+        console.log('受注機材明細削除', deleteMeisaiResult);
+
+        const deleteNyushukoDenResult = await delNyushukoDen(
+          data.juchuHeadId,
+          data.juchuKizaiHeadId,
+          deleteKizaiIds,
+          connection
+        );
+        console.log('入出庫伝票削除', deleteNyushukoDenResult);
+      }
+      // 追加
+      if (addJuchuKizaiMeisaiData.length > 0) {
+        const addMeisaiResult = await addJuchuKizaiMeisai(addJuchuKizaiMeisaiData, userNam, connection);
+        console.log('受注機材明細追加', addMeisaiResult);
+
+        const addNyushukoDenResult = await addNyushukoDen(data, addJuchuKizaiMeisaiData, userNam, connection);
+        console.log('入出庫伝票追加', addNyushukoDenResult);
+      }
+      // 更新
+      if (updateJuchuKizaiMeisaiData.length > 0) {
+        const updateMeisaiResult = await updJuchuKizaiMeisai(updateJuchuKizaiMeisaiData, userNam, connection);
+        console.log('受注機材明細更新', updateMeisaiResult);
+
+        const updateNyushukoDenResult = await updNyushukoDen(data, updateJuchuKizaiMeisaiData, userNam, connection);
+        console.log('入出庫伝票更新', updateNyushukoDenResult);
+      }
+
+      // 移動伝票更新
+      const addIdoKizaiData = newJuchuKizaiMeisaiData.filter(
+        (data) => !data.idoDenId && data.sagyoDenDat && !data.delFlag
+      );
+      const updateIdoKizaiData = newJuchuKizaiMeisaiData.filter(
+        (data) => data.idoDenId && data.sagyoDenDat && !data.delFlag
+      );
+      const deleteIdoKizaiData = newJuchuKizaiMeisaiData.filter(
+        (data) => data.idoDenId && (!data.sagyoDenDat || data.delFlag)
+      );
+      // 削除
+      if (deleteIdoKizaiData.length > 0) {
+        const deleteIdoDenIds = deleteIdoKizaiData.map((data) => data.idoDenId);
+        const deleteIdoDenResult = await delIdoDen(deleteIdoDenIds as number[], connection);
+        console.log('移動伝票削除', deleteIdoDenResult);
+
+        const deleteIdoFixResult = await delIdoFix(deleteIdoDenIds as number[], connection);
+        console.log('移動確定削除', deleteIdoFixResult);
+      }
+      // 追加
+      if (addIdoKizaiData.length > 0) {
+        const idoDenMaxId = await getIdoDenMaxId();
+        const newIdoDenId = idoDenMaxId ? idoDenMaxId.ido_den_id + 1 : 1;
+        const addIdoDenResult = await addIdoDen(newIdoDenId, addIdoKizaiData, userNam, connection);
+        console.log('移動伝票追加', addIdoDenResult);
+
+        const addIdoFixResult = await addIdoFix(newIdoDenId, addIdoKizaiData, userNam, connection);
+        console.log('移動確定追加', addIdoFixResult);
+      }
+      // 更新
+      if (updateIdoKizaiData.length > 0) {
+        const updateIdoDenResult = await updIdoDen(updateIdoKizaiData, userNam, connection);
+        console.log('移動伝票更新', updateIdoDenResult);
+
+        const updateIdoFixResult = await updIdoFix(updateIdoKizaiData, userNam, connection);
+        console.log('移動確定更新', updateIdoFixResult);
+      }
+    }
+
+    // 受注コンテナ明細更新
+    if (checkJuchuKizaiHead || checkJuchuContainerMeisai) {
+      //const copyJuchuContainerMeisaiData = [...juchuContainerMeisaiList];
+      const juchuContainerMeisaiMaxId = await getJuchuContainerMeisaiMaxId(data.juchuHeadId, data.juchuKizaiHeadId);
+      let newJuchuContainerMeisaiId = juchuContainerMeisaiMaxId
+        ? juchuContainerMeisaiMaxId.juchu_kizai_meisai_id + 1
+        : 1;
+
+      const newJuchuContainerMeisaiData = juchuContainerMeisaiList.map((data) =>
+        data.juchuKizaiMeisaiId === 0 && !data.delFlag
+          ? { ...data, juchuKizaiMeisaiId: newJuchuContainerMeisaiId++ }
+          : data
+      );
+
+      // 受注コンテナ明細更新
+      const addJuchuContainerMeisaiData = newJuchuContainerMeisaiData.filter((data) => !data.delFlag && !data.saveFlag);
+      const updateJuchuContainerMeisaiData = newJuchuContainerMeisaiData.filter(
+        (data) => !data.delFlag && data.saveFlag
+      );
+      const deleteJuchuContainerMeisaiData = newJuchuContainerMeisaiData.filter(
+        (data) => data.delFlag && data.saveFlag
+      );
+      // 削除
+      if (deleteJuchuContainerMeisaiData.length > 0) {
+        const deleteKizaiiIds = deleteJuchuContainerMeisaiData.map((data) => data.kizaiId);
+        const deleteContainerMeisaiResult = await delJuchuContainerMeisai(
+          data.juchuHeadId,
+          data.juchuKizaiHeadId,
+          deleteKizaiiIds,
+          connection
+        );
+        console.log('受注コンテナ明細削除', deleteContainerMeisaiResult);
+      }
+      // 追加
+      if (addJuchuContainerMeisaiData.length > 0) {
+        const addContainerMeisaiResult = await addJuchuContainerMeisai(
+          addJuchuContainerMeisaiData,
+          userNam,
+          connection
+        );
+        console.log('受注コンテナ明細追加', addContainerMeisaiResult);
+      }
+      // 更新
+      if (updateJuchuContainerMeisaiData.length > 0) {
+        const updateContainerMeisaiResult = await updJuchuContainerMeisai(
+          updateJuchuContainerMeisaiData,
+          userNam,
+          connection
+        );
+        console.log('受注コンテナ明細更新', updateContainerMeisaiResult);
+      }
+
+      // コンテナ入出庫伝票更新
+      if (newJuchuContainerMeisaiData.length > 0) {
+        const containerNyushukoDenResult = await updContainerNyushukoDen(
+          data,
+          newJuchuContainerMeisaiData,
+          userNam,
+          connection
+        );
+        console.log('コンテナ入出庫伝票更新', containerNyushukoDenResult);
+      }
+    }
+
+    // 入出庫確定更新
+    if (juchuKizaiMeisaiList.length > 0 || juchuContainerMeisaiList.length > 0) {
+      const kics =
+        juchuKizaiMeisaiList.filter((d) => d.shozokuId === 1 && !d.delFlag).length > 0 ||
+        juchuContainerMeisaiList.filter((d) => d.planKicsKizaiQty && !d.delFlag).length > 0
+          ? true
+          : false;
+      const yard =
+        juchuKizaiMeisaiList.filter((d) => d.shozokuId === 2 && !d.delFlag).length > 0 ||
+        juchuContainerMeisaiList.filter((d) => d.planYardKizaiQty && !d.delFlag).length > 0
+          ? true
+          : false;
+
+      const nyushukoFixResult = await updNyushukoFix(data, kics, yard, userNam, connection);
+      console.log('入出庫確定更新', nyushukoFixResult);
+    }
+
+    await connection.query('COMMIT');
+    return true;
+  } catch (e) {
+    console.error(e);
+    await connection.query('ROLLBACK');
+    return false;
+  } finally {
+    connection.release();
+  }
+};
 
 /**
  * メイン受注機材ヘッダー取得
@@ -114,7 +544,8 @@ export const addJuchuKizaiHead = async (
   juchuKizaiHeadId: number,
   juchuKizaiHeadData: JuchuKizaiHeadValues,
   juchuKizaiHeadKbn: number,
-  userNam: string
+  userNam: string,
+  connection: PoolClient
 ) => {
   const newData: JuchuKizaiHead = {
     juchu_head_id: juchuKizaiHeadData.juchuHeadId,
@@ -130,18 +561,13 @@ export const addJuchuKizaiHead = async (
     add_user: userNam,
   };
   try {
-    const { error } = await insertJuchuKizaiHead(newData);
+    await insertJuchuKizaiHead(newData, connection);
 
-    if (error) {
-      console.error('Error adding new juchuKizaiHead:', error.message);
-      return false;
-    } else {
-      console.log('New juchuKizaiHead added successfully:', newData);
-      return true;
-    }
+    console.log('New juchuKizaiHead added successfully:', newData);
+    return true;
   } catch (e) {
-    console.error(e);
-    return false;
+    console.error('Error adding new juchuKizaiHead:', e);
+    throw e;
   }
 };
 
@@ -151,7 +577,11 @@ export const addJuchuKizaiHead = async (
  * @param userNam ユーザー名
  * @returns
  */
-export const updJuchuKizaiHead = async (juchuKizaiHeadData: JuchuKizaiHeadValues, userNam: string) => {
+export const updJuchuKizaiHead = async (
+  juchuKizaiHeadData: JuchuKizaiHeadValues,
+  userNam: string,
+  connection: PoolClient
+) => {
   const updateData: JuchuKizaiHead = {
     juchu_head_id: juchuKizaiHeadData.juchuHeadId,
     juchu_kizai_head_id: juchuKizaiHeadData.juchuKizaiHeadId,
@@ -167,17 +597,11 @@ export const updJuchuKizaiHead = async (juchuKizaiHeadData: JuchuKizaiHeadValues
   };
 
   try {
-    const { error } = await updateJuchuKizaiHead(updateData);
-
-    if (error) {
-      console.error('Error updating juchu kizai head:', error.message);
-      return false;
-    }
+    await updateJuchuKizaiHead(updateData, connection);
     console.log('juchu kizai head updated successfully');
     return true;
   } catch (e) {
-    console.error('Exception while updating juchu kizai head:', e);
-    return false;
+    throw e;
   }
 };
 
@@ -254,7 +678,11 @@ export const getJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId:
  * @param userNam ユーザー名
  * @returns
  */
-export const addJuchuKizaiMeisai = async (juchuKizaiMeisaiData: JuchuKizaiMeisaiValues[], userNam: string) => {
+export const addJuchuKizaiMeisai = async (
+  juchuKizaiMeisaiData: JuchuKizaiMeisaiValues[],
+  userNam: string,
+  connection: PoolClient
+) => {
   const newData: JuchuKizaiMeisai[] = juchuKizaiMeisaiData.map((d) => ({
     juchu_head_id: d.juchuHeadId,
     juchu_kizai_head_id: d.juchuKizaiHeadId,
@@ -271,18 +699,13 @@ export const addJuchuKizaiMeisai = async (juchuKizaiMeisaiData: JuchuKizaiMeisai
   }));
 
   try {
-    const { error } = await insertJuchuKizaiMeisai(newData);
+    await insertJuchuKizaiMeisai(newData, connection);
 
-    if (error) {
-      console.error('Error adding kizai meisai:', error.message);
-      return false;
-    } else {
-      console.log('kizai meisai added successfully:', newData);
-      return true;
-    }
+    console.log('kizai meisai added successfully:', newData);
+    return true;
   } catch (e) {
     console.error('Exception while adding kizai meisai:', e);
-    return false;
+    throw e;
   }
 };
 
@@ -292,7 +715,11 @@ export const addJuchuKizaiMeisai = async (juchuKizaiMeisaiData: JuchuKizaiMeisai
  * @param userNam ユーザー名
  * @returns
  */
-export const updJuchuKizaiMeisai = async (juchuKizaiMeisaiData: JuchuKizaiMeisaiValues[], userNam: string) => {
+export const updJuchuKizaiMeisai = async (
+  juchuKizaiMeisaiData: JuchuKizaiMeisaiValues[],
+  userNam: string,
+  connection: PoolClient
+) => {
   const updateData: JuchuKizaiMeisai[] = juchuKizaiMeisaiData.map((d) => ({
     juchu_head_id: d.juchuHeadId,
     juchu_kizai_head_id: d.juchuKizaiHeadId,
@@ -310,18 +737,13 @@ export const updJuchuKizaiMeisai = async (juchuKizaiMeisaiData: JuchuKizaiMeisai
 
   try {
     for (const data of updateData) {
-      const { error } = await updateJuchuKizaiMeisai(data);
-
-      if (error) {
-        console.error('Error updating juchu kizai meisai:', error.message);
-        continue;
-      }
+      await updateJuchuKizaiMeisai(data, connection);
       console.log('juchu kizai meisai updated successfully:', data);
     }
     return true;
   } catch (e) {
     console.error('Exception while updating juchu kizai meisai:', e);
-    return false;
+    throw e;
   }
 };
 
@@ -331,15 +753,16 @@ export const updJuchuKizaiMeisai = async (juchuKizaiMeisaiData: JuchuKizaiMeisai
  * @param juchuKizaiHeadId 受注機材ヘッダーid
  * @param juchuKizaiMeisaiIds 受注機材明細id
  */
-export const delJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number, kizaiId: number[]) => {
+export const delJuchuKizaiMeisai = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  kizaiId: number[],
+  connection: PoolClient
+) => {
   try {
-    const { error } = await deleteJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId, kizaiId);
-
-    if (error) {
-      console.error('Error delete kizai meisai:', error.message);
-    }
+    await deleteJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId, kizaiId, connection);
   } catch (e) {
-    console.error(e);
+    throw e;
   }
 };
 
@@ -351,7 +774,8 @@ export const delJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId:
  */
 export const addJuchuContainerMeisai = async (
   juchuContainerMeisaiData: JuchuContainerMeisaiValues[],
-  userNam: string
+  userNam: string,
+  connection: PoolClient
 ) => {
   const newKicsData: JuchuCtnMeisai[] = juchuContainerMeisaiData.map((d) => ({
     juchu_head_id: d.juchuHeadId,
@@ -380,18 +804,12 @@ export const addJuchuContainerMeisai = async (
   const mergeData = [...newKicsData, ...newYardData];
 
   try {
-    const { error } = await insertJuchuContainerMeisai(mergeData);
-
-    if (error) {
-      console.error('Error adding container meisai:', error.message);
-      return false;
-    } else {
-      console.log('container meisai added successfully:', mergeData);
-      return true;
-    }
+    await insertJuchuContainerMeisai(mergeData, connection);
+    console.log('container meisai added successfully:', mergeData);
+    return true;
   } catch (e) {
     console.error('Exception while adding container meisai:', e);
-    return false;
+    throw e;
   }
 };
 
@@ -403,7 +821,8 @@ export const addJuchuContainerMeisai = async (
  */
 export const updJuchuContainerMeisai = async (
   juchuContainerMeisaiData: JuchuContainerMeisaiValues[],
-  userNam: string
+  userNam: string,
+  connection: PoolClient
 ) => {
   const updateKicsData: JuchuCtnMeisai[] = juchuContainerMeisaiData.map((d) => ({
     juchu_head_id: d.juchuHeadId,
@@ -433,18 +852,13 @@ export const updJuchuContainerMeisai = async (
 
   try {
     for (const data of mergeData) {
-      const { error } = await updateJuchuContainerMeisai(data);
-
-      if (error) {
-        console.error('Error updating juchu container meisai:', error.message);
-        continue;
-      }
+      await updateJuchuContainerMeisai(data, connection);
       console.log('juchu container meisai updated successfully:', data);
     }
     return true;
   } catch (e) {
     console.error('Exception while updating juchu container meisai:', e);
-    return false;
+    throw e;
   }
 };
 
@@ -454,15 +868,16 @@ export const updJuchuContainerMeisai = async (
  * @param juchuKizaiHeadId 受注機材ヘッダーid
  * @param kizaiId 機材id
  */
-export const delJuchuContainerMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number, kizaiId: number[]) => {
+export const delJuchuContainerMeisai = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  kizaiId: number[],
+  connection: PoolClient
+) => {
   try {
-    const { error } = await deleteJuchuContainerMeisai(juchuHeadId, juchuKizaiHeadId, kizaiId);
-
-    if (error) {
-      console.error('Error delete container meisai:', error.message);
-    }
+    await deleteJuchuContainerMeisai(juchuHeadId, juchuKizaiHeadId, kizaiId, connection);
   } catch (e) {
-    console.error(e);
+    throw e;
   }
 };
 
@@ -476,7 +891,8 @@ export const delJuchuContainerMeisai = async (juchuHeadId: number, juchuKizaiHea
 export const addNyushukoDen = async (
   juchuKizaiHeadData: JuchuKizaiHeadValues,
   juchuKizaiMeisaiData: JuchuKizaiMeisaiValues[],
-  userNam: string
+  userNam: string,
+  connection: PoolClient
 ) => {
   const newShukoStandbyData: NyushukoDen[] = juchuKizaiMeisaiData.map((d) => ({
     juchu_head_id: d.juchuHeadId,
@@ -529,18 +945,13 @@ export const addNyushukoDen = async (
   const mergeData = [...newShukoStandbyData, ...newShukoCheckData, ...newNyukoCheckData];
 
   try {
-    const { error } = await insertNyushukoDen(mergeData);
+    await insertNyushukoDen(mergeData, connection);
 
-    if (error) {
-      console.error('Error adding nyushuko den:', error.message);
-      return false;
-    } else {
-      console.log('nyushuko den added successfully:', mergeData);
-      return true;
-    }
+    console.log('nyushuko den added successfully:', mergeData);
+    return true;
   } catch (e) {
     console.error('Exception while adding nyushuko den:', e);
-    return false;
+    throw e;
   }
 };
 
@@ -554,7 +965,8 @@ export const addNyushukoDen = async (
 export const updNyushukoDen = async (
   juchuKizaiHeadData: JuchuKizaiHeadValues,
   juchuKizaiMeisaiData: JuchuKizaiMeisaiValues[],
-  userNam: string
+  userNam: string,
+  connection: PoolClient
 ) => {
   const updateShukoStandbyData: NyushukoDen[] = juchuKizaiMeisaiData.map((d) => ({
     juchu_head_id: d.juchuHeadId,
@@ -608,18 +1020,13 @@ export const updNyushukoDen = async (
 
   try {
     for (const data of mergeData) {
-      const { error } = await updateNyushukoDen(data);
-
-      if (error) {
-        console.error('Error updating nyushuko den:', error.message);
-        continue;
-      }
+      await updateNyushukoDen(data, connection);
     }
     console.log('nyushuko den updated successfully:', mergeData);
     return true;
   } catch (e) {
     console.error('Exception while updating nyushuko den:', e);
-    return false;
+    throw e;
   }
 };
 
@@ -629,15 +1036,16 @@ export const updNyushukoDen = async (
  * @param juchuKizaiHeadId 受注機材ヘッダーid
  * @param kizaiId 機材id
  */
-export const delNyushukoDen = async (juchuHeadId: number, juchuKizaiHeadId: number, kizaiId: number[]) => {
+export const delNyushukoDen = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  kizaiId: number[],
+  connection: PoolClient
+) => {
   try {
-    const { error } = await deleteNyushukoDen(juchuHeadId, juchuKizaiHeadId, kizaiId);
-
-    if (error) {
-      console.error('Error delete nyushuko den:', error.message);
-    }
+    await deleteNyushukoDen(juchuHeadId, juchuKizaiHeadId, kizaiId, connection);
   } catch (e) {
-    console.error(e);
+    throw e;
   }
 };
 
@@ -650,7 +1058,8 @@ export const delNyushukoDen = async (juchuHeadId: number, juchuKizaiHeadId: numb
 export const updContainerNyushukoDen = async (
   juchuKizaiHeadData: JuchuKizaiHeadValues,
   juchuContainerMeisaiData: JuchuContainerMeisaiValues[],
-  userNam: string
+  userNam: string,
+  connection: PoolClient
 ) => {
   for (const data of juchuContainerMeisaiData) {
     const kicsData =
@@ -744,69 +1153,54 @@ export const updContainerNyushukoDen = async (
 
       if (kicsConfirmResult.data && kicsConfirmResult.data.length > 0 && kicsData) {
         for (const data of kicsData) {
-          const { error: updateError } = await updateNyushukoDen({
-            ...data,
-            upd_dat: toJapanTimeString(),
-            upd_user: userNam,
-          });
-          if (updateError) {
-            console.error('Error updating kics container nyushuko den:', updateError);
-            continue;
-          }
+          await updateNyushukoDen(
+            {
+              ...data,
+              upd_dat: toJapanTimeString(),
+              upd_user: userNam,
+            },
+            connection
+          );
         }
       } else if (kicsConfirmResult.data && kicsConfirmResult.data.length > 0 && !kicsData) {
-        const { error: deleteError } = await deleteContainerNyushukoDen(kicsConfirmData);
-        if (deleteError) {
-          console.error('Error delete kics container nyushuko den:', deleteError.message);
-          continue;
-        }
+        await deleteContainerNyushukoDen(kicsConfirmData, connection);
       } else if (kicsConfirmResult!.data && kicsData) {
-        const { error: insertError } = await insertNyushukoDen(
+        await insertNyushukoDen(
           kicsData.map((d) => ({
             ...d,
             add_dat: toJapanTimeString(),
             add_user: userNam,
-          }))
+          })),
+          connection
         );
-        if (insertError) {
-          console.error('Error insert kics container nyushuko den:', insertError.message);
-          continue;
-        }
       }
       if (yardConfirmResult.data && yardConfirmResult.data.length > 0 && yardData) {
         for (const data of yardData) {
-          const { error: updateError } = await updateNyushukoDen({
-            ...data,
-            upd_dat: toJapanTimeString(),
-            upd_user: userNam,
-          });
-          if (updateError) {
-            console.error('Error updating yard container nyushuko den:', updateError.message);
-            continue;
-          }
+          await updateNyushukoDen(
+            {
+              ...data,
+              upd_dat: toJapanTimeString(),
+              upd_user: userNam,
+            },
+            connection
+          );
         }
       } else if (yardConfirmResult.data && yardConfirmResult.data.length > 0 && !yardData) {
-        const { error: deleteError } = await deleteContainerNyushukoDen(yardConfirmData);
-        if (deleteError) {
-          console.error('Error delete yard container nyushuko den:', deleteError.message);
-          continue;
-        }
+        await deleteContainerNyushukoDen(yardConfirmData, connection);
       } else if (yardConfirmResult!.data && yardData) {
-        const { error: insertError } = await insertNyushukoDen(
+        await insertNyushukoDen(
           yardData.map((d) => ({
             ...d,
             add_dat: toJapanTimeString(),
             add_user: userNam,
-          }))
+          })),
+          connection
         );
-        if (insertError) {
-          console.error('Error updating yard container nyushuko den:', insertError.message);
-          continue;
-        }
       }
       console.log('container nyushuko den updated successfully:', data);
+      return true;
     } catch (e) {
-      console.error(e);
+      throw e;
     }
   }
 };
@@ -819,7 +1213,13 @@ export const updContainerNyushukoDen = async (
  * @param userNam ユーザー名
  * @returns
  */
-export const updNyushukoFix = async (data: JuchuKizaiHeadValues, kics: boolean, yard: boolean, userNam: string) => {
+export const updNyushukoFix = async (
+  data: JuchuKizaiHeadValues,
+  kics: boolean,
+  yard: boolean,
+  userNam: string,
+  connection: PoolClient
+) => {
   const kicsData: NyushukoFix[] = [
     {
       juchu_head_id: data.juchuHeadId,
@@ -871,79 +1271,63 @@ export const updNyushukoFix = async (data: JuchuKizaiHeadValues, kics: boolean, 
     // KICS更新
     if (kicsConfirmResult.data && kicsConfirmResult.data.length > 0 && kics) {
       for (const data of kicsData) {
-        const { error: updateError } = await updateNyushukoFix({
-          ...data,
-          upd_dat: toJapanTimeString(),
-          upd_user: userNam,
-        });
-        if (updateError) {
-          console.error('Error updating kics nyushuko fix:', updateError.message);
-          throw new Error();
-        }
+        await updateNyushukoFix(
+          {
+            ...data,
+            upd_dat: toJapanTimeString(),
+            upd_user: userNam,
+          },
+          connection
+        );
       }
       // KICS削除
     } else if (kicsConfirmResult.data && kicsConfirmResult.data.length > 0 && !kics) {
-      const { error: deleteError } = await deleteNyushukoFix(kicsConfirmData);
-      if (deleteError) {
-        console.error('Error delete kics nyushuko fix:', deleteError.message);
-        throw new Error();
-      }
+      await deleteNyushukoFix(kicsConfirmData, connection);
       // KICS追加
     } else if (kicsConfirmResult!.data && kics) {
-      const { error: insertError } = await insertNyushukoFix(
+      await insertNyushukoFix(
         kicsData.map((d) => ({
           ...d,
           sagyo_fix_flg: 0,
           add_dat: toJapanTimeString(),
           add_user: userNam,
-        }))
+        })),
+        connection
       );
-      if (insertError) {
-        console.error('Error insert kics nyushuko fix:', insertError.message);
-        throw new Error();
-      }
     }
 
     // YARD更新
     if (yardConfirmResult.data && yardConfirmResult.data.length > 0 && yard) {
       for (const data of yardData) {
-        const { error: updateError } = await updateNyushukoFix({
-          ...data,
-          upd_dat: toJapanTimeString(),
-          upd_user: userNam,
-        });
-        if (updateError) {
-          console.error('Error updating yard nyushuko fix:', updateError.message);
-          throw new Error();
-        }
+        await updateNyushukoFix(
+          {
+            ...data,
+            upd_dat: toJapanTimeString(),
+            upd_user: userNam,
+          },
+          connection
+        );
       }
       // YARD削除
     } else if (yardConfirmResult.data && yardConfirmResult.data.length > 0 && !yard) {
-      const { error: deleteError } = await deleteNyushukoFix(yardConfirmData);
-      if (deleteError) {
-        console.error('Error delete yard nyushuko fix:', deleteError.message);
-        throw new Error();
-      }
+      await deleteNyushukoFix(yardConfirmData, connection);
       // YARD追加
     } else if (yardConfirmResult!.data && yard) {
-      const { error: insertError } = await insertNyushukoFix(
+      await insertNyushukoFix(
         yardData.map((d) => ({
           ...d,
           sagyo_fix_flg: 0,
           add_dat: toJapanTimeString(),
           add_user: userNam,
-        }))
+        })),
+        connection
       );
-      if (insertError) {
-        console.error('Error insert yard nyushuko fix:', insertError.message);
-        throw new Error();
-      }
     }
     console.log('nyushuko fix updated successfully:', data);
     return true;
   } catch (e) {
     console.error(e);
-    return false;
+    throw e;
   }
 };
 
@@ -971,7 +1355,12 @@ export const getIdoDenMaxId = async () => {
  * @param userNam ユーザー名
  * @returns
  */
-export const addIdoDen = async (newIdoDenId: number, idoKizaiData: JuchuKizaiMeisaiValues[], userNam: string) => {
+export const addIdoDen = async (
+  newIdoDenId: number,
+  idoKizaiData: JuchuKizaiMeisaiValues[],
+  userNam: string,
+  connection: PoolClient
+) => {
   const newLoadData: IdoDen[] = idoKizaiData.map((d, index) => ({
     ido_den_id: newIdoDenId + index,
     sagyo_den_dat: toISOStringYearMonthDay(d.sagyoDenDat as Date),
@@ -1007,18 +1396,12 @@ export const addIdoDen = async (newIdoDenId: number, idoKizaiData: JuchuKizaiMei
   const mergeData = [...newLoadData, ...newUnloadData];
 
   try {
-    const { error } = await insertIdoDen(mergeData);
-
-    if (error) {
-      console.error('Error adding ido den:', error.message);
-      return false;
-    } else {
-      console.log('ido den added successfully:', mergeData);
-      return true;
-    }
+    await insertIdoDen(mergeData, connection);
+    console.log('ido den added successfully:', mergeData);
+    return true;
   } catch (e) {
     console.error('Exception while adding ido den:', e);
-    return false;
+    throw e;
   }
 };
 
@@ -1028,7 +1411,7 @@ export const addIdoDen = async (newIdoDenId: number, idoKizaiData: JuchuKizaiMei
  * @param userNam ユーザー名
  * @returns
  */
-export const updIdoDen = async (idoKizaiData: JuchuKizaiMeisaiValues[], userNam: string) => {
+export const updIdoDen = async (idoKizaiData: JuchuKizaiMeisaiValues[], userNam: string, connection: PoolClient) => {
   const updateData: IdoDen[] = idoKizaiData.map((d) => {
     if (!d.idoDenId) {
       throw new Error();
@@ -1044,17 +1427,13 @@ export const updIdoDen = async (idoKizaiData: JuchuKizaiMeisaiValues[], userNam:
 
   try {
     for (const data of updateData) {
-      const { error } = await updateIdoDen(data);
-      if (error) {
-        console.error('Error updating ido den:', error.message);
-        continue;
-      }
+      await updateIdoDen(data, connection);
     }
     console.log('ido den updated successfully:', updateData);
     return true;
   } catch (e) {
     console.error('Exception while updating ido den:', e);
-    return false;
+    throw e;
   }
 };
 
@@ -1062,15 +1441,11 @@ export const updIdoDen = async (idoKizaiData: JuchuKizaiMeisaiValues[], userNam:
  * 移動伝票削除
  * @param idoDenIds 移動伝票id
  */
-export const delIdoDen = async (idoDenIds: number[]) => {
+export const delIdoDen = async (idoDenIds: number[], connection: PoolClient) => {
   try {
-    const { error } = await deleteIdoDen(idoDenIds);
-
-    if (error) {
-      console.error('Error delete ido den:', error.message);
-    }
+    await deleteIdoDen(idoDenIds, connection);
   } catch (e) {
-    console.error(e);
+    throw e;
   }
 };
 
@@ -1081,7 +1456,12 @@ export const delIdoDen = async (idoDenIds: number[]) => {
  * @param userNam ユーザー名
  * @returns
  */
-export const addIdoFix = async (newIdoDenId: number, idoKizaiData: JuchuKizaiMeisaiValues[], userNam: string) => {
+export const addIdoFix = async (
+  newIdoDenId: number,
+  idoKizaiData: JuchuKizaiMeisaiValues[],
+  userNam: string,
+  connection: PoolClient
+) => {
   const newDepartureData: IdoFix[] = idoKizaiData.map((d, index) => ({
     ido_den_id: newIdoDenId + index,
     sagyo_den_dat: toISOStringYearMonthDay(d.sagyoDenDat as Date),
@@ -1107,18 +1487,12 @@ export const addIdoFix = async (newIdoDenId: number, idoKizaiData: JuchuKizaiMei
   const mergeData = [...newDepartureData, ...newArrivalData];
 
   try {
-    const { error } = await insertIdoFix(mergeData);
-
-    if (error) {
-      console.error('Error adding ido fix:', error.message);
-      return false;
-    } else {
-      console.log('ido fix added successfully:', mergeData);
-      return true;
-    }
+    await insertIdoFix(mergeData, connection);
+    console.log('ido fix added successfully:', mergeData);
+    return true;
   } catch (e) {
     console.error('Exception while adding ido fix:', e);
-    return false;
+    throw e;
   }
 };
 
@@ -1128,7 +1502,7 @@ export const addIdoFix = async (newIdoDenId: number, idoKizaiData: JuchuKizaiMei
  * @param userNam ユーザー名
  * @returns
  */
-export const updIdoFix = async (idoKizaiData: JuchuKizaiMeisaiValues[], userNam: string) => {
+export const updIdoFix = async (idoKizaiData: JuchuKizaiMeisaiValues[], userNam: string, connection: PoolClient) => {
   const updateData: IdoFix[] = idoKizaiData.map((d) => {
     if (!d.idoDenId) {
       throw new Error();
@@ -1143,17 +1517,13 @@ export const updIdoFix = async (idoKizaiData: JuchuKizaiMeisaiValues[], userNam:
 
   try {
     for (const data of updateData) {
-      const { error } = await updateIdoFix(data);
-      if (error) {
-        console.error('Error updating ido fix:', error.message);
-        continue;
-      }
+      await updateIdoFix(data, connection);
     }
     console.log('ido fix updated successfully:', updateData);
     return true;
   } catch (e) {
     console.error('Exception while updating ido fix:', e);
-    return false;
+    throw e;
   }
 };
 
@@ -1161,15 +1531,11 @@ export const updIdoFix = async (idoKizaiData: JuchuKizaiMeisaiValues[], userNam:
  * 移動確定削除
  * @param idoDenIds 移動確定id
  */
-export const delIdoFix = async (idoDenIds: number[]) => {
+export const delIdoFix = async (idoDenIds: number[], connection: PoolClient) => {
   try {
-    const { error } = await deleteIdoFix(idoDenIds);
-
-    if (error) {
-      console.error('Error delete ido fix:', error.message);
-    }
+    await deleteIdoFix(idoDenIds, connection);
   } catch (e) {
-    console.error(e);
+    throw e;
   }
 };
 
@@ -1223,13 +1589,11 @@ export const confirmHonbanbi = async (
       toISOStringYearMonthDay(juchuHonbanbiDat)
     );
     if (error) {
-      console.error('ConfirmHonbanbi error : ', error);
       return false;
     }
     return true;
   } catch (e) {
-    console.error(e);
-    return false;
+    throw e;
   }
 };
 
@@ -1245,7 +1609,8 @@ export const addHonbanbi = async (
   juchuHeadId: number,
   juchuKizaiHeadId: number,
   juchuHonbanbiData: JuchuKizaiHonbanbiValues,
-  userNam: string
+  userNam: string,
+  connection: PoolClient
 ) => {
   const newData: JuchuKizaiHonbanbi = {
     juchu_head_id: juchuHeadId,
@@ -1258,15 +1623,11 @@ export const addHonbanbi = async (
     add_user: userNam,
   };
   try {
-    const { error } = await insertHonbanbi(newData);
-    if (error) {
-      console.log('Error Add honbanbi:', error.message);
-      return false;
-    }
+    await insertHonbanbi(newData, connection);
     console.log('honbanbi add successfully:', newData);
     return true;
   } catch (e) {
-    console.log(e);
+    throw e;
   }
 };
 
@@ -1282,7 +1643,8 @@ export const updNyushukoHonbanbi = async (
   juchuHeadId: number,
   juchuKizaiHeadId: number,
   juchuHonbanbiData: JuchuKizaiHonbanbiValues,
-  userNam: string
+  userNam: string,
+  connection: PoolClient
 ) => {
   const updateData: JuchuKizaiHonbanbi = {
     juchu_head_id: juchuHeadId,
@@ -1296,16 +1658,11 @@ export const updNyushukoHonbanbi = async (
   };
 
   try {
-    const { error } = await updateNyushukoHonbanbi(updateData);
-    if (error) {
-      console.error('Error updating honbanbi:', error.message);
-      return false;
-    }
+    await updateNyushukoHonbanbi(updateData, connection);
     console.log('honbanbi updated successfully:', updateData);
     return true;
   } catch (e) {
-    console.error(e);
-    return false;
+    throw e;
   }
 };
 
@@ -1321,7 +1678,8 @@ export const updHonbanbi = async (
   juchuHeadId: number,
   juchuKizaiHeadId: number,
   juchuHonbanbiData: JuchuKizaiHonbanbiValues,
-  userNam: string
+  userNam: string,
+  connection: PoolClient
 ) => {
   const updateData: JuchuKizaiHonbanbi = {
     juchu_head_id: juchuHeadId,
@@ -1335,16 +1693,11 @@ export const updHonbanbi = async (
   };
 
   try {
-    const { error } = await updateHonbanbi(updateData);
-    if (error) {
-      console.error('Error updating honbanbi:', error.message);
-      return false;
-    }
+    await updateHonbanbi(updateData, connection);
     console.log('honbanbi updated successfully:', updateData);
     return true;
   } catch (e) {
-    console.error(e);
-    return false;
+    throw e;
   }
 };
 
@@ -1358,21 +1711,19 @@ export const delHonbanbi = async (
   juchuHeadId: number,
   juchuKizaiHeadId: number,
   juchuHonbanbiShubetuId: number,
-  juchuHonbanbiDat: Date
+  juchuHonbanbiDat: Date,
+  connection: PoolClient
 ) => {
   try {
-    const { error } = await deleteHonbanbi(
+    await deleteHonbanbi(
       juchuHeadId,
       juchuKizaiHeadId,
       juchuHonbanbiShubetuId,
-      toISOStringYearMonthDay(juchuHonbanbiDat)
+      toISOStringYearMonthDay(juchuHonbanbiDat),
+      connection
     );
-
-    if (error) {
-      console.error('Error delete honbanbi:', error.message);
-    }
   } catch (e) {
-    console.error(e);
+    throw e;
   }
 };
 

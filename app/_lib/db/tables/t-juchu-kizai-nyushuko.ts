@@ -1,5 +1,7 @@
 'use server';
 
+import { PoolClient } from 'pg';
+
 import { SCHEMA, supabase } from '../supabase';
 import { JuchuKizaiNyushuko } from '../types/t-juchu-kizai-nyushuko-type';
 
@@ -55,9 +57,20 @@ export const selectJuchuKizaiNyushukoConfirm = async (data: {
  * @param userNam ユーザー名
  * @returns
  */
-export const insertJuchuKizaiNyushuko = async (data: JuchuKizaiNyushuko) => {
+export const insertJuchuKizaiNyushuko = async (data: JuchuKizaiNyushuko, connection: PoolClient) => {
+  const cols = Object.keys(data);
+  const values = Object.values(data);
+  const placeholders = values.map((_, i) => `$${i + 1}`).join(', ');
+
+  const query = `
+      INSERT INTO
+        ${SCHEMA}.t_juchu_kizai_nyushuko (${cols.join(',')})
+      VALUES 
+        (${placeholders})
+    `;
+
   try {
-    return await supabase.schema(SCHEMA).from('t_juchu_kizai_nyushuko').insert(data);
+    await connection.query(query, values);
   } catch (e) {
     throw e;
   }
@@ -69,36 +82,77 @@ export const insertJuchuKizaiNyushuko = async (data: JuchuKizaiNyushuko) => {
  * @param userNam ユーザー名
  * @returns
  */
-export const updateJuchuKizaiNyushuko = async (data: JuchuKizaiNyushuko) => {
+export const updateJuchuKizaiNyushuko = async (data: JuchuKizaiNyushuko, connection: PoolClient) => {
+  const whereKeys = ['juchu_head_id', 'juchu_kizai_head_id', 'nyushuko_shubetu_id', 'nyushuko_basho_id'] as const;
+
+  const allKeys = Object.keys(data) as (keyof typeof data)[];
+
+  const updateKeys = allKeys.filter((key) => !(whereKeys as readonly string[]).includes(key));
+
+  if (updateKeys.length === 0) {
+    throw new Error('No columns to update.');
+  }
+
+  const allValues: (string | number | null | undefined)[] = [];
+  let placeholderIndex = 1;
+
+  const setClause = updateKeys
+    .map((key) => {
+      allValues.push(data[key]);
+      return `${key} = $${placeholderIndex++}`;
+    })
+    .join(', ');
+
+  const whereClause = whereKeys
+    .map((key) => {
+      allValues.push(data[key]);
+      return `${key} = $${placeholderIndex++}`;
+    })
+    .join(' AND ');
+
+  const query = `
+      UPDATE
+        ${SCHEMA}.t_juchu_kizai_nyushuko
+      SET
+        ${setClause}
+      WHERE
+        ${whereClause}
+    `;
   try {
-    return await supabase
-      .schema(SCHEMA)
-      .from('t_juchu_kizai_nyushuko')
-      .update(data)
-      .eq('juchu_head_id', data.juchu_head_id)
-      .eq('juchu_kizai_head_id', data.juchu_kizai_head_id)
-      .eq('nyushuko_shubetu_id', data.nyushuko_shubetu_id)
-      .eq('nyushuko_basho_id', data.nyushuko_basho_id);
+    await connection.query(query, allValues);
   } catch (e) {
     throw e;
   }
 };
 
-export const deleteJchuKizaiNyushuko = async (data: {
-  juchu_head_id: number;
-  juchu_kizai_head_id: number;
-  nyushuko_shubetu_id: number;
-  nyushuko_basho_id: number;
-}) => {
+export const deleteJchuKizaiNyushuko = async (
+  data: {
+    juchu_head_id: number;
+    juchu_kizai_head_id: number;
+    nyushuko_shubetu_id: number;
+    nyushuko_basho_id: number;
+  },
+  connection: PoolClient
+) => {
+  const whereKeys = Object.keys(data) as (keyof typeof data)[];
+
+  if (whereKeys.length === 0) {
+    throw new Error('DELETE conditions cannot be empty.');
+  }
+
+  const whereClause = whereKeys.map((key, index) => `${key} = $${index + 1}`).join(' AND ');
+
+  const values = whereKeys.map((key) => data[key]);
+
+  const query = `
+    DELETE FROM
+      ${SCHEMA}.t_juchu_kizai_nyushuko
+    WHERE
+      ${whereClause}
+  `;
+
   try {
-    return await supabase
-      .schema(SCHEMA)
-      .from('t_juchu_kizai_nyushuko')
-      .delete()
-      .eq('juchu_head_id', data.juchu_head_id)
-      .eq('juchu_kizai_head_id', data.juchu_kizai_head_id)
-      .eq('nyushuko_shubetu_id', data.nyushuko_shubetu_id)
-      .eq('nyushuko_basho_id', data.nyushuko_basho_id);
+    await connection.query(query, values);
   } catch (e) {
     throw e;
   }
