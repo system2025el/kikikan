@@ -1,6 +1,6 @@
 'use server';
 
-import { QueryResult } from 'pg';
+import { PoolClient, QueryResult } from 'pg';
 
 import { selectKokyaku } from '@/app/_lib/db/tables/m-kokyaku';
 import { selectDetailStockList } from '@/app/_lib/db/tables/stock-table';
@@ -129,6 +129,7 @@ export const getJuchuKizaiHeadMaxId = async (juchuHeadId: number) => {
     return data;
   } catch (e) {
     console.error(e);
+    return null;
   }
 };
 
@@ -185,7 +186,8 @@ export const addJuchuKizaiNyushuko = async (
   yardShukoDat: Date | null,
   kicsNyukoDat: Date | null,
   yardNyukoDat: Date | null,
-  userNam: string
+  userNam: string,
+  connection: PoolClient
 ) => {
   const dates = [kicsShukoDat, yardShukoDat, kicsNyukoDat, yardNyukoDat];
   for (let i = 0; i < dates.length; i++) {
@@ -202,18 +204,13 @@ export const addJuchuKizaiNyushuko = async (
     };
 
     try {
-      const { error } = await insertJuchuKizaiNyushuko(newData);
-
-      if (error) {
-        console.error('Error adding kizai Nyushuko:', error.message);
-        return false;
-      } else {
-        console.log('kizai Nyushuko added successfully:', newData);
-      }
+      await insertJuchuKizaiNyushuko(newData, connection);
     } catch (e) {
       console.error('Exception while adding kizai Nyushuko:', e);
+      throw e;
     }
   }
+  console.log('kizai Nyushuko added successfully:', dates);
   return true;
 };
 
@@ -230,7 +227,8 @@ export const updJuchuKizaiNyushuko = async (
   yardShukoDat: Date | null,
   kicsNyukoDat: Date | null,
   yardNyukoDat: Date | null,
-  userNam: string
+  userNam: string,
+  connection: PoolClient
 ) => {
   const dates = [kicsShukoDat, yardShukoDat, kicsNyukoDat, yardNyukoDat];
   for (let i = 0; i < dates.length; i++) {
@@ -256,37 +254,20 @@ export const updJuchuKizaiNyushuko = async (
     try {
       const selectData = await selectJuchuKizaiNyushukoConfirm(confirmData);
 
+      // 更新
       if (selectData.data && data) {
-        const { error: updateError } = await updateJuchuKizaiNyushuko({
-          ...data,
-          upd_dat: toJapanTimeString(),
-          upd_user: userNam,
-        });
-        if (updateError) {
-          console.error('Error updating kizai nyushuko:', updateError.message);
-          continue;
-        }
+        await updateJuchuKizaiNyushuko({ ...data, upd_dat: toJapanTimeString(), upd_user: userNam }, connection);
+        // 削除
       } else if (selectData.data && !data) {
-        const { error: deleteError } = await deleteJchuKizaiNyushuko(confirmData);
-        if (deleteError) {
-          console.error('Error delete kizai nyushuko:', deleteError.message);
-          continue;
-        }
+        await deleteJchuKizaiNyushuko(confirmData, connection);
+        // 追加
       } else if (!selectData.data && data) {
-        const { error: insertError } = await insertJuchuKizaiNyushuko({
-          ...data,
-          add_dat: toJapanTimeString(),
-          add_user: userNam,
-        });
-        if (insertError) {
-          console.error('Error updating kizai nyushuko:', insertError.message);
-          continue;
-        }
+        await insertJuchuKizaiNyushuko({ ...data, add_dat: toJapanTimeString(), add_user: userNam }, connection);
       }
       console.log('kizai nyushuko updated successfully:', data);
     } catch (e) {
       console.error('Exception while updating kizai nyushuko:', e);
-      break;
+      throw e;
     }
   }
   return true;
@@ -456,7 +437,8 @@ export const addAllHonbanbi = async (
   juchuHeadId: number,
   juchuKizaiHeadId: number,
   juchuHonbanbiData: JuchuKizaiHonbanbiValues[],
-  userNam: string
+  userNam: string,
+  connection: PoolClient
 ) => {
   const newData: JuchuKizaiHonbanbi[] = juchuHonbanbiData.map((d) => ({
     juchu_head_id: juchuHeadId,
@@ -469,15 +451,12 @@ export const addAllHonbanbi = async (
     add_user: userNam,
   }));
   try {
-    const { error } = await insertAllHonbanbi(newData);
-    if (error) {
-      console.error('Error Add honbanbi:', error.message);
-      return false;
-    }
-    console.log('honbanbi addall successfully:', newData);
+    await insertAllHonbanbi(newData, connection);
+    console.log('honbanbi add all successfully:', newData);
     return true;
   } catch (e) {
-    console.log(e);
+    console.error('Error Add honbanbi:', e);
+    throw e;
   }
 };
 
@@ -487,14 +466,10 @@ export const addAllHonbanbi = async (
  * @param juchuKizaiHeadId 受注機材ヘッダーid
  * @param juchuHonbanbiData 受注機材本番日データ
  */
-export const delSiyouHonbanbi = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
+export const delSiyouHonbanbi = async (juchuHeadId: number, juchuKizaiHeadId: number, connection: PoolClient) => {
   try {
-    const { error } = await deleteSiyouHonbanbi(juchuHeadId, juchuKizaiHeadId);
-
-    if (error) {
-      console.error('Error delete honbanbi:', error.message);
-    }
+    await deleteSiyouHonbanbi(juchuHeadId, juchuKizaiHeadId, connection);
   } catch (e) {
-    console.error(e);
+    throw e;
   }
 };
