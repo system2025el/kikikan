@@ -101,12 +101,33 @@ export const MeisaiTblHeader = ({
             slotProps={{ input: { readOnly: true, onFocus: (e) => e.target.blur() } }}
           />
         </Grid2>
+        <Grid2 sx={styles.container} size={4}>
+          <Typography marginRight={1}>機材明細番号</Typography>
+          <TextFieldElement
+            name={`meisaiHeads.${index}.juchuKizaiHeadId`}
+            control={control}
+            sx={{
+              width: 120,
+              pointerEvents: 'none', // クリック不可にする
+              backgroundColor: '#f5f5f5', // グレー背景で無効っぽく
+              color: '#888',
+            }}
+            slotProps={{ input: { readOnly: true, onFocus: (e) => e.target.blur() } }}
+          />
+        </Grid2>
+      </Grid2>
+
+      <Grid2 container alignItems={'end'} my={0.5}>
+        <Grid2 sx={styles.container} size={4}>
+          <Typography marginRight={5}>公演名</Typography>
+          <TextFieldElement name={`meisaiHeads.${index}.koenNam`} control={control} sx={{ width: 400 }} />
+        </Grid2>
         <Grid2 sx={styles.container}>
-          <Typography marginRight={3}>貸出期間</Typography>
+          <Typography marginRight={5}>貸出期間</Typography>
           <Controller
             control={control}
             name={`meisaiHeads.${index}.seikyuRange.strt`}
-            render={({ field }) => <FormDateX value={field.value} onChange={field.onChange} sx={{ mr: 1 }} />}
+            render={({ field }) => <FormDateX value={field.value} onChange={field.onChange} sx={{ mr: 1 }} readonly />}
           />
           <span>～</span>
           <Controller
@@ -119,19 +140,12 @@ export const MeisaiTblHeader = ({
 
       <Grid2 container alignItems={'end'} my={0.5}>
         <Grid2 sx={styles.container} size={4}>
-          <Typography marginRight={5}>公演名</Typography>
-          <TextFieldElement name={`meisaiHeads.${index}.koenNam`} control={control} sx={{ width: 400 }} />
-        </Grid2>
-        <Grid2 sx={styles.container}>
-          <Typography marginRight={5}>担当者</Typography>
-          <TextFieldElement name={`meisaiHeads.${index}.kokyakuTantoNam`} control={control} />
-        </Grid2>
-      </Grid2>
-
-      <Grid2 container alignItems={'end'} my={0.5}>
-        <Grid2 sx={styles.container} size={4}>
           <Typography marginRight={3}>公演場所</Typography>
           <TextFieldElement name={`meisaiHeads.${index}.koenBashoNam`} control={control} sx={{ width: 400 }} />
+        </Grid2>
+        <Grid2 sx={styles.container}>
+          <Typography marginRight={7}>担当者</Typography>
+          <TextFieldElement name={`meisaiHeads.${index}.kokyakuTantoNam`} control={control} />
         </Grid2>
       </Grid2>
 
