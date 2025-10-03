@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { CheckboxElement, TextFieldElement } from 'react-hook-form-mui';
 
-import { toJapanMonthString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanDateString, toJapanMonthString } from '@/app/(main)/_lib/date-conversion';
 import { CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
 import { FormDateX, FormMonthX } from '@/app/(main)/_ui/date';
 import { Loading } from '@/app/(main)/_ui/loading';
@@ -24,7 +24,7 @@ export const CreateBillDialog = ({
   /* useForm ------------------------------------------------------------ */
   const { control, handleSubmit, reset } = useForm<{
     kokyaku: { id: number; name: string | null };
-    month: Date | null;
+    date: Date | null;
     showDetailFlg: boolean;
   }>({
     mode: 'onSubmit',
@@ -35,24 +35,26 @@ export const CreateBillDialog = ({
   /* methods ------------------------------------------------------------- */
   const onSubmit = async (data: {
     kokyaku: { id: number; name: string | null };
-    month: Date | null;
+    date: Date | null;
     showDetailFlg: boolean;
   }) => {
     console.log(data);
     router.push(
-      `bill-list/create?kokyakuId=${data.kokyaku.id}&date=${toJapanMonthString(data.month ?? undefined)}&flg=${data.showDetailFlg}`
+      `bill-list/create?kokyakuId=${data.kokyaku.id}&date=${toJapanDateString(data.date ?? undefined)}&flg=${data.showDetailFlg}`
     );
   };
 
   /* useEffect ----------------------------------------------------------- */
+  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     const getCustInfo = async () => {
       const kokyakuNam = await getChosenCustomerName(kokyakuId);
-      reset({ kokyaku: { id: kokyakuId, name: kokyakuNam ?? null }, month: new Date() });
+      reset({ kokyaku: { id: kokyakuId, name: kokyakuNam ?? null }, date: new Date() });
     };
     getCustInfo();
     setIsLoading(false);
   }, [kokyakuId]);
+  /* eslint-enable react-hooks/exhaustive-deps */
   return (
     <>
       <DialogTitle display={'flex'} justifyContent={'end'}>
@@ -88,7 +90,7 @@ export const CreateBillDialog = ({
               <Typography mr={1}>～</Typography>
               <Controller
                 control={control}
-                name="month"
+                name="date"
                 rules={{ required: '選択してください' }}
                 render={({ field, fieldState }) => (
                   <FormDateX

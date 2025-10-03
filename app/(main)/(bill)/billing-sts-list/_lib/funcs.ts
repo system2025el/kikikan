@@ -1,6 +1,6 @@
 'use server';
 
-import { selectFilteredBillingSts } from '@/app/_lib/db/tables/v-seikyu-date-lst';
+import { selectFilteredBillingSituations } from '@/app/_lib/db/tables/v-seikyu-date-lst';
 
 import { BillingStsSearchValues, BillingStsTableValues } from './types';
 
@@ -9,12 +9,14 @@ import { BillingStsSearchValues, BillingStsTableValues } from './types';
  * @param queries 検索条件
  * @returns 受注請求状況一覧テーブルに表示する配列
  */
-export const getFilteredBillingSts = async (queries: BillingStsSearchValues): Promise<BillingStsTableValues[]> => {
+export const getFilteredBillingSituations = async (
+  queries: BillingStsSearchValues
+): Promise<BillingStsTableValues[]> => {
   if (!queries.sts.includes('1') && !queries.sts.includes('2')) {
     return []; // 空配列を返す
   }
   try {
-    const { data, error } = await selectFilteredBillingSts(queries);
+    const { data, error } = await selectFilteredBillingSituations(queries);
     if (error) {
       console.error('DB情報取得エラー', error.message, error.cause, error.hint);
       throw error;

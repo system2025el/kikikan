@@ -401,6 +401,7 @@ export const FormDateX = ({
   value,
   error,
   helperText,
+  readonly,
   onChange,
 }: {
   sx?: object;
@@ -408,6 +409,7 @@ export const FormDateX = ({
   value?: Date | null;
   error?: boolean;
   helperText?: string;
+  readonly?: boolean;
   onChange?: (date: Date | null) => void;
 }) => {
   return (
@@ -429,17 +431,30 @@ export const FormDateX = ({
             '.Mui-disabled': {
               WebkitTextFillColor: 'black',
             },
+            pointerEvents: readonly ? 'none' : undefined,
+            backgroundColor: readonly ? grey[200] : undefined,
+            color: readonly ? '#888' : undefined,
             ...sx,
           },
+          inputProps: readonly
+            ? {
+                readOnly: true,
+                onFocus: (e: React.FocusEvent<HTMLInputElement>) => e.target.blur(), // フォーカスを外す
+              }
+            : undefined,
         },
         calendarHeader: { format: 'YYYY年MM月' },
       }} // カレンダーヘッダーのフォーマット
       views={['year', 'month', 'day']}
       disabled={disabled}
       value={value ? dayjs(value) : null}
-      onChange={(newValue: Dayjs | null) => {
-        onChange!(newValue ? newValue.toDate() : null);
-      }}
+      onChange={
+        readonly
+          ? () => {}
+          : (newValue: Dayjs | null) => {
+              onChange!(newValue ? newValue.toDate() : null);
+            }
+      }
     />
   );
 };
