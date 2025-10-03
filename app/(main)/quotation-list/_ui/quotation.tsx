@@ -161,8 +161,9 @@ export const Quotation = ({
       setValue('preTaxGokeiAmt', sum);
     }
 
-    const zei = (sum * (zeiRat ?? 0)) / 100;
-    if (zei !== currentZeiAmt) {
+    const zei = Math.round((sum * (zeiRat ?? 0)) / 100);
+    const currentZei = Math.round(currentZeiAmt ?? 0);
+    if (zei !== currentZei) {
       setValue('zeiAmt', zei === 0 ? null : zei);
     }
 

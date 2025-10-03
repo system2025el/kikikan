@@ -41,8 +41,10 @@ export const MeisaiLines = ({ index }: { index: number }) => {
       const theShokei = (qty * (honbanbiQty * 1000) * tankaAmt) / 1000;
       // 現在の小計の値と比較し、異なっていればフォームの値を更新する
       // (無限ループを防ぐため、値が違う場合のみsetValueを実行)
-      if (theShokei !== (Number(m.shokeiAmt) || 0)) {
-        setValue(`meisaiHeads.${index}.meisai.${i}.shokeiAmt`, theShokei);
+      const currentShokei = Math.round(Number(m.shokeiAmt) || 0);
+      const newShokei = Math.round(theShokei);
+      if (newShokei !== currentShokei) {
+        setValue(`meisaiHeads.${index}.meisai.${i}.shokeiAmt`, newShokei);
       }
     });
   }, [watchedMeisai, index, setValue]); // 依存配列に監視対象などを設定

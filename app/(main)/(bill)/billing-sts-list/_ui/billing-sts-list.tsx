@@ -9,7 +9,7 @@ import { CheckboxButtonGroup, SelectElement, TextFieldElement } from 'react-hook
 import { BackButton } from '@/app/(main)/_ui/buttons';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 
-import { getFilteredBillingSts } from '../_lib/funcs';
+import { getFilteredBillingSituations } from '../_lib/funcs';
 import { BillingStsSearchValues, BillingStsTableValues } from '../_lib/types';
 import { BillingStsListTable } from './billing-sts-list-table';
 
@@ -36,7 +36,7 @@ export const BillingStsList = ({ custs }: { custs: SelectTypes[] }) => {
   const onSubmit = async (data: BillingStsSearchValues) => {
     setIsLoading(true);
     console.log(data);
-    const theSts = await getFilteredBillingSts(data);
+    const theSts = await getFilteredBillingSituations(data);
     setBillSts(theSts);
     setIsLoading(false);
   };
