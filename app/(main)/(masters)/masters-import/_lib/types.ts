@@ -89,6 +89,7 @@ export type RfidImportTypes = {
   rfid_kizai_sts: number | null | undefined;
   del_flg: number | null | undefined;
   shozoku_id: number | null | undefined;
+  el_num?: number | null | undefined;
   mem?: string | null;
 };
 
@@ -98,7 +99,6 @@ export type RfidImportTypes = {
 export type KizaiImportTypes = {
   kizai_nam: string;
   section_nam?: string | null;
-  el_num?: number | null | undefined;
   shozoku_id: number | null | undefined;
   bld_cod?: string | null;
   tana_cod?: string | null;

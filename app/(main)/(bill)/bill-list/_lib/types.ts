@@ -42,7 +42,7 @@ export const BillHeadSchema = z.object({
   seikyuHeadId: z.number().nullish(),
   seikyuSts: z.number().nullish(),
   seikyuDat: z.date().nullish(),
-  aite: z.string().max(50, { message: validationMessages.maxStringLength(50) }),
+  aite: z.object({ id: z.number(), nam: z.string().max(50, { message: validationMessages.maxStringLength(50) }) }),
   seikyuHeadNam: z
     .string()
     .max(50, { message: validationMessages.maxStringLength(50) })
@@ -91,69 +91,57 @@ export const BillHeadSchema = z.object({
   gokeiAmt: z.number({ message: validationMessages.number() }).nullish(),
   meisaiHeads: z
     .array(
-      z.object({
-        seikyuMeisaiHeadId: z.number().int().nullish(),
-        seikyuMeisaiHeadNam: z
-          .string()
-          .max(50, { message: validationMessages.maxStringLength(50) })
-          .nullish(),
-        seikyuMeisaiKbn: z.number(),
-        headNamDspFlg: z.boolean(),
-        nebikiNam: z.string().nullish(),
-        nebikiAmt: z
-          .number()
-          .max(999999999, { message: validationMessages.maxNumberLength(9) })
-          .nullish(),
-        nebikiAftNam: z.string().nullish(),
-        shokeiMei: z.string().nullish(),
-        shokeiAmt: z
-          .number({ message: validationMessages.number() })
-          .max(999999999999, { message: validationMessages.maxNumberLength(12) })
-          .nullish(),
-        nebikiAftAmt: z
-          .number()
-          .max(999999999, { message: validationMessages.maxNumberLength(9) })
-          .nullish(),
-        biko1: z
-          .string()
-          .max(100, { message: validationMessages.maxStringLength(100) })
-          .nullish(),
-        biko2: z
-          .string()
-          .max(100, { message: validationMessages.maxStringLength(100) })
-          .nullish(),
-        biko3: z
-          .string()
-          .max(100, { message: validationMessages.maxStringLength(100) })
-          .nullish(),
-        meisai: z
-          .array(
-            z.object({
-              id: z.number().nullish(),
-              nam: z
-                .string()
-                .max(50, { message: validationMessages.maxStringLength(50) })
-                .nullish(),
-              qty: z
-                .number({ message: validationMessages.number() })
-                .max(9999, { message: validationMessages.maxNumberLength(4) })
-                .nullish(),
-              honbanbiQty: z
-                .number({ message: validationMessages.number() })
-                .max(999, { message: validationMessages.maxNumberLength(3) })
-                .nullish(),
-              tankaAmt: z
-                .number({ message: validationMessages.number() })
-                .max(999999999, { message: validationMessages.maxNumberLength(9) })
-                .nullish(),
-              shokeiAmt: z
-                .number({ message: validationMessages.number() })
-                .max(999999999999, { message: validationMessages.maxNumberLength(12) })
-                .nullish(),
-            })
-          )
-          .nullish(),
-      })
+      z
+        .object({
+          seikyuMeisaiHeadId: z.number().int().nullish(),
+          juchuHeadId: z.number().int().nullish(),
+          juchuKizaiHeadId: z.number().int().nullish(),
+          seikyuRange: z.object({ strt: z.date().nullish(), end: z.date().nullish() }).nullish(),
+          koenNam: z.string().nullish(),
+          koenBashoNam: z.string().nullish(),
+          kokyakuTantoNam: z.string().nullish(),
+          seikyuMeisaiHeadNam: z
+            .string()
+            .max(50, { message: validationMessages.maxStringLength(50) })
+            .nullish(),
+          nebikiAmt: z
+            .number()
+            .max(999999999, { message: validationMessages.maxNumberLength(9) })
+            .nullish(),
+          nebikiAftAmt: z
+            .number()
+            .max(999999999, { message: validationMessages.maxNumberLength(9) })
+            .nullish(),
+          zeiFlg: z.boolean(),
+          meisai: z
+            .array(
+              z.object({
+                id: z.number().nullish(),
+                nam: z
+                  .string()
+                  .max(50, { message: validationMessages.maxStringLength(50) })
+                  .nullish(),
+                qty: z
+                  .number({ message: validationMessages.number() })
+                  .max(9999, { message: validationMessages.maxNumberLength(4) })
+                  .nullish(),
+                honbanbiQty: z
+                  .number({ message: validationMessages.number() })
+                  .max(999, { message: validationMessages.maxNumberLength(3) })
+                  .nullish(),
+                tankaAmt: z
+                  .number({ message: validationMessages.number() })
+                  .max(999999999, { message: validationMessages.maxNumberLength(9) })
+                  .nullish(),
+                shokeiAmt: z
+                  .number({ message: validationMessages.number() })
+                  .max(999999999999, { message: validationMessages.maxNumberLength(12) })
+                  .nullish(),
+              })
+            )
+            .nullish(),
+        })
+        .nullish()
     )
     .nullish(),
 });

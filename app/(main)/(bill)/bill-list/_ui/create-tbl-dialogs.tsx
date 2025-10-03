@@ -16,13 +16,25 @@ import {
   Typography,
 } from '@mui/material';
 import { useEffect, useRef, useState } from 'react';
-import { UseFieldArrayReturn } from 'react-hook-form-mui';
+import {
+  Controller,
+  TextFieldElement,
+  useFieldArray,
+  UseFieldArrayReturn,
+  useForm,
+  useFormContext,
+} from 'react-hook-form-mui';
 
 import { CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
+import { FormDateX } from '@/app/(main)/_ui/date';
 import { Loading } from '@/app/(main)/_ui/loading';
+import {
+  getJuchuIsshikiMeisai,
+  getJuchuKizaiHeadNamList,
+  getJuchuKizaiMeisaiList,
+} from '@/app/(main)/quotation-list/_lib/funcs';
 
-import { getJuchuIsshikiMeisai, getJuchuKizaiHeadNamList, getJuchuKizaiMeisaiList } from '../_lib/func';
-import { QuotHeadValues } from '../_lib/types';
+import { BillHeadValues } from '../_lib/types';
 
 /**
  * 明細を機材明細から作成するか確認するダイアログ
@@ -31,11 +43,11 @@ import { QuotHeadValues } from '../_lib/types';
  */
 export const FirstDialogPage = ({
   handleClose,
-  addKizaiTbl,
+  addTbl,
   toSecondPage,
 }: {
   handleClose: () => void;
-  addKizaiTbl: () => void;
+  addTbl: () => void;
   toSecondPage: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
   return (
@@ -48,7 +60,7 @@ export const FirstDialogPage = ({
         <Button onClick={() => toSecondPage(true)}>はい</Button>
         <Button
           onClick={() => {
-            addKizaiTbl();
+            addTbl();
             handleClose();
           }}
         >
@@ -65,20 +77,21 @@ export const FirstDialogPage = ({
  * @returns  {JSX.Element}
  */
 export const SecondDialogPage = ({
-  juchuId,
-  field,
+  kokyakuId,
+  kokyakuNam,
+  headsField,
   handleClose,
   setSnackBarOpen,
   setSnackBarMessage,
 }: {
-  juchuId: number | null | undefined;
-  field: UseFieldArrayReturn<QuotHeadValues>;
+  kokyakuId: number;
+  kokyakuNam: string;
+  headsField: UseFieldArrayReturn<BillHeadValues>;
   handleClose: () => void;
   setSnackBarOpen: () => void;
   setSnackBarMessage: React.Dispatch<React.SetStateAction<string>>;
 }) => {
   /* debug用、レンダリング回数取得に使用 */
-  const hasRun = useRef(false);
   const [checked, setChecked] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -87,59 +100,43 @@ export const SecondDialogPage = ({
     { juchuHeadId: number; juchuKizaiHeadId: number; headNam: string }[]
   >([]);
 
+  /* useForm -------------------------------------- */
+  const { control, handleSubmit, setValue } = useForm({
+    mode: 'onSubmit',
+    reValidateMode: 'onSubmit',
+    defaultValues: {
+      kokyaku: { id: kokyakuId, nam: kokyakuNam },
+      juchuId: null,
+      dat: new Date(),
+    },
+  });
+
   /* methods ------------------------------------------------ */
   /* ヘッダが選ばれたときの処理 */
   const handleClickHeadNam = async (juchuId: number, kizaiHeadId: number, headNam: string, checked: boolean) => {
     console.log(kizaiHeadId, checked);
     if (checked) {
       const data = await getJuchuIsshikiMeisai(juchuId, kizaiHeadId);
-      field.append({
-        mituMeisaiHeadNam: null,
-        headNamDspFlg: false,
-        mituMeisaiKbn: 0,
-        nebikiNam: '値引き',
-        nebikiAftNam: '機材費',
+      headsField.append({
+        seikyuMeisaiHeadNam: null,
+        zeiFlg: false,
         meisai: data,
       });
     } else {
       const data = await getJuchuKizaiMeisaiList(juchuId, kizaiHeadId);
       console.log(data);
       // 取得した内容をテーブル内の明細に入れる
-      field.append({
-        mituMeisaiHeadNam: null,
-        headNamDspFlg: false,
-        mituMeisaiKbn: 0,
-        nebikiNam: '値引き',
-        nebikiAftNam: '機材費',
+      headsField.append({
+        seikyuMeisaiHeadNam: null,
+        zeiFlg: false,
         meisai: data,
       });
     }
     handleClose();
   };
 
-  /* eslint-disable react-hooks/exhaustive-deps */
   /* useEffect ---------------------------------------------- */
-  useEffect(() => {
-    if (!hasRun.current) {
-      hasRun.current = true;
-      if (!juchuId) {
-        // 受注機材Idが選ばれてない時にダイアログ閉じて何もしない
-        setSnackBarMessage(`受注番号が選ばれていません`);
-        setSnackBarOpen();
-        handleClose();
-        return;
-      }
-      /* 受注ヘッダIDから表示する受注機材ヘッダを取得する */
-      const getList = async () => {
-        const list = await getJuchuKizaiHeadNamList(juchuId);
-        setMeisaiHeadNamList(list);
-        setIsLoading(false);
-      };
-      getList();
-      console.log(meisaiHeadNamList);
-    }
-  }, []);
-  /* eslint-enable react-hooks/exhaustive-deps */
+  useEffect(() => {}, []);
 
   return (
     <>
@@ -151,11 +148,54 @@ export const SecondDialogPage = ({
         />
       </DialogTitle>
       <Box p={4}>
+        <form>
+          <Box sx={styles.container}>
+            <Typography mr={7}>相手</Typography>
+            <TextFieldElement
+              name="kokyaku.nam"
+              control={control}
+              sx={{
+                pointerEvents: 'none', // クリック不可にする
+                backgroundColor: '#f5f5f5', // グレー背景で無効っぽく
+                color: '#888',
+                width: 400,
+              }}
+              slotProps={{ input: { readOnly: true, onFocus: (e) => e.target.blur() } }}
+            />
+          </Box>
+          <Box sx={styles.container}>
+            <Typography mr={3}>受注番号</Typography>
+            <TextFieldElement name="juchuId" control={control} sx={{ width: 120 }} />
+          </Box>
+          <Box sx={styles.container}>
+            <Typography mr={5}>年月日</Typography>
+            <Typography mr={1}>～</Typography>
+            <Controller
+              control={control}
+              name="dat"
+              rules={{ required: '選択してください' }}
+              render={({ field, fieldState }) => (
+                <FormDateX
+                  value={field.value}
+                  onChange={field.onChange}
+                  sx={{
+                    mr: 1,
+                  }}
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message}
+                />
+              )}
+            />
+          </Box>
+          <Box sx={styles.container} justifyContent={'end'}>
+            <Button type="submit">検索</Button>
+          </Box>
+        </form>
         <Stack>
           <FormGroup>
             <FormControlLabel
               control={<Checkbox value={checked} onChange={() => setChecked(!checked)} />}
-              label=" 一式表示を有効にする"
+              label=" 詳細表示"
             />
           </FormGroup>
         </Stack>
@@ -193,4 +233,16 @@ export const SecondDialogPage = ({
       </DialogActions>
     </>
   );
+};
+
+/* style
+---------------------------------------------------------------------------------------------------- */
+/** @type {{ [key: string]: React.CSSProperties }} style */
+const styles: { [key: string]: React.CSSProperties } = {
+  // コンテナ
+  container: {
+    display: 'flex',
+    alignItems: 'center',
+    marginTop: 0.5,
+  },
 };

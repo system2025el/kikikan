@@ -14,31 +14,30 @@ import {
   Dialog,
   Divider,
   Grid2,
-  InputAdornment,
   Paper,
   Snackbar,
   TextField,
   Typography,
 } from '@mui/material';
 import { useRouter } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
-import { Controller, FieldPath, FormProvider, useFieldArray, useForm, useFormContext, useWatch } from 'react-hook-form';
+import { useEffect, useState } from 'react';
+import { Controller, FieldPath, FormProvider, useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import { toJapanDateString } from '@/app/(main)/_lib/date-conversion';
-import { BackButton } from '@/app/(main)/_ui/buttons';
 import { FormDateX } from '@/app/(main)/_ui/date';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { LoadingOverlay } from '@/app/(main)/_ui/loading';
 
 import { usePdf } from '../_lib/hooks/usePdf';
 import { JuchuValues, QuotHeadSchema, QuotHeadValues } from '../_lib/types';
-import { addQuot } from '../create/_lib/func';
-import { updateQuot } from '../edit/[id]/_lib/func';
-import { FirstDialogPage, SecondDialogPage } from './dialogs';
+import { addQuot } from '../create/_lib/funcs';
+import { updateQuot } from '../edit/[id]/_lib/funcs';
+import { FirstDialogPage, SecondDialogPage } from './create-tbl-dialogs';
 import { MeisaiLines } from './meisai';
 import { MeisaiTblHeader } from './meisai-tbl-header';
+import { ReadOnlyYenNumberElement } from './yen';
 
 /**
  * 見積書作成画面
@@ -836,77 +835,6 @@ export const Quotation = ({
         sx={{ marginTop: '65px' }}
       />
     </Container>
-  );
-};
-
-export const ReadOnlyYenNumberElement = <TFieldName extends FieldPath<QuotHeadValues>>({
-  name,
-}: {
-  name: TFieldName;
-}) => {
-  const { control } = useFormContext<QuotHeadValues>();
-  return (
-    <Controller
-      name={name}
-      control={control}
-      render={({ field, fieldState }) => (
-        <TextField
-          {...field}
-          value={
-            typeof field.value === 'number' && !isNaN(field.value)
-              ? field.value >= 0
-                ? `¥${Math.abs(field.value).toLocaleString()}`
-                : `-¥${Math.abs(field.value).toLocaleString()}`
-              : `¥0`
-          }
-          type="text"
-          onFocus={(e) => {
-            const rawValue = String(field.value ?? '');
-            setTimeout(() => {
-              e.target.value = rawValue;
-            }, 1);
-          }}
-          onBlur={(e) => {
-            const rawValue = e.target.value.replace(/[¥,]/g, '');
-            const numericValue = Number(rawValue);
-            field.onChange(numericValue);
-          }}
-          onChange={(e) => {
-            const raw = e.target.value.replace(/[^\d]/g, '');
-            if (/^\d*$/.test(raw)) {
-              field.onChange(Number(raw));
-              e.target.value = raw;
-            }
-          }}
-          sx={(theme) => ({
-            '.MuiOutlinedInput-notchedOutline': {
-              borderColor: fieldState.error?.message && theme.palette.error.main,
-            },
-            '.Mui-focused .MuiOutlinedInput-notchedOutline': {
-              borderColor: fieldState.error?.message && theme.palette.error.main,
-            },
-            '&:hover .MuiOutlinedInput-notchedOutline': {
-              borderColor: fieldState.error?.message && theme.palette.error.main,
-            },
-            '& .MuiInputBase-input': {
-              textAlign: 'right',
-            },
-            '.MuiFormHelperText-root': {
-              color: theme.palette.error.main,
-            },
-            '& input[type=number]::-webkit-inner-spin-button': {
-              WebkitAppearance: 'none',
-              margin: 0,
-            },
-            pointerEvents: 'none', // クリック不可にする
-            backgroundColor: '#f5f5f5', // グレー背景で無効っぽく
-            color: '#888',
-          })}
-          slotProps={{ input: { readOnly: true, onFocus: (e) => e.target.blur() } }}
-          helperText={fieldState.error?.message}
-        />
-      )}
-    />
   );
 };
 

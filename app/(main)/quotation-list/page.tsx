@@ -1,4 +1,4 @@
-import { getFilteredQuotList } from './_lib/func';
+import { getFilteredQuotList } from './_lib/funcs';
 import { QuotationList } from './_ui/quotation-list';
 
 const Page = async () => {

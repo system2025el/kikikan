@@ -101,9 +101,9 @@ const mockShukoData: ShukoTableValues[] = [
 
 export const ShukoList = (props: { shukoData: ShukoTableValues[] }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [selected, setSelected] = useState<number[]>([]);
-  // const [shukoList, setShukoList] = useState<ShukoTableValues[]>(props.shukoData);
-  const [shukoList, setShukoList] = useState<ShukoTableValues[]>(mockShukoData);
+  const [selected, setSelected] = useState<ShukoTableValues[]>([]);
+  const [shukoList, setShukoList] = useState<ShukoTableValues[]>(props.shukoData);
+
   /* useForm ------------------- */
   const { control, handleSubmit } = useForm({
     mode: 'onSubmit',
@@ -128,14 +128,10 @@ export const ShukoList = (props: { shukoData: ShukoTableValues[] }) => {
 
   // ボタン押下
   const handleOutput = async () => {
-    // チェックされた行を取り出し
-    const selectList = selected.map((index) => shukoList[index]);
-    console.log('selectList', selectList);
-
-    if (selectList.length === 0) return;
+    console.log(selected);
 
     // PdfModelの配列を作成
-    const pdfModels: PdfModel[] = selectList.map((row) => ({
+    const pdfModels: PdfModel[] = selected.map((row) => ({
       item1: row.juchuHeadId,
       item2: row.shukoDat,
       item3: row.kokyakuNam,

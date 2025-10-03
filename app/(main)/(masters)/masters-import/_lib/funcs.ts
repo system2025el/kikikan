@@ -55,7 +55,6 @@ export const ImportEqptRfidData = async (data: EqptImportType[]) => {
         .map((d) => ({
           kizai_nam: d.kizai_nam,
           section_nam: d.section_nam,
-          el_num: d.el_num,
           shozoku_id: d.shozoku_id,
           bld_cod: d.bld_cod,
           tana_cod: d.tana_cod,
@@ -89,6 +88,7 @@ export const ImportEqptRfidData = async (data: EqptImportType[]) => {
           rfid_kizai_sts: d.rfid_kizai_sts,
           del_flg: d.del_flg,
           shozoku_id: d.shozoku_id,
+          el_num: d.el_num,
           mem: d.del_flg === 1 ? d.mem : null,
         }))
         .filter((d) => d.rfid_tag_id && d.rfid_tag_id.trim() !== '')

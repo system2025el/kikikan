@@ -11,7 +11,7 @@ import { Loading } from '@/app/(main)/_ui/loading';
 import { FAKE_NEW_ID } from '../../_lib/constants';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
-import { emptyUser, formItems } from '../_lib/data';
+import { emptyUser, formItems } from '../_lib/datas';
 import { addNewUser, getChosenUser, updateUser } from '../_lib/funcs';
 import { UsersMasterDialogValues, UsersMaterDialogSchema } from '../_lib/types';
 /**

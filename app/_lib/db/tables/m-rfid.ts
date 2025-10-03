@@ -28,7 +28,7 @@ export const selectAllRfidWithKizai = async () => {
     mr.del_flg, 
     mk.section_num, 
     mk.kizai_nam, 
-    mk.el_num, 
+    mr.el_num, 
     mr.shozoku_id,
     mk.bld_cod, 
     mk.tana_cod, 

@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { insertNewUser, SelectFilteredUsers, selectOneUser, upDateUserDB } from '@/app/_lib/db/tables/m-user';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
-import { emptyUser } from './data';
+import { emptyUser } from './datas';
 import { UsersMasterDialogValues, UsersMasterTableValues } from './types';
 
 /**

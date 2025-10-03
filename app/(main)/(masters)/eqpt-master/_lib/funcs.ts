@@ -155,7 +155,6 @@ export const updateEqpt = async (rawData: EqptsMasterDialogValues, id: number) =
     kizai_nam: rawData.kizaiNam,
     del_flg: Number(rawData.delFlg),
     section_num: rawData.sectionNum,
-    el_num: rawData.elNum,
     shozoku_id: Number(rawData.shozokuId),
     bld_cod: rawData.bldCod,
     tana_cod: rawData.tanaCod,

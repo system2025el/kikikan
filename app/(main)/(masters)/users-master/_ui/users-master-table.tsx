@@ -24,7 +24,7 @@ import { Loading } from '@/app/(main)/_ui/loading';
 import { MuiTablePagination } from '../../../_ui/table-pagination';
 import { FAKE_NEW_ID, ROWS_PER_MASTER_TABLE_PAGE } from '../../_lib/constants';
 import { MasterTable } from '../../_ui/tables';
-import { mMHeader } from '../_lib/data';
+import { mMHeader } from '../_lib/datas';
 import { getFilteredUsers } from '../_lib/funcs';
 import { UsersMasterTableValues } from '../_lib/types';
 import { UsersMasterDialog } from './users-master-dialog';

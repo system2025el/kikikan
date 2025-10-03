@@ -1,39 +1,46 @@
 'use client';
 
 import SearchIcon from '@mui/icons-material/Search';
-import { Autocomplete, Box, Button, Container, Divider, Grid2, Paper, TextField, Typography } from '@mui/material';
-import { SetStateAction, useState } from 'react';
-import { Controller, useForm, useWatch } from 'react-hook-form';
+import { Box, Button, Container, Divider, Grid2, Paper, Typography } from '@mui/material';
+import { useState } from 'react';
+import { useForm, useWatch } from 'react-hook-form';
 import { CheckboxButtonGroup, SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
 import { BackButton } from '@/app/(main)/_ui/buttons';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 
+import { getFilteredBillingSts } from '../_lib/funcs';
+import { BillingStsSearchValues, BillingStsTableValues } from '../_lib/types';
 import { BillingStsListTable } from './billing-sts-list-table';
 
+/**
+ * 受注請求状況一覧画面
+ * @param param0
+ * @returns {JAX.Element} 受注請求状況一覧画面のコンポーネント
+ */
 export const BillingStsList = ({ custs }: { custs: SelectTypes[] }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [page, setPage] = useState<number>(1);
+  const [billSts, setBillSts] = useState<BillingStsTableValues[]>([]);
 
-  const { control, handleSubmit } = useForm<{
-    kokyaku: number | null;
-    kokyakuTantoNam: string | null;
-    sts: string[];
-  }>({
+  const { control, handleSubmit, getValues } = useForm<BillingStsSearchValues>({
     mode: 'onBlur',
     reValidateMode: 'onBlur',
     defaultValues: { kokyaku: null, kokyakuTantoNam: null, sts: ['1'] },
   });
 
+  // const kokyakuId = getValues('kokyaku');
   const kokyakuId = useWatch({ control, name: 'kokyaku' });
 
   /* method --------------------------------------------------------------- */
-  const onSubmit = async (data: { kokyaku: number | null; kokyakuTantoNam: string | null; sts: string[] }) => {
+  const onSubmit = async (data: BillingStsSearchValues) => {
     setIsLoading(true);
     console.log(data);
-
+    const theSts = await getFilteredBillingSts(data);
+    setBillSts(theSts);
     setIsLoading(false);
   };
+
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
       <Box justifySelf={'end'} mb={0.5}>
@@ -103,6 +110,7 @@ export const BillingStsList = ({ custs }: { custs: SelectTypes[] }) => {
         isLoading={isLoading}
         page={page}
         kokyakuId={Number(kokyakuId)}
+        billSts={billSts}
         setIsLoading={setIsLoading}
         setPage={setPage}
       />

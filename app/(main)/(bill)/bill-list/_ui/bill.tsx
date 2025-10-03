@@ -19,9 +19,10 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import { watch } from 'fs';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { Controller, FormProvider, useFieldArray, useForm } from 'react-hook-form';
+import { SetStateAction, useEffect, useState } from 'react';
+import { Controller, FieldArrayMethodProps, FormProvider, useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
@@ -29,13 +30,13 @@ import { validationMessages } from '@/app/(main)/_lib/validation-messages';
 import { FormDateX } from '@/app/(main)/_ui/date';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { LoadingOverlay } from '@/app/(main)/_ui/loading';
-import { FirstDialogPage, SecondDialogPage } from '@/app/(main)/quotation-list/_ui/dialogs';
-import { ReadOnlyYenNumberElement } from '@/app/(main)/quotation-list/_ui/quotation';
 
 import { usePdf } from '../_lib/hooks/usePdf';
 import { BillHeadSchema, BillHeadValues } from '../_lib/types';
+import { FirstDialogPage, SecondDialogPage } from './create-tbl-dialogs';
 import { MeisaiLines } from './meisai';
 import { MeisaiTblHeader } from './meisai-tbl-header';
+import { ReadOnlyYenNumberElement } from './yen';
 
 export const Bill = ({
   isNew,
@@ -84,6 +85,7 @@ export const Bill = ({
   } = billForm;
 
   const meisaiHeadFields = useFieldArray({ control, name: 'meisaiHeads' });
+  const kokyaku = useWatch({ control, name: 'aite' });
 
   /* methods ------------------------------------------------------ */
   /* 保存ボタン押下 */
@@ -217,7 +219,7 @@ export const Bill = ({
                     <Grid2 sx={styles.container}>
                       <Typography marginRight={1}>相手</Typography>
                       <TextFieldElement
-                        name="aite"
+                        name="aite.nam"
                         control={control}
                         sx={{
                           width: 400,
@@ -311,7 +313,7 @@ export const Bill = ({
                 <Divider />
                 <Box margin={0.5} padding={0.8}>
                   {meisaiHeadFields.fields.map((field, index) => (
-                    <Box key={field.id} p={1}>
+                    <Box key={field.id}>
                       <MeisaiTblHeader index={index} fields={meisaiHeadFields}>
                         <MeisaiLines index={index} />
                       </MeisaiTblHeader>
@@ -338,14 +340,28 @@ export const Bill = ({
                     }}
                     fullWidth
                   >
-                    {/* {showSecond && (
+                    {!showSecond && (
+                      <FirstDialogPage
+                        handleClose={() => setKizaimeisaiaddDialogOpen(false)}
+                        addTbl={() =>
+                          meisaiHeadFields.append({
+                            seikyuMeisaiHeadNam: null,
+                            zeiFlg: false,
+                          })
+                        }
+                        toSecondPage={setShowSecond}
+                      />
+                    )}
+                    {showSecond && (
                       <SecondDialogPage
-                        field={meisaiHeadFields}
                         handleClose={() => setKizaimeisaiaddDialogOpen(false)}
                         setSnackBarOpen={() => setSnackBarOpen(true)}
                         setSnackBarMessage={setSnackBarMessage}
+                        kokyakuId={kokyaku.id}
+                        kokyakuNam={kokyaku.nam}
+                        headsField={meisaiHeadFields}
                       />
-                    )} */}
+                    )}
                   </Dialog>
                 </Box>
               </Box>
@@ -361,7 +377,7 @@ export const Bill = ({
                   <Grid2 size={2}>
                     <ReadOnlyYenNumberElement name="chukeiAmt" />
                   </Grid2>
-                  <Grid2 size={1} justifyItems={'end'}>
+                  <Grid2 size={1.5} justifyItems={'end'}>
                     <Typography>消費税対象合計</Typography>
                   </Grid2>
                   <Grid2 size={2}>
@@ -370,7 +386,7 @@ export const Bill = ({
                 </Grid2>
                 <Grid2 container display={'flex'} alignItems={'center'} spacing={1} my={0.5}>
                   <Grid2 size={2.5} />
-                  <Grid2 size={1} justifyItems={'end'}>
+                  <Grid2 size={1.5} justifyItems={'end'}>
                     <Typography>消費税</Typography>
                   </Grid2>
                   <Grid2 size={2}>

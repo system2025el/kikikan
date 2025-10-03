@@ -39,7 +39,9 @@ export const updateQuot = async (data: QuotHeadValues, user: string): Promise<nu
         id: m.id ?? FAKE_NEW_ID,
       })),
     }));
-  const kokyakuId = await connection.query(`SELECT kokyaku_id from m_kokyaku WHERE kokyaku_nam = ${data.kokyaku}`);
+  const kokyakuId = await connection.query(
+    `SELECT kokyaku_id from ${SCHEMA}.m_kokyaku WHERE kokyaku_nam = ${data.kokyaku}`
+  );
 
   // // 見積明細準備
   // const meisaiList = meisaiheadList.flatMap((l) =>

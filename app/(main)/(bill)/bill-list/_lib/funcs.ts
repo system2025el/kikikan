@@ -6,6 +6,10 @@ import { SelectTypes } from '@/app/(main)/_ui/form-box';
 
 import { BillSearchValues, BillsListTableValues } from './types';
 
+/**
+ * 選択肢用請求ステータスを取得する関数
+ * @returns 選択肢用の請求ステータスの配列
+ */
 export const getBillingStsSelection = async (): Promise<SelectTypes[]> => {
   try {
     const { data, error } = await selectActiveSeikyuSts();
@@ -22,6 +26,11 @@ export const getBillingStsSelection = async (): Promise<SelectTypes[]> => {
   }
 };
 
+/**
+ * 請求一覧に表示するリストを取得・成形する関数
+ * @param queries 検索条件
+ * @returns
+ */
 export const getFilteredBills = async (
   queries: BillSearchValues = {
     billId: undefined,
@@ -43,7 +52,7 @@ export const getFilteredBills = async (
     if (!data || data.length === 0) {
       return [];
     }
-    return data.map((d, index) => ({
+    return data.map((d) => ({
       billHeadId: d.seikyu_head_id,
       billingSts: d.sts_nam,
       billHeadNam: d.seikyu_head_nam,
