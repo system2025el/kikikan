@@ -649,11 +649,11 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
     /* 詳細
      * -----------------------------------------------------------------*/
 
-    const workPage = page;
+    let workPage = page;
 
-    const startY = y_detail_2;
-    const rowHeight = 20;
+    let startY = y_detail_2;
     let index = 0;
+    const rowHeight = 20;
 
     if (param.meisaiHeads !== undefined && param.meisaiHeads != null) {
       // 機材費
@@ -663,12 +663,14 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
           if (detail.meisai !== undefined && detail.meisai != null) {
             // 空行
             if (0 < detailIndex) {
+              checkPageBreak(rowHeight);
               drawColumnLine();
               drawUnderLine();
               index++;
             }
 
             detail.meisai.forEach((row) => {
+              checkPageBreak(rowHeight);
               drawColumnLine();
               drawRow(row.nam, row.qty, row.honbanbiQty, row.tankaAmt, row.shokeiAmt);
               drawUnderLine();
@@ -677,24 +679,27 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
 
             // 1つ前の線を二重線にする
             workPage.drawLine({
-              start: { x: whiteSpace, y: startY - 20 * index - 2 }, // 通常の下線より少し上
-              end: { x: width - whiteSpace, y: startY - 20 * index - 2 }, // 通常の下線より少し上
+              start: { x: whiteSpace, y: startY - rowHeight * index - 2 }, // 通常の下線より少し上
+              end: { x: width - whiteSpace, y: startY - rowHeight * index - 2 }, // 通常の下線より少し上
               thickness: 1,
             });
 
             // 小計行1
+            checkPageBreak(rowHeight);
             drawColumnLine();
             drawShokei(detail.biko1, detail.shokeiMei, detail.shokeiAmt);
             drawUnderLine();
             index++;
 
             // 小計行2
+            checkPageBreak(rowHeight);
             drawColumnLine();
             drawShokei(detail.biko2, detail.nebikiNam, detail.nebikiAmt);
             drawUnderLine();
             index++;
 
             // 小計行3
+            checkPageBreak(rowHeight);
             drawColumnLine();
             drawShokei(detail.biko3, detail.nebikiAftNam, detail.nebikiAftAmt);
             drawUnderLine();
@@ -704,7 +709,14 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
           }
         });
 
-        // TODO:機材費の合計
+        if (0 < param.meisaiHeads.kizai.length) {
+          // 機材費の合計
+          checkPageBreak(rowHeight);
+          drawColumnLine();
+          drawShokei('', '機材費', param.kizaiChukeiAmt);
+          drawUnderLine();
+          index++;
+        }
       }
 
       // 人件費
@@ -714,12 +726,14 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
           if (detail.meisai !== undefined && detail.meisai != null) {
             // 空行
             if (0 < detailIndex) {
+              checkPageBreak(rowHeight);
               drawColumnLine();
               drawUnderLine();
               index++;
             }
 
             detail.meisai.forEach((row) => {
+              checkPageBreak(rowHeight);
               drawColumnLine();
               drawRow(row.nam, row.qty, row.honbanbiQty, row.tankaAmt, row.shokeiAmt);
               drawUnderLine();
@@ -728,24 +742,27 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
 
             // 1つ前の線を二重線にする
             workPage.drawLine({
-              start: { x: whiteSpace, y: startY - 20 * index - 2 }, // 通常の下線より少し上
-              end: { x: width - whiteSpace, y: startY - 20 * index - 2 }, // 通常の下線より少し上
+              start: { x: whiteSpace, y: startY - rowHeight * index - 2 }, // 通常の下線より少し上
+              end: { x: width - whiteSpace, y: startY - rowHeight * index - 2 }, // 通常の下線より少し上
               thickness: 1,
             });
 
             // 小計行1
+            checkPageBreak(rowHeight);
             drawColumnLine();
             drawShokei(detail.biko1, detail.shokeiMei, detail.shokeiAmt);
             drawUnderLine();
             index++;
 
             // 小計行2
+            checkPageBreak(rowHeight);
             drawColumnLine();
             drawShokei(detail.biko2, detail.nebikiNam, detail.nebikiAmt);
             drawUnderLine();
             index++;
 
             // 小計行3
+            checkPageBreak(rowHeight);
             drawColumnLine();
             drawShokei(detail.biko3, detail.nebikiAftNam, detail.nebikiAftAmt);
             drawUnderLine();
@@ -755,7 +772,14 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
           }
         });
 
-        // TODO:人権費の合計
+        if (0 < param.meisaiHeads.labor.length) {
+          // 人権費の合計
+          checkPageBreak(rowHeight);
+          drawColumnLine();
+          drawShokei('', '人件費', 0);
+          drawUnderLine();
+          index++;
+        }
       }
 
       // 諸経費
@@ -765,12 +789,14 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
           if (detail.meisai !== undefined && detail.meisai != null) {
             // 空行
             if (0 < detailIndex) {
+              checkPageBreak(rowHeight);
               drawColumnLine();
               drawUnderLine();
               index++;
             }
 
             detail.meisai.forEach((row) => {
+              checkPageBreak(rowHeight);
               drawColumnLine();
               drawRow(row.nam, row.qty, row.honbanbiQty, row.tankaAmt, row.shokeiAmt);
               drawUnderLine();
@@ -779,24 +805,27 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
 
             // 1つ前の線を二重線にする
             workPage.drawLine({
-              start: { x: whiteSpace, y: startY - 20 * index - 2 }, // 通常の下線より少し上
-              end: { x: width - whiteSpace, y: startY - 20 * index - 2 }, // 通常の下線より少し上
+              start: { x: whiteSpace, y: startY - rowHeight * index - 2 }, // 通常の下線より少し上
+              end: { x: width - whiteSpace, y: startY - rowHeight * index - 2 }, // 通常の下線より少し上
               thickness: 1,
             });
 
             // 小計行1
+            checkPageBreak(rowHeight);
             drawColumnLine();
             drawShokei(detail.biko1, detail.shokeiMei, detail.shokeiAmt);
             drawUnderLine();
             index++;
 
             // 小計行2
+            checkPageBreak(rowHeight);
             drawColumnLine();
             drawShokei(detail.biko2, detail.nebikiNam, detail.nebikiAmt);
             drawUnderLine();
             index++;
 
             // 小計行3
+            checkPageBreak(rowHeight);
             drawColumnLine();
             drawShokei(detail.biko3, detail.nebikiAftNam, detail.nebikiAftAmt);
             drawUnderLine();
@@ -806,8 +835,66 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
           }
         });
 
-        // TODO:諸経費の合計
+        if (0 < param.meisaiHeads.other.length) {
+          // 諸経費の合計
+          checkPageBreak(rowHeight);
+          drawColumnLine();
+          drawShokei('', '諸経費', 0);
+          drawUnderLine();
+          index++;
+        }
       }
+    }
+
+    function checkPageBreak(nextHeight: number) {
+      // 判定
+      if (0 < startY - whiteSpace - nextHeight) {
+        return;
+      }
+
+      // 下横線
+      workPage.drawLine({
+        start: { x: whiteSpace, y: startY - rowHeight * index },
+        end: { x: width - whiteSpace, y: startY - rowHeight * index },
+        thickness: boldLine,
+      });
+
+      workPage = pdfDoc.addPage();
+
+      startY = height - whiteSpace;
+      index = 0;
+
+      /* 外枠
+       * -----------------------------------------------------------------*/
+      // ページに線を描画
+      //const whiteSpace = 30;
+      //const boldLine = 2;
+
+      // 上横線
+      workPage.drawLine({
+        start: { x: whiteSpace, y: height - whiteSpace },
+        end: { x: width - whiteSpace, y: height - whiteSpace },
+        thickness: boldLine,
+      });
+      // 左縦線
+      workPage.drawLine({
+        start: { x: whiteSpace - 1, y: whiteSpace - 1 },
+        end: { x: whiteSpace - 1, y: height - (whiteSpace - 1) },
+        thickness: boldLine,
+      });
+      // 右縦線
+      workPage.drawLine({
+        start: { x: width - (whiteSpace + 1), y: whiteSpace - 1 },
+        end: { x: width - (whiteSpace + 1), y: height - (whiteSpace - 1) },
+        thickness: boldLine,
+      });
+      // // 下横線
+      // workPage.drawLine({
+      //   start: { x: whiteSpace, y: whiteSpace },
+      //   end: { x: width - whiteSpace, y: whiteSpace },
+      //   thickness: boldLine,
+      // });
+      // ------------------------------------------------------------------/
     }
 
     function drawColumnLine() {
@@ -973,30 +1060,36 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
 
     // ------------------------------------------------------------------/
 
+    checkPageBreak(rowHeight);
     drawColumnLine2();
     drawRow2('中計(機材費+人件費+諸経費)', 17128000);
     drawUnderLine();
     index++;
 
+    checkPageBreak(rowHeight);
     drawColumnLine2();
     drawRow2('特別調整値引き', -228000);
     drawUnderLine();
     index++;
 
+    checkPageBreak(rowHeight);
     drawColumnLine2();
     drawUnderLine();
     index++;
 
+    checkPageBreak(rowHeight);
     drawColumnLine2();
     drawRow2('合計', 169000000);
     drawUnderLine();
     index++;
 
+    checkPageBreak(rowHeight);
     drawColumnLine2();
     drawRow2('消費税（10%）', 1690000);
     drawUnderLine();
     index++;
 
+    checkPageBreak(rowHeight);
     drawColumnLine2();
     drawRow2('合計金額', 18590000);
     drawUnderLine();
@@ -1037,17 +1130,30 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
 
     // ------------------------------------------------------------------/
 
-    page.drawText(param.comment ?? '', {
-      x: 35,
-      y: startY - 20 * (index + 1) + 7,
-      font: customFont, // カスタムフォントの設定
-      size: 8,
-      //color: rgb(0, 0, 0),
-      //lineHeight: 24,
-      //opacity: 1,
+    checkPageBreak(rowHeight * 3);
+
+    const textArray = formatTextArray(param.comment ?? '', customFont, 8, 290);
+
+    let commentIndex = index;
+    let innerIndex = 0;
+    const innerH = startY - 20 * (index + 1) + 7;
+    textArray.forEach(() => {
+      if (innerIndex < 5) {
+        workPage.drawText(textArray[innerIndex], {
+          x: 35,
+          y: innerH - 10 * innerIndex,
+          font: customFont, // カスタムフォントの設定
+          size: 8,
+          //color: rgb(0, 0, 0),
+          //lineHeight: 24,
+          //opacity: 1,
+        });
+        commentIndex++;
+        innerIndex++;
+      }
     });
 
-    page.drawText('担当', {
+    workPage.drawText('担当', {
       x: 335,
       y: startY - 20 * (index + 1) + 7,
       font: customFont, // カスタムフォントの設定
@@ -1136,8 +1242,8 @@ const formatTextArray = (text: string, font: PDFFont, fontSize: number, maxWidth
     } else {
       // 1行分のテキスト確定
       textArray.push(currentText);
-      currentText = '';
-      currentWidth = 0;
+      currentText = item;
+      currentWidth = wordWidth;
     }
   }
 
