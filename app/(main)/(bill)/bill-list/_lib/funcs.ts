@@ -1,6 +1,7 @@
 'use server';
 
 import { selectActiveSeikyuSts } from '@/app/_lib/db/tables/m-seikyu-sts';
+import { selectJuchuKizaiHeadNamListFormBill } from '@/app/_lib/db/tables/t-juchu-kizai-head';
 import { selectChosenSeikyu } from '@/app/_lib/db/tables/t-seikyu-head';
 import { selectBillMeisai } from '@/app/_lib/db/tables/t-seikyu-meisai';
 import { selectBillMeisaiHead } from '@/app/_lib/db/tables/t-seikyu-meisai-head';
@@ -45,7 +46,7 @@ export const getFilteredBills = async (
       end: undefined,
     },
     kokyaku: undefined,
-    kokyakuTantoNam: undefined,
+    seikyuHeadNam: undefined,
   }
 ): Promise<BillsListTableValues[]> => {
   try {
@@ -175,6 +176,35 @@ export const getChosenBill = async (seikyuId: number) => {
       meisaiHeads: meisaisList, // 整形済みのデータを代入
     };
     return allData;
+  } catch (e) {
+    console.error('例外が発生しました', e);
+    throw e;
+  }
+};
+
+/**
+ * 請求のテーブル追加ダイアログ内の機材ヘッド名表示
+ * @param queries
+ */
+export const getJuchuKizaiHeadNamListForBill = async (queries: {
+  kokyaku: { id: number; nam: string };
+  juchuId: number | null;
+  dat: Date;
+}) => {
+  try {
+    const { data, error } = await selectJuchuKizaiHeadNamListFormBill(queries);
+    if (error) {
+      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
+      throw error;
+    }
+    if (!data || data.length === 0) {
+      return [];
+    }
+    return data.map((d) => ({
+      juchuHeadId: d.juchu_head_id,
+      juchuKizaiHeadId: d.juchu_kizai_head_id,
+      headNam: d.head_nam,
+    }));
   } catch (e) {
     console.error('例外が発生しました', e);
     throw e;

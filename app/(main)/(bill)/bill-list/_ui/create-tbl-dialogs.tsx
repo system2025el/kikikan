@@ -34,6 +34,7 @@ import {
   getJuchuKizaiMeisaiList,
 } from '@/app/(main)/quotation-list/_lib/funcs';
 
+import { getJuchuKizaiHeadNamListForBill } from '../_lib/funcs';
 import { BillHeadValues } from '../_lib/types';
 
 /**
@@ -93,7 +94,7 @@ export const SecondDialogPage = ({
 }) => {
   /* debug用、レンダリング回数取得に使用 */
   const [checked, setChecked] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   /* 表示する明細ヘッド名リスト */
   const [meisaiHeadNamList, setMeisaiHeadNamList] = useState<
@@ -137,12 +138,16 @@ export const SecondDialogPage = ({
     handleClose();
   };
 
-  const handleSearch = (data: { kokyaku: { id: number; nam: string }; juchuId: number | null; dat: Date }) => {
+  const handleSearch = async (data: { kokyaku: { id: number; nam: string }; juchuId: number | null; dat: Date }) => {
+    setIsLoading(true);
     console.log(data);
+    const meisaiNamList = await getJuchuKizaiHeadNamListForBill(data);
+    setMeisaiHeadNamList(meisaiNamList);
+    setIsLoading(false);
   };
 
   /* useEffect ---------------------------------------------- */
-  useEffect(() => {}, []);
+  // useEffect(() => {}, []);
 
   return (
     <>
@@ -193,7 +198,7 @@ export const SecondDialogPage = ({
           />
         </Box>
         <Box sx={styles.container} justifyContent={'end'}>
-          <Button onClick={() => handleSubmit(handleSearch)}>検索</Button>
+          <Button onClick={handleSubmit(handleSearch)}>検索</Button>
         </Box>
 
         <Stack>

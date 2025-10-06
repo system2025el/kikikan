@@ -49,6 +49,7 @@ export const selectFilteredJuchusForBill = async (queries: { kokyakuId: number; 
       v.juchu_kizai_head_id,
       v.kokyaku_tanto_nam,
       v.koen_nam,
+      v.koenbasho_nam,
       v.head_nam,
       v.shuko_dat,
       v.nyuko_dat,

@@ -2078,6 +2078,7 @@ export type Database = {
           seikyu_end_dat: string | null;
           seikyu_head_id: number;
           seikyu_meisai_head_id: number;
+          seikyu_meisai_head_nam: string | null;
           seikyu_str_dat: string | null;
           upd_dat: string | null;
           upd_user: string | null;
@@ -2097,6 +2098,7 @@ export type Database = {
           seikyu_end_dat?: string | null;
           seikyu_head_id: number;
           seikyu_meisai_head_id: number;
+          seikyu_meisai_head_nam?: string | null;
           seikyu_str_dat?: string | null;
           upd_dat?: string | null;
           upd_user?: string | null;
@@ -2116,6 +2118,7 @@ export type Database = {
           seikyu_end_dat?: string | null;
           seikyu_head_id?: number;
           seikyu_meisai_head_id?: number;
+          seikyu_meisai_head_nam?: string | null;
           seikyu_str_dat?: string | null;
           upd_dat?: string | null;
           upd_user?: string | null;
@@ -2408,14 +2411,17 @@ export type Database = {
           juchu_head_id: number | null;
           juchu_kizai_head_id: number | null;
           koen_nam: string | null;
+          koenbasho_nam: string | null;
           kokyaku_id: number | null;
           kokyaku_nam: string | null;
           kokyaku_tanto_nam: string | null;
           nyuko_dat: string | null;
           nyuko_fix_flg: number | null;
           seikyu_dat: string | null;
-          seikyu_head_jokyo_sts_nam: string | null;
+          seikyu_jokyo_sts_id: number | null;
           seikyu_jokyo_sts_nam: string | null;
+          seikyu_jokyo_total_sts_id: number | null;
+          seikyu_jokyo_total_sts_nam: string | null;
           shuko_dat: string | null;
           shuko_fix_flg: number | null;
         };
