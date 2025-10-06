@@ -32,6 +32,7 @@ import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { LoadingOverlay } from '@/app/(main)/_ui/loading';
 
 import { BillHeadSchema, BillHeadValues } from '../_lib/types';
+import { addBill } from '../create/_lib/funcs';
 import { FirstDialogPage, SecondDialogPage } from './create-tbl-dialogs';
 import { MeisaiLines } from './meisai';
 import { MeisaiTblHeader } from './meisai-tbl-header';
@@ -96,14 +97,14 @@ export const Bill = ({
 
   /* methods ------------------------------------------------------ */
   /* 保存ボタン押下 */
-  const onSubmit = async (/*data: billHeadValues*/) => {
+  const onSubmit = async (data: BillHeadValues) => {
     console.log('新規？', isNew, 'isDirty', isDirty);
-    //   if (isNew) {
-    //     await addbill(data, user?.name ?? '');
-    //   } else {
-    //     const result = await updatebill(data, user?.name ?? '');
-    //     console.log('更新したのは', result, '番の請求');
-    //   }
+    if (isNew) {
+      await addBill(data, user?.name ?? '');
+    } else {
+      // const result = await updatebill(data, user?.name ?? '');
+      // console.log('更新したのは', result, '番の請求');
+    }
     setSnackBarMessage('保存しました');
     setSnackBarOpen(true);
   };
@@ -128,7 +129,6 @@ export const Bill = ({
     if (isNew) {
       // 新規なら入力者をログインアカウントから取得する
       if (user?.name) {
-        console.log({ ...bill, nyuryokuUser: user.name });
         reset({ ...bill, nyuryokuUser: user.name });
       }
     } else {
@@ -348,8 +348,10 @@ export const Bill = ({
                         handleClose={() => setKizaimeisaiaddDialogOpen(false)}
                         addTbl={() =>
                           meisaiHeadFields.append({
+                            seikyuRange: { strt: null, end: null },
                             seikyuMeisaiHeadNam: null,
                             zeiFlg: false,
+                            meisai: [],
                           })
                         }
                         toSecondPage={setShowSecond}

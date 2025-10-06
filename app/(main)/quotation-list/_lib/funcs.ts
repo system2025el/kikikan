@@ -1,19 +1,12 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
-
 import pool from '@/app/_lib/db/postgres';
 import { SCHEMA } from '@/app/_lib/db/supabase';
 import { selectActiveMituSts } from '@/app/_lib/db/tables/m-mitu-sts';
 import { selectActiveUsers } from '@/app/_lib/db/tables/m-user';
-import { insertQuotHead, selectChosenMitu, updateQuotHead } from '@/app/_lib/db/tables/t-mitu-head';
-import { insertQuotMeisai, selectQuotMeisai, updateQuotMeisai } from '@/app/_lib/db/tables/t-mitu-meisai';
-import {
-  insertQuotMeisaiHead,
-  selectQuotMeisaiHead,
-  updateQuoteMeisaiHead,
-} from '@/app/_lib/db/tables/t-mitu-meisai-head';
+import { selectChosenMitu } from '@/app/_lib/db/tables/t-mitu-head';
+import { selectQuotMeisai } from '@/app/_lib/db/tables/t-mitu-meisai';
+import { selectQuotMeisaiHead } from '@/app/_lib/db/tables/t-mitu-meisai-head';
 import { selectJuchuKizaiHeadList } from '@/app/_lib/db/tables/v-juchu-kizai-head-lst';
 import { selectJuchu } from '@/app/_lib/db/tables/v-juchu-lst';
 import { selectKizaiHeadListForMitu } from '@/app/_lib/db/tables/v-mitu-kizai';
@@ -21,11 +14,10 @@ import { selectKizaiHeadListWithIsshikiForMitu } from '@/app/_lib/db/tables/v-mi
 import { MituHead } from '@/app/_lib/db/types/t-mitu-head-types';
 import { MituMeisaiHead } from '@/app/_lib/db/types/t-mitu-meisai-head-type';
 import { MituMeisai } from '@/app/_lib/db/types/t-mitu-meisai-type';
-import { toJapanDateString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanDateString } from '@/app/(main)/_lib/date-conversion';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
-import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 
-import { JuchuValues, QuotHeadValues, QuotMaisaiHeadValues } from './types';
+import { JuchuValues, QuotHeadValues, QuotMeisaiHeadValues } from './types';
 
 /**
  *
@@ -229,9 +221,9 @@ export const getChosenQuot = async (mituId: number) => {
     // ヘッダを区分ごとに分類・整形
     // 初期値
     const initialKbnMeisais: {
-      kizai: QuotMaisaiHeadValues[];
-      labor: QuotMaisaiHeadValues[];
-      other: QuotMaisaiHeadValues[];
+      kizai: QuotMeisaiHeadValues[];
+      labor: QuotMeisaiHeadValues[];
+      other: QuotMeisaiHeadValues[];
     } = { kizai: [], labor: [], other: [] };
     const kbnMeisais = meisaiHeads.reduce((acc, head) => {
       const associatedMeisais = meisaisByHeadId[head.mitu_meisai_head_id] || [];

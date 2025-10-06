@@ -1,9 +1,27 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
+
+import pool from '@/app/_lib/db/postgres';
+import { SCHEMA } from '@/app/_lib/db/supabase';
+import { insertBillHead } from '@/app/_lib/db/tables/t-seikyu-head';
+import { insertBillMeisai } from '@/app/_lib/db/tables/t-seikyu-meisai';
+import { insertBillMeisaiHead } from '@/app/_lib/db/tables/t-seikyu-meisai-head';
 import { selectFilteredJuchusForBill } from '@/app/_lib/db/tables/v-seikyu-date-lst';
+import { SeikyuHead } from '@/app/_lib/db/types/t-seikyu-head-type';
+import { SeikyuMeisaiHead } from '@/app/_lib/db/types/t-seikyu-meisai-head-type';
+import { SeikyuMeisai } from '@/app/_lib/db/types/t-seikyu-meisai-type';
+import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
+import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 
-import { BillMeisaiHeadsValues } from '../../_lib/types';
+import { BillHeadValues, BillMeisaiHeadsValues } from '../../_lib/types';
 
+/**
+ * 請求用に受注情報を取得する関数
+ * @param queries 顧客id, 取得最終日, 詳細表示フラグ
+ * @returns 請求画面に表示する情報
+ */
 export const getJuchusForBill = async (queries: {
   kokyakuId: number;
   date: string;
@@ -53,8 +71,8 @@ export const getJuchusForBill = async (queries: {
                   nam: `${m.head_nam}一式`,
                   qty: 1,
                   honbanbiQty: m.honbanbi_qty + m.add_dat_qty,
-                  tankaAmt: m.shokei_amt,
-                  shokeiAmt: 1 * (m.honbanbi_qty + m.add_dat_qty) * m.shokei_amt,
+                  tankaAmt: Number(m.shokei_amt),
+                  shokeiAmt: Number(1 * (m.honbanbi_qty + m.add_dat_qty) * m.shokei_amt),
                   ...m,
                 }))
           : [],
@@ -64,4 +82,129 @@ export const getJuchusForBill = async (queries: {
     console.error('例外が発生', e);
     throw e;
   }
+};
+
+/**
+ * 請求を保存する関数
+ * @param data 請求書フォーム内容
+ */
+const addBilling = async (data: BillHeadValues, user: string): Promise<number | null> => {
+  /* トランザクション準備 */
+  const connection = await pool.connect();
+  // 明細ヘッドIDと明細IDの発番
+  const meisaiheadList =
+    data.meisaiHeads?.map((l, index) => ({
+      ...l,
+      seikyuMeisaiHeadId: index + 1,
+      meisai: l?.meisai?.map((m, i) => ({
+        ...m,
+        id: i + 1,
+      })),
+    })) ?? [];
+  // 請求明細準備
+  const meisaiList =
+    meisaiheadList.flatMap((l) =>
+      l.meisai!.map((m) => ({
+        ...m,
+        seikyuMeisaiHeadId: l.seikyuMeisaiHeadId,
+      }))
+    ) ?? [];
+
+  try {
+    console.log('新規START');
+    // トランザクション開始
+    await connection.query('BEGIN');
+    // 新請求ヘッドID
+    const newSeikyuHeadId = await connection.query(`
+       SELECT coalesce(max(seikyu_head_id),0) + 1 as newid FROM ${SCHEMA}.t_seikyu_head
+      `);
+    // const kokyakuId = await connection.query(
+    //   `SELECT kokyaku_id from ${SCHEMA}.m_kokyaku WHERE kokyaku_nam = '${data.kokyaku}'`
+    // );
+    console.log(newSeikyuHeadId.rows[0].newid);
+    // 請求ヘッド
+    const billHead: SeikyuHead = {
+      seikyu_head_id: newSeikyuHeadId.rows[0].newid,
+      seikyu_sts: data.seikyuSts,
+      seikyu_dat: data.seikyuDat ? toJapanTimeString(data.seikyuDat, '-') : null,
+      seikyu_head_nam: data.seikyuHeadNam,
+      adr_post: data.adr1,
+      adr_shozai: data.adr2.shozai,
+      adr_tatemono: data.adr2.tatemono,
+      adr_sonota: data.adr2.sonota,
+      kokyaku_id: data.aite.id,
+      kokyaku_nam: data.aite.nam,
+      nyuryoku_user: data.nyuryokuUser,
+      zei_rat: data.zeiRat,
+      add_dat: toJapanTimeString(undefined, '-'),
+      add_user: user,
+    };
+    // 明細ヘッド
+    const meisaiHeads: SeikyuMeisaiHead[] = meisaiheadList
+      ? meisaiheadList.map((l, index) => ({
+          seikyu_head_id: newSeikyuHeadId.rows[0].newid,
+          seikyu_meisai_head_id: l.seikyuMeisaiHeadId ?? FAKE_NEW_ID,
+          juchu_head_id: l.juchuHeadId,
+          juchu_kizai_head_id: l.juchuKizaiHeadId,
+          seikyu_str_dat: l.seikyuRange?.strt ? toJapanTimeString(l.seikyuRange.strt, '-') : null,
+          seikyu_end_dat: l.seikyuRange?.end ? toJapanTimeString(l.seikyuRange.end, '-') : null,
+          // seikyu_meisai_head_nam: l.seikyuMeisaiHeadNam, あとで追加
+          koen_nam: l.koenNam,
+          koenbasho_nam: l.koenBashoNam,
+          kokyaku_tanto_nam: l.kokyakuTantoNam,
+          nebiki_amt: l.nebikiAmt,
+          zei_flg: Number(l.zeiFlg),
+          dsp_ord_num: index + 1,
+          add_dat: toJapanTimeString(undefined, '-'),
+          add_user: user,
+        }))
+      : [];
+    // 明細
+    const meisais: SeikyuMeisai[] =
+      meisaiList.map((l, index) => ({
+        seikyu_head_id: newSeikyuHeadId.rows[0].newid,
+        seikyu_meisai_head_id: l.seikyuMeisaiHeadId ?? FAKE_NEW_ID,
+        seikyu_meisai_id: l.id ?? FAKE_NEW_ID,
+        seikyu_meisai_nam: l.nam,
+        meisai_qty: l.qty ?? 0,
+        meisai_honbanbi_qty: l.honbanbiQty ?? 0,
+        meisai_tanka_amt: l.tankaAmt ?? 0,
+        // shokei_amt: l.shokeiAmt,
+        dsp_ord_num: index + 1,
+        add_dat: toJapanTimeString(undefined, '-'),
+        add_user: user,
+      })) ?? [];
+    if (billHead) {
+      const id = await insertBillHead(billHead, connection);
+      if (meisaiHeads && Object.keys(meisaiHeads).length !== 0) {
+        await insertBillMeisaiHead(meisaiHeads, connection);
+      }
+      if (meisais && Object.keys(meisais).length !== 0) {
+        await insertBillMeisai(meisais, connection);
+      }
+
+      await connection.query('COMMIT');
+      return id.rows[0].seikyu_head_id;
+    }
+    return null;
+  } catch (e) {
+    console.error('例外が発生', e);
+    // エラーでロールバック
+    await connection.query('ROLLBACK');
+    throw e;
+  } finally {
+    // なんにしてもpool解放
+    connection.release();
+  }
+};
+
+/**
+ * 請求を保存する関数を保存してリダイレクトする関数
+ * @param data
+ * @param user
+ */
+export const addBill = async (data: BillHeadValues, user: string) => {
+  const id = await addBilling(data, user);
+  await revalidatePath('/bill-list');
+  await redirect(`/bill-list/edit/${id}`);
 };

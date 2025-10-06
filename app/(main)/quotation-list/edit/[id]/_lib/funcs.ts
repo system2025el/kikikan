@@ -40,7 +40,7 @@ export const updateQuot = async (data: QuotHeadValues, user: string): Promise<nu
       })),
     }));
   const kokyakuId = await connection.query(
-    `SELECT kokyaku_id from ${SCHEMA}.m_kokyaku WHERE kokyaku_nam = ${data.kokyaku}`
+    `SELECT kokyaku_id from ${SCHEMA}.m_kokyaku WHERE kokyaku_nam = '${data.kokyaku}'`
   );
 
   // // 見積明細準備

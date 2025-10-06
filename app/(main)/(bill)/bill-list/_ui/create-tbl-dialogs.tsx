@@ -120,6 +120,7 @@ export const SecondDialogPage = ({
       headsField.append({
         seikyuMeisaiHeadNam: null,
         zeiFlg: false,
+        seikyuRange: { strt: null, end: null }, // あとでnullじゃなくする
         meisai: data,
       });
     } else {
@@ -129,6 +130,7 @@ export const SecondDialogPage = ({
       headsField.append({
         seikyuMeisaiHeadNam: null,
         zeiFlg: false,
+        seikyuRange: { strt: null, end: null }, // あとでnullじゃなくする
         meisai: data,
       });
     }
