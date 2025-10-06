@@ -137,6 +137,10 @@ export const SecondDialogPage = ({
     handleClose();
   };
 
+  const handleSearch = (data: { kokyaku: { id: number; nam: string }; juchuId: number | null; dat: Date }) => {
+    console.log(data);
+  };
+
   /* useEffect ---------------------------------------------- */
   useEffect(() => {}, []);
 
@@ -150,49 +154,48 @@ export const SecondDialogPage = ({
         />
       </DialogTitle>
       <Box p={4}>
-        <form>
-          <Box sx={styles.container}>
-            <Typography mr={7}>相手</Typography>
-            <TextFieldElement
-              name="kokyaku.nam"
-              control={control}
-              sx={{
-                pointerEvents: 'none', // クリック不可にする
-                backgroundColor: '#f5f5f5', // グレー背景で無効っぽく
-                color: '#888',
-                width: 400,
-              }}
-              slotProps={{ input: { readOnly: true, onFocus: (e) => e.target.blur() } }}
-            />
-          </Box>
-          <Box sx={styles.container}>
-            <Typography mr={3}>受注番号</Typography>
-            <TextFieldElement name="juchuId" control={control} sx={{ width: 120 }} />
-          </Box>
-          <Box sx={styles.container}>
-            <Typography mr={5}>年月日</Typography>
-            <Typography mr={1}>～</Typography>
-            <Controller
-              control={control}
-              name="dat"
-              rules={{ required: '選択してください' }}
-              render={({ field, fieldState }) => (
-                <FormDateX
-                  value={field.value}
-                  onChange={field.onChange}
-                  sx={{
-                    mr: 1,
-                  }}
-                  error={!!fieldState.error}
-                  helperText={fieldState.error?.message}
-                />
-              )}
-            />
-          </Box>
-          <Box sx={styles.container} justifyContent={'end'}>
-            <Button type="submit">検索</Button>
-          </Box>
-        </form>
+        <Box sx={styles.container}>
+          <Typography mr={7}>相手</Typography>
+          <TextFieldElement
+            name="kokyaku.nam"
+            control={control}
+            sx={{
+              pointerEvents: 'none', // クリック不可にする
+              backgroundColor: '#f5f5f5', // グレー背景で無効っぽく
+              color: '#888',
+              width: 400,
+            }}
+            slotProps={{ input: { readOnly: true, onFocus: (e) => e.target.blur() } }}
+          />
+        </Box>
+        <Box sx={styles.container}>
+          <Typography mr={3}>受注番号</Typography>
+          <TextFieldElement name="juchuId" control={control} sx={{ width: 120 }} />
+        </Box>
+        <Box sx={styles.container}>
+          <Typography mr={5}>年月日</Typography>
+          <Typography mr={1}>～</Typography>
+          <Controller
+            control={control}
+            name="dat"
+            rules={{ required: '選択してください' }}
+            render={({ field, fieldState }) => (
+              <FormDateX
+                value={field.value}
+                onChange={field.onChange}
+                sx={{
+                  mr: 1,
+                }}
+                error={!!fieldState.error}
+                helperText={fieldState.error?.message}
+              />
+            )}
+          />
+        </Box>
+        <Box sx={styles.container} justifyContent={'end'}>
+          <Button onClick={() => handleSubmit(handleSearch)}>検索</Button>
+        </Box>
+
         <Stack>
           <FormGroup>
             <FormControlLabel

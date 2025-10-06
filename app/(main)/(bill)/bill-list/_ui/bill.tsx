@@ -33,6 +33,7 @@ import { LoadingOverlay } from '@/app/(main)/_ui/loading';
 
 import { BillHeadSchema, BillHeadValues } from '../_lib/types';
 import { addBill } from '../create/_lib/funcs';
+import { updateBill } from '../edit/[id]/_lib/funcs';
 import { FirstDialogPage, SecondDialogPage } from './create-tbl-dialogs';
 import { MeisaiLines } from './meisai';
 import { MeisaiTblHeader } from './meisai-tbl-header';
@@ -49,7 +50,6 @@ export const Bill = ({
 }) => {
   /* ログイン中のユーザー */
   const user = useUserStore((state) => state.user);
-  console.log('ログインユーザー: ', user);
   const router = useRouter();
   /* useState ----------------------------------------------------------------- */
   /* ローディング中かどうか */
@@ -102,8 +102,7 @@ export const Bill = ({
     if (isNew) {
       await addBill(data, user?.name ?? '');
     } else {
-      // const result = await updatebill(data, user?.name ?? '');
-      // console.log('更新したのは', result, '番の請求');
+      await updateBill(data, user?.name ?? '');
     }
     setSnackBarMessage('保存しました');
     setSnackBarOpen(true);
@@ -131,8 +130,6 @@ export const Bill = ({
       if (user?.name) {
         reset({ ...bill, nyuryokuUser: user.name });
       }
-    } else {
-      reset(bill);
     }
   }, [user]);
   /* eslint-enable react-hooks/exhaustive-deps */
