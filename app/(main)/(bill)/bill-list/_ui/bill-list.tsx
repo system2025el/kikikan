@@ -49,27 +49,30 @@ export const BillList = ({
         <Box width={'100%'} p={2}>
           <form onSubmit={handleSubmit(onSubmit)}>
             <Grid2 container direction={'column'} spacing={1} width={'100%'}>
-              <Grid2 container size={'grow'} display={'flex'} alignItems={'baseline'}>
-                <Grid2 size={3} display={'flex'} alignItems={'baseline'}>
-                  <Typography noWrap mr={5}>
+              <Grid2 container display={'flex'} alignItems={'baseline'}>
+                <Grid2 size={5} display={'flex'} alignItems={'baseline'}>
+                  <Typography noWrap mr={7}>
                     請求番号
                   </Typography>
                   <TextFieldElement name="kokyaku" control={control} type="text" sx={{ width: 200 }} />
                 </Grid2>
-                <Grid2 size={'grow'} display={'flex'} alignItems={'baseline'}>
+                <Grid2 display={'flex'} alignItems={'baseline'}>
                   <Typography noWrap mr={3}>
                     請求ステータス
                   </Typography>
                   <TextFieldElement name="kokyaku" control={control} type="text" sx={{ width: 200 }} />
                 </Grid2>
-                <Grid2></Grid2>
               </Grid2>
-
-              <Grid2 size={'auto'} display={'flex'} alignItems={'baseline'}>
-                <Typography noWrap mr={1}>
+              <Grid2 display={'flex'} alignItems={'baseline'}>
+                <Typography noWrap mr={7}>
+                  請求書名
+                </Typography>
+                <TextFieldElement name="seikyuHeadNam" control={control} />
+              </Grid2>
+              <Grid2 display={'flex'} alignItems={'baseline'}>
+                <Typography noWrap mr={3}>
                   請求書発行日
                 </Typography>
-
                 <Controller
                   control={control}
                   name="range.str"
@@ -82,18 +85,13 @@ export const BillList = ({
                   render={({ field }) => <FormDateX value={field.value} onChange={field.onChange} sx={{ ml: 1 }} />}
                 />
               </Grid2>
-              <Grid2 display={'flex'} size={'grow'} alignItems={'baseline'}>
-                <Typography noWrap mr={9}>
-                  相手
-                </Typography>
-                <TextFieldElement name="kokyaku" control={control} />
-              </Grid2>
-              <Grid2 container size={12} display={'flex'} alignItems={'baseline'}>
+
+              <Grid2 container display={'flex'} alignItems={'baseline'}>
                 <Grid2 display={'flex'} size={'grow'} alignItems={'baseline'}>
-                  <Typography noWrap mr={3}>
-                    相手担当者
+                  <Typography noWrap mr={11}>
+                    相手
                   </Typography>
-                  <TextFieldElement name="kokyakuTantoNam" control={control} />
+                  <TextFieldElement name="kokyaku" control={control} />
                 </Grid2>
                 <Grid2 alignSelf={'end'}>
                   <Button type="submit">
