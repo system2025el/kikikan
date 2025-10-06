@@ -102,7 +102,9 @@ export const selectFilteredJuchusForBill = async (queries: { kokyakuId: number; 
       v.kokyaku_id = ${kokyakuId} AND
       v.shuko_fix_flg = 1 AND
       v.shuko_dat <= '${date}' AND
-      v.seikyu_jokyo_sts_id <> 9;
+      v.seikyu_jokyo_sts_id <> 9
+    ORDER BY
+      v.juchu_head_id ASC, v.juchu_kizai_head_id ASC;
     `;
   // console.log(query);
   try {

@@ -81,7 +81,11 @@ export const selectBillMeisaiHead = async (id: number) => {
     return await supabase
       .schema(SCHEMA)
       .from('t_seikyu_meisai_head')
-      .select('seikyu_meisai_head_id, seikyu_head_id, nebiki_amt, zei_flg')
+      .select(
+        `seikyu_meisai_head_id, seikyu_head_id, juchu_head_id, juchu_kizai_head_id,
+        seikyu_str_dat, seikyu_end_dat, kokyaku_tanto_nam, 
+        koen_nam, koenbasho_nam, nebiki_amt, zei_flg`
+      )
       .eq('seikyu_head_id', id)
       .order('dsp_ord_num');
   } catch (e) {

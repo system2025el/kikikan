@@ -36,9 +36,6 @@ export const updateBill = async (data: BillHeadValues, user: string): Promise<nu
       id: m.id ?? FAKE_NEW_ID,
     })),
   }));
-  const kokyakuId = await connection.query(
-    `SELECT kokyaku_id from ${SCHEMA}.m_kokyaku WHERE kokyaku_nam = '${data.kokyaku}'`
-  );
 
   // // 請求明細準備
   // const meisaiList = meisaiheadList.flatMap((l) =>
@@ -54,8 +51,8 @@ export const updateBill = async (data: BillHeadValues, user: string): Promise<nu
     seikyu_sts: data.seikyuSts,
     seikyu_dat: data.seikyuDat ? toJapanTimeString(data.seikyuDat, '-') : null,
     seikyu_head_nam: data.seikyuHeadNam,
-    kokyaku_id: kokyakuId.rows[0].kokyaku_id ?? null,
-    kokyaku_nam: data.kokyaku,
+    kokyaku_id: data.aite.id,
+    kokyaku_nam: data.aite.nam,
     nyuryoku_user: data.nyuryokuUser,
     zei_rat: data.zeiRat,
     upd_dat: toJapanTimeString(undefined, '-'),
@@ -89,7 +86,6 @@ export const updateBill = async (data: BillHeadValues, user: string): Promise<nu
       meisai_qty: m.qty ?? 0,
       meisai_honbanbi_qty: m.honbanbiQty ?? 0,
       meisai_tanka_amt: m.tankaAmt ?? 0,
-      // shokei_amt: m.shokeiAmt ?? null,
       dsp_ord_num: index + 1,
       add_dat: toJapanTimeString(undefined, '-'),
       add_user: user,
