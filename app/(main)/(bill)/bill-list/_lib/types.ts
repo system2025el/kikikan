@@ -153,7 +153,7 @@ export type BillSearchValues = {
   billingSts: number | null | undefined;
   range: { str: Date | null | undefined; end: Date | null | undefined };
   kokyaku: string | null | undefined;
-  kokyakuTantoNam: string | null | undefined;
+  seikyuHeadNam: string | null | undefined;
 };
 
 export type BillsListTableValues = {
