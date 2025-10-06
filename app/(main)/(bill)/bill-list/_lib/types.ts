@@ -36,7 +36,64 @@ export type JuchuValues = {
 };
 
 /**
- * 明細書全体のzodSchema
+ * 請求明細ヘッドのzodSchema
+ */
+const billMeisaiHeadSchema = z
+  .object({
+    seikyuMeisaiHeadId: z.number().int().nullish(),
+    juchuHeadId: z.number().int().nullish(),
+    juchuKizaiHeadId: z.number().int().nullish(),
+    seikyuRange: z.object({ strt: z.date().nullish(), end: z.date().nullish() }).nullish(),
+    koenNam: z.string().nullish(),
+    koenBashoNam: z.string().nullish(),
+    kokyakuTantoNam: z.string().nullish(),
+    seikyuMeisaiHeadNam: z
+      .string()
+      .max(50, { message: validationMessages.maxStringLength(50) })
+      .nullish(),
+    nebikiAmt: z
+      .number()
+      .max(999999999, { message: validationMessages.maxNumberLength(9) })
+      .nullish(),
+    nebikiAftAmt: z
+      .number()
+      .max(999999999, { message: validationMessages.maxNumberLength(9) })
+      .nullish(),
+    zeiFlg: z.boolean(),
+    meisai: z
+      .array(
+        z.object({
+          id: z.number().nullish(),
+          nam: z
+            .string()
+            .max(50, { message: validationMessages.maxStringLength(50) })
+            .nullish(),
+          qty: z
+            .number({ message: validationMessages.number() })
+            .max(9999, { message: validationMessages.maxNumberLength(4) })
+            .nullish(),
+          honbanbiQty: z
+            .number({ message: validationMessages.number() })
+            .max(999, { message: validationMessages.maxNumberLength(3) })
+            .nullish(),
+          tankaAmt: z
+            .number({ message: validationMessages.number() })
+            .max(999999999, { message: validationMessages.maxNumberLength(9) })
+            .nullish(),
+          shokeiAmt: z
+            .number({ message: validationMessages.number() })
+            .max(999999999999, { message: validationMessages.maxNumberLength(12) })
+            .nullish(),
+        })
+      )
+      .nullish(),
+  })
+  .nullish();
+
+export type BillMeisaiHeadsValues = z.infer<typeof billMeisaiHeadSchema>;
+
+/**
+ * 請求書全体のzodSchema
  */
 export const BillHeadSchema = z.object({
   seikyuHeadId: z.number().nullish(),
@@ -75,10 +132,6 @@ export const BillHeadSchema = z.object({
     .nullish(),
   kizaiChukeiAmt: z.number().nullish(),
   chukeiAmt: z.number().nullish(),
-  tokuNebikiMei: z
-    .string()
-    .max(10, { message: validationMessages.maxStringLength(10) })
-    .nullish(),
   preTaxGokeiAmt: z.number().nullish(),
   zeiAmt: z
     .number({ message: validationMessages.number() })
@@ -89,61 +142,7 @@ export const BillHeadSchema = z.object({
     .max(999, { message: validationMessages.maxNumberLength(3) })
     .nullish(),
   gokeiAmt: z.number({ message: validationMessages.number() }).nullish(),
-  meisaiHeads: z
-    .array(
-      z
-        .object({
-          seikyuMeisaiHeadId: z.number().int().nullish(),
-          juchuHeadId: z.number().int().nullish(),
-          juchuKizaiHeadId: z.number().int().nullish(),
-          seikyuRange: z.object({ strt: z.date().nullish(), end: z.date().nullish() }).nullish(),
-          koenNam: z.string().nullish(),
-          koenBashoNam: z.string().nullish(),
-          kokyakuTantoNam: z.string().nullish(),
-          seikyuMeisaiHeadNam: z
-            .string()
-            .max(50, { message: validationMessages.maxStringLength(50) })
-            .nullish(),
-          nebikiAmt: z
-            .number()
-            .max(999999999, { message: validationMessages.maxNumberLength(9) })
-            .nullish(),
-          nebikiAftAmt: z
-            .number()
-            .max(999999999, { message: validationMessages.maxNumberLength(9) })
-            .nullish(),
-          zeiFlg: z.boolean(),
-          meisai: z
-            .array(
-              z.object({
-                id: z.number().nullish(),
-                nam: z
-                  .string()
-                  .max(50, { message: validationMessages.maxStringLength(50) })
-                  .nullish(),
-                qty: z
-                  .number({ message: validationMessages.number() })
-                  .max(9999, { message: validationMessages.maxNumberLength(4) })
-                  .nullish(),
-                honbanbiQty: z
-                  .number({ message: validationMessages.number() })
-                  .max(999, { message: validationMessages.maxNumberLength(3) })
-                  .nullish(),
-                tankaAmt: z
-                  .number({ message: validationMessages.number() })
-                  .max(999999999, { message: validationMessages.maxNumberLength(9) })
-                  .nullish(),
-                shokeiAmt: z
-                  .number({ message: validationMessages.number() })
-                  .max(999999999999, { message: validationMessages.maxNumberLength(12) })
-                  .nullish(),
-              })
-            )
-            .nullish(),
-        })
-        .nullish()
-    )
-    .nullish(),
+  meisaiHeads: z.array(billMeisaiHeadSchema).nullish(),
 });
 
 /**

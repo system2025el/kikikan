@@ -1,5 +1,7 @@
 'use server';
 
+import { PoolClient } from 'pg';
+
 import { SCHEMA, supabase } from '../supabase';
 import { JuchuKizaiHonbanbi } from '../types/t-juchu-kizai-honbanbi-type';
 
@@ -62,9 +64,20 @@ export const selectHonbanbiConfirm = async (
  * @param userNam ユーザー名
  * @returns
  */
-export const insertHonbanbi = async (data: JuchuKizaiHonbanbi) => {
+export const insertHonbanbi = async (data: JuchuKizaiHonbanbi, connection: PoolClient) => {
+  const cols = Object.keys(data);
+  const values = Object.values(data);
+  const placeholders = values.map((_, i) => `$${i + 1}`).join(', ');
+
+  const query = `
+      INSERT INTO
+        ${SCHEMA}.t_juchu_kizai_honbanbi (${cols.join(',')})
+      VALUES 
+        (${placeholders})
+    `;
+
   try {
-    return await supabase.schema(SCHEMA).from('t_juchu_kizai_honbanbi').insert(data);
+    await connection.query(query, values);
   } catch (e) {
     throw e;
   }
@@ -78,9 +91,26 @@ export const insertHonbanbi = async (data: JuchuKizaiHonbanbi) => {
  * @param userNam ユーザー名
  * @returns
  */
-export const insertAllHonbanbi = async (data: JuchuKizaiHonbanbi[]) => {
+export const insertAllHonbanbi = async (data: JuchuKizaiHonbanbi[], connection: PoolClient) => {
+  const cols = Object.keys(data[0]) as (keyof (typeof data)[0])[];
+  const values = data.flatMap((obj) => cols.map((col) => obj[col] ?? null));
+  let placeholderIndex = 1;
+  const placeholders = data
+    .map(() => {
+      const rowPlaceholders = cols.map(() => `$${placeholderIndex++}`);
+      return `(${rowPlaceholders.join(', ')})`;
+    })
+    .join(', ');
+
+  const query = `
+    INSERT INTO
+      ${SCHEMA}.t_juchu_kizai_honbanbi (${cols.join(',')})
+    VALUES 
+      ${placeholders}
+  `;
+
   try {
-    return await supabase.schema(SCHEMA).from('t_juchu_kizai_honbanbi').insert(data);
+    await connection.query(query, values);
   } catch (e) {
     throw e;
   }
@@ -94,15 +124,44 @@ export const insertAllHonbanbi = async (data: JuchuKizaiHonbanbi[]) => {
  * @param userNam ユーザー名
  * @returns
  */
-export const updateNyushukoHonbanbi = async (data: JuchuKizaiHonbanbi) => {
+export const updateNyushukoHonbanbi = async (data: JuchuKizaiHonbanbi, connection: PoolClient) => {
+  const whereKeys = ['juchu_head_id', 'juchu_kizai_head_id', 'juchu_honbanbi_shubetu_id'] as const;
+
+  const allKeys = Object.keys(data) as (keyof typeof data)[];
+
+  const updateKeys = allKeys.filter((key) => !(whereKeys as readonly string[]).includes(key));
+
+  if (updateKeys.length === 0) {
+    throw new Error('No columns to update.');
+  }
+
+  const allValues: (string | number | null | undefined)[] = [];
+  let placeholderIndex = 1;
+
+  const setClause = updateKeys
+    .map((key) => {
+      allValues.push(data[key]);
+      return `${key} = $${placeholderIndex++}`;
+    })
+    .join(', ');
+
+  const whereClause = whereKeys
+    .map((key) => {
+      allValues.push(data[key]);
+      return `${key} = $${placeholderIndex++}`;
+    })
+    .join(' AND ');
+
+  const query = `
+      UPDATE
+        ${SCHEMA}.t_juchu_kizai_honbanbi
+      SET
+        ${setClause}
+      WHERE
+        ${whereClause}
+    `;
   try {
-    return await supabase
-      .schema(SCHEMA)
-      .from('t_juchu_kizai_honbanbi')
-      .update(data)
-      .eq('juchu_head_id', data.juchu_head_id)
-      .eq('juchu_kizai_head_id', data.juchu_kizai_head_id)
-      .eq('juchu_honbanbi_shubetu_id', data.juchu_honbanbi_shubetu_id);
+    await connection.query(query, allValues);
   } catch (e) {
     throw e;
   }
@@ -116,16 +175,49 @@ export const updateNyushukoHonbanbi = async (data: JuchuKizaiHonbanbi) => {
  * @param userNam ユーザー名
  * @returns
  */
-export const updateHonbanbi = async (data: JuchuKizaiHonbanbi) => {
+export const updateHonbanbi = async (data: JuchuKizaiHonbanbi, connection: PoolClient) => {
+  const whereKeys = [
+    'juchu_head_id',
+    'juchu_kizai_head_id',
+    'juchu_honbanbi_shubetu_id',
+    'juchu_honbanbi_dat',
+  ] as const;
+
+  const allKeys = Object.keys(data) as (keyof typeof data)[];
+
+  const updateKeys = allKeys.filter((key) => !(whereKeys as readonly string[]).includes(key));
+
+  if (updateKeys.length === 0) {
+    throw new Error('No columns to update.');
+  }
+
+  const allValues: (string | number | null | undefined)[] = [];
+  let placeholderIndex = 1;
+
+  const setClause = updateKeys
+    .map((key) => {
+      allValues.push(data[key]);
+      return `${key} = $${placeholderIndex++}`;
+    })
+    .join(', ');
+
+  const whereClause = whereKeys
+    .map((key) => {
+      allValues.push(data[key]);
+      return `${key} = $${placeholderIndex++}`;
+    })
+    .join(' AND ');
+
+  const query = `
+      UPDATE
+        ${SCHEMA}.t_juchu_kizai_honbanbi
+      SET
+        ${setClause}
+      WHERE
+        ${whereClause}
+    `;
   try {
-    return await supabase
-      .schema(SCHEMA)
-      .from('t_juchu_kizai_honbanbi')
-      .update(data)
-      .eq('juchu_head_id', data.juchu_head_id)
-      .eq('juchu_kizai_head_id', data.juchu_kizai_head_id)
-      .eq('juchu_honbanbi_shubetu_id', data.juchu_honbanbi_shubetu_id)
-      .eq('juchu_honbanbi_dat', data.juchu_honbanbi_dat);
+    await connection.query(query, allValues);
   } catch (e) {
     throw e;
   }
@@ -141,17 +233,23 @@ export const deleteHonbanbi = async (
   juchuHeadId: number,
   juchuKizaiHeadId: number,
   juchuHonbanbiShubetuId: number,
-  juchuHonbanbiDat: string
+  juchuHonbanbiDat: string,
+  connection: PoolClient
 ) => {
+  const query = `
+    DELETE FROM
+      ${SCHEMA}.t_juchu_kizai_honbanbi
+    WHERE
+      juchu_head_id = $1
+      AND juchu_kizai_head_id = $2
+      AND juchu_honbanbi_shubetu_id = $3
+      AND juchu_honbanbi_dat = $4
+  `;
+
+  const values = [juchuHeadId, juchuKizaiHeadId, juchuHonbanbiShubetuId, juchuHonbanbiDat];
+
   try {
-    return await supabase
-      .schema(SCHEMA)
-      .from('t_juchu_kizai_honbanbi')
-      .delete()
-      .eq('juchu_head_id', juchuHeadId)
-      .eq('juchu_kizai_head_id', juchuKizaiHeadId)
-      .eq('juchu_honbanbi_shubetu_id', juchuHonbanbiShubetuId)
-      .eq('juchu_honbanbi_dat', juchuHonbanbiDat);
+    await connection.query(query, values);
   } catch (e) {
     throw e;
   }
@@ -163,15 +261,20 @@ export const deleteHonbanbi = async (
  * @param juchuKizaiHeadId 受注機材ヘッダーid
  * @param juchuHonbanbiData 受注機材本番日データ
  */
-export const deleteSiyouHonbanbi = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
+export const deleteSiyouHonbanbi = async (juchuHeadId: number, juchuKizaiHeadId: number, connection: PoolClient) => {
+  const query = `
+    DELETE FROM
+      ${SCHEMA}.t_juchu_kizai_honbanbi
+    WHERE
+      juchu_head_id = $1
+      AND juchu_kizai_head_id = $2
+      AND juchu_honbanbi_shubetu_id = $3
+  `;
+
+  const values = [juchuHeadId, juchuKizaiHeadId, 1];
+
   try {
-    return await supabase
-      .schema(SCHEMA)
-      .from('t_juchu_kizai_honbanbi')
-      .delete()
-      .eq('juchu_head_id', juchuHeadId)
-      .eq('juchu_kizai_head_id', juchuKizaiHeadId)
-      .eq('juchu_honbanbi_shubetu_id', 1);
+    await connection.query(query, values);
   } catch (e) {
     throw e;
   }

@@ -83,7 +83,7 @@ export const ShukoList = (props: { shukoData: ShukoTableValues[] }) => {
           .join(', ');
       })(),
       */
-      item13: [], //row.kizaiData ?? [],
+      //item13: [], //row.kizaiData ?? [],
     }));
 
     console.log('pdfModels', pdfModels);

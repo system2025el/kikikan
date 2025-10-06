@@ -87,6 +87,14 @@ export const Bill = ({
   const meisaiHeadFields = useFieldArray({ control, name: 'meisaiHeads' });
   const kokyaku = useWatch({ control, name: 'aite' });
 
+  // 監視
+  const meisaiHeads = useWatch({ control, name: 'meisaiHeads' });
+  const currentChukei = useWatch({ control, name: 'chukeiAmt' });
+  const currentPreTaxGokei = useWatch({ control, name: 'preTaxGokeiAmt' });
+  const currentZeiAmt = useWatch({ control, name: 'zeiAmt' });
+  const zeiRat = useWatch({ control, name: 'zeiRat' });
+  const currentGokeiAmt = useWatch({ control, name: 'gokeiAmt' });
+
   /* methods ------------------------------------------------------ */
   /* 保存ボタン押下 */
   const onSubmit = async (/*data: billHeadValues*/) => {
@@ -160,11 +168,39 @@ export const Bill = ({
 
   /* ---------------------------------------------------------------------- */
 
+  // 見積全体計算
+  useEffect(() => {
+    const chukei = (meisaiHeads ?? []).reduce((acc, item) => acc + (item?.nebikiAftAmt ?? 0), 0);
+
+    if (chukei !== currentChukei) {
+      setValue('chukeiAmt', chukei);
+    }
+
+    const preTax = (meisaiHeads ?? [])
+      .filter((d) => d?.zeiFlg)
+      .reduce((acc, item) => acc + (item?.nebikiAftAmt ?? 0), 0);
+    if (preTax !== currentPreTaxGokei) {
+      setValue('preTaxGokeiAmt', preTax);
+    }
+
+    const zei = Math.round((preTax * (zeiRat ?? 0)) / 100);
+    const currentZei = Math.round(currentZeiAmt ?? 0);
+    if (zei !== currentZei) {
+      setValue('zeiAmt', zei === 0 ? null : zei);
+    }
+
+    const gokei = chukei + zei;
+
+    if (gokei !== currentGokeiAmt) {
+      setValue('gokeiAmt', gokei);
+    }
+  }, [meisaiHeads, currentChukei, currentPreTaxGokei, zeiRat, currentZeiAmt, currentGokeiAmt, setValue]);
+
   return (
     <>
       <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
         <Box justifySelf={'end'} mb={0.5}>
-          <Button onClick={() => router.push('/bill-list')}>戻る</Button>
+          <Button onClick={() => router.back()}>戻る</Button>
         </Box>
         <FormProvider {...billForm}>
           <form onSubmit={handleSubmit(onSubmit)}>
@@ -231,7 +267,7 @@ export const Bill = ({
                       />
                     </Grid2>
                     <Grid2 sx={styles.container}>
-                      <Typography marginRight={1}>請求書名</Typography>
+                      <Typography marginRight={{ xl: 1, lg: 3 }}>請求書名</Typography>
                       <TextFieldElement name="seikyuHeadNam" control={control} sx={{ width: 400 }} />
                     </Grid2>
                     <Grid2 sx={styles.container}>
