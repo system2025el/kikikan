@@ -53,28 +53,39 @@ export const selectFilteredJuchusForBill = async (queries: { kokyakuId: number; 
       v.shuko_dat,
       v.nyuko_dat,
       v.seikyu_dat,
-      honbanbi.honbanbi_qty,
-      honbanbi.add_dat_qty,
-      meisai.shokei_amt
-    FROM
-      ${SCHEMA}.v_seikyu_date_lst as v
-    LEFT JOIN
-      ${SCHEMA}.t_juchu_kizai_meisai as kizai
-    ON 
-      v.juchu_head_id = kizai.juchu_head_id AND v.juchu_kizai_head_id = kizai.juchu_kizai_head_id
-    LEFT JOIN
+      meisai.shokei_amt,
       (
         SELECT
-            juchu_head_id,
-            juchu_kizai_head_id,
-            count(juchu_honbanbi_dat) as honbanbi_qty,
-            sum(juchu_honbanbi_add_qty) as add_dat_qty
+          count(juchu_honbanbi_dat)
         FROM
-            ${SCHEMA}.t_juchu_kizai_honbanbi
-        GROUP BY
-            juchu_head_id, juchu_kizai_head_id
-      ) as honbanbi
-      ON v.juchu_head_id = honbanbi.juchu_head_id AND v.juchu_kizai_head_id = honbanbi.juchu_kizai_head_id
+          ${SCHEMA}.t_juchu_kizai_honbanbi as ch
+        WHERE
+          ch.juchu_head_id = v.juchu_head_id
+        AND
+          ch.juchu_kizai_head_id = v.juchu_kizai_head_id
+        AND
+          ch.juchu_honbanbi_shubetu_id = 40
+        AND
+          ch.juchu_honbanbi_dat >= COALESCE(v.seikyu_dat, v.shuko_dat)
+        AND
+          ch.juchu_honbanbi_dat <= LEAST(v.nyuko_dat, '${date}')
+      ) as honbanbi_qty,
+      (
+        SELECT
+          sum(juchu_honbanbi_add_qty)
+        FROM
+          ${SCHEMA}.t_juchu_kizai_honbanbi as sh
+       WHERE
+          sh.juchu_head_id = v.juchu_head_id
+        AND
+          sh.juchu_kizai_head_id = v.juchu_kizai_head_id
+        AND
+          sh.juchu_honbanbi_dat >= COALESCE(v.seikyu_dat, v.shuko_dat)
+        AND
+          sh.juchu_honbanbi_dat <= LEAST(v.nyuko_dat, '${date}')
+      ) as add_dat_qty
+    FROM
+      ${SCHEMA}.v_seikyu_date_lst as v
     LEFT JOIN
       (
         SELECT
@@ -93,6 +104,7 @@ export const selectFilteredJuchusForBill = async (queries: { kokyakuId: number; 
       v.shuko_dat <= '${date}' AND
       v.seikyu_jokyo_sts_id <> 9;
     `;
+  // console.log(query);
   try {
     return await pool.query(query);
   } catch (e) {

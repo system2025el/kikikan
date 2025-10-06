@@ -105,7 +105,7 @@ export const quotMeisaiHeadSchema = z.object({
 /**
  * 明細ヘッドのタイプ
  */
-export type QuotMaisaiHeadValues = z.infer<typeof quotMeisaiHeadSchema>;
+export type QuotMeisaiHeadValues = z.infer<typeof quotMeisaiHeadSchema>;
 
 /**
  * 明細書全体のzodSchema
