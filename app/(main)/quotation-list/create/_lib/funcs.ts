@@ -55,6 +55,7 @@ const addQuotation = async (data: QuotHeadValues, user: string): Promise<number 
     const kokyakuId = await connection.query(
       `SELECT kokyaku_id from ${SCHEMA}.m_kokyaku WHERE kokyaku_nam = '${data.kokyaku}'`
     );
+    console.log('☆☆☆☆☆☆☆☆☆☆☆', kokyakuId);
     console.log(newMituHeadId.rows[0].newid);
     // 見積ヘッド
     const quotHead: MituHead = {
@@ -63,7 +64,7 @@ const addQuotation = async (data: QuotHeadValues, user: string): Promise<number 
       mitu_sts: data.mituSts,
       mitu_dat: data.mituDat ? toJapanTimeString(data.mituDat) : null,
       mitu_head_nam: data.mituHeadNam,
-      kokyaku_id: kokyakuId.rows[0].kokyaku_id ?? null,
+      kokyaku_id: kokyakuId.rows[0]?.kokyaku_id ?? null,
       kokyaku_nam: data.kokyaku,
       nyuryoku_user: data.nyuryokuUser,
       mitu_str_dat: data.mituRange.strt ? toJapanTimeString(data.mituRange.strt) : null,

@@ -55,13 +55,11 @@ export const MeisaiTblHeader = ({
 
     // 計算結果が現在の値と異なる場合のみ更新
     if (sum !== (Number(currentShokeiAmt) || 0)) {
-      setValue(`meisaiHeads.${sectionNam}.${index}.shokeiAmt`, sum, {
-        shouldDirty: true, // isDirtyを更新する場合
-      });
+      setValue(`meisaiHeads.${sectionNam}.${index}.shokeiAmt`, sum, { shouldDirty: false });
     }
     const nebikiAft = sum - (nebikiAmt ?? 0);
     if (nebikiAft !== Number(currentNebikiAftAmt) || 0) {
-      setValue(`meisaiHeads.${sectionNam}.${index}.nebikiAftAmt`, nebikiAft);
+      setValue(`meisaiHeads.${sectionNam}.${index}.nebikiAftAmt`, nebikiAft, { shouldDirty: false });
     }
   }, [meisaiList, currentShokeiAmt, nebikiAmt, currentNebikiAftAmt, sectionNam, index, setValue]);
 

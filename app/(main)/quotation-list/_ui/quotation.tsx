@@ -120,6 +120,7 @@ export const Quotation = ({
     }
     setSnackBarMessage('保存しました');
     setSnackBarOpen(true);
+    reset(data);
   };
 
   /* useEffect ------------------------------------------------------------ */
@@ -140,7 +141,7 @@ export const Quotation = ({
   useEffect(() => {
     const kChukei = (kizaiHeads ?? []).reduce((acc, item) => acc + (item.nebikiAftAmt ?? 0), 0);
     if (currentKizaiChukei !== kChukei) {
-      setValue('kizaiChukeiAmt', kChukei);
+      setValue('kizaiChukeiAmt', kChukei, { shouldDirty: false });
     }
   }, [kizaiHeads, currentKizaiChukei, setValue]);
 
@@ -153,24 +154,24 @@ export const Quotation = ({
     const chukeiSum = kChukei + lChukei + oChukei;
 
     if (chukeiSum !== currentChukei) {
-      setValue('chukeiAmt', chukeiSum);
+      setValue('chukeiAmt', chukeiSum, { shouldDirty: false });
     }
 
     const sum = chukeiSum - (tokuNebikiAmt ?? 0);
     if (sum !== currentPreTaxGokei) {
-      setValue('preTaxGokeiAmt', sum);
+      setValue('preTaxGokeiAmt', sum, { shouldDirty: false });
     }
 
     const zei = Math.round((sum * (zeiRat ?? 0)) / 100);
     const currentZei = Math.round(currentZeiAmt ?? 0);
     if (zei !== currentZei) {
-      setValue('zeiAmt', zei === 0 ? null : zei);
+      setValue('zeiAmt', zei === 0 ? null : zei, { shouldDirty: false });
     }
 
     const gokei = sum + zei;
 
     if (gokei !== currentGokeiAmt) {
-      setValue('gokeiAmt', gokei);
+      setValue('gokeiAmt', gokei, { shouldDirty: false });
     }
   }, [
     kizaiHeads,
@@ -203,9 +204,9 @@ export const Quotation = ({
             <Grid2 container display="flex" alignItems="center" justifyContent="space-between" p={1}>
               <Typography margin={1}>見積書</Typography>
               <Box>
-                {/* <Button sx={{ margin: 1 }}>編集</Button> */}
-                <Button sx={{ margin: 1 }}>見積書印刷</Button>
-                {/* <Button sx={{ margin: 1 }}>複製</Button> */}
+                <Button sx={{ margin: 1 }} disabled={isNew || isDirty}>
+                  見積書印刷
+                </Button>
                 <Button sx={{ margin: 1 }} type="submit">
                   保存
                 </Button>

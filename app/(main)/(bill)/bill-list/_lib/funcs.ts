@@ -215,6 +215,13 @@ export const getJuchuKizaiHeadNamListForBill = async (queries: {
   }
 };
 
+/**
+ * テーブル追加時に選んだ機材明細の合算した情報を取得し成型する関数
+ * @param juchuHeadId 受注ヘッダID
+ * @param kizaiHeadId 機材明細ヘッダID
+ * @param dat 年月日
+ * @returns テーブル追加時に選んだ機材明細の合算した情報
+ */
 export const getJuchuKizaiMeisaiHeadForBill = async (juchuHeadId: number, kizaiHeadId: number, dat: Date) => {
   try {
     const data = await selectJuchuKizaiMeisaiHeadForBill(juchuHeadId, kizaiHeadId, dat);
@@ -248,7 +255,7 @@ export const getJuchuKizaiMeisaiHeadForBill = async (juchuHeadId: number, kizaiH
               .map((m) => ({
                 nam: `${m.head_nam}一式`,
                 qty: 1,
-                honbanbiQty: m.honbanbi_qty + m.add_dat_qty,
+                honbanbiQty: (Number(m.honbanbi_qty) ?? 0) + (Number(m.add_dat_qty) ?? 0),
                 tankaAmt: Number(m.shokei_amt),
                 shokeiAmt: Number(1 * (m.honbanbi_qty + m.add_dat_qty) * m.shokei_amt),
                 ...m,
