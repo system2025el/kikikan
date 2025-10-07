@@ -52,30 +52,43 @@ export const usePdf = (): [(param: BillHeadValues) => Promise<Blob>] => {
     const whiteSpace = 30;
     const boldLine = 2;
 
-    // 上横線
-    page.drawLine({
-      start: { x: whiteSpace, y: height - whiteSpace },
-      end: { x: width - whiteSpace, y: height - whiteSpace },
-      thickness: boldLine,
-    });
-    // 左縦線
-    page.drawLine({
-      start: { x: whiteSpace - 1, y: whiteSpace - 1 },
-      end: { x: whiteSpace - 1, y: height - (whiteSpace - 1) },
-      thickness: boldLine,
-    });
-    // 右縦線
-    page.drawLine({
-      start: { x: width - (whiteSpace + 1), y: whiteSpace - 1 },
-      end: { x: width - (whiteSpace + 1), y: height - (whiteSpace - 1) },
-      thickness: boldLine,
-    });
+    // // 上横線
+    // page.drawLine({
+    //   start: { x: whiteSpace, y: height - whiteSpace },
+    //   end: { x: width - whiteSpace, y: height - whiteSpace },
+    //   thickness: boldLine,
+    // });
+    // // 左縦線
+    // page.drawLine({
+    //   start: { x: whiteSpace - 1, y: whiteSpace - 1 },
+    //   end: { x: whiteSpace - 1, y: height - (whiteSpace - 1) },
+    //   thickness: boldLine,
+    // });
+    // // 右縦線
+    // page.drawLine({
+    //   start: { x: width - (whiteSpace + 1), y: whiteSpace - 1 },
+    //   end: { x: width - (whiteSpace + 1), y: height - (whiteSpace - 1) },
+    //   thickness: boldLine,
+    // });
     // // 下横線
     // page.drawLine({
     //   start: { x: whiteSpace, y: whiteSpace },
     //   end: { x: width - whiteSpace, y: whiteSpace },
     //   thickness: boldLine,
     // });
+    // ------------------------------------------------------------------/
+
+    /* タイトル・見積番号・見積日
+     * -----------------------------------------------------------------*/
+    page.drawText('請　求　書', {
+      x: 365,
+      y: 790,
+      font: customFont, // カスタムフォントの設定
+      size: 18,
+      //color: rgb(0, 0, 0),
+      //lineHeight: 10,
+      //opacity: 1,
+    });
     // ------------------------------------------------------------------/
 
     /*　ここまで出力内容
