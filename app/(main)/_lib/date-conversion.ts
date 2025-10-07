@@ -27,48 +27,16 @@ export const toISOStringWithTimezone = (date: Date): string => {
 // yyyy/MM/dd HH:mm:ss
 export const toISOString = (date: Date): string => {
   return dayjs(date).tz('Asia/Tokyo').format('YYYY/MM/DD HH:mm:ss');
-  // const jstDate = new Date(date.getTime() + 9 * 60 * 60 * 1000);
-
-  // const pad = function (str: string): string {
-  //   return ('0' + str).slice(-2);
-  // };
-  // const year = jstDate.getFullYear().toString();
-  // const month = pad((jstDate.getMonth() + 1).toString());
-  // const day = pad(jstDate.getDate().toString());
-  // const hour = pad(jstDate.getHours().toString());
-  // const min = pad(jstDate.getMinutes().toString());
-  // const sec = pad(jstDate.getSeconds().toString());
-  // return `${year}/${month}/${day} ${hour}:${min}:${sec}`;
 };
 
 // yyyy/MM/dd
 export const toISOStringYearMonthDay = (date: Date) => {
   return dayjs(date).tz('Asia/Tokyo').format('YYYY/MM/DD');
-
-  // const jstDate = new Date(date.getTime() + 9 * 60 * 60 * 1000);
-  // console.log('-------------------jstDate-------------------', jstDate);
-
-  // const pad = function (str: string): string {
-  //   return ('0' + str).slice(-2);
-  // };
-  // const year = jstDate.getFullYear().toString();
-  // const month = pad((jstDate.getMonth() + 1).toString());
-  // const day = pad(jstDate.getDate().toString());
-  // return `${year}/${month}/${day}`;
 };
 
 // MM/dd
 export const toISOStringMonthDay = (date: Date): string => {
   return dayjs(date).tz('Asia/Tokyo').format('MM/DD');
-
-  // const jstDate = new Date(date.getTime() + 9 * 60 * 60 * 1000);
-
-  // const pad = function (str: string): string {
-  //   return ('0' + str).slice(-2);
-  // };
-  // const month = pad((jstDate.getMonth() + 1).toString());
-  // const day = pad(jstDate.getDate().toString());
-  // return `${month}/${day}`;
 };
 
 /**
