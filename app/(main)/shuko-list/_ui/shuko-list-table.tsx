@@ -1,9 +1,9 @@
 'use client';
 
-import { Checkbox, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
+import { Button, Checkbox, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import { Dispatch, SetStateAction, useState } from 'react';
 
-import { toISOString } from '../../_lib/date-conversion';
+import { toISOString, toJapanTimeString } from '../../_lib/date-conversion';
 import { ShukoTableValues } from '../_lib/types';
 
 export const ShukoListTable = (props: {
@@ -41,26 +41,56 @@ export const ShukoListTable = (props: {
             <TableCell align="left">出庫場所</TableCell>
             <TableCell align="left">出庫日時</TableCell>
             <TableCell align="left">公演名</TableCell>
+            <TableCell align="left">機材明細名</TableCell>
             <TableCell align="left">顧客名</TableCell>
-            <TableCell align="left">出庫機材担当者</TableCell>
+            <TableCell align="left">課</TableCell>
             <TableCell align="center">スタンバイ</TableCell>
             <TableCell align="center">チェック</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {datas.map((row, index) => (
-            <TableRow key={index}>
+            <TableRow key={index} sx={{ whiteSpace: 'nowrap' }}>
               <TableCell padding="checkbox">
                 <Checkbox checked={selected.includes(row)} onChange={() => handleSelect(row)} />
               </TableCell>
               <TableCell align="center">{row.juchuHeadId}</TableCell>
-              <TableCell align="left"></TableCell>
-              <TableCell align="left">{toISOString(row.shukoDat)}</TableCell>
+              <TableCell align="left">{row.nyushukoBashoId === 1 ? 'K' : 'Y'}</TableCell>
+              <TableCell align="left">{toJapanTimeString(row.nyushukoDat)}</TableCell>
               <TableCell align="left">{row.koenNam}</TableCell>
+              <TableCell align="left">{row.headNamv}</TableCell>
               <TableCell align="left">{row.kokyakuNam}</TableCell>
-              <TableCell align="left"></TableCell>
-              <TableCell align="center"></TableCell>
-              <TableCell align="center"></TableCell>
+              <TableCell align="left">{row.sectionNamv}</TableCell>
+              <TableCell align="center">
+                <Button
+                  variant="text"
+                  size="small"
+                  href={`shuko-list/shuko-detail/${row.juchuHeadId}/${row.nyushukoBashoId}/${toJapanTimeString(row.nyushukoDat, '-')}/10`}
+                >
+                  {row.sstbSagyoStsId === 0
+                    ? '-'
+                    : row.sstbSagyoStsId === 11
+                      ? '△'
+                      : row.sstbSagyoStsId === 12
+                        ? '〇'
+                        : ''}
+                </Button>
+              </TableCell>
+              <TableCell align="center">
+                <Button
+                  variant="text"
+                  size="small"
+                  href={`shuko-list/shuko-detail/${row.juchuHeadId}/${row.nyushukoBashoId}/${toJapanTimeString(row.nyushukoDat, '-')}/20`}
+                >
+                  {row.schkSagyoStsId === 0
+                    ? '-'
+                    : row.schkSagyoStsId === 21
+                      ? '△'
+                      : row.schkSagyoStsId === 22
+                        ? '〇'
+                        : ''}
+                </Button>
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
