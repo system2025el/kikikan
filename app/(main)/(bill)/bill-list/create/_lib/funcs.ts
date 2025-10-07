@@ -8,7 +8,7 @@ import { SCHEMA } from '@/app/_lib/db/supabase';
 import { insertBillHead } from '@/app/_lib/db/tables/t-seikyu-head';
 import { insertBillMeisai } from '@/app/_lib/db/tables/t-seikyu-meisai';
 import { insertBillMeisaiHead } from '@/app/_lib/db/tables/t-seikyu-meisai-head';
-import { selectFilteredJuchusForBill } from '@/app/_lib/db/tables/v-seikyu-date-lst';
+import { selectFilteredJuchuDetailsForBill, selectFilteredJuchusForBill } from '@/app/_lib/db/tables/v-seikyu-date-lst';
 import { SeikyuHead } from '@/app/_lib/db/types/t-seikyu-head-type';
 import { SeikyuMeisaiHead } from '@/app/_lib/db/types/t-seikyu-meisai-head-type';
 import { SeikyuMeisai } from '@/app/_lib/db/types/t-seikyu-meisai-type';
@@ -28,14 +28,60 @@ export const getJuchusForBill = async (queries: {
   flg: boolean;
   tantouNam: string | null;
 }): Promise<BillMeisaiHeadsValues[]> => {
-  console.log(queries);
+  console.log('新規だよ', queries);
   const { kokyakuId, date, flg, tantouNam } = queries;
   try {
     if (flg) {
-      // 詳細表示するとき
-      return [];
+      // 詳細表示するとき ------------------------------------------------------------------------
+      const juchus = await selectFilteredJuchuDetailsForBill({
+        kokyakuId: kokyakuId,
+        date: date,
+        tantouNam: tantouNam,
+      });
+      if (!juchus) {
+        throw new Error('DB取得エラー');
+      }
+      if (!juchus.rows || juchus.rows.length === 0) {
+        return [];
+      }
+      console.log('受注情報', juchus.rows);
+      return juchus.rows.map((j) => ({
+        juchuHeadId: j.juchu_head_id,
+        juchuKizaiHeadId: j.juchu_kizai_head_id,
+        seikyuMeisaiHeadNam: j.head_nam,
+        koenNam: j.koen_nam,
+        seikyuRange: {
+          strt: j.seikyu_dat ? new Date(j.seikyu_dat) : new Date(j.shuko_dat),
+          end: new Date(j.nyuko_dat) > new Date(date) ? new Date(date) : new Date(j.nyuko_dat),
+        },
+        koenbashoNam: j.koenbasho_nam,
+        kokyakuTantoNam: j.kokyaku_tanto_nam,
+        zeiFlg: false,
+        meisai: Array.isArray(juchus.rows)
+          ? juchus.rows.filter(
+              (m) =>
+                m.juchu_head_id === j.juchu_head_id && m.juchu_kizai_head_id === j.juchu_kizai_head_id && m.shokei_amt
+            ).length === 0
+            ? []
+            : juchus.rows
+                .filter(
+                  (m) =>
+                    m.juchu_head_id === j.juchu_head_id &&
+                    m.juchu_kizai_head_id === j.juchu_kizai_head_id &&
+                    m.shokei_amt
+                )
+                .map((m) => ({
+                  nam: `${m.head_nam}一式`,
+                  qty: 1,
+                  honbanbiQty: (Number(m.honbanbi_qty) ?? 0) + (Number(m.add_dat_qty) ?? 0),
+                  tankaAmt: Number(m.shokei_amt),
+                  shokeiAmt: Number(1 * (m.honbanbi_qty + m.add_dat_qty) * m.shokei_amt),
+                  ...m,
+                }))
+          : [],
+      }));
     } else {
-      // 明細をまとめて表示するとき
+      // 明細をまとめて表示するとき -------------------------------------------------------------
       const juchus = await selectFilteredJuchusForBill({ kokyakuId: kokyakuId, date: date, tantouNam: tantouNam });
       if (!juchus) {
         throw new Error('DB取得エラー');
@@ -47,6 +93,7 @@ export const getJuchusForBill = async (queries: {
       return juchus.rows.map((j) => ({
         juchuHeadId: j.juchu_head_id,
         juchuKizaiHeadId: j.juchu_kizai_head_id,
+        seikyuMeisaiHeadNam: j.head_nam,
         koenNam: j.koen_nam,
         seikyuRange: {
           strt: j.seikyu_dat ? new Date(j.seikyu_dat) : new Date(j.shuko_dat),
