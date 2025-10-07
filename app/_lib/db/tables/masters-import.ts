@@ -38,7 +38,7 @@ export const checkRfid = async (list: RfidImportTypes[], connection: PoolClient)
     // 新規登録するデータがあれば新規登録処理
     if (insertList.length > 0) {
       // 現材の時刻取得
-      const addDat = toJapanTimeString();
+      const addDat = toJapanTimeString(undefined, '-');
       const addUser = 'excel_import';
 
       // 一時テーブルとして扱うインポートデータのカラムを定義
@@ -127,7 +127,7 @@ export const checkRfid = async (list: RfidImportTypes[], connection: PoolClient)
     const updateList = differnces.rows;
     // 差異がある場合
     if (updateList && updateList.length > 0) {
-      const updDat = toJapanTimeString();
+      const updDat = toJapanTimeString(undefined, '-');
       const updUser = 'excel_import';
       const updatePlaceholders = updateList
         .map((_, index) => {
@@ -218,7 +218,7 @@ export const checkKizai = async (list: KizaiImportTypes[], connection: PoolClien
     })
   );
   // 現在の日付とユーザー情報を取得
-  const addDat = toJapanTimeString();
+  const addDat = toJapanTimeString(undefined, '-');
   const addUser = 'excel_import';
 
   try {
@@ -319,7 +319,7 @@ export const checkDaibumon = async (list: string[], connection: PoolClient) => {
   }
   const placeholders = list.map((_, index) => `($${index + 1})`).join(',');
   // 現在の日付とユーザー情報
-  const addDat = toJapanTimeString();
+  const addDat = toJapanTimeString(undefined, '-');
   const addUser = 'excel_import';
   try {
     //  既存の大部門マスタの最大ID
@@ -372,7 +372,7 @@ export const checkShukeibumon = async (list: string[], connection: PoolClient) =
   }
   const placeholders = list.map((_, index) => `($${index + 1})`).join(',');
   // 現在の日付とユーザー情報
-  const addDat = toJapanTimeString();
+  const addDat = toJapanTimeString(undefined, '-');
   const addUser = 'excel_import';
 
   try {
@@ -442,7 +442,7 @@ export const checkBumon = async (
     })
   );
   // 現在の日付とユーザー情報を取得
-  const addDat = toJapanTimeString();
+  const addDat = toJapanTimeString(undefined, '-');
   const addUser = 'excel_import';
 
   try {
@@ -515,7 +515,7 @@ export const checkTanaban = async (list: TanabanImportTypes[], connection: PoolC
   const values = list.flatMap((item) => [item.bld_cod, item.tana_cod, item.eda_cod]);
 
   // 現日時取得
-  const addDate = toJapanTimeString();
+  const addDate = toJapanTimeString(undefined, '-');
   const addUser = 'excel_import';
 
   try {

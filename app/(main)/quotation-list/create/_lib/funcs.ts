@@ -20,12 +20,11 @@ import { QuotHeadValues } from '../../_lib/types';
  * 見積を保存する関数
  * @param data 見積書フォーム内容
  */
-const addQuottation = async (data: QuotHeadValues, user: string): Promise<number | null> => {
+const addQuotation = async (data: QuotHeadValues, user: string): Promise<number | null> => {
   /* トランザクション準備 */
   const connection = await pool.connect();
   // 見積明細ヘッド準備
   const keys = ['kizai', 'labor', 'other'];
-  let mId: number;
   // 明細ヘッドIDと明細IDの発番
   const meisaiheadList = keys
     .flatMap((key) => data.meisaiHeads?.[key as keyof typeof data.meisaiHeads] ?? [])
@@ -56,6 +55,7 @@ const addQuottation = async (data: QuotHeadValues, user: string): Promise<number
     const kokyakuId = await connection.query(
       `SELECT kokyaku_id from ${SCHEMA}.m_kokyaku WHERE kokyaku_nam = '${data.kokyaku}'`
     );
+    console.log('☆☆☆☆☆☆☆☆☆☆☆', kokyakuId);
     console.log(newMituHeadId.rows[0].newid);
     // 見積ヘッド
     const quotHead: MituHead = {
@@ -64,7 +64,7 @@ const addQuottation = async (data: QuotHeadValues, user: string): Promise<number
       mitu_sts: data.mituSts,
       mitu_dat: data.mituDat ? toJapanTimeString(data.mituDat) : null,
       mitu_head_nam: data.mituHeadNam,
-      kokyaku_id: kokyakuId.rows[0].kokyaku_id ?? null,
+      kokyaku_id: kokyakuId.rows[0]?.kokyaku_id ?? null,
       kokyaku_nam: data.kokyaku,
       nyuryoku_user: data.nyuryokuUser,
       mitu_str_dat: data.mituRange.strt ? toJapanTimeString(data.mituRange.strt) : null,
@@ -148,7 +148,7 @@ const addQuottation = async (data: QuotHeadValues, user: string): Promise<number
  * @param user
  */
 export const addQuot = async (data: QuotHeadValues, user: string) => {
-  const id = await addQuottation(data, user);
+  const id = await addQuotation(data, user);
   await revalidatePath('/quotation-list');
   await redirect(`/quotation-list/edit/${id}`);
 };

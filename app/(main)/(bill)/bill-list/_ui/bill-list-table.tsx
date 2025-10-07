@@ -152,8 +152,7 @@ export const BillListTable = ({
                       <Box minWidth={60}>{bill.billHeadId}</Box>
                     </Button>
                   </TableCell>
-                  <TableCell align="right">{bill.billingSts}</TableCell>
-
+                  <TableCell>{bill.billingSts}</TableCell>
                   <TableCell>
                     <LightTooltipWithText variant={'body2'} maxWidth={300}>
                       {bill.billHeadNam}

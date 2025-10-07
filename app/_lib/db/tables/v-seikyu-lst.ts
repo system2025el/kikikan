@@ -6,7 +6,7 @@ import pool from '../postgres';
 import { SCHEMA, supabase } from '../supabase';
 
 export const selectFilteredBills = async (queries: BillSearchValues) => {
-  const { billId, billingSts, range, kokyaku, kokyakuTantoNam } = queries;
+  const { billId, billingSts, range, kokyaku, seikyuHeadNam } = queries;
   const builder = supabase
     .schema(SCHEMA)
     .from('v_seikyu_lst')

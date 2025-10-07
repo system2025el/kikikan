@@ -10,7 +10,7 @@ import { getJuchusForBill } from './_lib/funcs';
 const Page = async ({ searchParams }: { searchParams: Promise<{ [key: string]: string | undefined }> }) => {
   const searchParam = await searchParams;
   console.log(searchParam);
-  const { kokyakuId, date, flg } = searchParam;
+  const { kokyakuId, date, flg, tantou } = searchParam;
   const [users, sts] = await Promise.all([getUsersSelection(), getBillingStsSelection()]);
 
   const custs = await getChosenCustomerIdAndName(Number(kokyakuId));
@@ -18,6 +18,7 @@ const Page = async ({ searchParams }: { searchParams: Promise<{ [key: string]: s
     kokyakuId: Number(kokyakuId),
     date: date ?? toJapanDateString(),
     flg: flg === 'true' ? true : false,
+    tantouNam: tantou === 'null' ? null : (tantou ?? null),
   });
 
   const chukei =
@@ -42,7 +43,7 @@ const Page = async ({ searchParams }: { searchParams: Promise<{ [key: string]: s
   const bill: BillHeadValues = {
     aite: { id: custs.kokyakuId, nam: custs.kokyakuNam },
     seikyuDat: new Date(),
-    adr1: custs.adrPost,
+    adr1: custs.adrPost.trim(),
     adr2: { shozai: custs.adrShozai, tatemono: custs.adrTatemono, sonota: custs.adrSonota },
     kokyaku: custs.kokyakuNam,
     meisaiHeads: juchus

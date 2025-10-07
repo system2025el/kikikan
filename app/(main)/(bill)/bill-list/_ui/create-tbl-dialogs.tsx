@@ -25,15 +25,13 @@ import {
   useFormContext,
 } from 'react-hook-form-mui';
 
+import { selectJuchuKizaiMeisaiHeadForBill } from '@/app/_lib/db/tables/v-seikyu-date-lst';
 import { CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
 import { FormDateX } from '@/app/(main)/_ui/date';
 import { Loading } from '@/app/(main)/_ui/loading';
-import {
-  getJuchuIsshikiMeisai,
-  getJuchuKizaiHeadNamList,
-  getJuchuKizaiMeisaiList,
-} from '@/app/(main)/quotation-list/_lib/funcs';
+import { getJuchuIsshikiMeisai, getJuchuKizaiMeisaiList } from '@/app/(main)/quotation-list/_lib/funcs';
 
+import { getJuchuKizaiHeadNamListForBill, getJuchuKizaiMeisaiHeadForBill } from '../_lib/funcs';
 import { BillHeadValues } from '../_lib/types';
 
 /**
@@ -93,11 +91,11 @@ export const SecondDialogPage = ({
 }) => {
   /* debug用、レンダリング回数取得に使用 */
   const [checked, setChecked] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   /* 表示する明細ヘッド名リスト */
   const [meisaiHeadNamList, setMeisaiHeadNamList] = useState<
-    { juchuHeadId: number; juchuKizaiHeadId: number; headNam: string }[]
+    { juchuHeadId: number; juchuKizaiHeadId: number; headNam: string; dat: Date }[]
   >([]);
 
   /* useForm -------------------------------------- */
@@ -112,31 +110,39 @@ export const SecondDialogPage = ({
   });
 
   /* methods ------------------------------------------------ */
+  /* 機材明細ヘッダリスト検索ボタン押下時 */
+  const handleSearch = async (data: { kokyaku: { id: number; nam: string }; juchuId: number | null; dat: Date }) => {
+    setIsLoading(true);
+    console.log(data);
+    const meisaiNamList = await getJuchuKizaiHeadNamListForBill(data);
+    setMeisaiHeadNamList(meisaiNamList.map((d) => ({ ...d, dat: data.dat })));
+    setIsLoading(false);
+  };
+
   /* ヘッダが選ばれたときの処理 */
-  const handleClickHeadNam = async (juchuId: number, kizaiHeadId: number, headNam: string, checked: boolean) => {
+  const handleClickHeadNam = async (juchuId: number, kizaiHeadId: number, checked: boolean, dat: Date) => {
     console.log(kizaiHeadId, checked);
     if (checked) {
-      const data = await getJuchuIsshikiMeisai(juchuId, kizaiHeadId);
-      headsField.append({
-        seikyuMeisaiHeadNam: null,
-        zeiFlg: false,
-        meisai: data,
-      });
+      // 詳細表示処理
+      // const data = await getJuchuIsshikiMeisai(juchuId, kizaiHeadId);
+      // headsField.append({
+      //   seikyuMeisaiHeadNam: null,
+      //   zeiFlg: false,
+      //   seikyuRange: { strt: null, end: null }, // あとでnullじゃなくする
+      //   meisai: data,
+      // });
     } else {
-      const data = await getJuchuKizaiMeisaiList(juchuId, kizaiHeadId);
+      // まとめて表示処理
+      const data = await getJuchuKizaiMeisaiHeadForBill(juchuId, kizaiHeadId, dat);
       console.log(data);
       // 取得した内容をテーブル内の明細に入れる
-      headsField.append({
-        seikyuMeisaiHeadNam: null,
-        zeiFlg: false,
-        meisai: data,
-      });
+      headsField.append(data);
     }
     handleClose();
   };
 
   /* useEffect ---------------------------------------------- */
-  useEffect(() => {}, []);
+  // useEffect(() => {}, []);
 
   return (
     <>
@@ -148,49 +154,48 @@ export const SecondDialogPage = ({
         />
       </DialogTitle>
       <Box p={4}>
-        <form>
-          <Box sx={styles.container}>
-            <Typography mr={7}>相手</Typography>
-            <TextFieldElement
-              name="kokyaku.nam"
-              control={control}
-              sx={{
-                pointerEvents: 'none', // クリック不可にする
-                backgroundColor: '#f5f5f5', // グレー背景で無効っぽく
-                color: '#888',
-                width: 400,
-              }}
-              slotProps={{ input: { readOnly: true, onFocus: (e) => e.target.blur() } }}
-            />
-          </Box>
-          <Box sx={styles.container}>
-            <Typography mr={3}>受注番号</Typography>
-            <TextFieldElement name="juchuId" control={control} sx={{ width: 120 }} />
-          </Box>
-          <Box sx={styles.container}>
-            <Typography mr={5}>年月日</Typography>
-            <Typography mr={1}>～</Typography>
-            <Controller
-              control={control}
-              name="dat"
-              rules={{ required: '選択してください' }}
-              render={({ field, fieldState }) => (
-                <FormDateX
-                  value={field.value}
-                  onChange={field.onChange}
-                  sx={{
-                    mr: 1,
-                  }}
-                  error={!!fieldState.error}
-                  helperText={fieldState.error?.message}
-                />
-              )}
-            />
-          </Box>
-          <Box sx={styles.container} justifyContent={'end'}>
-            <Button type="submit">検索</Button>
-          </Box>
-        </form>
+        <Box sx={styles.container}>
+          <Typography mr={7}>相手</Typography>
+          <TextFieldElement
+            name="kokyaku.nam"
+            control={control}
+            sx={{
+              pointerEvents: 'none', // クリック不可にする
+              backgroundColor: '#f5f5f5', // グレー背景で無効っぽく
+              color: '#888',
+              width: 400,
+            }}
+            slotProps={{ input: { readOnly: true, onFocus: (e) => e.target.blur() } }}
+          />
+        </Box>
+        <Box sx={styles.container}>
+          <Typography mr={3}>受注番号</Typography>
+          <TextFieldElement name="juchuId" control={control} sx={{ width: 120 }} />
+        </Box>
+        <Box sx={styles.container}>
+          <Typography mr={5}>年月日</Typography>
+          <Typography mr={1}>～</Typography>
+          <Controller
+            control={control}
+            name="dat"
+            rules={{ required: '選択してください' }}
+            render={({ field, fieldState }) => (
+              <FormDateX
+                value={field.value}
+                onChange={field.onChange}
+                sx={{
+                  mr: 1,
+                }}
+                error={!!fieldState.error}
+                helperText={fieldState.error?.message}
+              />
+            )}
+          />
+        </Box>
+        <Box sx={styles.container} justifyContent={'end'}>
+          <Button onClick={handleSubmit(handleSearch)}>検索</Button>
+        </Box>
+
         <Stack>
           <FormGroup>
             <FormControlLabel
@@ -208,7 +213,7 @@ export const SecondDialogPage = ({
                 meisaiHeadNamList.map((l) => (
                   <ListItem key={l.juchuKizaiHeadId} disablePadding>
                     <ListItemButton
-                      onClick={() => handleClickHeadNam(l.juchuHeadId, l.juchuKizaiHeadId, l.headNam, checked)}
+                      onClick={() => handleClickHeadNam(l.juchuHeadId, l.juchuKizaiHeadId, checked, l.dat)}
                       dense
                     >
                       <ListItemText primary={l.headNam} />

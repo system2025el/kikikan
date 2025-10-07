@@ -44,7 +44,7 @@ const masterList: MenuItem[] = [
   { name: '大部門マスタ', url: '/daibumons-master' },
   { name: '集計部門マスタ', url: '/shukeibumons-master' },
   { name: '部門マスタ', url: '/bumons-master' },
-  { name: '拠点マスタ', url: '/bases-master' },
+  // { name: '拠点マスタ', url: '/bases-master' },
   { name: '権限マスタ', url: '/' },
   { name: '一式マスタ', url: '/' },
   { name: '担当者マスタ', url: '/users-master' },
