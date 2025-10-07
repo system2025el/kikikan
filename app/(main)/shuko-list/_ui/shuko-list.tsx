@@ -61,7 +61,7 @@ export const ShukoList = (props: { shukoData: ShukoTableValues[] }) => {
     // PdfModelの配列を作成
     const pdfModels: PdfModel[] = selected.map((row) => ({
       item1: row.juchuHeadId,
-      item2: row.shukoDat,
+      item2: new Date(), //row.shukoDat,
       item3: row.kokyakuNam,
       item4: row.koenNam,
       item5: new Date(), //row.kashidashiDat ?? new Date(),
