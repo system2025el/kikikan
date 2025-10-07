@@ -141,7 +141,7 @@ export const MeisaiTblHeader = ({
       <Grid2 container alignItems={'end'} my={0.5}>
         <Grid2 sx={styles.container} size={4}>
           <Typography marginRight={3}>公演場所</Typography>
-          <TextFieldElement name={`meisaiHeads.${index}.koenBashoNam`} control={control} sx={{ width: 400 }} />
+          <TextFieldElement name={`meisaiHeads.${index}.koenbashoNam`} control={control} sx={{ width: 400 }} />
         </Grid2>
         <Grid2 sx={styles.container}>
           <Typography marginRight={7}>担当者</Typography>

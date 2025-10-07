@@ -69,7 +69,7 @@ export const updateBill = async (data: BillHeadValues, user: string): Promise<nu
     seikyu_end_dat: l.seikyuRange?.end ? toJapanTimeString(l.seikyuRange.end, '-') : null,
     seikyu_meisai_head_nam: l.seikyuMeisaiHeadNam ?? null,
     koen_nam: l.koenNam,
-    koenbasho_nam: l.koenBashoNam,
+    koenbasho_nam: l.koenbashoNam,
     kokyaku_tanto_nam: l.kokyakuTantoNam,
     nebiki_amt: l.nebikiAmt ?? null,
     zei_flg: Number(l.zeiFlg),

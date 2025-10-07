@@ -21,7 +21,7 @@ import { UseFieldArrayReturn } from 'react-hook-form-mui';
 import { CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
 import { Loading } from '@/app/(main)/_ui/loading';
 
-import { getJuchuIsshikiMeisai, getJuchuKizaiHeadNamList, getJuchuKizaiMeisaiList } from '../_lib/funcs';
+import { getJuchuIsshikiMeisai, getJuchuKizaiHeadNamListForQuot, getJuchuKizaiMeisaiList } from '../_lib/funcs';
 import { QuotHeadValues } from '../_lib/types';
 
 /**
@@ -131,7 +131,7 @@ export const SecondDialogPage = ({
       }
       /* 受注ヘッダIDから表示する受注機材ヘッダを取得する */
       const getList = async () => {
-        const list = await getJuchuKizaiHeadNamList(juchuId);
+        const list = await getJuchuKizaiHeadNamListForQuot(juchuId);
         setMeisaiHeadNamList(list);
         setIsLoading(false);
       };

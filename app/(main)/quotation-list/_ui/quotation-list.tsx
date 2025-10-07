@@ -16,7 +16,6 @@ import {
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 
-import { BackButton } from '../../_ui/buttons';
 import { TwoDatePickers } from '../../_ui/date';
 import { QuotTableValues } from '../_lib/types';
 import { QuotationListTable } from './quotation-list-table';
@@ -36,9 +35,6 @@ export const QuotationList = ({ quots }: { quots: QuotTableValues[] }) => {
   }, []);
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
-      <Box justifySelf={'end'} mb={0.5}>
-        <BackButton label={'戻る'} />
-      </Box>
       <Paper variant="outlined">
         <Box width={'100%'} display={'flex'} p={2}>
           <Typography noWrap>見積検索</Typography>

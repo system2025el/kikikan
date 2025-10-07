@@ -38,9 +38,6 @@ export const BillList = ({
 
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
-      <Box justifySelf={'end'} mb={0.5}>
-        <BackButton label={'戻る'} />
-      </Box>
       <Paper variant="outlined">
         <Box width={'100%'} display={'flex'} p={2}>
           <Typography noWrap>請求検索</Typography>

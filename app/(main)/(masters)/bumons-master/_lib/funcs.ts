@@ -81,7 +81,10 @@ export const getChosenbumon = async (id: number) => {
 export const addNewBumon = async (data: BumonsMasterDialogValues) => {
   try {
     await insertNewBumon(data);
+    await revalidatePath('/bumons-master');
+    await revalidatePath('/daibumon-master');
     await revalidatePath('/shukeibumon-master');
+    await revalidatePath('/eqpt-master');
   } catch (error) {
     console.log('DB接続エラー', error);
     throw error;
@@ -108,7 +111,10 @@ export const updateBumon = async (rawData: BumonsMasterDialogValues, id: number)
 
   try {
     await upDateBumonDB(updateDate);
-    await revalidatePath('/bumon-master');
+    await revalidatePath('/bumons-master');
+    await revalidatePath('/daibumon-master');
+    await revalidatePath('/shukeibumon-master');
+    await revalidatePath('/eqpt-master');
   } catch (error) {
     console.log('例外が発生しました', error);
     throw error;

@@ -26,16 +26,17 @@ export const getJuchusForBill = async (queries: {
   kokyakuId: number;
   date: string;
   flg: boolean;
+  tantouNam: string | null;
 }): Promise<BillMeisaiHeadsValues[]> => {
   console.log(queries);
-  const { kokyakuId, date, flg } = queries;
+  const { kokyakuId, date, flg, tantouNam } = queries;
   try {
     if (flg) {
       // 詳細表示するとき
       return [];
     } else {
       // 明細をまとめて表示するとき
-      const juchus = await selectFilteredJuchusForBill({ kokyakuId: kokyakuId, date: date });
+      const juchus = await selectFilteredJuchusForBill({ kokyakuId: kokyakuId, date: date, tantouNam: tantouNam });
       if (!juchus) {
         throw new Error('DB取得エラー');
       }
@@ -51,7 +52,7 @@ export const getJuchusForBill = async (queries: {
           strt: j.seikyu_dat ? new Date(j.seikyu_dat) : new Date(j.shuko_dat),
           end: new Date(j.nyuko_dat) > new Date(date) ? new Date(date) : new Date(j.nyuko_dat),
         },
-        koenBashoNam: j.koenbasho_nam,
+        koenbashoNam: j.koenbasho_nam,
         kokyakuTantoNam: j.kokyaku_tanto_nam,
         zeiFlg: false,
         meisai: Array.isArray(juchus.rows)
@@ -150,7 +151,7 @@ const addBilling = async (data: BillHeadValues, user: string): Promise<number | 
           seikyu_end_dat: l.seikyuRange?.end ? toJapanTimeString(l.seikyuRange.end, '-') : null,
           seikyu_meisai_head_nam: l.seikyuMeisaiHeadNam,
           koen_nam: l.koenNam,
-          koenbasho_nam: l.koenBashoNam,
+          koenbasho_nam: l.koenbashoNam,
           kokyaku_tanto_nam: l.kokyakuTantoNam,
           nebiki_amt: l.nebikiAmt,
           zei_flg: Number(l.zeiFlg),

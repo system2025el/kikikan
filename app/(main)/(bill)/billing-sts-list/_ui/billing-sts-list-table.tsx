@@ -41,6 +41,7 @@ export const BillingStsListTable = ({
   isLoading,
   page,
   kokyakuId,
+  tantouNam,
   billSts,
   setIsLoading,
   setPage,
@@ -48,6 +49,7 @@ export const BillingStsListTable = ({
   isLoading: boolean;
   page: number;
   kokyakuId: number;
+  tantouNam: string | null;
   billSts: BillingStsTableValues[];
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setPage: React.Dispatch<React.SetStateAction<number>>;
@@ -146,8 +148,8 @@ export const BillingStsListTable = ({
           </Table>
         </TableContainer>
       )}
-      <Dialog open={createOpen}>
-        <CreateBillDialog kokyakuId={kokyakuId} setDialogOpen={setCreateOpen} />
+      <Dialog open={createOpen} onClose={() => setCreateOpen(false)}>
+        <CreateBillDialog kokyakuId={kokyakuId} tantouNam={tantouNam} setDialogOpen={setCreateOpen} />
       </Dialog>
       <Snackbar
         open={snackBarOpen}

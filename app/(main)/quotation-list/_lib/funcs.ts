@@ -285,7 +285,7 @@ export const getChosenQuot = async (mituId: number) => {
  * @param juchuId 受注ヘッドID
  * @returns 選択用の機材ヘッダ名、受注ヘッドID、機材明細ヘッドIDの配列
  */
-export const getJuchuKizaiHeadNamList = async (juchuId: number) => {
+export const getJuchuKizaiHeadNamListForQuot = async (juchuId: number) => {
   try {
     const { data, error } = await selectJuchuKizaiHeadList(juchuId);
     if (error) {

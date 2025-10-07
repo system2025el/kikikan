@@ -25,16 +25,13 @@ import {
   useFormContext,
 } from 'react-hook-form-mui';
 
+import { selectJuchuKizaiMeisaiHeadForBill } from '@/app/_lib/db/tables/v-seikyu-date-lst';
 import { CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
 import { FormDateX } from '@/app/(main)/_ui/date';
 import { Loading } from '@/app/(main)/_ui/loading';
-import {
-  getJuchuIsshikiMeisai,
-  getJuchuKizaiHeadNamList,
-  getJuchuKizaiMeisaiList,
-} from '@/app/(main)/quotation-list/_lib/funcs';
+import { getJuchuIsshikiMeisai, getJuchuKizaiMeisaiList } from '@/app/(main)/quotation-list/_lib/funcs';
 
-import { getJuchuKizaiHeadNamListForBill } from '../_lib/funcs';
+import { getJuchuKizaiHeadNamListForBill, getJuchuKizaiMeisaiHeadForBill } from '../_lib/funcs';
 import { BillHeadValues } from '../_lib/types';
 
 /**
@@ -98,7 +95,7 @@ export const SecondDialogPage = ({
 
   /* 表示する明細ヘッド名リスト */
   const [meisaiHeadNamList, setMeisaiHeadNamList] = useState<
-    { juchuHeadId: number; juchuKizaiHeadId: number; headNam: string }[]
+    { juchuHeadId: number; juchuKizaiHeadId: number; headNam: string; dat: Date }[]
   >([]);
 
   /* useForm -------------------------------------- */
@@ -113,37 +110,35 @@ export const SecondDialogPage = ({
   });
 
   /* methods ------------------------------------------------ */
-  /* ヘッダが選ばれたときの処理 */
-  const handleClickHeadNam = async (juchuId: number, kizaiHeadId: number, headNam: string, checked: boolean) => {
-    console.log(kizaiHeadId, checked);
-    if (checked) {
-      const data = await getJuchuIsshikiMeisai(juchuId, kizaiHeadId);
-      headsField.append({
-        seikyuMeisaiHeadNam: null,
-        zeiFlg: false,
-        seikyuRange: { strt: null, end: null }, // あとでnullじゃなくする
-        meisai: data,
-      });
-    } else {
-      const data = await getJuchuKizaiMeisaiList(juchuId, kizaiHeadId);
-      console.log(data);
-      // 取得した内容をテーブル内の明細に入れる
-      headsField.append({
-        seikyuMeisaiHeadNam: null,
-        zeiFlg: false,
-        seikyuRange: { strt: null, end: null }, // あとでnullじゃなくする
-        meisai: data,
-      });
-    }
-    handleClose();
-  };
-
+  /* 機材明細ヘッダリスト検索ボタン押下時 */
   const handleSearch = async (data: { kokyaku: { id: number; nam: string }; juchuId: number | null; dat: Date }) => {
     setIsLoading(true);
     console.log(data);
     const meisaiNamList = await getJuchuKizaiHeadNamListForBill(data);
-    setMeisaiHeadNamList(meisaiNamList);
+    setMeisaiHeadNamList(meisaiNamList.map((d) => ({ ...d, dat: data.dat })));
     setIsLoading(false);
+  };
+
+  /* ヘッダが選ばれたときの処理 */
+  const handleClickHeadNam = async (juchuId: number, kizaiHeadId: number, checked: boolean, dat: Date) => {
+    console.log(kizaiHeadId, checked);
+    if (checked) {
+      // 詳細表示処理
+      // const data = await getJuchuIsshikiMeisai(juchuId, kizaiHeadId);
+      // headsField.append({
+      //   seikyuMeisaiHeadNam: null,
+      //   zeiFlg: false,
+      //   seikyuRange: { strt: null, end: null }, // あとでnullじゃなくする
+      //   meisai: data,
+      // });
+    } else {
+      // まとめて表示処理
+      const data = await getJuchuKizaiMeisaiHeadForBill(juchuId, kizaiHeadId, dat);
+      console.log(data);
+      // 取得した内容をテーブル内の明細に入れる
+      headsField.append(data);
+    }
+    handleClose();
   };
 
   /* useEffect ---------------------------------------------- */
@@ -218,7 +213,7 @@ export const SecondDialogPage = ({
                 meisaiHeadNamList.map((l) => (
                   <ListItem key={l.juchuKizaiHeadId} disablePadding>
                     <ListItemButton
-                      onClick={() => handleClickHeadNam(l.juchuHeadId, l.juchuKizaiHeadId, l.headNam, checked)}
+                      onClick={() => handleClickHeadNam(l.juchuHeadId, l.juchuKizaiHeadId, checked, l.dat)}
                       dense
                     >
                       <ListItemText primary={l.headNam} />

@@ -6,7 +6,6 @@ import { useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { CheckboxButtonGroup, SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
-import { BackButton } from '@/app/(main)/_ui/buttons';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 
 import { getFilteredBillingSituations } from '../_lib/funcs';
@@ -31,6 +30,7 @@ export const BillingStsList = ({ custs }: { custs: SelectTypes[] }) => {
 
   // const kokyakuId = getValues('kokyaku');
   const kokyakuId = useWatch({ control, name: 'kokyaku' });
+  const tantou = useWatch({ control, name: 'kokyakuTantoNam' });
 
   /* method --------------------------------------------------------------- */
   const onSubmit = async (data: BillingStsSearchValues) => {
@@ -43,9 +43,6 @@ export const BillingStsList = ({ custs }: { custs: SelectTypes[] }) => {
 
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
-      <Box justifySelf={'end'} mb={0.5}>
-        <BackButton label={'戻る'} />
-      </Box>
       <Paper variant="outlined">
         <Box width={'100%'} display={'flex'} p={2}>
           <Typography noWrap>受注請求状況検索</Typography>
@@ -110,6 +107,7 @@ export const BillingStsList = ({ custs }: { custs: SelectTypes[] }) => {
         isLoading={isLoading}
         page={page}
         kokyakuId={Number(kokyakuId)}
+        tantouNam={tantou}
         billSts={billSts}
         setIsLoading={setIsLoading}
         setPage={setPage}
