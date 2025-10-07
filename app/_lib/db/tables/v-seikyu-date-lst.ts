@@ -110,6 +110,7 @@ export const selectFilteredJuchusForBill = async (queries: {
       v.kokyaku_id = $1 AND
       v.shuko_fix_flg = 1 AND
       v.shuko_dat <= $2 AND
+      (v.seikyu_dat <= $2 OR v.seikyu_dat IS NULL) AND
       v.seikyu_jokyo_sts_id <> 9
   `;
 
@@ -127,6 +128,102 @@ export const selectFilteredJuchusForBill = async (queries: {
      ORDER BY
       v.juchu_head_id ASC, v.juchu_kizai_head_id ASC;
   `;
+
+  try {
+    return await pool.query(query, values);
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
+ * 受注請求状況一覧を詳細に取得する関数
+ * @param queries
+ * @returns 検索条件に一致する受注請求状況の詳細の配列
+ */
+export const selectFilteredJuchuDetailsForBill = async (queries: {
+  kokyakuId: number;
+  date: string;
+  tantouNam: string | null;
+}) => {
+  const { kokyakuId, date, tantouNam } = queries;
+  console.log(queries);
+  let query = `
+      SELECT
+        v.juchu_head_id,
+        v.juchu_kizai_head_id,
+        v.kokyaku_tanto_nam,
+        v.koen_nam,
+        v.koenbasho_nam,
+        v.head_nam,
+        v.shuko_dat,
+        v.nyuko_dat,
+        v.seikyu_dat,
+        (
+          SELECT
+            count(juchu_honbanbi_dat)
+          FROM
+            ${SCHEMA}.t_juchu_kizai_honbanbi as ch
+          WHERE
+            ch.juchu_head_id = v.juchu_head_id
+          AND
+            ch.juchu_kizai_head_id = v.juchu_kizai_head_id
+          AND
+            ch.juchu_honbanbi_shubetu_id = 40
+          AND
+            ch.juchu_honbanbi_dat >= COALESCE(v.seikyu_dat, v.shuko_dat)
+          AND
+            ch.juchu_honbanbi_dat <= LEAST(v.nyuko_dat, $2)
+        ) as honbanbi_qty,
+        (
+          SELECT
+            sum(juchu_honbanbi_add_qty)
+          FROM
+            ${SCHEMA}.t_juchu_kizai_honbanbi as sh
+          WHERE
+            sh.juchu_head_id = v.juchu_head_id
+          AND
+            sh.juchu_kizai_head_id = v.juchu_kizai_head_id
+          AND
+            sh.juchu_honbanbi_shubetu_id = 40
+          AND
+            sh.juchu_honbanbi_dat >= COALESCE(v.seikyu_dat, v.shuko_dat)
+          AND
+            sh.juchu_honbanbi_dat <= LEAST(v.nyuko_dat, $2)
+        ) as add_dat_qty,
+        kizai.kizai_nam,
+        meisai.kizai_tanka_amt,
+        (meisai.plan_kizai_qty + meisai.plan_yobi_qty) as plan_qty
+      FROM
+        ${SCHEMA}.v_seikyu_date_lst as v
+      LEFT JOIN
+        ${SCHEMA}.t_juchu_kizai_meisai as meisai
+      ON v.juchu_head_id = meisai.juchu_head_id AND v.juchu_kizai_head_id = meisai.juchu_kizai_head_id
+      LEFT JOIN
+        ${SCHEMA}.m_kizai as kizai
+      ON kizai.kizai_id = meisai.kizai_id
+      WHERE
+        v.kokyaku_id = $1 AND
+        v.shuko_fix_flg = 1 AND
+        v.shuko_dat <= $2 AND
+        (v.seikyu_dat <= $2 OR v.seikyu_dat IS NULL) AND
+        v.seikyu_jokyo_sts_id <> 9
+    `;
+
+  // 実行時に渡す値の配列
+  const values = [kokyakuId, date];
+
+  // tantouNamがあれば、WHERE句とvaluesに条件を追加
+  if (tantouNam && tantouNam !== '') {
+    // プレースホルダの番号はvaluesの要素数+1で動的に決定
+    query += ` AND v.kokyaku_tanto_nam = $${values.length + 1}`;
+    values.push(tantouNam);
+  }
+
+  query += `
+       ORDER BY
+        v.juchu_head_id ASC, v.juchu_kizai_head_id ASC;
+    `;
 
   try {
     return await pool.query(query, values);
@@ -154,6 +251,7 @@ export const selectJuchuKizaiHeadNamListFormBill = async (queries: {
       .eq('kokyaku_id', queries.kokyaku.id)
       .eq('shuko_fix_flg', 1)
       .lte('shuko_dat', toJapanDateString(queries.dat, '-'))
+      .or(`seikyu_dat.lte.${toJapanDateString(queries.dat, '-')},seikyu_dat.is.null`)
       .neq('seikyu_jokyo_sts_id', 9)
       .order('juchu_kizai_head_id');
   } catch (e) {

@@ -233,6 +233,7 @@ export const getJuchuKizaiMeisaiHeadForBill = async (juchuHeadId: number, kizaiH
     return data.rows.map((j) => ({
       juchuHeadId: j.juchu_head_id,
       juchuKizaiHeadId: j.juchu_kizai_head_id,
+      seikyuMeisaiHeadNam: j.head_nam,
       koenNam: j.koen_nam,
       seikyuRange: {
         strt: j.seikyu_dat ? new Date(j.seikyu_dat) : new Date(j.shuko_dat),
