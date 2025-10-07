@@ -44,7 +44,7 @@ export const MeisaiLines = ({ index, sectionNam }: { index: number; sectionNam: 
       // 現在の小計の値と比較し、異なっていればフォームの値を更新する
       // (無限ループを防ぐため、値が違う場合のみsetValueを実行)
       if (newShokei !== currentShokei) {
-        setValue(`meisaiHeads.${sectionNam}.${index}.meisai.${i}.shokeiAmt`, newShokei);
+        setValue(`meisaiHeads.${sectionNam}.${index}.meisai.${i}.shokeiAmt`, newShokei, { shouldDirty: false });
       }
     });
   }, [watchedMeisai, sectionNam, index, setValue]); // 依存配列に監視対象などを設定

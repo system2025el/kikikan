@@ -71,7 +71,7 @@ export const getJuchusForBill = async (queries: {
                 .map((m) => ({
                   nam: `${m.head_nam}一式`,
                   qty: 1,
-                  honbanbiQty: m.honbanbi_qty + m.add_dat_qty,
+                  honbanbiQty: (Number(m.honbanbi_qty) ?? 0) + (Number(m.add_dat_qty) ?? 0),
                   tankaAmt: Number(m.shokei_amt),
                   shokeiAmt: Number(1 * (m.honbanbi_qty + m.add_dat_qty) * m.shokei_amt),
                   ...m,
