@@ -81,7 +81,7 @@ export const addNewDaibumon = async (data: DaibumonsMasterDialogValues) => {
     await insertNewDaibumon(data);
     console.log('data : ', data);
     await revalidatePath('/bumons-master');
-    await revalidatePath('/daibumon-master');
+    await revalidatePath('/daibumons-master');
     await revalidatePath('/eqpt-master');
   } catch (error) {
     console.log('DB接続エラー', error);
@@ -108,7 +108,7 @@ export const updateDaibumon = async (rawData: DaibumonsMasterDialogValues, id: n
   try {
     await updateDaibumonDB(updateData);
     await revalidatePath('/bumons-master');
-    await revalidatePath('/daibumon-master');
+    await revalidatePath('/daibumons-master');
     await revalidatePath('/eqpt-master');
   } catch (error) {
     console.log('例外が発生', error);

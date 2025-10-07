@@ -81,7 +81,7 @@ export const addNewShukeibumon = async (data: ShukeibumonsMasterDialogValues) =>
     await insertNewShukeibumon(data);
     console.log('data : ', data);
     await revalidatePath('/bumons-master');
-    await revalidatePath('/shukeibumon-master');
+    await revalidatePath('/shukeibumons-master');
     await revalidatePath('/eqpt-master');
   } catch (error) {
     console.log('DB接続エラー', error);
@@ -108,7 +108,7 @@ export const updateShukeibumon = async (rawData: ShukeibumonsMasterDialogValues,
   try {
     await upDateShukeibumonDB(updateData);
     await revalidatePath('/bumons-master');
-    await revalidatePath('/shukeibumon-master');
+    await revalidatePath('/shukeibumons-master');
     await revalidatePath('/eqpt-master');
   } catch (error) {
     console.log('例外が発生', error);
