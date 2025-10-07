@@ -12,9 +12,11 @@ import { getChosenCustomerName } from '@/app/(main)/(masters)/customers-master/_
 
 export const CreateBillDialog = ({
   kokyakuId,
+  tantouNam,
   setDialogOpen,
 }: {
   kokyakuId: number;
+  tantouNam: string | null;
   setDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
   const router = useRouter();
@@ -24,6 +26,7 @@ export const CreateBillDialog = ({
   /* useForm ------------------------------------------------------------ */
   const { control, handleSubmit, reset } = useForm<{
     kokyaku: { id: number; name: string | null };
+    tantouNam: string | null;
     date: Date | null;
     showDetailFlg: boolean;
   }>({
@@ -33,14 +36,16 @@ export const CreateBillDialog = ({
   });
 
   /* methods ------------------------------------------------------------- */
+  /* 自動生成押下時 */
   const onSubmit = async (data: {
     kokyaku: { id: number; name: string | null };
+    tantouNam: string | null;
     date: Date | null;
     showDetailFlg: boolean;
   }) => {
     console.log(data);
     router.push(
-      `bill-list/create?kokyakuId=${data.kokyaku.id}&date=${toJapanDateString(data.date ?? undefined, '-')}&flg=${data.showDetailFlg}`
+      `bill-list/create?kokyakuId=${data.kokyaku.id}&date=${toJapanDateString(data.date ?? undefined, '-')}&flg=${data.showDetailFlg}&tantou=${tantouNam}`
     );
   };
 
@@ -49,7 +54,7 @@ export const CreateBillDialog = ({
   useEffect(() => {
     const getCustInfo = async () => {
       const kokyakuNam = await getChosenCustomerName(kokyakuId);
-      reset({ kokyaku: { id: kokyakuId, name: kokyakuNam ?? null }, date: new Date() });
+      reset({ kokyaku: { id: kokyakuId, name: kokyakuNam ?? null }, date: new Date(), tantouNam: tantouNam });
     };
     getCustInfo();
     setIsLoading(false);
@@ -62,7 +67,6 @@ export const CreateBillDialog = ({
           handleCloseDialog={() => {
             reset();
             setDialogOpen(false);
-            router.back();
           }}
         />
       </DialogTitle>
@@ -78,6 +82,19 @@ export const CreateBillDialog = ({
                 control={control}
                 sx={{
                   width: 400,
+                  pointerEvents: 'none', // クリック不可にする
+                  backgroundColor: '#f5f5f5', // グレー背景で無効っぽく
+                  color: '#888',
+                }}
+                slotProps={{ input: { readOnly: true, onFocus: (e) => e.target.blur() } }}
+              />
+            </Grid2>
+            <Grid2 display={'flex'} alignItems={'baseline'}>
+              <Typography mr={3}>相手担当者</Typography>
+              <TextFieldElement
+                name="tantouNam"
+                control={control}
+                sx={{
                   pointerEvents: 'none', // クリック不可にする
                   backgroundColor: '#f5f5f5', // グレー背景で無効っぽく
                   color: '#888',

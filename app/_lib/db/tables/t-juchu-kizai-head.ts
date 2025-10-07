@@ -331,19 +331,3 @@ export const updateReturnJuchuKizaiHead = async (data: JuchuKizaiHead, connectio
     throw e;
   }
 };
-
-export const selectJuchuKizaiHeadNamListFormBill = async (queries: {
-  kokyaku: { id: number; nam: string };
-  juchuId: number | null;
-  dat: Date;
-}) => {
-  try {
-    return await supabase
-      .schema(SCHEMA)
-      .from('t_juchu_kizai_head')
-      .select('juchu_head_id, juchu_kizai_head_id, head_nam')
-      .eq('juchu_head_id', queries.juchuId);
-  } catch (e) {
-    throw e;
-  }
-};

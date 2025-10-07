@@ -1,10 +1,14 @@
 'use server';
 
 import { selectActiveSeikyuSts } from '@/app/_lib/db/tables/m-seikyu-sts';
-import { selectJuchuKizaiHeadNamListFormBill } from '@/app/_lib/db/tables/t-juchu-kizai-head';
 import { selectChosenSeikyu } from '@/app/_lib/db/tables/t-seikyu-head';
 import { selectBillMeisai } from '@/app/_lib/db/tables/t-seikyu-meisai';
 import { selectBillMeisaiHead } from '@/app/_lib/db/tables/t-seikyu-meisai-head';
+import { selectJuchuKizaiHeadList } from '@/app/_lib/db/tables/v-juchu-kizai-head-lst';
+import {
+  selectJuchuKizaiHeadNamListFormBill,
+  selectJuchuKizaiMeisaiHeadForBill,
+} from '@/app/_lib/db/tables/v-seikyu-date-lst';
 import { selectFilteredBills } from '@/app/_lib/db/tables/v-seikyu-lst';
 import { SeikyuMeisaiHead } from '@/app/_lib/db/types/t-seikyu-meisai-head-type';
 import { SeikyuMeisai } from '@/app/_lib/db/types/t-seikyu-meisai-type';
@@ -87,7 +91,7 @@ export const getChosenBill = async (seikyuId: number) => {
       end: head.seikyu_end_dat ? new Date(head.seikyu_end_dat) : null,
     },
     koenNam: head.koen_nam,
-    koenBashoNam: head.koenbasho_nam,
+    koenbashoNam: head.koenbasho_nam,
     kokyakuTantoNam: head.kokyaku_tanto_nam,
     nebikiAmt: head.nebiki_amt,
     zeiFlg: Boolean(head.zei_flg),
@@ -204,6 +208,52 @@ export const getJuchuKizaiHeadNamListForBill = async (queries: {
       juchuHeadId: d.juchu_head_id,
       juchuKizaiHeadId: d.juchu_kizai_head_id,
       headNam: d.head_nam,
+    }));
+  } catch (e) {
+    console.error('例外が発生しました', e);
+    throw e;
+  }
+};
+
+export const getJuchuKizaiMeisaiHeadForBill = async (juchuHeadId: number, kizaiHeadId: number, dat: Date) => {
+  try {
+    const data = await selectJuchuKizaiMeisaiHeadForBill(juchuHeadId, kizaiHeadId, dat);
+    if (!data) {
+      console.error('例題が発生');
+    }
+    const d = data.rows[0];
+    console.log('☆☆☆☆☆☆☆☆☆', d);
+    return data.rows.map((j) => ({
+      juchuHeadId: j.juchu_head_id,
+      juchuKizaiHeadId: j.juchu_kizai_head_id,
+      koenNam: j.koen_nam,
+      seikyuRange: {
+        strt: j.seikyu_dat ? new Date(j.seikyu_dat) : new Date(j.shuko_dat),
+        end: new Date(j.nyuko_dat) > new Date(dat) ? new Date(dat) : new Date(j.nyuko_dat),
+      },
+      koenbashoNam: j.koenbasho_nam,
+      kokyakuTantoNam: j.kokyaku_tanto_nam,
+      zeiFlg: false,
+      meisai: Array.isArray(data.rows)
+        ? data.rows.filter(
+            (m) =>
+              m.juchu_head_id === j.juchu_head_id && m.juchu_kizai_head_id === j.juchu_kizai_head_id && m.shokei_amt
+          ).length === 0
+          ? []
+          : data.rows
+              .filter(
+                (m) =>
+                  m.juchu_head_id === j.juchu_head_id && m.juchu_kizai_head_id === j.juchu_kizai_head_id && m.shokei_amt
+              )
+              .map((m) => ({
+                nam: `${m.head_nam}一式`,
+                qty: 1,
+                honbanbiQty: m.honbanbi_qty + m.add_dat_qty,
+                tankaAmt: Number(m.shokei_amt),
+                shokeiAmt: Number(1 * (m.honbanbi_qty + m.add_dat_qty) * m.shokei_amt),
+                ...m,
+              }))
+        : [],
     }));
   } catch (e) {
     console.error('例外が発生しました', e);

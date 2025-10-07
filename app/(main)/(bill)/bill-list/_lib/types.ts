@@ -45,7 +45,7 @@ const billMeisaiHeadSchema = z
     juchuKizaiHeadId: z.number().int().nullish(),
     seikyuRange: z.object({ strt: z.date().nullish(), end: z.date().nullish() }),
     koenNam: z.string().nullish(),
-    koenBashoNam: z.string().nullish(),
+    koenbashoNam: z.string().nullish(),
     kokyakuTantoNam: z.string().nullish(),
     seikyuMeisaiHeadNam: z
       .string()
