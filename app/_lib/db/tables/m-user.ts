@@ -10,7 +10,12 @@ import { SCHEMA, supabase } from '../supabase';
  */
 export const selectActiveUsers = async () => {
   try {
-    return await supabase.schema('dev6').from('m_user').select('user_nam, shain_cod').neq('del_flg', 1);
+    return await supabase
+      .schema('dev6')
+      .from('m_user')
+      .select('user_nam, shain_cod')
+      .neq('del_flg', 1)
+      .order('dsp_ord_num');
   } catch (e) {
     throw e;
   }
