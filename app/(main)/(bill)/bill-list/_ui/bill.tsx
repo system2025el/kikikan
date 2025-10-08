@@ -106,22 +106,23 @@ export const Bill = ({
     }
     setSnackBarMessage('保存しました');
     setSnackBarOpen(true);
+    reset(data);
   };
 
   /* useEffect ------------------------------------------------------------ */
   /* eslint-disable react-hooks/exhaustive-deps */
-  //   useEffect(() => {
-  //     console.log('請求画面開いた', bill, 'isNew?', isNew, user?.name);
-  //     if (isNew) {
-  //       // 新規なら入力者をログインアカウントから取得する
-  //       if (user?.name) {
-  //         console.log({ ...bill, nyuryokuUser: user.name });
-  //         reset({ ...bill, nyuryokuUser: user.name });
-  //       }
-  //     } else {
-  //       reset(bill);
-  //     }
-  //   }, []);
+  useEffect(() => {
+    console.log('請求画面開いた', bill, 'isNew?', isNew, user?.name);
+    if (isNew) {
+      // 新規なら入力者をログインアカウントから取得する
+      if (user?.name) {
+        console.log({ ...bill, nyuryokuUser: user.name });
+        reset({ ...bill, nyuryokuUser: user.name });
+      }
+    } else {
+      reset(bill);
+    }
+  }, [user]);
 
   useEffect(() => {
     console.log('請求画面開いた', bill, 'isNew?', isNew, user?.name);
@@ -139,26 +140,26 @@ export const Bill = ({
     const chukei = (meisaiHeads ?? []).reduce((acc, item) => acc + (item?.nebikiAftAmt ?? 0), 0);
 
     if (chukei !== currentChukei) {
-      setValue('chukeiAmt', chukei);
+      setValue('chukeiAmt', chukei, { shouldDirty: false });
     }
 
     const preTax = (meisaiHeads ?? [])
       .filter((d) => d?.zeiFlg)
       .reduce((acc, item) => acc + (item?.nebikiAftAmt ?? 0), 0);
     if (preTax !== currentPreTaxGokei) {
-      setValue('preTaxGokeiAmt', preTax);
+      setValue('preTaxGokeiAmt', preTax, { shouldDirty: false });
     }
 
     const zei = Math.round((preTax * (zeiRat ?? 0)) / 100);
     const currentZei = Math.round(currentZeiAmt ?? 0);
     if (zei !== currentZei) {
-      setValue('zeiAmt', zei === 0 ? null : zei);
+      setValue('zeiAmt', zei === 0 ? null : zei, { shouldDirty: false });
     }
 
     const gokei = chukei + zei;
 
     if (gokei !== currentGokeiAmt) {
-      setValue('gokeiAmt', gokei);
+      setValue('gokeiAmt', gokei, { shouldDirty: false });
     }
   }, [meisaiHeads, currentChukei, currentPreTaxGokei, zeiRat, currentZeiAmt, currentGokeiAmt, setValue]);
 
@@ -174,7 +175,9 @@ export const Bill = ({
               <Grid2 container display="flex" alignItems="center" justifyContent="space-between" p={1}>
                 <Typography margin={1}>請求書</Typography>
                 <Box>
-                  <Button sx={{ margin: 1 }}>請求書印刷</Button>
+                  <Button sx={{ margin: 1 }} disabled={isNew || isDirty}>
+                    請求書印刷
+                  </Button>
                   <Button sx={{ margin: 1 }} type="submit">
                     保存
                   </Button>

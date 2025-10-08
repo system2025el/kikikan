@@ -98,20 +98,6 @@ export const BillingStsListTable = ({
                 新規
               </Button>
             </Grid2>
-            <Grid2>
-              <Button color="error">
-                <DeleteIcon fontSize="small" />
-                削除
-              </Button>
-            </Grid2>
-          </Grid2>
-          <Grid2 container spacing={1}>
-            <Grid2>
-              <Button>
-                <ContentCopyIcon fontSize="small" />
-                コピー
-              </Button>
-            </Grid2>
           </Grid2>
         </Grid2>
       </Grid2>

@@ -44,7 +44,7 @@ export const MeisaiLines = ({ index }: { index: number }) => {
       const currentShokei = Math.round(Number(m.shokeiAmt) || 0);
       const newShokei = Math.round(theShokei);
       if (newShokei !== currentShokei) {
-        setValue(`meisaiHeads.${index}.meisai.${i}.shokeiAmt`, newShokei);
+        setValue(`meisaiHeads.${index}.meisai.${i}.shokeiAmt`, newShokei, { shouldDirty: false });
       }
     });
   }, [watchedMeisai, index, setValue]); // 依存配列に監視対象などを設定
