@@ -118,7 +118,7 @@ export const selectActiveEqpts = async (query: string) => {
   `;
   const values = [];
   // queryチェック
-  if (query && query !== '') {
+  if (query && query.trim() !== '') {
     sqlQuery += ` AND k.kizai_nam ILIKE $${values.length + 1}`;
     values.push(`%${query}%`);
   }

@@ -21,7 +21,7 @@ export const selectFilteredBillingSituations = async (queries: BillingStsSearchV
     .eq('kokyaku_id', kokyaku)
     .eq('shuko_fix_flg', 1);
 
-  if (kokyakuTantoNam && kokyakuTantoNam !== '') {
+  if (kokyakuTantoNam && kokyakuTantoNam.trim() !== '') {
     builder.eq('kokyaku_tanto_nam', kokyakuTantoNam);
   }
   if (sts.length === 1 && sts[0] === '1') {
@@ -118,7 +118,7 @@ export const selectFilteredJuchusForBill = async (queries: {
   const values = [kokyakuId, date];
 
   // tantouNamがあれば、WHERE句とvaluesに条件を追加
-  if (tantouNam && tantouNam !== '') {
+  if (tantouNam && tantouNam.trim() !== '') {
     // プレースホルダの番号はvaluesの要素数+1で動的に決定
     query += ` AND v.kokyaku_tanto_nam = $${values.length + 1}`;
     values.push(tantouNam);
@@ -214,7 +214,7 @@ export const selectFilteredJuchuDetailsForBill = async (queries: {
   const values = [kokyakuId, date];
 
   // tantouNamがあれば、WHERE句とvaluesに条件を追加
-  if (tantouNam && tantouNam !== '') {
+  if (tantouNam && tantouNam.trim() !== '') {
     // プレースホルダの番号はvaluesの要素数+1で動的に決定
     query += ` AND v.kokyaku_tanto_nam = $${values.length + 1}`;
     values.push(tantouNam);
@@ -255,7 +255,7 @@ export const selectJuchuKizaiHeadNamListFormBill = async (queries: {
     .neq('seikyu_jokyo_sts_id', 9)
     .order('juchu_kizai_head_id');
 
-  if (queries.tantou && queries.tantou !== '') {
+  if (queries.tantou && queries.tantou.trim() !== '') {
     builder.eq('kokyaku_tanto_nam', queries.tantou);
   }
   try {
