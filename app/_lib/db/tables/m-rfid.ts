@@ -48,11 +48,11 @@ export const selectAllRfidWithKizai = async () => {
     mk.rank_amt_3, 
     mk.rank_amt_4, 
     mk.rank_amt_5 
-  FROM dev5.m_rfid AS mr
-  LEFT JOIN dev5.m_kizai AS mk ON mr.kizai_id = mk.kizai_id
-  LEFT JOIN dev5.m_bumon AS mb ON mk.bumon_id = mb.bumon_id
-  LEFT JOIN dev5.m_dai_bumon AS md ON mb.dai_bumon_id = md.dai_bumon_id
-  LEFT JOIN dev5.m_shukei_bumon AS ms ON mk.shukei_bumon_id = ms.shukei_bumon_id
+  FROM ${SCHEMA}.m_rfid AS mr
+  LEFT JOIN ${SCHEMA}.m_kizai AS mk ON mr.kizai_id = mk.kizai_id
+  LEFT JOIN ${SCHEMA}.m_bumon AS mb ON mk.bumon_id = mb.bumon_id
+  LEFT JOIN ${SCHEMA}.m_dai_bumon AS md ON mb.dai_bumon_id = md.dai_bumon_id
+  LEFT JOIN ${SCHEMA}.m_shukei_bumon AS ms ON mk.shukei_bumon_id = ms.shukei_bumon_id
   ORDER BY mr.rfid_tag_id
 `;
   try {
