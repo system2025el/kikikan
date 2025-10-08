@@ -214,7 +214,7 @@ export const CustomersMasterDialog = ({
                   <CheckboxElement name="delFlg" control={control} size="medium" disabled={editable ? false : true} />
                 </FormBox>
               </Grid2> */}
-              <Grid2>
+              {/* <Grid2>
                 <FormBox formItem={formItems[4]}>
                   <TextFieldElement
                     name="keisho"
@@ -225,7 +225,7 @@ export const CustomersMasterDialog = ({
                     disabled={editable ? false : true}
                   />
                 </FormBox>
-              </Grid2>
+              </Grid2> */}
               <Grid2>
                 <FormBox formItem={formItems[5]}>
                   <TextFieldElement
@@ -340,7 +340,7 @@ export const CustomersMasterDialog = ({
                   <CheckboxElement name="dspFlg" control={control} size="medium" disabled={editable ? false : true} />
                 </FormBox>
               </Grid2>
-              <Grid2>
+              {/* <Grid2>
                 <FormBox formItem={formItems[15]}>
                   <TextFieldElement
                     name="closeDay"
@@ -393,7 +393,7 @@ export const CustomersMasterDialog = ({
                     disabled={editable ? false : true}
                   />
                 </FormBox>
-              </Grid2>
+              </Grid2> */}
             </Grid2>
             <IsDirtyAlertDialog
               open={dirtyOpen}
