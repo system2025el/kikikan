@@ -64,13 +64,13 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
     });
     // 左縦線
     page.drawLine({
-      start: { x: whiteSpace - 1, y: whiteSpace - 1 },
+      start: { x: whiteSpace - 1, y: whiteSpace - 4 },
       end: { x: whiteSpace - 1, y: height - (whiteSpace - 1) },
       thickness: boldLine,
     });
     // 右縦線
     page.drawLine({
-      start: { x: width - (whiteSpace + 1), y: whiteSpace - 1 },
+      start: { x: width - (whiteSpace + 1), y: whiteSpace - 4 },
       end: { x: width - (whiteSpace + 1), y: height - (whiteSpace - 1) },
       thickness: boldLine,
     });
@@ -1062,13 +1062,13 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
 
     checkPageBreak(rowHeight);
     drawColumnLine2();
-    drawRow2('中計(機材費+人件費+諸経費)', 17128000);
+    drawRow2(param.chukeiMei ?? '', param.chukeiAmt ?? 0);
     drawUnderLine();
     index++;
 
     checkPageBreak(rowHeight);
     drawColumnLine2();
-    drawRow2('特別調整値引き', -228000);
+    drawRow2(param.tokuNebikiMei ?? '', param.tokuNebikiAmt ?? 0);
     drawUnderLine();
     index++;
 
@@ -1079,19 +1079,19 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
 
     checkPageBreak(rowHeight);
     drawColumnLine2();
-    drawRow2('合計', 169000000);
+    drawRow2('合計', (param.chukeiAmt ?? 0) - (param.tokuNebikiAmt ?? 0));
     drawUnderLine();
     index++;
 
     checkPageBreak(rowHeight);
     drawColumnLine2();
-    drawRow2('消費税（10%）', 1690000);
+    drawRow2(`消費税（${param.zeiRat?.toLocaleString()}%）`, param.zeiAmt ?? 0);
     drawUnderLine();
     index++;
 
     checkPageBreak(rowHeight);
     drawColumnLine2();
-    drawRow2('合計金額', 18590000);
+    drawRow2('合計金額', param.gokeiAmt ?? 0);
     drawUnderLine();
     index++;
 
@@ -1177,7 +1177,7 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
 
     // 下横線
     workPage.drawLine({
-      start: { x: whiteSpace, y: startY - 20 * (index + 3) },
+      start: { x: whiteSpace - 2, y: startY - 20 * (index + 3) }, // xの-2は微調整
       end: { x: width - whiteSpace, y: startY - 20 * (index + 3) },
       thickness: boldLine,
     });
