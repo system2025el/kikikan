@@ -4,7 +4,7 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Box, Button, Grid2, Stack, TextField, Typography } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   CheckboxElement,
   Control,
@@ -50,18 +50,21 @@ export const MeisaiTblHeader = ({
   const nebikiAmt = useWatch({ control, name: `meisaiHeads.${sectionNam}.${index}.nebikiAmt` });
   const currentNebikiAftAmt = useWatch({ control, name: `meisaiHeads.${sectionNam}.${index}.nebikiAftAmt` });
 
-  useEffect(() => {
-    const sum = (meisaiList ?? []).reduce((acc, item) => acc + (item.shokeiAmt ?? 0), 0);
+  const shokeiSum = useMemo(
+    () => Math.round((meisaiList ?? []).reduce((acc, item) => acc + (item.shokeiAmt ?? 0), 0)),
+    [meisaiList]
+  );
+  const nebikiAft = useMemo(() => Math.round(shokeiSum - (nebikiAmt ?? 0)), [shokeiSum, nebikiAmt]);
 
+  useEffect(() => {
     // 計算結果が現在の値と異なる場合のみ更新
-    if (sum !== (Number(currentShokeiAmt) || 0)) {
-      setValue(`meisaiHeads.${sectionNam}.${index}.shokeiAmt`, sum, { shouldDirty: false });
+    if (shokeiSum !== (Number(currentShokeiAmt) || 0)) {
+      setValue(`meisaiHeads.${sectionNam}.${index}.shokeiAmt`, shokeiSum, { shouldDirty: false });
     }
-    const nebikiAft = sum - (nebikiAmt ?? 0);
     if (nebikiAft !== Number(currentNebikiAftAmt) || 0) {
       setValue(`meisaiHeads.${sectionNam}.${index}.nebikiAftAmt`, nebikiAft, { shouldDirty: false });
     }
-  }, [meisaiList, currentShokeiAmt, nebikiAmt, currentNebikiAftAmt, sectionNam, index, setValue]);
+  }, [currentShokeiAmt, currentNebikiAftAmt, shokeiSum, nebikiAft, sectionNam, index, setValue]);
 
   return (
     <>
