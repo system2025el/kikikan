@@ -7,8 +7,7 @@ import { LocsMasterDialogValues, LocsMasterTableValues } from './types';
 export const lMHeader = [
   { key: 'name', label: '場所' },
   { key: 'address', label: '住所' },
-  { key: 'tel', label: 'Tel' },
-  { key: 'fax', label: 'Fax' },
+  { key: 'mem', label: 'メモ' },
   { key: 'hidden', label: '非表示' },
   { key: 'deleted', label: '無効' },
 ];
