@@ -520,6 +520,13 @@ export const Quotation = ({
                 </Dialog>
                 <Grid2 container px={2} alignItems={'center'} spacing={0.5}>
                   <Grid2 size={'grow'} />
+                  <Grid2 size={4.5}>
+                    <Divider sx={{ my: 1 }} />
+                  </Grid2>
+                  <Grid2 size={1} />
+                </Grid2>
+                <Grid2 container px={2} alignItems={'center'} spacing={0.5}>
+                  <Grid2 size={'grow'} />
                   <Grid2 size={1} textAlign={'end'}>
                     機材費：
                   </Grid2>
