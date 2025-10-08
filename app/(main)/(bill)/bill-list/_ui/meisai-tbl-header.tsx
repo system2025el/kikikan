@@ -51,7 +51,7 @@ export const MeisaiTblHeader = ({
 
     const nebikiAft = sum - (nebikiAmt ?? 0);
     if (nebikiAft !== Number(currentNebikiAftAmt) || 0) {
-      setValue(`meisaiHeads.${index}.nebikiAftAmt`, nebikiAft);
+      setValue(`meisaiHeads.${index}.nebikiAftAmt`, nebikiAft, { shouldDirty: false });
     }
   }, [meisaiList, nebikiAmt, currentNebikiAftAmt, index, setValue]);
 
