@@ -24,8 +24,11 @@ export const getFilteredUsers = async (query: string = '') => {
       return [];
     }
     const filteredUsers: UsersMasterTableValues[] = data.map((d, index) => ({
-      tantouId: index,
       tantouNam: d.user_nam,
+      mailAdr: d.mail_adr,
+      shainCod: d.shain_cod,
+      mem: d.mem,
+      lastLogin: '',
       tblDspId: index + 1,
       delFlg: Boolean(d.del_flg),
     }));

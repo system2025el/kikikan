@@ -24,7 +24,7 @@ import { Loading } from '@/app/(main)/_ui/loading';
 import { MuiTablePagination } from '../../../_ui/table-pagination';
 import { FAKE_NEW_ID, ROWS_PER_MASTER_TABLE_PAGE } from '../../_lib/constants';
 import { MasterTable } from '../../_ui/tables';
-import { mMHeader } from '../_lib/datas';
+import { userMHeader } from '../_lib/datas';
 import { getFilteredUsers } from '../_lib/funcs';
 import { UsersMasterTableValues } from '../_lib/types';
 import { UsersMasterDialog } from './users-master-dialog';
@@ -116,8 +116,8 @@ export const UserssMasterTable = ({
       ) : (
         <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
           <MasterTable
-            headers={mMHeader}
-            datas={theUsers!.map((l) => ({ ...l, id: l.tantouId, name: l.tantouNam }))}
+            headers={userMHeader}
+            datas={theUsers!.map((l) => ({ ...l, id: 0, name: l.tantouNam }))}
             page={page}
             rowsPerPage={rowsPerPage}
             handleOpenDialog={handleOpenDialog}
