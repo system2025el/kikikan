@@ -329,7 +329,9 @@ export const getJuchuKizaiMeisaiList = async (juchuId: number, kizaiHeadId: numb
       qty: d.plan_kizai_qty,
       honbanbiQty: d.juchu_honbanbi_calc_qty,
       tankaAmt: d.kizai_tanka_amt,
-      shokeiAmt: (d.plan_kizai_qty ?? 0) * (d.juchu_honbanbi_calc_qty ?? 0) * (d.kizai_tanka_amt ?? 0),
+      shokeiAmt: Math.round(
+        Number(d.plan_kizai_qty ?? 0) * Number(d.juchu_honbanbi_calc_qty ?? 0) * Number(d.kizai_tanka_amt ?? 0)
+      ),
     }));
   } catch (e) {
     console.error('例外が発生しました', e);
@@ -359,7 +361,9 @@ export const getJuchuIsshikiMeisai = async (juchuId: number, kizaiHeadId: number
       qty: d.plan_kizai_qty,
       honbanbiQty: d.juchu_honbanbi_calc_qty,
       tankaAmt: d.kizai_tanka_amt,
-      shokeiAmt: (d.plan_kizai_qty ?? 0) * (d.juchu_honbanbi_calc_qty ?? 0) * (d.kizai_tanka_amt ?? 0),
+      shokeiAmt: Math.round(
+        Number(d.plan_kizai_qty ?? 0) * Number(d.juchu_honbanbi_calc_qty ?? 0) * Number(d.kizai_tanka_amt ?? 0)
+      ),
     }));
   } catch (e) {
     console.error('例外が発生しました', e);

@@ -31,7 +31,11 @@ import { FormDateX } from '@/app/(main)/_ui/date';
 import { Loading } from '@/app/(main)/_ui/loading';
 import { getJuchuIsshikiMeisai, getJuchuKizaiMeisaiList } from '@/app/(main)/quotation-list/_lib/funcs';
 
-import { getJuchuKizaiHeadNamListForBill, getJuchuKizaiMeisaiHeadForBill } from '../_lib/funcs';
+import {
+  getJuchuKizaiHeadNamListForBill,
+  getJuchuKizaiMeisaiDetailsForBill,
+  getJuchuKizaiMeisaiHeadForBill,
+} from '../_lib/funcs';
 import { BillHeadValues } from '../_lib/types';
 
 /**
@@ -104,6 +108,7 @@ export const SecondDialogPage = ({
     reValidateMode: 'onSubmit',
     defaultValues: {
       kokyaku: { id: kokyakuId, nam: kokyakuNam },
+      tantou: null,
       juchuId: null,
       dat: new Date(),
     },
@@ -111,7 +116,12 @@ export const SecondDialogPage = ({
 
   /* methods ------------------------------------------------ */
   /* 機材明細ヘッダリスト検索ボタン押下時 */
-  const handleSearch = async (data: { kokyaku: { id: number; nam: string }; juchuId: number | null; dat: Date }) => {
+  const handleSearch = async (data: {
+    kokyaku: { id: number; nam: string };
+    tantou: string | null;
+    juchuId: number | null;
+    dat: Date;
+  }) => {
     setIsLoading(true);
     console.log(data);
     const meisaiNamList = await getJuchuKizaiHeadNamListForBill(data);
@@ -124,13 +134,8 @@ export const SecondDialogPage = ({
     console.log(kizaiHeadId, checked);
     if (checked) {
       // 詳細表示処理
-      // const data = await getJuchuIsshikiMeisai(juchuId, kizaiHeadId);
-      // headsField.append({
-      //   seikyuMeisaiHeadNam: null,
-      //   zeiFlg: false,
-      //   seikyuRange: { strt: null, end: null }, // あとでnullじゃなくする
-      //   meisai: data,
-      // });
+      const data = await getJuchuKizaiMeisaiDetailsForBill(juchuId, kizaiHeadId, dat);
+      headsField.append(data);
     } else {
       // まとめて表示処理
       const data = await getJuchuKizaiMeisaiHeadForBill(juchuId, kizaiHeadId, dat);
@@ -169,8 +174,12 @@ export const SecondDialogPage = ({
           />
         </Box>
         <Box sx={styles.container}>
+          <Typography mr={1}>相手担当者</Typography>
+          <TextFieldElement name="tantou" control={control} />
+        </Box>
+        <Box sx={styles.container}>
           <Typography mr={3}>受注番号</Typography>
-          <TextFieldElement name="juchuId" control={control} sx={{ width: 120 }} />
+          <TextFieldElement name="juchuId" control={control} sx={{ width: 120 }} type="number" />
         </Box>
         <Box sx={styles.container}>
           <Typography mr={5}>年月日</Typography>
