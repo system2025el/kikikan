@@ -7,6 +7,7 @@ import { selectBillMeisaiHead } from '@/app/_lib/db/tables/t-seikyu-meisai-head'
 import { selectJuchuKizaiHeadList } from '@/app/_lib/db/tables/v-juchu-kizai-head-lst';
 import {
   selectJuchuKizaiHeadNamListFormBill,
+  selectJuchuKizaiMeisaiDetailsForBill,
   selectJuchuKizaiMeisaiHeadForBill,
 } from '@/app/_lib/db/tables/v-seikyu-date-lst';
 import { selectFilteredBills } from '@/app/_lib/db/tables/v-seikyu-lst';
@@ -85,7 +86,7 @@ export const getChosenBill = async (seikyuId: number) => {
     juchuHeadId: head.juchu_head_id,
     juchuKizaiHeadId: head.juchu_kizai_head_id,
     seikyuMeisaiHeadId: head.seikyu_meisai_head_id,
-    // seikyuMeisaiHeadNam: head.seikyu_meisai_head_nam,
+    seikyuMeisaiHeadNam: head.seikyu_meisai_head_nam,
     seikyuRange: {
       strt: head.seikyu_str_dat ? new Date(head.seikyu_str_dat) : null,
       end: head.seikyu_end_dat ? new Date(head.seikyu_end_dat) : null,
@@ -162,7 +163,7 @@ export const getChosenBill = async (seikyuId: number) => {
       seikyuHeadId: seikyuData.seikyu_head_id,
       seikyuSts: seikyuData.seikyu_sts,
       seikyuDat: seikyuData.seikyu_dat ? new Date(seikyuData.seikyu_dat) : null,
-      // seikyuHeadNam: seikyuData.seikyu_head_nam,
+      seikyuHeadNam: seikyuData.seikyu_head_nam,
       kokyaku: seikyuData.kokyaku_nam,
       nyuryokuUser: seikyuData.nyuryoku_user,
       aite: { id: seikyuData.kokyaku_id, nam: seikyuData.kokyaku_nam },
@@ -192,6 +193,7 @@ export const getChosenBill = async (seikyuId: number) => {
  */
 export const getJuchuKizaiHeadNamListForBill = async (queries: {
   kokyaku: { id: number; nam: string };
+  tantou: string | null;
   juchuId: number | null;
   dat: Date;
 }) => {
@@ -258,11 +260,70 @@ export const getJuchuKizaiMeisaiHeadForBill = async (juchuHeadId: number, kizaiH
                 qty: 1,
                 honbanbiQty: (Number(m.honbanbi_qty) ?? 0) + (Number(m.add_dat_qty) ?? 0),
                 tankaAmt: Number(m.shokei_amt),
-                shokeiAmt: Number(1 * (m.honbanbi_qty + m.add_dat_qty) * m.shokei_amt),
+                shokeiAmt: Math.round(1 * (Number(m.honbanbi_qty) + Number(m.add_dat_qty)) * Number(m.shokei_amt)),
                 ...m,
               }))
         : [],
     }));
+  } catch (e) {
+    console.error('例外が発生しました', e);
+    throw e;
+  }
+};
+
+export const getJuchuKizaiMeisaiDetailsForBill = async (juchuHeadId: number, kizaiHeadId: number, dat: Date) => {
+  try {
+    const data = await selectJuchuKizaiMeisaiDetailsForBill(juchuHeadId, kizaiHeadId, dat);
+
+    if (!data) {
+      console.error('例題が発生');
+
+      throw new Error('DB取得エラー');
+    }
+    if (!data.rows || data.rows.length === 0) {
+      return [];
+    }
+    // juchus.rowsをグループ化して整形
+    const groupedResult = data.rows.reduce<Record<string, BillMeisaiHeadsValues>>((acc, currentRow) => {
+      // グループ化するためのユニークなキー
+      const groupKey = `${currentRow.juchu_head_id}-${currentRow.juchu_kizai_head_id}`;
+
+      // まだこのグループの親オブジェクトが作られていなければ作成
+      if (!acc[groupKey]) {
+        acc[groupKey] = {
+          juchuHeadId: currentRow.juchu_head_id,
+          juchuKizaiHeadId: currentRow.juchu_kizai_head_id,
+          seikyuMeisaiHeadNam: currentRow.head_nam,
+          koenNam: currentRow.koen_nam,
+          seikyuRange: {
+            strt: currentRow.seikyu_dat ? new Date(currentRow.seikyu_dat) : new Date(currentRow.shuko_dat),
+            end: new Date(currentRow.nyuko_dat) > new Date(dat) ? new Date(dat) : new Date(currentRow.nyuko_dat),
+          },
+          koenbashoNam: currentRow.koenbasho_nam,
+          kokyakuTantoNam: currentRow.kokyaku_tanto_nam,
+          zeiFlg: false,
+          meisai: [], // 明細を入れるための空配列
+        };
+      }
+
+      // 現在の行を明細データとして整形し、meisai配列に追加
+      const honbanbiQty = (Number(currentRow.honbanbi_qty) || 0) + (Number(currentRow.add_dat_qty) || 0);
+      const tankaAmt = Number(currentRow.kizai_tanka_amt) || 0;
+      const planQty = Number(currentRow.plan_qty) || 0;
+
+      acc[groupKey].meisai.push({
+        nam: currentRow.kizai_nam,
+        qty: planQty,
+        honbanbiQty: honbanbiQty,
+        tankaAmt: tankaAmt,
+        shokeiAmt: Math.round(planQty * honbanbiQty * tankaAmt),
+      });
+
+      return acc;
+    }, {});
+
+    // reduceの結果はオブジェクトなので、最後にObject.values()で配列に変換します
+    return Object.values(groupedResult);
   } catch (e) {
     console.error('例外が発生しました', e);
     throw e;

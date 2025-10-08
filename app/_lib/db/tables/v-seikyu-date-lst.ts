@@ -137,9 +137,9 @@ export const selectFilteredJuchusForBill = async (queries: {
 };
 
 /**
- * 受注請求状況一覧を詳細に取得する関数
+ * 受注請求状況明細一覧を詳細に取得する関数
  * @param queries
- * @returns 検索条件に一致する受注請求状況の詳細の配列
+ * @returns 検索条件に一致する受注請求状況の明細の配列
  */
 export const selectFilteredJuchuDetailsForBill = async (queries: {
   kokyakuId: number;
@@ -239,21 +239,27 @@ export const selectFilteredJuchuDetailsForBill = async (queries: {
  */
 export const selectJuchuKizaiHeadNamListFormBill = async (queries: {
   kokyaku: { id: number; nam: string };
+  tantou: string | null;
   juchuId: number | null;
   dat: Date;
 }) => {
+  const builder = supabase
+    .schema(SCHEMA)
+    .from('v_seikyu_date_lst')
+    .select('juchu_head_id, juchu_kizai_head_id, head_nam')
+    .eq('juchu_head_id', queries.juchuId)
+    .eq('kokyaku_id', queries.kokyaku.id)
+    .eq('shuko_fix_flg', 1)
+    .lte('shuko_dat', toJapanDateString(queries.dat, '-'))
+    .or(`seikyu_dat.lte.${toJapanDateString(queries.dat, '-')},seikyu_dat.is.null`)
+    .neq('seikyu_jokyo_sts_id', 9)
+    .order('juchu_kizai_head_id');
+
+  if (queries.tantou && queries.tantou !== '') {
+    builder.eq('kokyaku_tanto_nam', queries.tantou);
+  }
   try {
-    return await supabase
-      .schema(SCHEMA)
-      .from('v_seikyu_date_lst')
-      .select('juchu_head_id, juchu_kizai_head_id, head_nam')
-      .eq('juchu_head_id', queries.juchuId)
-      .eq('kokyaku_id', queries.kokyaku.id)
-      .eq('shuko_fix_flg', 1)
-      .lte('shuko_dat', toJapanDateString(queries.dat, '-'))
-      .or(`seikyu_dat.lte.${toJapanDateString(queries.dat, '-')},seikyu_dat.is.null`)
-      .neq('seikyu_jokyo_sts_id', 9)
-      .order('juchu_kizai_head_id');
+    return await builder;
   } catch (e) {
     throw e;
   }
@@ -325,6 +331,84 @@ export const selectJuchuKizaiMeisaiHeadForBill = async (juchuId: number, kizaiHe
             juchu_head_id, juchu_kizai_head_id
       ) as meisai
       ON v.juchu_head_id = meisai.juchu_head_id AND v.juchu_kizai_head_id = meisai.juchu_kizai_head_id
+    WHERE
+      v.juchu_head_id = $1
+    AND
+      v.juchu_kizai_head_id = $2; 
+  `;
+
+  // 実行時に渡す値の配列
+  const values = [juchuId, kizaiHeadId, toJapanDateString(date, '-')];
+
+  try {
+    return await pool.query(query, values);
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
+ * 条件に合う受注機材明細の情報を取得する関数
+ * @param juchuId 受注ヘッダID
+ * @param kizaiHeadId 受注機材ヘッダID
+ * @param date 年月日
+ * @returns 機材明細の詳細情報の配列
+ */
+export const selectJuchuKizaiMeisaiDetailsForBill = async (juchuId: number, kizaiHeadId: number, date: Date) => {
+  const query = `
+    SELECT
+      v.juchu_head_id,
+      v.juchu_kizai_head_id,
+      v.kokyaku_tanto_nam,
+      v.koen_nam,
+      v.koenbasho_nam,
+      v.head_nam,
+      v.shuko_dat,
+      v.nyuko_dat,
+      v.seikyu_dat,
+      (
+        SELECT
+          count(juchu_honbanbi_dat)
+        FROM
+          ${SCHEMA}.t_juchu_kizai_honbanbi as ch
+        WHERE
+          ch.juchu_head_id = v.juchu_head_id
+        AND
+          ch.juchu_kizai_head_id = v.juchu_kizai_head_id
+        AND
+          ch.juchu_honbanbi_shubetu_id = 40
+        AND
+          ch.juchu_honbanbi_dat >= COALESCE(v.seikyu_dat, v.shuko_dat)
+        AND
+          ch.juchu_honbanbi_dat <= LEAST(v.nyuko_dat, $3)
+      ) as honbanbi_qty,
+      (
+        SELECT
+          sum(juchu_honbanbi_add_qty)
+        FROM
+          ${SCHEMA}.t_juchu_kizai_honbanbi as sh
+        WHERE
+          sh.juchu_head_id = v.juchu_head_id
+        AND
+          sh.juchu_kizai_head_id = v.juchu_kizai_head_id
+        AND
+          sh.juchu_honbanbi_shubetu_id = 40
+        AND
+          sh.juchu_honbanbi_dat >= COALESCE(v.seikyu_dat, v.shuko_dat)
+        AND
+          sh.juchu_honbanbi_dat <= LEAST(v.nyuko_dat, $3)
+      ) as add_dat_qty,
+      kizai.kizai_nam,
+      meisai.kizai_tanka_amt,
+      (meisai.plan_kizai_qty + meisai.plan_yobi_qty) as plan_qty
+    FROM
+      ${SCHEMA}.v_seikyu_date_lst as v
+    LEFT JOIN
+      ${SCHEMA}.t_juchu_kizai_meisai as meisai
+    ON v.juchu_head_id = meisai.juchu_head_id AND v.juchu_kizai_head_id = meisai.juchu_kizai_head_id
+    LEFT JOIN
+      ${SCHEMA}.m_kizai as kizai
+    ON kizai.kizai_id = meisai.kizai_id
     WHERE
       v.juchu_head_id = $1
     AND

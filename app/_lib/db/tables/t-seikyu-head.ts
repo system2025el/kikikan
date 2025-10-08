@@ -77,7 +77,7 @@ export const selectChosenSeikyu = async (id: number) => {
       .from('t_seikyu_head')
       .select(
         `
-        seikyu_head_id, seikyu_sts, seikyu_dat, kokyaku_id,
+        seikyu_head_id, seikyu_sts, seikyu_dat, kokyaku_id, seikyu_head_nam,
         kokyaku_nam, adr_post, adr_shozai, adr_tatemono, adr_sonota,
         nyuryoku_user, zei_rat
         `
