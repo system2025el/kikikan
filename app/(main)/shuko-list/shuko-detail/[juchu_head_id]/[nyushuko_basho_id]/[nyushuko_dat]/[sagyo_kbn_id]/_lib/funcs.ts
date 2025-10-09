@@ -1,24 +1,24 @@
 'use server';
 
-import { selectShukoMeisai } from '@/app/_lib/db/tables/v-nyushuko-den2-lst';
+import { selectShukoDetail } from '@/app/_lib/db/tables/v-nyushuko-den2-lst';
 
-import { ShukoMeisaiTableValues } from './types';
+import { ShukoDetailTableValues } from './types';
 
-export const getShukoMeisai = async (
+export const getShukoDetail = async (
   juchuHeadId: number,
   nyushukoBashoId: number,
   nyushukoDat: string,
   sagyoKbnId: number
 ) => {
   try {
-    const { data, error } = await selectShukoMeisai(juchuHeadId, nyushukoBashoId, nyushukoDat, sagyoKbnId);
+    const { data, error } = await selectShukoDetail(juchuHeadId, nyushukoBashoId, nyushukoDat, sagyoKbnId);
 
     if (error) {
-      console.error('getShukoMeisai error : ', error);
+      console.error('getShukoDetail error : ', error);
       return null;
     }
 
-    const shukoMeisaiData: ShukoMeisaiTableValues[] = data.map((d) => ({
+    const shukoDetailData: ShukoDetailTableValues[] = data.map((d) => ({
       juchuHeadId: d.juchu_head_id,
       juchuKizaiHeadIdv: d.juchu_kizai_head_idv,
       headNamv: d.head_namv,
@@ -38,7 +38,7 @@ export const getShukoMeisai = async (
       ctnFlg: d.ctn_flg,
     }));
 
-    return shukoMeisaiData;
+    return shukoDetailData;
   } catch (e) {
     console.error(e);
     return null;

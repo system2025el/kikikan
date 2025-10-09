@@ -68,7 +68,7 @@ export const ShukoListTable = (props: {
                   href={`shuko-list/shuko-detail/${row.juchuHeadId}/${row.nyushukoBashoId}/${toJapanTimeString(row.nyushukoDat, '-')}/10`}
                 >
                   {row.sstbSagyoStsId === 0
-                    ? '-'
+                    ? 'ー'
                     : row.sstbSagyoStsId === 11
                       ? '△'
                       : row.sstbSagyoStsId === 12
@@ -83,7 +83,7 @@ export const ShukoListTable = (props: {
                   href={`shuko-list/shuko-detail/${row.juchuHeadId}/${row.nyushukoBashoId}/${toJapanTimeString(row.nyushukoDat, '-')}/20`}
                 >
                   {row.schkSagyoStsId === 0
-                    ? '-'
+                    ? 'ー'
                     : row.schkSagyoStsId === 21
                       ? '△'
                       : row.schkSagyoStsId === 22

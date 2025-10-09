@@ -184,3 +184,25 @@ export const deleteContainerNyushukoDen = async (
     throw e;
   }
 };
+
+/**
+ * 入出庫伝票補正数更新
+ * @param data 補正数更新データ
+ * @returns
+ */
+export const updateResultAdjQty = async (data: NyushukoDen) => {
+  try {
+    return await supabase
+      .schema(SCHEMA)
+      .from('t_nyushuko_den')
+      .update(data)
+      .eq('juchu_head_id', data.juchu_head_id)
+      .eq('juchu_kizai_head_id', data.juchu_kizai_head_id)
+      .eq('sagyo_kbn_id', data.sagyo_kbn_id)
+      .eq('sagyo_den_dat', data.sagyo_den_dat)
+      .eq('sagyo_id', data.sagyo_id)
+      .eq('kizai_id', data.kizai_id);
+  } catch (e) {
+    throw e;
+  }
+};

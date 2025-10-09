@@ -1,0 +1,40 @@
+export type ShukoEqptDetailTableValues = {
+  bldCod: string | null;
+  ctnFlg: number | null;
+  edaCod: string | null;
+  juchuHeadId: number;
+  juchuKizaiHeadId: number;
+  juchuKizaiMeisaiId: number | null;
+  kizaiId: number;
+  kizaiMem: string | null;
+  kizaiNam: string | null;
+  nyushukoBashoId: number;
+  nyushukoDat: string;
+  nyushukoShubetuId: number | null;
+  planQty: number | null;
+  resultAdjQty: number;
+  resultQty: number | null;
+  rfidDat: string | null;
+  rfidDelFlg: number | null;
+  rfidElNum: number | null;
+  rfidKizaiSts: number | null;
+  rfidMem: string | null;
+  rfidShozokuId: number | null;
+  rfidShozokuNam: string | null;
+  rfidStsNam: string | null;
+  rfidTagId: string | null;
+  rfidUser: string | null;
+  sagyoKbnId: number;
+  sagyoKbnNam: string | null;
+  tanaCod: string | null;
+};
+
+export type ShukoEqptValues = {
+  kizaiId: number;
+  kizaiNam: string | null;
+  bldCod: string | null;
+  tanaCod: string | null;
+  edaCod: string | null;
+  mem: string | null;
+  ctnFlg: boolean | null;
+};
