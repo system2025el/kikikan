@@ -1,4 +1,4 @@
-export type ShukoMeisaiTableValues = {
+export type ShukoDetailTableValues = {
   juchuHeadId: number | null;
   juchuKizaiHeadIdv: string | null;
   headNamv: string | null;
