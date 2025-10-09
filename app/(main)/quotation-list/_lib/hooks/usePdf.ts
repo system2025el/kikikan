@@ -15,21 +15,23 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
   // イメージ
   const [image, setImage] = useState<ArrayBuffer>(new ArrayBuffer(0));
 
+  // フォントの読み込み
+  const setupFont = async () => {
+    const fontBytes = await fetch('/fonts/ipaexg.ttf').then((res) => res.arrayBuffer());
+    setFont(fontBytes);
+  };
+
+  // イメージの読み込み
+  const setupImage = async () => {
+    const imageBytes = await fetch('/images/sign.png').then((res) => res.arrayBuffer());
+    setImage(imageBytes);
+  };
+
   useEffect(() => {
-    // フォントの読み込み
-    const setupFont = async () => {
-      const fontBytes = await fetch('/fonts/ipaexg.ttf').then((res) => res.arrayBuffer());
-      setFont(fontBytes);
-    };
-    setupFont();
-    //console.log('setupFont');
-    // イメージの読み込み
-    const setupImage = async () => {
-      const imageBytes = await fetch('/images/sign.png').then((res) => res.arrayBuffer());
-      setImage(imageBytes);
-    };
-    setupImage();
-    //console.log('setupImage');
+    Promise.allSettled([setupFont(), setupImage()])
+      .then(() => {})
+      .catch(() => {})
+      .finally(() => {});
   }, []);
 
   // PDF生成関数
