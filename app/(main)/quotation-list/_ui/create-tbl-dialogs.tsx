@@ -84,20 +84,27 @@ export const SecondDialogPage = ({
 
   /* 表示する明細ヘッド名リスト */
   const [meisaiHeadNamList, setMeisaiHeadNamList] = useState<
-    { juchuHeadId: number; juchuKizaiHeadId: number; headNam: string }[]
+    { juchuHeadId: number; juchuKizaiHeadId: number; nebikiAmt: number | null; headNam: string }[]
   >([]);
 
   /* methods ------------------------------------------------ */
   /* ヘッダが選ばれたときの処理 */
-  const handleClickHeadNam = async (juchuId: number, kizaiHeadId: number, headNam: string, checked: boolean) => {
+  const handleClickHeadNam = async (
+    juchuId: number,
+    kizaiHeadId: number,
+    headNam: string,
+    nebikiAmt: number | null,
+    checked: boolean
+  ) => {
     console.log(kizaiHeadId, checked);
     if (checked) {
       const data = await getJuchuIsshikiMeisai(juchuId, kizaiHeadId);
       field.append({
-        mituMeisaiHeadNam: null,
+        mituMeisaiHeadNam: headNam,
         headNamDspFlg: false,
         mituMeisaiKbn: 0,
         nebikiNam: '値引き',
+        nebikiAmt: nebikiAmt,
         nebikiAftNam: '機材費',
         meisai: data,
       });
@@ -106,10 +113,11 @@ export const SecondDialogPage = ({
       console.log(data);
       // 取得した内容をテーブル内の明細に入れる
       field.append({
-        mituMeisaiHeadNam: null,
+        mituMeisaiHeadNam: headNam,
         headNamDspFlg: false,
         mituMeisaiKbn: 0,
         nebikiNam: '値引き',
+        nebikiAmt: nebikiAmt,
         nebikiAftNam: '機材費',
         meisai: data,
       });
@@ -168,7 +176,9 @@ export const SecondDialogPage = ({
                 meisaiHeadNamList.map((l) => (
                   <ListItem key={l.juchuKizaiHeadId} disablePadding>
                     <ListItemButton
-                      onClick={() => handleClickHeadNam(l.juchuHeadId, l.juchuKizaiHeadId, l.headNam, checked)}
+                      onClick={() =>
+                        handleClickHeadNam(l.juchuHeadId, l.juchuKizaiHeadId, l.headNam, l.nebikiAmt, checked)
+                      }
                       dense
                     >
                       <ListItemText primary={l.headNam} />

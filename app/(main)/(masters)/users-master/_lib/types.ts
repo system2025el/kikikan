@@ -12,8 +12,11 @@ export const UsersMaterDialogSchema = z.object({
 export type UsersMasterDialogValues = z.infer<typeof UsersMaterDialogSchema>;
 
 export type UsersMasterTableValues = {
-  tantouId: number;
   tantouNam: string;
+  mailAdr: string | null;
+  shainCod: string | null;
+  mem: string | null;
+  lastLogin: string | null;
   tblDspId: number;
-  delFlg: boolean;
+  delFlg: boolean | null;
 };

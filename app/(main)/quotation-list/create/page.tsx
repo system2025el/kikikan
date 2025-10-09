@@ -56,7 +56,9 @@ const Page = async ({ searchParams }: { searchParams: Promise<{ [key: string]: s
         koenbashoNam: null,
         mituHonbanbiQty: null,
         biko: null,
+        kizaiChukeiMei: '中計',
         chukeiMei: '中計',
+        tokuNebikiMei: '特別値引き',
         meisaiHeads: {},
       };
 

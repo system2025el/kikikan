@@ -36,7 +36,8 @@ export const selectActiveCustomers = async () => {
       .from('m_kokyaku')
       .select('kokyaku_id, kokyaku_nam')
       .neq('dsp_flg', 0)
-      .neq('del_flg', 1);
+      .neq('del_flg', 1)
+      .order('dsp_ord_num');
   } catch (e) {
     throw e;
   }

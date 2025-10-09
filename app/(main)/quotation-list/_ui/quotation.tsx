@@ -20,7 +20,7 @@ import {
   Typography,
 } from '@mui/material';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Controller, FieldPath, FormProvider, useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
@@ -124,6 +124,23 @@ export const Quotation = ({
     reset(data);
   };
 
+  /* useMemo ---------------------------------------------------------- */
+  const kChukei = useMemo(
+    () => (kizaiHeads ?? []).reduce((acc, item) => acc + (item.nebikiAftAmt ?? 0), 0),
+    [kizaiHeads]
+  );
+
+  const chukeiSum = useMemo(() => {
+    const kChukei = (kizaiHeads ?? []).reduce((acc, item) => acc + (item.nebikiAftAmt ?? 0), 0);
+    const lChukei = (laborHeads ?? []).reduce((acc, item) => acc + (item.nebikiAftAmt ?? 0), 0);
+    const oChukei = (otherHeads ?? []).reduce((acc, item) => acc + (item.nebikiAftAmt ?? 0), 0);
+
+    return kChukei + lChukei + oChukei;
+  }, [kizaiHeads, laborHeads, otherHeads]);
+
+  const sum = useMemo(() => chukeiSum - (tokuNebikiAmt ?? 0), [chukeiSum, tokuNebikiAmt]);
+
+  const zei = useMemo(() => Math.round((sum * (zeiRat ?? 0)) / 100), [sum, zeiRat]);
   /* useEffect ------------------------------------------------------------ */
   /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
@@ -140,30 +157,21 @@ export const Quotation = ({
 
   // 機材中計計算
   useEffect(() => {
-    const kChukei = (kizaiHeads ?? []).reduce((acc, item) => acc + (item.nebikiAftAmt ?? 0), 0);
     if (currentKizaiChukei !== kChukei) {
       setValue('kizaiChukeiAmt', kChukei, { shouldDirty: false });
     }
-  }, [kizaiHeads, currentKizaiChukei, setValue]);
+  }, [kChukei, currentKizaiChukei, setValue]);
 
   // 見積全体計算
   useEffect(() => {
-    const kChukei = (kizaiHeads ?? []).reduce((acc, item) => acc + (item.nebikiAftAmt ?? 0), 0);
-    const lChukei = (laborHeads ?? []).reduce((acc, item) => acc + (item.nebikiAftAmt ?? 0), 0);
-    const oChukei = (otherHeads ?? []).reduce((acc, item) => acc + (item.nebikiAftAmt ?? 0), 0);
-
-    const chukeiSum = kChukei + lChukei + oChukei;
-
     if (chukeiSum !== currentChukei) {
       setValue('chukeiAmt', chukeiSum, { shouldDirty: false });
     }
 
-    const sum = chukeiSum - (tokuNebikiAmt ?? 0);
     if (sum !== currentPreTaxGokei) {
       setValue('preTaxGokeiAmt', sum, { shouldDirty: false });
     }
 
-    const zei = Math.round((sum * (zeiRat ?? 0)) / 100);
     const currentZei = Math.round(currentZeiAmt ?? 0);
     if (zei !== currentZei) {
       setValue('zeiAmt', zei === 0 ? null : zei, { shouldDirty: false });
@@ -174,18 +182,7 @@ export const Quotation = ({
     if (gokei !== currentGokeiAmt) {
       setValue('gokeiAmt', gokei, { shouldDirty: false });
     }
-  }, [
-    kizaiHeads,
-    laborHeads,
-    otherHeads,
-    currentChukei,
-    tokuNebikiAmt,
-    currentPreTaxGokei,
-    zeiRat,
-    currentZeiAmt,
-    currentGokeiAmt,
-    setValue,
-  ]);
+  }, [chukeiSum, sum, zei, currentChukei, currentPreTaxGokei, currentZeiAmt, currentGokeiAmt, setValue]);
 
   // デバッグ用
   useEffect(() => {
@@ -552,6 +549,13 @@ export const Quotation = ({
                     />
                   )}
                 </Dialog>
+                <Grid2 container px={2} alignItems={'center'} spacing={0.5}>
+                  <Grid2 size={'grow'} />
+                  <Grid2 size={4.5}>
+                    <Divider sx={{ my: 1 }} />
+                  </Grid2>
+                  <Grid2 size={1} />
+                </Grid2>
                 <Grid2 container px={2} alignItems={'center'} spacing={0.5}>
                   <Grid2 size={'grow'} />
                   <Grid2 size={1} textAlign={'end'}>

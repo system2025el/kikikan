@@ -10,7 +10,12 @@ import { SCHEMA, supabase } from '../supabase';
  */
 export const selectActiveUsers = async () => {
   try {
-    return await supabase.schema('dev6').from('m_user').select('user_nam, shain_cod').neq('del_flg', 1);
+    return await supabase
+      .schema('dev6')
+      .from('m_user')
+      .select('user_nam, shain_cod')
+      .neq('del_flg', 1)
+      .order('dsp_ord_num');
   } catch (e) {
     throw e;
   }
@@ -23,20 +28,15 @@ export const selectActiveUsers = async () => {
  */
 export const SelectFilteredUsers = async (query: string) => {
   const builder = supabase
-    .schema(SCHEMA)
+    .schema('dev6')
     .from('m_user')
-    .select('user_nam, del_flg') // テーブルに表示するカラム
-    .ilike('user_nam', `%${query}%`)
-    //   // あいまい検索、担当者名、担当者名かな、住所、電話番号、fax番号
-    //   .or(`user_nam.ilike.%${query}%`)
-    .order('dsp_ord_num'); // 並び順
-  // queryが存在する場合のみあいまい検索、担当者名、担当者名かな、住所、電話番号、fax番号
+    .select('user_nam, shain_cod, mail_adr, del_flg, mem')
+    .neq('del_flg', 1)
+    .order('dsp_ord_num');
+  // 検索条件あれば
   if (query && query.trim() !== '') {
-    builder.or(
-      `user_nam.ilike.%${query}%, kana.ilike.%${query}%, adr_shozai.ilike.%${query}%, adr_tatemono.ilike.%${query}%, adr_sonota.ilike.%${query}%, tel.ilike.%${query}%, fax.ilike.%${query}%`
-    );
+    builder.ilike('user_nam', query);
   }
-
   try {
     return await builder;
   } catch (e) {

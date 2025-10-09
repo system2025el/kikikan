@@ -13,7 +13,12 @@ import { MDaibumonDBValues } from '../types/m-daibumon-type';
  */
 export const selectActiveDaibumons = async () => {
   try {
-    return await supabase.schema(SCHEMA).from('m_dai_bumon').select('dai_bumon_id, dai_bumon_nam').neq('del_flg', 1);
+    return await supabase
+      .schema(SCHEMA)
+      .from('m_dai_bumon')
+      .select('dai_bumon_id, dai_bumon_nam')
+      .neq('del_flg', 1)
+      .order('dsp_ord_num');
   } catch (e) {
     throw e;
   }

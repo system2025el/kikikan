@@ -21,3 +21,22 @@ export const selectJuchuKizaiHeadList = async (juchuHeadId: number) => {
     throw e;
   }
 };
+
+/**
+ * 受注機材ヘッダーリスト取得
+ * @param juchuHeadId 受注機材ヘッダーid
+ * @returns
+ */
+export const selectJuchuKizaiHeadNamList = async (juchuHeadId: number) => {
+  try {
+    return await supabase
+      .schema(SCHEMA)
+      .from('v_juchu_kizai_head_lst')
+      .select('juchu_head_id, juchu_kizai_head_id, head_nam, nebiki_amt')
+      .eq('juchu_head_id', juchuHeadId)
+      .eq('juchu_kizai_head_kbn', 1)
+      .not('juchu_kizai_head_id', 'is', null);
+  } catch (e) {
+    throw e;
+  }
+};

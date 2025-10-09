@@ -9,6 +9,7 @@ import { BackButton } from '../../../_ui/buttons';
 import { getFilteredUsers } from '../_lib/funcs';
 import { UsersMasterTableValues } from '../_lib/types';
 import { UserssMasterTable } from './users-master-table';
+
 /**
  * 担当者マスタ画面
  * @returns {JSX.Element} 担当者マスタ画面コンポーネント
@@ -51,8 +52,8 @@ export const UsersMaster = ({ users }: { users: UsersMasterTableValues[] | undef
           <form onSubmit={handleSubmit(onSubmit)}>
             <Stack justifyContent={'space-between'} alignItems={'start'} mt={1}>
               <Stack alignItems={'baseline'}>
-                <Typography>担当者キーワード</Typography>
-                <TextFieldElement name="query" control={control} helperText={'～から部分一致検索'} />
+                <Typography>担当者名キーワード</Typography>
+                <TextFieldElement name="query" control={control} helperText={'名前の部分一致検索'} />
               </Stack>
               <Box alignSelf={'end'}>
                 <Button type="submit">

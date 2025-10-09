@@ -7,7 +7,7 @@ import { selectActiveUsers } from '@/app/_lib/db/tables/m-user';
 import { selectChosenMitu } from '@/app/_lib/db/tables/t-mitu-head';
 import { selectQuotMeisai } from '@/app/_lib/db/tables/t-mitu-meisai';
 import { selectQuotMeisaiHead } from '@/app/_lib/db/tables/t-mitu-meisai-head';
-import { selectJuchuKizaiHeadList } from '@/app/_lib/db/tables/v-juchu-kizai-head-lst';
+import { selectJuchuKizaiHeadList, selectJuchuKizaiHeadNamList } from '@/app/_lib/db/tables/v-juchu-kizai-head-lst';
 import { selectJuchu } from '@/app/_lib/db/tables/v-juchu-lst';
 import { selectKizaiHeadListForMitu } from '@/app/_lib/db/tables/v-mitu-kizai';
 import { selectKizaiHeadListWithIsshikiForMitu } from '@/app/_lib/db/tables/v-mitu-kizai-isshiki';
@@ -20,9 +20,9 @@ import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { JuchuValues, QuotHeadValues, QuotMeisaiHeadValues } from './types';
 
 /**
- *
+ * 請求一覧に表示する配列を取得する関数
  * @param queries
- * @returns
+ * @returns 請求一覧に表示する配列
  */
 export const getFilteredQuotList = async (queries: string = '') => {
   try {
@@ -141,7 +141,7 @@ export const getOrderForQuotation = async (id: number): Promise<JuchuValues | nu
 };
 
 /**
- * 選択された見積IDの見積書情報を取得する関数
+ * 見積一覧で選択された見積IDの見積書情報を取得する関数
  * @param mituId 選択された見積ヘッドID
  */
 export const getChosenQuot = async (mituId: number) => {
@@ -281,13 +281,13 @@ export const getChosenQuot = async (mituId: number) => {
 };
 
 /**
- * 選択用の機材ヘッダ名、受注ヘッドID、機材明細ヘッドIDを取得する関数
+ * 自動生成ダイアログ：選択用の機材ヘッダ名、受注ヘッドID、機材明細ヘッドIDを取得する関数
  * @param juchuId 受注ヘッドID
  * @returns 選択用の機材ヘッダ名、受注ヘッドID、機材明細ヘッドIDの配列
  */
 export const getJuchuKizaiHeadNamListForQuot = async (juchuId: number) => {
   try {
-    const { data, error } = await selectJuchuKizaiHeadList(juchuId);
+    const { data, error } = await selectJuchuKizaiHeadNamList(juchuId);
     if (error) {
       console.error('DB情報取得エラー', error.message, error.cause, error.hint);
       throw error;
@@ -300,6 +300,7 @@ export const getJuchuKizaiHeadNamListForQuot = async (juchuId: number) => {
       juchuHeadId: d.juchu_head_id,
       juchuKizaiHeadId: d.juchu_kizai_head_id,
       headNam: d.head_nam,
+      nebikiAmt: d.nebiki_amt,
     }));
   } catch (e) {
     console.error('例外が発生しました', e);
@@ -308,14 +309,14 @@ export const getJuchuKizaiHeadNamListForQuot = async (juchuId: number) => {
 };
 
 /**
- * 選択された機材明細ヘッダの明細を取得する関数
+ * 自動生成ダイアログ：選択された機材明細ヘッダの明細を取得する関数
  * @param juchuId 受注ヘッダID
  * @param kizaiHeadId 機材ヘッダID
  * @returns 機材明細の配列
  */
 export const getJuchuKizaiMeisaiList = async (juchuId: number, kizaiHeadId: number) => {
   try {
-    const { data, error } = await selectKizaiHeadListForMitu(juchuId, kizaiHeadId); // ビューが欲しい
+    const { data, error } = await selectKizaiHeadListForMitu(juchuId, kizaiHeadId);
     if (error) {
       console.error('DB情報取得エラー', error.message, error.cause, error.hint);
       throw error;
@@ -329,7 +330,9 @@ export const getJuchuKizaiMeisaiList = async (juchuId: number, kizaiHeadId: numb
       qty: d.plan_kizai_qty,
       honbanbiQty: d.juchu_honbanbi_calc_qty,
       tankaAmt: d.kizai_tanka_amt,
-      shokeiAmt: (d.plan_kizai_qty ?? 0) * (d.juchu_honbanbi_calc_qty ?? 0) * (d.kizai_tanka_amt ?? 0),
+      shokeiAmt: Math.round(
+        Number(d.plan_kizai_qty ?? 0) * Number(d.juchu_honbanbi_calc_qty ?? 0) * Number(d.kizai_tanka_amt ?? 0)
+      ),
     }));
   } catch (e) {
     console.error('例外が発生しました', e);
@@ -338,7 +341,7 @@ export const getJuchuKizaiMeisaiList = async (juchuId: number, kizaiHeadId: numb
 };
 
 /**
- * 選択された機材明細ヘッダの明細を一式でまとめて取得する関数
+ * 自動生成ダイアログ：選択された機材明細ヘッダの明細を一式でまとめて取得する関数
  * @param juchuId 受注ヘッダID
  * @param kizaiHeadId 機材ヘッダID
  * @returns 一式でまとめた機材明細の配列
@@ -359,7 +362,9 @@ export const getJuchuIsshikiMeisai = async (juchuId: number, kizaiHeadId: number
       qty: d.plan_kizai_qty,
       honbanbiQty: d.juchu_honbanbi_calc_qty,
       tankaAmt: d.kizai_tanka_amt,
-      shokeiAmt: (d.plan_kizai_qty ?? 0) * (d.juchu_honbanbi_calc_qty ?? 0) * (d.kizai_tanka_amt ?? 0),
+      shokeiAmt: Math.round(
+        Number(d.plan_kizai_qty ?? 0) * Number(d.juchu_honbanbi_calc_qty ?? 0) * Number(d.kizai_tanka_amt ?? 0)
+      ),
     }));
   } catch (e) {
     console.error('例外が発生しました', e);

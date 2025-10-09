@@ -45,41 +45,47 @@ export const getJuchusForBill = async (queries: {
         return [];
       }
       console.log('受注情報', juchus.rows);
-      return juchus.rows.map((j) => ({
-        juchuHeadId: j.juchu_head_id,
-        juchuKizaiHeadId: j.juchu_kizai_head_id,
-        seikyuMeisaiHeadNam: j.head_nam,
-        koenNam: j.koen_nam,
-        seikyuRange: {
-          strt: j.seikyu_dat ? new Date(j.seikyu_dat) : new Date(j.shuko_dat),
-          end: new Date(j.nyuko_dat) > new Date(date) ? new Date(date) : new Date(j.nyuko_dat),
-        },
-        koenbashoNam: j.koenbasho_nam,
-        kokyakuTantoNam: j.kokyaku_tanto_nam,
-        zeiFlg: false,
-        meisai: Array.isArray(juchus.rows)
-          ? juchus.rows.filter(
-              (m) =>
-                m.juchu_head_id === j.juchu_head_id && m.juchu_kizai_head_id === j.juchu_kizai_head_id && m.shokei_amt
-            ).length === 0
-            ? []
-            : juchus.rows
-                .filter(
-                  (m) =>
-                    m.juchu_head_id === j.juchu_head_id &&
-                    m.juchu_kizai_head_id === j.juchu_kizai_head_id &&
-                    m.shokei_amt
-                )
-                .map((m) => ({
-                  nam: `${m.head_nam}一式`,
-                  qty: 1,
-                  honbanbiQty: (Number(m.honbanbi_qty) ?? 0) + (Number(m.add_dat_qty) ?? 0),
-                  tankaAmt: Number(m.shokei_amt),
-                  shokeiAmt: Number(1 * (m.honbanbi_qty + m.add_dat_qty) * m.shokei_amt),
-                  ...m,
-                }))
-          : [],
-      }));
+      // juchus.rowsをグループ化して整形
+      const groupedResult = juchus.rows.reduce((acc, currentRow) => {
+        // グループ化するためのユニークなキー
+        const groupKey = `${currentRow.juchu_head_id}-${currentRow.juchu_kizai_head_id}`;
+
+        // まだこのグループの親オブジェクトが作られていなければ作成
+        if (!acc[groupKey]) {
+          acc[groupKey] = {
+            juchuHeadId: currentRow.juchu_head_id,
+            juchuKizaiHeadId: currentRow.juchu_kizai_head_id,
+            seikyuMeisaiHeadNam: currentRow.head_nam,
+            koenNam: currentRow.koen_nam,
+            seikyuRange: {
+              strt: currentRow.seikyu_dat ? new Date(currentRow.seikyu_dat) : new Date(currentRow.shuko_dat),
+              end: new Date(currentRow.nyuko_dat) > new Date(date) ? new Date(date) : new Date(currentRow.nyuko_dat),
+            },
+            koenbashoNam: currentRow.koenbasho_nam,
+            kokyakuTantoNam: currentRow.kokyaku_tanto_nam,
+            zeiFlg: false,
+            meisai: [], // 明細を入れるための空配列
+          };
+        }
+
+        // 現在の行を明細データとして整形し、meisai配列に追加
+        const honbanbiQty = (Number(currentRow.honbanbi_qty) || 0) + (Number(currentRow.add_dat_qty) || 0);
+        const tankaAmt = Number(currentRow.kizai_tanka_amt) || 0;
+        const planQty = Number(currentRow.plan_qty) || 0;
+
+        acc[groupKey].meisai.push({
+          nam: currentRow.kizai_nam,
+          qty: planQty,
+          honbanbiQty: honbanbiQty,
+          tankaAmt: tankaAmt,
+          shokeiAmt: Math.round(planQty * honbanbiQty * tankaAmt),
+        });
+
+        return acc;
+      }, {});
+
+      // reduceの結果はオブジェクトなので、最後にObject.values()で配列に変換します
+      return Object.values(groupedResult);
     } else {
       // 明細をまとめて表示するとき -------------------------------------------------------------
       const juchus = await selectFilteredJuchusForBill({ kokyakuId: kokyakuId, date: date, tantouNam: tantouNam });
@@ -120,7 +126,7 @@ export const getJuchusForBill = async (queries: {
                   qty: 1,
                   honbanbiQty: (Number(m.honbanbi_qty) ?? 0) + (Number(m.add_dat_qty) ?? 0),
                   tankaAmt: Number(m.shokei_amt),
-                  shokeiAmt: Number(1 * (m.honbanbi_qty + m.add_dat_qty) * m.shokei_amt),
+                  shokeiAmt: Math.round(1 * (Number(m.honbanbi_qty) + Number(m.add_dat_qty)) * Number(m.shokei_amt)),
                   ...m,
                 }))
           : [],

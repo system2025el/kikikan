@@ -17,7 +17,8 @@ export const selectActiveShukeibumons = async () => {
       .schema(SCHEMA)
       .from('m_shukei_bumon')
       .select('shukei_bumon_id, shukei_bumon_nam')
-      .neq('del_flg', 1);
+      .neq('del_flg', 1)
+      .order('dsp_ord_num');
   } catch (e) {
     throw e;
   }
