@@ -3,11 +3,13 @@
 import SaveAsIcon from '@mui/icons-material/SaveAs';
 import { Box, Button, Container, Divider, MenuItem, Paper, Select, TextField, Typography } from '@mui/material';
 import { useState } from 'react';
+
+import { useUserStore } from '@/app/_lib/stores/usestore';
+import { SelectTypes } from '@/app/(main)/_ui/form-box';
+
+import { updateRfidTagSts } from '../_lib/funcs';
 import { RfidsMasterTableValues } from '../_lib/types';
 import { RfidMasterTable } from './rfid-master-table';
-import { SelectTypes } from '@/app/(main)/_ui/form-box';
-import { updateRfidTagSts } from '../_lib/funcs';
-import { useUserStore } from '@/app/_lib/stores/usestore';
 
 export const RfidMaster = ({
   rfids,
