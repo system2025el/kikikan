@@ -2,6 +2,7 @@
 
 import AddIcon from '@mui/icons-material/Add';
 import {
+  alpha,
   Box,
   Button,
   Checkbox,
@@ -16,16 +17,18 @@ import {
   TableHead,
   TableRow,
   Typography,
+  useTheme,
 } from '@mui/material';
-import { grey } from '@mui/material/colors';
 import { useEffect, useMemo, useState } from 'react';
 
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { MuiTablePagination } from '../../../../_ui/table-pagination';
+import { RfidsMasterTableValues } from '../_lib/types';
+import { grey } from '@mui/material/colors';
 import { FAKE_NEW_ID, ROWS_PER_MASTER_TABLE_PAGE } from '../../../_lib/constants';
 import { getRfidsOfTheKizai } from '../_lib/funcs';
-import { RfidsMasterTableValues } from '../_lib/types';
+import { LightTooltipWithText } from '../../../_ui/tables';
 
 /** 機材マスタのテーブルコンポーネント */
 export const RfidMasterTable = ({
@@ -152,50 +155,76 @@ export const RfidMasterTable = ({
             <Table stickyHeader size="small" padding="none">
               <TableHead>
                 <TableRow sx={{ whiteSpace: 'nowrap' }}>
-                  <TableCell padding="checkbox" sx={{ alignContent: 'center' }}>
+                  <TableCell padding="checkbox">
                     <Checkbox
                       color="primary"
                       onChange={handleSelectAllClick}
+                      indeterminate={selectedTags.length > 0 && selectedTags.length < theRfids.length}
+                      checked={theRfids.length > 0 && selectedTags.length === theRfids.length}
                       sx={{
                         '& .MuiSvgIcon-root': {
                           backgroundColor: '#fff',
                           borderRadius: '4px',
+                          transition: 'background-color 0.3s',
                         },
-                        padding: 0,
                       }}
                     />
                   </TableCell>
                   <TableCell padding="checkbox" />
                   <TableCell>RFIDタグID</TableCell>
                   <TableCell>機材ステータス</TableCell>
-                  <TableCell>EL No.</TableCell>
+                  <TableCell align="right">EL No.</TableCell>
                   <TableCell>メモ</TableCell>
                   <TableCell>無効</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {theRfids!.map((row, index) => {
+                {list!.map((row) => {
                   const isItemSelected = selectedTags.includes(row.rfidTagId);
 
                   return (
-                    <TableRow
-                      hover
-                      onClick={(event) => handleSelectRfidTags(event, row.rfidTagId)}
-                      role="checkbox"
-                      aria-checked={isItemSelected}
-                      tabIndex={-1}
-                      key={row.rfidTagId}
-                      selected={isItemSelected}
-                      sx={{ cursor: 'pointer' }}
-                    >
-                      <TableCell padding="checkbox">
-                        <Checkbox color="primary" checked={isItemSelected} />
+                    <TableRow key={row.rfidTagId} selected={isItemSelected}>
+                      <TableCell
+                        padding="checkbox"
+                        onClick={(event) => handleSelectRfidTags(event, row.rfidTagId)}
+                        tabIndex={-1}
+                        sx={{ cursor: 'pointer', bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap' }}
+                      >
+                        <Checkbox
+                          color="primary"
+                          checked={isItemSelected}
+                          sx={{
+                            '& .MuiSvgIcon-root': {
+                              backgroundColor: '#fff',
+                              borderRadius: '4px',
+                              transition: 'background-color 0.3s',
+                            },
+                          }}
+                        />
                       </TableCell>
-                      <TableCell align="right">{row.tblDspId}</TableCell>
-                      <TableCell>{row.rfidTagId}</TableCell>
-                      <TableCell>{row.stsNam}</TableCell>
-                      <TableCell>{row.elNum}</TableCell>
-                      <TableCell>{row.mem}</TableCell>
+                      <TableCell
+                        align="right"
+                        sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap' }}
+                      >
+                        {row.tblDspId}
+                      </TableCell>
+                      <TableCell sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap' }}>
+                        {row.rfidTagId}
+                      </TableCell>
+                      <TableCell sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap' }}>
+                        {row.stsNam}
+                      </TableCell>
+                      <TableCell
+                        align="right"
+                        sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap' }}
+                      >
+                        {row.elNum}
+                      </TableCell>
+                      <TableCell sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap' }}>
+                        <LightTooltipWithText variant={'body2'} maxWidth={300}>
+                          {row.mem}
+                        </LightTooltipWithText>
+                      </TableCell>
                       <TableCell sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap' }}>
                         {row.delFlg ? '無効' : ''}
                       </TableCell>

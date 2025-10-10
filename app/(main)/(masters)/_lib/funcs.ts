@@ -7,10 +7,10 @@ import { selectActiveDaibumons } from '@/app/_lib/db/tables/m-daibumon';
 import { selectBundledEqpts } from '@/app/_lib/db/tables/m-kizai';
 import { selectBundledEqptIds } from '@/app/_lib/db/tables/m-kizai-set';
 import { selectActiveCustomers } from '@/app/_lib/db/tables/m-kokyaku';
-import { selectActiveSagyoSts } from '@/app/_lib/db/tables/m-sagyo-sts';
 import { selectActiveShozokus } from '@/app/_lib/db/tables/m-shozoku';
 import { selectActiveShukeibumons } from '@/app/_lib/db/tables/m-shukeibumon';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
+import { selectActiveSagyoSts } from '@/app/_lib/db/tables/m-sagyo-sts';
 
 /**
  * 選択肢に使う大部門リストを取得する関数

@@ -4,14 +4,14 @@ import { revalidatePath } from 'next/cache';
 
 import pool from '@/app/_lib/db/postgres';
 import { SCHEMA, supabase } from '@/app/_lib/db/supabase';
-import { selectOneEqpt } from '@/app/_lib/db/tables/m-kizai';
 import { updateMasterUpdates } from '@/app/_lib/db/tables/m-master-update';
-import { selectOneRfid, selectRfidsOfTheKizai } from '@/app/_lib/db/tables/m-rfid';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { nullToZero, zeroToNull } from '../../../_lib/value-converters';
 import { emptyRfid } from './datas';
 import { RfidsMasterDialogValues, RfidsMasterTableValues } from './types';
+import { selectOneRfid, selectRfidsOfTheKizai, updateRfidTagStsDB } from '@/app/_lib/db/tables/m-rfid';
+import { selectOneEqpt } from '@/app/_lib/db/tables/m-kizai';
 
 /**
  * 機材マスタで選ばれた機材のRFIDリストを取得、成型する関数
@@ -27,6 +27,7 @@ export const getRfidsOfTheKizai = async (kizaiId: number) => {
     }
     const filteredRfids: RfidsMasterTableValues[] = data.map((d, index) => ({
       rfidTagId: d.rfid_tag_id,
+      stsId: d.rfid_kizai_sts,
       stsNam: d.sts_nam,
       elNum: d.el_num,
       mem: d.mem,
@@ -131,3 +132,23 @@ export const getChosenRfid = async (id: string) => {
 //     throw error;
 //   }
 // };
+
+/**
+ * RFIDマスタで一括変更されたステータスを更新する関数
+ * @param data 機材ステータス一括変更されたデータ
+ */
+export const updateRfidTagSts = async (data: { tagId: string; sts: number }[], user: string) => {
+  const updateList = data.map((d) => ({
+    rfid_tag_id: d.tagId,
+    rfid_kizai_sts: d.sts,
+  }));
+  try {
+    await updateRfidTagStsDB(updateList, user);
+    await revalidatePath('/rfid-master');
+    await revalidatePath('/eqpt-master');
+    console.log(data);
+  } catch (e) {
+    console.error('例外が発生しました:', e);
+    throw e;
+  }
+};
