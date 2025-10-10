@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache';
 import pool from '@/app/_lib/db/postgres';
 import { selectOneEqpt } from '@/app/_lib/db/tables/m-kizai';
 import { deleteNyushukoCtnResult } from '@/app/_lib/db/tables/t-nyushuko-ctn-result';
-import { updateResultAdjQty } from '@/app/_lib/db/tables/t-nyushuko-den';
+import { updateNyushukoDen, updateResultAdjQty } from '@/app/_lib/db/tables/t-nyushuko-den';
 import { deleteNyushukoResult } from '@/app/_lib/db/tables/t-nyushuko-result';
 import { selectShukoEqptDetail } from '@/app/_lib/db/tables/v-nyushuko-den2-result';
 import { NyushukoDen } from '@/app/_lib/db/types/t-nyushuko-den-type';
@@ -97,7 +97,7 @@ export const getKizaiData = async (kizaiId: number) => {
   }
 };
 
-export const delNyushukoResult = async (deleteData: ShukoEqptDetailTableValues[]) => {
+export const delNyushukoResult = async (deleteData: ShukoEqptDetailTableValues[], userNam: string) => {
   const connection = await pool.connect();
 
   const deleteTagIds = deleteData.map((d) => d.rfidTagId).filter((id): id is string => id !== null);
@@ -106,26 +106,43 @@ export const delNyushukoResult = async (deleteData: ShukoEqptDetailTableValues[]
 
     if (deleteData[0].ctnFlg === 1) {
       await deleteNyushukoCtnResult(
-        deleteData[0].juchuHeadId!,
-        deleteData[0].sagyoKbnId!,
-        deleteData[0].nyushukoDat!,
-        deleteData[0].nyushukoBashoId!,
-        deleteData[0].kizaiId!,
+        deleteData[0].juchuHeadId,
+        deleteData[0].sagyoKbnId,
+        deleteData[0].nyushukoDat,
+        deleteData[0].nyushukoBashoId,
+        deleteData[0].kizaiId,
         deleteTagIds,
         connection
       );
     } else {
       await deleteNyushukoResult(
-        deleteData[0].juchuHeadId!,
-        deleteData[0].sagyoKbnId!,
-        deleteData[0].nyushukoDat!,
-        deleteData[0].nyushukoBashoId!,
-        deleteData[0].kizaiId!,
+        deleteData[0].juchuHeadId,
+        deleteData[0].sagyoKbnId,
+        deleteData[0].nyushukoDat,
+        deleteData[0].nyushukoBashoId,
+        deleteData[0].kizaiId,
         deleteTagIds,
         connection
       );
     }
-    await connection.query('COMMIT');
+    console.log('delete nyushuko result', deleteData);
+
+    const updateNyushukoDenData: NyushukoDen = {
+      juchu_head_id: deleteData[0].juchuHeadId,
+      juchu_kizai_head_id: deleteData[0].juchuKizaiHeadId,
+      sagyo_kbn_id: deleteData[0].sagyoKbnId,
+      sagyo_den_dat: deleteData[0].nyushukoDat,
+      sagyo_id: deleteData[0].nyushukoBashoId,
+      kizai_id: deleteData[0].kizaiId,
+      result_qty: deleteData[0].planQty && deleteData[0].planQty - deleteData.length,
+      upd_dat: toJapanTimeString(),
+      upd_user: userNam,
+    };
+
+    await updateNyushukoDen(updateNyushukoDenData, connection);
+    console.log('update nyushuko den result_qty', deleteData[0].planQty && deleteData[0].planQty - deleteData.length);
+
+    await await connection.query('COMMIT');
     revalidatePath(
       `shuko-list/shuko-detail/${deleteData[0].juchuHeadId!}/${deleteData[0].nyushukoBashoId!}/${deleteData[0].nyushukoDat!}/${deleteData[0].sagyoKbnId!}`
     );

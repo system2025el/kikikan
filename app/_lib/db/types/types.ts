@@ -1853,7 +1853,7 @@ export type Database = {
           add_user: string | null;
           juchu_head_id: number;
           juchu_kizai_head_id: number;
-          sagyo_den_dat: string | null;
+          sagyo_den_dat: string;
           sagyo_fix_flg: number | null;
           sagyo_id: number | null;
           sagyo_kbn_id: number;
@@ -1865,7 +1865,7 @@ export type Database = {
           add_user?: string | null;
           juchu_head_id: number;
           juchu_kizai_head_id: number;
-          sagyo_den_dat?: string | null;
+          sagyo_den_dat: string;
           sagyo_fix_flg?: number | null;
           sagyo_id?: number | null;
           sagyo_kbn_id: number;
@@ -1877,7 +1877,7 @@ export type Database = {
           add_user?: string | null;
           juchu_head_id?: number;
           juchu_kizai_head_id?: number;
-          sagyo_den_dat?: string | null;
+          sagyo_den_dat: string;
           sagyo_fix_flg?: number | null;
           sagyo_id?: number | null;
           sagyo_kbn_id?: number;

@@ -14,7 +14,8 @@ export const ShukoDetailTable = (props: { datas: ShukoDetailTableValues[] }) => 
 
   const handleClick = (kizaiId: number | null) => {
     if (kizaiId) {
-      router.push(`${path}/shuko-eqpt-detail/${kizaiId}`);
+      const planQty = datas.find((d) => d.kizaiId === kizaiId)?.planQty;
+      router.push(`${path}/shuko-eqpt-detail/${kizaiId}/${planQty}`);
     }
   };
 
@@ -40,7 +41,11 @@ export const ShukoDetailTable = (props: { datas: ShukoDetailTableValues[] }) => 
               sx={{
                 whiteSpace: 'nowrap',
                 backgroundColor:
-                  row.diff === 0 && row.ctnFlg !== 1 ? grey[300] : row.ctnFlg === 1 ? '#8EA9DB' : 'white',
+                  row.diff === 0 && row.ctnFlg !== 1
+                    ? 'rgba(158, 158, 158, 1)'
+                    : row.ctnFlg === 1
+                      ? 'rgba(68, 138, 255, 1)'
+                      : 'white',
               }}
               onClick={() => handleClick(row.kizaiId)}
               style={{ cursor: 'pointer' }}
@@ -57,12 +62,12 @@ export const ShukoDetailTable = (props: { datas: ShukoDetailTableValues[] }) => 
                   pr: 3,
                   backgroundColor:
                     row.diff > 0
-                      ? '#FFFF00'
+                      ? 'rgba(255, 255, 0, 1)'
                       : row.diff < 0
-                        ? '#F4B084'
+                        ? 'rgba(255, 171, 64, 1)'
                         : row.diff === 0 && row.ctnFlg === 1
-                          ? '#8EA9DB'
-                          : grey[300],
+                          ? 'rgba(68, 138, 255, 1)'
+                          : 'rgba(158, 158, 158, 1)',
                 }}
               >
                 {row.diff}
