@@ -1,37 +1,39 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Grid2, MenuItem, Select } from '@mui/material';
+import { Box, Button, Grid2, MenuItem, Select, TextField, Typography } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import { useEffect, useState } from 'react';
-import { Controller, TextareaAutosizeElement, TextFieldElement, useForm } from 'react-hook-form-mui';
+import {
+  CheckboxElement,
+  Controller,
+  SelectElement,
+  TextareaAutosizeElement,
+  TextFieldElement,
+  useForm,
+} from 'react-hook-form-mui';
 
-import { Loading } from '@/app/(main)/_ui/loading';
+import { FormBox, selectNone, SelectTypes } from '../../../../_ui/form-box';
+import { Loading } from '../../../../_ui/loading';
+import { FAKE_NEW_ID } from '../../../_lib/constants
+import { getAllSelections, getShozokuSelection } from '../../../_lib/funcs
+import { MasterDialogTitle } from '../../../_ui/dialog-title';
+import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../../_ui/dialogs';
+import { emptyRfid, formItems } from '../_lib/datas';
+import { addNewRfid, createRfidHistory, getChosenRfid, updateRfid } from '../_lib/funcs';
+import { RfidsMasterDialogSchema, RfidsMasterDialogValues } from '../_lib/types';
 
-import { FormBox, selectNone, SelectTypes } from '../../../_ui/form-box';
-import { FAKE_NEW_ID } from '../../_lib/constants';
-import { getAllBumonDSSelections } from '../../_lib/funcs';
-import { MasterDialogTitle } from '../../_ui/dialog-title';
-import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
-import { emptyBumon, formItems } from '../_lib/datas';
-import { addNewBumon, getChosenbumon, updateBumon } from '../_lib/funcs';
-import { BumonsMasterDialogSchema, BumonsMasterDialogValues } from '../_lib/types';
-
-/**
- * 部門マスタ詳細ダイアログ
- * @param
- * @returns {JSX.Element} 部門マスタ詳細ダイアログコンポーネント
- */
-export const BumonsMasterDialog = ({
-  bumonId,
+export const RfidMasterDialog = ({
+  rfidId,
   handleClose,
-  refetchBumons,
+  refetchRfids,
 }: {
-  bumonId: number;
+  rfidId: string;
   handleClose: () => void;
-  refetchBumons: () => void;
+  refetchRfids: () => Promise<void>;
 }) => {
-  /* useState -------------------------------------- */
-  /* 部門 */
-  /* DBのローディング状態 */
+  /* useState --------------------- */
+  /* rfid更新前の */
+  const [currentRfid, setCurrentRfid] = useState<RfidsMasterDialogValues>(emptyRfid);
+  /** DBのローディング状態 */
   const [isLoading, setIsLoading] = useState(true);
   /* ダイアログでの編集モードかどうか */
   const [editable, setEditable] = useState(false);
@@ -45,55 +47,53 @@ export const BumonsMasterDialog = ({
   const [action, setAction] = useState<'save' | 'delete' | 'restore' | undefined>(undefined);
   /* フォーム内のセレクトoptions */
   const [selectOptions, setSelectOptions] = useState<{
-    d: SelectTypes[];
-    s: SelectTypes[];
-  }>({ d: [], s: [] });
+    shozoku: SelectTypes[];
+  }>({ shozoku: [] });
 
-  /* useForm ----------------------------------------- */
+  /* useForm ------------------------- */
   const {
     control,
     formState: { isDirty },
-    watch,
     handleSubmit,
     reset,
+    watch,
     getValues,
   } = useForm({
     mode: 'onChange',
     reValidateMode: 'onChange',
-    resolver: zodResolver(BumonsMasterDialogSchema),
-    defaultValues: emptyBumon,
+    defaultValues: emptyRfid,
+    resolver: zodResolver(RfidsMasterDialogSchema),
   });
 
   const isDeleted = watch('delFlg');
-  const name = watch('bumonNam');
+  const name = watch('tagId');
 
-  /* methods ---------------------------------------- */
+  /* methods ---------------------------- */
   /* フォームを送信 */
-  const onSubmit = async (data: BumonsMasterDialogValues) => {
+  const onSubmit = async (data: RfidsMasterDialogValues) => {
     console.log('isDarty : ', isDirty);
-    console.log(data);
-    if (bumonId === FAKE_NEW_ID) {
-      // 新規の時
-      await addNewBumon(data);
+    if (rfidId === String(FAKE_NEW_ID)) {
+      // 新規登録
+      await addNewRfid(data);
       handleCloseDialog();
-      refetchBumons();
+      refetchRfids();
     } else {
-      // 更新の時
+      // 更新
       if (action === 'save') {
-        // 保存終了ボタン押したとき
-        await updateBumon(data, bumonId);
+        // 保存終了ボタン
+        await updateRfid(data, rfidId);
         handleCloseDialog();
-        refetchBumons();
+        refetchRfids();
       } else if (action === 'delete') {
-        // 削除ボタン押したとき
+        // 削除ボタン
         setDeleteOpen(true);
         return;
       } else if (action === 'restore') {
         // 有効化ボタン
         const values = await getValues();
-        await updateBumon({ ...values, delFlg: false }, bumonId);
+        await updateRfid({ ...values, delFlg: false }, rfidId);
         handleCloseDialog();
-        refetchBumons();
+        refetchRfids();
       }
     }
   };
@@ -118,35 +118,38 @@ export const BumonsMasterDialog = ({
   /* 削除確認ダイアログで削除選択時 */
   const handleConfirmDelete = async () => {
     const values = await getValues();
-    await updateBumon({ ...values, delFlg: true }, bumonId);
+    await createRfidHistory(currentRfid, rfidId);
+    await updateRfid({ ...values, delFlg: true }, rfidId);
     setDeleteOpen(false);
     handleCloseDialog();
-    await refetchBumons();
+    await refetchRfids();
   };
 
   /* useEffect --------------------------------------- */
   /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     console.log('★★★★★★★★★★★★★★★★★★★★★');
-    const getThatOnebumon = async () => {
-      const a = await getAllBumonDSSelections();
-      setSelectOptions(a!);
-      if (bumonId === FAKE_NEW_ID) {
+    const getThatOneRfid = async () => {
+      const [shozoku] = await Promise.all([getShozokuSelection()]);
+      setSelectOptions({ shozoku: shozoku });
+      console.log('pppppppppppppppppppppppppppppp', selectOptions);
+      if (rfidId === FAKE_NEW_ID) {
         // 新規追加モード
-        reset(emptyBumon); // フォーム初期化
+        reset(emptyRfid); // フォーム初期化
         setEditable(true); // 編集モードにする
         setIsLoading(false);
         setIsNew(true);
       } else {
-        const bumon1 = await getChosenbumon(bumonId);
-        if (bumon1) {
-          reset(bumon1); // 取得したデータでフォーム初期化
+        const rfid1 = await getChosenRfid(rfidId);
+        if (rfid1) {
+          setCurrentRfid(rfid1.data);
+          reset(rfid1.data); // 取得したデータでフォーム初期化
         }
         setIsLoading(false);
       }
     };
-    getThatOnebumon();
-  }, [bumonId]);
+    getThatOneRfid();
+  }, [rfidId]);
   /* eslint-enable react-hooks/exhaustive-deps */
 
   return (
@@ -156,13 +159,13 @@ export const BumonsMasterDialog = ({
           editable={editable}
           handleEditable={() => setEditable(true)}
           handleClose={handleClickClose}
-          dialogTitle="部門マスタ登録"
+          dialogTitle={'機材マスタ登録'}
           isNew={isNew}
           isDirty={isDirty}
-          setAction={setAction}
           isDeleted={isDeleted!}
+          setAction={setAction}
         />
-        {isLoading ? (
+        {isLoading ? ( //DB
           <Loading />
         ) : (
           <>
@@ -170,7 +173,7 @@ export const BumonsMasterDialog = ({
               <Grid2>
                 <FormBox formItem={formItems[0]} required>
                   <TextFieldElement
-                    name="bumonNam"
+                    name="tagId"
                     control={control}
                     label={editable ? formItems[0].exsample : ''}
                     fullWidth
@@ -180,10 +183,21 @@ export const BumonsMasterDialog = ({
                 </FormBox>
               </Grid2>
               <Grid2>
+                <FormBox formItem={formItems[1]}>
+                  <TextFieldElement
+                    name="elNum"
+                    control={control}
+                    label={editable ? formItems[1].exsample : ''}
+                    fullWidth
+                    sx={{ maxWidth: '90%' }}
+                    disabled={editable ? false : true}
+                  />
+                </FormBox>
+              </Grid2>
+              <Grid2>
                 <FormBox formItem={formItems[2]}>
                   <TextFieldElement
-                    multiline
-                    name="mem"
+                    name="shozokuId"
                     control={control}
                     label={editable ? formItems[2].exsample : ''}
                     fullWidth
@@ -194,40 +208,29 @@ export const BumonsMasterDialog = ({
               </Grid2>
               <Grid2>
                 <FormBox formItem={formItems[3]}>
-                  <Controller
-                    name="daibumonId"
+                  <TextFieldElement
+                    name="rfidKizaiSts"
                     control={control}
-                    defaultValue={0}
+                    label={editable ? formItems[3].exsample : ''}
+                    fullWidth
+                    sx={{ maxWidth: '90%' }}
                     disabled={editable ? false : true}
-                    render={({ field }) => (
-                      <Select {...field} sx={{ width: 250 }}>
-                        {[selectNone, ...selectOptions!.d].map((opt) => (
-                          <MenuItem key={opt.id} value={opt.id} sx={opt.id === 0 ? { color: grey[600] } : {}}>
-                            {opt.label}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    )}
                   />
                 </FormBox>
               </Grid2>
               <Grid2>
                 <FormBox formItem={formItems[4]}>
-                  <Controller
-                    name="shukeibumonId"
+                  <TextFieldElement
+                    name="mem"
                     control={control}
-                    defaultValue={0}
+                    label={editable ? formItems[4].exsample : ''}
+                    fullWidth
+                    sx={{ maxWidth: '90%' }}
                     disabled={editable ? false : true}
-                    render={({ field }) => (
-                      <Select {...field} sx={{ width: 250 }}>
-                        {[selectNone, ...selectOptions!.s].map((opt) => (
-                          <MenuItem key={opt.id} value={opt.id} sx={opt.id === 0 ? { color: grey[600] } : {}}>
-                            {opt.label}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    )}
                   />
+                  <Typography variant="body2" ml={2}>
+                    {formItems[4].other}
+                  </Typography>
                 </FormBox>
               </Grid2>
             </Grid2>

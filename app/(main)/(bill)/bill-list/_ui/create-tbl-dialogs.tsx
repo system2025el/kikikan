@@ -179,7 +179,21 @@ export const SecondDialogPage = ({
         </Box>
         <Box sx={styles.container}>
           <Typography mr={3}>受注番号</Typography>
-          <TextFieldElement name="juchuId" control={control} sx={{ width: 120 }} type="number" />
+          <TextFieldElement
+            name="juchuId"
+            control={control}
+            type="number"
+            sx={{
+              width: 120,
+              '& .MuiInputBase-input': {
+                textAlign: 'right',
+              },
+              '& input[type=number]::-webkit-inner-spin-button': {
+                WebkitAppearance: 'none',
+                margin: 0,
+              },
+            }}
+          />
         </Box>
         <Box sx={styles.container}>
           <Typography mr={5}>年月日</Typography>

@@ -7,7 +7,7 @@ import { SCHEMA, supabase } from '@/app/_lib/db/supabase';
 import { insertNewEqpt, selectActiveEqpts, selectOneEqpt, upDateEqptDB } from '@/app/_lib/db/tables/m-kizai';
 import { insertEqptHistory } from '@/app/_lib/db/tables/m-kizai-his';
 import { updateMasterUpdates } from '@/app/_lib/db/tables/m-master-update';
-import { selectCountOfTheEqpt } from '@/app/_lib/db/tables/m-rfid';
+import { selectCountOfTheEqpt, selectCountOfTheNgEqpt } from '@/app/_lib/db/tables/m-rfid';
 import { selectChosenEqptsDetails, selectFilteredEqpts } from '@/app/_lib/db/tables/v-kizai-list';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { EqptSelection } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_lib/types';
@@ -18,7 +18,7 @@ import {
   getBumonsSelection,
   getDaibumonsSelection,
   getShukeibumonsSelection,
-} from '../../_lib/funs';
+} from '../../_lib/funcs';
 import { nullToZero, zeroToNull } from '../../_lib/value-converters';
 import { emptyEqpt } from './datas';
 import { EqptsMasterDialogValues, EqptsMasterTableValues } from './types';
@@ -190,19 +190,16 @@ export const updateEqpt = async (rawData: EqptsMasterDialogValues, id: number) =
 /**
  * 機材の保有数を取得する関数
  * @param id 機材ID
- * @returns idの機材の保有数
+ * @returns idの機材の保有数とNG数
  */
 export const getEqptsQty = async (id: number) => {
   try {
-    const { count, error } = await selectCountOfTheEqpt(id);
-    if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+    const [all, ng] = await Promise.all([selectCountOfTheEqpt(id), selectCountOfTheNgEqpt(id)]);
+    if (all.error || ng.error) {
+      console.error('DB情報取得エラー', all?.error?.message, ng?.error?.message);
+      throw new Error('保有数取得エラー');
     }
-    if (!count || count === 0) {
-      return undefined;
-    }
-    return count;
+    return { all: all.count ?? 0, ng: ng.count ?? 0 };
   } catch (e) {
     console.error('例外が発生しました:', e);
     throw e;

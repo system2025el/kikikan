@@ -1,4 +1,4 @@
-import { getCustomerSelection } from '@/app/(main)/(masters)/_lib/funs';
+import { getCustomerSelection } from '@/app/(main)/(masters)/_lib/funcs';
 
 import { getChosenQuot, getMituStsSelection, getUsersSelection } from '../../_lib/funcs';
 import { QuotHeadValues } from '../../_lib/types';

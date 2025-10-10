@@ -62,20 +62,20 @@ export const formItems: FormItemsType[] = [
     constraints: '数字',
   },
   {
+    label: 'NG数',
+    exsample: '',
+    constraints: '数字',
+  },
+  {
+    label: '有効数',
+    exsample: '',
+    constraints: '数字',
+  },
+  {
     label: '課',
     exsample: '例）1',
     constraints: '数字',
     other: '所属無[0]、Ⅰ課[1]、Ⅱ課[2]、Ⅲ課[3]、Ⅳ課[4]、Ⅴ課[5]',
-  },
-  {
-    label: 'EL NO.',
-    exsample: '例）1',
-    constraints: '数字',
-  },
-  {
-    label: '削除フラグ',
-    exsample: '',
-    constraints: '選択',
   },
   {
     label: '所属',
@@ -131,11 +131,6 @@ export const formItems: FormItemsType[] = [
     label: 'コンテナフラグ',
     exsample: '',
     constraints: 'コンテナ系の場合チェック（入出庫するザル、台車など）',
-  },
-  {
-    label: 'デフォルト日数',
-    exsample: '例）1',
-    constraints: '数字　出庫前の移動に必要な日数',
   },
   {
     label: '定価',

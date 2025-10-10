@@ -1,4 +1,4 @@
-import { getCustomerSelection } from '../(masters)/_lib/funs';
+import { getCustomerSelection } from '../(masters)/_lib/funcs';
 import { getFilteredOrderList } from './_lib/funcs';
 import { OrderList } from './_ui/order-list';
 
