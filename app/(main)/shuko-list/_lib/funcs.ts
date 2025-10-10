@@ -4,6 +4,11 @@ import { selectFilteredShukoList } from '@/app/_lib/db/tables/v-nyushuko-den2';
 
 import { ShukoListSearchValues, ShukoTableValues } from './types';
 
+/**
+ * 出庫一覧取得
+ * @param queries 検索データ(受注番号、出庫日、出庫場所)
+ * @returns
+ */
 export const getShukoList = async (queries: ShukoListSearchValues) => {
   try {
     const data = await selectFilteredShukoList(queries);

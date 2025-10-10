@@ -13,6 +13,15 @@ import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { ShukoEqptDetailTableValues, ShukoEqptValues } from './types';
 
+/**
+ * 読取実績データ取得
+ * @param juchuHeadId 受注ヘッダーid
+ * @param nyushukoBashoId 入出庫場所id
+ * @param nyushukoDat 入出庫日
+ * @param sagyoKbnId 作業区分id
+ * @param kizaiId 機材id
+ * @returns
+ */
 export const getShukoEqptDetail = async (
   juchuHeadId: number,
   nyushukoBashoId: number,
@@ -97,6 +106,12 @@ export const getKizaiData = async (kizaiId: number) => {
   }
 };
 
+/**
+ * 読取実績データ削除
+ * @param deleteData 実績クリアデータ
+ * @param userNam ユーザー名
+ * @returns
+ */
 export const delNyushukoResult = async (deleteData: ShukoEqptDetailTableValues[], userNam: string) => {
   const connection = await pool.connect();
 

@@ -32,11 +32,14 @@ export const ShukoDetail = (props: { shukoDetailData: ShukoDetailTableValues[] }
   // user情報
   const user = useUserStore((state) => state.user);
 
-  const [snackBarOpen, setSnackBarOpen] = useState(false);
-  const [snackBarMessage, setSnackBarMessage] = useState('');
-
+  // 出発ボタンダイアログ制御
   const [departureOpen, setDepartureOpen] = useState(false);
+  // 出発解除ボタンダイアログ制御
   const [releaseOpen, setReleaseOpen] = useState(false);
+  // スナックバー制御
+  const [snackBarOpen, setSnackBarOpen] = useState(false);
+  // スナックバーメッセージ
+  const [snackBarMessage, setSnackBarMessage] = useState('');
 
   /**
    * 出発ボタン押下

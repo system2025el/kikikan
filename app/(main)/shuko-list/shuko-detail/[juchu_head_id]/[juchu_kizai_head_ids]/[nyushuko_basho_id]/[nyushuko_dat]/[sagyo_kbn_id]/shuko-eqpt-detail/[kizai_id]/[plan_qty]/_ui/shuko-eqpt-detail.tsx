@@ -47,14 +47,20 @@ export const ShukoEqptDetail = (props: {
   // ローディング
   const [isLoading, setIsLoading] = useState(false);
 
+  // 選択タグ
   const [selected, setSelected] = useState<number[]>([]);
-  const [deleteOpen, setDeleteOpen] = useState(false);
-  const [snackBarOpen, setSnackBarOpen] = useState(false);
-  const [snackBarMessage, setSnackBarMessage] = useState('');
 
+  // 出庫タグリスト
   const [shukoEqptDetailList, setShukoEqptDetailList] = useState<ShukoEqptDetailTableValues[]>(
     props.shukoEqptDetailData
   );
+
+  // 実績クリアダイアログ制御
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  // スナックバー制御
+  const [snackBarOpen, setSnackBarOpen] = useState(false);
+  // スナックバーメッセージ
+  const [snackBarMessage, setSnackBarMessage] = useState('');
 
   const {
     control,
@@ -69,6 +75,13 @@ export const ShukoEqptDetail = (props: {
     },
   });
 
+  /**
+   * 棚番作成
+   * @param a bldCod
+   * @param b tanaCod
+   * @param c edaCod
+   * @returns
+   */
   const joinStrings = (a: string | null, b: string | null, c: string | null) => {
     const parts = [a, b, c];
     const result = parts.filter(Boolean).join('-');
@@ -105,12 +118,20 @@ export const ShukoEqptDetail = (props: {
     }
   };
 
+  /**
+   * 実績クリアボタン押下
+   */
   const handleDelete = async () => {
     if (selected.length > 0) {
       setDeleteOpen(true);
     }
   };
 
+  /**
+   * 実績クリアダイアログボタン押下
+   * @param result ボタン結果(クリア:true, 戻る:false)
+   * @returns
+   */
   const handleResult = async (result: boolean) => {
     setDeleteOpen(false);
 

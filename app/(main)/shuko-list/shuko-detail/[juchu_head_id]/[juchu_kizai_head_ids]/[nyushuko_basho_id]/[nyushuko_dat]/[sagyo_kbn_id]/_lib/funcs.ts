@@ -9,6 +9,14 @@ import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { ShukoDetailTableValues } from './types';
 
+/**
+ * 出庫明細取得
+ * @param juchuHeadId 受注ヘッダーid
+ * @param nyushukoBashoId 入出庫場所id
+ * @param nyushukoDat 入出庫日
+ * @param sagyoKbnId 作業区分id
+ * @returns
+ */
 export const getShukoDetail = async (
   juchuHeadId: number,
   nyushukoBashoId: number,
