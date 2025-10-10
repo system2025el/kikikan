@@ -89,7 +89,7 @@ export type RfidImportTypes = {
   rfid_kizai_sts: number | null | undefined;
   del_flg: number | null | undefined;
   shozoku_id: number | null | undefined;
-  el_num?: number | null | undefined;
+  el_num: number | null | undefined;
   mem?: string | null;
 };
 

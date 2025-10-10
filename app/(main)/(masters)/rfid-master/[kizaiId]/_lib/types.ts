@@ -22,6 +22,7 @@ export type RfidsMasterTableValues = {
   rfidTagId: string;
   delFlg: boolean | null;
   mem: string | null;
+  stsId: number | null;
   stsNam: string | null;
   elNum: number | null;
   tblDspId: number;

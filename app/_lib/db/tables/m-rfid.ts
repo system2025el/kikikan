@@ -1,5 +1,6 @@
 'use server';
 
+import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import pool from '../postgres';
 import { SCHEMA, supabase } from '../supabase';
 
@@ -103,6 +104,7 @@ export const selectRfidsOfTheKizai = async (kizaiId: number) => {
       r.rfid_tag_id,
       shozoku.shozoku_nam,
       r.mem,
+      r.rfid_kizai_sts,
       sts.sts_nam,
       r.del_flg,
       r.el_num
@@ -120,6 +122,38 @@ export const selectRfidsOfTheKizai = async (kizaiId: number) => {
   `;
   try {
     return await pool.query(query, [kizaiId]);
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
+ * 変更があるRFIDマスタの更新をする関数
+ * @param data ステータスが変わったRFIDタグリスト
+ */
+export const updateRfidTagStsDB = async (data: { rfid_tag_id: string; rfid_kizai_sts: number }[], user: string) => {
+  const updDat = toJapanTimeString(undefined, '-');
+  const updatePlaceholders = data
+    .map((_, index) => {
+      const start = index * 2 + 1;
+      return `($${start}, $${start + 1})`;
+    })
+    .join(',');
+  const updateValues = data.flatMap((v) => [v.rfid_tag_id, v.rfid_kizai_sts]);
+  const query = `
+          UPDATE ${SCHEMA}.m_rfid AS mr
+          SET
+            rfid_kizai_sts = d.rfid_kizai_sts::integer,
+            upd_dat = $${updateValues.length + 1}::timestamp,
+            upd_user = $${updateValues.length + 2}
+          FROM (
+            VALUES ${updatePlaceholders}
+          ) AS d(rfid_tag_id, rfid_kizai_sts)
+          WHERE mr.rfid_tag_id = d.rfid_tag_id;
+        `;
+
+  try {
+    await pool.query(query, [...updateValues, updDat, user]);
   } catch (e) {
     throw e;
   }
