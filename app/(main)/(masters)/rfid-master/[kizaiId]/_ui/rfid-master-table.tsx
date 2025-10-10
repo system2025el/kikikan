@@ -17,15 +17,15 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
+import { grey } from '@mui/material/colors';
 import { useEffect, useMemo, useState } from 'react';
 
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { MuiTablePagination } from '../../../../_ui/table-pagination';
-import { RfidsMasterTableValues } from '../_lib/types';
-import { grey } from '@mui/material/colors';
 import { FAKE_NEW_ID, ROWS_PER_MASTER_TABLE_PAGE } from '../../../_lib/constants';
 import { getRfidsOfTheKizai } from '../_lib/funcs';
+import { RfidsMasterTableValues } from '../_lib/types';
 
 /** 機材マスタのテーブルコンポーネント */
 export const RfidMasterTable = ({

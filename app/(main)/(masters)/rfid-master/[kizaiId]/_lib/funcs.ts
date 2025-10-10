@@ -4,14 +4,14 @@ import { revalidatePath } from 'next/cache';
 
 import pool from '@/app/_lib/db/postgres';
 import { SCHEMA, supabase } from '@/app/_lib/db/supabase';
+import { selectOneEqpt } from '@/app/_lib/db/tables/m-kizai';
 import { updateMasterUpdates } from '@/app/_lib/db/tables/m-master-update';
+import { selectOneRfid, selectRfidsOfTheKizai } from '@/app/_lib/db/tables/m-rfid';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { nullToZero, zeroToNull } from '../../../_lib/value-converters';
 import { emptyRfid } from './datas';
 import { RfidsMasterDialogValues, RfidsMasterTableValues } from './types';
-import { selectOneRfid, selectRfidsOfTheKizai } from '@/app/_lib/db/tables/m-rfid';
-import { selectOneEqpt } from '@/app/_lib/db/tables/m-kizai';
 
 /**
  * 機材マスタで選ばれた機材のRFIDリストを取得、成型する関数
