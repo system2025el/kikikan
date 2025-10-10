@@ -13,7 +13,12 @@ import { MShozokuDBValues } from '../types/m-shozoku-type';
  */
 export const selectActiveShozokus = async () => {
   try {
-    return await supabase.schema(SCHEMA).from('m_shozoku').select('shozoku_id, shozoku_nam').neq('del_flg', 1);
+    return await supabase
+      .schema(SCHEMA)
+      .from('m_shozoku')
+      .select('shozoku_id, shozoku_nam')
+      .neq('del_flg', 1)
+      .order('shozoku_id');
   } catch (e) {
     throw e;
   }

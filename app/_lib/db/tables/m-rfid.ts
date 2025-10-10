@@ -1,9 +1,11 @@
 'use server';
 
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
+import { RfidsMasterDialogValues } from '@/app/(main)/(masters)/rfid-master/[kizaiId]/_lib/types';
 
 import pool from '../postgres';
 import { SCHEMA, supabase } from '../supabase';
+import { MRfidDBValues } from '../types/m-rfid-type';
 
 /**
  * 機材IDが一致するRFIDタグの数を返す
@@ -155,6 +157,22 @@ export const updateRfidTagStsDB = async (data: { rfid_tag_id: string; rfid_kizai
 
   try {
     await pool.query(query, [...updateValues, updDat, user]);
+  } catch (e) {
+    throw e;
+  }
+};
+
+export const insertNewRfid = async (data: MRfidDBValues) => {
+  try {
+    return await supabase.schema(SCHEMA).from('m_rfid').insert(data);
+  } catch (e) {
+    throw e;
+  }
+};
+
+export const upDateRfidDB = async (data: MRfidDBValues) => {
+  try {
+    return await supabase.schema(SCHEMA).from('m_rfid').update(data).eq('rfid_tag_id', data.rfid_tag_id);
   } catch (e) {
     throw e;
   }
