@@ -2,7 +2,13 @@ import { getShukoDetail } from './_lib/funcs';
 import { ShukoDetail } from './_ui/shuko-detail';
 
 const Page = async (props: {
-  params: Promise<{ juchu_head_id: string; nyushuko_basho_id: string; nyushuko_dat: string; sagyo_kbn_id: string }>;
+  params: Promise<{
+    juchu_head_id: string;
+    juchu_kizai_head_ids: string;
+    nyushuko_basho_id: string;
+    nyushuko_dat: string;
+    sagyo_kbn_id: string;
+  }>;
 }) => {
   const params = await props.params;
   const date = decodeURIComponent(params.nyushuko_dat);

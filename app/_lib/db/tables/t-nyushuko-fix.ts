@@ -64,7 +64,7 @@ export const insertNyushukoFix = async (data: NyushukoFix[], connection: PoolCli
  * @returns
  */
 export const updateNyushukoFix = async (data: NyushukoFix, connection: PoolClient) => {
-  const whereKeys = ['juchu_head_id', 'juchu_kizai_head_id', 'sagyo_kbn_id', 'sagyo_id'] as const;
+  const whereKeys = ['juchu_head_id', 'juchu_kizai_head_id', 'sagyo_kbn_id', 'sagyo_den_dat', 'sagyo_id'] as const;
 
   const allKeys = Object.keys(data) as (keyof typeof data)[];
 

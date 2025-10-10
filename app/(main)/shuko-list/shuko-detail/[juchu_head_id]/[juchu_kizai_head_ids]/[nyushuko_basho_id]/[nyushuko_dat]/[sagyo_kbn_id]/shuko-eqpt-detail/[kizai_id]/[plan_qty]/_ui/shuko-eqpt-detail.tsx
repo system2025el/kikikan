@@ -28,10 +28,19 @@ import { ShukoEqptDetailTableValues, ShukoEqptValues } from '../_lib/types';
 import { ShukoEqptDetailTable } from './shuko-eqpt-detail-table';
 
 export const ShukoEqptDetail = (props: {
+  params: {
+    juchu_head_id: string;
+    juchu_kizai_head_ids: string;
+    nyushuko_basho_id: string;
+    nyushuko_dat: string;
+    sagyo_kbn_id: string;
+    kizai_id: string;
+    plan_qty: string;
+  };
   shukoEqptDetailData: ShukoEqptDetailTableValues[];
   kizaiData: ShukoEqptValues;
 }) => {
-  const { kizaiData } = props;
+  const { params, kizaiData } = props;
 
   // user情報
   const user = useUserStore((state) => state.user);
@@ -67,16 +76,21 @@ export const ShukoEqptDetail = (props: {
     return result;
   };
 
+  /**
+   * 保存ボタン押下
+   * @param data 補正数
+   */
   const onSubmit = async (data: { resultAdjQty: number }) => {
-    if (isDirty && user && shukoEqptDetailList.length > 0) {
+    if (isDirty && user) {
       console.log(data);
+      const juchuKizaiHeadIds = params.juchu_kizai_head_ids.split(',').map(Number);
       const updateResult = await updResultAdjQty(
-        shukoEqptDetailList[0].juchuHeadId,
-        shukoEqptDetailList[0].juchuKizaiHeadId,
-        shukoEqptDetailList[0].sagyoKbnId,
-        shukoEqptDetailList[0].nyushukoDat,
-        shukoEqptDetailList[0].nyushukoBashoId,
-        shukoEqptDetailList[0].kizaiId,
+        Number(params.juchu_head_id),
+        juchuKizaiHeadIds[juchuKizaiHeadIds.length - 1],
+        Number(params.sagyo_kbn_id),
+        decodeURIComponent(params.nyushuko_dat),
+        Number(params.nyushuko_basho_id),
+        Number(params.kizai_id),
         data.resultAdjQty,
         user.name
       );
@@ -101,9 +115,11 @@ export const ShukoEqptDetail = (props: {
     setDeleteOpen(false);
 
     if (result) {
+      if (!user) return;
+
       setIsLoading(true);
       const deleteData = shukoEqptDetailList.filter((_, index) => selected.includes(index));
-      const deleteResult = await delNyushukoResult(deleteData);
+      const deleteResult = await delNyushukoResult(deleteData, user.name);
       if (deleteResult) {
         const newList = shukoEqptDetailList.filter((_, index) => !selected.includes(index));
         setShukoEqptDetailList(newList);
@@ -143,7 +159,7 @@ export const ShukoEqptDetail = (props: {
           </Grid2>
           <Grid2 container spacing={2} p={2}>
             <Typography>出庫予定数</Typography>
-            <Typography>{shukoEqptDetailList.length > 0 ? shukoEqptDetailList[0].planQty : 0}</Typography>
+            <Typography>{params.plan_qty}</Typography>
           </Grid2>
           <Grid2 container alignItems={'center'} spacing={5} p={1}>
             <Typography>全{shukoEqptDetailList.length}件</Typography>
@@ -185,20 +201,20 @@ export const ShukoEqptDetail = (props: {
         ) : (
           <ShukoEqptDetailTable datas={shukoEqptDetailList} selected={selected} setSelected={setSelected} />
         )}
-        <Dialog open={deleteOpen}>
-          <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
-            <WarningIcon color="error" />
-            <Box>実績をクリアします</Box>
-          </DialogTitle>
-          <DialogContentText m={2} p={2}>
-            実績をクリアしてよろしいでしょうか？
-          </DialogContentText>
-          <DialogActions>
-            <Button onClick={() => handleResult(true)}>クリア</Button>
-            <Button onClick={() => handleResult(false)}>戻る</Button>
-          </DialogActions>
-        </Dialog>
       </Paper>
+      <Dialog open={deleteOpen}>
+        <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
+          <WarningIcon color="error" />
+          <Box>実績をクリアします</Box>
+        </DialogTitle>
+        <DialogContentText m={2} p={2}>
+          実績をクリアしてよろしいでしょうか？
+        </DialogContentText>
+        <DialogActions>
+          <Button onClick={() => handleResult(true)}>クリア</Button>
+          <Button onClick={() => handleResult(false)}>戻る</Button>
+        </DialogActions>
+      </Dialog>
       <Snackbar
         open={snackBarOpen}
         autoHideDuration={6000}

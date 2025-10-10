@@ -1,14 +1,15 @@
 export type ShukoDetailTableValues = {
-  juchuHeadId: number | null;
-  juchuKizaiHeadIdv: string | null;
+  juchuHeadId: number;
+  juchuKizaiHeadIdv: number[] | null;
+  juchuKizaiHeadKbnv: number;
   headNamv: string | null;
   kizaiId: number | null;
   kizaiNam: string | null;
   koenNam: string | null;
   koenbashoNam: string | null;
   kokyakuNam: string | null;
-  nyushukoBashoId: number | null;
-  nyushukoDat: string | null;
+  nyushukoBashoId: number;
+  nyushukoDat: string;
   nyushukoShubetuId: number | null;
   planQty: number | null;
   resultAdjQty: number | null;

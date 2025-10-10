@@ -4,10 +4,12 @@ import { ShukoEqptDetail } from './_ui/shuko-eqpt-detail';
 const Page = async (props: {
   params: Promise<{
     juchu_head_id: string;
+    juchu_kizai_head_ids: string;
     nyushuko_basho_id: string;
     nyushuko_dat: string;
     sagyo_kbn_id: string;
     kizai_id: string;
+    plan_qty: string;
   }>;
 }) => {
   const params = await props.params;
@@ -27,6 +29,6 @@ const Page = async (props: {
     return <div>機材データが見つかりません</div>;
   }
 
-  return <ShukoEqptDetail shukoEqptDetailData={shukoEqptDetailData} kizaiData={kizaiData} />;
+  return <ShukoEqptDetail params={params} shukoEqptDetailData={shukoEqptDetailData} kizaiData={kizaiData} />;
 };
 export default Page;

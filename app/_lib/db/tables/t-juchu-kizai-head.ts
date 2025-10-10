@@ -92,6 +92,24 @@ export const selectReturnJuchuKizaiHead = async (juchuHeadId: number, juchuKizai
 };
 
 /**
+ * 子受注機材ヘッダー確認
+ * @param juchuHeadId 受注ヘッダーid
+ * @returns
+ */
+export const selectChildJuchuKizaiHeadConfirm = async (juchuHeadId: number) => {
+  try {
+    return await supabase
+      .schema(SCHEMA)
+      .from('t_juchu_kizai_head')
+      .select('*', { count: 'exact', head: true })
+      .eq('juchu_head_id', juchuHeadId)
+      .neq('juchu_kizai_head_kbn', 1);
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
  * 受注本番日数取得
  * @param juchuHeadId 受注ヘッダーid
  * @param juchuKizaiHeadId 受注機材ヘッダーid
