@@ -15,6 +15,23 @@ export const selectCountOfTheEqpt = async (id: number) => {
     throw e;
   }
 };
+/**
+ * 機材IDが一致する有効ではないRFIDのタグの数を返す
+ * @param id kizai_id
+ * @returns
+ */
+export const selectCountOfTheNgEqpt = async (id: number) => {
+  try {
+    return await supabase
+      .schema(SCHEMA)
+      .from('m_rfid')
+      .select('*', { count: 'exact', head: true })
+      .eq('kizai_id', id)
+      .gte('rfid_kizai_sts', 100);
+  } catch (e) {
+    throw e;
+  }
+};
 
 /**
  * 機材表エクセルに表示するすべての情報
@@ -57,6 +74,52 @@ export const selectAllRfidWithKizai = async () => {
 `;
   try {
     return await pool.query(query);
+  } catch (e) {
+    throw e;
+  }
+};
+
+export const selectOneRfid = async (id: string) => {
+  try {
+    return await supabase
+      .schema(SCHEMA)
+      .from('m_rfid')
+      .select('rfid_tag_id, el_num, shozoku_id, rfid_kizai_sts, mem, del_flg')
+      .eq('rfid_tsg_id', id)
+      .single();
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
+ * 機材IDが一致したRFIDタグ情報の配列を取得する関数
+ * @param kizaiId kizai_id
+ * @returns 機材IDが一致したRFIDタグ情報の配列
+ */
+export const selectRfidsOfTheKizai = async (kizaiId: number) => {
+  const query = `
+    SELECT
+      r.rfid_tag_id,
+      shozoku.shozoku_nam,
+      r.mem,
+      sts.sts_nam,
+      r.del_flg,
+      r.el_num
+    FROM
+      ${SCHEMA}.m_rfid as r
+    LEFT JOIN
+      ${SCHEMA}.m_shozoku as shozoku
+    ON r.shozoku_id = shozoku.shozoku_id
+    LEFT JOIN
+      ${SCHEMA}.m_sagyo_sts as sts
+    ON r.rfid_kizai_sts = sts.sts_id
+    WHERE
+      r.kizai_id = $1
+    ORDER BY r.rfid_tag_id
+  `;
+  try {
+    return await pool.query(query, [kizaiId]);
   } catch (e) {
     throw e;
   }

@@ -10,6 +10,7 @@ import { selectActiveCustomers } from '@/app/_lib/db/tables/m-kokyaku';
 import { selectActiveShozokus } from '@/app/_lib/db/tables/m-shozoku';
 import { selectActiveShukeibumons } from '@/app/_lib/db/tables/m-shukeibumon';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
+import { selectActiveSagyoSts } from '@/app/_lib/db/tables/m-sagyo-sts';
 
 /**
  * 選択肢に使う大部門リストを取得する関数
@@ -202,6 +203,32 @@ export const getCustomerSelection = async (): Promise<SelectTypes[]> => {
       label: d.kokyaku_nam,
     }));
     console.log('顧客が', selectElements.length, '件');
+    return selectElements;
+  } catch (e) {
+    console.error('例外が発生', e);
+    throw e;
+  }
+};
+
+/**
+ * 機材作業ステータスの選択肢を取得する関数
+ * @returns 機材作業ステータスの選択肢
+ */
+export const getRfidKizaiStsSelection = async () => {
+  try {
+    const { data, error } = await selectActiveSagyoSts();
+    if (error) {
+      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
+      throw error;
+    }
+    if (!data || data.length === 0) {
+      return [];
+    }
+    const selectElements: SelectTypes[] = data.map((d) => ({
+      id: d.sts_id,
+      label: d.sts_nam,
+    }));
+    console.log('Rfid作業ステータスが', selectElements.length, '件');
     return selectElements;
   } catch (e) {
     console.error('例外が発生', e);

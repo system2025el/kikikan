@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Grid2, MenuItem, Select, TextField, Typography } from '@mui/material';
+import { Box, Button, Grid2, MenuItem, Select, TextField, Typography } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import { useEffect, useState } from 'react';
 import {
@@ -14,7 +14,7 @@ import {
 import { FormBox, selectNone, SelectTypes } from '../../../_ui/form-box';
 import { Loading } from '../../../_ui/loading';
 import { FAKE_NEW_ID } from '../../_lib/constants';
-import { getAllSelections } from '../../_lib/funs';
+import { getAllSelections } from '../../_lib/funcs';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { emptyEqpt, formItems } from '../_lib/datas';
@@ -53,7 +53,7 @@ export const EqMasterDialog = ({
     shozoku: SelectTypes[];
   }>({ d: [], s: [], b: [], shozoku: [] });
   /* 保有数 */
-  const [kizaiQty, setKizaiQty] = useState<number | string>('');
+  const [kizaiQty, setKizaiQty] = useState<{ all: number; ng: number }>({ all: 0, ng: 0 });
 
   /* useForm ------------------------- */
   const {
@@ -149,7 +149,7 @@ export const EqMasterDialog = ({
       } else {
         const eqpt1 = await getChosenEqpt(eqptId);
         if (eqpt1) {
-          setKizaiQty(eqpt1.qty!);
+          setKizaiQty(eqpt1.qty);
           setCurrentEqpt(eqpt1.data);
           reset(eqpt1.data); // 取得したデータでフォーム初期化
         }
@@ -192,15 +192,35 @@ export const EqMasterDialog = ({
               </Grid2>
               <Grid2>
                 <FormBox formItem={formItems[1]}>
-                  <TextField value={kizaiQty != null ? String(kizaiQty) : ''} disabled />
+                  <TextField value={kizaiQty.all ? String(kizaiQty.all) : ''} disabled />
+                  <Box ml={1}>
+                    <Button
+                      component="a"
+                      href={`/rfid-master/${eqptId}`}
+                      target="_blank" // 新しいタブで開く
+                      rel="noopener noreferrer"
+                    >
+                      RFIDマスタ
+                    </Button>
+                  </Box>
                 </FormBox>
               </Grid2>
               <Grid2>
                 <FormBox formItem={formItems[2]}>
+                  <TextField value={kizaiQty.ng ? String(kizaiQty.ng) : ''} disabled />
+                </FormBox>
+              </Grid2>
+              <Grid2>
+                <FormBox formItem={formItems[3]}>
+                  <TextField value={kizaiQty ? String(kizaiQty.all - kizaiQty.ng) : ''} disabled />
+                </FormBox>
+              </Grid2>
+              <Grid2>
+                <FormBox formItem={formItems[4]}>
                   <TextFieldElement
                     name="sectionNum"
                     control={control}
-                    label={editable ? formItems[2].exsample : ''}
+                    label={editable ? formItems[4].exsample : ''}
                     fullWidth
                     sx={{
                       maxWidth: '20%',
@@ -216,30 +236,8 @@ export const EqMasterDialog = ({
                     type="number"
                   />
                   <Typography variant="body2" ml={2}>
-                    {formItems[2].other}
+                    {formItems[4].other}
                   </Typography>
-                </FormBox>
-              </Grid2>
-              <Grid2>
-                <FormBox formItem={formItems[3]}>
-                  <TextFieldElement
-                    name="elNum"
-                    control={control}
-                    label={editable ? formItems[3].exsample : ''}
-                    fullWidth
-                    sx={{
-                      maxWidth: '20%',
-                      '& .MuiInputBase-input': {
-                        textAlign: 'right',
-                      },
-                      '& input[type=number]::-webkit-inner-spin-button': {
-                        WebkitAppearance: 'none',
-                        margin: 0,
-                      },
-                    }}
-                    disabled={editable ? false : true}
-                    type="number"
-                  />
                 </FormBox>
               </Grid2>
               <Grid2>
@@ -383,14 +381,14 @@ export const EqMasterDialog = ({
                 </FormBox>
               </Grid2>
               <Grid2>
-                <FormBox formItem={formItems[16]}>
+                <FormBox formItem={formItems[16]} required>
                   <TextFieldElement
-                    name="defDatQty"
+                    name="regAmt"
                     control={control}
                     label={editable ? formItems[16].exsample : ''}
                     fullWidth
                     sx={{
-                      maxWidth: '20%',
+                      maxWidth: '50%',
                       '& .MuiInputBase-input': {
                         textAlign: 'right',
                       },
@@ -405,9 +403,9 @@ export const EqMasterDialog = ({
                 </FormBox>
               </Grid2>
               <Grid2>
-                <FormBox formItem={formItems[17]} required>
+                <FormBox formItem={formItems[17]}>
                   <TextFieldElement
-                    name="regAmt"
+                    name="rankAmt1"
                     control={control}
                     label={editable ? formItems[17].exsample : ''}
                     fullWidth
@@ -429,7 +427,7 @@ export const EqMasterDialog = ({
               <Grid2>
                 <FormBox formItem={formItems[18]}>
                   <TextFieldElement
-                    name="rankAmt1"
+                    name="rankAmt2"
                     control={control}
                     label={editable ? formItems[18].exsample : ''}
                     fullWidth
@@ -451,7 +449,7 @@ export const EqMasterDialog = ({
               <Grid2>
                 <FormBox formItem={formItems[19]}>
                   <TextFieldElement
-                    name="rankAmt2"
+                    name="rankAmt3"
                     control={control}
                     label={editable ? formItems[19].exsample : ''}
                     fullWidth
@@ -473,7 +471,7 @@ export const EqMasterDialog = ({
               <Grid2>
                 <FormBox formItem={formItems[20]}>
                   <TextFieldElement
-                    name="rankAmt3"
+                    name="rankAmt4"
                     control={control}
                     label={editable ? formItems[20].exsample : ''}
                     fullWidth
@@ -495,31 +493,9 @@ export const EqMasterDialog = ({
               <Grid2>
                 <FormBox formItem={formItems[21]}>
                   <TextFieldElement
-                    name="rankAmt4"
-                    control={control}
-                    label={editable ? formItems[21].exsample : ''}
-                    fullWidth
-                    sx={{
-                      maxWidth: '50%',
-                      '& .MuiInputBase-input': {
-                        textAlign: 'right',
-                      },
-                      '& input[type=number]::-webkit-inner-spin-button': {
-                        WebkitAppearance: 'none',
-                        margin: 0,
-                      },
-                    }}
-                    type="number"
-                    disabled={editable ? false : true}
-                  />
-                </FormBox>
-              </Grid2>
-              <Grid2>
-                <FormBox formItem={formItems[22]}>
-                  <TextFieldElement
                     name="rankAmt5"
                     control={control}
-                    label={editable ? formItems[22].exsample : ''}
+                    label={editable ? formItems[21].exsample : ''}
                     fullWidth
                     sx={{
                       maxWidth: '50%',

@@ -280,10 +280,8 @@ const BundleDialog = ({
                   const isItemSelected = selected.includes(row.kizaiId);
                   const labelId = `enhanced-table-checkbox-${index}`;
                   const nextRow = bundles![index + 1];
-
-                  const rowsToRender = [];
-
-                  rowsToRender.push(
+                  const rows = [];
+                  rows.push(
                     <TableRow
                       hover
                       onClick={(event) => handleSelectBundles(event, row.kizaiId)}
@@ -305,7 +303,7 @@ const BundleDialog = ({
                   );
                   // 次のkizaiGrpCodが異なるなら区切り行を追加
                   if (!nextRow || row.kizaiGrpCod !== nextRow.kizaiGrpCod) {
-                    rowsToRender.push(
+                    rows.push(
                       <TableRow key={`divider-${index}`}>
                         <TableCell colSpan={3}>
                           <Box height={10} width={'100%'} alignContent={'center'}>
@@ -315,7 +313,7 @@ const BundleDialog = ({
                       </TableRow>
                     );
                   }
-                  return rowsToRender;
+                  return rows;
                 })}
               </TableBody>
             </Table>

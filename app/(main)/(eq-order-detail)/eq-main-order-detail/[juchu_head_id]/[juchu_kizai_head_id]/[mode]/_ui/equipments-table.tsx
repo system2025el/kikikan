@@ -67,9 +67,9 @@ export const EqptTable = ({
               const labelId = `enhanced-table-checkbox-${index}`;
               const nextRow = list![index + 1];
 
-              const rowsToRender = [];
+              const rows = [];
 
-              rowsToRender.push(
+              rows.push(
                 <TableRow
                   hover
                   onClick={(event) => handleSelect(event, row.kizaiId)}
@@ -91,7 +91,7 @@ export const EqptTable = ({
               );
               // 次のkizaiGrpCodが異なるなら区切り行を追加
               if (!nextRow || row.kizaiGrpCod !== nextRow.kizaiGrpCod) {
-                rowsToRender.push(
+                rows.push(
                   <TableRow key={`divider-${index}`}>
                     <TableCell colSpan={3}>
                       <Box height={10} width={'100%'} alignContent={'center'}>
@@ -101,7 +101,7 @@ export const EqptTable = ({
                   </TableRow>
                 );
               }
-              return rowsToRender;
+              return rows;
             })}
           </TableBody>
         </Table>
