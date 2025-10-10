@@ -12,6 +12,7 @@ import { NyukoListSearchValues, NyukoTableValues } from './types';
 export const getNyukoList = async (queries: NyukoListSearchValues) => {
   try {
     const data = await selectFilteredNyukoList(queries);
+    console.log(data);
 
     if (!data) {
       return [];
@@ -26,7 +27,7 @@ export const getNyukoList = async (queries: NyukoListSearchValues) => {
       headNamv: d.head_namv,
       sectionNamv: d.section_namv,
       kokyakuNam: d.kokyaku_nam,
-      nchkSagyoStsId: d.schk_sagyo_sts_id,
+      nchkSagyoStsId: d.nchk_sagyo_sts_id,
     }));
 
     return nyukoList;

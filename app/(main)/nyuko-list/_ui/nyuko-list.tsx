@@ -43,6 +43,7 @@ export const NyukoList = (props: { shukoData: NyukoTableValues[] }) => {
   const onSubmit = async (data: NyukoListSearchValues) => {
     setIsLoading(true);
     const newNyukoList = await getNyukoList(data);
+    console.log(newNyukoList);
     setNyukoList(newNyukoList);
     setIsLoading(false);
   };
