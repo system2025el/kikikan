@@ -1,4 +1,5 @@
 import { toISOString, toISOStringYearMonthDay, toJapanDateString } from '@/app/(main)/_lib/date-conversion';
+import { NyukoListSearchValues } from '@/app/(main)/nyuko-list/_lib/types';
 import { ShukoListSearchValues } from '@/app/(main)/shuko-list/_lib/types';
 
 import pool from '../postgres';
@@ -42,7 +43,7 @@ export const selectFilteredShukoList = async (queries: ShukoListSearchValues) =>
   }
 };
 
-export const selectFilteredNyukoList = async (queries: ShukoListSearchValues) => {
+export const selectFilteredNyukoList = async (queries: NyukoListSearchValues) => {
   let query = `
     SELECT
       d2.juchu_head_id,

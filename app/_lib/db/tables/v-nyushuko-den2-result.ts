@@ -2,7 +2,7 @@
 
 import { SCHEMA, supabase } from '../supabase';
 
-export const selectShukoEqptDetail = async (
+export const selectNyushukoEqptDetail = async (
   juchuHeadId: number,
   nyushukoBashoId: number,
   nyushukoDat: string,
