@@ -38,6 +38,10 @@ export const ShukoList = (props: { shukoData: ShukoTableValues[] }) => {
     },
   });
 
+  /**
+   * 検索ボタン押下
+   * @param data 検索データ(受注番号、出庫日、出庫場所)
+   */
   const onSubmit = async (data: ShukoListSearchValues) => {
     setIsLoading(true);
     const newShukoList = await getShukoList(data);
@@ -49,7 +53,9 @@ export const ShukoList = (props: { shukoData: ShukoTableValues[] }) => {
   // PDFデータ生成フック
   const [printShuko] = usePdf();
 
-  // ボタン押下
+  /**
+   * 納品書出力ボタン押下
+   */
   const handleOutput = async () => {
     console.log(selected);
     //// チェックされた行を取り出し

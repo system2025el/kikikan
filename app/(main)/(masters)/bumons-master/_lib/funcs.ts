@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { insertNewBumon, selectFilteredBumons, selectOneBumon, upDateBumonDB } from '@/app/_lib/db/tables/m-bumon';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
-import { getDaibumonsSelection, getShukeibumonsSelection } from '../../_lib/funs';
+import { getDaibumonsSelection, getShukeibumonsSelection } from '../../_lib/funcs';
 import { emptyBumon } from './datas';
 import { BumonsMasterDialogValues, BumonsMasterTableValues } from './types';
 

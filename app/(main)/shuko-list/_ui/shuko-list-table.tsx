@@ -62,34 +62,42 @@ export const ShukoListTable = (props: {
               <TableCell align="left">{row.kokyakuNam}</TableCell>
               <TableCell align="left">{row.sectionNamv}</TableCell>
               <TableCell align="center">
-                <Button
-                  variant="text"
-                  size="small"
-                  href={`shuko-list/shuko-detail/${row.juchuHeadId}/${row.nyushukoBashoId}/${toJapanTimeString(row.nyushukoDat, '-')}/10`}
-                >
-                  {row.sstbSagyoStsId === 0
-                    ? '-'
-                    : row.sstbSagyoStsId === 11
-                      ? '△'
-                      : row.sstbSagyoStsId === 12
-                        ? '〇'
-                        : ''}
-                </Button>
+                {row.sstbSagyoStsId ? (
+                  <Button
+                    variant="text"
+                    size="small"
+                    href={`shuko-list/shuko-detail/${row.juchuHeadId}/${row.juchuKizaiHeadIdv}/${row.nyushukoBashoId}/${toJapanTimeString(row.nyushukoDat, '-')}/10`}
+                  >
+                    {row.sstbSagyoStsId === 0
+                      ? 'ー'
+                      : row.sstbSagyoStsId === 11
+                        ? '△'
+                        : row.sstbSagyoStsId === 12
+                          ? '〇'
+                          : ''}
+                  </Button>
+                ) : (
+                  ''
+                )}
               </TableCell>
               <TableCell align="center">
-                <Button
-                  variant="text"
-                  size="small"
-                  href={`shuko-list/shuko-detail/${row.juchuHeadId}/${row.nyushukoBashoId}/${toJapanTimeString(row.nyushukoDat, '-')}/20`}
-                >
-                  {row.schkSagyoStsId === 0
-                    ? '-'
-                    : row.schkSagyoStsId === 21
-                      ? '△'
-                      : row.schkSagyoStsId === 22
-                        ? '〇'
-                        : ''}
-                </Button>
+                {row.schkSagyoStsId ? (
+                  <Button
+                    variant="text"
+                    size="small"
+                    href={`shuko-list/shuko-detail/${row.juchuHeadId}/${row.juchuKizaiHeadIdv}/${row.nyushukoBashoId}/${toJapanTimeString(row.nyushukoDat, '-')}/20`}
+                  >
+                    {row.schkSagyoStsId === 0
+                      ? 'ー'
+                      : row.schkSagyoStsId === 21
+                        ? '△'
+                        : row.schkSagyoStsId === 22
+                          ? '〇'
+                          : ''}
+                  </Button>
+                ) : (
+                  ''
+                )}
               </TableCell>
             </TableRow>
           ))}

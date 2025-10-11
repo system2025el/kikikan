@@ -1,0 +1,230 @@
+'use client';
+
+import WarningIcon from '@mui/icons-material/Warning';
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContentText,
+  DialogTitle,
+  Divider,
+  Grid2,
+  Paper,
+  Snackbar,
+  TextField,
+  Typography,
+} from '@mui/material';
+import { useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { TextFieldElement } from 'react-hook-form-mui';
+
+import { useUserStore } from '@/app/_lib/stores/usestore';
+import { BackButton } from '@/app/(main)/_ui/buttons';
+import { Loading } from '@/app/(main)/_ui/loading';
+
+import { delNyukoResult, updNyukoResultAdjQty } from '../_lib/funcs';
+import { NyukoEqptDetailTableValues, NyukoEqptValues } from '../_lib/types';
+import { NyukoEqptDetailTable } from './nyuko-eqpt-detail-table';
+
+export const NyukoEqptDetail = (props: {
+  params: {
+    juchu_head_id: string;
+    juchu_kizai_head_ids: string;
+    nyushuko_basho_id: string;
+    nyushuko_dat: string;
+    kizai_id: string;
+    plan_qty: string;
+  };
+  nyukoEqptDetailData: NyukoEqptDetailTableValues[];
+  kizaiData: NyukoEqptValues;
+}) => {
+  const { params, kizaiData } = props;
+
+  // user情報
+  const user = useUserStore((state) => state.user);
+  // ローディング
+  const [isLoading, setIsLoading] = useState(false);
+
+  // 選択タグ
+  const [selected, setSelected] = useState<number[]>([]);
+
+  // 入庫タグリスト
+  const [nyukoEqptDetailList, setNyukoEqptDetailList] = useState<NyukoEqptDetailTableValues[]>(
+    props.nyukoEqptDetailData
+  );
+
+  // 実績クリアダイアログ制御
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  // スナックバー制御
+  const [snackBarOpen, setSnackBarOpen] = useState(false);
+  // スナックバーメッセージ
+  const [snackBarMessage, setSnackBarMessage] = useState('');
+
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { isDirty, defaultValues },
+  } = useForm({
+    mode: 'onChange',
+    reValidateMode: 'onChange',
+    defaultValues: {
+      resultAdjQty: props.nyukoEqptDetailData.length > 0 ? (props.nyukoEqptDetailData[0].resultAdjQty ?? 0) : 0,
+    },
+  });
+
+  /**
+   * 保存ボタン押下
+   * @param data 補正数
+   */
+  const onSubmit = async (data: { resultAdjQty: number }) => {
+    if (isDirty && user) {
+      console.log(data);
+      const juchuKizaiHeadIds = params.juchu_kizai_head_ids.split(',').map(Number);
+      const updateResult = await updNyukoResultAdjQty(
+        Number(params.juchu_head_id),
+        juchuKizaiHeadIds[juchuKizaiHeadIds.length - 1],
+        30,
+        decodeURIComponent(params.nyushuko_dat),
+        Number(params.nyushuko_basho_id),
+        Number(params.kizai_id),
+        data.resultAdjQty,
+        user.name
+      );
+      if (updateResult) {
+        setSnackBarMessage('保存しました');
+        setSnackBarOpen(true);
+        reset(data);
+      } else {
+        setSnackBarMessage('保存に失敗しました');
+        setSnackBarOpen(true);
+      }
+    }
+  };
+
+  /**
+   * 実績クリアボタン押下
+   */
+  const handleDelete = async () => {
+    if (selected.length > 0) {
+      setDeleteOpen(true);
+    }
+  };
+
+  /**
+   * 実績クリアダイアログボタン押下
+   * @param result ボタン結果(クリア:true, 戻る:false)
+   * @returns
+   */
+  const handleResult = async (result: boolean) => {
+    setDeleteOpen(false);
+
+    if (result) {
+      if (!user) return;
+
+      setIsLoading(true);
+      const deleteData = nyukoEqptDetailList.filter((_, index) => selected.includes(index));
+      const deleteResult = await delNyukoResult(deleteData, user.name);
+      if (deleteResult) {
+        const newList = nyukoEqptDetailList.filter((_, index) => !selected.includes(index));
+        setNyukoEqptDetailList(newList);
+        setSelected([]);
+      } else {
+        console.log('削除に失敗しました');
+      }
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <Box>
+      <Box display={'flex'} justifyContent={'end'} mb={1}>
+        <BackButton label={'戻る'} />
+      </Box>
+      <Paper variant="outlined">
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <Box display={'flex'} justifyContent={'space-between'} alignItems="center" p={2}>
+            <Typography fontSize={'large'}>機材詳細</Typography>
+            <Button type="submit">保存</Button>
+          </Box>
+          <Divider />
+          <Grid2 container spacing={5} p={2}>
+            <Box display={'flex'} alignItems={'center'}>
+              <Typography mr={2}>機材名</Typography>
+              <TextField value={kizaiData.kizaiNam ?? ''} disabled />
+            </Box>
+            <Box display={'flex'} alignItems={'center'}>
+              <Typography mr={2}>機材メモ</Typography>
+              <TextField value={kizaiData.mem ?? ''} disabled />
+            </Box>
+          </Grid2>
+          <Grid2 container spacing={2} p={2}>
+            <Typography>入庫予定数</Typography>
+            <Typography>{params.plan_qty}</Typography>
+          </Grid2>
+          <Grid2 container alignItems={'center'} spacing={5} p={1}>
+            <Typography>全{nyukoEqptDetailList.length}件</Typography>
+            <Button color="error" onClick={handleDelete}>
+              実績クリア
+            </Button>
+            <Box display={'flex'} alignItems={'center'}>
+              <Typography mr={2}>入庫補正数</Typography>
+              <Controller
+                name="resultAdjQty"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    type="number"
+                    onChange={(e) => {
+                      if (/^-?\d*$/.test(e.target.value)) {
+                        field.onChange(Number(e.target.value));
+                      }
+                    }}
+                    sx={{
+                      width: 150,
+                      '& .MuiInputBase-input': {
+                        textAlign: 'right',
+                      },
+                      '& input[type=number]::-webkit-inner-spin-button': {
+                        WebkitAppearance: 'none',
+                        margin: 0,
+                      },
+                    }}
+                  />
+                )}
+              />
+            </Box>
+          </Grid2>
+        </form>
+        {isLoading ? (
+          <Loading />
+        ) : (
+          <NyukoEqptDetailTable datas={nyukoEqptDetailList} selected={selected} setSelected={setSelected} />
+        )}
+      </Paper>
+      <Dialog open={deleteOpen}>
+        <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
+          <WarningIcon color="error" />
+          <Box>実績をクリアします</Box>
+        </DialogTitle>
+        <DialogContentText m={2} p={2}>
+          実績をクリアしてよろしいでしょうか？
+        </DialogContentText>
+        <DialogActions>
+          <Button onClick={() => handleResult(true)}>クリア</Button>
+          <Button onClick={() => handleResult(false)}>戻る</Button>
+        </DialogActions>
+      </Dialog>
+      <Snackbar
+        open={snackBarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackBarOpen(false)}
+        message={snackBarMessage}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={{ marginTop: '65px' }}
+      />
+    </Box>
+  );
+};

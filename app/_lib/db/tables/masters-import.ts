@@ -42,12 +42,12 @@ export const checkRfid = async (list: RfidImportTypes[], connection: PoolClient)
       const addUser = 'excel_import';
 
       // 一時テーブルとして扱うインポートデータのカラムを定義
-      const insertColumns = ['rfid_tag_id', 'kizai_nam', 'rfid_kizai_sts', 'del_flg', 'shozoku_id', 'mem'];
+      const columns = ['rfid_tag_id', 'kizai_nam', 'rfid_kizai_sts', 'del_flg', 'shozoku_id', 'mem', 'el_num'];
 
       const insertPlaceholders = insertList
         .map((_, index) => {
-          const start = index * insertColumns.length + 1;
-          return `(${insertColumns.map((_, i) => `$${start + i}`).join(',')})`;
+          const start = index * columns.length + 1;
+          return `(${columns.map((_, i) => `$${start + i}`).join(',')})`;
         })
         .join(',');
       // 挿入する値
@@ -58,9 +58,10 @@ export const checkRfid = async (list: RfidImportTypes[], connection: PoolClient)
         v.del_flg,
         v.shozoku_id,
         v.mem,
+        v.el_num,
       ]);
       const insertQuery = `
-          WITH imported_data(${insertColumns.join(',')}) AS (
+          WITH imported_data(${columns.join(',')}) AS (
             VALUES ${insertPlaceholders}
           )
           INSERT INTO ${SCHEMA}.m_rfid (
@@ -70,6 +71,7 @@ export const checkRfid = async (list: RfidImportTypes[], connection: PoolClient)
             del_flg,
             shozoku_id,
             mem,
+            el_num,
             add_dat,
             add_user
           )
@@ -80,6 +82,7 @@ export const checkRfid = async (list: RfidImportTypes[], connection: PoolClient)
             CAST(id.del_flg AS integer),
             CAST(id.shozoku_id AS integer),
             id.mem,
+            CAST(id.el_num AS integer),
             $${values.length + 1}::timestamp, -- add_dat
             $${values.length + 2}  -- add_user
           FROM
@@ -96,14 +99,14 @@ export const checkRfid = async (list: RfidImportTypes[], connection: PoolClient)
     // 全データ比較準備
     const placeholders = list
       .map((_, index) => {
-        const start = index * 6 + 1;
-        return `($${start}, $${start + 1}, $${start + 2}, $${start + 3}, $${start + 4}, $${start + 5})`;
+        const start = index * 7 + 1;
+        return `($${start}, $${start + 1}, $${start + 2}, $${start + 3}, $${start + 4}, $${start + 5}, $${start + 6})`;
       })
       .join(',');
     // 差異があるデータ群の取得
     const differnces = await connection.query(
       `
-        WITH imported_data(rfid_tag_id, kizai_nam, rfid_kizai_sts, del_flg, shozoku_id, mem) AS (
+        WITH imported_data(rfid_tag_id, kizai_nam, rfid_kizai_sts, del_flg, shozoku_id, mem, el_num) AS (
           VALUES ${placeholders}
         ),
         imported_only AS (
@@ -113,15 +116,16 @@ export const checkRfid = async (list: RfidImportTypes[], connection: PoolClient)
             id.rfid_kizai_sts::integer,
             id.del_flg::integer,
             id.shozoku_id::integer,
-            id.mem
+            id.mem,
+            id.el_num
           FROM imported_data AS id
           LEFT JOIN ${SCHEMA}.m_kizai AS mk ON id.kizai_nam = mk.kizai_nam
           EXCEPT ALL
-          SELECT rfid_tag_id, kizai_id, rfid_kizai_sts, del_flg, shozoku_id, mem FROM ${SCHEMA}.m_rfid
+          SELECT rfid_tag_id, kizai_id, rfid_kizai_sts, del_flg, shozoku_id, mem, el_num FROM ${SCHEMA}.m_rfid
         )
-        SELECT rfid_tag_id, kizai_id, rfid_kizai_sts, del_flg, shozoku_id, mem FROM imported_only
+        SELECT rfid_tag_id, kizai_id, rfid_kizai_sts, del_flg, shozoku_id, mem, el_num FROM imported_only
         `,
-      list.flatMap((v) => [v.rfid_tag_id, v.kizai_nam, v.rfid_kizai_sts, v.del_flg, v.shozoku_id, v.mem])
+      list.flatMap((v) => [v.rfid_tag_id, v.kizai_nam, v.rfid_kizai_sts, v.del_flg, v.shozoku_id, v.mem, v.el_num])
     );
     console.log('更新対象', differnces.rows);
     const updateList = differnces.rows;
@@ -131,8 +135,8 @@ export const checkRfid = async (list: RfidImportTypes[], connection: PoolClient)
       const updUser = 'excel_import';
       const updatePlaceholders = updateList
         .map((_, index) => {
-          const start = index * 6 + 1;
-          return `($${start}, $${start + 1}, $${start + 2}, $${start + 3}, $${start + 4}, $${start + 5})`;
+          const start = index * 7 + 1;
+          return `($${start}, $${start + 1}, $${start + 2}, $${start + 3}, $${start + 4}, $${start + 5}, $${start + 6})`;
         })
         .join(',');
       const updateValues = updateList.flatMap((v) => [
@@ -142,6 +146,7 @@ export const checkRfid = async (list: RfidImportTypes[], connection: PoolClient)
         v.del_flg,
         v.shozoku_id,
         v.del_flg === 1 ? v.mem : null,
+        v.el_num,
       ]);
       const updateQuery = `
           UPDATE ${SCHEMA}.m_rfid AS mr
@@ -151,11 +156,12 @@ export const checkRfid = async (list: RfidImportTypes[], connection: PoolClient)
             del_flg = d.del_flg::integer,
             shozoku_id = d.shozoku_id::integer,
             mem = d.mem,
+            el_num = d.el_num,
             upd_dat = $${updateValues.length + 1}::timestamp,
             upd_user = $${updateValues.length + 2}
           FROM (
             VALUES ${updatePlaceholders}
-          ) AS d(rfid_tag_id, kizai_id, rfid_kizai_sts, del_flg, shozoku_id, mem)
+          ) AS d(rfid_tag_id, kizai_id, rfid_kizai_sts, del_flg, shozoku_id, mem, el_num)
           WHERE mr.rfid_tag_id = d.rfid_tag_id;`;
 
       //更新実行
@@ -167,6 +173,7 @@ export const checkRfid = async (list: RfidImportTypes[], connection: PoolClient)
 
     console.log('RFIDマスタ処理した');
   } catch (e) {
+    console.error(e);
     throw new Error('例外が発生：DBエラーrfid');
   }
 };
