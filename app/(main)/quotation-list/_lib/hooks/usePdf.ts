@@ -669,6 +669,12 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
               drawColumnLine();
               drawUnderLine();
               index++;
+            } else {
+              checkPageBreak(rowHeight);
+              drawColumnLine();
+              drawShokei('＜機材費＞', null, null);
+              drawUnderLine();
+              index++;
             }
 
             detail.meisai.forEach((row) => {
@@ -689,7 +695,8 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
             // 小計行1
             checkPageBreak(rowHeight);
             drawColumnLine();
-            drawShokei(detail.biko1, detail.shokeiMei, detail.shokeiAmt);
+            drawShokei(detail.biko1, '小計', detail.shokeiAmt);
+            //drawShokei(detail.biko1, detail.shokeiMei, detail.shokeiAmt);
             drawUnderLine();
             index++;
 
@@ -712,10 +719,23 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
         });
 
         if (0 < param.meisaiHeads.kizai.length) {
+          // 1つ前の線を二重線にする
+          workPage.drawLine({
+            start: { x: whiteSpace, y: startY - rowHeight * index - 2 }, // 通常の下線より少し上
+            end: { x: width - whiteSpace, y: startY - rowHeight * index - 2 }, // 通常の下線より少し上
+            thickness: 1,
+          });
+
           // 機材費の合計
           checkPageBreak(rowHeight);
           drawColumnLine();
           drawShokei('', '機材費', param.kizaiChukeiAmt);
+          drawUnderLine();
+          index++;
+
+          // 空行
+          checkPageBreak(rowHeight);
+          drawColumnLine();
           drawUnderLine();
           index++;
         }
@@ -730,6 +750,12 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
             if (0 < detailIndex) {
               checkPageBreak(rowHeight);
               drawColumnLine();
+              drawUnderLine();
+              index++;
+            } else {
+              checkPageBreak(rowHeight);
+              drawColumnLine();
+              drawShokei('＜人件費＞', null, null);
               drawUnderLine();
               index++;
             }
@@ -752,7 +778,8 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
             // 小計行1
             checkPageBreak(rowHeight);
             drawColumnLine();
-            drawShokei(detail.biko1, detail.shokeiMei, detail.shokeiAmt);
+            drawShokei(detail.biko1, '小計', detail.shokeiAmt);
+            //drawShokei(detail.biko1, detail.shokeiMei, detail.shokeiAmt);
             drawUnderLine();
             index++;
 
@@ -775,10 +802,23 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
         });
 
         if (0 < param.meisaiHeads.labor.length) {
-          // 人権費の合計
+          // 1つ前の線を二重線にする
+          workPage.drawLine({
+            start: { x: whiteSpace, y: startY - rowHeight * index - 2 }, // 通常の下線より少し上
+            end: { x: width - whiteSpace, y: startY - rowHeight * index - 2 }, // 通常の下線より少し上
+            thickness: 1,
+          });
+
+          // 人件費の合計
           checkPageBreak(rowHeight);
           drawColumnLine();
           drawShokei('', '人件費', 0);
+          drawUnderLine();
+          index++;
+
+          // 空行
+          checkPageBreak(rowHeight);
+          drawColumnLine();
           drawUnderLine();
           index++;
         }
@@ -793,6 +833,12 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
             if (0 < detailIndex) {
               checkPageBreak(rowHeight);
               drawColumnLine();
+              drawUnderLine();
+              index++;
+            } else {
+              checkPageBreak(rowHeight);
+              drawColumnLine();
+              drawShokei('＜諸経費＞', null, null);
               drawUnderLine();
               index++;
             }
@@ -815,7 +861,8 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
             // 小計行1
             checkPageBreak(rowHeight);
             drawColumnLine();
-            drawShokei(detail.biko1, detail.shokeiMei, detail.shokeiAmt);
+            drawShokei(detail.biko1, '小計', detail.shokeiAmt);
+            //drawShokei(detail.biko1, detail.shokeiMei, detail.shokeiAmt);
             drawUnderLine();
             index++;
 
@@ -838,10 +885,23 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
         });
 
         if (0 < param.meisaiHeads.other.length) {
+          // 1つ前の線を二重線にする
+          workPage.drawLine({
+            start: { x: whiteSpace, y: startY - rowHeight * index - 2 }, // 通常の下線より少し上
+            end: { x: width - whiteSpace, y: startY - rowHeight * index - 2 }, // 通常の下線より少し上
+            thickness: 1,
+          });
+
           // 諸経費の合計
           checkPageBreak(rowHeight);
           drawColumnLine();
           drawShokei('', '諸経費', 0);
+          drawUnderLine();
+          index++;
+
+          // 空行
+          checkPageBreak(rowHeight);
+          drawColumnLine();
           drawUnderLine();
           index++;
         }
@@ -850,7 +910,8 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
 
     function checkPageBreak(nextHeight: number) {
       // 判定
-      if (0 < startY - whiteSpace - nextHeight) {
+      console.log(startY - rowHeight * index - whiteSpace - nextHeight);
+      if (0 < startY - rowHeight * index - whiteSpace - nextHeight) {
         return;
       }
 
@@ -861,7 +922,8 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
         thickness: boldLine,
       });
 
-      workPage = pdfDoc.addPage();
+      const nextPage = pdfDoc.addPage();
+      workPage = nextPage;
 
       startY = height - whiteSpace;
       index = 0;
@@ -1032,8 +1094,10 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
         // opacity: 1,
       });
 
+      const shokeiMeiWidth = customFont.widthOfTextAtSize(item2 ?? '', fontSize);
+
       workPage.drawText(item2 ?? '', {
-        x: 435,
+        x: 485 - shokeiMeiWidth,
         y: startY - 20 * (index + 1) + 3,
         font: customFont, // カスタムフォントの設定
         size: fontSize,

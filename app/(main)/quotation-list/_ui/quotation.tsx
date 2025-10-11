@@ -570,10 +570,10 @@ export const Quotation = ({
                   <Grid2 size={1} />
                 </Grid2>
               </Box>
-              {/* 人権費テーブル ------------------------------------------------------------ */}
+              {/* 人件費テーブル ------------------------------------------------------------ */}
               <Box margin={0.5} padding={0.8} borderTop={1} borderBottom={1} borderColor={'divider'}>
                 <Typography variant="h6" pt={1} pl={2}>
-                  人権費
+                  人件費
                 </Typography>
                 {laborFields.fields.map((field, index) => (
                   <Box key={field.id} p={1}>
