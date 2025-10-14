@@ -14,8 +14,7 @@ export const NyukoDetailTable = (props: { datas: NyukoDetailTableValues[] }) => 
 
   const handleClick = (kizaiId: number | null) => {
     if (kizaiId) {
-      const planQty = datas.find((d) => d.kizaiId === kizaiId)?.planQty;
-      router.push(`${path}/nyuko-eqpt-detail/${kizaiId}/${planQty}`);
+      router.push(`${path}/nyuko-eqpt-detail/${kizaiId}`);
     }
   };
 

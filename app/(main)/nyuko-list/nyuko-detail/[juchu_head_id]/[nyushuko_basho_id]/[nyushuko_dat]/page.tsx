@@ -4,7 +4,6 @@ import { NyukoDetail } from './_ui/nyuko-detail';
 const Page = async (props: {
   params: Promise<{
     juchu_head_id: string;
-    juchu_kizai_head_ids: string;
     nyushuko_basho_id: string;
     nyushuko_dat: string;
   }>;

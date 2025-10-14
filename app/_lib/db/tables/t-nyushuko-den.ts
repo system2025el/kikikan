@@ -245,23 +245,9 @@ export const updateResultAdjQty = async (data: NyushukoDen, connection: PoolClie
   } catch (e) {
     throw e;
   }
-  // try {
-  //   return await supabase
-  //     .schema(SCHEMA)
-  //     .from('t_nyushuko_den')
-  //     .update(data)
-  //     .eq('juchu_head_id', data.juchu_head_id)
-  //     .eq('juchu_kizai_head_id', data.juchu_kizai_head_id)
-  //     .eq('sagyo_kbn_id', data.sagyo_kbn_id)
-  //     .eq('sagyo_den_dat', data.sagyo_den_dat)
-  //     .eq('sagyo_id', data.sagyo_id)
-  //     .eq('kizai_id', data.kizai_id);
-  // } catch (e) {
-  //   throw e;
-  // }
 };
 
-export const selectKizaiDetailHead = async (
+export const selectKizaiDetail = async (
   juchuHeadId: number,
   nyushukoBashoId: number,
   sagyoDenDat: string,
