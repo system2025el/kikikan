@@ -178,7 +178,7 @@ export const NyukoEqptDetail = (props: {
                     {...field}
                     type="number"
                     onChange={(e) => {
-                      if (/^-?\d*$/.test(e.target.value)) {
+                      if (/^\d*$/.test(e.target.value)) {
                         field.onChange(Number(e.target.value));
                       }
                     }}

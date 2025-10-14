@@ -12,7 +12,7 @@ import { selectNyushukoEqptDetail } from '@/app/_lib/db/tables/v-nyushuko-den2-r
 import { NyushukoDen } from '@/app/_lib/db/types/t-nyushuko-den-type';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
-import { KizaiDetailHeadValues, ShukoEqptDetailTableValues, ShukoEqptValues } from './types';
+import { KizaiDetailValues, ShukoEqptDetailTableValues, ShukoEqptValues } from './types';
 
 export const getKizaiDetailHead = async (
   juchuHeadId: number,
@@ -29,7 +29,7 @@ export const getKizaiDetailHead = async (
       return [];
     }
 
-    const kizaiDetailHead: KizaiDetailHeadValues[] = data.map((d) => ({
+    const kizaiDetailHead: KizaiDetailValues[] = data.map((d) => ({
       juchuKizaiHeadId: d.juchu_kizai_head_id,
       planQty: d.plan_qty,
       resultQty: d.result_qty,
@@ -214,8 +214,8 @@ export const delshukoResult = async (deleteData: ShukoEqptDetailTableValues[], u
  * @returns
  */
 export const updShukoResultAdjQty = async (
+  kizaiDetailData: KizaiDetailValues[],
   juchuHeadId: number,
-  juchuKizaiHeadId: number,
   sagyoKbnId: number,
   sagyoDenDat: string,
   sagyoId: number,
@@ -223,28 +223,53 @@ export const updShukoResultAdjQty = async (
   resultAdjQty: number,
   userNam: string
 ) => {
-  const updateData: NyushukoDen = {
+  const connection = await pool.connect();
+
+  const adjQty: number[] = [];
+
+  if (kizaiDetailData.length === 1) {
+    adjQty.push(resultAdjQty);
+  } else {
+    let remainingAdjQty = resultAdjQty;
+    for (let i = 0; i < kizaiDetailData.length - 1; i++) {
+      const possibleAdjQty = (kizaiDetailData[i].planQty ?? 0) - (kizaiDetailData[i].resultQty ?? 0);
+      const assignAdjQty =
+        possibleAdjQty > 0 && possibleAdjQty <= remainingAdjQty
+          ? possibleAdjQty
+          : possibleAdjQty > 0 && possibleAdjQty >= remainingAdjQty
+            ? remainingAdjQty
+            : 0;
+      adjQty.push(assignAdjQty);
+      remainingAdjQty = remainingAdjQty - assignAdjQty >= 0 ? remainingAdjQty - assignAdjQty : 0;
+    }
+    adjQty.push(remainingAdjQty);
+  }
+
+  const updateData: NyushukoDen[] = kizaiDetailData.map((d, i) => ({
     juchu_head_id: juchuHeadId,
-    juchu_kizai_head_id: juchuKizaiHeadId,
+    juchu_kizai_head_id: d.juchuKizaiHeadId,
     sagyo_kbn_id: sagyoKbnId,
     sagyo_den_dat: sagyoDenDat,
     sagyo_id: sagyoId,
     kizai_id: kizaiId,
-    result_adj_qty: resultAdjQty,
+    result_adj_qty: adjQty[i],
     upd_dat: toJapanTimeString(),
     upd_user: userNam,
-  };
+  }));
   try {
-    const { error } = await updateResultAdjQty(updateData);
-    if (error) {
-      console.error('updResultAdjQty error : ', error);
-      return false;
+    await connection.query('BEGIN');
+    for (const data of updateData) {
+      await updateResultAdjQty(data, connection);
     }
+    await connection.query('COMMIT');
 
     revalidatePath(`shuko-list/shuko-detail/${juchuHeadId}/${sagyoId}/${sagyoDenDat}/${sagyoKbnId}`);
     return true;
   } catch (e) {
     console.error(e);
+    await connection.query('ROLLBACK');
     return false;
+  } finally {
+    connection.release();
   }
 };
