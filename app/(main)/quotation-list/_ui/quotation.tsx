@@ -30,6 +30,7 @@ import { FormDateX } from '@/app/(main)/_ui/date';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { LoadingOverlay } from '@/app/(main)/_ui/loading';
 
+import { usePdf } from '../_lib/hooks/usePdf';
 import { JuchuValues, QuotHeadSchema, QuotHeadValues } from '../_lib/types';
 import { addQuot } from '../create/_lib/funcs';
 import { updateQuot } from '../edit/[id]/_lib/funcs';
@@ -190,6 +191,36 @@ export const Quotation = ({
     }
   }, [errors]);
 
+  /* print pdf ------------------------------------------------------------ */
+
+  // PDF出力用のモデル
+  const [pdfModel, setPdfModel] = useState(quot);
+  // PDFデータ生成フック
+  const [printQuotation] = usePdf();
+
+  // ボタン押下
+  const hundlePrintPdf = async () => {
+    // PDFデータ生成
+    const blob = await printQuotation(pdfModel);
+    // ダウンロードもしくはブラウザ表示するためのURL
+    const url = URL.createObjectURL(blob);
+
+    // ダウンロードの場合
+    // const a = document.createElement('a');
+    // a.download = 'data.pdf';
+    // a.href = url;
+    // a.click();
+
+    // 別タブ表示の場合
+    window.open(url);
+  };
+
+  useEffect(() => {
+    setPdfModel(quot);
+  }, [quot]); // <- 変更の契機
+
+  /* ---------------------------------------------------------------------- */
+
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
       <Box justifySelf={'end'} mb={0.5}>
@@ -201,7 +232,7 @@ export const Quotation = ({
             <Grid2 container display="flex" alignItems="center" justifyContent="space-between" p={1}>
               <Typography margin={1}>見積書</Typography>
               <Box>
-                <Button sx={{ margin: 1 }} disabled={isNew || isDirty}>
+                <Button sx={{ margin: 1 }} onClick={hundlePrintPdf} disabled={isNew || isDirty}>
                   見積書印刷
                 </Button>
                 <Button sx={{ margin: 1 }} type="submit">
@@ -539,10 +570,10 @@ export const Quotation = ({
                   <Grid2 size={1} />
                 </Grid2>
               </Box>
-              {/* 人権費テーブル ------------------------------------------------------------ */}
+              {/* 人件費テーブル ------------------------------------------------------------ */}
               <Box margin={0.5} padding={0.8} borderTop={1} borderBottom={1} borderColor={'divider'}>
                 <Typography variant="h6" pt={1} pl={2}>
-                  人権費
+                  人件費
                 </Typography>
                 {laborFields.fields.map((field, index) => (
                   <Box key={field.id} p={1}>

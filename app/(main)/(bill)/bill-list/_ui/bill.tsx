@@ -31,6 +31,7 @@ import { FormDateX } from '@/app/(main)/_ui/date';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { LoadingOverlay } from '@/app/(main)/_ui/loading';
 
+import { usePdf } from '../_lib/hooks/usePdf';
 import { BillHeadSchema, BillHeadValues } from '../_lib/types';
 import { addBill } from '../create/_lib/funcs';
 import { updateBill } from '../edit/[id]/_lib/funcs';
@@ -135,6 +136,36 @@ export const Bill = ({
   }, [user]);
   /* eslint-enable react-hooks/exhaustive-deps */
 
+  /* print pdf ------------------------------------------------------------ */
+
+  // PDF出力用のモデル
+  const [pdfModel, setPdfModel] = useState(bill);
+  // PDFデータ生成フック
+  const [printBill] = usePdf();
+
+  // ボタン押下
+  const hundlePrintPdf = async () => {
+    // PDFデータ生成
+    const blob = await printBill(pdfModel);
+    // ダウンロードもしくはブラウザ表示するためのURL
+    const url = URL.createObjectURL(blob);
+
+    // ダウンロードの場合
+    // const a = document.createElement('a');
+    // a.download = 'data.pdf';
+    // a.href = url;
+    // a.click();
+
+    // 別タブ表示の場合
+    window.open(url);
+  };
+
+  useEffect(() => {
+    setPdfModel(bill);
+  }, [bill]); // <- 変更の契機
+
+  /* ---------------------------------------------------------------------- */
+
   // 見積全体計算
   useEffect(() => {
     const chukei = (meisaiHeads ?? []).reduce((acc, item) => acc + (item?.nebikiAftAmt ?? 0), 0);
@@ -175,7 +206,7 @@ export const Bill = ({
               <Grid2 container display="flex" alignItems="center" justifyContent="space-between" p={1}>
                 <Typography margin={1}>請求書</Typography>
                 <Box>
-                  <Button sx={{ margin: 1 }} disabled={isNew || isDirty}>
+                  <Button sx={{ margin: 1 }} onClick={hundlePrintPdf} disabled={isNew || isDirty}>
                     請求書印刷
                   </Button>
                   <Button sx={{ margin: 1 }} type="submit">
