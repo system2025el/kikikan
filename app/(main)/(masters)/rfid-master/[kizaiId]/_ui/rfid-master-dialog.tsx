@@ -101,7 +101,6 @@ export const RfidMasterDialog = ({
     } else {
       // 更新
       const elNumResult = await selectElNumExists(data.elNum);
-      console.log('元のえｌぬｍ', currentRfid.elNum, 'もとのえｌぬｍ', data.elNum);
       if (elNumResult.data && currentRfid.elNum !== data.elNum) {
         setElMessage('このEL No.は既に存在しています');
       }
