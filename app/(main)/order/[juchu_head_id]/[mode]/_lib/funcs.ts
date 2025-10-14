@@ -113,7 +113,7 @@ export const addJuchuHead = async (juchuHeadId: number, juchuHeadData: OrderValu
       console.error('Error adding new order:', error.message);
     } else {
       console.log('New order added successfully:', newData);
-      await revalidatePath('order-list');
+      await revalidatePath('/order-list');
     }
   } catch (e) {
     console.error('Exception while adding new order:', e);
@@ -153,7 +153,7 @@ export const updJuchuHead = async (data: OrderValues) => {
       return false;
     }
     console.log('Order updated successfully:', updateData);
-    await revalidatePath('order-list');
+    await revalidatePath('/order-list');
     return true;
   } catch (e) {
     console.error('Exception while updating order:', e);
