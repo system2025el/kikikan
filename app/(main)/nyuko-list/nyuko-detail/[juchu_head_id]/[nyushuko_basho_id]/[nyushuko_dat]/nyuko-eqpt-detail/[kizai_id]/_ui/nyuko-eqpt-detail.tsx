@@ -24,22 +24,23 @@ import { BackButton } from '@/app/(main)/_ui/buttons';
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { delNyukoResult, updNyukoResultAdjQty } from '../_lib/funcs';
-import { NyukoEqptDetailTableValues, NyukoEqptValues } from '../_lib/types';
+import { NyukoEqptDetailTableValues, NyukoEqptValues, NyukoKizaiDetailValues } from '../_lib/types';
 import { NyukoEqptDetailTable } from './nyuko-eqpt-detail-table';
 
 export const NyukoEqptDetail = (props: {
   params: {
     juchu_head_id: string;
-    juchu_kizai_head_ids: string;
     nyushuko_basho_id: string;
     nyushuko_dat: string;
     kizai_id: string;
-    plan_qty: string;
   };
   nyukoEqptDetailData: NyukoEqptDetailTableValues[];
   kizaiData: NyukoEqptValues;
+  kizaiDetailData: NyukoKizaiDetailValues[];
 }) => {
-  const { params, kizaiData } = props;
+  const { params, kizaiData, kizaiDetailData } = props;
+
+  console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', kizaiDetailData);
 
   // user情報
   const user = useUserStore((state) => state.user);
@@ -70,7 +71,7 @@ export const NyukoEqptDetail = (props: {
     mode: 'onChange',
     reValidateMode: 'onChange',
     defaultValues: {
-      resultAdjQty: props.nyukoEqptDetailData.length > 0 ? (props.nyukoEqptDetailData[0].resultAdjQty ?? 0) : 0,
+      resultAdjQty: kizaiDetailData.reduce((sum, row) => sum + (row.resultAdjQty ?? 0), 0),
     },
   });
 
@@ -80,11 +81,9 @@ export const NyukoEqptDetail = (props: {
    */
   const onSubmit = async (data: { resultAdjQty: number }) => {
     if (isDirty && user) {
-      console.log(data);
-      const juchuKizaiHeadIds = params.juchu_kizai_head_ids.split(',').map(Number);
       const updateResult = await updNyukoResultAdjQty(
+        kizaiDetailData,
         Number(params.juchu_head_id),
-        juchuKizaiHeadIds[juchuKizaiHeadIds.length - 1],
         30,
         decodeURIComponent(params.nyushuko_dat),
         Number(params.nyushuko_basho_id),
@@ -161,7 +160,7 @@ export const NyukoEqptDetail = (props: {
           </Grid2>
           <Grid2 container spacing={2} p={2}>
             <Typography>入庫予定数</Typography>
-            <Typography>{params.plan_qty}</Typography>
+            <Typography>{kizaiDetailData.reduce((sum, row) => sum + (row.planQty ?? 0), 0)}</Typography>
           </Grid2>
           <Grid2 container alignItems={'center'} spacing={5} p={1}>
             <Typography>全{nyukoEqptDetailList.length}件</Typography>

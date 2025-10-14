@@ -6,15 +6,24 @@ import { QueryResult } from 'pg';
 import pool from '@/app/_lib/db/postgres';
 import { selectOneEqpt } from '@/app/_lib/db/tables/m-kizai';
 import { deleteNyushukoCtnResult } from '@/app/_lib/db/tables/t-nyushuko-ctn-result';
-import { selectKizaiDetailHead, updateNyushukoDen, updateResultAdjQty } from '@/app/_lib/db/tables/t-nyushuko-den';
+import { selectKizaiDetail, updateNyushukoDen, updateResultAdjQty } from '@/app/_lib/db/tables/t-nyushuko-den';
 import { deleteNyushukoResult } from '@/app/_lib/db/tables/t-nyushuko-result';
 import { selectNyushukoEqptDetail } from '@/app/_lib/db/tables/v-nyushuko-den2-result';
 import { NyushukoDen } from '@/app/_lib/db/types/t-nyushuko-den-type';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
-import { KizaiDetailValues, ShukoEqptDetailTableValues, ShukoEqptValues } from './types';
+import { ShukoEqptDetailTableValues, ShukoEqptValues, ShukoKizaiDetailValues } from './types';
 
-export const getKizaiDetailHead = async (
+/**
+ * 出庫機材詳細取得
+ * @param juchuHeadId 受注ヘッダーid
+ * @param nyushukoBashoId 入出庫場所id
+ * @param sagyoDenDat 作業日時
+ * @param sagyoKbnId 作業区分id
+ * @param kizaiId 機材id
+ * @returns
+ */
+export const getShukoKizaiDetail = async (
   juchuHeadId: number,
   nyushukoBashoId: number,
   sagyoDenDat: string,
@@ -22,21 +31,21 @@ export const getKizaiDetailHead = async (
   kizaiId: number
 ) => {
   try {
-    const { data, error } = await selectKizaiDetailHead(juchuHeadId, nyushukoBashoId, sagyoDenDat, sagyoKbnId, kizaiId);
+    const { data, error } = await selectKizaiDetail(juchuHeadId, nyushukoBashoId, sagyoDenDat, sagyoKbnId, kizaiId);
 
     if (error) {
-      console.error('getKizaiDetailHead error : ', error);
+      console.error('getShukoKizaiDetail error : ', error);
       return [];
     }
 
-    const kizaiDetailHead: KizaiDetailValues[] = data.map((d) => ({
+    const shukoKizaiDetail: ShukoKizaiDetailValues[] = data.map((d) => ({
       juchuKizaiHeadId: d.juchu_kizai_head_id,
       planQty: d.plan_qty,
       resultQty: d.result_qty,
       resultAdjQty: d.result_adj_qty,
     }));
 
-    return kizaiDetailHead;
+    return shukoKizaiDetail;
   } catch (e) {
     console.error(e);
     return [];
@@ -214,7 +223,7 @@ export const delshukoResult = async (deleteData: ShukoEqptDetailTableValues[], u
  * @returns
  */
 export const updShukoResultAdjQty = async (
-  kizaiDetailData: KizaiDetailValues[],
+  kizaiDetailData: ShukoKizaiDetailValues[],
   juchuHeadId: number,
   sagyoKbnId: number,
   sagyoDenDat: string,

@@ -1,4 +1,4 @@
-export type KizaiDetailValues = {
+export type ShukoKizaiDetailValues = {
   juchuKizaiHeadId: number;
   planQty: number | null;
   resultQty: number | null;
