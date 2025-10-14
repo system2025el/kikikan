@@ -6,7 +6,14 @@ import pool from '@/app/_lib/db/postgres';
 import { SCHEMA, supabase } from '@/app/_lib/db/supabase';
 import { selectOneEqpt } from '@/app/_lib/db/tables/m-kizai';
 import { updateMasterUpdates } from '@/app/_lib/db/tables/m-master-update';
-import { selectOneRfid, selectRfidsOfTheKizai, updateRfidTagStsDB } from '@/app/_lib/db/tables/m-rfid';
+import {
+  insertNewRfid,
+  selectOneRfid,
+  selectRfidsOfTheKizai,
+  upDateRfidDB,
+  updateRfidTagStsDB,
+} from '@/app/_lib/db/tables/m-rfid';
+import { MRfidDBValues } from '@/app/_lib/db/types/m-rfid-type';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { nullToZero, zeroToNull } from '../../../_lib/value-converters';
@@ -62,9 +69,9 @@ export const getEqptNam = async (id: number): Promise<string> => {
 };
 
 /**
- * 選択された機材のデータを取得する関数
- * @param id 機材マスタID
- * @returns {Promise<RfidsMasterDialogValues | undefined>} 機材情報
+ * 選択されたRFIDのデータを取得する関数
+ * @param id RFIDマスタID
+ * @returns {Promise<RfidsMasterDialogValues | undefined>} RFID情報
  */
 export const getChosenRfid = async (id: string) => {
   try {
@@ -92,46 +99,60 @@ export const getChosenRfid = async (id: string) => {
   }
 };
 
-// /**
-//  * 機材マスタに新規登録する関数
-//  * @param data フォームで取得した機材情報
-//  */
-// export const addNewRfid = async (data: RfidsMasterDialogValues) => {
-//   console.log('機材マスタを追加する');
+/**
+ * RFIDマスタに新規登録する関数
+ * @param data フォームで取得したRFID情報
+ */
+export const addNewRfid = async (data: RfidsMasterDialogValues, kizaiId: number, user: string) => {
+  console.log('RFIDマスタを追加する');
+  const insertData: MRfidDBValues = {
+    kizai_id: kizaiId,
+    rfid_tag_id: data.tagId,
+    el_num: data.elNum,
+    shozoku_id: data.shozokuId,
+    mem: data.mem,
+    rfid_kizai_sts: data.rfidKizaiSts,
+    del_flg: 0,
+    add_dat: toJapanTimeString(),
+    add_user: user,
+  };
 
-//   try {
-//     await Promise.all([insertNewRfid(data), updateMasterUpdates('m_kizai')]);
-//     await revalidatePath('/rfid-master');
-//   } catch (error) {
-//     console.log('DB接続エラー', error);
-//     throw error;
-//   }
-// };
+  try {
+    await Promise.all([insertNewRfid(insertData), updateMasterUpdates('m_rfid')]);
+    await revalidatePath('/rfid-master');
+    await revalidatePath('/eqpt-master');
+  } catch (error) {
+    console.log('DB接続エラー', error);
+    throw error;
+  }
+};
 
-// /**
-//  * 機材マスタの情報を更新する関数
-//  * @param data フォームに入力されている情報
-//  * @param id 更新する機材マスタID
-//  */
-// export const updateRfid = async (rawData: RfidsMasterDialogValues, id: string) => {
-//   const date = toJapanTimeString();
-//   const updateData = {
-//     kizai_id: id,
-//     del_flg: Number(rawData.delFlg),
-//     shozoku_id: Number(rawData.shozokuId),
-//     mem: rawData.mem,
-//     upd_dat: date,
-//     upd_user: 'test_user',
-//   };
+/**
+ * RFIDマスタの情報を更新する関数
+ * @param data フォームに入力されている情報
+ * @param id 更新するRFIDマスタID
+ */
+export const updateRfid = async (data: RfidsMasterDialogValues, kizaiId: number, user: string) => {
+  const date = toJapanTimeString();
+  const updateData: MRfidDBValues = {
+    kizai_id: kizaiId,
+    rfid_tag_id: data.tagId,
+    del_flg: Number(data.delFlg),
+    shozoku_id: Number(data.shozokuId),
+    mem: data.mem,
+    upd_dat: date,
+    upd_user: user,
+  };
 
-//   try {
-//     await Promise.all([upDateRfidDB(updateData), updateMasterUpdates('m_kizai')]);
-//     await revalidatePath('/rfid-master');
-//   } catch (error) {
-//     console.log('例外が発生しました', error);
-//     throw error;
-//   }
-// };
+  try {
+    await Promise.all([upDateRfidDB(updateData), updateMasterUpdates('m_rfid')]);
+    await revalidatePath('/rfid-master');
+    await revalidatePath('/eqpt-master');
+  } catch (error) {
+    console.log('例外が発生しました', error);
+    throw error;
+  }
+};
 
 /**
  * RFIDマスタで一括変更されたステータスを更新する関数

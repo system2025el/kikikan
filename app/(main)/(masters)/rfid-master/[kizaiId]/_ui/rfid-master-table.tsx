@@ -29,6 +29,7 @@ import { FAKE_NEW_ID, ROWS_PER_MASTER_TABLE_PAGE } from '../../../_lib/constants
 import { LightTooltipWithText } from '../../../_ui/tables';
 import { getRfidsOfTheKizai } from '../_lib/funcs';
 import { RfidsMasterTableValues } from '../_lib/types';
+import { RfidMasterDialog } from './rfid-master-dialog';
 
 /** 機材マスタのテーブルコンポーネント */
 export const RfidMasterTable = ({
@@ -251,7 +252,12 @@ export const RfidMasterTable = ({
       )}
 
       <Dialog open={dialogOpen} fullScreen>
-        {/* <RfidMasterDialog handleClose={handleCloseDialog} rfidId={openId} refetchRfids={refetchRfids} /> */}
+        <RfidMasterDialog
+          handleClose={handleCloseDialog}
+          rfidId={openId}
+          refetchRfids={refetchRfids}
+          kizaiId={kizaiId}
+        />
       </Dialog>
     </Box>
   );
