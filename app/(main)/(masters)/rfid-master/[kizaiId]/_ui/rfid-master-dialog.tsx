@@ -11,6 +11,7 @@ import {
   useForm,
 } from 'react-hook-form-mui';
 
+import { selectElNumExists, selectOneRfid } from '@/app/_lib/db/tables/m-rfid';
 import { useUserStore } from '@/app/_lib/stores/usestore';
 
 import { FormBox, selectNone, SelectTypes } from '../../../../_ui/form-box';
@@ -55,6 +56,10 @@ export const RfidMasterDialog = ({
     shozoku: SelectTypes[];
     sts: SelectTypes[];
   }>({ shozoku: [], sts: [] });
+  /*  */
+  const [tagMessage, setTagMessage] = useState<string>('');
+  /*  */
+  const [elMessage, setElMessage] = useState<string>('');
 
   /* useForm ------------------------- */
   const {
@@ -80,26 +85,43 @@ export const RfidMasterDialog = ({
     console.log('isDarty : ', isDirty);
     if (rfidId === String(FAKE_NEW_ID)) {
       // 新規登録
-      await addNewRfid(data, kizaiId, user?.name ?? '');
-      handleCloseDialog();
-      refetchRfids();
+      const [tagResult, elNumResult] = await Promise.all([selectOneRfid(data.tagId), selectElNumExists(data.elNum!)]);
+      console.log(tagResult, elMessage);
+      if (tagResult.data) {
+        setTagMessage('このRFIDはすでに存在しています');
+      }
+      if (elNumResult.data) {
+        setElMessage('このEL No.は既に存在しています');
+      }
+      if (!tagResult.data && !elNumResult.data) {
+        await addNewRfid(data, kizaiId, user?.name ?? '');
+        handleCloseDialog();
+        refetchRfids();
+      }
     } else {
       // 更新
-      if (action === 'save') {
-        // 保存終了ボタン
-        await updateRfid(data, kizaiId, user?.name ?? '');
-        handleCloseDialog();
-        refetchRfids();
-      } else if (action === 'delete') {
-        // 削除ボタン
-        setDeleteOpen(true);
-        return;
-      } else if (action === 'restore') {
-        // 有効化ボタン
-        const values = await getValues();
-        await updateRfid({ ...values, delFlg: false }, kizaiId, user?.name ?? '');
-        handleCloseDialog();
-        refetchRfids();
+      const elNumResult = await selectElNumExists(data.elNum);
+      console.log('元のえｌぬｍ', currentRfid.elNum, 'もとのえｌぬｍ', data.elNum);
+      if (elNumResult.data && currentRfid.elNum !== data.elNum) {
+        setElMessage('このEL No.は既に存在しています');
+      }
+      if (!elNumResult.data || currentRfid.elNum === data.elNum) {
+        if (action === 'save') {
+          // 保存終了ボタン
+          await updateRfid(data, kizaiId, user?.name ?? '');
+          handleCloseDialog();
+          refetchRfids();
+        } else if (action === 'delete') {
+          // 削除ボタン
+          setDeleteOpen(true);
+          return;
+        } else if (action === 'restore') {
+          // 有効化ボタン
+          const values = await getValues();
+          await updateRfid({ ...values, delFlg: false }, kizaiId, user?.name ?? '');
+          handleCloseDialog();
+          refetchRfids();
+        }
       }
     }
   };
@@ -184,11 +206,20 @@ export const RfidMasterDialog = ({
                     label={editable ? formItems[0].exsample : ''}
                     sx={{ width: 300 }}
                     disabled={editable ? false : true}
+                    error={!!tagMessage}
+                    helperText={tagMessage}
+                    slotProps={{
+                      formHelperText: {
+                        sx: (theme) => ({
+                          color: theme.palette.error.main,
+                        }),
+                      },
+                    }}
                   />
                 </FormBox>
               </Grid2>
               <Grid2>
-                <FormBox formItem={formItems[1]}>
+                <FormBox formItem={formItems[1]} required>
                   <TextFieldElement
                     name="elNum"
                     control={control}
@@ -205,11 +236,20 @@ export const RfidMasterDialog = ({
                     }}
                     disabled={editable ? false : true}
                     type="number"
+                    error={!!elMessage}
+                    helperText={elMessage}
+                    slotProps={{
+                      formHelperText: {
+                        sx: (theme) => ({
+                          color: theme.palette.error.main,
+                        }),
+                      },
+                    }}
                   />
                 </FormBox>
               </Grid2>
               <Grid2>
-                <FormBox formItem={formItems[2]}>
+                <FormBox formItem={formItems[2]} required>
                   <SelectElement
                     name="shozokuId"
                     control={control}
@@ -221,7 +261,7 @@ export const RfidMasterDialog = ({
                 </FormBox>
               </Grid2>
               <Grid2>
-                <FormBox formItem={formItems[3]}>
+                <FormBox formItem={formItems[3]} required>
                   <SelectElement
                     name="rfidKizaiSts"
                     control={control}
