@@ -84,7 +84,7 @@ export const getChosenRfid = async (id: string) => {
       return emptyRfid;
     }
     const RfidDetails: RfidsMasterDialogValues = {
-      elNum: data.el_num,
+      elNum: data.el_num ?? 0,
       delFlg: Boolean(data.del_flg),
       shozokuId: nullToZero(data.shozoku_id),
       mem: data.mem,
@@ -138,15 +138,16 @@ export const updateRfid = async (data: RfidsMasterDialogValues, kizaiId: number,
     kizai_id: kizaiId,
     rfid_tag_id: data.tagId,
     del_flg: Number(data.delFlg),
+    el_num: data.elNum,
     shozoku_id: Number(data.shozokuId),
     mem: data.mem,
     upd_dat: date,
     upd_user: user,
   };
-
+  console.log(updateData);
   try {
     await Promise.all([upDateRfidDB(updateData), updateMasterUpdates('m_rfid')]);
-    await revalidatePath('/rfid-master');
+    await revalidatePath(`/rfid-master/${kizaiId}`);
     await revalidatePath('/eqpt-master');
   } catch (error) {
     console.log('例外が発生しました', error);
