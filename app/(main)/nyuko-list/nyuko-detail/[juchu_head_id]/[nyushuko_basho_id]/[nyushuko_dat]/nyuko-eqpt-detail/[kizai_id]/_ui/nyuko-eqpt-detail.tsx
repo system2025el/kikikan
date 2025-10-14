@@ -40,8 +40,6 @@ export const NyukoEqptDetail = (props: {
 }) => {
   const { params, kizaiData, kizaiDetailData } = props;
 
-  console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', kizaiDetailData);
-
   // user情報
   const user = useUserStore((state) => state.user);
   // ローディング
