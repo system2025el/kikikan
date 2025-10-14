@@ -65,7 +65,7 @@ export const ShukoListTable = (props: {
                 <Button
                   variant="text"
                   size="small"
-                  href={`shuko-list/shuko-detail/${row.juchuHeadId}/${row.juchuKizaiHeadIdv}/${row.nyushukoBashoId}/${toJapanTimeString(row.nyushukoDat, '-')}/10`}
+                  href={`shuko-list/shuko-detail/${row.juchuHeadId}/${row.nyushukoBashoId}/${toJapanTimeString(row.nyushukoDat, '-')}/10`}
                 >
                   {row.sstbSagyoStsId === 0
                     ? 'ー'
@@ -80,7 +80,7 @@ export const ShukoListTable = (props: {
                 <Button
                   variant="text"
                   size="small"
-                  href={`shuko-list/shuko-detail/${row.juchuHeadId}/${row.juchuKizaiHeadIdv}/${row.nyushukoBashoId}/${toJapanTimeString(row.nyushukoDat, '-')}/20`}
+                  href={`shuko-list/shuko-detail/${row.juchuHeadId}/${row.nyushukoBashoId}/${toJapanTimeString(row.nyushukoDat, '-')}/20`}
                 >
                   {row.schkSagyoStsId === 0
                     ? 'ー'
