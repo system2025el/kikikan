@@ -213,3 +213,25 @@ export const updateResultAdjQty = async (data: NyushukoDen) => {
     throw e;
   }
 };
+
+export const selectKizaiDetailHead = async (
+  juchuHeadId: number,
+  nyushukoBashoId: number,
+  sagyoDenDat: string,
+  sagyoKbnId: number,
+  kizaiId: number
+) => {
+  try {
+    return await supabase
+      .schema(SCHEMA)
+      .from('t_nyushuko_den')
+      .select('juchu_kizai_head_id, plan_qty, result_qty, result_adj_qty')
+      .eq('juchu_head_id', juchuHeadId)
+      .eq('sagyo_kbn_id', sagyoKbnId)
+      .eq('sagyo_den_dat', sagyoDenDat)
+      .eq('sagyo_id', nyushukoBashoId)
+      .eq('kizai_id', kizaiId);
+  } catch (e) {
+    throw e;
+  }
+};

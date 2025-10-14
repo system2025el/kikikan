@@ -1,4 +1,4 @@
-import { getKizaiData, getShukoEqptDetail } from './_lib/funcs';
+import { getKizaiData, getKizaiDetailHead, getShukoEqptDetail } from './_lib/funcs';
 import { ShukoEqptDetail } from './_ui/shuko-eqpt-detail';
 
 const Page = async (props: {
@@ -29,6 +29,21 @@ const Page = async (props: {
     return <div>機材データが見つかりません</div>;
   }
 
-  return <ShukoEqptDetail params={params} shukoEqptDetailData={shukoEqptDetailData} kizaiData={kizaiData} />;
+  const kizaiDetailHead = await getKizaiDetailHead(
+    Number(params.juchu_head_id),
+    Number(params.nyushuko_basho_id),
+    date,
+    Number(params.sagyo_kbn_id),
+    Number(params.kizai_id)
+  );
+
+  return (
+    <ShukoEqptDetail
+      params={params}
+      shukoEqptDetailData={shukoEqptDetailData}
+      kizaiData={kizaiData}
+      kizaiDetailHead={kizaiDetailHead}
+    />
+  );
 };
 export default Page;

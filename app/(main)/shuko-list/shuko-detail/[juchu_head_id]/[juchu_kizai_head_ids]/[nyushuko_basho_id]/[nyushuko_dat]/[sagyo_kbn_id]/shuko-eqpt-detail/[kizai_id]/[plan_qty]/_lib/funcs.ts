@@ -1,17 +1,47 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { QueryResult } from 'pg';
 
 import pool from '@/app/_lib/db/postgres';
 import { selectOneEqpt } from '@/app/_lib/db/tables/m-kizai';
 import { deleteNyushukoCtnResult } from '@/app/_lib/db/tables/t-nyushuko-ctn-result';
-import { updateNyushukoDen, updateResultAdjQty } from '@/app/_lib/db/tables/t-nyushuko-den';
+import { selectKizaiDetailHead, updateNyushukoDen, updateResultAdjQty } from '@/app/_lib/db/tables/t-nyushuko-den';
 import { deleteNyushukoResult } from '@/app/_lib/db/tables/t-nyushuko-result';
 import { selectNyushukoEqptDetail } from '@/app/_lib/db/tables/v-nyushuko-den2-result';
 import { NyushukoDen } from '@/app/_lib/db/types/t-nyushuko-den-type';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
-import { ShukoEqptDetailTableValues, ShukoEqptValues } from './types';
+import { KizaiDetailHeadValues, ShukoEqptDetailTableValues, ShukoEqptValues } from './types';
+
+export const getKizaiDetailHead = async (
+  juchuHeadId: number,
+  nyushukoBashoId: number,
+  sagyoDenDat: string,
+  sagyoKbnId: number,
+  kizaiId: number
+) => {
+  try {
+    const { data, error } = await selectKizaiDetailHead(juchuHeadId, nyushukoBashoId, sagyoDenDat, sagyoKbnId, kizaiId);
+
+    if (error) {
+      console.error('getKizaiDetailHead error : ', error);
+      return [];
+    }
+
+    const kizaiDetailHead: KizaiDetailHeadValues[] = data.map((d) => ({
+      juchuKizaiHeadId: d.juchu_kizai_head_id,
+      planQty: d.plan_qty,
+      resultQty: d.result_qty,
+      resultAdjQty: d.result_adj_qty,
+    }));
+
+    return kizaiDetailHead;
+  } catch (e) {
+    console.error(e);
+    return [];
+  }
+};
 
 /**
  * 出庫読取実績データ取得

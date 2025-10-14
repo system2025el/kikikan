@@ -24,7 +24,7 @@ import { BackButton } from '@/app/(main)/_ui/buttons';
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { delshukoResult, updShukoResultAdjQty } from '../_lib/funcs';
-import { ShukoEqptDetailTableValues, ShukoEqptValues } from '../_lib/types';
+import { KizaiDetailHeadValues, ShukoEqptDetailTableValues, ShukoEqptValues } from '../_lib/types';
 import { ShukoEqptDetailTable } from './shuko-eqpt-detail-table';
 
 export const ShukoEqptDetail = (props: {
@@ -39,6 +39,7 @@ export const ShukoEqptDetail = (props: {
   };
   shukoEqptDetailData: ShukoEqptDetailTableValues[];
   kizaiData: ShukoEqptValues;
+  kizaiDetailHead: KizaiDetailHeadValues[];
 }) => {
   const { params, kizaiData } = props;
 
