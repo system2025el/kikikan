@@ -100,13 +100,41 @@ export const QuotationList = ({
                   <Typography noWrap mr={7}>
                     見積番号
                   </Typography>
-                  <TextFieldElement name="mituId" control={control} type="number" sx={{ width: 120 }} />
+                  <TextFieldElement
+                    name="mituId"
+                    control={control}
+                    type="number"
+                    sx={{
+                      width: 120,
+                      '& .MuiInputBase-input': {
+                        textAlign: 'right',
+                      },
+                      '& input[type=number]::-webkit-inner-spin-button': {
+                        WebkitAppearance: 'none',
+                        margin: 0,
+                      },
+                    }}
+                  />
                 </Grid2>
                 <Grid2 size={{ sm: 12, md: 6 }} sx={styles.container}>
                   <Typography noWrap mr={5}>
                     受注番号
                   </Typography>
-                  <TextFieldElement name="juchuId" control={control} type="number" sx={{ width: 120 }} />
+                  <TextFieldElement
+                    name="juchuId"
+                    control={control}
+                    type="number"
+                    sx={{
+                      width: 120,
+                      '& .MuiInputBase-input': {
+                        textAlign: 'right',
+                      },
+                      '& input[type=number]::-webkit-inner-spin-button': {
+                        WebkitAppearance: 'none',
+                        margin: 0,
+                      },
+                    }}
+                  />
                 </Grid2>
               </Grid2>
               <Grid2 sx={styles.container}>
