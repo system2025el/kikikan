@@ -17,6 +17,19 @@ export type QuotTableValues = {
 };
 
 /**
+ * 見積一覧検索のタイプ
+ */
+export type QuotSearchValues = {
+  mituId: number | null;
+  juchuId: number | null;
+  mituSts: number | null;
+  mituHeadNam: string | null;
+  kokyaku: string | null;
+  mituDat: { strt: Date | null; end: Date | null };
+  nyuryokuUser: string | null;
+};
+
+/**
  * 見積書画面に表示する受注のタイプ
  */
 export type JuchuValues = {

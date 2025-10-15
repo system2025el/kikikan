@@ -87,3 +87,15 @@ export const selectChosenMitu = async (id: number) => {
     throw e;
   }
 };
+
+/**
+ * t_mitu_headのdel_flgを1にする関数
+ * @param {number[]}ids 見積ヘッダIDの配列
+ */
+export const updQuotHeadDelFlg = async (ids: number[]) => {
+  try {
+    await supabase.schema(SCHEMA).from('t_mitu_head').update({ del_flg: 1 }).in('mitu_head_id', ids);
+  } catch (e) {
+    throw e;
+  }
+};

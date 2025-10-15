@@ -6,12 +6,10 @@ import {
   Button,
   Container,
   Divider,
-  FormControl,
   Grid2,
   MenuItem,
   Paper,
   Select,
-  Stack,
   TextField,
   Typography,
 } from '@mui/material';
@@ -19,18 +17,16 @@ import { grey } from '@mui/material/colors';
 import { useEffect, useState } from 'react';
 import { Controller, TextFieldElement, useForm } from 'react-hook-form-mui';
 
-import { FormDateX, TwoDatePickers } from '../../_ui/date';
+import { FormDateX } from '../../_ui/date';
 import { selectNone, SelectTypes } from '../../_ui/form-box';
 import { FAKE_NEW_ID } from '../../(masters)/_lib/constants';
 import { getFilteredQuotList } from '../_lib/funcs';
-import { QuotTableValues } from '../_lib/types';
+import { QuotSearchValues, QuotTableValues } from '../_lib/types';
 import { QuotationListTable } from './quotation-list-table';
 
 export const QuotationList = ({
-  quots,
   options,
 }: {
-  quots: QuotTableValues[];
   options: {
     sts: SelectTypes[];
     custs: SelectTypes[];
@@ -39,14 +35,27 @@ export const QuotationList = ({
 }) => {
   /* useState -------------------------------------------- */
   /* 受注一覧 */
-  const [quotList, setQuotList] = useState<QuotTableValues[]>(quots ?? []);
+  const [quotList, setQuotList] = useState<QuotTableValues[]>([]);
   /* テーブルのページ */
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState<number>(1);
   /* ローディングかどうか */
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  /* 検索条件の保持 */
+  const [queries, setQueries] = useState<QuotSearchValues>({
+    mituId: null,
+    juchuId: null,
+    mituSts: FAKE_NEW_ID,
+    mituHeadNam: null,
+    kokyaku: null,
+    mituDat: {
+      strt: null,
+      end: null,
+    },
+    nyuryokuUser: null,
+  });
 
   /* useForm ------------------------------------------- */
-  const { control, handleSubmit } = useForm({
+  const { control, handleSubmit } = useForm<QuotSearchValues>({
     mode: 'onSubmit',
     defaultValues: {
       mituId: null,
@@ -60,30 +69,24 @@ export const QuotationList = ({
   });
 
   /* methods ------------------------------------------ */
-  /* */
-  const onSubmit = async (data: {
-    mituId: number | null;
-    juchuId: number | null;
-    mituSts: number | null;
-    mituHeadNam: string | null;
-    kokyaku: string | null;
-    mituDat: { strt: Date | null; end: Date | null };
-    nyuryokuUser: string | null;
-  }) => {
+  /* 検索ボタン押下時処理 */
+  const onSubmit = async (data: QuotSearchValues) => {
+    console.log(data);
     setIsLoading(true);
     setPage(1);
-    const orders = await getFilteredQuotList(data);
-    if (orders) {
-      setQuotList(orders);
+    const q = await getFilteredQuotList(data);
+    if (q) {
+      setQuotList(q);
       setIsLoading(false);
     }
+    setQueries(data);
     setIsLoading(false);
   };
 
   /* useEffect --------------------------------------- */
-  useEffect(() => {
-    setIsLoading(false);
-  }, []);
+  // useEffect(() => {
+  //   setIsLoading(false);
+  // }, []);
 
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
@@ -243,6 +246,7 @@ export const QuotationList = ({
         quots={quotList}
         isLoading={isLoading}
         page={page}
+        queries={queries}
         setIsLoading={setIsLoading}
         setPage={setPage}
       />
