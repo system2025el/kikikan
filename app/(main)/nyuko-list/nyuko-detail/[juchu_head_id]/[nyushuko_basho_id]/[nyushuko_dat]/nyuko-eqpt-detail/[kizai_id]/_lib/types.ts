@@ -1,3 +1,10 @@
+export type NyukoKizaiDetailValues = {
+  juchuKizaiHeadId: number;
+  planQty: number | null;
+  resultQty: number | null;
+  resultAdjQty: number | null;
+};
+
 export type NyukoEqptDetailTableValues = {
   bldCod: string | null;
   ctnFlg: number | null;

@@ -1,41 +1,88 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { QueryResult } from 'pg';
 
 import pool from '@/app/_lib/db/postgres';
 import { selectOneEqpt } from '@/app/_lib/db/tables/m-kizai';
 import { deleteNyushukoCtnResult } from '@/app/_lib/db/tables/t-nyushuko-ctn-result';
-import { updateNyushukoDen, updateResultAdjQty } from '@/app/_lib/db/tables/t-nyushuko-den';
+import { selectKizaiDetail, updateNyushukoDen, updateResultAdjQty } from '@/app/_lib/db/tables/t-nyushuko-den';
 import { deleteNyushukoResult } from '@/app/_lib/db/tables/t-nyushuko-result';
 import { selectNyushukoEqptDetail } from '@/app/_lib/db/tables/v-nyushuko-den2-result';
 import { NyushukoDen } from '@/app/_lib/db/types/t-nyushuko-den-type';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
-import { NyukoEqptDetailTableValues, NyukoEqptValues } from './types';
+import { ShukoEqptDetailTableValues, ShukoEqptValues, ShukoKizaiDetailValues } from './types';
 
 /**
- * 入庫読取実績データ取得
+ * 出庫機材詳細取得
  * @param juchuHeadId 受注ヘッダーid
  * @param nyushukoBashoId 入出庫場所id
- * @param nyushukoDat 入出庫日
+ * @param sagyoDenDat 作業日時
+ * @param sagyoKbnId 作業区分id
  * @param kizaiId 機材id
  * @returns
  */
-export const getNyukoEqptDetail = async (
+export const getShukoKizaiDetail = async (
   juchuHeadId: number,
   nyushukoBashoId: number,
-  nyushukoDat: string,
+  sagyoDenDat: string,
+  sagyoKbnId: number,
   kizaiId: number
 ) => {
   try {
-    const { data, error } = await selectNyushukoEqptDetail(juchuHeadId, nyushukoBashoId, nyushukoDat, 30, kizaiId);
+    const { data, error } = await selectKizaiDetail(juchuHeadId, nyushukoBashoId, sagyoDenDat, sagyoKbnId, kizaiId);
+
+    if (error) {
+      console.error('getShukoKizaiDetail error : ', error);
+      return [];
+    }
+
+    const shukoKizaiDetail: ShukoKizaiDetailValues[] = data.map((d) => ({
+      juchuKizaiHeadId: d.juchu_kizai_head_id,
+      planQty: d.plan_qty,
+      resultQty: d.result_qty,
+      resultAdjQty: d.result_adj_qty,
+    }));
+
+    return shukoKizaiDetail;
+  } catch (e) {
+    console.error(e);
+    return [];
+  }
+};
+
+/**
+ * 出庫読取実績データ取得
+ * @param juchuHeadId 受注ヘッダーid
+ * @param nyushukoBashoId 入出庫場所id
+ * @param nyushukoDat 入出庫日
+ * @param sagyoKbnId 作業区分id
+ * @param kizaiId 機材id
+ * @returns
+ */
+export const getShukoEqptDetail = async (
+  juchuHeadId: number,
+  nyushukoBashoId: number,
+  nyushukoDat: string,
+  sagyoKbnId: number,
+  kizaiId: number
+) => {
+  try {
+    const { data, error } = await selectNyushukoEqptDetail(
+      juchuHeadId,
+      nyushukoBashoId,
+      nyushukoDat,
+      sagyoKbnId,
+      kizaiId
+    );
 
     if (error) {
       console.error('getShukoEqptDetail error : ', error);
       return [];
     }
 
-    const nyukoEqptDetailData: NyukoEqptDetailTableValues[] = data.map((d) => ({
+    const shukoEqptDetailData: ShukoEqptDetailTableValues[] = data.map((d) => ({
       bldCod: d.bld_cod,
       ctnFlg: d.ctn_flg,
       edaCod: d.eda_cod,
@@ -66,7 +113,7 @@ export const getNyukoEqptDetail = async (
       tanaCod: d.tana_cod,
     }));
 
-    return nyukoEqptDetailData;
+    return shukoEqptDetailData;
   } catch (e) {
     console.error(e);
     return [];
@@ -74,7 +121,7 @@ export const getNyukoEqptDetail = async (
 };
 
 /**
- * 入庫機材データ取得
+ * 出庫機材データ取得
  * @param kizaiId 機材id
  * @returns 機材データ
  */
@@ -87,7 +134,7 @@ export const getKizaiData = async (kizaiId: number) => {
       return null;
     }
 
-    const kizaiData: NyukoEqptValues = {
+    const kizaiData: ShukoEqptValues = {
       kizaiId: data.kizai_id,
       kizaiNam: data.kizai_nam,
       bldCod: data.bld_cod,
@@ -110,7 +157,7 @@ export const getKizaiData = async (kizaiId: number) => {
  * @param userNam ユーザー名
  * @returns
  */
-export const delNyukoResult = async (deleteData: NyukoEqptDetailTableValues[], userNam: string) => {
+export const delshukoResult = async (deleteData: ShukoEqptDetailTableValues[], userNam: string) => {
   const connection = await pool.connect();
 
   const deleteTagIds = deleteData.map((d) => d.rfidTagId).filter((id): id is string => id !== null);
@@ -157,7 +204,7 @@ export const delNyukoResult = async (deleteData: NyukoEqptDetailTableValues[], u
 
     await await connection.query('COMMIT');
     revalidatePath(
-      `nyuko-list/nyuko-detail/${deleteData[0].juchuHeadId!}/${deleteData[0].nyushukoBashoId!}/${deleteData[0].nyushukoDat!}`
+      `shuko-list/shuko-detail/${deleteData[0].juchuHeadId!}/${deleteData[0].nyushukoBashoId!}/${deleteData[0].nyushukoDat!}/${deleteData[0].sagyoKbnId!}`
     );
     return true;
   } catch (e) {
@@ -175,9 +222,9 @@ export const delNyukoResult = async (deleteData: NyukoEqptDetailTableValues[], u
  * @param userNam ユーザー名
  * @returns
  */
-export const updNyukoResultAdjQty = async (
+export const updShukoResultAdjQty = async (
+  kizaiDetailData: ShukoKizaiDetailValues[],
   juchuHeadId: number,
-  juchuKizaiHeadId: number,
   sagyoKbnId: number,
   sagyoDenDat: string,
   sagyoId: number,
@@ -185,28 +232,53 @@ export const updNyukoResultAdjQty = async (
   resultAdjQty: number,
   userNam: string
 ) => {
-  const updateData: NyushukoDen = {
+  const connection = await pool.connect();
+
+  const adjQty: number[] = [];
+
+  if (kizaiDetailData.length === 1) {
+    adjQty.push(resultAdjQty);
+  } else {
+    let remainingAdjQty = resultAdjQty;
+    for (let i = 0; i < kizaiDetailData.length - 1; i++) {
+      const possibleAdjQty = (kizaiDetailData[i].planQty ?? 0) - (kizaiDetailData[i].resultQty ?? 0);
+      const assignAdjQty =
+        possibleAdjQty > 0 && possibleAdjQty <= remainingAdjQty
+          ? possibleAdjQty
+          : possibleAdjQty > 0 && possibleAdjQty >= remainingAdjQty
+            ? remainingAdjQty
+            : 0;
+      adjQty.push(assignAdjQty);
+      remainingAdjQty = remainingAdjQty - assignAdjQty >= 0 ? remainingAdjQty - assignAdjQty : 0;
+    }
+    adjQty.push(remainingAdjQty);
+  }
+
+  const updateData: NyushukoDen[] = kizaiDetailData.map((d, i) => ({
     juchu_head_id: juchuHeadId,
-    juchu_kizai_head_id: juchuKizaiHeadId,
+    juchu_kizai_head_id: d.juchuKizaiHeadId,
     sagyo_kbn_id: sagyoKbnId,
     sagyo_den_dat: sagyoDenDat,
     sagyo_id: sagyoId,
     kizai_id: kizaiId,
-    result_adj_qty: resultAdjQty,
+    result_adj_qty: adjQty[i],
     upd_dat: toJapanTimeString(),
     upd_user: userNam,
-  };
+  }));
   try {
-    const { error } = await updateResultAdjQty(updateData);
-    if (error) {
-      console.error('updResultAdjQty error : ', error);
-      return false;
+    await connection.query('BEGIN');
+    for (const data of updateData) {
+      await updateResultAdjQty(data, connection);
     }
+    await connection.query('COMMIT');
 
-    revalidatePath(`nyuko-list/nyuko-detail/${juchuHeadId}/${sagyoId}/${sagyoDenDat}`);
+    revalidatePath(`shuko-list/shuko-detail/${juchuHeadId}/${sagyoId}/${sagyoDenDat}/${sagyoKbnId}`);
     return true;
   } catch (e) {
     console.error(e);
+    await connection.query('ROLLBACK');
     return false;
+  } finally {
+    connection.release();
   }
 };

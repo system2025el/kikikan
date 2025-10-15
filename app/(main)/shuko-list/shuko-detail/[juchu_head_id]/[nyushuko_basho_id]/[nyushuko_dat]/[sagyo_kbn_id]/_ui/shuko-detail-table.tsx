@@ -14,8 +14,7 @@ export const ShukoDetailTable = (props: { datas: ShukoDetailTableValues[] }) => 
 
   const handleClick = (kizaiId: number | null) => {
     if (kizaiId) {
-      const planQty = datas.find((d) => d.kizaiId === kizaiId)?.planQty;
-      router.push(`${path}/shuko-eqpt-detail/${kizaiId}/${planQty}`);
+      router.push(`${path}/shuko-eqpt-detail/${kizaiId}`);
     }
   };
 

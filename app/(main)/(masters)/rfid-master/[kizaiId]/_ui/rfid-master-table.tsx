@@ -215,7 +215,7 @@ export const RfidMasterTable = ({
                           variant="text"
                           size="small"
                           sx={{ py: 0.2, px: 0, m: 0, minWidth: 0 }}
-                          onClick={() => {}}
+                          onClick={() => handleOpenDialog(row.rfidTagId)}
                         >
                           <Box minWidth={60}>{row.rfidTagId}</Box>
                         </Button>

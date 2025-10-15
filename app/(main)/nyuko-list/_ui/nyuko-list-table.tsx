@@ -35,11 +35,10 @@ export const NyukoListTable = (props: { datas: NyukoTableValues[] }) => {
               <TableCell align="left">{row.kokyakuNam}</TableCell>
               <TableCell align="left">{row.sectionNamv}</TableCell>
               <TableCell align="center">
-                {/* {row.nchkSagyoStsId ? ( */}
                 <Button
                   variant="text"
                   size="small"
-                  href={`nyuko-list/nyuko-detail/${row.juchuHeadId}/${row.juchuKizaiHeadIdv}/${row.nyushukoBashoId}/${toJapanTimeString(row.nyushukoDat, '-')}`}
+                  href={`nyuko-list/nyuko-detail/${row.juchuHeadId}/${row.nyushukoBashoId}/${toJapanTimeString(row.nyushukoDat, '-')}`}
                 >
                   {row.nchkSagyoStsId === 0
                     ? 'ー'
@@ -49,9 +48,6 @@ export const NyukoListTable = (props: { datas: NyukoTableValues[] }) => {
                         ? '〇'
                         : ''}
                 </Button>
-                {/* ) : (
-                  ''
-                )} */}
               </TableCell>
             </TableRow>
           ))}

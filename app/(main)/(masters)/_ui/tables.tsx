@@ -312,8 +312,9 @@ export const LightTooltipWithText = ({
         sx={{
           overflow: 'hidden',
           textOverflow: 'ellipsis',
-          display: 'inline-block',
+          display: 'inline-flex',
           verticalAlign: 'middle',
+          alignItems: 'center',
         }}
       >
         {children}
@@ -329,8 +330,9 @@ export const LightTooltipWithText = ({
       sx={{
         overflow: 'hidden',
         textOverflow: 'ellipsis',
-        display: 'inline-block',
+        display: 'inline-flex',
         verticalAlign: 'middle',
+        alignItems: 'center',
       }}
     >
       {children}

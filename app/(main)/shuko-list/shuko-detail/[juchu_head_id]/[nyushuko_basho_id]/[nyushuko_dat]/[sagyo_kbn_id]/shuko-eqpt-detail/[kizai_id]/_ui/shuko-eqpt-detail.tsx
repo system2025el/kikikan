@@ -24,23 +24,22 @@ import { BackButton } from '@/app/(main)/_ui/buttons';
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { delshukoResult, updShukoResultAdjQty } from '../_lib/funcs';
-import { ShukoEqptDetailTableValues, ShukoEqptValues } from '../_lib/types';
+import { ShukoEqptDetailTableValues, ShukoEqptValues, ShukoKizaiDetailValues } from '../_lib/types';
 import { ShukoEqptDetailTable } from './shuko-eqpt-detail-table';
 
 export const ShukoEqptDetail = (props: {
   params: {
     juchu_head_id: string;
-    juchu_kizai_head_ids: string;
     nyushuko_basho_id: string;
     nyushuko_dat: string;
     sagyo_kbn_id: string;
     kizai_id: string;
-    plan_qty: string;
   };
   shukoEqptDetailData: ShukoEqptDetailTableValues[];
   kizaiData: ShukoEqptValues;
+  kizaiDetailData: ShukoKizaiDetailValues[];
 }) => {
-  const { params, kizaiData } = props;
+  const { params, kizaiData, kizaiDetailData } = props;
 
   // user情報
   const user = useUserStore((state) => state.user);
@@ -71,7 +70,7 @@ export const ShukoEqptDetail = (props: {
     mode: 'onChange',
     reValidateMode: 'onChange',
     defaultValues: {
-      resultAdjQty: props.shukoEqptDetailData.length > 0 ? (props.shukoEqptDetailData[0].resultAdjQty ?? 0) : 0,
+      resultAdjQty: kizaiDetailData.reduce((sum, row) => sum + (row.resultAdjQty ?? 0), 0),
     },
   });
 
@@ -96,10 +95,9 @@ export const ShukoEqptDetail = (props: {
   const onSubmit = async (data: { resultAdjQty: number }) => {
     if (isDirty && user) {
       console.log(data);
-      const juchuKizaiHeadIds = params.juchu_kizai_head_ids.split(',').map(Number);
       const updateResult = await updShukoResultAdjQty(
+        kizaiDetailData,
         Number(params.juchu_head_id),
-        juchuKizaiHeadIds[juchuKizaiHeadIds.length - 1],
         Number(params.sagyo_kbn_id),
         decodeURIComponent(params.nyushuko_dat),
         Number(params.nyushuko_basho_id),
@@ -180,7 +178,7 @@ export const ShukoEqptDetail = (props: {
           </Grid2>
           <Grid2 container spacing={2} p={2}>
             <Typography>出庫予定数</Typography>
-            <Typography>{params.plan_qty}</Typography>
+            <Typography>{kizaiDetailData.reduce((sum, row) => sum + (row.planQty ?? 0), 0)}</Typography>
           </Grid2>
           <Grid2 container alignItems={'center'} spacing={5} p={1}>
             <Typography>全{shukoEqptDetailList.length}件</Typography>
@@ -197,7 +195,7 @@ export const ShukoEqptDetail = (props: {
                     {...field}
                     type="number"
                     onChange={(e) => {
-                      if (/^-?\d*$/.test(e.target.value)) {
+                      if (/^\d*$/.test(e.target.value)) {
                         field.onChange(Number(e.target.value));
                       }
                     }}
