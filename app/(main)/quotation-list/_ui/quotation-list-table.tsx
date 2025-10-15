@@ -173,7 +173,10 @@ export const QuotationListTable = ({
             </Grid2>
             <Grid2 container spacing={1}>
               <Grid2>
-                <Button disabled={selectedIds.length !== 1}>
+                <Button
+                  onClick={() => router.push(`quotation-list/copy?mituId=${selectedIds[0]}`)}
+                  disabled={selectedIds.length !== 1}
+                >
                   <ContentCopyIcon fontSize="small" />
                   見積コピー
                 </Button>
@@ -305,7 +308,7 @@ export const QuotationListTable = ({
         <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
           <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
             <WarningIcon color="error" />
-            <Box>無効化</Box>
+            <Box>削除</Box>
           </DialogTitle>
           <DialogContentText m={2}>{selectedIds.length}件の見積が削除されます。</DialogContentText>
           <DialogActions>
