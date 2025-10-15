@@ -69,7 +69,11 @@ export const IdoEqptDetail = () => {
               <TextField value={'XXXXXXXXXXXXXXXXXXXX'} disabled />
             </Box>
           </Grid2>
-          <Grid2 container alignItems={'center'} spacing={5} px={1} pt={3} pb={1}>
+          <Grid2 container spacing={2} p={2}>
+            <Typography>移動予定数</Typography>
+            <Typography>{1}</Typography>
+          </Grid2>
+          <Grid2 container alignItems={'center'} spacing={5} p={1}>
             <Typography>全{'XX'}件</Typography>
             <Button color="error" /*onClick={handleDelete}*/>クリア</Button>
             <Box display={'flex'} alignItems={'center'}>
