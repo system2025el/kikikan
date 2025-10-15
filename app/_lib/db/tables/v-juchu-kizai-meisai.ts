@@ -1,5 +1,6 @@
 'use server';
 
+import pool from '../postgres';
 import { SCHEMA, supabase } from '../supabase';
 
 /**
@@ -85,6 +86,50 @@ export const selectReturnJuchuKizaiMeisai = async (juchuHeadId: number, juchuKiz
       .eq('juchu_head_id', juchuHeadId)
       .eq('juchu_kizai_head_id', juchuKizaiHeadId)
       .not('kizai_id', 'is', null);
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
+ * 納品書PDF用受注機材データ取得
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadIds 受注機材ヘッダーid
+ * @param nyushukoBashoId 入出庫場所id
+ * @returns
+ */
+export const selectPdfJuchuKizaiMeisai = async (
+  juchuHeadId: number,
+  juchuKizaiHeadIds: string,
+  nyushukoBashoId: number
+) => {
+  try {
+    await pool.query(` SET search_path TO ${SCHEMA};`);
+    return await pool.query(`
+      select 
+          v_juchu_kizai_meisai.kizai_id as "kizaiId"
+          ,v_juchu_kizai_meisai.kizai_nam as "kizaiNam"
+          
+          ,sum(coalesce( v_juchu_kizai_meisai.plan_kizai_qty,0)) + sum(coalesce(v_juchu_kizai_meisai.keep_qty,0)) as "planKizaiQty"
+          ,sum(coalesce(v_juchu_kizai_meisai.plan_yobi_qty,0)) as "planYobiQty"
+          ,sum(coalesce( v_juchu_kizai_meisai.plan_kizai_qty,0)) + sum(coalesce(v_juchu_kizai_meisai.keep_qty,0)) + sum(coalesce(v_juchu_kizai_meisai.plan_yobi_qty,0)) as "planQty"
+          
+      from 
+          v_juchu_kizai_meisai
+              
+      where
+          v_juchu_kizai_meisai.juchu_head_id = ${juchuHeadId}
+          and
+          v_juchu_kizai_meisai.juchu_kizai_head_id in (${juchuKizaiHeadIds})    --出庫明細から機材ヘッダーIDセット
+          and 
+          v_juchu_kizai_meisai.shozoku_id = ${nyushukoBashoId}  -- 入出庫場所
+          
+      group by
+          v_juchu_kizai_meisai.juchu_head_id
+          ,v_juchu_kizai_meisai.kizai_id
+          ,v_juchu_kizai_meisai.kizai_nam
+      ;
+    `);
   } catch (e) {
     throw e;
   }
