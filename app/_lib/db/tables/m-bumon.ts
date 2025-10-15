@@ -1,6 +1,7 @@
 'use server';
 
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
+import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 import { BumonsMasterDialogValues } from '@/app/(main)/(masters)/bumons-master/_lib/types';
 
 import pool from '../postgres';
@@ -30,7 +31,7 @@ export const selectActiveBumons = async () => {
  * @param {string} query 部門名, 大部門ID, 集計部門ID
  * @returns bumon_name, dai_bumon_id, shukei_bumon_idで検索された部門マスタの配列 検索無しなら全件
  */
-export const selectFilteredBumons = async (queries: { q: string; d: number; s: number }) => {
+export const selectFilteredBumons = async (queries: { q: string; d: number | null; s: number | null }) => {
   const builder = supabase
     .schema(SCHEMA)
     .from('m_bumon')
@@ -40,10 +41,10 @@ export const selectFilteredBumons = async (queries: { q: string; d: number; s: n
   if (queries.q && queries.q.trim() !== '') {
     builder.ilike('bumon_nam', `%${queries.q}%`);
   }
-  if (queries.d !== 0) {
+  if (queries.d !== null && queries.d !== FAKE_NEW_ID) {
     builder.eq('dai_bumon_id', queries.d);
   }
-  if (queries.s !== 0) {
+  if (queries.s !== null && queries.s !== FAKE_NEW_ID) {
     builder.eq('shukei_bumon_id', queries.s);
   }
   try {
@@ -91,7 +92,15 @@ export const insertNewBumon = async (data: BumonsMasterDialogValues) => {
   `;
 
   const date = toJapanTimeString();
-  const values = [data.bumonNam, Number(data.delFlg), data.daibumonId, data.shukeibumonId, data.mem, date, 'shigasan'];
+  const values = [
+    data.bumonNam,
+    Number(data.delFlg),
+    data.daibumonId === FAKE_NEW_ID ? null : data.daibumonId,
+    data.shukeibumonId === FAKE_NEW_ID ? null : data.shukeibumonId,
+    data.mem,
+    date,
+    'shigasan',
+  ];
 
   try {
     await pool.query(query, values);

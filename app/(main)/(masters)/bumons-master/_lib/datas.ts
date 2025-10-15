@@ -1,5 +1,6 @@
 import { FormItemsType } from '@/app/(main)/_ui/form-box';
 
+import { FAKE_NEW_ID } from '../../_lib/constants';
 import { BumonsMasterDialogValues, BumonsMasterTableValues } from './types';
 /* 部門マスタテーブルヘッダー */
 export const BumonsMHeader = [
@@ -40,8 +41,8 @@ export const emptyBumon: BumonsMasterDialogValues = {
   bumonNam: '',
   delFlg: false,
   mem: '',
-  daibumonId: 0,
-  shukeibumonId: 0,
+  daibumonId: FAKE_NEW_ID,
+  shukeibumonId: FAKE_NEW_ID,
 };
 
 /*モック削除delete */

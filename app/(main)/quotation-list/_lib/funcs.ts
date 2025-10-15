@@ -11,12 +11,14 @@ import { selectJuchuKizaiHeadList, selectJuchuKizaiHeadNamList } from '@/app/_li
 import { selectJuchu } from '@/app/_lib/db/tables/v-juchu-lst';
 import { selectKizaiHeadListForMitu } from '@/app/_lib/db/tables/v-mitu-kizai';
 import { selectKizaiHeadListWithIsshikiForMitu } from '@/app/_lib/db/tables/v-mitu-kizai-isshiki';
+import { selectFilteredQuot } from '@/app/_lib/db/tables/v-mitu-lst';
 import { MituHead } from '@/app/_lib/db/types/t-mitu-head-types';
 import { MituMeisaiHead } from '@/app/_lib/db/types/t-mitu-meisai-head-type';
 import { MituMeisai } from '@/app/_lib/db/types/t-mitu-meisai-type';
 import { toJapanDateString } from '@/app/(main)/_lib/date-conversion';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 
+import { FAKE_NEW_ID } from '../../(masters)/_lib/constants';
 import { JuchuValues, QuotHeadValues, QuotMeisaiHeadValues } from './types';
 
 /**
@@ -24,26 +26,64 @@ import { JuchuValues, QuotHeadValues, QuotMeisaiHeadValues } from './types';
  * @param queries
  * @returns 請求一覧に表示する配列
  */
-export const getFilteredQuotList = async (queries: string = '') => {
+export const getFilteredQuotList = async (
+  queries: {
+    mituId: number | null;
+    juchuId: number | null;
+    mituSts: number | null;
+    mituHeadNam: string | null;
+    kokyaku: string | null;
+    mituDat: { strt: Date | null; end: Date | null };
+    nyuryokuUser: string | null;
+  } = {
+    mituId: null,
+    juchuId: null,
+    mituSts: FAKE_NEW_ID,
+    mituHeadNam: null,
+    kokyaku: null,
+    mituDat: {
+      strt: null,
+      end: null,
+    },
+    nyuryokuUser: null,
+  }
+) => {
   try {
-    const data = await pool.query(`
-        SELECT
-            mitu_head_id as "mituHeadId",
-            juchu_head_id as "juchuHeadId",
-            sts_nam as "mituStsNam",
-            mitu_head_nam as "mituHeadNam",
-            koen_nam as "koenNam",
-            kokyaku_nam as "kokyakuNam",
-            mitu_dat as "mituDat",
-            nyuryoku_user as "nyuryokuUser"
-        FROM
-          ${SCHEMA}.v_mitu_lst
-    `);
-    if (data) {
-      console.log(data.rows);
-      return data.rows.map((d) => ({ ...d, mituDat: toJapanDateString(d.mituDat) }));
+    const { data, error } = await selectFilteredQuot(queries);
+    if (error) {
+      console.error(error.message, error.cause, error.hint);
+      throw error;
     }
-    return [];
+    if (!data || data.length === 0) {
+      return [];
+    }
+    return data.map((d) => ({
+      mituHeadId: d.mitu_head_id,
+      juchuHeadId: d.juchu_head_id,
+      mituStsNam: d.sts_nam,
+      mituHeadNam: d.mitu_head_nam,
+      koenNam: d.koen_nam,
+      kokyakuNam: d.kokyaku_nam,
+      mituDat: d.mitu_dat,
+      nyuryokuUser: d.nyuryoku_user,
+    }));
+    //  pool.query(`
+    //     SELECT
+    //         mitu_head_id as "mituHeadId",
+    //         juchu_head_id as "juchuHeadId",
+    //         sts_nam as "mituStsNam",
+    //         mitu_head_nam as "mituHeadNam",
+    //         koen_nam as "koenNam",
+    //         kokyaku_nam as "kokyakuNam",
+    //         mitu_dat as "mituDat",
+    //         nyuryoku_user as "nyuryokuUser"
+    //     FROM
+    //       ${SCHEMA}.v_mitu_lst
+    // `);
+    // if (data) {
+    //   console.log(data.rows);
+    //   return data.rows.map((d) => ({ ...d, mituDat: toJapanDateString(d.mituDat) }));
+    // }
   } catch (e) {
     console.error('例外が発生しました:', e);
     throw e;

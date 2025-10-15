@@ -1,6 +1,7 @@
 'use client';
 import SearchIcon from '@mui/icons-material/Search';
 import {
+  Autocomplete,
   Box,
   Button,
   Container,
@@ -14,13 +15,28 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import { grey } from '@mui/material/colors';
 import { useEffect, useState } from 'react';
+import { Controller, TextFieldElement, useForm } from 'react-hook-form-mui';
 
-import { TwoDatePickers } from '../../_ui/date';
+import { FormDateX, TwoDatePickers } from '../../_ui/date';
+import { selectNone, SelectTypes } from '../../_ui/form-box';
+import { FAKE_NEW_ID } from '../../(masters)/_lib/constants';
+import { getFilteredQuotList } from '../_lib/funcs';
 import { QuotTableValues } from '../_lib/types';
 import { QuotationListTable } from './quotation-list-table';
 
-export const QuotationList = ({ quots }: { quots: QuotTableValues[] }) => {
+export const QuotationList = ({
+  quots,
+  options,
+}: {
+  quots: QuotTableValues[];
+  options: {
+    sts: SelectTypes[];
+    custs: SelectTypes[];
+    nyuryokuUser: SelectTypes[];
+  };
+}) => {
   /* useState -------------------------------------------- */
   /* 受注一覧 */
   const [quotList, setQuotList] = useState<QuotTableValues[]>(quots ?? []);
@@ -29,10 +45,46 @@ export const QuotationList = ({ quots }: { quots: QuotTableValues[] }) => {
   /* ローディングかどうか */
   const [isLoading, setIsLoading] = useState(true);
 
+  /* useForm ------------------------------------------- */
+  const { control, handleSubmit } = useForm({
+    mode: 'onSubmit',
+    defaultValues: {
+      mituId: null,
+      juchuId: null,
+      mituSts: FAKE_NEW_ID,
+      mituHeadNam: null,
+      kokyaku: null,
+      mituDat: { strt: null, end: null },
+      nyuryokuUser: '未選択',
+    },
+  });
+
+  /* methods ------------------------------------------ */
+  /* */
+  const onSubmit = async (data: {
+    mituId: number | null;
+    juchuId: number | null;
+    mituSts: number | null;
+    mituHeadNam: string | null;
+    kokyaku: string | null;
+    mituDat: { strt: Date | null; end: Date | null };
+    nyuryokuUser: string | null;
+  }) => {
+    setIsLoading(true);
+    setPage(1);
+    const orders = await getFilteredQuotList(data);
+    if (orders) {
+      setQuotList(orders);
+      setIsLoading(false);
+    }
+    setIsLoading(false);
+  };
+
   /* useEffect --------------------------------------- */
   useEffect(() => {
     setIsLoading(false);
   }, []);
+
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
       <Paper variant="outlined">
@@ -41,49 +93,121 @@ export const QuotationList = ({ quots }: { quots: QuotTableValues[] }) => {
         </Box>
         <Divider />
         <Box width={'100%'} p={2}>
-          <form>
-            <Grid2 container spacing={1} mt={1}>
-              <Grid2 size={{ sm: 12, md: 6 }} display={'flex'} alignItems={'center'}>
-                <Typography noWrap>見積番号</Typography>
-                <TextField type="number" sx={{ width: '35%', bgcolor: 'white' }} />
-                　～　 <TextField type="number" sx={{ width: '35%', bgcolor: 'white' }} />
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <Grid2 container direction={'column'} spacing={1} width={'100%'}>
+              <Grid2 container spacing={1}>
+                <Grid2 size={{ sm: 12, md: 3 }} sx={styles.container}>
+                  <Typography noWrap mr={7}>
+                    見積番号
+                  </Typography>
+                  <TextFieldElement name="mituId" control={control} type="number" sx={{ width: 120 }} />
+                </Grid2>
+                <Grid2 size={{ sm: 12, md: 6 }} sx={styles.container}>
+                  <Typography noWrap mr={5}>
+                    受注番号
+                  </Typography>
+                  <TextFieldElement name="juchuId" control={control} type="number" sx={{ width: 120 }} />
+                </Grid2>
               </Grid2>
-              <Grid2 size={{ sm: 12, md: 6 }} display={'flex'} alignItems={'center'}>
-                <Typography noWrap>請求番号</Typography>
-                <TextField type="number" sx={{ width: '35%', bgcolor: 'white' }} />
-                　～　 <TextField type="number" sx={{ width: '35%', bgcolor: 'white' }} />
+              <Grid2 sx={styles.container}>
+                <Typography noWrap mr={1}>
+                  見積ステータス
+                </Typography>
+                <Controller
+                  name="mituSts"
+                  control={control}
+                  render={({ field }) => (
+                    <Select {...field} sx={{ width: 250 }}>
+                      {[selectNone, ...options.sts].map((opt) => (
+                        <MenuItem
+                          key={opt.id}
+                          value={opt.id}
+                          sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
+                        >
+                          {opt.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  )}
+                />
+              </Grid2>
+              <Grid2 sx={styles.container}>
+                <Typography noWrap mr={7}>
+                  見積件名
+                </Typography>
+                <TextFieldElement name="mituHeadNam" control={control} sx={{ width: 300 }} />
+              </Grid2>
+              <Grid2 sx={styles.container}>
+                <Typography noWrap mr={7}>
+                  見積相手
+                </Typography>
+                <Controller
+                  name="kokyaku"
+                  control={control}
+                  render={({ field }) => (
+                    <Autocomplete
+                      {...field}
+                      onChange={(_, value) => {
+                        const label = typeof value === 'string' ? value : (value?.label ?? '');
+                        field.onChange(label);
+                      }}
+                      freeSolo
+                      autoSelect
+                      sx={{ width: 300 }}
+                      renderInput={(params) => <TextField {...params} />}
+                      options={options.custs}
+                      getOptionLabel={(option) => (typeof option === 'string' ? option : option.label)}
+                    />
+                  )}
+                />
+              </Grid2>
+              <Grid2 sx={styles.container}>
+                <Typography noWrap mr={9}>
+                  見積日
+                </Typography>
+                <Controller
+                  control={control}
+                  name="mituDat.strt"
+                  render={({ field }) => <FormDateX value={field.value} onChange={field.onChange} sx={{ mr: 1 }} />}
+                />
+                <span>～</span>
+                <Controller
+                  control={control}
+                  name="mituDat.end"
+                  render={({ field }) => <FormDateX value={field.value} onChange={field.onChange} sx={{ ml: 1 }} />}
+                />
+              </Grid2>
+              <Grid2 container justifyContent={'space-between'}>
+                <Grid2 sx={styles.container}>
+                  <Typography noWrap mr={9}>
+                    入力者
+                  </Typography>
+                  <Controller
+                    name="nyuryokuUser"
+                    control={control}
+                    render={({ field }) => (
+                      <Select {...field} sx={{ width: 250 }}>
+                        {[selectNone, ...options.nyuryokuUser].map((opt) => (
+                          <MenuItem
+                            key={opt.id}
+                            value={opt.label}
+                            sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
+                          >
+                            {opt.label}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    )}
+                  />
+                </Grid2>
+                <Grid2 alignSelf={'end'} justifySelf={'end'}>
+                  <Button type="submit">
+                    <SearchIcon />
+                    検索
+                  </Button>
+                </Grid2>
               </Grid2>
             </Grid2>
-            <Stack pt={1}>
-              <Typography noWrap>見積日</Typography>
-              <TwoDatePickers sx={{ bgcolor: 'white' }} />
-            </Stack>
-            <Stack width={'30%'} pt={1}>
-              <Typography noWrap>見積件名</Typography>
-              <FormControl sx={{ minWidth: '70%', bgcolor: 'white' }}>
-                <Select>
-                  <MenuItem></MenuItem>
-                </Select>
-              </FormControl>
-            </Stack>
-            <Stack width={'30%'} pt={1}>
-              <Typography noWrap>見積相手</Typography>
-              <FormControl sx={{ minWidth: '70%', bgcolor: 'white' }}>
-                <Select>
-                  <MenuItem></MenuItem>
-                </Select>
-              </FormControl>
-            </Stack>
-            <Stack width={'40%'} pt={1} sx={{ width: '100%' }} justifyContent={'space-between'}>
-              <Typography noWrap>見積メモ</Typography>
-              <TextField />
-              <Box mt={1} alignSelf={'end'} justifySelf={'end'}>
-                <Button type="submit">
-                  <SearchIcon />
-                  検索
-                </Button>
-              </Box>
-            </Stack>
           </form>
         </Box>
       </Paper>
@@ -96,4 +220,15 @@ export const QuotationList = ({ quots }: { quots: QuotTableValues[] }) => {
       />
     </Container>
   );
+};
+
+/* style
+---------------------------------------------------------------------------------------------------- */
+/** @type {{ [key: string]: React.CSSProperties }} style */
+const styles: { [key: string]: React.CSSProperties } = {
+  // コンテナ
+  container: {
+    display: 'flex',
+    alignItems: 'center',
+  },
 };

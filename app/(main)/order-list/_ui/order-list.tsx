@@ -15,6 +15,7 @@ import { RadioButtonGroup, SelectElement, TextFieldElement } from 'react-hook-fo
 import { BackButton } from '../../_ui/buttons';
 import { FormDateX } from '../../_ui/date';
 import { selectNone, SelectTypes } from '../../_ui/form-box';
+import { FAKE_NEW_ID } from '../../(masters)/_lib/constants';
 import { radioData } from '../_lib/datas';
 import { getFilteredOrderList } from '../_lib/funcs';
 import { OrderListTableValues, OrderSearchValues } from '../_lib/types';
@@ -41,7 +42,7 @@ export const OrderList = ({
     defaultValues: {
       criteria: 1,
       selectedDate: { value: '1', range: { from: null, to: null } },
-      customer: 0,
+      customer: FAKE_NEW_ID,
       listSort: { sort: 'shuko', order: 'asc' },
       stageName: '',
       orderStartDate: null,
@@ -124,7 +125,11 @@ export const OrderList = ({
                     render={({ field }) => (
                       <Select {...field} sx={{ width: 250 }}>
                         {[selectNone, ...(customers ?? [])].map((opt) => (
-                          <MenuItem key={opt.id} value={opt.id} sx={opt.id === 0 ? { color: grey[600] } : {}}>
+                          <MenuItem
+                            key={opt.id}
+                            value={opt.id}
+                            sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
+                          >
                             {opt.label}
                           </MenuItem>
                         ))}

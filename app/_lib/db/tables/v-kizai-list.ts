@@ -1,5 +1,7 @@
 'use server';
 
+import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
+
 import { SCHEMA, supabase } from '../supabase';
 
 /**
@@ -7,7 +9,12 @@ import { SCHEMA, supabase } from '../supabase';
  * @param {string} query 機材名, 部門ID, 大部門ID, 集計部門ID
  * @returns kizai_name, bumon_id, dai_bumon_id, shukei_bumon_idで検索された機材マスタの配列 検索無しなら全件
  */
-export const selectFilteredEqpts = async (queries: { q: string; d: number; s: number; b: number }) => {
+export const selectFilteredEqpts = async (queries: {
+  q: string;
+  d: number | null;
+  s: number | null;
+  b: number | null;
+}) => {
   const builder = supabase
     .schema(SCHEMA)
     .from('v_kizai_lst')
@@ -20,13 +27,13 @@ export const selectFilteredEqpts = async (queries: { q: string; d: number; s: nu
   if (queries.q && queries.q.trim() !== '') {
     builder.ilike('kizai_nam', `%${queries.q}%`);
   }
-  if (queries.b !== 0) {
+  if (queries.b !== null && queries.b !== FAKE_NEW_ID) {
     builder.eq('bumon_id', queries.b);
   }
-  if (queries.d !== 0) {
+  if (queries.d !== null && queries.d !== FAKE_NEW_ID) {
     builder.eq('dai_bumon_id', queries.d);
   }
-  if (queries.s !== 0) {
+  if (queries.s !== null && queries.s !== FAKE_NEW_ID) {
     builder.eq('shukei_bumon_id', queries.s);
   }
 

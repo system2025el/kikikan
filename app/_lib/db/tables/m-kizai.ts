@@ -1,7 +1,7 @@
 'use server';
 
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
-import { zeroToNull } from '@/app/(main)/(masters)/_lib/value-converters';
+import { fakeToNull } from '@/app/(main)/(masters)/_lib/value-converters';
 import { EqptsMasterDialogValues } from '@/app/(main)/(masters)/eqpt-master/_lib/types';
 
 import pool from '../postgres';
@@ -53,8 +53,8 @@ export const insertNewEqpt = async (data: EqptsMasterDialogValues) => {
     data.edaCod,
     data.kizaiGrpCod,
     data.mem,
-    zeroToNull(data.bumonId),
-    zeroToNull(data.shukeibumonId),
+    fakeToNull(data.bumonId),
+    fakeToNull(data.shukeibumonId),
     Number(data.dspFlg),
     Number(data.ctnFlg),
     data.defDatQty,

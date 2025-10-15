@@ -9,6 +9,7 @@ import { Controller, TextFieldElement, useForm } from 'react-hook-form-mui';
 import { selectNone, SelectTypes } from '@/app/(main)/_ui/form-box';
 
 import { BackButton } from '../../../_ui/buttons';
+import { FAKE_NEW_ID } from '../../_lib/constants';
 import { getFilteredEqpts } from '../_lib/funcs';
 import { EqptsMasterTableValues } from '../_lib/types';
 import { EqptMasterTable } from './eqpt-master-table';
@@ -36,24 +37,24 @@ export const EqptMaster = ({
   /* 検索useForm-------------------------- */
   const { control, handleSubmit } = useForm({
     mode: 'onSubmit',
-    defaultValues: { query: '', bumonQuery: 0, daibumonQuery: 0, shukeiQuery: 0 },
+    defaultValues: { query: '', bumonQuery: FAKE_NEW_ID, daibumonQuery: FAKE_NEW_ID, shukeiQuery: FAKE_NEW_ID },
   });
 
   /* methods ------------------------------------------ */
   /* 検索ボタン押下時 */
   const onSubmit = async (data: {
     query: string | undefined;
-    bumonQuery: number | undefined;
-    daibumonQuery: number | undefined;
-    shukeiQuery: number | undefined;
+    bumonQuery: number;
+    daibumonQuery: number;
+    shukeiQuery: number;
   }) => {
     setIsLoading(true);
     console.log('data : ', data);
     const newList = await getFilteredEqpts({
       q: data.query!,
-      d: data.daibumonQuery!,
-      s: data.shukeiQuery!,
-      b: data.bumonQuery!,
+      d: data.daibumonQuery === FAKE_NEW_ID ? null : data.daibumonQuery,
+      s: data.shukeiQuery === FAKE_NEW_ID ? null : data.shukeiQuery,
+      b: data.bumonQuery === FAKE_NEW_ID ? null : data.bumonQuery,
     });
     setPage(1);
     setTheEqpts(newList?.data);
@@ -87,7 +88,11 @@ export const EqptMaster = ({
                   render={({ field }) => (
                     <Select {...field} sx={{ width: 250 }}>
                       {[selectNone, ...options!.b!].map((opt) => (
-                        <MenuItem key={opt.id} value={opt.id} sx={opt.id === 0 ? { color: grey[600] } : {}}>
+                        <MenuItem
+                          key={opt.id}
+                          value={opt.id}
+                          sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
+                        >
                           {opt.label}
                         </MenuItem>
                       ))}
@@ -104,7 +109,11 @@ export const EqptMaster = ({
                   render={({ field }) => (
                     <Select {...field} sx={{ width: 250 }}>
                       {[selectNone, ...options!.d!].map((opt) => (
-                        <MenuItem key={opt.id} value={opt.id} sx={opt.id === 0 ? { color: grey[600] } : {}}>
+                        <MenuItem
+                          key={opt.id}
+                          value={opt.id}
+                          sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
+                        >
                           {opt.label}
                         </MenuItem>
                       ))}
@@ -121,7 +130,11 @@ export const EqptMaster = ({
                   render={({ field }) => (
                     <Select {...field} sx={{ width: 250 }}>
                       {[selectNone, ...options!.s!].map((opt) => (
-                        <MenuItem key={opt.id} value={opt.id} sx={opt.id === 0 ? { color: grey[600] } : {}}>
+                        <MenuItem
+                          key={opt.id}
+                          value={opt.id}
+                          sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
+                        >
                           {opt.label}
                         </MenuItem>
                       ))}
