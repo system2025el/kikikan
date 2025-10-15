@@ -302,7 +302,7 @@ export const QuotationListTable = ({
         )}
         {/* 見積作成方法確認ダイアログ */}
         <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
-          <CreateQuotDialog setDialogOpen={setDialogOpen} />
+          <CreateQuotDialog inputRef={inputRef} setDialogOpen={setDialogOpen} />
         </Dialog>
         {/* 見積削除確認ダイアログ */}
         <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>

@@ -8,12 +8,13 @@ import { TextFieldElement, useForm } from 'react-hook-form-mui';
 import { CloseMasterDialogButton } from '../../_ui/buttons';
 
 export const CreateQuotDialog = ({
+  inputRef,
   setDialogOpen,
 }: {
+  inputRef: React.RefObject<HTMLInputElement | null>;
   setDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
   const router = useRouter();
-  const inputRef = useRef<HTMLInputElement>(null);
 
   /* methods ------------------------------------- */
   /* 自動生成ボタン押下 */
@@ -28,6 +29,7 @@ export const CreateQuotDialog = ({
     reValidateMode: 'onSubmit',
     defaultValues: { juchuHeadId: null },
   });
+
   return (
     <>
       <DialogTitle display={'flex'} justifyContent={'space-between'}>

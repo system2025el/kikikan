@@ -1,4 +1,3 @@
-import { FAKE_NEW_ID } from '../../(masters)/_lib/constants';
 import { getCustomerSelection } from '../../(masters)/_lib/funcs';
 import { getChosenQuot, getMituStsSelection, getUsersSelection } from '../_lib/funcs';
 import { QuotHeadValues } from '../_lib/types';
