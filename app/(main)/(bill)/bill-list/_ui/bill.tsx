@@ -40,6 +40,11 @@ import { MeisaiLines } from './meisai';
 import { MeisaiTblHeader } from './meisai-tbl-header';
 import { ReadOnlyYenNumberElement } from './yen';
 
+/**
+ * 請求書作成画面
+ * @param param0
+ * @returns {JSX.Element} 請求書作成画面コンポーネント
+ */
 export const Bill = ({
   isNew,
   bill,
@@ -61,14 +66,12 @@ export const Bill = ({
   // ダイアログ開閉
   const [kizaiMeisaiaddDialogOpen, setKizaimeisaiaddDialogOpen] = useState(false);
   const [showSecond, setShowSecond] = useState(false);
-  const [createOpen, setCreateOpen] = useState(true);
 
   /* スナックバーの表示するかしないか */
   const [snackBarOpen, setSnackBarOpen] = useState(false);
   /* スナックバーのメッセージ */
   const [snackBarMessage, setSnackBarMessage] = useState('');
 
-  const [isEditing, setIsEditing] = useState(false);
   /* useForm -------------------------------------------------------------- */
   const billForm = useForm<BillHeadValues>({
     mode: 'onChange',
@@ -82,7 +85,7 @@ export const Bill = ({
     reset,
     getValues,
     setValue,
-    formState: { errors, isDirty },
+    formState: { isDirty },
   } = billForm;
 
   const meisaiHeadFields = useFieldArray({ control, name: 'meisaiHeads' });

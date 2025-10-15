@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { insertNewBumon, selectFilteredBumons, selectOneBumon, upDateBumonDB } from '@/app/_lib/db/tables/m-bumon';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
+import { FAKE_NEW_ID } from '../../_lib/constants';
 import { getDaibumonsSelection, getShukeibumonsSelection } from '../../_lib/funcs';
 import { emptyBumon } from './datas';
 import { BumonsMasterDialogValues, BumonsMasterTableValues } from './types';
@@ -14,7 +15,9 @@ import { BumonsMasterDialogValues, BumonsMasterTableValues } from './types';
  * @param query 検索キーワード
  * @returns {Promise<bumonsMasterTableValues[]>} 部門マスタテーブルに表示するデータ（ 検索キーワードが空の場合は全て ）
  */
-export const getFilteredBumons = async (queries: { q: string; d: number; s: number } = { q: '', d: 0, s: 0 }) => {
+export const getFilteredBumons = async (
+  queries: { q: string; d: number | null; s: number | null } = { q: '', d: null, s: null }
+) => {
   try {
     const [bumons, doptions, soptions] = await Promise.all([
       selectFilteredBumons(queries),
@@ -103,8 +106,8 @@ export const updateBumon = async (rawData: BumonsMasterDialogValues, id: number)
     bumon_nam: rawData.bumonNam,
     del_flg: Number(rawData.delFlg),
     mem: rawData.mem,
-    dai_bumon_id: rawData.daibumonId,
-    shukei_bumon_id: rawData.shukeibumonId,
+    dai_bumon_id: rawData.daibumonId === FAKE_NEW_ID ? null : rawData.daibumonId,
+    shukei_bumon_id: rawData.shukeibumonId === FAKE_NEW_ID ? null : rawData.shukeibumonId,
     upd_dat: date,
     upd_user: 'test_user',
   };

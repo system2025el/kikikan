@@ -61,6 +61,7 @@ export const ShukoEqptDetail = (props: {
   // スナックバーメッセージ
   const [snackBarMessage, setSnackBarMessage] = useState('');
 
+  /* useForm ------------------- */
   const {
     control,
     handleSubmit,

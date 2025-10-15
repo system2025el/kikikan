@@ -16,3 +16,11 @@ export type ShukoTableValues = {
   sstbSagyoStsId: number;
   schkSagyoStsId: number;
 };
+
+export type ShukoKizai = {
+  kizaiId: number;
+  kizaiNam: string;
+  planKizaiQty: number;
+  planYobiQty: number;
+  planQty: number;
+};

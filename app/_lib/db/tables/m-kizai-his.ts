@@ -1,6 +1,6 @@
 'use server';
 
-import { zeroToNull } from '@/app/(main)/(masters)/_lib/value-converters';
+import { fakeToNull } from '@/app/(main)/(masters)/_lib/value-converters';
 import { EqptsMasterDialogValues } from '@/app/(main)/(masters)/eqpt-master/_lib/types';
 
 import pool from '../postgres';
@@ -31,15 +31,15 @@ export const insertEqptHistory = async (data: EqptsMasterDialogValues, id: numbe
     data.kizaiNam,
     Number(data.delFlg),
     data.sectionNum,
-    zeroToNull(data.shozokuId),
+    fakeToNull(data.shozokuId),
     data.bldCod,
     data.tanaCod,
     data.edaCod,
     data.kizaiGrpCod,
     data.dspOrdNum,
     data.mem,
-    zeroToNull(data.bumonId),
-    zeroToNull(data.shukeibumonId),
+    fakeToNull(data.bumonId),
+    fakeToNull(data.shukeibumonId),
     Number(data.dspFlg),
     Number(data.ctnFlg),
     data.defDatQty,

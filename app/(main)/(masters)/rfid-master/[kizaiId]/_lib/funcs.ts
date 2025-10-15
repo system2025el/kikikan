@@ -16,7 +16,7 @@ import {
 import { MRfidDBValues } from '@/app/_lib/db/types/m-rfid-type';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
-import { nullToZero, zeroToNull } from '../../../_lib/value-converters';
+import { fakeToNull, nullToFake } from '../../../_lib/value-converters';
 import { emptyRfid } from './datas';
 import { RfidsMasterDialogValues, RfidsMasterTableValues } from './types';
 
@@ -86,7 +86,7 @@ export const getChosenRfid = async (id: string) => {
     const RfidDetails: RfidsMasterDialogValues = {
       elNum: data.el_num ?? 0,
       delFlg: Boolean(data.del_flg),
-      shozokuId: nullToZero(data.shozoku_id),
+      shozokuId: nullToFake(data.shozoku_id),
       mem: data.mem,
       tagId: data.rfid_tag_id,
       rfidKizaiSts: data.rfid_kizai_sts,

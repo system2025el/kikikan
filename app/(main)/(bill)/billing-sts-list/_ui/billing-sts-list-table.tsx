@@ -3,13 +3,17 @@
 import { KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
 import AddIcon from '@mui/icons-material/Add';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import DeleteIcon from '@mui/icons-material/Delete';
+import WarningIcon from '@mui/icons-material/Warning';
 import {
   Box,
   Button,
   Checkbox,
   Collapse,
   Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   Divider,
   Grid2,
   IconButton,
@@ -25,6 +29,9 @@ import {
 } from '@mui/material';
 import { useMemo, useState } from 'react';
 
+import { toJapanDateString } from '@/app/(main)/_lib/date-conversion';
+import { CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
+import { FormDateX } from '@/app/(main)/_ui/date';
 import { Loading } from '@/app/(main)/_ui/loading';
 import { MuiTablePagination } from '@/app/(main)/_ui/table-pagination';
 import { LightTooltipWithText } from '@/app/(main)/(masters)/_ui/tables';
@@ -157,6 +164,20 @@ export const BillingStsListTable = ({
 const BillingStsRow = ({ juchu }: { juchu: BillingStsTableValues }) => {
   /* 行の開閉 */
   const [open, setOpen] = useState(false);
+
+  /* 請求完了日変更ダイアログ */
+  const [changeDatOpen, setChangeDatOpen] = useState(false);
+  /* 元の請求済み期間 */
+  const [currentDat, setCurrentDat] = useState<Date | null>();
+  /* 新しい請求済み期間 */
+  const [newDat, setNewDat] = useState<Date | null>(currentDat ?? null);
+
+  /* methods ------------------------------------------------------- */
+  const handleChangeDat = async () => {
+    console.log('current::::: ', currentDat, ', new :::::::', newDat);
+    setChangeDatOpen(false);
+  };
+
   return (
     <>
       <TableRow>
@@ -182,10 +203,10 @@ const BillingStsRow = ({ juchu }: { juchu: BillingStsTableValues }) => {
             variant="text"
             size="small"
             sx={{ py: 0.2, px: 0, m: 0, minWidth: 0 }}
-            onClick={() => {
-              console.log('テーブルで受注請求状況番号', juchu.juchuId, 'をクリック');
-              //         router.push(`/bill-list/edit/${bill.mituHeadId}`);
-            }}
+            component="a"
+            href={`/order/${juchu.juchuId}/view`}
+            target="_blank" // 新しいタブで開く
+            rel="noopener noreferrer"
           >
             <Box width={60}>{juchu.juchuId}</Box>
           </Button>
@@ -298,6 +319,10 @@ const BillingStsRow = ({ juchu }: { juchu: BillingStsTableValues }) => {
                         borderBottom: index + 1 === juchu.heads.length ? 'none' : undefined,
                         py: 0.5,
                       }}
+                      onClick={() => {
+                        setCurrentDat(h.seikyuDat ? new Date(h.seikyuDat) : null);
+                        setChangeDatOpen(true);
+                      }}
                     >
                       {h.seikyuDat ? ` ～ ${h.seikyuDat}` : ''}
                     </TableCell>
@@ -305,6 +330,44 @@ const BillingStsRow = ({ juchu }: { juchu: BillingStsTableValues }) => {
                 ))}
               </TableBody>
             </Table>
+            {/* 請求済み期間変更ダイアログ */}
+            <Dialog
+              open={changeDatOpen}
+              onClose={() => {
+                setChangeDatOpen(false);
+                setNewDat(null);
+              }}
+            >
+              <DialogTitle alignContent={'center'} display={'flex'} justifyContent={'space-between'} ml={5} mt={1}>
+                請求済み期間を変更します。
+                <CloseMasterDialogButton
+                  handleCloseDialog={() => {
+                    setNewDat(null);
+                    setChangeDatOpen(false);
+                  }}
+                />
+              </DialogTitle>
+              <DialogContent sx={{ m: 5, justifyContent: 'center', display: 'flex', alignItems: 'center' }}>
+                <Typography mr={3}>請求済み期間</Typography>
+                <FormDateX value={newDat} onChange={(value) => setNewDat(value)} />
+              </DialogContent>
+              <DialogActions>
+                <Button
+                  onClick={() => handleChangeDat()}
+                  disabled={!newDat || (currentDat ? currentDat === newDat : false)}
+                >
+                  変更
+                </Button>
+                <Button
+                  onClick={() => {
+                    setChangeDatOpen(false);
+                    setNewDat(null);
+                  }}
+                >
+                  戻る
+                </Button>
+              </DialogActions>
+            </Dialog>
           </Collapse>
         </TableCell>
       </TableRow>

@@ -202,7 +202,11 @@ export const BumonsMasterDialog = ({
                     render={({ field }) => (
                       <Select {...field} sx={{ width: 250 }}>
                         {[selectNone, ...selectOptions!.d].map((opt) => (
-                          <MenuItem key={opt.id} value={opt.id} sx={opt.id === 0 ? { color: grey[600] } : {}}>
+                          <MenuItem
+                            key={opt.id}
+                            value={opt.id}
+                            sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
+                          >
                             {opt.label}
                           </MenuItem>
                         ))}
@@ -221,7 +225,11 @@ export const BumonsMasterDialog = ({
                     render={({ field }) => (
                       <Select {...field} sx={{ width: 250 }}>
                         {[selectNone, ...selectOptions!.s].map((opt) => (
-                          <MenuItem key={opt.id} value={opt.id} sx={opt.id === 0 ? { color: grey[600] } : {}}>
+                          <MenuItem
+                            key={opt.id}
+                            value={opt.id}
+                            sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
+                          >
                             {opt.label}
                           </MenuItem>
                         ))}

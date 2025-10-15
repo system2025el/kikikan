@@ -8,14 +8,14 @@ import { ShukoTableValues } from '../_lib/types';
 
 export const ShukoListTable = (props: {
   datas: ShukoTableValues[];
-  onSelectionChange: Dispatch<SetStateAction<ShukoTableValues[]>>;
+  onSelectionChange: Dispatch<SetStateAction<number[]>>;
 }) => {
   const { datas, onSelectionChange } = props;
 
-  const [selected, setSelected] = useState<ShukoTableValues[]>([]);
+  const [selected, setSelected] = useState<number[]>([]);
 
-  const handleSelect = (row: ShukoTableValues) => {
-    const newSelected = selected.includes(row) ? selected.filter((item) => item !== row) : [...selected, row];
+  const handleSelect = (index: number) => {
+    const newSelected = selected.includes(index) ? selected.filter((item) => item !== index) : [...selected, index];
 
     setSelected(newSelected);
     onSelectionChange(newSelected);
@@ -31,7 +31,7 @@ export const ShukoListTable = (props: {
                 indeterminate={datas && selected.length > 0 && selected.length < datas.length}
                 checked={datas && datas.length > 0 && selected.length === datas.length}
                 onChange={(e) => {
-                  const newSelected = e.target.checked && datas ? datas.map((row) => row) : [];
+                  const newSelected = e.target.checked && datas ? datas.map((_, index) => index) : [];
                   setSelected(newSelected);
                   onSelectionChange(newSelected);
                 }}
@@ -52,7 +52,7 @@ export const ShukoListTable = (props: {
           {datas.map((row, index) => (
             <TableRow key={index} sx={{ whiteSpace: 'nowrap' }}>
               <TableCell padding="checkbox">
-                <Checkbox checked={selected.includes(row)} onChange={() => handleSelect(row)} />
+                <Checkbox checked={selected.includes(index)} onChange={() => handleSelect(index)} />
               </TableCell>
               <TableCell align="center">{row.juchuHeadId}</TableCell>
               <TableCell align="left">{row.nyushukoBashoId === 1 ? 'K' : 'Y'}</TableCell>

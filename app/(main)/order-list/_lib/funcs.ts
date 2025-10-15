@@ -8,6 +8,7 @@ import pool from '@/app/_lib/db/postgres';
 import { SCHEMA } from '@/app/_lib/db/supabase';
 
 import { toJapanTimeString } from '../../_lib/date-conversion';
+import { FAKE_NEW_ID } from '../../(masters)/_lib/constants';
 import { OrderSearchValues } from './types';
 
 // .tz()を使う準備
@@ -48,7 +49,7 @@ export const getFilteredOrderList = async (
   }
 
   // 顧客
-  if (customer && customer > 0) {
+  if (customer && customer !== FAKE_NEW_ID) {
     queryParams.push(customer);
     whereClauses.push(`kokyaku_id = $${queryParams.length}`);
   }

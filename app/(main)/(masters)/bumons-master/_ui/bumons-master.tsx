@@ -8,6 +8,7 @@ import { Controller, TextFieldElement, useForm } from 'react-hook-form-mui';
 import { selectNone, SelectTypes } from '@/app/(main)/_ui/form-box';
 
 import { BackButton } from '../../../_ui/buttons';
+import { FAKE_NEW_ID } from '../../_lib/constants';
 import { getFilteredBumons } from '../_lib/funcs';
 import { BumonsMasterTableValues } from '../_lib/types';
 import { BumonsMasterTable } from './bumons-master-table';
@@ -39,21 +40,17 @@ export const BumonsMaster = ({
   /* useForm ------------------- */
   const { control, handleSubmit } = useForm({
     mode: 'onSubmit',
-    defaultValues: { query: '', daibumonQuery: 0, shukeiQuery: 0 },
+    defaultValues: { query: '', daibumonQuery: FAKE_NEW_ID, shukeiQuery: FAKE_NEW_ID },
   });
 
   /* 検索ボタン押下 */
-  const onSubmit = async (data: {
-    query: string | undefined;
-    daibumonQuery: number | undefined;
-    shukeiQuery: number | undefined;
-  }) => {
+  const onSubmit = async (data: { query: string | undefined; daibumonQuery: number; shukeiQuery: number }) => {
     setIsLoading(true);
     console.log('data : ', data);
     const newList = await getFilteredBumons({
       q: data.query!,
-      d: data.daibumonQuery!,
-      s: data.shukeiQuery!,
+      d: data.daibumonQuery === FAKE_NEW_ID ? null : data.daibumonQuery,
+      s: data.shukeiQuery === FAKE_NEW_ID ? null : data.shukeiQuery,
     });
     setPage(1);
     setTheBumons(newList?.data);
@@ -93,7 +90,11 @@ export const BumonsMaster = ({
                   render={({ field }) => (
                     <Select {...field} sx={{ width: 250 }}>
                       {[selectNone, ...options!.d].map((opt) => (
-                        <MenuItem key={opt.id} value={opt.id} sx={opt.id === 0 ? { color: grey[600] } : {}}>
+                        <MenuItem
+                          key={opt.id}
+                          value={opt.id}
+                          sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
+                        >
                           {opt.label}
                         </MenuItem>
                       ))}
@@ -111,7 +112,11 @@ export const BumonsMaster = ({
                   render={({ field }) => (
                     <Select {...field} sx={{ width: 250 }}>
                       {[selectNone, ...options!.s].map((opt) => (
-                        <MenuItem key={opt.id} value={opt.id} sx={opt.id === 0 ? { color: grey[600] } : {}}>
+                        <MenuItem
+                          key={opt.id}
+                          value={opt.id}
+                          sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
+                        >
                           {opt.label}
                         </MenuItem>
                       ))}

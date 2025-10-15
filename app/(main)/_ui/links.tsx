@@ -58,7 +58,7 @@ const settingList: MenuItem[] = [];
 const stockIOList: MenuItem[] = [
   { name: '出庫', url: '/shuko-list' },
   { name: '入庫', url: '/nyuko-list' },
-  { name: '移動', url: '/' },
+  { name: '移動', url: '/ido-list' },
   { name: 'Weeklyスケジュール', url: '/' },
 ];
 /* ログアウトリスト */

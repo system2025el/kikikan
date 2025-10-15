@@ -18,14 +18,14 @@ import { Controller, TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { TestDate } from '../../_ui/date';
 import { Loading } from '../../_ui/loading';
-import { getShukoList } from '../_lib/funcs';
-import { ShukoListSearchValues, ShukoTableValues } from '../_lib/types';
+import { getPdfData, getShukoList } from '../_lib/funcs';
+import { ShukoKizai, ShukoListSearchValues, ShukoTableValues } from '../_lib/types';
 import { PdfModel, usePdf } from '../shuko/_lib/hooks/usePdf';
 import { ShukoListTable } from './shuko-list-table';
 
 export const ShukoList = (props: { shukoData: ShukoTableValues[] }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [selected, setSelected] = useState<ShukoTableValues[]>([]);
+  const [selected, setSelected] = useState<number[]>([]);
   const [shukoList, setShukoList] = useState<ShukoTableValues[]>(props.shukoData);
 
   /* useForm ------------------- */
@@ -58,40 +58,26 @@ export const ShukoList = (props: { shukoData: ShukoTableValues[] }) => {
    */
   const handleOutput = async () => {
     console.log(selected);
-    //// チェックされた行を取り出し
-    //const selectList = selected.map((index) => shukoList[index]);
-    //console.log('selectList', selectList);
+    // チェックされた行を取り出し
+    const selectList = selected.map((index) => shukoList[index]);
+    console.log('selectList', selectList);
 
-    //if (selectList.length === 0) return;
+    if (selectList.length === 0) return;
 
-    // PdfModelの配列を作成
-    const pdfModels: PdfModel[] = selected.map((row) => ({
-      item1: row.juchuHeadId,
-      item2: new Date(), //row.shukoDat,
-      item3: row.kokyakuNam,
-      item4: row.koenNam,
-      item5: new Date(), //row.kashidashiDat ?? new Date(),
-      item6: new Date(), //row.henkyakuDat ?? new Date(),
-      item7: '', //row.koenbasho ?? '',
-      item8: 0, //row.honbanNissu ?? 0,
-      item9: '', //row.tanto ?? '',
-      item10: '', //row.mem ?? '',
-      item11: '', //row.gotantosha ?? '',
-      item12: '',
-      /*
-      (() => {
-        const dates = Array.isArray(row.honbanDat) ? row.honbanDat : row.honbanDat ? [row.honbanDat] : [new Date()];
-        return dates
-          .map((d) => {
-            const date = new Date(d);
-            return `${date.getMonth() + 1}/${date.getDate()}`;
-          })
-          .join(', ');
-      })(),
-      */
-      //item13: [], //row.kizaiData ?? [],
-    }));
-
+    // PdfModelの配列
+    const pdfModels: PdfModel[] = [];
+    // チェックされた行分データ取得
+    for (const data of selectList) {
+      const pdfData: PdfModel | null = await getPdfData(
+        data.juchuHeadId,
+        data.juchuKizaiHeadIdv,
+        data.nyushukoBashoId,
+        data.nyushukoDat
+      );
+      if (pdfData !== null) {
+        pdfModels.push(pdfData);
+      }
+    }
     console.log('pdfModels', pdfModels);
 
     // PDF生成

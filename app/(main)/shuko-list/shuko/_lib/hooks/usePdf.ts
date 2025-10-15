@@ -2,21 +2,22 @@ import fontkit from '@pdf-lib/fontkit';
 import { PDFDocument, rgb } from 'pdf-lib';
 import { useEffect, useState } from 'react';
 
+import { ShukoKizai } from '../../../_lib/types';
+
 // PDF出力用のモデル
 export type PdfModel = {
   item1: number; //受注番号
-  item2: Date; //年月日
+  item2: string; //年月日
   item3: string; //公演名
   item4: string; //顧客名
-  item5: Date; //貸出日
-  item6: Date; //返却日
+  item5: string; //貸出日
+  item6: string; //返却日
   item7: string; //公演場所
   item8: number; //本番日数
   item9: string; //担当
   item10: string; //備考
   item11: string; //ご担当者様
-  item12: string; //本番日
-  //item13?: ShukoKizai[]; //機材詳細
+  item12: ShukoKizai[]; //機材詳細
 };
 
 // PDFデータ生成フック
@@ -122,7 +123,7 @@ export const usePdf = (): [(params: PdfModel[]) => Promise<Blob>] => {
 
       // データ
       page.drawText(String(param.item1), { x: tableX + 17, y: tableY - cellHeight - 12, font: customFont, size: 8 });
-      page.drawText(param.item2.toISOString().slice(0, 10), {
+      page.drawText(param.item2, {
         x: tableX + cellWidth + 9,
         y: tableY - cellHeight - 12,
         font: customFont,
