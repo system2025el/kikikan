@@ -144,7 +144,7 @@ export const TestDate = (props: {
           InputProps: {
             endAdornment: (
               <>
-                {date && (
+                {date && onClear && (
                   <IconButton size="small" sx={{ p: 0 }} onClick={onClear} disabled={disabled}>
                     <ClearIcon fontSize="small" />
                   </IconButton>
