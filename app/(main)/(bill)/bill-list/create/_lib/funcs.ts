@@ -172,9 +172,7 @@ const addBilling = async (data: BillHeadValues, user: string): Promise<number | 
     const newSeikyuHeadId = await connection.query(`
        SELECT coalesce(max(seikyu_head_id),0) + 1 as newid FROM ${SCHEMA}.t_seikyu_head
       `);
-    // const kokyakuId = await connection.query(
-    //   `SELECT kokyaku_id from ${SCHEMA}.m_kokyaku WHERE kokyaku_nam = '${data.kokyaku}'`
-    // );
+
     console.log(newSeikyuHeadId.rows[0].newid);
     // 請求ヘッド
     const billHead: SeikyuHead = {

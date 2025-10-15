@@ -1,10 +1,12 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
+
 import pool from '@/app/_lib/db/postgres';
 import { SCHEMA } from '@/app/_lib/db/supabase';
 import { selectActiveMituSts } from '@/app/_lib/db/tables/m-mitu-sts';
 import { selectActiveUsers } from '@/app/_lib/db/tables/m-user';
-import { selectChosenMitu } from '@/app/_lib/db/tables/t-mitu-head';
+import { selectChosenMitu, updQuotHeadDelFlg } from '@/app/_lib/db/tables/t-mitu-head';
 import { selectQuotMeisai } from '@/app/_lib/db/tables/t-mitu-meisai';
 import { selectQuotMeisaiHead } from '@/app/_lib/db/tables/t-mitu-meisai-head';
 import { selectJuchuKizaiHeadList, selectJuchuKizaiHeadNamList } from '@/app/_lib/db/tables/v-juchu-kizai-head-lst';
@@ -19,7 +21,7 @@ import { toJapanDateString } from '@/app/(main)/_lib/date-conversion';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 
 import { FAKE_NEW_ID } from '../../(masters)/_lib/constants';
-import { JuchuValues, QuotHeadValues, QuotMeisaiHeadValues } from './types';
+import { JuchuValues, QuotHeadValues, QuotMeisaiHeadValues, QuotSearchValues } from './types';
 
 /**
  * 請求一覧に表示する配列を取得する関数
@@ -27,15 +29,7 @@ import { JuchuValues, QuotHeadValues, QuotMeisaiHeadValues } from './types';
  * @returns 請求一覧に表示する配列
  */
 export const getFilteredQuotList = async (
-  queries: {
-    mituId: number | null;
-    juchuId: number | null;
-    mituSts: number | null;
-    mituHeadNam: string | null;
-    kokyaku: string | null;
-    mituDat: { strt: Date | null; end: Date | null };
-    nyuryokuUser: string | null;
-  } = {
+  queries: QuotSearchValues = {
     mituId: null,
     juchuId: null,
     mituSts: FAKE_NEW_ID,
@@ -49,6 +43,7 @@ export const getFilteredQuotList = async (
   }
 ) => {
   try {
+    console.log('デバッグ中▼▼', queries);
     const { data, error } = await selectFilteredQuot(queries);
     if (error) {
       console.error(error.message, error.cause, error.hint);
@@ -67,23 +62,6 @@ export const getFilteredQuotList = async (
       mituDat: d.mitu_dat,
       nyuryokuUser: d.nyuryoku_user,
     }));
-    //  pool.query(`
-    //     SELECT
-    //         mitu_head_id as "mituHeadId",
-    //         juchu_head_id as "juchuHeadId",
-    //         sts_nam as "mituStsNam",
-    //         mitu_head_nam as "mituHeadNam",
-    //         koen_nam as "koenNam",
-    //         kokyaku_nam as "kokyakuNam",
-    //         mitu_dat as "mituDat",
-    //         nyuryoku_user as "nyuryokuUser"
-    //     FROM
-    //       ${SCHEMA}.v_mitu_lst
-    // `);
-    // if (data) {
-    //   console.log(data.rows);
-    //   return data.rows.map((d) => ({ ...d, mituDat: toJapanDateString(d.mituDat) }));
-    // }
   } catch (e) {
     console.error('例外が発生しました:', e);
     throw e;
@@ -408,6 +386,20 @@ export const getJuchuIsshikiMeisai = async (juchuId: number, kizaiHeadId: number
     }));
   } catch (e) {
     console.error('例外が発生しました', e);
+    throw e;
+  }
+};
+
+/**
+ * 一覧で選択された見積の削除フラグを１にする関数
+ * @param {number[]} ids 選択された見積のヘッドIDの配列
+ */
+export const updQuotDelFlg = async (ids: number[]) => {
+  try {
+    console.log('Delete ::: ', ids);
+    await updQuotHeadDelFlg(ids);
+    await revalidatePath('/quotation-list');
+  } catch (e) {
     throw e;
   }
 };
