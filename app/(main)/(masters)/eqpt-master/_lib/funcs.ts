@@ -19,7 +19,7 @@ import {
   getDaibumonsSelection,
   getShukeibumonsSelection,
 } from '../../_lib/funcs';
-import { nullToZero, zeroToNull } from '../../_lib/value-converters';
+import { fakeToNull, nullToFake } from '../../_lib/value-converters';
 import { emptyEqpt } from './datas';
 import { EqptsMasterDialogValues, EqptsMasterTableValues } from './types';
 
@@ -29,7 +29,7 @@ import { EqptsMasterDialogValues, EqptsMasterTableValues } from './types';
  * @returns {Promise<EqptsMasterTableValues[]>} 機材マスタテーブルに表示するデータ（ 検索キーワードが空の場合は全て ）
  */
 export const getFilteredEqpts = async (
-  queries: { q: string; b: number; d: number; s: number } = { q: '', b: 0, d: 0, s: 0 }
+  queries: { q: string; b: number | null; d: number | null; s: number | null } = { q: '', b: null, d: null, s: null }
 ) => {
   try {
     const [kizai, doptions, soptions, boption] = await Promise.all([
@@ -96,15 +96,15 @@ export const getChosenEqpt = async (id: number) => {
       sectionNum: data.section_num,
       elNum: data.el_num,
       delFlg: Boolean(data.del_flg),
-      shozokuId: nullToZero(data.shozoku_id),
+      shozokuId: nullToFake(data.shozoku_id),
       bldCod: data.bld_cod,
       tanaCod: data.tana_cod,
       edaCod: data.eda_cod,
       kizaiGrpCod: data.kizai_grp_cod,
       dspOrdNum: data.dsp_ord_num,
       mem: data.mem,
-      bumonId: nullToZero(data.bumon_id),
-      shukeibumonId: nullToZero(data.shukei_bumon_id),
+      bumonId: nullToFake(data.bumon_id),
+      shukeibumonId: nullToFake(data.shukei_bumon_id),
       dspFlg: Boolean(data.dsp_flg),
       ctnFlg: Boolean(data.ctn_flg),
       defDatQty: data.def_dat_qty,
@@ -162,8 +162,8 @@ export const updateEqpt = async (rawData: EqptsMasterDialogValues, id: number) =
     kizai_grp_cod: rawData.kizaiGrpCod,
     dsp_ord_num: rawData.dspOrdNum,
     mem: rawData.mem,
-    bumon_id: zeroToNull(rawData.bumonId),
-    shukei_bumon_id: zeroToNull(rawData.shukeibumonId),
+    bumon_id: fakeToNull(rawData.bumonId),
+    shukei_bumon_id: fakeToNull(rawData.shukeibumonId),
     dsp_flg: Number(rawData.dspFlg),
     ctn_flg: Number(rawData.ctnFlg),
     def_dat_qty: rawData.defDatQty,

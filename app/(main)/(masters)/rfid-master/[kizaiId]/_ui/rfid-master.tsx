@@ -1,7 +1,18 @@
 'use client';
 
 import SaveAsIcon from '@mui/icons-material/SaveAs';
-import { Box, Button, Container, Divider, MenuItem, Paper, Select, TextField, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  Container,
+  Divider,
+  MenuItem,
+  Paper,
+  Select,
+  Snackbar,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { useState } from 'react';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
@@ -22,15 +33,22 @@ export const RfidMaster = ({
 }) => {
   const user = useUserStore((state) => state.user);
   // useState
+  /* 表示されるRFIDリスト */
   const [theRfids, setTheRfids] = useState<RfidsMasterTableValues[] | undefined>(rfids);
   /* 今開いてるテーブルのページ数 */
   const [page, setPage] = useState(1);
   /* DBのローディング */
   const [isLoading, setIsLoading] = useState(true);
-  /* 選択される機材のidのリスト */
+  /* 選択された機材のidのリスト */
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  /* */
-  const [theSts, setTheSts] = useState<SelectTypes>();
+  /* 選ばれた機材ステータス */
+  const [selectedSts, setSelectedSts] = useState<SelectTypes>();
+  /* スナックバーの表示するかしないか */
+  const [snackBarOpen, setSnackBarOpen] = useState(false);
+  /* スナックバーのメッセージ */
+  const [snackBarMessage, setSnackBarMessage] = useState('');
+  /* 保存されたあとのフラグ */
+  const [saved, setSaved] = useState<boolean>(true);
   /* methods ------------------------------------------ */
   /* 適用ボタン押下時の処理 */
   const handleClickAdapt = (tagList: string[], selectedSts: SelectTypes) => {
@@ -48,6 +66,7 @@ export const RfidMaster = ({
         })
       : [];
     setTheRfids(newList);
+    setSaved(false);
   };
 
   /* 保存ボタン押下時の処理 */
@@ -67,6 +86,10 @@ export const RfidMaster = ({
       updateList.map((d) => ({ tagId: d.rfidTagId, sts: d.stsId ?? 0 })),
       user?.name ?? ''
     );
+
+    setSnackBarMessage('保存しました');
+    setSnackBarOpen(true);
+    setSaved(true);
   };
 
   return (
@@ -78,7 +101,7 @@ export const RfidMaster = ({
             <Button
               onClick={() => handleClickSave()}
               sx={{ alignItems: 'center' }}
-              disabled={!theRfids || rfids === theRfids}
+              disabled={!theRfids || rfids === theRfids || saved}
             >
               <SaveAsIcon fontSize="small" />
               保存
@@ -94,11 +117,11 @@ export const RfidMaster = ({
           <Box sx={styles.container}>
             <Typography mr={3}>機材ステータス一括変更</Typography>
             <Select
-              value={theSts?.id ?? ''}
+              value={selectedSts?.id ?? ''}
               onChange={(event) => {
                 const selectedId = Number(event.target.value);
                 const selectedObj = sts?.find((s) => Number(s.id) === selectedId);
-                setTheSts(selectedObj ?? undefined);
+                setSelectedSts(selectedObj ?? undefined);
               }}
               sx={{ width: 200 }}
             >
@@ -110,8 +133,8 @@ export const RfidMaster = ({
             </Select>
             <Button
               sx={{ ml: 1 }}
-              onClick={() => handleClickAdapt(selectedTags, theSts!)}
-              disabled={typeof theSts?.id !== 'number' || selectedTags.length === 0}
+              onClick={() => handleClickAdapt(selectedTags, selectedSts!)}
+              disabled={typeof selectedSts?.id !== 'number' || selectedTags.length === 0}
             >
               適用
             </Button>
@@ -127,6 +150,14 @@ export const RfidMaster = ({
         setIsLoading={setIsLoading}
         selectedTags={selectedTags}
         setSelectedTags={setSelectedTags}
+      />
+      <Snackbar
+        open={snackBarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackBarOpen(false)}
+        message={snackBarMessage}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={{ marginTop: '65px' }}
       />
     </Container>
   );

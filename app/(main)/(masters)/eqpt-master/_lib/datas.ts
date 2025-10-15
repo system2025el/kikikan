@@ -2,6 +2,7 @@ import { Label } from '@mui/icons-material';
 
 import { FormItemsType } from '@/app/(main)/_ui/form-box';
 
+import { FAKE_NEW_ID } from '../../_lib/constants';
 import { EqptsMasterDialogValues, EqptsMasterTableValues } from './types';
 
 /* 機材マスタヘッダー */
@@ -36,8 +37,8 @@ export const emptyEqpt: EqptsMasterDialogValues = {
   kizaiGrpCod: '',
   dspOrdNum: null,
   mem: '',
-  bumonId: 0,
-  shukeibumonId: 0,
+  bumonId: FAKE_NEW_ID,
+  shukeibumonId: FAKE_NEW_ID,
   dspFlg: true,
   ctnFlg: false,
   defDatQty: null,

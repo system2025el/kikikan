@@ -1,5 +1,7 @@
 import { Grid2, Typography } from '@mui/material';
 
+import { FAKE_NEW_ID } from '../(masters)/_lib/constants';
+
 /**
  * フォームなどをきれいに配置したいときの共通コンポーネント
  * @param
@@ -39,4 +41,4 @@ export const FormBox = ({
 export type FormItemsType = { label: string; constraints: string; exsample: string; other?: string };
 
 export type SelectTypes = { id: number | string; label: string };
-export const selectNone: SelectTypes = { id: 0, label: '未選択' };
+export const selectNone: SelectTypes = { id: FAKE_NEW_ID, label: '未選択' };
