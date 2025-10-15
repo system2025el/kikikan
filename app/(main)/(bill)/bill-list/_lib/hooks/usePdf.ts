@@ -46,7 +46,6 @@ export const usePdf = (): [(param: BillHeadValues) => Promise<Blob>] => {
 
     /* ここから出力内容
      * -----------------------------------------------------------------*/
-
     // PDFページ生成
     const page = pdfDoc.addPage();
 
@@ -67,7 +66,7 @@ export const usePdf = (): [(param: BillHeadValues) => Promise<Blob>] => {
       //opacity: 1,
     });
 
-    //TODO 角を丸くする処理を後で追加する
+    //TODO 角を丸くする処理を後で追加する？
     const tableX = 440;
     const tableY = 770;
     const cellWidth = 60;
@@ -123,19 +122,38 @@ export const usePdf = (): [(param: BillHeadValues) => Promise<Blob>] => {
     page.drawText('請求番号', { x: tableX + cellWidth + 15, y: tableY - 12, font: customFont, size: 8 });
 
     // データ
-    page.drawText('2025/05/31', { x: tableX + 8, y: tableY - cellHeight - 12, font: customFont, size: 8 });
-    page.drawText('18409', {
-      x: tableX + cellWidth + 16,
+    const issueDateText = param.seikyuDat
+      ? param.seikyuDat instanceof Date
+        ? param.seikyuDat.toLocaleDateString('ja-JP')
+        : String(param.seikyuDat)
+      : '';
+
+    page.drawText(issueDateText, {
+      x: tableX + 8,
       y: tableY - cellHeight - 12,
       font: customFont,
       size: 8,
     });
+
+    // 請求番号を中央寄せ
+    const seikyuText = String(param.seikyuHeadId ?? '');
+    const textWidth = customFont.widthOfTextAtSize(seikyuText, 8);
+    const cellCenterX = tableX + cellWidth + cellWidth / 2;
+    const textX = cellCenterX - textWidth / 2;
+
+    page.drawText(seikyuText, {
+      x: textX,
+      y: tableY - cellHeight - 12,
+      font: customFont,
+      size: 8,
+    });
+
     /* ---------------- 取引先：住所+ 会社名 + 御中 ---------------- */
     const clientInfoX = 80; // 左端からの位置
     let clientInfoY = 785; // Y座標の開始位置
 
     // 郵便番号
-    page.drawText('000-00000', {
+    page.drawText(String(param.adr1), {
       x: clientInfoX,
       y: clientInfoY,
       font: customFont,
@@ -144,7 +162,7 @@ export const usePdf = (): [(param: BillHeadValues) => Promise<Blob>] => {
 
     // 住所
     clientInfoY -= 15; // 1行下にずらす
-    page.drawText(' 札幌市中央区北２条西３丁目', {
+    page.drawText(String(param.adr2.shozai), {
       x: clientInfoX,
       y: clientInfoY,
       font: customFont,
@@ -152,7 +170,15 @@ export const usePdf = (): [(param: BillHeadValues) => Promise<Blob>] => {
     });
     //ビル名等
     clientInfoY -= 15; // 1行下にずらす
-    page.drawText('　　　　　　　 札幌北２条ビル８階', {
+    page.drawText(String(param.adr2.tatemono), {
+      x: clientInfoX,
+      y: clientInfoY,
+      font: customFont,
+      size: 9,
+    });
+    //その他
+    clientInfoY -= 15; // 少し間隔をあけて1行下にずらす
+    page.drawText(String(param.adr2.sonota ?? ''), {
       x: clientInfoX,
       y: clientInfoY,
       font: customFont,
@@ -161,7 +187,7 @@ export const usePdf = (): [(param: BillHeadValues) => Promise<Blob>] => {
 
     // 会社名
     clientInfoY -= 25; // 少し間隔をあけて1行下にずらす
-    page.drawText('　株式会社　○○○○　御中', {
+    page.drawText(`${param.aite.nam}御中`, {
       x: clientInfoX,
       y: clientInfoY,
       font: customFont,
@@ -169,8 +195,8 @@ export const usePdf = (): [(param: BillHeadValues) => Promise<Blob>] => {
     });
 
     // 顧客番号
-    clientInfoY -= 85; // 1行下にずらす
-    page.drawText('顧客番号: 1777', {
+    clientInfoY -= 75; // 1行下にずらす
+    page.drawText(`顧客番号：${param.aite.id} `, {
       x: clientInfoX - 45,
       y: clientInfoY,
       font: customFont,
@@ -193,7 +219,7 @@ export const usePdf = (): [(param: BillHeadValues) => Promise<Blob>] => {
     const rightPadding = 5;
 
     // --- 1行目：今回ご請求金額 ---
-    const totalAmountText = '¥686,400';
+    const totalAmountText = '￥' + Number(param.gokeiAmt ?? 0).toLocaleString();
     const totalAmountTextWidth = customFont.widthOfTextAtSize(totalAmountText, 12);
     const totalAmountX = billingTableX + billingTableWidth - totalAmountTextWidth - rightPadding;
     // 背景色と枠線
@@ -227,9 +253,8 @@ export const usePdf = (): [(param: BillHeadValues) => Promise<Blob>] => {
     });
 
     // --- 2行目：10％対象合計 ---
-    const subtotalText = '￥624,000';
+    const subtotalText = '￥' + Number(param.preTaxGokeiAmt ?? 0).toLocaleString();
     const subtotalTextWidth = customFont.widthOfTextAtSize(subtotalText, 10);
-    // 2行目、3行目の金額描画X座標を計算
     const amountX = billingTableX + billingTableWidth - subtotalTextWidth - rightPadding;
 
     page.drawRectangle({
@@ -250,7 +275,7 @@ export const usePdf = (): [(param: BillHeadValues) => Promise<Blob>] => {
       thickness: 0.5,
     });
 
-    page.drawText('10％対象合計', {
+    page.drawText(`${param.zeiRat ?? ''}％対象合計`, {
       x: billingTableX + 70,
       y: billingTableBottomY + billingTableRowHeight + 6,
       font: customFont,
@@ -264,7 +289,7 @@ export const usePdf = (): [(param: BillHeadValues) => Promise<Blob>] => {
     });
 
     // --- 3行目：消費税 ---
-    const taxText = '￥62,400';
+    const taxText = '￥' + Number(param.zeiAmt ?? 0).toLocaleString();
     const taxTextWidth = customFont.widthOfTextAtSize(taxText, 10);
     const taxAmountX = billingTableX + billingTableWidth - taxTextWidth - rightPadding;
 
@@ -286,13 +311,12 @@ export const usePdf = (): [(param: BillHeadValues) => Promise<Blob>] => {
       thickness: 0.5,
     });
 
-    page.drawText('消費税 (10%)', {
+    page.drawText(`消費税（${param.zeiRat ?? ''}％）`, {
       x: billingTableX + 70,
       y: billingTableBottomY + 7,
       font: customFont,
       size: 10,
     });
-
     // 金額（右寄せ）
     page.drawText(taxText, {
       x: taxAmountX, // 計算したX座標を使用
@@ -320,194 +344,301 @@ export const usePdf = (): [(param: BillHeadValues) => Promise<Blob>] => {
       height: 35,
     });
 
-    /* ---------------- 公演情報 ---------------- */
     let drawPositionY = billingTableBottomY - 10;
     const rowHeight = 20;
     const pageWidth = 525; // ページ幅に合わせて調整
-    const colWidthsPerRow = [
-      [50, 50, 50, 265, 50, 60],
-      [50, 290, 50, 135],
-    ];
-    const rows: (string | number)[][] = [
-      ['受注番号', 82830, '公演名', 'H/ ○○○○○○○○', '御担当', `〇 〇 様`],
-      ['公演場所', '〇〇ホール', '貸出期間', `2025/04/29～2025/05/09`],
-    ];
+    const pageMarginBottom = 50; // ページ下余白
 
-    rows.forEach((row, rowIndex) => {
-      const colWidths = colWidthsPerRow[rowIndex];
-      let colX = billingTableX; // テーブルの開始X座標を合わせる
+    // 日付フォーマッタ
+    function formatDate(date: string | number | Date | null | undefined) {
+      if (!date) return '';
+      const d = new Date(date);
+      if (isNaN(d.getTime())) return '';
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}/${month}/${day}`;
+    }
 
-      // 各行の「上」の横線
-      page.drawLine({
-        start: { x: colX, y: drawPositionY },
-        end: { x: colX + pageWidth, y: drawPositionY },
-        thickness: 1,
-        color: rgb(0, 0, 0),
-      });
+    // ページを切り替える関数
+    function addNewPage() {
+      const newPage = pdfDoc.addPage([595, 842]); // A4
+      return newPage;
+    }
 
-      row.forEach((cellText, colIndex) => {
-        const cellWidth = colWidths[colIndex];
+    // 描画対象のページ
+    let currentPage = page;
 
-        if (colIndex % 2 === 0) {
-          page.drawRectangle({
+    // 各明細ヘッダを処理
+    param.meisaiHeads.forEach((meisai, meisaiIndex) => {
+      // 明細がなくてもヘッダ情報を出すように変更
+      const meisaiList = meisai?.meisai ?? [];
+      // --- 公演情報テーブル ---
+      const colWidthsPerRow = [
+        [50, 50, 50, 265, 50, 60],
+        [50, 300, 50, 125],
+      ];
+
+      const rows: (string | number)[][] = [
+        [
+          '受注番号',
+          meisai?.juchuHeadId ?? '',
+          '公演名',
+          meisai?.koenNam ?? '',
+          '御担当',
+          `${meisai?.kokyakuTantoNam ?? ''} 様`,
+        ],
+        [
+          '公演場所',
+          meisai?.koenbashoNam ?? '',
+          '貸出期間',
+          `${formatDate(meisai?.seikyuRange?.strt)}～${formatDate(meisai?.seikyuRange?.end)}`,
+        ],
+      ];
+
+      // --- 公演情報の描画 ---
+      rows.forEach((row, rowIndex) => {
+        if (drawPositionY - rowHeight < pageMarginBottom) {
+          currentPage = addNewPage();
+          drawPositionY = 800;
+        }
+
+        const colWidths = colWidthsPerRow[rowIndex];
+        let colX = billingTableX;
+
+        // 横線
+        currentPage.drawLine({
+          start: { x: colX, y: drawPositionY },
+          end: { x: colX + pageWidth, y: drawPositionY },
+          thickness: 1,
+          color: rgb(0, 0, 0),
+        });
+
+        row.forEach((cellText, colIndex) => {
+          const cellWidth = colWidths[colIndex];
+          if (!cellWidth) return;
+
+          // 偶数列をグレー背景
+          if (colIndex % 2 === 0) {
+            currentPage.drawRectangle({
+              x: colX,
+              y: drawPositionY - rowHeight,
+              width: cellWidth,
+              height: rowHeight,
+              color: rgb(0.9, 0.9, 0.9),
+            });
+          }
+
+          // 枠線
+          currentPage.drawRectangle({
             x: colX,
             y: drawPositionY - rowHeight,
             width: cellWidth,
             height: rowHeight,
-            color: rgb(0.9, 0.9, 0.9),
+            borderColor: rgb(0, 0, 0),
+            borderWidth: 1,
           });
-        }
 
-        // セルの枠線
-        page.drawRectangle({
-          x: colX,
-          y: drawPositionY - rowHeight,
-          width: cellWidth,
-          height: rowHeight,
-          borderColor: rgb(0, 0, 0),
-          borderWidth: 1,
-        });
+          // テキスト
+          const textToDraw = String(cellText);
+          const textWidth = customFont.widthOfTextAtSize(textToDraw, 9);
+          // const textX = typeof cellText === 'number' ? colX + cellWidth - textWidth - 5 : colX + 5;
 
-        const textToDraw = String(cellText);
-
-        // 数値（右寄せ）
-        const textWidth = customFont.widthOfTextAtSize(textToDraw, 9);
-        let textX: number;
-        if (typeof cellText === 'number') {
-          textX = colX + cellWidth - textWidth - 5;
-        } else {
-          textX = colX + 5; // 左寄せ
-        }
-
-        page.drawText(textToDraw, {
-          x: textX,
-          y: drawPositionY - rowHeight + 7,
-          font: customFont,
-          size: 9,
-          color: rgb(0, 0, 0),
-        });
-
-        colX += cellWidth;
-      });
-
-      drawPositionY -= rowHeight;
-    });
-
-    // テーブル全体の「下」の横線
-    page.drawLine({
-      start: { x: billingTableX, y: drawPositionY },
-      end: { x: billingTableX + pageWidth, y: drawPositionY },
-      thickness: 1,
-      color: rgb(0, 0, 0),
-    });
-
-    //項目テーブル
-    // テーブル描画の開始Y座標
-    let yPosition = drawPositionY;
-
-    const fontSize = 10;
-
-    const tableData = [
-      ['項　　　　　　　目', '数量', '単価', '金額', '本番日数', '備考'], // ヘッダー
-      ['照明機材費・現地費一式', 1, 624000, 624000, 1, ''],
-      // ['照明機材', 1, 200000, 200000, 1, ''],
-      ['', '', ''], // 空の行
-      ['伝　票　計', 624000, ''],
-    ];
-
-    // 列幅設定
-    const columnWidthsByRow = {
-      header: [250, 30, 75, 75, 50, 45],
-      data: [250, 30, 75, 75, 50, 45],
-      summary: [355, 75, 95],
-    };
-
-    // 描画処理
-    tableData.forEach((row, rowIndex) => {
-      let currentRowWidths;
-      let fillColor;
-
-      if (rowIndex === 0) {
-        currentRowWidths = columnWidthsByRow.header;
-        fillColor = rgb(0.804, 0.894, 0.808); // ヘッダーは背景緑
-      } else if (rowIndex >= tableData.length - 2) {
-        currentRowWidths = columnWidthsByRow.summary;
-        fillColor = undefined;
-      } else {
-        currentRowWidths = columnWidthsByRow.data;
-        fillColor = undefined;
-      }
-
-      let colX = billingTableX;
-
-      row.forEach((cellText, colIndex) => {
-        const cellWidth = currentRowWidths[colIndex];
-        if (!cellWidth) return;
-
-        let textToDraw = String(cellText);
-
-        // 数値（カンマ区切り）
-        if (typeof cellText === 'number') {
-          textToDraw = cellText.toLocaleString();
-        }
-
-        // 伝票計の行で先頭列に￥マーク
-        if (rowIndex === tableData.length - 1 && colIndex === 1) {
-          textToDraw = '￥' + textToDraw;
-        }
-
-        // 背景と枠線
-        page.drawRectangle({
-          x: colX,
-          y: yPosition - rowHeight,
-          width: cellWidth,
-          height: rowHeight,
-          color: fillColor,
-          borderColor: rgb(0, 0, 0),
-          borderWidth: 1,
-        });
-
-        const textWidth = customFont.widthOfTextAtSize(textToDraw, fontSize);
-
-        // 数値は右寄せ、それ以外は中央寄せ
-        let textX;
-        if (rowIndex === 0) {
-          // ヘッダーは中央寄せ
-          textX = colX + (cellWidth - textWidth) / 2;
-        } else if (rowIndex === tableData.length - 1) {
-          // 伝票計の行
-          if (colIndex === 0) {
-            // 「伝票計」の文字は中央寄せ
+          let textX: number;
+          if (colIndex % 2 === 0) {
+            // 偶数列（項目名）は中央寄せ
             textX = colX + (cellWidth - textWidth) / 2;
           } else if (typeof cellText === 'number') {
-            // 金額は右寄せ
-            textX = colX + cellWidth - textWidth - 2;
+            // 数値は右寄せ
+            textX = colX + cellWidth - textWidth - 5;
           } else {
-            // その他は左寄せ
-            textX = colX + 2;
+            // 文字列は左寄せ
+            textX = colX + 5;
           }
-        } else {
-          // 通常データ行
-          if (typeof cellText === 'number') {
-            textX = colX + cellWidth - textWidth - 2; // 数値は右寄せ
-          } else {
-            textX = colX + 2; // 文字は左寄せ
+          currentPage.drawText(textToDraw, {
+            x: textX,
+            y: drawPositionY - rowHeight + 7,
+            font: customFont,
+            size: 9,
+            color: rgb(0, 0, 0),
+          });
+
+          colX += cellWidth;
+        });
+
+        drawPositionY -= rowHeight;
+      });
+
+      // --- 明細テーブルデータ ---
+      const columnWidthsByRow = {
+        header: [250, 30, 75, 75, 50, 45],
+        data: [250, 30, 75, 75, 50, 45],
+        summary: [355, 75, 95],
+      };
+
+      const tableData = [
+        ['項　　　　　　　目', '数量', '単価', '金額', '本番日数', '備考'],
+        ...meisaiList.map((item) => [
+          item.nam ?? '',
+          item.qty ?? 0,
+          item.tankaAmt ?? 0,
+          item.shokeiAmt,
+          item.honbanbiQty ?? 0,
+          '',
+        ]),
+        ['', '', ''],
+        ['伝　票　計', meisai?.nebikiAftAmt, ''],
+      ];
+
+      // --- 明細テーブル描画 ---
+      const fontSize = 10;
+
+      tableData.forEach((row, rowIndex) => {
+        // 改ページ処理（重複ヘッダー防止）
+        if (drawPositionY - rowHeight < pageMarginBottom) {
+          currentPage = addNewPage();
+          drawPositionY = 800;
+
+          // 次ページ先頭がヘッダー以外の時だけヘッダー描画
+          if (rowIndex !== 0) {
+            const header = ['項　　　　　　　目', '数量', '単価', '金額', '本番日数', '備考'];
+            let colX = billingTableX;
+            header.forEach((h, i) => {
+              const w = columnWidthsByRow.header[i];
+              currentPage.drawRectangle({
+                x: colX,
+                y: drawPositionY - rowHeight,
+                width: w,
+                height: rowHeight,
+                color: rgb(0.804, 0.894, 0.808),
+                borderColor: rgb(0, 0, 0),
+                borderWidth: 1,
+              });
+              currentPage.drawText(h, {
+                x: colX + (w - customFont.widthOfTextAtSize(h, fontSize)) / 2,
+                y: drawPositionY - rowHeight + 7,
+                font: customFont,
+                size: fontSize,
+                color: rgb(0, 0, 0),
+              });
+              colX += w;
+            });
+            drawPositionY -= rowHeight;
           }
         }
 
-        page.drawText(textToDraw, {
-          x: textX,
-          y: yPosition - rowHeight + (rowHeight - fontSize) / 2 + 1,
-          font: customFont,
-          size: fontSize,
-          color: rgb(0, 0, 0),
+        let currentRowWidths: number[];
+        let fillColor: ReturnType<typeof rgb> | undefined;
+
+        if (rowIndex === 0) {
+          currentRowWidths = columnWidthsByRow.header;
+          fillColor = rgb(0.804, 0.894, 0.808);
+        } else if (rowIndex >= tableData.length - 2) {
+          currentRowWidths = columnWidthsByRow.summary;
+        } else {
+          currentRowWidths = columnWidthsByRow.data;
+        }
+
+        let colX = billingTableX;
+        row.forEach((cellText, colIndex) => {
+          const cellWidth = currentRowWidths[colIndex];
+          if (!cellWidth) return;
+
+          let textToDraw = String(cellText);
+          if (typeof cellText === 'number') textToDraw = cellText.toLocaleString();
+          if (rowIndex === tableData.length - 1 && colIndex === 1) textToDraw = '￥' + textToDraw;
+
+          // 背景と枠
+          currentPage.drawRectangle({
+            x: colX,
+            y: drawPositionY - rowHeight,
+            width: cellWidth,
+            height: rowHeight,
+            color: fillColor,
+            borderColor: rgb(0, 0, 0),
+            borderWidth: 1,
+          });
+
+          const textWidth = customFont.widthOfTextAtSize(textToDraw, fontSize);
+          let textX: number;
+
+          // 数値は右寄せ、それ以外は中央寄せ
+          if (rowIndex === 0) {
+            // ヘッダー中央寄せ
+            textX = colX + (cellWidth - textWidth) / 2;
+          } else if (rowIndex === tableData.length - 1 && colIndex === 0) {
+            // 伝票計 中央寄せ
+            textX = colX + (cellWidth - textWidth) / 2;
+          } else if (typeof cellText === 'number') {
+            textX = colX + cellWidth - textWidth - 5; // 右寄せ
+          } else {
+            textX = colX + 2; // 左寄せ
+          }
+
+          currentPage.drawText(textToDraw, {
+            x: textX,
+            y: drawPositionY - rowHeight + (rowHeight - fontSize) / 2 + 1,
+            font: customFont,
+            size: fontSize,
+            color: rgb(0, 0, 0),
+          });
+
+          colX += cellWidth;
         });
 
-        colX += cellWidth;
+        drawPositionY -= rowHeight;
       });
 
-      yPosition -= rowHeight;
+      // 明細ごとに余白
+      drawPositionY -= 10;
     });
+    /* ---------------- フッター描画処理 ---------------- */
+
+    // すべてのページを取得
+    const pages = pdfDoc.getPages();
+    const totalPages = pages.length;
+
+    // フッターに表示する共通情報
+    const footerDate = issueDateText;
+    const footerSeikyuNo = `請求番号：${param.seikyuHeadId ?? ''}`;
+    const footerCompanyName = '株式会社　エンジニア・ライティング';
+
+    const footerY = 35; // ページ下部からのY座
+    const footerFontSize = 9;
+
+    // 各ページにフッターを描画
+    pages.forEach((targetPage, index) => {
+      const currentPageNum = index + 1;
+      const pageInfoText = `PAGE : ${currentPageNum} / ${totalPages}`;
+
+      // フッターの左側に表示するテキスト
+      const leftText = `${footerDate}   　　　${footerSeikyuNo}　　　　${footerCompanyName}`;
+
+      // ページ番号を右寄せにするための計算
+      const pageInfoTextWidth = customFont.widthOfTextAtSize(pageInfoText, footerFontSize);
+      const pageWidth = targetPage.getSize().width;
+      const rightTextX = pageWidth - pageInfoTextWidth - 40;
+
+      // 左側のテキストを描画
+      targetPage.drawText(leftText, {
+        x: 40, // 左マージンを40に設定
+        y: footerY,
+        font: customFont,
+        size: footerFontSize,
+        color: rgb(0, 0, 0),
+      });
+
+      // 右側のページ番号を描画
+      targetPage.drawText(pageInfoText, {
+        x: rightTextX,
+        y: footerY,
+        font: customFont,
+        size: footerFontSize,
+        color: rgb(0, 0, 0),
+      });
+    });
+
+    /* ---------------- フッター描画処理 (ここまで) ---------------- */
 
     /*　ここまで出力内容
      * -----------------------------------------------------------------*/

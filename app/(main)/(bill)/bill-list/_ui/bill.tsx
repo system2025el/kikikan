@@ -139,9 +139,17 @@ export const Bill = ({
   /* print pdf ------------------------------------------------------------ */
 
   // PDF出力用のモデル
-  const [pdfModel, setPdfModel] = useState(bill);
+  // const [pdfModel, setPdfModel] = useState(bill);
+  const [pdfModel, setPdfModel] = useState(getValues());
+  // フォーム全体を監視
+  const watchedValues = useWatch({ control });
   // PDFデータ生成フック
   const [printBill] = usePdf();
+
+  useEffect(() => {
+    // getValues() を使うことで setValue() の直後の値も確実に拾える
+    setPdfModel(getValues());
+  }, [watchedValues, getValues, setValue]);
 
   // ボタン押下
   const hundlePrintPdf = async () => {
@@ -160,9 +168,9 @@ export const Bill = ({
     window.open(url);
   };
 
-  useEffect(() => {
-    setPdfModel(bill);
-  }, [bill]); // <- 変更の契機
+  // useEffect(() => {
+  //   setPdfModel(bill);
+  // }, [bill]); // <- 変更の契機
 
   /* ---------------------------------------------------------------------- */
 
