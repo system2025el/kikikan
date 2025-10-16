@@ -1151,7 +1151,9 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
 
     checkPageBreak(rowHeight);
     drawColumnLine2();
-    drawRow2(`消費税（${param.zeiRat?.toLocaleString()}%）`, param.zeiAmt ?? 0);
+    const zeiRatText = param.zeiRat != null ? param.zeiRat.toLocaleString() : '';
+    const zeiAmt = param.zeiAmt ?? null;
+    drawRow2(`消費税（${zeiRatText}%）`, zeiAmt ?? 0);
     drawUnderLine();
     index++;
 
