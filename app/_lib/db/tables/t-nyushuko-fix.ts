@@ -6,6 +6,35 @@ import { SCHEMA, supabase } from '../supabase';
 import { NyushukoFix } from '../types/t-nyushuko-fix-type';
 
 /**
+ * 入出庫確定フラグ取得
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param sagyoKbnId 作業区分id
+ * @param sagyoId 作業id
+ * @returns
+ */
+export const selectNyushukoFixFlag = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  sagyoKbnId: number,
+  sagyoId: number
+) => {
+  try {
+    return await supabase
+      .schema(SCHEMA)
+      .from('t_nyushuko_fix')
+      .select('sagyo_fix_flg')
+      .eq('juchu_head_id', juchuHeadId)
+      .eq('juchu_kizai_head_id', juchuKizaiHeadId)
+      .eq('sagyo_kbn_id', sagyoKbnId)
+      .eq('sagyo_id', sagyoId)
+      .single();
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
  * 入出庫確定確認
  * @param data 入出庫確定確認データ
  * @returns

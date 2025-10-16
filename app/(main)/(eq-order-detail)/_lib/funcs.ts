@@ -42,6 +42,7 @@ import {
   selectJuchuKizaiNyushukoConfirm,
   updateJuchuKizaiNyushuko,
 } from '@/app/_lib/db/tables/t-juchu-kizai-nyushuko';
+import { selectNyushukoFixFlag } from '@/app/_lib/db/tables/t-nyushuko-fix';
 import { selectJuchuContainerMeisai } from '@/app/_lib/db/tables/v-juchu-ctn-meisai';
 import { selectJuchuKizaiMeisai, selectOyaJuchuKizaiMeisai } from '@/app/_lib/db/tables/v-juchu-kizai-meisai';
 import { JuchuCtnMeisai } from '@/app/_lib/db/types/t_juchu_ctn_meisai-type';
@@ -471,5 +472,32 @@ export const delSiyouHonbanbi = async (juchuHeadId: number, juchuKizaiHeadId: nu
     await deleteSiyouHonbanbi(juchuHeadId, juchuKizaiHeadId, connection);
   } catch (e) {
     throw e;
+  }
+};
+
+/**
+ * 入出庫確定フラグ取得
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param sagyoKbnId 作業区分id
+ * @param sagyoId 作業id
+ * @returns
+ */
+export const getNyushukoFixFlag = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  sagyoKbnId: number,
+  sagyoId: number
+) => {
+  try {
+    const { data, error } = await selectNyushukoFixFlag(juchuHeadId, juchuKizaiHeadId, sagyoKbnId, sagyoId);
+    if (error) {
+      console.error('getNyushukoFixFlag error: ', error);
+      return false;
+    }
+    return data.sagyo_fix_flg;
+  } catch (e) {
+    console.error(e);
+    return false;
   }
 };

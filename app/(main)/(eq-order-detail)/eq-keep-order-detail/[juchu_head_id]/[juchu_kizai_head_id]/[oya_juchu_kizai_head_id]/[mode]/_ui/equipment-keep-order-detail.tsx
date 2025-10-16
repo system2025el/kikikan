@@ -57,6 +57,7 @@ import {
 import {
   DeleteAlertDialog,
   NyushukoAlertDialog,
+  NyushukoFixAlertDialog,
   SaveAlertDialog,
 } from '@/app/(main)/(eq-order-detail)/_ui/caveat-dialog';
 import { OyaEqSelectionDialog } from '@/app/(main)/(eq-order-detail)/_ui/equipment-selection-dialog';
@@ -104,11 +105,17 @@ export const EquipmentKeepOrderDetail = (props: {
   keepShukoDate: Date | null;
   keepNyukoDate: Date | null;
   edit: boolean;
+  kicsFixFlag: boolean;
+  yardFixFlag: boolean;
 }) => {
   // user情報
   const user = useUserStore((state) => state.user);
   // 受注機材ヘッダー保存フラグ
   const saveKizaiHead = props.keepJuchuKizaiHeadData.juchuKizaiHeadId !== 0 ? true : false;
+  // KICS出発フラグ
+  const kicsFixFlag = props.kicsFixFlag;
+  // YARD出発フラグ
+  const yardFixFlag = props.yardFixFlag;
 
   // ロックデータ
   const [lockData, setLockData] = useState<LockValues | null>(null);
@@ -157,6 +164,8 @@ export const EquipmentKeepOrderDetail = (props: {
   const [EqSelectionDialogOpen, setEqSelectionDialogOpen] = useState(false);
   // 機材削除ダイアログ制御
   const [deleteOpen, setDeleteOpen] = useState(false);
+  // 出発中ダイアログ制御
+  const [nyushukoFixOpen, setNyushukoFixOpen] = useState(false);
 
   // アコーディオン制御
   const [expanded, setExpanded] = useState(false);
@@ -574,6 +583,20 @@ export const EquipmentKeepOrderDetail = (props: {
 
   // 明細削除ボタン押下時
   const handleMeisaiDelete = (target: { kizaiId: number; containerFlag: boolean }) => {
+    // 機材
+    if (!target.containerFlag) {
+      const deleteData = keepJuchuKizaiMeisaiList.find((d) => d.kizaiId === target.kizaiId && !d.delFlag);
+      if ((deleteData?.shozokuId === 1 && kicsFixFlag) || (deleteData?.shozokuId === 2 && yardFixFlag)) {
+        setNyushukoFixOpen(true);
+        return;
+      }
+    }
+
+    // コンテナ
+    if (target.containerFlag && (kicsFixFlag || yardFixFlag)) {
+      setNyushukoFixOpen(true);
+      return;
+    }
     setDeleteOpen(true);
     setDeleteTarget(target);
   };
@@ -1065,6 +1088,7 @@ export const EquipmentKeepOrderDetail = (props: {
           <IsDirtyAlertDialog open={dirtyOpen} onClick={handleResultDialog} />
           <NyushukoAlertDialog open={nyushukoOpen} onClick={() => setNyushukoOpen(false)} />
           <DeleteAlertDialog open={deleteOpen} onClick={handleMeisaiDeleteResult} />
+          <NyushukoFixAlertDialog open={nyushukoFixOpen} onClick={() => setNyushukoFixOpen(false)} />
         </Box>
       )}
     </>

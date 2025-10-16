@@ -70,3 +70,20 @@ export const DeleteAlertDialog = ({ open, onClick }: { open: boolean; onClick: (
     </Dialog>
   );
 };
+
+export const NyushukoFixAlertDialog = ({ open, onClick }: { open: boolean; onClick: () => void }) => {
+  return (
+    <Dialog open={open}>
+      <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
+        <WarningIcon color="error" />
+        <Box>出発しています</Box>
+      </DialogTitle>
+      <DialogContentText m={2} p={2}>
+        出発しているため削除できません
+      </DialogContentText>
+      <DialogActions>
+        <Button onClick={onClick}>確認</Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
