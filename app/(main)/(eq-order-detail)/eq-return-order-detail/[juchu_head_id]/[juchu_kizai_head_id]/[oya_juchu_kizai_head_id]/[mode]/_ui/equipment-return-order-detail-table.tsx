@@ -155,7 +155,7 @@ type ReturnEqTableProps = {
   rows: ReturnJuchuKizaiMeisaiValues[];
   edit: boolean;
   onChange: (kizaiId: number, returnOrderValue: number, returnSpareValue: number, returnTotalValue: number) => void;
-  handleDelete: (kizaiId: number) => void;
+  handleMeisaiDelete: (target: { kizaiId: number; containerFlag: boolean }) => void;
   handleMemoChange: (kizaiId: number, memo: string) => void;
   ref: React.RefObject<HTMLDivElement | null>;
 };
@@ -164,7 +164,7 @@ export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({
   rows,
   edit,
   onChange,
-  handleDelete,
+  handleMeisaiDelete,
   handleMemoChange,
   ref,
 }) => {
@@ -261,7 +261,7 @@ export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({
               rowIndex={rowIndex}
               edit={edit}
               handleOrderRef={handleReturnRef(rowIndex)}
-              handleDelete={handleDelete}
+              handleMeisaiDelete={handleMeisaiDelete}
               handleMemoChange={handleMemoChange}
               handleKeyDown={handleKeyDown}
               handlePlanKizaiQtyChange={handlePlanKizaiQtyChange}
@@ -279,7 +279,7 @@ type ReturnEqTableRowProps = {
   rowIndex: number;
   edit: boolean;
   handleOrderRef: (el: HTMLInputElement | null) => void;
-  handleDelete: (kizaiId: number) => void;
+  handleMeisaiDelete: (target: { kizaiId: number; containerFlag: boolean }) => void;
   handleMemoChange: (rowIndex: number, memo: string) => void;
   handlePlanKizaiQtyChange: (kizaiId: number, newValue: number) => void;
   handlePlanYobiQtyChange: (kizaiId: number, newValue: number) => void;
@@ -292,7 +292,7 @@ const ReturnEqTableRow = React.memo(
     rowIndex,
     edit,
     handleOrderRef,
-    handleDelete,
+    handleMeisaiDelete,
     handleMemoChange,
     handlePlanKizaiQtyChange,
     handlePlanYobiQtyChange,
@@ -303,7 +303,11 @@ const ReturnEqTableRow = React.memo(
     return (
       <TableRow>
         <TableCell sx={{ padding: 0, border: '1px solid black' }}>
-          <IconButton onClick={() => handleDelete(row.kizaiId)} sx={{ padding: 0, color: 'red' }} disabled={!edit}>
+          <IconButton
+            onClick={() => handleMeisaiDelete({ kizaiId: row.kizaiId, containerFlag: false })}
+            sx={{ padding: 0, color: 'red' }}
+            disabled={!edit}
+          >
             <Delete fontSize="small" />
           </IconButton>
         </TableCell>
@@ -445,9 +449,9 @@ export const ReturnContainerTable = (props: {
   edit: boolean;
   handleContainerMemoChange: (kizaiId: number, memo: string) => void;
   onChange: (kizaiId: number, kicsValue: number, yardValue: number, totalValue: number) => void;
-  handleContainerDelete: (kizaiId: number) => void;
+  handleMeisaiDelete: (target: { kizaiId: number; containerFlag: boolean }) => void;
 }) => {
-  const { rows, edit, handleContainerMemoChange, onChange, handleContainerDelete } = props;
+  const { rows, edit, handleContainerMemoChange, onChange, handleMeisaiDelete } = props;
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -535,7 +539,7 @@ export const ReturnContainerTable = (props: {
             <TableRow key={rowIndex}>
               <TableCell align="center" width={'min-content'} sx={{ padding: 0, border: '1px solid black' }}>
                 <IconButton
-                  onClick={() => handleContainerDelete(row.kizaiId)}
+                  onClick={() => handleMeisaiDelete({ kizaiId: row.kizaiId, containerFlag: true })}
                   sx={{ padding: 0, color: 'red' }}
                   disabled={!edit}
                 >

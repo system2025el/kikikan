@@ -224,7 +224,7 @@ export default function NavLinks() {
                   />
                 </ListItemButton>
               </ListItem>
-              {index === 11 && <Divider sx={{ ml: 8 }} />}
+              {index === 10 && <Divider sx={{ ml: 8 }} />}
             </Fragment>
           ))}
         </List>

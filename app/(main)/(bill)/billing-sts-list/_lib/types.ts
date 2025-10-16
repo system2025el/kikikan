@@ -9,6 +9,7 @@ export type BillingStsTableValues = {
   sts: string;
   ordNum: number;
   heads: {
+    kziHeadId: number;
     ordNum: number;
     headNam: string;
     shukoDat: string;

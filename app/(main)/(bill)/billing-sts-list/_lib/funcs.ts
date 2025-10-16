@@ -1,6 +1,10 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
+
+import { upsertSeikyuDat } from '@/app/_lib/db/tables/t-seikyu-date-juchu-kizai';
 import { selectFilteredBillingSituations } from '@/app/_lib/db/tables/v-seikyu-date-lst';
+import { toJapanDateString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { BillingStsSearchValues, BillingStsTableValues } from './types';
 
@@ -28,6 +32,7 @@ export const getFilteredBillingSituations = async (
 
     const heads = data.map((d) => ({
       juchuId: d.juchu_head_id,
+      kziHeadId: d.juchu_kizai_head_id,
       headNam: d.head_nam,
       shukoDat: d.shuko_dat,
       nyukoDat: d.nyuko_dat,
@@ -44,6 +49,36 @@ export const getFilteredBillingSituations = async (
       heads: heads.filter((h) => d.juchu_head_id === h.juchuId).map((h, i) => ({ ...h, ordNum: i + 1 })),
     }));
   } catch (e) {
+    throw e;
+  }
+};
+
+export const changeSeikyuDat = async (
+  {
+    juchuId,
+    kziHeadId,
+    newDat,
+  }: {
+    juchuId: number;
+    kziHeadId: number;
+    newDat: Date;
+  },
+  user: string
+) => {
+  const upsertData = {
+    juchu_head_id: juchuId,
+    juchu_kizai_head_id: kziHeadId,
+    seikyu_dat: toJapanDateString(newDat),
+    add_dat: toJapanTimeString(),
+    add_user: user,
+    upd_dat: toJapanTimeString(),
+    upd_user: user,
+  };
+  try {
+    await upsertSeikyuDat(upsertData);
+    await revalidatePath('/billing-sts-list');
+  } catch (e) {
+    console.error(e);
     throw e;
   }
 };

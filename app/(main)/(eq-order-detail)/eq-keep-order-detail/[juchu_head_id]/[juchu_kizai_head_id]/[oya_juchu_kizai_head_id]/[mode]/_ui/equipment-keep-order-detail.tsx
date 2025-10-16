@@ -54,7 +54,12 @@ import {
   OyaJuchuKizaiMeisaiValues,
   OyaJuchuKizaiNyushukoValues,
 } from '@/app/(main)/(eq-order-detail)/_lib/types';
-import { NyushukoAlertDialog, SaveAlertDialog } from '@/app/(main)/(eq-order-detail)/_ui/caveat-dialog';
+import {
+  DeleteAlertDialog,
+  NyushukoAlertDialog,
+  NyushukoFixAlertDialog,
+  SaveAlertDialog,
+} from '@/app/(main)/(eq-order-detail)/_ui/caveat-dialog';
 import { OyaEqSelectionDialog } from '@/app/(main)/(eq-order-detail)/_ui/equipment-selection-dialog';
 import {
   JuchuContainerMeisaiValues,
@@ -100,11 +105,17 @@ export const EquipmentKeepOrderDetail = (props: {
   keepShukoDate: Date | null;
   keepNyukoDate: Date | null;
   edit: boolean;
+  kicsFixFlag: boolean;
+  yardFixFlag: boolean;
 }) => {
   // user情報
   const user = useUserStore((state) => state.user);
   // 受注機材ヘッダー保存フラグ
   const saveKizaiHead = props.keepJuchuKizaiHeadData.juchuKizaiHeadId !== 0 ? true : false;
+  // KICS出発フラグ
+  const kicsFixFlag = props.kicsFixFlag;
+  // YARD出発フラグ
+  const yardFixFlag = props.yardFixFlag;
 
   // ロックデータ
   const [lockData, setLockData] = useState<LockValues | null>(null);
@@ -131,6 +142,8 @@ export const EquipmentKeepOrderDetail = (props: {
   const [keepJuchuContainerMeisaiList, setKeepJuchuContainerMeisaiList] = useState<KeepJuchuContainerMeisaiValues[]>(
     props.keepJuchuContainerMeisaiData ?? []
   );
+  // 削除機材
+  const [deleteTarget, setDeleteTarget] = useState<{ kizaiId: number; containerFlag: boolean } | null>(null);
 
   // 親出庫日
   const [oyaShukoDate, setShukoDate] = useState<Date | null>(props.oyaShukoDate);
@@ -149,6 +162,10 @@ export const EquipmentKeepOrderDetail = (props: {
   const [nyushukoOpen, setNyushukoOpen] = useState(false);
   // 機材追加ダイアログ制御
   const [EqSelectionDialogOpen, setEqSelectionDialogOpen] = useState(false);
+  // 機材削除ダイアログ制御
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  // 出発中ダイアログ制御
+  const [nyushukoFixOpen, setNyushukoFixOpen] = useState(false);
 
   // アコーディオン制御
   const [expanded, setExpanded] = useState(false);
@@ -419,216 +436,6 @@ export const EquipmentKeepOrderDetail = (props: {
     }
   };
 
-  // /**
-  //  *キープ新規受注機材ヘッダー追加
-  //  * @param data 受注機材ヘッダーデータ
-  //  * @param updateShukoDate 更新後出庫日
-  //  * @param updateNyukoDate 更新後入庫日
-  //  * @param updateDateRange 更新後出庫日から入庫日
-  //  * @param userNam ユーザー名
-  //  */
-  // const saveNewKeepJuchuKizaiHead = async (data: KeepJuchuKizaiHeadValues, userNam: string) => {
-  //   const maxId = await getJuchuKizaiHeadMaxId(data.juchuHeadId);
-  //   const newJuchuKizaiHeadId = maxId ? maxId.juchu_kizai_head_id + 1 : 1;
-  //   // 受注機材ヘッダー追加
-  //   const headResult = await addKeepJuchuKizaiHead(newJuchuKizaiHeadId, data, userNam);
-  //   console.log('受注機材ヘッダー追加', headResult);
-  //   // 受注機材入出庫追加
-  //   const nyushukoResult = await addJuchuKizaiNyushuko(
-  //     data.juchuHeadId,
-  //     newJuchuKizaiHeadId,
-  //     data.kicsShukoDat,
-  //     data.yardShukoDat,
-  //     data.kicsNyukoDat,
-  //     data.yardNyukoDat,
-  //     userNam
-  //   );
-  //   console.log('キープ受注機材入出庫追加', nyushukoResult);
-
-  //   redirect(`/eq-keep-order-detail/${data.juchuHeadId}/${newJuchuKizaiHeadId}/${data.oyaJuchuKizaiHeadId}/edit`);
-  // };
-
-  // /**
-  //  * キープ受注機材ヘッダー関係更新
-  //  * @param data 受注機材ヘッダーデータ
-  //  * @param updateShukoDate 更新後出庫日
-  //  * @param updateNyukoDate 更新後入庫日
-  //  * @param updateDateRange 更新後出庫日から入庫日
-  //  * @param userNam ユーザー名
-  //  */
-  // const saveKeepJuchuKizaiHead = async (
-  //   data: KeepJuchuKizaiHeadValues,
-  //   updateShukoDate: Date,
-  //   updateNyukoDate: Date,
-  //   userNam: string
-  // ) => {
-  //   // 受注機材ヘッド更新
-  //   const headResult = await updKeepJuchuKizaiHead(data, userNam);
-  //   console.log('キープ受注機材ヘッダー更新', headResult);
-
-  //   // 受注機材入出庫更新
-  //   const nyushukoResult = await updJuchuKizaiNyushuko(
-  //     data.juchuHeadId,
-  //     data.juchuKizaiHeadId,
-  //     data.kicsShukoDat,
-  //     data.yardShukoDat,
-  //     data.kicsNyukoDat,
-  //     data.yardNyukoDat,
-  //     userNam
-  //   );
-  //   console.log('キープ受注機材入出庫更新', nyushukoResult);
-
-  //   reset(data);
-  //   // 出庫日更新
-  //   setKeepShukoDate(updateShukoDate);
-  //   // 入庫日更新
-  //   setKeepNyukoDate(updateNyukoDate);
-  // };
-
-  // /**
-  //  * キープ受注機材明細関係更新
-  //  * @param juchuHeadId 受注ヘッダーid
-  //  * @param juchuKizaiHeadId 受注機材ヘッダーid
-  //  * @param userNam ユーザー名
-  //  */
-  // const saveKeepJuchuKizaiMeisai = async (data: KeepJuchuKizaiHeadValues, userNam: string) => {
-  //   const copyKeepJuchuKizaiMeisaiData = [...keepJuchuKizaiMeisaiList];
-  //   const juchuKizaiMeisaiMaxId = await getJuchuKizaiMeisaiMaxId(data.juchuHeadId, data.juchuKizaiHeadId);
-  //   let newKeepJuchuKizaiMeisaiId = juchuKizaiMeisaiMaxId ? juchuKizaiMeisaiMaxId.juchu_kizai_meisai_id + 1 : 1;
-
-  //   const newKeepJuchuKizaiMeisaiData = copyKeepJuchuKizaiMeisaiData.map((data) =>
-  //     data.juchuKizaiMeisaiId === 0 && !data.delFlag
-  //       ? { ...data, juchuKizaiMeisaiId: newKeepJuchuKizaiMeisaiId++ }
-  //       : data
-  //   );
-
-  //   // 受注機材明細更新
-  //   const addKeepJuchuKizaiMeisaiData = newKeepJuchuKizaiMeisaiData.filter((data) => !data.delFlag && !data.saveFlag);
-  //   const updateKeepJuchuKizaiMeisaiData = newKeepJuchuKizaiMeisaiData.filter((data) => !data.delFlag && data.saveFlag);
-  //   const deleteKeepJuchuKizaiMeisaiData = newKeepJuchuKizaiMeisaiData.filter((data) => data.delFlag && data.saveFlag);
-  //   // 削除
-  //   if (deleteKeepJuchuKizaiMeisaiData.length > 0) {
-  //     const deleteKizaiIds = deleteKeepJuchuKizaiMeisaiData.map((data) => data.kizaiId);
-  //     const deleteMeisaiResult = await delKeepJuchuKizaiMeisai(data.juchuHeadId, data.juchuKizaiHeadId, deleteKizaiIds);
-  //     console.log('キープ受注機材明細削除', deleteMeisaiResult);
-
-  //     const deleteNyushukoDenResult = await delKeepNyushukoDen(data.juchuHeadId, data.juchuKizaiHeadId, deleteKizaiIds);
-  //     console.log('キープ入出庫伝票削除', deleteNyushukoDenResult);
-  //   }
-  //   // 追加
-  //   if (addKeepJuchuKizaiMeisaiData.length > 0) {
-  //     const addMeisaiResult = addKeepJuchuKizaiMeisai(addKeepJuchuKizaiMeisaiData, userNam);
-  //     console.log('キープ受注機材明細追加', addMeisaiResult);
-
-  //     const addNyushukoDenResult = await addKeepNyushukoDen(data, addKeepJuchuKizaiMeisaiData, userNam);
-  //     console.log('キープ入出庫伝票追加', addNyushukoDenResult);
-  //   }
-  //   // 更新
-  //   if (updateKeepJuchuKizaiMeisaiData.length > 0) {
-  //     const updateMeisaiResult = await updKeepJuchuKizaiMeisai(updateKeepJuchuKizaiMeisaiData, userNam);
-  //     console.log('キープ受注機材明細更新', updateMeisaiResult);
-
-  //     const updateNyushukoDenResult = await updKeepNyushukoDen(data, updateKeepJuchuKizaiMeisaiData, userNam);
-  //     console.log('キープ入出庫伝票更新', updateNyushukoDenResult);
-  //   }
-
-  //   // 受注機材明細、機材在庫テーブル更新
-  //   const keepJuchuKizaiMeisaiData = await getKeepJuchuKizaiMeisai(
-  //     data.juchuHeadId,
-  //     data.juchuKizaiHeadId,
-  //     data.oyaJuchuKizaiHeadId
-  //   );
-  //   if (keepJuchuKizaiMeisaiData) {
-  //     setKeepJuchuKizaiMeisaiList(keepJuchuKizaiMeisaiData);
-  //     setOriginKeepJuchuKizaiMeisaiList(keepJuchuKizaiMeisaiData);
-  //   }
-
-  //   // 入出庫確定更新
-  //   const kics =
-  //     keepJuchuKizaiMeisaiList.filter((d) => d.shozokuId === 1 && !d.delFlag) &&
-  //     keepJuchuContainerMeisaiList.filter((d) => d.kicsKeepQty && !d.delFlag)
-  //       ? true
-  //       : false;
-  //   const yard =
-  //     keepJuchuKizaiMeisaiList.filter((d) => d.shozokuId === 2 && !d.delFlag) &&
-  //     keepJuchuContainerMeisaiList.filter((d) => d.yardKeepQty && !d.delFlag)
-  //       ? true
-  //       : false;
-
-  //   const nyushukoFixResult = await updKeepNyushukoFix(data, kics, yard, userNam);
-  //   console.log('キープ入出庫確定更新', nyushukoFixResult);
-  // };
-
-  // /**
-  //  * キープ受注コンテナ明細更新
-  //  * @param juchuHeadId 受注ヘッダーid
-  //  * @param juchuKizaiHeadId 受注機材ヘッダーid
-  //  * @param userNam ユーザー名
-  //  */
-  // const saveKeepJuchuContainerMeisai = async (data: KeepJuchuKizaiHeadValues, userNam: string) => {
-  //   const copyKeepJuchuContainerMeisaiData = [...keepJuchuContainerMeisaiList];
-  //   const juchuContainerMeisaiMaxId = await getJuchuContainerMeisaiMaxId(data.juchuHeadId, data.juchuKizaiHeadId);
-  //   let newKeepJuchuContainerMeisaiId = juchuContainerMeisaiMaxId
-  //     ? juchuContainerMeisaiMaxId.juchu_kizai_meisai_id + 1
-  //     : 1;
-
-  //   const newKeepJuchuContainerMeisaiData = copyKeepJuchuContainerMeisaiData.map((data) =>
-  //     data.juchuKizaiMeisaiId === 0 && !data.delFlag
-  //       ? { ...data, juchuKizaiMeisaiId: newKeepJuchuContainerMeisaiId++ }
-  //       : data
-  //   );
-
-  //   // 受注コンテナ明細更新
-  //   const addKeepJuchuContainerMeisaiData = newKeepJuchuContainerMeisaiData.filter(
-  //     (data) => !data.delFlag && !data.saveFlag
-  //   );
-  //   const updateKeepJuchuContainerMeisaiData = newKeepJuchuContainerMeisaiData.filter(
-  //     (data) => !data.delFlag && data.saveFlag
-  //   );
-  //   const deleteKeepJuchuContainerMeisaiData = newKeepJuchuContainerMeisaiData.filter(
-  //     (data) => data.delFlag && data.saveFlag
-  //   );
-  //   // 削除
-  //   if (deleteKeepJuchuContainerMeisaiData.length > 0) {
-  //     const deleteKizaiIds = deleteKeepJuchuContainerMeisaiData.map((data) => data.kizaiId);
-  //     const deleteContainerMeisaiResult = await delKeepJuchuContainerMeisai(
-  //       data.juchuHeadId,
-  //       data.juchuKizaiHeadId,
-  //       deleteKizaiIds
-  //     );
-  //     console.log('キープ受注コンテナ明細削除', deleteContainerMeisaiResult);
-  //   }
-  //   // 追加
-  //   if (addKeepJuchuContainerMeisaiData.length > 0) {
-  //     const addContainerMeisaiResult = addKeepJuchuContainerMeisai(addKeepJuchuContainerMeisaiData, userNam);
-  //     console.log('キープ受注コンテナ明細追加', addContainerMeisaiResult);
-  //   }
-  //   // 更新
-  //   if (updateKeepJuchuContainerMeisaiData.length > 0) {
-  //     const updateContainerMeisaiResult = await updKeepJuchuContainerMeisai(
-  //       updateKeepJuchuContainerMeisaiData,
-  //       userNam
-  //     );
-  //     console.log('キープ受注コンテナ明細更新', updateContainerMeisaiResult);
-  //   }
-
-  //   // キープコンテナ入出庫伝票更新
-  //   const containerNyushukoDenResult = await updKeepContainerNyushukoDen(
-  //     data,
-  //     newKeepJuchuContainerMeisaiData,
-  //     userNam
-  //   );
-  //   console.log('キープコンテナ入出庫伝票更新', containerNyushukoDenResult);
-
-  //   const keepJuchuContainerMeisaiData = await getKeepJuchuContainerMeisai(
-  //     data.juchuHeadId,
-  //     data.juchuKizaiHeadId,
-  //     data.oyaJuchuKizaiHeadId
-  //   );
-  //   setOriginKeepJuchuContainerMeisaiList(keepJuchuContainerMeisaiData ?? []);
-  //   setKeepJuchuContainerMeisaiList(keepJuchuContainerMeisaiData ?? []);
-  // };
-
   /**
    * 機材キープメモ入力時
    * @param rowIndex 入力された行番号
@@ -748,16 +555,6 @@ export const EquipmentKeepOrderDetail = (props: {
   };
 
   /**
-   * 機材テーブルの削除ボタン押下時
-   * @param kizaiId 機材id
-   */
-  const handleDelete = (kizaiId: number) => {
-    setKeepJuchuKizaiMeisaiList((prev) =>
-      prev.map((data) => (data.kizaiId === kizaiId && !data.delFlag ? { ...data, delFlag: true } : data))
-    );
-  };
-
-  /**
    * コンテナメモ入力時
    * @param kizaiId 機材id
    * @param memo コンテナメモ内容
@@ -784,14 +581,50 @@ export const EquipmentKeepOrderDetail = (props: {
     );
   };
 
-  /**
-   * コンテナテーブル削除ボタン押下時
-   * @param kizaiId 機材id
-   */
-  const handleKeepContainerDelete = (kizaiId: number) => {
-    setKeepJuchuContainerMeisaiList((prev) =>
-      prev.map((data) => (data.kizaiId === kizaiId && !data.delFlag ? { ...data, delFlag: true } : data))
-    );
+  // 明細削除ボタン押下時
+  const handleMeisaiDelete = (target: { kizaiId: number; containerFlag: boolean }) => {
+    // 機材
+    if (!target.containerFlag) {
+      const deleteData = keepJuchuKizaiMeisaiList.find((d) => d.kizaiId === target.kizaiId && !d.delFlag);
+      if ((deleteData?.shozokuId === 1 && kicsFixFlag) || (deleteData?.shozokuId === 2 && yardFixFlag)) {
+        setNyushukoFixOpen(true);
+        return;
+      }
+    }
+
+    // コンテナ
+    if (target.containerFlag && (kicsFixFlag || yardFixFlag)) {
+      setNyushukoFixOpen(true);
+      return;
+    }
+    setDeleteOpen(true);
+    setDeleteTarget(target);
+  };
+
+  // 明細削除ダイアログの押下ボタンによる処理
+  const handleMeisaiDeleteResult = (result: boolean) => {
+    if (!deleteTarget) return;
+
+    if (result) {
+      setDeleteOpen(false);
+      if (deleteTarget.containerFlag) {
+        setKeepJuchuContainerMeisaiList((prev) =>
+          prev.map((data) =>
+            data.kizaiId === deleteTarget.kizaiId && !data.delFlag ? { ...data, delFlag: true } : data
+          )
+        );
+      } else {
+        setKeepJuchuKizaiMeisaiList((prev) =>
+          prev.map((data) =>
+            data.kizaiId === deleteTarget.kizaiId && !data.delFlag ? { ...data, delFlag: true } : data
+          )
+        );
+      }
+      setDeleteTarget(null);
+    } else {
+      setDeleteOpen(false);
+      setDeleteTarget(null);
+    }
   };
 
   /**
@@ -1228,7 +1061,7 @@ export const EquipmentKeepOrderDetail = (props: {
                 <KeepEqTable
                   rows={keepJuchuKizaiMeisaiList}
                   edit={edit}
-                  handleDelete={handleDelete}
+                  handleMeisaiDelete={handleMeisaiDelete}
                   handleMemoChange={handleMemoChange}
                   onChange={handleCellChange}
                 />
@@ -1244,7 +1077,7 @@ export const EquipmentKeepOrderDetail = (props: {
                 edit={edit}
                 handleContainerMemoChange={handleKeepContainerMemoChange}
                 onChange={handleKeepContainerCellChange}
-                handleContainerDelete={handleKeepContainerDelete}
+                handleMeisaiDelete={handleMeisaiDelete}
               />
             </Box>
           </Paper>
@@ -1254,6 +1087,8 @@ export const EquipmentKeepOrderDetail = (props: {
           <SaveAlertDialog open={saveOpen} onClick={() => setSaveOpen(false)} />
           <IsDirtyAlertDialog open={dirtyOpen} onClick={handleResultDialog} />
           <NyushukoAlertDialog open={nyushukoOpen} onClick={() => setNyushukoOpen(false)} />
+          <DeleteAlertDialog open={deleteOpen} onClick={handleMeisaiDeleteResult} />
+          <NyushukoFixAlertDialog open={nyushukoFixOpen} onClick={() => setNyushukoFixOpen(false)} />
         </Box>
       )}
     </>

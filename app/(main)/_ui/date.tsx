@@ -17,6 +17,8 @@ import dayjs, { Dayjs } from 'dayjs';
 import { useMemo, useState } from 'react';
 import { ControllerFieldState, ControllerRenderProps, FieldErrors, Noop, useFormContext } from 'react-hook-form';
 import { DateRangePicker } from 'rsuite';
+
+import { toJapanDateString } from '../_lib/date-conversion';
 //import { DateRange } from 'rsuite/esm/DateRangePicker';
 
 dayjs.locale('ja'); // カレンダーの曜日のフォーマット
@@ -402,6 +404,8 @@ export const FormDateX = ({
   error,
   helperText,
   readonly,
+  minDate,
+  maxDate,
   onChange,
 }: {
   sx?: object;
@@ -410,6 +414,8 @@ export const FormDateX = ({
   error?: boolean;
   helperText?: string;
   readonly?: boolean;
+  minDate?: Date;
+  maxDate?: Date;
   onChange?: (date: Date | null) => void;
 }) => {
   return (
@@ -446,6 +452,12 @@ export const FormDateX = ({
         calendarHeader: { format: 'YYYY年MM月' },
       }} // カレンダーヘッダーのフォーマット
       views={['year', 'month', 'day']}
+      maxDate={dayjs(toJapanDateString(maxDate))}
+      minDate={dayjs(toJapanDateString(minDate))}
+      shouldDisableDate={(date) =>
+        date.isBefore(dayjs(toJapanDateString(minDate)), 'day') ||
+        date.isAfter(dayjs(toJapanDateString(maxDate)), 'day')
+      }
       disabled={disabled}
       value={value ? dayjs(value) : null}
       onChange={
@@ -458,7 +470,6 @@ export const FormDateX = ({
     />
   );
 };
-
 /**
  * 日付を選択し取得するコンポーネント
  * @param props sx スタイル disbled disabledかどうか

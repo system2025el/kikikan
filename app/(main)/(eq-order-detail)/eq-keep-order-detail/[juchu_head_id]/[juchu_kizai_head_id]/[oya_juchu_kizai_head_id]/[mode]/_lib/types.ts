@@ -18,14 +18,14 @@ export const KeepJuchuKizaiHeadSchema = z
     yardShukoDat: z.date().nullable(),
     yardNyukoDat: z.date().nullable(),
   })
-  .refine((data) => data.kicsShukoDat || data.yardShukoDat, {
-    message: '',
-    path: ['kicsShukoDat'],
-  })
-  .refine((data) => data.kicsShukoDat || data.yardShukoDat, {
-    message: validationMessages.required(),
-    path: ['yardShukoDat'],
-  })
+  // .refine((data) => data.kicsShukoDat || data.yardShukoDat, {
+  //   message: '',
+  //   path: ['kicsShukoDat'],
+  // })
+  // .refine((data) => data.kicsShukoDat || data.yardShukoDat, {
+  //   message: validationMessages.required(),
+  //   path: ['yardShukoDat'],
+  // })
   .refine((data) => data.kicsNyukoDat || data.yardNyukoDat, {
     message: '',
     path: ['kicsNyukoDat'],

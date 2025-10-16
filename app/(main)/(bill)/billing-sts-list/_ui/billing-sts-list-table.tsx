@@ -19,6 +19,7 @@ import {
   IconButton,
   Paper,
   Snackbar,
+  Stack,
   Table,
   TableBody,
   TableCell,
@@ -29,14 +30,17 @@ import {
 } from '@mui/material';
 import { useMemo, useState } from 'react';
 
-import { toJapanDateString } from '@/app/(main)/_lib/date-conversion';
+import { useUserStore } from '@/app/_lib/stores/usestore';
+import { toJapanDateString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
 import { FormDateX } from '@/app/(main)/_ui/date';
 import { Loading } from '@/app/(main)/_ui/loading';
 import { MuiTablePagination } from '@/app/(main)/_ui/table-pagination';
+import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 import { LightTooltipWithText } from '@/app/(main)/(masters)/_ui/tables';
 
 import { CreateBillDialog } from '../../bill-list/_ui/create-bill-dialog';
+import { changeSeikyuDat } from '../_lib/funcs';
 import { BillingStsTableValues } from '../_lib/types';
 
 /**
@@ -162,19 +166,41 @@ export const BillingStsListTable = ({
  * @returns {JSX.Element} 開閉するテーブルの行のコンポーネント
  */
 const BillingStsRow = ({ juchu }: { juchu: BillingStsTableValues }) => {
+  /* ログインユーザー */
+  const user = useUserStore((state) => state.user);
+
   /* 行の開閉 */
   const [open, setOpen] = useState(false);
 
   /* 請求完了日変更ダイアログ */
   const [changeDatOpen, setChangeDatOpen] = useState(false);
-  /* 元の請求済み期間 */
-  const [currentDat, setCurrentDat] = useState<Date | null>();
+  /* 編集する明細のID */
+  const [meisaiToUpd, setMeisaiToUpd] = useState<{
+    juchuId: number;
+    kziHeadId: number;
+    shukoDat: Date;
+    nyukoDat: Date;
+    currentDat: Date | null;
+  }>({
+    juchuId: FAKE_NEW_ID,
+    kziHeadId: FAKE_NEW_ID,
+    shukoDat: new Date(),
+    nyukoDat: new Date(),
+    currentDat: null,
+  });
   /* 新しい請求済み期間 */
-  const [newDat, setNewDat] = useState<Date | null>(currentDat ?? null);
+  const [newDat, setNewDat] = useState<Date | null>(null);
 
   /* methods ------------------------------------------------------- */
   const handleChangeDat = async () => {
-    console.log('current::::: ', currentDat, ', new :::::::', newDat);
+    console.log('current::::: ', meisaiToUpd.currentDat, ', new :::::::', newDat);
+    const m = meisaiToUpd;
+    const changeTo = {
+      juchuId: m.juchuId,
+      kziHeadId: m.kziHeadId,
+      newDat: newDat! > m.nyukoDat ? m.nyukoDat : newDat! < m.shukoDat ? m.shukoDat : newDat!,
+    };
+    await changeSeikyuDat(changeTo, user?.name ?? '');
     setChangeDatOpen(false);
   };
 
@@ -320,7 +346,14 @@ const BillingStsRow = ({ juchu }: { juchu: BillingStsTableValues }) => {
                         py: 0.5,
                       }}
                       onClick={() => {
-                        setCurrentDat(h.seikyuDat ? new Date(h.seikyuDat) : null);
+                        setNewDat(h.seikyuDat ? new Date(h.seikyuDat) : null);
+                        setMeisaiToUpd({
+                          juchuId: juchu.juchuId,
+                          kziHeadId: h.kziHeadId,
+                          nyukoDat: new Date(h.nyukoDat),
+                          shukoDat: new Date(h.shukoDat),
+                          currentDat: h.seikyuDat ? new Date(h.seikyuDat) : null,
+                        });
                         setChangeDatOpen(true);
                       }}
                     >
@@ -347,14 +380,34 @@ const BillingStsRow = ({ juchu }: { juchu: BillingStsTableValues }) => {
                   }}
                 />
               </DialogTitle>
-              <DialogContent sx={{ m: 5, justifyContent: 'center', display: 'flex', alignItems: 'center' }}>
-                <Typography mr={3}>請求済み期間</Typography>
-                <FormDateX value={newDat} onChange={(value) => setNewDat(value)} />
+
+              <DialogContent sx={{ m: 5 }}>
+                <Typography mb={2}>
+                  {toJapanDateString(meisaiToUpd.shukoDat)}～{toJapanDateString(meisaiToUpd.nyukoDat)}で選択してください
+                </Typography>
+                <Stack sx={{ justifyContent: 'center', display: 'flex', alignItems: 'center' }}>
+                  <Typography mr={3}>請求済み期間</Typography>
+                  <FormDateX
+                    value={newDat}
+                    onChange={(date) => {
+                      const m = meisaiToUpd;
+                      const theDate = date! > m.nyukoDat ? m.nyukoDat : date! < m.shukoDat ? null : date!;
+                      setNewDat(theDate);
+                    }}
+                    maxDate={meisaiToUpd.nyukoDat}
+                    minDate={meisaiToUpd.shukoDat}
+                  />
+                </Stack>
               </DialogContent>
               <DialogActions>
                 <Button
                   onClick={() => handleChangeDat()}
-                  disabled={!newDat || (currentDat ? currentDat === newDat : false)}
+                  disabled={
+                    !newDat ||
+                    (meisaiToUpd.currentDat
+                      ? toJapanDateString(meisaiToUpd.currentDat) === toJapanDateString(newDat)
+                      : false)
+                  }
                 >
                   変更
                 </Button>
