@@ -1011,11 +1011,11 @@ export const updKeepContainerNyushukoDen = async (
         );
       }
       console.log('keep container nyushuko den updated successfully:', data);
-      return true;
     } catch (e) {
       throw e;
     }
   }
+  return true;
 };
 
 /**
