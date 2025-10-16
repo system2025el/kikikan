@@ -52,3 +52,21 @@ export const NyushukoAlertDialog = ({ open, onClick }: { open: boolean; onClick:
     </Dialog>
   );
 };
+
+export const DeleteAlertDialog = ({ open, onClick }: { open: boolean; onClick: (result: boolean) => void }) => {
+  return (
+    <Dialog open={open}>
+      <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
+        <WarningIcon color="error" />
+        <Box>削除</Box>
+      </DialogTitle>
+      <DialogContentText m={2} p={2}>
+        削除してもよろしいでしょうか？
+      </DialogContentText>
+      <DialogActions>
+        <Button onClick={() => onClick(true)}>削除</Button>
+        <Button onClick={() => onClick(false)}>戻る</Button>
+      </DialogActions>
+    </Dialog>
+  );
+};

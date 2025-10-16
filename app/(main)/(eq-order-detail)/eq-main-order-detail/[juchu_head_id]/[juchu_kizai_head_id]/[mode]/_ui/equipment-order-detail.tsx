@@ -60,7 +60,12 @@ import {
 } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 import { DetailOerValues } from '@/app/(main)/(eq-order-detail)/_lib/types';
 
-import { MoveAlertDialog, NyushukoAlertDialog, SaveAlertDialog } from '../../../../../_ui/caveat-dialog';
+import {
+  DeleteAlertDialog,
+  MoveAlertDialog,
+  NyushukoAlertDialog,
+  SaveAlertDialog,
+} from '../../../../../_ui/caveat-dialog';
 import {
   addHonbanbi,
   addIdoDen,
@@ -169,6 +174,8 @@ const EquipmentOrderDetail = (props: {
   const [originPlanQty, setOriginPlanQty] = useState<number[]>(
     props.juchuKizaiMeisaiData ? props.juchuKizaiMeisaiData.map((data) => data.planQty ?? 0) : []
   );
+  // 削除機材
+  const [deleteTarget, setDeleteTarget] = useState<{ kizaiId: number; containerFlag: boolean } | null>(null);
 
   // 出庫日
   const [shukoDate, setShukoDate] = useState<Date | null>(props.shukoDate);
@@ -193,6 +200,8 @@ const EquipmentOrderDetail = (props: {
   const [EqSelectionDialogOpen, setEqSelectionDialogOpen] = useState(false);
   // 日付選択カレンダーダイアログ制御
   const [dateSelectionDialogOpne, setDateSelectionDialogOpne] = useState(false);
+  // 機材削除ダイアログ制御
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   // アコーディオン制御
   const [expanded, setExpanded] = useState(false);
@@ -770,22 +779,6 @@ const EquipmentOrderDetail = (props: {
   };
 
   /**
-   * 機材テーブルの削除ボタン押下時
-   * @param kizaiId 機材id
-   */
-  const handleDelete = (kizaiId: number) => {
-    const filterJuchuKizaiMeisaiList = juchuKizaiMeisaiList.filter((data) => !data.delFlag);
-    const rowIndex = filterJuchuKizaiMeisaiList.findIndex((data) => data.kizaiId === kizaiId);
-    const updatedJuchuKizaiMeisaiList = filterJuchuKizaiMeisaiList.filter((data) => data.kizaiId !== kizaiId);
-    setJuchuKizaiMeisaiList((prev) =>
-      prev.map((data) => (data.kizaiId === kizaiId && !data.delFlag ? { ...data, delFlag: true } : data))
-    );
-    setEqStockList((prev) => prev.filter((data) => !data.every((d) => d.kizaiId === kizaiId)));
-    setOriginPlanQty((prev) => prev.filter((_, index) => index !== rowIndex));
-    setPriceTotal(updatedJuchuKizaiMeisaiList.reduce((sum, row) => sum + (row.kizaiTankaAmt ?? 0), 0));
-  };
-
-  /**
    * 機材テーブルの移動日変更時
    * @param kizaiId 機材id
    * @param date 日付
@@ -841,14 +834,44 @@ const EquipmentOrderDetail = (props: {
     );
   };
 
-  /**
-   * コンテナテーブル削除ボタン押下時
-   * @param kizaiId 機材id
-   */
-  const handleContainerDelete = (kizaiId: number) => {
-    setJuchuContainerMeisaiList((prev) =>
-      prev.map((data) => (data.kizaiId === kizaiId && !data.delFlag ? { ...data, delFlag: true } : data))
-    );
+  // 明細削除ボタン押下時
+  const handleMeisaiDelete = (target: { kizaiId: number; containerFlag: boolean }) => {
+    setDeleteOpen(true);
+    setDeleteTarget(target);
+  };
+
+  // 明細削除ダイアログの押下ボタンによる処理
+  const handleMeisaiDeleteResult = (result: boolean) => {
+    if (!deleteTarget) return;
+
+    if (result) {
+      setDeleteOpen(false);
+      if (deleteTarget.containerFlag) {
+        setJuchuContainerMeisaiList((prev) =>
+          prev.map((data) =>
+            data.kizaiId === deleteTarget.kizaiId && !data.delFlag ? { ...data, delFlag: true } : data
+          )
+        );
+      } else {
+        const filterJuchuKizaiMeisaiList = juchuKizaiMeisaiList.filter((data) => !data.delFlag);
+        const rowIndex = filterJuchuKizaiMeisaiList.findIndex((data) => data.kizaiId === deleteTarget.kizaiId);
+        const updatedJuchuKizaiMeisaiList = filterJuchuKizaiMeisaiList.filter(
+          (data) => data.kizaiId !== deleteTarget.kizaiId
+        );
+        setJuchuKizaiMeisaiList((prev) =>
+          prev.map((data) =>
+            data.kizaiId === deleteTarget.kizaiId && !data.delFlag ? { ...data, delFlag: true } : data
+          )
+        );
+        setEqStockList((prev) => prev.filter((data) => !data.every((d) => d.kizaiId === deleteTarget.kizaiId)));
+        setOriginPlanQty((prev) => prev.filter((_, index) => index !== rowIndex));
+        setPriceTotal(updatedJuchuKizaiMeisaiList.reduce((sum, row) => sum + (row.kizaiTankaAmt ?? 0), 0));
+      }
+      setDeleteTarget(null);
+    } else {
+      setDeleteOpen(false);
+      setDeleteTarget(null);
+    }
   };
 
   /**
@@ -1624,7 +1647,7 @@ const EquipmentOrderDetail = (props: {
                         rows={juchuKizaiMeisaiList}
                         edit={edit}
                         onChange={handleCellChange}
-                        handleDelete={handleDelete}
+                        handleMeisaiDelete={handleMeisaiDelete}
                         handleCellDateChange={handleCellDateChange}
                         handleCellDateClear={handleCellDateClear}
                         handleMemoChange={handleMemoChange}
@@ -1676,7 +1699,7 @@ const EquipmentOrderDetail = (props: {
                     edit={edit}
                     handleContainerMemoChange={handleContainerMemoChange}
                     onChange={handleContainerCellChange}
-                    handleContainerDelete={handleContainerDelete}
+                    handleMeisaiDelete={handleMeisaiDelete}
                   />
                 </Box>
               </>
@@ -1916,6 +1939,7 @@ const EquipmentOrderDetail = (props: {
           <IsDirtyAlertDialog open={dirtyOpen} onClick={handleResultDialog} />
           <MoveAlertDialog open={moveOpen} onClick={handleMoveDialog} />
           <NyushukoAlertDialog open={nyushukoOpen} onClick={() => setNyushukoOpen(false)} />
+          <DeleteAlertDialog open={deleteOpen} onClick={handleMeisaiDeleteResult} />
         </Box>
       )}
     </>

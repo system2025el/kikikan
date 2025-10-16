@@ -67,7 +67,11 @@ import {
   OyaJuchuKizaiMeisaiValues,
   OyaJuchuKizaiNyushukoValues,
 } from '@/app/(main)/(eq-order-detail)/_lib/types';
-import { NyushukoAlertDialog, SaveAlertDialog } from '@/app/(main)/(eq-order-detail)/_ui/caveat-dialog';
+import {
+  DeleteAlertDialog,
+  NyushukoAlertDialog,
+  SaveAlertDialog,
+} from '@/app/(main)/(eq-order-detail)/_ui/caveat-dialog';
 import { OyaEqSelectionDialog } from '@/app/(main)/(eq-order-detail)/_ui/equipment-selection-dialog';
 import {
   JuchuContainerMeisaiValues,
@@ -158,6 +162,8 @@ export const EquipmentReturnOrderDetail = (props: {
   const [originReturnPlanQty, setOriginReturnPlanQty] = useState<number[]>(
     props.returnJuchuKizaiMeisaiData ? props.returnJuchuKizaiMeisaiData.map((data) => data.planQty ?? 0) : []
   );
+  // 削除機材
+  const [deleteTarget, setDeleteTarget] = useState<{ kizaiId: number; containerFlag: boolean } | null>(null);
 
   // 親出庫日
   const [oyaShukoDate, setoyaShukoDate] = useState<Date | null>(props.oyaShukoDate);
@@ -178,6 +184,8 @@ export const EquipmentReturnOrderDetail = (props: {
   const [nyushukoOpen, setNyushukoOpen] = useState(false);
   // 機材追加ダイアログ制御
   const [EqSelectionDialogOpen, setEqSelectionDialogOpen] = useState(false);
+  // 機材削除ダイアログ制御
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   // アコーディオン制御
   const [expanded, setExpanded] = useState(false);
@@ -778,6 +786,46 @@ export const EquipmentReturnOrderDetail = (props: {
     );
   };
 
+  // 明細削除ボタン押下時
+  const handleMeisaiDelete = (target: { kizaiId: number; containerFlag: boolean }) => {
+    setDeleteOpen(true);
+    setDeleteTarget(target);
+  };
+
+  // 明細削除ダイアログの押下ボタンによる処理
+  const handleMeisaiDeleteResult = (result: boolean) => {
+    if (!deleteTarget) return;
+
+    if (result) {
+      setDeleteOpen(false);
+      if (deleteTarget.containerFlag) {
+        setReturnJuchuContainerMeisaiList((prev) =>
+          prev.map((data) =>
+            data.kizaiId === deleteTarget.kizaiId && !data.delFlag ? { ...data, delFlag: true } : data
+          )
+        );
+      } else {
+        const filterJuchuKizaiMeisaiList = returnJuchuKizaiMeisaiList.filter((data) => !data.delFlag);
+        const rowIndex = filterJuchuKizaiMeisaiList.findIndex((data) => data.kizaiId === deleteTarget.kizaiId);
+        const updatedJuchuKizaiMeisaiList = filterJuchuKizaiMeisaiList.filter(
+          (data) => data.kizaiId !== deleteTarget.kizaiId
+        );
+        setReturnJuchuKizaiMeisaiList((prev) =>
+          prev.map((data) =>
+            data.kizaiId === deleteTarget.kizaiId && !data.delFlag ? { ...data, delFlag: true } : data
+          )
+        );
+        setEqStockList((prev) => prev.filter((data) => !data.every((d) => d.kizaiId === deleteTarget.kizaiId)));
+        setOriginReturnPlanQty((prev) => prev.filter((_, index) => index !== rowIndex));
+        setPriceTotal(updatedJuchuKizaiMeisaiList.reduce((sum, row) => sum + (row.kizaiTankaAmt ?? 0), 0));
+      }
+      setDeleteTarget(null);
+    } else {
+      setDeleteOpen(false);
+      setDeleteTarget(null);
+    }
+  };
+
   /**
    * KICS入庫日変更時
    * @param newDate KICS入庫日
@@ -1089,7 +1137,7 @@ export const EquipmentReturnOrderDetail = (props: {
                   <Grid2 container alignItems="center">
                     <Typography>小計金額</Typography>
                     <TextField
-                      value={`¥-${priceTotal.toLocaleString()}`}
+                      value={`-¥${priceTotal.toLocaleString()}`}
                       type="text"
                       sx={{
                         '& .MuiInputBase-input': {
@@ -1343,7 +1391,7 @@ export const EquipmentReturnOrderDetail = (props: {
                         rows={returnJuchuKizaiMeisaiList}
                         edit={edit}
                         onChange={handleCellChange}
-                        handleDelete={handleDelete}
+                        handleMeisaiDelete={handleMeisaiDelete}
                         handleMemoChange={handleMemoChange}
                         ref={leftRef}
                       />
@@ -1393,7 +1441,7 @@ export const EquipmentReturnOrderDetail = (props: {
                     edit={edit}
                     handleContainerMemoChange={handleReturnContainerMemoChange}
                     onChange={handleReturnContainerCellChange}
-                    handleContainerDelete={handleReturnContainerDelete}
+                    handleMeisaiDelete={handleMeisaiDelete}
                   />
                 </Box>
               </>
@@ -1405,6 +1453,7 @@ export const EquipmentReturnOrderDetail = (props: {
           <SaveAlertDialog open={saveOpen} onClick={() => setSaveOpen(false)} />
           <IsDirtyAlertDialog open={dirtyOpen} onClick={handleResultDialog} />
           <NyushukoAlertDialog open={nyushukoOpen} onClick={() => setNyushukoOpen(false)} />
+          <DeleteAlertDialog open={deleteOpen} onClick={handleMeisaiDeleteResult} />
         </Box>
       )}
     </>
