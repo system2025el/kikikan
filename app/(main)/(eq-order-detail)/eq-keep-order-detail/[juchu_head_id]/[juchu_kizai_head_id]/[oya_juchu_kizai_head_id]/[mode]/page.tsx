@@ -1,6 +1,6 @@
 import { getNyukoDate, getShukoDate } from '@/app/(main)/_lib/date-funcs';
 
-import { getDetailJuchuHead, getJuchuKizaiNyushuko } from '../../../../../_lib/funcs';
+import { getDetailJuchuHead, getJuchuKizaiNyushuko, getNyushukoFixFlag } from '../../../../../_lib/funcs';
 import { getKeepJuchuContainerMeisai, getKeepJuchuKizaiHead, getKeepJuchuKizaiMeisai } from './_lib/funcs';
 import { KeepJuchuContainerMeisaiValues, KeepJuchuKizaiHeadValues, KeepJuchuKizaiMeisaiValues } from './_lib/types';
 import { EquipmentKeepOrderDetail } from './_ui/equipment-keep-order-detail';
@@ -68,6 +68,10 @@ const Page = async (props: {
     const keepShukoDate = null;
     // キープ入庫日(初期値)
     const keepNyukoDate = null;
+    // KICS出発フラグ
+    const kicsFixFlag = false;
+    // YARD出発フラグ
+    const yardFixFlag = false;
 
     return (
       <EquipmentKeepOrderDetail
@@ -81,6 +85,8 @@ const Page = async (props: {
         keepShukoDate={keepShukoDate}
         keepNyukoDate={keepNyukoDate}
         edit={edit}
+        kicsFixFlag={kicsFixFlag}
+        yardFixFlag={yardFixFlag}
       />
     );
     // 既存
@@ -126,6 +132,13 @@ const Page = async (props: {
       keepJuchuKizaiHeadData.yardNyukoDat && new Date(keepJuchuKizaiHeadData.yardNyukoDat)
     );
 
+    // 出発フラグ
+    console.time();
+    const kicsFixFlag = await getNyushukoFixFlag(params.juchu_head_id, params.juchu_kizai_head_id, 60, 1);
+    const yardFixFlag = await getNyushukoFixFlag(params.juchu_head_id, params.juchu_kizai_head_id, 60, 2);
+    console.log('-----------------------------出発フラグ--------------------------');
+    console.timeEnd();
+
     return (
       <EquipmentKeepOrderDetail
         juchuHeadData={juchuHeadData}
@@ -138,6 +151,8 @@ const Page = async (props: {
         keepShukoDate={keepShukoDate}
         keepNyukoDate={keepNyukoDate}
         edit={edit}
+        kicsFixFlag={kicsFixFlag}
+        yardFixFlag={yardFixFlag}
       />
     );
   }

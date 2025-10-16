@@ -31,12 +31,18 @@ import { KeepJuchuContainerMeisaiValues, KeepJuchuKizaiMeisaiValues } from '../_
 type KeepEqTableProps = {
   rows: KeepJuchuKizaiMeisaiValues[];
   edit: boolean;
-  handleDelete: (kizaiId: number) => void;
+  handleMeisaiDelete: (target: { kizaiId: number; containerFlag: boolean }) => void;
   handleMemoChange: (kizaiId: number, memo: string) => void;
   onChange: (rowIndex: number, returnValue: number) => void;
 };
 
-export const KeepEqTable: React.FC<KeepEqTableProps> = ({ rows, edit, handleDelete, handleMemoChange, onChange }) => {
+export const KeepEqTable: React.FC<KeepEqTableProps> = ({
+  rows,
+  edit,
+  handleMeisaiDelete,
+  handleMemoChange,
+  onChange,
+}) => {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const visibleRows = rows.filter((row) => !row.delFlag);
@@ -112,7 +118,7 @@ export const KeepEqTable: React.FC<KeepEqTableProps> = ({ rows, edit, handleDele
               row={row}
               rowIndex={rowIndex}
               edit={edit}
-              handleDelete={handleDelete}
+              handleMeisaiDelete={handleMeisaiDelete}
               handleKeepRef={handleKeepRef(rowIndex)}
               handleMemoChange={handleMemoChange}
               handleKeyDown={handleKeyDown}
@@ -129,7 +135,7 @@ type KeepEqTableRowProps = {
   row: KeepJuchuKizaiMeisaiValues;
   rowIndex: number;
   edit: boolean;
-  handleDelete: (kizaiId: number) => void;
+  handleMeisaiDelete: (target: { kizaiId: number; containerFlag: boolean }) => void;
   handleKeepRef: (el: HTMLInputElement | null) => void;
   handleMemoChange: (kizaiId: number, memo: string) => void;
   handleKeepCellChange: (kizaiId: number, newValue: number) => void;
@@ -141,7 +147,7 @@ const KeepEqTableRow = React.memo(
     row,
     rowIndex,
     edit,
-    handleDelete,
+    handleMeisaiDelete,
     handleMemoChange,
     handleKeepCellChange,
     handleKeepRef,
@@ -152,7 +158,11 @@ const KeepEqTableRow = React.memo(
     return (
       <TableRow>
         <TableCell sx={{ padding: 0, border: '1px solid black' }}>
-          <IconButton onClick={() => handleDelete(row.kizaiId)} sx={{ padding: 0, color: 'red' }} disabled={!edit}>
+          <IconButton
+            onClick={() => handleMeisaiDelete({ kizaiId: row.kizaiId, containerFlag: false })}
+            sx={{ padding: 0, color: 'red' }}
+            disabled={!edit}
+          >
             <Delete fontSize="small" />
           </IconButton>
         </TableCell>
@@ -247,9 +257,9 @@ export const KeepContainerTable = (props: {
   edit: boolean;
   handleContainerMemoChange: (kizaiId: number, memo: string) => void;
   onChange: (kizaiId: number, kicsValue: number, yardValue: number) => void;
-  handleContainerDelete: (kizaiId: number) => void;
+  handleMeisaiDelete: (target: { kizaiId: number; containerFlag: boolean }) => void;
 }) => {
-  const { rows, edit, handleContainerMemoChange, onChange, handleContainerDelete } = props;
+  const { rows, edit, handleContainerMemoChange, onChange, handleMeisaiDelete } = props;
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -332,7 +342,7 @@ export const KeepContainerTable = (props: {
             <TableRow key={rowIndex}>
               <TableCell align="center" width={'min-content'} sx={{ padding: 0, border: '1px solid black' }}>
                 <IconButton
-                  onClick={() => handleContainerDelete(row.kizaiId)}
+                  onClick={() => handleMeisaiDelete({ kizaiId: row.kizaiId, containerFlag: true })}
                   sx={{ padding: 0, color: 'red' }}
                   disabled={!edit}
                 >

@@ -3,7 +3,7 @@ import { subDays } from 'date-fns';
 import { toISOStringYearMonthDay } from '@/app/(main)/_lib/date-conversion';
 import { getNyukoDate, getRange, getShukoDate } from '@/app/(main)/_lib/date-funcs';
 
-import { getDetailJuchuHead, getJuchuContainerMeisai, getStockList } from '../../../../_lib/funcs';
+import { getDetailJuchuHead, getJuchuContainerMeisai, getNyushukoFixFlag, getStockList } from '../../../../_lib/funcs';
 import { getHonbanbi, getJuchuKizaiHead, getJuchuKizaiMeisai } from './_lib/funcs';
 import {
   JuchuContainerMeisaiValues,
@@ -59,6 +59,10 @@ const Page = async (props: {
     const dateRange: string[] = [];
     // 受注本番日データ
     const newJuchuHonbanbiData: JuchuKizaiHonbanbiValues[] = [];
+    // KICS出発フラグ
+    const kicsFixFlag = false;
+    // YARD出発フラグ
+    const yardFixFlag = false;
 
     return (
       <EquipmentOrderDetail
@@ -72,6 +76,8 @@ const Page = async (props: {
         eqStockData={newEqStockData}
         juchuHonbanbiData={newJuchuHonbanbiData}
         edit={edit}
+        kicsFixFlag={kicsFixFlag}
+        yardFixFlag={yardFixFlag}
       />
     );
 
@@ -136,6 +142,13 @@ const Page = async (props: {
     console.log('-----------------------------受注機材本番日--------------------------');
     console.timeEnd();
 
+    // 出発フラグ
+    console.time();
+    const kicsFixFlag = await getNyushukoFixFlag(params.juchu_head_id, params.juchu_kizai_head_id, 60, 1);
+    const yardFixFlag = await getNyushukoFixFlag(params.juchu_head_id, params.juchu_kizai_head_id, 60, 2);
+    console.log('-----------------------------出発フラグ--------------------------');
+    console.timeEnd();
+
     return (
       <EquipmentOrderDetail
         juchuHeadData={juchuHeadData}
@@ -148,6 +161,8 @@ const Page = async (props: {
         eqStockData={eqStockData}
         juchuHonbanbiData={juchuHonbanbiData}
         edit={edit}
+        kicsFixFlag={kicsFixFlag}
+        yardFixFlag={yardFixFlag}
       />
     );
   }
