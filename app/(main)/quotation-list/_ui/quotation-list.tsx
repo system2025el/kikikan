@@ -40,22 +40,9 @@ export const QuotationList = ({
   const [page, setPage] = useState<number>(1);
   /* ローディングかどうか */
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  /* 検索条件の保持 */
-  const [queries, setQueries] = useState<QuotSearchValues>({
-    mituId: null,
-    juchuId: null,
-    mituSts: FAKE_NEW_ID,
-    mituHeadNam: null,
-    kokyaku: null,
-    mituDat: {
-      strt: null,
-      end: null,
-    },
-    nyuryokuUser: null,
-  });
 
   /* useForm ------------------------------------------- */
-  const { control, handleSubmit } = useForm<QuotSearchValues>({
+  const { control, handleSubmit, getValues } = useForm<QuotSearchValues>({
     mode: 'onSubmit',
     defaultValues: {
       mituId: null,
@@ -79,7 +66,6 @@ export const QuotationList = ({
       setQuotList(q);
       setIsLoading(false);
     }
-    setQueries(data);
     setIsLoading(false);
   };
 
@@ -246,7 +232,7 @@ export const QuotationList = ({
         quots={quotList}
         isLoading={isLoading}
         page={page}
-        queries={queries}
+        queries={getValues()}
         setIsLoading={setIsLoading}
         setPage={setPage}
       />

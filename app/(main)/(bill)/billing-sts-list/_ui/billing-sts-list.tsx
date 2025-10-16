@@ -51,7 +51,21 @@ export const BillingStsList = ({ custs }: { custs: SelectTypes[] }) => {
         <Box width={'100%'} p={2}>
           <form onSubmit={handleSubmit(onSubmit)}>
             <Grid2 container direction={'column'} spacing={1} width={'100%'}>
-              <Grid2 size={'auto'} display={'flex'} alignItems={'baseline'}>
+              <Grid2 display={'flex'} alignItems={'baseline'}>
+                <Grid2 size={0.5}>
+                  <Typography
+                    color="error.main"
+                    variant="body2"
+                    pr={0.5}
+                    display={{ xs: 'none', md: 'flex' }}
+                    justifySelf={'end'}
+                  >
+                    *必須
+                  </Typography>
+                  <Typography color="error.main" variant="body2" pr={0.5} display={{ md: 'none' }} justifySelf={'end'}>
+                    *
+                  </Typography>
+                </Grid2>
                 <Typography noWrap mr={9}>
                   相手
                 </Typography>
@@ -63,8 +77,8 @@ export const BillingStsList = ({ custs }: { custs: SelectTypes[] }) => {
                   rules={{ required: '必須項目です。' }}
                 />
               </Grid2>
-
-              <Grid2 size={'auto'} display={'flex'} alignItems={'baseline'}>
+              <Grid2 display={'flex'} alignItems={'baseline'}>
+                <Grid2 size={0.5} />
                 <Typography noWrap mr={3}>
                   相手担当者
                 </Typography>
@@ -73,6 +87,7 @@ export const BillingStsList = ({ custs }: { custs: SelectTypes[] }) => {
 
               <Grid2 size={12} display={'flex'} alignItems={'baseline'}>
                 <Grid2 container size={'grow'} alignItems={'baseline'}>
+                  <Grid2 size={0.5} />
                   <Typography noWrap mr={5}>
                     請求状況
                   </Typography>

@@ -173,7 +173,7 @@ export const getChosenQuot = async (mituId: number) => {
     nebikiAmt: head.nebiki_amt,
     nebikiAftAmt: head.nebiki_aft_amt,
     nebikiAftNam: head.nebiki_aft_nam,
-    shokeiMei: head.shokei_mei,
+    shokeiAmt: meisais.reduce((total, m) => total + (m.shokei_amt ?? 0), 0),
     biko1: head.biko_1,
     biko2: head.biko_2,
     biko3: head.biko_3,
@@ -183,7 +183,7 @@ export const getChosenQuot = async (mituId: number) => {
       qty: m.meisai_qty,
       honbanbiQty: m.meisai_honbanbi_qty,
       tankaAmt: m.meisai_tanka_amt,
-      shokei_amt: m.shokei_amt,
+      shokeiAmt: m.shokei_amt,
     })),
   });
   try {

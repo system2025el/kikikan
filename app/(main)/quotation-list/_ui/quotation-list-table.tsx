@@ -26,12 +26,9 @@ import {
 } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { TextFieldElement, useForm } from 'react-hook-form-mui';
 
-import { CloseMasterDialogButton } from '../../_ui/buttons';
 import { Loading } from '../../_ui/loading';
 import { MuiTablePagination } from '../../_ui/table-pagination';
-import { WillDeleteAlertDialog } from '../../(masters)/_ui/dialogs';
 import { LightTooltipWithText } from '../../(masters)/_ui/tables';
 import { getFilteredQuotList, updQuotDelFlg } from '../_lib/funcs';
 import { QuotSearchValues, QuotTableValues } from '../_lib/types';
@@ -270,7 +267,7 @@ export const QuotationListTable = ({
                         </Button>
                       </TableCell>
                       <TableCell align="right">{quotation.juchuHeadId}</TableCell>
-                      <TableCell>{quotation.mituStsNam}</TableCell>
+                      <TableCell sx={{ whiteSpace: 'nowrap' }}>{quotation.mituStsNam}</TableCell>
                       <TableCell>
                         <LightTooltipWithText variant={'body2'} maxWidth={200}>
                           {quotation.mituHeadNam}
@@ -286,8 +283,8 @@ export const QuotationListTable = ({
                           {quotation.koenNam}
                         </LightTooltipWithText>
                       </TableCell>
-                      <TableCell>{quotation.mituDat}</TableCell>
-                      <TableCell>{quotation.nyuryokuUser}</TableCell>
+                      <TableCell sx={{ whiteSpace: 'nowrap' }}>{quotation.mituDat}</TableCell>
+                      <TableCell sx={{ whiteSpace: 'nowrap' }}>{quotation.nyuryokuUser}</TableCell>
                     </TableRow>
                   );
                 })}
