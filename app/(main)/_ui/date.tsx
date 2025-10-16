@@ -452,12 +452,8 @@ export const FormDateX = ({
         calendarHeader: { format: 'YYYY年MM月' },
       }} // カレンダーヘッダーのフォーマット
       views={['year', 'month', 'day']}
-      maxDate={dayjs(toJapanDateString(maxDate))}
-      minDate={dayjs(toJapanDateString(minDate))}
-      shouldDisableDate={(date) =>
-        date.isBefore(dayjs(toJapanDateString(minDate)), 'day') ||
-        date.isAfter(dayjs(toJapanDateString(maxDate)), 'day')
-      }
+      maxDate={maxDate ? dayjs(toJapanDateString(maxDate)) : undefined}
+      minDate={minDate ? dayjs(toJapanDateString(minDate)) : undefined}
       disabled={disabled}
       value={value ? dayjs(value) : null}
       onChange={

@@ -185,13 +185,29 @@ export const QuotationList = ({
                 <Controller
                   control={control}
                   name="mituDat.strt"
-                  render={({ field }) => <FormDateX value={field.value} onChange={field.onChange} sx={{ mr: 1 }} />}
+                  render={({ field, fieldState: { error } }) => (
+                    <FormDateX
+                      value={field.value}
+                      onChange={field.onChange}
+                      sx={{ mr: 1 }}
+                      error={!!error}
+                      helperText={error?.message}
+                    />
+                  )}
                 />
                 <span>～</span>
                 <Controller
                   control={control}
                   name="mituDat.end"
-                  render={({ field }) => <FormDateX value={field.value} onChange={field.onChange} sx={{ ml: 1 }} />}
+                  render={({ field, fieldState: { error } }) => (
+                    <FormDateX
+                      value={field.value}
+                      onChange={field.onChange}
+                      sx={{ ml: 1 }}
+                      error={!!error}
+                      helperText={error?.message}
+                    />
+                  )}
                 />
               </Grid2>
               <Grid2 container justifyContent={'space-between'}>
