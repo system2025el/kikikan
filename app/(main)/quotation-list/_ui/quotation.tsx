@@ -382,8 +382,14 @@ export const Quotation = ({
                     <Controller
                       name="mituDat"
                       control={control}
-                      render={({ field }) => (
-                        <FormDateX value={field.value} onChange={field.onChange} sx={{ width: 242.5 }} />
+                      render={({ field, fieldState: { error } }) => (
+                        <FormDateX
+                          value={field.value}
+                          onChange={field.onChange}
+                          sx={{ width: 242.5 }}
+                          error={!!error}
+                          helperText={error?.message}
+                        />
                       )}
                     />
                   </Box>
@@ -446,16 +452,28 @@ export const Quotation = ({
                     <Controller
                       name="mituRange.strt"
                       control={control}
-                      render={({ field }) => (
-                        <FormDateX value={field.value} onChange={field.onChange} sx={{ width: 242.5 }} />
+                      render={({ field, fieldState: { error } }) => (
+                        <FormDateX
+                          value={field.value}
+                          onChange={field.onChange}
+                          sx={{ width: 242.5 }}
+                          error={!!error}
+                          helperText={error?.message}
+                        />
                       )}
                     />
                     ～
                     <Controller
                       name="mituRange.end"
                       control={control}
-                      render={({ field }) => (
-                        <FormDateX value={field.value} onChange={field.onChange} sx={{ width: 242.5 }} />
+                      render={({ field, fieldState: { error } }) => (
+                        <FormDateX
+                          value={field.value}
+                          onChange={field.onChange}
+                          sx={{ width: 242.5 }}
+                          error={!!error}
+                          helperText={error?.message}
+                        />
                       )}
                     />
                   </Box>
