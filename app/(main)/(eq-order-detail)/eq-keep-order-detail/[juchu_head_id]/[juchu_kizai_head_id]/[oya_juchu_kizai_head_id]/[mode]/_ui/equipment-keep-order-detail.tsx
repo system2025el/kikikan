@@ -180,7 +180,7 @@ export const EquipmentKeepOrderDetail = (props: {
     setError,
     trigger,
     clearErrors,
-    formState: { isDirty, errors, defaultValues },
+    formState: { isDirty, dirtyFields, errors, defaultValues },
   } = useForm({
     mode: 'onChange',
     reValidateMode: 'onChange',
@@ -372,6 +372,8 @@ export const EquipmentKeepOrderDetail = (props: {
       }
 
       const checkJuchuKizaiHead = isDirty;
+      const checkKicsShukoDat = defaultValues?.kicsShukoDat ? (dirtyFields.kicsShukoDat ?? false) : false;
+      const checkYardShukoDat = defaultValues?.yardShukoDat ? (dirtyFields.yardShukoDat ?? false) : false;
       const checkJuchuKizaiMeisai =
         JSON.stringify(originKeepJuchuKizaiMeisaiList) !==
         JSON.stringify(keepJuchuKizaiMeisaiList.filter((data) => !data.delFlag));
@@ -381,8 +383,12 @@ export const EquipmentKeepOrderDetail = (props: {
 
       const updateResult = await saveKeepJuchuKizai(
         checkJuchuKizaiHead,
+        checkKicsShukoDat,
+        checkYardShukoDat,
         checkJuchuKizaiMeisai,
         checkJuchuContainerMeisai,
+        defaultValues?.kicsShukoDat,
+        defaultValues?.yardShukoDat,
         data,
         updateShukoDate,
         updateNyukoDate,
