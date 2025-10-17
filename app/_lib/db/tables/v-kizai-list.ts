@@ -110,7 +110,7 @@ export const selectStockKizai = async (bumonId: number) => {
 /**
  * 検索条件に一致する受注の一覧の配列を取得する関数
  * @param query 検索条件
- * @returns
+ * @returns 検索にあう受注情報
  */
 export const selectFilteredJuchus = async (
   query: OrderSearchValues = {
