@@ -92,7 +92,8 @@ export const checkRfid = async (list: RfidImportTypes[], connection: PoolClient)
         `;
 
       // INSERT実行
-      await Promise.all([connection.query(insertQuery, [...values, addDat, addUser]), updateMasterUpdates('m_rfid')]);
+      await connection.query(insertQuery, [...values, addDat, addUser]);
+      updateMasterUpdates('m_rfid', connection);
     }
 
     // 更新処理
@@ -165,10 +166,8 @@ export const checkRfid = async (list: RfidImportTypes[], connection: PoolClient)
           WHERE mr.rfid_tag_id = d.rfid_tag_id;`;
 
       //更新実行
-      await Promise.all([
-        connection.query(updateQuery, [...updateValues, updDat, updUser]),
-        updateMasterUpdates('m_rfid'),
-      ]);
+      await connection.query(updateQuery, [...updateValues, updDat, updUser]);
+      await updateMasterUpdates('m_rfid', connection);
     }
 
     console.log('RFIDマスタ処理した');
@@ -303,7 +302,7 @@ export const checkKizai = async (list: KizaiImportTypes[], connection: PoolClien
 
     if (data) {
       if (data.rowCount && data.rowCount > 0) {
-        await updateMasterUpdates('m_kizai');
+        await updateMasterUpdates('m_kizai', connection);
       }
       return data.rows;
     }

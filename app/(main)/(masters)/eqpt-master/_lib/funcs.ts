@@ -133,13 +133,21 @@ export const getChosenEqpt = async (id: number) => {
  */
 export const addNewEqpt = async (data: EqptsMasterDialogValues) => {
   console.log('機材マスタを追加する');
-
+  const connection = await pool.connect();
   try {
-    await Promise.all([insertNewEqpt(data), updateMasterUpdates('m_kizai')]);
+    await connection.query('BEGIN');
+    await insertNewEqpt(data, connection);
+    await updateMasterUpdates('m_kizai', connection);
+    await connection.query('COMMIT');
+
     await revalidatePath('/eqpt-master');
   } catch (error) {
+    await connection.query('ROLLBACK');
+
     console.log('DB接続エラー', error);
     throw error;
+  } finally {
+    connection.release();
   }
 };
 
@@ -148,7 +156,11 @@ export const addNewEqpt = async (data: EqptsMasterDialogValues) => {
  * @param data フォームに入力されている情報
  * @param id 更新する機材マスタID
  */
-export const updateEqpt = async (rawData: EqptsMasterDialogValues, id: number) => {
+export const updateEqpt = async (
+  currentData: EqptsMasterDialogValues,
+  rawData: EqptsMasterDialogValues,
+  id: number
+) => {
   const date = toJapanTimeString();
   const updateData = {
     kizai_id: id,
@@ -177,13 +189,20 @@ export const updateEqpt = async (rawData: EqptsMasterDialogValues, id: number) =
     upd_user: 'test_user',
   };
   console.log(updateData.kizai_nam);
-
+  const connection = await pool.connect();
   try {
-    await Promise.all([upDateEqptDB(updateData), updateMasterUpdates('m_kizai')]);
+    await connection.query('BEGIN');
+    await insertEqptHistory(currentData, id, connection);
+    await upDateEqptDB(updateData, connection);
+    await updateMasterUpdates('m_kizai', connection);
     await revalidatePath('/eqpt-master');
+    await connection.query('COMMIT');
   } catch (error) {
+    await connection.query('ROLLBACK');
     console.log('例外が発生しました', error);
     throw error;
+  } finally {
+    await connection.release();
   }
 };
 
@@ -203,20 +222,5 @@ export const getEqptsQty = async (id: number) => {
   } catch (e) {
     console.error('例外が発生しました:', e);
     throw e;
-  }
-};
-
-/**
- * 機材マスタ更新時に、更新履歴テーブルに元情報を挿入する関数
- * @param data 更新前の情報
- * @param id 機材ID
- */
-export const createEqptHistory = async (data: EqptsMasterDialogValues, id: number) => {
-  console.log(data.mem);
-  try {
-    insertEqptHistory(data, id);
-  } catch (error) {
-    console.log('DB接続エラー', error);
-    throw error;
   }
 };

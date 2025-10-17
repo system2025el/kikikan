@@ -1,5 +1,7 @@
 'use server';
 
+import { PoolClient } from 'pg';
+
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { RfidsMasterDialogValues } from '@/app/(main)/(masters)/rfid-master/[kizaiId]/_lib/types';
 
@@ -171,9 +173,13 @@ export const updateRfidTagStsDB = async (data: { rfid_tag_id: string; rfid_kizai
  * RFIDマスタ新規登録
  * @param {MRfidDBValues} data
  */
-export const insertNewRfid = async (data: MRfidDBValues) => {
+export const insertNewRfid = async (data: MRfidDBValues, connection: PoolClient) => {
+  const cols = Object.keys(data);
+  const values = Object.values(data);
+  const placeholders = cols.map((_, i) => `$${i + 1}`);
+  const query = `INSERT INTO ${SCHEMA}.m_rfid (${cols.join(', ')}) VALUES (${placeholders.join(', ')})`;
   try {
-    await supabase.schema(SCHEMA).from('m_rfid').insert(data);
+    await connection.query(query, values);
   } catch (e) {
     throw e;
   }
@@ -183,9 +189,18 @@ export const insertNewRfid = async (data: MRfidDBValues) => {
  * RFIDマスタ更新
  * @param {MRfidDBValues} data
  */
-export const upDateRfidDB = async (data: MRfidDBValues) => {
+export const upDateRfidDB = async (data: MRfidDBValues, connection: PoolClient) => {
+  const { rfid_tag_id, ...rest } = data;
+  // 準備
+  const cols = Object.keys(rest);
+  const values = Object.values(rest);
+  // SET句
+  const setClause = cols.map((key, i) => `${key} = $${i + 1}`).join(', ');
+
+  const query = `UPDATE ${SCHEMA}.m_rfid SET ${setClause} WHERE rfid_tag_id = $${cols.length + 1}`;
+
   try {
-    await supabase.schema(SCHEMA).from('m_rfid').update(data).eq('rfid_tag_id', data.rfid_tag_id);
+    await connection.query(query, [...values, data.rfid_tag_id]);
   } catch (e) {
     throw e;
   }
