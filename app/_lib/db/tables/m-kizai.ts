@@ -1,5 +1,7 @@
 'use server';
 
+import { PoolClient } from 'pg';
+
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { fakeToNull } from '@/app/(main)/(masters)/_lib/value-converters';
 import { EqptsMasterDialogValues } from '@/app/(main)/(masters)/eqpt-master/_lib/types';
@@ -25,7 +27,7 @@ export const selectOneEqpt = async (id: number) => {
  * 機材マスタに新規挿入する関数
  * @param data 挿入するデータ
  */
-export const insertNewEqpt = async (data: EqptsMasterDialogValues) => {
+export const insertNewEqpt = async (data: EqptsMasterDialogValues, connection: PoolClient) => {
   const query = `
     INSERT INTO ${SCHEMA}.m_kizai (
       kizai_id, kizai_nam, del_flg, section_num, el_num, shozoku_id,
@@ -69,7 +71,7 @@ export const insertNewEqpt = async (data: EqptsMasterDialogValues) => {
     data.dspOrdNum,
   ];
   try {
-    await pool.query(query, values);
+    await connection.query(query, values);
   } catch (e) {
     throw e;
   }
@@ -80,13 +82,17 @@ export const insertNewEqpt = async (data: EqptsMasterDialogValues) => {
  * @param data 更新するデータ
  * @param id 更新する機材のkizai_id
  */
-export const upDateEqptDB = async (data: MKizaiDBValues) => {
+export const upDateEqptDB = async (data: MKizaiDBValues, connection: PoolClient) => {
+  const { kizai_id, ...rest } = data;
+  // 準備
+  const cols = Object.keys(rest);
+  const values = Object.values(rest);
+  // SET句
+  const setClause = cols.map((key, i) => `${key} = $${i + 1}`).join(', ');
+
+  const query = `UPDATE ${SCHEMA}.m_kizai SET ${setClause} WHERE kizai_id = $${cols.length + 1}`;
   try {
-    await supabase
-      .schema(SCHEMA)
-      .from('m_kizai')
-      .update({ ...data })
-      .eq('kizai_id', data.kizai_id);
+    await connection.query(query, [...values, data.kizai_id]);
   } catch (e) {
     throw e;
   }
@@ -128,7 +134,6 @@ export const selectActiveEqpts = async (query: string) => {
       k.kizai_grp_cod,
       k.dsp_ord_num;
   `;
-
   try {
     return await pool.query(sqlQuery, values);
   } catch (e) {

@@ -18,7 +18,7 @@ import { getAllSelections } from '../../_lib/funcs';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { emptyEqpt, formItems } from '../_lib/datas';
-import { addNewEqpt, createEqptHistory, getChosenEqpt, updateEqpt } from '../_lib/funcs';
+import { addNewEqpt, getChosenEqpt, updateEqpt } from '../_lib/funcs';
 import { EqptsMasterDialogSchema, EqptsMasterDialogValues } from '../_lib/types';
 
 export const EqMasterDialog = ({
@@ -87,8 +87,7 @@ export const EqMasterDialog = ({
       // 更新
       if (action === 'save') {
         // 保存終了ボタン
-        await createEqptHistory(currentEqpt, eqptId);
-        await updateEqpt(data, eqptId);
+        await updateEqpt(currentEqpt, data, eqptId);
         handleCloseDialog();
         refetchEqpts();
       } else if (action === 'delete') {
@@ -98,7 +97,7 @@ export const EqMasterDialog = ({
       } else if (action === 'restore') {
         // 有効化ボタン
         const values = await getValues();
-        await updateEqpt({ ...values, delFlg: false }, eqptId);
+        await updateEqpt(currentEqpt, { ...values, delFlg: false }, eqptId);
         handleCloseDialog();
         refetchEqpts();
       }
@@ -125,8 +124,7 @@ export const EqMasterDialog = ({
   /* 削除確認ダイアログで削除選択時 */
   const handleConfirmDelete = async () => {
     const values = await getValues();
-    await createEqptHistory(currentEqpt, eqptId);
-    await updateEqpt({ ...values, delFlg: true }, eqptId);
+    await updateEqpt(currentEqpt, { ...values, delFlg: true }, eqptId);
     setDeleteOpen(false);
     handleCloseDialog();
     await refetchEqpts();

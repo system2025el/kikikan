@@ -116,14 +116,22 @@ export const addNewRfid = async (data: RfidsMasterDialogValues, kizaiId: number,
     add_dat: toJapanTimeString(),
     add_user: user,
   };
-
+  const connection = await pool.connect();
   try {
-    await Promise.all([insertNewRfid(insertData), updateMasterUpdates('m_rfid')]);
+    connection.query('BEGIN');
+    await insertNewRfid(insertData, connection);
+    await updateMasterUpdates('m_rfid', connection);
+    await connection.query('COMMIT');
     await revalidatePath('/rfid-master');
     await revalidatePath('/eqpt-master');
   } catch (error) {
     console.log('DB接続エラー', error);
+    await connection.query('ROLLBACK');
+
     throw error;
+  } finally {
+    // なんにしてもpool解放
+    connection.release();
   }
 };
 
@@ -145,13 +153,23 @@ export const updateRfid = async (data: RfidsMasterDialogValues, kizaiId: number,
     upd_user: user,
   };
   console.log(updateData);
+  const connection = await pool.connect();
   try {
-    await Promise.all([upDateRfidDB(updateData), updateMasterUpdates('m_rfid')]);
+    connection.query('BEGIN');
+    await upDateRfidDB(updateData, connection);
+    await updateMasterUpdates('m_rfid', connection);
+
+    await connection.query('COMMIT');
+
     await revalidatePath(`/rfid-master/${kizaiId}`);
     await revalidatePath('/eqpt-master');
   } catch (error) {
     console.log('例外が発生しました', error);
+    await connection.query('ROLLBACK');
     throw error;
+  } finally {
+    // なんにしてもpool解放
+    connection.release();
   }
 };
 

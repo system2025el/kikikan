@@ -1,5 +1,7 @@
 'use server';
 
+import { PoolClient } from 'pg';
+
 import { fakeToNull } from '@/app/(main)/(masters)/_lib/value-converters';
 import { EqptsMasterDialogValues } from '@/app/(main)/(masters)/eqpt-master/_lib/types';
 
@@ -11,7 +13,7 @@ import { SCHEMA } from '../supabase';
  * @param data 更新前の機材データ
  * @param id 更新された機材の機材ID
  */
-export const insertEqptHistory = async (data: EqptsMasterDialogValues, id: number) => {
+export const insertEqptHistory = async (data: EqptsMasterDialogValues, id: number, connection: PoolClient) => {
   const query = `
           INSERT INTO ${SCHEMA}.m_kizai_his (
             kizai_id_his_num, kizai_id, kizai_nam, del_flg, section_num, shozoku_id,
@@ -55,7 +57,7 @@ export const insertEqptHistory = async (data: EqptsMasterDialogValues, id: numbe
     data.updDat,
   ];
   try {
-    await pool.query(query, values);
+    await connection.query(query, values);
   } catch (e) {
     throw e;
   }

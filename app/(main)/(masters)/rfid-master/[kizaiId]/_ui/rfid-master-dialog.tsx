@@ -203,11 +203,17 @@ export const RfidMasterDialog = ({
                     name="tagId"
                     control={control}
                     label={editable ? formItems[0].exsample : ''}
-                    sx={{ width: 300 }}
+                    sx={{
+                      width: 300,
+                      pointerEvents: !isNew ? 'none' : undefined, // クリック不可にする
+                      backgroundColor: !isNew ? '#f5f5f5' : undefined, // グレー背景で無効っぽく
+                      color: !isNew ? '#888' : undefined,
+                    }}
                     disabled={editable ? false : true}
                     error={!!tagMessage}
                     helperText={tagMessage}
                     slotProps={{
+                      input: { readOnly: !isNew ? true : false, onFocus: (e) => (!isNew ? e.target.blur() : {}) },
                       formHelperText: {
                         sx: (theme) => ({
                           color: theme.palette.error.main,

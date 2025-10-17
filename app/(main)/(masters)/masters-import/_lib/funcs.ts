@@ -135,5 +135,5 @@ export const ImportEqptRfidData = async (data: EqptImportType[]) => {
  * @param error エラー内容
  */
 export const sendLogServer = async (index: number, error: ZodIssue[]) => {
-  console.log(`${index} でバリデーションエラー:`, error);
+  console.log(`${index} 行目でバリデーションエラー:`, error);
 };
