@@ -4,8 +4,12 @@ import { Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRo
 import { grey, yellow } from '@mui/material/colors';
 import { useRouter } from 'next/navigation';
 
-export const IdoListTable = (/*props: {data: }*/) => {
+import { IdoTableValues } from '../_lib/types';
+
+export const IdoListTable = (props: { datas: IdoTableValues[] }) => {
   const router = useRouter();
+
+  const { datas } = props;
   return (
     <TableContainer sx={{ overflow: 'auto', maxHeight: '80vh', maxWidth: '70vw' }}>
       <Table stickyHeader size="small">
@@ -29,28 +33,68 @@ export const IdoListTable = (/*props: {data: }*/) => {
         <TableBody>
           <TableRow>
             <TableCell align="left">YARD→KICS</TableCell>
-            <TableCell align="left">〇</TableCell>
-            <TableCell align="left">〇</TableCell>
-            <TableCell align="center">
-              <Button onClick={() => router.push('ido-list/ido-detail/1/40')}>詳細</Button>
+            <TableCell align="left">
+              {datas[0].schkSagyoStsId === 0
+                ? 'ー'
+                : datas[0].schkSagyoStsId === 41
+                  ? '△'
+                  : datas[0].schkSagyoStsId === 42
+                    ? '〇'
+                    : '無し'}
             </TableCell>
-            <TableCell align="left">△</TableCell>
-            <TableCell align="left">ー</TableCell>
+            <TableCell align="left">
+              {datas[0].shukoFixFlg === 1 ? '〇' : datas[0].shukoFixFlg === 0 ? 'ー' : '無し'}
+            </TableCell>
             <TableCell align="center">
-              <Button onClick={() => router.push('ido-list/ido-detail/1/50')}>詳細</Button>
+              <Button onClick={() => router.push(`ido-list/ido-detail/${datas[0].idoDenId}/40`)}>詳細</Button>
+            </TableCell>
+            <TableCell align="left">
+              {datas[0].nchkSagyoStsId === 0
+                ? 'ー'
+                : datas[0].nchkSagyoStsId === 51
+                  ? '△'
+                  : datas[0].nchkSagyoStsId === 52
+                    ? '〇'
+                    : '無し'}
+            </TableCell>
+            <TableCell align="left">
+              {datas[0].nyukoFixFlg === 1 ? '〇' : datas[0].nyukoFixFlg === 0 ? 'ー' : '無し'}
+            </TableCell>
+            <TableCell align="center">
+              <Button onClick={() => router.push(`ido-list/ido-detail/${datas[0].idoDenId}/50`)}>詳細</Button>
             </TableCell>
           </TableRow>
           <TableRow>
             <TableCell align="left">KICS→YARD</TableCell>
-            <TableCell align="left">無し</TableCell>
-            <TableCell align="left">無し</TableCell>
-            <TableCell align="center">
-              <Button onClick={() => router.push('ido-list/ido-detail/1/40')}>詳細</Button>
+            <TableCell align="left">
+              {datas[1].schkSagyoStsId === 0
+                ? 'ー'
+                : datas[1].schkSagyoStsId === 41
+                  ? '△'
+                  : datas[1].schkSagyoStsId === 42
+                    ? '〇'
+                    : '無し'}
             </TableCell>
-            <TableCell align="left">無し</TableCell>
-            <TableCell align="left">無し</TableCell>
+            <TableCell align="left">
+              {datas[1].shukoFixFlg === 1 ? '〇' : datas[1].shukoFixFlg === 0 ? 'ー' : '無し'}
+            </TableCell>
             <TableCell align="center">
-              <Button onClick={() => router.push('ido-list/ido-detail/1/50')}>詳細</Button>
+              <Button onClick={() => router.push(`ido-list/ido-detail/${datas[1].idoDenId}/40`)}>詳細</Button>
+            </TableCell>
+            <TableCell align="left">
+              {datas[1].nchkSagyoStsId === 0
+                ? 'ー'
+                : datas[1].nchkSagyoStsId === 51
+                  ? '△'
+                  : datas[1].nchkSagyoStsId === 52
+                    ? '〇'
+                    : '無し'}
+            </TableCell>
+            <TableCell align="left">
+              {datas[1].nyukoFixFlg === 1 ? '〇' : datas[1].nyukoFixFlg === 0 ? 'ー' : '無し'}
+            </TableCell>
+            <TableCell align="center">
+              <Button onClick={() => router.push(`ido-list/ido-detail/${datas[1].idoDenId}/50`)}>詳細</Button>
             </TableCell>
           </TableRow>
         </TableBody>

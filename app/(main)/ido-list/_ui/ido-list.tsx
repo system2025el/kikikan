@@ -5,13 +5,17 @@ import { Box, Button, Divider, Grid2, Paper, Typography } from '@mui/material';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
-import { toISOStringYearMonthDay } from '../../_lib/date-conversion';
+import { toISOStringYearMonthDay, toJapanDateString } from '../../_lib/date-conversion';
 import { TestDate } from '../../_ui/date';
 import { Loading } from '../../_ui/loading';
+import { getIdoList } from '../_lib/funcs';
+import { IdoTableValues } from '../_lib/types';
 import { IdoListTable } from './ido-list-table';
 
-export const IdoList = () => {
+export const IdoList = (props: { idoData: IdoTableValues[] }) => {
   const [isLoading, setIsLoading] = useState(false);
+
+  const [idoList, setIdoList] = useState<IdoTableValues[]>(props.idoData);
 
   /* useForm ------------------- */
   const { control, handleSubmit } = useForm({
@@ -26,8 +30,13 @@ export const IdoList = () => {
    * @param data 検索データ(受注番号、出庫日、出庫場所)
    */
   const onSubmit = async (data: { idoDat: Date }) => {
-    console.log(toISOStringYearMonthDay(data.idoDat));
     setIsLoading(true);
+
+    const idoData = await getIdoList(toJapanDateString(data.idoDat));
+    if (idoData) {
+      setIdoList(idoData);
+    }
+
     setIsLoading(false);
   };
 
@@ -66,7 +75,7 @@ export const IdoList = () => {
           <Loading />
         ) : (
           <Box width={'100%'} mt={4}>
-            <IdoListTable /*datas={IdoList}*/ />
+            <IdoListTable datas={idoList} />
           </Box>
         )}
       </Paper>
