@@ -105,18 +105,14 @@ export const EquipmentKeepOrderDetail = (props: {
   keepShukoDate: Date | null;
   keepNyukoDate: Date | null;
   edit: boolean;
-  kicsFixFlag: boolean;
-  yardFixFlag: boolean;
+  fixFlag: boolean;
 }) => {
   // user情報
   const user = useUserStore((state) => state.user);
   // 受注機材ヘッダー保存フラグ
   const saveKizaiHead = props.keepJuchuKizaiHeadData.juchuKizaiHeadId !== 0 ? true : false;
-  // KICS出発フラグ
-  const kicsFixFlag = props.kicsFixFlag;
-  // YARD出発フラグ
-  const yardFixFlag = props.yardFixFlag;
-
+  // 出発フラグ
+  const fixFlag = props.fixFlag;
   // ロックデータ
   const [lockData, setLockData] = useState<LockValues | null>(null);
   // 全体の保存フラグ
@@ -215,17 +211,17 @@ export const EquipmentKeepOrderDetail = (props: {
   useUnsavedChangesWarning(isDirty, save);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || !props.edit) return;
 
     const asyncProcess = async () => {
       setIsLoading(true);
       const lockData = await getLock(1, props.juchuHeadData.juchuHeadId);
       setLockData(lockData);
-      if (props.edit && lockData === null) {
+      if (lockData === null) {
         await addLock(1, props.juchuHeadData.juchuHeadId, user.name);
         const newLockData = await getLock(1, props.juchuHeadData.juchuHeadId);
         setLockData(newLockData);
-      } else if (props.edit && lockData !== null && lockData.addUser !== user.name) {
+      } else if (lockData !== null && lockData.addUser !== user.name) {
         setEdit(false);
       }
       setIsLoading(false);
@@ -583,20 +579,6 @@ export const EquipmentKeepOrderDetail = (props: {
 
   // 明細削除ボタン押下時
   const handleMeisaiDelete = (target: { kizaiId: number; containerFlag: boolean }) => {
-    // 機材
-    if (!target.containerFlag) {
-      const deleteData = keepJuchuKizaiMeisaiList.find((d) => d.kizaiId === target.kizaiId && !d.delFlag);
-      if ((deleteData?.shozokuId === 1 && kicsFixFlag) || (deleteData?.shozokuId === 2 && yardFixFlag)) {
-        setNyushukoFixOpen(true);
-        return;
-      }
-    }
-
-    // コンテナ
-    if (target.containerFlag && (kicsFixFlag || yardFixFlag)) {
-      setNyushukoFixOpen(true);
-      return;
-    }
     setDeleteOpen(true);
     setDeleteTarget(target);
   };
@@ -724,13 +706,21 @@ export const EquipmentKeepOrderDetail = (props: {
                   <Typography>編集中</Typography>
                 </Grid2>
               )}
+              {fixFlag && (
+                <Box display={'flex'} alignItems={'center'}>
+                  <Typography>出庫済</Typography>
+                </Box>
+              )}
               <Grid2 container alignItems={'center'} spacing={1}>
-                {!edit || (lockData !== null && lockData?.addUser !== user?.name) ? (
+                {!edit || (lockData !== null && lockData?.addUser !== user?.name) || fixFlag ? (
                   <Typography>閲覧モード</Typography>
                 ) : (
                   <Typography>編集モード</Typography>
                 )}
-                <Button disabled={lockData && lockData?.addUser !== user?.name ? true : false} onClick={handleEdit}>
+                <Button
+                  disabled={(lockData && lockData?.addUser !== user?.name ? true : false) || fixFlag}
+                  onClick={handleEdit}
+                >
                   変更
                 </Button>
               </Grid2>

@@ -38,7 +38,7 @@ import { TextFieldElement } from 'react-hook-form-mui';
 import { shouldDisplay } from 'rsuite/esm/internals/Picker';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
-import { toISOString, toISOStringYearMonthDay } from '@/app/(main)/_lib/date-conversion';
+import { toISOString, toISOStringYearMonthDay, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { getNyukoDate, getRange, getShukoDate } from '@/app/(main)/_lib/date-funcs';
 import { addLock, delLock, getLock } from '@/app/(main)/_lib/funcs';
 import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
@@ -121,18 +121,15 @@ const EquipmentOrderDetail = (props: {
   eqStockData: StockTableValues[][] | undefined;
   juchuHonbanbiData: JuchuKizaiHonbanbiValues[] | undefined;
   edit: boolean;
-  kicsFixFlag: boolean;
-  yardFixFlag: boolean;
+  fixFlag: boolean;
 }) => {
   const router = useRouter();
   // user情報
   const user = useUserStore((state) => state.user);
   // 受注機材ヘッダー保存フラグ
   const saveKizaiHead = props.juchuKizaiHeadData.juchuKizaiHeadId !== 0 ? true : false;
-  // KICS出発フラグ
-  const kicsFixFlag = props.kicsFixFlag;
-  // YARD出発フラグ
-  const yardFixFlag = props.yardFixFlag;
+  // 出発フラグ
+  const fixFlag = props.fixFlag;
   // 全体の保存フラグ
   const [save, setSave] = useState(false);
 
@@ -249,7 +246,7 @@ const EquipmentOrderDetail = (props: {
     setError,
     trigger,
     clearErrors,
-    formState: { isDirty, errors, defaultValues },
+    formState: { isDirty, dirtyFields, errors, defaultValues },
   } = useForm({
     mode: 'onChange',
     reValidateMode: 'onChange',
@@ -281,17 +278,17 @@ const EquipmentOrderDetail = (props: {
   }, [saveKizaiHead, setIsSave]);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || !props.edit) return;
 
     const asyncProcess = async () => {
       setIsLoading(true);
       const lockData = await getLock(1, props.juchuHeadData.juchuHeadId);
       setLockData(lockData);
-      if (props.edit && lockData === null) {
+      if (lockData === null) {
         await addLock(1, props.juchuHeadData.juchuHeadId, user.name);
         const newLockData = await getLock(1, props.juchuHeadData.juchuHeadId);
         setLockData(newLockData);
-      } else if (props.edit && lockData !== null && lockData.addUser !== user.name) {
+      } else if (lockData !== null && lockData.addUser !== user.name) {
         setEdit(false);
       }
       setIsLoading(false);
@@ -481,6 +478,8 @@ const EquipmentOrderDetail = (props: {
 
       // 更新判定
       const checkJuchuKizaiHead = isDirty;
+      const checkKicsShukoDat = defaultValues?.kicsShukoDat ? (dirtyFields.kicsShukoDat ?? false) : false;
+      const checkYardShukoDat = defaultValues?.yardShukoDat ? (dirtyFields.yardShukoDat ?? false) : false;
       const checkJuchuHonbanbi = JSON.stringify(originJuchuHonbanbiList) !== JSON.stringify(juchuHonbanbiList);
       const checkJuchuKizaiMeisai =
         JSON.stringify(originJuchuKizaiMeisaiList) !==
@@ -491,9 +490,13 @@ const EquipmentOrderDetail = (props: {
 
       const updateResult = await saveJuchuKizai(
         checkJuchuKizaiHead,
+        checkKicsShukoDat,
+        checkYardShukoDat,
         checkJuchuHonbanbi,
         checkJuchuKizaiMeisai,
         checkJuchuContainerMeisai,
+        defaultValues?.kicsShukoDat,
+        defaultValues?.yardShukoDat,
         data,
         updateShukoDate,
         updateNyukoDate,
@@ -841,21 +844,6 @@ const EquipmentOrderDetail = (props: {
 
   // 明細削除ボタン押下時
   const handleMeisaiDelete = (target: { kizaiId: number; containerFlag: boolean }) => {
-    // 機材
-    if (!target.containerFlag) {
-      const deleteData = juchuKizaiMeisaiList.find((d) => d.kizaiId === target.kizaiId && !d.delFlag);
-      if ((deleteData?.shozokuId === 1 && kicsFixFlag) || (deleteData?.shozokuId === 2 && yardFixFlag)) {
-        setNyushukoFixOpen(true);
-        return;
-      }
-    }
-
-    // コンテナ
-    if (target.containerFlag && (kicsFixFlag || yardFixFlag)) {
-      setNyushukoFixOpen(true);
-      return;
-    }
-
     setDeleteOpen(true);
     setDeleteTarget(target);
   };
@@ -1278,17 +1266,38 @@ const EquipmentOrderDetail = (props: {
                   <Typography>編集中</Typography>
                 </Grid2>
               )}
+              {fixFlag && (
+                <Box display={'flex'} alignItems={'center'}>
+                  <Typography>出庫済</Typography>
+                </Box>
+              )}
               <Grid2 container alignItems={'center'} spacing={1}>
-                {!edit || (lockData !== null && lockData?.addUser !== user?.name) ? (
+                {!edit || (lockData !== null && lockData?.addUser !== user?.name) || fixFlag ? (
                   <Typography>閲覧モード</Typography>
                 ) : (
                   <Typography>編集モード</Typography>
                 )}
-                <Button disabled={lockData && lockData?.addUser !== user?.name ? true : false} onClick={handleEdit}>
+                <Button
+                  disabled={(lockData && lockData?.addUser !== user?.name ? true : false) || fixFlag}
+                  onClick={handleEdit}
+                >
                   変更
                 </Button>
               </Grid2>
               <BackButton label={'戻る'} />
+              <Button
+                onClick={() => {
+                  console.log(defaultValues?.kicsShukoDat ? (dirtyFields.kicsShukoDat ?? false) : false);
+                  console.log(
+                    '元',
+                    defaultValues?.kicsShukoDat ? toJapanTimeString(defaultValues?.kicsShukoDat) : null
+                  );
+                  const now = getValues('kicsShukoDat');
+                  console.log('新', now ? toJapanTimeString(now) : null);
+                }}
+              >
+                確認
+              </Button>
             </Grid2>
           </Box>
           {/*-------受注ヘッダー-------*/}
@@ -1962,7 +1971,7 @@ const EquipmentOrderDetail = (props: {
           <MoveAlertDialog open={moveOpen} onClick={handleMoveDialog} />
           <NyushukoAlertDialog open={nyushukoOpen} onClick={() => setNyushukoOpen(false)} />
           <DeleteAlertDialog open={deleteOpen} onClick={handleMeisaiDeleteResult} />
-          <NyushukoFixAlertDialog open={nyushukoFixOpen} onClick={() => setNyushukoFixOpen(false)} />
+          {/* <NyushukoFixAlertDialog open={nyushukoFixOpen} onClick={() => setNyushukoFixOpen(false)} /> */}
         </Box>
       )}
     </>
