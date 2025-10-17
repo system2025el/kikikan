@@ -230,7 +230,7 @@ export const selectFilteredJuchus = async (
           // whereClauses.push(`${dateColumn} >= $${queryParams.length}`);
         }
         if (selectedDate.range?.to) {
-          const nextDay = dayjs(selectedDate.range.to).add(1, 'day').startOf('day').toDate();
+          const nextDay = dayjs(selectedDate.range.to).tz('Asia/Tokyo').add(1, 'day').startOf('day').toDate();
           console.log('終わりの次の日！！！！！！', toJapanDateString(nextDay));
           builder.lt(dateColumn, toJapanDateString(nextDay));
           // queryParams.push(toJapanTimeString(nextDay));
