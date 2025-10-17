@@ -15,7 +15,7 @@ export const SelectFilteredVehs = async (/*query: string*/) => {
     .schema(SCHEMA)
     .from('m_sharyo')
     .select('sharyo_id, sharyo_nam, mem, dsp_flg, del_flg') // テーブルに表示するカラム
-    .order('dsp_ord_num'); // 並び順
+    .order('sharyo_nam'); // 並び順
   try {
     return await builder;
   } catch (e) {
