@@ -16,8 +16,6 @@ const Page = async (props: {
   const params = await props.params;
   // 受注機材ヘッダーid
   const juchuKizaiHeadId = Number(params.juchu_kizai_head_id);
-  // 編集モード(edit:編集、view:閲覧)
-  const edit = params.mode === 'edit' ? true : false;
   // 受注ヘッダーデータ
   const juchuHeadData = await getDetailJuchuHead(params.juchu_head_id);
   // 親受注機材入出庫データ
@@ -27,6 +25,15 @@ const Page = async (props: {
   if (!juchuHeadData || !oyaJuchuKizaiNyushukoData) {
     return <div>受注情報が見つかりません。</div>;
   }
+
+  // 出発フラグ
+  console.time();
+  const fixFlag = await getNyushukoFixFlag(params.juchu_head_id, params.juchu_kizai_head_id, 60);
+  console.log('-----------------------------出発フラグ--------------------------');
+  console.timeEnd();
+
+  // 編集モード(edit:編集、view:閲覧)
+  const edit = params.mode === 'edit' && !fixFlag ? true : false;
 
   // 出庫日
   const oyaShukoDate = getShukoDate(
@@ -68,10 +75,6 @@ const Page = async (props: {
     const keepShukoDate = null;
     // キープ入庫日(初期値)
     const keepNyukoDate = null;
-    // KICS出発フラグ
-    const kicsFixFlag = false;
-    // YARD出発フラグ
-    const yardFixFlag = false;
 
     return (
       <EquipmentKeepOrderDetail
@@ -85,8 +88,7 @@ const Page = async (props: {
         keepShukoDate={keepShukoDate}
         keepNyukoDate={keepNyukoDate}
         edit={edit}
-        kicsFixFlag={kicsFixFlag}
-        yardFixFlag={yardFixFlag}
+        fixFlag={fixFlag}
       />
     );
     // 既存
@@ -132,13 +134,6 @@ const Page = async (props: {
       keepJuchuKizaiHeadData.yardNyukoDat && new Date(keepJuchuKizaiHeadData.yardNyukoDat)
     );
 
-    // 出発フラグ
-    console.time();
-    const kicsFixFlag = await getNyushukoFixFlag(params.juchu_head_id, params.juchu_kizai_head_id, 60, 1);
-    const yardFixFlag = await getNyushukoFixFlag(params.juchu_head_id, params.juchu_kizai_head_id, 60, 2);
-    console.log('-----------------------------出発フラグ--------------------------');
-    console.timeEnd();
-
     return (
       <EquipmentKeepOrderDetail
         juchuHeadData={juchuHeadData}
@@ -151,8 +146,7 @@ const Page = async (props: {
         keepShukoDate={keepShukoDate}
         keepNyukoDate={keepNyukoDate}
         edit={edit}
-        kicsFixFlag={kicsFixFlag}
-        yardFixFlag={yardFixFlag}
+        fixFlag={fixFlag}
       />
     );
   }

@@ -267,17 +267,17 @@ export const EquipmentReturnOrderDetail = (props: {
   }, [isDirty, setIsDirty]);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || !props.edit) return;
 
     const asyncProcess = async () => {
       setIsLoading(true);
       const lockData = await getLock(1, props.juchuHeadData.juchuHeadId);
       setLockData(lockData);
-      if (props.edit && lockData === null) {
+      if (lockData === null) {
         await addLock(1, props.juchuHeadData.juchuHeadId, user.name);
         const newLockData = await getLock(1, props.juchuHeadData.juchuHeadId);
         setLockData(newLockData);
-      } else if (props.edit && lockData !== null && lockData.addUser !== user.name) {
+      } else if (lockData !== null && lockData.addUser !== user.name) {
         setEdit(false);
       }
       setIsLoading(false);

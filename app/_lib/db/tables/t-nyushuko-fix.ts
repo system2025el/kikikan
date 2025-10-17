@@ -13,12 +13,7 @@ import { NyushukoFix } from '../types/t-nyushuko-fix-type';
  * @param sagyoId 作業id
  * @returns
  */
-export const selectNyushukoFixFlag = async (
-  juchuHeadId: number,
-  juchuKizaiHeadId: number,
-  sagyoKbnId: number,
-  sagyoId: number
-) => {
+export const selectNyushukoFixFlag = async (juchuHeadId: number, juchuKizaiHeadId: number, sagyoKbnId: number) => {
   try {
     return await supabase
       .schema(SCHEMA)
@@ -26,9 +21,7 @@ export const selectNyushukoFixFlag = async (
       .select('sagyo_fix_flg')
       .eq('juchu_head_id', juchuHeadId)
       .eq('juchu_kizai_head_id', juchuKizaiHeadId)
-      .eq('sagyo_kbn_id', sagyoKbnId)
-      .eq('sagyo_id', sagyoId)
-      .single();
+      .eq('sagyo_kbn_id', sagyoKbnId);
   } catch (e) {
     throw e;
   }

@@ -59,6 +59,10 @@ import { toISOString, toISOStringYearMonthDay, toJapanTimeString } from '@/app/(
 import {
   addAllHonbanbi,
   addJuchuKizaiNyushuko,
+  delAllNyushukoCtnResult,
+  delAllNyushukoResult,
+  delNyushukoCtnResult,
+  delNyushukoResult,
   delSiyouHonbanbi,
   getJuchuContainerMeisaiMaxId,
   getJuchuKizaiHeadMaxId,
@@ -181,9 +185,13 @@ export const saveNewJuchuKizaiHead = async (
  */
 export const saveJuchuKizai = async (
   checkJuchuKizaiHead: boolean,
+  checkKicsShukoDat: boolean,
+  checkYardShukoDat: boolean,
   checkJuchuHonbanbi: boolean,
   checkJuchuKizaiMeisai: boolean,
   checkJuchuContainerMeisai: boolean,
+  originKicsShukoDat: Date | null | undefined,
+  originYardShukoDat: Date | null | undefined,
   data: JuchuKizaiHeadValues,
   updateShukoDate: Date,
   updateNyukoDate: Date,
@@ -313,7 +321,7 @@ export const saveJuchuKizai = async (
     }
 
     // 受注機材明細関係更新
-    if (checkJuchuKizaiHead || checkJuchuKizaiMeisai) {
+    if (checkKicsShukoDat || checkYardShukoDat || checkJuchuKizaiMeisai) {
       //const copyJuchuKizaiMeisaiData = [...juchuKizaiMeisaiList];
       const juchuKizaiMeisaiMaxId = await getJuchuKizaiMeisaiMaxId(data.juchuHeadId, data.juchuKizaiHeadId);
       let newJuchuKizaiMeisaiId = juchuKizaiMeisaiMaxId ? juchuKizaiMeisaiMaxId.juchu_kizai_meisai_id + 1 : 1;
@@ -363,6 +371,50 @@ export const saveJuchuKizai = async (
         console.log('入出庫伝票更新', updateNyushukoDenResult);
       }
 
+      // 入出庫実績削除
+      let kicsDelFlg = false;
+      let yardDelFlg = false;
+      if (checkKicsShukoDat && originKicsShukoDat) {
+        kicsDelFlg = await delAllNyushukoResult(
+          data.juchuHeadId,
+          toJapanTimeString(originKicsShukoDat, '-'),
+          1,
+          connection
+        );
+        console.log('KICSコンテナ入出庫実績削除', kicsDelFlg);
+      }
+      if (checkKicsShukoDat && originYardShukoDat) {
+        yardDelFlg = await delAllNyushukoResult(
+          data.juchuHeadId,
+          toJapanTimeString(originYardShukoDat, '-'),
+          2,
+          connection
+        );
+        console.log('YARDコンテナ入出庫実績削除', yardDelFlg);
+      }
+      const kicsKizaiIds = deleteJuchuKizaiMeisaiData.filter((d) => d.shozokuId === 1).map((d) => d.kizaiId);
+      const yardKizaiIds = deleteJuchuKizaiMeisaiData.filter((d) => d.shozokuId === 2).map((d) => d.kizaiId);
+      if (kicsKizaiIds.length > 0 && originKicsShukoDat && kicsDelFlg) {
+        const deleteKicsNyushukoResultResult = await delNyushukoResult(
+          data.juchuHeadId,
+          toJapanTimeString(originKicsShukoDat, '-'),
+          1,
+          kicsKizaiIds,
+          connection
+        );
+        console.log('KICS入出庫実績削除', deleteKicsNyushukoResultResult);
+      }
+      if (yardKizaiIds.length > 0 && originYardShukoDat && yardDelFlg) {
+        const deleteYardNyushukoResultResult = await delNyushukoResult(
+          data.juchuHeadId,
+          toJapanTimeString(originYardShukoDat, '-'),
+          2,
+          yardKizaiIds,
+          connection
+        );
+        console.log('YARD入出庫実績削除', deleteYardNyushukoResultResult);
+      }
+
       // 移動伝票更新
       const addIdoKizaiData = newJuchuKizaiMeisaiData.filter(
         (data) => !data.idoDenId && data.sagyoDenDat && !data.delFlag
@@ -403,7 +455,7 @@ export const saveJuchuKizai = async (
     }
 
     // 受注コンテナ明細更新
-    if (checkJuchuKizaiHead || checkJuchuContainerMeisai) {
+    if (checkKicsShukoDat || checkYardShukoDat || checkJuchuContainerMeisai) {
       //const copyJuchuContainerMeisaiData = [...juchuContainerMeisaiList];
       const juchuContainerMeisaiMaxId = await getJuchuContainerMeisaiMaxId(data.juchuHeadId, data.juchuKizaiHeadId);
       let newJuchuContainerMeisaiId = juchuContainerMeisaiMaxId
@@ -463,6 +515,58 @@ export const saveJuchuKizai = async (
           connection
         );
         console.log('コンテナ入出庫伝票更新', containerNyushukoDenResult);
+      }
+
+      // コンテナ入出庫実績削除
+      let kicsDelFlg = false;
+      let yardDelFlg = false;
+      if (checkKicsShukoDat && originKicsShukoDat) {
+        kicsDelFlg = await delAllNyushukoCtnResult(
+          data.juchuHeadId,
+          toJapanTimeString(originKicsShukoDat, '-'),
+          1,
+          connection
+        );
+        console.log('KICSコンテナ入出庫実績削除', kicsDelFlg);
+      }
+      if (checkKicsShukoDat && originYardShukoDat) {
+        yardDelFlg = await delAllNyushukoCtnResult(
+          data.juchuHeadId,
+          toJapanTimeString(originYardShukoDat, '-'),
+          2,
+          connection
+        );
+        console.log('YARDコンテナ入出庫実績削除', yardDelFlg);
+      }
+      const existingContainerMeisai = juchuContainerMeisaiList.filter((d) => d.saveFlag && !d.delFlag);
+      const deleteIds = juchuContainerMeisaiList.filter((d) => d.delFlag && d.saveFlag).map((d) => d.kizaiId);
+      const deleteKicsIds: number[] = [];
+      const deleteYardIds: number[] = [];
+      if (existingContainerMeisai.length > 0) {
+        const kicsContainerIds = existingContainerMeisai.filter((d) => d.planKicsKizaiQty === 0).map((d) => d.kizaiId);
+        const yardContainerIds = existingContainerMeisai.filter((d) => d.planYardKizaiQty === 0).map((d) => d.kizaiId);
+        deleteKicsIds.push(...deleteIds, ...kicsContainerIds);
+        deleteYardIds.push(...deleteIds, ...yardContainerIds);
+      }
+      if (originKicsShukoDat && deleteKicsIds.length > 0 && !kicsDelFlg) {
+        const deleteKicsContainerNyushukoResultResult = await delNyushukoCtnResult(
+          data.juchuHeadId,
+          toJapanTimeString(originKicsShukoDat, '-'),
+          1,
+          deleteKicsIds,
+          connection
+        );
+        console.log('KICSコンテナ入出庫実績削除', deleteKicsContainerNyushukoResultResult);
+      }
+      if (originYardShukoDat && deleteYardIds.length > 0 && !yardDelFlg) {
+        const deleteYardContainerNyushukoResultResult = await delNyushukoCtnResult(
+          data.juchuHeadId,
+          toJapanTimeString(originYardShukoDat, '-'),
+          2,
+          deleteYardIds,
+          connection
+        );
+        console.log('YARDコンテナ入出庫実績削除', deleteYardContainerNyushukoResultResult);
       }
     }
 

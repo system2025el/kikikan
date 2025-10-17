@@ -20,14 +20,21 @@ const Page = async (props: {
   const params = await props.params;
   // 受注機材ヘッダーid
   const juchuKizaiHeadId = Number(params.juchu_kizai_head_id);
-  // 編集モード(edit:編集、view:閲覧)
-  const edit = params.mode === 'edit' ? true : false;
   // 受注ヘッダーデータ
   const juchuHeadData = await getDetailJuchuHead(params.juchu_head_id);
 
   if (!juchuHeadData) {
     return <div>受注情報が見つかりません。</div>;
   }
+
+  // 出発フラグ
+  console.time();
+  const fixFlag = await getNyushukoFixFlag(params.juchu_head_id, params.juchu_kizai_head_id, 60);
+  console.log('-----------------------------出発フラグ--------------------------');
+  console.timeEnd();
+
+  // 編集モード(edit:編集、view:閲覧)
+  const edit = params.mode === 'edit' && !fixFlag ? true : false;
 
   // 新規
   if (juchuKizaiHeadId === 0) {
@@ -59,10 +66,6 @@ const Page = async (props: {
     const dateRange: string[] = [];
     // 受注本番日データ
     const newJuchuHonbanbiData: JuchuKizaiHonbanbiValues[] = [];
-    // KICS出発フラグ
-    const kicsFixFlag = false;
-    // YARD出発フラグ
-    const yardFixFlag = false;
 
     return (
       <EquipmentOrderDetail
@@ -76,8 +79,7 @@ const Page = async (props: {
         eqStockData={newEqStockData}
         juchuHonbanbiData={newJuchuHonbanbiData}
         edit={edit}
-        kicsFixFlag={kicsFixFlag}
-        yardFixFlag={yardFixFlag}
+        fixFlag={fixFlag}
       />
     );
 
@@ -142,13 +144,6 @@ const Page = async (props: {
     console.log('-----------------------------受注機材本番日--------------------------');
     console.timeEnd();
 
-    // 出発フラグ
-    console.time();
-    const kicsFixFlag = await getNyushukoFixFlag(params.juchu_head_id, params.juchu_kizai_head_id, 60, 1);
-    const yardFixFlag = await getNyushukoFixFlag(params.juchu_head_id, params.juchu_kizai_head_id, 60, 2);
-    console.log('-----------------------------出発フラグ--------------------------');
-    console.timeEnd();
-
     return (
       <EquipmentOrderDetail
         juchuHeadData={juchuHeadData}
@@ -161,8 +156,7 @@ const Page = async (props: {
         eqStockData={eqStockData}
         juchuHonbanbiData={juchuHonbanbiData}
         edit={edit}
-        kicsFixFlag={kicsFixFlag}
-        yardFixFlag={yardFixFlag}
+        fixFlag={fixFlag}
       />
     );
   }
