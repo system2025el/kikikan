@@ -223,14 +223,16 @@ export const selectFilteredJuchus = async (
 
       case '7': // '指定期間'
         if (selectedDate.range?.from) {
-          builder.gte(dateColumn, toJapanTimeString(selectedDate.range.from));
+          console.log('始まり！！！！！！', toJapanDateString(selectedDate.range?.from));
+          builder.gte(dateColumn, toJapanDateString(selectedDate.range.from));
 
           // queryParams.push(toJapanTimeString(selectedDate.range.from));
           // whereClauses.push(`${dateColumn} >= $${queryParams.length}`);
         }
         if (selectedDate.range?.to) {
           const nextDay = dayjs(selectedDate.range.to).add(1, 'day').startOf('day').toDate();
-          builder.lt(dateColumn, toJapanTimeString(nextDay));
+          console.log('終わりの次の日！！！！！！', toJapanDateString(nextDay));
+          builder.lt(dateColumn, toJapanDateString(nextDay));
           // queryParams.push(toJapanTimeString(nextDay));
           // whereClauses.push(`${dateColumn} < $${queryParams.length}`);
         }
