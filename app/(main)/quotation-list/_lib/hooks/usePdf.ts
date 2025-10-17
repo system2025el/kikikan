@@ -45,7 +45,6 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
 
     /* ここから出力内容
      * -----------------------------------------------------------------*/
-
     // PDFページ生成
     const page = pdfDoc.addPage();
 
@@ -530,8 +529,9 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
       //lineHeight: 24,
       //opacity: 1,
     });
-
-    page.drawText(`¥${param.gokeiAmt?.toLocaleString()}`, {
+    const gokeiAmtText = param.gokeiAmt != null ? param.gokeiAmt.toLocaleString() : '';
+    // page.drawText(`¥${param.gokeiAmt?.toLocaleString()}`, {
+    page.drawText(`¥${gokeiAmtText?.toLocaleString()}`, {
       x: 240,
       y: y_totalAmount,
       font: customFont, // カスタムフォントの設定
