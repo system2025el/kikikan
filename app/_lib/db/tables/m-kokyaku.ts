@@ -55,7 +55,7 @@ export const selectFilteredCustomers = async (query: string) => {
     .select(
       'kokyaku_id, kokyaku_nam, adr_shozai, adr_tatemono, adr_sonota, tel, fax, mem, dsp_flg, del_flg, kokyaku_rank'
     )
-    .order('dsp_ord_num');
+    .order('kokyaku_nam');
 
   // queryが存在する場合のみあいまい検索、顧客名、顧客名かな、住所、電話番号、fax番号
   if (query && query.trim() !== '') {

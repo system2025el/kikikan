@@ -34,7 +34,7 @@ export const selectFilteredShozokus = async (query: string) => {
     .schema(SCHEMA)
     .from('m_shozoku')
     .select('shozoku_id, shozoku_nam, mem, del_flg') // テーブルに表示するカラム
-    .order('dsp_ord_num'); // 並び順
+    .order('shozoku_nam'); // 並び順
   // 必要か？
   //   if (query && query.trim() !== '') {
   //     builder.ilike('shozoku_nam', `%${query}%`);

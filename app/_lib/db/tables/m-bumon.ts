@@ -36,7 +36,7 @@ export const selectFilteredBumons = async (queries: { q: string; d: number | nul
     .schema(SCHEMA)
     .from('m_bumon')
     .select('bumon_id, bumon_nam, mem, del_flg')
-    .order('dsp_ord_num');
+    .order('bumon_nam');
 
   if (queries.q && queries.q.trim() !== '') {
     builder.ilike('bumon_nam', `%${queries.q}%`);

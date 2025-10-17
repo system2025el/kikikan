@@ -32,7 +32,7 @@ export const SelectFilteredUsers = async (query: string) => {
     .from('m_user')
     .select('user_nam, shain_cod, mail_adr, del_flg, mem')
     .neq('del_flg', 1)
-    .order('dsp_ord_num');
+    .order('user_nam');
   // 検索条件あれば
   if (query && query.trim() !== '') {
     builder.ilike('user_nam', query);

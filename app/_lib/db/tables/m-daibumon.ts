@@ -34,7 +34,7 @@ export const selectFilteredDaibumons = async (query: string) => {
     .schema(SCHEMA)
     .from('m_dai_bumon')
     .select('dai_bumon_id, dai_bumon_nam,  mem, del_flg') // テーブルに表示するカラム
-    .order('dsp_ord_num'); // 並び順
+    .order('dai_bumon_nam'); // 並び順
 
   if (query && query.trim() !== '') {
     builder.ilike('dai_bumon_nam', `%${query}%`);
