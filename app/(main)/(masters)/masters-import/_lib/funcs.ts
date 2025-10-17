@@ -1,5 +1,7 @@
 'use server';
 
+import { ZodError, ZodIssue } from 'zod';
+
 import pool from '@/app/_lib/db/postgres';
 import {
   checkBumon,
@@ -125,4 +127,13 @@ export const ImportEqptRfidData = async (data: EqptImportType[]) => {
     // なんにしてもpool解放
     connection.release();
   }
+};
+
+/**
+ * エラー出力関数
+ * @param index エラーのある行番
+ * @param error エラー内容
+ */
+export const sendLogServer = async (index: number, error: ZodIssue[]) => {
+  console.log(`${index} でバリデーションエラー:`, error);
 };
