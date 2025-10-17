@@ -126,32 +126,15 @@ export const selectFilteredJuchus = async (
     juchu_head_id, juchu_sts_nam, koen_nam, koenbasho_nam, kokyaku_nam, juchu_dat, juchu_str_dat, juchu_end_dat
   `);
 
-  // let sqlQuery = `
-  //   SELECT
-  //     juchu_head_id as "juchuHeadId", juchu_sts_nam as "juchuStsNam", koen_nam as "koenNam",
-  //     koenbasho_nam as "koenbashoNam", kokyaku_nam as "kokyakuNam", juchu_dat as "juchuDat",
-  //     juchu_str_dat as "juchuStrDat", juchu_end_dat as "juchuEndDat"
-  //   FROM
-  //     ${SCHEMA}.v_juchu_lst
-  // `;
-  // const queryParams = [];
-  // const whereClauses = [];
-
   // 検索条件
   // 公演名
   if (stageName && stageName.trim() !== '') {
     builder.ilike('kokyaku_nam', `%${stageName}%`);
-
-    // queryParams.push(`%${stageName}%`);
-    // whereClauses.push(`koen_nam ILIKE $${queryParams.length}`);
   }
 
   // 顧客
   if (customer && customer !== FAKE_NEW_ID) {
     builder.eq('kokyaku_id', customer);
-
-    // queryParams.push(customer);
-    // whereClauses.push(`kokyaku_id = $${queryParams.length}`);
   }
 
   // 検索条件日付系
@@ -173,68 +156,43 @@ export const selectFilteredJuchus = async (
         const lastMonthStart = dayjs().tz('Asia/Tokyo').subtract(1, 'month').startOf('month').toDate();
         const lastMonthEnd = dayjs().tz('Asia/Tokyo').subtract(1, 'month').endOf('month').toDate();
         builder.gte(dateColumn, toJapanTimeString(lastMonthStart)).lte(dateColumn, toJapanTimeString(lastMonthEnd));
-
-        // queryParams.push(toJapanTimeString(lastMonthStart));
-        // whereClauses.push(`${dateColumn} >= $${queryParams.length}`);
-        // queryParams.push(toJapanTimeString(lastMonthEnd));
-        // whereClauses.push(`${dateColumn} <= $${queryParams.length}`);
         break;
 
       case '2': // '今月全て'
         const thisMonthStart = dayjs().tz('Asia/Tokyo').startOf('month').toDate();
         const thisMonthEnd = dayjs().tz('Asia/Tokyo').endOf('month').toDate();
         builder.gte(dateColumn, toJapanTimeString(thisMonthStart)).lte(dateColumn, toJapanTimeString(thisMonthEnd));
-
-        // queryParams.push(toJapanTimeString(thisMonthStart));
-        // whereClauses.push(`${dateColumn} >= $${queryParams.length}`);
-        // queryParams.push(toJapanTimeString(thisMonthEnd));
-        // whereClauses.push(`${dateColumn} <= $${queryParams.length}`);
         break;
 
       case '3': // '昨日'
         const yesterday = dayjs().tz('Asia/Tokyo').subtract(1, 'day').format('YYYY-MM-DD');
         builder.eq(dateColumn, toJapanTimeString(yesterday));
-        // queryParams.push(toJapanTimeString(yesterday));
-        // whereClauses.push(`${dateColumn} = $${queryParams.length}`);
         break;
 
       case '4': // '今日'
         const today = dayjs().tz('Asia/Tokyo').format('YYYY-MM-DD');
         builder.eq(dateColumn, toJapanTimeString(today));
-        // queryParams.push(toJapanTimeString(today));
-        // whereClauses.push(`${dateColumn} = $${queryParams.length}`);
         break;
 
       case '5': // '明日'
         const tomorrow = dayjs().tz('Asia/Tokyo').add(1, 'day').format('YYYY-MM-DD');
         builder.eq(dateColumn, toJapanTimeString(tomorrow));
-
-        // queryParams.push(toJapanTimeString(tomorrow));
-        // whereClauses.push(`${dateColumn} = $${queryParams.length}`);
         break;
 
       case '6': // '明日以降'
         const tomorrowAndAfter = dayjs().tz('Asia/Tokyo').add(1, 'day').startOf('day').toDate();
         builder.gte(dateColumn, toJapanDateString(tomorrowAndAfter));
-
-        // queryParams.push(toJapanTimeString(tomorrowAndAfter));
-        // whereClauses.push(`${dateColumn} >= $${queryParams.length}`);
         break;
 
       case '7': // '指定期間'
         if (selectedDate.range?.from) {
           console.log('始まり！！！！！！', toJapanDateString(selectedDate.range?.from));
           builder.gte(dateColumn, toJapanDateString(selectedDate.range.from));
-
-          // queryParams.push(toJapanTimeString(selectedDate.range.from));
-          // whereClauses.push(`${dateColumn} >= $${queryParams.length}`);
         }
         if (selectedDate.range?.to) {
           const nextDay = dayjs(selectedDate.range.to).tz('Asia/Tokyo').add(1, 'day').startOf('day').toDate();
           console.log('終わりの次の日！！！！！！', toJapanDateString(nextDay));
           builder.lt(dateColumn, toJapanDateString(nextDay));
-          // queryParams.push(toJapanTimeString(nextDay));
-          // whereClauses.push(`${dateColumn} < $${queryParams.length}`);
         }
         break;
 
@@ -246,14 +204,10 @@ export const selectFilteredJuchus = async (
   // 受注開始日
   if (orderStartDate) {
     builder.gte('juchu_str_dat', toJapanTimeString(orderStartDate));
-    // queryParams.push(toJapanTimeString(orderStartDate));
-    // whereClauses.push(`juchu_str_dat >= $${queryParams.length}`);
   }
   // 受注終了日
   if (orderFinishDate) {
     builder.lte('juchu_end_dat', toJapanTimeString(orderFinishDate));
-    // queryParams.push(toJapanTimeString(orderFinishDate));
-    // whereClauses.push(`juchu_end_dat <= $${queryParams.length}`);
   }
 
   // ソート処理
@@ -273,12 +227,6 @@ export const selectFilteredJuchus = async (
     if (order === 'asc') builder.order(sortCOlumn).order('juchu_head_id');
     if (order === 'desc') builder.order(sortCOlumn, { ascending: false }).order('juchu_head_id');
   }
-  // 昇降
-  // if (order === 'asc') sqlQuery += `, "juchuHeadId";`;
-  // if (order === 'desc') sqlQuery += ` Desc, "juchuHeadId";`;
-
-  // console.log('With Parameters:', queryParams);
-  // console.log('SQL=== ', sqlQuery);
 
   try {
     return await builder;
