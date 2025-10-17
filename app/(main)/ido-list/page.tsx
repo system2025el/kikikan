@@ -3,7 +3,7 @@ import { getIdoList } from './_lib/funcs';
 import { IdoList } from './_ui/ido-list';
 
 const Page = async () => {
-  const date = toJapanDateString();
+  const date = toJapanDateString(undefined, '-');
   const idoData = await getIdoList(date);
 
   if (!idoData) {

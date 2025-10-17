@@ -46,7 +46,7 @@ export const IdoListTable = (props: { datas: IdoTableValues[] }) => {
               {datas[0].shukoFixFlg === 1 ? '〇' : datas[0].shukoFixFlg === 0 ? 'ー' : '無し'}
             </TableCell>
             <TableCell align="center">
-              <Button onClick={() => router.push(`ido-list/ido-detail/${datas[0].idoDenId}/40`)}>詳細</Button>
+              <Button onClick={() => router.push(`ido-list/ido-detail/40/${datas[0].nyushukoDat}/2/2`)}>詳細</Button>
             </TableCell>
             <TableCell align="left">
               {datas[0].nchkSagyoStsId === 0
@@ -61,7 +61,7 @@ export const IdoListTable = (props: { datas: IdoTableValues[] }) => {
               {datas[0].nyukoFixFlg === 1 ? '〇' : datas[0].nyukoFixFlg === 0 ? 'ー' : '無し'}
             </TableCell>
             <TableCell align="center">
-              <Button onClick={() => router.push(`ido-list/ido-detail/${datas[0].idoDenId}/50`)}>詳細</Button>
+              <Button onClick={() => router.push(`ido-list/ido-detail/50${datas[0].nyushukoDat}/2/1`)}>詳細</Button>
             </TableCell>
           </TableRow>
           <TableRow>
@@ -79,7 +79,7 @@ export const IdoListTable = (props: { datas: IdoTableValues[] }) => {
               {datas[1].shukoFixFlg === 1 ? '〇' : datas[1].shukoFixFlg === 0 ? 'ー' : '無し'}
             </TableCell>
             <TableCell align="center">
-              <Button onClick={() => router.push(`ido-list/ido-detail/${datas[1].idoDenId}/40`)}>詳細</Button>
+              <Button onClick={() => router.push(`ido-list/ido-detail/40/${datas[1].nyushukoDat}/1/1`)}>詳細</Button>
             </TableCell>
             <TableCell align="left">
               {datas[1].nchkSagyoStsId === 0
@@ -94,7 +94,7 @@ export const IdoListTable = (props: { datas: IdoTableValues[] }) => {
               {datas[1].nyukoFixFlg === 1 ? '〇' : datas[1].nyukoFixFlg === 0 ? 'ー' : '無し'}
             </TableCell>
             <TableCell align="center">
-              <Button onClick={() => router.push(`ido-list/ido-detail/${datas[1].idoDenId}/50`)}>詳細</Button>
+              <Button onClick={() => router.push(`ido-list/ido-detail/50/${datas[1].nyushukoDat}/1/2`)}>詳細</Button>
             </TableCell>
           </TableRow>
         </TableBody>

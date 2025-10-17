@@ -32,7 +32,7 @@ export const IdoList = (props: { idoData: IdoTableValues[] }) => {
   const onSubmit = async (data: { idoDat: Date }) => {
     setIsLoading(true);
 
-    const idoData = await getIdoList(toJapanDateString(data.idoDat));
+    const idoData = await getIdoList(toJapanDateString(data.idoDat, '-'));
     if (idoData) {
       setIdoList(idoData);
     }
