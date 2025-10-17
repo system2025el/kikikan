@@ -127,13 +127,30 @@ export const MeisaiTblHeader = ({
           <Controller
             control={control}
             name={`meisaiHeads.${index}.seikyuRange.strt`}
-            render={({ field }) => <FormDateX value={field.value} onChange={field.onChange} sx={{ mr: 1 }} readonly />}
+            render={({ field, fieldState: { error } }) => (
+              <FormDateX
+                value={field.value}
+                onChange={field.onChange}
+                sx={{ mr: 1 }}
+                readonly
+                error={!!error}
+                helperText={error?.message}
+              />
+            )}
           />
           <span>～</span>
           <Controller
             control={control}
             name={`meisaiHeads.${index}.seikyuRange.end`}
-            render={({ field }) => <FormDateX value={field.value} onChange={field.onChange} sx={{ ml: 1 }} />}
+            render={({ field, fieldState: { error } }) => (
+              <FormDateX
+                value={field.value}
+                onChange={field.onChange}
+                sx={{ ml: 1 }}
+                error={!!error}
+                helperText={error?.message}
+              />
+            )}
           />
         </Grid2>
       </Grid2>

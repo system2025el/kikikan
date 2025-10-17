@@ -492,8 +492,12 @@ export const getNyushukoFixFlag = async (
   try {
     const { data, error } = await selectNyushukoFixFlag(juchuHeadId, juchuKizaiHeadId, sagyoKbnId, sagyoId);
     if (error) {
+      if (error.code === 'PGRST116') {
+        console.log('データなし');
+        return false;
+      }
       console.error('getNyushukoFixFlag error: ', error);
-      return false;
+      throw new Error(error.message);
     }
     return data.sagyo_fix_flg;
   } catch (e) {

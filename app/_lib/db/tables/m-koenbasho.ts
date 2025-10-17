@@ -15,7 +15,7 @@ export const selectFilteredLocs = async (query: string) => {
     .schema(SCHEMA)
     .from('m_koenbasho')
     .select('koenbasho_id, koenbasho_nam, adr_shozai, adr_tatemono, adr_sonota, tel,  fax, mem, dsp_flg, del_flg') // テーブルに表示するカラム
-    .order('dsp_ord_num'); // 並び順
+    .order('koenbasho_nam'); // 並び順
   // あいまい検索：公演場所名、かな、住所、電話番号、ファックス番号
   if (query && query.trim() !== '') {
     builder.or(

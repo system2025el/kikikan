@@ -289,8 +289,14 @@ export const Bill = ({
                     <Controller
                       name="seikyuDat"
                       control={control}
-                      render={({ field }) => (
-                        <FormDateX value={field.value} onChange={field.onChange} sx={{ width: 200 }} />
+                      render={({ field, fieldState: { error } }) => (
+                        <FormDateX
+                          value={field.value}
+                          onChange={field.onChange}
+                          sx={{ width: 200 }}
+                          error={!!error}
+                          helperText={error?.message}
+                        />
                       )}
                     />
                   </Grid2>

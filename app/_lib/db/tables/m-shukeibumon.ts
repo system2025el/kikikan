@@ -34,7 +34,7 @@ export const selectFilteredShukeibumons = async (query: string) => {
     .schema(SCHEMA)
     .from('m_shukei_bumon')
     .select('shukei_bumon_id, shukei_bumon_nam, mem, del_flg') // テーブルに表示するカラム
-    .order('dsp_ord_num'); // 並び順
+    .order('shukei_bumon_nam'); // 並び順
 
   if (query && query.trim() !== '') {
     builder.ilike('shukei_bumon_nam', `%${query}%`);

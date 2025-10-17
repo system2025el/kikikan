@@ -102,13 +102,27 @@ export const OrderList = ({
                     <Controller
                       control={control}
                       name="selectedDate.range.from"
-                      render={({ field }) => <FormDateX value={field.value} onChange={field.onChange} />}
+                      render={({ field, fieldState: { error } }) => (
+                        <FormDateX
+                          value={field.value}
+                          onChange={field.onChange}
+                          error={!!error}
+                          helperText={error?.message}
+                        />
+                      )}
                     />
                     <span>～</span>
                     <Controller
                       control={control}
                       name="selectedDate.range.to"
-                      render={({ field }) => <FormDateX value={field.value} onChange={field.onChange} />}
+                      render={({ field, fieldState: { error } }) => (
+                        <FormDateX
+                          value={field.value}
+                          onChange={field.onChange}
+                          error={!!error}
+                          helperText={error?.message}
+                        />
+                      )}
                     />
                   </Stack>
                 )}
@@ -192,7 +206,14 @@ export const OrderList = ({
                           return value === null || value instanceof Date || '日付が正しくありません';
                         },
                       }}
-                      render={({ field }) => <FormDateX value={field.value} onChange={field.onChange} />}
+                      render={({ field, fieldState: { error } }) => (
+                        <FormDateX
+                          value={field.value}
+                          onChange={field.onChange}
+                          error={!!error}
+                          helperText={error?.message}
+                        />
+                      )}
                     />
                     ～
                     <Controller
@@ -203,7 +224,14 @@ export const OrderList = ({
                           return value === null || value instanceof Date || '日付が正しくありません';
                         },
                       }}
-                      render={({ field }) => <FormDateX value={field.value} onChange={field.onChange} />}
+                      render={({ field, fieldState: { error } }) => (
+                        <FormDateX
+                          value={field.value}
+                          onChange={field.onChange}
+                          error={!!error}
+                          helperText={error?.message}
+                        />
+                      )}
                     />
                   </Grid2>
                 </Grid2>
