@@ -14,4 +14,5 @@ export type NyukoTableValues = {
   sectionNamv: string;
   kokyakuNam: string;
   nchkSagyoStsId: number;
+  nchkSagyoStsNamShort: string;
 };

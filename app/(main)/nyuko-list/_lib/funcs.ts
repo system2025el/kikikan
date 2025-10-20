@@ -28,6 +28,7 @@ export const getNyukoList = async (queries: NyukoListSearchValues) => {
       sectionNamv: d.section_namv,
       kokyakuNam: d.kokyaku_nam,
       nchkSagyoStsId: d.nchk_sagyo_sts_id,
+      nchkSagyoStsNamShort: d.nchk_sagyo_sts_nam_short,
     }));
 
     return nyukoList;
