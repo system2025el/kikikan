@@ -1,4 +1,4 @@
-import { getShukoDetail } from './_lib/funcs';
+import { getShukoDetail, getShukoFixFlag } from './_lib/funcs';
 import { ShukoDetail } from './_ui/shuko-detail';
 
 const Page = async (props: {
@@ -17,9 +17,19 @@ const Page = async (props: {
     date,
     Number(params.sagyo_kbn_id)
   );
-  if (!shukoDetailData) {
+  if (!shukoDetailData || shukoDetailData.length <= 0) {
     return <div>出庫明細が見つかりません。</div>;
   }
-  return <ShukoDetail shukoDetailData={shukoDetailData} />;
+
+  console.log(shukoDetailData[0].juchuKizaiHeadIdv);
+
+  const fixFlag = await getShukoFixFlag(
+    Number(params.juchu_head_id),
+    shukoDetailData[0].juchuKizaiHeadIdv![0],
+    60,
+    date,
+    Number(params.nyushuko_basho_id)
+  );
+  return <ShukoDetail shukoDetailData={shukoDetailData} fixFlag={fixFlag} />;
 };
 export default Page;
