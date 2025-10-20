@@ -59,6 +59,15 @@ export const getShukoDetail = async (
   }
 };
 
+/**
+ * 出庫作業確定フラグ取得
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param sagyoKbnId 作業区分id
+ * @param sagyoDenDat 作業日時
+ * @param sagyoId 作業id
+ * @returns
+ */
 export const getShukoFixFlag = async (
   juchuHeadId: number,
   juchuKizaiHeadId: number,
