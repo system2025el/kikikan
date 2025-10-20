@@ -65,13 +65,11 @@ export const ImportMaster = () => {
       if (type === 'eqpt') {
         const parsedEqptData: EqptImportType[] = [];
         let hasError = false;
-        console.log(
-          'どこいったｎ',
-          dataRows.map((d) => d[0])
-        );
         dataRows.forEach((row, index) => {
           // rfid_tag_idの部分が空ならそもそも取得しない
-          if (!row[0] || row[0].trim() !== '') return;
+          if (!row[0] || row[0].trim() === '') {
+            return;
+          }
           // 置き換え
           const rowObject = {
             rfid_tag_id: String(row[0]),
