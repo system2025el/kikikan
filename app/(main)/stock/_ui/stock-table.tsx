@@ -21,7 +21,7 @@ export const EqTable = (props: EqTableProps) => {
               機材名
             </TableCell>
             <TableCell align="left" size="small" style={styles.header}>
-              全数
+              有効数
             </TableCell>
           </TableRow>
         </TableHead>
