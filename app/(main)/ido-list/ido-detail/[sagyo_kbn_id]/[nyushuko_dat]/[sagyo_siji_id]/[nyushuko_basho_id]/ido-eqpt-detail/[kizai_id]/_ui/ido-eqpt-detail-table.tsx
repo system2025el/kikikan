@@ -1,6 +1,7 @@
 'use client';
 
 import { Checkbox, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
+import { grey } from '@mui/material/colors';
 import { Dispatch, SetStateAction } from 'react';
 
 export const IdoEqptDetailTable = (props: {
@@ -41,13 +42,13 @@ export const IdoEqptDetailTable = (props: {
             <TableCell padding="checkbox">
               <Checkbox />
             </TableCell>
-            <TableCell align="left">EL NO.</TableCell>
-            <TableCell align="left">RFIDタグID</TableCell>
-            <TableCell align="left">ステータス</TableCell>
-            <TableCell align="left">メモ</TableCell>
-            <TableCell align="left">読取日時</TableCell>
-            <TableCell align="left">担当者</TableCell>
-            <TableCell align="left">無効</TableCell>
+            <TableCell align="left">234</TableCell>
+            <TableCell align="left">BB0000000000000000001001</TableCell>
+            <TableCell align="left">移動チェック済</TableCell>
+            <TableCell align="left">XXXXXXXXXXX</TableCell>
+            <TableCell align="left">2025/09/10</TableCell>
+            <TableCell align="left">test_user</TableCell>
+            <TableCell align="left"></TableCell>
             {/* {datas.map((row, index) => (
             <TableRow key={row.rfidTagId} sx={{ backgroundColor: row.rfidDelFlg === 1 ? grey[300] : 'white' }}>
               <TableCell align="center" padding="none">
@@ -66,6 +67,21 @@ export const IdoEqptDetailTable = (props: {
               <TableCell align="left">{row.rfidDelFlg === 1 && '無効'}</TableCell>
             </TableRow>
           ))} */}
+          </TableRow>
+          <TableRow sx={{ whiteSpace: 'nowrap', bgcolor: grey[300] }}>
+            <TableCell align="center" padding="none">
+              {2}
+            </TableCell>
+            <TableCell padding="checkbox">
+              <Checkbox />
+            </TableCell>
+            <TableCell align="left">235</TableCell>
+            <TableCell align="left">BB0000000000000000001002</TableCell>
+            <TableCell align="left">移動チェック済</TableCell>
+            <TableCell align="left">XXXXXXXXXXX</TableCell>
+            <TableCell align="left">2025/09/10</TableCell>
+            <TableCell align="left">test_user</TableCell>
+            <TableCell align="left">無効</TableCell>
           </TableRow>
         </TableBody>
       </Table>

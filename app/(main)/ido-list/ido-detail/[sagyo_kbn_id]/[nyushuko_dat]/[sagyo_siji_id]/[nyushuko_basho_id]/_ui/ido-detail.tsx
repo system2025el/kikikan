@@ -5,7 +5,7 @@ import { Box, Button, Divider, Grid2, Paper, TextField, Typography } from '@mui/
 
 import { BackButton } from '@/app/(main)/_ui/buttons';
 
-import { NyukoIdoDenTable, ShukoIdoDenManualTable, ShukoIdoDenTable } from './ido-detail-table';
+import { NyukoIdoDenTable, ShukoIdoDenTable } from './ido-detail-table';
 
 export const IdoDetail = (props: { sagyoKbnId: number }) => {
   return (
@@ -35,35 +35,26 @@ export const IdoDetail = (props: { sagyoKbnId: number }) => {
         </Grid2>
         <Divider />
         {props.sagyoKbnId === 40 ? (
-          <>
-            <Box width={'100%'} pb={3}>
-              <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} p={2}>
-                <Typography>伝票指示</Typography>
-                <Grid2 container spacing={2}>
-                  <Typography sx={{ backgroundColor: 'rgba(158, 158, 158, 1)' }}>済</Typography>
-                  <Typography sx={{ backgroundColor: 'rgba(255, 171, 64, 1)' }}>不足</Typography>
-                  <Typography sx={{ backgroundColor: 'rgba(68, 138, 255, 1)' }}>コンテナ</Typography>
-                </Grid2>
-              </Box>
-              {/*idoDenData.length > 0 &&*/ <ShukoIdoDenTable /*datas={idoDetailData}*/ />}
-            </Box>
-            <Divider />
-            <Box width={'100%'}>
-              <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} p={2}>
-                <Box alignItems={'center'}>
-                  <Typography>手動指示</Typography>
-                  <Box py={1}>
-                    <Button /*onClick={() => handleOpenEqDialog()}*/>
-                      <AddIcon fontSize="small" />
-                      機材追加
-                    </Button>
-                  </Box>
+          <Box width={'100%'}>
+            <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} p={2}>
+              <Box alignItems={'center'}>
+                <Typography>手動指示</Typography>
+                <Box py={1}>
+                  <Button /*onClick={() => handleOpenEqDialog()}*/>
+                    <AddIcon fontSize="small" />
+                    機材追加
+                  </Button>
                 </Box>
-                <Button>保存</Button>
               </Box>
-              {/*idoDenManualList.length > 0 &&*/ <ShukoIdoDenManualTable /*datas={idoDenManualList}*/ />}
+              <Grid2 container alignItems={'center'} spacing={2}>
+                <Typography sx={{ backgroundColor: 'rgba(158, 158, 158, 1)' }}>済</Typography>
+                <Typography sx={{ backgroundColor: 'rgba(255, 171, 64, 1)' }}>不足</Typography>
+                <Typography sx={{ backgroundColor: 'rgba(68, 138, 255, 1)' }}>コンテナ</Typography>
+                <Button>保存</Button>
+              </Grid2>
             </Box>
-          </>
+            {/*idoDenManualList.length > 0 &&*/ <ShukoIdoDenTable /*datas={idoDenManualList}*/ />}
+          </Box>
         ) : (
           <Box width={'100%'} pb={3}>
             <Box display={'flex'} justifyContent={'end'} alignItems={'center'} width={'60vw'} p={2}>

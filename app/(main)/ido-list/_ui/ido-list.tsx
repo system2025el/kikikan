@@ -30,14 +30,12 @@ export const IdoList = (props: { idoData: IdoTableValues[] }) => {
    * @param data 検索データ(受注番号、出庫日、出庫場所)
    */
   const onSubmit = async (data: { idoDat: Date }) => {
-    setIsLoading(true);
-
-    const idoData = await getIdoList(toJapanDateString(data.idoDat, '-'));
-    if (idoData) {
-      setIdoList(idoData);
-    }
-
-    setIsLoading(false);
+    // setIsLoading(true);
+    // const idoData = await getIdoList(toJapanDateString(data.idoDat, '-'));
+    // if (idoData) {
+    //   setIdoList(idoData);
+    // }
+    // setIsLoading(false);
   };
 
   return (
