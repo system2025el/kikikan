@@ -1,4 +1,3 @@
-import { strict } from 'assert';
 import { number, z } from 'zod';
 
 import { validationMessages } from '@/app/(main)/_lib/validation-messages';
@@ -65,6 +64,8 @@ export type EqptsMasterTableValues = {
   kizaiId: number;
   kizaiNam: string | null;
   kizaiQty: number | null;
+  ngQty: number | null;
+  yukoQty: number | null;
   bumonNam: string | null;
   daibumonNam: string | null;
   delFlg: boolean | null;

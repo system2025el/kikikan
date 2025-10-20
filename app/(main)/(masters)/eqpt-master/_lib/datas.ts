@@ -10,6 +10,8 @@ export const eqptMHeader = [
   { key: 'name', label: '機材名' },
   { key: 'shozokuNam', label: '所属名' },
   { key: 'kizaiQty', label: '保有数' },
+  { key: 'ngQty', label: 'NG数' },
+  { key: 'yukoQty', label: '有効数' },
   { key: 'bumonNam', label: '部門' },
   { key: 'daibumonNam', label: '大部門' },
   { key: 'shukeibumonNam', label: '集計部門' },

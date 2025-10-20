@@ -4,7 +4,8 @@ import SearchIcon from '@mui/icons-material/Search';
 import { Box, Button, Container, Divider, Grid2, MenuItem, Paper, Select, Stack, Typography } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import { useState } from 'react';
-import { Controller, TextFieldElement, useForm } from 'react-hook-form-mui';
+import { CheckboxElement, Controller, TextFieldElement, useForm } from 'react-hook-form-mui';
+import { boolean } from 'zod';
 
 import { selectNone, SelectTypes } from '@/app/(main)/_ui/form-box';
 
@@ -37,7 +38,13 @@ export const EqptMaster = ({
   /* 検索useForm-------------------------- */
   const { control, handleSubmit } = useForm({
     mode: 'onSubmit',
-    defaultValues: { query: '', bumonQuery: FAKE_NEW_ID, daibumonQuery: FAKE_NEW_ID, shukeiQuery: FAKE_NEW_ID },
+    defaultValues: {
+      query: '',
+      bumonQuery: FAKE_NEW_ID,
+      daibumonQuery: FAKE_NEW_ID,
+      shukeiQuery: FAKE_NEW_ID,
+      ngFlg: false,
+    },
   });
 
   /* methods ------------------------------------------ */
@@ -47,6 +54,7 @@ export const EqptMaster = ({
     bumonQuery: number;
     daibumonQuery: number;
     shukeiQuery: number;
+    ngFlg: boolean;
   }) => {
     setIsLoading(true);
     console.log('data : ', data);
@@ -55,6 +63,7 @@ export const EqptMaster = ({
       d: data.daibumonQuery === FAKE_NEW_ID ? null : data.daibumonQuery,
       s: data.shukeiQuery === FAKE_NEW_ID ? null : data.shukeiQuery,
       b: data.bumonQuery === FAKE_NEW_ID ? null : data.bumonQuery,
+      ngFlg: data.ngFlg,
     });
     setPage(1);
     setTheEqpts(newList?.data);
@@ -143,12 +152,20 @@ export const EqptMaster = ({
                 />
               </Grid2>
             </Grid2>
-            <Box mt={1} alignSelf={'end'} justifySelf={'end'}>
-              <Button type="submit">
-                <SearchIcon />
-                検索
-              </Button>
-            </Box>
+            <Grid2 container alignItems={'center'} justifyContent={'space-between'} mt={1}>
+              <Grid2 size={'grow'} display={'flex'} alignItems={'center'}>
+                <Typography width={100}>NG有</Typography>
+                <CheckboxElement name="ngFlg" control={control} />
+              </Grid2>
+              <Grid2 size={1}>
+                <Box mt={1} alignSelf={'end'} justifySelf={'end'}>
+                  <Button type="submit">
+                    <SearchIcon />
+                    検索
+                  </Button>
+                </Box>
+              </Grid2>
+            </Grid2>
           </form>
           <Typography></Typography>
         </Box>
