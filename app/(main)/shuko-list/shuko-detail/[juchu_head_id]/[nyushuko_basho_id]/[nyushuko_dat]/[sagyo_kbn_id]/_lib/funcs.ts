@@ -28,7 +28,7 @@ export const getShukoDetail = async (
 
     if (error) {
       console.error('getShukoDetail error : ', error);
-      return null;
+      throw error;
     }
 
     const shukoDetailData: ShukoDetailTableValues[] = data.map((d) => ({

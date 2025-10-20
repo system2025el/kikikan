@@ -35,7 +35,7 @@ export const getShukoKizaiDetail = async (
 
     if (error) {
       console.error('getShukoKizaiDetail error : ', error);
-      return [];
+      throw error;
     }
 
     const shukoKizaiDetail: ShukoKizaiDetailValues[] = data.map((d) => ({
@@ -79,7 +79,7 @@ export const getShukoEqptDetail = async (
 
     if (error) {
       console.error('getShukoEqptDetail error : ', error);
-      return [];
+      throw error;
     }
 
     const shukoEqptDetailData: ShukoEqptDetailTableValues[] = data.map((d) => ({
@@ -131,7 +131,7 @@ export const getKizaiData = async (kizaiId: number) => {
 
     if (error) {
       console.error('getKizaiData error : ', error);
-      return null;
+      throw error;
     }
 
     const kizaiData: ShukoEqptValues = {

@@ -372,13 +372,12 @@ export const getJuchuHonbanbiQty = async (juchuHeadId: number, juchuKizaiHeadId:
     const { data, error } = await selectJuchuHonbanbiQty(juchuHeadId, juchuKizaiHeadId);
     if (error) {
       console.error('getJuchuHonbanbiQty error : ', error);
-      return null;
+      throw error;
     }
 
     return data.juchu_honbanbi_qty;
   } catch (e) {
     console.error(e);
-    return null;
   }
 };
 
@@ -393,7 +392,7 @@ export const getReturnJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHea
     const { data, error } = await selectReturnJuchuKizaiHead(juchuHeadId, juchuKizaiHeadId);
     if (error || data?.oya_juchu_kizai_head_id === null) {
       console.error('GetEqHeader juchuKizaiHead error : ', error);
-      return null;
+      throw error;
     }
 
     const juchuDate = await getJuchuKizaiNyushuko(juchuHeadId, juchuKizaiHeadId);
@@ -506,7 +505,7 @@ export const getReturnJuchuKizaiMeisai = async (
     const { data: returnData, error: returnError } = await selectReturnJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId);
     if (returnError) {
       console.error('GetKeeoEqList keep eqList error : ', returnError);
-      return [];
+      throw returnError;
     }
 
     const { data: eqTanka, error: eqTankaError } = await selectJuchuKizaiMeisaiKizaiTanka(
@@ -515,13 +514,13 @@ export const getReturnJuchuKizaiMeisai = async (
     );
     if (eqTankaError) {
       console.error('GetEqHeader eqTanka error : ', eqTankaError);
-      return [];
+      throw eqTankaError;
     }
 
     const { data: oyaData, error: oyaError } = await selectOyaJuchuKizaiMeisai(juchuHeadId, oyaJuchuKizaiHeadId);
     if (oyaError) {
       console.error('GetKeeoEqList oya eqList error : ', oyaError);
-      return [];
+      throw oyaError;
     }
 
     const returnJuchuKizaiMeisaiData: ReturnJuchuKizaiMeisaiValues[] = returnData.map((d) => ({
@@ -657,13 +656,13 @@ export const getReturnJuchuContainerMeisai = async (
     );
     if (containerError) {
       console.error('GetReturnContainerList return containerList error : ', containerError);
-      return [];
+      throw containerError;
     }
 
     const { data: oyaData, error: oyaError } = await selectJuchuContainerMeisai(juchuHeadId, oyaJuchuKizaiHeadId);
     if (oyaError) {
       console.error('GetReturnCOntainerList oya containerList error : ', oyaError);
-      return [];
+      throw oyaError;
     }
 
     const returnJuchuContainerMeisaiData: ReturnJuchuContainerMeisaiValues[] = containerData.map((d) => ({

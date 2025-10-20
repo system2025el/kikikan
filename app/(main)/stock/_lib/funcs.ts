@@ -48,7 +48,7 @@ export const getEqData = async (bumonId: number) => {
 
     if (error) {
       console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      return [];
+      throw error;
     }
 
     const eqList: EqTableValues[] = data.map((d) => ({

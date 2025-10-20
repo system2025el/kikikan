@@ -33,7 +33,7 @@ export const getNyukoKizaiDetail = async (
 
     if (error) {
       console.error('getNyukoKizaiDetail error : ', error);
-      return [];
+      throw error;
     }
 
     const nyukoKizaiDetail: NyukoKizaiDetailValues[] = data.map((d) => ({
@@ -46,7 +46,6 @@ export const getNyukoKizaiDetail = async (
     return nyukoKizaiDetail;
   } catch (e) {
     console.error(e);
-    return [];
   }
 };
 
@@ -69,7 +68,7 @@ export const getNyukoEqptDetail = async (
 
     if (error) {
       console.error('getShukoEqptDetail error : ', error);
-      return [];
+      throw error;
     }
 
     const nyukoEqptDetailData: NyukoEqptDetailTableValues[] = data.map((d) => ({
@@ -106,7 +105,7 @@ export const getNyukoEqptDetail = async (
     return nyukoEqptDetailData;
   } catch (e) {
     console.error(e);
-    return [];
+    throw e;
   }
 };
 
@@ -121,7 +120,7 @@ export const getKizaiData = async (kizaiId: number) => {
 
     if (error) {
       console.error('getKizaiData error : ', error);
-      return null;
+      throw error;
     }
 
     const kizaiData: NyukoEqptValues = {
@@ -137,7 +136,7 @@ export const getKizaiData = async (kizaiId: number) => {
     return kizaiData;
   } catch (e) {
     console.error(e);
-    return null;
+    throw e;
   }
 };
 

@@ -616,7 +616,7 @@ export const getJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHeadId: n
 
     if (juchuKizaiHeadData.error) {
       console.error('GetEqHeader juchuKizaiHead error : ', juchuKizaiHeadData.error);
-      return null;
+      throw juchuKizaiHeadData.error;
     }
 
     const juchuDate = await getJuchuKizaiNyushuko(juchuHeadId, juchuKizaiHeadId);
@@ -638,7 +638,7 @@ export const getJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHeadId: n
     };
     return jucuKizaiHeadData;
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 };
 
@@ -726,7 +726,7 @@ export const getJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId:
     const { data: eqList, error: eqListError } = await selectJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId);
     if (eqListError) {
       console.error('GetEqList eqList error : ', eqListError);
-      return [];
+      throw eqListError;
     }
     const uniqueIds = new Set();
     const uniqueEqList = eqList.filter((item) => {
@@ -743,7 +743,7 @@ export const getJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId:
 
     if (mKizaiError) {
       console.error('GetEqList eqShozokuId error : ', mKizaiError);
-      return [];
+      throw mKizaiError;
     }
 
     const { data: eqTanka, error: eqTankaError } = await selectJuchuKizaiMeisaiKizaiTanka(
@@ -752,7 +752,7 @@ export const getJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId:
     );
     if (eqTankaError) {
       console.error('GetEqHeader eqTanka error : ', eqTankaError);
-      return [];
+      throw eqTankaError;
     }
 
     const juchuKizaiMeisaiData: JuchuKizaiMeisaiValues[] = uniqueEqList.map((d) => ({
@@ -778,7 +778,8 @@ export const getJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId:
     }));
     return juchuKizaiMeisaiData;
   } catch (e) {
-    console.log(e);
+    console.error(e);
+    throw e;
   }
 };
 
@@ -1692,7 +1693,7 @@ export const getHonbanbi = async (juchuHeadId: number, juchuKizaiHeadId: number)
     const { data, error } = await selectHonbanbi(juchuHeadId, juchuKizaiHeadId);
     if (error) {
       console.error('GetHonbanbi honbanbi error : ', error);
-      return [];
+      throw error;
     }
 
     const juchuKizaiHonbanbiData: JuchuKizaiHonbanbiValues[] = data.map((d) => ({
@@ -1731,7 +1732,10 @@ export const confirmHonbanbi = async (
       toISOStringYearMonthDay(juchuHonbanbiDat)
     );
     if (error) {
-      return false;
+      if (error.code === 'PGRST116') {
+        return false;
+      }
+      throw error;
     }
     return true;
   } catch (e) {

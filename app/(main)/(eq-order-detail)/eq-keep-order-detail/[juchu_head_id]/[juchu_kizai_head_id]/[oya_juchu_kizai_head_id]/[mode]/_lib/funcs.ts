@@ -411,7 +411,7 @@ export const getKeepJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHeadI
     const { data, error } = await selectKeepJuchuKizaiHead(juchuHeadId, juchuKizaiHeadId);
     if (error || data?.oya_juchu_kizai_head_id === null) {
       console.error('GetEqHeader juchuKizaiHead error : ', error);
-      return null;
+      throw error;
     }
 
     const juchuDate = await getJuchuKizaiNyushuko(juchuHeadId, juchuKizaiHeadId);
@@ -434,7 +434,7 @@ export const getKeepJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHeadI
     console.log('keepJucuKizaiHeadData', keepJucuKizaiHeadData);
     return keepJucuKizaiHeadData;
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 };
 
@@ -521,13 +521,13 @@ export const getKeepJuchuKizaiMeisai = async (
     const { data: keepData, error: keepError } = await selectKeepJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId);
     if (keepError) {
       console.error('GetKeeoEqList keep eqList error : ', keepError);
-      return [];
+      throw keepError;
     }
 
     const { data: oyaData, error: oyaError } = await selectOyaJuchuKizaiMeisai(juchuHeadId, oyaJuchuKizaiHeadId);
     if (oyaError) {
       console.error('GetKeeoEqList oya eqList error : ', oyaError);
-      return [];
+      throw oyaError;
     }
 
     const keepJuchuKizaiMeisaiData: KeepJuchuKizaiMeisaiValues[] = keepData.map((d) => ({
@@ -657,13 +657,13 @@ export const getKeepJuchuContainerMeisai = async (
     );
     if (containerError) {
       console.error('GetKeepContainerList keep containerList error : ', containerError);
-      return [];
+      throw containerError;
     }
 
     const { data: oyaData, error: oyaError } = await selectJuchuContainerMeisai(juchuHeadId, oyaJuchuKizaiHeadId);
     if (oyaError) {
       console.error('GetKeepCOntainerList oya containerList error : ', oyaError);
-      return [];
+      throw oyaError;
     }
 
     const keepJuchuContainerMeisaiData: KeepJuchuContainerMeisaiValues[] = containerData.map((d) => ({

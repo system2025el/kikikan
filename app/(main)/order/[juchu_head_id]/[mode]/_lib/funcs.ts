@@ -72,8 +72,11 @@ export const getJuchuHead = async (juchuHeadId: number) => {
 export const getMaxId = async () => {
   try {
     const { data, error } = await selectMaxId();
-    if (error || !data) {
-      return null;
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return null;
+      }
+      throw error;
     }
     console.log('GetMaxId data : ', data);
     return data;
@@ -111,6 +114,7 @@ export const addJuchuHead = async (juchuHeadId: number, juchuHeadData: OrderValu
 
     if (error) {
       console.error('Error adding new order:', error.message);
+      throw error;
     } else {
       console.log('New order added successfully:', newData);
       await revalidatePath('/order-list');
@@ -150,7 +154,7 @@ export const updJuchuHead = async (data: OrderValues) => {
 
     if (error) {
       console.error('Error updating order:', error.message);
-      return false;
+      throw error;
     }
     console.log('Order updated successfully:', updateData);
     await revalidatePath('/order-list');
@@ -186,6 +190,7 @@ export const copyJuchuHead = async (juchuHeadId: number, data: OrderValues, user
 
     if (error) {
       console.error('Error adding new order:', error.message);
+      throw error;
     } else {
       console.log('New order added successfully:', copyData);
     }
@@ -205,7 +210,7 @@ export const getJuchuKizaiHeadList = async (juchuHeadId: number) => {
 
     if (error) {
       console.error('GetOrder juchu error : ', error);
-      throw new Error(error.message);
+      throw error;
     }
 
     if (!data || data.length === 0) return [];
@@ -291,7 +296,7 @@ export const getFilteredOrderCustomers = async (query: string) => {
       }
     } else {
       console.error('顧客情報取得エラー。', { message: error.message, code: error.code });
-      return [];
+      throw error;
     }
   } catch (e) {
     console.error('例外が発生しました:', e);

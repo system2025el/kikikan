@@ -22,7 +22,7 @@ export const getLoanKizaiData = async (kizaiId: number) => {
 
     if (error) {
       console.error(error.message);
-      throw new Error('選択機材が存在しません');
+      throw error;
     }
 
     const kizaiData: LoanKizai = {
@@ -34,7 +34,7 @@ export const getLoanKizaiData = async (kizaiId: number) => {
     return kizaiData;
   } catch (e) {
     console.error(e);
-    return null;
+    throw e;
   }
 };
 
@@ -49,7 +49,7 @@ export const getLoanJuchuData = async (kizaiId: number) => {
 
     if (error) {
       console.error(error.message);
-      return [];
+      throw error;
     }
 
     const seen = new Set();
@@ -76,7 +76,7 @@ export const getLoanJuchuData = async (kizaiId: number) => {
     return loanJuchuData;
   } catch (e) {
     console.error(e);
-    return [];
+    throw e;
   }
 };
 
@@ -97,7 +97,7 @@ export const confirmJuchuHeadId = async (strDat: Date) => {
     return data;
   } catch (e) {
     console.error(e);
-    return [];
+    throw e;
   }
 };
 
@@ -117,7 +117,7 @@ export const getLoanUseData = async (juchuHeadId: number, kizaiId: number, date:
     return data;
   } catch (e) {
     console.error(e);
-    return [];
+    throw e;
   }
 };
 
@@ -135,6 +135,6 @@ export const getLoanStockData = async (kizaiId: number, date: Date) => {
     return data;
   } catch (e) {
     console.error(e);
-    return [];
+    throw e;
   }
 };

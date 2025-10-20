@@ -22,7 +22,7 @@ export const getNyukoDetail = async (juchuHeadId: number, nyushukoBashoId: numbe
 
     if (error) {
       console.error('getShukoDetail error : ', error);
-      return null;
+      throw error;
     }
 
     const shukoDetailData: NyukoDetailTableValues[] = data.map((d) => ({
@@ -49,7 +49,6 @@ export const getNyukoDetail = async (juchuHeadId: number, nyushukoBashoId: numbe
     return shukoDetailData;
   } catch (e) {
     console.error(e);
-    return null;
   }
 };
 

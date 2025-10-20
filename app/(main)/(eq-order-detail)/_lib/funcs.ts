@@ -125,13 +125,15 @@ export const getJuchuKizaiHeadMaxId = async (juchuHeadId: number) => {
   try {
     const { data, error } = await selectJuchuKizaiHeadMaxId(juchuHeadId);
     if (error) {
-      return null;
+      if (error.code === 'PGRST116') {
+        return null;
+      }
+      throw error;
     }
     console.log('GetMaxId : ', data);
     return data;
   } catch (e) {
     console.error(e);
-    return null;
   }
 };
 
@@ -146,7 +148,7 @@ export const getJuchuKizaiNyushuko = async (juchuHeadId: number, juchuKizaiHeadI
     const { data, error } = await selectJuchuKizaiNyushuko(juchuHeadId, juchuKizaiHeadId);
     if (error) {
       console.error('GetEqHeader juchuDate error: ', error);
-      return null;
+      throw error;
     }
 
     const kicsShukoDat =
@@ -170,7 +172,6 @@ export const getJuchuKizaiNyushuko = async (juchuHeadId: number, juchuKizaiHeadI
     return juchuKizaiNyushukoData;
   } catch (e) {
     console.error(e);
-    return null;
   }
 };
 
@@ -286,7 +287,7 @@ export const getOyaJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHead
     const { data: eqList, error: eqListError } = await selectOyaJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId);
     if (eqListError) {
       console.error('GetEqList eqList error : ', eqListError);
-      return [];
+      throw eqListError;
     }
 
     const uniqueIds = new Set();
@@ -304,7 +305,7 @@ export const getOyaJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHead
     );
     if (eqTankaError) {
       console.error('GetEqHeader eqTanka error : ', eqTankaError);
-      return [];
+      throw eqTankaError;
     }
 
     const juchuKizaiMeisaiData: OyaJuchuKizaiMeisaiValues[] = uniqueEqList.map((d) => ({
@@ -334,10 +335,13 @@ export const getOyaJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHead
 export const getJuchuKizaiMeisaiMaxId = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
   try {
     const { data, error } = await selectJuchuKizaiMeisaiMaxId(juchuHeadId, juchuKizaiHeadId);
-    if (!error) {
-      console.log('GetMaxId : ', data);
-      return data;
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return null;
+      }
+      throw error;
     }
+    return data;
   } catch (e) {
     console.error(e);
   }
@@ -352,10 +356,13 @@ export const getJuchuKizaiMeisaiMaxId = async (juchuHeadId: number, juchuKizaiHe
 export const getJuchuContainerMeisaiMaxId = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
   try {
     const { data, error } = await selectJuchuContainerMeisaiMaxId(juchuHeadId, juchuKizaiHeadId);
-    if (!error) {
-      console.log('GetContainerMaxId : ', data);
-      return data;
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return null;
+      }
+      throw error;
     }
+    return data;
   } catch (e) {
     console.error(e);
   }
@@ -376,7 +383,7 @@ export const getJuchuContainerMeisai = async (juchuHeadId: number, juchuKizaiHea
 
     if (containerError) {
       console.error('GetJuchuContainerMeisai containerData error : ', containerError);
-      return [];
+      throw containerError;
     }
 
     const juchuContainerMeisaiData: JuchuContainerMeisaiValues[] = containerData.map((d) => ({
@@ -396,7 +403,7 @@ export const getJuchuContainerMeisai = async (juchuHeadId: number, juchuKizaiHea
     return juchuContainerMeisaiData;
   } catch (e) {
     console.error(e);
-    return [];
+    throw e;
   }
 };
 
@@ -489,7 +496,7 @@ export const getNyushukoFixFlag = async (juchuHeadId: number, juchuKizaiHeadId: 
     const { data, error } = await selectNyushukoFixFlag(juchuHeadId, juchuKizaiHeadId, sagyoKbnId);
     if (error) {
       console.error('getNyushukoFixFlag error: ', error);
-      throw new Error(error.message);
+      throw error;
     }
     const result = data.find((d) => d.sagyo_fix_flg === 1) ? true : false;
     return result;
