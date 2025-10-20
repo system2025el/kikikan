@@ -333,10 +333,10 @@ export const EquipmentKeepOrderDetail = (props: {
 
       // 更新
     } else {
-      const kicsMeisai = keepJuchuKizaiMeisaiList.filter((d) => d.shozokuId === 1);
-      const yardMeisai = keepJuchuKizaiMeisaiList.filter((d) => d.shozokuId === 2);
-      const kicsContainer = keepJuchuContainerMeisaiList.filter((d) => d.kicsKeepQty);
-      const yardContainer = keepJuchuContainerMeisaiList.filter((d) => d.yardKeepQty);
+      const kicsMeisai = keepJuchuKizaiMeisaiList.filter((d) => d.shozokuId === 1 && !d.delFlag);
+      const yardMeisai = keepJuchuKizaiMeisaiList.filter((d) => d.shozokuId === 2 && !d.delFlag);
+      const kicsContainer = keepJuchuContainerMeisaiList.filter((d) => d.kicsKeepQty && !d.delFlag);
+      const yardContainer = keepJuchuContainerMeisaiList.filter((d) => d.yardKeepQty && !d.delFlag);
 
       if (
         ((kicsMeisai.length > 0 || kicsContainer.length > 0) && (!data.kicsShukoDat || !data.kicsNyukoDat)) ||

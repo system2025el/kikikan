@@ -6,7 +6,12 @@ import pool from '@/app/_lib/db/postgres';
 import { selectActiveBumons } from '@/app/_lib/db/tables/m-bumon';
 import { selectActiveEqpts, selectBundledEqpts, selectMeisaiEqts } from '@/app/_lib/db/tables/m-kizai';
 import { selectBundledEqptIds } from '@/app/_lib/db/tables/m-kizai-set';
-import { deleteIdoDen, insertIdoDen, selectIdoDenMaxId, updateIdoDen } from '@/app/_lib/db/tables/t-ido-den';
+import {
+  deleteIdoDenJuchu,
+  insertIdoDenJuchu,
+  selectIdoDenJuchuMaxId,
+  updateIdoDenJuchu,
+} from '@/app/_lib/db/tables/t-ido-den-juchu';
 import { deleteIdoFix, insertIdoFix, updateIdoFix } from '@/app/_lib/db/tables/t-ido-fix';
 import {
   deleteJuchuContainerMeisai,
@@ -48,6 +53,7 @@ import {
 import { selectJuchuKizaiMeisai } from '@/app/_lib/db/tables/v-juchu-kizai-meisai';
 import { selectChosenEqptsDetails } from '@/app/_lib/db/tables/v-kizai-list';
 import { JuchuCtnMeisai } from '@/app/_lib/db/types/t_juchu_ctn_meisai-type';
+import { IdoDenJuchu } from '@/app/_lib/db/types/t-ido-den-juchu-type';
 import { IdoDen } from '@/app/_lib/db/types/t-ido-den-type';
 import { IdoFix } from '@/app/_lib/db/types/t-ido-fix-type';
 import { JuchuKizaiHead } from '@/app/_lib/db/types/t-juchu-kizai-head-type';
@@ -428,29 +434,29 @@ export const saveJuchuKizai = async (
       // 削除
       if (deleteIdoKizaiData.length > 0) {
         const deleteIdoDenIds = deleteIdoKizaiData.map((data) => data.idoDenId);
-        const deleteIdoDenResult = await delIdoDen(deleteIdoDenIds as number[], connection);
-        console.log('移動伝票削除', deleteIdoDenResult);
+        const deleteIdoDenResult = await delIdoDenJuchu(deleteIdoDenIds as number[], connection);
+        console.log('移動伝票受注削除', deleteIdoDenResult);
 
-        const deleteIdoFixResult = await delIdoFix(deleteIdoDenIds as number[], connection);
-        console.log('移動確定削除', deleteIdoFixResult);
+        // const deleteIdoFixResult = await delIdoFix(deleteIdoDenIds as number[], connection);
+        // console.log('移動確定削除', deleteIdoFixResult);
       }
       // 追加
       if (addIdoKizaiData.length > 0) {
-        const idoDenMaxId = await getIdoDenMaxId();
+        const idoDenMaxId = await getIdoDenJuchuMaxId();
         const newIdoDenId = idoDenMaxId ? idoDenMaxId.ido_den_id + 1 : 1;
-        const addIdoDenResult = await addIdoDen(newIdoDenId, addIdoKizaiData, userNam, connection);
-        console.log('移動伝票追加', addIdoDenResult);
+        const addIdoDenResult = await addIdoDenJuchu(newIdoDenId, addIdoKizaiData, userNam, connection);
+        console.log('移動伝票受注追加', addIdoDenResult);
 
-        const addIdoFixResult = await addIdoFix(newIdoDenId, addIdoKizaiData, userNam, connection);
-        console.log('移動確定追加', addIdoFixResult);
+        // const addIdoFixResult = await addIdoFix(newIdoDenId, addIdoKizaiData, userNam, connection);
+        // console.log('移動確定追加', addIdoFixResult);
       }
       // 更新
       if (updateIdoKizaiData.length > 0) {
-        const updateIdoDenResult = await updIdoDen(updateIdoKizaiData, userNam, connection);
-        console.log('移動伝票更新', updateIdoDenResult);
+        const updateIdoDenResult = await updIdoDenJuchu(updateIdoKizaiData, userNam, connection);
+        console.log('移動伝票受注更新', updateIdoDenResult);
 
-        const updateIdoFixResult = await updIdoFix(updateIdoKizaiData, userNam, connection);
-        console.log('移動確定更新', updateIdoFixResult);
+        // const updateIdoFixResult = await updIdoFix(updateIdoKizaiData, userNam, connection);
+        // console.log('移動確定更新', updateIdoFixResult);
       }
     }
 
@@ -1436,12 +1442,12 @@ export const updNyushukoFix = async (
 };
 
 /**
- * 移動伝票id最大値取得
- * @returns 移動伝票id最大値
+ * 移動伝票受注id最大値取得
+ * @returns 移動伝票受注id最大値
  */
-export const getIdoDenMaxId = async () => {
+export const getIdoDenJuchuMaxId = async () => {
   try {
-    const { data, error } = await selectIdoDenMaxId();
+    const { data, error } = await selectIdoDenJuchuMaxId();
     if (error) {
       return null;
     }
@@ -1453,27 +1459,26 @@ export const getIdoDenMaxId = async () => {
 };
 
 /**
- * 移動伝票新規追加
- * @param newIdoDenId 新規移動伝票id
- * @param idoKizaiData 移動伝票データ
+ * 移動伝票受注新規追加
+ * @param newIdoDenId 新規移動伝票受注id
+ * @param idoKizaiData 移動伝票受注データ
  * @param userNam ユーザー名
  * @returns
  */
-export const addIdoDen = async (
+export const addIdoDenJuchu = async (
   newIdoDenId: number,
   idoKizaiData: JuchuKizaiMeisaiValues[],
   userNam: string,
   connection: PoolClient
 ) => {
-  const newLoadData: IdoDen[] = idoKizaiData.map((d, index) => ({
+  const newLoadData: IdoDenJuchu[] = idoKizaiData.map((d, index) => ({
     ido_den_id: newIdoDenId + index,
     sagyo_den_dat: toISOStringYearMonthDay(d.sagyoDenDat as Date),
-    sagyo_siji_id: d.sagyoSijiId,
-    sagyo_id: d.sagyoSijiId,
+    sagyo_siji_id: d.mShozokuId,
+    sagyo_id: d.mShozokuId,
     sagyo_kbn_id: 40,
     kizai_id: d.kizaiId,
     plan_qty: d.planQty,
-    result_qty: null,
     juchu_head_id: d.juchuHeadId,
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
@@ -1481,15 +1486,14 @@ export const addIdoDen = async (
     add_user: userNam,
   }));
 
-  const newUnloadData: IdoDen[] = idoKizaiData.map((d, index) => ({
+  const newUnloadData: IdoDenJuchu[] = idoKizaiData.map((d, index) => ({
     ido_den_id: newIdoDenId + index,
     sagyo_den_dat: toISOStringYearMonthDay(d.sagyoDenDat as Date),
-    sagyo_siji_id: d.sagyoSijiId,
-    sagyo_id: d.sagyoSijiId === 1 ? 2 : 1,
+    sagyo_siji_id: d.mShozokuId,
+    sagyo_id: d.mShozokuId === 1 ? 2 : 1,
     sagyo_kbn_id: 50,
     kizai_id: d.kizaiId,
     plan_qty: d.planQty,
-    result_qty: null,
     juchu_head_id: d.juchuHeadId,
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
@@ -1500,7 +1504,7 @@ export const addIdoDen = async (
   const mergeData = [...newLoadData, ...newUnloadData];
 
   try {
-    await insertIdoDen(mergeData, connection);
+    await insertIdoDenJuchu(mergeData, connection);
     console.log('ido den added successfully:', mergeData);
     return true;
   } catch (e) {
@@ -1510,28 +1514,62 @@ export const addIdoDen = async (
 };
 
 /**
- * 移動伝票更新
- * @param idoKizaiData 移動伝票データ
+ * 移動伝票受注更新
+ * @param idoKizaiData 移動伝票受注データ
  * @param userNam ユーザー名
  * @returns
  */
-export const updIdoDen = async (idoKizaiData: JuchuKizaiMeisaiValues[], userNam: string, connection: PoolClient) => {
-  const updateData: IdoDen[] = idoKizaiData.map((d) => {
+export const updIdoDenJuchu = async (
+  idoKizaiData: JuchuKizaiMeisaiValues[],
+  userNam: string,
+  connection: PoolClient
+) => {
+  const updateLoadData: IdoDenJuchu[] = idoKizaiData.map((d) => {
     if (!d.idoDenId) {
       throw new Error();
     }
     return {
       ido_den_id: d.idoDenId,
       sagyo_den_dat: toISOStringYearMonthDay(d.sagyoDenDat as Date),
+      sagyo_siji_id: d.mShozokuId,
+      sagyo_id: d.mShozokuId,
+      sagyo_kbn_id: 40,
+      kizai_id: d.kizaiId,
       plan_qty: d.planQty,
+      juchu_head_id: d.juchuHeadId,
+      juchu_kizai_head_id: d.juchuKizaiHeadId,
+      juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
       upd_dat: toJapanTimeString(),
       upd_user: userNam,
     };
   });
 
+  const updateUnloadData: IdoDenJuchu[] = idoKizaiData.map((d) => {
+    if (!d.idoDenId) {
+      throw new Error();
+    }
+    return {
+      ido_den_id: d.idoDenId,
+      sagyo_den_dat: toISOStringYearMonthDay(d.sagyoDenDat as Date),
+      sagyo_siji_id: d.mShozokuId,
+      sagyo_id: d.mShozokuId === 1 ? 2 : 1,
+      sagyo_kbn_id: 50,
+      kizai_id: d.kizaiId,
+      plan_qty: d.planQty,
+      juchu_head_id: d.juchuHeadId,
+      juchu_kizai_head_id: d.juchuKizaiHeadId,
+      juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
+      upd_dat: toJapanTimeString(),
+      upd_user: userNam,
+    };
+  });
+
+  const updateData = [...updateLoadData, ...updateUnloadData];
+  console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', updateData);
+
   try {
     for (const data of updateData) {
-      await updateIdoDen(data, connection);
+      await updateIdoDenJuchu(data, connection);
     }
     console.log('ido den updated successfully:', updateData);
     return true;
@@ -1542,12 +1580,12 @@ export const updIdoDen = async (idoKizaiData: JuchuKizaiMeisaiValues[], userNam:
 };
 
 /**
- * 移動伝票削除
- * @param idoDenIds 移動伝票id
+ * 移動伝票受注削除
+ * @param idoDenIds 移動伝票受注id
  */
-export const delIdoDen = async (idoDenIds: number[], connection: PoolClient) => {
+export const delIdoDenJuchu = async (idoDenIds: number[], connection: PoolClient) => {
   try {
-    await deleteIdoDen(idoDenIds, connection);
+    await deleteIdoDenJuchu(idoDenIds, connection);
   } catch (e) {
     throw e;
   }

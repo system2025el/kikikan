@@ -4,7 +4,7 @@ import { PoolClient, QueryResult } from 'pg';
 
 import { selectKokyaku } from '@/app/_lib/db/tables/m-kokyaku';
 import { selectDetailStockList } from '@/app/_lib/db/tables/stock-table';
-import { deleteIdoDen, insertIdoDen, selectIdoDenMaxId, updateIdoDen } from '@/app/_lib/db/tables/t-ido-den';
+import { deleteIdoDen, insertIdoDen, selectIdoDenMaxId, updateIdoDen } from '@/app/_lib/db/tables/t-ido-den-juchu';
 import {
   deleteJuchuContainerMeisai,
   insertJuchuContainerMeisai,
