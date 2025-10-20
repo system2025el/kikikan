@@ -33,6 +33,7 @@ export const selectRfidsOfTheKizai = async (kizaiId: number) => {
       r.mem,
       r.rfid_kizai_sts,
       sts.sts_nam,
+      r.shozoku_id,
       r.del_flg,
       r.el_num
     FROM

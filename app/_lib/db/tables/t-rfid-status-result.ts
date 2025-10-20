@@ -12,29 +12,42 @@ import { RfidStatusResultValues } from '../types/t-rfid-status-result-type';
  * 変更があるRFIDマスタの更新をする関数
  * @param data ステータスが変わったRFIDタグリスト
  */
-export const updateRfidTagStsDB = async (data: { rfid_tag_id: string; rfid_kizai_sts: number }[], user: string) => {
-  const updDat = toJapanTimeString(undefined, '-');
-  const updatePlaceholders = data
+export const updateRfidTagStsDB = async (
+  data: { rfid_tag_id: string; rfid_kizai_sts: number; shozoku_id: number }[],
+  user: string
+) => {
+  const now = toJapanTimeString(undefined, '-');
+  // RFIDタグ管理テーブル側準備
+  const placeholders = data
     .map((_, index) => {
-      const start = index * 2 + 1;
-      return `($${start}, $${start + 1})`;
+      const start = index * 3 + 1;
+      return `($${start}, $${start + 1}, $${start + 2})`;
     })
     .join(',');
-  const updateValues = data.flatMap((v) => [v.rfid_tag_id, v.rfid_kizai_sts]);
+  const values = data.flatMap((v) => [v.rfid_tag_id, v.rfid_kizai_sts, v.shozoku_id]);
   const query = `
-          UPDATE ${SCHEMA}.t_rfid_status_result AS mr
-          SET
-            rfid_kizai_sts = d.rfid_kizai_sts::integer,
-            upd_dat = $${updateValues.length + 1}::timestamp,
-            upd_user = $${updateValues.length + 2}
-          FROM (
-            VALUES ${updatePlaceholders}
-          ) AS d(rfid_tag_id, rfid_kizai_sts)
-          WHERE mr.rfid_tag_id = d.rfid_tag_id;
-        `;
+            WITH imported_data (rfid_tag_id, rfid_kizai_sts, shozoku_id) AS (
+              VALUES ${placeholders}
+            )
+            INSERT INTO ${SCHEMA}.t_rfid_status_result (
+              rfid_tag_id,
+              rfid_kizai_sts,
+              shozoku_id,
+              upd_dat,
+              upd_user
+            )
+            SELECT
+              id.rfid_tag_id::varchar,
+              CAST(id.rfid_kizai_sts AS integer),
+              CAST(id.shozoku_id AS integer),
+              $${values.length + 1}::timestamp, -- upd_dat
+              $${values.length + 2}::varchar  -- upd_user
+            FROM
+              imported_data AS id
+          `;
 
   try {
-    await pool.query(query, [...updateValues, updDat, user]);
+    await pool.query(query, [...values, now, user]);
   } catch (e) {
     throw e;
   }
