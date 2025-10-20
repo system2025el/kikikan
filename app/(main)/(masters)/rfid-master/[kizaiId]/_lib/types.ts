@@ -29,6 +29,7 @@ export type RfidsMasterTableValues = {
   mem: string | null;
   stsId: number | null;
   stsNam: string | null;
+  shozokuId: number;
   elNum: number | null;
   tblDspId: number;
 };

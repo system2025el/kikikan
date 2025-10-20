@@ -33,6 +33,7 @@ export const getRfidsOfTheKizai = async (kizaiId: number) => {
       rfidTagId: d.rfid_tag_id,
       stsId: d.rfid_kizai_sts,
       stsNam: d.sts_nam,
+      shozokuId: d.shozoku_id,
       elNum: d.el_num,
       mem: d.mem,
       tblDspId: index + 1,
@@ -212,10 +213,11 @@ export const updateRfid = async (
  * RFIDマスタで一括変更されたステータスを更新する関数
  * @param data 機材ステータス一括変更されたデータ
  */
-export const updateRfidTagSts = async (data: { tagId: string; sts: number }[], user: string) => {
+export const updateRfidTagSts = async (data: { tagId: string; sts: number; shozokuId: number }[], user: string) => {
   const updateList = data.map((d) => ({
     rfid_tag_id: d.tagId,
     rfid_kizai_sts: d.sts,
+    shozoku_id: d.shozokuId,
   }));
   try {
     await updateRfidTagStsDB(updateList, user);

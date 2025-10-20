@@ -49,6 +49,14 @@ export const RfidMaster = ({
   const [snackBarMessage, setSnackBarMessage] = useState('');
   /* 保存されたあとのフラグ */
   const [saved, setSaved] = useState<boolean>(true);
+
+  // /* 元のステータスと一致してるかどうか */
+  // const isAllSame = rfids?.every((original) => {
+  //   const newItem = theRfids && theRfids.find((item) => item.rfidTagId === original.rfidTagId);
+  //   if (!newItem) return false;
+  //   return original.stsId === newItem.stsId && original.stsNam === newItem.stsNam;
+  // });
+
   /* methods ------------------------------------------ */
   /* 適用ボタン押下時の処理 */
   const handleClickAdapt = (tagList: string[], selectedSts: SelectTypes) => {
@@ -67,6 +75,10 @@ export const RfidMaster = ({
       : [];
     setTheRfids(newList);
     setSaved(false);
+    // if (isAllSame) {
+    //   setSnackBarMessage('保存済みの内容です。');
+    //   setSnackBarOpen(true);
+    // }
   };
 
   /* 保存ボタン押下時の処理 */
@@ -81,13 +93,16 @@ export const RfidMaster = ({
       return originalItem.stsId !== newItem.stsId || originalItem.stsNam !== newItem.stsNam;
     });
     console.log(updateList);
-    if (updateList.length === 0) return;
-    await updateRfidTagSts(
-      updateList.map((d) => ({ tagId: d.rfidTagId, sts: d.stsId ?? 0 })),
-      user?.name ?? ''
-    );
-
-    setSnackBarMessage('保存しました');
+    if (updateList.length === 0) {
+      setSnackBarMessage('保存済みの内容です。');
+    }
+    if (updateList.length > 0) {
+      await updateRfidTagSts(
+        updateList.map((d) => ({ tagId: d.rfidTagId, sts: d.stsId ?? 0, shozokuId: d.shozokuId })),
+        user?.name ?? ''
+      );
+      setSnackBarMessage('保存しました');
+    }
     setSnackBarOpen(true);
     setSaved(true);
   };
@@ -101,7 +116,7 @@ export const RfidMaster = ({
             <Button
               onClick={() => handleClickSave()}
               sx={{ alignItems: 'center' }}
-              disabled={!theRfids || rfids === theRfids || saved}
+              disabled={!theRfids || rfids === theRfids || saved /*|| isAllSame*/}
             >
               <SaveAsIcon fontSize="small" />
               保存
