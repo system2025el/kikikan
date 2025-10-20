@@ -11,7 +11,8 @@ import { LoanEqTableValues } from './types';
  */
 export const getFilteredEqpts = async (query: string) => {
   try {
-    const { data, error } = await selectFilteredEqpts({ q: query, d: 0, s: 0, b: 0 });
+    const { data, error } = await selectFilteredEqpts({ q: query, d: null, s: null, b: null });
+    console.log(data);
 
     if (error) {
       console.error('DB情報取得エラー', error.message, error.cause, error.hint);
