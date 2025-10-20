@@ -11,7 +11,7 @@ import {
   useForm,
 } from 'react-hook-form-mui';
 
-import { selectElNumExists, selectOneRfid } from '@/app/_lib/db/tables/m-rfid';
+import { selectElNumExists, selectOneRfid } from '@/app/_lib/db/tables/v-rfid';
 import { useUserStore } from '@/app/_lib/stores/usestore';
 
 import { FormBox, selectNone, SelectTypes } from '../../../../_ui/form-box';
@@ -107,7 +107,7 @@ export const RfidMasterDialog = ({
       if (!elNumResult.data || currentRfid.elNum === data.elNum) {
         if (action === 'save') {
           // 保存終了ボタン
-          await updateRfid(data, kizaiId, user?.name ?? '');
+          await updateRfid(currentRfid, data, kizaiId, user?.name ?? '');
           handleCloseDialog();
           refetchRfids();
         } else if (action === 'delete') {
@@ -117,7 +117,7 @@ export const RfidMasterDialog = ({
         } else if (action === 'restore') {
           // 有効化ボタン
           const values = await getValues();
-          await updateRfid({ ...values, delFlg: false }, kizaiId, user?.name ?? '');
+          await updateRfid(currentRfid, { ...values, delFlg: false }, kizaiId, user?.name ?? '');
           handleCloseDialog();
           refetchRfids();
         }
@@ -145,7 +145,7 @@ export const RfidMasterDialog = ({
   /* 削除確認ダイアログで削除選択時 */
   const handleConfirmDelete = async () => {
     const values = await getValues();
-    await updateRfid({ ...values, delFlg: true }, kizaiId, user?.name ?? '');
+    await updateRfid(currentRfid, { ...values, delFlg: true }, kizaiId, user?.name ?? '');
     setDeleteOpen(false);
     handleCloseDialog();
     await refetchRfids();
