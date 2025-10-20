@@ -186,7 +186,7 @@ export const RfidMasterDialog = ({
           editable={editable}
           handleEditable={() => setEditable(true)}
           handleClose={handleClickClose}
-          dialogTitle={'機材マスタ登録'}
+          dialogTitle={'RFIDマスタ登録'}
           isNew={isNew}
           isDirty={isDirty}
           isDeleted={isDeleted!}

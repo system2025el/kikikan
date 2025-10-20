@@ -4,6 +4,7 @@ import { Box, Container, Snackbar, Stack } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { read, utils } from 'xlsx';
 
+import { useUserStore } from '@/app/_lib/stores/usestore';
 import { BackButton } from '@/app/(main)/_ui/buttons';
 
 import { ImportEqptRfidData, sendLogServer } from '../_lib/funcs';
@@ -15,6 +16,9 @@ import { Section } from './section';
  * @returns {JSX.Element} マスタインポート画面のコンポーネント
  */
 export const ImportMaster = () => {
+  // ログインユーザ
+  const user = useUserStore((state) => state.user);
+
   const errorRows: number[] = [];
   /* useState ----------------------------------------------------- */
   /* インポートした機材RFIDマスタファイル名 */
@@ -128,7 +132,7 @@ export const ImportMaster = () => {
     if (eqptData.length !== 0) {
       try {
         // インポートするデータがあったら実行
-        await ImportEqptRfidData(eqptData);
+        await ImportEqptRfidData(eqptData, user?.name ?? '');
         setEqptFileName('ファイルが選択されていません');
         setSnackBarMessage(`${eqptFileName}を登録しました`);
         setSnackBarOpen(true);
@@ -145,10 +149,10 @@ export const ImportMaster = () => {
     }
   };
 
-  const handleImportRfid = () => {
-    // console.log('Importing RFID Data:', rfidData);
-    // alert('RFIDマスタのインポートが実行されました (コンソールを確認)');
-  };
+  // const handleImportRfid = () => {
+  //   // console.log('Importing RFID Data:', rfidData);
+  //   // alert('RFIDマスタのインポートが実行されました (コンソールを確認)');
+  // };
 
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
@@ -163,13 +167,13 @@ export const ImportMaster = () => {
           handleImport={handleImportEqpt}
           fileInputId="eqpts-excel-file"
         />
-        <Section
+        {/* <Section
           masterName={'顧客'}
           fileName={customerFileName}
           handleFileUpload={handleFileUpload}
           handleImport={handleImportRfid}
           fileInputId="customers-excel-file"
-        />
+        /> */}
       </Stack>
       <Snackbar
         open={snackBarOpen}
