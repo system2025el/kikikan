@@ -32,7 +32,9 @@ export const getShukoList = async (queries: ShukoListSearchValues) => {
       sectionNamv: d.section_namv,
       kokyakuNam: d.kokyaku_nam,
       sstbSagyoStsId: d.sstb_sagyo_sts_id,
+      sstbSagyoStsNamShort: d.sstb_sagyo_sts_nam_short,
       schkSagyoStsId: d.schk_sagyo_sts_id,
+      schkSagyoStsNamShort: d.schk_sagyo_sts_nam_short,
     }));
 
     return shukoList;

@@ -14,7 +14,9 @@ export type ShukoTableValues = {
   sectionNamv: string;
   kokyakuNam: string;
   sstbSagyoStsId: number;
+  sstbSagyoStsNamShort: string;
   schkSagyoStsId: number;
+  schkSagyoStsNamShort: string;
 };
 
 export type ShukoKizai = {

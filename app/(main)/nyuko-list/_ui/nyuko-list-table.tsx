@@ -40,13 +40,7 @@ export const NyukoListTable = (props: { datas: NyukoTableValues[] }) => {
                   size="small"
                   href={`nyuko-list/nyuko-detail/${row.juchuHeadId}/${row.nyushukoBashoId}/${toJapanTimeString(row.nyushukoDat, '-')}`}
                 >
-                  {row.nchkSagyoStsId === 0
-                    ? 'ー'
-                    : row.nchkSagyoStsId === 31
-                      ? '△'
-                      : row.nchkSagyoStsId === 32
-                        ? '〇'
-                        : ''}
+                  {row.nchkSagyoStsNamShort}
                 </Button>
               </TableCell>
             </TableRow>
