@@ -16,60 +16,47 @@ import { updateMasterUpdates } from './m-master-update';
  * @param connection
  * @returns
  */
-export const checkRfid = async (list: RfidImportTypes[], connection: PoolClient) => {
+export const checkRfid = async (list: RfidImportTypes[], connection: PoolClient, user: string, date: string) => {
   // 有効なデータがない場合は離脱
   if (!Array.isArray(list) || list.length === 0) {
     return [];
   }
+  console.log('ここまでは来てますかね？');
   try {
-    // インポートしたRFIDタグID
+    // インポートしたRFIDタグIDリスト
     const rfidTagIds = list.map((v) => v.rfid_tag_id);
     // m_rfidから既存のRFIDタグIDを取得
     const existingTagsResult = await connection.query(
-      `SELECT rfid_tag_id FROM ${SCHEMA}.m_rfid WHERE rfid_tag_id = ANY($1::text[]);`,
+      `SELECT rfid_tag_id FROM dev5.m_rfid WHERE rfid_tag_id = ANY($1::text[]);`,
       [rfidTagIds]
     );
     // 既存のRFIDタグIDを取得
     const existingRfidTags = new Set(existingTagsResult.rows.map((row) => row.rfid_tag_id));
-    // 新規登録するデータ
-    const insertList = list.filter((v) => !existingRfidTags.has(v.rfid_tag_id));
-    console.log('新規登録対象', insertList.length, '件');
 
+    // 新規登録するデータ(削除フラグが0)
+    const insertList = list.filter((v) => !existingRfidTags.has(v.rfid_tag_id) && v.del_flg === 0);
+    console.log('新規登録対象', insertList.length, '件');
     // 新規登録するデータがあれば新規登録処理
     if (insertList.length > 0) {
-      // 現材の時刻取得
-      const addDat = toJapanTimeString(undefined, '-');
-      const addUser = 'excel_import';
-
+      // RFIDマスタ準備
       // 一時テーブルとして扱うインポートデータのカラムを定義
-      const columns = ['rfid_tag_id', 'kizai_nam', 'rfid_kizai_sts', 'del_flg', 'shozoku_id', 'mem', 'el_num'];
-
-      const insertPlaceholders = insertList
+      const insertMasterCols = ['rfid_tag_id', 'kizai_nam', 'del_flg', 'mem', 'el_num'];
+      const insertMasterPlaceholders = insertList
         .map((_, index) => {
-          const start = index * columns.length + 1;
-          return `(${columns.map((_, i) => `$${start + i}`).join(',')})`;
+          const start = index * insertMasterCols.length + 1;
+          return `(${insertMasterCols.map((_, i) => `$${start + i}`).join(',')})`;
         })
         .join(',');
       // 挿入する値
-      const values = insertList.flatMap((v) => [
-        v.rfid_tag_id,
-        v.kizai_nam,
-        v.rfid_kizai_sts,
-        v.del_flg,
-        v.shozoku_id,
-        v.mem,
-        v.el_num,
-      ]);
-      const insertQuery = `
-          WITH imported_data(${columns.join(',')}) AS (
-            VALUES ${insertPlaceholders}
+      const insertMasterValues = insertList.flatMap((v) => [v.rfid_tag_id, v.kizai_nam, v.del_flg, v.mem, v.el_num]);
+      const insertMasterQuery = `
+          WITH imported_data(${insertMasterCols.join(',')}) AS (
+            VALUES ${insertMasterPlaceholders}
           )
-          INSERT INTO ${SCHEMA}.m_rfid (
+          INSERT INTO dev5.m_rfid (
             rfid_tag_id,
             kizai_id,
-            rfid_kizai_sts,
             del_flg,
-            shozoku_id,
             mem,
             el_num,
             add_dat,
@@ -78,95 +65,114 @@ export const checkRfid = async (list: RfidImportTypes[], connection: PoolClient)
           SELECT
             id.rfid_tag_id,
             mk.kizai_id, -- JOINして取得したkizai_id
-            CAST(id.rfid_kizai_sts AS integer),
             CAST(id.del_flg AS integer),
-            CAST(id.shozoku_id AS integer),
             id.mem,
             CAST(id.el_num AS integer),
-            $${values.length + 1}::timestamp, -- add_dat
-            $${values.length + 2}  -- add_user
+            $${insertMasterValues.length + 1}::timestamp, -- add_dat
+            $${insertMasterValues.length + 2}  -- add_user
           FROM
             imported_data AS id
           LEFT JOIN
-            ${SCHEMA}.m_kizai AS mk ON id.kizai_nam = mk.kizai_nam;
+            dev5.m_kizai AS mk ON id.kizai_nam = mk.kizai_nam;
         `;
 
+      // RFIDタグ管理テーブル側準備
+      const insertStsPlaceholders = insertList
+        .map((_, index) => {
+          const start = index * 2 + 1;
+          return `($${start}, $${start + 1}, $${start + 2})`;
+        })
+        .join(',');
+      const insertStsValues = insertList.flatMap((v) => [v.rfid_tag_id, v.rfid_kizai_sts, v.shozoku_id]);
+      const insertStsQuery = `
+          WITH imported_data (rfid_tag_id, rfid_kizai_sts, shozoku_id) AS (
+            VALUES ${insertStsPlaceholders}
+          )
+          INSERT INTO dev5.m_rfid (
+            rfid_tag_id,
+            rfid_kizai_sts,
+            shozoku_id,
+            upd_dat,
+            upd_user
+          )
+          SELECT
+            id.rfid_tag_id,
+            CAST(id.rfid_kizai_sts AS integer),
+            CAST(id.shozoku_id AS integer),
+            $${insertMasterValues.length + 1}::timestamp, -- upd_dat
+            $${insertMasterValues.length + 2}  -- upd_user
+          FROM
+            imported_data AS id
+          RETURNING *
+        `;
       // INSERT実行
-      await connection.query(insertQuery, [...values, addDat, addUser]);
+      await connection.query(insertMasterQuery, [...insertMasterValues, date, user]);
+      const result = await connection.query(insertStsQuery, [...insertStsValues, date, user]);
       updateMasterUpdates('m_rfid', connection);
+      console.log(result);
     }
 
     // 更新処理
     // 全データ比較準備
-    const placeholders = list
-      .map((_, index) => {
-        const start = index * 7 + 1;
-        return `($${start}, $${start + 1}, $${start + 2}, $${start + 3}, $${start + 4}, $${start + 5}, $${start + 6})`;
-      })
-      .join(',');
+    // const placeholders = list
+    //   .map((_, index) => {
+    //     const start = index * 5 + 1;
+    //     return `($${start}, $${start + 1}, $${start + 2}, $${start + 3}, $${start + 4})`;
+    //   })
+    //   .join(',');
     // 差異があるデータ群の取得
-    const differnces = await connection.query(
-      `
-        WITH imported_data(rfid_tag_id, kizai_nam, rfid_kizai_sts, del_flg, shozoku_id, mem, el_num) AS (
-          VALUES ${placeholders}
-        ),
-        imported_only AS (
-          SELECT
-            id.rfid_tag_id,
-            mk.kizai_id::integer,
-            id.rfid_kizai_sts::integer,
-            id.del_flg::integer,
-            id.shozoku_id::integer,
-            id.mem,
-            id.el_num::integer
-          FROM imported_data AS id
-          LEFT JOIN ${SCHEMA}.m_kizai AS mk ON id.kizai_nam = mk.kizai_nam
-          EXCEPT ALL
-          SELECT rfid_tag_id, kizai_id, rfid_kizai_sts, del_flg, shozoku_id, mem, el_num FROM ${SCHEMA}.m_rfid
-        )
-        SELECT rfid_tag_id, kizai_id, rfid_kizai_sts, del_flg, shozoku_id, mem, el_num FROM imported_only
-        `,
-      list.flatMap((v) => [v.rfid_tag_id, v.kizai_nam, v.rfid_kizai_sts, v.del_flg, v.shozoku_id, v.mem, v.el_num])
-    );
-    console.log('更新対象', differnces.rows);
-    const updateList = differnces.rows;
+    // const differnces = await connection.query(
+    //   `
+    //     WITH imported_data(rfid_tag_id, kizai_nam, rfid_kizai_sts, del_flg, shozoku_id, mem, el_num) AS (
+    //       VALUES ${placeholders}
+    //     ),
+    //     imported_only AS (
+    //       SELECT
+    //         id.rfid_tag_id,
+    //         mk.kizai_id::integer,
+    //         id.rfid_kizai_sts::integer,
+    //         id.del_flg::integer,
+    //         id.shozoku_id::integer,
+    //         id.mem,
+    //         id.el_num::integer
+    //       FROM imported_data AS id
+    //       LEFT JOIN dev5.m_kizai AS mk ON id.kizai_nam = mk.kizai_nam
+    //       EXCEPT ALL
+    //       SELECT rfid_tag_id, kizai_id, rfid_kizai_sts, del_flg, shozoku_id, mem, el_num FROM dev5.m_rfid
+    //     )
+    //     SELECT rfid_tag_id, kizai_id, rfid_kizai_sts, del_flg, shozoku_id, mem, el_num FROM imported_only
+    //     `,
+    //   list.flatMap((v) => [v.rfid_tag_id, v.kizai_nam, v.rfid_kizai_sts, v.del_flg, v.shozoku_id, v.mem, v.el_num])
+    // );
+    // console.log('更新対象', differnces.rows);
+    // const updateList = differnces.rows;
+
+    // 削除フラグが1の時
+    const updateList = list.filter((v) => existingRfidTags.has(v.rfid_tag_id) && v.del_flg === 1);
+
     // 差異がある場合
     if (updateList && updateList.length > 0) {
-      const updDat = toJapanTimeString(undefined, '-');
-      const updUser = 'excel_import';
       const updatePlaceholders = updateList
         .map((_, index) => {
-          const start = index * 7 + 1;
-          return `($${start}, $${start + 1}, $${start + 2}, $${start + 3}, $${start + 4}, $${start + 5}, $${start + 6})`;
+          const start = index * 2 + 1;
+          return `($${start}, $${start + 1})`;
         })
         .join(',');
-      const updateValues = updateList.flatMap((v) => [
-        v.rfid_tag_id,
-        v.kizai_id,
-        v.rfid_kizai_sts,
-        v.del_flg,
-        v.shozoku_id,
-        v.del_flg === 1 ? v.mem : null,
-        v.el_num,
-      ]);
+      const updateValues = updateList.flatMap((v) => [v.rfid_tag_id, v.del_flg, v.mem]);
       const updateQuery = `
-          UPDATE ${SCHEMA}.m_rfid AS mr
+          UPDATE dev5.m_rfid AS mr
           SET
-            kizai_id = d.kizai_id::integer,
-            rfid_kizai_sts = d.rfid_kizai_sts::integer,
             del_flg = d.del_flg::integer,
-            shozoku_id = d.shozoku_id::integer,
             mem = d.mem,
-            el_num = d.el_num,
             upd_dat = $${updateValues.length + 1}::timestamp,
             upd_user = $${updateValues.length + 2}
           FROM (
             VALUES ${updatePlaceholders}
-          ) AS d(rfid_tag_id, kizai_id, rfid_kizai_sts, del_flg, shozoku_id, mem, el_num)
+          ) AS d(rfid_tag_id, del_flg, mem)
           WHERE mr.rfid_tag_id = d.rfid_tag_id;`;
 
       //更新実行
-      await connection.query(updateQuery, [...updateValues, updDat, updUser]);
+      await connection.query(updateQuery, [...updateValues, date, user]);
       await updateMasterUpdates('m_rfid', connection);
     }
 
@@ -183,7 +189,7 @@ export const checkRfid = async (list: RfidImportTypes[], connection: PoolClient)
  * @param connection
  * @returns 新規登録された機材マスタの情報
  */
-export const checkKizai = async (list: KizaiImportTypes[], connection: PoolClient) => {
+export const checkKizai = async (list: KizaiImportTypes[], connection: PoolClient, user: string, date: string) => {
   // 有効なデータがない場合は離脱
   if (!Array.isArray(list) || list.length === 0) {
     return [];
@@ -223,13 +229,10 @@ export const checkKizai = async (list: KizaiImportTypes[], connection: PoolClien
       return value === undefined ? null : value;
     })
   );
-  // 現在の日付とユーザー情報を取得
-  const addDat = toJapanTimeString(undefined, '-');
-  const addUser = 'excel_import';
 
   try {
     // 既存の機材マスタの最大ID
-    const maxKizaiIdResult = await connection.query(`SELECT COALESCE(MAX(kizai_id), 0) FROM ${SCHEMA}.m_kizai;`);
+    const maxKizaiIdResult = await connection.query(`SELECT COALESCE(MAX(kizai_id), 0) FROM dev5.m_kizai;`);
     const maxKizaiId = maxKizaiIdResult.rows[0].coalesce;
 
     // データ比較、新規登録、取得
@@ -238,7 +241,7 @@ export const checkKizai = async (list: KizaiImportTypes[], connection: PoolClien
         WITH imported_data(${allColumns.join(',')}) AS (
           VALUES ${kizaiPlaceholders}
         )
-        INSERT INTO ${SCHEMA}.m_kizai (
+        INSERT INTO dev5.m_kizai (
           kizai_id,
           kizai_nam,
           section_num,
@@ -290,14 +293,14 @@ export const checkKizai = async (list: KizaiImportTypes[], connection: PoolClien
         FROM
           imported_data AS id
         LEFT JOIN
-         ${SCHEMA}.m_bumon AS mb ON id.bumon_nam = mb.bumon_nam
+         dev5.m_bumon AS mb ON id.bumon_nam = mb.bumon_nam
         LEFT JOIN
-         ${SCHEMA}.m_shukei_bumon AS ms ON id.shukei_bumon_nam = ms.shukei_bumon_nam
+         dev5.m_shukei_bumon AS ms ON id.shukei_bumon_nam = ms.shukei_bumon_nam
         WHERE
-          NOT EXISTS (SELECT 1 FROM ${SCHEMA}.m_kizai AS mk WHERE mk.kizai_nam = id.kizai_nam)
+          NOT EXISTS (SELECT 1 FROM dev5.m_kizai AS mk WHERE mk.kizai_nam = id.kizai_nam)
         RETURNING *;
         `,
-      [...kizaiValues, addDat, addUser]
+      [...kizaiValues, date, user]
     );
 
     if (data) {
@@ -318,19 +321,16 @@ export const checkKizai = async (list: KizaiImportTypes[], connection: PoolClien
  * @param connection
  * @returns 新規登録された大部門マスタの情報
  */
-export const checkDaibumon = async (list: string[], connection: PoolClient) => {
+export const checkDaibumon = async (list: string[], connection: PoolClient, user: string, date: string) => {
   // 有効なデータがない場合は離脱
   if (!Array.isArray(list) || list.length === 0) {
     return [];
   }
   const placeholders = list.map((_, index) => `($${index + 1})`).join(',');
-  // 現在の日付とユーザー情報
-  const addDat = toJapanTimeString(undefined, '-');
-  const addUser = 'excel_import';
   try {
     //  既存の大部門マスタの最大ID
     const maxIdResult = await connection.query(`
-        SELECT COALESCE(MAX(dai_bumon_id), 0) FROM ${SCHEMA}.m_dai_bumon;
+        SELECT COALESCE(MAX(dai_bumon_id), 0) FROM dev5.m_dai_bumon;
       `);
     const maxId = maxIdResult.rows[0].coalesce;
     // データ比較、新規登録、取得
@@ -340,9 +340,9 @@ export const checkDaibumon = async (list: string[], connection: PoolClient) => {
           VALUES ${placeholders}
         ),
         existing_data AS (
-          SELECT dai_bumon_nam FROM ${SCHEMA}.m_dai_bumon
+          SELECT dai_bumon_nam FROM dev5.m_dai_bumon
         )
-        INSERT INTO ${SCHEMA}.m_dai_bumon (dai_bumon_id, dai_bumon_nam, add_dat, add_user)
+        INSERT INTO dev5.m_dai_bumon (dai_bumon_id, dai_bumon_nam, add_dat, add_user)
         SELECT
           ${maxId} + ROW_NUMBER() OVER (ORDER BY id.dai_bumon_nam),
           id.dai_bumon_nam,
@@ -354,7 +354,7 @@ export const checkDaibumon = async (list: string[], connection: PoolClient) => {
           id.dai_bumon_nam NOT IN (SELECT dai_bumon_nam FROM existing_data)
         RETURNING *;
       `,
-      [...list, addDat, addUser]
+      [...list, date, user]
     );
     if (data) {
       return data.rows;
@@ -371,20 +371,17 @@ export const checkDaibumon = async (list: string[], connection: PoolClient) => {
  * @param connection
  * @returns 新規登録された集計部門マスタの情報
  */
-export const checkShukeibumon = async (list: string[], connection: PoolClient) => {
+export const checkShukeibumon = async (list: string[], connection: PoolClient, user: string, date: string) => {
   // 有効なデータがない場合は離脱
   if (!Array.isArray(list) || list.length === 0) {
     return [];
   }
   const placeholders = list.map((_, index) => `($${index + 1})`).join(',');
-  // 現在の日付とユーザー情報
-  const addDat = toJapanTimeString(undefined, '-');
-  const addUser = 'excel_import';
 
   try {
     //  既存の集計部門マスタの最大ID
     const maxIdResult = await connection.query(`
-        SELECT COALESCE(MAX(shukei_bumon_id), 0) FROM ${SCHEMA}.m_shukei_bumon;
+        SELECT COALESCE(MAX(shukei_bumon_id), 0) FROM dev5.m_shukei_bumon;
       `);
     const maxId = maxIdResult.rows[0].coalesce;
     // データ比較、新規登録、取得
@@ -394,9 +391,9 @@ export const checkShukeibumon = async (list: string[], connection: PoolClient) =
           VALUES ${placeholders}
         ),
         existing_data AS (
-          SELECT shukei_bumon_nam FROM ${SCHEMA}.m_shukei_bumon
+          SELECT shukei_bumon_nam FROM dev5.m_shukei_bumon
         )
-        INSERT INTO ${SCHEMA}.m_shukei_bumon (shukei_bumon_id, shukei_bumon_nam, add_dat, add_user)
+        INSERT INTO dev5.m_shukei_bumon (shukei_bumon_id, shukei_bumon_nam, add_dat, add_user)
         SELECT
           ${maxId} + ROW_NUMBER() OVER (ORDER BY id.shukei_bumon_nam),
           id.shukei_bumon_nam,
@@ -408,7 +405,7 @@ export const checkShukeibumon = async (list: string[], connection: PoolClient) =
           id.shukei_bumon_nam NOT IN (SELECT shukei_bumon_nam FROM existing_data)
         RETURNING *;
       `,
-      [...list, addDat, addUser]
+      [...list, date, user]
     );
     if (data) {
       return data.rows;
@@ -427,7 +424,9 @@ export const checkShukeibumon = async (list: string[], connection: PoolClient) =
  */
 export const checkBumon = async (
   list: { bumon_nam: string; dai_bumon_nam: string; shukei_bumon_nam: string }[],
-  connection: PoolClient
+  connection: PoolClient,
+  user: string,
+  date: string
 ) => {
   // 有効なデータがない場合は離脱
   if (!Array.isArray(list) || list.length === 0) {
@@ -447,13 +446,10 @@ export const checkBumon = async (
       return value === undefined ? null : value;
     })
   );
-  // 現在の日付とユーザー情報を取得
-  const addDat = toJapanTimeString(undefined, '-');
-  const addUser = 'excel_import';
 
   try {
     // 既存の部門マスタIDの最大値
-    const maxBumonIdResult = await connection.query(`SELECT COALESCE(MAX(bumon_id), 0) FROM ${SCHEMA}.m_bumon;`);
+    const maxBumonIdResult = await connection.query(`SELECT COALESCE(MAX(bumon_id), 0) FROM dev5.m_bumon;`);
     const maxBumonId = maxBumonIdResult.rows[0].coalesce;
     // データ比較、新規登録、取得
     const data = await connection.query(
@@ -461,7 +457,7 @@ export const checkBumon = async (
         WITH imported_data(${allColumns.join(',')}) AS (
           VALUES ${bumonPlaceholders}
         )
-        INSERT INTO ${SCHEMA}.m_bumon (
+        INSERT INTO dev5.m_bumon (
           bumon_id,
           bumon_nam,
           dai_bumon_id,
@@ -479,14 +475,14 @@ export const checkBumon = async (
         FROM
           imported_data AS id
         LEFT JOIN
-         ${SCHEMA}.m_dai_bumon AS md ON id.dai_bumon_nam = md.dai_bumon_nam
+         dev5.m_dai_bumon AS md ON id.dai_bumon_nam = md.dai_bumon_nam
         LEFT JOIN
-         ${SCHEMA}.m_shukei_bumon AS ms ON id.shukei_bumon_nam = ms.shukei_bumon_nam
+         dev5.m_shukei_bumon AS ms ON id.shukei_bumon_nam = ms.shukei_bumon_nam
         WHERE
-          NOT EXISTS (SELECT 1 FROM ${SCHEMA}.m_bumon AS mb WHERE mb.bumon_nam = id.bumon_nam)
+          NOT EXISTS (SELECT 1 FROM dev5.m_bumon AS mb WHERE mb.bumon_nam = id.bumon_nam)
         RETURNING *;
         `,
-      [...bumonValues, addDat, addUser]
+      [...bumonValues, date, user]
     );
 
     if (data) {
@@ -504,7 +500,7 @@ export const checkBumon = async (
  * @param connection
  * @returns 新規登録された棚番マスタの情報
  */
-export const checkTanaban = async (list: TanabanImportTypes[], connection: PoolClient) => {
+export const checkTanaban = async (list: TanabanImportTypes[], connection: PoolClient, user: string, date: string) => {
   // 有効なデータがない場合は離脱
   if (!Array.isArray(list) || list.length === 0) {
     return [];
@@ -520,14 +516,10 @@ export const checkTanaban = async (list: TanabanImportTypes[], connection: PoolC
   // プレースホルダーに渡す値をフラットな配列に変換
   const values = list.flatMap((item) => [item.bld_cod, item.tana_cod, item.eda_cod]);
 
-  // 現日時取得
-  const addDate = toJapanTimeString(undefined, '-');
-  const addUser = 'excel_import';
-
   try {
     const result = await connection.query(
       `
-        INSERT INTO ${SCHEMA}.m_tanaban (bld_cod, tana_cod, eda_cod, add_dat, add_user)
+        INSERT INTO dev5.m_tanaban (bld_cod, tana_cod, eda_cod, add_dat, add_user)
         SELECT
           t.bld_cod,
           t.tana_cod,
@@ -541,7 +533,7 @@ export const checkTanaban = async (list: TanabanImportTypes[], connection: PoolC
         DO NOTHING
         RETURNING bld_cod, tana_cod, eda_cod
         `,
-      [...values, addDate, addUser]
+      [...values, date, user]
     );
 
     return result.rows;

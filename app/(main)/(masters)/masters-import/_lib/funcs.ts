@@ -11,6 +11,7 @@ import {
   checkShukeibumon,
   checkTanaban,
 } from '@/app/_lib/db/tables/masters-import';
+import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { EqptImportType, KizaiImportTypes, RfidImportTypes, TanabanImportTypes } from './types';
 
@@ -22,31 +23,45 @@ import { EqptImportType, KizaiImportTypes, RfidImportTypes, TanabanImportTypes }
  * エクセルインポートしたものをDBに収納する処理
  * @param data エクセルから取得したデータの配列
  */
-export const ImportEqptRfidData = async (data: EqptImportType[]) => {
+export const ImportEqptRfidData = async (data: EqptImportType[], user: string) => {
   console.log(data);
+  // 現在時刻
+  const now = toJapanTimeString();
   /* 重複のない棚番用データ */
   const tanabanList: TanabanImportTypes[] = Array.from(
     new Map(
       data
+        .filter(({ bld_cod, del_flg }) => bld_cod && bld_cod.trim() !== '' && del_flg === 0)
         .map(({ bld_cod, tana_cod, eda_cod }) => ({ bld_cod, tana_cod, eda_cod }))
-        .filter(({ bld_cod }) => bld_cod && bld_cod.trim() !== '')
         .map((d) => [`${d.bld_cod}-${d.tana_cod}-${d.eda_cod}`, d])
     ).values()
   );
   /* 重複のない大部門用データ */
-  const daibumonNamList = [...new Set(data.map((d) => d.dai_bumon_nam!).filter((d) => d && d.trim() !== ''))];
+  const daibumonNamList = [
+    ...new Set(
+      data
+        .filter((d) => d.dai_bumon_nam && d.dai_bumon_nam.trim() !== '' && d.del_flg === 0)
+        .map((d) => d.dai_bumon_nam!)
+    ),
+  ];
   /* 重複のない集計部門用データ */
-  const shukeibumonNamList = [...new Set(data.map((d) => d.shukei_bumon_nam!).filter((d) => d && d.trim() !== ''))];
+  const shukeibumonNamList = [
+    ...new Set(
+      data
+        .filter((d) => d.shukei_bumon_nam && d.shukei_bumon_nam.trim() !== '' && d.del_flg === 0)
+        .map((d) => d.shukei_bumon_nam!)
+    ),
+  ];
   /* 重複のない部門用データ */
   const bumonNamList = Array.from(
     new Map(
       data
+        .filter((d) => d.bumon_nam && d.bumon_nam.trim() !== '' && d.del_flg === 0)
         .map((d) => ({
           bumon_nam: d.bumon_nam!,
           dai_bumon_nam: d.dai_bumon_nam!,
           shukei_bumon_nam: d.shukei_bumon_nam!,
         }))
-        .filter((d) => d.bumon_nam && d.bumon_nam.trim() !== '')
         .map((v) => [v.bumon_nam, v])
     ).values()
   );
@@ -54,6 +69,7 @@ export const ImportEqptRfidData = async (data: EqptImportType[]) => {
   const kizaiMasterList: KizaiImportTypes[] = Array.from(
     new Map(
       data
+        .filter((d) => d.kizai_nam && d.kizai_nam.trim() !== '' && d.del_flg === 0)
         .map((d) => ({
           kizai_nam: d.kizai_nam,
           section_nam: d.section_nam,
@@ -76,7 +92,6 @@ export const ImportEqptRfidData = async (data: EqptImportType[]) => {
           rank_amt_4: d.rank_amt_4,
           rank_amt_5: d.rank_amt_5,
         }))
-        .filter((d) => d.kizai_nam && d.kizai_nam.trim() !== '')
         .map((v) => [v.kizai_nam, v])
     ).values()
   );
@@ -105,17 +120,17 @@ export const ImportEqptRfidData = async (data: EqptImportType[]) => {
     // トランザクション開始
     await connection.query('BEGIN');
 
-    const tanabans = await checkTanaban(tanabanList, connection);
+    const tanabans = await checkTanaban(tanabanList, connection, user, now);
     console.log('棚番', tanabans.length, '件追加');
-    const daibumons = await checkDaibumon(daibumonNamList, connection);
+    const daibumons = await checkDaibumon(daibumonNamList, connection, user, now);
     console.log('大部門', daibumons.length, '件追加');
-    const shukeibumons = await checkShukeibumon(shukeibumonNamList, connection);
+    const shukeibumons = await checkShukeibumon(shukeibumonNamList, connection, user, now);
     console.log('集計部門', shukeibumons.length, '件追加');
-    const bumons = await checkBumon(bumonNamList, connection);
+    const bumons = await checkBumon(bumonNamList, connection, user, now);
     console.log('部門', bumons.length, '件追加');
-    const kizais = await checkKizai(kizaiMasterList, connection);
+    const kizais = await checkKizai(kizaiMasterList, connection, user, now);
     console.log('機材マスタ', kizais.length, '件追加');
-    await checkRfid(rfidList, connection);
+    await checkRfid(rfidList, connection, user, now);
     // すべて成功でコミット
     await connection.query('COMMIT');
   } catch (e) {
