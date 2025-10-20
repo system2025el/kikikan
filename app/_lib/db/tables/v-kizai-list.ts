@@ -18,12 +18,13 @@ export const selectFilteredEqpts = async (queries: {
   d: number | null;
   s: number | null;
   b: number | null;
+  ngFlg: boolean;
 }) => {
   const builder = supabase
     .schema(SCHEMA)
     .from('v_kizai_lst')
     .select(
-      'kizai_id, kizai_nam, kizai_qty, shozoku_nam, mem, bumon_nam, dai_bumon_nam, shukei_bumon_nam, reg_amt, rank_amt_1, rank_amt_2, rank_amt_3, rank_amt_4, rank_amt_5, dsp_flg, del_flg'
+      'kizai_id, kizai_nam, kizai_qty, kizai_ng_qty, shozoku_nam, mem, bumon_nam, dai_bumon_nam, shukei_bumon_nam, reg_amt, rank_amt_1, rank_amt_2, rank_amt_3, rank_amt_4, rank_amt_5, dsp_flg, del_flg'
     )
     .order('kizai_grp_cod')
     .order('dsp_ord_num');
@@ -40,7 +41,9 @@ export const selectFilteredEqpts = async (queries: {
   if (queries.s !== null && queries.s !== FAKE_NEW_ID) {
     builder.eq('shukei_bumon_id', queries.s);
   }
-
+  if (queries.ngFlg) {
+    builder.gt('kizai_ng_qty', 0);
+  }
   try {
     return await builder;
   } catch (e) {

@@ -29,7 +29,13 @@ import { EqptsMasterDialogValues, EqptsMasterTableValues } from './types';
  * @returns {Promise<EqptsMasterTableValues[]>} 機材マスタテーブルに表示するデータ（ 検索キーワードが空の場合は全て ）
  */
 export const getFilteredEqpts = async (
-  queries: { q: string; b: number | null; d: number | null; s: number | null } = { q: '', b: null, d: null, s: null }
+  queries: { q: string; b: number | null; d: number | null; s: number | null; ngFlg: boolean } = {
+    q: '',
+    b: null,
+    d: null,
+    s: null,
+    ngFlg: false,
+  }
 ) => {
   try {
     const [kizai, doptions, soptions, boption] = await Promise.all([
@@ -50,7 +56,9 @@ export const getFilteredEqpts = async (
     const filteredEqpts: EqptsMasterTableValues[] = data.map((d, index) => ({
       kizaiId: d.kizai_id,
       kizaiNam: d.kizai_nam,
-      kizaiQty: d.kizai_qty,
+      kizaiQty: Number(d.kizai_qty ?? 0),
+      ngQty: Number(d.kizai_ng_qty ?? 0),
+      yukoQty: Number(d.kizai_qty ?? 0) - Number(d.kizai_ng_qty ?? 0),
       shozokuNam: d.shozoku_nam,
       mem: d.mem,
       bumonNam: d.bumon_nam,
