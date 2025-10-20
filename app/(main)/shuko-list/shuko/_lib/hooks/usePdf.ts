@@ -156,7 +156,7 @@ export const usePdf = (): [(params: PdfModel[]) => Promise<Blob>] => {
 
       /* ---------------- 公演情報 ---------------- */
       const rowHeight = 20;
-      let currentY = 730;
+      let currentY = 750;
       const pageWidth = 300;
       const colWidthsPerRow = [
         [45, pageWidth - 45], // 1行目

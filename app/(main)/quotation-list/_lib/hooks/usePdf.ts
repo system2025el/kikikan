@@ -36,6 +36,7 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
 
   // PDF生成関数
   const printQuotation = async (param: QuotHeadValues): Promise<Blob> => {
+    console.log('param', param);
     // PDFドキュメント作成
     const pdfDoc = await PDFDocument.create();
 
@@ -63,24 +64,7 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
       end: { x: width - whiteSpace, y: height - whiteSpace },
       thickness: boldLine,
     });
-    // 左縦線
-    page.drawLine({
-      start: { x: whiteSpace - 1, y: whiteSpace - 4 },
-      end: { x: whiteSpace - 1, y: height - (whiteSpace - 1) },
-      thickness: boldLine,
-    });
-    // 右縦線
-    page.drawLine({
-      start: { x: width - (whiteSpace + 1), y: whiteSpace - 4 },
-      end: { x: width - (whiteSpace + 1), y: height - (whiteSpace - 1) },
-      thickness: boldLine,
-    });
-    // // 下横線
-    // page.drawLine({
-    //   start: { x: whiteSpace, y: whiteSpace },
-    //   end: { x: width - whiteSpace, y: whiteSpace },
-    //   thickness: boldLine,
-    // });
+
     // ------------------------------------------------------------------/
 
     /* タイトル・見積番号・見積日
@@ -401,33 +385,14 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
     });
 
     const lines = formatTextArray(param.biko ?? '', customFont, fontSize, maxWidth);
+    console.log('lines', lines);
 
-    if (1 < lines.length) {
-      page.drawText(lines[0], {
-        x: x2,
-        y: y5,
-        font: customFont, // カスタムフォントの設定
-        size: fontSize,
-        // maxWidth: maxWidth,
-        // wordBreaks: [''],
-        // color: rgb(0, 0, 0),
-        // lineHeight: 10,
-        // opacity: 1,
-      });
+    const originalText = lines[0] ?? ''; //配列の最初を取得
+    const actualLines = originalText.split('\n'); //文字列を分割して新しい配列を作成
+    const linesToDraw = actualLines.slice(0, 2); //最初の2行だけを抽出
 
-      page.drawText(lines[1], {
-        x: x2,
-        y: y5 - 12,
-        font: customFont, // カスタムフォントの設定
-        size: fontSize,
-        // maxWidth: maxWidth,
-        // wordBreaks: [''],
-        // color: rgb(0, 0, 0),
-        // lineHeight: 10,
-        // opacity: 1,
-      });
-    } else {
-      page.drawText(lines[0], {
+    if (0 < linesToDraw.length) {
+      page.drawText(linesToDraw[0], {
         x: x2,
         y: y5,
         font: customFont, // カスタムフォントの設定
@@ -439,6 +404,58 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
         // opacity: 1,
       });
     }
+
+    // 2行目が存在する場合
+    if (1 < linesToDraw.length) {
+      page.drawText(linesToDraw[1], {
+        x: x2,
+        y: y5 - 12, // 2行目のY座標
+        font: customFont,
+        size: fontSize,
+        // maxWidth: maxWidth,
+        // wordBreaks: [''],
+        // color: rgb(0, 0, 0),
+        // lineHeight: 10,
+        // opacity: 1,
+      });
+    }
+    // if (1 < lines.length) {
+    //   page.drawText(lines[0], {
+    //     x: x2,
+    //     y: y5,
+    //     font: customFont, // カスタムフォントの設定
+    //     size: fontSize,
+    //     // maxWidth: maxWidth,
+    //     // wordBreaks: [''],
+    //     // color: rgb(0, 0, 0),
+    //     // lineHeight: 10,
+    //     // opacity: 1,
+    //   });
+
+    //   page.drawText(lines[1], {
+    //     x: x2,
+    //     y: y5 - 12,
+    //     font: customFont, // カスタムフォントの設定
+    //     size: fontSize,
+    //     // maxWidth: maxWidth,
+    //     // wordBreaks: [''],
+    //     // color: rgb(0, 0, 0),
+    //     // lineHeight: 10,
+    //     // opacity: 1,
+    //   });
+    // } else {
+    //   page.drawText(lines[0], {
+    //     x: x2,
+    //     y: y5,
+    //     font: customFont, // カスタムフォントの設定
+    //     size: fontSize,
+    //     // maxWidth: maxWidth,
+    //     // wordBreaks: [''],
+    //     // color: rgb(0, 0, 0),
+    //     // lineHeight: 10,
+    //     // opacity: 1,
+    //   });
+    // }
     // ------------------------------------------------------------------/
 
     /* 画像
@@ -588,7 +605,7 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
       thickness: 1,
     });
 
-    const y_detail_3 = 550;
+    const y_detail_3 = 552;
 
     page.drawText('摘　　　　　　要', {
       x: 160,
@@ -611,7 +628,7 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
     });
 
     page.drawText('使用日', {
-      x: 395,
+      x: 397,
       y: y_detail_3,
       font: customFont, // カスタムフォントの設定
       size: 9,
@@ -915,10 +932,29 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
         return;
       }
 
+      const yBottom = startY - rowHeight * index; // 現在のページの最下部のY座標
+      const xLeft = whiteSpace; // 座標を統一
+      const xRight = width - whiteSpace; // 座標を統一
+      const yTop = height - whiteSpace; // 座標を統一
+
       // 下横線
       workPage.drawLine({
-        start: { x: whiteSpace, y: startY - rowHeight * index },
-        end: { x: width - whiteSpace, y: startY - rowHeight * index },
+        start: { x: xLeft, y: yBottom },
+        end: { x: xRight, y: yBottom },
+        thickness: boldLine,
+      });
+
+      // 左縦線
+      workPage.drawLine({
+        start: { x: xLeft + 1, y: yBottom },
+        end: { x: xLeft + 1, y: yTop },
+        thickness: boldLine,
+      });
+
+      // 右縦線
+      workPage.drawLine({
+        start: { x: xRight - 1, y: yBottom },
+        end: { x: xRight - 1, y: yTop },
         thickness: boldLine,
       });
 
@@ -940,24 +976,6 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
         end: { x: width - whiteSpace, y: height - whiteSpace },
         thickness: boldLine,
       });
-      // 左縦線
-      workPage.drawLine({
-        start: { x: whiteSpace - 1, y: whiteSpace - 1 },
-        end: { x: whiteSpace - 1, y: height - (whiteSpace - 1) },
-        thickness: boldLine,
-      });
-      // 右縦線
-      workPage.drawLine({
-        start: { x: width - (whiteSpace + 1), y: whiteSpace - 1 },
-        end: { x: width - (whiteSpace + 1), y: height - (whiteSpace - 1) },
-        thickness: boldLine,
-      });
-      // // 下横線
-      // workPage.drawLine({
-      //   start: { x: whiteSpace, y: whiteSpace },
-      //   end: { x: width - whiteSpace, y: whiteSpace },
-      //   thickness: boldLine,
-      // });
       // ------------------------------------------------------------------/
     }
 
@@ -1134,7 +1152,12 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
 
     checkPageBreak(rowHeight);
     drawColumnLine2();
-    drawRow2(param.tokuNebikiMei ?? '', param.tokuNebikiAmt ?? 0);
+    // drawRow2(param.tokuNebikiMei ?? '', Number(param.tokuNebikiAmt) ?? 0);
+    drawRow2(
+      param.tokuNebikiMei ?? '',
+      param.tokuNebikiAmt != null ? -Math.abs(param.tokuNebikiAmt) : 0,
+      rgb(1, 0, 0) // ← 赤文字指定
+    );
     drawUnderLine();
     index++;
 
@@ -1145,7 +1168,7 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
 
     checkPageBreak(rowHeight);
     drawColumnLine2();
-    drawRow2('合計', (param.chukeiAmt ?? 0) - (param.tokuNebikiAmt ?? 0));
+    drawRow2('合計', (param.chukeiAmt ?? 0) - (param.tokuNebikiAmt ?? 0), undefined, true);
     drawUnderLine();
     index++;
 
@@ -1153,13 +1176,13 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
     drawColumnLine2();
     const zeiRatText = param.zeiRat != null ? param.zeiRat.toLocaleString() : '';
     const zeiAmt = param.zeiAmt ?? null;
-    drawRow2(`消費税（${zeiRatText}%）`, zeiAmt ?? 0);
+    drawRow2(`消費税(${zeiRatText}%)`, zeiAmt ?? 0, undefined, true);
     drawUnderLine();
     index++;
 
     checkPageBreak(rowHeight);
     drawColumnLine2();
-    drawRow2('合計金額', param.gokeiAmt ?? 0);
+    drawRow2('合計金額', param.gokeiAmt ?? 0, undefined, true);
     drawUnderLine();
     index++;
 
@@ -1171,7 +1194,7 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
       });
     }
 
-    function drawRow2(item1: string, item2: number) {
+    function drawRow2(item1: string, item2: number, color = rgb(0, 0, 0), showYen = false) {
       fontSize = 8;
 
       const item1Width = customFont.widthOfTextAtSize(item1, fontSize);
@@ -1181,18 +1204,20 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
         y: startY - 20 * (index + 1) + 3,
         font: customFont, // カスタムフォントの設定
         size: fontSize,
-        // color: rgb(0, 0, 0),
+        color: color,
         // lineHeight: 24,
         // opacity: 1,
       });
 
-      const item2Width = customFont.widthOfTextAtSize(numberFormat(item2), fontSize);
+      const displayText = showYen ? `¥${numberFormat(item2)}` : numberFormat(item2);
+      const item2Width = customFont.widthOfTextAtSize(displayText, fontSize);
 
-      workPage.drawText(numberFormat(item2), {
+      workPage.drawText(displayText, {
         x: 555 - item2Width,
         y: startY - 20 * (index + 1) + 3,
-        font: customFont, // カスタムフォントの設定
+        font: customFont,
         size: fontSize,
+        color: color,
       });
     }
 
@@ -1243,10 +1268,28 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
       thickness: 1,
     });
 
-    // 下横線
+    const yBottom = startY - 20 * (index + 3); // 最終的なY座標
+    const xLeft = whiteSpace; // 統一したX座標
+    const xRight = width - whiteSpace; // 統一したX座標
+    const yTop = height - whiteSpace; // 統一したY座標
+    // 下横線 (最後のページ)
     workPage.drawLine({
-      start: { x: whiteSpace - 2, y: startY - 20 * (index + 3) }, // xの-2は微調整
-      end: { x: width - whiteSpace, y: startY - 20 * (index + 3) },
+      start: { x: xLeft, y: yBottom },
+      end: { x: xRight, y: yBottom },
+      thickness: boldLine,
+    });
+
+    // 左縦線 (最後のページ)
+    workPage.drawLine({
+      start: { x: xLeft + 1, y: yBottom },
+      end: { x: xLeft + 1, y: yTop },
+      thickness: boldLine,
+    });
+
+    // 右縦線 (最後のページ)
+    workPage.drawLine({
+      start: { x: xRight - 1, y: yBottom },
+      end: { x: xRight - 1, y: yTop },
       thickness: boldLine,
     });
 
