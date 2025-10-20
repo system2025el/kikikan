@@ -18,7 +18,7 @@ export const selectFilteredEqpts = async (queries: {
   d: number | null;
   s: number | null;
   b: number | null;
-  ngFlg: boolean;
+  ngFlg?: boolean;
 }) => {
   const builder = supabase
     .schema(SCHEMA)
