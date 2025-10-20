@@ -100,7 +100,7 @@ export const selectStockKizai = async (bumonId: number) => {
     return await supabase
       .schema(SCHEMA)
       .from('v_kizai_lst')
-      .select(`kizai_id, kizai_nam, kizai_qty, bumon_id, bumon_nam`)
+      .select(`kizai_id, kizai_nam, kizai_qty, bumon_id, bumon_nam, kizai_ng_qty`)
       .eq('bumon_id', bumonId)
       .eq('del_flg', 0)
       .eq('dsp_flg', 1)

@@ -54,7 +54,7 @@ export const getEqData = async (bumonId: number) => {
     const eqList: EqTableValues[] = data.map((d) => ({
       kizaiId: d.kizai_id,
       kizaiNam: d.kizai_nam,
-      kizaiQty: d.kizai_qty,
+      kizaiQty: d.kizai_qty - d.kizai_ng_qty,
       bumonId: d.bumon_id,
       bumonNam: d.bumon_nam,
     }));
