@@ -30,7 +30,7 @@ export const Section = ({
         <Grid2 size={2} justifyItems={'center'}>
           <Box>
             <input
-              accept=".xlsx, .xls"
+              accept=".xlsx, .xls, .xlsm"
               id={fileInputId}
               type="file"
               style={{ display: 'none' }}

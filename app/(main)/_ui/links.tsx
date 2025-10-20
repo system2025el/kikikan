@@ -30,7 +30,7 @@ const orderList: MenuItem[] = [
   { name: '新規受注', url: '/order/0/edit' },
   { name: '受注一覧', url: '/order-list' },
   { name: '在庫確認', url: '/stock' },
-  { name: '機材一覧', url: '/loan-situation' },
+  { name: '貸出状況', url: '/loan-situation' },
   { name: '見積一覧', url: '/quotation-list' },
   { name: '請求一覧', url: '/bill-list' },
   { name: '請求状況一覧', url: '/billing-sts-list' },

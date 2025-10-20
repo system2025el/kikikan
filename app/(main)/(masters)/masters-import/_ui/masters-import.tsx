@@ -62,6 +62,8 @@ export const ImportMaster = () => {
         const parsedEqptData: EqptImportType[] = [];
         let hasError = false;
         dataRows.forEach((row, index) => {
+          // rfid_tag_idの部分が空ならそもそも取得しない
+          if (!row[0]) return;
           // 置き換え
           const rowObject = {
             rfid_tag_id: String(row[0]),
@@ -95,10 +97,10 @@ export const ImportMaster = () => {
             setEqptFileName(file.name);
             parsedEqptData.push(result.data);
           } else {
-            console.error(`${file.name}の行 ${index + 2} でバリデーションエラー:`, result.error.issues);
+            console.error(`${file.name}の行 ${index + 1} でバリデーションエラー:`, result.error.issues);
             hasError = true;
-            errorRows.push(index + 2);
-            sendLogServer(index + 2, result.error.issues);
+            errorRows.push(index + 1);
+            sendLogServer(index + 1, result.error.issues);
           }
         });
 
