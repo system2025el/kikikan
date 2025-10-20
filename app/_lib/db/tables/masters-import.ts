@@ -21,13 +21,12 @@ export const checkRfid = async (list: RfidImportTypes[], connection: PoolClient,
   if (!Array.isArray(list) || list.length === 0) {
     return [];
   }
-  console.log('ここまでは来てますかね？');
   try {
     // インポートしたRFIDタグIDリスト
     const rfidTagIds = list.map((v) => v.rfid_tag_id);
     // m_rfidから既存のRFIDタグIDを取得
     const existingTagsResult = await connection.query(
-      `SELECT rfid_tag_id FROM dev5.m_rfid WHERE rfid_tag_id = ANY($1::text[]);`,
+      `SELECT rfid_tag_id FROM ${SCHEMA}.m_rfid WHERE rfid_tag_id = ANY($1::text[]);`,
       [rfidTagIds]
     );
     // 既存のRFIDタグIDを取得
@@ -53,7 +52,7 @@ export const checkRfid = async (list: RfidImportTypes[], connection: PoolClient,
           WITH imported_data(${insertMasterCols.join(',')}) AS (
             VALUES ${insertMasterPlaceholders}
           )
-          INSERT INTO dev5.m_rfid (
+          INSERT INTO ${SCHEMA}.m_rfid (
             rfid_tag_id,
             kizai_id,
             del_flg,
@@ -63,23 +62,23 @@ export const checkRfid = async (list: RfidImportTypes[], connection: PoolClient,
             add_user
           )
           SELECT
-            id.rfid_tag_id,
-            mk.kizai_id, -- JOINして取得したkizai_id
+            id.rfid_tag_id::varchar,
+            mk.kizai_id::integer, -- JOINして取得したkizai_id
             CAST(id.del_flg AS integer),
-            id.mem,
+            id.mem::varchar,
             CAST(id.el_num AS integer),
             $${insertMasterValues.length + 1}::timestamp, -- add_dat
-            $${insertMasterValues.length + 2}  -- add_user
+            $${insertMasterValues.length + 2}::varchar  -- add_user
           FROM
             imported_data AS id
           LEFT JOIN
-            dev5.m_kizai AS mk ON id.kizai_nam = mk.kizai_nam;
+            ${SCHEMA}.m_kizai AS mk ON id.kizai_nam = mk.kizai_nam;
         `;
 
       // RFIDタグ管理テーブル側準備
       const insertStsPlaceholders = insertList
         .map((_, index) => {
-          const start = index * 2 + 1;
+          const start = index * 3 + 1;
           return `($${start}, $${start + 1}, $${start + 2})`;
         })
         .join(',');
@@ -88,7 +87,7 @@ export const checkRfid = async (list: RfidImportTypes[], connection: PoolClient,
           WITH imported_data (rfid_tag_id, rfid_kizai_sts, shozoku_id) AS (
             VALUES ${insertStsPlaceholders}
           )
-          INSERT INTO dev5.m_rfid (
+          INSERT INTO ${SCHEMA}.t_rfid_status_result (
             rfid_tag_id,
             rfid_kizai_sts,
             shozoku_id,
@@ -96,20 +95,18 @@ export const checkRfid = async (list: RfidImportTypes[], connection: PoolClient,
             upd_user
           )
           SELECT
-            id.rfid_tag_id,
+            id.rfid_tag_id::varchar,
             CAST(id.rfid_kizai_sts AS integer),
             CAST(id.shozoku_id AS integer),
-            $${insertMasterValues.length + 1}::timestamp, -- upd_dat
-            $${insertMasterValues.length + 2}  -- upd_user
+            $${insertStsValues.length + 1}::timestamp, -- upd_dat
+            $${insertStsValues.length + 2}::varchar  -- upd_user
           FROM
             imported_data AS id
-          RETURNING *
         `;
       // INSERT実行
       await connection.query(insertMasterQuery, [...insertMasterValues, date, user]);
-      const result = await connection.query(insertStsQuery, [...insertStsValues, date, user]);
+      await connection.query(insertStsQuery, [...insertStsValues, date, user]);
       updateMasterUpdates('m_rfid', connection);
-      console.log(result);
     }
 
     // 更新処理
@@ -136,9 +133,9 @@ export const checkRfid = async (list: RfidImportTypes[], connection: PoolClient,
     //         id.mem,
     //         id.el_num::integer
     //       FROM imported_data AS id
-    //       LEFT JOIN dev5.m_kizai AS mk ON id.kizai_nam = mk.kizai_nam
+    //       LEFT JOIN ${SCHEMA}.m_kizai AS mk ON id.kizai_nam = mk.kizai_nam
     //       EXCEPT ALL
-    //       SELECT rfid_tag_id, kizai_id, rfid_kizai_sts, del_flg, shozoku_id, mem, el_num FROM dev5.m_rfid
+    //       SELECT rfid_tag_id, kizai_id, rfid_kizai_sts, del_flg, shozoku_id, mem, el_num FROM ${SCHEMA}.m_rfid
     //     )
     //     SELECT rfid_tag_id, kizai_id, rfid_kizai_sts, del_flg, shozoku_id, mem, el_num FROM imported_only
     //     `,
@@ -154,18 +151,18 @@ export const checkRfid = async (list: RfidImportTypes[], connection: PoolClient,
     if (updateList && updateList.length > 0) {
       const updatePlaceholders = updateList
         .map((_, index) => {
-          const start = index * 2 + 1;
-          return `($${start}, $${start + 1})`;
+          const start = index * 3 + 1;
+          return `($${start}, $${start + 1}, $${start + 2})`;
         })
         .join(',');
       const updateValues = updateList.flatMap((v) => [v.rfid_tag_id, v.del_flg, v.mem]);
       const updateQuery = `
-          UPDATE dev5.m_rfid AS mr
+          UPDATE ${SCHEMA}.m_rfid AS mr
           SET
             del_flg = d.del_flg::integer,
-            mem = d.mem,
+            mem = d.mem::varchar,
             upd_dat = $${updateValues.length + 1}::timestamp,
-            upd_user = $${updateValues.length + 2}
+            upd_user = $${updateValues.length + 2}::varchar
           FROM (
             VALUES ${updatePlaceholders}
           ) AS d(rfid_tag_id, del_flg, mem)
@@ -232,7 +229,7 @@ export const checkKizai = async (list: KizaiImportTypes[], connection: PoolClien
 
   try {
     // 既存の機材マスタの最大ID
-    const maxKizaiIdResult = await connection.query(`SELECT COALESCE(MAX(kizai_id), 0) FROM dev5.m_kizai;`);
+    const maxKizaiIdResult = await connection.query(`SELECT COALESCE(MAX(kizai_id), 0) FROM ${SCHEMA}.m_kizai;`);
     const maxKizaiId = maxKizaiIdResult.rows[0].coalesce;
 
     // データ比較、新規登録、取得
@@ -241,7 +238,7 @@ export const checkKizai = async (list: KizaiImportTypes[], connection: PoolClien
         WITH imported_data(${allColumns.join(',')}) AS (
           VALUES ${kizaiPlaceholders}
         )
-        INSERT INTO dev5.m_kizai (
+        INSERT INTO ${SCHEMA}.m_kizai (
           kizai_id,
           kizai_nam,
           section_num,
@@ -293,11 +290,11 @@ export const checkKizai = async (list: KizaiImportTypes[], connection: PoolClien
         FROM
           imported_data AS id
         LEFT JOIN
-         dev5.m_bumon AS mb ON id.bumon_nam = mb.bumon_nam
+         ${SCHEMA}.m_bumon AS mb ON id.bumon_nam = mb.bumon_nam
         LEFT JOIN
-         dev5.m_shukei_bumon AS ms ON id.shukei_bumon_nam = ms.shukei_bumon_nam
+         ${SCHEMA}.m_shukei_bumon AS ms ON id.shukei_bumon_nam = ms.shukei_bumon_nam
         WHERE
-          NOT EXISTS (SELECT 1 FROM dev5.m_kizai AS mk WHERE mk.kizai_nam = id.kizai_nam)
+          NOT EXISTS (SELECT 1 FROM ${SCHEMA}.m_kizai AS mk WHERE mk.kizai_nam = id.kizai_nam)
         RETURNING *;
         `,
       [...kizaiValues, date, user]
@@ -330,7 +327,7 @@ export const checkDaibumon = async (list: string[], connection: PoolClient, user
   try {
     //  既存の大部門マスタの最大ID
     const maxIdResult = await connection.query(`
-        SELECT COALESCE(MAX(dai_bumon_id), 0) FROM dev5.m_dai_bumon;
+        SELECT COALESCE(MAX(dai_bumon_id), 0) FROM ${SCHEMA}.m_dai_bumon;
       `);
     const maxId = maxIdResult.rows[0].coalesce;
     // データ比較、新規登録、取得
@@ -340,9 +337,9 @@ export const checkDaibumon = async (list: string[], connection: PoolClient, user
           VALUES ${placeholders}
         ),
         existing_data AS (
-          SELECT dai_bumon_nam FROM dev5.m_dai_bumon
+          SELECT dai_bumon_nam FROM ${SCHEMA}.m_dai_bumon
         )
-        INSERT INTO dev5.m_dai_bumon (dai_bumon_id, dai_bumon_nam, add_dat, add_user)
+        INSERT INTO ${SCHEMA}.m_dai_bumon (dai_bumon_id, dai_bumon_nam, add_dat, add_user)
         SELECT
           ${maxId} + ROW_NUMBER() OVER (ORDER BY id.dai_bumon_nam),
           id.dai_bumon_nam,
@@ -381,7 +378,7 @@ export const checkShukeibumon = async (list: string[], connection: PoolClient, u
   try {
     //  既存の集計部門マスタの最大ID
     const maxIdResult = await connection.query(`
-        SELECT COALESCE(MAX(shukei_bumon_id), 0) FROM dev5.m_shukei_bumon;
+        SELECT COALESCE(MAX(shukei_bumon_id), 0) FROM ${SCHEMA}.m_shukei_bumon;
       `);
     const maxId = maxIdResult.rows[0].coalesce;
     // データ比較、新規登録、取得
@@ -391,9 +388,9 @@ export const checkShukeibumon = async (list: string[], connection: PoolClient, u
           VALUES ${placeholders}
         ),
         existing_data AS (
-          SELECT shukei_bumon_nam FROM dev5.m_shukei_bumon
+          SELECT shukei_bumon_nam FROM ${SCHEMA}.m_shukei_bumon
         )
-        INSERT INTO dev5.m_shukei_bumon (shukei_bumon_id, shukei_bumon_nam, add_dat, add_user)
+        INSERT INTO ${SCHEMA}.m_shukei_bumon (shukei_bumon_id, shukei_bumon_nam, add_dat, add_user)
         SELECT
           ${maxId} + ROW_NUMBER() OVER (ORDER BY id.shukei_bumon_nam),
           id.shukei_bumon_nam,
@@ -449,7 +446,7 @@ export const checkBumon = async (
 
   try {
     // 既存の部門マスタIDの最大値
-    const maxBumonIdResult = await connection.query(`SELECT COALESCE(MAX(bumon_id), 0) FROM dev5.m_bumon;`);
+    const maxBumonIdResult = await connection.query(`SELECT COALESCE(MAX(bumon_id), 0) FROM ${SCHEMA}.m_bumon;`);
     const maxBumonId = maxBumonIdResult.rows[0].coalesce;
     // データ比較、新規登録、取得
     const data = await connection.query(
@@ -457,7 +454,7 @@ export const checkBumon = async (
         WITH imported_data(${allColumns.join(',')}) AS (
           VALUES ${bumonPlaceholders}
         )
-        INSERT INTO dev5.m_bumon (
+        INSERT INTO ${SCHEMA}.m_bumon (
           bumon_id,
           bumon_nam,
           dai_bumon_id,
@@ -475,11 +472,11 @@ export const checkBumon = async (
         FROM
           imported_data AS id
         LEFT JOIN
-         dev5.m_dai_bumon AS md ON id.dai_bumon_nam = md.dai_bumon_nam
+         ${SCHEMA}.m_dai_bumon AS md ON id.dai_bumon_nam = md.dai_bumon_nam
         LEFT JOIN
-         dev5.m_shukei_bumon AS ms ON id.shukei_bumon_nam = ms.shukei_bumon_nam
+         ${SCHEMA}.m_shukei_bumon AS ms ON id.shukei_bumon_nam = ms.shukei_bumon_nam
         WHERE
-          NOT EXISTS (SELECT 1 FROM dev5.m_bumon AS mb WHERE mb.bumon_nam = id.bumon_nam)
+          NOT EXISTS (SELECT 1 FROM ${SCHEMA}.m_bumon AS mb WHERE mb.bumon_nam = id.bumon_nam)
         RETURNING *;
         `,
       [...bumonValues, date, user]
@@ -519,7 +516,7 @@ export const checkTanaban = async (list: TanabanImportTypes[], connection: PoolC
   try {
     const result = await connection.query(
       `
-        INSERT INTO dev5.m_tanaban (bld_cod, tana_cod, eda_cod, add_dat, add_user)
+        INSERT INTO ${SCHEMA}.m_tanaban (bld_cod, tana_cod, eda_cod, add_dat, add_user)
         SELECT
           t.bld_cod,
           t.tana_cod,
