@@ -3,17 +3,17 @@
 import { PoolClient } from 'pg';
 
 import { SCHEMA, supabase } from '../supabase';
-import { IdoDen } from '../types/t-ido-den-type';
+import { IdoDenJuchu } from '../types/t-ido-den-juchu-type';
 
 /**
- * 移動伝票id最大値取得
- * @returns 移動伝票id最大値
+ * 移動伝票受注id最大値取得
+ * @returns 移動伝票受注id最大値
  */
-export const selectIdoDenMaxId = async () => {
+export const selectIdoDenJuchuMaxId = async () => {
   try {
     return await supabase
       .schema(SCHEMA)
-      .from('t_ido_den')
+      .from('t_ido_den_juchu')
       .select('ido_den_id')
       .order('ido_den_id', {
         ascending: false,
@@ -26,13 +26,13 @@ export const selectIdoDenMaxId = async () => {
 };
 
 /**
- * 移動伝票新規追加
- * @param newIdoDenId 新規移動伝票id
- * @param idoKizaiData 移動伝票データ
+ * 移動伝票受注新規追加
+ * @param newIdoDenId 新規移動伝票受注id
+ * @param idoKizaiData 移動伝票受注データ
  * @param userNam ユーザー名
  * @returns
  */
-export const insertIdoDen = async (data: IdoDen[], connection: PoolClient) => {
+export const insertIdoDenJuchu = async (data: IdoDenJuchu[], connection: PoolClient) => {
   const cols = Object.keys(data[0]) as (keyof (typeof data)[0])[];
   const values = data.flatMap((obj) => cols.map((col) => obj[col] ?? null));
   let placeholderIndex = 1;
@@ -45,7 +45,7 @@ export const insertIdoDen = async (data: IdoDen[], connection: PoolClient) => {
 
   const query = `
     INSERT INTO
-      ${SCHEMA}.t_ido_den (${cols.join(',')})
+      ${SCHEMA}.t_ido_den_juchu (${cols.join(',')})
     VALUES 
       ${placeholders}
   `;
@@ -58,13 +58,22 @@ export const insertIdoDen = async (data: IdoDen[], connection: PoolClient) => {
 };
 
 /**
- * 移動伝票更新
- * @param idoKizaiData 移動伝票データ
+ * 移動伝票受注更新
+ * @param idoKizaiData 移動伝票受注データ
  * @param userNam ユーザー名
  * @returns
  */
-export const updateIdoDen = async (data: IdoDen, connection: PoolClient) => {
-  const whereKeys = ['ido_den_id'] as const;
+export const updateIdoDenJuchu = async (data: IdoDenJuchu, connection: PoolClient) => {
+  const whereKeys = [
+    'ido_den_id',
+    'juchu_head_id',
+    'juchu_kizai_head_id',
+    'juchu_kizai_meisai_id',
+    'sagyo_kbn_id',
+    'sagyo_siji_id',
+    'sagyo_id',
+    'kizai_id',
+  ] as const;
 
   const allKeys = Object.keys(data) as (keyof typeof data)[];
 
@@ -93,7 +102,7 @@ export const updateIdoDen = async (data: IdoDen, connection: PoolClient) => {
 
   const query = `
       UPDATE
-        ${SCHEMA}.t_ido_den
+        ${SCHEMA}.t_ido_den_juchu
       SET
         ${setClause}
       WHERE
@@ -107,13 +116,13 @@ export const updateIdoDen = async (data: IdoDen, connection: PoolClient) => {
 };
 
 /**
- * 移動伝票削除
- * @param idoDenIds 移動伝票id
+ * 移動伝票受注削除
+ * @param idoDenIds 移動伝票受注id
  */
-export const deleteIdoDen = async (idoDenIds: number[], connection: PoolClient) => {
+export const deleteIdoDenJuchu = async (idoDenIds: number[], connection: PoolClient) => {
   const query = `
     DELETE FROM
-      ${SCHEMA}.t_ido_den
+      ${SCHEMA}.t_ido_den_juchu
     WHERE
       ido_den_id = ANY($1)
   `;

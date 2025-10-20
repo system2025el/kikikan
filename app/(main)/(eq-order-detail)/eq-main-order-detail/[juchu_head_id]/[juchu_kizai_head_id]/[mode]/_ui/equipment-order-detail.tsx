@@ -69,7 +69,7 @@ import {
 } from '../../../../../_ui/caveat-dialog';
 import {
   addHonbanbi,
-  addIdoDen,
+  addIdoDenJuchu,
   addIdoFix,
   addJuchuContainerMeisai,
   addJuchuKizaiHead,
@@ -77,18 +77,18 @@ import {
   addNyushukoDen,
   confirmHonbanbi,
   delHonbanbi,
-  delIdoDen,
+  delIdoDenJuchu,
   delIdoFix,
   delJuchuContainerMeisai,
   delJuchuKizaiMeisai,
   delNyushukoDen,
-  getIdoDenMaxId,
+  getIdoDenJuchuMaxId,
   getJuchuKizaiMeisai,
   saveJuchuKizai,
   saveNewJuchuKizaiHead,
   updContainerNyushukoDen,
   updHonbanbi,
-  updIdoDen,
+  updIdoDenJuchu,
   updIdoFix,
   updJuchuContainerMeisai,
   updJuchuKizaiHead,
@@ -438,10 +438,10 @@ const EquipmentOrderDetail = (props: {
 
       // 更新
     } else {
-      const kicsMeisai = juchuKizaiMeisaiList.filter((d) => d.shozokuId === 1);
-      const yardMeisai = juchuKizaiMeisaiList.filter((d) => d.shozokuId === 2);
-      const kicsContainer = juchuContainerMeisaiList.filter((d) => d.planKicsKizaiQty);
-      const yardContainer = juchuContainerMeisaiList.filter((d) => d.planYardKizaiQty);
+      const kicsMeisai = juchuKizaiMeisaiList.filter((d) => d.shozokuId === 1 && !d.delFlag);
+      const yardMeisai = juchuKizaiMeisaiList.filter((d) => d.shozokuId === 2 && !d.delFlag);
+      const kicsContainer = juchuContainerMeisaiList.filter((d) => d.planKicsKizaiQty && !d.delFlag);
+      const yardContainer = juchuContainerMeisaiList.filter((d) => d.planYardKizaiQty && !d.delFlag);
 
       if (
         ((kicsMeisai.length > 0 || kicsContainer.length > 0) && (!data.kicsShukoDat || !data.kicsNyukoDat)) ||
@@ -1285,19 +1285,6 @@ const EquipmentOrderDetail = (props: {
                 </Button>
               </Grid2>
               <BackButton label={'戻る'} />
-              <Button
-                onClick={() => {
-                  console.log(defaultValues?.kicsShukoDat ? (dirtyFields.kicsShukoDat ?? false) : false);
-                  console.log(
-                    '元',
-                    defaultValues?.kicsShukoDat ? toJapanTimeString(defaultValues?.kicsShukoDat) : null
-                  );
-                  const now = getValues('kicsShukoDat');
-                  console.log('新', now ? toJapanTimeString(now) : null);
-                }}
-              >
-                確認
-              </Button>
             </Grid2>
           </Box>
           {/*-------受注ヘッダー-------*/}
