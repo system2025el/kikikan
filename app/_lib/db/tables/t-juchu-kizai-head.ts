@@ -96,13 +96,14 @@ export const selectReturnJuchuKizaiHead = async (juchuHeadId: number, juchuKizai
  * @param juchuHeadId 受注ヘッダーid
  * @returns
  */
-export const selectChildJuchuKizaiHeadConfirm = async (juchuHeadId: number) => {
+export const selectChildJuchuKizaiHeadConfirm = async (juchuHeadId: number, juchuKizaiHeadIdv: number[]) => {
   try {
     return await supabase
       .schema(SCHEMA)
       .from('t_juchu_kizai_head')
       .select('*', { count: 'exact', head: true })
       .eq('juchu_head_id', juchuHeadId)
+      .in('oya_juchu_kizai_head_id', juchuKizaiHeadIdv)
       .neq('juchu_kizai_head_kbn', 1);
   } catch (e) {
     throw e;

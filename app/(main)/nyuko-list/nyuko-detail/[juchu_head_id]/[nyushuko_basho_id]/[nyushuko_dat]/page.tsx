@@ -1,3 +1,5 @@
+import { getNyukoFixFlag } from '@/app/(main)/nyuko-list/_lib/funcs';
+
 import { getNyukoDetail } from './_lib/funcs';
 import { NyukoDetail } from './_ui/nyuko-detail';
 
@@ -14,6 +16,14 @@ const Page = async (props: {
   if (!nyukoDetailData) {
     return <div>入庫明細が見つかりません。</div>;
   }
-  return <NyukoDetail nyukoDetailData={nyukoDetailData} />;
+
+  const fixFlag = await getNyukoFixFlag(
+    Number(params.juchu_head_id),
+    nyukoDetailData[0].juchuKizaiHeadIdv![0],
+    70,
+    date,
+    Number(params.nyushuko_basho_id)
+  );
+  return <NyukoDetail nyukoDetailData={nyukoDetailData} fixFlag={fixFlag} />;
 };
 export default Page;

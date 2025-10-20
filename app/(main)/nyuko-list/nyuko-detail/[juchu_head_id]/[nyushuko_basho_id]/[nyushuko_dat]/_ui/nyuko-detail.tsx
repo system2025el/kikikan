@@ -26,11 +26,13 @@ import { updNyukoDetail } from '../_lib/funcs';
 import { NyukoDetailTableValues } from '../_lib/types';
 import { NyukoDetailTable } from './nyuko-detail-table';
 
-export const NyukoDetail = (props: { nyukoDetailData: NyukoDetailTableValues[] }) => {
+export const NyukoDetail = (props: { nyukoDetailData: NyukoDetailTableValues[]; fixFlag: boolean }) => {
   const { nyukoDetailData } = props;
 
   // user情報
   const user = useUserStore((state) => state.user);
+
+  const [fixFlag, setFixFlag] = useState(props.fixFlag);
 
   // 到着ボタンダイアログ制御
   const [arrivalOpen, setArrivalOpen] = useState(false);
@@ -56,6 +58,7 @@ export const NyukoDetail = (props: { nyukoDetailData: NyukoDetailTableValues[] }
     const updateResult = await updNyukoDetail(nyukoDetailData, user.name);
 
     if (updateResult) {
+      setFixFlag(true);
       setSnackBarMessage('到着しました');
       setSnackBarOpen(true);
     } else {
@@ -72,7 +75,12 @@ export const NyukoDetail = (props: { nyukoDetailData: NyukoDetailTableValues[] }
       <Paper variant="outlined">
         <Box display={'flex'} justifyContent={'space-between'} alignItems="center" p={2}>
           <Typography fontSize={'large'}>入庫明細(入庫)</Typography>
-          <Button onClick={handleDeparture}>到着</Button>
+          <Grid2 container alignItems={'center'} spacing={2}>
+            {fixFlag && <Typography>到着済</Typography>}
+            <Button onClick={handleDeparture} disabled={fixFlag}>
+              到着
+            </Button>
+          </Grid2>
         </Box>
         <Divider />
         <Grid2 container spacing={1} p={1}>

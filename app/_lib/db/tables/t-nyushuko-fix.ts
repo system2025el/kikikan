@@ -28,6 +28,38 @@ export const selectNyushukoFixFlag = async (juchuHeadId: number, juchuKizaiHeadI
 };
 
 /**
+ * 入出庫確定フラグ取得(作業id指定)
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param sagyoKbnId 作業区分id
+ * @param sagyoDenDat 作業日時
+ * @param sagyoId 作業id
+ * @returns
+ */
+export const selectSagyoIdFilterNyushukoFixFlag = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  sagyoKbnId: number,
+  sagyoDenDat: string,
+  sagyoId: number
+) => {
+  try {
+    return await supabase
+      .schema(SCHEMA)
+      .from('t_nyushuko_fix')
+      .select('sagyo_fix_flg')
+      .eq('juchu_head_id', juchuHeadId)
+      .eq('juchu_kizai_head_id', juchuKizaiHeadId)
+      .eq('sagyo_kbn_id', sagyoKbnId)
+      //.eq('sagyo_den_dat', sagyoDenDat)
+      .eq('sagyo_id', sagyoId)
+      .single();
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
  * 入出庫確定確認
  * @param data 入出庫確定確認データ
  * @returns

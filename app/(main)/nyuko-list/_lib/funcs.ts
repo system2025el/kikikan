@@ -1,5 +1,6 @@
 'use server';
 
+import { selectSagyoIdFilterNyushukoFixFlag } from '@/app/_lib/db/tables/t-nyushuko-fix';
 import { selectFilteredNyukoList, selectFilteredShukoList } from '@/app/_lib/db/tables/v-nyushuko-den2';
 
 import { NyukoListSearchValues, NyukoTableValues } from './types';
@@ -35,5 +36,42 @@ export const getNyukoList = async (queries: NyukoListSearchValues) => {
   } catch (e) {
     console.error(e);
     return [];
+  }
+};
+
+/**
+ * 入庫作業確定フラグ取得
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param sagyoKbnId 作業区分id
+ * @param sagyoDenDat 作業日時
+ * @param sagyoId 作業id
+ * @returns
+ */
+export const getNyukoFixFlag = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  sagyoKbnId: number,
+  sagyoDenDat: string,
+  sagyoId: number
+) => {
+  try {
+    const { data, error } = await selectSagyoIdFilterNyushukoFixFlag(
+      juchuHeadId,
+      juchuKizaiHeadId,
+      sagyoKbnId,
+      sagyoDenDat,
+      sagyoId
+    );
+
+    if (error) {
+      console.error('getNyukoFixFlag error : ', error);
+      throw error;
+    }
+
+    return data.sagyo_fix_flg === 0 ? false : true;
+  } catch (e) {
+    console.error(e);
+    throw e;
   }
 };

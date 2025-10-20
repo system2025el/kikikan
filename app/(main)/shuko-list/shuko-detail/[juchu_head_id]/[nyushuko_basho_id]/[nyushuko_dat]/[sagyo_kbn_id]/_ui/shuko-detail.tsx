@@ -26,11 +26,13 @@ import { confirmChildJuchuKizaiHead, updShukoDetail } from '../_lib/funcs';
 import { ShukoDetailTableValues } from '../_lib/types';
 import { ShukoDetailTable } from './shuko-detail-table';
 
-export const ShukoDetail = (props: { shukoDetailData: ShukoDetailTableValues[] }) => {
+export const ShukoDetail = (props: { shukoDetailData: ShukoDetailTableValues[]; fixFlag: boolean }) => {
   const { shukoDetailData } = props;
 
   // user情報
   const user = useUserStore((state) => state.user);
+
+  const [fixFlag, setFixFlag] = useState(props.fixFlag);
 
   // 出発ボタンダイアログ制御
   const [departureOpen, setDepartureOpen] = useState(false);
@@ -58,6 +60,7 @@ export const ShukoDetail = (props: { shukoDetailData: ShukoDetailTableValues[] }
     const updateResult = await updShukoDetail(shukoDetailData, 1, user.name);
 
     if (updateResult) {
+      setFixFlag(true);
       setSnackBarMessage('出発しました');
       setSnackBarOpen(true);
     } else {
@@ -74,7 +77,10 @@ export const ShukoDetail = (props: { shukoDetailData: ShukoDetailTableValues[] }
     if (!user) return;
 
     const juchuHeadId = shukoDetailData[0].juchuHeadId;
-    const childJuchuKizaiHeadCount = await confirmChildJuchuKizaiHead(juchuHeadId);
+    const childJuchuKizaiHeadCount = await confirmChildJuchuKizaiHead(
+      juchuHeadId,
+      shukoDetailData[0].juchuKizaiHeadIdv!
+    );
 
     if (childJuchuKizaiHeadCount && childJuchuKizaiHeadCount > 0) {
       setReleaseOpen(true);
@@ -84,6 +90,7 @@ export const ShukoDetail = (props: { shukoDetailData: ShukoDetailTableValues[] }
     const updateResult = await updShukoDetail(shukoDetailData, 0, user.name);
 
     if (updateResult) {
+      setFixFlag(false);
       setSnackBarMessage('出発解除しました');
       setSnackBarOpen(true);
     } else {
@@ -102,13 +109,19 @@ export const ShukoDetail = (props: { shukoDetailData: ShukoDetailTableValues[] }
           <Typography fontSize={'large'}>
             出庫明細({shukoDetailData[0].sagyoKbnId === 20 ? '出庫' : 'スタンバイ'})
           </Typography>
-          <Grid2 container spacing={2}>
-            <Button onClick={handleDeparture} sx={{ display: shukoDetailData[0].sagyoKbnId === 20 ? 'block' : 'none' }}>
+          <Grid2 container alignItems={'center'} spacing={2}>
+            {fixFlag && <Typography>出庫済</Typography>}
+            <Button
+              onClick={handleDeparture}
+              disabled={fixFlag}
+              sx={{ display: shukoDetailData[0].sagyoKbnId === 20 ? 'block' : 'none' }}
+            >
               出発
             </Button>
             <Button
               color="error"
               onClick={handleRelease}
+              disabled={!fixFlag}
               sx={{ display: shukoDetailData[0].sagyoKbnId === 20 ? 'block' : 'none' }}
             >
               出発解除

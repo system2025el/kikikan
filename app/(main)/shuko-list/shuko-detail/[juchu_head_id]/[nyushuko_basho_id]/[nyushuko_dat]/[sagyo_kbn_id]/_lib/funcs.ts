@@ -2,7 +2,7 @@
 
 import pool from '@/app/_lib/db/postgres';
 import { selectChildJuchuKizaiHeadConfirm } from '@/app/_lib/db/tables/t-juchu-kizai-head';
-import { updateNyushukoFix } from '@/app/_lib/db/tables/t-nyushuko-fix';
+import { selectSagyoIdFilterNyushukoFixFlag, updateNyushukoFix } from '@/app/_lib/db/tables/t-nyushuko-fix';
 import { selectShukoDetail } from '@/app/_lib/db/tables/v-nyushuko-den2-lst';
 import { NyushukoFix } from '@/app/_lib/db/types/t-nyushuko-fix-type';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
@@ -60,6 +60,42 @@ export const getShukoDetail = async (
 };
 
 /**
+ * 出庫作業確定フラグ取得
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param sagyoKbnId 作業区分id
+ * @param sagyoDenDat 作業日時
+ * @param sagyoId 作業id
+ * @returns
+ */
+export const getShukoFixFlag = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  sagyoKbnId: number,
+  sagyoDenDat: string,
+  sagyoId: number
+) => {
+  try {
+    const { data, error } = await selectSagyoIdFilterNyushukoFixFlag(
+      juchuHeadId,
+      juchuKizaiHeadId,
+      sagyoKbnId,
+      sagyoDenDat,
+      sagyoId
+    );
+
+    if (error) {
+      console.error('getShukoFixFlag error : ', error);
+      throw error;
+    }
+
+    return data.sagyo_fix_flg === 0 ? false : true;
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
  * 出庫作業確定フラグ更新
  * @param shukoDetailData 出庫データ
  * @param sagyoFixFlg 作業確定フラグ
@@ -113,9 +149,9 @@ export const updShukoDetail = async (
  * @param juchuHeadId 受注ヘッダーid
  * @returns
  */
-export const confirmChildJuchuKizaiHead = async (juchuHeadId: number) => {
+export const confirmChildJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHeadIdv: number[]) => {
   try {
-    const { count, error } = await selectChildJuchuKizaiHeadConfirm(juchuHeadId);
+    const { count, error } = await selectChildJuchuKizaiHeadConfirm(juchuHeadId, juchuKizaiHeadIdv);
 
     if (error) {
       console.error('confirmChildJuchuKizaiHead error : ', error);
