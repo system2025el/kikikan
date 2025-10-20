@@ -1967,6 +1967,30 @@ export type Database = {
         };
         Relationships: [];
       };
+      t_rfid_status_result: {
+        Row: {
+          rfid_kizai_sts: number | null;
+          rfid_tag_id: string;
+          shozoku_id: number | null;
+          upd_dat: string;
+          upd_user: string | null;
+        };
+        Insert: {
+          rfid_kizai_sts?: number | null;
+          rfid_tag_id: string;
+          shozoku_id?: number | null;
+          upd_dat: string;
+          upd_user?: string | null;
+        };
+        Update: {
+          rfid_kizai_sts?: number | null;
+          rfid_tag_id?: string;
+          shozoku_id?: number | null;
+          upd_dat?: string;
+          upd_user?: string | null;
+        };
+        Relationships: [];
+      };
       t_seikyu_date_juchu_kizai: {
         Row: {
           add_dat: string | null;

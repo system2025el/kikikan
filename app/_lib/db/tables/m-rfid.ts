@@ -74,90 +74,6 @@ export const selectAllRfidWithKizai = async () => {
 };
 
 /**
- * タグIDが一致するRFIDタグの情報を取得する関数
- * @param id RFIDタグID
- * @returns {{}}
- */
-export const selectOneRfid = async (id: string) => {
-  try {
-    return await supabase
-      .schema(SCHEMA)
-      .from('m_rfid')
-      .select('rfid_tag_id, el_num, shozoku_id, rfid_kizai_sts, mem, del_flg')
-      .eq('rfid_tag_id', id)
-      .maybeSingle();
-  } catch (e) {
-    throw e;
-  }
-};
-
-/**
- * 機材IDが一致したRFIDタグ情報の配列を取得する関数
- * @param kizaiId kizai_id
- * @returns {{}[]}機材IDが一致したRFIDタグ情報の配列
- */
-export const selectRfidsOfTheKizai = async (kizaiId: number) => {
-  const query = `
-    SELECT
-      r.rfid_tag_id,
-      shozoku.shozoku_nam,
-      r.mem,
-      r.rfid_kizai_sts,
-      sts.sts_nam,
-      r.del_flg,
-      r.el_num
-    FROM
-      ${SCHEMA}.m_rfid as r
-    LEFT JOIN
-      ${SCHEMA}.m_shozoku as shozoku
-    ON r.shozoku_id = shozoku.shozoku_id
-    LEFT JOIN
-      ${SCHEMA}.m_sagyo_sts as sts
-    ON r.rfid_kizai_sts = sts.sts_id
-    WHERE
-      r.kizai_id = $1
-    ORDER BY r.rfid_tag_id
-  `;
-  try {
-    return await pool.query(query, [kizaiId]);
-  } catch (e) {
-    throw e;
-  }
-};
-
-/**
- * 変更があるRFIDマスタの更新をする関数
- * @param data ステータスが変わったRFIDタグリスト
- */
-export const updateRfidTagStsDB = async (data: { rfid_tag_id: string; rfid_kizai_sts: number }[], user: string) => {
-  const updDat = toJapanTimeString(undefined, '-');
-  const updatePlaceholders = data
-    .map((_, index) => {
-      const start = index * 2 + 1;
-      return `($${start}, $${start + 1})`;
-    })
-    .join(',');
-  const updateValues = data.flatMap((v) => [v.rfid_tag_id, v.rfid_kizai_sts]);
-  const query = `
-          UPDATE ${SCHEMA}.m_rfid AS mr
-          SET
-            rfid_kizai_sts = d.rfid_kizai_sts::integer,
-            upd_dat = $${updateValues.length + 1}::timestamp,
-            upd_user = $${updateValues.length + 2}
-          FROM (
-            VALUES ${updatePlaceholders}
-          ) AS d(rfid_tag_id, rfid_kizai_sts)
-          WHERE mr.rfid_tag_id = d.rfid_tag_id;
-        `;
-
-  try {
-    await pool.query(query, [...updateValues, updDat, user]);
-  } catch (e) {
-    throw e;
-  }
-};
-
-/**
  * RFIDマスタ新規登録
  * @param {MRfidDBValues} data
  */
@@ -189,20 +105,6 @@ export const upDateRfidDB = async (data: MRfidDBValues, connection: PoolClient) 
 
   try {
     await connection.query(query, [...values, data.rfid_tag_id]);
-  } catch (e) {
-    throw e;
-  }
-};
-
-/**
- * elNumが一致するRFIDを取得する関数
- * @param {number} elNum el No. el_num
- * @returns {{}[]}
- */
-export const selectElNumExists = async (elNum: number) => {
-  const builder = supabase.schema(SCHEMA).from('m_rfid').select('*').eq('el_num', elNum).maybeSingle();
-  try {
-    return await builder;
   } catch (e) {
     throw e;
   }

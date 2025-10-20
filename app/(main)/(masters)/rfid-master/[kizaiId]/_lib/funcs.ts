@@ -6,14 +6,11 @@ import pool from '@/app/_lib/db/postgres';
 import { SCHEMA, supabase } from '@/app/_lib/db/supabase';
 import { selectOneEqpt } from '@/app/_lib/db/tables/m-kizai';
 import { updateMasterUpdates } from '@/app/_lib/db/tables/m-master-update';
-import {
-  insertNewRfid,
-  selectOneRfid,
-  selectRfidsOfTheKizai,
-  upDateRfidDB,
-  updateRfidTagStsDB,
-} from '@/app/_lib/db/tables/m-rfid';
+import { insertNewRfid, upDateRfidDB } from '@/app/_lib/db/tables/m-rfid';
+import { insertNewRfidSts, updateRfidTagStsDB } from '@/app/_lib/db/tables/t-rfid-status-result';
+import { selectOneRfid, selectRfidsOfTheKizai } from '@/app/_lib/db/tables/v-rfid';
 import { MRfidDBValues } from '@/app/_lib/db/types/m-rfid-type';
+import { RfidStatusResultValues } from '@/app/_lib/db/types/t-rfid-status-result-type';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { fakeToNull, nullToFake } from '../../../_lib/value-converters';
@@ -76,6 +73,7 @@ export const getEqptNam = async (id: number): Promise<string> => {
 export const getChosenRfid = async (id: string) => {
   try {
     const { data, error } = await selectOneRfid(id);
+
     if (error) {
       console.error('DB情報取得エラー', error.message, error.cause, error.hint);
       throw error;
@@ -91,7 +89,6 @@ export const getChosenRfid = async (id: string) => {
       tagId: data.rfid_tag_id,
       rfidKizaiSts: data.rfid_kizai_sts,
     };
-
     return RfidDetails;
   } catch (e) {
     console.error('例外が発生しました:', e);
@@ -109,17 +106,23 @@ export const addNewRfid = async (data: RfidsMasterDialogValues, kizaiId: number,
     kizai_id: kizaiId,
     rfid_tag_id: data.tagId,
     el_num: data.elNum,
-    shozoku_id: data.shozokuId,
     mem: data.mem,
-    rfid_kizai_sts: data.rfidKizaiSts,
     del_flg: 0,
     add_dat: toJapanTimeString(),
     add_user: user,
+  };
+  const insertStsData: RfidStatusResultValues = {
+    rfid_tag_id: data.tagId,
+    shozoku_id: data.shozokuId,
+    rfid_kizai_sts: data.rfidKizaiSts,
+    upd_dat: toJapanTimeString(),
+    upd_user: user,
   };
   const connection = await pool.connect();
   try {
     connection.query('BEGIN');
     await insertNewRfid(insertData, connection);
+    await insertNewRfidSts(insertStsData, connection);
     await updateMasterUpdates('m_rfid', connection);
     await connection.query('COMMIT');
     await revalidatePath('/rfid-master');
@@ -140,25 +143,57 @@ export const addNewRfid = async (data: RfidsMasterDialogValues, kizaiId: number,
  * @param data フォームに入力されている情報
  * @param id 更新するRFIDマスタID
  */
-export const updateRfid = async (data: RfidsMasterDialogValues, kizaiId: number, user: string) => {
-  const date = toJapanTimeString();
+export const updateRfid = async (
+  current: RfidsMasterDialogValues,
+  data: RfidsMasterDialogValues,
+  kizaiId: number,
+  user: string
+) => {
+  const now = toJapanTimeString();
+  const masterChanged =
+    JSON.stringify({ tagId: current.tagId, elNum: current.elNum, mem: current.mem, delFlg: current.delFlg }) !==
+    JSON.stringify({
+      tagId: data.tagId,
+      elNum: data.elNum,
+      mem: data.mem,
+      delFlg: data.delFlg,
+    });
+  const stsChanged =
+    JSON.stringify({ tagId: current.tagId, shozokuId: current.shozokuId, rfidKizaiSts: current.rfidKizaiSts }) !==
+    JSON.stringify({
+      tagId: data.tagId,
+      shozokuId: data.shozokuId,
+      rfidKizaiSts: data.rfidKizaiSts,
+    });
+
   const updateData: MRfidDBValues = {
     kizai_id: kizaiId,
     rfid_tag_id: data.tagId,
     del_flg: Number(data.delFlg),
     el_num: data.elNum,
-    shozoku_id: Number(data.shozokuId),
     mem: data.mem,
-    upd_dat: date,
+    upd_dat: now,
+    upd_user: user,
+  };
+
+  const updateStsData: RfidStatusResultValues = {
+    rfid_tag_id: data.tagId,
+    shozoku_id: data.shozokuId,
+    rfid_kizai_sts: data.rfidKizaiSts,
+    upd_dat: now,
     upd_user: user,
   };
   console.log(updateData);
   const connection = await pool.connect();
   try {
     connection.query('BEGIN');
-    await upDateRfidDB(updateData, connection);
-    await updateMasterUpdates('m_rfid', connection);
-
+    if (masterChanged) {
+      await upDateRfidDB(updateData, connection);
+      await updateMasterUpdates('m_rfid', connection);
+    }
+    if (stsChanged) {
+      await insertNewRfidSts(updateStsData, connection);
+    }
     await connection.query('COMMIT');
 
     await revalidatePath(`/rfid-master/${kizaiId}`);
