@@ -16,24 +16,12 @@ import { MRfidDBValues } from '../types/m-rfid-type';
  */
 export const selectCountOfTheEqpt = async (id: number) => {
   try {
-    return await supabase.schema(SCHEMA).from('m_rfid').select('*', { count: 'exact', head: true }).eq('kizai_id', id);
-  } catch (e) {
-    throw e;
-  }
-};
-/**
- * 機材IDが一致する有効ではないRFIDのタグの数を返す
- * @param id kizai_id
- * @returns
- */
-export const selectCountOfTheNgEqpt = async (id: number) => {
-  try {
     return await supabase
       .schema(SCHEMA)
-      .from('m_rfid')
-      .select('*', { count: 'exact', head: true })
+      .from('v_kizai_qty')
+      .select('kizai_qty, kizai_ng_qty')
       .eq('kizai_id', id)
-      .gte('rfid_kizai_sts', 100);
+      .single();
   } catch (e) {
     throw e;
   }
