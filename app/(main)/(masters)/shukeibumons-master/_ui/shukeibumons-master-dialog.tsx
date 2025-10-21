@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { CheckboxElement, TextareaAutosizeElement, TextFieldElement } from 'react-hook-form-mui';
 
+import { useUserStore } from '@/app/_lib/stores/usestore';
 import { FormBox } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 
@@ -28,6 +29,9 @@ export const ShukeibumonsMasterDialog = ({
   handleClose: () => void;
   refetchShukeibumons: () => void;
 }) => {
+  // ログインユーザ
+  const user = useUserStore((state) => state.user);
+
   /* useState -------------------------------------- */
   /* DBのローディング状態 */
   const [isLoading, setIsLoading] = useState(true);
@@ -67,14 +71,14 @@ export const ShukeibumonsMasterDialog = ({
     console.log(data);
     if (shukeibumonId === FAKE_NEW_ID) {
       // 新規の時
-      await addNewShukeibumon(data);
+      await addNewShukeibumon(data, user?.name ?? '');
       handleCloseDialog();
       refetchShukeibumons();
     } else {
       // 更新の時
       if (action === 'save') {
         // 保存終了ボタン押したとき
-        await updateShukeibumon(data, shukeibumonId);
+        await updateShukeibumon(data, shukeibumonId, user?.name ?? '');
         handleCloseDialog();
         refetchShukeibumons();
       } else if (action === 'delete') {
@@ -84,7 +88,7 @@ export const ShukeibumonsMasterDialog = ({
       } else if (action === 'restore') {
         // 有効化ボタン
         const values = await getValues();
-        await updateShukeibumon({ ...values, delFlg: false }, shukeibumonId);
+        await updateShukeibumon({ ...values, delFlg: false }, shukeibumonId, user?.name ?? '');
         handleCloseDialog();
         refetchShukeibumons();
       }
@@ -111,7 +115,7 @@ export const ShukeibumonsMasterDialog = ({
   /* 削除確認ダイアログで削除選択時 */
   const handleConfirmDelete = async () => {
     const values = await getValues();
-    await updateShukeibumon({ ...values, delFlg: true }, shukeibumonId);
+    await updateShukeibumon({ ...values, delFlg: true }, shukeibumonId, user?.name ?? '');
     setDeleteOpen(false);
     handleCloseDialog();
     await refetchShukeibumons();

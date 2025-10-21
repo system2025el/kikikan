@@ -76,9 +76,9 @@ export const getChosenShukeibumon = async (id: number) => {
  * 集計部門マスタに新規登録する関数
  * @param data フォームで取得した集計部門情報
  */
-export const addNewShukeibumon = async (data: ShukeibumonsMasterDialogValues) => {
+export const addNewShukeibumon = async (data: ShukeibumonsMasterDialogValues, user: string) => {
   try {
-    await insertNewShukeibumon(data);
+    await insertNewShukeibumon(data, user);
     console.log('data : ', data);
     await revalidatePath('/bumons-master');
     await revalidatePath('/shukeibumons-master');
@@ -94,7 +94,7 @@ export const addNewShukeibumon = async (data: ShukeibumonsMasterDialogValues) =>
  * @param data フォームに入力されている情報
  * @param id 更新する集計部門マスタID
  */
-export const updateShukeibumon = async (rawData: ShukeibumonsMasterDialogValues, id: number) => {
+export const updateShukeibumon = async (rawData: ShukeibumonsMasterDialogValues, id: number, user: string) => {
   const date = toJapanTimeString();
   const updateData = {
     shukei_bumon_id: id,
@@ -102,7 +102,7 @@ export const updateShukeibumon = async (rawData: ShukeibumonsMasterDialogValues,
     del_flg: Number(rawData.delFlg),
     mem: rawData.mem,
     upd_dat: date,
-    upd_user: 'test_user',
+    upd_user: user,
   };
   console.log(updateData.shukei_bumon_nam);
   try {

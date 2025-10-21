@@ -68,7 +68,7 @@ export const selectOneShozoku = async (id: number) => {
  * 所属マスタに新規挿入する関数
  * @param data 挿入するデータ
  */
-export const insertNewShozoku = async (data: BasesMasterDialogValues) => {
+export const insertNewShozoku = async (data: BasesMasterDialogValues, user: string) => {
   const query = `
         INSERT INTO ${SCHEMA}.m_shozoku (
           shozoku_id, shozoku_nam, del_flg, dsp_ord_num,
@@ -82,7 +82,7 @@ export const insertNewShozoku = async (data: BasesMasterDialogValues) => {
         );
       `;
   const date = toJapanTimeString();
-  const values = [data.shozokuNam, Number(data.delFlg), data.mem, date, 'shigasan'];
+  const values = [data.shozokuNam, Number(data.delFlg), data.mem, date, user];
   try {
     await pool.query(query, values);
   } catch (e) {

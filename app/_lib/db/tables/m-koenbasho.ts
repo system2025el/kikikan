@@ -53,7 +53,7 @@ export const selectOneLoc = async (id: number) => {
  * 公演場所マスタに新規挿入する関数
  * @param data 挿入するデータ
  */
-export const insertNewLoc = async (data: LocsMasterDialogValues) => {
+export const insertNewLoc = async (data: LocsMasterDialogValues, user: string) => {
   const query = `
     INSERT INTO ${SCHEMA}.m_koenbasho (
       koenbasho_id, koenbasho_nam, kana, del_flg, dsp_ord_num,
@@ -84,7 +84,7 @@ export const insertNewLoc = async (data: LocsMasterDialogValues) => {
     data.mem,
     Number(data.dspFlg),
     date,
-    'shigasan',
+    user,
   ];
   try {
     await pool.query(query, values);

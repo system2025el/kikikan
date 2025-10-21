@@ -72,7 +72,7 @@ export const getChosenUser = async (id: number) => {
  * 担当者マスタに新規登録する関数
  * @param data フォームで取得した担当者情報
  */
-export const addNewUser = async (data: UsersMasterDialogValues) => {
+export const addNewUser = async (data: UsersMasterDialogValues, user: string) => {
   console.log(data.tantouNam);
   try {
     // await insertNewUser(data);
@@ -88,13 +88,13 @@ export const addNewUser = async (data: UsersMasterDialogValues) => {
  * @param data フォームに入力されている情報
  * @param id 更新する担当者マスタID
  */
-export const updateUser = async (data: UsersMasterDialogValues, id: number) => {
+export const updateUser = async (data: UsersMasterDialogValues, id: number, user: string) => {
   const date = toJapanTimeString();
   const updateData = {
     user_nam: data.tantouNam,
     del_flg: Number(data.delFlg),
     upd_dat: date,
-    upd_user: 'test_user',
+    upd_user: user,
   };
   console.log(updateData.user_nam);
   try {

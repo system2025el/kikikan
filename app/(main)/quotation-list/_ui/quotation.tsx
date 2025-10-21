@@ -492,6 +492,7 @@ export const Quotation = ({
                           margin: 0,
                         },
                       }}
+                      type="number"
                     />
                   </Box>
                   <Box sx={styles.container}>

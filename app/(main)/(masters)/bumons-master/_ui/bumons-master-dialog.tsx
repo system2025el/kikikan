@@ -4,6 +4,7 @@ import { grey } from '@mui/material/colors';
 import { useEffect, useState } from 'react';
 import { Controller, TextareaAutosizeElement, TextFieldElement, useForm } from 'react-hook-form-mui';
 
+import { useUserStore } from '@/app/_lib/stores/usestore';
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { FormBox, selectNone, SelectTypes } from '../../../_ui/form-box';
@@ -29,6 +30,9 @@ export const BumonsMasterDialog = ({
   handleClose: () => void;
   refetchBumons: () => void;
 }) => {
+  // ログインユーザ
+  const user = useUserStore((state) => state.user);
+
   /* useState -------------------------------------- */
   /* 部門 */
   /* DBのローディング状態 */
@@ -74,14 +78,14 @@ export const BumonsMasterDialog = ({
     console.log(data);
     if (bumonId === FAKE_NEW_ID) {
       // 新規の時
-      await addNewBumon(data);
+      await addNewBumon(data, user?.name ?? '');
       handleCloseDialog();
       refetchBumons();
     } else {
       // 更新の時
       if (action === 'save') {
         // 保存終了ボタン押したとき
-        await updateBumon(data, bumonId);
+        await updateBumon(data, bumonId, user?.name ?? '');
         handleCloseDialog();
         refetchBumons();
       } else if (action === 'delete') {
@@ -91,7 +95,7 @@ export const BumonsMasterDialog = ({
       } else if (action === 'restore') {
         // 有効化ボタン
         const values = await getValues();
-        await updateBumon({ ...values, delFlg: false }, bumonId);
+        await updateBumon({ ...values, delFlg: false }, bumonId, user?.name ?? '');
         handleCloseDialog();
         refetchBumons();
       }
@@ -118,7 +122,7 @@ export const BumonsMasterDialog = ({
   /* 削除確認ダイアログで削除選択時 */
   const handleConfirmDelete = async () => {
     const values = await getValues();
-    await updateBumon({ ...values, delFlg: true }, bumonId);
+    await updateBumon({ ...values, delFlg: true }, bumonId, user?.name ?? '');
     setDeleteOpen(false);
     handleCloseDialog();
     await refetchBumons();

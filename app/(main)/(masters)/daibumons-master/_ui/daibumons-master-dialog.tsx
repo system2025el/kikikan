@@ -4,6 +4,7 @@ import { SetStateAction, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { CheckboxElement, TextareaAutosizeElement, TextFieldElement } from 'react-hook-form-mui';
 
+import { useUserStore } from '@/app/_lib/stores/usestore';
 import { FormBox, FormItemsType } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 
@@ -29,6 +30,9 @@ export const DaibumonsMasterDialog = ({
   handleClose: () => void;
   refetchDaibumons: () => void;
 }) => {
+  // ログインユーザ
+  const user = useUserStore((state) => state.user);
+
   /* useState -------------------------------------- */
   /* DBのローディング状態 */
   const [isLoading, setIsLoading] = useState(true);
@@ -67,12 +71,12 @@ export const DaibumonsMasterDialog = ({
     console.log('isDarty : ', isDirty);
     console.log(data);
     if (daibumonId === FAKE_NEW_ID) {
-      await addNewDaibumon(data);
+      await addNewDaibumon(data, user?.name ?? '');
       handleCloseDialog();
       refetchDaibumons();
     } else {
       if (action === 'save') {
-        await updateDaibumon(data, daibumonId);
+        await updateDaibumon(data, daibumonId, user?.name ?? '');
         handleCloseDialog();
         refetchDaibumons();
       } else if (action === 'delete') {
@@ -81,7 +85,7 @@ export const DaibumonsMasterDialog = ({
       } else if (action === 'restore') {
         // 有効化ボタン
         const values = await getValues();
-        await updateDaibumon({ ...values, delFlg: false }, daibumonId);
+        await updateDaibumon({ ...values, delFlg: false }, daibumonId, user?.name ?? '');
         handleCloseDialog();
         refetchDaibumons();
       }
@@ -108,7 +112,7 @@ export const DaibumonsMasterDialog = ({
   /* 削除確認ダイアログで削除選択時 */
   const handleConfirmDelete = async () => {
     const values = await getValues();
-    await updateDaibumon({ ...values, delFlg: true }, daibumonId);
+    await updateDaibumon({ ...values, delFlg: true }, daibumonId, user?.name ?? '');
     setDeleteOpen(false);
     handleCloseDialog();
     await refetchDaibumons();

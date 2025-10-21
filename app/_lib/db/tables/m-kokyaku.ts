@@ -95,7 +95,7 @@ export const selectOneCustomer = async (id: number) => {
  * 顧客マスタに新規挿入する関数
  * @param data 挿入するデータ
  */
-export const insertNewCustomer = async (data: CustomersMasterDialogValues) => {
+export const insertNewCustomer = async (data: CustomersMasterDialogValues, user: string) => {
   const query = `
   INSERT INTO ${SCHEMA}.m_kokyaku (
     kokyaku_id, kokyaku_nam, kana, kokyaku_rank, keisho, del_flg, dsp_ord_num,
@@ -132,7 +132,7 @@ export const insertNewCustomer = async (data: CustomersMasterDialogValues) => {
     data.siteDay,
     Number(data.kizaiNebikiFlg),
     date,
-    'shigasan',
+    user,
   ];
   try {
     await pool.query(query, values);

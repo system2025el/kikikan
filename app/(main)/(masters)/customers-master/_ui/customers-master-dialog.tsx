@@ -11,6 +11,7 @@ import {
   useForm,
 } from 'react-hook-form-mui';
 
+import { useUserStore } from '@/app/_lib/stores/usestore';
 import { FormBox } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 
@@ -35,6 +36,9 @@ export const CustomersMasterDialog = ({
   handleClose: () => void;
   refetchCustomers: () => void;
 }) => {
+  // ログインユーザ
+  const user = useUserStore((state) => state.user);
+
   /* useState --------------------- */
   /** 顧客リスト */
   /** DBのローディング状態 */
@@ -75,14 +79,14 @@ export const CustomersMasterDialog = ({
     console.log(data);
     if (customerId === FAKE_NEW_ID) {
       // 新規の時
-      await addNewCustomer(data);
+      await addNewCustomer(data, user?.name ?? '');
       handleCloseDialog();
       refetchCustomers();
     } else {
       // 更新の時
       if (action === 'save') {
         // 保存終了ボタン押したとき
-        await updateCustomer(data, customerId);
+        await updateCustomer(data, customerId, user?.name ?? '');
         handleCloseDialog();
         refetchCustomers();
       } else if (action === 'delete') {
@@ -92,7 +96,7 @@ export const CustomersMasterDialog = ({
       } else if (action === 'restore') {
         // 有効化ボタン
         const values = await getValues();
-        await updateCustomer({ ...values, delFlg: false }, customerId);
+        await updateCustomer({ ...values, delFlg: false }, customerId, user?.name ?? '');
         handleCloseDialog();
         refetchCustomers();
       }
@@ -119,7 +123,7 @@ export const CustomersMasterDialog = ({
   /* 削除確認ダイアログで削除選択時 */
   const handleConfirmDelete = async () => {
     const values = await getValues();
-    await updateCustomer({ ...values, delFlg: true }, customerId);
+    await updateCustomer({ ...values, delFlg: true }, customerId, user?.name ?? '');
     setDeleteOpen(false);
     handleCloseDialog();
     await refetchCustomers();

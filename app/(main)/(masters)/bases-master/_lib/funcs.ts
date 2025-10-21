@@ -76,9 +76,9 @@ export const getChosenBase = async (id: number) => {
  * 所属マスタに新規登録する関数
  * @param data フォームで取得した所属情報
  */
-export const addNewBase = async (data: BasesMasterDialogValues) => {
+export const addNewBase = async (data: BasesMasterDialogValues, user: string) => {
   try {
-    await insertNewShozoku(data);
+    await insertNewShozoku(data, user);
     await revalidatePath('/bases-master');
   } catch (error) {
     console.log('DB接続エラー', error);
@@ -91,7 +91,7 @@ export const addNewBase = async (data: BasesMasterDialogValues) => {
  * @param data フォームに入力されている情報
  * @param id 更新する所属マスタID
  */
-export const updateBase = async (rawData: BasesMasterDialogValues, id: number) => {
+export const updateBase = async (rawData: BasesMasterDialogValues, id: number, user: string) => {
   const date = toJapanTimeString();
   const updateData = {
     shozoku_id: id,
@@ -100,7 +100,7 @@ export const updateBase = async (rawData: BasesMasterDialogValues, id: number) =
     del_flg: Number(rawData.delFlg),
     mem: rawData.mem,
     upd_dat: date,
-    upd_user: 'test_user',
+    upd_user: user,
   };
   console.log(updateData.shozoku_nam);
 

@@ -3,6 +3,8 @@ import { Grid2 } from '@mui/material';
 import { JSX, useEffect, useState } from 'react';
 import { CheckboxElement, TextareaAutosizeElement, TextFieldElement, useForm } from 'react-hook-form-mui';
 
+import { useUserStore } from '@/app/_lib/stores/usestore';
+
 import { FormBox } from '../../../_ui/form-box';
 import { Loading } from '../../../_ui/loading';
 import { FAKE_NEW_ID } from '../../_lib/constants';
@@ -25,6 +27,9 @@ export const VehiclesMasterDialog = ({
   handleClose: () => void;
   refetchVehs: () => Promise<void>;
 }) => {
+  // ログインユーザ
+  const user = useUserStore((state) => state.user);
+
   /* useState --------------------- */
   /** DBのローディング状態 */
   const [isLoading, setIsLoading] = useState(true);
@@ -63,12 +68,12 @@ export const VehiclesMasterDialog = ({
     console.log('isDarty : ', isDirty);
     console.log(data);
     if (vehicleId === FAKE_NEW_ID) {
-      await addNewVeh(data);
+      await addNewVeh(data, user?.name ?? '');
       handleCloseDialog();
       refetchVehs();
     } else {
       if (action === 'save') {
-        await updateVeh(data, vehicleId);
+        await updateVeh(data, vehicleId, user?.name ?? '');
         handleCloseDialog();
         refetchVehs();
       } else if (action === 'delete') {
@@ -77,7 +82,7 @@ export const VehiclesMasterDialog = ({
       } else if (action === 'restore') {
         // 有効化ボタン
         const values = await getValues();
-        await updateVeh({ ...values, delFlg: false }, vehicleId);
+        await updateVeh({ ...values, delFlg: false }, vehicleId, user?.name ?? '');
         handleCloseDialog();
         refetchVehs();
       }
@@ -104,7 +109,7 @@ export const VehiclesMasterDialog = ({
   /* 削除確認ダイアログで削除選択時 */
   const handleConfirmDelete = async () => {
     const values = await getValues();
-    await updateVeh({ ...values, delFlg: true }, vehicleId);
+    await updateVeh({ ...values, delFlg: true }, vehicleId, user?.name ?? '');
     setDeleteOpen(false);
     handleCloseDialog();
     await refetchVehs();

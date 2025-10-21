@@ -85,10 +85,10 @@ export const getChosenLoc = async (id: number) => {
  * 公演場所マスタに新規登録する関数
  * @param data フォームで取得した公演場所情報
  */
-export const addNewLoc = async (data: LocsMasterDialogValues) => {
+export const addNewLoc = async (data: LocsMasterDialogValues, user: string) => {
   console.log(data.locNam);
   try {
-    await insertNewLoc(data);
+    await insertNewLoc(data, user);
     await revalidatePath('/locations-master');
   } catch (error) {
     console.log('DB接続エラー', error);
@@ -101,7 +101,7 @@ export const addNewLoc = async (data: LocsMasterDialogValues) => {
  * @param data フォームに入力されている情報
  * @param id 更新する公演場所マスタID
  */
-export const updateLoc = async (data: LocsMasterDialogValues, id: number) => {
+export const updateLoc = async (data: LocsMasterDialogValues, id: number, user: string) => {
   const date = toJapanTimeString();
   const updateData = {
     koenbasho_id: id,
@@ -119,7 +119,7 @@ export const updateLoc = async (data: LocsMasterDialogValues, id: number) => {
     mem: data.mem,
     dsp_flg: Number(data.dspFlg),
     upd_dat: date,
-    upd_user: 'test_user',
+    upd_user: user,
   };
   console.log(updateData.koenbasho_nam);
   try {
