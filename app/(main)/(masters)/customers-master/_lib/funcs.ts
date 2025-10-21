@@ -160,10 +160,10 @@ export const getChosenCustomerIdAndName = async (id: number) => {
  * 顧客マスタに新規登録する関数
  * @param data フォームで取得した顧客情報
  */
-export const addNewCustomer = async (data: CustomersMasterDialogValues) => {
+export const addNewCustomer = async (data: CustomersMasterDialogValues, user: string) => {
   console.log(data.kokyakuNam);
   try {
-    await insertNewCustomer(data);
+    await insertNewCustomer(data, user);
     await revalidatePath('/customers-master');
   } catch (error) {
     console.log('DB接続エラー', error);
@@ -176,7 +176,7 @@ export const addNewCustomer = async (data: CustomersMasterDialogValues) => {
  * @param data フォームに入力されている情報
  * @param id 更新する顧客マスタID
  */
-export const updateCustomer = async (rawData: CustomersMasterDialogValues, id: number) => {
+export const updateCustomer = async (rawData: CustomersMasterDialogValues, id: number, user: string) => {
   const date = toJapanTimeString();
   const updateData = {
     kokyaku_id: id,
@@ -199,7 +199,7 @@ export const updateCustomer = async (rawData: CustomersMasterDialogValues, id: n
     site_day: rawData.siteDay,
     kizai_nebiki_flg: Number(rawData.kizaiNebikiFlg),
     upd_dat: date,
-    upd_user: 'test_user',
+    upd_user: user,
   };
   console.log(updateData.kokyaku_nam);
   try {

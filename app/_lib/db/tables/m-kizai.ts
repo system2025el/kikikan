@@ -27,7 +27,7 @@ export const selectOneEqpt = async (id: number) => {
  * 機材マスタに新規挿入する関数
  * @param data 挿入するデータ
  */
-export const insertNewEqpt = async (data: EqptsMasterDialogValues, connection: PoolClient) => {
+export const insertNewEqpt = async (data: EqptsMasterDialogValues, connection: PoolClient, user: string) => {
   const query = `
     INSERT INTO ${SCHEMA}.m_kizai (
       kizai_id, kizai_nam, del_flg, section_num, el_num, shozoku_id,
@@ -67,7 +67,7 @@ export const insertNewEqpt = async (data: EqptsMasterDialogValues, connection: P
     data.rankAmt4,
     data.rankAmt5,
     date,
-    'shigasan',
+    user,
     data.dspOrdNum,
   ];
   try {

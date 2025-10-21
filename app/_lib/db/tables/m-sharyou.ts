@@ -45,7 +45,7 @@ export const selectOneVeh = async (id: number) => {
  * 車両マスタに新規挿入する関数
  * @param data 挿入するデータ
  */
-export const insertNewVeh = async (data: VehsMasterDialogValues) => {
+export const insertNewVeh = async (data: VehsMasterDialogValues, user: string) => {
   const query = `
     INSERT INTO ${SCHEMA}.m_sharyo (
       sharyo_id, sharyo_nam, del_flg, dsp_ord_num,
@@ -59,7 +59,7 @@ export const insertNewVeh = async (data: VehsMasterDialogValues) => {
     );
   `;
   const date = toJapanTimeString();
-  const values = [data.sharyoNam, Number(data.delFlg), data.mem, Number(data.dspFlg), date, 'shigasan'];
+  const values = [data.sharyoNam, Number(data.delFlg), data.mem, Number(data.dspFlg), date, user];
   try {
     await pool.query(query, values);
   } catch (e) {

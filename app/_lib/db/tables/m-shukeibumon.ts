@@ -69,7 +69,7 @@ export const selectOneShukeibumon = async (id: number) => {
  * 集計部門マスタに新規挿入する関数
  * @param data 挿入するデータ
  */
-export const insertNewShukeibumon = async (data: ShukeibumonsMasterDialogValues) => {
+export const insertNewShukeibumon = async (data: ShukeibumonsMasterDialogValues, user: string) => {
   const query = `
     INSERT INTO ${SCHEMA}.m_shukei_bumon (
       shukei_bumon_id, shukei_bumon_nam, del_flg, dsp_ord_num,
@@ -83,7 +83,7 @@ export const insertNewShukeibumon = async (data: ShukeibumonsMasterDialogValues)
     );
   `;
   const date = toJapanTimeString();
-  const values = [data.shukeibumonNam, Number(data.delFlg), data.mem, date, 'shigasan'];
+  const values = [data.shukeibumonNam, Number(data.delFlg), data.mem, date, user];
 
   try {
     await pool.query(query, values);

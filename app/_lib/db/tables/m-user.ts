@@ -61,7 +61,7 @@ export const selectOneUser = async (id: number) => {
  * 担当者マスタに新規挿入する関数
  * @param data 挿入するデータ
  */
-export const insertNewUser = async (data: UsersMasterDialogValues) => {
+export const insertNewUser = async (data: UsersMasterDialogValues, user: string) => {
   const query = `
     INSERT INTO ${SCHEMA}.m_user (
       user_nam, del_flg, dsp_ord_num,
@@ -74,7 +74,7 @@ export const insertNewUser = async (data: UsersMasterDialogValues) => {
     );
   `;
   const date = toJapanTimeString();
-  const values = [data.tantouNam, Number(data.delFlg), date, 'shigasan'];
+  const values = [data.tantouNam, Number(data.delFlg), date, user];
   try {
     await pool.query(query, values);
   } catch (e) {

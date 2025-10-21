@@ -5,6 +5,7 @@ import { Grid2 } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { CheckboxElement, TextareaAutosizeElement, TextFieldElement, useForm } from 'react-hook-form-mui';
 
+import { useUserStore } from '@/app/_lib/stores/usestore';
 import { FormBox } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 
@@ -29,6 +30,9 @@ export const LocationsMasterDialog = ({
   handleClose: () => void;
   refetchLocs: () => Promise<void>;
 }) => {
+  // ログインユーザ
+  const user = useUserStore((state) => state.user);
+
   /* useState --------------------- */
   /** DBのローディング状態 */
   const [isLoading, setIsLoading] = useState(true);
@@ -70,14 +74,14 @@ export const LocationsMasterDialog = ({
 
     if (locationId === FAKE_NEW_ID) {
       // 新規の時
-      await addNewLoc(data);
+      await addNewLoc(data, user?.name ?? '');
       handleCloseDialog();
       refetchLocs();
     } else {
       // 更新の時
       if (action === 'save') {
         // 保存終了ボタン押したとき
-        await updateLoc(data, locationId);
+        await updateLoc(data, locationId, user?.name ?? '');
         handleCloseDialog();
         refetchLocs();
       } else if (action === 'delete') {
@@ -87,7 +91,7 @@ export const LocationsMasterDialog = ({
       } else if (action === 'restore') {
         // 有効化ボタン
         const values = await getValues();
-        await updateLoc({ ...values, delFlg: false }, locationId);
+        await updateLoc({ ...values, delFlg: false }, locationId, user?.name ?? '');
         handleCloseDialog();
         refetchLocs();
       }
@@ -114,7 +118,7 @@ export const LocationsMasterDialog = ({
   /* 削除確認ダイアログで削除選択時 */
   const handleConfirmDelete = async () => {
     const values = await getValues();
-    await updateLoc({ ...values, delFlg: true }, locationId);
+    await updateLoc({ ...values, delFlg: true }, locationId, user?.name ?? '');
     setDeleteOpen(false);
     handleCloseDialog();
     await refetchLocs();

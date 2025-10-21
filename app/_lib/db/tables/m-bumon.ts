@@ -76,7 +76,7 @@ export const selectOneBumon = async (id: number) => {
  * 部門マスタに新規挿入する関数
  * @param data 挿入するデータ
  */
-export const insertNewBumon = async (data: BumonsMasterDialogValues) => {
+export const insertNewBumon = async (data: BumonsMasterDialogValues, user: string) => {
   const query = `
     INSERT INTO ${SCHEMA}.m_bumon (
       bumon_id, bumon_nam, del_flg, dsp_ord_num,
@@ -99,7 +99,7 @@ export const insertNewBumon = async (data: BumonsMasterDialogValues) => {
     data.shukeibumonId === FAKE_NEW_ID ? null : data.shukeibumonId,
     data.mem,
     date,
-    'shigasan',
+    user,
   ];
 
   try {

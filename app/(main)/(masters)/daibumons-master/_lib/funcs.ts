@@ -76,9 +76,9 @@ export const getChosenDaibumon = async (id: number) => {
  * 大部門マスタに新規登録する関数
  * @param data フォームで取得した大部門情報
  */
-export const addNewDaibumon = async (data: DaibumonsMasterDialogValues) => {
+export const addNewDaibumon = async (data: DaibumonsMasterDialogValues, user: string) => {
   try {
-    await insertNewDaibumon(data);
+    await insertNewDaibumon(data, user);
     console.log('data : ', data);
     await revalidatePath('/bumons-master');
     await revalidatePath('/daibumons-master');
@@ -94,7 +94,7 @@ export const addNewDaibumon = async (data: DaibumonsMasterDialogValues) => {
  * @param data フォームに入力されている情報
  * @param id 更新する大部門マスタID
  */
-export const updateDaibumon = async (rawData: DaibumonsMasterDialogValues, id: number) => {
+export const updateDaibumon = async (rawData: DaibumonsMasterDialogValues, id: number, user: string) => {
   const date = toJapanTimeString();
   const updateData = {
     dai_bumon_id: id,
@@ -102,7 +102,7 @@ export const updateDaibumon = async (rawData: DaibumonsMasterDialogValues, id: n
     del_flg: Number(rawData.delFlg),
     mem: rawData.mem,
     upd_dat: date,
-    upd_user: 'test_user',
+    upd_user: user,
   };
   console.log(updateData.dai_bumon_nam);
   try {

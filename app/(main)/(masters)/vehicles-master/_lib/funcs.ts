@@ -73,10 +73,10 @@ export const getChosenVeh = async (id: number) => {
  * 車両マスタに新規登録する関数
  * @param data フォームで取得した車両情報
  */
-export const addNewVeh = async (data: VehsMasterDialogValues) => {
+export const addNewVeh = async (data: VehsMasterDialogValues, user: string) => {
   console.log(data.sharyoNam);
   try {
-    await insertNewVeh(data);
+    await insertNewVeh(data, user);
     await revalidatePath('/vehicles-master');
   } catch (error) {
     console.log('DB接続エラー', error);
@@ -89,7 +89,7 @@ export const addNewVeh = async (data: VehsMasterDialogValues) => {
  * @param data フォームに入力されている情報
  * @param id 更新する車両マスタID
  */
-export const updateVeh = async (data: VehsMasterDialogValues, id: number) => {
+export const updateVeh = async (data: VehsMasterDialogValues, id: number, user: string) => {
   const date = toJapanTimeString();
   const updateData = {
     sharyo_id: id,
@@ -98,7 +98,7 @@ export const updateVeh = async (data: VehsMasterDialogValues, id: number) => {
     mem: data.mem,
     dsp_flg: Number(data.dspFlg),
     upd_dat: date,
-    upd_user: 'test_user',
+    upd_user: user,
   };
   try {
     await upDateVehDB(updateData);

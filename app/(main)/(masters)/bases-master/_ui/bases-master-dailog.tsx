@@ -3,6 +3,8 @@ import { Grid2 } from '@mui/material';
 import { SetStateAction, useEffect, useState } from 'react';
 import { CheckboxElement, TextareaAutosizeElement, TextFieldElement, useForm } from 'react-hook-form-mui';
 
+import { useUserStore } from '@/app/_lib/stores/usestore';
+
 import { FormBox, FormItemsType } from '../../../_ui/form-box';
 import { Loading } from '../../../_ui/loading';
 import { FAKE_NEW_ID } from '../../_lib/constants';
@@ -26,6 +28,7 @@ export const BasesMasterDialog = ({
   handleClose: () => void;
   refetchBases: () => void;
 }) => {
+  const user = useUserStore((state) => state.user);
   /* useState -------------------------------------- */
   /* 拠点 */
   /* 新規作成かどうか */
@@ -66,14 +69,14 @@ export const BasesMasterDialog = ({
     console.log(data);
     if (baseId === FAKE_NEW_ID) {
       // 新規登録
-      await addNewBase(data);
+      await addNewBase(data, user?.name ?? '');
       handleCloseDialog();
       refetchBases();
     } else {
       // 更新
       if (action === 'save') {
         // 保存ボタン
-        await updateBase(data, baseId);
+        await updateBase(data, baseId, user?.name ?? '');
         handleCloseDialog();
         refetchBases();
       } else if (action === 'delete') {
@@ -83,7 +86,7 @@ export const BasesMasterDialog = ({
       } else if (action === 'restore') {
         // 有効化ボタン
         const values = await getValues();
-        await updateBase({ ...values, delFlg: false }, baseId);
+        await updateBase({ ...values, delFlg: false }, baseId, user?.name ?? '');
         handleCloseDialog();
         refetchBases();
       }
@@ -110,7 +113,7 @@ export const BasesMasterDialog = ({
   /* 削除確認ダイアログで削除選択時 */
   const handleConfirmDelete = async () => {
     const values = await getValues();
-    await updateBase({ ...values, delFlg: true }, baseId);
+    await updateBase({ ...values, delFlg: true }, baseId, user?.name ?? '');
     setDeleteOpen(false);
     handleCloseDialog();
     await refetchBases();

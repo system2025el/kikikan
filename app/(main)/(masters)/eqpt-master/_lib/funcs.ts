@@ -131,12 +131,12 @@ export const getChosenEqpt = async (id: number) => {
  * 機材マスタに新規登録する関数
  * @param data フォームで取得した機材情報
  */
-export const addNewEqpt = async (data: EqptsMasterDialogValues) => {
+export const addNewEqpt = async (data: EqptsMasterDialogValues, user: string) => {
   console.log('機材マスタを追加する');
   const connection = await pool.connect();
   try {
     await connection.query('BEGIN');
-    await insertNewEqpt(data, connection);
+    await insertNewEqpt(data, connection, user);
     await updateMasterUpdates('m_kizai', connection);
     await connection.query('COMMIT');
 
@@ -159,7 +159,8 @@ export const addNewEqpt = async (data: EqptsMasterDialogValues) => {
 export const updateEqpt = async (
   currentData: EqptsMasterDialogValues,
   rawData: EqptsMasterDialogValues,
-  id: number
+  id: number,
+  user: string
 ) => {
   const date = toJapanTimeString();
   const updateData = {
@@ -186,7 +187,7 @@ export const updateEqpt = async (
     rank_amt_4: rawData.rankAmt4,
     rank_amt_5: rawData.rankAmt5,
     upd_dat: date,
-    upd_user: 'test_user',
+    upd_user: user,
   };
   console.log(updateData.kizai_nam);
   const connection = await pool.connect();

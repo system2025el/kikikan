@@ -81,9 +81,9 @@ export const getChosenbumon = async (id: number) => {
  * 部門マスタに新規登録する関数
  * @param data フォームで取得した部門情報
  */
-export const addNewBumon = async (data: BumonsMasterDialogValues) => {
+export const addNewBumon = async (data: BumonsMasterDialogValues, user: string) => {
   try {
-    await insertNewBumon(data);
+    await insertNewBumon(data, user);
     await revalidatePath('/bumons-master');
     await revalidatePath('/daibumons-master');
     await revalidatePath('/shukeibumons-master');
@@ -99,7 +99,7 @@ export const addNewBumon = async (data: BumonsMasterDialogValues) => {
  * @param data フォームに入力されている情報
  * @param id 更新する部門マスタID
  */
-export const updateBumon = async (rawData: BumonsMasterDialogValues, id: number) => {
+export const updateBumon = async (rawData: BumonsMasterDialogValues, id: number, user: string) => {
   const date = toJapanTimeString();
   const updateDate = {
     bumon_id: id,
@@ -109,7 +109,7 @@ export const updateBumon = async (rawData: BumonsMasterDialogValues, id: number)
     dai_bumon_id: rawData.daibumonId === FAKE_NEW_ID ? null : rawData.daibumonId,
     shukei_bumon_id: rawData.shukeibumonId === FAKE_NEW_ID ? null : rawData.shukeibumonId,
     upd_dat: date,
-    upd_user: 'test_user',
+    upd_user: user,
   };
 
   try {

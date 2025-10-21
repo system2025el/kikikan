@@ -11,6 +11,8 @@ import {
   useForm,
 } from 'react-hook-form-mui';
 
+import { useUserStore } from '@/app/_lib/stores/usestore';
+
 import { FormBox, selectNone, SelectTypes } from '../../../_ui/form-box';
 import { Loading } from '../../../_ui/loading';
 import { FAKE_NEW_ID } from '../../_lib/constants';
@@ -30,6 +32,9 @@ export const EqMasterDialog = ({
   handleClose: () => void;
   refetchEqpts: () => Promise<void>;
 }) => {
+  // ログインユーザ
+  const user = useUserStore((state) => state.user);
+
   /* useState --------------------- */
   /* eqpt更新前の */
   const [currentEqpt, setCurrentEqpt] = useState<EqptsMasterDialogValues>(emptyEqpt);
@@ -80,14 +85,14 @@ export const EqMasterDialog = ({
     console.log(data.shukeibumonId, '::::', data.rankAmt1);
     if (eqptId === FAKE_NEW_ID) {
       // 新規登録
-      await addNewEqpt(data);
+      await addNewEqpt(data, user?.name ?? '');
       handleCloseDialog();
       refetchEqpts();
     } else {
       // 更新
       if (action === 'save') {
         // 保存終了ボタン
-        await updateEqpt(currentEqpt, data, eqptId);
+        await updateEqpt(currentEqpt, data, eqptId, user?.name ?? '');
         handleCloseDialog();
         refetchEqpts();
       } else if (action === 'delete') {
@@ -97,7 +102,7 @@ export const EqMasterDialog = ({
       } else if (action === 'restore') {
         // 有効化ボタン
         const values = await getValues();
-        await updateEqpt(currentEqpt, { ...values, delFlg: false }, eqptId);
+        await updateEqpt(currentEqpt, { ...values, delFlg: false }, eqptId, user?.name ?? '');
         handleCloseDialog();
         refetchEqpts();
       }
@@ -124,7 +129,7 @@ export const EqMasterDialog = ({
   /* 削除確認ダイアログで削除選択時 */
   const handleConfirmDelete = async () => {
     const values = await getValues();
-    await updateEqpt(currentEqpt, { ...values, delFlg: true }, eqptId);
+    await updateEqpt(currentEqpt, { ...values, delFlg: true }, eqptId, user?.name ?? '');
     setDeleteOpen(false);
     handleCloseDialog();
     await refetchEqpts();
