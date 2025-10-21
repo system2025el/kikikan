@@ -5,10 +5,12 @@ import { redirect } from 'next/navigation';
 
 import pool from '@/app/_lib/db/postgres';
 import { SCHEMA } from '@/app/_lib/db/supabase';
+import { delAndInsertSeikyuDat, upsertSeikyuDat } from '@/app/_lib/db/tables/t-seikyu-date-juchu-kizai';
 import { insertBillHead } from '@/app/_lib/db/tables/t-seikyu-head';
 import { insertBillMeisai } from '@/app/_lib/db/tables/t-seikyu-meisai';
 import { insertBillMeisaiHead } from '@/app/_lib/db/tables/t-seikyu-meisai-head';
 import { selectFilteredJuchuDetailsForBill, selectFilteredJuchusForBill } from '@/app/_lib/db/tables/v-seikyu-date-lst';
+import { SeikyuDatJuchuKizai } from '@/app/_lib/db/types/t-seikyu-date-juchu-kizai-type';
 import { SeikyuHead } from '@/app/_lib/db/types/t-seikyu-head-type';
 import { SeikyuMeisaiHead } from '@/app/_lib/db/types/t-seikyu-meisai-head-type';
 import { SeikyuMeisai } from '@/app/_lib/db/types/t-seikyu-meisai-type';
@@ -226,6 +228,18 @@ const addBilling = async (data: BillHeadValues, user: string): Promise<number | 
         add_dat: toJapanTimeString(undefined, '-'),
         add_user: user,
       })) ?? [];
+
+    // 請求完了日リスト（請求済み期間）
+    const seikyuDatList: SeikyuDatJuchuKizai[] =
+      meisaiHeads.length > 0
+        ? meisaiHeads.map((d) => ({
+            juchu_head_id: d.juchu_head_id!,
+            juchu_kizai_head_id: d.juchu_kizai_head_id!,
+            seikyu_dat: d.seikyu_end_dat!,
+            add_dat: toJapanTimeString(),
+            add_user: user,
+          }))
+        : [];
     if (billHead) {
       const id = await insertBillHead(billHead, connection);
       if (meisaiHeads && Object.keys(meisaiHeads).length !== 0) {
@@ -234,7 +248,9 @@ const addBilling = async (data: BillHeadValues, user: string): Promise<number | 
       if (meisais && Object.keys(meisais).length !== 0) {
         await insertBillMeisai(meisais, connection);
       }
-
+      if (seikyuDatList && seikyuDatList.length !== 0) {
+        await delAndInsertSeikyuDat(seikyuDatList, connection);
+      }
       await connection.query('COMMIT');
       return id.rows[0].seikyu_head_id;
     }

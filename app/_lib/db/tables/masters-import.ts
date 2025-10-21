@@ -1,6 +1,5 @@
 import { PoolClient } from 'pg';
 
-import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import {
   KizaiImportTypes,
   RfidImportTypes,

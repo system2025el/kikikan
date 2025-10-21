@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 
 import pool from '@/app/_lib/db/postgres';
 import { SCHEMA } from '@/app/_lib/db/supabase';
+import { delAndInsertSeikyuDat } from '@/app/_lib/db/tables/t-seikyu-date-juchu-kizai';
 import { updateBillHead } from '@/app/_lib/db/tables/t-seikyu-head';
 import { deleteBillMeisai, insertBillMeisai, updateBillMeisai } from '@/app/_lib/db/tables/t-seikyu-meisai';
 import {
@@ -11,6 +12,7 @@ import {
   insertBillMeisaiHead,
   updateBillMeisaiHead,
 } from '@/app/_lib/db/tables/t-seikyu-meisai-head';
+import { SeikyuDatJuchuKizai } from '@/app/_lib/db/types/t-seikyu-date-juchu-kizai-type';
 import { SeikyuHead } from '@/app/_lib/db/types/t-seikyu-head-type';
 import { SeikyuMeisai } from '@/app/_lib/db/types/t-seikyu-meisai-type';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
@@ -93,6 +95,18 @@ export const updateBill = async (data: BillHeadValues, user: string): Promise<nu
       upd_user: user,
     })),
   }));
+
+  // 請求完了日リスト（請求済み期間）
+  const seikyuDatList: SeikyuDatJuchuKizai[] =
+    meisaiHeads.length > 0
+      ? meisaiHeads.map((d) => ({
+          juchu_head_id: d.juchu_head_id!,
+          juchu_kizai_head_id: d.juchu_kizai_head_id!,
+          seikyu_dat: d.seikyu_end_dat!,
+          add_dat: toJapanTimeString(),
+          add_user: user,
+        }))
+      : [];
 
   try {
     console.log('更新START');
@@ -259,6 +273,9 @@ export const updateBill = async (data: BillHeadValues, user: string): Promise<nu
           updateMeisaiList.map(({ add_dat, add_user, ...rest }) => rest),
           connection
         );
+      }
+      if (seikyuDatList && seikyuDatList.length !== 0) {
+        await delAndInsertSeikyuDat(seikyuDatList, connection);
       }
 
       await connection.query('COMMIT');

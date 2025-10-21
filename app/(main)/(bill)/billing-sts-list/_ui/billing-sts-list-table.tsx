@@ -56,6 +56,7 @@ export const BillingStsListTable = ({
   billSts,
   setIsLoading,
   setPage,
+  refetch,
 }: {
   isLoading: boolean;
   page: number;
@@ -64,6 +65,7 @@ export const BillingStsListTable = ({
   billSts: BillingStsTableValues[];
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setPage: React.Dispatch<React.SetStateAction<number>>;
+  refetch: () => Promise<void>;
 }) => {
   const rowsPerPage = 50;
 
@@ -134,7 +136,7 @@ export const BillingStsListTable = ({
             </TableHead>
             <TableBody>
               {list.map((j, index) => (
-                <BillingStsRow key={index} juchu={j} />
+                <BillingStsRow key={index} juchu={j} refetch={refetch} />
               ))}
               {emptyRows > 0 && (
                 <TableRow style={{ height: 30 * emptyRows }}>
@@ -165,7 +167,7 @@ export const BillingStsListTable = ({
  * @param param0 受注請求状況の一覧
  * @returns {JSX.Element} 開閉するテーブルの行のコンポーネント
  */
-const BillingStsRow = ({ juchu }: { juchu: BillingStsTableValues }) => {
+const BillingStsRow = ({ juchu, refetch }: { juchu: BillingStsTableValues; refetch: () => Promise<void> }) => {
   /* ログインユーザー */
   const user = useUserStore((state) => state.user);
 
@@ -192,6 +194,7 @@ const BillingStsRow = ({ juchu }: { juchu: BillingStsTableValues }) => {
   const [newDat, setNewDat] = useState<Date | null>(null);
 
   /* methods ------------------------------------------------------- */
+  /* 請求完了日を変更する処理 */
   const handleChangeDat = async () => {
     console.log('current::::: ', meisaiToUpd.currentDat, ', new :::::::', newDat);
     const m = meisaiToUpd;
@@ -201,6 +204,8 @@ const BillingStsRow = ({ juchu }: { juchu: BillingStsTableValues }) => {
       newDat: newDat! > m.nyukoDat ? m.nyukoDat : newDat! < m.shukoDat ? m.shukoDat : newDat!,
     };
     await changeSeikyuDat(changeTo, user?.name ?? '');
+    refetch();
+    setOpen(true);
     setChangeDatOpen(false);
   };
 

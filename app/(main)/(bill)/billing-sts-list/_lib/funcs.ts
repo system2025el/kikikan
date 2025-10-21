@@ -53,6 +53,11 @@ export const getFilteredBillingSituations = async (
   }
 };
 
+/**
+ * 請求状況一覧で請求済み期間を変更する関数
+ * @param param0
+ * @param user ログインユーザー
+ */
 export const changeSeikyuDat = async (
   {
     juchuId,
@@ -71,8 +76,6 @@ export const changeSeikyuDat = async (
     seikyu_dat: toJapanDateString(newDat),
     add_dat: toJapanTimeString(),
     add_user: user,
-    upd_dat: toJapanTimeString(),
-    upd_user: user,
   };
   try {
     await upsertSeikyuDat(upsertData);
