@@ -1910,7 +1910,9 @@ export const checkSetoptions = async (idList: number[]) => {
     const setIdList = await selectBundledEqptIds(idList);
     console.log('setId List : ', setIdList.rows);
     const setIdListSet = new Set(setIdList.rows);
-    const setIdListArray = [...setIdListSet].map((l) => l.kizai_id).filter((kizai_id) => !idList.includes(kizai_id));
+    const setIdListArray = [...setIdListSet]
+      .map((l) => l.set_kizai_id)
+      .filter((kizai_id) => !idList.includes(kizai_id));
     console.log('setIdListArray : ', setIdListArray);
     // セットオプションリストが空なら空配列を返して終了
     if (setIdListArray.length === 0) return [];

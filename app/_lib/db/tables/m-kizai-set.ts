@@ -12,11 +12,11 @@ export const selectBundledEqptIds = async (idList: number[]) => {
   const placeholders = idList.map((_, i) => `$${i + 1}`).join(',');
   const query = `
     SELECT DISTINCT
-      kizai_id
+      set_kizai_id
     FROM
       ${SCHEMA}.m_kizai_set
     WHERE
-      set_kizai_id IN (${placeholders})
+      kizai_id IN (${placeholders})
   `;
   try {
     return await pool.query(query, idList);
