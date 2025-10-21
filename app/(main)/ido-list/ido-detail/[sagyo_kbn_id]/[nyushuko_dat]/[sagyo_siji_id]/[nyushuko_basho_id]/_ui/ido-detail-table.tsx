@@ -67,7 +67,7 @@ export const ShukoIdoDenTable = () => {
                   e.stopPropagation();
                 }}
                 type="number"
-                value={0}
+                defaultValue={0}
                 sx={{
                   width: 50,
                   '& .MuiInputBase-input': {
@@ -298,5 +298,15 @@ const styles: { [key: string]: React.CSSProperties } = {
   // ヘッダー
   header: {
     backgroundColor: purple[400],
+  },
+  // 行
+  row: {
+    border: '1px solid black',
+    whiteSpace: 'nowrap',
+    height: '26px',
+    paddingTop: 0,
+    paddingBottom: 0,
+    paddingLeft: 1,
+    paddingRight: 1,
   },
 };
