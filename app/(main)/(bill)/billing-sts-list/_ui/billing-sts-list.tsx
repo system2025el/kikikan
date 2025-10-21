@@ -33,10 +33,19 @@ export const BillingStsList = ({ custs }: { custs: SelectTypes[] }) => {
   const tantou = useWatch({ control, name: 'kokyakuTantoNam' });
 
   /* method --------------------------------------------------------------- */
+  /* 検索ボタンを押したときの処理 */
   const onSubmit = async (data: BillingStsSearchValues) => {
     setIsLoading(true);
     console.log(data);
     const theSts = await getFilteredBillingSituations(data);
+    setBillSts(theSts);
+    setIsLoading(false);
+  };
+
+  /* 再検索関数 */
+  const refetch = async () => {
+    setIsLoading(true);
+    const theSts = await getFilteredBillingSituations(getValues());
     setBillSts(theSts);
     setIsLoading(false);
   };
@@ -126,6 +135,7 @@ export const BillingStsList = ({ custs }: { custs: SelectTypes[] }) => {
         billSts={billSts}
         setIsLoading={setIsLoading}
         setPage={setPage}
+        refetch={refetch}
       />
     </Container>
   );
