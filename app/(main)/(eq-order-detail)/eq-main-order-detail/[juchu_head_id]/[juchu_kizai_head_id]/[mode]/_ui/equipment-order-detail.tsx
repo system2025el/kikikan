@@ -1242,13 +1242,6 @@ const EquipmentOrderDetail = (props: {
     setDateSelectionDialogOpne(false);
   };
 
-  if (user === null || isLoading)
-    return (
-      <Box height={'90vh'}>
-        <Loading />
-      </Box>
-    );
-
   return (
     <>
       {!user || isLoading ? (

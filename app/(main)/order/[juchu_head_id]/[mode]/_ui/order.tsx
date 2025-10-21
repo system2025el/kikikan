@@ -34,6 +34,7 @@ import { useUserStore } from '@/app/_lib/stores/usestore';
 import { toISOString } from '@/app/(main)/_lib/date-conversion';
 import { addLock, getLock } from '@/app/(main)/_lib/funcs';
 import { LockValues } from '@/app/(main)/_lib/types';
+import { BackButton } from '@/app/(main)/_ui/buttons';
 import DateX, { RSuiteDateRangePicker, TestDate } from '@/app/(main)/_ui/date';
 import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
 import { Loading } from '@/app/(main)/_ui/loading';
@@ -95,7 +96,6 @@ export const Order = (props: {
 
   /* useForm ------------------------- */
   const {
-    watch,
     control,
     handleSubmit,
     reset,
@@ -423,7 +423,7 @@ export const Order = (props: {
             <Typography>編集中</Typography>
           </Grid2>
         )}
-        <Grid2 container alignItems={'center'} spacing={1}>
+        <Grid2 container alignItems={'center'} spacing={2}>
           {!edit || (lockData !== null && lockData?.addUser !== user?.name) ? (
             <Typography>閲覧モード</Typography>
           ) : (
@@ -432,6 +432,7 @@ export const Order = (props: {
           <Button disabled={lockData && lockData?.addUser !== user?.name ? true : false} onClick={handleEdit}>
             変更
           </Button>
+          <BackButton label={'戻る'} />
         </Grid2>
       </Box>
       {/* --------------------------------受注ヘッダー------------------------------------- */}
