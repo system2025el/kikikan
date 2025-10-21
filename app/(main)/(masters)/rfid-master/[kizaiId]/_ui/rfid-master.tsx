@@ -51,7 +51,7 @@ export const RfidMaster = ({
   const [saved, setSaved] = useState<boolean>(true);
 
   // /* 元のステータスと一致してるかどうか */
-  // const isAllSame = rfids?.every((original) => {
+  //  const isAllSame = rfids?.every((original) => {
   //   const newItem = theRfids && theRfids.find((item) => item.rfidTagId === original.rfidTagId);
   //   if (!newItem) return false;
   //   return original.stsId === newItem.stsId && original.stsNam === newItem.stsNam;
