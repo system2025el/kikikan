@@ -29,6 +29,11 @@ export const IsDirtyAlertDialog = ({
   );
 };
 
+/**
+ * 削除警告ダイアログ
+ * @param param0
+ * @returns {JSX.Element}
+ */
 export const WillDeleteAlertDialog = ({
   open,
   data,

@@ -83,15 +83,21 @@ export const RfidMasterDialog = ({
   /* フォームを送信 */
   const onSubmit = async (data: RfidsMasterDialogValues) => {
     console.log('isDarty : ', isDirty);
+    setTagMessage('');
+    setElMessage('');
     if (rfidId === String(FAKE_NEW_ID)) {
       // 新規登録
       const [tagResult, elNumResult] = await Promise.all([selectOneRfid(data.tagId), selectElNumExists(data.elNum!)]);
       console.log(tagResult, elMessage);
       if (tagResult.data) {
         setTagMessage('このRFIDはすでに存在しています');
+      } else {
+        setTagMessage('');
       }
       if (elNumResult.data) {
         setElMessage('このEL No.は既に存在しています');
+      } else {
+        setElMessage('');
       }
       if (!tagResult.data && !elNumResult.data) {
         await addNewRfid(data, kizaiId, user?.name ?? '');
@@ -103,6 +109,8 @@ export const RfidMasterDialog = ({
       const elNumResult = await selectElNumExists(data.elNum);
       if (elNumResult.data && currentRfid.elNum !== data.elNum) {
         setElMessage('このEL No.は既に存在しています');
+      } else {
+        setElMessage('');
       }
       if (!elNumResult.data || currentRfid.elNum === data.elNum) {
         if (action === 'save') {

@@ -189,7 +189,10 @@ export const getChosenQuot = async (mituId: number) => {
   try {
     // 見積ヘッドの取得
     const { data: mituData, error: mituError } = await selectChosenMitu(mituId);
-    if (mituError) throw new Error('DBエラー：t_mitu_head');
+    if (mituError) {
+      console.error(mituError);
+      throw new Error('DBエラー：t_mitu_head');
+    }
     console.log(mituData);
 
     // 受注情報と明細情報を並列を取得
@@ -280,6 +283,7 @@ export const getChosenQuot = async (mituId: number) => {
       mituHonbanbiQty: mituData.mitu_honbanbi_qty,
       biko: mituData.biko,
       comment: mituData.comment,
+      kizaiChukeiMei: mituData.kizai_chukei_mei,
       chukeiMei: mituData.chukei_mei,
       tokuNebikiMei: mituData.toku_nebiki_mei,
       tokuNebikiAmt: mituData.toku_nebiki_amt,

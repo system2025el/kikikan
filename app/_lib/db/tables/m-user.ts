@@ -1,8 +1,13 @@
+'use server';
+
+import { PoolClient } from 'pg';
+
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { UsersMasterDialogValues } from '@/app/(main)/(masters)/users-master/_lib/types';
 
 import pool from '../postgres';
 import { SCHEMA, supabase } from '../supabase';
+import { MUserDBValues } from '../types/m-use-type';
 
 /**
  * 要修正・確認 m_userから有効な担当者リストを取得する関数 viewを作って社員コードではなくすべきか？
@@ -76,22 +81,16 @@ export const selectOneUser = async (mailAdr: string) => {
  * 担当者マスタに新規挿入する関数
  * @param data 挿入するデータ
  */
-export const insertNewUser = async (data: UsersMasterDialogValues, user: string) => {
+export const insertNewUser = async (data: MUserDBValues, connection: PoolClient) => {
+  const cols = Object.keys(data).join(', ');
+  const values = Object.values(data);
+  const placeholders = values.map((_, i) => `$${i + 1}`).join(',');
   const query = `
-    INSERT INTO ${SCHEMA}.m_user (
-      user_nam, del_flg, dsp_ord_num,
-      add_dat, add_user
-    )
-    VALUES (
-      $1, $2,
-      (SELECT coalesce(max(dsp_ord_num),0) + 1 FROM ${SCHEMA}.m_user),
-      $3, $4
-    );
+    INSERT INTO ${SCHEMA}.m_user (${cols})
+    VALUES (${placeholders});
   `;
-  const date = toJapanTimeString();
-  const values = [data.tantouNam, Number(data.delFlg), date, user];
   try {
-    await pool.query(query, values);
+    return await connection.query(query, values);
   } catch (e) {
     throw e;
   }
@@ -102,16 +101,78 @@ export const insertNewUser = async (data: UsersMasterDialogValues, user: string)
  * @param data 更新するデータ
  * @param id 更新する担当者のuser_id
  */
-export const upDateUserDB = async (
-  data: { user_nam: string; del_flg: number; upd_dat: string; upd_user: string },
-  id: number
-) => {
+export const upDateUserDB = async (data: MUserDBValues, connection: PoolClient) => {
+  const { mail_adr, ...rest } = data;
+  const cols = Object.keys(rest);
+  const updSet = cols
+    .map((key, index) => `"${key}" = $${index + 2}`) // $1はWHERE句で使うため、$2から開始
+    .join(', ');
+  const query = `
+    UPDATE "${SCHEMA}"."m_user"
+    SET ${updSet}
+    WHERE "mail_adr" = $1
+    RETURNING *;
+  `;
+
+  const values = [data.mail_adr, ...Object.values(rest)];
   try {
-    await supabase
+    await connection.query(query, values);
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
+ * supabaseクライアントでm_userを更新する関数
+ * @param {MUserDBValues} data 更新データ
+ */
+export const updMUserDelFlg = async (
+  data: { mail_adr: string; del_flg: number; upd_dat: string; upd_user: string },
+  connection: PoolClient
+) => {
+  const values = Object.values(data);
+  const query = `
+    UPDATE
+      ${SCHEMA}.m_user
+    SET
+      del_flg = $2,
+      upd_dat = $3,
+      upd_user = $4
+    WHERE
+      mail_adr = $1;
+  `;
+  try {
+    await connection.query(query, values);
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
+ * 社員コードの一致する担当者を取得する関数
+ * @param {string} cod 社員コード
+ */
+export const checkShainCod = async (cod: string) => {
+  try {
+    return await supabase
       .schema(SCHEMA)
       .from('m_user')
-      .update({ ...data })
-      .eq('instance_id', id);
+      .select('*')
+      .eq('shain_cod', cod)
+      .neq('del_flg', 1)
+      .maybeSingle();
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
+ * 無効も含めてメールアドレスの一致する担当者を取得する関数
+ * @param {string} cod メールアドレス
+ */
+export const checkMailAdr = async (adr: string) => {
+  try {
+    return await supabase.schema(SCHEMA).from('m_user').select('*').eq('mail_adr', adr).maybeSingle();
   } catch (e) {
     throw e;
   }

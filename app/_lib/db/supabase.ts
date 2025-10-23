@@ -35,3 +35,8 @@ export const supabase = createClient<Database>(process.env.SUPABASE_URL!, proces
 export const SCHEMA = 'dev6';
 
 export type schema = 'dev6';
+
+/**
+ * 絶対にクライアントで使わないでください。
+ */
+export const supabaseAdmin = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
