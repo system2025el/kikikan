@@ -1,6 +1,6 @@
 'use client';
 
-import { Link, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
+import { Button, Link, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import { usePathname, useRouter } from 'next/navigation';
 
@@ -46,12 +46,15 @@ export const ShukoDetailTable = (props: { datas: ShukoDetailTableValues[] }) => 
                       ? 'rgba(68, 138, 255, 1)'
                       : 'white',
               }}
-              onClick={() => handleClick(row.kizaiId)}
-              style={{ cursor: 'pointer' }}
-              hover
             >
               <TableCell padding="checkbox">{index + 1}</TableCell>
-              <TableCell align="left">{row.kizaiNam}</TableCell>
+              <TableCell
+                align="left"
+                onClick={() => handleClick(row.kizaiId)}
+                sx={{ cursor: 'pointer', '&:hover': { backgroundColor: 'rgba(0,0,0,0.04)' } }}
+              >
+                {row.kizaiNam}
+              </TableCell>
               <TableCell align="right">{row.planQty}</TableCell>
               <TableCell align="right">{row.resultQty}</TableCell>
               <TableCell align="right">{row.resultAdjQty}</TableCell>

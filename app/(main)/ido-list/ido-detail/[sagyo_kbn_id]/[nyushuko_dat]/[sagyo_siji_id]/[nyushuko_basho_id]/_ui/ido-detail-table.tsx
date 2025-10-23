@@ -109,7 +109,7 @@ export const ShukoIdoDenTable = (props: {
                 <TableCell padding="checkbox">{index + 1}</TableCell>
                 <TableCell
                   align="left"
-                  onClick={() => handleClick(row.kizaiId)}
+                  onClick={row.saveFlag ? () => handleClick(row.kizaiId) : undefined}
                   sx={{ cursor: 'pointer', '&:hover': { backgroundColor: 'rgba(0,0,0,0.04)' } }}
                 >
                   {row.kizaiNam}
