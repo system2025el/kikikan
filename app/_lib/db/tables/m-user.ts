@@ -26,19 +26,24 @@ export const selectActiveUsers = async () => {
  * @param query 検索キーワード
  * @returns {Promise<UsersDialogValues[]>} 公演場所マスタテーブルに表示するデータ（ 検索キーワードが空の場合は全て ）
  */
-export const SelectFilteredUsers = async (query: string) => {
-  const builder = supabase
-    .schema('dev6')
-    .from('m_user')
-    .select('user_nam, shain_cod, mail_adr, del_flg, mem')
-    .neq('del_flg', 1)
-    .order('user_nam');
+export const SelectFilteredUsers = async (searchQuery: string) => {
+  let query = `
+  SELECT
+    m.mail_adr, m.user_nam, m.del_flg, m.shain_cod, m.mem, u.last_sign_in_at
+  FROM
+    ${SCHEMA}.m_user as m
+  LEFT JOIN
+    auth.users as u
+  ON m.mail_adr = u.email
+  `;
+  const params = [];
   // 検索条件あれば
-  if (query && query.trim() !== '') {
-    builder.ilike('user_nam', query);
+  if (searchQuery && searchQuery.trim() !== '') {
+    query += `WHERE m.user_nam ILIKE $1`;
+    params.push(`%${searchQuery}%`);
   }
   try {
-    return await builder;
+    return await pool.query(query, params);
   } catch (e) {
     throw e;
   }
@@ -49,9 +54,19 @@ export const SelectFilteredUsers = async (query: string) => {
  * @param id 探すuser_id
  * @returns 担当者IDが一致する担当者情報
  */
-export const selectOneUser = async (id: number) => {
+export const selectOneUser = async (mailAdr: string) => {
+  const query = `
+  SELECT
+    m.mail_adr, m.user_nam, m.permission, m.del_flg, m.shain_cod, m.mem, u.last_sign_in_at
+  FROM
+    ${SCHEMA}.m_user as m
+  LEFT JOIN
+    auth.users as u
+  ON m.mail_adr = u.email
+  WHERE
+    m.mail_adr = $1;`;
   try {
-    return await supabase.schema(SCHEMA).from('m_user').select('user_nam, del_flg, mem').eq('instance_id', id).single();
+    return await pool.query(query, [mailAdr]);
   } catch (e) {
     throw e;
   }

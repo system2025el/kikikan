@@ -171,77 +171,69 @@ export const BumonsMasterDialog = ({
         ) : (
           <>
             <Grid2 container spacing={1} p={5} direction={'column'} justifyContent={'center'} width={'100%'}>
-              <Grid2>
-                <FormBox formItem={formItems[0]} required>
-                  <TextFieldElement
-                    name="bumonNam"
-                    control={control}
-                    label={editable ? formItems[0].exsample : ''}
-                    fullWidth
-                    sx={{ maxWidth: '90%' }}
-                    disabled={editable ? false : true}
-                  />
-                </FormBox>
-              </Grid2>
-              <Grid2>
-                <FormBox formItem={formItems[2]}>
-                  <TextFieldElement
-                    multiline
-                    name="mem"
-                    control={control}
-                    label={editable ? formItems[2].exsample : ''}
-                    fullWidth
-                    sx={{ maxWidth: '90%' }}
-                    disabled={editable ? false : true}
-                  />
-                </FormBox>
-              </Grid2>
-              <Grid2>
-                <FormBox formItem={formItems[3]}>
-                  <Controller
-                    name="daibumonId"
-                    control={control}
-                    defaultValue={0}
-                    disabled={editable ? false : true}
-                    render={({ field }) => (
-                      <Select {...field} sx={{ width: 250 }}>
-                        {[selectNone, ...selectOptions!.d].map((opt) => (
-                          <MenuItem
-                            key={opt.id}
-                            value={opt.id}
-                            sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
-                          >
-                            {opt.label}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    )}
-                  />
-                </FormBox>
-              </Grid2>
-              <Grid2>
-                <FormBox formItem={formItems[4]}>
-                  <Controller
-                    name="shukeibumonId"
-                    control={control}
-                    defaultValue={0}
-                    disabled={editable ? false : true}
-                    render={({ field }) => (
-                      <Select {...field} sx={{ width: 250 }}>
-                        {[selectNone, ...selectOptions!.s].map((opt) => (
-                          <MenuItem
-                            key={opt.id}
-                            value={opt.id}
-                            sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
-                          >
-                            {opt.label}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    )}
-                  />
-                </FormBox>
-              </Grid2>
+              <FormBox formItem={formItems[0]} required>
+                <TextFieldElement
+                  name="bumonNam"
+                  control={control}
+                  label={editable ? formItems[0].exsample : ''}
+                  fullWidth
+                  sx={{ maxWidth: '90%' }}
+                  disabled={editable ? false : true}
+                />
+              </FormBox>
+              <FormBox formItem={formItems[2]}>
+                <TextFieldElement
+                  multiline
+                  name="mem"
+                  control={control}
+                  label={editable ? formItems[2].exsample : ''}
+                  fullWidth
+                  sx={{ maxWidth: '90%' }}
+                  disabled={editable ? false : true}
+                />
+              </FormBox>
+              <FormBox formItem={formItems[3]}>
+                <Controller
+                  name="daibumonId"
+                  control={control}
+                  defaultValue={0}
+                  disabled={editable ? false : true}
+                  render={({ field }) => (
+                    <Select {...field} sx={{ width: 250 }}>
+                      {[selectNone, ...selectOptions!.d].map((opt) => (
+                        <MenuItem
+                          key={opt.id}
+                          value={opt.id}
+                          sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
+                        >
+                          {opt.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  )}
+                />
+              </FormBox>
+              <FormBox formItem={formItems[4]}>
+                <Controller
+                  name="shukeibumonId"
+                  control={control}
+                  defaultValue={0}
+                  disabled={editable ? false : true}
+                  render={({ field }) => (
+                    <Select {...field} sx={{ width: 250 }}>
+                      {[selectNone, ...selectOptions!.s].map((opt) => (
+                        <MenuItem
+                          key={opt.id}
+                          value={opt.id}
+                          sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
+                        >
+                          {opt.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  )}
+                />
+              </FormBox>
             </Grid2>
             <IsDirtyAlertDialog
               open={dirtyOpen}

@@ -18,10 +18,17 @@ import { BillingStsListTable } from './billing-sts-list-table';
  * @returns {JAX.Element} 受注請求状況一覧画面のコンポーネント
  */
 export const BillingStsList = ({ custs }: { custs: SelectTypes[] }) => {
+  /* useState --------------------------------------------------------------- */
+  /* ローディング */
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  /* ページ */
   const [page, setPage] = useState<number>(1);
+  /* 受注請求状況一覧 */
   const [billSts, setBillSts] = useState<BillingStsTableValues[]>([]);
+  /* テーブル初期表示 */
+  const [isFirst, setIsFirst] = useState<boolean>(true);
 
+  /* useForm --------------------------------------------------------------- */
   const { control, handleSubmit, getValues } = useForm<BillingStsSearchValues>({
     mode: 'onBlur',
     reValidateMode: 'onBlur',
@@ -36,6 +43,7 @@ export const BillingStsList = ({ custs }: { custs: SelectTypes[] }) => {
   /* 検索ボタンを押したときの処理 */
   const onSubmit = async (data: BillingStsSearchValues) => {
     setIsLoading(true);
+    setIsFirst(false);
     console.log(data);
     const theSts = await getFilteredBillingSituations(data);
     setBillSts(theSts);
@@ -133,7 +141,7 @@ export const BillingStsList = ({ custs }: { custs: SelectTypes[] }) => {
         kokyakuId={Number(kokyakuId)}
         tantouNam={tantou}
         billSts={billSts}
-        setIsLoading={setIsLoading}
+        isFirst={isFirst}
         setPage={setPage}
         refetch={refetch}
       />

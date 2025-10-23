@@ -181,348 +181,304 @@ export const EqMasterDialog = ({
         ) : (
           <>
             <Grid2 container spacing={1} p={5} direction={'column'} justifyContent={'center'} width={'100%'}>
-              <Grid2>
-                <FormBox formItem={formItems[0]} required>
-                  <TextFieldElement
-                    name="kizaiNam"
-                    control={control}
-                    label={editable ? formItems[0].exsample : ''}
-                    fullWidth
-                    sx={{ maxWidth: '90%' }}
-                    disabled={editable ? false : true}
-                  />
-                </FormBox>
-              </Grid2>
-              <Grid2>
-                <FormBox formItem={formItems[1]}>
-                  <TextField value={kizaiQty.all ? String(kizaiQty.all) : ''} disabled />
-                  <Box ml={1}>
-                    <Button
-                      component="a"
-                      href={`/rfid-master/${eqptId}`}
-                      target="_blank" // 新しいタブで開く
-                      rel="noopener noreferrer"
-                    >
-                      RFIDマスタ
-                    </Button>
-                  </Box>
-                </FormBox>
-              </Grid2>
-              <Grid2>
-                <FormBox formItem={formItems[2]}>
-                  <TextField value={kizaiQty.ng ? String(kizaiQty.ng) : ''} disabled />
-                </FormBox>
-              </Grid2>
-              <Grid2>
-                <FormBox formItem={formItems[3]}>
-                  <TextField value={kizaiQty ? String(kizaiQty.all - kizaiQty.ng) : ''} disabled />
-                </FormBox>
-              </Grid2>
-              <Grid2>
-                <FormBox formItem={formItems[4]}>
-                  <TextFieldElement
-                    name="sectionNum"
-                    control={control}
-                    label={editable ? formItems[4].exsample : ''}
-                    fullWidth
-                    sx={{
-                      maxWidth: '20%',
-                      '& .MuiInputBase-input': {
-                        textAlign: 'right',
-                      },
-                      '& input[type=number]::-webkit-inner-spin-button': {
-                        WebkitAppearance: 'none',
-                        margin: 0,
-                      },
-                    }}
-                    disabled={editable ? false : true}
-                    type="number"
-                  />
-                  <Typography variant="body2" ml={2}>
-                    {formItems[4].other}
-                  </Typography>
-                </FormBox>
-              </Grid2>
-              <Grid2>
-                <FormBox formItem={formItems[5]} required>
-                  <SelectElement
-                    name="shozokuId"
-                    control={control}
-                    disabled={editable ? false : true}
-                    sx={{ width: 250 }}
-                    options={selectOptions.shozoku!}
-                  />
-                </FormBox>
-              </Grid2>
-              <Grid2>
-                <FormBox formItem={formItems[6]}>
-                  <TextFieldElement
-                    name="bldCod"
-                    control={control}
-                    label={editable ? formItems[6].exsample : ''}
-                    fullWidth
-                    sx={{ maxWidth: '50%' }}
-                    disabled={editable ? false : true}
-                  />
-                </FormBox>
-              </Grid2>
-              <Grid2>
-                <FormBox formItem={formItems[7]}>
-                  <TextFieldElement
-                    name="tanaCod"
-                    control={control}
-                    label={editable ? formItems[7].exsample : ''}
-                    fullWidth
-                    sx={{ maxWidth: '50%' }}
-                    disabled={editable ? false : true}
-                  />
-                </FormBox>
-              </Grid2>
-              <Grid2>
-                <FormBox formItem={formItems[8]}>
-                  <TextFieldElement
-                    name="edaCod"
-                    control={control}
-                    label={editable ? formItems[8].exsample : ''}
-                    fullWidth
-                    sx={{ maxWidth: '50%' }}
-                    disabled={editable ? false : true}
-                  />
-                </FormBox>
-              </Grid2>
-              <Grid2>
-                <FormBox formItem={formItems[9]}>
-                  <TextFieldElement
-                    name="kizaiGrpCod"
-                    control={control}
-                    label={editable ? formItems[9].exsample : ''}
-                    fullWidth
-                    sx={{ maxWidth: '50%' }}
-                    disabled={editable ? false : true}
-                  />
-                </FormBox>
-              </Grid2>
-              <Grid2>
-                <FormBox formItem={formItems[10]}>
-                  <TextFieldElement
-                    name="dspOrdNum"
-                    control={control}
-                    label={editable ? formItems[10].exsample : ''}
-                    fullWidth
-                    sx={{
-                      maxWidth: '20%',
-                      '& .MuiInputBase-input': {
-                        textAlign: 'right',
-                      },
-                      '& input[type=number]::-webkit-inner-spin-button': {
-                        WebkitAppearance: 'none',
-                        margin: 0,
-                      },
-                    }}
-                    type="number"
-                    disabled={editable ? false : true}
-                  />
-                </FormBox>
-              </Grid2>
-              <Grid2>
-                <FormBox formItem={formItems[11]}>
-                  <TextFieldElement
-                    multiline
-                    name="mem"
-                    control={control}
-                    label={editable ? formItems[11].exsample : ''}
-                    fullWidth
-                    sx={{ maxWidth: '90%' }}
-                    disabled={editable ? false : true}
-                  />
-                </FormBox>
-              </Grid2>
-              <Grid2>
-                <FormBox formItem={formItems[12]}>
-                  <Controller
-                    name="bumonId"
-                    control={control}
-                    disabled={editable ? false : true}
-                    render={({ field }) => (
-                      <Select {...field} sx={{ width: 250 }}>
-                        {[selectNone, ...selectOptions.b!].map((opt) => (
-                          <MenuItem
-                            key={opt.id}
-                            value={opt.id}
-                            sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
-                          >
-                            {opt.label}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    )}
-                  />
-                </FormBox>
-              </Grid2>
-              <Grid2>
-                <FormBox formItem={formItems[13]}>
-                  <Controller
-                    name="shukeibumonId"
-                    control={control}
-                    disabled={editable ? false : true}
-                    render={({ field }) => (
-                      <Select {...field} sx={{ width: 250 }}>
-                        {[selectNone, ...selectOptions.s!].map((opt) => (
-                          <MenuItem
-                            key={opt.id}
-                            value={opt.id}
-                            sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
-                          >
-                            {opt.label}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    )}
-                  />
-                </FormBox>
-              </Grid2>
-              <Grid2>
-                <FormBox formItem={formItems[14]}>
-                  <CheckboxElement name="dspFlg" control={control} size="medium" disabled={editable ? false : true} />
-                </FormBox>
-              </Grid2>
-              <Grid2>
-                <FormBox formItem={formItems[15]}>
-                  <CheckboxElement name="ctnFlg" control={control} size="medium" disabled={editable ? false : true} />
-                </FormBox>
-              </Grid2>
-              <Grid2>
-                <FormBox formItem={formItems[16]} required>
-                  <TextFieldElement
-                    name="regAmt"
-                    control={control}
-                    label={editable ? formItems[16].exsample : ''}
-                    fullWidth
-                    sx={{
-                      maxWidth: '50%',
-                      '& .MuiInputBase-input': {
-                        textAlign: 'right',
-                      },
-                      '& input[type=number]::-webkit-inner-spin-button': {
-                        WebkitAppearance: 'none',
-                        margin: 0,
-                      },
-                    }}
-                    type="number"
-                    disabled={editable ? false : true}
-                  />
-                </FormBox>
-              </Grid2>
-              <Grid2>
-                <FormBox formItem={formItems[17]}>
-                  <TextFieldElement
-                    name="rankAmt1"
-                    control={control}
-                    label={editable ? formItems[17].exsample : ''}
-                    fullWidth
-                    sx={{
-                      maxWidth: '50%',
-                      '& .MuiInputBase-input': {
-                        textAlign: 'right',
-                      },
-                      '& input[type=number]::-webkit-inner-spin-button': {
-                        WebkitAppearance: 'none',
-                        margin: 0,
-                      },
-                    }}
-                    type="number"
-                    disabled={editable ? false : true}
-                  />
-                </FormBox>
-              </Grid2>
-              <Grid2>
-                <FormBox formItem={formItems[18]}>
-                  <TextFieldElement
-                    name="rankAmt2"
-                    control={control}
-                    label={editable ? formItems[18].exsample : ''}
-                    fullWidth
-                    sx={{
-                      maxWidth: '50%',
-                      '& .MuiInputBase-input': {
-                        textAlign: 'right',
-                      },
-                      '& input[type=number]::-webkit-inner-spin-button': {
-                        WebkitAppearance: 'none',
-                        margin: 0,
-                      },
-                    }}
-                    type="number"
-                    disabled={editable ? false : true}
-                  />
-                </FormBox>
-              </Grid2>
-              <Grid2>
-                <FormBox formItem={formItems[19]}>
-                  <TextFieldElement
-                    name="rankAmt3"
-                    control={control}
-                    label={editable ? formItems[19].exsample : ''}
-                    fullWidth
-                    sx={{
-                      maxWidth: '50%',
-                      '& .MuiInputBase-input': {
-                        textAlign: 'right',
-                      },
-                      '& input[type=number]::-webkit-inner-spin-button': {
-                        WebkitAppearance: 'none',
-                        margin: 0,
-                      },
-                    }}
-                    type="number"
-                    disabled={editable ? false : true}
-                  />
-                </FormBox>
-              </Grid2>
-              <Grid2>
-                <FormBox formItem={formItems[20]}>
-                  <TextFieldElement
-                    name="rankAmt4"
-                    control={control}
-                    label={editable ? formItems[20].exsample : ''}
-                    fullWidth
-                    sx={{
-                      maxWidth: '50%',
-                      '& .MuiInputBase-input': {
-                        textAlign: 'right',
-                      },
-                      '& input[type=number]::-webkit-inner-spin-button': {
-                        WebkitAppearance: 'none',
-                        margin: 0,
-                      },
-                    }}
-                    type="number"
-                    disabled={editable ? false : true}
-                  />
-                </FormBox>
-              </Grid2>
-              <Grid2>
-                <FormBox formItem={formItems[21]}>
-                  <TextFieldElement
-                    name="rankAmt5"
-                    control={control}
-                    label={editable ? formItems[21].exsample : ''}
-                    fullWidth
-                    sx={{
-                      maxWidth: '50%',
-                      '& .MuiInputBase-input': {
-                        textAlign: 'right',
-                      },
-                      '& input[type=number]::-webkit-inner-spin-button': {
-                        WebkitAppearance: 'none',
-                        margin: 0,
-                      },
-                    }}
-                    type="number"
-                    disabled={editable ? false : true}
-                  />
-                </FormBox>
-              </Grid2>
+              <FormBox formItem={formItems[0]} required>
+                <TextFieldElement
+                  name="kizaiNam"
+                  control={control}
+                  label={editable ? formItems[0].exsample : ''}
+                  fullWidth
+                  sx={{ maxWidth: '90%' }}
+                  disabled={editable ? false : true}
+                />
+              </FormBox>
+              <FormBox formItem={formItems[1]}>
+                <TextField value={kizaiQty.all ? String(kizaiQty.all) : ''} disabled />
+                <Box ml={1}>
+                  <Button
+                    component="a"
+                    href={`/rfid-master/${eqptId}`}
+                    target="_blank" // 新しいタブで開く
+                    rel="noopener noreferrer"
+                  >
+                    RFIDマスタ
+                  </Button>
+                </Box>
+              </FormBox>
+              <FormBox formItem={formItems[2]}>
+                <TextField value={kizaiQty.ng ? String(kizaiQty.ng) : ''} disabled />
+              </FormBox>
+              <FormBox formItem={formItems[3]}>
+                <TextField value={kizaiQty ? String(kizaiQty.all - kizaiQty.ng) : ''} disabled />
+              </FormBox>
+              <FormBox formItem={formItems[4]}>
+                <TextFieldElement
+                  name="sectionNum"
+                  control={control}
+                  label={editable ? formItems[4].exsample : ''}
+                  fullWidth
+                  sx={{
+                    maxWidth: '20%',
+                    '& .MuiInputBase-input': {
+                      textAlign: 'right',
+                    },
+                    '& input[type=number]::-webkit-inner-spin-button': {
+                      WebkitAppearance: 'none',
+                      margin: 0,
+                    },
+                  }}
+                  disabled={editable ? false : true}
+                  type="number"
+                />
+                <Typography variant="body2" ml={2}>
+                  {formItems[4].other}
+                </Typography>
+              </FormBox>
+              <FormBox formItem={formItems[5]} required>
+                <SelectElement
+                  name="shozokuId"
+                  control={control}
+                  disabled={editable ? false : true}
+                  sx={{ width: 250 }}
+                  options={selectOptions.shozoku!}
+                />
+              </FormBox>
+              <FormBox formItem={formItems[6]}>
+                <TextFieldElement
+                  name="bldCod"
+                  control={control}
+                  label={editable ? formItems[6].exsample : ''}
+                  fullWidth
+                  sx={{ maxWidth: '50%' }}
+                  disabled={editable ? false : true}
+                />
+              </FormBox>
+              <FormBox formItem={formItems[7]}>
+                <TextFieldElement
+                  name="tanaCod"
+                  control={control}
+                  label={editable ? formItems[7].exsample : ''}
+                  fullWidth
+                  sx={{ maxWidth: '50%' }}
+                  disabled={editable ? false : true}
+                />
+              </FormBox>
+              <FormBox formItem={formItems[8]}>
+                <TextFieldElement
+                  name="edaCod"
+                  control={control}
+                  label={editable ? formItems[8].exsample : ''}
+                  fullWidth
+                  sx={{ maxWidth: '50%' }}
+                  disabled={editable ? false : true}
+                />
+              </FormBox>
+              <FormBox formItem={formItems[9]}>
+                <TextFieldElement
+                  name="kizaiGrpCod"
+                  control={control}
+                  label={editable ? formItems[9].exsample : ''}
+                  fullWidth
+                  sx={{ maxWidth: '50%' }}
+                  disabled={editable ? false : true}
+                />
+              </FormBox>
+              <FormBox formItem={formItems[10]}>
+                <TextFieldElement
+                  name="dspOrdNum"
+                  control={control}
+                  label={editable ? formItems[10].exsample : ''}
+                  fullWidth
+                  sx={{
+                    maxWidth: '20%',
+                    '& .MuiInputBase-input': {
+                      textAlign: 'right',
+                    },
+                    '& input[type=number]::-webkit-inner-spin-button': {
+                      WebkitAppearance: 'none',
+                      margin: 0,
+                    },
+                  }}
+                  type="number"
+                  disabled={editable ? false : true}
+                />
+              </FormBox>
+              <FormBox formItem={formItems[11]}>
+                <TextFieldElement
+                  multiline
+                  name="mem"
+                  control={control}
+                  label={editable ? formItems[11].exsample : ''}
+                  fullWidth
+                  sx={{ maxWidth: '90%' }}
+                  disabled={editable ? false : true}
+                />
+              </FormBox>
+              <FormBox formItem={formItems[12]}>
+                <Controller
+                  name="bumonId"
+                  control={control}
+                  disabled={editable ? false : true}
+                  render={({ field }) => (
+                    <Select {...field} sx={{ width: 250 }}>
+                      {[selectNone, ...selectOptions.b!].map((opt) => (
+                        <MenuItem
+                          key={opt.id}
+                          value={opt.id}
+                          sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
+                        >
+                          {opt.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  )}
+                />
+              </FormBox>
+              <FormBox formItem={formItems[13]}>
+                <Controller
+                  name="shukeibumonId"
+                  control={control}
+                  disabled={editable ? false : true}
+                  render={({ field }) => (
+                    <Select {...field} sx={{ width: 250 }}>
+                      {[selectNone, ...selectOptions.s!].map((opt) => (
+                        <MenuItem
+                          key={opt.id}
+                          value={opt.id}
+                          sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
+                        >
+                          {opt.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  )}
+                />
+              </FormBox>
+              <FormBox formItem={formItems[14]}>
+                <CheckboxElement name="dspFlg" control={control} size="medium" disabled={editable ? false : true} />
+              </FormBox>
+              <FormBox formItem={formItems[15]}>
+                <CheckboxElement name="ctnFlg" control={control} size="medium" disabled={editable ? false : true} />
+              </FormBox>
+              <FormBox formItem={formItems[16]} required>
+                <TextFieldElement
+                  name="regAmt"
+                  control={control}
+                  label={editable ? formItems[16].exsample : ''}
+                  fullWidth
+                  sx={{
+                    maxWidth: '50%',
+                    '& .MuiInputBase-input': {
+                      textAlign: 'right',
+                    },
+                    '& input[type=number]::-webkit-inner-spin-button': {
+                      WebkitAppearance: 'none',
+                      margin: 0,
+                    },
+                  }}
+                  type="number"
+                  disabled={editable ? false : true}
+                />
+              </FormBox>
+              {/* <FormBox formItem={formItems[17]}>
+                <TextFieldElement
+                  name="rankAmt1"
+                  control={control}
+                  label={editable ? formItems[17].exsample : ''}
+                  fullWidth
+                  sx={{
+                    maxWidth: '50%',
+                    '& .MuiInputBase-input': {
+                      textAlign: 'right',
+                    },
+                    '& input[type=number]::-webkit-inner-spin-button': {
+                      WebkitAppearance: 'none',
+                      margin: 0,
+                    },
+                  }}
+                  type="number"
+                  disabled={editable ? false : true}
+                />
+              </FormBox>
+              <FormBox formItem={formItems[18]}>
+                <TextFieldElement
+                  name="rankAmt2"
+                  control={control}
+                  label={editable ? formItems[18].exsample : ''}
+                  fullWidth
+                  sx={{
+                    maxWidth: '50%',
+                    '& .MuiInputBase-input': {
+                      textAlign: 'right',
+                    },
+                    '& input[type=number]::-webkit-inner-spin-button': {
+                      WebkitAppearance: 'none',
+                      margin: 0,
+                    },
+                  }}
+                  type="number"
+                  disabled={editable ? false : true}
+                />
+              </FormBox>
+              <FormBox formItem={formItems[19]}>
+                <TextFieldElement
+                  name="rankAmt3"
+                  control={control}
+                  label={editable ? formItems[19].exsample : ''}
+                  fullWidth
+                  sx={{
+                    maxWidth: '50%',
+                    '& .MuiInputBase-input': {
+                      textAlign: 'right',
+                    },
+                    '& input[type=number]::-webkit-inner-spin-button': {
+                      WebkitAppearance: 'none',
+                      margin: 0,
+                    },
+                  }}
+                  type="number"
+                  disabled={editable ? false : true}
+                />
+              </FormBox>
+              <FormBox formItem={formItems[20]}>
+                <TextFieldElement
+                  name="rankAmt4"
+                  control={control}
+                  label={editable ? formItems[20].exsample : ''}
+                  fullWidth
+                  sx={{
+                    maxWidth: '50%',
+                    '& .MuiInputBase-input': {
+                      textAlign: 'right',
+                    },
+                    '& input[type=number]::-webkit-inner-spin-button': {
+                      WebkitAppearance: 'none',
+                      margin: 0,
+                    },
+                  }}
+                  type="number"
+                  disabled={editable ? false : true}
+                />
+              </FormBox>
+              <FormBox formItem={formItems[21]}>
+                <TextFieldElement
+                  name="rankAmt5"
+                  control={control}
+                  label={editable ? formItems[21].exsample : ''}
+                  fullWidth
+                  sx={{
+                    maxWidth: '50%',
+                    '& .MuiInputBase-input': {
+                      textAlign: 'right',
+                    },
+                    '& input[type=number]::-webkit-inner-spin-button': {
+                      WebkitAppearance: 'none',
+                      margin: 0,
+                    },
+                  }}
+                  type="number"
+                  disabled={editable ? false : true}
+                />
+              </FormBox> */}
             </Grid2>
             <IsDirtyAlertDialog
               open={dirtyOpen}

@@ -40,6 +40,8 @@ export const QuotationList = ({
   const [page, setPage] = useState<number>(1);
   /* ローディングかどうか */
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  /* テーブル初期表示 */
+  const [isFirst, setIsFirst] = useState<boolean>(true);
 
   /* useForm ------------------------------------------- */
   const { control, handleSubmit, getValues } = useForm<QuotSearchValues>({
@@ -60,6 +62,7 @@ export const QuotationList = ({
   const onSubmit = async (data: QuotSearchValues) => {
     console.log(data);
     setIsLoading(true);
+    setIsFirst(false);
     setPage(1);
     const q = await getFilteredQuotList(data);
     if (q) {
@@ -247,6 +250,7 @@ export const QuotationList = ({
       <QuotationListTable
         quots={quotList}
         isLoading={isLoading}
+        isFirst={isFirst}
         page={page}
         queries={getValues()}
         setIsLoading={setIsLoading}

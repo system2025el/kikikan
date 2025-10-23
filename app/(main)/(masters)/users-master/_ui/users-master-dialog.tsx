@@ -1,9 +1,9 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Grid2 } from '@mui/material';
+import { Grid2, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { TextFieldElement, useForm } from 'react-hook-form-mui';
+import { RadioButtonGroup, TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import { FormBox } from '@/app/(main)/_ui/form-box';
@@ -12,7 +12,7 @@ import { Loading } from '@/app/(main)/_ui/loading';
 import { FAKE_NEW_ID } from '../../_lib/constants';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
-import { emptyUser, formItems } from '../_lib/datas';
+import { emptyUser, formItems, radioPair, radioTrio } from '../_lib/datas';
 import { addNewUser, getChosenUser, updateUser } from '../_lib/funcs';
 import { UsersMasterDialogValues, UsersMaterDialogSchema } from '../_lib/types';
 /**
@@ -21,11 +21,11 @@ import { UsersMasterDialogValues, UsersMaterDialogSchema } from '../_lib/types';
  * @returns {JSX.Element} 担当者マスタの詳細ダイアログコンポーネント
  */
 export const UsersMasterDialog = ({
-  userId,
+  mailAdr,
   handleClose,
   refetchUsers,
 }: {
-  userId: number;
+  mailAdr: string;
   handleClose: () => void;
   refetchUsers: () => void;
 }) => {
@@ -69,7 +69,7 @@ export const UsersMasterDialog = ({
   const onSubmit = async (data: UsersMasterDialogValues) => {
     console.log('isDarty : ', isDirty);
     console.log(data);
-    if (userId === FAKE_NEW_ID) {
+    if (mailAdr === String(FAKE_NEW_ID)) {
       // await addNewUser(data);
       handleCloseDialog();
       refetchUsers();
@@ -122,14 +122,8 @@ export const UsersMasterDialog = ({
   useEffect(() => {
     console.log('★★★★★★★★★★★★★★★★★★★★★');
     const getThatOneUser = async () => {
-      if (userId === FAKE_NEW_ID) {
-        // 新規追加モード
-        reset(emptyUser); // フォーム初期化
-        setEditable(true); // 編集モードにする
-        setIsLoading(false);
-        setIsNew(true);
-      } else {
-        const user1 = await getChosenUser(userId);
+      if (mailAdr && mailAdr !== String(FAKE_NEW_ID)) {
+        const user1 = await getChosenUser(mailAdr);
         if (user1) {
           reset(user1); // 取得したデータでフォーム初期化
         }
@@ -137,7 +131,7 @@ export const UsersMasterDialog = ({
       }
     };
     getThatOneUser();
-  }, [userId]);
+  }, [mailAdr]);
   /* eslint-enable react-hooks/exhaustive-deps */
 
   return (
@@ -158,23 +152,105 @@ export const UsersMasterDialog = ({
         ) : (
           <>
             <Grid2 container spacing={1} p={5} direction={'column'} justifyContent={'center'} width={'100%'}>
-              <Grid2>
-                <FormBox formItem={formItems[0]} required={true}>
-                  <TextFieldElement
-                    name="tantouNam"
-                    control={control}
-                    label={editable ? formItems[0].exsample : ''}
-                    fullWidth
-                    sx={{ maxWidth: '90%' }}
-                    disabled={editable ? false : true}
-                  />
-                </FormBox>
-              </Grid2>
-              {/* <Grid2>
-                <FormBox formItem={formItems[1]}>
-                  <CheckboxElement name="delFlg" control={control} size="medium" disabled={editable ? false : true} />
-                </FormBox>
-              </Grid2> */}
+              <FormBox formItem={formItems[0]} required>
+                <TextFieldElement
+                  name="tantouNam"
+                  control={control}
+                  label={editable ? formItems[0].exsample : ''}
+                  fullWidth
+                  sx={{ maxWidth: '90%' }}
+                  disabled={editable ? false : true}
+                />
+              </FormBox>
+              <FormBox formItem={formItems[1]} required>
+                <TextFieldElement
+                  name="mailAdr"
+                  control={control}
+                  label={editable ? formItems[1].exsample : ''}
+                  fullWidth
+                  sx={{ maxWidth: '90%' }}
+                  disabled={editable ? false : true}
+                />
+              </FormBox>
+              <FormBox formItem={formItems[2]}>
+                <TextFieldElement
+                  name="shainCod"
+                  control={control}
+                  label={editable ? formItems[2].exsample : ''}
+                  fullWidth
+                  sx={{ maxWidth: '90%' }}
+                  disabled={editable ? false : true}
+                />
+              </FormBox>
+
+              <FormBox formItem={formItems[3]} required align="baseline">
+                <Grid2 container direction={'column'} spacing={1} p={0.5}>
+                  <Grid2 sx={styles.container}>
+                    <Typography mr={8}>受注系画面</Typography>
+                    <RadioButtonGroup
+                      name="psermission.juchu"
+                      control={control}
+                      options={radioTrio}
+                      disabled={editable ? false : true}
+                      row
+                    />
+                  </Grid2>
+                  <Grid2 sx={styles.container}>
+                    <Typography mr={6}>入出庫系画面</Typography>
+
+                    <RadioButtonGroup
+                      name="psermission.nyushuko"
+                      control={control}
+                      options={radioTrio}
+                      disabled={editable ? false : true}
+                      row
+                    />
+                  </Grid2>
+                  <Grid2 sx={styles.container}>
+                    <Typography mr={2}>業務マスタ系画面</Typography>
+                    <RadioButtonGroup
+                      name="psermission.masters"
+                      control={control}
+                      options={radioTrio}
+                      disabled={editable ? false : true}
+                      row
+                    />
+                  </Grid2>
+                  <Grid2 sx={styles.container}>
+                    <Typography mr={6}>ログイン管理</Typography>
+                    <RadioButtonGroup
+                      name="psermission.loginSetting"
+                      control={control}
+                      options={radioPair}
+                      disabled={editable ? false : true}
+                      row
+                    />
+                  </Grid2>
+                  <Grid2 sx={styles.container}>
+                    <Typography mr={6}>ハンディ作業</Typography>
+                    <RadioButtonGroup
+                      name="psermission.ht"
+                      control={control}
+                      options={radioPair}
+                      disabled={editable ? false : true}
+                      row
+                    />
+                  </Grid2>
+                </Grid2>
+              </FormBox>
+              <FormBox formItem={formItems[4]}>
+                <TextFieldElement
+                  name="mem"
+                  control={control}
+                  label={editable ? formItems[4].exsample : ''}
+                  fullWidth
+                  sx={{ maxWidth: '90%' }}
+                  disabled={editable ? false : true}
+                />
+              </FormBox>
+              <FormBox formItem={formItems[5]}>
+                <TextFieldElement name="lastLoginAt" control={control} sx={{ maxWidth: '90%' }} disabled />
+              </FormBox>
             </Grid2>
             <IsDirtyAlertDialog
               open={dirtyOpen}
@@ -195,4 +271,6 @@ export const UsersMasterDialog = ({
 };
 
 /** ---------------------------スタイル----------------------------- */
-const styles: { [key: string]: React.CSSProperties } = {};
+const styles: { [key: string]: React.CSSProperties } = {
+  container: { display: 'flex', alignItems: 'center' },
+};

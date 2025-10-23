@@ -141,7 +141,7 @@ export const MasterTable = ({
         })}
         {emptyRows > 0 && (
           <TableRow style={{ height: 25 * emptyRows }}>
-            <TableCell colSpan={headers.length + 2} />
+            <TableCell colSpan={headers.length + 1} />
           </TableRow>
         )}
       </TableBody>

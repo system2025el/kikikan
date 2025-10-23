@@ -37,12 +37,12 @@ export const BillListTable = ({
   bills,
   isLoading,
   page,
-  custs,
-  setIsLoading,
+  isFirst,
   setPage,
 }: {
   bills: BillsListTableValues[];
   isLoading: boolean;
+  isFirst: boolean;
   page: number;
   custs: SelectTypes[];
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
@@ -62,7 +62,6 @@ export const BillListTable = ({
   const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - bills.length) : 0;
 
   /* useState ----------------------------------------------------------- */
-  const [dialogOpen, setDialogOpen] = useState(false);
 
   /* useForm ------------------------------------------------------------ */
   const { control, handleSubmit, reset } = useForm<{
@@ -107,6 +106,8 @@ export const BillListTable = ({
       </Grid2>
       {isLoading ? (
         <Loading />
+      ) : isFirst ? (
+        <></>
       ) : !list || list.length === 0 ? (
         <Typography justifySelf={'center'}>該当する請求がありません</Typography>
       ) : (

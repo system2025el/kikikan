@@ -43,6 +43,7 @@ export const QuotationListTable = ({
   isLoading,
   page,
   queries,
+  isFirst,
   setIsLoading,
   setPage,
 }: {
@@ -50,6 +51,7 @@ export const QuotationListTable = ({
   isLoading: boolean;
   page: number;
   queries: QuotSearchValues;
+  isFirst: boolean;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setPage: React.Dispatch<React.SetStateAction<number>>;
 }) => {
@@ -183,6 +185,8 @@ export const QuotationListTable = ({
         </Grid2>
         {isLoading ? (
           <Loading />
+        ) : isFirst ? (
+          <></>
         ) : !list || list.length === 0 ? (
           <Typography justifySelf={'center'}>該当する見積がありません</Typography>
         ) : (
