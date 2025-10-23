@@ -1,6 +1,6 @@
 'use server';
 
-import { selectFilteredIdoList } from '@/app/_lib/db/tables/v-ido-den2yoko';
+import { selectFilteredIdoList } from '@/app/_lib/db/tables/v-ido-den3';
 
 import { IdoTableValues } from './types';
 

@@ -12,7 +12,6 @@ import {
   selectIdoDenJuchuMaxId,
   updateIdoDenJuchu,
 } from '@/app/_lib/db/tables/t-ido-den-juchu';
-import { deleteIdoFix, insertIdoFix, updateIdoFix } from '@/app/_lib/db/tables/t-ido-fix';
 import {
   deleteJuchuContainerMeisai,
   insertJuchuContainerMeisai,
@@ -436,9 +435,6 @@ export const saveJuchuKizai = async (
         const deleteIdoDenIds = deleteIdoKizaiData.map((data) => data.idoDenId);
         const deleteIdoDenResult = await delIdoDenJuchu(deleteIdoDenIds as number[], connection);
         console.log('移動伝票受注削除', deleteIdoDenResult);
-
-        // const deleteIdoFixResult = await delIdoFix(deleteIdoDenIds as number[], connection);
-        // console.log('移動確定削除', deleteIdoFixResult);
       }
       // 追加
       if (addIdoKizaiData.length > 0) {
@@ -446,17 +442,11 @@ export const saveJuchuKizai = async (
         const newIdoDenId = idoDenMaxId ? idoDenMaxId.ido_den_id + 1 : 1;
         const addIdoDenResult = await addIdoDenJuchu(newIdoDenId, addIdoKizaiData, userNam, connection);
         console.log('移動伝票受注追加', addIdoDenResult);
-
-        // const addIdoFixResult = await addIdoFix(newIdoDenId, addIdoKizaiData, userNam, connection);
-        // console.log('移動確定追加', addIdoFixResult);
       }
       // 更新
       if (updateIdoKizaiData.length > 0) {
         const updateIdoDenResult = await updIdoDenJuchu(updateIdoKizaiData, userNam, connection);
         console.log('移動伝票受注更新', updateIdoDenResult);
-
-        // const updateIdoFixResult = await updIdoFix(updateIdoKizaiData, userNam, connection);
-        // console.log('移動確定更新', updateIdoFixResult);
       }
     }
 
@@ -1587,96 +1577,6 @@ export const updIdoDenJuchu = async (
 export const delIdoDenJuchu = async (idoDenIds: number[], connection: PoolClient) => {
   try {
     await deleteIdoDenJuchu(idoDenIds, connection);
-  } catch (e) {
-    throw e;
-  }
-};
-
-/**
- * 移動確定新規追加
- * @param newIdoDenId 新規移動確定id
- * @param idoKizaiData 移動伝票データ
- * @param userNam ユーザー名
- * @returns
- */
-export const addIdoFix = async (
-  newIdoDenId: number,
-  idoKizaiData: JuchuKizaiMeisaiValues[],
-  userNam: string,
-  connection: PoolClient
-) => {
-  const newDepartureData: IdoFix[] = idoKizaiData.map((d, index) => ({
-    ido_den_id: newIdoDenId + index,
-    sagyo_den_dat: toISOStringYearMonthDay(d.sagyoDenDat as Date),
-    sagyo_siji_id: d.sagyoSijiId,
-    sagyo_id: d.sagyoSijiId,
-    sagyo_kbn_id: 60,
-    sagyo_fix_flg: 0,
-    add_dat: toJapanTimeString(),
-    add_user: userNam,
-  }));
-
-  const newArrivalData: IdoFix[] = idoKizaiData.map((d, index) => ({
-    ido_den_id: newIdoDenId + index,
-    sagyo_den_dat: toISOStringYearMonthDay(d.sagyoDenDat as Date),
-    sagyo_siji_id: d.sagyoSijiId,
-    sagyo_id: d.sagyoSijiId === 1 ? 2 : 1,
-    sagyo_kbn_id: 70,
-    sagyo_fix_flg: 0,
-    add_dat: toJapanTimeString(),
-    add_user: userNam,
-  }));
-
-  const mergeData = [...newDepartureData, ...newArrivalData];
-
-  try {
-    await insertIdoFix(mergeData, connection);
-    console.log('ido fix added successfully:', mergeData);
-    return true;
-  } catch (e) {
-    console.error('Exception while adding ido fix:', e);
-    throw e;
-  }
-};
-
-/**
- * 移動確定更新
- * @param idoKizaiData 移動伝票データ
- * @param userNam ユーザー名
- * @returns
- */
-export const updIdoFix = async (idoKizaiData: JuchuKizaiMeisaiValues[], userNam: string, connection: PoolClient) => {
-  const updateData: IdoFix[] = idoKizaiData.map((d) => {
-    if (!d.idoDenId) {
-      throw new Error();
-    }
-    return {
-      ido_den_id: d.idoDenId,
-      sagyo_den_dat: toISOStringYearMonthDay(d.sagyoDenDat as Date),
-      upd_dat: toJapanTimeString(),
-      upd_user: userNam,
-    };
-  });
-
-  try {
-    for (const data of updateData) {
-      await updateIdoFix(data, connection);
-    }
-    console.log('ido fix updated successfully:', updateData);
-    return true;
-  } catch (e) {
-    console.error('Exception while updating ido fix:', e);
-    throw e;
-  }
-};
-
-/**
- * 移動確定削除
- * @param idoDenIds 移動確定id
- */
-export const delIdoFix = async (idoDenIds: number[], connection: PoolClient) => {
-  try {
-    await deleteIdoFix(idoDenIds, connection);
   } catch (e) {
     throw e;
   }

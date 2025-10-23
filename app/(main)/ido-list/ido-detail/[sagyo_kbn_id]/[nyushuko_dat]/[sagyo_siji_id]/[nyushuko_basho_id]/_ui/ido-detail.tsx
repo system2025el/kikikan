@@ -1,22 +1,200 @@
 'use client';
 
 import AddIcon from '@mui/icons-material/Add';
-import { Box, Button, Dialog, Divider, Grid2, Paper, TextField, Typography } from '@mui/material';
-import { useState } from 'react';
+import WarningIcon from '@mui/icons-material/Warning';
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContentText,
+  DialogTitle,
+  Divider,
+  Grid2,
+  Paper,
+  Snackbar,
+  TextField,
+  Typography,
+} from '@mui/material';
+import { useRef, useState } from 'react';
 
+import { useUserStore } from '@/app/_lib/stores/usestore';
 import { toJapanDateString } from '@/app/(main)/_lib/date-conversion';
 import { BackButton } from '@/app/(main)/_ui/buttons';
 import { TestDate } from '@/app/(main)/_ui/date';
 
-import { IdoDetailValues } from '../_lib/types';
+import { addIdoFix, delIdoFix, getIdoDenMaxId, saveIdoDen } from '../_lib/funcs';
+import { IdoDetailTableValues, IdoDetailValues, SelectedIdoEqptsValues } from '../_lib/types';
 import { NyukoIdoDenTable, ShukoIdoDenTable } from './ido-detail-table';
 import { IdoEqptSelectionDialog } from './ido-equipment-selection-dialog';
 
-export const IdoDetail = (props: { idoDetailData: IdoDetailValues }) => {
+export const IdoDetail = (props: {
+  idoDetailData: IdoDetailValues;
+  idoDetailTableData: IdoDetailTableValues[];
+  fixFlag: boolean;
+}) => {
   const { idoDetailData } = props;
+
+  // user情報
+  const user = useUserStore((state) => state.user);
+
+  const [fixFlag, setFixFlag] = useState(props.fixFlag);
+
+  // 移動明細リスト
+  const [idoDetailList, setIdoDetailList] = useState<IdoDetailTableValues[]>(props.idoDetailTableData);
+  // 削除対象ID
+  const [deleteId, setDeleteId] = useState<number | null>(null);
 
   // 機材追加ダイアログ制御
   const [idoEqSelectionDialogOpen, setIdoEqSelectionDialogOpen] = useState(false);
+  // 削除ダイアログ制御
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  // 出発ダイアログ制御
+  const [departureOpen, setDepartureOpen] = useState(false);
+  // スナックバー制御
+  const [snackBarOpen, setSnackBarOpen] = useState(false);
+  // スナックバーメッセージ
+  const [snackBarMessage, setSnackBarMessage] = useState('');
+
+  /**
+   * 出発、到着ボタン押下
+   * @returns
+   */
+  const handleFix = async () => {
+    if (!user || idoDetailList.length === 0) return;
+
+    const message = idoDetailData.sagyoKbnId === 40 ? '出発' : '到着';
+    let result = false;
+    if (idoDetailData.sagyoKbnId === 40) {
+      const diffCheck = idoDetailList.find((data) => data.diffQty !== 0);
+
+      if (diffCheck) {
+        setDepartureOpen(true);
+        return;
+      }
+
+      result = await addIdoFix(
+        60,
+        idoDetailData.sagyoSijiId,
+        idoDetailData.nyushukoDat,
+        idoDetailData.nyushukoBashoId,
+        user.name
+      );
+    } else {
+      result = await addIdoFix(
+        70,
+        idoDetailData.sagyoSijiId,
+        idoDetailData.nyushukoDat,
+        idoDetailData.nyushukoBashoId,
+        user.name
+      );
+    }
+
+    if (result) {
+      setFixFlag(true);
+      setSnackBarMessage(`${message}しました`);
+      setSnackBarOpen(true);
+    } else {
+      setSnackBarMessage(`${message}に失敗しました`);
+      setSnackBarOpen(true);
+    }
+  };
+
+  /**
+   * 出発解除ボタン押下時
+   */
+  const handleRelease = async () => {
+    const result = await delIdoFix(
+      60,
+      idoDetailData.sagyoSijiId,
+      idoDetailData.nyushukoDat,
+      idoDetailData.nyushukoBashoId
+    );
+
+    if (result) {
+      setFixFlag(false);
+      setSnackBarMessage('出発解除しました');
+      setSnackBarOpen(true);
+    } else {
+      setSnackBarMessage('出発解除に失敗しました');
+      setSnackBarOpen(true);
+    }
+  };
+
+  /**
+   * 保存ボタン押下時
+   * @returns
+   */
+  const handleSave = async () => {
+    if (!user || idoDetailList.length === 0) return;
+
+    const updateData = await saveIdoDen(idoDetailList, user.name);
+
+    if (updateData) {
+      setIdoDetailList(updateData);
+      setSnackBarMessage('保存しました');
+      setSnackBarOpen(true);
+    } else {
+      setSnackBarMessage('保存に失敗しました');
+      setSnackBarOpen(true);
+    }
+  };
+
+  // 移動明細削除ボタン押下時
+  const handleIdoDenDelete = (kizaiId: number) => {
+    setDeleteOpen(true);
+    setDeleteId(kizaiId);
+  };
+
+  // 移動明細削除ダイアログの押下ボタンによる処理
+  const handleDeleteResult = (result: boolean) => {
+    if (!deleteId) return;
+
+    if (result) {
+      setIdoDetailList((prev) =>
+        prev.map((data) => (data.kizaiId === deleteId && !data.delFlag ? { ...data, delFlag: true } : data))
+      );
+      setDeleteOpen(false);
+      setDeleteId(null);
+    } else {
+      setDeleteOpen(false);
+      setDeleteId(null);
+    }
+  };
+
+  /**
+   * 機材追加時
+   * @param data 選択された機材データ
+   */
+  const setEqpts = async (data: SelectedIdoEqptsValues[]) => {
+    const kizaiIds = new Set(idoDetailList.filter((data) => !data.delFlag).map((data) => data.kizaiId));
+    const filterKizaiData = data.filter((d) => !kizaiIds.has(d.kizaiId));
+    const selectIdoEqpt: IdoDetailTableValues[] = filterKizaiData.map((d) => ({
+      idoDenId: 0,
+      sagyoKbnId: idoDetailData.sagyoKbnId,
+      nyushukoDat: idoDetailData.nyushukoDat,
+      sagyosijiId: idoDetailData.sagyoSijiId,
+      nyushukoBashoId: idoDetailData.nyushukoBashoId,
+      juchuFlg: 0,
+      kizaiId: d.kizaiId,
+      kizaiNam: d.kizaiNam,
+      shozokuId: d.shozokuId,
+      rfidYardQty: d.rfidYardQty,
+      rfidKicsQty: d.rfidKicsQty,
+      planJuchuQty: 0,
+      planLowQty: 0,
+      planQty: 0,
+      resultAdjQty: 0,
+      resultQty: 0,
+      diffQty: 0,
+      ctnFlg: d.ctnFlg,
+      delFlag: false,
+      saveFlag: false,
+    }));
+
+    setIdoDetailList((prev) => [...prev, ...selectIdoEqpt]);
+  };
+
   return (
     <Box>
       <Box display={'flex'} justifyContent={'end'} mb={1}>
@@ -27,7 +205,20 @@ export const IdoDetail = (props: { idoDetailData: IdoDetailValues }) => {
           <Typography fontSize={'large'}>
             移動明細({idoDetailData.sagyoKbnId === 40 ? '移動出庫' : '移動入庫'})
           </Typography>
-          <Button /*onClick={handleDeparture}*/>{idoDetailData.sagyoKbnId === 40 ? '出発' : '到着'}</Button>
+          <Grid2 container alignItems={'center'} spacing={2}>
+            {fixFlag && <Typography>{idoDetailData.sagyoKbnId === 40 ? '出発済' : '到着済'}</Typography>}
+            <Button onClick={handleFix} disabled={fixFlag}>
+              {idoDetailData.sagyoKbnId === 40 ? '出発' : '到着'}
+            </Button>
+            <Button
+              color="error"
+              onClick={handleRelease}
+              disabled={!fixFlag}
+              sx={{ display: idoDetailData.sagyoKbnId === 40 ? 'inline-flex' : 'none' }}
+            >
+              出発解除
+            </Button>
+          </Grid2>
         </Box>
         <Divider />
         <Grid2 container size={{ xs: 12, sm: 12, md: 6 }} direction={'column'} p={{ sx: 1, sm: 1, md: 2 }} spacing={1}>
@@ -61,10 +252,18 @@ export const IdoDetail = (props: { idoDetailData: IdoDetailValues }) => {
                 <Typography sx={{ backgroundColor: 'rgba(158, 158, 158, 1)' }}>済</Typography>
                 <Typography sx={{ backgroundColor: 'rgba(255, 171, 64, 1)' }}>不足</Typography>
                 <Typography sx={{ backgroundColor: 'rgba(68, 138, 255, 1)' }}>コンテナ</Typography>
-                <Button>保存</Button>
+                <Button onClick={handleSave} sx={{ display: idoDetailData.sagyoKbnId === 40 ? 'inline-flex' : 'none' }}>
+                  保存
+                </Button>
               </Grid2>
             </Box>
-            {/*idoDenManualList.length > 0 &&*/ <ShukoIdoDenTable /*datas={idoDenManualList}*/ />}
+            {idoDetailList.length > 0 && (
+              <ShukoIdoDenTable
+                datas={idoDetailList}
+                setIdoDetailList={setIdoDetailList}
+                handleIdoDenDelete={handleIdoDenDelete}
+              />
+            )}
           </Box>
         ) : (
           <Box width={'100%'} pb={3}>
@@ -75,13 +274,46 @@ export const IdoDetail = (props: { idoDetailData: IdoDetailValues }) => {
                 <Typography sx={{ backgroundColor: 'rgba(68, 138, 255, 1)' }}>コンテナ</Typography>
               </Grid2>
             </Box>
-            {/*idoDenData.length > 0 &&*/ <NyukoIdoDenTable /*datas={idoDetailData}*/ />}
+            {idoDetailList.length > 0 && <NyukoIdoDenTable datas={idoDetailList} />}
           </Box>
         )}
       </Paper>
       <Dialog open={idoEqSelectionDialogOpen} fullScreen>
-        <IdoEqptSelectionDialog setEqpts={() => {}} handleCloseDialog={() => setIdoEqSelectionDialogOpen(false)} />
+        <IdoEqptSelectionDialog setEqpts={setEqpts} handleCloseDialog={() => setIdoEqSelectionDialogOpen(false)} />
       </Dialog>
+      <Dialog open={deleteOpen}>
+        <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
+          <WarningIcon color="error" />
+          <Box>削除</Box>
+        </DialogTitle>
+        <DialogContentText m={2} p={2}>
+          削除してもよろしいでしょうか？
+        </DialogContentText>
+        <DialogActions>
+          <Button onClick={() => handleDeleteResult(true)}>削除</Button>
+          <Button onClick={() => handleDeleteResult(false)}>戻る</Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog open={departureOpen}>
+        <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
+          <WarningIcon color="error" />
+          <Box>不足があります</Box>
+        </DialogTitle>
+        <DialogContentText m={2} p={2}>
+          不足があるため、出発できません
+        </DialogContentText>
+        <DialogActions>
+          <Button onClick={() => setDepartureOpen(false)}>確認</Button>
+        </DialogActions>
+      </Dialog>
+      <Snackbar
+        open={snackBarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackBarOpen(false)}
+        message={snackBarMessage}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={{ marginTop: '65px' }}
+      />
     </Box>
   );
 };

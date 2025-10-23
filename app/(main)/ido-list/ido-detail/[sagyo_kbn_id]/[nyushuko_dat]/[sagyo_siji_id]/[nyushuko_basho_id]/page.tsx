@@ -1,5 +1,5 @@
-import { getIdoDetail } from './_lib/funcs';
-import { IdoDetailValues } from './_lib/types';
+import { getIdoDen, getIdoFix } from './_lib/funcs';
+import { IdoDetailTableValues, IdoDetailValues } from './_lib/types';
 import { IdoDetail } from './_ui/ido-detail';
 
 const Page = async (props: {
@@ -35,7 +35,11 @@ const Page = async (props: {
     nyushukoBashoId: nyushukoBashoId,
   };
 
-  const idoDetailTableData = await getIdoDetail(sagyoKbnId);
-  return <IdoDetail idoDetailData={idoDetailData} />;
+  const idoDenData = await getIdoDen(sagyoKbnId, sagyoSijiId, nyushukoDat, nyushukoBashoId);
+
+  const fixKbn = sagyoKbnId === 40 ? 60 : 70;
+  const fixFlag = await getIdoFix(fixKbn, sagyoSijiId, nyushukoDat, nyushukoBashoId);
+
+  return <IdoDetail idoDetailData={idoDetailData} idoDetailTableData={idoDenData} fixFlag={fixFlag} />;
 };
 export default Page;

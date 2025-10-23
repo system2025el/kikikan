@@ -28,7 +28,7 @@ import { TextFieldElement } from 'react-hook-form-mui';
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { checkSetoptions, getIdoEqptsForEqptSelection, getIdoSelectedEqpts } from '../_lib/funcs';
-import { IdoEqptSelection } from '../_lib/types';
+import { IdoEqptSelection, SelectedIdoEqptsValues } from '../_lib/types';
 import { IdoEqptBumonsTable } from './ido-equipment-bumons-table';
 import { IdoEqptTable } from './ido-equipments-table';
 
@@ -36,7 +36,7 @@ export const IdoEqptSelectionDialog = ({
   setEqpts,
   handleCloseDialog,
 }: {
-  setEqpts: (data: IdoEqptSelection[]) => void;
+  setEqpts: (data: SelectedIdoEqptsValues[]) => void;
   handleCloseDialog: () => void;
 }) => {
   /* useState ------------------------- */
@@ -217,7 +217,7 @@ const IdoBundleDialog = ({
   isLoading: boolean;
   selectedEqpts: number[];
   handleClose: () => void;
-  setEqpts: (data: IdoEqptSelection[]) => void;
+  setEqpts: (data: SelectedIdoEqptsValues[]) => void;
 }) => {
   /* useState ------------------------------------------ */
   /* 選択される機材のidのリスト */

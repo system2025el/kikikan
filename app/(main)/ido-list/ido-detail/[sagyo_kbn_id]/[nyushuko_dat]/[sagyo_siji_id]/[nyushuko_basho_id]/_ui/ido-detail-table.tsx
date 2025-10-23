@@ -1,15 +1,41 @@
 'use client';
 import Delete from '@mui/icons-material/Delete';
-import { IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField } from '@mui/material';
+import {
+  Button,
+  IconButton,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+} from '@mui/material';
 import { purple } from '@mui/material/colors';
 import { usePathname, useRouter } from 'next/navigation';
+import { Dispatch, RefObject, SetStateAction, useState } from 'react';
 
-export const ShukoIdoDenTable = () => {
+import { IdoDetailTableValues } from '../_lib/types';
+
+export const ShukoIdoDenTable = (props: {
+  datas: IdoDetailTableValues[];
+  setIdoDetailList: Dispatch<SetStateAction<IdoDetailTableValues[]>>;
+  handleIdoDenDelete: (kizaiId: number) => void;
+}) => {
+  const { datas, setIdoDetailList, handleIdoDenDelete } = props;
+
   const router = useRouter();
   const path = usePathname();
 
-  const handleClick = () => {
-    router.push(`${path}/ido-eqpt-detail/1`);
+  const handleClick = (kizaiId: number) => {
+    router.push(`${path}/ido-eqpt-detail/${kizaiId}`);
+  };
+
+  const handleCellChange = (kizaiId: number, planQty: number) => {
+    const updateData = datas.map((d) =>
+      d.kizaiId === kizaiId ? { ...d, planQty: planQty, diffQty: d.resultQty + d.resultAdjQty - planQty } : d
+    );
+    setIdoDetailList(updateData);
   };
 
   return (
@@ -52,177 +78,101 @@ export const ShukoIdoDenTable = () => {
           </TableRow>
         </TableHead>
         <TableBody>
-          <TableRow onClick={handleClick} style={{ cursor: 'pointer' }} hover sx={{ whiteSpace: 'nowrap' }}>
-            <TableCell padding="checkbox"></TableCell>
-            <TableCell padding="checkbox">{1}</TableCell>
-            <TableCell align="left">X001</TableCell>
-            <TableCell align="left">Y</TableCell>
-            <TableCell align="right">10</TableCell>
-            <TableCell align="right">5</TableCell>
-            <TableCell align="right">8</TableCell>
-            <TableCell align="right">3</TableCell>
-            <TableCell align="right" size="small">
-              <TextField
-                onClick={(e) => {
-                  e.stopPropagation();
-                }}
-                type="number"
-                defaultValue={0}
+          {datas
+            .filter((d) => !d.delFlag)
+            .map((row, index) => (
+              <TableRow
+                key={index}
                 sx={{
-                  width: 50,
-                  '& .MuiInputBase-input': {
-                    textAlign: 'right',
-                    p: 0.5,
-                  },
-                  '& input[type=number]::-webkit-inner-spin-button': {
-                    WebkitAppearance: 'none',
-                    margin: 0,
-                  },
+                  whiteSpace: 'nowrap',
+                  backgroundColor:
+                    row.diffQty === 0 && !row.ctnFlg
+                      ? 'rgba(158, 158, 158, 1)'
+                      : row.ctnFlg
+                        ? 'rgba(68, 138, 255, 1)'
+                        : 'white',
                 }}
-                slotProps={{
-                  input: {
-                    style: { textAlign: 'right' },
-                    inputMode: 'numeric',
-                  },
-                }}
-              />
-            </TableCell>
-            <TableCell align="right">0</TableCell>
-            <TableCell align="right">0</TableCell>
-            <TableCell align="right">0</TableCell>
-          </TableRow>
-          <TableRow onClick={handleClick} style={{ cursor: 'pointer' }} hover sx={{ whiteSpace: 'nowrap' }}>
-            <TableCell padding="checkbox"></TableCell>
-            <TableCell padding="checkbox">{2}</TableCell>
-            <TableCell align="left">X002</TableCell>
-            <TableCell align="left">Y</TableCell>
-            <TableCell align="right">12</TableCell>
-            <TableCell align="right">5</TableCell>
-            <TableCell align="right">5</TableCell>
-            <TableCell align="right">0</TableCell>
-            <TableCell align="right" size="small">
-              <TextField
-                onClick={(e) => {
-                  e.stopPropagation();
-                }}
-                type="number"
-                value={0}
-                sx={{
-                  width: 50,
-                  '& .MuiInputBase-input': {
-                    textAlign: 'right',
-                    p: 0.5,
-                  },
-                  '& input[type=number]::-webkit-inner-spin-button': {
-                    WebkitAppearance: 'none',
-                    margin: 0,
-                  },
-                }}
-                slotProps={{
-                  input: {
-                    style: { textAlign: 'right' },
-                    inputMode: 'numeric',
-                  },
-                }}
-              />
-            </TableCell>
-            <TableCell align="right">0</TableCell>
-            <TableCell align="right">0</TableCell>
-            <TableCell align="right">0</TableCell>
-          </TableRow>
-          <TableRow onClick={handleClick} style={{ cursor: 'pointer' }} hover sx={{ whiteSpace: 'nowrap' }}>
-            <TableCell padding="checkbox">
-              <IconButton /*onClick={() => handleDelete(row.kizaiId)}*/ sx={{ color: 'red' }}>
-                <Delete fontSize="small" />
-              </IconButton>
-            </TableCell>
-            <TableCell padding="checkbox">{3}</TableCell>
-            <TableCell align="left">X011</TableCell>
-            <TableCell align="left">Y</TableCell>
-            <TableCell align="right">7</TableCell>
-            <TableCell align="right">0</TableCell>
-            <TableCell align="right">0</TableCell>
-            <TableCell align="right">0</TableCell>
-            <TableCell align="right" size="small">
-              <TextField
-                onClick={(e) => {
-                  e.stopPropagation();
-                }}
-                type="number"
-                value={0}
-                sx={{
-                  width: 50,
-                  '& .MuiInputBase-input': {
-                    textAlign: 'right',
-                    p: 0.5,
-                  },
-                  '& input[type=number]::-webkit-inner-spin-button': {
-                    WebkitAppearance: 'none',
-                    margin: 0,
-                  },
-                }}
-                slotProps={{
-                  input: {
-                    style: { textAlign: 'right' },
-                    inputMode: 'numeric',
-                  },
-                }}
-              />
-            </TableCell>
-            <TableCell align="right">0</TableCell>
-            <TableCell align="right">0</TableCell>
-            <TableCell align="right">0</TableCell>
-          </TableRow>
-          <TableRow onClick={handleClick} style={{ cursor: 'pointer' }} hover sx={{ whiteSpace: 'nowrap' }}>
-            <TableCell padding="checkbox">
-              <IconButton /*onClick={() => handleDelete(row.kizaiId)}*/ sx={{ color: 'red' }}>
-                <Delete fontSize="small" />
-              </IconButton>
-            </TableCell>
-            <TableCell padding="checkbox">{4}</TableCell>
-            <TableCell align="left">X012</TableCell>
-            <TableCell align="left">Y</TableCell>
-            <TableCell align="right">8</TableCell>
-            <TableCell align="right">3</TableCell>
-            <TableCell align="right">0</TableCell>
-            <TableCell align="right">0</TableCell>
-            <TableCell align="right" size="small">
-              <TextField
-                onClick={(e) => {
-                  e.stopPropagation();
-                }}
-                type="number"
-                value={0}
-                sx={{
-                  width: 50,
-                  '& .MuiInputBase-input': {
-                    textAlign: 'right',
-                    p: 0.5,
-                  },
-                  '& input[type=number]::-webkit-inner-spin-button': {
-                    WebkitAppearance: 'none',
-                    margin: 0,
-                  },
-                }}
-                slotProps={{
-                  input: {
-                    style: { textAlign: 'right' },
-                    inputMode: 'numeric',
-                  },
-                }}
-              />
-            </TableCell>
-            <TableCell align="right">0</TableCell>
-            <TableCell align="right">0</TableCell>
-            <TableCell align="right">0</TableCell>
-          </TableRow>
+              >
+                <TableCell padding="checkbox">
+                  <IconButton
+                    onClick={(e) => {
+                      handleIdoDenDelete(row.kizaiId);
+                    }}
+                    sx={{
+                      display: row.juchuFlg === 0 ? 'inline-block' : 'none',
+                      color: 'red',
+                    }}
+                  >
+                    <Delete fontSize="small" />
+                  </IconButton>
+                </TableCell>
+                <TableCell padding="checkbox">{index + 1}</TableCell>
+                <TableCell
+                  align="left"
+                  onClick={() => handleClick(row.kizaiId)}
+                  sx={{ cursor: 'pointer', '&:hover': { backgroundColor: 'rgba(0,0,0,0.04)' } }}
+                >
+                  {row.kizaiNam}
+                </TableCell>
+                <TableCell align="left">{row.shozokuId === 1 ? 'K' : 'Y'}</TableCell>
+                <TableCell align="right">{row.rfidYardQty}</TableCell>
+                <TableCell align="right">{row.rfidKicsQty}</TableCell>
+                <TableCell align="right">{row.planJuchuQty}</TableCell>
+                <TableCell align="right">{row.planLowQty}</TableCell>
+                <TableCell align="right" size="small">
+                  <TextField
+                    type="text"
+                    value={row.planQty}
+                    onChange={(e) => {
+                      if (/^\d*$/.test(e.target.value)) {
+                        handleCellChange(row.kizaiId, Number(e.target.value));
+                      }
+                    }}
+                    sx={{
+                      width: 50,
+                      '& .MuiInputBase-input': {
+                        textAlign: 'right',
+                        p: 0.5,
+                      },
+                      '& input[type=number]::-webkit-inner-spin-button': {
+                        WebkitAppearance: 'none',
+                        margin: 0,
+                      },
+                    }}
+                    slotProps={{
+                      input: {
+                        style: { textAlign: 'right' },
+                        inputMode: 'numeric',
+                      },
+                    }}
+                  />
+                </TableCell>
+                <TableCell align="right">{row.resultQty}</TableCell>
+                <TableCell align="right">{row.resultAdjQty}</TableCell>
+                <TableCell
+                  align="right"
+                  sx={{
+                    backgroundColor:
+                      row.diffQty < 0
+                        ? 'rgba(255, 171, 64, 1)'
+                        : row.diffQty === 0 && row.ctnFlg
+                          ? 'rgba(68, 138, 255, 1)'
+                          : 'rgba(158, 158, 158, 1)',
+                  }}
+                >
+                  {row.diffQty}
+                </TableCell>
+              </TableRow>
+            ))}
         </TableBody>
       </Table>
     </TableContainer>
   );
 };
 
-export const NyukoIdoDenTable = () => {
+export const NyukoIdoDenTable = (props: { datas: IdoDetailTableValues[] }) => {
+  const { datas } = props;
+
   const router = useRouter();
   const path = usePathname();
 
@@ -253,38 +203,22 @@ export const NyukoIdoDenTable = () => {
           </TableRow>
         </TableHead>
         <TableBody>
-          <TableRow onClick={handleClick} style={{ cursor: 'pointer' }} hover sx={{ whiteSpace: 'nowrap' }}>
-            <TableCell padding="checkbox">{1}</TableCell>
-            <TableCell align="left">X001</TableCell>
-            <TableCell align="right">3</TableCell>
-            <TableCell align="right">2</TableCell>
-            <TableCell align="right">1</TableCell>
-            <TableCell align="right">0</TableCell>
-          </TableRow>
-          <TableRow onClick={handleClick} style={{ cursor: 'pointer' }} hover sx={{ whiteSpace: 'nowrap' }}>
-            <TableCell padding="checkbox">{2}</TableCell>
-            <TableCell align="left">X002</TableCell>
-            <TableCell align="right">0</TableCell>
-            <TableCell align="right">0</TableCell>
-            <TableCell align="right">0</TableCell>
-            <TableCell align="right">0</TableCell>
-          </TableRow>
-          <TableRow onClick={handleClick} style={{ cursor: 'pointer' }} hover sx={{ whiteSpace: 'nowrap' }}>
-            <TableCell padding="checkbox">{3}</TableCell>
-            <TableCell align="left">X011</TableCell>
-            <TableCell align="right">3</TableCell>
-            <TableCell align="right">2</TableCell>
-            <TableCell align="right">1</TableCell>
-            <TableCell align="right">0</TableCell>
-          </TableRow>
-          <TableRow onClick={handleClick} style={{ cursor: 'pointer' }} hover sx={{ whiteSpace: 'nowrap' }}>
-            <TableCell padding="checkbox">{4}</TableCell>
-            <TableCell align="left">X012</TableCell>
-            <TableCell align="right">0</TableCell>
-            <TableCell align="right">0</TableCell>
-            <TableCell align="right">0</TableCell>
-            <TableCell align="right">0</TableCell>
-          </TableRow>
+          {datas.map((row, index) => (
+            <TableRow
+              key={index}
+              onClick={handleClick}
+              style={{ cursor: 'pointer' }}
+              hover
+              sx={{ whiteSpace: 'nowrap' }}
+            >
+              <TableCell padding="checkbox">{index + 1}</TableCell>
+              <TableCell align="left">{row.kizaiNam}</TableCell>
+              <TableCell align="right">{row.planQty}</TableCell>
+              <TableCell align="right">{row.resultQty}</TableCell>
+              <TableCell align="right">{row.resultAdjQty}</TableCell>
+              <TableCell align="right">{row.diffQty}</TableCell>
+            </TableRow>
+          ))}
         </TableBody>
       </Table>
     </TableContainer>
