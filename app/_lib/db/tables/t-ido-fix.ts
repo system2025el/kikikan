@@ -6,78 +6,66 @@ import { SCHEMA, supabase } from '../supabase';
 import { IdoFix } from '../types/t-ido-fix-type';
 
 /**
- * 移動確定新規追加
- * @param data 移動確定データ
+ * 移動確定id最大値取得
  * @returns
  */
-export const insertIdoFix = async (data: IdoFix[], connection: PoolClient) => {
-  const cols = Object.keys(data[0]) as (keyof (typeof data)[0])[];
-  const values = data.flatMap((obj) => cols.map((col) => obj[col] ?? null));
-  let placeholderIndex = 1;
-  const placeholders = data
-    .map(() => {
-      const rowPlaceholders = cols.map(() => `$${placeholderIndex++}`);
-      return `(${rowPlaceholders.join(', ')})`;
-    })
-    .join(', ');
-
-  const query = `
-    INSERT INTO
-      ${SCHEMA}.t_ido_fix (${cols.join(',')})
-    VALUES 
-      ${placeholders}
-  `;
-
+export const selectIdoFixMaxId = async () => {
   try {
-    await connection.query(query, values);
+    return await supabase
+      .schema(SCHEMA)
+      .from('t_ido_fix')
+      .select('ido_den_id')
+      .order('ido_den_id', {
+        ascending: false,
+      })
+      .limit(1)
+      .single();
   } catch (e) {
     throw e;
   }
 };
 
 /**
- * 移動確定更新
+ * 移動確定取得
+ * @param sagyoKbnId 作業区分id
+ * @param sagyoSijiId 作業指示id
+ * @param sagyoDenDatDat 作業日時
+ * @param sagyoId 作業id
+ * @returns
+ */
+export const selectIdoFix = async (
+  sagyoKbnId: number,
+  sagyoSijiId: number,
+  sagyoDenDatDat: string,
+  sagyoId: number
+) => {
+  try {
+    return await supabase
+      .schema(SCHEMA)
+      .from('t_ido_fix')
+      .select('ido_den_id')
+      .eq('sagyo_kbn_id', sagyoKbnId)
+      .eq('sagyo_siji_id', sagyoSijiId)
+      .eq('sagyo_den_dat', sagyoDenDatDat)
+      .eq('sagyo_id', sagyoId)
+      .order('ido_den_id', {
+        ascending: false,
+      })
+      .limit(1)
+      .single();
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
+ * 移動確定新規追加
  * @param data 移動確定データ
  * @returns
  */
-export const updateIdoFix = async (data: IdoFix, connection: PoolClient) => {
-  const whereKeys = ['ido_den_id'] as const;
-
-  const allKeys = Object.keys(data) as (keyof typeof data)[];
-
-  const updateKeys = allKeys.filter((key) => !(whereKeys as readonly string[]).includes(key));
-
-  if (updateKeys.length === 0) {
-    throw new Error('No columns to update.');
-  }
-
-  const allValues: (string | number | null | undefined)[] = [];
-  let placeholderIndex = 1;
-
-  const setClause = updateKeys
-    .map((key) => {
-      allValues.push(data[key]);
-      return `${key} = $${placeholderIndex++}`;
-    })
-    .join(', ');
-
-  const whereClause = whereKeys
-    .map((key) => {
-      allValues.push(data[key]);
-      return `${key} = $${placeholderIndex++}`;
-    })
-    .join(' AND ');
-
-  const query = `
-      UPDATE
-        ${SCHEMA}.t_ido_fix
-      SET
-        ${setClause}
-      WHERE
-        ${whereClause}
-    `;
+export const insertIdoFix = async (data: IdoFix) => {
   try {
-    await connection.query(query, allValues);
+    return await supabase.schema(SCHEMA).from('t_ido_fix').insert(data);
   } catch (e) {
     throw e;
   }
@@ -88,18 +76,21 @@ export const updateIdoFix = async (data: IdoFix, connection: PoolClient) => {
  * @param idoDenIds 移動確定id
  * @returns
  */
-export const deleteIdoFix = async (idoDenIds: number[], connection: PoolClient) => {
-  const query = `
-    DELETE FROM
-      ${SCHEMA}.t_ido_fix
-    WHERE
-      ido_den_id = ANY($1)
-  `;
-
-  const values = [idoDenIds];
-
+export const deleteIdoFix = async (
+  sagyoKbnId: number,
+  sagyoSijiId: number,
+  sagyoDenDatDat: string,
+  sagyoId: number
+) => {
   try {
-    await connection.query(query, values);
+    await supabase
+      .schema(SCHEMA)
+      .from('t_ido_fix')
+      .delete()
+      .eq('sagyo_kbn_id', sagyoKbnId)
+      .eq('sagyo_siji_id', sagyoSijiId)
+      .eq('sagyo_den_dat', sagyoDenDatDat)
+      .eq('sagyo_id', sagyoId);
   } catch (e) {
     throw e;
   }

@@ -73,6 +73,27 @@ export const selectChosenEqptsDetails = async (idList: number[]) => {
 };
 
 /**
+ * 移動機材IDが一致する移動機材のデータ配列を取得する関数
+ * @param idList kizai_idの配列
+ * @returns 機材ID, 機材名, 所属ID, 所属名, 機材グループコード, 表示順, 定価, ランクごとの価格, 保有数
+ */
+export const selectChosenIdoEqptsDetails = async (idList: number[]) => {
+  try {
+    return await supabase
+      .schema(SCHEMA)
+      .from('v_kizai_lst')
+      .select(
+        `kizai_id, kizai_nam, shozoku_id, shozoku_nam, kizai_grp_cod, dsp_ord_num, rfid_kics_qty, rfid_yard_qty, ctn_flg`
+      )
+      .in('kizai_id', idList)
+      .order('kizai_grp_cod')
+      .order('dsp_ord_num');
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
  * 貸出状況用機材データ取得
  * @param kizaiId 機材id
  * @returns 機材id,機材名,定価,保有数
