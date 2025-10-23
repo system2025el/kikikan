@@ -73,7 +73,7 @@ export const getIdoDen = async (sagyoKbnId: number, sagyoSijiId: number, sagyoDe
       diffQty: d.diff_qty,
       ctnFlg: d.ctn_flg,
       delFlag: false,
-      saveFlag: true,
+      saveFlag: d.ido_den_id ? true : false,
     }));
 
     return idoDetailTableList;
