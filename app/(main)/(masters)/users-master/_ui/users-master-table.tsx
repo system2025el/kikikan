@@ -101,10 +101,18 @@ export const UserssMasterTable = ({
         <Grid2 spacing={1}>
           <MuiTablePagination arrayList={theUsers!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
         </Grid2>
-        <Grid2 container spacing={3}>
-          <Typography color="error" variant="body2">
-            ※マスタは削除できません。登録画面で無効化してください
-          </Typography>
+        <Grid2 container spacing={3} alignItems={'center'}>
+          <Grid2>
+            <Typography color="error" variant="body2">
+              ※マスタは削除できません。登録画面で無効化してください
+            </Typography>
+          </Grid2>
+          <Grid2>
+            <Button onClick={() => handleOpenDialog(String(FAKE_NEW_ID))}>
+              <AddIcon fontSize="small" />
+              新規
+            </Button>
+          </Grid2>
         </Grid2>
       </Grid2>
       {isLoading ? (
@@ -179,7 +187,7 @@ export const UserssMasterTable = ({
       )}
 
       <Dialog open={dialogOpen} fullScreen>
-        <UsersMasterDialog mailAdr={openId} handleClose={handleCloseDialog} refetchUsers={refetchUsers} />
+        <UsersMasterDialog currentMailAdr={openId} handleClose={handleCloseDialog} refetchUsers={refetchUsers} />
       </Dialog>
     </Box>
   );

@@ -1,19 +1,22 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Grid2, Typography } from '@mui/material';
+import WarningIcon from '@mui/icons-material/Warning';
+import { Box, Button, Dialog, DialogActions, DialogContentText, DialogTitle, Grid2, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { RadioButtonGroup, TextFieldElement, useForm } from 'react-hook-form-mui';
 
+import { checkMailAdr, checkShainCod, selectActiveUsers } from '@/app/_lib/db/tables/m-user';
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import { FormBox } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
+import { data } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_lib/data';
 
 import { FAKE_NEW_ID } from '../../_lib/constants';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { emptyUser, formItems, radioPair, radioTrio } from '../_lib/datas';
-import { addNewUser, getChosenUser, updateUser } from '../_lib/funcs';
+import { addNewUser, deleteUsers, getChosenUser, restoreUsers, updateUser } from '../_lib/funcs';
 import { UsersMasterDialogValues, UsersMaterDialogSchema } from '../_lib/types';
 /**
  * 担当者マスタの詳細ダイアログ
@@ -21,11 +24,11 @@ import { UsersMasterDialogValues, UsersMaterDialogSchema } from '../_lib/types';
  * @returns {JSX.Element} 担当者マスタの詳細ダイアログコンポーネント
  */
 export const UsersMasterDialog = ({
-  mailAdr,
+  currentMailAdr,
   handleClose,
   refetchUsers,
 }: {
-  mailAdr: string;
+  currentMailAdr: string;
   handleClose: () => void;
   refetchUsers: () => void;
 }) => {
@@ -38,13 +41,20 @@ export const UsersMasterDialog = ({
   /* ダイアログでの編集モードかどうか */
   const [editable, setEditable] = useState(false);
   /* 新規作成かどうか */
-  const [isNew, setIsNew] = useState(false);
+  const [isNew, setIsNew] = useState<boolean>(false);
   /* 未保存ダイアログ出すかどうか */
-  const [dirtyOpen, setDirtyOpen] = useState(false);
+  const [dirtyOpen, setDirtyOpen] = useState<boolean>(false);
   /* 削除フラグ確認ダイアログ出すかどうか */
-  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState<boolean>(false);
+  const [restoreOpen, setRestoreOpen] = useState<boolean>(false);
   /* submit時のactions (save, delete) */
   const [action, setAction] = useState<'save' | 'delete' | 'restore' | undefined>(undefined);
+  /* メアドのエラーメッセージ */
+  const [adrErrorMsg, setAdrErrorMsg] = useState<string | null>(null);
+  /* 社員コードのエラーメッセージ */
+  const [codErrorMsg, setCodErrorMsg] = useState<string | null>(null);
+  /* 元の社員番号 */
+  const [currentShainCod, setCurrentShainCod] = useState<string | null>(null);
 
   /* useForm ------------------------- */
   const {
@@ -53,6 +63,7 @@ export const UsersMasterDialog = ({
     watch,
     handleSubmit,
     reset,
+    setValue,
     getValues,
   } = useForm({
     mode: 'onChange',
@@ -62,31 +73,79 @@ export const UsersMasterDialog = ({
   });
 
   const isDeleted = watch('delFlg');
-  const name = watch('tantouNam');
+  const mail = watch('mailAdr');
 
   /* methods ---------------------------- */
   /* フォームを送信 */
   const onSubmit = async (data: UsersMasterDialogValues) => {
     console.log('isDarty : ', isDirty);
     console.log(data);
-    if (mailAdr === String(FAKE_NEW_ID)) {
-      // await addNewUser(data);
-      handleCloseDialog();
-      refetchUsers();
-    } else {
-      if (action === 'save') {
-        // await updateUser(data, userId);
+    setCodErrorMsg(null);
+    setAdrErrorMsg(null);
+
+    if (currentMailAdr === String(FAKE_NEW_ID)) {
+      // 新規処理
+      // メールアドレスと社員コードの重複確認
+      const adr = await checkMailAdr(data.mailAdr);
+      if (adr.data) {
+        setAdrErrorMsg('既に使われているメールアドレスです');
+      }
+      if (data.shainCod) {
+        const cod = await checkShainCod(data.shainCod);
+        if (cod.data) {
+          setCodErrorMsg(`既に使われている社員コードです`);
+        }
+        if (!adr.data && !cod.data) {
+          await addNewUser(data, user?.name ?? '');
+          handleCloseDialog();
+          refetchUsers();
+        }
+      }
+      if (!adr.data) {
+        await addNewUser(data, user?.name ?? '');
         handleCloseDialog();
         refetchUsers();
+      }
+    } else {
+      // 更新処理
+      if (action === 'save') {
+        // 保存
+        if (data.shainCod && data.shainCod !== currentShainCod) {
+          const cod = await checkShainCod(data.shainCod);
+          if (cod.data) {
+            setCodErrorMsg(`既に使われている社員コードです`);
+            setEditable(true);
+          }
+        } else {
+          await updateUser(currentMailAdr, data, user?.name ?? '');
+          handleCloseDialog();
+          refetchUsers();
+        }
       } else if (action === 'delete') {
+        // 無効化
         setDeleteOpen(true);
         return;
       } else if (action === 'restore') {
-        // 有効化ボタン
-        const values = await getValues();
-        // await updateUser({ ...values, delFlg: false }, userId);
-        handleCloseDialog();
-        refetchUsers();
+        // 社員コードの重複確認
+        if (currentShainCod) {
+          const cod = await checkShainCod(currentShainCod);
+          if (cod.data) {
+            setCodErrorMsg(`既に使われている社員コードです`);
+            setValue('delFlg', false);
+            setEditable(true);
+          } else {
+            // 有効化ボタン
+            setRestoreOpen(true);
+            handleCloseDialog();
+            refetchUsers();
+          }
+        }
+        if (!currentShainCod) {
+          // 有効化ボタン
+          setRestoreOpen(true);
+          handleCloseDialog();
+          refetchUsers();
+        }
       }
     }
   };
@@ -108,11 +167,18 @@ export const UsersMasterDialog = ({
     }
   };
 
-  /* 削除確認ダイアログで削除選択時 */
+  /* 無効化確認ダイアログで無効化選択時 */
   const handleConfirmDelete = async () => {
-    const values = await getValues();
-    // await updateUser({ ...values, delFlg: true }, userId);
+    await deleteUsers(currentMailAdr, user?.name ?? '');
     setDeleteOpen(false);
+    handleCloseDialog();
+    await refetchUsers();
+  };
+
+  /* 有効か確認ダイアログで有効化選択時 */
+  const handleConfirmRestore = async () => {
+    await restoreUsers(currentMailAdr, user?.name ?? '');
+    setRestoreOpen(false);
     handleCloseDialog();
     await refetchUsers();
   };
@@ -122,16 +188,23 @@ export const UsersMasterDialog = ({
   useEffect(() => {
     console.log('★★★★★★★★★★★★★★★★★★★★★');
     const getThatOneUser = async () => {
-      if (mailAdr && mailAdr !== String(FAKE_NEW_ID)) {
-        const user1 = await getChosenUser(mailAdr);
+      if (currentMailAdr === String(FAKE_NEW_ID)) {
+        // 新規追加モード
+        reset(emptyUser); // フォーム初期化
+        setEditable(true); // 編集モードにする
+        setIsLoading(false);
+        setIsNew(true);
+      } else {
+        const user1 = await getChosenUser(currentMailAdr);
         if (user1) {
           reset(user1); // 取得したデータでフォーム初期化
+          setCurrentShainCod(user1.shainCod ?? null);
         }
         setIsLoading(false);
       }
     };
     getThatOneUser();
-  }, [mailAdr]);
+  }, [currentMailAdr]);
   /* eslint-enable react-hooks/exhaustive-deps */
 
   return (
@@ -169,7 +242,17 @@ export const UsersMasterDialog = ({
                   label={editable ? formItems[1].exsample : ''}
                   fullWidth
                   sx={{ maxWidth: '90%' }}
-                  disabled={editable ? false : true}
+                  disabled={!editable || !isNew}
+                  error={!!adrErrorMsg}
+                  helperText={adrErrorMsg}
+                  slotProps={{
+                    formHelperText: {
+                      sx: (theme) => ({
+                        color: theme.palette.error.main,
+                      }),
+                    },
+                  }}
+                  type="email"
                 />
               </FormBox>
               <FormBox formItem={formItems[2]}>
@@ -178,8 +261,17 @@ export const UsersMasterDialog = ({
                   control={control}
                   label={editable ? formItems[2].exsample : ''}
                   fullWidth
-                  sx={{ maxWidth: '90%' }}
+                  sx={{ width: 120 }}
                   disabled={editable ? false : true}
+                  error={!!codErrorMsg}
+                  helperText={codErrorMsg}
+                  slotProps={{
+                    formHelperText: {
+                      sx: (theme) => ({
+                        color: theme.palette.error.main,
+                      }),
+                    },
+                  }}
                 />
               </FormBox>
 
@@ -257,12 +349,45 @@ export const UsersMasterDialog = ({
               handleCloseDirty={() => setDirtyOpen(false)}
               handleCloseAll={handleCloseDialog}
             />
-            <WillDeleteAlertDialog
-              open={deleteOpen}
-              data={name}
-              handleCloseDelete={() => setDeleteOpen(false)}
-              handleCloseAll={handleConfirmDelete}
-            />
+            {/* 無効化・認証情報削除確認ダイアログ */}
+            <Dialog open={deleteOpen}>
+              <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
+                <WarningIcon color="error" />
+                <Box>無効化</Box>
+              </DialogTitle>
+              <DialogContentText m={2}>
+                {mail}が無効化されます
+                <br />
+                {mail}の認証情報が削除され、ログインできなくなります
+              </DialogContentText>
+              <DialogActions>
+                <Button color="error" onClick={() => handleConfirmDelete()}>
+                  無効化
+                </Button>
+                <Button onClick={() => setDeleteOpen(false)}>戻る</Button>
+              </DialogActions>
+            </Dialog>
+            {/* 有効化・認証メール送信確認ダイアログ */}
+            <Dialog open={restoreOpen}>
+              <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
+                <WarningIcon color="error" />
+                <Box>有効化</Box>
+              </DialogTitle>
+
+              <DialogContentText m={5}>
+                {mail}が有効化されます
+                <br />
+                {mail}に届いたメールから
+                <br />
+                承認とログインを行ってください
+              </DialogContentText>
+              <DialogActions>
+                <Button color="error" onClick={() => handleConfirmRestore()}>
+                  有効化
+                </Button>
+                <Button onClick={() => setRestoreOpen(false)}>戻る</Button>
+              </DialogActions>
+            </Dialog>
           </>
         )}
       </form>
