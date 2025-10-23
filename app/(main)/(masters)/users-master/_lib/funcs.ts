@@ -15,20 +15,16 @@ import { UsersMasterDialogValues, UsersMasterTableValues } from './types';
  */
 export const getFilteredUsers = async (query: string = '') => {
   try {
-    const { data, error } = await SelectFilteredUsers(query);
-    if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
-    }
-    if (!data || data.length === 0) {
+    const { rows } = await SelectFilteredUsers(query);
+    if (!rows || rows.length === 0) {
       return [];
     }
-    const filteredUsers: UsersMasterTableValues[] = data.map((d, index) => ({
+    const filteredUsers: UsersMasterTableValues[] = rows.map((d, index) => ({
       tantouNam: d.user_nam,
       mailAdr: d.mail_adr,
       shainCod: d.shain_cod,
       mem: d.mem,
-      lastLogin: '',
+      lastLogin: !d.last_sign_in_at ? null : toJapanTimeString(d.last_sign_in_at),
       tblDspId: index + 1,
       delFlg: Boolean(d.del_flg),
     }));
@@ -45,22 +41,40 @@ export const getFilteredUsers = async (query: string = '') => {
  * @param id 担当者マスタID
  * @returns {Promise<UsersMasterDialogValues>} - 担当者の詳細情報。取得失敗時は空オブジェクトを返します。
  */
-export const getChosenUser = async (id: number) => {
+export const getChosenUser = async (mailAdr: string) => {
   try {
-    const { data, error } = await selectOneUser(id);
+    const { rows } = await selectOneUser(mailAdr);
 
-    if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
-    }
-    if (!data) {
+    if (!rows || rows.length === 0) {
       return emptyUser;
     }
+    // permissionを２進数に戻す
+    const biString = rows[0].permission.toString(2).padStart(8);
+
     const UserDetails: UsersMasterDialogValues = {
-      tantouNam: data.user_nam,
-      delFlg: Boolean(data.del_flg),
+      mailAdr: rows[0].mail_adr,
+      tantouNam: rows[0].user_nam,
+      delFlg: Boolean(rows[0].del_flg),
+      psermission:
+        rows[0].permission === 65535
+          ? {
+              juchu: '11',
+              nyushuko: '11',
+              masters: '11',
+              ht: '1',
+              loginSetting: '1',
+            }
+          : {
+              juchu: biString.slice(0, 2),
+              nyushuko: biString.slice(2, 4),
+              masters: biString.slice(4, 6),
+              ht: biString.slice(6, 7),
+              loginSetting: biString.slice(7, 8),
+            },
+      mem: rows[0].mem,
+      lastLoginAt: !rows[0].last_sign_in_at ? null : toJapanTimeString(rows[0].last_sign_in_at),
     };
-    console.log(UserDetails.delFlg);
+    console.log(UserDetails.psermission);
     return UserDetails;
   } catch (e) {
     console.error('例外が発生しました:', e);
@@ -75,8 +89,8 @@ export const getChosenUser = async (id: number) => {
 export const addNewUser = async (data: UsersMasterDialogValues, user: string) => {
   console.log(data.tantouNam);
   try {
-    // await insertNewUser(data);
-    // await revalidatePath('/users-master');
+    await insertNewUser(data, user);
+    await revalidatePath('/users-master');
   } catch (error) {
     console.log('DB接続エラー', error);
     throw error;

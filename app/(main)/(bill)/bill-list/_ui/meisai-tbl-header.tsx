@@ -223,8 +223,8 @@ export const MeisaiTblHeader = ({
                   isEditing
                     ? (field.value ?? '')
                     : typeof field.value === 'number' && !isNaN(field.value)
-                      ? `${'-'}¥${Math.abs(field.value).toLocaleString()}`
-                      : `${'-'}¥0`
+                      ? `¥-${Math.abs(field.value).toLocaleString()}`
+                      : `¥0`
                 }
                 type="text"
                 onFocus={(e) => {

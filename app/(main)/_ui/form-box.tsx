@@ -11,13 +11,15 @@ export const FormBox = ({
   children,
   formItem,
   required,
+  align,
 }: {
   children: React.ReactNode;
   formItem: FormItemsType;
   required?: boolean;
+  align?: string;
 }) => {
   return (
-    <Grid2 container spacing={1} direction={'row'} width={'100%'} alignItems={'center'}>
+    <Grid2 container spacing={1} direction={'row'} width={'100%'} alignItems={align ?? 'center'}>
       <Grid2 size={1}>
         {required && (
           <Typography color="error" align="right">

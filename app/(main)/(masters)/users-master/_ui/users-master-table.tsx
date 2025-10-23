@@ -16,14 +16,14 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import {} from '@mui/material/colors';
+import { grey } from '@mui/material/colors';
 import { useEffect, useMemo, useState } from 'react';
 
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { MuiTablePagination } from '../../../_ui/table-pagination';
 import { FAKE_NEW_ID, ROWS_PER_MASTER_TABLE_PAGE } from '../../_lib/constants';
-import { MasterTable } from '../../_ui/tables';
+import { LightTooltipWithText, MasterTable } from '../../_ui/tables';
 import { userMHeader } from '../_lib/datas';
 import { getFilteredUsers } from '../_lib/funcs';
 import { UsersMasterTableValues } from '../_lib/types';
@@ -51,16 +51,24 @@ export const UserssMasterTable = ({
   /* useState
    * -------------------------------------------------------- */
   /* ダイアログ開く顧客のID、閉じるとき、未選択でFAKE_NEW_IDとする */
-  const [openId, setOpenID] = useState(FAKE_NEW_ID);
+  const [openId, setOpenID] = useState(String(FAKE_NEW_ID));
   /* 顧客詳細ダイアログの開閉状態 */
   const [dialogOpen, setDialogOpen] = useState(false);
   /* 担当者リスト */
   const [theUsers, setTheUsers] = useState(users);
+
+  /* 表示するリスト */
+  const list = useMemo(
+    () => (theUsers && rowsPerPage > 0 ? theUsers.slice((page - 1) * rowsPerPage, page * rowsPerPage) : theUsers),
+    [page, rowsPerPage, theUsers]
+  );
+  const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - theUsers!.length) : 0;
+
   /* Methods
   ------------------------------------------------------------ */
   /* 詳細ダイアログを開く関数 */
-  const handleOpenDialog = (id: number) => {
-    setOpenID(id);
+  const handleOpenDialog = (mailAdr: string) => {
+    setOpenID(mailAdr);
     setDialogOpen(true);
   };
   /* ダイアログを閉じる関数 */
@@ -94,17 +102,9 @@ export const UserssMasterTable = ({
           <MuiTablePagination arrayList={theUsers!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
         </Grid2>
         <Grid2 container spacing={3}>
-          <Grid2 alignContent={'center'}>
-            <Typography color="error" variant="body2">
-              ※マスタは削除できません。登録画面で無効化してください
-            </Typography>
-          </Grid2>
-          <Grid2>
-            <Button onClick={() => handleOpenDialog(FAKE_NEW_ID)}>
-              <AddIcon fontSize="small" />
-              新規
-            </Button>
-          </Grid2>
+          <Typography color="error" variant="body2">
+            ※マスタは削除できません。登録画面で無効化してください
+          </Typography>
         </Grid2>
       </Grid2>
       {isLoading ? (
@@ -113,18 +113,73 @@ export const UserssMasterTable = ({
         <Typography>該当するデータがありません</Typography>
       ) : (
         <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
-          <MasterTable
-            headers={userMHeader}
-            datas={theUsers!.map((l) => ({ ...l, id: 0, name: l.tantouNam }))}
-            page={page}
-            rowsPerPage={rowsPerPage}
-            handleOpenDialog={handleOpenDialog}
-          />
+          <Table sx={{ minWidth: '100%' }} aria-labelledby="tableTitle" padding="none" stickyHeader>
+            <TableHead sx={{ bgcolor: 'primary.light' }}>
+              <TableRow sx={{ whiteSpace: 'nowrap' }}>
+                <TableCell width={50} />
+                {userMHeader.map((h) => (
+                  <TableCell key={h.key}>{h.label}</TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {list!.map((l) => {
+                const isDeleted = l.delFlg === true;
+                return (
+                  <TableRow hover key={l.tblDspId}>
+                    <TableCell
+                      width={50}
+                      sx={{
+                        bgcolor: isDeleted ? grey[300] : undefined,
+                        paddingLeft: 1,
+                        paddingRight: 1,
+                        textAlign: 'end',
+                      }}
+                    >
+                      {l.tblDspId}
+                    </TableCell>
+                    <TableCell sx={{ bgcolor: isDeleted ? grey[300] : undefined, whiteSpace: 'nowrap' }}>
+                      <Button
+                        variant="text"
+                        size="medium"
+                        onClick={() => handleOpenDialog(l.mailAdr)}
+                        sx={{ p: 0, m: 0, minWidth: 0 }}
+                      >
+                        <LightTooltipWithText variant={'button'} maxWidth={300}>
+                          {l.tantouNam}
+                        </LightTooltipWithText>
+                      </Button>
+                    </TableCell>
+                    <TableCell sx={{ bgcolor: isDeleted ? grey[300] : undefined, whiteSpace: 'nowrap' }}>
+                      {l.mailAdr}
+                    </TableCell>
+                    <TableCell sx={{ bgcolor: isDeleted ? grey[300] : undefined, whiteSpace: 'nowrap' }}>
+                      {l.shainCod ?? ''}
+                    </TableCell>
+                    <TableCell sx={{ bgcolor: isDeleted ? grey[300] : undefined, whiteSpace: 'nowrap' }}>
+                      {l.mem}
+                    </TableCell>
+                    <TableCell sx={{ bgcolor: isDeleted ? grey[300] : undefined, whiteSpace: 'nowrap' }}>
+                      {l.lastLogin}
+                    </TableCell>
+                    <TableCell sx={{ bgcolor: isDeleted ? grey[300] : undefined, whiteSpace: 'nowrap' }}>
+                      {isDeleted && <>無効</>}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+              {emptyRows > 0 && (
+                <TableRow style={{ height: 25 * emptyRows }}>
+                  <TableCell colSpan={userMHeader.length + 1} />
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
         </TableContainer>
       )}
 
       <Dialog open={dialogOpen} fullScreen>
-        <UsersMasterDialog userId={openId} handleClose={handleCloseDialog} refetchUsers={refetchUsers} />
+        <UsersMasterDialog mailAdr={openId} handleClose={handleCloseDialog} refetchUsers={refetchUsers} />
       </Dialog>
     </Box>
   );

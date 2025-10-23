@@ -159,31 +159,27 @@ export const BasesMasterDialog = ({
         ) : (
           <>
             <Grid2 container spacing={1} p={5} direction={'column'} justifyContent={'center'} width={'100%'}>
-              <Grid2>
-                <FormBox formItem={formItems[0]} required={true}>
-                  <TextFieldElement
-                    name="shozokuNam"
-                    control={control}
-                    label={editable ? formItems[0].exsample : ''}
-                    fullWidth
-                    sx={{ maxWidth: '90%' }}
-                    disabled={editable ? false : true}
-                  />
-                </FormBox>
-              </Grid2>
-              <Grid2>
-                <FormBox formItem={formItems[2]}>
-                  <TextFieldElement
-                    multiline
-                    name="mem"
-                    control={control}
-                    label={editable ? formItems[2].exsample : ''}
-                    fullWidth
-                    sx={{ maxWidth: '90%' }}
-                    disabled={editable ? false : true}
-                  />
-                </FormBox>
-              </Grid2>
+              <FormBox formItem={formItems[0]} required>
+                <TextFieldElement
+                  name="shozokuNam"
+                  control={control}
+                  label={editable ? formItems[0].exsample : ''}
+                  fullWidth
+                  sx={{ maxWidth: '90%' }}
+                  disabled={editable ? false : true}
+                />
+              </FormBox>
+              <FormBox formItem={formItems[2]}>
+                <TextFieldElement
+                  multiline
+                  name="mem"
+                  control={control}
+                  label={editable ? formItems[2].exsample : ''}
+                  fullWidth
+                  sx={{ maxWidth: '90%' }}
+                  disabled={editable ? false : true}
+                />
+              </FormBox>
             </Grid2>
             <IsDirtyAlertDialog
               open={dirtyOpen}

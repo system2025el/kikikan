@@ -197,102 +197,92 @@ export const RfidMasterDialog = ({
         ) : (
           <>
             <Grid2 container spacing={1} p={5} direction={'column'} justifyContent={'center'} width={'100%'}>
-              <Grid2>
-                <FormBox formItem={formItems[0]} required>
-                  <TextFieldElement
-                    name="tagId"
-                    control={control}
-                    label={editable ? formItems[0].exsample : ''}
-                    sx={{
-                      width: 300,
-                      pointerEvents: !isNew ? 'none' : undefined, // クリック不可にする
-                      backgroundColor: !isNew ? '#f5f5f5' : undefined, // グレー背景で無効っぽく
-                      color: !isNew ? '#888' : undefined,
-                    }}
-                    disabled={editable ? false : true}
-                    error={!!tagMessage}
-                    helperText={tagMessage}
-                    slotProps={{
-                      input: { readOnly: !isNew ? true : false, onFocus: (e) => (!isNew ? e.target.blur() : {}) },
-                      formHelperText: {
-                        sx: (theme) => ({
-                          color: theme.palette.error.main,
-                        }),
-                      },
-                    }}
-                  />
-                </FormBox>
-              </Grid2>
-              <Grid2>
-                <FormBox formItem={formItems[1]} required>
-                  <TextFieldElement
-                    name="elNum"
-                    control={control}
-                    label={editable ? formItems[1].exsample : ''}
-                    sx={{
-                      width: 120,
-                      '& .MuiInputBase-input': {
-                        textAlign: 'right',
-                      },
-                      '& input[type=number]::-webkit-inner-spin-button': {
-                        WebkitAppearance: 'none',
-                        margin: 0,
-                      },
-                    }}
-                    disabled={editable ? false : true}
-                    type="number"
-                    error={!!elMessage}
-                    helperText={elMessage}
-                    slotProps={{
-                      formHelperText: {
-                        sx: (theme) => ({
-                          color: theme.palette.error.main,
-                        }),
-                      },
-                    }}
-                  />
-                </FormBox>
-              </Grid2>
-              <Grid2>
-                <FormBox formItem={formItems[2]} required>
-                  <SelectElement
-                    name="shozokuId"
-                    control={control}
-                    label={editable ? formItems[2].exsample : ''}
-                    sx={{ width: 120 }}
-                    disabled={editable ? false : true}
-                    options={selectOptions.shozoku}
-                  />
-                </FormBox>
-              </Grid2>
-              <Grid2>
-                <FormBox formItem={formItems[3]} required>
-                  <SelectElement
-                    name="rfidKizaiSts"
-                    control={control}
-                    label={editable ? formItems[3].exsample : ''}
-                    sx={{ width: 300 }}
-                    disabled={editable ? false : true}
-                    options={selectOptions.sts}
-                  />
-                </FormBox>
-              </Grid2>
-              <Grid2>
-                <FormBox formItem={formItems[4]}>
-                  <TextFieldElement
-                    name="mem"
-                    control={control}
-                    label={editable ? formItems[4].exsample : ''}
-                    fullWidth
-                    sx={{ maxWidth: '90%' }}
-                    disabled={editable ? false : true}
-                    multiline
-                  />
-                  <Typography variant="body2" ml={2}>
-                    {formItems[4].other}
-                  </Typography>
-                </FormBox>
-              </Grid2>
+              <FormBox formItem={formItems[0]} required>
+                <TextFieldElement
+                  name="tagId"
+                  control={control}
+                  label={editable ? formItems[0].exsample : ''}
+                  sx={{
+                    width: 300,
+                    pointerEvents: !isNew ? 'none' : undefined, // クリック不可にする
+                    backgroundColor: !isNew ? '#f5f5f5' : undefined, // グレー背景で無効っぽく
+                    color: !isNew ? '#888' : undefined,
+                  }}
+                  disabled={editable ? false : true}
+                  error={!!tagMessage}
+                  helperText={tagMessage}
+                  slotProps={{
+                    input: { readOnly: !isNew ? true : false, onFocus: (e) => (!isNew ? e.target.blur() : {}) },
+                    formHelperText: {
+                      sx: (theme) => ({
+                        color: theme.palette.error.main,
+                      }),
+                    },
+                  }}
+                />
+              </FormBox>
+              <FormBox formItem={formItems[1]} required>
+                <TextFieldElement
+                  name="elNum"
+                  control={control}
+                  label={editable ? formItems[1].exsample : ''}
+                  sx={{
+                    width: 120,
+                    '& .MuiInputBase-input': {
+                      textAlign: 'right',
+                    },
+                    '& input[type=number]::-webkit-inner-spin-button': {
+                      WebkitAppearance: 'none',
+                      margin: 0,
+                    },
+                  }}
+                  disabled={editable ? false : true}
+                  type="number"
+                  error={!!elMessage}
+                  helperText={elMessage}
+                  slotProps={{
+                    formHelperText: {
+                      sx: (theme) => ({
+                        color: theme.palette.error.main,
+                      }),
+                    },
+                  }}
+                />
+              </FormBox>
+              <FormBox formItem={formItems[2]} required>
+                <SelectElement
+                  name="shozokuId"
+                  control={control}
+                  label={editable ? formItems[2].exsample : ''}
+                  sx={{ width: 120 }}
+                  disabled={editable ? false : true}
+                  options={selectOptions.shozoku}
+                />
+              </FormBox>
+              <FormBox formItem={formItems[3]} required>
+                <SelectElement
+                  name="rfidKizaiSts"
+                  control={control}
+                  label={editable ? formItems[3].exsample : ''}
+                  sx={{ width: 300 }}
+                  disabled={editable ? false : true}
+                  options={selectOptions.sts}
+                />
+              </FormBox>
+              <FormBox formItem={formItems[4]}>
+                <TextFieldElement
+                  name="mem"
+                  control={control}
+                  label={editable ? formItems[4].exsample : ''}
+                  fullWidth
+                  sx={{ maxWidth: '90%' }}
+                  disabled={editable ? false : true}
+                  multiline
+                />
+                <Typography variant="body2" ml={2}>
+                  {formItems[4].other}
+                </Typography>
+              </FormBox>
             </Grid2>
             <IsDirtyAlertDialog
               open={dirtyOpen}

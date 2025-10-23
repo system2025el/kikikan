@@ -20,15 +20,22 @@ export const BillList = ({
   bills: BillsListTableValues[];
   selectOptions: { custs: SelectTypes[]; sts: SelectTypes[] };
 }) => {
+  /* useState ---------------------------------------------------- */
+  /* 初期表示用 */
+  const [isFirst, setIsFirst] = useState<boolean>(true);
+  /* ローディング状態 */
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  /* ページ  */
   const [page, setPage] = useState<number>(1);
 
+  /* useForm ----------------------------------------------------- */
   const { control, handleSubmit } = useForm<BillSearchValues>({
     defaultValues: {},
   });
 
   const onSubmit = async (data: BillSearchValues) => {
     console.log(data);
+    setIsFirst(false);
   };
 
   /* useEffect --------------------------------------- */
@@ -120,6 +127,7 @@ export const BillList = ({
       <BillListTable
         bills={bills}
         isLoading={isLoading}
+        isFirst={isFirst}
         page={page}
         custs={selectOptions.custs}
         setIsLoading={setIsLoading}

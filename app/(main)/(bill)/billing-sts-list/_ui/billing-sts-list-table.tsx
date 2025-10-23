@@ -54,7 +54,7 @@ export const BillingStsListTable = ({
   kokyakuId,
   tantouNam,
   billSts,
-  setIsLoading,
+  isFirst,
   setPage,
   refetch,
 }: {
@@ -63,7 +63,7 @@ export const BillingStsListTable = ({
   kokyakuId: number;
   tantouNam: string | null;
   billSts: BillingStsTableValues[];
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  isFirst: boolean;
   setPage: React.Dispatch<React.SetStateAction<number>>;
   refetch: () => Promise<void>;
 }) => {
@@ -116,6 +116,8 @@ export const BillingStsListTable = ({
       </Grid2>
       {isLoading ? (
         <Loading />
+      ) : isFirst ? (
+        <></>
       ) : !list || list.length === 0 ? (
         <Typography justifySelf={'center'}>該当する受注請求状況がありません</Typography>
       ) : (

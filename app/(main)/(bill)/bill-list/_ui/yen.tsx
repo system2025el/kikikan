@@ -27,7 +27,7 @@ export const ReadOnlyYenNumberElement = <TFieldName extends FieldPath<BillHeadVa
             typeof field.value === 'number' && !isNaN(field.value)
               ? field.value >= 0
                 ? `¥${Math.abs(field.value).toLocaleString()}`
-                : `-¥${Math.abs(field.value).toLocaleString()}`
+                : `¥-${Math.abs(field.value).toLocaleString()}`
               : `¥0`
           }
           type="text"
