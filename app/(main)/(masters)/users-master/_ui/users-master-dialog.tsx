@@ -16,7 +16,14 @@ import { FAKE_NEW_ID } from '../../_lib/constants';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { emptyUser, formItems, radioPair, radioTrio } from '../_lib/datas';
-import { addNewUser, deleteUsers, getChosenUser, restoreUsers, updateUser } from '../_lib/funcs';
+import {
+  addNewUser,
+  deleteUsers,
+  getChosenUser,
+  restoreUsers,
+  restoreUsersAndShainCod,
+  updateUser,
+} from '../_lib/funcs';
 import { UsersMasterDialogValues, UsersMaterDialogSchema } from '../_lib/types';
 /**
  * 担当者マスタの詳細ダイアログ
@@ -46,7 +53,10 @@ export const UsersMasterDialog = ({
   const [dirtyOpen, setDirtyOpen] = useState<boolean>(false);
   /* 削除フラグ確認ダイアログ出すかどうか */
   const [deleteOpen, setDeleteOpen] = useState<boolean>(false);
+  /* 有効化確認ダイアログ */
   const [restoreOpen, setRestoreOpen] = useState<boolean>(false);
+  /* 有効処理中 */
+  const [willRestore, setWillRestore] = useState<boolean>(false);
   /* submit時のactions (save, delete) */
   const [action, setAction] = useState<'save' | 'delete' | 'restore' | undefined>(undefined);
   /* メアドのエラーメッセージ */
@@ -109,42 +119,50 @@ export const UsersMasterDialog = ({
     } else {
       // 更新処理
       if (action === 'save') {
-        // 保存
-        if (data.shainCod && data.shainCod !== currentShainCod) {
-          const cod = await checkShainCod(data.shainCod);
-          if (cod.data) {
-            setCodErrorMsg(`既に使われている社員コードです`);
-            setEditable(true);
+        if (willRestore) {
+          // 有効化処理
+          if (data.shainCod) {
+            const cod = await checkShainCod(data.shainCod);
+            if (cod.data) {
+              setCodErrorMsg(`既に使われている社員コードです`);
+              setEditable(true);
+            }
+          } else {
+            setRestoreOpen(true);
           }
         } else {
-          await updateUser(currentMailAdr, data, user?.name ?? '');
-          handleCloseDialog();
-          refetchUsers();
+          // 保存処理
+          if (data.shainCod && data.shainCod !== currentShainCod) {
+            const cod = await checkShainCod(data.shainCod);
+            if (cod.data) {
+              setCodErrorMsg(`既に使われている社員コードです`);
+              setEditable(true);
+            }
+          } else {
+            await updateUser(currentMailAdr, data, user?.name ?? '');
+            handleCloseDialog();
+            refetchUsers();
+          }
         }
       } else if (action === 'delete') {
         // 無効化
         setDeleteOpen(true);
         return;
       } else if (action === 'restore') {
+        // 有効化
         // 社員コードの重複確認
         if (currentShainCod) {
           const cod = await checkShainCod(currentShainCod);
           if (cod.data) {
             setCodErrorMsg(`既に使われている社員コードです`);
             setValue('delFlg', false);
-            setEditable(true);
+            setWillRestore(true);
           } else {
-            // 有効化ボタン
             setRestoreOpen(true);
-            handleCloseDialog();
-            refetchUsers();
           }
         }
         if (!currentShainCod) {
-          // 有効化ボタン
           setRestoreOpen(true);
-          handleCloseDialog();
-          refetchUsers();
         }
       }
     }
@@ -177,10 +195,18 @@ export const UsersMasterDialog = ({
 
   /* 有効か確認ダイアログで有効化選択時 */
   const handleConfirmRestore = async () => {
-    await restoreUsers(currentMailAdr, user?.name ?? '');
-    setRestoreOpen(false);
-    handleCloseDialog();
-    await refetchUsers();
+    if (willRestore) {
+      const shainCod = getValues('shainCod');
+      await restoreUsersAndShainCod(currentMailAdr, shainCod ?? null, user?.name ?? '');
+      setRestoreOpen(false);
+      handleCloseDialog();
+      await refetchUsers();
+    } else {
+      await restoreUsers(currentMailAdr, user?.name ?? '');
+      setRestoreOpen(false);
+      handleCloseDialog();
+      await refetchUsers();
+    }
   };
 
   /* useEffect --------------------------------------- */
@@ -262,7 +288,7 @@ export const UsersMasterDialog = ({
                   label={editable ? formItems[2].exsample : ''}
                   fullWidth
                   sx={{ width: 120 }}
-                  disabled={editable ? false : true}
+                  disabled={editable || willRestore ? false : true}
                   error={!!codErrorMsg}
                   helperText={codErrorMsg}
                   slotProps={{

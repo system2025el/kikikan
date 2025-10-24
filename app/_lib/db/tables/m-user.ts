@@ -149,6 +149,33 @@ export const updMUserDelFlg = async (
 };
 
 /**
+ * supabaseクライアントでm_userを更新する関数
+ * @param {MUserDBValues} data 更新データ
+ */
+export const updMUserDelFlgAndShainCod = async (
+  data: { mail_adr: string; del_flg: number; upd_dat: string; upd_user: string; shain_cod: string | null },
+  connection: PoolClient
+) => {
+  const values = Object.values(data);
+  const query = `
+    UPDATE
+      ${SCHEMA}.m_user
+    SET
+      del_flg = $2,
+      upd_dat = $3,
+      upd_user = $4,
+      shain_cod = $5
+    WHERE
+      mail_adr = $1;
+  `;
+  try {
+    await connection.query(query, values);
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
  * 社員コードの一致する担当者を取得する関数
  * @param {string} cod 社員コード
  */
