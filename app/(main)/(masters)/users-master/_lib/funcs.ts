@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { getURL } from 'next/dist/shared/lib/utils';
 
 import pool from '@/app/_lib/db/postgres';
 import { supabase, supabaseAdmin } from '@/app/_lib/db/supabase';
@@ -114,11 +115,17 @@ export const addNewUser = async (data: UsersMasterDialogValues, user: string) =>
   const connection = await pool.connect();
   try {
     await connection.query('BEGIN');
+    // 担当者マスタ更新
     const result = await insertNewUser(insertData, connection);
     if (result) {
       console.log(result);
     }
-    const { error } = await supabase.auth.signUp({ email: data.mailAdr, password: 'password' });
+    // 認証メール送信
+    const { error } = await supabase.auth.signUp({
+      email: data.mailAdr,
+      password: 'password',
+      options: { emailRedirectTo: getUrl() },
+    });
     console.log('できた');
     await revalidatePath('/users-master');
     if (error) {
@@ -228,9 +235,14 @@ export const restoreUsers = async (mailAdr: string, user: string) => {
   const connection = await pool.connect();
   try {
     await connection.query('BEGIN');
+    // 担当者マスタ更新
     await updMUserDelFlg(delData, connection);
-
-    const { error } = await supabase.auth.signUp({ email: mailAdr, password: 'password' });
+    // 認証メール送信
+    const { error } = await supabase.auth.signUp({
+      email: mailAdr,
+      password: 'password',
+      options: { emailRedirectTo: getUrl() },
+    });
     if (error) {
       console.error('削除失敗:', error.message);
       await connection.query('ROLLBACK');
@@ -261,9 +273,14 @@ export const restoreUsersAndShainCod = async (mailAdr: string, shainCod: string 
   const connection = await pool.connect();
   try {
     await connection.query('BEGIN');
+    // 担当者マスタ更新
     await updMUserDelFlgAndShainCod(delData, connection);
-
-    const { error } = await supabase.auth.signUp({ email: mailAdr, password: 'password' });
+    // 認証メール送信
+    const { error } = await supabase.auth.signUp({
+      email: mailAdr,
+      password: 'password',
+      options: { emailRedirectTo: getUrl() },
+    });
     if (error) {
       console.error('削除失敗:', error.message);
       await connection.query('ROLLBACK');
