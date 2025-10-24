@@ -124,7 +124,7 @@ export const addNewUser = async (data: UsersMasterDialogValues, user: string) =>
     const { error } = await supabase.auth.signUp({
       email: data.mailAdr,
       password: 'password',
-      options: { emailRedirectTo: getUrl() },
+      options: { emailRedirectTo: `${getUrl()}auth/callback` },
     });
     console.log('できた');
     await revalidatePath('/users-master');
@@ -241,7 +241,7 @@ export const restoreUsers = async (mailAdr: string, user: string) => {
     const { error } = await supabase.auth.signUp({
       email: mailAdr,
       password: 'password',
-      options: { emailRedirectTo: getUrl() },
+      options: { emailRedirectTo: `${getUrl()}auth/callback` },
     });
     if (error) {
       console.error('削除失敗:', error.message);
@@ -279,7 +279,7 @@ export const restoreUsersAndShainCod = async (mailAdr: string, shainCod: string 
     const { error } = await supabase.auth.signUp({
       email: mailAdr,
       password: 'password',
-      options: { emailRedirectTo: getUrl() },
+      options: { emailRedirectTo: `${getUrl()}auth/callback` },
     });
     if (error) {
       console.error('削除失敗:', error.message);

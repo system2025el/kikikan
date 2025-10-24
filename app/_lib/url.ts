@@ -3,7 +3,7 @@
  * @returns ログイン画面のURL（開発中はlocalhost:3000）
  */
 export const getUrl = () => {
-  let url = process.env.VERCEL_URL ?? 'localhost:3000';
+  let url = process.env.VERCEL_URL ?? 'https://localhost:3000/';
   url = url.startsWith('http') ? url : `https://${url}`;
   return url.endsWith('/') ? url : `${url}/`;
 };
