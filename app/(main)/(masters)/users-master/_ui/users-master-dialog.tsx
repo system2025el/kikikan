@@ -126,6 +126,8 @@ export const UsersMasterDialog = ({
             if (cod.data) {
               setCodErrorMsg(`既に使われている社員コードです`);
               setEditable(true);
+            } else {
+              setRestoreOpen(true);
             }
           } else {
             setRestoreOpen(true);
