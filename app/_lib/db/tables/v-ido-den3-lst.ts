@@ -26,3 +26,28 @@ export const selectIdoDen = async (sagyoKbnId: number, sagyoSijiId: number, sagy
     throw e;
   }
 };
+
+export const selectIdoDenOne = async (
+  sagyoKbnId: number,
+  sagyoSijiId: number,
+  sagyoDenDat: string,
+  sagyoId: number,
+  kizaiId: number
+) => {
+  try {
+    return await supabase
+      .schema(SCHEMA)
+      .from('v_ido_den3_lst')
+      .select(
+        'ido_den_id, kizai_id, kizai_nam, plan_qty, result_qty, result_adj_qty, ctn_flg, bld_cod, tana_cod, eda_cod, kizai_mem'
+      )
+      .eq('sagyo_kbn_id', sagyoKbnId)
+      .eq('sagyo_siji_id', sagyoSijiId)
+      .eq('nyushuko_dat', sagyoDenDat)
+      .eq('nyushuko_basho_id', sagyoId)
+      .eq('kizai_id', kizaiId)
+      .single();
+  } catch (e) {
+    throw e;
+  }
+};

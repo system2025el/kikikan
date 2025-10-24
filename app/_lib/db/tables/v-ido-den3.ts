@@ -16,28 +16,28 @@ export const selectFilteredIdoList = async (sagyoDenDat: string, sagyoSijiId: nu
   const query = `
     SELECT 
         distinct 
-        den2yoko.sagyo_siji_id,
-        den2yoko.nyushuko_dat,
+        den3.sagyo_siji_id,
+        den3.nyushuko_dat,
         -- 出庫チェック  
-        den2yoko.schk_sagyo_sts_id,
-        den2yoko.schk_sagyo_sts_nam_short,
+        den3.schk_sagyo_sts_id,
+        den3.schk_sagyo_sts_nam_short,
         -- 入庫チェック
-        den2yoko.nchk_sagyo_sts_id,
-        den2yoko.nchk_sagyo_sts_nam_short,
+        den3.nchk_sagyo_sts_id,
+        den3.nchk_sagyo_sts_nam_short,
         -- 出発
-        den2yoko.shuko_fix_flg,  --1の場合は行グレーに
+        den3.shuko_fix_flg,  --1の場合は行グレーに
         -- 到着
-        den2yoko.nyuko_fix_flg
+        den3.nyuko_fix_flg
     FROM
         --入出庫伝票テーブル主のビュー
-        ${SCHEMA}.v_ido_den2yoko as den2yoko
+        ${SCHEMA}.v_ido_den3 as den3
 
     WHERE
-        den2yoko.nyushuko_dat = '${sagyoDenDat}' --その日だけ抽出
-        AND den2yoko.sagyo_siji_id = ${sagyoSijiId}
+        den3.nyushuko_dat = '${sagyoDenDat}' --その日だけ抽出
+        AND den3.sagyo_siji_id = ${sagyoSijiId}
 
     ORDER BY
-        den2yoko.nyushuko_dat
+        den3.nyushuko_dat
   `;
   try {
     return (await pool.query(query)).rows;

@@ -144,8 +144,11 @@ export const ShukoEqptDetail = (props: {
         const newList = shukoEqptDetailList.filter((_, index) => !selected.includes(index));
         setShukoEqptDetailList(newList);
         setSelected([]);
+        setSnackBarMessage('実績をクリアしました');
+        setSnackBarOpen(true);
       } else {
-        console.log('削除に失敗しました');
+        setSnackBarMessage('実績のクリアに失敗しました');
+        setSnackBarOpen(true);
       }
       setIsLoading(false);
     }

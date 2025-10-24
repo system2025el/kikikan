@@ -4,11 +4,21 @@ import { Checkbox, Table, TableBody, TableCell, TableContainer, TableHead, Table
 import { grey } from '@mui/material/colors';
 import { Dispatch, SetStateAction } from 'react';
 
+import { toJapanDateString } from '@/app/(main)/_lib/date-conversion';
+
+import { IdoEqptDetailTableValues } from '../_lib/types';
+
 export const IdoEqptDetailTable = (props: {
-  /*datas: IdoEqptDetailTableValues[];*/
+  datas: IdoEqptDetailTableValues[];
   selected: number[];
   setSelected: Dispatch<SetStateAction<number[]>>;
 }) => {
+  const { datas, selected, setSelected } = props;
+
+  const handleSelect = (index: number) => {
+    const newSelected = selected.includes(index) ? selected.filter((item) => item !== index) : [...selected, index];
+    setSelected(newSelected);
+  };
   return (
     <TableContainer sx={{ overflow: 'auto', maxHeight: '80vh' }}>
       <Table stickyHeader size="small">
@@ -17,12 +27,12 @@ export const IdoEqptDetailTable = (props: {
             <TableCell padding="none" />
             <TableCell padding="checkbox">
               <Checkbox
-              // indeterminate={datas && selected.length > 0 && selected.length < datas.length}
-              // checked={datas && datas.length > 0 && selected.length === datas.length}
-              // onChange={(e) => {
-              //   const newSelected = e.target.checked && datas ? datas.map((row, index) => index) : [];
-              //   setSelected(newSelected);
-              // }}
+                indeterminate={datas && selected.length > 0 && selected.length < datas.length}
+                checked={datas && datas.length > 0 && selected.length === datas.length}
+                onChange={(e) => {
+                  const newSelected = e.target.checked && datas ? datas.map((row, index) => index) : [];
+                  setSelected(newSelected);
+                }}
               />
             </TableCell>
             <TableCell align="left">EL NO.</TableCell>
@@ -35,21 +45,7 @@ export const IdoEqptDetailTable = (props: {
           </TableRow>
         </TableHead>
         <TableBody>
-          <TableRow sx={{ whiteSpace: 'nowrap' }}>
-            <TableCell align="center" padding="none">
-              {1}
-            </TableCell>
-            <TableCell padding="checkbox">
-              <Checkbox />
-            </TableCell>
-            <TableCell align="left">234</TableCell>
-            <TableCell align="left">BB0000000000000000001001</TableCell>
-            <TableCell align="left">移動チェック済</TableCell>
-            <TableCell align="left">XXXXXXXXXXX</TableCell>
-            <TableCell align="left">2025/09/10</TableCell>
-            <TableCell align="left">test_user</TableCell>
-            <TableCell align="left"></TableCell>
-            {/* {datas.map((row, index) => (
+          {datas.map((row, index) => (
             <TableRow key={row.rfidTagId} sx={{ backgroundColor: row.rfidDelFlg === 1 ? grey[300] : 'white' }}>
               <TableCell align="center" padding="none">
                 {index + 1}
@@ -59,30 +55,13 @@ export const IdoEqptDetailTable = (props: {
               </TableCell>
               <TableCell align="left">{row.rfidElNum}</TableCell>
               <TableCell align="left">{row.rfidTagId}</TableCell>
-              <TableCell align="left">{row.sagyoKbnNam}</TableCell>
+              <TableCell align="left">{row.rfidStsNam}</TableCell>
               <TableCell align="left">{row.rfidMem}</TableCell>
-              <TableCell align="left">{row.nyushukoBashoId === 1 ? 'K' : 'Y'}</TableCell>
               <TableCell align="left">{row.rfidDat && toJapanDateString(row.rfidDat)}</TableCell>
               <TableCell align="left">{row.rfidUser}</TableCell>
               <TableCell align="left">{row.rfidDelFlg === 1 && '無効'}</TableCell>
             </TableRow>
-          ))} */}
-          </TableRow>
-          <TableRow sx={{ whiteSpace: 'nowrap', bgcolor: grey[300] }}>
-            <TableCell align="center" padding="none">
-              {2}
-            </TableCell>
-            <TableCell padding="checkbox">
-              <Checkbox />
-            </TableCell>
-            <TableCell align="left">235</TableCell>
-            <TableCell align="left">BB0000000000000000001002</TableCell>
-            <TableCell align="left">移動チェック済</TableCell>
-            <TableCell align="left">XXXXXXXXXXX</TableCell>
-            <TableCell align="left">2025/09/10</TableCell>
-            <TableCell align="left">test_user</TableCell>
-            <TableCell align="left">無効</TableCell>
-          </TableRow>
+          ))}
         </TableBody>
       </Table>
     </TableContainer>

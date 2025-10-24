@@ -56,7 +56,7 @@ export const ShukoEqptDetailTable = (props: {
               </TableCell>
               <TableCell align="left">{row.rfidElNum}</TableCell>
               <TableCell align="left">{row.rfidTagId}</TableCell>
-              <TableCell align="left">{row.sagyoKbnNam}</TableCell>
+              <TableCell align="left">{row.rfidStsNam}</TableCell>
               <TableCell align="left">{row.rfidMem}</TableCell>
               <TableCell align="left">{row.nyushukoBashoId === 1 ? 'K' : 'Y'}</TableCell>
               <TableCell align="left">{row.rfidDat && toJapanDateString(row.rfidDat)}</TableCell>
