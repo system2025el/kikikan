@@ -194,13 +194,16 @@ export const delshukoResult = async (deleteData: ShukoEqptDetailTableValues[], u
       sagyo_den_dat: deleteData[0].nyushukoDat,
       sagyo_id: deleteData[0].nyushukoBashoId,
       kizai_id: deleteData[0].kizaiId,
-      result_qty: deleteData[0].planQty && deleteData[0].planQty - deleteData.length,
+      result_qty: deleteData[0].resultQty && deleteData[0].resultQty - deleteData.length,
       upd_dat: toJapanTimeString(),
       upd_user: userNam,
     };
 
     await updateNyushukoDen(updateNyushukoDenData, connection);
-    console.log('update nyushuko den result_qty', deleteData[0].planQty && deleteData[0].planQty - deleteData.length);
+    console.log(
+      'update nyushuko den result_qty',
+      deleteData[0].resultQty && deleteData[0].resultQty - deleteData.length
+    );
 
     await await connection.query('COMMIT');
     revalidatePath(

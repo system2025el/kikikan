@@ -16,12 +16,14 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import { toJapanDateString } from '@/app/(main)/_lib/date-conversion';
+import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
 import { BackButton } from '@/app/(main)/_ui/buttons';
 import { TestDate } from '@/app/(main)/_ui/date';
+import { useDirty } from '@/app/(main)/_ui/dirty-context';
 
 import { addIdoFix, delIdoFix, getIdoDenMaxId, saveIdoDen } from '../_lib/funcs';
 import { IdoDetailTableValues, IdoDetailValues, SelectedIdoEqptsValues } from '../_lib/types';
@@ -38,8 +40,15 @@ export const IdoDetail = (props: {
   // user情報
   const user = useUserStore((state) => state.user);
 
+  // 出発、到着フラグ
   const [fixFlag, setFixFlag] = useState(props.fixFlag);
+  // 編集中フラグ
+  const [editFlag, setEditFlag] = useState(false);
+  // 保存フラグ
+  const [saveFlag, setSaveFlag] = useState(true);
 
+  // 移動明細リスト
+  const [originIdoDetailList, setOriginIdoDetailList] = useState<IdoDetailTableValues[]>(props.idoDetailTableData);
   // 移動明細リスト
   const [idoDetailList, setIdoDetailList] = useState<IdoDetailTableValues[]>(props.idoDetailTableData);
   // 削除対象ID
@@ -49,6 +58,8 @@ export const IdoDetail = (props: {
   const [idoEqSelectionDialogOpen, setIdoEqSelectionDialogOpen] = useState(false);
   // 削除ダイアログ制御
   const [deleteOpen, setDeleteOpen] = useState(false);
+  // 保存ダイアログ制御
+  const [saveOpen, setSaveOpen] = useState(false);
   // 出発ダイアログ制御
   const [departureOpen, setDepartureOpen] = useState(false);
   // スナックバー制御
@@ -56,12 +67,43 @@ export const IdoDetail = (props: {
   // スナックバーメッセージ
   const [snackBarMessage, setSnackBarMessage] = useState('');
 
+  // context
+  const { setIsDirty, setIsSave } = useDirty();
+  // ブラウザバック、F5、×ボタンでページを離れた際のhook
+  useUnsavedChangesWarning(editFlag, saveFlag);
+
+  useEffect(() => {
+    const unsavedData = originIdoDetailList.filter((d) => !d.saveFlag);
+    if (unsavedData.length > 0) {
+      setSaveFlag(false);
+      setIsSave(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const filterIdoDetailList = idoDetailList.filter((d) => !d.delFlag);
+    if (JSON.stringify(originIdoDetailList) !== JSON.stringify(filterIdoDetailList)) {
+      setEditFlag(true);
+      setIsDirty(true);
+    } else {
+      setEditFlag(false);
+      setIsDirty(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [idoDetailList]);
+
   /**
    * 出発、到着ボタン押下
    * @returns
    */
   const handleFix = async () => {
     if (!user || idoDetailList.length === 0) return;
+
+    if (editFlag || !saveFlag) {
+      setSaveOpen(true);
+      return;
+    }
 
     const message = idoDetailData.sagyoKbnId === 40 ? '出発' : '到着';
     let result = false;
@@ -131,7 +173,12 @@ export const IdoDetail = (props: {
     const updateData = await saveIdoDen(idoDetailList, user.name);
 
     if (updateData) {
+      setOriginIdoDetailList(updateData);
       setIdoDetailList(updateData);
+      setEditFlag(false);
+      setIsDirty(false);
+      setSaveFlag(true);
+      setIsSave(true);
       setSnackBarMessage('保存しました');
       setSnackBarOpen(true);
     } else {
@@ -242,7 +289,7 @@ export const IdoDetail = (props: {
               <Box alignItems={'center'}>
                 <Typography>手動指示</Typography>
                 <Box py={1}>
-                  <Button onClick={() => setIdoEqSelectionDialogOpen(true)}>
+                  <Button onClick={() => setIdoEqSelectionDialogOpen(true)} disabled={fixFlag}>
                     <AddIcon fontSize="small" />
                     機材追加
                   </Button>
@@ -252,16 +299,21 @@ export const IdoDetail = (props: {
                 <Typography sx={{ backgroundColor: 'rgba(158, 158, 158, 1)' }}>済</Typography>
                 <Typography sx={{ backgroundColor: 'rgba(255, 171, 64, 1)' }}>不足</Typography>
                 <Typography sx={{ backgroundColor: 'rgba(68, 138, 255, 1)' }}>コンテナ</Typography>
-                <Button onClick={handleSave} sx={{ display: idoDetailData.sagyoKbnId === 40 ? 'inline-flex' : 'none' }}>
+                <Button
+                  onClick={handleSave}
+                  disabled={fixFlag}
+                  sx={{ display: idoDetailData.sagyoKbnId === 40 ? 'inline-flex' : 'none' }}
+                >
                   保存
                 </Button>
               </Grid2>
             </Box>
-            {idoDetailList.length > 0 && (
+            {idoDetailList.filter((d) => !d.delFlag).length > 0 && (
               <ShukoIdoDenTable
                 datas={idoDetailList}
                 setIdoDetailList={setIdoDetailList}
                 handleIdoDenDelete={handleIdoDenDelete}
+                fixFlag={fixFlag}
               />
             )}
           </Box>
@@ -274,7 +326,7 @@ export const IdoDetail = (props: {
                 <Typography sx={{ backgroundColor: 'rgba(68, 138, 255, 1)' }}>コンテナ</Typography>
               </Grid2>
             </Box>
-            {idoDetailList.length > 0 && <NyukoIdoDenTable datas={idoDetailList} />}
+            {idoDetailList.filter((d) => !d.delFlag).length > 0 && <NyukoIdoDenTable datas={idoDetailList} />}
           </Box>
         )}
       </Paper>
@@ -304,6 +356,18 @@ export const IdoDetail = (props: {
         </DialogContentText>
         <DialogActions>
           <Button onClick={() => setDepartureOpen(false)}>確認</Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog open={saveOpen}>
+        <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
+          <WarningIcon color="error" />
+          <Box>出発できません</Box>
+        </DialogTitle>
+        <DialogContentText m={2} p={2}>
+          未保存のデータがあるため、出発できません
+        </DialogContentText>
+        <DialogActions>
+          <Button onClick={() => setSaveOpen(false)}>確認</Button>
         </DialogActions>
       </Dialog>
       <Snackbar

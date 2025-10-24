@@ -21,8 +21,9 @@ export const ShukoIdoDenTable = (props: {
   datas: IdoDetailTableValues[];
   setIdoDetailList: Dispatch<SetStateAction<IdoDetailTableValues[]>>;
   handleIdoDenDelete: (kizaiId: number) => void;
+  fixFlag: boolean;
 }) => {
-  const { datas, setIdoDetailList, handleIdoDenDelete } = props;
+  const { datas, setIdoDetailList, handleIdoDenDelete, fixFlag } = props;
 
   const router = useRouter();
   const path = usePathname();
@@ -86,11 +87,13 @@ export const ShukoIdoDenTable = (props: {
                 sx={{
                   whiteSpace: 'nowrap',
                   backgroundColor:
-                    row.diffQty === 0 && !row.ctnFlg
-                      ? 'rgba(158, 158, 158, 1)'
-                      : row.ctnFlg
-                        ? 'rgba(68, 138, 255, 1)'
-                        : 'white',
+                    row.planQty === 0 && !row.ctnFlg
+                      ? 'white'
+                      : row.diffQty === 0 && !row.ctnFlg
+                        ? 'rgba(158, 158, 158, 1)'
+                        : row.ctnFlg
+                          ? 'rgba(68, 138, 255, 1)'
+                          : 'white',
                 }}
               >
                 <TableCell padding="checkbox">
@@ -102,6 +105,7 @@ export const ShukoIdoDenTable = (props: {
                       display: row.juchuFlg === 0 ? 'inline-block' : 'none',
                       color: 'red',
                     }}
+                    disabled={fixFlag}
                   >
                     <Delete fontSize="small" />
                   </IconButton>
@@ -128,6 +132,7 @@ export const ShukoIdoDenTable = (props: {
                         handleCellChange(row.kizaiId, Number(e.target.value));
                       }
                     }}
+                    disabled={fixFlag}
                     sx={{
                       width: 50,
                       '& .MuiInputBase-input': {
@@ -153,11 +158,15 @@ export const ShukoIdoDenTable = (props: {
                   align="right"
                   sx={{
                     backgroundColor:
-                      row.diffQty < 0
-                        ? 'rgba(255, 171, 64, 1)'
-                        : row.diffQty === 0 && row.ctnFlg
-                          ? 'rgba(68, 138, 255, 1)'
-                          : 'rgba(158, 158, 158, 1)',
+                      row.planQty === 0 && !row.ctnFlg
+                        ? 'white'
+                        : row.diffQty > 0
+                          ? 'rgba(255, 255, 0, 1)'
+                          : row.diffQty < 0
+                            ? 'rgba(255, 171, 64, 1)'
+                            : row.diffQty === 0 && row.ctnFlg
+                              ? 'rgba(68, 138, 255, 1)'
+                              : 'rgba(158, 158, 158, 1)',
                   }}
                 >
                   {row.diffQty}
@@ -176,8 +185,8 @@ export const NyukoIdoDenTable = (props: { datas: IdoDetailTableValues[] }) => {
   const router = useRouter();
   const path = usePathname();
 
-  const handleClick = () => {
-    router.push(`${path}/ido-eqpt-detail/1`);
+  const handleClick = (kizaiId: number) => {
+    router.push(`${path}/ido-eqpt-detail/${kizaiId}`);
   };
   return (
     <TableContainer sx={{ overflow: 'auto', maxHeight: '80vh', maxWidth: '60vw' }}>
@@ -206,17 +215,46 @@ export const NyukoIdoDenTable = (props: { datas: IdoDetailTableValues[] }) => {
           {datas.map((row, index) => (
             <TableRow
               key={index}
-              onClick={handleClick}
-              style={{ cursor: 'pointer' }}
-              hover
-              sx={{ whiteSpace: 'nowrap' }}
+              sx={{
+                whiteSpace: 'nowrap',
+                backgroundColor:
+                  row.planQty === 0 && !row.ctnFlg
+                    ? 'white'
+                    : row.diffQty === 0 && !row.ctnFlg
+                      ? 'rgba(158, 158, 158, 1)'
+                      : row.ctnFlg
+                        ? 'rgba(68, 138, 255, 1)'
+                        : 'white',
+              }}
             >
               <TableCell padding="checkbox">{index + 1}</TableCell>
-              <TableCell align="left">{row.kizaiNam}</TableCell>
+              <TableCell
+                align="left"
+                onClick={row.saveFlag ? () => handleClick(row.kizaiId) : undefined}
+                sx={{ cursor: 'pointer', '&:hover': { backgroundColor: 'rgba(0,0,0,0.04)' } }}
+              >
+                {row.kizaiNam}
+              </TableCell>
               <TableCell align="right">{row.planQty}</TableCell>
               <TableCell align="right">{row.resultQty}</TableCell>
               <TableCell align="right">{row.resultAdjQty}</TableCell>
-              <TableCell align="right">{row.diffQty}</TableCell>
+              <TableCell
+                align="right"
+                sx={{
+                  backgroundColor:
+                    row.planQty === 0 && !row.ctnFlg
+                      ? 'white'
+                      : row.diffQty > 0
+                        ? 'rgba(255, 255, 0, 1)'
+                        : row.diffQty < 0
+                          ? 'rgba(255, 171, 64, 1)'
+                          : row.diffQty === 0 && row.ctnFlg
+                            ? 'rgba(68, 138, 255, 1)'
+                            : 'rgba(158, 158, 158, 1)',
+                }}
+              >
+                {row.diffQty}
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>

@@ -127,8 +127,11 @@ export const NyukoEqptDetail = (props: {
         const newList = nyukoEqptDetailList.filter((_, index) => !selected.includes(index));
         setNyukoEqptDetailList(newList);
         setSelected([]);
+        setSnackBarMessage('実績をクリアしました');
+        setSnackBarOpen(true);
       } else {
-        console.log('削除に失敗しました');
+        setSnackBarMessage('実績のクリアに失敗しました');
+        setSnackBarOpen(true);
       }
       setIsLoading(false);
     }
