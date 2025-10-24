@@ -276,6 +276,7 @@ export const restoreUsersAndShainCod = async (mailAdr: string, shainCod: string 
     // 担当者マスタ更新
     await updMUserDelFlgAndShainCod(delData, connection);
     // 認証メール送信
+    console.log(`${getUrl()}auth/callback`);
     const { error } = await supabase.auth.signUp({
       email: mailAdr,
       password: 'password',
