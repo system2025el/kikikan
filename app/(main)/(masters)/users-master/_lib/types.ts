@@ -3,7 +3,7 @@ import { string, z } from 'zod';
 import { validationMessages } from '@/app/(main)/_lib/validation-messages';
 
 export const UsersMaterDialogSchema = z.object({
-  mailAdr: string().email(),
+  mailAdr: string().email({ message: validationMessages.email() }),
   tantouNam: z
     .string()
     .max(100, { message: validationMessages.maxStringLength(100) })
