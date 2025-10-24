@@ -156,7 +156,7 @@ export const usePdf = (): [(params: PdfModel[]) => Promise<Blob>] => {
 
       /* ---------------- 公演情報 ---------------- */
       const rowHeight = 20;
-      let currentY = 730;
+      let currentY = 750;
       const pageWidth = 300;
       const colWidthsPerRow = [
         [45, pageWidth - 45], // 1行目
@@ -281,8 +281,8 @@ export const usePdf = (): [(params: PdfModel[]) => Promise<Blob>] => {
       const pageStartY = 800; // 新しいページのY座標の開始位置
       const marginBottom = 50; // これより下には描画しないというマージン
 
-      const tableColWidths = [250, 40, 40, 40, 160];
-      const headerTexts = ['機　　材　　名', '受注数', '予備数', '合計数', '備　　考'];
+      const tableColWidths = [250, 40, 240];
+      const headerTexts = ['機　　材　　名', '合計数', '備　　考'];
 
       // 現在の描画Y座標を管理する変数
       const tableCurrentY = tableStartY;
@@ -291,9 +291,7 @@ export const usePdf = (): [(params: PdfModel[]) => Promise<Blob>] => {
       drawTableHeader(page, customFont, tableStartX, tableCurrentY, tableRowHeight, tableColWidths, headerTexts);
 
       const tableData =
-        param.item12 && param.item12.length > 0
-          ? param.item12
-          : [{ kizaiNam: '', planQty: '', planYobiQty: '', planKizaiQty: '' }];
+        param.item12 && param.item12.length > 0 ? param.item12 : [{ kizaiNam: '', planQty: '', planYobiQty: '' }];
 
       let currentBottomY = tableStartY - tableRowHeight;
 
@@ -340,7 +338,7 @@ export const usePdf = (): [(params: PdfModel[]) => Promise<Blob>] => {
         });
         colX += tableColWidths[0];
 
-        // 受注数セル
+        // 合計数セル
         page.drawRectangle({
           x: colX,
           y,
@@ -349,17 +347,18 @@ export const usePdf = (): [(params: PdfModel[]) => Promise<Blob>] => {
           borderColor: rgb(0, 0, 0),
           borderWidth: 1,
         });
-        const planKizaiText = `${item.planKizaiQty ?? ''}`;
-        const planKizaiTextWidth = customFont.widthOfTextAtSize(planKizaiText, 10);
-        page.drawText(planKizaiText, {
-          x: colX + tableColWidths[1] - planKizaiTextWidth - 3, // 3pxのパディング
+
+        const planQtyText = `${item.planQty ?? ''}`;
+        const planQtyTextWidth = customFont.widthOfTextAtSize(planQtyText, 10);
+        page.drawText(planQtyText, {
+          x: colX + tableColWidths[1] - planQtyTextWidth - 3, // 3pxのパディング
           y: y + (tableRowHeight - 10) / 2,
           font: customFont,
           size: 10,
         });
         colX += tableColWidths[1];
 
-        // 予備数セル
+        // 備考セル
         page.drawRectangle({
           x: colX,
           y,
@@ -368,45 +367,21 @@ export const usePdf = (): [(params: PdfModel[]) => Promise<Blob>] => {
           borderColor: rgb(0, 0, 0),
           borderWidth: 1,
         });
-        const planYobiText = `${item.planYobiQty ?? ''}`;
-        const planYobiTextWidth = customFont.widthOfTextAtSize(planYobiText, 10);
-        page.drawText(planYobiText, {
-          x: colX + tableColWidths[2] - planYobiTextWidth - 3, // 3pxのパディング
-          y: y + (tableRowHeight - 10) / 2,
-          font: customFont,
-          size: 10,
-        });
+
+        const planYobiQty = item.planYobiQty ?? 0;
+        // 予備数量が 0 または "0" のときは表示しない
+        if (Number(planYobiQty) !== 0) {
+          const planYobiQtyText = ` 予備:${planYobiQty}`;
+          const planYobiQtyWidth = customFont.widthOfTextAtSize(planYobiQtyText, 10);
+          page.drawText(planYobiQtyText, {
+            x: colX + tableColWidths[1] - planYobiQtyWidth - 3, // 右寄せ + 3pxパディング
+            y: y + (tableRowHeight - 10) / 2,
+            font: customFont,
+            size: 10,
+          });
+        }
+
         colX += tableColWidths[2];
-
-        // 合計数セル
-        page.drawRectangle({
-          x: colX,
-          y,
-          width: tableColWidths[3],
-          height: tableRowHeight,
-          borderColor: rgb(0, 0, 0),
-          borderWidth: 1,
-        });
-        const planQtyText = `${item.planQty ?? ''}`;
-        const planQtyTextWidth = customFont.widthOfTextAtSize(planQtyText, 10);
-        page.drawText(planQtyText, {
-          x: colX + tableColWidths[3] - planQtyTextWidth - 3, // 3pxのパディング
-          y: y + (tableRowHeight - 10) / 2,
-          font: customFont,
-          size: 10,
-        });
-        colX += tableColWidths[3];
-
-        // 備考セル
-        page.drawRectangle({
-          x: colX,
-          y,
-          width: tableColWidths[4],
-          height: tableRowHeight,
-          borderColor: rgb(0, 0, 0),
-          borderWidth: 1,
-        });
-        colX += tableColWidths[4];
       }
     }
 
