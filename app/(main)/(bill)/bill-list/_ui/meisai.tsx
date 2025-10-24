@@ -193,7 +193,12 @@ export const MeisaiLines = ({ index }: { index: number }) => {
       ))}
       <Grid2 container px={2} alignItems={'center'}>
         <Grid2 size={0.5} />
-        <Button size="small" onClick={() => meisaiFields.append({ nam: null })}>
+        <Button
+          size="small"
+          onClick={() =>
+            meisaiFields.append({ nam: null, qty: null, honbanbiQty: null, tankaAmt: null, shokeiAmt: null })
+          }
+        >
           <AddIcon fontSize="small" />
           項目
         </Button>

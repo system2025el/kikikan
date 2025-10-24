@@ -396,6 +396,13 @@ export const Bill = ({
                         handleClose={() => setKizaimeisaiaddDialogOpen(false)}
                         addTbl={() =>
                           meisaiHeadFields.append({
+                            juchuHeadId: null,
+                            juchuKizaiHeadId: null,
+                            koenNam: null,
+                            koenbashoNam: null,
+                            kokyakuTantoNam: null,
+                            nebikiAmt: null,
+                            nebikiAftAmt: null,
                             seikyuRange: { strt: null, end: null },
                             seikyuMeisaiHeadNam: null,
                             zeiFlg: false,
