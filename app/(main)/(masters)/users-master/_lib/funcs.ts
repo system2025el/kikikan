@@ -10,6 +10,7 @@ import {
   selectOneUser,
   upDateUserDB,
   updMUserDelFlg,
+  updMUserDelFlgAndShainCod,
 } from '@/app/_lib/db/tables/m-user';
 import { MUserDBValues } from '@/app/_lib/db/types/m-use-type';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
@@ -58,7 +59,7 @@ export const getChosenUser = async (mailAdr: string) => {
       return emptyUser;
     }
     // permissionを２進数に戻す
-    const biString = rows[0].permission.toString(2).padStart(8);
+    const biString = rows[0].permission.toString(2).padStart(8, 0);
 
     const UserDetails: UsersMasterDialogValues = {
       mailAdr: rows[0].mail_adr,
@@ -228,6 +229,39 @@ export const restoreUsers = async (mailAdr: string, user: string) => {
   try {
     await connection.query('BEGIN');
     await updMUserDelFlg(delData, connection);
+
+    const { error } = await supabase.auth.signUp({ email: mailAdr, password: 'password' });
+    if (error) {
+      console.error('削除失敗:', error.message);
+      await connection.query('ROLLBACK');
+      throw error;
+    }
+    await connection.query('COMMIT');
+  } catch (e) {
+    await connection.query('ROLLBACK');
+    throw e;
+  } finally {
+    connection.release();
+  }
+};
+
+/**
+ * 条件の担当者マスタを有効化し社員コードを変更、authの認証メールを送信する関数
+ * @param data
+ */
+export const restoreUsersAndShainCod = async (mailAdr: string, shainCod: string | null, user: string) => {
+  const delData = {
+    mail_adr: mailAdr,
+    del_flg: 0,
+    upd_dat: toJapanTimeString(undefined, '-'),
+    upd_user: user,
+    shain_cod: shainCod,
+  };
+
+  const connection = await pool.connect();
+  try {
+    await connection.query('BEGIN');
+    await updMUserDelFlgAndShainCod(delData, connection);
 
     const { error } = await supabase.auth.signUp({ email: mailAdr, password: 'password' });
     if (error) {
