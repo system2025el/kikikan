@@ -1,5 +1,6 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
 import { PoolClient } from 'pg';
 
 import pool from '@/app/_lib/db/postgres';
@@ -73,7 +74,7 @@ export const getIdoDen = async (sagyoKbnId: number, sagyoSijiId: number, sagyoDe
       diffQty: d.diff_qty,
       ctnFlg: d.ctn_flg,
       delFlag: false,
-      saveFlag: d.ido_den_id ? true : false,
+      saveFlag: d.ido_den_id !== null ? true : false,
     }));
 
     return idoDetailTableList;
@@ -274,6 +275,7 @@ export const addIdoFix = async (
 export const delIdoFix = async (sagyoKbnId: number, sagyoSijiId: number, sagyoDenDatDat: string, sagyoId: number) => {
   try {
     await deleteIdoFix(sagyoKbnId, sagyoSijiId, sagyoDenDatDat, sagyoId);
+    return true;
   } catch (e) {
     console.error(e);
     return false;
@@ -301,7 +303,7 @@ export const saveIdoDen = async (idoDenData: IdoDetailTableValues[], userNam: st
   try {
     // 削除
     if (delIdoDenData.length > 0) {
-      const deleteIds = delIdoDenData.map((data) => data.kizaiId);
+      const deleteIds = delIdoDenData.map((data) => data.idoDenId);
       await delIdoDen(deleteIds, connection);
     }
     // 追加
@@ -314,6 +316,8 @@ export const saveIdoDen = async (idoDenData: IdoDetailTableValues[], userNam: st
     }
     console.log('saveIdoDen successfully');
     await connection.query('COMMIT');
+
+    revalidatePath('ido-list');
 
     const updateIdoDenData = saveIdoDenData.filter((d) => !d.delFlag).map((d) => ({ ...d, saveFlag: true }));
     return updateIdoDenData;

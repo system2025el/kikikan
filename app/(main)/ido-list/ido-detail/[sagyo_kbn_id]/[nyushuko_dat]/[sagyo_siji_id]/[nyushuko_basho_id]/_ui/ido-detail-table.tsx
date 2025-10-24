@@ -21,8 +21,9 @@ export const ShukoIdoDenTable = (props: {
   datas: IdoDetailTableValues[];
   setIdoDetailList: Dispatch<SetStateAction<IdoDetailTableValues[]>>;
   handleIdoDenDelete: (kizaiId: number) => void;
+  fixFlag: boolean;
 }) => {
-  const { datas, setIdoDetailList, handleIdoDenDelete } = props;
+  const { datas, setIdoDetailList, handleIdoDenDelete, fixFlag } = props;
 
   const router = useRouter();
   const path = usePathname();
@@ -104,6 +105,7 @@ export const ShukoIdoDenTable = (props: {
                       display: row.juchuFlg === 0 ? 'inline-block' : 'none',
                       color: 'red',
                     }}
+                    disabled={fixFlag}
                   >
                     <Delete fontSize="small" />
                   </IconButton>
@@ -130,6 +132,7 @@ export const ShukoIdoDenTable = (props: {
                         handleCellChange(row.kizaiId, Number(e.target.value));
                       }
                     }}
+                    disabled={fixFlag}
                     sx={{
                       width: 50,
                       '& .MuiInputBase-input': {
