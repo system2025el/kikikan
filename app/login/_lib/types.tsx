@@ -1,5 +1,6 @@
-import { validationMessages } from '@/app/(main)/_lib/validation-messages';
 import z from 'zod';
+
+import { validationMessages } from '@/app/(main)/_lib/validation-messages';
 
 // ユーザーログイン用ヴァリデーション
 export const UserSchema = z.object({
