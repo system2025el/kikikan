@@ -1,7 +1,6 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { getURL } from 'next/dist/shared/lib/utils';
 
 import pool from '@/app/_lib/db/postgres';
 import { supabase, supabaseAdmin } from '@/app/_lib/db/supabase';
@@ -14,6 +13,7 @@ import {
   updMUserDelFlgAndShainCod,
 } from '@/app/_lib/db/tables/m-user';
 import { MUserDBValues } from '@/app/_lib/db/types/m-use-type';
+import { getUrl } from '@/app/_lib/url';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { emptyUser } from './datas';
