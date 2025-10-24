@@ -78,7 +78,7 @@ export const UsersMasterDialog = ({
   } = useForm({
     mode: 'onChange',
     reValidateMode: 'onChange',
-    defaultValues: {},
+    defaultValues: emptyUser,
     resolver: zodResolver(UsersMaterDialogSchema),
   });
 

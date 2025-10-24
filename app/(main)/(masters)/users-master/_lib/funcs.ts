@@ -121,6 +121,7 @@ export const addNewUser = async (data: UsersMasterDialogValues, user: string) =>
       console.log(result);
     }
     // 認証メール送信
+    console.log(`${getUrl()}`);
     const { error } = await supabase.auth.signUp({
       email: data.mailAdr,
       password: 'password',
@@ -238,6 +239,7 @@ export const restoreUsers = async (mailAdr: string, user: string) => {
     // 担当者マスタ更新
     await updMUserDelFlg(delData, connection);
     // 認証メール送信
+    console.log(`${getUrl()}`);
     const { error } = await supabase.auth.signUp({
       email: mailAdr,
       password: 'password',
@@ -276,7 +278,7 @@ export const restoreUsersAndShainCod = async (mailAdr: string, shainCod: string 
     // 担当者マスタ更新
     await updMUserDelFlgAndShainCod(delData, connection);
     // 認証メール送信
-    console.log(`${getUrl()}auth/callback`);
+    console.log(`${getUrl()}`);
     const { error } = await supabase.auth.signUp({
       email: mailAdr,
       password: 'password',
