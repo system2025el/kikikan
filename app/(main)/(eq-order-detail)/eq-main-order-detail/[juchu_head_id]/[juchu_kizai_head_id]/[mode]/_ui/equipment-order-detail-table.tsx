@@ -30,6 +30,7 @@ import { MemoTooltip } from '@/app/(main)/(eq-order-detail)/_ui/memo-tooltip';
 
 import { getDateHeaderBackgroundColor, getStockRowBackgroundColor } from '../_lib/colorselect';
 import {
+  IdoJuchuKizaiMeisaiValues,
   JuchuContainerMeisaiValues,
   JuchuKizaiHonbanbiValues,
   JuchuKizaiMeisaiValues,
@@ -133,8 +134,6 @@ type EqTableProps = {
   edit: boolean;
   onChange: (kizaiId: number, orderValue: number, spareValue: number, totalValue: number) => void;
   handleMeisaiDelete: (target: { kizaiId: number; containerFlag: boolean }) => void;
-  handleCellDateChange: (kizaiId: number, date: Dayjs | null) => void;
-  handleCellDateClear: (kizaiId: number) => void;
   handleMemoChange: (kizaiId: number, memo: string) => void;
   ref: React.RefObject<HTMLDivElement | null>;
 };
@@ -144,8 +143,6 @@ export const EqTable: React.FC<EqTableProps> = ({
   edit,
   onChange,
   handleMeisaiDelete,
-  handleCellDateChange,
-  handleCellDateClear,
   handleMemoChange,
   ref,
 }) => {
@@ -182,21 +179,11 @@ export const EqTable: React.FC<EqTableProps> = ({
         <TableHead>
           <TableRow>
             <TableCell size="small" style={styles.header} />
-            <TableCell size="small" style={styles.header} />
-            <TableCell align="left" size="small" style={styles.header}>
-              移動日時
-            </TableCell>
-            <TableCell align="left" size="small" style={styles.header}>
-              入出庫場所
-            </TableCell>
             <TableCell align="left" size="small" style={styles.header}>
               メモ
             </TableCell>
             <TableCell align="left" size="small" style={styles.header}>
               機材名
-            </TableCell>
-            <TableCell align="right" size="small" style={styles.header}>
-              全数
             </TableCell>
             <TableCell align="right" size="small" style={styles.header}>
               受注数
@@ -218,8 +205,6 @@ export const EqTable: React.FC<EqTableProps> = ({
               edit={edit}
               handleOrderRef={handleOrderRef(rowIndex)}
               handleMeisaiDelete={handleMeisaiDelete}
-              handleCellDateChange={handleCellDateChange}
-              handleCellDateClear={handleCellDateClear}
               handleMemoChange={handleMemoChange}
               handleKeyDown={handleKeyDown}
               handlePlanKizaiQtyChange={handlePlanKizaiQtyChange}
@@ -238,8 +223,6 @@ type EqTableRowProps = {
   edit: boolean;
   handleOrderRef: (el: HTMLInputElement | null) => void;
   handleMeisaiDelete: (target: { kizaiId: number; containerFlag: boolean }) => void;
-  handleCellDateChange: (kizaiId: number, date: Dayjs | null) => void;
-  handleCellDateClear: (kizaiId: number) => void;
   handleMemoChange: (kizaiId: number, memo: string) => void;
   handlePlanKizaiQtyChange: (kizaiId: number, newValue: number) => void;
   handlePlanYobiQtyChange: (kizaiId: number, newValue: number) => void;
@@ -253,20 +236,12 @@ const EqTableRow = React.memo(
     edit,
     handleOrderRef,
     handleMeisaiDelete,
-    handleCellDateChange,
-    handleCellDateClear,
     handleMemoChange,
     handlePlanKizaiQtyChange,
     handlePlanYobiQtyChange,
     handleKeyDown,
   }: EqTableRowProps) => {
     console.log('描画', rowIndex);
-
-    const handleDateChange = (date: Dayjs | null) => {
-      if (date !== null) {
-        handleCellDateChange(row.kizaiId, date);
-      }
-    };
 
     return (
       <TableRow>
@@ -278,34 +253,6 @@ const EqTableRow = React.memo(
           >
             <Delete fontSize="small" />
           </IconButton>
-        </TableCell>
-        <TableCell align="right" size="small" sx={{ bgcolor: grey[200], py: 0, px: 1, border: '1px solid black' }}>
-          {rowIndex + 1}
-        </TableCell>
-        <TableCell style={styles.row} size="small">
-          <Box display="flex" width={'200px'}>
-            <TestDate
-              sx={{
-                '& .MuiPickersInputBase-root': {
-                  height: '23px',
-                },
-                '& .MuiPickersSectionList-root': {
-                  padding: 0,
-                },
-                '& .MuiButtonBase-root': {
-                  padding: 0,
-                },
-              }}
-              date={row.sagyoDenDat}
-              onChange={handleDateChange}
-              onClear={() => handleCellDateClear(row.kizaiId)}
-              disabled={!edit}
-            />
-            {row.sagyoSijiId && <Typography>{row.sagyoSijiId === 1 ? 'K→Y' : 'Y→K'}</Typography>}
-          </Box>
-        </TableCell>
-        <TableCell style={styles.row} align="left" size="small" sx={{ bgcolor: grey[200] }}>
-          {row.shozokuId === 1 ? 'K' : 'Y'}
         </TableCell>
         <TableCell style={styles.row} align="center" size="small">
           <MemoTooltip
@@ -324,9 +271,6 @@ const EqTableRow = React.memo(
           >
             {row.kizaiNam}
           </Button>
-        </TableCell>
-        <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
-          {row.kizaiQty}
         </TableCell>
         <TableCell style={styles.row} align="right" size="small">
           <TextField
@@ -422,6 +366,314 @@ const EqTableRow = React.memo(
 );
 
 EqTableRow.displayName = 'EqTableRow';
+
+type IdoEqTableProps = {
+  rows: IdoJuchuKizaiMeisaiValues[];
+  edit: boolean;
+  handleCellDateChange: (kizaiId: number, date: Dayjs | null) => void;
+  handleCellDateClear: (kizaiId: number) => void;
+};
+
+export const IdoEqTable: React.FC<IdoEqTableProps> = ({ rows, edit, handleCellDateChange, handleCellDateClear }) => {
+  const visibleRows = rows.filter((row) => !row.delFlag);
+
+  return (
+    <TableContainer component={Paper} style={{ overflow: 'scroll', maxHeight: '80vh' }}>
+      <Table stickyHeader>
+        <TableHead>
+          <TableRow>
+            <TableCell size="small" style={styles.header} />
+            <TableCell align="left" size="small" style={styles.header}>
+              移動日
+            </TableCell>
+            <TableCell align="left" size="small" style={styles.header}>
+              入出庫場所
+            </TableCell>
+            <TableCell align="left" size="small" style={styles.header}>
+              機材名
+            </TableCell>
+            <TableCell align="right" size="small" style={styles.header}>
+              全数
+            </TableCell>
+            <TableCell align="right" size="small" style={styles.header}>
+              受注数
+            </TableCell>
+            <TableCell align="right" size="small" style={styles.header}>
+              予備数
+            </TableCell>
+            <TableCell align="right" size="small" style={styles.header}>
+              合計数
+            </TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {visibleRows.map((row, rowIndex) => (
+            <TableRow key={rowIndex}>
+              <TableCell
+                align="right"
+                size="small"
+                sx={{ bgcolor: grey[200], py: 0, px: 1, border: '1px solid black' }}
+              >
+                {rowIndex + 1}
+              </TableCell>
+              <TableCell style={styles.row} size="small">
+                <Box display="flex" width={'200px'}>
+                  <TestDate
+                    sx={{
+                      '& .MuiPickersInputBase-root': {
+                        height: '23px',
+                      },
+                      '& .MuiPickersSectionList-root': {
+                        padding: 0,
+                      },
+                      '& .MuiButtonBase-root': {
+                        padding: 0,
+                      },
+                    }}
+                    date={row.sagyoDenDat}
+                    onChange={(date) => handleCellDateChange(row.kizaiId, date)}
+                    onClear={() => handleCellDateClear(row.kizaiId)}
+                    disabled={!edit}
+                  />
+                  {row.sagyoSijiId && <Typography>{row.sagyoSijiId === 1 ? 'K→Y' : 'Y→K'}</Typography>}
+                </Box>
+              </TableCell>
+              <TableCell style={styles.row} align="left" size="small" sx={{ bgcolor: grey[200] }}>
+                {row.shozokuId === 1 ? 'K' : 'Y'}
+              </TableCell>
+              <TableCell style={styles.row} align="left" size="small">
+                <Button
+                  variant="text"
+                  sx={{ p: 0, justifyContent: 'start' }}
+                  onClick={() => window.open(`/loan-situation/${row.kizaiId}`)}
+                >
+                  {row.kizaiNam}
+                </Button>
+              </TableCell>
+              <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
+                {row.kizaiQty}
+              </TableCell>
+              <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
+                {row.planKizaiQty}
+              </TableCell>
+              <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
+                {row.planYobiQty}
+              </TableCell>
+              <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
+                {row.planQty}
+              </TableCell>
+            </TableRow>
+            // <IdoEqTableRow
+            //   key={rowIndex}
+            //   row={row}
+            //   rowIndex={rowIndex}
+            //   edit={edit}
+            //   handleOrderRef={handleOrderRef(rowIndex)}
+            //   handleMeisaiDelete={handleMeisaiDelete}
+            //   handleCellDateChange={handleCellDateChange}
+            //   handleCellDateClear={handleCellDateClear}
+            //   handleMemoChange={handleMemoChange}
+            //   handleKeyDown={handleKeyDown}
+            //   handlePlanKizaiQtyChange={handlePlanKizaiQtyChange}
+            //   handlePlanYobiQtyChange={handlePlanYobiQtyChange}
+            // />
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+};
+
+// type IdoEqTableRowProps = {
+//   row: IdoJuchuKizaiMeisaiValues;
+//   rowIndex: number;
+//   edit: boolean;
+//   handleOrderRef: (el: HTMLInputElement | null) => void;
+//   handleMeisaiDelete: (target: { kizaiId: number; containerFlag: boolean }) => void;
+//   handleCellDateChange: (kizaiId: number, date: Dayjs | null) => void;
+//   handleCellDateClear: (kizaiId: number) => void;
+//   handleMemoChange: (kizaiId: number, memo: string) => void;
+//   handlePlanKizaiQtyChange: (kizaiId: number, newValue: number) => void;
+//   handlePlanYobiQtyChange: (kizaiId: number, newValue: number) => void;
+//   handleKeyDown: (e: React.KeyboardEvent, rowIndex: number) => void;
+// };
+
+// const IdoEqTableRow = React.memo(
+//   ({
+//     row,
+//     rowIndex,
+//     edit,
+//     handleOrderRef,
+//     handleMeisaiDelete,
+//     handleCellDateChange,
+//     handleCellDateClear,
+//     handleMemoChange,
+//     handlePlanKizaiQtyChange,
+//     handlePlanYobiQtyChange,
+//     handleKeyDown,
+//   }: IdoEqTableRowProps) => {
+//     console.log('描画', rowIndex);
+
+//     const handleDateChange = (date: Dayjs | null) => {
+//       if (date !== null) {
+//         handleCellDateChange(row.kizaiId, date);
+//       }
+//     };
+
+//     return (
+//       <TableRow>
+//         <TableCell sx={{ padding: 0, border: '1px solid black' }}>
+//           <IconButton
+//             onClick={() => handleMeisaiDelete({ kizaiId: row.kizaiId, containerFlag: false })}
+//             sx={{ padding: 0, color: 'red' }}
+//             disabled={!edit}
+//           >
+//             <Delete fontSize="small" />
+//           </IconButton>
+//         </TableCell>
+//         <TableCell align="right" size="small" sx={{ bgcolor: grey[200], py: 0, px: 1, border: '1px solid black' }}>
+//           {rowIndex + 1}
+//         </TableCell>
+//         <TableCell style={styles.row} size="small">
+//           <Box display="flex" width={'200px'}>
+//             <TestDate
+//               sx={{
+//                 '& .MuiPickersInputBase-root': {
+//                   height: '23px',
+//                 },
+//                 '& .MuiPickersSectionList-root': {
+//                   padding: 0,
+//                 },
+//                 '& .MuiButtonBase-root': {
+//                   padding: 0,
+//                 },
+//               }}
+//               date={row.sagyoDenDat}
+//               onChange={handleDateChange}
+//               onClear={() => handleCellDateClear(row.kizaiId)}
+//               disabled={!edit}
+//             />
+//             {row.sagyoSijiId && <Typography>{row.sagyoSijiId === 1 ? 'K→Y' : 'Y→K'}</Typography>}
+//           </Box>
+//         </TableCell>
+//         <TableCell style={styles.row} align="left" size="small" sx={{ bgcolor: grey[200] }}>
+//           {row.shozokuId === 1 ? 'K' : 'Y'}
+//         </TableCell>
+//         <TableCell style={styles.row} align="center" size="small">
+//           <MemoTooltip
+//             name={row.kizaiNam}
+//             memo={row.mem ? row.mem : ''}
+//             handleMemoChange={handleMemoChange}
+//             kizaiId={row.kizaiId}
+//             disabled={!edit}
+//           />
+//         </TableCell>
+//         <TableCell style={styles.row} align="left" size="small">
+//           <Button
+//             variant="text"
+//             sx={{ p: 0, justifyContent: 'start' }}
+//             onClick={() => window.open(`/loan-situation/${row.kizaiId}`)}
+//           >
+//             {row.kizaiNam}
+//           </Button>
+//         </TableCell>
+//         <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
+//           {row.kizaiQty}
+//         </TableCell>
+//         <TableCell style={styles.row} align="right" size="small">
+//           <TextField
+//             variant="standard"
+//             value={row.planKizaiQty}
+//             type="text"
+//             onChange={(e) => {
+//               if (/^\d*$/.test(e.target.value)) {
+//                 handlePlanKizaiQtyChange(row.kizaiId, Number(e.target.value));
+//               }
+//             }}
+//             sx={{
+//               '& .MuiInputBase-input': {
+//                 textAlign: 'right',
+//                 padding: 0,
+//                 fontSize: 'small',
+//               },
+//               '& input[type=number]': {
+//                 MozAppearance: 'textfield',
+//               },
+//               '& input[type=number]::-webkit-outer-spin-button': {
+//                 WebkitAppearance: 'none',
+//                 margin: 0,
+//               },
+//               '& input[type=number]::-webkit-inner-spin-button': {
+//                 WebkitAppearance: 'none',
+//                 margin: 0,
+//               },
+//             }}
+//             slotProps={{
+//               input: {
+//                 style: { textAlign: 'right' },
+//                 disableUnderline: true,
+//                 inputMode: 'numeric',
+//               },
+//             }}
+//             inputRef={handleOrderRef}
+//             onKeyDown={(e) => {
+//               handleKeyDown(e, rowIndex);
+//             }}
+//             onFocus={(e) => e.target.select()}
+//             disabled={!edit}
+//           />
+//         </TableCell>
+//         <TableCell style={styles.row} align="right" size="small">
+//           <TextField
+//             variant="standard"
+//             value={row.planYobiQty}
+//             type="text"
+//             onChange={(e) => {
+//               if (/^\d*$/.test(e.target.value)) {
+//                 handlePlanYobiQtyChange(row.kizaiId, Number(e.target.value));
+//               }
+//             }}
+//             sx={{
+//               '& .MuiInputBase-input': {
+//                 textAlign: 'right',
+//                 padding: 0,
+//                 fontSize: 'small',
+//               },
+//               '& input[type=number]': {
+//                 MozAppearance: 'textfield',
+//               },
+//               '& input[type=number]::-webkit-outer-spin-button': {
+//                 WebkitAppearance: 'none',
+//                 margin: 0,
+//               },
+//               '& input[type=number]::-webkit-inner-spin-button': {
+//                 WebkitAppearance: 'none',
+//                 margin: 0,
+//               },
+//             }}
+//             slotProps={{
+//               input: {
+//                 style: { textAlign: 'right' },
+//                 disableUnderline: true,
+//                 inputMode: 'numeric',
+//               },
+//             }}
+//             onFocus={(e) => e.target.select()}
+//             disabled={!edit}
+//           />
+//         </TableCell>
+//         <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
+//           {row.planQty}
+//         </TableCell>
+//       </TableRow>
+//     );
+//   },
+//   (prevProps, nextProps) => {
+//     return prevProps.row === nextProps.row && prevProps.edit === nextProps.edit;
+//   }
+// );
+
+// IdoEqTableRow.displayName = 'IdoEqTableRow';
 
 export const ContainerTable = (props: {
   rows: JuchuContainerMeisaiValues[];

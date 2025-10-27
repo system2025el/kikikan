@@ -4,8 +4,9 @@ import { toISOStringYearMonthDay } from '@/app/(main)/_lib/date-conversion';
 import { getNyukoDate, getRange, getShukoDate } from '@/app/(main)/_lib/date-funcs';
 
 import { getDetailJuchuHead, getJuchuContainerMeisai, getNyushukoFixFlag, getStockList } from '../../../../_lib/funcs';
-import { getHonbanbi, getJuchuKizaiHead, getJuchuKizaiMeisai } from './_lib/funcs';
+import { getHonbanbi, getIdoJuchuKizaiMeisai, getJuchuKizaiHead, getJuchuKizaiMeisai } from './_lib/funcs';
 import {
+  IdoJuchuKizaiMeisaiValues,
   JuchuContainerMeisaiValues,
   JuchuKizaiHeadValues,
   JuchuKizaiHonbanbiValues,
@@ -54,6 +55,8 @@ const Page = async (props: {
     };
     // 受注機材明細データ(初期値)
     const newJuchuKizaiMeisaiData: JuchuKizaiMeisaiValues[] = [];
+    // 移動受注機材明細データ(初期値)
+    const newIdoJuchuKizaiMeisaiData: IdoJuchuKizaiMeisaiValues[] = [];
     // 受注コンテナ明細データ(初期値)
     const newJuchuContainerMeisaiData: JuchuContainerMeisaiValues[] = [];
     // 機材在庫データ(初期値)
@@ -72,6 +75,7 @@ const Page = async (props: {
         juchuHeadData={juchuHeadData}
         juchuKizaiHeadData={newJuchuKizaiHeadData}
         juchuKizaiMeisaiData={newJuchuKizaiMeisaiData}
+        idoJuchuKizaiMeisaiData={newIdoJuchuKizaiMeisaiData}
         juchuContainerMeisaiData={newJuchuContainerMeisaiData}
         shukoDate={shukoDate}
         nyukoDate={nyukoDate}
@@ -97,6 +101,12 @@ const Page = async (props: {
     // 受注機材明細データ
     console.time();
     const juchuKizaiMeisaiData = await getJuchuKizaiMeisai(params.juchu_head_id, params.juchu_kizai_head_id);
+    console.log('----------------------------受注機材明細---------------------------------');
+    console.timeEnd();
+
+    // 移動受注機材明細データ
+    console.time();
+    const idoJuchuKizaiMeisaiData = await getIdoJuchuKizaiMeisai(params.juchu_head_id, params.juchu_kizai_head_id);
     console.log('----------------------------受注機材明細---------------------------------');
     console.timeEnd();
 
@@ -149,6 +159,7 @@ const Page = async (props: {
         juchuHeadData={juchuHeadData}
         juchuKizaiHeadData={juchuKizaiHeadData}
         juchuKizaiMeisaiData={juchuKizaiMeisaiData}
+        idoJuchuKizaiMeisaiData={idoJuchuKizaiMeisaiData}
         juchuContainerMeisaiData={juchuContainerMeisaiData}
         shukoDate={shukoDate}
         nyukoDate={nyukoDate}

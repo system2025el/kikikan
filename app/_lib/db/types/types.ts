@@ -1040,7 +1040,6 @@ export type Database = {
           ido_den_id: number | null;
           juchu_head_id: number;
           juchu_kizai_head_id: number;
-          juchu_kizai_meisai_id: number;
           kizai_id: number;
           plan_qty: number | null;
           sagyo_den_dat: string;
@@ -1056,7 +1055,6 @@ export type Database = {
           ido_den_id?: number | null;
           juchu_head_id: number;
           juchu_kizai_head_id: number;
-          juchu_kizai_meisai_id: number;
           kizai_id: number;
           plan_qty?: number | null;
           sagyo_den_dat: string;
@@ -1072,7 +1070,6 @@ export type Database = {
           ido_den_id?: number | null;
           juchu_head_id?: number;
           juchu_kizai_head_id?: number;
-          juchu_kizai_meisai_id?: number;
           kizai_id?: number;
           plan_qty?: number | null;
           sagyo_den_dat?: string;

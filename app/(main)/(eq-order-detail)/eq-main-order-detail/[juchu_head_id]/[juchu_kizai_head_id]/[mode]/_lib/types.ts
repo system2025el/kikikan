@@ -45,15 +45,28 @@ export type JuchuKizaiMeisaiValues = {
   juchuHeadId: number;
   juchuKizaiHeadId: number;
   juchuKizaiMeisaiId: number;
+  shozokuId: number;
+  mem: string | null;
+  kizaiId: number;
+  kizaiTankaAmt: number;
+  kizaiNam: string;
+  planKizaiQty: number | null;
+  planYobiQty: number | null;
+  planQty: number | null;
+  delFlag: boolean;
+  saveFlag: boolean;
+};
+
+export type IdoJuchuKizaiMeisaiValues = {
+  juchuHeadId: number;
+  juchuKizaiHeadId: number;
   idoDenId: number | null;
   sagyoDenDat: Date | null;
   sagyoSijiId: number | null;
   mShozokuId: number;
   shozokuId: number;
   shozokuNam: string;
-  mem: string | null;
   kizaiId: number;
-  kizaiTankaAmt: number;
   kizaiNam: string;
   kizaiQty: number;
   planKizaiQty: number | null;

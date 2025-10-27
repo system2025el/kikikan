@@ -67,8 +67,9 @@ import {
   NyushukoFixAlertDialog,
   SaveAlertDialog,
 } from '../../../../../_ui/caveat-dialog';
-import { getJuchuKizaiMeisai, saveJuchuKizai, saveNewJuchuKizaiHead } from '../_lib/funcs';
+import { getIdoJuchuKizaiMeisai, getJuchuKizaiMeisai, saveJuchuKizai, saveNewJuchuKizaiHead } from '../_lib/funcs';
 import {
+  IdoJuchuKizaiMeisaiValues,
   JuchuContainerMeisaiValues,
   JuchuKizaiHeadSchema,
   JuchuKizaiHeadValues,
@@ -78,13 +79,14 @@ import {
   StockTableValues,
 } from '../_lib/types';
 import { DateSelectDialog } from './date-selection-dialog';
-import { ContainerTable, EqTable, StockTable } from './equipment-order-detail-table';
+import { ContainerTable, EqTable, IdoEqTable, StockTable } from './equipment-order-detail-table';
 import { EqptSelectionDialog } from './equipment-selection-dailog';
 
 const EquipmentOrderDetail = (props: {
   juchuHeadData: DetailOerValues;
   juchuKizaiHeadData: JuchuKizaiHeadValues;
   juchuKizaiMeisaiData: JuchuKizaiMeisaiValues[] | undefined;
+  idoJuchuKizaiMeisaiData: IdoJuchuKizaiMeisaiValues[] | undefined;
   juchuContainerMeisaiData: JuchuContainerMeisaiValues[];
   shukoDate: Date | null;
   nyukoDate: Date | null;
@@ -120,6 +122,14 @@ const EquipmentOrderDetail = (props: {
   // 受注機材明細リスト
   const [juchuKizaiMeisaiList, setJuchuKizaiMeisaiList] = useState<JuchuKizaiMeisaiValues[]>(
     props.juchuKizaiMeisaiData ?? []
+  );
+  // 移動受注機材明細元データ
+  const [originIdoJuchuKizaiMeisaiList, setOriginIdoJuchuKizaiMeisaiList] = useState<IdoJuchuKizaiMeisaiValues[]>(
+    props.idoJuchuKizaiMeisaiData ?? []
+  );
+  // 移動受注機材明細リスト
+  const [idoJuchuKizaiMeisaiList, setIdoJuchuKizaiMeisaiList] = useState<IdoJuchuKizaiMeisaiValues[]>(
+    props.idoJuchuKizaiMeisaiData ?? []
   );
   // 受注コンテナ明細元データ
   const [originJuchuContainerMeisaiList, setOriginJuchuContainerMeisaiList] = useState<JuchuContainerMeisaiValues[]>(
@@ -455,6 +465,9 @@ const EquipmentOrderDetail = (props: {
       const checkJuchuKizaiMeisai =
         JSON.stringify(originJuchuKizaiMeisaiList) !==
         JSON.stringify(juchuKizaiMeisaiList.filter((data) => !data.delFlag));
+      const checkIdoJuchuKizaiMeisai =
+        JSON.stringify(originIdoJuchuKizaiMeisaiList) !==
+        JSON.stringify(idoJuchuKizaiMeisaiList.filter((data) => !data.delFlag));
       const checkJuchuContainerMeisai =
         JSON.stringify(originJuchuContainerMeisaiList) !==
         JSON.stringify(juchuContainerMeisaiList.filter((data) => !data.delFlag));
@@ -465,6 +478,7 @@ const EquipmentOrderDetail = (props: {
         checkYardShukoDat,
         checkJuchuHonbanbi,
         checkJuchuKizaiMeisai,
+        checkIdoJuchuKizaiMeisai,
         checkJuchuContainerMeisai,
         defaultValues?.kicsShukoDat,
         defaultValues?.yardShukoDat,
@@ -475,6 +489,7 @@ const EquipmentOrderDetail = (props: {
         juchuHonbanbiList,
         juchuHonbanbiDeleteList,
         juchuKizaiMeisaiList,
+        idoJuchuKizaiMeisaiList,
         juchuContainerMeisaiList,
         userNam
       );
@@ -694,7 +709,7 @@ const EquipmentOrderDetail = (props: {
    * @param kizaiId 機材id
    */
   const handleCellDateClear = (kizaiId: number) => {
-    setJuchuKizaiMeisaiList((prev) =>
+    setIdoJuchuKizaiMeisaiList((prev) =>
       prev.map((row) =>
         row.kizaiId === kizaiId ? { ...row, sagyoDenDat: null, sagyoSijiId: null, shozokuId: row.mShozokuId } : row
       )
@@ -755,6 +770,13 @@ const EquipmentOrderDetail = (props: {
           : data
       )
     );
+    setIdoJuchuKizaiMeisaiList((prev) =>
+      prev.map((data) =>
+        data.kizaiId === kizaiId && !data.delFlag
+          ? { ...data, planKizaiQty: planKizaiQty, planYobiQty: planYobiQty, planQty: planQty }
+          : data
+      )
+    );
   };
 
   /**
@@ -765,7 +787,7 @@ const EquipmentOrderDetail = (props: {
   const handleCellDateChange = (kizaiId: number, date: Dayjs | null) => {
     if (date !== null) {
       const newDate = date.toDate();
-      setJuchuKizaiMeisaiList((prev) =>
+      setIdoJuchuKizaiMeisaiList((prev) =>
         prev.map((row) =>
           row.kizaiId === kizaiId && !row.delFlag
             ? {
@@ -821,10 +843,10 @@ const EquipmentOrderDetail = (props: {
 
   // 明細削除ダイアログの押下ボタンによる処理
   const handleMeisaiDeleteResult = (result: boolean) => {
+    setDeleteOpen(false);
     if (!deleteTarget) return;
 
     if (result) {
-      setDeleteOpen(false);
       // コンテナ削除
       if (deleteTarget.containerFlag) {
         setJuchuContainerMeisaiList((prev) =>
@@ -1004,7 +1026,7 @@ const EquipmentOrderDetail = (props: {
   const handleMoveDialog = (result: boolean) => {
     if (result) {
       if (idoDat !== null && getValues('yardShukoDat') === null) {
-        setJuchuKizaiMeisaiList((prev) =>
+        setIdoJuchuKizaiMeisaiList((prev) =>
           prev.map((row) =>
             row.mShozokuId === 2 && !row.delFlag
               ? {
@@ -1019,7 +1041,7 @@ const EquipmentOrderDetail = (props: {
         setIdoDat(null);
         setMoveOpen(false);
       } else if (idoDat !== null && getValues('kicsShukoDat') === null) {
-        setJuchuKizaiMeisaiList((prev) =>
+        setIdoJuchuKizaiMeisaiList((prev) =>
           prev.map((row) =>
             row.mShozokuId === 1 && !row.delFlag
               ? {
@@ -1034,7 +1056,7 @@ const EquipmentOrderDetail = (props: {
         setIdoDat(null);
         setMoveOpen(false);
       } else {
-        setJuchuKizaiMeisaiList((prev) =>
+        setIdoJuchuKizaiMeisaiList((prev) =>
           prev.map((row) =>
             row.sagyoDenDat ? { ...row, sagyoDenDat: idoDat, sagyoSijiId: null, shozokuId: row.mShozokuId } : row
           )
@@ -1142,7 +1164,7 @@ const EquipmentOrderDetail = (props: {
       shozokuNam: d.shozokuNam,
       mem: '',
       kizaiId: d.kizaiId,
-      kizaiTankaAmt: d.rankAmt,
+      kizaiTankaAmt: d.regAmt,
       kizaiNam: d.kizaiNam,
       kizaiQty: d.kizaiQty,
       planKizaiQty: 0,
@@ -1594,7 +1616,7 @@ const EquipmentOrderDetail = (props: {
 
             <Dialog open={EqSelectionDialogOpen} fullScreen>
               <EqptSelectionDialog
-                rank={props.juchuHeadData.kokyaku.kokyakuRank}
+                // rank={props.juchuHeadData.kokyaku.kokyakuRank}
                 setEqpts={setEqpts}
                 handleCloseDialog={handleCloseEqDialog}
               />
@@ -1603,7 +1625,7 @@ const EquipmentOrderDetail = (props: {
               <Loading />
             ) : (
               <>
-                <Box display={'flex'} flexDirection="row" width="100%">
+                <Box display={'flex'} flexDirection="row" width="100%" py={2}>
                   <Box
                     sx={{
                       width: {
@@ -1630,8 +1652,6 @@ const EquipmentOrderDetail = (props: {
                         edit={edit}
                         onChange={handleCellChange}
                         handleMeisaiDelete={handleMeisaiDelete}
-                        handleCellDateChange={handleCellDateChange}
-                        handleCellDateClear={handleCellDateClear}
                         handleMemoChange={handleMemoChange}
                         ref={leftRef}
                       />
@@ -1670,6 +1690,17 @@ const EquipmentOrderDetail = (props: {
                       ref={rightRef}
                     />
                   </Box>
+                </Box>
+                <Box
+                  display={Object.keys(idoJuchuKizaiMeisaiList.filter((d) => !d.delFlag)).length > 0 ? 'block' : 'none'}
+                  py={2}
+                >
+                  <IdoEqTable
+                    rows={idoJuchuKizaiMeisaiList}
+                    edit={edit}
+                    handleCellDateChange={handleCellDateChange}
+                    handleCellDateClear={handleCellDateClear}
+                  />
                 </Box>
                 <Box
                   display={juchuContainerMeisaiList.filter((d) => !d.delFlag).length > 0 ? 'block' : 'none'}
