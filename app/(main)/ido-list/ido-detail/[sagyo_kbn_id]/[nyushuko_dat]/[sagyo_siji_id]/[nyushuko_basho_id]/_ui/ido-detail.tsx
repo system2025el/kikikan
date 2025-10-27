@@ -16,7 +16,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import { toJapanDateString } from '@/app/(main)/_lib/date-conversion';
@@ -187,6 +187,19 @@ export const IdoDetail = (props: {
     }
   };
 
+  /**
+   * 移動数変更時
+   * @param kizaiId 機材id
+   * @param planQty 移動数
+   */
+  const handleCellChange = (kizaiId: number, planQty: number) => {
+    setIdoDetailList((prev) =>
+      prev.map((d) =>
+        d.kizaiId === kizaiId ? { ...d, planQty: planQty, diffQty: d.resultQty + d.resultAdjQty - planQty } : d
+      )
+    );
+  };
+
   // 移動明細削除ボタン押下時
   const handleIdoDenDelete = (kizaiId: number) => {
     setDeleteOpen(true);
@@ -311,7 +324,7 @@ export const IdoDetail = (props: {
             {idoDetailList.filter((d) => !d.delFlag).length > 0 && (
               <ShukoIdoDenTable
                 datas={idoDetailList}
-                setIdoDetailList={setIdoDetailList}
+                handleCellChange={handleCellChange}
                 handleIdoDenDelete={handleIdoDenDelete}
                 fixFlag={fixFlag}
               />
