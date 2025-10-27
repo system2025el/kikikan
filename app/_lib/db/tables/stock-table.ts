@@ -23,7 +23,7 @@ export const selectDetailStockList = async (
       select   
     cal.cal_dat as "calDat" --スケジュール日
     ,coalesce(zaiko_kizai.kizai_id,${kizaiId} /*■変数箇所■*/) as "kizaiId"   -- 機材ID
-    ,coalesce(zaiko_kizai.kizai_qty,(select v_kizai_qty.kizai_qty from v_kizai_qty where v_kizai_qty.kizai_id = ${kizaiId} /*■変数箇所■*/)) as "kizaiQty"   --機材数（保有数） 
+    ,coalesce(zaiko_kizai.kizai_qty,(select v_kizai_qty.kizai_qty from v_kizai_qty where v_kizai_qty.kizai_id = ${kizaiId} /*■変数箇所■*/)) as "kizaiQty"   --機材数（有効数） 
     ,coalesce(zaiko_kizai.juchu_qty,0) as "juchuQty"   --受注数 NULL時0固定    /*貸出状況スケジュール*/
     
 --     ,coalesce(zaiko_kizai.yobi_qty,0) as yobi_qty   --予備数 NULL時0固定  

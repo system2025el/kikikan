@@ -156,7 +156,11 @@ const EquipmentOrderDetail = (props: {
     props.juchuKizaiMeisaiData ? props.juchuKizaiMeisaiData.map((data) => data.planQty ?? 0) : []
   );
   // 削除機材
-  const [deleteTarget, setDeleteTarget] = useState<{ kizaiId: number; containerFlag: boolean } | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{
+    rowIndex: number;
+    kizaiId: number;
+    containerFlag: boolean;
+  } | null>(null);
 
   // 出庫日
   const [shukoDate, setShukoDate] = useState<Date | null>(props.shukoDate);
@@ -836,7 +840,7 @@ const EquipmentOrderDetail = (props: {
   };
 
   // 明細削除ボタン押下時
-  const handleMeisaiDelete = (target: { kizaiId: number; containerFlag: boolean }) => {
+  const handleMeisaiDelete = (target: { rowIndex: number; kizaiId: number; containerFlag: boolean }) => {
     setDeleteOpen(true);
     setDeleteTarget(target);
   };
@@ -849,25 +853,34 @@ const EquipmentOrderDetail = (props: {
     if (result) {
       // コンテナ削除
       if (deleteTarget.containerFlag) {
-        setJuchuContainerMeisaiList((prev) =>
-          prev.map((data) =>
-            data.kizaiId === deleteTarget.kizaiId && !data.delFlag ? { ...data, delFlag: true } : data
-          )
+        setJuchuContainerMeisaiList(
+          (prev) =>
+            prev
+              .filter((d) => !d.delFlag)
+              .map((data, index) =>
+                index === deleteTarget.rowIndex && !data.delFlag ? { ...data, delFlag: true } : data
+              )
+          // prev.map((data) =>
+          //   data.kizaiId === deleteTarget.rowIndex && !data.delFlag ? { ...data, delFlag: true } : data
+          // )
         );
         // 機材削除
       } else {
         const filterJuchuKizaiMeisaiList = juchuKizaiMeisaiList.filter((data) => !data.delFlag);
-        const rowIndex = filterJuchuKizaiMeisaiList.findIndex((data) => data.kizaiId === deleteTarget.kizaiId);
+        //const rowIndex = filterJuchuKizaiMeisaiList.findIndex((data) => data.kizaiId === deleteTarget.kizaiId);
         const updatedJuchuKizaiMeisaiList = filterJuchuKizaiMeisaiList.filter(
-          (data) => data.kizaiId !== deleteTarget.kizaiId
+          (_, index) => index !== deleteTarget.rowIndex
         );
         setJuchuKizaiMeisaiList((prev) =>
-          prev.map((data) =>
-            data.kizaiId === deleteTarget.kizaiId && !data.delFlag ? { ...data, delFlag: true } : data
-          )
+          prev
+            .filter((d) => !d.delFlag)
+            .map((data, index) =>
+              index === deleteTarget.rowIndex && !data.delFlag ? { ...data, delFlag: true } : data
+            )
         );
-        setEqStockList((prev) => prev.filter((data) => !data.every((d) => d.kizaiId === deleteTarget.kizaiId)));
-        setOriginPlanQty((prev) => prev.filter((_, index) => index !== rowIndex));
+        setEqStockList((prev) => prev.filter((_, index) => index !== deleteTarget.rowIndex));
+        //setEqStockList((prev) => prev.filter((data) => !data.every((d) => d.kizaiId === deleteTarget.kizaiId)));
+        setOriginPlanQty((prev) => prev.filter((_, index) => index !== deleteTarget.rowIndex));
         setPriceTotal(updatedJuchuKizaiMeisaiList.reduce((sum, row) => sum + (row.kizaiTankaAmt ?? 0), 0));
       }
       setDeleteTarget(null);
@@ -1146,27 +1159,16 @@ const EquipmentOrderDetail = (props: {
     const kizaiData = data.filter((d) => !d.ctnFlg);
     const kizaiIds = new Set(juchuKizaiMeisaiList.filter((data) => !data.delFlag).map((data) => data.kizaiId));
     const filterKizaiData = kizaiData.filter((d) => !kizaiIds.has(d.kizaiId));
-    const selectEq: JuchuKizaiMeisaiValues[] = filterKizaiData.map((d) => ({
+    const selectEq: JuchuKizaiMeisaiValues[] = kizaiData.map((d) => ({
       juchuHeadId: getValues('juchuHeadId'),
       juchuKizaiHeadId: getValues('juchuKizaiHeadId'),
       juchuKizaiMeisaiId: 0,
-      idoDenId: null,
-      sagyoDenDat:
-        d.shozokuId === 1 && kicsIdoDat !== null
-          ? kicsIdoDat
-          : d.shozokuId === 2 && yardIdoDat !== null
-            ? yardIdoDat
-            : null,
-      sagyoSijiId: d.shozokuId === 1 && kicsIdoDat !== null ? 1 : d.shozokuId === 2 && yardIdoDat !== null ? 2 : null,
-      mShozokuId: d.shozokuId,
       shozokuId:
         d.shozokuId === 1 && kicsIdoDat !== null ? 2 : d.shozokuId === 2 && yardIdoDat !== null ? 1 : d.shozokuId,
-      shozokuNam: d.shozokuNam,
       mem: '',
       kizaiId: d.kizaiId,
       kizaiTankaAmt: d.regAmt,
       kizaiNam: d.kizaiNam,
-      kizaiQty: d.kizaiQty,
       planKizaiQty: 0,
       planYobiQty: 0,
       planQty: 0,
@@ -1187,6 +1189,31 @@ const EquipmentOrderDetail = (props: {
       selectEqStockData.push(stock);
     }
 
+    const selectIdoEq: IdoJuchuKizaiMeisaiValues[] = filterKizaiData.map((d) => ({
+      juchuHeadId: getValues('juchuHeadId'),
+      juchuKizaiHeadId: getValues('juchuKizaiHeadId'),
+      idoDenId: null,
+      sagyoDenDat:
+        d.shozokuId === 1 && kicsIdoDat !== null
+          ? kicsIdoDat
+          : d.shozokuId === 2 && yardIdoDat !== null
+            ? yardIdoDat
+            : null,
+      sagyoSijiId: d.shozokuId === 1 && kicsIdoDat !== null ? 1 : d.shozokuId === 2 && yardIdoDat !== null ? 2 : null,
+      mShozokuId: d.shozokuId,
+      shozokuId:
+        d.shozokuId === 1 && kicsIdoDat !== null ? 2 : d.shozokuId === 2 && yardIdoDat !== null ? 1 : d.shozokuId,
+      shozokuNam: d.shozokuNam,
+      kizaiId: d.kizaiId,
+      kizaiNam: d.kizaiNam,
+      kizaiQty: d.kizaiQty,
+      planKizaiQty: 0,
+      planYobiQty: 0,
+      planQty: 0,
+      delFlag: false,
+      saveFlag: false,
+    }));
+
     const containerData = data.filter((d) => d.ctnFlg);
     const containerIds = new Set(juchuContainerMeisaiList.filter((data) => !data.delFlag).map((data) => data.kizaiId));
     const filterContainerData = containerData.filter((d) => !containerIds.has(d.kizaiId));
@@ -1205,6 +1232,7 @@ const EquipmentOrderDetail = (props: {
     }));
 
     setJuchuKizaiMeisaiList((prev) => [...prev, ...selectEq]);
+    setIdoJuchuKizaiMeisaiList((prev) => [...prev, ...selectIdoEq]);
     setJuchuContainerMeisaiList((prev) => [...prev, ...selectContainer]);
     setEqStockList((prev) => [...prev, ...selectEqStockData]);
     setOriginPlanQty((prev) => [...prev, ...newPlanQtys]);
