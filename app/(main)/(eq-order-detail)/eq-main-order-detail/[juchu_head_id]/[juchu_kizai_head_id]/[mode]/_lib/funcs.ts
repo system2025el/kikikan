@@ -330,7 +330,7 @@ export const saveJuchuKizai = async (
     }
 
     // 受注機材明細関係更新
-    if (checkKicsShukoDat || checkYardShukoDat || checkJuchuKizaiMeisai || checkIdoJuchuKizaiMeisai) {
+    if (checkKicsShukoDat || checkYardShukoDat || checkJuchuKizaiMeisai) {
       //const copyJuchuKizaiMeisaiData = [...juchuKizaiMeisaiList];
       const juchuKizaiMeisaiMaxId = await getJuchuKizaiMeisaiMaxId(data.juchuHeadId, data.juchuKizaiHeadId);
       let newJuchuKizaiMeisaiId = juchuKizaiMeisaiMaxId ? juchuKizaiMeisaiMaxId.juchu_kizai_meisai_id + 1 : 1;
@@ -423,8 +423,10 @@ export const saveJuchuKizai = async (
         );
         console.log('YARD入出庫実績削除', deleteYardNyushukoResultResult);
       }
+    }
 
-      // 移動伝票更新
+    // 移動伝票更新
+    if (checkIdoJuchuKizaiMeisai) {
       const addIdoKizaiData = idoJuchuKizaiMeisaiList.filter(
         (data) => !data.idoDenId && data.sagyoDenDat && !data.delFlag
       );

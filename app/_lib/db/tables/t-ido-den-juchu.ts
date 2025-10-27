@@ -68,7 +68,6 @@ export const updateIdoDenJuchu = async (data: IdoDenJuchu, connection: PoolClien
     'ido_den_id',
     'juchu_head_id',
     'juchu_kizai_head_id',
-    'juchu_kizai_meisai_id',
     'sagyo_kbn_id',
     'sagyo_siji_id',
     'sagyo_id',

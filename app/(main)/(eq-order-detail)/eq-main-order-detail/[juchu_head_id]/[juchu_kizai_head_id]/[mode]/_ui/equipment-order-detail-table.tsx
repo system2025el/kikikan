@@ -387,22 +387,22 @@ export const IdoEqTable: React.FC<IdoEqTableProps> = ({ rows, edit, handleCellDa
               移動日
             </TableCell>
             <TableCell align="left" size="small" style={styles.header}>
-              入出庫場所
+              YK
             </TableCell>
             <TableCell align="left" size="small" style={styles.header}>
               機材名
             </TableCell>
             <TableCell align="right" size="small" style={styles.header}>
-              有効数
+              有効
             </TableCell>
             <TableCell align="right" size="small" style={styles.header}>
-              受注数
+              受注
             </TableCell>
             <TableCell align="right" size="small" style={styles.header}>
-              予備数
+              予備
             </TableCell>
             <TableCell align="right" size="small" style={styles.header}>
-              合計数
+              合計
             </TableCell>
           </TableRow>
         </TableHead>
