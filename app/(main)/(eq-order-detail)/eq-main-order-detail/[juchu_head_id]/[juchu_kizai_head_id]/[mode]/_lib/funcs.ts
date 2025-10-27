@@ -50,6 +50,7 @@ import {
   updateNyushukoFix,
 } from '@/app/_lib/db/tables/t-nyushuko-fix';
 import { selectJuchuKizaiMeisai } from '@/app/_lib/db/tables/v-juchu-kizai-meisai';
+import { selectIdoJuchuKizaiMeisai } from '@/app/_lib/db/tables/v-juchu-kizai-meisai-sum';
 import { selectChosenEqptsDetails } from '@/app/_lib/db/tables/v-kizai-list';
 import { JuchuCtnMeisai } from '@/app/_lib/db/types/t_juchu_ctn_meisai-type';
 import { IdoDenJuchu } from '@/app/_lib/db/types/t-ido-den-juchu-type';
@@ -78,6 +79,7 @@ import {
 
 import {
   EqptSelection,
+  IdoJuchuKizaiMeisaiValues,
   JuchuContainerMeisaiValues,
   JuchuKizaiHeadValues,
   JuchuKizaiHonbanbiValues,
@@ -194,6 +196,7 @@ export const saveJuchuKizai = async (
   checkYardShukoDat: boolean,
   checkJuchuHonbanbi: boolean,
   checkJuchuKizaiMeisai: boolean,
+  checkIdoJuchuKizaiMeisai: boolean,
   checkJuchuContainerMeisai: boolean,
   originKicsShukoDat: Date | null | undefined,
   originYardShukoDat: Date | null | undefined,
@@ -204,6 +207,7 @@ export const saveJuchuKizai = async (
   juchuHonbanbiList: JuchuKizaiHonbanbiValues[],
   juchuHonbanbiDeleteList: JuchuKizaiHonbanbiValues[],
   juchuKizaiMeisaiList: JuchuKizaiMeisaiValues[],
+  idoJuchuKizaiMeisaiList: IdoJuchuKizaiMeisaiValues[],
   juchuContainerMeisaiList: JuchuContainerMeisaiValues[],
   userNam: string
 ) => {
@@ -326,7 +330,7 @@ export const saveJuchuKizai = async (
     }
 
     // 受注機材明細関係更新
-    if (checkKicsShukoDat || checkYardShukoDat || checkJuchuKizaiMeisai) {
+    if (checkKicsShukoDat || checkYardShukoDat || checkJuchuKizaiMeisai || checkIdoJuchuKizaiMeisai) {
       //const copyJuchuKizaiMeisaiData = [...juchuKizaiMeisaiList];
       const juchuKizaiMeisaiMaxId = await getJuchuKizaiMeisaiMaxId(data.juchuHeadId, data.juchuKizaiHeadId);
       let newJuchuKizaiMeisaiId = juchuKizaiMeisaiMaxId ? juchuKizaiMeisaiMaxId.juchu_kizai_meisai_id + 1 : 1;
@@ -421,13 +425,13 @@ export const saveJuchuKizai = async (
       }
 
       // 移動伝票更新
-      const addIdoKizaiData = newJuchuKizaiMeisaiData.filter(
+      const addIdoKizaiData = idoJuchuKizaiMeisaiList.filter(
         (data) => !data.idoDenId && data.sagyoDenDat && !data.delFlag
       );
-      const updateIdoKizaiData = newJuchuKizaiMeisaiData.filter(
+      const updateIdoKizaiData = idoJuchuKizaiMeisaiList.filter(
         (data) => data.idoDenId && data.sagyoDenDat && !data.delFlag
       );
-      const deleteIdoKizaiData = newJuchuKizaiMeisaiData.filter(
+      const deleteIdoKizaiData = idoJuchuKizaiMeisaiList.filter(
         (data) => data.idoDenId && (!data.sagyoDenDat || data.delFlag)
       );
       // 削除
@@ -706,16 +710,16 @@ export const updJuchuKizaiHead = async (
 };
 
 /**
- * メイン受注機材明細リスト取得
+ * メイン受注機材明細取得
  * @param juchuHeadId 受注ヘッダーid
  * @param juchuKizaiHeadId 受注機材ヘッダーid
- * @returns 受注機材明細リスト
+ * @returns
  */
 export const getJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
   try {
     const { data: eqList, error: eqListError } = await selectJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId);
     if (eqListError) {
-      console.error('GetEqList eqList error : ', eqListError);
+      console.error('getJuchuKizaiMeisai eqList error : ', eqListError);
       throw eqListError;
     }
     const uniqueIds = new Set();
@@ -726,15 +730,6 @@ export const getJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId:
       uniqueIds.add(item.juchu_kizai_meisai_id);
       return true;
     });
-
-    const eqIds = uniqueEqList.map((data) => data.kizai_id);
-
-    const { data: mKizai, error: mKizaiError } = await selectMeisaiEqts(eqIds);
-
-    if (mKizaiError) {
-      console.error('GetEqList eqShozokuId error : ', mKizaiError);
-      throw mKizaiError;
-    }
 
     const { data: eqTanka, error: eqTankaError } = await selectJuchuKizaiMeisaiKizaiTanka(
       juchuHeadId,
@@ -749,15 +744,57 @@ export const getJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId:
       juchuHeadId: d.juchu_head_id,
       juchuKizaiHeadId: d.juchu_kizai_head_id,
       juchuKizaiMeisaiId: d.juchu_kizai_meisai_id,
+      shozokuId: d.shozoku_id,
+      mem: d.mem,
+      kizaiId: d.kizai_id,
+      kizaiTankaAmt: eqTanka.find((t) => t.kizai_id === d.kizai_id)?.kizai_tanka_amt || 0,
+      kizaiNam: d.kizai_nam ?? '',
+      planKizaiQty: d.plan_kizai_qty,
+      planYobiQty: d.plan_yobi_qty,
+      planQty: d.plan_qty,
+      delFlag: false,
+      saveFlag: true,
+    }));
+    return juchuKizaiMeisaiData;
+  } catch (e) {
+    console.error(e);
+    throw e;
+  }
+};
+
+/**
+ * メイン移動受注機材明細リスト取得
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @returns 受注機材明細リスト
+ */
+export const getIdoJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
+  try {
+    const { data: eqList, error: eqListError } = await selectIdoJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId);
+    if (eqListError) {
+      console.error('GetEqList eqList error : ', eqListError);
+      throw eqListError;
+    }
+
+    const eqIds = eqList.map((data) => data.kizai_id);
+
+    const { data: mKizai, error: mKizaiError } = await selectMeisaiEqts(eqIds);
+
+    if (mKizaiError) {
+      console.error('GetEqList eqShozokuId error : ', mKizaiError);
+      throw mKizaiError;
+    }
+
+    const juchuKizaiMeisaiData: IdoJuchuKizaiMeisaiValues[] = eqList.map((d) => ({
+      juchuHeadId: d.juchu_head_id,
+      juchuKizaiHeadId: d.juchu_kizai_head_id,
       idoDenId: d.ido_den_id,
       sagyoDenDat: d.sagyo_den_dat ? new Date(d.sagyo_den_dat) : null,
       sagyoSijiId: d.sagyo_siji_id === 'K→Y' ? 1 : d.sagyo_siji_id === 'Y→K' ? 2 : null,
       mShozokuId: mKizai.find((data) => data.kizai_id === d.kizai_id)?.shozoku_id,
       shozokuId: d.shozoku_id,
       shozokuNam: d.shozoku_nam ?? '',
-      mem: d.mem,
       kizaiId: d.kizai_id,
-      kizaiTankaAmt: eqTanka.find((t) => t.kizai_id === d.kizai_id)?.kizai_tanka_amt || 0,
       kizaiNam: d.kizai_nam ?? '',
       kizaiQty: d.kizai_qty ?? 0,
       planKizaiQty: d.plan_kizai_qty,
@@ -1440,12 +1477,16 @@ export const getIdoDenJuchuMaxId = async () => {
   try {
     const { data, error } = await selectIdoDenJuchuMaxId();
     if (error) {
-      return null;
+      if (error.code === 'PGRST116') {
+        return null;
+      }
+      throw error;
     }
-    console.log('GetMaxId : ', data);
+    console.log('getIdoDenJuchuMaxId: ', data);
     return data;
   } catch (e) {
     console.error(e);
+    throw e;
   }
 };
 
@@ -1458,7 +1499,7 @@ export const getIdoDenJuchuMaxId = async () => {
  */
 export const addIdoDenJuchu = async (
   newIdoDenId: number,
-  idoKizaiData: JuchuKizaiMeisaiValues[],
+  idoKizaiData: IdoJuchuKizaiMeisaiValues[],
   userNam: string,
   connection: PoolClient
 ) => {
@@ -1472,7 +1513,6 @@ export const addIdoDenJuchu = async (
     plan_qty: d.planQty,
     juchu_head_id: d.juchuHeadId,
     juchu_kizai_head_id: d.juchuKizaiHeadId,
-    juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
     add_dat: toJapanTimeString(),
     add_user: userNam,
   }));
@@ -1487,7 +1527,6 @@ export const addIdoDenJuchu = async (
     plan_qty: d.planQty,
     juchu_head_id: d.juchuHeadId,
     juchu_kizai_head_id: d.juchuKizaiHeadId,
-    juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
     add_dat: toJapanTimeString(),
     add_user: userNam,
   }));
@@ -1511,7 +1550,7 @@ export const addIdoDenJuchu = async (
  * @returns
  */
 export const updIdoDenJuchu = async (
-  idoKizaiData: JuchuKizaiMeisaiValues[],
+  idoKizaiData: IdoJuchuKizaiMeisaiValues[],
   userNam: string,
   connection: PoolClient
 ) => {
@@ -1529,7 +1568,6 @@ export const updIdoDenJuchu = async (
       plan_qty: d.planQty,
       juchu_head_id: d.juchuHeadId,
       juchu_kizai_head_id: d.juchuKizaiHeadId,
-      juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
       upd_dat: toJapanTimeString(),
       upd_user: userNam,
     };
@@ -1549,15 +1587,12 @@ export const updIdoDenJuchu = async (
       plan_qty: d.planQty,
       juchu_head_id: d.juchuHeadId,
       juchu_kizai_head_id: d.juchuKizaiHeadId,
-      juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
       upd_dat: toJapanTimeString(),
       upd_user: userNam,
     };
   });
 
   const updateData = [...updateLoadData, ...updateUnloadData];
-  console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', updateData);
-
   try {
     for (const data of updateData) {
       await updateIdoDenJuchu(data, connection);
