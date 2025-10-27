@@ -93,7 +93,6 @@ export const SecondDialogPage = ({
   setSnackBarOpen: () => void;
   setSnackBarMessage: React.Dispatch<React.SetStateAction<string>>;
 }) => {
-  /* debug用、レンダリング回数取得に使用 */
   const [checked, setChecked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 

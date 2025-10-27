@@ -15,3 +15,29 @@ export const selectBundledEqptIds = async (idList: number[]) => {
     throw e;
   }
 };
+
+/**
+ * 機材IDに一致するセット機材を取得する関数
+ * @param kizaiId kizai_id
+ * @returns m_kizai_setのDB型の配列
+ */
+export const selectSetOptions = async (kizaiId: number) => {
+  const query = `
+  SELECT
+    s.set_kizai_id, v.kizai_nam, v.shozoku_nam, v.bumon_id, v.kizai_grp_cod, v.ctn_flg
+  FROM
+    ${SCHEMA}.m_kizai_set as s
+  LEFT JOIN
+    ${SCHEMA}.v_kizai_lst as v
+  ON
+    s.set_kizai_id = v.kizai_id
+  WHERE
+    s.kizai_id = $1
+  AND
+    v.del_flg <> 1`;
+  try {
+    return await pool.query(query, [kizaiId]);
+  } catch (e) {
+    throw e;
+  }
+};

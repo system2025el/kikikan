@@ -4,8 +4,8 @@ import { PoolClient } from 'pg';
 
 import pool from '@/app/_lib/db/postgres';
 import { selectActiveBumons } from '@/app/_lib/db/tables/m-bumon';
-import { selectActiveEqpts, selectBundledEqpts, selectMeisaiEqts } from '@/app/_lib/db/tables/m-kizai';
-import { selectBundledEqptIds } from '@/app/_lib/db/tables/m-kizai-set';
+import { selectActiveEqpts, selectBundledEqpts, selectMeisaiEqts, selectOneEqpt } from '@/app/_lib/db/tables/m-kizai';
+import { selectBundledEqptIds, selectSetOptions } from '@/app/_lib/db/tables/m-kizai-set';
 import {
   deleteIdoDenJuchu,
   insertIdoDenJuchu,
@@ -1880,6 +1880,38 @@ export const getSelectedEqpts = async (idList: number[] /* rank: number*/) => {
     return selectedEqpts;
   } catch (e) {
     console.error('例外が発生しました:', e);
+    throw e;
+  }
+};
+
+/**
+ * セットオプション選択画面に表示する配列
+ * @param {number} kizaiId 親機材のID
+ * @returns {EqptSelection[]} セットオプションの配列
+ */
+export const getSetOptions = async (kizaiId: number) => {
+  try {
+    let setList: EqptSelection[];
+
+    const [setOptions, eqptNam] = await Promise.all([selectSetOptions(kizaiId), selectOneEqpt(kizaiId)]);
+    if (!setOptions || eqptNam.error) {
+      throw new Error('セットオプション取得時エラー');
+    }
+    if (!setOptions.rows || setOptions.rowCount === 0) {
+      setList = [];
+    }
+    setList = setOptions.rows.map((d) => ({
+      kizaiId: d.set_kizai_id,
+      kizaiNam: d.kizai_nam,
+      shozokuNam: d.shozoku_nam,
+      bumonId: d.bumon_id,
+      kizaiGrpCod: d.kizai_grp_cod,
+      ctnFlg: d.ctn_flg,
+    }));
+
+    return { setList: setList, eqptNam: eqptNam.data.kizai_nam ?? '' };
+  } catch (e) {
+    console.error(e);
     throw e;
   }
 };

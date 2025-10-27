@@ -19,14 +19,15 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import React, { SetStateAction, useEffect, useState } from 'react';
+import { green } from '@mui/material/colors';
+import React, { SetStateAction, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { bundleData } from '../_lib/eqdata';
-import { checkSetoptions, getEqptsForEqptSelection, getSelectedEqpts } from '../_lib/funcs';
+import { checkSetoptions, getEqptsForEqptSelection, getSelectedEqpts, getSetOptions } from '../_lib/funcs';
 import { EqptSelection, SelectedEqptsValues } from '../_lib/types';
 import { EqptBumonsTable } from './equipment-bumons-table';
 import { EqptTable } from './equipments-table';
@@ -70,10 +71,7 @@ export const EqptSelectionDialog = ({
   /* methods ------------------------------ */
   /* 確定ボタン押下時 */
   const handleClickConfirm = async () => {
-    /* 親機材を取得し配列にpush */
-    const oyaEqpts = await getSelectedEqpts(selectedEqptIds);
-    if (oyaEqpts && oyaEqpts.length !== 0) selectedEqptList.push(...oyaEqpts);
-    // 選ばれた配列からセットオプションの存在確認
+    // 選ばれた機材IDの配列からセットオプションの存在確認
     const setList = await checkSetoptions(selectedEqptIds);
     if (setList.length !== 0) {
       // セットオプション付きの機材があるとき
@@ -93,7 +91,6 @@ export const EqptSelectionDialog = ({
   const handleCloseBundle = () => {
     setEqptsWSet([]);
     setBundleDialogOpen(false);
-    handleCloseDialog();
   };
 
   /** 機材を選択する処理 */
@@ -189,9 +186,10 @@ export const EqptSelectionDialog = ({
           {eqptsWSet.length > 0 && (
             <BundleDialog
               open={bundleDialogOpen}
-              handleConfirmAll={(setArray: SelectedEqptsValues[]) => {
+              handleConfirmAll={(selected: SelectedEqptsValues[]) => {
+                setEqpts(selected);
                 handleCloseBundle();
-                setEqpts([...selectedEqptList, ...setArray]);
+                handleCloseDialog();
               }}
               handleCloseDialog={handleCloseBundle}
               eqptsWSet={eqptsWSet}
@@ -239,22 +237,30 @@ const BundleDialog = ({
   eqptsWSet: number[];
   // rank: number;
   /** 選んだセットと親機材配列を */
-  handleConfirmAll: (setArray: SelectedEqptsValues[]) => void;
+  handleConfirmAll: (selected: SelectedEqptsValues[]) => void;
   /** セットオプションダイアログを閉じる */
   handleCloseDialog: () => void;
   /** 機材明細画面に渡す機材をセットする */
   setEqpts: (data: SelectedEqptsValues[]) => void;
 }) => {
+  /** セット全体の機材配列 */
+  const selectedEqptList: SelectedEqptsValues[] = [];
+  /** debug用、レンダリング回数取得に使用 */
+  const hasRun = useRef(false);
   /* useState ------------------------------------------ */
+  /** セットダイアログに表示する機材名 */
+  const [oyaKizaiNam, setOyakizaiNam] = useState<string>('');
   /* 選択される機材のidのリスト */
   const [selected, setSelected] = useState<number[]>([]);
   /* 今開いてる機材ID配列のインデックス */
   const [currentIndex, setCurrentIndex] = useState(0);
   /* 表示するセットオプションの配列 */
   const [bundles, setBundles] = useState<EqptSelection[]>([]);
+  /* ローディング */
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   /* methods -------------------------------------------------------- */
-  /* 行押下時（選択時）の処理 */
+  /** 行押下時（選択時）の処理 */
   const handleSelectBundles = (event: React.MouseEvent<unknown>, id: number) => {
     const selectedIndex = selected.indexOf(id);
     let newSelected: number[] = [];
@@ -271,36 +277,72 @@ const BundleDialog = ({
     setSelected(newSelected);
   };
 
-  /* 確定ボタン押下時 */
+  /** 確定ボタン押下時 */
   const handleClickConfirm = async () => {
-    const selectedSet = await getSelectedEqpts(selected);
-    console.log('最終的に渡される機材の配列データ: ', selectedSet!);
-    setEqpts(selectedSet!);
-    handleConfirmAll(selectedSet);
+    console.log('-------------------------セットオプションダイアログ確定ボタン');
+    if (selected && selected.length > 0) {
+      const sets = await getSelectedEqpts(selected);
+      // セットなので、blankQtyを1にする
+      const setList = sets!.map((d) => ({ ...d, blnkQty: 1 }));
+      selectedEqptList.push(...setList);
+    }
+    console.log('選ばれたデータ、親子どっちも', selectedEqptList);
+    handleConfirmAll(selectedEqptList);
+  };
+
+  /** 別セット選択ボタン押下時 */
+  const handleClickAnother = async () => {
+    const [sets, oya] = await Promise.all([getSelectedEqpts(selected), getSelectedEqpts([eqptsWSet[currentIndex]])]);
+    // セットなので、blankQtyを1にする
+    const setList = sets!.map((d) => ({ ...d, blnkQty: 1 }));
+    selectedEqptList.push(...setList);
+    selectedEqptList.push(...oya);
+    setSelected([]);
   };
 
   /* useEffect */
+  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
-    if (open) {
-      const getSet = async () => {
-        // const bundles = await getSetOptions(eqptsWSet);
-      };
+    if (!hasRun.current) {
+      hasRun.current = true;
+      if (open) {
+        const getSet = async () => {
+          const [oya, sets] = await Promise.all([
+            getSelectedEqpts([eqptsWSet[currentIndex]]),
+            getSetOptions(eqptsWSet[currentIndex]),
+          ]);
+          setBundles(sets.setList);
+          setOyakizaiNam(sets.eqptNam);
+          // 選択された機材配列に親機材をpush
+          selectedEqptList.push(...oya);
+          console.log('初期表示の時の親機材', selectedEqptList);
+        };
+        getSet();
+        setIsLoading(false);
+      }
     }
-  }, [eqptsWSet, open]);
+  }, [eqptsWSet, open, currentIndex]);
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   return (
     <Dialog open={open} onClose={() => handleCloseDialog()}>
       <DialogTitle justifyContent={'space-between'} display={'flex'}>
-        セットオプション {eqptsWSet[0]}
-        <Box>
-          <Button onClick={() => handleClickConfirm()}>確定</Button>
-        </Box>
+        セットオプション
+        <br />
+        {oyaKizaiNam}
+        <Stack spacing={2}>
+          <Box>
+            <Button sx={{ bgcolor: green[500] }} onClick={() => handleClickAnother()}>
+              別セット選択
+            </Button>
+          </Box>
+          <Box>
+            <Button onClick={() => handleClickConfirm()}>確定</Button>
+          </Box>
+        </Stack>
       </DialogTitle>
       <DialogContent>
         <TableContainer component={Paper} sx={{ width: 500 }}>
-          {/* {isLoading ? (
-            <Loading />
-          ) : ( */}
           <Table stickyHeader padding="none">
             <TableHead>
               <TableRow>
@@ -309,8 +351,11 @@ const BundleDialog = ({
                 <TableCell>在庫場所</TableCell>
               </TableRow>
             </TableHead>
-            <TableBody>
-              {/* {bundles!.map((row, index) => {
+            {isLoading ? (
+              <Loading />
+            ) : (
+              <TableBody>
+                {bundles!.map((row, index) => {
                   const isItemSelected = selected.includes(row.kizaiId);
                   const labelId = `enhanced-table-checkbox-${index}`;
                   const nextRow = bundles![index + 1];
@@ -348,10 +393,10 @@ const BundleDialog = ({
                     );
                   }
                   return rows;
-                })} */}
-            </TableBody>
+                })}
+              </TableBody>
+            )}
           </Table>
-          {/* )} */}
         </TableContainer>
       </DialogContent>
     </Dialog>
