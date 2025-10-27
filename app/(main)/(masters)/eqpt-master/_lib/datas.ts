@@ -16,11 +16,11 @@ export const eqptMHeader = [
   { key: 'daibumonNam', label: '大部門' },
   { key: 'shukeibumonNam', label: '集計部門' },
   { key: 'regAmt', label: '定価' },
-  { key: 'rankAmt1', label: '価格1' },
-  { key: 'rankAmt2', label: '価格2' },
-  { key: 'rankAmt3', label: '価格3' },
-  { key: 'rankAmt4', label: '価格4' },
-  { key: 'rankAmt5', label: '価格5' },
+  // { key: 'rankAmt1', label: '価格1' },
+  // { key: 'rankAmt2', label: '価格2' },
+  // { key: 'rankAmt3', label: '価格3' },
+  // { key: 'rankAmt4', label: '価格4' },
+  // { key: 'rankAmt5', label: '価格5' },
   { key: 'mem', label: 'メモ' },
   { key: 'hidden', label: '非表示' },
   { key: 'deleted', label: '無効' },
@@ -45,11 +45,11 @@ export const emptyEqpt: EqptsMasterDialogValues = {
   ctnFlg: false,
   defDatQty: null,
   regAmt: 0,
-  rankAmt1: null,
-  rankAmt2: null,
-  rankAmt3: null,
-  rankAmt4: null,
-  rankAmt5: null,
+  // rankAmt1: null,
+  // rankAmt2: null,
+  // rankAmt3: null,
+  // rankAmt4: null,
+  // rankAmt5: null,
 };
 
 /*  */
@@ -140,29 +140,29 @@ export const formItems: FormItemsType[] = [
     exsample: '例）10000',
     constraints: '円貨',
   },
-  {
-    label: '顧客ランク価格１',
-    exsample: '例）10000',
-    constraints: '円貨 当該ランク価格が未入力の場合、受注伝票では定価が適用されます。',
-  },
-  {
-    label: '顧客ランク価格2',
-    exsample: '例）10000',
-    constraints: '円貨 当該ランク価格が未入力の場合、受注伝票では定価が適用されます。',
-  },
-  {
-    label: '顧客ランク価格3',
-    exsample: '例）10000',
-    constraints: '円貨 当該ランク価格が未入力の場合、受注伝票では定価が適用されます。',
-  },
-  {
-    label: '顧客ランク価格4',
-    exsample: '例）10000',
-    constraints: '円貨 当該ランク価格が未入力の場合、受注伝票では定価が適用されます。',
-  },
-  {
-    label: '顧客ランク価格5',
-    exsample: '例）10000',
-    constraints: '円貨 当該ランク価格が未入力の場合、受注伝票では定価が適用されます。',
-  },
+  // {
+  //   label: '顧客ランク価格１',
+  //   exsample: '例）10000',
+  //   constraints: '円貨 当該ランク価格が未入力の場合、受注伝票では定価が適用されます。',
+  // },
+  // {
+  //   label: '顧客ランク価格2',
+  //   exsample: '例）10000',
+  //   constraints: '円貨 当該ランク価格が未入力の場合、受注伝票では定価が適用されます。',
+  // },
+  // {
+  //   label: '顧客ランク価格3',
+  //   exsample: '例）10000',
+  //   constraints: '円貨 当該ランク価格が未入力の場合、受注伝票では定価が適用されます。',
+  // },
+  // {
+  //   label: '顧客ランク価格4',
+  //   exsample: '例）10000',
+  //   constraints: '円貨 当該ランク価格が未入力の場合、受注伝票では定価が適用されます。',
+  // },
+  // {
+  //   label: '顧客ランク価格5',
+  //   exsample: '例）10000',
+  //   constraints: '円貨 当該ランク価格が未入力の場合、受注伝票では定価が適用されます。',
+  // },
 ];

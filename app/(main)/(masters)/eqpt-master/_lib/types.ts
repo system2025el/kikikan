@@ -45,11 +45,11 @@ export const EqptsMasterDialogSchema = z.object({
   ctnFlg: z.boolean().optional(),
   defDatQty: z.number().nullable(),
   regAmt: z.number({ message: '定価を入力してください' }).min(1, { message: '定価を入力してください' }),
-  rankAmt1: z.number().nullable(),
-  rankAmt2: z.number().nullable(),
-  rankAmt3: z.number().nullable(),
-  rankAmt4: z.number().nullable(),
-  rankAmt5: z.number().nullable(),
+  // rankAmt1: z.number().nullable(),
+  // rankAmt2: z.number().nullable(),
+  // rankAmt3: z.number().nullable(),
+  // rankAmt4: z.number().nullable(),
+  // rankAmt5: z.number().nullable(),
 });
 
 type eqptsMasterDialogValues = z.infer<typeof EqptsMasterDialogSchema>;
@@ -71,11 +71,11 @@ export type EqptsMasterTableValues = {
   delFlg: boolean | null;
   dspFlg: boolean | null;
   mem: string | null;
-  rankAmt1: number | null;
-  rankAmt2: number | null;
-  rankAmt3: number | null;
-  rankAmt4: number | null;
-  rankAmt5: number | null;
+  // rankAmt1: number | null;
+  // rankAmt2: number | null;
+  // rankAmt3: number | null;
+  // rankAmt4: number | null;
+  // rankAmt5: number | null;
   regAmt: number | null;
   shozokuNam: string | null;
   shukeibumonNam: string | null;

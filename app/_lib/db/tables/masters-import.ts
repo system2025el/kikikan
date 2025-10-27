@@ -207,11 +207,11 @@ export const checkKizai = async (list: KizaiImportTypes[], connection: PoolClien
     'ctn_flg',
     'def_dat_qty',
     'reg_amt',
-    'rank_amt_1',
-    'rank_amt_2',
-    'rank_amt_3',
-    'rank_amt_4',
-    'rank_amt_5',
+    // 'rank_amt_1',
+    // 'rank_amt_2',
+    // 'rank_amt_3',
+    // 'rank_amt_4',
+    // 'rank_amt_5',
   ];
   const kizaiPlaceholders = list
     .map((_, index) => {
@@ -254,11 +254,11 @@ export const checkKizai = async (list: KizaiImportTypes[], connection: PoolClien
           ctn_flg,
           def_dat_qty,
           reg_amt,
-          rank_amt_1,
-          rank_amt_2,
-          rank_amt_3,
-          rank_amt_4,
-          rank_amt_5,
+          -- rank_amt_1,
+          -- rank_amt_2,
+          -- rank_amt_3,
+          -- rank_amt_4,
+          -- rank_amt_5,
           add_dat,
           add_user
         )
@@ -279,11 +279,11 @@ export const checkKizai = async (list: KizaiImportTypes[], connection: PoolClien
           CAST(NULLIF(id.ctn_flg, '') AS integer),
           CAST(NULLIF(id.def_dat_qty, '') AS integer),
           CAST(NULLIF(id.reg_amt, '') AS integer),
-          CAST(NULLIF(id.rank_amt_1, '') AS integer),
-          CAST(NULLIF(id.rank_amt_2, '') AS integer),
-          CAST(NULLIF(id.rank_amt_3, '') AS integer),
-          CAST(NULLIF(id.rank_amt_4, '') AS integer),
-          CAST(NULLIF(id.rank_amt_5, '') AS integer),
+          -- CAST(NULLIF(id.rank_amt_1, '') AS integer),
+          -- CAST(NULLIF(id.rank_amt_2, '') AS integer),
+          -- CAST(NULLIF(id.rank_amt_3, '') AS integer),
+          -- CAST(NULLIF(id.rank_amt_4, '') AS integer),
+          -- CAST(NULLIF(id.rank_amt_5, '') AS integer),
           $${kizaiValues.length + 1}::timestamp,
           $${kizaiValues.length + 2}
         FROM
