@@ -281,7 +281,7 @@ export const usePdf = (): [(params: PdfModel[]) => Promise<Blob>] => {
       const pageStartY = 800; // 新しいページのY座標の開始位置
       const marginBottom = 50; // これより下には描画しないというマージン
 
-      const tableColWidths = [250, 40, 240];
+      const tableColWidths = [300, 40, 190];
       const headerTexts = ['機　　材　　名', '合計数', '備　　考'];
 
       // 現在の描画Y座標を管理する変数
