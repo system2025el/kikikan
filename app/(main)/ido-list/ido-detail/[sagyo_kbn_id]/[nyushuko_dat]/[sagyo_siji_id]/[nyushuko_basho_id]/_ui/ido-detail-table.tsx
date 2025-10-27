@@ -13,30 +13,26 @@ import {
 } from '@mui/material';
 import { purple } from '@mui/material/colors';
 import { usePathname, useRouter } from 'next/navigation';
-import { Dispatch, RefObject, SetStateAction, useState } from 'react';
 
 import { IdoDetailTableValues } from '../_lib/types';
 
 export const ShukoIdoDenTable = (props: {
   datas: IdoDetailTableValues[];
-  setIdoDetailList: Dispatch<SetStateAction<IdoDetailTableValues[]>>;
+  handleCellChange: (kizaiId: number, planQty: number) => void;
   handleIdoDenDelete: (kizaiId: number) => void;
   fixFlag: boolean;
 }) => {
-  const { datas, setIdoDetailList, handleIdoDenDelete, fixFlag } = props;
+  const { datas, handleCellChange, handleIdoDenDelete, fixFlag } = props;
 
   const router = useRouter();
   const path = usePathname();
 
+  /**
+   * 機材名押下時
+   * @param kizaiId 機材id
+   */
   const handleClick = (kizaiId: number) => {
     router.push(`${path}/ido-eqpt-detail/${kizaiId}`);
-  };
-
-  const handleCellChange = (kizaiId: number, planQty: number) => {
-    const updateData = datas.map((d) =>
-      d.kizaiId === kizaiId ? { ...d, planQty: planQty, diffQty: d.resultQty + d.resultAdjQty - planQty } : d
-    );
-    setIdoDetailList(updateData);
   };
 
   return (
