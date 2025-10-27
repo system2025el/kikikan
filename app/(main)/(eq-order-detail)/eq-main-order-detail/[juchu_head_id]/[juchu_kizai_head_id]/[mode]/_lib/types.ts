@@ -119,7 +119,7 @@ export type SelectedEqptsValues = {
   kizaiGrpCod: string;
   dspOrdNum: number;
   regAmt: number;
-  // rankAmt: number;
+  rankAmt: number;
   kizaiQty: number;
   ctnFlg: boolean;
   blnkQty: number;
