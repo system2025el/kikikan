@@ -40,7 +40,7 @@ export const selectAllRfidWithKizai = async () => {
     mk.section_num, 
     mk.kizai_nam, 
     mr.el_num, 
-    mr.shozoku_id,
+    mk.shozoku_id,
     mk.bld_cod, 
     mk.tana_cod, 
     mk.eda_cod, 
@@ -54,11 +54,11 @@ export const selectAllRfidWithKizai = async () => {
     mk.ctn_flg, 
     mk.def_dat_qty, 
     mk.reg_amt, 
-    mk.rank_amt_1, 
-    mk.rank_amt_2, 
-    mk.rank_amt_3, 
-    mk.rank_amt_4, 
-    mk.rank_amt_5 
+    -- mk.rank_amt_1, 
+    -- mk.rank_amt_2, 
+    -- mk.rank_amt_3, 
+    -- mk.rank_amt_4, 
+    -- mk.rank_amt_5 
   FROM ${SCHEMA}.m_rfid AS mr
   LEFT JOIN ${SCHEMA}.m_kizai AS mk ON mr.kizai_id = mk.kizai_id
   LEFT JOIN ${SCHEMA}.m_bumon AS mb ON mk.bumon_id = mb.bumon_id

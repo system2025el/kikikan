@@ -92,11 +92,11 @@ export const ImportMaster = () => {
             ctn_flg: parseNumber(row[17]),
             def_dat_qty: parseNumber(row[18]),
             reg_amt: parseNumber(row[19]),
-            rank_amt_1: parseNumber(row[20]),
-            rank_amt_2: parseNumber(row[21]),
-            rank_amt_3: parseNumber(row[22]),
-            rank_amt_4: parseNumber(row[23]),
-            rank_amt_5: parseNumber(row[24]),
+            // rank_amt_1: parseNumber(row[20]),
+            // rank_amt_2: parseNumber(row[21]),
+            // rank_amt_3: parseNumber(row[22]),
+            // rank_amt_4: parseNumber(row[23]),
+            // rank_amt_5: parseNumber(row[24]),
           };
           const result = eqptSchema.safeParse(rowObject);
           if (result.success) {

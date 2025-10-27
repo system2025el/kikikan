@@ -38,11 +38,11 @@ export const getAllEqptAndRfid = async () => {
         row.ctn_flg,
         row.def_dat_qty,
         row.reg_amt,
-        row.rank_amt_1,
-        row.rank_amt_2,
-        row.rank_amt_3,
-        row.rank_amt_4,
-        row.rank_amt_5,
+        // row.rank_amt_1,
+        // row.rank_amt_2,
+        // row.rank_amt_3,
+        // row.rank_amt_4,
+        // row.rank_amt_5,
       ]);
       // ヘッダーの日本語名
       const header = [
@@ -66,11 +66,11 @@ export const getAllEqptAndRfid = async () => {
         'コンテナフラグ',
         'デフォルト日数',
         '定価',
-        'ランク価格１',
-        'ランク価格２',
-        'ランク価格３',
-        'ランク価格４',
-        'ランク価格５',
+        // 'ランク価格１',
+        // 'ランク価格２',
+        // 'ランク価格３',
+        // 'ランク価格４',
+        // 'ランク価格５',
       ];
 
       //  AOA (Array of Arrays) 形式でワークシートを作成
@@ -79,7 +79,7 @@ export const getAllEqptAndRfid = async () => {
       // ループ処理のためにセル範囲を出す
       const range = utils.decode_range(worksheet['!ref'] || '');
       // セルが文字列でいてほしいカラムのインデックス
-      const targetCols = [0, 4, 7, 8, 9, 10, 11, 12, 13, 14, 19, 20, 21, 22, 23, 24];
+      const targetCols = [0, 4, 7, 8, 9, 10, 11, 12, 13, 14, 19 /*, 20, 21, 22, 23, 24*/];
       for (let row = 1; row <= range.e.r; ++row) {
         for (const colIndex of targetCols) {
           if (colIndex > range.e.c) continue;

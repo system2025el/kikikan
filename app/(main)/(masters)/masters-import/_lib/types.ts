@@ -29,11 +29,11 @@ export const eqptSchema = z.object({
   ctn_flg: z.number().nullish(),
   def_dat_qty: z.number().nullish(),
   reg_amt: z.number().nullish(),
-  rank_amt_1: z.number().nullish(),
-  rank_amt_2: z.number().nullish(),
-  rank_amt_3: z.number().nullish(),
-  rank_amt_4: z.number().nullish(),
-  rank_amt_5: z.number().nullish(),
+  // rank_amt_1: z.number().nullish(),
+  // rank_amt_2: z.number().nullish(),
+  // rank_amt_3: z.number().nullish(),
+  // rank_amt_4: z.number().nullish(),
+  // rank_amt_5: z.number().nullish(),
 });
 
 /**
@@ -60,11 +60,11 @@ export type EqptImportRowType = [
   number | null, // ctn_flg
   number | null, // def_dat_qty
   number, // reg_amt
-  number | null, // rank_amt_1
-  number | null, // rank_amt_2
-  number | null, // rank_amt_3
-  number | null, // rank_amt_4
-  number | null, // rank_amt_5
+  // number | null, // rank_amt_1
+  // number | null, // rank_amt_2
+  // number | null, // rank_amt_3
+  // number | null, // rank_amt_4
+  // number | null, // rank_amt_5
 ];
 
 /**
@@ -112,11 +112,11 @@ export type KizaiImportTypes = {
   ctn_flg?: number | null | undefined;
   def_dat_qty?: number | null | undefined;
   reg_amt?: number | null | undefined;
-  rank_amt_1?: number | null | undefined;
-  rank_amt_2?: number | null | undefined;
-  rank_amt_3?: number | null | undefined;
-  rank_amt_4?: number | null | undefined;
-  rank_amt_5?: number | null | undefined;
+  // rank_amt_1?: number | null | undefined;
+  // rank_amt_2?: number | null | undefined;
+  // rank_amt_3?: number | null | undefined;
+  // rank_amt_4?: number | null | undefined;
+  // rank_amt_5?: number | null | undefined;
 };
 
 /**
@@ -147,9 +147,9 @@ export const customerSchema = z.object({
   ctn_flg: z.number().nullish(),
   def_dat_qty: z.number().nullish(),
   reg_amt: z.number().nullish(),
-  rank_amt_1: z.number().nullish(),
-  rank_amt_2: z.number().nullish(),
-  rank_amt_3: z.number().nullish(),
-  rank_amt_4: z.number().nullish(),
-  rank_amt_5: z.number().nullish(),
+  // rank_amt_1: z.number().nullish(),
+  // rank_amt_2: z.number().nullish(),
+  // rank_amt_3: z.number().nullish(),
+  // rank_amt_4: z.number().nullish(),
+  // rank_amt_5: z.number().nullish(),
 });

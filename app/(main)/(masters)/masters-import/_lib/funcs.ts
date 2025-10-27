@@ -86,11 +86,11 @@ export const ImportEqptRfidData = async (data: EqptImportType[], user: string) =
           ctn_flg: d.ctn_flg,
           def_dat_qty: d.def_dat_qty,
           reg_amt: d.reg_amt,
-          rank_amt_1: d.rank_amt_1,
-          rank_amt_2: d.rank_amt_2,
-          rank_amt_3: d.rank_amt_3,
-          rank_amt_4: d.rank_amt_4,
-          rank_amt_5: d.rank_amt_5,
+          // rank_amt_1: d.rank_amt_1,
+          // rank_amt_2: d.rank_amt_2,
+          // rank_amt_3: d.rank_amt_3,
+          // rank_amt_4: d.rank_amt_4,
+          // rank_amt_5: d.rank_amt_5,
         }))
         .map((v) => [v.kizai_nam, v])
     ).values()
