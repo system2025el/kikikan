@@ -11,6 +11,8 @@ import TableRow from '@mui/material/TableRow';
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 
+import { Loading } from '@/app/(main)/_ui/loading';
+
 import { getBumonsForEqptSelection } from '../_lib/funcs';
 
 /**
@@ -32,42 +34,48 @@ export const EqptBumonsTable = ({ selected, handleClick }: { selected: number; h
       label: string;
     }[]
   >([]);
-
+  /** ローディング */
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   /* useeffect ------------------------ */
   useEffect(() => {
     const getBumons = async () => {
       const abumons = await getBumonsForEqptSelection();
       setBumons(abumons!);
+      setIsLoading(false);
     };
     getBumons();
   }, []);
 
   return (
     <TableContainer component={Paper} variant="outlined" square sx={{ height: '75vh' }}>
-      <Table stickyHeader padding="none">
-        <TableHead>
-          <TableRow>
-            <TableCell>部門名</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {bumons.map((row) => {
-            return (
-              <TableRow
-                hover
-                onClick={() => handleClick(row.id)}
-                tabIndex={-1}
-                key={row.tblDspNum}
-                sx={{ cursor: 'pointer', bgcolor: selected === row.id ? selectedColor : '' }}
-              >
-                <TableCell component="th" scope="row">
-                  {row.label}
-                </TableCell>
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
+      {isLoading ? (
+        <Loading />
+      ) : (
+        <Table stickyHeader padding="none">
+          <TableHead>
+            <TableRow>
+              <TableCell>部門名</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {bumons.map((row) => {
+              return (
+                <TableRow
+                  hover
+                  onClick={() => handleClick(row.id)}
+                  tabIndex={-1}
+                  key={row.tblDspNum}
+                  sx={{ cursor: 'pointer', bgcolor: selected === row.id ? selectedColor : '' }}
+                >
+                  <TableCell component="th" scope="row">
+                    {row.label}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      )}
     </TableContainer>
   );
 };
