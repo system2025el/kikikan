@@ -280,48 +280,105 @@ const BundleDialog = ({
   /** 確定ボタン押下時 */
   const handleClickConfirm = async () => {
     console.log('-------------------------セットオプションダイアログ確定ボタン');
+    // 今機材が選択されてたら配列にpush
     if (selected && selected.length > 0) {
       const sets = await getSelectedEqpts(selected);
       // セットなので、blankQtyを1にする
       const setList = sets!.map((d) => ({ ...d, blnkQty: 1 }));
       selectedEqptListRef.current.push(...setList);
     }
-    console.log('選ばれたデータ、親子どっちも', selectedEqptListRef.current);
-    handleConfirmAll(selectedEqptListRef.current);
+    // 選択リセット
+    setSelected([]);
+
+    // セットあり機材IDリストの長さでダイアログ続けるか判断
+    console.log('今のインデックス: ', currentIndex, ' 元の親機材の長さ: ', eqptsWSet.length);
+    if (currentIndex + 1 < eqptsWSet.length) {
+      setIsLoading(true);
+      setCurrentIndex(currentIndex + 1);
+      // const [oya, sets] = await Promise.all([
+      //   getSelectedEqpts([eqptsWSet[currentIndex + 1]]),
+      //   getSetOptions(eqptsWSet[currentIndex + 1]),
+      // ]);
+      // setBundles(sets.setList);
+      // setOyakizaiNam(sets.eqptNam);
+      // setIsLoading(false);
+      // // 選択された機材配列に親機材をpush
+      // selectedEqptListRef.current.push(...oya);
+      // console.log('初期表示の時の親機材', selectedEqptListRef.current);
+    } else {
+      console.log('選ばれたデータ、親子どっちも', selectedEqptListRef.current);
+      handleConfirmAll(selectedEqptListRef.current);
+    }
   };
 
   /** 別セット選択ボタン押下時 */
   const handleClickAnother = async () => {
+    setIsLoading(true);
     const [sets, oya] = await Promise.all([getSelectedEqpts(selected), getSelectedEqpts([eqptsWSet[currentIndex]])]);
     // セットなので、blankQtyを1にする
     const setList = sets!.map((d) => ({ ...d, blnkQty: 1 }));
     selectedEqptListRef.current.push(...setList);
     selectedEqptListRef.current.push(...oya);
     setSelected([]);
+    setIsLoading(false);
   };
 
   /* useEffect */
   /* eslint-disable react-hooks/exhaustive-deps */
+  /* 画面初期表示 */
   useEffect(() => {
     if (!hasRun.current) {
       hasRun.current = true;
       if (open) {
+        // ダイアログが開いた時、最初のデータ（index: 0）を取得
+        setIsLoading(true);
         const getSet = async () => {
           const [oya, sets] = await Promise.all([
-            getSelectedEqpts([eqptsWSet[currentIndex]]),
-            getSetOptions(eqptsWSet[currentIndex]),
+            getSelectedEqpts([eqptsWSet[0]]), // 0番目を決め打ちで取得
+            getSetOptions(eqptsWSet[0]),
           ]);
           setBundles(sets.setList);
           setOyakizaiNam(sets.eqptNam);
-          // 選択された機材配列に親機材をpush
+
+          // 配列をリセットしてから親機材をpush
+          selectedEqptListRef.current = [];
           selectedEqptListRef.current.push(...oya);
           console.log('初期表示の時の親機材', selectedEqptListRef.current);
+          setIsLoading(false);
         };
         getSet();
-        setIsLoading(false);
+      } else {
+        // ダイアログが閉じたら、すべての状態をリセット
+        setCurrentIndex(0);
+        setSelected([]);
+        setOyakizaiNam('');
+        setBundles([]);
+        selectedEqptListRef.current = [];
       }
     }
-  }, [eqptsWSet, open, currentIndex]);
+  }, [open]);
+
+  /* インデックスが進んだとき */
+  useEffect(() => {
+    // 0 は上記の初期化で処理済みなので、1以上の場合のみ実行
+    if (currentIndex > 0) {
+      setIsLoading(true);
+      const getSet = async () => {
+        const [oya, sets] = await Promise.all([
+          getSelectedEqpts([eqptsWSet[currentIndex]]), // 変更後の currentIndex を使用
+          getSetOptions(eqptsWSet[currentIndex]),
+        ]);
+        setBundles(sets.setList);
+        setOyakizaiNam(sets.eqptNam);
+        // 選択された機材配列に親機材をpush
+        selectedEqptListRef.current.push(...oya);
+        console.log('次の親機材', selectedEqptListRef.current);
+        setIsLoading(false);
+      };
+      getSet();
+    }
+  }, [currentIndex]);
+
   /* eslint-enable react-hooks/exhaustive-deps */
 
   return (
@@ -329,7 +386,7 @@ const BundleDialog = ({
       <DialogTitle justifyContent={'space-between'} display={'flex'}>
         セットオプション
         <br />
-        {oyaKizaiNam}
+        {isLoading ? <></> : oyaKizaiNam}
         <Stack spacing={2}>
           <Box>
             <Button sx={{ bgcolor: green[500] }} onClick={() => handleClickAnother()}>
@@ -343,17 +400,18 @@ const BundleDialog = ({
       </DialogTitle>
       <DialogContent>
         <TableContainer component={Paper} sx={{ width: 500 }}>
-          <Table stickyHeader padding="none">
-            <TableHead>
-              <TableRow>
-                <TableCell padding="checkbox" />
-                <TableCell>機材名</TableCell>
-                <TableCell>在庫場所</TableCell>
-              </TableRow>
-            </TableHead>
-            {isLoading ? (
-              <Loading />
-            ) : (
+          {isLoading ? (
+            <Loading />
+          ) : (
+            <Table stickyHeader padding="none">
+              <TableHead>
+                <TableRow>
+                  <TableCell padding="checkbox" />
+                  <TableCell>機材名</TableCell>
+                  <TableCell>在庫場所</TableCell>
+                </TableRow>
+              </TableHead>
+
               <TableBody>
                 {bundles!.map((row, index) => {
                   const isItemSelected = selected.includes(row.kizaiId);
@@ -395,8 +453,8 @@ const BundleDialog = ({
                   return rows;
                 })}
               </TableBody>
-            )}
-          </Table>
+            </Table>
+          )}
         </TableContainer>
       </DialogContent>
     </Dialog>
