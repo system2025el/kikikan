@@ -236,7 +236,7 @@ const BundleDialog = ({
   /** セット有機材のID配列 */
   eqptsWSet: number[];
   // rank: number;
-  /** 選んだセットと親機材配列を */
+  /** 選んだ機材配列を画面に渡してダイアログをすべて閉じる */
   handleConfirmAll: (selected: SelectedEqptsValues[]) => void;
   /** セットオプションダイアログを閉じる */
   handleCloseDialog: () => void;
@@ -244,7 +244,7 @@ const BundleDialog = ({
   setEqpts: (data: SelectedEqptsValues[]) => void;
 }) => {
   /** セット全体の機材配列 */
-  const selectedEqptList: SelectedEqptsValues[] = [];
+  const selectedEqptListRef = useRef<SelectedEqptsValues[]>([]);
   /** debug用、レンダリング回数取得に使用 */
   const hasRun = useRef(false);
   /* useState ------------------------------------------ */
@@ -284,10 +284,10 @@ const BundleDialog = ({
       const sets = await getSelectedEqpts(selected);
       // セットなので、blankQtyを1にする
       const setList = sets!.map((d) => ({ ...d, blnkQty: 1 }));
-      selectedEqptList.push(...setList);
+      selectedEqptListRef.current.push(...setList);
     }
-    console.log('選ばれたデータ、親子どっちも', selectedEqptList);
-    handleConfirmAll(selectedEqptList);
+    console.log('選ばれたデータ、親子どっちも', selectedEqptListRef.current);
+    handleConfirmAll(selectedEqptListRef.current);
   };
 
   /** 別セット選択ボタン押下時 */
@@ -295,8 +295,8 @@ const BundleDialog = ({
     const [sets, oya] = await Promise.all([getSelectedEqpts(selected), getSelectedEqpts([eqptsWSet[currentIndex]])]);
     // セットなので、blankQtyを1にする
     const setList = sets!.map((d) => ({ ...d, blnkQty: 1 }));
-    selectedEqptList.push(...setList);
-    selectedEqptList.push(...oya);
+    selectedEqptListRef.current.push(...setList);
+    selectedEqptListRef.current.push(...oya);
     setSelected([]);
   };
 
@@ -314,8 +314,8 @@ const BundleDialog = ({
           setBundles(sets.setList);
           setOyakizaiNam(sets.eqptNam);
           // 選択された機材配列に親機材をpush
-          selectedEqptList.push(...oya);
-          console.log('初期表示の時の親機材', selectedEqptList);
+          selectedEqptListRef.current.push(...oya);
+          console.log('初期表示の時の親機材', selectedEqptListRef.current);
         };
         getSet();
         setIsLoading(false);
