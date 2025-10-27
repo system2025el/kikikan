@@ -487,6 +487,7 @@ export type Database = {
           kokyaku_rank: number;
           mail: string | null;
           mem: string | null;
+          nebiki_rat: number | null;
           site_day: number | null;
           tel: string | null;
           tel_mobile: string | null;
@@ -513,6 +514,7 @@ export type Database = {
           kokyaku_rank: number;
           mail?: string | null;
           mem?: string | null;
+          nebiki_rat?: number | null;
           site_day?: number | null;
           tel?: string | null;
           tel_mobile?: string | null;
@@ -539,6 +541,7 @@ export type Database = {
           kokyaku_rank?: number;
           mail?: string | null;
           mem?: string | null;
+          nebiki_rat?: number | null;
           site_day?: number | null;
           tel?: string | null;
           tel_mobile?: string | null;
