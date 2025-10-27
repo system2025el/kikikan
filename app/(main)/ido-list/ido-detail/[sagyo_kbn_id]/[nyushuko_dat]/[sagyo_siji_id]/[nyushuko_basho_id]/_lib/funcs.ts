@@ -364,9 +364,12 @@ export const getIdoBumonsForEqptSelection = async () => {
  */
 export const checkSetoptions = async (idList: number[]) => {
   try {
-    const setIdList = await selectBundledEqptIds(idList);
-    console.log('setId List : ', setIdList.rows);
-    const setIdListSet = new Set(setIdList.rows);
+    const { data: setIdList, error: setIdListError } = await selectBundledEqptIds(idList);
+    if (setIdListError) {
+      throw setIdListError;
+    }
+    console.log('setId List : ', setIdList);
+    const setIdListSet = new Set(setIdList);
     const setIdListArray = [...setIdListSet]
       .map((l) => l.set_kizai_id)
       .filter((kizai_id) => !idList.includes(kizai_id));
