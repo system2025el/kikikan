@@ -1801,27 +1801,19 @@ export const getBumonsForEqptSelection = async () => {
 };
 
 /**
- * 選ばれた機材に対するセットオプションを確認する関数
+ * セットオプションを持つ機材のIDの配列を取得する関数
  * @param idList 選ばれた機材たちの機材IDリスト
- * @returns セットオプションの機材の配列、もともと選ばれていたり、なかった場合はから配列を返す
+ * @returns セットオプション付きの機材の配列、なかった場合は空配列を返す
  */
-export const checkSetoptions = async (idList: number[]) => {
+export const checkSetoptions = async (idList: number[]): Promise<number[]> => {
   try {
-    const setIdList = await selectBundledEqptIds(idList);
-    console.log('setId List : ', setIdList.rows);
-    const setIdListSet = new Set(setIdList.rows);
-    const setIdListArray = [...setIdListSet]
-      .map((l) => l.set_kizai_id)
-      .filter((kizai_id) => !idList.includes(kizai_id));
-    console.log('setIdListArray : ', setIdListArray);
-    // セットオプションリストが空なら空配列を返して終了
-    if (setIdListArray.length === 0) return [];
-    const data = await selectBundledEqpts(setIdListArray);
-    console.log('set options : ', data.rows);
-    if (!data || data.rowCount === 0) {
-      return [];
+    const { data: setIdList, error: setIdError } = await selectBundledEqptIds(idList);
+    if (setIdError) {
+      console.error('例外発生', setIdError);
+      throw setIdError;
     }
-    return data.rows;
+    if (!setIdList || setIdList.length === 0) return [];
+    return setIdList.map((d) => d.kizai_id);
   } catch (e) {
     console.error('例外が発生しました:', e);
     throw e;
@@ -1852,7 +1844,7 @@ export const getEqptsForEqptSelection = async (query: string = ''): Promise<Eqpt
  * @param rank 顧客ランク
  * @returns {SelectedEqptsValues[]} 表に渡す機材の配列
  */
-export const getSelectedEqpts = async (idList: number[], rank: number) => {
+export const getSelectedEqpts = async (idList: number[] /* rank: number*/) => {
   // const rankParse = (rank: number) => {};
   try {
     const { data, error } = await selectChosenEqptsDetails(idList);
@@ -1869,20 +1861,21 @@ export const getSelectedEqpts = async (idList: number[], rank: number) => {
       kizaiGrpCod: d.kizai_grp_cod ?? '',
       dspOrdNum: d.dsp_ord_num ?? 0,
       regAmt: d.reg_amt ?? 0,
-      rankAmt:
-        rank === 1
-          ? (d.rank_amt_1 ?? 0)
-          : rank === 2
-            ? (d.rank_amt_2 ?? 0)
-            : rank === 3
-              ? (d.rank_amt_3 ?? 0)
-              : rank === 4
-                ? (d.rank_amt_4 ?? 0)
-                : rank === 5
-                  ? (d.rank_amt_5 ?? 0)
-                  : 0,
+      // rankAmt:
+      //   rank === 1
+      //     ? (d.rank_amt_1 ?? 0)
+      //     : rank === 2
+      //       ? (d.rank_amt_2 ?? 0)
+      //       : rank === 3
+      //         ? (d.rank_amt_3 ?? 0)
+      //         : rank === 4
+      //           ? (d.rank_amt_4 ?? 0)
+      //           : rank === 5
+      //             ? (d.rank_amt_5 ?? 0)
+      //             : 0,
       kizaiQty: d.kizai_qty ?? 0,
       ctnFlg: d.ctn_flg,
+      blnkQty: 0,
     }));
     return selectedEqpts;
   } catch (e) {

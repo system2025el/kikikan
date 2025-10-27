@@ -32,19 +32,25 @@ import { EqptBumonsTable } from './equipment-bumons-table';
 import { EqptTable } from './equipments-table';
 
 export const EqptSelectionDialog = ({
-  rank,
+  // rank,
   setEqpts,
   handleCloseDialog,
 }: {
-  rank: number;
+  // rank: number;
+  /**
+   * 機材選択画面に渡す機材配列をセットする関数
+   * @param {SelectedEqptsValues[]} data
+   * @returns
+   */
   setEqpts: (data: SelectedEqptsValues[]) => void;
+  /** 機材選択ダイアログ閉じる関数 */
   handleCloseDialog: () => void;
 }) => {
+  /** 機材明細画面に渡す機材の配列 */
+  const selectedEqptList: SelectedEqptsValues[] = [];
   /* useState ------------------------- */
   /* 選ばれている機材の配列 */
   const [selectedEqptIds, setSelectedEqptIds] = useState<number[]>([]);
-  /* セットオプションのダイアログ開閉 */
-  const [bundleDialogOpen, setBundleDialogOpen] = useState(false);
   /* 選択されている部門 */
   const [selectedBumon, setSelectedBumon] = useState(-100);
   /* 機材リスト全体 */
@@ -53,8 +59,10 @@ export const EqptSelectionDialog = ({
   const [searching, setSearching] = useState<boolean>(false);
   /* Loadingかどうか */
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  /* セットオプションのデータ配列 */
-  const [bundles, setBundles] = useState<EqptSelection[]>([]);
+  /* セットオプション有機材のデータ配列 */
+  const [eqptsWSet, setEqptsWSet] = useState<number[]>([]);
+  /* セットオプションのダイアログ開閉 */
+  const [bundleDialogOpen, setBundleDialogOpen] = useState(false);
 
   /* useform ------------------------------- */
   const { handleSubmit, control, watch, getValues } = useForm({ defaultValues: { query: '' } });
@@ -62,27 +70,33 @@ export const EqptSelectionDialog = ({
   /* methods ------------------------------ */
   /* 確定ボタン押下時 */
   const handleClickConfirm = async () => {
+    /* 親機材を取得し配列にpush */
+    const oyaEqpts = await getSelectedEqpts(selectedEqptIds);
+    if (oyaEqpts && oyaEqpts.length !== 0) selectedEqptList.push(...oyaEqpts);
+    // 選ばれた配列からセットオプションの存在確認
     const setList = await checkSetoptions(selectedEqptIds);
     if (setList.length !== 0) {
-      setBundles(setList);
+      // セットオプション付きの機材があるとき
+      setEqptsWSet(setList);
       setBundleDialogOpen(true);
     } else {
-      // selectedEqptIdsが今回選んだ全機材であるので、idをもとに機材情報を取得しダイアログを閉じたい
-      const data = await getSelectedEqpts(selectedEqptIds, rank);
+      // セットオプションがない時
+      // 親機材(blankQty: 0)として配列に保持する
+      const data = await getSelectedEqpts(selectedEqptIds);
       console.log('最終的に渡される機材の配列データ: ', data!);
       setEqpts(data!);
       handleCloseDialog();
     }
   };
 
-  /* セットオプションダイアログを閉じる */
+  /** セットオプションダイアログを閉じる */
   const handleCloseBundle = () => {
-    setBundles([]);
+    setEqptsWSet([]);
     setBundleDialogOpen(false);
     handleCloseDialog();
   };
 
-  /* 機材を選択する処理 */
+  /** 機材を選択する処理 */
   const handleClick = (event: React.MouseEvent<unknown>, id: number) => {
     const selectedIndex = selectedEqptIds.indexOf(id);
     let newSelected: number[] = [];
@@ -102,13 +116,13 @@ export const EqptSelectionDialog = ({
     setSelectedEqptIds(newSelected);
   };
 
-  /* 部門の行を押下時処理 */
+  /** 部門の行を押下時処理 */
   const handleClickBumon = (id: number) => {
     setSelectedBumon(id);
     setSearching(false);
   };
 
-  /* 検索ボタン押下時処理 */
+  /** 検索ボタン押下時処理 */
   const onSubmit = async (data: { query: string }) => {
     console.log('Push search', data.query);
     setIsLoading(true);
@@ -172,16 +186,19 @@ export const EqptSelectionDialog = ({
           <Button onClick={() => handleClickConfirm()} disabled={selectedEqptIds.length === 0 ? true : false}>
             確定
           </Button>
-          <Dialog open={bundleDialogOpen} onClose={() => setBundleDialogOpen(false)}>
+          {eqptsWSet.length > 0 && (
             <BundleDialog
-              handleClose={handleCloseBundle}
-              bundles={bundles}
-              isLoading={isLoading}
-              selectedEqpts={selectedEqptIds}
-              rank={rank}
+              open={bundleDialogOpen}
+              handleConfirmAll={(setArray: SelectedEqptsValues[]) => {
+                handleCloseBundle();
+                setEqpts([...selectedEqptList, ...setArray]);
+              }}
+              handleCloseDialog={handleCloseBundle}
+              eqptsWSet={eqptsWSet}
+              // rank={rank}
               setEqpts={setEqpts}
             />
-          </Dialog>
+          )}
         </Box>
 
         <Grid2 container display={'flex'} pb={2} spacing={1} justifyContent={'space-between'}>
@@ -210,23 +227,31 @@ export const EqptSelectionDialog = ({
  * @returns 機材のセットオプションを選ぶダイアログコンポーネント
  */
 const BundleDialog = ({
-  bundles,
-  isLoading,
-  selectedEqpts,
-  rank,
-  handleClose,
+  open,
+  eqptsWSet,
+  // rank,
+  handleConfirmAll,
+  handleCloseDialog,
   setEqpts,
 }: {
-  bundles: EqptSelection[];
-  isLoading: boolean;
-  selectedEqpts: number[];
-  rank: number;
-  handleClose: () => void;
+  open: boolean;
+  /** セット有機材のID配列 */
+  eqptsWSet: number[];
+  // rank: number;
+  /** 選んだセットと親機材配列を */
+  handleConfirmAll: (setArray: SelectedEqptsValues[]) => void;
+  /** セットオプションダイアログを閉じる */
+  handleCloseDialog: () => void;
+  /** 機材明細画面に渡す機材をセットする */
   setEqpts: (data: SelectedEqptsValues[]) => void;
 }) => {
   /* useState ------------------------------------------ */
   /* 選択される機材のidのリスト */
   const [selected, setSelected] = useState<number[]>([]);
+  /* 今開いてる機材ID配列のインデックス */
+  const [currentIndex, setCurrentIndex] = useState(0);
+  /* 表示するセットオプションの配列 */
+  const [bundles, setBundles] = useState<EqptSelection[]>([]);
 
   /* methods -------------------------------------------------------- */
   /* 行押下時（選択時）の処理 */
@@ -248,35 +273,44 @@ const BundleDialog = ({
 
   /* 確定ボタン押下時 */
   const handleClickConfirm = async () => {
-    const data = await getSelectedEqpts([...selectedEqpts, ...selected], rank);
-    console.log('最終的に渡される機材の配列データ: ', data!);
-    setEqpts(data!);
-    handleClose();
+    const selectedSet = await getSelectedEqpts(selected);
+    console.log('最終的に渡される機材の配列データ: ', selectedSet!);
+    setEqpts(selectedSet!);
+    handleConfirmAll(selectedSet);
   };
 
+  /* useEffect */
+  useEffect(() => {
+    if (open) {
+      const getSet = async () => {
+        // const bundles = await getSetOptions(eqptsWSet);
+      };
+    }
+  }, [eqptsWSet, open]);
+
   return (
-    <>
+    <Dialog open={open} onClose={() => handleCloseDialog()}>
       <DialogTitle justifyContent={'space-between'} display={'flex'}>
-        セットオプション
+        セットオプション {eqptsWSet[0]}
         <Box>
           <Button onClick={() => handleClickConfirm()}>確定</Button>
         </Box>
       </DialogTitle>
       <DialogContent>
         <TableContainer component={Paper} sx={{ width: 500 }}>
-          {isLoading ? (
+          {/* {isLoading ? (
             <Loading />
-          ) : (
-            <Table stickyHeader padding="none">
-              <TableHead>
-                <TableRow>
-                  <TableCell padding="checkbox" />
-                  <TableCell>機材名</TableCell>
-                  <TableCell>在庫場所</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {bundles!.map((row, index) => {
+          ) : ( */}
+          <Table stickyHeader padding="none">
+            <TableHead>
+              <TableRow>
+                <TableCell padding="checkbox" />
+                <TableCell>機材名</TableCell>
+                <TableCell>在庫場所</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {/* {bundles!.map((row, index) => {
                   const isItemSelected = selected.includes(row.kizaiId);
                   const labelId = `enhanced-table-checkbox-${index}`;
                   const nextRow = bundles![index + 1];
@@ -314,12 +348,12 @@ const BundleDialog = ({
                     );
                   }
                   return rows;
-                })}
-              </TableBody>
-            </Table>
-          )}
+                })} */}
+            </TableBody>
+          </Table>
+          {/* )} */}
         </TableContainer>
       </DialogContent>
-    </>
+    </Dialog>
   );
 };

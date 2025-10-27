@@ -96,6 +96,9 @@ export type JuchuKizaiHonbanbiValues = {
   juchuHonbanbiAddQty: number | null;
 };
 
+/**
+ * 機材選択画面で表示する機材の型
+ */
 export type EqptSelection = {
   kizaiId: number;
   kizaiNam: string;
@@ -105,6 +108,9 @@ export type EqptSelection = {
   ctnFlg: boolean;
 };
 
+/**
+ * 機材明細に渡す選択された機材の型
+ */
 export type SelectedEqptsValues = {
   kizaiId: number;
   kizaiNam: string;
@@ -113,7 +119,8 @@ export type SelectedEqptsValues = {
   kizaiGrpCod: string;
   dspOrdNum: number;
   regAmt: number;
-  rankAmt: number;
+  // rankAmt: number;
   kizaiQty: number;
   ctnFlg: boolean;
+  blnkQty: number;
 };
