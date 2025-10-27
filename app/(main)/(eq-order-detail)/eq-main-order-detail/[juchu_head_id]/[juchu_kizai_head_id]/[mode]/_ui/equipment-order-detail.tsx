@@ -1142,7 +1142,7 @@ const EquipmentOrderDetail = (props: {
       shozokuNam: d.shozokuNam,
       mem: '',
       kizaiId: d.kizaiId,
-      kizaiTankaAmt: d.rankAmt,
+      kizaiTankaAmt: d.regAmt,
       kizaiNam: d.kizaiNam,
       kizaiQty: d.kizaiQty,
       planKizaiQty: 0,
@@ -1594,7 +1594,7 @@ const EquipmentOrderDetail = (props: {
 
             <Dialog open={EqSelectionDialogOpen} fullScreen>
               <EqptSelectionDialog
-                rank={props.juchuHeadData.kokyaku.kokyakuRank}
+                // rank={props.juchuHeadData.kokyaku.kokyakuRank}
                 setEqpts={setEqpts}
                 handleCloseDialog={handleCloseEqDialog}
               />
