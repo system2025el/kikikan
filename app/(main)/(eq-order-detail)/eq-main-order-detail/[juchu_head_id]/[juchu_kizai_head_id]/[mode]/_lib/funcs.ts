@@ -751,9 +751,9 @@ export const getJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId:
       kizaiId: d.kizai_id,
       kizaiTankaAmt: eqTanka.find((t) => t.kizai_id === d.kizai_id)?.kizai_tanka_amt || 0,
       kizaiNam: d.kizai_nam ?? '',
-      planKizaiQty: d.plan_kizai_qty,
-      planYobiQty: d.plan_yobi_qty,
-      planQty: d.plan_qty,
+      planKizaiQty: d.plan_kizai_qty ?? 0,
+      planYobiQty: d.plan_yobi_qty ?? 0,
+      planQty: d.plan_qty ?? 0,
       delFlag: false,
       saveFlag: true,
     }));
@@ -1850,7 +1850,8 @@ export const checkSetoptions = async (idList: number[]): Promise<number[]> => {
       throw setIdError;
     }
     if (!setIdList || setIdList.length === 0) return [];
-    return setIdList.map((d) => d.kizai_id);
+    // return setIdList.map((d) => d.kizai_id);
+    return Array.from(new Set(setIdList.map((d) => d.kizai_id)));
   } catch (e) {
     console.error('例外が発生しました:', e);
     throw e;

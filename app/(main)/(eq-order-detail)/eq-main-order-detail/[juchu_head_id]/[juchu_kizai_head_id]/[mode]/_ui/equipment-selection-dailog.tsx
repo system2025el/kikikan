@@ -301,7 +301,7 @@ const BundleDialog = ({
   };
 
   /* useEffect */
-  /* eslint-disable react-hooks/exhaustive-deps */
+   
   useEffect(() => {
     if (!hasRun.current) {
       hasRun.current = true;
@@ -322,7 +322,7 @@ const BundleDialog = ({
       }
     }
   }, [eqptsWSet, open, currentIndex]);
-  /* eslint-enable react-hooks/exhaustive-deps */
+   
 
   return (
     <Dialog open={open} onClose={() => handleCloseDialog()}>

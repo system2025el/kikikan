@@ -853,24 +853,35 @@ const EquipmentOrderDetail = (props: {
     if (result) {
       // コンテナ削除
       if (deleteTarget.containerFlag) {
-        setJuchuContainerMeisaiList(
-          (prev) =>
-            prev
-              .filter((d) => !d.delFlag)
-              .map((data, index) =>
-                index === deleteTarget.rowIndex && !data.delFlag ? { ...data, delFlag: true } : data
-              )
-          // prev.map((data) =>
-          //   data.kizaiId === deleteTarget.rowIndex && !data.delFlag ? { ...data, delFlag: true } : data
-          // )
+        setJuchuContainerMeisaiList((prev) =>
+          prev.map((data) =>
+            data.kizaiId === deleteTarget.kizaiId && !data.delFlag ? { ...data, delFlag: true } : data
+          )
         );
         // 機材削除
       } else {
         const filterJuchuKizaiMeisaiList = juchuKizaiMeisaiList.filter((data) => !data.delFlag);
-        //const rowIndex = filterJuchuKizaiMeisaiList.findIndex((data) => data.kizaiId === deleteTarget.kizaiId);
         const updatedJuchuKizaiMeisaiList = filterJuchuKizaiMeisaiList.filter(
           (_, index) => index !== deleteTarget.rowIndex
         );
+        const deleteJuchuKizaiMeisai = juchuKizaiMeisaiList.filter((d) => d.kizaiId === deleteTarget.kizaiId);
+
+        if (deleteJuchuKizaiMeisai.length === 1) {
+          setIdoJuchuKizaiMeisaiList((prev) => prev.filter((d) => d.kizaiId !== deleteTarget.kizaiId));
+        } else {
+          setIdoJuchuKizaiMeisaiList((prev) =>
+            prev.map((d) =>
+              d.kizaiId === deleteTarget.kizaiId
+                ? {
+                    ...d,
+                    planKizaiQty: d.planKizaiQty - filterJuchuKizaiMeisaiList[deleteTarget.rowIndex].planKizaiQty,
+                    planYobiQty: d.planYobiQty - filterJuchuKizaiMeisaiList[deleteTarget.rowIndex].planYobiQty,
+                    planQty: d.planQty - filterJuchuKizaiMeisaiList[deleteTarget.rowIndex].planQty,
+                  }
+                : d
+            )
+          );
+        }
         setJuchuKizaiMeisaiList((prev) =>
           prev
             .filter((d) => !d.delFlag)
@@ -879,7 +890,6 @@ const EquipmentOrderDetail = (props: {
             )
         );
         setEqStockList((prev) => prev.filter((_, index) => index !== deleteTarget.rowIndex));
-        //setEqStockList((prev) => prev.filter((data) => !data.every((d) => d.kizaiId === deleteTarget.kizaiId)));
         setOriginPlanQty((prev) => prev.filter((_, index) => index !== deleteTarget.rowIndex));
         setPriceTotal(updatedJuchuKizaiMeisaiList.reduce((sum, row) => sum + (row.kizaiTankaAmt ?? 0), 0));
       }

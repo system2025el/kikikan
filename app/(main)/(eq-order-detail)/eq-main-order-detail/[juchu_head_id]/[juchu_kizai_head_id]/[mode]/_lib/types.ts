@@ -50,9 +50,9 @@ export type JuchuKizaiMeisaiValues = {
   kizaiId: number;
   kizaiTankaAmt: number;
   kizaiNam: string;
-  planKizaiQty: number | null;
-  planYobiQty: number | null;
-  planQty: number | null;
+  planKizaiQty: number;
+  planYobiQty: number;
+  planQty: number;
   delFlag: boolean;
   saveFlag: boolean;
 };
@@ -69,9 +69,9 @@ export type IdoJuchuKizaiMeisaiValues = {
   kizaiId: number;
   kizaiNam: string;
   kizaiQty: number;
-  planKizaiQty: number | null;
-  planYobiQty: number | null;
-  planQty: number | null;
+  planKizaiQty: number;
+  planYobiQty: number;
+  planQty: number;
   delFlag: boolean;
   saveFlag: boolean;
 };
