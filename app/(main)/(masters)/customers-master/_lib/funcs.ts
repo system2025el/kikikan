@@ -9,6 +9,7 @@ import {
   upDateCustomerDB,
 } from '@/app/_lib/db/tables/m-kokyaku';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
+import { KokyakuSchema } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/types';
 
 import { emptyCustomer } from './datas';
 import { CustomersMasterDialogValues, CustomersMasterTableValues } from './types';
@@ -67,7 +68,7 @@ export const getChosenCustomer = async (id: number) => {
     const CustomerDetails: CustomersMasterDialogValues = {
       kokyakuNam: data.kokyaku_nam,
       kana: data.kana,
-      nebikiAmt: data.nebiki_amt,
+      nebikiRat: data.nebiki_rat,
       delFlg: Boolean(data.del_flg),
       // keisho: data.keisho,
       adrPost: data.adr_post,
@@ -131,7 +132,7 @@ export const getChosenCustomerIdAndName = async (id: number) => {
       kokyakuId: data.kokyaku_id,
       kokyakuNam: data.kokyaku_nam,
       kana: data.kana,
-      nebikiAmt: data.nebiki_amt,
+      nebikiAmt: data.nebiki_rat,
       delFlg: Boolean(data.del_flg),
       keisho: data.keisho,
       adrPost: data.adr_post,
@@ -182,7 +183,8 @@ export const updateCustomer = async (rawData: CustomersMasterDialogValues, id: n
     kokyaku_id: id,
     kokyaku_nam: rawData.kokyakuNam,
     kana: rawData.kana,
-    nebiki_amt: rawData.nebikiAmt,
+    kokyaku_rank: rawData.kokyakuRank ?? 0,
+    nebiki_rat: rawData.nebikiRat,
     del_flg: Number(rawData.delFlg),
     adr_post: rawData.adrPost,
     adr_shozai: rawData.adrShozai,

@@ -82,7 +82,7 @@ export const selectOneCustomer = async (id: number) => {
       .schema(SCHEMA)
       .from('m_kokyaku')
       .select(
-        'kokyaku_id, kokyaku_nam, kana, nebiki_amt, keisho, del_flg, adr_post, adr_shozai, adr_tatemono, adr_sonota, tel, tel_mobile, fax, mail, mem, dsp_flg, close_day, site_day, kizai_nebiki_flg'
+        'kokyaku_id, kokyaku_nam, kana, nebiki_rat, keisho, del_flg, adr_post, adr_shozai, adr_tatemono, adr_sonota, tel, tel_mobile, fax, mail, mem, dsp_flg, close_day, site_day, kizai_nebiki_flg'
       )
       .eq('kokyaku_id', id)
       .single();
@@ -98,17 +98,16 @@ export const selectOneCustomer = async (id: number) => {
 export const insertNewCustomer = async (data: CustomersMasterDialogValues, user: string) => {
   const query = `
   INSERT INTO ${SCHEMA}.m_kokyaku (
-    kokyaku_id, kokyaku_nam, kana, kokyaku_rank, keisho, del_flg, dsp_ord_num,
+    kokyaku_id, kokyaku_nam, kana, kokyaku_rank, del_flg, dsp_ord_num,
     adr_post, adr_shozai, adr_tatemono, adr_sonota,
     tel, tel_mobile, fax, mail,
-    mem, dsp_flg, close_day, site_day, kizai_nebiki_flg,
-    add_dat, add_user
+    mem, dsp_flg, add_dat, add_user
   )
   VALUES (
     (SELECT coalesce(max(kokyaku_id),0) + 1 FROM ${SCHEMA}.m_kokyaku),
-    $1, $2, $3, $4, $5,
+    $1, $2, $3, $4,
     (SELECT coalesce(max(dsp_ord_num),0) + 1 FROM ${SCHEMA}.m_kokyaku),
-    $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20
+    $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16
   );
 `;
   const date = toJapanTimeString();
@@ -116,7 +115,7 @@ export const insertNewCustomer = async (data: CustomersMasterDialogValues, user:
     data.kokyakuNam,
     data.kana,
     data.kokyakuRank,
-    data.keisho,
+    // data.keisho,
     Number(data.delFlg),
     data.adrPost,
     data.adrShozai,
@@ -128,9 +127,9 @@ export const insertNewCustomer = async (data: CustomersMasterDialogValues, user:
     data.mail,
     data.mem,
     Number(data.dspFlg),
-    data.closeDay,
-    data.siteDay,
-    Number(data.kizaiNebikiFlg),
+    // data.closeDay,
+    // data.siteDay,
+    // Number(data.kizaiNebikiFlg),
     date,
     user,
   ];

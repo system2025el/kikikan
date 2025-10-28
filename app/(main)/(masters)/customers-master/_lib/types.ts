@@ -16,6 +16,7 @@ export const CustomersMaterDialogSchema = z.object({
   //   .string()
   //   .max(10, { message: validationMessages.maxStringLength(10) })
   //   .nullish(),
+  kokyakuRank: z.number().nullish(),
   adrPost: z
     .string()
     .max(20, { message: validationMessages.maxStringLength(20) })
@@ -54,7 +55,7 @@ export const CustomersMaterDialogSchema = z.object({
     .max(200, { message: validationMessages.maxStringLength(200) })
     .nullish(),
   dspFlg: z.boolean().optional(),
-  nebikiAmt: z.number().nullish(),
+  nebikiRat: z.number().nullish(),
   // closeDay: z.number({ message: validationMessages.number() }).nullable(),
   // siteDay: z.number({ message: validationMessages.number() }).nullable(),
   // kizaiNebikiFlg: z.boolean().optional(),
