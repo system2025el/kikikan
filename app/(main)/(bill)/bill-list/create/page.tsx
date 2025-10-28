@@ -16,7 +16,7 @@ const Page = async ({ searchParams }: { searchParams: Promise<{ [key: string]: s
   const custs = await getChosenCustomerIdAndName(Number(kokyakuId));
   const juchus = await getJuchusForBill({
     kokyakuId: Number(kokyakuId),
-    date: date ?? toJapanDateString(),
+    date: date ?? toJapanDateString(undefined, '-'),
     flg: flg === 'true' ? true : false,
     tantouNam: tantou === 'null' ? null : (tantou ?? null),
   });

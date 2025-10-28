@@ -29,6 +29,7 @@ type MenuItem = {
 const orderList: MenuItem[] = [
   { name: '新規受注', url: '/order/0/edit' },
   { name: '受注一覧', url: '/order-list' },
+  { name: '機材明細一覧', url: '/eqpt-order-list' },
   { name: '在庫確認', url: '/stock' },
   { name: '貸出状況', url: '/loan-situation' },
   { name: '見積一覧', url: '/quotation-list' },

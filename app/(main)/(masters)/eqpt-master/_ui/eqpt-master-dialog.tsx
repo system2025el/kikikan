@@ -199,6 +199,7 @@ export const EqMasterDialog = ({
                     href={`/rfid-master/${eqptId}`}
                     target="_blank" // 新しいタブで開く
                     rel="noopener noreferrer"
+                    disabled={isNew}
                   >
                     RFIDマスタ
                   </Button>

@@ -39,8 +39,7 @@ export const insertNewEqpt = async (data: EqptsMasterDialogValues, connection: P
     VALUES (
       (SELECT coalesce(max(kizai_id),0) + 1 FROM ${SCHEMA}.m_kizai),
       $1, $2, $3, $4, $5, $6, $7, $8, $9,
-      $24,
-      $10, $11, $12, $13, $14, $15, $16, $17, $18 -- , $19, $20, $21, $22, $23
+      $10, $11, $12, $13, $14, $15, $16, $17, $18, $19::varchar -- , $20, $21, $22, $23
     );
   `;
   const date = toJapanTimeString();
@@ -54,6 +53,7 @@ export const insertNewEqpt = async (data: EqptsMasterDialogValues, connection: P
     data.tanaCod,
     data.edaCod,
     data.kizaiGrpCod,
+    data.dspOrdNum,
     data.mem,
     fakeToNull(data.bumonId),
     fakeToNull(data.shukeibumonId),
@@ -68,7 +68,6 @@ export const insertNewEqpt = async (data: EqptsMasterDialogValues, connection: P
     // data.rankAmt5,
     date,
     user,
-    data.dspOrdNum,
   ];
   try {
     await connection.query(query, values);

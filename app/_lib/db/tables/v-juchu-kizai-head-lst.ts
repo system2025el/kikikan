@@ -1,5 +1,8 @@
 'use server';
 
+import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
+import { EqptOrderSearchValues } from '@/app/(main)/eqpt-order-list/_lib/types';
+
 import { SCHEMA, supabase } from '../supabase';
 
 /**
@@ -54,6 +57,50 @@ export const selectPdfJuchuKizaiHead = async (
       .select('juchu_honbanbi_calc_qty, kics_shuko_dat, kics_nyuko_dat, yard_shuko_dat, yard_nyuko_dat')
       .eq('juchu_head_id', juchuHeadId)
       .in('juchu_kizai_head_id', ids);
+  } catch (e) {
+    throw e;
+  }
+};
+
+export const selectFilteredKizaiHead = async ({
+  range,
+  radio,
+  juchuId,
+  headNam,
+  kokyaku,
+  koenNam,
+  koenbashoNam,
+}: EqptOrderSearchValues) => {
+  const builder = supabase
+    .schema(SCHEMA)
+    .from('v_juchu_kizai_head_lst')
+    .select(
+      `juchu_head_id, kokyaku_nam, koen_nam, koenbasho_nam, head_nam, kics_shuko_dat, kics_nyuko_dat, yard_shuko_dat, yard_nyuko_dat`
+    );
+
+  if (radio === 'shuko') {
+    // 出庫日検索
+  } else {
+    //入庫日検索
+  }
+
+  if (juchuId) {
+    builder.eq('juchu_head_id', juchuId);
+  }
+  if (headNam && headNam.trim() !== '') {
+    builder.ilike('head_nam', `%${headNam}%`);
+  }
+  if (kokyaku && kokyaku !== FAKE_NEW_ID) {
+    builder.eq('kokyaku_id', kokyaku);
+  }
+  if (koenNam && koenNam.trim() !== '') {
+    builder.ilike('koen_nam', `%${koenNam}%`);
+  }
+  if (koenbashoNam && koenbashoNam.trim() !== '') {
+    builder.ilike('koenbasho_nam', `%${koenbashoNam}%`);
+  }
+  try {
+    return await builder;
   } catch (e) {
     throw e;
   }
