@@ -33,14 +33,14 @@ export const insertNewEqpt = async (data: EqptsMasterDialogValues, connection: P
       kizai_id, kizai_nam, del_flg, section_num, el_num, shozoku_id,
       bld_cod, tana_cod, eda_cod, kizai_grp_cod, dsp_ord_num, mem,
       bumon_id, shukei_bumon_id, dsp_flg, ctn_flg, def_dat_qty,
-      reg_amt, rank_amt_1, rank_amt_2, rank_amt_3, rank_amt_4, rank_amt_5, 
+      reg_amt,-- rank_amt_1, rank_amt_2, rank_amt_3, rank_amt_4, rank_amt_5, 
       add_dat, add_user
     )
     VALUES (
       (SELECT coalesce(max(kizai_id),0) + 1 FROM ${SCHEMA}.m_kizai),
       $1, $2, $3, $4, $5, $6, $7, $8, $9,
       $24,
-      $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23
+      $10, $11, $12, $13, $14, $15, $16, $17, $18 -- , $19, $20, $21, $22, $23
     );
   `;
   const date = toJapanTimeString();
@@ -61,11 +61,11 @@ export const insertNewEqpt = async (data: EqptsMasterDialogValues, connection: P
     Number(data.ctnFlg),
     data.defDatQty,
     data.regAmt,
-    data.rankAmt1,
-    data.rankAmt2,
-    data.rankAmt3,
-    data.rankAmt4,
-    data.rankAmt5,
+    // data.rankAmt1,
+    // data.rankAmt2,
+    // data.rankAmt3,
+    // data.rankAmt4,
+    // data.rankAmt5,
     date,
     user,
     data.dspOrdNum,
