@@ -718,11 +718,14 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
             index++;
 
             // 小計行2
-            checkPageBreak(rowHeight);
-            drawColumnLine();
-            drawShokei(detail.biko2, detail.nebikiNam, detail.nebikiAmt);
-            drawUnderLine();
-            index++;
+            if (detail.nebikiAmt && Number(detail.nebikiAmt) !== 0) {
+              checkPageBreak(rowHeight);
+              drawColumnLine();
+              const displayAmt: number = -Math.abs(Number(detail.nebikiAmt)); // nebikiAmt を数値化してマイナス符号を付ける
+              drawShokei(detail.biko2, detail.nebikiNam, displayAmt);
+              drawUnderLine();
+              index++;
+            }
 
             // 小計行3
             checkPageBreak(rowHeight);
@@ -801,11 +804,14 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
             index++;
 
             // 小計行2
-            checkPageBreak(rowHeight);
-            drawColumnLine();
-            drawShokei(detail.biko2, detail.nebikiNam, detail.nebikiAmt);
-            drawUnderLine();
-            index++;
+            if (detail.nebikiAmt && Number(detail.nebikiAmt) !== 0) {
+              checkPageBreak(rowHeight);
+              drawColumnLine();
+              const displayAmt: number = -Math.abs(Number(detail.nebikiAmt)); // nebikiAmt を数値化してマイナス符号を付ける
+              drawShokei(detail.biko2, detail.nebikiNam, displayAmt);
+              drawUnderLine();
+              index++;
+            }
 
             // 小計行3
             checkPageBreak(rowHeight);
@@ -884,11 +890,14 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
             index++;
 
             // 小計行2
-            checkPageBreak(rowHeight);
-            drawColumnLine();
-            drawShokei(detail.biko2, detail.nebikiNam, detail.nebikiAmt);
-            drawUnderLine();
-            index++;
+            if (detail.nebikiAmt && Number(detail.nebikiAmt) !== 0) {
+              checkPageBreak(rowHeight);
+              drawColumnLine();
+              const displayAmt: number = -Math.abs(Number(detail.nebikiAmt)); // nebikiAmt を数値化してマイナス符号を付ける
+              drawShokei(detail.biko2, detail.nebikiNam, displayAmt);
+              drawUnderLine();
+              index++;
+            }
 
             // 小計行3
             checkPageBreak(rowHeight);
@@ -1150,16 +1159,17 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
     drawUnderLine();
     index++;
 
-    checkPageBreak(rowHeight);
-    drawColumnLine2();
-    // drawRow2(param.tokuNebikiMei ?? '', Number(param.tokuNebikiAmt) ?? 0);
-    drawRow2(
-      param.tokuNebikiMei ?? '',
-      param.tokuNebikiAmt != null ? -Math.abs(param.tokuNebikiAmt) : 0,
-      rgb(1, 0, 0) // ← 赤文字指定
-    );
-    drawUnderLine();
-    index++;
+    if (Number(param.tokuNebikiAmt) !== 0) {
+      checkPageBreak(rowHeight);
+      drawColumnLine2();
+      drawRow2(
+        param.tokuNebikiMei ?? '',
+        param.tokuNebikiAmt != null ? -Math.abs(param.tokuNebikiAmt) : 0,
+        rgb(1, 0, 0) // ← 赤文字指定
+      );
+      drawUnderLine();
+      index++;
+    }
 
     checkPageBreak(rowHeight);
     drawColumnLine2();
