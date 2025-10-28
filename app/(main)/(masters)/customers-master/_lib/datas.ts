@@ -35,9 +35,7 @@ export const cMHeader = [
 export const emptyCustomer: CustomersMasterDialogValues = {
   kokyakuNam: '',
   kana: '',
-  kokyakuRank: 0,
   delFlg: false,
-  keisho: '',
   adrPost: '',
   adrShozai: '',
   adrTatemono: '',
@@ -48,9 +46,7 @@ export const emptyCustomer: CustomersMasterDialogValues = {
   mail: '',
   mem: '',
   dspFlg: true,
-  closeDay: null,
-  siteDay: null,
-  kizaiNebikiFlg: false,
+  nebikiAmt: null,
 };
 /*  */
 export const formItems: FormItemsType[] = [
@@ -65,9 +61,10 @@ export const formItems: FormItemsType[] = [
     constraints: '100文字まで',
   },
   {
-    label: '顧客ランク',
-    exsample: '',
-    constraints: '１～５選択',
+    label: '値引き率',
+    exsample: '20.5',
+    constraints: 'パーセント表示',
+    other: '%',
   },
   {
     label: '削除フラグ',

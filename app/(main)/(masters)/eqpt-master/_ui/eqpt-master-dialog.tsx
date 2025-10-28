@@ -82,7 +82,7 @@ export const EqMasterDialog = ({
   /* フォームを送信 */
   const onSubmit = async (data: EqptsMasterDialogValues) => {
     console.log('isDarty : ', isDirty);
-    console.log(data.shukeibumonId, '::::', data.rankAmt1);
+    // console.log(data.shukeibumonId, '::::', data.rankAmt1);
     if (eqptId === FAKE_NEW_ID) {
       // 新規登録
       await addNewEqpt(data, user?.name ?? '');

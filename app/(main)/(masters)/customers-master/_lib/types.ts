@@ -11,12 +11,11 @@ export const CustomersMaterDialogSchema = z.object({
     .string()
     .max(100, { message: validationMessages.maxStringLength(100) })
     .min(1, { message: validationMessages.required() }),
-  kokyakuRank: z.number({ message: validationMessages.number() }),
   delFlg: z.boolean().optional(),
-  keisho: z
-    .string()
-    .max(10, { message: validationMessages.maxStringLength(10) })
-    .nullish(),
+  // keisho: z
+  //   .string()
+  //   .max(10, { message: validationMessages.maxStringLength(10) })
+  //   .nullish(),
   adrPost: z
     .string()
     .max(20, { message: validationMessages.maxStringLength(20) })
@@ -49,16 +48,16 @@ export const CustomersMaterDialogSchema = z.object({
     .string()
     .max(100, { message: validationMessages.maxStringLength(100) })
     .refine((val) => val === '' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val), { message: validationMessages.email() })
-    .optional()
-    .nullable(),
+    .nullish(),
   mem: z
     .string()
     .max(200, { message: validationMessages.maxStringLength(200) })
     .nullish(),
   dspFlg: z.boolean().optional(),
-  closeDay: z.number({ message: validationMessages.number() }).nullable(),
-  siteDay: z.number({ message: validationMessages.number() }).nullable(),
-  kizaiNebikiFlg: z.boolean().optional(),
+  nebikiAmt: z.number().nullish(),
+  // closeDay: z.number({ message: validationMessages.number() }).nullable(),
+  // siteDay: z.number({ message: validationMessages.number() }).nullable(),
+  // kizaiNebikiFlg: z.boolean().optional(),
 });
 export type CustomersMasterDialogValues = z.infer<typeof CustomersMaterDialogSchema>;
 
