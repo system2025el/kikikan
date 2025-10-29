@@ -126,19 +126,19 @@ export const formItems: FormItemsType[] = [
     exsample: '',
     constraints: '選択リストへの表示',
   },
-  {
-    label: '月締日',
-    exsample: '例）31、15　※月末締めの場合31を指定',
-    constraints: '数字',
-  },
-  {
-    label: '支払サイト日数',
-    exsample: '例）月末締め翌月末払いの場合30、翌々月末払いは60を指定',
-    constraints: '数字',
-  },
-  {
-    label: '機材値引き対象フラグ',
-    exsample: '',
-    constraints: '',
-  },
+  // {
+  //   label: '月締日',
+  //   exsample: '例）31、15　※月末締めの場合31を指定',
+  //   constraints: '数字',
+  // },
+  // {
+  //   label: '支払サイト日数',
+  //   exsample: '例）月末締め翌月末払いの場合30、翌々月末払いは60を指定',
+  //   constraints: '数字',
+  // },
+  // {
+  //   label: '機材値引き対象フラグ',
+  //   exsample: '',
+  //   constraints: '',
+  // },
 ];

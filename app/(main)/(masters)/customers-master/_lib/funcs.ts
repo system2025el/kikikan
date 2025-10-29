@@ -9,7 +9,6 @@ import {
   upDateCustomerDB,
 } from '@/app/_lib/db/tables/m-kokyaku';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
-import { KokyakuSchema } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/types';
 
 import { emptyCustomer } from './datas';
 import { CustomersMasterDialogValues, CustomersMasterTableValues } from './types';
@@ -110,7 +109,7 @@ export const getChosenCustomerIdAndName = async (id: number) => {
         kokyakuId: null,
         kokyakuNam: '',
         kana: '',
-        nebikiAmt: null,
+        nebikiRat: null,
         delFlg: false,
         // keisho: '',
         adrPost: '',
@@ -132,9 +131,9 @@ export const getChosenCustomerIdAndName = async (id: number) => {
       kokyakuId: data.kokyaku_id,
       kokyakuNam: data.kokyaku_nam,
       kana: data.kana,
-      nebikiAmt: data.nebiki_rat,
+      nebikiRat: data.nebiki_rat,
       delFlg: Boolean(data.del_flg),
-      keisho: data.keisho,
+      // keisho: data.keisho,
       adrPost: data.adr_post,
       adrShozai: data.adr_shozai,
       adrTatemono: data.adr_tatemono,
@@ -145,9 +144,9 @@ export const getChosenCustomerIdAndName = async (id: number) => {
       mail: data.mail,
       mem: data.mem,
       dspFlg: Boolean(data.dsp_flg),
-      closeDay: data.close_day,
-      siteDay: data.site_day,
-      kizaiNebikiFlg: Boolean(data.kizai_nebiki_flg),
+      // closeDay: data.close_day,
+      // siteDay: data.site_day,
+      // kizaiNebikiFlg: Boolean(data.kizai_nebiki_flg),
     };
     console.log(CustomerDetails.delFlg);
     return CustomerDetails;
@@ -183,7 +182,7 @@ export const updateCustomer = async (rawData: CustomersMasterDialogValues, id: n
     kokyaku_id: id,
     kokyaku_nam: rawData.kokyakuNam,
     kana: rawData.kana,
-    kokyaku_rank: rawData.kokyakuRank ?? 0,
+    kokyaku_rank: 0,
     nebiki_rat: rawData.nebikiRat,
     del_flg: Number(rawData.delFlg),
     adr_post: rawData.adrPost,

@@ -82,7 +82,7 @@ export const selectOneCustomer = async (id: number) => {
       .schema(SCHEMA)
       .from('m_kokyaku')
       .select(
-        'kokyaku_id, kokyaku_nam, kana, nebiki_rat, keisho, del_flg, adr_post, adr_shozai, adr_tatemono, adr_sonota, tel, tel_mobile, fax, mail, mem, dsp_flg, close_day, site_day, kizai_nebiki_flg'
+        'kokyaku_id, kokyaku_nam, kana, nebiki_rat, del_flg, adr_post, adr_shozai, adr_tatemono, adr_sonota, tel, tel_mobile, fax, mail, mem, dsp_flg'
       )
       .eq('kokyaku_id', id)
       .single();
@@ -114,8 +114,7 @@ export const insertNewCustomer = async (data: CustomersMasterDialogValues, user:
   const values = [
     data.kokyakuNam,
     data.kana,
-    data.kokyakuRank,
-    // data.keisho,
+    0,
     Number(data.delFlg),
     data.adrPost,
     data.adrShozai,
@@ -127,9 +126,6 @@ export const insertNewCustomer = async (data: CustomersMasterDialogValues, user:
     data.mail,
     data.mem,
     Number(data.dspFlg),
-    // data.closeDay,
-    // data.siteDay,
-    // Number(data.kizaiNebikiFlg),
     date,
     user,
   ];

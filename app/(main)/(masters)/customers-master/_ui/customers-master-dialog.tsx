@@ -1,7 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Grid2 } from '@mui/material';
+import { Grid2, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import {
   CheckboxElement,
@@ -190,35 +190,25 @@ export const CustomersMasterDialog = ({
                   disabled={editable ? false : true}
                 />
               </FormBox>
-              <FormBox formItem={formItems[2]} required>
-                <SelectElement
-                  name="kokyakuRank"
+              <FormBox formItem={formItems[2]}>
+                <TextFieldElement
+                  name="nebikiRat"
                   control={control}
-                  label={editable ? formItems[2].exsample : ''}
-                  options={[
-                    { id: 1, label: 1 },
-                    { id: 2, label: 2 },
-                    { id: 3, label: 3 },
-                    { id: 4, label: 4 },
-                    { id: 5, label: 5 },
-                  ]}
-                  fullWidth
-                  sx={{ maxWidth: '50%' }}
+                  type="number"
+                  sx={{
+                    width: 120,
+                    '& .MuiInputBase-input': {
+                      textAlign: 'right',
+                    },
+                    '& input[type=number]::-webkit-inner-spin-button': {
+                      WebkitAppearance: 'none',
+                      margin: 0,
+                    },
+                  }}
                   disabled={editable ? false : true}
                 />
+                <Typography>%</Typography>
               </FormBox>
-              {/* <Grid2>
-                <FormBox formItem={formItems[4]}>
-                  <TextFieldElement
-                    name="keisho"
-                    control={control}
-                    label={editable ? formItems[4].exsample : ''}
-                    fullWidth
-                    sx={{ maxWidth: '50%' }}
-                    disabled={editable ? false : true}
-                  />
-                </FormBox>
-              </Grid2> */}
               <FormBox formItem={formItems[5]}>
                 <TextFieldElement
                   name="adrPost"
@@ -297,6 +287,7 @@ export const CustomersMasterDialog = ({
                   fullWidth
                   sx={{ maxWidth: '90%' }}
                   disabled={editable ? false : true}
+                  type="email"
                 />
               </FormBox>
               <FormBox formItem={formItems[13]}>
