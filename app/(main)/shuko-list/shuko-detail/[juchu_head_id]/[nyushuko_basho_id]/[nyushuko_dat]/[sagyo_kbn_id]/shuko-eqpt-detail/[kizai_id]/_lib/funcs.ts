@@ -40,6 +40,7 @@ export const getShukoKizaiDetail = async (
 
     const shukoKizaiDetail: ShukoKizaiDetailValues[] = data.map((d) => ({
       juchuKizaiHeadId: d.juchu_kizai_head_id,
+      juchuKizaiMeisaiId: 
       planQty: d.plan_qty,
       resultQty: d.result_qty,
       resultAdjQty: d.result_adj_qty,
@@ -260,6 +261,7 @@ export const updShukoResultAdjQty = async (
   const updateData: NyushukoDen[] = kizaiDetailData.map((d, i) => ({
     juchu_head_id: juchuHeadId,
     juchu_kizai_head_id: d.juchuKizaiHeadId,
+    juchu_kizai_meisai_id: 
     sagyo_kbn_id: sagyoKbnId,
     sagyo_den_dat: sagyoDenDat,
     sagyo_id: sagyoId,

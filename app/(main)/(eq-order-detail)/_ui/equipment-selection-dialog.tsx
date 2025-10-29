@@ -99,7 +99,7 @@ export const OyaEqSelectionDialog = ({
                     <ListItemIcon>
                       <Checkbox edge="start" checked={selected.includes(value.kizaiId)} tabIndex={-1} disableRipple />
                     </ListItemIcon>
-                    <ListItemText primary={value.kizaiNam} />
+                    <ListItemText primary={'*'.repeat(value.indentNum) + value.kizaiNam} />
                   </ListItemButton>
                 </ListItem>
               );

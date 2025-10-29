@@ -345,22 +345,10 @@ export const saveJuchuKizai = async (
       const deleteJuchuKizaiMeisaiData = newJuchuKizaiMeisaiData.filter((data) => data.delFlag && data.saveFlag);
       // 削除
       if (deleteJuchuKizaiMeisaiData.length > 0) {
-        const deleteKizaiIds = deleteJuchuKizaiMeisaiData.map((data) => data.kizaiId);
-
-        const deleteMeisaiResult = await delJuchuKizaiMeisai(
-          data.juchuHeadId,
-          data.juchuKizaiHeadId,
-          deleteKizaiIds,
-          connection
-        );
+        const deleteMeisaiResult = await delJuchuKizaiMeisai(deleteJuchuKizaiMeisaiData, connection);
         console.log('受注機材明細削除', deleteMeisaiResult);
 
-        const deleteNyushukoDenResult = await delNyushukoDen(
-          data.juchuHeadId,
-          data.juchuKizaiHeadId,
-          deleteKizaiIds,
-          connection
-        );
+        const deleteNyushukoDenResult = await delNyushukoDen(deleteJuchuKizaiMeisaiData, connection);
         console.log('入出庫伝票削除', deleteNyushukoDenResult);
       }
       // 追加
@@ -896,14 +884,20 @@ export const updJuchuKizaiMeisai = async (
  * @param juchuKizaiHeadId 受注機材ヘッダーid
  * @param juchuKizaiMeisaiIds 受注機材明細id
  */
-export const delJuchuKizaiMeisai = async (
-  juchuHeadId: number,
-  juchuKizaiHeadId: number,
-  kizaiId: number[],
-  connection: PoolClient
-) => {
+export const delJuchuKizaiMeisai = async (juchuKizaiMeisaiData: JuchuKizaiMeisaiValues[], connection: PoolClient) => {
+  const deleteData = juchuKizaiMeisaiData.map((d) => ({
+    juchu_head_id: d.juchuHeadId,
+    juchu_kizai_head_id: d.juchuKizaiHeadId,
+    juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
+    kizai_id: d.kizaiId,
+  }));
+
   try {
-    await deleteJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId, kizaiId, connection);
+    for (const data of deleteData) {
+      await deleteJuchuKizaiMeisai(data, connection);
+    }
+    console.log('juchu kizai meisai delete successfully:', deleteData);
+    return true;
   } catch (e) {
     throw e;
   }
@@ -1179,14 +1173,20 @@ export const updNyushukoDen = async (
  * @param juchuKizaiHeadId 受注機材ヘッダーid
  * @param kizaiId 機材id
  */
-export const delNyushukoDen = async (
-  juchuHeadId: number,
-  juchuKizaiHeadId: number,
-  kizaiId: number[],
-  connection: PoolClient
-) => {
+export const delNyushukoDen = async (juchuKizaiMeisaiData: JuchuKizaiMeisaiValues[], connection: PoolClient) => {
+  const deleteData = juchuKizaiMeisaiData.map((d) => ({
+    juchu_head_id: d.juchuHeadId,
+    juchu_kizai_head_id: d.juchuKizaiHeadId,
+    juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
+    kizai_id: d.kizaiId,
+  }));
+
   try {
-    await deleteNyushukoDen(juchuHeadId, juchuKizaiHeadId, kizaiId, connection);
+    for (const data of deleteData) {
+      await deleteNyushukoDen(data, connection);
+    }
+    console.log('nyushuko den delete successfully:', deleteData);
+    return true;
   } catch (e) {
     throw e;
   }

@@ -46,7 +46,14 @@ export const insertNyushukoDen = async (data: NyushukoDen[], connection: PoolCli
  * @returns
  */
 export const updateNyushukoDen = async (data: NyushukoDen, connection: PoolClient) => {
-  const whereKeys = ['juchu_head_id', 'juchu_kizai_head_id', 'sagyo_kbn_id', 'sagyo_id', 'kizai_id'] as const;
+  const whereKeys = [
+    'juchu_head_id',
+    'juchu_kizai_head_id',
+    'juchu_kizai_meisai_id',
+    'sagyo_kbn_id',
+    'sagyo_id',
+    'kizai_id',
+  ] as const;
 
   const allKeys = Object.keys(data) as (keyof typeof data)[];
 
@@ -96,9 +103,7 @@ export const updateNyushukoDen = async (data: NyushukoDen, connection: PoolClien
  * @returns
  */
 export const deleteNyushukoDen = async (
-  juchuHeadId: number,
-  juchuKizaiHeadId: number,
-  kizaiId: number[],
+  data: { juchu_head_id: number; juchu_kizai_head_id: number; juchu_kizai_meisai_id: number; kizai_id: number },
   connection: PoolClient
 ) => {
   const query = `
@@ -107,10 +112,11 @@ export const deleteNyushukoDen = async (
     WHERE
       juchu_head_id = $1
       AND juchu_kizai_head_id = $2
-      AND kizai_id = ANY($3)
+      And juchu_kizai_meisai_id = $3
+      AND kizai_id = $4
   `;
 
-  const values = [juchuHeadId, juchuKizaiHeadId, kizaiId];
+  const values = [data.juchu_head_id, data.juchu_kizai_head_id, data.juchu_kizai_meisai_id, data.kizai_id];
 
   try {
     await connection.query(query, values);
@@ -251,7 +257,7 @@ export const selectKizaiDetail = async (
     return await supabase
       .schema(SCHEMA)
       .from('t_nyushuko_den')
-      .select('juchu_kizai_head_id, plan_qty, result_qty, result_adj_qty')
+      .select('juchu_kizai_head_id, juchu_kizai_meisai_id, plan_qty, result_qty, result_adj_qty')
       .eq('juchu_head_id', juchuHeadId)
       .eq('sagyo_kbn_id', sagyoKbnId)
       .eq('sagyo_den_dat', sagyoDenDat)

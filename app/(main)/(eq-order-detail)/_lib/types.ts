@@ -32,6 +32,7 @@ export type OyaJuchuKizaiMeisaiValues = {
   kizaiId: number;
   kizaiTankaAmt: number;
   kizaiNam: string;
-  planKizaiQty: number | null;
-  planYobiQty: number | null;
+  planKizaiQty: number;
+  planYobiQty: number;
+  indentNum: number;
 };

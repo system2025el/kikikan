@@ -319,6 +319,7 @@ export const getOyaJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHead
       kizaiNam: d.kizai_nam ?? '',
       planKizaiQty: d.plan_kizai_qty,
       planYobiQty: d.plan_yobi_qty,
+      indentNum: d.indent_num,
     }));
     return juchuKizaiMeisaiData;
   } catch (e) {

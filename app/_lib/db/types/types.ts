@@ -1954,7 +1954,7 @@ export type Database = {
           indent_num: number | null;
           juchu_head_id: number;
           juchu_kizai_head_id: number;
-          juchu_kizai_meisai_id: number | null;
+          juchu_kizai_meisai_id: number;
           kizai_id: number;
           plan_qty: number | null;
           result_adj_qty: number | null;
@@ -1972,7 +1972,7 @@ export type Database = {
           indent_num?: number | null;
           juchu_head_id: number;
           juchu_kizai_head_id: number;
-          juchu_kizai_meisai_id?: number | null;
+          juchu_kizai_meisai_id: number;
           kizai_id: number;
           plan_qty?: number | null;
           result_adj_qty?: number | null;
@@ -1990,7 +1990,7 @@ export type Database = {
           indent_num?: number | null;
           juchu_head_id?: number;
           juchu_kizai_head_id?: number;
-          juchu_kizai_meisai_id?: number | null;
+          juchu_kizai_meisai_id: number;
           kizai_id?: number;
           plan_qty?: number | null;
           result_adj_qty?: number | null;
