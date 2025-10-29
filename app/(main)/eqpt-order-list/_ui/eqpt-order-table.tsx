@@ -142,7 +142,7 @@ export const EqptOrderTable = ({
                       </Button>
                     </TableCell>
                     <TableCell>
-                      <LightTooltipWithText variant={'body2'} maxWidth={100}>
+                      <LightTooltipWithText variant={'body2'} maxWidth={200}>
                         {order.headNam}
                       </LightTooltipWithText>
                     </TableCell>
@@ -152,7 +152,7 @@ export const EqptOrderTable = ({
                       </LightTooltipWithText>
                     </TableCell>
                     <TableCell>
-                      <LightTooltipWithText variant={'body2'} maxWidth={150}>
+                      <LightTooltipWithText variant={'body2'} maxWidth={200}>
                         {order.koenbashoNam}
                       </LightTooltipWithText>
                     </TableCell>
@@ -162,7 +162,7 @@ export const EqptOrderTable = ({
                       </LightTooltipWithText>
                     </TableCell>
                     <TableCell>
-                      <LightTooltipWithText variant={'body2'} maxWidth={100}>
+                      <LightTooltipWithText variant={'body2'} maxWidth={120}>
                         {`K ${order.kShukoDat ? toJapanDateString(order.kShukoDat) : '-'}`}
                         <br />
                         {`Y ${order.yShukoDat ? toJapanDateString(order.yShukoDat) : '-'}`}

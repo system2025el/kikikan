@@ -306,15 +306,15 @@ export const LightTooltipWithText = ({
       <Typography
         ref={textRef}
         noWrap
-        maxWidth={maxWidth}
         variant={variant}
-        textTransform={'none'}
+        textTransform="none"
         sx={{
+          maxWidth: `${maxWidth}px`,
           overflow: 'hidden',
           textOverflow: 'ellipsis',
-          display: 'inline-flex',
+          whiteSpace: 'nowrap',
+          display: 'inline-block',
           verticalAlign: 'middle',
-          alignItems: 'center',
         }}
       >
         {children}
@@ -324,15 +324,15 @@ export const LightTooltipWithText = ({
     <Typography
       ref={textRef}
       noWrap
-      maxWidth={maxWidth}
       variant={variant}
-      textTransform={'none'}
+      textTransform="none"
       sx={{
+        maxWidth: `${maxWidth}px`,
         overflow: 'hidden',
         textOverflow: 'ellipsis',
-        display: 'inline-flex',
+        whiteSpace: 'nowrap',
+        display: 'inline-block',
         verticalAlign: 'middle',
-        alignItems: 'center',
       }}
     >
       {children}

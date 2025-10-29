@@ -31,14 +31,21 @@ import { getFilteredOrderList } from '../_lib/funcs';
 import { EqptOrderListTableValues, EqptOrderSearchValues } from '../_lib/types';
 import { EqptOrderTable } from './eqpt-order-table';
 
-/** 受注一覧画面 */
+/**
+ * 機材明細一覧画面
+ * @param param0
+ * @returns {JSX.Element} 機材明細一覧画面コンポーネント
+ */
 export const EqptOrderList = ({
   orders,
   customers,
   locs,
 }: {
+  /** 明細一覧 */
   orders: EqptOrderListTableValues[] | undefined;
+  /** 顧客選択肢 */
   customers: SelectTypes[] | undefined;
+  /** 個↑場所選択肢 */
   locs: SelectTypes[] | undefined;
 }) => {
   /* useState -------------------------------------------- */
@@ -60,7 +67,7 @@ export const EqptOrderList = ({
   });
 
   /* methods ---------------------------------------- */
-  /* 検索押下時の処理 */
+  /** 検索押下時の処理 */
   const onSubmit = async (data: EqptOrderSearchValues) => {
     setIsLoading(true);
     setPage(1);
