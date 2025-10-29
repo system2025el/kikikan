@@ -142,9 +142,16 @@ export const EqptOrderTable = ({
                       </Button>
                     </TableCell>
                     <TableCell>
-                      <LightTooltipWithText variant={'body2'} maxWidth={200}>
-                        {order.headNam}
-                      </LightTooltipWithText>
+                      <Button
+                        variant="text"
+                        size="small"
+                        sx={{ py: 0.2, px: 0, m: 0, minWidth: 0 }}
+                        href={`/eq-main-order-detail/${order.juchuHeadId}/${order.kizaiHeadId}/view`}
+                      >
+                        <LightTooltipWithText variant={'button'} maxWidth={300}>
+                          {order.headNam}
+                        </LightTooltipWithText>
+                      </Button>
                     </TableCell>
                     <TableCell>
                       <LightTooltipWithText variant={'body2'} maxWidth={200}>
