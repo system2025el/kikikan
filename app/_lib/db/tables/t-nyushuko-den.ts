@@ -46,14 +46,7 @@ export const insertNyushukoDen = async (data: NyushukoDen[], connection: PoolCli
  * @returns
  */
 export const updateNyushukoDen = async (data: NyushukoDen, connection: PoolClient) => {
-  const whereKeys = [
-    'juchu_head_id',
-    'juchu_kizai_head_id',
-    'sagyo_kbn_id',
-    'sagyo_den_dat',
-    'sagyo_id',
-    'kizai_id',
-  ] as const;
+  const whereKeys = ['juchu_head_id', 'juchu_kizai_head_id', 'sagyo_kbn_id', 'sagyo_id', 'kizai_id'] as const;
 
   const allKeys = Object.keys(data) as (keyof typeof data)[];
 

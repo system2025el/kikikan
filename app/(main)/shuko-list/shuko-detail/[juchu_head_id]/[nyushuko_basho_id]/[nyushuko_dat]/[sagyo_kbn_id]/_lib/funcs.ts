@@ -85,7 +85,9 @@ export const getShukoFixFlag = async (
     );
 
     if (error) {
-      console.error('getShukoFixFlag error : ', error);
+      if (error.code === 'PGRST116') {
+        return false;
+      }
       throw error;
     }
 

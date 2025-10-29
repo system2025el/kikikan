@@ -16,19 +16,22 @@ import { useState } from 'react';
 export const MemoTooltip = (props: {
   name: string;
   memo: string;
-  kizaiId: number;
-  handleMemoChange: (kizaiId: number, memo: string) => void;
+  rowIndex: number;
+  handleMemoChange: (rowIndex: number, memo: string) => void;
   disabled: boolean;
 }) => {
   const [open, setOpen] = useState(false);
   const [equipmentMemo, setEquipmentMemo] = useState(props.memo);
 
   const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const handleClose = () => {
+    setEquipmentMemo(props.memo);
+    setOpen(false);
+  };
 
   const handleSave = () => {
-    props.handleMemoChange(props.kizaiId, equipmentMemo);
-    handleClose();
+    props.handleMemoChange(props.rowIndex, equipmentMemo);
+    setOpen(false);
   };
 
   return (

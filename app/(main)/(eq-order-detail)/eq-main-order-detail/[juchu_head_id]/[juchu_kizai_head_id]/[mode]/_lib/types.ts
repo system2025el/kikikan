@@ -53,6 +53,7 @@ export type JuchuKizaiMeisaiValues = {
   planKizaiQty: number;
   planYobiQty: number;
   planQty: number;
+  indentNum: number;
   delFlag: boolean;
   saveFlag: boolean;
 };
@@ -82,9 +83,9 @@ export type JuchuContainerMeisaiValues = {
   juchuKizaiMeisaiId: number;
   kizaiId: number;
   kizaiNam: string;
-  planKicsKizaiQty: number | null;
-  planYardKizaiQty: number | null;
-  planQty: number | null;
+  planKicsKizaiQty: number;
+  planYardKizaiQty: number;
+  planQty: number;
   mem: string | null;
   delFlag: boolean;
   saveFlag: boolean;
