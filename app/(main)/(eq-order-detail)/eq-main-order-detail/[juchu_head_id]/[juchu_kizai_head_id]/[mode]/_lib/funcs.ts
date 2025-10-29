@@ -837,6 +837,7 @@ export const addJuchuKizaiMeisai = async (
     add_dat: toJapanTimeString(),
     add_user: userNam,
     shozoku_id: d.shozokuId,
+    indent_num: d.indentNum,
   }));
 
   try {
@@ -874,6 +875,7 @@ export const updJuchuKizaiMeisai = async (
     upd_dat: toJapanTimeString(),
     upd_user: userNam,
     shozoku_id: d.shozokuId,
+    indent_num: d.indentNum,
   }));
 
   try {
