@@ -132,8 +132,8 @@ StockTableRow.displayName = 'StockTableRow';
 type EqTableProps = {
   rows: JuchuKizaiMeisaiValues[];
   edit: boolean;
-  onChange: (rowIndex: number, orderValue: number, spareValue: number, totalValue: number) => void;
-  handleMeisaiDelete: (target: { rowIndex: number; kizaiId: number; containerFlag: boolean }) => void;
+  onChange: (rowIndex: number, kizaiId: number, orderValue: number, spareValue: number, totalValue: number) => void;
+  handleMeisaiDelete: (rowIndex: number, row: JuchuKizaiMeisaiValues) => void;
   handleMemoChange: (rowIndex: number, memo: string) => void;
   ref: React.RefObject<HTMLDivElement | null>;
 };
@@ -150,16 +150,26 @@ export const EqTable: React.FC<EqTableProps> = ({
 
   const visibleRows = rows.filter((row) => !row.delFlag);
 
-  const handlePlanKizaiQtyChange = (rowIndex: number, newValue: number) => {
-    const planYobiQty = visibleRows.find((row, index) => index === rowIndex)?.planYobiQty || 0;
+  const handlePlanKizaiQtyChange = (rowIndex: number, kizaiId: number, newValue: number) => {
+    const planYobiQty = visibleRows.find((_, index) => index === rowIndex)?.planYobiQty || 0;
     const planQty = planYobiQty + newValue;
-    onChange(rowIndex, newValue, planYobiQty, planQty);
+    onChange(rowIndex, kizaiId, newValue, planYobiQty, planQty);
   };
 
-  const handlePlanYobiQtyChange = (rowIndex: number, newValue: number) => {
-    const planKizaiQty = visibleRows.find((row, index) => index === rowIndex)?.planKizaiQty || 0;
+  const handlePlanYobiQtyChange = (rowIndex: number, kizaiId: number, newValue: number) => {
+    const planKizaiQty = visibleRows.find((_, index) => index === rowIndex)?.planKizaiQty || 0;
     const planQty = planKizaiQty + newValue;
-    onChange(rowIndex, planKizaiQty, newValue, planQty);
+    onChange(rowIndex, kizaiId, planKizaiQty, newValue, planQty);
+  };
+
+  const handleCellChange = (
+    rowIndex: number,
+    kizaiId: number,
+    planKizaiQty: number,
+    planYobiQty: number,
+    planQty: number
+  ) => {
+    onChange(rowIndex, kizaiId, planKizaiQty, planYobiQty, planQty);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent, rowIndex: number) => {
@@ -209,6 +219,7 @@ export const EqTable: React.FC<EqTableProps> = ({
               handleKeyDown={handleKeyDown}
               handlePlanKizaiQtyChange={handlePlanKizaiQtyChange}
               handlePlanYobiQtyChange={handlePlanYobiQtyChange}
+              handleCellChange={handleCellChange}
             />
           ))}
         </TableBody>
@@ -222,10 +233,17 @@ type EqTableRowProps = {
   rowIndex: number;
   edit: boolean;
   handleOrderRef: (el: HTMLInputElement | null) => void;
-  handleMeisaiDelete: (target: { rowIndex: number; kizaiId: number; containerFlag: boolean }) => void;
+  handleMeisaiDelete: (rowIndex: number, row: JuchuKizaiMeisaiValues) => void;
   handleMemoChange: (rowIndex: number, memo: string) => void;
-  handlePlanKizaiQtyChange: (rowIndex: number, newValue: number) => void;
-  handlePlanYobiQtyChange: (rowIndex: number, newValue: number) => void;
+  handlePlanKizaiQtyChange: (rowIndex: number, kizaiId: number, newValue: number) => void;
+  handlePlanYobiQtyChange: (rowIndex: number, kizaiId: number, newValue: number) => void;
+  handleCellChange: (
+    rowIndex: number,
+    kizaiId: number,
+    planKizaiQty: number,
+    planYobiQty: number,
+    planQty: number
+  ) => void;
   handleKeyDown: (e: React.KeyboardEvent, rowIndex: number) => void;
 };
 
@@ -239,6 +257,7 @@ const EqTableRow = React.memo(
     handleMemoChange,
     handlePlanKizaiQtyChange,
     handlePlanYobiQtyChange,
+    handleCellChange,
     handleKeyDown,
   }: EqTableRowProps) => {
     console.log('描画', rowIndex);
@@ -247,7 +266,7 @@ const EqTableRow = React.memo(
       <TableRow>
         <TableCell sx={{ padding: 0, border: '1px solid black' }}>
           <IconButton
-            onClick={() => handleMeisaiDelete({ rowIndex: rowIndex, kizaiId: row.kizaiId, containerFlag: false })}
+            onClick={() => handleMeisaiDelete(rowIndex, row)}
             sx={{ padding: 0, color: 'red' }}
             disabled={!edit}
           >
@@ -259,7 +278,7 @@ const EqTableRow = React.memo(
             name={row.kizaiNam}
             memo={row.mem ? row.mem : ''}
             handleMemoChange={handleMemoChange}
-            kizaiId={row.kizaiId}
+            rowIndex={rowIndex}
             disabled={!edit}
           />
         </TableCell>
@@ -279,7 +298,8 @@ const EqTableRow = React.memo(
             type="text"
             onChange={(e) => {
               if (/^\d*$/.test(e.target.value)) {
-                handlePlanKizaiQtyChange(rowIndex, Number(e.target.value));
+                //handlePlanKizaiQtyChange(rowIndex, row.kizaiId, Number(e.target.value));
+                handleCellChange(rowIndex, row.kizaiId, Number(e.target.value), row.planYobiQty, row.planQty);
               }
             }}
             sx={{
@@ -322,7 +342,8 @@ const EqTableRow = React.memo(
             type="text"
             onChange={(e) => {
               if (/^\d*$/.test(e.target.value)) {
-                handlePlanYobiQtyChange(rowIndex, Number(e.target.value));
+                //handlePlanYobiQtyChange(rowIndex, row.kizaiId, Number(e.target.value));
+                handleCellChange(rowIndex, row.kizaiId, row.planKizaiQty, Number(e.target.value), row.planQty);
               }
             }}
             sx={{
@@ -475,7 +496,7 @@ export const ContainerTable = (props: {
   edit: boolean;
   handleContainerMemoChange: (kizaiId: number, memo: string) => void;
   onChange: (kizaiId: number, kicsValue: number, yardValue: number, totalValue: number) => void;
-  handleMeisaiDelete: (target: { rowIndex: number; kizaiId: number; containerFlag: boolean }) => void;
+  handleMeisaiDelete: (row: JuchuContainerMeisaiValues) => void;
 }) => {
   const { rows, edit, handleContainerMemoChange, onChange, handleMeisaiDelete } = props;
 
@@ -534,11 +555,7 @@ export const ContainerTable = (props: {
           {visibleRows.map((row, rowIndex) => (
             <TableRow key={rowIndex}>
               <TableCell align="center" width={'min-content'} sx={{ padding: 0, border: '1px solid black' }}>
-                <IconButton
-                  onClick={() => handleMeisaiDelete({ rowIndex: rowIndex, kizaiId: row.kizaiId, containerFlag: true })}
-                  sx={{ padding: 0, color: 'red' }}
-                  disabled={!edit}
-                >
+                <IconButton onClick={() => handleMeisaiDelete(row)} sx={{ padding: 0, color: 'red' }} disabled={!edit}>
                   <Delete fontSize="small" />
                 </IconButton>
               </TableCell>
@@ -554,7 +571,7 @@ export const ContainerTable = (props: {
                   name={row.kizaiNam}
                   memo={row.mem ? row.mem : ''}
                   handleMemoChange={handleContainerMemoChange}
-                  kizaiId={row.kizaiId}
+                  rowIndex={rowIndex}
                   disabled={!edit}
                 />
               </TableCell>

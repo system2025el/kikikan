@@ -392,7 +392,7 @@ export const saveJuchuKizai = async (
         );
         console.log('KICSコンテナ入出庫実績削除', kicsDelFlg);
       }
-      if (checkKicsShukoDat && originYardShukoDat) {
+      if (checkYardShukoDat && originYardShukoDat) {
         yardDelFlg = await delAllNyushukoResult(
           data.juchuHeadId,
           toJapanTimeString(originYardShukoDat, '-'),
@@ -754,6 +754,7 @@ export const getJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId:
       planKizaiQty: d.plan_kizai_qty ?? 0,
       planYobiQty: d.plan_yobi_qty ?? 0,
       planQty: d.plan_qty ?? 0,
+      indentNum: d.indent_num ?? 0,
       delFlag: false,
       saveFlag: true,
     }));
@@ -799,9 +800,9 @@ export const getIdoJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHead
       kizaiId: d.kizai_id,
       kizaiNam: d.kizai_nam ?? '',
       kizaiQty: d.kizai_qty ?? 0,
-      planKizaiQty: d.plan_kizai_qty,
-      planYobiQty: d.plan_yobi_qty,
-      planQty: d.plan_qty,
+      planKizaiQty: d.plan_kizai_qty ?? 0,
+      planYobiQty: d.plan_yobi_qty ?? 0,
+      planQty: d.plan_qty ?? 0,
       delFlag: false,
       saveFlag: true,
     }));

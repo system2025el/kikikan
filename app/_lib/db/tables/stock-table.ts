@@ -22,14 +22,14 @@ export const selectDetailStockList = async (
     return await pool.query(`
       select   
     cal.cal_dat as "calDat" --スケジュール日
-    ,coalesce(zaiko_kizai.kizai_id,${kizaiId} /*■変数箇所■*/) as "kizaiId"   -- 機材ID
-    ,coalesce(zaiko_kizai.kizai_qty,(select v_kizai_qty.kizai_qty from v_kizai_qty where v_kizai_qty.kizai_id = ${kizaiId} /*■変数箇所■*/)) as "kizaiQty"   --機材数（有効数） 
-    ,coalesce(zaiko_kizai.juchu_qty,0) as "juchuQty"   --受注数 NULL時0固定    /*貸出状況スケジュール*/
+    ,coalesce(zaiko_kizai.kizai_id,${kizaiId} /*■変数箇所■*/)::integer as "kizaiId"   -- 機材ID
+    ,coalesce(zaiko_kizai.kizai_qty,(select v_kizai_qty.kizai_qty from v_kizai_qty where v_kizai_qty.kizai_id = ${kizaiId} /*■変数箇所■*/))::integer as "kizaiQty"   --機材数（有効数） 
+    ,coalesce(zaiko_kizai.juchu_qty,0)::integer as "juchuQty"   --受注数 NULL時0固定    /*貸出状況スケジュール*/
     
 --     ,coalesce(zaiko_kizai.yobi_qty,0) as yobi_qty   --予備数 NULL時0固定  
 --     ,coalesce(zaiko_kizai.plan_qty,0) as plan_qty   --合計数 NULL時0固定  
 
-    ,coalesce(zaiko_kizai.zaiko_qty,(select v_kizai_qty.kizai_qty from v_kizai_qty where v_kizai_qty.kizai_id = ${kizaiId} /*■変数箇所■*/)) as "zaikoQty"     --在庫数   /*受注機材明細スケジュール、在庫状況スケジュール*/
+    ,coalesce(zaiko_kizai.zaiko_qty,(select v_kizai_qty.kizai_qty from v_kizai_qty where v_kizai_qty.kizai_id = ${kizaiId} /*■変数箇所■*/))::integer as "zaikoQty"     --在庫数   /*受注機材明細スケジュール、在庫状況スケジュール*/
     ,coalesce(zaiko_kizai.juchu_honbanbi_shubetu_id,0) as "juchuHonbanbiShubetuId" --受注本番日種別
     ,coalesce(zaiko_kizai.juchu_honbanbi_shubetu_color,'white') as "juchuHonbanbiColor" --受注本番日種別カラー
 from 
@@ -97,13 +97,13 @@ export const selectUseList = async (juchuHeadId: number, kizaiId: number, date: 
     return await pool.query(`
       select   
     cal.cal_dat as "calDat" --スケジュール日
-    ,coalesce(zaiko_kizai.kizai_id,${kizaiId} /*■変数箇所■*/) as "kizaiId"   -- 機材ID
-    ,coalesce(zaiko_kizai.kizai_qty,(select v_kizai_qty.kizai_qty from v_kizai_qty where v_kizai_qty.kizai_id = ${kizaiId} /*■変数箇所■*/)) as "kizaiQty"   --機材数（保有数） 
+    ,coalesce(zaiko_kizai.kizai_id,${kizaiId} /*■変数箇所■*/)::integer as "kizaiId"   -- 機材ID
+    ,coalesce(zaiko_kizai.kizai_qty,(select v_kizai_qty.kizai_qty from v_kizai_qty where v_kizai_qty.kizai_id = ${kizaiId} /*■変数箇所■*/))::integer as "kizaiQty"   --機材数（保有数） 
 
 --    ,coalesce(zaiko_kizai.juchu_qty,0) as juchuQty   --全体受注数 NULL時0固定    
 --    ,coalesce(zaiko_kizai.yobi_qty,0) as yobiQty   --全体予備数 NULL時0固定  
-    ,coalesce(zaiko_kizai.plan_qty,0) as "planQty"   --全体合計数 NULL時0固定  
-    ,coalesce(zaiko_kizai.zaiko_qty,(select v_kizai_qty.kizai_qty from v_kizai_qty where v_kizai_qty.kizai_id = ${kizaiId} /*■変数箇所■*/)) as "zaikoQty"     --全体在庫数   /*受注機材明細スケジュール、在庫状況スケジュール*/
+    ,coalesce(zaiko_kizai.plan_qty,0)::integer as "planQty"   --全体合計数 NULL時0固定  
+    ,coalesce(zaiko_kizai.zaiko_qty,(select v_kizai_qty.kizai_qty from v_kizai_qty where v_kizai_qty.kizai_id = ${kizaiId} /*■変数箇所■*/))::integer as "zaikoQty"     --全体在庫数   /*受注機材明細スケジュール、在庫状況スケジュール*/
 
 --     -- 自受注合計数を全体在庫から引いておいて、画面側で自受注合計数を加算しても制御は可能
 --     ,coalesce(zaiko_kizai.zaiko_qty,(select v_kizai_qty.kizai_qty from v_kizai_qty where v_kizai_qty.kizai_id = ${kizaiId} /*■変数箇所■*/)) as zaiko_qty_jogai     --全体在庫数   /*受注機材明細スケジュール、在庫状況スケジュール*/

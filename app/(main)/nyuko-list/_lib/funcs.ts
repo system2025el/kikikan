@@ -65,7 +65,9 @@ export const getNyukoFixFlag = async (
     );
 
     if (error) {
-      console.error('getNyukoFixFlag error : ', error);
+      if (error.code === 'PGRST116') {
+        return false;
+      }
       throw error;
     }
 

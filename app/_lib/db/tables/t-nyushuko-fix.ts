@@ -51,7 +51,7 @@ export const selectSagyoIdFilterNyushukoFixFlag = async (
       .eq('juchu_head_id', juchuHeadId)
       .eq('juchu_kizai_head_id', juchuKizaiHeadId)
       .eq('sagyo_kbn_id', sagyoKbnId)
-      //.eq('sagyo_den_dat', sagyoDenDat)
+      .eq('sagyo_den_dat', sagyoDenDat)
       .eq('sagyo_id', sagyoId)
       .single();
   } catch (e) {
