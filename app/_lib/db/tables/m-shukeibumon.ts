@@ -18,7 +18,7 @@ export const selectActiveShukeibumons = async () => {
       .from('m_shukei_bumon')
       .select('shukei_bumon_id, shukei_bumon_nam')
       .neq('del_flg', 1)
-      .order('dsp_ord_num');
+      .order('shukei_bumon_nam');
   } catch (e) {
     throw e;
   }

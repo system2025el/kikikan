@@ -5,7 +5,6 @@ import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
 
 import { selectFilteredKizaiHead } from '@/app/_lib/db/tables/v-juchu-kizai-head-lst';
-import { selectFilteredJuchus } from '@/app/_lib/db/tables/v-kizai-list';
 
 import { EqptOrderListTableValues, EqptOrderSearchValues } from './types';
 

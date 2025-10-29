@@ -20,7 +20,7 @@ export const selectActiveUsers = async () => {
       .from('m_user')
       .select('user_nam, shain_cod')
       .neq('del_flg', 1)
-      .order('dsp_ord_num');
+      .order('user_nam');
   } catch (e) {
     throw e;
   }

@@ -125,6 +125,7 @@ export const ImportMaster = () => {
       }
     };
     reader.readAsArrayBuffer(file);
+    event.target.value = '';
   };
 
   /* 機材インポートの登録ボタン押下時 */
