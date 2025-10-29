@@ -924,16 +924,16 @@ const EquipmentOrderDetail = (props: {
    * @param planYardKizaiQty YARDコンテナ数
    * @param planQty コンテナ合計数
    */
-  const handleContainerCellChange = (
-    kizaiId: number,
-    planKicsKizaiQty: number,
-    planYardKizaiQty: number,
-    planQty: number
-  ) => {
+  const handleContainerCellChange = (kizaiId: number, planKicsKizaiQty: number, planYardKizaiQty: number) => {
     setJuchuContainerMeisaiList((prev) =>
       prev.map((data) =>
         data.kizaiId === kizaiId && !data.delFlag
-          ? { ...data, planKicsKizaiQty: planKicsKizaiQty, planYardKizaiQty: planYardKizaiQty, planQty: planQty }
+          ? {
+              ...data,
+              planKicsKizaiQty: planKicsKizaiQty,
+              planYardKizaiQty: planYardKizaiQty,
+              planQty: planKicsKizaiQty + planYardKizaiQty,
+            }
           : data
       )
     );
@@ -1788,7 +1788,7 @@ const EquipmentOrderDetail = (props: {
                       <EqTable
                         rows={juchuKizaiMeisaiList}
                         edit={edit}
-                        onChange={handleCellChange}
+                        handleCellChange={handleCellChange}
                         handleMeisaiDelete={handleEqMeisaiDelete}
                         handleMemoChange={handleMemoChange}
                         ref={leftRef}
@@ -1849,7 +1849,7 @@ const EquipmentOrderDetail = (props: {
                     rows={juchuContainerMeisaiList}
                     edit={edit}
                     handleContainerMemoChange={handleContainerMemoChange}
-                    onChange={handleContainerCellChange}
+                    handleContainerCellChange={handleContainerCellChange}
                     handleMeisaiDelete={handleCtnMeisaiDelete}
                   />
                 </Box>

@@ -132,7 +132,13 @@ StockTableRow.displayName = 'StockTableRow';
 type EqTableProps = {
   rows: JuchuKizaiMeisaiValues[];
   edit: boolean;
-  onChange: (rowIndex: number, kizaiId: number, orderValue: number, spareValue: number, totalValue: number) => void;
+  handleCellChange: (
+    rowIndex: number,
+    kizaiId: number,
+    orderValue: number,
+    spareValue: number,
+    totalValue: number
+  ) => void;
   handleMeisaiDelete: (rowIndex: number, row: JuchuKizaiMeisaiValues) => void;
   handleMemoChange: (rowIndex: number, memo: string) => void;
   ref: React.RefObject<HTMLDivElement | null>;
@@ -141,7 +147,7 @@ type EqTableProps = {
 export const EqTable: React.FC<EqTableProps> = ({
   rows,
   edit,
-  onChange,
+  handleCellChange,
   handleMeisaiDelete,
   handleMemoChange,
   ref,
@@ -149,28 +155,6 @@ export const EqTable: React.FC<EqTableProps> = ({
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const visibleRows = rows.filter((row) => !row.delFlag);
-
-  const handlePlanKizaiQtyChange = (rowIndex: number, kizaiId: number, newValue: number) => {
-    const planYobiQty = visibleRows.find((_, index) => index === rowIndex)?.planYobiQty || 0;
-    const planQty = planYobiQty + newValue;
-    onChange(rowIndex, kizaiId, newValue, planYobiQty, planQty);
-  };
-
-  const handlePlanYobiQtyChange = (rowIndex: number, kizaiId: number, newValue: number) => {
-    const planKizaiQty = visibleRows.find((_, index) => index === rowIndex)?.planKizaiQty || 0;
-    const planQty = planKizaiQty + newValue;
-    onChange(rowIndex, kizaiId, planKizaiQty, newValue, planQty);
-  };
-
-  const handleCellChange = (
-    rowIndex: number,
-    kizaiId: number,
-    planKizaiQty: number,
-    planYobiQty: number,
-    planQty: number
-  ) => {
-    onChange(rowIndex, kizaiId, planKizaiQty, planYobiQty, planQty);
-  };
 
   const handleKeyDown = (e: React.KeyboardEvent, rowIndex: number) => {
     if (e.key === 'Enter') {
@@ -217,8 +201,6 @@ export const EqTable: React.FC<EqTableProps> = ({
               handleMeisaiDelete={handleMeisaiDelete}
               handleMemoChange={handleMemoChange}
               handleKeyDown={handleKeyDown}
-              handlePlanKizaiQtyChange={handlePlanKizaiQtyChange}
-              handlePlanYobiQtyChange={handlePlanYobiQtyChange}
               handleCellChange={handleCellChange}
             />
           ))}
@@ -235,8 +217,6 @@ type EqTableRowProps = {
   handleOrderRef: (el: HTMLInputElement | null) => void;
   handleMeisaiDelete: (rowIndex: number, row: JuchuKizaiMeisaiValues) => void;
   handleMemoChange: (rowIndex: number, memo: string) => void;
-  handlePlanKizaiQtyChange: (rowIndex: number, kizaiId: number, newValue: number) => void;
-  handlePlanYobiQtyChange: (rowIndex: number, kizaiId: number, newValue: number) => void;
   handleCellChange: (
     rowIndex: number,
     kizaiId: number,
@@ -255,8 +235,6 @@ const EqTableRow = React.memo(
     handleOrderRef,
     handleMeisaiDelete,
     handleMemoChange,
-    handlePlanKizaiQtyChange,
-    handlePlanYobiQtyChange,
     handleCellChange,
     handleKeyDown,
   }: EqTableRowProps) => {
@@ -288,7 +266,7 @@ const EqTableRow = React.memo(
             sx={{ p: 0, justifyContent: 'start' }}
             onClick={() => window.open(`/loan-situation/${row.kizaiId}`)}
           >
-            {row.kizaiNam}
+            {'*'.repeat(row.indentNum) + row.kizaiNam}
           </Button>
         </TableCell>
         <TableCell style={styles.row} align="right" size="small">
@@ -298,7 +276,6 @@ const EqTableRow = React.memo(
             type="text"
             onChange={(e) => {
               if (/^\d*$/.test(e.target.value)) {
-                //handlePlanKizaiQtyChange(rowIndex, row.kizaiId, Number(e.target.value));
                 handleCellChange(rowIndex, row.kizaiId, Number(e.target.value), row.planYobiQty, row.planQty);
               }
             }}
@@ -342,7 +319,6 @@ const EqTableRow = React.memo(
             type="text"
             onChange={(e) => {
               if (/^\d*$/.test(e.target.value)) {
-                //handlePlanYobiQtyChange(rowIndex, row.kizaiId, Number(e.target.value));
                 handleCellChange(rowIndex, row.kizaiId, row.planKizaiQty, Number(e.target.value), row.planQty);
               }
             }}
@@ -495,26 +471,14 @@ export const ContainerTable = (props: {
   rows: JuchuContainerMeisaiValues[];
   edit: boolean;
   handleContainerMemoChange: (kizaiId: number, memo: string) => void;
-  onChange: (kizaiId: number, kicsValue: number, yardValue: number, totalValue: number) => void;
+  handleContainerCellChange: (kizaiId: number, kicsValue: number, yardValue: number) => void;
   handleMeisaiDelete: (row: JuchuContainerMeisaiValues) => void;
 }) => {
-  const { rows, edit, handleContainerMemoChange, onChange, handleMeisaiDelete } = props;
+  const { rows, edit, handleContainerMemoChange, handleContainerCellChange, handleMeisaiDelete } = props;
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const visibleRows = rows.filter((row) => !row.delFlag);
-
-  const handlePlanKicsKizaiQtyChange = (kizaiId: number, newValue: number) => {
-    const planYardKizaiQty = rows.find((row) => row.kizaiId === kizaiId && !row.delFlag)?.planYardKizaiQty || 0;
-    const planQty = planYardKizaiQty + newValue;
-    onChange(kizaiId, newValue, planYardKizaiQty, planQty);
-  };
-
-  const handlePlanYardKizaiQtyChange = (kizaiId: number, newValue: number) => {
-    const planKicsKizaiQty = rows.find((row) => row.kizaiId === kizaiId)?.planKicsKizaiQty || 0;
-    const planQty = planKicsKizaiQty + newValue;
-    onChange(kizaiId, planKicsKizaiQty, newValue, planQty);
-  };
 
   const handleKeyDown = (e: React.KeyboardEvent, rowIndex: number, cellNum: number) => {
     if (e.key === 'Enter') {
@@ -591,7 +555,7 @@ export const ContainerTable = (props: {
                   type="text"
                   onChange={(e) => {
                     if (/^\d*$/.test(e.target.value)) {
-                      handlePlanKicsKizaiQtyChange(row.kizaiId, Number(e.target.value));
+                      handleContainerCellChange(row.kizaiId, Number(e.target.value), row.planYardKizaiQty);
                     }
                   }}
                   sx={{
@@ -635,7 +599,7 @@ export const ContainerTable = (props: {
                   type="text"
                   onChange={(e) => {
                     if (/^\d*$/.test(e.target.value)) {
-                      handlePlanYardKizaiQtyChange(row.kizaiId, Number(e.target.value));
+                      handleContainerCellChange(row.kizaiId, row.planKicsKizaiQty, Number(e.target.value));
                     }
                   }}
                   sx={{

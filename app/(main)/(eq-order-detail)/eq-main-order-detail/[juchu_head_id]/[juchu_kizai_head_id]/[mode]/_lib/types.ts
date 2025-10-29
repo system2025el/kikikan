@@ -85,7 +85,7 @@ export type JuchuContainerMeisaiValues = {
   kizaiNam: string;
   planKicsKizaiQty: number;
   planYardKizaiQty: number;
-  planQty: number | null;
+  planQty: number;
   mem: string | null;
   delFlag: boolean;
   saveFlag: boolean;
