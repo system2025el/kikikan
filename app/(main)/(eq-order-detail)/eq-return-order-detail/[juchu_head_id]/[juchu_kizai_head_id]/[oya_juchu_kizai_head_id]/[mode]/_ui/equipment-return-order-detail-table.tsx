@@ -322,7 +322,7 @@ const ReturnEqTableRow = React.memo(
             name={row.kizaiNam}
             memo={row.mem ? row.mem : ''}
             handleMemoChange={handleMemoChange}
-            kizaiId={row.kizaiId}
+            rowIndex={rowIndex}
             disabled={!edit}
           />
         </TableCell>
@@ -558,7 +558,7 @@ export const ReturnContainerTable = (props: {
                   name={row.kizaiNam}
                   memo={row.mem ? row.mem : ''}
                   handleMemoChange={handleContainerMemoChange}
-                  kizaiId={row.kizaiId}
+                  rowIndex={rowIndex}
                   disabled={!edit}
                 />
               </TableCell>

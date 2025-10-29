@@ -177,7 +177,7 @@ const KeepEqTableRow = React.memo(
             name={row.kizaiNam}
             memo={row.mem ? row.mem : ''}
             handleMemoChange={handleMemoChange}
-            kizaiId={row.kizaiId}
+            rowIndex={rowIndex}
             disabled={!edit}
           />
         </TableCell>
@@ -361,7 +361,7 @@ export const KeepContainerTable = (props: {
                   name={row.kizaiNam}
                   memo={row.mem ? row.mem : ''}
                   handleMemoChange={handleContainerMemoChange}
-                  kizaiId={row.kizaiId}
+                  rowIndex={rowIndex}
                   disabled={!edit}
                 />
               </TableCell>
