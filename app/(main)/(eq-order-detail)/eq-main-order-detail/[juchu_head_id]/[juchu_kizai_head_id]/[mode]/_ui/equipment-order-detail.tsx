@@ -1408,7 +1408,6 @@ const EquipmentOrderDetail = (props: {
                 </Button>
               </Grid2>
               <BackButton label={'戻る'} />
-              <Button onClick={() => console.log('juchuKizaiMeisaiList', juchuKizaiMeisaiList)}></Button>
             </Grid2>
           </Box>
           {/*-------受注ヘッダー-------*/}
