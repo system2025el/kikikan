@@ -1,5 +1,6 @@
 'use server';
 
+import { toJapanDateString } from '@/app/(main)/_lib/date-conversion';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 import { EqptOrderSearchValues } from '@/app/(main)/eqpt-order-list/_lib/types';
 
@@ -62,6 +63,11 @@ export const selectPdfJuchuKizaiHead = async (
   }
 };
 
+/**
+ * 検索条件に一致する機材明細一覧を取得する関数
+ * @param param0 検索条件
+ * @returns v_juchu_kizai_head_lst型のobject
+ */
 export const selectFilteredKizaiHead = async ({
   range,
   radio,
@@ -71,6 +77,7 @@ export const selectFilteredKizaiHead = async ({
   koenNam,
   koenbashoNam,
 }: EqptOrderSearchValues) => {
+  // 基本のセレクト
   const builder = supabase
     .schema(SCHEMA)
     .from('v_juchu_kizai_head_lst')
@@ -78,24 +85,54 @@ export const selectFilteredKizaiHead = async ({
       `juchu_head_id, kokyaku_nam, koen_nam, koenbasho_nam, head_nam, kics_shuko_dat, kics_nyuko_dat, yard_shuko_dat, yard_nyuko_dat`
     );
 
-  if (radio === 'shuko') {
-    // 出庫日検索
-  } else {
-    //入庫日検索
+  // 期間のfromが入ってたら
+  if (range?.from) {
+    switch (radio) {
+      case 'shuko': // '出庫日'
+        builder.or(
+          `yard_shuko_dat.gte.${toJapanDateString(range.from)},kics_shuko_dat.gte.${toJapanDateString(range.from)}`
+        );
+        break;
+      case 'nyuko': // '入庫日'
+        builder.or(
+          `yard_nyuko_dat.gte.${toJapanDateString(range.from)},kics_nyuko_dat.gte.${toJapanDateString(range.from)}`
+        );
+        break;
+    }
   }
 
+  // 期間のtoが入ってたら
+  if (range?.to) {
+    switch (radio) {
+      case 'shuko': // '出庫日'
+        builder.or(
+          `yard_shuko_dat.lte.${toJapanDateString(range.to)},kics_shuko_dat.lte.${toJapanDateString(range.to)}`
+        );
+        break;
+      case 'nyuko': // '入庫日'
+        builder.or(
+          `yard_nyuko_dat.lte.${toJapanDateString(range.to)},kics_nyuko_dat.lte.${toJapanDateString(range.to)}`
+        );
+        break;
+    }
+  }
+  // 受注番号が入っていたら
   if (juchuId) {
     builder.eq('juchu_head_id', juchuId);
   }
+  // 機材明細名が入っていたら
   if (headNam && headNam.trim() !== '') {
     builder.ilike('head_nam', `%${headNam}%`);
   }
+  // 顧客が選択されていたら
   if (kokyaku && kokyaku !== FAKE_NEW_ID) {
     builder.eq('kokyaku_id', kokyaku);
   }
+  // 公演名が入っていたら
   if (koenNam && koenNam.trim() !== '') {
     builder.ilike('koen_nam', `%${koenNam}%`);
   }
+  // 公演場所が入っていたら
   if (koenbashoNam && koenbashoNam.trim() !== '') {
     builder.ilike('koenbasho_nam', `%${koenbashoNam}%`);
   }

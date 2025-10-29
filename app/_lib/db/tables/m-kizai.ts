@@ -42,7 +42,7 @@ export const insertNewEqpt = async (data: EqptsMasterDialogValues, connection: P
       $10, $11, $12, $13, $14, $15, $16, $17, $18, $19::varchar -- , $20, $21, $22, $23
     );
   `;
-  const date = toJapanTimeString();
+  const date = toJapanTimeString(undefined, '-');
   const values = [
     data.kizaiNam,
     Number(data.delFlg),

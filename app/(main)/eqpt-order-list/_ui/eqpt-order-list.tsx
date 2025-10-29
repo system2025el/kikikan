@@ -3,11 +3,24 @@
 import 'dayjs/locale/ja';
 
 import SearchIcon from '@mui/icons-material/Search';
-import { Box, Button, Container, Divider, Grid2, MenuItem, Paper, Select, Stack, Typography } from '@mui/material';
+import {
+  Autocomplete,
+  Box,
+  Button,
+  Container,
+  Divider,
+  Grid2,
+  MenuItem,
+  Paper,
+  Select,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { grey } from '@mui/material/colors';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { RadioButtonGroup, SelectElement, TextFieldElement } from 'react-hook-form-mui';
+import { RadioButtonGroup, TextFieldElement } from 'react-hook-form-mui';
 
 import { BackButton } from '../../_ui/buttons';
 import { FormDateX } from '../../_ui/date';
@@ -22,9 +35,11 @@ import { EqptOrderTable } from './eqpt-order-table';
 export const EqptOrderList = ({
   orders,
   customers,
+  locs,
 }: {
   orders: EqptOrderListTableValues[] | undefined;
   customers: SelectTypes[] | undefined;
+  locs: SelectTypes[] | undefined;
 }) => {
   /* useState -------------------------------------------- */
   /* 受注一覧 */
@@ -39,6 +54,8 @@ export const EqptOrderList = ({
     defaultValues: {
       radio: 'shuko',
       range: { from: new Date(), to: new Date() },
+      kokyaku: FAKE_NEW_ID,
+      koenbashoNam: '',
     },
   });
 
@@ -115,13 +132,19 @@ export const EqptOrderList = ({
             </Grid2>
             <Grid2 sx={styles.container}>
               <Typography noWrap minWidth={110}>
+                機材明細名
+              </Typography>
+              <TextFieldElement name="headNam" control={control} sx={{ width: 300 }} />
+            </Grid2>
+            <Grid2 sx={styles.container}>
+              <Typography noWrap minWidth={110}>
                 顧客
               </Typography>
               <Controller
                 name="kokyaku"
                 control={control}
                 render={({ field }) => (
-                  <Select {...field} sx={{ width: 250 }}>
+                  <Select {...field} sx={{ width: 300 }}>
                     {[selectNone, ...(customers ?? [])].map((opt) => (
                       <MenuItem
                         key={opt.id}
@@ -146,7 +169,25 @@ export const EqptOrderList = ({
                 <Typography noWrap minWidth={110}>
                   公演場所
                 </Typography>
-                <TextFieldElement name="koenbashoNam" control={control} sx={{ width: 300 }} />
+                <Controller
+                  name="koenbashoNam"
+                  control={control}
+                  render={({ field }) => (
+                    <Autocomplete
+                      {...field}
+                      onChange={(_, value) => {
+                        const label = typeof value === 'string' ? value : (value?.label ?? '');
+                        field.onChange(label);
+                      }}
+                      freeSolo
+                      autoSelect
+                      sx={{ width: 300 }}
+                      renderInput={(params) => <TextField {...params} />}
+                      options={locs ?? []}
+                      getOptionLabel={(option) => (typeof option === 'string' ? option : option.label)}
+                    />
+                  )}
+                />
               </Grid2>
               <Grid2 size={'grow'} alignItems={'self-end'}>
                 <Box justifySelf={'end'}>

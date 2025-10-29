@@ -6,6 +6,24 @@ import { SCHEMA, supabase } from '../supabase';
 import { MKoenbashoDBValues } from '../types/m-koenbasho-type';
 
 /**
+ * 顧客マスタから有効な顧客リストを取得する関数
+ * @returns 有効な顧客のリスト
+ */
+export const selectActiveLocations = async () => {
+  try {
+    return await supabase
+      .schema(SCHEMA)
+      .from('m_koenbasho')
+      .select('koenbasho_id, koenbasho_nam')
+      .neq('dsp_flg', 0)
+      .neq('del_flg', 1)
+      .order('koenbasho_nam');
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
  * 公演場所マスタテーブルのデータを取得する関数
  * @param query 検索キーワード
  * @returns {Promise<LocsDialogValues[]>} 公演場所マスタテーブルに表示するデータ（ 検索キーワードが空の場合は全て ）

@@ -2,11 +2,34 @@
 
 import { revalidatePath } from 'next/cache';
 
-import { insertNewLoc, selectFilteredLocs, selectOneLoc, upDateLocDB } from '@/app/_lib/db/tables/m-koenbasho';
+import {
+  insertNewLoc,
+  selectActiveLocations,
+  selectFilteredLocs,
+  selectOneLoc,
+  upDateLocDB,
+} from '@/app/_lib/db/tables/m-koenbasho';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
+import { SelectTypes } from '@/app/(main)/_ui/form-box';
 
 import { emptyLoc } from './datas';
 import { LocsMasterDialogValues, LocsMasterTableValues } from './types';
+
+export const getLocsSelection = async (): Promise<SelectTypes[]> => {
+  try {
+    const { data, error } = await selectActiveLocations();
+    if (error) {
+      console.error('例外発生', error);
+      throw error;
+    }
+    if (!data || data.length === 0) {
+      return [];
+    }
+    return data.map((d) => ({ id: d.koenbasho_id, label: d.koenbasho_nam }));
+  } catch (e) {
+    throw e;
+  }
+};
 
 /**
  * 公演場所マスタテーブルのデータを取得する関数

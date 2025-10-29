@@ -18,7 +18,7 @@ export const selectActiveDaibumons = async () => {
       .from('m_dai_bumon')
       .select('dai_bumon_id, dai_bumon_nam')
       .neq('del_flg', 1)
-      .order('dsp_ord_num');
+      .order('dai_bumon_nam');
   } catch (e) {
     throw e;
   }
