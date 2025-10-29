@@ -1,10 +1,18 @@
 'use server';
 
+import dayjs from 'dayjs';
+import timezone from 'dayjs/plugin/timezone';
+import utc from 'dayjs/plugin/utc';
+
 import { toJapanDateString } from '@/app/(main)/_lib/date-conversion';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 import { EqptOrderSearchValues } from '@/app/(main)/eqpt-order-list/_lib/types';
 
 import { SCHEMA, supabase } from '../supabase';
+
+// .tz()を使う準備
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 /**
  * 受注機材ヘッダーリスト取得
@@ -103,16 +111,13 @@ export const selectFilteredKizaiHead = async ({
 
   // 期間のtoが入ってたら
   if (range?.to) {
+    const nextDay = dayjs(range.to).tz('Asia/Tokyo').add(1, 'day').startOf('day').toDate(); // +1日
     switch (radio) {
       case 'shuko': // '出庫日'
-        builder.or(
-          `yard_shuko_dat.lte.${toJapanDateString(range.to)},kics_shuko_dat.lte.${toJapanDateString(range.to)}`
-        );
+        builder.or(`yard_shuko_dat.lt.${toJapanDateString(nextDay)},kics_shuko_dat.lt.${toJapanDateString(nextDay)}`); // 未満
         break;
       case 'nyuko': // '入庫日'
-        builder.or(
-          `yard_nyuko_dat.lte.${toJapanDateString(range.to)},kics_nyuko_dat.lte.${toJapanDateString(range.to)}`
-        );
+        builder.or(`yard_nyuko_dat.lt.${toJapanDateString(nextDay)},kics_nyuko_dat.lt.${toJapanDateString(nextDay)}`); // 未満
         break;
     }
   }

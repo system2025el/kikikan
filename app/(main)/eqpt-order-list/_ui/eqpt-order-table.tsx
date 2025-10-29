@@ -1,7 +1,5 @@
 'use client';
 
-import AddIcon from '@mui/icons-material/Add';
-import MergeIcon from '@mui/icons-material/Merge';
 import {
   Box,
   Button,
@@ -19,7 +17,7 @@ import {
 } from '@mui/material';
 import React, { useEffect, useMemo } from 'react';
 
-import { toISOStringYearMonthDay, toJapanDateString } from '../../_lib/date-conversion';
+import { toJapanDateString } from '../../_lib/date-conversion';
 import { Loading } from '../../_ui/loading';
 import { MuiTablePagination } from '../../_ui/table-pagination';
 import { LightTooltipWithText } from '../../(masters)/_ui/tables';
@@ -66,33 +64,9 @@ export const EqptOrderTable = ({
           機材明細一覧
         </Typography>
         <Divider />
-        <Grid2 container mt={0.5} mx={0.5} justifyContent={'space-between'}>
+        <Grid2 container mt={0.5} mx={0.5}>
           <Grid2 spacing={1}>
             <MuiTablePagination arrayList={orderList} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
-          </Grid2>
-          <Grid2 container spacing={1}>
-            <Grid2 container spacing={1}>
-              <Grid2>
-                <Button href="/order/0/edit">
-                  <AddIcon fontSize="small" />
-                  新規受注
-                </Button>
-              </Grid2>
-            </Grid2>
-            <Grid2 container spacing={1}>
-              <Grid2>
-                <Button>
-                  <MergeIcon fontSize="small" />
-                  受注マージ
-                </Button>
-              </Grid2>
-              {/* <Grid2>
-                <Button>
-                  <ContentCopyIcon fontSize="small" />
-                  受注コピー
-                </Button>
-              </Grid2> */}
-            </Grid2>
           </Grid2>
         </Grid2>
         {isLoading ? (
