@@ -75,6 +75,7 @@ export const EqptSelectionDialog = ({
     const setList = await checkSetoptions(selectedEqptIds);
     if (setList.length !== 0) {
       // セットオプション付きの機材があるとき
+      // セット有機材IDリスト
       setEqptsWSet(setList);
       setBundleDialogOpen(true);
     } else {
@@ -193,6 +194,7 @@ export const EqptSelectionDialog = ({
               }}
               handleCloseDialog={handleCloseBundle}
               eqptsWSet={eqptsWSet}
+              eqptsAll={selectedEqptIds}
               // rank={rank}
               setEqpts={setEqpts}
             />
@@ -227,6 +229,7 @@ export const EqptSelectionDialog = ({
 const BundleDialog = ({
   open,
   eqptsWSet,
+  eqptsAll,
   // rank,
   handleConfirmAll,
   handleCloseDialog,
@@ -235,6 +238,7 @@ const BundleDialog = ({
   open: boolean;
   /** セット有機材のID配列 */
   eqptsWSet: number[];
+  eqptsAll: number[];
   // rank: number;
   /** 選んだ機材配列を画面に渡してダイアログをすべて閉じる */
   handleConfirmAll: (selected: SelectedEqptsValues[]) => void;
@@ -333,6 +337,7 @@ const BundleDialog = ({
         // ダイアログが開いた時、最初のデータ（index: 0）を取得
         setIsLoading(true);
         const getSet = async () => {
+          // セット有機材詳細と表示するセット機材を取得
           const [oya, sets] = await Promise.all([
             getSelectedEqpts([eqptsWSet[0]]), // 0番目を決め打ちで取得
             getSetOptions(eqptsWSet[0]),
@@ -340,8 +345,13 @@ const BundleDialog = ({
           setBundles(sets.setList);
           setOyakizaiNam(sets.eqptNam);
 
-          // 配列をリセットしてから親機材をpush
+          // セットがない単独の機材
+          const solo = await getSelectedEqpts(eqptsAll.filter((d) => !eqptsWSet.includes(d)));
+
+          // 配列をリセットしてから親機材と単独機材をpush
           selectedEqptListRef.current = [];
+
+          selectedEqptListRef.current.push(...solo);
           selectedEqptListRef.current.push(...oya);
           console.log('初期表示の時の親機材', selectedEqptListRef.current);
           setIsLoading(false);
