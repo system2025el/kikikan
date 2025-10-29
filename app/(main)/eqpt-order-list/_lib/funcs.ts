@@ -37,6 +37,7 @@ export const getFilteredOrderList = async (
     }
     return data.map((d) => ({
       juchuHeadId: d.juchu_head_id,
+      kizaiHeadId: d.juchu_kizai_head_id,
       headNam: d.head_nam,
       koenNam: d.koen_nam,
       koenbashoNam: d.koenbasho_nam,

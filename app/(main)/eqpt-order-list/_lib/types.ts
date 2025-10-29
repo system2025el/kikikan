@@ -3,6 +3,7 @@
  */
 export type EqptOrderListTableValues = {
   juchuHeadId: number;
+  kizaiHeadId: number;
   headNam: string;
   koenNam: string;
   koenbashoNam: string;
