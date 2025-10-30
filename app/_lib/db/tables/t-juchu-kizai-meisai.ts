@@ -134,9 +134,7 @@ export const updateJuchuKizaiMeisai = async (data: JuchuKizaiMeisai, connection:
  * @param kizaiId 機材id
  */
 export const deleteJuchuKizaiMeisai = async (
-  juchuHeadId: number,
-  juchuKizaiHeadId: number,
-  kizaiId: number[],
+  data: { juchu_head_id: number; juchu_kizai_head_id: number; juchu_kizai_meisai_id: number; kizai_id: number },
   connection: PoolClient
 ) => {
   const query = `
@@ -145,10 +143,11 @@ export const deleteJuchuKizaiMeisai = async (
     WHERE
       juchu_head_id = $1
       AND juchu_kizai_head_id = $2
-      AND kizai_id = ANY($3)
+      AND juchu_kizai_meisai_id = $3
+      AND kizai_id = $4
   `;
 
-  const values = [juchuHeadId, juchuKizaiHeadId, kizaiId];
+  const values = [data.juchu_head_id, data.juchu_kizai_head_id, data.juchu_kizai_meisai_id, data.kizai_id];
 
   try {
     await connection.query(query, values);

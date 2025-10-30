@@ -24,21 +24,14 @@ import { BackButton } from '@/app/(main)/_ui/buttons';
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { delNyukoResult, updNyukoResultAdjQty } from '../_lib/funcs';
-import { NyukoEqptDetailTableValues, NyukoEqptValues, NyukoKizaiDetailValues } from '../_lib/types';
+import { NyukoEqptDetailTableValues, NyukoEqptDetailValues } from '../_lib/types';
 import { NyukoEqptDetailTable } from './nyuko-eqpt-detail-table';
 
 export const NyukoEqptDetail = (props: {
-  params: {
-    juchu_head_id: string;
-    nyushuko_basho_id: string;
-    nyushuko_dat: string;
-    kizai_id: string;
-  };
-  nyukoEqptDetailData: NyukoEqptDetailTableValues[];
-  kizaiData: NyukoEqptValues;
-  kizaiDetailData: NyukoKizaiDetailValues[];
+  nyukoEqptDetailData: NyukoEqptDetailValues;
+  nyukoEqptDetailTableData: NyukoEqptDetailTableValues[];
 }) => {
-  const { params, kizaiData, kizaiDetailData } = props;
+  const { nyukoEqptDetailData } = props;
 
   // user情報
   const user = useUserStore((state) => state.user);
@@ -50,7 +43,7 @@ export const NyukoEqptDetail = (props: {
 
   // 入庫タグリスト
   const [nyukoEqptDetailList, setNyukoEqptDetailList] = useState<NyukoEqptDetailTableValues[]>(
-    props.nyukoEqptDetailData
+    props.nyukoEqptDetailTableData
   );
 
   // 実績クリアダイアログ制御
@@ -69,7 +62,7 @@ export const NyukoEqptDetail = (props: {
     mode: 'onChange',
     reValidateMode: 'onChange',
     defaultValues: {
-      resultAdjQty: kizaiDetailData.reduce((sum, row) => sum + (row.resultAdjQty ?? 0), 0),
+      resultAdjQty: nyukoEqptDetailData.resultAdjQty,
     },
   });
 
@@ -79,16 +72,7 @@ export const NyukoEqptDetail = (props: {
    */
   const onSubmit = async (data: { resultAdjQty: number }) => {
     if (isDirty && user) {
-      const updateResult = await updNyukoResultAdjQty(
-        kizaiDetailData,
-        Number(params.juchu_head_id),
-        30,
-        decodeURIComponent(params.nyushuko_dat),
-        Number(params.nyushuko_basho_id),
-        Number(params.kizai_id),
-        data.resultAdjQty,
-        user.name
-      );
+      const updateResult = await updNyukoResultAdjQty(nyukoEqptDetailData, data.resultAdjQty, user.name);
       if (updateResult) {
         setSnackBarMessage('保存しました');
         setSnackBarOpen(true);
@@ -122,7 +106,7 @@ export const NyukoEqptDetail = (props: {
 
       setIsLoading(true);
       const deleteData = nyukoEqptDetailList.filter((_, index) => selected.includes(index));
-      const deleteResult = await delNyukoResult(deleteData, user.name);
+      const deleteResult = await delNyukoResult(nyukoEqptDetailData, deleteData, user.name);
       if (deleteResult) {
         const newList = nyukoEqptDetailList.filter((_, index) => !selected.includes(index));
         setNyukoEqptDetailList(newList);
@@ -135,6 +119,14 @@ export const NyukoEqptDetail = (props: {
       }
       setIsLoading(false);
     }
+  };
+
+  /**
+   * チェックボックス選択時
+   * @param selected 選択index
+   */
+  const handleSelect = (selected: number[]) => {
+    setSelected(selected);
   };
 
   return (
@@ -152,16 +144,19 @@ export const NyukoEqptDetail = (props: {
           <Grid2 container spacing={5} p={2}>
             <Box display={'flex'} alignItems={'center'}>
               <Typography mr={2}>機材名</Typography>
-              <TextField value={kizaiData.kizaiNam ?? ''} disabled />
+              <TextField
+                value={'*'.repeat(nyukoEqptDetailData.indentNum) + (nyukoEqptDetailData.kizaiNam ?? '')}
+                disabled
+              />
             </Box>
             <Box display={'flex'} alignItems={'center'}>
               <Typography mr={2}>機材メモ</Typography>
-              <TextField value={kizaiData.mem ?? ''} disabled />
+              <TextField value={nyukoEqptDetailData.kizaiMem ?? ''} disabled />
             </Box>
           </Grid2>
           <Grid2 container spacing={2} p={2}>
             <Typography>入庫予定数</Typography>
-            <Typography>{kizaiDetailData.reduce((sum, row) => sum + (row.planQty ?? 0), 0)}</Typography>
+            <Typography>{nyukoEqptDetailData.planQty}</Typography>
           </Grid2>
           <Grid2 container alignItems={'center'} spacing={5} p={1}>
             <Typography>全{nyukoEqptDetailList.length}件</Typography>
@@ -201,7 +196,7 @@ export const NyukoEqptDetail = (props: {
         {isLoading ? (
           <Loading />
         ) : (
-          <NyukoEqptDetailTable datas={nyukoEqptDetailList} selected={selected} setSelected={setSelected} />
+          <NyukoEqptDetailTable datas={nyukoEqptDetailList} selected={selected} handleSelect={handleSelect} />
         )}
       </Paper>
       <Dialog open={deleteOpen}>

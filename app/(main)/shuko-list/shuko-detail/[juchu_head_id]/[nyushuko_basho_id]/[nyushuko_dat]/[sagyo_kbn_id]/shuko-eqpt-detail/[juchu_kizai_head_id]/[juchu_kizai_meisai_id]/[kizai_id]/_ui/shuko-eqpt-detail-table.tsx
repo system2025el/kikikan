@@ -11,13 +11,13 @@ import { ShukoEqptDetailTableValues } from '../_lib/types';
 export const ShukoEqptDetailTable = (props: {
   datas: ShukoEqptDetailTableValues[];
   selected: number[];
-  setSelected: Dispatch<SetStateAction<number[]>>;
+  handleSelect: (selected: number[]) => void;
 }) => {
-  const { datas, selected, setSelected } = props;
+  const { datas, selected, handleSelect } = props;
 
-  const handleSelect = (index: number) => {
+  const handleCheck = (index: number) => {
     const newSelected = selected.includes(index) ? selected.filter((item) => item !== index) : [...selected, index];
-    setSelected(newSelected);
+    handleSelect(newSelected);
   };
   return (
     <TableContainer sx={{ overflow: 'auto', maxHeight: '80vh' }}>
@@ -30,8 +30,8 @@ export const ShukoEqptDetailTable = (props: {
                 indeterminate={datas && selected.length > 0 && selected.length < datas.length}
                 checked={datas && datas.length > 0 && selected.length === datas.length}
                 onChange={(e) => {
-                  const newSelected = e.target.checked && datas ? datas.map((row, index) => index) : [];
-                  setSelected(newSelected);
+                  const newSelected = e.target.checked && datas ? datas.map((_, index) => index) : [];
+                  handleSelect(newSelected);
                 }}
               />
             </TableCell>
@@ -52,7 +52,7 @@ export const ShukoEqptDetailTable = (props: {
                 {index + 1}
               </TableCell>
               <TableCell padding="checkbox">
-                <Checkbox checked={selected.includes(index)} onChange={() => handleSelect(index)} />
+                <Checkbox checked={selected.includes(index)} onChange={() => handleCheck(index)} />
               </TableCell>
               <TableCell align="left">{row.rfidElNum}</TableCell>
               <TableCell align="left">{row.rfidTagId}</TableCell>

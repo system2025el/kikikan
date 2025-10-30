@@ -31,9 +31,9 @@ import { KeepJuchuContainerMeisaiValues, KeepJuchuKizaiMeisaiValues } from '../_
 type KeepEqTableProps = {
   rows: KeepJuchuKizaiMeisaiValues[];
   edit: boolean;
-  handleMeisaiDelete: (target: { kizaiId: number; containerFlag: boolean }) => void;
+  handleMeisaiDelete: (rowIndex: number, row: KeepJuchuKizaiMeisaiValues) => void;
   handleMemoChange: (kizaiId: number, memo: string) => void;
-  onChange: (rowIndex: number, returnValue: number) => void;
+  handleCellChange: (rowIndex: number, keepValue: number) => void;
 };
 
 export const KeepEqTable: React.FC<KeepEqTableProps> = ({
@@ -41,15 +41,11 @@ export const KeepEqTable: React.FC<KeepEqTableProps> = ({
   edit,
   handleMeisaiDelete,
   handleMemoChange,
-  onChange,
+  handleCellChange,
 }) => {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const visibleRows = rows.filter((row) => !row.delFlag);
-
-  const handleKeepCellChange = (rowIndex: number, newValue: number) => {
-    onChange(rowIndex, newValue);
-  };
 
   const handleKeyDown = (e: React.KeyboardEvent, rowIndex: number) => {
     if (e.key === 'Enter') {
@@ -122,7 +118,7 @@ export const KeepEqTable: React.FC<KeepEqTableProps> = ({
               handleKeepRef={handleKeepRef(rowIndex)}
               handleMemoChange={handleMemoChange}
               handleKeyDown={handleKeyDown}
-              handleKeepCellChange={handleKeepCellChange}
+              handleCellChange={handleCellChange}
             />
           ))}
         </TableBody>
@@ -135,10 +131,10 @@ type KeepEqTableRowProps = {
   row: KeepJuchuKizaiMeisaiValues;
   rowIndex: number;
   edit: boolean;
-  handleMeisaiDelete: (target: { kizaiId: number; containerFlag: boolean }) => void;
+  handleMeisaiDelete: (rowIndex: number, row: KeepJuchuKizaiMeisaiValues) => void;
   handleKeepRef: (el: HTMLInputElement | null) => void;
   handleMemoChange: (kizaiId: number, memo: string) => void;
-  handleKeepCellChange: (kizaiId: number, newValue: number) => void;
+  handleCellChange: (rowIndex: number, keepValue: number) => void;
   handleKeyDown: (e: React.KeyboardEvent, rowIndex: number) => void;
 };
 
@@ -149,7 +145,7 @@ const KeepEqTableRow = React.memo(
     edit,
     handleMeisaiDelete,
     handleMemoChange,
-    handleKeepCellChange,
+    handleCellChange,
     handleKeepRef,
     handleKeyDown,
   }: KeepEqTableRowProps) => {
@@ -159,7 +155,7 @@ const KeepEqTableRow = React.memo(
       <TableRow>
         <TableCell sx={{ padding: 0, border: '1px solid black' }}>
           <IconButton
-            onClick={() => handleMeisaiDelete({ kizaiId: row.kizaiId, containerFlag: false })}
+            onClick={() => handleMeisaiDelete(rowIndex, row)}
             sx={{ padding: 0, color: 'red' }}
             disabled={!edit}
           >
@@ -187,7 +183,7 @@ const KeepEqTableRow = React.memo(
             sx={{ p: 0, justifyContent: 'start' }}
             onClick={() => window.open(`/loan-situation/${row.kizaiId}`)}
           >
-            {row.kizaiNam}
+            {'*'.repeat(row.indentNum) + row.kizaiNam}
           </Button>
         </TableCell>
         <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
@@ -206,7 +202,7 @@ const KeepEqTableRow = React.memo(
                 /^\d*$/.test(e.target.value) &&
                 Number(e.target.value) <= (row.oyaPlanKizaiQty ?? 0) + (row.oyaPlanYobiQty ?? 0)
               ) {
-                handleKeepCellChange(row.kizaiId, Number(e.target.value));
+                handleCellChange(row.kizaiId, Number(e.target.value));
               }
             }}
             sx={{
@@ -256,24 +252,14 @@ export const KeepContainerTable = (props: {
   rows: KeepJuchuContainerMeisaiValues[];
   edit: boolean;
   handleContainerMemoChange: (kizaiId: number, memo: string) => void;
-  onChange: (kizaiId: number, kicsValue: number, yardValue: number) => void;
-  handleMeisaiDelete: (target: { kizaiId: number; containerFlag: boolean }) => void;
+  handleContainerCellChange: (kizaiId: number, kicsValue: number, yardValue: number) => void;
+  handleMeisaiDelete: (row: KeepJuchuContainerMeisaiValues) => void;
 }) => {
-  const { rows, edit, handleContainerMemoChange, onChange, handleMeisaiDelete } = props;
+  const { rows, edit, handleContainerMemoChange, handleContainerCellChange, handleMeisaiDelete } = props;
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const visibleRows = rows.filter((row) => !row.delFlag);
-
-  const handlePlanKicsKizaiQtyChange = (kizaiId: number, newValue: number) => {
-    const yardKeepQty = rows.find((row) => row.kizaiId === kizaiId && !row.delFlag)?.yardKeepQty || 0;
-    onChange(kizaiId, newValue, yardKeepQty);
-  };
-
-  const handlePlanYardKizaiQtyChange = (kizaiId: number, newValue: number) => {
-    const kicsKeepQty = rows.find((row) => row.kizaiId === kizaiId)?.kicsKeepQty || 0;
-    onChange(kizaiId, kicsKeepQty, newValue);
-  };
 
   const handleKeyDown = (e: React.KeyboardEvent, rowIndex: number, cellNum: number) => {
     if (e.key === 'Enter') {
@@ -341,11 +327,7 @@ export const KeepContainerTable = (props: {
           {visibleRows.map((row, rowIndex) => (
             <TableRow key={rowIndex}>
               <TableCell align="center" width={'min-content'} sx={{ padding: 0, border: '1px solid black' }}>
-                <IconButton
-                  onClick={() => handleMeisaiDelete({ kizaiId: row.kizaiId, containerFlag: true })}
-                  sx={{ padding: 0, color: 'red' }}
-                  disabled={!edit}
-                >
+                <IconButton onClick={() => handleMeisaiDelete(row)} sx={{ padding: 0, color: 'red' }} disabled={!edit}>
                   <Delete fontSize="small" />
                 </IconButton>
               </TableCell>
@@ -387,7 +369,7 @@ export const KeepContainerTable = (props: {
                   type="text"
                   onChange={(e) => {
                     if (/^\d*$/.test(e.target.value) && Number(e.target.value) <= (row.oyaPlanKicsKizaiQty ?? 0)) {
-                      handlePlanKicsKizaiQtyChange(row.kizaiId, Number(e.target.value));
+                      handleContainerCellChange(row.kizaiId, Number(e.target.value), row.yardKeepQty);
                     }
                   }}
                   sx={{
@@ -431,7 +413,7 @@ export const KeepContainerTable = (props: {
                   type="text"
                   onChange={(e) => {
                     if (/^\d*$/.test(e.target.value) && Number(e.target.value) <= (row.oyaPlanYardKizaiQty ?? 0)) {
-                      handlePlanYardKizaiQtyChange(row.kizaiId, Number(e.target.value));
+                      handleContainerCellChange(row.kizaiId, row.kicsKeepQty, Number(e.target.value));
                     }
                   }}
                   sx={{

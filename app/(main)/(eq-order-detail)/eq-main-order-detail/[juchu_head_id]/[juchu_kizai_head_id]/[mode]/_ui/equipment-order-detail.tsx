@@ -337,7 +337,7 @@ const EquipmentOrderDetail = (props: {
   }, [juchuKizaiMeisaiList, isLoading, isDetailLoading]);
 
   useEffect(() => {
-    // 削除考慮
+    // 機材idをキーとして受注数、予備数、合計数の各合計値算出
     const sum = juchuKizaiMeisaiList
       .filter((d) => !d.delFlag)
       .reduce((acc, current) => {
@@ -413,6 +413,33 @@ const EquipmentOrderDetail = (props: {
         setEdit(true);
       }
     }
+  };
+
+  /**
+   * 同期スクロール処理
+   * @param source
+   * @returns
+   */
+  const syncScroll = (source: 'left' | 'right') => {
+    if (isSyncing.current) return;
+    isSyncing.current = true;
+
+    const left = leftRef.current;
+    const right = rightRef.current;
+
+    if (!left || !right) return;
+
+    if (source === 'left') {
+      const ratio = left.scrollTop / (left.scrollHeight - left.clientHeight);
+      right.scrollTop = ratio * (right.scrollHeight - right.clientHeight);
+    } else {
+      const ratio = right.scrollTop / (right.scrollHeight - right.clientHeight);
+      left.scrollTop = ratio * (left.scrollHeight - left.clientHeight);
+    }
+
+    requestAnimationFrame(() => {
+      isSyncing.current = false;
+    });
   };
 
   /**
@@ -637,6 +664,9 @@ const EquipmentOrderDetail = (props: {
             setOriginEqStockList(updatedEqStockData);
           }
         }
+        if (checkIdoJuchuKizaiMeisai) {
+          setOriginIdoJuchuKizaiMeisaiList(idoJuchuKizaiMeisaiList);
+        }
         if (checkJuchuContainerMeisai) {
           const juchuContainerMeisaiData = await getJuchuContainerMeisai(data.juchuHeadId, data.juchuKizaiHeadId);
           setOriginJuchuContainerMeisaiList(juchuContainerMeisaiData);
@@ -681,33 +711,6 @@ const EquipmentOrderDetail = (props: {
     }
     setEqStockList(updatedEqStockData);
     return updatedEqStockData;
-  };
-
-  /**
-   * 同期スクロール処理
-   * @param source
-   * @returns
-   */
-  const syncScroll = (source: 'left' | 'right') => {
-    if (isSyncing.current) return;
-    isSyncing.current = true;
-
-    const left = leftRef.current;
-    const right = rightRef.current;
-
-    if (!left || !right) return;
-
-    if (source === 'left') {
-      const ratio = left.scrollTop / (left.scrollHeight - left.clientHeight);
-      right.scrollTop = ratio * (right.scrollHeight - right.clientHeight);
-    } else {
-      const ratio = right.scrollTop / (right.scrollHeight - right.clientHeight);
-      left.scrollTop = ratio * (left.scrollHeight - left.clientHeight);
-    }
-
-    requestAnimationFrame(() => {
-      isSyncing.current = false;
-    });
   };
 
   /**
@@ -787,7 +790,9 @@ const EquipmentOrderDetail = (props: {
    * @param memo メモ内容
    */
   const handleMemoChange = (rowIndex: number, memo: string) => {
-    setJuchuKizaiMeisaiList((prev) => prev.map((data, index) => (index === rowIndex ? { ...data, mem: memo } : data)));
+    setJuchuKizaiMeisaiList((prev) =>
+      prev.filter((d) => !d.delFlag).map((data, index) => (index === rowIndex ? { ...data, mem: memo } : data))
+    );
   };
 
   /**
@@ -922,7 +927,6 @@ const EquipmentOrderDetail = (props: {
    * @param kizaiId 機材id
    * @param planKicsKizaiQty KICSコンテナ数
    * @param planYardKizaiQty YARDコンテナ数
-   * @param planQty コンテナ合計数
    */
   const handleContainerCellChange = (kizaiId: number, planKicsKizaiQty: number, planYardKizaiQty: number) => {
     setJuchuContainerMeisaiList((prev) =>

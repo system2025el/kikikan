@@ -24,22 +24,14 @@ import { BackButton } from '@/app/(main)/_ui/buttons';
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { delshukoResult, updShukoResultAdjQty } from '../_lib/funcs';
-import { ShukoEqptDetailTableValues, ShukoEqptValues, ShukoKizaiDetailValues } from '../_lib/types';
+import { ShukoEqptDetailTableValues, ShukoEqptDetailValues } from '../_lib/types';
 import { ShukoEqptDetailTable } from './shuko-eqpt-detail-table';
 
 export const ShukoEqptDetail = (props: {
-  params: {
-    juchu_head_id: string;
-    nyushuko_basho_id: string;
-    nyushuko_dat: string;
-    sagyo_kbn_id: string;
-    kizai_id: string;
-  };
-  shukoEqptDetailData: ShukoEqptDetailTableValues[];
-  kizaiData: ShukoEqptValues;
-  kizaiDetailData: ShukoKizaiDetailValues[];
+  shukoEqptDetailData: ShukoEqptDetailValues;
+  shukoEqptDetailTableData: ShukoEqptDetailTableValues[];
 }) => {
-  const { params, kizaiData, kizaiDetailData } = props;
+  const { shukoEqptDetailData } = props;
 
   // user情報
   const user = useUserStore((state) => state.user);
@@ -51,7 +43,7 @@ export const ShukoEqptDetail = (props: {
 
   // 出庫タグリスト
   const [shukoEqptDetailList, setShukoEqptDetailList] = useState<ShukoEqptDetailTableValues[]>(
-    props.shukoEqptDetailData
+    props.shukoEqptDetailTableData
   );
 
   // 実績クリアダイアログ制御
@@ -71,7 +63,7 @@ export const ShukoEqptDetail = (props: {
     mode: 'onChange',
     reValidateMode: 'onChange',
     defaultValues: {
-      resultAdjQty: kizaiDetailData.reduce((sum, row) => sum + (row.resultAdjQty ?? 0), 0),
+      resultAdjQty: shukoEqptDetailData.resultAdjQty,
     },
   });
 
@@ -96,16 +88,7 @@ export const ShukoEqptDetail = (props: {
   const onSubmit = async (data: { resultAdjQty: number }) => {
     if (isDirty && user) {
       console.log(data);
-      const updateResult = await updShukoResultAdjQty(
-        kizaiDetailData,
-        Number(params.juchu_head_id),
-        Number(params.sagyo_kbn_id),
-        decodeURIComponent(params.nyushuko_dat),
-        Number(params.nyushuko_basho_id),
-        Number(params.kizai_id),
-        data.resultAdjQty,
-        user.name
-      );
+      const updateResult = await updShukoResultAdjQty(shukoEqptDetailData, data.resultAdjQty, user.name);
       if (updateResult) {
         setSnackBarMessage('保存しました');
         setSnackBarOpen(true);
@@ -139,7 +122,7 @@ export const ShukoEqptDetail = (props: {
 
       setIsLoading(true);
       const deleteData = shukoEqptDetailList.filter((_, index) => selected.includes(index));
-      const deleteResult = await delshukoResult(deleteData, user.name);
+      const deleteResult = await delshukoResult(shukoEqptDetailData, deleteData, user.name);
       if (deleteResult) {
         const newList = shukoEqptDetailList.filter((_, index) => !selected.includes(index));
         setShukoEqptDetailList(newList);
@@ -152,6 +135,14 @@ export const ShukoEqptDetail = (props: {
       }
       setIsLoading(false);
     }
+  };
+
+  /**
+   * チェックボックス選択時
+   * @param selected 選択index
+   */
+  const handleSelect = (selected: number[]) => {
+    setSelected(selected);
   };
 
   return (
@@ -169,20 +160,26 @@ export const ShukoEqptDetail = (props: {
           <Grid2 container spacing={5} p={2}>
             <Box display={'flex'} alignItems={'center'}>
               <Typography mr={2}>機材名</Typography>
-              <TextField value={kizaiData.kizaiNam ?? ''} disabled />
+              <TextField
+                value={'*'.repeat(shukoEqptDetailData.indentNum) + (shukoEqptDetailData.kizaiNam ?? '')}
+                disabled
+              />
             </Box>
             <Box display={'flex'} alignItems={'center'}>
               <Typography mr={2}>棚番</Typography>
-              <TextField value={joinStrings(kizaiData.bldCod, kizaiData.tanaCod, kizaiData.edaCod)} disabled />
+              <TextField
+                value={joinStrings(shukoEqptDetailData.bldCod, shukoEqptDetailData.tanaCod, shukoEqptDetailData.edaCod)}
+                disabled
+              />
             </Box>
             <Box display={'flex'} alignItems={'center'}>
               <Typography mr={2}>機材メモ</Typography>
-              <TextField value={kizaiData.mem ?? ''} disabled />
+              <TextField value={shukoEqptDetailData.kizaiMem ?? ''} disabled />
             </Box>
           </Grid2>
           <Grid2 container spacing={2} p={2}>
             <Typography>出庫予定数</Typography>
-            <Typography>{kizaiDetailData.reduce((sum, row) => sum + (row.planQty ?? 0), 0)}</Typography>
+            <Typography>{shukoEqptDetailData.planQty}</Typography>
           </Grid2>
           <Grid2 container alignItems={'center'} spacing={5} p={1}>
             <Typography>全{shukoEqptDetailList.length}件</Typography>
@@ -222,7 +219,7 @@ export const ShukoEqptDetail = (props: {
         {isLoading ? (
           <Loading />
         ) : (
-          <ShukoEqptDetailTable datas={shukoEqptDetailList} selected={selected} setSelected={setSelected} />
+          <ShukoEqptDetailTable datas={shukoEqptDetailList} selected={selected} handleSelect={handleSelect} />
         )}
       </Paper>
       <Dialog open={deleteOpen}>

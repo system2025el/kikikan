@@ -154,16 +154,22 @@ ReturnStockTableRow.displayName = 'ReturnStockTableRow';
 type ReturnEqTableProps = {
   rows: ReturnJuchuKizaiMeisaiValues[];
   edit: boolean;
-  onChange: (kizaiId: number, returnOrderValue: number, returnSpareValue: number, returnTotalValue: number) => void;
-  handleMeisaiDelete: (target: { kizaiId: number; containerFlag: boolean }) => void;
-  handleMemoChange: (kizaiId: number, memo: string) => void;
+  handleCellChange: (
+    rowIndex: number,
+    kizaiId: number,
+    returnOrderValue: number,
+    returnSpareValue: number,
+    returnTotalValue: number
+  ) => void;
+  handleMeisaiDelete: (rowIndex: number, row: ReturnJuchuKizaiMeisaiValues) => void;
+  handleMemoChange: (rowIndex: number, memo: string) => void;
   ref: React.RefObject<HTMLDivElement | null>;
 };
 
 export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({
   rows,
   edit,
-  onChange,
+  handleCellChange,
   handleMeisaiDelete,
   handleMemoChange,
   ref,
@@ -171,18 +177,6 @@ export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const visibleRows = rows.filter((row) => !row.delFlag);
-
-  const handlePlanKizaiQtyChange = (kizaiId: number, newValue: number) => {
-    const planYobiQty = rows.find((row) => row.kizaiId === kizaiId && !row.delFlag)?.planYobiQty || 0;
-    const planQty = planYobiQty + newValue;
-    onChange(kizaiId, newValue, planYobiQty, planQty);
-  };
-
-  const handlePlanYobiQtyChange = (kizaiId: number, newValue: number) => {
-    const planKizaiQty = rows.find((row) => row.kizaiId === kizaiId)?.planKizaiQty || 0;
-    const planQty = planKizaiQty + newValue;
-    onChange(kizaiId, planKizaiQty, newValue, planQty);
-  };
 
   const handleKeyDown = (e: React.KeyboardEvent, rowIndex: number) => {
     if (e.key === 'Enter') {
@@ -221,35 +215,35 @@ export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({
               sx={{ position: 'sticky', top: 0, zIndex: 2, bgcolor: 'red' }}
               colSpan={3}
             >
-              返却数
+              返却
             </TableCell>
           </TableRow>
           <TableRow>
             <TableCell size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }} />
             <TableCell size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }} />
             <TableCell align="left" size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
-              入庫場所
+              YK
             </TableCell>
             <TableCell align="left" size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
-              返却メモ
+              メモ
             </TableCell>
             <TableCell align="left" size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
               機材名
             </TableCell>
             <TableCell align="right" size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
-              受注数
+              受注
             </TableCell>
             <TableCell align="right" size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
-              予備数
+              予備
             </TableCell>
             <TableCell align="right" size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
-              受注数
+              受注
             </TableCell>
             <TableCell align="right" size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
-              予備数
+              予備
             </TableCell>
             <TableCell align="right" size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
-              合計数
+              合計
             </TableCell>
           </TableRow>
         </TableHead>
@@ -264,8 +258,7 @@ export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({
               handleMeisaiDelete={handleMeisaiDelete}
               handleMemoChange={handleMemoChange}
               handleKeyDown={handleKeyDown}
-              handlePlanKizaiQtyChange={handlePlanKizaiQtyChange}
-              handlePlanYobiQtyChange={handlePlanYobiQtyChange}
+              handleCellChange={handleCellChange}
             />
           ))}
         </TableBody>
@@ -279,10 +272,15 @@ type ReturnEqTableRowProps = {
   rowIndex: number;
   edit: boolean;
   handleOrderRef: (el: HTMLInputElement | null) => void;
-  handleMeisaiDelete: (target: { kizaiId: number; containerFlag: boolean }) => void;
+  handleMeisaiDelete: (rowIndex: number, row: ReturnJuchuKizaiMeisaiValues) => void;
   handleMemoChange: (rowIndex: number, memo: string) => void;
-  handlePlanKizaiQtyChange: (kizaiId: number, newValue: number) => void;
-  handlePlanYobiQtyChange: (kizaiId: number, newValue: number) => void;
+  handleCellChange: (
+    rowIndex: number,
+    kizaiId: number,
+    planKizaiQty: number,
+    planYobiQty: number,
+    planQty: number
+  ) => void;
   handleKeyDown: (e: React.KeyboardEvent, rowIndex: number) => void;
 };
 
@@ -294,8 +292,7 @@ const ReturnEqTableRow = React.memo(
     handleOrderRef,
     handleMeisaiDelete,
     handleMemoChange,
-    handlePlanKizaiQtyChange,
-    handlePlanYobiQtyChange,
+    handleCellChange,
     handleKeyDown,
   }: ReturnEqTableRowProps) => {
     console.log('描画', rowIndex);
@@ -304,7 +301,7 @@ const ReturnEqTableRow = React.memo(
       <TableRow>
         <TableCell sx={{ padding: 0, border: '1px solid black' }}>
           <IconButton
-            onClick={() => handleMeisaiDelete({ kizaiId: row.kizaiId, containerFlag: false })}
+            onClick={() => handleMeisaiDelete(rowIndex, row)}
             sx={{ padding: 0, color: 'red' }}
             disabled={!edit}
           >
@@ -332,7 +329,7 @@ const ReturnEqTableRow = React.memo(
             sx={{ p: 0, justifyContent: 'start' }}
             onClick={() => window.open(`/loan-situation/${row.kizaiId}`)}
           >
-            {row.kizaiNam}
+            {'*'.repeat(row.indentNum) + row.kizaiNam}
           </Button>
         </TableCell>
         <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
@@ -348,7 +345,7 @@ const ReturnEqTableRow = React.memo(
             type="text"
             onChange={(e) => {
               if (/^\d*$/.test(e.target.value) && Number(e.target.value) <= (row.oyaPlanKizaiQty ?? 0)) {
-                handlePlanKizaiQtyChange(row.kizaiId, Number(e.target.value));
+                handleCellChange(rowIndex, row.kizaiId, Number(e.target.value), row.planYobiQty, row.planQty);
               }
             }}
             sx={{
@@ -395,7 +392,7 @@ const ReturnEqTableRow = React.memo(
             type="text"
             onChange={(e) => {
               if (/^\d*$/.test(e.target.value) && Number(e.target.value) <= (row.oyaPlanYobiQty ?? 0)) {
-                handlePlanYobiQtyChange(row.kizaiId, Number(e.target.value));
+                handleCellChange(rowIndex, row.kizaiId, row.planKizaiQty, Number(e.target.value), row.planQty);
               }
             }}
             sx={{
@@ -448,26 +445,14 @@ export const ReturnContainerTable = (props: {
   rows: ReturnJuchuContainerMeisaiValues[];
   edit: boolean;
   handleContainerMemoChange: (kizaiId: number, memo: string) => void;
-  onChange: (kizaiId: number, kicsValue: number, yardValue: number, totalValue: number) => void;
-  handleMeisaiDelete: (target: { kizaiId: number; containerFlag: boolean }) => void;
+  handleContainerCellChange: (kizaiId: number, kicsValue: number, yardValue: number) => void;
+  handleMeisaiDelete: (row: ReturnJuchuContainerMeisaiValues) => void;
 }) => {
-  const { rows, edit, handleContainerMemoChange, onChange, handleMeisaiDelete } = props;
+  const { rows, edit, handleContainerMemoChange, handleContainerCellChange, handleMeisaiDelete } = props;
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const visibleRows = rows.filter((row) => !row.delFlag);
-
-  const handlePlanKicsKizaiQtyChange = (kizaiId: number, newValue: number) => {
-    const planYardKizaiQty = rows.find((row) => row.kizaiId === kizaiId && !row.delFlag)?.planYardKizaiQty || 0;
-    const planQty = planYardKizaiQty + newValue;
-    onChange(kizaiId, newValue, planYardKizaiQty, planQty);
-  };
-
-  const handlePlanYardKizaiQtyChange = (kizaiId: number, newValue: number) => {
-    const planKicsKizaiQty = rows.find((row) => row.kizaiId === kizaiId)?.planKicsKizaiQty || 0;
-    const planQty = planKicsKizaiQty + newValue;
-    onChange(kizaiId, planKicsKizaiQty, newValue, planQty);
-  };
 
   const handleKeyDown = (e: React.KeyboardEvent, rowIndex: number, cellNum: number) => {
     if (e.key === 'Enter') {
@@ -505,14 +490,14 @@ export const ReturnContainerTable = (props: {
               sx={{ position: 'sticky', top: 0, zIndex: 2, bgcolor: 'red' }}
               colSpan={3}
             >
-              返却数
+              返却
             </TableCell>
           </TableRow>
           <TableRow>
             <TableCell size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }} />
             <TableCell size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }} />
             <TableCell align="left" size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
-              返却メモ
+              メモ
             </TableCell>
             <TableCell align="left" size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
               機材名
@@ -530,7 +515,7 @@ export const ReturnContainerTable = (props: {
               Y
             </TableCell>
             <TableCell align="right" size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
-              合計数
+              合計
             </TableCell>
           </TableRow>
         </TableHead>
@@ -538,11 +523,7 @@ export const ReturnContainerTable = (props: {
           {visibleRows.map((row, rowIndex) => (
             <TableRow key={rowIndex}>
               <TableCell align="center" width={'min-content'} sx={{ padding: 0, border: '1px solid black' }}>
-                <IconButton
-                  onClick={() => handleMeisaiDelete({ kizaiId: row.kizaiId, containerFlag: true })}
-                  sx={{ padding: 0, color: 'red' }}
-                  disabled={!edit}
-                >
+                <IconButton onClick={() => handleMeisaiDelete(row)} sx={{ padding: 0, color: 'red' }} disabled={!edit}>
                   <Delete fontSize="small" />
                 </IconButton>
               </TableCell>
@@ -584,7 +565,7 @@ export const ReturnContainerTable = (props: {
                   type="text"
                   onChange={(e) => {
                     if (/^\d*$/.test(e.target.value) && Number(e.target.value) <= (row.oyaPlanKicsKizaiQty ?? 0)) {
-                      handlePlanKicsKizaiQtyChange(row.kizaiId, Number(e.target.value));
+                      handleContainerCellChange(row.kizaiId, Number(e.target.value), row.planYardKizaiQty);
                     }
                   }}
                   sx={{
@@ -632,7 +613,7 @@ export const ReturnContainerTable = (props: {
                   type="text"
                   onChange={(e) => {
                     if (/^\d*$/.test(e.target.value) && Number(e.target.value) <= (row.oyaPlanYardKizaiQty ?? 0)) {
-                      handlePlanYardKizaiQtyChange(row.kizaiId, Number(e.target.value));
+                      handleContainerCellChange(row.kizaiId, row.planKicsKizaiQty, Number(e.target.value));
                     }
                   }}
                   sx={{
