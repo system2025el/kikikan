@@ -6,6 +6,8 @@ import utc from 'dayjs/plugin/utc';
 
 import { selectFilteredKizaiHead } from '@/app/_lib/db/tables/v-juchu-kizai-head-lst';
 
+import { toJapanDateString } from '../../_lib/date-conversion';
+import { FAKE_NEW_ID } from '../../(masters)/_lib/constants';
 import { EqptOrderListTableValues, EqptOrderSearchValues } from './types';
 
 // .tz()を使う準備
@@ -20,10 +22,11 @@ dayjs.extend(timezone);
 export const getFilteredOrderList = async (
   query: EqptOrderSearchValues = {
     radio: 'shuko',
-    range: { from: new Date(), to: new Date() },
+    range: { from: new Date(toJapanDateString()), to: new Date(toJapanDateString()) },
+    kokyaku: FAKE_NEW_ID,
   }
 ): Promise<EqptOrderListTableValues[]> => {
-  console.log(query);
+  console.log('ーーーーー機材明細一覧の時間確認', query);
 
   try {
     //

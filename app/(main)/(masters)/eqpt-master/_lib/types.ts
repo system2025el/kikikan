@@ -44,7 +44,10 @@ export const EqptsMasterDialogSchema = z.object({
   dspFlg: z.boolean().optional(),
   ctnFlg: z.boolean().optional(),
   defDatQty: z.number().nullable(),
-  regAmt: z.number({ message: '定価を入力してください' }).min(1, { message: '定価を入力してください' }),
+  regAmt: z
+    .number({ message: '定価を入力してください' })
+    .int({ message: '整数で入力してください' })
+    .min(1, { message: '定価を入力してください' }),
   // rankAmt1: z.number().nullable(),
   // rankAmt2: z.number().nullable(),
   // rankAmt3: z.number().nullable(),
