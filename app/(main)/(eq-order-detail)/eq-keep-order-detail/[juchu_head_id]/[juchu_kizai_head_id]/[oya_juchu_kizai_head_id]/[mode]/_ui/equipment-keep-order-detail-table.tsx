@@ -84,26 +84,26 @@ export const KeepEqTable: React.FC<KeepEqTableProps> = ({
               sx={{ position: 'sticky', top: 0, zIndex: 2, bgcolor: 'green' }}
               rowSpan={2}
             >
-              キープ数
+              キープ
             </TableCell>
           </TableRow>
           <TableRow>
             <TableCell size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }} />
             <TableCell size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }} />
             <TableCell align="left" size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
-              在庫場所
+              YK
             </TableCell>
             <TableCell align="left" size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
-              キープメモ
+              メモ
             </TableCell>
             <TableCell align="left" size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
               機材名
             </TableCell>
             <TableCell align="right" size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
-              受注数
+              受注
             </TableCell>
             <TableCell align="right" size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
-              予備数
+              予備
             </TableCell>
           </TableRow>
         </TableHead>
@@ -297,14 +297,14 @@ export const KeepContainerTable = (props: {
               sx={{ position: 'sticky', top: 0, zIndex: 2, bgcolor: 'green' }}
               colSpan={2}
             >
-              キープ数
+              キープ
             </TableCell>
           </TableRow>
           <TableRow>
             <TableCell size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }} />
             <TableCell size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }} />
             <TableCell align="left" size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
-              キープメモ
+              メモ
             </TableCell>
             <TableCell align="left" size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
               機材名
