@@ -128,7 +128,7 @@ export const SecondDialogPage = ({
     setIsLoading(false);
   };
 
-  /* ヘッダが選ばれたときの処理 */
+  /** ヘッダが選ばれたときの処理 */
   const handleClickHeadNam = async (juchuId: number, kizaiHeadId: number, checked: boolean, dat: Date) => {
     console.log(kizaiHeadId, checked);
     if (checked) {

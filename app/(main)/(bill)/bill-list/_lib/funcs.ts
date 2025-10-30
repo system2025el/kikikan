@@ -4,7 +4,6 @@ import { selectActiveSeikyuSts } from '@/app/_lib/db/tables/m-seikyu-sts';
 import { selectChosenSeikyu } from '@/app/_lib/db/tables/t-seikyu-head';
 import { selectBillMeisai } from '@/app/_lib/db/tables/t-seikyu-meisai';
 import { selectBillMeisaiHead } from '@/app/_lib/db/tables/t-seikyu-meisai-head';
-import { selectJuchuKizaiHeadList } from '@/app/_lib/db/tables/v-juchu-kizai-head-lst';
 import {
   selectJuchuKizaiHeadNamListFormBill,
   selectJuchuKizaiMeisaiDetailsForBill,
@@ -274,6 +273,7 @@ export const getJuchuKizaiMeisaiHeadForBill = async (juchuHeadId: number, kizaiH
 export const getJuchuKizaiMeisaiDetailsForBill = async (juchuHeadId: number, kizaiHeadId: number, dat: Date) => {
   try {
     const data = await selectJuchuKizaiMeisaiDetailsForBill(juchuHeadId, kizaiHeadId, dat);
+    console.log(data.rows);
 
     if (!data) {
       console.error('例題が発生');
@@ -305,14 +305,13 @@ export const getJuchuKizaiMeisaiDetailsForBill = async (juchuHeadId: number, kiz
           meisai: [], // 明細を入れるための空配列
         };
       }
-
       // 現在の行を明細データとして整形し、meisai配列に追加
       const honbanbiQty = (Number(currentRow.honbanbi_qty) || 0) + (Number(currentRow.add_dat_qty) || 0);
       const tankaAmt = Number(currentRow.kizai_tanka_amt) || 0;
       const planQty = Number(currentRow.plan_qty) || 0;
 
       acc[groupKey].meisai.push({
-        nam: currentRow.kizai_nam,
+        nam: currentRow.kizai_nam ? `${'*'.repeat(currentRow.indent_num ?? 0)}${currentRow.kizai_nam}` : null,
         qty: planQty,
         honbanbiQty: honbanbiQty,
         tankaAmt: tankaAmt,

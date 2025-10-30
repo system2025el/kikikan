@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 
 import pool from '@/app/_lib/db/postgres';
 import { SCHEMA } from '@/app/_lib/db/supabase';
-import { delAndInsertSeikyuDat, upsertSeikyuDat } from '@/app/_lib/db/tables/t-seikyu-date-juchu-kizai';
+import { delAndInsertSeikyuDat } from '@/app/_lib/db/tables/t-seikyu-date-juchu-kizai';
 import { insertBillHead } from '@/app/_lib/db/tables/t-seikyu-head';
 import { insertBillMeisai } from '@/app/_lib/db/tables/t-seikyu-meisai';
 import { insertBillMeisaiHead } from '@/app/_lib/db/tables/t-seikyu-meisai-head';
@@ -76,7 +76,7 @@ export const getJuchusForBill = async (queries: {
         const planQty = Number(currentRow.plan_qty) || 0;
 
         acc[groupKey].meisai.push({
-          nam: currentRow.kizai_nam,
+          nam: currentRow.kizai_nam ? `${'*'.repeat(currentRow.indent_num ?? 0)}${currentRow.kizai_nam}` : null,
           qty: planQty,
           honbanbiQty: honbanbiQty,
           tankaAmt: tankaAmt,
