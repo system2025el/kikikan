@@ -16,8 +16,8 @@ import {
 import { useEffect, useState } from 'react';
 
 import { Loading } from '../../_ui/loading';
-import { getJuchuContainerMeisai, getOyaJuchuKizaiMeisai } from '../_lib/funcs';
-import { OyaJuchuKizaiMeisaiValues } from '../_lib/types';
+import { getJuchuContainerMeisai, getOyaJuchuContainerMeisai, getOyaJuchuKizaiMeisai } from '../_lib/funcs';
+import { OyaJuchuContainerMeisaiValues, OyaJuchuKizaiMeisaiValues } from '../_lib/types';
 import { JuchuContainerMeisaiValues } from '../eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_lib/types';
 
 export const OyaEqSelectionDialog = ({
@@ -28,13 +28,13 @@ export const OyaEqSelectionDialog = ({
 }: {
   juchuHeadId: number;
   oyaJuchuKizaiHeadId: number;
-  setEqpts: (eqData: OyaJuchuKizaiMeisaiValues[], containerData: JuchuContainerMeisaiValues[]) => void;
+  setEqpts: (eqData: OyaJuchuKizaiMeisaiValues[], containerData: OyaJuchuContainerMeisaiValues[]) => void;
   onClose: (result: boolean) => void;
 }) => {
   // 親機材リスト
   const [oyaEqList, setOyaEqList] = useState<OyaJuchuKizaiMeisaiValues[]>([]);
   // 親コンテナリスト
-  const [oyaContainerList, setOyaContainerList] = useState<JuchuContainerMeisaiValues[]>([]);
+  const [oyaContainerList, setOyaContainerList] = useState<OyaJuchuContainerMeisaiValues[]>([]);
   // 選択機材id
   const [selected, setSelected] = useState<number[]>([]);
   // Loadingかどうか
@@ -57,7 +57,7 @@ export const OyaEqSelectionDialog = ({
   useEffect(() => {
     const getOyaEqpts = async () => {
       const oyaEq = await getOyaJuchuKizaiMeisai(juchuHeadId, oyaJuchuKizaiHeadId);
-      const oyaContainer = await getJuchuContainerMeisai(juchuHeadId, oyaJuchuKizaiHeadId);
+      const oyaContainer = await getOyaJuchuContainerMeisai(juchuHeadId, oyaJuchuKizaiHeadId);
       console.log('親機材リスト: ', oyaEq);
       setOyaEqList(oyaEq ?? []);
       setOyaContainerList(oyaContainer ?? []);

@@ -44,7 +44,7 @@ import {
 import { deleteAllNyushukoCtnResult, deleteKizaiIdNyushukoCtnResult } from '@/app/_lib/db/tables/t-nyushuko-ctn-result';
 import { selectNyushukoFixFlag } from '@/app/_lib/db/tables/t-nyushuko-fix';
 import { deleteAllNyushukoResult, deleteKizaiIdNyushukoResult } from '@/app/_lib/db/tables/t-nyushuko-result';
-import { selectJuchuContainerMeisai } from '@/app/_lib/db/tables/v-juchu-ctn-meisai';
+import { selectJuchuContainerMeisai, selectOyaJuchuContainerMeisai } from '@/app/_lib/db/tables/v-juchu-ctn-meisai';
 import { selectJuchuKizaiMeisai, selectOyaJuchuKizaiMeisai } from '@/app/_lib/db/tables/v-juchu-kizai-meisai';
 import { JuchuCtnMeisai } from '@/app/_lib/db/types/t_juchu_ctn_meisai-type';
 import { IdoDen } from '@/app/_lib/db/types/t-ido-den-type';
@@ -61,7 +61,7 @@ import {
   JuchuKizaiMeisaiValues,
   StockTableValues,
 } from '../eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_lib/types';
-import { DetailOerValues, OyaJuchuKizaiMeisaiValues } from './types';
+import { DetailOerValues, OyaJuchuContainerMeisaiValues, OyaJuchuKizaiMeisaiValues } from './types';
 
 /**
  * 明細用受注ヘッダー取得
@@ -317,8 +317,8 @@ export const getOyaJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHead
       kizaiId: d.kizai_id,
       kizaiTankaAmt: eqTanka.find((t) => t.kizai_id === d.kizai_id)?.kizai_tanka_amt || 0,
       kizaiNam: d.kizai_nam ?? '',
-      planKizaiQty: d.plan_kizai_qty,
-      planYobiQty: d.plan_yobi_qty,
+      planKizaiQty: d.plan_kizai_qty ?? 0,
+      planYobiQty: d.plan_yobi_qty ?? 0,
       indentNum: d.indent_num,
     }));
     return juchuKizaiMeisaiData;
@@ -393,15 +393,51 @@ export const getJuchuContainerMeisai = async (juchuHeadId: number, juchuKizaiHea
       juchuKizaiMeisaiId: d.juchu_kizai_meisai_id,
       kizaiId: d.kizai_id,
       kizaiNam: d.kizai_nam,
-      planKicsKizaiQty: d.kics_plan_kizai_qty,
-      planYardKizaiQty: d.yard_plan_kizai_qty,
-      planQty: d.kics_plan_kizai_qty + d.yard_plan_kizai_qty,
+      planKicsKizaiQty: d.kics_plan_kizai_qty ?? 0,
+      planYardKizaiQty: d.yard_plan_kizai_qty ?? 0,
+      planQty: (d.kics_plan_kizai_qty ?? 0) + (d.yard_plan_kizai_qty ?? 0),
       mem: d.mem,
       delFlag: false,
       saveFlag: true,
     }));
 
     return juchuContainerMeisaiData;
+  } catch (e) {
+    console.error(e);
+    throw e;
+  }
+};
+
+/**
+ * 親受注コンテナ明細リスト取得
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @returns 受注コンテナ明細リスト
+ */
+export const getOyaJuchuContainerMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
+  try {
+    const { data: containerData, error: containerError } = await selectOyaJuchuContainerMeisai(
+      juchuHeadId,
+      juchuKizaiHeadId
+    );
+
+    if (containerError) {
+      console.error('getOyaJuchuContainerMeisai error : ', containerError);
+      throw containerError;
+    }
+
+    const oyaJuchuContainerMeisaiData: OyaJuchuContainerMeisaiValues[] = containerData.map((d) => ({
+      juchuHeadId: d.juchu_head_id,
+      juchuKizaiHeadId: d.juchu_kizai_head_id,
+      juchuKizaiMeisaiId: d.juchu_kizai_meisai_id,
+      kizaiId: d.kizai_id,
+      kizaiNam: d.kizai_nam,
+      planKicsKizaiQty: d.kics_plan_kizai_qty ?? 0,
+      planYardKizaiQty: d.yard_plan_kizai_qty ?? 0,
+      mem: d.mem,
+    }));
+
+    return oyaJuchuContainerMeisaiData;
   } catch (e) {
     console.error(e);
     throw e;
@@ -508,29 +544,6 @@ export const getNyushukoFixFlag = async (juchuHeadId: number, juchuKizaiHeadId: 
 };
 
 /**
- * 入出庫実績削除
- * @param juchuHeadId 受注ヘッダーid
- * @param sagyoDenDat 作業日時
- * @param sagyoId 作業id
- * @param kizaiIds 機材id
- * @param connection
- */
-export const delNyushukoResult = async (
-  juchuHeadId: number,
-  sagyoDenDat: string,
-  sagyoId: number,
-  kizaiIds: number[],
-  connection: PoolClient
-) => {
-  try {
-    await deleteKizaiIdNyushukoResult(juchuHeadId, sagyoDenDat, sagyoId, kizaiIds, connection);
-    return true;
-  } catch (e) {
-    throw e;
-  }
-};
-
-/**
  * 入出庫実績全削除
  * @param juchuHeadId 受注ヘッダーid
  * @param sagyoDenDat 作業日時
@@ -539,12 +552,13 @@ export const delNyushukoResult = async (
  */
 export const delAllNyushukoResult = async (
   juchuHeadId: number,
+  juchuKizaiHeadId: number,
   sagyoDenDat: string,
   sagyoId: number,
   connection: PoolClient
 ) => {
   try {
-    await deleteAllNyushukoResult(juchuHeadId, sagyoDenDat, sagyoId, connection);
+    await deleteAllNyushukoResult(juchuHeadId, juchuKizaiHeadId, sagyoDenDat, sagyoId, connection);
     return true;
   } catch (e) {
     throw e;
@@ -562,13 +576,14 @@ export const delAllNyushukoResult = async (
  */
 export const delNyushukoCtnResult = async (
   juchuHeadId: number,
+  juchuKizaiHeadId: number,
   sagyoDenDat: string,
   sagyoId: number,
   kizaiIds: number[],
   connection: PoolClient
 ) => {
   try {
-    await deleteKizaiIdNyushukoCtnResult(juchuHeadId, sagyoDenDat, sagyoId, kizaiIds, connection);
+    await deleteKizaiIdNyushukoCtnResult(juchuHeadId, juchuKizaiHeadId, sagyoDenDat, sagyoId, kizaiIds, connection);
     return true;
   } catch (e) {
     throw e;
@@ -585,12 +600,13 @@ export const delNyushukoCtnResult = async (
  */
 export const delAllNyushukoCtnResult = async (
   juchuHeadId: number,
+  juchuKizaiHeadId: number,
   sagyoDenDat: string,
   sagyoId: number,
   connection: PoolClient
 ) => {
   try {
-    await deleteAllNyushukoCtnResult(juchuHeadId, sagyoDenDat, sagyoId, connection);
+    await deleteAllNyushukoCtnResult(juchuHeadId, juchuKizaiHeadId, sagyoDenDat, sagyoId, connection);
     return true;
   } catch (e) {
     throw e;

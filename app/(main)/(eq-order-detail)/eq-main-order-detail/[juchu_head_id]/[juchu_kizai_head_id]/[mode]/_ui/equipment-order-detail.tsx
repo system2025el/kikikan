@@ -790,7 +790,9 @@ const EquipmentOrderDetail = (props: {
    * @param memo メモ内容
    */
   const handleMemoChange = (rowIndex: number, memo: string) => {
-    setJuchuKizaiMeisaiList((prev) => prev.map((data, index) => (index === rowIndex ? { ...data, mem: memo } : data)));
+    setJuchuKizaiMeisaiList((prev) =>
+      prev.filter((d) => !d.delFlag).map((data, index) => (index === rowIndex ? { ...data, mem: memo } : data))
+    );
   };
 
   /**
@@ -1230,9 +1232,6 @@ const EquipmentOrderDetail = (props: {
    * @param data 選択された機材データ
    */
   const setEqpts = async (data: SelectedEqptsValues[]) => {
-    /**
-     * 同じ明細idのものははじくようにする
-     */
     setIsDetailLoading(true);
     const kicsDat = getValues('kicsShukoDat');
     const yardDat = getValues('yardShukoDat');

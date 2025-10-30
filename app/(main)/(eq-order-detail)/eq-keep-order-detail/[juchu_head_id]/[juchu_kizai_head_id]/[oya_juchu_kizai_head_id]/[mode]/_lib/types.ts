@@ -18,14 +18,6 @@ export const KeepJuchuKizaiHeadSchema = z
     yardShukoDat: z.date().nullable(),
     yardNyukoDat: z.date().nullable(),
   })
-  // .refine((data) => data.kicsShukoDat || data.yardShukoDat, {
-  //   message: '',
-  //   path: ['kicsShukoDat'],
-  // })
-  // .refine((data) => data.kicsShukoDat || data.yardShukoDat, {
-  //   message: validationMessages.required(),
-  //   path: ['yardShukoDat'],
-  // })
   .refine((data) => data.kicsNyukoDat || data.yardNyukoDat, {
     message: '',
     path: ['kicsNyukoDat'],
@@ -46,9 +38,10 @@ export type KeepJuchuKizaiMeisaiValues = {
   mem: string | null;
   kizaiId: number;
   kizaiNam: string;
-  oyaPlanKizaiQty: number | null;
-  oyaPlanYobiQty: number | null;
-  keepQty: number | null;
+  oyaPlanKizaiQty: number;
+  oyaPlanYobiQty: number;
+  keepQty: number;
+  indentNum: number;
   delFlag: boolean;
   saveFlag: boolean;
 };
@@ -60,10 +53,10 @@ export type KeepJuchuContainerMeisaiValues = {
   mem: string | null;
   kizaiId: number;
   kizaiNam: string;
-  oyaPlanKicsKizaiQty: number | null;
-  oyaPlanYardKizaiQty: number | null;
-  kicsKeepQty: number | null;
-  yardKeepQty: number | null;
+  oyaPlanKicsKizaiQty: number;
+  oyaPlanYardKizaiQty: number;
+  kicsKeepQty: number;
+  yardKeepQty: number;
   delFlag: boolean;
   saveFlag: boolean;
 };

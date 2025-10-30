@@ -55,6 +55,7 @@ import { Loading } from '@/app/(main)/_ui/loading';
 import { getStockList } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 import {
   DetailOerValues,
+  OyaJuchuContainerMeisaiValues,
   OyaJuchuKizaiMeisaiValues,
   OyaJuchuKizaiNyushukoValues,
 } from '@/app/(main)/(eq-order-detail)/_lib/types';
@@ -960,7 +961,10 @@ export const EquipmentReturnOrderDetail = (props: {
    * 機材追加時
    * @param data 親受注機材明細データ
    */
-  const setEqpts = async (eqData: OyaJuchuKizaiMeisaiValues[], containerData: JuchuContainerMeisaiValues[]) => {
+  const setEqpts = async (eqData: OyaJuchuKizaiMeisaiValues[], containerData: OyaJuchuContainerMeisaiValues[]) => {
+    /**
+     * 同じ明細idのものははじくようにする
+     */
     setIsDetailLoading(true);
     const eqIds = new Set(returnJuchuKizaiMeisaiList.filter((d) => !d.delFlag).map((d) => d.kizaiId));
     // const filterEqData = eqData.filter((d) => !eqIds.has(d.kizaiId));
@@ -974,8 +978,8 @@ export const EquipmentReturnOrderDetail = (props: {
       kizaiId: d.kizaiId,
       kizaiTankaAmt: d.kizaiTankaAmt,
       kizaiNam: d.kizaiNam,
-      oyaPlanKizaiQty: d.planKizaiQty ?? 0,
-      oyaPlanYobiQty: d.planYobiQty ?? 0,
+      oyaPlanKizaiQty: d.planKizaiQty,
+      oyaPlanYobiQty: d.planYobiQty,
       planKizaiQty: 0,
       planYobiQty: 0,
       planQty: 0,
@@ -1020,8 +1024,8 @@ export const EquipmentReturnOrderDetail = (props: {
       mem: '',
       kizaiId: d.kizaiId,
       kizaiNam: d.kizaiNam,
-      oyaPlanKicsKizaiQty: d.planKicsKizaiQty ?? 0,
-      oyaPlanYardKizaiQty: d.planYardKizaiQty ?? 0,
+      oyaPlanKicsKizaiQty: d.planKicsKizaiQty,
+      oyaPlanYardKizaiQty: d.planYardKizaiQty,
       planKicsKizaiQty: 0,
       planYardKizaiQty: 0,
       planQty: 0,
