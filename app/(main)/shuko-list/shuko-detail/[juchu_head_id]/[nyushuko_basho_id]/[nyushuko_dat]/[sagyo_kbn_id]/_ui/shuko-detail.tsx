@@ -23,11 +23,15 @@ import { BackButton } from '@/app/(main)/_ui/buttons';
 import { DateTime, TestDate } from '@/app/(main)/_ui/date';
 
 import { confirmChildJuchuKizaiHead, updShukoDetail } from '../_lib/funcs';
-import { ShukoDetailTableValues } from '../_lib/types';
+import { ShukoDetailTableValues, ShukoDetailValues } from '../_lib/types';
 import { ShukoDetailTable } from './shuko-detail-table';
 
-export const ShukoDetail = (props: { shukoDetailData: ShukoDetailTableValues[]; fixFlag: boolean }) => {
-  const { shukoDetailData } = props;
+export const ShukoDetail = (props: {
+  shukoDetailData: ShukoDetailValues;
+  shukoDetailTableData: ShukoDetailTableValues[];
+  fixFlag: boolean;
+}) => {
+  const { shukoDetailData, shukoDetailTableData } = props;
 
   // user情報
   const user = useUserStore((state) => state.user);
@@ -50,14 +54,14 @@ export const ShukoDetail = (props: { shukoDetailData: ShukoDetailTableValues[]; 
   const handleDeparture = async () => {
     if (!user) return;
 
-    const diffCheck = shukoDetailData.find((data) => data.diff !== 0);
+    const diffCheck = shukoDetailTableData.find((data) => data.diff !== 0);
 
     if (diffCheck) {
       setDepartureOpen(true);
       return;
     }
 
-    const updateResult = await updShukoDetail(shukoDetailData, 1, user.name);
+    const updateResult = await updShukoDetail(shukoDetailData, shukoDetailTableData, 1, user.name);
 
     if (updateResult) {
       setFixFlag(true);
@@ -76,18 +80,17 @@ export const ShukoDetail = (props: { shukoDetailData: ShukoDetailTableValues[]; 
   const handleRelease = async () => {
     if (!user) return;
 
-    const juchuHeadId = shukoDetailData[0].juchuHeadId;
-    const childJuchuKizaiHeadCount = await confirmChildJuchuKizaiHead(
-      juchuHeadId,
-      shukoDetailData[0].juchuKizaiHeadIdv!
-    );
+    const juchuKizaiHeadIds = [
+      ...new Set(shukoDetailTableData.map((d) => d.juchuKizaiHeadId).filter((id) => id !== null)),
+    ];
+    const childJuchuKizaiHeadCount = await confirmChildJuchuKizaiHead(shukoDetailData.juchuHeadId, juchuKizaiHeadIds);
 
     if (childJuchuKizaiHeadCount && childJuchuKizaiHeadCount > 0) {
       setReleaseOpen(true);
       return;
     }
 
-    const updateResult = await updShukoDetail(shukoDetailData, 0, user.name);
+    const updateResult = await updShukoDetail(shukoDetailData, shukoDetailTableData, 0, user.name);
 
     if (updateResult) {
       setFixFlag(false);
@@ -107,14 +110,14 @@ export const ShukoDetail = (props: { shukoDetailData: ShukoDetailTableValues[]; 
       <Paper variant="outlined">
         <Box display={'flex'} justifyContent={'space-between'} alignItems="center" p={2}>
           <Typography fontSize={'large'}>
-            出庫明細({shukoDetailData[0].sagyoKbnId === 20 ? '出庫' : 'スタンバイ'})
+            出庫明細({shukoDetailData.sagyoKbnId === 20 ? '出庫' : 'スタンバイ'})
           </Typography>
           <Grid2 container alignItems={'center'} spacing={2}>
             {fixFlag && <Typography>出庫済</Typography>}
             <Button
               onClick={handleDeparture}
               disabled={fixFlag}
-              sx={{ display: shukoDetailData[0].sagyoKbnId === 20 ? 'block' : 'none' }}
+              sx={{ display: shukoDetailData.sagyoKbnId === 20 ? 'block' : 'none' }}
             >
               出発
             </Button>
@@ -122,7 +125,7 @@ export const ShukoDetail = (props: { shukoDetailData: ShukoDetailTableValues[]; 
               color="error"
               onClick={handleRelease}
               disabled={!fixFlag}
-              sx={{ display: shukoDetailData[0].sagyoKbnId === 20 ? 'block' : 'none' }}
+              sx={{ display: shukoDetailData.sagyoKbnId === 20 ? 'block' : 'none' }}
             >
               出発解除
             </Button>
@@ -133,12 +136,12 @@ export const ShukoDetail = (props: { shukoDetailData: ShukoDetailTableValues[]; 
           <Grid2 container size={{ xs: 12, sm: 12, md: 6 }} direction={'column'} p={{ sx: 1, sm: 1, md: 1 }}>
             <Box display={'flex'} alignItems={'center'}>
               <Typography mr={4}>受注番号</Typography>
-              <TextField value={shukoDetailData[0].juchuHeadId} disabled />
+              <TextField value={shukoDetailData.juchuHeadId} disabled />
             </Box>
             <Box display={'flex'} alignItems={'center'}>
               <Typography mr={4}>出庫日時</Typography>
               <DateTime
-                date={shukoDetailData[0].nyushukoDat ? new Date(shukoDetailData[0].nyushukoDat) : null}
+                date={shukoDetailData.nyushukoDat ? new Date(shukoDetailData.nyushukoDat) : null}
                 onChange={() => {}}
                 onAccept={() => {}}
                 disabled
@@ -146,32 +149,32 @@ export const ShukoDetail = (props: { shukoDetailData: ShukoDetailTableValues[]; 
             </Box>
             <Box display={'flex'} alignItems={'center'}>
               <Typography mr={4}>出庫場所</Typography>
-              <TextField value={shukoDetailData[0].nyushukoBashoId === 1 ? 'KICS' : 'YARD'} disabled />
+              <TextField value={shukoDetailData.nyushukoBashoId === 1 ? 'KICS' : 'YARD'} disabled />
             </Box>
             <Box display={'flex'} alignItems={'center'}>
               <Typography mr={2}>機材明細名</Typography>
-              <TextField value={shukoDetailData[0].headNamv} disabled />
+              <TextField value={shukoDetailTableData[0].headNamv} disabled />
             </Box>
           </Grid2>
           <Grid2 container size={{ xs: 12, sm: 12, md: 6 }} direction={'column'} p={{ sx: 1, sm: 1, md: 1 }}>
             <Box display={'flex'} alignItems={'center'}>
               <Typography mr={6}>公演名</Typography>
-              <TextField value={shukoDetailData[0].koenNam} fullWidth disabled />
+              <TextField value={shukoDetailTableData[0].koenNam} fullWidth disabled />
             </Box>
             <Box display={'flex'} alignItems={'center'}>
               <Typography mr={4}>公演場所</Typography>
-              <TextField value={shukoDetailData[0].koenbashoNam} fullWidth disabled />
+              <TextField value={shukoDetailTableData[0].koenbashoNam} fullWidth disabled />
             </Box>
             <Box display={'flex'} alignItems={'center'}>
               <Typography mr={6}>顧客名</Typography>
-              <TextField value={shukoDetailData[0].kokyakuNam} fullWidth disabled />
+              <TextField value={shukoDetailTableData[0].kokyakuNam} fullWidth disabled />
             </Box>
           </Grid2>
         </Grid2>
         <Divider />
         <Box width={'100%'}>
           <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} width={'60vw'} p={1}>
-            <Typography>全{shukoDetailData ? shukoDetailData.length : 0}件</Typography>
+            <Typography>全{shukoDetailTableData ? shukoDetailTableData.length : 0}件</Typography>
             <Grid2 container spacing={2}>
               <Typography sx={{ backgroundColor: 'rgba(158, 158, 158, 1)' }}>済</Typography>
               <Typography sx={{ backgroundColor: 'rgba(255, 171, 64, 1)' }}>不足</Typography>
@@ -179,7 +182,7 @@ export const ShukoDetail = (props: { shukoDetailData: ShukoDetailTableValues[]; 
               <Typography sx={{ backgroundColor: 'rgba(68, 138, 255, 1)' }}>コンテナ</Typography>
             </Grid2>
           </Box>
-          {shukoDetailData.length > 0 && <ShukoDetailTable datas={shukoDetailData} />}
+          {shukoDetailTableData.length > 0 && <ShukoDetailTable datas={shukoDetailTableData} />}
         </Box>
       </Paper>
       <Dialog open={departureOpen}>

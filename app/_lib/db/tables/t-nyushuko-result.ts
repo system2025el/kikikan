@@ -6,6 +6,8 @@ import { SCHEMA } from '../supabase';
 
 export const deleteNyushukoResult = async (
   juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  juchuKizaiMeisaiId: number,
   sagyoKbnId: number,
   nyushukoDat: string,
   sagyoId: number,
@@ -18,14 +20,25 @@ export const deleteNyushukoResult = async (
         ${SCHEMA}.t_nyushuko_result
       WHERE
         juchu_head_id = $1
-        AND sagyo_kbn_id = $2
-        AND sagyo_den_dat = $3
-        AND sagyo_id = $4
-        AND kizai_id = $5
-        AND rfid_tag_id = ANY($6)
+        AND juchu_kizai_head_id = $2
+        AND juchu_kizai_meisai_id = $3
+        AND sagyo_kbn_id = $4
+        AND sagyo_den_dat = $5
+        AND sagyo_id = $6
+        AND kizai_id = $7
+        AND rfid_tag_id = ANY($8)
     `;
 
-  const values = [juchuHeadId, sagyoKbnId, nyushukoDat, sagyoId, kizaiId, rfidTagIds];
+  const values = [
+    juchuHeadId,
+    juchuKizaiHeadId,
+    juchuKizaiMeisaiId,
+    sagyoKbnId,
+    nyushukoDat,
+    sagyoId,
+    kizaiId,
+    rfidTagIds,
+  ];
 
   try {
     await connection.query(query, values);

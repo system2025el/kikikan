@@ -1,4 +1,5 @@
 import { getShukoDetail, getShukoFixFlag } from './_lib/funcs';
+import { ShukoDetailValues } from './_lib/types';
 import { ShukoDetail } from './_ui/shuko-detail';
 
 const Page = async (props: {
@@ -10,26 +11,33 @@ const Page = async (props: {
   }>;
 }) => {
   const params = await props.params;
-  const date = decodeURIComponent(params.nyushuko_dat);
-  const shukoDetailData = await getShukoDetail(
+
+  const shukoDetailData: ShukoDetailValues = {
+    juchuHeadId: Number(params.juchu_head_id),
+    nyushukoBashoId: Number(params.nyushuko_basho_id),
+    nyushukoDat: decodeURIComponent(params.nyushuko_dat),
+    sagyoKbnId: Number(params.sagyo_kbn_id),
+  };
+
+  const shukoDetailTableData = await getShukoDetail(
     Number(params.juchu_head_id),
     Number(params.nyushuko_basho_id),
-    date,
+    shukoDetailData.nyushukoDat,
     Number(params.sagyo_kbn_id)
   );
-  if (!shukoDetailData || shukoDetailData.length <= 0) {
+  if (!shukoDetailTableData || shukoDetailTableData.length <= 0) {
     return <div>出庫明細が見つかりません。</div>;
   }
 
-  console.log(shukoDetailData[0].juchuKizaiHeadIdv);
-
   const fixFlag = await getShukoFixFlag(
     Number(params.juchu_head_id),
-    shukoDetailData[0].juchuKizaiHeadIdv![0],
+    shukoDetailTableData[0].juchuKizaiHeadId!,
     60,
-    date,
+    shukoDetailData.nyushukoDat,
     Number(params.nyushuko_basho_id)
   );
-  return <ShukoDetail shukoDetailData={shukoDetailData} fixFlag={fixFlag} />;
+  return (
+    <ShukoDetail shukoDetailData={shukoDetailData} shukoDetailTableData={shukoDetailTableData} fixFlag={fixFlag} />
+  );
 };
 export default Page;
