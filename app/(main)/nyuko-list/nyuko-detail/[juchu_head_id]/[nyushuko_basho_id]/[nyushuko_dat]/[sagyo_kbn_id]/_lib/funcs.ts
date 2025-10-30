@@ -1,13 +1,12 @@
 'use server';
 
 import pool from '@/app/_lib/db/postgres';
-import { selectChildJuchuKizaiHeadConfirm } from '@/app/_lib/db/tables/t-juchu-kizai-head';
 import { updateNyushukoFix } from '@/app/_lib/db/tables/t-nyushuko-fix';
-import { selectShukoDetail } from '@/app/_lib/db/tables/v-nyushuko-den2-lst';
+import { selectNyushukoDetail } from '@/app/_lib/db/tables/v-nyushuko-den2-lst';
 import { NyushukoFix } from '@/app/_lib/db/types/t-nyushuko-fix-type';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
-import { NyukoDetailTableValues } from './types';
+import { NyukoDetailTableValues, NyukoDetailValues } from './types';
 
 /**
  * 入庫明細取得
@@ -16,19 +15,25 @@ import { NyukoDetailTableValues } from './types';
  * @param nyushukoDat 入出庫日
  * @returns
  */
-export const getNyukoDetail = async (juchuHeadId: number, nyushukoBashoId: number, nyushukoDat: string) => {
+export const getNyukoDetail = async (
+  juchuHeadId: number,
+  nyushukoBashoId: number,
+  nyushukoDat: string,
+  sagyoKbnId: number
+) => {
   try {
-    const { data, error } = await selectShukoDetail(juchuHeadId, nyushukoBashoId, nyushukoDat, 30);
+    const { data, error } = await selectNyushukoDetail(juchuHeadId, nyushukoBashoId, nyushukoDat, sagyoKbnId);
 
     if (error) {
-      console.error('getShukoDetail error : ', error);
+      console.error('getNyukoDetail error : ', error);
       throw error;
     }
 
-    const shukoDetailData: NyukoDetailTableValues[] = data.map((d) => ({
+    const nyukoDetailData: NyukoDetailTableValues[] = data.map((d) => ({
       juchuHeadId: d.juchu_head_id,
-      juchuKizaiHeadIdv: d.juchu_kizai_head_idv.split(',').map(Number),
-      juchuKizaiHeadKbnv: Number(d.juchu_kizai_head_kbnv),
+      juchuKizaiHeadId: d.juchu_kizai_head_id,
+      juchuKizaiMeisaiId: d.juchu_kizai_meisai_id,
+      juchuKizaiHeadKbn: d.juchu_kizai_head_kbn,
       headNamv: d.head_namv,
       kizaiId: d.kizai_id,
       kizaiNam: d.kizai_nam,
@@ -44,9 +49,11 @@ export const getNyukoDetail = async (juchuHeadId: number, nyushukoBashoId: numbe
       sagyoKbnId: d.sagyo_kbn_id,
       diff: (d.result_qty ?? 0) + (d.result_adj_qty ?? 0) - (d.plan_qty ?? 0),
       ctnFlg: d.ctn_flg,
+      dspOrdNumMeisai: d.dsp_ord_num_meisai,
+      indentNum: d.indent_num ?? 0,
     }));
 
-    return shukoDetailData;
+    return nyukoDetailData;
   } catch (e) {
     console.error(e);
   }
@@ -59,20 +66,28 @@ export const getNyukoDetail = async (juchuHeadId: number, nyushukoBashoId: numbe
  * @param userNam ユーザー名
  * @returns
  */
-export const updNyukoDetail = async (nyukoDetailData: NyukoDetailTableValues[], userNam: string) => {
+export const updNyukoDetail = async (
+  nyukoDetailData: NyukoDetailValues,
+  nyukoDetailTableData: NyukoDetailTableValues[],
+  userNam: string
+) => {
   const connection = await pool.connect();
 
-  if (nyukoDetailData.length === 0 || !nyukoDetailData[0].juchuKizaiHeadIdv) {
+  if (nyukoDetailTableData.length === 0) {
     console.error('No data to update');
     return;
   }
 
-  const updateFixData: NyushukoFix[] = nyukoDetailData[0].juchuKizaiHeadIdv.map((id) => ({
-    juchu_head_id: nyukoDetailData[0].juchuHeadId,
+  const juchuKizaiHeadIds = [
+    ...new Set(nyukoDetailTableData.map((d) => d.juchuKizaiHeadId).filter((id) => id !== null)),
+  ];
+
+  const updateFixData: NyushukoFix[] = juchuKizaiHeadIds.map((id) => ({
+    juchu_head_id: nyukoDetailData.juchuHeadId,
     juchu_kizai_head_id: id,
     sagyo_kbn_id: 70,
-    sagyo_den_dat: nyukoDetailData[0].nyushukoDat,
-    sagyo_id: nyukoDetailData[0].nyushukoBashoId,
+    sagyo_den_dat: nyukoDetailData.nyushukoDat,
+    sagyo_id: nyukoDetailData.nyushukoBashoId,
     sagyo_fix_flg: 1,
     upd_dat: toJapanTimeString(),
     upd_user: userNam,

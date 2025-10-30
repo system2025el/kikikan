@@ -20,10 +20,10 @@ const Page = async (props: {
   };
 
   const shukoDetailTableData = await getShukoDetail(
-    Number(params.juchu_head_id),
-    Number(params.nyushuko_basho_id),
+    shukoDetailData.juchuHeadId,
+    shukoDetailData.nyushukoBashoId,
     shukoDetailData.nyushukoDat,
-    Number(params.sagyo_kbn_id)
+    shukoDetailData.sagyoKbnId
   );
   if (!shukoDetailTableData || shukoDetailTableData.length <= 0) {
     return <div>出庫明細が見つかりません。</div>;

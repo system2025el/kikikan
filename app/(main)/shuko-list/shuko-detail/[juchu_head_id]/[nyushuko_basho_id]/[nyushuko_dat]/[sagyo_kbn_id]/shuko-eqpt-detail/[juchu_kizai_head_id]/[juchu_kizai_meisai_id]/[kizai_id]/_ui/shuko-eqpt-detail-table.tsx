@@ -11,15 +11,13 @@ import { ShukoEqptDetailTableValues } from '../_lib/types';
 export const ShukoEqptDetailTable = (props: {
   datas: ShukoEqptDetailTableValues[];
   selected: number[];
-  setSelected: Dispatch<SetStateAction<number[]>>;
   handleSelect: (selected: number[]) => void;
 }) => {
-  const { datas, selected, setSelected, handleSelect } = props;
+  const { datas, selected, handleSelect } = props;
 
   const handleCheck = (index: number) => {
     const newSelected = selected.includes(index) ? selected.filter((item) => item !== index) : [...selected, index];
     handleSelect(newSelected);
-    //setSelected(newSelected);
   };
   return (
     <TableContainer sx={{ overflow: 'auto', maxHeight: '80vh' }}>

@@ -113,7 +113,7 @@ export const ShukoDetail = (props: {
             出庫明細({shukoDetailData.sagyoKbnId === 20 ? '出庫' : 'スタンバイ'})
           </Typography>
           <Grid2 container alignItems={'center'} spacing={2}>
-            {fixFlag && <Typography>出庫済</Typography>}
+            {fixFlag && <Typography>出発済</Typography>}
             <Button
               onClick={handleDeparture}
               disabled={fixFlag}

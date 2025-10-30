@@ -1,7 +1,15 @@
+export type NyukoDetailValues = {
+  juchuHeadId: number;
+  nyushukoBashoId: number;
+  nyushukoDat: string;
+  sagyoKbnId: number;
+};
+
 export type NyukoDetailTableValues = {
   juchuHeadId: number;
-  juchuKizaiHeadIdv: number[] | null;
-  juchuKizaiHeadKbnv: number;
+  juchuKizaiHeadId: number | null;
+  juchuKizaiMeisaiId: number;
+  juchuKizaiHeadKbn: number;
   headNamv: string | null;
   kizaiId: number | null;
   kizaiNam: string | null;
@@ -17,4 +25,6 @@ export type NyukoDetailTableValues = {
   sagyoKbnId: number | null;
   diff: number;
   ctnFlg: number | null;
+  dspOrdNumMeisai: number | null;
+  indentNum: number;
 };

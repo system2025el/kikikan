@@ -137,6 +137,10 @@ export const ShukoEqptDetail = (props: {
     }
   };
 
+  /**
+   * チェックボックス選択時
+   * @param selected 選択index
+   */
   const handleSelect = (selected: number[]) => {
     setSelected(selected);
   };
@@ -215,12 +219,7 @@ export const ShukoEqptDetail = (props: {
         {isLoading ? (
           <Loading />
         ) : (
-          <ShukoEqptDetailTable
-            datas={shukoEqptDetailList}
-            selected={selected}
-            setSelected={setSelected}
-            handleSelect={handleSelect}
-          />
+          <ShukoEqptDetailTable datas={shukoEqptDetailList} selected={selected} handleSelect={handleSelect} />
         )}
       </Paper>
       <Dialog open={deleteOpen}>
