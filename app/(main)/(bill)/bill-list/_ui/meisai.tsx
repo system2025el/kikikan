@@ -16,22 +16,27 @@ import { ReadOnlyYenNumberElement } from './yen';
  * @returns 請求の明細項目のUIコンポーネント
  */
 export const MeisaiLines = ({ index }: { index: number }) => {
-  const [isEditing, setIsEditing] = useState(false);
+  /* useState --------------------------------------------------------- */
+  /** フォーカスしている行 */
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+
+  /* useForm ---------------------------------------------------------- */
   const { control, setValue } = useFormContext<BillHeadValues>();
   // フォームのフィールド（明細）
   const meisaiFields = useFieldArray({ control, name: `meisaiHeads.${index}.meisai` });
-
-  /* 明細項目の順番を帰るボタン押下時 */
-  const moveRow = (i: number, direction: number) => {
-    meisaiFields.move(i, i + direction);
-  };
-
   // 明細行の監視
   const watchedMeisai = useWatch({
     control,
     name: `meisaiHeads.${index}.meisai`,
   });
 
+  /* methods ---------------------------------------------------------- */
+  /* 明細項目の順番を帰るボタン押下時 */
+  const moveRow = (i: number, direction: number) => {
+    meisaiFields.move(i, i + direction);
+  };
+
+  /* useEffect -------------------------------------------------------- */
   useEffect(() => {
     watchedMeisai?.forEach((m, i) => {
       const qty = Number(m.qty) || 0;
@@ -104,7 +109,7 @@ export const MeisaiLines = ({ index }: { index: number }) => {
                   <TextField
                     {...field}
                     value={
-                      isEditing
+                      editingIndex === i
                         ? (field.value ?? '')
                         : typeof field.value === 'number' && !isNaN(field.value)
                           ? `¥${Math.abs(field.value).toLocaleString()}`
@@ -112,7 +117,7 @@ export const MeisaiLines = ({ index }: { index: number }) => {
                     }
                     type="text"
                     onFocus={(e) => {
-                      setIsEditing(true);
+                      setEditingIndex(i);
                       const rawValue = String(field.value ?? '');
                       e.target.value = rawValue;
                     }}
@@ -120,7 +125,7 @@ export const MeisaiLines = ({ index }: { index: number }) => {
                       const rawValue = e.target.value.replace(/[¥,]/g, '');
                       const numericValue = Math.abs(Number(rawValue));
                       field.onChange(numericValue);
-                      setIsEditing(false);
+                      setEditingIndex(null);
                     }}
                     onChange={(e) => {
                       const raw = e.target.value.replace(/[^\d]/g, '');

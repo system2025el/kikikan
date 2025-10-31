@@ -7,6 +7,11 @@ import { TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { CloseMasterDialogButton } from '../../_ui/buttons';
 
+/**
+ * 見積書作成確認ダイアログ
+ * @param param0
+ * @returns {JSX.Element} 見積作成時のダイアログコンポーネント
+ */
 export const CreateQuotDialog = ({
   inputRef,
   setDialogOpen,
@@ -17,7 +22,7 @@ export const CreateQuotDialog = ({
   const router = useRouter();
 
   /* methods ------------------------------------- */
-  /* 自動生成ボタン押下 */
+  /** 自動生成ボタン押下 */
   const onSubmit = (data: { juchuHeadId: number | null }) => {
     console.log(data.juchuHeadId, 'の見積もりを自動生成');
     router.push(`/quotation-list/create?juchuId=${data.juchuHeadId}`);

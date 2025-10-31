@@ -1,17 +1,16 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { alpha, Grid2, useTheme } from '@mui/material';
-import { SetStateAction, useEffect, useState } from 'react';
+import { Grid2 } from '@mui/material';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { CheckboxElement, TextareaAutosizeElement, TextFieldElement } from 'react-hook-form-mui';
+import { TextFieldElement } from 'react-hook-form-mui';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
-import { FormBox, FormItemsType } from '@/app/(main)/_ui/form-box';
+import { FormBox } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { FAKE_NEW_ID } from '../../_lib/constants';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
-import { BumonsMasterDialogValues } from '../../bumons-master/_lib/types';
 import { emptyDaibumon, formItems } from '../_lib/datas';
 import { addNewDaibumon, getChosenDaibumon, updateDaibumon } from '../_lib/funcs';
 import { DaibumonsMasterDialogSchema, DaibumonsMasterDialogValues } from '../_lib/types';
