@@ -98,6 +98,7 @@ export const SecondDialogPage = ({
   ) => {
     console.log(kizaiHeadId, checked);
     if (checked) {
+      // 一式表示
       const data = await getJuchuIsshikiMeisai(juchuId, kizaiHeadId);
       field.append({
         mituMeisaiHeadNam: headNam,
@@ -109,6 +110,7 @@ export const SecondDialogPage = ({
         meisai: data,
       });
     } else {
+      // 全表示
       const data = await getJuchuKizaiMeisaiList(juchuId, kizaiHeadId);
       console.log(data);
       // 取得した内容をテーブル内の明細に入れる
