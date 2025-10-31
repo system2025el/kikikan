@@ -322,22 +322,22 @@ export const saveReturnJuchuKizai = async (
       }
     }
 
-    // 入出庫確定更新
-    if (returnJuchuKizaiMeisaiList.length > 0 || returnJuchuContainerMeisaiList.length > 0) {
-      const kics =
-        returnJuchuKizaiMeisaiList.filter((d) => d.shozokuId === 1 && !d.delFlag).length > 0 ||
-        returnJuchuContainerMeisaiList.filter((d) => d.planKicsKizaiQty && !d.delFlag).length > 0
-          ? true
-          : false;
-      const yard =
-        returnJuchuKizaiMeisaiList.filter((d) => d.shozokuId === 2 && !d.delFlag).length > 0 ||
-        returnJuchuContainerMeisaiList.filter((d) => d.planYardKizaiQty && !d.delFlag).length > 0
-          ? true
-          : false;
+    // // 入出庫確定更新
+    // if (returnJuchuKizaiMeisaiList.length > 0 || returnJuchuContainerMeisaiList.length > 0) {
+    //   const kics =
+    //     returnJuchuKizaiMeisaiList.filter((d) => d.shozokuId === 1 && !d.delFlag).length > 0 ||
+    //     returnJuchuContainerMeisaiList.filter((d) => d.planKicsKizaiQty && !d.delFlag).length > 0
+    //       ? true
+    //       : false;
+    //   const yard =
+    //     returnJuchuKizaiMeisaiList.filter((d) => d.shozokuId === 2 && !d.delFlag).length > 0 ||
+    //     returnJuchuContainerMeisaiList.filter((d) => d.planYardKizaiQty && !d.delFlag).length > 0
+    //       ? true
+    //       : false;
 
-      const nyushukoFixResult = await updReturnNyushukoFix(data, kics, yard, userNam, connection);
-      console.log('返却入出庫確定更新', nyushukoFixResult);
-    }
+    //   const nyushukoFixResult = await updReturnNyushukoFix(data, kics, yard, userNam, connection);
+    //   console.log('返却入出庫確定更新', nyushukoFixResult);
+    // }
 
     await connection.query('COMMIT');
     return true;
@@ -527,6 +527,7 @@ export const getReturnJuchuKizaiMeisai = async (
       planKizaiQty: d.plan_kizai_qty ? -1 * d.plan_kizai_qty : d.plan_kizai_qty,
       planYobiQty: d.plan_yobi_qty ? -1 * d.plan_yobi_qty : d.plan_yobi_qty,
       planQty: d.plan_qty ? -1 * d.plan_qty : d.plan_qty,
+      dspOrdNum: d.dsp_ord_num,
       indentNum: d.indent_num ?? 0,
       delFlag: false,
       saveFlag: true,
@@ -557,6 +558,8 @@ export const addReturnJuchuKizaiMeisai = async (
     plan_kizai_qty: d.planKizaiQty ? -1 * d.planKizaiQty : d.planKizaiQty,
     plan_yobi_qty: d.planYobiQty ? -1 * d.planYobiQty : d.planYobiQty,
     mem: d.mem,
+    dspOrdNum: d.dspOrdNum,
+    indentNum: d.indentNum,
     add_dat: toJapanTimeString(),
     add_user: userNam,
     shozoku_id: d.shozokuId,
@@ -591,6 +594,8 @@ export const updReturnJuchuKizaiMeisai = async (
     plan_kizai_qty: d.planKizaiQty ? -1 * d.planKizaiQty : d.planKizaiQty,
     plan_yobi_qty: d.planYobiQty ? -1 * d.planYobiQty : d.planYobiQty,
     mem: d.mem,
+    dspOrdNum: d.dspOrdNum,
+    indentNum: d.indentNum,
     upd_dat: toJapanTimeString(),
     upd_user: userNam,
     shozoku_id: d.shozokuId,
@@ -675,6 +680,8 @@ export const getReturnJuchuContainerMeisai = async (
       planKicsKizaiQty: d.kics_plan_kizai_qty ? -1 * d.kics_plan_kizai_qty : d.kics_plan_kizai_qty,
       planYardKizaiQty: d.yard_plan_kizai_qty ? -1 * d.yard_plan_kizai_qty : d.yard_plan_kizai_qty,
       planQty: -1 * (d.kics_plan_kizai_qty + d.yard_plan_kizai_qty),
+      dspOrdNum: d.dsp_ord_num,
+      indentNum: 0,
       delFlag: false,
       saveFlag: true,
     }));
@@ -703,6 +710,8 @@ export const addReturnJuchuContainerMeisai = async (
     plan_kizai_qty: d.planKicsKizaiQty ? -1 * d.planKicsKizaiQty : d.planKicsKizaiQty,
     shozoku_id: 1,
     mem: d.mem,
+    dspOrdNum: d.dspOrdNum,
+    indentNum: d.indentNum,
     add_dat: toJapanTimeString(),
     add_user: userNam,
   }));
@@ -715,6 +724,8 @@ export const addReturnJuchuContainerMeisai = async (
     plan_kizai_qty: d.planYardKizaiQty ? -1 * d.planYardKizaiQty : d.planYardKizaiQty,
     shozoku_id: 2,
     mem: d.mem,
+    dspOrdNum: d.dspOrdNum,
+    indentNum: d.indentNum,
     add_dat: toJapanTimeString(),
     add_user: userNam,
   }));
@@ -750,6 +761,8 @@ export const updReturnJuchuContainerMeisai = async (
     plan_kizai_qty: d.planKicsKizaiQty ? -1 * d.planKicsKizaiQty : d.planKicsKizaiQty,
     shozoku_id: 1,
     mem: d.mem,
+    dspOrdNum: d.dspOrdNum,
+    indentNum: d.indentNum,
     upd_dat: toJapanTimeString(),
     upd_user: userNam,
   }));
@@ -762,6 +775,8 @@ export const updReturnJuchuContainerMeisai = async (
     plan_kizai_qty: d.planYardKizaiQty ? -1 * d.planYardKizaiQty : d.planYardKizaiQty,
     shozoku_id: 2,
     mem: d.mem,
+    dspOrdNum: d.dspOrdNum,
+    indentNum: d.indentNum,
     upd_dat: toJapanTimeString(),
     upd_user: userNam,
   }));
@@ -824,6 +839,8 @@ export const addReturnNyushukoDen = async (
     sagyo_id: d.shozokuId,
     kizai_id: d.kizaiId,
     plan_qty: d.planQty,
+    dspOrdNum: d.dspOrdNum,
+    indentNum: d.indentNum,
     add_dat: toJapanTimeString(),
     add_user: userNam,
   }));
@@ -863,6 +880,8 @@ export const updReturnNyushukoDen = async (
     sagyo_id: d.shozokuId,
     kizai_id: d.kizaiId,
     plan_qty: d.planQty,
+    dspOrdNum: d.dspOrdNum,
+    indentNum: d.indentNum,
     add_dat: toJapanTimeString(),
     add_user: userNam,
   }));
@@ -930,6 +949,8 @@ export const updReturnContainerNyushukoDen = async (
             sagyo_id: 1,
             kizai_id: data.kizaiId,
             plan_qty: data.planKicsKizaiQty,
+            dspOrdNum: data.dspOrdNum,
+            indentNum: data.indentNum,
           }
         : null;
     const yardData =
@@ -943,6 +964,8 @@ export const updReturnContainerNyushukoDen = async (
             sagyo_id: 2,
             kizai_id: data.kizaiId,
             plan_qty: data.planYardKizaiQty,
+            dspOrdNum: data.dspOrdNum,
+            indentNum: data.indentNum,
           }
         : null;
     const kicsConfirmData = {
