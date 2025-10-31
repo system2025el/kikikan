@@ -1,6 +1,6 @@
 'use client';
 
-import { alpha, DialogTitle, Stack, Typography, useTheme } from '@mui/material';
+import { DialogTitle, lighten, Stack, Toolbar, Typography, useTheme } from '@mui/material';
 
 import { CloseMasterDialogButton, DeleteButton, MakeEditModeButton, SubmitButton } from '../../_ui/buttons';
 
@@ -30,32 +30,44 @@ export const MasterDialogTitle = ({
 }) => {
   /* useTheme */
   const theme = useTheme();
-  const colorOfThis = alpha(theme.palette.primary.main, 0.5);
+  const colorOfThis = lighten(theme.palette.primary.main, 0.5);
   /* 閉じるボタン押下 */
   const handleCloseDialog = () => {
     handleClose();
   };
 
   return (
-    <DialogTitle display={'flex'} justifyContent={'space-between'} alignItems={'center'} bgcolor={colorOfThis}>
-      {dialogTitle}
-      {editable && !isNew && <Typography>編集モード</Typography>}
-      {isNew && <Typography>新規登録</Typography>}
-      <Stack>
-        <SubmitButton type="submit" disabled={isDirty ? false : true} onClick={() => setAction('save')} />
-        {!isNew && (
-          <>
-            <MakeEditModeButton handleEditable={handleEditable} disabled={editable ? true : false} />
-            <DeleteButton
-              disabled={isNew ? true : false}
-              type="submit"
-              onClick={isDeleted ? () => setAction('restore') : () => setAction('delete')}
-              isDeleted={isDeleted}
-            />
-          </>
-        )}
-        <CloseMasterDialogButton handleCloseDialog={handleCloseDialog} />
-      </Stack>
-    </DialogTitle>
+    <>
+      <DialogTitle
+        display={'flex'}
+        justifyContent={'space-between'}
+        alignItems={'center'}
+        bgcolor={colorOfThis}
+        position={'fixed'}
+        top={0}
+        width={'100%'}
+        zIndex={1200}
+      >
+        {dialogTitle}
+        {editable && !isNew && <Typography>編集モード</Typography>}
+        {isNew && <Typography>新規登録</Typography>}
+        <Stack>
+          <SubmitButton type="submit" disabled={isDirty ? false : true} onClick={() => setAction('save')} />
+          {!isNew && (
+            <>
+              <MakeEditModeButton handleEditable={handleEditable} disabled={editable ? true : false} />
+              <DeleteButton
+                disabled={isNew ? true : false}
+                type="submit"
+                onClick={isDeleted ? () => setAction('restore') : () => setAction('delete')}
+                isDeleted={isDeleted}
+              />
+            </>
+          )}
+          <CloseMasterDialogButton handleCloseDialog={handleCloseDialog} />
+        </Stack>
+      </DialogTitle>
+      <Toolbar sx={{ bgcolor: 'white', zIndex: 1150 }} />
+    </>
   );
 };

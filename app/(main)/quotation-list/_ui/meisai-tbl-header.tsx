@@ -29,12 +29,17 @@ export const MeisaiTblHeader = ({
   sectionFields: UseFieldArrayReturn<QuotHeadValues>;
   children: React.ReactNode;
 }) => {
-  const [isEditing, setIsEditing] = useState(false);
+  /* useState ------------------------------------------------------ */
+  /** フォーカスしている行 */
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+
+  /* methods ------------------------------------------------------- */
   /* 明細テーブルの順番を変えるボタン押下時 */
   const moveRow = (index: number, direction: number) => {
     sectionFields.move(index, index + direction);
   };
 
+  /* useForm ------------------------------------------------------- */
   const { control, setValue } = useFormContext<QuotHeadValues>();
 
   // 明細の監視
@@ -50,12 +55,14 @@ export const MeisaiTblHeader = ({
   const nebikiAmt = useWatch({ control, name: `meisaiHeads.${sectionNam}.${index}.nebikiAmt` });
   const currentNebikiAftAmt = useWatch({ control, name: `meisaiHeads.${sectionNam}.${index}.nebikiAftAmt` });
 
+  /* 自動計算 ----------------------------------------------------- */
   const shokeiSum = useMemo(
     () => Math.round((meisaiList ?? []).reduce((acc, item) => acc + (item.shokeiAmt ?? 0), 0)),
     [meisaiList]
   );
   const nebikiAft = useMemo(() => Math.round(shokeiSum - (nebikiAmt ?? 0)), [shokeiSum, nebikiAmt]);
 
+  /* useEffect ---------------------------------------------------- */
   useEffect(() => {
     // 計算結果が現在の値と異なる場合のみ更新
     if (shokeiSum !== (Number(currentShokeiAmt) || 0)) {
@@ -181,7 +188,7 @@ export const MeisaiTblHeader = ({
               <TextField
                 {...field}
                 value={
-                  isEditing
+                  editingIndex === index
                     ? (field.value ?? '')
                     : typeof field.value === 'number' && !isNaN(field.value)
                       ? `¥-${Math.abs(field.value).toLocaleString()}`
@@ -189,7 +196,7 @@ export const MeisaiTblHeader = ({
                 }
                 type="text"
                 onFocus={(e) => {
-                  setIsEditing(true);
+                  setEditingIndex(index);
                   const rawValue = String(field.value ?? '');
                   setTimeout(() => {
                     e.target.value = rawValue;
@@ -199,7 +206,7 @@ export const MeisaiTblHeader = ({
                   const rawValue = e.target.value.replace(/[¥,]/g, '');
                   const numericValue = Math.abs(Number(rawValue));
                   field.onChange(numericValue);
-                  setIsEditing(false);
+                  setEditingIndex(null);
                 }}
                 onChange={(e) => {
                   const raw = e.target.value.replace(/[^\d]/g, '');

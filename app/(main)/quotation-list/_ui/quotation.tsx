@@ -3,6 +3,8 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import AddIcon from '@mui/icons-material/Add';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import PrintIcon from '@mui/icons-material/Print';
+import SaveAsIcon from '@mui/icons-material/SaveAs';
 import {
   Accordion,
   AccordionDetails,
@@ -13,6 +15,7 @@ import {
   Container,
   Dialog,
   Divider,
+  Fab,
   Grid2,
   Paper,
   Snackbar,
@@ -73,8 +76,11 @@ export const Quotation = ({
   const [snackBarOpen, setSnackBarOpen] = useState(false);
   /* スナックバーのメッセージ */
   const [snackBarMessage, setSnackBarMessage] = useState('');
+  /** 値引きの編集状態 */
+  const [nebikiEditing, setNebikiEditing] = useState(false);
+  /** 税の編集状態 */
+  const [zeiEditing, setZeiEditing] = useState(false);
 
-  const [isEditing, setIsEditing] = useState(false);
   /* useForm -------------------------------------------------------------- */
   const quotForm = useForm<QuotHeadValues>({
     mode: 'onChange',
@@ -110,7 +116,7 @@ export const Quotation = ({
   const currentGokeiAmt = useWatch({ control, name: 'gokeiAmt' });
 
   /* methods ------------------------------------------------------ */
-  /* 保存ボタン押下 */
+  /** 保存ボタン押下 */
   const onSubmit = async (data: QuotHeadValues) => {
     console.log('新規？', isNew, 'isDirty', isDirty);
     if (isNew) {
@@ -144,6 +150,7 @@ export const Quotation = ({
   /* useEffect ------------------------------------------------------------ */
   /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
+    router.prefetch('/quotaiton-list');
     if (isNew) {
       // 新規なら入力者をログインアカウントから取得する
       if (user?.name) {
@@ -233,10 +240,8 @@ export const Quotation = ({
               <Typography margin={1}>見積書</Typography>
               <Box>
                 <Button sx={{ margin: 1 }} onClick={hundlePrintPdf} disabled={isNew || isDirty}>
+                  <PrintIcon fontSize="small" sx={{ mr: 0.5 }} />
                   見積書印刷
-                </Button>
-                <Button sx={{ margin: 1 }} type="submit">
-                  保存
                 </Button>
               </Box>
             </Grid2>
@@ -688,7 +693,7 @@ export const Quotation = ({
                       <TextField
                         {...field}
                         value={
-                          isEditing
+                          nebikiEditing
                             ? (field.value ?? '')
                             : typeof field.value === 'number' && !isNaN(field.value)
                               ? `¥-${Math.abs(field.value).toLocaleString()}`
@@ -696,7 +701,7 @@ export const Quotation = ({
                         }
                         type="text"
                         onFocus={(e) => {
-                          setIsEditing(true);
+                          setNebikiEditing(true);
                           const rawValue = String(field.value ?? '');
                           setTimeout(() => {
                             e.target.value = rawValue;
@@ -706,7 +711,7 @@ export const Quotation = ({
                           const rawValue = e.target.value.replace(/[¥,]/g, '');
                           const numericValue = Math.abs(Number(rawValue));
                           field.onChange(numericValue);
-                          setIsEditing(false);
+                          setNebikiEditing(false);
                         }}
                         onChange={(e) => {
                           const raw = e.target.value.replace(/[^\d]/g, '');
@@ -766,7 +771,7 @@ export const Quotation = ({
                       <TextField
                         {...field}
                         value={
-                          isEditing
+                          zeiEditing
                             ? (field.value ?? '')
                             : typeof field.value === 'number' && !isNaN(field.value)
                               ? `¥${Math.abs(field.value).toLocaleString()}`
@@ -774,7 +779,7 @@ export const Quotation = ({
                         }
                         type="text"
                         onFocus={(e) => {
-                          setIsEditing(true);
+                          setZeiEditing(true);
                           const rawValue = String(field.value ?? '');
                           e.target.value = rawValue;
                         }}
@@ -782,7 +787,7 @@ export const Quotation = ({
                           const rawValue = e.target.value.replace(/[¥,]/g, '');
                           const numericValue = Math.abs(Number(rawValue));
                           field.onChange(numericValue);
-                          setIsEditing(false);
+                          setZeiEditing(false);
                         }}
                         onChange={(e) => {
                           const raw = e.target.value.replace(/[^\d]/g, '');
@@ -847,6 +852,12 @@ export const Quotation = ({
               </Grid2>
             </Box>
           </Paper>
+          <Box position={'fixed'} zIndex={1050} bottom={10} right={10}>
+            <Fab variant="extended" color="primary" sx={{ margin: 1 }} type="submit" size="medium">
+              <SaveAsIcon fontSize="small" sx={{ mr: 1 }} />
+              保存
+            </Fab>
+          </Box>
         </form>
       </FormProvider>
       <Snackbar

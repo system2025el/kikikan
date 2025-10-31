@@ -3,6 +3,8 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import AddIcon from '@mui/icons-material/Add';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import PrintIcon from '@mui/icons-material/Print';
+import SaveAsIcon from '@mui/icons-material/SaveAs';
 import {
   Accordion,
   AccordionDetails,
@@ -13,6 +15,7 @@ import {
   Container,
   Dialog,
   Divider,
+  Fab,
   Grid2,
   Paper,
   Snackbar,
@@ -118,6 +121,11 @@ export const Bill = ({
   useEffect(() => {
     console.log('請求画面開いた', bill, 'isNew?', isNew, user?.name);
     if (isNew) {
+      router.prefetch('/billing-sts-list');
+    } else {
+      router.prefetch('/bill-list');
+    }
+    if (isNew) {
       // 新規なら入力者をログインアカウントから取得する
       if (user?.name) {
         console.log({ ...bill, nyuryokuUser: user.name });
@@ -209,7 +217,7 @@ export const Bill = ({
     <>
       <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
         <Box justifySelf={'end'} mb={0.5}>
-          <Button onClick={() => router.back()}>戻る</Button>
+          <Button onClick={() => (isNew ? router.push('/billing-sts-list') : router.push('/bill-list'))}>戻る</Button>
         </Box>
         <FormProvider {...billForm}>
           <form onSubmit={handleSubmit(onSubmit)}>
@@ -218,10 +226,8 @@ export const Bill = ({
                 <Typography margin={1}>請求書</Typography>
                 <Box>
                   <Button sx={{ margin: 1 }} onClick={hundlePrintPdf} disabled={isNew || isDirty}>
+                    <PrintIcon fontSize="small" sx={{ mr: 0.5 }} />
                     請求書印刷
-                  </Button>
-                  <Button sx={{ margin: 1 }} type="submit">
-                    保存
                   </Button>
                 </Box>
               </Grid2>
@@ -482,6 +488,12 @@ export const Bill = ({
                 </Grid2>
               </Box>
             </Paper>
+            <Box position={'fixed'} zIndex={1050} bottom={10} right={10}>
+              <Fab variant="extended" color="primary" sx={{ margin: 1 }} type="submit" size="medium">
+                <SaveAsIcon fontSize="small" sx={{ mr: 1 }} />
+                保存
+              </Fab>
+            </Box>
           </form>
         </FormProvider>
         <Snackbar
