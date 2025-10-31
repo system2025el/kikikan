@@ -311,7 +311,7 @@ export const getJuchuKizaiMeisaiDetailsForBill = async (juchuHeadId: number, kiz
       const planQty = Number(currentRow.plan_qty) || 0;
 
       acc[groupKey].meisai.push({
-        nam: currentRow.kizai_nam ? `${'*'.repeat(currentRow.indent_num ?? 0)}${currentRow.kizai_nam}` : null,
+        nam: currentRow.kizai_nam ? `${' * '.repeat(currentRow.indent_num ?? 0)}${currentRow.kizai_nam}` : null,
         qty: planQty,
         honbanbiQty: honbanbiQty,
         tankaAmt: tankaAmt,

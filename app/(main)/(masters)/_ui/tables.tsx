@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, styled, Tooltip, tooltipClasses, TooltipProps, Typography } from '@mui/material';
+import { Box, Button, styled, Tooltip, tooltipClasses, TooltipProps, Typography } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -296,46 +296,36 @@ export const LightTooltipWithText = ({
     }
   }, [children]);
 
+  const commonStyle = {
+    maxWidth: `${maxWidth}px`,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    display: 'inline-block',
+    verticalAlign: 'middle',
+    fontSize: '0.875rem',
+    fontWeight: variant === 'button' ? 500 : 'normal',
+    textTransform: 'none',
+  } as const;
+
   return isOverflowed ? (
-    <LightTooltip
-      title={children}
-      slotProps={{
-        transition: { timeout: 1500 },
-      }}
-    >
-      <Typography
-        ref={textRef}
-        noWrap
-        variant={variant}
-        textTransform="none"
-        sx={{
-          maxWidth: `${maxWidth}px`,
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
-          display: 'inline-block',
-          verticalAlign: 'middle',
+    <Box display={'flex'}>
+      <LightTooltip
+        title={children}
+        slotProps={{
+          transition: { timeout: 1500 },
         }}
       >
-        {children}
-      </Typography>
-    </LightTooltip>
+        <span ref={textRef} style={commonStyle}>
+          {children}
+        </span>
+      </LightTooltip>
+    </Box>
   ) : (
-    <Typography
-      ref={textRef}
-      noWrap
-      variant={variant}
-      textTransform="none"
-      sx={{
-        maxWidth: `${maxWidth}px`,
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        whiteSpace: 'nowrap',
-        display: 'inline-block',
-        verticalAlign: 'middle',
-      }}
-    >
-      {children}
-    </Typography>
+    <Box display={'flex'}>
+      <span ref={textRef} style={commonStyle}>
+        {children}
+      </span>
+    </Box>
   );
 };
