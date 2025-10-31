@@ -15,11 +15,12 @@ export const selectJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHead
       .schema(SCHEMA)
       .from('v_juchu_kizai_meisai')
       .select(
-        'juchu_head_id, juchu_kizai_head_id, juchu_kizai_meisai_id, shozoku_id, mem, kizai_id, kizai_nam, plan_kizai_qty, plan_yobi_qty, plan_qty, indent_num'
+        'juchu_head_id, juchu_kizai_head_id, juchu_kizai_meisai_id, shozoku_id, mem, kizai_id, kizai_nam, plan_kizai_qty, plan_yobi_qty, plan_qty, dsp_ord_num, indent_num'
       )
       .eq('juchu_head_id', juchuHeadId)
       .eq('juchu_kizai_head_id', juchuKizaiHeadId)
-      .not('kizai_id', 'is', null);
+      .not('kizai_id', 'is', null)
+      .order('dsp_ord_num');
   } catch (e) {
     throw e;
   }
@@ -37,11 +38,12 @@ export const selectOyaJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiH
       .schema(SCHEMA)
       .from('v_juchu_kizai_meisai')
       .select(
-        'juchu_head_id, juchu_kizai_head_id, juchu_kizai_meisai_id, shozoku_id, shozoku_nam, kizai_id, kizai_nam, plan_kizai_qty, plan_yobi_qty, indent_num'
+        'juchu_head_id, juchu_kizai_head_id, juchu_kizai_meisai_id, shozoku_id, shozoku_nam, kizai_id, kizai_nam, plan_kizai_qty, plan_yobi_qty, dsp_ord_num, indent_num'
       )
       .eq('juchu_head_id', juchuHeadId)
       .eq('juchu_kizai_head_id', juchuKizaiHeadId)
-      .not('kizai_id', 'is', null);
+      .not('kizai_id', 'is', null)
+      .order('dsp_ord_num');
   } catch (e) {
     throw e;
   }
@@ -59,11 +61,12 @@ export const selectKeepJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizai
       .schema(SCHEMA)
       .from('v_juchu_kizai_meisai')
       .select(
-        'juchu_head_id, juchu_kizai_head_id, juchu_kizai_meisai_id, shozoku_id, shozoku_nam, mem, kizai_id, kizai_nam, plan_kizai_qty, plan_yobi_qty, keep_qty, indent_num'
+        'juchu_head_id, juchu_kizai_head_id, juchu_kizai_meisai_id, shozoku_id, shozoku_nam, mem, kizai_id, kizai_nam, plan_kizai_qty, plan_yobi_qty, keep_qty, dsp_ord_num, indent_num'
       )
       .eq('juchu_head_id', juchuHeadId)
       .eq('juchu_kizai_head_id', juchuKizaiHeadId)
-      .not('kizai_id', 'is', null);
+      .not('kizai_id', 'is', null)
+      .order('dsp_ord_num');
   } catch (e) {
     throw e;
   }
@@ -81,11 +84,12 @@ export const selectReturnJuchuKizaiMeisai = async (juchuHeadId: number, juchuKiz
       .schema(SCHEMA)
       .from('v_juchu_kizai_meisai')
       .select(
-        'juchu_head_id, juchu_kizai_head_id, juchu_kizai_meisai_id, shozoku_id, shozoku_nam, mem, kizai_id, kizai_nam, plan_kizai_qty, plan_yobi_qty, plan_qty, indent_num'
+        'juchu_head_id, juchu_kizai_head_id, juchu_kizai_meisai_id, shozoku_id, shozoku_nam, mem, kizai_id, kizai_nam, plan_kizai_qty, plan_yobi_qty, plan_qty, dsp_ord_num, indent_num'
       )
       .eq('juchu_head_id', juchuHeadId)
       .eq('juchu_kizai_head_id', juchuKizaiHeadId)
-      .not('kizai_id', 'is', null);
+      .not('kizai_id', 'is', null)
+      .order('dsp_ord_num');
   } catch (e) {
     throw e;
   }

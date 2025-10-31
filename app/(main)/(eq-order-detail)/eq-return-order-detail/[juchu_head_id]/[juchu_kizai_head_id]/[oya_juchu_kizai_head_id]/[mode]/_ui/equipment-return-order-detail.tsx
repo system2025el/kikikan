@@ -983,6 +983,7 @@ export const EquipmentReturnOrderDetail = (props: {
       planKizaiQty: 0,
       planYobiQty: 0,
       planQty: 0,
+      dspOrdNum: d.dspOrdNum,
       indentNum: d.indentNum,
       delFlag: false,
       saveFlag: false,
@@ -1029,6 +1030,8 @@ export const EquipmentReturnOrderDetail = (props: {
       planKicsKizaiQty: 0,
       planYardKizaiQty: 0,
       planQty: 0,
+      dspOrdNum: d.dspOrdNum,
+      indentNum: d.indentNum,
       delFlag: false,
       saveFlag: false,
     }));

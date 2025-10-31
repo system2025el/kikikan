@@ -47,6 +47,7 @@ export type ReturnJuchuKizaiMeisaiValues = {
   planKizaiQty: number;
   planYobiQty: number;
   planQty: number;
+  dspOrdNum: number;
   indentNum: number;
   delFlag: boolean;
   saveFlag: boolean;
@@ -64,6 +65,8 @@ export type ReturnJuchuContainerMeisaiValues = {
   planKicsKizaiQty: number;
   planYardKizaiQty: number;
   planQty: number;
+  dspOrdNum: number;
+  indentNum: number;
   delFlag: boolean;
   saveFlag: boolean;
 };

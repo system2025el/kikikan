@@ -642,6 +642,7 @@ export const EquipmentKeepOrderDetail = (props: {
       oyaPlanKizaiQty: d.planKizaiQty,
       oyaPlanYobiQty: d.planYobiQty,
       keepQty: 0,
+      dspOrdNum: d.dspOrdNum,
       indentNum: d.indentNum,
       delFlag: false,
       saveFlag: false,
@@ -660,6 +661,8 @@ export const EquipmentKeepOrderDetail = (props: {
       oyaPlanYardKizaiQty: d.planYardKizaiQty,
       kicsKeepQty: 0,
       yardKeepQty: 0,
+      dspOrdNum: d.dspOrdNum,
+      indentNum: d.indentNum,
       delFlag: false,
       saveFlag: false,
     }));

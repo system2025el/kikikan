@@ -41,6 +41,7 @@ export type KeepJuchuKizaiMeisaiValues = {
   oyaPlanKizaiQty: number;
   oyaPlanYobiQty: number;
   keepQty: number;
+  dspOrdNum: number;
   indentNum: number;
   delFlag: boolean;
   saveFlag: boolean;
@@ -57,6 +58,8 @@ export type KeepJuchuContainerMeisaiValues = {
   oyaPlanYardKizaiQty: number;
   kicsKeepQty: number;
   yardKeepQty: number;
+  dspOrdNum: number;
+  indentNum: number;
   delFlag: boolean;
   saveFlag: boolean;
 };

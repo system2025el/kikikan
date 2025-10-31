@@ -1267,7 +1267,8 @@ const EquipmentOrderDetail = (props: {
       planKizaiQty: 0,
       planYobiQty: 0,
       planQty: 0,
-      indentNum: d.blnkQty,
+      dspOrdNum: 0,
+      indentNum: d.indentNum,
       delFlag: false,
       saveFlag: false,
     }));
@@ -1336,6 +1337,8 @@ const EquipmentOrderDetail = (props: {
       planYardKizaiQty: 0,
       planQty: 0,
       mem: '',
+      dspOrdNum: 0,
+      indentNum: 0,
       delFlag: false,
       saveFlag: false,
     }));

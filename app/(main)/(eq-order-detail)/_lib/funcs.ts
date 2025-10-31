@@ -319,6 +319,7 @@ export const getOyaJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHead
       kizaiNam: d.kizai_nam ?? '',
       planKizaiQty: d.plan_kizai_qty ?? 0,
       planYobiQty: d.plan_yobi_qty ?? 0,
+      dspOrdNum: d.dsp_ord_num,
       indentNum: d.indent_num,
     }));
     return juchuKizaiMeisaiData;
@@ -397,6 +398,8 @@ export const getJuchuContainerMeisai = async (juchuHeadId: number, juchuKizaiHea
       planYardKizaiQty: d.yard_plan_kizai_qty ?? 0,
       planQty: (d.kics_plan_kizai_qty ?? 0) + (d.yard_plan_kizai_qty ?? 0),
       mem: d.mem,
+      dspOrdNum: d.dsp_ord_num ?? 0,
+      indentNum: 0,
       delFlag: false,
       saveFlag: true,
     }));
@@ -435,6 +438,8 @@ export const getOyaJuchuContainerMeisai = async (juchuHeadId: number, juchuKizai
       planKicsKizaiQty: d.kics_plan_kizai_qty ?? 0,
       planYardKizaiQty: d.yard_plan_kizai_qty ?? 0,
       mem: d.mem,
+      dspOrdNum: d.dsp_ord_num,
+      indentNum: 0,
     }));
 
     return oyaJuchuContainerMeisaiData;
@@ -559,6 +564,7 @@ export const delAllNyushukoResult = async (
 ) => {
   try {
     await deleteAllNyushukoResult(juchuHeadId, juchuKizaiHeadId, sagyoDenDat, sagyoId, connection);
+    await deleteAllNyushukoCtnResult(juchuHeadId, juchuKizaiHeadId, sagyoDenDat, sagyoId, connection);
     return true;
   } catch (e) {
     throw e;
@@ -584,29 +590,6 @@ export const delNyushukoCtnResult = async (
 ) => {
   try {
     await deleteKizaiIdNyushukoCtnResult(juchuHeadId, juchuKizaiHeadId, sagyoDenDat, sagyoId, kizaiIds, connection);
-    return true;
-  } catch (e) {
-    throw e;
-  }
-};
-
-/**
- * コンテナ入出庫実績全削除
- * @param juchuHeadId 受注ヘッダーid
- * @param sagyoDenDat 作業日時
- * @param sagyoId 作業id
- * @param connection
- * @returns
- */
-export const delAllNyushukoCtnResult = async (
-  juchuHeadId: number,
-  juchuKizaiHeadId: number,
-  sagyoDenDat: string,
-  sagyoId: number,
-  connection: PoolClient
-) => {
-  try {
-    await deleteAllNyushukoCtnResult(juchuHeadId, juchuKizaiHeadId, sagyoDenDat, sagyoId, connection);
     return true;
   } catch (e) {
     throw e;
