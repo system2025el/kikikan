@@ -38,7 +38,7 @@ export const NyukoListTable = (props: { datas: NyukoTableValues[] }) => {
                 <Button
                   variant="text"
                   size="small"
-                  href={`nyuko-list/nyuko-detail/${row.juchuHeadId}/${row.nyushukoBashoId}/${toJapanTimeString(row.nyushukoDat, '-')}`}
+                  href={`nyuko-list/nyuko-detail/${row.juchuHeadId}/${row.nyushukoBashoId}/${toJapanTimeString(row.nyushukoDat, '-')}/30`}
                 >
                   {row.nchkSagyoStsNamShort}
                 </Button>
