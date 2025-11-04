@@ -58,7 +58,7 @@ export const EqMasterDialog = ({
     shozoku: SelectTypes[];
   }>({ d: [], s: [], b: [], shozoku: [] });
   /* 保有数 */
-  const [kizaiQty, setKizaiQty] = useState<{ all: number; ng: number }>({ all: 0, ng: 0 });
+  const [kizaiQty, setKizaiQty] = useState<{ yuko: number; ng: number }>({ yuko: 0, ng: 0 });
 
   /* useForm ------------------------- */
   const {
@@ -192,7 +192,10 @@ export const EqMasterDialog = ({
                 />
               </FormBox>
               <FormBox formItem={formItems[1]}>
-                <TextField value={kizaiQty.all ? String(kizaiQty.all) : ''} disabled />
+                <TextField
+                  value={kizaiQty ? String(Number(kizaiQty.yuko ?? 0) + Number(kizaiQty.ng ?? 0)) : ''}
+                  disabled
+                />
                 <Box ml={1}>
                   <Button
                     component="a"
@@ -206,10 +209,10 @@ export const EqMasterDialog = ({
                 </Box>
               </FormBox>
               <FormBox formItem={formItems[2]}>
-                <TextField value={kizaiQty.ng ? String(kizaiQty.ng) : ''} disabled />
+                <TextField value={kizaiQty.ng ? String(kizaiQty.ng ?? 0) : ''} disabled />
               </FormBox>
               <FormBox formItem={formItems[3]}>
-                <TextField value={kizaiQty ? String(kizaiQty.all - kizaiQty.ng) : ''} disabled />
+                <TextField value={kizaiQty.yuko ? String(kizaiQty.yuko ?? 0) : ''} disabled />
               </FormBox>
               <FormBox formItem={formItems[4]}>
                 <TextFieldElement

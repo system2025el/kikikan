@@ -219,7 +219,7 @@ export const getEqptsQty = async (id: number) => {
       console.error('DB情報取得エラー', error?.message, error?.message);
       throw new Error('保有数取得エラー');
     }
-    return { all: data.kizai_qty ?? 0, ng: data.kizai_ng_qty ?? 0 };
+    return { yuko: data.kizai_qty ?? 0, ng: data.kizai_ng_qty ?? 0 };
   } catch (e) {
     console.error('例外が発生しました:', e);
     throw e;
