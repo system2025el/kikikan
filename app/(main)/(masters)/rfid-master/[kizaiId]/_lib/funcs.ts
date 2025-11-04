@@ -151,15 +151,18 @@ export const updateRfid = async (
   kizaiId: number,
   user: string
 ) => {
-  const now = toJapanTimeString();
+  /** 現在時刻 */
+  const now = toJapanTimeString(undefined, '-');
   const masterChanged =
     JSON.stringify({ tagId: current.tagId, elNum: current.elNum, mem: current.mem, delFlg: current.delFlg }) !==
-    JSON.stringify({
-      tagId: data.tagId,
-      elNum: data.elNum,
-      mem: data.mem,
-      delFlg: data.delFlg,
-    });
+      JSON.stringify({
+        tagId: data.tagId,
+        elNum: data.elNum,
+        mem: data.mem,
+        delFlg: data.delFlg,
+      }) ||
+    (current.rfidKizaiSts > 101 && data.rfidKizaiSts <= 101) || //
+    (current.rfidKizaiSts <= 101 && data.rfidKizaiSts > 101);
   const stsChanged =
     JSON.stringify({ tagId: current.tagId, shozokuId: current.shozokuId, rfidKizaiSts: current.rfidKizaiSts }) !==
     JSON.stringify({
@@ -171,7 +174,7 @@ export const updateRfid = async (
   const updateData: MRfidDBValues = {
     kizai_id: kizaiId,
     rfid_tag_id: data.tagId,
-    del_flg: Number(data.delFlg),
+    del_flg: Number(data.rfidKizaiSts) > 101 ? 1 : 0, // NGより大きいステータスの時無効化する
     el_num: data.elNum,
     mem: data.mem,
     upd_dat: now,
@@ -185,6 +188,7 @@ export const updateRfid = async (
     upd_dat: now,
     upd_user: user,
   };
+
   console.log(updateData);
   const connection = await pool.connect();
   try {

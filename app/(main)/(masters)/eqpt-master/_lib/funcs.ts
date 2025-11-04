@@ -48,9 +48,9 @@ export const getFilteredEqpts = async (
     const filteredEqpts: EqptsMasterTableValues[] = data.map((d, index) => ({
       kizaiId: d.kizai_id,
       kizaiNam: d.kizai_nam,
-      kizaiQty: Number(d.kizai_qty ?? 0),
+      kizaiQty: Number(d.kizai_qty) + Number(d.kizai_ng_qty),
       ngQty: Number(d.kizai_ng_qty ?? 0),
-      yukoQty: Number(d.kizai_qty ?? 0) - Number(d.kizai_ng_qty ?? 0),
+      yukoQty: Number(d.kizai_qty ?? 0),
       shozokuNam: d.shozoku_nam,
       mem: d.mem,
       bumonNam: d.bumon_nam,
