@@ -258,94 +258,85 @@ export const LoanSituation = (props: {
           <Typography>貸出状況</Typography>
         </Box>
         <Divider />
-        <Grid2 container alignItems={'center'} px={2} py={2} spacing={2}>
+        <Grid2 container alignItems={'center'} px={2} py={0.5} spacing={2}>
           <Typography>機材名</Typography>
-          <TextField value={kizaiData.kizaiNam} sx={{ minWidth: 400 }} disabled></TextField>
-        </Grid2>
-        <Grid2 container alignItems={'center'} px={2} py={1} spacing={2}>
-          <Typography>保有数</Typography>
+          <TextField value={kizaiData.kizaiNam} sx={{ minWidth: 400 }} disabled />
+          <Typography ml={2}>保有数</Typography>
           <TextField
             disabled
             value={kizaiData.kizaiQty}
             sx={{
-              maxWidth: 150,
+              maxWidth: 100,
               '& .MuiInputBase-input': {
                 textAlign: 'right',
               },
             }}
           />
-          <Grid2 container alignItems={'center'}>
-            <Typography>定価</Typography>
-            <TextField
-              value={`¥${kizaiData.regAmt.toLocaleString()}`}
-              disabled
-              sx={{
-                maxWidth: 200,
-                '& .MuiInputBase-input': {
-                  textAlign: 'right',
-                },
-              }}
-            ></TextField>
-          </Grid2>
-          <Grid2 pl={2}>
-            <FormControl>
-              <RadioGroup value={sortValue} onChange={handleRadioChange} row>
-                <FormControlLabel value="shuko" control={<Radio />} label="出庫日順" />
-                <FormControlLabel value="nyuko" control={<Radio />} label="入庫日順" />
-              </RadioGroup>
-            </FormControl>
-          </Grid2>
+          <Typography ml={2}>定価</Typography>
+          <TextField
+            value={`¥${kizaiData.regAmt.toLocaleString()}`}
+            disabled
+            sx={{
+              maxWidth: 120,
+              '& .MuiInputBase-input': {
+                textAlign: 'right',
+              },
+            }}
+          />
+          <FormControl sx={{ ml: 3 }}>
+            <RadioGroup value={sortValue} onChange={handleRadioChange} row>
+              <FormControlLabel value="shuko" control={<Radio />} label="出庫日順" />
+              <FormControlLabel value="nyuko" control={<Radio />} label="入庫日順" />
+            </RadioGroup>
+          </FormControl>
           <Box display={'flex'} justifyContent={'end'} p={2}>
             <Button onClick={handleReload}>再表示</Button>
           </Box>
         </Grid2>
-        {isLoading ? (
-          <Loading />
-        ) : (
-          <Box display={'flex'} flexDirection="row" width="100%">
-            <Box
-              sx={{
-                width: {
-                  xs: '40%',
-                  sm: '40%',
-                  md: '40%',
-                  lg: 'min-content',
-                },
-                mt: 5.8,
-              }}
-            >
-              <LoanSituationTable rows={loanJuchuList} ref={leftRef} />
-              <Box display={'flex'} justifyContent={'end'} p={0.5}>
-                <Typography fontSize={'small'}>在庫数</Typography>
-              </Box>
-            </Box>
-            <Box overflow="auto" sx={{ width: { xs: '60%', sm: '60%', md: 'auto' } }}>
-              <Box display="flex" my={1}>
-                <Box display={loanJuchuList.length > 0 ? 'flex' : 'none'} alignItems={'end'} mr={2}>
-                  <Typography fontSize={'small'}>使用数</Typography>
-                </Box>
-                <Button onClick={handleBackDateChange}>
-                  <ArrowBackIosNewIcon fontSize="small" />
-                </Button>
-                <Button variant="outlined" onClick={handleClick}>
-                  日付選択
-                </Button>
-                <Popper open={open} anchorEl={anchorEl} placement="bottom-start" sx={{ zIndex: 1202 }}>
-                  <ClickAwayListener onClickAway={handleClickAway}>
-                    <Paper elevation={3} sx={{ mt: 1 }}>
-                      <Calendar date={selectDate} onChange={handleDateChange} />
-                    </Paper>
-                  </ClickAwayListener>
-                </Popper>
-                <Button onClick={handleForwardDateChange}>
-                  <ArrowForwardIosIcon fontSize="small" />
-                </Button>
-              </Box>
-              <UseTable eqUseList={eqUseList} eqStockList={eqStockList} ref={rightRef} />
-            </Box>
-          </Box>
-        )}
       </Paper>
+      {isLoading ? (
+        <Loading />
+      ) : (
+        <Box display={'flex'} flexDirection="row" width="100%">
+          <Box
+            sx={{
+              width: {
+                xs: '20%',
+                sm: '20%',
+                md: '20%',
+                lg: 'min-content',
+              },
+              mt: 5.9,
+            }}
+          >
+            <LoanSituationTable rows={loanJuchuList} ref={leftRef} />
+          </Box>
+          <Box overflow="auto" sx={{ width: { xs: '60%', sm: '60%', md: 'auto' } }}>
+            <Box display="flex" my={1}>
+              <Box display={loanJuchuList.length > 0 ? 'flex' : 'none'} alignItems={'end'} mr={2}>
+                <Typography fontSize={'small'}>使用数</Typography>
+              </Box>
+              <Button onClick={handleBackDateChange}>
+                <ArrowBackIosNewIcon fontSize="small" />
+              </Button>
+              <Button variant="outlined" onClick={handleClick}>
+                日付選択
+              </Button>
+              <Popper open={open} anchorEl={anchorEl} placement="bottom-start" sx={{ zIndex: 1202 }}>
+                <ClickAwayListener onClickAway={handleClickAway}>
+                  <Paper elevation={3} sx={{ mt: 1 }}>
+                    <Calendar date={selectDate} onChange={handleDateChange} />
+                  </Paper>
+                </ClickAwayListener>
+              </Popper>
+              <Button onClick={handleForwardDateChange}>
+                <ArrowForwardIosIcon fontSize="small" />
+              </Button>
+            </Box>
+            <UseTable eqUseList={eqUseList} eqStockList={eqStockList} ref={rightRef} />
+          </Box>
+        </Box>
+      )}
     </Box>
   );
 };

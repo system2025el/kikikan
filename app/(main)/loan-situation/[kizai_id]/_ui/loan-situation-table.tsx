@@ -1,8 +1,19 @@
 'use client';
 
-import { Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
+import {
+  Button,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableFooter,
+  TableHead,
+  TableRow,
+} from '@mui/material';
 
 import { toISOStringMonthDay } from '@/app/(main)/_lib/date-conversion';
+import { LightTooltipWithText } from '@/app/(main)/(masters)/_ui/tables';
 
 import { LoanJuchu, LoanStockTableValues, LoanUseTableValues } from '../_lib/types';
 
@@ -15,20 +26,46 @@ export const LoanSituationTable = (props: LoanSituationTableProps) => {
   const { rows, ref } = props;
 
   return (
-    <TableContainer ref={ref} component={Paper} style={{ overflowX: 'auto' }}>
-      <Table>
+    <TableContainer
+      ref={ref}
+      component={Paper}
+      style={{ overflowX: 'auto' }}
+      square
+      variant="outlined"
+      sx={{ maxHeight: '80vh' }}
+    >
+      <Table stickyHeader padding="none">
         <TableHead>
           <TableRow>
-            <TableCell align="center" size="small" style={styles.header}>
+            <TableCell
+              align="right"
+              sx={{
+                height: 15,
+                lineHeight: '1rem',
+                py: 0,
+                px: 1,
+                border: '1px solid black',
+                color: 'black',
+                bgcolor: 'white',
+                fontWeight: 400,
+                fontSize: '0.50rem',
+              }}
+              colSpan={4}
+            >
+              在庫数
+            </TableCell>
+          </TableRow>
+          <TableRow sx={{ position: 'sticky', top: 15 }}>
+            <TableCell align="center" style={styles.header}>
               受注番号
             </TableCell>
-            <TableCell align="left" size="small" style={styles.header}>
+            <TableCell align="left" style={styles.header}>
               公演名
             </TableCell>
-            <TableCell align="left" size="small" style={styles.header}>
+            <TableCell align="left" style={styles.header}>
               出庫日
             </TableCell>
-            <TableCell align="left" size="small" style={styles.header}>
+            <TableCell align="left" style={styles.header}>
               入庫日
             </TableCell>
           </TableRow>
@@ -37,7 +74,11 @@ export const LoanSituationTable = (props: LoanSituationTableProps) => {
           {rows.map((row) => (
             <TableRow key={row.juchuHeadId}>
               <TableCell style={styles.row}>
-                <Button variant="text" href={`/order/${row.juchuHeadId}/${'view'}`} sx={{ p: 0 }}>
+                <Button
+                  variant="text"
+                  href={`/order/${row.juchuHeadId}/${'view'}`}
+                  sx={{ p: 0, height: 10, m: 0, fontSize: '0.50rem', width: 1 }}
+                >
                   {row.juchuHeadId}
                 </Button>
               </TableCell>
@@ -47,6 +88,28 @@ export const LoanSituationTable = (props: LoanSituationTableProps) => {
             </TableRow>
           ))}
         </TableBody>
+        <TableFooter>
+          <TableRow sx={{ position: 'sticky', bottom: 0 }}>
+            <TableCell
+              align="right"
+              size="small"
+              sx={{
+                border: '1px solid black',
+                whiteSpace: 'nowrap',
+                color: 'black',
+                bgcolor: 'white',
+                padding: 0,
+                px: 1,
+                height: 15,
+                lineHeight: '1rem',
+                fontSize: '0.50rem',
+              }}
+              colSpan={4}
+            >
+              在庫数
+            </TableCell>
+          </TableRow>
+        </TableFooter>
       </Table>
     </TableContainer>
   );
@@ -62,23 +125,54 @@ export const UseTable = (props: UseTableProps) => {
   const { eqUseList, eqStockList, ref } = props;
 
   return (
-    <TableContainer ref={ref} component={Paper} style={{ overflowX: 'auto' }}>
-      <Table>
+    <TableContainer
+      ref={ref}
+      component={Paper}
+      style={{ overflowX: 'auto' }}
+      square
+      variant="outlined"
+      sx={{ maxHeight: '80vh' }}
+    >
+      <Table stickyHeader padding="none">
         <TableHead>
           <TableRow>
+            {eqStockList.length > 0 &&
+              eqStockList.map((cell, colIndex) => (
+                <TableCell
+                  key={colIndex}
+                  align="right"
+                  sx={{
+                    border: '1px solid black',
+                    height: 15,
+                    lineHeight: '1rem',
+                    py: 0,
+                    px: 1,
+                    color: cell.zaikoQty < 0 ? 'red' : 'black',
+                    bgcolor: 'white',
+                    fontWeight: 400,
+                    fontSize: '0.50rem',
+                  }}
+                >
+                  {cell.zaikoQty}
+                </TableCell>
+              ))}
+          </TableRow>
+          <TableRow sx={{ position: 'sticky', top: 15 }}>
             {eqStockList.length > 0 &&
               eqStockList.map((cell, index) => (
                 <TableCell
                   key={index}
-                  align="right"
-                  size="small"
+                  align="center"
                   sx={{
                     border: '1px solid grey',
                     whiteSpace: 'nowrap',
                     color: 'white',
                     bgcolor: 'black',
-                    padding: 0,
-                    height: '25px',
+                    paddingY: 0,
+                    paddingX: 0.1,
+                    height: 15,
+                    lineHeight: '1rem',
+                    fontSize: '0.50rem',
                   }}
                 >
                   {toISOStringMonthDay(cell.calDat)}
@@ -94,14 +188,23 @@ export const UseTable = (props: UseTableProps) => {
                   <TableCell
                     key={colIndex}
                     align="right"
-                    sx={{ bgcolor: cell.juchuHonbanbiColor, border: '1px solid black', height: '25px', py: 0, px: 1 }}
+                    sx={{
+                      bgcolor: cell.juchuHonbanbiColor,
+                      border: '1px solid black',
+                      height: 15,
+                      py: 0,
+                      px: 1,
+                      fontSize: '0.50rem',
+                    }}
                   >
                     {cell.planQty}
                   </TableCell>
                 ))}
               </TableRow>
             ))}
-          <TableRow>
+        </TableBody>
+        <TableFooter>
+          <TableRow sx={{ position: 'sticky', bottom: 0 }}>
             {eqStockList.length > 0 &&
               eqStockList.map((cell, colIndex) => (
                 <TableCell
@@ -109,17 +212,20 @@ export const UseTable = (props: UseTableProps) => {
                   align="right"
                   sx={{
                     border: '1px solid black',
-                    height: 25,
+                    height: 15,
+                    lineHeight: '1rem',
                     py: 0,
                     px: 1,
                     color: cell.zaikoQty < 0 ? 'red' : 'black',
+                    bgcolor: 'white',
+                    fontSize: '0.50rem',
                   }}
                 >
                   {cell.zaikoQty}
                 </TableCell>
               ))}
           </TableRow>
-        </TableBody>
+        </TableFooter>
       </Table>
     </TableContainer>
   );
@@ -131,18 +237,27 @@ export const UseTable = (props: UseTableProps) => {
 const styles: { [key: string]: React.CSSProperties } = {
   // ヘッダー
   header: {
-    border: '1px solid grey',
+    border: '1px solid black',
+    height: 15,
+    lineHeight: '1rem',
     whiteSpace: 'nowrap',
-    padding: 0,
+    paddingTop: 0,
+    paddingBottom: 0,
+    paddingLeft: 0.1,
+    paddingRight: 0.1,
+    fontSize: '0.50rem',
+    width: 1,
   },
   // 行
   row: {
     border: '1px solid black',
+    fontSize: '0.50rem',
     whiteSpace: 'nowrap',
-    height: 25,
+    width: 1,
+    height: 15,
     paddingTop: 0,
     paddingBottom: 0,
-    paddingLeft: 1,
-    paddingRight: 1,
+    paddingLeft: 0.1,
+    paddingRight: 0.1,
   },
 };

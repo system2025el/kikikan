@@ -21,6 +21,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { Loading } from '../../_ui/loading';
 import { MuiTablePagination } from '../../_ui/table-pagination';
+import { LightTooltipWithText } from '../../(masters)/_ui/tables';
 import { LoanEqTableValues } from '../_lib/types';
 
 export const LoanListTable = (props: {
@@ -50,7 +51,7 @@ export const LoanListTable = (props: {
       ) : !datas || datas!.length === 0 ? (
         <Typography ml={2}>該当するデータがありません</Typography>
       ) : (
-        <TableContainer component={Paper} sx={{ maxHeight: '80vh', mt: 1 }}>
+        <TableContainer component={Paper} sx={{ maxHeight: '80vh', mt: 1 }} square>
           <Table stickyHeader size="small">
             <TableHead>
               <TableRow sx={{ whiteSpace: 'nowrap' }}>
@@ -64,6 +65,9 @@ export const LoanListTable = (props: {
                 <TableCell align="right" style={styles.style}>
                   保有数
                 </TableCell>
+                <TableCell align="right" style={styles.style}>
+                  NG数
+                </TableCell>
                 <TableCell align="left" style={styles.style}>
                   部門
                 </TableCell>
@@ -75,21 +79,6 @@ export const LoanListTable = (props: {
                 </TableCell>
                 <TableCell align="right" style={styles.style}>
                   定価
-                </TableCell>
-                <TableCell align="right" style={styles.style}>
-                  価格1
-                </TableCell>
-                <TableCell align="right" style={styles.style}>
-                  価格2
-                </TableCell>
-                <TableCell align="right" style={styles.style}>
-                  価格3
-                </TableCell>
-                <TableCell align="right" style={styles.style}>
-                  価格4
-                </TableCell>
-                <TableCell align="right" style={styles.style}>
-                  価格5
                 </TableCell>
                 <TableCell align="left" style={styles.style}>
                   メモ
@@ -118,6 +107,9 @@ export const LoanListTable = (props: {
                   <TableCell align="right" style={styles.style}>
                     {loan.kizaiQty}
                   </TableCell>
+                  <TableCell align="right" style={styles.style}>
+                    {loan.kizaiNgQty}
+                  </TableCell>
                   <TableCell align="left" style={styles.style}>
                     {loan.bumonNam}
                   </TableCell>
@@ -130,23 +122,10 @@ export const LoanListTable = (props: {
                   <TableCell align="right" style={styles.style}>
                     {loan.regAmt}
                   </TableCell>
-                  <TableCell align="right" style={styles.style}>
-                    {loan.rankAmt1}
-                  </TableCell>
-                  <TableCell align="right" style={styles.style}>
-                    {loan.rankAmt2}
-                  </TableCell>
-                  <TableCell align="right" style={styles.style}>
-                    {loan.rankAmt3}
-                  </TableCell>
-                  <TableCell align="right" style={styles.style}>
-                    {loan.rankAmt4}
-                  </TableCell>
-                  <TableCell align="right" style={styles.style}>
-                    {loan.rankAmt5}
-                  </TableCell>
                   <TableCell align="left" style={styles.style}>
-                    {loan.mem}
+                    <LightTooltipWithText variant={'body2'} maxWidth={280}>
+                      {loan.mem}
+                    </LightTooltipWithText>
                   </TableCell>
                   {/* <TableCell>
                   <Box display={'flex'}>
