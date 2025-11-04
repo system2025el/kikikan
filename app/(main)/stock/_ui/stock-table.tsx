@@ -27,7 +27,7 @@ export const EqTable = (props: EqTableProps) => {
   const borderColor = lighten(theme.palette.primary.light, 0.8);
 
   return (
-    <TableContainer ref={ref} component={Paper} style={{ overflow: 'scroll', maxHeight: '80vh' }}>
+    <TableContainer ref={ref} component={Paper} style={{ overflow: 'scroll', maxHeight: '80vh' }} square>
       <Table stickyHeader>
         <TableHead>
           <TableRow>
@@ -89,7 +89,7 @@ export const EqStockTable = (props: EqStockTableProps) => {
   const borderColor = lighten(theme.palette.primary.light, 0.8);
 
   return (
-    <TableContainer ref={ref} component={Paper} style={{ overflowX: 'auto', maxHeight: '80vh' }}>
+    <TableContainer ref={ref} component={Paper} style={{ overflowX: 'auto', maxHeight: '80vh' }} square>
       <Table stickyHeader>
         <TableHead>
           <TableRow>
