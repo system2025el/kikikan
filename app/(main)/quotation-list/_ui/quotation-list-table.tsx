@@ -29,6 +29,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import { Loading } from '../../_ui/loading';
 import { MuiTablePagination } from '../../_ui/table-pagination';
+import { ROWS_PER_MASTER_TABLE_PAGE } from '../../(masters)/_lib/constants';
 import { LightTooltipWithText } from '../../(masters)/_ui/tables';
 import { getFilteredQuotList, updQuotDelFlg } from '../_lib/funcs';
 import { QuotSearchValues, QuotTableValues } from '../_lib/types';
@@ -55,36 +56,38 @@ export const QuotationListTable = ({
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setPage: React.Dispatch<React.SetStateAction<number>>;
 }) => {
-  const rowsPerPage = 50;
+  /** テーブル1ページの行数 */
+  const rowsPerPage = ROWS_PER_MASTER_TABLE_PAGE;
+  /** ページ遷移用router */
   const router = useRouter();
+  /** ダイアログ開いたときにフォーカス管理するRef */
   const inputRef = useRef<HTMLInputElement>(null);
 
   /* useState ------------------------------------- */
-  /* 表示する見積リスト */
+  /** 表示する見積リスト */
   const [theQuots, setTheQuots] = useState<QuotTableValues[]>(quots);
-  /* ダイアログの開閉 */
+  /** ダイアログの開閉 */
   const [dialogOpen, setDialogOpen] = useState(false);
-  /* ダイアログの開閉 */
+  /** ダイアログの開閉 */
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  /* 選択された見積Idの配列 */
+  /** 選択された見積Idの配列 */
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
-  /* スナックバーの表示するかしないか */
+  /** スナックバーの表示するかしないか */
   const [snackBarOpen, setSnackBarOpen] = useState(false);
-  /* スナックバーのメッセージ */
+  /** スナックバーのメッセージ */
   const [snackBarMessage, setSnackBarMessage] = useState('');
 
-  // 表示するデータ
+  /** 表示するデータ */
   const list = useMemo(() => {
     return rowsPerPage > 0
       ? theQuots.map((l, index) => ({ ...l, ordNum: index + 1 })).slice((page - 1) * rowsPerPage, page * rowsPerPage)
       : theQuots.map((l, index) => ({ ...l, ordNum: index + 1 }));
   }, [page, rowsPerPage, theQuots]);
-  // テーブル最後のページ用の空データの長さ
+  /** テーブル最後のページ用の空データの長さ */
   const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - theQuots.length) : 0;
 
   /* methods -------------------------------------------- */
-
-  /* 削除ボタン押下時処理 */
+  /** 削除ボタン押下時処理 */
   const handleClickDelete = async (mituIds: number[]) => {
     await updQuotDelFlg(mituIds);
     setSelectedIds([]);
@@ -97,7 +100,7 @@ export const QuotationListTable = ({
     setTheQuots(q);
   };
 
-  /* チェックボックス押下（選択時）の処理 */
+  /** チェックボックス押下（選択時）の処理 */
   const handleSelectQuotIds = (event: React.MouseEvent<unknown>, id: number) => {
     const selectedIndex = selectedIds.indexOf(id);
     let newSelected: number[] = [];
@@ -114,7 +117,7 @@ export const QuotationListTable = ({
     setSelectedIds(newSelected);
   };
 
-  /* 全選択チャックボックス押下時の処理 */
+  /** 全選択チャックボックス押下時の処理 */
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked && theQuots) {
       const newSelected = theQuots.map((r) => r.mituHeadId);

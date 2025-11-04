@@ -38,6 +38,7 @@ export const RfidMasterTable = ({
   isLoading,
   page,
   selectedTags,
+  setRfid,
   setIsLoading,
   setPage,
   setSelectedTags,
@@ -47,39 +48,39 @@ export const RfidMasterTable = ({
   isLoading: boolean;
   page: number;
   selectedTags: string[];
+  setRfid: React.Dispatch<React.SetStateAction<RfidsMasterTableValues[] | undefined>>;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setPage: React.Dispatch<React.SetStateAction<number>>;
   setSelectedTags: React.Dispatch<React.SetStateAction<string[]>>;
 }) => {
-  /* テーブル1ページの行数 */
+  /** テーブル1ページの行数 */
   const rowsPerPage = ROWS_PER_MASTER_TABLE_PAGE;
+
   /* useState ------------------------------------------------ */
   /* ダイアログ開く機材のID、閉じるとき、未選択でFAKE_NEW_IDとする */
   const [openId, setOpenID] = useState<string>(String(FAKE_NEW_ID));
   /* 詳細ダイアログの開閉状態 */
   const [dialogOpen, setDialogOpen] = useState(false);
-  /* 場所リスト */
-  const [theRfids, setTheRfids] = useState<RfidsMasterTableValues[] | undefined>(rfids);
 
   /* methods ------------------------------------------- */
-  /* 詳細ダイアログを開く関数 */
+  /** 詳細ダイアログを開く関数 */
   const handleOpenDialog = (id: string) => {
     setOpenID(id);
     setDialogOpen(true);
   };
-  /* ダイアログを閉じる関数 */
+  /** ダイアログを閉じる関数 */
   const handleCloseDialog = () => {
     setDialogOpen(false);
   };
-  /* 情報が変わったときに更新される */
+  /** 情報が変わったときに更新される */
   const refetchRfids = async () => {
     setIsLoading(true);
     const updated = await getRfidsOfTheKizai(kizaiId);
-    setTheRfids(updated);
+    setRfid(updated);
     setIsLoading(false);
   };
 
-  /* チェックボックス押下（選択時）の処理 */
+  /** チェックボックス押下（選択時）の処理 */
   const handleSelectRfidTags = (event: React.MouseEvent<unknown>, id: string) => {
     const selectedIndex = selectedTags.indexOf(id);
     let newSelected: string[] = [];
@@ -95,10 +96,10 @@ export const RfidMasterTable = ({
     }
     setSelectedTags(newSelected);
   };
-  /* 全選択チャックボックス押下時の処理 */
+  /** 全選択チャックボックス押下時の処理 */
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.checked && theRfids) {
-      const newSelected = theRfids.map((r) => r.rfidTagId);
+    if (event.target.checked && rfids) {
+      const newSelected = rfids.map((r) => r.rfidTagId);
       setSelectedTags(newSelected);
       return;
     }
@@ -106,22 +107,17 @@ export const RfidMasterTable = ({
   };
 
   /* useMemo ------------------------------------------------- */
-  /* 表示するリスト */
+  /** 表示するRFIDタグリスト */
   const list = useMemo(
-    () => (theRfids && rowsPerPage > 0 ? theRfids.slice((page - 1) * rowsPerPage, page * rowsPerPage) : theRfids),
-    [page, rowsPerPage, theRfids]
+    () => (rfids && rowsPerPage > 0 ? rfids.slice((page - 1) * rowsPerPage, page * rowsPerPage) : rfids),
+    [page, rowsPerPage, rfids]
   );
-  // テーブル最後のページ用の空データの長さ
-  const emptyRows = theRfids && page > 1 ? Math.max(0, page * rowsPerPage - theRfids.length) : 0;
-
-  /* useEffect ----------------------------------------------- */
-  useEffect(() => {
-    setTheRfids(rfids); // 親からのRfidsが更新された場合に同期
-  }, [rfids]);
+  /** テーブル最後のページ用の空データの長さ */
+  const emptyRows = rfids && page > 1 ? Math.max(0, page * rowsPerPage - rfids.length) : 0;
 
   useEffect(() => {
-    setIsLoading(false); //theRfidsが変わったらローディング終わり
-  }, [theRfids, setIsLoading]);
+    setIsLoading(false); //Rfidsが変わったらローディング終わり
+  }, [rfids, setIsLoading]);
 
   return (
     <Box>
@@ -131,7 +127,7 @@ export const RfidMasterTable = ({
       <Divider />
       <Grid2 container mt={0.5} mx={0.5} justifyContent={'space-between'} alignItems={'center'}>
         <Grid2 spacing={1}>
-          <MuiTablePagination arrayList={theRfids!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
+          <MuiTablePagination arrayList={rfids!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
         </Grid2>
         <Grid2 container spacing={3}>
           <Grid2>
@@ -144,7 +140,7 @@ export const RfidMasterTable = ({
       </Grid2>
       {isLoading ? (
         <Loading />
-      ) : !theRfids || theRfids!.length === 0 ? (
+      ) : !rfids || rfids!.length === 0 ? (
         <Typography>該当するRFIDタグがありません</Typography>
       ) : (
         <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
@@ -160,8 +156,8 @@ export const RfidMasterTable = ({
                     <Checkbox
                       color="primary"
                       onChange={handleSelectAllClick}
-                      indeterminate={selectedTags.length > 0 && selectedTags.length < theRfids.length}
-                      checked={theRfids.length > 0 && selectedTags.length === theRfids.length}
+                      indeterminate={selectedTags.length > 0 && selectedTags.length < rfids.length}
+                      checked={rfids.length > 0 && selectedTags.length === rfids.length}
                       sx={{
                         '& .MuiSvgIcon-root': {
                           backgroundColor: '#fff',

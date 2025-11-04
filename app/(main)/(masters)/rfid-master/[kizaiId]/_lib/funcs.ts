@@ -1,12 +1,13 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { connection } from 'next/server';
 
 import pool from '@/app/_lib/db/postgres';
 import { SCHEMA, supabase } from '@/app/_lib/db/supabase';
 import { selectOneEqpt } from '@/app/_lib/db/tables/m-kizai';
 import { updateMasterUpdates } from '@/app/_lib/db/tables/m-master-update';
-import { insertNewRfid, upDateRfidDB } from '@/app/_lib/db/tables/m-rfid';
+import { insertNewRfid, upDateRfidDB, updateRfidTagDelFlgs } from '@/app/_lib/db/tables/m-rfid';
 import { insertNewRfidSts, updateRfidTagStsDB } from '@/app/_lib/db/tables/t-rfid-status-result';
 import { selectOneRfid, selectRfidsOfTheKizai } from '@/app/_lib/db/tables/v-rfid';
 import { MRfidDBValues } from '@/app/_lib/db/types/m-rfid-type';
@@ -126,7 +127,7 @@ export const addNewRfid = async (data: RfidsMasterDialogValues, kizaiId: number,
     await insertNewRfidSts(insertStsData, connection);
     await updateMasterUpdates('m_rfid', connection);
     await connection.query('COMMIT');
-    await revalidatePath('/rfid-master');
+    await revalidatePath(`/rfid-master/${kizaiId}`);
     await revalidatePath('/eqpt-master');
   } catch (error) {
     console.log('DB接続エラー', error);
@@ -213,19 +214,45 @@ export const updateRfid = async (
  * RFIDマスタで一括変更されたステータスを更新する関数
  * @param data 機材ステータス一括変更されたデータ
  */
-export const updateRfidTagSts = async (data: { tagId: string; sts: number; shozokuId: number }[], user: string) => {
+export const updateRfidTagSts = async (
+  data: { tagId: string; sts: number; shozokuId: number }[],
+  user: string,
+  kizaiId: number,
+  delList: { rfidTagId: string; delFlg: number }[]
+) => {
   const updateList = data.map((d) => ({
     rfid_tag_id: d.tagId,
     rfid_kizai_sts: d.sts,
     shozoku_id: d.shozokuId,
   }));
+  const connection = await pool.connect();
+  console.log('======================================================', delList);
   try {
-    await updateRfidTagStsDB(updateList, user);
+    await connection.query('BEGIN');
+
+    if (delList && delList.length > 0) {
+      await updateRfidTagDelFlgs(
+        delList.map((l) => ({
+          rfid_tag_id: l.rfidTagId,
+          del_flg: l.delFlg,
+        })),
+        connection,
+        kizaiId,
+        user
+      );
+      await updateMasterUpdates('m_rfid', connection);
+    }
+
+    await updateRfidTagStsDB(updateList, user, connection);
     await revalidatePath('/rfid-master');
     await revalidatePath('/eqpt-master');
     console.log(data);
+    await connection.query('COMMIT');
   } catch (e) {
     console.error('例外が発生しました:', e);
+    await connection.query('ROLLBACK');
     throw e;
+  } finally {
+    connection.release();
   }
 };

@@ -29,6 +29,7 @@ import { FormMonthX } from '@/app/(main)/_ui/date';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 import { MuiTablePagination } from '@/app/(main)/_ui/table-pagination';
+import { ROWS_PER_MASTER_TABLE_PAGE } from '@/app/(main)/(masters)/_lib/constants';
 import { LightTooltipWithText } from '@/app/(main)/(masters)/_ui/tables';
 
 import { BillsListTableValues } from '../_lib/types';
@@ -48,7 +49,8 @@ export const BillListTable = ({
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setPage: React.Dispatch<React.SetStateAction<number>>;
 }) => {
-  const rowsPerPage = 50;
+  /** テーブル1ページの行数 */
+  const rowsPerPage = ROWS_PER_MASTER_TABLE_PAGE;
   const router = useRouter();
 
   const list = useMemo(

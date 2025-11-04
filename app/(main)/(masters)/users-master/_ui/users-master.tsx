@@ -16,10 +16,11 @@ import { UserssMasterTable } from './users-master-table';
  */
 export const UsersMaster = ({ users }: { users: UsersMasterTableValues[] | undefined }) => {
   /* useState ------------------ */
+  /** 表示する担当者の配列 */
   const [theUsers, setTheUsers] = useState(users);
-  /* 今開いてるテーブルのページ数 */
+  /** 今開いてるテーブルのページ数 */
   const [page, setPage] = useState(1);
-  /* DBのローディング */
+  /** ローディング */
   const [isLoading, setIsLoading] = useState(true);
 
   /* useForm ------------------- */
@@ -28,7 +29,8 @@ export const UsersMaster = ({ users }: { users: UsersMasterTableValues[] | undef
     defaultValues: { query: '' },
   });
 
-  /* 検索ボタン押下 */
+  /* methods ------------------------------- */
+  /** 検索ボタン押下 */
   const onSubmit = async (data: { query: string | undefined }) => {
     setIsLoading(true);
     console.log('data : ', data);
@@ -40,9 +42,6 @@ export const UsersMaster = ({ users }: { users: UsersMasterTableValues[] | undef
 
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
-      <Box justifySelf={'end'} mb={0.5}>
-        <BackButton label={'戻る'} />
-      </Box>
       <Paper variant="outlined">
         <Box width={'100%'} display={'flex'} p={2}>
           <Typography>担当者マスタ検索</Typography>

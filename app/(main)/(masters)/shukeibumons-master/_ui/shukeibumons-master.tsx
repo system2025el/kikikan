@@ -17,10 +17,11 @@ import { ShukeibumonsMasterTable } from './shukeibumons-master-table';
  */
 export const ShukeibumonsMaster = ({ shukeibumons }: { shukeibumons: ShukeibumonsMasterTableValues[] | undefined }) => {
   /* useState ------------------ */
+  /** 表示する集計部門の配列 */
   const [theShukeibumons, setTheShukeibumons] = useState(shukeibumons);
-  /* 今開いてるテーブルのページ数 */
+  /** 今開いてるテーブルのページ数 */
   const [page, setPage] = useState(1);
-  /* DBのローディング */
+  /** ローディング */
   const [isLoading, setIsLoading] = useState(true);
 
   /* useForm ------------------- */
@@ -29,7 +30,8 @@ export const ShukeibumonsMaster = ({ shukeibumons }: { shukeibumons: Shukeibumon
     defaultValues: { query: '' },
   });
 
-  /* 検索ボタン押下 */
+  /* methods ------------------- */
+  /** 検索ボタン押下 */
   const onSubmit = async (data: { query: string | undefined }) => {
     setIsLoading(true);
     console.log('data : ', data);
@@ -41,9 +43,6 @@ export const ShukeibumonsMaster = ({ shukeibumons }: { shukeibumons: Shukeibumon
 
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
-      <Box justifySelf={'end'} mb={0.5}>
-        <BackButton label={'戻る'} />
-      </Box>
       <Paper variant="outlined">
         <Box width={'100%'} display={'flex'} p={2}>
           <Typography>集計部門マスタ検索</Typography>

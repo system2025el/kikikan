@@ -22,6 +22,7 @@ import React, { useEffect, useMemo } from 'react';
 import { toISOStringYearMonthDay } from '../../_lib/date-conversion';
 import { Loading } from '../../_ui/loading';
 import { MuiTablePagination } from '../../_ui/table-pagination';
+import { ROWS_PER_MASTER_TABLE_PAGE } from '../../(masters)/_lib/constants';
 import { LightTooltipWithText } from '../../(masters)/_ui/tables';
 import { OrderListTableValues } from '../_lib/types';
 
@@ -43,15 +44,16 @@ export const OrderTable = ({
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setPage: React.Dispatch<React.SetStateAction<number>>;
 }) => {
-  const rowsPerPage = 50;
+  /** テーブル1ページの行数 */
+  const rowsPerPage = ROWS_PER_MASTER_TABLE_PAGE;
 
-  // 表示するデータ
+  /** 表示するデータ */
   const list = useMemo(() => {
     return rowsPerPage > 0
       ? orderList.map((l, index) => ({ ...l, ordNum: index + 1 })).slice((page - 1) * rowsPerPage, page * rowsPerPage)
       : orderList.map((l, index) => ({ ...l, ordNum: index + 1 }));
-  }, [orderList, page]);
-  // テーブル最後のページ用の空データの長さ
+  }, [orderList, page, rowsPerPage]);
+  /** テーブル最後のページ用の空データの長さ */
   const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - orderList.length) : 0;
 
   /* useEffect -------------------------------------------- */
