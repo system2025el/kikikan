@@ -14,7 +14,8 @@ import { RfidStatusResultValues } from '../types/t-rfid-status-result-type';
  */
 export const updateRfidTagStsDB = async (
   data: { rfid_tag_id: string; rfid_kizai_sts: number; shozoku_id: number }[],
-  user: string
+  user: string,
+  connection: PoolClient
 ) => {
   const now = toJapanTimeString(undefined, '-');
   // RFIDタグ管理テーブル側準備
@@ -47,7 +48,7 @@ export const updateRfidTagStsDB = async (
           `;
 
   try {
-    await pool.query(query, [...values, now, user]);
+    await connection.query(query, [...values, now, user]);
   } catch (e) {
     throw e;
   }

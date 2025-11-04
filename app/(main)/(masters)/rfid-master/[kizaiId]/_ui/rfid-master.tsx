@@ -18,7 +18,7 @@ import { useState } from 'react';
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 
-import { updateRfidTagSts } from '../_lib/funcs';
+import { getRfidsOfTheKizai, updateRfidTagSts } from '../_lib/funcs';
 import { RfidsMasterTableValues } from '../_lib/types';
 import { RfidMasterTable } from './rfid-master-table';
 
@@ -31,6 +31,7 @@ export const RfidMaster = ({
   sts: SelectTypes[] | undefined;
   kizai: { id: number; nam: string };
 }) => {
+  /** ログインユーザ */
   const user = useUserStore((state) => state.user);
   // useState
   /* 表示されるRFIDリスト */
@@ -58,9 +59,9 @@ export const RfidMaster = ({
   // });
 
   /* methods ------------------------------------------ */
-  /* 適用ボタン押下時の処理 */
+  /** 適用ボタン押下時の処理 */
   const handleClickAdapt = (tagList: string[], selectedSts: SelectTypes) => {
-    console.log('タグリスト', tagList, 'ステータス', selectedSts);
+    console.log('タグリスト', tagList, 'ステータス', selectedSts, '最初のリスト', theRfids);
     const newList = theRfids
       ? theRfids.map((r) => {
           if (tagList.includes(r.rfidTagId)) {
@@ -81,27 +82,60 @@ export const RfidMaster = ({
     // }
   };
 
-  /* 保存ボタン押下時の処理 */
+  /** 保存ボタン押下時の処理 */
   const handleClickSave = async () => {
     if (!theRfids) return;
     // 更新される予定のRFIDマスタリスト
     const updateList = theRfids.filter((newItem) => {
-      const originalItem = rfids?.find((original) => original.rfidTagId === newItem.rfidTagId);
-      if (!originalItem) {
+      const currentItem = rfids?.find((current) => current.rfidTagId === newItem.rfidTagId);
+      if (!currentItem) {
         return true;
       }
-      return originalItem.stsId !== newItem.stsId || originalItem.stsNam !== newItem.stsNam;
+      return currentItem.stsId !== newItem.stsId || currentItem.stsNam !== newItem.stsNam;
     });
     console.log(updateList);
     if (updateList.length === 0) {
       setSnackBarMessage('保存済みの内容です。');
     }
     if (updateList.length > 0) {
+      // 無効化フラグを変化させるタグ配列
+      console.log('△△△△△△△', updateList, '←←←', rfids);
+      const changeDelFlgList = updateList.reduce(
+        (acc, l) => {
+          const current = rfids?.find((c) => c.rfidTagId === l.rfidTagId);
+          if (!current) {
+            return acc;
+          }
+          if (current.stsId === null || current.stsId === undefined || l.stsId === null || l.stsId === undefined) {
+            return acc;
+          }
+
+          // 無効化 : 元が101（NG） 以下 AND 新が101より大きい
+          if (current.stsId <= 101 && l.stsId > 101) {
+            acc.push({ rfidTagId: l.rfidTagId, delFlg: 1 });
+          }
+          // 有効化 : 元が101（NG）より大きい AND 新が101以下
+          else if (current.stsId > 101 && l.stsId <= 101) {
+            acc.push({ rfidTagId: l.rfidTagId, delFlg: 0 });
+          }
+          // 他は除外
+          return acc;
+        },
+        [] as { rfidTagId: string; delFlg: number }[]
+      );
+
       await updateRfidTagSts(
         updateList.map((d) => ({ tagId: d.rfidTagId, sts: d.stsId ?? 0, shozokuId: d.shozokuId })),
-        user?.name ?? ''
+        user?.name ?? '',
+        kizai.id,
+        changeDelFlgList
       );
       setSnackBarMessage('保存しました');
+      // 表更新
+      setIsLoading(true);
+      const updated = await getRfidsOfTheKizai(kizai.id);
+      setTheRfids(updated);
+      setIsLoading(false);
     }
     setSnackBarOpen(true);
     setSaved(true);
@@ -118,7 +152,7 @@ export const RfidMaster = ({
               sx={{ alignItems: 'center' }}
               disabled={!theRfids || rfids === theRfids || saved /*|| isAllSame*/}
             >
-              <SaveAsIcon fontSize="small" />
+              <SaveAsIcon fontSize="small" sx={{ mr: 0.5 }} />
               保存
             </Button>
           </Box>
@@ -161,6 +195,7 @@ export const RfidMaster = ({
         kizaiId={kizai.id}
         page={page}
         isLoading={isLoading}
+        setRfid={setTheRfids}
         setPage={setPage}
         setIsLoading={setIsLoading}
         selectedTags={selectedTags}

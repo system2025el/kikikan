@@ -28,11 +28,12 @@ export const EqptMaster = ({
       }
     | undefined;
 }) => {
-  // useState
+  /* useState ------------------------------------------------- */
+  /** 表示する機材の配列 */
   const [theEqpts, setTheEqpts] = useState<EqptsMasterTableValues[] | undefined>(eqpts);
-  /* 今開いてるテーブルのページ数 */
+  /** 今開いてるテーブルのページ数 */
   const [page, setPage] = useState(1);
-  /* DBのローディング */
+  /** ローディング */
   const [isLoading, setIsLoading] = useState(true);
 
   /* 検索useForm-------------------------- */
@@ -48,7 +49,7 @@ export const EqptMaster = ({
   });
 
   /* methods ------------------------------------------ */
-  /* 検索ボタン押下時 */
+  /** 検索ボタン押下時 */
   const onSubmit = async (data: {
     query: string | undefined;
     bumonQuery: number;
@@ -69,11 +70,9 @@ export const EqptMaster = ({
     setTheEqpts(newList?.data);
     console.log('theEqpt : ', theEqpts);
   };
+
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
-      <Box justifySelf={'end'} mb={0.5}>
-        <BackButton label={'戻る'} />
-      </Box>
       <Paper variant="outlined">
         <Box width={'100%'} display={'flex'} p={2}>
           <Typography>機材マスタ一覧</Typography>

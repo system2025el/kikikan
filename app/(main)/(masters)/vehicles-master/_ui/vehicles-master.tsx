@@ -15,10 +15,11 @@ import { VehiclesMasterTable } from './vehicles-master-table';
  */
 export const VehiclesMaster = ({ vehs }: { vehs: VehsMasterTableValues[] | undefined }) => {
   /* useState ------------------ */
+  /** 表示する車両の配列 */
   const [theVehs, setTheVehs] = useState(vehs);
-  /* 表示してるページ */
+  /** 表示してるページ */
   const [page, setPage] = useState(1);
-  /* DBのローディング */
+  /** ローディング */
   const [isLoading, setIsLoading] = useState(true);
 
   // 車両マスタに検索自体必要なのか？
@@ -39,9 +40,6 @@ export const VehiclesMaster = ({ vehs }: { vehs: VehsMasterTableValues[] | undef
 
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
-      <Box justifySelf={'end'} mb={0.5}>
-        <BackButton label={'戻る'} />
-      </Box>
       <Paper variant="outlined">
         <Box width={'100%'} display={'flex'} p={2}>
           <Typography>車両マスタ検索</Typography>

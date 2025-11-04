@@ -36,7 +36,7 @@ import { CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
 import { FormDateX } from '@/app/(main)/_ui/date';
 import { Loading } from '@/app/(main)/_ui/loading';
 import { MuiTablePagination } from '@/app/(main)/_ui/table-pagination';
-import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
+import { FAKE_NEW_ID, ROWS_PER_MASTER_TABLE_PAGE } from '@/app/(main)/(masters)/_lib/constants';
 import { LightTooltipWithText } from '@/app/(main)/(masters)/_ui/tables';
 
 import { CreateBillDialog } from '../../bill-list/_ui/create-bill-dialog';
@@ -67,7 +67,8 @@ export const BillingStsListTable = ({
   setPage: React.Dispatch<React.SetStateAction<number>>;
   refetch: () => Promise<void>;
 }) => {
-  const rowsPerPage = 50;
+  /** テーブル1ページの行数 */
+  const rowsPerPage = ROWS_PER_MASTER_TABLE_PAGE;
 
   const list = useMemo(
     () => (rowsPerPage > 0 ? billSts.slice((page - 1) * rowsPerPage, page * rowsPerPage) : billSts),

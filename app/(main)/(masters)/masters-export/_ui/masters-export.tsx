@@ -13,12 +13,13 @@ import { getAllEqptAndRfid } from '../_lib/funcs';
  * @returns {JSX.Element} マスタエクスポート画面のコンポーネント
  */
 export const ExportMaster = () => {
-  /* スナックバーの表示するかしないか */
+  /** スナックバーの表示するかしないか */
   const [snackBarOpen, setSnackBarOpen] = useState(false);
-  /* スナックバーのメッセージ */
+  /** スナックバーのメッセージ */
   const [snackBarMessage, setSnackBarMessage] = useState('ファイルが選択されていません');
 
-  /* エクスポートボタン押下時 */
+  /* methods ---------------------------------------------- */
+  /** エクスポートボタン押下時 */
   const exportFile = async () => {
     const data = await getAllEqptAndRfid();
     if (data) {
@@ -33,9 +34,6 @@ export const ExportMaster = () => {
 
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
-      <Box justifySelf={'end'} mb={0.5}>
-        <BackButton label={'戻る'} />
-      </Box>
       <Stack direction={'column'} spacing={5} sx={{ minWidth: '100%' }}>
         <Paper variant="outlined" sx={{ minWidth: '100%' }}>
           <Box width={'100%'} display={'flex'} p={2}>

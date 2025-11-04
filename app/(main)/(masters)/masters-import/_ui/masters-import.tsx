@@ -21,21 +21,21 @@ export const ImportMaster = () => {
 
   const errorRows: number[] = [];
   /* useState ----------------------------------------------------- */
-  /* インポートした機材RFIDマスタファイル名 */
+  /** インポートした機材RFIDマスタファイル名 */
   const [eqptFileName, setEqptFileName] = useState<string>('ファイルが選択されていません');
-  /* インポートした顧客マスタファイル名 */
+  /** インポートした顧客マスタファイル名 */
   const [customerFileName, setCustomerFileName] = useState<string>('ファイルが選択されていません');
-  /* 機材RFIDデータ */
+  /** 機材RFIDデータ */
   const [eqptData, setEqptData] = useState<EqptImportType[]>([]);
-  /* 顧客データ */
+  /** 顧客データ */
   // const [customerData, setCustomerData] = useState<RFIDImportType[]>([]);
-  /* スナックバーの表示するかしないか */
+  /** スナックバーの表示するかしないか */
   const [snackBarOpen, setSnackBarOpen] = useState(false);
-  /* スナックバーのメッセージ */
+  /** スナックバーのメッセージ */
   const [snackBarMessage, setSnackBarMessage] = useState('ファイルが選択されていません');
 
   /* methods ----------------------------------------------------- */
-  /* ファイルを選んでデータをオブジェクト化 */
+  /** ファイルを選んでデータをオブジェクト化 */
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, type: 'eqpt' | 'customer' | '') => {
     const file = event.target.files?.[0];
     if (!file) {
@@ -152,16 +152,8 @@ export const ImportMaster = () => {
     }
   };
 
-  // const handleImportRfid = () => {
-  //   // console.log('Importing RFID Data:', rfidData);
-  //   // alert('RFIDマスタのインポートが実行されました (コンソールを確認)');
-  // };
-
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
-      <Box justifySelf={'end'} mb={0.5}>
-        <BackButton label={'戻る'} />
-      </Box>
       <Stack direction={'column'} spacing={5} sx={{ minWidth: '100%' }}>
         <Section
           masterName={'機材RFID'}
@@ -170,13 +162,6 @@ export const ImportMaster = () => {
           handleImport={handleImportEqpt}
           fileInputId="eqpts-excel-file"
         />
-        {/* <Section
-          masterName={'顧客'}
-          fileName={customerFileName}
-          handleFileUpload={handleFileUpload}
-          handleImport={handleImportRfid}
-          fileInputId="customers-excel-file"
-        /> */}
       </Stack>
       <Snackbar
         open={snackBarOpen}

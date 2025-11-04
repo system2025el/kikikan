@@ -16,10 +16,11 @@ import { LocationsMasterTable } from './locations-master-table';
  */
 export const LocationsMaster = ({ locs }: { locs: LocsMasterTableValues[] | undefined }) => {
   /* useState ------------------ */
+  /** 表示する公演場所の配列 */
   const [theLocs, setTheLocs] = useState(locs);
-  /* 今開いてるテーブルのページ数 */
+  /** 今開いてるテーブルのページ数 */
   const [page, setPage] = useState(1);
-  /* DBのローディング */
+  /** ローディング */
   const [isLoading, setIsLoading] = useState(true);
 
   /* useForm ------------------- */
@@ -29,7 +30,8 @@ export const LocationsMaster = ({ locs }: { locs: LocsMasterTableValues[] | unde
     resolver: zodResolver(LocsMasterSearchSchema),
   });
 
-  /* 検索ボタン押下 */
+  /* methods --------------------------------- */
+  /** 検索ボタン押下 */
   const onSubmit = async (data: LocsMasterSearchValues) => {
     setIsLoading(true);
     console.log('data : ', data, 'locs : ', locs);
@@ -42,9 +44,6 @@ export const LocationsMaster = ({ locs }: { locs: LocsMasterTableValues[] | unde
   return (
     <>
       <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
-        <Box justifySelf={'end'} mb={0.5}>
-          <BackButton label={'戻る'} />
-        </Box>
         <Paper variant="outlined">
           <Box width={'100%'} display={'flex'} p={2}>
             <Typography>公演場所マスタ検索</Typography>

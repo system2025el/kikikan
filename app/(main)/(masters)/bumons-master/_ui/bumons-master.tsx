@@ -12,12 +12,12 @@ import { FAKE_NEW_ID } from '../../_lib/constants';
 import { getFilteredBumons } from '../_lib/funcs';
 import { BumonsMasterTableValues } from '../_lib/types';
 import { BumonsMasterTable } from './bumons-master-table';
+
 /**
  * 部門マスタ画面
  * @param {bumons} 部門リスト
  * @returns {JSX.Element} 部門マスタコンポーネント
  */
-
 export const BumonsMaster = ({
   bumons,
   options,
@@ -31,10 +31,11 @@ export const BumonsMaster = ({
     | undefined;
 }) => {
   /* useState ------------------ */
+  /** 表示する部門の配列 */
   const [theBumons, setTheBumons] = useState(bumons);
-  /* 今開いてるテーブルのページ数 */
+  /** 今開いてるテーブルのページ数 */
   const [page, setPage] = useState(1);
-  /* DBのローディング */
+  /** ローディング */
   const [isLoading, setIsLoading] = useState(true);
 
   /* useForm ------------------- */
@@ -43,7 +44,8 @@ export const BumonsMaster = ({
     defaultValues: { query: '', daibumonQuery: FAKE_NEW_ID, shukeiQuery: FAKE_NEW_ID },
   });
 
-  /* 検索ボタン押下 */
+  /* methods -------------------- */
+  /** 検索ボタン押下 */
   const onSubmit = async (data: { query: string | undefined; daibumonQuery: number; shukeiQuery: number }) => {
     setIsLoading(true);
     console.log('data : ', data);
@@ -59,9 +61,6 @@ export const BumonsMaster = ({
 
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
-      <Box justifySelf={'end'} mb={0.5}>
-        <BackButton label={'戻る'} />
-      </Box>
       <Paper variant="outlined">
         <Box width={'100%'} display={'flex'} p={2}>
           <Typography>部門マスタ検索</Typography>

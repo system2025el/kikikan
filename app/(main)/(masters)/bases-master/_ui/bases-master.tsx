@@ -13,16 +13,14 @@ import { BasesMasterTable } from './bases-master-table';
  */
 export const BasesMaster = ({ bases }: { bases: BasesMasterTableValues[] | undefined }) => {
   /* useState ------------------ */
+  /** 表示する拠点の配列 */
   const [theBases, setTheBases] = useState(bases);
-  /* 今開いてるテーブルのページ数 */
+  /** 今開いてるテーブルのページ数 */
   const [page, setPage] = useState(1);
-  /* DBのローディング */
+  /** ローディング */
   const [isLoading, setIsLoading] = useState(true);
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
-      <Box justifySelf={'end'} mb={0.5}>
-        <BackButton label={'戻る'} />
-      </Box>
       <Paper variant="outlined">
         <Box width={'100%'} display={'flex'} p={2}>
           <Typography>拠点マスタ検索</Typography>

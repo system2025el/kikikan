@@ -18,7 +18,6 @@ import { BumonsMasterDialog } from './bumons-master-dialog';
  * @param
  * @returns {JSX.Element} 部門マスタテーブル
  */
-
 export const BumonsMasterTable = ({
   bumons,
   isLoading,
@@ -32,27 +31,27 @@ export const BumonsMasterTable = ({
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setPage: React.Dispatch<React.SetStateAction<number>>;
 }) => {
-  /* 1ページごとの表示数 */
+  /** 1ページごとの表示数 */
   const rowsPerPage = ROWS_PER_MASTER_TABLE_PAGE;
   /* useState --------------------------------------- */
-  /* ダイアログ開く部門のID、閉じるとき、未選択でFAKE_NEW_IDとする */
+  /** ダイアログ開く部門のID、閉じるとき、未選択でFAKE_NEW_IDとする */
   const [openId, setOpenID] = useState<number>(FAKE_NEW_ID);
-  /* 詳細ダイアログの開閉状態 */
+  /** 詳細ダイアログの開閉状態 */
   const [dialogOpen, setDialogOpen] = useState(false);
-  /* 部門リスト */
+  /** 表示する部門リスト */
   const [theBumons, setTheBumons] = useState<BumonsMasterTableValues[] | undefined>(bumons);
 
   /* methods ---------------------------------------- */
-  /* 選んだ部門ダイアログを開く関数 */
+  /** 選んだ部門ダイアログを開く関数 */
   const handleOpenDialog = (id: number) => {
     setOpenID(id);
     setDialogOpen(true);
   };
-  /* ダイアログを閉じる関数 */
+  /** ダイアログを閉じる関数 */
   const handleCloseDialog = () => {
     setDialogOpen(false);
   };
-  /* 情報が変わったときに更新される */
+  /** 情報が変わったときに更新される */
   const refetchBumons = async () => {
     setIsLoading(true);
     const updated = await getFilteredBumons();
@@ -60,6 +59,7 @@ export const BumonsMasterTable = ({
     setIsLoading(false);
   };
 
+  /* useEffect ------------------------------------------ */
   useEffect(() => {
     setTheBumons(bumons); // 親からのBumonsが更新された場合に同期
   }, [bumons]);

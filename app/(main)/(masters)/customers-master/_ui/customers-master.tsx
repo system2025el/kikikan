@@ -14,10 +14,11 @@ import { CustomersMasterTable } from './customers-master-table';
  */
 export const CustomersMaster = ({ customers }: { customers: CustomersMasterTableValues[] | undefined }) => {
   /* useState ------------------ */
-  const [theCustomers, setTheCustomers] = useState(customers);
-  /* 今開いてるテーブルのページ数 */
+  /** 表示する顧客の配列 */
+  const [theCustomers, setTheCustomers] = useState<CustomersMasterTableValues[] | undefined>(customers);
+  /** 今開いてるテーブルのページ数 */
   const [page, setPage] = useState(1);
-  /* DBのローディング */
+  /** DBのローディング */
   const [isLoading, setIsLoading] = useState(true);
 
   /* useForm ------------------- */
@@ -26,7 +27,8 @@ export const CustomersMaster = ({ customers }: { customers: CustomersMasterTable
     defaultValues: { query: '' },
   });
 
-  /* 検索ボタン押下 */
+  /* methods --------------------- */
+  /** 検索ボタン押下 */
   const onSubmit = async (data: { query: string | undefined }) => {
     setIsLoading(true);
     console.log('data : ', data);
@@ -38,9 +40,6 @@ export const CustomersMaster = ({ customers }: { customers: CustomersMasterTable
 
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
-      <Box justifySelf={'end'} mb={0.5}>
-        <BackButton label={'戻る'} />
-      </Box>
       <Paper variant="outlined">
         <Box width={'100%'} display={'flex'} p={2}>
           <Typography>顧客マスタ検索</Typography>

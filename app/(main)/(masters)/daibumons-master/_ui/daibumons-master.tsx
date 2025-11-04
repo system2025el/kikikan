@@ -16,20 +16,22 @@ import { DaibumonsMasterTable } from './daibumons-master-table';
  * @returns {JSX.Element} 大部門マスタコンポーネント
  */
 export const DaibumonsMaster = ({ daibumons }: { daibumons: DaibumonsMasterTableValues[] | undefined }) => {
-  /* useState ------------------ */
+  /* useState ------------------------------------- */
+  /** 表示する大部門の配列 */
   const [theDaibumons, setTheDaibumons] = useState(daibumons);
-  /* 今開いてるテーブルのページ数 */
+  /** 今開いてるテーブルのページ数 */
   const [page, setPage] = useState(1);
-  /* DBのローディング */
+  /** DBのローディング */
   const [isLoading, setIsLoading] = useState(true);
 
-  /* useForm ------------------- */
+  /* useForm ------------------------------------ */
   const { control, handleSubmit } = useForm({
     mode: 'onSubmit',
     defaultValues: { query: '' },
   });
 
-  /* 検索ボタン押下 */
+  /* methods ------------------------------------- */
+  /** 検索ボタン押下 */
   const onSubmit = async (data: { query?: string | undefined }) => {
     setIsLoading(true);
     console.log('data : ', data);
@@ -41,9 +43,6 @@ export const DaibumonsMaster = ({ daibumons }: { daibumons: DaibumonsMasterTable
 
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
-      <Box justifySelf={'end'} mb={0.5}>
-        <BackButton label={'戻る'} />
-      </Box>
       <Paper variant="outlined">
         <Box width={'100%'} display={'flex'} p={2} justifyContent={'space-between'} alignItems={'center'}>
           <Typography>大部門マスタ検索</Typography>
