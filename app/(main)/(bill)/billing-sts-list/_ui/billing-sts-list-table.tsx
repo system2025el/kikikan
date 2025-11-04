@@ -237,10 +237,7 @@ const BillingStsRow = ({ juchu, refetch }: { juchu: BillingStsTableValues; refet
             variant="text"
             size="small"
             sx={{ py: 0.2, px: 0, m: 0, minWidth: 0 }}
-            component="a"
-            href={`/order/${juchu.juchuId}/view`}
-            target="_blank" // 新しいタブで開く
-            rel="noopener noreferrer"
+            onClick={() => window.open(`/order/${juchu.juchuId}/view`)}
           >
             <Box width={60}>{juchu.juchuId}</Box>
           </Button>
