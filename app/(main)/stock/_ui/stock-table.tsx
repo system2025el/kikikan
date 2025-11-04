@@ -1,4 +1,16 @@
-import { Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
+import {
+  Button,
+  lighten,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  useTheme,
+} from '@mui/material';
+import { red } from '@mui/material/colors';
 
 import { toISOStringMonthDay } from '../../_lib/date-conversion';
 import { EqTableValues, StockTableValues } from '../_lib/types';
@@ -10,6 +22,9 @@ type EqTableProps = {
 
 export const EqTable = (props: EqTableProps) => {
   const { eqList, ref } = props;
+
+  const theme = useTheme();
+  const borderColor = lighten(theme.palette.primary.light, 0.8);
 
   return (
     <TableContainer ref={ref} component={Paper} style={{ overflow: 'scroll', maxHeight: '80vh' }}>
@@ -38,20 +53,21 @@ export const EqTable = (props: EqTableProps) => {
                   paddingBottom: 0,
                   paddingLeft: 1,
                   paddingRight: 1,
+                  bgcolor: index % 2 === 1 ? borderColor : undefined,
                 }}
               >
                 {index + 1}
               </TableCell>
-              <TableCell align="left" style={styles.row}>
+              <TableCell align="left" style={styles.row} sx={{ bgcolor: index % 2 === 1 ? borderColor : undefined }}>
                 <Button
                   variant="text"
                   onClick={() => window.open(`/loan-situation/${row.kizaiId}`)}
-                  sx={{ p: 0, justifyContent: 'start' }}
+                  sx={{ p: 0, m: 0, justifyContent: 'start', height: 20 }}
                 >
                   {row.kizaiNam}
                 </Button>
               </TableCell>
-              <TableCell align="right" style={styles.row}>
+              <TableCell align="right" style={styles.row} sx={{ bgcolor: index % 2 === 1 ? borderColor : undefined }}>
                 {row.kizaiQty}
               </TableCell>
             </TableRow>
@@ -69,6 +85,8 @@ type EqStockTableProps = {
 
 export const EqStockTable = (props: EqStockTableProps) => {
   const { eqStockList, ref } = props;
+  const theme = useTheme();
+  const borderColor = lighten(theme.palette.primary.light, 0.8);
 
   return (
     <TableContainer ref={ref} component={Paper} style={{ overflowX: 'auto', maxHeight: '80vh' }}>
@@ -87,7 +105,7 @@ export const EqStockTable = (props: EqStockTableProps) => {
                     color: 'white',
                     bgcolor: 'black',
                     padding: 0,
-                    height: '25px',
+                    height: 25,
                   }}
                 >
                   {toISOStringMonthDay(cell.calDat)}
@@ -103,7 +121,14 @@ export const EqStockTable = (props: EqStockTableProps) => {
                   <TableCell
                     key={colIndex}
                     align="right"
-                    sx={{ border: '1px solid black', height: '25px', py: 0, px: 1 }}
+                    sx={{
+                      border: '1px solid black',
+                      height: 25,
+                      py: 0,
+                      px: 1,
+                      color: Number(cell.zaikoQty) < 0 ? red[500] : undefined,
+                      bgcolor: rowIndex % 2 === 1 ? borderColor : undefined,
+                    }}
                   >
                     {cell.zaikoQty}
                   </TableCell>

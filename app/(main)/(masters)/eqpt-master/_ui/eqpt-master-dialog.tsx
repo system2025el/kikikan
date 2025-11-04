@@ -197,13 +197,7 @@ export const EqMasterDialog = ({
                   disabled
                 />
                 <Box ml={1}>
-                  <Button
-                    component="a"
-                    href={`/rfid-master/${eqptId}`}
-                    target="_blank" // 新しいタブで開く
-                    rel="noopener noreferrer"
-                    disabled={isNew}
-                  >
+                  <Button onClick={() => window.open(`/rfid-master/${eqptId}`)} disabled={isNew}>
                     RFIDマスタ
                   </Button>
                 </Box>
