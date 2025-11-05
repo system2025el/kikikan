@@ -297,24 +297,20 @@ export const LoanSituation = (props: {
       {isLoading ? (
         <Loading />
       ) : (
-        <Box>
-          <Grid2 container>
-            <Grid2
-              size={{
-                xs: 'auto',
-                sm: 'auto',
-                md: 'auto',
-                lg: 'auto',
-              }}
-            ></Grid2>
-            <Grid2
-              overflow="auto"
-              size={{ xs: 'grow', sm: 'grow', md: 'grow' }}
-              display={'flex'}
-              alignItems={'center'}
-              mt={1}
-              mb={0.5}
-            >
+        <Grid2 container>
+          <Grid2
+            size={{
+              xs: 'auto',
+              sm: 'auto',
+              md: 'auto',
+              lg: 'auto',
+            }}
+          >
+            <Box height={31} mt={1} mb={0.5} />
+            <LoanSituationTable rows={loanJuchuList} ref={leftRef} />
+          </Grid2>
+          <Grid2 overflow="auto" size={{ xs: 'grow', sm: 'grow', md: 'grow' }}>
+            <Box display={'flex'} alignItems={'center'} height={31} mt={1} mb={0.5}>
               <Box display={loanJuchuList.length > 0 ? 'flex' : 'none'} alignItems={'end'} mr={2}>
                 <Typography fontSize={'small'}>使用数</Typography>
               </Box>
@@ -334,25 +330,10 @@ export const LoanSituation = (props: {
               <Button onClick={handleForwardDateChange}>
                 <ArrowForwardIosIcon fontSize="small" />
               </Button>
-            </Grid2>
+            </Box>
+            <UseTable eqUseList={eqUseList} eqStockList={eqStockList} ref={rightRef} />
           </Grid2>
-
-          <Grid2 container>
-            <Grid2
-              size={{
-                xs: 'auto',
-                sm: 'auto',
-                md: 'auto',
-                lg: 'auto',
-              }}
-            >
-              <LoanSituationTable rows={loanJuchuList} ref={leftRef} />
-            </Grid2>
-            <Grid2 overflow="auto" size={{ xs: 'grow', sm: 'grow', md: 'grow' }}>
-              <UseTable eqUseList={eqUseList} eqStockList={eqStockList} ref={rightRef} />
-            </Grid2>
-          </Grid2>
-        </Box>
+        </Grid2>
       )}
     </Box>
   );
