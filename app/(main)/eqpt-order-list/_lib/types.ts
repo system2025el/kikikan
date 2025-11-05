@@ -28,4 +28,5 @@ export type EqptOrderSearchValues = {
   kokyaku?: number | null;
   koenNam?: string | null;
   koenbashoNam?: string | null;
+  listSort: { sort: string; order: string };
 };

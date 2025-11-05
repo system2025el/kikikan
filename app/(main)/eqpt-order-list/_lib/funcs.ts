@@ -24,6 +24,7 @@ export const getFilteredOrderList = async (
     radio: 'shuko',
     range: { from: new Date(toJapanDateString()), to: new Date(toJapanDateString()) },
     kokyaku: FAKE_NEW_ID,
+    listSort: { sort: 'shuko', order: 'asc' },
   }
 ): Promise<EqptOrderListTableValues[]> => {
   console.log('ーーーーー機材明細一覧の時間確認', query);

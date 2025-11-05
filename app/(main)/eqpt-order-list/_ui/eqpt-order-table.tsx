@@ -45,13 +45,13 @@ export const EqptOrderTable = ({
   /** テーブル1ページの行数 */
   const rowsPerPage = ROWS_PER_MASTER_TABLE_PAGE;
 
-  // 表示するデータ
+  /** 表示するデータ */
   const list = useMemo(() => {
     return rowsPerPage > 0
       ? orderList.map((l, index) => ({ ...l, ordNum: index + 1 })).slice((page - 1) * rowsPerPage, page * rowsPerPage)
       : orderList.map((l, index) => ({ ...l, ordNum: index + 1 }));
   }, [orderList, page, rowsPerPage]);
-  // テーブル最後のページ用の空データの長さ
+  /** テーブル最後のページ用の空データの長さ */
   const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - orderList.length) : 0;
 
   /* useEffect -------------------------------------------- */
@@ -63,7 +63,7 @@ export const EqptOrderTable = ({
     <>
       <Box>
         <Typography pt={1} pl={2}>
-          機材明細一覧
+          受注明細一覧
         </Typography>
         <Divider />
         <Grid2 container mt={0.5} mx={0.5}>
@@ -83,7 +83,7 @@ export const EqptOrderTable = ({
                   <TableCell />
                   <TableCell padding="none" />
                   <TableCell align="right">受注番号</TableCell>
-                  <TableCell align="left">機材明細名</TableCell>
+                  <TableCell align="left">受注明細名</TableCell>
                   <TableCell align="left">公演名</TableCell>
                   <TableCell align="left">公演場所</TableCell>
                   <TableCell align="left">顧客名</TableCell>
@@ -107,21 +107,28 @@ export const EqptOrderTable = ({
                     >
                       {order.ordNum}
                     </TableCell>
-                    <TableCell align="center">
+                    <TableCell align="right" sx={{ minWidth: 0, whiteSpace: 'nowrap' }}>
                       <Button
                         variant="text"
                         size="small"
-                        sx={{ py: 0.2, px: 0, m: 0, minWidth: 0 }}
+                        sx={{ py: 0.2, px: 1, m: 0, width: 'auto' }}
                         href={`/order/${order.juchuHeadId}/${'view'}`}
                       >
-                        <Box minWidth={60}>{order.juchuHeadId}</Box>
+                        {order.juchuHeadId}
                       </Button>
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ minWidth: 0, whiteSpace: 'nowrap' }}>
                       <Button
                         variant="text"
                         size="small"
-                        sx={{ py: 0.2, px: 0, m: 0, minWidth: 0 }}
+                        sx={{
+                          py: 0.2,
+                          px: 1,
+                          m: 0,
+                          width: 'auto',
+                          justifyContent: 'flex-start',
+                          textAlign: 'left',
+                        }}
                         href={`/eq-main-order-detail/${order.juchuHeadId}/${order.kizaiHeadId}/view`}
                       >
                         <LightTooltipWithText variant={'button'} maxWidth={300}>

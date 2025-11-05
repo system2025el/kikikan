@@ -84,6 +84,7 @@ export const selectFilteredKizaiHead = async ({
   kokyaku,
   koenNam,
   koenbashoNam,
+  listSort,
 }: EqptOrderSearchValues) => {
   // 基本のセレクト
   const builder = supabase
@@ -141,6 +142,26 @@ export const selectFilteredKizaiHead = async ({
   if (koenbashoNam && koenbashoNam.trim() !== '') {
     builder.ilike('koenbasho_nam', `%${koenbashoNam}%`);
   }
+
+  // ソート処理
+  const { sort, order } = listSort;
+  // ソート項目をMap化
+  const sortMap: Record<string, string> = {
+    shuko: 'shuko_dat',
+    nyuko: 'nyuko_dat',
+    juchuId: 'juchu_head_id',
+    headNam: 'head_nam',
+    juchuDat: 'juchu_dat',
+    koenNam: 'koen_nam',
+    kokyakuNam: 'kokyaku_nam',
+  };
+  // キーでソート基準のカラムを指定
+  const sortCOlumn = sortMap[sort];
+  if (sortCOlumn) {
+    if (order === 'asc') builder.order(sortCOlumn).order('juchu_head_id');
+    if (order === 'desc') builder.order(sortCOlumn, { ascending: false }).order('juchu_head_id');
+  }
+
   try {
     return await builder;
   } catch (e) {

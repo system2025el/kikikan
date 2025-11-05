@@ -20,7 +20,7 @@ import {
 import { grey } from '@mui/material/colors';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { RadioButtonGroup, TextFieldElement } from 'react-hook-form-mui';
+import { RadioButtonGroup, SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
 import { BackButton } from '../../_ui/buttons';
 import { FormDateX } from '../../_ui/date';
@@ -32,9 +32,9 @@ import { EqptOrderListTableValues, EqptOrderSearchValues } from '../_lib/types';
 import { EqptOrderTable } from './eqpt-order-table';
 
 /**
- * 機材明細一覧画面
+ * 受注明細一覧画面
  * @param param0
- * @returns {JSX.Element} 機材明細一覧画面コンポーネント
+ * @returns {JSX.Element} 受注明細一覧画面コンポーネント
  */
 export const EqptOrderList = ({
   orders,
@@ -63,6 +63,7 @@ export const EqptOrderList = ({
       range: { from: new Date(), to: new Date() },
       kokyaku: FAKE_NEW_ID,
       koenbashoNam: '',
+      listSort: { sort: 'shuko', order: 'asc' },
     },
   });
 
@@ -91,16 +92,16 @@ export const EqptOrderList = ({
       </Box>
       <Paper variant="outlined">
         <Box width={'100%'} display={'flex'} p={2}>
-          <Typography>機材明細検索</Typography>
+          <Typography>受注明細検索</Typography>
         </Box>
         <Divider />
         <form onSubmit={handleSubmit(onSubmit)}>
-          <Grid2 container direction={'column'} px={4} pt={2} pb={1} spacing={1}>
+          <Grid2 container px={4} pt={2} pb={2} spacing={1}>
             <Grid2 sx={styles.container}>
-              <Typography noWrap minWidth={110}>
-                期間
-              </Typography>
-              <Stack direction="row" spacing={2} alignItems="center" display={'flex'}>
+              <Stack direction="row" spacing={2} sx={styles.container}>
+                <Typography noWrap minWidth={90}>
+                  期間
+                </Typography>
                 <Controller
                   control={control}
                   name="range.from"
@@ -131,78 +132,111 @@ export const EqptOrderList = ({
                 <RadioButtonGroup row name="radio" control={control} options={radioData} />
               </Stack>
             </Grid2>
-            <Grid2 sx={styles.container}>
-              <Typography noWrap minWidth={110}>
-                受注番号
-              </Typography>
-              <TextFieldElement name="juchuId" control={control} sx={{ width: 120 }} />
-            </Grid2>
-            <Grid2 sx={styles.container}>
-              <Typography noWrap minWidth={110}>
-                機材明細名
-              </Typography>
-              <TextFieldElement name="headNam" control={control} sx={{ width: 300 }} />
-            </Grid2>
-            <Grid2 sx={styles.container}>
-              <Typography noWrap minWidth={110}>
-                顧客
-              </Typography>
-              <Controller
-                name="kokyaku"
-                control={control}
-                render={({ field }) => (
-                  <Select {...field} sx={{ width: 300 }}>
-                    {[selectNone, ...(customers ?? [])].map((opt) => (
-                      <MenuItem
-                        key={opt.id}
-                        value={opt.id}
-                        sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
-                      >
-                        {opt.label}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                )}
-              />
-            </Grid2>
-            <Grid2 sx={styles.container}>
-              <Typography noWrap minWidth={110}>
-                公演名
-              </Typography>
-              <TextFieldElement name="koenNam" control={control} sx={{ width: 300 }} />
-            </Grid2>
-            <Grid2 container display={'flex'} spacing={1}>
-              <Grid2 sx={styles.container}>
-                <Typography noWrap minWidth={110}>
-                  公演場所
-                </Typography>
-                <Controller
-                  name="koenbashoNam"
-                  control={control}
-                  render={({ field }) => (
-                    <Autocomplete
-                      {...field}
-                      onChange={(_, value) => {
-                        const label = typeof value === 'string' ? value : (value?.label ?? '');
-                        field.onChange(label);
-                      }}
-                      freeSolo
-                      autoSelect
-                      sx={{ width: 300 }}
-                      renderInput={(params) => <TextField {...params} />}
-                      options={locs ?? []}
-                      getOptionLabel={(option) => (typeof option === 'string' ? option : option.label)}
-                    />
-                  )}
-                />
+            <Grid2 container width={'100%'}>
+              <Grid2 container direction={'column'} size={5.5}>
+                <Stack direction="row" spacing={2} sx={styles.container}>
+                  <Typography noWrap minWidth={90}>
+                    受注番号
+                  </Typography>
+                  <TextFieldElement name="juchuId" control={control} sx={{ width: 120 }} />
+                </Stack>
+                <Stack direction="row" spacing={2} sx={styles.container}>
+                  <Typography noWrap minWidth={90}>
+                    受注明細名
+                  </Typography>
+                  <TextFieldElement name="headNam" control={control} sx={{ width: 300 }} />
+                </Stack>
+                <Stack direction="row" spacing={2} sx={styles.container}>
+                  <Typography noWrap minWidth={90}>
+                    顧客
+                  </Typography>
+                  <Controller
+                    name="kokyaku"
+                    control={control}
+                    render={({ field }) => (
+                      <Select {...field} sx={{ width: 300 }}>
+                        {[selectNone, ...(customers ?? [])].map((opt) => (
+                          <MenuItem
+                            key={opt.id}
+                            value={opt.id}
+                            sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
+                          >
+                            {opt.label}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    )}
+                  />
+                </Stack>
               </Grid2>
-              <Grid2 size={'grow'} alignItems={'self-end'}>
-                <Box justifySelf={'end'}>
-                  <Button type="submit">
-                    <SearchIcon />
-                    検索
-                  </Button>
-                </Box>
+              <Grid2 container direction={'column'} size={'grow'}>
+                <Stack direction="row" spacing={2} sx={styles.container}>
+                  <Typography noWrap minWidth={90}>
+                    公演名
+                  </Typography>
+                  <TextFieldElement name="koenNam" control={control} sx={{ width: 300 }} />
+                </Stack>
+                <Stack direction="row" spacing={2} sx={styles.container}>
+                  <Typography noWrap minWidth={90}>
+                    公演場所
+                  </Typography>
+                  <Controller
+                    name="koenbashoNam"
+                    control={control}
+                    render={({ field }) => (
+                      <Autocomplete
+                        {...field}
+                        onChange={(_, value) => {
+                          const label = typeof value === 'string' ? value : (value?.label ?? '');
+                          field.onChange(label);
+                        }}
+                        freeSolo
+                        autoSelect
+                        sx={{ width: 300 }}
+                        renderInput={(params) => <TextField {...params} />}
+                        options={locs ?? []}
+                        getOptionLabel={(option) => (typeof option === 'string' ? option : option.label)}
+                      />
+                    )}
+                  />
+                </Stack>
+                <Stack direction="row" spacing={2} sx={styles.container}>
+                  <Typography noWrap minWidth={90}>
+                    ソート
+                  </Typography>
+                  <SelectElement
+                    name="listSort.sort"
+                    control={control}
+                    options={[
+                      { id: 'shuko', label: '出庫日' },
+                      { id: 'nyuko', label: '入庫日' },
+                      { id: 'juchuId', label: '受注番号' },
+                      { id: 'headNam', label: '受注明細名' },
+                      { id: 'juchuDat', label: '受注日' },
+                      { id: 'koenNam', label: '公演名' },
+                      { id: 'kokyakuNam', label: '顧客名' },
+                    ]}
+                    sx={{ minWidth: 150 }}
+                  />
+                  <Box width={10} />
+                  <RadioButtonGroup
+                    control={control}
+                    name="listSort.order"
+                    options={[
+                      { id: 'asc', label: '昇順' },
+                      { id: 'desc', label: '降順' },
+                    ]}
+                    row
+                  />
+                  <Grid2 size={'grow'} alignItems={'self-end'}>
+                    <Box justifySelf={'end'}>
+                      <Button type="submit">
+                        <SearchIcon />
+                        検索
+                      </Button>
+                    </Box>
+                  </Grid2>
+                </Stack>
               </Grid2>
             </Grid2>
           </Grid2>
