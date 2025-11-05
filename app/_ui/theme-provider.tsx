@@ -90,7 +90,7 @@ const lightTheme = createTheme(
         defaultProps: {
           size: 'small',
           variant: 'contained',
-          sx: { whiteSpace: 'nowrap', minWidth: 'max-content' },
+          sx: { whiteSpace: 'nowrap', minWidth: 'max-content', textTransform: 'none' },
         },
       },
       MuiStack: {
