@@ -53,7 +53,7 @@ export const NyukoDetailTable = (props: { datas: NyukoDetailTableValues[] }) => 
                 onClick={() => handleClick(row.kizaiId)}
                 sx={{ cursor: 'pointer', '&:hover': { backgroundColor: 'rgba(0,0,0,0.04)' } }}
               >
-                {'*'.repeat(row.indentNum) + row.kizaiNam}
+                {row.kizaiNam}
               </TableCell>
               <TableCell align="right">{row.planQty}</TableCell>
               <TableCell align="right">{row.resultQty}</TableCell>

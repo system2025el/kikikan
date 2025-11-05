@@ -329,7 +329,7 @@ const ReturnEqTableRow = React.memo(
             sx={{ p: 0, justifyContent: 'start' }}
             onClick={() => window.open(`/loan-situation/${row.kizaiId}`)}
           >
-            {'*'.repeat(row.indentNum) + row.kizaiNam}
+            {row.kizaiNam}
           </Button>
         </TableCell>
         <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>

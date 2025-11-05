@@ -47,8 +47,8 @@ export const OyaEqSelectionDialog = ({
 
   /* 確定ボタン押下時 */
   const handleClickConfirm = () => {
-    const selectEqData = oyaEqList.filter((data) => selected.includes(data.kizaiId));
-    const selectContainerData = oyaContainerList.filter((data) => selected.includes(data.kizaiId));
+    const selectEqData = oyaEqList.filter((data) => selected.includes(data.dspOrdNum));
+    const selectContainerData = oyaContainerList.filter((data) => selected.includes(data.dspOrdNum));
     setEqpts(selectEqData, selectContainerData);
     onClose(false);
   };
@@ -94,22 +94,22 @@ export const OyaEqSelectionDialog = ({
           >
             {oyaEqList.map((value) => {
               return (
-                <ListItem key={value.kizaiId} disablePadding>
-                  <ListItemButton onClick={() => handleToggle(value.kizaiId)} dense>
+                <ListItem key={value.dspOrdNum} disablePadding>
+                  <ListItemButton onClick={() => handleToggle(value.dspOrdNum)} dense>
                     <ListItemIcon>
-                      <Checkbox edge="start" checked={selected.includes(value.kizaiId)} tabIndex={-1} disableRipple />
+                      <Checkbox edge="start" checked={selected.includes(value.dspOrdNum)} tabIndex={-1} disableRipple />
                     </ListItemIcon>
-                    <ListItemText primary={'*'.repeat(value.indentNum) + value.kizaiNam} />
+                    <ListItemText primary={value.kizaiNam} />
                   </ListItemButton>
                 </ListItem>
               );
             })}
             {oyaContainerList.map((value) => {
               return (
-                <ListItem key={value.kizaiId} disablePadding>
-                  <ListItemButton onClick={() => handleToggle(value.kizaiId)} dense>
+                <ListItem key={value.dspOrdNum} disablePadding>
+                  <ListItemButton onClick={() => handleToggle(value.dspOrdNum)} dense>
                     <ListItemIcon>
-                      <Checkbox edge="start" checked={selected.includes(value.kizaiId)} tabIndex={-1} disableRipple />
+                      <Checkbox edge="start" checked={selected.includes(value.dspOrdNum)} tabIndex={-1} disableRipple />
                     </ListItemIcon>
                     <ListItemText primary={value.kizaiNam} />
                   </ListItemButton>

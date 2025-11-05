@@ -50,8 +50,6 @@ export const deleteNyushukoCtnResult = async (
 export const deleteKizaiIdNyushukoCtnResult = async (
   juchuHeadId: number,
   juchuKizaiHeadId: number,
-  sagyoDenDat: string,
-  sagyoId: number,
   kizaiIds: number[],
   connection: PoolClient
 ) => {
@@ -61,12 +59,10 @@ export const deleteKizaiIdNyushukoCtnResult = async (
       WHERE
         juchu_head_id = $1
         AND juchu_kizai_head_id = $2
-        AND sagyo_den_dat = $3
-        AND sagyo_id = $4
-        AND kizai_id = ANY($5)
+        AND kizai_id = ANY($3)
     `;
 
-  const values = [juchuHeadId, juchuKizaiHeadId, sagyoDenDat, sagyoId, kizaiIds];
+  const values = [juchuHeadId, juchuKizaiHeadId, kizaiIds];
 
   try {
     await connection.query(query, values);
@@ -78,7 +74,6 @@ export const deleteKizaiIdNyushukoCtnResult = async (
 export const deleteAllNyushukoCtnResult = async (
   juchuHeadId: number,
   juchuKizaiHeadId: number,
-  sagyoDenDat: string,
   sagyoId: number,
   connection: PoolClient
 ) => {
@@ -88,11 +83,60 @@ export const deleteAllNyushukoCtnResult = async (
       WHERE
         juchu_head_id = $1
         AND juchu_kizai_head_id = $2
-        AND sagyo_den_dat = $3
-        AND sagyo_id = $4
+        AND sagyo_id = $3
     `;
 
-  const values = [juchuHeadId, juchuKizaiHeadId, sagyoDenDat, sagyoId];
+  const values = [juchuHeadId, juchuKizaiHeadId, sagyoId];
+
+  try {
+    await connection.query(query, values);
+  } catch (e) {
+    throw e;
+  }
+};
+
+export const deleteAllShukoCtnResult = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  sagyoId: number,
+  connection: PoolClient
+) => {
+  const query = `
+      DELETE FROM
+        ${SCHEMA}.t_nyushuko_ctn_result
+      WHERE
+        juchu_head_id = $1
+        AND juchu_kizai_head_id = $2
+        AND sagyo_id = $3
+        AND sagyo_kbn_id = ANY($4)
+    `;
+
+  const values = [juchuHeadId, juchuKizaiHeadId, sagyoId, [10, 20]];
+
+  try {
+    await connection.query(query, values);
+  } catch (e) {
+    throw e;
+  }
+};
+
+export const deleteAllNyukoCtnResult = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  sagyoId: number,
+  connection: PoolClient
+) => {
+  const query = `
+      DELETE FROM
+        ${SCHEMA}.t_nyushuko_ctn_result
+      WHERE
+        juchu_head_id = $1
+        AND juchu_kizai_head_id = $2
+        AND sagyo_id = $3
+        AND sagyo_kbn_id = $4
+    `;
+
+  const values = [juchuHeadId, juchuKizaiHeadId, sagyoId, 30];
 
   try {
     await connection.query(query, values);

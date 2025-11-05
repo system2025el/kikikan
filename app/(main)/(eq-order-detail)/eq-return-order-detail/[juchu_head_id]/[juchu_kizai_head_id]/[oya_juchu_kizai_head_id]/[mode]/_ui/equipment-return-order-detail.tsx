@@ -772,9 +772,7 @@ export const EquipmentReturnOrderDetail = (props: {
 
     if (result) {
       setReturnJuchuKizaiMeisaiList((prev) =>
-        prev
-          .filter((d) => !d.delFlag)
-          .map((data, index) => (index === deleteEq.rowIndex ? { ...data, delFlag: true } : data))
+        prev.map((data) => (data === deleteEq.row ? { ...data, delFlag: true } : data))
       );
       const updatedEqStockData = eqStockListRef.current[deleteEq.rowIndex];
       const targetIndex = updatedEqStockData

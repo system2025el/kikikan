@@ -288,7 +288,7 @@ const BundleDialog = ({
     if (selected && selected.length > 0) {
       const sets = await getSelectedEqpts(selected);
       // セットなので、blankQtyを1にする
-      const setList = sets!.map((d) => ({ ...d, blnkQty: 1 }));
+      const setList = sets!.map((d) => ({ ...d, indentNum: 1 }));
       selectedEqptListRef.current.push(...setList);
     }
     // 選択リセット
@@ -319,8 +319,8 @@ const BundleDialog = ({
   const handleClickAnother = async () => {
     setIsLoading(true);
     const [sets, oya] = await Promise.all([getSelectedEqpts(selected), getSelectedEqpts([eqptsWSet[currentIndex]])]);
-    // セットなので、blankQtyを1にする
-    const setList = sets!.map((d) => ({ ...d, blnkQty: 1 }));
+    // セットなので、indentNumを1にする
+    const setList = sets!.map((d) => ({ ...d, indentNum: 1 }));
     selectedEqptListRef.current.push(...setList);
     selectedEqptListRef.current.push(...oya);
     setSelected([]);

@@ -37,11 +37,13 @@ import {
   updateJuchuKizaiMeisai,
 } from '@/app/_lib/db/tables/t-juchu-kizai-meisai';
 import {
+  deleteAllNyushukoDen,
   deleteContainerNyushukoDen,
   deleteNyushukoDen,
   insertNyushukoDen,
   selectContainerNyushukoDenConfirm,
   updateNyushukoDen,
+  upsertNyushukoDen,
 } from '@/app/_lib/db/tables/t-nyushuko-den';
 import {
   deleteNyushukoFix,
@@ -66,6 +68,7 @@ import { toISOString, toISOStringYearMonthDay, toJapanTimeString } from '@/app/(
 import {
   addAllHonbanbi,
   addJuchuKizaiNyushuko,
+  delAllNyushukoDen,
   delAllNyushukoResult,
   delNyushukoCtnResult,
   delSiyouHonbanbi,
@@ -328,92 +331,239 @@ export const saveJuchuKizai = async (
       }
     }
 
-    // 入出庫実績削除
-    let kicsDelFlg = false;
-    let yardDelFlg = false;
-    if (checkKicsDat && originKicsShukoDat) {
-      kicsDelFlg = await delAllNyushukoResult(
-        data.juchuHeadId,
-        data.juchuKizaiHeadId,
-        toJapanTimeString(originKicsShukoDat, '-'),
-        1,
-        connection
-      );
-      console.log('KICS入出庫実績削除', kicsDelFlg);
-    }
-    if (checkYardDat && originYardShukoDat) {
-      yardDelFlg = await delAllNyushukoResult(
-        data.juchuHeadId,
-        data.juchuKizaiHeadId,
-        toJapanTimeString(originYardShukoDat, '-'),
-        2,
-        connection
-      );
-      console.log('YARD入出庫実績削除', yardDelFlg);
-    }
-
-    // 受注機材明細、入出庫伝票
-    if (checkKicsDat || checkYardDat || checkJuchuKizaiMeisai) {
+    let dspOrdNum = 1;
+    // 受注明細、入出庫伝票、入出庫実績
+    if (checkKicsDat || checkYardDat || checkJuchuKizaiMeisai || checkJuchuContainerMeisai) {
+      // 受注機材明細id最大値
       const juchuKizaiMeisaiMaxId = await getJuchuKizaiMeisaiMaxId(data.juchuHeadId, data.juchuKizaiHeadId);
       let newJuchuKizaiMeisaiId = juchuKizaiMeisaiMaxId ? juchuKizaiMeisaiMaxId.juchu_kizai_meisai_id + 1 : 1;
-
-      let dspOrdNum = 1;
-      const newJuchuKizaiMeisaiData = juchuKizaiMeisaiList
-        .filter((d) => !d.delFlag)
-        .map((data) =>
-          data.juchuKizaiMeisaiId === 0
-            ? { ...data, juchuKizaiMeisaiId: newJuchuKizaiMeisaiId++, dspOrdNum: dspOrdNum++ }
-            : { ...data, dspOrdNum: dspOrdNum++ }
-        );
+      // 機材の並び順設定
+      const updKizaiDspOrdNum = juchuKizaiMeisaiList.map((data) =>
+        !data.delFlag ? { ...data, dspOrdNum: dspOrdNum++ } : data
+      );
+      // 新規機材に明細id割り振り
+      const newJuchuKizaiMeisaiData = updKizaiDspOrdNum.map((data) =>
+        data.juchuKizaiMeisaiId === 0 && !data.delFlag ? { ...data, juchuKizaiMeisaiId: newJuchuKizaiMeisaiId++ } : data
+      );
 
       // 追加明細
       const addJuchuKizaiMeisaiData = newJuchuKizaiMeisaiData.filter((data) => !data.delFlag && !data.saveFlag);
       // 更新明細
       const updateJuchuKizaiMeisaiData = newJuchuKizaiMeisaiData.filter((data) => !data.delFlag && data.saveFlag);
       // 削除明細
-      const deleteJuchuKizaiMeisaiData = juchuKizaiMeisaiList.filter((data) => data.delFlag && data.saveFlag);
+      const deleteJuchuKizaiMeisaiData = newJuchuKizaiMeisaiData.filter((data) => data.delFlag && data.saveFlag);
       // 削除
       if (deleteJuchuKizaiMeisaiData.length > 0) {
+        console.log('deleteJuchuKizaiMeisaiData', deleteJuchuKizaiMeisaiData);
         const deleteMeisaiResult = await delJuchuKizaiMeisai(deleteJuchuKizaiMeisaiData, connection);
         console.log('受注機材明細削除', deleteMeisaiResult);
-
-        const deleteNyushukoDenResult = await delNyushukoDen(deleteJuchuKizaiMeisaiData, connection);
-        console.log('入出庫伝票削除', deleteNyushukoDenResult);
       }
       // 追加
       if (addJuchuKizaiMeisaiData.length > 0) {
         const addMeisaiResult = await addJuchuKizaiMeisai(addJuchuKizaiMeisaiData, userNam, connection);
         console.log('受注機材明細追加', addMeisaiResult);
-
-        const addNyushukoDenResult = await addNyushukoDen(data, addJuchuKizaiMeisaiData, userNam, connection);
-        console.log('入出庫伝票追加', addNyushukoDenResult);
       }
       // 更新
       if (updateJuchuKizaiMeisaiData.length > 0) {
         const updateMeisaiResult = await updJuchuKizaiMeisai(updateJuchuKizaiMeisaiData, userNam, connection);
         console.log('受注機材明細更新', updateMeisaiResult);
-
-        const updateNyushukoDenResult = await updNyushukoDen(data, updateJuchuKizaiMeisaiData, userNam, connection);
-        console.log('入出庫伝票更新', updateNyushukoDenResult);
       }
 
-      const kicsKizaiMeisaiData = deleteJuchuKizaiMeisaiData.filter((d) => d.shozokuId === 1);
-      const yardKizaiMeisaiData = deleteJuchuKizaiMeisaiData.filter((d) => d.shozokuId === 2);
-      if (kicsKizaiMeisaiData.length > 0 && originKicsShukoDat && !kicsDelFlg) {
-        const deleteKicsNyushukoResultResult = await delNyushukoResult(
-          kicsKizaiMeisaiData,
-          toJapanTimeString(originKicsShukoDat, '-'),
+      // 受注コンテナ明細id最大値
+      const juchuContainerMeisaiMaxId = await getJuchuContainerMeisaiMaxId(data.juchuHeadId, data.juchuKizaiHeadId);
+      let newJuchuContainerMeisaiId = juchuContainerMeisaiMaxId
+        ? juchuContainerMeisaiMaxId.juchu_kizai_meisai_id + 1
+        : 1;
+      // コンテナの並び順設定
+      const updCtnDspOrdNum = juchuContainerMeisaiList.map((data) =>
+        !data.delFlag ? { ...data, dspOrdNum: dspOrdNum++ } : data
+      );
+      // 新規コンテナに明細id割り振り
+      const newJuchuContainerMeisaiData = updCtnDspOrdNum.map((data) =>
+        data.juchuKizaiMeisaiId === 0 && !data.delFlag
+          ? { ...data, juchuKizaiMeisaiId: newJuchuContainerMeisaiId++ }
+          : data
+      );
+
+      // 追加コンテナ
+      const addJuchuContainerMeisaiData = newJuchuContainerMeisaiData.filter((data) => !data.delFlag && !data.saveFlag);
+      // 更新コンテナ
+      const updateJuchuContainerMeisaiData = newJuchuContainerMeisaiData.filter(
+        (data) => !data.delFlag && data.saveFlag
+      );
+      // 削除コンテナ
+      const deleteJuchuContainerMeisaiData = newJuchuContainerMeisaiData.filter(
+        (data) => data.delFlag && data.saveFlag
+      );
+      // 削除
+      if (deleteJuchuContainerMeisaiData.length > 0) {
+        const deleteKizaiiIds = deleteJuchuContainerMeisaiData.map((data) => data.kizaiId);
+        const deleteCtnMeisaiResult = await delJuchuContainerMeisai(
+          data.juchuHeadId,
+          data.juchuKizaiHeadId,
+          deleteKizaiiIds,
           connection
         );
-        console.log('KICS入出庫実績削除', deleteKicsNyushukoResultResult);
+        console.log('受注コンテナ明細削除', deleteCtnMeisaiResult);
       }
-      if (yardKizaiMeisaiData.length > 0 && originYardShukoDat && !yardDelFlg) {
-        const deleteYardNyushukoResultResult = await delNyushukoResult(
-          yardKizaiMeisaiData,
-          toJapanTimeString(originYardShukoDat, '-'),
+      // 追加
+      if (addJuchuContainerMeisaiData.length > 0) {
+        const addCtnMeisaiResult = await addJuchuContainerMeisai(addJuchuContainerMeisaiData, userNam, connection);
+        console.log('受注コンテナ明細追加', addCtnMeisaiResult);
+      }
+      // 更新
+      if (updateJuchuContainerMeisaiData.length > 0) {
+        const updateContainerMeisaiResult = await updJuchuContainerMeisai(
+          updateJuchuContainerMeisaiData,
+          userNam,
           connection
         );
-        console.log('YARD入出庫実績削除', deleteYardNyushukoResultResult);
+        console.log('受注コンテナ明細更新', updateContainerMeisaiResult);
+      }
+
+      // 入出庫伝票
+      // 日付に変更があった場合は全削除後追加
+      if (checkKicsDat || checkYardDat) {
+        const deleteAllNyushukoDenResult = await delAllNyushukoDen(data.juchuHeadId, data.juchuKizaiHeadId, connection);
+        console.log('入出庫伝票全削除', deleteAllNyushukoDenResult);
+
+        // 削除されていない機材明細
+        const filterNewJuchuKizaiMeisai = newJuchuKizaiMeisaiData.filter((d) => !d.delFlag);
+        const addNyushukoDenResult = await addNyushukoDen(data, filterNewJuchuKizaiMeisai, userNam, connection);
+        console.log('入出庫伝票追加', addNyushukoDenResult);
+
+        // 削除されていないコンテナ明細
+        const filterNewJuchuCntMeisai = newJuchuContainerMeisaiData.filter((d) => !d.delFlag);
+        if (data.kicsShukoDat && data.kicsNyukoDat) {
+          const addCtnNyushukoDenResult = await addCtnNyushukoDen(
+            filterNewJuchuCntMeisai,
+            data.kicsShukoDat,
+            data.kicsNyukoDat,
+            1,
+            userNam,
+            connection
+          );
+          console.log('KICSコンテナ入出庫伝票追加', addCtnNyushukoDenResult);
+        }
+        if (data.yardShukoDat && data.yardNyukoDat) {
+          const addCtnNyushukoDenResult = await addCtnNyushukoDen(
+            filterNewJuchuCntMeisai,
+            data.yardShukoDat,
+            data.yardNyukoDat,
+            2,
+            userNam,
+            connection
+          );
+          console.log('YARDコンテナ入出庫伝票追加', addCtnNyushukoDenResult);
+        }
+      } else {
+        // 機材入出庫伝票削除
+        if (deleteJuchuKizaiMeisaiData.length > 0) {
+          const deleteNyushukoDenResult = await delNyushukoDen(deleteJuchuKizaiMeisaiData, connection);
+          console.log('入出庫伝票削除', deleteNyushukoDenResult);
+        }
+        // 機材入出庫伝票追加
+        if (addJuchuKizaiMeisaiData.length > 0) {
+          const addNyushukoDenResult = await addNyushukoDen(data, addJuchuKizaiMeisaiData, userNam, connection);
+          console.log('入出庫伝票追加', addNyushukoDenResult);
+        }
+        // 機材入出庫伝票更新
+        if (updateJuchuKizaiMeisaiData.length > 0) {
+          const updateNyushukoDenResult = await updNyushukoDen(data, updateJuchuKizaiMeisaiData, userNam, connection);
+          console.log('入出庫伝票更新', updateNyushukoDenResult);
+        }
+
+        // コンテナ入出庫伝票削除
+        if (deleteJuchuContainerMeisaiData.length > 0) {
+          const deleteCtnNyushukoDenResult = await delCtnNyushukoDen(deleteJuchuContainerMeisaiData, connection);
+          console.log('コンテナ入出庫伝票削除', deleteCtnNyushukoDenResult);
+        }
+        // コンテナ入出庫伝票追加
+        if (addJuchuContainerMeisaiData.length > 0) {
+          if (data.kicsShukoDat && data.kicsNyukoDat) {
+            const addCtnNyushukoDenResult = await addCtnNyushukoDen(
+              addJuchuContainerMeisaiData,
+              data.kicsShukoDat,
+              data.kicsNyukoDat,
+              1,
+              userNam,
+              connection
+            );
+            console.log('KICSコンテナ入出庫伝票追加', addCtnNyushukoDenResult);
+          }
+          if (data.yardShukoDat && data.yardNyukoDat) {
+            const addCtnNyushukoDenResult = await addCtnNyushukoDen(
+              addJuchuContainerMeisaiData,
+              data.yardShukoDat,
+              data.yardNyukoDat,
+              2,
+              userNam,
+              connection
+            );
+            console.log('YARDコンテナ入出庫伝票追加', addCtnNyushukoDenResult);
+          }
+        }
+        // コンテナ入出庫伝票更新
+        if (updateJuchuContainerMeisaiData.length > 0) {
+          if (data.kicsShukoDat && data.kicsNyukoDat) {
+            const updCtnNyushukoDenResult = await updCtnNyushukoDen(
+              addJuchuContainerMeisaiData,
+              data.kicsShukoDat,
+              data.kicsNyukoDat,
+              1,
+              userNam,
+              connection
+            );
+            console.log('KICSコンテナ入出庫伝票更新', updCtnNyushukoDenResult);
+          }
+          if (data.yardShukoDat && data.yardNyukoDat) {
+            const updCtnNyushukoDenResult = await updCtnNyushukoDen(
+              addJuchuContainerMeisaiData,
+              data.yardShukoDat,
+              data.yardNyukoDat,
+              2,
+              userNam,
+              connection
+            );
+            console.log('YARDコンテナ入出庫伝票更新', updCtnNyushukoDenResult);
+          }
+        }
+      }
+
+      // 入出庫実績削除
+      if (checkKicsDat && originKicsShukoDat) {
+        const delKicsNyushukoDenResult = await delAllNyushukoResult(
+          data.juchuHeadId,
+          data.juchuKizaiHeadId,
+          1,
+          connection
+        );
+        console.log('KICS入出庫実績全削除', delKicsNyushukoDenResult);
+      }
+      if (checkYardDat && originYardShukoDat) {
+        const delYardNyushukoDenResult = await delAllNyushukoResult(
+          data.juchuHeadId,
+          data.juchuKizaiHeadId,
+          2,
+          connection
+        );
+        console.log('YARD入出庫実績全削除', delYardNyushukoDenResult);
+      }
+
+      if (deleteJuchuKizaiMeisaiData.length > 0) {
+        const deleteNyushukoResultResult = await delNyushukoResult(deleteJuchuKizaiMeisaiData, connection);
+        console.log('削除機材入出庫実績削除', deleteNyushukoResultResult);
+      }
+
+      const deleteIds = deleteJuchuContainerMeisaiData.map((d) => d.kizaiId);
+      if (deleteIds.length > 0) {
+        const deleteKicsContainerNyushukoResultResult = await delNyushukoCtnResult(
+          data.juchuHeadId,
+          data.juchuKizaiHeadId,
+          deleteIds,
+          connection
+        );
+        console.log('削除コンテナ入出庫実績削除', deleteKicsContainerNyushukoResultResult);
       }
     }
 
@@ -448,106 +598,129 @@ export const saveJuchuKizai = async (
       }
     }
 
-    // 受注コンテナ明細更新
-    if (checkKicsDat || checkYardDat || checkJuchuContainerMeisai) {
-      //const copyJuchuContainerMeisaiData = [...juchuContainerMeisaiList];
-      const juchuContainerMeisaiMaxId = await getJuchuContainerMeisaiMaxId(data.juchuHeadId, data.juchuKizaiHeadId);
-      let newJuchuContainerMeisaiId = juchuContainerMeisaiMaxId
-        ? juchuContainerMeisaiMaxId.juchu_kizai_meisai_id + 1
-        : 1;
+    // // 受注コンテナ明細更新
+    // if (checkKicsDat || checkYardDat || checkJuchuContainerMeisai) {
+    //   const juchuContainerMeisaiMaxId = await getJuchuContainerMeisaiMaxId(data.juchuHeadId, data.juchuKizaiHeadId);
+    //   let newJuchuContainerMeisaiId = juchuContainerMeisaiMaxId
+    //     ? juchuContainerMeisaiMaxId.juchu_kizai_meisai_id + 1
+    //     : 1;
 
-      const newJuchuContainerMeisaiData = juchuContainerMeisaiList.map((data) =>
-        data.juchuKizaiMeisaiId === 0 && !data.delFlag
-          ? { ...data, juchuKizaiMeisaiId: newJuchuContainerMeisaiId++ }
-          : data
-      );
+    //   const updDspOrdNum = juchuContainerMeisaiList.map((data) =>
+    //     !data.delFlag ? { ...data, dspOrdNum: dspOrdNum++ } : data
+    //   );
 
-      // 受注コンテナ明細
-      const addJuchuContainerMeisaiData = newJuchuContainerMeisaiData.filter((data) => !data.delFlag && !data.saveFlag);
-      const updateJuchuContainerMeisaiData = newJuchuContainerMeisaiData.filter(
-        (data) => !data.delFlag && data.saveFlag
-      );
-      const deleteJuchuContainerMeisaiData = newJuchuContainerMeisaiData.filter(
-        (data) => data.delFlag && data.saveFlag
-      );
-      // 削除
-      if (deleteJuchuContainerMeisaiData.length > 0) {
-        const deleteKizaiiIds = deleteJuchuContainerMeisaiData.map((data) => data.kizaiId);
-        const deleteContainerMeisaiResult = await delJuchuContainerMeisai(
-          data.juchuHeadId,
-          data.juchuKizaiHeadId,
-          deleteKizaiiIds,
-          connection
-        );
-        console.log('受注コンテナ明細削除', deleteContainerMeisaiResult);
-      }
-      // 追加
-      if (addJuchuContainerMeisaiData.length > 0) {
-        const addContainerMeisaiResult = await addJuchuContainerMeisai(
-          addJuchuContainerMeisaiData,
-          userNam,
-          connection
-        );
-        console.log('受注コンテナ明細追加', addContainerMeisaiResult);
-      }
-      // 更新
-      if (updateJuchuContainerMeisaiData.length > 0) {
-        const updateContainerMeisaiResult = await updJuchuContainerMeisai(
-          updateJuchuContainerMeisaiData,
-          userNam,
-          connection
-        );
-        console.log('受注コンテナ明細更新', updateContainerMeisaiResult);
-      }
+    //   const newJuchuContainerMeisaiData = updDspOrdNum.map((data) =>
+    //     data.juchuKizaiMeisaiId === 0 && !data.delFlag
+    //       ? { ...data, juchuKizaiMeisaiId: newJuchuContainerMeisaiId++ }
+    //       : data
+    //   );
 
-      // コンテナ入出庫伝票更新
-      if (newJuchuContainerMeisaiData.length > 0) {
-        const containerNyushukoDenResult = await updContainerNyushukoDen(
-          data,
-          newJuchuContainerMeisaiData,
-          userNam,
-          connection
-        );
-        console.log('コンテナ入出庫伝票更新', containerNyushukoDenResult);
-      }
+    //   // 追加コンテナ
+    //   const addJuchuContainerMeisaiData = newJuchuContainerMeisaiData.filter((data) => !data.delFlag && !data.saveFlag);
+    //   // 更新コンテナ
+    //   const updateJuchuContainerMeisaiData = newJuchuContainerMeisaiData.filter(
+    //     (data) => !data.delFlag && data.saveFlag
+    //   );
+    //   // 削除コンテナ
+    //   const deleteJuchuContainerMeisaiData = newJuchuContainerMeisaiData.filter(
+    //     (data) => data.delFlag && data.saveFlag
+    //   );
+    //   // 削除
+    //   if (deleteJuchuContainerMeisaiData.length > 0) {
+    //     const deleteKizaiiIds = deleteJuchuContainerMeisaiData.map((data) => data.kizaiId);
+    //     const deleteCtnMeisaiResult = await delJuchuContainerMeisai(
+    //       data.juchuHeadId,
+    //       data.juchuKizaiHeadId,
+    //       deleteKizaiiIds,
+    //       connection
+    //     );
+    //     console.log('受注コンテナ明細削除', deleteCtnMeisaiResult);
 
-      const existingContainerMeisai = juchuContainerMeisaiList.filter((d) => d.saveFlag && !d.delFlag);
-      const deleteIds = juchuContainerMeisaiList.filter((d) => d.delFlag && d.saveFlag).map((d) => d.kizaiId);
-      const deleteKicsIds: number[] = [];
-      const deleteYardIds: number[] = [];
-      if (existingContainerMeisai.length > 0) {
-        const kicsContainerIds = existingContainerMeisai.filter((d) => d.planKicsKizaiQty === 0).map((d) => d.kizaiId);
-        const yardContainerIds = existingContainerMeisai.filter((d) => d.planYardKizaiQty === 0).map((d) => d.kizaiId);
-        deleteKicsIds.push(...deleteIds, ...kicsContainerIds);
-        deleteYardIds.push(...deleteIds, ...yardContainerIds);
-      }
-      if (originKicsShukoDat && deleteKicsIds.length > 0 && !kicsDelFlg) {
-        const deleteKicsContainerNyushukoResultResult = await delNyushukoCtnResult(
-          data.juchuHeadId,
-          data.juchuKizaiHeadId,
-          toJapanTimeString(originKicsShukoDat, '-'),
-          1,
-          deleteKicsIds,
-          connection
-        );
-        console.log('KICSコンテナ入出庫実績削除', deleteKicsContainerNyushukoResultResult);
-      }
-      if (originYardShukoDat && deleteYardIds.length > 0 && !yardDelFlg) {
-        const deleteYardContainerNyushukoResultResult = await delNyushukoCtnResult(
-          data.juchuHeadId,
-          data.juchuKizaiHeadId,
-          toJapanTimeString(originYardShukoDat, '-'),
-          2,
-          deleteYardIds,
-          connection
-        );
-        console.log('YARDコンテナ入出庫実績削除', deleteYardContainerNyushukoResultResult);
-      }
-    }
+    //     const deleteCtnNyushukoDenResult = await delCtnNyushukoDen(deleteJuchuContainerMeisaiData, connection);
+    //     console.log('コンテナ入出庫伝票削除', deleteCtnNyushukoDenResult);
+    //   }
+    //   // 追加
+    //   if (addJuchuContainerMeisaiData.length > 0) {
+    //     const addCtnMeisaiResult = await addJuchuContainerMeisai(addJuchuContainerMeisaiData, userNam, connection);
+    //     console.log('受注コンテナ明細追加', addCtnMeisaiResult);
 
-    // 入出庫伝票更新
-    if (checkKicsDat || checkYardDat || checkJuchuKizaiMeisai || checkJuchuContainerMeisai) {
-    }
+    //     if (data.kicsShukoDat && data.kicsNyukoDat) {
+    //       const addCtnNyushukoDenResult = await addCtnNyushukoDen(
+    //         addJuchuContainerMeisaiData,
+    //         data.kicsShukoDat,
+    //         data.kicsNyukoDat,
+    //         1,
+    //         userNam,
+    //         connection
+    //       );
+    //       console.log('KICSコンテナ入出庫伝票追加', addCtnNyushukoDenResult);
+    //     }
+    //     if (data.yardShukoDat && data.yardNyukoDat) {
+    //       const addCtnNyushukoDenResult = await addCtnNyushukoDen(
+    //         addJuchuContainerMeisaiData,
+    //         data.yardShukoDat,
+    //         data.yardNyukoDat,
+    //         2,
+    //         userNam,
+    //         connection
+    //       );
+    //       console.log('YARDコンテナ入出庫伝票追加', addCtnNyushukoDenResult);
+    //     }
+    //   }
+    //   // 更新
+    //   if (updateJuchuContainerMeisaiData.length > 0) {
+    //     const updateContainerMeisaiResult = await updJuchuContainerMeisai(
+    //       updateJuchuContainerMeisaiData,
+    //       userNam,
+    //       connection
+    //     );
+    //     console.log('受注コンテナ明細更新', updateContainerMeisaiResult);
+    //   }
+
+    //   // // コンテナ入出庫伝票更新
+    //   // if (newJuchuContainerMeisaiData.length > 0) {
+    //   //   const containerNyushukoDenResult = await updContainerNyushukoDen(
+    //   //     data,
+    //   //     newJuchuContainerMeisaiData,
+    //   //     userNam,
+    //   //     connection
+    //   //   );
+    //   //   console.log('コンテナ入出庫伝票更新', containerNyushukoDenResult);
+    //   // }
+
+    //   const existingContainerMeisai = juchuContainerMeisaiList.filter((d) => d.saveFlag && !d.delFlag);
+    //   const deleteIds = juchuContainerMeisaiList.filter((d) => d.delFlag && d.saveFlag).map((d) => d.kizaiId);
+    //   const deleteKicsIds: number[] = [];
+    //   const deleteYardIds: number[] = [];
+    //   if (existingContainerMeisai.length > 0) {
+    //     const kicsContainerIds = existingContainerMeisai.filter((d) => d.planKicsKizaiQty === 0).map((d) => d.kizaiId);
+    //     const yardContainerIds = existingContainerMeisai.filter((d) => d.planYardKizaiQty === 0).map((d) => d.kizaiId);
+    //     deleteKicsIds.push(...deleteIds, ...kicsContainerIds);
+    //     deleteYardIds.push(...deleteIds, ...yardContainerIds);
+    //   }
+    //   if (originKicsShukoDat && deleteKicsIds.length > 0 && !kicsDelFlg) {
+    //     const deleteKicsContainerNyushukoResultResult = await delNyushukoCtnResult(
+    //       data.juchuHeadId,
+    //       data.juchuKizaiHeadId,
+    //       toJapanTimeString(originKicsShukoDat, '-'),
+    //       1,
+    //       deleteKicsIds,
+    //       connection
+    //     );
+    //     console.log('KICSコンテナ入出庫実績削除', deleteKicsContainerNyushukoResultResult);
+    //   }
+    //   if (originYardShukoDat && deleteYardIds.length > 0 && !yardDelFlg) {
+    //     const deleteYardContainerNyushukoResultResult = await delNyushukoCtnResult(
+    //       data.juchuHeadId,
+    //       data.juchuKizaiHeadId,
+    //       toJapanTimeString(originYardShukoDat, '-'),
+    //       2,
+    //       deleteYardIds,
+    //       connection
+    //     );
+    //     console.log('YARDコンテナ入出庫実績削除', deleteYardContainerNyushukoResultResult);
+    //   }
+    // }
 
     // // 入出庫確定更新
     // if (juchuKizaiMeisaiList.length > 0 || juchuContainerMeisaiList.length > 0) {
@@ -731,7 +904,7 @@ export const getJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId:
       planKizaiQty: d.plan_kizai_qty ?? 0,
       planYobiQty: d.plan_yobi_qty ?? 0,
       planQty: d.plan_qty ?? 0,
-      dspOrdNum: d.dsp_ord_num ?? i,
+      dspOrdNum: d.dsp_ord_num,
       indentNum: d.indent_num ?? 0,
       delFlag: false,
       saveFlag: true,
@@ -757,7 +930,16 @@ export const getIdoJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHead
       throw eqListError;
     }
 
-    const eqIds = eqList.map((data) => data.kizai_id);
+    const uniqueIds = new Set();
+    const uniqueEqList = eqList.filter((item) => {
+      if (uniqueIds.has(item.kizai_id)) {
+        return false;
+      }
+      uniqueIds.add(item.kizai_id);
+      return true;
+    });
+
+    const eqIds = uniqueEqList.map((data) => data.kizai_id);
 
     const { data: mKizai, error: mKizaiError } = await selectMeisaiEqts(eqIds);
 
@@ -766,7 +948,7 @@ export const getIdoJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHead
       throw mKizaiError;
     }
 
-    const juchuKizaiMeisaiData: IdoJuchuKizaiMeisaiValues[] = eqList.map((d) => ({
+    const juchuKizaiMeisaiData: IdoJuchuKizaiMeisaiValues[] = uniqueEqList.map((d) => ({
       juchuHeadId: d.juchu_head_id,
       juchuKizaiHeadId: d.juchu_kizai_head_id,
       idoDenId: d.ido_den_id,
@@ -854,6 +1036,7 @@ export const updJuchuKizaiMeisai = async (
     upd_dat: toJapanTimeString(),
     upd_user: userNam,
     shozoku_id: d.shozokuId,
+    dsp_ord_num: d.dspOrdNum,
     indent_num: d.indentNum,
   }));
 
@@ -913,6 +1096,8 @@ export const addJuchuContainerMeisai = async (
     plan_kizai_qty: d.planKicsKizaiQty,
     shozoku_id: 1,
     mem: d.mem,
+    dsp_ord_num: d.dspOrdNum,
+    indent_num: d.indentNum,
     add_dat: toJapanTimeString(),
     add_user: userNam,
   }));
@@ -925,6 +1110,8 @@ export const addJuchuContainerMeisai = async (
     plan_kizai_qty: d.planYardKizaiQty,
     shozoku_id: 2,
     mem: d.mem,
+    dsp_ord_num: d.dspOrdNum,
+    indent_num: d.indentNum,
     add_dat: toJapanTimeString(),
     add_user: userNam,
   }));
@@ -960,6 +1147,8 @@ export const updJuchuContainerMeisai = async (
     plan_kizai_qty: d.planKicsKizaiQty,
     shozoku_id: 1,
     mem: d.mem,
+    dsp_ord_num: d.dspOrdNum,
+    indent_num: d.indentNum,
     upd_dat: toJapanTimeString(),
     upd_user: userNam,
   }));
@@ -972,6 +1161,8 @@ export const updJuchuContainerMeisai = async (
     plan_kizai_qty: d.planYardKizaiQty,
     shozoku_id: 2,
     mem: d.mem,
+    dsp_ord_num: d.dspOrdNum,
+    indent_num: d.indentNum,
     upd_dat: toJapanTimeString(),
     upd_user: userNam,
   }));
@@ -1196,172 +1387,352 @@ export const delNyushukoDen = async (juchuKizaiMeisaiData: JuchuKizaiMeisaiValue
 };
 
 /**
- * コンテナ入出庫伝票更新
- * @param juchuKizaiHeadData 受注機材ヘッダーデータ
- * @param juchuContainerMeisaiData 受注コンテナ明細データ
+ * コンテナ入出庫伝票新規追加
+ * @param juchuCtnMeisaiData 受注コンテナ明細データ
+ * @param shukoDat 出庫日
+ * @param nyukoDat 入庫日
+ * @param sagyoId 作業id
  * @param userNam ユーザー名
+ * @param connection
+ * @returns
  */
-export const updContainerNyushukoDen = async (
-  juchuKizaiHeadData: JuchuKizaiHeadValues,
-  juchuContainerMeisaiData: JuchuContainerMeisaiValues[],
+export const addCtnNyushukoDen = async (
+  juchuCtnMeisaiData: JuchuContainerMeisaiValues[],
+  shukoDat: Date,
+  nyukoDat: Date,
+  sagyoId: number,
   userNam: string,
   connection: PoolClient
 ) => {
-  for (const data of juchuContainerMeisaiData) {
-    const kicsData =
-      !data.delFlag && data.planKicsKizaiQty !== 0
-        ? [
-            {
-              juchu_head_id: data.juchuHeadId,
-              juchu_kizai_head_id: data.juchuKizaiHeadId,
-              juchu_kizai_meisai_id: data.juchuKizaiMeisaiId,
-              sagyo_kbn_id: 10,
-              sagyo_den_dat: toISOString(juchuKizaiHeadData.kicsShukoDat as Date),
-              sagyo_id: 1,
-              kizai_id: data.kizaiId,
-              plan_qty: data.planKicsKizaiQty,
-              dspOrdNum: data.dspOrdNum,
-              indentNum: data.indentNum,
-            },
-            {
-              juchu_head_id: data.juchuHeadId,
-              juchu_kizai_head_id: data.juchuKizaiHeadId,
-              juchu_kizai_meisai_id: data.juchuKizaiMeisaiId,
-              sagyo_kbn_id: 20,
-              sagyo_den_dat: toISOString(juchuKizaiHeadData.kicsShukoDat as Date),
-              sagyo_id: 1,
-              kizai_id: data.kizaiId,
-              plan_qty: data.planKicsKizaiQty,
-              dspOrdNum: data.dspOrdNum,
-              indentNum: data.indentNum,
-            },
-            {
-              juchu_head_id: data.juchuHeadId,
-              juchu_kizai_head_id: data.juchuKizaiHeadId,
-              juchu_kizai_meisai_id: data.juchuKizaiMeisaiId,
-              sagyo_kbn_id: 30,
-              sagyo_den_dat: toISOString(juchuKizaiHeadData.kicsNyukoDat as Date),
-              sagyo_id: 1,
-              kizai_id: data.kizaiId,
-              plan_qty: data.planKicsKizaiQty,
-              dspOrdNum: data.dspOrdNum,
-              indentNum: data.indentNum,
-            },
-          ]
-        : null;
-    const yardData =
-      !data.delFlag && data.planYardKizaiQty !== 0
-        ? [
-            {
-              juchu_head_id: data.juchuHeadId,
-              juchu_kizai_head_id: data.juchuKizaiHeadId,
-              juchu_kizai_meisai_id: data.juchuKizaiMeisaiId,
-              sagyo_kbn_id: 10,
-              sagyo_den_dat: toISOString(juchuKizaiHeadData.yardShukoDat as Date),
-              sagyo_id: 2,
-              kizai_id: data.kizaiId,
-              plan_qty: data.planYardKizaiQty,
-              dspOrdNum: data.dspOrdNum,
-              indentNum: data.indentNum,
-            },
-            {
-              juchu_head_id: data.juchuHeadId,
-              juchu_kizai_head_id: data.juchuKizaiHeadId,
-              juchu_kizai_meisai_id: data.juchuKizaiMeisaiId,
-              sagyo_kbn_id: 20,
-              sagyo_den_dat: toISOString(juchuKizaiHeadData.yardShukoDat as Date),
-              sagyo_id: 2,
-              kizai_id: data.kizaiId,
-              plan_qty: data.planYardKizaiQty,
-              dspOrdNum: data.dspOrdNum,
-              indentNum: data.indentNum,
-            },
-            {
-              juchu_head_id: data.juchuHeadId,
-              juchu_kizai_head_id: data.juchuKizaiHeadId,
-              juchu_kizai_meisai_id: data.juchuKizaiMeisaiId,
-              sagyo_kbn_id: 30,
-              sagyo_den_dat: toISOString(juchuKizaiHeadData.yardNyukoDat as Date),
-              sagyo_id: 2,
-              kizai_id: data.kizaiId,
-              plan_qty: data.planYardKizaiQty,
-              dspOrdNum: data.dspOrdNum,
-              indentNum: data.indentNum,
-            },
-          ]
-        : null;
-    const kicsConfirmData = {
-      juchu_head_id: data.juchuHeadId,
-      juchu_kizai_head_id: data.juchuKizaiHeadId,
-      juchu_kizai_meisai_id: data.juchuKizaiMeisaiId,
-      kizai_id: data.kizaiId,
-      sagyo_id: 1,
-    };
-    const yardConfirmData = {
-      juchu_head_id: data.juchuHeadId,
-      juchu_kizai_head_id: data.juchuKizaiHeadId,
-      juchu_kizai_meisai_id: data.juchuKizaiMeisaiId,
-      kizai_id: data.kizaiId,
-      sagyo_id: 2,
-    };
+  const newCtnShukoStandbyData: NyushukoDen[] = juchuCtnMeisaiData.map((d) => ({
+    juchu_head_id: d.juchuHeadId,
+    juchu_kizai_head_id: d.juchuKizaiHeadId,
+    juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
+    sagyo_kbn_id: 10,
+    sagyo_den_dat: toISOString(shukoDat),
+    sagyo_id: sagyoId,
+    kizai_id: d.kizaiId,
+    plan_qty: sagyoId === 1 ? d.planKicsKizaiQty : d.planYardKizaiQty,
+    dsp_ord_num: d.dspOrdNum,
+    indent_num: d.indentNum,
+    add_dat: toJapanTimeString(),
+    add_user: userNam,
+  }));
 
-    try {
-      const kicsConfirmResult = await selectContainerNyushukoDenConfirm(kicsConfirmData);
-      const yardConfirmResult = await selectContainerNyushukoDenConfirm(yardConfirmData);
+  const newCtnShukoCheckData: NyushukoDen[] = juchuCtnMeisaiData.map((d) => ({
+    juchu_head_id: d.juchuHeadId,
+    juchu_kizai_head_id: d.juchuKizaiHeadId,
+    juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
+    sagyo_kbn_id: 20,
+    sagyo_den_dat: toISOString(shukoDat),
+    sagyo_id: sagyoId,
+    kizai_id: d.kizaiId,
+    plan_qty: sagyoId === 1 ? d.planKicsKizaiQty : d.planYardKizaiQty,
+    dsp_ord_num: d.dspOrdNum,
+    indent_num: d.indentNum,
+    add_dat: toJapanTimeString(),
+    add_user: userNam,
+  }));
 
-      if (kicsConfirmResult.data && kicsConfirmResult.data.length > 0 && kicsData) {
-        for (const data of kicsData) {
-          await updateNyushukoDen(
-            {
-              ...data,
-              upd_dat: toJapanTimeString(),
-              upd_user: userNam,
-            },
-            connection
-          );
-        }
-      } else if (kicsConfirmResult.data && kicsConfirmResult.data.length > 0 && !kicsData) {
-        await deleteContainerNyushukoDen(kicsConfirmData, connection);
-      } else if (kicsConfirmResult!.data && kicsData) {
-        await insertNyushukoDen(
-          kicsData.map((d) => ({
-            ...d,
-            add_dat: toJapanTimeString(),
-            add_user: userNam,
-          })),
-          connection
-        );
-      }
-      if (yardConfirmResult.data && yardConfirmResult.data.length > 0 && yardData) {
-        for (const data of yardData) {
-          await updateNyushukoDen(
-            {
-              ...data,
-              upd_dat: toJapanTimeString(),
-              upd_user: userNam,
-            },
-            connection
-          );
-        }
-      } else if (yardConfirmResult.data && yardConfirmResult.data.length > 0 && !yardData) {
-        await deleteContainerNyushukoDen(yardConfirmData, connection);
-      } else if (yardConfirmResult!.data && yardData) {
-        await insertNyushukoDen(
-          yardData.map((d) => ({
-            ...d,
-            add_dat: toJapanTimeString(),
-            add_user: userNam,
-          })),
-          connection
-        );
-      }
-      console.log('container nyushuko den updated successfully:', data);
-    } catch (e) {
-      throw e;
-    }
+  const newCtnNyukoCheckData: NyushukoDen[] = juchuCtnMeisaiData.map((d) => ({
+    juchu_head_id: d.juchuHeadId,
+    juchu_kizai_head_id: d.juchuKizaiHeadId,
+    juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
+    sagyo_kbn_id: 30,
+    sagyo_den_dat: toISOString(nyukoDat),
+    sagyo_id: sagyoId,
+    kizai_id: d.kizaiId,
+    plan_qty: sagyoId === 1 ? d.planKicsKizaiQty : d.planYardKizaiQty,
+    dsp_ord_num: d.dspOrdNum,
+    indent_num: d.indentNum,
+    add_dat: toJapanTimeString(),
+    add_user: userNam,
+  }));
+
+  const mergeData = [...newCtnShukoStandbyData, ...newCtnShukoCheckData, ...newCtnNyukoCheckData];
+
+  try {
+    await insertNyushukoDen(mergeData, connection);
+
+    console.log('ctn nyushuko den added successfully:', mergeData);
+    return true;
+  } catch (e) {
+    console.error('Exception while adding ctn nyushuko den:', e);
+    throw e;
   }
-  return true;
 };
+
+/**
+ * コンテナ入出庫伝票更新
+ * @param juchuCtnMeisaiData 受注コンテナ明細データ
+ * @param shukoDat 出庫日
+ * @param nyukoDat 入庫日
+ * @param sagyoId 作業id
+ * @param userNam ユーザー名
+ * @param connection
+ */
+export const updCtnNyushukoDen = async (
+  juchuCtnMeisaiData: JuchuContainerMeisaiValues[],
+  shukoDat: Date,
+  nyukoDat: Date,
+  sagyoId: number,
+  userNam: string,
+  connection: PoolClient
+) => {
+  const updCtnShukoStandbyData: NyushukoDen[] = juchuCtnMeisaiData.map((d) => ({
+    juchu_head_id: d.juchuHeadId,
+    juchu_kizai_head_id: d.juchuKizaiHeadId,
+    juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
+    sagyo_kbn_id: 10,
+    sagyo_den_dat: toISOString(shukoDat),
+    sagyo_id: sagyoId,
+    kizai_id: d.kizaiId,
+    plan_qty: sagyoId === 1 ? d.planKicsKizaiQty : d.planYardKizaiQty,
+    dsp_ord_num: d.dspOrdNum,
+    indent_num: d.indentNum,
+    add_dat: toJapanTimeString(),
+    add_user: userNam,
+  }));
+
+  const updCtnShukoCheckData: NyushukoDen[] = juchuCtnMeisaiData.map((d) => ({
+    juchu_head_id: d.juchuHeadId,
+    juchu_kizai_head_id: d.juchuKizaiHeadId,
+    juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
+    sagyo_kbn_id: 20,
+    sagyo_den_dat: toISOString(shukoDat),
+    sagyo_id: sagyoId,
+    kizai_id: d.kizaiId,
+    plan_qty: sagyoId === 1 ? d.planKicsKizaiQty : d.planYardKizaiQty,
+    dsp_ord_num: d.dspOrdNum,
+    indent_num: d.indentNum,
+    add_dat: toJapanTimeString(),
+    add_user: userNam,
+  }));
+
+  const updCtnNyukoCheckData: NyushukoDen[] = juchuCtnMeisaiData.map((d) => ({
+    juchu_head_id: d.juchuHeadId,
+    juchu_kizai_head_id: d.juchuKizaiHeadId,
+    juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
+    sagyo_kbn_id: 30,
+    sagyo_den_dat: toISOString(nyukoDat),
+    sagyo_id: sagyoId,
+    kizai_id: d.kizaiId,
+    plan_qty: sagyoId === 1 ? d.planKicsKizaiQty : d.planYardKizaiQty,
+    dsp_ord_num: d.dspOrdNum,
+    indent_num: d.indentNum,
+    add_dat: toJapanTimeString(),
+    add_user: userNam,
+  }));
+
+  const mergeData = [...updCtnShukoStandbyData, ...updCtnShukoCheckData, ...updCtnNyukoCheckData];
+
+  try {
+    for (const data of mergeData) {
+      await updateNyushukoDen(data, connection);
+    }
+    console.log('ctn nyushuko den updated successfully:', mergeData);
+    return true;
+  } catch (e) {
+    console.error('Exception while updating ctn nyushuko den:', e);
+    throw e;
+  }
+};
+
+/**
+ * コンテナ入出庫伝票削除
+ * @param juchuContainerMeisaiData 受注コンテナ明細データ
+ * @param connection
+ * @returns
+ */
+export const delCtnNyushukoDen = async (
+  juchuContainerMeisaiData: JuchuContainerMeisaiValues[],
+  connection: PoolClient
+) => {
+  const deleteData = juchuContainerMeisaiData.map((d) => ({
+    juchu_head_id: d.juchuHeadId,
+    juchu_kizai_head_id: d.juchuKizaiHeadId,
+    juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
+    kizai_id: d.kizaiId,
+  }));
+
+  try {
+    for (const data of deleteData) {
+      await deleteNyushukoDen(data, connection);
+    }
+    console.log('ctn nyushuko den delete successfully:', deleteData);
+    return true;
+  } catch (e) {
+    throw e;
+  }
+};
+
+// /**
+//  * コンテナ入出庫伝票更新
+//  * @param juchuKizaiHeadData 受注機材ヘッダーデータ
+//  * @param juchuContainerMeisaiData 受注コンテナ明細データ
+//  * @param userNam ユーザー名
+//  */
+// export const updContainerNyushukoDen = async (
+//   juchuKizaiHeadData: JuchuKizaiHeadValues,
+//   juchuContainerMeisaiData: JuchuContainerMeisaiValues[],
+//   userNam: string,
+//   connection: PoolClient
+// ) => {
+//   for (const data of juchuContainerMeisaiData) {
+//     const kicsData =
+//       !data.delFlag && data.planKicsKizaiQty !== 0
+//         ? [
+//             {
+//               juchu_head_id: data.juchuHeadId,
+//               juchu_kizai_head_id: data.juchuKizaiHeadId,
+//               juchu_kizai_meisai_id: data.juchuKizaiMeisaiId,
+//               sagyo_kbn_id: 10,
+//               sagyo_den_dat: toISOString(juchuKizaiHeadData.kicsShukoDat as Date),
+//               sagyo_id: 1,
+//               kizai_id: data.kizaiId,
+//               plan_qty: data.planKicsKizaiQty,
+//               dsp_ord_num: data.dspOrdNum,
+//               indent_num: data.indentNum,
+//             },
+//             {
+//               juchu_head_id: data.juchuHeadId,
+//               juchu_kizai_head_id: data.juchuKizaiHeadId,
+//               juchu_kizai_meisai_id: data.juchuKizaiMeisaiId,
+//               sagyo_kbn_id: 20,
+//               sagyo_den_dat: toISOString(juchuKizaiHeadData.kicsShukoDat as Date),
+//               sagyo_id: 1,
+//               kizai_id: data.kizaiId,
+//               plan_qty: data.planKicsKizaiQty,
+//               dsp_ord_num: data.dspOrdNum,
+//               indent_num: data.indentNum,
+//             },
+//             {
+//               juchu_head_id: data.juchuHeadId,
+//               juchu_kizai_head_id: data.juchuKizaiHeadId,
+//               juchu_kizai_meisai_id: data.juchuKizaiMeisaiId,
+//               sagyo_kbn_id: 30,
+//               sagyo_den_dat: toISOString(juchuKizaiHeadData.kicsNyukoDat as Date),
+//               sagyo_id: 1,
+//               kizai_id: data.kizaiId,
+//               plan_qty: data.planKicsKizaiQty,
+//               dsp_ord_num: data.dspOrdNum,
+//               indent_num: data.indentNum,
+//             },
+//           ]
+//         : null;
+//     const yardData =
+//       !data.delFlag && data.planYardKizaiQty !== 0
+//         ? [
+//             {
+//               juchu_head_id: data.juchuHeadId,
+//               juchu_kizai_head_id: data.juchuKizaiHeadId,
+//               juchu_kizai_meisai_id: data.juchuKizaiMeisaiId,
+//               sagyo_kbn_id: 10,
+//               sagyo_den_dat: toISOString(juchuKizaiHeadData.yardShukoDat as Date),
+//               sagyo_id: 2,
+//               kizai_id: data.kizaiId,
+//               plan_qty: data.planYardKizaiQty,
+//               dsp_ord_num: data.dspOrdNum,
+//               indent_num: data.indentNum,
+//             },
+//             {
+//               juchu_head_id: data.juchuHeadId,
+//               juchu_kizai_head_id: data.juchuKizaiHeadId,
+//               juchu_kizai_meisai_id: data.juchuKizaiMeisaiId,
+//               sagyo_kbn_id: 20,
+//               sagyo_den_dat: toISOString(juchuKizaiHeadData.yardShukoDat as Date),
+//               sagyo_id: 2,
+//               kizai_id: data.kizaiId,
+//               plan_qty: data.planYardKizaiQty,
+//               dsp_ord_num: data.dspOrdNum,
+//               indent_num: data.indentNum,
+//             },
+//             {
+//               juchu_head_id: data.juchuHeadId,
+//               juchu_kizai_head_id: data.juchuKizaiHeadId,
+//               juchu_kizai_meisai_id: data.juchuKizaiMeisaiId,
+//               sagyo_kbn_id: 30,
+//               sagyo_den_dat: toISOString(juchuKizaiHeadData.yardNyukoDat as Date),
+//               sagyo_id: 2,
+//               kizai_id: data.kizaiId,
+//               plan_qty: data.planYardKizaiQty,
+//               dsp_ord_num: data.dspOrdNum,
+//               indent_num: data.indentNum,
+//             },
+//           ]
+//         : null;
+//     const kicsConfirmData = {
+//       juchu_head_id: data.juchuHeadId,
+//       juchu_kizai_head_id: data.juchuKizaiHeadId,
+//       juchu_kizai_meisai_id: data.juchuKizaiMeisaiId,
+//       kizai_id: data.kizaiId,
+//       sagyo_id: 1,
+//     };
+//     const yardConfirmData = {
+//       juchu_head_id: data.juchuHeadId,
+//       juchu_kizai_head_id: data.juchuKizaiHeadId,
+//       juchu_kizai_meisai_id: data.juchuKizaiMeisaiId,
+//       kizai_id: data.kizaiId,
+//       sagyo_id: 2,
+//     };
+
+//     try {
+//       const kicsConfirmResult = await selectContainerNyushukoDenConfirm(kicsConfirmData);
+//       const yardConfirmResult = await selectContainerNyushukoDenConfirm(yardConfirmData);
+
+//       if (kicsConfirmResult.data && kicsConfirmResult.data.length > 0 && kicsData) {
+//         for (const data of kicsData) {
+//           await updateNyushukoDen(
+//             {
+//               ...data,
+//               upd_dat: toJapanTimeString(),
+//               upd_user: userNam,
+//             },
+//             connection
+//           );
+//         }
+//       } else if (kicsConfirmResult.data && kicsConfirmResult.data.length > 0 && !kicsData) {
+//         await deleteContainerNyushukoDen(kicsConfirmData, connection);
+//       } else if (kicsConfirmResult!.data && kicsData) {
+//         await insertNyushukoDen(
+//           kicsData.map((d) => ({
+//             ...d,
+//             add_dat: toJapanTimeString(),
+//             add_user: userNam,
+//           })),
+//           connection
+//         );
+//       }
+//       if (yardConfirmResult.data && yardConfirmResult.data.length > 0 && yardData) {
+//         for (const data of yardData) {
+//           await updateNyushukoDen(
+//             {
+//               ...data,
+//               upd_dat: toJapanTimeString(),
+//               upd_user: userNam,
+//             },
+//             connection
+//           );
+//         }
+//       } else if (yardConfirmResult.data && yardConfirmResult.data.length > 0 && !yardData) {
+//         await deleteContainerNyushukoDen(yardConfirmData, connection);
+//       } else if (yardConfirmResult!.data && yardData) {
+//         await insertNyushukoDen(
+//           yardData.map((d) => ({
+//             ...d,
+//             add_dat: toJapanTimeString(),
+//             add_user: userNam,
+//           })),
+//           connection
+//         );
+//       }
+//       console.log('container nyushuko den updated successfully:', data);
+//     } catch (e) {
+//       throw e;
+//     }
+//   }
+//   return true;
+// };
 
 // /**
 //  * 入出庫確定更新
@@ -1491,23 +1862,15 @@ export const updContainerNyushukoDen = async (
 
 /**
  * 入出庫実績削除
- * @param juchuHeadId 受注ヘッダーid
- * @param sagyoDenDat 作業日時
- * @param sagyoId 作業id
- * @param kizaiIds 機材id
+ * @param juchuKizaiMeisaiData 受注機材明細データ
  * @param connection
+ * @returns
  */
-export const delNyushukoResult = async (
-  juchuKizaiMeisaiData: JuchuKizaiMeisaiValues[],
-  sagyoDenDat: string,
-  connection: PoolClient
-) => {
+export const delNyushukoResult = async (juchuKizaiMeisaiData: JuchuKizaiMeisaiValues[], connection: PoolClient) => {
   const deleteData = juchuKizaiMeisaiData.map((d) => ({
     juchuHeadId: d.juchuHeadId,
     juchuKizaiHeadId: d.juchuKizaiHeadId,
     juchuKizaiMeisaiId: d.juchuKizaiMeisaiId,
-    sagyoDenDat: sagyoDenDat,
-    sagyoId: d.shozokuId,
     kizaiId: d.kizaiId,
   }));
   try {
@@ -1516,8 +1879,6 @@ export const delNyushukoResult = async (
         data.juchuHeadId,
         data.juchuKizaiHeadId,
         data.juchuKizaiMeisaiId,
-        data.sagyoDenDat,
-        data.sagyoId,
         data.kizaiId,
         connection
       );

@@ -53,7 +53,7 @@ export const ShukoDetailTable = (props: { datas: ShukoDetailTableValues[] }) => 
                 onClick={() => handleClick(row.juchuKizaiHeadId, row.juchuKizaiMeisaiId, row.kizaiId)}
                 sx={{ cursor: 'pointer', '&:hover': { backgroundColor: 'rgba(0,0,0,0.04)' } }}
               >
-                {'*'.repeat(row.indentNum) + row.kizaiNam}
+                {row.kizaiNam}
               </TableCell>
               <TableCell align="right">{row.planQty}</TableCell>
               <TableCell align="right">{row.resultQty}</TableCell>
