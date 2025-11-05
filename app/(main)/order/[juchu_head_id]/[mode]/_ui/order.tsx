@@ -14,6 +14,7 @@ import {
   Button,
   Dialog,
   Divider,
+  Fab,
   FormControl,
   Grid2,
   MenuItem,
@@ -443,10 +444,6 @@ export const Order = (props: {
               <Typography>受注ヘッダー</Typography>
             </Grid2>
             <Grid2 container spacing={1}>
-              <Button type="submit" disabled={!edit}>
-                <CheckIcon fontSize="small" />
-                保存
-              </Button>
               <Button color="error" disabled={!edit}>
                 <Delete fontSize="small" />
                 伝票削除
@@ -461,11 +458,11 @@ export const Order = (props: {
           <Grid2 container spacing={{ xs: 0, sm: 0, md: 2 }}>
             <Grid2 size={{ xs: 12, sm: 12, md: 6 }}>
               <Box sx={styles.container}>
-                <Typography marginRight={5} whiteSpace="nowrap">
+                <Typography marginRight={7} whiteSpace="nowrap">
                   受注番号
                 </Typography>
                 {getValues('juchuHeadId') === 0 ? (
-                  <TextField slotProps={{ input: { readOnly: true } }}></TextField>
+                  <TextField slotProps={{ input: { readOnly: true } }} sx={{ width: 120 }} />
                 ) : (
                   <TextFieldElement
                     name="juchuHeadId"
@@ -476,14 +473,15 @@ export const Order = (props: {
                         WebkitAppearance: 'none',
                         margin: 0,
                       },
+                      width: 120,
                     }}
                     slotProps={{ input: { readOnly: true } }}
-                  ></TextFieldElement>
+                  />
                 )}
               </Box>
               <Box sx={styles.container}>
-                <Typography mr={2}>受注ステータス</Typography>
-                <FormControl size="small" sx={{ width: 150 }}>
+                <Typography mr={1}>受注ステータス</Typography>
+                <FormControl size="small" sx={{ width: 160 }}>
                   <Controller
                     name="juchuSts"
                     control={control}
@@ -502,7 +500,7 @@ export const Order = (props: {
                 </FormControl>
               </Box>
               <Box sx={styles.container}>
-                <Typography marginRight={7}>受注日</Typography>
+                <Typography marginRight={9}>受注日</Typography>
                 <Controller
                   name="juchuDat"
                   control={control}
@@ -519,8 +517,8 @@ export const Order = (props: {
                 />
               </Box>
               <Box sx={styles.container}>
-                <Typography marginRight={7}>入力者</Typography>
-                <FormControl size="small" sx={{ width: '30%', minWidth: '80px' }}>
+                <Typography marginRight={9}>入力者</Typography>
+                <FormControl size="small" sx={{ width: 160, minWidth: '80px' }}>
                   <Controller
                     name="nyuryokuUser"
                     control={control}
@@ -538,11 +536,7 @@ export const Order = (props: {
                 {/*<TextFieldElement name="nyuryokuUser" control={control} disabled={!edit}></TextFieldElement>*/}
               </Box>
               <Box sx={styles.container}>
-                <Typography mr={2}>
-                  受注開始日/
-                  <br />
-                  受注終了日
-                </Typography>
+                <Typography mr={2}>出庫日/入庫日</Typography>
                 <Controller
                   name="juchuRange"
                   control={control}
@@ -572,7 +566,7 @@ export const Order = (props: {
                 </Button>
               </Box>
               <Box sx={styles.container}>
-                <Typography marginRight={9}>相手</Typography>
+                <Typography marginRight={9}>顧客</Typography>
                 <Controller
                   name="kokyaku.kokyakuNam"
                   control={control}
@@ -592,67 +586,11 @@ export const Order = (props: {
                 />
               </Box>
               <Box sx={styles.container}>
-                <Typography marginRight={3}>相手担当者</Typography>
+                <Typography marginRight={3}>顧客担当者</Typography>
                 <TextFieldElement name="kokyakuTantoNam" control={control} disabled={!edit}></TextFieldElement>
               </Box>
               <Box sx={styles.container}>
-                <Typography marginRight={7}>値引き</Typography>
-                <Controller
-                  name="nebikiAmt"
-                  control={control}
-                  render={({ field, fieldState }) => (
-                    <TextField
-                      {...field}
-                      value={
-                        isEditing
-                          ? (field.value ?? '')
-                          : field.value !== null && !isNaN(Number(field.value))
-                            ? `¥${Number(field.value).toLocaleString()}`
-                            : '¥0'
-                      }
-                      onFocus={(e) => {
-                        setIsEditing(true);
-                        const rawValue = e.target.value.replace(/[¥,]/g, '');
-                        e.target.value = rawValue;
-                      }}
-                      onBlur={(e) => {
-                        const rawValue = e.target.value.replace(/[¥,]/g, '');
-                        const numericValue = Number(rawValue);
-                        field.onChange(numericValue);
-                        setIsEditing(false);
-                      }}
-                      onChange={(e) => {
-                        const raw = e.target.value.replace(/[^\d]/g, '');
-                        if (/^\d*$/.test(raw)) {
-                          field.onChange(Number(raw));
-                          e.target.value = raw;
-                        }
-                      }}
-                      sx={{
-                        '.MuiOutlinedInput-notchedOutline': {
-                          borderColor: fieldState.error?.message && 'red',
-                        },
-                        '.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                          borderColor: fieldState.error?.message && 'red',
-                        },
-                        '&:hover .MuiOutlinedInput-notchedOutline': {
-                          borderColor: fieldState.error?.message && 'red',
-                        },
-                        '& .MuiInputBase-input': {
-                          textAlign: 'right',
-                        },
-                        '.MuiFormHelperText-root': {
-                          color: 'red',
-                        },
-                      }}
-                      helperText={fieldState.error?.message}
-                      disabled={!edit}
-                    />
-                  )}
-                />
-                <Typography ml={4} mr={2}>
-                  税区分
-                </Typography>
+                <Typography mr={7}>税区分</Typography>
                 <FormControl size="small" sx={{ width: '8%', minWidth: '80px' }}>
                   <Controller
                     name="zeiKbn"
@@ -669,8 +607,8 @@ export const Order = (props: {
               </Box>
             </Grid2>
           </Grid2>
-          <Box display={'flex'} alignItems={'center'} p={2}>
-            <Typography marginRight={2}>メモ</Typography>
+          <Box display={'flex'} alignItems={'center'} px={2} pb={2}>
+            <Typography marginRight={3}>メモ</Typography>
             <TextFieldElement
               name="mem"
               control={control}
@@ -690,6 +628,12 @@ export const Order = (props: {
               //   },
               // }}
             ></TextFieldElement>
+          </Box>
+          <Box position={'fixed'} zIndex={1050} bottom={10} right={10}>
+            <Fab variant="extended" color="primary" sx={{ margin: 1 }} type="submit" size="medium">
+              <CheckIcon fontSize="small" sx={{ mr: 1 }} />
+              保存
+            </Fab>
           </Box>
         </form>
         {/* 公演場所検索ダイアログ */}
