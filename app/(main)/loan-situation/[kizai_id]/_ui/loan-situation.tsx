@@ -297,22 +297,24 @@ export const LoanSituation = (props: {
       {isLoading ? (
         <Loading />
       ) : (
-        <Box display={'flex'} flexDirection="row" width="100%">
-          <Box
-            sx={{
-              width: {
-                xs: '20%',
-                sm: '20%',
-                md: '20%',
-                lg: 'min-content',
-              },
-              mt: 5.9,
-            }}
-          >
-            <LoanSituationTable rows={loanJuchuList} ref={leftRef} />
-          </Box>
-          <Box overflow="auto" sx={{ width: { xs: '60%', sm: '60%', md: 'auto' } }}>
-            <Box display="flex" my={1}>
+        <Box>
+          <Grid2 container>
+            <Grid2
+              size={{
+                xs: 'auto',
+                sm: 'auto',
+                md: 'auto',
+                lg: 'auto',
+              }}
+            ></Grid2>
+            <Grid2
+              overflow="auto"
+              size={{ xs: 'grow', sm: 'grow', md: 'grow' }}
+              display={'flex'}
+              alignItems={'center'}
+              mt={1}
+              mb={0.5}
+            >
               <Box display={loanJuchuList.length > 0 ? 'flex' : 'none'} alignItems={'end'} mr={2}>
                 <Typography fontSize={'small'}>使用数</Typography>
               </Box>
@@ -332,9 +334,24 @@ export const LoanSituation = (props: {
               <Button onClick={handleForwardDateChange}>
                 <ArrowForwardIosIcon fontSize="small" />
               </Button>
-            </Box>
-            <UseTable eqUseList={eqUseList} eqStockList={eqStockList} ref={rightRef} />
-          </Box>
+            </Grid2>
+          </Grid2>
+
+          <Grid2 container>
+            <Grid2
+              size={{
+                xs: 'auto',
+                sm: 'auto',
+                md: 'auto',
+                lg: 'auto',
+              }}
+            >
+              <LoanSituationTable rows={loanJuchuList} ref={leftRef} />
+            </Grid2>
+            <Grid2 overflow="auto" size={{ xs: 'grow', sm: 'grow', md: 'grow' }}>
+              <UseTable eqUseList={eqUseList} eqStockList={eqStockList} ref={rightRef} />
+            </Grid2>
+          </Grid2>
         </Box>
       )}
     </Box>

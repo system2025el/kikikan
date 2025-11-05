@@ -49,6 +49,7 @@ export const LoanSituationTable = (props: LoanSituationTableProps) => {
                 bgcolor: 'white',
                 fontWeight: 400,
                 fontSize: '0.50rem',
+                minWidth: 0,
               }}
               colSpan={4}
             >
@@ -77,12 +78,16 @@ export const LoanSituationTable = (props: LoanSituationTableProps) => {
                 <Button
                   variant="text"
                   href={`/order/${row.juchuHeadId}/${'view'}`}
-                  sx={{ p: 0, height: 10, m: 0, fontSize: '0.50rem', width: 1 }}
+                  sx={{ p: 0, height: 10, m: 0, fontSize: '0.50rem', minWidth: 0, width: 1 }}
                 >
                   {row.juchuHeadId}
                 </Button>
               </TableCell>
-              <TableCell style={styles.row}>{row.koenNam}</TableCell>
+              <TableCell style={styles.row} sx={{ minWidth: 0 }}>
+                <LightTooltipWithText variant="0.50rem" maxWidth={150}>
+                  {row.koenNam}
+                </LightTooltipWithText>
+              </TableCell>
               <TableCell style={styles.row}>{row.shukoDat ? toISOStringMonthDay(row.shukoDat) : ''}</TableCell>
               <TableCell style={styles.row}>{row.nyukoDat ? toISOStringMonthDay(row.nyukoDat) : ''}</TableCell>
             </TableRow>
@@ -103,6 +108,7 @@ export const LoanSituationTable = (props: LoanSituationTableProps) => {
                 height: 15,
                 lineHeight: '1rem',
                 fontSize: '0.50rem',
+                minWidth: 0,
               }}
               colSpan={4}
             >
@@ -151,6 +157,7 @@ export const UseTable = (props: UseTableProps) => {
                     bgcolor: 'white',
                     fontWeight: 400,
                     fontSize: '0.50rem',
+                    minWidth: 0,
                   }}
                 >
                   {cell.zaikoQty}
@@ -173,6 +180,7 @@ export const UseTable = (props: UseTableProps) => {
                     height: 15,
                     lineHeight: '1rem',
                     fontSize: '0.50rem',
+                    minWidth: 0,
                   }}
                 >
                   {toISOStringMonthDay(cell.calDat)}
@@ -195,6 +203,7 @@ export const UseTable = (props: UseTableProps) => {
                       py: 0,
                       px: 1,
                       fontSize: '0.50rem',
+                      minWidth: 0,
                     }}
                   >
                     {cell.planQty}
@@ -219,6 +228,7 @@ export const UseTable = (props: UseTableProps) => {
                     color: cell.zaikoQty < 0 ? 'red' : 'black',
                     bgcolor: 'white',
                     fontSize: '0.50rem',
+                    minWidth: 0,
                   }}
                 >
                   {cell.zaikoQty}
@@ -247,6 +257,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     paddingRight: 0.1,
     fontSize: '0.50rem',
     width: 1,
+    minWidth: 0,
   },
   // 行
   row: {
@@ -259,5 +270,6 @@ const styles: { [key: string]: React.CSSProperties } = {
     paddingBottom: 0,
     paddingLeft: 0.1,
     paddingRight: 0.1,
+    minWidth: 0,
   },
 };
