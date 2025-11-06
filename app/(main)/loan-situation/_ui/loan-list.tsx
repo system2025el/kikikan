@@ -6,7 +6,6 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
-import { BackButton } from '../../_ui/buttons';
 import { getFilteredEqpts } from '../_lib/funcs';
 import { LoanEqTableValues } from '../_lib/types';
 import { LoanListTable } from './loan-list-table';
@@ -46,9 +45,6 @@ export const LoanList = ({ eqpts }: { eqpts: LoanEqTableValues[] | undefined }) 
 
   return (
     <Box>
-      <Box display={'flex'} justifyContent={'end'} mb={1}>
-        <BackButton label={'戻る'} />
-      </Box>
       {/*貸出状況検索*/}
       <Paper variant="outlined">
         <Grid2 container spacing={2} alignItems="center" p={2}>
