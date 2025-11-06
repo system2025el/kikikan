@@ -668,8 +668,8 @@ export const EquipmentKeepOrderDetail = (props: {
    */
   const setEqpts = async (eqData: OyaJuchuKizaiMeisaiValues[], containerData: OyaJuchuContainerMeisaiValues[]) => {
     // 同じ並び順のものははじくようにする
-    const eqIds = new Set(keepJuchuKizaiMeisaiList.filter((d) => !d.delFlag).map((d) => d.dspOrdNum));
-    const filterEqData = eqData.filter((d) => !eqIds.has(d.dspOrdNum));
+    const dspOrdNums = new Set(keepJuchuKizaiMeisaiList.filter((d) => !d.delFlag).map((d) => d.dspOrdNum));
+    const filterEqData = eqData.filter((d) => !dspOrdNums.has(d.dspOrdNum));
     const newOyaJuchuKizaiMeisaiData: KeepJuchuKizaiMeisaiValues[] = filterEqData.map((d) => ({
       juchuHeadId: getValues('juchuHeadId'),
       juchuKizaiHeadId: getValues('juchuKizaiHeadId'),
@@ -710,7 +710,9 @@ export const EquipmentKeepOrderDetail = (props: {
     setKeepJuchuKizaiMeisaiList((prev) =>
       [...prev, ...newOyaJuchuKizaiMeisaiData].sort((a, b) => a.dspOrdNum - b.dspOrdNum)
     );
-    setKeepJuchuContainerMeisaiList((prev) => [...prev, ...newKeepJuchuContainerMeisaiData]);
+    setKeepJuchuContainerMeisaiList((prev) =>
+      [...prev, ...newKeepJuchuContainerMeisaiData].sort((a, b) => a.dspOrdNum - b.dspOrdNum)
+    );
   };
 
   // 機材入力ダイアログ開閉

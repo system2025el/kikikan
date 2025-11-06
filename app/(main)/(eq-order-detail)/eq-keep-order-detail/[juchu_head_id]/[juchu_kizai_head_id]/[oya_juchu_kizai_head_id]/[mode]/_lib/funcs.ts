@@ -410,10 +410,10 @@ export const saveKeepJuchuKizai = async (
           );
           console.log('KICSコンテナ出庫伝票追加', addCtnShukoDenResult);
         }
-        if (data.yardNyukoDat) {
+        if (data.yardShukoDat) {
           const addYardShukoDenResult = await addShukoDen(
             filterNewYardJuchuKizaiMeisai,
-            data.yardNyukoDat,
+            data.yardShukoDat,
             2,
             userNam,
             connection
@@ -422,7 +422,7 @@ export const saveKeepJuchuKizai = async (
 
           const addCtnShukoDenResult = await addCtnShukoDen(
             filterNewJuchuCntMeisai,
-            data.yardNyukoDat,
+            data.yardShukoDat,
             2,
             userNam,
             connection
