@@ -25,6 +25,7 @@ export const getShukoList = async (queries: ShukoListSearchValues) => {
     const shukoList: ShukoTableValues[] = data.map((d) => ({
       juchuHeadId: d.juchu_head_id,
       koenNam: d.koen_nam,
+      koenbashoNam: d.koenbasho_nam,
       nyushukoDat: d.nyushuko_dat,
       nyushukoBashoId: d.nyushuko_basho_id,
       juchuKizaiHeadIdv: d.juchu_kizai_head_idv,

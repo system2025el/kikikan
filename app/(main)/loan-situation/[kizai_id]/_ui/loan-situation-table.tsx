@@ -56,7 +56,7 @@ export const LoanSituationTable = (props: LoanSituationTableProps) => {
               在庫数
             </TableCell>
           </TableRow>
-          <TableRow sx={{ position: 'sticky', top: 15 }}>
+          <TableRow sx={{ position: 'sticky', top: 15, zIndex: 2 }}>
             <TableCell align="center" style={styles.header}>
               受注番号
             </TableCell>
@@ -164,7 +164,7 @@ export const UseTable = (props: UseTableProps) => {
                 </TableCell>
               ))}
           </TableRow>
-          <TableRow sx={{ position: 'sticky', top: 15 }}>
+          <TableRow sx={{ position: 'sticky', top: 15, zIndex: 2 }}>
             {eqStockList.length > 0 &&
               eqStockList.map((cell, index) => (
                 <TableCell
