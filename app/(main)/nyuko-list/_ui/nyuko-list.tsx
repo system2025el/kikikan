@@ -14,7 +14,7 @@ import {
   Typography,
 } from '@mui/material';
 import { useState } from 'react';
-import { Controller, TextFieldElement, useForm } from 'react-hook-form-mui';
+import { CheckboxButtonGroup, Controller, TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { TestDate } from '../../_ui/date';
 import { Loading } from '../../_ui/loading';
@@ -33,6 +33,7 @@ export const NyukoList = (props: { shukoData: NyukoTableValues[] }) => {
       juchuHeadId: null,
       shukoDat: new Date(),
       shukoBasho: 0,
+      section: [],
     },
   });
 
@@ -56,7 +57,7 @@ export const NyukoList = (props: { shukoData: NyukoTableValues[] }) => {
         </Box>
         <Divider />
         <form onSubmit={handleSubmit(onSubmit)}>
-          <Grid2 container alignItems={'center'} p={2} spacing={4}>
+          <Grid2 container alignItems={'center'} px={2} pt={1} spacing={4}>
             <Box display={'flex'} alignItems={'center'}>
               <Typography mr={2}>受注番号</Typography>
               <TextFieldElement
@@ -65,7 +66,7 @@ export const NyukoList = (props: { shukoData: NyukoTableValues[] }) => {
                 type="number"
                 inputMode="numeric"
                 sx={{
-                  maxWidth: 180,
+                  maxWidth: 120,
                   '& .MuiInputBase-input': {
                     textAlign: 'right',
                   },
@@ -108,11 +109,32 @@ export const NyukoList = (props: { shukoData: NyukoTableValues[] }) => {
                 />
               </FormControl>
             </Box>
+            <Box display={'flex'} alignItems={'center'}>
+              <Typography noWrap mr={2}>
+                課
+              </Typography>
+              <Box border={1} borderColor={'divider'} borderRadius={1} pl={1}>
+                <CheckboxButtonGroup
+                  name="section"
+                  control={control}
+                  options={[
+                    { id: 'Ⅰ', label: 'Ⅰ' },
+                    { id: 'Ⅱ', label: 'Ⅱ' },
+                    { id: 'Ⅲ', label: 'Ⅲ' },
+                    { id: 'Ⅳ', label: 'Ⅳ' },
+                    { id: 'Ⅴ', label: 'Ⅴ' },
+                  ]}
+                  row
+                />
+              </Box>
+            </Box>
+          </Grid2>
+          <Box alignItems={'end'} justifySelf={'end'} px={2} pb={1}>
             <Button type="submit">
               <SearchIcon fontSize="small" />
               検索
             </Button>
-          </Grid2>
+          </Box>
         </form>
         <Divider />
         {isLoading ? (

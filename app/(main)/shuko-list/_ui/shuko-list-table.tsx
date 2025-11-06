@@ -23,17 +23,25 @@ export const ShukoListTable = (props: {
 
   return (
     <TableContainer sx={{ overflow: 'auto', maxHeight: '80vh' }}>
-      <Table stickyHeader size="small">
-        <TableHead sx={{ bgcolor: 'primary.light' }}>
+      <Table stickyHeader size="small" /*padding="none"*/>
+        <TableHead>
           <TableRow sx={{ whiteSpace: 'nowrap' }}>
             <TableCell padding="checkbox">
               <Checkbox
-                indeterminate={datas && selected.length > 0 && selected.length < datas.length}
-                checked={datas && datas.length > 0 && selected.length === datas.length}
+                color="primary"
                 onChange={(e) => {
                   const newSelected = e.target.checked && datas ? datas.map((_, index) => index) : [];
                   setSelected(newSelected);
                   onSelectionChange(newSelected);
+                }}
+                indeterminate={datas && selected.length > 0 && selected.length < datas.length}
+                checked={datas && datas.length > 0 && selected.length === datas.length}
+                sx={{
+                  '& .MuiSvgIcon-root': {
+                    backgroundColor: '#fff',
+                    borderRadius: '4px',
+                    transition: 'background-color 0.3s',
+                  },
                 }}
               />
             </TableCell>
@@ -41,6 +49,7 @@ export const ShukoListTable = (props: {
             <TableCell align="left">出庫場所</TableCell>
             <TableCell align="left">出庫日時</TableCell>
             <TableCell align="left">公演名</TableCell>
+            <TableCell align="left">公演場所</TableCell>
             <TableCell align="left">機材明細名</TableCell>
             <TableCell align="left">顧客名</TableCell>
             <TableCell align="left">課</TableCell>
@@ -58,6 +67,7 @@ export const ShukoListTable = (props: {
               <TableCell align="left">{row.nyushukoBashoId === 1 ? 'K' : 'Y'}</TableCell>
               <TableCell align="left">{toJapanTimeString(row.nyushukoDat)}</TableCell>
               <TableCell align="left">{row.koenNam}</TableCell>
+              <TableCell align="left">{row.koenbashoNam}</TableCell>
               <TableCell align="left">{row.headNamv}</TableCell>
               <TableCell align="left">{row.kokyakuNam}</TableCell>
               <TableCell align="left">{row.sectionNamv}</TableCell>
@@ -66,6 +76,7 @@ export const ShukoListTable = (props: {
                   variant="text"
                   size="small"
                   href={`shuko-list/shuko-detail/${row.juchuHeadId}/${row.nyushukoBashoId}/${toJapanTimeString(row.nyushukoDat, '-')}/10`}
+                  sx={{ py: 0, px: 1 }}
                 >
                   {row.sstbSagyoStsNamShort}
                 </Button>
@@ -75,6 +86,7 @@ export const ShukoListTable = (props: {
                   variant="text"
                   size="small"
                   href={`shuko-list/shuko-detail/${row.juchuHeadId}/${row.nyushukoBashoId}/${toJapanTimeString(row.nyushukoDat, '-')}/20`}
+                  sx={{ py: 0, px: 1 }}
                 >
                   {row.schkSagyoStsNamShort}
                 </Button>

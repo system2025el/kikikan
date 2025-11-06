@@ -10,6 +10,7 @@ export const selectFilteredShukoList = async (queries: ShukoListSearchValues) =>
     SELECT
       d2.juchu_head_id,
       d2.koen_nam,
+      d2.koenbasho_nam,
       d2.nyushuko_dat,
       d2.nyushuko_basho_id,
       d2.juchu_kizai_head_idv,
@@ -35,6 +36,10 @@ export const selectFilteredShukoList = async (queries: ShukoListSearchValues) =>
   if (queries.shukoDat !== null) {
     query += ` AND d2.nyushuko_dat::text LIKE '%${toJapanDateString(queries.shukoDat, '-')}%'`;
   }
+  if (queries.section && queries.section.length !== 0) {
+    const likeClouds = queries.section.map((d) => ` AND d2.section_namv::TEXT LIKE '%${d}%'`).join('');
+    query += likeClouds;
+  }
 
   query += ' ORDER BY d2.nyushuko_dat';
 
@@ -50,6 +55,7 @@ export const selectFilteredNyukoList = async (queries: NyukoListSearchValues) =>
     SELECT
       d2.juchu_head_id,
       d2.koen_nam,
+      d2.koenbasho_nam,
       d2.nyushuko_dat,
       d2.nyushuko_basho_id,
       d2.juchu_kizai_head_idv,
@@ -72,6 +78,10 @@ export const selectFilteredNyukoList = async (queries: NyukoListSearchValues) =>
   }
   if (queries.shukoDat !== null) {
     query += ` AND d2.nyushuko_dat::text LIKE '%${toJapanDateString(queries.shukoDat, '-')}%'`;
+  }
+  if (queries.section && queries.section.length !== 0) {
+    const likeClouds = queries.section.map((d) => ` AND d2.section_namv::TEXT LIKE '%${d}%'`).join('');
+    query += likeClouds;
   }
 
   query += ' ORDER BY d2.nyushuko_dat';
