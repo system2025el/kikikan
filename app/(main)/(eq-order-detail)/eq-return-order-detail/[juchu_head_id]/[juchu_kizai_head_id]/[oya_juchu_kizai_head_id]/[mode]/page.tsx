@@ -3,7 +3,7 @@ import { subDays } from 'date-fns';
 import { getNyukoDate, getRange, getShukoDate } from '@/app/(main)/_lib/date-funcs';
 import { StockTableValues } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_lib/types';
 
-import { getDetailJuchuHead, getJuchuKizaiNyushuko, getStockList } from '../../../../../_lib/funcs';
+import { getDetailJuchuHead, getJuchuKizaiNyushuko, getNyushukoFixFlag, getStockList } from '../../../../../_lib/funcs';
 import {
   getJuchuHonbanbiQty,
   getReturnJuchuContainerMeisai,
@@ -51,6 +51,12 @@ const Page = async (props: {
   // 在庫テーブルヘッダー用日付範囲
   const stockTableHeaderDateRange = getRange(oyaShukoDate, oyaNyukoDate);
 
+  // 入庫フラグ
+  console.time();
+  const nyukoFixFlag = await getNyushukoFixFlag(params.juchu_head_id, params.juchu_kizai_head_id, 70);
+  console.log('-----------------------------出発フラグ--------------------------');
+  console.timeEnd();
+
   // 新規
   if (juchuKizaiHeadId === 0) {
     // 親本番日数
@@ -94,6 +100,7 @@ const Page = async (props: {
         returnNyukoDate={returnNyukoDate}
         dateRange={dateRange}
         edit={edit}
+        nyukoFixFlag={nyukoFixFlag}
       />
     );
 
@@ -169,6 +176,7 @@ const Page = async (props: {
         returnNyukoDate={returnNyukoDate}
         dateRange={dateRange}
         edit={edit}
+        nyukoFixFlag={nyukoFixFlag}
       />
     );
   }

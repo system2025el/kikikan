@@ -82,14 +82,17 @@ export const EquipmentKeepOrderDetail = (props: {
   keepShukoDate: Date | null;
   keepNyukoDate: Date | null;
   edit: boolean;
-  fixFlag: boolean;
+  shukoFixFlag: boolean;
+  nyukoFixFlag: boolean;
 }) => {
   // user情報
   const user = useUserStore((state) => state.user);
   // 受注機材ヘッダー保存フラグ
   const saveKizaiHead = props.keepJuchuKizaiHeadData.juchuKizaiHeadId !== 0 ? true : false;
-  // 出発フラグ
-  const fixFlag = props.fixFlag;
+  // 出庫フラグ
+  const shukoFixFlag = props.shukoFixFlag;
+  // 入庫フラグ
+  const nyukoFixFlag = props.nyukoFixFlag;
   // ロックデータ
   const [lockData, setLockData] = useState<LockValues | null>(null);
   // 全体の保存フラグ
@@ -769,19 +772,25 @@ export const EquipmentKeepOrderDetail = (props: {
                   <Typography>編集中</Typography>
                 </Grid2>
               )}
-              {fixFlag && (
+              {shukoFixFlag ? (
                 <Box display={'flex'} alignItems={'center'}>
                   <Typography>出庫済</Typography>
                 </Box>
+              ) : nyukoFixFlag ? (
+                <Box display={'flex'} alignItems={'center'}>
+                  <Typography>入庫済</Typography>
+                </Box>
+              ) : (
+                <></>
               )}
               <Grid2 container alignItems={'center'} spacing={1}>
-                {!edit || (lockData !== null && lockData?.addUser !== user?.name) || fixFlag ? (
+                {!edit || (lockData !== null && lockData?.addUser !== user?.name) || shukoFixFlag ? (
                   <Typography>閲覧モード</Typography>
                 ) : (
                   <Typography>編集モード</Typography>
                 )}
                 <Button
-                  disabled={(lockData && lockData?.addUser !== user?.name ? true : false) || fixFlag}
+                  disabled={(lockData && lockData?.addUser !== user?.name ? true : false) || shukoFixFlag}
                   onClick={handleEdit}
                 >
                   変更
@@ -977,7 +986,7 @@ export const EquipmentKeepOrderDetail = (props: {
                             onChange={handleKicsNyukoChange}
                             onAccept={handleKicsNyukoAccept}
                             fieldstate={fieldState}
-                            disabled={!edit}
+                            disabled={!edit || nyukoFixFlag}
                             onClear={() => {
                               field.onChange(null);
                               trigger(['kicsNyukoDat', 'yardNyukoDat']);
@@ -999,7 +1008,7 @@ export const EquipmentKeepOrderDetail = (props: {
                             onChange={handleYardNyukoChange}
                             onAccept={handleYardNyukoAccept}
                             fieldstate={fieldState}
-                            disabled={!edit}
+                            disabled={!edit || nyukoFixFlag}
                             onClear={() => {
                               field.onChange(null);
                               trigger(['kicsNyukoDat', 'yardNyukoDat']);
@@ -1102,7 +1111,7 @@ export const EquipmentKeepOrderDetail = (props: {
             </Dialog>
             <Box width="100%">
               <Box my={1} mx={2}>
-                <Button disabled={!edit} onClick={() => handleOpenEqDialog()}>
+                <Button disabled={!edit || nyukoFixFlag} onClick={() => handleOpenEqDialog()}>
                   <AddIcon fontSize="small" />
                   機材追加
                 </Button>
@@ -1114,6 +1123,7 @@ export const EquipmentKeepOrderDetail = (props: {
                 <KeepEqTable
                   rows={keepJuchuKizaiMeisaiList}
                   edit={edit}
+                  nyukoFixFlag={nyukoFixFlag}
                   handleMeisaiDelete={handleEqMeisaiDelete}
                   handleMemoChange={handleMemoChange}
                   handleCellChange={handleCellChange}
@@ -1128,6 +1138,7 @@ export const EquipmentKeepOrderDetail = (props: {
               <KeepContainerTable
                 rows={keepJuchuContainerMeisaiList}
                 edit={edit}
+                nyukoFixFlag={nyukoFixFlag}
                 handleContainerMemoChange={handleKeepContainerMemoChange}
                 handleContainerCellChange={handleKeepContainerCellChange}
                 handleMeisaiDelete={handleCtnMeisaiDelete}

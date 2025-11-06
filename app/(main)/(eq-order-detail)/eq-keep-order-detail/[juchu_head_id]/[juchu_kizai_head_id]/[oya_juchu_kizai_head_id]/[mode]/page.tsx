@@ -26,14 +26,20 @@ const Page = async (props: {
     return <div>受注情報が見つかりません。</div>;
   }
 
-  // 出発フラグ
+  // 出庫フラグ
   console.time();
-  const fixFlag = await getNyushukoFixFlag(params.juchu_head_id, params.juchu_kizai_head_id, 60);
+  const shukoFixFlag = await getNyushukoFixFlag(params.juchu_head_id, params.juchu_kizai_head_id, 60);
+  console.log('-----------------------------出発フラグ--------------------------');
+  console.timeEnd();
+
+  // 入庫フラグ
+  console.time();
+  const nyukoFixFlag = await getNyushukoFixFlag(params.juchu_head_id, params.juchu_kizai_head_id, 70);
   console.log('-----------------------------出発フラグ--------------------------');
   console.timeEnd();
 
   // 編集モード(edit:編集、view:閲覧)
-  const edit = params.mode === 'edit' && !fixFlag ? true : false;
+  const edit = params.mode === 'edit' && !shukoFixFlag ? true : false;
 
   // 出庫日
   const oyaShukoDate = getShukoDate(
@@ -88,7 +94,8 @@ const Page = async (props: {
         keepShukoDate={keepShukoDate}
         keepNyukoDate={keepNyukoDate}
         edit={edit}
-        fixFlag={fixFlag}
+        shukoFixFlag={shukoFixFlag}
+        nyukoFixFlag={nyukoFixFlag}
       />
     );
     // 既存
@@ -146,7 +153,8 @@ const Page = async (props: {
         keepShukoDate={keepShukoDate}
         keepNyukoDate={keepNyukoDate}
         edit={edit}
-        fixFlag={fixFlag}
+        shukoFixFlag={shukoFixFlag}
+        nyukoFixFlag={nyukoFixFlag}
       />
     );
   }

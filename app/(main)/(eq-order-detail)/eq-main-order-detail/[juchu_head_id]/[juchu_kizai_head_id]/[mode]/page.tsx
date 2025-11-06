@@ -50,8 +50,8 @@ const Page = async (props: {
       headNam: '',
       kicsShukoDat: null,
       kicsNyukoDat: null,
-      yardShukoDat: null,
-      yardNyukoDat: null,
+      yardShukoDat: juchuHeadData.juchuRange ? juchuHeadData.juchuRange[0] : null,
+      yardNyukoDat: juchuHeadData.juchuRange ? juchuHeadData.juchuRange[1] : null,
     };
     // 受注機材明細データ(初期値)
     const newJuchuKizaiMeisaiData: JuchuKizaiMeisaiValues[] = [];
