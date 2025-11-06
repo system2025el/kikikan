@@ -68,9 +68,6 @@ export const OrderList = ({
 
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
-      <Box justifySelf={'end'} mb={0.5}>
-        <BackButton label={'戻る'} />
-      </Box>
       <Paper variant="outlined">
         <Box width={'100%'} display={'flex'} p={2}>
           <Typography>受注検索</Typography>

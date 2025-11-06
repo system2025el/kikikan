@@ -313,7 +313,7 @@ export const Order = (props: {
 
     if (!isDirty) {
       await deleteLock(1, props.juchuHeadData.juchuHeadId);
-      router.push('/order/vehicle-order-detail');
+      router.push(`/vehicle-order-detail/${props.juchuHeadData.juchuHeadId}/0/edit`);
     } else {
       setPath(`/vehicle-order-detail/${props.juchuHeadData.juchuHeadId}/0/edit`);
       setDirtyOpen(true);

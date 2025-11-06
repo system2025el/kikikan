@@ -83,8 +83,22 @@ export const LoanSituationTable = (props: LoanSituationTableProps) => {
                   {row.juchuHeadId}
                 </Button>
               </TableCell>
-              <TableCell style={styles.row} sx={{ minWidth: 0 }}>
-                <LightTooltipWithText variant="0.50rem" maxWidth={150}>
+              <TableCell
+                style={{
+                  border: '1px solid black',
+                  fontSize: '0.70rem',
+                  whiteSpace: 'nowrap',
+                  width: 1,
+                  height: 18,
+                  paddingTop: 0,
+                  paddingBottom: 0,
+                  paddingLeft: 0.1,
+                  paddingRight: 0.1,
+                  minWidth: 0,
+                }}
+                sx={{ minWidth: 0 }}
+              >
+                <LightTooltipWithText variant="0.70rem" maxWidth={150}>
                   {row.koenNam}
                 </LightTooltipWithText>
               </TableCell>
@@ -199,7 +213,7 @@ export const UseTable = (props: UseTableProps) => {
                     sx={{
                       bgcolor: cell.juchuHonbanbiColor,
                       border: '1px solid black',
-                      height: 15,
+                      height: 18,
                       py: 0,
                       px: 1,
                       fontSize: '0.50rem',
