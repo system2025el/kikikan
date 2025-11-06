@@ -4,4 +4,5 @@ export const validationMessages = {
   required: (): string => '必須項目です',
   email: (): string => '有効なメールアドレスを入力してください',
   number: (): string => '数字を入力してください',
+  int: (): string => '整数を入力してください',
 };

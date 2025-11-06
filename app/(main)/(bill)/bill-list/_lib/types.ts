@@ -52,12 +52,13 @@ const billMeisaiHeadSchema = z
       .max(50, { message: validationMessages.maxStringLength(50) })
       .nullish(),
     nebikiAmt: z
-      .number()
-      .max(999999999, { message: validationMessages.maxNumberLength(9) })
+      .number({ message: validationMessages.number() })
+      .int({ message: validationMessages.int() })
+      .max(9999999999, { message: validationMessages.maxNumberLength(10) })
       .nullish(),
     nebikiAftAmt: z
       .number()
-      .max(999999999, { message: validationMessages.maxNumberLength(9) })
+      .max(9999999999, { message: validationMessages.maxNumberLength(10) })
       .nullish(),
     zeiFlg: z.boolean(),
     meisai: z.array(
@@ -77,11 +78,11 @@ const billMeisaiHeadSchema = z
           .nullish(),
         tankaAmt: z
           .number({ message: validationMessages.number() })
-          .max(999999999, { message: validationMessages.maxNumberLength(9) })
+          .max(9999999999, { message: validationMessages.maxNumberLength(10) })
           .nullish(),
         shokeiAmt: z
           .number({ message: validationMessages.number() })
-          .max(999999999999, { message: validationMessages.maxNumberLength(12) })
+          .max(9999999999, { message: validationMessages.maxNumberLength(10) })
           .nullish(),
       })
     ),
@@ -94,8 +95,8 @@ export type BillMeisaiHeadsValues = z.infer<typeof billMeisaiHeadSchema>;
  * 請求書全体のzodSchema
  */
 export const BillHeadSchema = z.object({
-  seikyuHeadId: z.number().nullish(),
-  seikyuSts: z.number().nullish(),
+  seikyuHeadId: z.number().int().nullish(),
+  seikyuSts: z.number().int().nullish(),
   seikyuDat: z.date().nullish(),
   aite: z.object({ id: z.number(), nam: z.string().max(50, { message: validationMessages.maxStringLength(50) }) }),
   seikyuHeadNam: z
@@ -128,18 +129,31 @@ export const BillHeadSchema = z.object({
     .string()
     .max(20, { message: validationMessages.maxStringLength(20) })
     .nullish(),
-  kizaiChukeiAmt: z.number().nullish(),
-  chukeiAmt: z.number().nullish(),
-  preTaxGokeiAmt: z.number().nullish(),
+  kizaiChukeiAmt: z
+    .number()
+    .max(9999999999, { message: validationMessages.maxNumberLength(10) })
+    .nullish(),
+  chukeiAmt: z
+    .number()
+    .max(9999999999, { message: validationMessages.maxNumberLength(10) })
+    .nullish(),
+  preTaxGokeiAmt: z
+    .number()
+    .max(9999999999, { message: validationMessages.maxNumberLength(10) })
+    .nullish(),
   zeiAmt: z
     .number({ message: validationMessages.number() })
-    .max(999999999999, { message: validationMessages.maxNumberLength(12) })
+    .max(9999999999, { message: validationMessages.maxNumberLength(10) })
     .nullish(),
   zeiRat: z
     .number({ message: validationMessages.number() })
     .max(999, { message: validationMessages.maxNumberLength(3) })
     .nullish(),
-  gokeiAmt: z.number({ message: validationMessages.number() }).nullish(),
+  gokeiAmt: z
+    .number({ message: validationMessages.number() })
+    .int({ message: validationMessages.int() })
+    .max(9999999999, { message: validationMessages.maxNumberLength(10) })
+    .nullish(),
   meisaiHeads: z.array(billMeisaiHeadSchema),
 });
 
