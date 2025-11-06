@@ -36,10 +36,15 @@ import {
   JuchuKizaiHonbanbiValues,
   JuchuKizaiMeisaiValues,
 } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_lib/types';
+import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 import { StockTableValues } from '@/app/(main)/stock/_lib/types';
 
-const VehicleOrderDetail = (props: {
+const VehicleOrderDetail = ({
+  juchuHeadData,
+  sharyoHeadId,
+}: {
   juchuHeadData: DetailOerValues;
+  sharyoHeadId: number;
   idoJuchuKizaiMeisaiData: IdoJuchuKizaiMeisaiValues[] | undefined;
   juchuContainerMeisaiData: JuchuContainerMeisaiValues[];
   shukoDate: Date | null;
@@ -50,6 +55,7 @@ const VehicleOrderDetail = (props: {
   edit: boolean;
   fixFlag: boolean;
 }) => {
+  /**  */
   const [selectStatus, setSelectStatus] = useState('入力中');
   /** 受注ヘッダーアコーディオン制御 */
   const [juchuExpanded, setJuchuExpanded] = useState(false);
@@ -61,28 +67,12 @@ const VehicleOrderDetail = (props: {
   };
 
   /** 動的フォーム準備 */
-  // フォームの型定義
-  type FormValue = {
-    vehicles: {
-      vehicleName: string;
-    }[];
-    situation: string;
-    date: string;
-    time: string;
-    place: string;
-  };
-  // デフォルト値
-  const defaultValue = { vehicleName: '' };
 
   // React hook formの設定
-  const { control, handleSubmit } = useForm<FormValue>({
+  const { control, handleSubmit } = useForm<{ vehicles: { id: string }[] }>({
     mode: 'onTouched',
     defaultValues: {
-      vehicles: [defaultValue],
-      situation: '出庫',
-      date: '',
-      time: '',
-      place: '立合',
+      vehicles: [],
     },
   });
   // useFieldArrayの設定と関数呼び出し
@@ -91,7 +81,7 @@ const VehicleOrderDetail = (props: {
     name: 'vehicles',
   });
   // フォーム送信処理
-  const onSubmit = async (data: FormValue) => {
+  const onSubmit = async (data: { vehicles: { id: string }[] }) => {
     console.log(data);
   };
 
@@ -123,7 +113,7 @@ const VehicleOrderDetail = (props: {
             {!juchuExpanded && (
               <Grid2 size={'grow'} alignItems={'center'} display={'flex'}>
                 <Typography marginRight={2}>公演名</Typography>
-                <Typography>{props.juchuHeadData.koenNam}</Typography>
+                <Typography>{juchuHeadData.koenNam}</Typography>
               </Grid2>
             )}
           </Grid2>
@@ -138,12 +128,12 @@ const VehicleOrderDetail = (props: {
                     <Typography marginRight={3} whiteSpace="nowrap">
                       受注番号
                     </Typography>
-                    <TextField value={props.juchuHeadData.juchuHeadId} disabled></TextField>
+                    <TextField value={juchuHeadData.juchuHeadId} disabled></TextField>
                   </Grid2>
                   <Grid2 display="flex" direction="row" alignItems="center">
                     <Typography mr={2}>受注ステータス</Typography>
                     <FormControl size="small" sx={{ width: 120 }}>
-                      <Select value={props.juchuHeadData.juchuSts} disabled>
+                      <Select value={juchuHeadData.juchuSts} disabled>
                         <MenuItem value={0}>入力中</MenuItem>
                         <MenuItem value={1}>仮受注</MenuItem>
                         <MenuItem value={2}>処理中</MenuItem>
@@ -160,13 +150,13 @@ const VehicleOrderDetail = (props: {
                 <Typography marginRight={5} whiteSpace="nowrap">
                   受注日
                 </Typography>
-                <TestDate date={props.juchuHeadData.juchuDat} onChange={() => {}} disabled />
+                <TestDate date={juchuHeadData.juchuDat} onChange={() => {}} disabled />
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={5} whiteSpace="nowrap">
                   入力者
                 </Typography>
-                <TextField value={props.juchuHeadData.nyuryokuUser} disabled></TextField>
+                <TextField value={juchuHeadData.nyuryokuUser} disabled></TextField>
               </Box>
             </Grid2>
             <Grid2>
@@ -174,22 +164,19 @@ const VehicleOrderDetail = (props: {
                 <Typography marginRight={5} whiteSpace="nowrap">
                   公演名
                 </Typography>
-                <TextField value={props.juchuHeadData.koenNam} disabled></TextField>
+                <TextField value={juchuHeadData.koenNam} disabled></TextField>
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={3} whiteSpace="nowrap">
                   公演場所
                 </Typography>
-                <TextField
-                  value={props.juchuHeadData.koenbashoNam ? props.juchuHeadData.koenbashoNam : ''}
-                  disabled
-                ></TextField>
+                <TextField value={juchuHeadData.koenbashoNam ? juchuHeadData.koenbashoNam : ''} disabled></TextField>
               </Box>
               <Box sx={styles.container}>
                 <Typography marginRight={7} whiteSpace="nowrap">
                   相手
                 </Typography>
-                <TextField value={props.juchuHeadData.kokyaku.kokyakuNam} disabled></TextField>
+                <TextField value={juchuHeadData.kokyaku.kokyakuNam} disabled></TextField>
               </Box>
             </Grid2>
           </Grid2>
@@ -248,12 +235,10 @@ const VehicleOrderDetail = (props: {
       {/* ---------------- 車両入力 ------------------ */}
       <Paper variant="outlined" sx={{ mt: 2 }}>
         <Box display={'flex'} px={2} py={1} alignItems={'center'}>
-          <Typography whiteSpace="nowrap">車両入力</Typography>
-          <Box ml={'35%'}>
-            <Button sx={{ margin: 1 }}>編集</Button>
-            {/* フォーム送信ボタン */}
-            <Button onClick={handleSubmit(onSubmit)}>保存</Button>
-          </Box>
+          <Grid2 container direction="column" spacing={1}>
+            <Typography>受注明細(車両)</Typography>
+            <Typography fontSize={'small'}>車両入力</Typography>
+          </Grid2>
         </Box>
         <Divider />
 
@@ -261,12 +246,12 @@ const VehicleOrderDetail = (props: {
           <Stack mt={1}>
             <Box width={100}></Box>
             {/* フォーム追加ボタン */}
-            <Button onClick={() => append(defaultValue)}>
+            <Button onClick={() => append({ id: '' })}>
               <AddIcon fontSize="small" />
               車両追加
             </Button>
           </Stack>
-          <Stack spacing={1} marginLeft={2} alignItems={'baseline'}>
+          <Stack spacing={1} m={2} alignItems={'baseline'}>
             <Box width={80}>
               <Typography whiteSpace="nowrap">車両サイズ</Typography>
             </Box>
@@ -277,7 +262,7 @@ const VehicleOrderDetail = (props: {
                 return (
                   <Stack key={field.id} direction={'row'} spacing={1} my={1}>
                     <Controller
-                      name={`vehicles.${index}.vehicleName`}
+                      name={`vehicles.${index}.id`}
                       control={control}
                       render={({ field }) => (
                         <Select {...field} sx={{ minWidth: '20vw', bgcolor: 'white' }}>
@@ -295,66 +280,7 @@ const VehicleOrderDetail = (props: {
                 );
               })}
             </Box>
-            {/*  */}
           </Stack>
-          <Stack spacing={1} alignItems="center" margin={1} marginLeft={2}>
-            <Box width={80}>
-              <Typography whiteSpace={'nowrap'}>区分</Typography>
-            </Box>
-            <Controller
-              name="situation"
-              control={control}
-              render={({ field }) => (
-                <Select {...field} sx={{ minWidth: '10vw', bgcolor: 'white' }}>
-                  <MenuItem value="出庫">出庫</MenuItem>
-                  <MenuItem value="入庫">入庫</MenuItem>
-                  <MenuItem value="移動Y-K">移動Y→K</MenuItem>
-                  <MenuItem value="移動K-Y">移動K→Y</MenuItem>
-                </Select>
-              )}
-            />
-          </Stack>
-          <Grid2
-            container
-            display={'flex'}
-            spacing={1}
-            alignItems="center"
-            margin={1}
-            marginLeft={2}
-            sx={{ width: '80%' }}
-          >
-            <Grid2 size={{ sm: 12, md: 'grow' }} display={'flex'} alignItems={'center'}>
-              <Box width={80}>
-                <Typography marginRight={8} whiteSpace="nowrap">
-                  日時
-                </Typography>
-              </Box>
-              <Controller
-                name="date"
-                control={control}
-                render={({ field }) => (
-                  <DateTime date={new Date()} onChange={() => {}} onAccept={() => {}} sx={{ bgcolor: 'white' }} />
-                )}
-              />
-            </Grid2>
-            <Grid2 size={{ sm: 12, md: 4 }} display={'flex'} alignItems={'center'}>
-              <Typography marginLeft={5} marginRight={2} whiteSpace="nowrap">
-                作業場所
-              </Typography>
-              <Controller
-                name="place"
-                control={control}
-                render={({ field }) => (
-                  <Select {...field} sx={{ minWidth: '10vw', bgcolor: 'white' }}>
-                    <MenuItem value="立合">立合</MenuItem>
-                    <MenuItem value="YARD">YARD</MenuItem>
-                    <MenuItem value="KICD-K">KICD</MenuItem>
-                    <MenuItem value="厚木-Y">厚木</MenuItem>
-                  </Select>
-                )}
-              />
-            </Grid2>
-          </Grid2>
         </Box>
       </Paper>
     </Container>

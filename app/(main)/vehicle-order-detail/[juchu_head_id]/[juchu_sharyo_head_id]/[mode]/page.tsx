@@ -17,6 +17,7 @@ const Page = async (props: {
   return (
     <VehicleOrderDetail
       juchuHeadData={juchuHeadData}
+      sharyoHeadId={params.juchu_sharyo_head_id}
       idoJuchuKizaiMeisaiData={undefined}
       juchuContainerMeisaiData={[]}
       shukoDate={null}
