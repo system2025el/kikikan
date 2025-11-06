@@ -17,7 +17,7 @@ import {
 } from '@mui/material';
 import React, { useEffect, useMemo } from 'react';
 
-import { toJapanDateString } from '../../_lib/date-conversion';
+import { toJapanDateString, toJapanTimeString } from '../../_lib/date-conversion';
 import { Loading } from '../../_ui/loading';
 import { MuiTablePagination } from '../../_ui/table-pagination';
 import { ROWS_PER_MASTER_TABLE_PAGE } from '../../(masters)/_lib/constants';
@@ -87,8 +87,8 @@ export const EqptOrderTable = ({
                   <TableCell align="left">公演名</TableCell>
                   <TableCell align="left">公演場所</TableCell>
                   <TableCell align="left">顧客名</TableCell>
-                  <TableCell align="left">出庫日</TableCell>
-                  <TableCell align="left">入庫日</TableCell>
+                  <TableCell align="left">出庫日時</TableCell>
+                  <TableCell align="left">入庫日時</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -152,17 +152,17 @@ export const EqptOrderTable = ({
                       </LightTooltipWithText>
                     </TableCell>
                     <TableCell>
-                      <LightTooltipWithText variant={'body2'} maxWidth={120}>
-                        {`K ${order.kShukoDat ? toJapanDateString(order.kShukoDat) : '-'}`}
+                      <LightTooltipWithText variant={'body2'} maxWidth={180}>
+                        {`K ${order.kShukoDat ? toJapanTimeString(order.kShukoDat) : '-'}`}
                         <br />
-                        {`Y ${order.yShukoDat ? toJapanDateString(order.yShukoDat) : '-'}`}
+                        {`Y ${order.yShukoDat ? toJapanTimeString(order.yShukoDat) : '-'}`}
                       </LightTooltipWithText>
                     </TableCell>
                     <TableCell>
-                      <LightTooltipWithText variant={'body2'} maxWidth={100}>
-                        {`K ${order.kNyukoDat ? toJapanDateString(order.kNyukoDat) : '-'}`}
+                      <LightTooltipWithText variant={'body2'} maxWidth={180}>
+                        {`K ${order.kNyukoDat ? toJapanTimeString(order.kNyukoDat) : '-'}`}
                         <br />
-                        {`Y ${order.yNyukoDat ? toJapanDateString(order.yNyukoDat) : '-'}`}
+                        {`Y ${order.yNyukoDat ? toJapanTimeString(order.yNyukoDat) : '-'}`}
                       </LightTooltipWithText>
                     </TableCell>
                   </TableRow>
