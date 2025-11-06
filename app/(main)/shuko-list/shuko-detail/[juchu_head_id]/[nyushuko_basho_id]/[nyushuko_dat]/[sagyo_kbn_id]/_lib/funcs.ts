@@ -1,11 +1,22 @@
 'use server';
 
+import { PoolClient } from 'pg';
+
 import pool from '@/app/_lib/db/postgres';
+import { selectJuchuContainerMeisaiMaxId, upsertJuchuContainerMeisai } from '@/app/_lib/db/tables/t-juchu-ctn-meisai';
 import { selectChildJuchuKizaiHeadConfirm } from '@/app/_lib/db/tables/t-juchu-kizai-head';
-import { selectSagyoIdFilterNyushukoFixFlag, updateNyushukoFix } from '@/app/_lib/db/tables/t-nyushuko-fix';
+import { upsertNyushukoDen } from '@/app/_lib/db/tables/t-nyushuko-den';
+import {
+  deleteShukoFix,
+  insertNyushukoFix,
+  selectSagyoIdFilterNyushukoFixFlag,
+} from '@/app/_lib/db/tables/t-nyushuko-fix';
 import { selectNyushukoDetail } from '@/app/_lib/db/tables/v-nyushuko-den2-lst';
+import { JuchuCtnMeisai } from '@/app/_lib/db/types/t_juchu_ctn_meisai-type';
+import { NyushukoDen } from '@/app/_lib/db/types/t-nyushuko-den-type';
 import { NyushukoFix } from '@/app/_lib/db/types/t-nyushuko-fix-type';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
+import { NyukoDetail } from '@/app/(main)/nyuko-list/nyuko-detail/[juchu_head_id]/[nyushuko_basho_id]/[nyushuko_dat]/[sagyo_kbn_id]/_ui/nyuko-detail';
 
 import { ShukoDetailTableValues, ShukoDetailValues } from './types';
 
@@ -101,7 +112,7 @@ export const getShukoFixFlag = async (
 };
 
 /**
- * 出庫作業確定フラグ更新
+ * 出発
  * @param shukoDetailData 出庫データ
  * @param sagyoFixFlg 作業確定フラグ
  * @param userNam ユーザー名
@@ -110,8 +121,220 @@ export const getShukoFixFlag = async (
 export const updShukoDetail = async (
   shukoDetailData: ShukoDetailValues,
   shukoDetailTableData: ShukoDetailTableValues[],
-  sagyoFixFlg: number,
   userNam: string
+) => {
+  if (shukoDetailTableData.length === 0) {
+    console.error('No data to update');
+    return;
+  }
+
+  const connection = await pool.connect();
+
+  try {
+    await connection.query('BEGIN');
+
+    // 出庫伝票UPSERT
+    const upsertShukoDenResult = await upsShukoDen(shukoDetailTableData, userNam, connection);
+    console.log('出庫伝票UPSERT', upsertShukoDenResult);
+
+    // 受注明細UPSERT
+    const upsertJuchuMeisaiResult = await upsJuchuKizaiMeisai(shukoDetailTableData, userNam, connection);
+    console.log('受注明細UPSERT', upsertJuchuMeisaiResult);
+
+    // 入出庫確定追加
+    const addNyushukoFixResult = await addNyushukoFix(shukoDetailData, shukoDetailTableData, userNam, connection);
+    console.log('入出庫確定追加', addNyushukoFixResult);
+
+    await connection.query('COMMIT');
+    return true;
+  } catch (e) {
+    console.error(e);
+    await connection.query('ROLLBACK');
+    return false;
+  } finally {
+    connection.release();
+  }
+};
+
+/**
+ * 受注コンテナ明細id最大値取得
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @returns 受注コンテナ明細id最大値
+ */
+export const getJuchuContainerMeisaiMaxId = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
+  try {
+    const { data, error } = await selectJuchuContainerMeisaiMaxId(juchuHeadId, juchuKizaiHeadId);
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return null;
+      }
+      throw error;
+    }
+    return data;
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
+ * 受注明細UPSERT
+ * @param shukoDetailTableData 出庫テーブルデータ
+ * @param userNam ユーザー名
+ * @param connection
+ */
+export const upsJuchuKizaiMeisai = async (
+  shukoDetailTableData: ShukoDetailTableValues[],
+  userNam: string,
+  connection: PoolClient
+) => {
+  const juchuKizaiHeadIds = [
+    ...new Set(shukoDetailTableData.map((d) => d.juchuKizaiHeadId).filter((id) => id !== null)),
+  ];
+
+  try {
+    for (const juchuKizaiHeadId of juchuKizaiHeadIds) {
+      const juchuContainerMeisaiMaxId = await getJuchuContainerMeisaiMaxId(
+        shukoDetailTableData[0].juchuHeadId,
+        juchuKizaiHeadId
+      );
+      let newJuchuContainerMeisaiId = juchuContainerMeisaiMaxId
+        ? juchuContainerMeisaiMaxId.juchu_kizai_meisai_id + 1
+        : 1;
+
+      const updateData = shukoDetailTableData
+        .filter((d) => d.juchuKizaiHeadId === juchuKizaiHeadId)
+        .map((data) =>
+          data.juchuKizaiMeisaiId === 0 ? { ...data, juchuKizaiMeisaiId: newJuchuContainerMeisaiId++ } : data
+        );
+
+      const upsertCtnData: JuchuCtnMeisai[] = updateData.map((d) => ({
+        juchu_head_id: d.juchuHeadId,
+        juchu_kizai_head_id: d.juchuKizaiHeadId,
+        juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
+        keep_qty: d.juchuKizaiHeadKbn === 3 ? (d.resultQty ?? 0) + (d.resultAdjQty ?? 0) : null,
+        kizai_id: d.kizaiId,
+        plan_kizai_qty: d.juchuKizaiHeadKbn !== 3 ? (d.resultQty ?? 0) + (d.resultAdjQty ?? 0) : null,
+        shozoku_id: d.nyushukoShubetuId ?? 0,
+        dsp_ord_num: d.dspOrdNumMeisai,
+        indent_num: d.indentNum,
+        add_dat: toJapanTimeString(),
+        add_user: userNam,
+        upd_dat: null,
+        upd_user: null,
+      }));
+
+      await upsertJuchuContainerMeisai(upsertCtnData, connection);
+      console.log('juchu ctn meisai upsert successfully:', upsertCtnData);
+    }
+    return true;
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
+ * 出庫伝票UPSERT
+ * @param shukoDetailTableData 出庫テーブルデータ
+ * @param userNam ユーザー名
+ * @param connection
+ * @returns
+ */
+export const upsShukoDen = async (
+  shukoDetailTableData: ShukoDetailTableValues[],
+  userNam: string,
+  connection: PoolClient
+) => {
+  const updateShukoStandbyData: NyushukoDen[] = shukoDetailTableData.map((d) => ({
+    juchu_head_id: d.juchuHeadId,
+    juchu_kizai_head_id: d.juchuKizaiHeadId,
+    juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
+    kizai_id: d.kizaiId,
+    plan_qty: (d.resultQty ?? 0) + (d.resultAdjQty ?? 0),
+    sagyo_den_dat: d.nyushukoDat,
+    sagyo_id: d.nyushukoBashoId,
+    sagyo_kbn_id: 10,
+    dsp_ord_num: d.dspOrdNumMeisai,
+    indent_num: d.indentNum,
+    upd_dat: toJapanTimeString(),
+    upd_user: userNam,
+  }));
+
+  const updateShukoCheckData: NyushukoDen[] = shukoDetailTableData.map((d) => ({
+    juchu_head_id: d.juchuHeadId,
+    juchu_kizai_head_id: d.juchuKizaiHeadId,
+    juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
+    kizai_id: d.kizaiId,
+    plan_qty: (d.resultQty ?? 0) + (d.resultAdjQty ?? 0),
+    sagyo_den_dat: d.nyushukoDat,
+    sagyo_id: d.nyushukoBashoId,
+    sagyo_kbn_id: 20,
+    dsp_ord_num: d.dspOrdNumMeisai,
+    indent_num: d.indentNum,
+    upd_dat: toJapanTimeString(),
+    upd_user: userNam,
+  }));
+
+  const mergeData = [...updateShukoStandbyData, ...updateShukoCheckData];
+
+  try {
+    await upsertNyushukoDen(mergeData, connection);
+
+    console.log('nyushuko den upsert successfully:', mergeData);
+    return true;
+  } catch (e) {
+    console.error('Exception while updating nyushuko den:', e);
+    throw e;
+  }
+};
+
+/**
+ * 出庫確定新規追加
+ * @param shukoDetailData 出庫データ
+ * @param shukoDetailTableData 出庫テーブルデータ
+ * @param userNam ユーザー名
+ * @param connection
+ */
+export const addNyushukoFix = async (
+  shukoDetailData: ShukoDetailValues,
+  shukoDetailTableData: ShukoDetailTableValues[],
+  userNam: string,
+  connection: PoolClient
+) => {
+  const juchuKizaiHeadIds = [
+    ...new Set(shukoDetailTableData.map((d) => d.juchuKizaiHeadId).filter((id) => id !== null)),
+  ];
+
+  const newFixData: NyushukoFix[] = juchuKizaiHeadIds.map((id) => ({
+    juchu_head_id: shukoDetailData.juchuHeadId,
+    juchu_kizai_head_id: id,
+    sagyo_kbn_id: 60,
+    sagyo_den_dat: shukoDetailData.nyushukoDat,
+    sagyo_id: shukoDetailData.nyushukoBashoId,
+    sagyo_fix_flg: 1,
+    upd_dat: toJapanTimeString(),
+    upd_user: userNam,
+  }));
+
+  try {
+    await insertNyushukoFix(newFixData, connection);
+    console.log('nyushuko fix add successfully:', newFixData);
+    return true;
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
+ * 出発解除
+ * @param shukoDetailData 出庫データ
+ * @param shukoDetailTableData 出庫テーブルデータ
+ * @param userNam ユーザー名
+ * @param connection
+ */
+export const delNyushukoFix = async (
+  shukoDetailData: ShukoDetailValues,
+  shukoDetailTableData: ShukoDetailTableValues[]
 ) => {
   const connection = await pool.connect();
 
@@ -124,24 +347,20 @@ export const updShukoDetail = async (
     ...new Set(shukoDetailTableData.map((d) => d.juchuKizaiHeadId).filter((id) => id !== null)),
   ];
 
-  const updateFixData: NyushukoFix[] = juchuKizaiHeadIds.map((id) => ({
+  const deleteFixData = juchuKizaiHeadIds.map((d) => ({
     juchu_head_id: shukoDetailData.juchuHeadId,
-    juchu_kizai_head_id: id,
+    juchu_kizai_head_id: d,
     sagyo_kbn_id: 60,
-    sagyo_den_dat: shukoDetailData.nyushukoDat,
     sagyo_id: shukoDetailData.nyushukoBashoId,
-    sagyo_fix_flg: sagyoFixFlg,
-    upd_dat: toJapanTimeString(),
-    upd_user: userNam,
   }));
 
   try {
     await connection.query('BEGIN');
 
-    for (const data of updateFixData) {
-      await updateNyushukoFix(data, connection);
-      console.log('nyushuko fix sagyo_fix_flg updated successfully:', data);
+    for (const data of deleteFixData) {
+      await deleteShukoFix(data, connection);
     }
+    console.log('nyushuko fix delete successfully:', deleteFixData);
 
     await connection.query('COMMIT');
     return true;

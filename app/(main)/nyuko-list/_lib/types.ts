@@ -17,4 +17,5 @@ export type NyukoTableValues = {
   kokyakuNam: string;
   nchkSagyoStsId: number;
   nchkSagyoStsNamShort: string;
+  nyukoFixFlg: boolean;
 };

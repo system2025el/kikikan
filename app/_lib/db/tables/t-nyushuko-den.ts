@@ -95,8 +95,12 @@ export const updateNyushukoDen = async (data: NyushukoDen, connection: PoolClien
   }
 };
 
+/**
+ * 入出庫伝票UPSERT
+ * @param data 入出庫伝票データ
+ * @param connection
+ */
 export const upsertNyushukoDen = async (data: NyushukoDen[], connection: PoolClient) => {
-  console.log('aaaaaaaaaaaaaaaaaaa', data[0]);
   const cols = Object.keys(data[0]) as (keyof (typeof data)[0])[];
 
   // ★ 4. INSERT用の values 配列の生成

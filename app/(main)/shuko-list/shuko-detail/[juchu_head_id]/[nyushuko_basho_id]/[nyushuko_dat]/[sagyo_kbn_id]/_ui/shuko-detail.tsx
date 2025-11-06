@@ -22,7 +22,7 @@ import { useUserStore } from '@/app/_lib/stores/usestore';
 import { BackButton } from '@/app/(main)/_ui/buttons';
 import { DateTime, TestDate } from '@/app/(main)/_ui/date';
 
-import { confirmChildJuchuKizaiHead, updShukoDetail } from '../_lib/funcs';
+import { confirmChildJuchuKizaiHead, delNyushukoFix, updShukoDetail } from '../_lib/funcs';
 import { ShukoDetailTableValues, ShukoDetailValues } from '../_lib/types';
 import { ShukoDetailTable } from './shuko-detail-table';
 
@@ -54,14 +54,14 @@ export const ShukoDetail = (props: {
   const handleDeparture = async () => {
     if (!user) return;
 
-    const diffCheck = shukoDetailTableData.find((data) => data.diff !== 0);
+    const diffCheck = shukoDetailTableData.find((data) => data.diff !== 0 && !data.ctnFlg);
 
     if (diffCheck) {
       setDepartureOpen(true);
       return;
     }
 
-    const updateResult = await updShukoDetail(shukoDetailData, shukoDetailTableData, 1, user.name);
+    const updateResult = await updShukoDetail(shukoDetailData, shukoDetailTableData, user.name);
 
     if (updateResult) {
       setFixFlag(true);
@@ -90,7 +90,7 @@ export const ShukoDetail = (props: {
       return;
     }
 
-    const updateResult = await updShukoDetail(shukoDetailData, shukoDetailTableData, 0, user.name);
+    const updateResult = await delNyushukoFix(shukoDetailData, shukoDetailTableData);
 
     if (updateResult) {
       setFixFlag(false);

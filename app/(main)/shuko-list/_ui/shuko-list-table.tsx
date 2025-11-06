@@ -5,6 +5,7 @@ import { Dispatch, SetStateAction, useState } from 'react';
 
 import { toISOString, toJapanTimeString } from '../../_lib/date-conversion';
 import { ShukoTableValues } from '../_lib/types';
+import { grey } from '@mui/material/colors';
 
 export const ShukoListTable = (props: {
   datas: ShukoTableValues[];
@@ -59,7 +60,7 @@ export const ShukoListTable = (props: {
         </TableHead>
         <TableBody>
           {datas.map((row, index) => (
-            <TableRow key={index} sx={{ whiteSpace: 'nowrap' }}>
+            <TableRow key={index} sx={{ whiteSpace: 'nowrap', backgroundColor: row.shukoFixFlg ? grey[300] : 'white' }}>
               <TableCell padding="checkbox">
                 <Checkbox checked={selected.includes(index)} onChange={() => handleSelect(index)} />
               </TableCell>
