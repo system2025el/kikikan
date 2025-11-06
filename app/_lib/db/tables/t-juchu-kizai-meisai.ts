@@ -85,7 +85,7 @@ export const insertJuchuKizaiMeisai = async (data: JuchuKizaiMeisai[], connectio
  * @returns
  */
 export const updateJuchuKizaiMeisai = async (data: JuchuKizaiMeisai, connection: PoolClient) => {
-  const whereKeys = ['juchu_head_id', 'juchu_kizai_head_id', 'kizai_id'] as const;
+  const whereKeys = ['juchu_head_id', 'juchu_kizai_head_id', 'juchu_kizai_meisai_id', 'kizai_id'] as const;
 
   const allKeys = Object.keys(data) as (keyof typeof data)[];
 

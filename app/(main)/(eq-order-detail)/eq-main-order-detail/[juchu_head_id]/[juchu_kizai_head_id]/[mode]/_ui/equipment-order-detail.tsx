@@ -51,6 +51,7 @@ import {
   addAllHonbanbi,
   addJuchuKizaiNyushuko,
   delSiyouHonbanbi,
+  getDic,
   getJuchuContainerMeisai,
   getJuchuContainerMeisaiMaxId,
   getJuchuKizaiHeadMaxId,
@@ -496,8 +497,8 @@ const EquipmentOrderDetail = (props: {
     } else {
       const kicsMeisai = juchuKizaiMeisaiList.filter((d) => d.shozokuId === 1 && !d.delFlag);
       const yardMeisai = juchuKizaiMeisaiList.filter((d) => d.shozokuId === 2 && !d.delFlag);
-      const kicsContainer = juchuContainerMeisaiList.filter((d) => d.planKicsKizaiQty && !d.delFlag);
-      const yardContainer = juchuContainerMeisaiList.filter((d) => d.planYardKizaiQty && !d.delFlag);
+      const kicsContainer = juchuContainerMeisaiList.filter((d) => d.planKicsKizaiQty > 0 && !d.delFlag);
+      const yardContainer = juchuContainerMeisaiList.filter((d) => d.planYardKizaiQty > 0 && !d.delFlag);
 
       if (
         ((kicsMeisai.length > 0 || kicsContainer.length > 0) && (!data.kicsShukoDat || !data.kicsNyukoDat)) ||
@@ -534,10 +535,8 @@ const EquipmentOrderDetail = (props: {
 
       // 更新判定
       const checkJuchuKizaiHead = isDirty;
-      const checkKicsDat =
-        defaultValues?.kicsShukoDat && (dirtyFields.kicsShukoDat || dirtyFields.kicsNyukoDat) ? true : false;
-      const checkYardDat =
-        defaultValues?.yardShukoDat && (dirtyFields.yardShukoDat || dirtyFields.yardNyukoDat) ? true : false;
+      const checkKicsDat = dirtyFields.kicsShukoDat || dirtyFields.kicsNyukoDat ? true : false;
+      const checkYardDat = dirtyFields.yardShukoDat || dirtyFields.yardNyukoDat ? true : false;
       const checkJuchuHonbanbi = JSON.stringify(originJuchuHonbanbiList) !== JSON.stringify(juchuHonbanbiList);
       const checkJuchuKizaiMeisai =
         JSON.stringify(originJuchuKizaiMeisaiList) !==
@@ -790,9 +789,16 @@ const EquipmentOrderDetail = (props: {
    * @param memo メモ内容
    */
   const handleMemoChange = (rowIndex: number, memo: string) => {
-    setJuchuKizaiMeisaiList((prev) =>
-      prev.filter((d) => !d.delFlag).map((data, index) => (index === rowIndex ? { ...data, mem: memo } : data))
-    );
+    setJuchuKizaiMeisaiList((prev) => {
+      const visibleIndex = prev
+        .map((data, index) => (!data.delFlag ? index : null))
+        .filter((index) => index !== null) as number[];
+
+      const index = visibleIndex[rowIndex];
+      if (index === undefined) return prev;
+
+      return prev.map((data, i) => (i === index ? { ...data, mem: memo } : data));
+    });
   };
 
   /**
@@ -826,15 +832,20 @@ const EquipmentOrderDetail = (props: {
       )
     );
 
-    setJuchuKizaiMeisaiList((prev) =>
-      prev
-        .filter((d) => !d.delFlag)
-        .map((data, index) =>
-          index === rowIndex
-            ? { ...data, planKizaiQty: planKizaiQty, planYobiQty: planYobiQty, planQty: planKizaiQty + planYobiQty }
-            : data
-        )
-    );
+    setJuchuKizaiMeisaiList((prev) => {
+      const visibleIndex = prev
+        .map((data, index) => (!data.delFlag ? index : null))
+        .filter((index) => index !== null) as number[];
+
+      const index = visibleIndex[rowIndex];
+      if (index === undefined) return prev;
+
+      return prev.map((data, i) =>
+        i === index
+          ? { ...data, planKizaiQty: planKizaiQty, planYobiQty: planYobiQty, planQty: planKizaiQty + planYobiQty }
+          : data
+      );
+    });
   };
 
   // 機材明細削除ボタン押下時
@@ -849,11 +860,17 @@ const EquipmentOrderDetail = (props: {
     if (!deleteEq) return;
 
     if (result) {
-      setJuchuKizaiMeisaiList((prev) =>
-        prev
-          .filter((d) => !d.delFlag)
-          .map((data, index) => (index === deleteEq.rowIndex ? { ...data, delFlag: true } : data))
-      );
+      setJuchuKizaiMeisaiList((prev) => {
+        const visibleIndex = prev
+          .map((data, index) => (!data.delFlag ? index : null))
+          .filter((index) => index !== null) as number[];
+
+        const index = visibleIndex[deleteEq.rowIndex];
+        if (index === undefined) return prev;
+
+        return prev.map((data, i) => (i === index ? { ...data, delFlag: true } : data));
+      });
+
       const updatedEqStockData = eqStockListRef.current[deleteEq.rowIndex];
       const targetIndex = updatedEqStockData
         .map((d, index) => (dateRange.includes(toISOStringYearMonthDay(d.calDat)) ? index : -1))
@@ -916,10 +933,17 @@ const EquipmentOrderDetail = (props: {
    * @param kizaiId 機材id
    * @param memo コンテナメモ内容
    */
-  const handleContainerMemoChange = (kizaiId: number, memo: string) => {
-    setJuchuContainerMeisaiList((prev) =>
-      prev.map((data) => (data.kizaiId === kizaiId && !data.delFlag ? { ...data, mem: memo } : data))
-    );
+  const handleContainerMemoChange = (rowIndex: number, memo: string) => {
+    setJuchuContainerMeisaiList((prev) => {
+      const visibleIndex = prev
+        .map((data, index) => (!data.delFlag ? index : null))
+        .filter((index) => index !== null) as number[];
+
+      const index = visibleIndex[rowIndex];
+      if (index === undefined) return prev;
+
+      return prev.map((data, i) => (i === index ? { ...data, mem: memo } : data));
+    });
   };
 
   /**
@@ -928,10 +952,17 @@ const EquipmentOrderDetail = (props: {
    * @param planKicsKizaiQty KICSコンテナ数
    * @param planYardKizaiQty YARDコンテナ数
    */
-  const handleContainerCellChange = (kizaiId: number, planKicsKizaiQty: number, planYardKizaiQty: number) => {
-    setJuchuContainerMeisaiList((prev) =>
-      prev.map((data) =>
-        data.kizaiId === kizaiId && !data.delFlag
+  const handleContainerCellChange = (rowIndex: number, planKicsKizaiQty: number, planYardKizaiQty: number) => {
+    setJuchuContainerMeisaiList((prev) => {
+      const visibleIndex = prev
+        .map((data, index) => (!data.delFlag ? index : null))
+        .filter((index) => index !== null) as number[];
+
+      const index = visibleIndex[rowIndex];
+      if (index === undefined) return prev;
+
+      return prev.map((data, i) =>
+        i === index
           ? {
               ...data,
               planKicsKizaiQty: planKicsKizaiQty,
@@ -939,8 +970,8 @@ const EquipmentOrderDetail = (props: {
               planQty: planKicsKizaiQty + planYardKizaiQty,
             }
           : data
-      )
-    );
+      );
+    });
   };
 
   // コンテナ明細削除ボタン押下時
@@ -1233,6 +1264,9 @@ const EquipmentOrderDetail = (props: {
    */
   const setEqpts = async (data: SelectedEqptsValues[]) => {
     setIsDetailLoading(true);
+
+    const indentChara = await getDic(1);
+
     const kicsDat = getValues('kicsShukoDat');
     const yardDat = getValues('yardShukoDat');
     const kicsIdoDat =
@@ -1263,7 +1297,7 @@ const EquipmentOrderDetail = (props: {
       mem: '',
       kizaiId: d.kizaiId,
       kizaiTankaAmt: d.regAmt,
-      kizaiNam: d.kizaiNam,
+      kizaiNam: `${indentChara.repeat(d.indentNum)}${d.kizaiNam}`,
       planKizaiQty: 0,
       planYobiQty: 0,
       planQty: 0,

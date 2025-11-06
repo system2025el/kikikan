@@ -88,6 +88,39 @@ export type Database = {
         };
         Relationships: [];
       };
+      m_dic: {
+        Row: {
+          add_dat: string | null;
+          add_user: string | null;
+          dic_id: number | null;
+          dic_val: string | null;
+          dsp_ord_num: number | null;
+          mem: string | null;
+          upd_dat: string | null;
+          upd_user: string | null;
+        };
+        Insert: {
+          add_dat?: string | null;
+          add_user?: string | null;
+          dic_id?: number | null;
+          dic_val?: string | null;
+          dsp_ord_num?: number | null;
+          mem?: string | null;
+          upd_dat?: string | null;
+          upd_user?: string | null;
+        };
+        Update: {
+          add_dat?: string | null;
+          add_user?: string | null;
+          dic_id?: number | null;
+          dic_val?: string | null;
+          dsp_ord_num?: number | null;
+          mem?: string | null;
+          upd_dat?: string | null;
+          upd_user?: string | null;
+        };
+        Relationships: [];
+      };
       m_honbanbi_color: {
         Row: {
           add_dat: string | null;

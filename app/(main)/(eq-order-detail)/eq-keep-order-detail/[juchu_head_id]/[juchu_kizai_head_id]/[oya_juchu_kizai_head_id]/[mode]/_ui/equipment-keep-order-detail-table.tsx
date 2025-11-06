@@ -31,8 +31,8 @@ import { KeepJuchuContainerMeisaiValues, KeepJuchuKizaiMeisaiValues } from '../_
 type KeepEqTableProps = {
   rows: KeepJuchuKizaiMeisaiValues[];
   edit: boolean;
-  handleMeisaiDelete: (rowIndex: number, row: KeepJuchuKizaiMeisaiValues) => void;
-  handleMemoChange: (kizaiId: number, memo: string) => void;
+  handleMeisaiDelete: (rowIndex: number) => void;
+  handleMemoChange: (rowIndex: number, memo: string) => void;
   handleCellChange: (rowIndex: number, keepValue: number) => void;
 };
 
@@ -131,9 +131,9 @@ type KeepEqTableRowProps = {
   row: KeepJuchuKizaiMeisaiValues;
   rowIndex: number;
   edit: boolean;
-  handleMeisaiDelete: (rowIndex: number, row: KeepJuchuKizaiMeisaiValues) => void;
+  handleMeisaiDelete: (rowIndex: number) => void;
   handleKeepRef: (el: HTMLInputElement | null) => void;
-  handleMemoChange: (kizaiId: number, memo: string) => void;
+  handleMemoChange: (rowIndex: number, memo: string) => void;
   handleCellChange: (rowIndex: number, keepValue: number) => void;
   handleKeyDown: (e: React.KeyboardEvent, rowIndex: number) => void;
 };
@@ -154,11 +154,7 @@ const KeepEqTableRow = React.memo(
     return (
       <TableRow>
         <TableCell sx={{ padding: 0, border: '1px solid black' }}>
-          <IconButton
-            onClick={() => handleMeisaiDelete(rowIndex, row)}
-            sx={{ padding: 0, color: 'red' }}
-            disabled={!edit}
-          >
+          <IconButton onClick={() => handleMeisaiDelete(rowIndex)} sx={{ padding: 0, color: 'red' }} disabled={!edit}>
             <Delete fontSize="small" />
           </IconButton>
         </TableCell>
@@ -183,7 +179,7 @@ const KeepEqTableRow = React.memo(
             sx={{ p: 0, justifyContent: 'start' }}
             onClick={() => window.open(`/loan-situation/${row.kizaiId}`)}
           >
-            {'*'.repeat(row.indentNum) + row.kizaiNam}
+            {row.kizaiNam}
           </Button>
         </TableCell>
         <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
@@ -202,7 +198,7 @@ const KeepEqTableRow = React.memo(
                 /^\d*$/.test(e.target.value) &&
                 Number(e.target.value) <= (row.oyaPlanKizaiQty ?? 0) + (row.oyaPlanYobiQty ?? 0)
               ) {
-                handleCellChange(row.kizaiId, Number(e.target.value));
+                handleCellChange(rowIndex, Number(e.target.value));
               }
             }}
             sx={{
@@ -253,7 +249,7 @@ export const KeepContainerTable = (props: {
   edit: boolean;
   handleContainerMemoChange: (kizaiId: number, memo: string) => void;
   handleContainerCellChange: (kizaiId: number, kicsValue: number, yardValue: number) => void;
-  handleMeisaiDelete: (row: KeepJuchuContainerMeisaiValues) => void;
+  handleMeisaiDelete: (kizaiId: number) => void;
 }) => {
   const { rows, edit, handleContainerMemoChange, handleContainerCellChange, handleMeisaiDelete } = props;
 
@@ -327,7 +323,11 @@ export const KeepContainerTable = (props: {
           {visibleRows.map((row, rowIndex) => (
             <TableRow key={rowIndex}>
               <TableCell align="center" width={'min-content'} sx={{ padding: 0, border: '1px solid black' }}>
-                <IconButton onClick={() => handleMeisaiDelete(row)} sx={{ padding: 0, color: 'red' }} disabled={!edit}>
+                <IconButton
+                  onClick={() => handleMeisaiDelete(row.kizaiId)}
+                  sx={{ padding: 0, color: 'red' }}
+                  disabled={!edit}
+                >
                   <Delete fontSize="small" />
                 </IconButton>
               </TableCell>

@@ -329,7 +329,7 @@ const ReturnEqTableRow = React.memo(
             sx={{ p: 0, justifyContent: 'start' }}
             onClick={() => window.open(`/loan-situation/${row.kizaiId}`)}
           >
-            {'*'.repeat(row.indentNum) + row.kizaiNam}
+            {row.kizaiNam}
           </Button>
         </TableCell>
         <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
@@ -444,8 +444,8 @@ ReturnEqTableRow.displayName = 'ReturnEqTableRow';
 export const ReturnContainerTable = (props: {
   rows: ReturnJuchuContainerMeisaiValues[];
   edit: boolean;
-  handleContainerMemoChange: (kizaiId: number, memo: string) => void;
-  handleContainerCellChange: (kizaiId: number, kicsValue: number, yardValue: number) => void;
+  handleContainerMemoChange: (rowIndex: number, memo: string) => void;
+  handleContainerCellChange: (rowIndex: number, kicsValue: number, yardValue: number) => void;
   handleMeisaiDelete: (row: ReturnJuchuContainerMeisaiValues) => void;
 }) => {
   const { rows, edit, handleContainerMemoChange, handleContainerCellChange, handleMeisaiDelete } = props;
@@ -565,7 +565,7 @@ export const ReturnContainerTable = (props: {
                   type="text"
                   onChange={(e) => {
                     if (/^\d*$/.test(e.target.value) && Number(e.target.value) <= (row.oyaPlanKicsKizaiQty ?? 0)) {
-                      handleContainerCellChange(row.kizaiId, Number(e.target.value), row.planYardKizaiQty);
+                      handleContainerCellChange(rowIndex, Number(e.target.value), row.planYardKizaiQty);
                     }
                   }}
                   sx={{
@@ -613,7 +613,7 @@ export const ReturnContainerTable = (props: {
                   type="text"
                   onChange={(e) => {
                     if (/^\d*$/.test(e.target.value) && Number(e.target.value) <= (row.oyaPlanYardKizaiQty ?? 0)) {
-                      handleContainerCellChange(row.kizaiId, row.planKicsKizaiQty, Number(e.target.value));
+                      handleContainerCellChange(rowIndex, row.planKicsKizaiQty, Number(e.target.value));
                     }
                   }}
                   sx={{

@@ -95,6 +95,171 @@ export const updateNyushukoDen = async (data: NyushukoDen, connection: PoolClien
   }
 };
 
+export const upsertNyushukoDen = async (data: NyushukoDen[], connection: PoolClient) => {
+  console.log('aaaaaaaaaaaaaaaaaaa', data[0]);
+  const cols = Object.keys(data[0]) as (keyof (typeof data)[0])[];
+
+  // ★ 4. INSERT用の values 配列の生成
+  const insertValues = data.flatMap((obj) => cols.map((col) => obj[col] ?? null));
+
+  // ★ 5. INSERT用の placeholders を生成
+  let placeholderIndex = 1;
+  const placeholders = data
+    .map(() => {
+      const rowPlaceholders = cols.map(() => `$${placeholderIndex++}`);
+      return `(${rowPlaceholders.join(', ')})`;
+    })
+    .join(', ');
+
+  // placeholderIndex はここで (行数 * 列数) + 1 の値になっています。
+
+  // ★ 6. UPDATE用の値を $ プレースホルダー用に準備
+  //    (INSERT用プレースホルダーの続きの番号を使う)
+  const updateTimestampPlaceholder = `$${placeholderIndex++}`; // 例: $101
+  const updateUserPlaceholder = `$${placeholderIndex++}`; // 例: $102
+
+  // ★ 7. 最終的な values 配列を作成
+  //    (INSERT用の値配列 ...insertValues の後ろに、UPDATE用の値を追加)
+  const values = [
+    ...insertValues,
+    data[0].add_dat, // $101 に対応
+    data[0].add_user, // $102 に対応
+  ];
+
+  // ★ 8. 競合キー(複合キー)の定義
+  const conflictKeys = [
+    'juchu_head_id',
+    'juchu_kizai_head_id',
+    'juchu_kizai_meisai_id',
+    'sagyo_den_dat',
+    'sagyo_kbn_id',
+    'sagyo_id',
+    'kizai_id',
+  ];
+
+  const updateKeys = [
+    'juchu_head_id',
+    'juchu_kizai_head_id',
+    'juchu_kizai_meisai_id',
+    'sagyo_kbn_id',
+    'sagyo_id',
+    'kizai_id',
+  ];
+
+  // ★ 9. UPDATE対象列のリストを動的生成
+  //    (競合キー、add_* 列、upd_* 列 を除く)
+  const columnsToUpdate = cols.filter(
+    (col) =>
+      !updateKeys.includes(col as string) &&
+      col !== 'add_dat' &&
+      col !== 'add_user' &&
+      col !== 'upd_dat' && // upd_* 列は個別にSET句で指定するため除外
+      col !== 'upd_user'
+  );
+
+  // ★ 10. `DO UPDATE SET` 句のSQL文字列を生成
+  // (1) 通常の列 (EXCLUDED を使う = 挿入しようとした新しい値で更新)
+  const updateSetNormal = columnsToUpdate.map((col) => `${col as string} = EXCLUDED.${col as string}`).join(',\n    ');
+
+  // (2) 監査列 (手順6で用意した $ プレースホルダーを使う)
+  const updateSetAudit = [`upd_dat = ${updateTimestampPlaceholder}`, `upd_user = ${updateUserPlaceholder}`].join(
+    ',\n    '
+  );
+
+  // ★ 11. 最終的な UPSERT クエリの構築
+  //     (通常の列がない場合も考慮し、カンマを適切に挿入)
+  const query = `
+    INSERT INTO
+      ${SCHEMA}.t_nyushuko_den (${cols.join(',')})
+    VALUES 
+      ${placeholders}
+    ON CONFLICT (${conflictKeys.join(', ')})
+    DO UPDATE SET
+      ${updateSetNormal ? updateSetNormal + ',\n    ' : ''}${updateSetAudit}
+  `;
+
+  // 12. 実行 (元のロジックのまま)
+  try {
+    await connection.query(query, values);
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
+ * 入出庫伝票全削除
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param connection
+ */
+export const deleteAllNyushukoDen = async (juchuHeadId: number, juchuKizaiHeadId: number, connection: PoolClient) => {
+  const query = `
+    DELETE FROM
+      ${SCHEMA}.t_nyushuko_den
+    WHERE
+      juchu_head_id = $1
+      AND juchu_kizai_head_id = $2
+  `;
+
+  const values = [juchuHeadId, juchuKizaiHeadId];
+
+  try {
+    await connection.query(query, values);
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
+ * 出庫伝票全削除
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param connection
+ */
+export const deleteAllShukoDen = async (juchuHeadId: number, juchuKizaiHeadId: number, connection: PoolClient) => {
+  const query = `
+    DELETE FROM
+      ${SCHEMA}.t_nyushuko_den
+    WHERE
+      juchu_head_id = $1
+      AND juchu_kizai_head_id = $2
+      AND sagyo_kbn_id = ANY($3)
+  `;
+
+  const values = [juchuHeadId, juchuKizaiHeadId, [10, 20]];
+
+  try {
+    await connection.query(query, values);
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
+ * 入庫伝票全削除
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param connection
+ */
+export const deleteAllNyukoDen = async (juchuHeadId: number, juchuKizaiHeadId: number, connection: PoolClient) => {
+  const query = `
+    DELETE FROM
+      ${SCHEMA}.t_nyushuko_den
+    WHERE
+      juchu_head_id = $1
+      AND juchu_kizai_head_id = $2
+      AND sagyo_kbn_id = $3
+  `;
+
+  const values = [juchuHeadId, juchuKizaiHeadId, 30];
+
+  try {
+    await connection.query(query, values);
+  } catch (e) {
+    throw e;
+  }
+};
+
 /**
  * 入出庫伝票削除
  * @param juchuHeadId 受注ヘッダーid
@@ -112,11 +277,79 @@ export const deleteNyushukoDen = async (
     WHERE
       juchu_head_id = $1
       AND juchu_kizai_head_id = $2
-      And juchu_kizai_meisai_id = $3
+      AND juchu_kizai_meisai_id = $3
       AND kizai_id = $4
   `;
 
   const values = [data.juchu_head_id, data.juchu_kizai_head_id, data.juchu_kizai_meisai_id, data.kizai_id];
+
+  try {
+    await connection.query(query, values);
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
+ * 出庫伝票削除
+ * @param data 出庫伝票削除データ
+ * @param connection
+ */
+export const deleteShukoDen = async (
+  data: {
+    juchu_head_id: number;
+    juchu_kizai_head_id: number;
+    juchu_kizai_meisai_id: number;
+    kizai_id: number;
+  },
+  connection: PoolClient
+) => {
+  const query = `
+    DELETE FROM
+      ${SCHEMA}.t_nyushuko_den
+    WHERE
+      juchu_head_id = $1
+      AND juchu_kizai_head_id = $2
+      AND juchu_kizai_meisai_id = $3
+      AND kizai_id = $4
+      AND sagyo_kbn_id = ANY($5)
+  `;
+
+  const values = [data.juchu_head_id, data.juchu_kizai_head_id, data.juchu_kizai_meisai_id, data.kizai_id, [10, 20]];
+
+  try {
+    await connection.query(query, values);
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
+ * 入庫伝票削除
+ * @param data 入庫伝票削除データ
+ * @param connection
+ */
+export const deleteNyukoDen = async (
+  data: {
+    juchu_head_id: number;
+    juchu_kizai_head_id: number;
+    juchu_kizai_meisai_id: number;
+    kizai_id: number;
+  },
+  connection: PoolClient
+) => {
+  const query = `
+    DELETE FROM
+      ${SCHEMA}.t_nyushuko_den
+    WHERE
+      juchu_head_id = $1
+      AND juchu_kizai_head_id = $2
+      AND juchu_kizai_meisai_id = $3
+      AND sagyo_kbn_id = $4
+      AND kizai_id = $5
+  `;
+
+  const values = [data.juchu_head_id, data.juchu_kizai_head_id, data.juchu_kizai_meisai_id, 30, data.kizai_id];
 
   try {
     await connection.query(query, values);

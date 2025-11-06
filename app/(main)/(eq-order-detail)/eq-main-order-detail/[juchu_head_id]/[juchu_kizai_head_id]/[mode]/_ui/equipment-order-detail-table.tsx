@@ -266,7 +266,7 @@ const EqTableRow = React.memo(
             sx={{ p: 0, justifyContent: 'start' }}
             onClick={() => window.open(`/loan-situation/${row.kizaiId}`)}
           >
-            {'*'.repeat(row.indentNum) + row.kizaiNam}
+            {row.kizaiNam}
           </Button>
         </TableCell>
         <TableCell style={styles.row} align="right" size="small">
@@ -470,8 +470,8 @@ export const IdoEqTable: React.FC<IdoEqTableProps> = ({ rows, edit, handleCellDa
 export const ContainerTable = (props: {
   rows: JuchuContainerMeisaiValues[];
   edit: boolean;
-  handleContainerMemoChange: (kizaiId: number, memo: string) => void;
-  handleContainerCellChange: (kizaiId: number, kicsValue: number, yardValue: number) => void;
+  handleContainerMemoChange: (rowIndex: number, memo: string) => void;
+  handleContainerCellChange: (rowIndex: number, kicsValue: number, yardValue: number) => void;
   handleMeisaiDelete: (row: JuchuContainerMeisaiValues) => void;
 }) => {
   const { rows, edit, handleContainerMemoChange, handleContainerCellChange, handleMeisaiDelete } = props;
@@ -555,7 +555,7 @@ export const ContainerTable = (props: {
                   type="text"
                   onChange={(e) => {
                     if (/^\d*$/.test(e.target.value)) {
-                      handleContainerCellChange(row.kizaiId, Number(e.target.value), row.planYardKizaiQty);
+                      handleContainerCellChange(rowIndex, Number(e.target.value), row.planYardKizaiQty);
                     }
                   }}
                   sx={{
@@ -599,7 +599,7 @@ export const ContainerTable = (props: {
                   type="text"
                   onChange={(e) => {
                     if (/^\d*$/.test(e.target.value)) {
-                      handleContainerCellChange(row.kizaiId, row.planKicsKizaiQty, Number(e.target.value));
+                      handleContainerCellChange(rowIndex, row.planKicsKizaiQty, Number(e.target.value));
                     }
                   }}
                   sx={{
