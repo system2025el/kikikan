@@ -103,10 +103,10 @@ export const updateNyushukoDen = async (data: NyushukoDen, connection: PoolClien
 export const upsertNyushukoDen = async (data: NyushukoDen[], connection: PoolClient) => {
   const cols = Object.keys(data[0]) as (keyof (typeof data)[0])[];
 
-  // ★ 4. INSERT用の values 配列の生成
+  // INSERT用の values 配列の生成
   const insertValues = data.flatMap((obj) => cols.map((col) => obj[col] ?? null));
 
-  // ★ 5. INSERT用の placeholders を生成
+  // INSERT用の placeholders を生成
   let placeholderIndex = 1;
   const placeholders = data
     .map(() => {
@@ -115,22 +115,14 @@ export const upsertNyushukoDen = async (data: NyushukoDen[], connection: PoolCli
     })
     .join(', ');
 
-  // placeholderIndex はここで (行数 * 列数) + 1 の値になっています。
+  // UPDATE用の値を $ プレースホルダー用に準備(INSERT用プレースホルダーの続きの番号を使う)
+  const updateTimestampPlaceholder = `$${placeholderIndex++}`;
+  const updateUserPlaceholder = `$${placeholderIndex++}`;
 
-  // ★ 6. UPDATE用の値を $ プレースホルダー用に準備
-  //    (INSERT用プレースホルダーの続きの番号を使う)
-  const updateTimestampPlaceholder = `$${placeholderIndex++}`; // 例: $101
-  const updateUserPlaceholder = `$${placeholderIndex++}`; // 例: $102
+  // 最終的な values 配列を作成(INSERT用の値配列 ...insertValues の後ろに、UPDATE用の値を追加)
+  const values = [...insertValues, data[0].add_dat, data[0].add_user];
 
-  // ★ 7. 最終的な values 配列を作成
-  //    (INSERT用の値配列 ...insertValues の後ろに、UPDATE用の値を追加)
-  const values = [
-    ...insertValues,
-    data[0].add_dat, // $101 に対応
-    data[0].add_user, // $102 に対応
-  ];
-
-  // ★ 8. 競合キー(複合キー)の定義
+  // 競合キー(複合キー)の定義
   const conflictKeys = [
     'juchu_head_id',
     'juchu_kizai_head_id',
@@ -141,6 +133,7 @@ export const upsertNyushukoDen = async (data: NyushukoDen[], connection: PoolCli
     'kizai_id',
   ];
 
+  // UPDATE用の競合キー(複合キー)の定義
   const updateKeys = [
     'juchu_head_id',
     'juchu_kizai_head_id',
@@ -150,28 +143,25 @@ export const upsertNyushukoDen = async (data: NyushukoDen[], connection: PoolCli
     'kizai_id',
   ];
 
-  // ★ 9. UPDATE対象列のリストを動的生成
-  //    (競合キー、add_* 列、upd_* 列 を除く)
+  // UPDATE対象列のリストを動的生成(競合キー、add_* 列、upd_* 列 を除く)
   const columnsToUpdate = cols.filter(
     (col) =>
       !updateKeys.includes(col as string) &&
       col !== 'add_dat' &&
       col !== 'add_user' &&
-      col !== 'upd_dat' && // upd_* 列は個別にSET句で指定するため除外
+      col !== 'upd_dat' &&
       col !== 'upd_user'
   );
 
-  // ★ 10. `DO UPDATE SET` 句のSQL文字列を生成
-  // (1) 通常の列 (EXCLUDED を使う = 挿入しようとした新しい値で更新)
+  // DO UPDATE SET 句のSQL文字列を生成
   const updateSetNormal = columnsToUpdate.map((col) => `${col as string} = EXCLUDED.${col as string}`).join(',\n    ');
 
-  // (2) 監査列 (手順6で用意した $ プレースホルダーを使う)
+  // upd_datとupd_userは別途作成
   const updateSetAudit = [`upd_dat = ${updateTimestampPlaceholder}`, `upd_user = ${updateUserPlaceholder}`].join(
     ',\n    '
   );
 
-  // ★ 11. 最終的な UPSERT クエリの構築
-  //     (通常の列がない場合も考慮し、カンマを適切に挿入)
+  // 最終的な UPSERT クエリの構築
   const query = `
     INSERT INTO
       ${SCHEMA}.t_nyushuko_den (${cols.join(',')})
@@ -182,7 +172,6 @@ export const upsertNyushukoDen = async (data: NyushukoDen[], connection: PoolCli
       ${updateSetNormal ? updateSetNormal + ',\n    ' : ''}${updateSetAudit}
   `;
 
-  // 12. 実行 (元のロジックのまま)
   try {
     await connection.query(query, values);
   } catch (e) {

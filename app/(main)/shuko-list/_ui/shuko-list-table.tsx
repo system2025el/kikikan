@@ -1,11 +1,11 @@
 'use client';
 
 import { Button, Checkbox, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
+import { grey } from '@mui/material/colors';
 import { Dispatch, SetStateAction, useState } from 'react';
 
 import { toISOString, toJapanTimeString } from '../../_lib/date-conversion';
 import { ShukoTableValues } from '../_lib/types';
-import { grey } from '@mui/material/colors';
 
 export const ShukoListTable = (props: {
   datas: ShukoTableValues[];
