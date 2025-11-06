@@ -50,7 +50,7 @@ export const CustomersMaterDialogSchema = z.object({
     .max(200, { message: validationMessages.maxStringLength(200) })
     .nullish(),
   dspFlg: z.boolean().optional(),
-  nebikiRat: z.number({ message: validationMessages.number() }).int({ message: '整数で入力してください' }).nullish(),
+  nebikiRat: z.number({ message: validationMessages.number() }).int({ message: validationMessages.int() }).nullish(),
 });
 export type CustomersMasterDialogValues = z.infer<typeof CustomersMaterDialogSchema>;
 

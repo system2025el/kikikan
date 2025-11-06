@@ -8,10 +8,10 @@ export const EqptsMasterDialogSchema = z.object({
     .string()
     .max(100, { message: validationMessages.maxStringLength(100) })
     .min(1, { message: validationMessages.required() }),
-  sectionNum: z.number().nullable(),
+  sectionNum: z.number().int().nullable(),
   elNum: z.number().nullable(),
   delFlg: z.boolean().optional(),
-  shozokuId: z.number({ message: '選択してください' }).min(1, { message: '選択してください' }),
+  shozokuId: z.number({ message: '選択してください' }).int().min(1, { message: '選択してください' }),
   bldCod: z
     .string()
     .max(20, { message: validationMessages.maxStringLength(20) })
@@ -28,7 +28,7 @@ export const EqptsMasterDialogSchema = z.object({
     .string()
     .max(10, { message: validationMessages.maxStringLength(10) })
     .nullish(),
-  dspOrdNum: z.number().nullable(),
+  dspOrdNum: z.number({ message: validationMessages.number() }).int({ message: validationMessages.int() }).nullable(),
   mem: z
     .string()
     .max(200, { message: validationMessages.maxStringLength(200) })
@@ -46,7 +46,8 @@ export const EqptsMasterDialogSchema = z.object({
   defDatQty: z.number().nullable(),
   regAmt: z
     .number({ message: '定価を入力してください' })
-    .int({ message: '整数で入力してください' })
+    .int({ message: validationMessages.int() })
+    .max(9999999999, { message: validationMessages.maxNumberLength(10) })
     .min(1, { message: '定価を入力してください' }),
   // rankAmt1: z.number().nullable(),
   // rankAmt2: z.number().nullable(),

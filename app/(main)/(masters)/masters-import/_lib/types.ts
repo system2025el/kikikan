@@ -10,25 +10,25 @@ export type EqptImportType = z.infer<typeof eqptSchema>;
  */
 export const eqptSchema = z.object({
   rfid_tag_id: z.string(),
-  rfid_kizai_sts: z.number(),
-  del_flg: z.number(),
+  rfid_kizai_sts: z.number().int(),
+  del_flg: z.number().int().max(1).min(0),
   section_nam: z.string().optional(),
   kizai_nam: z.string(),
-  el_num: z.number().nullish(),
-  shozoku_id: z.number(),
+  el_num: z.number().int().nullish(),
+  shozoku_id: z.number().int(),
   bld_cod: z.string().optional(),
   tana_cod: z.string().optional(),
   eda_cod: z.string().optional(),
   kizai_grp_cod: z.string().optional(),
-  dsp_ord_num: z.number().nullish(),
+  dsp_ord_num: z.number().int().nullish(),
   mem: z.string().optional(),
   dai_bumon_nam: z.string().optional(),
   bumon_nam: z.string().optional(),
   shukei_bumon_nam: z.string().optional(),
-  dsp_flg: z.number().nullish(),
-  ctn_flg: z.number().nullish(),
+  dsp_flg: z.number().int().nullish(),
+  ctn_flg: z.number().int().max(1).min(0).nullish(),
   def_dat_qty: z.number().nullish(),
-  reg_amt: z.number().nullish(),
+  reg_amt: z.number().max(9999999999).int().nullish(),
   // rank_amt_1: z.number().nullish(),
   // rank_amt_2: z.number().nullish(),
   // rank_amt_3: z.number().nullish(),
@@ -123,33 +123,3 @@ export type KizaiImportTypes = {
  * 機材RFIDマスタ表エクセルインポートで使う棚番マスタの型
  */
 export type TanabanImportTypes = { bld_cod?: string; tana_cod?: string; eda_cod?: string };
-
-/**
- * 顧客マスタ表インポートの型
- */
-
-/**
- * 機材RFIDマスタ表エクセルインポートのzod Schema
- */
-export const customerSchema = z.object({
-  kokyaku_nam: z.string(),
-  kana: z.string(),
-  kokyaku_rank: z.number(),
-  del_flg: z.number().nullish(),
-  dsp_ord_num: z.number().nullish(),
-  keisho: z.string().optional(),
-  adr_post: z.string().optional(),
-  mem: z.string().optional(),
-  dai_bumon_nam: z.string().optional(),
-  bumon_nam: z.string().optional(),
-  shukei_bumon_nam: z.string().optional(),
-  dsp_flg: z.number().nullish(),
-  ctn_flg: z.number().nullish(),
-  def_dat_qty: z.number().nullish(),
-  reg_amt: z.number().nullish(),
-  // rank_amt_1: z.number().nullish(),
-  // rank_amt_2: z.number().nullish(),
-  // rank_amt_3: z.number().nullish(),
-  // rank_amt_4: z.number().nullish(),
-  // rank_amt_5: z.number().nullish(),
-});

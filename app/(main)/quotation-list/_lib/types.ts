@@ -62,17 +62,18 @@ export const quotMeisaiHeadSchema = z.object({
   nebikiNam: z.string().nullish(),
   nebikiAmt: z
     .number()
-    .max(999999999, { message: validationMessages.maxNumberLength(9) })
+    .int({ message: validationMessages.int() })
+    .max(9999999999, { message: validationMessages.maxNumberLength(10) })
     .nullish(),
   nebikiAftNam: z.string().nullish(),
   shokeiMei: z.string().nullish(),
   shokeiAmt: z
     .number({ message: validationMessages.number() })
-    .max(999999999999, { message: validationMessages.maxNumberLength(12) })
+    .max(9999999999, { message: validationMessages.maxNumberLength(10) })
     .nullish(),
   nebikiAftAmt: z
     .number()
-    .max(999999999, { message: validationMessages.maxNumberLength(9) })
+    .max(9999999999, { message: validationMessages.maxNumberLength(10) })
     .nullish(),
   biko1: z
     .string()
@@ -104,11 +105,11 @@ export const quotMeisaiHeadSchema = z.object({
           .nullish(),
         tankaAmt: z
           .number({ message: validationMessages.number() })
-          .max(999999999, { message: validationMessages.maxNumberLength(9) })
+          .max(9999999999, { message: validationMessages.maxNumberLength(10) })
           .nullish(),
         shokeiAmt: z
           .number({ message: validationMessages.number() })
-          .max(999999999999, { message: validationMessages.maxNumberLength(12) })
+          .max(9999999999, { message: validationMessages.maxNumberLength(10) })
           .nullish(),
       })
     )
@@ -172,24 +173,33 @@ export const QuotHeadSchema = z.object({
     .string()
     .max(10, { message: validationMessages.maxStringLength(10) })
     .nullish(),
-  kizaiChukeiAmt: z.number().nullish(),
+  kizaiChukeiAmt: z
+    .number()
+    .max(9999999999, { message: validationMessages.maxNumberLength(10) })
+    .nullish(),
   chukeiMei: z
     .string()
     .max(10, { message: validationMessages.maxStringLength(10) })
     .nullish(),
-  chukeiAmt: z.number().nullish(),
+  chukeiAmt: z
+    .number()
+    .max(9999999999, { message: validationMessages.maxNumberLength(10) })
+    .nullish(),
   tokuNebikiMei: z
     .string()
     .max(10, { message: validationMessages.maxStringLength(10) })
     .nullish(),
   tokuNebikiAmt: z
     .number({ message: validationMessages.number() })
-    .max(999999999, { message: validationMessages.maxNumberLength(9) })
+    .max(9999999999, { message: validationMessages.maxNumberLength(10) })
     .nullish(),
-  preTaxGokeiAmt: z.number().nullish(),
+  preTaxGokeiAmt: z
+    .number()
+    .max(9999999999, { message: validationMessages.maxNumberLength(10) })
+    .nullish(),
   zeiAmt: z
     .number({ message: validationMessages.number() })
-    .max(999999999999, { message: validationMessages.maxNumberLength(12) })
+    .max(9999999999, { message: validationMessages.maxNumberLength(10) })
     .nullish(),
   zeiRat: z
     .number({ message: validationMessages.number() })
@@ -199,7 +209,11 @@ export const QuotHeadSchema = z.object({
     .string()
     .max(10, { message: validationMessages.maxStringLength(10) })
     .nullish(),
-  gokeiAmt: z.number({ message: validationMessages.number() }).nullish(),
+  gokeiAmt: z
+    .number({ message: validationMessages.number() })
+    .int({ message: validationMessages.int() })
+    .max(9999999999, { message: validationMessages.maxNumberLength(10) })
+    .nullish(),
   meisaiHeads: z
     .object({
       kizai: z.array(quotMeisaiHeadSchema).nullish(),

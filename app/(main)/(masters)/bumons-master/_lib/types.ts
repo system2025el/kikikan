@@ -12,8 +12,8 @@ export const BumonsMasterDialogSchema = z.object({
     .string()
     .max(200, { message: validationMessages.maxStringLength(200) })
     .nullish(),
-  daibumonId: z.number().nullish(),
-  shukeibumonId: z.number().nullish(),
+  daibumonId: z.number().int().nullish(),
+  shukeibumonId: z.number().int().nullish(),
 });
 export type BumonsMasterDialogValues = z.infer<typeof BumonsMasterDialogSchema>;
 
