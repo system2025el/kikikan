@@ -18,7 +18,7 @@ import { CustomersMasterDialogValues, CustomersMasterTableValues } from './types
  * @param query 検索キーワード
  * @returns {Promise<CustomersMasterTableValues[]>} 顧客マスタテーブルに表示するデータ（ 検索キーワードが空の場合は全て ）
  */
-export const getFilteredCustomers = async (query: string = '') => {
+export const getFilteredCustomers = async (query: string | undefined = '') => {
   try {
     const { data, error } = await selectFilteredCustomers(query);
     if (error) {

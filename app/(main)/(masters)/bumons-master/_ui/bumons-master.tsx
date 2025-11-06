@@ -39,7 +39,7 @@ export const BumonsMaster = ({
   const [isLoading, setIsLoading] = useState(true);
 
   /* useForm ------------------- */
-  const { control, handleSubmit } = useForm({
+  const { control, handleSubmit, getValues } = useForm({
     mode: 'onSubmit',
     defaultValues: { query: '', daibumonQuery: FAKE_NEW_ID, shukeiQuery: FAKE_NEW_ID },
   });
@@ -137,6 +137,7 @@ export const BumonsMaster = ({
         bumons={theBumons}
         page={page}
         isLoading={isLoading}
+        searchParams={getValues()}
         setPage={setPage}
         setIsLoading={setIsLoading}
       />

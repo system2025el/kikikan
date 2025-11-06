@@ -22,7 +22,7 @@ export const CustomersMaster = ({ customers }: { customers: CustomersMasterTable
   const [isLoading, setIsLoading] = useState(true);
 
   /* useForm ------------------- */
-  const { control, handleSubmit } = useForm({
+  const { control, handleSubmit, getValues } = useForm({
     mode: 'onSubmit',
     defaultValues: { query: '' },
   });
@@ -70,6 +70,7 @@ export const CustomersMaster = ({ customers }: { customers: CustomersMasterTable
         customers={theCustomers}
         page={page}
         isLoading={isLoading}
+        searchParams={getValues()}
         setPage={setPage}
         setIsLoading={setIsLoading}
       />

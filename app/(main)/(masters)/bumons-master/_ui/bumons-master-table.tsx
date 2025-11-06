@@ -22,12 +22,14 @@ export const BumonsMasterTable = ({
   bumons,
   isLoading,
   page,
+  searchParams,
   setIsLoading,
   setPage,
 }: {
   bumons: BumonsMasterTableValues[] | undefined;
   isLoading: boolean;
   page: number;
+  searchParams: { query: string | undefined; daibumonQuery: number; shukeiQuery: number };
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setPage: React.Dispatch<React.SetStateAction<number>>;
 }) => {
@@ -54,7 +56,11 @@ export const BumonsMasterTable = ({
   /** 情報が変わったときに更新される */
   const refetchBumons = async () => {
     setIsLoading(true);
-    const updated = await getFilteredBumons();
+    const updated = await getFilteredBumons({
+      q: searchParams.query!,
+      d: searchParams.daibumonQuery === FAKE_NEW_ID ? null : searchParams.daibumonQuery,
+      s: searchParams.shukeiQuery === FAKE_NEW_ID ? null : searchParams.shukeiQuery,
+    });
     setTheBumons(updated?.data);
     setIsLoading(false);
   };

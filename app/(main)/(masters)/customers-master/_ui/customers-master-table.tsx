@@ -21,12 +21,14 @@ export const CustomersMasterTable = ({
   customers,
   isLoading,
   page,
+  searchParams,
   setIsLoading,
   setPage,
 }: {
   customers: CustomersMasterTableValues[] | undefined;
   isLoading: boolean;
   page: number;
+  searchParams: { query: string | undefined };
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setPage: React.Dispatch<React.SetStateAction<number>>;
 }) => {
@@ -53,7 +55,7 @@ export const CustomersMasterTable = ({
   /* 情報が変わったときに更新される */
   const refetchCustomers = async () => {
     setIsLoading(true);
-    const updated = await getFilteredCustomers();
+    const updated = await getFilteredCustomers(searchParams.query);
     setTheCustomers(updated);
     setIsLoading(false);
   };
