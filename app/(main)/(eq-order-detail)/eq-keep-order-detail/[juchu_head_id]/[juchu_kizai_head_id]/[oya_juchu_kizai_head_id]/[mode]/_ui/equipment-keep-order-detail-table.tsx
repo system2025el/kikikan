@@ -31,6 +31,7 @@ import { KeepJuchuContainerMeisaiValues, KeepJuchuKizaiMeisaiValues } from '../_
 type KeepEqTableProps = {
   rows: KeepJuchuKizaiMeisaiValues[];
   edit: boolean;
+  nyukoFixFlag: boolean;
   handleMeisaiDelete: (rowIndex: number) => void;
   handleMemoChange: (rowIndex: number, memo: string) => void;
   handleCellChange: (rowIndex: number, keepValue: number) => void;
@@ -39,6 +40,7 @@ type KeepEqTableProps = {
 export const KeepEqTable: React.FC<KeepEqTableProps> = ({
   rows,
   edit,
+  nyukoFixFlag,
   handleMeisaiDelete,
   handleMemoChange,
   handleCellChange,
@@ -114,6 +116,7 @@ export const KeepEqTable: React.FC<KeepEqTableProps> = ({
               row={row}
               rowIndex={rowIndex}
               edit={edit}
+              nyukoFixFlag={nyukoFixFlag}
               handleMeisaiDelete={handleMeisaiDelete}
               handleKeepRef={handleKeepRef(rowIndex)}
               handleMemoChange={handleMemoChange}
@@ -131,6 +134,7 @@ type KeepEqTableRowProps = {
   row: KeepJuchuKizaiMeisaiValues;
   rowIndex: number;
   edit: boolean;
+  nyukoFixFlag: boolean;
   handleMeisaiDelete: (rowIndex: number) => void;
   handleKeepRef: (el: HTMLInputElement | null) => void;
   handleMemoChange: (rowIndex: number, memo: string) => void;
@@ -143,6 +147,7 @@ const KeepEqTableRow = React.memo(
     row,
     rowIndex,
     edit,
+    nyukoFixFlag,
     handleMeisaiDelete,
     handleMemoChange,
     handleCellChange,
@@ -154,7 +159,11 @@ const KeepEqTableRow = React.memo(
     return (
       <TableRow>
         <TableCell sx={{ padding: 0, border: '1px solid black' }}>
-          <IconButton onClick={() => handleMeisaiDelete(rowIndex)} sx={{ padding: 0, color: 'red' }} disabled={!edit}>
+          <IconButton
+            onClick={() => handleMeisaiDelete(rowIndex)}
+            sx={{ padding: 0, color: 'red' }}
+            disabled={!edit || nyukoFixFlag}
+          >
             <Delete fontSize="small" />
           </IconButton>
         </TableCell>
@@ -170,7 +179,7 @@ const KeepEqTableRow = React.memo(
             memo={row.mem ? row.mem : ''}
             handleMemoChange={handleMemoChange}
             rowIndex={rowIndex}
-            disabled={!edit}
+            disabled={!edit || nyukoFixFlag}
           />
         </TableCell>
         <TableCell style={styles.row} align="left" size="small">
@@ -231,7 +240,7 @@ const KeepEqTableRow = React.memo(
               handleKeyDown(e, rowIndex);
             }}
             onFocus={(e) => e.target.select()}
-            disabled={!edit}
+            disabled={!edit || nyukoFixFlag}
           />
         </TableCell>
       </TableRow>
@@ -247,11 +256,12 @@ KeepEqTableRow.displayName = 'KeepEqTableRow';
 export const KeepContainerTable = (props: {
   rows: KeepJuchuContainerMeisaiValues[];
   edit: boolean;
+  nyukoFixFlag: boolean;
   handleContainerMemoChange: (kizaiId: number, memo: string) => void;
   handleContainerCellChange: (kizaiId: number, kicsValue: number, yardValue: number) => void;
   handleMeisaiDelete: (kizaiId: number) => void;
 }) => {
-  const { rows, edit, handleContainerMemoChange, handleContainerCellChange, handleMeisaiDelete } = props;
+  const { rows, edit, nyukoFixFlag, handleContainerMemoChange, handleContainerCellChange, handleMeisaiDelete } = props;
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -344,7 +354,7 @@ export const KeepContainerTable = (props: {
                   memo={row.mem ? row.mem : ''}
                   handleMemoChange={handleContainerMemoChange}
                   rowIndex={rowIndex}
-                  disabled={!edit}
+                  disabled={!edit || nyukoFixFlag}
                 />
               </TableCell>
               <TableCell style={styles.row} align="left" size="small">
@@ -403,7 +413,7 @@ export const KeepContainerTable = (props: {
                     handleKeyDown(e, rowIndex, 0);
                   }}
                   onFocus={(e) => e.target.select()}
-                  disabled={!edit}
+                  disabled={!edit || nyukoFixFlag}
                 />
               </TableCell>
               <TableCell style={styles.row} align="right" size="small">
@@ -447,7 +457,7 @@ export const KeepContainerTable = (props: {
                     handleKeyDown(e, rowIndex, 1);
                   }}
                   onFocus={(e) => e.target.select()}
-                  disabled={!edit}
+                  disabled={!edit || nyukoFixFlag}
                 />
               </TableCell>
             </TableRow>

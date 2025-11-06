@@ -98,11 +98,14 @@ export const EquipmentReturnOrderDetail = (props: {
   returnNyukoDate: Date | null;
   dateRange: string[];
   edit: boolean;
+  nyukoFixFlag: boolean;
 }) => {
   // user情報
   const user = useUserStore((state) => state.user);
   // 受注機材ヘッダー保存フラグ
   const saveKizaiHead = props.returnJuchuKizaiHeadData.juchuKizaiHeadId !== 0 ? true : false;
+  // 入庫フラグ
+  const nyukoFixFlag = props.nyukoFixFlag;
   // 全体の保存フラグ
   const [save, setSave] = useState(false);
 
@@ -1116,6 +1119,11 @@ export const EquipmentReturnOrderDetail = (props: {
                   <Typography>編集中</Typography>
                 </Grid2>
               )}
+              {nyukoFixFlag && (
+                <Box display={'flex'} alignItems={'center'}>
+                  <Typography>入庫済</Typography>
+                </Box>
+              )}
               <Grid2 container alignItems={'center'} spacing={1}>
                 {!edit || (lockData !== null && lockData?.addUser !== user?.name) ? (
                   <Typography>閲覧モード</Typography>
@@ -1367,10 +1375,12 @@ export const EquipmentReturnOrderDetail = (props: {
                           render={({ field, fieldState }) => (
                             <DateTime
                               date={field.value}
+                              minDate={props.oyaJuchuKizaiNyushukoData.kicsShukoDat ?? undefined}
+                              maxDate={props.oyaJuchuKizaiNyushukoData.kicsNyukoDat ?? undefined}
                               onChange={handleKicsNyukoChange}
                               onAccept={handleKicsNyukoAccept}
                               fieldstate={fieldState}
-                              disabled={!edit}
+                              disabled={!edit || nyukoFixFlag}
                               onClear={() => {
                                 field.onChange(null);
                                 trigger(['kicsNyukoDat', 'yardNyukoDat']);
@@ -1387,10 +1397,12 @@ export const EquipmentReturnOrderDetail = (props: {
                           render={({ field, fieldState }) => (
                             <DateTime
                               date={field.value}
+                              minDate={props.oyaJuchuKizaiNyushukoData.yardShukoDat ?? undefined}
+                              maxDate={props.oyaJuchuKizaiNyushukoData.yardNyukoDat ?? undefined}
                               onChange={handleYardNyukoChange}
                               onAccept={handleYardNyukoAccept}
                               fieldstate={fieldState}
-                              disabled={!edit}
+                              disabled={!edit || nyukoFixFlag}
                               onClear={() => {
                                 field.onChange(null);
                                 trigger(['kicsNyukoDat', 'yardNyukoDat']);
