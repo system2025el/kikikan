@@ -59,7 +59,11 @@ export const RfidMaster = ({
   // });
 
   /* methods ------------------------------------------ */
-  /** 適用ボタン押下時の処理 */
+  /**
+   * 適用ボタン押下時の処理
+   * @param {string[]} tagList 選ばれているRFID
+   * @param {SelectTypes} selectedSts 選ばれている作業ステータス
+   */
   const handleClickAdapt = (tagList: string[], selectedSts: SelectTypes) => {
     console.log('タグリスト', tagList, 'ステータス', selectedSts, '最初のリスト', theRfids);
     const newList = theRfids
@@ -82,7 +86,9 @@ export const RfidMaster = ({
     // }
   };
 
-  /** 保存ボタン押下時の処理 */
+  /**
+   * 保存ボタン押下時の処理
+   */
   const handleClickSave = async () => {
     if (!theRfids) return;
     // 更新される予定のRFIDマスタリスト

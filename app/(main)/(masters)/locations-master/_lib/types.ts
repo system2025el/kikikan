@@ -68,9 +68,3 @@ export type LocsMasterTableValues = {
   mem: string | null;
   tel: string | null;
 };
-
-/* 検索用スキーマ */
-export const LocsMasterSearchSchema = z.object({
-  query: z.string().optional(),
-});
-export type LocsMasterSearchValues = z.infer<typeof LocsMasterSearchSchema>;

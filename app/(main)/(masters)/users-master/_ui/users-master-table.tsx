@@ -37,12 +37,14 @@ export const UserssMasterTable = ({
   users,
   isLoading,
   page,
+  searchParams,
   setIsLoading,
   setPage,
 }: {
   users: UsersMasterTableValues[] | undefined;
   isLoading: boolean;
   page: number;
+  searchParams: { query: string | undefined };
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setPage: React.Dispatch<React.SetStateAction<number>>;
 }) => {
@@ -66,19 +68,19 @@ export const UserssMasterTable = ({
 
   /* Methods
   ------------------------------------------------------------ */
-  /* 詳細ダイアログを開く関数 */
+  /** 詳細ダイアログを開く関数 */
   const handleOpenDialog = (mailAdr: string) => {
     setOpenID(mailAdr);
     setDialogOpen(true);
   };
-  /* ダイアログを閉じる関数 */
+  /** ダイアログを閉じる関数 */
   const handleCloseDialog = () => {
     setDialogOpen(false);
   };
-  /* 情報が変わったときに更新される */
+  /** 情報が変わったときに更新される */
   const refetchUsers = async () => {
     setIsLoading(true);
-    const updated = await getFilteredUsers();
+    const updated = await getFilteredUsers(searchParams.query);
     setTheUsers(updated);
     setIsLoading(false);
   };

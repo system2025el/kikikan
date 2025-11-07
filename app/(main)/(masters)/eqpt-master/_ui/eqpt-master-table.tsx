@@ -19,12 +19,20 @@ export const EqptMasterTable = ({
   eqpts,
   isLoading,
   page,
+  searchParams,
   setIsLoading,
   setPage,
 }: {
   eqpts: EqptsMasterTableValues[] | undefined;
   isLoading: boolean;
   page: number;
+  searchParams: {
+    query: string | undefined;
+    bumonQuery: number;
+    daibumonQuery: number;
+    shukeiQuery: number;
+    ngFlg: boolean;
+  };
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setPage: React.Dispatch<React.SetStateAction<number>>;
 }) => {
@@ -51,7 +59,13 @@ export const EqptMasterTable = ({
   /* 情報が変わったときに更新される */
   const refetchEqpts = async () => {
     setIsLoading(true);
-    const updated = await getFilteredEqpts();
+    const updated = await getFilteredEqpts({
+      q: searchParams.query!,
+      d: searchParams.daibumonQuery === FAKE_NEW_ID ? null : searchParams.daibumonQuery,
+      s: searchParams.shukeiQuery === FAKE_NEW_ID ? null : searchParams.shukeiQuery,
+      b: searchParams.bumonQuery === FAKE_NEW_ID ? null : searchParams.bumonQuery,
+      ngFlg: searchParams.ngFlg,
+    });
     setTheEqpts(updated?.data);
     setIsLoading(false);
   };

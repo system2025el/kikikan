@@ -70,6 +70,7 @@ export const DaibumonsMaster = ({ daibumons }: { daibumons: DaibumonsMasterTable
       <DaibumonsMasterTable
         daibumons={theDaibumons}
         page={page}
+        searchParams={getValues()}
         isLoading={isLoading}
         setPage={setPage}
         setIsLoading={setIsLoading}

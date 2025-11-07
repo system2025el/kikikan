@@ -22,12 +22,14 @@ export const LocationsMasterTable = ({
   locs,
   isLoading,
   page,
+  searchParams,
   setIsLoading,
   setPage,
 }: {
   locs: LocsMasterTableValues[] | undefined;
   isLoading: boolean;
   page: number;
+  searchParams: { query: string | undefined };
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setPage: React.Dispatch<React.SetStateAction<number>>;
 }) => {
@@ -54,7 +56,7 @@ export const LocationsMasterTable = ({
   /* 情報が変わったときに更新される */
   const refetchLocs = async () => {
     setIsLoading(true);
-    const updated = await getFilteredLocs();
+    const updated = await getFilteredLocs(searchParams.query);
     setTheLocs(updated);
     setIsLoading(false);
   };

@@ -107,7 +107,8 @@ export const Bill = ({
   const onSubmit = async (data: BillHeadValues) => {
     console.log('新規？', isNew, 'isDirty', isDirty);
     if (isNew) {
-      await addBill(data, user?.name ?? '');
+      const id = await addBill(data, user?.name ?? '');
+      router.replace(`/bill-list/edit/${id}`);
     } else {
       await updateBill(data, user?.name ?? '');
     }
@@ -120,11 +121,6 @@ export const Bill = ({
   /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     console.log('請求画面開いた', bill, 'isNew?', isNew, user?.name);
-    if (isNew) {
-      router.prefetch('/billing-sts-list');
-    } else {
-      router.prefetch('/bill-list');
-    }
     if (isNew) {
       // 新規なら入力者をログインアカウントから取得する
       if (user?.name) {
@@ -217,7 +213,11 @@ export const Bill = ({
     <>
       <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
         <Box justifySelf={'end'} mb={0.5}>
-          <Button onClick={() => (isNew ? router.push('/billing-sts-list') : router.push('/bill-list'))}>戻る</Button>
+          <Button
+            onClick={() => /*(isNew ? router.push('/billing-sts-list') : router.push('/bill-list'))*/ router.back()}
+          >
+            戻る
+          </Button>
         </Box>
         <FormProvider {...billForm}>
           <form onSubmit={handleSubmit(onSubmit)}>

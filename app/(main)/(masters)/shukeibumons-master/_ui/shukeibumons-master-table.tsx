@@ -21,12 +21,14 @@ export const ShukeibumonsMasterTable = ({
   shukeibumons,
   isLoading,
   page,
+  searchParams,
   setIsLoading,
   setPage,
 }: {
   shukeibumons: ShukeibumonsMasterTableValues[] | undefined;
   isLoading: boolean;
   page: number;
+  searchParams: { query: string | undefined };
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setPage: React.Dispatch<React.SetStateAction<number>>;
 }) => {
@@ -52,7 +54,7 @@ export const ShukeibumonsMasterTable = ({
   /* 情報が変わったときに更新される */
   const refetchShukeibumons = async () => {
     setIsLoading(true);
-    const updated = await getFilteredShukeibumons();
+    const updated = await getFilteredShukeibumons(searchParams.query);
     setTheShukeibumons(updated);
     setIsLoading(false);
   };

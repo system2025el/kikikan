@@ -21,12 +21,14 @@ export const DaibumonsMasterTable = ({
   daibumons,
   isLoading,
   page,
+  searchParams,
   setIsLoading,
   setPage,
 }: {
   daibumons: DaibumonsMasterTableValues[] | undefined;
   isLoading: boolean;
   page: number;
+  searchParams: { query?: string | undefined };
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setPage: React.Dispatch<React.SetStateAction<number>>;
 }) => {
@@ -52,7 +54,7 @@ export const DaibumonsMasterTable = ({
   /* 情報が変わったときに更新される */
   const refetchDaibumons = async () => {
     setIsLoading(true);
-    const updated = await getFilteredDaibumons();
+    const updated = await getFilteredDaibumons(searchParams.query);
     setTheDaibumons(updated);
     setIsLoading(false);
   };

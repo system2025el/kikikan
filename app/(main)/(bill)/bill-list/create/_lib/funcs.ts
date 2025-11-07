@@ -144,7 +144,7 @@ export const getJuchusForBill = async (queries: {
  * 請求を保存する関数
  * @param data 請求書フォーム内容
  */
-const addBilling = async (data: BillHeadValues, user: string): Promise<number | null> => {
+export const addBill = async (data: BillHeadValues, user: string): Promise<number | null> => {
   /* トランザクション準備 */
   const connection = await pool.connect();
   // 明細ヘッドIDと明細IDの発番
@@ -252,6 +252,8 @@ const addBilling = async (data: BillHeadValues, user: string): Promise<number | 
         await delAndInsertSeikyuDat(seikyuDatList, connection);
       }
       await connection.query('COMMIT');
+      await revalidatePath('/bill-list');
+      await revalidatePath('/billing-sts-list');
       return id.rows[0].seikyu_head_id;
     }
     return null;
@@ -264,15 +266,4 @@ const addBilling = async (data: BillHeadValues, user: string): Promise<number | 
     // なんにしてもpool解放
     connection.release();
   }
-};
-
-/**
- * 請求を保存する関数を保存してリダイレクトする関数
- * @param data
- * @param user
- */
-export const addBill = async (data: BillHeadValues, user: string) => {
-  const id = await addBilling(data, user);
-  await revalidatePath('/bill-list');
-  await redirect(`/bill-list/edit/${id}`);
 };

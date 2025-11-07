@@ -20,7 +20,7 @@ import { QuotHeadValues } from '../../_lib/types';
  * 見積を保存する関数
  * @param data 見積書フォーム内容
  */
-const addQuotation = async (data: QuotHeadValues, user: string): Promise<number | null> => {
+export const addQuot = async (data: QuotHeadValues, user: string): Promise<number | null> => {
   /* トランザクション準備 */
   const connection = await pool.connect();
   // 見積明細ヘッド準備
@@ -128,6 +128,7 @@ const addQuotation = async (data: QuotHeadValues, user: string): Promise<number 
       }
 
       await connection.query('COMMIT');
+      await revalidatePath('/quotation-list');
       return id.rows[0].mitu_head_id;
     }
     return null;
@@ -140,15 +141,4 @@ const addQuotation = async (data: QuotHeadValues, user: string): Promise<number 
     // なんにしてもpool解放
     connection.release();
   }
-};
-
-/**
- * 見積を保存する関数を保存してリダイレクトする関数
- * @param data
- * @param user
- */
-export const addQuot = async (data: QuotHeadValues, user: string) => {
-  const id = await addQuotation(data, user);
-  await revalidatePath('/quotation-list');
-  await redirect(`/quotation-list/edit/${id}`);
 };
