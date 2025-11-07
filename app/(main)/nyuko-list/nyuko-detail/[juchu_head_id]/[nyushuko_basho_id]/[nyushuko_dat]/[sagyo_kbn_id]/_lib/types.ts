@@ -7,11 +7,11 @@ export type NyukoDetailValues = {
 
 export type NyukoDetailTableValues = {
   juchuHeadId: number;
-  juchuKizaiHeadId: number | null;
+  juchuKizaiHeadId: number;
   juchuKizaiMeisaiId: number;
   juchuKizaiHeadKbn: number;
   headNamv: string | null;
-  kizaiId: number | null;
+  kizaiId: number;
   kizaiNam: string | null;
   koenNam: string | null;
   koenbashoNam: string | null;

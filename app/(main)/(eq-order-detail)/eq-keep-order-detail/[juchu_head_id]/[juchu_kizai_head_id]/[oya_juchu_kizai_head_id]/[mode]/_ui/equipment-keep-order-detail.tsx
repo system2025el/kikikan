@@ -549,7 +549,7 @@ export const EquipmentKeepOrderDetail = (props: {
   // コンテナ明細削除ダイアログの押下ボタンによる処理
   const handleCtnMeisaiDeleteResult = (result: boolean) => {
     setDeleteCtnOpen(false);
-    if (!deleteCtnIndex) return;
+    if (deleteCtnIndex === null) return;
 
     if (result) {
       setKeepJuchuContainerMeisaiList((prev) => {
@@ -558,6 +558,7 @@ export const EquipmentKeepOrderDetail = (props: {
           .filter((index) => index !== null) as number[];
 
         const index = visibleIndex[deleteCtnIndex];
+        console.log(index);
         if (index === undefined) return prev;
 
         return prev.map((data, i) => (i === index ? { ...data, delFlag: true } : data));

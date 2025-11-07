@@ -19,6 +19,8 @@ export const selectNyushukoDetail = async (
       .eq('nyushuko_basho_id', nyushukoBashoId)
       .eq('nyushuko_dat', nyushukoDat)
       .eq('sagyo_kbn_id', sagyoKbnId)
+      //.order('ctn_flg')
+      .order('juchu_kizai_head_id')
       .order('dsp_ord_num_meisai');
   } catch (e) {
     throw e;

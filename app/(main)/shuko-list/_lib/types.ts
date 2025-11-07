@@ -12,6 +12,7 @@ export type ShukoTableValues = {
   nyushukoDat: string;
   nyushukoBashoId: number;
   juchuKizaiHeadIdv: string;
+  juchuKizaiHeadKbn: number;
   headNamv: string;
   sectionNamv: string;
   kokyakuNam: string;

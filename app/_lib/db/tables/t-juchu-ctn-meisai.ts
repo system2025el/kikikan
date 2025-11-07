@@ -137,7 +137,7 @@ export const upsertJuchuContainerMeisai = async (data: JuchuCtnMeisai[], connect
   const values = [...insertValues, data[0].add_dat, data[0].add_user];
 
   // 競合キー(複合キー)の定義
-  const conflictKeys = ['juchu_head_id', 'juchu_kizai_head_id', 'juchu_kizai_meisai_id'];
+  const conflictKeys = ['juchu_head_id', 'juchu_kizai_head_id', 'juchu_kizai_meisai_id', 'kizai_id', 'shozoku_id'];
 
   // UPDATE対象列のリストを動的生成(競合キー、add_* 列、upd_* 列 を除く)
   const columnsToUpdate = cols.filter(
