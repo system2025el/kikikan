@@ -130,15 +130,17 @@ export const updShukoDetail = async (
 
   const connection = await pool.connect();
 
+  const ctnData = shukoDetailTableData.filter((data) => data.ctnFlg);
+
   try {
     await connection.query('BEGIN');
 
     // 出庫伝票UPSERT
-    const upsertShukoDenResult = await upsShukoDen(shukoDetailTableData, userNam, connection);
+    const upsertShukoDenResult = await upsShukoDen(ctnData, userNam, connection);
     console.log('出庫伝票UPSERT', upsertShukoDenResult);
 
     // 受注明細UPSERT
-    const upsertJuchuMeisaiResult = await upsJuchuKizaiMeisai(shukoDetailTableData, userNam, connection);
+    const upsertJuchuMeisaiResult = await upsJuchuKizaiMeisai(ctnData, userNam, connection);
     console.log('受注明細UPSERT', upsertJuchuMeisaiResult);
 
     // 入出庫確定追加
@@ -256,8 +258,10 @@ export const upsShukoDen = async (
     sagyo_kbn_id: 10,
     dsp_ord_num: d.dspOrdNumMeisai,
     indent_num: d.indentNum,
-    upd_dat: toJapanTimeString(),
-    upd_user: userNam,
+    add_dat: toJapanTimeString(),
+    add_user: userNam,
+    upd_dat: null,
+    upd_user: null,
   }));
 
   const updateShukoCheckData: NyushukoDen[] = shukoDetailTableData.map((d) => ({
@@ -271,8 +275,10 @@ export const upsShukoDen = async (
     sagyo_kbn_id: 20,
     dsp_ord_num: d.dspOrdNumMeisai,
     indent_num: d.indentNum,
-    upd_dat: toJapanTimeString(),
-    upd_user: userNam,
+    add_dat: toJapanTimeString(),
+    add_user: userNam,
+    upd_dat: null,
+    upd_user: null,
   }));
 
   const mergeData = [...updateShukoStandbyData, ...updateShukoCheckData];
