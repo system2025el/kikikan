@@ -24,7 +24,7 @@ export const UsersMaster = ({ users }: { users: UsersMasterTableValues[] | undef
   const [isLoading, setIsLoading] = useState(true);
 
   /* useForm ------------------- */
-  const { control, handleSubmit } = useForm({
+  const { control, handleSubmit, getValues } = useForm({
     mode: 'onSubmit',
     defaultValues: { query: '' },
   });
@@ -68,6 +68,7 @@ export const UsersMaster = ({ users }: { users: UsersMasterTableValues[] | undef
         users={theUsers}
         isLoading={isLoading}
         page={page}
+        searchParams={getValues()}
         setIsLoading={setIsLoading}
         setPage={setPage}
       />

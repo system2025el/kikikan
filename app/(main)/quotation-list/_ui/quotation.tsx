@@ -24,7 +24,7 @@ import {
 } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
-import { Controller, FieldPath, FormProvider, useFieldArray, useForm, useWatch } from 'react-hook-form';
+import { Controller, FormProvider, useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
@@ -120,7 +120,10 @@ export const Quotation = ({
   const onSubmit = async (data: QuotHeadValues) => {
     console.log('新規？', isNew, 'isDirty', isDirty);
     if (isNew) {
-      await addQuot(data, user?.name ?? '');
+      setIsLoading(true);
+      // 登録された見積ヘッダID
+      const id = await addQuot(data, user?.name ?? '');
+      router.replace(`/quotation-list/edit/${id}`);
     } else {
       const result = await updateQuot(data, user?.name ?? '');
       console.log('更新したのは', result, '番の見積');
@@ -150,7 +153,6 @@ export const Quotation = ({
   /* useEffect ------------------------------------------------------------ */
   /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
-    router.prefetch('/quotaiton-list');
     if (isNew) {
       // 新規なら入力者をログインアカウントから取得する
       if (user?.name) {
@@ -231,7 +233,7 @@ export const Quotation = ({
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
       <Box justifySelf={'end'} mb={0.5}>
-        <Button onClick={() => router.push('/quotation-list')}>戻る</Button>
+        <Button onClick={() => /*router.push('/quotation-list')*/ router.back()}>戻る</Button>
       </Box>
       <FormProvider {...quotForm}>
         <form onSubmit={handleSubmit(onSubmit)}>

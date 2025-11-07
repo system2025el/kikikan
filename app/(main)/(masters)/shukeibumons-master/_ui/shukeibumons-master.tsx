@@ -25,7 +25,7 @@ export const ShukeibumonsMaster = ({ shukeibumons }: { shukeibumons: Shukeibumon
   const [isLoading, setIsLoading] = useState(true);
 
   /* useForm ------------------- */
-  const { control, handleSubmit } = useForm({
+  const { control, handleSubmit, getValues } = useForm({
     mode: 'onSubmit',
     defaultValues: { query: '' },
   });
@@ -71,6 +71,7 @@ export const ShukeibumonsMaster = ({ shukeibumons }: { shukeibumons: Shukeibumon
         shukeibumons={theShukeibumons}
         isLoading={isLoading}
         page={page}
+        searchParams={getValues()}
         setIsLoading={setIsLoading}
         setPage={setPage}
       />

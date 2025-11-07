@@ -36,8 +36,8 @@ export const EqptMaster = ({
   /** ローディング */
   const [isLoading, setIsLoading] = useState(true);
 
-  /* 検索useForm-------------------------- */
-  const { control, handleSubmit } = useForm({
+  /** 検索useForm-------------------------- */
+  const { control, handleSubmit, getValues } = useForm({
     mode: 'onSubmit',
     defaultValues: {
       query: '',
@@ -172,6 +172,7 @@ export const EqptMaster = ({
       <EqptMasterTable
         eqpts={theEqpts}
         page={page}
+        searchParams={getValues()}
         isLoading={isLoading}
         setPage={setPage}
         setIsLoading={setIsLoading}
