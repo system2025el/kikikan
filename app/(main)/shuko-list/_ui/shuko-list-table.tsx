@@ -1,6 +1,7 @@
 'use client';
 
 import { Button, Checkbox, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
+import { grey } from '@mui/material/colors';
 import { Dispatch, SetStateAction, useState } from 'react';
 
 import { toISOString, toJapanTimeString } from '../../_lib/date-conversion';
@@ -59,7 +60,7 @@ export const ShukoListTable = (props: {
         </TableHead>
         <TableBody>
           {datas.map((row, index) => (
-            <TableRow key={index} sx={{ whiteSpace: 'nowrap' }}>
+            <TableRow key={index} sx={{ whiteSpace: 'nowrap', backgroundColor: row.shukoFixFlg ? grey[300] : 'white' }}>
               <TableCell padding="checkbox">
                 <Checkbox checked={selected.includes(index)} onChange={() => handleSelect(index)} />
               </TableCell>
@@ -75,7 +76,7 @@ export const ShukoListTable = (props: {
                 <Button
                   variant="text"
                   size="small"
-                  href={`shuko-list/shuko-detail/${row.juchuHeadId}/${row.nyushukoBashoId}/${toJapanTimeString(row.nyushukoDat, '-')}/10`}
+                  href={`shuko-list/shuko-detail/${row.juchuHeadId}/${row.juchuKizaiHeadKbn}/${row.nyushukoBashoId}/${toJapanTimeString(row.nyushukoDat, '-')}/10/${row.juchuKizaiHeadKbn}`}
                   sx={{ py: 0, px: 1 }}
                 >
                   {row.sstbSagyoStsNamShort}
@@ -85,7 +86,7 @@ export const ShukoListTable = (props: {
                 <Button
                   variant="text"
                   size="small"
-                  href={`shuko-list/shuko-detail/${row.juchuHeadId}/${row.nyushukoBashoId}/${toJapanTimeString(row.nyushukoDat, '-')}/20`}
+                  href={`shuko-list/shuko-detail/${row.juchuHeadId}/${row.juchuKizaiHeadKbn}/${row.nyushukoBashoId}/${toJapanTimeString(row.nyushukoDat, '-')}/20`}
                   sx={{ py: 0, px: 1 }}
                 >
                   {row.schkSagyoStsNamShort}

@@ -1,7 +1,7 @@
 import { toJapanDateString } from '../../_lib/date-conversion';
 import { getCustomerSelection } from '../../(masters)/_lib/funcs';
 import { getMituStsSelection, getOrderForQuotation, getUsersSelection } from '../_lib/funcs';
-import { JuchuValues } from '../_lib/types';
+import { JuchuValues, QuotHeadValues } from '../_lib/types';
 import { Quotation } from '../_ui/quotation';
 
 const Page = async ({ searchParams }: { searchParams: Promise<{ [key: string]: string | undefined }> }) => {
@@ -22,7 +22,8 @@ const Page = async ({ searchParams }: { searchParams: Promise<{ [key: string]: s
     order = await getOrderForQuotation(juchuId);
   }
 
-  const quot = order
+  /** 見積初期値 */
+  const quot: QuotHeadValues = order
     ? {
         mituHeadId: null,
         juchuHeadId: order.juchuHeadId,
@@ -40,6 +41,7 @@ const Page = async ({ searchParams }: { searchParams: Promise<{ [key: string]: s
         kizaiChukeiMei: '中計',
         chukeiMei: '中計',
         tokuNebikiMei: '特別値引き',
+        zeiRat: 10,
         meisaiHeads: {},
       }
     : {
@@ -59,6 +61,7 @@ const Page = async ({ searchParams }: { searchParams: Promise<{ [key: string]: s
         kizaiChukeiMei: '中計',
         chukeiMei: '中計',
         tokuNebikiMei: '特別値引き',
+        zeiRat: 10,
         meisaiHeads: {},
       };
 

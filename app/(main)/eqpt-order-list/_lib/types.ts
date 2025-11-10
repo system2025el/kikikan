@@ -5,6 +5,8 @@ export type EqptOrderListTableValues = {
   juchuHeadId: number;
   kizaiHeadId: number;
   headNam: string;
+  headKbn: number;
+  oyaJuchuKizaiHeadId: number;
   koenNam: string;
   koenbashoNam: string;
   kokyakuNam: string;
