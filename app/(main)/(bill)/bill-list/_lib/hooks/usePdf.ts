@@ -23,6 +23,7 @@ export const usePdf = (): [(param: BillHeadValues) => Promise<Blob>] => {
     const imageBytes = await fetch('/images/sign.bank.png').then((res) => res.arrayBuffer());
     setImage(imageBytes);
   };
+
   const setupLog = async () => {
     const logBytes = await fetch('/images/log.png').then((res) => res.arrayBuffer());
     setLog(logBytes);
@@ -35,8 +36,8 @@ export const usePdf = (): [(param: BillHeadValues) => Promise<Blob>] => {
       .finally(() => {});
   }, []);
 
-  // PDF生成関数
   const printBill = async (param: BillHeadValues): Promise<Blob> => {
+    console.log('param', param);
     // PDFドキュメント作成
     const pdfDoc = await PDFDocument.create();
 
@@ -217,7 +218,6 @@ export const usePdf = (): [(param: BillHeadValues) => Promise<Blob>] => {
 
     // 右側の余白
     const rightPadding = 5;
-
     // --- 1行目：今回ご請求金額 ---
     const totalAmountText = '￥' + Number(param.gokeiAmt ?? 0).toLocaleString();
     const totalAmountTextWidth = customFont.widthOfTextAtSize(totalAmountText, 12);
@@ -252,78 +252,81 @@ export const usePdf = (): [(param: BillHeadValues) => Promise<Blob>] => {
       size: 12,
     });
 
-    // --- 2行目：10％対象合計 ---
-    const subtotalText = '￥' + Number(param.preTaxGokeiAmt ?? 0).toLocaleString();
-    const subtotalTextWidth = customFont.widthOfTextAtSize(subtotalText, 10);
-    const amountX = billingTableX + billingTableWidth - subtotalTextWidth - rightPadding;
+    if (param.zeiRat) {
+      //消費税が設定していない場合、対象合計と消費税の枠を非表示にする。
+      // --- 2行目：（）％対象合計 ---
+      const subtotalText = '￥' + Number(param.preTaxGokeiAmt ?? 0).toLocaleString();
+      const subtotalTextWidth = customFont.widthOfTextAtSize(subtotalText, 10);
+      const amountX = billingTableX + billingTableWidth - subtotalTextWidth - rightPadding;
 
-    page.drawRectangle({
-      x: billingTableX + 50,
-      y: billingTableBottomY + billingTableRowHeight,
-      width: billingTableWidth - 50,
-      height: billingTableRowHeight,
-      borderColor: rgb(0, 0, 0),
-      borderWidth: 0.5,
-    });
+      page.drawRectangle({
+        x: billingTableX + 50,
+        y: billingTableBottomY + billingTableRowHeight,
+        width: billingTableWidth - 50,
+        height: billingTableRowHeight,
+        borderColor: rgb(0, 0, 0),
+        borderWidth: 0.5,
+      });
 
-    // 縦線
-    const dividerX2 = billingTableX + 150;
-    page.drawLine({
-      start: { x: dividerX2, y: billingTableBottomY + billingTableRowHeight },
-      end: { x: dividerX2, y: billingTableBottomY + billingTableRowHeight * 2 },
-      color: rgb(0, 0, 0),
-      thickness: 0.5,
-    });
+      // 縦線
+      const dividerX2 = billingTableX + 150;
+      page.drawLine({
+        start: { x: dividerX2, y: billingTableBottomY + billingTableRowHeight },
+        end: { x: dividerX2, y: billingTableBottomY + billingTableRowHeight * 2 },
+        color: rgb(0, 0, 0),
+        thickness: 0.5,
+      });
 
-    page.drawText(`${param.zeiRat ?? ''}％対象合計`, {
-      x: billingTableX + 70,
-      y: billingTableBottomY + billingTableRowHeight + 6,
-      font: customFont,
-      size: 10,
-    });
-    page.drawText(subtotalText, {
-      x: amountX, // 縦線の右側に配置
-      y: billingTableBottomY + billingTableRowHeight + 6,
-      font: customFont,
-      size: 10,
-    });
+      page.drawText(`${param.zeiRat ?? ''}％対象合計`, {
+        x: billingTableX + 70,
+        y: billingTableBottomY + billingTableRowHeight + 6,
+        font: customFont,
+        size: 10,
+      });
+      page.drawText(subtotalText, {
+        x: amountX, // 縦線の右側に配置
+        y: billingTableBottomY + billingTableRowHeight + 6,
+        font: customFont,
+        size: 10,
+      });
 
-    // --- 3行目：消費税 ---
-    const taxText = '￥' + Number(param.zeiAmt ?? 0).toLocaleString();
-    const taxTextWidth = customFont.widthOfTextAtSize(taxText, 10);
-    const taxAmountX = billingTableX + billingTableWidth - taxTextWidth - rightPadding;
+      // --- 3行目：消費税 ---
+      const taxText = '￥' + Number(param.zeiAmt ?? 0).toLocaleString();
+      const taxTextWidth = customFont.widthOfTextAtSize(taxText, 10);
+      const taxAmountX = billingTableX + billingTableWidth - taxTextWidth - rightPadding;
 
-    // 長方形の描画
-    page.drawRectangle({
-      x: billingTableX + 50,
-      y: billingTableBottomY,
-      width: billingTableWidth - 50,
-      height: billingTableRowHeight,
-      borderColor: rgb(0, 0, 0),
-      borderWidth: 0.5,
-    });
+      // 長方形の描画
+      page.drawRectangle({
+        x: billingTableX + 50,
+        y: billingTableBottomY,
+        width: billingTableWidth - 50,
+        height: billingTableRowHeight,
+        borderColor: rgb(0, 0, 0),
+        borderWidth: 0.5,
+      });
 
-    // 縦線の描画
-    page.drawLine({
-      start: { x: dividerX2, y: billingTableBottomY },
-      end: { x: dividerX2, y: billingTableBottomY + billingTableRowHeight },
-      color: rgb(0, 0, 0),
-      thickness: 0.5,
-    });
+      // 縦線の描画
+      page.drawLine({
+        start: { x: dividerX2, y: billingTableBottomY },
+        end: { x: dividerX2, y: billingTableBottomY + billingTableRowHeight },
+        color: rgb(0, 0, 0),
+        thickness: 0.5,
+      });
 
-    page.drawText(`消費税（${param.zeiRat ?? ''}％）`, {
-      x: billingTableX + 70,
-      y: billingTableBottomY + 7,
-      font: customFont,
-      size: 10,
-    });
-    // 金額（右寄せ）
-    page.drawText(taxText, {
-      x: taxAmountX, // 計算したX座標を使用
-      y: billingTableBottomY + 7,
-      font: customFont,
-      size: 10,
-    });
+      page.drawText(`消費税（${param.zeiRat ?? ''}％）`, {
+        x: billingTableX + 70,
+        y: billingTableBottomY + 7,
+        font: customFont,
+        size: 10,
+      });
+      // 金額（右寄せ）
+      page.drawText(taxText, {
+        x: taxAmountX, // 計算したX座標を使用
+        y: billingTableBottomY + 7,
+        font: customFont,
+        size: 10,
+      });
+    }
 
     /* ---------------- 署名画像 ---------------- */
     const pngImage = await pdfDoc.embedPng(image);
@@ -375,34 +378,31 @@ export const usePdf = (): [(param: BillHeadValues) => Promise<Blob>] => {
       const meisaiList = meisai?.meisai ?? [];
       // --- 公演情報テーブル ---
       const colWidthsPerRow = [
-        [50, 50, 50, 265, 50, 60],
-        [50, 300, 50, 125],
+        [40, 60, 40, 385],
+        [40, 60, 40, 385], //  ダミー
+        [40, 205, 40, 130, 40, 70],
       ];
 
       const rows: (string | number)[][] = [
-        [
-          '受注番号',
-          meisai?.juchuHeadId ?? '',
-          '公演名',
-          meisai?.koenNam ?? '',
-          '御担当',
-          `${meisai?.kokyakuTantoNam ?? ''} 様`,
-        ],
+        ['受注番号', meisai?.juchuHeadId ?? '', '公演名', meisai?.koenNam ?? ''],
+        ['', '', '', ''], //ダミー（↑を2行にするための）
         [
           '公演場所',
           meisai?.koenbashoNam ?? '',
           '貸出期間',
           `${formatDate(meisai?.seikyuRange?.strt)}～${formatDate(meisai?.seikyuRange?.end)}`,
+          '御担当',
+          `${meisai?.kokyakuTantoNam ?? ''} 様`,
         ],
       ];
 
-      // --- 公演情報の描画 ---
       rows.forEach((row, rowIndex) => {
-        if (drawPositionY - rowHeight < pageMarginBottom) {
+        if (rowIndex === 1) return;
+        const currentRowHeight = rowIndex === 0 ? rowHeight * 1.5 : rowHeight;
+        if (drawPositionY - currentRowHeight < pageMarginBottom) {
           currentPage = addNewPage();
           drawPositionY = 800;
         }
-
         const colWidths = colWidthsPerRow[rowIndex];
         let colX = billingTableX;
 
@@ -422,9 +422,9 @@ export const usePdf = (): [(param: BillHeadValues) => Promise<Blob>] => {
           if (colIndex % 2 === 0) {
             currentPage.drawRectangle({
               x: colX,
-              y: drawPositionY - rowHeight,
+              y: drawPositionY - currentRowHeight,
               width: cellWidth,
-              height: rowHeight,
+              height: currentRowHeight,
               color: rgb(0.9, 0.9, 0.9),
             });
           }
@@ -432,18 +432,17 @@ export const usePdf = (): [(param: BillHeadValues) => Promise<Blob>] => {
           // 枠線
           currentPage.drawRectangle({
             x: colX,
-            y: drawPositionY - rowHeight,
+            y: drawPositionY - currentRowHeight,
             width: cellWidth,
-            height: rowHeight,
+            height: currentRowHeight,
             borderColor: rgb(0, 0, 0),
             borderWidth: 1,
           });
 
           // テキスト
           const textToDraw = String(cellText);
+          console.log('textToDraw', textToDraw);
           const textWidth = customFont.widthOfTextAtSize(textToDraw, 9);
-          // const textX = typeof cellText === 'number' ? colX + cellWidth - textWidth - 5 : colX + 5;
-
           let textX: number;
           if (colIndex % 2 === 0) {
             // 偶数列（項目名）は中央寄せ
@@ -455,41 +454,93 @@ export const usePdf = (): [(param: BillHeadValues) => Promise<Blob>] => {
             // 文字列は左寄せ
             textX = colX + 5;
           }
-          currentPage.drawText(textToDraw, {
-            x: textX,
-            y: drawPositionY - rowHeight + 7,
-            font: customFont,
-            size: 9,
-            color: rgb(0, 0, 0),
-          });
+          let textToDrawFinal = textToDraw;
+          const availableWidth = cellWidth - (colIndex % 2 === 0 ? 0 : 10);
+          const fontSize = 9;
+
+          if (rowIndex === 0 && customFont.widthOfTextAtSize(textToDraw, fontSize) > availableWidth) {
+            let line1 = '';
+            let line2 = textToDraw;
+            for (let i = 0; i < textToDraw.length; i++) {
+              if (customFont.widthOfTextAtSize(line1 + textToDraw[i], fontSize) <= availableWidth) {
+                line1 += textToDraw[i];
+              } else {
+                line2 = textToDraw.slice(i);
+                break;
+              }
+            }
+            // 2行目も溢れるならカット
+            if (customFont.widthOfTextAtSize(line2, fontSize) > availableWidth) {
+              while (customFont.widthOfTextAtSize(line2, fontSize) > availableWidth && line2.length > 0) {
+                line2 = line2.slice(0, -1);
+              }
+            }
+            textToDrawFinal = line1 + '\n' + line2;
+          } else {
+            if (customFont.widthOfTextAtSize(textToDrawFinal, fontSize) > availableWidth) {
+              while (
+                customFont.widthOfTextAtSize(textToDrawFinal, fontSize) > availableWidth &&
+                textToDrawFinal.length > 0
+              ) {
+                textToDrawFinal = textToDrawFinal.slice(0, -2) + '様';
+              }
+            }
+          }
+
+          // 描画
+          if (rowIndex === 0 && colIndex === 3) {
+            currentPage.drawText(textToDrawFinal, {
+              x: textX,
+              y: drawPositionY - currentRowHeight + 18,
+              font: customFont,
+              size: fontSize,
+              color: rgb(0, 0, 0),
+              lineHeight: fontSize + 2,
+            });
+          } else if (rowIndex === 0) {
+            currentPage.drawText(textToDrawFinal, {
+              x: textX,
+              y: drawPositionY - currentRowHeight + 12,
+              font: customFont,
+              size: fontSize,
+              color: rgb(0, 0, 0),
+            });
+          } else {
+            currentPage.drawText(textToDrawFinal, {
+              x: textX,
+              y: drawPositionY - currentRowHeight + 7,
+              font: customFont,
+              size: fontSize,
+              color: rgb(0, 0, 0),
+            });
+          }
 
           colX += cellWidth;
         });
 
-        drawPositionY -= rowHeight;
+        drawPositionY -= currentRowHeight;
       });
 
       // --- 明細テーブルデータ ---
       const columnWidthsByRow = {
-        header: [250, 30, 75, 75, 50, 45],
-        data: [250, 30, 75, 75, 50, 45],
-        summary: [355, 75, 95],
+        header: [275, 30, 50, 80, 90],
+        data: [275, 30, 50, 80, 90],
+        line: [355, 80, 90],
+        summary: [435, 90],
       };
 
       const tableData = [
-        ['項　　　　　　　目', '数量', '単価', '金額', '本番日数', '備考'],
+        ['項　　　　　　　目', '数量', '本番日数', '単価', '金額'],
         ...meisaiList.map((item) => [
           item.nam ?? '',
           item.qty ?? 0,
-          item.tankaAmt ?? 0,
-          item.shokeiAmt,
           item.honbanbiQty ?? 0,
-          '',
+          item.tankaAmt ?? 0,
+          item.shokeiAmt ?? 0,
         ]),
         ['', '', ''],
-        ['伝　票　計', meisai?.nebikiAftAmt, ''],
+        ['伝　票　計', meisai?.nebikiAftAmt],
       ];
-
       // --- 明細テーブル描画 ---
       const fontSize = 10;
 
@@ -499,9 +550,8 @@ export const usePdf = (): [(param: BillHeadValues) => Promise<Blob>] => {
           currentPage = addNewPage();
           drawPositionY = 800;
 
-          // 次ページ先頭がヘッダー以外の時だけヘッダー描画
           if (rowIndex !== 0) {
-            const header = ['項　　　　　　　目', '数量', '単価', '金額', '本番日数', '備考'];
+            const header = ['項　　　　　　　目', '数量', '本番日数', '単価', '金額'];
             let colX = billingTableX;
             header.forEach((h, i) => {
               const w = columnWidthsByRow.header[i];
@@ -530,12 +580,21 @@ export const usePdf = (): [(param: BillHeadValues) => Promise<Blob>] => {
         let currentRowWidths: number[];
         let fillColor: ReturnType<typeof rgb> | undefined;
 
+        const summaryRowIndex = tableData.length - 1;
+        const lineRowIndex = tableData.length - 2;
+
         if (rowIndex === 0) {
+          // 0行目: header
           currentRowWidths = columnWidthsByRow.header;
           fillColor = rgb(0.804, 0.894, 0.808);
-        } else if (rowIndex >= tableData.length - 2) {
+        } else if (rowIndex === summaryRowIndex) {
+          // 最終行: summary
           currentRowWidths = columnWidthsByRow.summary;
+        } else if (rowIndex === lineRowIndex) {
+          // 最終から2番目の行: line
+          currentRowWidths = columnWidthsByRow.line;
         } else {
+          // それ以外: data
           currentRowWidths = columnWidthsByRow.data;
         }
 
@@ -592,6 +651,7 @@ export const usePdf = (): [(param: BillHeadValues) => Promise<Blob>] => {
       // 明細ごとに余白
       drawPositionY -= 10;
     });
+
     /* ---------------- フッター描画処理 ---------------- */
 
     // すべてのページを取得
