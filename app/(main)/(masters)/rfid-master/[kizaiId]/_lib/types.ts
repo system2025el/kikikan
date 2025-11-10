@@ -33,6 +33,9 @@ export type RfidsMasterTableValues = {
   stsId: number | null;
   stsNam: string | null;
   shozokuId: number;
+  shozokuNam: string;
   elNum: number | null;
+  updDat: Date;
+  updUser: string;
   tblDspId: number;
 };

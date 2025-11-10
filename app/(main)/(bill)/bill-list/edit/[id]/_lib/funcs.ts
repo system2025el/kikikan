@@ -15,7 +15,7 @@ import {
 import { SeikyuDatJuchuKizai } from '@/app/_lib/db/types/t-seikyu-date-juchu-kizai-type';
 import { SeikyuHead } from '@/app/_lib/db/types/t-seikyu-head-type';
 import { SeikyuMeisai } from '@/app/_lib/db/types/t-seikyu-meisai-type';
-import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 
 import { BillHeadValues } from '../../../_lib/types';
@@ -57,7 +57,7 @@ export const updateBill = async (data: BillHeadValues, user: string): Promise<nu
     kokyaku_nam: data.aite.nam,
     nyuryoku_user: data.nyuryokuUser,
     zei_rat: data.zeiRat,
-    upd_dat: toJapanTimeString(undefined, '-'),
+    upd_dat: toJapanTimeStampString(),
     upd_user: user,
   };
   // 明細ヘッド
@@ -76,9 +76,9 @@ export const updateBill = async (data: BillHeadValues, user: string): Promise<nu
     nebiki_amt: l.nebikiAmt ?? null,
     zei_flg: Number(l.zeiFlg),
     dsp_ord_num: index + 1,
-    add_dat: toJapanTimeString(undefined, '-'),
+    add_dat: toJapanTimeStampString(),
     add_user: user,
-    upd_dat: toJapanTimeString(undefined, '-'),
+    upd_dat: toJapanTimeStampString(),
     upd_user: user,
     meisai: l.meisai?.map((m) => ({
       seikyu_head_id: data.seikyuHeadId!,
@@ -89,9 +89,9 @@ export const updateBill = async (data: BillHeadValues, user: string): Promise<nu
       meisai_honbanbi_qty: m.honbanbiQty ?? 0,
       meisai_tanka_amt: m.tankaAmt ?? 0,
       dsp_ord_num: index + 1,
-      add_dat: toJapanTimeString(undefined, '-'),
+      add_dat: toJapanTimeStampString(),
       add_user: user,
-      upd_dat: toJapanTimeString(undefined, '-'),
+      upd_dat: toJapanTimeStampString(),
       upd_user: user,
     })),
   }));
@@ -103,7 +103,7 @@ export const updateBill = async (data: BillHeadValues, user: string): Promise<nu
           juchu_head_id: d.juchu_head_id!,
           juchu_kizai_head_id: d.juchu_kizai_head_id!,
           seikyu_dat: d.seikyu_end_dat!,
-          add_dat: toJapanTimeString(),
+          add_dat: toJapanTimeStampString(),
           add_user: user,
         }))
       : [];

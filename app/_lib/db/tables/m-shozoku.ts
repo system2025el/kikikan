@@ -1,6 +1,6 @@
 'use server';
 
-import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { BasesMasterDialogValues } from '@/app/(main)/(masters)/bases-master/_lib/types';
 
 import pool from '../postgres';
@@ -81,7 +81,7 @@ export const insertNewShozoku = async (data: BasesMasterDialogValues, user: stri
           $3, $4, $5
         );
       `;
-  const date = toJapanTimeString();
+  const date = toJapanTimeStampString();
   const values = [data.shozokuNam, Number(data.delFlg), data.mem, date, user];
   try {
     await pool.query(query, values);

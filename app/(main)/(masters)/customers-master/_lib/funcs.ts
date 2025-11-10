@@ -8,7 +8,7 @@ import {
   selectOneCustomer,
   upDateCustomerDB,
 } from '@/app/_lib/db/tables/m-kokyaku';
-import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { emptyCustomer } from './datas';
 import { CustomersMasterDialogValues, CustomersMasterTableValues } from './types';
@@ -177,7 +177,7 @@ export const addNewCustomer = async (data: CustomersMasterDialogValues, user: st
  * @param id 更新する顧客マスタID
  */
 export const updateCustomer = async (rawData: CustomersMasterDialogValues, id: number, user: string) => {
-  const date = toJapanTimeString();
+  const date = toJapanTimeStampString();
   const updateData = {
     kokyaku_id: id,
     kokyaku_nam: rawData.kokyakuNam,

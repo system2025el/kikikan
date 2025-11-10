@@ -8,7 +8,7 @@ import {
   selectOneDaibumon,
   updateDaibumonDB,
 } from '@/app/_lib/db/tables/m-daibumon';
-import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { emptyDaibumon } from './datas';
 import { DaibumonsMasterDialogValues, DaibumonsMasterTableValues } from './types';
@@ -95,7 +95,7 @@ export const addNewDaibumon = async (data: DaibumonsMasterDialogValues, user: st
  * @param id 更新する大部門マスタID
  */
 export const updateDaibumon = async (rawData: DaibumonsMasterDialogValues, id: number, user: string) => {
-  const date = toJapanTimeString();
+  const date = toJapanTimeStampString();
   const updateData = {
     dai_bumon_id: id,
     dai_bumon_nam: rawData.daibumonNam,

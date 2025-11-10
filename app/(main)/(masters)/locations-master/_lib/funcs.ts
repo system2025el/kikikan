@@ -9,7 +9,7 @@ import {
   selectOneLoc,
   upDateLocDB,
 } from '@/app/_lib/db/tables/m-koenbasho';
-import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 
 import { emptyLoc } from './datas';
@@ -125,7 +125,7 @@ export const addNewLoc = async (data: LocsMasterDialogValues, user: string) => {
  * @param id 更新する公演場所マスタID
  */
 export const updateLoc = async (data: LocsMasterDialogValues, id: number, user: string) => {
-  const date = toJapanTimeString();
+  const date = toJapanTimeStampString();
   const updateData = {
     koenbasho_id: id,
     koenbasho_nam: data.locNam,

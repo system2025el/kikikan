@@ -8,7 +8,7 @@ import { insertEqptHistory } from '@/app/_lib/db/tables/m-kizai-his';
 import { updateMasterUpdates } from '@/app/_lib/db/tables/m-master-update';
 import { selectCountOfTheEqpt } from '@/app/_lib/db/tables/m-rfid';
 import { selectFilteredEqpts } from '@/app/_lib/db/tables/v-kizai-list';
-import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { getBumonsSelection, getDaibumonsSelection, getShukeibumonsSelection } from '../../_lib/funcs';
 import { fakeToNull, nullToFake } from '../../_lib/value-converters';
@@ -162,7 +162,7 @@ export const updateEqpt = async (
   id: number,
   user: string
 ) => {
-  const date = toJapanTimeString();
+  const date = toJapanTimeStampString();
   const updateData = {
     kizai_id: id,
     kizai_nam: rawData.kizaiNam,

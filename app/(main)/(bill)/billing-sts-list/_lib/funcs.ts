@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 
 import { upsertSeikyuDat } from '@/app/_lib/db/tables/t-seikyu-date-juchu-kizai';
 import { selectFilteredBillingSituations } from '@/app/_lib/db/tables/v-seikyu-date-lst';
-import { toJapanDateString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanDateString, toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { BillingStsSearchValues, BillingStsTableValues } from './types';
 
@@ -74,7 +74,7 @@ export const changeSeikyuDat = async (
     juchu_head_id: juchuId,
     juchu_kizai_head_id: kziHeadId,
     seikyu_dat: toJapanDateString(newDat),
-    add_dat: toJapanTimeString(),
+    add_dat: toJapanTimeStampString(),
     add_user: user,
   };
   try {

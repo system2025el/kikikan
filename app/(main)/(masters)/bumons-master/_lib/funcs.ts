@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 
 import { insertNewBumon, selectFilteredBumons, selectOneBumon, upDateBumonDB } from '@/app/_lib/db/tables/m-bumon';
-import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { FAKE_NEW_ID } from '../../_lib/constants';
 import { getDaibumonsSelection, getShukeibumonsSelection } from '../../_lib/funcs';
@@ -100,7 +100,7 @@ export const addNewBumon = async (data: BumonsMasterDialogValues, user: string) 
  * @param id 更新する部門マスタID
  */
 export const updateBumon = async (rawData: BumonsMasterDialogValues, id: number, user: string) => {
-  const date = toJapanTimeString();
+  const date = toJapanTimeStampString();
   const updateDate = {
     bumon_id: id,
     bumon_nam: rawData.bumonNam,

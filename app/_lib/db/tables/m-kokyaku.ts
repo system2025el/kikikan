@@ -1,6 +1,6 @@
 'use server';
 
-import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { CustomersMasterDialogValues } from '@/app/(main)/(masters)/customers-master/_lib/types';
 
 import pool from '../postgres';
@@ -110,7 +110,7 @@ export const insertNewCustomer = async (data: CustomersMasterDialogValues, user:
     $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16
   );
 `;
-  const date = toJapanTimeString();
+  const date = toJapanTimeStampString();
   const values = [
     data.kokyakuNam,
     data.kana,

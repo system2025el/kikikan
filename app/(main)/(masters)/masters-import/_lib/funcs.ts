@@ -11,7 +11,7 @@ import {
   checkShukeibumon,
   checkTanaban,
 } from '@/app/_lib/db/tables/masters-import';
-import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { EqptImportType, KizaiImportTypes, RfidImportTypes, TanabanImportTypes } from './types';
 
@@ -26,7 +26,7 @@ import { EqptImportType, KizaiImportTypes, RfidImportTypes, TanabanImportTypes }
 export const ImportEqptRfidData = async (data: EqptImportType[], user: string) => {
   console.log(data);
   // 現在時刻
-  const now = toJapanTimeString();
+  const now = toJapanTimeStampString();
   /* 重複のない棚番用データ */
   const tanabanList: TanabanImportTypes[] = Array.from(
     new Map(

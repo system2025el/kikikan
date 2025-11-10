@@ -12,7 +12,7 @@ import { insertNewRfidSts, updateRfidTagStsDB } from '@/app/_lib/db/tables/t-rfi
 import { selectOneRfid, selectRfidsOfTheKizai } from '@/app/_lib/db/tables/v-rfid';
 import { MRfidDBValues } from '@/app/_lib/db/types/m-rfid-type';
 import { RfidStatusResultValues } from '@/app/_lib/db/types/t-rfid-status-result-type';
-import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { fakeToNull, nullToFake } from '../../../_lib/value-converters';
 import { emptyRfid } from './datas';
@@ -35,10 +35,13 @@ export const getRfidsOfTheKizai = async (kizaiId: number) => {
       stsId: d.rfid_kizai_sts,
       stsNam: d.sts_nam,
       shozokuId: d.shozoku_id,
+      shozokuNam: d.shozoku_nam,
       elNum: d.el_num,
       mem: d.mem,
       tblDspId: index + 1,
       delFlg: Boolean(d.del_flg),
+      updDat: d.upd_dat,
+      updUser: d.upd_user,
     }));
     console.log('機材マスタリストを取得した');
     return filteredRfids;
@@ -110,14 +113,14 @@ export const addNewRfid = async (data: RfidsMasterDialogValues, kizaiId: number,
     el_num: data.elNum,
     mem: data.mem,
     del_flg: 0,
-    add_dat: toJapanTimeString(),
+    add_dat: toJapanTimeStampString(),
     add_user: user,
   };
   const insertStsData: RfidStatusResultValues = {
     rfid_tag_id: data.tagId,
     shozoku_id: data.shozokuId,
     rfid_kizai_sts: data.rfidKizaiSts,
-    upd_dat: toJapanTimeString(),
+    upd_dat: toJapanTimeStampString(),
     upd_user: user,
   };
   const connection = await pool.connect();
@@ -152,7 +155,7 @@ export const updateRfid = async (
   user: string
 ) => {
   /** 現在時刻 */
-  const now = toJapanTimeString(undefined, '-');
+  const now = toJapanTimeStampString();
   const masterChanged =
     JSON.stringify({ tagId: current.tagId, elNum: current.elNum, mem: current.mem, delFlg: current.delFlg }) !==
       JSON.stringify({

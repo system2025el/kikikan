@@ -2,7 +2,7 @@
 
 import { PoolClient } from 'pg';
 
-import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import pool from '../postgres';
 import { SCHEMA, supabase } from '../supabase';
@@ -17,7 +17,7 @@ export const updateRfidTagStsDB = async (
   user: string,
   connection: PoolClient
 ) => {
-  const now = toJapanTimeString(undefined, '-');
+  const now = toJapanTimeStampString();
   // RFIDタグ管理テーブル側準備
   const placeholders = data
     .map((_, index) => {
