@@ -4,13 +4,13 @@ import { NyukoEqptDetail } from './_ui/nyuko-eqpt-detail';
 
 const Page = async (props: {
   params: Promise<{
-    juchuHeadId: string;
-    juchuKizaiHeadKbn: string;
-    nyushukoBashoId: string;
+    jhId: string;
+    jkhKbn: string;
+    nbId: string;
     nyushukoDat: string;
-    sagyoKbnId: string;
-    juchuKizaiHeadId: string;
-    juchuKizaiMeisaiId: string;
+    skId: string;
+    jkhId: string;
+    jkmId: string;
     kizaiId: string;
   }>;
 }) => {
@@ -20,12 +20,12 @@ const Page = async (props: {
   console.log('a');
 
   const nyukoEqptDetailData: NyukoEqptDetailValues | null = await getNyukoEqptDetail(
-    Number(params.juchuHeadId),
-    Number(params.juchuKizaiHeadId),
-    Number(params.juchuKizaiMeisaiId),
-    Number(params.nyushukoBashoId),
+    Number(params.jhId),
+    Number(params.jkhId),
+    Number(params.jkmId),
+    Number(params.nbId),
     date,
-    Number(params.sagyoKbnId),
+    Number(params.skId),
     Number(params.kizaiId)
   );
   if (!nyukoEqptDetailData) {
@@ -33,12 +33,12 @@ const Page = async (props: {
   }
 
   const nyukoEqptDetailTableData: NyukoEqptDetailTableValues[] = await getNyukoEqptDetailTable(
-    Number(params.juchuHeadId),
-    Number(params.juchuKizaiHeadId),
-    Number(params.juchuKizaiMeisaiId),
-    Number(params.nyushukoBashoId),
+    Number(params.jhId),
+    Number(params.jkhId),
+    Number(params.jkmId),
+    Number(params.nbId),
     date,
-    Number(params.sagyoKbnId),
+    Number(params.skId),
     Number(params.kizaiId)
   );
 

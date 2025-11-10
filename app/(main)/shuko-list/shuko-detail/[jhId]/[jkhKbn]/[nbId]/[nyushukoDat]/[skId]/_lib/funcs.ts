@@ -16,7 +16,6 @@ import { JuchuCtnMeisai } from '@/app/_lib/db/types/t_juchu_ctn_meisai-type';
 import { NyushukoDen } from '@/app/_lib/db/types/t-nyushuko-den-type';
 import { NyushukoFix } from '@/app/_lib/db/types/t-nyushuko-fix-type';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
-import { NyukoDetail } from '@/app/(main)/nyuko-list/nyuko-detail/[juchuHeadId]/[juchuKizaiHeadKbn]/[nyushukoBashoId]/[nyushukoDat]/[sagyoKbnId]/_ui/nyuko-detail';
 
 import { ShukoDetailTableValues, ShukoDetailValues } from './types';
 

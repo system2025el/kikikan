@@ -6,21 +6,21 @@ import { NyukoDetail } from './_ui/nyuko-detail';
 
 const Page = async (props: {
   params: Promise<{
-    juchuHeadId: string;
-    juchuKizaiHeadKbn: string;
-    nyushukoBashoId: string;
+    jhId: string;
+    jkhKbn: string;
+    nbId: string;
     nyushukoDat: string;
-    sagyoKbnId: string;
+    skId: string;
   }>;
 }) => {
   const params = await props.params;
 
   const nyukoDetailData: NyukoDetailValues = {
-    juchuHeadId: Number(params.juchuHeadId),
-    juchuKizaiHeadKbn: Number(params.juchuKizaiHeadKbn),
-    nyushukoBashoId: Number(params.nyushukoBashoId),
+    juchuHeadId: Number(params.jhId),
+    juchuKizaiHeadKbn: Number(params.jkhKbn),
+    nyushukoBashoId: Number(params.nbId),
     nyushukoDat: decodeURIComponent(params.nyushukoDat),
-    sagyoKbnId: Number(params.sagyoKbnId),
+    sagyoKbnId: Number(params.skId),
   };
 
   const nyukoDetailTableData = await getNyukoDetail(
@@ -35,11 +35,11 @@ const Page = async (props: {
   }
 
   const fixFlag = await getNyukoFixFlag(
-    Number(params.juchuHeadId),
+    Number(params.jhId),
     nyukoDetailTableData[0].juchuKizaiHeadId!,
     70,
     nyukoDetailData.nyushukoDat,
-    Number(params.nyushukoBashoId)
+    Number(params.nbId)
   );
   return (
     <NyukoDetail nyukoDetailData={nyukoDetailData} nyukoDetailTableData={nyukoDetailTableData} fixFlag={fixFlag} />

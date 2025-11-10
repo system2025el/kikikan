@@ -4,21 +4,21 @@ import { ShukoDetail } from './_ui/shuko-detail';
 
 const Page = async (props: {
   params: Promise<{
-    juchuHeadId: string;
-    juchuKizaiHeadKbn: string;
-    nyushukoBashoId: string;
+    jhId: string;
+    jkhKbn: string;
+    nbId: string;
     nyushukoDat: string;
-    sagyoKbnId: string;
+    skId: string;
   }>;
 }) => {
   const params = await props.params;
 
   const shukoDetailData: ShukoDetailValues = {
-    juchuHeadId: Number(params.juchuHeadId),
-    juchuKizaiHeadKbn: Number(params.juchuKizaiHeadKbn),
-    nyushukoBashoId: Number(params.nyushukoBashoId),
+    juchuHeadId: Number(params.jhId),
+    juchuKizaiHeadKbn: Number(params.jkhKbn),
+    nyushukoBashoId: Number(params.nbId),
     nyushukoDat: decodeURIComponent(params.nyushukoDat),
-    sagyoKbnId: Number(params.sagyoKbnId),
+    sagyoKbnId: Number(params.skId),
   };
 
   const shukoDetailTableData = await getShukoDetail(
@@ -33,11 +33,11 @@ const Page = async (props: {
   }
 
   const fixFlag = await getShukoFixFlag(
-    Number(params.juchuHeadId),
+    Number(params.jhId),
     shukoDetailTableData[0].juchuKizaiHeadId!,
     60,
     shukoDetailData.nyushukoDat,
-    Number(params.nyushukoBashoId)
+    Number(params.nbId)
   );
   return (
     <ShukoDetail shukoDetailData={shukoDetailData} shukoDetailTableData={shukoDetailTableData} fixFlag={fixFlag} />
