@@ -22,6 +22,7 @@ import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { RadioButtonGroup, SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
+import { toJapanDateString } from '../../_lib/date-conversion';
 import { FormDateX } from '../../_ui/date';
 import { selectNone, SelectTypes } from '../../_ui/form-box';
 import { FAKE_NEW_ID } from '../../(masters)/_lib/constants';
@@ -59,7 +60,7 @@ export const EqptOrderList = ({
   const { control, handleSubmit, watch } = useForm<EqptOrderSearchValues>({
     defaultValues: {
       radio: 'shuko',
-      range: { from: new Date(), to: new Date() },
+      range: { from: new Date(toJapanDateString()), to: new Date(toJapanDateString()) },
       kokyaku: FAKE_NEW_ID,
       koenbashoNam: '',
       listSort: { sort: 'shuko', order: 'asc' },
