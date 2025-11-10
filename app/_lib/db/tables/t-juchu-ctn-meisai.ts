@@ -2,7 +2,7 @@
 
 import { PoolClient } from 'pg';
 
-import { JuchuContainerMeisaiValues } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_lib/types';
+import { JuchuContainerMeisaiValues } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
 
 import { SCHEMA, supabase } from '../supabase';
 import { JuchuCtnMeisai } from '../types/t_juchu_ctn_meisai-type';

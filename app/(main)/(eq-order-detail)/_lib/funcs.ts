@@ -72,7 +72,7 @@ import {
   JuchuKizaiHonbanbiValues,
   JuchuKizaiMeisaiValues,
   StockTableValues,
-} from '../eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_lib/types';
+} from '../eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
 import { DetailOerValues, OyaJuchuContainerMeisaiValues, OyaJuchuKizaiMeisaiValues } from './types';
 
 /**

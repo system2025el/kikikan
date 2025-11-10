@@ -10,7 +10,7 @@ import { checkMailAdr, checkShainCod, selectActiveUsers } from '@/app/_lib/db/ta
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import { FormBox } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
-import { data } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_lib/data';
+import { data } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/data';
 
 import { FAKE_NEW_ID } from '../../_lib/constants';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
