@@ -91,7 +91,7 @@ export const selectFilteredKizaiHead = async ({
     .schema(SCHEMA)
     .from('v_juchu_kizai_head_lst')
     .select(
-      `juchu_head_id, juchu_kizai_head_id, kokyaku_nam, koen_nam, koenbasho_nam, head_nam, kics_shuko_dat, kics_nyuko_dat, yard_shuko_dat, yard_nyuko_dat`
+      `juchu_head_id, juchu_kizai_head_id, juchu_kizai_head_kbn, kokyaku_nam, koen_nam, koenbasho_nam, head_nam, kics_shuko_dat, kics_nyuko_dat, yard_shuko_dat, yard_nyuko_dat, oya_juchu_kizai_head_id`
     );
 
   // 期間のfromが入ってたら

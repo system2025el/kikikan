@@ -15,6 +15,7 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
+import { useRouter } from 'next/navigation';
 import React, { useEffect, useMemo } from 'react';
 
 import { toJapanDateString, toJapanTimeString } from '../../_lib/date-conversion';
@@ -22,7 +23,7 @@ import { Loading } from '../../_ui/loading';
 import { MuiTablePagination } from '../../_ui/table-pagination';
 import { ROWS_PER_MASTER_TABLE_PAGE } from '../../(masters)/_lib/constants';
 import { LightTooltipWithText } from '../../(masters)/_ui/tables';
-import { EqptOrderListTableValues } from '../_lib/types';
+import { EqptOrderListTableValues, EqptOrderSearchValues } from '../_lib/types';
 
 /**
  * 受注一覧用テーブル
@@ -33,17 +34,21 @@ export const EqptOrderTable = ({
   orderList,
   isLoading,
   page,
+  searchParams,
   setIsLoading,
   setPage,
 }: {
   orderList: EqptOrderListTableValues[];
   isLoading: boolean;
   page: number;
+  searchParams: EqptOrderSearchValues;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setPage: React.Dispatch<React.SetStateAction<number>>;
 }) => {
   /** テーブル1ページの行数 */
   const rowsPerPage = ROWS_PER_MASTER_TABLE_PAGE;
+  /** ページルーター */
+  const router = useRouter();
 
   /** 表示するデータ */
   const list = useMemo(() => {
@@ -112,7 +117,10 @@ export const EqptOrderTable = ({
                         variant="text"
                         size="small"
                         sx={{ py: 0.2, px: 1, m: 0, width: 'auto' }}
-                        href={`/order/${order.juchuHeadId}/${'view'}`}
+                        onClick={() => {
+                          sessionStorage.setItem('orderListSearchParams', JSON.stringify(searchParams));
+                          router.push(`/order/${order.juchuHeadId}/${'view'}`);
+                        }}
                       >
                         {order.juchuHeadId}
                       </Button>
@@ -128,8 +136,27 @@ export const EqptOrderTable = ({
                           width: 'auto',
                           justifyContent: 'flex-start',
                           textAlign: 'left',
+                          color:
+                            order.headKbn === 1
+                              ? 'primary'
+                              : order.headKbn === 2
+                                ? 'red'
+                                : order.headKbn === 3
+                                  ? 'green'
+                                  : 'primary',
                         }}
-                        href={`/eq-main-order-detail/${order.juchuHeadId}/${order.kizaiHeadId}/view`}
+                        onClick={() => {
+                          sessionStorage.setItem('orderListSearchParams', JSON.stringify(searchParams));
+                          router.push(
+                            order.headKbn === 1
+                              ? `/eq-main-order-detail/${order.juchuHeadId}/${order.kizaiHeadId}/view`
+                              : order.headKbn === 2
+                                ? `/eq-return-order-detail/${order.juchuHeadId}/${order.kizaiHeadId}/${order.oyaJuchuKizaiHeadId}/view`
+                                : order.headKbn === 3
+                                  ? `/eq-keep-order-detail/${order.juchuHeadId}/${order.kizaiHeadId}/${order.oyaJuchuKizaiHeadId}/view`
+                                  : `/eq-main-order-detail/${order.juchuHeadId}/${order.kizaiHeadId}/view`
+                          );
+                        }}
                       >
                         <LightTooltipWithText variant={'button'} maxWidth={300}>
                           {order.headNam}
