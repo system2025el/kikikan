@@ -13,7 +13,7 @@ import {
 } from '@mui/material';
 import React from 'react';
 
-import { toJapanDateString } from '../../_lib/date-conversion';
+import { toJapanDateString, toJapanTimeString } from '../../_lib/date-conversion';
 import { LightTooltipWithText } from '../../(masters)/_ui/tables';
 import { EqptOrderListTableValues } from '../../eqpt-order-list/_lib/types';
 /**
@@ -38,18 +38,19 @@ export const VehiclesTable = ({ orders }: { orders: EqptOrderListTableValues[] }
             <TableCell>公演名</TableCell>
             <TableCell>公演場所</TableCell>
             <TableCell>顧客名</TableCell>
-            <TableCell>出庫日</TableCell>
-            <TableCell>入庫日</TableCell>
+            <TableCell>出庫日時</TableCell>
+            <TableCell>入庫日時</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {orders.map((order) => (
             <TableRow key={order.juchuHeadId} hover>
-              <TableCell align="right" sx={{ minWidth: 0, whiteSpace: 'nowrap' }}>
+              {/* <TableCell align="right" sx={{ minWidth: 0, whiteSpace: 'nowrap' }}> */}
+              <TableCell>
                 <Button
                   variant="text"
                   size="small"
-                  sx={{ py: 0.2, px: 1, m: 0, width: 'auto' }}
+                  // sx={{ py: 0.2, px: 1, m: 0, width: 'auto' }}
                   href={`/order/${order.juchuHeadId}/${'view'}`}
                 >
                   {order.juchuHeadId}
@@ -90,17 +91,17 @@ export const VehiclesTable = ({ orders }: { orders: EqptOrderListTableValues[] }
                 </LightTooltipWithText>
               </TableCell>
               <TableCell>
-                <LightTooltipWithText variant={'body2'} maxWidth={120}>
-                  {`K ${order.kShukoDat ? toJapanDateString(order.kShukoDat) : '-'}`}
+                <LightTooltipWithText variant={'body2'} maxWidth={180}>
+                  {`K ${order.kShukoDat ? toJapanTimeString(order.kShukoDat) : '-'}`}
                   <br />
-                  {`Y ${order.yShukoDat ? toJapanDateString(order.yShukoDat) : '-'}`}
+                  {`Y ${order.yShukoDat ? toJapanTimeString(order.yShukoDat) : '-'}`}
                 </LightTooltipWithText>
               </TableCell>
               <TableCell>
-                <LightTooltipWithText variant={'body2'} maxWidth={100}>
-                  {`K ${order.kNyukoDat ? toJapanDateString(order.kNyukoDat) : '-'}`}
+                <LightTooltipWithText variant={'body2'} maxWidth={180}>
+                  {`K ${order.kNyukoDat ? toJapanTimeString(order.kNyukoDat) : '-'}`}
                   <br />
-                  {`Y ${order.yNyukoDat ? toJapanDateString(order.yNyukoDat) : '-'}`}
+                  {`Y ${order.yNyukoDat ? toJapanTimeString(order.yNyukoDat) : '-'}`}
                 </LightTooltipWithText>
               </TableCell>
             </TableRow>
