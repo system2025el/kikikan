@@ -99,12 +99,12 @@ export const selectFilteredKizaiHead = async ({
     switch (radio) {
       case 'shuko': // '出庫日'
         builder.or(
-          `yard_shuko_dat.gte.${toJapanDateString(range.from)},kics_shuko_dat.gte.${toJapanDateString(range.from)}`
+          `yard_shuko_dat.gte.${toJapanDateString(range.from, '-')},kics_shuko_dat.gte.${toJapanDateString(range.from, '-')}`
         );
         break;
       case 'nyuko': // '入庫日'
         builder.or(
-          `yard_nyuko_dat.gte.${toJapanDateString(range.from)},kics_nyuko_dat.gte.${toJapanDateString(range.from)}`
+          `yard_nyuko_dat.gte.${toJapanDateString(range.from, '-')},kics_nyuko_dat.gte.${toJapanDateString(range.from, '-')}`
         );
         break;
     }
@@ -115,10 +115,14 @@ export const selectFilteredKizaiHead = async ({
     const nextDay = dayjs(range.to).tz('Asia/Tokyo').add(1, 'day').startOf('day').toDate(); // +1日
     switch (radio) {
       case 'shuko': // '出庫日'
-        builder.or(`yard_shuko_dat.lt.${toJapanDateString(nextDay)},kics_shuko_dat.lt.${toJapanDateString(nextDay)}`); // 未満
+        builder.or(
+          `yard_shuko_dat.lt.${toJapanDateString(nextDay, '-')},kics_shuko_dat.lt.${toJapanDateString(nextDay, '-')}`
+        ); // 未満
         break;
       case 'nyuko': // '入庫日'
-        builder.or(`yard_nyuko_dat.lt.${toJapanDateString(nextDay)},kics_nyuko_dat.lt.${toJapanDateString(nextDay)}`); // 未満
+        builder.or(
+          `yard_nyuko_dat.lt.${toJapanDateString(nextDay, '-')},kics_nyuko_dat.lt.${toJapanDateString(nextDay, '-')}`
+        ); // 未満
         break;
     }
   }
