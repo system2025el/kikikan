@@ -12,9 +12,9 @@ export const NyukoDetailTable = (props: { datas: NyukoDetailTableValues[] }) => 
   const router = useRouter();
   const path = usePathname();
 
-  const handleClick = (kizaiId: number | null) => {
-    if (kizaiId) {
-      router.push(`${path}/nyuko-eqpt-detail/${kizaiId}`);
+  const handleClick = (juchuKizaiHeadId: number | null, juchuKizaiMeisaiId: number | null, kizaiId: number | null) => {
+    if (juchuKizaiHeadId && juchuKizaiMeisaiId && kizaiId) {
+      router.push(`${path}/nyuko-eqpt-detail/${juchuKizaiHeadId}/${juchuKizaiMeisaiId}/${kizaiId}`);
     }
   };
 
@@ -50,7 +50,7 @@ export const NyukoDetailTable = (props: { datas: NyukoDetailTableValues[] }) => 
               <TableCell padding="checkbox">{index + 1}</TableCell>
               <TableCell
                 align="left"
-                onClick={() => handleClick(row.kizaiId)}
+                onClick={() => handleClick(row.juchuKizaiHeadId, row.juchuKizaiMeisaiId, row.kizaiId)}
                 sx={{ cursor: 'pointer', '&:hover': { backgroundColor: 'rgba(0,0,0,0.04)' } }}
               >
                 {row.kizaiNam}

@@ -25,12 +25,19 @@ import { NyukoDetailTableValues, NyukoDetailValues } from './types';
  */
 export const getNyukoDetail = async (
   juchuHeadId: number,
+  juchuKizaiHeadKbn: number,
   nyushukoBashoId: number,
   nyushukoDat: string,
   sagyoKbnId: number
 ) => {
   try {
-    const { data, error } = await selectNyushukoDetail(juchuHeadId, nyushukoBashoId, nyushukoDat, sagyoKbnId);
+    const { data, error } = await selectNyushukoDetail(
+      juchuHeadId,
+      juchuKizaiHeadKbn,
+      nyushukoBashoId,
+      nyushukoDat,
+      sagyoKbnId
+    );
 
     if (error) {
       console.error('getNyukoDetail error : ', error);
@@ -41,7 +48,7 @@ export const getNyukoDetail = async (
       juchuHeadId: d.juchu_head_id,
       juchuKizaiHeadId: d.juchu_kizai_head_id,
       juchuKizaiMeisaiId: d.juchu_kizai_meisai_id,
-      juchuKizaiHeadKbn: d.juchu_kizai_head_kbn,
+      juchuKizaiHeadKbn: d.juchu_kizai_head_kbnv,
       headNamv: d.head_namv,
       kizaiId: d.kizai_id,
       kizaiNam: d.kizai_nam,

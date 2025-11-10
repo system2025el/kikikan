@@ -5,10 +5,10 @@ import { ShukoEqptDetail } from './_ui/shuko-eqpt-detail';
 const Page = async (props: {
   params: Promise<{
     juchu_head_id: string;
+    juchu_kizai_head_kbn: string;
     nyushuko_basho_id: string;
     nyushuko_dat: string;
     sagyo_kbn_id: string;
-    juchu_kizai_head_kbn: string;
     juchu_kizai_head_id: string;
     juchu_kizai_meisai_id: string;
     kizai_id: string;
