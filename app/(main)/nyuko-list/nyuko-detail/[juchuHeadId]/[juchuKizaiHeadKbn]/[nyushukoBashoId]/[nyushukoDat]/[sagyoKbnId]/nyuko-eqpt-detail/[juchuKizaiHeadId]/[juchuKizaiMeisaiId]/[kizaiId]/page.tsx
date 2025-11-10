@@ -17,6 +17,7 @@ const Page = async (props: {
   const params = await props.params;
 
   const date = decodeURIComponent(params.nyushukoDat);
+  console.log('a');
 
   const nyukoEqptDetailData: NyukoEqptDetailValues | null = await getNyukoEqptDetail(
     Number(params.juchuHeadId),
