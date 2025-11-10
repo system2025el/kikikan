@@ -40,7 +40,7 @@ import DateX, { RSuiteDateRangePicker, TestDate } from '@/app/(main)/_ui/date';
 import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
 import { Loading } from '@/app/(main)/_ui/loading';
 import { SelectTable } from '@/app/(main)/_ui/table';
-import { equipmentRows, users, vehicleHeaders, vehicleRows } from '@/app/(main)/order/[juchu_head_id]/[mode]/_lib/data';
+import { equipmentRows, users, vehicleHeaders, vehicleRows } from '@/app/(main)/order/[juchuHeadId]/[mode]/_lib/data';
 
 import { useUnsavedChangesWarning } from '../../../../_lib/hook';
 import { addJuchuHead, copyJuchuHead, getJuchuHead, getMaxId, updJuchuHead } from '../_lib/funcs';
