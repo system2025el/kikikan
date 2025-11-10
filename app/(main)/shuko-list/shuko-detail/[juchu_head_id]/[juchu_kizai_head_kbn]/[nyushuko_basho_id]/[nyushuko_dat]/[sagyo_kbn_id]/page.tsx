@@ -5,6 +5,7 @@ import { ShukoDetail } from './_ui/shuko-detail';
 const Page = async (props: {
   params: Promise<{
     juchu_head_id: string;
+    juchu_kizai_head_kbn: string;
     nyushuko_basho_id: string;
     nyushuko_dat: string;
     sagyo_kbn_id: string;
@@ -14,6 +15,7 @@ const Page = async (props: {
 
   const shukoDetailData: ShukoDetailValues = {
     juchuHeadId: Number(params.juchu_head_id),
+    juchuKizaiHeadKbn: Number(params.juchu_kizai_head_kbn),
     nyushukoBashoId: Number(params.nyushuko_basho_id),
     nyushukoDat: decodeURIComponent(params.nyushuko_dat),
     sagyoKbnId: Number(params.sagyo_kbn_id),
@@ -21,6 +23,7 @@ const Page = async (props: {
 
   const shukoDetailTableData = await getShukoDetail(
     shukoDetailData.juchuHeadId,
+    shukoDetailData.juchuKizaiHeadKbn,
     shukoDetailData.nyushukoBashoId,
     shukoDetailData.nyushukoDat,
     shukoDetailData.sagyoKbnId

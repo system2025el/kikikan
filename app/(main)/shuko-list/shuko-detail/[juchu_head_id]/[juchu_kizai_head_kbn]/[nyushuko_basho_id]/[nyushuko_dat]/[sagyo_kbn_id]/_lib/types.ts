@@ -1,5 +1,6 @@
 export type ShukoDetailValues = {
   juchuHeadId: number;
+  juchuKizaiHeadKbn: number;
   nyushukoBashoId: number;
   nyushukoDat: string;
   sagyoKbnId: number;

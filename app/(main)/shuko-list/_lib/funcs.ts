@@ -29,7 +29,7 @@ export const getShukoList = async (queries: ShukoListSearchValues) => {
       nyushukoDat: d.nyushuko_dat,
       nyushukoBashoId: d.nyushuko_basho_id,
       juchuKizaiHeadIdv: d.juchu_kizai_head_idv,
-      juchuKizaiHeadKbn: d.juchu_kizai_head_kbn,
+      juchuKizaiHeadKbn: d.juchu_kizai_head_kbnv,
       headNamv: d.head_namv,
       sectionNamv: d.section_namv,
       kokyakuNam: d.kokyaku_nam,

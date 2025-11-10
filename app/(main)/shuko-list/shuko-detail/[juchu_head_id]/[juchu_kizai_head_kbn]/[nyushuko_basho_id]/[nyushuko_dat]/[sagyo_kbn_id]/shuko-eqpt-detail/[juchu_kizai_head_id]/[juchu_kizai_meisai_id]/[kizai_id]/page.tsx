@@ -8,6 +8,7 @@ const Page = async (props: {
     nyushuko_basho_id: string;
     nyushuko_dat: string;
     sagyo_kbn_id: string;
+    juchu_kizai_head_kbn: string;
     juchu_kizai_head_id: string;
     juchu_kizai_meisai_id: string;
     kizai_id: string;
