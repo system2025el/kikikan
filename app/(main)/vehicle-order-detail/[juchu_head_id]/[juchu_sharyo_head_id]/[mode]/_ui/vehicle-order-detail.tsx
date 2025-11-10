@@ -35,7 +35,7 @@ import {
   JuchuKizaiHeadValues,
   JuchuKizaiHonbanbiValues,
   JuchuKizaiMeisaiValues,
-} from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_lib/types';
+} from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 import { StockTableValues } from '@/app/(main)/stock/_lib/types';
 

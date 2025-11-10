@@ -2,8 +2,8 @@
 
 import { PoolClient } from 'pg';
 
-import { KeepJuchuKizaiHeadValues } from '@/app/(main)/(eq-order-detail)/eq-keep-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[oya_juchu_kizai_head_id]/[mode]/_lib/types';
-import { JuchuKizaiHeadValues } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchu_head_id]/[juchu_kizai_head_id]/[mode]/_lib/types';
+import { KeepJuchuKizaiHeadValues } from '@/app/(main)/(eq-order-detail)/eq-keep-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[oyaJuchuKizaiHeadId]/[mode]/_lib/types';
+import { JuchuKizaiHeadValues } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
 
 import { SCHEMA, supabase } from '../supabase';
 import { JuchuKizaiHead } from '../types/t-juchu-kizai-head-type';
