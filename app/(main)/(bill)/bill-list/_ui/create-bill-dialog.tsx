@@ -10,13 +10,17 @@ import { FormDateX, FormMonthX } from '@/app/(main)/_ui/date';
 import { Loading } from '@/app/(main)/_ui/loading';
 import { getChosenCustomerName } from '@/app/(main)/(masters)/customers-master/_lib/funcs';
 
+import { BillingStsSearchValues } from '../../billing-sts-list/_lib/types';
+
 export const CreateBillDialog = ({
   kokyakuId,
   tantouNam,
+  searchParams,
   setDialogOpen,
 }: {
   kokyakuId: number;
   tantouNam: string | null;
+  searchParams: BillingStsSearchValues;
   setDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
   const router = useRouter();
@@ -44,6 +48,7 @@ export const CreateBillDialog = ({
     showDetailFlg: boolean;
   }) => {
     console.log(data);
+    sessionStorage.setItem('billingStsSearchParams', JSON.stringify(searchParams));
     router.push(
       `bill-list/create?kokyakuId=${data.kokyaku.id}&date=${toJapanDateString(data.date ?? undefined, '-')}&flg=${data.showDetailFlg}&tantou=${tantouNam}`
     );

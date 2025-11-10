@@ -32,13 +32,14 @@ import { MuiTablePagination } from '@/app/(main)/_ui/table-pagination';
 import { ROWS_PER_MASTER_TABLE_PAGE } from '@/app/(main)/(masters)/_lib/constants';
 import { LightTooltipWithText } from '@/app/(main)/(masters)/_ui/tables';
 
-import { BillsListTableValues } from '../_lib/types';
+import { BillSearchValues, BillsListTableValues } from '../_lib/types';
 
 export const BillListTable = ({
   bills,
   isLoading,
   page,
   isFirst,
+  searchParams,
   setPage,
 }: {
   bills: BillsListTableValues[];
@@ -46,6 +47,7 @@ export const BillListTable = ({
   isFirst: boolean;
   page: number;
   custs: SelectTypes[];
+  searchParams: BillSearchValues;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setPage: React.Dispatch<React.SetStateAction<number>>;
 }) => {
@@ -99,7 +101,11 @@ export const BillListTable = ({
             </Button>
           </Grid2>
           <Grid2 container spacing={1}>
-            <Button>
+            <Button
+              onClick={() => {
+                // sessionStorage.setItem('billListSearchParams', JSON.stringify(searchParams));
+              }}
+            >
               <ContentCopyIcon fontSize="small" />
               コピー
             </Button>
@@ -149,6 +155,7 @@ export const BillListTable = ({
                       sx={{ py: 0.2, px: 0, m: 0, minWidth: 0 }}
                       onClick={() => {
                         console.log('テーブルで請求番号', bill.billHeadId, 'をクリック');
+                        sessionStorage.setItem('billListSearchParams', JSON.stringify(searchParams));
                         router.push(`/bill-list/edit/${bill.billHeadId}`);
                       }}
                     >

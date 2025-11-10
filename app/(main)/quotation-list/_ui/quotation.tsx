@@ -120,9 +120,9 @@ export const Quotation = ({
   const onSubmit = async (data: QuotHeadValues) => {
     console.log('新規？', isNew, 'isDirty', isDirty);
     if (isNew) {
-      setIsLoading(true);
       // 登録された見積ヘッダID
       const id = await addQuot(data, user?.name ?? '');
+      setIsLoading(true);
       router.replace(`/quotation-list/edit/${id}`);
     } else {
       const result = await updateQuot(data, user?.name ?? '');

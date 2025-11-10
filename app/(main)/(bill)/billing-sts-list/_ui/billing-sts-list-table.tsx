@@ -41,7 +41,7 @@ import { LightTooltipWithText } from '@/app/(main)/(masters)/_ui/tables';
 
 import { CreateBillDialog } from '../../bill-list/_ui/create-bill-dialog';
 import { changeSeikyuDat } from '../_lib/funcs';
-import { BillingStsTableValues } from '../_lib/types';
+import { BillingStsSearchValues, BillingStsTableValues } from '../_lib/types';
 
 /**
  * 受注請求助教一覧テーブル
@@ -55,6 +55,7 @@ export const BillingStsListTable = ({
   tantouNam,
   billSts,
   isFirst,
+  searchParams,
   setPage,
   refetch,
 }: {
@@ -64,6 +65,7 @@ export const BillingStsListTable = ({
   tantouNam: string | null;
   billSts: BillingStsTableValues[];
   isFirst: boolean;
+  searchParams: BillingStsSearchValues;
   setPage: React.Dispatch<React.SetStateAction<number>>;
   refetch: () => Promise<void>;
 }) => {
@@ -151,7 +153,12 @@ export const BillingStsListTable = ({
         </TableContainer>
       )}
       <Dialog open={createOpen} onClose={() => setCreateOpen(false)}>
-        <CreateBillDialog kokyakuId={kokyakuId} tantouNam={tantouNam} setDialogOpen={setCreateOpen} />
+        <CreateBillDialog
+          kokyakuId={kokyakuId}
+          tantouNam={tantouNam}
+          searchParams={searchParams}
+          setDialogOpen={setCreateOpen}
+        />
       </Dialog>
       <Snackbar
         open={snackBarOpen}

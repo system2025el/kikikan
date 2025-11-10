@@ -2,7 +2,7 @@
 
 import SearchIcon from '@mui/icons-material/Search';
 import { Box, Button, Container, Divider, Grid2, Paper, Typography } from '@mui/material';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { CheckboxButtonGroup, SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
@@ -29,7 +29,7 @@ export const BillingStsList = ({ custs }: { custs: SelectTypes[] }) => {
   const [isFirst, setIsFirst] = useState<boolean>(true);
 
   /* useForm --------------------------------------------------------------- */
-  const { control, handleSubmit, getValues } = useForm<BillingStsSearchValues>({
+  const { control, reset, handleSubmit, getValues } = useForm<BillingStsSearchValues>({
     mode: 'onBlur',
     reValidateMode: 'onBlur',
     defaultValues: { kokyaku: null, kokyakuTantoNam: null, sts: ['1'] },
@@ -57,6 +57,38 @@ export const BillingStsList = ({ custs }: { custs: SelectTypes[] }) => {
     setBillSts(theSts);
     setIsLoading(false);
   };
+
+  /** useEffect ------------------------------------------------------------- */
+  /* eslint-disable react-hooks/exhaustive-deps */
+  useEffect(() => {
+    const searchPramsString = sessionStorage.getItem('billingStsSearchParams');
+    const searchParams = searchPramsString ? JSON.parse(searchPramsString) : null;
+
+    const get = async () => {
+      // メモリ上に検索条件があるか確認
+      sessionStorage.removeItem('billingStsSearchParams');
+      // 読み込み中
+      setIsLoading(true);
+      // 初期表示ではない
+      setIsFirst(false);
+      // ページ初期化
+      setPage(1);
+      // 検索条件表示と検索
+      reset(searchParams);
+      const q = await getFilteredBillingSituations(searchParams);
+      if (q) {
+        setBillSts(q);
+      }
+      setIsLoading(false);
+    };
+
+    // メモリ上に検索条件があれば実行
+    if (searchParams) {
+      get();
+    }
+    setIsLoading(false);
+  }, []);
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
@@ -142,6 +174,7 @@ export const BillingStsList = ({ custs }: { custs: SelectTypes[] }) => {
         tantouNam={tantou}
         billSts={billSts}
         isFirst={isFirst}
+        searchParams={getValues()}
         setPage={setPage}
         refetch={refetch}
       />

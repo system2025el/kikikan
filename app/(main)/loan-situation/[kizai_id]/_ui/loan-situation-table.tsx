@@ -48,7 +48,6 @@ export const LoanSituationTable = (props: LoanSituationTableProps) => {
                 color: 'black',
                 bgcolor: 'white',
                 fontWeight: 400,
-                fontSize: '0.50rem',
                 minWidth: 0,
               }}
               colSpan={4}
@@ -78,7 +77,7 @@ export const LoanSituationTable = (props: LoanSituationTableProps) => {
                 <Button
                   variant="text"
                   href={`/order/${row.juchuHeadId}/${'view'}`}
-                  sx={{ p: 0, height: 10, m: 0, fontSize: '0.50rem', minWidth: 0, width: 1 }}
+                  sx={{ p: 0, height: '15px', m: 0, minWidth: 0, width: 1 }}
                 >
                   {row.juchuHeadId}
                 </Button>
@@ -86,10 +85,9 @@ export const LoanSituationTable = (props: LoanSituationTableProps) => {
               <TableCell
                 style={{
                   border: '1px solid black',
-                  fontSize: '0.70rem',
                   whiteSpace: 'nowrap',
                   width: 1,
-                  height: 18,
+                  height: 25,
                   paddingTop: 0,
                   paddingBottom: 0,
                   paddingLeft: 0.1,
@@ -98,7 +96,7 @@ export const LoanSituationTable = (props: LoanSituationTableProps) => {
                 }}
                 sx={{ minWidth: 0 }}
               >
-                <LightTooltipWithText variant="0.70rem" maxWidth={150}>
+                <LightTooltipWithText variant="body2" maxWidth={150}>
                   {row.koenNam}
                 </LightTooltipWithText>
               </TableCell>
@@ -121,8 +119,8 @@ export const LoanSituationTable = (props: LoanSituationTableProps) => {
                 px: 1,
                 height: 15,
                 lineHeight: '1rem',
-                fontSize: '0.50rem',
                 minWidth: 0,
+                fontSize: '0.875rem',
               }}
               colSpan={4}
             >
@@ -166,11 +164,10 @@ export const UseTable = (props: UseTableProps) => {
                     height: 15,
                     lineHeight: '1rem',
                     py: 0,
-                    px: 1,
+                    px: 0.5,
                     color: cell.zaikoQty < 0 ? 'red' : 'black',
                     bgcolor: 'white',
                     fontWeight: 400,
-                    fontSize: '0.50rem',
                     minWidth: 0,
                   }}
                 >
@@ -193,7 +190,6 @@ export const UseTable = (props: UseTableProps) => {
                     paddingX: 0.1,
                     height: 15,
                     lineHeight: '1rem',
-                    fontSize: '0.50rem',
                     minWidth: 0,
                   }}
                 >
@@ -213,10 +209,9 @@ export const UseTable = (props: UseTableProps) => {
                     sx={{
                       bgcolor: cell.juchuHonbanbiColor,
                       border: '1px solid black',
-                      height: 18,
+                      height: 25,
                       py: 0,
-                      px: 1,
-                      fontSize: '0.50rem',
+                      px: 0.5,
                       minWidth: 0,
                     }}
                   >
@@ -237,11 +232,11 @@ export const UseTable = (props: UseTableProps) => {
                     border: '1px solid black',
                     height: 15,
                     lineHeight: '1rem',
+                    fontSize: '0.875rem',
                     py: 0,
-                    px: 1,
+                    px: 0.5,
                     color: cell.zaikoQty < 0 ? 'red' : 'black',
                     bgcolor: 'white',
-                    fontSize: '0.50rem',
                     minWidth: 0,
                   }}
                 >
@@ -269,14 +264,12 @@ const styles: { [key: string]: React.CSSProperties } = {
     paddingBottom: 0,
     paddingLeft: 0.1,
     paddingRight: 0.1,
-    fontSize: '0.50rem',
     width: 1,
     minWidth: 0,
   },
   // 行
   row: {
     border: '1px solid black',
-    fontSize: '0.50rem',
     whiteSpace: 'nowrap',
     width: 1,
     height: 15,
