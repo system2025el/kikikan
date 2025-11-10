@@ -10,6 +10,7 @@ import { BackButton } from '@/app/(main)/_ui/buttons';
 import { FormDateX } from '@/app/(main)/_ui/date';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 
+import { getFilteredBills } from '../_lib/funcs';
 import { BillSearchValues, BillsListTableValues } from '../_lib/types';
 import { BillListTable } from './bill-list-table';
 
@@ -27,21 +28,50 @@ export const BillList = ({
   const [isLoading, setIsLoading] = useState<boolean>(true);
   /* ページ  */
   const [page, setPage] = useState<number>(1);
-
+  /**  */
+  const [thebills, setBills] = useState<BillsListTableValues[]>(bills);
   /* useForm ----------------------------------------------------- */
-  const { control, handleSubmit } = useForm<BillSearchValues>({
+  const { control, reset, handleSubmit, getValues } = useForm<BillSearchValues>({
     defaultValues: {},
   });
 
   const onSubmit = async (data: BillSearchValues) => {
-    console.log(data);
+    console.log('検索ーーーーーーーーーーーーーーーー', data);
     setIsFirst(false);
   };
 
-  /* useEffect --------------------------------------- */
+  /** useEffect ------------------------------------------------------------- */
+  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
+    // メモリ上に検索条件があるか確認
+    const searchPramsString = sessionStorage.getItem('billListSearchParams');
+    const searchParams = searchPramsString ? JSON.parse(searchPramsString) : null;
+
+    const get = async () => {
+      // メモリ開放
+      sessionStorage.removeItem('billListSearchParams');
+      // 読み込み中
+      setIsLoading(true);
+      // 初期表示ではない
+      setIsFirst(false);
+      // 初期表示ではない
+      setPage(1);
+      // 検索条件表示と検索
+      reset(searchParams);
+      const q = await getFilteredBills(searchParams);
+      if (q) {
+        setBills(q);
+      }
+      setIsLoading(false);
+    };
+
+    // メモリ上に検索条件があれば実行
+    if (searchParams) {
+      get();
+    }
     setIsLoading(false);
   }, []);
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
@@ -58,13 +88,13 @@ export const BillList = ({
                   <Typography noWrap mr={7}>
                     請求番号
                   </Typography>
-                  <TextFieldElement name="kokyaku" control={control} type="text" sx={{ width: 200 }} />
+                  <TextFieldElement name="billId" control={control} type="text" sx={{ width: 200 }} />
                 </Grid2>
                 <Grid2 display={'flex'} alignItems={'baseline'}>
                   <Typography noWrap mr={3}>
                     請求ステータス
                   </Typography>
-                  <TextFieldElement name="kokyaku" control={control} type="text" sx={{ width: 200 }} />
+                  <TextFieldElement name="billingSts" control={control} type="text" sx={{ width: 200 }} />
                 </Grid2>
               </Grid2>
               <Grid2 display={'flex'} alignItems={'baseline'}>
@@ -130,6 +160,7 @@ export const BillList = ({
         isFirst={isFirst}
         page={page}
         custs={selectOptions.custs}
+        searchParams={getValues()}
         setIsLoading={setIsLoading}
         setPage={setPage}
       />

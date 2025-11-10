@@ -44,7 +44,7 @@ export const QuotationList = ({
   const [isFirst, setIsFirst] = useState<boolean>(true);
 
   /* useForm ------------------------------------------- */
-  const { control, handleSubmit, getValues } = useForm<QuotSearchValues>({
+  const { control, reset, handleSubmit, getValues } = useForm<QuotSearchValues>({
     mode: 'onSubmit',
     defaultValues: {
       mituId: null,
@@ -73,9 +73,37 @@ export const QuotationList = ({
   };
 
   /* useEffect --------------------------------------- */
-  // useEffect(() => {
-  //   setIsLoading(false);
-  // }, []);
+  /* eslint-disable react-hooks/exhaustive-deps */
+  useEffect(() => {
+    // メモリ上に検索条件があるか確認
+    const searchPramsString = sessionStorage.getItem('quotListSearchParams');
+    const searchParams = searchPramsString ? JSON.parse(searchPramsString) : null;
+
+    const get = async () => {
+      // メモリ開放
+      sessionStorage.removeItem('quotListSearchParams');
+      // 読み込み中
+      setIsLoading(true);
+      // 初期表示ではない
+      setIsFirst(false);
+      // ページ初期化
+      setPage(1);
+      // 検索条件表示と検索
+      reset(searchParams);
+      const q = await getFilteredQuotList(searchParams);
+      if (q) {
+        setQuotList(q);
+      }
+      setIsLoading(false);
+    };
+
+    // メモリ上に検索条件があれば実行
+    if (searchParams) {
+      get();
+    }
+    setIsLoading(false);
+  }, []);
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
@@ -253,6 +281,7 @@ export const QuotationList = ({
         isFirst={isFirst}
         page={page}
         queries={getValues()}
+        searchParams={getValues()}
         setIsLoading={setIsLoading}
         setPage={setPage}
       />

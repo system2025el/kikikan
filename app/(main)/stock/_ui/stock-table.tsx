@@ -105,7 +105,8 @@ export const EqStockTable = (props: EqStockTableProps) => {
                     color: 'white',
                     bgcolor: 'black',
                     padding: 0,
-                    height: 25,
+                    height: 15,
+                    lineHeight: '1rem',
                   }}
                 >
                   {toISOStringMonthDay(cell.calDat)}
@@ -150,6 +151,8 @@ const styles: { [key: string]: React.CSSProperties } = {
     border: '1px solid grey',
     whiteSpace: 'nowrap',
     padding: 0,
+    height: 15,
+    lineHeight: '1rem',
   },
   // 行
   row: {

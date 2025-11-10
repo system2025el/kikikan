@@ -108,6 +108,7 @@ export const Bill = ({
     console.log('新規？', isNew, 'isDirty', isDirty);
     if (isNew) {
       const id = await addBill(data, user?.name ?? '');
+      setIsLoading(true);
       router.replace(`/bill-list/edit/${id}`);
     } else {
       await updateBill(data, user?.name ?? '');

@@ -45,6 +45,7 @@ export const QuotationListTable = ({
   page,
   queries,
   isFirst,
+  searchParams,
   setIsLoading,
   setPage,
 }: {
@@ -53,6 +54,7 @@ export const QuotationListTable = ({
   page: number;
   queries: QuotSearchValues;
   isFirst: boolean;
+  searchParams: QuotSearchValues;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setPage: React.Dispatch<React.SetStateAction<number>>;
 }) => {
@@ -176,7 +178,10 @@ export const QuotationListTable = ({
             <Grid2 container spacing={1}>
               <Grid2>
                 <Button
-                  onClick={() => router.push(`quotation-list/copy?mituId=${selectedIds[0]}`)}
+                  onClick={() => {
+                    sessionStorage.setItem('quotListSearchParams', JSON.stringify(searchParams));
+                    router.push(`quotation-list/copy?mituId=${selectedIds[0]}`);
+                  }}
                   disabled={selectedIds.length !== 1}
                 >
                   <ContentCopyIcon fontSize="small" />
@@ -267,6 +272,7 @@ export const QuotationListTable = ({
                           sx={{ py: 0.2, px: 0, m: 0, minWidth: 0 }}
                           onClick={() => {
                             console.log('テーブルで見積番号', quotation.mituHeadId, 'をクリック');
+                            sessionStorage.setItem('quotListSearchParams', JSON.stringify(searchParams));
                             router.push(`/quotation-list/edit/${quotation.mituHeadId}`);
                           }}
                         >
@@ -306,7 +312,7 @@ export const QuotationListTable = ({
         )}
         {/* 見積作成方法確認ダイアログ */}
         <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
-          <CreateQuotDialog inputRef={inputRef} setDialogOpen={setDialogOpen} />
+          <CreateQuotDialog inputRef={inputRef} searchParams={searchParams} setDialogOpen={setDialogOpen} />
         </Dialog>
         {/* 見積削除確認ダイアログ */}
         <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
