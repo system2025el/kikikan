@@ -1,4 +1,4 @@
-import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { VehsMasterDialogValues } from '@/app/(main)/(masters)/vehicles-master/_lib/types';
 
 import pool from '../postgres';
@@ -58,7 +58,7 @@ export const insertNewVeh = async (data: VehsMasterDialogValues, user: string) =
       $3, $4, $5, $6
     );
   `;
-  const date = toJapanTimeString();
+  const date = toJapanTimeStampString();
   const values = [data.sharyoNam, Number(data.delFlg), data.mem, Number(data.dspFlg), date, user];
   try {
     await pool.query(query, values);

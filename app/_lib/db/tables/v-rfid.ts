@@ -35,12 +35,18 @@ export const selectRfidsOfTheKizai = async (kizaiId: number) => {
       sts.sts_nam,
       r.shozoku_id,
       r.del_flg,
-      r.el_num
+      r.el_num,
+      r.upd_dat,
+      r.upd_user,
+      shozoku.shozoku_nam
     FROM
       ${SCHEMA}.v_rfid as r
     LEFT JOIN
       ${SCHEMA}.m_sagyo_sts as sts
     ON r.rfid_kizai_sts = sts.sts_id
+    LEFT JOIN
+      ${SCHEMA}.m_shozoku as shozoku
+    ON r.shozoku_id = shozoku.shozoku_id
     WHERE
       r.kizai_id = $1
     ORDER BY r.rfid_tag_id

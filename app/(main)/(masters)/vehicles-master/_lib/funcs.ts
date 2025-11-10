@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 
 import { insertNewVeh, SelectFilteredVehs, selectOneVeh, upDateVehDB } from '@/app/_lib/db/tables/m-sharyou';
-import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { emptyVeh } from './datas';
 import { VehsMasterDialogValues, VehsMasterTableValues } from './types';
@@ -90,7 +90,7 @@ export const addNewVeh = async (data: VehsMasterDialogValues, user: string) => {
  * @param id 更新する車両マスタID
  */
 export const updateVeh = async (data: VehsMasterDialogValues, id: number, user: string) => {
-  const date = toJapanTimeString();
+  const date = toJapanTimeStampString();
   const updateData = {
     sharyo_id: id,
     sharyo_nam: data.sharyoNam,

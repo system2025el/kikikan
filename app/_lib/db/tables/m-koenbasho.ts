@@ -1,4 +1,4 @@
-import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { LocsMasterDialogValues } from '@/app/(main)/(masters)/locations-master/_lib/types';
 
 import pool from '../postgres';
@@ -86,7 +86,7 @@ export const insertNewLoc = async (data: LocsMasterDialogValues, user: string) =
       $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15
     );
   `;
-  const date = toJapanTimeString();
+  const date = toJapanTimeStampString();
   const values = [
     data.locNam,
     data.kana,

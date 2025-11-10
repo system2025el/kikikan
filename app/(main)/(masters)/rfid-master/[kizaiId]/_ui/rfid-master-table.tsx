@@ -22,6 +22,7 @@ import {
 import { grey } from '@mui/material/colors';
 import { useEffect, useMemo, useState } from 'react';
 
+import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { MuiTablePagination } from '../../../../_ui/table-pagination';
@@ -127,7 +128,7 @@ export const RfidMasterTable = ({
       <Divider />
       <Grid2 container mt={0.5} mx={0.5} justifyContent={'space-between'} alignItems={'center'}>
         <Grid2 spacing={1}>
-          <MuiTablePagination arrayList={rfids!} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
+          <MuiTablePagination arrayList={rfids ?? []} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
         </Grid2>
         <Grid2 container spacing={3}>
           <Grid2>
@@ -168,10 +169,13 @@ export const RfidMasterTable = ({
                     />
                   </TableCell>
                   <TableCell padding="checkbox" />
-                  <TableCell>RFIDタグID</TableCell>
-                  <TableCell>機材ステータス</TableCell>
                   <TableCell align="right">EL No.</TableCell>
+                  <TableCell>RFIDタグID</TableCell>
+                  <TableCell>ステータス</TableCell>
                   <TableCell>メモ</TableCell>
+                  <TableCell>最終在庫場所</TableCell>
+                  <TableCell>更新日時</TableCell>
+                  <TableCell>担当者</TableCell>
                   <TableCell>無効</TableCell>
                 </TableRow>
               </TableHead>
@@ -205,7 +209,12 @@ export const RfidMasterTable = ({
                       >
                         {row.tblDspId}
                       </TableCell>
-
+                      <TableCell
+                        align="right"
+                        sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap', width: 100 }}
+                      >
+                        {row.elNum}
+                      </TableCell>
                       <TableCell sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap', width: 250 }}>
                         <Button
                           variant="text"
@@ -219,15 +228,24 @@ export const RfidMasterTable = ({
                       <TableCell sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap', width: 250 }}>
                         {row.stsNam}
                       </TableCell>
-                      <TableCell
-                        align="right"
-                        sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap', width: 100 }}
-                      >
-                        {row.elNum}
-                      </TableCell>
                       <TableCell sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap' }}>
                         <LightTooltipWithText variant={'body2'} maxWidth={400}>
                           {row.mem}
+                        </LightTooltipWithText>
+                      </TableCell>
+                      <TableCell sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap' }}>
+                        <LightTooltipWithText variant={'body2'} maxWidth={400}>
+                          {row.shozokuNam}
+                        </LightTooltipWithText>
+                      </TableCell>
+                      <TableCell sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap' }}>
+                        <LightTooltipWithText variant={'body2'} maxWidth={400}>
+                          {row.updDat ? toJapanTimeString(row.updDat) : ''}
+                        </LightTooltipWithText>
+                      </TableCell>
+                      <TableCell sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap' }}>
+                        <LightTooltipWithText variant={'body2'} maxWidth={400}>
+                          {row.updUser}
                         </LightTooltipWithText>
                       </TableCell>
                       <TableCell sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap', width: 50 }}>

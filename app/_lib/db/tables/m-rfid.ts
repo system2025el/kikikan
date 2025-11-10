@@ -2,7 +2,7 @@
 
 import { PoolClient } from 'pg';
 
-import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { RfidsMasterDialogValues } from '@/app/(main)/(masters)/rfid-master/[kizaiId]/_lib/types';
 
 import pool from '../postgres';
@@ -122,7 +122,7 @@ export const updateRfidTagDelFlgs = async (
   user: string
 ) => {
   console.log('無効化有効化： ', data);
-  const now = toJapanTimeString(undefined, '-');
+  const now = toJapanTimeStampString();
   // RFIDタグ管理テーブル側準備
   const placeholders = data
     .map((_, index) => {

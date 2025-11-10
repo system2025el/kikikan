@@ -14,7 +14,7 @@ import { SeikyuDatJuchuKizai } from '@/app/_lib/db/types/t-seikyu-date-juchu-kiz
 import { SeikyuHead } from '@/app/_lib/db/types/t-seikyu-head-type';
 import { SeikyuMeisaiHead } from '@/app/_lib/db/types/t-seikyu-meisai-head-type';
 import { SeikyuMeisai } from '@/app/_lib/db/types/t-seikyu-meisai-type';
-import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 
 import { BillHeadValues, BillMeisaiHeadsValues } from '../../_lib/types';
@@ -190,7 +190,7 @@ export const addBill = async (data: BillHeadValues, user: string): Promise<numbe
       kokyaku_nam: data.aite.nam,
       nyuryoku_user: data.nyuryokuUser,
       zei_rat: data.zeiRat,
-      add_dat: toJapanTimeString(undefined, '-'),
+      add_dat: toJapanTimeStampString(),
       add_user: user,
     };
     // 明細ヘッド
@@ -209,7 +209,7 @@ export const addBill = async (data: BillHeadValues, user: string): Promise<numbe
           nebiki_amt: l.nebikiAmt,
           zei_flg: Number(l.zeiFlg),
           dsp_ord_num: index + 1,
-          add_dat: toJapanTimeString(undefined, '-'),
+          add_dat: toJapanTimeStampString(),
           add_user: user,
         }))
       : [];
@@ -225,7 +225,7 @@ export const addBill = async (data: BillHeadValues, user: string): Promise<numbe
         meisai_tanka_amt: l.tankaAmt ?? 0,
         // shokei_amt: l.shokeiAmt,
         dsp_ord_num: index + 1,
-        add_dat: toJapanTimeString(undefined, '-'),
+        add_dat: toJapanTimeStampString(),
         add_user: user,
       })) ?? [];
 
@@ -236,7 +236,7 @@ export const addBill = async (data: BillHeadValues, user: string): Promise<numbe
             juchu_head_id: d.juchu_head_id!,
             juchu_kizai_head_id: d.juchu_kizai_head_id!,
             seikyu_dat: d.seikyu_end_dat!,
-            add_dat: toJapanTimeString(),
+            add_dat: toJapanTimeStampString(),
             add_user: user,
           }))
         : [];

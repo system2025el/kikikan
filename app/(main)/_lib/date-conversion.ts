@@ -40,13 +40,28 @@ export const toISOStringMonthDay = (date: Date): string => {
 };
 
 /**
- * 日本時間の文字列に変換する関数
- * @param input 引数無なら現在時刻 Date string number
- * @returns {string} 日本時間の文字列
+ * 日本時間の年月日日時文字列に変換する関数
+ * @param {Date | string | number} input 引数無なら現在時刻 Date string number
+ * @param {string} str 時間の間に入る記号
+ * @returns {string} 日本時間の文字列 YYYY${str}MM${str}DD HH:mm
  */
 export const toJapanTimeString = (input: Date | string | number = new Date(), str: string = '/'): string => {
   return dayjs(input).tz('Asia/Tokyo').format(`YYYY${str}MM${str}DD HH:mm`);
 };
+/**
+ * 日本時間の年月日文字列に変換する関数
+ * @param {Date | string | number} input 引数無なら現在時刻 Date string number
+ * @param {string} str 時間の間に入る記号
+ * @returns {string} 日本時間の文字列 YYYY${str}MM${str}DD
+ */
 export const toJapanDateString = (input: Date | string | number = new Date(), str: string = '/'): string => {
   return dayjs(input).tz('Asia/Tokyo').format(`YYYY${str}MM${str}DD`);
+};
+/**
+ * 日本時間のtimestamp型 文字列に変換する関数
+ * @param input 引数無なら現在時刻 Date string number
+ * @returns {string} 日本時間の文字列 YYYY-MM-DD HH:mm:ss
+ */
+export const toJapanTimeStampString = (input: Date | string | number = new Date()): string => {
+  return dayjs(input).tz('Asia/Tokyo').format(`YYYY-MM-DD HH:mm:ss`);
 };

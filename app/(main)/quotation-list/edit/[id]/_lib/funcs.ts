@@ -13,7 +13,7 @@ import {
 } from '@/app/_lib/db/tables/t-mitu-meisai-head';
 import { MituHead } from '@/app/_lib/db/types/t-mitu-head-types';
 import { MituMeisai } from '@/app/_lib/db/types/t-mitu-meisai-type';
-import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 
 import { QuotHeadValues } from '../../../_lib/types';
@@ -76,7 +76,7 @@ export const updateQuot = async (data: QuotHeadValues, user: string): Promise<nu
     zei_rat: data.zeiRat,
     gokei_mei: data.gokeiMei,
     gokei_amt: data.gokeiAmt,
-    upd_dat: toJapanTimeString(),
+    upd_dat: toJapanTimeStampString(),
     upd_user: user,
     kizai_chukei_mei: data.kizaiChukeiMei,
   };
@@ -96,9 +96,9 @@ export const updateQuot = async (data: QuotHeadValues, user: string): Promise<nu
     biko_1: l.biko1,
     biko_2: l.biko2,
     biko_3: l.biko3,
-    add_dat: toJapanTimeString(),
+    add_dat: toJapanTimeStampString(),
     add_user: user,
-    upd_dat: toJapanTimeString(),
+    upd_dat: toJapanTimeStampString(),
     upd_user: user,
     meisai: l.meisai?.map((m) => ({
       mitu_head_id: data.mituHeadId!,
@@ -110,9 +110,9 @@ export const updateQuot = async (data: QuotHeadValues, user: string): Promise<nu
       meisai_tanka_amt: m.tankaAmt ?? 0,
       shokei_amt: m.shokeiAmt ?? null,
       dsp_ord_num: index + 1,
-      add_dat: toJapanTimeString(),
+      add_dat: toJapanTimeStampString(),
       add_user: user,
-      upd_dat: toJapanTimeString(),
+      upd_dat: toJapanTimeStampString(),
       upd_user: user,
     })),
   }));

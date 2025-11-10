@@ -1,6 +1,6 @@
 'use server';
 
-import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 import { BumonsMasterDialogValues } from '@/app/(main)/(masters)/bumons-master/_lib/types';
 
@@ -91,7 +91,7 @@ export const insertNewBumon = async (data: BumonsMasterDialogValues, user: strin
     );
   `;
 
-  const date = toJapanTimeString();
+  const date = toJapanTimeStampString();
   const values = [
     data.bumonNam,
     Number(data.delFlg),
