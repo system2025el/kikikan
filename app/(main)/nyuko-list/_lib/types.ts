@@ -12,9 +12,11 @@ export type NyukoTableValues = {
   nyushukoDat: string;
   nyushukoBashoId: number;
   juchuKizaiHeadIdv: string;
+  juchuKizaiHeadKbn: number;
   headNamv: string;
   sectionNamv: string;
   kokyakuNam: string;
   nchkSagyoStsId: number;
   nchkSagyoStsNamShort: string;
+  nyukoFixFlg: boolean;
 };

@@ -257,9 +257,9 @@ export const KeepContainerTable = (props: {
   rows: KeepJuchuContainerMeisaiValues[];
   edit: boolean;
   nyukoFixFlag: boolean;
-  handleContainerMemoChange: (kizaiId: number, memo: string) => void;
-  handleContainerCellChange: (kizaiId: number, kicsValue: number, yardValue: number) => void;
-  handleMeisaiDelete: (kizaiId: number) => void;
+  handleContainerMemoChange: (rowIndex: number, memo: string) => void;
+  handleContainerCellChange: (rowIndex: number, kicsValue: number, yardValue: number) => void;
+  handleMeisaiDelete: (rowIndex: number) => void;
 }) => {
   const { rows, edit, nyukoFixFlag, handleContainerMemoChange, handleContainerCellChange, handleMeisaiDelete } = props;
 
@@ -334,7 +334,7 @@ export const KeepContainerTable = (props: {
             <TableRow key={rowIndex}>
               <TableCell align="center" width={'min-content'} sx={{ padding: 0, border: '1px solid black' }}>
                 <IconButton
-                  onClick={() => handleMeisaiDelete(row.kizaiId)}
+                  onClick={() => handleMeisaiDelete(rowIndex)}
                   sx={{ padding: 0, color: 'red' }}
                   disabled={!edit}
                 >
@@ -379,7 +379,7 @@ export const KeepContainerTable = (props: {
                   type="text"
                   onChange={(e) => {
                     if (/^\d*$/.test(e.target.value) && Number(e.target.value) <= (row.oyaPlanKicsKizaiQty ?? 0)) {
-                      handleContainerCellChange(row.kizaiId, Number(e.target.value), row.yardKeepQty);
+                      handleContainerCellChange(rowIndex, Number(e.target.value), row.yardKeepQty);
                     }
                   }}
                   sx={{
@@ -423,7 +423,7 @@ export const KeepContainerTable = (props: {
                   type="text"
                   onChange={(e) => {
                     if (/^\d*$/.test(e.target.value) && Number(e.target.value) <= (row.oyaPlanYardKizaiQty ?? 0)) {
-                      handleContainerCellChange(row.kizaiId, row.kicsKeepQty, Number(e.target.value));
+                      handleContainerCellChange(rowIndex, row.kicsKeepQty, Number(e.target.value));
                     }
                   }}
                   sx={{

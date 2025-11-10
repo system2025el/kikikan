@@ -17,12 +17,13 @@ import {
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import { useState } from 'react';
+import { set } from 'zod';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import { BackButton } from '@/app/(main)/_ui/buttons';
 import { DateTime, TestDate } from '@/app/(main)/_ui/date';
 
-import { confirmChildJuchuKizaiHead, updShukoDetail } from '../_lib/funcs';
+import { confirmChildJuchuKizaiHead, delNyushukoFix, getShukoDetail, updShukoDetail } from '../_lib/funcs';
 import { ShukoDetailTableValues, ShukoDetailValues } from '../_lib/types';
 import { ShukoDetailTable } from './shuko-detail-table';
 
@@ -31,12 +32,16 @@ export const ShukoDetail = (props: {
   shukoDetailTableData: ShukoDetailTableValues[];
   fixFlag: boolean;
 }) => {
-  const { shukoDetailData, shukoDetailTableData } = props;
+  const { shukoDetailData } = props;
 
   // user情報
   const user = useUserStore((state) => state.user);
 
   const [fixFlag, setFixFlag] = useState(props.fixFlag);
+
+  const [shukoDetailTableData, setShukoDetailTableData] = useState<ShukoDetailTableValues[]>(
+    props.shukoDetailTableData
+  );
 
   // 出発ボタンダイアログ制御
   const [departureOpen, setDepartureOpen] = useState(false);
@@ -54,14 +59,18 @@ export const ShukoDetail = (props: {
   const handleDeparture = async () => {
     if (!user) return;
 
-    const diffCheck = shukoDetailTableData.find((data) => data.diff !== 0);
+    const diffCheck = shukoDetailTableData.find(
+      (data) =>
+        (data.juchuKizaiHeadKbn !== 3 && !data.ctnFlg && data.diff !== 0) ||
+        (data.juchuKizaiHeadKbn === 3 && data.diff !== 0)
+    );
 
     if (diffCheck) {
       setDepartureOpen(true);
       return;
     }
 
-    const updateResult = await updShukoDetail(shukoDetailData, shukoDetailTableData, 1, user.name);
+    const updateResult = await updShukoDetail(shukoDetailData, shukoDetailTableData, user.name);
 
     if (updateResult) {
       setFixFlag(true);
@@ -90,7 +99,7 @@ export const ShukoDetail = (props: {
       return;
     }
 
-    const updateResult = await updShukoDetail(shukoDetailData, shukoDetailTableData, 0, user.name);
+    const updateResult = await delNyushukoFix(shukoDetailData, shukoDetailTableData);
 
     if (updateResult) {
       setFixFlag(false);

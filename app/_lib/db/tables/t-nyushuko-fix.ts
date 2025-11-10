@@ -196,3 +196,41 @@ export const deleteNyushukoFix = async (
     throw e;
   }
 };
+
+/**
+ * 出庫確定削除
+ * @param data 出庫確定削除データ
+ * @param connection
+ */
+export const deleteShukoFix = async (
+  data: {
+    juchu_head_id: number;
+    juchu_kizai_head_id: number;
+    sagyo_kbn_id: number;
+    sagyo_id: number;
+  },
+  connection: PoolClient
+) => {
+  const whereKeys = Object.keys(data) as (keyof typeof data)[];
+
+  if (whereKeys.length === 0) {
+    throw new Error('DELETE conditions cannot be empty.');
+  }
+
+  const whereClause = whereKeys.map((key, index) => `${key} = $${index + 1}`).join(' AND ');
+
+  const values = whereKeys.map((key) => data[key]);
+
+  const query = `
+    DELETE FROM
+      ${SCHEMA}.t_nyushuko_fix
+    WHERE
+      ${whereClause}
+  `;
+
+  try {
+    await connection.query(query, values);
+  } catch (e) {
+    throw e;
+  }
+};
