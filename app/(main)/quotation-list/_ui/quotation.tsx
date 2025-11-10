@@ -57,25 +57,28 @@ export const Quotation = ({
   isNew: boolean;
   quot: QuotHeadValues;
 }) => {
-  /* ログイン中のユーザー */
+  /** ログイン中のユーザー */
   const user = useUserStore((state) => state.user);
+  /** ページのルーター */
   const router = useRouter();
   /* useState ----------------------------------------------------------------- */
-  /* ローディング中かどうか */
+  /** ローディング中かどうか */
   const [isLoading, setIsLoading] = useState(false);
-  // 受注選択アコーディオン制御
+  /** 受注選択アコーディオン制御 */
   const [juchuExpanded, setJuchuExpanded] = useState(false);
-  // 見積ヘッダアコーディオン制御
+  /** 見積ヘッダアコーディオン制御 */
   const [mitsuExpanded, setMitsuExpanded] = useState(true);
 
-  // ダイアログ開閉
+  /** テーブル追加ダイアログ開閉 */
   const [kizaiMeisaiaddDialogOpen, setKizaimeisaiaddDialogOpen] = useState(false);
+  /** テーブル自動生成ダイアログ開閉 */
   const [showSecond, setShowSecond] = useState(false);
 
-  /* スナックバーの表示するかしないか */
+  /** スナックバーの表示するかしないか */
   const [snackBarOpen, setSnackBarOpen] = useState(false);
-  /* スナックバーのメッセージ */
+  /** スナックバーのメッセージ */
   const [snackBarMessage, setSnackBarMessage] = useState('');
+
   /** 値引きの編集状態 */
   const [nebikiEditing, setNebikiEditing] = useState(false);
   /** 税の編集状態 */
@@ -99,20 +102,33 @@ export const Quotation = ({
   } = quotForm;
 
   // formfield
+  /** 機材明細 */
   const kizaiFields = useFieldArray({ control, name: 'meisaiHeads.kizai' });
+  /** 人件費明細 */
   const laborFields = useFieldArray({ control, name: 'meisaiHeads.labor' });
+  /** その他の明細 */
   const otherFields = useFieldArray({ control, name: 'meisaiHeads.other' });
 
   // 監視
+  /** 機材の明細ヘッダ */
   const kizaiHeads = useWatch({ control, name: 'meisaiHeads.kizai' });
+  /** 人件費の明細ヘッダ */
   const laborHeads = useWatch({ control, name: 'meisaiHeads.labor' });
+  /** その他の明細ヘッダ */
   const otherHeads = useWatch({ control, name: 'meisaiHeads.other' });
+  /** 現在の機材中計金額の値 */
   const currentKizaiChukei = useWatch({ control, name: 'kizaiChukeiAmt' });
+  /** 現在の中計金額の値 */
   const currentChukei = useWatch({ control, name: 'chukeiAmt' });
+  /** 値引き金額の値 */
   const tokuNebikiAmt = useWatch({ control, name: 'tokuNebikiAmt' });
+  /** 現在の税抜き合計金額の値 */
   const currentPreTaxGokei = useWatch({ control, name: 'preTaxGokeiAmt' });
+  /** 現在の税金額の値 */
   const currentZeiAmt = useWatch({ control, name: 'zeiAmt' });
+  /** 現在の税率の値 */
   const zeiRat = useWatch({ control, name: 'zeiRat' });
+  /** 現在の合計金額の値 */
   const currentGokeiAmt = useWatch({ control, name: 'gokeiAmt' });
 
   /* methods ------------------------------------------------------ */

@@ -57,7 +57,7 @@ export const EqptOrderList = ({
   const [isLoading, setIsLoading] = useState(true);
 
   /* useForm ------------------------------------------ */
-  const { control, handleSubmit, watch } = useForm<EqptOrderSearchValues>({
+  const { control, handleSubmit, reset, getValues } = useForm<EqptOrderSearchValues>({
     defaultValues: {
       radio: 'shuko',
       range: { from: new Date(toJapanDateString()), to: new Date(toJapanDateString()) },
@@ -81,9 +81,36 @@ export const EqptOrderList = ({
   };
 
   /* useEffect --------------------------------------- */
+  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
+    // メモリ上に検索条件があるか確認
+    const searchPramsString = sessionStorage.getItem('orderListSearchParams');
+    const searchParams = searchPramsString ? JSON.parse(searchPramsString) : null;
+    console.log('検索条件＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝', searchParams);
+
+    const get = async () => {
+      // メモリ開放
+      sessionStorage.removeItem('orderListSearchParams');
+      // 読み込み中
+      setIsLoading(true);
+      // ページ初期化
+      setPage(1);
+      // 検索条件表示と検索
+      reset(searchParams);
+      const q = await getFilteredOrderList(searchParams);
+      if (q) {
+        setOrderList(q);
+      }
+      setIsLoading(false);
+    };
+
+    // メモリ上に検索条件があれば実行
+    if (searchParams) {
+      get();
+    }
     setIsLoading(false);
   }, []);
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
@@ -243,6 +270,7 @@ export const EqptOrderList = ({
         orderList={orderList}
         isLoading={isLoading}
         page={page}
+        searchParams={getValues()}
         setIsLoading={setIsLoading}
         setPage={setPage}
       />

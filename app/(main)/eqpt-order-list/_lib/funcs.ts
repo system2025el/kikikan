@@ -43,6 +43,8 @@ export const getFilteredOrderList = async (
       juchuHeadId: d.juchu_head_id,
       kizaiHeadId: d.juchu_kizai_head_id,
       headNam: d.head_nam,
+      headKbn: d.juchu_kizai_head_kbn,
+      oyaJuchuKizaiHeadId: d.oya_juchu_kizai_head_id,
       koenNam: d.koen_nam,
       koenbashoNam: d.koenbasho_nam,
       kokyakuNam: d.kokyaku_nam,
