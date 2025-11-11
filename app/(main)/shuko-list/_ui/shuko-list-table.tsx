@@ -76,7 +76,7 @@ export const ShukoListTable = (props: {
                 <Button
                   variant="text"
                   size="small"
-                  href={`shuko-list/shuko-detail/${row.juchuHeadId}/${row.juchuKizaiHeadKbn}/${row.nyushukoBashoId}/${toJapanTimeString(row.nyushukoDat, '-')}/10/${row.juchuKizaiHeadKbn}`}
+                  href={`shuko-list/shuko-detail/${row.juchuHeadId}/${row.juchuKizaiHeadKbn}/${row.nyushukoBashoId}/${toJapanTimeString(row.nyushukoDat, '-')}/10`}
                   sx={{ py: 0, px: 1 }}
                 >
                   {row.sstbSagyoStsNamShort}
