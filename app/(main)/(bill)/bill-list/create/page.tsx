@@ -54,6 +54,7 @@ const Page = async ({ searchParams }: { searchParams: Promise<{ [key: string]: s
       : [],
     chukeiAmt: chukei,
     preTaxGokeiAmt: preTax,
+    zeiRat: 10,
     gokeiAmt: chukei,
   };
   console.log(
