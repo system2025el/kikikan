@@ -2,6 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import AddIcon from '@mui/icons-material/Add';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import PrintIcon from '@mui/icons-material/Print';
 import SaveAsIcon from '@mui/icons-material/SaveAs';
@@ -212,13 +213,9 @@ export const Bill = ({
 
   return (
     <>
-      <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
+      <Container disableGutters sx={{ minWidth: '100%', pb: 10 }} maxWidth={'xl'}>
         <Box justifySelf={'end'} mb={0.5}>
-          <Button
-            onClick={() => /*(isNew ? router.push('/billing-sts-list') : router.push('/bill-list'))*/ router.back()}
-          >
-            戻る
-          </Button>
+          <Button onClick={() => router.back()}>戻る</Button>
         </Box>
         <FormProvider {...billForm}>
           <form onSubmit={handleSubmit(onSubmit)}>
@@ -489,10 +486,14 @@ export const Bill = ({
                 </Grid2>
               </Box>
             </Paper>
-            <Box position={'fixed'} zIndex={1050} bottom={10} right={10}>
-              <Fab variant="extended" color="primary" sx={{ margin: 1 }} type="submit" size="medium">
-                <SaveAsIcon fontSize="small" sx={{ mr: 1 }} />
+            {/** 固定ボタン 保存＆ページトップ */}
+            <Box position={'fixed'} zIndex={1050} bottom={25} right={25} alignItems={'center'}>
+              <Fab variant="extended" color="primary" type="submit" sx={{ mr: 2 }}>
+                <SaveAsIcon sx={{ mr: 1 }} />
                 保存
+              </Fab>
+              <Fab color="primary" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+                <ArrowUpwardIcon />
               </Fab>
             </Box>
           </form>
@@ -509,78 +510,6 @@ export const Bill = ({
     </>
   );
 };
-
-// export const ReadOnlyYenNumberElement = <TFieldName extends FieldPath<billHeadValues>>({
-//   name,
-// }: {
-//   name: TFieldName;
-// }) => {
-//   const { control } = useFormContext<billHeadValues>();
-//   return (
-//     <Controller
-//       name={name}
-//       control={control}
-//       render={({ field, fieldState }) => (
-//         <TextField
-//           {...field}
-//           value={
-//             typeof field.value === 'number' && !isNaN(field.value)
-//               ? field.value >= 0
-//                 ? `¥${Math.abs(field.value).toLocaleString()}`
-//                 : `¥-${Math.abs(field.value).toLocaleString()}`
-//               : `¥0`
-//           }
-//           type="text"
-//           onFocus={(e) => {
-//             const rawValue = String(field.value ?? '');
-//             setTimeout(() => {
-//               e.target.value = rawValue;
-//             }, 1);
-//           }}
-//           onBlur={(e) => {
-//             const rawValue = e.target.value.replace(/[¥,]/g, '');
-//             const numericValue = Number(rawValue);
-//             field.onChange(numericValue);
-//           }}
-//           onChange={(e) => {
-//             const raw = e.target.value.replace(/[^\d]/g, '');
-//             if (/^\d*$/.test(raw)) {
-//               field.onChange(Number(raw));
-//               e.target.value = raw;
-//             }
-//           }}
-//           sx={(theme) => ({
-// '.MuiOutlinedInput-notchedOutline': {
-//     borderColor: fieldState.error?.message && theme.palette.error.main,
-//   },
-//   '.Mui-focused .MuiOutlinedInput-notchedOutline': {
-//     borderColor: fieldState.error?.message && theme.palette.error.main,
-//   },
-//   '&:hover .MuiOutlinedInput-notchedOutline': {
-//     borderColor: fieldState.error?.message && theme.palette.error.main,
-//   },
-//   '& .MuiInputBase-input': {
-//     textAlign: 'right',
-//   },
-//   '.MuiFormHelperText-root': {
-//     color: theme.palette.error.main,
-//   },
-//   '& input[type=number]::-webkit-inner-spin-button': {
-//     WebkitAppearance: 'none',
-//     margin: 0,
-//   },
-// }
-//             pointerEvents: 'none', // クリック不可にする
-//             backgroundColor: '#f5f5f5', // グレー背景で無効っぽく
-//             color: '#888',
-//           })}
-//           slotProps={{ input: { readOnly: true, onFocus: (e) => e.target.blur() } }}
-//           helperText={fieldState.error?.message}
-//         />
-//       )}
-//     />
-//   );
-// };
 
 /* style
 ---------------------------------------------------------------------------------------------------- */

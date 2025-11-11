@@ -61,7 +61,7 @@ export const KeepEqTable: React.FC<KeepEqTableProps> = ({
   };
 
   return (
-    <TableContainer component={Paper} style={{ overflow: 'scroll', maxHeight: '80vh' }}>
+    <TableContainer style={{ overflow: 'scroll', maxHeight: '80vh' }}>
       <Table>
         <TableHead>
           <TableRow>
@@ -279,7 +279,7 @@ export const KeepContainerTable = (props: {
   };
 
   return (
-    <TableContainer component={Paper} style={{ overflow: 'auto', maxHeight: '80vh' }}>
+    <TableContainer style={{ overflow: 'auto', maxHeight: '80vh' }}>
       <Table stickyHeader>
         <TableHead>
           <TableRow>

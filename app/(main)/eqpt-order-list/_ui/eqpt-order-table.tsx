@@ -18,7 +18,7 @@ import {
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useMemo } from 'react';
 
-import { toJapanTimeString,toJapanYMDString } from '../../_lib/date-conversion';
+import { toJapanTimeString, toJapanYMDString } from '../../_lib/date-conversion';
 import { Loading } from '../../_ui/loading';
 import { MuiTablePagination } from '../../_ui/table-pagination';
 import { ROWS_PER_MASTER_TABLE_PAGE } from '../../(masters)/_lib/constants';

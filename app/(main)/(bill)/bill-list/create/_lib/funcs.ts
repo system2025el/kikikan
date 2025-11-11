@@ -16,7 +16,7 @@ import { SeikyuDatJuchuKizai } from '@/app/_lib/db/types/t-seikyu-date-juchu-kiz
 import { SeikyuHead } from '@/app/_lib/db/types/t-seikyu-head-type';
 import { SeikyuMeisaiHead } from '@/app/_lib/db/types/t-seikyu-meisai-head-type';
 import { SeikyuMeisai } from '@/app/_lib/db/types/t-seikyu-meisai-type';
-import { toJapanTimeStampString, toJapanTimeString,toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanTimeStampString, toJapanTimeString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 
 import { BillHeadValues, BillMeisaiHeadsValues } from '../../_lib/types';

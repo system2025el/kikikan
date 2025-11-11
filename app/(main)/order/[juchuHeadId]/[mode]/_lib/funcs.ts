@@ -7,7 +7,7 @@ import { selectFilteredCustomers, selectKokyaku } from '@/app/_lib/db/tables/m-k
 import { insertJuchuHead, selectJuchuHead, selectMaxId, updateJuchuHead } from '@/app/_lib/db/tables/t-juchu-head';
 import { selectJuchuKizaiHeadList } from '@/app/_lib/db/tables/v-juchu-kizai-head-lst';
 import { JuchuHead } from '@/app/_lib/db/types/t-juchu-head-type';
-import { toJapanTimeString,toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanTimeString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 
 import { CustomersDialogValues, EqTableValues, LocsDialogValues, OrderValues } from './types';
 

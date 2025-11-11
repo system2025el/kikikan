@@ -7,6 +7,7 @@ import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import CheckIcon from '@mui/icons-material/Check';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import SaveAsIcon from '@mui/icons-material/SaveAs';
 import {
   Accordion,
   AccordionDetails,
@@ -14,6 +15,7 @@ import {
   Box,
   Button,
   ClickAwayListener,
+  Container,
   Dialog,
   Divider,
   Fab,
@@ -1420,141 +1422,140 @@ const EquipmentOrderDetail = (props: {
           <Loading />
         </Box>
       ) : (
-        <Box>
-          <Box display={'flex'} justifyContent={'end'} mb={1}>
-            <Grid2 container spacing={4}>
-              {lockData !== null && lockData.addUser !== user?.name && (
-                <Grid2 container alignItems={'center'} spacing={2}>
-                  <Typography>{lockData.addDat && toJapanTimeString(new Date(lockData.addDat))}</Typography>
-                  <Typography>{lockData.addUser}</Typography>
-                  <Typography>編集中</Typography>
-                </Grid2>
-              )}
-              {fixFlag && (
-                <Box display={'flex'} alignItems={'center'}>
-                  <Typography>出庫済</Typography>
-                </Box>
-              )}
-              <Grid2 container alignItems={'center'} spacing={1}>
-                {!edit || (lockData !== null && lockData?.addUser !== user?.name) || fixFlag ? (
-                  <Typography>閲覧モード</Typography>
-                ) : (
-                  <Typography>編集モード</Typography>
-                )}
-                <Button
-                  disabled={(lockData && lockData?.addUser !== user?.name ? true : false) || fixFlag}
-                  onClick={handleEdit}
-                >
-                  変更
-                </Button>
-              </Grid2>
-              <BackButton label={'戻る'} />
-            </Grid2>
-          </Box>
-          {/*-------受注ヘッダー-------*/}
-          <Accordion expanded={expanded} onChange={handleExpansion}>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />} component="div">
-              <Box display="flex" justifyContent="space-between" alignItems="center" py={1} width="100%">
-                <Grid2 container display="flex" justifyContent="space-between" spacing={2}>
-                  <Typography>受注ヘッダー</Typography>
-                  <Grid2 container display={expanded ? 'none' : 'flex'} spacing={2}>
-                    <Typography>公演名</Typography>
-                    <Typography>{props.juchuHeadData.koenNam}</Typography>
+        <Container disableGutters sx={{ minWidth: '100%', pb: 10 }} maxWidth={'xl'}>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <Box display={'flex'} justifyContent={'end'} mb={1}>
+              <Grid2 container spacing={4}>
+                {lockData !== null && lockData.addUser !== user?.name && (
+                  <Grid2 container alignItems={'center'} spacing={2}>
+                    <Typography>{lockData.addDat && toJapanTimeString(new Date(lockData.addDat))}</Typography>
+                    <Typography>{lockData.addUser}</Typography>
+                    <Typography>編集中</Typography>
                   </Grid2>
+                )}
+                {fixFlag && (
+                  <Box display={'flex'} alignItems={'center'}>
+                    <Typography>出庫済</Typography>
+                  </Box>
+                )}
+                <Grid2 container alignItems={'center'} spacing={1}>
+                  {!edit || (lockData !== null && lockData?.addUser !== user?.name) || fixFlag ? (
+                    <Typography>閲覧モード</Typography>
+                  ) : (
+                    <Typography>編集モード</Typography>
+                  )}
+                  <Button
+                    disabled={(lockData && lockData?.addUser !== user?.name ? true : false) || fixFlag}
+                    onClick={handleEdit}
+                  >
+                    変更
+                  </Button>
                 </Grid2>
-              </Box>
-            </AccordionSummary>
-            <AccordionDetails sx={{ padding: 0 }}>
-              <Divider />
-              <Grid2 container display="flex">
-                <Grid2>
-                  <Grid2 container margin={2} spacing={2}>
-                    <Grid2 container display="flex" direction="row" alignItems="center">
-                      <Grid2 display="flex" direction="row" alignItems="center">
-                        <Typography marginRight={3} whiteSpace="nowrap">
-                          受注番号
-                        </Typography>
-                        <TextField value={props.juchuHeadData.juchuHeadId} disabled></TextField>
-                      </Grid2>
-                      <Grid2 display="flex" direction="row" alignItems="center">
-                        <Typography mr={2}>受注ステータス</Typography>
-                        <FormControl size="small" sx={{ width: 120 }}>
-                          <Select value={props.juchuHeadData.juchuSts} disabled>
-                            <MenuItem value={0}>入力中</MenuItem>
-                            <MenuItem value={1}>仮受注</MenuItem>
-                            <MenuItem value={2}>処理中</MenuItem>
-                            <MenuItem value={3}>確定</MenuItem>
-                            <MenuItem value={4}>貸出済み</MenuItem>
-                            <MenuItem value={5}>返却済み</MenuItem>
-                            <MenuItem value={9}>受注キャンセル</MenuItem>
-                          </Select>
-                        </FormControl>
-                      </Grid2>
+                <BackButton label={'戻る'} />
+              </Grid2>
+            </Box>
+            {/*-------受注ヘッダー-------*/}
+            <Accordion
+              expanded={expanded}
+              onChange={handleExpansion}
+              sx={{
+                borderRadius: 1,
+                overflow: 'hidden',
+              }}
+              variant="outlined"
+            >
+              <AccordionSummary expandIcon={<ExpandMoreIcon />} component="div">
+                <Box display="flex" justifyContent="space-between" alignItems="center" py={1} width="100%">
+                  <Grid2 container display="flex" justifyContent="space-between" spacing={2}>
+                    <Typography>受注ヘッダー</Typography>
+                    <Grid2 container display={expanded ? 'none' : 'flex'} spacing={2}>
+                      <Typography>公演名</Typography>
+                      <Typography>{props.juchuHeadData.koenNam}</Typography>
                     </Grid2>
                   </Grid2>
-                  <Box sx={styles.container}>
-                    <Typography marginRight={5} whiteSpace="nowrap">
-                      受注日
-                    </Typography>
-                    <TestDate date={props.juchuHeadData.juchuDat} onChange={() => {}} disabled />
-                  </Box>
-                  <Box sx={styles.container}>
-                    <Typography marginRight={5} whiteSpace="nowrap">
-                      入力者
-                    </Typography>
-                    <TextField value={props.juchuHeadData.nyuryokuUser} disabled></TextField>
-                  </Box>
+                </Box>
+              </AccordionSummary>
+              <AccordionDetails sx={{ padding: 0 }}>
+                <Divider />
+                <Grid2 container display="flex">
+                  <Grid2>
+                    <Grid2 container margin={2} spacing={2}>
+                      <Grid2 container display="flex" direction="row" alignItems="center">
+                        <Grid2 display="flex" direction="row" alignItems="center">
+                          <Typography marginRight={3} whiteSpace="nowrap">
+                            受注番号
+                          </Typography>
+                          <TextField value={props.juchuHeadData.juchuHeadId} disabled></TextField>
+                        </Grid2>
+                        <Grid2 display="flex" direction="row" alignItems="center">
+                          <Typography mr={2}>受注ステータス</Typography>
+                          <FormControl size="small" sx={{ width: 120 }}>
+                            <Select value={props.juchuHeadData.juchuSts} disabled>
+                              <MenuItem value={0}>入力中</MenuItem>
+                              <MenuItem value={1}>仮受注</MenuItem>
+                              <MenuItem value={2}>処理中</MenuItem>
+                              <MenuItem value={3}>確定</MenuItem>
+                              <MenuItem value={4}>貸出済み</MenuItem>
+                              <MenuItem value={5}>返却済み</MenuItem>
+                              <MenuItem value={9}>受注キャンセル</MenuItem>
+                            </Select>
+                          </FormControl>
+                        </Grid2>
+                      </Grid2>
+                    </Grid2>
+                    <Box sx={styles.container}>
+                      <Typography marginRight={5} whiteSpace="nowrap">
+                        受注日
+                      </Typography>
+                      <TestDate date={props.juchuHeadData.juchuDat} onChange={() => {}} disabled />
+                    </Box>
+                    <Box sx={styles.container}>
+                      <Typography marginRight={5} whiteSpace="nowrap">
+                        入力者
+                      </Typography>
+                      <TextField value={props.juchuHeadData.nyuryokuUser} disabled></TextField>
+                    </Box>
+                  </Grid2>
+                  <Grid2>
+                    <Box sx={{ display: 'flex', alignItems: 'center', ml: 2, mt: { xs: 0, sm: 0, md: 2 } }}>
+                      <Typography marginRight={5} whiteSpace="nowrap">
+                        公演名
+                      </Typography>
+                      <TextField value={props.juchuHeadData.koenNam} disabled></TextField>
+                    </Box>
+                    <Box sx={styles.container}>
+                      <Typography marginRight={3} whiteSpace="nowrap">
+                        公演場所
+                      </Typography>
+                      <TextField
+                        value={props.juchuHeadData.koenbashoNam ? props.juchuHeadData.koenbashoNam : ''}
+                        disabled
+                      ></TextField>
+                    </Box>
+                    <Box sx={styles.container}>
+                      <Typography marginRight={7} whiteSpace="nowrap">
+                        相手
+                      </Typography>
+                      <TextField value={props.juchuHeadData.kokyaku.kokyakuNam} disabled></TextField>
+                    </Box>
+                  </Grid2>
                 </Grid2>
-                <Grid2>
-                  <Box sx={{ display: 'flex', alignItems: 'center', ml: 2, mt: { xs: 0, sm: 0, md: 2 } }}>
-                    <Typography marginRight={5} whiteSpace="nowrap">
-                      公演名
-                    </Typography>
-                    <TextField value={props.juchuHeadData.koenNam} disabled></TextField>
-                  </Box>
-                  <Box sx={styles.container}>
-                    <Typography marginRight={3} whiteSpace="nowrap">
-                      公演場所
-                    </Typography>
-                    <TextField
-                      value={props.juchuHeadData.koenbashoNam ? props.juchuHeadData.koenbashoNam : ''}
-                      disabled
-                    ></TextField>
-                  </Box>
-                  <Box sx={styles.container}>
-                    <Typography marginRight={7} whiteSpace="nowrap">
-                      相手
-                    </Typography>
-                    <TextField value={props.juchuHeadData.kokyaku.kokyakuNam} disabled></TextField>
-                  </Box>
-                </Grid2>
-              </Grid2>
-            </AccordionDetails>
-          </Accordion>
-          {/*-------受注機材ヘッダー-------*/}
-          <form onSubmit={handleSubmit(onSubmit)}>
+              </AccordionDetails>
+            </Accordion>
+            {/*-------受注機材ヘッダー-------*/}
+
             <Accordion
               sx={{
-                mt: 2,
-                '& .Mui-expanded': {
-                  mt: 2,
-                },
+                marginTop: 2,
+                borderRadius: 1,
+                overflow: 'hidden',
               }}
+              variant="outlined"
               defaultExpanded
             >
               <AccordionSummary expandIcon={<ExpandMoreIcon />} component="div">
                 <Box display="flex" alignItems={'center'} justifyContent="space-between" py={1} width={'100%'}>
                   <Typography>受注機材ヘッダー</Typography>
-                  <Button
-                    type="submit"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                    }}
-                    disabled={!edit}
-                  >
-                    <CheckIcon fontSize="small" />
-                    保存
-                  </Button>
                 </Box>
               </AccordionSummary>
               <AccordionDetails sx={{ padding: 0 }}>
@@ -1781,6 +1782,25 @@ const EquipmentOrderDetail = (props: {
                 </Box>
               </AccordionDetails>
             </Accordion>
+            {/** 固定ボタン 保存＆ページトップ */}
+            <Box position={'fixed'} zIndex={1050} bottom={25} right={25} alignItems={'center'}>
+              <Fab
+                variant="extended"
+                color="primary"
+                type="submit"
+                sx={{ mr: 2 }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+                disabled={!edit}
+              >
+                <SaveAsIcon sx={{ mr: 1 }} />
+                保存
+              </Fab>
+              <Fab color="primary" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+                <ArrowUpwardIcon />
+              </Fab>
+            </Box>
           </form>
           {/*-------受注明細(機材)-------*/}
           <Paper variant="outlined" sx={{ mt: 2 }}>
@@ -1897,7 +1917,7 @@ const EquipmentOrderDetail = (props: {
             )}
           </Paper>
           {/*-------本番日-------*/}
-          <Paper variant="outlined" sx={{ my: 2 }}>
+          <Paper variant="outlined" sx={{ mt: 2 }}>
             <Box>
               <Box sx={styles.container}>
                 <Typography marginRight={{ xs: 2, sm: 9, md: 9, lg: 9 }} whiteSpace="nowrap">
@@ -2123,9 +2143,6 @@ const EquipmentOrderDetail = (props: {
               </Grid2>
             </Box>
           </Paper>
-          <Fab color="primary" onClick={scrollTop} sx={{ position: 'fixed', bottom: 32, right: 32, zIndex: 1000 }}>
-            <ArrowUpwardIcon fontSize="small" />
-          </Fab>
           <SaveAlertDialog open={saveOpen} onClick={() => setSaveOpen(false)} />
           <IsDirtyAlertDialog open={dirtyOpen} onClick={handleResultDialog} />
           <MoveAlertDialog open={moveOpen} onClick={handleMoveDialog} />
@@ -2133,7 +2150,7 @@ const EquipmentOrderDetail = (props: {
           <DeleteAlertDialog open={deleteEqOpen} onClick={handleEqMeisaiDeleteResult} />
           <DeleteAlertDialog open={deleteCtnOpen} onClick={handleCtnMeisaiDeleteResult} />
           {/* <NyushukoFixAlertDialog open={nyushukoFixOpen} onClick={() => setNyushukoFixOpen(false)} /> */}
-        </Box>
+        </Container>
       )}
     </>
   );

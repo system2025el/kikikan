@@ -2,16 +2,19 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import AddIcon from '@mui/icons-material/Add';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import CheckIcon from '@mui/icons-material/Check';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import Delete from '@mui/icons-material/Delete';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import SaveAsIcon from '@mui/icons-material/SaveAs';
 import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
   Box,
   Button,
+  Container,
   Dialog,
   Divider,
   Fab,
@@ -415,7 +418,7 @@ export const Order = (props: {
     );
 
   return (
-    <Box>
+    <Container disableGutters sx={{ minWidth: '100%', pb: 10 }} maxWidth={'xl'}>
       <Box display={'flex'} justifyContent={'end'} mb={1}>
         {lockData !== null && lockData.addUser !== user?.name && (
           <Grid2 container alignItems={'center'} spacing={2} px={4}>
@@ -437,7 +440,7 @@ export const Order = (props: {
         </Grid2>
       </Box>
       {/* --------------------------------受注ヘッダー------------------------------------- */}
-      <Paper>
+      <Paper variant="outlined">
         <form onSubmit={handleSubmit(onSubmit)}>
           <Grid2 container display="flex" alignItems="center" justifyContent="space-between" p={2}>
             <Grid2>
@@ -629,10 +632,14 @@ export const Order = (props: {
               // }}
             ></TextFieldElement>
           </Box>
-          <Box position={'fixed'} zIndex={1050} bottom={10} right={10}>
-            <Fab variant="extended" color="primary" sx={{ margin: 1 }} type="submit" size="medium">
-              <CheckIcon fontSize="small" sx={{ mr: 1 }} />
+          {/** 固定ボタン 保存＆ページトップ */}
+          <Box position={'fixed'} zIndex={1050} bottom={25} right={25} alignItems={'center'}>
+            <Fab variant="extended" color="primary" type="submit" sx={{ mr: 2 }}>
+              <SaveAsIcon sx={{ mr: 1 }} />
               保存
+            </Fab>
+            <Fab color="primary" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+              <ArrowUpwardIcon />
             </Fab>
           </Box>
         </form>
@@ -652,9 +659,9 @@ export const Order = (props: {
         </Dialog>
       </Paper>
       {/* --------------------------------受注明細（機材）------------------------------------- */}
-      <Accordion sx={{ marginTop: 2 }} defaultExpanded>
+      <Accordion sx={{ marginTop: 2, borderRadius: 1, overflow: 'hidden' }} defaultExpanded variant="outlined">
         <AccordionSummary expandIcon={<ExpandMoreIcon />} component="div">
-          <Grid2 container alignItems="center" justifyContent="space-between" py={1} sx={{ width: '100%' }} spacing={1}>
+          <Grid2 container alignItems="center" justifyContent="space-between" sx={{ width: '100%' }} spacing={1}>
             <Grid2>
               <Typography>受注機材ヘッダー一覧</Typography>
             </Grid2>
@@ -735,9 +742,9 @@ export const Order = (props: {
         </AccordionDetails>
       </Accordion>
       {/* -------------------------車両----------------------------------- */}
-      <Accordion sx={{ marginTop: 2 }} defaultExpanded>
+      <Accordion sx={{ marginTop: 2, borderRadius: 1, overflow: 'hidden' }} defaultExpanded variant="outlined">
         <AccordionSummary expandIcon={<ExpandMoreIcon />} component="div">
-          <Grid2 container alignItems="center" justifyContent="space-between" py={1} sx={{ width: '100%' }} spacing={1}>
+          <Grid2 container alignItems="center" justifyContent="space-between" sx={{ width: '100%' }} spacing={1}>
             <Grid2>
               <Typography>受注車両ヘッダー一覧</Typography>
             </Grid2>
@@ -780,7 +787,7 @@ export const Order = (props: {
       <IsDirtyAlertDialog open={dirtyOpen} onClick={handleResultDialog} />
       <SelectAlertDialog open={selectOpen} onClick={() => setSelectOpen(false)} />
       <CopyConfirmDialog open={copyOpen} onClick={handleCopyResultDialog} />
-    </Box>
+    </Container>
   );
 };
 
