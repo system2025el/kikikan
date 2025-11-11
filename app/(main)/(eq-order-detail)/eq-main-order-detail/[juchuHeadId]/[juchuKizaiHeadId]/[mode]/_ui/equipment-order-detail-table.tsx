@@ -46,7 +46,7 @@ type StockTableProps = {
 
 export const StockTable: React.FC<StockTableProps> = ({ eqStockList, dateRange, juchuHonbanbiList, ref }) => {
   return (
-    <TableContainer ref={ref} component={Paper} style={{ overflow: 'scroll', maxHeight: '80vh' }}>
+    <TableContainer ref={ref} style={{ overflow: 'scroll', maxHeight: '80vh' }}>
       <Table stickyHeader>
         <TableHead>
           <TableRow>
@@ -168,7 +168,7 @@ export const EqTable: React.FC<EqTableProps> = ({
   };
 
   return (
-    <TableContainer ref={ref} component={Paper} style={{ overflow: 'scroll', maxHeight: '80vh' }}>
+    <TableContainer ref={ref} style={{ overflow: 'scroll', maxHeight: '80vh' }}>
       <Table stickyHeader>
         <TableHead>
           <TableRow>
@@ -375,7 +375,7 @@ export const IdoEqTable: React.FC<IdoEqTableProps> = ({ rows, edit, handleCellDa
   const visibleRows = rows.filter((row) => !row.delFlag);
 
   return (
-    <TableContainer component={Paper} style={{ overflow: 'scroll', maxHeight: '80vh' }}>
+    <TableContainer style={{ overflow: 'scroll', maxHeight: '80vh' }}>
       <Table stickyHeader>
         <TableHead>
           <TableRow>
@@ -492,7 +492,7 @@ export const ContainerTable = (props: {
   };
 
   return (
-    <TableContainer component={Paper} style={{ overflow: 'auto', maxHeight: '80vh' }}>
+    <TableContainer style={{ overflow: 'auto', maxHeight: '80vh' }}>
       <Table stickyHeader>
         <TableHead>
           <TableRow>

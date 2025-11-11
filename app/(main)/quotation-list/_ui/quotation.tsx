@@ -2,6 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import AddIcon from '@mui/icons-material/Add';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import PrintIcon from '@mui/icons-material/Print';
 import SaveAsIcon from '@mui/icons-material/SaveAs';
@@ -247,9 +248,9 @@ export const Quotation = ({
   /* ---------------------------------------------------------------------- */
 
   return (
-    <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
+    <Container disableGutters sx={{ minWidth: '100%', pb: 10 }} maxWidth={'xl'}>
       <Box justifySelf={'end'} mb={0.5}>
-        <Button onClick={() => /*router.push('/quotation-list')*/ router.back()}>戻る</Button>
+        <Button onClick={() => router.back()}>戻る</Button>
       </Box>
       <FormProvider {...quotForm}>
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -675,7 +676,6 @@ export const Quotation = ({
               </Box>
             </Box>
           </Paper>
-
           {/* まとめ ------------------------------------------------------------------------------------ */}
           <Paper sx={{ marginTop: 2, pt: 1 }} variant="outlined">
             <Box margin={0.5} padding={0.8}>
@@ -870,10 +870,14 @@ export const Quotation = ({
               </Grid2>
             </Box>
           </Paper>
-          <Box position={'fixed'} zIndex={1050} bottom={10} right={10}>
-            <Fab variant="extended" color="primary" sx={{ margin: 1 }} type="submit" size="medium">
-              <SaveAsIcon fontSize="small" sx={{ mr: 1 }} />
+          {/** 固定ボタン 保存＆ページトップ */}
+          <Box position={'fixed'} zIndex={1050} bottom={25} right={25} alignItems={'center'}>
+            <Fab variant="extended" color="primary" type="submit" sx={{ mr: 2 }}>
+              <SaveAsIcon sx={{ mr: 1 }} />
               保存
+            </Fab>
+            <Fab color="primary" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+              <ArrowUpwardIcon />
             </Fab>
           </Box>
         </form>

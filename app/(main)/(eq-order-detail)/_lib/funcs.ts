@@ -65,7 +65,7 @@ import { JuchuKizaiHonbanbi } from '@/app/_lib/db/types/t-juchu-kizai-honbanbi-t
 import { JuchuKizaiMeisai } from '@/app/_lib/db/types/t-juchu-kizai-meisai-type';
 import { JuchuKizaiNyushuko } from '@/app/_lib/db/types/t-juchu-kizai-nyushuko-type';
 
-import { toJapanTimeString,toJapanYMDString } from '../../_lib/date-conversion';
+import { toJapanTimeString, toJapanYMDString } from '../../_lib/date-conversion';
 import {
   JuchuContainerMeisaiValues,
   JuchuKizaiHeadValues,

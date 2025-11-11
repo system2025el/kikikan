@@ -199,60 +199,58 @@ export const OrderVehicleTable: React.FC<OrderVehicleTableProps> = ({ orderVehic
   // };
 
   return (
-    <Paper sx={{ width: '100%', mb: 2 }}>
-      <TableContainer sx={{ overflow: 'auto' }}>
-        <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle" size="small">
-          <TableHead sx={{ bgcolor: 'primary.light' }}>
-            <TableRow sx={{ whiteSpace: 'nowrap' }}>
+    <TableContainer sx={{ overflow: 'auto' }}>
+      <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle" size="small">
+        <TableHead sx={{ bgcolor: 'primary.light' }}>
+          <TableRow sx={{ whiteSpace: 'nowrap' }}>
+            <TableCell padding="checkbox">
+              <Checkbox
+                indeterminate={rows && selected.length > 0 && selected.length < rows.length}
+                checked={rows && rows.length > 0 && selected.length === rows.length}
+                onChange={(e) => {
+                  const newSelected = e.target.checked && rows ? rows.map((row) => row.juchuSharyoHeadId) : [];
+                  setSelected(newSelected);
+                  onVehicleSelectionChange(newSelected);
+                }}
+              />
+            </TableCell>
+            <TableCell padding="none" />
+            <TableCell align="left">車両明細名</TableCell>
+            <TableCell align="left">区分</TableCell>
+            <TableCell align="left">日付</TableCell>
+            <TableCell align="left">車両メモ</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {rows!.map((row, index) => (
+            <TableRow hover key={row.juchuSharyoHeadId}>
               <TableCell padding="checkbox">
                 <Checkbox
-                  indeterminate={rows && selected.length > 0 && selected.length < rows.length}
-                  checked={rows && rows.length > 0 && selected.length === rows.length}
-                  onChange={(e) => {
-                    const newSelected = e.target.checked && rows ? rows.map((row) => row.juchuSharyoHeadId) : [];
-                    setSelected(newSelected);
-                    onVehicleSelectionChange(newSelected);
-                  }}
+                  checked={selected.includes(row.juchuSharyoHeadId)}
+                  onChange={() => handleSelect(row.juchuSharyoHeadId)}
                 />
               </TableCell>
-              <TableCell padding="none" />
-              <TableCell align="left">車両明細名</TableCell>
-              <TableCell align="left">区分</TableCell>
-              <TableCell align="left">日付</TableCell>
-              <TableCell align="left">車両メモ</TableCell>
+              <TableCell padding="none">{index + 1}</TableCell>
+              <TableCell align="left">
+                <Button
+                  href={'/order/vehicle-order-detail'}
+                  variant="text"
+                  sx={{
+                    color: 'primary',
+                    whiteSpace: 'nowrap',
+                    justifyContent: 'start',
+                  }}
+                >
+                  {row.headNam}
+                </Button>
+              </TableCell>
+              <TableCell align="left">{row.kbn}</TableCell>
+              <TableCell align="left">{row.dat ? toJapanTimeString(new Date(row.dat)) : ''}</TableCell>
+              <TableCell align="left">{row.mem}</TableCell>
             </TableRow>
-          </TableHead>
-          <TableBody>
-            {rows!.map((row, index) => (
-              <TableRow hover key={row.juchuSharyoHeadId}>
-                <TableCell padding="checkbox">
-                  <Checkbox
-                    checked={selected.includes(row.juchuSharyoHeadId)}
-                    onChange={() => handleSelect(row.juchuSharyoHeadId)}
-                  />
-                </TableCell>
-                <TableCell padding="none">{index + 1}</TableCell>
-                <TableCell align="left">
-                  <Button
-                    href={'/order/vehicle-order-detail'}
-                    variant="text"
-                    sx={{
-                      color: 'primary',
-                      whiteSpace: 'nowrap',
-                      justifyContent: 'start',
-                    }}
-                  >
-                    {row.headNam}
-                  </Button>
-                </TableCell>
-                <TableCell align="left">{row.kbn}</TableCell>
-                <TableCell align="left">{row.dat ? toJapanTimeString(new Date(row.dat)) : ''}</TableCell>
-                <TableCell align="left">{row.mem}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </Paper>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
 };

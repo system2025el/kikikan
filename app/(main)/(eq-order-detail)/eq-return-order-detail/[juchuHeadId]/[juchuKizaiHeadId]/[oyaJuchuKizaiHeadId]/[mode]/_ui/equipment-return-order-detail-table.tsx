@@ -50,7 +50,7 @@ export const ReturnStockTable: React.FC<ReturnStockTableProps> = ({
   ref,
 }) => {
   return (
-    <TableContainer ref={ref} component={Paper} style={{ overflow: 'scroll', maxHeight: '80vh' }}>
+    <TableContainer ref={ref} style={{ overflow: 'scroll', maxHeight: '80vh' }}>
       <Table>
         <TableHead>
           <TableRow>
@@ -186,7 +186,7 @@ export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({
   };
 
   return (
-    <TableContainer ref={ref} component={Paper} style={{ overflow: 'scroll', maxHeight: '80vh' }}>
+    <TableContainer ref={ref} style={{ overflow: 'scroll', maxHeight: '80vh' }}>
       <Table stickyHeader>
         <TableHead>
           <TableRow>
@@ -462,7 +462,7 @@ export const ReturnContainerTable = (props: {
   };
 
   return (
-    <TableContainer component={Paper} style={{ overflow: 'auto', maxHeight: '80vh' }}>
+    <TableContainer style={{ overflow: 'auto', maxHeight: '80vh' }}>
       <Table stickyHeader>
         <TableHead>
           <TableRow>
