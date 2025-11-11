@@ -12,7 +12,7 @@ import {
 } from '@mui/material';
 import { red } from '@mui/material/colors';
 
-import { toISOStringMonthDay } from '../../_lib/date-conversion';
+import { toJapanMDString } from '../../_lib/date-conversion';
 import { EqTableValues, StockTableValues } from '../_lib/types';
 
 type EqTableProps = {
@@ -109,7 +109,7 @@ export const EqStockTable = (props: EqStockTableProps) => {
                     lineHeight: '1rem',
                   }}
                 >
-                  {toISOStringMonthDay(cell.calDat)}
+                  {toJapanMDString(cell.calDat)}
                 </TableCell>
               ))}
           </TableRow>

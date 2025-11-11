@@ -1,10 +1,10 @@
-import { toJapanDateString } from '../_lib/date-conversion';
+import { toJapanYMDString } from '../_lib/date-conversion';
 import { getIdoList } from './_lib/funcs';
 import { IdoTableValues } from './_lib/types';
 import { IdoList } from './_ui/ido-list';
 
 const Page = async () => {
-  const date = toJapanDateString(undefined, '-');
+  const date = toJapanYMDString(undefined, '-');
   const idoData = await getIdoList(date);
 
   if (!idoData) {

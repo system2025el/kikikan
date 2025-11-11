@@ -43,7 +43,7 @@ import { Controller, useForm, useWatch } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
-import { toISOString, toISOStringMonthDay, toISOStringYearMonthDay } from '@/app/(main)/_lib/date-conversion';
+import { toJapanTimeString,toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { getNyukoDate, getRange } from '@/app/(main)/_lib/date-funcs';
 import { addLock, delLock, getLock } from '@/app/(main)/_lib/funcs';
 import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
@@ -673,7 +673,7 @@ export const EquipmentReturnOrderDetail = (props: {
           }, new Map<number, number>());
 
         const targetIndex = updatedEqStockData[0]
-          .map((d, index) => (dateRange.includes(toISOStringYearMonthDay(d.calDat)) ? index : -1))
+          .map((d, index) => (dateRange.includes(toJapanYMDString(d.calDat)) ? index : -1))
           .filter((index) => index !== -1);
 
         const subUpdatedEqStockData = updatedEqStockData.map((data, index) =>
@@ -750,7 +750,7 @@ export const EquipmentReturnOrderDetail = (props: {
   ) => {
     const updatedEqStockData = eqStockListRef.current[rowIndex];
     const targetIndex = updatedEqStockData
-      .map((d, index) => (dateRange.includes(toISOStringYearMonthDay(d.calDat)) ? index : -1))
+      .map((d, index) => (dateRange.includes(toJapanYMDString(d.calDat)) ? index : -1))
       .filter((index) => index !== -1);
 
     setEqStockList((prev) =>
@@ -806,7 +806,7 @@ export const EquipmentReturnOrderDetail = (props: {
 
       const updatedEqStockData = eqStockListRef.current[deleteEq.rowIndex];
       const targetIndex = updatedEqStockData
-        .map((d, index) => (dateRange.includes(toISOStringYearMonthDay(d.calDat)) ? index : -1))
+        .map((d, index) => (dateRange.includes(toJapanYMDString(d.calDat)) ? index : -1))
         .filter((index) => index !== -1);
       setEqStockList((prev) =>
         prev
@@ -1034,7 +1034,7 @@ export const EquipmentReturnOrderDetail = (props: {
         );
         if (originReturnPlanQty.get(newIds[i])) {
           const updateStock = stock.map((d) =>
-            dateRange.includes(toISOStringYearMonthDay(d.calDat))
+            dateRange.includes(toJapanYMDString(d.calDat))
               ? { ...d, zaikoQty: d.zaikoQty - originReturnPlanQty.get(newIds[i])! }
               : d
           );
@@ -1114,7 +1114,7 @@ export const EquipmentReturnOrderDetail = (props: {
             <Grid2 container spacing={4}>
               {lockData !== null && lockData.addUser !== user?.name && (
                 <Grid2 container alignItems={'center'} spacing={2}>
-                  <Typography>{lockData.addDat && toISOString(new Date(lockData.addDat))}</Typography>
+                  <Typography>{lockData.addDat && toJapanTimeString(new Date(lockData.addDat))}</Typography>
                   <Typography>{lockData.addUser}</Typography>
                   <Typography>編集中</Typography>
                 </Grid2>

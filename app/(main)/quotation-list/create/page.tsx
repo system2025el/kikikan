@@ -1,4 +1,4 @@
-import { toJapanDateString } from '../../_lib/date-conversion';
+import { toJapanYMDString } from '../../_lib/date-conversion';
 import { getCustomerSelection } from '../../(masters)/_lib/funcs';
 import { getMituStsSelection, getOrderForQuotation, getUsersSelection } from '../_lib/funcs';
 import { JuchuValues, QuotHeadValues } from '../_lib/types';

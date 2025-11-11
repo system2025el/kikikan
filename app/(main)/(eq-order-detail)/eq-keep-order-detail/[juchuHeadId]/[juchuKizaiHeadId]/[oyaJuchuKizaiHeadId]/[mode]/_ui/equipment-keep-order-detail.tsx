@@ -33,7 +33,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
-import { toISOString, toISOStringMonthDay } from '@/app/(main)/_lib/date-conversion';
+import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { getNyukoDate, getShukoDate } from '@/app/(main)/_lib/date-funcs';
 import { addLock, delLock, getLock } from '@/app/(main)/_lib/funcs';
 import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
@@ -768,7 +768,7 @@ export const EquipmentKeepOrderDetail = (props: {
             <Grid2 container spacing={4}>
               {lockData !== null && lockData.addUser !== user?.name && (
                 <Grid2 container alignItems={'center'} spacing={2}>
-                  <Typography>{lockData.addDat && toISOString(new Date(lockData.addDat))}</Typography>
+                  <Typography>{lockData.addDat && toJapanTimeString(new Date(lockData.addDat))}</Typography>
                   <Typography>{lockData.addUser}</Typography>
                   <Typography>編集中</Typography>
                 </Grid2>

@@ -18,7 +18,7 @@ import { useMemo, useState } from 'react';
 import { ControllerFieldState, ControllerRenderProps, FieldErrors, Noop, useFormContext } from 'react-hook-form';
 import { DateRangePicker } from 'rsuite';
 
-import { toJapanDateString } from '../_lib/date-conversion';
+import { toJapanYMDString } from '../_lib/date-conversion';
 //import { DateRange } from 'rsuite/esm/DateRangePicker';
 
 dayjs.locale('ja'); // カレンダーの曜日のフォーマット
@@ -452,8 +452,8 @@ export const FormDateX = ({
         calendarHeader: { format: 'YYYY年MM月' },
       }} // カレンダーヘッダーのフォーマット
       views={['year', 'month', 'day']}
-      maxDate={maxDate ? dayjs(toJapanDateString(maxDate)) : undefined}
-      minDate={minDate ? dayjs(toJapanDateString(minDate)) : undefined}
+      maxDate={maxDate ? dayjs(toJapanYMDString(maxDate)) : undefined}
+      minDate={minDate ? dayjs(toJapanYMDString(minDate)) : undefined}
       disabled={disabled}
       value={value ? dayjs(value) : null}
       onChange={

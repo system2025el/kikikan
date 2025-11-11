@@ -32,7 +32,7 @@ import { TextFieldElement } from 'react-hook-form-mui';
 
 import { deleteLock } from '@/app/_lib/db/tables/t-lock';
 import { useUserStore } from '@/app/_lib/stores/usestore';
-import { toISOString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { addLock, getLock } from '@/app/(main)/_lib/funcs';
 import { LockValues } from '@/app/(main)/_lib/types';
 import { BackButton } from '@/app/(main)/_ui/buttons';
@@ -419,7 +419,7 @@ export const Order = (props: {
       <Box display={'flex'} justifyContent={'end'} mb={1}>
         {lockData !== null && lockData.addUser !== user?.name && (
           <Grid2 container alignItems={'center'} spacing={2} px={4}>
-            <Typography>{lockData.addDat && toISOString(new Date(lockData.addDat))}</Typography>
+            <Typography>{lockData.addDat && toJapanTimeString(new Date(lockData.addDat))}</Typography>
             <Typography>{lockData.addUser}</Typography>
             <Typography>編集中</Typography>
           </Grid2>

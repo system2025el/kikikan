@@ -19,7 +19,7 @@ import {
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
-import { toJapanDateString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
 import { BackButton } from '@/app/(main)/_ui/buttons';
 import { TestDate } from '@/app/(main)/_ui/date';

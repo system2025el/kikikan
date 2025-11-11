@@ -6,7 +6,7 @@ import { selectStockList, selectUseList } from '@/app/_lib/db/tables/stock-table
 import { selectLoanJuchuData } from '@/app/_lib/db/tables/v-juchu-kizai-den';
 import { selectJuchuHeadIds } from '@/app/_lib/db/tables/v-juchu-lst';
 import { selectLoanKizai } from '@/app/_lib/db/tables/v-kizai-list';
-import { toISOStringYearMonthDay } from '@/app/(main)/_lib/date-conversion';
+import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { getNyukoDate, getShukoDate } from '@/app/(main)/_lib/date-funcs';
 
 import { LoanConfirmJuchuHeadId, LoanJuchu, LoanKizai, LoanStockTableValues, LoanUseTableValues } from './types';
@@ -86,7 +86,7 @@ export const getLoanJuchuData = async (kizaiId: number) => {
  * @returns 貸出状況確認用受注ヘッダーidリスト
  */
 export const confirmJuchuHeadId = async (strDat: Date) => {
-  const stringStrDat = toISOStringYearMonthDay(strDat);
+  const stringStrDat = toJapanYMDString(strDat, '-');
   try {
     const result: QueryResult<LoanConfirmJuchuHeadId> = await selectJuchuHeadIds(stringStrDat);
     if (result.rowCount === 0) {
@@ -109,7 +109,7 @@ export const confirmJuchuHeadId = async (strDat: Date) => {
  * @returns 貸出状況用使用データ
  */
 export const getLoanUseData = async (juchuHeadId: number, kizaiId: number, date: Date) => {
-  const stringDate = toISOStringYearMonthDay(date);
+  const stringDate = toJapanYMDString(date, '-');
   try {
     //console.log('DB Connected');
     const result: QueryResult<LoanUseTableValues> = await selectUseList(juchuHeadId, kizaiId, stringDate);
@@ -128,7 +128,7 @@ export const getLoanUseData = async (juchuHeadId: number, kizaiId: number, date:
  * @returns 貸出状況用在庫データ
  */
 export const getLoanStockData = async (kizaiId: number, date: Date) => {
-  const stringDate = toISOStringYearMonthDay(date);
+  const stringDate = toJapanYMDString(date, '-');
   try {
     const result: QueryResult<LoanStockTableValues> = await selectStockList(kizaiId, stringDate);
     const data: LoanStockTableValues[] = result.rows;

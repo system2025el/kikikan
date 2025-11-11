@@ -4,7 +4,7 @@ import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
 
-import { toJapanDateString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanTimeString,toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 import { OrderSearchValues } from '@/app/(main)/order-list/_lib/types';
 
@@ -144,18 +144,18 @@ export const selectFilteredJuchus = async (
 
       case '6': // '明日以降'
         const tomorrowAndAfter = dayjs().tz('Asia/Tokyo').add(1, 'day').startOf('day').toDate();
-        builder.gte(dateColumn, toJapanDateString(tomorrowAndAfter, '-'));
+        builder.gte(dateColumn, toJapanYMDString(tomorrowAndAfter, '-'));
         break;
 
       case '7': // '指定期間'
         if (selectedDate.range?.from) {
-          console.log('始まり！！！！！！', toJapanDateString(selectedDate.range?.from, '-'));
-          builder.gte(dateColumn, toJapanDateString(selectedDate.range.from, '-'));
+          console.log('始まり！！！！！！', toJapanYMDString(selectedDate.range?.from, '-'));
+          builder.gte(dateColumn, toJapanYMDString(selectedDate.range.from, '-'));
         }
         if (selectedDate.range?.to) {
           const nextDay = dayjs(selectedDate.range.to).tz('Asia/Tokyo').add(1, 'day').startOf('day').toDate();
-          console.log('終わりの次の日！！！！！！', toJapanDateString(nextDay), '-');
-          builder.lt(dateColumn, toJapanDateString(nextDay));
+          console.log('終わりの次の日！！！！！！', toJapanYMDString(nextDay, '-'));
+          builder.lt(dateColumn, toJapanYMDString(nextDay, '-'));
         }
         break;
 

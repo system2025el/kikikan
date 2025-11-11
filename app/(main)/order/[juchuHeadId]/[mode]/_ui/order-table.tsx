@@ -17,7 +17,7 @@ import TableRow from '@mui/material/TableRow';
 import * as React from 'react';
 import { useState } from 'react';
 
-import { toISOString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { EqTableValues, VehicleTableValues } from '../_lib/types';
 
@@ -138,14 +138,14 @@ export const OrderEqTable: React.FC<OrderEqTableProps> = ({ orderEqRows, edit, o
                   </Button>
                 </TableCell>
                 <TableCell align="left">
-                  {`K ${row.kicsShukoDat ? toISOString(new Date(row.kicsShukoDat)) : 'ー'}`}
+                  {`K ${row.kicsShukoDat ? toJapanTimeString(new Date(row.kicsShukoDat)) : 'ー'}`}
                   <br />
-                  {`Y ${row.yardShukoDat ? toISOString(new Date(row.yardShukoDat)) : 'ー'}`}
+                  {`Y ${row.yardShukoDat ? toJapanTimeString(new Date(row.yardShukoDat)) : 'ー'}`}
                 </TableCell>
                 <TableCell align="left">
-                  {`K ${row.kicsNyukoDat ? toISOString(new Date(row.kicsNyukoDat)) : 'ー'}`}
+                  {`K ${row.kicsNyukoDat ? toJapanTimeString(new Date(row.kicsNyukoDat)) : 'ー'}`}
                   <br />
-                  {`Y ${row.yardNyukoDat ? toISOString(new Date(row.yardNyukoDat)) : 'ー'}`}
+                  {`Y ${row.yardNyukoDat ? toJapanTimeString(new Date(row.yardNyukoDat)) : 'ー'}`}
                 </TableCell>
                 <TableCell align="right">{row.sikomibi}</TableCell>
                 <TableCell align="right">{row.rihabi}</TableCell>
@@ -246,7 +246,7 @@ export const OrderVehicleTable: React.FC<OrderVehicleTableProps> = ({ orderVehic
                   </Button>
                 </TableCell>
                 <TableCell align="left">{row.kbn}</TableCell>
-                <TableCell align="left">{row.dat ? toISOString(new Date(row.dat)) : ''}</TableCell>
+                <TableCell align="left">{row.dat ? toJapanTimeString(new Date(row.dat)) : ''}</TableCell>
                 <TableCell align="left">{row.mem}</TableCell>
               </TableRow>
             ))}

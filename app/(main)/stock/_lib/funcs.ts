@@ -6,7 +6,7 @@ import { selectActiveBumons } from '@/app/_lib/db/tables/m-bumon';
 import { selectStockList } from '@/app/_lib/db/tables/stock-table';
 import { selectStockKizai } from '@/app/_lib/db/tables/v-kizai-list';
 
-import { toISOStringYearMonthDay } from '../../_lib/date-conversion';
+import { toJapanYMDString } from '../../_lib/date-conversion';
 import { Bumon, EqTableValues, StockTableValues } from './types';
 
 /**
@@ -73,7 +73,7 @@ export const getEqData = async (bumonId: number) => {
  * @returns 在庫データ
  */
 export const getEqStockData = async (kizaiId: number, date: Date) => {
-  const stringDate = toISOStringYearMonthDay(date);
+  const stringDate = toJapanYMDString(date, '-');
   try {
     const result: QueryResult<StockTableValues> = await selectStockList(kizaiId, stringDate);
     const data: StockTableValues[] = result.rows;

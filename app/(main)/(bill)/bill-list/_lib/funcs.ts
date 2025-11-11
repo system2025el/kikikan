@@ -16,7 +16,7 @@ import {
 import { selectFilteredBills } from '@/app/_lib/db/tables/v-seikyu-lst';
 import { SeikyuMeisaiHead } from '@/app/_lib/db/types/t-seikyu-meisai-head-type';
 import { SeikyuMeisai } from '@/app/_lib/db/types/t-seikyu-meisai-type';
-import { toJapanDateString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 
 import { BillHeadValues, BillMeisaiHeadsValues, BillSearchValues, BillsListTableValues } from './types';
@@ -247,7 +247,7 @@ export const getJuchuKizaiMeisaiHeadForBill = async (juchuHeadId: number, kizaiH
       koenNam: j.koen_nam,
       seikyuRange: {
         strt:
-          j.seikyu_dat && toJapanDateString(j.seikyu_dat) !== toJapanDateString(j.shuko_dat)
+          j.seikyu_dat && toJapanYMDString(j.seikyu_dat) !== toJapanYMDString(j.shuko_dat)
             ? dayjs(j.seikyu_dat).tz('Asia/Tokyo').add(1, 'day').startOf('day').toDate()
             : new Date(j.shuko_dat),
         end: new Date(j.nyuko_dat) > new Date(dat) ? new Date(dat) : new Date(j.nyuko_dat),
@@ -317,7 +317,7 @@ export const getJuchuKizaiMeisaiDetailsForBill = async (juchuHeadId: number, kiz
           seikyuRange: {
             strt:
               currentRow.seikyu_dat &&
-              toJapanDateString(currentRow.seikyu_dat) !== toJapanDateString(currentRow.shuko_dat)
+              toJapanYMDString(currentRow.seikyu_dat) !== toJapanYMDString(currentRow.shuko_dat)
                 ? dayjs(currentRow.seikyu_dat).tz('Asia/Tokyo').add(1, 'day').startOf('day').toDate()
                 : new Date(currentRow.shuko_dat),
             end: new Date(currentRow.nyuko_dat) > new Date(dat) ? new Date(dat) : new Date(currentRow.nyuko_dat),

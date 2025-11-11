@@ -22,7 +22,7 @@ import { addDays, addMonths, set, subDays, subMonths } from 'date-fns';
 import dayjs, { Dayjs } from 'dayjs';
 import { useEffect, useRef, useState } from 'react';
 
-import { toISOStringMonthDay } from '@/app/(main)/_lib/date-conversion';
+import {} from '@/app/(main)/_lib/date-conversion';
 import { BackButton } from '@/app/(main)/_ui/buttons';
 import { Calendar } from '@/app/(main)/_ui/date';
 import { Loading } from '@/app/(main)/_ui/loading';

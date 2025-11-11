@@ -12,7 +12,7 @@ import {
   TableRow,
 } from '@mui/material';
 
-import { toISOStringMonthDay } from '@/app/(main)/_lib/date-conversion';
+import { toJapanMDString } from '@/app/(main)/_lib/date-conversion';
 import { LightTooltipWithText } from '@/app/(main)/(masters)/_ui/tables';
 
 import { LoanJuchu, LoanStockTableValues, LoanUseTableValues } from '../_lib/types';
@@ -100,8 +100,8 @@ export const LoanSituationTable = (props: LoanSituationTableProps) => {
                   {row.koenNam}
                 </LightTooltipWithText>
               </TableCell>
-              <TableCell style={styles.row}>{row.shukoDat ? toISOStringMonthDay(row.shukoDat) : ''}</TableCell>
-              <TableCell style={styles.row}>{row.nyukoDat ? toISOStringMonthDay(row.nyukoDat) : ''}</TableCell>
+              <TableCell style={styles.row}>{row.shukoDat ? toJapanMDString(row.shukoDat) : ''}</TableCell>
+              <TableCell style={styles.row}>{row.nyukoDat ? toJapanMDString(row.nyukoDat) : ''}</TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -193,7 +193,7 @@ export const UseTable = (props: UseTableProps) => {
                     minWidth: 0,
                   }}
                 >
-                  {toISOStringMonthDay(cell.calDat)}
+                  {toJapanMDString(cell.calDat)}
                 </TableCell>
               ))}
           </TableRow>

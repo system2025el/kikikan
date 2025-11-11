@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { CheckboxElement, TextFieldElement } from 'react-hook-form-mui';
 
-import { toJapanDateString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
 import { FormDateX, FormMonthX } from '@/app/(main)/_ui/date';
 import { Loading } from '@/app/(main)/_ui/loading';
@@ -50,7 +50,7 @@ export const CreateBillDialog = ({
     console.log(data);
     sessionStorage.setItem('billingStsSearchParams', JSON.stringify(searchParams));
     router.push(
-      `bill-list/create?kokyakuId=${data.kokyaku.id}&date=${toJapanDateString(data.date ?? undefined, '-')}&flg=${data.showDetailFlg}&tantou=${tantouNam}`
+      `bill-list/create?kokyakuId=${data.kokyaku.id}&date=${toJapanYMDString(data.date ?? undefined, '-')}&flg=${data.showDetailFlg}&tantou=${tantouNam}`
     );
   };
 
