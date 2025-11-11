@@ -4,7 +4,7 @@ import { Button, Checkbox, Table, TableBody, TableCell, TableContainer, TableHea
 import { grey } from '@mui/material/colors';
 import { Dispatch, SetStateAction, useState } from 'react';
 
-import { toISOString, toJapanTimeString } from '../../_lib/date-conversion';
+import { toJapanTimeString } from '../../_lib/date-conversion';
 import { ShukoTableValues } from '../_lib/types';
 
 export const ShukoListTable = (props: {

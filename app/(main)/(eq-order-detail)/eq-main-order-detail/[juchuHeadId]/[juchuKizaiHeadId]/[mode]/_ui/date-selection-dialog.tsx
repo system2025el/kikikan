@@ -4,7 +4,7 @@ import { Box, Button, Container, Divider, Grid2, Paper, Tab, Tabs, TextField, Ty
 import { grey } from '@mui/material/colors';
 import { useEffect, useState } from 'react';
 
-import { toISOStringYearMonthDay } from '@/app/(main)/_lib/date-conversion';
+import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { getRange } from '@/app/(main)/_lib/date-funcs';
 import { RSuiteDateRangePicker } from '@/app/(main)/_ui/date';
 
@@ -198,8 +198,8 @@ export const DateSelectDialog = ({
             juchuHonbanbiAddQty: 0,
           }));
           setSikomi((prev) => {
-            const existDate = new Set(prev.map((d) => toISOStringYearMonthDay(d.juchuHonbanbiDat)));
-            const unique = updatedSikomi.filter((d) => !existDate.has(toISOStringYearMonthDay(d.juchuHonbanbiDat)));
+            const existDate = new Set(prev.map((d) => toJapanYMDString(d.juchuHonbanbiDat)));
+            const unique = updatedSikomi.filter((d) => !existDate.has(toJapanYMDString(d.juchuHonbanbiDat)));
             return [...prev, ...unique].sort((a, b) => a.juchuHonbanbiDat.getTime() - b.juchuHonbanbiDat.getTime());
           });
           break;
@@ -214,8 +214,8 @@ export const DateSelectDialog = ({
             juchuHonbanbiAddQty: 0,
           }));
           setRh((prev) => {
-            const existDate = new Set(prev.map((d) => toISOStringYearMonthDay(d.juchuHonbanbiDat)));
-            const unique = updatedRh.filter((d) => !existDate.has(toISOStringYearMonthDay(d.juchuHonbanbiDat)));
+            const existDate = new Set(prev.map((d) => toJapanYMDString(d.juchuHonbanbiDat)));
+            const unique = updatedRh.filter((d) => !existDate.has(toJapanYMDString(d.juchuHonbanbiDat)));
             return [...prev, ...unique].sort((a, b) => a.juchuHonbanbiDat.getTime() - b.juchuHonbanbiDat.getTime());
           });
           break;
@@ -230,8 +230,8 @@ export const DateSelectDialog = ({
             juchuHonbanbiAddQty: 0,
           }));
           setGp((prev) => {
-            const existDate = new Set(prev.map((d) => toISOStringYearMonthDay(d.juchuHonbanbiDat)));
-            const unique = updatedGp.filter((d) => !existDate.has(toISOStringYearMonthDay(d.juchuHonbanbiDat)));
+            const existDate = new Set(prev.map((d) => toJapanYMDString(d.juchuHonbanbiDat)));
+            const unique = updatedGp.filter((d) => !existDate.has(toJapanYMDString(d.juchuHonbanbiDat)));
             return [...prev, ...unique].sort((a, b) => a.juchuHonbanbiDat.getTime() - b.juchuHonbanbiDat.getTime());
           });
           break;
@@ -246,8 +246,8 @@ export const DateSelectDialog = ({
             juchuHonbanbiAddQty: 0,
           }));
           setHonban((prev) => {
-            const existDate = new Set(prev.map((d) => toISOStringYearMonthDay(d.juchuHonbanbiDat)));
-            const unique = updatedHonban.filter((d) => !existDate.has(toISOStringYearMonthDay(d.juchuHonbanbiDat)));
+            const existDate = new Set(prev.map((d) => toJapanYMDString(d.juchuHonbanbiDat)));
+            const unique = updatedHonban.filter((d) => !existDate.has(toJapanYMDString(d.juchuHonbanbiDat)));
             return [...prev, ...unique].sort((a, b) => a.juchuHonbanbiDat.getTime() - b.juchuHonbanbiDat.getTime());
           });
           break;
@@ -323,7 +323,7 @@ export const DateSelectDialog = ({
               width={{ md: '50%' }}
             >
               <Grid2 size={3} maxWidth={120}>
-                <Typography>{toISOStringYearMonthDay(data.juchuHonbanbiDat)}</Typography>
+                <Typography>{toJapanYMDString(data.juchuHonbanbiDat)}</Typography>
               </Grid2>
               <Grid2 size={5} maxWidth={250}>
                 <TextField
@@ -361,7 +361,7 @@ export const DateSelectDialog = ({
               width={{ md: '50%' }}
             >
               <Grid2 size={3} maxWidth={120}>
-                <Typography>{toISOStringYearMonthDay(data.juchuHonbanbiDat)}</Typography>
+                <Typography>{toJapanYMDString(data.juchuHonbanbiDat)}</Typography>
               </Grid2>
               <Grid2 size={5} maxWidth={250}>
                 <TextField
@@ -399,7 +399,7 @@ export const DateSelectDialog = ({
               width={{ md: '50%' }}
             >
               <Grid2 size={3} maxWidth={120}>
-                <Typography>{toISOStringYearMonthDay(data.juchuHonbanbiDat)}</Typography>
+                <Typography>{toJapanYMDString(data.juchuHonbanbiDat)}</Typography>
               </Grid2>
               <Grid2 size={5} maxWidth={250}>
                 <TextField
@@ -440,7 +440,7 @@ export const DateSelectDialog = ({
               width={{ md: '50%' }}
             >
               <Grid2 size={3} maxWidth={120}>
-                <Typography>{toISOStringYearMonthDay(data.juchuHonbanbiDat)}</Typography>
+                <Typography>{toJapanYMDString(data.juchuHonbanbiDat)}</Typography>
               </Grid2>
               <Grid2 size={3} display={'flex'} alignItems={'center'} maxWidth={100}>
                 <TextField

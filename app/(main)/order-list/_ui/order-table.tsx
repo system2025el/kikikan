@@ -19,7 +19,7 @@ import {
 } from '@mui/material';
 import React, { useEffect, useMemo } from 'react';
 
-import { toISOStringYearMonthDay } from '../../_lib/date-conversion';
+import { toJapanYMDString } from '../../_lib/date-conversion';
 import { Loading } from '../../_ui/loading';
 import { MuiTablePagination } from '../../_ui/table-pagination';
 import { ROWS_PER_MASTER_TABLE_PAGE } from '../../(masters)/_lib/constants';
@@ -170,17 +170,17 @@ export const OrderTable = ({
                     </TableCell>
                     <TableCell>
                       <LightTooltipWithText variant={'body2'} maxWidth={100}>
-                        {toISOStringYearMonthDay(new Date(order.juchuDat))}
+                        {toJapanYMDString(new Date(order.juchuDat))}
                       </LightTooltipWithText>
                     </TableCell>
                     <TableCell>
                       <LightTooltipWithText variant={'body2'} maxWidth={100}>
-                        {order.juchuStrDat && toISOStringYearMonthDay(new Date(order.juchuStrDat))}
+                        {order.juchuStrDat && toJapanYMDString(new Date(order.juchuStrDat))}
                       </LightTooltipWithText>
                     </TableCell>
                     <TableCell>
                       <LightTooltipWithText variant={'body2'} maxWidth={100}>
-                        {order.juchuEndDat && toISOStringYearMonthDay(new Date(order.juchuEndDat))}
+                        {order.juchuEndDat && toJapanYMDString(new Date(order.juchuEndDat))}
                       </LightTooltipWithText>
                     </TableCell>
                   </TableRow>

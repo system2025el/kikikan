@@ -1,6 +1,6 @@
 'use server';
 
-import { toJapanDateString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { BillingStsSearchValues } from '@/app/(main)/(bill)/billing-sts-list/_lib/types';
 
 import pool from '../postgres';
@@ -251,8 +251,8 @@ export const selectJuchuKizaiHeadNamListFormBill = async (queries: {
     .eq('juchu_head_id', queries.juchuId)
     .eq('kokyaku_id', queries.kokyaku.id)
     .eq('shuko_fix_flg', 1)
-    .lte('shuko_dat', toJapanDateString(queries.dat, '-'))
-    .or(`seikyu_dat.lte.${toJapanDateString(queries.dat, '-')},seikyu_dat.is.null`)
+    .lte('shuko_dat', toJapanYMDString(queries.dat, '-'))
+    .or(`seikyu_dat.lte.${toJapanYMDString(queries.dat, '-')},seikyu_dat.is.null`)
     .neq('seikyu_jokyo_sts_id', 9)
     .order('juchu_kizai_head_id');
 
@@ -339,7 +339,7 @@ export const selectJuchuKizaiMeisaiHeadForBill = async (juchuId: number, kizaiHe
   `;
 
   // 実行時に渡す値の配列
-  const values = [juchuId, kizaiHeadId, toJapanDateString(date, '-')];
+  const values = [juchuId, kizaiHeadId, toJapanYMDString(date, '-')];
 
   try {
     return await pool.query(query, values);
@@ -418,7 +418,7 @@ export const selectJuchuKizaiMeisaiDetailsForBill = async (juchuId: number, kiza
   `;
 
   // 実行時に渡す値の配列
-  const values = [juchuId, kizaiHeadId, toJapanDateString(date, '-')];
+  const values = [juchuId, kizaiHeadId, toJapanYMDString(date, '-')];
 
   try {
     return await pool.query(query, values);

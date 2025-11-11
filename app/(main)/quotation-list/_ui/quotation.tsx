@@ -28,7 +28,7 @@ import { Controller, FormProvider, useFieldArray, useForm, useWatch } from 'reac
 import { SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
-import { toJapanDateString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { FormDateX } from '@/app/(main)/_ui/date';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { LoadingOverlay } from '@/app/(main)/_ui/loading';
@@ -305,7 +305,7 @@ export const Quotation = ({
                   </Grid2>
                   <Box sx={styles.container}>
                     <Typography marginRight={7}>受注日</Typography>
-                    <TextField value={order.juchuDat ? toJapanDateString(order.juchuDat) : ''} disabled />
+                    <TextField value={order.juchuDat ? toJapanYMDString(order.juchuDat) : ''} disabled />
                   </Box>
                   <Box sx={styles.container}>
                     <Typography marginRight={7}>入力者</Typography>
@@ -313,11 +313,11 @@ export const Quotation = ({
                   </Box>
                   <Box sx={styles.container}>
                     <Typography marginRight={5}>受注開始</Typography>
-                    <TextField value={order.juchuRange.strt ? toJapanDateString(order.juchuRange.strt) : ''} disabled />
+                    <TextField value={order.juchuRange.strt ? toJapanYMDString(order.juchuRange.strt) : ''} disabled />
                   </Box>
                   <Box sx={styles.container}>
                     <Typography marginRight={5}>受注終了</Typography>
-                    <TextField value={order.juchuRange.end ? toJapanDateString(order.juchuRange.end) : ''} disabled />
+                    <TextField value={order.juchuRange.end ? toJapanYMDString(order.juchuRange.end) : ''} disabled />
                   </Box>
                 </Grid2>
                 <Grid2 size={5.5}>

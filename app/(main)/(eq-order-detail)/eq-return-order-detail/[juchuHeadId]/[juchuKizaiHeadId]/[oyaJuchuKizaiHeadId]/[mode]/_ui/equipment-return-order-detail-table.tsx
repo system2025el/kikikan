@@ -25,7 +25,7 @@ import { grey } from '@mui/material/colors';
 import { Dayjs } from 'dayjs';
 import React, { useRef, useState } from 'react';
 
-import { toISOStringMonthDay, toISOStringYearMonthDay } from '@/app/(main)/_lib/date-conversion';
+import { toJapanMDString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { MemoTooltip } from '@/app/(main)/(eq-order-detail)/_ui/memo-tooltip';
 import { getStockRowBackgroundColor } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/colorselect';
 import {
@@ -80,16 +80,12 @@ export const ReturnStockTable: React.FC<ReturnStockTableProps> = ({
                   size="small"
                   sx={{
                     border:
-                      getDateHeaderBackgroundColor(toISOStringYearMonthDay(data.calDat), stockTableHeaderDateRange) ===
-                      'black'
+                      getDateHeaderBackgroundColor(toJapanYMDString(data.calDat), stockTableHeaderDateRange) === 'black'
                         ? '1px solid grey'
                         : '1px solid black',
                     whiteSpace: 'nowrap',
                     color: 'white',
-                    bgcolor: getDateHeaderBackgroundColor(
-                      toISOStringYearMonthDay(data.calDat),
-                      stockTableHeaderDateRange
-                    ),
+                    bgcolor: getDateHeaderBackgroundColor(toJapanYMDString(data.calDat), stockTableHeaderDateRange),
                     padding: 0,
                     height: '26px',
                     position: 'sticky',
@@ -97,7 +93,7 @@ export const ReturnStockTable: React.FC<ReturnStockTableProps> = ({
                     zIndex: 2,
                   }}
                 >
-                  {toISOStringMonthDay(data.calDat)}
+                  {toJapanMDString(data.calDat)}
                 </TableCell>
               ))}
           </TableRow>

@@ -65,7 +65,7 @@ import { JuchuKizaiHonbanbi } from '@/app/_lib/db/types/t-juchu-kizai-honbanbi-t
 import { JuchuKizaiMeisai } from '@/app/_lib/db/types/t-juchu-kizai-meisai-type';
 import { JuchuKizaiNyushuko } from '@/app/_lib/db/types/t-juchu-kizai-nyushuko-type';
 
-import { toISOStringYearMonthDay, toJapanTimeString } from '../../_lib/date-conversion';
+import { toJapanTimeString,toJapanYMDString } from '../../_lib/date-conversion';
 import {
   JuchuContainerMeisaiValues,
   JuchuKizaiHeadValues,
@@ -491,7 +491,7 @@ export const getOyaJuchuContainerMeisai = async (juchuHeadId: number, juchuKizai
  * @returns 機材在庫テーブル用データ
  */
 export const getStockList = async (juchuHeadId: number, juchuKizaiHeadId: number, kizaiId: number, date: Date) => {
-  const stringDate = toISOStringYearMonthDay(date);
+  const stringDate = toJapanYMDString(date, '-');
   try {
     //console.log('DB Connected');
     const result: QueryResult<StockTableValues> = await selectDetailStockList(
@@ -527,7 +527,7 @@ export const addAllHonbanbi = async (
     juchu_head_id: juchuHeadId,
     juchu_kizai_head_id: juchuKizaiHeadId,
     juchu_honbanbi_shubetu_id: d.juchuHonbanbiShubetuId,
-    juchu_honbanbi_dat: toISOStringYearMonthDay(d.juchuHonbanbiDat),
+    juchu_honbanbi_dat: toJapanYMDString(d.juchuHonbanbiDat, '-'),
     mem: d.mem ? d.mem : null,
     juchu_honbanbi_add_qty: d.juchuHonbanbiAddQty,
     add_dat: toJapanTimeString(),

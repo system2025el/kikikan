@@ -17,7 +17,7 @@ import { selectFilteredQuot } from '@/app/_lib/db/tables/v-mitu-lst';
 import { MituHead } from '@/app/_lib/db/types/t-mitu-head-types';
 import { MituMeisaiHead } from '@/app/_lib/db/types/t-mitu-meisai-head-type';
 import { MituMeisai } from '@/app/_lib/db/types/t-mitu-meisai-type';
-import { toJapanDateString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 
 import { FAKE_NEW_ID } from '../../(masters)/_lib/constants';

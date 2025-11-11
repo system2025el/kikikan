@@ -7,7 +7,7 @@ import { selectFilteredCustomers, selectKokyaku } from '@/app/_lib/db/tables/m-k
 import { insertJuchuHead, selectJuchuHead, selectMaxId, updateJuchuHead } from '@/app/_lib/db/tables/t-juchu-head';
 import { selectJuchuKizaiHeadList } from '@/app/_lib/db/tables/v-juchu-kizai-head-lst';
 import { JuchuHead } from '@/app/_lib/db/types/t-juchu-head-type';
-import { toISOStringYearMonthDay, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanTimeString,toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 
 import { CustomersDialogValues, EqTableValues, LocsDialogValues, OrderValues } from './types';
 
@@ -94,9 +94,9 @@ export const addJuchuHead = async (juchuHeadId: number, juchuHeadData: OrderValu
     juchu_head_id: juchuHeadId,
     del_flg: juchuHeadData.delFlg,
     juchu_sts: juchuHeadData.juchuSts,
-    juchu_dat: toISOStringYearMonthDay(juchuHeadData.juchuDat),
-    juchu_str_dat: juchuHeadData.juchuRange && toISOStringYearMonthDay(juchuHeadData.juchuRange[0]),
-    juchu_end_dat: juchuHeadData.juchuRange && toISOStringYearMonthDay(juchuHeadData.juchuRange[1]),
+    juchu_dat: toJapanYMDString(juchuHeadData.juchuDat, '-'),
+    juchu_str_dat: juchuHeadData.juchuRange && toJapanYMDString(juchuHeadData.juchuRange[0], '-'),
+    juchu_end_dat: juchuHeadData.juchuRange && toJapanYMDString(juchuHeadData.juchuRange[1], '-'),
     nyuryoku_user: juchuHeadData.nyuryokuUser,
     koen_nam: juchuHeadData.koenNam,
     koenbasho_nam: juchuHeadData.koenbashoNam,
@@ -134,9 +134,9 @@ export const updJuchuHead = async (data: OrderValues) => {
     juchu_head_id: data.juchuHeadId,
     del_flg: data.delFlg,
     juchu_sts: data.juchuSts,
-    juchu_dat: toISOStringYearMonthDay(data.juchuDat),
-    juchu_str_dat: data.juchuRange && toISOStringYearMonthDay(data.juchuRange[0]),
-    juchu_end_dat: data.juchuRange && toISOStringYearMonthDay(data.juchuRange[1]),
+    juchu_dat: toJapanYMDString(data.juchuDat, '-'),
+    juchu_str_dat: data.juchuRange && toJapanYMDString(data.juchuRange[0], '-'),
+    juchu_end_dat: data.juchuRange && toJapanYMDString(data.juchuRange[1], '-'),
     nyuryoku_user: data.nyuryokuUser,
     koen_nam: data.koenNam,
     koenbasho_nam: data.koenbashoNam,
@@ -170,9 +170,9 @@ export const copyJuchuHead = async (juchuHeadId: number, data: OrderValues, user
     juchu_head_id: juchuHeadId,
     del_flg: data.delFlg,
     juchu_sts: data.juchuSts,
-    juchu_dat: toISOStringYearMonthDay(data.juchuDat),
-    juchu_str_dat: data.juchuRange && toISOStringYearMonthDay(data.juchuRange[0]),
-    juchu_end_dat: data.juchuRange && toISOStringYearMonthDay(data.juchuRange[1]),
+    juchu_dat: toJapanYMDString(data.juchuDat, '-'),
+    juchu_str_dat: data.juchuRange && toJapanYMDString(data.juchuRange[0], '-'),
+    juchu_end_dat: data.juchuRange && toJapanYMDString(data.juchuRange[1], '-'),
     nyuryoku_user: data.nyuryokuUser,
     koen_nam: data.koenNam,
     koenbasho_nam: data.koenbashoNam,

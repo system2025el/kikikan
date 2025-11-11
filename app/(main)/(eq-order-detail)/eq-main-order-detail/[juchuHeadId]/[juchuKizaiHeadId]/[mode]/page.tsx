@@ -1,6 +1,5 @@
 import { subDays } from 'date-fns';
 
-import { toISOStringYearMonthDay } from '@/app/(main)/_lib/date-conversion';
 import { getNyukoDate, getRange, getShukoDate } from '@/app/(main)/_lib/date-funcs';
 
 import { getDetailJuchuHead, getJuchuContainerMeisai, getNyushukoFixFlag, getStockList } from '../../../../_lib/funcs';

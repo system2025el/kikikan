@@ -1,6 +1,6 @@
 import { Dayjs } from 'dayjs';
 
-import { toISOStringYearMonthDay } from '@/app/(main)/_lib/date-conversion';
+import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 
 import { JuchuKizaiHonbanbiValues } from './types';
 
@@ -14,11 +14,11 @@ export const getStockRowBackgroundColor = (
   dateRange: string[],
   juchuHonbanbiList: JuchuKizaiHonbanbiValues[]
 ): string => {
-  const cellDate = toISOStringYearMonthDay(date);
+  const cellDate = toJapanYMDString(date);
 
-  if (juchuHonbanbiList.some((date) => toISOStringYearMonthDay(date.juchuHonbanbiDat) === cellDate)) {
+  if (juchuHonbanbiList.some((date) => toJapanYMDString(date.juchuHonbanbiDat) === cellDate)) {
     const shubetuId = juchuHonbanbiList.find(
-      (date) => toISOStringYearMonthDay(date.juchuHonbanbiDat) === cellDate
+      (date) => toJapanYMDString(date.juchuHonbanbiDat) === cellDate
     )?.juchuHonbanbiShubetuId;
     switch (shubetuId) {
       case 40:

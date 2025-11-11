@@ -1,6 +1,6 @@
 'use server';
 
-import { toJapanDateString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 
 import pool from '../postgres';
 import { SCHEMA, supabase } from '../supabase';

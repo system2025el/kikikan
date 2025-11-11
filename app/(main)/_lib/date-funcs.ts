@@ -1,4 +1,4 @@
-import { toISOStringYearMonthDay } from './date-conversion';
+import { toJapanYMDString } from './date-conversion';
 
 export const getShukoDate = (kicsShukoDat: Date | null, yardShukoDat: Date | null) => {
   if (kicsShukoDat && yardShukoDat) {
@@ -39,7 +39,7 @@ export const getRange = (start: Date | null, end: Date | null): string[] => {
     const current = new Date(start);
 
     while (current <= end) {
-      const dateStr = toISOStringYearMonthDay(current);
+      const dateStr = toJapanYMDString(current);
       range.push(dateStr);
       current.setDate(current.getDate() + 1);
     }

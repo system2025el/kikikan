@@ -5,7 +5,7 @@ import { Box, Button, Dialog, Divider, Grid2, Paper, Typography } from '@mui/mat
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
-import { toISOStringYearMonthDay, toJapanDateString } from '../../_lib/date-conversion';
+import { toJapanYMDString } from '../../_lib/date-conversion';
 import { TestDate } from '../../_ui/date';
 import { Loading } from '../../_ui/loading';
 import { getIdoList } from '../_lib/funcs';
@@ -31,7 +31,7 @@ export const IdoList = (props: { idoData: IdoTableValues[] }) => {
    */
   const onSubmit = async (data: { idoDat: Date }) => {
     setIsLoading(true);
-    const idoData = await getIdoList(toJapanDateString(data.idoDat, '-'));
+    const idoData = await getIdoList(toJapanYMDString(data.idoDat, '-'));
     if (idoData) {
       setIdoList(idoData);
     }

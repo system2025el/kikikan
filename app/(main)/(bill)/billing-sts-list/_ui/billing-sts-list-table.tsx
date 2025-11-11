@@ -31,7 +31,7 @@ import {
 import { useMemo, useState } from 'react';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
-import { toJapanDateString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanTimeString,toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
 import { FormDateX } from '@/app/(main)/_ui/date';
 import { Loading } from '@/app/(main)/_ui/loading';
@@ -395,7 +395,7 @@ const BillingStsRow = ({ juchu, refetch }: { juchu: BillingStsTableValues; refet
 
               <DialogContent sx={{ m: 5 }}>
                 <Typography mb={2}>
-                  {toJapanDateString(meisaiToUpd.shukoDat)}～{toJapanDateString(meisaiToUpd.nyukoDat)}で選択してください
+                  {toJapanYMDString(meisaiToUpd.shukoDat)}～{toJapanYMDString(meisaiToUpd.nyukoDat)}で選択してください
                 </Typography>
                 <Stack sx={{ justifyContent: 'center', display: 'flex', alignItems: 'center' }}>
                   <Typography mr={3}>請求済み期間</Typography>
@@ -417,7 +417,7 @@ const BillingStsRow = ({ juchu, refetch }: { juchu: BillingStsTableValues; refet
                   disabled={
                     !newDat ||
                     (meisaiToUpd.currentDat
-                      ? toJapanDateString(meisaiToUpd.currentDat) === toJapanDateString(newDat)
+                      ? toJapanYMDString(meisaiToUpd.currentDat) === toJapanYMDString(newDat)
                       : false)
                   }
                 >

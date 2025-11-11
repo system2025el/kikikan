@@ -4,7 +4,7 @@ import { Checkbox, Table, TableBody, TableCell, TableContainer, TableHead, Table
 import { grey } from '@mui/material/colors';
 import { Dispatch, SetStateAction } from 'react';
 
-import { toJapanDateString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 
 import { IdoEqptDetailTableValues } from '../_lib/types';
 
@@ -57,7 +57,7 @@ export const IdoEqptDetailTable = (props: {
               <TableCell align="left">{row.rfidTagId}</TableCell>
               <TableCell align="left">{row.rfidStsNam}</TableCell>
               <TableCell align="left">{row.rfidMem}</TableCell>
-              <TableCell align="left">{row.rfidDat && toJapanDateString(row.rfidDat)}</TableCell>
+              <TableCell align="left">{row.rfidDat && toJapanYMDString(row.rfidDat)}</TableCell>
               <TableCell align="left">{row.rfidUser}</TableCell>
               <TableCell align="left">{row.rfidDelFlg === 1 && '無効'}</TableCell>
             </TableRow>

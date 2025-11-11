@@ -4,7 +4,6 @@ import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
 
 import pool from '@/app/_lib/db/postgres';
 import { SCHEMA } from '@/app/_lib/db/supabase';
@@ -17,7 +16,7 @@ import { SeikyuDatJuchuKizai } from '@/app/_lib/db/types/t-seikyu-date-juchu-kiz
 import { SeikyuHead } from '@/app/_lib/db/types/t-seikyu-head-type';
 import { SeikyuMeisaiHead } from '@/app/_lib/db/types/t-seikyu-meisai-head-type';
 import { SeikyuMeisai } from '@/app/_lib/db/types/t-seikyu-meisai-type';
-import { toJapanDateString, toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanTimeStampString, toJapanTimeString,toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 
 import { BillHeadValues, BillMeisaiHeadsValues } from '../../_lib/types';
@@ -112,7 +111,7 @@ export const getJuchusForBill = async (queries: {
         koenNam: j.koen_nam,
         seikyuRange: {
           strt:
-            j.seikyu_dat && toJapanDateString(j.seikyu_dat) !== toJapanDateString(j.shuko_dat)
+            j.seikyu_dat && toJapanYMDString(j.seikyu_dat) !== toJapanYMDString(j.shuko_dat)
               ? dayjs(j.seikyu_dat).tz('Asia/Tokyo').add(1, 'day').startOf('day').toDate()
               : new Date(j.shuko_dat),
           end: new Date(j.nyuko_dat) > new Date(date) ? new Date(date) : new Date(j.nyuko_dat),

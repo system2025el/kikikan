@@ -1,4 +1,4 @@
-import { toJapanDateString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { getChosenCustomer, getChosenCustomerIdAndName } from '@/app/(main)/(masters)/customers-master/_lib/funcs';
 import { getUsersSelection } from '@/app/(main)/quotation-list/_lib/funcs';
 
@@ -16,7 +16,7 @@ const Page = async ({ searchParams }: { searchParams: Promise<{ [key: string]: s
   const custs = await getChosenCustomerIdAndName(Number(kokyakuId));
   const juchus = await getJuchusForBill({
     kokyakuId: Number(kokyakuId),
-    date: date ?? toJapanDateString(undefined, '-'),
+    date: date ?? toJapanYMDString(undefined, '-'),
     flg: flg === 'true' ? true : false,
     tantouNam: tantou === 'null' ? null : (tantou ?? null),
   });

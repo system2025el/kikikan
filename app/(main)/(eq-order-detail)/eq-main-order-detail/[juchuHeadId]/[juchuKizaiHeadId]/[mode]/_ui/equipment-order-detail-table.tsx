@@ -24,7 +24,7 @@ import { grey } from '@mui/material/colors';
 import { Dayjs } from 'dayjs';
 import React, { useRef, useState } from 'react';
 
-import { toISOStringMonthDay, toISOStringYearMonthDay } from '@/app/(main)/_lib/date-conversion';
+import { toJapanMDString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { TestDate } from '@/app/(main)/_ui/date';
 import { MemoTooltip } from '@/app/(main)/(eq-order-detail)/_ui/memo-tooltip';
 
@@ -58,17 +58,17 @@ export const StockTable: React.FC<StockTableProps> = ({ eqStockList, dateRange, 
                   size="small"
                   sx={{
                     border:
-                      getDateHeaderBackgroundColor(toISOStringYearMonthDay(data.calDat), dateRange) === 'black'
+                      getDateHeaderBackgroundColor(toJapanYMDString(data.calDat), dateRange) === 'black'
                         ? '1px solid grey'
                         : '1px solid black',
                     whiteSpace: 'nowrap',
                     color: 'white',
-                    bgcolor: getDateHeaderBackgroundColor(toISOStringYearMonthDay(data.calDat), dateRange),
+                    bgcolor: getDateHeaderBackgroundColor(toJapanYMDString(data.calDat), dateRange),
                     padding: 0,
                     height: '26px',
                   }}
                 >
-                  {toISOStringMonthDay(data.calDat)}
+                  {toJapanMDString(data.calDat)}
                 </TableCell>
               ))}
           </TableRow>

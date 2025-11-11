@@ -1,4 +1,4 @@
-import { toISOString, toISOStringYearMonthDay, toJapanDateString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { NyukoListSearchValues } from '@/app/(main)/nyuko-list/_lib/types';
 import { ShukoListSearchValues } from '@/app/(main)/shuko-list/_lib/types';
 
@@ -36,7 +36,7 @@ export const selectFilteredShukoList = async (queries: ShukoListSearchValues) =>
     query += ` AND d2.nyushuko_basho_id = ${queries.shukoBasho}`;
   }
   if (queries.shukoDat !== null) {
-    query += ` AND d2.nyushuko_dat::text LIKE '%${toJapanDateString(queries.shukoDat, '-')}%'`;
+    query += ` AND d2.nyushuko_dat::text LIKE '%${toJapanYMDString(queries.shukoDat, '-')}%'`;
   }
   if (queries.section && queries.section.length !== 0) {
     const likeClouds = queries.section.map((d) => ` AND d2.section_namv::TEXT LIKE '%${d}%'`).join('');
@@ -81,7 +81,7 @@ export const selectFilteredNyukoList = async (queries: NyukoListSearchValues) =>
     query += ` AND d2.nyushuko_basho_id = ${queries.shukoBasho}`;
   }
   if (queries.shukoDat !== null) {
-    query += ` AND d2.nyushuko_dat::text LIKE '%${toJapanDateString(queries.shukoDat, '-')}%'`;
+    query += ` AND d2.nyushuko_dat::text LIKE '%${toJapanYMDString(queries.shukoDat, '-')}%'`;
   }
   if (queries.section && queries.section.length !== 0) {
     const likeClouds = queries.section.map((d) => ` AND d2.section_namv::TEXT LIKE '%${d}%'`).join('');

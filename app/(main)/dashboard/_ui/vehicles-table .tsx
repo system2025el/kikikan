@@ -13,7 +13,7 @@ import {
 } from '@mui/material';
 import React from 'react';
 
-import { toJapanDateString, toJapanTimeString } from '../../_lib/date-conversion';
+import { toJapanTimeString,toJapanYMDString } from '../../_lib/date-conversion';
 import { LightTooltipWithText } from '../../(masters)/_ui/tables';
 import { EqptOrderListTableValues } from '../../eqpt-order-list/_lib/types';
 /**

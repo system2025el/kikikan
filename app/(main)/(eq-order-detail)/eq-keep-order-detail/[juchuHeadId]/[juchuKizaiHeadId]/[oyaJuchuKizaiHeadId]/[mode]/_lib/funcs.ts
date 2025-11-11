@@ -48,7 +48,7 @@ import { JuchuKizaiMeisai } from '@/app/_lib/db/types/t-juchu-kizai-meisai-type'
 import { NyushukoDen } from '@/app/_lib/db/types/t-nyushuko-den-type';
 import { NyushukoFix } from '@/app/_lib/db/types/t-nyushuko-fix-type';
 import { Database } from '@/app/_lib/db/types/types';
-import { toISOString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import {
   addJuchuKizaiNyushuko,
   delAllNyukoResult,
@@ -1168,8 +1168,8 @@ export const delKeepJuchuContainerMeisai = async (
 //           sagyo_kbn_id: 10,
 //           sagyo_den_dat:
 //             d.shozokuId === 1
-//               ? toISOString(keepJuchuKizaiHeadData.kicsShukoDat as Date)
-//               : toISOString(keepJuchuKizaiHeadData.yardShukoDat as Date),
+//               ? toJapanTimeStampString(keepJuchuKizaiHeadData.kicsShukoDat as Date)
+//               : toJapanTimeStampString(keepJuchuKizaiHeadData.yardShukoDat as Date),
 //           sagyo_id: d.shozokuId,
 //           kizai_id: d.kizaiId,
 //           plan_qty: d.keepQty,
@@ -1189,8 +1189,8 @@ export const delKeepJuchuContainerMeisai = async (
 //           sagyo_kbn_id: 20,
 //           sagyo_den_dat:
 //             d.shozokuId === 1
-//               ? toISOString(keepJuchuKizaiHeadData.kicsShukoDat as Date)
-//               : toISOString(keepJuchuKizaiHeadData.yardShukoDat as Date),
+//               ? toJapanTimeStampString(keepJuchuKizaiHeadData.kicsShukoDat as Date)
+//               : toJapanTimeStampString(keepJuchuKizaiHeadData.yardShukoDat as Date),
 //           sagyo_id: d.shozokuId,
 //           kizai_id: d.kizaiId,
 //           plan_qty: d.keepQty,
@@ -1208,8 +1208,8 @@ export const delKeepJuchuContainerMeisai = async (
 //     sagyo_kbn_id: 30,
 //     sagyo_den_dat:
 //       d.shozokuId === 1
-//         ? toISOString(keepJuchuKizaiHeadData.kicsNyukoDat as Date)
-//         : toISOString(keepJuchuKizaiHeadData.yardNyukoDat as Date),
+//         ? toJapanTimeStampString(keepJuchuKizaiHeadData.kicsNyukoDat as Date)
+//         : toJapanTimeStampString(keepJuchuKizaiHeadData.yardNyukoDat as Date),
 //     sagyo_id: d.shozokuId,
 //     kizai_id: d.kizaiId,
 //     plan_qty: d.keepQty,
@@ -1251,8 +1251,8 @@ export const delKeepJuchuContainerMeisai = async (
 //     sagyo_kbn_id: 10,
 //     sagyo_den_dat:
 //       d.shozokuId === 1
-//         ? toISOString(keepJuchuKizaiHeadData.kicsShukoDat as Date)
-//         : toISOString(keepJuchuKizaiHeadData.yardShukoDat as Date),
+//         ? toJapanTimeStampString(keepJuchuKizaiHeadData.kicsShukoDat as Date)
+//         : toJapanTimeStampString(keepJuchuKizaiHeadData.yardShukoDat as Date),
 //     sagyo_id: d.shozokuId,
 //     kizai_id: d.kizaiId,
 //     plan_qty: d.keepQty,
@@ -1269,8 +1269,8 @@ export const delKeepJuchuContainerMeisai = async (
 //     sagyo_kbn_id: 20,
 //     sagyo_den_dat:
 //       d.shozokuId === 1
-//         ? toISOString(keepJuchuKizaiHeadData.kicsShukoDat as Date)
-//         : toISOString(keepJuchuKizaiHeadData.yardShukoDat as Date),
+//         ? toJapanTimeStampString(keepJuchuKizaiHeadData.kicsShukoDat as Date)
+//         : toJapanTimeStampString(keepJuchuKizaiHeadData.yardShukoDat as Date),
 //     sagyo_id: d.shozokuId,
 //     kizai_id: d.kizaiId,
 //     plan_qty: d.keepQty,
@@ -1287,8 +1287,8 @@ export const delKeepJuchuContainerMeisai = async (
 //     sagyo_kbn_id: 30,
 //     sagyo_den_dat:
 //       d.shozokuId === 1
-//         ? toISOString(keepJuchuKizaiHeadData.kicsNyukoDat as Date)
-//         : toISOString(keepJuchuKizaiHeadData.yardNyukoDat as Date),
+//         ? toJapanTimeStampString(keepJuchuKizaiHeadData.kicsNyukoDat as Date)
+//         : toJapanTimeStampString(keepJuchuKizaiHeadData.yardNyukoDat as Date),
 //     sagyo_id: d.shozokuId,
 //     kizai_id: d.kizaiId,
 //     plan_qty: d.keepQty,
@@ -1332,7 +1332,7 @@ export const addShukoDen = async (
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
     sagyo_kbn_id: 10,
-    sagyo_den_dat: toISOString(shukoDat),
+    sagyo_den_dat: toJapanTimeStampString(shukoDat),
     sagyo_id: sagyoId,
     kizai_id: d.kizaiId,
     plan_qty: d.keepQty,
@@ -1347,7 +1347,7 @@ export const addShukoDen = async (
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
     sagyo_kbn_id: 20,
-    sagyo_den_dat: toISOString(shukoDat),
+    sagyo_den_dat: toJapanTimeStampString(shukoDat),
     sagyo_id: sagyoId,
     kizai_id: d.kizaiId,
     plan_qty: d.keepQty,
@@ -1389,7 +1389,7 @@ export const updShukoDen = async (
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
     sagyo_kbn_id: 10,
-    sagyo_den_dat: toISOString(shukoDat),
+    sagyo_den_dat: toJapanTimeStampString(shukoDat),
     sagyo_id: sagyoId,
     kizai_id: d.kizaiId,
     plan_qty: d.keepQty,
@@ -1404,7 +1404,7 @@ export const updShukoDen = async (
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
     sagyo_kbn_id: 20,
-    sagyo_den_dat: toISOString(shukoDat),
+    sagyo_den_dat: toJapanTimeStampString(shukoDat),
     sagyo_id: sagyoId,
     kizai_id: d.kizaiId,
     plan_qty: d.keepQty,
@@ -1449,8 +1449,8 @@ export const addNyukoDen = async (
     sagyo_kbn_id: 30,
     sagyo_den_dat:
       d.shozokuId === 1
-        ? toISOString(juchuKizaiHeadData.kicsNyukoDat as Date)
-        : toISOString(juchuKizaiHeadData.yardNyukoDat as Date),
+        ? toJapanTimeStampString(juchuKizaiHeadData.kicsNyukoDat as Date)
+        : toJapanTimeStampString(juchuKizaiHeadData.yardNyukoDat as Date),
     sagyo_id: d.shozokuId,
     kizai_id: d.kizaiId,
     plan_qty: d.keepQty,
@@ -1491,8 +1491,8 @@ export const updNyukoDen = async (
     sagyo_kbn_id: 30,
     sagyo_den_dat:
       d.shozokuId === 1
-        ? toISOString(juchuKizaiHeadData.kicsNyukoDat as Date)
-        : toISOString(juchuKizaiHeadData.yardNyukoDat as Date),
+        ? toJapanTimeStampString(juchuKizaiHeadData.kicsNyukoDat as Date)
+        : toJapanTimeStampString(juchuKizaiHeadData.yardNyukoDat as Date),
     sagyo_id: d.shozokuId,
     kizai_id: d.kizaiId,
     plan_qty: d.keepQty,
@@ -1535,7 +1535,7 @@ export const addCtnShukoDen = async (
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
     sagyo_kbn_id: 10,
-    sagyo_den_dat: toISOString(shukoDat),
+    sagyo_den_dat: toJapanTimeStampString(shukoDat),
     sagyo_id: sagyoId,
     kizai_id: d.kizaiId,
     plan_qty: sagyoId === 1 ? d.kicsKeepQty : d.yardKeepQty,
@@ -1550,7 +1550,7 @@ export const addCtnShukoDen = async (
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
     sagyo_kbn_id: 20,
-    sagyo_den_dat: toISOString(shukoDat),
+    sagyo_den_dat: toJapanTimeStampString(shukoDat),
     sagyo_id: sagyoId,
     kizai_id: d.kizaiId,
     plan_qty: sagyoId === 1 ? d.kicsKeepQty : d.yardKeepQty,
@@ -1594,7 +1594,7 @@ export const updCtnShukoDen = async (
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
     sagyo_kbn_id: 10,
-    sagyo_den_dat: toISOString(shukoDat),
+    sagyo_den_dat: toJapanTimeStampString(shukoDat),
     sagyo_id: sagyoId,
     kizai_id: d.kizaiId,
     plan_qty: sagyoId === 1 ? d.kicsKeepQty : d.yardKeepQty,
@@ -1609,7 +1609,7 @@ export const updCtnShukoDen = async (
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
     sagyo_kbn_id: 20,
-    sagyo_den_dat: toISOString(shukoDat),
+    sagyo_den_dat: toJapanTimeStampString(shukoDat),
     sagyo_id: sagyoId,
     kizai_id: d.kizaiId,
     plan_qty: sagyoId === 1 ? d.kicsKeepQty : d.yardKeepQty,
@@ -1655,7 +1655,7 @@ export const addCtnNyukoDen = async (
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
     sagyo_kbn_id: 30,
-    sagyo_den_dat: toISOString(nyukoDat),
+    sagyo_den_dat: toJapanTimeStampString(nyukoDat),
     sagyo_id: sagyoId,
     kizai_id: d.kizaiId,
     plan_qty: sagyoId === 1 ? d.kicsKeepQty : d.yardKeepQty,
@@ -1697,7 +1697,7 @@ export const updCtnNyukoDen = async (
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
     sagyo_kbn_id: 30,
-    sagyo_den_dat: toISOString(nyukoDat),
+    sagyo_den_dat: toJapanTimeStampString(nyukoDat),
     sagyo_id: sagyoId,
     kizai_id: d.kizaiId,
     plan_qty: sagyoId === 1 ? d.kicsKeepQty : d.yardKeepQty,
@@ -1870,7 +1870,7 @@ export const delCtnNyukoDen = async (
 //               juchu_kizai_head_id: data.juchuKizaiHeadId,
 //               juchu_kizai_meisai_id: data.juchuKizaiMeisaiId,
 //               sagyo_kbn_id: 10,
-//               sagyo_den_dat: toISOString(keepJuchuKizaiHeadData.kicsShukoDat as Date),
+//               sagyo_den_dat: toJapanTimeStampString(keepJuchuKizaiHeadData.kicsShukoDat as Date),
 //               sagyo_id: 1,
 //               kizai_id: data.kizaiId,
 //               plan_qty: data.kicsKeepQty,
@@ -1882,7 +1882,7 @@ export const delCtnNyukoDen = async (
 //               juchu_kizai_head_id: data.juchuKizaiHeadId,
 //               juchu_kizai_meisai_id: data.juchuKizaiMeisaiId,
 //               sagyo_kbn_id: 20,
-//               sagyo_den_dat: toISOString(keepJuchuKizaiHeadData.kicsShukoDat as Date),
+//               sagyo_den_dat: toJapanTimeStampString(keepJuchuKizaiHeadData.kicsShukoDat as Date),
 //               sagyo_id: 1,
 //               kizai_id: data.kizaiId,
 //               plan_qty: data.kicsKeepQty,
@@ -1894,7 +1894,7 @@ export const delCtnNyukoDen = async (
 //               juchu_kizai_head_id: data.juchuKizaiHeadId,
 //               juchu_kizai_meisai_id: data.juchuKizaiMeisaiId,
 //               sagyo_kbn_id: 30,
-//               sagyo_den_dat: toISOString(keepJuchuKizaiHeadData.kicsNyukoDat as Date),
+//               sagyo_den_dat: toJapanTimeStampString(keepJuchuKizaiHeadData.kicsNyukoDat as Date),
 //               sagyo_id: 1,
 //               kizai_id: data.kizaiId,
 //               plan_qty: data.kicsKeepQty,
@@ -1911,7 +1911,7 @@ export const delCtnNyukoDen = async (
 //               juchu_kizai_head_id: data.juchuKizaiHeadId,
 //               juchu_kizai_meisai_id: data.juchuKizaiMeisaiId,
 //               sagyo_kbn_id: 10,
-//               sagyo_den_dat: toISOString(keepJuchuKizaiHeadData.yardShukoDat as Date),
+//               sagyo_den_dat: toJapanTimeStampString(keepJuchuKizaiHeadData.yardShukoDat as Date),
 //               sagyo_id: 2,
 //               kizai_id: data.kizaiId,
 //               plan_qty: data.yardKeepQty,
@@ -1923,7 +1923,7 @@ export const delCtnNyukoDen = async (
 //               juchu_kizai_head_id: data.juchuKizaiHeadId,
 //               juchu_kizai_meisai_id: data.juchuKizaiMeisaiId,
 //               sagyo_kbn_id: 20,
-//               sagyo_den_dat: toISOString(keepJuchuKizaiHeadData.yardShukoDat as Date),
+//               sagyo_den_dat: toJapanTimeStampString(keepJuchuKizaiHeadData.yardShukoDat as Date),
 //               sagyo_id: 2,
 //               kizai_id: data.kizaiId,
 //               plan_qty: data.yardKeepQty,
@@ -1935,7 +1935,7 @@ export const delCtnNyukoDen = async (
 //               juchu_kizai_head_id: data.juchuKizaiHeadId,
 //               juchu_kizai_meisai_id: data.juchuKizaiMeisaiId,
 //               sagyo_kbn_id: 30,
-//               sagyo_den_dat: toISOString(keepJuchuKizaiHeadData.yardNyukoDat as Date),
+//               sagyo_den_dat: toJapanTimeStampString(keepJuchuKizaiHeadData.yardNyukoDat as Date),
 //               sagyo_id: 2,
 //               kizai_id: data.kizaiId,
 //               plan_qty: data.yardKeepQty,
@@ -2037,14 +2037,14 @@ export const delCtnNyukoDen = async (
 //       juchu_head_id: data.juchuHeadId,
 //       juchu_kizai_head_id: data.juchuKizaiHeadId,
 //       sagyo_kbn_id: 60,
-//       sagyo_den_dat: toISOString(data.kicsShukoDat as Date),
+//       sagyo_den_dat: toJapanTimeStampString(data.kicsShukoDat as Date),
 //       sagyo_id: 1,
 //     },
 //     {
 //       juchu_head_id: data.juchuHeadId,
 //       juchu_kizai_head_id: data.juchuKizaiHeadId,
 //       sagyo_kbn_id: 70,
-//       sagyo_den_dat: toISOString(data.kicsNyukoDat as Date),
+//       sagyo_den_dat: toJapanTimeStampString(data.kicsNyukoDat as Date),
 //       sagyo_id: 1,
 //     },
 //   ];
@@ -2053,14 +2053,14 @@ export const delCtnNyukoDen = async (
 //       juchu_head_id: data.juchuHeadId,
 //       juchu_kizai_head_id: data.juchuKizaiHeadId,
 //       sagyo_kbn_id: 60,
-//       sagyo_den_dat: toISOString(data.yardShukoDat as Date),
+//       sagyo_den_dat: toJapanTimeStampString(data.yardShukoDat as Date),
 //       sagyo_id: 2,
 //     },
 //     {
 //       juchu_head_id: data.juchuHeadId,
 //       juchu_kizai_head_id: data.juchuKizaiHeadId,
 //       sagyo_kbn_id: 70,
-//       sagyo_den_dat: toISOString(data.yardNyukoDat as Date),
+//       sagyo_den_dat: toJapanTimeStampString(data.yardNyukoDat as Date),
 //       sagyo_id: 2,
 //     },
 //   ];

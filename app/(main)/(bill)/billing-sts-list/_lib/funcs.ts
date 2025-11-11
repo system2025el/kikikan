@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 
 import { upsertSeikyuDat } from '@/app/_lib/db/tables/t-seikyu-date-juchu-kizai';
 import { selectFilteredBillingSituations } from '@/app/_lib/db/tables/v-seikyu-date-lst';
-import { toJapanDateString, toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanTimeStampString, toJapanTimeString,toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 
 import { BillingStsSearchValues, BillingStsTableValues } from './types';
 
@@ -73,7 +73,7 @@ export const changeSeikyuDat = async (
   const upsertData = {
     juchu_head_id: juchuId,
     juchu_kizai_head_id: kziHeadId,
-    seikyu_dat: toJapanDateString(newDat),
+    seikyu_dat: toJapanYMDString(newDat, '-'),
     add_dat: toJapanTimeStampString(),
     add_user: user,
   };

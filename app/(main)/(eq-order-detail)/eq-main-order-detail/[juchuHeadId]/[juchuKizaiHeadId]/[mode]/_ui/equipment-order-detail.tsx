@@ -38,7 +38,7 @@ import { TextFieldElement } from 'react-hook-form-mui';
 import { shouldDisplay } from 'rsuite/esm/internals/Picker';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
-import { toISOString, toISOStringYearMonthDay, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanTimeString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { getNyukoDate, getRange, getShukoDate } from '@/app/(main)/_lib/date-funcs';
 import { addLock, delLock, getLock } from '@/app/(main)/_lib/funcs';
 import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
@@ -738,7 +738,7 @@ const EquipmentOrderDetail = (props: {
         updatedEqStockData.length > 0
       ) {
         const targetIndex = updatedEqStockData[0]
-          .map((d, index) => (dateRange.includes(toISOStringYearMonthDay(d.calDat)) ? index : -1))
+          .map((d, index) => (dateRange.includes(toJapanYMDString(d.calDat)) ? index : -1))
           .filter((index) => index !== -1);
 
         const subUpdatedEqStockData = updatedEqStockData.map((data, index) =>
@@ -817,7 +817,7 @@ const EquipmentOrderDetail = (props: {
   ) => {
     const updatedEqStockData = eqStockListRef.current[rowIndex];
     const targetIndex = updatedEqStockData
-      .map((d, index) => (dateRange.includes(toISOStringYearMonthDay(d.calDat)) ? index : -1))
+      .map((d, index) => (dateRange.includes(toJapanYMDString(d.calDat)) ? index : -1))
       .filter((index) => index !== -1);
 
     setEqStockList((prev) =>
@@ -873,7 +873,7 @@ const EquipmentOrderDetail = (props: {
 
       const updatedEqStockData = eqStockListRef.current[deleteEq.rowIndex];
       const targetIndex = updatedEqStockData
-        .map((d, index) => (dateRange.includes(toISOStringYearMonthDay(d.calDat)) ? index : -1))
+        .map((d, index) => (dateRange.includes(toJapanYMDString(d.calDat)) ? index : -1))
         .filter((index) => index !== -1);
       setEqStockList((prev) =>
         prev
@@ -1322,7 +1322,7 @@ const EquipmentOrderDetail = (props: {
         );
         if (originPlanQty.get(newIds[i])) {
           const updateStock = stock.map((d) =>
-            dateRange.includes(toISOStringYearMonthDay(d.calDat))
+            dateRange.includes(toJapanYMDString(d.calDat))
               ? { ...d, zaikoQty: d.zaikoQty + originPlanQty.get(newIds[i])! }
               : d
           );
@@ -1425,7 +1425,7 @@ const EquipmentOrderDetail = (props: {
             <Grid2 container spacing={4}>
               {lockData !== null && lockData.addUser !== user?.name && (
                 <Grid2 container alignItems={'center'} spacing={2}>
-                  <Typography>{lockData.addDat && toISOString(new Date(lockData.addDat))}</Typography>
+                  <Typography>{lockData.addDat && toJapanTimeString(new Date(lockData.addDat))}</Typography>
                   <Typography>{lockData.addUser}</Typography>
                   <Typography>編集中</Typography>
                 </Grid2>
@@ -1952,7 +1952,7 @@ const EquipmentOrderDetail = (props: {
                       data.juchuHonbanbiShubetuId === 10 && (
                         <Grid2 key={index} container display="flex" flexDirection="row">
                           <Grid2 size={6} maxWidth={408}>
-                            <Typography>{toISOStringYearMonthDay(data.juchuHonbanbiDat)}</Typography>
+                            <Typography>{toJapanYMDString(data.juchuHonbanbiDat)}</Typography>
                           </Grid2>
                           <Grid2 size={6}>
                             <Typography sx={{ wordBreak: 'break-word', whiteSpace: 'wrap' }}>{data.mem}</Typography>
@@ -2003,7 +2003,7 @@ const EquipmentOrderDetail = (props: {
                       data.juchuHonbanbiShubetuId === 20 && (
                         <Grid2 key={index} container display="flex" flexDirection="row">
                           <Grid2 size={6} maxWidth={408}>
-                            <Typography>{toISOStringYearMonthDay(data.juchuHonbanbiDat)}</Typography>
+                            <Typography>{toJapanYMDString(data.juchuHonbanbiDat)}</Typography>
                           </Grid2>
                           <Grid2 size={6}>
                             <Typography sx={{ wordBreak: 'break-word', whiteSpace: 'wrap' }}>{data.mem}</Typography>
@@ -2054,7 +2054,7 @@ const EquipmentOrderDetail = (props: {
                       data.juchuHonbanbiShubetuId === 30 && (
                         <Grid2 key={index} container display="flex" flexDirection="row">
                           <Grid2 size={6} maxWidth={408}>
-                            <Typography>{toISOStringYearMonthDay(data.juchuHonbanbiDat)}</Typography>
+                            <Typography>{toJapanYMDString(data.juchuHonbanbiDat)}</Typography>
                           </Grid2>
                           <Grid2 size={6}>
                             <Typography sx={{ wordBreak: 'break-word', whiteSpace: 'wrap' }}>{data.mem}</Typography>
@@ -2109,7 +2109,7 @@ const EquipmentOrderDetail = (props: {
                       data.juchuHonbanbiShubetuId === 40 && (
                         <Grid2 key={index} container display="flex" flexDirection="row">
                           <Grid2 size={3} maxWidth={200}>
-                            <Typography>{toISOStringYearMonthDay(data.juchuHonbanbiDat)}</Typography>
+                            <Typography>{toJapanYMDString(data.juchuHonbanbiDat)}</Typography>
                           </Grid2>
                           <Grid2 size={3} maxWidth={200}>
                             <Typography>{data.juchuHonbanbiAddQty}</Typography>
