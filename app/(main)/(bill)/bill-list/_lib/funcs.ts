@@ -1,5 +1,9 @@
 'use server';
 
+import dayjs from 'dayjs';
+import timezone from 'dayjs/plugin/timezone';
+import utc from 'dayjs/plugin/utc';
+
 import { selectActiveSeikyuSts } from '@/app/_lib/db/tables/m-seikyu-sts';
 import { selectChosenSeikyu } from '@/app/_lib/db/tables/t-seikyu-head';
 import { selectBillMeisai } from '@/app/_lib/db/tables/t-seikyu-meisai';
@@ -12,9 +16,14 @@ import {
 import { selectFilteredBills } from '@/app/_lib/db/tables/v-seikyu-lst';
 import { SeikyuMeisaiHead } from '@/app/_lib/db/types/t-seikyu-meisai-head-type';
 import { SeikyuMeisai } from '@/app/_lib/db/types/t-seikyu-meisai-type';
+import { toJapanDateString } from '@/app/(main)/_lib/date-conversion';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 
 import { BillHeadValues, BillMeisaiHeadsValues, BillSearchValues, BillsListTableValues } from './types';
+
+// .tz()を使う準備
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 /**
  * 選択肢用請求ステータスを取得する関数
@@ -237,7 +246,10 @@ export const getJuchuKizaiMeisaiHeadForBill = async (juchuHeadId: number, kizaiH
       seikyuMeisaiHeadNam: j.head_nam,
       koenNam: j.koen_nam,
       seikyuRange: {
-        strt: j.seikyu_dat ? new Date(j.seikyu_dat) : new Date(j.shuko_dat),
+        strt:
+          j.seikyu_dat && toJapanDateString(j.seikyu_dat) !== toJapanDateString(j.shuko_dat)
+            ? dayjs(j.seikyu_dat).tz('Asia/Tokyo').add(1, 'day').startOf('day').toDate()
+            : new Date(j.shuko_dat),
         end: new Date(j.nyuko_dat) > new Date(dat) ? new Date(dat) : new Date(j.nyuko_dat),
       },
       koenbashoNam: j.koenbasho_nam,
@@ -270,6 +282,13 @@ export const getJuchuKizaiMeisaiHeadForBill = async (juchuHeadId: number, kizaiH
   }
 };
 
+/**
+ * 請求で選ばれたの受注の詳細な明細を取得する関数
+ * @param juchuHeadId 受注ヘッダーID
+ * @param kizaiHeadId 受注機材ヘッダーID
+ * @param dat 請求期間
+ * @returns
+ */
 export const getJuchuKizaiMeisaiDetailsForBill = async (juchuHeadId: number, kizaiHeadId: number, dat: Date) => {
   try {
     const data = await selectJuchuKizaiMeisaiDetailsForBill(juchuHeadId, kizaiHeadId, dat);
@@ -296,7 +315,11 @@ export const getJuchuKizaiMeisaiDetailsForBill = async (juchuHeadId: number, kiz
           seikyuMeisaiHeadNam: currentRow.head_nam,
           koenNam: currentRow.koen_nam,
           seikyuRange: {
-            strt: currentRow.seikyu_dat ? new Date(currentRow.seikyu_dat) : new Date(currentRow.shuko_dat),
+            strt:
+              currentRow.seikyu_dat &&
+              toJapanDateString(currentRow.seikyu_dat) !== toJapanDateString(currentRow.shuko_dat)
+                ? dayjs(currentRow.seikyu_dat).tz('Asia/Tokyo').add(1, 'day').startOf('day').toDate()
+                : new Date(currentRow.shuko_dat),
             end: new Date(currentRow.nyuko_dat) > new Date(dat) ? new Date(dat) : new Date(currentRow.nyuko_dat),
           },
           koenbashoNam: currentRow.koenbasho_nam,

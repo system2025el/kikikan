@@ -192,6 +192,7 @@ export const SecondDialogPage = ({
                 margin: 0,
               },
             }}
+            rules={{ required: `入力してください` }}
           />
         </Box>
         <Box sx={styles.container}>

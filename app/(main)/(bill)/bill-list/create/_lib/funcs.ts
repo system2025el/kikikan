@@ -1,5 +1,8 @@
 'use server';
 
+import dayjs from 'dayjs';
+import timezone from 'dayjs/plugin/timezone';
+import utc from 'dayjs/plugin/utc';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
@@ -14,10 +17,14 @@ import { SeikyuDatJuchuKizai } from '@/app/_lib/db/types/t-seikyu-date-juchu-kiz
 import { SeikyuHead } from '@/app/_lib/db/types/t-seikyu-head-type';
 import { SeikyuMeisaiHead } from '@/app/_lib/db/types/t-seikyu-meisai-head-type';
 import { SeikyuMeisai } from '@/app/_lib/db/types/t-seikyu-meisai-type';
-import { toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanDateString, toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 
 import { BillHeadValues, BillMeisaiHeadsValues } from '../../_lib/types';
+
+// .tz()を使う準備
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 /**
  * 請求用に受注情報を取得する関数
@@ -104,7 +111,10 @@ export const getJuchusForBill = async (queries: {
         seikyuMeisaiHeadNam: j.head_nam,
         koenNam: j.koen_nam,
         seikyuRange: {
-          strt: j.seikyu_dat ? new Date(j.seikyu_dat) : new Date(j.shuko_dat),
+          strt:
+            j.seikyu_dat && toJapanDateString(j.seikyu_dat) !== toJapanDateString(j.shuko_dat)
+              ? dayjs(j.seikyu_dat).tz('Asia/Tokyo').add(1, 'day').startOf('day').toDate()
+              : new Date(j.shuko_dat),
           end: new Date(j.nyuko_dat) > new Date(date) ? new Date(date) : new Date(j.nyuko_dat),
         },
         koenbashoNam: j.koenbasho_nam,
