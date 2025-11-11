@@ -100,6 +100,8 @@ const EquipmentOrderDetail = (props: {
   fixFlag: boolean;
 }) => {
   const router = useRouter();
+  /** ダイアログ上部に戻るためのref */
+  const scrollRef = useRef<HTMLDivElement>(null);
   // user情報
   const user = useUserStore((state) => state.user);
   // 受注機材ヘッダー保存フラグ
@@ -1934,6 +1936,7 @@ const EquipmentOrderDetail = (props: {
                     nyukoDate={nyukoDate}
                     juchuHonbanbiList={juchuHonbanbiList}
                     juchuHonbanbiDeleteList={juchuHonbanbiDeleteList}
+                    scrollRef={scrollRef}
                     onClose={handleCloseDateDialog}
                     onSave={handleSave}
                   />
@@ -1951,8 +1954,11 @@ const EquipmentOrderDetail = (props: {
                 </Typography>
               </Box>
               <Grid2 container spacing={1} ml={{ xs: 10, sm: 17, md: 17, lg: 17 }} py={2} width={{ md: '50%' }}>
-                <Grid2 size={6} maxWidth={408}>
+                <Grid2 size={3} maxWidth={200}>
                   <Typography>日付</Typography>
+                </Grid2>
+                <Grid2 size={3} maxWidth={200}>
+                  <Typography>追加日数</Typography>
                 </Grid2>
                 <Grid2 size={6}>
                   <Typography>メモ</Typography>
@@ -1971,8 +1977,11 @@ const EquipmentOrderDetail = (props: {
                     (data, index) =>
                       data.juchuHonbanbiShubetuId === 10 && (
                         <Grid2 key={index} container display="flex" flexDirection="row">
-                          <Grid2 size={6} maxWidth={408}>
+                          <Grid2 size={3} maxWidth={200}>
                             <Typography>{toJapanYMDString(data.juchuHonbanbiDat)}</Typography>
+                          </Grid2>
+                          <Grid2 size={3} maxWidth={200}>
+                            <Typography>{data.juchuHonbanbiAddQty}</Typography>
                           </Grid2>
                           <Grid2 size={6}>
                             <Typography sx={{ wordBreak: 'break-word', whiteSpace: 'wrap' }}>{data.mem}</Typography>
@@ -2002,8 +2011,11 @@ const EquipmentOrderDetail = (props: {
                 py={2}
                 width={{ md: '50%' }}
               >
-                <Grid2 size={6} maxWidth={408}>
+                <Grid2 size={3} maxWidth={200}>
                   <Typography>日付</Typography>
+                </Grid2>
+                <Grid2 size={3} maxWidth={200}>
+                  <Typography>追加日数</Typography>
                 </Grid2>
                 <Grid2 size={6}>
                   <Typography>メモ</Typography>
@@ -2022,8 +2034,11 @@ const EquipmentOrderDetail = (props: {
                     (data, index) =>
                       data.juchuHonbanbiShubetuId === 20 && (
                         <Grid2 key={index} container display="flex" flexDirection="row">
-                          <Grid2 size={6} maxWidth={408}>
+                          <Grid2 size={3} maxWidth={200}>
                             <Typography>{toJapanYMDString(data.juchuHonbanbiDat)}</Typography>
+                          </Grid2>
+                          <Grid2 size={3} maxWidth={200}>
+                            <Typography>{data.juchuHonbanbiAddQty}</Typography>
                           </Grid2>
                           <Grid2 size={6}>
                             <Typography sx={{ wordBreak: 'break-word', whiteSpace: 'wrap' }}>{data.mem}</Typography>
@@ -2053,8 +2068,11 @@ const EquipmentOrderDetail = (props: {
                 py={2}
                 width={{ md: '50%' }}
               >
-                <Grid2 size={6} maxWidth={408}>
+                <Grid2 size={3} maxWidth={200}>
                   <Typography>日付</Typography>
+                </Grid2>
+                <Grid2 size={3} maxWidth={200}>
+                  <Typography>追加日数</Typography>
                 </Grid2>
                 <Grid2 size={6}>
                   <Typography>メモ</Typography>
@@ -2073,8 +2091,11 @@ const EquipmentOrderDetail = (props: {
                     (data, index) =>
                       data.juchuHonbanbiShubetuId === 30 && (
                         <Grid2 key={index} container display="flex" flexDirection="row">
-                          <Grid2 size={6} maxWidth={408}>
+                          <Grid2 size={3} maxWidth={200}>
                             <Typography>{toJapanYMDString(data.juchuHonbanbiDat)}</Typography>
+                          </Grid2>
+                          <Grid2 size={3} maxWidth={200}>
+                            <Typography>{data.juchuHonbanbiAddQty}</Typography>
                           </Grid2>
                           <Grid2 size={6}>
                             <Typography sx={{ wordBreak: 'break-word', whiteSpace: 'wrap' }}>{data.mem}</Typography>

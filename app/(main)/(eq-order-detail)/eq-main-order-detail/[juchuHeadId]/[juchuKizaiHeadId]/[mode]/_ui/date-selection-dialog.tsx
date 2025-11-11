@@ -1,8 +1,10 @@
 'use client';
 
-import { Box, Button, Container, Divider, Grid2, Paper, Tab, Tabs, TextField, Typography } from '@mui/material';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import SaveAsIcon from '@mui/icons-material/SaveAs';
+import { Box, Button, Container, Divider, Fab, Grid2, Paper, Tab, Tabs, TextField, Typography } from '@mui/material';
 import { grey } from '@mui/material/colors';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { getRange } from '@/app/(main)/_lib/date-funcs';
@@ -23,6 +25,7 @@ type DateDialogProps = {
   nyukoDate: Date | null;
   juchuHonbanbiList: JuchuKizaiHonbanbiValues[];
   juchuHonbanbiDeleteList: JuchuKizaiHonbanbiValues[];
+  scrollRef: React.RefObject<HTMLDivElement | null>;
   onClose: () => void;
   onSave: (juchuHonbanbiList: JuchuKizaiHonbanbiValues[], juchuHonbanbiDeleteList: JuchuKizaiHonbanbiValues[]) => void;
 };
@@ -44,6 +47,7 @@ export const DateSelectDialog = ({
   nyukoDate,
   juchuHonbanbiList,
   juchuHonbanbiDeleteList,
+  scrollRef,
   onClose,
   onSave,
 }: DateDialogProps) => {
@@ -89,6 +93,16 @@ export const DateSelectDialog = ({
   const handleSikomiMemChange = (index: number, value: string) => {
     setSikomi((prev) => prev.map((d, i) => (i === index ? { ...d, mem: value } : d)));
   };
+
+  /**
+   * 仕込み追加日数更新
+   * @param index index
+   * @param value 仕込み追加日数
+   */
+  const handleSikomiAddChange = (index: number, value: number) => {
+    setSikomi((prev) => prev.map((d, i) => (i === index ? { ...d, juchuHonbanbiAddQty: value } : d)));
+  };
+
   /**
    * 仕込指定日削除
    * @param index index
@@ -97,6 +111,15 @@ export const DateSelectDialog = ({
     setDeleteList((prev) => [...prev, sikomi[index]]);
     const updatedSikomi = sikomi.filter((_, i) => i !== index);
     setSikomi(updatedSikomi);
+  };
+
+  /**
+   * Rh追加日数更新
+   * @param index index
+   * @param value Rh追加日数
+   */
+  const handleRhAddChange = (index: number, value: number) => {
+    setRh((prev) => prev.map((d, i) => (i === index ? { ...d, juchuHonbanbiAddQty: value } : d)));
   };
 
   /**
@@ -115,6 +138,15 @@ export const DateSelectDialog = ({
     setDeleteList((prev) => [...prev, rh[index]]);
     const updatedRh = rh.filter((_, i) => i !== index);
     setRh(updatedRh);
+  };
+
+  /**
+   * Gp追加日数更新
+   * @param index index
+   * @param value Gp追加日数
+   */
+  const handleGpAddChange = (index: number, value: number) => {
+    setGp((prev) => prev.map((d, i) => (i === index ? { ...d, juchuHonbanbiAddQty: value } : d)));
   };
 
   /**
@@ -263,19 +295,20 @@ export const DateSelectDialog = ({
     setDateRange(range);
   };
 
+  /** ダイアログ上部へ */
+  const scrollToTop = () => {
+    console.log('ref==============================', scrollRef);
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = 0;
+    }
+  };
+
   return (
-    <Container disableGutters sx={{ minWidth: '100%', p: 3 }} maxWidth={'xl'}>
+    <Container disableGutters sx={{ minWidth: '100%', p: 3, overflowY: 'auto' }} maxWidth={'xl'} ref={scrollRef}>
       <Paper variant="outlined">
         <Box display="flex" justifyContent="space-between" alignItems="center" p={2}>
           <Typography margin={1}>日付選択</Typography>
           <Grid2 container spacing={1}>
-            <Button
-              onClick={() => {
-                handleSave();
-              }}
-            >
-              保存
-            </Button>
             <Button onClick={handleClose}>戻る</Button>
           </Grid2>
         </Box>
@@ -306,7 +339,10 @@ export const DateSelectDialog = ({
             <Grid2 size={3} maxWidth={120}>
               <Typography>日付</Typography>
             </Grid2>
-            <Grid2 size={5} maxWidth={200}>
+            <Grid2 size={3} maxWidth={100}>
+              <Typography>追加日数</Typography>
+            </Grid2>
+            <Grid2 size={5} maxWidth={250}>
               <Typography>メモ</Typography>
             </Grid2>
           </Grid2>
@@ -325,13 +361,30 @@ export const DateSelectDialog = ({
               <Grid2 size={3} maxWidth={120}>
                 <Typography>{toJapanYMDString(data.juchuHonbanbiDat)}</Typography>
               </Grid2>
-              <Grid2 size={5} maxWidth={250}>
+              <Grid2 size={3} display={'flex'} alignItems={'center'} maxWidth={100}>
+                <TextField
+                  value={data.juchuHonbanbiAddQty ?? 0}
+                  onChange={(e) => handleSikomiAddChange(index, Number(e.target.value))}
+                  type="number"
+                  sx={{
+                    width: '50px',
+                    '& .MuiInputBase-input': {
+                      textAlign: 'right',
+                    },
+                    '& input[type=number]::-webkit-inner-spin-button': {
+                      WebkitAppearance: 'none',
+                      margin: 0,
+                    },
+                  }}
+                />
+              </Grid2>
+              <Grid2 size={4} maxWidth={250}>
                 <TextField
                   value={data.mem ? data.mem : ''}
                   onChange={(e) => handleSikomiMemChange(index, e.target.value)}
                 ></TextField>
               </Grid2>
-              <Grid2 size={4}>
+              <Grid2 size={2}>
                 <Button sx={{ ml: 2, bgcolor: 'red', color: 'white' }} onClick={() => handleSikomiRemove(index)}>
                   削除
                 </Button>
@@ -344,7 +397,10 @@ export const DateSelectDialog = ({
             <Grid2 size={3} maxWidth={120}>
               <Typography>日付</Typography>
             </Grid2>
-            <Grid2 size={5} maxWidth={200}>
+            <Grid2 size={3} maxWidth={100}>
+              <Typography>追加日数</Typography>
+            </Grid2>
+            <Grid2 size={5} maxWidth={250}>
               <Typography>メモ</Typography>
             </Grid2>
           </Grid2>
@@ -363,13 +419,30 @@ export const DateSelectDialog = ({
               <Grid2 size={3} maxWidth={120}>
                 <Typography>{toJapanYMDString(data.juchuHonbanbiDat)}</Typography>
               </Grid2>
-              <Grid2 size={5} maxWidth={250}>
+              <Grid2 size={3} display={'flex'} alignItems={'center'} maxWidth={100}>
+                <TextField
+                  value={data.juchuHonbanbiAddQty ?? 0}
+                  onChange={(e) => handleRhAddChange(index, Number(e.target.value))}
+                  type="number"
+                  sx={{
+                    width: '50px',
+                    '& .MuiInputBase-input': {
+                      textAlign: 'right',
+                    },
+                    '& input[type=number]::-webkit-inner-spin-button': {
+                      WebkitAppearance: 'none',
+                      margin: 0,
+                    },
+                  }}
+                />
+              </Grid2>
+              <Grid2 size={4} maxWidth={250}>
                 <TextField
                   value={data.mem ? data.mem : ''}
                   onChange={(e) => handleRhMemChange(index, e.target.value)}
                 ></TextField>
               </Grid2>
-              <Grid2 size={4}>
+              <Grid2 size={2}>
                 <Button sx={{ ml: 2, bgcolor: 'red', color: 'white' }} onClick={() => handleRhRemove(index)}>
                   削除
                 </Button>
@@ -382,7 +455,10 @@ export const DateSelectDialog = ({
             <Grid2 size={3} maxWidth={120}>
               <Typography>日付</Typography>
             </Grid2>
-            <Grid2 size={5} maxWidth={200}>
+            <Grid2 size={3} maxWidth={100}>
+              <Typography>追加日数</Typography>
+            </Grid2>
+            <Grid2 size={5} maxWidth={250}>
               <Typography>メモ</Typography>
             </Grid2>
           </Grid2>
@@ -401,13 +477,30 @@ export const DateSelectDialog = ({
               <Grid2 size={3} maxWidth={120}>
                 <Typography>{toJapanYMDString(data.juchuHonbanbiDat)}</Typography>
               </Grid2>
-              <Grid2 size={5} maxWidth={250}>
+              <Grid2 size={3} display={'flex'} alignItems={'center'} maxWidth={100}>
+                <TextField
+                  value={data.juchuHonbanbiAddQty ?? 0}
+                  onChange={(e) => handleGpAddChange(index, Number(e.target.value))}
+                  type="number"
+                  sx={{
+                    width: '50px',
+                    '& .MuiInputBase-input': {
+                      textAlign: 'right',
+                    },
+                    '& input[type=number]::-webkit-inner-spin-button': {
+                      WebkitAppearance: 'none',
+                      margin: 0,
+                    },
+                  }}
+                />
+              </Grid2>
+              <Grid2 size={4} maxWidth={250}>
                 <TextField
                   value={data.mem ? data.mem : ''}
                   onChange={(e) => handleGpMemChange(index, e.target.value)}
                 ></TextField>
               </Grid2>
-              <Grid2 size={4}>
+              <Grid2 size={2}>
                 <Button sx={{ ml: 2, bgcolor: 'red', color: 'white' }} onClick={() => handleGpRemove(index)}>
                   削除
                 </Button>
@@ -474,6 +567,24 @@ export const DateSelectDialog = ({
           ))}
         </TabPanel>
       </Paper>
+      {/** 固定ボタン 保存＆ページトップ */}
+      <Box position={'fixed'} zIndex={1050} bottom={25} right={25} alignItems={'center'}>
+        <Fab
+          variant="extended"
+          color="primary"
+          type="submit"
+          sx={{ mr: 2 }}
+          onClick={() => {
+            handleSave();
+          }}
+        >
+          <SaveAsIcon sx={{ mr: 1 }} />
+          保存
+        </Fab>
+        <Fab color="primary" onClick={() => scrollToTop()}>
+          <ArrowUpwardIcon />
+        </Fab>
+      </Box>
     </Container>
   );
 };

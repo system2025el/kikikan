@@ -1,6 +1,8 @@
 'use client';
 
 import AddIcon from '@mui/icons-material/Add';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import SaveAsIcon from '@mui/icons-material/SaveAs';
 import WarningIcon from '@mui/icons-material/Warning';
 import {
   Box,
@@ -10,6 +12,7 @@ import {
   DialogContentText,
   DialogTitle,
   Divider,
+  Fab,
   Grid2,
   Paper,
   Snackbar,
@@ -312,13 +315,6 @@ export const IdoDetail = (props: {
                 <Typography sx={{ backgroundColor: 'rgba(158, 158, 158, 1)' }}>済</Typography>
                 <Typography sx={{ backgroundColor: 'rgba(255, 171, 64, 1)' }}>不足</Typography>
                 <Typography sx={{ backgroundColor: 'rgba(68, 138, 255, 1)' }}>コンテナ</Typography>
-                <Button
-                  onClick={handleSave}
-                  disabled={fixFlag}
-                  sx={{ display: idoDetailData.sagyoKbnId === 40 ? 'inline-flex' : 'none' }}
-                >
-                  保存
-                </Button>
               </Grid2>
             </Box>
             {idoDetailList.filter((d) => !d.delFlag).length > 0 && (
@@ -343,6 +339,21 @@ export const IdoDetail = (props: {
           </Box>
         )}
       </Paper>
+      {/** 固定ボタン 保存＆ページトップ */}
+      <Box position={'fixed'} zIndex={1050} bottom={25} right={25} alignItems={'center'}>
+        <Fab variant="extended" color="primary" type="submit" sx={{ mr: 2 }}>
+          <SaveAsIcon sx={{ mr: 1 }} />
+          保存
+        </Fab>
+        <Fab
+          color="primary"
+          onClick={handleSave}
+          disabled={fixFlag}
+          sx={{ display: idoDetailData.sagyoKbnId === 40 ? 'inline-flex' : 'none' }}
+        >
+          <ArrowUpwardIcon />
+        </Fab>
+      </Box>
       <Dialog open={idoEqSelectionDialogOpen} fullScreen>
         <IdoEqptSelectionDialog setEqpts={setEqpts} handleCloseDialog={() => setIdoEqSelectionDialogOpen(false)} />
       </Dialog>

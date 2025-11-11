@@ -1,5 +1,7 @@
 'use client';
 
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import SaveAsIcon from '@mui/icons-material/SaveAs';
 import WarningIcon from '@mui/icons-material/Warning';
 import {
   Box,
@@ -9,6 +11,7 @@ import {
   DialogContentText,
   DialogTitle,
   Divider,
+  Fab,
   Grid2,
   Paper,
   Snackbar,
@@ -143,7 +146,7 @@ export const IdoEqptDetail = (props: {
         <form onSubmit={handleSubmit(onSubmit)}>
           <Box display={'flex'} justifyContent={'space-between'} alignItems="center" p={2}>
             <Typography fontSize={'large'}>移動詳細(RFIDタグ)</Typography>
-            <Button type="submit">保存</Button>
+            {/* <Button type="submit">保存</Button> */}
           </Box>
           <Divider />
           <Grid2 container spacing={5} p={2}>
@@ -201,6 +204,16 @@ export const IdoEqptDetail = (props: {
               />
             </Box>
           </Grid2>
+          {/** 固定ボタン 保存＆ページトップ */}
+          <Box position={'fixed'} zIndex={1050} bottom={25} right={25} alignItems={'center'}>
+            <Fab variant="extended" color="primary" type="submit" sx={{ mr: 2 }}>
+              <SaveAsIcon sx={{ mr: 1 }} />
+              保存
+            </Fab>
+            <Fab color="primary" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+              <ArrowUpwardIcon />
+            </Fab>
+          </Box>
         </form>
         {isLoading ? (
           <Loading />
