@@ -39,8 +39,8 @@ export const ShukoEqptDetailTable = (props: {
             <TableCell align="left">RFIDタグID</TableCell>
             <TableCell align="left">ステータス</TableCell>
             <TableCell align="left">メモ</TableCell>
-            <TableCell align="left">入出庫拠点</TableCell>
-            <TableCell align="left">読取日時</TableCell>
+            <TableCell align="left">在庫場所</TableCell>
+            <TableCell align="left">更新日時</TableCell>
             <TableCell align="left">担当者</TableCell>
             <TableCell align="left">無効</TableCell>
           </TableRow>
