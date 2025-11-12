@@ -60,7 +60,7 @@ export const EqptOrderList = ({
   const { control, handleSubmit, reset, getValues } = useForm<EqptOrderSearchValues>({
     defaultValues: {
       radio: 'shuko',
-      range: { from: new Date(toJapanTimeStampString()), to: new Date(toJapanTimeStampString()) },
+      range: { from: new Date(), to: new Date() },
       kokyaku: FAKE_NEW_ID,
       koenbashoNam: '',
       listSort: { sort: 'shuko', order: 'asc' },
