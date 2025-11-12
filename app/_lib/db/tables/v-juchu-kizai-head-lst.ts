@@ -96,8 +96,8 @@ export const selectFilteredKizaiHead = async ({
 
   // 期間のfromが入ってたら
   if (range?.from) {
-    const startOfDay = range.from.toISOString();
-    console.log('start of the day: ', toJapanTimeStampString(startOfDay));
+    const startOfDay = dayjs(range.from).tz('Asia/Tokyo').startOf('day').toISOString();
+    console.log('start of the day: ', startOfDay);
     switch (radio) {
       case 'shuko': // '出庫日'
         builder.or(`yard_shuko_dat.gte.${startOfDay},kics_shuko_dat.gte.${startOfDay}`);
@@ -110,14 +110,14 @@ export const selectFilteredKizaiHead = async ({
 
   // 期間のtoが入ってたら
   if (range?.to) {
-    const endOfDay = dayjs(range.to).endOf('day').toISOString();
+    const endOfDay = dayjs(range.to).tz('Asia/Tokyo').endOf('day').toISOString();
     console.log('end of the day: ', endOfDay);
     switch (radio) {
       case 'shuko': // '出庫日'
-        builder.or(`yard_shuko_dat.lte.${endOfDay},kics_shuko_dat.lte.${endOfDay}`);
+        builder.or(`yard_shuko_dat.lt.${endOfDay},kics_shuko_dat.lt.${endOfDay}`);
         break;
       case 'nyuko': // '入庫日'
-        builder.or(`yard_nyuko_dat.lte.${endOfDay},kics_nyuko_dat.lte.${endOfDay}`);
+        builder.or(`yard_nyuko_dat.lt.${endOfDay},kics_nyuko_dat.lt.${endOfDay}`);
         break;
     }
   }
