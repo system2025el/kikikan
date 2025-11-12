@@ -4,7 +4,7 @@ import dayjs from 'dayjs';
 
 import pool from '@/app/_lib/db/postgres';
 import { supabase } from '@/app/_lib/db/supabase';
-import { toJapanTimeStampString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanTimeStampString, toJapanYMDString, toTimeStampString } from '@/app/(main)/_lib/date-conversion';
 
 export const getTimeTest = async (data: {
   id: number | null;
@@ -17,10 +17,10 @@ export const getTimeTest = async (data: {
     query += ` AND id = ${data.id}`;
   }
   if (data.created) {
-    query += ` AND created_at >= '${toJapanTimeStampString(data.created)}' `;
+    query += ` AND created_at >= '${toTimeStampString(data.created)}' `;
   }
   if (data.shuko) {
-    query += ` AND shuko_dat = '${toJapanTimeStampString(data.shuko)}' `;
+    query += ` AND shuko_dat = '${toTimeStampString(data.shuko)}' `;
   }
   console.log(query);
   return (await pool.query(query)).rows;
