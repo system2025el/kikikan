@@ -16,7 +16,7 @@ import {
 import { useState } from 'react';
 import { CheckboxButtonGroup, Controller, TextFieldElement, useForm } from 'react-hook-form-mui';
 
-import { toJapanTimeString } from '../../_lib/date-conversion';
+import { toJapanTimeStampString, toJapanTimeString } from '../../_lib/date-conversion';
 import { TestDate } from '../../_ui/date';
 import { Loading } from '../../_ui/loading';
 import { getPdfData, getShukoList } from '../_lib/funcs';
@@ -34,7 +34,7 @@ export const ShukoList = (props: { shukoData: ShukoTableValues[] }) => {
     mode: 'onSubmit',
     defaultValues: {
       juchuHeadId: null,
-      shukoDat: new Date(toJapanTimeString()),
+      shukoDat: new Date(toJapanTimeStampString()),
       shukoBasho: 0,
       section: [],
     },

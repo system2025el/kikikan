@@ -31,7 +31,7 @@ import {
 import { useMemo, useState } from 'react';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
-import { toJapanTimeString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanTimeStampString, toJapanTimeString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
 import { FormDateX } from '@/app/(main)/_ui/date';
 import { Loading } from '@/app/(main)/_ui/loading';
@@ -196,8 +196,8 @@ const BillingStsRow = ({ juchu, refetch }: { juchu: BillingStsTableValues; refet
   }>({
     juchuId: FAKE_NEW_ID,
     kziHeadId: FAKE_NEW_ID,
-    shukoDat: new Date(toJapanTimeString()),
-    nyukoDat: new Date(toJapanTimeString()),
+    shukoDat: new Date(toJapanTimeStampString()),
+    nyukoDat: new Date(toJapanTimeStampString()),
     currentDat: null,
   });
   /* 新しい請求済み期間 */

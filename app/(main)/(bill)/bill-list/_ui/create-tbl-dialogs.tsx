@@ -110,7 +110,7 @@ export const SecondDialogPage = ({
       kokyaku: { id: kokyakuId, nam: kokyakuNam },
       tantou: null,
       juchuId: null,
-      dat: new Date(toJapanTimeString()),
+      dat: new Date(toJapanTimeStampString()),
     },
   });
 
