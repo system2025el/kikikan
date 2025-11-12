@@ -1,5 +1,7 @@
 'use server';
 
+import dayjs from 'dayjs';
+
 import pool from '@/app/_lib/db/postgres';
 import { supabase } from '@/app/_lib/db/supabase';
 import { toJapanTimeStampString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
@@ -25,8 +27,9 @@ export const getTimeTest = async (data: {
 };
 
 export const insertTimeTest = async (data: { id: number; created: Date | null; shuko: Date | null }): Promise<void> => {
+  const shukodat = data.shuko ? dayjs(data.shuko).format(`YYYY-MM-DD`) : null;
   const query = `
-    INSERT INTO test_takahashi.time_test VALUES(${data.id}, ${data.created ? `'${data.created.toISOString()}'` : null}, ${data.shuko ? `'${toJapanYMDString(data.shuko)}'` : null})`;
+    INSERT INTO test_takahashi.time_test VALUES(${data.id}, ${data.created ? `'${data.created.toISOString()}'` : null}, ${data.shuko ? `'${shukodat}'` : null})`;
   console.log(query);
   await pool.query(query);
 };
