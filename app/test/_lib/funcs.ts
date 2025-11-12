@@ -21,18 +21,22 @@ export const getTimeTest = async (data: {
   if (data.id) {
     query += ` AND id = ${data.id}`;
   }
-  if (data.created) {
-    query += ` AND created_at >= '${toJapanTimeStampString(data.created)}' `;
-  }
+  //   if (data.created) {
+  //     query += ` AND created_at >= '${toJapanTimeStampString(data.created)}' `;
+  //   }
+  //   if (data.shuko) {
+  //     query += ` AND shuko_dat = '${toJapanYMDString(data.shuko)}' `;
+  //   }
+
   if (data.shuko) {
-    query += ` AND shuko_dat = '${toJapanYMDString(data.shuko)}' `;
+    query += ` AND created_at >= = '${toJapanYMDString(data.shuko)}' `;
   }
   console.log(query);
   return (await pool.query(query)).rows;
 };
 
 export const insertTimeTest = async (data: { id: number; created: Date | null; shuko: Date | null }): Promise<void> => {
-  const shukodat = data.shuko ? dayjs(data.shuko).format(`YYYY-MM-DD`) : null;
+  const shukodat = data.shuko ? toJapanYMDString(data.shuko) : null;
   const query = `
     INSERT INTO test_takahashi.time_test VALUES(${data.id}, ${data.created ? `'${data.created.toISOString()}'` : null}, ${data.shuko ? `'${shukodat}'` : null})`;
   console.log(query);
