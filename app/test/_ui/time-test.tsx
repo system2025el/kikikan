@@ -19,7 +19,7 @@ import { useState } from 'react';
 import { Controller, TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { supabase } from '@/app/_lib/db/supabase';
-import { toJapanTimeStampString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanTimeStampString, toTimeStampString } from '@/app/(main)/_lib/date-conversion';
 import { DateTime, FormDateX } from '@/app/(main)/_ui/date';
 
 import { getTimeTest, insertTimeTest } from '../_lib/funcs';
@@ -163,7 +163,7 @@ export const TimeTest = () => {
                   <TableRow key={d.id}>
                     <TableCell>{d.id}</TableCell>
                     <TableCell>{d.created ? toJapanTimeStampString(d.created) : ''}</TableCell>
-                    <TableCell>{d.shuko ? toJapanTimeStampString(d.shuko) : ''}</TableCell>
+                    <TableCell>{d.shuko ? toTimeStampString(d.shuko) : ''}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

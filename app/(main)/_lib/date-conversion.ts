@@ -41,3 +41,12 @@ export const toJapanMDString = (input: Date | string | number = new Date(), str:
 export const toJapanTimeStampString = (input: Date | string | number = new Date()): string => {
   return dayjs(input).tz('Asia/Tokyo').format(`YYYY-MM-DD HH:mm:ss`);
 };
+
+/**
+ * timetest
+ * @param input
+ * @returns
+ */
+export const toTimeStampString = (input: Date | string | number = new Date()): string => {
+  return dayjs(input).format(`YYYY-MM-DD HH:mm:ss`);
+};

@@ -29,7 +29,7 @@ export const getTimeTest = async (data: {
 export const insertTimeTest = async (data: { id: number; created: Date | null; shuko: Date | null }): Promise<void> => {
   const shukodat = data.shuko ? dayjs(data.shuko).format(`YYYY-MM-DD`) : null;
   const query = `
-    INSERT INTO test_takahashi.time_test VALUES(${data.id}, ${data.created ? `'${data.created.toISOString()}'` : null}, ${data.shuko ? `'${shukodat}'` : null})`;
+    INSERT INTO test_takahashi.time_test VALUES(${data.id}, ${data.created ? `'${/*data.created.toISOString()*/ new Date().toISOString()}'` : null}, ${data.shuko ? `'${shukodat}'` : null})`;
   console.log(query);
   await pool.query(query);
 };
