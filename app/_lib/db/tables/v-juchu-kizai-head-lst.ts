@@ -96,36 +96,28 @@ export const selectFilteredKizaiHead = async ({
 
   // 期間のfromが入ってたら
   if (range?.from) {
-    const startOfDay = dayjs(range.to).tz('Asia/Tokyo').startOf('day').toDate();
+    const startOfDay = range.from.toISOString();
     console.log('start of the day: ', toJapanTimeStampString(startOfDay));
     switch (radio) {
       case 'shuko': // '出庫日'
-        builder.or(
-          `yard_shuko_dat.gte.${toJapanTimeStampString(startOfDay)},kics_shuko_dat.gte.${toJapanTimeStampString(startOfDay)}`
-        );
+        builder.or(`yard_shuko_dat.gte.${startOfDay},kics_shuko_dat.gte.${startOfDay}`);
         break;
       case 'nyuko': // '入庫日'
-        builder.or(
-          `yard_nyuko_dat.gte.${toJapanTimeStampString(startOfDay)},kics_nyuko_dat.gte.${toJapanTimeStampString(startOfDay)}`
-        );
+        builder.or(`yard_nyuko_dat.gte.${startOfDay},kics_nyuko_dat.gte.${startOfDay}`);
         break;
     }
   }
 
   // 期間のtoが入ってたら
   if (range?.to) {
-    const endOfDay = dayjs(range.to).tz('Asia/Tokyo').endOf('day').toDate();
-    console.log('end of the day: ', toJapanTimeStampString(endOfDay));
+    const endOfDay = range.to.toISOString();
+    console.log('end of the day: ', endOfDay);
     switch (radio) {
       case 'shuko': // '出庫日'
-        builder.or(
-          `yard_shuko_dat.lte.${toJapanTimeStampString(endOfDay)},kics_shuko_dat.lte.${toJapanTimeStampString(endOfDay)}`
-        );
+        builder.or(`yard_shuko_dat.lte.${endOfDay},kics_shuko_dat.lte.${endOfDay}`);
         break;
       case 'nyuko': // '入庫日'
-        builder.or(
-          `yard_nyuko_dat.lte.${toJapanTimeStampString(endOfDay)},kics_nyuko_dat.lte.${toJapanTimeStampString(endOfDay)}`
-        );
+        builder.or(`yard_nyuko_dat.lte.${endOfDay},kics_nyuko_dat.lte.${endOfDay}`);
         break;
     }
   }
