@@ -6,7 +6,7 @@ import utc from 'dayjs/plugin/utc';
 
 import { selectFilteredKizaiHead } from '@/app/_lib/db/tables/v-juchu-kizai-head-lst';
 
-import { toJapanYMDString } from '../../_lib/date-conversion';
+import { toJapanTimeString, toJapanYMDString } from '../../_lib/date-conversion';
 import { FAKE_NEW_ID } from '../../(masters)/_lib/constants';
 import { EqptOrderListTableValues, EqptOrderSearchValues } from './types';
 
@@ -22,7 +22,7 @@ dayjs.extend(timezone);
 export const getFilteredOrderList = async (
   query: EqptOrderSearchValues = {
     radio: 'shuko',
-    range: { from: new Date(toJapanYMDString()), to: new Date(toJapanYMDString()) },
+    range: { from: new Date(toJapanTimeString()), to: new Date(toJapanTimeString()) },
     kokyaku: FAKE_NEW_ID,
     listSort: { sort: 'shuko', order: 'asc' },
   }

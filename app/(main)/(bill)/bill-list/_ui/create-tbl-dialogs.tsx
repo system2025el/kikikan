@@ -26,6 +26,7 @@ import {
 } from 'react-hook-form-mui';
 
 import { selectJuchuKizaiMeisaiHeadForBill } from '@/app/_lib/db/tables/v-seikyu-date-lst';
+import { toJapanTimeStampString, toJapanTimeString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
 import { FormDateX } from '@/app/(main)/_ui/date';
 import { Loading } from '@/app/(main)/_ui/loading';
@@ -109,7 +110,7 @@ export const SecondDialogPage = ({
       kokyaku: { id: kokyakuId, nam: kokyakuNam },
       tantou: null,
       juchuId: null,
-      dat: new Date(),
+      dat: new Date(toJapanTimeString()),
     },
   });
 

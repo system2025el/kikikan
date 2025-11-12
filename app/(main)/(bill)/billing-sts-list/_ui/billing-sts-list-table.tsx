@@ -196,8 +196,8 @@ const BillingStsRow = ({ juchu, refetch }: { juchu: BillingStsTableValues; refet
   }>({
     juchuId: FAKE_NEW_ID,
     kziHeadId: FAKE_NEW_ID,
-    shukoDat: new Date(),
-    nyukoDat: new Date(),
+    shukoDat: new Date(toJapanTimeString()),
+    nyukoDat: new Date(toJapanTimeString()),
     currentDat: null,
   });
   /* 新しい請求済み期間 */
