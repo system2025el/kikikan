@@ -110,7 +110,7 @@ export const selectFilteredKizaiHead = async ({
 
   // 期間のtoが入ってたら
   if (range?.to) {
-    const endOfDay = range.to.toISOString();
+    const endOfDay = dayjs(range.to).endOf('day').toISOString();
     console.log('end of the day: ', endOfDay);
     switch (radio) {
       case 'shuko': // '出庫日'
