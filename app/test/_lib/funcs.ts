@@ -2,7 +2,7 @@
 
 import pool from '@/app/_lib/db/postgres';
 import { supabase } from '@/app/_lib/db/supabase';
-import { toJapanTimeStampString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanTimeStampString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 
 export const getTimeTest = async (data: {
   id: number | null;
@@ -22,4 +22,11 @@ export const getTimeTest = async (data: {
   }
   console.log(query);
   return (await pool.query(query)).rows;
+};
+
+export const insertTimeTest = async (data: { id: number; created: Date | null; shuko: Date | null }): Promise<void> => {
+  const query = `
+    INSERT INTO test_takahashi.time_test VALUES(${data.id}, ${data.created ? `'${data.created.toISOString()}'` : null}, ${data.shuko ? `'${toJapanYMDString(data.shuko)}'` : null})`;
+  console.log(query);
+  await pool.query(query);
 };

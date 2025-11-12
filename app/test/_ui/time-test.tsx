@@ -22,21 +22,22 @@ import { supabase } from '@/app/_lib/db/supabase';
 import { toJapanTimeStampString } from '@/app/(main)/_lib/date-conversion';
 import { DateTime, FormDateX } from '@/app/(main)/_ui/date';
 
-import { getTimeTest } from '../_lib/funcs';
+import { getTimeTest, insertTimeTest } from '../_lib/funcs';
 
 export const TimeTest = () => {
   const [testlist, setTestlist] = useState<{ id: number; created: Date | null; shuko: Date | null }[]>([]);
 
   const form = useForm<{ id: number; created: Date | null; shuko: Date | null }>({});
-  const { handleSubmit: fhandleSubmit, setValue: fsetvalue, control: fcontrol } = form;
+  const { handleSubmit: fhandleSubmit, setValue: fsetvalue, control: fcontrol, watch: fwatch } = form;
   const fonSubmit = async (data: { id: number; created: Date | null; shuko: Date | null }) => {
     console.log(data);
+    await insertTimeTest(data);
   };
 
   const search = useForm<{ id: number | null; created: Date | null; shuko: Date | null }>({
     defaultValues: { id: null, created: null, shuko: null },
   });
-  const { handleSubmit: shandleSubmit, setValue: ssetvalue, control: scontrol } = search;
+  const { handleSubmit: shandleSubmit, setValue: ssetvalue, control: scontrol, watch: swatch } = search;
   const sonSubmit = async (data: { id: number | null; created: Date | null; shuko: Date | null }) => {
     console.log(data);
     const d: { id: number; created: Date | null; shuko: Date | null }[] = await getTimeTest(data);
@@ -46,11 +47,17 @@ export const TimeTest = () => {
     }
   };
 
+  const fc = fwatch('created');
+  const fs = fwatch('shuko');
+
+  const sc = swatch('created');
+  const ss = swatch('shuko');
+
   return (
     <Container>
       <Box sx={{ border: 1, borderColor: 'divider' }}>
         <Typography variant="h3">Form</Typography>
-        <form>
+        <form onSubmit={fhandleSubmit(fonSubmit)}>
           <Stack>
             id: <TextFieldElement name="id" control={fcontrol} />
           </Stack>
@@ -72,6 +79,7 @@ export const TimeTest = () => {
               />
             )}
           />
+          {fc ? toJapanTimeStampString(fc) : '無'}
           <Stack>
             shuko_dat:
             <Controller
@@ -87,6 +95,7 @@ export const TimeTest = () => {
                 />
               )}
             />
+            {fs ? toJapanTimeStampString(fs) : '無'}
             <Button type="submit">submit</Button>
           </Stack>
         </form>
@@ -118,6 +127,7 @@ export const TimeTest = () => {
                 />
               )}
             />
+            {sc ? toJapanTimeStampString(sc) : '無'}
           </Stack>
           <Stack>
             shuko_dat:
@@ -134,7 +144,8 @@ export const TimeTest = () => {
                 />
               )}
             />
-            <Button type="submit">submit</Button>
+            {ss ? toJapanTimeStampString(ss) : '無'}
+            <Button type="submit">search</Button>
           </Stack>
         </form>
         <TableContainer>
