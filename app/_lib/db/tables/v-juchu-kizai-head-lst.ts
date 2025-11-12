@@ -4,7 +4,7 @@ import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
 
-import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanTimeStampString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 import { EqptOrderSearchValues } from '@/app/(main)/eqpt-order-list/_lib/types';
 
@@ -96,15 +96,17 @@ export const selectFilteredKizaiHead = async ({
 
   // 期間のfromが入ってたら
   if (range?.from) {
+    const startOfDay = dayjs(range.to).tz('Asia/Tokyo').startOf('day').toDate();
+    console.log('start of the day: ', toJapanTimeStampString(startOfDay));
     switch (radio) {
       case 'shuko': // '出庫日'
         builder.or(
-          `yard_shuko_dat.gte.${toJapanYMDString(range.from, '-')},kics_shuko_dat.gte.${toJapanYMDString(range.from, '-')}`
+          `yard_shuko_dat.gte.${toJapanTimeStampString(startOfDay)},kics_shuko_dat.gte.${toJapanTimeStampString(startOfDay)}`
         );
         break;
       case 'nyuko': // '入庫日'
         builder.or(
-          `yard_nyuko_dat.gte.${toJapanYMDString(range.from, '-')},kics_nyuko_dat.gte.${toJapanYMDString(range.from, '-')}`
+          `yard_nyuko_dat.gte.${toJapanTimeStampString(startOfDay)},kics_nyuko_dat.gte.${toJapanTimeStampString(startOfDay)}`
         );
         break;
     }
@@ -112,17 +114,18 @@ export const selectFilteredKizaiHead = async ({
 
   // 期間のtoが入ってたら
   if (range?.to) {
-    const nextDay = dayjs(range.to).tz('Asia/Tokyo').add(1, 'day').startOf('day').toDate(); // +1日
+    const endOfDay = dayjs(range.to).tz('Asia/Tokyo').endOf('day').toDate();
+    console.log('end of the day: ', toJapanTimeStampString(endOfDay));
     switch (radio) {
       case 'shuko': // '出庫日'
         builder.or(
-          `yard_shuko_dat.lt.${toJapanYMDString(nextDay, '-')},kics_shuko_dat.lt.${toJapanYMDString(nextDay, '-')}`
-        ); // 未満
+          `yard_shuko_dat.lte.${toJapanTimeStampString(endOfDay)},kics_shuko_dat.lte.${toJapanTimeStampString(endOfDay)}`
+        );
         break;
       case 'nyuko': // '入庫日'
         builder.or(
-          `yard_nyuko_dat.lt.${toJapanYMDString(nextDay, '-')},kics_nyuko_dat.lt.${toJapanYMDString(nextDay, '-')}`
-        ); // 未満
+          `yard_nyuko_dat.lte.${toJapanTimeStampString(endOfDay)},kics_nyuko_dat.lte.${toJapanTimeStampString(endOfDay)}`
+        );
         break;
     }
   }
