@@ -1,4 +1,4 @@
-import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanTimeString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { getChosenCustomer, getChosenCustomerIdAndName } from '@/app/(main)/(masters)/customers-master/_lib/funcs';
 import { getUsersSelection } from '@/app/(main)/quotation-list/_lib/funcs';
 
@@ -42,7 +42,7 @@ const Page = async ({ searchParams }: { searchParams: Promise<{ [key: string]: s
 
   const bill: BillHeadValues = {
     aite: { id: custs.kokyakuId, nam: custs.kokyakuNam },
-    seikyuDat: new Date(),
+    seikyuDat: new Date(toJapanTimeString()),
     adr1: custs.adrPost.trim(),
     adr2: { shozai: custs.adrShozai, tatemono: custs.adrTatemono, sonota: custs.adrSonota },
     kokyaku: custs.kokyakuNam,
