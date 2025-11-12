@@ -29,7 +29,7 @@ export const getTimeTest = async (data: {
   //   }
 
   if (data.shuko) {
-    query += ` AND created_at >= = '${toJapanYMDString(data.shuko)}' `;
+    query += ` AND created_at >= '${toJapanYMDString(data.shuko)}' `;
   }
   console.log(query);
   return (await pool.query(query)).rows;
