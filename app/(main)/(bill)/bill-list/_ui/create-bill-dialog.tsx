@@ -6,7 +6,7 @@ import { CheckboxElement, TextFieldElement } from 'react-hook-form-mui';
 
 import { toJapanTimeStampString, toJapanTimeString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
-import { FormDateX, FormMonthX } from '@/app/(main)/_ui/date';
+import { FormDateX } from '@/app/(main)/_ui/date';
 import { Loading } from '@/app/(main)/_ui/loading';
 import { getChosenCustomerName } from '@/app/(main)/(masters)/customers-master/_lib/funcs';
 

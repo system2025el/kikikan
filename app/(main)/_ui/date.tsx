@@ -171,65 +171,6 @@ export const TestDate = (props: {
   );
 };
 
-/**
- * 2つ並んだ日付選択コンポーネント
- * @param props sx スタイルを決めるオブジェクト
- * @returns {JSX.Element} MUIX DatePicker × 2
- */
-export const TwoDatePickers = (props: { sx?: object; disabled?: boolean }) => {
-  const { sx, disabled } = props;
-  return (
-    <>
-      <DatePicker
-        name="date"
-        format="YYYY/MM/DD" // テキストエリア内のフォーマット
-        slotProps={{
-          textField: {
-            size: 'small',
-            sx: {
-              width: '15%',
-              minWidth: 150,
-              ...sx,
-              bgcolor: disabled ? grey[200] : 'white',
-              '.Mui-disabled': {
-                WebkitTextFillColor: 'black',
-              },
-              ...sx,
-            },
-          },
-          calendarHeader: { format: 'YYYY年MM月' },
-        }} // カレンダーヘッダーのフォーマット
-        defaultValue={today}
-        views={['year', 'month', 'day']}
-        className="MuiDateText"
-      />
-      ～
-      <DatePicker
-        name="date"
-        format="YYYY/MM/DD" // テキストエリア内のフォーマット
-        slotProps={{
-          textField: {
-            size: 'small',
-            sx: {
-              width: '15%',
-              minWidth: 150,
-              ...sx,
-              bgcolor: disabled ? grey[300] : 'white',
-              '.Mui-disabled': {
-                WebkitTextFillColor: 'black',
-              },
-              ...sx,
-            },
-          },
-          calendarHeader: { format: 'YYYY年MM月' },
-        }} // カレンダーヘッダーのフォーマット
-        defaultValue={today}
-        views={['year', 'month', 'day']}
-      />
-    </>
-  );
-};
-
 export const DateTime = (props: {
   sx?: object;
   disabled?: boolean;
@@ -463,54 +404,6 @@ export const FormDateX = ({
               onChange!(newValue ? newValue.toDate() : null);
             }
       }
-    />
-  );
-};
-/**
- * 日付を選択し取得するコンポーネント
- * @param props sx スタイル disbled disabledかどうか
- * @returns {JSX.Element} MUIX DatePickerコンポーネント
- */
-export const FormMonthX = ({
-  sx,
-  disabled,
-  value,
-  error,
-  helperText,
-  onChange,
-}: {
-  sx?: object;
-  disabled?: boolean;
-  value?: Date | null;
-  error?: boolean;
-  helperText?: string;
-  onChange?: (date: Date | null) => void;
-}) => {
-  return (
-    <DatePicker
-      format="YYYY/MM"
-      views={['year', 'month']}
-      disabled={disabled}
-      value={value ? dayjs(value) : null}
-      onChange={(newValue: Dayjs | null) => {
-        onChange?.(newValue ? newValue.toDate() : null);
-      }}
-      slotProps={{
-        textField: {
-          error,
-          helperText,
-          size: 'small',
-          sx: {
-            bgcolor: disabled ? grey[200] : 'white',
-            width: 200,
-            padding: 0,
-            '.Mui-disabled': {
-              WebkitTextFillColor: 'black',
-            },
-            ...sx,
-          },
-        },
-      }}
     />
   );
 };
