@@ -78,9 +78,7 @@ export const EqptOrderTable = ({
         </Grid2>
         {isLoading ? (
           <Loading />
-        ) : !list || list.length === 0 ? (
-          <Typography justifySelf={'center'}>該当する受注がありません</Typography>
-        ) : (
+        ) : list && list.length > 0 ? (
           <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
             <Table stickyHeader size="small" padding="none">
               <TableHead>
@@ -202,6 +200,8 @@ export const EqptOrderTable = ({
               </TableBody>
             </Table>
           </TableContainer>
+        ) : (
+          <Typography justifySelf={'center'}>該当する受注がありません</Typography>
         )}
       </Box>
     </>
