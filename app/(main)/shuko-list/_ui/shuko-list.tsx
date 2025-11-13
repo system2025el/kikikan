@@ -13,7 +13,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CheckboxButtonGroup, Controller, TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { toJapanTimeStampString, toJapanTimeString } from '../../_lib/date-conversion';
@@ -24,17 +24,17 @@ import { ShukoKizai, ShukoListSearchValues, ShukoTableValues } from '../_lib/typ
 import { PdfModel, usePdf } from '../shuko/_lib/hooks/usePdf';
 import { ShukoListTable } from './shuko-list-table';
 
-export const ShukoList = (props: { shukoData: ShukoTableValues[] }) => {
+export const ShukoList = (/*props: { shukoData: ShukoTableValues[] }*/) => {
   const [isLoading, setIsLoading] = useState(false);
   const [selected, setSelected] = useState<number[]>([]);
-  const [shukoList, setShukoList] = useState<ShukoTableValues[]>(props.shukoData);
+  const [shukoList, setShukoList] = useState<ShukoTableValues[]>(/*props.shukoData*/ []);
 
   /* useForm ------------------- */
-  const { control, handleSubmit } = useForm({
+  const { control, handleSubmit, getValues } = useForm({
     mode: 'onSubmit',
     defaultValues: {
       juchuHeadId: null,
-      shukoDat: new Date(toJapanTimeStampString()),
+      shukoDat: new Date(),
       shukoBasho: 0,
       section: [],
     },
@@ -89,6 +89,13 @@ export const ShukoList = (props: { shukoData: ShukoTableValues[] }) => {
     const url = URL.createObjectURL(blob);
     window.open(url);
   };
+
+  /* useEffect --------------------------------- */
+  /* eslint-disable react-hooks/exhaustive-deps */
+  useEffect(() => {
+    onSubmit(getValues());
+  }, []);
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   return (
     <Box>
