@@ -1,3 +1,4 @@
+import { toJapanTimeStampString } from '../_lib/date-conversion';
 import { FAKE_NEW_ID } from '../(masters)/_lib/constants';
 import { getCustomerSelection } from '../(masters)/_lib/funcs';
 import { getLocsSelection } from '../(masters)/locations-master/_lib/funcs';
@@ -18,7 +19,7 @@ const Page = async () => {
   const [orderList, customers, locs] = await Promise.all([
     getFilteredOrderList({
       radio: 'shuko',
-      range: { from: new Date(), to: new Date() },
+      range: { from: new Date(toJapanTimeStampString()), to: new Date(toJapanTimeStampString()) },
       kokyaku: FAKE_NEW_ID,
       listSort: { sort: 'shuko', order: 'asc' },
     }),
