@@ -9,6 +9,12 @@ import { EqptOrderList } from './_ui/eqpt-order-list';
  * @returns 受注一覧画面
  */
 const Page = async () => {
+  const searchs = {
+    radio: 'shuko',
+    range: { from: new Date(), to: new Date() },
+    kokyaku: FAKE_NEW_ID,
+    listSort: { sort: 'shuko', order: 'asc' },
+  };
   const [orderList, customers, locs] = await Promise.all([
     getFilteredOrderList({
       radio: 'shuko',
@@ -19,7 +25,12 @@ const Page = async () => {
     getCustomerSelection(),
     getLocsSelection(),
   ]);
-  return <EqptOrderList orders={orderList} customers={customers} locs={locs} />;
+  return (
+    <>
+      {JSON.stringify(searchs)}
+      <EqptOrderList orders={orderList} customers={customers} locs={locs} />
+    </>
+  );
 };
 
 export default Page;
