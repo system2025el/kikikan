@@ -78,6 +78,7 @@ export const EqptOrderList = () => {
   /* useEffect --------------------------------------- */
   /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
+    setIsLoading(true);
     // メモリ上に検索条件があるか確認
     const searchPramsString = sessionStorage.getItem('orderListSearchParams');
     const searchParams = searchPramsString ? JSON.parse(searchPramsString) : null;
@@ -114,13 +115,13 @@ export const EqptOrderList = () => {
       setOrderList(o);
       setCustomers(c);
       setLocs(l);
+      setIsLoading(false);
     };
     getList();
     // メモリ上に検索条件があれば実行
     if (searchParams) {
       get();
     }
-    setIsLoading(false);
   }, []);
   /* eslint-enable react-hooks/exhaustive-deps */
 

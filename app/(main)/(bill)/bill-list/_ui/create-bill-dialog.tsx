@@ -61,7 +61,8 @@ export const CreateBillDialog = ({
       const kokyakuNam = await getChosenCustomerName(kokyakuId);
       reset({
         kokyaku: { id: kokyakuId, name: kokyakuNam ?? null },
-        date: new Date(toJapanTimeStampString()),
+        // date: new Date(toJapanTimeStampString()),
+        date: new Date(),
         tantouNam: tantouNam,
       });
     };

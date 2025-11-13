@@ -13,7 +13,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CheckboxButtonGroup, Controller, TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { toJapanTimeStampString } from '../../_lib/date-conversion';
@@ -23,16 +23,16 @@ import { getNyukoList } from '../_lib/funcs';
 import { NyukoListSearchValues, NyukoTableValues } from '../_lib/types';
 import { NyukoListTable } from './nyuko-list-table';
 
-export const NyukoList = (props: { shukoData: NyukoTableValues[] }) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [nyukoList, setNyukoList] = useState<NyukoTableValues[]>(props.shukoData);
+export const NyukoList = (/*props: { shukoData: NyukoTableValues[] }*/) => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [nyukoList, setNyukoList] = useState<NyukoTableValues[]>(/*props.shukoData*/ []);
 
   /* useForm ------------------- */
-  const { control, handleSubmit } = useForm({
+  const { control, handleSubmit, getValues } = useForm({
     mode: 'onSubmit',
     defaultValues: {
       juchuHeadId: null,
-      shukoDat: new Date(toJapanTimeStampString()),
+      shukoDat: new Date(),
       shukoBasho: 0,
       section: [],
     },
@@ -49,6 +49,13 @@ export const NyukoList = (props: { shukoData: NyukoTableValues[] }) => {
     setNyukoList(newNyukoList);
     setIsLoading(false);
   };
+
+  /* useEffect --------------------------------- */
+  /* eslint-disable react-hooks/exhaustive-deps */
+  useEffect(() => {
+    onSubmit(getValues());
+  }, []);
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   return (
     <Box>
