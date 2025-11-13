@@ -1,3 +1,4 @@
+import { FAKE_NEW_ID } from '../(masters)/_lib/constants';
 import { getCustomerSelection } from '../(masters)/_lib/funcs';
 import { getLocsSelection } from '../(masters)/locations-master/_lib/funcs';
 import { getFilteredOrderList } from './_lib/funcs';
@@ -9,7 +10,12 @@ import { EqptOrderList } from './_ui/eqpt-order-list';
  */
 const Page = async () => {
   const [orderList, customers, locs] = await Promise.all([
-    getFilteredOrderList(),
+    getFilteredOrderList({
+      radio: 'shuko',
+      range: { from: new Date(), to: new Date() },
+      kokyaku: FAKE_NEW_ID,
+      listSort: { sort: 'shuko', order: 'asc' },
+    }),
     getCustomerSelection(),
     getLocsSelection(),
   ]);
