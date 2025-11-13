@@ -26,6 +26,8 @@ import { toJapanTimeStampString, toJapanTimeString, toJapanYMDString } from '../
 import { FormDateX } from '../../_ui/date';
 import { selectNone, SelectTypes } from '../../_ui/form-box';
 import { FAKE_NEW_ID } from '../../(masters)/_lib/constants';
+import { getCustomerSelection } from '../../(masters)/_lib/funcs';
+import { getLocsSelection } from '../../(masters)/locations-master/_lib/funcs';
 import { radioData } from '../_lib/datas';
 import { getFilteredOrderList } from '../_lib/funcs';
 import { EqptOrderListTableValues, EqptOrderSearchValues } from '../_lib/types';
@@ -36,25 +38,18 @@ import { EqptOrderTable } from './eqpt-order-table';
  * @param param0
  * @returns {JSX.Element} 受注明細一覧画面コンポーネント
  */
-export const EqptOrderList = ({
-  orders,
-  customers,
-  locs,
-}: {
-  /** 明細一覧 */
-  orders: EqptOrderListTableValues[] | undefined;
-  /** 顧客選択肢 */
-  customers: SelectTypes[] | undefined;
-  /** 個↑場所選択肢 */
-  locs: SelectTypes[] | undefined;
-}) => {
+export const EqptOrderList = () => {
   /* useState -------------------------------------------- */
   /* 受注一覧 */
-  const [orderList, setOrderList] = useState<EqptOrderListTableValues[]>(orders ?? []);
+  const [orderList, setOrderList] = useState<EqptOrderListTableValues[]>([]);
   /* テーブルのページ */
   const [page, setPage] = useState(1);
   /* ローディングかどうか */
   const [isLoading, setIsLoading] = useState(true);
+  /** */
+  const [customers, setCustomers] = useState<SelectTypes[] | undefined>([]);
+  /** */
+  const [locs, setLocs] = useState<SelectTypes[] | undefined>([]);
 
   /* useForm ------------------------------------------ */
   const { control, handleSubmit, reset, getValues } = useForm<EqptOrderSearchValues>({
@@ -104,6 +99,23 @@ export const EqptOrderList = ({
       setIsLoading(false);
     };
 
+    // 初期表示
+    const getList = async () => {
+      const [o, c, l] = await Promise.all([
+        getFilteredOrderList({
+          radio: 'shuko',
+          range: { from: new Date(), to: new Date() },
+          kokyaku: FAKE_NEW_ID,
+          listSort: { sort: 'shuko', order: 'asc' },
+        }),
+        getCustomerSelection(),
+        getLocsSelection(),
+      ]);
+      setOrderList(o);
+      setCustomers(c);
+      setLocs(l);
+    };
+    getList();
     // メモリ上に検索条件があれば実行
     if (searchParams) {
       get();
