@@ -9,32 +9,31 @@ import { CheckboxButtonGroup, TextFieldElement } from 'react-hook-form-mui';
 import { BackButton } from '@/app/(main)/_ui/buttons';
 import { FormDateX } from '@/app/(main)/_ui/date';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
+import { getCustomerSelection } from '@/app/(main)/(masters)/_lib/funcs';
 
-import { getFilteredBills } from '../_lib/funcs';
+import { getBillingStsSelection, getFilteredBills } from '../_lib/funcs';
 import { BillSearchValues, BillsListTableValues } from '../_lib/types';
 import { BillListTable } from './bill-list-table';
 
-export const BillList = ({
-  bills,
-  selectOptions,
-}: {
-  bills: BillsListTableValues[];
-  selectOptions: { custs: SelectTypes[]; sts: SelectTypes[] };
-}) => {
+export const BillList = () => {
   /* useState ---------------------------------------------------- */
   /* 初期表示用 */
   const [isFirst, setIsFirst] = useState<boolean>(true);
   /* ローディング状態 */
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   /* ページ  */
   const [page, setPage] = useState<number>(1);
-  /**  */
-  const [thebills, setBills] = useState<BillsListTableValues[]>(bills);
+  /** 選択肢一覧 */
+  const [options, setOptions] = useState<{ custs: SelectTypes[]; sts: SelectTypes[] }>({ custs: [], sts: [] });
+  /** 請求一覧 */
+  const [bills, setBills] = useState<BillsListTableValues[]>([]);
+
   /* useForm ----------------------------------------------------- */
-  const { control, reset, handleSubmit, getValues } = useForm<BillSearchValues>({
+  const { control, reset, handleSubmit, getValues, setValue } = useForm<BillSearchValues>({
     defaultValues: {},
   });
 
+  /** 検索ボタン押下 */
   const onSubmit = async (data: BillSearchValues) => {
     console.log('検索ーーーーーーーーーーーーーーーー', data);
     setIsFirst(false);
@@ -47,28 +46,38 @@ export const BillList = ({
     const searchPramsString = sessionStorage.getItem('billListSearchParams');
     const searchParams = searchPramsString ? JSON.parse(searchPramsString) : null;
 
-    const get = async () => {
+    const getList = async () => {
       // メモリ開放
       sessionStorage.removeItem('billListSearchParams');
       // 読み込み中
       setIsLoading(true);
       // 初期表示ではない
       setIsFirst(false);
-      // 初期表示ではない
-      setPage(1);
-      // 検索条件表示と検索
-      reset(searchParams);
-      const q = await getFilteredBills(searchParams);
+
+      // 検索
+      const q = await getFilteredBills(getValues());
       if (q) {
         setBills(q);
       }
       setIsLoading(false);
     };
 
-    // メモリ上に検索条件があれば実行
+    const getOptions = async () => {
+      // 選択肢取得
+      const [custs, sts] = await Promise.all([getCustomerSelection(), getBillingStsSelection()]);
+      setOptions({ custs: custs, sts: sts });
+    };
+
+    // 選択肢取得
+    getOptions();
+
+    // メモリ上に検索条件があればセットして実行
     if (searchParams) {
-      get();
+      reset(searchParams);
+      // 実行
+      getList();
     }
+
     setIsLoading(false);
   }, []);
   /* eslint-enable react-hooks/exhaustive-deps */
@@ -159,7 +168,7 @@ export const BillList = ({
         isLoading={isLoading}
         isFirst={isFirst}
         page={page}
-        custs={selectOptions.custs}
+        custs={options.custs}
         searchParams={getValues()}
         setIsLoading={setIsLoading}
         setPage={setPage}

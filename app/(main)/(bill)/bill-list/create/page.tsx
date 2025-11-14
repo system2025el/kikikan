@@ -1,8 +1,6 @@
-import { toJapanTimeStampString, toJapanTimeString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
-import { getChosenCustomer, getChosenCustomerIdAndName } from '@/app/(main)/(masters)/customers-master/_lib/funcs';
-import { getUsersSelection } from '@/app/(main)/quotation-list/_lib/funcs';
+import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
+import { getChosenCustomerIdAndName } from '@/app/(main)/(masters)/customers-master/_lib/funcs';
 
-import { getBillingStsSelection, getFilteredBills } from '../_lib/funcs';
 import { BillHeadValues } from '../_lib/types';
 import { Bill } from '../_ui/bill';
 import { getJuchusForBill } from './_lib/funcs';
@@ -11,7 +9,6 @@ const Page = async ({ searchParams }: { searchParams: Promise<{ [key: string]: s
   const searchParam = await searchParams;
   console.log(searchParam);
   const { kokyakuId, date, flg, tantou } = searchParam;
-  const [users, sts] = await Promise.all([getUsersSelection(), getBillingStsSelection()]);
 
   const custs = await getChosenCustomerIdAndName(Number(kokyakuId));
   const juchus = await getJuchusForBill({
@@ -62,7 +59,7 @@ const Page = async ({ searchParams }: { searchParams: Promise<{ [key: string]: s
     '請求書新規作成：',
     bill.meisaiHeads?.map((d) => d?.seikyuRange)
   );
-  return <Bill isNew={true} bill={bill} options={{ users: users, sts: sts }} />;
+  return <Bill isNew={true} bill={bill} />;
 };
 
 export default Page;
