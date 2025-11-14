@@ -1,40 +1,55 @@
 'use client';
-
+import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
-import { Box, Button, Container, Divider, Grid2, MenuItem, Paper, Select, Stack, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  Container,
+  Dialog,
+  Divider,
+  Grid2,
+  MenuItem,
+  Paper,
+  Select,
+  Stack,
+  TableContainer,
+  Typography,
+} from '@mui/material';
 import { grey } from '@mui/material/colors';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CheckboxElement, Controller, TextFieldElement, useForm } from 'react-hook-form-mui';
-import { boolean } from 'zod';
 
 import { selectNone, SelectTypes } from '@/app/(main)/_ui/form-box';
+import { Loading } from '@/app/(main)/_ui/loading';
+import { MuiTablePagination } from '@/app/(main)/_ui/table-pagination';
 
-import { BackButton } from '../../../_ui/buttons';
-import { FAKE_NEW_ID } from '../../_lib/constants';
+import { FAKE_NEW_ID, ROWS_PER_MASTER_TABLE_PAGE } from '../../_lib/constants';
+import { MasterTableOfEqpt } from '../../_ui/tables';
+import { eqptMHeader } from '../_lib/datas';
 import { getFilteredEqpts } from '../_lib/funcs';
 import { EqptsMasterTableValues } from '../_lib/types';
-import { EqptMasterTable } from './eqpt-master-table';
+import { EqMasterDialog } from './eqpt-master-dialog';
 
-export const EqptMaster = ({
-  eqpts,
-  options,
-}: {
-  eqpts: EqptsMasterTableValues[] | undefined;
-  options:
-    | {
-        d: SelectTypes[];
-        s: SelectTypes[];
-        b: SelectTypes[];
-      }
-    | undefined;
-}) => {
+export const EqptMaster = () => {
+  /* テーブル1ページの行数 */
+  const rowsPerPage = ROWS_PER_MASTER_TABLE_PAGE;
   /* useState ------------------------------------------------- */
   /** 表示する機材の配列 */
-  const [theEqpts, setTheEqpts] = useState<EqptsMasterTableValues[] | undefined>(eqpts);
+  const [eqpts, setEqpts] = useState<EqptsMasterTableValues[]>([]);
   /** 今開いてるテーブルのページ数 */
   const [page, setPage] = useState(1);
   /** ローディング */
   const [isLoading, setIsLoading] = useState(true);
+  /** 選択肢 */
+  const [options, setOptions] = useState<{ d: SelectTypes[]; s: SelectTypes[]; b: SelectTypes[] }>({
+    d: [],
+    s: [],
+    b: [],
+  });
+  /* ダイアログ開く機材のID、閉じるとき、未選択でFAKE_NEW_IDとする */
+  const [openId, setOpenID] = useState<number>(FAKE_NEW_ID);
+  /* 詳細ダイアログの開閉状態 */
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   /** 検索useForm-------------------------- */
   const { control, handleSubmit, getValues } = useForm({
@@ -67,9 +82,47 @@ export const EqptMaster = ({
       ngFlg: data.ngFlg,
     });
     setPage(1);
-    setTheEqpts(newList?.data);
-    console.log('theEqpt : ', theEqpts);
+    setEqpts(newList?.data);
+    setIsLoading(false);
+    console.log('theEqpt : ', eqpts);
   };
+
+  /** 詳細ダイアログを開く関数 */
+  const handleOpenDialog = (id: number) => {
+    setOpenID(id);
+    setDialogOpen(true);
+  };
+  /** ダイアログを閉じる関数 */
+  const handleCloseDialog = () => {
+    setDialogOpen(false);
+  };
+  /** 情報が変わったときに更新される */
+  const refetchEqpts = async () => {
+    setIsLoading(true);
+    const searchParams = getValues();
+    const updated = await getFilteredEqpts({
+      q: searchParams.query!,
+      d: searchParams.daibumonQuery === FAKE_NEW_ID ? null : searchParams.daibumonQuery,
+      s: searchParams.shukeiQuery === FAKE_NEW_ID ? null : searchParams.shukeiQuery,
+      b: searchParams.bumonQuery === FAKE_NEW_ID ? null : searchParams.bumonQuery,
+      ngFlg: searchParams.ngFlg,
+    });
+    setEqpts(updated?.data);
+    setIsLoading(false);
+  };
+
+  /* useEffect ----------------------------------- */
+  /** 初期表示 */
+  useEffect(() => {
+    const getList = async () => {
+      setIsLoading(true);
+      const dataList = await getFilteredEqpts();
+      setEqpts(dataList.data);
+      setOptions(dataList.options);
+      setIsLoading(false);
+    };
+    getList();
+  }, []);
 
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
@@ -169,14 +222,53 @@ export const EqptMaster = ({
           <Typography></Typography>
         </Box>
       </Paper>
-      <EqptMasterTable
-        eqpts={theEqpts}
-        page={page}
-        searchParams={getValues()}
-        isLoading={isLoading}
-        setPage={setPage}
-        setIsLoading={setIsLoading}
-      />
+      <Box>
+        <Typography pt={1} pl={2}>
+          一覧
+        </Typography>
+        <Divider />
+        <Grid2 container mt={0.5} mx={0.5} justifyContent={'space-between'} alignItems={'center'}>
+          <Grid2 spacing={1}>
+            <MuiTablePagination arrayList={eqpts ?? []} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
+          </Grid2>
+          <Grid2 container spacing={3}>
+            <Grid2 alignContent={'center'}>
+              <Typography color="error" variant="body2">
+                ※マスタは削除できません。登録画面で無効化してください
+              </Typography>
+            </Grid2>
+            <Grid2>
+              <Button onClick={() => handleOpenDialog(FAKE_NEW_ID)}>
+                <AddIcon fontSize="small" />
+                新規
+              </Button>
+            </Grid2>
+          </Grid2>
+        </Grid2>
+        {isLoading ? (
+          <Loading />
+        ) : !eqpts || eqpts.length === 0 ? (
+          <Typography>該当するデータがありません</Typography>
+        ) : (
+          <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
+            <MasterTableOfEqpt
+              headers={eqptMHeader}
+              datas={eqpts.map((l) => ({
+                ...l,
+                id: l.kizaiId,
+                name: l.kizaiNam,
+              }))}
+              page={page}
+              rowsPerPage={rowsPerPage}
+              handleOpenDialog={handleOpenDialog}
+            />
+          </TableContainer>
+        )}
+
+        <Dialog open={dialogOpen} fullScreen>
+          <EqMasterDialog handleClose={handleCloseDialog} eqptId={openId} refetchEqpts={refetchEqpts} />
+        </Dialog>
+      </Box>
     </Container>
   );
 };

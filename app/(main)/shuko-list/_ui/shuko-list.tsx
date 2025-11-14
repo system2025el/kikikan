@@ -25,7 +25,7 @@ import { PdfModel, usePdf } from '../shuko/_lib/hooks/usePdf';
 import { ShukoListTable } from './shuko-list-table';
 
 export const ShukoList = (/*props: { shukoData: ShukoTableValues[] }*/) => {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [selected, setSelected] = useState<number[]>([]);
   const [shukoList, setShukoList] = useState<ShukoTableValues[]>(/*props.shukoData*/ []);
 

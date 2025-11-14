@@ -7,6 +7,7 @@ import { useForm, useWatch } from 'react-hook-form';
 import { CheckboxButtonGroup, SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
+import { getCustomerSelection } from '@/app/(main)/(masters)/_lib/funcs';
 
 import { getFilteredBillingSituations } from '../_lib/funcs';
 import { BillingStsSearchValues, BillingStsTableValues } from '../_lib/types';
@@ -17,7 +18,7 @@ import { BillingStsListTable } from './billing-sts-list-table';
  * @param param0
  * @returns {JAX.Element} 受注請求状況一覧画面のコンポーネント
  */
-export const BillingStsList = ({ custs }: { custs: SelectTypes[] }) => {
+export const BillingStsList = () => {
   /* useState --------------------------------------------------------------- */
   /* ローディング */
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -27,6 +28,8 @@ export const BillingStsList = ({ custs }: { custs: SelectTypes[] }) => {
   const [billSts, setBillSts] = useState<BillingStsTableValues[]>([]);
   /* テーブル初期表示 */
   const [isFirst, setIsFirst] = useState<boolean>(true);
+  /** */
+  const [custs, setCusts] = useState<SelectTypes[]>([]);
 
   /* useForm --------------------------------------------------------------- */
   const { control, reset, handleSubmit, getValues } = useForm<BillingStsSearchValues>({
@@ -64,17 +67,15 @@ export const BillingStsList = ({ custs }: { custs: SelectTypes[] }) => {
     const searchPramsString = sessionStorage.getItem('billingStsSearchParams');
     const searchParams = searchPramsString ? JSON.parse(searchPramsString) : null;
 
-    const get = async () => {
+    const getList = async () => {
       // メモリ上に検索条件があるか確認
       sessionStorage.removeItem('billingStsSearchParams');
       // 読み込み中
       setIsLoading(true);
       // 初期表示ではない
       setIsFirst(false);
-      // ページ初期化
-      setPage(1);
-      // 検索条件表示と検索
-      reset(searchParams);
+
+      // 検索
       const q = await getFilteredBillingSituations(searchParams);
       if (q) {
         setBillSts(q);
@@ -82,10 +83,21 @@ export const BillingStsList = ({ custs }: { custs: SelectTypes[] }) => {
       setIsLoading(false);
     };
 
+    const getOptions = async () => {
+      // 選択肢取得
+      const [clist] = await Promise.all([getCustomerSelection()]);
+      setCusts(clist);
+    };
+
+    // 選択肢取得
+    getOptions();
+
     // メモリ上に検索条件があれば実行
     if (searchParams) {
-      get();
+      reset(searchParams);
+      getList();
     }
+
     setIsLoading(false);
   }, []);
   /* eslint-enable react-hooks/exhaustive-deps */

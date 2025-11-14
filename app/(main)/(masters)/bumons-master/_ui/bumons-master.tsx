@@ -1,50 +1,65 @@
 'use client';
+import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
-import { Box, Button, Container, Divider, MenuItem, Paper, Select, Stack, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  Container,
+  Dialog,
+  Divider,
+  Grid2,
+  MenuItem,
+  Paper,
+  Select,
+  Stack,
+  TableContainer,
+  Typography,
+} from '@mui/material';
 import { grey } from '@mui/material/colors';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Controller, TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { selectNone, SelectTypes } from '@/app/(main)/_ui/form-box';
+import { Loading } from '@/app/(main)/_ui/loading';
+import { MuiTablePagination } from '@/app/(main)/_ui/table-pagination';
 
-import { BackButton } from '../../../_ui/buttons';
-import { FAKE_NEW_ID } from '../../_lib/constants';
+import { FAKE_NEW_ID, ROWS_PER_MASTER_TABLE_PAGE } from '../../_lib/constants';
+import { MasterTable } from '../../_ui/tables';
+import { BumonsMHeader } from '../_lib/datas';
 import { getFilteredBumons } from '../_lib/funcs';
 import { BumonsMasterTableValues } from '../_lib/types';
-import { BumonsMasterTable } from './bumons-master-table';
+import { BumonsMasterDialog } from './bumons-master-dialog';
 
 /**
  * 部門マスタ画面
  * @param {bumons} 部門リスト
  * @returns {JSX.Element} 部門マスタコンポーネント
  */
-export const BumonsMaster = ({
-  bumons,
-  options,
-}: {
-  bumons: BumonsMasterTableValues[] | undefined;
-  options:
-    | {
-        d: SelectTypes[];
-        s: SelectTypes[];
-      }
-    | undefined;
-}) => {
-  /* useState ------------------ */
+export const BumonsMaster = () => {
+  /** 1ページごとの表示数 */
+  const rowsPerPage = ROWS_PER_MASTER_TABLE_PAGE;
+
+  /* useState -------------------------------------- */
   /** 表示する部門の配列 */
-  const [theBumons, setTheBumons] = useState(bumons);
+  const [bumons, setBumons] = useState<BumonsMasterTableValues[]>([]);
+  /** 選択肢 */
+  const [options, setOptions] = useState<{ d: SelectTypes[]; s: SelectTypes[] }>({ d: [], s: [] });
   /** 今開いてるテーブルのページ数 */
   const [page, setPage] = useState(1);
   /** ローディング */
   const [isLoading, setIsLoading] = useState(true);
+  /** ダイアログ開く部門のID、閉じるとき、未選択でFAKE_NEW_IDとする */
+  const [openId, setOpenID] = useState<number>(FAKE_NEW_ID);
+  /** 詳細ダイアログの開閉状態 */
+  const [dialogOpen, setDialogOpen] = useState(false);
 
-  /* useForm ------------------- */
+  /* useForm ---------------------------------------- */
   const { control, handleSubmit, getValues } = useForm({
     mode: 'onSubmit',
     defaultValues: { query: '', daibumonQuery: FAKE_NEW_ID, shukeiQuery: FAKE_NEW_ID },
   });
 
-  /* methods -------------------- */
+  /* methods ---------------------------------------- */
   /** 検索ボタン押下 */
   const onSubmit = async (data: { query: string | undefined; daibumonQuery: number; shukeiQuery: number }) => {
     setIsLoading(true);
@@ -55,9 +70,44 @@ export const BumonsMaster = ({
       s: data.shukeiQuery === FAKE_NEW_ID ? null : data.shukeiQuery,
     });
     setPage(1);
-    setTheBumons(newList?.data);
-    console.log('theLocs : ', theBumons);
+    setBumons(newList?.data);
+    setIsLoading(false);
+    console.log('theLocs : ', bumons);
   };
+  /** 選んだ部門ダイアログを開く関数 */
+  const handleOpenDialog = (id: number) => {
+    setOpenID(id);
+    setDialogOpen(true);
+  };
+  /** ダイアログを閉じる関数 */
+  const handleCloseDialog = () => {
+    setDialogOpen(false);
+  };
+  /** 情報が変わったときに更新される */
+  const refetchBumons = async () => {
+    setIsLoading(true);
+    const searchParams = getValues();
+    const updated = await getFilteredBumons({
+      q: searchParams.query!,
+      d: searchParams.daibumonQuery === FAKE_NEW_ID ? null : searchParams.daibumonQuery,
+      s: searchParams.shukeiQuery === FAKE_NEW_ID ? null : searchParams.shukeiQuery,
+    });
+    setBumons(updated?.data);
+    setIsLoading(false);
+  };
+
+  /* useEffect ----------------------------------- */
+  /** 初期表示 */
+  useEffect(() => {
+    const getList = async () => {
+      setIsLoading(true);
+      const dataList = await getFilteredBumons();
+      setBumons(dataList.data);
+      setOptions(dataList.options);
+      setIsLoading(false);
+    };
+    getList();
+  }, []);
 
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
@@ -133,14 +183,48 @@ export const BumonsMaster = ({
           </form>
         </Box>
       </Paper>
-      <BumonsMasterTable
-        bumons={theBumons}
-        page={page}
-        isLoading={isLoading}
-        searchParams={getValues()}
-        setPage={setPage}
-        setIsLoading={setIsLoading}
-      />
+      <Box>
+        <Typography pt={1} pl={2}>
+          一覧
+        </Typography>
+        <Divider />
+        <Grid2 container mt={0.5} mx={0.5} justifyContent={'space-between'} alignItems={'center'}>
+          <Grid2 spacing={1}>
+            <MuiTablePagination arrayList={bumons ?? []} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
+          </Grid2>
+          <Grid2 container spacing={3}>
+            <Grid2 alignContent={'center'}>
+              <Typography color="error" variant="body2">
+                ※マスタは削除できません。登録画面で無効化してください
+              </Typography>
+            </Grid2>
+            <Grid2>
+              <Button onClick={() => handleOpenDialog(FAKE_NEW_ID)}>
+                <AddIcon fontSize="small" />
+                新規
+              </Button>
+            </Grid2>
+          </Grid2>
+        </Grid2>
+        {isLoading ? (
+          <Loading />
+        ) : !bumons || bumons.length === 0 ? (
+          <Typography>該当するデータがありません</Typography>
+        ) : (
+          <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
+            <MasterTable
+              headers={BumonsMHeader}
+              datas={bumons.map((l) => ({ ...l, id: l.bumonId, name: l.bumonNam }))}
+              handleOpenDialog={handleOpenDialog}
+              page={page}
+              rowsPerPage={rowsPerPage}
+            />
+          </TableContainer>
+        )}
+        <Dialog open={dialogOpen} fullScreen>
+          <BumonsMasterDialog handleClose={handleCloseDialog} bumonId={openId} refetchBumons={refetchBumons} />
+        </Dialog>
+      </Box>
     </Container>
   );
 };

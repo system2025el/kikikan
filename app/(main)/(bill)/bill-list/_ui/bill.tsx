@@ -34,7 +34,9 @@ import { validationMessages } from '@/app/(main)/_lib/validation-messages';
 import { FormDateX } from '@/app/(main)/_ui/date';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { LoadingOverlay } from '@/app/(main)/_ui/loading';
+import { getUsersSelection } from '@/app/(main)/quotation-list/_lib/funcs';
 
+import { getBillingStsSelection } from '../_lib/funcs';
 import { usePdf } from '../_lib/hooks/usePdf';
 import { BillHeadSchema, BillHeadValues } from '../_lib/types';
 import { addBill } from '../create/_lib/funcs';
@@ -49,21 +51,15 @@ import { ReadOnlyYenNumberElement } from './yen';
  * @param param0
  * @returns {JSX.Element} 請求書作成画面コンポーネント
  */
-export const Bill = ({
-  isNew,
-  bill,
-  options,
-}: {
-  isNew: boolean;
-  bill: BillHeadValues;
-  options: { users: SelectTypes[]; sts: SelectTypes[] };
-}) => {
+export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) => {
   /* ログイン中のユーザー */
   const user = useUserStore((state) => state.user);
   const router = useRouter();
   /* useState ----------------------------------------------------------------- */
   /* ローディング中かどうか */
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  /** 選択肢 */
+  const [options, setOptions] = useState<{ users: SelectTypes[]; sts: SelectTypes[] }>({ users: [], sts: [] });
   // 請求ヘッダアコーディオン制御
   const [seikyuExpanded, setSeikyuExpanded] = useState(true);
 
@@ -122,27 +118,29 @@ export const Bill = ({
   /* useEffect ------------------------------------------------------------ */
   /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
-    console.log('請求画面開いた', bill, 'isNew?', isNew, user?.name);
-    if (isNew) {
-      // 新規なら入力者をログインアカウントから取得する
-      if (user?.name) {
-        console.log({ ...bill, nyuryokuUser: user.name });
-        reset({ ...bill, nyuryokuUser: user.name });
-      }
-    } else {
-      reset(bill);
-    }
-  }, [user]);
+    const getOptions = async () => {
+      const [users, sts] = await Promise.all([getUsersSelection(), getBillingStsSelection()]);
+      setOptions({ users: users, sts: sts });
+    };
+    getOptions();
+  }, []);
 
   useEffect(() => {
     console.log('請求画面開いた', bill, 'isNew?', isNew, user?.name);
     if (isNew) {
       // 新規なら入力者をログインアカウントから取得する
       if (user?.name) {
+        console.log({ ...bill, nyuryokuUser: user.name });
         reset({ ...bill, nyuryokuUser: user.name });
+        setTimeout(() => {
+          setIsLoading(false);
+        }, 5000); // reset待ち
       }
+    } else {
+      reset(bill);
+      setIsLoading(false);
     }
-  }, [user]);
+  }, [user, isNew, bill]);
   /* eslint-enable react-hooks/exhaustive-deps */
 
   /* print pdf ------------------------------------------------------------ */
