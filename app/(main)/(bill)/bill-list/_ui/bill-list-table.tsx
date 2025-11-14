@@ -1,17 +1,12 @@
-import AddIcon from '@mui/icons-material/Add';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DeleteIcon from '@mui/icons-material/Delete';
 import {
   Box,
   Button,
   Checkbox,
-  Dialog,
-  DialogActions,
-  DialogTitle,
   Divider,
   Grid2,
   Paper,
-  Stack,
   Table,
   TableBody,
   TableCell,
@@ -21,8 +16,8 @@ import {
   Typography,
 } from '@mui/material';
 import { useRouter } from 'next/navigation';
-import { useMemo, useState } from 'react';
-import { CheckboxElement, Controller, SelectElement, TextFieldElement, useForm } from 'react-hook-form-mui';
+import { useMemo } from 'react';
+import { useForm } from 'react-hook-form-mui';
 
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
@@ -38,6 +33,8 @@ export const BillListTable = ({
   page,
   isFirst,
   searchParams,
+  setIsLoading,
+  setIsFirst,
   setPage,
 }: {
   bills: BillsListTableValues[];
@@ -47,6 +44,7 @@ export const BillListTable = ({
   custs: SelectTypes[];
   searchParams: BillSearchValues;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsFirst: React.Dispatch<React.SetStateAction<boolean>>;
   setPage: React.Dispatch<React.SetStateAction<number>>;
 }) => {
   /** テーブル1ページの行数 */
@@ -62,8 +60,6 @@ export const BillListTable = ({
   );
   // テーブル最後のページ用の空データの長さ
   const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - bills.length) : 0;
-
-  /* useState ----------------------------------------------------------- */
 
   /* useForm ------------------------------------------------------------ */
   const { control, handleSubmit, reset } = useForm<{
@@ -110,9 +106,9 @@ export const BillListTable = ({
           </Grid2>
         </Grid2>
       </Grid2>
-      {isLoading ? (
+      {isLoading && !isFirst ? (
         <Loading />
-      ) : isFirst ? (
+      ) : isFirst && (!list || list.length === 0) ? (
         <></>
       ) : !list || list.length === 0 ? (
         <Typography justifySelf={'center'}>該当する請求がありません</Typography>
@@ -154,6 +150,8 @@ export const BillListTable = ({
                       onClick={() => {
                         console.log('テーブルで請求番号', bill.billHeadId, 'をクリック');
                         sessionStorage.setItem('billListSearchParams', JSON.stringify(searchParams));
+                        setIsLoading(true);
+                        setIsFirst(true);
                         router.push(`/bill-list/edit/${bill.billHeadId}`);
                       }}
                     >

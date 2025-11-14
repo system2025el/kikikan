@@ -117,9 +117,9 @@ export const BillingStsListTable = ({
           </Grid2>
         </Grid2>
       </Grid2>
-      {isLoading ? (
+      {isLoading && !isFirst ? (
         <Loading />
-      ) : isFirst ? (
+      ) : isFirst && (!list || list.length === 0) ? (
         <></>
       ) : !list || list.length === 0 ? (
         <Typography justifySelf={'center'}>該当する受注請求状況がありません</Typography>

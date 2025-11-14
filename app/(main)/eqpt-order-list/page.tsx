@@ -26,11 +26,7 @@ const Page = async () => {
   //   getCustomerSelection(),
   //   getLocsSelection(),
   // ]);
-  return (
-    <>
-      <EqptOrderList /*orders={orderList} customers={customers} locs={locs}*/ />
-    </>
-  );
+  return <EqptOrderList /*orders={orderList} customers={customers} locs={locs}*/ />;
 };
 
 export default Page;

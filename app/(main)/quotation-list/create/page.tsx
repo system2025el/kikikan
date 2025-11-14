@@ -7,13 +7,6 @@ import { Quotation } from '../_ui/quotation';
 const Page = async ({ searchParams }: { searchParams: Promise<{ [key: string]: string | undefined }> }) => {
   const searchParam = await searchParams;
   const juchuId = Number(searchParam.juchuId);
-  // 選択肢取得
-  const [users, mituSts, custs] = await Promise.all([
-    getUsersSelection(),
-    getMituStsSelection(),
-    getCustomerSelection(),
-  ]);
-  const options = { users: users, mituSts: mituSts, custs: custs };
 
   let order: JuchuValues | null = null;
 
@@ -67,7 +60,6 @@ const Page = async ({ searchParams }: { searchParams: Promise<{ [key: string]: s
 
   return (
     <Quotation
-      selectOptions={options}
       isNew={true}
       order={
         order ?? {

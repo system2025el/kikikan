@@ -47,6 +47,8 @@ export const QuotationListTable = ({
   isFirst,
   searchParams,
   setIsLoading,
+  setQuotList,
+  setIsFirst,
   setPage,
 }: {
   quots: QuotTableValues[];
@@ -55,7 +57,9 @@ export const QuotationListTable = ({
   queries: QuotSearchValues;
   isFirst: boolean;
   searchParams: QuotSearchValues;
+  setQuotList: React.Dispatch<React.SetStateAction<QuotTableValues[]>>;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsFirst: React.Dispatch<React.SetStateAction<boolean>>;
   setPage: React.Dispatch<React.SetStateAction<number>>;
 }) => {
   /** テーブル1ページの行数 */
@@ -66,8 +70,6 @@ export const QuotationListTable = ({
   const inputRef = useRef<HTMLInputElement>(null);
 
   /* useState ------------------------------------- */
-  /** 表示する見積リスト */
-  const [theQuots, setTheQuots] = useState<QuotTableValues[]>(quots);
   /** ダイアログの開閉 */
   const [dialogOpen, setDialogOpen] = useState(false);
   /** ダイアログの開閉 */
@@ -82,11 +84,11 @@ export const QuotationListTable = ({
   /** 表示するデータ */
   const list = useMemo(() => {
     return rowsPerPage > 0
-      ? theQuots.map((l, index) => ({ ...l, ordNum: index + 1 })).slice((page - 1) * rowsPerPage, page * rowsPerPage)
-      : theQuots.map((l, index) => ({ ...l, ordNum: index + 1 }));
-  }, [page, rowsPerPage, theQuots]);
+      ? quots.map((l, index) => ({ ...l, ordNum: index + 1 })).slice((page - 1) * rowsPerPage, page * rowsPerPage)
+      : quots.map((l, index) => ({ ...l, ordNum: index + 1 }));
+  }, [page, rowsPerPage, quots]);
   /** テーブル最後のページ用の空データの長さ */
-  const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - theQuots.length) : 0;
+  const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - quots.length) : 0;
 
   /* methods -------------------------------------------- */
   /** 削除ボタン押下時処理 */
@@ -99,7 +101,7 @@ export const QuotationListTable = ({
     setIsLoading(true);
     const q = await getFilteredQuotList(queries);
     console.log(q);
-    setTheQuots(q);
+    setQuotList(q);
   };
 
   /** チェックボックス押下（選択時）の処理 */
@@ -121,8 +123,8 @@ export const QuotationListTable = ({
 
   /** 全選択チャックボックス押下時の処理 */
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.checked && theQuots) {
-      const newSelected = theQuots.map((r) => r.mituHeadId);
+    if (event.target.checked && quots) {
+      const newSelected = quots.map((r) => r.mituHeadId);
       setSelectedIds(newSelected);
       return;
     }
@@ -140,15 +142,6 @@ export const QuotationListTable = ({
     }
   }, [dialogOpen]);
 
-  useEffect(() => {
-    setTheQuots(quots);
-    setIsLoading(false);
-  }, [quots, setIsLoading]);
-
-  useEffect(() => {
-    setIsLoading(false);
-  }, [theQuots, setIsLoading]);
-
   return (
     <>
       <Box>
@@ -158,7 +151,7 @@ export const QuotationListTable = ({
         <Divider />
         <Grid2 container mt={1} mx={0.5} justifyContent={'space-between'}>
           <Grid2 spacing={1}>
-            <MuiTablePagination arrayList={theQuots} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
+            <MuiTablePagination arrayList={quots} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
           </Grid2>
           <Grid2 container spacing={1}>
             <Grid2 container spacing={1}>
@@ -191,9 +184,9 @@ export const QuotationListTable = ({
             </Grid2>
           </Grid2>
         </Grid2>
-        {isLoading ? (
+        {isLoading && !isFirst ? (
           <Loading />
-        ) : isFirst ? (
+        ) : isFirst && (!list || list.length === 0) ? (
           <></>
         ) : !list || list.length === 0 ? (
           <Typography justifySelf={'center'}>該当する見積がありません</Typography>
@@ -206,8 +199,8 @@ export const QuotationListTable = ({
                     <Checkbox
                       color="primary"
                       onChange={handleSelectAllClick}
-                      indeterminate={selectedIds.length > 0 && selectedIds.length < theQuots.length}
-                      checked={theQuots.length > 0 && selectedIds.length === theQuots.length}
+                      indeterminate={selectedIds.length > 0 && selectedIds.length < quots.length}
+                      checked={quots.length > 0 && selectedIds.length === quots.length}
                       sx={{
                         '& .MuiSvgIcon-root': {
                           backgroundColor: '#fff',
@@ -273,6 +266,8 @@ export const QuotationListTable = ({
                           onClick={() => {
                             console.log('テーブルで見積番号', quotation.mituHeadId, 'をクリック');
                             sessionStorage.setItem('quotListSearchParams', JSON.stringify(searchParams));
+                            setIsLoading(true);
+                            setIsFirst(true);
                             router.push(`/quotation-list/edit/${quotation.mituHeadId}`);
                           }}
                         >

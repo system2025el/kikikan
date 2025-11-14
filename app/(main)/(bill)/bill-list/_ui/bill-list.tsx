@@ -9,18 +9,23 @@ import { CheckboxButtonGroup, TextFieldElement } from 'react-hook-form-mui';
 import { BackButton } from '@/app/(main)/_ui/buttons';
 import { FormDateX } from '@/app/(main)/_ui/date';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
+import { LoadingOverlay } from '@/app/(main)/_ui/loading';
 import { getCustomerSelection } from '@/app/(main)/(masters)/_lib/funcs';
 
 import { getBillingStsSelection, getFilteredBills } from '../_lib/funcs';
 import { BillSearchValues, BillsListTableValues } from '../_lib/types';
 import { BillListTable } from './bill-list-table';
 
+/**
+ * 請求一画面の検索部のUI
+ * @returns {JSX.Element} 請求一覧コンポーネント
+ */
 export const BillList = () => {
   /* useState ---------------------------------------------------- */
   /* 初期表示用 */
   const [isFirst, setIsFirst] = useState<boolean>(true);
   /* ローディング状態 */
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   /* ページ  */
   const [page, setPage] = useState<number>(1);
   /** 選択肢一覧 */
@@ -36,7 +41,15 @@ export const BillList = () => {
   /** 検索ボタン押下 */
   const onSubmit = async (data: BillSearchValues) => {
     console.log('検索ーーーーーーーーーーーーーーーー', data);
+    setIsLoading(true);
     setIsFirst(false);
+    setPage(1);
+    const q = await getFilteredBills(data);
+    if (q) {
+      setBills(q);
+      setIsLoading(false);
+    }
+    setIsLoading(false);
   };
 
   /** useEffect ------------------------------------------------------------- */
@@ -77,13 +90,13 @@ export const BillList = () => {
       // 実行
       getList();
     }
-
     setIsLoading(false);
   }, []);
   /* eslint-enable react-hooks/exhaustive-deps */
 
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
+      {isFirst && isLoading && <LoadingOverlay />}
       <Paper variant="outlined">
         <Box width={'100%'} display={'flex'} p={2}>
           <Typography noWrap>請求検索</Typography>
@@ -171,6 +184,7 @@ export const BillList = () => {
         custs={options.custs}
         searchParams={getValues()}
         setIsLoading={setIsLoading}
+        setIsFirst={setIsFirst}
         setPage={setPage}
       />
     </Container>
