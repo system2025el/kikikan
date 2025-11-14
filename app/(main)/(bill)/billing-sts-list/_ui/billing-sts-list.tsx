@@ -7,6 +7,7 @@ import { useForm, useWatch } from 'react-hook-form';
 import { CheckboxButtonGroup, SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
+import { LoadingOverlay } from '@/app/(main)/_ui/loading';
 import { getCustomerSelection } from '@/app/(main)/(masters)/_lib/funcs';
 
 import { getFilteredBillingSituations } from '../_lib/funcs';
@@ -21,7 +22,7 @@ import { BillingStsListTable } from './billing-sts-list-table';
 export const BillingStsList = () => {
   /* useState --------------------------------------------------------------- */
   /* ローディング */
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   /* ページ */
   const [page, setPage] = useState<number>(1);
   /* 受注請求状況一覧 */
@@ -104,6 +105,7 @@ export const BillingStsList = () => {
 
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
+      {isFirst && isLoading && <LoadingOverlay />}
       <Paper variant="outlined">
         <Box width={'100%'} display={'flex'} p={2}>
           <Typography noWrap>受注請求状況検索</Typography>

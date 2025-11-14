@@ -12,12 +12,6 @@ const Page = async ({ searchParams }: { searchParams: Promise<{ [key: string]: s
   const searchParam = await searchParams;
   console.log(searchParam);
 
-  // 選択肢取得
-  const [users, mituSts, custs] = await Promise.all([
-    getUsersSelection(),
-    getMituStsSelection(),
-    getCustomerSelection(),
-  ]);
   const data = await getChosenQuot(Number(searchParam.mituId));
   const quot: QuotHeadValues = {
     ...data.m,
@@ -47,18 +41,7 @@ const Page = async ({ searchParams }: { searchParams: Promise<{ [key: string]: s
     nebikiAmt: null,
     zeiKbn: null,
   };
-  return (
-    <Quotation
-      selectOptions={{
-        users: users,
-        mituSts: mituSts,
-        custs: custs,
-      }}
-      order={order}
-      isNew={true}
-      quot={quot}
-    />
-  );
+  return <Quotation order={order} isNew={true} quot={quot} />;
 };
 
 export default Page;

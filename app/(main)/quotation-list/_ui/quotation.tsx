@@ -34,6 +34,8 @@ import { FormDateX } from '@/app/(main)/_ui/date';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { LoadingOverlay } from '@/app/(main)/_ui/loading';
 
+import { getCustomerSelection } from '../../(masters)/_lib/funcs';
+import { getMituStsSelection,getUsersSelection } from '../_lib/funcs';
 import { usePdf } from '../_lib/hooks/usePdf';
 import { JuchuValues, QuotHeadSchema, QuotHeadValues } from '../_lib/types';
 import { addQuot } from '../create/_lib/funcs';
@@ -47,17 +49,7 @@ import { ReadOnlyYenNumberElement } from './yen';
  * 見積書作成画面
  * @returns {JSX.Element} 見積書作成ページ
  */
-export const Quotation = ({
-  selectOptions,
-  order,
-  isNew,
-  quot,
-}: {
-  selectOptions: { users: SelectTypes[]; mituSts: SelectTypes[]; custs: SelectTypes[] };
-  order: JuchuValues;
-  isNew: boolean;
-  quot: QuotHeadValues;
-}) => {
+export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: boolean; quot: QuotHeadValues }) => {
   /** ログイン中のユーザー */
   const user = useUserStore((state) => state.user);
   /** ページのルーター */
@@ -69,7 +61,12 @@ export const Quotation = ({
   const [juchuExpanded, setJuchuExpanded] = useState(false);
   /** 見積ヘッダアコーディオン制御 */
   const [mitsuExpanded, setMitsuExpanded] = useState(true);
-
+  /** 選択肢 */
+  const [options, setOptions] = useState<{ users: SelectTypes[]; mituSts: SelectTypes[]; custs: SelectTypes[] }>({
+    users: [],
+    mituSts: [],
+    custs: [],
+  });
   /** テーブル追加ダイアログ開閉 */
   const [kizaiMeisaiaddDialogOpen, setKizaimeisaiaddDialogOpen] = useState(false);
   /** テーブル自動生成ダイアログ開閉 */
@@ -168,6 +165,19 @@ export const Quotation = ({
 
   const zei = useMemo(() => Math.round((sum * (zeiRat ?? 0)) / 100), [sum, zeiRat]);
   /* useEffect ------------------------------------------------------------ */
+  useEffect(() => {
+    const getOptions = async () => {
+      // 選択肢取得
+      const [users, mituSts, custs] = await Promise.all([
+        getUsersSelection(),
+        getMituStsSelection(),
+        getCustomerSelection(),
+      ]);
+      setOptions({ users: users, mituSts: mituSts, custs: custs });
+    };
+    getOptions();
+  }, []);
+
   /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     if (isNew) {
@@ -389,12 +399,7 @@ export const Quotation = ({
                     </Grid2>
                     <Grid2 display="flex" direction="row" alignItems="center">
                       <Typography marginRight={3}>見積ステータス</Typography>
-                      <SelectElement
-                        name="mituSts"
-                        control={control}
-                        sx={{ width: 180 }}
-                        options={selectOptions.mituSts}
-                      />
+                      <SelectElement name="mituSts" control={control} sx={{ width: 180 }} options={options.mituSts} />
                     </Grid2>
                   </Grid2>
                   <Box sx={styles.container}>
@@ -425,9 +430,9 @@ export const Quotation = ({
                       render={({ field }) => (
                         <Autocomplete
                           {...field}
-                          options={selectOptions.users}
+                          options={options.users}
                           getOptionLabel={(option) => option.label}
-                          value={selectOptions.users.find((opt: SelectTypes) => opt.label === field.value) || null}
+                          value={options.users.find((opt: SelectTypes) => opt.label === field.value) || null}
                           onChange={(_, value) => field.onChange(value?.label ?? '')}
                           renderInput={(params) => <TextField {...params} />}
                           sx={{ width: 242.5 }}
@@ -451,7 +456,7 @@ export const Quotation = ({
                           autoSelect
                           sx={{ width: 300 }}
                           renderInput={(params) => <TextField {...params} />}
-                          options={selectOptions.custs}
+                          options={options.custs}
                           getOptionLabel={(option) => (typeof option === 'string' ? option : option.label)}
                         />
                       )}

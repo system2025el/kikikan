@@ -35,14 +35,7 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
     nebikiAmt: null,
     zeiKbn: null,
   };
-  // 選択肢取得
-  const [users, mituSts, custs] = await Promise.all([
-    getUsersSelection(),
-    getMituStsSelection(),
-    getCustomerSelection(),
-  ]);
-  const options = { users: users, mituSts: mituSts, custs: custs };
-  return <Quotation selectOptions={options} order={order} isNew={false} quot={quot} />;
+  return <Quotation order={order} isNew={false} quot={quot} />;
 };
 
 export default Page;

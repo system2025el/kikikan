@@ -2,10 +2,11 @@
 
 import { Button, DialogActions, DialogTitle, Stack, Typography } from '@mui/material';
 import { useRouter } from 'next/navigation';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { CloseMasterDialogButton } from '../../_ui/buttons';
+import { LoadingOverlay } from '../../_ui/loading';
 import { QuotSearchValues } from '../_lib/types';
 
 /**
@@ -23,12 +24,15 @@ export const CreateQuotDialog = ({
   setDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
   const router = useRouter();
+  /** ローディング */
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   /* methods ------------------------------------- */
   /** 自動生成ボタン押下 */
   const onSubmit = (data: { juchuHeadId: number | null }) => {
     console.log(data.juchuHeadId, 'の見積もりを自動生成');
     sessionStorage.setItem('quotListSearchParams', JSON.stringify(searchParams));
+    setIsLoading(true);
     router.push(`/quotation-list/create?juchuId=${data.juchuHeadId}`);
   };
 
@@ -41,6 +45,7 @@ export const CreateQuotDialog = ({
 
   return (
     <>
+      {isLoading && <LoadingOverlay />}
       <DialogTitle display={'flex'} justifyContent={'space-between'}>
         受注番号から自動生成
         <CloseMasterDialogButton handleCloseDialog={() => setDialogOpen(false)} />

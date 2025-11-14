@@ -19,29 +19,29 @@ import { Controller, TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { FormDateX } from '../../_ui/date';
 import { selectNone, SelectTypes } from '../../_ui/form-box';
+import { LoadingOverlay } from '../../_ui/loading';
 import { FAKE_NEW_ID } from '../../(masters)/_lib/constants';
-import { getFilteredQuotList } from '../_lib/funcs';
+import { getCustomerSelection } from '../../(masters)/_lib/funcs';
+import { getFilteredQuotList, getMituStsSelection, getUsersSelection } from '../_lib/funcs';
 import { QuotSearchValues, QuotTableValues } from '../_lib/types';
 import { QuotationListTable } from './quotation-list-table';
 
-export const QuotationList = ({
-  options,
-}: {
-  options: {
-    sts: SelectTypes[];
-    custs: SelectTypes[];
-    nyuryokuUser: SelectTypes[];
-  };
-}) => {
+export const QuotationList = () => {
   /* useState -------------------------------------------- */
   /* 受注一覧 */
   const [quotList, setQuotList] = useState<QuotTableValues[]>([]);
   /* テーブルのページ */
   const [page, setPage] = useState<number>(1);
   /* ローディングかどうか */
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   /* テーブル初期表示 */
   const [isFirst, setIsFirst] = useState<boolean>(true);
+  /* 選択肢 */
+  const [options, setOptions] = useState<{ sts: SelectTypes[]; custs: SelectTypes[]; nyuryokuUser: SelectTypes[] }>({
+    sts: [],
+    custs: [],
+    nyuryokuUser: [],
+  });
 
   /* useForm ------------------------------------------- */
   const { control, reset, handleSubmit, getValues } = useForm<QuotSearchValues>({
@@ -79,17 +79,15 @@ export const QuotationList = ({
     const searchPramsString = sessionStorage.getItem('quotListSearchParams');
     const searchParams = searchPramsString ? JSON.parse(searchPramsString) : null;
 
-    const get = async () => {
+    const getList = async () => {
       // メモリ開放
       sessionStorage.removeItem('quotListSearchParams');
       // 読み込み中
       setIsLoading(true);
       // 初期表示ではない
       setIsFirst(false);
-      // ページ初期化
-      setPage(1);
-      // 検索条件表示と検索
-      reset(searchParams);
+
+      // 検索
       const q = await getFilteredQuotList(searchParams);
       if (q) {
         setQuotList(q);
@@ -97,9 +95,23 @@ export const QuotationList = ({
       setIsLoading(false);
     };
 
+    const getOptions = async () => {
+      // 選択肢取得
+      const [sts, custs, nyuryokuUser] = await Promise.all([
+        getMituStsSelection(),
+        getCustomerSelection(),
+        getUsersSelection(),
+      ]);
+      setOptions({ sts: sts, custs: custs, nyuryokuUser: nyuryokuUser });
+    };
+
+    // 選択肢取得
+    getOptions();
+
     // メモリ上に検索条件があれば実行
     if (searchParams) {
-      get();
+      reset(searchParams);
+      getList();
     }
     setIsLoading(false);
   }, []);
@@ -107,6 +119,7 @@ export const QuotationList = ({
 
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
+      {isFirst && isLoading && <LoadingOverlay />}
       <Paper variant="outlined">
         <Box width={'100%'} display={'flex'} p={2}>
           <Typography noWrap>見積検索</Typography>
@@ -282,7 +295,9 @@ export const QuotationList = ({
         page={page}
         queries={getValues()}
         searchParams={getValues()}
+        setQuotList={setQuotList}
         setIsLoading={setIsLoading}
+        setIsFirst={setIsFirst}
         setPage={setPage}
       />
     </Container>

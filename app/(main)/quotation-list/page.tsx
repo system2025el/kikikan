@@ -3,12 +3,7 @@ import { getFilteredQuotList, getMituStsSelection, getUsersSelection } from './_
 import { QuotationList } from './_ui/quotation-list';
 
 const Page = async () => {
-  const [sts, custs, nyuryokuUser] = await Promise.all([
-    getMituStsSelection(),
-    getCustomerSelection(),
-    getUsersSelection(),
-  ]);
-  return <QuotationList options={{ sts: sts, custs: custs, nyuryokuUser: nyuryokuUser }} />;
+  return <QuotationList />;
 };
 
 export default Page;
