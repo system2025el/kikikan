@@ -40,7 +40,7 @@ export const ShukoDetailTable = (props: { datas: ShukoDetailTableValues[] }) => 
               sx={{
                 whiteSpace: 'nowrap',
                 backgroundColor:
-                  row.diff === 0 && row.ctnFlg !== 1
+                  row.diff === 0 && row.ctnFlg !== 1 && row.planQty !== 0
                     ? 'rgba(158, 158, 158, 1)'
                     : row.ctnFlg === 1
                       ? 'rgba(68, 138, 255, 1)'
@@ -69,7 +69,9 @@ export const ShukoDetailTable = (props: { datas: ShukoDetailTableValues[] }) => 
                         ? 'rgba(255, 171, 64, 1)'
                         : row.diff === 0 && row.ctnFlg === 1
                           ? 'rgba(68, 138, 255, 1)'
-                          : 'rgba(158, 158, 158, 1)',
+                          : row.planQty !== 0
+                            ? 'rgba(158, 158, 158, 1)'
+                            : undefined,
                 }}
               >
                 {row.diff}
