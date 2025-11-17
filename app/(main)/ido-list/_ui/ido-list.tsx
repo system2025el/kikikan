@@ -2,7 +2,7 @@
 
 import SearchIcon from '@mui/icons-material/Search';
 import { Box, Button, Dialog, Divider, Grid2, Paper, Typography } from '@mui/material';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
 import { toJapanYMDString } from '../../_lib/date-conversion';
@@ -12,10 +12,10 @@ import { getIdoList } from '../_lib/funcs';
 import { IdoTableValues } from '../_lib/types';
 import { IdoListTable } from './ido-list-table';
 
-export const IdoList = (props: { idoData: IdoTableValues[] }) => {
-  const [isLoading, setIsLoading] = useState(false);
+export const IdoList = () => {
+  const [isLoading, setIsLoading] = useState(true);
 
-  const [idoList, setIdoList] = useState<IdoTableValues[]>(props.idoData);
+  const [idoList, setIdoList] = useState<IdoTableValues[]>([]);
 
   /* useForm ------------------- */
   const { control, handleSubmit } = useForm({
@@ -37,6 +37,22 @@ export const IdoList = (props: { idoData: IdoTableValues[] }) => {
     }
     setIsLoading(false);
   };
+
+  /* useEffect ----------------------------------- */
+  /** 初期表示 */
+  useEffect(() => {
+    const getList = async () => {
+      setIsLoading(true);
+      const date = toJapanYMDString(undefined, '-');
+      const idoData = await getIdoList(date);
+      if (!idoData) {
+        return <div>エラー</div>;
+      }
+      setIdoList(idoData);
+      setIsLoading(false);
+    };
+    getList();
+  }, []);
 
   return (
     <Box>
@@ -71,10 +87,12 @@ export const IdoList = (props: { idoData: IdoTableValues[] }) => {
         <Divider />
         {isLoading ? (
           <Loading />
-        ) : (
+        ) : idoList.length > 0 ? (
           <Box width={'100%'} mt={4}>
             <IdoListTable datas={idoList} />
           </Box>
+        ) : (
+          <div>エラー</div>
         )}
       </Paper>
     </Box>

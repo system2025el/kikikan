@@ -23,13 +23,17 @@ import { Controller, useForm } from 'react-hook-form';
 
 import { Calendar } from '../../_ui/date';
 import { Loading } from '../../_ui/loading';
-import { getEqData, getEqStockData } from '../_lib/funcs';
+import { FAKE_NEW_ID } from '../../(masters)/_lib/constants';
+import { getBumonsData, getEqData, getEqStockData } from '../_lib/funcs';
 import { Bumon, EqTableValues, StockTableValues } from '../_lib/types';
 import { EqStockTable, EqTable } from './stock-table';
 
-export const Stock = (props: { bumons: Bumon[] }) => {
+export const Stock = () => {
   // ローディング
   const [isLoading, setIsLoading] = useState(false);
+
+  // 部門リスト
+  const [bumons, setBumons] = useState<Bumon[]>([]);
 
   // 機材リスト
   const [eqList, setEqList] = useState<EqTableValues[]>([]);
@@ -49,9 +53,9 @@ export const Stock = (props: { bumons: Bumon[] }) => {
   const isSyncing = useRef(false);
 
   /* 検索useForm-------------------------- */
-  const { control, handleSubmit } = useForm({
+  const { control, handleSubmit, reset } = useForm<{ bumonId: number }>({
     mode: 'onSubmit',
-    defaultValues: { bumonId: props.bumons[0].bumonId },
+    defaultValues: { bumonId: FAKE_NEW_ID },
   });
 
   useEffect(() => {
@@ -103,6 +107,7 @@ export const Stock = (props: { bumons: Bumon[] }) => {
    * @param data フォームデータ(部門id)
    */
   const onSubmit = async (data: { bumonId: number }) => {
+    if (!data.bumonId) return;
     setIsLoading(true);
     console.log(data.bumonId);
     const newEqList = await getEqData(data.bumonId);
@@ -164,6 +169,21 @@ export const Stock = (props: { bumons: Bumon[] }) => {
     setAnchorEl(null);
   };
 
+  /* useEffect ----------------------------------- */
+  /* eslint-disable react-hooks/exhaustive-deps */
+  /** 初期表示 */
+  useEffect(() => {
+    const getList = async () => {
+      setIsLoading(true);
+      const bumonList = await getBumonsData();
+      setBumons(bumonList);
+      reset({ bumonId: bumonList[0].bumonId });
+      setIsLoading(false);
+    };
+    getList();
+  }, []);
+  /* eslint-enable react-hooks/exhaustive-deps */
+
   return (
     <Paper>
       <Box display="flex" justifyContent="space-between" alignItems="center">
@@ -178,12 +198,13 @@ export const Stock = (props: { bumons: Bumon[] }) => {
               name="bumonId"
               control={control}
               render={({ field }) => (
-                <Select {...field} defaultValue={props.bumons[0].bumonId} sx={{ minWidth: 250 }}>
-                  {props.bumons.map((d) => (
-                    <MenuItem key={d.bumonId} value={d.bumonId}>
-                      {d.bumonNam}
-                    </MenuItem>
-                  ))}
+                <Select {...field} sx={{ minWidth: 250 }}>
+                  {bumons.length > 0 &&
+                    bumons.map((d: Bumon) => (
+                      <MenuItem key={d.bumonId} value={d.bumonId}>
+                        {d.bumonNam}
+                      </MenuItem>
+                    ))}
                 </Select>
               )}
             />
