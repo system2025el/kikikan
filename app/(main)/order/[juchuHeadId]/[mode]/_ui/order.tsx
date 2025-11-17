@@ -128,7 +128,7 @@ export const Order = (props: {
       kokyaku: props.juchuHeadData.kokyaku,
       kokyakuTantoNam: props.juchuHeadData.kokyakuTantoNam,
       mem: props.juchuHeadData.mem,
-      nebikiAmt: props.juchuHeadData.nebikiAmt,
+      // nebikiAmt: props.juchuHeadData.nebikiAmt,
       zeiKbn: props.juchuHeadData.zeiKbn,
     },
     resolver: zodResolver(OrderSchema),
