@@ -160,13 +160,11 @@ export const RfidMasterDialog = ({
   };
 
   /* useEffect --------------------------------------- */
-  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     console.log('★★★★★★★★★★★★★★★★★★★★★');
     const getThatOneRfid = async () => {
       const [shozoku, sts] = await Promise.all([getShozokuSelection(), getRfidKizaiStsSelection()]);
       setSelectOptions({ shozoku: shozoku, sts: sts });
-      console.log('pppppppppppppppppppppppppppppp', selectOptions);
       if (rfidId === String(FAKE_NEW_ID)) {
         // 新規追加モード
         reset(emptyRfid); // フォーム初期化
@@ -184,8 +182,7 @@ export const RfidMasterDialog = ({
       }
     };
     getThatOneRfid();
-  }, [rfidId]);
-  /* eslint-enable react-hooks/exhaustive-deps */
+  }, [rfidId, reset]);
 
   return (
     <>

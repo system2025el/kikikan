@@ -125,7 +125,6 @@ export const LocationsMasterDialog = ({
   };
 
   /* useEffect --------------------------------------- */
-  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     console.log('★★★★★★★★★★★★★★★★★★★★★');
     const getThatOneloc = async () => {
@@ -144,8 +143,7 @@ export const LocationsMasterDialog = ({
       }
     };
     getThatOneloc();
-  }, [locationId]);
-  /* eslint-enable react-hooks/exhaustive-deps */
+  }, [locationId, reset]);
 
   return (
     <>

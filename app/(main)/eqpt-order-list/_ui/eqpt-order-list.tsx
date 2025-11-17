@@ -76,7 +76,6 @@ export const EqptOrderList = () => {
   };
 
   /* useEffect --------------------------------------- */
-  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     setIsLoading(true);
     // メモリ上に検索条件があるか確認
@@ -122,8 +121,7 @@ export const EqptOrderList = () => {
     if (searchParams) {
       get();
     }
-  }, []);
-  /* eslint-enable react-hooks/exhaustive-deps */
+  }, [reset]);
 
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>

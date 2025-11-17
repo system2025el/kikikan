@@ -116,7 +116,6 @@ export const VehiclesMasterDialog = ({
   };
 
   /* useEffect --------------------------------------- */
-  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     console.log('★★★★★★★★★★★★★★★★★★★★★');
     const getThatOneVeh = async () => {
@@ -135,8 +134,7 @@ export const VehiclesMasterDialog = ({
       }
     };
     getThatOneVeh();
-  }, [vehicleId]);
-  /* eslint-enable react-hooks/exhaustive-deps */
+  }, [vehicleId, reset]);
 
   return (
     <>

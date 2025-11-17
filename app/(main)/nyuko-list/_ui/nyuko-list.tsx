@@ -39,11 +39,9 @@ export const NyukoList = (/*props: { shukoData: NyukoTableValues[] }*/) => {
   };
 
   /* useEffect --------------------------------- */
-  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     onSubmit(getValues());
-  }, []);
-  /* eslint-enable react-hooks/exhaustive-deps */
+  }, [getValues]);
 
   return (
     <Box>

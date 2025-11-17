@@ -129,7 +129,6 @@ export const BumonsMasterDialog = ({
   };
 
   /* useEffect --------------------------------------- */
-  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     console.log('★★★★★★★★★★★★★★★★★★★★★');
     const getThatOnebumon = async () => {
@@ -150,8 +149,7 @@ export const BumonsMasterDialog = ({
       }
     };
     getThatOnebumon();
-  }, [bumonId]);
-  /* eslint-enable react-hooks/exhaustive-deps */
+  }, [bumonId, reset]);
 
   return (
     <>

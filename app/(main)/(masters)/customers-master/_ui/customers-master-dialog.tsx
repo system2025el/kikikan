@@ -130,7 +130,6 @@ export const CustomersMasterDialog = ({
   };
 
   /* useEffect --------------------------------------- */
-  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     console.log('★★★★★★★★★★★★★★★★★★★★★');
     const getThatOneCustomer = async () => {
@@ -149,8 +148,7 @@ export const CustomersMasterDialog = ({
       }
     };
     getThatOneCustomer();
-  }, [customerId]);
-  /* eslint-enable react-hooks/exhaustive-deps */
+  }, [customerId, reset]);
 
   return (
     <>

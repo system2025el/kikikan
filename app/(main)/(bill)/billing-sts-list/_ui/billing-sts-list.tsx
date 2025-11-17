@@ -63,7 +63,6 @@ export const BillingStsList = () => {
   };
 
   /** useEffect ------------------------------------------------------------- */
-  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     const searchPramsString = sessionStorage.getItem('billingStsSearchParams');
     const searchParams = searchPramsString ? JSON.parse(searchPramsString) : null;
@@ -100,8 +99,7 @@ export const BillingStsList = () => {
     }
 
     setIsLoading(false);
-  }, []);
-  /* eslint-enable react-hooks/exhaustive-deps */
+  }, [reset]);
 
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
