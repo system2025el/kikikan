@@ -55,7 +55,6 @@ export const CreateBillDialog = ({
   };
 
   /* useEffect ----------------------------------------------------------- */
-  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     const getCustInfo = async () => {
       const kokyakuNam = await getChosenCustomerName(kokyakuId);
@@ -68,8 +67,7 @@ export const CreateBillDialog = ({
     };
     getCustInfo();
     setIsLoading(false);
-  }, [kokyakuId]);
-  /* eslint-enable react-hooks/exhaustive-deps */
+  }, [tantouNam, kokyakuId, reset]);
   return (
     <>
       <DialogTitle display={'flex'} justifyContent={'end'}>

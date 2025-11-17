@@ -328,7 +328,6 @@ const BundleDialog = ({
   };
 
   /* useEffect */
-  /* eslint-disable react-hooks/exhaustive-deps */
   /* 画面初期表示 */
   useEffect(() => {
     if (!hasRun.current) {
@@ -366,7 +365,7 @@ const BundleDialog = ({
         selectedEqptListRef.current = [];
       }
     }
-  }, [open]);
+  }, [open, eqptsAll, eqptsWSet]);
 
   /* インデックスが進んだとき */
   useEffect(() => {
@@ -387,9 +386,7 @@ const BundleDialog = ({
       };
       getSet();
     }
-  }, [currentIndex]);
-
-  /* eslint-enable react-hooks/exhaustive-deps */
+  }, [eqptsWSet, currentIndex]);
 
   return (
     <Dialog open={open} onClose={() => handleCloseDialog()}>

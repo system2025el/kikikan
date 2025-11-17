@@ -56,7 +56,7 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
   const router = useRouter();
   /* useState ----------------------------------------------------------------- */
   /** ローディング中かどうか */
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   /** 受注選択アコーディオン制御 */
   const [juchuExpanded, setJuchuExpanded] = useState(false);
   /** 見積ヘッダアコーディオン制御 */
@@ -93,8 +93,6 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
     control,
     handleSubmit,
     reset,
-    getValues,
-
     setValue,
     formState: { errors, isDirty },
   } = quotForm;
@@ -164,7 +162,9 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
   const sum = useMemo(() => chukeiSum - (tokuNebikiAmt ?? 0), [chukeiSum, tokuNebikiAmt]);
 
   const zei = useMemo(() => Math.round((sum * (zeiRat ?? 0)) / 100), [sum, zeiRat]);
+
   /* useEffect ------------------------------------------------------------ */
+  /** 初期表示とログインユーザを取得とセット */
   useEffect(() => {
     const getOptions = async () => {
       // 選択肢取得
@@ -176,20 +176,17 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
       setOptions({ users: users, mituSts: mituSts, custs: custs });
     };
     getOptions();
-  }, []);
 
-  /* eslint-disable react-hooks/exhaustive-deps */
-  useEffect(() => {
     if (isNew) {
       // 新規なら入力者をログインアカウントから取得する
       if (user?.name) {
-        reset({ ...quot, nyuryokuUser: user.name });
+        setValue('nyuryokuUser', user.name);
       }
-    } else {
-      reset(quot);
     }
-  }, [user]);
-  /* eslint-enable react-hooks/exhaustive-deps */
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 5000); // setValue待ち
+  }, [user, isNew, quot, setValue]);
 
   // 機材中計計算
   useEffect(() => {

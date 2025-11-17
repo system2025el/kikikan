@@ -73,7 +73,6 @@ export const QuotationList = () => {
   };
 
   /* useEffect --------------------------------------- */
-  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     // メモリ上に検索条件があるか確認
     const searchPramsString = sessionStorage.getItem('quotListSearchParams');
@@ -114,8 +113,7 @@ export const QuotationList = () => {
       getList();
     }
     setIsLoading(false);
-  }, []);
-  /* eslint-enable react-hooks/exhaustive-deps */
+  }, [reset]);
 
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>

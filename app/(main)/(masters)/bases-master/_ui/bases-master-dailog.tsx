@@ -120,7 +120,6 @@ export const BasesMasterDialog = ({
   };
 
   /* useEffect --------------------------------------- */
-  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     console.log('★★★★★★★★★★★★★★★★★★★★★');
     const getThatOneBase = async () => {
@@ -139,8 +138,8 @@ export const BasesMasterDialog = ({
       }
     };
     getThatOneBase();
-  }, [baseId]);
-  /* eslint-enable react-hooks/exhaustive-deps */
+  }, [baseId, reset]);
+
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit)}>

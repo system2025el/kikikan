@@ -136,13 +136,11 @@ export const EqMasterDialog = ({
   };
 
   /* useEffect --------------------------------------- */
-  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     console.log('★★★★★★★★★★★★★★★★★★★★★');
     const getThatOneEqpt = async () => {
       const a = await getAllSelections();
       setSelectOptions(a);
-      console.log('pppppppppppppppppppppppppppppp', selectOptions);
       if (eqptId === FAKE_NEW_ID) {
         // 新規追加モード
         reset(emptyEqpt); // フォーム初期化
@@ -160,8 +158,7 @@ export const EqMasterDialog = ({
       }
     };
     getThatOneEqpt();
-  }, [eqptId]);
-  /* eslint-enable react-hooks/exhaustive-deps */
+  }, [eqptId, reset]);
 
   return (
     <>

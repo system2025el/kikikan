@@ -122,7 +122,6 @@ export const ShukeibumonsMasterDialog = ({
   };
 
   /* useEffect --------------------------------------- */
-  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     console.log('★★★★★★★★★★★★★★★★★★★★★');
     const getThatOneShukeibumon = async () => {
@@ -141,8 +140,7 @@ export const ShukeibumonsMasterDialog = ({
       }
     };
     getThatOneShukeibumon();
-  }, [shukeibumonId]);
-  /* eslint-enable react-hooks/exhaustive-deps */
+  }, [shukeibumonId, reset]);
 
   return (
     <>

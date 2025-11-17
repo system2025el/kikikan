@@ -212,7 +212,6 @@ export const UsersMasterDialog = ({
   };
 
   /* useEffect --------------------------------------- */
-  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     console.log('★★★★★★★★★★★★★★★★★★★★★');
     const getThatOneUser = async () => {
@@ -232,8 +231,7 @@ export const UsersMasterDialog = ({
       }
     };
     getThatOneUser();
-  }, [currentMailAdr]);
-  /* eslint-enable react-hooks/exhaustive-deps */
+  }, [currentMailAdr, reset]);
 
   return (
     <>

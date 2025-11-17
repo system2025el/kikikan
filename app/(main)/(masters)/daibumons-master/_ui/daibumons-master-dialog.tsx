@@ -118,7 +118,6 @@ export const DaibumonsMasterDialog = ({
   };
 
   /* useEffect --------------------------------------- */
-  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     console.log('★★★★★★★★★★★★★★★★★★★★★');
     const getThatOneDaibumon = async () => {
@@ -138,8 +137,7 @@ export const DaibumonsMasterDialog = ({
       }
     };
     getThatOneDaibumon();
-  }, [daibumonId]);
-  /* eslint-enable react-hooks/exhaustive-deps */
+  }, [daibumonId, reset]);
 
   return (
     <>

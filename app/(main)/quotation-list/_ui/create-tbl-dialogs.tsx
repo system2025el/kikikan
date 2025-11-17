@@ -127,7 +127,6 @@ export const SecondDialogPage = ({
     handleClose();
   };
 
-  /* eslint-disable react-hooks/exhaustive-deps */
   /* useEffect ---------------------------------------------- */
   useEffect(() => {
     if (!hasRun.current) {
@@ -148,8 +147,7 @@ export const SecondDialogPage = ({
       getList();
       console.log(meisaiHeadNamList);
     }
-  }, []);
-  /* eslint-enable react-hooks/exhaustive-deps */
+  }, [handleClose, juchuId, meisaiHeadNamList, setSnackBarMessage, setSnackBarOpen]);
 
   return (
     <>

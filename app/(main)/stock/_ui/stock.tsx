@@ -170,7 +170,6 @@ export const Stock = () => {
   };
 
   /* useEffect ----------------------------------- */
-  /* eslint-disable react-hooks/exhaustive-deps */
   /** 初期表示 */
   useEffect(() => {
     const getList = async () => {
@@ -181,8 +180,7 @@ export const Stock = () => {
       setIsLoading(false);
     };
     getList();
-  }, []);
-  /* eslint-enable react-hooks/exhaustive-deps */
+  }, [reset]);
 
   return (
     <Paper>

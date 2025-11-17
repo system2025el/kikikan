@@ -116,32 +116,26 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
   };
 
   /* useEffect ------------------------------------------------------------ */
-  /* eslint-disable react-hooks/exhaustive-deps */
+  // 初期表示とログインユーザを取得とセット
   useEffect(() => {
+    console.log('請求画面開いた', bill, 'isNew?', isNew, user?.name);
     const getOptions = async () => {
       const [users, sts] = await Promise.all([getUsersSelection(), getBillingStsSelection()]);
       setOptions({ users: users, sts: sts });
     };
     getOptions();
-  }, []);
 
-  useEffect(() => {
-    console.log('請求画面開いた', bill, 'isNew?', isNew, user?.name);
     if (isNew) {
       // 新規なら入力者をログインアカウントから取得する
       if (user?.name) {
         console.log({ ...bill, nyuryokuUser: user.name });
-        reset({ ...bill, nyuryokuUser: user.name });
-        setTimeout(() => {
-          setIsLoading(false);
-        }, 5000); // reset待ち
+        setValue('nyuryokuUser', user.name);
       }
-    } else {
-      reset(bill);
-      setIsLoading(false);
     }
-  }, [user, isNew, bill]);
-  /* eslint-enable react-hooks/exhaustive-deps */
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 5000); // setValue待ち
+  }, [user, isNew, bill, setValue]);
 
   /* print pdf ------------------------------------------------------------ */
 

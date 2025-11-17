@@ -91,11 +91,9 @@ export const ShukoList = (/*props: { shukoData: ShukoTableValues[] }*/) => {
   };
 
   /* useEffect --------------------------------- */
-  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     onSubmit(getValues());
-  }, []);
-  /* eslint-enable react-hooks/exhaustive-deps */
+  }, [getValues]);
 
   return (
     <Box>

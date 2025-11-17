@@ -53,7 +53,6 @@ export const BillList = () => {
   };
 
   /** useEffect ------------------------------------------------------------- */
-  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     // メモリ上に検索条件があるか確認
     const searchPramsString = sessionStorage.getItem('billListSearchParams');
@@ -91,8 +90,7 @@ export const BillList = () => {
       getList();
     }
     setIsLoading(false);
-  }, []);
-  /* eslint-enable react-hooks/exhaustive-deps */
+  }, [getValues, reset]);
 
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
