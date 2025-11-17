@@ -15,11 +15,13 @@ import React from 'react';
 
 import { toJapanTimeString, toJapanYMDString } from '../../_lib/date-conversion';
 import { LightTooltipWithText } from '../../(masters)/_ui/tables';
-import { EqptOrderListTableValues } from '../../eqpt-order-list/_lib/types';
+import { DashboardTableValues } from '../_lib/types';
+
 /**
- * 出庫時間未設定テーブル
+ * 車両未設定テーブル
  */
-export const VehiclesTable = ({ orders }: { orders: EqptOrderListTableValues[] }) => {
+export const VehiclesTable = ({ orders }: { orders: DashboardTableValues[] }) => {
+  console.log('orders(車両)', orders);
   // データがない場合の表示
   if (!orders || orders.length === 0) {
     return (
@@ -29,7 +31,7 @@ export const VehiclesTable = ({ orders }: { orders: EqptOrderListTableValues[] }
     );
   }
   return (
-    <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
+    <TableContainer component={Paper} square sx={{ maxHeight: '230px', mt: 0.5, overflow: 'auto' }}>
       <Table stickyHeader size="small" padding="none">
         <TableHead>
           <TableRow sx={{ whiteSpace: 'nowrap' }}>
@@ -92,16 +94,16 @@ export const VehiclesTable = ({ orders }: { orders: EqptOrderListTableValues[] }
               </TableCell>
               <TableCell>
                 <LightTooltipWithText variant={'body2'} maxWidth={180}>
-                  {`K ${order.kShukoDat ? toJapanTimeString(order.kShukoDat) : '-'}`}
+                  {`K ${order.kicsShukoDat ? toJapanTimeString(order.kicsShukoDat ?? undefined) : '-'}`}
                   <br />
-                  {`Y ${order.yShukoDat ? toJapanTimeString(order.yShukoDat) : '-'}`}
+                  {`Y ${order.yardShukoDat ? toJapanTimeString(order.yardShukoDat) : '-'}`}
                 </LightTooltipWithText>
               </TableCell>
               <TableCell>
                 <LightTooltipWithText variant={'body2'} maxWidth={180}>
-                  {`K ${order.kNyukoDat ? toJapanTimeString(order.kNyukoDat) : '-'}`}
+                  {`K ${order.kicsNyukoDat ? toJapanTimeString(order.kicsNyukoDat) : '-'}`}
                   <br />
-                  {`Y ${order.yNyukoDat ? toJapanTimeString(order.yNyukoDat) : '-'}`}
+                  {`Y ${order.yardNyukoDat ? toJapanTimeString(order.yardNyukoDat) : '-'}`}
                 </LightTooltipWithText>
               </TableCell>
             </TableRow>

@@ -5,58 +5,54 @@ import { alpha, Box, Button, CircularProgress, Divider, Paper, Stack, Typography
 import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
 
-import { getFilteredOrderList } from '../../eqpt-order-list/_lib/funcs';
-import { EqptOrderListTableValues } from '../../eqpt-order-list/_lib/types';
-import { getFilteredEqpts } from '../../loan-situation/_lib/funcs';
-import { LoanEqTableValues } from '../../loan-situation/_lib/types';
+import { getMinusZaikoList, getShukoList, getVehiclesList } from '../_lib/funcs';
+import { DashboardTableValues, MinusZaikoValues } from '../_lib/types';
 import { EqptTable } from './eqpt-table';
 import { ShukoTable } from './shuko-table';
 import { VehiclesTable } from './vehicles-table ';
 
 export const Dashboard = () => {
-  const theme = useTheme();
-  const selectedBgColor = alpha(theme.palette.primary.main, 0.6);
   const today = dayjs().format('YYYY/MM/DD');
   const nextWeek = dayjs().add(7, 'day').format('YYYY/MM/DD');
-  // ステート管理
+
   const [loading, setLoading] = useState<boolean>(true);
-  const [unsetTimeOrders, setUnsetTimeOrders] = useState<EqptOrderListTableValues[]>([]);
-  const [shortageEqpts, setShortageEqpts] = useState<LoanEqTableValues[]>([]);
+  const [unsetShukoTimeOrders, setUnsetShukoTimeOrders] = useState<DashboardTableValues[]>([]);
+  const [unsetTimeOrders, setUnsetTimeOrders] = useState<DashboardTableValues[]>([]);
+  const [shortageEqpts, setShortageEqpts] = useState<MinusZaikoValues[]>([]);
 
-  // データ取得
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      setLoading(true);
-
-      try {
-        const [ordersData, shortageData] = await Promise.all([
-          // 出庫時間未設定データの取得
-          getFilteredOrderList({
-            radio: 'shuko',
-            range: { from: new Date(), to: new Date() },
-            kokyaku: null,
-            koenbashoNam: '',
-            listSort: { sort: 'shuko', order: 'asc' },
-          }),
-          getFilteredEqpts(),
-        ]);
-
-        // 結果をステートにセット
-        if (ordersData) {
-          setUnsetTimeOrders(ordersData);
-        }
-        if (shortageData) {
-          setShortageEqpts(shortageData as LoanEqTableValues[]);
-        }
-      } catch (error) {
-        console.error('Failed to fetch dashboard data:', error);
-        // エラーハンドリング
-      } finally {
-        setLoading(false);
+  const fetchDashboardData = async () => {
+    setLoading(true);
+    try {
+      const [shukoData, ordersData, shortageData] = await Promise.all([
+        getShukoList(today, 7),
+        getVehiclesList(today, 7),
+        getMinusZaikoList(today, 7),
+      ]);
+      if (shukoData) {
+        setUnsetShukoTimeOrders(shukoData);
       }
-    };
 
+      if (ordersData) {
+        setUnsetTimeOrders(ordersData);
+      }
+
+      if (shortageData) {
+        setShortageEqpts(shortageData as MinusZaikoValues[]);
+      }
+    } catch (error) {
+      console.error('Failed to fetch dashboard data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleReload = () => {
     fetchDashboardData();
+  };
+
+  useEffect(() => {
+    fetchDashboardData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -69,14 +65,16 @@ export const Dashboard = () => {
               {today}～{nextWeek}
             </Typography>
           </Box>
-          <Button startIcon={<UpdateIcon />}>再更新</Button>
+          <Button startIcon={<UpdateIcon />} onClick={handleReload} disabled={loading}>
+            {loading ? '更新中...' : '再表示'}
+          </Button>
         </Box>
         <Divider />
 
         <Stack spacing={3} direction="column" alignItems="flex-start" sx={{ width: '100%', pt: 5 }}>
           <Paper variant="outlined" sx={{ p: 2, width: '100%', maxWidth: '1600px' }}>
             <Typography variant="h6" gutterBottom>
-              出庫時間未設定
+              出庫時刻未設定
             </Typography>
 
             {loading ? (
@@ -84,8 +82,7 @@ export const Dashboard = () => {
                 <CircularProgress size={30} />
               </Box>
             ) : (
-              // 出庫時間未設定テーブル
-              <ShukoTable orders={unsetTimeOrders} />
+              <ShukoTable orders={unsetShukoTimeOrders} />
             )}
           </Paper>
 
@@ -99,14 +96,13 @@ export const Dashboard = () => {
                 <CircularProgress size={30} />
               </Box>
             ) : (
-              // 車両未設定テーブル
               <VehiclesTable orders={unsetTimeOrders} />
             )}
           </Paper>
 
           <Paper variant="outlined" sx={{ p: 2, width: '100%', maxWidth: '700px' }}>
             <Typography variant="h6" gutterBottom>
-              在庫不足状況
+              マイナス在庫
             </Typography>
 
             {loading ? (
@@ -114,7 +110,7 @@ export const Dashboard = () => {
                 <CircularProgress size={30} />
               </Box>
             ) : (
-              // 車両未設定テーブル
+              //  マイナス在庫テーブル
               <EqptTable eqpts={shortageEqpts} />
             )}
           </Paper>

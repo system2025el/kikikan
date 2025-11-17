@@ -13,13 +13,14 @@ import {
 } from '@mui/material';
 import React from 'react';
 
-import { LoanEqTableValues } from '../../loan-situation/_lib/types';
+import { MinusZaikoValues } from '../_lib/types';
 
 /**
  * 機材テーブル
  */
-export const EqptTable = ({ eqpts }: { eqpts: LoanEqTableValues[] }) => {
+export const EqptTable = ({ eqpts }: { eqpts: MinusZaikoValues[] }) => {
   // データがない場合の表示
+  console.log('eqpts', eqpts);
   if (!eqpts || eqpts.length === 0) {
     return (
       <Typography variant="body2" color="textSecondary" sx={{ p: 2, textAlign: 'center' }}>
@@ -29,7 +30,7 @@ export const EqptTable = ({ eqpts }: { eqpts: LoanEqTableValues[] }) => {
   }
 
   return (
-    <TableContainer component={Paper} variant="outlined" sx={{ maxHeight: 300, mt: 1 }}>
+    <TableContainer component={Paper} variant="outlined" sx={{ maxHeight: '230px', mt: 0.5, overflow: 'auto' }}>
       <Table stickyHeader size="small" aria-label="eqpt table">
         <TableHead>
           <TableRow sx={{ whiteSpace: 'nowrap' }}>
