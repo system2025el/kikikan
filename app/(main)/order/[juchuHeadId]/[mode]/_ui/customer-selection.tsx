@@ -133,7 +133,7 @@ export const CustomerSelectionDialog = (props: {
                           handleCustSelect({
                             kokyakuId: customer.kokyakuId,
                             kokyakuNam: customer.kokyakuNam,
-                            kokyakuRank: customer.kokyakuRank,
+                            // kokyakuRank: customer.kokyakuRank,
                           })
                         }
                       >
