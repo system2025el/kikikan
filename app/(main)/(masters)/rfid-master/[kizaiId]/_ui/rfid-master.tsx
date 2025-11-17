@@ -1,55 +1,130 @@
 'use client';
-
+import AddIcon from '@mui/icons-material/Add';
 import SaveAsIcon from '@mui/icons-material/SaveAs';
 import {
   Box,
   Button,
+  Checkbox,
   Container,
+  Dialog,
   Divider,
+  Grid2,
   MenuItem,
   Paper,
   Select,
   Snackbar,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   TextField,
   Typography,
 } from '@mui/material';
-import { useState } from 'react';
+import { grey } from '@mui/material/colors';
+import { useEffect, useMemo, useState } from 'react';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
+import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
+import { Loading } from '@/app/(main)/_ui/loading';
+import { MuiTablePagination } from '@/app/(main)/_ui/table-pagination';
 
-import { getRfidsOfTheKizai, updateRfidTagSts } from '../_lib/funcs';
+import { FAKE_NEW_ID, ROWS_PER_MASTER_TABLE_PAGE } from '../../../_lib/constants';
+import { getRfidKizaiStsSelection } from '../../../_lib/funcs';
+import { LightTooltipWithText } from '../../../_ui/tables';
+import { getEqptNam, getRfidsOfTheKizai, updateRfidTagSts } from '../_lib/funcs';
 import { RfidsMasterTableValues } from '../_lib/types';
-import { RfidMasterTable } from './rfid-master-table';
+import { RfidMasterDialog } from './rfid-master-dialog';
 
-export const RfidMaster = ({
-  rfids,
-  sts,
-  kizai,
-}: {
-  rfids: RfidsMasterTableValues[] | undefined;
-  sts: SelectTypes[] | undefined;
-  kizai: { id: number; nam: string };
-}) => {
+export const RfidMaster = ({ kizaiId }: { kizaiId: number }) => {
+  /** テーブル1ページの行数 */
+  const rowsPerPage = ROWS_PER_MASTER_TABLE_PAGE;
+
   /** ログインユーザ */
   const user = useUserStore((state) => state.user);
-  // useState
-  /* 表示されるRFIDリスト */
-  const [theRfids, setTheRfids] = useState<RfidsMasterTableValues[] | undefined>(rfids);
-  /* 今開いてるテーブルのページ数 */
+  /** useState ------------------------------------------------- */
+  /** 表示されるRFIDリスト */
+  const [theRfids, setTheRfids] = useState<RfidsMasterTableValues[] | undefined>([]);
+  /** 初期表示のRFIDリスト（一括変更に利用） */
+  const [currentRfids, setCurrentRfids] = useState<RfidsMasterTableValues[] | undefined>([]);
+  /** 機材名 */
+  const [kizaiNam, setKizaiNam] = useState<string>('');
+  /** 選択肢 */
+  const [stsOption, setStsOption] = useState<SelectTypes[]>([]);
+  /** 今開いてるテーブルのページ数 */
   const [page, setPage] = useState(1);
-  /* DBのローディング */
+  /** DBのローディング */
   const [isLoading, setIsLoading] = useState(true);
-  /* 選択された機材のidのリスト */
+  /** 選択された機材のidのリスト */
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  /* 選ばれた機材ステータス */
+  /** 選ばれた機材ステータス */
   const [selectedSts, setSelectedSts] = useState<SelectTypes>();
-  /* スナックバーの表示するかしないか */
+  /** スナックバーの表示するかしないか */
   const [snackBarOpen, setSnackBarOpen] = useState(false);
-  /* スナックバーのメッセージ */
+  /** スナックバーのメッセージ */
   const [snackBarMessage, setSnackBarMessage] = useState('');
-  /* 保存されたあとのフラグ */
+  /** 保存されたあとのフラグ */
   const [saved, setSaved] = useState<boolean>(true);
+  /* ダイアログ開く機材のID、閉じるとき、未選択でFAKE_NEW_IDとする */
+  const [openId, setOpenID] = useState<string>(String(FAKE_NEW_ID));
+  /* 詳細ダイアログの開閉状態 */
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  /* methods ------------------------------------------- */
+  /** 詳細ダイアログを開く関数 */
+  const handleOpenDialog = (id: string) => {
+    setOpenID(id);
+    setDialogOpen(true);
+  };
+  /** ダイアログを閉じる関数 */
+  const handleCloseDialog = () => {
+    setDialogOpen(false);
+  };
+  /** 情報が変わったときに更新される */
+  const refetchRfids = async () => {
+    setIsLoading(true);
+    const updated = await getRfidsOfTheKizai(kizaiId);
+    setTheRfids(updated);
+    setCurrentRfids(updated);
+    setIsLoading(false);
+  };
+
+  /** チェックボックス押下（選択時）の処理 */
+  const handleSelectRfidTags = (event: React.MouseEvent<unknown>, id: string) => {
+    const selectedIndex = selectedTags.indexOf(id);
+    let newSelected: string[] = [];
+
+    if (selectedIndex === -1) {
+      newSelected = newSelected.concat(selectedTags, id);
+    } else if (selectedIndex === 0) {
+      newSelected = newSelected.concat(selectedTags.slice(1));
+    } else if (selectedIndex === selectedTags.length - 1) {
+      newSelected = newSelected.concat(selectedTags.slice(0, -1));
+    } else if (selectedIndex > 0) {
+      newSelected = newSelected.concat(selectedTags.slice(0, selectedIndex), selectedTags.slice(selectedIndex + 1));
+    }
+    setSelectedTags(newSelected);
+  };
+  /** 全選択チャックボックス押下時の処理 */
+  const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.checked && theRfids) {
+      const newSelected = theRfids.map((r) => r.rfidTagId);
+      setSelectedTags(newSelected);
+      return;
+    }
+    setSelectedTags([]);
+  };
+
+  /* useMemo ------------------------------------------------- */
+  /** 表示するRFIDタグリスト */
+  const list = useMemo(
+    () => (theRfids && rowsPerPage > 0 ? theRfids.slice((page - 1) * rowsPerPage, page * rowsPerPage) : theRfids),
+    [page, rowsPerPage, theRfids]
+  );
+  /** テーブル最後のページ用の空データの長さ */
+  const emptyRows = theRfids && page > 1 ? Math.max(0, page * rowsPerPage - theRfids.length) : 0;
 
   // /* 元のステータスと一致してるかどうか */
   //  const isAllSame = rfids?.every((original) => {
@@ -78,6 +153,7 @@ export const RfidMaster = ({
           return r;
         })
       : [];
+    // 表示する配列を更新
     setTheRfids(newList);
     setSaved(false);
     // if (isAllSame) {
@@ -93,7 +169,7 @@ export const RfidMaster = ({
     if (!theRfids) return;
     // 更新される予定のRFIDマスタリスト
     const updateList = theRfids.filter((newItem) => {
-      const currentItem = rfids?.find((current) => current.rfidTagId === newItem.rfidTagId);
+      const currentItem = currentRfids?.find((current) => current.rfidTagId === newItem.rfidTagId);
       if (!currentItem) {
         return true;
       }
@@ -105,10 +181,10 @@ export const RfidMaster = ({
     }
     if (updateList.length > 0) {
       // 無効化フラグを変化させるタグ配列
-      console.log('△△△△△△△', updateList, '←←←', rfids);
+      console.log('△△△△△△△', updateList, '←←←', currentRfids);
       const changeDelFlgList = updateList.reduce(
         (acc, l) => {
-          const current = rfids?.find((c) => c.rfidTagId === l.rfidTagId);
+          const current = currentRfids?.find((c) => c.rfidTagId === l.rfidTagId);
           if (!current) {
             return acc;
           }
@@ -133,19 +209,33 @@ export const RfidMaster = ({
       await updateRfidTagSts(
         updateList.map((d) => ({ tagId: d.rfidTagId, sts: d.stsId ?? 0, shozokuId: d.shozokuId })),
         user?.name ?? '',
-        kizai.id,
+        kizaiId,
         changeDelFlgList
       );
       setSnackBarMessage('保存しました');
       // 表更新
-      setIsLoading(true);
-      const updated = await getRfidsOfTheKizai(kizai.id);
-      setTheRfids(updated);
-      setIsLoading(false);
+      refetchRfids();
     }
     setSnackBarOpen(true);
     setSaved(true);
   };
+
+  /* useEffect -------------------------------------------------------------- */
+  /** 初期表示 */
+  useEffect(() => {
+    const getList = async () => {
+      setIsLoading(true);
+      const rfids = await getRfidsOfTheKizai(Number(kizaiId));
+      const sts = await getRfidKizaiStsSelection();
+      const kizai = await getEqptNam(Number(kizaiId));
+      setTheRfids(rfids);
+      setCurrentRfids(rfids);
+      setKizaiNam(kizai);
+      setStsOption(sts);
+      setIsLoading(false);
+    };
+    getList();
+  }, [kizaiId]);
 
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
@@ -156,7 +246,9 @@ export const RfidMaster = ({
             <Button
               onClick={() => handleClickSave()}
               sx={{ alignItems: 'center' }}
-              disabled={!theRfids || rfids === theRfids || saved /*|| isAllSame*/}
+              disabled={
+                !theRfids || JSON.stringify(currentRfids) === JSON.stringify(theRfids) || saved /*|| isAllSame*/
+              }
             >
               <SaveAsIcon fontSize="small" sx={{ mr: 0.5 }} />
               保存
@@ -167,7 +259,7 @@ export const RfidMaster = ({
         <Box width={'100%'} pb={1}>
           <Box sx={styles.container}>
             <Typography mr={3}>機材名</Typography>
-            <TextField value={kizai.nam} disabled />
+            <TextField value={kizaiNam} disabled />
           </Box>
           <Box sx={styles.container}>
             <Typography mr={3}>機材ステータス一括変更</Typography>
@@ -175,12 +267,12 @@ export const RfidMaster = ({
               value={selectedSts?.id ?? ''}
               onChange={(event) => {
                 const selectedId = Number(event.target.value);
-                const selectedObj = sts?.find((s) => Number(s.id) === selectedId);
+                const selectedObj = stsOption?.find((s) => Number(s.id) === selectedId);
                 setSelectedSts(selectedObj ?? undefined);
               }}
               sx={{ width: 200 }}
             >
-              {sts?.map((s) => (
+              {stsOption?.map((s) => (
                 <MenuItem key={s.id} value={Number(s.id)}>
                   {s.label}
                 </MenuItem>
@@ -196,17 +288,165 @@ export const RfidMaster = ({
           </Box>
         </Box>
       </Paper>
-      <RfidMasterTable
-        rfids={theRfids}
-        kizaiId={kizai.id}
-        page={page}
-        isLoading={isLoading}
-        setRfid={setTheRfids}
-        setPage={setPage}
-        setIsLoading={setIsLoading}
-        selectedTags={selectedTags}
-        setSelectedTags={setSelectedTags}
-      />
+      <Box>
+        <Typography pt={1} pl={2}>
+          RFID一覧
+        </Typography>
+        <Divider />
+        <Grid2 container mt={0.5} mx={0.5} justifyContent={'space-between'} alignItems={'center'}>
+          <Grid2 spacing={1}>
+            <MuiTablePagination arrayList={theRfids ?? []} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
+          </Grid2>
+          <Grid2 container spacing={3}>
+            <Grid2>
+              <Button onClick={() => handleOpenDialog(String(FAKE_NEW_ID))}>
+                <AddIcon fontSize="small" />
+                新規
+              </Button>
+            </Grid2>
+          </Grid2>
+        </Grid2>
+        {isLoading ? (
+          <Loading />
+        ) : !theRfids || theRfids!.length === 0 ? (
+          <Typography>該当するRFIDタグがありません</Typography>
+        ) : (
+          <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
+            {isLoading ? (
+              <Loading />
+            ) : !list || list.length === 0 ? (
+              <Typography justifySelf={'center'}>該当する見積がありません</Typography>
+            ) : (
+              <Table stickyHeader size="small" padding="none">
+                <TableHead>
+                  <TableRow sx={{ whiteSpace: 'nowrap' }}>
+                    <TableCell padding="checkbox">
+                      <Checkbox
+                        color="primary"
+                        onChange={handleSelectAllClick}
+                        indeterminate={selectedTags.length > 0 && selectedTags.length < theRfids.length}
+                        checked={theRfids.length > 0 && selectedTags.length === theRfids.length}
+                        sx={{
+                          '& .MuiSvgIcon-root': {
+                            backgroundColor: '#fff',
+                            borderRadius: '4px',
+                            transition: 'background-color 0.3s',
+                          },
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell padding="checkbox" />
+                    <TableCell align="right">EL No.</TableCell>
+                    <TableCell>RFIDタグID</TableCell>
+                    <TableCell>ステータス</TableCell>
+                    <TableCell>メモ</TableCell>
+                    <TableCell>最終在庫場所</TableCell>
+                    <TableCell>更新日時</TableCell>
+                    <TableCell>担当者</TableCell>
+                    <TableCell>無効</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {list!.map((row) => {
+                    const isItemSelected = selectedTags.includes(row.rfidTagId);
+
+                    return (
+                      <TableRow key={row.rfidTagId} selected={isItemSelected}>
+                        <TableCell
+                          padding="checkbox"
+                          onClick={(event) => handleSelectRfidTags(event, row.rfidTagId)}
+                          tabIndex={-1}
+                          sx={{ cursor: 'pointer', bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap' }}
+                        >
+                          <Checkbox
+                            color="primary"
+                            checked={isItemSelected}
+                            sx={{
+                              '& .MuiSvgIcon-root': {
+                                backgroundColor: '#fff',
+                                borderRadius: '4px',
+                                transition: 'background-color 0.3s',
+                              },
+                            }}
+                          />
+                        </TableCell>
+                        <TableCell
+                          align="right"
+                          sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap' }}
+                        >
+                          {row.tblDspId}
+                        </TableCell>
+                        <TableCell
+                          align="right"
+                          sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap', width: 100 }}
+                        >
+                          {row.elNum}
+                        </TableCell>
+                        <TableCell
+                          sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap', width: 250 }}
+                        >
+                          <Button
+                            variant="text"
+                            size="small"
+                            sx={{ py: 0.2, px: 0, m: 0, minWidth: 0 }}
+                            onClick={() => handleOpenDialog(row.rfidTagId)}
+                          >
+                            <Box minWidth={60}>{row.rfidTagId}</Box>
+                          </Button>
+                        </TableCell>
+                        <TableCell
+                          sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap', width: 250 }}
+                        >
+                          {row.stsNam}
+                        </TableCell>
+                        <TableCell sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap' }}>
+                          <LightTooltipWithText variant={'body2'} maxWidth={400}>
+                            {row.mem}
+                          </LightTooltipWithText>
+                        </TableCell>
+                        <TableCell sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap' }}>
+                          <LightTooltipWithText variant={'body2'} maxWidth={400}>
+                            {row.shozokuNam}
+                          </LightTooltipWithText>
+                        </TableCell>
+                        <TableCell sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap' }}>
+                          <LightTooltipWithText variant={'body2'} maxWidth={400}>
+                            {row.updDat ? toJapanTimeString(row.updDat) : ''}
+                          </LightTooltipWithText>
+                        </TableCell>
+                        <TableCell sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap' }}>
+                          <LightTooltipWithText variant={'body2'} maxWidth={400}>
+                            {row.updUser}
+                          </LightTooltipWithText>
+                        </TableCell>
+                        <TableCell
+                          sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap', width: 50 }}
+                        >
+                          {row.delFlg ? '無効' : ''}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                  {emptyRows > 0 && (
+                    <TableRow style={{ height: 30 * emptyRows }}>
+                      <TableCell colSpan={7} />
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            )}
+          </TableContainer>
+        )}
+
+        <Dialog open={dialogOpen} fullScreen>
+          <RfidMasterDialog
+            handleClose={handleCloseDialog}
+            rfidId={openId}
+            refetchRfids={refetchRfids}
+            kizaiId={kizaiId}
+          />
+        </Dialog>
+      </Box>
       <Snackbar
         open={snackBarOpen}
         autoHideDuration={6000}
