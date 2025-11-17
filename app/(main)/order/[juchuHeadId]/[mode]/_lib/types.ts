@@ -8,7 +8,7 @@ export const KokyakuSchema = z.object({
     .string({ message: validationMessages.required() })
     .min(1, { message: validationMessages.required() })
     .max(20, { message: validationMessages.maxStringLength(20) }),
-  kokyakuRank: z.number(),
+  // kokyakuRank: z.number(),
 });
 
 export type KokyakuValues = z.infer<typeof KokyakuSchema>;
@@ -34,12 +34,12 @@ export const OrderSchema = z.object({
     .max(16, { message: validationMessages.maxStringLength(16) })
     .nullable(),
   mem: z.string().nullable(),
-  nebikiAmt: z
-    .number()
-    .max(9999999999, { message: validationMessages.maxNumberLength(10) })
-    .int({ message: validationMessages.int() })
+  // nebikiAmt: z
+  //   .number()
+  //   .max(9999999999, { message: validationMessages.maxNumberLength(10) })
+  //   .int({ message: validationMessages.int() })
 
-    .nullable(),
+  //   .nullable(),
   zeiKbn: z.number(),
 });
 
@@ -59,7 +59,7 @@ export type EqTableValues = {
   honbanbi: number | null;
   juchuHonbanbiCalcQty: number | null;
   shokei: number | null;
-  nebikiAmt: number | null;
+  // nebikiAmt: number | null;
   oyaJuchuKizaiHeadId: number | null;
   htKbn: number;
   juchuKizaiHeadKbn: number;

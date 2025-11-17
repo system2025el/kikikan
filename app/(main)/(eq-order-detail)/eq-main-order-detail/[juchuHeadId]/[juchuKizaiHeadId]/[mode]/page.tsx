@@ -45,6 +45,7 @@ const Page = async (props: { params: Promise<{ juchuHeadId: string; juchuKizaiHe
       juchuKizaiHeadKbn: 1,
       juchuHonbanbiQty: null,
       nebikiAmt: null,
+      nebikiRat: null,
       mem: null,
       headNam: '',
       kicsShukoDat: null,

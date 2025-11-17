@@ -115,10 +115,11 @@ export const getDetailJuchuHead = async (juchuHeadId: number) => {
       kokyaku: {
         kokyakuId: juchuData.data.kokyaku_id,
         kokyakuNam: kokyakuData.data.kokyaku_nam,
-        kokyakuRank: kokyakuData.data.kokyaku_rank,
+        // kokyakuRank: kokyakuData.data.kokyaku_rank,
       },
       kokyakuTantoNam: juchuData.data.kokyaku_tanto_nam,
       mem: juchuData.data.mem,
+      nebikiRat: kokyakuData.data.nebiki_rat,
       nebikiAmt: juchuData.data.nebiki_amt,
       zeiKbn: juchuData.data.zei_kbn ?? 2,
     };
