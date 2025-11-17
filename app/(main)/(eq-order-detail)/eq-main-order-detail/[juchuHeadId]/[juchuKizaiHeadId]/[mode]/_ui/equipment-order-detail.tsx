@@ -5,7 +5,6 @@ import AddIcon from '@mui/icons-material/Add';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
-import CheckIcon from '@mui/icons-material/Check';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SaveAsIcon from '@mui/icons-material/SaveAs';
 import {
@@ -25,19 +24,16 @@ import {
   Paper,
   Popper,
   Select,
-  SelectChangeEvent,
   TextField,
   Typography,
 } from '@mui/material';
-import { add, addMonths, endOfMonth, set, sub, subDays, subMonths } from 'date-fns';
+import { addMonths, subDays, subMonths } from 'date-fns';
 import dayjs, { Dayjs } from 'dayjs';
-import { get } from 'http';
 import { redirect, useRouter } from 'next/navigation';
-import { use, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import React from 'react';
-import { Controller, ControllerRenderProps, useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
-import { shouldDisplay } from 'rsuite/esm/internals/Picker';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import { toJapanTimeString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
@@ -49,28 +45,16 @@ import { BackButton } from '@/app/(main)/_ui/buttons';
 import { Calendar, DateTime, TestDate } from '@/app/(main)/_ui/date';
 import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
 import { Loading } from '@/app/(main)/_ui/loading';
-import {
-  addAllHonbanbi,
-  addJuchuKizaiNyushuko,
-  delSiyouHonbanbi,
-  getDic,
-  getJuchuContainerMeisai,
-  getJuchuContainerMeisaiMaxId,
-  getJuchuKizaiHeadMaxId,
-  getJuchuKizaiMeisaiMaxId,
-  getStockList,
-  updJuchuKizaiNyushuko,
-} from '@/app/(main)/(eq-order-detail)/_lib/funcs';
+import { getDic, getJuchuContainerMeisai, getStockList } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 import { DetailOerValues } from '@/app/(main)/(eq-order-detail)/_lib/types';
 
 import {
   DeleteAlertDialog,
   MoveAlertDialog,
   NyushukoAlertDialog,
-  NyushukoFixAlertDialog,
   SaveAlertDialog,
 } from '../../../../../_ui/caveat-dialog';
-import { getIdoJuchuKizaiMeisai, getJuchuKizaiMeisai, saveJuchuKizai, saveNewJuchuKizaiHead } from '../_lib/funcs';
+import { getJuchuKizaiMeisai, saveJuchuKizai, saveNewJuchuKizaiHead } from '../_lib/funcs';
 import {
   IdoJuchuKizaiMeisaiValues,
   JuchuContainerMeisaiValues,
@@ -221,7 +205,9 @@ const EquipmentOrderDetail = (props: {
   );
 
   // 編集中かどうか
-  const [isEditing, setIsEditing] = useState(false);
+  const [isNebikiRatEditing, setIsNebikiRatEditing] = useState(false);
+  // 編集中かどうか
+  const [isNebikiAmtEditing, setIsNebikiAmtEditing] = useState(false);
 
   // context
   const { setIsDirty, setIsSave, setLock } = useDirty();
@@ -253,6 +239,7 @@ const EquipmentOrderDetail = (props: {
       juchuKizaiHeadKbn: props.juchuKizaiHeadData.juchuKizaiHeadKbn,
       juchuHonbanbiQty: props.juchuKizaiHeadData.juchuHonbanbiQty,
       nebikiAmt: props.juchuKizaiHeadData.nebikiAmt,
+      nebikiRat: props.juchuHeadData.nebikiRat,
       mem: props.juchuKizaiHeadData.mem,
       headNam: props.juchuKizaiHeadData.headNam,
       kicsShukoDat: props.juchuKizaiHeadData.kicsShukoDat ? new Date(props.juchuKizaiHeadData.kicsShukoDat) : null,
@@ -262,6 +249,20 @@ const EquipmentOrderDetail = (props: {
     },
     resolver: zodResolver(JuchuKizaiHeadSchema),
   });
+  /** 割引率の監視 */
+  const nebikiRat = watch('nebikiRat');
+  /** 割引金額の監視 */
+  const nebikiAmt = watch('nebikiAmt');
+
+  // 割引率（金額）
+  const waribikiRatAmt = useMemo(() => {
+    const amt = priceTotal * ((nebikiRat ?? 0) / 100);
+    setValue('nebikiAmt', amt);
+    return amt;
+  }, [priceTotal, nebikiRat, setValue]);
+
+  // 割引後金額（割引金額）
+  const nebikiAftAmt = useMemo(() => priceTotal - (nebikiAmt ?? 0), [priceTotal, nebikiAmt]);
 
   // ブラウザバック、F5、×ボタンでページを離れた際のhook
   useUnsavedChangesWarning(isDirty, save);
@@ -456,7 +457,6 @@ const EquipmentOrderDetail = (props: {
     console.log('保存開始');
     if (!user) return;
     setIsLoading(true);
-    setIsEditing(false);
 
     // ユーザー名
     const userNam = user.name;
@@ -1517,6 +1517,15 @@ const EquipmentOrderDetail = (props: {
                       </Typography>
                       <TextField value={props.juchuHeadData.nyuryokuUser} disabled></TextField>
                     </Box>
+                    <Box sx={styles.container}>
+                      <Typography marginRight={5} whiteSpace="nowrap">
+                        割引率
+                      </Typography>
+                      <TextField
+                        value={props.juchuHeadData.nebikiRat ? `${props.juchuHeadData.nebikiRat} %` : ''}
+                        disabled
+                      ></TextField>
+                    </Box>
                   </Grid2>
                   <Grid2>
                     <Box sx={{ display: 'flex', alignItems: 'center', ml: 2, mt: { xs: 0, sm: 0, md: 2 } }}>
@@ -1562,80 +1571,189 @@ const EquipmentOrderDetail = (props: {
               </AccordionSummary>
               <AccordionDetails sx={{ padding: 0 }}>
                 <Divider />
-                <Grid2 container alignItems="center" spacing={2} p={2}>
-                  <Grid2 container alignItems="center">
-                    <Typography>機材明細名</Typography>
-                    <TextFieldElement name="headNam" control={control} disabled={!edit}></TextFieldElement>
-                  </Grid2>
-                  <Grid2 container alignItems="center">
-                    <Typography>小計金額</Typography>
-                    <TextField
-                      value={`¥${priceTotal.toLocaleString()}`}
-                      type="text"
-                      sx={{
-                        '& .MuiInputBase-input': {
-                          textAlign: 'right',
-                        },
-                      }}
-                      disabled
-                    />
-                  </Grid2>
-                  <Grid2 container alignItems="center">
-                    <Typography>値引き</Typography>
-                    <Controller
-                      name="nebikiAmt"
-                      control={control}
-                      render={({ field, fieldState }) => (
-                        <TextField
-                          {...field}
-                          value={
-                            isEditing
-                              ? (field.value ?? '')
-                              : field.value !== null && !isNaN(field.value)
-                                ? `¥${Number(field.value).toLocaleString()}`
-                                : '¥0'
-                          }
-                          type="text"
-                          onFocus={(e) => {
-                            setIsEditing(true);
-                            const rawValue = e.target.value.replace(/[¥,]/g, '');
-                            e.target.value = rawValue;
-                          }}
-                          onBlur={(e) => {
-                            const rawValue = e.target.value.replace(/[¥,]/g, '');
-                            const numericValue = Number(rawValue);
-                            field.onChange(numericValue);
-                            setIsEditing(false);
-                          }}
-                          onChange={(e) => {
-                            const raw = e.target.value.replace(/[^\d]/g, '');
-                            if (/^\d*$/.test(raw)) {
-                              field.onChange(Number(raw));
-                              e.target.value = raw;
+                <Grid2 container alignItems="center" spacing={1} py={1} px={2}>
+                  <Typography>機材明細名</Typography>
+                  <TextFieldElement name="headNam" control={control} disabled={!edit}></TextFieldElement>
+                </Grid2>
+                <Grid2 container alignItems="baseline" spacing={2} py={1} px={2}>
+                  <Grid2 container direction={'column'} spacing={1}>
+                    <Grid2 sx={styles.grid2Row}>
+                      <Typography mr={3}>機材合計</Typography>
+                      <TextField
+                        value={`¥${priceTotal.toLocaleString()}`}
+                        type="text"
+                        sx={{
+                          width: 150,
+                          '& .MuiInputBase-input': {
+                            textAlign: 'right',
+                          },
+                        }}
+                        disabled
+                      />
+                      <Typography mx={1}>割引率</Typography>
+                      <Controller
+                        name="nebikiRat"
+                        control={control}
+                        render={({ field, fieldState }) => (
+                          <TextField
+                            {...field}
+                            value={
+                              isNebikiRatEditing
+                                ? (field.value ?? '')
+                                : field.value !== null && !isNaN(field.value)
+                                  ? `${Number(field.value).toLocaleString()} %`
+                                  : ''
                             }
-                          }}
+                            type="text"
+                            onFocus={(e) => {
+                              setIsNebikiRatEditing(true);
+                              const rawValue = e.target.value.replace(/[%,]/g, '');
+                              e.target.value = rawValue;
+                            }}
+                            onBlur={(e) => {
+                              const rawValue = e.target.value.replace(/[%,]/g, '');
+                              const numericValue = Number(rawValue);
+                              field.onChange(numericValue);
+                              setIsNebikiRatEditing(false);
+                            }}
+                            onChange={(e) => {
+                              const raw = e.target.value.replace(/[^\d]/g, '');
+                              if (/^\d*$/.test(raw)) {
+                                field.onChange(Number(raw));
+                                e.target.value = raw;
+                              }
+                            }}
+                            sx={{
+                              width: 80,
+                              '.MuiOutlinedInput-notchedOutline': {
+                                borderColor: fieldState.error?.message && 'red',
+                              },
+                              '.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                borderColor: fieldState.error?.message && 'red',
+                              },
+                              '&:hover .MuiOutlinedInput-notchedOutline': {
+                                borderColor: fieldState.error?.message && 'red',
+                              },
+                              '& .MuiInputBase-input': {
+                                textAlign: 'right',
+                              },
+                              '.MuiFormHelperText-root': {
+                                color: 'red',
+                              },
+                            }}
+                            helperText={fieldState.error?.message}
+                            disabled={!edit}
+                          />
+                        )}
+                      />
+                    </Grid2>
+                  </Grid2>
+
+                  <Grid2 container direction={'column'} spacing={1} size={{ sm: 12, md: 'grow' }}>
+                    <Grid2 container width={'100%'} spacing={2}>
+                      <Grid2 size={'grow'} sx={styles.grid2Row} justifyContent={{ sm: 'start', md: 'end' }}>
+                        <Typography>割引率（金額）</Typography>
+                        <TextField
+                          value={`¥${waribikiRatAmt.toLocaleString()}`}
+                          type="text"
                           sx={{
-                            '.MuiOutlinedInput-notchedOutline': {
-                              borderColor: fieldState.error?.message && 'red',
-                            },
-                            '.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                              borderColor: fieldState.error?.message && 'red',
-                            },
-                            '&:hover .MuiOutlinedInput-notchedOutline': {
-                              borderColor: fieldState.error?.message && 'red',
-                            },
+                            width: 150,
                             '& .MuiInputBase-input': {
                               textAlign: 'right',
                             },
-                            '.MuiFormHelperText-root': {
-                              color: 'red',
+                          }}
+                          disabled
+                        />
+                      </Grid2>
+                      <Grid2 size={6} sx={styles.grid2Row}>
+                        <Typography mr={2}>割引後金額（割引率）</Typography>
+                        <TextField
+                          value={`¥${(priceTotal - waribikiRatAmt).toLocaleString()}`}
+                          type="text"
+                          sx={{
+                            width: 150,
+                            '& .MuiInputBase-input': {
+                              textAlign: 'right',
                             },
                           }}
-                          helperText={fieldState.error?.message}
-                          disabled={!edit}
+                          disabled
                         />
-                      )}
-                    />
+                      </Grid2>
+                    </Grid2>
+                    <Grid2 container width={'100%'} spacing={2}>
+                      <Grid2 size={'grow'} sx={styles.grid2Row} justifyContent={{ sm: 'start', md: 'end' }}>
+                        <Typography>割引金額（確定）</Typography>
+                        <Controller
+                          name="nebikiAmt"
+                          control={control}
+                          render={({ field, fieldState }) => (
+                            <TextField
+                              {...field}
+                              value={
+                                isNebikiAmtEditing
+                                  ? (field.value ?? '')
+                                  : field.value !== null && !isNaN(field.value)
+                                    ? `¥${Number(field.value).toLocaleString()}`
+                                    : ''
+                              }
+                              type="text"
+                              onFocus={(e) => {
+                                setIsNebikiAmtEditing(true);
+                                const rawValue = e.target.value.replace(/[¥,]/g, '');
+                                e.target.value = rawValue;
+                              }}
+                              onBlur={(e) => {
+                                const rawValue = e.target.value.replace(/[¥,]/g, '');
+                                const numericValue = Number(rawValue);
+                                field.onChange(numericValue);
+                                setIsNebikiAmtEditing(false);
+                              }}
+                              onChange={(e) => {
+                                const raw = e.target.value.replace(/[^\d]/g, '');
+                                if (/^\d*$/.test(raw)) {
+                                  field.onChange(Number(raw));
+                                  e.target.value = raw;
+                                }
+                              }}
+                              sx={{
+                                width: 150,
+                                '.MuiOutlinedInput-notchedOutline': {
+                                  borderColor: fieldState.error?.message && 'red',
+                                },
+                                '.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                  borderColor: fieldState.error?.message && 'red',
+                                },
+                                '&:hover .MuiOutlinedInput-notchedOutline': {
+                                  borderColor: fieldState.error?.message && 'red',
+                                },
+                                '& .MuiInputBase-input': {
+                                  textAlign: 'right',
+                                },
+                                '.MuiFormHelperText-root': {
+                                  color: 'red',
+                                },
+                              }}
+                              helperText={fieldState.error?.message}
+                              disabled={!edit}
+                            />
+                          )}
+                        />
+                      </Grid2>
+                      <Grid2 size={6} sx={styles.grid2Row}>
+                        <Typography>割引後金額（割引金額）</Typography>
+                        <TextField
+                          value={`¥${nebikiAftAmt.toLocaleString()}`}
+                          type="text"
+                          sx={{
+                            width: 150,
+                            '& .MuiInputBase-input': {
+                              textAlign: 'right',
+                            },
+                          }}
+                          disabled
+                        />
+                      </Grid2>
+                    </Grid2>
                   </Grid2>
                 </Grid2>
                 <Grid2 container p={2} spacing={2}>
@@ -2190,6 +2308,9 @@ const styles: { [key: string]: React.CSSProperties } = {
     margin: 2,
     marginLeft: 2,
   },
-  // ボタン
-  button: {},
+  // grid2row
+  grid2Row: {
+    display: 'flex',
+    alignItems: 'center',
+  },
 };

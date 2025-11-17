@@ -7,9 +7,10 @@ export type DetailOerValues = {
   nyuryokuUser: string;
   koenNam: string;
   koenbashoNam: string | null;
-  kokyaku: { kokyakuId: number; kokyakuNam: string; kokyakuRank: number };
+  kokyaku: { kokyakuId: number; kokyakuNam: string /*kokyakuRank: number*/ };
   kokyakuTantoNam: string | null;
   mem: string | null;
+  nebikiRat: number | null;
   nebikiAmt: number | null;
   zeiKbn: number;
 };

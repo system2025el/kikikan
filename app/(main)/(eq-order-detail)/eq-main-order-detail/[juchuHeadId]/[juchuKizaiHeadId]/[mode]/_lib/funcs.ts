@@ -775,6 +775,7 @@ export const getJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHeadId: n
       juchuKizaiHeadKbn: juchuKizaiHeadData.data.juchu_kizai_head_kbn,
       juchuHonbanbiQty: juchuKizaiHeadData.data.juchu_honbanbi_qty,
       nebikiAmt: juchuKizaiHeadData.data.nebiki_amt,
+      nebikiRat: juchuKizaiHeadData.data.nebiki_rat ?? 0,
       mem: juchuKizaiHeadData.data.mem ? juchuKizaiHeadData.data.mem : '',
       headNam: juchuKizaiHeadData.data.head_nam ?? '',
       kicsShukoDat: juchuDate.kicsShukoDat ? new Date(juchuDate.kicsShukoDat) : null,

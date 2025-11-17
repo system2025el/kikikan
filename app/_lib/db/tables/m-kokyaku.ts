@@ -17,7 +17,7 @@ export const selectKokyaku = async (kokyaku_id: number) => {
     return await supabase
       .schema(SCHEMA)
       .from('m_kokyaku')
-      .select('kokyaku_nam, kokyaku_rank')
+      .select('kokyaku_nam, nebiki_rat')
       .eq('kokyaku_id', kokyaku_id)
       .single();
   } catch (e) {

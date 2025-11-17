@@ -12,6 +12,10 @@ export const JuchuKizaiHeadSchema = z
       .number()
       .max(99999999, { message: validationMessages.maxNumberLength(8) })
       .nullable(),
+    nebikiRat: z
+      .number()
+      .max(999, { message: validationMessages.maxNumberLength(3) })
+      .nullable(),
     mem: z.string().nullable(),
     headNam: z
       .string({ message: validationMessages.required() })

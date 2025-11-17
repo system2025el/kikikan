@@ -40,7 +40,9 @@ export const selectJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHeadId
     return await supabase
       .schema(SCHEMA)
       .from('t_juchu_kizai_head')
-      .select('juchu_head_id, juchu_kizai_head_id, juchu_kizai_head_kbn, juchu_honbanbi_qty, nebiki_amt, mem, head_nam')
+      .select(
+        'juchu_head_id, juchu_kizai_head_id, juchu_kizai_head_kbn, juchu_honbanbi_qty, nebiki_amt, mem, head_nam, nebiki_rat'
+      )
       .eq('juchu_head_id', juchuHeadId)
       .eq('juchu_kizai_head_id', juchuKizaiHeadId)
       .single();
