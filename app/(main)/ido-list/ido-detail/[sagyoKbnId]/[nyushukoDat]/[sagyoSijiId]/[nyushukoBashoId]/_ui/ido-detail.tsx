@@ -341,16 +341,17 @@ export const IdoDetail = (props: {
       </Paper>
       {/** 固定ボタン 保存＆ページトップ */}
       <Box position={'fixed'} zIndex={1050} bottom={25} right={25} alignItems={'center'}>
-        <Fab variant="extended" color="primary" type="submit" sx={{ mr: 2 }}>
-          <SaveAsIcon sx={{ mr: 1 }} />
-          保存
-        </Fab>
         <Fab
+          variant="extended"
           color="primary"
           onClick={handleSave}
           disabled={fixFlag}
-          sx={{ display: idoDetailData.sagyoKbnId === 40 ? 'inline-flex' : 'none' }}
+          sx={{ /*display: idoDetailData.sagyoKbnId === 40 ? 'inline-flex' : 'none',*/ mr: 2 }}
         >
+          <SaveAsIcon sx={{ mr: 1 }} />
+          保存
+        </Fab>
+        <Fab color="primary" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
           <ArrowUpwardIcon />
         </Fab>
       </Box>
