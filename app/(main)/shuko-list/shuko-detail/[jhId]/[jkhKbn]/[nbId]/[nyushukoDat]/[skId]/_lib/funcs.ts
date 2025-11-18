@@ -143,7 +143,7 @@ export const updShukoDetail = async (
     await connection.query('BEGIN');
 
     // キープ以外は明細、伝票を更新
-    if (shukoDetailTableData[0].juchuKizaiHeadKbn !== 3) {
+    if (shukoDetailTableData[0].juchuKizaiHeadKbn !== 3 && ctnData && ctnData.length > 0) {
       // 受注明細UPSERT
       const upsertJuchuMeisaiResult = await upsJuchuCtnMeisai(ctnData, userNam, connection);
       console.log('受注明細UPSERT', upsertJuchuMeisaiResult);
@@ -190,8 +190,6 @@ export const upsJuchuCtnMeisai = async (
     indent_num: d.indentNum,
     add_dat: toJapanTimeString(),
     add_user: userNam,
-    upd_dat: null,
-    upd_user: null,
   }));
   try {
     await upsertJuchuContainerMeisai(upsertCtnData, connection);
