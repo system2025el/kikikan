@@ -1,15 +1,17 @@
 'use client';
 
 import SearchIcon from '@mui/icons-material/Search';
-import { Box, Button, Container, Divider, Grid2, Paper, TextField, Typography } from '@mui/material';
+import { Box, Button, Container, Divider, Grid2, MenuItem, Paper, Select, TextField, Typography } from '@mui/material';
+import { grey } from '@mui/material/colors';
 import { SetStateAction, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { CheckboxButtonGroup, TextFieldElement } from 'react-hook-form-mui';
 
 import { BackButton } from '@/app/(main)/_ui/buttons';
 import { FormDateX } from '@/app/(main)/_ui/date';
-import { SelectTypes } from '@/app/(main)/_ui/form-box';
+import { selectNone, SelectTypes } from '@/app/(main)/_ui/form-box';
 import { LoadingOverlay } from '@/app/(main)/_ui/loading';
+import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 import { getCustomerSelection } from '@/app/(main)/(masters)/_lib/funcs';
 
 import { getBillingStsSelection, getFilteredBills } from '../_lib/funcs';
@@ -35,7 +37,16 @@ export const BillList = () => {
 
   /* useForm ----------------------------------------------------- */
   const { control, reset, handleSubmit, getValues, setValue } = useForm<BillSearchValues>({
-    defaultValues: {},
+    defaultValues: {
+      billId: null,
+      billingSts: FAKE_NEW_ID,
+      range: {
+        str: null,
+        end: null,
+      },
+      kokyaku: '未選択',
+      seikyuHeadNam: null,
+    },
   });
 
   /** 検索ボタン押下 */
@@ -100,79 +111,124 @@ export const BillList = () => {
           <Typography noWrap>請求検索</Typography>
         </Box>
         <Divider />
-        <Box width={'100%'} p={2}>
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <Grid2 container direction={'column'} spacing={1} width={'100%'}>
-              <Grid2 container display={'flex'} alignItems={'baseline'}>
-                <Grid2 size={5} display={'flex'} alignItems={'baseline'}>
-                  <Typography noWrap mr={7}>
-                    請求番号
-                  </Typography>
-                  <TextFieldElement name="billId" control={control} type="text" sx={{ width: 200 }} />
-                </Grid2>
-                <Grid2 display={'flex'} alignItems={'baseline'}>
-                  <Typography noWrap mr={3}>
-                    請求ステータス
-                  </Typography>
-                  <TextFieldElement name="billingSts" control={control} type="text" sx={{ width: 200 }} />
-                </Grid2>
-              </Grid2>
-              <Grid2 display={'flex'} alignItems={'baseline'}>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <Grid2 container direction={'column'} spacing={1} width={'100%'} p={2}>
+            <Grid2 container spacing={1}>
+              <Grid2 size={{ sm: 12, md: 3 }} sx={styles.container}>
                 <Typography noWrap mr={7}>
-                  請求書名
+                  請求番号
                 </Typography>
-                <TextFieldElement name="seikyuHeadNam" control={control} />
+                <TextFieldElement
+                  name="billId"
+                  control={control}
+                  sx={{
+                    width: 120,
+                    '& .MuiInputBase-input': {
+                      textAlign: 'right',
+                    },
+                    '& input[type=number]::-webkit-inner-spin-button': {
+                      WebkitAppearance: 'none',
+                      margin: 0,
+                    },
+                  }}
+                  type="number"
+                />
               </Grid2>
-              <Grid2 display={'flex'} alignItems={'baseline'}>
+              <Grid2 sx={styles.container}>
                 <Typography noWrap mr={3}>
-                  請求書発行日
+                  請求ステータス
                 </Typography>
                 <Controller
+                  name="billingSts"
                   control={control}
-                  name="range.str"
-                  render={({ field, fieldState: { error } }) => (
-                    <FormDateX
-                      value={field.value}
-                      onChange={field.onChange}
-                      sx={{ mr: 1 }}
-                      error={!!error}
-                      helperText={error?.message}
-                    />
+                  defaultValue={0}
+                  render={({ field }) => (
+                    <Select {...field} sx={{ width: 200 }}>
+                      {[selectNone, ...options!.sts].map((opt) => (
+                        <MenuItem
+                          key={opt.id}
+                          value={opt.id}
+                          sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
+                        >
+                          {opt.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
                   )}
                 />
-                <span>～</span>
-                <Controller
-                  control={control}
-                  name="range.end"
-                  render={({ field, fieldState: { error } }) => (
-                    <FormDateX
-                      value={field.value}
-                      onChange={field.onChange}
-                      sx={{ ml: 1 }}
-                      error={!!error}
-                      helperText={error?.message}
-                    />
-                  )}
-                />
-              </Grid2>
-
-              <Grid2 container display={'flex'} alignItems={'baseline'}>
-                <Grid2 display={'flex'} size={'grow'} alignItems={'baseline'}>
-                  <Typography noWrap mr={11}>
-                    相手
-                  </Typography>
-                  <TextFieldElement name="kokyaku" control={control} />
-                </Grid2>
-                <Grid2 alignSelf={'end'}>
-                  <Button type="submit">
-                    <SearchIcon />
-                    検索
-                  </Button>
-                </Grid2>
               </Grid2>
             </Grid2>
-          </form>
-        </Box>
+            <Grid2 sx={styles.container}>
+              <Typography noWrap mr={7}>
+                請求書名
+              </Typography>
+              <TextFieldElement name="seikyuHeadNam" control={control} />
+            </Grid2>
+            <Grid2 sx={styles.container}>
+              <Typography noWrap mr={3}>
+                請求書発行日
+              </Typography>
+              <Controller
+                control={control}
+                name="range.str"
+                render={({ field, fieldState: { error } }) => (
+                  <FormDateX
+                    value={field.value}
+                    onChange={field.onChange}
+                    sx={{ mr: 1 }}
+                    error={!!error}
+                    helperText={error?.message}
+                  />
+                )}
+              />
+              <span>～</span>
+              <Controller
+                control={control}
+                name="range.end"
+                render={({ field, fieldState: { error } }) => (
+                  <FormDateX
+                    value={field.value}
+                    onChange={field.onChange}
+                    sx={{ ml: 1 }}
+                    error={!!error}
+                    helperText={error?.message}
+                  />
+                )}
+              />
+            </Grid2>
+
+            <Grid2 container sx={styles.container}>
+              <Grid2 display={'flex'} size={'grow'} alignItems={'baseline'}>
+                <Typography noWrap mr={11}>
+                  相手
+                </Typography>
+                <Controller
+                  name="kokyaku"
+                  control={control}
+                  render={({ field }) => (
+                    <Select {...field} sx={{ width: 250 }}>
+                      {[selectNone, ...options!.custs].map((opt) => (
+                        <MenuItem
+                          key={opt.id}
+                          value={opt.label}
+                          sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
+                        >
+                          {opt.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  )}
+                />
+              </Grid2>
+              <Grid2 alignSelf={'end'}>
+                <Button type="submit">
+                  <SearchIcon />
+                  検索
+                </Button>
+              </Grid2>
+            </Grid2>
+          </Grid2>
+        </form>
       </Paper>
       <BillListTable
         bills={bills}
@@ -187,4 +243,15 @@ export const BillList = () => {
       />
     </Container>
   );
+};
+
+/* style
+---------------------------------------------------------------------------------------------------- */
+/** @type {{ [key: string]: React.CSSProperties }} style */
+const styles: { [key: string]: React.CSSProperties } = {
+  // コンテナ
+  container: {
+    display: 'flex',
+    alignItems: 'center',
+  },
 };

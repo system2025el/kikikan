@@ -163,11 +163,11 @@ export const BillHeadSchema = z.object({
 export type BillHeadValues = z.infer<typeof BillHeadSchema>;
 
 export type BillSearchValues = {
-  billId: number | null | undefined;
-  billingSts: number | null | undefined;
-  range: { str: Date | null | undefined; end: Date | null | undefined };
-  kokyaku: string | null | undefined;
-  seikyuHeadNam: string | null | undefined;
+  billId: number | null;
+  billingSts: number | null;
+  range: { str: Date | null; end: Date | null };
+  kokyaku: string | null;
+  seikyuHeadNam: string | null;
 };
 
 export type BillsListTableValues = {
