@@ -18,6 +18,7 @@ import { SeikyuMeisaiHead } from '@/app/_lib/db/types/t-seikyu-meisai-head-type'
 import { SeikyuMeisai } from '@/app/_lib/db/types/t-seikyu-meisai-type';
 import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
+import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 
 import { BillHeadValues, BillMeisaiHeadsValues, BillSearchValues, BillsListTableValues } from './types';
 
@@ -52,26 +53,22 @@ export const getBillingStsSelection = async (): Promise<SelectTypes[]> => {
  */
 export const getFilteredBills = async (
   queries: BillSearchValues = {
-    billId: undefined,
-    billingSts: undefined,
+    billId: null,
+    billingSts: FAKE_NEW_ID,
     range: {
-      str: undefined,
-      end: undefined,
+      str: null,
+      end: null,
     },
-    kokyaku: undefined,
-    seikyuHeadNam: undefined,
+    kokyaku: '未選択',
+    seikyuHeadNam: null,
   }
 ): Promise<BillsListTableValues[]> => {
   try {
-    const { data, error } = await selectFilteredBills(queries);
-    if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
-    }
-    if (!data || data.length === 0) {
+    const { rows } = await selectFilteredBills(queries);
+    if (!rows || rows.length === 0) {
       return [];
     }
-    return data.map((d) => ({
+    return rows.map((d) => ({
       billHeadId: d.seikyu_head_id,
       billingSts: d.sts_nam,
       billHeadNam: d.seikyu_head_nam,

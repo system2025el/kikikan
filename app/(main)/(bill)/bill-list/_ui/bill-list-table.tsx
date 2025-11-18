@@ -19,6 +19,7 @@ import { useRouter } from 'next/navigation';
 import { useMemo } from 'react';
 import { useForm } from 'react-hook-form-mui';
 
+import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 import { MuiTablePagination } from '@/app/(main)/_ui/table-pagination';
@@ -171,7 +172,7 @@ export const BillListTable = ({
                   </TableCell>
                   <TableCell>
                     <LightTooltipWithText variant={'body2'} maxWidth={200}>
-                      {bill.seikyuDat}
+                      {bill.seikyuDat ? toJapanYMDString(bill.seikyuDat) : ''}
                     </LightTooltipWithText>
                   </TableCell>
                 </TableRow>
