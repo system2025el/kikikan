@@ -30,8 +30,9 @@ FROM (
       v_juchu_kizai_head_lst.kics_shuko_dat::time = '00:00:00'
       OR v_juchu_kizai_head_lst.yard_shuko_dat::time = '00:00:00'
       -- ２）NULLのもの
-      OR v_juchu_kizai_head_lst.kics_shuko_dat IS NULL
-      OR v_juchu_kizai_head_lst.yard_shuko_dat IS NULL
+      OR   (v_juchu_kizai_head_lst.kics_shuko_dat is null
+            AND
+            v_juchu_kizai_head_lst.yard_shuko_dat is null)
   ) AS juchu_kizai_head_lst
   RIGHT OUTER JOIN
   /* スケジュール生成して外部結合 */

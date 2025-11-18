@@ -13,7 +13,9 @@ import { VehiclesTable } from './vehicles-table ';
 
 export const Dashboard = () => {
   const today = dayjs().format('YYYY/MM/DD');
-  const nextWeek = dayjs().add(7, 'day').format('YYYY/MM/DD');
+  const nextWeek = dayjs()
+    .add(7 - 1, 'day')
+    .format('YYYY/MM/DD');
 
   const [loading, setLoading] = useState<boolean>(true);
   const [unsetShukoTimeOrders, setUnsetShukoTimeOrders] = useState<DashboardTableValues[]>([]);
