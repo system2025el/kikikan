@@ -1198,8 +1198,8 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
 
     function drawColumnLine2() {
       workPage.drawLine({
-        start: { x: 420, y: startY - 20 * index },
-        end: { x: 420, y: startY - 20 * (index + 1) },
+        start: { x: 430, y: startY - 20 * index },
+        end: { x: 430, y: startY - 20 * (index + 1) },
         thickness: 1,
       });
     }
@@ -1210,7 +1210,7 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
       const item1Width = customFont.widthOfTextAtSize(item1, fontSize);
 
       workPage.drawText(item1, {
-        x: 410 - item1Width,
+        x: 425 - item1Width,
         y: startY - 20 * (index + 1) + 3,
         font: customFont, // カスタムフォントの設定
         size: fontSize,
@@ -1257,7 +1257,7 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
     });
 
     workPage.drawText('担当', {
-      x: 335,
+      x: 355,
       y: startY - 20 * (index + 1) + 7,
       font: customFont, // カスタムフォントの設定
       size: 8,
@@ -1265,16 +1265,16 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
       //lineHeight: 24,
       //opacity: 1,
     });
-
+    //担当左
     workPage.drawLine({
-      start: { x: 330, y: startY - 20 * index },
-      end: { x: 330, y: startY - 20 * (index + 3) },
+      start: { x: 350, y: startY - 20 * index },
+      end: { x: 350, y: startY - 20 * (index + 3) },
       thickness: 1,
     });
-
+    //担当右
     workPage.drawLine({
-      start: { x: 420, y: startY - 20 * index },
-      end: { x: 420, y: startY - 20 * (index + 3) },
+      start: { x: 430, y: startY - 20 * index },
+      end: { x: 430, y: startY - 20 * (index + 3) },
       thickness: 1,
     });
 
