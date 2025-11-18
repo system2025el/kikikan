@@ -272,6 +272,17 @@ export const LoanSituation = (props: {
               },
             }}
           />
+          <Typography ml={2}>NG数</Typography>
+          <TextField
+            disabled
+            value={kizaiData.ngQty}
+            sx={{
+              maxWidth: 100,
+              '& .MuiInputBase-input': {
+                textAlign: 'right',
+              },
+            }}
+          />
           <Typography ml={2}>定価</Typography>
           <TextField
             value={`¥${kizaiData.regAmt.toLocaleString()}`}

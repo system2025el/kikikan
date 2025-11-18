@@ -84,7 +84,7 @@ export const EqptOrderTable = ({
               <TableHead>
                 <TableRow sx={{ whiteSpace: 'nowrap' }}>
                   <TableCell />
-                  <TableCell padding="none" />
+                  {/* <TableCell padding="none" /> */}
                   <TableCell align="right">受注番号</TableCell>
                   <TableCell align="left">受注明細名</TableCell>
                   <TableCell align="left">公演名</TableCell>
@@ -100,7 +100,7 @@ export const EqptOrderTable = ({
                     <TableCell padding="checkbox">
                       <Checkbox color="primary" />
                     </TableCell>
-                    <TableCell
+                    {/* <TableCell
                       width={50}
                       sx={{
                         paddingLeft: 1,
@@ -109,7 +109,7 @@ export const EqptOrderTable = ({
                       }}
                     >
                       {order.ordNum}
-                    </TableCell>
+                    </TableCell> */}
                     <TableCell align="right" sx={{ minWidth: 0, whiteSpace: 'nowrap' }}>
                       <Button
                         variant="text"

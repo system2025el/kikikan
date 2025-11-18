@@ -103,7 +103,7 @@ export const selectLoanKizai = async (kizaiId: number) => {
     return await supabase
       .schema(SCHEMA)
       .from('v_kizai_lst')
-      .select('kizai_id, kizai_nam, reg_amt, kizai_qty')
+      .select('kizai_id, kizai_nam, reg_amt, kizai_qty, kizai_ng_qty')
       .eq('kizai_id', kizaiId)
       .single();
   } catch (e) {

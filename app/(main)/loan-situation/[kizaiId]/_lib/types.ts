@@ -3,6 +3,7 @@ export type LoanKizai = {
   kizaiNam: string;
   regAmt: number;
   kizaiQty: number;
+  ngQty: number;
 };
 
 export type LoanJuchu = {

@@ -156,16 +156,17 @@ export const checkRfid = async (list: RfidImportTypes[], connection: PoolClient,
         .join(',');
       const updateValues = updateList.flatMap((v) => [v.rfid_tag_id, v.del_flg, v.mem]);
       const updateQuery = `
-          UPDATE ${SCHEMA}.m_rfid AS mr
-          SET
-            del_flg = d.del_flg::integer,
-            mem = d.mem::varchar,
-            upd_dat = $${updateValues.length + 1}::timestamp,
-            upd_user = $${updateValues.length + 2}::varchar
-          FROM (
-            VALUES ${updatePlaceholders}
-          ) AS d(rfid_tag_id, del_flg, mem)
-          WHERE mr.rfid_tag_id = d.rfid_tag_id;`;
+        UPDATE ${SCHEMA}.m_rfid AS mr
+        SET
+          del_flg = d.del_flg::integer,
+          mem = d.mem::varchar,
+          upd_dat = $${updateValues.length + 1}::timestamp,
+          upd_user = $${updateValues.length + 2}::varchar
+        FROM (
+          VALUES ${updatePlaceholders}
+        ) AS d(rfid_tag_id, del_flg, mem)
+        WHERE mr.rfid_tag_id = d.rfid_tag_id;
+      `;
 
       //更新実行
       await connection.query(updateQuery, [...updateValues, date, user]);
