@@ -255,14 +255,16 @@ const EquipmentOrderDetail = (props: {
   const nebikiAmt = watch('nebikiAmt');
 
   // 割引率（金額）
-  const waribikiRatAmt = useMemo(() => {
-    const amt = priceTotal * ((nebikiRat ?? 0) / 100);
-    setValue('nebikiAmt', amt);
-    return amt;
-  }, [priceTotal, nebikiRat, setValue]);
+  const waribikiRatAmt = useMemo(() => priceTotal * ((nebikiRat ?? 0) / 100), [priceTotal, nebikiRat]);
 
   // 割引後金額（割引金額）
-  const nebikiAftAmt = useMemo(() => priceTotal - (nebikiAmt ?? 0), [priceTotal, nebikiAmt]);
+  const nebikiAftAmt = useMemo(() => {
+    if (nebikiAmt) {
+      return priceTotal - nebikiAmt;
+    } else {
+      return priceTotal - waribikiRatAmt;
+    }
+  }, [priceTotal, nebikiAmt, waribikiRatAmt]);
 
   // ブラウザバック、F5、×ボタンでページを離れた際のhook
   useUnsavedChangesWarning(isDirty, save);
@@ -1686,13 +1688,14 @@ const EquipmentOrderDetail = (props: {
                         <Controller
                           name="nebikiAmt"
                           control={control}
+                          rules={{ required: '入力してください' }}
                           render={({ field, fieldState }) => (
                             <TextField
                               {...field}
                               value={
                                 isNebikiAmtEditing
                                   ? (field.value ?? '')
-                                  : field.value !== null && !isNaN(field.value)
+                                  : field.value !== null && field.value !== undefined && !isNaN(field.value)
                                     ? `¥${Number(field.value).toLocaleString()}`
                                     : ''
                               }
@@ -1742,7 +1745,7 @@ const EquipmentOrderDetail = (props: {
                       <Grid2 size={6} sx={styles.grid2Row}>
                         <Typography>割引後金額（割引金額）</Typography>
                         <TextField
-                          value={`¥${nebikiAftAmt.toLocaleString()}`}
+                          value={nebikiAftAmt ? `¥${nebikiAftAmt.toLocaleString()}` : ''}
                           type="text"
                           sx={{
                             width: 150,
