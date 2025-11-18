@@ -239,7 +239,7 @@ const EquipmentOrderDetail = (props: {
       juchuKizaiHeadKbn: props.juchuKizaiHeadData.juchuKizaiHeadKbn,
       juchuHonbanbiQty: props.juchuKizaiHeadData.juchuHonbanbiQty,
       nebikiAmt: props.juchuKizaiHeadData.nebikiAmt,
-      nebikiRat: props.juchuHeadData.nebikiRat,
+      nebikiRat: props.juchuKizaiHeadData.nebikiRat ?? props.juchuHeadData.nebikiRat,
       mem: props.juchuKizaiHeadData.mem,
       headNam: props.juchuKizaiHeadData.headNam,
       kicsShukoDat: props.juchuKizaiHeadData.kicsShukoDat ? new Date(props.juchuKizaiHeadData.kicsShukoDat) : null,
