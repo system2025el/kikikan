@@ -10,11 +10,11 @@ export const JuchuKizaiHeadSchema = z
     juchuHonbanbiQty: z.number().nullable(),
     nebikiAmt: z
       .number()
-      .min(0, { message: validationMessages.required() })
       .max(9999999999, { message: validationMessages.maxNumberLength(10) })
       .nullable(),
     nebikiRat: z
       .number()
+      .int()
       .max(999, { message: validationMessages.maxNumberLength(3) })
       .nullable(),
     mem: z.string().nullable(),

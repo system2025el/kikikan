@@ -53,7 +53,7 @@ export const selectAllRfidWithKizai = async () => {
     mk.dsp_flg, 
     mk.ctn_flg, 
     mk.def_dat_qty, 
-    mk.reg_amt, 
+    mk.reg_amt
     -- mk.rank_amt_1, 
     -- mk.rank_amt_2, 
     -- mk.rank_amt_3, 
