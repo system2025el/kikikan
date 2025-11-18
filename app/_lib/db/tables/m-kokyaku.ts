@@ -46,15 +46,13 @@ export const selectActiveCustomers = async () => {
 /**
  * 顧客マスタテーブルのデータを取得する関数
  * @param query 検索キーワード
- * @returns {Promise<CustomersDialogValues[]>} 公演場所マスタテーブルに表示するデータ（ 検索キーワードが空の場合は全て ）
+ * @returns {Promise<CustomersDialogValues[]>} 顧客マスタテーブルに表示するデータ（ 検索キーワードが空の場合は全て ）
  */
 export const selectFilteredCustomers = async (query: string) => {
   const builder = supabase
     .schema(SCHEMA)
     .from('m_kokyaku')
-    .select(
-      'kokyaku_id, kokyaku_nam, adr_shozai, adr_tatemono, adr_sonota, tel, fax, mem, dsp_flg, del_flg, kokyaku_rank'
-    )
+    .select('kokyaku_id, kokyaku_nam, adr_shozai, adr_tatemono, adr_sonota, tel, fax, mem, dsp_flg, del_flg')
     .order('kokyaku_nam');
 
   // queryが存在する場合のみあいまい検索、顧客名、顧客名かな、住所、電話番号、fax番号

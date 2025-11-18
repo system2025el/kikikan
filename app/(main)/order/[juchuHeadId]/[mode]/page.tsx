@@ -23,10 +23,10 @@ const Page = async (props: { params: Promise<{ juchuHeadId: string; mode: string
       nyuryokuUser: '',
       koenNam: '',
       koenbashoNam: null,
-      kokyaku: { kokyakuId: 0, kokyakuNam: '', kokyakuRank: 0 },
+      kokyaku: { kokyakuId: 0, kokyakuNam: '' /*, kokyakuRank: 0*/ },
       kokyakuTantoNam: null,
       mem: null,
-      nebikiAmt: null,
+      // nebikiAmt: null,
       zeiKbn: 2,
     };
 

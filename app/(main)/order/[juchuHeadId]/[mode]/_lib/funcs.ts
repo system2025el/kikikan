@@ -281,7 +281,7 @@ export const getFilteredOrderCustomers = async (query: string) => {
         const filteredCustomers: CustomersDialogValues[] = data.map((d, index) => ({
           kokyakuId: d.kokyaku_id,
           kokyakuNam: d.kokyaku_nam,
-          kokyakuRank: d.kokyaku_rank,
+          // kokyakuRank: d.kokyaku_rank,
           adrShozai: d.adr_shozai ?? '',
           adrTatemono: d.adr_tatemono ?? '',
           adrSonota: d.adr_sonota ?? '',

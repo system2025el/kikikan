@@ -77,7 +77,7 @@ export type VehicleTableValues = {
 export type CustomersDialogValues = {
   kokyakuId: number;
   kokyakuNam: string;
-  kokyakuRank: number;
+  // kokyakuRank: number;
   adrShozai: string;
   adrTatemono: string;
   adrSonota: string;
