@@ -37,6 +37,11 @@ export const formItems: FormItemsType[] = [
     exsample: '',
     constraints: '200文字まで',
   },
+  {
+    label: '機材リスト',
+    exsample: '',
+    constraints: '複数選択',
+  },
   // {
   //   label: '表示フラグ',
   //   exsample: '',

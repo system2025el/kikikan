@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Grid2 } from '@mui/material';
+import { Autocomplete, Box, Button, Dialog, DialogTitle, Grid2, TextField } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
@@ -12,7 +12,7 @@ import { FAKE_NEW_ID } from '../../_lib/constants';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { emptyIsshiki, formItems } from '../_lib/datas';
-import { addNewIsshiki, getChosenIsshiki, updateIsshiki } from '../_lib/funcs';
+import { addNewIsshiki, getChosenIsshiki, getEqptsSelection, updateIsshiki } from '../_lib/funcs';
 import { IsshikisMasterDialogSchema, IsshikisMasterDialogValues } from '../_lib/types';
 
 /**
@@ -50,7 +50,8 @@ export const IsshikisMasterDialog = ({
   const [eqptList, setEqptLIst] = useState<SelectTypes[]>([]);
   /** 選択制御用の機材の配列 */
   const [selectedList, setSelectedList] = useState<SelectTypes[]>([]);
-
+  /** 機材選択ダイアログ開閉 */
+  const [eqSelectOpen, setEqSelectOpen] = useState<boolean>(false);
   /** 選択肢の機材リスト */
   const [options, setOptions] = useState<SelectTypes[]>([]);
 
@@ -71,6 +72,7 @@ export const IsshikisMasterDialog = ({
 
   const isDeleted = watch('delFlg');
   const name = watch('isshikiNam');
+  const kizaiList = watch('kizaiList');
 
   /* methods ---------------------------------------- */
   /* フォームを送信 */
@@ -129,6 +131,9 @@ export const IsshikisMasterDialog = ({
   useEffect(() => {
     console.log('★★★★★★★★★★★★★★★★★★★★★');
     const getThatOneIsshiki = async () => {
+      const o = await getEqptsSelection();
+      setOptions(o);
+
       if (isshikiId === FAKE_NEW_ID) {
         // 新規追加モード
         reset(emptyIsshiki); // フォーム初期化
@@ -195,6 +200,14 @@ export const IsshikisMasterDialog = ({
                   sx={{ maxWidth: '90%' }}
                   disabled={editable ? false : true}
                 />
+              </FormBox>
+              <FormBox formItem={formItems[3]}>
+                <Button onClick={() => setEqSelectOpen(true)}>機材選択</Button>
+                <Dialog open={eqSelectOpen} onClose={() => setEqSelectOpen(false)}>
+                  <DialogTitle>一式機材選択</DialogTitle>
+                  <Box></Box>
+                </Dialog>
+                {eqptList.map((d) => d.label)}
               </FormBox>
             </Grid2>
             <IsDirtyAlertDialog

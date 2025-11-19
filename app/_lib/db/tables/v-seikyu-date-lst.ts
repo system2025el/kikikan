@@ -2,6 +2,7 @@
 
 import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { BillingStsSearchValues } from '@/app/(main)/(bill)/billing-sts-list/_lib/types';
+import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 
 import pool from '../postgres';
 import { SCHEMA, supabase } from '../supabase';
@@ -18,7 +19,7 @@ export const selectFilteredBillingSituations = async (queries: BillingStsSearchV
     .schema(SCHEMA)
     .from('v_seikyu_date_lst')
     .select('*')
-    .eq('kokyaku_id', kokyaku)
+    .eq('kokyaku_id', kokyaku ?? FAKE_NEW_ID)
     .eq('shuko_fix_flg', 1);
 
   if (kokyakuTantoNam && kokyakuTantoNam.trim() !== '') {
@@ -248,7 +249,7 @@ export const selectJuchuKizaiHeadNamListFormBill = async (queries: {
     .schema(SCHEMA)
     .from('v_seikyu_date_lst')
     .select('juchu_head_id, juchu_kizai_head_id, head_nam')
-    .eq('juchu_head_id', queries.juchuId)
+    .eq('juchu_head_id', queries.juchuId ?? FAKE_NEW_ID)
     .eq('kokyaku_id', queries.kokyaku.id)
     .eq('shuko_fix_flg', 1)
     .lte('shuko_dat', toJapanYMDString(queries.dat, '-'))

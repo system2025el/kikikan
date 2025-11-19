@@ -8,7 +8,9 @@ import {
   selectOneIsshiki,
   updateIsshikiDB,
 } from '@/app/_lib/db/tables/m-issiki';
+import { selectActiveEqpts } from '@/app/_lib/db/tables/m-kizai';
 import { toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
+import { SelectTypes } from '@/app/(main)/_ui/form-box';
 
 import { emptyIsshiki } from './datas';
 import { IsshikisMasterDialogValues, IsshikisMasterTableValues } from './types';
@@ -117,5 +119,22 @@ export const updateIsshiki = async (rawData: IsshikisMasterDialogValues, id: num
   } catch (error) {
     console.log('例外が発生', error);
     throw error;
+  }
+};
+
+/**
+ * 機材の選択肢を取得、成型する関数
+ * @returns { SelectTypes[] } 選択肢
+ */
+export const getEqptsSelection = async () => {
+  try {
+    const data = (await selectActiveEqpts('')).rows;
+
+    if (!data) {
+      throw new Error('error : eqpt master');
+    }
+    return data.map((d) => ({ id: d.kizaiId, label: d.kizaiNam }));
+  } catch (e) {
+    throw e;
   }
 };

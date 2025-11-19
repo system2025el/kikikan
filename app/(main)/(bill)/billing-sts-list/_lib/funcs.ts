@@ -21,7 +21,7 @@ export const getFilteredBillingSituations = async (
     return []; // 空配列を返す
   }
   try {
-    const { data, error } = await selectFilteredBillingSituations(queries);
+    const { data, error } = await selectFilteredBillingSituations({ ...queries, kokyaku: queries.kokyaku });
     if (error) {
       console.error('DB情報取得エラー', error.message, error.cause, error.hint);
       throw error;
