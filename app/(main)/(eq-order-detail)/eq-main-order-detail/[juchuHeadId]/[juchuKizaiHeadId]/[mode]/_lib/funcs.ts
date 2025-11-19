@@ -587,7 +587,7 @@ export const saveJuchuKizai = async (
       // 追加
       if (addIdoKizaiData.length > 0) {
         const idoDenMaxId = await getIdoDenJuchuMaxId();
-        const newIdoDenId = idoDenMaxId ? idoDenMaxId.ido_den_id + 1 : 1;
+        const newIdoDenId = idoDenMaxId ? idoDenMaxId + 1 : 1;
         const addIdoDenResult = await addIdoDenJuchu(newIdoDenId, addIdoKizaiData, userNam, connection);
         console.log('移動伝票受注追加', addIdoDenResult);
       }
@@ -907,7 +907,7 @@ export const getJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId:
       planKizaiQty: d.plan_kizai_qty ?? 0,
       planYobiQty: d.plan_yobi_qty ?? 0,
       planQty: d.plan_qty ?? 0,
-      dspOrdNum: d.dsp_ord_num,
+      dspOrdNum: d.dsp_ord_num ?? 0,
       indentNum: d.indent_num ?? 0,
       delFlag: false,
       saveFlag: true,
@@ -942,7 +942,7 @@ export const getIdoJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHead
       return true;
     });
 
-    const eqIds = uniqueEqList.map((data) => data.kizai_id);
+    const eqIds = uniqueEqList.map((data) => data.kizai_id).filter((id) => id !== null);
 
     const { data: mKizai, error: mKizaiError } = await selectMeisaiEqts(eqIds);
 
@@ -952,15 +952,15 @@ export const getIdoJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHead
     }
 
     const juchuKizaiMeisaiData: IdoJuchuKizaiMeisaiValues[] = uniqueEqList.map((d) => ({
-      juchuHeadId: d.juchu_head_id,
-      juchuKizaiHeadId: d.juchu_kizai_head_id,
+      juchuHeadId: d.juchu_head_id ?? 0,
+      juchuKizaiHeadId: d.juchu_kizai_head_id ?? 0,
       idoDenId: d.ido_den_id,
       sagyoDenDat: d.sagyo_den_dat ? new Date(d.sagyo_den_dat) : null,
       sagyoSijiId: d.sagyo_siji_id === 'K→Y' ? 1 : d.sagyo_siji_id === 'Y→K' ? 2 : null,
-      mShozokuId: mKizai.find((data) => data.kizai_id === d.kizai_id)?.shozoku_id,
-      shozokuId: d.shozoku_id,
+      mShozokuId: mKizai.find((data) => data.kizai_id === d.kizai_id)?.shozoku_id ?? 0,
+      shozokuId: d.shozoku_id ?? 0,
       shozokuNam: d.shozoku_nam ?? '',
-      kizaiId: d.kizai_id,
+      kizaiId: d.kizai_id ?? 0,
       kizaiNam: d.kizai_nam ?? '',
       kizaiQty: d.kizai_qty ?? 0,
       planKizaiQty: d.plan_kizai_qty ?? 0,
@@ -1906,7 +1906,7 @@ export const getIdoDenJuchuMaxId = async () => {
       throw error;
     }
     console.log('getIdoDenJuchuMaxId: ', data);
-    return data;
+    return data.ido_den_id;
   } catch (e) {
     console.error(e);
     throw e;
@@ -2333,7 +2333,7 @@ export const getSelectedEqpts = async (idList: number[] /* rank: number*/) => {
       //             ? (d.rank_amt_5 ?? 0)
       //             : 0,
       kizaiQty: d.kizai_qty ?? 0,
-      ctnFlg: d.ctn_flg,
+      ctnFlg: d.ctn_flg === 1 ? true : false,
       indentNum: 0,
     }));
     return selectedEqpts;

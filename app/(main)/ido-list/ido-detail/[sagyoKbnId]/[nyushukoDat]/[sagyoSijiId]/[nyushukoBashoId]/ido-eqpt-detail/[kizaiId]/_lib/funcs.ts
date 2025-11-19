@@ -29,7 +29,7 @@ export const getIdoDenDetail = async (
     }
 
     const idoEqptDetailData: IdoEqptDetailValues = {
-      idoDenId: data.ido_den_id,
+      idoDenId: data.ido_den_id ?? 0,
       sagyoKbnId: sagyoKbnId,
       sagyoSijiId: sagyoSijiId,
       sagyoDenDat: sagyoDenDat,
@@ -37,13 +37,13 @@ export const getIdoDenDetail = async (
       planQty: data.plan_qty,
       resultQty: data.result_qty,
       resultAdjQty: data.result_adj_qty,
-      kizaiId: data.kizai_id,
+      kizaiId: data.kizai_id ?? 0,
       kizaiNam: data.kizai_nam,
       bldCod: data.bld_cod,
       tanaCod: data.tana_cod,
       edaCod: data.eda_cod,
       mem: data.kizai_mem,
-      ctnFlg: data.ctn_flg,
+      ctnFlg: data.ctn_flg === 1 ? true : false,
     };
 
     return idoEqptDetailData;
@@ -69,9 +69,9 @@ export const getIdoEqptDetail = async (
     }
 
     const idoEqptDetailData: IdoEqptDetailTableValues[] = data.map((d) => ({
-      idoDenId: d.ido_den_id,
+      idoDenId: d.ido_den_id ?? 0,
       rfidElNum: d.rfid_el_num,
-      rfidTagId: d.rfid_tag_id,
+      rfidTagId: d.rfid_tag_id ?? '',
       rfidKizaiSts: d.rfid_kizai_sts,
       rfidStsNam: d.rfid_sts_nam,
       rfidMem: d.rfid_mem,

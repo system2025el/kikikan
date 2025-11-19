@@ -64,7 +64,7 @@ export const getShukoEqptDetail = async (
       tanaCod: data.tana_cod,
       edaCod: data.eda_cod,
       kizaiMem: data.kizai_mem,
-      ctnFlg: data.ctn_flg,
+      ctnFlg: data.ctn_flg === 1 ? true : false,
       indentNum: data.indent_num ?? 0,
     };
 
@@ -110,7 +110,7 @@ export const getShukoEqptDetailTable = async (
     }
 
     const shukoEqptDetailTableData: ShukoEqptDetailTableValues[] = data.map((d) => ({
-      nyushukoBashoId: d.nyushuko_basho_id,
+      nyushukoBashoId: d.nyushuko_basho_id ?? 0,
       rfidDat: d.rfid_dat,
       rfidDelFlg: d.rfid_del_flg,
       rfidElNum: d.rfid_el_num,
