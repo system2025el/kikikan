@@ -154,7 +154,7 @@ export const updShukoDetail = async (
     }
 
     // 入出庫確定追加
-    const addNyushukoFixResult = await addNyushukoFix(shukoDetailData, shukoDetailTableData, userNam, connection);
+    const addNyushukoFixResult = await addShukoFix(shukoDetailData, shukoDetailTableData, userNam, connection);
     console.log('入出庫確定追加', addNyushukoFixResult);
 
     await connection.query('COMMIT');
@@ -269,7 +269,7 @@ export const updNyushukoDen = async (
  * @param userNam ユーザー名
  * @param connection
  */
-export const addNyushukoFix = async (
+export const addShukoFix = async (
   shukoDetailData: ShukoDetailValues,
   shukoDetailTableData: ShukoDetailTableValues[],
   userNam: string,
@@ -306,7 +306,7 @@ export const addNyushukoFix = async (
  * @param userNam ユーザー名
  * @param connection
  */
-export const delNyushukoFix = async (
+export const delShukoFix = async (
   shukoDetailData: ShukoDetailValues,
   shukoDetailTableData: ShukoDetailTableValues[]
 ) => {

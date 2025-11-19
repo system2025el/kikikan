@@ -96,6 +96,43 @@ export const updateNyushukoDen = async (data: NyushukoDen, connection: PoolClien
 };
 
 /**
+ * 親入庫伝票更新
+ * @param data 入出庫伝票データ
+ * @param connection
+ */
+export const updateOyaNyukoDen = async (data: NyushukoDen, connection: PoolClient) => {
+  const query = `
+    UPDATE
+      ${SCHEMA}.t_nyushuko_den
+    SET
+      plan_qty = plan_qty - ${data.plan_qty ?? 0}
+      upd_dat = ${data.upd_dat}
+      upd_user = ${data.upd_user}
+    WHERE
+      juchu_head_id = ${data.juchu_head_id}
+      AND juchu_kizai_head_id = (
+        SELECT 
+          oya_juchu_kizai_head_id 
+        FROM 
+          ${SCHEMA}.t_juchu_kizai_head 
+        WHERE 
+          juchu_head_id = ${data.juchu_head_id} 
+          AND juchu_kizai_head_id = ${data.juchu_kizai_head_id}
+      )
+      AND sagyo_kbn_id = ${data.sagyo_kbn_id}
+      AND sagyo_id = ${data.sagyo_id}
+      AND kizai_id = ${data.kizai_id}
+      AND dsp_ord_num = ${data.dsp_ord_num}
+  `;
+
+  try {
+    await connection.query(query);
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
  * 入出庫伝票UPSERT
  * @param data 入出庫伝票データ
  * @param connection
