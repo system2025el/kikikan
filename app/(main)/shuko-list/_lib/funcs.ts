@@ -80,17 +80,17 @@ export const getPdfData = async (
     console.log('juchuKizaiHeadData', juchuKizaiHeadData);
 
     const honbanbiCalcQty = juchuKizaiHeadData.reduce((max, current) => {
-      return current.juchu_honbanbi_calc_qty > max.juchu_honbanbi_calc_qty ? current : max;
+      return (current.juchu_honbanbi_calc_qty ?? 0) > (max.juchu_honbanbi_calc_qty ?? 0) ? current : max;
     }).juchu_honbanbi_calc_qty;
     console.log('honbanbiCalcQty', honbanbiCalcQty);
 
     const nyukoDat =
       nyushukoBashoId === 1
         ? juchuKizaiHeadData.reduce((min, current) => {
-            return new Date(current.kics_nyuko_dat) < new Date(min.kics_nyuko_dat) ? current : min;
+            return new Date(current.kics_nyuko_dat ?? '') < new Date(min.kics_nyuko_dat ?? '') ? current : min;
           }).kics_nyuko_dat
         : juchuKizaiHeadData.reduce((min, current) => {
-            return new Date(current.yard_nyuko_dat) < new Date(min.yard_nyuko_dat) ? current : min;
+            return new Date(current.yard_nyuko_dat ?? '') < new Date(min.yard_nyuko_dat ?? '') ? current : min;
           }).yard_nyuko_dat;
     console.log('nyukoDat', nyukoDat);
 
@@ -101,15 +101,15 @@ export const getPdfData = async (
     const pdjData: PdfModel = {
       item1: juchuHeadData.juchu_head_id,
       item2: toJapanYMDString(),
-      item3: juchuHeadData.koen_nam,
-      item4: juchuHeadData.kokyaku_nam,
+      item3: juchuHeadData.koen_nam ?? '',
+      item4: juchuHeadData.kokyaku_nam ?? '',
       item5: toJapanYMDString(nyushukoDat),
-      item6: toJapanYMDString(nyukoDat),
-      item7: juchuHeadData.koenbasho_nam,
-      item8: honbanbiCalcQty,
-      item9: juchuHeadData.nyuryoku_user,
+      item6: nyukoDat ? toJapanYMDString(nyukoDat) : '',
+      item7: juchuHeadData.koenbasho_nam ?? '',
+      item8: honbanbiCalcQty ?? 0,
+      item9: juchuHeadData.nyuryoku_user ?? '',
       item10: '',
-      item11: juchuHeadData.kokyaku_tanto_nam,
+      item11: juchuHeadData.kokyaku_tanto_nam ?? '',
       item12: kizaiData,
     };
 

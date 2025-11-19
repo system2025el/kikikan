@@ -352,8 +352,8 @@ export const getOyaJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHead
       kizaiNam: d.kizai_nam ?? '',
       planKizaiQty: d.plan_kizai_qty ?? 0,
       planYobiQty: d.plan_yobi_qty ?? 0,
-      dspOrdNum: d.dsp_ord_num,
-      indentNum: d.indent_num,
+      dspOrdNum: d.dsp_ord_num ?? 0,
+      indentNum: d.indent_num ?? 0,
     }));
     return juchuKizaiMeisaiData;
   } catch (e) {
@@ -422,11 +422,11 @@ export const getJuchuContainerMeisai = async (juchuHeadId: number, juchuKizaiHea
     }
 
     const juchuContainerMeisaiData: JuchuContainerMeisaiValues[] = containerData.map((d) => ({
-      juchuHeadId: d.juchu_head_id,
-      juchuKizaiHeadId: d.juchu_kizai_head_id,
-      juchuKizaiMeisaiId: d.juchu_kizai_meisai_id,
-      kizaiId: d.kizai_id,
-      kizaiNam: d.kizai_nam,
+      juchuHeadId: d.juchu_head_id ?? 0,
+      juchuKizaiHeadId: d.juchu_kizai_head_id ?? 0,
+      juchuKizaiMeisaiId: d.juchu_kizai_meisai_id ?? 0,
+      kizaiId: d.kizai_id ?? 0,
+      kizaiNam: d.kizai_nam ?? '',
       planKicsKizaiQty: d.kics_plan_kizai_qty ?? 0,
       planYardKizaiQty: d.yard_plan_kizai_qty ?? 0,
       planQty: (d.kics_plan_kizai_qty ?? 0) + (d.yard_plan_kizai_qty ?? 0),
@@ -463,15 +463,15 @@ export const getOyaJuchuContainerMeisai = async (juchuHeadId: number, juchuKizai
     }
 
     const oyaJuchuContainerMeisaiData: OyaJuchuContainerMeisaiValues[] = containerData.map((d) => ({
-      juchuHeadId: d.juchu_head_id,
-      juchuKizaiHeadId: d.juchu_kizai_head_id,
-      juchuKizaiMeisaiId: d.juchu_kizai_meisai_id,
-      kizaiId: d.kizai_id,
-      kizaiNam: d.kizai_nam,
+      juchuHeadId: d.juchu_head_id ?? 0,
+      juchuKizaiHeadId: d.juchu_kizai_head_id ?? 0,
+      juchuKizaiMeisaiId: d.juchu_kizai_meisai_id ?? 0,
+      kizaiId: d.kizai_id ?? 0,
+      kizaiNam: d.kizai_nam ?? '',
       planKicsKizaiQty: d.kics_plan_kizai_qty ?? 0,
       planYardKizaiQty: d.yard_plan_kizai_qty ?? 0,
       mem: d.mem,
-      dspOrdNum: d.dsp_ord_num,
+      dspOrdNum: d.dsp_ord_num ?? 0,
       indentNum: 0,
     }));
 
