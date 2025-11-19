@@ -2,6 +2,7 @@
 
 import { selectFilteredJuchus } from '@/app/_lib/db/tables/v-juchu-lst';
 
+import { FAKE_NEW_ID } from '../../(masters)/_lib/constants';
 import { OrderListTableValues, OrderSearchValues } from './types';
 
 /**
@@ -29,14 +30,14 @@ export const getFilteredOrderList = async (
       return [];
     }
     return data.map((d) => ({
-      juchuHeadId: d.juchu_head_id,
-      juchuStsNam: d.juchu_sts_nam,
-      juchuDat: d.juchu_dat,
-      juchuStrDat: d.juchu_str_dat,
-      juchuEndDat: d.juchu_end_dat,
-      koenNam: d.koen_nam,
-      koenbashoNam: d.koenbasho_nam,
-      kokyakuNam: d.kokyaku_nam,
+      juchuHeadId: d.juchu_head_id ?? FAKE_NEW_ID,
+      juchuStsNam: d.juchu_sts_nam ?? '',
+      juchuDat: d.juchu_dat ?? '',
+      juchuStrDat: d.juchu_str_dat ?? '',
+      juchuEndDat: d.juchu_end_dat ?? '',
+      koenNam: d.koen_nam ?? '',
+      koenbashoNam: d.koenbasho_nam ?? '',
+      kokyakuNam: d.kokyaku_nam ?? '',
     }));
   } catch (e) {
     console.error('例外が発生しました:', e);

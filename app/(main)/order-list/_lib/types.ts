@@ -7,9 +7,9 @@ export type OrderListTableValues = {
   koenNam: string;
   koenbashoNam: string;
   kokyakuNam: string;
-  juchuDat: Date;
-  juchuStrDat: Date;
-  juchuEndDat: Date;
+  juchuDat: string;
+  juchuStrDat: string;
+  juchuEndDat: string;
 };
 
 /**

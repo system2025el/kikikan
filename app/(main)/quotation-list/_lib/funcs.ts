@@ -53,14 +53,14 @@ export const getFilteredQuotList = async (
       return [];
     }
     return data.map((d) => ({
-      mituHeadId: d.mitu_head_id,
-      juchuHeadId: d.juchu_head_id,
-      mituStsNam: d.sts_nam,
-      mituHeadNam: d.mitu_head_nam,
-      koenNam: d.koen_nam,
-      kokyakuNam: d.kokyaku_nam,
-      mituDat: d.mitu_dat,
-      nyuryokuUser: d.nyuryoku_user,
+      mituHeadId: d.mitu_head_id ?? FAKE_NEW_ID,
+      juchuHeadId: d.juchu_head_id ?? FAKE_NEW_ID,
+      mituStsNam: d.sts_nam ?? '',
+      mituHeadNam: d.mitu_head_nam ?? '',
+      koenNam: d.koen_nam ?? '',
+      kokyakuNam: d.kokyaku_nam ?? '',
+      mituDat: d.mitu_dat ?? '',
+      nyuryokuUser: d.nyuryoku_user ?? '',
     }));
   } catch (e) {
     console.error('例外が発生しました:', e);
