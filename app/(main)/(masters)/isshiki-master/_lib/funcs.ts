@@ -8,10 +8,12 @@ import {
   selectOneIsshiki,
   updateIsshikiDB,
 } from '@/app/_lib/db/tables/m-issiki';
-import { selectActiveEqpts } from '@/app/_lib/db/tables/m-kizai';
+import { selectActiveEqpts, selectActiveEqptsForIsshiki } from '@/app/_lib/db/tables/m-kizai';
 import { toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
+import { EqptSelection } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
 
+import { FAKE_NEW_ID } from '../../_lib/constants';
 import { emptyIsshiki } from './datas';
 import { IsshikisMasterDialogValues, IsshikisMasterTableValues } from './types';
 
@@ -123,18 +125,19 @@ export const updateIsshiki = async (rawData: IsshikisMasterDialogValues, id: num
 };
 
 /**
- * 機材の選択肢を取得、成型する関数
- * @returns { SelectTypes[] } 選択肢
+ * 機材選択に表示するための機材リスト
+ * @param query 検索キーワード
+ * @returns
  */
-export const getEqptsSelection = async () => {
+export const getEqptsForEqptSelection = async (query: number = FAKE_NEW_ID): Promise<EqptSelection[]> => {
   try {
-    const data = (await selectActiveEqpts('')).rows;
-
-    if (!data) {
-      throw new Error('error : eqpt master');
+    const data = await selectActiveEqptsForIsshiki(query);
+    if (!data || data.rowCount === 0) {
+      return [];
     }
-    return data.map((d) => ({ id: d.kizaiId, label: d.kizaiNam }));
+    return data.rows;
   } catch (e) {
+    console.error('例外が発生しました:', e);
     throw e;
   }
 };

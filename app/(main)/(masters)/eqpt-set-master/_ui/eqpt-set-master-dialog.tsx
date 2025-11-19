@@ -1,35 +1,33 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { Box, Button, Grid2, Stack, Typography } from '@mui/material';
+import { Grid2 } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
-import { FormBox, SelectTypes } from '@/app/(main)/_ui/form-box';
+import { FormBox } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { FAKE_NEW_ID } from '../../_lib/constants';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
-import { emptyIsshiki, formItems } from '../_lib/datas';
-import { addNewIsshiki, getChosenIsshiki, updateIsshiki } from '../_lib/funcs';
-import { IsshikisMasterDialogSchema, IsshikisMasterDialogValues } from '../_lib/types';
-import { EqptIsshikiSelectionDialog } from './eqtp-selection-dialog';
+import { emptyEqptSet, formItems } from '../_lib/datas';
+import { addNewEqptSet, getChosenEqptSet,updateEqptSet } from '../_lib/funcs';
+import { EqptSetsMasterDialogSchema, EqptSetsMasterDialogValues } from '../_lib/types';
 
 /**
- * 一式マスタ詳細ダイアログ
+ * 機材セットマスタ詳細ダイアログ
  * @param
- * @returns {JSX.Element} 一式マスタ詳細ダイアログコンポーネント
+ * @returns {JSX.Element} 機材セットマスタ詳細ダイアログコンポーネント
  */
-export const IsshikisMasterDialog = ({
-  isshikiId,
+export const EqptSetsMasterDialog = ({
+  eqptSetId,
   handleClose,
-  refetchIsshikis,
+  refetchEqptSets,
 }: {
-  isshikiId: number;
+  eqptSetId: number;
   handleClose: () => void;
-  refetchIsshikis: () => void;
+  refetchEqptSets: () => void;
 }) => {
   // ログインユーザ
   const user = useUserStore((state) => state.user);
@@ -48,11 +46,6 @@ export const IsshikisMasterDialog = ({
   /* submit時のactions (save, delete) */
   const [action, setAction] = useState<'save' | 'delete' | 'restore' | undefined>(undefined);
 
-  /** 表示する機材リスト */
-  const [eqptList, setEqptList] = useState<SelectTypes[]>([]);
-  /** 機材選択ダイアログ開閉 */
-  const [eqSelectOpen, setEqSelectOpen] = useState<boolean>(false);
-
   /* useForm ----------------------------------------- */
   const {
     control,
@@ -61,41 +54,38 @@ export const IsshikisMasterDialog = ({
     handleSubmit,
     reset,
     getValues,
-    setValue,
   } = useForm({
     mode: 'onChange',
     reValidateMode: 'onChange',
-    resolver: zodResolver(IsshikisMasterDialogSchema),
-    defaultValues: emptyIsshiki,
+    resolver: zodResolver(EqptSetsMasterDialogSchema),
+    defaultValues: emptyEqptSet,
   });
 
   const isDeleted = watch('delFlg');
-  const name = watch('isshikiNam');
-  const kizaiList = watch('kizaiList');
 
   /* methods ---------------------------------------- */
   /* フォームを送信 */
-  const onSubmit = async (data: IsshikisMasterDialogValues) => {
+  const onSubmit = async (data: EqptSetsMasterDialogValues) => {
     console.log('isDarty : ', isDirty);
     console.log(data);
-    if (isshikiId === FAKE_NEW_ID) {
-      await addNewIsshiki(data, user?.name ?? '');
+    if (eqptSetId === FAKE_NEW_ID) {
+      await addNewEqptSet(data, user?.name ?? '');
       handleCloseDialog();
-      refetchIsshikis();
+      refetchEqptSets();
     } else {
       if (action === 'save') {
-        await updateIsshiki(data, isshikiId, user?.name ?? '');
+        await updateEqptSet(data, eqptSetId, user?.name ?? '');
         handleCloseDialog();
-        refetchIsshikis();
+        refetchEqptSets();
       } else if (action === 'delete') {
         setDeleteOpen(true);
         return;
       } else if (action === 'restore') {
         // 有効化ボタン
         const values = await getValues();
-        await updateIsshiki({ ...values, delFlg: false }, isshikiId, user?.name ?? '');
+        await updateEqptSet({ ...values, delFlg: false }, eqptSetId, user?.name ?? '');
         handleCloseDialog();
-        refetchIsshikis();
+        refetchEqptSets();
       }
     }
   };
@@ -120,33 +110,33 @@ export const IsshikisMasterDialog = ({
   /* 削除確認ダイアログで削除選択時 */
   const handleConfirmDelete = async () => {
     const values = await getValues();
-    await updateIsshiki({ ...values, delFlg: true }, isshikiId, user?.name ?? '');
+    await updateEqptSet({ ...values, delFlg: true }, eqptSetId, user?.name ?? '');
     setDeleteOpen(false);
     handleCloseDialog();
-    await refetchIsshikis();
+    await refetchEqptSets();
   };
 
   /* useEffect --------------------------------------- */
   useEffect(() => {
     console.log('★★★★★★★★★★★★★★★★★★★★★');
-    const getThatOneIsshiki = async () => {
-      if (isshikiId === FAKE_NEW_ID) {
+    const getThatOneEqptSet = async () => {
+      if (eqptSetId === FAKE_NEW_ID) {
         // 新規追加モード
-        reset(emptyIsshiki); // フォーム初期化
+        reset(emptyEqptSet); // フォーム初期化
         setEditable(true); // 編集モードにする
         setIsLoading(false);
         setIsNew(true);
       } else {
-        const isshiki1 = await getChosenIsshiki(isshikiId);
-        if (isshiki1) {
-          reset(isshiki1); // 取得したデータでフォーム初期化
+        const eqptSet1 = await getChosenEqptSet(eqptSetId);
+        if (eqptSet1) {
+          reset(eqptSet1); // 取得したデータでフォーム初期化
           // }
           setIsLoading(false);
         }
       }
     };
-    getThatOneIsshiki();
-  }, [isshikiId, reset]);
+    getThatOneEqptSet();
+  }, [eqptSetId, reset]);
 
   return (
     <>
@@ -155,7 +145,7 @@ export const IsshikisMasterDialog = ({
           editable={editable}
           handleEditable={() => setEditable(true)}
           handleClose={handleClickClose}
-          dialogTitle="一式マスタ登録"
+          dialogTitle="機材セットマスタ登録"
           isNew={isNew}
           isDirty={isDirty}
           setAction={setAction}
@@ -166,26 +156,16 @@ export const IsshikisMasterDialog = ({
         ) : (
           <>
             <Grid2 container spacing={1} p={5} direction={'column'} justifyContent={'center'} width={'100%'}>
-              <FormBox formItem={formItems[0]} required>
+              {/* <FormBox formItem={formItems[0]} required>
                 <TextFieldElement
-                  name="isshikiNam"
+                  name="eqptSetNam"
                   control={control}
                   label={editable ? formItems[0].exsample : ''}
                   fullWidth
                   sx={{ maxWidth: '90%' }}
                   disabled={editable ? false : true}
                 />
-              </FormBox>
-              <FormBox formItem={formItems[1]} required>
-                <TextFieldElement
-                  name="regAmt"
-                  control={control}
-                  label={editable ? formItems[1].exsample : ''}
-                  fullWidth
-                  sx={{ maxWidth: '90%' }}
-                  disabled={editable ? false : true}
-                />
-              </FormBox>
+              </FormBox> */}
               <FormBox formItem={formItems[2]}>
                 <TextFieldElement
                   multiline
@@ -197,30 +177,6 @@ export const IsshikisMasterDialog = ({
                   disabled={editable ? false : true}
                 />
               </FormBox>
-              <FormBox formItem={formItems[3]} align="baseline">
-                <Box width={'100%'} border={1} borderColor={'divider'} p={1}>
-                  <Button onClick={() => setEqSelectOpen(true)}>機材選択</Button>
-                  <EqptIsshikiSelectionDialog
-                    open={eqSelectOpen}
-                    isshikiId={isshikiId}
-                    setOpen={setEqSelectOpen}
-                    setEqptList={setEqptList}
-                    setValue={setValue}
-                  />
-
-                  {eqptList.map((d) => (
-                    <Stack key={d.id} sx={{ width: '100%', my: 0.5 }}>
-                      <Button sx={{ paddingX: 1, paddingY: 0, minWidth: 0 }} color="error">
-                        <DeleteIcon fontSize="small" />
-                      </Button>
-
-                      <Typography whiteSpace={'nowrap'} sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {d.label}
-                      </Typography>
-                    </Stack>
-                  ))}
-                </Box>
-              </FormBox>
             </Grid2>
             <IsDirtyAlertDialog
               open={dirtyOpen}
@@ -229,7 +185,7 @@ export const IsshikisMasterDialog = ({
             />
             <WillDeleteAlertDialog
               open={deleteOpen}
-              data={name}
+              data={'name'}
               handleCloseDelete={() => setDeleteOpen(false)}
               handleCloseAll={handleConfirmDelete}
             />
