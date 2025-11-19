@@ -98,13 +98,13 @@ export const updNyukoDetail = async (
     await connection.query('BEGIN');
 
     switch (nyukoDetailData.juchuKizaiHeadKbn) {
-      case 1:
+      case 1: // メイン
         await updMainNyukoDetail(nyukoDetailData, nyukoDetailTableData, userNam, connection);
         break;
-      case 2:
+      case 2: // 返却
         await updReturnNyukoDetail(nyukoDetailData, nyukoDetailTableData, userNam, connection);
         break;
-      case 3:
+      case 3: // キープ
         await updKeepNyukoDetail(nyukoDetailData, nyukoDetailTableData, userNam, connection);
         break;
     }
@@ -248,7 +248,7 @@ export const upsJuchuKizaiMeisai = async (
     shozoku_id: d.nyushukoShubetuId ?? 0,
     dsp_ord_num: d.dspOrdNumMeisai,
     indent_num: d.indentNum,
-    add_dat: new Date().toISOString(),
+    add_dat: toJapanTimeStampString(),
     add_user: userNam,
     upd_dat: null,
     upd_user: null,
@@ -284,7 +284,7 @@ export const upsJuchuCtnMeisai = async (
     shozoku_id: d.nyushukoShubetuId ?? 0,
     dsp_ord_num: d.dspOrdNumMeisai,
     indent_num: d.indentNum,
-    add_dat: toJapanTimeString(),
+    add_dat: toJapanTimeStampString(),
     add_user: userNam,
   }));
   try {
@@ -320,7 +320,7 @@ export const updNyukoDen = async (
     sagyo_kbn_id: 30,
     dsp_ord_num: d.dspOrdNumMeisai,
     indent_num: d.indentNum,
-    add_dat: new Date().toISOString(),
+    add_dat: toJapanTimeStampString(),
     add_user: userNam,
     upd_dat: null,
     upd_user: null,
@@ -363,7 +363,7 @@ export const upsShukoDen = async (
     sagyo_kbn_id: 10,
     dsp_ord_num: d.dspOrdNumMeisai,
     indent_num: d.indentNum,
-    add_dat: new Date().toISOString(),
+    add_dat: toJapanTimeStampString(),
     add_user: userNam,
     upd_dat: null,
     upd_user: null,
@@ -380,7 +380,7 @@ export const upsShukoDen = async (
     sagyo_kbn_id: 20,
     dsp_ord_num: d.dspOrdNumMeisai,
     indent_num: d.indentNum,
-    add_dat: new Date().toISOString(),
+    add_dat: toJapanTimeStampString(),
     add_user: userNam,
     upd_dat: null,
     upd_user: null,
@@ -422,7 +422,7 @@ export const updOyaNyukoDen = async (
     sagyo_kbn_id: 30,
     dsp_ord_num: d.dspOrdNumMeisai,
     indent_num: d.indentNum,
-    upd_dat: new Date().toISOString(),
+    upd_dat: toJapanTimeStampString(),
     upd_user: userNam,
   }));
 
@@ -461,7 +461,7 @@ export const addNyukoFix = async (
     sagyo_den_dat: nyukoDetailData.nyushukoDat,
     sagyo_id: nyukoDetailData.nyushukoBashoId,
     sagyo_fix_flg: 1,
-    upd_dat: new Date().toISOString(),
+    upd_dat: toJapanTimeStampString(),
     upd_user: userNam,
   }));
 

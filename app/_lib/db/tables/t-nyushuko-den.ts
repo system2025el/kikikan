@@ -105,9 +105,9 @@ export const updateOyaNyukoDen = async (data: NyushukoDen, connection: PoolClien
     UPDATE
       ${SCHEMA}.t_nyushuko_den
     SET
-      plan_qty = plan_qty - ${data.plan_qty ?? 0}
-      upd_dat = ${data.upd_dat}
-      upd_user = ${data.upd_user}
+      plan_qty = plan_qty - ${data.plan_qty ?? 0},
+      -- upd_dat = ${data.upd_dat},
+      upd_user = '${data.upd_user}'
     WHERE
       juchu_head_id = ${data.juchu_head_id}
       AND juchu_kizai_head_id = (
@@ -124,6 +124,8 @@ export const updateOyaNyukoDen = async (data: NyushukoDen, connection: PoolClien
       AND kizai_id = ${data.kizai_id}
       AND dsp_ord_num = ${data.dsp_ord_num}
   `;
+
+  console.log(query);
 
   try {
     await connection.query(query);
