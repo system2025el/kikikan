@@ -14,6 +14,7 @@ import { MRfidDBValues } from '@/app/_lib/db/types/m-rfid-type';
 import { RfidStatusResultValues } from '@/app/_lib/db/types/t-rfid-status-result-type';
 import { toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
+import { FAKE_NEW_ID } from '../../../_lib/constants';
 import { fakeToNull, nullToFake } from '../../../_lib/value-converters';
 import { emptyRfid } from './datas';
 import { RfidsMasterDialogValues, RfidsMasterTableValues } from './types';
@@ -91,8 +92,8 @@ export const getChosenRfid = async (id: string) => {
       delFlg: Boolean(data.del_flg),
       shozokuId: nullToFake(data.shozoku_id),
       mem: data.mem,
-      tagId: data.rfid_tag_id,
-      rfidKizaiSts: data.rfid_kizai_sts,
+      tagId: data.rfid_tag_id ?? '',
+      rfidKizaiSts: data.rfid_kizai_sts ?? FAKE_NEW_ID,
     };
     return RfidDetails;
   } catch (e) {

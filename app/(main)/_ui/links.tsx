@@ -45,7 +45,7 @@ const masterList: MenuItem[] = [
   { name: '部門マスタ', url: '/bumons-master' },
   // { name: '拠点マスタ', url: '/bases-master' },
   // { name: '権限マスタ', url: '/' },
-  { name: '一式マスタ', url: '/' },
+  { name: '一式マスタ', url: '/isshiki-master' },
   { name: '担当者マスタ', url: '/users-master' },
   { name: '機材セットマスタ', url: '/eqpt-bundle-master' },
   { name: 'マスタインポート', url: '/masters-import' },

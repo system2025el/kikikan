@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { upsertSeikyuDat } from '@/app/_lib/db/tables/t-seikyu-date-juchu-kizai';
 import { selectFilteredBillingSituations } from '@/app/_lib/db/tables/v-seikyu-date-lst';
 import { toJapanTimeStampString, toJapanTimeString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
+import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 
 import { BillingStsSearchValues, BillingStsTableValues } from './types';
 
@@ -31,20 +32,20 @@ export const getFilteredBillingSituations = async (
     console.log(data);
 
     const heads = data.map((d) => ({
-      juchuId: d.juchu_head_id,
-      kziHeadId: d.juchu_kizai_head_id,
-      headNam: d.head_nam,
-      shukoDat: d.shuko_dat,
-      nyukoDat: d.nyuko_dat,
+      juchuId: d.juchu_head_id ?? FAKE_NEW_ID,
+      kziHeadId: d.juchu_kizai_head_id ?? FAKE_NEW_ID,
+      headNam: d.head_nam ?? '',
+      shukoDat: d.shuko_dat ?? '',
+      nyukoDat: d.nyuko_dat ?? '',
       seikyuDat: d.seikyu_dat ?? null,
     }));
     const uniqueData = Array.from(new Map(data.map((d) => [JSON.stringify(d.juchu_head_id), d])).values());
     return uniqueData.map((d, index) => ({
-      juchuId: d.juchu_head_id,
-      kokyakuNam: d.kokyaku_nam,
-      kokyakuTantoNam: d.kokyaku_tanto_nam,
-      koenNam: d.koen_nam,
-      sts: d.seikyu_jokyo_total_sts_nam,
+      juchuId: d.juchu_head_id ?? FAKE_NEW_ID,
+      kokyakuNam: d.kokyaku_nam ?? '',
+      kokyakuTantoNam: d.kokyaku_tanto_nam ?? '',
+      koenNam: d.koen_nam ?? '',
+      sts: d.seikyu_jokyo_total_sts_nam ?? '',
       ordNum: index + 1,
       heads: heads.filter((h) => d.juchu_head_id === h.juchuId).map((h, i) => ({ ...h, ordNum: i + 1 })),
     }));
