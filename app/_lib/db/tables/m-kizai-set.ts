@@ -1,7 +1,11 @@
 'use server';
 
+import { toJapanTimeStampString } from '@/app/(main)/_lib/date-conversion';
+import { EqptSetsMasterDialogValues } from '@/app/(main)/(masters)/eqpt-set-master/_lib/types';
+
 import pool from '../postgres';
 import { SCHEMA, supabase } from '../supabase';
+import { MKizaiSetDBValues } from '../types/m-kizai-set-type';
 
 /**
  * 選択された機材のセット機材のIDリストを取得する関数
@@ -37,6 +41,104 @@ export const selectSetOptions = async (kizaiId: number) => {
     v.del_flg <> 1`;
   try {
     return await pool.query(query, [kizaiId]);
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
+ * DBから有効な機材セットを取得する関数
+ * @returns 有効な機材セットのidと名前の配列
+ */
+export const selectActiveEqptSets = async () => {
+  try {
+    return await supabase
+      .schema(SCHEMA)
+      .from('m_kizai_set')
+      .select('kizai_set_id, kizai_set_nam')
+      .neq('del_flg', 1)
+      .order('kizai_set_nam');
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
+ * kizai_set_namが一致する機材セットを取得する関数
+ * @param {string} query 機材セット名
+ * @returns kizai_set_nameで検索された機材セットマスタの配列 検索無しなら全件
+ */
+export const selectFilteredEqptSets = async (query: string) => {
+  const builder = supabase.schema(SCHEMA).from('m_kizai_set').select('set_kizai_id,  mem, del_flg'); // テーブルに表示するカラム
+
+  if (query && query.trim() !== '') {
+    builder.ilike('kizai_set_nam', `%${query}%`);
+  }
+
+  try {
+    return await builder;
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
+ * kizai_set_idが一致する機材セットを取得する関数
+ * @param id 探すkizai_set_id
+ * @returns kizai_set_idが一致する機材セット
+ */
+export const selectOneEqptSet = async (id: number) => {
+  try {
+    return await supabase
+      .schema(SCHEMA)
+      .from('m_kizai_set')
+      .select('set_kizai_id, del_flg, mem')
+      .eq('kizai_set_id', id)
+      .single();
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
+ * 機材セットマスタに新規挿入する関数
+ * @param data 挿入するデータ
+ */
+export const insertNewEqptSet = async (data: EqptSetsMasterDialogValues, user: string) => {
+  const query = `
+          INSERT INTO ${SCHEMA}.m_kizai_set (
+            kizai_set_id, kizai_set_nam, del_flg, dsp_ord_num,
+            mem, add_dat, add_user
+          )
+          VALUES (
+            (SELECT coalesce(max(kizai_set_id),0) + 1 FROM ${SCHEMA}.m_kizai_set),
+            $1, $2,
+            (SELECT coalesce(max(dsp_ord_num),0) + 1 FROM ${SCHEMA}.m_kizai_set),
+            $3, $4, $5
+          );
+        `;
+  const date = toJapanTimeStampString();
+  const values = [Number(data.delFlg), data.mem, date, user];
+
+  try {
+    await pool.query(query, values);
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
+ * 機材セットマスタを更新する関数
+ * @param data 更新するデータ
+ * @param id 更新する機材セットのkizai_set_id
+ */
+export const updateEqptSetDB = async (data: MKizaiSetDBValues) => {
+  try {
+    await supabase
+      .schema(SCHEMA)
+      .from('m_kizai_set')
+      .update({ ...data })
+      .eq('kizai_id', data.kizai_id);
   } catch (e) {
     throw e;
   }
