@@ -39,28 +39,3 @@ export const emptyShukeibumon: ShukeibumonsMasterDialogValues = {
   delFlg: false,
   mem: '',
 };
-
-/*モック削除delete */
-export const shukeibumonsList: ShukeibumonsMasterTableValues[] = [
-  {
-    shukeibumonNam: '照明部',
-    mem: 'XXXXXXXXXXX',
-    shukeibumonId: 1,
-    tblDspId: 0,
-    delFlg: false,
-  },
-  {
-    shukeibumonNam: 'L課（Control）',
-    mem: 'XXXXXXXX',
-    shukeibumonId: 2,
-    tblDspId: 0,
-    delFlg: false,
-  },
-  {
-    shukeibumonNam: 'L課（SPOT）',
-    mem: 'XXXXXXX',
-    shukeibumonId: 3,
-    tblDspId: 0,
-    delFlg: false,
-  },
-];

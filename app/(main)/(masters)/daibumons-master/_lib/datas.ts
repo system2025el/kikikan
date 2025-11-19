@@ -38,35 +38,3 @@ export const formItems: FormItemsType[] = [
     constraints: '',
   },
 ];
-
-/*モック削除delete */
-export const daibumonsList: DaibumonsMasterTableValues[] = [
-  {
-    daibumonId: 1,
-    daibumonNam: '照明',
-    mem: 'XXXXXXXXXXX',
-    tblDspId: 0,
-    delFlg: false,
-  },
-  {
-    daibumonId: 2,
-    daibumonNam: 'Moving Light',
-    mem: 'XXXXXXXX',
-    tblDspId: 0,
-    delFlg: false,
-  },
-  {
-    daibumonNam: 'ムービング ゴボ',
-    mem: 'XXXXXXX',
-    daibumonId: 3,
-    tblDspId: 0,
-    delFlg: false,
-  },
-  {
-    daibumonNam: '空（カラ）ケース',
-    daibumonId: 4,
-    mem: '',
-    tblDspId: 0,
-    delFlg: false,
-  },
-];

@@ -44,28 +44,3 @@ export const emptyBumon: BumonsMasterDialogValues = {
   daibumonId: FAKE_NEW_ID,
   shukeibumonId: FAKE_NEW_ID,
 };
-
-/*モック削除delete */
-export const bumonsList: BumonsMasterTableValues[] = [
-  {
-    bumonId: 1,
-    bumonNam: 'ムービングライト',
-    mem: 'あえいうえおあおかけきくけこかこ',
-    tblDspId: 0,
-    delFlg: false,
-  },
-  {
-    bumonId: 2,
-    bumonNam: 'スポットライト',
-    mem: '',
-    tblDspId: 0,
-    delFlg: false,
-  },
-  {
-    bumonId: 3,
-    bumonNam: 'その他',
-    mem: '',
-    tblDspId: 0,
-    delFlg: false,
-  },
-];

@@ -212,9 +212,9 @@ export const getJuchuKizaiHeadNamListForBill = async (queries: {
       return [];
     }
     return data.map((d) => ({
-      juchuHeadId: d.juchu_head_id,
-      juchuKizaiHeadId: d.juchu_kizai_head_id,
-      headNam: d.head_nam,
+      juchuHeadId: d.juchu_head_id ?? FAKE_NEW_ID,
+      juchuKizaiHeadId: d.juchu_kizai_head_id ?? FAKE_NEW_ID,
+      headNam: d.head_nam ?? '',
     }));
   } catch (e) {
     console.error('例外が発生しました', e);

@@ -10,6 +10,7 @@ import { selectCountOfTheEqpt } from '@/app/_lib/db/tables/m-rfid';
 import { selectFilteredEqpts } from '@/app/_lib/db/tables/v-kizai-list';
 import { toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
+import { FAKE_NEW_ID } from '../../_lib/constants';
 import { getBumonsSelection, getDaibumonsSelection, getShukeibumonsSelection } from '../../_lib/funcs';
 import { fakeToNull, nullToFake } from '../../_lib/value-converters';
 import { emptyEqpt } from './datas';
@@ -46,7 +47,7 @@ export const getFilteredEqpts = async (
       return { data: [], options: options };
     }
     const filteredEqpts: EqptsMasterTableValues[] = data.map((d, index) => ({
-      kizaiId: d.kizai_id,
+      kizaiId: d.kizai_id ?? FAKE_NEW_ID,
       kizaiNam: d.kizai_nam,
       kizaiQty: Number(d.kizai_qty) + Number(d.kizai_ng_qty),
       ngQty: Number(d.kizai_ng_qty ?? 0),

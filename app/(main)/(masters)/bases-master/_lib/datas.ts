@@ -35,28 +35,3 @@ export const emptyBase: BasesMasterDialogValues = {
   delFlg: false,
   mem: '',
 };
-
-/**モック削除delete */
-export const basesList: BasesMasterTableValues[] = [
-  {
-    shozokuNam: 'KICS',
-    mem: '川崎',
-    shozokuId: 1,
-    tblDspId: 0,
-    delFlg: false,
-  },
-  {
-    shozokuNam: 'YARD',
-    mem: '大和',
-    shozokuId: 2,
-    tblDspId: 0,
-    delFlg: false,
-  },
-  {
-    shozokuNam: 'その他',
-    mem: '厚木など',
-    shozokuId: 3,
-    tblDspId: 0,
-    delFlg: false,
-  },
-];

@@ -32,7 +32,7 @@ export const getRfidsOfTheKizai = async (kizaiId: number) => {
       return [];
     }
     const filteredRfids: RfidsMasterTableValues[] = data.map((d, index) => ({
-      rfidTagId: d.rfid_tag_id,
+      rfidTagId: d.rfid_tag_id ?? '',
       stsId: d.rfid_kizai_sts,
       stsNam: d.sts_nam,
       shozokuId: d.shozoku_id,
