@@ -23,7 +23,7 @@ import { useUserStore } from '@/app/_lib/stores/usestore';
 import { BackButton } from '@/app/(main)/_ui/buttons';
 import { DateTime, TestDate } from '@/app/(main)/_ui/date';
 
-import { confirmChildJuchuKizaiHead, delNyushukoFix, getShukoDetail, updShukoDetail } from '../_lib/funcs';
+import { confirmChildJuchuKizaiHead, delShukoFix, getShukoDetail, updShukoDetail } from '../_lib/funcs';
 import { ShukoDetailTableValues, ShukoDetailValues } from '../_lib/types';
 import { ShukoDetailTable } from './shuko-detail-table';
 
@@ -99,7 +99,7 @@ export const ShukoDetail = (props: {
       return;
     }
 
-    const updateResult = await delNyushukoFix(shukoDetailData, shukoDetailTableData);
+    const updateResult = await delShukoFix(shukoDetailData, shukoDetailTableData);
 
     if (updateResult) {
       setFixFlag(false);

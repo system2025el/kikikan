@@ -5,14 +5,14 @@ import { PoolClient } from 'pg';
 import pool from '@/app/_lib/db/postgres';
 import { selectJuchuContainerMeisaiMaxId, upsertJuchuContainerMeisai } from '@/app/_lib/db/tables/t-juchu-ctn-meisai';
 import { selectJuchuKizaiMeisaiMaxId, upsertJuchuKizaiMeisai } from '@/app/_lib/db/tables/t-juchu-kizai-meisai';
-import { upsertNyushukoDen } from '@/app/_lib/db/tables/t-nyushuko-den';
+import { updateOyaNyukoDen, upsertNyushukoDen } from '@/app/_lib/db/tables/t-nyushuko-den';
 import { insertNyushukoFix, updateNyushukoFix } from '@/app/_lib/db/tables/t-nyushuko-fix';
 import { selectNyushukoDetail } from '@/app/_lib/db/tables/v-nyushuko-den2-lst';
 import { JuchuCtnMeisai } from '@/app/_lib/db/types/t_juchu_ctn_meisai-type';
 import { JuchuKizaiMeisai } from '@/app/_lib/db/types/t-juchu-kizai-meisai-type';
 import { NyushukoDen } from '@/app/_lib/db/types/t-nyushuko-den-type';
 import { NyushukoFix } from '@/app/_lib/db/types/t-nyushuko-fix-type';
-import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { NyukoDetailTableValues, NyukoDetailValues } from './types';
 
@@ -96,6 +96,18 @@ export const updNyukoDetail = async (
   try {
     await connection.query('BEGIN');
 
+    switch (nyukoDetailData.juchuKizaiHeadKbn) {
+      case 1:
+        await updMainNyukoDetail(nyukoDetailData, nyukoDetailTableData, userNam, connection);
+        break;
+      case 2:
+        await updReturnNyukoDetail(nyukoDetailData, nyukoDetailTableData, userNam, connection);
+        break;
+      case 3:
+        await updKeepNyukoDetail(nyukoDetailData, nyukoDetailTableData, userNam, connection);
+        break;
+    }
+
     await connection.query('COMMIT');
     return true;
   } catch (e) {
@@ -104,6 +116,73 @@ export const updNyukoDetail = async (
     return false;
   } finally {
     connection.release();
+  }
+};
+
+/**
+ * メイン入庫伝票到着処理
+ * @param nyukoDetailData 入庫データ
+ * @param nyukoDetailTableData 入庫テーブルデータ
+ * @param userNam ユーザー名
+ * @param connection
+ */
+export const updMainNyukoDetail = async (
+  nyukoDetailData: NyukoDetailValues,
+  nyukoDetailTableData: NyukoDetailTableValues[],
+  userNam: string,
+  connection: PoolClient
+) => {
+  try {
+    await addNyukoFix(nyukoDetailData, nyukoDetailTableData, userNam, connection);
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
+ * 返却入庫伝票到着処理
+ * @param nyukoDetailData 入庫データ
+ * @param nyukoDetailTableData 入庫テーブルデータ
+ * @param userNam ユーザー名
+ * @param connection
+ */
+export const updReturnNyukoDetail = async (
+  nyukoDetailData: NyukoDetailValues,
+  nyukoDetailTableData: NyukoDetailTableValues[],
+  userNam: string,
+  connection: PoolClient
+) => {
+  try {
+    // 返却入庫伝票更新
+    await upsNyushukoDen(nyukoDetailTableData, null, userNam, connection);
+
+    // 親入子伝票更新
+    await updOyaNyukoDen(nyukoDetailTableData, userNam, connection);
+
+    // 入庫確定追加
+    await addNyukoFix(nyukoDetailData, nyukoDetailTableData, userNam, connection);
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
+ * キープ入庫伝票到着処理
+ * @param nyukoDetailData 入庫データ
+ * @param nyukoDetailTableData 入庫テーブルデータ
+ * @param userNam ユーザー名
+ * @param connection
+ */
+export const updKeepNyukoDetail = async (
+  nyukoDetailData: NyukoDetailValues,
+  nyukoDetailTableData: NyukoDetailTableValues[],
+  userNam: string,
+  connection: PoolClient
+) => {
+  try {
+    await addNyukoFix(nyukoDetailData, nyukoDetailTableData, userNam, connection);
+  } catch (e) {
+    throw e;
   }
 };
 
@@ -259,6 +338,46 @@ export const upsJuchuCtnMeisai = async (
   }
 };
 
+// /**
+//  * 入庫伝票UPSERT
+//  * @param nyukoDetailTableData 入庫テーブルデータ
+//  * @param userNam ユーザー名
+//  * @param connection
+//  * @returns
+//  */
+// export const upsNyukoDen = async (
+//   nyukoDetailTableData: NyukoDetailTableValues[],
+//   userNam: string,
+//   connection: PoolClient
+// ) => {
+//   const upsertNyukoData: NyushukoDen[] = nyukoDetailTableData.map((d) => ({
+//     juchu_head_id: d.juchuHeadId,
+//     juchu_kizai_head_id: d.juchuKizaiHeadId,
+//     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
+//     kizai_id: d.kizaiId,
+//     plan_qty: (d.resultQty ?? 0) + (d.resultAdjQty ?? 0),
+//     sagyo_den_dat: d.nyushukoDat,
+//     sagyo_id: d.nyushukoBashoId,
+//     sagyo_kbn_id: 30,
+//     dsp_ord_num: d.dspOrdNumMeisai,
+//     indent_num: d.indentNum,
+//     add_dat: toJapanTimeString(),
+//     add_user: userNam,
+//     upd_dat: null,
+//     upd_user: null,
+//   }));
+
+//   try {
+//     await upsertNyushukoDen(upsertNyukoData, connection);
+
+//     console.log('nyushuko den upsert successfully:', upsertNyukoData);
+//     return true;
+//   } catch (e) {
+//     console.error('Exception while updating nyushuko den:', e);
+//     throw e;
+//   }
+// };
+
 /**
  * 入庫伝票UPSERT
  * @param nyukoDetailTableData 入庫テーブルデータ
@@ -266,11 +385,50 @@ export const upsJuchuCtnMeisai = async (
  * @param connection
  * @returns
  */
-export const upsNyukoDen = async (
+export const upsNyushukoDen = async (
   nyukoDetailTableData: NyukoDetailTableValues[],
+  shukoDat: string | null,
   userNam: string,
   connection: PoolClient
 ) => {
+  const upsertShukoStandbyData: NyushukoDen[] = shukoDat
+    ? nyukoDetailTableData.map((d) => ({
+        juchu_head_id: d.juchuHeadId,
+        juchu_kizai_head_id: d.juchuKizaiHeadId,
+        juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
+        kizai_id: d.kizaiId,
+        plan_qty: (d.resultQty ?? 0) + (d.resultAdjQty ?? 0),
+        sagyo_den_dat: shukoDat,
+        sagyo_id: d.nyushukoBashoId,
+        sagyo_kbn_id: 10,
+        dsp_ord_num: d.dspOrdNumMeisai,
+        indent_num: d.indentNum,
+        add_dat: toJapanTimeString(),
+        add_user: userNam,
+        upd_dat: null,
+        upd_user: null,
+      }))
+    : [];
+
+  const upsertShukoCheckData: NyushukoDen[] = shukoDat
+    ? nyukoDetailTableData.map((d) => ({
+        juchu_head_id: d.juchuHeadId,
+        juchu_kizai_head_id: d.juchuKizaiHeadId,
+        juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
+        kizai_id: d.kizaiId,
+        plan_qty: (d.resultQty ?? 0) + (d.resultAdjQty ?? 0),
+        sagyo_den_dat: shukoDat,
+        sagyo_id: d.nyushukoBashoId,
+        sagyo_kbn_id: 20,
+        dsp_ord_num: d.dspOrdNumMeisai,
+        indent_num: d.indentNum,
+        add_dat: toJapanTimeString(),
+        add_user: userNam,
+        upd_dat: null,
+        upd_user: null,
+      }))
+    : [];
+
   const updateNyukoData: NyushukoDen[] = nyukoDetailTableData.map((d) => ({
     juchu_head_id: d.juchuHeadId,
     juchu_kizai_head_id: d.juchuKizaiHeadId,
@@ -288,11 +446,51 @@ export const upsNyukoDen = async (
     upd_user: null,
   }));
 
+  const mergeData = [...upsertShukoStandbyData, ...upsertShukoCheckData, ...updateNyukoData];
+
   try {
-    await upsertNyushukoDen(updateNyukoData, connection);
+    await upsertNyushukoDen(mergeData, connection);
 
     console.log('nyushuko den upsert successfully:', updateNyukoData);
     return true;
+  } catch (e) {
+    console.error('Exception while updating nyushuko den:', e);
+    throw e;
+  }
+};
+
+/**
+ * 親入庫伝票更新
+ * @param nyukoDetailTableData 入庫テーブルデータ
+ * @param userNam ユーザー名
+ * @param connection
+ * @returns
+ */
+export const updOyaNyukoDen = async (
+  nyukoDetailTableData: NyukoDetailTableValues[],
+  userNam: string,
+  connection: PoolClient
+) => {
+  const updateNyukoData: NyushukoDen[] = nyukoDetailTableData.map((d) => ({
+    juchu_head_id: d.juchuHeadId,
+    juchu_kizai_head_id: d.juchuKizaiHeadId,
+    juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
+    kizai_id: d.kizaiId,
+    plan_qty: (d.resultQty ?? 0) + (d.resultAdjQty ?? 0),
+    sagyo_den_dat: d.nyushukoDat,
+    sagyo_id: d.nyushukoBashoId,
+    sagyo_kbn_id: 30,
+    dsp_ord_num: d.dspOrdNumMeisai,
+    indent_num: d.indentNum,
+    upd_dat: toJapanTimeStampString(),
+    upd_user: userNam,
+  }));
+
+  try {
+    for (const data of updateNyukoData) {
+      await updateOyaNyukoDen(data, connection);
+    }
+    console.log('oya nyuko den update successfully:', updateNyukoData);
   } catch (e) {
     console.error('Exception while updating nyushuko den:', e);
     throw e;
@@ -306,7 +504,7 @@ export const upsNyukoDen = async (
  * @param userNam ユーザー名
  * @param connection
  */
-export const addNyushukoFix = async (
+export const addNyukoFix = async (
   nyukoDetailData: NyukoDetailValues,
   nyukoDetailTableData: NyukoDetailTableValues[],
   userNam: string,
@@ -330,7 +528,6 @@ export const addNyushukoFix = async (
   try {
     await insertNyushukoFix(newFixData, connection);
     console.log('nyushuko fix add successfully:', newFixData);
-    return true;
   } catch (e) {
     throw e;
   }

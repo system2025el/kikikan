@@ -70,7 +70,7 @@ const Page = async (props: {
       juchuHeadId: juchuHeadId,
       juchuKizaiHeadId: juchuKizaiHeadId,
       juchuKizaiHeadKbn: 2,
-      juchuHonbanbiQty: oyaJuchuHonbanbiQty,
+      juchuHonbanbiQty: oyaJuchuHonbanbiQty ?? 0,
       nebikiAmt: null,
       mem: null,
       headNam: '',
