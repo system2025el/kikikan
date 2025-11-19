@@ -6,14 +6,14 @@ export type EqptOrderListTableValues = {
   kizaiHeadId: number;
   headNam: string;
   headKbn: number;
-  oyaJuchuKizaiHeadId: number;
+  oyaJuchuKizaiHeadId: number | null;
   koenNam: string;
   koenbashoNam: string;
   kokyakuNam: string;
-  yShukoDat: Date | null;
-  yNyukoDat: Date | null;
-  kShukoDat: Date | null;
-  kNyukoDat: Date | null;
+  yShukoDat: string | null;
+  yNyukoDat: string | null;
+  kShukoDat: string | null;
+  kNyukoDat: string | null;
 };
 
 /**

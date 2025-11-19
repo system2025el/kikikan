@@ -156,7 +156,7 @@ export const selectBundledEqpts = async (setIds: number[]) => {
             k.kizai_grp_cod as "kizaiGrpCod"
           FROM
             dev6.m_kizai as k
-          INNER JOIN
+          LEFT JOIN
             dev6.m_shozoku as s
           ON
             k.shozoku_id = s.shozoku_id

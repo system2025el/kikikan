@@ -71,14 +71,14 @@ export const selectOneShozoku = async (id: number) => {
 export const insertNewShozoku = async (data: BasesMasterDialogValues, user: string) => {
   const query = `
         INSERT INTO ${SCHEMA}.m_shozoku (
-          shozoku_id, shozoku_nam, del_flg, dsp_ord_num,
+          shozoku_id, shozoku_nam, del_flg, dsp_ord_num, reg_amt,
           mem, add_dat, add_user
         )
         VALUES (
           (SELECT coalesce(max(shozoku_id),0) + 1 FROM ${SCHEMA}.m_shozoku),
           $1, $2, 
           (SELECT coalesce(max(dsp_ord_num),0) + 1 FROM ${SCHEMA}.m_shozoku),
-          $3, $4, $5
+          $3, $4, $5, $6
         );
       `;
   const date = toJapanTimeStampString();

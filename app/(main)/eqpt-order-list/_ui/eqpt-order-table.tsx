@@ -178,16 +178,16 @@ export const EqptOrderTable = ({
                     </TableCell>
                     <TableCell>
                       <LightTooltipWithText variant={'body2'} maxWidth={180}>
-                        {`K ${order.kShukoDat ? toJapanTimeString(order.kShukoDat) : '-'}`}
+                        {`K  ${order.kShukoDat}`}
                         <br />
-                        {`Y ${order.yShukoDat ? toJapanTimeString(order.yShukoDat) : '-'}`}
+                        {`Y  ${order.yShukoDat}`}
                       </LightTooltipWithText>
                     </TableCell>
                     <TableCell>
                       <LightTooltipWithText variant={'body2'} maxWidth={180}>
-                        {`K ${order.kNyukoDat ? toJapanTimeString(order.kNyukoDat) : '-'}`}
+                        {`K  ${order.kNyukoDat}`}
                         <br />
-                        {`Y ${order.yNyukoDat ? toJapanTimeString(order.yNyukoDat) : '-'}`}
+                        {`Y  ${order.yNyukoDat}`}
                       </LightTooltipWithText>
                     </TableCell>
                   </TableRow>

@@ -40,18 +40,18 @@ export const getFilteredOrderList = async (
       return [];
     }
     return data.map((d) => ({
-      juchuHeadId: d.juchu_head_id,
-      kizaiHeadId: d.juchu_kizai_head_id,
-      headNam: d.head_nam,
-      headKbn: d.juchu_kizai_head_kbn,
+      juchuHeadId: d.juchu_head_id ?? FAKE_NEW_ID,
+      kizaiHeadId: d.juchu_kizai_head_id ?? FAKE_NEW_ID,
+      headNam: d.head_nam ?? '',
+      headKbn: d.juchu_kizai_head_kbn ?? FAKE_NEW_ID,
       oyaJuchuKizaiHeadId: d.oya_juchu_kizai_head_id,
-      koenNam: d.koen_nam,
-      koenbashoNam: d.koenbasho_nam,
-      kokyakuNam: d.kokyaku_nam,
-      kShukoDat: d.kics_shuko_dat,
-      kNyukoDat: d.kics_nyuko_dat,
-      yShukoDat: d.yard_shuko_dat,
-      yNyukoDat: d.yard_nyuko_dat,
+      koenNam: d.koen_nam ?? '',
+      koenbashoNam: d.koenbasho_nam ?? '',
+      kokyakuNam: d.kokyaku_nam ?? '',
+      kShukoDat: d.kics_shuko_dat ? toJapanTimeString(d.kics_shuko_dat) : '-',
+      kNyukoDat: d.kics_nyuko_dat ? toJapanTimeString(d.kics_nyuko_dat) : '-',
+      yShukoDat: d.yard_shuko_dat ? toJapanTimeString(d.yard_shuko_dat) : '-',
+      yNyukoDat: d.yard_nyuko_dat ? toJapanTimeString(d.yard_nyuko_dat) : '-',
     }));
   } catch (e) {
     console.error('例外が発生しました:', e);
