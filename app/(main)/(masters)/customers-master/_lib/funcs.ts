@@ -10,6 +10,7 @@ import {
 } from '@/app/_lib/db/tables/m-kokyaku';
 import { toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
+import { FAKE_NEW_ID } from '../../_lib/constants';
 import { emptyCustomer } from './datas';
 import { CustomersMasterDialogValues, CustomersMasterTableValues } from './types';
 
@@ -106,7 +107,7 @@ export const getChosenCustomerIdAndName = async (id: number) => {
     }
     if (!data) {
       return {
-        kokyakuId: null,
+        kokyakuId: FAKE_NEW_ID,
         kokyakuNam: '',
         kana: '',
         nebikiRat: null,
@@ -128,21 +129,21 @@ export const getChosenCustomerIdAndName = async (id: number) => {
       };
     }
     const CustomerDetails = {
-      kokyakuId: data.kokyaku_id,
-      kokyakuNam: data.kokyaku_nam,
-      kana: data.kana,
-      nebikiRat: data.nebiki_rat,
+      kokyakuId: data.kokyaku_id ?? FAKE_NEW_ID,
+      kokyakuNam: data.kokyaku_nam ?? '',
+      kana: data.kana ?? '',
+      nebikiRat: data.nebiki_rat ?? 0,
       delFlg: Boolean(data.del_flg),
       // keisho: data.keisho,
-      adrPost: data.adr_post,
-      adrShozai: data.adr_shozai,
-      adrTatemono: data.adr_tatemono,
-      adrSonota: data.adr_sonota,
-      tel: data.tel,
-      telMobile: data.tel_mobile,
-      fax: data.fax,
-      mail: data.mail,
-      mem: data.mem,
+      adrPost: data.adr_post ?? '',
+      adrShozai: data.adr_shozai ?? '',
+      adrTatemono: data.adr_tatemono ?? '',
+      adrSonota: data.adr_sonota ?? '',
+      tel: data.tel ?? '',
+      telMobile: data.tel_mobile ?? '',
+      fax: data.fax ?? '',
+      mail: data.mail ?? '',
+      mem: data.mem ?? '',
       dspFlg: Boolean(data.dsp_flg),
       // closeDay: data.close_day,
       // siteDay: data.site_day,
