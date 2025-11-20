@@ -154,9 +154,9 @@ export const EquipmentReturnOrderDetail = (props: {
     }, new Map<number, number>())
   );
   // 削除機材
-  const [deleteEq, setDeleteEq] = useState<{ rowIndex: number; row: JuchuKizaiMeisaiValues } | null>(null);
+  const [deleteEq, setDeleteEq] = useState<{ rowIndex: number; row: ReturnJuchuKizaiMeisaiValues } | null>(null);
   // 削除コンテナ
-  const [deleteCtn, setDeleteCtn] = useState<JuchuContainerMeisaiValues | null>(null);
+  const [deleteCtn, setDeleteCtn] = useState<ReturnJuchuContainerMeisaiValues | null>(null);
 
   // 親出庫日
   const [oyaShukoDate, setoyaShukoDate] = useState<Date | null>(props.oyaShukoDate);
@@ -783,7 +783,7 @@ export const EquipmentReturnOrderDetail = (props: {
   };
 
   // 機材明細削除ボタン押下時
-  const handleEqMeisaiDelete = (rowIndex: number, row: JuchuKizaiMeisaiValues) => {
+  const handleEqMeisaiDelete = (rowIndex: number, row: ReturnJuchuKizaiMeisaiValues) => {
     setDeleteEqOpen(true);
     setDeleteEq({ rowIndex: rowIndex, row: row });
   };
@@ -875,7 +875,7 @@ export const EquipmentReturnOrderDetail = (props: {
   };
 
   // コンテナ明細削除ボタン押下時
-  const handleCtnMeisaiDelete = (row: JuchuContainerMeisaiValues) => {
+  const handleCtnMeisaiDelete = (row: ReturnJuchuContainerMeisaiValues) => {
     setDeleteCtnOpen(true);
     setDeleteCtn(row);
   };
