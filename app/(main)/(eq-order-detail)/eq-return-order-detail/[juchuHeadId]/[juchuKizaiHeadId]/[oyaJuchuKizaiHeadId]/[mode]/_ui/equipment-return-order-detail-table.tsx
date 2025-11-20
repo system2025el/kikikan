@@ -170,19 +170,50 @@ export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({
   handleMemoChange,
   ref,
 }) => {
-  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const inputOrderRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const inputYobiRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const visibleRows = rows.filter((row) => !row.delFlag);
 
-  const handleKeyDown = (e: React.KeyboardEvent, rowIndex: number) => {
+  const handleOrderKeyDown = (e: React.KeyboardEvent, rowIndex: number) => {
+    console.log(e.key);
     if (e.key === 'Enter') {
       e.preventDefault();
-      inputRefs.current[rowIndex + 1]?.focus();
+      inputOrderRefs.current[rowIndex + 1]?.focus();
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      inputOrderRefs.current[rowIndex + 1]?.focus();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      inputOrderRefs.current[rowIndex - 1]?.focus();
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      inputYobiRefs.current[rowIndex]?.focus();
     }
   };
 
-  const handleReturnRef = (rowIndex: number) => (el: HTMLInputElement | null) => {
-    inputRefs.current[rowIndex] = el;
+  const handleOrderRef = (rowIndex: number) => (el: HTMLInputElement | null) => {
+    inputOrderRefs.current[rowIndex] = el;
+  };
+
+  const handleYobiKeyDown = (e: React.KeyboardEvent, rowIndex: number) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      inputYobiRefs.current[rowIndex + 1]?.focus();
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      inputYobiRefs.current[rowIndex + 1]?.focus();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      inputYobiRefs.current[rowIndex - 1]?.focus();
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      inputOrderRefs.current[rowIndex]?.focus();
+    }
+  };
+
+  const handleYobiRef = (rowIndex: number) => (el: HTMLInputElement | null) => {
+    inputYobiRefs.current[rowIndex] = el;
   };
 
   return (
@@ -250,10 +281,12 @@ export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({
               row={row}
               rowIndex={rowIndex}
               edit={edit}
-              handleOrderRef={handleReturnRef(rowIndex)}
+              handleOrderRef={handleOrderRef(rowIndex)}
+              handleYobiRef={handleYobiRef(rowIndex)}
               handleMeisaiDelete={handleMeisaiDelete}
               handleMemoChange={handleMemoChange}
-              handleKeyDown={handleKeyDown}
+              handleOrderKeyDown={handleOrderKeyDown}
+              handleYobiKeyDown={handleYobiKeyDown}
               handleCellChange={handleCellChange}
             />
           ))}
@@ -268,6 +301,7 @@ type ReturnEqTableRowProps = {
   rowIndex: number;
   edit: boolean;
   handleOrderRef: (el: HTMLInputElement | null) => void;
+  handleYobiRef: (el: HTMLInputElement | null) => void;
   handleMeisaiDelete: (rowIndex: number, row: ReturnJuchuKizaiMeisaiValues) => void;
   handleMemoChange: (rowIndex: number, memo: string) => void;
   handleCellChange: (
@@ -277,7 +311,8 @@ type ReturnEqTableRowProps = {
     planYobiQty: number,
     planQty: number
   ) => void;
-  handleKeyDown: (e: React.KeyboardEvent, rowIndex: number) => void;
+  handleOrderKeyDown: (e: React.KeyboardEvent, rowIndex: number) => void;
+  handleYobiKeyDown: (e: React.KeyboardEvent, rowIndex: number) => void;
 };
 
 const ReturnEqTableRow = React.memo(
@@ -286,10 +321,12 @@ const ReturnEqTableRow = React.memo(
     rowIndex,
     edit,
     handleOrderRef,
+    handleYobiRef,
     handleMeisaiDelete,
     handleMemoChange,
     handleCellChange,
-    handleKeyDown,
+    handleOrderKeyDown,
+    handleYobiKeyDown,
   }: ReturnEqTableRowProps) => {
     console.log('描画', rowIndex);
 
@@ -375,7 +412,7 @@ const ReturnEqTableRow = React.memo(
             }}
             inputRef={handleOrderRef}
             onKeyDown={(e) => {
-              handleKeyDown(e, rowIndex);
+              handleOrderKeyDown(e, rowIndex);
             }}
             onFocus={(e) => e.target.select()}
             disabled={!edit}
@@ -420,6 +457,10 @@ const ReturnEqTableRow = React.memo(
                 inputMode: 'numeric',
               },
             }}
+            inputRef={handleYobiRef}
+            onKeyDown={(e) => {
+              handleYobiKeyDown(e, rowIndex);
+            }}
             onFocus={(e) => e.target.select()}
             disabled={!edit}
           />
@@ -446,19 +487,49 @@ export const ReturnContainerTable = (props: {
 }) => {
   const { rows, edit, handleContainerMemoChange, handleContainerCellChange, handleMeisaiDelete } = props;
 
-  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const inputKicsRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const inputYardRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const visibleRows = rows.filter((row) => !row.delFlag);
 
-  const handleKeyDown = (e: React.KeyboardEvent, rowIndex: number, cellNum: number) => {
+  const handleKicsKeyDown = (e: React.KeyboardEvent, rowIndex: number) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      inputRefs.current[2 * rowIndex + cellNum + 1]?.focus();
+      inputKicsRefs.current[rowIndex + 1]?.focus();
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      inputKicsRefs.current[rowIndex + 1]?.focus();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      inputKicsRefs.current[rowIndex - 1]?.focus();
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      inputYardRefs.current[rowIndex]?.focus();
     }
   };
 
-  const handleContainerRef = (el: HTMLInputElement | null, rowIndex: number, cellNum: number) => {
-    inputRefs.current[2 * rowIndex + cellNum] = el;
+  const handleContainerKicsRef = (el: HTMLInputElement | null, rowIndex: number) => {
+    inputKicsRefs.current[rowIndex] = el;
+  };
+
+  const handleYardKeyDown = (e: React.KeyboardEvent, rowIndex: number) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      inputYardRefs.current[rowIndex + 1]?.focus();
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      inputYardRefs.current[rowIndex + 1]?.focus();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      inputYardRefs.current[rowIndex - 1]?.focus();
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      inputKicsRefs.current[rowIndex]?.focus();
+    }
+  };
+
+  const handleContainerYardRef = (el: HTMLInputElement | null, rowIndex: number) => {
+    inputYardRefs.current[rowIndex] = el;
   };
 
   return (
@@ -594,9 +665,9 @@ export const ReturnContainerTable = (props: {
                       inputMode: 'numeric',
                     },
                   }}
-                  inputRef={(el) => handleContainerRef(el, rowIndex, 0)}
+                  inputRef={(el) => handleContainerKicsRef(el, rowIndex)}
                   onKeyDown={(e) => {
-                    handleKeyDown(e, rowIndex, 0);
+                    handleKicsKeyDown(e, rowIndex);
                   }}
                   onFocus={(e) => e.target.select()}
                   disabled={!edit}
@@ -642,9 +713,9 @@ export const ReturnContainerTable = (props: {
                       inputMode: 'numeric',
                     },
                   }}
-                  inputRef={(el) => handleContainerRef(el, rowIndex, 1)}
+                  inputRef={(el) => handleContainerYardRef(el, rowIndex)}
                   onKeyDown={(e) => {
-                    handleKeyDown(e, rowIndex, 1);
+                    handleYardKeyDown(e, rowIndex);
                   }}
                   onFocus={(e) => e.target.select()}
                   disabled={!edit}
