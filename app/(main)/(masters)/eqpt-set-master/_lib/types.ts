@@ -13,7 +13,8 @@ export const EqptSetsMasterDialogSchema = z.object({
 export type EqptSetsMasterDialogValues = z.infer<typeof EqptSetsMasterDialogSchema>;
 
 export type EqptSetsMasterTableValues = {
-  eqptSetId: number;
+  oyaKizaiId: number;
+  oyaKizaiNam: number;
   delFlg: boolean | null;
   mem: string | null;
   tblDspId: number;

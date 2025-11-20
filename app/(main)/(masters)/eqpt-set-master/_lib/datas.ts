@@ -4,7 +4,7 @@ import { EqptSetsMasterDialogValues } from './types';
 
 /* 機材セットマスタテーブルヘッダー */
 export const eqptSetMHeader = [
-  { key: 'name', label: '名称' },
+  { key: 'name', label: '機材名称' },
   { key: 'mem', label: 'メモ' },
   { key: 'deleted', label: '無効' },
 ];

@@ -152,7 +152,7 @@ export const EqptSetsMaster = () => {
           <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
             <MasterTable
               headers={eqptSetMHeader}
-              datas={eqptSets.map((l) => ({ ...l, id: l.eqptSetId, name: '' }))}
+              datas={eqptSets.map((l) => ({ ...l, id: l.oyaKizaiId, name: l.oyaKizaiNam }))}
               handleOpenDialog={handleOpenDialog}
               page={page}
               rowsPerPage={rowsPerPage}
@@ -160,7 +160,7 @@ export const EqptSetsMaster = () => {
           </TableContainer>
         )}
         <Dialog open={dialogOpen} fullScreen>
-          <EqptSetsMasterDialog handleClose={handleCloseDialog} eqptSetId={openId} refetchEqptSets={refetchEqptSets} />
+          <EqptSetsMasterDialog handleClose={handleCloseDialog} oyaId={openId} refetchEqptSets={refetchEqptSets} />
         </Dialog>
       </Box>
     </Container>
