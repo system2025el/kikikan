@@ -12,7 +12,7 @@ import { FAKE_NEW_ID } from '../../_lib/constants';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { emptyEqptSet, formItems } from '../_lib/datas';
-import { addNewEqptSet, getChosenEqptSet,updateEqptSet } from '../_lib/funcs';
+import { addNewEqptSet, getChosenEqptSet, updateEqptSet } from '../_lib/funcs';
 import { EqptSetsMasterDialogSchema, EqptSetsMasterDialogValues } from '../_lib/types';
 
 /**

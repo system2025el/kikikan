@@ -906,8 +906,14 @@ const EquipmentOrderDetail = (props: {
   const handleCellDateClear = (kizaiId: number) => {
     setIdoJuchuKizaiMeisaiList((prev) =>
       prev.map((row) =>
-        row.kizaiId === kizaiId ? { ...row, sagyoDenDat: null, sagyoSijiId: null, shozokuId: row.mShozokuId } : row
+        row.kizaiId === kizaiId && !row.delFlag
+          ? { ...row, sagyoDenDat: null, sagyoSijiId: null, shozokuId: row.mShozokuId }
+          : row
       )
+    );
+
+    setJuchuKizaiMeisaiList((prev) =>
+      prev.map((row) => (row.kizaiId === kizaiId && !row.delFlag ? { ...row, shozokuId: row.mShozokuId } : row))
     );
   };
 
@@ -919,6 +925,7 @@ const EquipmentOrderDetail = (props: {
   const handleCellDateChange = (kizaiId: number, date: Dayjs | null) => {
     if (date !== null) {
       const newDate = date.toDate();
+      // 移動機材明細、所属変更
       setIdoJuchuKizaiMeisaiList((prev) =>
         prev.map((row) =>
           row.kizaiId === kizaiId && !row.delFlag
@@ -929,6 +936,13 @@ const EquipmentOrderDetail = (props: {
                 shozokuId: row.mShozokuId === 1 ? 2 : 1,
               }
             : row
+        )
+      );
+
+      // 受注機材明細、所属変更
+      setJuchuKizaiMeisaiList((prev) =>
+        prev.map((row) =>
+          row.kizaiId === kizaiId && !row.delFlag ? { ...row, shozokuId: row.mShozokuId === 1 ? 2 : 1 } : row
         )
       );
     }
@@ -1163,6 +1177,11 @@ const EquipmentOrderDetail = (props: {
               : row
           )
         );
+
+        setJuchuKizaiMeisaiList((prev) =>
+          prev.map((row) => (row.mShozokuId === 2 && !row.delFlag ? { ...row, shozokuId: 1 } : row))
+        );
+
         setIdoDat(null);
         setMoveOpen(false);
       } else if (idoDat !== null && getValues('kicsShukoDat') === null) {
@@ -1178,6 +1197,11 @@ const EquipmentOrderDetail = (props: {
               : row
           )
         );
+
+        setJuchuKizaiMeisaiList((prev) =>
+          prev.map((row) => (row.mShozokuId === 1 && !row.delFlag ? { ...row, shozokuId: 2 } : row))
+        );
+
         setIdoDat(null);
         setMoveOpen(false);
       } else {
@@ -1186,6 +1210,11 @@ const EquipmentOrderDetail = (props: {
             row.sagyoDenDat ? { ...row, sagyoDenDat: idoDat, sagyoSijiId: null, shozokuId: row.mShozokuId } : row
           )
         );
+
+        setJuchuKizaiMeisaiList((prev) =>
+          prev.map((row) => (!row.delFlag ? { ...row, shozokuId: row.mShozokuId } : row))
+        );
+
         setIdoDat(null);
         setMoveOpen(false);
       }
@@ -1298,6 +1327,7 @@ const EquipmentOrderDetail = (props: {
       juchuHeadId: getValues('juchuHeadId'),
       juchuKizaiHeadId: getValues('juchuKizaiHeadId'),
       juchuKizaiMeisaiId: 0,
+      mShozokuId: d.shozokuId,
       shozokuId:
         d.shozokuId === 1 && kicsIdoDat !== null ? 2 : d.shozokuId === 2 && yardIdoDat !== null ? 1 : d.shozokuId,
       mem: '',

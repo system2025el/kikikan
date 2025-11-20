@@ -43,6 +43,7 @@ import {
   insertNyushukoDen,
   selectContainerNyushukoDenConfirm,
   updateNyushukoDen,
+  updateNyushukoDenFromKizaiMeisai,
   upsertNyushukoDen,
 } from '@/app/_lib/db/tables/t-nyushuko-den';
 import {
@@ -886,6 +887,15 @@ export const getJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId:
       return true;
     });
 
+    const eqIds = [...new Set(eqList.map((data) => data.kizai_id))];
+
+    const { data: mKizai, error: mKizaiError } = await selectMeisaiEqts(eqIds);
+
+    if (mKizaiError) {
+      console.error('GetEqList eqShozokuId error : ', mKizaiError);
+      throw mKizaiError;
+    }
+
     const { data: eqTanka, error: eqTankaError } = await selectJuchuKizaiMeisaiKizaiTanka(
       juchuHeadId,
       juchuKizaiHeadId
@@ -899,6 +909,7 @@ export const getJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId:
       juchuHeadId: d.juchu_head_id,
       juchuKizaiHeadId: d.juchu_kizai_head_id,
       juchuKizaiMeisaiId: d.juchu_kizai_meisai_id,
+      mShozokuId: mKizai.find((data) => data.kizai_id === d.kizai_id)?.shozoku_id ?? 0,
       shozokuId: d.shozoku_id,
       mem: d.mem,
       kizaiId: d.kizai_id,
@@ -1354,7 +1365,7 @@ export const updNyushukoDen = async (
 
   try {
     for (const data of mergeData) {
-      await updateNyushukoDen(data, connection);
+      await updateNyushukoDenFromKizaiMeisai(data, connection);
     }
     console.log('nyushuko den updated successfully:', mergeData);
     return true;
