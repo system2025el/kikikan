@@ -116,20 +116,19 @@ export const updateOyaNyukoDen = async (data: NyushukoDen, connection: PoolClien
         FROM 
           ${SCHEMA}.t_juchu_kizai_head 
         WHERE 
-          juchu_head_id = $5 
-          AND juchu_kizai_head_id = $6
+          juchu_head_id = $4 
+          AND juchu_kizai_head_id = $5
       )
-      AND sagyo_kbn_id = $7
-      AND sagyo_id = $8
-      AND kizai_id = $9
-      AND dsp_ord_num = $10
+      AND sagyo_kbn_id = $6
+      AND sagyo_id = $7
+      AND kizai_id = $8
+      AND dsp_ord_num = $9
   `;
 
   const values = [
     data.plan_qty,
     data.upd_dat,
     data.upd_user,
-    data.juchu_head_id,
     data.juchu_head_id,
     data.juchu_kizai_head_id,
     data.sagyo_kbn_id,
