@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Box, Button, Grid2, Stack, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useFieldArray, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
@@ -48,12 +48,17 @@ export const IsshikisMasterDialog = ({
   /* submit時のactions (save, delete) */
   const [action, setAction] = useState<'save' | 'delete' | 'restore' | undefined>(undefined);
 
-  /** 表示する機材リスト */
-  const [eqptList, setEqptList] = useState<SelectTypes[]>([]);
   /** 機材選択ダイアログ開閉 */
   const [eqSelectOpen, setEqSelectOpen] = useState<boolean>(false);
 
   /* useForm ----------------------------------------- */
+  const isshikiForm = useForm({
+    mode: 'onChange',
+    reValidateMode: 'onChange',
+    resolver: zodResolver(IsshikisMasterDialogSchema),
+    defaultValues: emptyIsshiki,
+  });
+
   const {
     control,
     formState: { isDirty },
@@ -62,16 +67,14 @@ export const IsshikisMasterDialog = ({
     reset,
     getValues,
     setValue,
-  } = useForm({
-    mode: 'onChange',
-    reValidateMode: 'onChange',
-    resolver: zodResolver(IsshikisMasterDialogSchema),
-    defaultValues: emptyIsshiki,
-  });
+  } = isshikiForm;
+
+  const kizaisField = useFieldArray({ control, name: 'kizaiList' });
+
+  const kizaiList = watch('kizaiList');
 
   const isDeleted = watch('delFlg');
   const name = watch('isshikiNam');
-  const kizaiList = watch('kizaiList');
 
   /* methods ---------------------------------------- */
   /* フォームを送信 */
@@ -140,7 +143,6 @@ export const IsshikisMasterDialog = ({
         const isshiki1 = await getChosenIsshiki(isshikiId);
         if (isshiki1) {
           reset(isshiki1); // 取得したデータでフォーム初期化
-          // }
           setIsLoading(false);
         }
       }
@@ -203,19 +205,25 @@ export const IsshikisMasterDialog = ({
                   <EqptIsshikiSelectionDialog
                     open={eqSelectOpen}
                     isshikiId={isshikiId}
+                    currentEqptList={kizaiList.map((d) => d.id)}
                     setOpen={setEqSelectOpen}
-                    setEqptList={setEqptList}
                     setValue={setValue}
                   />
 
-                  {eqptList.map((d) => (
+                  {kizaisField.fields.map((d, index) => (
                     <Stack key={d.id} sx={{ width: '100%', my: 0.5 }}>
-                      <Button sx={{ paddingX: 1, paddingY: 0, minWidth: 0 }} color="error">
+                      <Button
+                        color="error"
+                        sx={{ paddingX: 1, paddingY: 0, minWidth: 0 }}
+                        onClick={() => {
+                          kizaisField.remove(index);
+                        }}
+                      >
                         <DeleteIcon fontSize="small" />
                       </Button>
-
+                      {/* <TextFieldElement name={`kizaiList.${index}.nam`} control={control} /> */}
                       <Typography whiteSpace={'nowrap'} sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {d.label}
+                        {kizaiList[index].nam}
                       </Typography>
                     </Stack>
                   ))}

@@ -223,16 +223,14 @@ export const selectActiveEqptsForIsshiki = async (query: number | null) => {
 
   // queryチェック
   if (query && query !== FAKE_NEW_ID) {
-    sqlQuery += ` AND (i.issiki_id IS NULL OR i.issiki_id = ${query}`;
+    sqlQuery += ` AND (i.issiki_id IS NULL OR i.issiki_id = ${query})`;
   } else {
     sqlQuery += ` AND (i.issiki_id IS NULL)`;
   }
 
   // ORDER BY
   sqlQuery += `
-    ORDER BY
-      k.kizai_grp_cod,
-      k.dsp_ord_num;
+     ORDER BY k.kizai_grp_cod, k.dsp_ord_num;
   `;
   try {
     return await pool.query(sqlQuery);

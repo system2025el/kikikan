@@ -49,13 +49,26 @@ export const selectFilteredIsshikis = async () => {
  * @returns issiki_idが一致する一式
  */
 export const selectOneIsshiki = async (id: number) => {
+  const query = `
+    SELECT
+      i.issiki_id, i.issiki_nam, set.kizai_id, k.kizai_nam, i.del_flg, i.mem, i.reg_amt
+    FROM
+      ${SCHEMA}.m_issiki as i
+    LEFT JOIN
+      ${SCHEMA}.m_issiki_set as set
+    ON
+      set.issiki_id = i.issiki_id
+    LEFT JOIN
+      ${SCHEMA}.m_kizai as k
+    ON
+      set.kizai_id = k.kizai_id
+    WHERE
+      i.issiki_id = $1
+    ORDER BY k.kizai_grp_cod, k.dsp_ord_num
+    `;
   try {
-    return await supabase
-      .schema(SCHEMA)
-      .from('m_issiki')
-      .select('issiki_nam, del_flg, mem, reg_amt')
-      .eq('issiki_id', id)
-      .single();
+    // return await supabase.schema(SCHEMA).from('m_issiki_set').select('kizai_id').eq('issiki_id', id);
+    return await pool.query(query, [id]);
   } catch (e) {
     throw e;
   }
