@@ -57,20 +57,17 @@ export const getFilteredIsshikis = async () => {
  */
 export const getChosenIsshiki = async (id: number) => {
   try {
-    const { data, error } = await selectOneIsshiki(id);
-    if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
-    }
-    if (!data) {
+    const { rows } = await selectOneIsshiki(id);
+    if (!rows || rows.length === 0) {
       return emptyIsshiki;
     }
     // ダイアログ表示用に形成
     const isshikiDetails: IsshikisMasterDialogValues = {
-      isshikiNam: data.issiki_nam ?? '',
-      delFlg: Boolean(data.del_flg),
-      mem: data.mem,
-      kizaiList: [],
+      isshikiNam: rows[0].issiki_nam ?? '',
+      regAmt: rows[0].reg_amt,
+      delFlg: Boolean(rows[0].del_flg),
+      mem: rows[0].mem,
+      kizaiList: rows.map((d) => ({ id: d.kizai_id, nam: d.kizai_nam })),
     };
     return isshikiDetails;
   } catch (e) {

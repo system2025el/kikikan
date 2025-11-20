@@ -15,7 +15,7 @@ import {
   TableRow,
 } from '@mui/material';
 import { SetStateAction, useEffect, useState } from 'react';
-import { UseFormSetValue } from 'react-hook-form';
+import { UseFieldArrayReturn, UseFormSetValue } from 'react-hook-form';
 
 import { CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
@@ -23,26 +23,22 @@ import { Loading } from '@/app/(main)/_ui/loading';
 import { getSelectedEqpts } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/funcs';
 import { EqptSelection } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
 
+import { EqptSetsMasterDialogValues } from '../../eqpt-set-master/_lib/types';
 import { getEqptsForEqptSelection } from '../_lib/funcs';
+import { IsshikisMasterDialogValues } from '../_lib/types';
 
 export const EqptIsshikiSelectionDialog = ({
   open,
   isshikiId,
+  currentEqptList,
   setOpen,
-  setEqptList,
   setValue,
 }: {
   open: boolean;
   isshikiId: number;
+  currentEqptList: number[];
   setOpen: React.Dispatch<SetStateAction<boolean>>;
-  setEqptList: React.Dispatch<SetStateAction<SelectTypes[]>>;
-  setValue: UseFormSetValue<{
-    isshikiNam: string;
-    kizaiList: number[];
-    regAmt?: number | null | undefined;
-    delFlg?: boolean | undefined;
-    mem?: string | null | undefined;
-  }>;
+  setValue: UseFormSetValue<IsshikisMasterDialogValues>;
 }) => {
   /** ローディング */
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -74,19 +70,23 @@ export const EqptIsshikiSelectionDialog = ({
   /** 確定ボタン押下時処理 */
   const handleClickCnfirm = async () => {
     const selectedList = await getSelectedEqpts(selected);
-    setEqptList(selectedList.map((d) => ({ id: d.kizaiId, label: d.kizaiNam })));
-    setValue('kizaiList', selected);
+    setValue(
+      'kizaiList',
+      selectedList.map((d) => ({ id: d.kizaiId, nam: d.kizaiNam }))
+    );
   };
 
   /* useEffect --------------------------------------------- */
   useEffect(() => {
     const getEq = async () => {
-      const o = await getEqptsForEqptSelection();
+      const o = await getEqptsForEqptSelection(isshikiId);
       setOptions(o);
+      setSelected(currentEqptList);
       setIsLoading(false);
     };
     getEq();
-  }, []);
+  }, [currentEqptList, isshikiId]);
+
   return (
     <Dialog open={open} onClose={() => setOpen(false)}>
       <DialogTitle display={'flex'} justifyContent={'space-between'}>
