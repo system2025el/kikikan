@@ -144,12 +144,12 @@ export const updShukoDetail = async (
 
     // キープ以外は明細、伝票を更新
     if (shukoDetailTableData[0].juchuKizaiHeadKbn !== 3 && ctnData && ctnData.length > 0) {
-      // 受注明細UPSERT
+      // コンテナ明細追加更新
       const upsertJuchuMeisaiResult = await upsJuchuCtnMeisai(ctnData, userNam, connection);
-      console.log('受注明細UPSERT', upsertJuchuMeisaiResult);
+      console.log('コンテナ明細UPSERT', upsertJuchuMeisaiResult);
 
-      // 入出庫伝票UPSERT
-      const upsertShukoDenResult = await updNyushukoDen(ctnData, userNam, connection);
+      // 入出庫伝票追加更新
+      const upsertShukoDenResult = await upsNyushukoDen(ctnData, userNam, connection);
       console.log('入出庫伝票UPSERT', upsertShukoDenResult);
     }
 
@@ -169,7 +169,7 @@ export const updShukoDetail = async (
 };
 
 /**
- * 受注コンテナ明細UPSERT
+ * 受注コンテナ明細追加更新
  * @param shukoDetailTableData 出庫テーブルデータ
  * @param userNam ユーザー名
  * @param connection
@@ -202,13 +202,13 @@ export const upsJuchuCtnMeisai = async (
 };
 
 /**
- * 入出庫伝票更新
+ * 入出庫伝票追加更新
  * @param shukoDetailTableData 出庫テーブルデータ
  * @param userNam ユーザー名
  * @param connection
  * @returns
  */
-export const updNyushukoDen = async (
+export const upsNyushukoDen = async (
   shukoDetailTableData: ShukoDetailTableValues[],
   userNam: string,
   connection: PoolClient
@@ -250,9 +250,7 @@ export const updNyushukoDen = async (
   const mergeData = [...updCtnShukoCheckData, ...updCtnNyukoCheckData];
 
   try {
-    for (const data of mergeData) {
-      await updateNyushukoDen(data, connection);
-    }
+    await upsertNyushukoDen(mergeData, connection);
 
     console.log('nyushuko den upsert successfully:', mergeData);
     return true;

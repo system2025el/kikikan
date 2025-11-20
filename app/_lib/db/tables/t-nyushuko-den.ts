@@ -105,28 +105,40 @@ export const updateOyaNyukoDen = async (data: NyushukoDen, connection: PoolClien
     UPDATE
       ${SCHEMA}.t_nyushuko_den
     SET
-      plan_qty = plan_qty - ${data.plan_qty ?? 0}
-      upd_dat = ${data.upd_dat}
-      upd_user = ${data.upd_user}
+      plan_qty = plan_qty - $1,
+      upd_dat = $2,
+      upd_user = $3
     WHERE
-      juchu_head_id = ${data.juchu_head_id}
+      juchu_head_id = $4
       AND juchu_kizai_head_id = (
         SELECT 
           oya_juchu_kizai_head_id 
         FROM 
           ${SCHEMA}.t_juchu_kizai_head 
         WHERE 
-          juchu_head_id = ${data.juchu_head_id} 
-          AND juchu_kizai_head_id = ${data.juchu_kizai_head_id}
+          juchu_head_id = $4 
+          AND juchu_kizai_head_id = $5
       )
-      AND sagyo_kbn_id = ${data.sagyo_kbn_id}
-      AND sagyo_id = ${data.sagyo_id}
-      AND kizai_id = ${data.kizai_id}
-      AND dsp_ord_num = ${data.dsp_ord_num}
+      AND sagyo_kbn_id = $6
+      AND sagyo_id = $7
+      AND kizai_id = $8
+      AND dsp_ord_num = $9
   `;
 
+  const values = [
+    data.plan_qty,
+    data.upd_dat,
+    data.upd_user,
+    data.juchu_head_id,
+    data.juchu_kizai_head_id,
+    data.sagyo_kbn_id,
+    data.sagyo_id,
+    data.kizai_id,
+    data.dsp_ord_num,
+  ];
+
   try {
-    await connection.query(query);
+    await connection.query(query, values);
   } catch (e) {
     throw e;
   }

@@ -109,7 +109,7 @@ export const selectPdfJuchuKizaiMeisai = async (
 ) => {
   try {
     await pool.query(` SET search_path TO ${SCHEMA};`);
-    return await pool.query(`
+    const query = `
       select 
           v_juchu_kizai_meisai.kizai_id as "kizaiId"
           ,v_juchu_kizai_meisai.kizai_nam as "kizaiNam"
@@ -122,18 +122,22 @@ export const selectPdfJuchuKizaiMeisai = async (
           v_juchu_kizai_meisai
               
       where
-          v_juchu_kizai_meisai.juchu_head_id = ${juchuHeadId}
+          v_juchu_kizai_meisai.juchu_head_id = $1
           and
-          v_juchu_kizai_meisai.juchu_kizai_head_id in (${juchuKizaiHeadIds})    --出庫明細から機材ヘッダーIDセット
+          v_juchu_kizai_meisai.juchu_kizai_head_id in ($2)    --出庫明細から機材ヘッダーIDセット
           and 
-          v_juchu_kizai_meisai.shozoku_id = ${nyushukoBashoId}  -- 入出庫場所
+          v_juchu_kizai_meisai.shozoku_id = $3  -- 入出庫場所
           
       group by
           v_juchu_kizai_meisai.juchu_head_id
           ,v_juchu_kizai_meisai.kizai_id
           ,v_juchu_kizai_meisai.kizai_nam
       ;
-    `);
+    `;
+
+    const values = [juchuHeadId, juchuKizaiHeadIds, nyushukoBashoId];
+
+    return await pool.query(query, values);
   } catch (e) {
     throw e;
   }
