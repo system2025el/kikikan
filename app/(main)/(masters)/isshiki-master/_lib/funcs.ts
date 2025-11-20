@@ -67,7 +67,7 @@ export const getChosenIsshiki = async (id: number) => {
       regAmt: rows[0].reg_amt,
       delFlg: Boolean(rows[0].del_flg),
       mem: rows[0].mem,
-      kizaiList: rows.map((d) => ({ id: d.kizai_id, nam: d.kizai_nam })),
+      kizaiList: rows[0].kizai_id ? rows.map((d) => ({ id: d.kizai_id, nam: d.kizai_nam })) : [],
     };
     return isshikiDetails;
   } catch (e) {
