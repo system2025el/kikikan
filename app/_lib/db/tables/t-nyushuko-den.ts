@@ -41,7 +41,7 @@ export const insertNyushukoDen = async (data: NyushukoDen[], connection: PoolCli
 };
 
 /**
- * 入出庫伝票更新
+ * 入出庫伝票更新(受注機材明細画面の機材明細からの更新以外)
  * @param data 入出庫伝票データ
  * @returns
  */
@@ -52,6 +52,60 @@ export const updateNyushukoDen = async (data: NyushukoDen, connection: PoolClien
     'juchu_kizai_meisai_id',
     'sagyo_kbn_id',
     'sagyo_id',
+    'kizai_id',
+  ] as const;
+
+  const allKeys = Object.keys(data) as (keyof typeof data)[];
+
+  const updateKeys = allKeys.filter((key) => !(whereKeys as readonly string[]).includes(key));
+
+  if (updateKeys.length === 0) {
+    throw new Error('No columns to update.');
+  }
+
+  const allValues: (string | number | null | undefined)[] = [];
+  let placeholderIndex = 1;
+
+  const setClause = updateKeys
+    .map((key) => {
+      allValues.push(data[key]);
+      return `${key} = $${placeholderIndex++}`;
+    })
+    .join(', ');
+
+  const whereClause = whereKeys
+    .map((key) => {
+      allValues.push(data[key]);
+      return `${key} = $${placeholderIndex++}`;
+    })
+    .join(' AND ');
+
+  const query = `
+      UPDATE
+        ${SCHEMA}.t_nyushuko_den
+      SET
+        ${setClause}
+      WHERE
+        ${whereClause}
+    `;
+  try {
+    await connection.query(query, allValues);
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
+ * 入出庫伝票更新(受注機材明細画面の機材明細からの更新)
+ * @param data 入出庫伝票データ
+ * @returns
+ */
+export const updateNyushukoDenFromKizaiMeisai = async (data: NyushukoDen, connection: PoolClient) => {
+  const whereKeys = [
+    'juchu_head_id',
+    'juchu_kizai_head_id',
+    'juchu_kizai_meisai_id',
+    'sagyo_kbn_id',
     'kizai_id',
   ] as const;
 
