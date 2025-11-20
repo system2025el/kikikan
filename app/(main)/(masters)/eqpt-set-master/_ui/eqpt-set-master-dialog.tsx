@@ -12,7 +12,7 @@ import { FAKE_NEW_ID } from '../../_lib/constants';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { emptyEqptSet, formItems } from '../_lib/datas';
-import { addNewEqptSet, getChosenEqptSet,updateEqptSet } from '../_lib/funcs';
+import { addNewEqptSet, getChosenEqptSet, updateEqptSet } from '../_lib/funcs';
 import { EqptSetsMasterDialogSchema, EqptSetsMasterDialogValues } from '../_lib/types';
 
 /**
@@ -21,11 +21,11 @@ import { EqptSetsMasterDialogSchema, EqptSetsMasterDialogValues } from '../_lib/
  * @returns {JSX.Element} 機材セットマスタ詳細ダイアログコンポーネント
  */
 export const EqptSetsMasterDialog = ({
-  eqptSetId,
+  oyaId,
   handleClose,
   refetchEqptSets,
 }: {
-  eqptSetId: number;
+  oyaId: number;
   handleClose: () => void;
   refetchEqptSets: () => void;
 }) => {
@@ -68,13 +68,13 @@ export const EqptSetsMasterDialog = ({
   const onSubmit = async (data: EqptSetsMasterDialogValues) => {
     console.log('isDarty : ', isDirty);
     console.log(data);
-    if (eqptSetId === FAKE_NEW_ID) {
+    if (oyaId === FAKE_NEW_ID) {
       await addNewEqptSet(data, user?.name ?? '');
       handleCloseDialog();
       refetchEqptSets();
     } else {
       if (action === 'save') {
-        await updateEqptSet(data, eqptSetId, user?.name ?? '');
+        await updateEqptSet(data, oyaId, user?.name ?? '');
         handleCloseDialog();
         refetchEqptSets();
       } else if (action === 'delete') {
@@ -83,7 +83,7 @@ export const EqptSetsMasterDialog = ({
       } else if (action === 'restore') {
         // 有効化ボタン
         const values = await getValues();
-        await updateEqptSet({ ...values, delFlg: false }, eqptSetId, user?.name ?? '');
+        await updateEqptSet({ ...values, delFlg: false }, oyaId, user?.name ?? '');
         handleCloseDialog();
         refetchEqptSets();
       }
@@ -110,7 +110,7 @@ export const EqptSetsMasterDialog = ({
   /* 削除確認ダイアログで削除選択時 */
   const handleConfirmDelete = async () => {
     const values = await getValues();
-    await updateEqptSet({ ...values, delFlg: true }, eqptSetId, user?.name ?? '');
+    await updateEqptSet({ ...values, delFlg: true }, oyaId, user?.name ?? '');
     setDeleteOpen(false);
     handleCloseDialog();
     await refetchEqptSets();
@@ -120,23 +120,23 @@ export const EqptSetsMasterDialog = ({
   useEffect(() => {
     console.log('★★★★★★★★★★★★★★★★★★★★★');
     const getThatOneEqptSet = async () => {
-      if (eqptSetId === FAKE_NEW_ID) {
+      if (oyaId === FAKE_NEW_ID) {
         // 新規追加モード
         reset(emptyEqptSet); // フォーム初期化
         setEditable(true); // 編集モードにする
         setIsLoading(false);
         setIsNew(true);
       } else {
-        const eqptSet1 = await getChosenEqptSet(eqptSetId);
-        if (eqptSet1) {
-          reset(eqptSet1); // 取得したデータでフォーム初期化
-          // }
-          setIsLoading(false);
-        }
+        // const eqptSet1 = await getChosenEqptSet(oyaId);
+        // if (eqptSet1) {
+        //   reset(eqptSet1); // 取得したデータでフォーム初期化
+        //   // }
+        //   setIsLoading(false);
+        // }
       }
     };
     getThatOneEqptSet();
-  }, [eqptSetId, reset]);
+  }, [oyaId, reset]);
 
   return (
     <>

@@ -69,14 +69,33 @@ export const selectActiveEqptSets = async () => {
  * @returns kizai_set_nameで検索された機材セットマスタの配列 検索無しなら全件
  */
 export const selectFilteredEqptSets = async (query: string) => {
-  const builder = supabase.schema(SCHEMA).from('m_kizai_set').select('set_kizai_id,  mem, del_flg'); // テーブルに表示するカラム
+  // const builder = supabase.schema(SCHEMA).from('m_kizai_set').select('set_kizai_id,  mem, del_flg'); // テーブルに表示するカラム
+
+  // if (query && query.trim() !== '') {
+  //   builder.ilike('kizai_set_nam', `%${query}%`);
+  // }
+
+  let queryString = `
+    SELECT
+      s.kizai_id, k.kizai_nam, s.mem, s.del_flg
+    FROM
+      ${SCHEMA}.m_kizai_set as s
+    LEFT JOIN
+      ${SCHEMA}.m_kizai as k
+    ON s.kizai_id = k.kizai_id
+  `;
+  const values = [];
 
   if (query && query.trim() !== '') {
-    builder.ilike('kizai_set_nam', `%${query}%`);
+    queryString += ` WHERE k.kizai_nam ILIKE '$1'`;
+    values.push(query);
   }
 
+  queryString += ` GROUP BY s.kizai_id, k.kizai_nam, s.mem, s.del_flg`;
+
   try {
-    return await builder;
+    // return await builder;
+    return await pool.query(queryString, values);
   } catch (e) {
     throw e;
   }
@@ -88,6 +107,14 @@ export const selectFilteredEqptSets = async (query: string) => {
  * @returns kizai_set_idが一致する機材セット
  */
 export const selectOneEqptSet = async (id: number) => {
+  const query = `
+    SELECT
+      set_kizai_id
+    FROM
+    LEFT JOIN
+    ON
+    WHERE
+  `;
   try {
     return await supabase
       .schema(SCHEMA)

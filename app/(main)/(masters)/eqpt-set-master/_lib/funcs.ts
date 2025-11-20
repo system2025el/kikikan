@@ -20,17 +20,18 @@ import { EqptSetsMasterDialogValues, EqptSetsMasterTableValues } from './types';
  */
 export const getFilteredEqptSets = async (query: string = '') => {
   try {
-    const { data, error } = await selectFilteredEqptSets(query);
-    if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
-    }
-    if (!data || data.length === 0) {
+    const { rows } = await selectFilteredEqptSets(query);
+    // if (error) {
+    //   console.error('DB情報取得エラー', error.message, error.cause, error.hint);
+    //   throw error;
+    // }
+    if (!rows || rows.length === 0) {
       return [];
     }
     // 機材セットマスタ画面のテーブル要に形成
-    const filteredEqptSets: EqptSetsMasterTableValues[] = data.map((d, index) => ({
-      eqptSetId: d.set_kizai_id,
+    const filteredEqptSets: EqptSetsMasterTableValues[] = rows.map((d, index) => ({
+      oyaKizaiId: d.kizai_id,
+      oyaKizaiNam: d.kizai_nam,
       mem: d.mem,
       tblDspId: index + 1,
       delFlg: Boolean(d.del_flg),
