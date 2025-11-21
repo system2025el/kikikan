@@ -21,28 +21,30 @@ import { CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 import { getSelectedEqpts } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/funcs';
-import { EqptSelection } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
+import {
+  EqptSelection,
+  SelectedEqptsValues,
+} from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
 
-import { EqptSetsMasterDialogValues } from '../../eqpt-set-master/_lib/types';
-import { getEqptsForEqptSelection } from '../_lib/funcs';
-import { IsshikisMasterDialogValues } from '../_lib/types';
+import { getEqptsForOyaEqptSelection, getEqptsForSetEqptSelection } from '../_lib/funcs';
+import { EqptSetsMasterDialogValues } from '../_lib/types';
 
-export const EqptIsshikiSelectionDialog = ({
+export const EqptSetSelectionDialog = ({
   open,
-  isshikiId,
+  oyaEqptId,
   currentEqptList,
   setOpen,
   setValue,
 }: {
   open: boolean;
-  isshikiId: number;
+  oyaEqptId: number;
   currentEqptList: {
     id: number;
     nam: string;
     mem?: string | null | undefined;
   }[];
   setOpen: React.Dispatch<SetStateAction<boolean>>;
-  setValue: UseFormSetValue<IsshikisMasterDialogValues>;
+  setValue: UseFormSetValue<EqptSetsMasterDialogValues>;
 }) => {
   /** ローディング */
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -82,19 +84,19 @@ export const EqptIsshikiSelectionDialog = ({
         mem: match?.mem ?? null,
       };
     });
-    setValue('kizaiList', setList);
+    setValue('setEqptList', setList);
   };
 
   /* useEffect --------------------------------------------- */
   useEffect(() => {
     const getEq = async () => {
-      const o = await getEqptsForEqptSelection(isshikiId);
+      const o = await getEqptsForSetEqptSelection();
       setOptions(o);
       setSelected(currentEqptList.map((d) => d.id));
       setIsLoading(false);
     };
     getEq();
-  }, [currentEqptList, isshikiId]);
+  }, [currentEqptList, oyaEqptId]);
 
   return (
     <Dialog open={open} onClose={() => setOpen(false)}>

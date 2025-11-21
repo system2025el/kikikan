@@ -69,15 +69,9 @@ export const selectActiveEqptSets = async () => {
  * @returns kizai_set_nameで検索された機材セットマスタの配列 検索無しなら全件
  */
 export const selectFilteredEqptSets = async (query: string) => {
-  // const builder = supabase.schema(SCHEMA).from('m_kizai_set').select('set_kizai_id,  mem, del_flg'); // テーブルに表示するカラム
-
-  // if (query && query.trim() !== '') {
-  //   builder.ilike('kizai_set_nam', `%${query}%`);
-  // }
-
   let queryString = `
     SELECT
-      s.kizai_id, k.kizai_nam, s.mem, s.del_flg
+      s.kizai_id, k.kizai_nam, s.del_flg
     FROM
       ${SCHEMA}.m_kizai_set as s
     LEFT JOIN
@@ -91,10 +85,9 @@ export const selectFilteredEqptSets = async (query: string) => {
     values.push(query);
   }
 
-  queryString += ` GROUP BY s.kizai_id, k.kizai_nam, s.mem, s.del_flg`;
+  queryString += ` GROUP BY s.kizai_id, k.kizai_nam, s.del_flg`;
 
   try {
-    // return await builder;
     return await pool.query(queryString, values);
   } catch (e) {
     throw e;
@@ -109,19 +102,24 @@ export const selectFilteredEqptSets = async (query: string) => {
 export const selectOneEqptSet = async (id: number) => {
   const query = `
     SELECT
-      set_kizai_id
+      set.kizai_id, set.set_kizai_id, k.kizai_nam as set_kizai_nam, set.del_flg, set.mem
     FROM
+      ${SCHEMA}.m_kizai_set as set
     LEFT JOIN
+      ${SCHEMA}.m_kizai as k
     ON
+      k.kizai_id = set.set_kizai_id
     WHERE
+      set.kizai_id = $1
   `;
   try {
-    return await supabase
-      .schema(SCHEMA)
-      .from('m_kizai_set')
-      .select('set_kizai_id, del_flg, mem')
-      .eq('kizai_set_id', id)
-      .single();
+    return pool.query(query, [id]);
+    // return await supabase
+    //   .schema(SCHEMA)
+    //   .from('m_kizai_set')
+    //   .select('set_kizai_id, del_flg, mem')
+    //   .eq('kizai_set_id', id)
+    //   .single();
   } catch (e) {
     throw e;
   }
@@ -145,7 +143,7 @@ export const insertNewEqptSet = async (data: EqptSetsMasterDialogValues, user: s
           );
         `;
   const date = toJapanTimeStampString();
-  const values = [Number(data.delFlg), data.mem, date, user];
+  const values = [Number(data.delFlg), /*data.mem,*/ date, user];
 
   try {
     await pool.query(query, values);

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 
+import { selectActiveEqpts, selectActiveEqptsForSet } from '@/app/_lib/db/tables/m-kizai';
 import {
   insertNewEqptSet,
   selectFilteredEqptSets,
@@ -9,7 +10,10 @@ import {
   updateEqptSetDB,
 } from '@/app/_lib/db/tables/m-kizai-set';
 import { toJapanTimeStampString } from '@/app/(main)/_lib/date-conversion';
+import { SelectTypes } from '@/app/(main)/_ui/form-box';
+import { EqptSelection } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
 
+import { FAKE_NEW_ID } from '../../_lib/constants';
 import { emptyEqptSet } from './datas';
 import { EqptSetsMasterDialogValues, EqptSetsMasterTableValues } from './types';
 
@@ -30,8 +34,8 @@ export const getFilteredEqptSets = async (query: string = '') => {
     }
     // 機材セットマスタ画面のテーブル要に形成
     const filteredEqptSets: EqptSetsMasterTableValues[] = rows.map((d, index) => ({
-      oyaKizaiId: d.kizai_id,
-      oyaKizaiNam: d.kizai_nam,
+      oyaEqptId: d.kizai_id,
+      oyaEqptNam: d.kizai_nam,
       mem: d.mem,
       tblDspId: index + 1,
       delFlg: Boolean(d.del_flg),
@@ -51,18 +55,18 @@ export const getFilteredEqptSets = async (query: string = '') => {
  */
 export const getChosenEqptSet = async (id: number) => {
   try {
-    const { data, error } = await selectOneEqptSet(id);
-    if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
-    }
-    if (!data) {
+    const { rows } = await selectOneEqptSet(id);
+
+    if (!rows) {
       return emptyEqptSet;
     }
     // ダイアログ表示用に形成
     const eqptSetDetails: EqptSetsMasterDialogValues = {
-      delFlg: Boolean(data.del_flg),
-      mem: data.mem,
+      delFlg: Boolean(rows[0].del_flg),
+      eqptId: rows[0].kizai_id,
+      setEqptList: rows[0].set_kizai_id
+        ? rows.map((d) => ({ id: d.set_kizai_id, nam: d.set_kizai_nam, mem: d.mem }))
+        : [],
     };
     return eqptSetDetails;
   } catch (e) {
@@ -79,9 +83,7 @@ export const addNewEqptSet = async (data: EqptSetsMasterDialogValues, user: stri
   try {
     await insertNewEqptSet(data, user);
     console.log('data : ', data);
-    await revalidatePath('/bumons-master');
-    await revalidatePath('/eqptSet-master');
-    await revalidatePath('/eqpt-master');
+    await revalidatePath('/eqpt-set-master');
   } catch (error) {
     console.log('DB接続エラー', error);
     throw error;
@@ -99,17 +101,54 @@ export const updateEqptSet = async (rawData: EqptSetsMasterDialogValues, id: num
     kizai_id: id,
     set_kizai_id: id,
     del_flg: Number(rawData.delFlg),
-    mem: rawData.mem,
+    // mem: rawData.mem,
     upd_dat: date,
     upd_user: user,
   };
   try {
     await updateEqptSetDB(updateData);
-    await revalidatePath('/bumons-master');
-    await revalidatePath('/eqptSet-master');
-    await revalidatePath('/eqpt-master');
+    await revalidatePath('/eqpt-set-master');
   } catch (error) {
     console.log('例外が発生', error);
     throw error;
+  }
+};
+
+/**
+ * 機材セットマスタの親機材選択肢に表示するための機材リスト
+ * @returns {Promise<SelectTypes[]>} 選択肢配列
+ */
+export const getEqptsForOyaEqptSelection = async (): Promise<SelectTypes[]> => {
+  try {
+    const data = await selectActiveEqptsForSet();
+    if (!data || data.rowCount === 0) {
+      return [];
+    }
+    console.log('=========================================', data.rows);
+    return data.rows.map((d) => ({ id: d.kizaiId, label: d.kizaiNam, grpId: d.bumonId, grpNam: d.bumonNam }));
+  } catch (e) {
+    console.error('例外が発生しました:', e);
+    throw e;
+  }
+};
+
+/**
+ * セット機材の選択肢を取得する関数
+ * @returns 有効な機材の配列
+ */
+export const getEqptsForSetEqptSelection = async (): Promise<EqptSelection[]> => {
+  try {
+    try {
+      const data = await selectActiveEqpts('');
+      if (!data || data.rowCount === 0) {
+        return [];
+      }
+      return data.rows;
+    } catch (e) {
+      console.error('例外が発生しました:', e);
+      throw e;
+    }
+  } catch (e) {
+    throw e;
   }
 };

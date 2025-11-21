@@ -152,7 +152,7 @@ export const EqptSetsMaster = () => {
           <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
             <MasterTable
               headers={eqptSetMHeader}
-              datas={eqptSets.map((l) => ({ ...l, id: l.oyaKizaiId, name: l.oyaKizaiNam }))}
+              datas={eqptSets.map((l) => ({ ...l, id: l.oyaEqptId, name: l.oyaEqptNam }))}
               handleOpenDialog={handleOpenDialog}
               page={page}
               rowsPerPage={rowsPerPage}

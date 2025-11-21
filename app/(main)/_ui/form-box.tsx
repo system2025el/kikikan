@@ -30,10 +30,10 @@ export const FormBox = ({
       <Grid2 size={2}>
         <Typography ml={3}>{formItem.label}</Typography>
       </Grid2>
-      <Grid2 size={5} alignItems={'center'} display={'flex'}>
+      <Grid2 size={'grow'} alignItems={'center'} display={'flex'}>
         {children}
       </Grid2>
-      <Grid2 size={4}>
+      <Grid2 size={3}>
         <Typography variant="body2">{formItem.constraints}</Typography>
       </Grid2>
     </Grid2>
@@ -42,5 +42,5 @@ export const FormBox = ({
 
 export type FormItemsType = { label: string; constraints: string; exsample: string; other?: string };
 
-export type SelectTypes = { id: number | string; label: string };
+export type SelectTypes = { id: number | string; label: string; grpId?: number; grpNam?: string };
 export const selectNone: SelectTypes = { id: FAKE_NEW_ID, label: '未選択' };
