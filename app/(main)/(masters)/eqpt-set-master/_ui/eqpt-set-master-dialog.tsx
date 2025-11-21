@@ -1,11 +1,24 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { Autocomplete, Box, Button, Grid2, Stack, TextField, Typography } from '@mui/material';
+import {
+  Autocomplete,
+  Box,
+  Button,
+  DialogTitle,
+  Grid2,
+  lighten,
+  Stack,
+  TextField,
+  Toolbar,
+  Typography,
+  useTheme,
+} from '@mui/material';
 import { useEffect, useState } from 'react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
+import { CloseMasterDialogButton, DeleteButton, MakeEditModeButton, SubmitButton } from '@/app/(main)/_ui/buttons';
 import { FormBox, SelectTypes } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 
@@ -34,6 +47,9 @@ export const EqptSetsMasterDialog = ({
 }) => {
   // ログインユーザ
   const user = useUserStore((state) => state.user);
+  /* useTheme */
+  const theme = useTheme();
+  const colorOfThis = lighten(theme.palette.primary.main, 0.5);
 
   /* useState -------------------------------------- */
   /* DBのローディング状態 */
@@ -165,16 +181,30 @@ export const EqptSetsMasterDialog = ({
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <MasterDialogTitle
-          editable={editable}
-          handleEditable={() => setEditable(true)}
-          handleClose={handleClickClose}
-          dialogTitle="機材セットマスタ登録"
-          isNew={isNew}
-          isDirty={isDirty}
-          setAction={setAction}
-          isDeleted={isDeleted!}
-        />
+        <DialogTitle
+          display={'flex'}
+          justifyContent={'space-between'}
+          alignItems={'center'}
+          bgcolor={colorOfThis}
+          position={'fixed'}
+          top={0}
+          width={'100%'}
+          zIndex={1200}
+        >
+          機材セットマスタ登録
+          {editable && !isNew && <Typography>編集モード</Typography>}
+          {isNew && <Typography>新規登録</Typography>}
+          <Stack>
+            <SubmitButton type="submit" disabled={isDirty ? false : true} onClick={() => setAction('save')} />
+            {!isNew && (
+              <>
+                <MakeEditModeButton handleEditable={() => setEditable(true)} disabled={editable ? true : false} />
+              </>
+            )}
+            <CloseMasterDialogButton handleCloseDialog={handleClickClose} />
+          </Stack>
+        </DialogTitle>
+        <Toolbar sx={{ bgcolor: 'white', zIndex: 1150 }} />
         {isLoading ? (
           <Loading />
         ) : (
@@ -241,7 +271,11 @@ export const EqptSetsMasterDialog = ({
                       >
                         {setList[index].nam}
                       </Typography>
-                      <TextFieldElement name={`setEqptList.${index}.mem`} control={control} />
+                      <TextFieldElement
+                        name={`setEqptList.${index}.mem`}
+                        control={control}
+                        disabled={editable ? false : true}
+                      />
                     </Stack>
                   ))}
                 </Box>
