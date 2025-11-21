@@ -207,7 +207,7 @@ export const IsshikisMasterDialog = ({
                   <EqptIsshikiSelectionDialog
                     open={eqSelectOpen}
                     isshikiId={isshikiId}
-                    currentEqptList={kizaiList.map((d) => d.id)}
+                    currentEqptList={kizaiList}
                     setOpen={setEqSelectOpen}
                     setValue={setValue}
                   />
