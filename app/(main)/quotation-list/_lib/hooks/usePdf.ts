@@ -673,7 +673,6 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
     let startY = y_detail_2;
     let index = 0;
     const rowHeight = 20;
-
     if (param.meisaiHeads !== undefined && param.meisaiHeads != null) {
       // 機材費
       if (param.meisaiHeads.kizai !== undefined && param.meisaiHeads.kizai != null) {
@@ -693,7 +692,14 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
               drawUnderLine();
               index++;
             }
-
+            //タイトルを見積書に出力するにチェックした時表示
+            if (detail.headNamDspFlg) {
+              checkPageBreak(rowHeight);
+              drawColumnLine();
+              drawShokei('＜' + detail.mituMeisaiHeadNam + '＞', null, null);
+              drawUnderLine();
+              index++;
+            }
             detail.meisai.forEach((row) => {
               checkPageBreak(rowHeight);
               drawColumnLine();
@@ -779,7 +785,13 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
               drawUnderLine();
               index++;
             }
-
+            if (detail.headNamDspFlg) {
+              checkPageBreak(rowHeight);
+              drawColumnLine();
+              drawShokei('＜' + detail.mituMeisaiHeadNam + '＞', null, null);
+              drawUnderLine();
+              index++;
+            }
             detail.meisai.forEach((row) => {
               checkPageBreak(rowHeight);
               drawColumnLine();
@@ -865,7 +877,13 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
               drawUnderLine();
               index++;
             }
-
+            if (detail.headNamDspFlg) {
+              checkPageBreak(rowHeight);
+              drawColumnLine();
+              drawShokei('＜' + detail.mituMeisaiHeadNam + '＞', null, null);
+              drawUnderLine();
+              index++;
+            }
             detail.meisai.forEach((row) => {
               checkPageBreak(rowHeight);
               drawColumnLine();
@@ -1277,7 +1295,16 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
       end: { x: 430, y: startY - 20 * (index + 3) },
       thickness: 1,
     });
-
+    //担当者名
+    if (param.nyuryokuUser) {
+      const text = param.nyuryokuUser;
+      workPage.drawText(text, {
+        x: 365,
+        y: startY - 20 * (index + 1) - 14,
+        size: 8,
+        font: customFont,
+      });
+    }
     const yBottom = startY - 20 * (index + 3); // 最終的なY座標
     const xLeft = whiteSpace; // 統一したX座標
     const xRight = width - whiteSpace; // 統一したX座標
