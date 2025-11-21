@@ -122,7 +122,7 @@ export const updateIsshiki = async (rawData: IsshikisMasterDialogValues, id: num
  * @param query 検索キーワード
  * @returns
  */
-export const getEqptsForEqptSelection = async (query: number = FAKE_NEW_ID): Promise<SelectTypes[]> => {
+export const getEqptsForEqptSelection = async (query: number = FAKE_NEW_ID): Promise<EqptSelection[]> => {
   try {
     const data = await selectActiveEqptsForIsshiki(query);
     if (!data || data.rowCount === 0) {
