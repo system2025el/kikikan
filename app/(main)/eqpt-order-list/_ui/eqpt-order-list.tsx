@@ -52,15 +52,17 @@ export const EqptOrderList = () => {
   const [locs, setLocs] = useState<SelectTypes[] | undefined>([]);
 
   /* useForm ------------------------------------------ */
-  const { control, handleSubmit, reset, getValues } = useForm<EqptOrderSearchValues>({
+  const { control, handleSubmit, reset, getValues, watch } = useForm<EqptOrderSearchValues>({
     defaultValues: {
       radio: 'shuko',
-      range: { from: new Date(), to: new Date() },
+      selectedDate: { value: '4', range: { from: null, to: null } },
       kokyaku: FAKE_NEW_ID,
       koenbashoNam: '',
       listSort: { sort: 'shuko', order: 'asc' },
     },
   });
+  /** 検索条件の種別の監視 */
+  const selectedDateValue = watch('selectedDate.value');
 
   /* methods ---------------------------------------- */
   /** 検索押下時の処理 */
@@ -104,7 +106,7 @@ export const EqptOrderList = () => {
       const [o, c, l] = await Promise.all([
         getFilteredOrderList({
           radio: 'shuko',
-          range: { from: new Date(), to: new Date() },
+          selectedDate: { value: '4', range: { from: null, to: null } },
           kokyaku: FAKE_NEW_ID,
           listSort: { sort: 'shuko', order: 'asc' },
         }),
@@ -131,41 +133,50 @@ export const EqptOrderList = () => {
         </Box>
         <Divider />
         <form onSubmit={handleSubmit(onSubmit)}>
-          <Grid2 container px={4} pt={2} pb={2} spacing={1}>
-            <Grid2 sx={styles.container}>
-              <Stack direction="row" spacing={2} sx={styles.container}>
-                <Typography noWrap minWidth={90}>
-                  期間
-                </Typography>
-                <Controller
-                  control={control}
-                  name="range.from"
-                  render={({ field, fieldState: { error } }) => (
-                    <FormDateX
-                      value={field.value}
-                      onChange={field.onChange}
-                      error={!!error}
-                      helperText={error?.message}
-                    />
-                  )}
-                />
-                <span>～</span>
-                <Controller
-                  control={control}
-                  name="range.to"
-                  render={({ field, fieldState: { error } }) => (
-                    <FormDateX
-                      value={field.value}
-                      onChange={field.onChange}
-                      error={!!error}
-                      helperText={error?.message}
-                    />
-                  )}
-                />
-              </Stack>
-              <Stack ml={7}>
-                <RadioButtonGroup row name="radio" control={control} options={radioData} />
-              </Stack>
+          <Grid2 container px={2} pt={1} pb={2} spacing={1}>
+            <Grid2 container>
+              <SelectElement
+                name="radio"
+                label="検索条件"
+                control={control}
+                options={[
+                  { id: 'shuko', label: '出庫日が' },
+                  { id: 'nyuko', label: '入庫日が' },
+                ]}
+                sx={{ bgcolor: 'white', minWidth: 150 }}
+              />
+            </Grid2>
+            <Grid2 container spacing={2} sx={styles.container} ml={1}>
+              <RadioButtonGroup control={control} name="selectedDate.value" options={radioData} row />
+              {selectedDateValue === '7' && (
+                <Stack direction="row" spacing={2} alignItems="center">
+                  <Controller
+                    control={control}
+                    name="selectedDate.range.from"
+                    render={({ field, fieldState: { error } }) => (
+                      <FormDateX
+                        value={field.value}
+                        onChange={field.onChange}
+                        error={!!error}
+                        helperText={error?.message}
+                      />
+                    )}
+                  />
+                  <span>～</span>
+                  <Controller
+                    control={control}
+                    name="selectedDate.range.to"
+                    render={({ field, fieldState: { error } }) => (
+                      <FormDateX
+                        value={field.value}
+                        onChange={field.onChange}
+                        error={!!error}
+                        helperText={error?.message}
+                      />
+                    )}
+                  />
+                </Stack>
+              )}
             </Grid2>
             <Grid2 container width={'100%'}>
               <Grid2 container direction={'column'} size={5.5}>

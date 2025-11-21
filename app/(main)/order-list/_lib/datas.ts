@@ -1,16 +1,6 @@
 /** ラヂオボタン用データ */
 export const radioData = [
-  {
-    id: '1',
-    label: '先月全て',
-    FormControlLabelProps: {
-      sx: {
-        '& .MuiFormControlLabel-label': {
-          fontSize: '0.5rem',
-        },
-      },
-    },
-  },
+  { id: '1', label: '先月全て' },
   { id: '2', label: '今月全て' },
   { id: '3', label: '昨日' },
   { id: '4', label: '今日' },

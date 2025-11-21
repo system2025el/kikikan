@@ -20,9 +20,12 @@ export type EqptOrderListTableValues = {
  * 受注一覧検索用タイプ
  */
 export type EqptOrderSearchValues = {
-  range?: {
-    from: Date | null;
-    to: Date | null;
+  selectedDate?: {
+    value: string;
+    range?: {
+      from: Date | null;
+      to: Date | null;
+    };
   };
   radio: 'shuko' | 'nyuko';
   juchuId?: number | null;

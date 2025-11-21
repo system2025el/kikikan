@@ -4,7 +4,7 @@ import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
 
-import { toJapanTimeStampString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanTimeStampString, toJapanTimeString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 import { EqptOrderSearchValues } from '@/app/(main)/eqpt-order-list/_lib/types';
 
@@ -77,7 +77,7 @@ export const selectPdfJuchuKizaiHead = async (
  * @returns v_juchu_kizai_head_lst型のobject
  */
 export const selectFilteredKizaiHead = async ({
-  range,
+  selectedDate,
   radio,
   juchuId,
   headNam,
@@ -94,33 +94,94 @@ export const selectFilteredKizaiHead = async ({
       `juchu_head_id, juchu_kizai_head_id, juchu_kizai_head_kbn, kokyaku_nam, koen_nam, koenbasho_nam, head_nam, kics_shuko_dat, kics_nyuko_dat, yard_shuko_dat, yard_nyuko_dat, oya_juchu_kizai_head_id`
     );
 
-  // 期間のfromが入ってたら
-  if (range?.from) {
-    const startOfDay = dayjs(range.from).tz('Asia/Tokyo').startOf('day').toISOString();
-    console.log('start of the day: ', startOfDay);
-    switch (radio) {
-      case 'shuko': // '出庫日'
-        builder.or(`yard_shuko_dat.gte.${startOfDay},kics_shuko_dat.gte.${startOfDay}`);
+  // 検索条件日付
+  let dateColumn = '';
+  switch (radio) {
+    case 'shuko': // '出庫日が'
+      dateColumn = 'shuko_dat';
+      break;
+    case 'nyuko': // '入庫日が'
+      dateColumn = 'nyuko_dat';
+      break;
+  }
+
+  if (dateColumn) {
+    switch (selectedDate?.value) {
+      case '1': {
+        // '先月全て'
+        const startOfLastMonth = dayjs().tz('Asia/Tokyo').subtract(1, 'month').startOf('month').toISOString();
+        const endOfLastMonth = dayjs().tz('Asia/Tokyo').subtract(1, 'month').endOf('month').toISOString();
+        builder
+          .or(`yard_${dateColumn}.gte.${startOfLastMonth},kics_${dateColumn}.gte.${startOfLastMonth}`)
+          .or(`yard_${dateColumn}.lt.${endOfLastMonth},kics_${dateColumn}.lt.${endOfLastMonth}`);
         break;
-      case 'nyuko': // '入庫日'
-        builder.or(`yard_nyuko_dat.gte.${startOfDay},kics_nyuko_dat.gte.${startOfDay}`);
+      }
+      case '2': {
+        // '今月全て'
+        const startOfThisMonth = dayjs().tz('Asia/Tokyo').startOf('month').toISOString();
+        const endOfThisMonth = dayjs().tz('Asia/Tokyo').endOf('month').toISOString();
+        builder
+          .or(`yard_${dateColumn}.gte.${startOfThisMonth},kics_${dateColumn}.gte.${startOfThisMonth}`)
+          .or(`yard_${dateColumn}.lt.${endOfThisMonth},kics_${dateColumn}.lt.${endOfThisMonth}`);
+        break;
+      }
+      case '3': {
+        // '昨日'
+        const startOfYesterday = dayjs().tz('Asia/Tokyo').subtract(1, 'day').startOf('day').toISOString();
+        const startOfToday = dayjs().tz('Asia/Tokyo').startOf('day').toISOString();
+        builder
+          .or(`yard_${dateColumn}.gte.${startOfYesterday},kics_${dateColumn}.gte.${startOfYesterday}`)
+          .or(`yard_${dateColumn}.lt.${startOfToday},kics_${dateColumn}.lt.${startOfToday}`);
+        break;
+      }
+      case '4': {
+        // '今日'
+        const startOfToday = dayjs().tz('Asia/Tokyo').startOf('day').toISOString();
+        const startOfTomorrow = dayjs().tz('Asia/Tokyo').add(1, 'day').startOf('day').toISOString();
+        builder
+          .or(`yard_${dateColumn}.gte.${startOfToday},kics_${dateColumn}.gte.${startOfToday}`)
+          .or(`yard_${dateColumn}.lt.${startOfTomorrow},kics_${dateColumn}.lt.${startOfTomorrow}`);
+
+        break;
+      }
+      case '5': {
+        // '明日'
+        const startOfTomorrow = dayjs().tz('Asia/Tokyo').add(1, 'day').startOf('day').toISOString();
+        const startOfDayAfterTomorrow = dayjs().tz('Asia/Tokyo').add(2, 'day').startOf('day').toISOString();
+        builder
+          .or(`yard_${dateColumn}.gte.${startOfTomorrow},kics_${dateColumn}.gte.${startOfTomorrow}`)
+          .or(`yard_${dateColumn}.lt.${startOfDayAfterTomorrow},kics_${dateColumn}.lt.${startOfDayAfterTomorrow}`);
+
+        break;
+      }
+      case '6': {
+        // '明日以降'
+        const tomorrowAndAfter = dayjs().tz('Asia/Tokyo').add(1, 'day').startOf('day').toISOString();
+        builder.or(`yard_${dateColumn}.gte.${tomorrowAndAfter},kics_${dateColumn}.gte.${tomorrowAndAfter}`);
+
+        break;
+      }
+      case '7': {
+        // '指定期間'
+        if (selectedDate.range?.from) {
+          const startOfDay = dayjs(selectedDate.range.from).tz('Asia/Tokyo').startOf('day').toISOString();
+          console.log('start of the day: ', startOfDay);
+          builder.or(`yard_${dateColumn}.gte.${startOfDay},kics_${dateColumn}.gte.${startOfDay}`);
+        }
+
+        if (selectedDate.range?.to) {
+          // 翌日の00:00:00未満
+          const nextDay = dayjs(selectedDate.range.to).tz('Asia/Tokyo').add(1, 'day').startOf('day').toISOString();
+          console.log('start of the next day: ', nextDay);
+          builder.or(`yard_${dateColumn}.lt.${nextDay},kics_${dateColumn}.lt.${nextDay}`);
+        }
+        break;
+      }
+      default:
         break;
     }
   }
 
-  // 期間のtoが入ってたら
-  if (range?.to) {
-    const endOfDay = dayjs(range.to).tz('Asia/Tokyo').endOf('day').toISOString();
-    console.log('end of the day: ', endOfDay);
-    switch (radio) {
-      case 'shuko': // '出庫日'
-        builder.or(`yard_shuko_dat.lt.${endOfDay},kics_shuko_dat.lt.${endOfDay}`);
-        break;
-      case 'nyuko': // '入庫日'
-        builder.or(`yard_nyuko_dat.lt.${endOfDay},kics_nyuko_dat.lt.${endOfDay}`);
-        break;
-    }
-  }
   // 受注番号が入っていたら
   if (juchuId) {
     builder.eq('juchu_head_id', juchuId);
