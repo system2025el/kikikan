@@ -14,8 +14,9 @@ import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { getEqptNam } from '../../rfid-master/[kizaiId]/_lib/funcs';
 import { emptyEqptSet, formItems } from '../_lib/datas';
-import { addNewEqptSet, getChosenEqptSet, getEqptsForEqptSelection, updateEqptSet } from '../_lib/funcs';
+import { addNewEqptSet, getChosenEqptSet, getEqptsForOyaEqptSelection, updateEqptSet } from '../_lib/funcs';
 import { EqptSetsMasterDialogSchema, EqptSetsMasterDialogValues } from '../_lib/types';
+import { EqptSetSelectionDialog } from './eqtp-selection-dialog';
 
 /**
  * 機材セットマスタ詳細ダイアログ
@@ -52,6 +53,9 @@ export const EqptSetsMasterDialog = ({
   /** 機材名 */
   const [kizaiNam, setKizaiNam] = useState<string>('');
 
+  /** 機材選択ダイアログ開閉 */
+  const [eqSelectOpen, setEqSelectOpen] = useState<boolean>(false);
+
   /* useForm ----------------------------------------- */
   const {
     control,
@@ -59,6 +63,7 @@ export const EqptSetsMasterDialog = ({
     watch,
     handleSubmit,
     reset,
+    setValue,
     getValues,
   } = useForm({
     mode: 'onChange',
@@ -67,7 +72,9 @@ export const EqptSetsMasterDialog = ({
     defaultValues: emptyEqptSet,
   });
 
+  /** 無効化の監視 */
   const isDeleted = watch('delFlg');
+  /** セット機材リストの監視 */
   const setList = watch('setEqptList');
 
   const setField = useFieldArray({ control, name: 'setEqptList' });
@@ -131,7 +138,7 @@ export const EqptSetsMasterDialog = ({
     const getThatOneEqptSet = async () => {
       if (oyaId === FAKE_NEW_ID) {
         // 新規追加モード
-        const op = await getEqptsForEqptSelection();
+        const op = await getEqptsForOyaEqptSelection();
         if (!op) {
           setOptions([]);
         } else {
@@ -200,43 +207,21 @@ export const EqptSetsMasterDialog = ({
                     )}
                   />
                 ) : (
-                  <TextField value={kizaiNam} disabled />
+                  <TextField value={kizaiNam} disabled fullWidth sx={{ maxWidth: '90%' }} />
                 )}
               </FormBox>
-              <FormBox formItem={formItems[2]}>
-                <TextFieldElement
-                  multiline
-                  name="mem"
-                  control={control}
-                  label={editable ? formItems[2].exsample : ''}
-                  fullWidth
-                  sx={{ maxWidth: '90%' }}
-                  disabled={editable ? false : true}
-                />
-              </FormBox>
-              <FormBox formItem={formItems[2]}>
-                <TextFieldElement
-                  multiline
-                  name="setEqptList"
-                  control={control}
-                  label={editable ? formItems[2].exsample : ''}
-                  fullWidth
-                  sx={{ maxWidth: '90%' }}
-                  disabled={editable ? false : true}
-                />
-              </FormBox>
-              <FormBox formItem={formItems[3]} align="baseline">
+              <FormBox formItem={formItems[1]} align="baseline">
                 <Box width={'100%'} border={1} borderColor={'divider'} p={1}>
-                  <Button onClick={() => {} /*setEqSelectOpen(true)*/} disabled={editable ? false : true}>
+                  <Button onClick={() => setEqSelectOpen(true)} disabled={editable ? false : true}>
                     機材選択
                   </Button>
-                  {/* <EqptIsshikiSelectionDialog
+                  <EqptSetSelectionDialog
                     open={eqSelectOpen}
-                    isshikiId={isshikiId}
-                    currentEqptList={kizaiList.map((d) => d.id)}
+                    oyaEqptId={oyaId}
+                    currentEqptList={setList}
                     setOpen={setEqSelectOpen}
                     setValue={setValue}
-                  /> */}
+                  />
 
                   {setField.fields.map((d, index) => (
                     <Stack key={d.id} sx={{ width: '100%', my: 0.5 }}>
@@ -250,10 +235,13 @@ export const EqptSetsMasterDialog = ({
                       >
                         <DeleteIcon fontSize="small" />
                       </Button>
-                      {/* <TextFieldElement name={`kizaiList.${index}.nam`} control={control} /> */}
-                      <Typography whiteSpace={'nowrap'} sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      <Typography
+                        whiteSpace={'nowrap'}
+                        sx={{ overflow: 'hidden', textOverflow: 'ellipsis', width: '65%' }}
+                      >
                         {setList[index].nam}
                       </Typography>
+                      <TextFieldElement name={`setEqptList.${index}.mem`} control={control} />
                     </Stack>
                   ))}
                 </Box>

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 
-import { selectActiveEqptsForSet } from '@/app/_lib/db/tables/m-kizai';
+import { selectActiveEqpts, selectActiveEqptsForSet } from '@/app/_lib/db/tables/m-kizai';
 import {
   insertNewEqptSet,
   selectFilteredEqptSets,
@@ -15,6 +15,7 @@ import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { FAKE_NEW_ID } from '../../_lib/constants';
 import { emptyEqptSet } from './datas';
 import { EqptSetsMasterDialogValues, EqptSetsMasterTableValues } from './types';
+import { EqptSelection } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
 
 /**
  * 機材セットマスタのデータを取得する関数、引数無は全取得
@@ -62,9 +63,10 @@ export const getChosenEqptSet = async (id: number) => {
     // ダイアログ表示用に形成
     const eqptSetDetails: EqptSetsMasterDialogValues = {
       delFlg: Boolean(rows[0].del_flg),
-      mem: rows[0].mem,
       eqptId: rows[0].kizai_id,
-      setEqptList: rows[0].set_kizai_id ? rows.map((d) => ({ id: d.set_kizai_id, nam: d.set_kizai_nam })) : [],
+      setEqptList: rows[0].set_kizai_id
+        ? rows.map((d) => ({ id: d.set_kizai_id, nam: d.set_kizai_nam, mem: d.mem }))
+        : [],
     };
     return eqptSetDetails;
   } catch (e) {
@@ -99,7 +101,7 @@ export const updateEqptSet = async (rawData: EqptSetsMasterDialogValues, id: num
     kizai_id: id,
     set_kizai_id: id,
     del_flg: Number(rawData.delFlg),
-    mem: rawData.mem,
+    // mem: rawData.mem,
     upd_dat: date,
     upd_user: user,
   };
@@ -113,10 +115,10 @@ export const updateEqptSet = async (rawData: EqptSetsMasterDialogValues, id: num
 };
 
 /**
- * 機材セットマスタの機材選択肢に表示するための機材リスト
+ * 機材セットマスタの親機材選択肢に表示するための機材リスト
  * @returns {Promise<SelectTypes[]>} 選択肢配列
  */
-export const getEqptsForEqptSelection = async (): Promise<SelectTypes[]> => {
+export const getEqptsForOyaEqptSelection = async (): Promise<SelectTypes[]> => {
   try {
     const data = await selectActiveEqptsForSet();
     if (!data || data.rowCount === 0) {
@@ -126,6 +128,27 @@ export const getEqptsForEqptSelection = async (): Promise<SelectTypes[]> => {
     return data.rows.map((d) => ({ id: d.kizaiId, label: d.kizaiNam, grpId: d.bumonId, grpNam: d.bumonNam }));
   } catch (e) {
     console.error('例外が発生しました:', e);
+    throw e;
+  }
+};
+
+/**
+ * セット機材の選択肢を取得する関数
+ * @returns 有効な機材の配列
+ */
+export const getEqptsForSetEqptSelection = async (): Promise<EqptSelection[]> => {
+  try {
+    try {
+      const data = await selectActiveEqpts('');
+      if (!data || data.rowCount === 0) {
+        return [];
+      }
+      return data.rows;
+    } catch (e) {
+      console.error('例外が発生しました:', e);
+      throw e;
+    }
+  } catch (e) {
     throw e;
   }
 };

@@ -30,10 +30,10 @@ export const FormBox = ({
       <Grid2 size={2}>
         <Typography ml={3}>{formItem.label}</Typography>
       </Grid2>
-      <Grid2 size={5} alignItems={'center'} display={'flex'}>
+      <Grid2 size={'grow'} alignItems={'center'} display={'flex'}>
         {children}
       </Grid2>
-      <Grid2 size={4}>
+      <Grid2 size={3}>
         <Typography variant="body2">{formItem.constraints}</Typography>
       </Grid2>
     </Grid2>
