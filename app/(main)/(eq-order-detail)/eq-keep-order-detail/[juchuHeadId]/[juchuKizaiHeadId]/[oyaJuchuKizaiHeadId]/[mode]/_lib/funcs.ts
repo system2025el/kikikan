@@ -50,6 +50,7 @@ import { NyushukoFix } from '@/app/_lib/db/types/t-nyushuko-fix-type';
 import { Database } from '@/app/_lib/db/types/types';
 import { toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import {
+  addDummyNyushukoDen,
   addJuchuKizaiNyushuko,
   delAllNyukoResult,
   delAllNyushukoResult,
@@ -93,6 +94,14 @@ export const saveNewKeepJuchuKizaiHead = async (data: KeepJuchuKizaiHeadValues, 
       connection
     );
     console.log('キープ受注機材入出庫追加', nyushukoResult);
+
+    // ダミー入庫伝票追加
+    if (data.kicsNyukoDat) {
+      await addDummyNyushukoDen(data.juchuHeadId, newJuchuKizaiHeadId, data.kicsNyukoDat, 1, userNam, connection);
+    }
+    if (data.yardNyukoDat) {
+      await addDummyNyushukoDen(data.juchuHeadId, newJuchuKizaiHeadId, data.yardNyukoDat, 2, userNam, connection);
+    }
 
     await connection.query('COMMIT');
     return newJuchuKizaiHeadId;
@@ -194,30 +203,16 @@ export const saveKeepJuchuKizai = async (
       if (deleteKeepJuchuKizaiMeisaiData.length > 0) {
         const deleteMeisaiResult = await delKeepJuchuKizaiMeisai(deleteKeepJuchuKizaiMeisaiData, connection);
         console.log('キープ受注機材明細削除', deleteMeisaiResult);
-
-        // const deleteNyushukoDenResult = await delKeepNyushukoDen(deleteKeepJuchuKizaiMeisaiData, connection);
-        // console.log('キープ入出庫伝票削除', deleteNyushukoDenResult);
       }
       // 追加
       if (addKeepJuchuKizaiMeisaiData.length > 0) {
         const addMeisaiResult = await addKeepJuchuKizaiMeisai(addKeepJuchuKizaiMeisaiData, userNam, connection);
         console.log('キープ受注機材明細追加', addMeisaiResult);
-
-        // const addNyushukoDenResult = await addKeepNyushukoDen(data, addKeepJuchuKizaiMeisaiData, userNam, connection);
-        // console.log('キープ入出庫伝票追加', addNyushukoDenResult);
       }
       // 更新
       if (updateKeepJuchuKizaiMeisaiData.length > 0) {
         const updateMeisaiResult = await updKeepJuchuKizaiMeisai(updateKeepJuchuKizaiMeisaiData, userNam, connection);
         console.log('キープ受注機材明細更新', updateMeisaiResult);
-
-        // const updateNyushukoDenResult = await updKeepNyushukoDen(
-        //   data,
-        //   updateKeepJuchuKizaiMeisaiData,
-        //   userNam,
-        //   connection
-        // );
-        // console.log('キープ入出庫伝票更新', updateNyushukoDenResult);
       }
 
       // 受注コンテナ明細id最大値
@@ -278,6 +273,14 @@ export const saveKeepJuchuKizai = async (
       if (checkKicsNyukoDat || checkYardNyukoDat) {
         const deleteNyukoDenResult = await delAllNyukoDen(data.juchuHeadId, data.juchuKizaiHeadId, connection);
         console.log('入庫伝票全削除', deleteNyukoDenResult);
+
+        // ダミー入庫伝票追加
+        if (data.kicsNyukoDat) {
+          await addDummyNyushukoDen(data.juchuHeadId, data.juchuKizaiHeadId, data.kicsNyukoDat, 1, userNam, connection);
+        }
+        if (data.yardNyukoDat) {
+          await addDummyNyushukoDen(data.juchuHeadId, data.juchuKizaiHeadId, data.yardNyukoDat, 2, userNam, connection);
+        }
 
         // 削除されていない機材明細
         const filterNewKeepJuchuKizaiMeisai = newKeepJuchuKizaiMeisaiData.filter((d) => !d.delFlag);

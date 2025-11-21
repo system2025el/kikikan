@@ -48,7 +48,7 @@ import {
   deleteAllShukoCtnResult,
   deleteKizaiIdNyushukoCtnResult,
 } from '@/app/_lib/db/tables/t-nyushuko-ctn-result';
-import { deleteAllNyushukoDen } from '@/app/_lib/db/tables/t-nyushuko-den';
+import { deleteAllNyushukoDen, insertNyushukoDen } from '@/app/_lib/db/tables/t-nyushuko-den';
 import { selectNyushukoFixFlag } from '@/app/_lib/db/tables/t-nyushuko-fix';
 import {
   deleteAllNyukoResult,
@@ -64,8 +64,9 @@ import { JuchuKizaiHead } from '@/app/_lib/db/types/t-juchu-kizai-head-type';
 import { JuchuKizaiHonbanbi } from '@/app/_lib/db/types/t-juchu-kizai-honbanbi-type';
 import { JuchuKizaiMeisai } from '@/app/_lib/db/types/t-juchu-kizai-meisai-type';
 import { JuchuKizaiNyushuko } from '@/app/_lib/db/types/t-juchu-kizai-nyushuko-type';
+import { NyushukoDen } from '@/app/_lib/db/types/t-nyushuko-den-type';
 
-import { toJapanTimeString, toJapanYMDString } from '../../_lib/date-conversion';
+import { toJapanTimeStampString, toJapanTimeString, toJapanYMDString } from '../../_lib/date-conversion';
 import {
   JuchuContainerMeisaiValues,
   JuchuKizaiHeadValues,
@@ -578,6 +579,52 @@ export const getNyushukoFixFlag = async (juchuHeadId: number, juchuKizaiHeadId: 
   } catch (e) {
     console.error(e);
     return false;
+  }
+};
+
+/**
+ * ダミー入庫伝票追加
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param date 日付
+ * @param sagyoId 作業id
+ * @param userNam ユーザー名
+ * @param connection
+ * @returns
+ */
+export const addDummyNyushukoDen = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  date: Date,
+  sagyoId: number,
+  userNam: string,
+  connection: PoolClient
+) => {
+  const dummyData: NyushukoDen[] = [
+    {
+      juchu_head_id: juchuHeadId,
+      juchu_kizai_head_id: juchuKizaiHeadId,
+      juchu_kizai_meisai_id: 0,
+      sagyo_kbn_id: 30,
+      sagyo_den_dat: toJapanTimeStampString(date),
+      sagyo_id: sagyoId,
+      kizai_id: 0,
+      plan_qty: 0,
+      dsp_ord_num: 0,
+      indent_num: 0,
+      add_dat: toJapanTimeString(),
+      add_user: userNam,
+    },
+  ];
+
+  try {
+    await insertNyushukoDen(dummyData, connection);
+
+    console.log('dummy nyushuko den added successfully:', dummyData);
+    return true;
+  } catch (e) {
+    console.error('Exception while adding dummy nyushuko den:', e);
+    throw e;
   }
 };
 

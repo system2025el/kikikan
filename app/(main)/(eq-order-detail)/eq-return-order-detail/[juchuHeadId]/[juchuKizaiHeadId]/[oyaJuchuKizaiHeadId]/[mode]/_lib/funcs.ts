@@ -45,6 +45,7 @@ import { NyushukoFix } from '@/app/_lib/db/types/t-nyushuko-fix-type';
 import { toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import {
   addAllHonbanbi,
+  addDummyNyushukoDen,
   addJuchuKizaiNyushuko,
   delAllNyukoResult,
   delAllNyushukoDen,
@@ -113,6 +114,14 @@ export const saveNewReturnJuchuKizaiHead = async (
       connection
     );
     console.log('使用中本番日追加', addReturnHonbanbiResult);
+
+    // ダミー入庫伝票追加
+    if (data.kicsNyukoDat) {
+      await addDummyNyushukoDen(data.juchuHeadId, newJuchuKizaiHeadId, data.kicsNyukoDat, 1, userNam, connection);
+    }
+    if (data.yardNyukoDat) {
+      await addDummyNyushukoDen(data.juchuHeadId, newJuchuKizaiHeadId, data.yardNyukoDat, 2, userNam, connection);
+    }
 
     await connection.query('COMMIT');
     return newJuchuKizaiHeadId;
@@ -305,6 +314,14 @@ export const saveReturnJuchuKizai = async (
       if (checkKicsDat || checkYardDat) {
         const deleteAllNyukoDenResult = await delAllNyushukoDen(data.juchuHeadId, data.juchuKizaiHeadId, connection);
         console.log('入庫伝票全削除', deleteAllNyukoDenResult);
+
+        // ダミー入庫伝票追加
+        if (data.kicsNyukoDat) {
+          await addDummyNyushukoDen(data.juchuHeadId, data.juchuKizaiHeadId, data.kicsNyukoDat, 1, userNam, connection);
+        }
+        if (data.yardNyukoDat) {
+          await addDummyNyushukoDen(data.juchuHeadId, data.juchuKizaiHeadId, data.yardNyukoDat, 2, userNam, connection);
+        }
 
         // 削除されていない機材明細
         const filterNewJuchuKizaiMeisai = newReturnJuchuKizaiMeisaiData.filter((d) => !d.delFlag);
