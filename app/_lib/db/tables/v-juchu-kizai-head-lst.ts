@@ -110,48 +110,61 @@ export const selectFilteredKizaiHead = async ({
       case '1': {
         // '先月全て'
         const startOfLastMonth = dayjs().tz('Asia/Tokyo').subtract(1, 'month').startOf('month').toISOString();
-        const endOfLastMonth = dayjs().tz('Asia/Tokyo').subtract(1, 'month').endOf('month').toISOString();
-        builder
-          .or(`yard_${dateColumn}.gte.${startOfLastMonth},kics_${dateColumn}.gte.${startOfLastMonth}`)
-          .or(`yard_${dateColumn}.lt.${endOfLastMonth},kics_${dateColumn}.lt.${endOfLastMonth}`);
+        const startOfThisMonth = dayjs().tz('Asia/Tokyo').add(1, 'month').startOf('month').toISOString();
+        builder.or(
+          // yardが先月の範囲
+          `and(yard_${dateColumn}.gte.${startOfLastMonth},yard_${dateColumn}.lt.${startOfThisMonth}),` +
+            // kicsが先月の範囲
+            `and(kics_${dateColumn}.gte.${startOfLastMonth},kics_${dateColumn}.lt.${startOfThisMonth})`
+        );
         break;
       }
       case '2': {
         // '今月全て'
         const startOfThisMonth = dayjs().tz('Asia/Tokyo').startOf('month').toISOString();
-        const endOfThisMonth = dayjs().tz('Asia/Tokyo').endOf('month').toISOString();
-        builder
-          .or(`yard_${dateColumn}.gte.${startOfThisMonth},kics_${dateColumn}.gte.${startOfThisMonth}`)
-          .or(`yard_${dateColumn}.lt.${endOfThisMonth},kics_${dateColumn}.lt.${endOfThisMonth}`);
+        const startOfNextMonth = dayjs().tz('Asia/Tokyo').add(1, 'month').startOf('month').toISOString();
+        builder.or(
+          // yardが今月の範囲
+          `and(yard_${dateColumn}.gte.${startOfThisMonth},yard_${dateColumn}.lt.${startOfNextMonth}),` +
+            // kicsが今月の範囲
+            `and(kics_${dateColumn}.gte.${startOfThisMonth},kics_${dateColumn}.lt.${startOfNextMonth})`
+        );
         break;
       }
       case '3': {
         // '昨日'
         const startOfYesterday = dayjs().tz('Asia/Tokyo').subtract(1, 'day').startOf('day').toISOString();
         const startOfToday = dayjs().tz('Asia/Tokyo').startOf('day').toISOString();
-        builder
-          .or(`yard_${dateColumn}.gte.${startOfYesterday},kics_${dateColumn}.gte.${startOfYesterday}`)
-          .or(`yard_${dateColumn}.lt.${startOfToday},kics_${dateColumn}.lt.${startOfToday}`);
+        builder.or(
+          // yardが昨日の範囲内
+          `and(yard_${dateColumn}.gte.${startOfYesterday},yard_${dateColumn}.lt.${startOfToday}),` +
+            // kicsが昨日の範囲内
+            `and(kics_${dateColumn}.gte.${startOfYesterday},kics_${dateColumn}.lt.${startOfToday})`
+        );
         break;
       }
       case '4': {
         // '今日'
         const startOfToday = dayjs().tz('Asia/Tokyo').startOf('day').toISOString();
         const startOfTomorrow = dayjs().tz('Asia/Tokyo').add(1, 'day').startOf('day').toISOString();
-        builder
-          .or(`yard_${dateColumn}.gte.${startOfToday},kics_${dateColumn}.gte.${startOfToday}`)
-          .or(`yard_${dateColumn}.lt.${startOfTomorrow},kics_${dateColumn}.lt.${startOfTomorrow}`);
-
+        builder.or(
+          // yardが今日の範囲内
+          `and(yard_${dateColumn}.gte.${startOfToday},yard_${dateColumn}.lt.${startOfTomorrow}),` +
+            // kicsが今日の範囲内
+            `and(kics_${dateColumn}.gte.${startOfToday},kics_${dateColumn}.lt.${startOfTomorrow})`
+        );
         break;
       }
       case '5': {
         // '明日'
         const startOfTomorrow = dayjs().tz('Asia/Tokyo').add(1, 'day').startOf('day').toISOString();
         const startOfDayAfterTomorrow = dayjs().tz('Asia/Tokyo').add(2, 'day').startOf('day').toISOString();
-        builder
-          .or(`yard_${dateColumn}.gte.${startOfTomorrow},kics_${dateColumn}.gte.${startOfTomorrow}`)
-          .or(`yard_${dateColumn}.lt.${startOfDayAfterTomorrow},kics_${dateColumn}.lt.${startOfDayAfterTomorrow}`);
-
+        builder.or(
+          // yardが明日の範囲内
+          `and(yard_${dateColumn}.gte.${startOfTomorrow},yard_${dateColumn}.lt.${startOfDayAfterTomorrow}),` +
+            // kicsが明日の範囲内
+            `and(kics_${dateColumn}.gte.${startOfTomorrow},kics_${dateColumn}.lt.${startOfDayAfterTomorrow})`
+        );
         break;
       }
       case '6': {
@@ -163,14 +176,27 @@ export const selectFilteredKizaiHead = async ({
       }
       case '7': {
         // '指定期間'
-        if (selectedDate.range?.from) {
+        if (selectedDate.range?.from && selectedDate.range.to) {
+          // 指定日がどちらも入ってる場合
+          const startOfDay = dayjs(selectedDate.range.from).tz('Asia/Tokyo').startOf('day').toISOString();
+          const startOfnextDay = dayjs(selectedDate.range.to)
+            .tz('Asia/Tokyo')
+            .add(1, 'day')
+            .startOf('day')
+            .toISOString();
+          builder.or(
+            // yardが今日の範囲内
+            `and(yard_${dateColumn}.gte.${startOfDay},yard_${dateColumn}.lt.${startOfnextDay}),` +
+              // kicsが今日の範囲内
+              `and(kics_${dateColumn}.gte.${startOfDay},kics_${dateColumn}.lt.${startOfnextDay})`
+          );
+        } else if (selectedDate.range?.from) {
+          // fromだけの場合
           const startOfDay = dayjs(selectedDate.range.from).tz('Asia/Tokyo').startOf('day').toISOString();
           console.log('start of the day: ', startOfDay);
           builder.or(`yard_${dateColumn}.gte.${startOfDay},kics_${dateColumn}.gte.${startOfDay}`);
-        }
-
-        if (selectedDate.range?.to) {
-          // 翌日の00:00:00未満
+        } else if (selectedDate.range?.to) {
+          // toだけの場合
           const nextDay = dayjs(selectedDate.range.to).tz('Asia/Tokyo').add(1, 'day').startOf('day').toISOString();
           console.log('start of the next day: ', nextDay);
           builder.or(`yard_${dateColumn}.lt.${nextDay},kics_${dateColumn}.lt.${nextDay}`);
