@@ -1,6 +1,6 @@
 import { FormItemsType } from '@/app/(main)/_ui/form-box';
 
-import { IsshikisMasterDialogValues, IsshikisMasterTableValues } from './types';
+import { IsshikisMasterDialogValues } from './types';
 
 /* 一式マスタテーブルヘッダー */
 export const isshikiMHeader = [
@@ -28,7 +28,7 @@ export const formItems: FormItemsType[] = [
   },
   {
     label: '単価',
-    exsample: '数字',
+    exsample: '',
     constraints: '10桁まで',
   },
 

@@ -228,6 +228,11 @@ export const IsshikisMasterDialog = ({
                       <Typography whiteSpace={'nowrap'} sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {kizaiList[index].nam}
                       </Typography>
+                      <TextFieldElement
+                        name={`kizaiList.${index}.mem`}
+                        control={control}
+                        disabled={editable ? false : true}
+                      />
                     </Stack>
                   ))}
                 </Box>

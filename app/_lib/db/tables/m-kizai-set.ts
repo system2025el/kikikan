@@ -81,10 +81,9 @@ export const selectFilteredEqptSets = async (query: string) => {
   const values = [];
 
   if (query && query.trim() !== '') {
-    queryString += ` WHERE k.kizai_nam ILIKE '$1'`;
-    values.push(query);
+    queryString += ` WHERE k.kizai_nam ILIKE $1`;
+    values.push(`%${query}%`);
   }
-
   queryString += ` GROUP BY s.kizai_id, k.kizai_nam, s.del_flg`;
 
   try {
