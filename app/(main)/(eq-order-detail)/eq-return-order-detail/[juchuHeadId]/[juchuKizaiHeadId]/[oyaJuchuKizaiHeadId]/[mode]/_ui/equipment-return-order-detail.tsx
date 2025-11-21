@@ -1139,13 +1139,25 @@ export const EquipmentReturnOrderDetail = (props: {
               expanded={expanded}
               onChange={handleExpansion}
               sx={{
+                marginTop: 2,
                 borderRadius: 1,
                 overflow: 'hidden',
               }}
               variant="outlined"
             >
-              <AccordionSummary expandIcon={<ExpandMoreIcon />} component="div">
-                <Box display="flex" justifyContent="space-between" alignItems="center" py={1} width="100%">
+              <AccordionSummary
+                expandIcon={<ExpandMoreIcon />}
+                component="div"
+                sx={{
+                  minHeight: '30px',
+                  maxHeight: '30px',
+                  '&.Mui-expanded': {
+                    minHeight: '30px',
+                    maxHeight: '30px',
+                  },
+                }}
+              >
+                <Box display="flex" justifyContent="space-between" alignItems="center" width="100%">
                   <Grid2 container display="flex" justifyContent="space-between" spacing={2}>
                     <Typography>受注ヘッダー</Typography>
                     <Grid2 container display={expanded ? 'none' : 'flex'} spacing={2}>
@@ -1231,10 +1243,23 @@ export const EquipmentReturnOrderDetail = (props: {
                 overflow: 'hidden',
               }}
               variant="outlined"
-              defaultExpanded
+              defaultExpanded={!saveKizaiHead}
             >
-              <AccordionSummary expandIcon={<ExpandMoreIcon />} component="div" sx={{ bgcolor: 'red', color: 'white' }}>
-                <Box display="flex" alignItems="center" justifyContent="space-between" py={1} width={'100%'}>
+              <AccordionSummary
+                expandIcon={<ExpandMoreIcon />}
+                component="div"
+                sx={{
+                  minHeight: '30px',
+                  maxHeight: '30px',
+                  '&.Mui-expanded': {
+                    minHeight: '30px',
+                    maxHeight: '30px',
+                  },
+                  bgcolor: 'red',
+                  color: 'white',
+                }}
+              >
+                <Box display="flex" alignItems="center" justifyContent="space-between" width={'100%'}>
                   <Typography>受注機材ヘッダー(返却)</Typography>
                 </Box>
               </AccordionSummary>
@@ -1480,11 +1505,8 @@ export const EquipmentReturnOrderDetail = (props: {
           </form>
           {/*返却受注明細(機材)*/}
           <Paper variant="outlined" sx={{ mt: 2 }}>
-            <Box display="flex" justifyContent="space-between" alignItems="center" py={1} px={2}>
-              <Grid2 container direction="column" spacing={1}>
-                <Typography>受注明細(機材)</Typography>
-                <Typography fontSize={'small'}>機材入力</Typography>
-              </Grid2>
+            <Box display="flex" justifyContent="space-between" alignItems="center" px={2} height={'30px'}>
+              <Typography>受注明細(機材)</Typography>
             </Box>
             <Divider />
             <Dialog open={EqSelectionDialogOpen} maxWidth="sm" fullWidth>
