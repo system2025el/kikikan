@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { string, z } from 'zod';
 
 import { validationMessages } from '@/app/(main)/_lib/validation-messages';
 
@@ -20,7 +20,7 @@ export const IsshikisMasterDialogSchema = z.object({
     .string()
     .max(200, { message: validationMessages.maxStringLength(200) })
     .nullish(),
-  kizaiList: z.array(z.object({ id: z.number(), nam: z.string() })),
+  kizaiList: z.array(z.object({ id: z.number(), nam: z.string(), mem: string().nullish() })),
 });
 
 /**

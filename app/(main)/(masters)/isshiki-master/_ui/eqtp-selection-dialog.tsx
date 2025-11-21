@@ -36,7 +36,11 @@ export const EqptIsshikiSelectionDialog = ({
 }: {
   open: boolean;
   isshikiId: number;
-  currentEqptList: number[];
+  currentEqptList: {
+    id: number;
+    nam: string;
+    mem?: string | null | undefined;
+  }[];
   setOpen: React.Dispatch<SetStateAction<boolean>>;
   setValue: UseFormSetValue<IsshikisMasterDialogValues>;
 }) => {
@@ -70,10 +74,15 @@ export const EqptIsshikiSelectionDialog = ({
   /** 確定ボタン押下時処理 */
   const handleClickCnfirm = async () => {
     const selectedList = await getSelectedEqpts(selected);
-    setValue(
-      'kizaiList',
-      selectedList.map((d) => ({ id: d.kizaiId, nam: d.kizaiNam }))
-    );
+    const setList: { id: number; nam: string; mem: string | null }[] = selectedList.map((newItem) => {
+      const match = currentEqptList.find((c) => c.id === newItem.kizaiId);
+      return {
+        id: newItem.kizaiId,
+        nam: newItem.kizaiNam ?? match?.nam ?? '',
+        mem: match?.mem ?? null,
+      };
+    });
+    setValue('kizaiList', setList);
   };
 
   /* useEffect --------------------------------------------- */
@@ -81,7 +90,7 @@ export const EqptIsshikiSelectionDialog = ({
     const getEq = async () => {
       const o = await getEqptsForEqptSelection(isshikiId);
       setOptions(o);
-      setSelected(currentEqptList);
+      setSelected(currentEqptList.map((d) => d.id));
       setIsLoading(false);
     };
     getEq();
