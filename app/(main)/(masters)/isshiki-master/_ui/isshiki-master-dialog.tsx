@@ -201,7 +201,9 @@ export const IsshikisMasterDialog = ({
               </FormBox>
               <FormBox formItem={formItems[3]} align="baseline">
                 <Box width={'100%'} border={1} borderColor={'divider'} p={1}>
-                  <Button onClick={() => setEqSelectOpen(true)}>機材選択</Button>
+                  <Button onClick={() => setEqSelectOpen(true)} disabled={editable ? false : true}>
+                    機材選択
+                  </Button>
                   <EqptIsshikiSelectionDialog
                     open={eqSelectOpen}
                     isshikiId={isshikiId}
@@ -218,6 +220,7 @@ export const IsshikisMasterDialog = ({
                         onClick={() => {
                           kizaisField.remove(index);
                         }}
+                        disabled={editable ? false : true}
                       >
                         <DeleteIcon fontSize="small" />
                       </Button>

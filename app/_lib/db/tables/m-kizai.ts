@@ -156,9 +156,9 @@ export const selectBundledEqpts = async (setIds: number[]) => {
             k.bumon_id as "bumonId",
             k.kizai_grp_cod as "kizaiGrpCod"
           FROM
-            dev6.m_kizai as k
+            ${SCHEMA}.m_kizai as k
           LEFT JOIN
-            dev6.m_shozoku as s
+            ${SCHEMA}.m_shozoku as s
           ON
             k.shozoku_id = s.shozoku_id
           WHERE
@@ -232,6 +232,42 @@ export const selectActiveEqptsForIsshiki = async (query: number | null) => {
   sqlQuery += `
      ORDER BY k.kizai_grp_cod, k.dsp_ord_num;
   `;
+  try {
+    return await pool.query(sqlQuery);
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
+ * 機材セットマスタにまだ登録していない有効な機材の情報を取得する関数
+ * @returns {[]} 選択肢の配列
+ */
+export const selectActiveEqptsForSet = async () => {
+  const sqlQuery = `
+  SELECT
+    k.kizai_id as "kizaiId",
+    k.kizai_nam as "kizaiNam",
+    k.bumon_id as "bumonId",
+    b.bumon_nam as "bumonNam"
+  FROM
+    ${SCHEMA}.m_kizai as k
+  LEFT JOIN
+    ${SCHEMA}.m_kizai_set as set
+  ON
+    k.kizai_id = set.kizai_id
+  LEFT JOIN
+    ${SCHEMA}.m_bumon as b
+  ON
+    b.bumon_id = k.bumon_id
+  WHERE
+    k.del_flg <> 1
+  AND
+    k.dsp_flg <> 0
+  AND
+    set.kizai_id IS NULL
+  ORDER BY k.kizai_grp_cod, k.dsp_ord_num;
+`;
   try {
     return await pool.query(sqlQuery);
   } catch (e) {

@@ -109,19 +109,24 @@ export const selectFilteredEqptSets = async (query: string) => {
 export const selectOneEqptSet = async (id: number) => {
   const query = `
     SELECT
-      set_kizai_id
+      set.kizai_id, set.set_kizai_id, k.kizai_nam as set_kizai_nam, set.del_flg
     FROM
+      ${SCHEMA}.m_kizai_set as set
     LEFT JOIN
+      ${SCHEMA}.m_kizai as k
     ON
+      k.kizai_id = set.set_kizai_id
     WHERE
+      set.kizai_id = $1
   `;
   try {
-    return await supabase
-      .schema(SCHEMA)
-      .from('m_kizai_set')
-      .select('set_kizai_id, del_flg, mem')
-      .eq('kizai_set_id', id)
-      .single();
+    return pool.query(query, [id]);
+    // return await supabase
+    //   .schema(SCHEMA)
+    //   .from('m_kizai_set')
+    //   .select('set_kizai_id, del_flg, mem')
+    //   .eq('kizai_set_id', id)
+    //   .single();
   } catch (e) {
     throw e;
   }

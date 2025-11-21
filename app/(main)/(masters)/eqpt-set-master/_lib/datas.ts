@@ -1,5 +1,6 @@
 import { FormItemsType } from '@/app/(main)/_ui/form-box';
 
+import { FAKE_NEW_ID } from '../../_lib/constants';
 import { EqptSetsMasterDialogValues } from './types';
 
 /* 機材セットマスタテーブルヘッダー */
@@ -13,6 +14,8 @@ export const eqptSetMHeader = [
 export const emptyEqptSet: EqptSetsMasterDialogValues = {
   delFlg: false,
   mem: '',
+  eqptId: FAKE_NEW_ID,
+  setEqptList: [],
 };
 
 export const formItems: FormItemsType[] = [

@@ -84,9 +84,7 @@ export const addNewIsshiki = async (data: IsshikisMasterDialogValues, user: stri
   try {
     await insertNewIsshiki(data, user);
     console.log('data : ', data);
-    await revalidatePath('/bumons-master');
     await revalidatePath('/isshiki-master');
-    await revalidatePath('/eqpt-master');
   } catch (error) {
     console.log('DB接続エラー', error);
     throw error;
@@ -112,9 +110,7 @@ export const updateIsshiki = async (rawData: IsshikisMasterDialogValues, id: num
   console.log(updateData.issiki_nam);
   try {
     await updateIsshikiDB(updateData);
-    await revalidatePath('/bumons-master');
     await revalidatePath('/isshiki-master');
-    await revalidatePath('/eqpt-master');
   } catch (error) {
     console.log('例外が発生', error);
     throw error;
@@ -126,7 +122,7 @@ export const updateIsshiki = async (rawData: IsshikisMasterDialogValues, id: num
  * @param query 検索キーワード
  * @returns
  */
-export const getEqptsForEqptSelection = async (query: number = FAKE_NEW_ID): Promise<EqptSelection[]> => {
+export const getEqptsForEqptSelection = async (query: number = FAKE_NEW_ID): Promise<SelectTypes[]> => {
   try {
     const data = await selectActiveEqptsForIsshiki(query);
     if (!data || data.rowCount === 0) {

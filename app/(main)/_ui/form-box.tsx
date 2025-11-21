@@ -42,5 +42,5 @@ export const FormBox = ({
 
 export type FormItemsType = { label: string; constraints: string; exsample: string; other?: string };
 
-export type SelectTypes = { id: number | string; label: string };
+export type SelectTypes = { id: number | string; label: string; grpId?: number; grpNam?: string };
 export const selectNone: SelectTypes = { id: FAKE_NEW_ID, label: '未選択' };
