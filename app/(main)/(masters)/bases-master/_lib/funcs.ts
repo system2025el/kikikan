@@ -4,14 +4,36 @@ import { revalidatePath } from 'next/cache';
 
 import {
   insertNewShozoku,
+  selectActiveShozokus,
   selectFilteredShozokus,
   selectOneShozoku,
   upDateShozokuDB,
 } from '@/app/_lib/db/tables/m-shozoku';
 import { toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
+import { SelectTypes } from '@/app/(main)/_ui/form-box';
 
 import { emptyBase } from './datas';
 import { BasesMasterDialogValues, BasesMasterTableValues } from './types';
+
+/**
+ * 拠点の選択肢を取得する関数
+ * @returns {SelectTypes[]} 所属拠点の選択肢
+ */
+export const getBasesSelections = async (): Promise<SelectTypes[]> => {
+  try {
+    const { data, error } = await selectActiveShozokus();
+
+    if (error) {
+      console.error(error.message, error.hint, error.cause, error.details);
+    }
+    if (!data || data.length === 0) {
+      return [];
+    }
+    return data.map((d) => ({ id: d.shozoku_id, label: d.shozoku_nam }));
+  } catch (e) {
+    throw e;
+  }
+};
 
 /**
  * 所属マスタテーブルのデータを取得する関数

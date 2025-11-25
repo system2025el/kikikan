@@ -141,59 +141,59 @@ export const BasesMasterDialog = ({
   }, [baseId, reset]);
 
   return (
-    <>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <MasterDialogTitle
-          editable={editable}
-          handleEditable={() => setEditable(true)}
-          handleClose={handleClickClose}
-          dialogTitle="所属マスタ登録"
-          isDirty={isDirty}
-          isNew={isNew}
-          setAction={setAction}
-          isDeleted={isDeleted!}
-        />
-        {isLoading ? (
-          <Loading />
-        ) : (
-          <>
-            <Grid2 container spacing={1} p={5} direction={'column'} justifyContent={'center'} width={'100%'}>
-              <FormBox formItem={formItems[0]} required>
-                <TextFieldElement
-                  name="shozokuNam"
-                  control={control}
-                  label={editable ? formItems[0].exsample : ''}
-                  fullWidth
-                  sx={{ maxWidth: '90%' }}
-                  disabled={editable ? false : true}
-                />
-              </FormBox>
-              <FormBox formItem={formItems[2]}>
-                <TextFieldElement
-                  multiline
-                  name="mem"
-                  control={control}
-                  label={editable ? formItems[2].exsample : ''}
-                  fullWidth
-                  sx={{ maxWidth: '90%' }}
-                  disabled={editable ? false : true}
-                />
-              </FormBox>
-            </Grid2>
-            <IsDirtyAlertDialog
-              open={dirtyOpen}
-              handleCloseDirty={() => setDirtyOpen(false)}
-              handleCloseAll={handleCloseDialog}
-            />
-            <WillDeleteAlertDialog
-              open={deleteOpen}
-              data={name}
-              handleCloseDelete={() => setDeleteOpen(false)}
-              handleCloseAll={handleConfirmDelete}
-            />
-          </>
-        )}
-      </form>
-    </>
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <MasterDialogTitle
+        editable={editable}
+        handleEditable={() => setEditable(true)}
+        handleClose={handleClickClose}
+        dialogTitle="所属マスタ登録"
+        isDirty={isDirty}
+        isNew={isNew}
+        setAction={setAction}
+        isDeleted={isDeleted!}
+      />
+      {isLoading ? (
+        <Loading />
+      ) : (
+        <>
+          <Grid2 container spacing={1} p={5} direction={'column'} justifyContent={'center'} width={'100%'}>
+            <FormBox formItem={formItems[0]} required>
+              <TextFieldElement
+                name="shozokuNam"
+                control={control}
+                label={editable ? formItems[0].exsample : ''}
+                fullWidth
+                sx={{ maxWidth: '90%' }}
+                disabled={editable ? false : true}
+              />
+            </FormBox>
+            <FormBox formItem={formItems[2]}>
+              <TextFieldElement
+                multiline
+                name="mem"
+                control={control}
+                label={editable ? formItems[2].exsample : ''}
+                fullWidth
+                minRows={3}
+                maxRows={3}
+                sx={{ maxWidth: '90%' }}
+                disabled={editable ? false : true}
+              />
+            </FormBox>
+          </Grid2>
+          <IsDirtyAlertDialog
+            open={dirtyOpen}
+            handleCloseDirty={() => setDirtyOpen(false)}
+            handleCloseAll={handleCloseDialog}
+          />
+          <WillDeleteAlertDialog
+            open={deleteOpen}
+            data={name}
+            handleCloseDelete={() => setDeleteOpen(false)}
+            handleCloseAll={handleConfirmDelete}
+          />
+        </>
+      )}
+    </form>
   );
 };

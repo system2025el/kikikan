@@ -276,6 +276,8 @@ export const LocationsMasterDialog = ({
                   control={control}
                   label={editable ? formItems[11].exsample : ''}
                   fullWidth
+                  minRows={3}
+                  maxRows={3}
                   sx={{ maxWidth: '90%' }}
                   disabled={editable ? false : true}
                 />

@@ -131,95 +131,92 @@ export const EqptMaster = () => {
           <Typography>機材マスタ一覧</Typography>
         </Box>
         <Divider />
-        <Box width={'100%'} p={2}>
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <Stack justifyContent={'space-between'} alignItems={'start'} mt={1}>
-              <Stack>
-                <Typography noWrap>機材名キーワード</Typography>
-                <TextFieldElement name={'query'} control={control} />
-              </Stack>
+        <Box width={'100%'} p={2} component={'form'} onSubmit={handleSubmit(onSubmit)}>
+          <Stack justifyContent={'space-between'} alignItems={'start'} mt={1}>
+            <Stack>
+              <Typography noWrap>機材名キーワード</Typography>
+              <TextFieldElement name={'query'} control={control} />
             </Stack>
-            <Grid2 container justifyContent={'space-between'} alignItems={'start'} mt={1} spacing={1}>
-              <Grid2 size={{ sm: 12, md: 4 }} display={'flex'} alignItems={'center'}>
-                <Typography width={100}>部門</Typography>
-                <Controller
-                  name="bumonQuery"
-                  control={control}
-                  defaultValue={0}
-                  render={({ field }) => (
-                    <Select {...field} sx={{ width: 250 }}>
-                      {[selectNone, ...options!.b!].map((opt) => (
-                        <MenuItem
-                          key={opt.id}
-                          value={opt.id}
-                          sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
-                        >
-                          {opt.label}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  )}
-                />
-              </Grid2>
-              <Grid2 size={{ sm: 12, md: 4 }} display={'flex'} alignItems={'center'}>
-                <Typography width={100}>大部門</Typography>
-                <Controller
-                  name="daibumonQuery"
-                  control={control}
-                  defaultValue={0}
-                  render={({ field }) => (
-                    <Select {...field} sx={{ width: 250 }}>
-                      {[selectNone, ...options!.d!].map((opt) => (
-                        <MenuItem
-                          key={opt.id}
-                          value={opt.id}
-                          sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
-                        >
-                          {opt.label}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  )}
-                />
-              </Grid2>
-              <Grid2 size={{ sm: 12, md: 4 }} display={'flex'} alignItems={'center'}>
-                <Typography width={100}>集計部門</Typography>
-                <Controller
-                  name="shukeiQuery"
-                  control={control}
-                  defaultValue={0}
-                  render={({ field }) => (
-                    <Select {...field} sx={{ width: 250 }}>
-                      {[selectNone, ...options!.s!].map((opt) => (
-                        <MenuItem
-                          key={opt.id}
-                          value={opt.id}
-                          sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
-                        >
-                          {opt.label}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  )}
-                />
-              </Grid2>
+          </Stack>
+          <Grid2 container justifyContent={'space-between'} alignItems={'start'} mt={1} spacing={1}>
+            <Grid2 size={{ sm: 12, md: 4 }} display={'flex'} alignItems={'center'}>
+              <Typography width={100}>部門</Typography>
+              <Controller
+                name="bumonQuery"
+                control={control}
+                defaultValue={0}
+                render={({ field }) => (
+                  <Select {...field} sx={{ width: 250 }}>
+                    {[selectNone, ...options!.b!].map((opt) => (
+                      <MenuItem
+                        key={opt.id}
+                        value={opt.id}
+                        sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
+                      >
+                        {opt.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                )}
+              />
             </Grid2>
-            <Grid2 container alignItems={'center'} justifyContent={'space-between'} mt={1}>
-              <Grid2 size={'grow'} display={'flex'} alignItems={'center'}>
-                <Typography width={100}>NG有</Typography>
-                <CheckboxElement name="ngFlg" control={control} />
-              </Grid2>
-              <Grid2 size={1}>
-                <Box mt={1} alignSelf={'end'} justifySelf={'end'}>
-                  <Button type="submit">
-                    <SearchIcon />
-                    検索
-                  </Button>
-                </Box>
-              </Grid2>
+            <Grid2 size={{ sm: 12, md: 4 }} display={'flex'} alignItems={'center'}>
+              <Typography width={100}>大部門</Typography>
+              <Controller
+                name="daibumonQuery"
+                control={control}
+                defaultValue={0}
+                render={({ field }) => (
+                  <Select {...field} sx={{ width: 250 }}>
+                    {[selectNone, ...options!.d!].map((opt) => (
+                      <MenuItem
+                        key={opt.id}
+                        value={opt.id}
+                        sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
+                      >
+                        {opt.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                )}
+              />
             </Grid2>
-          </form>
-          <Typography></Typography>
+            <Grid2 size={{ sm: 12, md: 4 }} display={'flex'} alignItems={'center'}>
+              <Typography width={100}>集計部門</Typography>
+              <Controller
+                name="shukeiQuery"
+                control={control}
+                defaultValue={0}
+                render={({ field }) => (
+                  <Select {...field} sx={{ width: 250 }}>
+                    {[selectNone, ...options!.s!].map((opt) => (
+                      <MenuItem
+                        key={opt.id}
+                        value={opt.id}
+                        sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
+                      >
+                        {opt.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                )}
+              />
+            </Grid2>
+          </Grid2>
+          <Grid2 container alignItems={'center'} justifyContent={'space-between'} mt={1}>
+            <Grid2 size={'grow'} display={'flex'} alignItems={'center'}>
+              <Typography width={100}>NG有</Typography>
+              <CheckboxElement name="ngFlg" control={control} />
+            </Grid2>
+            <Grid2 size={1}>
+              <Box mt={1} alignSelf={'end'} justifySelf={'end'}>
+                <Button type="submit">
+                  <SearchIcon />
+                  検索
+                </Button>
+              </Box>
+            </Grid2>
+          </Grid2>
         </Box>
       </Paper>
       <Box>

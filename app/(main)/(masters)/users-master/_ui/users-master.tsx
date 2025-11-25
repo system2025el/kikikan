@@ -114,21 +114,19 @@ export const UsersMaster = () => {
           <Typography>担当者マスタ検索</Typography>
         </Box>
         <Divider />
-        <Box width={'100%'} p={2}>
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <Stack justifyContent={'space-between'} alignItems={'start'} mt={1}>
-              <Stack alignItems={'baseline'}>
-                <Typography>担当者名キーワード</Typography>
-                <TextFieldElement name="query" control={control} helperText={'名前の部分一致検索'} />
-              </Stack>
-              <Box alignSelf={'end'}>
-                <Button type="submit">
-                  <SearchIcon />
-                  検索
-                </Button>
-              </Box>
+        <Box width={'100%'} p={2} component={'form'} onSubmit={handleSubmit(onSubmit)}>
+          <Stack justifyContent={'space-between'} alignItems={'start'} mt={1}>
+            <Stack alignItems={'baseline'}>
+              <Typography>担当者名キーワード</Typography>
+              <TextFieldElement name="query" control={control} helperText={'名前の部分一致検索'} />
             </Stack>
-          </form>
+            <Box alignSelf={'end'}>
+              <Button type="submit">
+                <SearchIcon />
+                検索
+              </Button>
+            </Box>
+          </Stack>
         </Box>
       </Paper>
       <Box>

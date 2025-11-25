@@ -102,23 +102,21 @@ export const EqptSetsMaster = () => {
           <Typography>機材セットマスタ検索</Typography>
         </Box>
         <Divider />
-        <Box width={'100%'} p={2}>
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <Stack justifyContent={'space-between'} alignItems={'start'} mt={1}>
-              <Stack alignItems={'baseline'}>
-                <Typography noWrap width={200}>
-                  機材セット名キーワード
-                </Typography>
-                <TextFieldElement name="query" control={control} helperText={''} />
-              </Stack>
-              <Box alignSelf={'end'}>
-                <Button type="submit">
-                  <SearchIcon />
-                  検索
-                </Button>
-              </Box>
+        <Box width={'100%'} p={2} component={'form'} onSubmit={handleSubmit(onSubmit)}>
+          <Stack justifyContent={'space-between'} alignItems={'start'} mt={1}>
+            <Stack alignItems={'baseline'}>
+              <Typography noWrap width={200}>
+                機材セット名キーワード
+              </Typography>
+              <TextFieldElement name="query" control={control} helperText={''} />
             </Stack>
-          </form>
+            <Box alignSelf={'end'}>
+              <Button type="submit">
+                <SearchIcon />
+                検索
+              </Button>
+            </Box>
+          </Stack>
         </Box>
       </Paper>
       <Box>

@@ -109,75 +109,79 @@ export const BillingStsList = () => {
           <Typography noWrap>受注請求状況検索</Typography>
         </Box>
         <Divider />
-        <Box width={'100%'} p={2}>
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <Grid2 container direction={'column'} spacing={1} width={'100%'}>
-              <Grid2 display={'flex'} alignItems={'baseline'}>
-                <Grid2 size={0.5}>
-                  <Typography
-                    color="error.main"
-                    variant="body2"
-                    pr={0.5}
-                    display={{ xs: 'none', md: 'flex' }}
-                    justifySelf={'end'}
-                  >
-                    *必須
-                  </Typography>
-                  <Typography color="error.main" variant="body2" pr={0.5} display={{ md: 'none' }} justifySelf={'end'}>
-                    *
-                  </Typography>
-                </Grid2>
-                <Typography noWrap mr={9}>
-                  相手
-                </Typography>
-                <SelectElement
-                  name="kokyaku"
-                  control={control}
-                  options={custs}
-                  sx={{ width: 500 }}
-                  rules={{ required: '必須項目です。' }}
-                />
-              </Grid2>
-              <Grid2 display={'flex'} alignItems={'baseline'}>
-                <Grid2 size={0.5} />
-                <Typography noWrap mr={3}>
-                  相手担当者
-                </Typography>
-                <TextFieldElement name="kokyakuTantoNam" control={control} type="text" sx={{ width: 200 }} />
-              </Grid2>
-
-              <Grid2 size={12} display={'flex'} alignItems={'baseline'}>
-                <Grid2 container size={'grow'} alignItems={'baseline'}>
-                  <Grid2 size={0.5} />
-                  <Typography noWrap mr={5}>
-                    請求状況
-                  </Typography>
-                  <CheckboxButtonGroup
-                    name="sts"
-                    control={control}
-                    options={[
-                      {
-                        id: '1',
-                        label: '請求未完了',
-                      },
-                      {
-                        id: '2',
-                        label: '請求完了',
-                      },
-                    ]}
-                    row
-                  />
-                </Grid2>
-                <Grid2 alignSelf={'end'}>
-                  <Button type="submit">
-                    <SearchIcon />
-                    検索
-                  </Button>
-                </Grid2>
-              </Grid2>
+        <Grid2
+          container
+          direction={'column'}
+          spacing={1}
+          width={'100%'}
+          p={2}
+          component={'form'}
+          onSubmit={handleSubmit(onSubmit)}
+        >
+          <Grid2 display={'flex'} alignItems={'baseline'}>
+            <Grid2 size={0.5}>
+              <Typography
+                color="error.main"
+                variant="body2"
+                pr={0.5}
+                display={{ xs: 'none', md: 'flex' }}
+                justifySelf={'end'}
+              >
+                *必須
+              </Typography>
+              <Typography color="error.main" variant="body2" pr={0.5} display={{ md: 'none' }} justifySelf={'end'}>
+                *
+              </Typography>
             </Grid2>
-          </form>
-        </Box>
+            <Typography noWrap mr={9}>
+              相手
+            </Typography>
+            <SelectElement
+              name="kokyaku"
+              control={control}
+              options={custs}
+              sx={{ width: 500 }}
+              rules={{ required: '必須項目です。' }}
+            />
+          </Grid2>
+          <Grid2 display={'flex'} alignItems={'baseline'}>
+            <Grid2 size={0.5} />
+            <Typography noWrap mr={3}>
+              相手担当者
+            </Typography>
+            <TextFieldElement name="kokyakuTantoNam" control={control} type="text" sx={{ width: 200 }} />
+          </Grid2>
+
+          <Grid2 size={12} display={'flex'} alignItems={'baseline'}>
+            <Grid2 container size={'grow'} alignItems={'baseline'}>
+              <Grid2 size={0.5} />
+              <Typography noWrap mr={5}>
+                請求状況
+              </Typography>
+              <CheckboxButtonGroup
+                name="sts"
+                control={control}
+                options={[
+                  {
+                    id: '1',
+                    label: '請求未完了',
+                  },
+                  {
+                    id: '2',
+                    label: '請求完了',
+                  },
+                ]}
+                row
+              />
+            </Grid2>
+            <Grid2 alignSelf={'end'}>
+              <Button type="submit">
+                <SearchIcon />
+                検索
+              </Button>
+            </Grid2>
+          </Grid2>
+        </Grid2>
       </Paper>
       <BillingStsListTable
         isLoading={isLoading}

@@ -111,124 +111,130 @@ export const BillList = () => {
           <Typography noWrap>請求検索</Typography>
         </Box>
         <Divider />
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <Grid2 container direction={'column'} spacing={1} width={'100%'} p={2}>
-            <Grid2 container spacing={1}>
-              <Grid2 size={{ sm: 12, md: 3 }} sx={styles.container}>
-                <Typography noWrap mr={7}>
-                  請求番号
-                </Typography>
-                <TextFieldElement
-                  name="billId"
-                  control={control}
-                  sx={{
-                    width: 120,
-                    '& .MuiInputBase-input': {
-                      textAlign: 'right',
-                    },
-                    '& input[type=number]::-webkit-inner-spin-button': {
-                      WebkitAppearance: 'none',
-                      margin: 0,
-                    },
-                  }}
-                  type="number"
-                />
-              </Grid2>
-              <Grid2 sx={styles.container}>
-                <Typography noWrap mr={3}>
-                  請求ステータス
-                </Typography>
-                <Controller
-                  name="billingSts"
-                  control={control}
-                  defaultValue={0}
-                  render={({ field }) => (
-                    <Select {...field} sx={{ width: 200 }}>
-                      {[selectNone, ...options!.sts].map((opt) => (
-                        <MenuItem
-                          key={opt.id}
-                          value={opt.id}
-                          sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
-                        >
-                          {opt.label}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  )}
-                />
-              </Grid2>
-            </Grid2>
-            <Grid2 sx={styles.container}>
+        <Grid2
+          component={'form'}
+          onSubmit={handleSubmit(onSubmit)}
+          container
+          direction={'column'}
+          spacing={1}
+          width={'100%'}
+          p={2}
+        >
+          <Grid2 container spacing={1}>
+            <Grid2 size={{ sm: 12, md: 3 }} sx={styles.container}>
               <Typography noWrap mr={7}>
-                請求書名
+                請求番号
               </Typography>
-              <TextFieldElement name="seikyuHeadNam" control={control} />
+              <TextFieldElement
+                name="billId"
+                control={control}
+                sx={{
+                  width: 120,
+                  '& .MuiInputBase-input': {
+                    textAlign: 'right',
+                  },
+                  '& input[type=number]::-webkit-inner-spin-button': {
+                    WebkitAppearance: 'none',
+                    margin: 0,
+                  },
+                }}
+                type="number"
+              />
             </Grid2>
             <Grid2 sx={styles.container}>
               <Typography noWrap mr={3}>
-                請求書発行日
+                請求ステータス
               </Typography>
               <Controller
+                name="billingSts"
                 control={control}
-                name="range.str"
-                render={({ field, fieldState: { error } }) => (
-                  <FormDateX
-                    value={field.value}
-                    onChange={field.onChange}
-                    sx={{ mr: 1 }}
-                    error={!!error}
-                    helperText={error?.message}
-                  />
+                defaultValue={0}
+                render={({ field }) => (
+                  <Select {...field} sx={{ width: 200 }}>
+                    {[selectNone, ...options!.sts].map((opt) => (
+                      <MenuItem
+                        key={opt.id}
+                        value={opt.id}
+                        sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
+                      >
+                        {opt.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
                 )}
               />
-              <span>～</span>
-              <Controller
-                control={control}
-                name="range.end"
-                render={({ field, fieldState: { error } }) => (
-                  <FormDateX
-                    value={field.value}
-                    onChange={field.onChange}
-                    sx={{ ml: 1 }}
-                    error={!!error}
-                    helperText={error?.message}
-                  />
-                )}
-              />
-            </Grid2>
-
-            <Grid2 container sx={styles.container}>
-              <Grid2 display={'flex'} size={'grow'} alignItems={'baseline'}>
-                <Typography noWrap mr={11}>
-                  相手
-                </Typography>
-                <Controller
-                  name="kokyaku"
-                  control={control}
-                  render={({ field }) => (
-                    <Select {...field} sx={{ width: 250 }}>
-                      {[selectNone, ...options!.custs].map((opt) => (
-                        <MenuItem
-                          key={opt.id}
-                          value={opt.label}
-                          sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
-                        >
-                          {opt.label}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  )}
-                />
-              </Grid2>
-              <Grid2 alignSelf={'end'}>
-                <Button type="submit">
-                  <SearchIcon />
-                  検索
-                </Button>
-              </Grid2>
             </Grid2>
           </Grid2>
-        </form>
+          <Grid2 sx={styles.container}>
+            <Typography noWrap mr={7}>
+              請求書名
+            </Typography>
+            <TextFieldElement name="seikyuHeadNam" control={control} />
+          </Grid2>
+          <Grid2 sx={styles.container}>
+            <Typography noWrap mr={3}>
+              請求書発行日
+            </Typography>
+            <Controller
+              control={control}
+              name="range.str"
+              render={({ field, fieldState: { error } }) => (
+                <FormDateX
+                  value={field.value}
+                  onChange={field.onChange}
+                  sx={{ mr: 1 }}
+                  error={!!error}
+                  helperText={error?.message}
+                />
+              )}
+            />
+            <span>～</span>
+            <Controller
+              control={control}
+              name="range.end"
+              render={({ field, fieldState: { error } }) => (
+                <FormDateX
+                  value={field.value}
+                  onChange={field.onChange}
+                  sx={{ ml: 1 }}
+                  error={!!error}
+                  helperText={error?.message}
+                />
+              )}
+            />
+          </Grid2>
+
+          <Grid2 container sx={styles.container}>
+            <Grid2 display={'flex'} size={'grow'} alignItems={'baseline'}>
+              <Typography noWrap mr={11}>
+                相手
+              </Typography>
+              <Controller
+                name="kokyaku"
+                control={control}
+                render={({ field }) => (
+                  <Select {...field} sx={{ width: 250 }}>
+                    {[selectNone, ...options!.custs].map((opt) => (
+                      <MenuItem
+                        key={opt.id}
+                        value={opt.label}
+                        sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
+                      >
+                        {opt.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                )}
+              />
+            </Grid2>
+            <Grid2 alignSelf={'end'}>
+              <Button type="submit">
+                <SearchIcon />
+                検索
+              </Button>
+            </Grid2>
+          </Grid2>
+        </Grid2>
       </Paper>
       <BillListTable
         bills={bills}
