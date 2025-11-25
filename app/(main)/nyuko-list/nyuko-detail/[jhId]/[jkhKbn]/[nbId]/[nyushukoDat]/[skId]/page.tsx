@@ -1,6 +1,6 @@
 import { getNyukoFixFlag } from '@/app/(main)/nyuko-list/_lib/funcs';
 
-import { getNyukoDetail } from './_lib/funcs';
+import { getNyukoDetail, getNyukoDetailTable } from './_lib/funcs';
 import { NyukoDetailValues } from './_lib/types';
 import { NyukoDetail } from './_ui/nyuko-detail';
 
@@ -15,28 +15,33 @@ const Page = async (props: {
 }) => {
   const params = await props.params;
 
-  const nyukoDetailData: NyukoDetailValues = {
-    juchuHeadId: Number(params.jhId),
-    juchuKizaiHeadKbn: Number(params.jkhKbn),
-    nyushukoBashoId: Number(params.nbId),
-    nyushukoDat: decodeURIComponent(params.nyushukoDat),
-    sagyoKbnId: Number(params.skId),
-  };
+  const nyukoDetailData = await getNyukoDetail(
+    Number(params.jhId),
+    Number(params.jkhKbn),
+    Number(params.nbId),
+    decodeURIComponent(params.nyushukoDat),
+    Number(params.skId)
+  );
 
-  const nyukoDetailTableData = await getNyukoDetail(
+  if (!nyukoDetailData) {
+    return <div>エラー</div>;
+  }
+
+  const nyukoDetailTableData = await getNyukoDetailTable(
     nyukoDetailData.juchuHeadId,
     nyukoDetailData.juchuKizaiHeadKbn,
     nyukoDetailData.nyushukoBashoId,
     nyukoDetailData.nyushukoDat,
     nyukoDetailData.sagyoKbnId
   );
+
   if (!nyukoDetailTableData) {
-    return <div>入庫明細が見つかりません。</div>;
+    return <div>エラー</div>;
   }
 
   const fixFlag = await getNyukoFixFlag(
     Number(params.jhId),
-    nyukoDetailTableData[0].juchuKizaiHeadId!,
+    nyukoDetailData.juchuKizaiHeadIds[0],
     70,
     nyukoDetailData.nyushukoDat,
     Number(params.nbId)

@@ -8,6 +8,7 @@ import { selectJuchuKizaiMeisaiMaxId, upsertJuchuKizaiMeisai } from '@/app/_lib/
 import { selectJuchuKizaiNyushukoConfirm } from '@/app/_lib/db/tables/t-juchu-kizai-nyushuko';
 import { updateNyushukoDen, updateOyaNyukoDen, upsertNyushukoDen } from '@/app/_lib/db/tables/t-nyushuko-den';
 import { insertNyushukoFix, updateNyushukoFix } from '@/app/_lib/db/tables/t-nyushuko-fix';
+import { selectNyukoOne } from '@/app/_lib/db/tables/v-nyushuko-den2';
 import { selectNyushukoDetail } from '@/app/_lib/db/tables/v-nyushuko-den2-lst';
 import { JuchuCtnMeisai } from '@/app/_lib/db/types/t_juchu_ctn_meisai-type';
 import { JuchuKizaiMeisai } from '@/app/_lib/db/types/t-juchu-kizai-meisai-type';
@@ -20,11 +21,55 @@ import { NyukoDetailTableValues, NyukoDetailValues } from './types';
 /**
  * 入庫明細取得
  * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadKbn 受注機材ヘッダー区分
+ * @param nyushukoBashoId 入出庫場所id
+ * @param nyushukoDat 入出庫日時
+ * @param sagyoKbnId 作業区分id
+ * @returns
+ */
+export const getNyukoDetail = async (
+  juchuHeadId: number,
+  juchuKizaiHeadKbn: number,
+  nyushukoBashoId: number,
+  nyushukoDat: string,
+  sagyoKbnId: number
+) => {
+  try {
+    const { data, error } = await selectNyukoOne(juchuHeadId, juchuKizaiHeadKbn, nyushukoBashoId, nyushukoDat, 2);
+
+    if (error) {
+      console.error('getNyukoDetail error : ', error);
+      throw error;
+    }
+
+    const nyukoDetailData: NyukoDetailValues = {
+      juchuHeadId: juchuHeadId,
+      juchuKizaiHeadKbn: juchuKizaiHeadKbn,
+      nyushukoBashoId: nyushukoBashoId,
+      nyushukoDat: nyushukoDat,
+      sagyoKbnId: sagyoKbnId,
+      juchuKizaiHeadIds: data.juchu_kizai_head_idv?.split(',').map((id) => parseInt(id)) || [],
+      nyushukoShubetuId: 2,
+      headNamv: data.head_namv,
+      koenNam: data.koen_nam,
+      koenbashoNam: data.koenbasho_nam,
+      kokyakuNam: data.kokyaku_nam,
+    };
+
+    return nyukoDetailData;
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+/**
+ * 入庫明細テーブルデータ取得
+ * @param juchuHeadId 受注ヘッダーid
  * @param nyushukoBashoId 入出庫場所id
  * @param nyushukoDat 入出庫日
  * @returns
  */
-export const getNyukoDetail = async (
+export const getNyukoDetailTable = async (
   juchuHeadId: number,
   juchuKizaiHeadKbn: number,
   nyushukoBashoId: number,
@@ -41,11 +86,11 @@ export const getNyukoDetail = async (
     );
 
     if (error) {
-      console.error('getNyukoDetail error : ', error);
+      console.error('getNyukoDetailTable error : ', error);
       throw error;
     }
 
-    const nyukoDetailData: NyukoDetailTableValues[] = data.map((d) => ({
+    const nyukoDetailTableData: NyukoDetailTableValues[] = data.map((d) => ({
       juchuHeadId: d.juchu_head_id ?? 0,
       juchuKizaiHeadId: d.juchu_kizai_head_id ?? 0,
       juchuKizaiMeisaiId: d.juchu_kizai_meisai_id ?? 0,
@@ -69,7 +114,7 @@ export const getNyukoDetail = async (
       indentNum: d.indent_num ?? 0,
     }));
 
-    return nyukoDetailData;
+    return nyukoDetailTableData;
   } catch (e) {
     console.error(e);
   }

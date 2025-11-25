@@ -99,21 +99,21 @@ export const NyukoDetail = (props: {
             </Box>
             <Box display={'flex'} alignItems={'center'}>
               <Typography mr={2}>機材明細名</Typography>
-              <TextField value={nyukoDetailTableData[0].headNamv} disabled />
+              <TextField value={nyukoDetailData.headNamv} disabled />
             </Box>
           </Grid2>
           <Grid2 container size={{ xs: 12, sm: 12, md: 6 }} direction={'column'} p={{ sx: 1, sm: 1, md: 1 }}>
             <Box display={'flex'} alignItems={'center'}>
               <Typography mr={6}>公演名</Typography>
-              <TextField value={nyukoDetailTableData[0].koenNam} fullWidth disabled />
+              <TextField value={nyukoDetailData.koenNam} fullWidth disabled />
             </Box>
             <Box display={'flex'} alignItems={'center'}>
               <Typography mr={4}>公演場所</Typography>
-              <TextField value={nyukoDetailTableData[0].koenbashoNam} fullWidth disabled />
+              <TextField value={nyukoDetailData.koenbashoNam} fullWidth disabled />
             </Box>
             <Box display={'flex'} alignItems={'center'}>
               <Typography mr={6}>顧客名</Typography>
-              <TextField value={nyukoDetailTableData[0].kokyakuNam} fullWidth disabled />
+              <TextField value={nyukoDetailData.kokyakuNam} fullWidth disabled />
             </Box>
           </Grid2>
         </Grid2>
