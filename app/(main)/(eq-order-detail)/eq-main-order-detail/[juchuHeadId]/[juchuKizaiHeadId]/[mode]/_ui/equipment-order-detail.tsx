@@ -259,12 +259,8 @@ const EquipmentOrderDetail = (props: {
 
   // 割引後金額（割引金額）
   const nebikiAftAmt = useMemo(() => {
-    if (nebikiAmt) {
-      return priceTotal - nebikiAmt;
-    } else {
-      return priceTotal - waribikiRatAmt;
-    }
-  }, [priceTotal, nebikiAmt, waribikiRatAmt]);
+    return priceTotal - (nebikiAmt ?? 0);
+  }, [priceTotal, nebikiAmt]);
 
   // ブラウザバック、F5、×ボタンでページを離れた際のhook
   useUnsavedChangesWarning(isDirty, save);

@@ -163,21 +163,19 @@ export const EqptSelectionDialog = ({
             <Typography>機材選択</Typography>
           </Box>
           <Divider />
-          <Box width={'100%'} px={2} pb={1}>
-            <form onSubmit={handleSubmit(onSubmit)}>
-              <Stack justifyContent={'space-between'} alignItems={'start'} mt={1}>
-                <Stack alignItems={'baseline'}>
-                  <Typography>機材名キーワード</Typography>
-                  <TextFieldElement name="query" control={control} />
-                </Stack>
-                <Box alignSelf={'end'}>
-                  <Button type="submit">
-                    <SearchIcon />
-                    検索
-                  </Button>
-                </Box>
+          <Box width={'100%'} px={2} pb={1} component={'form'} onSubmit={handleSubmit(onSubmit)}>
+            <Stack justifyContent={'space-between'} alignItems={'start'} mt={1}>
+              <Stack alignItems={'baseline'}>
+                <Typography>機材名キーワード</Typography>
+                <TextFieldElement name="query" control={control} />
               </Stack>
-            </form>
+              <Box alignSelf={'end'}>
+                <Button type="submit">
+                  <SearchIcon />
+                  検索
+                </Button>
+              </Box>
+            </Stack>
           </Box>
         </Paper>
         <Box display={'flex'} p={0.5} justifyContent={'end'}>
