@@ -178,14 +178,28 @@ export const DateTime = (props: {
   minDate?: Date;
   maxDate?: Date;
   fieldstate?: ControllerFieldState;
+  timeSteps?: number;
   onChange: (value: Dayjs | null) => void;
   onAccept: (value: Dayjs | null) => void;
   onClear?: () => void;
 }) => {
-  const { sx, disabled, date, minDate, maxDate, fieldstate, onChange, onAccept, onClear } = props;
+  const { sx, disabled, date, minDate, maxDate, fieldstate, timeSteps, onChange, onAccept, onClear } = props;
 
   //カレンダーの表示を制御する
   const [open, setOpen] = useState(false);
+
+  /** 表示用に時間を丸める計算 */
+  const roundedValue = useMemo(() => {
+    if (!date) return null;
+    const d = dayjs(date);
+    const step = timeSteps ?? 5; // デフォルト値も考慮
+    // 分数を取得
+    const currentMinute = d.minute();
+    // 四捨五入
+    const roundedMinute = Math.round(currentMinute / step) * step;
+
+    return d.minute(roundedMinute).second(0);
+  }, [date, timeSteps]);
 
   return (
     <DateTimePicker
@@ -194,6 +208,7 @@ export const DateTime = (props: {
       open={open}
       onOpen={() => setOpen(true)}
       onClose={() => setOpen(false)}
+      timeSteps={{ minutes: timeSteps ?? 5 }}
       slotProps={{
         actionBar: { actions: ['accept', 'cancel'] },
         textField: {
@@ -229,7 +244,7 @@ export const DateTime = (props: {
         },
         calendarHeader: { format: 'YYYY年MM月' },
       }} // カレンダーヘッダーのフォーマット
-      value={date && dayjs(date)}
+      value={/*date && dayjs(date)*/ roundedValue}
       minDate={minDate && dayjs(minDate)}
       maxDate={maxDate && dayjs(maxDate)}
       views={['year', 'month', 'day', 'hours', 'minutes']}

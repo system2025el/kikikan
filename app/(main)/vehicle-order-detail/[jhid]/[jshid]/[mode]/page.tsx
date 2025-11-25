@@ -15,7 +15,7 @@ const Page = async (props: { params: Promise<{ jhid: number; jshid: number; mode
   return (
     <VehicleOrderDetail
       juchuHeadData={juchuHeadData}
-      sharyoHeadId={params.jshid}
+      sharyoHeadId={Number(params.jshid)}
       idoJuchuKizaiMeisaiData={undefined}
       juchuContainerMeisaiData={[]}
       shukoDate={null}
