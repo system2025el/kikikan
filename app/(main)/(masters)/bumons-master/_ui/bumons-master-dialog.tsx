@@ -186,6 +186,8 @@ export const BumonsMasterDialog = ({
                   control={control}
                   label={editable ? formItems[2].exsample : ''}
                   fullWidth
+                  minRows={3}
+                  maxRows={3}
                   sx={{ maxWidth: '90%' }}
                   disabled={editable ? false : true}
                 />

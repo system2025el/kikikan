@@ -1,13 +1,11 @@
-import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { getDetailJuchuHead } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 
 import VehicleOrderDetail from './_ui/vehicle-order-detail';
-const Page = async (props: {
-  params: Promise<{ juchu_head_id: number; juchu_sharyo_head_id: number; mode: string }>;
-}) => {
+
+const Page = async (props: { params: Promise<{ jhid: number; jshid: number; mode: string }> }) => {
   const params = await props.params;
   /** 受注ヘッダーデータ */
-  const juchuHeadData = await getDetailJuchuHead(params.juchu_head_id);
+  const juchuHeadData = await getDetailJuchuHead(params.jhid);
   if (!juchuHeadData) {
     return <div>受注情報が見つかりません。</div>;
   }
@@ -17,7 +15,7 @@ const Page = async (props: {
   return (
     <VehicleOrderDetail
       juchuHeadData={juchuHeadData}
-      sharyoHeadId={params.juchu_sharyo_head_id}
+      sharyoHeadId={params.jshid}
       idoJuchuKizaiMeisaiData={undefined}
       juchuContainerMeisaiData={[]}
       shukoDate={null}

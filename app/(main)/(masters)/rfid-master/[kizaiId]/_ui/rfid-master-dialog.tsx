@@ -280,6 +280,8 @@ export const RfidMasterDialog = ({
                   control={control}
                   label={editable ? formItems[4].exsample : ''}
                   fullWidth
+                  minRows={3}
+                  maxRows={3}
                   sx={{ maxWidth: '90%' }}
                   disabled={editable ? false : true}
                   multiline

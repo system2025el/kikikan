@@ -6,6 +6,18 @@ import { SCHEMA, supabase } from '../supabase';
 import { MSharyoDBValues } from '../types/m-sharyo-type';
 
 /**
+ * m_sharyoから有効な車両の配列を取得する関数
+ * @returns 有効な車両の配列
+ */
+export const selectActiveVehs = async () => {
+  try {
+    return supabase.schema(SCHEMA).from('m_sharyo').select('sharyo_id, sharyo_nam').neq('del_flg', 1).neq('dsp_flg', 0);
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
  * 車両マスタテーブルのデータを取得する関数
  * @param query 検索キーワード
  * @returns {Promise<VehsDialogValues[]>} 公演場所マスタテーブルに表示するデータ（ 検索キーワードが空の場合は全て ）

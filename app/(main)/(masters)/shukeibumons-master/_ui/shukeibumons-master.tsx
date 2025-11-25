@@ -102,23 +102,21 @@ export const ShukeibumonsMaster = () => {
           <Typography>集計部門マスタ検索</Typography>
         </Box>
         <Divider />
-        <Box width={'100%'} p={2}>
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <Stack justifyContent={'space-between'} alignItems={'start'} mt={1}>
-              <Stack alignItems={'baseline'}>
-                <Typography noWrap width={200}>
-                  集計部門名キーワード
-                </Typography>
-                <TextFieldElement name="query" control={control} helperText={''} />
-              </Stack>
-              <Box alignSelf={'end'}>
-                <Button type="submit">
-                  <SearchIcon />
-                  検索
-                </Button>
-              </Box>
+        <Box width={'100%'} p={2} component={'form'} onSubmit={handleSubmit(onSubmit)}>
+          <Stack justifyContent={'space-between'} alignItems={'start'} mt={1}>
+            <Stack alignItems={'baseline'}>
+              <Typography noWrap width={200}>
+                集計部門名キーワード
+              </Typography>
+              <TextFieldElement name="query" control={control} helperText={''} />
             </Stack>
-          </form>
+            <Box alignSelf={'end'}>
+              <Button type="submit">
+                <SearchIcon />
+                検索
+              </Button>
+            </Box>
+          </Stack>
         </Box>
       </Paper>
       <Box>
