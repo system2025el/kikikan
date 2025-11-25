@@ -60,6 +60,11 @@ export const getPdfData = async (
   nyushukoBashoId: number,
   nyushukoDat: string
 ) => {
+  console.log('---押下時渡されたデータ---');
+  console.log('juchuHeadId', juchuHeadId);
+  console.log('juchuKizaiHeadIds', juchuKizaiHeadIds);
+  console.log('nyushukoBashoId', nyushukoBashoId);
+  console.log('nyushukoDat', nyushukoDat);
   try {
     const { data: juchuHeadData, error: juchuHeadDataError } = await selectPdfJuchuHead(juchuHeadId);
     if (juchuHeadDataError) {
@@ -94,8 +99,7 @@ export const getPdfData = async (
           }).yard_nyuko_dat;
     console.log('nyukoDat', nyukoDat);
 
-    const kizaiData: ShukoKizai[] = (await selectPdfJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadIds, nyushukoBashoId))
-      .rows;
+    const kizaiData: ShukoKizai[] = (await selectPdfJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadIds, nyushukoDat)).rows;
     console.log('kizaiData', kizaiData);
 
     const pdjData: PdfModel = {

@@ -24,9 +24,9 @@ export type ShukoTableValues = {
 };
 
 export type ShukoKizai = {
-  kizaiId: number;
-  kizaiNam: string;
+  kizai_id: number;
+  kizai_nam: string;
   planKizaiQty: number;
-  planYobiQty: number;
-  planQty: number;
+  plan_yobi_qty: number;
+  plan_qty: number;
 };

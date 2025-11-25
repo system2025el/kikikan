@@ -102,44 +102,94 @@ export const selectReturnJuchuKizaiMeisai = async (juchuHeadId: number, juchuKiz
  * @param nyushukoBashoId 入出庫場所id
  * @returns
  */
-export const selectPdfJuchuKizaiMeisai = async (
-  juchuHeadId: number,
-  juchuKizaiHeadIds: string,
-  nyushukoBashoId: number
-) => {
-  const ids = juchuKizaiHeadIds.split(',').map(Number);
+export const selectPdfJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadIds: string, shukoDat: string) => {
   try {
     await pool.query(` SET search_path TO ${SCHEMA};`);
-    const query = `
-      select 
-          v_juchu_kizai_meisai.kizai_id as "kizaiId"
-          ,v_juchu_kizai_meisai.kizai_nam as "kizaiNam"
-          
-          ,sum(coalesce( v_juchu_kizai_meisai.plan_kizai_qty,0)) + sum(coalesce(v_juchu_kizai_meisai.keep_qty,0)) as "planKizaiQty"
-          ,sum(coalesce(v_juchu_kizai_meisai.plan_yobi_qty,0)) as "planYobiQty"
-          ,sum(coalesce( v_juchu_kizai_meisai.plan_kizai_qty,0)) + sum(coalesce(v_juchu_kizai_meisai.keep_qty,0)) + sum(coalesce(v_juchu_kizai_meisai.plan_yobi_qty,0)) as "planQty"
-          
-      from 
-          v_juchu_kizai_meisai
-              
-      where
-          v_juchu_kizai_meisai.juchu_head_id = $1
-          and
-          v_juchu_kizai_meisai.juchu_kizai_head_id = ANY($2)    --出庫明細から機材ヘッダーIDセット
-          and 
-          v_juchu_kizai_meisai.shozoku_id = $3  -- 入出庫場所
-          
-      group by
-          v_juchu_kizai_meisai.juchu_head_id
-          ,v_juchu_kizai_meisai.kizai_id
-          ,v_juchu_kizai_meisai.kizai_nam
-      ;
-    `;
+    const query = `select 
 
-    const values = [juchuHeadId, ids, nyushukoBashoId];
+    v_juchu_kizai_head_lst.juchu_head_id
+    ,v_juchu_kizai_head_lst.yard_shuko_dat 
 
-    return await pool.query(query, values);
+    ,v_juchu_kizai_meisai.kizai_id
+    ,v_juchu_kizai_meisai.kizai_nam
+    
+    ,(coalesce( v_juchu_kizai_meisai.plan_kizai_qty,0)) + (coalesce(v_juchu_kizai_meisai.keep_qty,0)) as plan_qty
+    ,(coalesce(v_juchu_kizai_meisai.plan_yobi_qty,0)) as plan_yobi_qty
+    
+    --ソート用カラム
+    ,v_juchu_kizai_head_lst.juchu_kizai_head_id
+    ,0 as ctn_flg
+    ,v_juchu_kizai_meisai.dsp_ord_num
+    
+from 
+    dev6.v_juchu_kizai_head_lst
+
+    left join  dev6.v_juchu_kizai_meisai on
+        v_juchu_kizai_head_lst.juchu_head_id = v_juchu_kizai_meisai.juchu_head_id
+        and
+        v_juchu_kizai_head_lst.juchu_kizai_head_id = v_juchu_kizai_meisai.juchu_kizai_head_id
+        
+where
+    v_juchu_kizai_head_lst.juchu_head_id = $1
+    and
+    v_juchu_kizai_head_lst.juchu_kizai_head_id=any(string_to_array($2, ',')::int[])    --出庫明細から機材ヘッダーIDセット
+  
+    and
+    v_juchu_kizai_head_lst.yard_shuko_dat = $3   
+    
+    and
+    v_juchu_kizai_head_lst.juchu_kizai_head_kbn in (1,3)    --通常、キープ
+    
+--コンテナも追加(KICS+YARD)
+union all
+select 
+
+    v_juchu_kizai_head_lst.juchu_head_id
+    ,v_juchu_kizai_head_lst.yard_shuko_dat 
+
+    ,v_juchu_ctn_meisai.kizai_id
+    ,v_juchu_ctn_meisai.kizai_nam
+    
+    ,(coalesce(v_juchu_ctn_meisai.kics_plan_kizai_qty,0)) + (coalesce(v_juchu_ctn_meisai.yard_plan_kizai_qty,0)) as plan_qty
+    --~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    --コンテナはKICS+YARD両方を合算
+    
+    ,0 as plan_yobi_qty
+    
+    --ソート用カラム
+    ,v_juchu_kizai_head_lst.juchu_kizai_head_id
+    ,1 as ctn_flg
+    ,v_juchu_ctn_meisai.dsp_ord_num
+from 
+    dev6.v_juchu_kizai_head_lst
+
+    left join  dev6.v_juchu_ctn_meisai on
+        v_juchu_kizai_head_lst.juchu_head_id = v_juchu_ctn_meisai.juchu_head_id
+        and
+        v_juchu_kizai_head_lst.juchu_kizai_head_id = v_juchu_ctn_meisai.juchu_kizai_head_id
+        
+where
+    v_juchu_kizai_head_lst.juchu_head_id = $1
+    and
+    v_juchu_kizai_head_lst.juchu_kizai_head_id=any(string_to_array($2, ',')::int[])    --出庫明細から機材ヘッダーIDセット
+    and
+    v_juchu_kizai_head_lst.yard_shuko_dat = $3   
+    
+    and
+    v_juchu_kizai_head_lst.juchu_kizai_head_kbn in (1,3)    --通常、キープ
+    
+
+order by
+    juchu_kizai_head_id
+    ,ctn_flg
+    ,dsp_ord_num
+`;
+    const values = [juchuHeadId, juchuKizaiHeadIds, shukoDat];
+    const result = await pool.query(query, values);
+    return result;
   } catch (e) {
+    console.error('selectPdfJuchuKizaiMeisai でエラーが発生しました:', e);
+
     throw e;
   }
 };

@@ -755,7 +755,8 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
           // 機材費の合計
           checkPageBreak(rowHeight);
           drawColumnLine();
-          drawShokei('', '機材費', param.kizaiChukeiAmt);
+          // drawShokei('', '機材費', param.kizaiChukeiAmt);
+          drawShokei('', param.kizaiChukeiMei, param.kizaiChukeiAmt);
           drawUnderLine();
           index++;
 
@@ -845,11 +846,11 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
           });
 
           // 人件費の合計
-          checkPageBreak(rowHeight);
-          drawColumnLine();
-          drawShokei('', '人件費', 0);
-          drawUnderLine();
-          index++;
+          // checkPageBreak(rowHeight);
+          // drawColumnLine();
+          // drawShokei('', '人件費', 0);
+          // drawUnderLine();
+          // index++;
 
           // 空行
           checkPageBreak(rowHeight);
@@ -937,11 +938,11 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
           });
 
           // 諸経費の合計
-          checkPageBreak(rowHeight);
-          drawColumnLine();
-          drawShokei('', '諸経費', 0);
-          drawUnderLine();
-          index++;
+          // checkPageBreak(rowHeight);
+          // drawColumnLine();
+          // drawShokei('', '諸経費', 0);
+          // drawUnderLine();
+          // index++;
 
           // 空行
           checkPageBreak(rowHeight);

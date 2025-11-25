@@ -291,10 +291,9 @@ export const usePdf = (): [(params: PdfModel[]) => Promise<Blob>] => {
       drawTableHeader(page, customFont, tableStartX, tableCurrentY, tableRowHeight, tableColWidths, headerTexts);
 
       const tableData =
-        param.item12 && param.item12.length > 0 ? param.item12 : [{ kizaiNam: '', planQty: '', planYobiQty: '' }];
+        param.item12 && param.item12.length > 0 ? param.item12 : [{ kizai_nam: '', plan_qty: '', plan_yobi_qty: '' }];
 
       let currentBottomY = tableStartY - tableRowHeight;
-
       //ループで機材データを描画
       for (const item of tableData) {
         // 次の行がページに収まるかをチェック
@@ -311,12 +310,11 @@ export const usePdf = (): [(params: PdfModel[]) => Promise<Blob>] => {
 
         // 現在の行を描画するためにY座標を更新
         currentBottomY -= tableRowHeight;
-
         const y = currentBottomY; // 現在行の底辺のY座標
         let colX = tableStartX;
         const textMaxWidth = tableColWidths[0] - 6;
         const truncatedText = formatTextLine(
-          item.kizaiNam ?? '',
+          item.kizai_nam ?? '',
           customFont,
           10, // フォントサイズ
           textMaxWidth
@@ -348,7 +346,7 @@ export const usePdf = (): [(params: PdfModel[]) => Promise<Blob>] => {
           borderWidth: 1,
         });
 
-        const planQtyText = `${item.planQty ?? ''}`;
+        const planQtyText = `${item.plan_qty ?? ''}`;
         const planQtyTextWidth = customFont.widthOfTextAtSize(planQtyText, 10);
         page.drawText(planQtyText, {
           x: colX + tableColWidths[1] - planQtyTextWidth - 3, // 3pxのパディング
@@ -368,7 +366,7 @@ export const usePdf = (): [(params: PdfModel[]) => Promise<Blob>] => {
           borderWidth: 1,
         });
 
-        const planYobiQty = item.planYobiQty ?? 0;
+        const planYobiQty = item.plan_yobi_qty ?? 0;
         // 予備数量が 0 または "0" のときは表示しない
         if (Number(planYobiQty) !== 0) {
           const planYobiQtyText = ` 予備:${planYobiQty}`;

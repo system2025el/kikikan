@@ -16,7 +16,7 @@ import {
 import { useEffect, useState } from 'react';
 import { CheckboxButtonGroup, Controller, TextFieldElement, useForm } from 'react-hook-form-mui';
 
-import { toJapanTimeStampString, toJapanTimeString } from '../../_lib/date-conversion';
+import { toJapanTimeStampString, toJapanTimeString, toJapanYMDString } from '../../_lib/date-conversion';
 import { TestDate } from '../../_ui/date';
 import { Loading } from '../../_ui/loading';
 import { getPdfData, getShukoList } from '../_lib/funcs';
@@ -70,11 +70,12 @@ export const ShukoList = (/*props: { shukoData: ShukoTableValues[] }*/) => {
     const pdfModels: PdfModel[] = [];
     // チェックされた行分データ取得
     for (const data of selectList) {
+      const nyushukoDat = toJapanTimeStampString(data.nyushukoDat);
       const pdfData: PdfModel | null = await getPdfData(
         data.juchuHeadId,
         data.juchuKizaiHeadIdv,
         data.nyushukoBashoId,
-        data.nyushukoDat
+        nyushukoDat
       );
       if (pdfData !== null) {
         pdfModels.push(pdfData);
