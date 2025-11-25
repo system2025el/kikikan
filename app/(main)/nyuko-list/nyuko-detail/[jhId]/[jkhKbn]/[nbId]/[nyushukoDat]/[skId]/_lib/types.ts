@@ -4,6 +4,12 @@ export type NyukoDetailValues = {
   nyushukoBashoId: number;
   nyushukoDat: string;
   sagyoKbnId: number;
+  juchuKizaiHeadIds: number[];
+  nyushukoShubetuId: number;
+  headNamv: string | null;
+  koenNam: string | null;
+  koenbashoNam: string | null;
+  kokyakuNam: string | null;
 };
 
 export type NyukoDetailTableValues = {

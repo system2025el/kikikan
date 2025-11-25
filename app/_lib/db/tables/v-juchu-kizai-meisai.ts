@@ -107,6 +107,7 @@ export const selectPdfJuchuKizaiMeisai = async (
   juchuKizaiHeadIds: string,
   nyushukoBashoId: number
 ) => {
+  const ids = juchuKizaiHeadIds.split(',').map(Number);
   try {
     await pool.query(` SET search_path TO ${SCHEMA};`);
     const query = `
@@ -124,7 +125,7 @@ export const selectPdfJuchuKizaiMeisai = async (
       where
           v_juchu_kizai_meisai.juchu_head_id = $1
           and
-          v_juchu_kizai_meisai.juchu_kizai_head_id in ($2)    --出庫明細から機材ヘッダーIDセット
+          v_juchu_kizai_meisai.juchu_kizai_head_id = ANY($2)    --出庫明細から機材ヘッダーIDセット
           and 
           v_juchu_kizai_meisai.shozoku_id = $3  -- 入出庫場所
           
@@ -135,7 +136,7 @@ export const selectPdfJuchuKizaiMeisai = async (
       ;
     `;
 
-    const values = [juchuHeadId, juchuKizaiHeadIds, nyushukoBashoId];
+    const values = [juchuHeadId, ids, nyushukoBashoId];
 
     return await pool.query(query, values);
   } catch (e) {
