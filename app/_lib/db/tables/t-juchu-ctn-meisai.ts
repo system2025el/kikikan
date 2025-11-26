@@ -205,3 +205,25 @@ export const deleteJuchuContainerMeisai = async (
     throw e;
   }
 };
+
+export const deleteJuchuCtnMeisaiFromOrder = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  connection: PoolClient
+) => {
+  const query = `
+    DELETE FROM
+      ${SCHEMA}.t_juchu_ctn_meisai
+    WHERE
+      juchu_head_id = $1
+      AND juchu_kizai_head_id = $2
+  `;
+
+  const values = [juchuHeadId, juchuKizaiHeadId];
+
+  try {
+    await connection.query(query, values);
+  } catch (e) {
+    throw e;
+  }
+};

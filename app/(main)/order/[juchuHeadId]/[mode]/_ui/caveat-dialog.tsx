@@ -18,7 +18,15 @@ export const SaveAlertDialog = ({ open, onClick }: { open: boolean; onClick: () 
   );
 };
 
-export const SelectAlertDialog = ({ open, onClick }: { open: boolean; onClick: () => void }) => {
+export const SelectAlertDialog = ({
+  open,
+  message,
+  onClick,
+}: {
+  open: boolean;
+  message: string;
+  onClick: () => void;
+}) => {
   return (
     <Dialog open={open}>
       <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
@@ -26,7 +34,7 @@ export const SelectAlertDialog = ({ open, onClick }: { open: boolean; onClick: (
         <Box>選択項目を確認してください</Box>
       </DialogTitle>
       <DialogContentText m={2} p={2}>
-        メイン機材を1つ選択してください
+        {message}
       </DialogContentText>
       <DialogActions>
         <Button onClick={onClick}>確認</Button>
@@ -58,10 +66,34 @@ export const HeadDeleteConfirmDialog = ({ open, onClick }: { open: boolean; onCl
     <Dialog open={open}>
       <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
         <WarningIcon color="error" />
-        <Box>受注ヘッダーを削除します</Box>
+        <Box>伝票を削除します</Box>
       </DialogTitle>
       <DialogContentText m={2} p={2}>
-        受注ヘッダー削除してもよろしいでしょうか？
+        伝票を削除してもよろしいでしょうか？
+      </DialogContentText>
+      <DialogActions>
+        <Button onClick={() => onClick(true)}>削除</Button>
+        <Button onClick={() => onClick(false)}>戻る</Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
+
+export const KizaiHeadDeleteConfirmDialog = ({
+  open,
+  onClick,
+}: {
+  open: boolean;
+  onClick: (result: boolean) => void;
+}) => {
+  return (
+    <Dialog open={open}>
+      <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
+        <WarningIcon color="error" />
+        <Box>受注明細を削除します</Box>
+      </DialogTitle>
+      <DialogContentText m={2} p={2}>
+        受注明細を削除してもよろしいでしょうか？
       </DialogContentText>
       <DialogActions>
         <Button onClick={() => onClick(true)}>削除</Button>

@@ -234,3 +234,25 @@ export const deleteShukoFix = async (
     throw e;
   }
 };
+
+export const deleteNyushukoFixFromOrder = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  connection: PoolClient
+) => {
+  const query = `
+    DELETE FROM
+      ${SCHEMA}.t_nyushuko_fix
+    WHERE
+      juchu_head_id = $1
+      AND juchu_kizai_head_id = $2
+  `;
+
+  const values = [juchuHeadId, juchuKizaiHeadId];
+
+  try {
+    await connection.query(query, values);
+  } catch (e) {
+    throw e;
+  }
+};

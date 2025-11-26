@@ -47,9 +47,23 @@ import { SelectTable } from '@/app/(main)/_ui/table';
 import { equipmentRows, users, vehicleHeaders, vehicleRows } from '@/app/(main)/order/[juchuHeadId]/[mode]/_lib/data';
 
 import { useUnsavedChangesWarning } from '../../../../_lib/hook';
-import { addJuchuHead, copyJuchuHead, delJuchuHead, getJuchuHead, getMaxId, updJuchuHead } from '../_lib/funcs';
+import {
+  addJuchuHead,
+  copyJuchuHead,
+  delJuchuHead,
+  delJuchuMeisai,
+  getJuchuHead,
+  getMaxId,
+  updJuchuHead,
+} from '../_lib/funcs';
 import { EqTableValues, KokyakuValues, OrderSchema, OrderValues, VehicleTableValues } from '../_lib/types';
-import { CopyConfirmDialog, HeadDeleteConfirmDialog, SaveAlertDialog, SelectAlertDialog } from './caveat-dialog';
+import {
+  CopyConfirmDialog,
+  HeadDeleteConfirmDialog,
+  KizaiHeadDeleteConfirmDialog,
+  SaveAlertDialog,
+  SelectAlertDialog,
+} from './caveat-dialog';
 import { CustomerSelectionDialog } from './customer-selection';
 import { LocationSelectDialog } from './location-selection';
 import { OrderEqTable, OrderVehicleTable } from './order-table';
@@ -65,12 +79,17 @@ export const Order = (props: {
   const user = useUserStore((state) => state.user);
   // userList
   const userList = users;
-  // ローディング
+
+  // 画面全体ローディング
   const [isLoading, setIsLoading] = useState(false);
+  // 受注機材ヘッダー一覧ローディング
+  const [isJuchuKizaiLoading, setIsJuchuKizaiLoading] = useState(false);
+
   // 編集モード(true:編集、false:閲覧)
   const [edit, setEdit] = useState(props.edit);
   // 保存フラグ
   const [save, setSave] = useState(false);
+
   // 機材ヘッダーデータ
   const [eqHeaderList, setEqHeaderList] = useState<EqTableValues[] | undefined>(props.juchuKizaiHeadDatas);
   // 車両ヘッダーデータ
@@ -78,16 +97,20 @@ export const Order = (props: {
   // ロックデータ
   const [lockData, setLockData] = useState<LockValues | null>(null);
 
-  // 未保存ダイアログを出すかどうか
+  // 未保存ダイアログ制御
   const [saveOpen, setSaveOpen] = useState(false);
-  // 編集内容が未保存ダイアログを出すかどうか
+  // 編集内容が未保存ダイアログ制御
   const [dirtyOpen, setDirtyOpen] = useState(false);
-  // 機材選択ダイアログを出すかどうか
+  // 機材選択ダイアログ制御
   const [selectOpen, setSelectOpen] = useState(false);
-  // 受注ヘッダー削除ダイアログ
+  // 機材選択ダイアログ用メッセージ
+  const [selectAlertMessage, setSelectAlertMessage] = useState('');
+  // 受注ヘッダー削除ダイアログ制御
   const [headDeleteOpen, setHeadDeleteOpen] = useState(false);
-  // コピーダイアログ
+  // コピーダイアログ制御
   const [copyOpen, setCopyOpen] = useState(false);
+  // 受注機材ヘッダー削除ダイアログ制御
+  const [kizaiHeadDeleteOpen, setKizaiHeadDeleteOpen] = useState(false);
   // スナックバー制御
   const [snackBarOpen, setSnackBarOpen] = useState(false);
   // スナックバーメッセージ
@@ -323,9 +346,11 @@ export const Order = (props: {
           setDirtyOpen(true);
         }
       } else {
+        setSelectAlertMessage('受注明細を1つ選択してください');
         setSelectOpen(true);
       }
     } else {
+      setSelectAlertMessage('受注明細を1つ選択してください');
       setSelectOpen(true);
     }
   };
@@ -348,9 +373,11 @@ export const Order = (props: {
           setDirtyOpen(true);
         }
       } else {
+        setSelectAlertMessage('受注明細を1つ選択してください');
         setSelectOpen(true);
       }
     } else {
+      setSelectAlertMessage('受注明細を1つ選択してください');
       setSelectOpen(true);
     }
   };
@@ -368,6 +395,53 @@ export const Order = (props: {
     } else {
       setPath(`/vehicle-order-detail/${props.juchuHeadData.juchuHeadId}/0/edit`);
       setDirtyOpen(true);
+    }
+  };
+
+  // 受注明細削除ボタン押下
+  const handleKizaiHeadDeleteCheck = async () => {
+    if (selectEq.length !== 1 || !eqHeaderList) {
+      setSelectAlertMessage('受注明細を1つ選択してください');
+      setSelectOpen(true);
+      return;
+    }
+
+    // 選択データ
+    const selectData = eqHeaderList.find((d) => d.juchuKizaiHeadId === selectEq[0]);
+    // 選択されたデータの子データ
+    const childData = eqHeaderList.find((d) => d.oyaJuchuKizaiHeadId === selectData?.juchuKizaiHeadId);
+
+    if (childData) {
+      setSelectAlertMessage('返却、キープが紐づいている場合は削除できません');
+      setSelectOpen(true);
+      return;
+    }
+
+    setKizaiHeadDeleteOpen(true);
+  };
+
+  /**
+   * 受注明細削除ダイアログボタン押下
+   * @param result ボタン押下結果
+   */
+  const handleKizaiHeadDelete = async (result: boolean) => {
+    setKizaiHeadDeleteOpen(false);
+    if (result && eqHeaderList) {
+      setIsJuchuKizaiLoading(true);
+      // 選択データ
+      const selectData = eqHeaderList.find((d) => d.juchuKizaiHeadId === selectEq[0]);
+
+      const deleteResult = await delJuchuMeisai(selectData!.juchuHeadId, selectData!.juchuKizaiHeadId);
+
+      if (deleteResult) {
+        setEqHeaderList((prev) => prev?.filter((data) => data.juchuKizaiHeadId !== selectData?.juchuKizaiHeadId));
+        setSnackBarMessage('削除しました');
+        setSnackBarOpen(true);
+      } else {
+        setSnackBarMessage('削除に失敗しました');
+        setSnackBarOpen(true);
+      }
+      setIsJuchuKizaiLoading(false);
     }
   };
 
@@ -750,7 +824,7 @@ export const Order = (props: {
                 color="error"
                 onClick={(e) => {
                   e.stopPropagation();
-                  console.log(selectEq);
+                  handleKizaiHeadDeleteCheck();
                 }}
                 disabled={!edit}
               >
@@ -761,8 +835,13 @@ export const Order = (props: {
           </Grid2>
         </AccordionSummary>
         <AccordionDetails sx={{ padding: 0 }}>
-          {eqHeaderList && eqHeaderList?.length > 0 && (
-            <OrderEqTable orderEqRows={eqHeaderList} edit={edit} onEqSelectionChange={handleEqSelectionChange} />
+          {isJuchuKizaiLoading ? (
+            <Loading />
+          ) : (
+            eqHeaderList &&
+            eqHeaderList?.length > 0 && (
+              <OrderEqTable orderEqRows={eqHeaderList} edit={edit} onEqSelectionChange={handleEqSelectionChange} />
+            )
           )}
         </AccordionDetails>
       </Accordion>
@@ -810,9 +889,10 @@ export const Order = (props: {
       </Accordion>
       <SaveAlertDialog open={saveOpen} onClick={() => setSaveOpen(false)} />
       <IsDirtyAlertDialog open={dirtyOpen} onClick={handleResultDialog} />
-      <SelectAlertDialog open={selectOpen} onClick={() => setSelectOpen(false)} />
+      <SelectAlertDialog open={selectOpen} message={selectAlertMessage} onClick={() => setSelectOpen(false)} />
       <CopyConfirmDialog open={copyOpen} onClick={handleCopyResultDialog} />
       <HeadDeleteConfirmDialog open={headDeleteOpen} onClick={handleHeadDelete} />
+      <KizaiHeadDeleteConfirmDialog open={kizaiHeadDeleteOpen} onClick={handleKizaiHeadDelete} />
       <Snackbar
         open={snackBarOpen}
         autoHideDuration={6000}

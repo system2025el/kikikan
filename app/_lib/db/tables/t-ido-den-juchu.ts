@@ -134,3 +134,25 @@ export const deleteIdoDenJuchu = async (idoDenIds: number[], connection: PoolCli
     throw e;
   }
 };
+
+export const deleteIdoDenJuchuFromOrder = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  connection: PoolClient
+) => {
+  const query = `
+    DELETE FROM
+      ${SCHEMA}.t_ido_den_juchu
+    WHERE
+      juchu_head_id = $1
+      AND juchu_kizai_head_id = $2
+  `;
+
+  const values = [juchuHeadId, juchuKizaiHeadId];
+
+  try {
+    await connection.query(query, values);
+  } catch (e) {
+    throw e;
+  }
+};

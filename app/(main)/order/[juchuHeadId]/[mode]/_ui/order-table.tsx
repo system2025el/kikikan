@@ -85,7 +85,7 @@ export const OrderEqTable: React.FC<OrderEqTableProps> = ({ orderEqRows, edit, o
                 />
               </TableCell>
               <TableCell padding="none" />
-              <TableCell align="left">機材明細名</TableCell>
+              <TableCell align="left">受注明細名</TableCell>
               <TableCell align="left">出庫</TableCell>
               <TableCell align="left">入庫</TableCell>
               <TableCell align="right">仕込</TableCell>

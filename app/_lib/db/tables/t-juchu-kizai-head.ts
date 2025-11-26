@@ -352,3 +352,27 @@ export const updateReturnJuchuKizaiHead = async (data: JuchuKizaiHead, connectio
     throw e;
   }
 };
+
+/**
+ * 受注機材ヘッダー削除
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param connection
+ */
+export const deleteJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHeadId: number, connection: PoolClient) => {
+  const query = `
+    DELETE FROM
+      ${SCHEMA}.t_juchu_kizai_head
+    WHERE
+      juchu_head_id = $1
+      AND juchu_kizai_head_id = $2
+  `;
+
+  const values = [juchuHeadId, juchuKizaiHeadId];
+
+  try {
+    await connection.query(query, values);
+  } catch (e) {
+    throw e;
+  }
+};

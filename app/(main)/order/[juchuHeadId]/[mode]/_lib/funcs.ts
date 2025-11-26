@@ -2,10 +2,22 @@
 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { PoolClient } from 'pg';
 
+import pool from '@/app/_lib/db/postgres';
 import { selectFilteredLocs } from '@/app/_lib/db/tables/m-koenbasho';
 import { selectFilteredCustomers, selectKokyaku } from '@/app/_lib/db/tables/m-kokyaku';
+import { deleteIdoDenJuchuFromOrder } from '@/app/_lib/db/tables/t-ido-den-juchu';
+import { deleteJuchuCtnMeisaiFromOrder } from '@/app/_lib/db/tables/t-juchu-ctn-meisai';
 import { insertJuchuHead, selectJuchuHead, selectMaxId, updateJuchuHead } from '@/app/_lib/db/tables/t-juchu-head';
+import { deleteJuchuKizaiHead } from '@/app/_lib/db/tables/t-juchu-kizai-head';
+import { deleteJuchuKizaiHonbanbiFromOrder } from '@/app/_lib/db/tables/t-juchu-kizai-honbanbi';
+import { deleteJuchuKizaiMeisaiFromOrder } from '@/app/_lib/db/tables/t-juchu-kizai-meisai';
+import { deleteJuchuKizaiNyushukoFromOrder } from '@/app/_lib/db/tables/t-juchu-kizai-nyushuko';
+import { deleteNyushukoCtnResultFromOrder } from '@/app/_lib/db/tables/t-nyushuko-ctn-result';
+import { deleteNyushukoDenFromOrder } from '@/app/_lib/db/tables/t-nyushuko-den';
+import { deleteNyushukoFixFromOrder } from '@/app/_lib/db/tables/t-nyushuko-fix';
+import { deleteNyushukoResultFromOrder } from '@/app/_lib/db/tables/t-nyushuko-result';
 import { selectJuchuKizaiHeadList } from '@/app/_lib/db/tables/v-juchu-kizai-head-lst';
 import { JuchuHead } from '@/app/_lib/db/types/t-juchu-head-type';
 import { toJapanTimeString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
@@ -363,6 +375,214 @@ export const getFilteredOrderLocs = async (query: string = '') => {
     return filteredLocs;
   } catch (e) {
     console.error('例外が発生しました:', e);
+    throw e;
+  }
+};
+
+/**
+ * 受注明細削除
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @returns
+ */
+export const delJuchuMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
+  const connection = await pool.connect();
+
+  try {
+    await connection.query('BEGIN');
+
+    // 移動受注伝票削除
+    await delIdoDenJuchu(juchuHeadId, juchuKizaiHeadId, connection);
+
+    // 入出庫実績削除
+    await delNyushukoResult(juchuHeadId, juchuKizaiHeadId, connection);
+
+    // 入出庫コンテナ実績削除
+    await delNyushukoCtnResult(juchuHeadId, juchuKizaiHeadId, connection);
+
+    // 入出庫伝票削除
+    await delNyushukoDen(juchuHeadId, juchuKizaiHeadId, connection);
+
+    // 入出庫確定削除
+    await delNyushukoFix(juchuHeadId, juchuKizaiHeadId, connection);
+
+    // 受注機材明細削除
+    await delJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId, connection);
+
+    // 受注コンテナ明細削除
+    await delJuchuCtnMeisai(juchuHeadId, juchuKizaiHeadId, connection);
+
+    // 受注機材本番日削除
+    await delJuchuKizaiHonbanbi(juchuHeadId, juchuKizaiHeadId, connection);
+
+    // 受注機材入出庫削除
+    await delJuchuKizaiNyushuko(juchuHeadId, juchuKizaiHeadId, connection);
+
+    // 受注機材ヘッダー削除
+    await delJuchuKizaiHead(juchuHeadId, juchuKizaiHeadId, connection);
+
+    await connection.query('COMMIT');
+
+    await revalidatePath('/eqpt-order-list');
+    await revalidatePath('/shuko-list');
+    await revalidatePath('/nyuko-list');
+    await revalidatePath('/ido-list');
+    return true;
+  } catch (e) {
+    console.error(e);
+    await connection.query('ROLLBACK');
+    return false;
+  } finally {
+    connection.release();
+  }
+};
+
+/**
+ * 受注機材ヘッダー削除
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param connection
+ */
+export const delJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHeadId: number, connection: PoolClient) => {
+  try {
+    await deleteJuchuKizaiHead(juchuHeadId, juchuKizaiHeadId, connection);
+  } catch (e) {
+    console.error('受注機材ヘッダー削除エラー', e);
+    throw e;
+  }
+};
+
+/**
+ * 受注機材入出庫削除
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param connection
+ */
+export const delJuchuKizaiNyushuko = async (juchuHeadId: number, juchuKizaiHeadId: number, connection: PoolClient) => {
+  try {
+    await deleteJuchuKizaiNyushukoFromOrder(juchuHeadId, juchuKizaiHeadId, connection);
+  } catch (e) {
+    console.error('受注機材入出庫削除エラー', e);
+    throw e;
+  }
+};
+
+/**
+ * 受注機材明細削除
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param connection
+ */
+export const delJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number, connection: PoolClient) => {
+  try {
+    await deleteJuchuKizaiMeisaiFromOrder(juchuHeadId, juchuKizaiHeadId, connection);
+  } catch (e) {
+    console.error('受注機材明細削除エラー', e);
+    throw e;
+  }
+};
+
+/**
+ * 受注コンテナ明細削除
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param connection
+ */
+export const delJuchuCtnMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number, connection: PoolClient) => {
+  try {
+    await deleteJuchuCtnMeisaiFromOrder(juchuHeadId, juchuKizaiHeadId, connection);
+  } catch (e) {
+    console.error('受注コンテナ明細削除エラー', e);
+    throw e;
+  }
+};
+
+/**
+ * 受注機材本番日削除
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param connection
+ */
+export const delJuchuKizaiHonbanbi = async (juchuHeadId: number, juchuKizaiHeadId: number, connection: PoolClient) => {
+  try {
+    await deleteJuchuKizaiHonbanbiFromOrder(juchuHeadId, juchuKizaiHeadId, connection);
+  } catch (e) {
+    console.error('受注機材本番日削除エラー', e);
+    throw e;
+  }
+};
+
+/**
+ * 入出庫伝票削除
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param connection
+ */
+export const delNyushukoDen = async (juchuHeadId: number, juchuKizaiHeadId: number, connection: PoolClient) => {
+  try {
+    await deleteNyushukoDenFromOrder(juchuHeadId, juchuKizaiHeadId, connection);
+  } catch (e) {
+    console.error('入出庫伝票削除エラー', e);
+    throw e;
+  }
+};
+
+/**
+ * 入出庫実績削除
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param connection
+ */
+export const delNyushukoResult = async (juchuHeadId: number, juchuKizaiHeadId: number, connection: PoolClient) => {
+  try {
+    await deleteNyushukoResultFromOrder(juchuHeadId, juchuKizaiHeadId, connection);
+  } catch (e) {
+    console.error('入出庫実績削除エラー', e);
+    throw e;
+  }
+};
+
+/**
+ * コンテナ入出庫実績削除
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param connection
+ */
+export const delNyushukoCtnResult = async (juchuHeadId: number, juchuKizaiHeadId: number, connection: PoolClient) => {
+  try {
+    await deleteNyushukoCtnResultFromOrder(juchuHeadId, juchuKizaiHeadId, connection);
+  } catch (e) {
+    console.error('コンテナ入出庫実績削除エラー', e);
+    throw e;
+  }
+};
+
+/**
+ * 入出庫確定削除
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param connection
+ */
+export const delNyushukoFix = async (juchuHeadId: number, juchuKizaiHeadId: number, connection: PoolClient) => {
+  try {
+    await deleteNyushukoFixFromOrder(juchuHeadId, juchuKizaiHeadId, connection);
+  } catch (e) {
+    console.error('入出庫確定削除エラー', e);
+    throw e;
+  }
+};
+
+/**
+ * 移動伝票受注削除
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param connection
+ */
+export const delIdoDenJuchu = async (juchuHeadId: number, juchuKizaiHeadId: number, connection: PoolClient) => {
+  try {
+    await deleteIdoDenJuchuFromOrder(juchuHeadId, juchuKizaiHeadId, connection);
+  } catch (e) {
+    console.error('移動伝票受注削除エラー', e);
     throw e;
   }
 };
