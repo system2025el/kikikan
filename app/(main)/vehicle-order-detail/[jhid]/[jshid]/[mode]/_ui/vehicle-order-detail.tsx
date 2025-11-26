@@ -32,10 +32,12 @@ import { useEffect, useState } from 'react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import { SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
+import { useUserStore } from '@/app/_lib/stores/usestore';
 import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { BackButton } from '@/app/(main)/_ui/buttons';
 import { DateTime, TestDate } from '@/app/(main)/_ui/date';
 import { selectNone, SelectTypes } from '@/app/(main)/_ui/form-box';
+import { LoadingOverlay } from '@/app/(main)/_ui/loading';
 import { DetailOerValues } from '@/app/(main)/(eq-order-detail)/_lib/types';
 import {
   IdoJuchuKizaiMeisaiValues,
@@ -52,7 +54,12 @@ import {
   JuchuSharyoHeadValues,
 } from '@/app/(main)/vehicle-order-detail/[jhid]/[jshid]/[mode]/_lib/types';
 
-import { addNewJuchuSharyoHead, getVehsSelections } from '../_lib/funcs';
+import {
+  addNewJuchuSharyoHead,
+  getChosenJuchuSharyoMeisais,
+  getVehsSelections,
+  updateJuchuSharyoHead,
+} from '../_lib/funcs';
 
 const VehicleOrderDetail = ({
   juchuHeadData,
@@ -70,6 +77,11 @@ const VehicleOrderDetail = ({
   edit: boolean;
   fixFlag: boolean;
 }) => {
+  /** ログインユーザ */
+  const user = useUserStore((state) => state.user);
+  /** 初期値 */
+  let currentSharyoMeisai: JuchuSharyoHeadValues;
+  /* useState ----------------------------------------------------- */
   /** 選択肢 */
   const [options, setOptions] = useState<{ kbn: SelectTypes[]; basho: SelectTypes[]; vehs: SelectTypes[] }>({
     kbn: [],
@@ -77,16 +89,21 @@ const VehicleOrderDetail = ({
     vehs: [],
   });
   /** 受注ヘッダーアコーディオン制御 */
-  const [juchuExpanded, setJuchuExpanded] = useState(false);
+  const [juchuExpanded, setJuchuExpanded] = useState<boolean>(false);
   /** 受注車両ヘッダーアコーディオン制御 */
-  const [sharyoExpanded, setSharyoExpanded] = useState(true);
+  const [sharyoExpanded, setSharyoExpanded] = useState<boolean>(true);
+  /** ローディング */
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  /** 変更前の車両明細 */
+  const [currentMeisai, setCurrentMeisai] = useState<JuchuSharyoHeadValues>();
 
-  // React hook formの設定
+  /* useForm ------------------------------------------------------- */
   const {
     control,
     handleSubmit,
     setValue,
     trigger,
+    reset,
     formState: { isDirty, errors },
   } = useForm<JuchuSharyoHeadValues>({
     mode: 'onTouched',
@@ -99,19 +116,26 @@ const VehicleOrderDetail = ({
       nyushukoKbn: FAKE_NEW_ID,
       nyushukoDat: null,
       nyushukoBashoId: FAKE_NEW_ID,
-      meisai: {
-        v1Id: FAKE_NEW_ID,
-        v1Mem: null,
-        v2Id: FAKE_NEW_ID,
-        v2Mem: null,
-      },
+      meisai: [
+        { sharyoId: FAKE_NEW_ID, sharyoQty: null, sharyoMem: null },
+        { sharyoId: FAKE_NEW_ID, sharyoQty: null, sharyoMem: null },
+      ],
     },
   });
 
-  // フォーム送信処理
+  /** 車両明細の配列 */
+  const sharyoMeisai = useFieldArray({ control, name: 'meisai' });
+
+  /* methods -------------------------------------------------------- */
+  /** フォーム送信処理 */
   const onSubmit = async (data: JuchuSharyoHeadValues) => {
     trigger();
-    await addNewJuchuSharyoHead(data);
+    if (sharyoHeadId <= 0) {
+      await addNewJuchuSharyoHead(data, user?.name ?? '');
+    } else {
+      if (!currentMeisai) return;
+      updateJuchuSharyoHead(data, currentMeisai!, user?.name ?? '');
+    }
   };
 
   function setError(newError: string | null): void {
@@ -120,6 +144,7 @@ const VehicleOrderDetail = ({
 
   /* useEffect ------------------------------------------------------- */
   useEffect(() => {
+    /** 選択肢の取得 */
     const getOptions = async () => {
       const v = await getVehsSelections();
       const base = await getBasesSelections();
@@ -131,10 +156,28 @@ const VehicleOrderDetail = ({
         basho: base,
         vehs: v,
       });
-      setValue('juchuShryoHeadId', Number(sharyoHeadId), { shouldDirty: false });
     };
+
+    /** 車両明細取得 */
+    const getMeisais = async () => {
+      const meisais = await getChosenJuchuSharyoMeisais(juchuHeadData.juchuHeadId, sharyoHeadId);
+      reset(meisais);
+      setCurrentMeisai(meisais);
+      setIsLoading(false);
+    };
+
+    // データ取得実行
     getOptions();
-  }, [setValue, sharyoHeadId]);
+    // 新規以外はデータ取得してフォームにresetする
+    if (sharyoHeadId > 0) {
+      getMeisais();
+      // setTimeout(() => {
+      //   setIsLoading(false);
+      // }, 10000);
+    } else {
+      setIsLoading(false);
+    }
+  }, [sharyoHeadId, juchuHeadData.juchuHeadId, reset]);
 
   useEffect(() => {
     console.log(errors);
@@ -142,6 +185,7 @@ const VehicleOrderDetail = ({
 
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
+      {isLoading && <LoadingOverlay />}
       <form onSubmit={handleSubmit(onSubmit)}>
         <Box justifySelf={'end'}>
           <BackButton label={'戻る'} />
@@ -311,12 +355,13 @@ const VehicleOrderDetail = ({
                         fieldstate={fieldState}
                         timeSteps={15}
                         disabled={false}
+                        disableClearable
                       />
                     )}
                   />
                 </Grid2>
                 <Grid2 sx={styles.baselineContainer}>
-                  <Typography mr={5}>作業場</Typography>
+                  <Typography mr={5}>作業場所</Typography>
                   <SelectElement name="nyushukoBashoId" control={control} sx={{ width: 120 }} options={options.basho} />
                 </Grid2>
               </Grid2>
@@ -336,7 +381,7 @@ const VehicleOrderDetail = ({
             </Grid2>
           </AccordionDetails>
         </Accordion>
-        {/* ---------------- 車両入力 ------------------ */}
+        {/* --------------------------------------- 車両入力 --------------------------------------- */}
         <Paper variant="outlined" sx={{ mt: 0.5 }}>
           <Box px={2} alignItems={'center'}>
             <Typography>受注明細(車両)</Typography>
@@ -344,98 +389,64 @@ const VehicleOrderDetail = ({
           </Box>
           <Divider />
 
-          <Box px={4} width={'100%'}>
-            <Grid2 container spacing={{ sm: 1, md: 3 }} my={1} sx={styles.baselineContainer}>
-              <Grid2 size={'auto'}>
-                <Controller
-                  name={'meisai.v1Id'}
-                  control={control}
-                  render={({ field }) => (
-                    <Select {...field} sx={{ minWidth: { sm: '60vw', md: '30vw' }, ml: { sm: 5, md: 0 } }}>
-                      {[selectNone, ...options.vehs].map((opt) => (
-                        <MenuItem
-                          key={opt.id}
-                          value={opt.id}
-                          sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
-                        >
-                          {opt.label}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  )}
-                />
+          <Box width={'100%'} px={2}>
+            {sharyoMeisai.fields.map((_, index) => (
+              <Grid2
+                key={index}
+                container
+                spacing={{ sm: 1, md: 3 }}
+                my={1}
+                ml={{ sm: 6, md: 11 }}
+                sx={styles.baselineContainer}
+              >
+                <Grid2 size={'auto'}>
+                  <Controller
+                    name={`meisai.${index}.sharyoId`}
+                    control={control}
+                    render={({ field }) => (
+                      <Select {...field} sx={{ minWidth: { sm: '60vw', md: '30vw' }, ml: { sm: 5, md: 0 } }}>
+                        {[selectNone, ...options.vehs].map((opt) => (
+                          <MenuItem
+                            key={opt.id}
+                            value={opt.id}
+                            sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
+                          >
+                            {opt.label}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    )}
+                  />
+                </Grid2>
+                <Grid2 sx={styles.baselineContainer} size={'auto'}>
+                  <Typography mr={1}>台数</Typography>
+                  <TextFieldElement
+                    name={`meisai.${index}.sharyoQty`}
+                    control={control}
+                    sx={{
+                      width: 50,
+                      '& .MuiInputBase-input': {
+                        textAlign: 'right',
+                      },
+                      '& input[type=number]::-webkit-inner-spin-button': {
+                        WebkitAppearance: 'none',
+                        margin: 0,
+                      },
+                    }}
+                    type="number"
+                  />
+                </Grid2>
+                <Grid2 sx={styles.baselineContainer} size={'auto'}>
+                  <Typography mr={1}>メモ</Typography>
+                  <TextFieldElement name={`meisai.${index}.sharyoMem`} control={control} />
+                </Grid2>
               </Grid2>
-              <Grid2 sx={styles.baselineContainer} size={'auto'}>
-                <Typography mr={1}>台数</Typography>
-                <TextFieldElement
-                  name="meisai.v1Qty"
-                  control={control}
-                  sx={{
-                    width: 50,
-                    '& .MuiInputBase-input': {
-                      textAlign: 'right',
-                    },
-                    '& input[type=number]::-webkit-inner-spin-button': {
-                      WebkitAppearance: 'none',
-                      margin: 0,
-                    },
-                  }}
-                  type="number"
-                />
-              </Grid2>
-              <Grid2 sx={styles.baselineContainer} size={'auto'}>
-                <Typography mr={1}>メモ</Typography>
-                <TextFieldElement name="meisai.v1Mem" control={control} />
-              </Grid2>
-            </Grid2>
-            <Grid2 container spacing={{ sm: 1, md: 3 }} my={1} sx={styles.baselineContainer}>
-              <Grid2>
-                <Controller
-                  name={'meisai.v2Id'}
-                  control={control}
-                  render={({ field }) => (
-                    <Select {...field} sx={{ minWidth: { sm: '60vw', md: '30vw' }, ml: { sm: 5, md: 0 } }}>
-                      {[selectNone, ...options.vehs].map((opt) => (
-                        <MenuItem
-                          key={opt.id}
-                          value={opt.id}
-                          sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
-                        >
-                          {opt.label}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  )}
-                />
-              </Grid2>
-              <Grid2 sx={styles.baselineContainer} size={'auto'}>
-                <Typography mr={1}>台数</Typography>
-                <TextFieldElement
-                  name="meisai.v2Qty"
-                  control={control}
-                  sx={{
-                    width: 50,
-                    '& .MuiInputBase-input': {
-                      textAlign: 'right',
-                    },
-                    '& input[type=number]::-webkit-inner-spin-button': {
-                      WebkitAppearance: 'none',
-                      margin: 0,
-                    },
-                  }}
-                  type="number"
-                />
-              </Grid2>
-              <Grid2 sx={styles.baselineContainer}>
-                <Typography mr={1}>メモ</Typography>
-                <TextFieldElement name="meisai.v2Mem" control={control} />
-              </Grid2>
-            </Grid2>
+            ))}
           </Box>
         </Paper>
         {/** 固定ボタン 保存＆ページトップ */}
         <Box position={'fixed'} zIndex={1050} bottom={25} right={25} alignItems={'center'}>
-          <Fab variant="extended" color="primary" type="submit" sx={{ mr: 2 }}>
+          <Fab variant="extended" color="primary" type="submit" sx={{ mr: 2 }} disabled={!isDirty}>
             <SaveAsIcon sx={{ mr: 1 }} />
             保存
           </Fab>

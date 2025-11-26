@@ -10,7 +10,7 @@ const Page = async (props: { params: Promise<{ jhid: number; jshid: number; mode
     return <div>受注情報が見つかりません。</div>;
   }
 
-  /** 入出庫 */
+  /**  */
 
   return (
     <VehicleOrderDetail

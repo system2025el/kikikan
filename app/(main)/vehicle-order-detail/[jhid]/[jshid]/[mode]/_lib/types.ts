@@ -11,16 +11,18 @@ export const JuchuSharyoHeadSchema = z.object({
     .max(20, { message: validationMessages.maxStringLength(20) }),
   nyushukoKbn: z.number(),
   nyushukoDat: z.date({ message: validationMessages.required() }).nullable(),
-  nyushukoBashoId: z.number(),
+  nyushukoBashoId: z.number().min(0),
   headMem: z.string().nullable(),
-  meisai: z.object({
-    v1Id: z.number().nullable(),
-    v1Qty: z.number({ message: validationMessages.number() }).int({ message: validationMessages.int() }).nullable(),
-    v1Mem: z.string().nullable(),
-    v2Id: z.number().nullable(),
-    v2Qty: z.number({ message: validationMessages.number() }).int({ message: validationMessages.int() }).nullable(),
-    v2Mem: z.string().nullable(),
-  }),
+  meisai: z.array(
+    z.object({
+      sharyoId: z.number().nullable(),
+      sharyoQty: z
+        .number({ message: validationMessages.number() })
+        .int({ message: validationMessages.int() })
+        .nullable(),
+      sharyoMem: z.string().nullable(),
+    })
+  ),
 });
 // .refine((data) => data.meisai.v1Id && data.meisai.v1Id > 0, {
 //   message: '入力してください',
