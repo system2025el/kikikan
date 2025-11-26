@@ -25,10 +25,11 @@ import {
   Paper,
   Select,
   SelectChangeEvent,
+  Snackbar,
   TextField,
   Typography,
 } from '@mui/material';
-import { redirect, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { use, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
@@ -46,9 +47,9 @@ import { SelectTable } from '@/app/(main)/_ui/table';
 import { equipmentRows, users, vehicleHeaders, vehicleRows } from '@/app/(main)/order/[juchuHeadId]/[mode]/_lib/data';
 
 import { useUnsavedChangesWarning } from '../../../../_lib/hook';
-import { addJuchuHead, copyJuchuHead, getJuchuHead, getMaxId, updJuchuHead } from '../_lib/funcs';
+import { addJuchuHead, copyJuchuHead, delJuchuHead, getJuchuHead, getMaxId, updJuchuHead } from '../_lib/funcs';
 import { EqTableValues, KokyakuValues, OrderSchema, OrderValues, VehicleTableValues } from '../_lib/types';
-import { CopyConfirmDialog, SaveAlertDialog, SelectAlertDialog } from './caveat-dialog';
+import { CopyConfirmDialog, HeadDeleteConfirmDialog, SaveAlertDialog, SelectAlertDialog } from './caveat-dialog';
 import { CustomerSelectionDialog } from './customer-selection';
 import { LocationSelectDialog } from './location-selection';
 import { OrderEqTable, OrderVehicleTable } from './order-table';
@@ -76,14 +77,22 @@ export const Order = (props: {
   const [vehicleHeaderList, setVehicleHeaderList] = useState<VehicleTableValues[] | undefined>(vehicleRows);
   // ロックデータ
   const [lockData, setLockData] = useState<LockValues | null>(null);
+
   // 未保存ダイアログを出すかどうか
   const [saveOpen, setSaveOpen] = useState(false);
   // 編集内容が未保存ダイアログを出すかどうか
   const [dirtyOpen, setDirtyOpen] = useState(false);
   // 機材選択ダイアログを出すかどうか
   const [selectOpen, setSelectOpen] = useState(false);
+  // 受注ヘッダー削除ダイアログ
+  const [headDeleteOpen, setHeadDeleteOpen] = useState(false);
   // コピーダイアログ
   const [copyOpen, setCopyOpen] = useState(false);
+  // スナックバー制御
+  const [snackBarOpen, setSnackBarOpen] = useState(false);
+  // スナックバーメッセージ
+  const [snackBarMessage, setSnackBarMessage] = useState('');
+
   // 機材テーブル選択行
   const [selectEq, setSelectEq] = useState<number[]>([]);
   // 車両テーブル選択行
@@ -190,7 +199,7 @@ export const Order = (props: {
       const maxId = await getMaxId();
       const newOrderId = maxId ? maxId.juchu_head_id + 1 : 1;
       await addJuchuHead(newOrderId, data, user.name);
-      redirect(`/order/${newOrderId}/edit`);
+      router.push(`/order/${newOrderId}/edit`);
       // 更新
     } else {
       const update = await updJuchuHead(data);
@@ -229,6 +238,22 @@ export const Order = (props: {
     }
   };
 
+  // 伝票削除ボタン押下
+  const handleHeadDelete = async (result: boolean) => {
+    if (result) {
+      setIsLoading(true);
+      const deleteResult = await delJuchuHead(getValues('juchuHeadId'));
+
+      if (!deleteResult) {
+        setSnackBarMessage('削除に失敗しました');
+        setSnackBarOpen(true);
+        setIsLoading(false);
+      }
+    } else {
+      setHeadDeleteOpen(false);
+    }
+  };
+
   // コピーボタン押下
   const handleCopy = async () => {
     if (!save || isDirty) {
@@ -237,6 +262,29 @@ export const Order = (props: {
     }
 
     setCopyOpen(true);
+  };
+
+  /**
+   * コピーダイアログボタン押下
+   * @param result ボタン押下結果
+   */
+  const handleCopyResultDialog = async (result: boolean) => {
+    if (result) {
+      const maxId = await getMaxId();
+      if (maxId) {
+        const newOrderId = maxId.juchu_head_id + 1;
+        const currentData = await getJuchuHead(props.juchuHeadData.juchuHeadId);
+        if (user && currentData) {
+          await copyJuchuHead(newOrderId, currentData, user.name);
+        }
+        window.open(`/order/${newOrderId}/${'edit'}`);
+        setCopyOpen(false);
+      } else {
+        console.error('Failed to retrieve max order ID');
+      }
+    } else {
+      setCopyOpen(false);
+    }
   };
 
   // 機材入力ボタン押下
@@ -347,29 +395,6 @@ export const Order = (props: {
     }
   };
 
-  /**
-   * コピーダイアログボタン押下
-   * @param result ボタン押下結果
-   */
-  const handleCopyResultDialog = async (result: boolean) => {
-    if (result) {
-      const maxId = await getMaxId();
-      if (maxId) {
-        const newOrderId = maxId.juchu_head_id + 1;
-        const currentData = await getJuchuHead(props.juchuHeadData.juchuHeadId);
-        if (user && currentData) {
-          await copyJuchuHead(newOrderId, currentData, user.name);
-        }
-        window.open(`/order/${newOrderId}/${'edit'}`);
-        setCopyOpen(false);
-      } else {
-        console.error('Failed to retrieve max order ID');
-      }
-    } else {
-      setCopyOpen(false);
-    }
-  };
-
   const handleEqSelectionChange = (selectedIds: number[]) => {
     setSelectEq(selectedIds);
   };
@@ -436,7 +461,7 @@ export const Order = (props: {
           <Button disabled={lockData && lockData?.addUser !== user?.name ? true : false} onClick={handleEdit}>
             変更
           </Button>
-          <BackButton label={'戻る'} />
+          <BackButton label={'戻る'} sx={{ display: save ? 'inline-flex' : 'none' }} />
         </Grid2>
       </Box>
       {/* --------------------------------受注ヘッダー------------------------------------- */}
@@ -447,7 +472,7 @@ export const Order = (props: {
               <Typography>受注ヘッダー</Typography>
             </Grid2>
             <Grid2 container spacing={1}>
-              <Button color="error" disabled={!edit}>
+              <Button color="error" onClick={() => setHeadDeleteOpen(true)} disabled={!edit}>
                 <Delete fontSize="small" />
                 伝票削除
               </Button>
@@ -787,6 +812,15 @@ export const Order = (props: {
       <IsDirtyAlertDialog open={dirtyOpen} onClick={handleResultDialog} />
       <SelectAlertDialog open={selectOpen} onClick={() => setSelectOpen(false)} />
       <CopyConfirmDialog open={copyOpen} onClick={handleCopyResultDialog} />
+      <HeadDeleteConfirmDialog open={headDeleteOpen} onClick={handleHeadDelete} />
+      <Snackbar
+        open={snackBarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackBarOpen(false)}
+        message={snackBarMessage}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={{ marginTop: '65px' }}
+      />
     </Container>
   );
 };

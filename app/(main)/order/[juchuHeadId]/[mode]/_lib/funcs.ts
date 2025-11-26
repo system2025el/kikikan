@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
 
 import { selectFilteredLocs } from '@/app/_lib/db/tables/m-koenbasho';
 import { selectFilteredCustomers, selectKokyaku } from '@/app/_lib/db/tables/m-kokyaku';
@@ -21,7 +22,7 @@ export const getJuchuHead = async (juchuHeadId: number) => {
     const juchuData = await selectJuchuHead(juchuHeadId);
 
     if (juchuData.error || !juchuData.data) {
-      console.error('GetOrder juchu error : ', juchuData.error);
+      console.error('GetOrder juchu error : ', juchuData.error, juchuHeadId);
       throw new Error('受注ヘッダーが存在しません');
     }
 
@@ -163,6 +164,33 @@ export const updJuchuHead = async (data: OrderValues) => {
     console.error('Exception while updating order:', e);
     return false;
   }
+};
+
+/**
+ * 受注ヘッダー削除
+ * @param juchuHeadId 受注ヘッダーid
+ * @returns
+ */
+export const delJuchuHead = async (juchuHeadId: number) => {
+  const deleteData: JuchuHead = {
+    juchu_head_id: juchuHeadId,
+    del_flg: 1,
+  };
+  try {
+    const { error } = await updateJuchuHead(deleteData);
+
+    if (error) {
+      throw error;
+    }
+
+    console.log('Juchu head deleted successfully:', juchuHeadId);
+    await revalidatePath('/eqpt-order-list');
+  } catch (e) {
+    console.error(e);
+    return false;
+  }
+
+  await redirect('/order/0/edit');
 };
 
 export const copyJuchuHead = async (juchuHeadId: number, data: OrderValues, userNam: string) => {

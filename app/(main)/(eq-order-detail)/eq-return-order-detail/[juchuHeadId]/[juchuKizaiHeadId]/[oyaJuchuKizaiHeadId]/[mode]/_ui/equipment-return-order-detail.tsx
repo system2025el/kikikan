@@ -38,7 +38,7 @@ import {
 } from '@mui/material';
 import { addMonths, endOfMonth, set, subDays, subMonths } from 'date-fns';
 import dayjs, { Dayjs } from 'dayjs';
-import { redirect } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
@@ -101,6 +101,7 @@ export const EquipmentReturnOrderDetail = (props: {
   edit: boolean;
   nyukoFixFlag: boolean;
 }) => {
+  const router = useRouter();
   // user情報
   const user = useUserStore((state) => state.user);
   // 受注機材ヘッダー保存フラグ
@@ -431,7 +432,9 @@ export const EquipmentReturnOrderDetail = (props: {
       const newJuchuKizaiHeadId = await saveNewReturnJuchuKizaiHead(data, updateDateRange, userNam);
 
       if (newJuchuKizaiHeadId) {
-        redirect(`/eq-return-order-detail/${data.juchuHeadId}/${newJuchuKizaiHeadId}/${data.oyaJuchuKizaiHeadId}/edit`);
+        router.push(
+          `/eq-return-order-detail/${data.juchuHeadId}/${newJuchuKizaiHeadId}/${data.oyaJuchuKizaiHeadId}/edit`
+        );
       } else {
         console.log('保存失敗');
         setIsLoading(false);

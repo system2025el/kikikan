@@ -52,3 +52,21 @@ export const CopyConfirmDialog = ({ open, onClick }: { open: boolean; onClick: (
     </Dialog>
   );
 };
+
+export const HeadDeleteConfirmDialog = ({ open, onClick }: { open: boolean; onClick: (result: boolean) => void }) => {
+  return (
+    <Dialog open={open}>
+      <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
+        <WarningIcon color="error" />
+        <Box>受注ヘッダーを削除します</Box>
+      </DialogTitle>
+      <DialogContentText m={2} p={2}>
+        受注ヘッダー削除してもよろしいでしょうか？
+      </DialogContentText>
+      <DialogActions>
+        <Button onClick={() => onClick(true)}>削除</Button>
+        <Button onClick={() => onClick(false)}>戻る</Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
