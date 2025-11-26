@@ -179,11 +179,13 @@ export const DateTime = (props: {
   maxDate?: Date;
   fieldstate?: ControllerFieldState;
   timeSteps?: number;
+  disableClearable?: boolean;
   onChange: (value: Dayjs | null) => void;
   onAccept: (value: Dayjs | null) => void;
   onClear?: () => void;
 }) => {
-  const { sx, disabled, date, minDate, maxDate, fieldstate, timeSteps, onChange, onAccept, onClear } = props;
+  const { sx, disabled, date, minDate, maxDate, fieldstate, timeSteps, disableClearable, onChange, onAccept, onClear } =
+    props;
 
   //カレンダーの表示を制御する
   const [open, setOpen] = useState(false);
@@ -230,7 +232,7 @@ export const DateTime = (props: {
           InputProps: {
             endAdornment: (
               <>
-                {date && (
+                {date && !disableClearable && (
                   <IconButton size="small" sx={{ p: 0 }} onClick={onClear} disabled={disabled}>
                     <ClearIcon fontSize="small" />
                   </IconButton>

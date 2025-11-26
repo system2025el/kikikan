@@ -1,7 +1,15 @@
 'use server';
 
+import { redirect } from 'next/navigation';
+
+import pool from '@/app/_lib/db/postgres';
 import { selectActiveVehs } from '@/app/_lib/db/tables/m-sharyou';
+import { insertJuchuSharyoHead, selectJuchuSharyoMeisai } from '@/app/_lib/db/tables/t-juchu-sharyo-head';
+import { insertJuchuSharyoMeisai } from '@/app/_lib/db/tables/t-juchu-sharyo-meisai';
+import { JuchuSharyoHeadDBValues } from '@/app/_lib/db/types/t-juchu-sharyo-head-type';
+import { JuchuSharyoMeisaiDBValues } from '@/app/_lib/db/types/t-juchu-sharyo-meisai-type';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
+import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 
 import { JuchuSharyoHeadValues } from './types';
 
@@ -24,9 +32,134 @@ export const getVehsSelections = async (): Promise<SelectTypes[]> => {
   }
 };
 
-export const addNewJuchuSharyoHead = async (data: JuchuSharyoHeadValues) => {
+/**
+ * 選択された受注車両明細を取得、成型する関数
+ * @param {number} juchuHeadId
+ * @param {number} sharyoHeadId
+ * @returns {Promise<JuchuSharyoHeadValues>} フォーム型のデータ
+ */
+export const getChosenJuchuSharyoMeisais = async (
+  juchuHeadId: number,
+  sharyoHeadId: number
+): Promise<JuchuSharyoHeadValues> => {
   try {
-    console.log('==========================================', data);
+    const { rows } = await selectJuchuSharyoMeisai(juchuHeadId, sharyoHeadId);
+    console.log('==============================================', rows);
+
+    const meisaiList =
+      rows.length === 2
+        ? rows.map((r) => ({
+            sharyoId: r.sharyo_id,
+            sharyoQty: r.daisu,
+            sharyoMem: r.sharyo_mem,
+          }))
+        : rows.length === 1
+          ? [
+              { sharyoId: rows[0].sharyo_id, sharyoQty: rows[0].daisu, sharyoMem: rows[0].sharyo_mem },
+              { sharyoId: FAKE_NEW_ID, sharyoQty: null, sharyoMem: null },
+            ]
+          : [
+              { sharyoId: FAKE_NEW_ID, sharyoQty: null, sharyoMem: null },
+              { sharyoId: FAKE_NEW_ID, sharyoQty: null, sharyoMem: null },
+            ];
+
+    const sharyoData: JuchuSharyoHeadValues = {
+      juchuHeadId: juchuHeadId,
+      juchuShryoHeadId: sharyoHeadId,
+      headNam: rows[0].head_nam,
+      headMem: rows[0].head_mem,
+      nyushukoDat: new Date(rows[0].nyushuko_dat),
+      nyushukoBashoId: rows[0].nyushuko_basho_id,
+      nyushukoKbn: rows[0].nyushuko_shubetu_id,
+      meisai: meisaiList,
+    };
+
+    return sharyoData;
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
+ * 受注車両明細ヘッダの新規登録関数
+ * @param {JuchuSharyoHeadValues} data フォームの情報
+ * @param {string} user ログインユーザ名
+ */
+export const addNewJuchuSharyoHead = async (data: JuchuSharyoHeadValues, user: string) => {
+  /**現在時刻の文字列 */
+  const now = new Date().toISOString();
+  /** 車両明細ヘッダのデータ */
+  const sharyoHead: JuchuSharyoHeadDBValues = {
+    juchu_head_id: data.juchuHeadId,
+    juchu_sharyo_head_id: FAKE_NEW_ID,
+    mem: data.headMem,
+    head_nam: data.headNam,
+    dsp_ord_num: FAKE_NEW_ID,
+    add_dat: now,
+    add_user: user,
+  };
+
+  const connection = await pool.connect();
+
+  try {
+    // トランザクション開始
+    await connection.query('BEGIN');
+
+    if (!sharyoHead) {
+      connection.query('ROLLBACK');
+      throw new Error('正しくない情報');
+    }
+    /** 車両明細ヘッダ登録して新規取得したヘッダID */
+    const sharyoHeadId = (await insertJuchuSharyoHead(sharyoHead, connection)).rows[0].juchu_sharyo_head_id;
+
+    /** 車両明細のデータ、台数無は登録しない */
+    const sharyoMeisai: JuchuSharyoMeisaiDBValues[] = data.meisai
+      .filter((d) => d.sharyoId && d.sharyoId !== FAKE_NEW_ID && Number(d.sharyoQty) !== 0)
+      .map((d, index) => ({
+        juchu_head_id: data.juchuHeadId,
+        juchu_sharyo_head_id: Number(sharyoHeadId),
+        juchu_sharyo_meisai_id: index + 1,
+        sharyo_id: d.sharyoId,
+        nyushuko_shubetu_id: data.nyushukoKbn,
+        nyushuko_basho_id: data.nyushukoBashoId,
+        nyushuko_dat: data.nyushukoDat?.toISOString() ?? '',
+        daisu: d.sharyoQty,
+        mem: d.sharyoMem,
+        add_dat: now,
+        add_user: user,
+      }));
+
+    console.log('=========================================', sharyoMeisai);
+    if (sharyoMeisai && sharyoMeisai.length > 0) {
+      const { rows } = await insertJuchuSharyoMeisai(sharyoMeisai, connection);
+      console.log(rows.length, '件の明細を登録');
+    }
+    await connection.query('COMMIT');
+    await redirect(`/vehicle-order-detail/${data.juchuHeadId}/${Number(sharyoHeadId)}/edit`);
+  } catch (e) {
+    await connection.query('ROLLBACK');
+    throw e;
+  } finally {
+    connection.release();
+  }
+};
+
+/**
+ * 車両明細を更新する関数
+ * @param newData
+ * @param currentData
+ * @param user
+ */
+export const updateJuchuSharyoHead = async (
+  /** 編集後データ */
+  newData: JuchuSharyoHeadValues,
+  /** 編集前データ */
+  currentData: JuchuSharyoHeadValues,
+  /** ログインユーザ */
+  user: string
+) => {
+  try {
+    console.log('===============================', newData, currentData);
   } catch (e) {
     throw e;
   }
