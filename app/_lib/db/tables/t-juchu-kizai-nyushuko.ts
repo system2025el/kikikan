@@ -125,7 +125,7 @@ export const updateJuchuKizaiNyushuko = async (data: JuchuKizaiNyushuko, connect
   }
 };
 
-export const deleteJchuKizaiNyushuko = async (
+export const deleteJuchuKizaiNyushuko = async (
   data: {
     juchu_head_id: number;
     juchu_kizai_head_id: number;
@@ -150,6 +150,28 @@ export const deleteJchuKizaiNyushuko = async (
     WHERE
       ${whereClause}
   `;
+
+  try {
+    await connection.query(query, values);
+  } catch (e) {
+    throw e;
+  }
+};
+
+export const deleteJuchuKizaiNyushukoFromOrder = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  connection: PoolClient
+) => {
+  const query = `
+    DELETE FROM
+      ${SCHEMA}.t_juchu_kizai_nyushuko
+    WHERE
+      juchu_head_id = $1
+      AND juchu_kizai_head_id = $2
+  `;
+
+  const values = [juchuHeadId, juchuKizaiHeadId];
 
   try {
     await connection.query(query, values);

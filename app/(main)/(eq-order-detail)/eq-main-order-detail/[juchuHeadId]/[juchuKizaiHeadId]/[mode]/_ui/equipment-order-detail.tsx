@@ -29,7 +29,7 @@ import {
 } from '@mui/material';
 import { addMonths, subDays, subMonths } from 'date-fns';
 import dayjs, { Dayjs } from 'dayjs';
-import { redirect, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -490,7 +490,7 @@ const EquipmentOrderDetail = (props: {
       );
 
       if (newJuchuKizaiHeadId) {
-        redirect(`/eq-main-order-detail/${data.juchuHeadId}/${newJuchuKizaiHeadId}/edit`);
+        router.push(`/eq-main-order-detail/${data.juchuHeadId}/${newJuchuKizaiHeadId}/edit`);
       } else {
         console.log('保存失敗');
       }

@@ -36,7 +36,7 @@ import {
   updateJuchuKizaiMeisai,
 } from '@/app/_lib/db/tables/t-juchu-kizai-meisai';
 import {
-  deleteJchuKizaiNyushuko,
+  deleteJuchuKizaiNyushuko,
   insertJuchuKizaiNyushuko,
   selectJuchuKizaiNyushuko,
   selectJuchuKizaiNyushukoConfirm,
@@ -296,7 +296,7 @@ export const updJuchuKizaiNyushuko = async (
         await updateJuchuKizaiNyushuko({ ...data, upd_dat: toJapanTimeString(), upd_user: userNam }, connection);
         // 削除
       } else if (selectData.data && !data) {
-        await deleteJchuKizaiNyushuko(confirmData, connection);
+        await deleteJuchuKizaiNyushuko(confirmData, connection);
         // 追加
       } else if (!selectData.data && data) {
         await insertJuchuKizaiNyushuko({ ...data, add_dat: toJapanTimeString(), add_user: userNam }, connection);
