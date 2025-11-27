@@ -173,7 +173,7 @@ export const OrderEqTable: React.FC<OrderEqTableProps> = ({ orderEqRows, edit, o
 };
 
 type OrderVehicleTableProps = {
-  orderVehicleRows: VehicleTableValues[] | undefined;
+  orderVehicleRows: VehicleTableValues[];
   onVehicleSelectionChange: (selectedIds: number[]) => void;
 };
 
@@ -200,15 +200,15 @@ export const OrderVehicleTable: React.FC<OrderVehicleTableProps> = ({ orderVehic
 
   return (
     <TableContainer sx={{ overflow: 'auto' }}>
-      <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle" size="small">
-        <TableHead sx={{ bgcolor: 'primary.light' }}>
+      <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle" size="small" padding="none">
+        <TableHead>
           <TableRow sx={{ whiteSpace: 'nowrap' }}>
             <TableCell padding="checkbox">
               <Checkbox
                 indeterminate={rows && selected.length > 0 && selected.length < rows.length}
                 checked={rows && rows.length > 0 && selected.length === rows.length}
                 onChange={(e) => {
-                  const newSelected = e.target.checked && rows ? rows.map((row) => row.juchuSharyoHeadId) : [];
+                  const newSelected = e.target.checked && rows ? rows.map((row) => row.sharyoHeadId) : [];
                   setSelected(newSelected);
                   onVehicleSelectionChange(newSelected);
                 }}
@@ -216,24 +216,26 @@ export const OrderVehicleTable: React.FC<OrderVehicleTableProps> = ({ orderVehic
             </TableCell>
             <TableCell padding="none" />
             <TableCell align="left">車両明細名</TableCell>
-            <TableCell align="left">区分</TableCell>
+            <TableCell align="left">場所</TableCell>
+            <TableCell align="left">出庫</TableCell>
+            <TableCell align="left">入庫</TableCell>
             <TableCell align="left">日付</TableCell>
             <TableCell align="left">車両メモ</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {rows!.map((row, index) => (
-            <TableRow hover key={row.juchuSharyoHeadId}>
+            <TableRow hover key={row.sharyoHeadId}>
               <TableCell padding="checkbox">
                 <Checkbox
-                  checked={selected.includes(row.juchuSharyoHeadId)}
-                  onChange={() => handleSelect(row.juchuSharyoHeadId)}
+                  checked={selected.includes(row.sharyoHeadId)}
+                  onChange={() => handleSelect(row.sharyoHeadId)}
                 />
               </TableCell>
               <TableCell padding="none">{index + 1}</TableCell>
               <TableCell align="left">
                 <Button
-                  href={'/order/vehicle-order-detail'}
+                  href={`/vehicle-order-detail/${row.juchuHeadId}/${row.sharyoHeadId}/edit`}
                   variant="text"
                   sx={{
                     color: 'primary',
@@ -241,12 +243,14 @@ export const OrderVehicleTable: React.FC<OrderVehicleTableProps> = ({ orderVehic
                     justifyContent: 'start',
                   }}
                 >
-                  {row.headNam}
+                  {row.sharyoHeadNam}
                 </Button>
               </TableCell>
-              <TableCell align="left">{row.kbn}</TableCell>
-              <TableCell align="left">{row.dat ? toJapanTimeString(new Date(row.dat)) : ''}</TableCell>
-              <TableCell align="left">{row.mem}</TableCell>
+              <TableCell align="left">{row.basho}</TableCell>
+              <TableCell align="left">{row.shubetsuId === 1 ? row.shubetuNam : ' - '}</TableCell>
+              <TableCell align="left">{row.shubetsuId === 2 ? row.shubetuNam : ' - '}</TableCell>
+              <TableCell align="left">{row.nyushukoDat}</TableCell>
+              <TableCell align="left">{row.headMem}</TableCell>
             </TableRow>
           ))}
         </TableBody>

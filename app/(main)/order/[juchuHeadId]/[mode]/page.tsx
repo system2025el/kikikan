@@ -1,8 +1,8 @@
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import { Order } from '@/app/(main)/order/[juchuHeadId]/[mode]/_ui/order';
 
-import { getJuchuHead, getJuchuKizaiHeadList } from './_lib/funcs';
-import { EqTableValues, OrderValues } from './_lib/types';
+import { getJuchuHead, getJuchuKizaiHeadList, getJuchuSharyoHeadList } from './_lib/funcs';
+import { EqTableValues, OrderValues, VehicleTableValues } from './_lib/types';
 
 const Page = async (props: { params: Promise<{ juchuHeadId: string; mode: string }> }) => {
   const params = await props.params;
@@ -32,19 +32,37 @@ const Page = async (props: { params: Promise<{ juchuHeadId: string; mode: string
 
     // 受注機材ヘッダーデータ(初期値)
     const newJuchuKizaiHeadData: EqTableValues[] = [];
+    // 受注車両ヘッダーデータ(初期値)
+    const newJuchuSharyoHeadData: VehicleTableValues[] = [];
 
-    return <Order juchuHeadData={newJuchuHeadData} juchuKizaiHeadDatas={newJuchuKizaiHeadData} edit={edit} />;
+    return (
+      <Order
+        juchuHeadData={newJuchuHeadData}
+        juchuKizaiHeadDatas={newJuchuKizaiHeadData}
+        juchusharyoHeadDatas={newJuchuSharyoHeadData}
+        edit={edit}
+      />
+    );
     // 既存
   } else {
     // 受注ヘッダーデータ
     const juchuHeadData = await getJuchuHead(juchuHeadId);
     // 受注機材ヘッダーデータ
     const juchuKizaiHeadDatas = await getJuchuKizaiHeadList(juchuHeadId);
+    // 受注機材ヘッダーデータ
+    const juchuSharyoHeadDatas = await getJuchuSharyoHeadList(juchuHeadId);
 
     if (!juchuHeadData) {
       return <div>受注情報が見つかりません。</div>;
     }
-    return <Order juchuHeadData={juchuHeadData} juchuKizaiHeadDatas={juchuKizaiHeadDatas} edit={edit} />;
+    return (
+      <Order
+        juchuHeadData={juchuHeadData}
+        juchuKizaiHeadDatas={juchuKizaiHeadDatas}
+        juchusharyoHeadDatas={juchuSharyoHeadDatas}
+        edit={edit}
+      />
+    );
   }
 };
 export default Page;
