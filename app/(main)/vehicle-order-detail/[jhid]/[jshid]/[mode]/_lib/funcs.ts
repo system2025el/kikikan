@@ -168,33 +168,3 @@ export const updateJuchuSharyoHead = async (
     throw e;
   }
 };
-
-/**
- * 受注車両ヘッダリストを取得、成型する関数 後で移動move
- * @param {number} juchuheadId 受注ヘッダID
- * @returns {Promise<VehicleTableValues[]>} 受注車両テーブルの配列
- */
-export const getJuchuSharyoHeadList = async (juchuheadId: number): Promise<VehicleTableValues[]> => {
-  try {
-    const { data, error } = await selectJuchuSharyoHeadList(juchuheadId);
-
-    if (error) {
-      console.error(error);
-    }
-    if (!data || data.length === 0) {
-      return [];
-    }
-
-    return data.map((d, index) => ({
-      sharyoHeadId: d.juchu_sharyo_head_id ?? FAKE_NEW_ID,
-      sharyoHeadNam: d.head_nam ?? '',
-      basho: d.shozoku_nam ?? '',
-      shubetsuId: d.nyushuko_shubetu_id ?? FAKE_NEW_ID,
-      shubetuNam: d.nyushuko_shubetu_nam ?? '',
-      nyushukoDat: d.nyushuko_dat ? toJapanTimeString(d.nyushuko_dat) : '',
-      headMem: d.mem,
-    }));
-  } catch (e) {
-    throw e;
-  }
-};

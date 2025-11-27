@@ -89,7 +89,7 @@ export const ImportMaster = () => {
             bumon_nam: String(row[14] ?? ''),
             shukei_bumon_nam: String(row[15] ?? ''),
             dsp_flg: parseNumber(row[16]),
-            ctn_flg: parseNumber(row[17]),
+            ctn_flg: Number(row[17] ?? 0),
             def_dat_qty: parseNumber(row[18]),
             reg_amt: parseNumber(row[19]),
             // rank_amt_1: parseNumber(row[20]),

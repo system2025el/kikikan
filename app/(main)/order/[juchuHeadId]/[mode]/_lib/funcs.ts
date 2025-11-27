@@ -14,15 +14,18 @@ import { deleteJuchuKizaiHead } from '@/app/_lib/db/tables/t-juchu-kizai-head';
 import { deleteJuchuKizaiHonbanbiFromOrder } from '@/app/_lib/db/tables/t-juchu-kizai-honbanbi';
 import { deleteJuchuKizaiMeisaiFromOrder } from '@/app/_lib/db/tables/t-juchu-kizai-meisai';
 import { deleteJuchuKizaiNyushukoFromOrder } from '@/app/_lib/db/tables/t-juchu-kizai-nyushuko';
+import { selectJuchuSharyoMeisai } from '@/app/_lib/db/tables/t-juchu-sharyo-head';
 import { deleteNyushukoCtnResultFromOrder } from '@/app/_lib/db/tables/t-nyushuko-ctn-result';
 import { deleteNyushukoDenFromOrder } from '@/app/_lib/db/tables/t-nyushuko-den';
 import { deleteNyushukoFixFromOrder } from '@/app/_lib/db/tables/t-nyushuko-fix';
 import { deleteNyushukoResultFromOrder } from '@/app/_lib/db/tables/t-nyushuko-result';
 import { selectJuchuKizaiHeadList } from '@/app/_lib/db/tables/v-juchu-kizai-head-lst';
+import { selectJuchuSharyoHeadList } from '@/app/_lib/db/tables/v-juchu-sharyo-head-lst';
 import { JuchuHead } from '@/app/_lib/db/types/t-juchu-head-type';
 import { toJapanTimeString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
+import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 
-import { CustomersDialogValues, EqTableValues, LocsDialogValues, OrderValues } from './types';
+import { CustomersDialogValues, EqTableValues, LocsDialogValues, OrderValues, VehicleTableValues } from './types';
 
 /**
  * 受注ヘッダー取得
@@ -302,6 +305,33 @@ export const getJuchuKizaiHeadList = async (juchuHeadId: number) => {
     return result;
   } catch (e) {
     console.error('Exception while selecting eqlist:', e);
+  }
+};
+
+export const getJuchuSharyoHeadList = async (juchuHeadId: number) => {
+  try {
+    const { data, error } = await selectJuchuSharyoHeadList(juchuHeadId);
+    if (error) {
+      console.error('GetOrder juchu error : ', error);
+      throw error;
+    }
+
+    if (!data || data.length === 0) return [];
+
+    const sharyoData: VehicleTableValues[] = data.map((d) => ({
+      juchuHeadId: d.juchu_head_id ?? FAKE_NEW_ID,
+      sharyoHeadId: d.juchu_sharyo_head_id ?? FAKE_NEW_ID,
+      sharyoHeadNam: d.head_nam ?? '',
+      shubetsuId: d.nyushuko_shubetu_id ?? FAKE_NEW_ID,
+      shubetuNam: d.nyushuko_shubetu_nam ?? '',
+      basho: d.shozoku_nam,
+      nyushukoDat: d.nyushuko_dat ? toJapanTimeString(d.nyushuko_dat) : '',
+      headMem: d.mem,
+    }));
+
+    return sharyoData;
+  } catch (e) {
+    throw e;
   }
 };
 

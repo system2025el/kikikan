@@ -67,11 +67,13 @@ export type EqTableValues = {
 
 export type VehicleTableValues = {
   juchuHeadId: number;
-  juchuSharyoHeadId: number;
-  headNam: string;
-  kbn: string;
-  dat: Date;
-  mem: string;
+  sharyoHeadId: number;
+  sharyoHeadNam: string;
+  basho: string | null;
+  shubetsuId: number;
+  shubetuNam: string;
+  nyushukoDat: string;
+  headMem: string | null;
 };
 
 export type CustomersDialogValues = {

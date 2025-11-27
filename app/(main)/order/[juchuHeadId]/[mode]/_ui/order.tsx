@@ -71,6 +71,7 @@ import { OrderEqTable, OrderVehicleTable } from './order-table';
 export const Order = (props: {
   juchuHeadData: OrderValues;
   juchuKizaiHeadDatas: EqTableValues[] | undefined;
+  juchusharyoHeadDatas: VehicleTableValues[] | undefined;
   edit: boolean;
   //lockData: LockValues | null;
 }) => {
@@ -93,7 +94,9 @@ export const Order = (props: {
   // 機材ヘッダーデータ
   const [eqHeaderList, setEqHeaderList] = useState<EqTableValues[] | undefined>(props.juchuKizaiHeadDatas);
   // 車両ヘッダーデータ
-  const [vehicleHeaderList, setVehicleHeaderList] = useState<VehicleTableValues[] | undefined>(vehicleRows);
+  const [vehicleHeaderList, setVehicleHeaderList] = useState<VehicleTableValues[] | undefined>(
+    props.juchusharyoHeadDatas
+  );
   // ロックデータ
   const [lockData, setLockData] = useState<LockValues | null>(null);
 
