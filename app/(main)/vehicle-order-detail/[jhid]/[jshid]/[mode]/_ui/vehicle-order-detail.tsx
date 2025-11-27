@@ -64,6 +64,7 @@ import {
 const VehicleOrderDetail = ({
   juchuHeadData,
   sharyoHeadId,
+  edit,
 }: {
   juchuHeadData: DetailOerValues;
   sharyoHeadId: number;
@@ -96,6 +97,8 @@ const VehicleOrderDetail = ({
   const [isLoading, setIsLoading] = useState<boolean>(true);
   /** 変更前の車両明細 */
   const [currentMeisai, setCurrentMeisai] = useState<JuchuSharyoHeadValues>();
+  // 編集モード(true:編集、false:閲覧)
+  const [editable, setEditable] = useState(edit);
 
   /* useForm ------------------------------------------------------- */
   const {
@@ -187,8 +190,23 @@ const VehicleOrderDetail = ({
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
       {isLoading && <LoadingOverlay />}
       <form onSubmit={handleSubmit(onSubmit)}>
-        <Box justifySelf={'end'}>
-          <BackButton label={'戻る'} />
+        <Box display={'flex'} justifySelf={'end'}>
+          <Grid2 container spacing={4}>
+            <Grid2 container alignItems={'center'} spacing={1}>
+              {!editable /*|| (lockData !== null && lockData?.addUser !== user?.name) || fixFlag*/ ? (
+                <Typography>閲覧モード</Typography>
+              ) : (
+                <Typography>編集モード</Typography>
+              )}
+              <Button
+                // disabled={(lockData && lockData?.addUser !== user?.name ? true : false) || fixFlag}
+                onClick={() => setEditable(!editable)}
+              >
+                変更
+              </Button>
+            </Grid2>
+            <BackButton label={'戻る'} />
+          </Grid2>
         </Box>
         {/* 受注ヘッダ ---------------------------------------------------------------------------------- */}
         <Accordion
@@ -234,7 +252,7 @@ const VehicleOrderDetail = ({
                       <Typography marginRight={3} whiteSpace="nowrap">
                         受注番号
                       </Typography>
-                      <TextField value={juchuHeadData.juchuHeadId} disabled sx={{ width: 120 }}></TextField>
+                      <TextField value={juchuHeadData.juchuHeadId} disabled sx={{ width: 120 }} />
                     </Grid2>
                     <Grid2 display="flex" direction="row" alignItems="center">
                       <Typography mr={2}>受注ステータス</Typography>
@@ -262,7 +280,7 @@ const VehicleOrderDetail = ({
                   <Typography marginRight={5} whiteSpace="nowrap">
                     入力者
                   </Typography>
-                  <TextField value={juchuHeadData.nyuryokuUser} disabled></TextField>
+                  <TextField value={juchuHeadData.nyuryokuUser} disabled />
                 </Box>
               </Grid2>
               <Grid2>
@@ -270,19 +288,19 @@ const VehicleOrderDetail = ({
                   <Typography marginRight={5} whiteSpace="nowrap">
                     公演名
                   </Typography>
-                  <TextField value={juchuHeadData.koenNam} disabled></TextField>
+                  <TextField value={juchuHeadData.koenNam} disabled />
                 </Box>
                 <Box sx={styles.container}>
                   <Typography marginRight={3} whiteSpace="nowrap">
                     公演場所
                   </Typography>
-                  <TextField value={juchuHeadData.koenbashoNam ? juchuHeadData.koenbashoNam : ''} disabled></TextField>
+                  <TextField value={juchuHeadData.koenbashoNam ? juchuHeadData.koenbashoNam : ''} disabled />
                 </Box>
                 <Box sx={styles.container}>
                   <Typography marginRight={7} whiteSpace="nowrap">
                     相手
                   </Typography>
-                  <TextField value={juchuHeadData.kokyaku.kokyakuNam} disabled></TextField>
+                  <TextField value={juchuHeadData.kokyaku.kokyakuNam} disabled />
                 </Box>
               </Grid2>
             </Grid2>
@@ -318,7 +336,13 @@ const VehicleOrderDetail = ({
               <Grid2 container sx={styles.baselineContainer} spacing={{ sm: 1, md: 5 }}>
                 <Grid2 size={{ sm: 12, md: 6 }} sx={styles.baselineContainer}>
                   <Typography mr={1}>車両明細名</Typography>
-                  <TextFieldElement name="headNam" control={control} fullWidth sx={{ maxWidth: 400 }} />
+                  <TextFieldElement
+                    name="headNam"
+                    control={control}
+                    fullWidth
+                    sx={{ maxWidth: 400 }}
+                    disabled={!editable}
+                  />
                 </Grid2>
                 <Grid2 sx={styles.baselineContainer}>
                   <Typography mr={1}>入出庫区分</Typography>
@@ -330,6 +354,7 @@ const VehicleOrderDetail = ({
                       { id: 1, label: '入庫' },
                       { id: 2, label: '出庫' },
                     ]}
+                    disabled={!editable}
                   />
                 </Grid2>
               </Grid2>
@@ -354,7 +379,7 @@ const VehicleOrderDetail = ({
                         }}
                         fieldstate={fieldState}
                         timeSteps={15}
-                        disabled={false}
+                        disabled={!editable}
                         disableClearable
                       />
                     )}
@@ -362,7 +387,13 @@ const VehicleOrderDetail = ({
                 </Grid2>
                 <Grid2 sx={styles.baselineContainer}>
                   <Typography mr={5}>作業場所</Typography>
-                  <SelectElement name="nyushukoBashoId" control={control} sx={{ width: 120 }} options={options.basho} />
+                  <SelectElement
+                    name="nyushukoBashoId"
+                    control={control}
+                    sx={{ width: 120 }}
+                    options={options.basho}
+                    disabled={!editable}
+                  />
                 </Grid2>
               </Grid2>
               <Grid2 container sx={styles.baselineContainer}>
@@ -375,6 +406,7 @@ const VehicleOrderDetail = ({
                     sx={{ width: 1, mr: 1 }}
                     minRows={3}
                     maxRows={3}
+                    disabled={!editable}
                   />
                 </Grid2>
               </Grid2>
@@ -403,6 +435,7 @@ const VehicleOrderDetail = ({
                   <Controller
                     name={`meisai.${index}.sharyoId`}
                     control={control}
+                    disabled={!editable}
                     render={({ field }) => (
                       <Select {...field} sx={{ minWidth: { sm: '60vw', md: '30vw' }, ml: { sm: 5, md: 0 } }}>
                         {[selectNone, ...options.vehs].map((opt) => (
@@ -434,11 +467,12 @@ const VehicleOrderDetail = ({
                       },
                     }}
                     type="number"
+                    disabled={!editable}
                   />
                 </Grid2>
                 <Grid2 sx={styles.baselineContainer} size={'auto'}>
                   <Typography mr={1}>メモ</Typography>
-                  <TextFieldElement name={`meisai.${index}.sharyoMem`} control={control} />
+                  <TextFieldElement name={`meisai.${index}.sharyoMem`} control={control} disabled={!editable} />
                 </Grid2>
               </Grid2>
             ))}
@@ -446,7 +480,7 @@ const VehicleOrderDetail = ({
         </Paper>
         {/** 固定ボタン 保存＆ページトップ */}
         <Box position={'fixed'} zIndex={1050} bottom={25} right={25} alignItems={'center'}>
-          <Fab variant="extended" color="primary" type="submit" sx={{ mr: 2 }} disabled={!isDirty}>
+          <Fab variant="extended" color="primary" type="submit" sx={{ mr: 2 }} disabled={!isDirty || !editable}>
             <SaveAsIcon sx={{ mr: 1 }} />
             保存
           </Fab>
