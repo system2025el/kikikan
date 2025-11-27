@@ -2,6 +2,9 @@ import z from 'zod';
 
 import { validationMessages } from '../../../../../_lib/validation-messages';
 
+/**
+ * 受注車両ヘッダ入力フォームのスキーマ
+ */
 export const JuchuSharyoHeadSchema = z.object({
   juchuHeadId: z.number(),
   juchuShryoHeadId: z.number(),
@@ -33,4 +36,20 @@ export const JuchuSharyoHeadSchema = z.object({
 //   path: ['nyushukoDat'],
 // });
 
+/**
+ * 受注車両ヘッダ入力フォームの型
+ */
 export type JuchuSharyoHeadValues = z.infer<typeof JuchuSharyoHeadSchema>;
+
+// /**
+//  * 受注車両のテーブル表示用の型 後で移動move削除delete
+//  */
+// export type JuchuSharyoHeadTableValues = {
+//   sharyoHeadId: number;
+//   sharyoHeadNam: string;
+//   basho: string | null;
+//   shubetsuId: number;
+//   shubetuNam: string;
+//   nyushukoDat: string;
+//   headMem: string | null;
+// };

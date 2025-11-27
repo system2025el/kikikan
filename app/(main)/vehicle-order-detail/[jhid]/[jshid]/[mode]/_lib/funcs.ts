@@ -6,10 +6,14 @@ import pool from '@/app/_lib/db/postgres';
 import { selectActiveVehs } from '@/app/_lib/db/tables/m-sharyou';
 import { insertJuchuSharyoHead, selectJuchuSharyoMeisai } from '@/app/_lib/db/tables/t-juchu-sharyo-head';
 import { insertJuchuSharyoMeisai } from '@/app/_lib/db/tables/t-juchu-sharyo-meisai';
+import { selectJuchuSharyoHeadList } from '@/app/_lib/db/tables/v-juchu-sharyo-head-lst';
 import { JuchuSharyoHeadDBValues } from '@/app/_lib/db/types/t-juchu-sharyo-head-type';
 import { JuchuSharyoMeisaiDBValues } from '@/app/_lib/db/types/t-juchu-sharyo-meisai-type';
+import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
+import { fakeToNull, nullToFake } from '@/app/(main)/(masters)/_lib/value-converters';
+import { VehicleTableValues } from '@/app/(main)/order/[juchuHeadId]/[mode]/_lib/types';
 
 import { JuchuSharyoHeadValues } from './types';
 
@@ -70,7 +74,7 @@ export const getChosenJuchuSharyoMeisais = async (
       headMem: rows[0].head_mem,
       nyushukoDat: new Date(rows[0].nyushuko_dat),
       nyushukoBashoId: rows[0].nyushuko_basho_id,
-      nyushukoKbn: rows[0].nyushuko_shubetu_id,
+      nyushukoKbn: nullToFake(rows[0].nyushuko_shubetu_id),
       meisai: meisaiList,
     };
 
@@ -120,7 +124,7 @@ export const addNewJuchuSharyoHead = async (data: JuchuSharyoHeadValues, user: s
         juchu_sharyo_head_id: Number(sharyoHeadId),
         juchu_sharyo_meisai_id: index + 1,
         sharyo_id: d.sharyoId,
-        nyushuko_shubetu_id: data.nyushukoKbn,
+        nyushuko_shubetu_id: fakeToNull(data.nyushukoKbn),
         nyushuko_basho_id: data.nyushukoBashoId,
         nyushuko_dat: data.nyushukoDat?.toISOString() ?? '',
         daisu: d.sharyoQty,
@@ -160,6 +164,36 @@ export const updateJuchuSharyoHead = async (
 ) => {
   try {
     console.log('===============================', newData, currentData);
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
+ * 受注車両ヘッダリストを取得、成型する関数 後で移動move
+ * @param {number} juchuheadId 受注ヘッダID
+ * @returns {Promise<VehicleTableValues[]>} 受注車両テーブルの配列
+ */
+export const getJuchuSharyoHeadList = async (juchuheadId: number): Promise<VehicleTableValues[]> => {
+  try {
+    const { data, error } = await selectJuchuSharyoHeadList(juchuheadId);
+
+    if (error) {
+      console.error(error);
+    }
+    if (!data || data.length === 0) {
+      return [];
+    }
+
+    return data.map((d, index) => ({
+      sharyoHeadId: d.juchu_sharyo_head_id ?? FAKE_NEW_ID,
+      sharyoHeadNam: d.head_nam ?? '',
+      basho: d.shozoku_nam ?? '',
+      shubetsuId: d.nyushuko_shubetu_id ?? FAKE_NEW_ID,
+      shubetuNam: d.nyushuko_shubetu_nam ?? '',
+      nyushukoDat: d.nyushuko_dat ? toJapanTimeString(d.nyushuko_dat) : '',
+      headMem: d.mem,
+    }));
   } catch (e) {
     throw e;
   }
