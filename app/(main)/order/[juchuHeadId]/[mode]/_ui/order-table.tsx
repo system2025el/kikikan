@@ -235,7 +235,7 @@ export const OrderVehicleTable: React.FC<OrderVehicleTableProps> = ({ orderVehic
               <TableCell padding="none">{index + 1}</TableCell>
               <TableCell align="left">
                 <Button
-                  href={`/vehicle-order-detail/${row.juchuHeadId}/${row.sharyoHeadId}/edit`}
+                  href={`/vehicle-order-detail/${row.juchuHeadId}/${row.sharyoHeadId}/view`}
                   variant="text"
                   sx={{
                     color: 'primary',

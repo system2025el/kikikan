@@ -10,6 +10,8 @@ const Page = async (props: { params: Promise<{ jhid: number; jshid: number; mode
     return <div>受注情報が見つかりません。</div>;
   }
 
+  /** 編集モード(edit:編集、view:閲覧) */
+  const edit = params.mode === 'edit' ? true : false;
   /**  */
 
   return (
@@ -23,7 +25,7 @@ const Page = async (props: { params: Promise<{ jhid: number; jshid: number; mode
       dateRange={[]}
       eqStockData={undefined}
       juchuHonbanbiData={undefined}
-      edit={false}
+      edit={edit}
       fixFlag={false}
     />
   );
