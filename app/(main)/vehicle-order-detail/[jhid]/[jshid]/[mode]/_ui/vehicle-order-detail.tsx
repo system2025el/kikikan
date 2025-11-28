@@ -399,7 +399,7 @@ const VehicleOrderDetail = ({
                   />
                 </Grid2>
                 <Grid2 sx={styles.baselineContainer}>
-                  <Typography mr={5}>作業場所</Typography>
+                  <Typography mr={3}>作業場所</Typography>
                   <SelectElement
                     name="nyushukoBashoId"
                     control={control}

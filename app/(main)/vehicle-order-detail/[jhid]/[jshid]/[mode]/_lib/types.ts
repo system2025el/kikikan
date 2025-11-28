@@ -14,7 +14,7 @@ export const JuchuSharyoHeadSchema = z.object({
     .max(20, { message: validationMessages.maxStringLength(20) }),
   nyushukoKbn: z.number(),
   nyushukoDat: z.date({ message: validationMessages.required() }).nullable(),
-  nyushukoBashoId: z.number().min(0),
+  nyushukoBashoId: z.number({ message: validationMessages.required() }).min(0),
   headMem: z.string().nullable(),
   meisai: z.array(
     z.object({
