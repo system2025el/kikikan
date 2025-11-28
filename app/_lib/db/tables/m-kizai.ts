@@ -47,7 +47,7 @@ export const insertNewEqpt = async (data: EqptsMasterDialogValues, connection: P
   const values = [
     data.kizaiNam,
     Number(data.delFlg),
-    data.sectionNum,
+    fakeToNull(data.sectionNum),
     data.elNum,
     data.shozokuId,
     data.bldCod,

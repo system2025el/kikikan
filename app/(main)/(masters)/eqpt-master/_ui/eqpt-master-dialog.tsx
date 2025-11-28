@@ -56,7 +56,8 @@ export const EqMasterDialog = ({
     s: SelectTypes[];
     b: SelectTypes[];
     shozoku: SelectTypes[];
-  }>({ d: [], s: [], b: [], shozoku: [] });
+    section: SelectTypes[];
+  }>({ d: [], s: [], b: [], shozoku: [], section: [] });
   /* 保有数 */
   const [kizaiQty, setKizaiQty] = useState<{ yuko: number; ng: number }>({ yuko: 0, ng: 0 });
 
@@ -206,27 +207,24 @@ export const EqMasterDialog = ({
                 <TextField value={kizaiQty.yuko ? String(kizaiQty.yuko ?? 0) : ''} disabled />
               </FormBox>
               <FormBox formItem={formItems[4]}>
-                <TextFieldElement
+                <Controller
                   name="sectionNum"
                   control={control}
-                  label={editable ? formItems[4].exsample : ''}
-                  fullWidth
-                  sx={{
-                    maxWidth: '20%',
-                    '& .MuiInputBase-input': {
-                      textAlign: 'right',
-                    },
-                    '& input[type=number]::-webkit-inner-spin-button': {
-                      WebkitAppearance: 'none',
-                      margin: 0,
-                    },
-                  }}
                   disabled={editable ? false : true}
-                  type="number"
+                  render={({ field }) => (
+                    <Select {...field} sx={{ width: 250 }}>
+                      {[selectNone, ...selectOptions.section].map((opt) => (
+                        <MenuItem
+                          key={opt.id}
+                          value={opt.id}
+                          sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
+                        >
+                          {opt.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  )}
                 />
-                <Typography variant="body2" ml={2}>
-                  {formItems[4].other}
-                </Typography>
               </FormBox>
               <FormBox formItem={formItems[5]} required>
                 <SelectElement
