@@ -131,8 +131,8 @@ export const EqptMaster = () => {
           <Typography>機材マスタ一覧</Typography>
         </Box>
         <Divider />
-        <Box width={'100%'} p={2} component={'form'} onSubmit={handleSubmit(onSubmit)}>
-          <Stack justifyContent={'space-between'} alignItems={'start'} mt={1}>
+        <Box width={'100%'} px={2} py={1} component={'form'} onSubmit={handleSubmit(onSubmit)}>
+          <Stack justifyContent={'space-between'} alignItems={'start'}>
             <Stack>
               <Typography noWrap>機材名キーワード</Typography>
               <TextFieldElement name={'query'} control={control} />

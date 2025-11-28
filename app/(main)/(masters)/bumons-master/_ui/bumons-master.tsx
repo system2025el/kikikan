@@ -25,7 +25,7 @@ import { MuiTablePagination } from '@/app/(main)/_ui/table-pagination';
 
 import { FAKE_NEW_ID, ROWS_PER_MASTER_TABLE_PAGE } from '../../_lib/constants';
 import { MasterTable } from '../../_ui/tables';
-import { BumonsMHeader } from '../_lib/datas';
+import { bumonsMHeader } from '../_lib/datas';
 import { getFilteredBumons } from '../_lib/funcs';
 import { BumonsMasterTableValues } from '../_lib/types';
 import { BumonsMasterDialog } from './bumons-master-dialog';
@@ -116,10 +116,7 @@ export const BumonsMaster = () => {
           <Typography>部門マスタ検索</Typography>
         </Box>
         <Divider />
-        <Box width={'100%'} p={2}>
-          <Stack>
-            <Typography variant="body2">検索</Typography>
-          </Stack>
+        <Box width={'100%'} px={2} py={1}>
           <form onSubmit={handleSubmit(onSubmit)}>
             <Stack alignItems={'center'}>
               <Typography noWrap width={140}>
@@ -213,7 +210,7 @@ export const BumonsMaster = () => {
         ) : (
           <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
             <MasterTable
-              headers={BumonsMHeader}
+              headers={bumonsMHeader}
               datas={bumons.map((l) => ({ ...l, id: l.bumonId, name: l.bumonNam }))}
               handleOpenDialog={handleOpenDialog}
               page={page}

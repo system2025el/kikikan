@@ -102,8 +102,8 @@ export const LocationsMaster = () => {
             <Typography>公演場所マスタ検索</Typography>
           </Box>
           <Divider />
-          <Box width={'100%'} p={2} component={'form'} onSubmit={handleSubmit(onSubmit)}>
-            <Stack justifyContent={'space-between'} alignItems={'start'} mt={1}>
+          <Box width={'100%'} px={2} py={1} component={'form'} onSubmit={handleSubmit(onSubmit)}>
+            <Stack justifyContent={'space-between'} alignItems={'start'}>
               <Stack alignItems={'baseline'}>
                 <Typography>キーワード</Typography>
                 <TextFieldElement name="query" control={control} helperText={'場所、住所、Tel、Faxから検索'} />
