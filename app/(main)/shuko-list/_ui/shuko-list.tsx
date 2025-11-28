@@ -18,7 +18,9 @@ import { CheckboxButtonGroup, Controller, TextFieldElement, useForm } from 'reac
 
 import { toJapanTimeStampString, toJapanTimeString, toJapanYMDString } from '../../_lib/date-conversion';
 import { TestDate } from '../../_ui/date';
+import { SelectTypes } from '../../_ui/form-box';
 import { Loading } from '../../_ui/loading';
+import { getSectionShortSelections } from '../../(masters)/sections-master/_lib/funcs';
 import { getPdfData, getShukoList } from '../_lib/funcs';
 import { ShukoKizai, ShukoListSearchValues, ShukoTableValues } from '../_lib/types';
 import { PdfModel, usePdf } from '../shuko/_lib/hooks/usePdf';
@@ -28,9 +30,10 @@ export const ShukoList = (/*props: { shukoData: ShukoTableValues[] }*/) => {
   const [isLoading, setIsLoading] = useState(true);
   const [selected, setSelected] = useState<number[]>([]);
   const [shukoList, setShukoList] = useState<ShukoTableValues[]>(/*props.shukoData*/ []);
+  const [options, setOptions] = useState<SelectTypes[]>([]);
 
   /* useForm ------------------- */
-  const { control, handleSubmit, getValues } = useForm({
+  const { control, handleSubmit, getValues } = useForm<ShukoListSearchValues>({
     mode: 'onSubmit',
     defaultValues: {
       juchuHeadId: null,
@@ -49,6 +52,12 @@ export const ShukoList = (/*props: { shukoData: ShukoTableValues[] }*/) => {
     const newShukoList = await getShukoList(data);
     setShukoList(newShukoList);
     setIsLoading(false);
+  };
+
+  /** 選択肢の取得 */
+  const getOptions = async () => {
+    const radio = await getSectionShortSelections();
+    setOptions(radio);
   };
 
   /* 納品書出力(PDF) ------------------- */
@@ -93,6 +102,7 @@ export const ShukoList = (/*props: { shukoData: ShukoTableValues[] }*/) => {
 
   /* useEffect --------------------------------- */
   useEffect(() => {
+    getOptions();
     onSubmit(getValues());
   }, [getValues]);
 
@@ -104,8 +114,8 @@ export const ShukoList = (/*props: { shukoData: ShukoTableValues[] }*/) => {
         </Box>
         <Divider />
         <form onSubmit={handleSubmit(onSubmit)}>
-          <Grid2 container alignItems={'center'} px={2} pt={1} spacing={4}>
-            <Box display={'flex'} alignItems={'center'}>
+          <Grid2 container alignItems={'center'} px={2} py={1} spacing={2}>
+            <Grid2 display={'flex'} alignItems={'center'}>
               <Typography mr={2}>受注番号</Typography>
               <TextFieldElement
                 name="juchuHeadId"
@@ -123,8 +133,8 @@ export const ShukoList = (/*props: { shukoData: ShukoTableValues[] }*/) => {
                   },
                 }}
               />
-            </Box>
-            <Box display={'flex'} alignItems={'center'} width={'fit-content'}>
+            </Grid2>
+            <Grid2 display={'flex'} alignItems={'center'} width={'fit-content'}>
               <Typography mr={2}>出庫日</Typography>
               <Controller
                 name="shukoDat"
@@ -139,8 +149,8 @@ export const ShukoList = (/*props: { shukoData: ShukoTableValues[] }*/) => {
                   />
                 )}
               />
-            </Box>
-            <Box display={'flex'} alignItems={'center'}>
+            </Grid2>
+            <Grid2 display={'flex'} alignItems={'center'}>
               <Typography mr={2}>出庫場所</Typography>
               <FormControl size="small" sx={{ width: 120 }}>
                 <Controller
@@ -155,33 +165,24 @@ export const ShukoList = (/*props: { shukoData: ShukoTableValues[] }*/) => {
                   )}
                 />
               </FormControl>
-            </Box>
-            <Box display={'flex'} alignItems={'center'}>
+            </Grid2>
+            <Grid2 display={'flex'} alignItems={'center'}>
               <Typography noWrap mr={2}>
                 課
               </Typography>
               <Box border={1} borderColor={'divider'} borderRadius={1} pl={1}>
-                <CheckboxButtonGroup
-                  name="section"
-                  control={control}
-                  options={[
-                    { id: 'Ⅰ', label: 'Ⅰ' },
-                    { id: 'Ⅱ', label: 'Ⅱ' },
-                    { id: 'Ⅲ', label: 'Ⅲ' },
-                    { id: 'Ⅳ', label: 'Ⅳ' },
-                    { id: 'Ⅴ', label: 'Ⅴ' },
-                  ]}
-                  row
-                />
+                <CheckboxButtonGroup name="section" control={control} options={options} row />
               </Box>
-            </Box>
+            </Grid2>
+            <Grid2 size={'grow'} alignItems={'end'} justifyContent={'end'}>
+              <Box alignSelf={'end'} justifySelf={'end'}>
+                <Button type="submit">
+                  <SearchIcon fontSize="small" />
+                  検索
+                </Button>
+              </Box>
+            </Grid2>
           </Grid2>
-          <Box alignItems={'end'} justifySelf={'end'} px={2} pb={1}>
-            <Button type="submit">
-              <SearchIcon fontSize="small" />
-              検索
-            </Button>
-          </Box>
         </form>
         <Divider />
         {isLoading ? (

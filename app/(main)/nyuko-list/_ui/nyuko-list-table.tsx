@@ -16,12 +16,12 @@ export const NyukoListTable = (props: { datas: NyukoTableValues[] }) => {
             <TableCell align="center">受注番号</TableCell>
             <TableCell align="left">入庫場所</TableCell>
             <TableCell align="left">入庫日時</TableCell>
+            <TableCell align="center">チェック</TableCell>
             <TableCell align="left">公演名</TableCell>
             <TableCell align="left">公演場所</TableCell>
             <TableCell align="left">機材明細名</TableCell>
             <TableCell align="left">顧客名</TableCell>
             <TableCell align="left">課</TableCell>
-            <TableCell align="center">チェック</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -30,11 +30,6 @@ export const NyukoListTable = (props: { datas: NyukoTableValues[] }) => {
               <TableCell align="center">{row.juchuHeadId}</TableCell>
               <TableCell align="left">{row.nyushukoBashoId === 1 ? 'K' : 'Y'}</TableCell>
               <TableCell align="left">{toJapanTimeString(row.nyushukoDat)}</TableCell>
-              <TableCell align="left">{row.koenNam}</TableCell>
-              <TableCell align="left">{row.koenbashoNam}</TableCell>
-              <TableCell align="left">{row.headNamv}</TableCell>
-              <TableCell align="left">{row.kokyakuNam}</TableCell>
-              <TableCell align="left">{row.sectionNamv}</TableCell>
               <TableCell align="center">
                 <Button
                   variant="text"
@@ -45,6 +40,11 @@ export const NyukoListTable = (props: { datas: NyukoTableValues[] }) => {
                   {row.nchkSagyoStsNamShort}
                 </Button>
               </TableCell>
+              <TableCell align="left">{row.koenNam}</TableCell>
+              <TableCell align="left">{row.koenbashoNam}</TableCell>
+              <TableCell align="left">{row.headNamv}</TableCell>
+              <TableCell align="left">{row.kokyakuNam}</TableCell>
+              <TableCell align="left">{row.sectionNamv}</TableCell>
             </TableRow>
           ))}
         </TableBody>

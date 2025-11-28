@@ -4,14 +4,38 @@ import { revalidatePath } from 'next/cache';
 
 import {
   insertNewSection,
+  selectActiveSections,
   selectFilteredSections,
   selectOneSection,
   upDateSectionDB,
 } from '@/app/_lib/db/tables/m-section';
 import { toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
+import { SelectTypes } from '@/app/(main)/_ui/form-box';
 
 import { emptySection } from './datas';
 import { SectionsMasterDialogValues, SectionsMasterTableValues } from './types';
+
+/**
+ * 課の選択肢を取得・成型する関数（略称）
+ * @returns {SelectTypes[]} id, labelともに略称
+ */
+export const getSectionShortSelections = async () => {
+  try {
+    const { data, error } = await selectActiveSections();
+    if (error) {
+      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
+      throw error;
+    }
+    if (!data || data.length === 0) {
+      return [];
+    }
+
+    return data.map((d) => ({ id: d.section_nam_short, label: d.section_nam_short }));
+  } catch (e) {
+    console.error('例外が発生しました:', e);
+    throw e;
+  }
+};
 
 /**
  * 課マスタテーブルのデータを取得する関数

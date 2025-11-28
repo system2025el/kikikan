@@ -16,9 +16,9 @@ export const selectActiveSections = async () => {
     return await supabase
       .schema(SCHEMA)
       .from('m_section')
-      .select('section_id, section_nam')
+      .select('section_id, section_nam, section_nam_short')
       .neq('del_flg', 1)
-      .order('section_nam');
+      .order('section_id');
   } catch (e) {
     throw e;
   }
