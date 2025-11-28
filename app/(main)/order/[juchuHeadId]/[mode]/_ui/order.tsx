@@ -5,6 +5,7 @@ import AddIcon from '@mui/icons-material/Add';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import CheckIcon from '@mui/icons-material/Check';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import CreateIcon from '@mui/icons-material/Create';
 import Delete from '@mui/icons-material/Delete';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SaveAsIcon from '@mui/icons-material/SaveAs';
@@ -549,6 +550,13 @@ export const Order = (props: {
               <Typography>受注ヘッダー</Typography>
             </Grid2>
             <Grid2 container spacing={1}>
+              <Button
+                onClick={() => router.push(`/quotation-list/create?juchuId=${getValues('juchuHeadId')}`)}
+                disabled={isDirty}
+              >
+                <CreateIcon fontSize="small" />
+                見積作成
+              </Button>
               <Button color="error" onClick={() => setHeadDeleteOpen(true)} disabled={!edit}>
                 <Delete fontSize="small" />
                 伝票削除
