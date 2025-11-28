@@ -94,7 +94,7 @@ export const getChosenEqpt = async (id: number) => {
     }
     const EqptDetails: EqptsMasterDialogValues = {
       kizaiNam: data.kizai_nam,
-      sectionNum: data.section_num,
+      sectionNum: nullToFake(data.section_num),
       elNum: data.el_num,
       delFlg: Boolean(data.del_flg),
       shozokuId: nullToFake(data.shozoku_id),
@@ -168,7 +168,7 @@ export const updateEqpt = async (
     kizai_id: id,
     kizai_nam: rawData.kizaiNam,
     del_flg: Number(rawData.delFlg),
-    section_num: rawData.sectionNum,
+    section_num: fakeToNull(rawData.sectionNum),
     shozoku_id: Number(rawData.shozokuId),
     bld_cod: rawData.bldCod,
     tana_cod: rawData.tanaCod,

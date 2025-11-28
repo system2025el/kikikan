@@ -29,7 +29,7 @@ export const eqptMHeader = [
 /*  */
 export const emptyEqpt: EqptsMasterDialogValues = {
   kizaiNam: '',
-  sectionNum: null,
+  sectionNum: FAKE_NEW_ID,
   elNum: null,
   delFlg: false,
   shozokuId: 0,
@@ -76,9 +76,8 @@ export const formItems: FormItemsType[] = [
   },
   {
     label: '課',
-    exsample: '例）1',
-    constraints: '数字',
-    other: '所属無[0]、Ⅰ課[1]、Ⅱ課[2]、Ⅲ課[3]、Ⅳ課[4]、Ⅴ課[5]',
+    exsample: '',
+    constraints: 'リスト選択',
   },
   {
     label: '所属',

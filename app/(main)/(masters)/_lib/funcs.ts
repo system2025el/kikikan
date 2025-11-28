@@ -12,6 +12,8 @@ import { selectActiveShozokus } from '@/app/_lib/db/tables/m-shozoku';
 import { selectActiveShukeibumons } from '@/app/_lib/db/tables/m-shukeibumon';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 
+import { getSectionSelections, getSectionShortSelections } from '../sections-master/_lib/funcs';
+
 /**
  * 選択肢に使う大部門リストを取得する関数
  * @returns {SelectTypes[]} 大部門のidと大部門名のlabelを持ったオブジェクトの配列、エラーの場合空配列
@@ -128,18 +130,20 @@ export const getAllSelections = async (): Promise<{
   s: SelectTypes[];
   b: SelectTypes[];
   shozoku: SelectTypes[];
+  section: SelectTypes[];
 }> => {
   try {
-    const [daibumons, shukeibumons, bumons, shozoku] = await Promise.all([
+    const [daibumons, shukeibumons, bumons, shozoku, section] = await Promise.all([
       getDaibumonsSelection(),
       getShukeibumonsSelection(),
       getBumonsSelection(),
       getShozokuSelection(),
+      getSectionSelections(),
     ]);
-    return { d: daibumons!, s: shukeibumons!, b: bumons!, shozoku: shozoku! };
+    return { d: daibumons, s: shukeibumons, b: bumons, shozoku: shozoku, section: section };
   } catch (error) {
     console.error('Error fetching all selections:', error);
-    return { d: [], s: [], b: [], shozoku: [] };
+    return { d: [], s: [], b: [], shozoku: [], section: [] };
   }
 };
 

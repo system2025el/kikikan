@@ -38,6 +38,28 @@ export const getSectionShortSelections = async () => {
 };
 
 /**
+ * 課の選択肢を取得・成型する関数
+ * @returns {SelectTypes[]} idはsection id, labelは名称
+ */
+export const getSectionSelections = async () => {
+  try {
+    const { data, error } = await selectActiveSections();
+    if (error) {
+      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
+      throw error;
+    }
+    if (!data || data.length === 0) {
+      return [];
+    }
+
+    return data.map((d) => ({ id: d.section_id, label: d.section_nam }));
+  } catch (e) {
+    console.error('例外が発生しました:', e);
+    throw e;
+  }
+};
+
+/**
  * 課マスタテーブルのデータを取得する関数
  * @param query 検索キーワード
  * @returns {Promise<SectionsMasterTableValues[]>} 課マスタテーブルに表示するデータ（ 検索キーワードが空の場合は全て ）
