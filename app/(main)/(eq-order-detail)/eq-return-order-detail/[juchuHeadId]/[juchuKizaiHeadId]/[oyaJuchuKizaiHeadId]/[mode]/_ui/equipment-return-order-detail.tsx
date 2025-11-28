@@ -33,6 +33,7 @@ import {
   Popper,
   Select,
   SelectChangeEvent,
+  Snackbar,
   TextField,
   Typography,
 } from '@mui/material';
@@ -182,6 +183,11 @@ export const EquipmentReturnOrderDetail = (props: {
   const [deleteEqOpen, setDeleteEqOpen] = useState(false);
   // コンテナ削除ダイアログ制御
   const [deleteCtnOpen, setDeleteCtnOpen] = useState(false);
+
+  // スナックバー制御
+  const [snackBarOpen, setSnackBarOpen] = useState(false);
+  // スナックバーメッセージ
+  const [snackBarMessage, setSnackBarMessage] = useState('');
 
   // アコーディオン制御
   const [expanded, setExpanded] = useState(false);
@@ -598,8 +604,12 @@ export const EquipmentReturnOrderDetail = (props: {
         }
         setSave(true);
         setIsSave(true);
+
+        setSnackBarMessage('保存しました');
+        setSnackBarOpen(true);
       } else {
-        console.log('保存失敗');
+        setSnackBarMessage('保存に失敗しました');
+        setSnackBarOpen(true);
       }
       setIsLoading(false);
     }
@@ -1606,13 +1616,21 @@ export const EquipmentReturnOrderDetail = (props: {
               </>
             )}
           </Paper>
-          <SaveAlertDialog open={saveOpen} onClick={() => setSaveOpen(false)} />
-          <IsDirtyAlertDialog open={dirtyOpen} onClick={handleResultDialog} />
-          <NyushukoAlertDialog open={nyushukoOpen} onClick={() => setNyushukoOpen(false)} />
-          <DeleteAlertDialog open={deleteEqOpen} onClick={handleEqMeisaiDeleteResult} />
-          <DeleteAlertDialog open={deleteCtnOpen} onClick={handleCtnMeisaiDeleteResult} />
         </Container>
       )}
+      <SaveAlertDialog open={saveOpen} onClick={() => setSaveOpen(false)} />
+      <IsDirtyAlertDialog open={dirtyOpen} onClick={handleResultDialog} />
+      <NyushukoAlertDialog open={nyushukoOpen} onClick={() => setNyushukoOpen(false)} />
+      <DeleteAlertDialog open={deleteEqOpen} onClick={handleEqMeisaiDeleteResult} />
+      <DeleteAlertDialog open={deleteCtnOpen} onClick={handleCtnMeisaiDeleteResult} />
+      <Snackbar
+        open={snackBarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackBarOpen(false)}
+        message={snackBarMessage}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={{ marginTop: '65px' }}
+      />
     </>
   );
 };

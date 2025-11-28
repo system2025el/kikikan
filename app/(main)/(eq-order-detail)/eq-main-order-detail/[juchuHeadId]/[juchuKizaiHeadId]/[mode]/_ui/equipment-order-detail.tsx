@@ -5,6 +5,7 @@ import AddIcon from '@mui/icons-material/Add';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SaveAsIcon from '@mui/icons-material/SaveAs';
 import {
@@ -24,6 +25,7 @@ import {
   Paper,
   Popper,
   Select,
+  Snackbar,
   TextField,
   Typography,
 } from '@mui/material';
@@ -54,7 +56,7 @@ import {
   NyushukoAlertDialog,
   SaveAlertDialog,
 } from '../../../../../_ui/caveat-dialog';
-import { getJuchuKizaiMeisai, saveJuchuKizai, saveNewJuchuKizaiHead } from '../_lib/funcs';
+import { getJuchuKizaiMeisai, juchuMeisaiCopy, saveJuchuKizai, saveNewJuchuKizaiHead } from '../_lib/funcs';
 import {
   IdoJuchuKizaiMeisaiValues,
   JuchuContainerMeisaiValues,
@@ -65,6 +67,7 @@ import {
   SelectedEqptsValues,
   StockTableValues,
 } from '../_lib/types';
+import { CopyDialog } from './copy-dialog';
 import { DateSelectDialog } from './date-selection-dialog';
 import { ContainerTable, EqTable, IdoEqTable, StockTable } from './equipment-order-detail-table';
 import { EqptSelectionDialog } from './equipment-selection-dailog';
@@ -180,12 +183,21 @@ const EquipmentOrderDetail = (props: {
   const [nyushukoOpen, setNyushukoOpen] = useState(false);
   // 機材追加ダイアログ制御
   const [EqSelectionDialogOpen, setEqSelectionDialogOpen] = useState(false);
+  // コピーダイアログ制御
+  const [copyDialogOpen, setCopyDialogOpen] = useState(false);
+  // 分離ダイアログ制御
+  const [separationDialogOpen, setSeparationDialogOpen] = useState(false);
   // 日付選択カレンダーダイアログ制御
   const [dateSelectionDialogOpne, setDateSelectionDialogOpne] = useState(false);
   // 機材削除ダイアログ制御
   const [deleteEqOpen, setDeleteEqOpen] = useState(false);
   // コンテナ削除ダイアログ制御
   const [deleteCtnOpen, setDeleteCtnOpen] = useState(false);
+
+  // スナックバー制御
+  const [snackBarOpen, setSnackBarOpen] = useState(false);
+  // スナックバーメッセージ
+  const [snackBarMessage, setSnackBarMessage] = useState('');
 
   // アコーディオン制御
   const [expanded, setExpanded] = useState(false);
@@ -271,7 +283,8 @@ const EquipmentOrderDetail = (props: {
   useEffect(() => {
     setSave(saveKizaiHead);
     setIsSave(saveKizaiHead);
-  }, [saveKizaiHead, setIsSave]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (!user || !props.edit) return;
@@ -492,7 +505,8 @@ const EquipmentOrderDetail = (props: {
       if (newJuchuKizaiHeadId) {
         router.push(`/eq-main-order-detail/${data.juchuHeadId}/${newJuchuKizaiHeadId}/edit`);
       } else {
-        console.log('保存失敗');
+        setSnackBarMessage('保存に失敗しました');
+        setSnackBarOpen(true);
       }
 
       // 更新
@@ -579,7 +593,7 @@ const EquipmentOrderDetail = (props: {
           setOriginJuchuHonbanbiList(juchuHonbanbiList);
           setJuchuHonbanbiDeleteList([]);
         }
-        if (checkJuchuKizaiHead && checkJuchuKizaiMeisai) {
+        if (checkJuchuKizaiHead && (checkJuchuKizaiMeisai || checkJuchuContainerMeisai)) {
           // 受注機材ヘッダー状態管理更新
           reset(data);
           // 出庫日更新
@@ -617,6 +631,11 @@ const EquipmentOrderDetail = (props: {
             );
             setOriginEqStockList(updatedEqStockData);
           }
+
+          // 受注コンテナ明細更新
+          const juchuCtnMeisaiData = await getJuchuContainerMeisai(data.juchuHeadId, data.juchuKizaiHeadId);
+          setJuchuContainerMeisaiList(juchuCtnMeisaiData);
+          setOriginJuchuContainerMeisaiList(juchuCtnMeisaiData);
         } else if (checkJuchuKizaiHead) {
           // 受注機材ヘッダー状態管理更新
           reset(data);
@@ -637,7 +656,7 @@ const EquipmentOrderDetail = (props: {
             juchuKizaiMeisaiList
           );
           setOriginEqStockList(updatedEqStockData);
-        } else if (checkJuchuKizaiMeisai) {
+        } else if (checkJuchuKizaiMeisai || checkJuchuContainerMeisai) {
           // 受注機材明細、機材在庫テーブル更新
           const juchuKizaiMeisaiData = await getJuchuKizaiMeisai(data.juchuHeadId, data.juchuKizaiHeadId);
           if (juchuKizaiMeisaiData) {
@@ -664,19 +683,23 @@ const EquipmentOrderDetail = (props: {
             );
             setOriginEqStockList(updatedEqStockData);
           }
-        }
-        if (checkIdoJuchuKizaiMeisai) {
-          setOriginIdoJuchuKizaiMeisaiList(idoJuchuKizaiMeisaiList);
-        }
-        if (checkJuchuContainerMeisai) {
+
+          // 受注コンテナ明細更新
           const juchuContainerMeisaiData = await getJuchuContainerMeisai(data.juchuHeadId, data.juchuKizaiHeadId);
           setOriginJuchuContainerMeisaiList(juchuContainerMeisaiData);
           setJuchuContainerMeisaiList(juchuContainerMeisaiData);
         }
+        if (checkIdoJuchuKizaiMeisai) {
+          setOriginIdoJuchuKizaiMeisaiList(idoJuchuKizaiMeisaiList);
+        }
         setSave(true);
         setIsSave(true);
+
+        setSnackBarMessage('保存しました');
+        setSnackBarOpen(true);
       } else {
-        console.log('保存失敗');
+        setSnackBarMessage('保存に失敗しました');
+        setSnackBarOpen(true);
       }
       setIsLoading(false);
     }
@@ -1433,6 +1456,104 @@ const EquipmentOrderDetail = (props: {
     setEqSelectionDialogOpen(false);
   };
 
+  // コピーダイアログ開閉
+  const handleOpenCopyDialog = () => {
+    console.log(!save, isDirty);
+    if (!save || isDirty) {
+      setSaveOpen(true);
+      return;
+    }
+    setCopyDialogOpen(true);
+  };
+  const handleCloseOperationDialog = () => {
+    setCopyDialogOpen(false);
+  };
+
+  // コピー処理
+  const handleCopyConfirmed = async (
+    headNam: string,
+    selectEq: JuchuKizaiMeisaiValues[],
+    selectCtn: JuchuContainerMeisaiValues[]
+  ) => {
+    if (!user || !shukoDate || !nyukoDate) return;
+
+    // ユーザー名
+    const userNam = user.name;
+
+    // 受注機材ヘッダー
+    const newJuchuKizaiHead = { ...getValues(), headNam: headNam };
+    console.log('newJuchuKizaiHead', newJuchuKizaiHead);
+
+    // 機材id
+    const ids = [...new Set(selectEq.map((d) => d.kizaiId))];
+    // 選択された機材に対する移動データ
+    const selectIdoList = idoJuchuKizaiMeisaiList
+      .filter((d) => ids.includes(d.kizaiId) && !d.delFlag && d.sagyoDenDat)
+      .map((d) => ({ ...d, planKizaiQty: 0, planYobiQty: 0, planQty: 0 }));
+    console.log('selectIdoList', selectIdoList);
+
+    const sum = selectEq
+      .filter((d) => !d.delFlag)
+      .reduce((acc, current) => {
+        const key = current.kizaiId;
+        const currentTotals = acc.get(key) ?? { planKizaiQty: 0, planYobiQty: 0, planQty: 0 };
+        currentTotals.planKizaiQty += current.planKizaiQty;
+        currentTotals.planYobiQty += current.planYobiQty;
+        currentTotals.planQty += current.planQty;
+
+        acc.set(key, currentTotals);
+
+        return acc;
+      }, new Map<number, { planKizaiQty: number; planYobiQty: number; planQty: number }>());
+
+    // 移動データの数値更新
+    const idoList = selectIdoList.map((d) =>
+      sum.get(d.kizaiId)
+        ? {
+            ...d,
+            planKizaiQty: sum.get(d.kizaiId)!.planKizaiQty,
+            planYobiQty: sum.get(d.kizaiId)!.planYobiQty,
+            planQty: sum.get(d.kizaiId)!.planQty,
+          }
+        : { ...d, delFlag: true }
+    );
+    console.log('idoList', idoList);
+
+    // コピー処理
+    const copyResult = await juchuMeisaiCopy(
+      newJuchuKizaiHead,
+      shukoDate,
+      nyukoDate,
+      dateRange,
+      selectEq,
+      selectCtn,
+      idoList,
+      juchuHonbanbiList,
+      userNam
+    );
+
+    if (copyResult) {
+      setCopyDialogOpen(false);
+      setSnackBarMessage('コピーしました');
+      setSnackBarOpen(true);
+    } else {
+      setSnackBarMessage('コピーに失敗しました');
+      setSnackBarOpen(true);
+    }
+  };
+
+  // 分離ダイアログ開閉
+  const handleOpenSeparationDialog = () => {
+    if (!saveKizaiHead) {
+      setSaveOpen(true);
+      return;
+    }
+    setCopyDialogOpen(true);
+  };
+  const handleCloseSeparationDialog = () => {
+    setCopyDialogOpen(false);
+  };
+
   // 本番日入力ダイアログ開閉
   const handleOpenDateDialog = () => {
     if (!saveKizaiHead) {
@@ -1977,6 +2098,17 @@ const EquipmentOrderDetail = (props: {
           <Paper variant="outlined" sx={{ mt: 2 }}>
             <Box display="flex" justifyContent="space-between" alignItems="center" px={2} height={'30px'}>
               <Typography>受注明細(機材)</Typography>
+              <Button
+                disabled={
+                  !edit ||
+                  (juchuKizaiMeisaiList.filter((d) => !d.delFlag).length === 0 &&
+                    juchuContainerMeisaiList.filter((d) => !d.delFlag).length === 0)
+                }
+                onClick={handleOpenCopyDialog}
+              >
+                <ContentCopyIcon fontSize="small" />
+                コピー
+              </Button>
             </Box>
             <Divider />
 
@@ -1985,6 +2117,15 @@ const EquipmentOrderDetail = (props: {
                 // rank={props.juchuHeadData.kokyaku.kokyakuRank}
                 setEqpts={setEqpts}
                 handleCloseDialog={handleCloseEqDialog}
+              />
+            </Dialog>
+
+            <Dialog open={copyDialogOpen} sx={{ zIndex: 1201 }}>
+              <CopyDialog
+                juchuKizaiMeisaiList={juchuKizaiMeisaiList.filter((d) => !d.delFlag)}
+                juchuContainerMeisaiList={juchuContainerMeisaiList.filter((d) => !d.delFlag)}
+                handleCopyConfirmed={handleCopyConfirmed}
+                handleCloseOperationDialog={handleCloseOperationDialog}
               />
             </Dialog>
             {isDetailLoading ? (
@@ -2003,7 +2144,7 @@ const EquipmentOrderDetail = (props: {
                     }}
                   >
                     <Box my={1} mx={2}>
-                      <Button disabled={!edit} onClick={() => handleOpenEqDialog()}>
+                      <Button disabled={!edit} onClick={handleOpenEqDialog}>
                         <AddIcon fontSize="small" />
                         機材追加
                       </Button>
@@ -2330,15 +2471,22 @@ const EquipmentOrderDetail = (props: {
               </Grid2>
             </Box>
           </Paper>
-          <SaveAlertDialog open={saveOpen} onClick={() => setSaveOpen(false)} />
-          <IsDirtyAlertDialog open={dirtyOpen} onClick={handleResultDialog} />
-          <MoveAlertDialog open={moveOpen} onClick={handleMoveDialog} />
-          <NyushukoAlertDialog open={nyushukoOpen} onClick={() => setNyushukoOpen(false)} />
-          <DeleteAlertDialog open={deleteEqOpen} onClick={handleEqMeisaiDeleteResult} />
-          <DeleteAlertDialog open={deleteCtnOpen} onClick={handleCtnMeisaiDeleteResult} />
-          {/* <NyushukoFixAlertDialog open={nyushukoFixOpen} onClick={() => setNyushukoFixOpen(false)} /> */}
         </Container>
       )}
+      <SaveAlertDialog open={saveOpen} onClick={() => setSaveOpen(false)} />
+      <IsDirtyAlertDialog open={dirtyOpen} onClick={handleResultDialog} />
+      <MoveAlertDialog open={moveOpen} onClick={handleMoveDialog} />
+      <NyushukoAlertDialog open={nyushukoOpen} onClick={() => setNyushukoOpen(false)} />
+      <DeleteAlertDialog open={deleteEqOpen} onClick={handleEqMeisaiDeleteResult} />
+      <DeleteAlertDialog open={deleteCtnOpen} onClick={handleCtnMeisaiDeleteResult} />
+      <Snackbar
+        open={snackBarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackBarOpen(false)}
+        message={snackBarMessage}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={{ marginTop: '65px' }}
+      />
     </>
   );
 };
