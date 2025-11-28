@@ -22,6 +22,7 @@ import {
   Paper,
   Select,
   SelectChangeEvent,
+  Snackbar,
   Stack,
   TextField,
   Typography,
@@ -100,11 +101,17 @@ const VehicleOrderDetail = ({
   // 編集モード(true:編集、false:閲覧)
   const [editable, setEditable] = useState(edit);
 
+  /* スナックバーの表示するかしないか */
+  const [snackBarOpen, setSnackBarOpen] = useState(false);
+  /* スナックバーのメッセージ */
+  const [snackBarMessage, setSnackBarMessage] = useState('');
+
   /* useForm ------------------------------------------------------- */
   const {
     control,
     handleSubmit,
     setValue,
+    getValues,
     trigger,
     reset,
     formState: { isDirty, errors },
@@ -130,37 +137,44 @@ const VehicleOrderDetail = ({
   const sharyoMeisai = useFieldArray({ control, name: 'meisai' });
 
   /* methods -------------------------------------------------------- */
+  /** 選択肢の取得 */
+  const getOptions = async () => {
+    const v = await getVehsSelections();
+    const base = await getBasesSelections();
+    setOptions({
+      kbn: [
+        { id: 'shuko', label: '出庫' },
+        { id: 'nyuko', label: '入庫' },
+      ],
+      basho: base,
+      vehs: v,
+    });
+  };
+
   /** フォーム送信処理 */
   const onSubmit = async (data: JuchuSharyoHeadValues) => {
-    trigger();
+    setIsLoading(true);
     if (sharyoHeadId <= 0) {
       await addNewJuchuSharyoHead(data, user?.name ?? '');
     } else {
       if (!currentMeisai) return;
       updateJuchuSharyoHead(data, currentMeisai!, user?.name ?? '');
+      const newData = getValues();
+      reset(newData);
+      setCurrentMeisai(newData);
+      await getOptions();
+      /** 車両明細取得 */
+      const meisais = await getChosenJuchuSharyoMeisais(juchuHeadData.juchuHeadId, sharyoHeadId);
+      reset(meisais);
+      setCurrentMeisai(meisais);
+      setIsLoading(false);
+      setSnackBarMessage('保存しました');
+      setSnackBarOpen(true);
     }
   };
 
-  function setError(newError: string | null): void {
-    throw new Error('Function not implemented.');
-  }
-
   /* useEffect ------------------------------------------------------- */
   useEffect(() => {
-    /** 選択肢の取得 */
-    const getOptions = async () => {
-      const v = await getVehsSelections();
-      const base = await getBasesSelections();
-      setOptions({
-        kbn: [
-          { id: 'shuko', label: '出庫' },
-          { id: 'nyuko', label: '入庫' },
-        ],
-        basho: base,
-        vehs: v,
-      });
-    };
-
     /** 車両明細取得 */
     const getMeisais = async () => {
       const meisais = await getChosenJuchuSharyoMeisais(juchuHeadData.juchuHeadId, sharyoHeadId);
@@ -168,7 +182,6 @@ const VehicleOrderDetail = ({
       setCurrentMeisai(meisais);
       setIsLoading(false);
     };
-
     // データ取得実行
     getOptions();
     // 新規以外はデータ取得してフォームにresetする
@@ -489,6 +502,14 @@ const VehicleOrderDetail = ({
           </Fab>
         </Box>
       </form>
+      <Snackbar
+        open={snackBarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackBarOpen(false)}
+        message={snackBarMessage}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={{ marginTop: '65px' }}
+      />
     </Container>
   );
 };

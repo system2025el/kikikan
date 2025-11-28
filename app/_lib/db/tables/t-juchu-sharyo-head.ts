@@ -1,6 +1,7 @@
 'use server';
 
 import { PoolClient } from 'pg';
+import { set } from 'zod';
 
 import pool from '../postgres';
 import { SCHEMA } from '../supabase';
@@ -61,13 +62,40 @@ export const insertJuchuSharyoHead = async (data: JuchuSharyoHeadDBValues, conne
     .join(', ');
   const query = `
     INSERT INTO
-        ${SCHEMA}.t_juchu_sharyo_head (${cols})
+        ${SCHEMA}.t_juchu_sharyo_head (${cols.join(',')})
     VALUES (${placeholders})
     RETURNING juchu_sharyo_head_id;
   `;
   try {
     console.log(query);
     return await connection.query(query, values);
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
+ * 受注車両ヘッダの更新する関数
+ * @param {JuchuSharyoHeadDBValues} data 更新データ
+ * @param {PoolClient} connection トランザクション用
+ */
+export const updJuchuSharyoHeadDB = async (data: JuchuSharyoHeadDBValues, connection: PoolClient) => {
+  const { juchu_head_id, juchu_sharyo_head_id, ...rest } = data;
+  const cols = Object.keys(rest);
+  const values = Object.values(rest);
+  const setClause = cols.map((c, index) => `${c} = $${index + 1}`).join(',');
+  const query = `
+    UPDATE
+      ${SCHEMA}.t_juchu_sharyo_head
+    SET
+      ${setClause}
+    WHERE
+      juchu_head_id = $${cols.length + 1}
+    AND
+      juchu_sharyo_head_id = $${cols.length + 2}
+  `;
+  try {
+    await connection.query(query, [...values, juchu_head_id, juchu_sharyo_head_id]);
   } catch (e) {
     throw e;
   }
