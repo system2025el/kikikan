@@ -3,7 +3,7 @@ import { FormItemsType } from '@/app/(main)/_ui/form-box';
 import { FAKE_NEW_ID } from '../../_lib/constants';
 import { BumonsMasterDialogValues, BumonsMasterTableValues } from './types';
 /* 部門マスタテーブルヘッダー */
-export const BumonsMHeader = [
+export const bumonsMHeader = [
   { key: 'name', label: '名称' },
   { key: 'mem', label: 'メモ' },
   { key: 'deleted', label: '無効' },

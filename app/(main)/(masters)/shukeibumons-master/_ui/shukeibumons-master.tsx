@@ -102,8 +102,8 @@ export const ShukeibumonsMaster = () => {
           <Typography>集計部門マスタ検索</Typography>
         </Box>
         <Divider />
-        <Box width={'100%'} p={2} component={'form'} onSubmit={handleSubmit(onSubmit)}>
-          <Stack justifyContent={'space-between'} alignItems={'start'} mt={1}>
+        <Box width={'100%'} px={2} py={1} component={'form'} onSubmit={handleSubmit(onSubmit)}>
+          <Stack justifyContent={'space-between'} alignItems={'start'}>
             <Stack alignItems={'baseline'}>
               <Typography noWrap width={200}>
                 集計部門名キーワード

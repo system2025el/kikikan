@@ -1,5 +1,3 @@
-// yarn run v1.22.22
-// $ C:\workspace\kikikan\node_modules\.bin\supabase gen types typescript --project-id jimqcvyaoddsxbcrsnfs --schema dev2
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export type Database = {
@@ -675,7 +673,7 @@ export type Database = {
           add_dat: string | null;
           add_user: string | null;
           del_flg: number | null;
-          el_num?: number | null;
+          el_num: number | null;
           kizai_id: number;
           mem: string | null;
           rfid_kizai_sts: number | null;
@@ -1547,6 +1545,7 @@ export type Database = {
           kizai_id: number;
           kizai_tanka_amt: number | null;
           mem: string | null;
+          mem2: string | null;
           plan_kizai_qty: number | null;
           plan_yobi_qty: number | null;
           shozoku_id: number;
@@ -1565,6 +1564,7 @@ export type Database = {
           kizai_id: number;
           kizai_tanka_amt?: number | null;
           mem?: string | null;
+          mem2?: string | null;
           plan_kizai_qty?: number | null;
           plan_yobi_qty?: number | null;
           shozoku_id: number;
@@ -1583,6 +1583,7 @@ export type Database = {
           kizai_id?: number;
           kizai_tanka_amt?: number | null;
           mem?: string | null;
+          mem2?: string | null;
           plan_kizai_qty?: number | null;
           plan_yobi_qty?: number | null;
           shozoku_id?: number;
@@ -1606,6 +1607,7 @@ export type Database = {
           kizai_id: number;
           kizai_tanka_amt: number | null;
           mem: string | null;
+          mem2: string | null;
           plan_kizai_qty: number | null;
           plan_yobi_qty: number | null;
           shozoku_id: number | null;
@@ -1626,6 +1628,7 @@ export type Database = {
           kizai_id: number;
           kizai_tanka_amt?: number | null;
           mem?: string | null;
+          mem2?: string | null;
           plan_kizai_qty?: number | null;
           plan_yobi_qty?: number | null;
           shozoku_id?: number | null;
@@ -1646,6 +1649,7 @@ export type Database = {
           kizai_id?: number;
           kizai_tanka_amt?: number | null;
           mem?: string | null;
+          mem2?: string | null;
           plan_kizai_qty?: number | null;
           plan_yobi_qty?: number | null;
           shozoku_id?: number | null;
@@ -1830,7 +1834,7 @@ export type Database = {
           gokei_amt: number | null;
           gokei_mei: string | null;
           juchu_head_id: number | null;
-          kizai_chukei_mei?: string | null;
+          kizai_chukei_mei: string | null;
           koen_nam: string | null;
           koenbasho_nam: string | null;
           kokyaku_id: number | null;
@@ -3039,7 +3043,7 @@ export type Database = {
       v_juchu_kizai_dat_qty: {
         Row: {
           juchu_qty: number | null;
-          kizai_id: number;
+          kizai_id: number | null;
           plan_dat: string | null;
           plan_qty: number | null;
           yobi_qty: number | null;
@@ -3064,16 +3068,16 @@ export type Database = {
           dsp_ord_num: number | null;
           eda_cod: string | null;
           indent_num: number | null;
-          juchu_head_id: number;
-          juchu_kizai_head_id: number;
+          juchu_head_id: number | null;
+          juchu_kizai_head_id: number | null;
           juchu_kizai_meisai_id: number | null;
           juchu_mem: string | null;
           juchu_sts: number | null;
           kics_nyuko_dat: string | null;
           kics_shuko_dat: string | null;
-          kizai_id: number;
+          kizai_id: number | null;
           kizai_nam: string | null;
-          koen_nam: string;
+          koen_nam: string | null;
           koenbasho_nam: string | null;
           kokyaku_id: number | null;
           kokyaku_nam: string | null;
@@ -3089,16 +3093,17 @@ export type Database = {
         Row: {
           dsp_ord_num: number | null;
           genebi: number | null;
-          head_nam: string;
+          head_nam: string | null;
           honbanbi: number | null;
           ht_kbn: number | null;
-          juchu_head_id: number;
+          juchu_head_id: number | null;
           juchu_honbanbi_calc_qty: number | null;
-          juchu_kizai_head_id: number;
-          juchu_kizai_head_kbn: number;
+          juchu_kizai_head_id: number | null;
+          juchu_kizai_head_kbn: number | null;
           keikoku: string | null;
           kics_nyuko_dat: string | null;
           kics_shuko_dat: string | null;
+          kics_shuko_fix_flg: number | null;
           koen_nam: string | null;
           koenbasho_nam: string | null;
           kokyaku_id: number | null;
@@ -3115,6 +3120,7 @@ export type Database = {
           sikomibi: number | null;
           yard_nyuko_dat: string | null;
           yard_shuko_dat: string | null;
+          yard_shuko_fix_flg: number | null;
         };
         Relationships: [];
       };
@@ -3123,21 +3129,22 @@ export type Database = {
           dsp_ord_num: number | null;
           ido_den_id: number | null;
           indent_num: number | null;
-          juchu_head_id: number;
-          juchu_kizai_head_id: number;
-          juchu_kizai_meisai_id: number;
+          juchu_head_id: number | null;
+          juchu_kizai_head_id: number | null;
+          juchu_kizai_meisai_id: number | null;
           keep_qty: number | null;
-          kizai_id: number;
+          kizai_id: number | null;
           kizai_nam: string | null;
           kizai_qty: number | null;
           mem: string | null;
+          mem2: string | null;
           oya_juchu_kizai_head_id: number | null;
           plan_kizai_qty: number | null;
           plan_qty: number | null;
           plan_yobi_qty: number | null;
           sagyo_den_dat: string | null;
           sagyo_siji_id: string | null;
-          shozoku_id: number;
+          shozoku_id: number | null;
           shozoku_nam: string | null;
         };
         Relationships: [];
@@ -3181,7 +3188,33 @@ export type Database = {
         Row: {
           juchu_dat: string | null;
           juchu_end_dat: string | null;
-          juchu_head_id: number;
+          juchu_head_id: number | null;
+          juchu_str_dat: string | null;
+          juchu_sts: number | null;
+          juchu_sts_nam: string | null;
+          koen_nam: string | null;
+          koenbasho_nam: string | null;
+          kokyaku_id: number | null;
+          kokyaku_nam: string | null;
+          kokyaku_tanto_nam: string | null;
+          mem: string | null;
+          nebiki_amt: number | null;
+          nebiki_rat: number | null;
+          nyuko_dat: string | null;
+          nyuryoku_user: string | null;
+          nyushuko_sts: string | null;
+          nyushuko_sts_nam: string | null;
+          shuko_dat: string | null;
+          zei_kbn: number | null;
+          zei_nam: string | null;
+        };
+        Relationships: [];
+      };
+      v_juchu_lst_org: {
+        Row: {
+          juchu_dat: string | null;
+          juchu_end_dat: string | null;
+          juchu_head_id: number | null;
           juchu_str_dat: string | null;
           juchu_sts: number | null;
           juchu_sts_nam: string | null;
@@ -3265,7 +3298,7 @@ export type Database = {
           eda_cod: string | null;
           kizai_del_qty: number | null;
           kizai_grp_cod: string | null;
-          kizai_id: number;
+          kizai_id: number | null;
           kizai_nam: string | null;
           kizai_ng_qty: number | null;
           kizai_qty: number | null;
@@ -3414,6 +3447,7 @@ export type Database = {
           koenbasho_nam: string | null;
           kokyaku_nam: string | null;
           mem: string | null;
+          mem2: string | null;
           nyushuko_basho_id: number | null;
           nyushuko_dat: string | null;
           nyushuko_shubetu_id: number | null;
@@ -3477,6 +3511,7 @@ export type Database = {
           koen_nam: string | null;
           koenbasho_nam: string | null;
           kokyaku_nam: string | null;
+          mem2: string | null;
           nyushuko_basho_id: number | null;
           nyushuko_dat: string | null;
           nyushuko_shubetu_id: number | null;
@@ -3510,6 +3545,7 @@ export type Database = {
           koen_nam: string | null;
           koenbasho_nam: string | null;
           kokyaku_nam: string | null;
+          mem2: string | null;
           nyushuko_basho_id: number | null;
           nyushuko_dat: string | null;
           nyushuko_shubetu_id: number | null;
@@ -3801,310 +3837,6 @@ export type Database = {
         };
         Relationships: [];
       };
-    };
-    Functions: {
-      [_ in never]: never;
-    };
-    Enums: {
-      [_ in never]: never;
-    };
-    CompositeTypes: {
-      [_ in never]: never;
-    };
-  };
-  dev5: {
-    Tables: {
-      m_bumon: {
-        Row: {
-          add_dat: string | null;
-          add_user: string | null;
-          bumon_id: number;
-          bumon_nam: string;
-          dai_bumon_id: number | null;
-          del_flg: number | null;
-          dsp_ord_num: number | null;
-          mem: string | null;
-          shukei_bumon_id: number | null;
-          upd_dat: string | null;
-          upd_user: string | null;
-        };
-        Insert: {
-          add_dat?: string | null;
-          add_user?: string | null;
-          bumon_id: number;
-          bumon_nam: string;
-          dai_bumon_id?: number | null;
-          del_flg?: number | null;
-          dsp_ord_num?: number | null;
-          mem?: string | null;
-          shukei_bumon_id?: number | null;
-          upd_dat?: string | null;
-          upd_user?: string | null;
-        };
-        Update: {
-          add_dat?: string | null;
-          add_user?: string | null;
-          bumon_id?: number;
-          bumon_nam?: string;
-          dai_bumon_id?: number | null;
-          del_flg?: number | null;
-          dsp_ord_num?: number | null;
-          mem?: string | null;
-          shukei_bumon_id?: number | null;
-          upd_dat?: string | null;
-          upd_user?: string | null;
-        };
-        Relationships: [];
-      };
-      m_dai_bumon: {
-        Row: {
-          add_dat: string | null;
-          add_user: string | null;
-          dai_bumon_id: number;
-          dai_bumon_nam: string;
-          del_flg: number | null;
-          dsp_ord_num: number | null;
-          mem: string | null;
-          upd_dat: string | null;
-          upd_user: string | null;
-        };
-        Insert: {
-          add_dat?: string | null;
-          add_user?: string | null;
-          dai_bumon_id: number;
-          dai_bumon_nam: string;
-          del_flg?: number | null;
-          dsp_ord_num?: number | null;
-          mem?: string | null;
-          upd_dat?: string | null;
-          upd_user?: string | null;
-        };
-        Update: {
-          add_dat?: string | null;
-          add_user?: string | null;
-          dai_bumon_id?: number;
-          dai_bumon_nam?: string;
-          del_flg?: number | null;
-          dsp_ord_num?: number | null;
-          mem?: string | null;
-          upd_dat?: string | null;
-          upd_user?: string | null;
-        };
-        Relationships: [];
-      };
-      m_kizai: {
-        Row: {
-          add_dat: string | null;
-          add_user: string | null;
-          bld_cod: string | null;
-          bumon_id: number | null;
-          ctn_flg: number | null;
-          dai_bumon_id: number | null;
-          def_dat_qty: number | null;
-          del_flg: number | null;
-          dsp_flg: number | null;
-          dsp_ord_num: number | null;
-          eda_cod: string | null;
-          el_num: number | null;
-          kizai_grp_cod: string | null;
-          kizai_id: number;
-          kizai_nam: string;
-          mem: string | null;
-          rank_amt_1: number | null;
-          rank_amt_2: number | null;
-          rank_amt_3: number | null;
-          rank_amt_4: number | null;
-          rank_amt_5: number | null;
-          reg_amt: number | null;
-          section_num: number | null;
-          shozoku_id: number;
-          shukei_bumon_id: number | null;
-          tana_cod: string | null;
-          upd_dat: string | null;
-          upd_user: string | null;
-        };
-        Insert: {
-          add_dat?: string | null;
-          add_user?: string | null;
-          bld_cod?: string | null;
-          bumon_id?: number | null;
-          ctn_flg?: number | null;
-          dai_bumon_id?: number | null;
-          def_dat_qty?: number | null;
-          del_flg?: number | null;
-          dsp_flg?: number | null;
-          dsp_ord_num?: number | null;
-          eda_cod?: string | null;
-          el_num?: number | null;
-          kizai_grp_cod?: string | null;
-          kizai_id: number;
-          kizai_nam: string;
-          mem?: string | null;
-          rank_amt_1?: number | null;
-          rank_amt_2?: number | null;
-          rank_amt_3?: number | null;
-          rank_amt_4?: number | null;
-          rank_amt_5?: number | null;
-          reg_amt?: number | null;
-          section_num?: number | null;
-          shozoku_id: number;
-          shukei_bumon_id?: number | null;
-          tana_cod?: string | null;
-          upd_dat?: string | null;
-          upd_user?: string | null;
-        };
-        Update: {
-          add_dat?: string | null;
-          add_user?: string | null;
-          bld_cod?: string | null;
-          bumon_id?: number | null;
-          ctn_flg?: number | null;
-          dai_bumon_id?: number | null;
-          def_dat_qty?: number | null;
-          del_flg?: number | null;
-          dsp_flg?: number | null;
-          dsp_ord_num?: number | null;
-          eda_cod?: string | null;
-          el_num?: number | null;
-          kizai_grp_cod?: string | null;
-          kizai_id?: number;
-          kizai_nam?: string;
-          mem?: string | null;
-          rank_amt_1?: number | null;
-          rank_amt_2?: number | null;
-          rank_amt_3?: number | null;
-          rank_amt_4?: number | null;
-          rank_amt_5?: number | null;
-          reg_amt?: number | null;
-          section_num?: number | null;
-          shozoku_id?: number;
-          shukei_bumon_id?: number | null;
-          tana_cod?: string | null;
-          upd_dat?: string | null;
-          upd_user?: string | null;
-        };
-        Relationships: [];
-      };
-      m_rfid: {
-        Row: {
-          add_dat: string | null;
-          add_user: string | null;
-          el_num?: number | null;
-          del_flg: number | null;
-          kizai_id: number;
-          mem: string | null;
-          rfid_kizai_sts: number | null;
-          rfid_tag_id: string;
-          shozoku_id: number | null;
-          upd_dat: string | null;
-          upd_user: string | null;
-        };
-        Insert: {
-          add_dat?: string | null;
-          add_user?: string | null;
-          el_num?: number | null;
-          del_flg?: number | null;
-          kizai_id: number;
-          mem?: string | null;
-          rfid_kizai_sts?: number | null;
-          rfid_tag_id: string;
-          shozoku_id?: number | null;
-          upd_dat?: string | null;
-          upd_user?: string | null;
-        };
-        Update: {
-          add_dat?: string | null;
-          add_user?: string | null;
-          el_num?: number | null;
-          del_flg?: number | null;
-          kizai_id?: number;
-          mem?: string | null;
-          rfid_kizai_sts?: number | null;
-          rfid_tag_id?: string;
-          shozoku_id?: number | null;
-          upd_dat?: string | null;
-          upd_user?: string | null;
-        };
-        Relationships: [];
-      };
-      m_shukei_bumon: {
-        Row: {
-          add_dat: string | null;
-          add_user: string | null;
-          del_flg: number | null;
-          dsp_ord_num: number | null;
-          mem: string | null;
-          shukei_bumon_id: number;
-          shukei_bumon_nam: string;
-          upd_dat: string | null;
-          upd_user: string | null;
-        };
-        Insert: {
-          add_dat?: string | null;
-          add_user?: string | null;
-          del_flg?: number | null;
-          dsp_ord_num?: number | null;
-          mem?: string | null;
-          shukei_bumon_id: number;
-          shukei_bumon_nam: string;
-          upd_dat?: string | null;
-          upd_user?: string | null;
-        };
-        Update: {
-          add_dat?: string | null;
-          add_user?: string | null;
-          del_flg?: number | null;
-          dsp_ord_num?: number | null;
-          mem?: string | null;
-          shukei_bumon_id?: number;
-          shukei_bumon_nam?: string;
-          upd_dat?: string | null;
-          upd_user?: string | null;
-        };
-        Relationships: [];
-      };
-      m_tanaban: {
-        Row: {
-          add_dat: string | null;
-          add_user: string | null;
-          bld_cod: string;
-          del_flg: number | null;
-          dsp_ord_num: number | null;
-          eda_cod: string;
-          mem: string | null;
-          tana_cod: string;
-          upd_dat: string | null;
-          upd_user: string | null;
-        };
-        Insert: {
-          add_dat?: string | null;
-          add_user?: string | null;
-          bld_cod: string;
-          del_flg?: number | null;
-          dsp_ord_num?: number | null;
-          eda_cod: string;
-          mem?: string | null;
-          tana_cod: string;
-          upd_dat?: string | null;
-          upd_user?: string | null;
-        };
-        Update: {
-          add_dat?: string | null;
-          add_user?: string | null;
-          bld_cod?: string;
-          del_flg?: number | null;
-          dsp_ord_num?: number | null;
-          eda_cod?: string;
-          mem?: string | null;
-          tana_cod?: string;
-          upd_dat?: string | null;
-          upd_user?: string | null;
-        };
-        Relationships: [];
-      };
-    };
-    Views: {
-      [_ in never]: never;
     };
     Functions: {
       [_ in never]: never;

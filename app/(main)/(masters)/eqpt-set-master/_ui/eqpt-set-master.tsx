@@ -102,8 +102,8 @@ export const EqptSetsMaster = () => {
           <Typography>機材セットマスタ検索</Typography>
         </Box>
         <Divider />
-        <Box width={'100%'} p={2} component={'form'} onSubmit={handleSubmit(onSubmit)}>
-          <Stack justifyContent={'space-between'} alignItems={'start'} mt={1}>
+        <Box width={'100%'} px={2} py={1} component={'form'} onSubmit={handleSubmit(onSubmit)}>
+          <Stack justifyContent={'space-between'} alignItems={'start'}>
             <Stack alignItems={'baseline'}>
               <Typography noWrap width={200}>
                 機材セット名キーワード

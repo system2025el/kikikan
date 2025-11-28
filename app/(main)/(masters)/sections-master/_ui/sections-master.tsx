@@ -8,75 +8,81 @@ import {
   Dialog,
   Divider,
   Grid2,
+  MenuItem,
   Paper,
+  Select,
   Stack,
   TableContainer,
   Typography,
 } from '@mui/material';
+import { grey } from '@mui/material/colors';
 import { useEffect, useState } from 'react';
-import { TextFieldElement, useForm } from 'react-hook-form-mui';
+import { Controller, TextFieldElement, useForm } from 'react-hook-form-mui';
 
+import { selectNone, SelectTypes } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 import { MuiTablePagination } from '@/app/(main)/_ui/table-pagination';
 
 import { FAKE_NEW_ID, ROWS_PER_MASTER_TABLE_PAGE } from '../../_lib/constants';
 import { MasterTable } from '../../_ui/tables';
-import { cMHeader } from '../_lib/datas';
-import { getFilteredCustomers } from '../_lib/funcs';
-import { CustomersMasterTableValues } from '../_lib/types';
-import { CustomersMasterDialog } from './customers-master-dialog';
+import { sectionsMHeader } from '../_lib/datas';
+import { getFilteredSections } from '../_lib/funcs';
+import { SectionsMasterTableValues } from '../_lib/types';
+import { SectionsMasterDialog } from './sections-master-dialog';
+
 /**
- * 顧客マスタ画面
- * @returns {JSX.Element} 顧客マスタ画面コンポーネント
+ * 課マスタ画面
+ * @param {sections} 課リスト
+ * @returns {JSX.Element} 課マスタコンポーネント
  */
-export const CustomersMaster = () => {
-  /* 1ページごとの表示数 */
+export const SectionsMaster = () => {
+  /** 1ページごとの表示数 */
   const rowsPerPage = ROWS_PER_MASTER_TABLE_PAGE;
 
-  /* useState ------------------------------ */
-  /** 表示する顧客の配列 */
-  const [customers, setCustomers] = useState<CustomersMasterTableValues[]>([]);
+  /* useState -------------------------------------- */
+  /** 表示する課の配列 */
+  const [sections, setSections] = useState<SectionsMasterTableValues[]>([]);
   /** 今開いてるテーブルのページ数 */
   const [page, setPage] = useState(1);
-  /** DBのローディング */
+  /** ローディング */
   const [isLoading, setIsLoading] = useState(true);
-  /* ダイアログ開く顧客のID、閉じるとき、未選択でFAKE_NEW_IDとする */
-  const [openId, setOpenID] = useState(FAKE_NEW_ID);
-  /** 顧客詳細ダイアログの開閉状態 */
+  /** ダイアログ開く課のID、閉じるとき、未選択でFAKE_NEW_IDとする */
+  const [openId, setOpenID] = useState<number>(FAKE_NEW_ID);
+  /** 詳細ダイアログの開閉状態 */
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  /* useForm ------------------------------- */
+  /* useForm ---------------------------------------- */
   const { control, handleSubmit, getValues } = useForm({
     mode: 'onSubmit',
     defaultValues: { query: '' },
   });
 
-  /* methods ------------------------------------------- */
+  /* methods ---------------------------------------- */
   /** 検索ボタン押下 */
   const onSubmit = async (data: { query: string | undefined }) => {
     setIsLoading(true);
     console.log('data : ', data);
-    const newList = await getFilteredCustomers(data.query!);
+    const newList = await getFilteredSections(data.query);
     setPage(1);
-    setCustomers(newList);
+    setSections(newList);
     setIsLoading(false);
-    console.log('theLocs : ', customers);
+    console.log('theLocs : ', sections);
   };
-  /** 顧客詳細ダイアログを開く関数 */
+  /** 選んだ課ダイアログを開く関数 */
   const handleOpenDialog = (id: number) => {
     setOpenID(id);
     setDialogOpen(true);
   };
-  /** 顧客詳細ダイアログを閉じる関数 */
+  /** ダイアログを閉じる関数 */
   const handleCloseDialog = () => {
     setDialogOpen(false);
   };
   /** 情報が変わったときに更新される */
-  const refetchCustomers = async () => {
+  const refetchSections = async () => {
     setIsLoading(true);
     const searchParams = getValues();
-    const updated = await getFilteredCustomers(searchParams.query);
-    setCustomers(updated);
+    const updated = await getFilteredSections(getValues().query);
+    setSections(updated);
     setIsLoading(false);
   };
 
@@ -85,8 +91,8 @@ export const CustomersMaster = () => {
   useEffect(() => {
     const getList = async () => {
       setIsLoading(true);
-      const dataList = await getFilteredCustomers();
-      setCustomers(dataList);
+      const dataList = await getFilteredSections();
+      setSections(dataList);
       setIsLoading(false);
     };
     getList();
@@ -96,26 +102,26 @@ export const CustomersMaster = () => {
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
       <Paper variant="outlined">
         <Box width={'100%'} display={'flex'} p={2}>
-          <Typography>顧客マスタ検索</Typography>
+          <Typography>課マスタ検索</Typography>
         </Box>
         <Divider />
-        <Box width={'100%'} px={2} py={1} component={'form'} onSubmit={handleSubmit(onSubmit)}>
-          <Stack justifyContent={'space-between'} alignItems={'start'}>
-            <Stack alignItems={'baseline'}>
-              <Typography>顧客キーワード</Typography>
-              <TextFieldElement
-                name="query"
-                control={control}
-                helperText={'社名、かな、住所、TEL、FAX、メモから部分一致検索'}
-              />
+        <Box width={'100%'} px={2} py={1}>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <Stack justifyContent={'space-between'} alignItems={'start'}>
+              <Stack spacing={1}>
+                <Typography noWrap width={140}>
+                  課名キーワード
+                </Typography>
+                <TextFieldElement name="query" control={control} />
+              </Stack>
+              <Box alignSelf={'end'}>
+                <Button type="submit">
+                  <SearchIcon />
+                  検索
+                </Button>
+              </Box>
             </Stack>
-            <Box alignSelf={'end'}>
-              <Button type="submit">
-                <SearchIcon />
-                検索
-              </Button>
-            </Box>
-          </Stack>
+          </form>
         </Box>
       </Paper>
       <Box>
@@ -125,7 +131,7 @@ export const CustomersMaster = () => {
         <Divider />
         <Grid2 container mt={0.5} mx={0.5} justifyContent={'space-between'} alignItems={'center'}>
           <Grid2 spacing={1}>
-            <MuiTablePagination arrayList={customers ?? []} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
+            <MuiTablePagination arrayList={sections ?? []} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
           </Grid2>
           <Grid2 container spacing={3}>
             <Grid2 alignContent={'center'}>
@@ -143,30 +149,21 @@ export const CustomersMaster = () => {
         </Grid2>
         {isLoading ? (
           <Loading />
-        ) : customers && customers.length > 0 ? (
+        ) : !sections || sections.length === 0 ? (
+          <Typography>該当するデータがありません</Typography>
+        ) : (
           <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
             <MasterTable
-              headers={cMHeader}
-              datas={customers.map((l) => ({
-                ...l,
-                id: l.kokyakuId,
-                name: l.kokyakuNam,
-                address: [l.adrShozai, l.adrTatemono, l.adrSonota].filter(Boolean).join(' '),
-              }))}
+              headers={sectionsMHeader}
+              datas={sections.map((l) => ({ ...l, id: l.sectionId, name: l.sectionNam }))}
+              handleOpenDialog={handleOpenDialog}
               page={page}
               rowsPerPage={rowsPerPage}
-              handleOpenDialog={handleOpenDialog}
             />
           </TableContainer>
-        ) : (
-          <Typography>該当するデータがありません</Typography>
         )}
         <Dialog open={dialogOpen} fullScreen>
-          <CustomersMasterDialog
-            customerId={openId}
-            handleClose={handleCloseDialog}
-            refetchCustomers={refetchCustomers}
-          />
+          <SectionsMasterDialog handleClose={handleCloseDialog} sectionId={openId} refetchSections={refetchSections} />
         </Dialog>
       </Box>
     </Container>
