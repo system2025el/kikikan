@@ -19,6 +19,7 @@ import {
 } from '@mui/material';
 import { useState } from 'react';
 
+import { validationMessages } from '@/app/(main)/_lib/validation-messages';
 import { Loading, LoadingOverlay } from '@/app/(main)/_ui/loading';
 
 import { JuchuContainerMeisaiValues, JuchuKizaiMeisaiValues } from '../_lib/types';
@@ -27,7 +28,7 @@ export const CopyDialog = ({
   juchuKizaiMeisaiList,
   juchuContainerMeisaiList,
   handleCopyConfirmed,
-  handleCloseOperationDialog,
+  handleCloseCopyDialog,
 }: {
   juchuKizaiMeisaiList: JuchuKizaiMeisaiValues[];
   juchuContainerMeisaiList: JuchuContainerMeisaiValues[];
@@ -36,7 +37,7 @@ export const CopyDialog = ({
     selectEq: JuchuKizaiMeisaiValues[],
     selectCtn: JuchuContainerMeisaiValues[]
   ) => void;
-  handleCloseOperationDialog: () => void;
+  handleCloseCopyDialog: () => void;
 }) => {
   // ローディング
   const [isLoading, setIsLoading] = useState(false);
@@ -44,6 +45,10 @@ export const CopyDialog = ({
   const [headNam, setHeadNam] = useState('');
   // 選択
   const [selected, setSelected] = useState<number[]>([]);
+  // エラー
+  const [errors, setErrors] = useState({
+    headNam: '',
+  });
 
   const handleSelect = (dspOrdNum: number) => {
     const newSelected = selected.includes(dspOrdNum)
@@ -54,6 +59,10 @@ export const CopyDialog = ({
   };
 
   const handleClickConfirmed = async () => {
+    if (!headNam) {
+      setErrors((prev) => ({ ...prev, headNam: validationMessages.required() }));
+      return;
+    }
     setIsLoading(true);
     const selectEqData = juchuKizaiMeisaiList.filter((data) => selected.includes(data.dspOrdNum));
     const selectContainerData = juchuContainerMeisaiList.filter((data) => selected.includes(data.dspOrdNum));
@@ -62,23 +71,30 @@ export const CopyDialog = ({
   };
 
   return (
-    <Container sx={{ p: 2 }}>
+    <Container sx={{ p: 1 }}>
       <Typography>コピー</Typography>
       {isLoading && <LoadingOverlay />}
       <Paper variant="outlined">
-        <Grid2 container alignItems={'center'} spacing={2} p={1}>
+        <Grid2 container alignItems={'baseline'} spacing={2} p={1}>
           <Typography>機材明細名</Typography>
-          <TextField value={headNam} onChange={(e) => setHeadNam(e.target.value)} />
+          <TextField
+            value={headNam}
+            onChange={(e) => {
+              setHeadNam(e.target.value);
+              setErrors((prev) => ({ ...prev, headNam: '' }));
+            }}
+            error={Boolean(errors.headNam)}
+            helperText={errors.headNam}
+          />
         </Grid2>
         <Divider />
-        <TableContainer sx={{ overflow: 'auto', maxHeight: '65vh' }}>
+        <TableContainer sx={{ overflow: 'auto', maxHeight: '60vh' }}>
           <Table stickyHeader aria-labelledby="tableTitle" size="small">
             <TableHead sx={{ bgcolor: 'primary.light' }}>
               <TableRow sx={{ whiteSpace: 'nowrap' }}>
                 <TableCell padding="checkbox">
                   <Checkbox
                     indeterminate={
-                      juchuKizaiMeisaiList &&
                       selected.length > 0 &&
                       selected.length < juchuKizaiMeisaiList.length + juchuContainerMeisaiList.length
                     }
@@ -119,7 +135,7 @@ export const CopyDialog = ({
       <Box display={'flex'} justifyContent={'end'} my={1}>
         <Grid2 container spacing={2}>
           <Button onClick={handleClickConfirmed}>確定</Button>
-          <Button onClick={handleCloseOperationDialog}>戻る</Button>
+          <Button onClick={handleCloseCopyDialog}>戻る</Button>
         </Grid2>
       </Box>
     </Container>

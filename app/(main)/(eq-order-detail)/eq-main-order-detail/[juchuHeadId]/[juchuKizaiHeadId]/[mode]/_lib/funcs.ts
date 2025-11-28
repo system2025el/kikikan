@@ -513,7 +513,7 @@ export const saveJuchuKizai = async (
         if (updateJuchuContainerMeisaiData.length > 0) {
           if (data.kicsShukoDat && data.kicsNyukoDat) {
             const updCtnNyushukoDenResult = await updCtnNyushukoDen(
-              addJuchuContainerMeisaiData,
+              updateJuchuContainerMeisaiData,
               data.kicsShukoDat,
               data.kicsNyukoDat,
               1,
@@ -524,7 +524,7 @@ export const saveJuchuKizai = async (
           }
           if (data.yardShukoDat && data.yardNyukoDat) {
             const updCtnNyushukoDenResult = await updCtnNyushukoDen(
-              addJuchuContainerMeisaiData,
+              updateJuchuContainerMeisaiData,
               data.yardShukoDat,
               data.yardNyukoDat,
               2,

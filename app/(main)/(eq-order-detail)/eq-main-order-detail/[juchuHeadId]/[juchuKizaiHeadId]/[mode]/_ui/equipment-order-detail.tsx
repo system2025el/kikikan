@@ -2,6 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import AddIcon from '@mui/icons-material/Add';
+import AltRouteIcon from '@mui/icons-material/AltRoute';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
@@ -71,6 +72,7 @@ import { CopyDialog } from './copy-dialog';
 import { DateSelectDialog } from './date-selection-dialog';
 import { ContainerTable, EqTable, IdoEqTable, StockTable } from './equipment-order-detail-table';
 import { EqptSelectionDialog } from './equipment-selection-dailog';
+import { SeparationDialog } from './separation-dialog';
 
 const EquipmentOrderDetail = (props: {
   juchuHeadData: DetailOerValues;
@@ -1458,14 +1460,13 @@ const EquipmentOrderDetail = (props: {
 
   // コピーダイアログ開閉
   const handleOpenCopyDialog = () => {
-    console.log(!save, isDirty);
     if (!save || isDirty) {
       setSaveOpen(true);
       return;
     }
     setCopyDialogOpen(true);
   };
-  const handleCloseOperationDialog = () => {
+  const handleCloseCopyDialog = () => {
     setCopyDialogOpen(false);
   };
 
@@ -1544,15 +1545,22 @@ const EquipmentOrderDetail = (props: {
 
   // 分離ダイアログ開閉
   const handleOpenSeparationDialog = () => {
-    if (!saveKizaiHead) {
+    if (!save || isDirty) {
       setSaveOpen(true);
       return;
     }
-    setCopyDialogOpen(true);
+    setSeparationDialogOpen(true);
   };
   const handleCloseSeparationDialog = () => {
-    setCopyDialogOpen(false);
+    setSeparationDialogOpen(false);
   };
+
+  // 分離処理
+  const handleSeparationConfirmed = async (
+    headNam: string,
+    selectEq: JuchuKizaiMeisaiValues[],
+    selectCtn: JuchuContainerMeisaiValues[]
+  ) => {};
 
   // 本番日入力ダイアログ開閉
   const handleOpenDateDialog = () => {
@@ -2098,17 +2106,31 @@ const EquipmentOrderDetail = (props: {
           <Paper variant="outlined" sx={{ mt: 2 }}>
             <Box display="flex" justifyContent="space-between" alignItems="center" px={2} height={'30px'}>
               <Typography>受注明細(機材)</Typography>
-              <Button
-                disabled={
-                  !edit ||
-                  (juchuKizaiMeisaiList.filter((d) => !d.delFlag).length === 0 &&
-                    juchuContainerMeisaiList.filter((d) => !d.delFlag).length === 0)
-                }
-                onClick={handleOpenCopyDialog}
-              >
-                <ContentCopyIcon fontSize="small" />
-                コピー
-              </Button>
+              <Grid2 container spacing={2}>
+                <Button
+                  disabled={
+                    !edit ||
+                    (juchuKizaiMeisaiList.filter((d) => !d.delFlag).length === 0 &&
+                      juchuContainerMeisaiList.filter((d) => !d.delFlag).length === 0)
+                  }
+                  onClick={handleOpenCopyDialog}
+                >
+                  <ContentCopyIcon fontSize="small" />
+                  コピー
+                </Button>
+                <Button
+                  disabled={
+                    !edit ||
+                    (juchuKizaiMeisaiList.filter((d) => !d.delFlag).length === 0 &&
+                      juchuContainerMeisaiList.filter((d) => !d.delFlag).length === 0) ||
+                    fixFlag
+                  }
+                  onClick={handleOpenSeparationDialog}
+                >
+                  <AltRouteIcon fontSize="small" />
+                  分離
+                </Button>
+              </Grid2>
             </Box>
             <Divider />
 
@@ -2120,12 +2142,41 @@ const EquipmentOrderDetail = (props: {
               />
             </Dialog>
 
-            <Dialog open={copyDialogOpen} sx={{ zIndex: 1201 }}>
+            <Dialog
+              open={copyDialogOpen}
+              slotProps={{
+                paper: {
+                  sx: {
+                    maxWidth: 'none',
+                  },
+                },
+              }}
+              sx={{ zIndex: 1201 }}
+            >
               <CopyDialog
                 juchuKizaiMeisaiList={juchuKizaiMeisaiList.filter((d) => !d.delFlag)}
                 juchuContainerMeisaiList={juchuContainerMeisaiList.filter((d) => !d.delFlag)}
                 handleCopyConfirmed={handleCopyConfirmed}
-                handleCloseOperationDialog={handleCloseOperationDialog}
+                handleCloseCopyDialog={handleCloseCopyDialog}
+              />
+            </Dialog>
+
+            <Dialog
+              open={separationDialogOpen}
+              slotProps={{
+                paper: {
+                  sx: {
+                    maxWidth: 'none',
+                  },
+                },
+              }}
+              sx={{ zIndex: 1201 }}
+            >
+              <SeparationDialog
+                juchuKizaiMeisaiList={juchuKizaiMeisaiList.filter((d) => !d.delFlag)}
+                juchuContainerMeisaiList={juchuContainerMeisaiList.filter((d) => !d.delFlag)}
+                handleSeparationConfirmed={handleSeparationConfirmed}
+                handleCloseSeparationDialog={handleCloseSeparationDialog}
               />
             </Dialog>
             {isDetailLoading ? (
