@@ -1,5 +1,6 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
 import { PoolClient } from 'pg';
 
 import pool from '@/app/_lib/db/postgres';
@@ -124,6 +125,9 @@ export const saveNewReturnJuchuKizaiHead = async (
     }
 
     await connection.query('COMMIT');
+
+    await revalidatePath('/eqpt-order-list');
+
     return newJuchuKizaiHeadId;
   } catch (e) {
     console.error(e);
@@ -458,89 +462,12 @@ export const saveReturnJuchuKizai = async (
       }
     }
 
-    // // 受注コンテナ明細更新
-    // if (checkJuchuKizaiHead || checkJuchuContainerMeisai) {
-    //   const juchuContainerMeisaiMaxId = await getJuchuContainerMeisaiMaxId(data.juchuHeadId, data.juchuKizaiHeadId);
-    //   let newReturnJuchuContainerMeisaiId = juchuContainerMeisaiMaxId
-    //     ? juchuContainerMeisaiMaxId.juchu_kizai_meisai_id + 1
-    //     : 1;
-
-    //   const newReturnJuchuContainerMeisaiData = returnJuchuContainerMeisaiList.map((data) =>
-    //     data.juchuKizaiMeisaiId === 0 && !data.delFlag
-    //       ? { ...data, juchuKizaiMeisaiId: newReturnJuchuContainerMeisaiId++ }
-    //       : data
-    //   );
-
-    //   // 受注コンテナ明細更新
-    //   const addReturnJuchuContainerMeisaiData = newReturnJuchuContainerMeisaiData.filter(
-    //     (data) => !data.delFlag && !data.saveFlag
-    //   );
-    //   const updateReturnJuchuContainerMeisaiData = newReturnJuchuContainerMeisaiData.filter(
-    //     (data) => !data.delFlag && data.saveFlag
-    //   );
-    //   const deleteReturnJuchuContainerMeisaiData = newReturnJuchuContainerMeisaiData.filter(
-    //     (data) => data.delFlag && data.saveFlag
-    //   );
-    //   // 削除
-    //   if (deleteReturnJuchuContainerMeisaiData.length > 0) {
-    //     const deleteKizaiIds = deleteReturnJuchuContainerMeisaiData.map((data) => data.kizaiId);
-    //     const deleteContainerMeisaiResult = await delReturnJuchuContainerMeisai(
-    //       data.juchuHeadId,
-    //       data.juchuKizaiHeadId,
-    //       deleteKizaiIds,
-    //       connection
-    //     );
-    //     console.log('返却受注コンテナ明細削除', deleteContainerMeisaiResult);
-    //   }
-    //   // 追加
-    //   if (addReturnJuchuContainerMeisaiData.length > 0) {
-    //     const addContainerMeisaiResult = await addReturnJuchuContainerMeisai(
-    //       addReturnJuchuContainerMeisaiData,
-    //       userNam,
-    //       connection
-    //     );
-    //     console.log('返却受注コンテナ明細追加', addContainerMeisaiResult);
-    //   }
-    //   // 更新
-    //   if (updateReturnJuchuContainerMeisaiData.length > 0) {
-    //     const updateContainerMeisaiResult = await updReturnJuchuContainerMeisai(
-    //       updateReturnJuchuContainerMeisaiData,
-    //       userNam,
-    //       connection
-    //     );
-    //     console.log('返却受注コンテナ明細更新', updateContainerMeisaiResult);
-    //   }
-
-    //   // 返却コンテナ入出庫伝票更新
-    //   if (newReturnJuchuContainerMeisaiData.length > 0) {
-    //     const containerNyushukoDenResult = await updReturnContainerNyushukoDen(
-    //       data,
-    //       newReturnJuchuContainerMeisaiData,
-    //       userNam,
-    //       connection
-    //     );
-    //     console.log('返却コンテナ入出庫伝票更新', containerNyushukoDenResult);
-    //   }
-    // }
-
-    // // 入出庫確定更新
-    // if (returnJuchuKizaiMeisaiList.length > 0 || returnJuchuContainerMeisaiList.length > 0) {
-    //   const kics =
-    //     returnJuchuKizaiMeisaiList.filter((d) => d.shozokuId === 1 && !d.delFlag).length > 0 ||
-    //     returnJuchuContainerMeisaiList.filter((d) => d.planKicsKizaiQty && !d.delFlag).length > 0
-    //       ? true
-    //       : false;
-    //   const yard =
-    //     returnJuchuKizaiMeisaiList.filter((d) => d.shozokuId === 2 && !d.delFlag).length > 0 ||
-    //     returnJuchuContainerMeisaiList.filter((d) => d.planYardKizaiQty && !d.delFlag).length > 0
-    //       ? true
-    //       : false;
-
-    //   const nyushukoFixResult = await updReturnNyushukoFix(data, kics, yard, userNam, connection);
-    //   console.log('返却入出庫確定更新', nyushukoFixResult);
-    // }
-
     await connection.query('COMMIT');
+
+    await revalidatePath('/eqpt-order-list');
+    await revalidatePath('/shuko-list');
+    await revalidatePath('/nyuko-list');
+
     return true;
   } catch (e) {
     console.error(e);
