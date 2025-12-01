@@ -58,13 +58,7 @@ import {
   updJuchuHead,
 } from '../_lib/funcs';
 import { EqTableValues, KokyakuValues, OrderSchema, OrderValues, VehicleTableValues } from '../_lib/types';
-import {
-  CopyConfirmDialog,
-  HeadDeleteConfirmDialog,
-  KizaiHeadDeleteConfirmDialog,
-  SaveAlertDialog,
-  SelectAlertDialog,
-} from './caveat-dialog';
+import { AlertDialog, CopyConfirmDialog, HeadDeleteConfirmDialog, KizaiHeadDeleteConfirmDialog } from './caveat-dialog';
 import { CustomerSelectionDialog } from './customer-selection';
 import { LocationSelectDialog } from './location-selection';
 import { OrderEqTable, OrderVehicleTable } from './order-table';
@@ -81,6 +75,8 @@ export const Order = (props: {
   const user = useUserStore((state) => state.user);
   // userList
   const userList = users;
+  // 保存フラグ
+  const save = props.juchuHeadData.juchuHeadId !== 0 ? true : false;
 
   // 画面全体ローディング
   const [isLoading, setIsLoading] = useState(false);
@@ -89,8 +85,6 @@ export const Order = (props: {
 
   // 編集モード(true:編集、false:閲覧)
   const [edit, setEdit] = useState(props.edit);
-  // 保存フラグ
-  const [save, setSave] = useState(false);
 
   // 機材ヘッダーデータ
   const [eqHeaderList, setEqHeaderList] = useState<EqTableValues[] | undefined>(props.juchuKizaiHeadDatas);
@@ -101,14 +95,14 @@ export const Order = (props: {
   // ロックデータ
   const [lockData, setLockData] = useState<LockValues | null>(null);
 
-  // 未保存ダイアログ制御
-  const [saveOpen, setSaveOpen] = useState(false);
+  // 警告ダイアログ制御
+  const [alertOpen, setAlertOpen] = useState(false);
+  // 警告ダイアログタイトル
+  const [alertTitle, setAlertTitle] = useState('');
+  // 警告ダイアログ用メッセージ
+  const [alertMessage, setAlertMessage] = useState('');
   // 編集内容が未保存ダイアログ制御
   const [dirtyOpen, setDirtyOpen] = useState(false);
-  // 機材選択ダイアログ制御
-  const [selectOpen, setSelectOpen] = useState(false);
-  // 機材選択ダイアログ用メッセージ
-  const [selectAlertMessage, setSelectAlertMessage] = useState('');
   // 受注ヘッダー削除ダイアログ制御
   const [headDeleteOpen, setHeadDeleteOpen] = useState(false);
   // コピーダイアログ制御
@@ -121,18 +115,16 @@ export const Order = (props: {
   const [snackBarMessage, setSnackBarMessage] = useState('');
 
   // 機材テーブル選択行
-  const [selectEq, setSelectEq] = useState<number[]>([]);
+  const [selectEq, setSelectEq] = useState<number | null>(null);
   // 車両テーブル選択行
   const [selectVehicle, setSelectVehicle] = useState<number[]>([]);
   // 遷移先path
   const [path, setPath] = useState<string | null>(null);
 
   // context
-  const { setIsDirty, setIsSave, setLock } = useDirty();
+  const { setIsDirty, setLock } = useDirty();
   // 合計金額
   const priceTotal = eqHeaderList!.reduce((sum, row) => sum + (row.shokei ?? 0), 0);
-  // 編集中かどうか
-  const [isEditing, setIsEditing] = useState(false);
 
   /* useForm ------------------------- */
   const {
@@ -171,16 +163,17 @@ export const Order = (props: {
   });
 
   // ブラウザバック、F5、×ボタンでページを離れた際のhook
-  useUnsavedChangesWarning(isDirty, save);
+  useUnsavedChangesWarning(isDirty);
 
-  /**
-   * useEffect
-   */
   useEffect(() => {
     if (!user) return;
 
-    setValue('nyuryokuUser', user.name);
-    if (getValues('juchuHeadId') === 0) return;
+    if (getValues('juchuHeadId') === 0) {
+      const data = { ...getValues(), nyuryokuUser: user.name };
+      reset(data);
+      return;
+    }
+
     const asyncProcess = async () => {
       setIsLoading(true);
       const lockData = await getLock(1, props.juchuHeadData.juchuHeadId);
@@ -196,30 +189,21 @@ export const Order = (props: {
     };
     asyncProcess();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+  }, []);
 
   useEffect(() => {
     setIsDirty(isDirty);
-    setIsSave(save);
-  }, [isDirty, save, setIsDirty, setIsSave]);
+  }, [isDirty, setIsDirty]);
 
   useEffect(() => {
     setLock(lockData);
   }, [lockData, setLock]);
-
-  useEffect(() => {
-    if (props.juchuHeadData.juchuHeadId !== 0) {
-      setSave(true);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   // 保存ボタン押下
   const onSubmit = async (data: OrderValues) => {
     console.log('update : 開始');
     if (!user) return;
     setIsLoading(true);
-    setIsEditing(false);
 
     // 新規
     if (data.juchuHeadId === 0) {
@@ -229,11 +213,17 @@ export const Order = (props: {
       router.push(`/order/${newOrderId}/edit`);
       // 更新
     } else {
-      const update = await updJuchuHead(data);
-      reset(data);
-      setSave(true);
-      setIsLoading(false);
-      console.log('update : ', update);
+      const updateResult = await updJuchuHead(data);
+      if (updateResult) {
+        reset(data);
+        setIsLoading(false);
+        setSnackBarMessage('保存しました');
+        setSnackBarOpen(true);
+      } else {
+        setIsLoading(false);
+        setSnackBarMessage('保存に失敗しました');
+        setSnackBarOpen(true);
+      }
     }
   };
 
@@ -283,8 +273,10 @@ export const Order = (props: {
 
   // コピーボタン押下
   const handleCopy = async () => {
-    if (!save || isDirty) {
-      setSaveOpen(true);
+    if (isDirty) {
+      setAlertTitle('保存されていません');
+      setAlertMessage('1度保存をしてください');
+      setAlertOpen(true);
       return;
     }
 
@@ -316,11 +308,6 @@ export const Order = (props: {
 
   // 機材入力ボタン押下
   const handleAddEq = async () => {
-    if (!save) {
-      setSaveOpen(true);
-      return;
-    }
-
     if (!isDirty) {
       await deleteLock(1, props.juchuHeadData.juchuHeadId);
       router.push(`/eq-main-order-detail/${props.juchuHeadData.juchuHeadId}/0/edit`);
@@ -332,13 +319,9 @@ export const Order = (props: {
 
   // 返却入力ボタン押下
   const handleAddReturn = async () => {
-    if (!save) {
-      setSaveOpen(true);
-      return;
-    }
-
-    if (selectEq.length === 1 && eqHeaderList) {
-      const selectData = eqHeaderList.find((d) => d.juchuKizaiHeadId === selectEq[0]);
+    if (selectEq && eqHeaderList) {
+      const selectData = eqHeaderList.find((d) => d.juchuKizaiHeadId === selectEq);
+      console.log(selectData);
       if (selectData && selectData.juchuKizaiHeadKbn === 1) {
         if (!isDirty) {
           await deleteLock(1, props.juchuHeadData.juchuHeadId);
@@ -350,24 +333,21 @@ export const Order = (props: {
           setDirtyOpen(true);
         }
       } else {
-        setSelectAlertMessage('受注明細を1つ選択してください');
-        setSelectOpen(true);
+        setAlertTitle('選択項目を確認してください');
+        setAlertMessage('メイン明細を選択してください');
+        setAlertOpen(true);
       }
     } else {
-      setSelectAlertMessage('受注明細を1つ選択してください');
-      setSelectOpen(true);
+      setAlertTitle('選択項目を確認してください');
+      setAlertMessage('メイン明細を選択してください');
+      setAlertOpen(true);
     }
   };
 
   // キープ入力ボタン押下
   const handleAddKeep = async () => {
-    if (!save) {
-      setSaveOpen(true);
-      return;
-    }
-
-    if (selectEq.length === 1 && eqHeaderList) {
-      const selectData = eqHeaderList.find((d) => d.juchuKizaiHeadId === selectEq[0]);
+    if (selectEq && eqHeaderList) {
+      const selectData = eqHeaderList.find((d) => d.juchuKizaiHeadId === selectEq);
       if (selectData && selectData.juchuKizaiHeadKbn === 1) {
         if (!isDirty) {
           await deleteLock(1, props.juchuHeadData.juchuHeadId);
@@ -377,22 +357,42 @@ export const Order = (props: {
           setDirtyOpen(true);
         }
       } else {
-        setSelectAlertMessage('受注明細を1つ選択してください');
-        setSelectOpen(true);
+        setAlertTitle('選択項目を確認してください');
+        setAlertMessage('メイン明細を選択してください');
+        setAlertOpen(true);
       }
     } else {
-      setSelectAlertMessage('受注明細を1つ選択してください');
-      setSelectOpen(true);
+      setAlertTitle('選択項目を確認してください');
+      setAlertMessage('メイン明細を選択してください');
+      setAlertOpen(true);
+    }
+  };
+
+  /**
+   * 受注機材明細画面へ遷移
+   * @param row クリックされた受注明細情報
+   */
+  const handleClickEqOrderName = async (row: EqTableValues) => {
+    const mode = edit ? 'edit' : 'view';
+    const path =
+      row.juchuKizaiHeadKbn === 1
+        ? `/eq-main-order-detail/${row.juchuHeadId}/${row.juchuKizaiHeadId}/${mode}`
+        : row.juchuKizaiHeadKbn === 2
+          ? `/eq-return-order-detail/${row.juchuHeadId}/${row.juchuKizaiHeadId}/${row.oyaJuchuKizaiHeadId}/${mode}`
+          : row.juchuKizaiHeadKbn === 3
+            ? `/eq-keep-order-detail/${row.juchuHeadId}/${row.juchuKizaiHeadId}/${row.oyaJuchuKizaiHeadId}/${mode}`
+            : `/eq-main-order-detail/${row.juchuHeadId}/${row.juchuKizaiHeadId}/${mode}`;
+    if (!isDirty) {
+      await deleteLock(1, props.juchuHeadData.juchuHeadId);
+      router.push(path);
+    } else {
+      setPath(path);
+      setDirtyOpen(true);
     }
   };
 
   // 車両入力ボタン押下
   const handleAddVehicle = async () => {
-    if (!save) {
-      setSaveOpen(true);
-      return;
-    }
-
     if (!isDirty) {
       await deleteLock(1, props.juchuHeadData.juchuHeadId);
       router.push(`/vehicle-order-detail/${props.juchuHeadData.juchuHeadId}/0/edit`);
@@ -404,20 +404,22 @@ export const Order = (props: {
 
   // 受注明細削除ボタン押下
   const handleKizaiHeadDeleteCheck = async () => {
-    if (selectEq.length !== 1 || !eqHeaderList) {
-      setSelectAlertMessage('受注明細を1つ選択してください');
-      setSelectOpen(true);
+    if (!selectEq || !eqHeaderList) {
+      setAlertTitle('選択項目を確認してください');
+      setAlertMessage('受注明細を1つ選択してください');
+      setAlertOpen(true);
       return;
     }
 
     // 選択データ
-    const selectData = eqHeaderList.find((d) => d.juchuKizaiHeadId === selectEq[0]);
+    const selectData = eqHeaderList.find((d) => d.juchuKizaiHeadId === selectEq);
     // 選択されたデータの子データ
     const childData = eqHeaderList.find((d) => d.oyaJuchuKizaiHeadId === selectData?.juchuKizaiHeadId);
 
     if (childData) {
-      setSelectAlertMessage('返却、キープが紐づいている場合は削除できません');
-      setSelectOpen(true);
+      setAlertTitle('選択項目を確認してください');
+      setAlertMessage('返却、キープが紐づいている場合は削除できません');
+      setAlertOpen(true);
       return;
     }
 
@@ -433,7 +435,7 @@ export const Order = (props: {
     if (result && eqHeaderList) {
       setIsJuchuKizaiLoading(true);
       // 選択データ
-      const selectData = eqHeaderList.find((d) => d.juchuKizaiHeadId === selectEq[0]);
+      const selectData = eqHeaderList.find((d) => d.juchuKizaiHeadId === selectEq);
 
       const deleteResult = await delJuchuMeisai(selectData!.juchuHeadId, selectData!.juchuKizaiHeadId);
 
@@ -458,7 +460,6 @@ export const Order = (props: {
       await deleteLock(1, props.juchuHeadData.juchuHeadId);
       setLockData(null);
       setIsDirty(false);
-      setIsSave(true);
       router.push(path);
       setPath(null);
     } else if (result && !path) {
@@ -473,8 +474,8 @@ export const Order = (props: {
     }
   };
 
-  const handleEqSelectionChange = (selectedIds: number[]) => {
-    setSelectEq(selectedIds);
+  const handleEqSelectionChange = (selectedId: number) => {
+    setSelectEq(selectedId);
   };
 
   const handleVehicleSelectionChange = (selectedIds: number[]) => {
@@ -553,11 +554,17 @@ export const Order = (props: {
               <Button
                 onClick={() => router.push(`/quotation-list/create?juchuId=${getValues('juchuHeadId')}`)}
                 disabled={isDirty}
+                sx={{ display: save ? 'inline-flex' : 'none' }}
               >
                 <CreateIcon fontSize="small" />
                 見積作成
               </Button>
-              <Button color="error" onClick={() => setHeadDeleteOpen(true)} disabled={!edit}>
+              <Button
+                color="error"
+                onClick={() => setHeadDeleteOpen(true)}
+                disabled={!edit}
+                sx={{ display: save ? 'inline-flex' : 'none' }}
+              >
                 <Delete fontSize="small" />
                 伝票削除
               </Button>
@@ -769,138 +776,152 @@ export const Order = (props: {
         </Dialog>
       </Paper>
       {/* --------------------------------受注明細（機材）------------------------------------- */}
-      <Accordion sx={{ marginTop: 2, borderRadius: 1, overflow: 'hidden' }} defaultExpanded variant="outlined">
-        <AccordionSummary expandIcon={<ExpandMoreIcon />} component="div">
-          <Grid2 container alignItems="center" justifyContent="space-between" sx={{ width: '100%' }} spacing={1}>
-            <Grid2>
-              <Typography>受注機材ヘッダー一覧</Typography>
+      {save && (
+        <Accordion sx={{ marginTop: 2, borderRadius: 1, overflow: 'hidden' }} defaultExpanded variant="outlined">
+          <AccordionSummary expandIcon={<ExpandMoreIcon />} component="div">
+            <Grid2 container alignItems="center" justifyContent="space-between" sx={{ width: '100%' }} spacing={1}>
+              <Grid2>
+                <Typography>受注機材ヘッダー一覧</Typography>
+              </Grid2>
+              <Grid2 container display="flex" alignItems="center" spacing={1}>
+                <Typography>合計金額</Typography>
+                <TextField
+                  sx={{
+                    width: '40%',
+                    minWidth: '90px',
+                    '& .MuiInputBase-input': {
+                      textAlign: 'right',
+                      padding: 1,
+                    },
+                  }}
+                  value={`¥${priceTotal.toLocaleString()}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                  disabled
+                ></TextField>
+              </Grid2>
+              <Grid2 container spacing={1}>
+                <Button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleAddEq();
+                  }}
+                  disabled={!edit}
+                >
+                  <AddIcon fontSize="small" />
+                  機材入力
+                </Button>
+                <Button
+                  //href="/order/equipment-return-order-detail"
+                  color="error"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleAddReturn();
+                  }}
+                  disabled={!edit}
+                >
+                  <AddIcon fontSize="small" />
+                  返却入力
+                </Button>
+                <Button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleAddKeep();
+                  }}
+                  disabled={!edit}
+                  sx={{ bgcolor: 'green' }}
+                >
+                  <AddIcon fontSize="small" />
+                  キープ入力
+                </Button>
+                <Button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                  disabled={!edit}
+                >
+                  <ContentCopyIcon fontSize="small" />
+                  コピー
+                </Button>
+                <Button
+                  color="error"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleKizaiHeadDeleteCheck();
+                  }}
+                  disabled={!edit}
+                >
+                  <Delete fontSize="small" />
+                  受注明細削除
+                </Button>
+              </Grid2>
             </Grid2>
-            <Grid2 container display="flex" alignItems="center" spacing={1}>
-              <Typography>合計金額</Typography>
-              <TextField
-                sx={{
-                  width: '40%',
-                  minWidth: '90px',
-                  '& .MuiInputBase-input': {
-                    textAlign: 'right',
-                    padding: 1,
-                  },
-                }}
-                value={`¥${priceTotal.toLocaleString()}`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                }}
-                disabled
-              ></TextField>
-            </Grid2>
-            <Grid2 container spacing={1}>
-              <Button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleAddEq();
-                }}
-                disabled={!edit}
-              >
-                <AddIcon fontSize="small" />
-                機材入力
-              </Button>
-              <Button
-                //href="/order/equipment-return-order-detail"
-                color="error"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleAddReturn();
-                }}
-                disabled={!edit}
-              >
-                <AddIcon fontSize="small" />
-                返却入力
-              </Button>
-              <Button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleAddKeep();
-                }}
-                disabled={!edit}
-                sx={{ bgcolor: 'green' }}
-              >
-                <AddIcon fontSize="small" />
-                キープ入力
-              </Button>
-              <Button disabled={!edit}>
-                <ContentCopyIcon fontSize="small" />
-                コピー
-              </Button>
-              <Button
-                color="error"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleKizaiHeadDeleteCheck();
-                }}
-                disabled={!edit}
-              >
-                <Delete fontSize="small" />
-                受注明細削除
-              </Button>
-            </Grid2>
-          </Grid2>
-        </AccordionSummary>
-        <AccordionDetails sx={{ padding: 0 }}>
-          {isJuchuKizaiLoading ? (
-            <Loading />
-          ) : (
-            eqHeaderList &&
-            eqHeaderList?.length > 0 && (
-              <OrderEqTable orderEqRows={eqHeaderList} edit={edit} onEqSelectionChange={handleEqSelectionChange} />
-            )
-          )}
-        </AccordionDetails>
-      </Accordion>
+          </AccordionSummary>
+          <AccordionDetails sx={{ padding: 0 }}>
+            {isJuchuKizaiLoading ? (
+              <Loading />
+            ) : (
+              eqHeaderList &&
+              eqHeaderList?.length > 0 && (
+                <OrderEqTable
+                  orderEqRows={eqHeaderList}
+                  edit={edit}
+                  selectEq={selectEq}
+                  onEqSelectionChange={handleEqSelectionChange}
+                  handleClickEqOrderName={handleClickEqOrderName}
+                />
+              )
+            )}
+          </AccordionDetails>
+        </Accordion>
+      )}
       {/* -------------------------車両----------------------------------- */}
-      <Accordion sx={{ marginTop: 2, borderRadius: 1, overflow: 'hidden' }} defaultExpanded variant="outlined">
-        <AccordionSummary expandIcon={<ExpandMoreIcon />} component="div">
-          <Grid2 container alignItems="center" justifyContent="space-between" sx={{ width: '100%' }} spacing={1}>
-            <Grid2>
-              <Typography>受注車両ヘッダー一覧</Typography>
-            </Grid2>
-            <Grid2 container spacing={1}>
-              <Button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleAddVehicle();
-                }}
-                disabled={!edit}
-              >
-                <AddIcon fontSize="small" />
-                車両入力
-              </Button>
+      {save && (
+        <Accordion sx={{ marginTop: 2, borderRadius: 1, overflow: 'hidden' }} defaultExpanded variant="outlined">
+          <AccordionSummary expandIcon={<ExpandMoreIcon />} component="div">
+            <Grid2 container alignItems="center" justifyContent="space-between" sx={{ width: '100%' }} spacing={1}>
+              <Grid2>
+                <Typography>受注車両ヘッダー一覧</Typography>
+              </Grid2>
+              <Grid2 container spacing={1}>
+                <Button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleAddVehicle();
+                  }}
+                  disabled={!edit}
+                >
+                  <AddIcon fontSize="small" />
+                  車両入力
+                </Button>
 
-              <Button
-                color="error"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  console.log(selectVehicle);
-                }}
-                disabled={!edit}
-              >
-                <Delete fontSize="small" />
-                受注明細削除
-              </Button>
+                <Button
+                  color="error"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    console.log(selectVehicle);
+                  }}
+                  disabled={!edit}
+                >
+                  <Delete fontSize="small" />
+                  受注明細削除
+                </Button>
+              </Grid2>
             </Grid2>
-          </Grid2>
-        </AccordionSummary>
-        <AccordionDetails sx={{ padding: 0 }}>
-          {vehicleHeaderList && vehicleHeaderList?.length > 0 && (
-            <OrderVehicleTable
-              orderVehicleRows={vehicleHeaderList}
-              onVehicleSelectionChange={handleVehicleSelectionChange}
-            />
-          )}
-        </AccordionDetails>
-      </Accordion>
-      <SaveAlertDialog open={saveOpen} onClick={() => setSaveOpen(false)} />
+          </AccordionSummary>
+          <AccordionDetails sx={{ padding: 0 }}>
+            {vehicleHeaderList && vehicleHeaderList?.length > 0 && (
+              <OrderVehicleTable
+                orderVehicleRows={vehicleHeaderList}
+                onVehicleSelectionChange={handleVehicleSelectionChange}
+              />
+            )}
+          </AccordionDetails>
+        </Accordion>
+      )}
       <IsDirtyAlertDialog open={dirtyOpen} onClick={handleResultDialog} />
-      <SelectAlertDialog open={selectOpen} message={selectAlertMessage} onClick={() => setSelectOpen(false)} />
+      <AlertDialog open={alertOpen} title={alertTitle} message={alertMessage} onClick={() => setAlertOpen(false)} />
       <CopyConfirmDialog open={copyOpen} onClick={handleCopyResultDialog} />
       <HeadDeleteConfirmDialog open={headDeleteOpen} onClick={handleHeadDelete} />
       <KizaiHeadDeleteConfirmDialog open={kizaiHeadDeleteOpen} onClick={handleKizaiHeadDelete} />

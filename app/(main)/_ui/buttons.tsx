@@ -9,15 +9,19 @@ import SaveAsIcon from '@mui/icons-material/SaveAs';
 import { Box, Button, IconButton } from '@mui/material';
 import { useRouter } from 'next/navigation';
 
+import { useDirty } from './dirty-context';
+
 /**
  * ブラウザバックするボタン
  * @param スタイルオブジェクトとボタンの表示文字
  * @returns 戻るボタン
  */
 export const BackButton = ({ sx, label }: { sx?: object; label: string }) => {
-  const router = useRouter();
+  //const router = useRouter();
+  const { requestBack } = useDirty();
+
   const handleBack = () => {
-    router.back();
+    requestBack();
   };
 
   return (

@@ -97,8 +97,9 @@ const EquipmentOrderDetail = (props: {
   const saveKizaiHead = props.juchuKizaiHeadData.juchuKizaiHeadId !== 0 ? true : false;
   // 出発フラグ
   const fixFlag = props.fixFlag;
-  // 全体の保存フラグ
-  const [save, setSave] = useState(false);
+
+  // 受注機材ヘッダー以外の編集フラグ
+  const [otherDirty, setOtherDirty] = useState(false);
 
   // 全体ローディング
   const [isLoading, setIsLoading] = useState(false);
@@ -224,7 +225,7 @@ const EquipmentOrderDetail = (props: {
   const [isNebikiAmtEditing, setIsNebikiAmtEditing] = useState(false);
 
   // context
-  const { setIsDirty, setIsSave, setLock } = useDirty();
+  const { setIsDirty, setLock } = useDirty();
 
   // ref
   const eqStockListRef = useRef(eqStockList);
@@ -277,16 +278,11 @@ const EquipmentOrderDetail = (props: {
   }, [priceTotal, nebikiAmt]);
 
   // ブラウザバック、F5、×ボタンでページを離れた際のhook
-  useUnsavedChangesWarning(isDirty, save);
+  useUnsavedChangesWarning(isDirty || otherDirty ? true : false);
 
   /**
    * useEffect
    */
-  useEffect(() => {
-    setSave(saveKizaiHead);
-    setIsSave(saveKizaiHead);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   useEffect(() => {
     if (!user || !props.edit) return;
@@ -306,26 +302,24 @@ const EquipmentOrderDetail = (props: {
     };
     asyncProcess();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+  }, []);
 
   useEffect(() => {
-    setIsDirty(isDirty);
-  }, [isDirty, setIsDirty]);
+    const dirty = isDirty || otherDirty ? true : false;
+    setIsDirty(dirty);
+  }, [isDirty, otherDirty, setIsDirty]);
 
   useEffect(() => {
     const filterJuchuKizaiMeisaiList = juchuKizaiMeisaiList.filter((data) => !data.delFlag);
     const filterJuchuContainerMeisaiList = juchuContainerMeisaiList.filter((data) => !data.delFlag);
     if (
-      saveKizaiHead &&
       JSON.stringify(originJuchuKizaiMeisaiList) === JSON.stringify(filterJuchuKizaiMeisaiList) &&
       JSON.stringify(originJuchuContainerMeisaiList) === JSON.stringify(filterJuchuContainerMeisaiList) &&
       JSON.stringify(originJuchuHonbanbiList) === JSON.stringify(juchuHonbanbiList)
     ) {
-      setSave(true);
-      setIsSave(true);
+      setOtherDirty(false);
     } else {
-      setSave(false);
-      setIsSave(false);
+      setOtherDirty(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [juchuKizaiMeisaiList, juchuContainerMeisaiList, juchuHonbanbiList]);
@@ -694,8 +688,7 @@ const EquipmentOrderDetail = (props: {
         if (checkIdoJuchuKizaiMeisai) {
           setOriginIdoJuchuKizaiMeisaiList(idoJuchuKizaiMeisaiList);
         }
-        setSave(true);
-        setIsSave(true);
+        setOtherDirty(false);
 
         setSnackBarMessage('保存しました');
         setSnackBarOpen(true);
@@ -1448,10 +1441,6 @@ const EquipmentOrderDetail = (props: {
 
   // 機材入力ダイアログ開閉
   const handleOpenEqDialog = async () => {
-    if (!saveKizaiHead) {
-      setSaveOpen(true);
-      return;
-    }
     setEqSelectionDialogOpen(true);
   };
   const handleCloseEqDialog = () => {
@@ -1460,7 +1449,7 @@ const EquipmentOrderDetail = (props: {
 
   // コピーダイアログ開閉
   const handleOpenCopyDialog = () => {
-    if (!save || isDirty) {
+    if (otherDirty || isDirty) {
       setSaveOpen(true);
       return;
     }
@@ -1545,7 +1534,7 @@ const EquipmentOrderDetail = (props: {
 
   // 分離ダイアログ開閉
   const handleOpenSeparationDialog = () => {
-    if (!save || isDirty) {
+    if (otherDirty || isDirty) {
       setSaveOpen(true);
       return;
     }
@@ -1659,10 +1648,6 @@ const EquipmentOrderDetail = (props: {
 
   // 本番日入力ダイアログ開閉
   const handleOpenDateDialog = () => {
-    if (!saveKizaiHead) {
-      setSaveOpen(true);
-      return;
-    }
     setDateSelectionDialogOpne(true);
   };
   const handleCloseDateDialog = () => {
@@ -2250,424 +2235,430 @@ const EquipmentOrderDetail = (props: {
             </Box>
           </form>
           {/*-------受注明細(機材)-------*/}
-          <Paper variant="outlined" sx={{ mt: 2 }}>
-            <Box display="flex" justifyContent="space-between" alignItems="center" px={2} height={'30px'}>
-              <Typography>受注明細(機材)</Typography>
-              <Grid2 container spacing={2}>
-                <Button
-                  disabled={
-                    juchuKizaiMeisaiList.filter((d) => !d.delFlag).length === 0 &&
-                    juchuContainerMeisaiList.filter((d) => !d.delFlag).length === 0
-                  }
-                  onClick={handleOpenCopyDialog}
-                >
-                  <ContentCopyIcon fontSize="small" />
-                  コピー
-                </Button>
-                <Button
-                  disabled={
-                    !edit ||
-                    (juchuKizaiMeisaiList.filter((d) => !d.delFlag).length === 0 &&
-                      juchuContainerMeisaiList.filter((d) => !d.delFlag).length === 0) ||
-                    fixFlag
-                  }
-                  onClick={handleOpenSeparationDialog}
-                >
-                  <AltRouteIcon fontSize="small" />
-                  分離
-                </Button>
-              </Grid2>
-            </Box>
-            <Divider />
-
-            <Dialog open={EqSelectionDialogOpen} fullScreen>
-              <EqptSelectionDialog
-                // rank={props.juchuHeadData.kokyaku.kokyakuRank}
-                setEqpts={setEqpts}
-                handleCloseDialog={handleCloseEqDialog}
-              />
-            </Dialog>
-
-            <Dialog
-              open={copyDialogOpen}
-              slotProps={{
-                paper: {
-                  sx: {
-                    maxWidth: 'none',
-                  },
-                },
-              }}
-              sx={{ zIndex: 1201 }}
-            >
-              <CopyDialog
-                juchuKizaiMeisaiList={juchuKizaiMeisaiList.filter((d) => !d.delFlag)}
-                juchuContainerMeisaiList={juchuContainerMeisaiList.filter((d) => !d.delFlag)}
-                handleCopyConfirmed={handleCopyConfirmed}
-                handleCloseCopyDialog={handleCloseCopyDialog}
-              />
-            </Dialog>
-
-            <Dialog
-              open={separationDialogOpen}
-              slotProps={{
-                paper: {
-                  sx: {
-                    maxWidth: 'none',
-                  },
-                },
-              }}
-              sx={{ zIndex: 1201 }}
-            >
-              <SeparationDialog
-                juchuKizaiMeisaiList={juchuKizaiMeisaiList.filter((d) => !d.delFlag)}
-                juchuContainerMeisaiList={juchuContainerMeisaiList.filter((d) => !d.delFlag)}
-                handleSeparationConfirmed={handleSeparationConfirmed}
-                handleCloseSeparationDialog={handleCloseSeparationDialog}
-              />
-            </Dialog>
-            {isDetailLoading ? (
-              <Loading />
-            ) : (
-              <>
-                <Box display={'flex'} flexDirection="row" width="100%" py={2}>
-                  <Box
-                    sx={{
-                      width: {
-                        xs: '40%',
-                        sm: '40%',
-                        md: '40%',
-                        lg: 'min-content',
-                      },
-                    }}
+          {saveKizaiHead && (
+            <Paper variant="outlined" sx={{ mt: 2 }}>
+              <Box display="flex" justifyContent="space-between" alignItems="center" px={2} height={'30px'}>
+                <Typography>受注明細(機材)</Typography>
+                <Grid2 container spacing={2}>
+                  <Button
+                    disabled={
+                      juchuKizaiMeisaiList.filter((d) => !d.delFlag).length === 0 &&
+                      juchuContainerMeisaiList.filter((d) => !d.delFlag).length === 0
+                    }
+                    onClick={handleOpenCopyDialog}
                   >
-                    <Box my={1} mx={2}>
-                      <Button disabled={!edit} onClick={handleOpenEqDialog}>
-                        <AddIcon fontSize="small" />
-                        機材追加
-                      </Button>
+                    <ContentCopyIcon fontSize="small" />
+                    コピー
+                  </Button>
+                  <Button
+                    disabled={
+                      !edit ||
+                      (juchuKizaiMeisaiList.filter((d) => !d.delFlag).length === 0 &&
+                        juchuContainerMeisaiList.filter((d) => !d.delFlag).length === 0) ||
+                      fixFlag
+                    }
+                    onClick={handleOpenSeparationDialog}
+                  >
+                    <AltRouteIcon fontSize="small" />
+                    分離
+                  </Button>
+                </Grid2>
+              </Box>
+              <Divider />
+
+              <Dialog open={EqSelectionDialogOpen} fullScreen>
+                <EqptSelectionDialog
+                  // rank={props.juchuHeadData.kokyaku.kokyakuRank}
+                  setEqpts={setEqpts}
+                  handleCloseDialog={handleCloseEqDialog}
+                />
+              </Dialog>
+
+              <Dialog
+                open={copyDialogOpen}
+                slotProps={{
+                  paper: {
+                    sx: {
+                      maxWidth: 'none',
+                    },
+                  },
+                }}
+                sx={{ zIndex: 1201 }}
+              >
+                <CopyDialog
+                  juchuKizaiMeisaiList={juchuKizaiMeisaiList.filter((d) => !d.delFlag)}
+                  juchuContainerMeisaiList={juchuContainerMeisaiList.filter((d) => !d.delFlag)}
+                  handleCopyConfirmed={handleCopyConfirmed}
+                  handleCloseCopyDialog={handleCloseCopyDialog}
+                />
+              </Dialog>
+
+              <Dialog
+                open={separationDialogOpen}
+                slotProps={{
+                  paper: {
+                    sx: {
+                      maxWidth: 'none',
+                    },
+                  },
+                }}
+                sx={{ zIndex: 1201 }}
+              >
+                <SeparationDialog
+                  juchuKizaiMeisaiList={juchuKizaiMeisaiList.filter((d) => !d.delFlag)}
+                  juchuContainerMeisaiList={juchuContainerMeisaiList.filter((d) => !d.delFlag)}
+                  handleSeparationConfirmed={handleSeparationConfirmed}
+                  handleCloseSeparationDialog={handleCloseSeparationDialog}
+                />
+              </Dialog>
+              {isDetailLoading ? (
+                <Loading />
+              ) : (
+                <>
+                  <Box display={'flex'} flexDirection="row" width="100%" py={2}>
+                    <Box
+                      sx={{
+                        width: {
+                          xs: '40%',
+                          sm: '40%',
+                          md: '40%',
+                          lg: 'min-content',
+                        },
+                      }}
+                    >
+                      <Box my={1} mx={2}>
+                        <Button disabled={!edit} onClick={handleOpenEqDialog}>
+                          <AddIcon fontSize="small" />
+                          機材追加
+                        </Button>
+                      </Box>
+                      <Box
+                        display={
+                          Object.keys(juchuKizaiMeisaiList.filter((d) => !d.delFlag)).length > 0 ? 'block' : 'none'
+                        }
+                      >
+                        <EqTable
+                          rows={juchuKizaiMeisaiList}
+                          edit={edit}
+                          handleCellChange={handleCellChange}
+                          handleMeisaiDelete={handleEqMeisaiDelete}
+                          handleMemoChange={handleMemoChange}
+                          ref={leftRef}
+                        />
+                      </Box>
                     </Box>
                     <Box
-                      display={
-                        Object.keys(juchuKizaiMeisaiList.filter((d) => !d.delFlag)).length > 0 ? 'block' : 'none'
-                      }
+                      display={Object.keys(eqStockList).length > 0 ? 'block' : 'none'}
+                      overflow="auto"
+                      sx={{ width: { xs: '60%', sm: '60%', md: 'auto' } }}
                     >
-                      <EqTable
-                        rows={juchuKizaiMeisaiList}
-                        edit={edit}
-                        handleCellChange={handleCellChange}
-                        handleMeisaiDelete={handleEqMeisaiDelete}
-                        handleMemoChange={handleMemoChange}
-                        ref={leftRef}
+                      <Box display={Object.keys(eqStockList).length > 0 ? 'flex' : 'none'} my={1}>
+                        <Box display={'flex'} alignItems={'end'} mr={2}>
+                          <Typography fontSize={'small'}>在庫数</Typography>
+                        </Box>
+                        <Button onClick={handleBackDateChange}>
+                          <ArrowBackIosNewIcon fontSize="small" />
+                        </Button>
+                        <Button variant="outlined" onClick={handleClick}>
+                          日付選択
+                        </Button>
+                        <Popper open={open} anchorEl={anchorEl} placement="bottom-start" sx={{ zIndex: 1000 }}>
+                          <ClickAwayListener onClickAway={handleClickAway}>
+                            <Paper elevation={3} sx={{ mt: 1 }}>
+                              <Calendar date={selectDate} onChange={handleDateChange} />
+                            </Paper>
+                          </ClickAwayListener>
+                        </Popper>
+                        <Button onClick={handleForwardDateChange}>
+                          <ArrowForwardIosIcon fontSize="small" />
+                        </Button>
+                      </Box>
+                      <StockTable
+                        eqStockList={eqStockList}
+                        dateRange={dateRange}
+                        juchuHonbanbiList={juchuHonbanbiList}
+                        ref={rightRef}
                       />
                     </Box>
                   </Box>
                   <Box
-                    display={Object.keys(eqStockList).length > 0 ? 'block' : 'none'}
-                    overflow="auto"
-                    sx={{ width: { xs: '60%', sm: '60%', md: 'auto' } }}
+                    display={
+                      Object.keys(idoJuchuKizaiMeisaiList.filter((d) => !d.delFlag)).length > 0 ? 'block' : 'none'
+                    }
+                    py={2}
                   >
-                    <Box display={Object.keys(eqStockList).length > 0 ? 'flex' : 'none'} my={1}>
-                      <Box display={'flex'} alignItems={'end'} mr={2}>
-                        <Typography fontSize={'small'}>在庫数</Typography>
-                      </Box>
-                      <Button onClick={handleBackDateChange}>
-                        <ArrowBackIosNewIcon fontSize="small" />
-                      </Button>
-                      <Button variant="outlined" onClick={handleClick}>
-                        日付選択
-                      </Button>
-                      <Popper open={open} anchorEl={anchorEl} placement="bottom-start" sx={{ zIndex: 1000 }}>
-                        <ClickAwayListener onClickAway={handleClickAway}>
-                          <Paper elevation={3} sx={{ mt: 1 }}>
-                            <Calendar date={selectDate} onChange={handleDateChange} />
-                          </Paper>
-                        </ClickAwayListener>
-                      </Popper>
-                      <Button onClick={handleForwardDateChange}>
-                        <ArrowForwardIosIcon fontSize="small" />
-                      </Button>
-                    </Box>
-                    <StockTable
-                      eqStockList={eqStockList}
-                      dateRange={dateRange}
-                      juchuHonbanbiList={juchuHonbanbiList}
-                      ref={rightRef}
+                    <IdoEqTable
+                      rows={idoJuchuKizaiMeisaiList}
+                      edit={edit}
+                      handleCellDateChange={handleCellDateChange}
+                      handleCellDateClear={handleCellDateClear}
                     />
                   </Box>
-                </Box>
-                <Box
-                  display={Object.keys(idoJuchuKizaiMeisaiList.filter((d) => !d.delFlag)).length > 0 ? 'block' : 'none'}
-                  py={2}
-                >
-                  <IdoEqTable
-                    rows={idoJuchuKizaiMeisaiList}
-                    edit={edit}
-                    handleCellDateChange={handleCellDateChange}
-                    handleCellDateClear={handleCellDateClear}
-                  />
-                </Box>
-                <Box
-                  display={juchuContainerMeisaiList.filter((d) => !d.delFlag).length > 0 ? 'block' : 'none'}
-                  py={2}
-                  width={'fit-content'}
-                >
-                  <ContainerTable
-                    rows={juchuContainerMeisaiList}
-                    edit={edit}
-                    handleContainerMemoChange={handleContainerMemoChange}
-                    handleContainerCellChange={handleContainerCellChange}
-                    handleMeisaiDelete={handleCtnMeisaiDelete}
-                  />
-                </Box>
-              </>
-            )}
-          </Paper>
+                  <Box
+                    display={juchuContainerMeisaiList.filter((d) => !d.delFlag).length > 0 ? 'block' : 'none'}
+                    py={2}
+                    width={'fit-content'}
+                  >
+                    <ContainerTable
+                      rows={juchuContainerMeisaiList}
+                      edit={edit}
+                      handleContainerMemoChange={handleContainerMemoChange}
+                      handleContainerCellChange={handleContainerCellChange}
+                      handleMeisaiDelete={handleCtnMeisaiDelete}
+                    />
+                  </Box>
+                </>
+              )}
+            </Paper>
+          )}
           {/*-------本番日-------*/}
-          <Paper variant="outlined" sx={{ mt: 2 }}>
-            <Box>
-              <Box sx={styles.container}>
-                <Typography marginRight={{ xs: 2, sm: 9, md: 9, lg: 9 }} whiteSpace="nowrap">
-                  本番日
-                </Typography>
-                <Button disabled={!edit} onClick={handleOpenDateDialog}>
-                  編集
-                </Button>
-                <Dialog open={dateSelectionDialogOpne} fullScreen sx={{ zIndex: 1201 }}>
-                  <DateSelectDialog
-                    juchuHeadId={getValues('juchuHeadId')}
-                    juchuKizaiHeadId={getValues('juchuKizaiHeadId')}
-                    shukoDate={shukoDate}
-                    nyukoDate={nyukoDate}
-                    juchuHonbanbiList={juchuHonbanbiList}
-                    juchuHonbanbiDeleteList={juchuHonbanbiDeleteList}
-                    scrollRef={scrollRef}
-                    onClose={handleCloseDateDialog}
-                    onSave={handleSave}
-                  />
-                </Dialog>
+          {saveKizaiHead && (
+            <Paper variant="outlined" sx={{ mt: 2 }}>
+              <Box>
+                <Box sx={styles.container}>
+                  <Typography marginRight={{ xs: 2, sm: 9, md: 9, lg: 9 }} whiteSpace="nowrap">
+                    本番日
+                  </Typography>
+                  <Button disabled={!edit} onClick={handleOpenDateDialog}>
+                    編集
+                  </Button>
+                  <Dialog open={dateSelectionDialogOpne} fullScreen sx={{ zIndex: 1201 }}>
+                    <DateSelectDialog
+                      juchuHeadId={getValues('juchuHeadId')}
+                      juchuKizaiHeadId={getValues('juchuKizaiHeadId')}
+                      shukoDate={shukoDate}
+                      nyukoDate={nyukoDate}
+                      juchuHonbanbiList={juchuHonbanbiList}
+                      juchuHonbanbiDeleteList={juchuHonbanbiDeleteList}
+                      scrollRef={scrollRef}
+                      onClose={handleCloseDateDialog}
+                      onSave={handleSave}
+                    />
+                  </Dialog>
+                </Box>
+                <Box
+                  display={'flex'}
+                  justifyContent={'center'}
+                  ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
+                  width={75}
+                  bgcolor={'mediumpurple'}
+                >
+                  <Typography fontSize={'small'} py={1} px={3} sx={{ color: 'white' }}>
+                    仕込
+                  </Typography>
+                </Box>
+                <Grid2 container spacing={1} ml={{ xs: 10, sm: 17, md: 17, lg: 17 }} py={2} width={{ md: '50%' }}>
+                  <Grid2 size={3} maxWidth={200}>
+                    <Typography>日付</Typography>
+                  </Grid2>
+                  <Grid2 size={3} maxWidth={200}>
+                    <Typography>追加日数</Typography>
+                  </Grid2>
+                  <Grid2 size={6}>
+                    <Typography>メモ</Typography>
+                  </Grid2>
+                </Grid2>
+                <Grid2
+                  container
+                  display="flex"
+                  flexDirection="column"
+                  spacing={1}
+                  ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
+                  width={{ md: '50%' }}
+                >
+                  {juchuHonbanbiList &&
+                    juchuHonbanbiList.map(
+                      (data, index) =>
+                        data.juchuHonbanbiShubetuId === 10 && (
+                          <Grid2 key={index} container display="flex" flexDirection="row">
+                            <Grid2 size={3} maxWidth={200}>
+                              <Typography>{toJapanYMDString(data.juchuHonbanbiDat)}</Typography>
+                            </Grid2>
+                            <Grid2 size={3} maxWidth={200}>
+                              <Typography>{data.juchuHonbanbiAddQty}</Typography>
+                            </Grid2>
+                            <Grid2 size={6}>
+                              <Typography sx={{ wordBreak: 'break-word', whiteSpace: 'wrap' }}>{data.mem}</Typography>
+                            </Grid2>
+                          </Grid2>
+                        )
+                    )}
+                </Grid2>
+                <Box
+                  display={'flex'}
+                  justifyContent={'center'}
+                  ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
+                  mt={4}
+                  width={75}
+                  bgcolor={'orange'}
+                >
+                  <Typography fontSize={'small'} py={1} px={3} sx={{ color: 'white' }}>
+                    RH
+                  </Typography>
+                </Box>
+                <Grid2
+                  container
+                  display="flex"
+                  flexDirection="row"
+                  spacing={1}
+                  ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
+                  py={2}
+                  width={{ md: '50%' }}
+                >
+                  <Grid2 size={3} maxWidth={200}>
+                    <Typography>日付</Typography>
+                  </Grid2>
+                  <Grid2 size={3} maxWidth={200}>
+                    <Typography>追加日数</Typography>
+                  </Grid2>
+                  <Grid2 size={6}>
+                    <Typography>メモ</Typography>
+                  </Grid2>
+                </Grid2>
+                <Grid2
+                  container
+                  display="flex"
+                  flexDirection="column"
+                  spacing={1}
+                  ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
+                  width={{ md: '50%' }}
+                >
+                  {juchuHonbanbiList &&
+                    juchuHonbanbiList.map(
+                      (data, index) =>
+                        data.juchuHonbanbiShubetuId === 20 && (
+                          <Grid2 key={index} container display="flex" flexDirection="row">
+                            <Grid2 size={3} maxWidth={200}>
+                              <Typography>{toJapanYMDString(data.juchuHonbanbiDat)}</Typography>
+                            </Grid2>
+                            <Grid2 size={3} maxWidth={200}>
+                              <Typography>{data.juchuHonbanbiAddQty}</Typography>
+                            </Grid2>
+                            <Grid2 size={6}>
+                              <Typography sx={{ wordBreak: 'break-word', whiteSpace: 'wrap' }}>{data.mem}</Typography>
+                            </Grid2>
+                          </Grid2>
+                        )
+                    )}
+                </Grid2>
+                <Box
+                  display={'flex'}
+                  justifyContent={'center'}
+                  ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
+                  mt={4}
+                  width={75}
+                  bgcolor={'lightgreen'}
+                >
+                  <Typography fontSize={'small'} py={1} px={3} sx={{ color: 'white' }}>
+                    GP
+                  </Typography>
+                </Box>
+                <Grid2
+                  container
+                  display="flex"
+                  flexDirection="row"
+                  spacing={1}
+                  ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
+                  py={2}
+                  width={{ md: '50%' }}
+                >
+                  <Grid2 size={3} maxWidth={200}>
+                    <Typography>日付</Typography>
+                  </Grid2>
+                  <Grid2 size={3} maxWidth={200}>
+                    <Typography>追加日数</Typography>
+                  </Grid2>
+                  <Grid2 size={6}>
+                    <Typography>メモ</Typography>
+                  </Grid2>
+                </Grid2>
+                <Grid2
+                  container
+                  display="flex"
+                  flexDirection="column"
+                  spacing={1}
+                  ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
+                  width={{ md: '50%' }}
+                >
+                  {juchuHonbanbiList &&
+                    juchuHonbanbiList.map(
+                      (data, index) =>
+                        data.juchuHonbanbiShubetuId === 30 && (
+                          <Grid2 key={index} container display="flex" flexDirection="row">
+                            <Grid2 size={3} maxWidth={200}>
+                              <Typography>{toJapanYMDString(data.juchuHonbanbiDat)}</Typography>
+                            </Grid2>
+                            <Grid2 size={3} maxWidth={200}>
+                              <Typography>{data.juchuHonbanbiAddQty}</Typography>
+                            </Grid2>
+                            <Grid2 size={6}>
+                              <Typography sx={{ wordBreak: 'break-word', whiteSpace: 'wrap' }}>{data.mem}</Typography>
+                            </Grid2>
+                          </Grid2>
+                        )
+                    )}
+                </Grid2>
+                <Box
+                  display={'flex'}
+                  justifyContent={'center'}
+                  ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
+                  mt={4}
+                  width={75}
+                  bgcolor={'pink'}
+                >
+                  <Typography fontSize={'small'} py={1} px={3} sx={{ color: 'white' }}>
+                    本番
+                  </Typography>
+                </Box>
+                <Grid2
+                  container
+                  display="flex"
+                  flexDirection="row"
+                  spacing={1}
+                  ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
+                  py={2}
+                  width={{ md: '50%' }}
+                >
+                  <Grid2 size={3} maxWidth={200}>
+                    <Typography>日付</Typography>
+                  </Grid2>
+                  <Grid2 size={3} maxWidth={200}>
+                    <Typography>追加日数</Typography>
+                  </Grid2>
+                  <Grid2 size={6}>
+                    <Typography>メモ</Typography>
+                  </Grid2>
+                </Grid2>
+                <Grid2
+                  container
+                  display="flex"
+                  flexDirection="column"
+                  spacing={1}
+                  ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
+                  pb={2}
+                  width={{ md: '50%' }}
+                >
+                  {juchuHonbanbiList &&
+                    juchuHonbanbiList.map(
+                      (data, index) =>
+                        data.juchuHonbanbiShubetuId === 40 && (
+                          <Grid2 key={index} container display="flex" flexDirection="row">
+                            <Grid2 size={3} maxWidth={200}>
+                              <Typography>{toJapanYMDString(data.juchuHonbanbiDat)}</Typography>
+                            </Grid2>
+                            <Grid2 size={3} maxWidth={200}>
+                              <Typography>{data.juchuHonbanbiAddQty}</Typography>
+                            </Grid2>
+                            <Grid2 size={6}>
+                              <Typography sx={{ wordBreak: 'break-word', whiteSpace: 'wrap' }}>{data.mem}</Typography>
+                            </Grid2>
+                          </Grid2>
+                        )
+                    )}
+                </Grid2>
               </Box>
-              <Box
-                display={'flex'}
-                justifyContent={'center'}
-                ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
-                width={75}
-                bgcolor={'mediumpurple'}
-              >
-                <Typography fontSize={'small'} py={1} px={3} sx={{ color: 'white' }}>
-                  仕込
-                </Typography>
-              </Box>
-              <Grid2 container spacing={1} ml={{ xs: 10, sm: 17, md: 17, lg: 17 }} py={2} width={{ md: '50%' }}>
-                <Grid2 size={3} maxWidth={200}>
-                  <Typography>日付</Typography>
-                </Grid2>
-                <Grid2 size={3} maxWidth={200}>
-                  <Typography>追加日数</Typography>
-                </Grid2>
-                <Grid2 size={6}>
-                  <Typography>メモ</Typography>
-                </Grid2>
-              </Grid2>
-              <Grid2
-                container
-                display="flex"
-                flexDirection="column"
-                spacing={1}
-                ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
-                width={{ md: '50%' }}
-              >
-                {juchuHonbanbiList &&
-                  juchuHonbanbiList.map(
-                    (data, index) =>
-                      data.juchuHonbanbiShubetuId === 10 && (
-                        <Grid2 key={index} container display="flex" flexDirection="row">
-                          <Grid2 size={3} maxWidth={200}>
-                            <Typography>{toJapanYMDString(data.juchuHonbanbiDat)}</Typography>
-                          </Grid2>
-                          <Grid2 size={3} maxWidth={200}>
-                            <Typography>{data.juchuHonbanbiAddQty}</Typography>
-                          </Grid2>
-                          <Grid2 size={6}>
-                            <Typography sx={{ wordBreak: 'break-word', whiteSpace: 'wrap' }}>{data.mem}</Typography>
-                          </Grid2>
-                        </Grid2>
-                      )
-                  )}
-              </Grid2>
-              <Box
-                display={'flex'}
-                justifyContent={'center'}
-                ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
-                mt={4}
-                width={75}
-                bgcolor={'orange'}
-              >
-                <Typography fontSize={'small'} py={1} px={3} sx={{ color: 'white' }}>
-                  RH
-                </Typography>
-              </Box>
-              <Grid2
-                container
-                display="flex"
-                flexDirection="row"
-                spacing={1}
-                ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
-                py={2}
-                width={{ md: '50%' }}
-              >
-                <Grid2 size={3} maxWidth={200}>
-                  <Typography>日付</Typography>
-                </Grid2>
-                <Grid2 size={3} maxWidth={200}>
-                  <Typography>追加日数</Typography>
-                </Grid2>
-                <Grid2 size={6}>
-                  <Typography>メモ</Typography>
-                </Grid2>
-              </Grid2>
-              <Grid2
-                container
-                display="flex"
-                flexDirection="column"
-                spacing={1}
-                ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
-                width={{ md: '50%' }}
-              >
-                {juchuHonbanbiList &&
-                  juchuHonbanbiList.map(
-                    (data, index) =>
-                      data.juchuHonbanbiShubetuId === 20 && (
-                        <Grid2 key={index} container display="flex" flexDirection="row">
-                          <Grid2 size={3} maxWidth={200}>
-                            <Typography>{toJapanYMDString(data.juchuHonbanbiDat)}</Typography>
-                          </Grid2>
-                          <Grid2 size={3} maxWidth={200}>
-                            <Typography>{data.juchuHonbanbiAddQty}</Typography>
-                          </Grid2>
-                          <Grid2 size={6}>
-                            <Typography sx={{ wordBreak: 'break-word', whiteSpace: 'wrap' }}>{data.mem}</Typography>
-                          </Grid2>
-                        </Grid2>
-                      )
-                  )}
-              </Grid2>
-              <Box
-                display={'flex'}
-                justifyContent={'center'}
-                ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
-                mt={4}
-                width={75}
-                bgcolor={'lightgreen'}
-              >
-                <Typography fontSize={'small'} py={1} px={3} sx={{ color: 'white' }}>
-                  GP
-                </Typography>
-              </Box>
-              <Grid2
-                container
-                display="flex"
-                flexDirection="row"
-                spacing={1}
-                ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
-                py={2}
-                width={{ md: '50%' }}
-              >
-                <Grid2 size={3} maxWidth={200}>
-                  <Typography>日付</Typography>
-                </Grid2>
-                <Grid2 size={3} maxWidth={200}>
-                  <Typography>追加日数</Typography>
-                </Grid2>
-                <Grid2 size={6}>
-                  <Typography>メモ</Typography>
-                </Grid2>
-              </Grid2>
-              <Grid2
-                container
-                display="flex"
-                flexDirection="column"
-                spacing={1}
-                ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
-                width={{ md: '50%' }}
-              >
-                {juchuHonbanbiList &&
-                  juchuHonbanbiList.map(
-                    (data, index) =>
-                      data.juchuHonbanbiShubetuId === 30 && (
-                        <Grid2 key={index} container display="flex" flexDirection="row">
-                          <Grid2 size={3} maxWidth={200}>
-                            <Typography>{toJapanYMDString(data.juchuHonbanbiDat)}</Typography>
-                          </Grid2>
-                          <Grid2 size={3} maxWidth={200}>
-                            <Typography>{data.juchuHonbanbiAddQty}</Typography>
-                          </Grid2>
-                          <Grid2 size={6}>
-                            <Typography sx={{ wordBreak: 'break-word', whiteSpace: 'wrap' }}>{data.mem}</Typography>
-                          </Grid2>
-                        </Grid2>
-                      )
-                  )}
-              </Grid2>
-              <Box
-                display={'flex'}
-                justifyContent={'center'}
-                ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
-                mt={4}
-                width={75}
-                bgcolor={'pink'}
-              >
-                <Typography fontSize={'small'} py={1} px={3} sx={{ color: 'white' }}>
-                  本番
-                </Typography>
-              </Box>
-              <Grid2
-                container
-                display="flex"
-                flexDirection="row"
-                spacing={1}
-                ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
-                py={2}
-                width={{ md: '50%' }}
-              >
-                <Grid2 size={3} maxWidth={200}>
-                  <Typography>日付</Typography>
-                </Grid2>
-                <Grid2 size={3} maxWidth={200}>
-                  <Typography>追加日数</Typography>
-                </Grid2>
-                <Grid2 size={6}>
-                  <Typography>メモ</Typography>
-                </Grid2>
-              </Grid2>
-              <Grid2
-                container
-                display="flex"
-                flexDirection="column"
-                spacing={1}
-                ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
-                pb={2}
-                width={{ md: '50%' }}
-              >
-                {juchuHonbanbiList &&
-                  juchuHonbanbiList.map(
-                    (data, index) =>
-                      data.juchuHonbanbiShubetuId === 40 && (
-                        <Grid2 key={index} container display="flex" flexDirection="row">
-                          <Grid2 size={3} maxWidth={200}>
-                            <Typography>{toJapanYMDString(data.juchuHonbanbiDat)}</Typography>
-                          </Grid2>
-                          <Grid2 size={3} maxWidth={200}>
-                            <Typography>{data.juchuHonbanbiAddQty}</Typography>
-                          </Grid2>
-                          <Grid2 size={6}>
-                            <Typography sx={{ wordBreak: 'break-word', whiteSpace: 'wrap' }}>{data.mem}</Typography>
-                          </Grid2>
-                        </Grid2>
-                      )
-                  )}
-              </Grid2>
-            </Box>
-          </Paper>
+            </Paper>
+          )}
         </Container>
       )}
       <SaveAlertDialog open={saveOpen} onClick={() => setSaveOpen(false)} />

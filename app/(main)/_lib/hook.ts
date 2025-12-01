@@ -3,10 +3,10 @@
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
-export const useUnsavedChangesWarning = (isDirty: boolean, isSave: boolean) => {
+export const useUnsavedChangesWarning = (isDirty: boolean) => {
   useEffect(() => {
     const handleBeforeUnload = async (e: BeforeUnloadEvent) => {
-      if (!isDirty && isSave) {
+      if (!isDirty) {
         return;
       }
       e.preventDefault();
@@ -17,5 +17,5 @@ export const useUnsavedChangesWarning = (isDirty: boolean, isSave: boolean) => {
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [isDirty, isSave]);
+  }, [isDirty]);
 };
