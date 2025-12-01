@@ -274,7 +274,7 @@ export const QuotationListTable = ({
                           <Box minWidth={60}>{quotation.mituHeadId}</Box>
                         </Button>
                       </TableCell>
-                      <TableCell align="right">{quotation.juchuHeadId}</TableCell>
+                      <TableCell align="right">{quotation.juchuHeadId > 0 ? quotation.juchuHeadId : '-'}</TableCell>
                       <TableCell sx={{ whiteSpace: 'nowrap' }}>{quotation.mituStsNam}</TableCell>
                       <TableCell>
                         <LightTooltipWithText variant={'body2'} maxWidth={200}>

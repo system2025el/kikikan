@@ -199,9 +199,14 @@ const VehicleOrderDetail = ({
       //   setIsLoading(false);
       // }, 10000);
     } else {
+      // 受注機材から自動生成対応
+      /** 入出庫種別ID */
       const kbn = searchParams.get('kbn');
+      /** 入出庫日時（ISOString想定） */
       const date = searchParams.get('date');
+      /** 入出庫場所ID */
       const basho = searchParams.get('basho');
+      // それぞれあればセット
       if (kbn && kbn.trim() !== '') {
         setValue('nyushukoKbn', Number(kbn), { shouldDirty: false });
       }
