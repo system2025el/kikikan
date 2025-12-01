@@ -439,7 +439,6 @@ const VehicleOrderDetail = ({
                           setValue('nyushukoDat', newDate.toDate(), { shouldDirty: true, shouldValidate: true });
                         }}
                         fieldstate={fieldState}
-                        timeSteps={15}
                         disabled={!editable}
                         disableClearable
                       />
