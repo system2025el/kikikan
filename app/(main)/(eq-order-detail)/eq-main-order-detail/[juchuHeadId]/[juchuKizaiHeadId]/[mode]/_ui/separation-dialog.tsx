@@ -19,12 +19,12 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import { validationMessages } from '@/app/(main)/_lib/validation-messages';
 import { Loading, LoadingOverlay } from '@/app/(main)/_ui/loading';
 
-import { JuchuContainerMeisaiValues, JuchuKizaiMeisaiValues } from '../_lib/types';
+import { JuchuContainerMeisaiValues, JuchuKizaiMeisaiValues, SeparationCtn, SeparationEq } from '../_lib/types';
 
 export const SeparationDialog = ({
   juchuKizaiMeisaiList,
@@ -41,10 +41,23 @@ export const SeparationDialog = ({
   ) => void;
   handleCloseSeparationDialog: () => void;
 }) => {
+  const inputEqOrderRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const inputEqYobiRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const inputCtnKRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const inputCtnYRefs = useRef<(HTMLInputElement | null)[]>([]);
+
   // ローディング
   const [isLoading, setIsLoading] = useState(false);
   // 機材明細名
   const [headNam, setHeadNam] = useState('');
+  // 分離機材
+  const [separationEq, setSeparationEq] = useState<SeparationEq[]>(
+    juchuKizaiMeisaiList.map((data) => ({ ...data, separatePlanKizaiQty: 0, separatePlanYobiQty: 0 }))
+  );
+  // 分離コンテナ
+  const [separationCtn, setSeparationCtn] = useState<SeparationCtn[]>(
+    juchuContainerMeisaiList.map((data) => ({ ...data, separatePlanKicsKizaiQty: 0, separatePlanYardKizaiQty: 0 }))
+  );
   // 機材選択
   const [selectedEq, setSelectedEq] = useState<number[]>([]);
   // コンテナ選択
@@ -80,10 +93,107 @@ export const SeparationDialog = ({
     }
 
     setIsLoading(true);
-    const selectEqData = juchuKizaiMeisaiList.filter((data) => selectedEq.includes(data.dspOrdNum));
-    const selectContainerData = juchuContainerMeisaiList.filter((data) => selectedCtn.includes(data.dspOrdNum));
-    await handleSeparationConfirmed(headNam, selectEqData, selectContainerData);
+    // 選択機材
+    const selectEqData = separationEq.filter((data) => selectedEq.includes(data.dspOrdNum));
+    // 選択コンテナ
+    const selectContainerData = separationCtn.filter((data) => selectedCtn.includes(data.dspOrdNum));
+
+    // 入力された数値を受注数、予備数、合計数に入れる
+    const updateEq: JuchuKizaiMeisaiValues[] = selectEqData.map((d) => ({
+      ...d,
+      planKizaiQty: d.separatePlanKizaiQty,
+      planYobiQty: d.separatePlanYobiQty,
+      planQty: d.separatePlanKizaiQty + d.separatePlanYobiQty,
+    }));
+    const updateCtn: JuchuContainerMeisaiValues[] = selectContainerData.map((d) => ({
+      ...d,
+      planKicsKizaiQty: d.separatePlanKicsKizaiQty,
+      planYardKizaiQty: d.separatePlanYardKizaiQty,
+      planQty: d.separatePlanKicsKizaiQty + d.separatePlanYardKizaiQty,
+    }));
+
+    await handleSeparationConfirmed(headNam, updateEq, updateCtn);
     setIsLoading(false);
+  };
+
+  const handleEqOrderRef = (rowIndex: number, e: HTMLInputElement | null) => {
+    inputEqOrderRefs.current[rowIndex] = e;
+  };
+
+  const handleEqOrderKeyDown = (e: React.KeyboardEvent, rowIndex: number) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      inputEqOrderRefs.current[rowIndex + 1]?.focus();
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      inputEqOrderRefs.current[rowIndex + 1]?.focus();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      inputEqOrderRefs.current[rowIndex - 1]?.focus();
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      inputEqYobiRefs.current[rowIndex]?.focus();
+    }
+  };
+
+  const handleEqYobiRef = (rowIndex: number, e: HTMLInputElement | null) => {
+    inputEqYobiRefs.current[rowIndex] = e;
+  };
+
+  const handleEqYobiKeyDown = (e: React.KeyboardEvent, rowIndex: number) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      inputEqYobiRefs.current[rowIndex + 1]?.focus();
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      inputEqYobiRefs.current[rowIndex + 1]?.focus();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      inputEqYobiRefs.current[rowIndex - 1]?.focus();
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      inputEqOrderRefs.current[rowIndex]?.focus();
+    }
+  };
+
+  const handleCtnKRef = (rowIndex: number, e: HTMLInputElement | null) => {
+    inputCtnKRefs.current[rowIndex] = e;
+  };
+
+  const handleCtnKKeyDown = (e: React.KeyboardEvent, rowIndex: number) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      inputCtnKRefs.current[rowIndex + 1]?.focus();
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      inputCtnKRefs.current[rowIndex + 1]?.focus();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      inputCtnKRefs.current[rowIndex - 1]?.focus();
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      inputCtnYRefs.current[rowIndex]?.focus();
+    }
+  };
+
+  const handleCtnYRef = (rowIndex: number, e: HTMLInputElement | null) => {
+    inputCtnYRefs.current[rowIndex] = e;
+  };
+
+  const handleCtnYKeyDown = (e: React.KeyboardEvent, rowIndex: number) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      inputCtnYRefs.current[rowIndex + 1]?.focus();
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      inputCtnYRefs.current[rowIndex + 1]?.focus();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      inputCtnYRefs.current[rowIndex - 1]?.focus();
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      inputCtnKRefs.current[rowIndex]?.focus();
+    }
   };
 
   return (
@@ -104,13 +214,13 @@ export const SeparationDialog = ({
           />
         </Grid2>
         <Box display={'flex'}>
-          {juchuKizaiMeisaiList.length > 0 && (
+          {separationEq.length > 0 && (
             <TableContainer
               sx={{
                 overflow: 'auto',
                 maxHeight: '60vh',
-                maxWidth: juchuContainerMeisaiList.length > 0 ? '60%' : '100%',
-                mr: juchuContainerMeisaiList.length > 0 ? 2 : 0,
+                maxWidth: separationCtn.length > 0 ? '60%' : '100%',
+                mr: separationCtn.length > 0 ? 2 : 0,
               }}
             >
               <Table stickyHeader aria-labelledby="tableTitle" size="small">
@@ -118,12 +228,10 @@ export const SeparationDialog = ({
                   <TableRow sx={{ whiteSpace: 'nowrap' }}>
                     <TableCell padding="checkbox">
                       <Checkbox
-                        indeterminate={selectedEq.length > 0 && selectedEq.length < juchuKizaiMeisaiList.length}
-                        checked={selectedEq.length === juchuKizaiMeisaiList.length}
+                        indeterminate={selectedEq.length > 0 && selectedEq.length < separationEq.length}
+                        checked={selectedEq.length === separationEq.length}
                         onChange={(e) => {
-                          const newSelectedEq = e.target.checked
-                            ? juchuKizaiMeisaiList.map((row) => row.dspOrdNum)
-                            : [];
+                          const newSelectedEq = e.target.checked ? separationEq.map((row) => row.dspOrdNum) : [];
                           setSelectedEq(newSelectedEq);
                         }}
                       />
@@ -136,7 +244,7 @@ export const SeparationDialog = ({
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {juchuKizaiMeisaiList.map((row, index) => (
+                  {separationEq.map((row, index) => (
                     <TableRow hover key={index}>
                       <TableCell padding="checkbox">
                         <Checkbox
@@ -149,7 +257,17 @@ export const SeparationDialog = ({
                       <TableCell align="right">{row.planYobiQty}</TableCell>
                       <TableCell align="right">
                         <TextField
+                          value={row.separatePlanKizaiQty}
                           type="number"
+                          onChange={(e) => {
+                            if (Number(e.target.value) <= row.planKizaiQty) {
+                              setSeparationEq((prev) =>
+                                prev.map((d, i) =>
+                                  i === index ? { ...d, separatePlanKizaiQty: Number(e.target.value) } : d
+                                )
+                              );
+                            }
+                          }}
                           slotProps={{
                             input: {
                               sx: {
@@ -169,11 +287,26 @@ export const SeparationDialog = ({
                               margin: 0,
                             },
                           }}
+                          inputRef={(e) => handleEqOrderRef(index, e)}
+                          onKeyDown={(e) => {
+                            handleEqOrderKeyDown(e, index);
+                          }}
+                          onFocus={(e) => e.target.select()}
                         />
                       </TableCell>
                       <TableCell align="right">
                         <TextField
+                          value={row.separatePlanYobiQty}
                           type="number"
+                          onChange={(e) => {
+                            if (Number(e.target.value) <= row.planYobiQty) {
+                              setSeparationEq((prev) =>
+                                prev.map((d, i) =>
+                                  i === index ? { ...d, separatePlanYobiQty: Number(e.target.value) } : d
+                                )
+                              );
+                            }
+                          }}
                           slotProps={{
                             input: {
                               sx: {
@@ -193,6 +326,11 @@ export const SeparationDialog = ({
                               margin: 0,
                             },
                           }}
+                          inputRef={(e) => handleEqYobiRef(index, e)}
+                          onKeyDown={(e) => {
+                            handleEqYobiKeyDown(e, index);
+                          }}
+                          onFocus={(e) => e.target.select()}
                         />
                       </TableCell>
                     </TableRow>
@@ -201,21 +339,19 @@ export const SeparationDialog = ({
               </Table>
             </TableContainer>
           )}
-          {juchuContainerMeisaiList.length > 0 && (
+          {separationCtn.length > 0 && (
             <TableContainer
-              sx={{ overflow: 'auto', maxHeight: '60vh', maxWidth: juchuKizaiMeisaiList.length > 0 ? '40%' : '100%' }}
+              sx={{ overflow: 'auto', maxHeight: '60vh', maxWidth: separationEq.length > 0 ? '40%' : '100%' }}
             >
               <Table stickyHeader aria-labelledby="tableTitle" size="small">
                 <TableHead sx={{ bgcolor: 'primary.light' }}>
                   <TableRow sx={{ whiteSpace: 'nowrap' }}>
                     <TableCell padding="checkbox">
                       <Checkbox
-                        indeterminate={selectedCtn.length > 0 && selectedCtn.length < juchuContainerMeisaiList.length}
-                        checked={selectedCtn.length === juchuContainerMeisaiList.length}
+                        indeterminate={selectedCtn.length > 0 && selectedCtn.length < separationCtn.length}
+                        checked={selectedCtn.length === separationCtn.length}
                         onChange={(e) => {
-                          const newSelectedCtn = e.target.checked
-                            ? juchuContainerMeisaiList.map((row) => row.dspOrdNum)
-                            : [];
+                          const newSelectedCtn = e.target.checked ? separationCtn.map((row) => row.dspOrdNum) : [];
                           setSelectedCtn(newSelectedCtn);
                         }}
                       />
@@ -228,7 +364,7 @@ export const SeparationDialog = ({
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {juchuContainerMeisaiList.map((row, index) => (
+                  {separationCtn.map((row, index) => (
                     <TableRow hover key={index}>
                       <TableCell padding="checkbox">
                         <Checkbox
@@ -241,7 +377,17 @@ export const SeparationDialog = ({
                       <TableCell align="right">{row.planYardKizaiQty}</TableCell>
                       <TableCell align="right">
                         <TextField
+                          value={row.separatePlanKicsKizaiQty}
                           type="number"
+                          onChange={(e) => {
+                            if (Number(e.target.value) <= row.planKicsKizaiQty) {
+                              setSeparationCtn((prev) =>
+                                prev.map((d, i) =>
+                                  i === index ? { ...d, separatePlanKicsKizaiQty: Number(e.target.value) } : d
+                                )
+                              );
+                            }
+                          }}
                           slotProps={{
                             input: {
                               sx: {
@@ -261,11 +407,26 @@ export const SeparationDialog = ({
                               margin: 0,
                             },
                           }}
+                          inputRef={(e) => handleCtnKRef(index, e)}
+                          onKeyDown={(e) => {
+                            handleCtnKKeyDown(e, index);
+                          }}
+                          onFocus={(e) => e.target.select()}
                         />
                       </TableCell>
                       <TableCell align="right">
                         <TextField
+                          value={row.separatePlanYardKizaiQty}
                           type="number"
+                          onChange={(e) => {
+                            if (Number(e.target.value) <= row.planYardKizaiQty) {
+                              setSeparationCtn((prev) =>
+                                prev.map((d, i) =>
+                                  i === index ? { ...d, separatePlanYardKizaiQty: Number(e.target.value) } : d
+                                )
+                              );
+                            }
+                          }}
                           slotProps={{
                             input: {
                               sx: {
@@ -285,6 +446,11 @@ export const SeparationDialog = ({
                               margin: 0,
                             },
                           }}
+                          inputRef={(e) => handleCtnYRef(index, e)}
+                          onKeyDown={(e) => {
+                            handleCtnYKeyDown(e, index);
+                          }}
+                          onFocus={(e) => e.target.select()}
                         />
                       </TableCell>
                     </TableRow>
@@ -297,7 +463,9 @@ export const SeparationDialog = ({
       </Paper>
       <Box display={'flex'} justifyContent={'end'} my={1}>
         <Grid2 container spacing={2}>
-          <Button onClick={handleClickConfirmed}>確定</Button>
+          <Button disabled={selectedEq.length + selectedCtn.length === 0} onClick={handleClickConfirmed}>
+            確定
+          </Button>
           <Button onClick={handleCloseSeparationDialog}>戻る</Button>
         </Grid2>
       </Box>
