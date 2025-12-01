@@ -147,3 +147,19 @@ export type SelectedEqptsValues = {
   ctnFlg: boolean;
   indentNum: number;
 };
+
+/**
+ * 分離用機材type
+ */
+export type SeparationEq = JuchuKizaiMeisaiValues & {
+  separatePlanKizaiQty: number;
+  separatePlanYobiQty: number;
+};
+
+/**
+ * 分離用コンテナtype
+ */
+export type SeparationCtn = JuchuContainerMeisaiValues & {
+  separatePlanKicsKizaiQty: number;
+  separatePlanYardKizaiQty: number;
+};

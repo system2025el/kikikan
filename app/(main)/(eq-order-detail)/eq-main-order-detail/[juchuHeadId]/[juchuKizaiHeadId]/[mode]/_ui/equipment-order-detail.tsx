@@ -1560,7 +1560,102 @@ const EquipmentOrderDetail = (props: {
     headNam: string,
     selectEq: JuchuKizaiMeisaiValues[],
     selectCtn: JuchuContainerMeisaiValues[]
-  ) => {};
+  ) => {
+    if (!user || !shukoDate || !nyukoDate) return;
+
+    // ユーザー名
+    const userNam = user.name;
+
+    // 受注機材ヘッダー
+    const newJuchuKizaiHead = { ...getValues(), headNam: headNam };
+    console.log('newJuchuKizaiHead', newJuchuKizaiHead);
+
+    // 機材id
+    const ids = [...new Set(selectEq.map((d) => d.kizaiId))];
+    // 選択された機材に対する移動データ
+    const selectIdoList = idoJuchuKizaiMeisaiList
+      .filter((d) => ids.includes(d.kizaiId) && !d.delFlag && d.sagyoDenDat)
+      .map((d) => ({ ...d, planKizaiQty: 0, planYobiQty: 0, planQty: 0 }));
+    console.log('selectIdoList', selectIdoList);
+
+    const sum = selectEq
+      .filter((d) => !d.delFlag)
+      .reduce((acc, current) => {
+        const key = current.kizaiId;
+        const currentTotals = acc.get(key) ?? { planKizaiQty: 0, planYobiQty: 0, planQty: 0 };
+        currentTotals.planKizaiQty += current.planKizaiQty;
+        currentTotals.planYobiQty += current.planYobiQty;
+        currentTotals.planQty += current.planQty;
+
+        acc.set(key, currentTotals);
+
+        return acc;
+      }, new Map<number, { planKizaiQty: number; planYobiQty: number; planQty: number }>());
+
+    // 移動データの数値更新
+    const idoList = selectIdoList.map((d) =>
+      sum.get(d.kizaiId)
+        ? {
+            ...d,
+            planKizaiQty: sum.get(d.kizaiId)!.planKizaiQty,
+            planYobiQty: sum.get(d.kizaiId)!.planYobiQty,
+            planQty: sum.get(d.kizaiId)!.planQty,
+          }
+        : { ...d, delFlag: true }
+    );
+    console.log('idoList', idoList);
+
+    // 分離処理
+    const separationResult = await juchuMeisaiCopy(
+      newJuchuKizaiHead,
+      shukoDate,
+      nyukoDate,
+      dateRange,
+      selectEq,
+      selectCtn,
+      idoList,
+      juchuHonbanbiList,
+      userNam
+    );
+
+    if (separationResult) {
+      const selectDspOrdNum = [...selectEq.map((d) => d.dspOrdNum), ...selectCtn.map((d) => d.dspOrdNum)];
+      setJuchuKizaiMeisaiList((prev) =>
+        prev.map((data) =>
+          selectDspOrdNum.includes(data.dspOrdNum)
+            ? {
+                ...data,
+                planKizaiQty: data.planKizaiQty - selectEq.find((d) => d.dspOrdNum === data.dspOrdNum)!.planKizaiQty,
+                planYobiQty: data.planYobiQty - selectEq.find((d) => d.dspOrdNum === data.dspOrdNum)!.planYobiQty,
+                planQty: data.planQty - selectEq.find((d) => d.dspOrdNum === data.dspOrdNum)!.planQty,
+              }
+            : data
+        )
+      );
+
+      setJuchuContainerMeisaiList((prev) =>
+        prev.map((data) =>
+          selectDspOrdNum.includes(data.dspOrdNum)
+            ? {
+                ...data,
+                planKicsKizaiQty:
+                  data.planKicsKizaiQty - selectCtn.find((d) => d.dspOrdNum === data.dspOrdNum)!.planKicsKizaiQty,
+                planYardKizaiQty:
+                  data.planYardKizaiQty - selectCtn.find((d) => d.dspOrdNum === data.dspOrdNum)!.planYardKizaiQty,
+                planQty: data.planQty - selectCtn.find((d) => d.dspOrdNum === data.dspOrdNum)!.planQty,
+              }
+            : data
+        )
+      );
+
+      setSeparationDialogOpen(false);
+      setSnackBarMessage('分離しました');
+      setSnackBarOpen(true);
+    } else {
+      setSnackBarMessage('分離に失敗しました');
+      setSnackBarOpen(true);
+    }
+  };
 
   // 本番日入力ダイアログ開閉
   const handleOpenDateDialog = () => {
@@ -2109,9 +2204,8 @@ const EquipmentOrderDetail = (props: {
               <Grid2 container spacing={2}>
                 <Button
                   disabled={
-                    !edit ||
-                    (juchuKizaiMeisaiList.filter((d) => !d.delFlag).length === 0 &&
-                      juchuContainerMeisaiList.filter((d) => !d.delFlag).length === 0)
+                    juchuKizaiMeisaiList.filter((d) => !d.delFlag).length === 0 &&
+                    juchuContainerMeisaiList.filter((d) => !d.delFlag).length === 0
                   }
                   onClick={handleOpenCopyDialog}
                 >
