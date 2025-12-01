@@ -1937,98 +1937,150 @@ const EquipmentOrderDetail = (props: {
                   </Grid2>
                 </Grid2>
                 <Grid2 container p={2} spacing={2}>
-                  <Grid2 width={300}>
+                  <Grid2 width={350}>
                     <Typography>出庫日時</Typography>
-                    <Grid2>
+                    <Grid2 sx={styles.grid2Row}>
                       <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
                       <Controller
                         name="kicsShukoDat"
                         control={control}
                         render={({ field, fieldState }) => (
-                          <DateTime
-                            date={field.value}
-                            maxDate={
-                              juchuHonbanbiList.length > 0 ? new Date(juchuHonbanbiList[0].juchuHonbanbiDat) : undefined
-                            }
-                            onChange={handleKicsShukoChange}
-                            onAccept={handleKicsShukoAccept}
-                            fieldstate={fieldState}
-                            disabled={!edit}
-                            onClear={handleKicsClear}
-                          />
+                          <Box sx={styles.grid2Row}>
+                            <DateTime
+                              date={field.value}
+                              maxDate={
+                                juchuHonbanbiList.length > 0
+                                  ? new Date(juchuHonbanbiList[0].juchuHonbanbiDat)
+                                  : undefined
+                              }
+                              onChange={handleKicsShukoChange}
+                              onAccept={handleKicsShukoAccept}
+                              fieldstate={fieldState}
+                              disabled={!edit}
+                              onClear={handleKicsClear}
+                            />
+                            <Button
+                              onClick={() =>
+                                window.open(
+                                  `/vehicle-order-detail/${props.juchuHeadData.juchuHeadId}/0/edit?kbn=2&date=${field.value?.toISOString()}&basho=1`
+                                )
+                              }
+                              disabled={!field.value ? true : false}
+                            >
+                              車両
+                            </Button>
+                          </Box>
                         )}
                       />
                     </Grid2>
-                    <Grid2>
+                    <Grid2 sx={styles.grid2Row}>
                       <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
                       <Controller
                         name="yardShukoDat"
                         control={control}
                         render={({ field, fieldState }) => (
-                          <DateTime
-                            date={field.value}
-                            maxDate={
-                              juchuHonbanbiList.length > 0 ? new Date(juchuHonbanbiList[0].juchuHonbanbiDat) : undefined
-                            }
-                            onChange={handleYardShukoChange}
-                            onAccept={handleYardShukoAccept}
-                            fieldstate={fieldState}
-                            disabled={!edit}
-                            onClear={handleYardClear}
-                          />
+                          <Box sx={styles.grid2Row}>
+                            <DateTime
+                              date={field.value}
+                              maxDate={
+                                juchuHonbanbiList.length > 0
+                                  ? new Date(juchuHonbanbiList[0].juchuHonbanbiDat)
+                                  : undefined
+                              }
+                              onChange={handleYardShukoChange}
+                              onAccept={handleYardShukoAccept}
+                              fieldstate={fieldState}
+                              disabled={!edit}
+                              onClear={handleYardClear}
+                            />
+                            <Button
+                              onClick={() =>
+                                window.open(
+                                  `/vehicle-order-detail/${props.juchuHeadData.juchuHeadId}/0/edit?kbn=2&date=${field.value?.toISOString()}&basho=2`
+                                )
+                              }
+                              disabled={!field.value ? true : false}
+                            >
+                              車両
+                            </Button>
+                          </Box>
                         )}
                       />
                     </Grid2>
                   </Grid2>
-                  <Grid2 width={300}>
+                  <Grid2 size={'auto'}>
                     <Typography>入庫日時</Typography>
-                    <Grid2>
+                    <Grid2 sx={styles.grid2Row}>
                       <TextField defaultValue={'K'} disabled sx={{ width: '10%', minWidth: 50 }} />
                       <Controller
                         name="kicsNyukoDat"
                         control={control}
                         render={({ field, fieldState }) => (
-                          <DateTime
-                            date={field.value}
-                            minDate={
-                              juchuHonbanbiList.length > 0
-                                ? new Date(juchuHonbanbiList[juchuHonbanbiList.length - 1].juchuHonbanbiDat)
-                                : undefined
-                            }
-                            onChange={handleKicsNyukoChange}
-                            onAccept={handleKicsNyukoAccept}
-                            fieldstate={fieldState}
-                            disabled={!edit}
-                            onClear={() => {
-                              field.onChange(null);
-                              trigger(['kicsNyukoDat', 'yardNyukoDat']);
-                            }}
-                          />
+                          <Box sx={styles.grid2Row}>
+                            <DateTime
+                              date={field.value}
+                              minDate={
+                                juchuHonbanbiList.length > 0
+                                  ? new Date(juchuHonbanbiList[juchuHonbanbiList.length - 1].juchuHonbanbiDat)
+                                  : undefined
+                              }
+                              onChange={handleKicsNyukoChange}
+                              onAccept={handleKicsNyukoAccept}
+                              fieldstate={fieldState}
+                              disabled={!edit}
+                              onClear={() => {
+                                field.onChange(null);
+                                trigger(['kicsNyukoDat', 'yardNyukoDat']);
+                              }}
+                            />
+                            <Button
+                              onClick={() =>
+                                window.open(
+                                  `/vehicle-order-detail/${props.juchuHeadData.juchuHeadId}/0/edit?kbn=1&date=${field.value?.toISOString()}&basho=1`
+                                )
+                              }
+                              disabled={!field.value ? true : false}
+                            >
+                              車両
+                            </Button>
+                          </Box>
                         )}
                       />
                     </Grid2>
-                    <Grid2>
+                    <Grid2 sx={styles.grid2Row}>
                       <TextField defaultValue={'Y'} disabled sx={{ width: '10%', minWidth: 50 }} />
                       <Controller
                         name="yardNyukoDat"
                         control={control}
                         render={({ field, fieldState }) => (
-                          <DateTime
-                            date={field.value}
-                            minDate={
-                              juchuHonbanbiList.length > 0
-                                ? new Date(juchuHonbanbiList[juchuHonbanbiList.length - 1].juchuHonbanbiDat)
-                                : undefined
-                            }
-                            onChange={handleYardNyukoChange}
-                            onAccept={handleYardNyukoAccept}
-                            fieldstate={fieldState}
-                            disabled={!edit}
-                            onClear={() => {
-                              field.onChange(null);
-                              trigger(['kicsNyukoDat', 'yardNyukoDat']);
-                            }}
-                          />
+                          <Box sx={styles.grid2Row}>
+                            <DateTime
+                              date={field.value}
+                              minDate={
+                                juchuHonbanbiList.length > 0
+                                  ? new Date(juchuHonbanbiList[juchuHonbanbiList.length - 1].juchuHonbanbiDat)
+                                  : undefined
+                              }
+                              onChange={handleYardNyukoChange}
+                              onAccept={handleYardNyukoAccept}
+                              fieldstate={fieldState}
+                              disabled={!edit}
+                              onClear={() => {
+                                field.onChange(null);
+                                trigger(['kicsNyukoDat', 'yardNyukoDat']);
+                              }}
+                            />
+                            <Button
+                              onClick={() =>
+                                window.open(
+                                  `/vehicle-order-detail/${props.juchuHeadData.juchuHeadId}/0/edit?kbn=1&date=${field.value?.toISOString()}&basho=2`
+                                )
+                              }
+                              disabled={!field.value ? true : false}
+                            >
+                              車両
+                            </Button>
+                          </Box>
                         )}
                       />
                     </Grid2>
