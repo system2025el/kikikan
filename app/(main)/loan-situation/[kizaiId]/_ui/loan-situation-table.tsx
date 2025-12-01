@@ -29,7 +29,7 @@ export const LoanSituationTable = (props: LoanSituationTableProps) => {
     <TableContainer
       ref={ref}
       component={Paper}
-      style={{ overflowX: 'auto' }}
+      style={{ overflowX: 'scroll' }}
       square
       variant="outlined"
       sx={{ maxHeight: '80vh' }}
@@ -146,7 +146,7 @@ export const UseTable = (props: UseTableProps) => {
     <TableContainer
       ref={ref}
       component={Paper}
-      style={{ overflowX: 'auto' }}
+      style={{ overflowX: 'scroll' }}
       square
       variant="outlined"
       sx={{ maxHeight: '80vh' }}

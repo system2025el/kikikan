@@ -16,6 +16,7 @@ import {
   Divider,
   Fab,
   FormControl,
+  FormHelperText,
   Grid2,
   ListItem,
   MenuItem,
@@ -117,9 +118,11 @@ const VehicleOrderDetail = ({
     setValue,
     getValues,
     reset,
-    formState: { isDirty, errors },
+    trigger,
+    formState: { isDirty, errors: sharyoError },
   } = useForm<JuchuSharyoHeadValues>({
-    mode: 'onTouched',
+    mode: 'onChange',
+    reValidateMode: 'onBlur',
     resolver: zodResolver(JuchuSharyoHeadSchema),
     defaultValues: {
       juchuHeadId: juchuHeadData.juchuHeadId,
@@ -221,8 +224,8 @@ const VehicleOrderDetail = ({
   }, [sharyoHeadId, juchuHeadData.juchuHeadId, searchParams, reset, setValue]);
 
   useEffect(() => {
-    console.log(errors);
-  }, [errors]);
+    console.log(sharyoError);
+  }, [sharyoError]);
 
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
@@ -402,18 +405,16 @@ const VehicleOrderDetail = ({
                   <Controller
                     name="nyushukoDat"
                     control={control}
-                    rules={{ required: '必須です' }}
                     render={({ field, fieldState }) => (
                       <DateTime
                         date={field.value}
-                        maxDate={undefined}
                         onChange={(newDate: Dayjs | null) => {
                           if (newDate === null) return;
-                          setValue('nyushukoDat', newDate.toDate(), { shouldDirty: true });
+                          setValue('nyushukoDat', newDate.toDate(), { shouldDirty: true, shouldValidate: true });
                         }}
                         onAccept={(newDate: Dayjs | null) => {
                           if (newDate === null) return;
-                          setValue('nyushukoDat', newDate.toDate(), { shouldDirty: true });
+                          setValue('nyushukoDat', newDate.toDate(), { shouldDirty: true, shouldValidate: true });
                         }}
                         fieldstate={fieldState}
                         timeSteps={15}
@@ -429,7 +430,7 @@ const VehicleOrderDetail = ({
                     name="nyushukoBashoId"
                     control={control}
                     sx={{ width: 120 }}
-                    options={options.basho} // マスタ内の'その他'を'厚木'に変更
+                    options={options.basho}
                     disabled={!editable}
                   />
                 </Grid2>
@@ -451,6 +452,7 @@ const VehicleOrderDetail = ({
             </Grid2>
           </AccordionDetails>
         </Accordion>
+
         {/* --------------------------------------- 車両入力 --------------------------------------- */}
         <Paper variant="outlined" sx={{ mt: 0.5 }}>
           <Box px={2} alignItems={'center'}>
@@ -474,18 +476,21 @@ const VehicleOrderDetail = ({
                     name={`meisai.${index}.sharyoId`}
                     control={control}
                     disabled={!editable}
-                    render={({ field }) => (
-                      <Select {...field} sx={{ minWidth: { sm: '60vw', md: '30vw' }, ml: { sm: 5, md: 0 } }}>
-                        {[selectNone, ...options.vehs].map((opt) => (
-                          <MenuItem
-                            key={opt.id}
-                            value={opt.id}
-                            sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
-                          >
-                            {opt.label}
-                          </MenuItem>
-                        ))}
-                      </Select>
+                    render={({ field, fieldState: { error } }) => (
+                      <FormControl error={!!error} sx={{ minWidth: { sm: '60vw', md: '30vw' }, ml: { sm: 5, md: 0 } }}>
+                        <Select {...field} value={field.value ?? ''}>
+                          {[selectNone, ...options.vehs].map((opt) => (
+                            <MenuItem
+                              key={opt.id}
+                              value={opt.id}
+                              sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
+                            >
+                              {opt.label}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                        {error && <FormHelperText>{error.message}</FormHelperText>}
+                      </FormControl>
                     )}
                   />
                 </Grid2>
@@ -514,6 +519,11 @@ const VehicleOrderDetail = ({
                 </Grid2>
               </Grid2>
             ))}
+            {sharyoError.meisai?.root?.message && (
+              <Typography variant="caption" color={'error.main'} ml={{ sm: 6, md: 11 }}>
+                {sharyoError.meisai?.root?.message}
+              </Typography>
+            )}
           </Box>
         </Paper>
         {/** 固定ボタン 保存＆ページトップ */}
