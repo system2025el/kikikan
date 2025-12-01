@@ -29,6 +29,7 @@ import {
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import { Dayjs } from 'dayjs';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import { SelectElement, TextFieldElement } from 'react-hook-form-mui';
@@ -81,8 +82,11 @@ const VehicleOrderDetail = ({
 }) => {
   /** ログインユーザ */
   const user = useUserStore((state) => state.user);
-  /** 初期値 */
-  let currentSharyoMeisai: JuchuSharyoHeadValues;
+  /** ルーター */
+  const router = useRouter();
+  /** クエリパラメータ */
+  const searchParams = useSearchParams();
+
   /* useState ----------------------------------------------------- */
   /** 選択肢 */
   const [options, setOptions] = useState<{ kbn: SelectTypes[]; basho: SelectTypes[]; vehs: SelectTypes[] }>({
@@ -112,7 +116,6 @@ const VehicleOrderDetail = ({
     handleSubmit,
     setValue,
     getValues,
-    trigger,
     reset,
     formState: { isDirty, errors },
   } = useForm<JuchuSharyoHeadValues>({
@@ -155,8 +158,13 @@ const VehicleOrderDetail = ({
   const onSubmit = async (data: JuchuSharyoHeadValues) => {
     setIsLoading(true);
     if (sharyoHeadId <= 0) {
-      await addNewJuchuSharyoHead(data, user?.name ?? '');
+      // 新規登録
+      const newId = await addNewJuchuSharyoHead(data, user?.name ?? '');
+      setSnackBarMessage('保存しました');
+      setSnackBarOpen(true);
+      router.replace(`/vehicle-order-detail/${data.juchuHeadId}/${Number(newId)}/edit`);
     } else {
+      // 更新処理
       if (!currentMeisai) return;
       updateJuchuSharyoHead(data, currentMeisai!, user?.name ?? '');
       const newData = getValues();
@@ -191,9 +199,21 @@ const VehicleOrderDetail = ({
       //   setIsLoading(false);
       // }, 10000);
     } else {
+      const kbn = searchParams.get('kbn');
+      const date = searchParams.get('date');
+      const basho = searchParams.get('basho');
+      if (kbn && kbn.trim() !== '') {
+        setValue('nyushukoKbn', Number(kbn), { shouldDirty: false });
+      }
+      if (date && date.trim() !== '') {
+        setValue('nyushukoDat', new Date(date), { shouldDirty: false });
+      }
+      if (basho && basho.trim() !== '') {
+        setValue('nyushukoBashoId', Number(basho), { shouldDirty: false });
+      }
       setIsLoading(false);
     }
-  }, [sharyoHeadId, juchuHeadData.juchuHeadId, reset]);
+  }, [sharyoHeadId, juchuHeadData.juchuHeadId, searchParams, reset, setValue]);
 
   useEffect(() => {
     console.log(errors);
@@ -404,7 +424,7 @@ const VehicleOrderDetail = ({
                     name="nyushukoBashoId"
                     control={control}
                     sx={{ width: 120 }}
-                    options={options.basho}
+                    options={options.basho} // マスタ内の'その他'を'厚木'に変更
                     disabled={!editable}
                   />
                 </Grid2>

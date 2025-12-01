@@ -98,7 +98,7 @@ export const getChosenJuchuSharyoMeisais = async (
  * @param {JuchuSharyoHeadValues} data フォームの情報
  * @param {string} user ログインユーザ名
  */
-export const addNewJuchuSharyoHead = async (data: JuchuSharyoHeadValues, user: string) => {
+export const addNewJuchuSharyoHead = async (data: JuchuSharyoHeadValues, user: string): Promise<number> => {
   /**現在時刻の文字列 */
   const now = new Date().toISOString();
   /** 車両明細ヘッダのデータ */
@@ -148,7 +148,7 @@ export const addNewJuchuSharyoHead = async (data: JuchuSharyoHeadValues, user: s
       console.log(rows.length, '件の明細を登録');
     }
     await connection.query('COMMIT');
-    await redirect(`/vehicle-order-detail/${data.juchuHeadId}/${Number(sharyoHeadId)}/edit`);
+    return sharyoHeadId;
   } catch (e) {
     await connection.query('ROLLBACK');
     throw e;
