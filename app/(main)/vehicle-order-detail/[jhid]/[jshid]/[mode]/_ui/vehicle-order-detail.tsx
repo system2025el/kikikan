@@ -1,6 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { DialerSip } from '@mui/icons-material';
 import AddIcon from '@mui/icons-material/Add';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -13,6 +14,10 @@ import {
   Box,
   Button,
   Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Divider,
   Fab,
   FormControl,
@@ -37,7 +42,7 @@ import { SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
-import { BackButton } from '@/app/(main)/_ui/buttons';
+import { BackButton, CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
 import { DateTime, TestDate } from '@/app/(main)/_ui/date';
 import { selectNone, SelectTypes } from '@/app/(main)/_ui/form-box';
 import { LoadingOverlay } from '@/app/(main)/_ui/loading';
@@ -110,6 +115,8 @@ const VehicleOrderDetail = ({
   const [snackBarOpen, setSnackBarOpen] = useState(false);
   /* スナックバーのメッセージ */
   const [snackBarMessage, setSnackBarMessage] = useState('');
+  /** メモ削除確認ダイアログ */
+  const [memOpen, setMemOpen] = useState<boolean>(false);
 
   /* useForm ------------------------------------------------------- */
   const {
@@ -157,8 +164,23 @@ const VehicleOrderDetail = ({
     });
   };
 
+  /** 保存ボタン押下時処理 */
+  const onSubmit = (data: JuchuSharyoHeadValues) => {
+    /** メモだけ書かれた明細がないか */
+    const memOnly = data.meisai.some(
+      (item) => item.sharyoMem !== null && (item.sharyoId === null || item.sharyoQty === null)
+    );
+    if (memOnly) {
+      // あればダイアログ開いて確認
+      setMemOpen(true);
+    } else {
+      // 無ければ保存
+      handleSave(data);
+    }
+  };
+
   /** フォーム送信処理 */
-  const onSubmit = async (data: JuchuSharyoHeadValues) => {
+  const handleSave = async (data: JuchuSharyoHeadValues) => {
     setIsLoading(true);
     if (sharyoHeadId <= 0) {
       // 新規登録
@@ -537,6 +559,27 @@ const VehicleOrderDetail = ({
           </Fab>
         </Box>
       </form>
+      <Dialog open={memOpen} onClose={() => setMemOpen(false)}>
+        <DialogTitle display={'flex'} justifyContent={'end'}>
+          <CloseMasterDialogButton
+            handleCloseDialog={() => {
+              setMemOpen(false);
+            }}
+          />
+        </DialogTitle>
+        <DialogContent>車両がないメモは保存されません</DialogContent>
+        <DialogActions>
+          <Button onClick={() => setMemOpen(false)}>戻る</Button>
+          <Button
+            onClick={() => {
+              handleSave(getValues());
+              setMemOpen(false);
+            }}
+          >
+            はい
+          </Button>
+        </DialogActions>
+      </Dialog>
       <Snackbar
         open={snackBarOpen}
         autoHideDuration={6000}
