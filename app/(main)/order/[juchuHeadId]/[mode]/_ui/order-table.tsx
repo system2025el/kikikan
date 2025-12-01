@@ -4,7 +4,7 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { Box, Button, Collapse, IconButton, Typography } from '@mui/material';
+import { Box, Button, Collapse, IconButton, Radio, RadioGroup, Typography } from '@mui/material';
 import Checkbox from '@mui/material/Checkbox';
 import { grey } from '@mui/material/colors';
 import Paper from '@mui/material/Paper';
@@ -14,6 +14,7 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
+import { useRouter } from 'next/navigation';
 import * as React from 'react';
 import { useState } from 'react';
 
@@ -40,21 +41,26 @@ export type Row = {
 type OrderEqTableProps = {
   orderEqRows: EqTableValues[] | undefined;
   edit: boolean;
-  onEqSelectionChange: (selectedIds: number[]) => void;
+  selectEq: number | null;
+  onEqSelectionChange: (selectedId: number) => void;
+  handleClickEqOrderName: (row: EqTableValues) => void;
 };
 
-export const OrderEqTable: React.FC<OrderEqTableProps> = ({ orderEqRows, edit, onEqSelectionChange }) => {
+export const OrderEqTable: React.FC<OrderEqTableProps> = ({
+  orderEqRows,
+  edit,
+  selectEq,
+  onEqSelectionChange,
+  handleClickEqOrderName,
+}) => {
+  const router = useRouter();
+
   const [rows, setRows] = useState(orderEqRows);
-  const [selected, setSelected] = useState<number[]>([]);
-  console.log('-------------------------------------', rows);
 
   const mode = edit ? 'edit' : 'view';
 
-  const handleSelect = (id: number) => {
-    const newSelected = selected.includes(id) ? selected.filter((item) => item !== id) : [...selected, id];
-
-    setSelected(newSelected);
-    onEqSelectionChange(newSelected);
+  const handleSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    onEqSelectionChange(Number(event.target.value));
   };
 
   // const moveRow = (index: number, direction: number) => {
@@ -73,17 +79,7 @@ export const OrderEqTable: React.FC<OrderEqTableProps> = ({ orderEqRows, edit, o
         <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle" size="small">
           <TableHead sx={{ bgcolor: 'primary.light' }}>
             <TableRow sx={{ whiteSpace: 'nowrap' }}>
-              <TableCell padding="checkbox">
-                <Checkbox
-                  indeterminate={rows && selected.length > 0 && selected.length < rows.length}
-                  checked={rows && rows.length > 0 && selected.length === rows.length}
-                  onChange={(e) => {
-                    const newSelected = e.target.checked && rows ? rows.map((row) => row.juchuKizaiHeadId) : [];
-                    setSelected(newSelected);
-                    onEqSelectionChange(newSelected);
-                  }}
-                />
-              </TableCell>
+              <TableCell padding="none" />
               <TableCell padding="none" />
               <TableCell align="left">受注明細名</TableCell>
               <TableCell align="left">出庫</TableCell>
@@ -101,23 +97,17 @@ export const OrderEqTable: React.FC<OrderEqTableProps> = ({ orderEqRows, edit, o
             {rows!.map((row, index) => (
               <TableRow hover key={row.juchuKizaiHeadId}>
                 <TableCell padding="checkbox">
-                  <Checkbox
-                    checked={selected.includes(row.juchuKizaiHeadId)}
-                    onChange={() => handleSelect(row.juchuKizaiHeadId)}
+                  <Radio
+                    name="table-radio"
+                    checked={selectEq === row.juchuKizaiHeadId}
+                    value={row.juchuKizaiHeadId}
+                    onChange={handleSelect}
                   />
                 </TableCell>
                 <TableCell padding="none">{index + 1}</TableCell>
                 <TableCell align={'left'}>
                   <Button
-                    href={
-                      row.juchuKizaiHeadKbn === 1
-                        ? `/eq-main-order-detail/${row.juchuHeadId}/${row.juchuKizaiHeadId}/${mode}`
-                        : row.juchuKizaiHeadKbn === 2
-                          ? `/eq-return-order-detail/${row.juchuHeadId}/${row.juchuKizaiHeadId}/${row.oyaJuchuKizaiHeadId}/${mode}`
-                          : row.juchuKizaiHeadKbn === 3
-                            ? `/eq-keep-order-detail/${row.juchuHeadId}/${row.juchuKizaiHeadId}/${row.oyaJuchuKizaiHeadId}/${mode}`
-                            : `/eq-main-order-detail/${row.juchuHeadId}/${row.juchuKizaiHeadId}/${mode}`
-                    }
+                    onClick={() => handleClickEqOrderName(row)}
                     variant="text"
                     sx={{
                       color:
