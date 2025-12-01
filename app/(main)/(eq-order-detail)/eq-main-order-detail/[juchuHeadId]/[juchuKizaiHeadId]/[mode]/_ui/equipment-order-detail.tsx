@@ -283,7 +283,6 @@ const EquipmentOrderDetail = (props: {
   /**
    * useEffect
    */
-
   useEffect(() => {
     if (!user || !props.edit) return;
 

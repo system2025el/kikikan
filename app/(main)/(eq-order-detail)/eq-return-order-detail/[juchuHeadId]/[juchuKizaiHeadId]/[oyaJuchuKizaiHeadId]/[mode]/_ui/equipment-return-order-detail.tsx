@@ -109,8 +109,9 @@ export const EquipmentReturnOrderDetail = (props: {
   const saveKizaiHead = props.returnJuchuKizaiHeadData.juchuKizaiHeadId !== 0 ? true : false;
   // 入庫フラグ
   const nyukoFixFlag = props.nyukoFixFlag;
-  // 全体の保存フラグ
-  const [save, setSave] = useState(false);
+
+  // 受注機材ヘッダー以外の編集フラグ
+  const [otherDirty, setOtherDirty] = useState(false);
 
   // ローディング
   const [isLoading, setIsLoading] = useState(false);
@@ -210,7 +211,7 @@ export const EquipmentReturnOrderDetail = (props: {
   const [isEditing, setIsEditing] = useState(false);
 
   // context
-  const { setIsDirty, setIsSave, setLock } = useDirty();
+  const { setIsDirty, setLock } = useDirty();
 
   // ref
   const eqStockListRef = useRef(eqStockList);
@@ -258,16 +259,11 @@ export const EquipmentReturnOrderDetail = (props: {
   });
 
   // ブラウザバック、F5、×ボタンでページを離れた際のhook
-  useUnsavedChangesWarning(isDirty, save);
+  useUnsavedChangesWarning(isDirty || otherDirty ? true : false);
 
   /**
    * useEffect
    */
-  useEffect(() => {
-    setSave(saveKizaiHead);
-    setIsSave(saveKizaiHead);
-  }, [saveKizaiHead, setIsSave]);
-
   useEffect(() => {
     if (!user || !props.edit) return;
 
@@ -286,25 +282,23 @@ export const EquipmentReturnOrderDetail = (props: {
     };
     asyncProcess();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+  }, []);
 
   useEffect(() => {
-    setIsDirty(isDirty);
-  }, [isDirty, setIsDirty]);
+    const dirty = isDirty || otherDirty ? true : false;
+    setIsDirty(dirty);
+  }, [isDirty, otherDirty, setIsDirty]);
 
   useEffect(() => {
     const filterJuchuKizaiMeisaiList = returnJuchuKizaiMeisaiList.filter((data) => !data.delFlag);
     const filterJuchuContainerMeisaiList = returnJuchuContainerMeisaiList.filter((data) => !data.delFlag);
     if (
-      saveKizaiHead &&
       JSON.stringify(originReturnJuchuKizaiMeisaiList) === JSON.stringify(filterJuchuKizaiMeisaiList) &&
       JSON.stringify(originReturnJuchuContainerMeisaiList) === JSON.stringify(filterJuchuContainerMeisaiList)
     ) {
-      setSave(true);
-      setIsSave(true);
+      setOtherDirty(false);
     } else {
-      setSave(false);
-      setIsSave(false);
+      setOtherDirty(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [returnJuchuKizaiMeisaiList, returnJuchuContainerMeisaiList]);
@@ -602,8 +596,7 @@ export const EquipmentReturnOrderDetail = (props: {
           setOriginReturnJuchuContainerMeisaiList(returnJuchuContainerMeisaiData ?? []);
           setReturnJuchuContainerMeisaiList(returnJuchuContainerMeisaiData ?? []);
         }
-        setSave(true);
-        setIsSave(true);
+        setOtherDirty(false);
 
         setSnackBarMessage('保存しました');
         setSnackBarOpen(true);
@@ -1099,10 +1092,6 @@ export const EquipmentReturnOrderDetail = (props: {
 
   // 機材入力ダイアログ開閉
   const handleOpenEqDialog = async () => {
-    if (!saveKizaiHead) {
-      setSaveOpen(true);
-      return;
-    }
     setEqSelectionDialogOpen(true);
   };
 
@@ -1517,105 +1506,109 @@ export const EquipmentReturnOrderDetail = (props: {
             </Box>
           </form>
           {/*返却受注明細(機材)*/}
-          <Paper variant="outlined" sx={{ mt: 2 }}>
-            <Box display="flex" justifyContent="space-between" alignItems="center" px={2} height={'30px'}>
-              <Typography>受注明細(機材)</Typography>
-            </Box>
-            <Divider />
-            <Dialog open={EqSelectionDialogOpen} maxWidth="sm" fullWidth>
-              <OyaEqSelectionDialog
-                juchuHeadId={props.juchuHeadData.juchuHeadId}
-                oyaJuchuKizaiHeadId={props.oyaJuchuKizaiNyushukoData.juchuKizaiHeadId}
-                setEqpts={setEqpts}
-                onClose={setEqSelectionDialogOpen}
-              />
-            </Dialog>
-            {isDetailLoading ? (
-              <Loading />
-            ) : (
-              <>
-                <Box display="flex" flexDirection="row" width="100%">
-                  <Box
-                    sx={{
-                      width: {
-                        xs: '40%',
-                        sm: '40%',
-                        md: '40%',
-                        lg: 'min-content',
-                      },
-                    }}
-                  >
-                    <Box mx={2} my={1}>
-                      <Button disabled={!edit} onClick={() => handleOpenEqDialog()}>
-                        <AddIcon fontSize="small" />
-                        機材追加
-                      </Button>
+          {saveKizaiHead && (
+            <Paper variant="outlined" sx={{ mt: 2 }}>
+              <Box display="flex" justifyContent="space-between" alignItems="center" px={2} height={'30px'}>
+                <Typography>受注明細(機材)</Typography>
+              </Box>
+              <Divider />
+              <Dialog open={EqSelectionDialogOpen} maxWidth="sm" fullWidth>
+                <OyaEqSelectionDialog
+                  juchuHeadId={props.juchuHeadData.juchuHeadId}
+                  oyaJuchuKizaiHeadId={props.oyaJuchuKizaiNyushukoData.juchuKizaiHeadId}
+                  setEqpts={setEqpts}
+                  onClose={setEqSelectionDialogOpen}
+                />
+              </Dialog>
+              {isDetailLoading ? (
+                <Loading />
+              ) : (
+                <>
+                  <Box display="flex" flexDirection="row" width="100%">
+                    <Box
+                      sx={{
+                        width: {
+                          xs: '40%',
+                          sm: '40%',
+                          md: '40%',
+                          lg: 'min-content',
+                        },
+                      }}
+                    >
+                      <Box mx={2} my={1}>
+                        <Button disabled={!edit} onClick={() => handleOpenEqDialog()}>
+                          <AddIcon fontSize="small" />
+                          機材追加
+                        </Button>
+                      </Box>
+                      <Box
+                        display={
+                          Object.keys(returnJuchuKizaiMeisaiList.filter((d) => !d.delFlag)).length > 0
+                            ? 'block'
+                            : 'none'
+                        }
+                      >
+                        <ReturnEqTable
+                          rows={returnJuchuKizaiMeisaiList}
+                          edit={edit}
+                          handleCellChange={handleCellChange}
+                          handleMeisaiDelete={handleEqMeisaiDelete}
+                          handleMemoChange={handleMemoChange}
+                          ref={leftRef}
+                        />
+                      </Box>
                     </Box>
                     <Box
-                      display={
-                        Object.keys(returnJuchuKizaiMeisaiList.filter((d) => !d.delFlag)).length > 0 ? 'block' : 'none'
-                      }
+                      display={Object.keys(eqStockList).length > 0 ? 'block' : 'none'}
+                      overflow="auto"
+                      sx={{ width: { xs: '60%', sm: '60%', md: 'auto' } }}
                     >
-                      <ReturnEqTable
-                        rows={returnJuchuKizaiMeisaiList}
-                        edit={edit}
-                        handleCellChange={handleCellChange}
-                        handleMeisaiDelete={handleEqMeisaiDelete}
-                        handleMemoChange={handleMemoChange}
-                        ref={leftRef}
+                      <Box display="flex" my={1}>
+                        <Box display={'flex'} alignItems={'end'} mr={2}>
+                          <Typography fontSize={'small'}>在庫数</Typography>
+                        </Box>
+                        <Button onClick={handleBackDateChange}>
+                          <ArrowBackIosNewIcon fontSize="small" />
+                        </Button>
+                        <Button variant="outlined" onClick={handleClick}>
+                          日付選択
+                        </Button>
+                        <Popper open={open} anchorEl={anchorEl} placement="bottom-start" sx={{ zIndex: 1000 }}>
+                          <ClickAwayListener onClickAway={handleClickAway}>
+                            <Paper elevation={3} sx={{ mt: 1 }}>
+                              <Calendar date={selectDate} onChange={handleDateChange} />
+                            </Paper>
+                          </ClickAwayListener>
+                        </Popper>
+                        <Button onClick={handleForwardDateChange}>
+                          <ArrowForwardIosIcon fontSize="small" />
+                        </Button>
+                      </Box>
+                      <ReturnStockTable
+                        eqStockList={eqStockList}
+                        dateRange={dateRange}
+                        stockTableHeaderDateRange={props.stockTableHeaderDateRange}
+                        ref={rightRef}
                       />
                     </Box>
                   </Box>
                   <Box
-                    display={Object.keys(eqStockList).length > 0 ? 'block' : 'none'}
-                    overflow="auto"
-                    sx={{ width: { xs: '60%', sm: '60%', md: 'auto' } }}
+                    display={returnJuchuContainerMeisaiList.filter((d) => !d.delFlag).length > 0 ? 'block' : 'none'}
+                    py={2}
+                    width={'fit-content'}
                   >
-                    <Box display="flex" my={1}>
-                      <Box display={'flex'} alignItems={'end'} mr={2}>
-                        <Typography fontSize={'small'}>在庫数</Typography>
-                      </Box>
-                      <Button onClick={handleBackDateChange}>
-                        <ArrowBackIosNewIcon fontSize="small" />
-                      </Button>
-                      <Button variant="outlined" onClick={handleClick}>
-                        日付選択
-                      </Button>
-                      <Popper open={open} anchorEl={anchorEl} placement="bottom-start" sx={{ zIndex: 1000 }}>
-                        <ClickAwayListener onClickAway={handleClickAway}>
-                          <Paper elevation={3} sx={{ mt: 1 }}>
-                            <Calendar date={selectDate} onChange={handleDateChange} />
-                          </Paper>
-                        </ClickAwayListener>
-                      </Popper>
-                      <Button onClick={handleForwardDateChange}>
-                        <ArrowForwardIosIcon fontSize="small" />
-                      </Button>
-                    </Box>
-                    <ReturnStockTable
-                      eqStockList={eqStockList}
-                      dateRange={dateRange}
-                      stockTableHeaderDateRange={props.stockTableHeaderDateRange}
-                      ref={rightRef}
+                    <ReturnContainerTable
+                      rows={returnJuchuContainerMeisaiList}
+                      edit={edit}
+                      handleContainerMemoChange={handleReturnContainerMemoChange}
+                      handleContainerCellChange={handleReturnContainerCellChange}
+                      handleMeisaiDelete={handleCtnMeisaiDelete}
                     />
                   </Box>
-                </Box>
-                <Box
-                  display={returnJuchuContainerMeisaiList.filter((d) => !d.delFlag).length > 0 ? 'block' : 'none'}
-                  py={2}
-                  width={'fit-content'}
-                >
-                  <ReturnContainerTable
-                    rows={returnJuchuContainerMeisaiList}
-                    edit={edit}
-                    handleContainerMemoChange={handleReturnContainerMemoChange}
-                    handleContainerCellChange={handleReturnContainerCellChange}
-                    handleMeisaiDelete={handleCtnMeisaiDelete}
-                  />
-                </Box>
-              </>
-            )}
-          </Paper>
+                </>
+              )}
+            </Paper>
+          )}
         </Container>
       )}
       <SaveAlertDialog open={saveOpen} onClick={() => setSaveOpen(false)} />
