@@ -112,6 +112,22 @@ export const addNewJuchuSharyoHead = async (data: JuchuSharyoHeadValues, user: s
     add_user: user,
   };
 
+  /** 車両情報が抜けていれば除いた明細配列 */
+  const correctMeisai = data.meisai.filter(
+    (d) => d.sharyoId && d.sharyoId !== FAKE_NEW_ID && d.sharyoQty && Number(d.sharyoQty) !== 0
+  );
+  /** 同じ車両ならばまとめた明細配列 */
+  const newMeisai =
+    correctMeisai.length === 2 && correctMeisai[0].sharyoId === correctMeisai[1].sharyoId
+      ? [
+          {
+            sharyoId: correctMeisai[0].sharyoId,
+            sharyoQty: Number(correctMeisai[0].sharyoQty) + Number(correctMeisai[1].sharyoQty),
+            sharyoMem: `${correctMeisai[0].sharyoMem} ${correctMeisai[1].sharyoMem}`,
+          },
+        ]
+      : correctMeisai;
+
   const connection = await pool.connect();
 
   try {
@@ -126,21 +142,19 @@ export const addNewJuchuSharyoHead = async (data: JuchuSharyoHeadValues, user: s
     const sharyoHeadId = (await insertJuchuSharyoHead(sharyoHead, connection)).rows[0].juchu_sharyo_head_id;
 
     /** 車両明細のデータ、台数無は登録しない */
-    const sharyoMeisai: JuchuSharyoMeisaiDBValues[] = data.meisai
-      .filter((d) => d.sharyoId && d.sharyoId !== FAKE_NEW_ID && d.sharyoQty && Number(d.sharyoQty) !== 0)
-      .map((d, index) => ({
-        juchu_head_id: data.juchuHeadId,
-        juchu_sharyo_head_id: Number(sharyoHeadId),
-        juchu_sharyo_meisai_id: index + 1,
-        sharyo_id: d.sharyoId,
-        nyushuko_shubetu_id: fakeToNull(data.nyushukoKbn),
-        nyushuko_basho_id: data.nyushukoBashoId,
-        nyushuko_dat: data.nyushukoDat?.toISOString() ?? '',
-        daisu: d.sharyoQty,
-        mem: d.sharyoMem,
-        add_dat: now,
-        add_user: user,
-      }));
+    const sharyoMeisai: JuchuSharyoMeisaiDBValues[] = newMeisai.map((d, index) => ({
+      juchu_head_id: data.juchuHeadId,
+      juchu_sharyo_head_id: Number(sharyoHeadId),
+      juchu_sharyo_meisai_id: index + 1,
+      sharyo_id: d.sharyoId,
+      nyushuko_shubetu_id: fakeToNull(data.nyushukoKbn),
+      nyushuko_basho_id: data.nyushukoBashoId,
+      nyushuko_dat: data.nyushukoDat?.toISOString() ?? '',
+      daisu: d.sharyoQty,
+      mem: d.sharyoMem,
+      add_dat: now,
+      add_user: user,
+    }));
 
     console.log('=========================================', sharyoMeisai);
     if (sharyoMeisai && sharyoMeisai.length > 0) {
@@ -172,9 +186,22 @@ export const updateJuchuSharyoHead = async (
   user: string
 ) => {
   const now = new Date().toISOString();
-  const newMeisaiData = newData.meisai.filter(
-    (m) => m.sharyoId && m.sharyoId !== FAKE_NEW_ID && m.sharyoQty && m.sharyoQty !== 0
+
+  /** 車両情報が抜けていれば除いた明細配列 */
+  const correctMeisai = newData.meisai.filter(
+    (d) => d.sharyoId && d.sharyoId !== FAKE_NEW_ID && d.sharyoQty && Number(d.sharyoQty) !== 0
   );
+  /** 同じ車両ならばまとめた明細配列 */
+  const newMeisaiData =
+    correctMeisai.length === 2 && correctMeisai[0].sharyoId === correctMeisai[1].sharyoId
+      ? [
+          {
+            sharyoId: correctMeisai[0].sharyoId,
+            sharyoQty: Number(correctMeisai[0].sharyoQty) + Number(correctMeisai[1].sharyoQty),
+            sharyoMem: `${correctMeisai[0].sharyoMem} ${correctMeisai[1].sharyoMem}`,
+          },
+        ]
+      : correctMeisai;
   const currentMeisaiData = currentData.meisai.filter(
     (m) => m.sharyoId && m.sharyoId !== FAKE_NEW_ID && m.sharyoQty && m.sharyoQty !== 0
   );
@@ -222,7 +249,7 @@ export const updateJuchuSharyoHead = async (
         /** 削除する行のID作成 */
         const delMeisais: { juchu_head_id: number; juchu_sharyo_head_id: number; juchu_sharyo_meisai_id: number }[] =
           [];
-        Array.from({ length: meisaiLengthDiff }, (_, i) => meisaiLengthDiff - i).forEach((n) => {
+        Array.from({ length: meisaiLengthDiff }, (_, i) => meisaiLengthDiff + 1 - i).forEach((n) => {
           console.log(n);
           delMeisais.push({
             juchu_head_id: newData.juchuHeadId,
