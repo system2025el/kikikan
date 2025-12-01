@@ -15,9 +15,9 @@ import { LockValues } from '../_lib/types';
 type DirtyContextType = {
   isDirty: boolean;
   setIsDirty: (val: boolean) => void;
-  setIsSave: (val: boolean) => void;
   setLock: (val: LockValues | null) => void;
   requestNavigation: (path: string) => void;
+  requestBack: () => void;
 };
 
 const DirtyContext = createContext<DirtyContextType | undefined>(undefined);
@@ -26,14 +26,12 @@ export const DirtyProvider = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   const user = useUserStore((state) => state.user);
   const [isDirty, setIsDirty] = useState(false);
-  const [isSave, setIsSave] = useState(true);
   const [lock, setLock] = useState<LockValues | null>(null);
   const [pendingPath, setPendingPath] = useState<string | null>(null);
   const [showDialog, setShowDialog] = useState(false);
 
   const requestNavigation = async (path: string) => {
-    if (isDirty || !isSave) {
-      console.log(isDirty, isSave);
+    if (isDirty) {
       setPendingPath(path);
       setShowDialog(true);
     } else {
@@ -41,6 +39,7 @@ export const DirtyProvider = ({ children }: { children: React.ReactNode }) => {
         await delLock(lock.lockShubetu, lock.headId);
         setLock(null);
       }
+      setIsDirty(false);
       router.push(path);
     }
   };
@@ -53,10 +52,32 @@ export const DirtyProvider = ({ children }: { children: React.ReactNode }) => {
     if (pendingPath) {
       setShowDialog(false);
       setIsDirty(false);
-      setIsSave(true);
       router.push(pendingPath);
       setPendingPath(null);
     }
+  };
+
+  const requestBack = async () => {
+    if (isDirty) {
+      setShowDialog(true);
+    } else {
+      if (lock && lock.addUser === user?.name) {
+        await delLock(lock.lockShubetu, lock.headId);
+        setLock(null);
+      }
+      setIsDirty(false);
+      router.back();
+    }
+  };
+
+  const confirmBack = async () => {
+    if (lock && lock.addUser === user?.name) {
+      await delLock(lock.lockShubetu, lock.headId);
+      setLock(null);
+    }
+    setShowDialog(false);
+    setIsDirty(false);
+    router.back();
   };
 
   const cancelNavigation = () => {
@@ -66,14 +87,18 @@ export const DirtyProvider = ({ children }: { children: React.ReactNode }) => {
 
   const handleResult = (result: boolean) => {
     if (result) {
-      confirmNavigation();
+      if (pendingPath) {
+        confirmNavigation();
+      } else {
+        confirmBack();
+      }
     } else {
       cancelNavigation();
     }
   };
 
   return (
-    <DirtyContext.Provider value={{ isDirty, setIsDirty, setIsSave, setLock, requestNavigation }}>
+    <DirtyContext.Provider value={{ isDirty, setIsDirty, setLock, requestNavigation, requestBack }}>
       {children}
       <IsDirtyAlertDialog open={showDialog} onClick={handleResult} />
     </DirtyContext.Provider>

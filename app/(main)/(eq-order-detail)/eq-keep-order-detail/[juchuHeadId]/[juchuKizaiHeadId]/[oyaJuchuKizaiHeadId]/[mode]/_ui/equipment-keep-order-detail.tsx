@@ -99,8 +99,9 @@ export const EquipmentKeepOrderDetail = (props: {
   const nyukoFixFlag = props.nyukoFixFlag;
   // ロックデータ
   const [lockData, setLockData] = useState<LockValues | null>(null);
-  // 全体の保存フラグ
-  const [save, setSave] = useState(false);
+
+  // 受注機材ヘッダー以外の編集フラグ
+  const [otherDirty, setOtherDirty] = useState(false);
 
   // ローディング
   const [isLoading, setIsLoading] = useState(false);
@@ -159,7 +160,7 @@ export const EquipmentKeepOrderDetail = (props: {
   const [expanded, setExpanded] = useState(false);
 
   // context
-  const { setIsDirty, setIsSave, setLock } = useDirty();
+  const { setIsDirty, setLock } = useDirty();
 
   /* useForm ------------------------- */
   const {
@@ -200,16 +201,11 @@ export const EquipmentKeepOrderDetail = (props: {
   });
 
   // ブラウザバック、F5、×ボタンでページを離れた際のhook
-  useUnsavedChangesWarning(isDirty, save);
+  useUnsavedChangesWarning(isDirty || otherDirty ? true : false);
 
   /**
    * useEffect
    */
-  useEffect(() => {
-    setSave(saveKizaiHead);
-    setIsSave(saveKizaiHead);
-  }, [saveKizaiHead, setIsSave]);
-
   useEffect(() => {
     if (!user || !props.edit) return;
 
@@ -228,25 +224,23 @@ export const EquipmentKeepOrderDetail = (props: {
     };
     asyncProcess();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+  }, []);
 
   useEffect(() => {
-    setIsDirty(isDirty);
-  }, [isDirty, setIsDirty]);
+    const dirty = isDirty || otherDirty ? true : false;
+    setIsDirty(dirty);
+  }, [isDirty, otherDirty, setIsDirty]);
 
   useEffect(() => {
     const filterJuchuKizaiMeisaiList = keepJuchuKizaiMeisaiList.filter((data) => !data.delFlag);
     const filterJuchuContainerMeisaiList = keepJuchuContainerMeisaiList.filter((data) => !data.delFlag);
     if (
-      saveKizaiHead &&
       JSON.stringify(originKeepJuchuKizaiMeisaiList) === JSON.stringify(filterJuchuKizaiMeisaiList) &&
       JSON.stringify(originKeepJuchuContainerMeisaiList) === JSON.stringify(filterJuchuContainerMeisaiList)
     ) {
-      setSave(true);
-      setIsSave(true);
+      setOtherDirty(false);
     } else {
-      setSave(false);
-      setIsSave(false);
+      setOtherDirty(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [keepJuchuKizaiMeisaiList, keepJuchuContainerMeisaiList]);
@@ -426,8 +420,7 @@ export const EquipmentKeepOrderDetail = (props: {
           setOriginKeepJuchuContainerMeisaiList(keepJuchuContainerMeisaiData ?? []);
           setKeepJuchuContainerMeisaiList(keepJuchuContainerMeisaiData ?? []);
         }
-        setSave(true);
-        setIsSave(true);
+        setOtherDirty(false);
 
         setSnackBarMessage('保存しました');
         setSnackBarOpen(true);
@@ -724,10 +717,6 @@ export const EquipmentKeepOrderDetail = (props: {
 
   // 機材入力ダイアログ開閉
   const handleOpenEqDialog = () => {
-    if (!saveKizaiHead) {
-      setSaveOpen(true);
-      return;
-    }
     setEqSelectionDialogOpen(true);
   };
 
@@ -1121,56 +1110,60 @@ export const EquipmentKeepOrderDetail = (props: {
             </Box>
           </form>
           {/*受注明細(機材)*/}
-          <Paper variant="outlined" sx={{ mt: 2 }}>
-            <Box display="flex" alignItems="center" px={2} height={'30px'}>
-              <Typography>受注明細(機材)</Typography>
-            </Box>
-            <Divider />
+          {saveKizaiHead && (
+            <Paper variant="outlined" sx={{ mt: 2 }}>
+              <Box display="flex" alignItems="center" px={2} height={'30px'}>
+                <Typography>受注明細(機材)</Typography>
+              </Box>
+              <Divider />
 
-            <Dialog open={EqSelectionDialogOpen} maxWidth="sm" fullWidth>
-              <OyaEqSelectionDialog
-                juchuHeadId={props.juchuHeadData.juchuHeadId}
-                oyaJuchuKizaiHeadId={props.oyaJuchuKizaiHeadData.juchuKizaiHeadId}
-                setEqpts={setEqpts}
-                onClose={setEqSelectionDialogOpen}
-              />
-            </Dialog>
-            <Box width="100%">
-              <Box my={1} mx={2}>
-                <Button disabled={!edit || nyukoFixFlag} onClick={() => handleOpenEqDialog()}>
-                  <AddIcon fontSize="small" />
-                  機材追加
-                </Button>
+              <Dialog open={EqSelectionDialogOpen} maxWidth="sm" fullWidth>
+                <OyaEqSelectionDialog
+                  juchuHeadId={props.juchuHeadData.juchuHeadId}
+                  oyaJuchuKizaiHeadId={props.oyaJuchuKizaiHeadData.juchuKizaiHeadId}
+                  setEqpts={setEqpts}
+                  onClose={setEqSelectionDialogOpen}
+                />
+              </Dialog>
+              <Box width="100%">
+                <Box my={1} mx={2}>
+                  <Button disabled={!edit || nyukoFixFlag} onClick={() => handleOpenEqDialog()}>
+                    <AddIcon fontSize="small" />
+                    機材追加
+                  </Button>
+                </Box>
+                <Box
+                  width={'min-content'}
+                  display={
+                    Object.keys(keepJuchuKizaiMeisaiList.filter((d) => !d.delFlag)).length > 0 ? 'block' : 'none'
+                  }
+                >
+                  <KeepEqTable
+                    rows={keepJuchuKizaiMeisaiList}
+                    edit={edit}
+                    nyukoFixFlag={nyukoFixFlag}
+                    handleMeisaiDelete={handleEqMeisaiDelete}
+                    handleMemoChange={handleMemoChange}
+                    handleCellChange={handleCellChange}
+                  />
+                </Box>
               </Box>
               <Box
-                width={'min-content'}
-                display={Object.keys(keepJuchuKizaiMeisaiList.filter((d) => !d.delFlag)).length > 0 ? 'block' : 'none'}
+                display={keepJuchuContainerMeisaiList.filter((d) => !d.delFlag).length > 0 ? 'block' : 'none'}
+                py={2}
+                width={'fit-content'}
               >
-                <KeepEqTable
-                  rows={keepJuchuKizaiMeisaiList}
+                <KeepContainerTable
+                  rows={keepJuchuContainerMeisaiList}
                   edit={edit}
                   nyukoFixFlag={nyukoFixFlag}
-                  handleMeisaiDelete={handleEqMeisaiDelete}
-                  handleMemoChange={handleMemoChange}
-                  handleCellChange={handleCellChange}
+                  handleContainerMemoChange={handleKeepContainerMemoChange}
+                  handleContainerCellChange={handleKeepContainerCellChange}
+                  handleMeisaiDelete={handleCtnMeisaiDelete}
                 />
               </Box>
-            </Box>
-            <Box
-              display={keepJuchuContainerMeisaiList.filter((d) => !d.delFlag).length > 0 ? 'block' : 'none'}
-              py={2}
-              width={'fit-content'}
-            >
-              <KeepContainerTable
-                rows={keepJuchuContainerMeisaiList}
-                edit={edit}
-                nyukoFixFlag={nyukoFixFlag}
-                handleContainerMemoChange={handleKeepContainerMemoChange}
-                handleContainerCellChange={handleKeepContainerCellChange}
-                handleMeisaiDelete={handleCtnMeisaiDelete}
-              />
-            </Box>
-          </Paper>
+            </Paper>
+          )}
         </Container>
       )}
       <SaveAlertDialog open={saveOpen} onClick={() => setSaveOpen(false)} />

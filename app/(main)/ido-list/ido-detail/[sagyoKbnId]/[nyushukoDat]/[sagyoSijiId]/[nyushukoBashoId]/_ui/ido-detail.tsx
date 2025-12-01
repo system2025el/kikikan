@@ -71,15 +71,14 @@ export const IdoDetail = (props: {
   const [snackBarMessage, setSnackBarMessage] = useState('');
 
   // context
-  const { setIsDirty, setIsSave } = useDirty();
+  const { setIsDirty } = useDirty();
   // ブラウザバック、F5、×ボタンでページを離れた際のhook
-  useUnsavedChangesWarning(editFlag, saveFlag);
+  useUnsavedChangesWarning(editFlag);
 
   useEffect(() => {
     const unsavedData = originIdoDetailList.filter((d) => !d.saveFlag);
     if (unsavedData.length > 0) {
       setSaveFlag(false);
-      setIsSave(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -181,7 +180,6 @@ export const IdoDetail = (props: {
       setEditFlag(false);
       setIsDirty(false);
       setSaveFlag(true);
-      setIsSave(true);
       setSnackBarMessage('保存しました');
       setSnackBarOpen(true);
     } else {
