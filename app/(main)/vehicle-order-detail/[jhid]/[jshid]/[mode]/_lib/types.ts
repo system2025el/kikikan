@@ -64,14 +64,6 @@ export const JuchuSharyoHeadSchema = z
     },
     { message: '最低1台登録してください', path: ['meisai'] }
   );
-// .refine((data) => data.meisai.v1Id && data.meisai.v1Id > 0, {
-//   message: '入力してください',
-//   path: ['meisai.v1Id'],
-// })
-// .refine((data) => data.nyushukoDat, {
-//   message: '必須項目です',
-//   path: ['nyushukoDat'],
-// });
 
 /**
  * 受注車両ヘッダ入力フォームの型
