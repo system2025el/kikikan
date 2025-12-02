@@ -3099,6 +3099,7 @@ export type Database = {
           keikoku: string | null;
           kics_nyuko_dat: string | null;
           kics_shuko_dat: string | null;
+          kics_shuko_fix_flg: number | null;
           koen_nam: string | null;
           koenbasho_nam: string | null;
           kokyaku_id: number | null;
@@ -3115,6 +3116,7 @@ export type Database = {
           sikomibi: number | null;
           yard_nyuko_dat: string | null;
           yard_shuko_dat: string | null;
+          yard_shuko_fix_flg: number | null;
         };
         Relationships: [];
       };

@@ -38,6 +38,7 @@ import { TextFieldElement } from 'react-hook-form-mui';
 import { deleteLock } from '@/app/_lib/db/tables/t-lock';
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
+import { getNyukoDate, getRange, getShukoDate } from '@/app/(main)/_lib/date-funcs';
 import { addLock, getLock } from '@/app/(main)/_lib/funcs';
 import { LockValues } from '@/app/(main)/_lib/types';
 import { BackButton } from '@/app/(main)/_ui/buttons';
@@ -50,15 +51,24 @@ import { equipmentRows, users, vehicleHeaders, vehicleRows } from '@/app/(main)/
 import { useUnsavedChangesWarning } from '../../../../_lib/hook';
 import {
   addJuchuHead,
-  copyJuchuHead,
+  copyJuchuKizaiHeadMeisai,
   delJuchuHead,
   delJuchuMeisai,
   getJuchuHead,
+  getJuchuKizaiHeadList,
   getMaxId,
   updJuchuHead,
 } from '../_lib/funcs';
-import { EqTableValues, KokyakuValues, OrderSchema, OrderValues, VehicleTableValues } from '../_lib/types';
-import { AlertDialog, CopyConfirmDialog, HeadDeleteConfirmDialog, KizaiHeadDeleteConfirmDialog } from './caveat-dialog';
+import {
+  CopyDialogValue,
+  EqTableValues,
+  KokyakuValues,
+  OrderSchema,
+  OrderValues,
+  VehicleTableValues,
+} from '../_lib/types';
+import { AlertDialog, HeadDeleteConfirmDialog, KizaiHeadDeleteConfirmDialog } from './caveat-dialog';
+import { CopyDialog } from './copy-dialog';
 import { CustomerSelectionDialog } from './customer-selection';
 import { LocationSelectDialog } from './location-selection';
 import { OrderEqTable, OrderVehicleTable } from './order-table';
@@ -116,6 +126,8 @@ export const Order = (props: {
 
   // 機材テーブル選択行
   const [selectEq, setSelectEq] = useState<number | null>(null);
+  // 機材選択データ
+  const [selectEqHeader, setSelectEqHeader] = useState<EqTableValues | null>(null);
   // 車両テーブル選択行
   const [selectVehicle, setSelectVehicle] = useState<number[]>([]);
   // 遷移先path
@@ -271,41 +283,6 @@ export const Order = (props: {
     }
   };
 
-  // コピーボタン押下
-  const handleCopy = async () => {
-    if (isDirty) {
-      setAlertTitle('保存されていません');
-      setAlertMessage('1度保存をしてください');
-      setAlertOpen(true);
-      return;
-    }
-
-    setCopyOpen(true);
-  };
-
-  /**
-   * コピーダイアログボタン押下
-   * @param result ボタン押下結果
-   */
-  const handleCopyResultDialog = async (result: boolean) => {
-    if (result) {
-      const maxId = await getMaxId();
-      if (maxId) {
-        const newOrderId = maxId.juchu_head_id + 1;
-        const currentData = await getJuchuHead(props.juchuHeadData.juchuHeadId);
-        if (user && currentData) {
-          await copyJuchuHead(newOrderId, currentData, user.name);
-        }
-        window.open(`/order/${newOrderId}/${'edit'}`);
-        setCopyOpen(false);
-      } else {
-        console.error('Failed to retrieve max order ID');
-      }
-    } else {
-      setCopyOpen(false);
-    }
-  };
-
   // 機材入力ボタン押下
   const handleAddEq = async () => {
     if (!isDirty) {
@@ -319,17 +296,17 @@ export const Order = (props: {
 
   // 返却入力ボタン押下
   const handleAddReturn = async () => {
-    if (selectEq && eqHeaderList) {
-      const selectData = eqHeaderList.find((d) => d.juchuKizaiHeadId === selectEq);
-      console.log(selectData);
-      if (selectData && selectData.juchuKizaiHeadKbn === 1) {
+    if (selectEqHeader) {
+      if (selectEqHeader && selectEqHeader.juchuKizaiHeadKbn === 1) {
         if (!isDirty) {
           await deleteLock(1, props.juchuHeadData.juchuHeadId);
           router.push(
-            `/eq-return-order-detail/${props.juchuHeadData.juchuHeadId}/0/${selectData.juchuKizaiHeadId}/edit`
+            `/eq-return-order-detail/${props.juchuHeadData.juchuHeadId}/0/${selectEqHeader.juchuKizaiHeadId}/edit`
           );
         } else {
-          setPath(`/eq-return-order-detail/${props.juchuHeadData.juchuHeadId}/0/${selectData.juchuKizaiHeadId}/edit`);
+          setPath(
+            `/eq-return-order-detail/${props.juchuHeadData.juchuHeadId}/0/${selectEqHeader.juchuKizaiHeadId}/edit`
+          );
           setDirtyOpen(true);
         }
       } else {
@@ -346,14 +323,15 @@ export const Order = (props: {
 
   // キープ入力ボタン押下
   const handleAddKeep = async () => {
-    if (selectEq && eqHeaderList) {
-      const selectData = eqHeaderList.find((d) => d.juchuKizaiHeadId === selectEq);
-      if (selectData && selectData.juchuKizaiHeadKbn === 1) {
+    if (selectEqHeader) {
+      if (selectEqHeader && selectEqHeader.juchuKizaiHeadKbn === 1) {
         if (!isDirty) {
           await deleteLock(1, props.juchuHeadData.juchuHeadId);
-          router.push(`/eq-keep-order-detail/${props.juchuHeadData.juchuHeadId}/0/${selectData.juchuKizaiHeadId}/edit`);
+          router.push(
+            `/eq-keep-order-detail/${props.juchuHeadData.juchuHeadId}/0/${selectEqHeader.juchuKizaiHeadId}/edit`
+          );
         } else {
-          setPath(`/eq-keep-order-detail/${props.juchuHeadData.juchuHeadId}/0/${selectData.juchuKizaiHeadId}/edit`);
+          setPath(`/eq-keep-order-detail/${props.juchuHeadData.juchuHeadId}/0/${selectEqHeader.juchuKizaiHeadId}/edit`);
           setDirtyOpen(true);
         }
       } else {
@@ -365,6 +343,131 @@ export const Order = (props: {
       setAlertTitle('選択項目を確認してください');
       setAlertMessage('メイン明細を選択してください');
       setAlertOpen(true);
+    }
+  };
+
+  // コピーボタン押下
+  const handleOpenCopyDialog = async () => {
+    if (selectEqHeader && selectEqHeader.juchuKizaiHeadKbn === 1) {
+      setCopyOpen(true);
+    } else {
+      setAlertTitle('選択項目を確認してください');
+      setAlertMessage('メイン明細を選択してください');
+      setAlertOpen(true);
+    }
+  };
+  const handleCloseCopyDialog = () => {
+    setCopyOpen(false);
+  };
+
+  /**
+   * コピーダイアログボタン押下
+   * @param result ボタン押下結果
+   */
+  const handleCopyConfirmed = async (data: CopyDialogValue) => {
+    if (!user || !selectEqHeader) return;
+
+    // ユーザー名
+    const userNam = user.name;
+    // 受注ヘッダーid
+    const newJuchuHeadId = data.juchuHeadid ? Number(data.juchuHeadid) : getValues('juchuHeadId');
+
+    const checkJuchuHeadId = await getJuchuHead(newJuchuHeadId);
+    if (!checkJuchuHeadId) {
+      setSnackBarMessage('受注番号がありません');
+      setSnackBarOpen(true);
+      return false;
+    }
+
+    // 出庫日
+    const shukoDate = getShukoDate(
+      data.kicsShukoDat && new Date(data.kicsShukoDat),
+      data.yardShukoDat && new Date(data.yardShukoDat)
+    );
+    // 入庫日
+    const nyukoDate = getNyukoDate(
+      data.kicsNyukoDat && new Date(data.kicsNyukoDat),
+      data.yardNyukoDat && new Date(data.yardNyukoDat)
+    );
+    // 出庫日から入庫日
+    const dateRange = getRange(shukoDate, nyukoDate);
+
+    if (!shukoDate || !nyukoDate) {
+      return;
+    }
+
+    const copyResult = await copyJuchuKizaiHeadMeisai(
+      selectEqHeader,
+      newJuchuHeadId,
+      data,
+      shukoDate,
+      nyukoDate,
+      dateRange,
+      userNam
+    );
+
+    if (copyResult) {
+      setCopyOpen(false);
+      setSnackBarMessage('コピーしました');
+      setSnackBarOpen(true);
+      if (!data.juchuHeadid || Number(data.juchuHeadid) === getValues('juchuHeadId')) {
+        setIsJuchuKizaiLoading(true);
+        const juchuKizaiHeadDatas = await getJuchuKizaiHeadList(getValues('juchuHeadId'));
+        setEqHeaderList(juchuKizaiHeadDatas);
+        setIsJuchuKizaiLoading(false);
+      }
+    } else {
+      setSnackBarMessage('コピーに失敗しました');
+      setSnackBarOpen(true);
+    }
+
+    return true;
+  };
+
+  // 受注明細削除ボタン押下
+  const handleKizaiHeadDeleteCheck = async () => {
+    if (!selectEqHeader || !eqHeaderList) {
+      setAlertTitle('選択項目を確認してください');
+      setAlertMessage('受注明細を1つ選択してください');
+      setAlertOpen(true);
+      return;
+    }
+
+    // 選択されたデータの子データ
+    const childData = eqHeaderList.find((d) => d.oyaJuchuKizaiHeadId === selectEqHeader.juchuKizaiHeadId);
+
+    if (childData) {
+      setAlertTitle('選択項目を確認してください');
+      setAlertMessage('返却、キープが紐づいている場合は削除できません');
+      setAlertOpen(true);
+      return;
+    }
+
+    setKizaiHeadDeleteOpen(true);
+  };
+
+  /**
+   * 受注明細削除ダイアログボタン押下
+   * @param result ボタン押下結果
+   */
+  const handleKizaiHeadDelete = async (result: boolean) => {
+    setKizaiHeadDeleteOpen(false);
+    if (result && selectEqHeader) {
+      setIsJuchuKizaiLoading(true);
+
+      const deleteResult = await delJuchuMeisai(selectEqHeader.juchuHeadId, selectEqHeader.juchuKizaiHeadId);
+
+      if (deleteResult) {
+        setEqHeaderList((prev) => prev?.filter((data) => data.juchuKizaiHeadId !== selectEqHeader.juchuKizaiHeadId));
+        setSelectEq(null);
+        setSelectEqHeader(null);
+        setSnackBarMessage('削除しました');
+        setSnackBarOpen(true);
+      } else {
+        setSnackBarMessage('削除に失敗しました');
+        setSnackBarOpen(true);
+      }
+      setIsJuchuKizaiLoading(false);
     }
   };
 
@@ -402,55 +505,6 @@ export const Order = (props: {
     }
   };
 
-  // 受注明細削除ボタン押下
-  const handleKizaiHeadDeleteCheck = async () => {
-    if (!selectEq || !eqHeaderList) {
-      setAlertTitle('選択項目を確認してください');
-      setAlertMessage('受注明細を1つ選択してください');
-      setAlertOpen(true);
-      return;
-    }
-
-    // 選択データ
-    const selectData = eqHeaderList.find((d) => d.juchuKizaiHeadId === selectEq);
-    // 選択されたデータの子データ
-    const childData = eqHeaderList.find((d) => d.oyaJuchuKizaiHeadId === selectData?.juchuKizaiHeadId);
-
-    if (childData) {
-      setAlertTitle('選択項目を確認してください');
-      setAlertMessage('返却、キープが紐づいている場合は削除できません');
-      setAlertOpen(true);
-      return;
-    }
-
-    setKizaiHeadDeleteOpen(true);
-  };
-
-  /**
-   * 受注明細削除ダイアログボタン押下
-   * @param result ボタン押下結果
-   */
-  const handleKizaiHeadDelete = async (result: boolean) => {
-    setKizaiHeadDeleteOpen(false);
-    if (result && eqHeaderList) {
-      setIsJuchuKizaiLoading(true);
-      // 選択データ
-      const selectData = eqHeaderList.find((d) => d.juchuKizaiHeadId === selectEq);
-
-      const deleteResult = await delJuchuMeisai(selectData!.juchuHeadId, selectData!.juchuKizaiHeadId);
-
-      if (deleteResult) {
-        setEqHeaderList((prev) => prev?.filter((data) => data.juchuKizaiHeadId !== selectData?.juchuKizaiHeadId));
-        setSnackBarMessage('削除しました');
-        setSnackBarOpen(true);
-      } else {
-        setSnackBarMessage('削除に失敗しました');
-        setSnackBarOpen(true);
-      }
-      setIsJuchuKizaiLoading(false);
-    }
-  };
-
   /**
    * 破棄ダイアログボタン押下
    * @param result ボタン押下結果
@@ -475,7 +529,9 @@ export const Order = (props: {
   };
 
   const handleEqSelectionChange = (selectedId: number) => {
+    const selectData = eqHeaderList?.find((d) => d.juchuKizaiHeadId === selectedId);
     setSelectEq(selectedId);
+    setSelectEqHeader(selectData!);
   };
 
   const handleVehicleSelectionChange = (selectedIds: number[]) => {
@@ -838,6 +894,7 @@ export const Order = (props: {
                 <Button
                   onClick={(e) => {
                     e.stopPropagation();
+                    handleOpenCopyDialog();
                   }}
                   disabled={!edit}
                 >
@@ -858,6 +915,13 @@ export const Order = (props: {
               </Grid2>
             </Grid2>
           </AccordionSummary>
+          <Dialog open={copyOpen} sx={{ zIndex: 1201 }}>
+            <CopyDialog
+              selectEqHeader={selectEqHeader}
+              handleCopyConfirmed={handleCopyConfirmed}
+              handleCloseCopyDialog={handleCloseCopyDialog}
+            />
+          </Dialog>
           <AccordionDetails sx={{ padding: 0 }}>
             {isJuchuKizaiLoading ? (
               <Loading />
@@ -922,7 +986,6 @@ export const Order = (props: {
       )}
       <IsDirtyAlertDialog open={dirtyOpen} onClick={handleResultDialog} />
       <AlertDialog open={alertOpen} title={alertTitle} message={alertMessage} onClick={() => setAlertOpen(false)} />
-      <CopyConfirmDialog open={copyOpen} onClick={handleCopyResultDialog} />
       <HeadDeleteConfirmDialog open={headDeleteOpen} onClick={handleHeadDelete} />
       <KizaiHeadDeleteConfirmDialog open={kizaiHeadDeleteOpen} onClick={handleKizaiHeadDelete} />
       <Snackbar

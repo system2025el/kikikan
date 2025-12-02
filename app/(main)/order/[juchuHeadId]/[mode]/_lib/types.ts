@@ -59,10 +59,14 @@ export type EqTableValues = {
   honbanbi: number | null;
   juchuHonbanbiCalcQty: number | null;
   shokei: number | null;
-  // nebikiAmt: number | null;
+  nebikiAmt: number | null;
+  nebikiRat: number | null;
   oyaJuchuKizaiHeadId: number | null;
   htKbn: number;
   juchuKizaiHeadKbn: number;
+  mem: string | null;
+  kicsShukoFixFlg: number | null;
+  yardShukoFixFlg: number | null;
 };
 
 export type VehicleTableValues = {
@@ -103,4 +107,110 @@ export type LocsDialogValues = {
   locNam: string;
   mem: string | null;
   tel: string | null;
+};
+
+export const baseCopyDialogSchema = z.object({
+  juchuHeadid: z.string().optional(),
+  headNam: z.string({ message: validationMessages.required() }).min(1, { message: validationMessages.required() }),
+  kicsShukoDat: z.date().nullable(),
+  kicsNyukoDat: z.date().nullable(),
+  yardShukoDat: z.date().nullable(),
+  yardNyukoDat: z.date().nullable(),
+});
+
+export type CopyDialogValue = z.infer<typeof baseCopyDialogSchema>;
+
+export const CopyDialogSchema = (origin: EqTableValues | null) =>
+  z.object({
+    juchuHeadid: z.string().optional(),
+    headNam: z
+      .string({ message: validationMessages.required() })
+      .min(1, { message: validationMessages.required() })
+      .max(20, { message: validationMessages.maxStringLength(20) }),
+    kicsShukoDat:
+      origin && origin.kicsShukoDat ? z.date({ message: validationMessages.required() }) : z.date().nullable(),
+    kicsNyukoDat:
+      origin && origin.kicsNyukoDat ? z.date({ message: validationMessages.required() }) : z.date().nullable(),
+    yardShukoDat:
+      origin && origin.yardShukoDat ? z.date({ message: validationMessages.required() }) : z.date().nullable(),
+    yardNyukoDat:
+      origin && origin.yardNyukoDat ? z.date({ message: validationMessages.required() }) : z.date().nullable(),
+  });
+
+export type CopyJuchuKizaiHeadValue = {
+  juchuHeadId: number;
+  mem: string | null;
+  headNam: string;
+  kicsShukoDat: Date | null;
+  kicsNyukoDat: Date | null;
+  yardShukoDat: Date | null;
+  yardNyukoDat: Date | null;
+  juchuKizaiHeadKbn: number;
+  juchuKizaiHeadId: number;
+  juchuHonbanbiQty: number | null;
+  nebikiAmt: number | null;
+  nebikiRat: number | null;
+};
+
+export type CopyJuchuKizaiHonbanbiValues = {
+  juchuHeadId: number;
+  juchuKizaiHeadId: number;
+  juchuHonbanbiShubetuId: number;
+  juchuHonbanbiDat: Date;
+  mem: string | null;
+  juchuHonbanbiAddQty: number | null;
+};
+
+export type CopyJuchuKizaiMeisaiValues = {
+  juchuHeadId: number;
+  juchuKizaiHeadId: number;
+  juchuKizaiMeisaiId: number;
+  mShozokuId: number;
+  shozokuId: number;
+  mem: string | null;
+  kizaiId: number;
+  kizaiTankaAmt: number;
+  kizaiNam: string;
+  planKizaiQty: number;
+  planYobiQty: number;
+  planQty: number;
+  dspOrdNum: number;
+  indentNum: number;
+  delFlag: boolean;
+  saveFlag: boolean;
+};
+
+export type CopyIdoJuchuKizaiMeisaiValues = {
+  juchuHeadId: number;
+  juchuKizaiHeadId: number;
+  idoDenId: number | null;
+  sagyoDenDat: Date | null;
+  sagyoSijiId: number | null;
+  mShozokuId: number;
+  shozokuId: number;
+  shozokuNam: string;
+  kizaiId: number;
+  kizaiNam: string;
+  kizaiQty: number;
+  planKizaiQty: number;
+  planYobiQty: number;
+  planQty: number;
+  delFlag: boolean;
+  saveFlag: boolean;
+};
+
+export type CopyJuchuContainerMeisaiValues = {
+  juchuHeadId: number;
+  juchuKizaiHeadId: number;
+  juchuKizaiMeisaiId: number;
+  kizaiId: number;
+  kizaiNam: string;
+  planKicsKizaiQty: number;
+  planYardKizaiQty: number;
+  planQty: number;
+  mem: string | null;
+  dspOrdNum: number;
+  indentNum: number;
+  delFlag: boolean;
+  saveFlag: boolean;
 };
