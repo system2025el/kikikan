@@ -226,8 +226,10 @@ export const IsshikisMasterDialog = ({
                       >
                         <DeleteIcon fontSize="small" />
                       </Button>
-                      {/* <TextFieldElement name={`kizaiList.${index}.nam`} control={control} /> */}
-                      <Typography whiteSpace={'nowrap'} sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      <Typography
+                        whiteSpace={'nowrap'}
+                        sx={{ overflow: 'hidden', textOverflow: 'ellipsis', width: '65%' }}
+                      >
                         {kizaiList[index].nam}
                       </Typography>
                       <TextFieldElement

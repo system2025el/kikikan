@@ -60,7 +60,25 @@ export const ShukoListTable = (props: {
         </TableHead>
         <TableBody>
           {datas.map((row, index) => (
-            <TableRow key={index} sx={{ whiteSpace: 'nowrap', backgroundColor: row.shukoFixFlg ? grey[300] : 'white' }}>
+            <TableRow
+              key={index}
+              sx={{
+                whiteSpace: 'nowrap',
+                backgroundColor: row.shukoFixFlg
+                  ? '#808080'
+                  : row.sstbSagyoStsId === 11 && row.schkSagyoStsId === 0
+                    ? '#fff0f5' // スタンバイ△・チェック未 lavenderblush
+                    : row.sstbSagyoStsId === 12 && row.schkSagyoStsId === 0
+                      ? '#f0ffff' // スタンバイ〇・チェック未 azure
+                      : row.sstbSagyoStsId === 12 && row.schkSagyoStsId === 21
+                        ? '#87cefa' // スタンバイ〇・チェック△ lightskyblue
+                        : row.sstbSagyoStsId === 12 && row.schkSagyoStsId === 22
+                          ? '#66cdaa' // スタンバイ〇・チェック〇 mediumaquamarine
+                          : row.sstbSagyoStsId < 12 && row.schkSagyoStsId > 20
+                            ? '#ffff00' // スタンバイが未or△の時に、チェックが△or〇 黄色
+                            : 'white',
+              }}
+            >
               <TableCell padding="checkbox">
                 <Checkbox checked={selected.includes(index)} onChange={() => handleSelect(index)} />
               </TableCell>

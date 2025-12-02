@@ -9,8 +9,7 @@ import {
   updateIsshikiDB,
 } from '@/app/_lib/db/tables/m-issiki';
 import { selectActiveEqpts, selectActiveEqptsForIsshiki } from '@/app/_lib/db/tables/m-kizai';
-import { toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
-import { SelectTypes } from '@/app/(main)/_ui/form-box';
+import { toJapanTimeStampString } from '@/app/(main)/_lib/date-conversion';
 import { EqptSelection } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
 
 import { FAKE_NEW_ID } from '../../_lib/constants';
@@ -122,9 +121,9 @@ export const updateIsshiki = async (rawData: IsshikisMasterDialogValues, id: num
  * @param query 検索キーワード
  * @returns
  */
-export const getEqptsForEqptSelection = async (query: number = FAKE_NEW_ID): Promise<EqptSelection[]> => {
+export const getEqptsForEqptSelection = async (query: string = ''): Promise<EqptSelection[]> => {
   try {
-    const data = await selectActiveEqptsForIsshiki(query);
+    const data = await selectActiveEqpts(query);
     if (!data || data.rowCount === 0) {
       return [];
     }

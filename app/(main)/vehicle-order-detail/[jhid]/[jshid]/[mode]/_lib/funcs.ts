@@ -320,7 +320,7 @@ export const updateJuchuSharyoHead = async (
 };
 
 /**
- * 選ばれた車両の明細ヘッダと明細を削除する関数 後で移動move
+ * 選ばれた車両の明細ヘッダと明細を削除する関数 orderのfuncsに後で移動move
  * @param {{ juchuHeadId: number; sharyoHeadId: number }[]} ids 選択された車両明細のIDのペアの配列
  */
 export const delJuchuSharyoMeisais = async (ids: { juchuHeadId: number; sharyoHeadId: number }[]) => {

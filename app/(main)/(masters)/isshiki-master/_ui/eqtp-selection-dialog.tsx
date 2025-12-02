@@ -7,14 +7,16 @@ import {
   DialogTitle,
   Divider,
   Paper,
+  Stack,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
+  TextField,
 } from '@mui/material';
-import { SetStateAction, useEffect, useState } from 'react';
+import { SetStateAction, useEffect, useMemo, useState } from 'react';
 import { UseFieldArrayReturn, UseFormSetValue } from 'react-hook-form';
 
 import { CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
@@ -23,7 +25,6 @@ import { Loading } from '@/app/(main)/_ui/loading';
 import { getSelectedEqpts } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/funcs';
 import { EqptSelection } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
 
-import { EqptSetsMasterDialogValues } from '../../eqpt-set-master/_lib/types';
 import { getEqptsForEqptSelection } from '../_lib/funcs';
 import { IsshikisMasterDialogValues } from '../_lib/types';
 
@@ -85,10 +86,20 @@ export const EqptIsshikiSelectionDialog = ({
     setValue('kizaiList', setList);
   };
 
+  /* useMemo ------------------------------------------------ */
+  /** 表示する機材リスト */
+  const list = useMemo(
+    () =>
+      search && search.trim() !== ''
+        ? options.filter((d) => d.kizaiNam.toLowerCase().includes(search.toLowerCase()))
+        : options,
+    [search, options]
+  );
+
   /* useEffect --------------------------------------------- */
   useEffect(() => {
     const getEq = async () => {
-      const o = await getEqptsForEqptSelection(isshikiId);
+      const o = await getEqptsForEqptSelection();
       setOptions(o);
       setSelected(currentEqptList.map((d) => d.id));
       setIsLoading(false);
@@ -97,7 +108,13 @@ export const EqptIsshikiSelectionDialog = ({
   }, [currentEqptList, isshikiId]);
 
   return (
-    <Dialog open={open} onClose={() => setOpen(false)}>
+    <Dialog
+      open={open}
+      onClose={() => {
+        setOpen(false);
+        setSearch(null);
+      }}
+    >
       <DialogTitle display={'flex'} justifyContent={'space-between'}>
         一式機材選択
         <Box>
@@ -105,6 +122,7 @@ export const EqptIsshikiSelectionDialog = ({
             sx={{ mr: 3 }}
             onClick={() => {
               handleClickCnfirm();
+              setSearch(null);
               setOpen(false);
             }}
           >
@@ -113,74 +131,85 @@ export const EqptIsshikiSelectionDialog = ({
           <CloseMasterDialogButton
             handleCloseDialog={() => {
               setOpen(false);
+              setSearch(null);
             }}
           />
         </Box>
       </DialogTitle>
       <DialogContent>
-        <TableContainer sx={{ width: 500, my: 1, maxHeight: '80vh' }}>
-          {isLoading ? (
-            <Loading />
-          ) : (
-            <Table stickyHeader padding="none">
-              <TableHead>
-                <TableRow>
-                  <TableCell padding="checkbox" />
-                  <TableCell>機材名</TableCell>
-                  <TableCell>在庫場所</TableCell>
-                </TableRow>
-              </TableHead>
+        <Box width={'100%'}>
+          <Stack justifyContent={'center'}>
+            <TextField
+              value={search ?? ''}
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                setSearch(event.target.value);
+              }}
+            />
+          </Stack>
+          <TableContainer component={Paper} variant="outlined" square sx={{ width: 500, my: 1, maxHeight: '70vh' }}>
+            {isLoading ? (
+              <Loading />
+            ) : (
+              <Table stickyHeader padding="none">
+                <TableHead>
+                  <TableRow>
+                    <TableCell padding="checkbox" />
+                    <TableCell>機材名</TableCell>
+                    <TableCell>在庫場所</TableCell>
+                  </TableRow>
+                </TableHead>
 
-              <TableBody>
-                {options!.map((row, index) => {
-                  const isItemSelected = selected.includes(row.kizaiId);
-                  const labelId = `enhanced-table-checkbox-${index}`;
-                  const nextRow = options![index + 1];
-                  const rows = [];
-                  rows.push(
-                    <TableRow
-                      hover
-                      onClick={(event) => handleSelectEqpts(event, row.kizaiId)}
-                      role="checkbox"
-                      aria-checked={isItemSelected}
-                      tabIndex={-1}
-                      key={row.kizaiId}
-                      selected={isItemSelected}
-                      sx={{ cursor: 'pointer' }}
-                    >
-                      <TableCell padding="checkbox">
-                        <Checkbox color="primary" checked={isItemSelected} />
-                      </TableCell>
-                      <TableCell component="th" id={labelId} scope="row" padding="none">
-                        {row.kizaiNam}
-                      </TableCell>
-                      <TableCell>{row.shozokuNam}</TableCell>
-                    </TableRow>
-                  );
-                  // 次のkizaiGrpCodが異なるなら区切り行を追加
-                  if (!nextRow || row.kizaiGrpCod !== nextRow.kizaiGrpCod) {
+                <TableBody>
+                  {list!.map((row, index) => {
+                    const isItemSelected = selected.includes(row.kizaiId);
+                    const labelId = `enhanced-table-checkbox-${index}`;
+                    const nextRow = options![index + 1];
+                    const rows = [];
                     rows.push(
-                      <TableRow key={`divider-${index}`}>
-                        <TableCell colSpan={3}>
-                          <Box height={10} width={'100%'} alignContent={'center'}>
-                            <Divider
-                              sx={{
-                                borderStyle: 'dashed',
-                                borderColor: 'CaptionText',
-                                borderBottomWidth: 2,
-                              }}
-                            />
-                          </Box>
+                      <TableRow
+                        hover
+                        onClick={(event) => handleSelectEqpts(event, row.kizaiId)}
+                        role="checkbox"
+                        aria-checked={isItemSelected}
+                        tabIndex={-1}
+                        key={row.kizaiId}
+                        selected={isItemSelected}
+                        sx={{ cursor: 'pointer' }}
+                      >
+                        <TableCell padding="checkbox">
+                          <Checkbox color="primary" checked={isItemSelected} />
                         </TableCell>
+                        <TableCell component="th" id={labelId} scope="row" padding="none">
+                          {row.kizaiNam}
+                        </TableCell>
+                        <TableCell>{row.shozokuNam}</TableCell>
                       </TableRow>
                     );
-                  }
-                  return rows;
-                })}
-              </TableBody>
-            </Table>
-          )}
-        </TableContainer>
+                    // 次のkizaiGrpCodが異なるなら区切り行を追加
+                    if (!nextRow || row.kizaiGrpCod !== nextRow.kizaiGrpCod) {
+                      rows.push(
+                        <TableRow key={`divider-${index}`}>
+                          <TableCell colSpan={3}>
+                            <Box height={10} width={'100%'} alignContent={'center'}>
+                              <Divider
+                                sx={{
+                                  borderStyle: 'dashed',
+                                  borderColor: 'CaptionText',
+                                  borderBottomWidth: 2,
+                                }}
+                              />
+                            </Box>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    }
+                    return rows;
+                  })}
+                </TableBody>
+              </Table>
+            )}
+          </TableContainer>
+        </Box>
       </DialogContent>
     </Dialog>
   );

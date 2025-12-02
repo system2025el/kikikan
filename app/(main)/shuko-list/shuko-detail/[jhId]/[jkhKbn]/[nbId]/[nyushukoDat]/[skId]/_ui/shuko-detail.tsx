@@ -182,14 +182,22 @@ export const ShukoDetail = (props: {
         </Grid2>
         <Divider />
         <Box width={'100%'}>
-          <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} width={'60vw'} p={1}>
+          <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} width={'60vw'} pl={1} py={0.5}>
             <Typography>全{shukoDetailTableData ? shukoDetailTableData.length : 0}件</Typography>
-            <Grid2 container spacing={2}>
-              <Typography sx={{ backgroundColor: 'rgba(158, 158, 158, 1)' }}>済</Typography>
-              <Typography sx={{ backgroundColor: 'rgba(255, 171, 64, 1)' }}>不足</Typography>
-              <Typography sx={{ backgroundColor: 'rgba(255, 255, 0, 1)' }}>過剰</Typography>
-              <Typography sx={{ backgroundColor: 'rgba(68, 138, 255, 1)' }}>コンテナ</Typography>
-            </Grid2>
+            <Box display={'flex'} alignItems={'center'}>
+              <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: 'rgba(158, 158, 158, 1)' }}>
+                済
+              </Typography>
+              <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: 'rgba(255, 171, 64, 1)' }}>
+                不足
+              </Typography>
+              <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: 'rgba(255, 255, 0, 1)' }}>
+                過剰
+              </Typography>
+              <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: 'rgba(68, 138, 255, 1)' }}>
+                コンテナ
+              </Typography>
+            </Box>
           </Box>
           {shukoDetailTableData.length > 0 && <ShukoDetailTable datas={shukoDetailTableData} />}
         </Box>
