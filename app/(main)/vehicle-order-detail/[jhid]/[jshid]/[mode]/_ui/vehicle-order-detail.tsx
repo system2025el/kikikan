@@ -414,8 +414,8 @@ const VehicleOrderDetail = ({
                     control={control}
                     sx={{ width: 120 }}
                     options={[
-                      { id: 1, label: '入庫' },
-                      { id: 2, label: '出庫' },
+                      { id: 2, label: '入庫' },
+                      { id: 1, label: '出庫' },
                     ]}
                     disabled={!editable}
                   />

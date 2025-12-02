@@ -249,7 +249,7 @@ export const IsshikisMasterDialog = ({
               open={deleteOpen}
               data={name}
               handleCloseDelete={() => setDeleteOpen(false)}
-              handleCloseAll={handleConfirmDelete}
+              handleConfirmDelete={handleConfirmDelete}
             />
           </>
         )}

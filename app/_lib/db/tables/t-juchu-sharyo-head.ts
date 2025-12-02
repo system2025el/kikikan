@@ -100,3 +100,40 @@ export const updJuchuSharyoHeadDB = async (data: JuchuSharyoHeadDBValues, connec
     throw e;
   }
 };
+
+/**
+ * IDの組み合わせが一致する受注削除ヘッダを削除する関数
+ * @param {{ juchu_head_id: number; juchu_sharyo_head_id: number }[]} ids 受注ヘッダIDと受注車両ヘッダIDの組み合わせ配列
+ * @param {PoolClient} connection トランザクション
+ */
+export const deleteJuchuSharyoHead = async (
+  ids: { juchu_head_id: number; juchu_sharyo_head_id: number }[],
+  connection: PoolClient
+) => {
+  const cols = Object.keys(ids[0]);
+  const values = ids.flatMap((d) => Object.values(d));
+  const placeholders = ids
+    .map((_, rowIndex) => {
+      const start = rowIndex * cols.length + 1;
+      const group = Array.from({ length: cols.length }, (_, colIndex) => `$${start + colIndex}`);
+      return `(${group.join(',')})`;
+    })
+    .join(',');
+
+  const query = `
+    DELETE FROM 
+      ${SCHEMA}.t_juchu_sharyo_head
+    WHERE
+      (${cols.join(',')})
+    IN
+      (${placeholders})
+  `;
+
+  console.log(query);
+
+  try {
+    await connection.query(query, values);
+  } catch (e) {
+    throw e;
+  }
+};

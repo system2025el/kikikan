@@ -6,12 +6,13 @@ import pool from '@/app/_lib/db/postgres';
 import { SCHEMA, supabase } from '@/app/_lib/db/supabase';
 import { selectActiveVehs } from '@/app/_lib/db/tables/m-sharyou';
 import {
+  deleteJuchuSharyoHead,
   insertJuchuSharyoHead,
   selectJuchuSharyoMeisai,
   updJuchuSharyoHeadDB,
 } from '@/app/_lib/db/tables/t-juchu-sharyo-head';
 import {
-  delJuchuSharyoMeisai,
+  deleteJuchuSharyoMeisais,
   insertJuchuSharyoMeisai,
   upsertJuchuSharyoMeisai,
 } from '@/app/_lib/db/tables/t-juchu-sharyo-meisai';
@@ -123,7 +124,7 @@ export const addNewJuchuSharyoHead = async (data: JuchuSharyoHeadValues, user: s
           {
             sharyoId: correctMeisai[0].sharyoId,
             sharyoQty: Number(correctMeisai[0].sharyoQty) + Number(correctMeisai[1].sharyoQty),
-            sharyoMem: `${correctMeisai[0].sharyoMem} ${correctMeisai[1].sharyoMem}`,
+            sharyoMem: `${correctMeisai[0].sharyoMem ?? ''} ${correctMeisai[1].sharyoMem ?? ''}`,
           },
         ]
       : correctMeisai;
@@ -198,7 +199,7 @@ export const updateJuchuSharyoHead = async (
           {
             sharyoId: correctMeisai[0].sharyoId,
             sharyoQty: Number(correctMeisai[0].sharyoQty) + Number(correctMeisai[1].sharyoQty),
-            sharyoMem: `${correctMeisai[0].sharyoMem} ${correctMeisai[1].sharyoMem}`,
+            sharyoMem: `${correctMeisai[0].sharyoMem ?? ''} ${correctMeisai[1].sharyoMem ?? ''}`,
           },
         ]
       : correctMeisai;
@@ -261,7 +262,7 @@ export const updateJuchuSharyoHead = async (
 
         if (delMeisais && delMeisais.length > 0)
           // 削除実行
-          await delJuchuSharyoMeisai(delMeisais, connection);
+          await deleteJuchuSharyoMeisais(delMeisais, connection);
       }
 
       /** 新しいデータ */
@@ -312,6 +313,27 @@ export const updateJuchuSharyoHead = async (
     await connection.query('COMMIT');
   } catch (e) {
     await connection.query('ROLLBACK');
+    throw e;
+  } finally {
+    connection.release();
+  }
+};
+
+/**
+ * 選ばれた車両の明細ヘッダと明細を削除する関数 後で移動move
+ * @param {{ juchuHeadId: number; sharyoHeadId: number }[]} ids 選択された車両明細のIDのペアの配列
+ */
+export const delJuchuSharyoMeisais = async (ids: { juchuHeadId: number; sharyoHeadId: number }[]) => {
+  const delList = ids.map((d) => ({ juchu_head_id: d.juchuHeadId, juchu_sharyo_head_id: d.sharyoHeadId }));
+
+  const connection = await pool.connect();
+  try {
+    await connection.query('BEGIN');
+    await deleteJuchuSharyoHead(delList, connection);
+    await deleteJuchuSharyoMeisais(delList, connection);
+    await connection.query('COMMIT');
+  } catch (e) {
+    connection.query('ROLLBACK');
     throw e;
   } finally {
     connection.release();

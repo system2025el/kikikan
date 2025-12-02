@@ -37,29 +37,33 @@ export const IsDirtyAlertDialog = ({
 export const WillDeleteAlertDialog = ({
   open,
   data,
+  title,
   handleCloseDelete,
-  handleCloseAll,
+  handleConfirmDelete,
 }: {
   open: boolean;
   data: string;
+  title?: string;
   handleCloseDelete: () => void;
-  handleCloseAll: () => void;
+  handleConfirmDelete: () => void;
 }) => {
+  /** 表示するタイトル文言 */
+  const dispTitle = title ?? '無効化';
   return (
-    <>
-      <Dialog open={open}>
-        <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
-          <WarningIcon color="error" />
-          <Box>無効化</Box>
-        </DialogTitle>
-        <DialogContentText m={2}>{data}が無効化されます。</DialogContentText>
-        <DialogActions>
-          <Button color="error" onClick={() => handleCloseAll()}>
-            無効化
-          </Button>
-          <Button onClick={() => handleCloseDelete()}>戻る</Button>
-        </DialogActions>
-      </Dialog>
-    </>
+    <Dialog open={open}>
+      <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
+        <WarningIcon color="error" />
+        <Box>{dispTitle}</Box>
+      </DialogTitle>
+      <DialogContentText m={2}>
+        {data}が{dispTitle}されます。
+      </DialogContentText>
+      <DialogActions>
+        <Button color="error" onClick={() => handleConfirmDelete()}>
+          {dispTitle}
+        </Button>
+        <Button onClick={() => handleCloseDelete()}>戻る</Button>
+      </DialogActions>
+    </Dialog>
   );
 };
