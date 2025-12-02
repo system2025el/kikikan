@@ -2041,7 +2041,7 @@ const EquipmentOrderDetail = (props: {
                             <Button
                               onClick={() =>
                                 window.open(
-                                  `/vehicle-order-detail/${props.juchuHeadData.juchuHeadId}/0/edit?kbn=2&date=${field.value?.toISOString()}&basho=1`
+                                  `/vehicle-order-detail/${props.juchuHeadData.juchuHeadId}/0/edit?kbn=1&date=${field.value?.toISOString()}&basho=1`
                                 )
                               }
                               disabled={!field.value ? true : false}
@@ -2075,7 +2075,7 @@ const EquipmentOrderDetail = (props: {
                             <Button
                               onClick={() =>
                                 window.open(
-                                  `/vehicle-order-detail/${props.juchuHeadData.juchuHeadId}/0/edit?kbn=2&date=${field.value?.toISOString()}&basho=2`
+                                  `/vehicle-order-detail/${props.juchuHeadData.juchuHeadId}/0/edit?kbn=1&date=${field.value?.toISOString()}&basho=2`
                                 )
                               }
                               disabled={!field.value ? true : false}
@@ -2115,7 +2115,7 @@ const EquipmentOrderDetail = (props: {
                             <Button
                               onClick={() =>
                                 window.open(
-                                  `/vehicle-order-detail/${props.juchuHeadData.juchuHeadId}/0/edit?kbn=1&date=${field.value?.toISOString()}&basho=1`
+                                  `/vehicle-order-detail/${props.juchuHeadData.juchuHeadId}/0/edit?kbn=2&date=${field.value?.toISOString()}&basho=1`
                                 )
                               }
                               disabled={!field.value ? true : false}
@@ -2152,7 +2152,7 @@ const EquipmentOrderDetail = (props: {
                             <Button
                               onClick={() =>
                                 window.open(
-                                  `/vehicle-order-detail/${props.juchuHeadData.juchuHeadId}/0/edit?kbn=1&date=${field.value?.toISOString()}&basho=2`
+                                  `/vehicle-order-detail/${props.juchuHeadData.juchuHeadId}/0/edit?kbn=2&date=${field.value?.toISOString()}&basho=2`
                                 )
                               }
                               disabled={!field.value ? true : false}

@@ -36,18 +36,22 @@ export const insertJuchuSharyoMeisai = async (data: JuchuSharyoMeisaiDBValues[],
 };
 
 /**
- * IDが一致する受注車両明細を削除する関数
- * @param {{ juchu_head_id: number; juchu_sharyo_head_id: number; juchu_sharyo_meisai_id: number }[]} ids 削除条件のID達の配列
+ * ３つのIDが一致する受注車両明細を削除する関数
+ * @param {{ juchu_head_id: number; juchu_sharyo_head_id: number; juchu_sharyo_meisai_id?: number }[]} ids 削除条件のID達の配列
  * @param {PoolClient} connection トランザクション
  */
-export const delJuchuSharyoMeisai = async (
-  ids: { juchu_head_id: number; juchu_sharyo_head_id: number; juchu_sharyo_meisai_id: number }[],
+export const deleteJuchuSharyoMeisais = async (
+  ids: { juchu_head_id: number; juchu_sharyo_head_id: number; juchu_sharyo_meisai_id?: number }[],
   connection: PoolClient
 ) => {
   const cols = Object.keys(ids[0]);
   const placeholders = ids
-    .map((_, i) => `($${i * 3 + 1}::integer, $${i * 3 + 2}::integer, $${i * 3 + 3}::integer)`)
-    .join(', ');
+    .map((_, rowIndex) => {
+      const start = rowIndex * cols.length + 1;
+      const group = Array.from({ length: cols.length }, (_, colIndex) => `$${start + colIndex}`);
+      return `(${group.join(',')})`;
+    })
+    .join(',');
   const values = ids.flatMap((d) => Object.values(d));
 
   const query = `

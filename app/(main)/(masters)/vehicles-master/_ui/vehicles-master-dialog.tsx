@@ -190,7 +190,7 @@ export const VehiclesMasterDialog = ({
               open={deleteOpen}
               data={name}
               handleCloseDelete={() => setDeleteOpen(false)}
-              handleCloseAll={handleConfirmDelete}
+              handleConfirmDelete={handleConfirmDelete}
             />
           </>
         )}

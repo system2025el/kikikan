@@ -290,7 +290,7 @@ export const EqptSetsMasterDialog = ({
               open={deleteOpen}
               data={'name'}
               handleCloseDelete={() => setDeleteOpen(false)}
-              handleCloseAll={handleConfirmDelete}
+              handleConfirmDelete={handleConfirmDelete}
             />
           </>
         )}
