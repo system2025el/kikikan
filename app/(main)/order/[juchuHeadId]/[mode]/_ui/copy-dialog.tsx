@@ -1,7 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Box, Button, Container, Grid2, Paper, TextField, Typography } from '@mui/material';
+import { Box, Button, Container, DialogContent, Grid2, Paper, TextField, Typography } from '@mui/material';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
@@ -112,6 +112,7 @@ export const CopyDialog = ({
                       onClear={() => {
                         field.onChange(null);
                       }}
+                      //isDialog
                     />
                   )}
                 />
@@ -132,6 +133,7 @@ export const CopyDialog = ({
                       onClear={() => {
                         field.onChange(null);
                       }}
+                      //isDialog
                     />
                   )}
                 />
@@ -155,6 +157,7 @@ export const CopyDialog = ({
                       onClear={() => {
                         field.onChange(null);
                       }}
+                      //isDialog
                     />
                   )}
                 />
@@ -175,6 +178,7 @@ export const CopyDialog = ({
                       onClear={() => {
                         field.onChange(null);
                       }}
+                      //isDialog
                     />
                   )}
                 />
