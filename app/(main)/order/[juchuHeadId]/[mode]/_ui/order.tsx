@@ -46,7 +46,9 @@ import DateX, { RSuiteDateRangePicker, TestDate } from '@/app/(main)/_ui/date';
 import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
 import { Loading } from '@/app/(main)/_ui/loading';
 import { SelectTable } from '@/app/(main)/_ui/table';
+import { WillDeleteAlertDialog } from '@/app/(main)/(masters)/_ui/dialogs';
 import { equipmentRows, users, vehicleHeaders, vehicleRows } from '@/app/(main)/order/[juchuHeadId]/[mode]/_lib/data';
+import { delJuchuSharyoMeisais } from '@/app/(main)/vehicle-order-detail/[jhid]/[jshid]/[mode]/_lib/funcs';
 
 import { useUnsavedChangesWarning } from '../../../../_lib/hook';
 import {
@@ -56,6 +58,7 @@ import {
   delJuchuMeisai,
   getJuchuHead,
   getJuchuKizaiHeadList,
+  getJuchuSharyoHeadList,
   getMaxId,
   updJuchuHead,
 } from '../_lib/funcs';
@@ -119,6 +122,8 @@ export const Order = (props: {
   const [copyOpen, setCopyOpen] = useState(false);
   // 受注機材ヘッダー削除ダイアログ制御
   const [kizaiHeadDeleteOpen, setKizaiHeadDeleteOpen] = useState(false);
+  // 受注車両ヘッダー削除ダイアログ制御
+  const [sharyoHeadDeleteOpen, setSharyoHeadDeleteOpen] = useState(false);
   // スナックバー制御
   const [snackBarOpen, setSnackBarOpen] = useState(false);
   // スナックバーメッセージ
@@ -128,8 +133,8 @@ export const Order = (props: {
   const [selectEq, setSelectEq] = useState<number | null>(null);
   // 機材選択データ
   const [selectEqHeader, setSelectEqHeader] = useState<EqTableValues | null>(null);
-  // 車両テーブル選択行
-  const [selectVehicle, setSelectVehicle] = useState<number[]>([]);
+  // 車両テーブル選択ID配列
+  const [selectedVehs, setSelectedVehs] = useState<number[]>([]);
   // 遷移先path
   const [path, setPath] = useState<string | null>(null);
 
@@ -534,10 +539,6 @@ export const Order = (props: {
     setSelectEqHeader(selectData!);
   };
 
-  const handleVehicleSelectionChange = (selectedIds: number[]) => {
-    setSelectVehicle(selectedIds);
-  };
-
   // 公演場所選択ダイアログ
   const [locationDialogOpen, setLocationDialogOpen] = useState(false);
   const handleOpenLocationDialog = () => {
@@ -568,6 +569,20 @@ export const Order = (props: {
     setValue('kokyaku.kokyakuNam', customer.kokyakuNam, { shouldDirty: true });
     clearErrors('kokyaku.kokyakuNam');
     handleCloseCustomerDialog();
+  };
+
+  // 車両明細削除処理
+  const handleDeleteVehs = async () => {
+    await delJuchuSharyoMeisais(
+      selectedVehs.map((d) => ({
+        juchuHeadId: props.juchuHeadData.juchuHeadId,
+        sharyoHeadId: d,
+      }))
+    );
+    const newVehHeads = await getJuchuSharyoHeadList(props.juchuHeadData.juchuHeadId);
+    setVehicleHeaderList(newVehHeads);
+    setSelectedVehs([]);
+    setSharyoHeadDeleteOpen(false);
   };
 
   if (user === null || isLoading)
@@ -964,7 +979,8 @@ export const Order = (props: {
                   color="error"
                   onClick={(e) => {
                     e.stopPropagation();
-                    console.log(selectVehicle);
+                    console.log(selectedVehs);
+                    setSharyoHeadDeleteOpen(true);
                   }}
                   disabled={!edit}
                 >
@@ -977,8 +993,9 @@ export const Order = (props: {
           <AccordionDetails sx={{ padding: 0 }}>
             {vehicleHeaderList && vehicleHeaderList?.length > 0 && (
               <OrderVehicleTable
+                selected={selectedVehs}
                 orderVehicleRows={vehicleHeaderList}
-                onVehicleSelectionChange={handleVehicleSelectionChange}
+                setSelected={setSelectedVehs}
               />
             )}
           </AccordionDetails>
@@ -988,6 +1005,13 @@ export const Order = (props: {
       <AlertDialog open={alertOpen} title={alertTitle} message={alertMessage} onClick={() => setAlertOpen(false)} />
       <HeadDeleteConfirmDialog open={headDeleteOpen} onClick={handleHeadDelete} />
       <KizaiHeadDeleteConfirmDialog open={kizaiHeadDeleteOpen} onClick={handleKizaiHeadDelete} />
+      <WillDeleteAlertDialog
+        open={sharyoHeadDeleteOpen}
+        data={`${selectedVehs.length}件の車両明細`}
+        title="削除"
+        handleCloseDelete={() => setSharyoHeadDeleteOpen(false)}
+        handleConfirmDelete={() => handleDeleteVehs()}
+      />
       <Snackbar
         open={snackBarOpen}
         autoHideDuration={6000}

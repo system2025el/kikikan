@@ -164,18 +164,15 @@ export const OrderEqTable: React.FC<OrderEqTableProps> = ({
 
 type OrderVehicleTableProps = {
   orderVehicleRows: VehicleTableValues[];
-  onVehicleSelectionChange: (selectedIds: number[]) => void;
+  selected: number[];
+  setSelected: React.Dispatch<React.SetStateAction<number[]>>;
 };
 
-export const OrderVehicleTable: React.FC<OrderVehicleTableProps> = ({ orderVehicleRows, onVehicleSelectionChange }) => {
-  const [rows, setRows] = useState(orderVehicleRows);
-  const [selected, setSelected] = useState<number[]>([]);
-
+export const OrderVehicleTable: React.FC<OrderVehicleTableProps> = ({ selected, orderVehicleRows, setSelected }) => {
   const handleSelect = (id: number) => {
     const newSelected = selected.includes(id) ? selected.filter((item) => item !== id) : [...selected, id];
 
     setSelected(newSelected);
-    onVehicleSelectionChange(newSelected);
   };
 
   // const moveRow = (index: number, direction: number) => {
@@ -195,12 +192,19 @@ export const OrderVehicleTable: React.FC<OrderVehicleTableProps> = ({ orderVehic
           <TableRow sx={{ whiteSpace: 'nowrap' }}>
             <TableCell padding="checkbox">
               <Checkbox
-                indeterminate={rows && selected.length > 0 && selected.length < rows.length}
-                checked={rows && rows.length > 0 && selected.length === rows.length}
+                indeterminate={orderVehicleRows && selected.length > 0 && selected.length < orderVehicleRows.length}
+                checked={orderVehicleRows && orderVehicleRows.length > 0 && selected.length === orderVehicleRows.length}
                 onChange={(e) => {
-                  const newSelected = e.target.checked && rows ? rows.map((row) => row.sharyoHeadId) : [];
+                  const newSelected =
+                    e.target.checked && orderVehicleRows ? orderVehicleRows.map((row) => row.sharyoHeadId) : [];
                   setSelected(newSelected);
-                  onVehicleSelectionChange(newSelected);
+                }}
+                sx={{
+                  '& .MuiSvgIcon-root': {
+                    backgroundColor: '#fff',
+                    borderRadius: '4px',
+                    transition: 'background-color 0.3s',
+                  },
                 }}
               />
             </TableCell>
@@ -214,10 +218,11 @@ export const OrderVehicleTable: React.FC<OrderVehicleTableProps> = ({ orderVehic
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows!.map((row, index) => (
+          {orderVehicleRows!.map((row, index) => (
             <TableRow hover key={row.sharyoHeadId}>
               <TableCell padding="checkbox">
                 <Checkbox
+                  color="primary"
                   checked={selected.includes(row.sharyoHeadId)}
                   onChange={() => handleSelect(row.sharyoHeadId)}
                 />
@@ -231,6 +236,7 @@ export const OrderVehicleTable: React.FC<OrderVehicleTableProps> = ({ orderVehic
                     color: 'primary',
                     whiteSpace: 'nowrap',
                     justifyContent: 'start',
+                    textTransform: 'none',
                   }}
                 >
                   {row.sharyoHeadNam}
