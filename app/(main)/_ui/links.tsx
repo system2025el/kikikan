@@ -79,6 +79,14 @@ export default function NavLinks() {
   const { isDirty } = useDirty();
   const { requestNavigation } = useDirty();
 
+  // /** 検索条件保持削除処理 */
+  // const delSessionStorage = () => {
+  //   sessionStorage.removeItem('billListSearchParams');
+  //   sessionStorage.removeItem('billingStsSearchParams');
+  //   sessionStorage.removeItem('orderListSearchParams');
+  //   sessionStorage.removeItem('quotListSearchParams');
+  // };
+
   /* useState -------------------------------------------- */
   /* 受注管理開閉 */
   const [orderOpen, setorderOpen] = useState(true);
@@ -94,30 +102,30 @@ export default function NavLinks() {
   // const [loginOpen, setroginOpen] = useState(true);
 
   /* methods ----------------------------------------- */
-  /* 現ページとのpath比較 */
+  /** 現ページとのpath比較 */
   const isSelected = (url: string): boolean => {
     if (pathname === url /*|| pathname.startsWith(url + '/')*/) {
       return true;
     }
     return false;
   };
-  /* 受注管理クリック時 */
+  /** 受注管理クリック時 */
   const orderClick = () => {
     setorderOpen(!orderOpen);
   };
-  /* プリントクリック時 */
+  /** プリントクリック時 */
   const printClick = () => {
     setprintOpen(!printOpen);
   };
-  /* マスタ管理クリック時 */
+  /** マスタ管理クリック時 */
   const masterClick = () => {
     setmasterOpen(!masterOpen);
   };
-  /* 設定クリック時 */
+  /** 設定クリック時 */
   const settingClick = () => {
     setsettingOpen(!settingOpen);
   };
-  /* 入出庫管理クリック時 */
+  /** 入出庫管理クリック時 */
   const stockIOClick = () => {
     setStockIOOpen(!stockIOOpen);
   };
@@ -188,7 +196,7 @@ export default function NavLinks() {
                 backgroundColor: isSelected(text.url) ? currentPgColor : undefined,
               }}
             >
-              <ListItemButton href={text.url} dense>
+              <ListItemButton onClick={() => requestNavigation(text.url)} dense>
                 <ListItemText
                   primary={text.name}
                   sx={{ color: isSelected(text.url) ? 'primary.dark' : undefined, pl: 8 }}
@@ -217,7 +225,7 @@ export default function NavLinks() {
                   backgroundColor: isSelected(text.url) ? currentPgColor : undefined,
                 }}
               >
-                <ListItemButton href={text.url} dense>
+                <ListItemButton onClick={() => requestNavigation(text.url)} dense>
                   <ListItemText
                     primary={text.name}
                     sx={{ color: isSelected(text.url) ? 'primary.dark' : undefined, pl: 8 }}
@@ -247,7 +255,7 @@ export default function NavLinks() {
                 backgroundColor: isSelected(text.url) ? currentPgColor : undefined,
               }}
             >
-              <ListItemButton href={text.url} dense>
+              <ListItemButton onClick={() => requestNavigation(text.url)} dense>
                 <ListItemText
                   primary={text.name}
                   sx={{ color: isSelected(text.url) ? 'primary.dark' : undefined, pl: 8 }}
@@ -276,7 +284,7 @@ export default function NavLinks() {
                 backgroundColor: isSelected(text.url) ? currentPgColor : undefined,
               }}
             >
-              <ListItemButton href={text.url} dense>
+              <ListItemButton onClick={() => requestNavigation(text.url)} dense>
                 <ListItemText primary={text.name} sx={{ color: isSelected(text.url) ? 'primary.dark' : undefined, pl: 8 }} />
               </ListItemButton>
             </ListItem>

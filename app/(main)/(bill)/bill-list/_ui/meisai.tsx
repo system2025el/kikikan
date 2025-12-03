@@ -15,7 +15,7 @@ import { ReadOnlyYenNumberElement } from './yen';
  * @param param0
  * @returns 請求の明細項目のUIコンポーネント
  */
-export const MeisaiLines = ({ index }: { index: number }) => {
+export const MeisaiLines = ({ index, editable }: { index: number; editable: boolean }) => {
   /* useState --------------------------------------------------------- */
   /** フォーカスしている行 */
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
@@ -61,13 +61,13 @@ export const MeisaiLines = ({ index }: { index: number }) => {
           <Grid2 container px={2} my={0.5} alignItems={'center'} spacing={0.5}>
             <Grid2 size={0.5} justifyItems={'end'}>
               <Box>
-                <IconButton size="small" onClick={() => meisaiFields.remove(i)}>
-                  <DeleteIcon fontSize="small" color="error" />
+                <IconButton size="small" onClick={() => meisaiFields.remove(i)} disabled={!editable} color="error">
+                  <DeleteIcon fontSize="small" />
                 </IconButton>
               </Box>
             </Grid2>
             <Grid2 size={'grow'}>
-              <TextFieldElement name={`meisaiHeads.${index}.meisai.${i}.nam`} control={control} />
+              <TextFieldElement name={`meisaiHeads.${index}.meisai.${i}.nam`} control={control} disabled={!editable} />
             </Grid2>
             <Grid2 size={1}>
               <TextFieldElement
@@ -83,6 +83,7 @@ export const MeisaiLines = ({ index }: { index: number }) => {
                   },
                 }}
                 type="number"
+                disabled={!editable}
               />
             </Grid2>
             <Grid2 size={0.8}>
@@ -99,6 +100,7 @@ export const MeisaiLines = ({ index }: { index: number }) => {
                   },
                 }}
                 type="number"
+                disabled={!editable}
               />
             </Grid2>
             <Grid2 size={1.5}>
@@ -156,6 +158,7 @@ export const MeisaiLines = ({ index }: { index: number }) => {
                       },
                     })}
                     helperText={fieldState.error?.message}
+                    disabled={!editable}
                   />
                 )}
               />
@@ -174,7 +177,7 @@ export const MeisaiLines = ({ index }: { index: number }) => {
                 }}
                 size="small"
                 onClick={() => moveRow(i, -1)}
-                disabled={i === 0}
+                disabled={i === 0 || !editable}
               >
                 <ArrowUpwardIcon fontSize="small" />
               </IconButton>
@@ -188,7 +191,7 @@ export const MeisaiLines = ({ index }: { index: number }) => {
                 }}
                 size="small"
                 onClick={() => moveRow(i, 1)}
-                disabled={i === meisaiFields.fields.length - 1}
+                disabled={i === meisaiFields.fields.length - 1 || !editable}
               >
                 <ArrowDownwardIcon fontSize="small" />
               </IconButton>
@@ -203,6 +206,7 @@ export const MeisaiLines = ({ index }: { index: number }) => {
           onClick={() =>
             meisaiFields.append({ nam: null, qty: null, honbanbiQty: null, tankaAmt: null, shokeiAmt: null })
           }
+          disabled={!editable}
         >
           <AddIcon fontSize="small" />
           項目

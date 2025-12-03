@@ -15,7 +15,15 @@ import { ReadOnlyYenNumberElement } from './yen';
  * @param param0
  * @returns 見積の明細項目のUIコンポーネント
  */
-export const MeisaiLines = ({ index, sectionNam }: { index: number; sectionNam: 'kizai' | 'labor' | 'other' }) => {
+export const MeisaiLines = ({
+  index,
+  sectionNam,
+  editable,
+}: {
+  index: number;
+  sectionNam: 'kizai' | 'labor' | 'other';
+  editable: boolean;
+}) => {
   /** フォーカスしている行 */
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
@@ -61,14 +69,18 @@ export const MeisaiLines = ({ index, sectionNam }: { index: number; sectionNam: 
           <Grid2 container px={2} my={0.5} alignItems={'center'} spacing={0.5}>
             <Grid2 size={0.5} justifyItems={'end'}>
               <Box>
-                <IconButton size="small" onClick={() => meisaiFields.remove(i)}>
-                  <DeleteIcon fontSize="small" color="error" />
+                <IconButton size="small" onClick={() => meisaiFields.remove(i)} disabled={!editable} color="error">
+                  <DeleteIcon fontSize="small" />
                 </IconButton>
               </Box>
             </Grid2>
             <Grid2 size={'grow'}>
               {sectionNam !== 'labor' ? (
-                <TextFieldElement name={`meisaiHeads.${sectionNam}.${index}.meisai.${i}.nam`} control={control} />
+                <TextFieldElement
+                  name={`meisaiHeads.${sectionNam}.${index}.meisai.${i}.nam`}
+                  control={control}
+                  disabled={!editable}
+                />
               ) : (
                 <SelectElement
                   name={`meisaiHeads.${sectionNam}.${index}.meisai.${i}.nam`}
@@ -81,6 +93,7 @@ export const MeisaiLines = ({ index, sectionNam }: { index: number; sectionNam: 
                     { id: '...', label: '...' },
                   ]}
                   sx={{ width: 242.5 }}
+                  disabled={!editable}
                 />
               )}
             </Grid2>
@@ -98,6 +111,7 @@ export const MeisaiLines = ({ index, sectionNam }: { index: number; sectionNam: 
                   },
                 }}
                 type="number"
+                disabled={!editable}
               />
             </Grid2>
             <Grid2 size={0.8}>
@@ -114,6 +128,7 @@ export const MeisaiLines = ({ index, sectionNam }: { index: number; sectionNam: 
                   },
                 }}
                 type="number"
+                disabled={!editable}
               />
             </Grid2>
             <Grid2 size={1.5}>
@@ -171,6 +186,7 @@ export const MeisaiLines = ({ index, sectionNam }: { index: number; sectionNam: 
                       },
                     })}
                     helperText={fieldState.error?.message}
+                    disabled={!editable}
                   />
                 )}
               />
@@ -189,7 +205,7 @@ export const MeisaiLines = ({ index, sectionNam }: { index: number; sectionNam: 
                 }}
                 size="small"
                 onClick={() => moveRow(i, -1)}
-                disabled={i === 0}
+                disabled={i === 0 || !editable}
               >
                 <ArrowUpwardIcon fontSize="small" />
               </IconButton>
@@ -203,7 +219,7 @@ export const MeisaiLines = ({ index, sectionNam }: { index: number; sectionNam: 
                 }}
                 size="small"
                 onClick={() => moveRow(i, 1)}
-                disabled={i === meisaiFields.fields.length - 1}
+                disabled={i === meisaiFields.fields.length - 1 || !editable}
               >
                 <ArrowDownwardIcon fontSize="small" />
               </IconButton>
@@ -213,7 +229,7 @@ export const MeisaiLines = ({ index, sectionNam }: { index: number; sectionNam: 
       ))}
       <Grid2 container px={2} alignItems={'center'}>
         <Grid2 size={0.5} />
-        <Button size="small" onClick={() => meisaiFields.append({ nam: null })}>
+        <Button size="small" onClick={() => meisaiFields.append({ nam: null })} disabled={!editable}>
           <AddIcon fontSize="small" />
           項目
         </Button>

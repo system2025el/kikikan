@@ -29,11 +29,16 @@ import { Controller, FormProvider, useFieldArray, useForm, useWatch } from 'reac
 import { SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
-import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanTimeString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { FormDateX } from '@/app/(main)/_ui/date';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { LoadingOverlay } from '@/app/(main)/_ui/loading';
 
+import { addLock, delLock, getLock } from '../../_lib/funcs';
+import { useUnsavedChangesWarning } from '../../_lib/hook';
+import { LockValues } from '../../_lib/types';
+import { BackButton } from '../../_ui/buttons';
+import { IsDirtyAlertDialog, useDirty } from '../../_ui/dirty-context';
 import { getCustomerSelection } from '../../(masters)/_lib/funcs';
 import { getMituStsSelection, getUsersSelection } from '../_lib/funcs';
 import { usePdf } from '../_lib/hooks/usePdf';
@@ -76,6 +81,13 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
   const [snackBarOpen, setSnackBarOpen] = useState(false);
   /** スナックバーのメッセージ */
   const [snackBarMessage, setSnackBarMessage] = useState('');
+  /** 編集内容が未保存ダイアログ制御 */
+  const [dirtyOpen, setDirtyOpen] = useState(false);
+
+  /** ロックデータ */
+  const [lockData, setLockData] = useState<LockValues | null>(null);
+  /** 全体の編集状態 */
+  const [editable, setEditable] = useState(isNew ? true : false);
 
   /** 値引きの編集状態 */
   const [nebikiEditing, setNebikiEditing] = useState(false);
@@ -127,6 +139,11 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
   /** 現在の合計金額の値 */
   const currentGokeiAmt = useWatch({ control, name: 'gokeiAmt' });
 
+  // context
+  const { setIsDirty, setLock } = useDirty();
+  // ブラウザバック、F5、×ボタンでページを離れた際のhook
+  useUnsavedChangesWarning(isDirty);
+
   /* methods ------------------------------------------------------ */
   /** 保存ボタン押下 */
   const onSubmit = async (data: QuotHeadValues) => {
@@ -143,6 +160,51 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
     setSnackBarMessage('保存しました');
     setSnackBarOpen(true);
     reset(data);
+  };
+
+  /** 編集モード変更 */
+  const handleEdit = async () => {
+    // 編集→閲覧
+    if (editable) {
+      if (isDirty) {
+        setDirtyOpen(true);
+        return;
+      }
+      await delLock(2, quot.mituHeadId ?? 0);
+      setLockData(null);
+      setEditable(false);
+      // 閲覧→編集
+    } else {
+      if (!user) return;
+      const lockData = await getLock(2, quot.mituHeadId ?? 0);
+      setLockData(lockData);
+      if (lockData === null) {
+        await addLock(2, quot.mituHeadId ?? 0, user.name);
+        const newLockData = await getLock(2, quot.mituHeadId ?? 0);
+        setLockData(newLockData);
+        setEditable(true);
+      } else if (lockData !== null && lockData.addUser === user.name) {
+        setEditable(true);
+      }
+    }
+  };
+
+  /**
+   * 警告ダイアログの押下ボタンによる処理
+   * @param result 結果
+   */
+  const handleResultDialog = async (result: boolean) => {
+    if (result) {
+      if (!isNew) {
+        await delLock(2, quot.mituHeadId ?? 0);
+        setLockData(null);
+      }
+      setEditable(false);
+      reset();
+      setDirtyOpen(false);
+    } else {
+      setDirtyOpen(false);
+    }
   };
 
   /* useMemo ---------------------------------------------------------- */
@@ -175,6 +237,20 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
       ]);
       setOptions({ users: users, mituSts: mituSts, custs: custs });
     };
+
+    /** ロック確認 */
+    const asyncProcess = async () => {
+      const lockData = await getLock(2, quot.mituHeadId ?? 0);
+      setLockData(lockData);
+      if (lockData === null) {
+        await addLock(2, quot.mituHeadId ?? 0, user?.name ?? '');
+        const newLockData = await getLock(2, quot.mituHeadId ?? 0);
+        setLockData(newLockData);
+      } else if (lockData !== null && lockData.addUser !== user?.name) {
+        setEditable(false);
+      }
+    };
+
     getOptions();
 
     if (isNew) {
@@ -182,6 +258,9 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
       if (user?.name) {
         setValue('nyuryokuUser', user.name);
       }
+    } else {
+      // 編集でログインユーザがあるときロックデータを確認する
+      if (user && quot.mituHeadId) asyncProcess();
     }
     setTimeout(() => {
       setIsLoading(false);
@@ -216,6 +295,17 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
       setValue('gokeiAmt', gokei, { shouldDirty: false });
     }
   }, [chukeiSum, sum, zei, currentChukei, currentPreTaxGokei, currentZeiAmt, currentGokeiAmt, setValue]);
+
+  // ロック
+  useEffect(() => {
+    setLock(lockData);
+  }, [lockData, setLock]);
+
+  // 変更あるかどうか
+  useEffect(() => {
+    const dirty = isDirty;
+    setIsDirty(dirty);
+  }, [isDirty, setIsDirty]);
 
   // デバッグ用
   useEffect(() => {
@@ -256,9 +346,34 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
 
   return (
     <Container disableGutters sx={{ minWidth: '100%', pb: 10 }} maxWidth={'xl'}>
-      <Box justifySelf={'end'} mb={0.5}>
-        <Button onClick={() => router.back()}>戻る</Button>
-      </Box>
+      <Grid2 container spacing={4} display={'flex'} justifyContent={'end'} mb={1}>
+        {lockData !== null && lockData.addUser !== user?.name && (
+          <Grid2 container alignItems={'center'} spacing={2}>
+            <Typography>{lockData.addDat && toJapanTimeString(new Date(lockData.addDat))}</Typography>
+            <Typography>{lockData.addUser}</Typography>
+            <Typography>編集中</Typography>
+          </Grid2>
+        )}
+        {/* {fixFlag && (
+          <Box display={'flex'} alignItems={'center'}>
+            <Typography>出庫済</Typography>
+          </Box>
+        )} */}
+        <Grid2 container alignItems={'center'} spacing={1}>
+          {!editable || (lockData !== null && lockData?.addUser !== user?.name) ? (
+            <Typography>閲覧モード</Typography>
+          ) : (
+            <Typography>編集モード</Typography>
+          )}
+          <Button
+            disabled={(lockData && lockData?.addUser !== user?.name ? true : false) && isNew}
+            onClick={handleEdit}
+          >
+            変更
+          </Button>
+        </Grid2>
+        <BackButton label={'戻る'} />
+      </Grid2>
       <FormProvider {...quotForm}>
         <form onSubmit={handleSubmit(onSubmit)}>
           <Paper variant="outlined">
@@ -392,16 +507,23 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
                           color: '#888',
                         }}
                         slotProps={{ input: { readOnly: true, onFocus: (e) => e.target.blur() } }}
+                        disabled={!editable}
                       />
                     </Grid2>
                     <Grid2 display="flex" direction="row" alignItems="center">
                       <Typography marginRight={3}>見積ステータス</Typography>
-                      <SelectElement name="mituSts" control={control} sx={{ width: 180 }} options={options.mituSts} />
+                      <SelectElement
+                        name="mituSts"
+                        control={control}
+                        sx={{ width: 180 }}
+                        options={options.mituSts}
+                        disabled={!editable}
+                      />
                     </Grid2>
                   </Grid2>
                   <Box sx={styles.container}>
                     <Typography marginRight={5}>見積件名</Typography>
-                    <TextFieldElement name="mituHeadNam" control={control} sx={{ width: 300 }} />
+                    <TextFieldElement name="mituHeadNam" control={control} sx={{ width: 300 }} disabled={!editable} />
                   </Box>
                   <Box sx={styles.container}>
                     <Typography marginRight={7}>見積日</Typography>
@@ -415,6 +537,7 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
                           sx={{ width: 242.5 }}
                           error={!!error}
                           helperText={error?.message}
+                          disabled={!editable}
                         />
                       )}
                     />
@@ -424,6 +547,7 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
                     <Controller
                       name="nyuryokuUser"
                       control={control}
+                      disabled={!editable}
                       render={({ field }) => (
                         <Autocomplete
                           {...field}
@@ -442,6 +566,7 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
                     <Controller
                       name="kokyaku"
                       control={control}
+                      disabled={!editable}
                       render={({ field }) => (
                         <Autocomplete
                           {...field}
@@ -461,23 +586,24 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
                   </Box>
                   <Box sx={styles.container}>
                     <Typography marginRight={1}>見積先担当者</Typography>
-                    <TextFieldElement name="kokyakuTantoNam" control={control} />
+                    <TextFieldElement name="kokyakuTantoNam" control={control} disabled={!editable} />
                   </Box>
                 </Grid2>
                 <Grid2 size={5.5}>
                   <Box sx={styles.container}>
                     <Typography marginRight={7}>作品名</Typography>
-                    <TextFieldElement name="koenNam" control={control} sx={{ width: 300 }} />
+                    <TextFieldElement name="koenNam" control={control} sx={{ width: 300 }} disabled={!editable} />
                   </Box>
                   <Box sx={styles.container}>
                     <Typography marginRight={5}>実施場所</Typography>
-                    <TextFieldElement name="koenbashoNam" control={control} sx={{ width: 300 }} />
+                    <TextFieldElement name="koenbashoNam" control={control} sx={{ width: 300 }} disabled={!editable} />
                   </Box>
                   <Box sx={styles.container}>
                     <Typography marginRight={5}>貸出期間</Typography>
                     <Controller
                       name="mituRange.strt"
                       control={control}
+                      disabled={!editable}
                       render={({ field, fieldState: { error } }) => (
                         <FormDateX
                           value={field.value}
@@ -485,6 +611,7 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
                           sx={{ width: 242.5 }}
                           error={!!error}
                           helperText={error?.message}
+                          disabled={!editable}
                         />
                       )}
                     />
@@ -499,6 +626,7 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
                           sx={{ width: 242.5 }}
                           error={!!error}
                           helperText={error?.message}
+                          disabled={!editable}
                         />
                       )}
                     />
@@ -519,11 +647,12 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
                         },
                       }}
                       type="number"
+                      disabled={!editable}
                     />
                   </Box>
                   <Box sx={styles.container}>
                     <Typography marginRight={9}>備考</Typography>
-                    <TextFieldElement name="biko" control={control} sx={{ width: 300 }} />
+                    <TextFieldElement name="biko" control={control} sx={{ width: 300 }} disabled={!editable} />
                   </Box>
                 </Grid2>
               </Grid2>
@@ -543,13 +672,13 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
                 </Typography>
                 {kizaiFields.fields.map((field, index) => (
                   <Box key={field.id} p={1}>
-                    <MeisaiTblHeader index={index} sectionNam="kizai" sectionFields={kizaiFields}>
-                      <MeisaiLines index={index} sectionNam="kizai" />
+                    <MeisaiTblHeader index={index} sectionNam="kizai" sectionFields={kizaiFields} editable={editable}>
+                      <MeisaiLines index={index} sectionNam="kizai" editable={editable} />
                     </MeisaiTblHeader>
                   </Box>
                 ))}
                 <Box m={1}>
-                  <Button size="small" onClick={() => setKizaimeisaiaddDialogOpen(true)}>
+                  <Button size="small" onClick={() => setKizaimeisaiaddDialogOpen(true)} disabled={!editable}>
                     <AddIcon fontSize="small" />
                     テーブル
                   </Button>
@@ -607,7 +736,7 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
                     機材費：
                   </Grid2>
                   <Grid2 size={1.5}>
-                    <TextFieldElement name="kizaiChukeiMei" control={control} />
+                    <TextFieldElement name="kizaiChukeiMei" control={control} disabled={!editable} />
                   </Grid2>
                   <Grid2 size={2}>
                     <ReadOnlyYenNumberElement name="kizaiChukeiAmt" />
@@ -623,8 +752,8 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
                 {laborFields.fields.map((field, index) => (
                   <Box key={field.id} p={1}>
                     {/* {index > 0 && <Divider sx={{ mx: 5 }} />} */}
-                    <MeisaiTblHeader index={index} sectionNam="labor" sectionFields={laborFields}>
-                      <MeisaiLines index={index} sectionNam="labor" />
+                    <MeisaiTblHeader index={index} sectionNam="labor" sectionFields={laborFields} editable={editable}>
+                      <MeisaiLines index={index} sectionNam="labor" editable={editable} />
                     </MeisaiTblHeader>
                   </Box>
                 ))}
@@ -640,6 +769,7 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
                         nebikiAftNam: '人件費',
                       })
                     }
+                    disabled={!editable}
                   >
                     <AddIcon fontSize="small" />
                     テーブル
@@ -653,8 +783,8 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
                 </Typography>
                 {otherFields.fields.map((field, index) => (
                   <Box key={field.id} p={1}>
-                    <MeisaiTblHeader index={index} sectionNam="other" sectionFields={otherFields}>
-                      <MeisaiLines index={index} sectionNam="other" />
+                    <MeisaiTblHeader index={index} sectionNam="other" sectionFields={otherFields} editable={editable}>
+                      <MeisaiLines index={index} sectionNam="other" editable={editable} />
                     </MeisaiTblHeader>
                   </Box>
                 ))}
@@ -670,6 +800,7 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
                         nebikiAftNam: 'その他',
                       })
                     }
+                    disabled={!editable}
                   >
                     <AddIcon fontSize="small" />
                     テーブル
@@ -686,14 +817,14 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
                   <Typography textAlign={'center'}>コメント</Typography>
                 </Grid2>
                 <Grid2 size={6}>
-                  <TextFieldElement name="comment" control={control} multiline fullWidth />
+                  <TextFieldElement name="comment" control={control} multiline fullWidth disabled={!editable} />
                 </Grid2>
                 <Grid2 size={'grow'} />
               </Grid2>
               <Grid2 container display={'flex'} alignItems={'center'} spacing={0.5} my={0.5}>
                 <Grid2 size={'grow'} />
                 <Grid2 size={1.5}>
-                  <TextFieldElement name="chukeiMei" control={control} />
+                  <TextFieldElement name="chukeiMei" control={control} disabled={!editable} />
                 </Grid2>
                 <Grid2 size={2}>
                   <ReadOnlyYenNumberElement name="chukeiAmt" />
@@ -703,7 +834,7 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
               <Grid2 container display={'flex'} alignItems={'center'} spacing={0.5} my={0.5}>
                 <Grid2 size={'grow'} />
                 <Grid2 size={1.5}>
-                  <TextFieldElement name="tokuNebikiMei" control={control} />
+                  <TextFieldElement name="tokuNebikiMei" control={control} disabled={!editable} />
                 </Grid2>
                 <Grid2 size={2}>
                   <Controller
@@ -762,6 +893,7 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
                           },
                         })}
                         helperText={fieldState.error?.message}
+                        disabled={!editable}
                       />
                     )}
                   />
@@ -838,6 +970,7 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
                           },
                         })}
                         helperText={fieldState.error?.message}
+                        disabled={!editable}
                       />
                     )}
                   />
@@ -856,6 +989,7 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
                       },
                     }}
                     type="number"
+                    disabled={!editable}
                   />
                   <Typography alignSelf={'center'}>%</Typography>
                 </Grid2>
@@ -874,7 +1008,7 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
           </Paper>
           {/** 固定ボタン 保存＆ページトップ */}
           <Box position={'fixed'} zIndex={1050} bottom={25} right={25} alignItems={'center'}>
-            <Fab variant="extended" color="primary" type="submit" sx={{ mr: 2 }}>
+            <Fab variant="extended" color="primary" type="submit" sx={{ mr: 2 }} disabled={!editable}>
               <SaveAsIcon sx={{ mr: 1 }} />
               保存
             </Fab>
@@ -884,6 +1018,7 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
           </Box>
         </form>
       </FormProvider>
+      <IsDirtyAlertDialog open={dirtyOpen} onClick={handleResultDialog} />
       <Snackbar
         open={snackBarOpen}
         autoHideDuration={6000}
