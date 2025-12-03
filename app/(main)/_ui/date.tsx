@@ -180,15 +180,30 @@ export const DateTime = (props: {
   fieldstate?: ControllerFieldState;
   timeSteps?: number;
   disableClearable?: boolean;
+  //isDialog?: boolean;
   onChange: (value: Dayjs | null) => void;
   onAccept: (value: Dayjs | null) => void;
   onClear?: () => void;
 }) => {
-  const { sx, disabled, date, minDate, maxDate, fieldstate, timeSteps, disableClearable, onChange, onAccept, onClear } =
-    props;
+  const {
+    sx,
+    disabled,
+    date,
+    minDate,
+    maxDate,
+    fieldstate,
+    timeSteps,
+    disableClearable,
+    //isDialog,
+    onChange,
+    onAccept,
+    onClear,
+  } = props;
 
   //カレンダーの表示を制御する
   const [open, setOpen] = useState(false);
+
+  //const shouldDisablePortal = isDialog === true;
 
   /** 表示用に時間を丸める計算 */
   const roundedValue = useMemo(() => {
@@ -245,6 +260,9 @@ export const DateTime = (props: {
           },
         },
         calendarHeader: { format: 'YYYY年MM月' },
+        // popper: {
+        //   disablePortal: shouldDisablePortal,
+        // },
       }} // カレンダーヘッダーのフォーマット
       value={/*date && dayjs(date)*/ roundedValue}
       minDate={minDate && dayjs(minDate)}
