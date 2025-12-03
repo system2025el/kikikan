@@ -1,4 +1,4 @@
-import { getNyukoEqptDetail, getNyukoEqptDetailTable } from './_lib/funcs';
+import { getNyukoEqptDetail, getNyukoEqptDetailTable, getNyukoFixFlag } from './_lib/funcs';
 import { NyukoEqptDetailTableValues, NyukoEqptDetailValues } from './_lib/types';
 import { NyukoEqptDetail } from './_ui/nyuko-eqpt-detail';
 
@@ -42,8 +42,20 @@ const Page = async (props: {
     Number(params.kizaiId)
   );
 
+  const fixFlag = await getNyukoFixFlag(
+    Number(params.jhId),
+    nyukoEqptDetailData.juchuKizaiHeadId,
+    70,
+    nyukoEqptDetailData.nyushukoDat,
+    Number(params.nbId)
+  );
+
   return (
-    <NyukoEqptDetail nyukoEqptDetailData={nyukoEqptDetailData} nyukoEqptDetailTableData={nyukoEqptDetailTableData} />
+    <NyukoEqptDetail
+      nyukoEqptDetailData={nyukoEqptDetailData}
+      nyukoEqptDetailTableData={nyukoEqptDetailTableData}
+      fixFlag={fixFlag}
+    />
   );
 };
 export default Page;

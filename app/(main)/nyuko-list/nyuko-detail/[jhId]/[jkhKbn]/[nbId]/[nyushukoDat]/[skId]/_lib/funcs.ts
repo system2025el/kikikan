@@ -8,7 +8,11 @@ import { selectJuchuContainerMeisaiMaxId, upsertJuchuContainerMeisai } from '@/a
 import { selectJuchuKizaiMeisaiMaxId, upsertJuchuKizaiMeisai } from '@/app/_lib/db/tables/t-juchu-kizai-meisai';
 import { selectJuchuKizaiNyushukoConfirm } from '@/app/_lib/db/tables/t-juchu-kizai-nyushuko';
 import { updateNyushukoDen, updateOyaNyukoDen, upsertNyushukoDen } from '@/app/_lib/db/tables/t-nyushuko-den';
-import { insertNyushukoFix, updateNyushukoFix } from '@/app/_lib/db/tables/t-nyushuko-fix';
+import {
+  insertNyushukoFix,
+  selectSagyoIdFilterNyushukoFixFlag,
+  updateNyushukoFix,
+} from '@/app/_lib/db/tables/t-nyushuko-fix';
 import { selectNyukoOne } from '@/app/_lib/db/tables/v-nyushuko-den2';
 import { selectNyushukoDetail } from '@/app/_lib/db/tables/v-nyushuko-den2-lst';
 import { JuchuCtnMeisai } from '@/app/_lib/db/types/t_juchu_ctn_meisai-type';
@@ -285,6 +289,45 @@ export const updKeepNyukoDetail = async (
     // 入庫確定追加
     await addNyukoFix(nyukoDetailData, nyukoDetailTableData, userNam, connection);
   } catch (e) {
+    throw e;
+  }
+};
+
+/**
+ * 入庫作業確定フラグ取得
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param sagyoKbnId 作業区分id
+ * @param sagyoDenDat 作業日時
+ * @param sagyoId 作業id
+ * @returns
+ */
+export const getNyukoFixFlag = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  sagyoKbnId: number,
+  sagyoDenDat: string,
+  sagyoId: number
+) => {
+  try {
+    const { data, error } = await selectSagyoIdFilterNyushukoFixFlag(
+      juchuHeadId,
+      juchuKizaiHeadId,
+      sagyoKbnId,
+      sagyoDenDat,
+      sagyoId
+    );
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return false;
+      }
+      throw error;
+    }
+
+    return data.sagyo_fix_flg === 0 ? false : true;
+  } catch (e) {
+    console.error(e);
     throw e;
   }
 };

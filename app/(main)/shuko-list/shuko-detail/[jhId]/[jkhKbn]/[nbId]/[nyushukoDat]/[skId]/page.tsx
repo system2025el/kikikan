@@ -39,7 +39,6 @@ const Page = async (props: {
     shukoDetailData.nyushukoDat,
     Number(params.nbId)
   );
-  console.log('取得');
   return (
     <ShukoDetail shukoDetailData={shukoDetailData} shukoDetailTableData={shukoDetailTableData} fixFlag={fixFlag} />
   );

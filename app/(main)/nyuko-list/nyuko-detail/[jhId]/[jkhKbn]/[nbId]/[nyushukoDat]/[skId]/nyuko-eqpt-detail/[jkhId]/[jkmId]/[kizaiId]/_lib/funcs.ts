@@ -6,6 +6,7 @@ import pool from '@/app/_lib/db/postgres';
 import { selectOneEqpt } from '@/app/_lib/db/tables/m-kizai';
 import { deleteNyushukoCtnResult } from '@/app/_lib/db/tables/t-nyushuko-ctn-result';
 import { updateNyushukoDen, updateResultAdjQty } from '@/app/_lib/db/tables/t-nyushuko-den';
+import { selectSagyoIdFilterNyushukoFixFlag } from '@/app/_lib/db/tables/t-nyushuko-fix';
 import { deleteNyushukoResult } from '@/app/_lib/db/tables/t-nyushuko-result';
 import { selectNyushukoDetailOne } from '@/app/_lib/db/tables/v-nyushuko-den2-lst';
 import { selectNyushukoEqptDetail } from '@/app/_lib/db/tables/v-nyushuko-den2-result';
@@ -237,5 +238,44 @@ export const updNyukoResultAdjQty = async (
   } catch (e) {
     console.error(e);
     return false;
+  }
+};
+
+/**
+ * 入庫作業確定フラグ取得
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param sagyoKbnId 作業区分id
+ * @param sagyoDenDat 作業日時
+ * @param sagyoId 作業id
+ * @returns
+ */
+export const getNyukoFixFlag = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  sagyoKbnId: number,
+  sagyoDenDat: string,
+  sagyoId: number
+) => {
+  try {
+    const { data, error } = await selectSagyoIdFilterNyushukoFixFlag(
+      juchuHeadId,
+      juchuKizaiHeadId,
+      sagyoKbnId,
+      sagyoDenDat,
+      sagyoId
+    );
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return false;
+      }
+      throw error;
+    }
+
+    return data.sagyo_fix_flg === 0 ? false : true;
+  } catch (e) {
+    console.error(e);
+    throw e;
   }
 };

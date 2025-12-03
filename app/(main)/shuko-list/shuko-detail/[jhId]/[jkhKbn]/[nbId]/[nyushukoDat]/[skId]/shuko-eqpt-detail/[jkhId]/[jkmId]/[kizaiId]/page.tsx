@@ -1,4 +1,4 @@
-import { getShukoEqptDetail, getShukoEqptDetailTable } from './_lib/funcs';
+import { getShukoEqptDetail, getShukoEqptDetailTable, getShukoFixFlag } from './_lib/funcs';
 import { ShukoEqptDetailTableValues, ShukoEqptDetailValues } from './_lib/types';
 import { ShukoEqptDetail } from './_ui/shuko-eqpt-detail';
 
@@ -41,8 +41,20 @@ const Page = async (props: {
     Number(params.kizaiId)
   );
 
+  const fixFlag = await getShukoFixFlag(
+    Number(params.jhId),
+    shukoEqptDetailData.juchuKizaiHeadId,
+    60,
+    shukoEqptDetailData.nyushukoDat,
+    Number(params.nbId)
+  );
+
   return (
-    <ShukoEqptDetail shukoEqptDetailData={shukoEqptDetailData} shukoEqptDetailTableData={shukoEqptDetailTableData} />
+    <ShukoEqptDetail
+      shukoEqptDetailData={shukoEqptDetailData}
+      shukoEqptDetailTableData={shukoEqptDetailTableData}
+      fixFlag={fixFlag}
+    />
   );
 };
 export default Page;
