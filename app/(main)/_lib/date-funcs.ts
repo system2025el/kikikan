@@ -36,12 +36,16 @@ export const getNyukoDate = (kicsNyukoDat: Date | null, yardNyukoDat: Date | nul
 export const getRange = (start: Date | null, end: Date | null): string[] => {
   if (start !== null && end !== null) {
     const range: string[] = [];
-    const current = new Date(start);
+    let current = toJapanYMDString(start);
+    const endStr = toJapanYMDString(end);
 
-    while (current <= end) {
+    while (current <= endStr) {
       const dateStr = toJapanYMDString(current);
       range.push(dateStr);
-      current.setDate(current.getDate() + 1);
+      const d = new Date(dateStr);
+      d.setDate(d.getDate() + 1);
+      const next = toJapanYMDString(d);
+      current = next;
     }
 
     return range;

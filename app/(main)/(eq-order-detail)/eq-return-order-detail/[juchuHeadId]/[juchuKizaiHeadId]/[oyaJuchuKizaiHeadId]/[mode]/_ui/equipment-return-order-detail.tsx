@@ -72,6 +72,7 @@ import {
   JuchuKizaiMeisaiValues,
   StockTableValues,
 } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
+import { getJuchuKizaiMeisaiList } from '@/app/(main)/quotation-list/_lib/funcs';
 
 import {
   getReturnJuchuContainerMeisai,
@@ -196,17 +197,6 @@ export const EquipmentReturnOrderDetail = (props: {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
-  // 合計金額
-  const [priceTotal, setPriceTotal] = useState(
-    returnJuchuKizaiMeisaiList!.reduce(
-      (sum, row) =>
-        props.returnJuchuKizaiHeadData.juchuHonbanbiQty && row.planKizaiQty
-          ? sum + row.kizaiTankaAmt * row.planKizaiQty * props.returnJuchuKizaiHeadData.juchuHonbanbiQty
-          : 0,
-      0
-    )
-  );
-
   // 編集中かどうか
   const [isEditing, setIsEditing] = useState(false);
 
@@ -239,7 +229,7 @@ export const EquipmentReturnOrderDetail = (props: {
       juchuKizaiHeadId: props.returnJuchuKizaiHeadData.juchuKizaiHeadId,
       juchuKizaiHeadKbn: props.returnJuchuKizaiHeadData.juchuKizaiHeadKbn,
       juchuHonbanbiQty: props.returnJuchuKizaiHeadData.juchuHonbanbiQty,
-      nebikiAmt: props.returnJuchuKizaiHeadData.nebikiAmt,
+      //nebikiAmt: props.returnJuchuKizaiHeadData.nebikiAmt,
       mem: props.returnJuchuKizaiHeadData.mem,
       headNam: props.returnJuchuKizaiHeadData.headNam,
       oyaJuchuKizaiHeadId: props.returnJuchuKizaiHeadData.oyaJuchuKizaiHeadId,
@@ -327,19 +317,6 @@ export const EquipmentReturnOrderDetail = (props: {
       }
     };
   }, [returnJuchuKizaiMeisaiList, isLoading, isDetailLoading]);
-
-  useEffect(() => {
-    const updatedPriceTotal = returnJuchuKizaiMeisaiList
-      .filter((data) => !data.delFlag)
-      .reduce(
-        (sum, row) =>
-          getValues('juchuHonbanbiQty') !== null
-            ? sum + row.kizaiTankaAmt * row.planKizaiQty * (juchuHonbanbiQty ?? 0)
-            : 0,
-        0
-      );
-    setPriceTotal(updatedPriceTotal);
-  }, [getValues, returnJuchuKizaiMeisaiList, juchuHonbanbiQty]);
 
   /**
    * 編集モード変更
@@ -744,29 +721,20 @@ export const EquipmentReturnOrderDetail = (props: {
    * 機材テーブルの受注数、予備数入力時
    * @param rowIndex 行数
    * @param kizaiId 機材id
-   * @param planKizaiQty 受注数
-   * @param planYobiQty 予備数
    * @param planQty 合計
    */
-  const handleCellChange = (
-    rowIndex: number,
-    kizaiId: number,
-    planKizaiQty: number,
-    planYobiQty: number,
-    planQty: number
-  ) => {
+  const handleCellChange = (rowIndex: number, kizaiId: number, planQty: number) => {
     const updatedEqStockData = eqStockListRef.current[rowIndex];
     const targetIndex = updatedEqStockData
       .map((d, index) => (dateRange.includes(toJapanYMDString(d.calDat)) ? index : -1))
       .filter((index) => index !== -1);
 
+    const originPlanQty = returnJuchuKizaiMeisaiList.filter((d) => !d.delFlag)[rowIndex].planQty;
     setEqStockList((prev) =>
       prev.map((data) =>
         data[0].kizaiId === kizaiId
           ? data.map((d, i) =>
-              targetIndex.includes(i)
-                ? { ...d, zaikoQty: Number(d.zaikoQty) - planQty + planKizaiQty + planYobiQty }
-                : d
+              targetIndex.includes(i) ? { ...d, zaikoQty: Number(d.zaikoQty) - originPlanQty + planQty } : d
             )
           : data
       )
@@ -780,11 +748,7 @@ export const EquipmentReturnOrderDetail = (props: {
       const index = visibleIndex[rowIndex];
       if (index === undefined) return prev;
 
-      return prev.map((data, i) =>
-        i === index
-          ? { ...data, planKizaiQty: planKizaiQty, planYobiQty: planYobiQty, planQty: planKizaiQty + planYobiQty }
-          : data
-      );
+      return prev.map((data, i) => (i === index ? { ...data, planQty: planQty } : data));
     });
   };
 
@@ -1017,8 +981,6 @@ export const EquipmentReturnOrderDetail = (props: {
       kizaiNam: d.kizaiNam,
       oyaPlanKizaiQty: d.planKizaiQty,
       oyaPlanYobiQty: d.planYobiQty,
-      planKizaiQty: 0,
-      planYobiQty: 0,
       planQty: 0,
       dspOrdNum: d.dspOrdNum,
       indentNum: d.indentNum,
@@ -1268,11 +1230,11 @@ export const EquipmentReturnOrderDetail = (props: {
               <AccordionDetails sx={{ padding: 0 }}>
                 <Divider />
                 <Grid2 container alignItems="center" spacing={2} p={2}>
-                  <Grid2 container alignItems="center">
+                  <Grid2 container alignItems="baseline">
                     <Typography>機材明細名</Typography>
                     <TextFieldElement name="headNam" control={control} disabled={!edit}></TextFieldElement>
                   </Grid2>
-                  <Grid2 container alignItems="center">
+                  {/* <Grid2 container alignItems="center">
                     <Typography>小計金額</Typography>
                     <TextField
                       value={`-¥${priceTotal.toLocaleString()}`}
@@ -1341,7 +1303,7 @@ export const EquipmentReturnOrderDetail = (props: {
                         />
                       )}
                     />
-                  </Grid2>
+                  </Grid2> */}
                 </Grid2>
                 <Grid2 container p={2} spacing={2}>
                   <Grid2 container spacing={2}>
@@ -1436,7 +1398,7 @@ export const EquipmentReturnOrderDetail = (props: {
                     </Grid2>
                   </Grid2>
                 </Grid2>
-                <Box display={'flex'} p={2}>
+                {/* <Box display={'flex'} p={2}>
                   <Grid2 container alignItems="center" spacing={1}>
                     <Typography>本番日数</Typography>
                     <TextFieldElement
@@ -1460,7 +1422,7 @@ export const EquipmentReturnOrderDetail = (props: {
                     ></TextFieldElement>
                     <Typography>日</Typography>
                   </Grid2>
-                </Box>
+                </Box> */}
                 <Box display={'flex'} alignItems="center" p={2}>
                   <Typography mr={2}>メモ</Typography>
                   <TextFieldElement

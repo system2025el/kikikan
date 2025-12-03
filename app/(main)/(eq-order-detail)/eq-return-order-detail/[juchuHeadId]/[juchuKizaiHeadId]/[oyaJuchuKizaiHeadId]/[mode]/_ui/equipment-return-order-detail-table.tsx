@@ -150,13 +150,7 @@ ReturnStockTableRow.displayName = 'ReturnStockTableRow';
 type ReturnEqTableProps = {
   rows: ReturnJuchuKizaiMeisaiValues[];
   edit: boolean;
-  handleCellChange: (
-    rowIndex: number,
-    kizaiId: number,
-    returnOrderValue: number,
-    returnSpareValue: number,
-    returnTotalValue: number
-  ) => void;
+  handleCellChange: (rowIndex: number, kizaiId: number, planQty: number) => void;
   handleMeisaiDelete: (rowIndex: number, row: ReturnJuchuKizaiMeisaiValues) => void;
   handleMemoChange: (rowIndex: number, memo: string) => void;
   ref: React.RefObject<HTMLDivElement | null>;
@@ -240,7 +234,7 @@ export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({
               size="small"
               style={styles.header}
               sx={{ position: 'sticky', top: 0, zIndex: 2, bgcolor: 'red' }}
-              colSpan={3}
+              rowSpan={2}
             >
               返却
             </TableCell>
@@ -263,7 +257,7 @@ export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({
             <TableCell align="right" size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
               予備
             </TableCell>
-            <TableCell align="right" size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
+            {/* <TableCell align="right" size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
               受注
             </TableCell>
             <TableCell align="right" size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
@@ -271,7 +265,7 @@ export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({
             </TableCell>
             <TableCell align="right" size="small" style={styles.header} sx={{ position: 'sticky', top: 24, zIndex: 2 }}>
               合計
-            </TableCell>
+            </TableCell> */}
           </TableRow>
         </TableHead>
         <TableBody>
@@ -304,13 +298,7 @@ type ReturnEqTableRowProps = {
   handleYobiRef: (el: HTMLInputElement | null) => void;
   handleMeisaiDelete: (rowIndex: number, row: ReturnJuchuKizaiMeisaiValues) => void;
   handleMemoChange: (rowIndex: number, memo: string) => void;
-  handleCellChange: (
-    rowIndex: number,
-    kizaiId: number,
-    planKizaiQty: number,
-    planYobiQty: number,
-    planQty: number
-  ) => void;
+  handleCellChange: (rowIndex: number, kizaiId: number, planQty: number) => void;
   handleOrderKeyDown: (e: React.KeyboardEvent, rowIndex: number) => void;
   handleYobiKeyDown: (e: React.KeyboardEvent, rowIndex: number) => void;
 };
@@ -374,11 +362,11 @@ const ReturnEqTableRow = React.memo(
         <TableCell style={styles.row} align="right" size="small">
           <TextField
             variant="standard"
-            value={row.planKizaiQty}
+            value={row.planQty}
             type="text"
             onChange={(e) => {
-              if (/^\d*$/.test(e.target.value) && Number(e.target.value) <= (row.oyaPlanKizaiQty ?? 0)) {
-                handleCellChange(rowIndex, row.kizaiId, Number(e.target.value), row.planYobiQty, row.planQty);
+              if (/^\d*$/.test(e.target.value) && Number(e.target.value) <= row.oyaPlanKizaiQty + row.oyaPlanYobiQty) {
+                handleCellChange(rowIndex, row.kizaiId, Number(e.target.value));
               }
             }}
             sx={{
@@ -418,7 +406,7 @@ const ReturnEqTableRow = React.memo(
             disabled={!edit}
           />
         </TableCell>
-        <TableCell style={styles.row} align="right" size="small">
+        {/* <TableCell style={styles.row} align="right" size="small">
           <TextField
             variant="standard"
             value={row.planYobiQty}
@@ -467,7 +455,7 @@ const ReturnEqTableRow = React.memo(
         </TableCell>
         <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200], color: 'red' }}>
           {row.planQty}
-        </TableCell>
+        </TableCell> */}
       </TableRow>
     );
   },

@@ -8,10 +8,10 @@ export const ReturnJuchuKizaiHeadSchema = z
     juchuKizaiHeadId: z.number(),
     juchuKizaiHeadKbn: z.number(),
     juchuHonbanbiQty: z.number().nullable(),
-    nebikiAmt: z
-      .number()
-      .max(99999999, { message: validationMessages.maxNumberLength(8) })
-      .nullable(),
+    // nebikiAmt: z
+    //   .number()
+    //   .max(99999999, { message: validationMessages.maxNumberLength(8) })
+    //   .nullable(),
     mem: z.string().nullable(),
     headNam: z
       .string({ message: validationMessages.required() })
@@ -44,8 +44,6 @@ export type ReturnJuchuKizaiMeisaiValues = {
   kizaiNam: string;
   oyaPlanKizaiQty: number;
   oyaPlanYobiQty: number;
-  planKizaiQty: number;
-  planYobiQty: number;
   planQty: number;
   dspOrdNum: number;
   indentNum: number;
