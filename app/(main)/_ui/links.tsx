@@ -43,7 +43,7 @@ const masterList: MenuItem[] = [
   { name: '大部門マスタ', url: '/daibumons-master' },
   { name: '集計部門マスタ', url: '/shukeibumons-master' },
   { name: '部門マスタ', url: '/bumons-master' },
-  { name: '課マスタ', url: '/sections-master' },
+  // { name: '課マスタ', url: '/sections-master' },
   // { name: '拠点マスタ', url: '/bases-master' },
   // { name: '権限マスタ', url: '/' },
   { name: '一式マスタ', url: '/isshiki-master' },
@@ -224,7 +224,7 @@ export default function NavLinks() {
                   />
                 </ListItemButton>
               </ListItem>
-              {index === 10 && <Divider sx={{ ml: 8 }} />}
+              {index === 9 && <Divider sx={{ ml: 8 }} />}
             </Fragment>
           ))}
         </List>
