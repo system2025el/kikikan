@@ -23,15 +23,20 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { watch } from 'fs';
 import { useRouter } from 'next/navigation';
-import { SetStateAction, useEffect, useState } from 'react';
-import { Controller, FieldArrayMethodProps, FormProvider, useFieldArray, useForm, useWatch } from 'react-hook-form';
+import { useEffect, useState } from 'react';
+import { Controller, FormProvider, useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
+import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
+import { addLock, delLock, getLock } from '@/app/(main)/_lib/funcs';
+import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
+import { LockValues } from '@/app/(main)/_lib/types';
 import { validationMessages } from '@/app/(main)/_lib/validation-messages';
+import { BackButton } from '@/app/(main)/_ui/buttons';
 import { FormDateX } from '@/app/(main)/_ui/date';
+import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { LoadingOverlay } from '@/app/(main)/_ui/loading';
 import { getUsersSelection } from '@/app/(main)/quotation-list/_lib/funcs';
@@ -71,6 +76,13 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
   const [snackBarOpen, setSnackBarOpen] = useState(false);
   /* スナックバーのメッセージ */
   const [snackBarMessage, setSnackBarMessage] = useState('');
+  /** 編集内容が未保存ダイアログ制御 */
+  const [dirtyOpen, setDirtyOpen] = useState(false);
+
+  /** ロックデータ */
+  const [lockData, setLockData] = useState<LockValues | null>(null);
+  /** 全体の編集状態 */
+  const [editable, setEditable] = useState(isNew ? true : false);
 
   /* useForm -------------------------------------------------------------- */
   const billForm = useForm<BillHeadValues>({
@@ -99,6 +111,11 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
   const zeiRat = useWatch({ control, name: 'zeiRat' });
   const currentGokeiAmt = useWatch({ control, name: 'gokeiAmt' });
 
+  // context
+  const { setIsDirty, setLock } = useDirty();
+  // ブラウザバック、F5、×ボタンでページを離れた際のhook
+  useUnsavedChangesWarning(isDirty);
+
   /* methods ------------------------------------------------------ */
   /* 保存ボタン押下 */
   const onSubmit = async (data: BillHeadValues) => {
@@ -115,6 +132,51 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
     reset(data);
   };
 
+  /** 編集モード変更 */
+  const handleEdit = async () => {
+    // 編集→閲覧
+    if (editable) {
+      if (isDirty) {
+        setDirtyOpen(true);
+        return;
+      }
+      await delLock(3, bill.seikyuHeadId ?? 0);
+      setLockData(null);
+      setEditable(false);
+      // 閲覧→編集
+    } else {
+      if (!user) return;
+      const lockData = await getLock(3, bill.seikyuHeadId ?? 0);
+      setLockData(lockData);
+      if (lockData === null) {
+        await addLock(3, bill.seikyuHeadId ?? 0, user.name);
+        const newLockData = await getLock(3, bill.seikyuHeadId ?? 0);
+        setLockData(newLockData);
+        setEditable(true);
+      } else if (lockData !== null && lockData.addUser === user.name) {
+        setEditable(true);
+      }
+    }
+  };
+
+  /**
+   * 警告ダイアログの押下ボタンによる処理
+   * @param result 結果
+   */
+  const handleResultDialog = async (result: boolean) => {
+    if (result) {
+      if (!isNew) {
+        await delLock(3, bill.seikyuHeadId ?? 0);
+        setLockData(null);
+      }
+      setEditable(false);
+      reset();
+      setDirtyOpen(false);
+    } else {
+      setDirtyOpen(false);
+    }
+  };
+
   /* useEffect ------------------------------------------------------------ */
   // 初期表示とログインユーザを取得とセット
   useEffect(() => {
@@ -123,6 +185,20 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
       const [users, sts] = await Promise.all([getUsersSelection(), getBillingStsSelection()]);
       setOptions({ users: users, sts: sts });
     };
+
+    /** ロック確認 */
+    const asyncProcess = async () => {
+      const lockData = await getLock(3, bill.seikyuHeadId ?? 0);
+      setLockData(lockData);
+      if (lockData === null) {
+        await addLock(3, bill.seikyuHeadId ?? 0, user?.name ?? '');
+        const newLockData = await getLock(3, bill.seikyuHeadId ?? 0);
+        setLockData(newLockData);
+      } else if (lockData !== null && lockData.addUser !== user?.name) {
+        setEditable(false);
+      }
+    };
+
     getOptions();
 
     if (isNew) {
@@ -131,11 +207,53 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
         console.log({ ...bill, nyuryokuUser: user.name });
         setValue('nyuryokuUser', user.name);
       }
+    } else {
+      // 編集でログインユーザがあるときロックデータを確認する
+      if (user && bill.seikyuHeadId) asyncProcess();
     }
     setTimeout(() => {
       setIsLoading(false);
     }, 5000); // setValue待ち
   }, [user, isNew, bill, setValue]);
+
+  // 見積全体計算
+  useEffect(() => {
+    const chukei = (meisaiHeads ?? []).reduce((acc, item) => acc + (item?.nebikiAftAmt ?? 0), 0);
+
+    if (chukei !== currentChukei) {
+      setValue('chukeiAmt', chukei, { shouldDirty: false });
+    }
+
+    const preTax = (meisaiHeads ?? [])
+      .filter((d) => d?.zeiFlg)
+      .reduce((acc, item) => acc + (item?.nebikiAftAmt ?? 0), 0);
+    if (preTax !== currentPreTaxGokei) {
+      setValue('preTaxGokeiAmt', preTax, { shouldDirty: false });
+    }
+
+    const zei = Math.round((preTax * (zeiRat ?? 0)) / 100);
+    const currentZei = Math.round(currentZeiAmt ?? 0);
+    if (zei !== currentZei) {
+      setValue('zeiAmt', zei === 0 ? null : zei, { shouldDirty: false });
+    }
+
+    const gokei = chukei + zei;
+
+    if (gokei !== currentGokeiAmt) {
+      setValue('gokeiAmt', gokei, { shouldDirty: false });
+    }
+  }, [meisaiHeads, currentChukei, currentPreTaxGokei, zeiRat, currentZeiAmt, currentGokeiAmt, setValue]);
+
+  // ロック
+  useEffect(() => {
+    setLock(lockData);
+  }, [lockData, setLock]);
+
+  // 変更あるかどうか
+  useEffect(() => {
+    const dirty = isDirty;
+    setIsDirty(dirty);
+  }, [isDirty, setIsDirty]);
 
   /* print pdf ------------------------------------------------------------ */
 
@@ -174,41 +292,37 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
   // }, [bill]); // <- 変更の契機
 
   /* ---------------------------------------------------------------------- */
-
-  // 見積全体計算
-  useEffect(() => {
-    const chukei = (meisaiHeads ?? []).reduce((acc, item) => acc + (item?.nebikiAftAmt ?? 0), 0);
-
-    if (chukei !== currentChukei) {
-      setValue('chukeiAmt', chukei, { shouldDirty: false });
-    }
-
-    const preTax = (meisaiHeads ?? [])
-      .filter((d) => d?.zeiFlg)
-      .reduce((acc, item) => acc + (item?.nebikiAftAmt ?? 0), 0);
-    if (preTax !== currentPreTaxGokei) {
-      setValue('preTaxGokeiAmt', preTax, { shouldDirty: false });
-    }
-
-    const zei = Math.round((preTax * (zeiRat ?? 0)) / 100);
-    const currentZei = Math.round(currentZeiAmt ?? 0);
-    if (zei !== currentZei) {
-      setValue('zeiAmt', zei === 0 ? null : zei, { shouldDirty: false });
-    }
-
-    const gokei = chukei + zei;
-
-    if (gokei !== currentGokeiAmt) {
-      setValue('gokeiAmt', gokei, { shouldDirty: false });
-    }
-  }, [meisaiHeads, currentChukei, currentPreTaxGokei, zeiRat, currentZeiAmt, currentGokeiAmt, setValue]);
-
   return (
     <>
       <Container disableGutters sx={{ minWidth: '100%', pb: 10 }} maxWidth={'xl'}>
-        <Box justifySelf={'end'} mb={0.5}>
-          <Button onClick={() => router.back()}>戻る</Button>
-        </Box>
+        <Grid2 container spacing={4} display={'flex'} justifyContent={'end'} mb={1}>
+          {lockData !== null && lockData.addUser !== user?.name && (
+            <Grid2 container alignItems={'center'} spacing={2}>
+              <Typography>{lockData.addDat && toJapanTimeString(new Date(lockData.addDat))}</Typography>
+              <Typography>{lockData.addUser}</Typography>
+              <Typography>編集中</Typography>
+            </Grid2>
+          )}
+          {/* {fixFlag && (
+                 <Box display={'flex'} alignItems={'center'}>
+                   <Typography>出庫済</Typography>
+                 </Box>
+               )} */}
+          <Grid2 container alignItems={'center'} spacing={1}>
+            {!editable || (lockData !== null && lockData?.addUser !== user?.name) ? (
+              <Typography>閲覧モード</Typography>
+            ) : (
+              <Typography>編集モード</Typography>
+            )}
+            <Button
+              disabled={(lockData && lockData?.addUser !== user?.name ? true : false) && isNew}
+              onClick={handleEdit}
+            >
+              変更
+            </Button>
+          </Grid2>
+          <BackButton label={'戻る'} />
+        </Grid2>
         <FormProvider {...billForm}>
           <form onSubmit={handleSubmit(onSubmit)}>
             <Paper variant="outlined">
@@ -255,6 +369,7 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
                           color: '#888',
                         }}
                         slotProps={{ input: { readOnly: true, onFocus: (e) => e.target.blur() } }}
+                        disabled={!editable}
                       />
                     </Grid2>
                     <Grid2 sx={styles.container}>
@@ -269,15 +384,27 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
                           color: '#888',
                         }}
                         slotProps={{ input: { readOnly: true, onFocus: (e) => e.target.blur() } }}
+                        disabled={!editable}
                       />
                     </Grid2>
                     <Grid2 sx={styles.container}>
                       <Typography marginRight={{ xl: 1, lg: 3 }}>請求書名</Typography>
-                      <TextFieldElement name="seikyuHeadNam" control={control} sx={{ width: 400 }} />
+                      <TextFieldElement
+                        name="seikyuHeadNam"
+                        control={control}
+                        sx={{ width: 400 }}
+                        disabled={!editable}
+                      />
                     </Grid2>
                     <Grid2 sx={styles.container}>
                       <Typography marginRight={1}>請求ステータス</Typography>
-                      <SelectElement name="seikyuSts" control={control} sx={{ width: 180 }} options={options.sts} />
+                      <SelectElement
+                        name="seikyuSts"
+                        control={control}
+                        sx={{ width: 180 }}
+                        options={options.sts}
+                        disabled={!editable}
+                      />
                     </Grid2>
                   </Grid2>
                   <Grid2 sx={styles.container}>
@@ -292,6 +419,7 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
                           sx={{ width: 200 }}
                           error={!!error}
                           helperText={error?.message}
+                          disabled={!editable}
                         />
                       )}
                     />
@@ -310,13 +438,14 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
                           onChange={(_, value) => field.onChange(value?.label ?? '')}
                           renderInput={(params) => <TextField {...params} />}
                           sx={{ width: 242.5 }}
+                          disabled={!editable}
                         />
                       )}
                     />
                   </Grid2>
                   <Grid2 sx={styles.container}>
                     <Typography marginRight={1}>請求先住所</Typography>
-                    <TextFieldElement name="adr1" control={control} sx={{ width: 100, mr: 2 }} />
+                    <TextFieldElement name="adr1" control={control} sx={{ width: 100, mr: 2 }} disabled={!editable} />
                     <Controller
                       name="adr2"
                       control={control}
@@ -339,13 +468,14 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
                           error={!!fieldState.error}
                           helperText={fieldState.error?.message}
                           sx={{ width: 500 }}
+                          disabled={!editable}
                         />
                       )}
                     />
                   </Grid2>
                   <Grid2 sx={styles.container}>
                     <Typography marginRight={3}>請求先名</Typography>
-                    <TextFieldElement name="kokyaku" control={control} sx={{ width: 400 }} />
+                    <TextFieldElement name="kokyaku" control={control} sx={{ width: 400 }} disabled={!editable} />
                   </Grid2>
                 </Grid2>
               </AccordionDetails>
@@ -361,13 +491,13 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
                 <Box margin={0.5} padding={0.8}>
                   {meisaiHeadFields.fields.map((field, index) => (
                     <Box key={field.id}>
-                      <MeisaiTblHeader index={index} fields={meisaiHeadFields}>
-                        <MeisaiLines index={index} />
+                      <MeisaiTblHeader index={index} fields={meisaiHeadFields} editable={editable}>
+                        <MeisaiLines index={index} editable={editable} />
                       </MeisaiTblHeader>
                     </Box>
                   ))}
                   <Box m={1}>
-                    <Button size="small" onClick={() => setKizaimeisaiaddDialogOpen(true)}>
+                    <Button size="small" onClick={() => setKizaimeisaiaddDialogOpen(true)} disabled={!editable}>
                       <AddIcon fontSize="small" />
                       テーブル
                     </Button>
@@ -462,6 +592,7 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
                         },
                       }}
                       type="number"
+                      disabled={!editable}
                     />
                     <Typography alignSelf={'center'}>%</Typography>
                   </Grid2>
@@ -480,7 +611,7 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
             </Paper>
             {/** 固定ボタン 保存＆ページトップ */}
             <Box position={'fixed'} zIndex={1050} bottom={25} right={25} alignItems={'center'}>
-              <Fab variant="extended" color="primary" type="submit" sx={{ mr: 2 }}>
+              <Fab variant="extended" color="primary" type="submit" sx={{ mr: 2 }} disabled={!editable}>
                 <SaveAsIcon sx={{ mr: 1 }} />
                 保存
               </Fab>
@@ -490,6 +621,7 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
             </Box>
           </form>
         </FormProvider>
+        <IsDirtyAlertDialog open={dirtyOpen} onClick={handleResultDialog} />
         <Snackbar
           open={snackBarOpen}
           autoHideDuration={6000}

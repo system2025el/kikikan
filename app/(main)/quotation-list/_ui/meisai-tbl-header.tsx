@@ -22,11 +22,13 @@ export const MeisaiTblHeader = ({
   index,
   sectionNam,
   sectionFields,
+  editable,
   children,
 }: {
   index: number;
   sectionNam: 'kizai' | 'labor' | 'other';
   sectionFields: UseFieldArrayReturn<QuotHeadValues>;
+  editable: boolean;
   children: React.ReactNode;
 }) => {
   /* useState ------------------------------------------------------ */
@@ -78,12 +80,17 @@ export const MeisaiTblHeader = ({
       <Grid2 container alignItems={'end'} my={0.5}>
         <Grid2 size={1} />
         <Grid2 size={5} display={'flex'} alignItems={'base-line'}>
-          <TextFieldElement name={`meisaiHeads.${sectionNam}.${index}.mituMeisaiHeadNam`} control={control} />
+          <TextFieldElement
+            name={`meisaiHeads.${sectionNam}.${index}.mituMeisaiHeadNam`}
+            control={control}
+            disabled={!editable}
+          />
           <CheckboxElement
             name={`meisaiHeads.${sectionNam}.${index}.headNamDspFlg`}
             control={control}
             sx={{ ml: 1 }}
             label="タイトルを見積書に出力する"
+            disabled={!editable}
           />
         </Grid2>
         <Grid2 size={'grow'} justifyItems={'end'}>
@@ -93,6 +100,7 @@ export const MeisaiTblHeader = ({
               onClick={() => {
                 sectionFields.remove(index);
               }}
+              disabled={!editable}
             >
               <DeleteIcon fontSize="small" />
               削除
@@ -101,10 +109,10 @@ export const MeisaiTblHeader = ({
         </Grid2>
         <Grid2 size={1} justifyItems={'end'}>
           <Stack spacing={1}>
-            <Button disabled={index === 0} onClick={() => moveRow(index, -1)}>
+            <Button disabled={index === 0 || !editable} onClick={() => moveRow(index, -1)}>
               <ArrowUpwardIcon fontSize="small" />
             </Button>
-            <Button disabled={index === sectionFields.fields.length - 1} onClick={() => moveRow(index, 1)}>
+            <Button disabled={index === sectionFields.fields.length - 1 || !editable} onClick={() => moveRow(index, 1)}>
               <ArrowDownwardIcon fontSize="small" />
             </Button>
           </Stack>
@@ -156,6 +164,7 @@ export const MeisaiTblHeader = ({
             control={control}
             fullWidth
             placeholder="備考１"
+            disabled={!editable}
           />
         </Grid2>
         <Grid2 size={'grow'} />
@@ -174,11 +183,16 @@ export const MeisaiTblHeader = ({
             control={control}
             fullWidth
             placeholder="備考２"
+            disabled={!editable}
           />
         </Grid2>
         <Grid2 size={'grow'} />
         <Grid2 size={1.5}>
-          <TextFieldElement name={`meisaiHeads.${sectionNam}.${index}.nebikiNam`} control={control} />
+          <TextFieldElement
+            name={`meisaiHeads.${sectionNam}.${index}.nebikiNam`}
+            control={control}
+            disabled={!editable}
+          />
         </Grid2>
         <Grid2 size={2}>
           <Controller
@@ -237,6 +251,7 @@ export const MeisaiTblHeader = ({
                   },
                 })}
                 helperText={fieldState.error?.message}
+                disabled={!editable}
               />
             )}
           />
@@ -250,11 +265,16 @@ export const MeisaiTblHeader = ({
             control={control}
             fullWidth
             placeholder="備考３"
+            disabled={!editable}
           />
         </Grid2>
         <Grid2 size={'grow'} />
         <Grid2 size={1.5}>
-          <TextFieldElement name={`meisaiHeads.${sectionNam}.${index}.nebikiAftNam`} control={control} />
+          <TextFieldElement
+            name={`meisaiHeads.${sectionNam}.${index}.nebikiAftNam`}
+            control={control}
+            disabled={!editable}
+          />
         </Grid2>
         <Grid2 size={2}>
           <ReadOnlyYenNumberElement name={`meisaiHeads.${sectionNam}.${index}.nebikiAftAmt`} />

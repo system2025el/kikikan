@@ -20,14 +20,21 @@ import { FormDateX } from '@/app/(main)/_ui/date';
 import { BillHeadValues } from '../_lib/types';
 import { ReadOnlyYenNumberElement } from './yen';
 
+/**
+ * 請求の明細ヘッダUIコンポーネント
+ * @param param0
+ * @returns 請求の明細ヘッダUIコンポーネント
+ */
 export const MeisaiTblHeader = ({
   index,
   fields,
+  editable,
   children,
 }: {
   index: number;
   fields: UseFieldArrayReturn<BillHeadValues>;
   children: React.ReactNode;
+  editable: boolean;
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   /* 明細テーブルの順番を変えるボタン押下時 */
@@ -59,7 +66,12 @@ export const MeisaiTblHeader = ({
     <Box border={1} borderColor={'divider'} p={1}>
       <Grid2 container alignItems={'end'} my={0.5}>
         <Grid2 size={4} sx={styles.container}>
-          <TextFieldElement name={`meisaiHeads.${index}.seikyuMeisaiHeadNam`} control={control} fullWidth />
+          <TextFieldElement
+            name={`meisaiHeads.${index}.seikyuMeisaiHeadNam`}
+            control={control}
+            fullWidth
+            disabled={!editable}
+          />
         </Grid2>
         <Grid2 size={'grow'} justifyItems={'end'}>
           <Box>
@@ -68,6 +80,7 @@ export const MeisaiTblHeader = ({
               onClick={() => {
                 fields.remove(index);
               }}
+              disabled={!editable}
             >
               <DeleteIcon fontSize="small" />
               削除
@@ -76,10 +89,10 @@ export const MeisaiTblHeader = ({
         </Grid2>
         <Grid2 size={1} justifyItems={'end'}>
           <Stack spacing={1}>
-            <Button disabled={index === 0} onClick={() => moveRow(index, -1)}>
+            <Button disabled={index === 0 || !editable} onClick={() => moveRow(index, -1)}>
               <ArrowUpwardIcon fontSize="small" />
             </Button>
-            <Button disabled={index === fields.fields.length - 1} onClick={() => moveRow(index, 1)}>
+            <Button disabled={index === fields.fields.length - 1 || !editable} onClick={() => moveRow(index, 1)}>
               <ArrowDownwardIcon fontSize="small" />
             </Button>
           </Stack>
@@ -99,6 +112,7 @@ export const MeisaiTblHeader = ({
               color: '#888',
             }}
             slotProps={{ input: { readOnly: true, onFocus: (e) => e.target.blur() } }}
+            disabled={!editable}
           />
         </Grid2>
         <Grid2 sx={styles.container} size={4}>
@@ -113,6 +127,7 @@ export const MeisaiTblHeader = ({
               color: '#888',
             }}
             slotProps={{ input: { readOnly: true, onFocus: (e) => e.target.blur() } }}
+            disabled={!editable}
           />
         </Grid2>
       </Grid2>
@@ -120,7 +135,12 @@ export const MeisaiTblHeader = ({
       <Grid2 container alignItems={'end'} my={0.5}>
         <Grid2 sx={styles.container} size={4}>
           <Typography marginRight={5}>公演名</Typography>
-          <TextFieldElement name={`meisaiHeads.${index}.koenNam`} control={control} sx={{ width: 400 }} />
+          <TextFieldElement
+            name={`meisaiHeads.${index}.koenNam`}
+            control={control}
+            sx={{ width: 400 }}
+            disabled={!editable}
+          />
         </Grid2>
         <Grid2 sx={styles.container}>
           <Typography marginRight={5}>貸出期間</Typography>
@@ -135,6 +155,7 @@ export const MeisaiTblHeader = ({
                 readonly
                 error={!!error}
                 helperText={error?.message}
+                disabled={!editable}
               />
             )}
           />
@@ -149,6 +170,7 @@ export const MeisaiTblHeader = ({
                 sx={{ ml: 1 }}
                 error={!!error}
                 helperText={error?.message}
+                disabled={!editable}
               />
             )}
           />
@@ -158,11 +180,16 @@ export const MeisaiTblHeader = ({
       <Grid2 container alignItems={'end'} my={0.5}>
         <Grid2 sx={styles.container} size={4}>
           <Typography marginRight={3}>公演場所</Typography>
-          <TextFieldElement name={`meisaiHeads.${index}.koenbashoNam`} control={control} sx={{ width: 400 }} />
+          <TextFieldElement
+            name={`meisaiHeads.${index}.koenbashoNam`}
+            control={control}
+            sx={{ width: 400 }}
+            disabled={!editable}
+          />
         </Grid2>
         <Grid2 sx={styles.container}>
           <Typography marginRight={7}>担当者</Typography>
-          <TextFieldElement name={`meisaiHeads.${index}.kokyakuTantoNam`} control={control} />
+          <TextFieldElement name={`meisaiHeads.${index}.kokyakuTantoNam`} control={control} disabled={!editable} />
         </Grid2>
       </Grid2>
 
@@ -269,6 +296,7 @@ export const MeisaiTblHeader = ({
                   },
                 })}
                 helperText={fieldState.error?.message}
+                disabled={!editable}
               />
             )}
           />
@@ -291,7 +319,7 @@ export const MeisaiTblHeader = ({
           <Typography textAlign="end">消費税対象</Typography>
         </Grid2>
         <Grid2 size={2}>
-          <CheckboxElement name={`meisaiHeads.${index}.zeiFlg`} control={control} size="medium" />
+          <CheckboxElement name={`meisaiHeads.${index}.zeiFlg`} control={control} size="medium" disabled={!editable} />
         </Grid2>
         <Grid2 size={1} />
       </Grid2>
