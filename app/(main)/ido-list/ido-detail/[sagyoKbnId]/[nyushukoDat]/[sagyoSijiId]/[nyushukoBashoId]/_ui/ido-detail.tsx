@@ -22,6 +22,7 @@ import {
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
+import { statusColors } from '@/app/(main)/_lib/colors';
 import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
 import { BackButton } from '@/app/(main)/_ui/buttons';
@@ -309,11 +310,17 @@ export const IdoDetail = (props: {
                   </Button>
                 </Box>
               </Box>
-              <Grid2 container alignItems={'center'} spacing={2}>
-                <Typography sx={{ backgroundColor: 'rgba(158, 158, 158, 1)' }}>済</Typography>
-                <Typography sx={{ backgroundColor: 'rgba(255, 171, 64, 1)' }}>不足</Typography>
-                <Typography sx={{ backgroundColor: 'rgba(68, 138, 255, 1)' }}>コンテナ</Typography>
-              </Grid2>
+              <Box display={'flex'} alignItems={'center'}>
+                <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.completed }}>
+                  済
+                </Typography>
+                <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.lack }}>
+                  不足
+                </Typography>
+                <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.ctn }}>
+                  コンテナ
+                </Typography>
+              </Box>
             </Box>
             {idoDetailList.filter((d) => !d.delFlag).length > 0 && (
               <ShukoIdoDenTable
@@ -327,11 +334,17 @@ export const IdoDetail = (props: {
         ) : (
           <Box width={'100%'} pb={3}>
             <Box display={'flex'} justifyContent={'end'} alignItems={'center'} width={'60vw'} p={2}>
-              <Grid2 container spacing={2}>
-                <Typography sx={{ backgroundColor: 'rgba(158, 158, 158, 1)' }}>済</Typography>
-                <Typography sx={{ backgroundColor: 'rgba(255, 171, 64, 1)' }}>不足</Typography>
-                <Typography sx={{ backgroundColor: 'rgba(68, 138, 255, 1)' }}>コンテナ</Typography>
-              </Grid2>
+              <Box display={'flex'} alignItems={'center'}>
+                <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.completed }}>
+                  済
+                </Typography>
+                <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.lack }}>
+                  不足
+                </Typography>
+                <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.ctn }}>
+                  コンテナ
+                </Typography>
+              </Box>
             </Box>
             {idoDetailList.filter((d) => !d.delFlag).length > 0 && <NyukoIdoDenTable datas={idoDetailList} />}
           </Box>

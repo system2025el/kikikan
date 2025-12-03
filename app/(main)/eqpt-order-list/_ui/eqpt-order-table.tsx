@@ -18,6 +18,7 @@ import {
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useMemo } from 'react';
 
+import { dispColors } from '../../_lib/colors';
 import { toJapanTimeString, toJapanYMDString } from '../../_lib/date-conversion';
 import { Loading } from '../../_ui/loading';
 import { MuiTablePagination } from '../../_ui/table-pagination';
@@ -136,12 +137,12 @@ export const EqptOrderTable = ({
                           textAlign: 'left',
                           color:
                             order.headKbn === 1
-                              ? 'primary'
+                              ? dispColors.main
                               : order.headKbn === 2
-                                ? 'red'
+                                ? dispColors.return
                                 : order.headKbn === 3
-                                  ? 'green'
-                                  : 'primary',
+                                  ? dispColors.keep
+                                  : dispColors.main,
                         }}
                         onClick={() => {
                           sessionStorage.setItem('orderListSearchParams', JSON.stringify(searchParams));

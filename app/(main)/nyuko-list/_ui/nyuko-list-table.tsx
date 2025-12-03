@@ -1,7 +1,18 @@
 'use client';
 
-import { Button, Checkbox, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
+import {
+  Button,
+  Checkbox,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+} from '@mui/material';
 
+import { dispColors } from '../../_lib/colors';
 import { toJapanTimeString } from '../../_lib/date-conversion';
 import { NyukoTableValues } from '../_lib/types';
 
@@ -42,7 +53,22 @@ export const NyukoListTable = (props: { datas: NyukoTableValues[] }) => {
               </TableCell>
               <TableCell align="left">{row.koenNam}</TableCell>
               <TableCell align="left">{row.koenbashoNam}</TableCell>
-              <TableCell align="left">{row.headNamv}</TableCell>
+              <TableCell align="left">
+                <Typography
+                  variant="body2"
+                  color={
+                    row.juchuKizaiHeadKbn === 1
+                      ? dispColors.main
+                      : row.juchuKizaiHeadKbn === 2
+                        ? dispColors.return
+                        : row.juchuKizaiHeadKbn === 3
+                          ? dispColors.keep
+                          : dispColors.main
+                  }
+                >
+                  {row.headNamv}
+                </Typography>
+              </TableCell>
               <TableCell align="left">{row.kokyakuNam}</TableCell>
               <TableCell align="left">{row.sectionNamv}</TableCell>
             </TableRow>

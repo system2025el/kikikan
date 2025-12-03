@@ -4,6 +4,8 @@ import { Button, Link, Paper, Table, TableBody, TableCell, TableContainer, Table
 import { grey } from '@mui/material/colors';
 import { usePathname, useRouter } from 'next/navigation';
 
+import { dispColors, statusColors } from '@/app/(main)/_lib/colors';
+
 import { ShukoDetailTableValues } from '../_lib/types';
 
 export const ShukoDetailTable = (props: { datas: ShukoDetailTableValues[] }) => {
@@ -41,9 +43,9 @@ export const ShukoDetailTable = (props: { datas: ShukoDetailTableValues[] }) => 
                 whiteSpace: 'nowrap',
                 backgroundColor:
                   row.diff === 0 && row.planQty !== 0 //&& row.ctnFlg !== 1
-                    ? 'rgba(158, 158, 158, 1)'
+                    ? statusColors.completed
                     : row.ctnFlg === 1
-                      ? 'rgba(68, 138, 255, 1)'
+                      ? statusColors.ctn
                       : 'white',
               }}
             >
@@ -51,7 +53,7 @@ export const ShukoDetailTable = (props: { datas: ShukoDetailTableValues[] }) => 
               <TableCell
                 align="left"
                 onClick={() => handleClick(row.juchuKizaiHeadId, row.juchuKizaiMeisaiId, row.kizaiId)}
-                sx={{ cursor: 'pointer', '&:hover': { backgroundColor: 'rgba(0,0,0,0.04)' } }}
+                sx={{ cursor: 'pointer', '&:hover': { backgroundColor: dispColors.hover } }}
               >
                 {row.kizaiNam}
               </TableCell>
@@ -64,13 +66,13 @@ export const ShukoDetailTable = (props: { datas: ShukoDetailTableValues[] }) => 
                   pr: 3,
                   backgroundColor:
                     row.diff === 0 && row.planQty !== 0
-                      ? 'rgba(158, 158, 158, 1)'
+                      ? statusColors.completed
                       : row.diff > 0
-                        ? 'rgba(255, 255, 0, 1)'
+                        ? statusColors.excess
                         : row.diff < 0
-                          ? 'rgba(255, 171, 64, 1)'
+                          ? statusColors.lack
                           : row.ctnFlg === 1
-                            ? 'rgba(68, 138, 255, 1)'
+                            ? statusColors.ctn
                             : undefined,
                 }}
               >

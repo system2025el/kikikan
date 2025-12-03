@@ -20,6 +20,7 @@ import { useState } from 'react';
 import { set } from 'zod';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
+import { statusColors } from '@/app/(main)/_lib/colors';
 import { BackButton } from '@/app/(main)/_ui/buttons';
 import { DateTime, TestDate } from '@/app/(main)/_ui/date';
 
@@ -119,7 +120,7 @@ export const ShukoDetail = (props: {
       <Paper variant="outlined">
         <Box display={'flex'} justifyContent={'space-between'} alignItems="center" p={2}>
           <Typography fontSize={'large'}>
-            出庫明細({shukoDetailData.sagyoKbnId === 20 ? '出庫' : 'スタンバイ'})
+            出庫明細({shukoDetailData.sagyoKbnId === 20 ? 'チェック' : 'スタンバイ'})
           </Typography>
           <Grid2 container alignItems={'center'} spacing={2}>
             {fixFlag && <Typography>出発済</Typography>}
@@ -185,16 +186,16 @@ export const ShukoDetail = (props: {
           <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} width={'60vw'} pl={1} py={0.5}>
             <Typography>全{shukoDetailTableData ? shukoDetailTableData.length : 0}件</Typography>
             <Box display={'flex'} alignItems={'center'}>
-              <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: 'rgba(158, 158, 158, 1)' }}>
+              <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.completed }}>
                 済
               </Typography>
-              <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: 'rgba(255, 171, 64, 1)' }}>
+              <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.lack }}>
                 不足
               </Typography>
-              <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: 'rgba(255, 255, 0, 1)' }}>
+              <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.excess }}>
                 過剰
               </Typography>
-              <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: 'rgba(68, 138, 255, 1)' }}>
+              <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.ctn }}>
                 コンテナ
               </Typography>
             </Box>

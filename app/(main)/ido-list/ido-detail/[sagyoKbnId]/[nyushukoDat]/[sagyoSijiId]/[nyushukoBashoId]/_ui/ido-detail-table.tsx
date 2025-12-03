@@ -14,6 +14,8 @@ import {
 import { purple } from '@mui/material/colors';
 import { usePathname, useRouter } from 'next/navigation';
 
+import { dispColors, statusColors } from '@/app/(main)/_lib/colors';
+
 import { IdoDetailTableValues } from '../_lib/types';
 
 export const ShukoIdoDenTable = (props: {
@@ -86,9 +88,9 @@ export const ShukoIdoDenTable = (props: {
                     row.planQty === 0 && !row.ctnFlg
                       ? 'white'
                       : row.diffQty === 0 && !row.ctnFlg
-                        ? 'rgba(158, 158, 158, 1)'
+                        ? statusColors.completed
                         : row.ctnFlg
-                          ? 'rgba(68, 138, 255, 1)'
+                          ? statusColors.ctn
                           : 'white',
                 }}
               >
@@ -110,7 +112,7 @@ export const ShukoIdoDenTable = (props: {
                 <TableCell
                   align="left"
                   onClick={row.saveFlag ? () => handleClick(row.kizaiId) : undefined}
-                  sx={{ cursor: 'pointer', '&:hover': { backgroundColor: 'rgba(0,0,0,0.04)' } }}
+                  sx={{ cursor: 'pointer', '&:hover': { backgroundColor: dispColors.hover } }}
                 >
                   {row.kizaiNam}
                 </TableCell>
@@ -157,12 +159,12 @@ export const ShukoIdoDenTable = (props: {
                       row.planQty === 0 && !row.ctnFlg
                         ? 'white'
                         : row.diffQty > 0
-                          ? 'rgba(255, 255, 0, 1)'
+                          ? statusColors.excess
                           : row.diffQty < 0
-                            ? 'rgba(255, 171, 64, 1)'
+                            ? statusColors.lack
                             : row.diffQty === 0 && row.ctnFlg
-                              ? 'rgba(68, 138, 255, 1)'
-                              : 'rgba(158, 158, 158, 1)',
+                              ? statusColors.ctn
+                              : statusColors.completed,
                   }}
                 >
                   {row.diffQty}
@@ -217,9 +219,9 @@ export const NyukoIdoDenTable = (props: { datas: IdoDetailTableValues[] }) => {
                   row.planQty === 0 && !row.ctnFlg
                     ? 'white'
                     : row.diffQty === 0 && !row.ctnFlg
-                      ? 'rgba(158, 158, 158, 1)'
+                      ? statusColors.completed
                       : row.ctnFlg
-                        ? 'rgba(68, 138, 255, 1)'
+                        ? statusColors.ctn
                         : 'white',
               }}
             >
@@ -227,7 +229,7 @@ export const NyukoIdoDenTable = (props: { datas: IdoDetailTableValues[] }) => {
               <TableCell
                 align="left"
                 onClick={row.saveFlag ? () => handleClick(row.kizaiId) : undefined}
-                sx={{ cursor: 'pointer', '&:hover': { backgroundColor: 'rgba(0,0,0,0.04)' } }}
+                sx={{ cursor: 'pointer', '&:hover': { backgroundColor: dispColors.hover } }}
               >
                 {row.kizaiNam}
               </TableCell>
@@ -241,12 +243,12 @@ export const NyukoIdoDenTable = (props: { datas: IdoDetailTableValues[] }) => {
                     row.planQty === 0 && !row.ctnFlg
                       ? 'white'
                       : row.diffQty > 0
-                        ? 'rgba(255, 255, 0, 1)'
+                        ? statusColors.excess
                         : row.diffQty < 0
-                          ? 'rgba(255, 171, 64, 1)'
+                          ? statusColors.lack
                           : row.diffQty === 0 && row.ctnFlg
-                            ? 'rgba(68, 138, 255, 1)'
-                            : 'rgba(158, 158, 158, 1)',
+                            ? statusColors.ctn
+                            : statusColors.completed,
                 }}
               >
                 {row.diffQty}
