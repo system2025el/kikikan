@@ -1,5 +1,6 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
 import { PoolClient } from 'pg';
 
 import pool from '@/app/_lib/db/postgres';
@@ -158,6 +159,10 @@ export const updShukoDetail = async (
     console.log('入出庫確定追加', addNyushukoFixResult);
 
     await connection.query('COMMIT');
+
+    await revalidatePath('/shuko-list');
+    await revalidatePath('/nyuko-list');
+
     return true;
   } catch (e) {
     console.error(e);
@@ -335,6 +340,9 @@ export const delShukoFix = async (
     console.log('nyushuko fix delete successfully:', deleteFixData);
 
     await connection.query('COMMIT');
+
+    await revalidatePath('/shuko-list');
+
     return true;
   } catch (e) {
     console.error(e);

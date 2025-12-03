@@ -46,6 +46,7 @@ const Page = async (props: {
     nyukoDetailData.nyushukoDat,
     Number(params.nbId)
   );
+  console.log('取得');
   return (
     <NyukoDetail nyukoDetailData={nyukoDetailData} nyukoDetailTableData={nyukoDetailTableData} fixFlag={fixFlag} />
   );

@@ -85,13 +85,11 @@ export const ShukoIdoDenTable = (props: {
                 sx={{
                   whiteSpace: 'nowrap',
                   backgroundColor:
-                    row.planQty === 0 && !row.ctnFlg
-                      ? 'white'
-                      : row.diffQty === 0 && !row.ctnFlg
-                        ? statusColors.completed
-                        : row.ctnFlg
-                          ? statusColors.ctn
-                          : 'white',
+                    row.diffQty === 0 && row.planQty !== 0
+                      ? statusColors.completed
+                      : row.ctnFlg
+                        ? statusColors.ctn
+                        : 'white',
                 }}
               >
                 <TableCell padding="checkbox">
@@ -156,15 +154,15 @@ export const ShukoIdoDenTable = (props: {
                   align="right"
                   sx={{
                     backgroundColor:
-                      row.planQty === 0 && !row.ctnFlg
-                        ? 'white'
-                        : row.diffQty > 0
+                      row.planQty === 0 && row.planQty !== 0
+                        ? statusColors.completed
+                        : row.planQty > 0
                           ? statusColors.excess
-                          : row.diffQty < 0
+                          : row.planQty < 0
                             ? statusColors.lack
-                            : row.diffQty === 0 && row.ctnFlg
+                            : row.ctnFlg
                               ? statusColors.ctn
-                              : statusColors.completed,
+                              : undefined,
                   }}
                 >
                   {row.diffQty}

@@ -33,16 +33,12 @@ export const ShukoDetail = (props: {
   shukoDetailTableData: ShukoDetailTableValues[];
   fixFlag: boolean;
 }) => {
-  const { shukoDetailData } = props;
+  const { shukoDetailData, shukoDetailTableData } = props;
 
   // user情報
   const user = useUserStore((state) => state.user);
 
   const [fixFlag, setFixFlag] = useState(props.fixFlag);
-
-  const [shukoDetailTableData, setShukoDetailTableData] = useState<ShukoDetailTableValues[]>(
-    props.shukoDetailTableData
-  );
 
   // 出発ボタンダイアログ制御
   const [departureOpen, setDepartureOpen] = useState(false);

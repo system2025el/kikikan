@@ -1,5 +1,6 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
 import { PoolClient } from 'pg';
 
 import pool from '@/app/_lib/db/postgres';
@@ -155,6 +156,10 @@ export const updNyukoDetail = async (
     }
 
     await connection.query('COMMIT');
+
+    await revalidatePath('/shuko-list');
+    await revalidatePath('/nyuko-list');
+
     return true;
   } catch (e) {
     console.error(e);
@@ -199,6 +204,10 @@ export const updReturnNyukoDetail = async (
   userNam: string,
   connection: PoolClient
 ) => {
+  // 機材データ
+  const kizaiData = nyukoDetailTableData.filter((d) => !d.ctnFlg);
+  // コンテナデータ
+  const ctnData = nyukoDetailTableData.filter((data) => data.ctnFlg);
   try {
     // 返却入庫伝票更新
     await updNyukoDen(nyukoDetailTableData, userNam, connection);
@@ -206,7 +215,15 @@ export const updReturnNyukoDetail = async (
     // 親入子伝票更新
     await updOyaNyukoDen(nyukoDetailTableData, userNam, connection);
 
-    // 機材明細更新保留
+    // 機材明細追加更新
+    if (kizaiData && kizaiData.length > 0) {
+      await upsJuchuKizaiMeisai(kizaiData, userNam, connection);
+    }
+
+    // コンテナ明細追加更新
+    if (ctnData && ctnData.length > 0) {
+      await upsJuchuCtnMeisai(ctnData, userNam, connection);
+    }
 
     // 入庫確定追加
     await addNyukoFix(nyukoDetailData, nyukoDetailTableData, userNam, connection);
@@ -231,9 +248,9 @@ export const updKeepNyukoDetail = async (
   const juchuKizaiHeadIds = [
     ...new Set(nyukoDetailTableData.map((d) => d.juchuKizaiHeadId).filter((id) => id !== null)),
   ];
-
+  // 機材データ
   const kizaiData = nyukoDetailTableData.filter((d) => !d.ctnFlg);
-
+  // コンテナデータ
   const ctnData = nyukoDetailTableData.filter((data) => data.ctnFlg);
 
   try {
@@ -257,12 +274,12 @@ export const updKeepNyukoDetail = async (
 
     // 機材明細追加更新
     if (kizaiData && kizaiData.length > 0) {
-      await upsJuchuKizaiMeisai(nyukoDetailTableData, userNam, connection);
+      await upsJuchuKizaiMeisai(kizaiData, userNam, connection);
     }
 
     // コンテナ明細追加更新
     if (ctnData && ctnData.length > 0) {
-      await upsJuchuCtnMeisai(nyukoDetailTableData, userNam, connection);
+      await upsJuchuCtnMeisai(ctnData, userNam, connection);
     }
 
     // 入庫確定追加
