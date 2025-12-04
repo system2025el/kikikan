@@ -53,6 +53,7 @@ export type JuchuKizaiMeisaiValues = {
   mShozokuId: number;
   shozokuId: number;
   mem: string | null;
+  mem2: string | null;
   kizaiId: number;
   kizaiTankaAmt: number;
   kizaiNam: string;

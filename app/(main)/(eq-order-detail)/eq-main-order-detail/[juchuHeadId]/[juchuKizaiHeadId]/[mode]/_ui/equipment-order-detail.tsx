@@ -821,6 +821,24 @@ const EquipmentOrderDetail = (props: {
   };
 
   /**
+   * 機材連絡メモ入力時
+   * @param kizaiId 機材id
+   * @param memo メモ内容
+   */
+  const handleMemo2Change = (rowIndex: number, memo: string) => {
+    setJuchuKizaiMeisaiList((prev) => {
+      const visibleIndex = prev
+        .map((data, index) => (!data.delFlag ? index : null))
+        .filter((index) => index !== null) as number[];
+
+      const index = visibleIndex[rowIndex];
+      if (index === undefined) return prev;
+
+      return prev.map((data, i) => (i === index ? { ...data, mem2: memo } : data));
+    });
+  };
+
+  /**
    * 機材テーブルの受注数、予備数入力時
    * @param kizaiId 機材id
    * @param planKizaiQty 受注数
@@ -1344,6 +1362,7 @@ const EquipmentOrderDetail = (props: {
       shozokuId:
         d.shozokuId === 1 && kicsIdoDat !== null ? 2 : d.shozokuId === 2 && yardIdoDat !== null ? 1 : d.shozokuId,
       mem: '',
+      mem2: '',
       kizaiId: d.kizaiId,
       kizaiTankaAmt: d.regAmt,
       kizaiNam: `${indentChara.repeat(d.indentNum)}${d.kizaiNam}`,
@@ -2342,6 +2361,7 @@ const EquipmentOrderDetail = (props: {
                           handleCellChange={handleCellChange}
                           handleMeisaiDelete={handleEqMeisaiDelete}
                           handleMemoChange={handleMemoChange}
+                          handleMemo2Change={handleMemo2Change}
                           ref={leftRef}
                         />
                       </Box>
