@@ -349,7 +349,12 @@ export const upsJuchuKizaiMeisai = async (
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
     keep_qty: d.juchuKizaiHeadKbn === 3 ? (d.resultQty ?? 0) + (d.resultAdjQty ?? 0) : null,
     kizai_id: d.kizaiId,
-    plan_kizai_qty: d.juchuKizaiHeadKbn !== 3 ? (d.resultQty ?? 0) + (d.resultAdjQty ?? 0) : null,
+    plan_kizai_qty:
+      d.juchuKizaiHeadKbn === 1
+        ? (d.resultQty ?? 0) + (d.resultAdjQty ?? 0)
+        : d.juchuKizaiHeadKbn === 2
+          ? -1 * ((d.resultQty ?? 0) + (d.resultAdjQty ?? 0))
+          : null,
     shozoku_id: d.nyushukoShubetuId ?? 0,
     dsp_ord_num: d.dspOrdNumMeisai,
     indent_num: d.indentNum,
