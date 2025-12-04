@@ -141,6 +141,7 @@ type EqTableProps = {
   ) => void;
   handleMeisaiDelete: (rowIndex: number, row: JuchuKizaiMeisaiValues) => void;
   handleMemoChange: (rowIndex: number, memo: string) => void;
+  handleMemo2Change: (rowIndex: number, memo: string) => void;
   ref: React.RefObject<HTMLDivElement | null>;
 };
 
@@ -150,6 +151,7 @@ export const EqTable: React.FC<EqTableProps> = ({
   handleCellChange,
   handleMeisaiDelete,
   handleMemoChange,
+  handleMemo2Change,
   ref,
 }) => {
   const inputOrderRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -219,6 +221,9 @@ export const EqTable: React.FC<EqTableProps> = ({
             <TableCell align="right" size="small" style={styles.header}>
               合計
             </TableCell>
+            <TableCell align="left" size="small" style={styles.header}>
+              連絡
+            </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -232,6 +237,7 @@ export const EqTable: React.FC<EqTableProps> = ({
               handleYobiRef={handleYobiRef(rowIndex)}
               handleMeisaiDelete={handleMeisaiDelete}
               handleMemoChange={handleMemoChange}
+              handleMemo2Change={handleMemo2Change}
               handleOrderKeyDown={handleOrderKeyDown}
               handleYobiKeyDown={handleYobiKeyDown}
               handleCellChange={handleCellChange}
@@ -251,6 +257,7 @@ type EqTableRowProps = {
   handleYobiRef: (el: HTMLInputElement | null) => void;
   handleMeisaiDelete: (rowIndex: number, row: JuchuKizaiMeisaiValues) => void;
   handleMemoChange: (rowIndex: number, memo: string) => void;
+  handleMemo2Change: (rowIndex: number, memo: string) => void;
   handleCellChange: (
     rowIndex: number,
     kizaiId: number,
@@ -271,6 +278,7 @@ const EqTableRow = React.memo(
     handleYobiRef,
     handleMeisaiDelete,
     handleMemoChange,
+    handleMemo2Change,
     handleCellChange,
     handleOrderKeyDown,
     handleYobiKeyDown,
@@ -394,6 +402,15 @@ const EqTableRow = React.memo(
         </TableCell>
         <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
           {row.planQty}
+        </TableCell>
+        <TableCell style={styles.row} align="center" size="small">
+          <MemoTooltip
+            name={row.kizaiNam}
+            memo={row.mem2 ?? ''}
+            handleMemoChange={handleMemo2Change}
+            rowIndex={rowIndex}
+            disabled={!edit}
+          />
         </TableCell>
       </TableRow>
     );

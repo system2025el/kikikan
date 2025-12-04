@@ -821,6 +821,24 @@ const EquipmentOrderDetail = (props: {
   };
 
   /**
+   * 機材連絡メモ入力時
+   * @param kizaiId 機材id
+   * @param memo メモ内容
+   */
+  const handleMemo2Change = (rowIndex: number, memo: string) => {
+    setJuchuKizaiMeisaiList((prev) => {
+      const visibleIndex = prev
+        .map((data, index) => (!data.delFlag ? index : null))
+        .filter((index) => index !== null) as number[];
+
+      const index = visibleIndex[rowIndex];
+      if (index === undefined) return prev;
+
+      return prev.map((data, i) => (i === index ? { ...data, mem2: memo } : data));
+    });
+  };
+
+  /**
    * 機材テーブルの受注数、予備数入力時
    * @param kizaiId 機材id
    * @param planKizaiQty 受注数
@@ -1344,6 +1362,7 @@ const EquipmentOrderDetail = (props: {
       shozokuId:
         d.shozokuId === 1 && kicsIdoDat !== null ? 2 : d.shozokuId === 2 && yardIdoDat !== null ? 1 : d.shozokuId,
       mem: '',
+      mem2: '',
       kizaiId: d.kizaiId,
       kizaiTankaAmt: d.regAmt,
       kizaiNam: `${indentChara.repeat(d.indentNum)}${d.kizaiNam}`,
@@ -1829,7 +1848,7 @@ const EquipmentOrderDetail = (props: {
               </AccordionSummary>
               <AccordionDetails sx={{ padding: 0 }}>
                 <Divider />
-                <Grid2 container alignItems="center" spacing={1} py={1} px={2}>
+                <Grid2 container alignItems="baseline" spacing={1} py={1} px={2}>
                   <Typography>機材明細名</Typography>
                   <TextFieldElement name="headNam" control={control} disabled={!edit}></TextFieldElement>
                 </Grid2>
@@ -2342,6 +2361,7 @@ const EquipmentOrderDetail = (props: {
                           handleCellChange={handleCellChange}
                           handleMeisaiDelete={handleEqMeisaiDelete}
                           handleMemoChange={handleMemoChange}
+                          handleMemo2Change={handleMemo2Change}
                           ref={leftRef}
                         />
                       </Box>
@@ -2694,6 +2714,6 @@ const styles: { [key: string]: React.CSSProperties } = {
   // grid2row
   grid2Row: {
     display: 'flex',
-    alignItems: 'center',
+    alignItems: 'baseline',
   },
 };

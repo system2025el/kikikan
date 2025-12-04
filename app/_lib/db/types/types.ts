@@ -1547,6 +1547,7 @@ export type Database = {
           kizai_id: number;
           kizai_tanka_amt: number | null;
           mem: string | null;
+          mem2: string | null;
           plan_kizai_qty: number | null;
           plan_yobi_qty: number | null;
           shozoku_id: number;
@@ -1565,6 +1566,7 @@ export type Database = {
           kizai_id: number;
           kizai_tanka_amt?: number | null;
           mem?: string | null;
+          mem2?: string | null;
           plan_kizai_qty?: number | null;
           plan_yobi_qty?: number | null;
           shozoku_id: number;
@@ -1583,6 +1585,7 @@ export type Database = {
           kizai_id?: number;
           kizai_tanka_amt?: number | null;
           mem?: string | null;
+          mem2?: string | null;
           plan_kizai_qty?: number | null;
           plan_yobi_qty?: number | null;
           shozoku_id?: number;
@@ -3133,6 +3136,7 @@ export type Database = {
           kizai_nam: string | null;
           kizai_qty: number | null;
           mem: string | null;
+          mem2: string | null;
           oya_juchu_kizai_head_id: number | null;
           plan_kizai_qty: number | null;
           plan_qty: number | null;
