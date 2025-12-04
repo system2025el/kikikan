@@ -1062,6 +1062,7 @@ export const addJuchuKizaiMeisai = async (
     plan_kizai_qty: d.planKizaiQty,
     plan_yobi_qty: d.planYobiQty,
     mem: d.mem,
+    mem2: d.mem2,
     keep_qty: null,
     add_dat: toJapanTimeString(),
     add_user: userNam,
