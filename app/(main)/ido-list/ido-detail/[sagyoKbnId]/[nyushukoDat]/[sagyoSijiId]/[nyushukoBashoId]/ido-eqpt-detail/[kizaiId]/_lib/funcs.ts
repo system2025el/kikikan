@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 import pool from '@/app/_lib/db/postgres';
 import { deleteIdoCtnResult } from '@/app/_lib/db/tables/t-ido-ctn-result';
 import { updateIdoDen } from '@/app/_lib/db/tables/t-ido-den';
+import { selectIdoFix } from '@/app/_lib/db/tables/t-ido-fix';
 import { deleteIdoResult } from '@/app/_lib/db/tables/t-ido-result';
 import { selectIdoDenOne } from '@/app/_lib/db/tables/v-ido-den3-lst';
 import { selectIdoEqptDetail } from '@/app/_lib/db/tables/v-ido-den3-result';
@@ -175,5 +176,30 @@ export const updIdoResultAdjQty = async (
   } catch (e) {
     console.error(e);
     return false;
+  }
+};
+
+/**
+ * 移動確定取得
+ * @param sagyoKbnId 作業区分id
+ * @param sagyoSijiId 作業指示id
+ * @param sagyoDenDatDat 作業日時
+ * @param sagyoId 作業id
+ * @returns
+ */
+export const getIdoFix = async (sagyoKbnId: number, sagyoSijiId: number, sagyoDenDatDat: string, sagyoId: number) => {
+  try {
+    const { error } = await selectIdoFix(sagyoKbnId, sagyoSijiId, sagyoDenDatDat, sagyoId);
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return false;
+      }
+      throw error;
+    }
+
+    return true;
+  } catch (e) {
+    console.error(e);
+    throw e;
   }
 };

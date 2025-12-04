@@ -77,11 +77,11 @@ export const selectFilteredNyukoList = async (queries: NyukoListSearchValues) =>
   if (queries.juchuHeadId !== null) {
     query += ` AND d2.juchu_head_id = ${queries.juchuHeadId}`;
   }
-  if (queries.shukoBasho !== 0) {
-    query += ` AND d2.nyushuko_basho_id = ${queries.shukoBasho}`;
+  if (queries.nyukoBasho !== 0) {
+    query += ` AND d2.nyushuko_basho_id = ${queries.nyukoBasho}`;
   }
-  if (queries.shukoDat !== null) {
-    query += ` AND d2.nyushuko_dat::text LIKE '%${toJapanYMDString(queries.shukoDat, '-')}%'`;
+  if (queries.nyukoDat !== null) {
+    query += ` AND d2.nyushuko_dat::text LIKE '%${toJapanYMDString(queries.nyukoDat, '-')}%'`;
   }
   if (queries.section && queries.section.length !== 0) {
     const likeClouds = queries.section.map((d) => ` d2.section_namv::TEXT LIKE '%${d}%'`).join(' OR');

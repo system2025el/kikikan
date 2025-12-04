@@ -18,7 +18,7 @@ export const IdoList = () => {
   const [idoList, setIdoList] = useState<IdoTableValues[]>([]);
 
   /* useForm ------------------- */
-  const { control, handleSubmit } = useForm({
+  const { control, handleSubmit, getValues, reset } = useForm({
     mode: 'onSubmit',
     defaultValues: {
       idoDat: new Date(),
@@ -31,6 +31,7 @@ export const IdoList = () => {
    */
   const onSubmit = async (data: { idoDat: Date }) => {
     setIsLoading(true);
+    sessionStorage.setItem('idoListSearchParams', JSON.stringify(getValues()));
     const idoData = await getIdoList(toJapanYMDString(data.idoDat, '-'));
     if (idoData) {
       setIdoList(idoData);
@@ -41,9 +42,12 @@ export const IdoList = () => {
   /* useEffect ----------------------------------- */
   /** 初期表示 */
   useEffect(() => {
-    const getList = async () => {
+    const searchPramsString = sessionStorage.getItem('idoListSearchParams');
+    const searchParams = searchPramsString ? JSON.parse(searchPramsString) : null;
+
+    const getList = async (searchParams: { idoDat: Date }) => {
       setIsLoading(true);
-      const date = toJapanYMDString(undefined, '-');
+      const date = toJapanYMDString(searchParams.idoDat, '-');
       const idoData = await getIdoList(date);
       if (!idoData) {
         return <div>エラー</div>;
@@ -51,7 +55,14 @@ export const IdoList = () => {
       setIdoList(idoData);
       setIsLoading(false);
     };
-    getList();
+
+    if (searchParams) {
+      reset(searchParams);
+      getList(searchParams);
+    } else {
+      getList(getValues());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

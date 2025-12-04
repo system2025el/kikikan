@@ -32,8 +32,9 @@ import { IdoEqptDetailTable } from './ido-eqpt-detail-table';
 export const IdoEqptDetail = (props: {
   idoDenDetailData: IdoEqptDetailValues;
   idoEqptDetailData: IdoEqptDetailTableValues[];
+  fixFlag: boolean;
 }) => {
-  const { idoDenDetailData } = props;
+  const { idoDenDetailData, fixFlag } = props;
 
   // user情報
   const user = useUserStore((state) => state.user);
@@ -139,9 +140,10 @@ export const IdoEqptDetail = (props: {
 
   return (
     <Box>
-      <Box display={'flex'} justifyContent={'end'} mb={1}>
+      <Grid2 container justifyContent={'end'} alignItems={'center'} spacing={2} mb={1}>
+        {fixFlag && <Typography>{idoDenDetailData.sagyoKbnId === 40 ? '出発済' : '到着済'}</Typography>}
         <BackButton label={'戻る'} />
-      </Box>
+      </Grid2>
       <Paper variant="outlined">
         <form onSubmit={handleSubmit(onSubmit)}>
           <Box display={'flex'} justifyContent={'space-between'} alignItems="center" p={2}>
@@ -172,7 +174,7 @@ export const IdoEqptDetail = (props: {
           </Grid2>
           <Grid2 container alignItems={'center'} spacing={5} p={1}>
             <Typography>全{idoEqptDetailList.length}件</Typography>
-            <Button color="error" onClick={handleDelete}>
+            <Button color="error" onClick={handleDelete} disabled={fixFlag}>
               クリア
             </Button>
             <Box display={'flex'} alignItems={'center'}>
@@ -199,6 +201,7 @@ export const IdoEqptDetail = (props: {
                         margin: 0,
                       },
                     }}
+                    disabled={fixFlag}
                   />
                 )}
               />
@@ -206,7 +209,7 @@ export const IdoEqptDetail = (props: {
           </Grid2>
           {/** 固定ボタン 保存＆ページトップ */}
           <Box position={'fixed'} zIndex={1050} bottom={25} right={25} alignItems={'center'}>
-            <Fab variant="extended" color="primary" type="submit" sx={{ mr: 2 }}>
+            <Fab variant="extended" color="primary" type="submit" sx={{ mr: 2 }} disabled={fixFlag}>
               <SaveAsIcon sx={{ mr: 1 }} />
               保存
             </Fab>
