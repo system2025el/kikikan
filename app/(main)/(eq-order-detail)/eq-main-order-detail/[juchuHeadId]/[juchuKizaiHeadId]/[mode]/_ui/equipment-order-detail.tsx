@@ -1829,7 +1829,7 @@ const EquipmentOrderDetail = (props: {
               </AccordionSummary>
               <AccordionDetails sx={{ padding: 0 }}>
                 <Divider />
-                <Grid2 container alignItems="center" spacing={1} py={1} px={2}>
+                <Grid2 container alignItems="baseline" spacing={1} py={1} px={2}>
                   <Typography>機材明細名</Typography>
                   <TextFieldElement name="headNam" control={control} disabled={!edit}></TextFieldElement>
                 </Grid2>
@@ -2694,6 +2694,6 @@ const styles: { [key: string]: React.CSSProperties } = {
   // grid2row
   grid2Row: {
     display: 'flex',
-    alignItems: 'center',
+    alignItems: 'baseline',
   },
 };
