@@ -1,4 +1,4 @@
-import { getIdoDenDetail, getIdoEqptDetail } from './_lib/funcs';
+import { getIdoDenDetail, getIdoEqptDetail, getIdoFix } from './_lib/funcs';
 import { IdoEqptDetail } from './_ui/ido-eqpt-detail';
 
 const Page = async (props: {
@@ -28,6 +28,14 @@ const Page = async (props: {
     Number(params.kizaiId)
   );
 
-  return <IdoEqptDetail idoDenDetailData={idoDenDetailData} idoEqptDetailData={idoEqptDetailData} />;
+  const fixKbn = Number(params.sagyoKbnId) === 40 ? 60 : 70;
+  const fixFlag = await getIdoFix(
+    fixKbn,
+    Number(params.sagyoSijiId),
+    params.nyushukoDat,
+    Number(params.nyushukoBashoId)
+  );
+
+  return <IdoEqptDetail idoDenDetailData={idoDenDetailData} idoEqptDetailData={idoEqptDetailData} fixFlag={fixFlag} />;
 };
 export default Page;

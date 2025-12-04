@@ -17,12 +17,14 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
+import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
 import { BackButton } from '@/app/(main)/_ui/buttons';
+import { useDirty } from '@/app/(main)/_ui/dirty-context';
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { delNyukoResult, updNyukoResultAdjQty } from '../_lib/funcs';
@@ -32,8 +34,9 @@ import { NyukoEqptDetailTable } from './nyuko-eqpt-detail-table';
 export const NyukoEqptDetail = (props: {
   nyukoEqptDetailData: NyukoEqptDetailValues;
   nyukoEqptDetailTableData: NyukoEqptDetailTableValues[];
+  fixFlag: boolean;
 }) => {
-  const { nyukoEqptDetailData } = props;
+  const { nyukoEqptDetailData, fixFlag } = props;
 
   // user情報
   const user = useUserStore((state) => state.user);
@@ -67,6 +70,15 @@ export const NyukoEqptDetail = (props: {
       resultAdjQty: nyukoEqptDetailData.resultAdjQty,
     },
   });
+
+  // context
+  const { setIsDirty } = useDirty();
+  // ブラウザバック、F5、×ボタンでページを離れた際のhook
+  useUnsavedChangesWarning(isDirty);
+
+  useEffect(() => {
+    setIsDirty(isDirty);
+  }, [isDirty, setIsDirty]);
 
   /**
    * 保存ボタン押下
@@ -133,9 +145,10 @@ export const NyukoEqptDetail = (props: {
 
   return (
     <Box>
-      <Box display={'flex'} justifyContent={'end'} mb={1}>
+      <Grid2 container justifyContent={'end'} alignItems={'center'} spacing={2} mb={1}>
+        {fixFlag && <Typography>到着済</Typography>}
         <BackButton label={'戻る'} />
-      </Box>
+      </Grid2>
       <Paper variant="outlined">
         <form onSubmit={handleSubmit(onSubmit)}>
           <Box display={'flex'} justifyContent={'space-between'} alignItems="center" p={2}>
@@ -162,7 +175,7 @@ export const NyukoEqptDetail = (props: {
           </Grid2>
           <Grid2 container alignItems={'center'} spacing={5} p={1}>
             <Typography>全{nyukoEqptDetailList.length}件</Typography>
-            <Button color="error" onClick={handleDelete}>
+            <Button color="error" onClick={handleDelete} disabled={fixFlag}>
               実績クリア
             </Button>
             <Box display={'flex'} alignItems={'center'}>
@@ -189,6 +202,7 @@ export const NyukoEqptDetail = (props: {
                         margin: 0,
                       },
                     }}
+                    disabled={fixFlag}
                   />
                 )}
               />
@@ -196,7 +210,7 @@ export const NyukoEqptDetail = (props: {
           </Grid2>
           {/** 固定ボタン 保存＆ページトップ */}
           <Box position={'fixed'} zIndex={1050} bottom={25} right={25} alignItems={'center'}>
-            <Fab variant="extended" color="primary" type="submit" sx={{ mr: 2 }}>
+            <Fab variant="extended" color="primary" type="submit" sx={{ mr: 2 }} disabled={fixFlag}>
               <SaveAsIcon sx={{ mr: 1 }} />
               保存
             </Fab>

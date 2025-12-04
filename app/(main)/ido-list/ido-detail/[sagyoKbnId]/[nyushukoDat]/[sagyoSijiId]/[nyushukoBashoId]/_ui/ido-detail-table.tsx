@@ -15,6 +15,7 @@ import { purple } from '@mui/material/colors';
 import { usePathname, useRouter } from 'next/navigation';
 
 import { dispColors, statusColors } from '@/app/(main)/_lib/colors';
+import { useDirty } from '@/app/(main)/_ui/dirty-context';
 
 import { IdoDetailTableValues } from '../_lib/types';
 
@@ -29,12 +30,15 @@ export const ShukoIdoDenTable = (props: {
   const router = useRouter();
   const path = usePathname();
 
+  // context
+  const { requestNavigation } = useDirty();
+
   /**
    * 機材名押下時
    * @param kizaiId 機材id
    */
   const handleClick = (kizaiId: number) => {
-    router.push(`${path}/ido-eqpt-detail/${kizaiId}`);
+    requestNavigation(`${path}/ido-eqpt-detail/${kizaiId}`);
   };
 
   return (
@@ -85,13 +89,11 @@ export const ShukoIdoDenTable = (props: {
                 sx={{
                   whiteSpace: 'nowrap',
                   backgroundColor:
-                    row.planQty === 0 && !row.ctnFlg
-                      ? 'white'
-                      : row.diffQty === 0 && !row.ctnFlg
-                        ? statusColors.completed
-                        : row.ctnFlg
-                          ? statusColors.ctn
-                          : 'white',
+                    row.diffQty === 0 && row.planQty !== 0
+                      ? statusColors.completed
+                      : row.ctnFlg
+                        ? statusColors.ctn
+                        : 'white',
                 }}
               >
                 <TableCell padding="checkbox">
@@ -156,15 +158,15 @@ export const ShukoIdoDenTable = (props: {
                   align="right"
                   sx={{
                     backgroundColor:
-                      row.planQty === 0 && !row.ctnFlg
-                        ? 'white'
+                      row.diffQty === 0 && row.planQty !== 0
+                        ? statusColors.completed
                         : row.diffQty > 0
                           ? statusColors.excess
                           : row.diffQty < 0
                             ? statusColors.lack
-                            : row.diffQty === 0 && row.ctnFlg
+                            : row.ctnFlg
                               ? statusColors.ctn
-                              : statusColors.completed,
+                              : undefined,
                   }}
                 >
                   {row.diffQty}
@@ -216,13 +218,11 @@ export const NyukoIdoDenTable = (props: { datas: IdoDetailTableValues[] }) => {
               sx={{
                 whiteSpace: 'nowrap',
                 backgroundColor:
-                  row.planQty === 0 && !row.ctnFlg
-                    ? 'white'
-                    : row.diffQty === 0 && !row.ctnFlg
-                      ? statusColors.completed
-                      : row.ctnFlg
-                        ? statusColors.ctn
-                        : 'white',
+                  row.diffQty === 0 && row.planQty !== 0 //&& row.ctnFlg !== 1
+                    ? statusColors.completed
+                    : row.diffQty === 1
+                      ? statusColors.ctn
+                      : 'white',
               }}
             >
               <TableCell padding="checkbox">{index + 1}</TableCell>
@@ -240,15 +240,15 @@ export const NyukoIdoDenTable = (props: { datas: IdoDetailTableValues[] }) => {
                 align="right"
                 sx={{
                   backgroundColor:
-                    row.planQty === 0 && !row.ctnFlg
-                      ? 'white'
+                    row.diffQty === 0 && row.planQty !== 0
+                      ? statusColors.completed
                       : row.diffQty > 0
                         ? statusColors.excess
                         : row.diffQty < 0
                           ? statusColors.lack
-                          : row.diffQty === 0 && row.ctnFlg
+                          : row.ctnFlg
                             ? statusColors.ctn
-                            : statusColors.completed,
+                            : undefined,
                 }}
               >
                 {row.diffQty}

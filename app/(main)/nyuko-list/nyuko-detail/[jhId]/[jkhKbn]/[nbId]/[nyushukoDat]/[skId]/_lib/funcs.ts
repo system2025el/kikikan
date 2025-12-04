@@ -1,5 +1,6 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
 import { PoolClient } from 'pg';
 
 import pool from '@/app/_lib/db/postgres';
@@ -7,7 +8,11 @@ import { selectJuchuContainerMeisaiMaxId, upsertJuchuContainerMeisai } from '@/a
 import { selectJuchuKizaiMeisaiMaxId, upsertJuchuKizaiMeisai } from '@/app/_lib/db/tables/t-juchu-kizai-meisai';
 import { selectJuchuKizaiNyushukoConfirm } from '@/app/_lib/db/tables/t-juchu-kizai-nyushuko';
 import { updateNyushukoDen, updateOyaNyukoDen, upsertNyushukoDen } from '@/app/_lib/db/tables/t-nyushuko-den';
-import { insertNyushukoFix, updateNyushukoFix } from '@/app/_lib/db/tables/t-nyushuko-fix';
+import {
+  insertNyushukoFix,
+  selectSagyoIdFilterNyushukoFixFlag,
+  updateNyushukoFix,
+} from '@/app/_lib/db/tables/t-nyushuko-fix';
 import { selectNyukoOne } from '@/app/_lib/db/tables/v-nyushuko-den2';
 import { selectNyushukoDetail } from '@/app/_lib/db/tables/v-nyushuko-den2-lst';
 import { JuchuCtnMeisai } from '@/app/_lib/db/types/t_juchu_ctn_meisai-type';
@@ -155,6 +160,10 @@ export const updNyukoDetail = async (
     }
 
     await connection.query('COMMIT');
+
+    await revalidatePath('/shuko-list');
+    await revalidatePath('/nyuko-list');
+
     return true;
   } catch (e) {
     console.error(e);
@@ -199,6 +208,10 @@ export const updReturnNyukoDetail = async (
   userNam: string,
   connection: PoolClient
 ) => {
+  // 機材データ
+  const kizaiData = nyukoDetailTableData.filter((d) => !d.ctnFlg);
+  // コンテナデータ
+  const ctnData = nyukoDetailTableData.filter((data) => data.ctnFlg);
   try {
     // 返却入庫伝票更新
     await updNyukoDen(nyukoDetailTableData, userNam, connection);
@@ -206,7 +219,15 @@ export const updReturnNyukoDetail = async (
     // 親入子伝票更新
     await updOyaNyukoDen(nyukoDetailTableData, userNam, connection);
 
-    // 機材明細更新保留
+    // 機材明細追加更新
+    if (kizaiData && kizaiData.length > 0) {
+      await upsJuchuKizaiMeisai(kizaiData, userNam, connection);
+    }
+
+    // コンテナ明細追加更新
+    if (ctnData && ctnData.length > 0) {
+      await upsJuchuCtnMeisai(ctnData, userNam, connection);
+    }
 
     // 入庫確定追加
     await addNyukoFix(nyukoDetailData, nyukoDetailTableData, userNam, connection);
@@ -231,9 +252,9 @@ export const updKeepNyukoDetail = async (
   const juchuKizaiHeadIds = [
     ...new Set(nyukoDetailTableData.map((d) => d.juchuKizaiHeadId).filter((id) => id !== null)),
   ];
-
+  // 機材データ
   const kizaiData = nyukoDetailTableData.filter((d) => !d.ctnFlg);
-
+  // コンテナデータ
   const ctnData = nyukoDetailTableData.filter((data) => data.ctnFlg);
 
   try {
@@ -257,17 +278,56 @@ export const updKeepNyukoDetail = async (
 
     // 機材明細追加更新
     if (kizaiData && kizaiData.length > 0) {
-      await upsJuchuKizaiMeisai(nyukoDetailTableData, userNam, connection);
+      await upsJuchuKizaiMeisai(kizaiData, userNam, connection);
     }
 
     // コンテナ明細追加更新
     if (ctnData && ctnData.length > 0) {
-      await upsJuchuCtnMeisai(nyukoDetailTableData, userNam, connection);
+      await upsJuchuCtnMeisai(ctnData, userNam, connection);
     }
 
     // 入庫確定追加
     await addNyukoFix(nyukoDetailData, nyukoDetailTableData, userNam, connection);
   } catch (e) {
+    throw e;
+  }
+};
+
+/**
+ * 入庫作業確定フラグ取得
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param sagyoKbnId 作業区分id
+ * @param sagyoDenDat 作業日時
+ * @param sagyoId 作業id
+ * @returns
+ */
+export const getNyukoFixFlag = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  sagyoKbnId: number,
+  sagyoDenDat: string,
+  sagyoId: number
+) => {
+  try {
+    const { data, error } = await selectSagyoIdFilterNyushukoFixFlag(
+      juchuHeadId,
+      juchuKizaiHeadId,
+      sagyoKbnId,
+      sagyoDenDat,
+      sagyoId
+    );
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return false;
+      }
+      throw error;
+    }
+
+    return data.sagyo_fix_flg === 0 ? false : true;
+  } catch (e) {
+    console.error(e);
     throw e;
   }
 };

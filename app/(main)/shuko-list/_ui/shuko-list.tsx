@@ -33,7 +33,7 @@ export const ShukoList = (/*props: { shukoData: ShukoTableValues[] }*/) => {
   const [options, setOptions] = useState<SelectTypes[]>([]);
 
   /* useForm ------------------- */
-  const { control, handleSubmit, getValues } = useForm<ShukoListSearchValues>({
+  const { control, handleSubmit, getValues, reset } = useForm<ShukoListSearchValues>({
     mode: 'onSubmit',
     defaultValues: {
       juchuHeadId: null,
@@ -49,6 +49,7 @@ export const ShukoList = (/*props: { shukoData: ShukoTableValues[] }*/) => {
    */
   const onSubmit = async (data: ShukoListSearchValues) => {
     setIsLoading(true);
+    sessionStorage.setItem('shukoListSearchParams', JSON.stringify(getValues()));
     const newShukoList = await getShukoList(data);
     setShukoList(newShukoList);
     setIsLoading(false);
@@ -102,9 +103,25 @@ export const ShukoList = (/*props: { shukoData: ShukoTableValues[] }*/) => {
 
   /* useEffect --------------------------------- */
   useEffect(() => {
+    const searchPramsString = sessionStorage.getItem('shukoListSearchParams');
+    const searchParams: ShukoListSearchValues = searchPramsString ? JSON.parse(searchPramsString) : null;
+
     getOptions();
-    onSubmit(getValues());
-  }, [getValues]);
+
+    const getList = async (searchParams: ShukoListSearchValues) => {
+      const newShukoList = await getShukoList(searchParams);
+      setShukoList(newShukoList);
+      setIsLoading(false);
+    };
+
+    if (searchParams) {
+      reset(searchParams);
+      getList(searchParams);
+    } else {
+      getList(getValues());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Box>

@@ -13,18 +13,18 @@ import { getNyukoList } from '../_lib/funcs';
 import { NyukoListSearchValues, NyukoTableValues } from '../_lib/types';
 import { NyukoListTable } from './nyuko-list-table';
 
-export const NyukoList = (/*props: { shukoData: NyukoTableValues[] }*/) => {
+export const NyukoList = (/*props: { shukoData: NyukoTableValues[]}*/) => {
   const [isLoading, setIsLoading] = useState(true);
   const [nyukoList, setNyukoList] = useState<NyukoTableValues[]>(/*props.shukoData*/ []);
   const [options, setOptions] = useState<SelectTypes[]>([]);
 
   /* useForm ------------------- */
-  const { control, handleSubmit, getValues } = useForm<NyukoListSearchValues>({
+  const { control, handleSubmit, getValues, reset } = useForm<NyukoListSearchValues>({
     mode: 'onSubmit',
     defaultValues: {
       juchuHeadId: null,
-      shukoDat: new Date(),
-      shukoBasho: 0,
+      nyukoDat: new Date(),
+      nyukoBasho: 0,
       section: [],
     },
   });
@@ -35,8 +35,8 @@ export const NyukoList = (/*props: { shukoData: NyukoTableValues[] }*/) => {
    */
   const onSubmit = async (data: NyukoListSearchValues) => {
     setIsLoading(true);
+    sessionStorage.setItem('nyukoListSearchParams', JSON.stringify(getValues()));
     const newNyukoList = await getNyukoList(data);
-    console.log(newNyukoList);
     setNyukoList(newNyukoList);
     setIsLoading(false);
   };
@@ -49,9 +49,24 @@ export const NyukoList = (/*props: { shukoData: NyukoTableValues[] }*/) => {
 
   /* useEffect --------------------------------- */
   useEffect(() => {
+    const searchPramsString = sessionStorage.getItem('nyukoListSearchParams');
+    const searchParams: NyukoListSearchValues = searchPramsString ? JSON.parse(searchPramsString) : null;
     getOptions();
-    onSubmit(getValues());
-  }, [getValues]);
+
+    const getList = async (searchParams: NyukoListSearchValues) => {
+      const newNyukoList = await getNyukoList(searchParams);
+      setNyukoList(newNyukoList);
+      setIsLoading(false);
+    };
+
+    if (searchParams) {
+      reset(searchParams);
+      getList(searchParams);
+    } else {
+      getList(getValues());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Box>
@@ -84,7 +99,7 @@ export const NyukoList = (/*props: { shukoData: NyukoTableValues[] }*/) => {
             <Grid2 display={'flex'} alignItems={'center'} width={'fit-content'}>
               <Typography mr={2}>入庫日</Typography>
               <Controller
-                name="shukoDat"
+                name="nyukoDat"
                 control={control}
                 render={({ field, fieldState }) => (
                   <TestDate
@@ -101,7 +116,7 @@ export const NyukoList = (/*props: { shukoData: NyukoTableValues[] }*/) => {
               <Typography mr={2}>入庫場所</Typography>
               <FormControl size="small" sx={{ width: 120 }}>
                 <Controller
-                  name="shukoBasho"
+                  name="nyukoBasho"
                   control={control}
                   render={({ field }) => (
                     <Select {...field}>

@@ -37,7 +37,7 @@ export const NyukoListTable = (props: { datas: NyukoTableValues[] }) => {
         </TableHead>
         <TableBody>
           {datas.map((row, index) => (
-            <TableRow key={index} sx={{ whiteSpace: 'nowrap' }}>
+            <TableRow key={index} sx={{ whiteSpace: 'nowrap', backgroundColor: row.nyukoFixFlg ? '#808080' : 'white' }}>
               <TableCell align="center">{row.juchuHeadId}</TableCell>
               <TableCell align="left">{row.nyushukoBashoId === 1 ? 'K' : 'Y'}</TableCell>
               <TableCell align="left">{toJapanTimeString(row.nyushukoDat)}</TableCell>

@@ -1,6 +1,4 @@
-import { getNyukoFixFlag } from '@/app/(main)/nyuko-list/_lib/funcs';
-
-import { getNyukoDetail, getNyukoDetailTable } from './_lib/funcs';
+import { getNyukoDetail, getNyukoDetailTable, getNyukoFixFlag } from './_lib/funcs';
 import { NyukoDetailValues } from './_lib/types';
 import { NyukoDetail } from './_ui/nyuko-detail';
 

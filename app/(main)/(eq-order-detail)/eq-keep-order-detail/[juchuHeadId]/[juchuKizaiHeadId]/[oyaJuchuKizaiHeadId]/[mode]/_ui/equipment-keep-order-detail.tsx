@@ -1141,7 +1141,7 @@ export const EquipmentKeepOrderDetail = (props: {
                   <KeepEqTable
                     rows={keepJuchuKizaiMeisaiList}
                     edit={edit}
-                    nyukoFixFlag={nyukoFixFlag}
+                    shukoFixFlag={shukoFixFlag}
                     handleMeisaiDelete={handleEqMeisaiDelete}
                     handleMemoChange={handleMemoChange}
                     handleCellChange={handleCellChange}
