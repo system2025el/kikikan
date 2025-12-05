@@ -51,12 +51,7 @@ import {
   OyaJuchuKizaiMeisaiValues,
   OyaJuchuKizaiNyushukoValues,
 } from '@/app/(main)/(eq-order-detail)/_lib/types';
-import {
-  DeleteAlertDialog,
-  NyushukoAlertDialog,
-  NyushukoFixAlertDialog,
-  SaveAlertDialog,
-} from '@/app/(main)/(eq-order-detail)/_ui/caveat-dialog';
+import { AlertDialog, DeleteAlertDialog } from '@/app/(main)/(eq-order-detail)/_ui/caveat-dialog';
 import { OyaEqSelectionDialog } from '@/app/(main)/(eq-order-detail)/_ui/equipment-selection-dialog';
 import { JuchuContainerMeisaiValues } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
 
@@ -138,12 +133,14 @@ export const EquipmentKeepOrderDetail = (props: {
   // キープ入庫日
   const [keepNyukoDate, setKeepNyukoDate] = useState<Date | null>(props.keepNyukoDate);
 
-  // 未保存ダイアログ制御
-  const [saveOpen, setSaveOpen] = useState(false);
+  // 警告ダイアログ制御
+  const [alertOpen, setAlertOpen] = useState(false);
+  // 警告ダイアログタイトル
+  const [alertTitle, setAlertTitle] = useState('');
+  // 警告ダイアログ用メッセージ
+  const [alertMessage, setAlertMessage] = useState('');
   // 編集内容が未保存ダイアログ制御
   const [dirtyOpen, setDirtyOpen] = useState(false);
-  // 入出庫日時ダイアログ制御
-  const [nyushukoOpen, setNyushukoOpen] = useState(false);
   // 機材追加ダイアログ制御
   const [EqSelectionDialogOpen, setEqSelectionDialogOpen] = useState(false);
   // 機材削除ダイアログ制御
@@ -350,7 +347,9 @@ export const EquipmentKeepOrderDetail = (props: {
             message: '',
           });
         }
-        setNyushukoOpen(true);
+        setAlertTitle('入出庫日時が入力されていません');
+        setAlertMessage('入出庫日時を入力してください');
+        setAlertOpen(true);
         setIsLoading(false);
         return;
       }
@@ -1166,9 +1165,8 @@ export const EquipmentKeepOrderDetail = (props: {
           )}
         </Container>
       )}
-      <SaveAlertDialog open={saveOpen} onClick={() => setSaveOpen(false)} />
+      <AlertDialog open={alertOpen} title={alertTitle} message={alertMessage} onClick={() => setAlertOpen(false)} />
       <IsDirtyAlertDialog open={dirtyOpen} onClick={handleResultDialog} />
-      <NyushukoAlertDialog open={nyushukoOpen} onClick={() => setNyushukoOpen(false)} />
       <DeleteAlertDialog open={deleteEqOpen} onClick={handleEqMeisaiDeleteResult} />
       <DeleteAlertDialog open={deleteCtnOpen} onClick={handleCtnMeisaiDeleteResult} />
       <Snackbar

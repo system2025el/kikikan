@@ -51,12 +51,7 @@ import { Loading } from '@/app/(main)/_ui/loading';
 import { getDic, getJuchuContainerMeisai, getStockList } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 import { DetailOerValues } from '@/app/(main)/(eq-order-detail)/_lib/types';
 
-import {
-  DeleteAlertDialog,
-  MoveAlertDialog,
-  NyushukoAlertDialog,
-  SaveAlertDialog,
-} from '../../../../../_ui/caveat-dialog';
+import { AlertDialog, DeleteAlertDialog, MoveAlertDialog } from '../../../../../_ui/caveat-dialog';
 import { getJuchuKizaiMeisai, juchuMeisaiCopy, saveJuchuKizai, saveNewJuchuKizaiHead } from '../_lib/funcs';
 import {
   IdoJuchuKizaiMeisaiValues,
@@ -176,14 +171,16 @@ const EquipmentOrderDetail = (props: {
   // 移動日
   const [idoDat, setIdoDat] = useState<Date | null>(null);
 
-  // 未保存ダイアログ制御
-  const [saveOpen, setSaveOpen] = useState(false);
+  // 警告ダイアログ制御
+  const [alertOpen, setAlertOpen] = useState(false);
+  // 警告ダイアログタイトル
+  const [alertTitle, setAlertTitle] = useState('');
+  // 警告ダイアログ用メッセージ
+  const [alertMessage, setAlertMessage] = useState('');
   // 編集内容が未保存ダイアログ制御
   const [dirtyOpen, setDirtyOpen] = useState(false);
   // 移動日更新ダイアログ制御
   const [moveOpen, setMoveOpen] = useState(false);
-  // 入出庫日時ダイアログ制御
-  const [nyushukoOpen, setNyushukoOpen] = useState(false);
   // 機材追加ダイアログ制御
   const [EqSelectionDialogOpen, setEqSelectionDialogOpen] = useState(false);
   // コピーダイアログ制御
@@ -539,7 +536,9 @@ const EquipmentOrderDetail = (props: {
             message: '',
           });
         }
-        setNyushukoOpen(true);
+        setAlertTitle('入出庫日時が入力されていません');
+        setAlertMessage('入出庫日時を入力してください');
+        setAlertOpen(true);
         setIsLoading(false);
         return;
       }
@@ -1468,7 +1467,9 @@ const EquipmentOrderDetail = (props: {
   // コピーダイアログ開閉
   const handleOpenCopyDialog = () => {
     if (otherDirty || isDirty) {
-      setSaveOpen(true);
+      setAlertTitle('保存されていません');
+      setAlertMessage('1度保存をしてください');
+      setAlertOpen(true);
       return;
     }
     setCopyDialogOpen(true);
@@ -1553,7 +1554,9 @@ const EquipmentOrderDetail = (props: {
   // 分離ダイアログ開閉
   const handleOpenSeparationDialog = () => {
     if (otherDirty || isDirty) {
-      setSaveOpen(true);
+      setAlertTitle('保存されていません');
+      setAlertMessage('1度保存をしてください');
+      setAlertOpen(true);
       return;
     }
     setSeparationDialogOpen(true);
@@ -2680,10 +2683,9 @@ const EquipmentOrderDetail = (props: {
           )}
         </Container>
       )}
-      <SaveAlertDialog open={saveOpen} onClick={() => setSaveOpen(false)} />
+      <AlertDialog open={alertOpen} title={alertTitle} message={alertMessage} onClick={() => setAlertOpen(false)} />
       <IsDirtyAlertDialog open={dirtyOpen} onClick={handleResultDialog} />
       <MoveAlertDialog open={moveOpen} onClick={handleMoveDialog} />
-      <NyushukoAlertDialog open={nyushukoOpen} onClick={() => setNyushukoOpen(false)} />
       <DeleteAlertDialog open={deleteEqOpen} onClick={handleEqMeisaiDeleteResult} />
       <DeleteAlertDialog open={deleteCtnOpen} onClick={handleCtnMeisaiDeleteResult} />
       <Snackbar
