@@ -49,7 +49,7 @@ const Page = async (props: { params: Promise<{ juchuHeadId: string; mode: string
     const juchuHeadData = await getJuchuHead(juchuHeadId);
     // 受注機材ヘッダーデータ
     const juchuKizaiHeadDatas = await getJuchuKizaiHeadList(juchuHeadId);
-    // 受注機材ヘッダーデータ
+    // 受注車両ヘッダーデータ
     const juchuSharyoHeadDatas = await getJuchuSharyoHeadList(juchuHeadId);
 
     if (!juchuHeadData) {

@@ -302,7 +302,12 @@ export const Order = (props: {
   // 返却入力ボタン押下
   const handleAddReturn = async () => {
     if (selectEqHeader) {
-      if (selectEqHeader && selectEqHeader.juchuKizaiHeadKbn === 1) {
+      if (
+        selectEqHeader &&
+        selectEqHeader.juchuKizaiHeadKbn === 1 &&
+        (selectEqHeader.kicsShukoDat ? selectEqHeader.kicsShukoFixFlg === 1 : true) &&
+        (selectEqHeader.yardShukoDat ? selectEqHeader.yardShukoFixFlg === 1 : true)
+      ) {
         if (!isDirty) {
           await deleteLock(1, props.juchuHeadData.juchuHeadId);
           router.push(
@@ -316,12 +321,12 @@ export const Order = (props: {
         }
       } else {
         setAlertTitle('選択項目を確認してください');
-        setAlertMessage('メイン明細を選択してください');
+        setAlertMessage('出発済のメイン明細を選択してください');
         setAlertOpen(true);
       }
     } else {
       setAlertTitle('選択項目を確認してください');
-      setAlertMessage('メイン明細を選択してください');
+      setAlertMessage('出発済のメイン明細を選択してください');
       setAlertOpen(true);
     }
   };
@@ -329,7 +334,12 @@ export const Order = (props: {
   // キープ入力ボタン押下
   const handleAddKeep = async () => {
     if (selectEqHeader) {
-      if (selectEqHeader && selectEqHeader.juchuKizaiHeadKbn === 1) {
+      if (
+        selectEqHeader &&
+        selectEqHeader.juchuKizaiHeadKbn === 1 &&
+        (selectEqHeader.kicsShukoDat ? selectEqHeader.kicsShukoFixFlg === 1 : true) &&
+        (selectEqHeader.yardShukoDat ? selectEqHeader.yardShukoFixFlg === 1 : true)
+      ) {
         if (!isDirty) {
           await deleteLock(1, props.juchuHeadData.juchuHeadId);
           router.push(
@@ -341,12 +351,12 @@ export const Order = (props: {
         }
       } else {
         setAlertTitle('選択項目を確認してください');
-        setAlertMessage('メイン明細を選択してください');
+        setAlertMessage('出発済のメイン明細を選択してください');
         setAlertOpen(true);
       }
     } else {
       setAlertTitle('選択項目を確認してください');
-      setAlertMessage('メイン明細を選択してください');
+      setAlertMessage('出発済のメイン明細を選択してください');
       setAlertOpen(true);
     }
   };
