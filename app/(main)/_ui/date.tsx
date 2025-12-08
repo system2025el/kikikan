@@ -382,6 +382,7 @@ export const FormDateX = ({
   readonly,
   minDate,
   maxDate,
+  notClearable,
   onChange,
 }: {
   sx?: object;
@@ -392,6 +393,7 @@ export const FormDateX = ({
   readonly?: boolean;
   minDate?: Date;
   maxDate?: Date;
+  notClearable?: boolean;
   onChange?: (date: Date | null) => void;
 }) => {
   return (
@@ -400,7 +402,7 @@ export const FormDateX = ({
       format="YYYY/MM/DD" // テキストエリア内のフォーマット
       slotProps={{
         field: {
-          clearable: true,
+          clearable: notClearable ? false : true,
         },
         textField: {
           error,
