@@ -9,8 +9,9 @@ export type WeeklyScheduleValues = {
     sharyoHeadNam: string | null;
     nyushukoDat: string | null;
     nyushukoShubetuId: number | null;
+    nyushukoBashoId: number | null;
     koenNam: string | null;
     kokyakuNam: string | null;
-    sharyos: string[];
+    sharyos: { nam: string; daisu: number }[];
   }[];
 };

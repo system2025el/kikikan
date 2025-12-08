@@ -1,67 +1,8 @@
 'use server';
 
-import pool from '@/app/_lib/db/postgres';
-import { SCHEMA } from '@/app/_lib/db/supabase';
+import { selectWeeklyList } from '@/app/_lib/db/tables/t-juchu-sharyo-head';
 
-import { toJapanYMDString } from '../../_lib/date-conversion';
 import { WeeklyScheduleValues } from './types';
-
-export const selectWeeklyList = async (date: string) => {
-  try {
-    const query = `
-        SELECT   
-          CAST(cal.cal_dat AS DATE), --スケジュール日
-          s_meisai.juchu_head_id,
-          s_meisai.juchu_sharyo_head_id,
-          s_head.head_nam as sharyo_head_nam,
-          s_meisai.nyushuko_dat,
-          t_weekly.mem as weekly_mem,
-          t_weekly.holiday_flg,
-          t_weekly.tanto_nam,
-          s_meisai.nyushuko_shubetu_id,
-          sharyo.sharyo_nam,
-          juchu.koen_nam,
-          kokyaku.kokyaku_nam
-        FROM
-          dev6.t_juchu_sharyo_head as s_head
-        LEFT JOIN
-          dev6.t_juchu_sharyo_meisai as s_meisai
-        ON 
-          s_head.juchu_head_id = s_meisai.juchu_head_id
-        AND
-          s_head.juchu_sharyo_head_id = s_meisai.juchu_sharyo_head_id
-        LEFT JOIN
-          dev6.t_juchu_head as juchu
-        ON
-          juchu.juchu_head_id = s_meisai.juchu_head_id
-        LEFT JOIN
-          dev6.m_kokyaku as kokyaku
-        ON
-          kokyaku.kokyaku_id = juchu.kokyaku_id
-        LEFT JOIN
-          dev6.m_sharyo as sharyo
-        ON
-          sharyo.sharyo_id = s_meisai.sharyo_id
-        RIGHT OUTER JOIN 
-          /* スケジュール生成して外部結合 */
-          (
-              -- スケジュールの生成範囲 /*■変数箇所■*/
-              select $1::date + g.i as cal_dat from generate_series(0, 14) as g(i)
-          ) as cal
-        ON CAST(s_meisai.nyushuko_dat AS DATE) = cal.cal_dat    
-        LEFT JOIN
-          dev6.t_weekly
-        ON cal.cal_dat = t_weekly.weekly_dat
-        ORDER BY cal_dat;
-    `;
-
-    const values = [date];
-
-    return (await pool.query(query, values)).rows;
-  } catch (e) {
-    throw e;
-  }
-};
 
 export const getWeeklyScheduleList = async (date: Date): Promise<WeeklyScheduleValues[]> => {
   try {
@@ -75,9 +16,10 @@ export const getWeeklyScheduleList = async (date: Date): Promise<WeeklyScheduleV
       sharyoHeadNam: string | null;
       nyushukoDat: string | null;
       nyushukoShubetuId: number | null;
+      nyushukoBashoId: number | null;
       koenNam: string | null;
       kokyakuNam: string | null;
-      sharyos: string[];
+      sharyos: { nam: string; daisu: number }[];
     };
 
     // 日付をキーにして、集計用オブジェクトを保持するMap
@@ -126,6 +68,7 @@ export const getWeeklyScheduleList = async (date: Date): Promise<WeeklyScheduleV
           sharyoHeadNam: row.sharyo_head_nam,
           nyushukoDat: row.nyushuko_dat,
           nyushukoShubetuId: row.nyushuko_shubetu_id,
+          nyushukoBashoId: row.nyushuko_basho_id,
           koenNam: row.koen_nam,
           kokyakuNam: row.kokyaku_nam,
           sharyos: [],
@@ -137,7 +80,7 @@ export const getWeeklyScheduleList = async (date: Date): Promise<WeeklyScheduleV
         const targetJob = currentDay.juchuSharyoMap[sharyoMeisaiKey];
         // 重複チェック
         if (!targetJob.sharyos.includes(row.sharyo_nam)) {
-          targetJob.sharyos.push(row.sharyo_nam);
+          targetJob.sharyos.push({ nam: row.sharyo_nam, daisu: row.daisu });
         }
       }
     });

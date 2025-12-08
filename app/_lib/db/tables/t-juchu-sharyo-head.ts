@@ -137,3 +137,67 @@ export const deleteJuchuSharyoHead = async (
     throw e;
   }
 };
+
+/**
+ * 2週間（14日）分の車両情報を取得する関数
+ * @param date 指定日
+ * @returns 日付ごとの配列
+ */
+export const selectWeeklyList = async (date: string) => {
+  try {
+    const query = `
+        SELECT   
+          CAST(cal.cal_dat AS DATE), --スケジュール日
+          s_meisai.juchu_head_id,
+          s_meisai.juchu_sharyo_head_id,
+          s_head.head_nam as sharyo_head_nam,
+          s_meisai.nyushuko_dat,
+          t_weekly.mem as weekly_mem,
+          t_weekly.holiday_flg,
+          t_weekly.tanto_nam,
+          s_meisai.nyushuko_shubetu_id,
+          s_meisai.nyushuko_basho_id,
+          sharyo.sharyo_nam,
+          s_meisai.daisu,
+          juchu.koen_nam,
+          kokyaku.kokyaku_nam
+        FROM
+          dev6.t_juchu_sharyo_head as s_head
+        LEFT JOIN
+          dev6.t_juchu_sharyo_meisai as s_meisai
+        ON 
+          s_head.juchu_head_id = s_meisai.juchu_head_id
+        AND
+          s_head.juchu_sharyo_head_id = s_meisai.juchu_sharyo_head_id
+        LEFT JOIN
+          dev6.t_juchu_head as juchu
+        ON
+          juchu.juchu_head_id = s_meisai.juchu_head_id
+        LEFT JOIN
+          dev6.m_kokyaku as kokyaku
+        ON
+          kokyaku.kokyaku_id = juchu.kokyaku_id
+        LEFT JOIN
+          dev6.m_sharyo as sharyo
+        ON
+          sharyo.sharyo_id = s_meisai.sharyo_id
+        RIGHT OUTER JOIN 
+          /* スケジュール生成して外部結合 */
+          (
+              -- スケジュールの生成範囲 /*■変数箇所■*/
+              select $1::date + g.i as cal_dat from generate_series(0, 14) as g(i)
+          ) as cal
+        ON CAST(s_meisai.nyushuko_dat AS DATE) = cal.cal_dat    
+        LEFT JOIN
+          dev6.t_weekly
+        ON cal.cal_dat = t_weekly.weekly_dat
+        ORDER BY s_meisai.nyushuko_dat;
+    `;
+
+    const values = [date];
+
+    return (await pool.query(query, values)).rows;
+  } catch (e) {
+    throw e;
+  }
+};

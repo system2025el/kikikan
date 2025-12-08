@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  Box,
   Container,
   Divider,
   Grid2,
@@ -13,12 +14,14 @@ import {
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 
+import { weeklyColors } from '../../_lib/colors';
 import {
   toJapanHHmmString,
   toJapanTimeString,
   toJapanYMDAndDayString,
   toJapanYMDString,
 } from '../../_lib/date-conversion';
+import { LightTooltipWithText } from '../../(masters)/_ui/tables';
 import { getWeeklyScheduleList } from '../_lib/funcs';
 import { WeeklyScheduleValues } from '../_lib/types';
 
@@ -50,7 +53,8 @@ export const WeeklySchedule = () => {
                     border: '1px solid black',
                     px: 0,
                     whiteSpace: 'nowrap',
-                    minWidth: 250,
+                    minWidth: 300,
+                    maxWidth: 300,
                     height: 20.1,
                     bgcolor: 'white',
                     color: 'black',
@@ -109,43 +113,99 @@ export const WeeklySchedule = () => {
                         width={1}
                         sx={{ borderBottom: index + 1 !== date.timeDatas.length ? 1 : undefined }}
                       >
-                        <Grid2 height={20.1} px={0.5} display={'flex'}>
-                          <Grid2 display={'flex'} width={40} whiteSpace={'nowrap'}>
+                        <Box height={20.1} display={'flex'}>
+                          <Box display={'flex'} justifyContent={'end'} width={50} whiteSpace={'nowrap'}>
                             {time.nyushukoDat ? toJapanHHmmString(time.nyushukoDat) : ''}
-                          </Grid2>
+                          </Box>
                           <Divider orientation="vertical" />
-                          <Grid2 display={'flex'} width={60} whiteSpace={'nowrap'}>
+                          <Box
+                            display={'flex'}
+                            width={100}
+                            whiteSpace={'nowrap'}
+                            bgcolor={time.nyushukoShubetuId === 1 ? weeklyColors.shuko : weeklyColors.nyuko}
+                          >
                             {time.nyushukoShubetuId === 1 ? '積み' : '降ろし'}
-                          </Grid2>
+                          </Box>
                           <Divider orientation="vertical" />
-                          <Grid2 display={'flex'} width={120} whiteSpace={'nowrap'}>
-                            {time.kokyakuNam}
-                          </Grid2>
-                        </Grid2>
+                          <Box
+                            display={'flex'}
+                            width={150}
+                            whiteSpace={'nowrap'}
+                            bgcolor={
+                              time.nyushukoBashoId === 1
+                                ? weeklyColors.kics
+                                : time.nyushukoBashoId === 3
+                                  ? weeklyColors.atsugi
+                                  : weeklyColors.yard
+                            }
+                          >
+                            <LightTooltipWithText variant={'body2'} maxWidth={150}>
+                              {time.kokyakuNam}
+                            </LightTooltipWithText>
+                          </Box>
+                        </Box>
                         <Divider variant="fullWidth" />
-                        <Grid2 height={20.1} px={0.5} display={'flex'}>
-                          <Grid2 display={'flex'} width={40} whiteSpace={'nowrap'} />
+                        <Box height={20.1} display={'flex'}>
+                          <Box display={'flex'} justifyContent={'end'} width={50} whiteSpace={'nowrap'} />
                           <Divider orientation="vertical" />
-                          <Grid2 display={'flex'} width={60} whiteSpace={'nowrap'}>
-                            {time.sharyos[0] ?? ''}
-                          </Grid2>
+                          <Box
+                            display={'flex'}
+                            width={100}
+                            whiteSpace={'nowrap'}
+                            bgcolor={time.nyushukoShubetuId === 1 ? weeklyColors.shuko : weeklyColors.nyuko}
+                          >
+                            {time.sharyos[0]?.nam ?? ''}
+                            {time.sharyos[0]?.daisu > 1 ? ` ×${time.sharyos[0]?.daisu}` : ''}
+                          </Box>
                           <Divider orientation="vertical" />
-                          <Grid2 display={'flex'} width={120} whiteSpace={'nowrap'}>
-                            {time.koenNam}
-                          </Grid2>
-                        </Grid2>
+                          <Box
+                            display={'flex'}
+                            width={150}
+                            whiteSpace={'nowrap'}
+                            bgcolor={
+                              time.nyushukoBashoId === 1
+                                ? weeklyColors.kics
+                                : time.nyushukoBashoId === 3
+                                  ? weeklyColors.atsugi
+                                  : weeklyColors.yard
+                            }
+                          >
+                            <LightTooltipWithText variant={'body2'} maxWidth={150}>
+                              {time.koenNam}
+                            </LightTooltipWithText>
+                          </Box>
+                        </Box>
                         <Divider />
-                        <Grid2 height={20.1} px={0.5} display={'flex'}>
-                          <Grid2 display={'flex'} width={40} whiteSpace={'nowrap'} />
+                        <Box height={20.1} display={'flex'}>
+                          <Box display={'flex'} justifyContent={'end'} width={50} whiteSpace={'nowrap'} />
                           <Divider orientation="vertical" />
-                          <Grid2 display={'flex'} width={60} whiteSpace={'nowrap'}>
-                            {time.sharyos[1] ?? ''}
-                          </Grid2>
+                          <Box
+                            display={'flex'}
+                            width={100}
+                            whiteSpace={'nowrap'}
+                            bgcolor={time.nyushukoShubetuId === 1 ? weeklyColors.shuko : weeklyColors.nyuko}
+                          >
+                            {time.sharyos[1]?.nam ?? ''}
+                            {time.sharyos[1]?.daisu > 1 ? ` ×${time.sharyos[1]?.daisu}` : ''}
+                          </Box>
                           <Divider orientation="vertical" />
-                          <Grid2 display={'flex'} width={120} whiteSpace={'nowrap'}>
-                            {time.sharyoHeadNam}
-                          </Grid2>
-                        </Grid2>
+                          <Box
+                            display={'flex'}
+                            width={150}
+                            whiteSpace={'nowrap'}
+                            bgcolor={
+                              time.nyushukoBashoId === 1
+                                ? weeklyColors.kics
+                                : time.nyushukoBashoId === 3
+                                  ? weeklyColors.atsugi
+                                  : weeklyColors.yard
+                            }
+                          >
+                            <LightTooltipWithText variant={'body2'} maxWidth={150}>
+                              {time.sharyoHeadNam}
+                            </LightTooltipWithText>
+                          </Box>
+                        </Box>
                       </Grid2>
                     ))}
                 </TableCell>
