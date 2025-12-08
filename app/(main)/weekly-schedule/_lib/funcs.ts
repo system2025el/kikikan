@@ -19,7 +19,7 @@ export const selectWeeklyList = async (date: string) => {
           t_weekly.holiday_flg,
           t_weekly.tanto_nam,
           s_meisai.nyushuko_shubetu_id,
-          s_meisai.sharyo_id,
+          sharyo.sharyo_nam,
           juchu.koen_nam,
           kokyaku.kokyaku_nam
         FROM
@@ -38,6 +38,10 @@ export const selectWeeklyList = async (date: string) => {
           dev6.m_kokyaku as kokyaku
         ON
           kokyaku.kokyaku_id = juchu.kokyaku_id
+        LEFT JOIN
+          dev6.m_sharyo as sharyo
+        ON
+          sharyo.sharyo_id = s_meisai.sharyo_id
         RIGHT OUTER JOIN 
           /* スケジュール生成して外部結合 */
           (
@@ -73,7 +77,7 @@ export const getWeeklyScheduleList = async (date: Date): Promise<WeeklyScheduleV
       nyushukoShubetuId: number | null;
       koenNam: string | null;
       kokyakuNam: string | null;
-      sharyoIds: number[];
+      sharyos: string[];
     };
 
     // 日付をキーにして、集計用オブジェクトを保持するMap
@@ -124,16 +128,16 @@ export const getWeeklyScheduleList = async (date: Date): Promise<WeeklyScheduleV
           nyushukoShubetuId: row.nyushuko_shubetu_id,
           koenNam: row.koen_nam,
           kokyakuNam: row.kokyaku_nam,
-          sharyoIds: [],
+          sharyos: [],
         };
       }
 
       // 車両整理
-      if (row.sharyo_id !== null) {
+      if (row.sharyo_nam !== null) {
         const targetJob = currentDay.juchuSharyoMap[sharyoMeisaiKey];
         // 重複チェック
-        if (!targetJob.sharyoIds.includes(row.sharyo_id)) {
-          targetJob.sharyoIds.push(row.sharyo_id);
+        if (!targetJob.sharyos.includes(row.sharyo_nam)) {
+          targetJob.sharyos.push(row.sharyo_nam);
         }
       }
     });
