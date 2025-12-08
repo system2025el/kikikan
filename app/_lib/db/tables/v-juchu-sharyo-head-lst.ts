@@ -9,7 +9,12 @@ import { SCHEMA, supabase } from '../supabase';
  */
 export const selectJuchuSharyoHeadList = async (juchuHeadId: number) => {
   try {
-    return supabase.schema(SCHEMA).from('v_juchu_sharyo_head_lst').select('*').eq('juchu_head_id', juchuHeadId);
+    return supabase
+      .schema(SCHEMA)
+      .from('v_juchu_sharyo_head_lst')
+      .select('*')
+      .eq('juchu_head_id', juchuHeadId)
+      .not('juchu_sharyo_head_id', 'is', null);
   } catch (e) {
     throw e;
   }

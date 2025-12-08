@@ -230,7 +230,7 @@ export const OrderVehicleTable: React.FC<OrderVehicleTableProps> = ({ selected, 
               <TableCell padding="none">{index + 1}</TableCell>
               <TableCell align="left">
                 <Button
-                  href={`/vehicle-order-detail/${row.juchuHeadId}/${row.sharyoHeadId}/view`}
+                  onClick={() => window.open(`/vehicle-order-detail/${row.juchuHeadId}/${row.sharyoHeadId}/view`)}
                   variant="text"
                   sx={{
                     color: 'primary',
