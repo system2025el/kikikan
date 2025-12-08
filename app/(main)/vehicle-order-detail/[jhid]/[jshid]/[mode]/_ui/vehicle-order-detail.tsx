@@ -41,9 +41,13 @@ import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import { SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
-import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanTimeString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
+import { addLock, delLock, getLock } from '@/app/(main)/_lib/funcs';
+import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
+import { LockValues } from '@/app/(main)/_lib/types';
 import { BackButton, CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
 import { DateTime, TestDate } from '@/app/(main)/_ui/date';
+import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
 import { selectNone, SelectTypes } from '@/app/(main)/_ui/form-box';
 import { LoadingOverlay } from '@/app/(main)/_ui/loading';
 import { DetailOerValues } from '@/app/(main)/(eq-order-detail)/_lib/types';
@@ -110,6 +114,10 @@ const VehicleOrderDetail = ({
   const [currentMeisai, setCurrentMeisai] = useState<JuchuSharyoHeadValues>();
   // 編集モード(true:編集、false:閲覧)
   const [editable, setEditable] = useState(edit);
+  // ロックデータ
+  const [lockData, setLockData] = useState<LockValues | null>(null);
+  // 編集内容が未保存ダイアログ制御
+  const [dirtyOpen, setDirtyOpen] = useState(false);
 
   /* スナックバーの表示するかしないか */
   const [snackBarOpen, setSnackBarOpen] = useState(false);
@@ -148,6 +156,11 @@ const VehicleOrderDetail = ({
 
   /** 車両明細の配列 */
   const sharyoMeisai = useFieldArray({ control, name: 'meisai' });
+
+  // context
+  const { setIsDirty, setLock } = useDirty();
+  // ブラウザバック、F5、×ボタンでページを離れた際のhook
+  useUnsavedChangesWarning(isDirty);
 
   /* methods -------------------------------------------------------- */
   /** 選択肢の取得 */
@@ -206,6 +219,51 @@ const VehicleOrderDetail = ({
     }
   };
 
+  /**
+   * 編集モード変更
+   */
+  const handleEdit = async () => {
+    // 編集→閲覧
+    if (editable) {
+      if (isDirty) {
+        setDirtyOpen(true);
+        return;
+      }
+      await delLock(1, juchuHeadData.juchuHeadId);
+      setLockData(null);
+      setEditable(false);
+      // 閲覧→編集
+    } else {
+      if (!user) return;
+      const lockData = await getLock(1, juchuHeadData.juchuHeadId);
+      setLockData(lockData);
+      if (lockData === null) {
+        await addLock(1, juchuHeadData.juchuHeadId, user.name);
+        const newLockData = await getLock(1, juchuHeadData.juchuHeadId);
+        setLockData(newLockData);
+        setEditable(true);
+      } else if (lockData !== null && lockData.addUser === user.name) {
+        setEditable(true);
+      }
+    }
+  };
+
+  /**
+   * 警告ダイアログの押下ボタンによる処理
+   * @param result 結果
+   */
+  const handleResultDialog = async (result: boolean) => {
+    if (result) {
+      await delLock(1, juchuHeadData.juchuHeadId);
+      setLockData(null);
+      setEditable(false);
+      reset();
+      setDirtyOpen(false);
+    } else {
+      setDirtyOpen(false);
+    }
+  };
+
   /* useEffect ------------------------------------------------------- */
   useEffect(() => {
     /** 車両明細取得 */
@@ -215,6 +273,24 @@ const VehicleOrderDetail = ({
       setCurrentMeisai(meisais);
       setIsLoading(false);
     };
+
+    /** ロック確認 */
+    const asyncProcess = async () => {
+      const lockData = await getLock(1, juchuHeadData.juchuHeadId);
+      setLockData(lockData);
+      if (lockData === null) {
+        await addLock(1, juchuHeadData.juchuHeadId, user?.name ?? '');
+        const newLockData = await getLock(1, juchuHeadData.juchuHeadId);
+        setLockData(newLockData);
+      } else if (lockData !== null && lockData.addUser !== user?.name) {
+        setEditable(false);
+      }
+    };
+
+    if (sharyoHeadId !== 0) {
+      asyncProcess();
+    }
+
     // データ取得実行
     getOptions();
     // 新規以外はデータ取得してフォームにresetする
@@ -241,35 +317,61 @@ const VehicleOrderDetail = ({
       if (basho && basho.trim() !== '') {
         setValue('nyushukoBashoId', Number(basho), { shouldDirty: false });
       }
+      if (sharyoHeadId === 0) {
+        setValue(
+          'headNam',
+          juchuHeadData.koenbashoNam && juchuHeadData.koenbashoNam.trim() !== ''
+            ? `${juchuHeadData.koenbashoNam}行き`
+            : '',
+          { shouldDirty: true }
+        );
+      }
       setIsLoading(false);
     }
-  }, [sharyoHeadId, juchuHeadData.juchuHeadId, searchParams, reset, setValue]);
+  }, [sharyoHeadId, juchuHeadData.juchuHeadId, juchuHeadData.koenbashoNam, user?.name, searchParams, reset, setValue]);
 
   useEffect(() => {
     console.log(sharyoError);
   }, [sharyoError]);
 
+  // ロック
+  useEffect(() => {
+    setLock(lockData);
+  }, [lockData, setLock]);
+
+  // 変更あるかどうか
+  useEffect(() => {
+    const dirty = isDirty;
+    setIsDirty(dirty);
+  }, [isDirty, setIsDirty]);
+
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
       {isLoading && <LoadingOverlay />}
       <form onSubmit={handleSubmit(onSubmit)}>
-        <Box display={'flex'} justifySelf={'end'}>
-          <Grid2 container spacing={4}>
-            <Grid2 container alignItems={'center'} spacing={1}>
-              {!editable /*|| (lockData !== null && lockData?.addUser !== user?.name) || fixFlag*/ ? (
-                <Typography>閲覧モード</Typography>
-              ) : (
-                <Typography>編集モード</Typography>
-              )}
-              <Button
-                // disabled={(lockData && lockData?.addUser !== user?.name ? true : false) || fixFlag}
-                onClick={() => setEditable(!editable)}
-              >
-                変更
-              </Button>
+        <Grid2 container spacing={4} display={'flex'} justifyContent={'end'} mb={1}>
+          {lockData !== null && lockData.addUser !== user?.name && (
+            <Grid2 container alignItems={'center'} spacing={2}>
+              <Typography>{lockData.addDat && toJapanTimeString(new Date(lockData.addDat))}</Typography>
+              <Typography>{lockData.addUser}</Typography>
+              <Typography>編集中</Typography>
             </Grid2>
+          )}
+          <Grid2 container alignItems={'center'} spacing={1}>
+            {!editable || (lockData !== null && lockData?.addUser !== user?.name) ? (
+              <Typography>閲覧モード</Typography>
+            ) : (
+              <Typography>編集モード</Typography>
+            )}
+            <Button
+              disabled={lockData && lockData?.addUser !== user?.name ? true : false || juchuHeadData.juchuHeadId === 0}
+              onClick={handleEdit}
+            >
+              変更
+            </Button>
           </Grid2>
-        </Box>
+          <BackButton label={'戻る'} />
+        </Grid2>
         {/* 受注ヘッダ ---------------------------------------------------------------------------------- */}
         <Accordion
           expanded={juchuExpanded}
@@ -578,6 +680,8 @@ const VehicleOrderDetail = ({
           </Button>
         </DialogActions>
       </Dialog>
+      <IsDirtyAlertDialog open={dirtyOpen} onClick={handleResultDialog} />
+
       <Snackbar
         open={snackBarOpen}
         autoHideDuration={6000}

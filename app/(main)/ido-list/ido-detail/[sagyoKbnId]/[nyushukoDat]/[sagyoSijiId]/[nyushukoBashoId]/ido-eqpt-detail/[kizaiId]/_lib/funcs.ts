@@ -176,6 +176,8 @@ export const updIdoResultAdjQty = async (
   } catch (e) {
     console.error(e);
     return false;
+  } finally {
+    connection.release();
   }
 };
 

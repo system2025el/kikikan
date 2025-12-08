@@ -12,7 +12,6 @@ import { SeikyuDatJuchuKizai } from '../types/t-seikyu-date-juchu-kizai-type';
  * @param {SeikyuDatJuchuKizai} newData t_seikyu_date_juchu_kizaiの型
  */
 export const upsertSeikyuDat = async (newData: SeikyuDatJuchuKizai) => {
-  const connection = await pool.connect();
   try {
     console.log('できてますか？', newData);
     await supabase
