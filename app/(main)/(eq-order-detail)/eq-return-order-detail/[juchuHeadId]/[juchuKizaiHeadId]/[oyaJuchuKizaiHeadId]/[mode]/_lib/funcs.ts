@@ -661,6 +661,7 @@ export const getReturnJuchuKizaiMeisai = async (
     return returnJuchuKizaiMeisaiData;
   } catch (e) {
     console.error(e);
+    throw e;
   }
 };
 
@@ -812,6 +813,7 @@ export const getReturnJuchuContainerMeisai = async (
     return returnJuchuContainerMeisaiData;
   } catch (e) {
     console.error(e);
+    throw e;
   }
 };
 
