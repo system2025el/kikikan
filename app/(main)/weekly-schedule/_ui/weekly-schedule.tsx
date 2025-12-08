@@ -38,13 +38,25 @@ export const WeeklySchedule = () => {
   }, [scheList]);
   return (
     <TableContainer>
-      <Table padding="none">
+      <Table padding="none" sx={{ border: '2px solid black' }}>
         <TableHead>
-          <TableRow>
+          <TableRow sx={{}}>
             {scheList &&
               scheList.length > 0 &&
               scheList.map((date, index) => (
-                <TableCell key={date.calDat} sx={{ border: '1px solid black', px: 0, whiteSpace: 'nowrap' }}>
+                <TableCell
+                  key={date.calDat}
+                  sx={{
+                    border: '1px solid black',
+                    px: 0,
+                    whiteSpace: 'nowrap',
+                    minWidth: 250,
+                    height: 20.1,
+                    bgcolor: 'white',
+                    color: 'black',
+                  }}
+                  align="center"
+                >
                   {toJapanYMDAndDayString(date.calDat)}
                 </TableCell>
               ))}
@@ -53,8 +65,11 @@ export const WeeklySchedule = () => {
             {scheList &&
               scheList.length > 0 &&
               scheList.map((date, index) => (
-                <TableCell key={date.calDat} sx={{ border: '1px solid black', px: 0 }}>
-                  {date.mem ?? '-'}
+                <TableCell
+                  key={date.calDat}
+                  sx={{ border: '1px solid black', px: 0, height: 20.1, bgcolor: 'white', color: 'black' }}
+                >
+                  {date.mem ?? ''}
                 </TableCell>
               ))}
           </TableRow>
@@ -62,8 +77,18 @@ export const WeeklySchedule = () => {
             {scheList &&
               scheList.length > 0 &&
               scheList.map((date, index) => (
-                <TableCell key={date.calDat} sx={{ border: '1px solid black', px: 0 }}>
-                  {date.tantoNam ?? '-'}
+                <TableCell
+                  key={date.calDat}
+                  sx={{
+                    border: '1px solid black',
+                    borderBottom: '2px solid black',
+                    px: 0,
+                    height: 20.1,
+                    bgcolor: 'white',
+                    color: 'black',
+                  }}
+                >
+                  {date.tantoNam ?? ''}
                 </TableCell>
               ))}
           </TableRow>
@@ -76,29 +101,51 @@ export const WeeklySchedule = () => {
                 <TableCell key={date.calDat} sx={{ border: '1px solid black', px: 0 }}>
                   {date.timeDatas &&
                     date.timeDatas.length > 0 &&
-                    date.timeDatas.map((time) => (
+                    date.timeDatas.map((time, index) => (
                       <Grid2
                         container
                         key={time.juchuSharyoId}
                         direction={'column'}
                         width={1}
-                        sx={{ border: '1px solid black', px: 0 }}
+                        sx={{ borderBottom: index + 1 !== date.timeDatas.length ? 1 : undefined }}
                       >
                         <Grid2 height={20.1} px={0.5} display={'flex'}>
                           <Grid2 display={'flex'} width={40} whiteSpace={'nowrap'}>
                             {time.nyushukoDat ? toJapanHHmmString(time.nyushukoDat) : ''}
                           </Grid2>
+                          <Divider orientation="vertical" />
                           <Grid2 display={'flex'} width={60} whiteSpace={'nowrap'}>
                             {time.nyushukoShubetuId === 1 ? '積み' : '降ろし'}
                           </Grid2>
+                          <Divider orientation="vertical" />
                           <Grid2 display={'flex'} width={120} whiteSpace={'nowrap'}>
                             {time.kokyakuNam}
                           </Grid2>
                         </Grid2>
                         <Divider variant="fullWidth" />
-                        <Grid2 height={20.1} px={0.5}></Grid2>
+                        <Grid2 height={20.1} px={0.5} display={'flex'}>
+                          <Grid2 display={'flex'} width={40} whiteSpace={'nowrap'} />
+                          <Divider orientation="vertical" />
+                          <Grid2 display={'flex'} width={60} whiteSpace={'nowrap'}>
+                            {time.sharyos[0] ?? ''}
+                          </Grid2>
+                          <Divider orientation="vertical" />
+                          <Grid2 display={'flex'} width={120} whiteSpace={'nowrap'}>
+                            {time.koenNam}
+                          </Grid2>
+                        </Grid2>
                         <Divider />
-                        <Grid2 height={20.1} px={0.5}></Grid2>
+                        <Grid2 height={20.1} px={0.5} display={'flex'}>
+                          <Grid2 display={'flex'} width={40} whiteSpace={'nowrap'} />
+                          <Divider orientation="vertical" />
+                          <Grid2 display={'flex'} width={60} whiteSpace={'nowrap'}>
+                            {time.sharyos[1] ?? ''}
+                          </Grid2>
+                          <Divider orientation="vertical" />
+                          <Grid2 display={'flex'} width={120} whiteSpace={'nowrap'}>
+                            {time.sharyoHeadNam}
+                          </Grid2>
+                        </Grid2>
                       </Grid2>
                     ))}
                 </TableCell>
