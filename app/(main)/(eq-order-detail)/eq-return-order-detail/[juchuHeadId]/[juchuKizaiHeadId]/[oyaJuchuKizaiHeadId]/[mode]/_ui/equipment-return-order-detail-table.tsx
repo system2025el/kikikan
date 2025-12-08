@@ -347,7 +347,7 @@ const ReturnEqTableRow = React.memo(
         <TableCell style={styles.row} align="left" size="small">
           <Button
             variant="text"
-            sx={{ p: 0, justifyContent: 'start' }}
+            sx={{ p: 0, justifyContent: 'start', textTransform: 'none' }}
             onClick={() => window.open(`/loan-situation/${row.kizaiId}`)}
           >
             {row.kizaiNam}
@@ -601,7 +601,7 @@ export const ReturnContainerTable = (props: {
               <TableCell style={styles.row} align="left" size="small">
                 <Button
                   variant="text"
-                  sx={{ p: 0, justifyContent: 'start' }}
+                  sx={{ p: 0, justifyContent: 'start', textTransform: 'none' }}
                   onClick={() => window.open(`/loan-situation/${row.kizaiId}`)}
                 >
                   {row.kizaiNam}
