@@ -41,3 +41,26 @@ export const dispColors = {
    */
   main: 'primary',
 };
+
+export const weeklyColors = {
+  /**
+   * 積み
+   */
+  shuko: 'rgba(142, 170, 219, 1)',
+  /**
+   * 降ろし
+   */
+  nyuko: 'rgba(252, 228, 214, 1)',
+  /**
+   * KICKS (id: 1)
+   */
+  kics: 'rgba(255, 204, 255, 1)',
+  /**
+   * YARD (id: 2)
+   */
+  yard: 'white', // undefinedでもいいが念のため白に指定
+  /**
+   * 厚木 (id: 3)
+   */
+  atsugi: 'rgba(189, 215, 238, 1)',
+};
