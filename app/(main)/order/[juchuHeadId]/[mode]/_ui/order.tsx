@@ -501,13 +501,7 @@ export const Order = (props: {
 
   // 車両入力ボタン押下
   const handleAddVehicle = async () => {
-    if (!isDirty) {
-      await deleteLock(1, props.juchuHeadData.juchuHeadId);
-      router.push(`/vehicle-order-detail/${props.juchuHeadData.juchuHeadId}/0/edit`);
-    } else {
-      setPath(`/vehicle-order-detail/${props.juchuHeadData.juchuHeadId}/0/edit`);
-      setDirtyOpen(true);
-    }
+    window.open(`/vehicle-order-detail/${props.juchuHeadData.juchuHeadId}/0/edit`);
   };
 
   /**
@@ -974,7 +968,6 @@ export const Order = (props: {
                   <AddIcon fontSize="small" />
                   車両入力
                 </Button>
-
                 <Button
                   color="error"
                   onClick={(e) => {
@@ -991,12 +984,16 @@ export const Order = (props: {
             </Grid2>
           </AccordionSummary>
           <AccordionDetails sx={{ padding: 0 }}>
-            {vehicleHeaderList && vehicleHeaderList?.length > 0 && (
+            {vehicleHeaderList && vehicleHeaderList?.length > 0 ? (
               <OrderVehicleTable
                 selected={selectedVehs}
                 orderVehicleRows={vehicleHeaderList}
                 setSelected={setSelectedVehs}
               />
+            ) : (
+              <Typography mx={5} variant="body2">
+                車両明細がありません
+              </Typography>
             )}
           </AccordionDetails>
         </Accordion>

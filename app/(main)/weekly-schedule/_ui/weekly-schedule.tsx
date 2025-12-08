@@ -74,7 +74,7 @@ export const WeeklySchedule = () => {
           <TableRow>
             {scheList &&
               scheList.length > 0 &&
-              scheList.map((date, index) => (
+              scheList.map((date) => (
                 <TableCell
                   key={date.calDat}
                   sx={{ border: '1px solid black', px: 0, height: 20.1, bgcolor: 'white', color: 'black' }}
@@ -86,7 +86,7 @@ export const WeeklySchedule = () => {
           <TableRow>
             {scheList &&
               scheList.length > 0 &&
-              scheList.map((date, index) => (
+              scheList.map((date) => (
                 <TableCell
                   key={date.calDat}
                   sx={{
@@ -122,23 +122,21 @@ export const WeeklySchedule = () => {
                         }}
                       >
                         <Box height={20.1} display={'flex'}>
-                          <Box display={'flex'} justifyContent={'end'} width={50} whiteSpace={'nowrap'}>
+                          <Box justifyContent={'end'} width={50} sx={styles.boxStyle}>
                             {time.nyushukoDat ? toJapanHHmmString(time.nyushukoDat) : ''}
                           </Box>
                           <Divider orientation="vertical" />
                           <Box
-                            display={'flex'}
                             width={100}
-                            whiteSpace={'nowrap'}
+                            sx={styles.boxStyle}
                             bgcolor={time.nyushukoShubetuId === 1 ? weeklyColors.shuko : weeklyColors.nyuko}
                           >
                             {time.nyushukoShubetuId === 1 ? '積み' : '降ろし'}
                           </Box>
                           <Divider orientation="vertical" />
                           <Box
-                            display={'flex'}
                             width={150}
-                            whiteSpace={'nowrap'}
+                            sx={styles.boxStyle}
                             bgcolor={
                               time.nyushukoBashoId === 1
                                 ? weeklyColors.kics
@@ -154,12 +152,11 @@ export const WeeklySchedule = () => {
                         </Box>
                         <Divider variant="fullWidth" />
                         <Box height={20.1} display={'flex'}>
-                          <Box display={'flex'} justifyContent={'end'} width={50} whiteSpace={'nowrap'} />
+                          <Box justifyContent={'end'} width={50} sx={styles.boxStyle} />
                           <Divider orientation="vertical" />
                           <Box
-                            display={'flex'}
                             width={100}
-                            whiteSpace={'nowrap'}
+                            sx={styles.boxStyle}
                             bgcolor={time.nyushukoShubetuId === 1 ? weeklyColors.shuko : weeklyColors.nyuko}
                           >
                             {time.sharyos[0]?.nam ?? ''}
@@ -167,9 +164,8 @@ export const WeeklySchedule = () => {
                           </Box>
                           <Divider orientation="vertical" />
                           <Box
-                            display={'flex'}
                             width={150}
-                            whiteSpace={'nowrap'}
+                            sx={styles.boxStyle}
                             bgcolor={
                               time.nyushukoBashoId === 1
                                 ? weeklyColors.kics
@@ -185,12 +181,11 @@ export const WeeklySchedule = () => {
                         </Box>
                         <Divider />
                         <Box height={20.1} display={'flex'}>
-                          <Box display={'flex'} justifyContent={'end'} width={50} whiteSpace={'nowrap'} />
+                          <Box justifyContent={'end'} width={50} sx={styles.boxStyle} />
                           <Divider orientation="vertical" />
                           <Box
-                            display={'flex'}
                             width={100}
-                            whiteSpace={'nowrap'}
+                            sx={styles.boxStyle}
                             bgcolor={time.nyushukoShubetuId === 1 ? weeklyColors.shuko : weeklyColors.nyuko}
                           >
                             {time.sharyos[1]?.nam ?? ''}
@@ -198,9 +193,8 @@ export const WeeklySchedule = () => {
                           </Box>
                           <Divider orientation="vertical" />
                           <Box
-                            display={'flex'}
                             width={150}
-                            whiteSpace={'nowrap'}
+                            sx={styles.boxStyle}
                             bgcolor={
                               time.nyushukoBashoId === 1
                                 ? weeklyColors.kics
@@ -223,4 +217,16 @@ export const WeeklySchedule = () => {
       </Table>
     </TableContainer>
   );
+};
+
+/* style
+---------------------------------------------------------------------------------------------------- */
+/** @type {{ [key: string]: React.CSSProperties }} style */
+const styles: { [key: string]: React.CSSProperties } = {
+  // コンテナ
+  boxStyle: {
+    display: 'flex',
+    alignItems: 'center',
+    whiteSpace: 'nowrap',
+  },
 };
