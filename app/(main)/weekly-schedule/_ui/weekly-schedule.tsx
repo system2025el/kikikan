@@ -16,6 +16,7 @@ import { useEffect, useState } from 'react';
 
 import { weeklyColors } from '../../_lib/colors';
 import {
+  toJapanDayString,
   toJapanHHmmString,
   toJapanTimeString,
   toJapanYMDAndDayString,
@@ -57,7 +58,12 @@ export const WeeklySchedule = () => {
                     maxWidth: 300,
                     height: 20.1,
                     bgcolor: 'white',
-                    color: 'black',
+                    color:
+                      toJapanDayString(date.calDat) === '土' ||
+                      toJapanDayString(date.calDat) === '日' ||
+                      date.holidayFlg
+                        ? 'red'
+                        : 'black',
                   }}
                   align="center"
                 >
@@ -102,16 +108,18 @@ export const WeeklySchedule = () => {
             {scheList &&
               scheList.length > 0 &&
               scheList.map((date) => (
-                <TableCell key={date.calDat} sx={{ border: '1px solid black', px: 0 }}>
+                <TableCell key={date.calDat} sx={{ border: '1px solid black', px: 0, verticalAlign: 'top' }}>
                   {date.timeDatas &&
                     date.timeDatas.length > 0 &&
                     date.timeDatas.map((time, index) => (
-                      <Grid2
-                        container
-                        key={time.juchuSharyoId}
-                        direction={'column'}
+                      <Box
+                        key={index}
                         width={1}
-                        sx={{ borderBottom: index + 1 !== date.timeDatas.length ? 1 : undefined }}
+                        sx={{
+                          borderBottom:
+                            date.timeDatas.length === 1 || index + 1 !== date.timeDatas.length ? 1 : undefined,
+                          alignItems: 'start',
+                        }}
                       >
                         <Box height={20.1} display={'flex'}>
                           <Box display={'flex'} justifyContent={'end'} width={50} whiteSpace={'nowrap'}>
@@ -206,7 +214,7 @@ export const WeeklySchedule = () => {
                             </LightTooltipWithText>
                           </Box>
                         </Box>
-                      </Grid2>
+                      </Box>
                     ))}
                 </TableCell>
               ))}

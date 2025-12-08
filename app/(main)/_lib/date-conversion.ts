@@ -72,3 +72,11 @@ export const toJapanTimeStampString = (input: Date | string | number = new Date(
 export const toTimeStampString = (input: Date | string | number = new Date()): string => {
   return dayjs(input).format(`YYYY-MM-DD HH:mm:ss`);
 };
+/**
+ * 日本時間の曜日を文字列に変換する関数
+ * @param {Date | string | number} input 引数無なら現在時刻 Date string number
+ * @returns {string} 日本時間の曜日の文字列
+ */
+export const toJapanDayString = (input: Date | string | number = new Date()): string => {
+  return dayjs(input).tz('Asia/Tokyo').locale('ja').format(`dd`);
+};
