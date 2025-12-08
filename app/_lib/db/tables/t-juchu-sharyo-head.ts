@@ -191,7 +191,7 @@ export const selectWeeklyList = async (date: string) => {
         LEFT JOIN
           dev6.t_weekly
         ON cal.cal_dat = t_weekly.weekly_dat
-        ORDER BY s_meisai.nyushuko_dat;
+        ORDER BY cal.cal_dat, s_meisai.nyushuko_dat;
     `;
 
     const values = [date];
