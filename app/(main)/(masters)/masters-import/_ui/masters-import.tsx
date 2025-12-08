@@ -56,8 +56,14 @@ export const ImportMaster = () => {
         return;
       }
       const workbook = read(arrayBuffer, { type: 'array' });
-      const sheetName = workbook.SheetNames[0];
+      const sheetName = 'Sheet1';
       const worksheet = workbook.Sheets[sheetName];
+      if (!worksheet) {
+        setSnackBarMessage(`指定されたシート(${sheetName})が見つかりませんでした`);
+        setSnackBarOpen(true);
+        console.error('指定されたシートが見つかりませんでした');
+        return;
+      }
       const jsonData: EqptImportRowType[] = utils.sheet_to_json(worksheet, { header: 1 });
       const dataRows = jsonData.slice(1);
       console.log('Excel内容 (生データ):', dataRows);
@@ -106,7 +112,7 @@ export const ImportMaster = () => {
             console.error(`${file.name}の行 ${index + 1} でバリデーションエラー:`, result.error.issues);
             hasError = true;
             errorRows.push(index + 1);
-            sendLogServer(index + 1, result.error.issues);
+            // sendLogServer(index + 1, result.error.issues);
           }
         });
 
