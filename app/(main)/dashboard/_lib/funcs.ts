@@ -12,7 +12,6 @@ import { DashboardTableValues, MinusZaikoValues } from './types';
 export const getShukoList = async (startDate: string, totalDays: number) => {
   try {
     const result = await selectshukoTimeList(startDate, totalDays);
-
     const data = result.rows;
 
     if (!data || data.length === 0) {
@@ -30,8 +29,8 @@ export const getShukoList = async (startDate: string, totalDays: number) => {
       kicsShukoDat: d.kics_shuko_dat ?? null,
       yardNyukoDat: d.yard_nyuko_dat ?? null,
       kicsNyukoDat: d.kics_nyuko_dat ?? null,
+      headKbn: d.juchu_kizai_head_kbn ?? null,
     }));
-
     return EqTableData;
   } catch (e) {
     throw e;
@@ -49,7 +48,6 @@ export const getVehiclesList = async (startDate: string, totalDays: number) => {
     const result = await selectVehiclesList(startDate, totalDays);
 
     const data = result.rows;
-
     if (!data || data.length === 0) {
       return [];
     }
@@ -65,8 +63,8 @@ export const getVehiclesList = async (startDate: string, totalDays: number) => {
       kicsShukoDat: d.kics_shuko_dat ?? null,
       yardNyukoDat: d.yard_nyuko_dat ?? null,
       kicsNyukoDat: d.kics_nyuko_dat ?? null,
+      headKbn: d.juchu_kizai_head_kbn ?? null,
     }));
-
     return EqTableData;
   } catch (e) {
     console.error('Exception while selecting dashboard eqlist:', e);

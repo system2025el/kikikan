@@ -13,7 +13,8 @@ import {
 } from '@mui/material';
 import React from 'react';
 
-import { toJapanTimeString, toJapanYMDString } from '../../_lib/date-conversion';
+import { dispColors } from '../../_lib/colors';
+import { toJapanTimeString } from '../../_lib/date-conversion';
 import { LightTooltipWithText } from '../../(masters)/_ui/tables';
 import { DashboardTableValues } from '../_lib/types';
 
@@ -69,6 +70,14 @@ export const VehiclesTable = ({ orders }: { orders: DashboardTableValues[] }) =>
                     width: 'auto',
                     justifyContent: 'flex-start',
                     textAlign: 'left',
+                    color:
+                      order.headKbn === 1
+                        ? dispColors.main
+                        : order.headKbn === 2
+                          ? dispColors.return
+                          : order.headKbn === 3
+                            ? dispColors.keep
+                            : dispColors.main,
                   }}
                   href={`/eq-main-order-detail/${order.juchuHeadId}/${order.kizaiHeadId}/view`}
                 >

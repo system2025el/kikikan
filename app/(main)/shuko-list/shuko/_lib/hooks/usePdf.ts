@@ -157,21 +157,32 @@ export const usePdf = (): [(params: PdfModel[]) => Promise<Blob>] => {
       /* ---------------- 公演情報 ---------------- */
       const rowHeight = 20;
       let currentY = 750;
-      const pageWidth = 300;
+      const pageWidth = 340;
       const colWidthsPerRow = [
         [45, pageWidth - 45], // 1行目
-        [45, 65, 45, 65, 50, 30], // 2行目
+        [45, 80, 45, 80, 50, 40], // 2行目
         [45, pageWidth - 45], // 3行目
         [45, pageWidth - 45, 45, pageWidth - 45], // 4行目
-        [45, 135, 45, 75], // 5行目
+        [45, 150, 45, 100], // 5行目
       ];
 
+      const contactName = param.item11;
+      let displayContact = '';
+
+      if (contactName) {
+        // 名前がある場合：長さチェック（9文字以上なら省略）
+        const namePart = contactName.length > 8 ? contactName.slice(0, 8) + '…' : contactName;
+        displayContact = `${namePart} 様`;
+      } else {
+        // 名前がない場合：空文字にする（' 様'も表示されない）
+        displayContact = '';
+      }
       const rows = [
         ['公 演 名', param.item3],
         ['貸 出 日', param.item5, '返 却 日', param.item6, '本番日数', param.item8 ?? ''],
         ['公演場所', param.item7],
         ['担　　当', param.item9],
-        ['備　　考', param.item10, '御担当者', `${param.item11 ?? '               '} 様`],
+        ['備　　考', param.item10, '御担当者', displayContact ?? ''],
       ];
 
       rows.forEach((row, rowIndex) => {
@@ -234,9 +245,9 @@ export const usePdf = (): [(params: PdfModel[]) => Promise<Blob>] => {
       const pngImage = await pdfDoc.embedPng(image);
       pngImage.scale(1);
       page.drawImage(pngImage, {
-        x: 360,
+        x: 380,
         y: currentY + 25,
-        width: 200,
+        width: 180,
         height: 75,
       });
 

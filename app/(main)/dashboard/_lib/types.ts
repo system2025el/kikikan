@@ -14,6 +14,7 @@ export type DashboardTableValues = {
   kicsShukoDat: string | null;
   yardNyukoDat: string | null;
   kicsNyukoDat: string | null;
+  headKbn: number;
 };
 
 //マイナス在庫
