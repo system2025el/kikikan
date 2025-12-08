@@ -51,12 +51,7 @@ import {
   OyaJuchuKizaiMeisaiValues,
   OyaJuchuKizaiNyushukoValues,
 } from '@/app/(main)/(eq-order-detail)/_lib/types';
-import {
-  DeleteAlertDialog,
-  NyushukoAlertDialog,
-  NyushukoFixAlertDialog,
-  SaveAlertDialog,
-} from '@/app/(main)/(eq-order-detail)/_ui/caveat-dialog';
+import { AlertDialog, DeleteAlertDialog } from '@/app/(main)/(eq-order-detail)/_ui/caveat-dialog';
 import { OyaEqSelectionDialog } from '@/app/(main)/(eq-order-detail)/_ui/equipment-selection-dialog';
 import { JuchuContainerMeisaiValues } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
 
@@ -78,12 +73,12 @@ export const EquipmentKeepOrderDetail = (props: {
   juchuHeadData: DetailOerValues;
   oyaJuchuKizaiHeadData: OyaJuchuKizaiNyushukoValues;
   keepJuchuKizaiHeadData: KeepJuchuKizaiHeadValues;
-  keepJuchuKizaiMeisaiData: KeepJuchuKizaiMeisaiValues[] | undefined;
-  keepJuchuContainerMeisaiData: KeepJuchuContainerMeisaiValues[] | undefined;
+  // keepJuchuKizaiMeisaiData: KeepJuchuKizaiMeisaiValues[] | undefined;
+  // keepJuchuContainerMeisaiData: KeepJuchuContainerMeisaiValues[] | undefined;
   oyaShukoDate: Date;
   oyaNyukoDate: Date;
-  keepShukoDate: Date | null;
-  keepNyukoDate: Date | null;
+  // keepShukoDate: Date | null;
+  // keepNyukoDate: Date | null;
   edit: boolean;
   shukoFixFlag: boolean;
   nyukoFixFlag: boolean;
@@ -105,24 +100,26 @@ export const EquipmentKeepOrderDetail = (props: {
 
   // ローディング
   const [isLoading, setIsLoading] = useState(false);
+  // 機材明細ローディング
+  const [isDetailLoading, setIsDetailLoading] = useState(false);
   // 編集モード(true:編集、false:閲覧)
   const [edit, setEdit] = useState(props.edit);
 
   // キープ受注機材明細元リスト
   const [originKeepJuchuKizaiMeisaiList, setOriginKeepJuchuKizaiMeisaiList] = useState<KeepJuchuKizaiMeisaiValues[]>(
-    props.keepJuchuKizaiMeisaiData ? props.keepJuchuKizaiMeisaiData : []
+    /*props.keepJuchuKizaiMeisaiData ??*/ []
   );
   // キープ受注機材明細リスト
   const [keepJuchuKizaiMeisaiList, setKeepJuchuKizaiMeisaiList] = useState<KeepJuchuKizaiMeisaiValues[]>(
-    props.keepJuchuKizaiMeisaiData ? props.keepJuchuKizaiMeisaiData : []
+    /*props.keepJuchuKizaiMeisaiData ??*/ []
   );
   // キープ受注コンテナ明細元リスト
   const [originKeepJuchuContainerMeisaiList, setOriginKeepJuchuContainerMeisaiList] = useState<
     KeepJuchuContainerMeisaiValues[]
-  >(props.keepJuchuContainerMeisaiData ?? []);
+  >(/*props.keepJuchuContainerMeisaiData ??*/ []);
   // キープ受注コンテナ明細リスト
   const [keepJuchuContainerMeisaiList, setKeepJuchuContainerMeisaiList] = useState<KeepJuchuContainerMeisaiValues[]>(
-    props.keepJuchuContainerMeisaiData ?? []
+    /*props.keepJuchuContainerMeisaiData ??*/ []
   );
   // 削除機材
   const [deleteEqIndex, setDeleteEqIndex] = useState<number | null>(null);
@@ -134,16 +131,18 @@ export const EquipmentKeepOrderDetail = (props: {
   // 親入庫日
   const [oyaNyukoDate, setNyukoDate] = useState<Date | null>(props.oyaNyukoDate);
   // キープ出庫日
-  const [keepShukoDate, setKeepShukoDate] = useState<Date | null>(props.keepShukoDate);
+  const [keepShukoDate, setKeepShukoDate] = useState<Date | null>(/*props.keepShukoDate*/ null);
   // キープ入庫日
-  const [keepNyukoDate, setKeepNyukoDate] = useState<Date | null>(props.keepNyukoDate);
+  const [keepNyukoDate, setKeepNyukoDate] = useState<Date | null>(/*props.keepNyukoDate*/ null);
 
-  // 未保存ダイアログ制御
-  const [saveOpen, setSaveOpen] = useState(false);
+  // 警告ダイアログ制御
+  const [alertOpen, setAlertOpen] = useState(false);
+  // 警告ダイアログタイトル
+  const [alertTitle, setAlertTitle] = useState('');
+  // 警告ダイアログ用メッセージ
+  const [alertMessage, setAlertMessage] = useState('');
   // 編集内容が未保存ダイアログ制御
   const [dirtyOpen, setDirtyOpen] = useState(false);
-  // 入出庫日時ダイアログ制御
-  const [nyushukoOpen, setNyushukoOpen] = useState(false);
   // 機材追加ダイアログ制御
   const [EqSelectionDialogOpen, setEqSelectionDialogOpen] = useState(false);
   // 機材削除ダイアログ制御
@@ -207,9 +206,50 @@ export const EquipmentKeepOrderDetail = (props: {
    * useEffect
    */
   useEffect(() => {
-    if (!user || !props.edit) return;
+    const getData = async () => {
+      setIsDetailLoading(true);
+
+      // 受注機材ヘッダーデータ
+      const juchuKizaiHeadData = getValues();
+
+      // キープ受注機材明細データ
+      const juchuKizaiMeisaiData = await getKeepJuchuKizaiMeisai(
+        juchuKizaiHeadData.juchuHeadId,
+        juchuKizaiHeadData.juchuKizaiHeadId,
+        juchuKizaiHeadData.oyaJuchuKizaiHeadId
+      );
+
+      // キープ受注コンテナ明細データ
+      const keepJuchuContainerMeisaiData = await getKeepJuchuContainerMeisai(
+        juchuKizaiHeadData.juchuHeadId,
+        juchuKizaiHeadData.juchuKizaiHeadId,
+        juchuKizaiHeadData.oyaJuchuKizaiHeadId
+      );
+
+      // キープ出庫日
+      const keepShukoDate = getShukoDate(
+        juchuKizaiHeadData.kicsShukoDat && new Date(juchuKizaiHeadData.kicsShukoDat),
+        juchuKizaiHeadData.yardShukoDat && new Date(juchuKizaiHeadData.yardShukoDat)
+      );
+      // キープ入庫日
+      const keepNyukoDate = getNyukoDate(
+        juchuKizaiHeadData.kicsNyukoDat && new Date(juchuKizaiHeadData.kicsNyukoDat),
+        juchuKizaiHeadData.yardNyukoDat && new Date(juchuKizaiHeadData.yardNyukoDat)
+      );
+
+      setOriginKeepJuchuKizaiMeisaiList(juchuKizaiMeisaiData);
+      setKeepJuchuKizaiMeisaiList(juchuKizaiMeisaiData);
+      setOriginKeepJuchuContainerMeisaiList(keepJuchuContainerMeisaiData);
+      setKeepJuchuContainerMeisaiList(keepJuchuContainerMeisaiData);
+      setKeepShukoDate(keepShukoDate);
+      setKeepNyukoDate(keepNyukoDate);
+
+      setIsDetailLoading(false);
+    };
 
     const asyncProcess = async () => {
+      if (!user || !props.edit) return;
+
       setIsLoading(true);
       const lockData = await getLock(1, props.juchuHeadData.juchuHeadId);
       setLockData(lockData);
@@ -223,6 +263,9 @@ export const EquipmentKeepOrderDetail = (props: {
       setIsLoading(false);
     };
     asyncProcess();
+    if (saveKizaiHead) {
+      getData();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -350,7 +393,9 @@ export const EquipmentKeepOrderDetail = (props: {
             message: '',
           });
         }
-        setNyushukoOpen(true);
+        setAlertTitle('入出庫日時が入力されていません');
+        setAlertMessage('入出庫日時を入力してください');
+        setAlertOpen(true);
         setIsLoading(false);
         return;
       }
@@ -1125,50 +1170,55 @@ export const EquipmentKeepOrderDetail = (props: {
                   onClose={setEqSelectionDialogOpen}
                 />
               </Dialog>
-              <Box width="100%">
-                <Box my={1} mx={2}>
-                  <Button disabled={!edit || nyukoFixFlag} onClick={() => handleOpenEqDialog()}>
-                    <AddIcon fontSize="small" />
-                    機材追加
-                  </Button>
-                </Box>
-                <Box
-                  width={'min-content'}
-                  display={
-                    Object.keys(keepJuchuKizaiMeisaiList.filter((d) => !d.delFlag)).length > 0 ? 'block' : 'none'
-                  }
-                >
-                  <KeepEqTable
-                    rows={keepJuchuKizaiMeisaiList}
-                    edit={edit}
-                    shukoFixFlag={shukoFixFlag}
-                    handleMeisaiDelete={handleEqMeisaiDelete}
-                    handleMemoChange={handleMemoChange}
-                    handleCellChange={handleCellChange}
-                  />
-                </Box>
-              </Box>
-              <Box
-                display={keepJuchuContainerMeisaiList.filter((d) => !d.delFlag).length > 0 ? 'block' : 'none'}
-                py={2}
-                width={'fit-content'}
-              >
-                <KeepContainerTable
-                  rows={keepJuchuContainerMeisaiList}
-                  edit={edit}
-                  nyukoFixFlag={nyukoFixFlag}
-                  handleContainerMemoChange={handleKeepContainerMemoChange}
-                  handleContainerCellChange={handleKeepContainerCellChange}
-                  handleMeisaiDelete={handleCtnMeisaiDelete}
-                />
-              </Box>
+              {isDetailLoading ? (
+                <Loading />
+              ) : (
+                <>
+                  <Box width="100%">
+                    <Box my={1} mx={2}>
+                      <Button disabled={!edit || nyukoFixFlag} onClick={() => handleOpenEqDialog()}>
+                        <AddIcon fontSize="small" />
+                        機材追加
+                      </Button>
+                    </Box>
+                    <Box
+                      width={'min-content'}
+                      display={
+                        Object.keys(keepJuchuKizaiMeisaiList.filter((d) => !d.delFlag)).length > 0 ? 'block' : 'none'
+                      }
+                    >
+                      <KeepEqTable
+                        rows={keepJuchuKizaiMeisaiList}
+                        edit={edit}
+                        shukoFixFlag={shukoFixFlag}
+                        handleMeisaiDelete={handleEqMeisaiDelete}
+                        handleMemoChange={handleMemoChange}
+                        handleCellChange={handleCellChange}
+                      />
+                    </Box>
+                  </Box>
+                  <Box
+                    display={keepJuchuContainerMeisaiList.filter((d) => !d.delFlag).length > 0 ? 'block' : 'none'}
+                    py={2}
+                    width={'fit-content'}
+                  >
+                    <KeepContainerTable
+                      rows={keepJuchuContainerMeisaiList}
+                      edit={edit}
+                      nyukoFixFlag={nyukoFixFlag}
+                      handleContainerMemoChange={handleKeepContainerMemoChange}
+                      handleContainerCellChange={handleKeepContainerCellChange}
+                      handleMeisaiDelete={handleCtnMeisaiDelete}
+                    />
+                  </Box>
+                </>
+              )}
             </Paper>
           )}
         </Container>
       )}
-      <SaveAlertDialog open={saveOpen} onClick={() => setSaveOpen(false)} />
+      <AlertDialog open={alertOpen} title={alertTitle} message={alertMessage} onClick={() => setAlertOpen(false)} />
       <IsDirtyAlertDialog open={dirtyOpen} onClick={handleResultDialog} />
-      <NyushukoAlertDialog open={nyushukoOpen} onClick={() => setNyushukoOpen(false)} />
       <DeleteAlertDialog open={deleteEqOpen} onClick={handleEqMeisaiDeleteResult} />
       <DeleteAlertDialog open={deleteCtnOpen} onClick={handleCtnMeisaiDeleteResult} />
       <Snackbar

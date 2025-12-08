@@ -75,28 +75,28 @@ const Page = async (props: {
       yardShukoDat: null,
       yardNyukoDat: null,
     };
-    // キープ受注機材明細データ(初期値)
-    const newKeepJuchuKizaiMeisaiData: KeepJuchuKizaiMeisaiValues[] = [];
+    // // キープ受注機材明細データ(初期値)
+    // const newKeepJuchuKizaiMeisaiData: KeepJuchuKizaiMeisaiValues[] = [];
 
-    // キープ受注コンテナ明細データ(初期値)
-    const newKeepJuchuContainerMeisaiData: KeepJuchuContainerMeisaiValues[] = [];
+    // // キープ受注コンテナ明細データ(初期値)
+    // const newKeepJuchuContainerMeisaiData: KeepJuchuContainerMeisaiValues[] = [];
 
-    // キープ出庫日(初期値)
-    const keepShukoDate = null;
-    // キープ入庫日(初期値)
-    const keepNyukoDate = null;
+    // // キープ出庫日(初期値)
+    // const keepShukoDate = null;
+    // // キープ入庫日(初期値)
+    // const keepNyukoDate = null;
 
     return (
       <EquipmentKeepOrderDetail
         juchuHeadData={juchuHeadData}
         oyaJuchuKizaiHeadData={oyaJuchuKizaiNyushukoData}
         keepJuchuKizaiHeadData={newKeepJuchuKizaiHeadData}
-        keepJuchuKizaiMeisaiData={newKeepJuchuKizaiMeisaiData}
-        keepJuchuContainerMeisaiData={newKeepJuchuContainerMeisaiData}
+        // keepJuchuKizaiMeisaiData={newKeepJuchuKizaiMeisaiData}
+        // keepJuchuContainerMeisaiData={newKeepJuchuContainerMeisaiData}
         oyaShukoDate={oyaShukoDate}
         oyaNyukoDate={oyaNyukoDate}
-        keepShukoDate={keepShukoDate}
-        keepNyukoDate={keepNyukoDate}
+        // keepShukoDate={keepShukoDate}
+        // keepNyukoDate={keepNyukoDate}
         edit={edit}
         shukoFixFlag={shukoFixFlag}
         nyukoFixFlag={nyukoFixFlag}
@@ -114,44 +114,44 @@ const Page = async (props: {
       return <div>受注機材情報が見つかりません。</div>;
     }
 
-    // キープ受注機材明細データ
-    console.time();
-    const juchuKizaiMeisaiData = await getKeepJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId, oyaJuchuKizaiHeadId);
-    console.log('----------------------------受注機材明細---------------------------------');
-    console.timeEnd();
+    // // キープ受注機材明細データ
+    // console.time();
+    // const juchuKizaiMeisaiData = await getKeepJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId, oyaJuchuKizaiHeadId);
+    // console.log('----------------------------受注機材明細---------------------------------');
+    // console.timeEnd();
 
-    // キープ受注コンテナ明細データ
-    console.time();
-    const keepJuchuContainerMeisaiData = await getKeepJuchuContainerMeisai(
-      juchuHeadId,
-      juchuKizaiHeadId,
-      oyaJuchuKizaiHeadId
-    );
-    console.log('----------------------------受注コンテナ明細---------------------------------');
-    console.timeEnd();
+    // // キープ受注コンテナ明細データ
+    // console.time();
+    // const keepJuchuContainerMeisaiData = await getKeepJuchuContainerMeisai(
+    //   juchuHeadId,
+    //   juchuKizaiHeadId,
+    //   oyaJuchuKizaiHeadId
+    // );
+    // console.log('----------------------------受注コンテナ明細---------------------------------');
+    // console.timeEnd();
 
-    // キープ出庫日
-    const keepShukoDate = getShukoDate(
-      keepJuchuKizaiHeadData.kicsShukoDat && new Date(keepJuchuKizaiHeadData.kicsShukoDat),
-      keepJuchuKizaiHeadData.yardShukoDat && new Date(keepJuchuKizaiHeadData.yardShukoDat)
-    );
-    // キープ入庫日
-    const keepNyukoDate = getNyukoDate(
-      keepJuchuKizaiHeadData.kicsNyukoDat && new Date(keepJuchuKizaiHeadData.kicsNyukoDat),
-      keepJuchuKizaiHeadData.yardNyukoDat && new Date(keepJuchuKizaiHeadData.yardNyukoDat)
-    );
+    // // キープ出庫日
+    // const keepShukoDate = getShukoDate(
+    //   keepJuchuKizaiHeadData.kicsShukoDat && new Date(keepJuchuKizaiHeadData.kicsShukoDat),
+    //   keepJuchuKizaiHeadData.yardShukoDat && new Date(keepJuchuKizaiHeadData.yardShukoDat)
+    // );
+    // // キープ入庫日
+    // const keepNyukoDate = getNyukoDate(
+    //   keepJuchuKizaiHeadData.kicsNyukoDat && new Date(keepJuchuKizaiHeadData.kicsNyukoDat),
+    //   keepJuchuKizaiHeadData.yardNyukoDat && new Date(keepJuchuKizaiHeadData.yardNyukoDat)
+    // );
 
     return (
       <EquipmentKeepOrderDetail
         juchuHeadData={juchuHeadData}
         oyaJuchuKizaiHeadData={oyaJuchuKizaiNyushukoData}
         keepJuchuKizaiHeadData={keepJuchuKizaiHeadData}
-        keepJuchuKizaiMeisaiData={juchuKizaiMeisaiData}
-        keepJuchuContainerMeisaiData={keepJuchuContainerMeisaiData}
+        // keepJuchuKizaiMeisaiData={juchuKizaiMeisaiData}
+        // keepJuchuContainerMeisaiData={keepJuchuContainerMeisaiData}
         oyaShukoDate={oyaShukoDate}
         oyaNyukoDate={oyaNyukoDate}
-        keepShukoDate={keepShukoDate}
-        keepNyukoDate={keepNyukoDate}
+        // keepShukoDate={keepShukoDate}
+        // keepNyukoDate={keepNyukoDate}
         edit={edit}
         shukoFixFlag={shukoFixFlag}
         nyukoFixFlag={nyukoFixFlag}

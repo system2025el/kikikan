@@ -30,7 +30,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { addMonths, subDays, subMonths } from 'date-fns';
+import { addMonths, setDate, subDays, subMonths } from 'date-fns';
 import dayjs, { Dayjs } from 'dayjs';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -51,13 +51,14 @@ import { Loading } from '@/app/(main)/_ui/loading';
 import { getDic, getJuchuContainerMeisai, getStockList } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 import { DetailOerValues } from '@/app/(main)/(eq-order-detail)/_lib/types';
 
+import { AlertDialog, DeleteAlertDialog, MoveAlertDialog } from '../../../../../_ui/caveat-dialog';
 import {
-  DeleteAlertDialog,
-  MoveAlertDialog,
-  NyushukoAlertDialog,
-  SaveAlertDialog,
-} from '../../../../../_ui/caveat-dialog';
-import { getJuchuKizaiMeisai, juchuMeisaiCopy, saveJuchuKizai, saveNewJuchuKizaiHead } from '../_lib/funcs';
+  getIdoJuchuKizaiMeisai,
+  getJuchuKizaiMeisai,
+  juchuMeisaiCopy,
+  saveJuchuKizai,
+  saveNewJuchuKizaiHead,
+} from '../_lib/funcs';
 import {
   IdoJuchuKizaiMeisaiValues,
   JuchuContainerMeisaiValues,
@@ -77,13 +78,13 @@ import { SeparationDialog } from './separation-dialog';
 const EquipmentOrderDetail = (props: {
   juchuHeadData: DetailOerValues;
   juchuKizaiHeadData: JuchuKizaiHeadValues;
-  juchuKizaiMeisaiData: JuchuKizaiMeisaiValues[] | undefined;
-  idoJuchuKizaiMeisaiData: IdoJuchuKizaiMeisaiValues[] | undefined;
-  juchuContainerMeisaiData: JuchuContainerMeisaiValues[];
-  shukoDate: Date | null;
-  nyukoDate: Date | null;
-  dateRange: string[];
-  eqStockData: StockTableValues[][] | undefined;
+  // juchuKizaiMeisaiData: JuchuKizaiMeisaiValues[] | undefined;
+  // idoJuchuKizaiMeisaiData: IdoJuchuKizaiMeisaiValues[] | undefined;
+  // juchuContainerMeisaiData: JuchuContainerMeisaiValues[];
+  // shukoDate: Date | null;
+  // nyukoDate: Date | null;
+  // dateRange: string[];
+  // eqStockData: StockTableValues[][] | undefined;
   juchuHonbanbiData: JuchuKizaiHonbanbiValues[] | undefined;
   edit: boolean;
   fixFlag: boolean;
@@ -112,32 +113,32 @@ const EquipmentOrderDetail = (props: {
   const [lockData, setLockData] = useState<LockValues | null>(null);
   // 受注機材明細元データ
   const [originJuchuKizaiMeisaiList, setOriginJuchuKizaiMeisaiList] = useState<JuchuKizaiMeisaiValues[]>(
-    props.juchuKizaiMeisaiData ?? []
+    /*props.juchuKizaiMeisaiData ??*/ []
   );
   // 受注機材明細リスト
   const [juchuKizaiMeisaiList, setJuchuKizaiMeisaiList] = useState<JuchuKizaiMeisaiValues[]>(
-    props.juchuKizaiMeisaiData ?? []
+    /*props.juchuKizaiMeisaiData ??*/ []
   );
   // 移動受注機材明細元データ
   const [originIdoJuchuKizaiMeisaiList, setOriginIdoJuchuKizaiMeisaiList] = useState<IdoJuchuKizaiMeisaiValues[]>(
-    props.idoJuchuKizaiMeisaiData ?? []
+    /*props.idoJuchuKizaiMeisaiData ??*/ []
   );
   // 移動受注機材明細リスト
   const [idoJuchuKizaiMeisaiList, setIdoJuchuKizaiMeisaiList] = useState<IdoJuchuKizaiMeisaiValues[]>(
-    props.idoJuchuKizaiMeisaiData ?? []
+    /*props.idoJuchuKizaiMeisaiData ??*/ []
   );
   // 受注コンテナ明細元データ
   const [originJuchuContainerMeisaiList, setOriginJuchuContainerMeisaiList] = useState<JuchuContainerMeisaiValues[]>(
-    props.juchuContainerMeisaiData ?? []
+    /*props.juchuContainerMeisaiData ??*/ []
   );
   // 受注コンテナ明細リスト
   const [juchuContainerMeisaiList, setJuchuContainerMeisaiList] = useState<JuchuContainerMeisaiValues[]>(
-    props.juchuContainerMeisaiData ?? []
+    /*props.juchuContainerMeisaiData ??*/ []
   );
   // 機材在庫元データ
-  const [originEqStockList, setOriginEqStockList] = useState<StockTableValues[][]>(props.eqStockData ?? []);
+  const [originEqStockList, setOriginEqStockList] = useState<StockTableValues[][]>(/*props.eqStockData ??*/ []);
   // 機材在庫リスト
-  const [eqStockList, setEqStockList] = useState<StockTableValues[][]>(props.eqStockData ? props.eqStockData : []);
+  const [eqStockList, setEqStockList] = useState<StockTableValues[][]>(/*props.eqStockData ??*/ []);
   // 受注本番日元データ
   const [originJuchuHonbanbiList, setOriginJuchuHonbanbiList] = useState<JuchuKizaiHonbanbiValues[]>(
     props.juchuHonbanbiData ?? []
@@ -166,24 +167,26 @@ const EquipmentOrderDetail = (props: {
   const [deleteCtn, setDeleteCtn] = useState<JuchuContainerMeisaiValues | null>(null);
 
   // 出庫日
-  const [shukoDate, setShukoDate] = useState<Date | null>(props.shukoDate);
+  const [shukoDate, setShukoDate] = useState<Date | null>(/*props.shukoDate*/ null);
   // 入庫日
-  const [nyukoDate, setNyukoDate] = useState<Date | null>(props.nyukoDate);
+  const [nyukoDate, setNyukoDate] = useState<Date | null>(/*props.nyukoDate*/ null);
   // 出庫日から入庫日
-  const [dateRange, setDateRange] = useState<string[]>(props.dateRange);
+  const [dateRange, setDateRange] = useState<string[]>(/*props.dateRange*/ []);
   // カレンダー選択日
-  const [selectDate, setSelectDate] = useState<Date>(props.shukoDate ? props.shukoDate : new Date());
+  const [selectDate, setSelectDate] = useState<Date>(/*props.shukoDate ? props.shukoDate :*/ new Date());
   // 移動日
   const [idoDat, setIdoDat] = useState<Date | null>(null);
 
-  // 未保存ダイアログ制御
-  const [saveOpen, setSaveOpen] = useState(false);
+  // 警告ダイアログ制御
+  const [alertOpen, setAlertOpen] = useState(false);
+  // 警告ダイアログタイトル
+  const [alertTitle, setAlertTitle] = useState('');
+  // 警告ダイアログ用メッセージ
+  const [alertMessage, setAlertMessage] = useState('');
   // 編集内容が未保存ダイアログ制御
   const [dirtyOpen, setDirtyOpen] = useState(false);
   // 移動日更新ダイアログ制御
   const [moveOpen, setMoveOpen] = useState(false);
-  // 入出庫日時ダイアログ制御
-  const [nyushukoOpen, setNyushukoOpen] = useState(false);
   // 機材追加ダイアログ制御
   const [EqSelectionDialogOpen, setEqSelectionDialogOpen] = useState(false);
   // コピーダイアログ制御
@@ -284,9 +287,83 @@ const EquipmentOrderDetail = (props: {
    * useEffect
    */
   useEffect(() => {
-    if (!user || !props.edit) return;
+    const getData = async () => {
+      setIsDetailLoading(true);
+      // 受注機材ヘッダーデータ
+      const juchuKizaiHeadData = getValues();
+
+      // 受注機材明細データ
+      const juchuKizaiMeisaiData = await getJuchuKizaiMeisai(
+        juchuKizaiHeadData.juchuHeadId,
+        juchuKizaiHeadData.juchuKizaiHeadId
+      );
+
+      // 移動受注機材明細データ
+      const idoJuchuKizaiMeisaiData = await getIdoJuchuKizaiMeisai(
+        juchuKizaiHeadData.juchuHeadId,
+        juchuKizaiHeadData.juchuKizaiHeadId
+      );
+
+      // 受注コンテナ明細データ
+      const juchuContainerMeisaiData = await getJuchuContainerMeisai(
+        juchuKizaiHeadData.juchuHeadId,
+        juchuKizaiHeadData.juchuKizaiHeadId
+      );
+
+      // 出庫日
+      const shukoDate = getShukoDate(
+        juchuKizaiHeadData.kicsShukoDat && new Date(juchuKizaiHeadData.kicsShukoDat),
+        juchuKizaiHeadData.yardShukoDat && new Date(juchuKizaiHeadData.yardShukoDat)
+      );
+      // 入庫日
+      const nyukoDate = getNyukoDate(
+        juchuKizaiHeadData.kicsNyukoDat && new Date(juchuKizaiHeadData.kicsNyukoDat),
+        juchuKizaiHeadData.yardNyukoDat && new Date(juchuKizaiHeadData.yardNyukoDat)
+      );
+
+      // 出庫日から入庫日
+      const dateRange = getRange(shukoDate, nyukoDate);
+
+      // 機材在庫データ
+      const updatedEqStockData = await updateEqStock(
+        juchuKizaiHeadData?.juchuHeadId,
+        juchuKizaiHeadData?.juchuKizaiHeadId,
+        shukoDate,
+        juchuKizaiMeisaiData ?? []
+      );
+
+      setOriginJuchuKizaiMeisaiList(juchuKizaiMeisaiData ?? []);
+      setJuchuKizaiMeisaiList(juchuKizaiMeisaiData ?? []);
+      setOriginIdoJuchuKizaiMeisaiList(idoJuchuKizaiMeisaiData);
+      setIdoJuchuKizaiMeisaiList(idoJuchuKizaiMeisaiData);
+      setOriginJuchuContainerMeisaiList(juchuContainerMeisaiData);
+      setJuchuContainerMeisaiList(juchuContainerMeisaiData);
+      setShukoDate(shukoDate);
+      setNyukoDate(nyukoDate);
+      setSelectDate(shukoDate ?? new Date());
+      setDateRange(dateRange);
+      setOriginEqStockList(updatedEqStockData);
+      setEqStockList(updatedEqStockData);
+      setOriginPlanQty(
+        juchuKizaiMeisaiData.reduce((acc, current) => {
+          const key = current.kizaiId;
+          const total = acc.get(key);
+          if (total) {
+            const currentTotal = total + current.planQty;
+            acc.set(key, currentTotal);
+          } else {
+            acc.set(key, current.planQty);
+          }
+          return acc;
+        }, new Map<number, number>())
+      );
+
+      setIsDetailLoading(false);
+    };
 
     const asyncProcess = async () => {
+      if (!user || !props.edit) return;
+
       setIsLoading(true);
       const lockData = await getLock(1, props.juchuHeadData.juchuHeadId);
       setLockData(lockData);
@@ -300,6 +377,9 @@ const EquipmentOrderDetail = (props: {
       setIsLoading(false);
     };
     asyncProcess();
+    if (saveKizaiHead) {
+      getData();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -539,7 +619,9 @@ const EquipmentOrderDetail = (props: {
             message: '',
           });
         }
-        setNyushukoOpen(true);
+        setAlertTitle('入出庫日時が入力されていません');
+        setAlertMessage('入出庫日時を入力してください');
+        setAlertOpen(true);
         setIsLoading(false);
         return;
       }
@@ -625,6 +707,7 @@ const EquipmentOrderDetail = (props: {
               juchuKizaiMeisaiData
             );
             setOriginEqStockList(updatedEqStockData);
+            setEqStockList(updatedEqStockData);
           }
 
           // 受注コンテナ明細更新
@@ -651,6 +734,7 @@ const EquipmentOrderDetail = (props: {
             juchuKizaiMeisaiList
           );
           setOriginEqStockList(updatedEqStockData);
+          setEqStockList(updatedEqStockData);
         } else if (checkJuchuKizaiMeisai || checkJuchuContainerMeisai) {
           // 受注機材明細、機材在庫テーブル更新
           const juchuKizaiMeisaiData = await getJuchuKizaiMeisai(data.juchuHeadId, data.juchuKizaiHeadId);
@@ -677,6 +761,7 @@ const EquipmentOrderDetail = (props: {
               juchuKizaiMeisaiData
             );
             setOriginEqStockList(updatedEqStockData);
+            setEqStockList(updatedEqStockData);
           }
 
           // 受注コンテナ明細更新
@@ -709,25 +794,32 @@ const EquipmentOrderDetail = (props: {
   const updateEqStock = async (
     juchuHeadId: number,
     juchuKizaiHeadId: number,
-    shukoDate: Date,
+    shukoDate: Date | null,
     juchuKizaiMeisaiData: JuchuKizaiMeisaiValues[]
   ) => {
     // 受注機材idリスト
-    const ids = juchuKizaiMeisaiData.map((data) => data.kizaiId);
+    const ids = juchuKizaiMeisaiData.filter((d) => !d.delFlag).map((data) => data.kizaiId);
     // 機材在庫データ
     const updatedEqStockData: StockTableValues[][] = [];
-    if (ids) {
-      for (let i = 0; i < ids.length; i++) {
-        const stock: StockTableValues[] = await getStockList(
-          juchuHeadId,
-          juchuKizaiHeadId,
-          ids[i],
-          subDays(shukoDate, 1)
-        );
-        updatedEqStockData.push(stock);
+    // id確認用セット
+    const checkIds = new Set<number>();
+    if (ids && shukoDate) {
+      for (const id of ids) {
+        if (checkIds.has(id)) {
+          const stock = updatedEqStockData.find((d) => d[0].kizaiId === id);
+          updatedEqStockData.push(stock!);
+        } else {
+          checkIds.add(id);
+          const stock: StockTableValues[] = await getStockList(
+            juchuHeadId,
+            juchuKizaiHeadId,
+            id,
+            subDays(shukoDate, 1)
+          );
+          updatedEqStockData.push(stock);
+        }
       }
     }
-    setEqStockList(updatedEqStockData);
     return updatedEqStockData;
   };
 
@@ -1374,25 +1466,24 @@ const EquipmentOrderDetail = (props: {
       delFlag: false,
       saveFlag: false,
     }));
+
     const newIds = selectEq.map((data) => data.kizaiId);
     // 機材在庫データ
     const selectEqStockData: StockTableValues[][] = [];
-    for (let i = 0; i < newIds.length; i++) {
-      if (kizaiIds.has(newIds[i])) {
-        const stock = eqStockListRef.current.find((d) => d[0].kizaiId === newIds[i]);
+    for (const id of newIds) {
+      if (kizaiIds.has(id)) {
+        const stock = eqStockListRef.current.find((d) => d[0].kizaiId === id);
         selectEqStockData.push(stock!);
       } else {
         const stock: StockTableValues[] = await getStockList(
           getValues('juchuHeadId'),
           getValues('juchuKizaiHeadId'),
-          newIds[i],
+          id,
           subDays(selectDate, 1)
         );
-        if (originPlanQty.get(newIds[i])) {
+        if (originPlanQty.get(id)) {
           const updateStock = stock.map((d) =>
-            dateRange.includes(toJapanYMDString(d.calDat))
-              ? { ...d, zaikoQty: d.zaikoQty + originPlanQty.get(newIds[i])! }
-              : d
+            dateRange.includes(toJapanYMDString(d.calDat)) ? { ...d, zaikoQty: d.zaikoQty + originPlanQty.get(id)! } : d
           );
           selectEqStockData.push(updateStock);
         } else {
@@ -1468,7 +1559,9 @@ const EquipmentOrderDetail = (props: {
   // コピーダイアログ開閉
   const handleOpenCopyDialog = () => {
     if (otherDirty || isDirty) {
-      setSaveOpen(true);
+      setAlertTitle('保存されていません');
+      setAlertMessage('1度保存をしてください');
+      setAlertOpen(true);
       return;
     }
     setCopyDialogOpen(true);
@@ -1553,7 +1646,9 @@ const EquipmentOrderDetail = (props: {
   // 分離ダイアログ開閉
   const handleOpenSeparationDialog = () => {
     if (otherDirty || isDirty) {
-      setSaveOpen(true);
+      setAlertTitle('保存されていません');
+      setAlertMessage('1度保存をしてください');
+      setAlertOpen(true);
       return;
     }
     setSeparationDialogOpen(true);
@@ -2680,10 +2775,9 @@ const EquipmentOrderDetail = (props: {
           )}
         </Container>
       )}
-      <SaveAlertDialog open={saveOpen} onClick={() => setSaveOpen(false)} />
+      <AlertDialog open={alertOpen} title={alertTitle} message={alertMessage} onClick={() => setAlertOpen(false)} />
       <IsDirtyAlertDialog open={dirtyOpen} onClick={handleResultDialog} />
       <MoveAlertDialog open={moveOpen} onClick={handleMoveDialog} />
-      <NyushukoAlertDialog open={nyushukoOpen} onClick={() => setNyushukoOpen(false)} />
       <DeleteAlertDialog open={deleteEqOpen} onClick={handleEqMeisaiDeleteResult} />
       <DeleteAlertDialog open={deleteCtnOpen} onClick={handleCtnMeisaiDeleteResult} />
       <Snackbar
