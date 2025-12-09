@@ -1858,11 +1858,12 @@ export const getBumonsForEqptSelection = async () => {
  */
 export const checkSetoptions = async (idList: number[]): Promise<number[]> => {
   try {
-    const { data: setIdList, error: setIdError } = await selectBundledEqptIds(idList);
-    if (setIdError) {
-      console.error('例外発生', setIdError);
-      throw setIdError;
-    }
+    // const { data: setIdList, error: setIdListError } = await selectBundledEqptIds(idList);
+    const { rows: setIdList } = await selectBundledEqptIds(idList);
+    // if (setIdError) {
+    //   console.error('例外発生', setIdError);
+    //   throw setIdError;
+    // }
     if (!setIdList || setIdList.length === 0) return [];
     // return setIdList.map((d) => d.kizai_id);
     return Array.from(new Set(setIdList.map((d) => d.kizai_id)));

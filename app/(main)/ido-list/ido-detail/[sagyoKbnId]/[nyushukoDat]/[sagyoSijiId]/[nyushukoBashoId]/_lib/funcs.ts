@@ -364,10 +364,12 @@ export const getIdoBumonsForEqptSelection = async () => {
  */
 export const checkSetoptions = async (idList: number[]) => {
   try {
-    const { data: setIdList, error: setIdListError } = await selectBundledEqptIds(idList);
-    if (setIdListError) {
-      throw setIdListError;
-    }
+    // const { data: setIdList, error: setIdListError } = await selectBundledEqptIds(idList);
+    const { rows: setIdList } = await selectBundledEqptIds(idList);
+
+    // if (setIdListError) {
+    //   throw setIdListError;
+    // }
     console.log('setId List : ', setIdList);
     const setIdListSet = new Set(setIdList);
     const setIdListArray = [...setIdListSet]

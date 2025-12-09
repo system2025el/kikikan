@@ -13,8 +13,15 @@ import { MKizaiSetDBValues } from '../types/m-kizai-set-type';
  * @returns 選択された機材のセット機材のIDリスト
  */
 export const selectBundledEqptIds = async (idList: number[]) => {
+  const query = `
+  SELECT kizai_id, set_kizai_id
+  FROM "${SCHEMA}"."m_kizai_set"
+  WHERE kizai_id = ANY($1)
+`;
   try {
-    return await supabase.schema(SCHEMA).from('m_kizai_set').select('kizai_id, set_kizai_id').in('kizai_id', idList);
+    // return await supabase.schema(SCHEMA).from('m_kizai_set').select('kizai_id, set_kizai_id').in('kizai_id', idList);
+
+    return await pool.query(query, [idList]);
   } catch (e) {
     throw e;
   }
