@@ -37,12 +37,11 @@ export const selectJuchu = async (id: number) => {
 
 export const selectJuchuHeadIds = async (strDat: string) => {
   try {
-    await pool.query(` SET search_path TO ${SCHEMA};`);
     const query = `
       select 
           v_juchu_lst.juchu_head_id as "juchuHeadId"
       from 
-          v_juchu_lst
+          ${SCHEMA}.v_juchu_lst
       where
           -- ①出庫日がスケジュール終了日より小さい、且つ、
           v_juchu_lst.shuko_dat <= cast($1 as date) + cast( '90 days' as INTERVAL ) --【変数】
