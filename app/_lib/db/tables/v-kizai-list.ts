@@ -26,8 +26,7 @@ export const selectFilteredEqpts = async (queries: {
     .from('v_kizai_lst')
     .select(
       'kizai_id, kizai_nam, kizai_qty, kizai_ng_qty, shozoku_nam, mem, bumon_nam, dai_bumon_nam, shukei_bumon_nam, reg_amt, dsp_flg, del_flg'
-    )
-    .eq('kizai_id', 1);
+    );
 
   if (queries.q && queries.q.trim() !== '') {
     builder.ilike('kizai_nam', `%${queries.q}%`);
