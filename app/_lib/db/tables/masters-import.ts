@@ -36,75 +36,86 @@ export const checkRfid = async (list: RfidImportTypes[], connection: PoolClient,
     console.log('新規登録対象', insertList.length, '件');
     // 新規登録するデータがあれば新規登録処理
     if (insertList.length > 0) {
-      // RFIDマスタ準備
-      // 一時テーブルとして扱うインポートデータのカラムを定義
-      const insertMasterCols = ['rfid_tag_id', 'kizai_nam', 'del_flg', 'mem', 'el_num'];
-      const insertMasterPlaceholders = insertList
-        .map((_, index) => {
-          const start = index * insertMasterCols.length + 1;
-          return `(${insertMasterCols.map((_, i) => `$${start + i}`).join(',')})`;
-        })
-        .join(',');
-      // 挿入する値
-      const insertMasterValues = insertList.flatMap((v) => [v.rfid_tag_id, v.kizai_nam, v.del_flg, v.mem, v.el_num]);
-      const insertMasterQuery = `
-          WITH imported_data(${insertMasterCols.join(',')}) AS (
-            VALUES ${insertMasterPlaceholders}
-          )
-          INSERT INTO ${SCHEMA}.m_rfid (
-            rfid_tag_id,
-            kizai_id,
-            del_flg,
-            mem,
-            el_num,
-            add_dat,
-            add_user
-          )
-          SELECT
-            id.rfid_tag_id::varchar,
-            mk.kizai_id::integer, -- JOINして取得したkizai_id
-            CAST(id.del_flg AS integer),
-            id.mem::varchar,
-            CAST(id.el_num AS integer),
-            $${insertMasterValues.length + 1}::timestamp, -- add_dat
-            $${insertMasterValues.length + 2}::varchar  -- add_user
-          FROM
-            imported_data AS id
-          LEFT JOIN
-            ${SCHEMA}.m_kizai AS mk ON id.kizai_nam = mk.kizai_nam;
-        `;
+      // ■ チャンク設定
+      // PostgreSQLのパラメータ上限(65,535)に対して余裕を持たせる。2000件 * 5 = 10,000パラメータ
+      const CHUNK_SIZE = 2000;
+      for (let i = 0; i < insertList.length; i += CHUNK_SIZE) {
+        // 今回処理する分だけ切り出す
+        const chunk = insertList.slice(i, i + CHUNK_SIZE);
 
-      // RFIDタグ管理テーブル側準備
-      const insertStsPlaceholders = insertList
-        .map((_, index) => {
-          const start = index * 3 + 1;
-          return `($${start}, $${start + 1}, $${start + 2})`;
-        })
-        .join(',');
-      const insertStsValues = insertList.flatMap((v) => [v.rfid_tag_id, v.rfid_kizai_sts, v.shozoku_id]);
-      const insertStsQuery = `
-          WITH imported_data (rfid_tag_id, rfid_kizai_sts, shozoku_id) AS (
-            VALUES ${insertStsPlaceholders}
-          )
-          INSERT INTO ${SCHEMA}.t_rfid_status_result (
-            rfid_tag_id,
-            rfid_kizai_sts,
-            shozoku_id,
-            upd_dat,
-            upd_user
-          )
-          SELECT
-            id.rfid_tag_id::varchar,
-            CAST(id.rfid_kizai_sts AS integer),
-            CAST(id.shozoku_id AS integer),
-            $${insertStsValues.length + 1}::timestamp, -- upd_dat
-            $${insertStsValues.length + 2}::varchar  -- upd_user
-          FROM
-            imported_data AS id
-        `;
-      // INSERT実行
-      await connection.query(insertMasterQuery, [...insertMasterValues, date, user]);
-      await connection.query(insertStsQuery, [...insertStsValues, date, user]);
+        //  RFIDマスタ準備 (chunkを使用) ---
+        const insertMasterCols = ['rfid_tag_id', 'kizai_nam', 'del_flg', 'mem', 'el_num'];
+        const insertMasterPlaceholders = chunk
+          .map((_, index) => {
+            const start = index * insertMasterCols.length + 1;
+            return `(${insertMasterCols.map((_, i) => `$${start + i}`).join(',')})`;
+          })
+          .join(',');
+        // insertList ではなく chunk から値を展開
+        const insertMasterValues = chunk.flatMap((v) => [v.rfid_tag_id, v.kizai_nam, v.del_flg, v.mem, v.el_num]);
+        const insertMasterQuery = `
+            WITH imported_data(${insertMasterCols.join(',')}) AS (
+              VALUES ${insertMasterPlaceholders}
+            )
+            INSERT INTO ${SCHEMA}.m_rfid (
+              rfid_tag_id,
+              kizai_id,
+              del_flg,
+              mem,
+              el_num,
+              add_dat,
+              add_user
+            )
+            SELECT
+              id.rfid_tag_id::varchar,
+              mk.kizai_id::integer,
+              CAST(id.del_flg AS integer),
+              id.mem::varchar,
+              CAST(id.el_num AS integer),
+              $${insertMasterValues.length + 1}::timestamp, -- add_dat
+              $${insertMasterValues.length + 2}::varchar  -- add_user
+            FROM
+              imported_data AS id
+            LEFT JOIN
+              ${SCHEMA}.m_kizai AS mk ON id.kizai_nam = mk.kizai_nam;
+          `;
+
+        // RFIDタグ管理テーブル側準備 (chunkを使用) ---
+        const insertStsPlaceholders = chunk
+          .map((_, index) => {
+            const start = index * 3 + 1;
+            return `($${start}, $${start + 1}, $${start + 2})`;
+          })
+          .join(',');
+        const insertStsValues = chunk.flatMap((v) => [v.rfid_tag_id, v.rfid_kizai_sts, v.shozoku_id]);
+        const insertStsQuery = `
+            WITH imported_data (rfid_tag_id, rfid_kizai_sts, shozoku_id) AS (
+              VALUES ${insertStsPlaceholders}
+            )
+            INSERT INTO ${SCHEMA}.t_rfid_status_result (
+              rfid_tag_id,
+              rfid_kizai_sts,
+              shozoku_id,
+              upd_dat,
+              upd_user
+            )
+            SELECT
+              id.rfid_tag_id::varchar,
+              CAST(id.rfid_kizai_sts AS integer),
+              CAST(id.shozoku_id AS integer),
+              $${insertStsValues.length + 1}::timestamp, -- upd_dat
+              $${insertStsValues.length + 2}::varchar  -- upd_user
+            FROM
+              imported_data AS id
+          `;
+
+        // INSERT実行 (分割ごとに実行) ---
+        // console.log(`Processing chunk: ${i} to ${i + chunk.length}`);
+        await connection.query(insertMasterQuery, [...insertMasterValues, date, user]);
+        await connection.query(insertStsQuery, [...insertStsValues, date, user]);
+      }
+
+      // ループ終了後に更新処理
       updateMasterUpdates('m_rfid', connection);
     }
 
@@ -148,14 +159,21 @@ export const checkRfid = async (list: RfidImportTypes[], connection: PoolClient,
 
     // 差異がある場合
     if (updateList && updateList.length > 0) {
-      const updatePlaceholders = updateList
-        .map((_, index) => {
-          const start = index * 3 + 1;
-          return `($${start}, $${start + 1}, $${start + 2})`;
-        })
-        .join(',');
-      const updateValues = updateList.flatMap((v) => [v.rfid_tag_id, v.del_flg, v.mem]);
-      const updateQuery = `
+      // ■ チャンク設定
+      // PostgreSQLのパラメータ上限(65,535)に対して余裕を持たせる。3 * 5000件 + 2 = 15,002パラメータ
+      const CHUNK_SIZE = 5000;
+
+      for (let i = 0; i < insertList.length; i += CHUNK_SIZE) {
+        // 今回処理する分だけ切り出す
+        const chunk = updateList.slice(i, i + CHUNK_SIZE);
+        const updatePlaceholders = chunk
+          .map((_, index) => {
+            const start = index * 3 + 1;
+            return `($${start}, $${start + 1}, $${start + 2})`;
+          })
+          .join(',');
+        const updateValues = chunk.flatMap((v) => [v.rfid_tag_id, v.del_flg, v.mem]);
+        const updateQuery = `
         UPDATE ${SCHEMA}.m_rfid AS mr
         SET
           del_flg = d.del_flg::integer,
@@ -167,9 +185,10 @@ export const checkRfid = async (list: RfidImportTypes[], connection: PoolClient,
         ) AS d(rfid_tag_id, del_flg, mem)
         WHERE mr.rfid_tag_id = d.rfid_tag_id;
       `;
+        //更新実行
+        await connection.query(updateQuery, [...updateValues, date, user]);
+      }
 
-      //更新実行
-      await connection.query(updateQuery, [...updateValues, date, user]);
       await updateMasterUpdates('m_rfid', connection);
     }
 
@@ -192,49 +211,41 @@ export const checkKizai = async (list: KizaiImportTypes[], connection: PoolClien
     return [];
   }
   // 一時テーブル用のインポートしたデータ準備
-  const allColumns = [
-    'kizai_nam',
-    'section_nam',
-    'shozoku_id',
-    'bld_cod',
-    'tana_cod',
-    'eda_cod',
-    'kizai_grp_cod',
-    'dsp_ord_num',
-    'mem',
-    'bumon_nam',
-    'shukei_bumon_nam',
-    'dsp_flg',
-    'ctn_flg',
-    'def_dat_qty',
-    'reg_amt',
-    // 'rank_amt_1',
-    // 'rank_amt_2',
-    // 'rank_amt_3',
-    // 'rank_amt_4',
-    // 'rank_amt_5',
-  ];
-  const kizaiPlaceholders = list
-    .map((_, index) => {
-      const start = index * allColumns.length + 1;
-      return `(${allColumns.map((_, i) => `$${start + i}`).join(',')})`;
-    })
-    .join(',');
-  const kizaiValues = list.flatMap((v) =>
-    allColumns.map((col) => {
-      const value = v[col as keyof KizaiImportTypes];
-      return value === undefined ? null : value;
-    })
-  );
+  const allColumns = Object.keys(list[0]);
+  // パラメータ上限対策：チャンクサイズ設定（1行約15カラム * 2000行 = 30,000パラメータ < 65535）
+  const CHUNK_SIZE = 2000;
+
+  // 最終的に返却する全結果を格納する配列
+  const allResultRows = [];
+  // 更新があったかどうかのフラグ
+  let hasUpdates = false;
 
   try {
-    // 既存の機材マスタの最大ID
-    const maxKizaiIdResult = await connection.query(`SELECT COALESCE(MAX(kizai_id), 0) FROM ${SCHEMA}.m_kizai;`);
-    const maxKizaiId = maxKizaiIdResult.rows[0].coalesce;
+    for (let i = 0; i < list.length; i += CHUNK_SIZE) {
+      // 今回処理するデータを切り出し
+      const chunk = list.slice(i, i + CHUNK_SIZE);
 
-    // データ比較、新規登録、取得
-    const data = await connection.query(
-      `
+      // ループの都度最新の最大IDを取得する、前のループでINSERTされた分を考慮
+      const maxKizaiIdResult = await connection.query(`SELECT COALESCE(MAX(kizai_id), 0) FROM ${SCHEMA}.m_kizai;`);
+      const currentMaxKizaiId = maxKizaiIdResult.rows[0].coalesce;
+
+      const kizaiPlaceholders = chunk
+        .map((_, index) => {
+          const start = index * allColumns.length + 1;
+          return `(${allColumns.map((_, i) => `$${start + i}`).join(',')})`;
+        })
+        .join(',');
+
+      const kizaiValues = chunk.flatMap((v: KizaiImportTypes) =>
+        allColumns.map((col) => {
+          const value = v[col as keyof KizaiImportTypes];
+
+          return value === undefined ? null : value;
+        })
+      );
+
+      // 実行
+      const queryText = `
         WITH imported_data(${allColumns.join(',')}) AS (
           VALUES ${kizaiPlaceholders}
         )
@@ -255,16 +266,11 @@ export const checkKizai = async (list: KizaiImportTypes[], connection: PoolClien
           ctn_flg,
           def_dat_qty,
           reg_amt,
-          -- rank_amt_1,
-          -- rank_amt_2,
-          -- rank_amt_3,
-          -- rank_amt_4,
-          -- rank_amt_5,
           add_dat,
           add_user
         )
         SELECT
-          ${maxKizaiId} + ROW_NUMBER() OVER (ORDER BY id.kizai_nam),
+          ${currentMaxKizaiId} + ROW_NUMBER() OVER (ORDER BY id.kizai_nam), -- 最新のMAX ID + 連番
           id.kizai_nam,
           CAST(NULLIF(id.section_nam, '') AS integer),
           CAST(NULLIF(id.shozoku_id, '') AS integer),
@@ -280,38 +286,38 @@ export const checkKizai = async (list: KizaiImportTypes[], connection: PoolClien
           CAST(NULLIF(id.ctn_flg, '') AS integer),
           CAST(NULLIF(id.def_dat_qty, '') AS integer),
           CAST(NULLIF(id.reg_amt, '') AS integer),
-          -- CAST(NULLIF(id.rank_amt_1, '') AS integer),
-          -- CAST(NULLIF(id.rank_amt_2, '') AS integer),
-          -- CAST(NULLIF(id.rank_amt_3, '') AS integer),
-          -- CAST(NULLIF(id.rank_amt_4, '') AS integer),
-          -- CAST(NULLIF(id.rank_amt_5, '') AS integer),
           $${kizaiValues.length + 1}::timestamp,
-          $${kizaiValues.length + 2}
+          $${kizaiValues.length + 2}::varchar
         FROM
           imported_data AS id
         LEFT JOIN
-         ${SCHEMA}.m_bumon AS mb ON id.bumon_nam = mb.bumon_nam
+          ${SCHEMA}.m_bumon AS mb ON id.bumon_nam = mb.bumon_nam
         LEFT JOIN
-         ${SCHEMA}.m_shukei_bumon AS ms ON id.shukei_bumon_nam = ms.shukei_bumon_nam
+          ${SCHEMA}.m_shukei_bumon AS ms ON id.shukei_bumon_nam = ms.shukei_bumon_nam
         WHERE
           NOT EXISTS (SELECT 1 FROM ${SCHEMA}.m_kizai AS mk WHERE mk.kizai_nam = id.kizai_nam)
         RETURNING *;
-        `,
-      [...kizaiValues, date, user]
-    );
+      `;
 
-    if (data) {
-      if (data.rowCount && data.rowCount > 0) {
-        await updateMasterUpdates('m_kizai', connection);
+      const result = await connection.query(queryText, [...kizaiValues, date, user]);
+
+      // 結果の蓄積とフラグ更新
+      if (result && result.rows.length > 0) {
+        allResultRows.push(...result.rows);
+        hasUpdates = true;
       }
-      return data.rows;
     }
-    return [];
+    if (hasUpdates) {
+      await updateMasterUpdates('m_kizai', connection);
+    }
+
+    return allResultRows;
   } catch (e) {
     console.log(e);
     throw new Error('例外が発生：DBエラーkizai');
   }
 };
+
 /**
  * 大部門マスタ確認
  * @param list
