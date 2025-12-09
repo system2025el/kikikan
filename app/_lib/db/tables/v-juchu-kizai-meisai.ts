@@ -104,7 +104,6 @@ export const selectReturnJuchuKizaiMeisai = async (juchuHeadId: number, juchuKiz
  */
 export const selectPdfJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadIds: string, shukoDat: string) => {
   try {
-    await pool.query(` SET search_path TO ${SCHEMA};`);
     const query = `select 
 
     v_juchu_kizai_head_lst.juchu_head_id
@@ -122,9 +121,9 @@ export const selectPdfJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiH
     ,v_juchu_kizai_meisai.dsp_ord_num
     
 from 
-    dev6.v_juchu_kizai_head_lst
+    ${SCHEMA}.v_juchu_kizai_head_lst
 
-    left join  dev6.v_juchu_kizai_meisai on
+    left join  ${SCHEMA}.v_juchu_kizai_meisai on
         v_juchu_kizai_head_lst.juchu_head_id = v_juchu_kizai_meisai.juchu_head_id
         and
         v_juchu_kizai_head_lst.juchu_kizai_head_id = v_juchu_kizai_meisai.juchu_kizai_head_id

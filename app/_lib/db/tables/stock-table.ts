@@ -18,18 +18,17 @@ export const selectDetailStockList = async (
   date: string
 ) => {
   try {
-    await pool.query(` SET search_path TO ${SCHEMA};`);
     const query = `
       select   
     cal.cal_dat as "calDat" --スケジュール日
     ,coalesce(zaiko_kizai.kizai_id,$1 /*■変数箇所■*/)::integer as "kizaiId"   -- 機材ID
-    ,coalesce(zaiko_kizai.kizai_qty,(select v_kizai_qty.kizai_qty from v_kizai_qty where v_kizai_qty.kizai_id = $1 /*■変数箇所■*/))::integer as "kizaiQty"   --機材数（有効数） 
+    ,coalesce(zaiko_kizai.kizai_qty,(select v_kizai_qty.kizai_qty from ${SCHEMA}.v_kizai_qty where v_kizai_qty.kizai_id = $1 /*■変数箇所■*/))::integer as "kizaiQty"   --機材数（有効数） 
     ,coalesce(zaiko_kizai.juchu_qty,0)::integer as "juchuQty"   --受注数 NULL時0固定    /*貸出状況スケジュール*/
     
 --     ,coalesce(zaiko_kizai.yobi_qty,0) as yobi_qty   --予備数 NULL時0固定  
 --     ,coalesce(zaiko_kizai.plan_qty,0) as plan_qty   --合計数 NULL時0固定  
 
-    ,coalesce(zaiko_kizai.zaiko_qty,(select v_kizai_qty.kizai_qty from v_kizai_qty where v_kizai_qty.kizai_id = $1 /*■変数箇所■*/))::integer as "zaikoQty"     --在庫数   /*受注機材明細スケジュール、在庫状況スケジュール*/
+    ,coalesce(zaiko_kizai.zaiko_qty,(select v_kizai_qty.kizai_qty from ${SCHEMA}.v_kizai_qty where v_kizai_qty.kizai_id = $1 /*■変数箇所■*/))::integer as "zaikoQty"     --在庫数   /*受注機材明細スケジュール、在庫状況スケジュール*/
     ,coalesce(zaiko_kizai.juchu_honbanbi_shubetu_id,0) as "juchuHonbanbiShubetuId" --受注本番日種別
     ,coalesce(zaiko_kizai.juchu_honbanbi_shubetu_color,'white') as "juchuHonbanbiColor" --受注本番日種別カラー
 from 
@@ -45,12 +44,12 @@ from
             ,honbanbi.juchu_honbanbi_shubetu_id --受注本番日種別ID
             ,honbanbi.juchu_honbanbi_shubetu_color --受注本番日種別カラー
         from
-            v_zaiko_qty
+            ${SCHEMA}.v_zaiko_qty
             
         left outer join
             ----------------------
             ----１．受注機材明細スケジュールビュー
-            v_honbanbi_juchu_kizai as honbanbi on
+            ${SCHEMA}.v_honbanbi_juchu_kizai as honbanbi on
             ----------------------
             
             v_zaiko_qty.plan_dat = honbanbi.plan_dat
@@ -97,20 +96,19 @@ order by cal_dat;
  */
 export const selectUseList = async (juchuHeadId: number, kizaiId: number, date: string) => {
   try {
-    await pool.query(` SET search_path TO ${SCHEMA};`);
     const query = `
       select   
     cal.cal_dat as "calDat" --スケジュール日
     ,coalesce(zaiko_kizai.kizai_id,$1 /*■変数箇所■*/)::integer as "kizaiId"   -- 機材ID
-    ,coalesce(zaiko_kizai.kizai_qty,(select v_kizai_qty.kizai_qty from v_kizai_qty where v_kizai_qty.kizai_id = $1 /*■変数箇所■*/))::integer as "kizaiQty"   --機材数（保有数） 
+    ,coalesce(zaiko_kizai.kizai_qty,(select v_kizai_qty.kizai_qty from ${SCHEMA}.v_kizai_qty where v_kizai_qty.kizai_id = $1 /*■変数箇所■*/))::integer as "kizaiQty"   --機材数（保有数） 
 
 --    ,coalesce(zaiko_kizai.juchu_qty,0) as juchuQty   --全体受注数 NULL時0固定    
 --    ,coalesce(zaiko_kizai.yobi_qty,0) as yobiQty   --全体予備数 NULL時0固定  
     ,coalesce(zaiko_kizai.plan_qty,0)::integer as "planQty"   --全体合計数 NULL時0固定  
-    ,coalesce(zaiko_kizai.zaiko_qty,(select v_kizai_qty.kizai_qty from v_kizai_qty where v_kizai_qty.kizai_id = $1 /*■変数箇所■*/))::integer as "zaikoQty"     --全体在庫数   /*受注機材明細スケジュール、在庫状況スケジュール*/
+    ,coalesce(zaiko_kizai.zaiko_qty,(select v_kizai_qty.kizai_qty from ${SCHEMA}.v_kizai_qty where v_kizai_qty.kizai_id = $1 /*■変数箇所■*/))::integer as "zaikoQty"     --全体在庫数   /*受注機材明細スケジュール、在庫状況スケジュール*/
 
 --     -- 自受注合計数を全体在庫から引いておいて、画面側で自受注合計数を加算しても制御は可能
---     ,coalesce(zaiko_kizai.zaiko_qty,(select v_kizai_qty.kizai_qty from v_kizai_qty where v_kizai_qty.kizai_id = $1 /*■変数箇所■*/)) as zaiko_qty_jogai     --全体在庫数   /*受注機材明細スケジュール、在庫状況スケジュール*/
+--     ,coalesce(zaiko_kizai.zaiko_qty,(select v_kizai_qty.kizai_qty from ${SCHEMA}.v_kizai_qty where v_kizai_qty.kizai_id = $1 /*■変数箇所■*/)) as zaiko_qty_jogai     --全体在庫数   /*受注機材明細スケジュール、在庫状況スケジュール*/
 
 --    ,coalesce(zaiko_kizai.juchu_honbanbi_shubetu_id,0) as juchu_honbanbi_shubetu_id --受注本番日種別
     ,coalesce(zaiko_kizai.juchu_honbanbi_shubetu_color,'white') as "juchuHonbanbiColor" --受注本番日種別カラー
@@ -127,12 +125,12 @@ from
             ,honbanbi.juchu_honbanbi_shubetu_id --受注本番日種別ID
             ,honbanbi.juchu_honbanbi_shubetu_color --受注本番日種別カラー
         from
-            v_zaiko_qty_kasi
+            ${SCHEMA}.v_zaiko_qty_kasi
             
         left outer join
             ----------------------
              --２．貸出状況スケジュールビュー
-              v_honbanbi_kasi_jokyo as honbanbi on
+              ${SCHEMA}.v_honbanbi_kasi_jokyo as honbanbi on
             ----------------------
             
             v_zaiko_qty_kasi.plan_dat = honbanbi.plan_dat
@@ -180,12 +178,11 @@ order by cal_dat;
  */
 export const selectStockList = async (kizaiId: number, date: string) => {
   try {
-    await pool.query(` SET search_path TO ${SCHEMA};`);
     const query = `
       select   
         cal.cal_dat as "calDat" --スケジュール日
         ,coalesce(zaiko_kizai.kizai_id,$1 /*■変数箇所■*/) as "kizaiId"   -- 機材ID
-        ,coalesce(zaiko_kizai.zaiko_qty,(select v_kizai_qty.kizai_qty from v_kizai_qty where v_kizai_qty.kizai_id = $1 /*■変数箇所■*/)) as "zaikoQty"     --在庫数   /*受注機材明細スケジュール、在庫状況スケジュール*/
+        ,coalesce(zaiko_kizai.zaiko_qty,(select v_kizai_qty.kizai_qty from ${SCHEMA}.v_kizai_qty where v_kizai_qty.kizai_id = $1 /*■変数箇所■*/)) as "zaikoQty"     --在庫数   /*受注機材明細スケジュール、在庫状況スケジュール*/
       from 
       (
         select 
@@ -193,7 +190,7 @@ export const selectStockList = async (kizaiId: number, date: string) => {
             ,v_zaiko_qty.kizai_id   --機材ID
             ,v_zaiko_qty.zaiko_qty  --機材の在庫数
         from
-            v_zaiko_qty
+            ${SCHEMA}.v_zaiko_qty
         where
             --指定した１機材
             v_zaiko_qty.kizai_id = $1 /*■変数箇所■*/

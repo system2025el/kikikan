@@ -149,6 +149,15 @@ export type SelectedEqptsValues = {
   indentNum: number;
 };
 
+export const DialogSchema = z.object({
+  headNam: z
+    .string({ message: validationMessages.required() })
+    .min(1, { message: validationMessages.required() })
+    .max(20, { message: validationMessages.maxStringLength(20) }),
+});
+
+export type DialogValues = z.infer<typeof DialogSchema>;
+
 /**
  * 分離用機材type
  */

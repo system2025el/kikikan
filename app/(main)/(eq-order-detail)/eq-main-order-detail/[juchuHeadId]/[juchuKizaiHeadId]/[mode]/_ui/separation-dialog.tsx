@@ -1,5 +1,6 @@
 'use client';
 
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Box,
   Button,
@@ -20,11 +21,20 @@ import {
   Typography,
 } from '@mui/material';
 import { useRef, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { TextFieldElement } from 'react-hook-form-mui';
 
 import { validationMessages } from '@/app/(main)/_lib/validation-messages';
 import { Loading, LoadingOverlay } from '@/app/(main)/_ui/loading';
 
-import { JuchuContainerMeisaiValues, JuchuKizaiMeisaiValues, SeparationCtn, SeparationEq } from '../_lib/types';
+import {
+  DialogSchema,
+  DialogValues,
+  JuchuContainerMeisaiValues,
+  JuchuKizaiMeisaiValues,
+  SeparationCtn,
+  SeparationEq,
+} from '../_lib/types';
 
 export const SeparationDialog = ({
   juchuKizaiMeisaiList,
@@ -48,8 +58,6 @@ export const SeparationDialog = ({
 
   // ローディング
   const [isLoading, setIsLoading] = useState(false);
-  // 機材明細名
-  const [headNam, setHeadNam] = useState('');
   // 分離機材
   const [separationEq, setSeparationEq] = useState<SeparationEq[]>(
     juchuKizaiMeisaiList.map((data) => ({ ...data, separatePlanKizaiQty: 0, separatePlanYobiQty: 0 }))
@@ -62,9 +70,15 @@ export const SeparationDialog = ({
   const [selectedEq, setSelectedEq] = useState<number[]>([]);
   // コンテナ選択
   const [selectedCtn, setSelectedCtn] = useState<number[]>([]);
-  // エラー
-  const [errors, setErrors] = useState({
-    headNam: '',
+
+  /* useForm ------------------------- */
+  const { control, handleSubmit } = useForm({
+    mode: 'onChange',
+    reValidateMode: 'onChange',
+    defaultValues: {
+      headNam: '',
+    },
+    resolver: zodResolver(DialogSchema),
   });
 
   // 機材チェックボックス押下
@@ -86,12 +100,7 @@ export const SeparationDialog = ({
   };
 
   // 確定ボタン押下
-  const handleClickConfirmed = async () => {
-    if (!headNam) {
-      setErrors((prev) => ({ ...prev, headNam: validationMessages.required() }));
-      return;
-    }
-
+  const onSubmit = async (data: DialogValues) => {
     setIsLoading(true);
     // 選択機材
     const selectEqData = separationEq.filter((data) => selectedEq.includes(data.dspOrdNum));
@@ -112,7 +121,7 @@ export const SeparationDialog = ({
       planQty: d.separatePlanKicsKizaiQty + d.separatePlanYardKizaiQty,
     }));
 
-    await handleSeparationConfirmed(headNam, updateEq, updateCtn);
+    await handleSeparationConfirmed(data.headNam, updateEq, updateCtn);
     setIsLoading(false);
   };
 
@@ -198,277 +207,271 @@ export const SeparationDialog = ({
 
   return (
     <Container sx={{ p: 1 }}>
-      <Typography>分離</Typography>
-      {isLoading && <LoadingOverlay />}
-      <Paper variant="outlined">
-        <Grid2 container alignItems={'baseline'} spacing={2} p={1}>
-          <Typography>機材明細名</Typography>
-          <TextField
-            value={headNam}
-            onChange={(e) => {
-              setHeadNam(e.target.value);
-              setErrors((prev) => ({ ...prev, headNam: '' }));
-            }}
-            error={Boolean(errors.headNam)}
-            helperText={errors.headNam}
-          />
-        </Grid2>
-        <Box display={'flex'}>
-          {separationEq.length > 0 && (
-            <TableContainer
-              sx={{
-                overflow: 'auto',
-                maxHeight: '60vh',
-                maxWidth: separationCtn.length > 0 ? '60%' : '100%',
-                mr: separationCtn.length > 0 ? 2 : 0,
-              }}
-            >
-              <Table stickyHeader aria-labelledby="tableTitle" size="small">
-                <TableHead sx={{ bgcolor: 'primary.light' }}>
-                  <TableRow sx={{ whiteSpace: 'nowrap' }}>
-                    <TableCell padding="checkbox">
-                      <Checkbox
-                        indeterminate={selectedEq.length > 0 && selectedEq.length < separationEq.length}
-                        checked={selectedEq.length === separationEq.length}
-                        onChange={(e) => {
-                          const newSelectedEq = e.target.checked ? separationEq.map((row) => row.dspOrdNum) : [];
-                          setSelectedEq(newSelectedEq);
-                        }}
-                      />
-                    </TableCell>
-                    <TableCell align="left">機材名</TableCell>
-                    <TableCell align="right">受注</TableCell>
-                    <TableCell align="right">予備</TableCell>
-                    <TableCell align="right">受注</TableCell>
-                    <TableCell align="right">予備</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {separationEq.map((row, index) => (
-                    <TableRow hover key={index}>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <Typography>分離</Typography>
+        {isLoading && <LoadingOverlay />}
+        <Paper variant="outlined">
+          <Grid2 container alignItems={'baseline'} spacing={2} p={1}>
+            <Typography>機材明細名</Typography>
+            <TextFieldElement name="headNam" control={control} />
+          </Grid2>
+          <Box display={'flex'}>
+            {separationEq.length > 0 && (
+              <TableContainer
+                sx={{
+                  overflow: 'auto',
+                  maxHeight: '60vh',
+                  maxWidth: separationCtn.length > 0 ? '60%' : '100%',
+                  mr: separationCtn.length > 0 ? 2 : 0,
+                }}
+              >
+                <Table stickyHeader aria-labelledby="tableTitle" size="small">
+                  <TableHead sx={{ bgcolor: 'primary.light' }}>
+                    <TableRow sx={{ whiteSpace: 'nowrap' }}>
                       <TableCell padding="checkbox">
                         <Checkbox
-                          checked={selectedEq.includes(row.dspOrdNum)}
-                          onChange={() => handleSelectEq(row.dspOrdNum)}
-                        />
-                      </TableCell>
-                      <TableCell align="left">{row.kizaiNam}</TableCell>
-                      <TableCell align="right">{row.planKizaiQty}</TableCell>
-                      <TableCell align="right">{row.planYobiQty}</TableCell>
-                      <TableCell align="right">
-                        <TextField
-                          value={row.separatePlanKizaiQty}
-                          type="number"
+                          indeterminate={selectedEq.length > 0 && selectedEq.length < separationEq.length}
+                          checked={selectedEq.length === separationEq.length}
                           onChange={(e) => {
-                            if (Number(e.target.value) <= row.planKizaiQty) {
-                              setSeparationEq((prev) =>
-                                prev.map((d, i) =>
-                                  i === index ? { ...d, separatePlanKizaiQty: Number(e.target.value) } : d
-                                )
-                              );
-                            }
+                            const newSelectedEq = e.target.checked ? separationEq.map((row) => row.dspOrdNum) : [];
+                            setSelectedEq(newSelectedEq);
                           }}
-                          slotProps={{
-                            input: {
-                              sx: {
-                                height: 25,
-                                fontSize: 'small',
-                              },
-                            },
-                          }}
-                          sx={{
-                            width: '60px',
-                            '& .MuiInputBase-input': {
-                              padding: 1,
-                              textAlign: 'right',
-                            },
-                            '& input[type=number]::-webkit-inner-spin-button': {
-                              WebkitAppearance: 'none',
-                              margin: 0,
-                            },
-                          }}
-                          inputRef={(e) => handleEqOrderRef(index, e)}
-                          onKeyDown={(e) => {
-                            handleEqOrderKeyDown(e, index);
-                          }}
-                          onFocus={(e) => e.target.select()}
                         />
                       </TableCell>
-                      <TableCell align="right">
-                        <TextField
-                          value={row.separatePlanYobiQty}
-                          type="number"
-                          onChange={(e) => {
-                            if (Number(e.target.value) <= row.planYobiQty) {
-                              setSeparationEq((prev) =>
-                                prev.map((d, i) =>
-                                  i === index ? { ...d, separatePlanYobiQty: Number(e.target.value) } : d
-                                )
-                              );
-                            }
-                          }}
-                          slotProps={{
-                            input: {
-                              sx: {
-                                height: 25,
-                                fontSize: 'small',
-                              },
-                            },
-                          }}
-                          sx={{
-                            width: '60px',
-                            '& .MuiInputBase-input': {
-                              padding: 1,
-                              textAlign: 'right',
-                            },
-                            '& input[type=number]::-webkit-inner-spin-button': {
-                              WebkitAppearance: 'none',
-                              margin: 0,
-                            },
-                          }}
-                          inputRef={(e) => handleEqYobiRef(index, e)}
-                          onKeyDown={(e) => {
-                            handleEqYobiKeyDown(e, index);
-                          }}
-                          onFocus={(e) => e.target.select()}
-                        />
-                      </TableCell>
+                      <TableCell align="left">機材名</TableCell>
+                      <TableCell align="right">受注</TableCell>
+                      <TableCell align="right">予備</TableCell>
+                      <TableCell align="right">受注</TableCell>
+                      <TableCell align="right">予備</TableCell>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          )}
-          {separationCtn.length > 0 && (
-            <TableContainer
-              sx={{ overflow: 'auto', maxHeight: '60vh', maxWidth: separationEq.length > 0 ? '40%' : '100%' }}
-            >
-              <Table stickyHeader aria-labelledby="tableTitle" size="small">
-                <TableHead sx={{ bgcolor: 'primary.light' }}>
-                  <TableRow sx={{ whiteSpace: 'nowrap' }}>
-                    <TableCell padding="checkbox">
-                      <Checkbox
-                        indeterminate={selectedCtn.length > 0 && selectedCtn.length < separationCtn.length}
-                        checked={selectedCtn.length === separationCtn.length}
-                        onChange={(e) => {
-                          const newSelectedCtn = e.target.checked ? separationCtn.map((row) => row.dspOrdNum) : [];
-                          setSelectedCtn(newSelectedCtn);
-                        }}
-                      />
-                    </TableCell>
-                    <TableCell align="left">機材名</TableCell>
-                    <TableCell align="right">K</TableCell>
-                    <TableCell align="right">Y</TableCell>
-                    <TableCell align="right">K</TableCell>
-                    <TableCell align="right">Y</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {separationCtn.map((row, index) => (
-                    <TableRow hover key={index}>
+                  </TableHead>
+                  <TableBody>
+                    {separationEq.map((row, index) => (
+                      <TableRow hover key={index}>
+                        <TableCell padding="checkbox">
+                          <Checkbox
+                            checked={selectedEq.includes(row.dspOrdNum)}
+                            onChange={() => handleSelectEq(row.dspOrdNum)}
+                          />
+                        </TableCell>
+                        <TableCell align="left">{row.kizaiNam}</TableCell>
+                        <TableCell align="right">{row.planKizaiQty}</TableCell>
+                        <TableCell align="right">{row.planYobiQty}</TableCell>
+                        <TableCell align="right">
+                          <TextField
+                            value={row.separatePlanKizaiQty}
+                            type="number"
+                            onChange={(e) => {
+                              if (Number(e.target.value) <= row.planKizaiQty) {
+                                setSeparationEq((prev) =>
+                                  prev.map((d, i) =>
+                                    i === index ? { ...d, separatePlanKizaiQty: Number(e.target.value) } : d
+                                  )
+                                );
+                              }
+                            }}
+                            slotProps={{
+                              input: {
+                                sx: {
+                                  height: 25,
+                                  fontSize: 'small',
+                                },
+                              },
+                            }}
+                            sx={{
+                              width: '60px',
+                              '& .MuiInputBase-input': {
+                                padding: 1,
+                                textAlign: 'right',
+                              },
+                              '& input[type=number]::-webkit-inner-spin-button': {
+                                WebkitAppearance: 'none',
+                                margin: 0,
+                              },
+                            }}
+                            inputRef={(e) => handleEqOrderRef(index, e)}
+                            onKeyDown={(e) => {
+                              handleEqOrderKeyDown(e, index);
+                            }}
+                            onFocus={(e) => e.target.select()}
+                          />
+                        </TableCell>
+                        <TableCell align="right">
+                          <TextField
+                            value={row.separatePlanYobiQty}
+                            type="number"
+                            onChange={(e) => {
+                              if (Number(e.target.value) <= row.planYobiQty) {
+                                setSeparationEq((prev) =>
+                                  prev.map((d, i) =>
+                                    i === index ? { ...d, separatePlanYobiQty: Number(e.target.value) } : d
+                                  )
+                                );
+                              }
+                            }}
+                            slotProps={{
+                              input: {
+                                sx: {
+                                  height: 25,
+                                  fontSize: 'small',
+                                },
+                              },
+                            }}
+                            sx={{
+                              width: '60px',
+                              '& .MuiInputBase-input': {
+                                padding: 1,
+                                textAlign: 'right',
+                              },
+                              '& input[type=number]::-webkit-inner-spin-button': {
+                                WebkitAppearance: 'none',
+                                margin: 0,
+                              },
+                            }}
+                            inputRef={(e) => handleEqYobiRef(index, e)}
+                            onKeyDown={(e) => {
+                              handleEqYobiKeyDown(e, index);
+                            }}
+                            onFocus={(e) => e.target.select()}
+                          />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            )}
+            {separationCtn.length > 0 && (
+              <TableContainer
+                sx={{ overflow: 'auto', maxHeight: '60vh', maxWidth: separationEq.length > 0 ? '40%' : '100%' }}
+              >
+                <Table stickyHeader aria-labelledby="tableTitle" size="small">
+                  <TableHead sx={{ bgcolor: 'primary.light' }}>
+                    <TableRow sx={{ whiteSpace: 'nowrap' }}>
                       <TableCell padding="checkbox">
                         <Checkbox
-                          checked={selectedCtn.includes(row.dspOrdNum)}
-                          onChange={() => handleSelectCtn(row.dspOrdNum)}
-                        />
-                      </TableCell>
-                      <TableCell align="left">{row.kizaiNam}</TableCell>
-                      <TableCell align="right">{row.planKicsKizaiQty}</TableCell>
-                      <TableCell align="right">{row.planYardKizaiQty}</TableCell>
-                      <TableCell align="right">
-                        <TextField
-                          value={row.separatePlanKicsKizaiQty}
-                          type="number"
+                          indeterminate={selectedCtn.length > 0 && selectedCtn.length < separationCtn.length}
+                          checked={selectedCtn.length === separationCtn.length}
                           onChange={(e) => {
-                            if (Number(e.target.value) <= row.planKicsKizaiQty) {
-                              setSeparationCtn((prev) =>
-                                prev.map((d, i) =>
-                                  i === index ? { ...d, separatePlanKicsKizaiQty: Number(e.target.value) } : d
-                                )
-                              );
-                            }
+                            const newSelectedCtn = e.target.checked ? separationCtn.map((row) => row.dspOrdNum) : [];
+                            setSelectedCtn(newSelectedCtn);
                           }}
-                          slotProps={{
-                            input: {
-                              sx: {
-                                height: 25,
-                                fontSize: 'small',
-                              },
-                            },
-                          }}
-                          sx={{
-                            width: '60px',
-                            '& .MuiInputBase-input': {
-                              padding: 1,
-                              textAlign: 'right',
-                            },
-                            '& input[type=number]::-webkit-inner-spin-button': {
-                              WebkitAppearance: 'none',
-                              margin: 0,
-                            },
-                          }}
-                          inputRef={(e) => handleCtnKRef(index, e)}
-                          onKeyDown={(e) => {
-                            handleCtnKKeyDown(e, index);
-                          }}
-                          onFocus={(e) => e.target.select()}
                         />
                       </TableCell>
-                      <TableCell align="right">
-                        <TextField
-                          value={row.separatePlanYardKizaiQty}
-                          type="number"
-                          onChange={(e) => {
-                            if (Number(e.target.value) <= row.planYardKizaiQty) {
-                              setSeparationCtn((prev) =>
-                                prev.map((d, i) =>
-                                  i === index ? { ...d, separatePlanYardKizaiQty: Number(e.target.value) } : d
-                                )
-                              );
-                            }
-                          }}
-                          slotProps={{
-                            input: {
-                              sx: {
-                                height: 25,
-                                fontSize: 'small',
-                              },
-                            },
-                          }}
-                          sx={{
-                            width: '60px',
-                            '& .MuiInputBase-input': {
-                              padding: 1,
-                              textAlign: 'right',
-                            },
-                            '& input[type=number]::-webkit-inner-spin-button': {
-                              WebkitAppearance: 'none',
-                              margin: 0,
-                            },
-                          }}
-                          inputRef={(e) => handleCtnYRef(index, e)}
-                          onKeyDown={(e) => {
-                            handleCtnYKeyDown(e, index);
-                          }}
-                          onFocus={(e) => e.target.select()}
-                        />
-                      </TableCell>
+                      <TableCell align="left">機材名</TableCell>
+                      <TableCell align="right">K</TableCell>
+                      <TableCell align="right">Y</TableCell>
+                      <TableCell align="right">K</TableCell>
+                      <TableCell align="right">Y</TableCell>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          )}
+                  </TableHead>
+                  <TableBody>
+                    {separationCtn.map((row, index) => (
+                      <TableRow hover key={index}>
+                        <TableCell padding="checkbox">
+                          <Checkbox
+                            checked={selectedCtn.includes(row.dspOrdNum)}
+                            onChange={() => handleSelectCtn(row.dspOrdNum)}
+                          />
+                        </TableCell>
+                        <TableCell align="left">{row.kizaiNam}</TableCell>
+                        <TableCell align="right">{row.planKicsKizaiQty}</TableCell>
+                        <TableCell align="right">{row.planYardKizaiQty}</TableCell>
+                        <TableCell align="right">
+                          <TextField
+                            value={row.separatePlanKicsKizaiQty}
+                            type="number"
+                            onChange={(e) => {
+                              if (Number(e.target.value) <= row.planKicsKizaiQty) {
+                                setSeparationCtn((prev) =>
+                                  prev.map((d, i) =>
+                                    i === index ? { ...d, separatePlanKicsKizaiQty: Number(e.target.value) } : d
+                                  )
+                                );
+                              }
+                            }}
+                            slotProps={{
+                              input: {
+                                sx: {
+                                  height: 25,
+                                  fontSize: 'small',
+                                },
+                              },
+                            }}
+                            sx={{
+                              width: '60px',
+                              '& .MuiInputBase-input': {
+                                padding: 1,
+                                textAlign: 'right',
+                              },
+                              '& input[type=number]::-webkit-inner-spin-button': {
+                                WebkitAppearance: 'none',
+                                margin: 0,
+                              },
+                            }}
+                            inputRef={(e) => handleCtnKRef(index, e)}
+                            onKeyDown={(e) => {
+                              handleCtnKKeyDown(e, index);
+                            }}
+                            onFocus={(e) => e.target.select()}
+                          />
+                        </TableCell>
+                        <TableCell align="right">
+                          <TextField
+                            value={row.separatePlanYardKizaiQty}
+                            type="number"
+                            onChange={(e) => {
+                              if (Number(e.target.value) <= row.planYardKizaiQty) {
+                                setSeparationCtn((prev) =>
+                                  prev.map((d, i) =>
+                                    i === index ? { ...d, separatePlanYardKizaiQty: Number(e.target.value) } : d
+                                  )
+                                );
+                              }
+                            }}
+                            slotProps={{
+                              input: {
+                                sx: {
+                                  height: 25,
+                                  fontSize: 'small',
+                                },
+                              },
+                            }}
+                            sx={{
+                              width: '60px',
+                              '& .MuiInputBase-input': {
+                                padding: 1,
+                                textAlign: 'right',
+                              },
+                              '& input[type=number]::-webkit-inner-spin-button': {
+                                WebkitAppearance: 'none',
+                                margin: 0,
+                              },
+                            }}
+                            inputRef={(e) => handleCtnYRef(index, e)}
+                            onKeyDown={(e) => {
+                              handleCtnYKeyDown(e, index);
+                            }}
+                            onFocus={(e) => e.target.select()}
+                          />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            )}
+          </Box>
+        </Paper>
+        <Box display={'flex'} justifyContent={'end'} my={1}>
+          <Grid2 container spacing={2}>
+            <Button type="submit" disabled={selectedEq.length + selectedCtn.length === 0}>
+              確定
+            </Button>
+            <Button onClick={handleCloseSeparationDialog}>戻る</Button>
+          </Grid2>
         </Box>
-      </Paper>
-      <Box display={'flex'} justifyContent={'end'} my={1}>
-        <Grid2 container spacing={2}>
-          <Button disabled={selectedEq.length + selectedCtn.length === 0} onClick={handleClickConfirmed}>
-            確定
-          </Button>
-          <Button onClick={handleCloseSeparationDialog}>戻る</Button>
-        </Grid2>
-      </Box>
+      </form>
     </Container>
   );
 };
