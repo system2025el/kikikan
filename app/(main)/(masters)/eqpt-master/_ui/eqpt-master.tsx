@@ -116,6 +116,7 @@ export const EqptMaster = () => {
   useEffect(() => {
     const getList = async () => {
       setIsLoading(true);
+      console.log('testtestestestessteste');
       const dataList = await getFilteredEqpts();
       setEqpts(dataList.data);
       setOptions(dataList.options);

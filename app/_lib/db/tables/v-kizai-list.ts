@@ -6,6 +6,7 @@ import { toJapanTimeString, toJapanYMDString } from '@/app/(main)/_lib/date-conv
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 import { OrderSearchValues } from '@/app/(main)/order-list/_lib/types';
 
+import pool from '../postgres';
 import { SCHEMA, supabase } from '../supabase';
 
 /**
@@ -20,15 +21,13 @@ export const selectFilteredEqpts = async (queries: {
   b: number | null;
   ngFlg?: boolean;
 }) => {
-  console.log('data');
   const builder = supabase
     .schema(SCHEMA)
     .from('v_kizai_lst')
     .select(
-      'kizai_id, kizai_nam, kizai_qty, kizai_ng_qty, shozoku_nam, mem, bumon_nam, dai_bumon_nam, shukei_bumon_nam, reg_amt, rank_amt_1, rank_amt_2, rank_amt_3, rank_amt_4, rank_amt_5, dsp_flg, del_flg'
+      'kizai_id, kizai_nam, kizai_qty, kizai_ng_qty, shozoku_nam, mem, bumon_nam, dai_bumon_nam, shukei_bumon_nam, reg_amt, dsp_flg, del_flg'
     )
-    .order('kizai_grp_cod')
-    .order('dsp_ord_num');
+    .eq('kizai_id', 1);
 
   if (queries.q && queries.q.trim() !== '') {
     builder.ilike('kizai_nam', `%${queries.q}%`);
@@ -45,7 +44,93 @@ export const selectFilteredEqpts = async (queries: {
   if (queries.ngFlg) {
     builder.gt('kizai_ng_qty', 0);
   }
+  //   let query = `
+  //     select distinct
+  //   m_kizai.kizai_id,
+  //   m_kizai.kizai_nam,
+  //   m_kizai.shozoku_id,
+  //   m_kizai.del_flg,
+  //   m_kizai.bld_cod,
+  //   m_kizai.tana_cod,
+  //   m_kizai.eda_cod,
+  //   case
+  //     when m_kizai.kizai_grp_cod::text = ''::text then '未設定'::character varying
+  //     when m_kizai.kizai_grp_cod is null then '未設定'::character varying
+  //     else m_kizai.kizai_grp_cod
+  //   end as kizai_grp_cod,
+  //   m_kizai.dsp_ord_num,
+  //   m_kizai.mem,
+  //   m_kizai.bumon_id,
+  //   m_kizai.shukei_bumon_id,
+  //   m_kizai.dsp_flg,
+  //   m_kizai.ctn_flg,
+  //   m_kizai.def_dat_qty,
+  //   m_kizai.reg_amt,
+  //   m_kizai.rank_amt_1,
+  //   m_kizai.rank_amt_2,
+  //   m_kizai.rank_amt_3,
+  //   m_kizai.rank_amt_4,
+  //   m_kizai.rank_amt_5,
+  //   m_kizai.section_num,
+  //   case
+  //     when m_section.section_nam_short is not null then m_section.section_nam_short::text
+  //     else m_kizai.section_num::text
+  //   end as section_nam,
+  //   v_kizai_qty.kizai_qty,
+  //   v_kizai_qty.kizai_ng_qty,
+  //   v_kizai_qty.kizai_del_qty,
+  //   m_shozoku.shozoku_nam,
+  //   m_shozoku.shozoku_nam_short,
+  //   m_bumon.bumon_nam,
+  //   m_shukei_bumon.shukei_bumon_nam,
+  //   m_dai_bumon.dai_bumon_id,
+  //   m_dai_bumon.dai_bumon_nam,
+  //   v_kizai_qty.rfid_kics_qty,
+  //   v_kizai_qty.rfid_yard_qty
+  // from
+  //   dev6.m_kizai
+  //   left join dev6.m_shozoku on m_shozoku.shozoku_id = m_kizai.shozoku_id
+  //   and m_shozoku.del_flg = 0
+  //   left join dev6.m_bumon on m_bumon.bumon_id = m_kizai.bumon_id
+  //   and m_bumon.del_flg = 0
+  //   left join dev6.m_shukei_bumon on m_shukei_bumon.shukei_bumon_id = m_kizai.shukei_bumon_id
+  //   and m_shukei_bumon.del_flg = 0
+  //   left join dev6.m_dai_bumon on m_dai_bumon.dai_bumon_id = m_bumon.dai_bumon_id
+  //   and m_shukei_bumon.shukei_bumon_id = m_kizai.shukei_bumon_id
+  //   and m_dai_bumon.del_flg = 0
+  //   left join dev6.v_kizai_qty on v_kizai_qty.kizai_id = m_kizai.kizai_id
+  //   left join dev6.m_section on m_section.section_id = COALESCE(m_kizai.section_num, 0)
+  //   and m_section.del_flg = 0
+  // order by
+  //   (
+  //     case
+  //       when m_kizai.kizai_grp_cod::text = ''::text then '未設定'::character varying
+  //       when m_kizai.kizai_grp_cod is null then '未設定'::character varying
+  //       else m_kizai.kizai_grp_cod
+  //     end
+  //   ),
+  //   m_kizai.dsp_ord_num,
+  //   m_kizai.kizai_nam;
+  //   `;
+
+  if (queries.q && queries.q.trim() !== '') {
+    builder.ilike('kizai_nam', `%${queries.q}%`);
+  }
+  if (queries.b !== null && queries.b !== FAKE_NEW_ID) {
+    builder.eq('bumon_id', queries.b);
+  }
+  if (queries.d !== null && queries.d !== FAKE_NEW_ID) {
+    builder.eq('dai_bumon_id', queries.d);
+  }
+  if (queries.s !== null && queries.s !== FAKE_NEW_ID) {
+    builder.eq('shukei_bumon_id', queries.s);
+  }
+  if (queries.ngFlg) {
+    builder.gt('kizai_ng_qty', 0);
+  }
+
   try {
+    // return await pool.query(query);
     return await builder;
   } catch (e) {
     throw e;
