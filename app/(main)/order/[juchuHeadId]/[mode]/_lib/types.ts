@@ -109,7 +109,7 @@ export type LocsDialogValues = {
   tel: string | null;
 };
 
-export const baseCopyDialogSchema = z.object({
+export const BaseCopyDialogSchema = z.object({
   juchuHeadid: z.string().optional(),
   headNam: z.string({ message: validationMessages.required() }).min(1, { message: validationMessages.required() }),
   kicsShukoDat: z.date().nullable(),
@@ -118,7 +118,7 @@ export const baseCopyDialogSchema = z.object({
   yardNyukoDat: z.date().nullable(),
 });
 
-export type CopyDialogValue = z.infer<typeof baseCopyDialogSchema>;
+export type CopyDialogValue = z.infer<typeof BaseCopyDialogSchema>;
 
 export const CopyDialogSchema = (origin: EqTableValues | null) =>
   z.object({
