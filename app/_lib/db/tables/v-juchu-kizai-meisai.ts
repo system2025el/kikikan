@@ -11,16 +11,41 @@ import { SCHEMA, supabase } from '../supabase';
  */
 export const selectJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
   try {
-    return await supabase
-      .schema(SCHEMA)
-      .from('v_juchu_kizai_meisai')
-      .select(
-        'juchu_head_id, juchu_kizai_head_id, juchu_kizai_meisai_id, shozoku_id, mem, mem2, kizai_id, kizai_nam, plan_kizai_qty, plan_yobi_qty, plan_qty, dsp_ord_num, indent_num'
-      )
-      .eq('juchu_head_id', juchuHeadId)
-      .eq('juchu_kizai_head_id', juchuKizaiHeadId)
-      .not('kizai_id', 'is', null)
-      .order('dsp_ord_num');
+    const queey = `
+      SELECT 
+        juchu_head_id, 
+        juchu_kizai_head_id, 
+        juchu_kizai_meisai_id, 
+        shozoku_id, 
+        mem, 
+        mem2, 
+        kizai_id, 
+        kizai_nam, 
+        plan_kizai_qty, 
+        plan_yobi_qty, 
+        plan_qty, 
+        dsp_ord_num, 
+        indent_num 
+      FROM ${SCHEMA}.v_juchu_kizai_meisai
+      WHERE juchu_head_id = $1
+        AND juchu_kizai_head_id = $2
+        AND kizai_id IS NOT NULL
+      ORDER BY 
+        dsp_ord_num
+    `;
+    const values = [juchuHeadId, juchuKizaiHeadId];
+    const result = await pool.query(queey, values);
+    return result.rows;
+    // return await supabase
+    //   .schema(SCHEMA)
+    //   .from('v_juchu_kizai_meisai')
+    //   .select(
+    //     'juchu_head_id, juchu_kizai_head_id, juchu_kizai_meisai_id, shozoku_id, mem, mem2, kizai_id, kizai_nam, plan_kizai_qty, plan_yobi_qty, plan_qty, dsp_ord_num, indent_num'
+    //   )
+    //   .eq('juchu_head_id', juchuHeadId)
+    //   .eq('juchu_kizai_head_id', juchuKizaiHeadId)
+    //   .not('kizai_id', 'is', null)
+    //   .order('dsp_ord_num');
   } catch (e) {
     throw e;
   }

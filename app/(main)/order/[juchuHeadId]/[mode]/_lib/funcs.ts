@@ -984,11 +984,11 @@ export const addAllHonbanbi = async (
  */
 export const getJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
   try {
-    const { data: eqList, error: eqListError } = await selectJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId);
-    if (eqListError) {
-      console.error('getJuchuKizaiMeisai eqList error : ', eqListError);
-      throw eqListError;
-    }
+    const /*{ data: eqList, error: eqListError }*/ eqList = await selectJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId);
+    // if (eqListError) {
+    //   console.error('getJuchuKizaiMeisai eqList error : ', eqListError);
+    //   throw eqListError;
+    // }
     const uniqueIds = new Set();
     const uniqueEqList = eqList.filter((item) => {
       if (uniqueIds.has(item.juchu_kizai_meisai_id)) {
@@ -1338,11 +1338,14 @@ export const addCtnNyushukoDen = async (
  */
 export const getIdoJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
   try {
-    const { data: eqList, error: eqListError } = await selectIdoJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId);
-    if (eqListError) {
-      console.error('GetEqList eqList error : ', eqListError);
-      throw eqListError;
-    }
+    const /*{ data: eqList, error: eqListError }*/ eqList = await selectIdoJuchuKizaiMeisai(
+        juchuHeadId,
+        juchuKizaiHeadId
+      );
+    // if (eqListError) {
+    //   console.error('GetEqList eqList error : ', eqListError);
+    //   throw eqListError;
+    // }
 
     const uniqueIds = new Set();
     const uniqueEqList = eqList.filter((item) => {
