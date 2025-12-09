@@ -1,5 +1,6 @@
 'use client';
 
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Box,
   Button,
@@ -18,11 +19,13 @@ import {
   Typography,
 } from '@mui/material';
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { TextFieldElement } from 'react-hook-form-mui';
 
 import { validationMessages } from '@/app/(main)/_lib/validation-messages';
 import { Loading, LoadingOverlay } from '@/app/(main)/_ui/loading';
 
-import { JuchuContainerMeisaiValues, JuchuKizaiMeisaiValues } from '../_lib/types';
+import { DialogSchema, DialogValues, JuchuContainerMeisaiValues, JuchuKizaiMeisaiValues } from '../_lib/types';
 
 export const CopyDialog = ({
   juchuKizaiMeisaiList,
@@ -41,15 +44,20 @@ export const CopyDialog = ({
 }) => {
   // ローディング
   const [isLoading, setIsLoading] = useState(false);
-  // 機材明細名
-  const [headNam, setHeadNam] = useState('');
   // 選択
   const [selected, setSelected] = useState<number[]>([]);
-  // エラー
-  const [errors, setErrors] = useState({
-    headNam: '',
+
+  /* useForm ------------------------- */
+  const { control, handleSubmit } = useForm({
+    mode: 'onChange',
+    reValidateMode: 'onChange',
+    defaultValues: {
+      headNam: '',
+    },
+    resolver: zodResolver(DialogSchema),
   });
 
+  // 選択処理
   const handleSelect = (dspOrdNum: number) => {
     const newSelected = selected.includes(dspOrdNum)
       ? selected.filter((item) => item !== dspOrdNum)
@@ -58,88 +66,85 @@ export const CopyDialog = ({
     setSelected(newSelected);
   };
 
-  const handleClickConfirmed = async () => {
-    if (!headNam) {
-      setErrors((prev) => ({ ...prev, headNam: validationMessages.required() }));
-      return;
-    }
+  // 確定ボタン押下
+  const onSubmit = async (data: DialogValues) => {
     setIsLoading(true);
     const selectEqData = juchuKizaiMeisaiList.filter((data) => selected.includes(data.dspOrdNum));
     const selectContainerData = juchuContainerMeisaiList.filter((data) => selected.includes(data.dspOrdNum));
-    await handleCopyConfirmed(headNam, selectEqData, selectContainerData);
+    await handleCopyConfirmed(data.headNam, selectEqData, selectContainerData);
     setIsLoading(false);
   };
 
   return (
     <Container sx={{ p: 1 }}>
-      <Typography>コピー</Typography>
-      {isLoading && <LoadingOverlay />}
-      <Paper variant="outlined">
-        <Grid2 container alignItems={'baseline'} spacing={2} p={1}>
-          <Typography>機材明細名</Typography>
-          <TextField
-            value={headNam}
-            onChange={(e) => {
-              setHeadNam(e.target.value);
-              setErrors((prev) => ({ ...prev, headNam: '' }));
-            }}
-            error={Boolean(errors.headNam)}
-            helperText={errors.headNam}
-          />
-        </Grid2>
-        <Divider />
-        <TableContainer sx={{ overflow: 'auto', maxHeight: '60vh' }}>
-          <Table stickyHeader aria-labelledby="tableTitle" size="small">
-            <TableHead sx={{ bgcolor: 'primary.light' }}>
-              <TableRow sx={{ whiteSpace: 'nowrap' }}>
-                <TableCell padding="checkbox">
-                  <Checkbox
-                    indeterminate={
-                      selected.length > 0 &&
-                      selected.length < juchuKizaiMeisaiList.length + juchuContainerMeisaiList.length
-                    }
-                    checked={selected.length === juchuKizaiMeisaiList.length + juchuContainerMeisaiList.length}
-                    onChange={(e) => {
-                      const newSelectedEq = e.target.checked ? juchuKizaiMeisaiList.map((row) => row.dspOrdNum) : [];
-                      const newSelectedCtn = e.target.checked
-                        ? juchuContainerMeisaiList.map((row) => row.dspOrdNum)
-                        : [];
-                      setSelected([...newSelectedEq, ...newSelectedCtn]);
-                    }}
-                  />
-                </TableCell>
-                <TableCell align="left">機材名</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {juchuKizaiMeisaiList.map((row, index) => (
-                <TableRow hover key={index}>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <Typography>コピー</Typography>
+        {isLoading && <LoadingOverlay />}
+        <Paper variant="outlined">
+          <Grid2 container alignItems={'baseline'} spacing={2} p={1}>
+            <Typography>機材明細名</Typography>
+            <TextFieldElement name="headNam" control={control} />
+          </Grid2>
+          <Divider />
+          <TableContainer sx={{ overflow: 'auto', maxHeight: '60vh' }}>
+            <Table stickyHeader aria-labelledby="tableTitle" size="small">
+              <TableHead sx={{ bgcolor: 'primary.light' }}>
+                <TableRow sx={{ whiteSpace: 'nowrap' }}>
                   <TableCell padding="checkbox">
-                    <Checkbox checked={selected.includes(row.dspOrdNum)} onChange={() => handleSelect(row.dspOrdNum)} />
+                    <Checkbox
+                      indeterminate={
+                        selected.length > 0 &&
+                        selected.length < juchuKizaiMeisaiList.length + juchuContainerMeisaiList.length
+                      }
+                      checked={selected.length === juchuKizaiMeisaiList.length + juchuContainerMeisaiList.length}
+                      onChange={(e) => {
+                        const newSelectedEq = e.target.checked ? juchuKizaiMeisaiList.map((row) => row.dspOrdNum) : [];
+                        const newSelectedCtn = e.target.checked
+                          ? juchuContainerMeisaiList.map((row) => row.dspOrdNum)
+                          : [];
+                        setSelected([...newSelectedEq, ...newSelectedCtn]);
+                      }}
+                    />
                   </TableCell>
-                  <TableCell align="left">{row.kizaiNam}</TableCell>
+                  <TableCell align="left">機材名</TableCell>
                 </TableRow>
-              ))}
-              {juchuContainerMeisaiList.map((row, index) => (
-                <TableRow hover key={index}>
-                  <TableCell padding="checkbox">
-                    <Checkbox checked={selected.includes(row.dspOrdNum)} onChange={() => handleSelect(row.dspOrdNum)} />
-                  </TableCell>
-                  <TableCell align="left">{row.kizaiNam}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Paper>
-      <Box display={'flex'} justifyContent={'end'} my={1}>
-        <Grid2 container spacing={2}>
-          <Button disabled={selected.length === 0} onClick={handleClickConfirmed}>
-            確定
-          </Button>
-          <Button onClick={handleCloseCopyDialog}>戻る</Button>
-        </Grid2>
-      </Box>
+              </TableHead>
+              <TableBody>
+                {juchuKizaiMeisaiList.map((row, index) => (
+                  <TableRow hover key={index}>
+                    <TableCell padding="checkbox">
+                      <Checkbox
+                        checked={selected.includes(row.dspOrdNum)}
+                        onChange={() => handleSelect(row.dspOrdNum)}
+                      />
+                    </TableCell>
+                    <TableCell align="left">{row.kizaiNam}</TableCell>
+                  </TableRow>
+                ))}
+                {juchuContainerMeisaiList.map((row, index) => (
+                  <TableRow hover key={index}>
+                    <TableCell padding="checkbox">
+                      <Checkbox
+                        checked={selected.includes(row.dspOrdNum)}
+                        onChange={() => handleSelect(row.dspOrdNum)}
+                      />
+                    </TableCell>
+                    <TableCell align="left">{row.kizaiNam}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Paper>
+        <Box display={'flex'} justifyContent={'end'} my={1}>
+          <Grid2 container spacing={2}>
+            <Button type="submit" disabled={selected.length === 0}>
+              確定
+            </Button>
+            <Button onClick={handleCloseCopyDialog}>戻る</Button>
+          </Grid2>
+        </Box>
+      </form>
     </Container>
   );
 };
