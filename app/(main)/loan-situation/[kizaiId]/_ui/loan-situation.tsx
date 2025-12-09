@@ -33,20 +33,20 @@ import { LoanSituationTable, UseTable } from './loan-situation-table';
 
 export const LoanSituation = (props: {
   kizaiData: LoanKizai;
-  loanJuchuData: LoanJuchu[];
-  eqUseData: LoanUseTableValues[][];
-  eqStockData: LoanStockTableValues[];
+  // loanJuchuData: LoanJuchu[];
+  // eqUseData: LoanUseTableValues[][];
+  // eqStockData: LoanStockTableValues[];
 }) => {
   const { kizaiData } = props;
 
   // ローディング
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   // 貸出受注データリスト
-  const [loanJuchuList, setLoanJuchuList] = useState<LoanJuchu[]>(props.loanJuchuData);
+  const [loanJuchuList, setLoanJuchuList] = useState<LoanJuchu[]>(/*props.loanJuchuData*/ []);
   // 機材使用リスト
-  const [eqUseList, setEqUseList] = useState<LoanUseTableValues[][]>(props.eqUseData);
+  const [eqUseList, setEqUseList] = useState<LoanUseTableValues[][]>(/*props.eqUseData*/ []);
   // 機材在庫リスト
-  const [eqStockList, setEqStockList] = useState<LoanStockTableValues[]>(props.eqStockData);
+  const [eqStockList, setEqStockList] = useState<LoanStockTableValues[]>(/*props.eqStockData*/ []);
   // カレンダー選択日
   const [selectDate, setSelectDate] = useState<Date>(new Date());
   // ラジオボタン選択値
@@ -60,6 +60,54 @@ export const LoanSituation = (props: {
   const leftRef = useRef<HTMLDivElement>(null);
   const rightRef = useRef<HTMLDivElement>(null);
   const isSyncing = useRef(false);
+
+  useEffect(() => {
+    const getData = async () => {
+      // ヘッダー開始日
+      const strDat = subDays(new Date(), 1);
+      // 機材在庫データ
+      const eqStockData: LoanStockTableValues[] = await getLoanStockData(kizaiData.kizaiId, strDat);
+      // ヘッダー開始日から終了日までに該当する受注ヘッダーidリスト
+      const confirmJuchuHeadIds = await confirmJuchuHeadId(strDat);
+      // 貸出受注データ
+      const loanJuchuData = await getLoanJuchuData(kizaiData.kizaiId);
+
+      // 該当する受注ヘッダーidリストに含まれる貸出受注データのみ抽出
+      const filterLoanJuchuData = loanJuchuData.filter((d) => confirmJuchuHeadIds.includes(d.juchuHeadId));
+
+      if (filterLoanJuchuData.length === 0) {
+        setEqStockList(eqStockData);
+        return;
+      }
+
+      filterLoanJuchuData.sort((a, b) => {
+        const dateA = a.shukoDat ? new Date(a.shukoDat).getTime() : null;
+        const dateB = b.shukoDat ? new Date(b.shukoDat).getTime() : null;
+
+        if (dateA === null && dateB === null) return 0;
+        if (dateA === null) return 1;
+        if (dateB === null) return -1;
+
+        return dateA - dateB;
+      });
+
+      const juchuHeadIds = filterLoanJuchuData.map((d) => d.juchuHeadId);
+
+      const eqUseData: LoanUseTableValues[][] = [];
+      for (const juchuHeadId of juchuHeadIds) {
+        const data: LoanUseTableValues[] = await getLoanUseData(juchuHeadId, kizaiData.kizaiId, strDat);
+        eqUseData.push(data);
+      }
+
+      setLoanJuchuList(filterLoanJuchuData);
+      setEqUseList(eqUseData);
+      setEqStockList(eqStockData);
+
+      setIsLoading(false);
+    };
+    getData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const left = leftRef.current;
