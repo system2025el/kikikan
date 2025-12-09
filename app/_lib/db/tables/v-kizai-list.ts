@@ -20,6 +20,7 @@ export const selectFilteredEqpts = async (queries: {
   b: number | null;
   ngFlg?: boolean;
 }) => {
+  console.log('data');
   const builder = supabase
     .schema(SCHEMA)
     .from('v_kizai_lst')
