@@ -3,17 +3,14 @@ import z from 'zod';
 import { validationMessages } from '@/app/(main)/_lib/validation-messages';
 
 /**
- * 見積一覧表示テーブルのタイプ
+ * 請求一覧表示テーブルのタイプ
  */
-export type BillTableValues = {
-  seikyuHeadId: number;
-  juchuHeadId: number;
-  seikyuStsNam: string;
-  seikyuHeadNam: string;
-  koenNam: string;
-  kokyakuNam: string;
-  seikyuDat: string;
-  nyuryokuUser: string;
+export type BillsListTableValues = {
+  billHeadId: number;
+  billingSts: string | null;
+  billHeadNam: string | null;
+  kokyaku: string | null;
+  seikyuDat: string | null;
 };
 
 /**
@@ -168,12 +165,4 @@ export type BillSearchValues = {
   range: { str: Date | null; end: Date | null };
   kokyaku: string | null;
   seikyuHeadNam: string | null;
-};
-
-export type BillsListTableValues = {
-  billHeadId: number;
-  billingSts: string | null;
-  billHeadNam: string | null;
-  kokyaku: string | null;
-  seikyuDat: string | null;
 };

@@ -47,6 +47,8 @@ export const BillingStsList = () => {
   /* 検索ボタンを押したときの処理 */
   const onSubmit = async (data: BillingStsSearchValues) => {
     setIsLoading(true);
+    // 検索条件保持
+    sessionStorage.setItem('billingStsSearchParams', JSON.stringify(data));
     setIsFirst(false);
     console.log(data);
     const theSts = await getFilteredBillingSituations(data);
@@ -68,8 +70,6 @@ export const BillingStsList = () => {
     const searchParams = searchPramsString ? JSON.parse(searchPramsString) : null;
 
     const getList = async () => {
-      // メモリ上に検索条件があるか確認
-      sessionStorage.removeItem('billingStsSearchParams');
       // 読み込み中
       setIsLoading(true);
       // 初期表示ではない
@@ -190,7 +190,6 @@ export const BillingStsList = () => {
         tantouNam={tantou}
         billSts={billSts}
         isFirst={isFirst}
-        searchParams={getValues()}
         setPage={setPage}
         refetch={refetch}
       />

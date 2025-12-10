@@ -88,3 +88,15 @@ export const selectChosenSeikyu = async (id: number) => {
     throw e;
   }
 };
+
+/**
+ * t_seikyu_headのdel_flgを1にする関数
+ * @param {number[]}ids 請求ヘッダIDの配列
+ */
+export const updBillHeadDelFlg = async (ids: number[]) => {
+  try {
+    await supabase.schema(SCHEMA).from('t_seikyu_head').update({ del_flg: 1 }).in('seikyu_head_id', ids);
+  } catch (e) {
+    throw e;
+  }
+};

@@ -43,7 +43,6 @@ export const QuotationListTable = ({
   quots,
   isLoading,
   page,
-  queries,
   isFirst,
   searchParams,
   setIsLoading,
@@ -54,7 +53,6 @@ export const QuotationListTable = ({
   quots: QuotTableValues[];
   isLoading: boolean;
   page: number;
-  queries: QuotSearchValues;
   isFirst: boolean;
   searchParams: QuotSearchValues;
   setQuotList: React.Dispatch<React.SetStateAction<QuotTableValues[]>>;
@@ -72,7 +70,7 @@ export const QuotationListTable = ({
   /* useState ------------------------------------- */
   /** ダイアログの開閉 */
   const [dialogOpen, setDialogOpen] = useState(false);
-  /** ダイアログの開閉 */
+  /** 削除ダイアログの開閉 */
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   /** 選択された見積Idの配列 */
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
@@ -99,9 +97,10 @@ export const QuotationListTable = ({
     setSnackBarMessage(`見積を${mituIds.length}件削除しました`);
     setSnackBarOpen(true);
     setIsLoading(true);
-    const q = await getFilteredQuotList(queries);
+    const q = await getFilteredQuotList(searchParams);
     console.log(q);
     setQuotList(q);
+    setIsLoading(false);
   };
 
   /** チェックボックス押下（選択時）の処理 */
@@ -172,7 +171,6 @@ export const QuotationListTable = ({
               <Grid2>
                 <Button
                   onClick={() => {
-                    sessionStorage.setItem('quotListSearchParams', JSON.stringify(searchParams));
                     router.push(`quotation-list/copy?mituId=${selectedIds[0]}`);
                   }}
                   disabled={selectedIds.length !== 1}
@@ -265,7 +263,6 @@ export const QuotationListTable = ({
                           sx={{ py: 0.2, px: 0, m: 0, minWidth: 0 }}
                           onClick={() => {
                             console.log('テーブルで見積番号', quotation.mituHeadId, 'をクリック');
-                            sessionStorage.setItem('quotListSearchParams', JSON.stringify(searchParams));
                             setIsLoading(true);
                             setIsFirst(true);
                             router.push(`/quotation-list/edit/${quotation.mituHeadId}`);
@@ -307,7 +304,7 @@ export const QuotationListTable = ({
         )}
         {/* 見積作成方法確認ダイアログ */}
         <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
-          <CreateQuotDialog inputRef={inputRef} searchParams={searchParams} setDialogOpen={setDialogOpen} />
+          <CreateQuotDialog inputRef={inputRef} setDialogOpen={setDialogOpen} />
         </Dialog>
         {/* 見積削除確認ダイアログ */}
         <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>

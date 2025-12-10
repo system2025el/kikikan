@@ -55,7 +55,6 @@ export const BillingStsListTable = ({
   tantouNam,
   billSts,
   isFirst,
-  searchParams,
   setPage,
   refetch,
 }: {
@@ -65,7 +64,6 @@ export const BillingStsListTable = ({
   tantouNam: string | null;
   billSts: BillingStsTableValues[];
   isFirst: boolean;
-  searchParams: BillingStsSearchValues;
   setPage: React.Dispatch<React.SetStateAction<number>>;
   refetch: () => Promise<void>;
 }) => {
@@ -153,12 +151,7 @@ export const BillingStsListTable = ({
         </TableContainer>
       )}
       <Dialog open={createOpen} onClose={() => setCreateOpen(false)}>
-        <CreateBillDialog
-          kokyakuId={kokyakuId}
-          tantouNam={tantouNam}
-          searchParams={searchParams}
-          setDialogOpen={setCreateOpen}
-        />
+        <CreateBillDialog kokyakuId={kokyakuId} tantouNam={tantouNam} setDialogOpen={setCreateOpen} />
       </Dialog>
       <Snackbar
         open={snackBarOpen}

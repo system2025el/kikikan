@@ -3,9 +3,10 @@
 import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
+import { revalidatePath } from 'next/cache';
 
 import { selectActiveSeikyuSts } from '@/app/_lib/db/tables/m-seikyu-sts';
-import { selectChosenSeikyu } from '@/app/_lib/db/tables/t-seikyu-head';
+import { selectChosenSeikyu, updBillHeadDelFlg } from '@/app/_lib/db/tables/t-seikyu-head';
 import { selectBillMeisai } from '@/app/_lib/db/tables/t-seikyu-meisai';
 import { selectBillMeisaiHead } from '@/app/_lib/db/tables/t-seikyu-meisai-head';
 import {
@@ -345,6 +346,20 @@ export const getJuchuKizaiMeisaiDetailsForBill = async (juchuHeadId: number, kiz
     return Object.values(groupedResult);
   } catch (e) {
     console.error('例外が発生しました', e);
+    throw e;
+  }
+};
+
+/**
+ * 一覧で選択された請求の削除フラグを１にする関数
+ * @param {number[]} ids 選択された請求のヘッドIDの配列
+ */
+export const updBillDelFlg = async (ids: number[]) => {
+  try {
+    console.log('Delete ::: ', ids);
+    await updBillHeadDelFlg(ids);
+    await revalidatePath('/bill-list');
+  } catch (e) {
     throw e;
   }
 };

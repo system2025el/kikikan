@@ -16,11 +16,9 @@ import { QuotSearchValues } from '../_lib/types';
  */
 export const CreateQuotDialog = ({
   inputRef,
-  searchParams,
   setDialogOpen,
 }: {
   inputRef: React.RefObject<HTMLInputElement | null>;
-  searchParams: QuotSearchValues;
   setDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
   const router = useRouter();
@@ -31,7 +29,6 @@ export const CreateQuotDialog = ({
   /** 自動生成ボタン押下 */
   const onSubmit = (data: { juchuHeadId: number | null }) => {
     console.log(data.juchuHeadId, 'の見積もりを自動生成');
-    sessionStorage.setItem('quotListSearchParams', JSON.stringify(searchParams));
     setIsLoading(true);
     router.push(`/quotation-list/create?juchuId=${data.juchuHeadId}`);
   };
@@ -77,7 +74,6 @@ export const CreateQuotDialog = ({
           <Button
             onClick={() => {
               setDialogOpen(false);
-              sessionStorage.setItem('quotListSearchParams', JSON.stringify(searchParams));
               router.push('/quotation-list/create');
             }}
           >
