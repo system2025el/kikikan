@@ -148,19 +148,30 @@ const EquipmentOrderDetail = (props: {
   // 受注本番日削除リスト
   const [juchuHonbanbiDeleteList, setJuchuHonbanbiDeleteList] = useState<JuchuKizaiHonbanbiValues[]>([]);
   // 受注機材明細元合計数
-  const [originPlanQty, setOriginPlanQty] = useState<Map<number, number>>(
-    juchuKizaiMeisaiList.reduce((acc, current) => {
-      const key = current.kizaiId;
-      const total = acc.get(key);
-      if (total) {
-        const currentTotal = total + current.planQty;
-        acc.set(key, currentTotal);
-      } else {
-        acc.set(key, current.planQty);
-      }
-      return acc;
-    }, new Map<number, number>())
-  );
+  const originPlanQty = originJuchuKizaiMeisaiList.reduce((acc, current) => {
+    const key = current.kizaiId;
+    const total = acc.get(key);
+    if (total) {
+      const currentTotal = total + current.planQty;
+      acc.set(key, currentTotal);
+    } else {
+      acc.set(key, current.planQty);
+    }
+    return acc;
+  }, new Map<number, number>());
+  // const [originPlanQty, setOriginPlanQty] = useState<Map<number, number>>(
+  //   juchuKizaiMeisaiList.reduce((acc, current) => {
+  //     const key = current.kizaiId;
+  //     const total = acc.get(key);
+  //     if (total) {
+  //       const currentTotal = total + current.planQty;
+  //       acc.set(key, currentTotal);
+  //     } else {
+  //       acc.set(key, current.planQty);
+  //     }
+  //     return acc;
+  //   }, new Map<number, number>())
+  // );
   // 削除機材
   const [deleteEq, setDeleteEq] = useState<{ rowIndex: number; row: JuchuKizaiMeisaiValues } | null>(null);
   // 削除コンテナ
@@ -211,16 +222,16 @@ const EquipmentOrderDetail = (props: {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
-  // 合計金額
-  const [priceTotal, setPriceTotal] = useState(
-    juchuKizaiMeisaiList!.reduce(
-      (sum, row) =>
-        props.juchuKizaiHeadData.juchuHonbanbiQty && row.planKizaiQty
-          ? sum + row.kizaiTankaAmt * row.planKizaiQty * props.juchuKizaiHeadData.juchuHonbanbiQty
-          : 0,
-      0
-    )
-  );
+  // // 合計金額
+  // const [priceTotal, setPriceTotal] = useState(
+  //   juchuKizaiMeisaiList!.reduce(
+  //     (sum, row) =>
+  //       props.juchuKizaiHeadData.juchuHonbanbiQty && row.planKizaiQty
+  //         ? sum + row.kizaiTankaAmt * row.planKizaiQty * props.juchuKizaiHeadData.juchuHonbanbiQty
+  //         : 0,
+  //     0
+  //   )
+  // );
 
   // 編集中かどうか
   const [isNebikiRatEditing, setIsNebikiRatEditing] = useState(false);
@@ -267,18 +278,28 @@ const EquipmentOrderDetail = (props: {
     },
     resolver: zodResolver(JuchuKizaiHeadSchema),
   });
+  /** 本番日数の監視 */
+  const juchuHonbanbiQty = watch('juchuHonbanbiQty');
   /** 割引率の監視 */
   const nebikiRat = watch('nebikiRat');
   /** 割引金額の監視 */
   const nebikiAmt = watch('nebikiAmt');
 
+  // 合計金額
+  const priceTotal = juchuKizaiMeisaiList.reduce(
+    (sum, row) => sum + row.kizaiTankaAmt * row.planKizaiQty * (juchuHonbanbiQty ?? 0),
+    0
+  );
+
   // 割引率（金額）
-  const waribikiRatAmt = useMemo(() => priceTotal * ((nebikiRat ?? 0) / 100), [priceTotal, nebikiRat]);
+  const waribikiRatAmt = priceTotal * ((nebikiRat ?? 0) / 100);
+  // const waribikiRatAmt = useMemo(() => priceTotal * ((nebikiRat ?? 0) / 100), [priceTotal, nebikiRat]);
 
   // 割引後金額（割引金額）
-  const nebikiAftAmt = useMemo(() => {
-    return priceTotal - (nebikiAmt ?? 0);
-  }, [priceTotal, nebikiAmt]);
+  const nebikiAftAmt = priceTotal - (nebikiAmt ?? 0);
+  // const nebikiAftAmt = useMemo(() => {
+  //   return priceTotal - (nebikiAmt ?? 0);
+  // }, [priceTotal, nebikiAmt]);
 
   // ブラウザバック、F5、×ボタンでページを離れた際のhook
   useUnsavedChangesWarning(isDirty || otherDirty ? true : false);
@@ -344,19 +365,19 @@ const EquipmentOrderDetail = (props: {
       setDateRange(dateRange);
       setOriginEqStockList(updatedEqStockData);
       setEqStockList(updatedEqStockData);
-      setOriginPlanQty(
-        juchuKizaiMeisaiData.reduce((acc, current) => {
-          const key = current.kizaiId;
-          const total = acc.get(key);
-          if (total) {
-            const currentTotal = total + current.planQty;
-            acc.set(key, currentTotal);
-          } else {
-            acc.set(key, current.planQty);
-          }
-          return acc;
-        }, new Map<number, number>())
-      );
+      // setOriginPlanQty(
+      //   juchuKizaiMeisaiData.reduce((acc, current) => {
+      //     const key = current.kizaiId;
+      //     const total = acc.get(key);
+      //     if (total) {
+      //       const currentTotal = total + current.planQty;
+      //       acc.set(key, currentTotal);
+      //     } else {
+      //       acc.set(key, current.planQty);
+      //     }
+      //     return acc;
+      //   }, new Map<number, number>())
+      // );
 
       setIsDetailLoading(false);
     };
@@ -459,16 +480,16 @@ const EquipmentOrderDetail = (props: {
         )
     );
 
-    const updatedPriceTotal = juchuKizaiMeisaiList
-      .filter((data) => !data.delFlag)
-      .reduce(
-        (sum, row) =>
-          getValues('juchuHonbanbiQty') !== null
-            ? sum + row.kizaiTankaAmt * row.planKizaiQty * (getValues('juchuHonbanbiQty') ?? 0)
-            : 0,
-        0
-      );
-    setPriceTotal(updatedPriceTotal);
+    // const updatedPriceTotal = juchuKizaiMeisaiList
+    //   .filter((data) => !data.delFlag)
+    //   .reduce(
+    //     (sum, row) =>
+    //       getValues('juchuHonbanbiQty') !== null
+    //         ? sum + row.kizaiTankaAmt * row.planKizaiQty * (getValues('juchuHonbanbiQty') ?? 0)
+    //         : 0,
+    //     0
+    //   );
+    // setPriceTotal(updatedPriceTotal);
   }, [getValues, juchuKizaiMeisaiList]);
 
   /**
@@ -687,19 +708,19 @@ const EquipmentOrderDetail = (props: {
           if (juchuKizaiMeisaiData) {
             setJuchuKizaiMeisaiList(juchuKizaiMeisaiData);
             setOriginJuchuKizaiMeisaiList(juchuKizaiMeisaiData);
-            setOriginPlanQty(
-              juchuKizaiMeisaiData.reduce((acc, current) => {
-                const key = current.kizaiId;
-                const total = acc.get(key);
-                if (total) {
-                  const currentTotal = total + current.planQty;
-                  acc.set(key, currentTotal);
-                } else {
-                  acc.set(key, current.planQty);
-                }
-                return acc;
-              }, new Map<number, number>())
-            );
+            // setOriginPlanQty(
+            //   juchuKizaiMeisaiData.reduce((acc, current) => {
+            //     const key = current.kizaiId;
+            //     const total = acc.get(key);
+            //     if (total) {
+            //       const currentTotal = total + current.planQty;
+            //       acc.set(key, currentTotal);
+            //     } else {
+            //       acc.set(key, current.planQty);
+            //     }
+            //     return acc;
+            //   }, new Map<number, number>())
+            // );
             const updatedEqStockData = await updateEqStock(
               data.juchuHeadId,
               data.juchuKizaiHeadId,
@@ -741,19 +762,19 @@ const EquipmentOrderDetail = (props: {
           if (juchuKizaiMeisaiData) {
             setJuchuKizaiMeisaiList(juchuKizaiMeisaiData);
             setOriginJuchuKizaiMeisaiList(juchuKizaiMeisaiData);
-            setOriginPlanQty(
-              juchuKizaiMeisaiData.reduce((acc, current) => {
-                const key = current.kizaiId;
-                const total = acc.get(key);
-                if (total) {
-                  const currentTotal = total + current.planQty;
-                  acc.set(key, currentTotal);
-                } else {
-                  acc.set(key, current.planQty);
-                }
-                return acc;
-              }, new Map<number, number>())
-            );
+            // setOriginPlanQty(
+            //   juchuKizaiMeisaiData.reduce((acc, current) => {
+            //     const key = current.kizaiId;
+            //     const total = acc.get(key);
+            //     if (total) {
+            //       const currentTotal = total + current.planQty;
+            //       acc.set(key, currentTotal);
+            //     } else {
+            //       acc.set(key, current.planQty);
+            //     }
+            //     return acc;
+            //   }, new Map<number, number>())
+            // );
             const updatedEqStockData = await updateEqStock(
               data.juchuHeadId,
               data.juchuKizaiHeadId,
@@ -1362,19 +1383,19 @@ const EquipmentOrderDetail = (props: {
       setJuchuHonbanbiDeleteList([]);
       setJuchuKizaiMeisaiList(originJuchuKizaiMeisaiList);
       setJuchuContainerMeisaiList(originJuchuContainerMeisaiList);
-      setOriginPlanQty(
-        originJuchuKizaiMeisaiList.reduce((acc, current) => {
-          const key = current.kizaiId;
-          const total = acc.get(key);
-          if (total) {
-            const currentTotal = total + current.planQty;
-            acc.set(key, currentTotal);
-          } else {
-            acc.set(key, current.planQty);
-          }
-          return acc;
-        }, new Map<number, number>())
-      );
+      // setOriginPlanQty(
+      //   originJuchuKizaiMeisaiList.reduce((acc, current) => {
+      //     const key = current.kizaiId;
+      //     const total = acc.get(key);
+      //     if (total) {
+      //       const currentTotal = total + current.planQty;
+      //       acc.set(key, currentTotal);
+      //     } else {
+      //       acc.set(key, current.planQty);
+      //     }
+      //     return acc;
+      //   }, new Map<number, number>())
+      // );
       setEqStockList(originEqStockList);
       setDirtyOpen(false);
     } else {
@@ -1392,14 +1413,14 @@ const EquipmentOrderDetail = (props: {
     const honbanbiQty = updatedHonbanbiList.filter((data) => data.juchuHonbanbiShubetuId === 40).length;
     const addHonbanbiQty = updatedHonbanbiList.reduce((sum, data) => sum + (data.juchuHonbanbiAddQty ?? 0), 0);
     const updatedJuchuHonbanbiQty = honbanbiQty + addHonbanbiQty;
-    const updatedPriceTotal = juchuKizaiMeisaiList
-      .filter((data) => !data.delFlag)
-      .reduce((sum, row) => sum + row.kizaiTankaAmt * (row.planKizaiQty ?? 0) * updatedJuchuHonbanbiQty, 0);
+    // const updatedPriceTotal = juchuKizaiMeisaiList
+    //   .filter((data) => !data.delFlag)
+    //   .reduce((sum, row) => sum + row.kizaiTankaAmt * (row.planKizaiQty ?? 0) * updatedJuchuHonbanbiQty, 0);
 
     if (getValues('juchuHonbanbiQty') !== updatedJuchuHonbanbiQty) {
       setValue('juchuHonbanbiQty', updatedJuchuHonbanbiQty, { shouldDirty: true });
     }
-    setPriceTotal(updatedPriceTotal);
+    // setPriceTotal(updatedPriceTotal);
     setJuchuHonbanbiList(updatedHonbanbiList);
     setJuchuHonbanbiDeleteList(updatedHonbanbiDeleteList);
 
@@ -1799,11 +1820,6 @@ const EquipmentOrderDetail = (props: {
                   </Button>
                 </Grid2>
                 <BackButton label={'戻る'} />
-                <Button
-                  onClick={() => {
-                    console.log(originPlanQty);
-                  }}
-                ></Button>
               </Grid2>
             </Box>
             {/*-------受注ヘッダー-------*/}

@@ -11,6 +11,7 @@ import { getRange } from '@/app/(main)/_lib/date-funcs';
 import { RSuiteDateRangePicker } from '@/app/(main)/_ui/date';
 
 import { JuchuKizaiHonbanbiValues } from '../_lib/types';
+import { TabPanelUI } from './date-selection-dialog-tabpanel';
 
 type TabPanelProps = {
   children?: React.ReactNode;
@@ -335,236 +336,36 @@ export const DateSelectDialog = ({
         </Grid2>
         <Divider />
         <TabPanel value={value} index={10}>
-          <Grid2 container display="flex" flexDirection="row" spacing={2} ml={2} width={{ md: '50%' }}>
-            <Grid2 size={3} maxWidth={120}>
-              <Typography>日付</Typography>
-            </Grid2>
-            <Grid2 size={3} maxWidth={100}>
-              <Typography>追加日数</Typography>
-            </Grid2>
-            <Grid2 size={5} maxWidth={250}>
-              <Typography>メモ</Typography>
-            </Grid2>
-          </Grid2>
-          {sikomi.map((data, index) => (
-            <Grid2
-              key={index}
-              container
-              display="flex"
-              flexDirection="row"
-              alignItems={'center'}
-              spacing={2}
-              ml={2}
-              py={1}
-              width={{ md: '50%' }}
-            >
-              <Grid2 size={3} maxWidth={120}>
-                <Typography>{toJapanYMDString(data.juchuHonbanbiDat)}</Typography>
-              </Grid2>
-              <Grid2 size={3} display={'flex'} alignItems={'center'} maxWidth={100}>
-                <TextField
-                  value={data.juchuHonbanbiAddQty ?? 0}
-                  onChange={(e) => handleSikomiAddChange(index, Number(e.target.value))}
-                  type="number"
-                  sx={{
-                    width: '50px',
-                    '& .MuiInputBase-input': {
-                      textAlign: 'right',
-                    },
-                    '& input[type=number]::-webkit-inner-spin-button': {
-                      WebkitAppearance: 'none',
-                      margin: 0,
-                    },
-                  }}
-                />
-              </Grid2>
-              <Grid2 size={4} maxWidth={250}>
-                <TextField
-                  value={data.mem ? data.mem : ''}
-                  onChange={(e) => handleSikomiMemChange(index, e.target.value)}
-                ></TextField>
-              </Grid2>
-              <Grid2 size={2}>
-                <Button sx={{ ml: 2, bgcolor: 'red', color: 'white' }} onClick={() => handleSikomiRemove(index)}>
-                  削除
-                </Button>
-              </Grid2>
-            </Grid2>
-          ))}
+          <TabPanelUI
+            JuchuKizaiHonbanbiData={sikomi}
+            handleAddChange={handleSikomiAddChange}
+            handleMemChange={handleSikomiMemChange}
+            handleRemove={handleSikomiRemove}
+          />
         </TabPanel>
         <TabPanel value={value} index={20}>
-          <Grid2 container display="flex" flexDirection="row" spacing={2} ml={2} width={{ md: '50%' }}>
-            <Grid2 size={3} maxWidth={120}>
-              <Typography>日付</Typography>
-            </Grid2>
-            <Grid2 size={3} maxWidth={100}>
-              <Typography>追加日数</Typography>
-            </Grid2>
-            <Grid2 size={5} maxWidth={250}>
-              <Typography>メモ</Typography>
-            </Grid2>
-          </Grid2>
-          {rh.map((data, index) => (
-            <Grid2
-              key={index}
-              container
-              display="flex"
-              flexDirection="row"
-              alignItems={'center'}
-              spacing={2}
-              ml={2}
-              py={1}
-              width={{ md: '50%' }}
-            >
-              <Grid2 size={3} maxWidth={120}>
-                <Typography>{toJapanYMDString(data.juchuHonbanbiDat)}</Typography>
-              </Grid2>
-              <Grid2 size={3} display={'flex'} alignItems={'center'} maxWidth={100}>
-                <TextField
-                  value={data.juchuHonbanbiAddQty ?? 0}
-                  onChange={(e) => handleRhAddChange(index, Number(e.target.value))}
-                  type="number"
-                  sx={{
-                    width: '50px',
-                    '& .MuiInputBase-input': {
-                      textAlign: 'right',
-                    },
-                    '& input[type=number]::-webkit-inner-spin-button': {
-                      WebkitAppearance: 'none',
-                      margin: 0,
-                    },
-                  }}
-                />
-              </Grid2>
-              <Grid2 size={4} maxWidth={250}>
-                <TextField
-                  value={data.mem ? data.mem : ''}
-                  onChange={(e) => handleRhMemChange(index, e.target.value)}
-                ></TextField>
-              </Grid2>
-              <Grid2 size={2}>
-                <Button sx={{ ml: 2, bgcolor: 'red', color: 'white' }} onClick={() => handleRhRemove(index)}>
-                  削除
-                </Button>
-              </Grid2>
-            </Grid2>
-          ))}
+          <TabPanelUI
+            JuchuKizaiHonbanbiData={rh}
+            handleAddChange={handleRhAddChange}
+            handleMemChange={handleRhMemChange}
+            handleRemove={handleRhRemove}
+          />
         </TabPanel>
         <TabPanel value={value} index={30}>
-          <Grid2 container display="flex" flexDirection="row" spacing={2} ml={2} width={{ md: '50%' }}>
-            <Grid2 size={3} maxWidth={120}>
-              <Typography>日付</Typography>
-            </Grid2>
-            <Grid2 size={3} maxWidth={100}>
-              <Typography>追加日数</Typography>
-            </Grid2>
-            <Grid2 size={5} maxWidth={250}>
-              <Typography>メモ</Typography>
-            </Grid2>
-          </Grid2>
-          {gp.map((data, index) => (
-            <Grid2
-              key={index}
-              container
-              display="flex"
-              flexDirection="row"
-              alignItems={'center'}
-              spacing={2}
-              ml={2}
-              py={1}
-              width={{ md: '50%' }}
-            >
-              <Grid2 size={3} maxWidth={120}>
-                <Typography>{toJapanYMDString(data.juchuHonbanbiDat)}</Typography>
-              </Grid2>
-              <Grid2 size={3} display={'flex'} alignItems={'center'} maxWidth={100}>
-                <TextField
-                  value={data.juchuHonbanbiAddQty ?? 0}
-                  onChange={(e) => handleGpAddChange(index, Number(e.target.value))}
-                  type="number"
-                  sx={{
-                    width: '50px',
-                    '& .MuiInputBase-input': {
-                      textAlign: 'right',
-                    },
-                    '& input[type=number]::-webkit-inner-spin-button': {
-                      WebkitAppearance: 'none',
-                      margin: 0,
-                    },
-                  }}
-                />
-              </Grid2>
-              <Grid2 size={4} maxWidth={250}>
-                <TextField
-                  value={data.mem ? data.mem : ''}
-                  onChange={(e) => handleGpMemChange(index, e.target.value)}
-                ></TextField>
-              </Grid2>
-              <Grid2 size={2}>
-                <Button sx={{ ml: 2, bgcolor: 'red', color: 'white' }} onClick={() => handleGpRemove(index)}>
-                  削除
-                </Button>
-              </Grid2>
-            </Grid2>
-          ))}
+          <TabPanelUI
+            JuchuKizaiHonbanbiData={gp}
+            handleAddChange={handleGpAddChange}
+            handleMemChange={handleGpMemChange}
+            handleRemove={handleGpRemove}
+          />
         </TabPanel>
         <TabPanel value={value} index={40}>
-          <Grid2 container display="flex" flexDirection="row" spacing={2} ml={2} width={{ md: '50%' }}>
-            <Grid2 size={3} maxWidth={120}>
-              <Typography>日付</Typography>
-            </Grid2>
-            <Grid2 size={3} maxWidth={100}>
-              <Typography>追加日数</Typography>
-            </Grid2>
-            <Grid2 size={5} maxWidth={250}>
-              <Typography>メモ</Typography>
-            </Grid2>
-          </Grid2>
-          {honban.map((data, index) => (
-            <Grid2
-              key={index}
-              container
-              display="flex"
-              flexDirection="row"
-              alignItems={'center'}
-              spacing={2}
-              ml={2}
-              py={1}
-              width={{ md: '50%' }}
-            >
-              <Grid2 size={3} maxWidth={120}>
-                <Typography>{toJapanYMDString(data.juchuHonbanbiDat)}</Typography>
-              </Grid2>
-              <Grid2 size={3} display={'flex'} alignItems={'center'} maxWidth={100}>
-                <TextField
-                  value={data.juchuHonbanbiAddQty ?? 0}
-                  onChange={(e) => handleHonbanAddChange(index, Number(e.target.value))}
-                  type="number"
-                  sx={{
-                    width: '50px',
-                    '& .MuiInputBase-input': {
-                      textAlign: 'right',
-                    },
-                    '& input[type=number]::-webkit-inner-spin-button': {
-                      WebkitAppearance: 'none',
-                      margin: 0,
-                    },
-                  }}
-                />
-              </Grid2>
-              <Grid2 size={4} maxWidth={250}>
-                <TextField
-                  value={data.mem ? data.mem : ''}
-                  onChange={(e) => handleHonbanMemChange(index, e.target.value)}
-                ></TextField>
-              </Grid2>
-              <Grid2 size={2}>
-                <Button sx={{ ml: 2, bgcolor: 'red', color: 'white' }} onClick={() => handleHonbanRemove(index)}>
-                  削除
-                </Button>
-              </Grid2>
-            </Grid2>
-          ))}
+          <TabPanelUI
+            JuchuKizaiHonbanbiData={honban}
+            handleAddChange={handleHonbanAddChange}
+            handleMemChange={handleHonbanMemChange}
+            handleRemove={handleHonbanRemove}
+          />
         </TabPanel>
       </Paper>
       {/** 固定ボタン 保存＆ページトップ */}
