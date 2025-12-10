@@ -8,7 +8,7 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: '12.2.3 (519615d)';
   };
-  dev8: {
+  dev6: {
     Tables: {
       m_bumon: {
         Row: {
