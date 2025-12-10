@@ -4,6 +4,8 @@ import {
   Box,
   Button,
   Container,
+  Dialog,
+  DialogTitle,
   Divider,
   Paper,
   Table,
@@ -15,14 +17,18 @@ import {
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import { CheckboxElement, TextFieldElement } from 'react-hook-form-mui';
+import { Stack } from 'rsuite';
 
 import { weeklyColors } from '../../_lib/colors';
 import { toJapanDayString, toJapanHHmmString, toJapanYMDAndDayString } from '../../_lib/date-conversion';
+import { CloseMasterDialogButton } from '../../_ui/buttons';
 import { FormDateX } from '../../_ui/date';
 import { LoadingOverlay } from '../../_ui/loading';
 import { LightTooltipWithText } from '../../(masters)/_ui/tables';
 import { getWeeklyScheduleList } from '../_lib/funcs';
 import { WeeklyScheduleValues } from '../_lib/types';
+import { TantoDialog } from './tanto-dialog';
 
 export const WeeklySchedule = () => {
   /* useState ------------------------------------------------------------ */
@@ -30,6 +36,10 @@ export const WeeklySchedule = () => {
   const [scheList, setScheList] = useState<WeeklyScheduleValues[]>([]);
   /** ローディング */
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  /** 担当者入力ダイアログ開閉 */
+  const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+  /** 選ばれた日にちの文字列 */
+  const [selectedDate, setSelectedDate] = useState<string>('');
 
   /* useForm ------------------------------------------------------------- */
   const { handleSubmit, control } = useForm<{ dat: Date }>({
@@ -44,6 +54,12 @@ export const WeeklySchedule = () => {
     const list = await getWeeklyScheduleList(data.dat);
     setScheList(list);
     setIsLoading(false);
+  };
+
+  /** テーブル上部の担当者・メモをクリックしたときの処理 */
+  const handleClickDateHead = (dat: string) => {
+    setSelectedDate(dat);
+    setDialogOpen(true);
   };
 
   /* useEffect ----------------------------------------------------------- */
@@ -91,7 +107,7 @@ export const WeeklySchedule = () => {
         {isLoading && <LoadingOverlay />}
         <Table padding="none" sx={{ border: '2px solid black' }}>
           <TableHead>
-            <TableRow sx={{}}>
+            <TableRow>
               {scheList &&
                 scheList.length > 0 &&
                 scheList.map((date, index) => (
@@ -99,7 +115,7 @@ export const WeeklySchedule = () => {
                     key={date.calDat}
                     sx={{
                       border: '1px solid black',
-                      px: 0,
+                      px: 1,
                       whiteSpace: 'nowrap',
                       minWidth: 300,
                       maxWidth: 300,
@@ -113,6 +129,7 @@ export const WeeklySchedule = () => {
                           : 'black',
                     }}
                     align="center"
+                    onClick={() => handleClickDateHead(date.calDat)}
                   >
                     {toJapanYMDAndDayString(date.calDat)}
                   </TableCell>
@@ -124,7 +141,8 @@ export const WeeklySchedule = () => {
                 scheList.map((date) => (
                   <TableCell
                     key={date.calDat}
-                    sx={{ border: '1px solid black', px: 0, height: 20.1, bgcolor: 'white', color: 'black' }}
+                    sx={{ border: '1px solid black', px: 1, height: 20.1, bgcolor: 'white', color: 'black' }}
+                    onClick={() => handleClickDateHead(date.calDat)}
                   >
                     {date.mem ?? ''}
                   </TableCell>
@@ -139,17 +157,22 @@ export const WeeklySchedule = () => {
                     sx={{
                       border: '1px solid black',
                       borderBottom: '2px solid black',
-                      px: 0,
+                      px: 1,
                       height: 20.1,
                       bgcolor: 'white',
                       color: 'black',
                     }}
+                    onClick={() => handleClickDateHead(date.calDat)}
                   >
                     {date.tantoNam ?? ''}
                   </TableCell>
                 ))}
             </TableRow>
           </TableHead>
+
+          {/** 担当者入力ダイアログ */}
+          <TantoDialog open={dialogOpen} date={selectedDate} setOpen={setDialogOpen} />
+
           <TableBody>
             <TableRow>
               {scheList &&

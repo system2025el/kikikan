@@ -4,6 +4,11 @@ import { selectWeeklyList } from '@/app/_lib/db/tables/t-juchu-sharyo-head';
 
 import { WeeklyScheduleValues } from './types';
 
+/**
+ * Weeklyスケジュールを取得する関数
+ * @param date
+ * @returns
+ */
 export const getWeeklyScheduleList = async (date: Date): Promise<WeeklyScheduleValues[]> => {
   try {
     const data = await selectWeeklyList(date.toISOString());
@@ -41,9 +46,9 @@ export const getWeeklyScheduleList = async (date: Date): Promise<WeeklyScheduleV
       if (!dateMap[dateKey]) {
         dateMap[dateKey] = {
           cal_dat: row.cal_dat,
-          weekly_mem: null,
-          tanto_nam: null,
-          holiday_flg: null,
+          weekly_mem: row.weekly_mem ?? null,
+          tanto_nam: row.tanto_nam ?? null,
+          holiday_flg: row.holiday_flg ? Number(row.holiday_flg) : null,
           juchuSharyoMap: {},
         };
       }
@@ -106,6 +111,20 @@ export const getWeeklyScheduleList = async (date: Date): Promise<WeeklyScheduleV
     // );
 
     return resultData;
+  } catch (e) {
+    throw e;
+  }
+};
+
+/** 日付に対するシフト担当者、メモ、祝日フラグを挿入する関数 */
+export const insertWeeklyData = async (data: {
+  dat: string;
+  mem: string | null;
+  tantoNam: string | null;
+  holidayFlg: boolean;
+}) => {
+  try {
+    console.log(data);
   } catch (e) {
     throw e;
   }
