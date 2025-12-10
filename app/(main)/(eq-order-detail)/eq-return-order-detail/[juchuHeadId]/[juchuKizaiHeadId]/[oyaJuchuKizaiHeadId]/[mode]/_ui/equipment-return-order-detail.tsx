@@ -140,19 +140,30 @@ export const EquipmentReturnOrderDetail = (props: {
   // 機材在庫リスト
   const [eqStockList, setEqStockList] = useState<StockTableValues[][]>(/*props.eqStockData ??*/ []);
   // 返却受注機材明細元合計数
-  const [originReturnPlanQty, setOriginReturnPlanQty] = useState<Map<number, number>>(
-    returnJuchuKizaiMeisaiList.reduce((acc, current) => {
-      const key = current.kizaiId;
-      const total = acc.get(key);
-      if (total) {
-        const currentTotal = total + current.planQty;
-        acc.set(key, currentTotal);
-      } else {
-        acc.set(key, current.planQty);
-      }
-      return acc;
-    }, new Map<number, number>())
-  );
+  const originReturnPlanQty = originReturnJuchuKizaiMeisaiList.reduce((acc, current) => {
+    const key = current.kizaiId;
+    const total = acc.get(key);
+    if (total) {
+      const currentTotal = total + current.planQty;
+      acc.set(key, currentTotal);
+    } else {
+      acc.set(key, current.planQty);
+    }
+    return acc;
+  }, new Map<number, number>());
+  // const [originReturnPlanQty, setOriginReturnPlanQty] = useState<Map<number, number>>(
+  //   returnJuchuKizaiMeisaiList.reduce((acc, current) => {
+  //     const key = current.kizaiId;
+  //     const total = acc.get(key);
+  //     if (total) {
+  //       const currentTotal = total + current.planQty;
+  //       acc.set(key, currentTotal);
+  //     } else {
+  //       acc.set(key, current.planQty);
+  //     }
+  //     return acc;
+  //   }, new Map<number, number>())
+  // );
   // 削除機材
   const [deleteEq, setDeleteEq] = useState<{ rowIndex: number; row: ReturnJuchuKizaiMeisaiValues } | null>(null);
   // 削除コンテナ
@@ -291,19 +302,19 @@ export const EquipmentReturnOrderDetail = (props: {
       setReturnJuchuContainerMeisaiList(returnJuchuContainerMeisaiData);
       setOriginEqStockList(updatedEqStockData);
       setEqStockList(updatedEqStockData);
-      setOriginReturnPlanQty(
-        returnJuchuKizaiMeisaiData.reduce((acc, current) => {
-          const key = current.kizaiId;
-          const total = acc.get(key);
-          if (total) {
-            const currentTotal = total + current.planQty;
-            acc.set(key, currentTotal);
-          } else {
-            acc.set(key, current.planQty);
-          }
-          return acc;
-        }, new Map<number, number>())
-      );
+      // setOriginReturnPlanQty(
+      //   returnJuchuKizaiMeisaiData.reduce((acc, current) => {
+      //     const key = current.kizaiId;
+      //     const total = acc.get(key);
+      //     if (total) {
+      //       const currentTotal = total + current.planQty;
+      //       acc.set(key, currentTotal);
+      //     } else {
+      //       acc.set(key, current.planQty);
+      //     }
+      //     return acc;
+      //   }, new Map<number, number>())
+      // );
       setReturnNyukoDate(returnNyukoDate);
       setDateRange(dateRange);
       setSelectDate(returnNyukoDate ?? new Date());
@@ -553,19 +564,19 @@ export const EquipmentReturnOrderDetail = (props: {
           if (juchuKizaiMeisaiData) {
             setReturnJuchuKizaiMeisaiList(juchuKizaiMeisaiData);
             setOriginReturnJuchuKizaiMeisaiList(juchuKizaiMeisaiData);
-            setOriginReturnPlanQty(
-              juchuKizaiMeisaiData.reduce((acc, current) => {
-                const key = current.kizaiId;
-                const total = acc.get(key);
-                if (total) {
-                  const currentTotal = total + current.planQty;
-                  acc.set(key, currentTotal);
-                } else {
-                  acc.set(key, current.planQty);
-                }
-                return acc;
-              }, new Map<number, number>())
-            );
+            // setOriginReturnPlanQty(
+            //   juchuKizaiMeisaiData.reduce((acc, current) => {
+            //     const key = current.kizaiId;
+            //     const total = acc.get(key);
+            //     if (total) {
+            //       const currentTotal = total + current.planQty;
+            //       acc.set(key, currentTotal);
+            //     } else {
+            //       acc.set(key, current.planQty);
+            //     }
+            //     return acc;
+            //   }, new Map<number, number>())
+            // );
             const updatedEqStockData = await updateEqStock(
               data.juchuHeadId,
               data.juchuKizaiHeadId,
@@ -604,19 +615,19 @@ export const EquipmentReturnOrderDetail = (props: {
           if (juchuKizaiMeisaiData) {
             setReturnJuchuKizaiMeisaiList(juchuKizaiMeisaiData);
             setOriginReturnJuchuKizaiMeisaiList(juchuKizaiMeisaiData);
-            setOriginReturnPlanQty(
-              juchuKizaiMeisaiData.reduce((acc, current) => {
-                const key = current.kizaiId;
-                const total = acc.get(key);
-                if (total) {
-                  const currentTotal = total + current.planQty;
-                  acc.set(key, currentTotal);
-                } else {
-                  acc.set(key, current.planQty);
-                }
-                return acc;
-              }, new Map<number, number>())
-            );
+            // setOriginReturnPlanQty(
+            //   juchuKizaiMeisaiData.reduce((acc, current) => {
+            //     const key = current.kizaiId;
+            //     const total = acc.get(key);
+            //     if (total) {
+            //       const currentTotal = total + current.planQty;
+            //       acc.set(key, currentTotal);
+            //     } else {
+            //       acc.set(key, current.planQty);
+            //     }
+            //     return acc;
+            //   }, new Map<number, number>())
+            // );
             const updatedEqStockData = await updateEqStock(
               data.juchuHeadId,
               data.juchuKizaiHeadId,
@@ -1009,19 +1020,19 @@ export const EquipmentReturnOrderDetail = (props: {
       setSelectDate(oyaShukoDate ?? new Date());
       setReturnJuchuKizaiMeisaiList(originReturnJuchuKizaiMeisaiList);
       setReturnJuchuContainerMeisaiList(originReturnJuchuContainerMeisaiList);
-      setOriginReturnPlanQty(
-        originReturnJuchuKizaiMeisaiList.reduce((acc, current) => {
-          const key = current.kizaiId;
-          const total = acc.get(key);
-          if (total) {
-            const currentTotal = total + current.planQty;
-            acc.set(key, currentTotal);
-          } else {
-            acc.set(key, current.planQty);
-          }
-          return acc;
-        }, new Map<number, number>())
-      );
+      // setOriginReturnPlanQty(
+      //   originReturnJuchuKizaiMeisaiList.reduce((acc, current) => {
+      //     const key = current.kizaiId;
+      //     const total = acc.get(key);
+      //     if (total) {
+      //       const currentTotal = total + current.planQty;
+      //       acc.set(key, currentTotal);
+      //     } else {
+      //       acc.set(key, current.planQty);
+      //     }
+      //     return acc;
+      //   }, new Map<number, number>())
+      // );
       setEqStockList(originEqStockList);
       setDirtyOpen(false);
     } else {
