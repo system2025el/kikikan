@@ -68,6 +68,8 @@ export const EqptOrderList = () => {
   /** 検索押下時の処理 */
   const onSubmit = async (data: EqptOrderSearchValues) => {
     setIsLoading(true);
+    // 検索条件保持
+    sessionStorage.setItem('orderListSearchParams', JSON.stringify(data));
     setPage(1);
     const orders = await getFilteredOrderList(data);
     if (orders) {
@@ -86,8 +88,6 @@ export const EqptOrderList = () => {
     console.log('検索条件＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝', searchParams);
 
     const get = async () => {
-      // メモリ開放
-      sessionStorage.removeItem('orderListSearchParams');
       // 読み込み中
       setIsLoading(true);
       // ページ初期化
@@ -292,7 +292,6 @@ export const EqptOrderList = () => {
         orderList={orderList}
         isLoading={isLoading}
         page={page}
-        searchParams={getValues()}
         setIsLoading={setIsLoading}
         setPage={setPage}
       />

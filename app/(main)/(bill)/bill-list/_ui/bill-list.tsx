@@ -53,6 +53,8 @@ export const BillList = () => {
   const onSubmit = async (data: BillSearchValues) => {
     console.log('検索ーーーーーーーーーーーーーーーー', data);
     setIsLoading(true);
+    // 検索条件保持
+    sessionStorage.setItem('billListSearchParams', JSON.stringify(getValues()));
     setIsFirst(false);
     setPage(1);
     const q = await getFilteredBills(data);
@@ -70,8 +72,6 @@ export const BillList = () => {
     const searchParams = searchPramsString ? JSON.parse(searchPramsString) : null;
 
     const getList = async () => {
-      // メモリ開放
-      sessionStorage.removeItem('billListSearchParams');
       // 読み込み中
       setIsLoading(true);
       // 初期表示ではない
@@ -242,6 +242,7 @@ export const BillList = () => {
         isFirst={isFirst}
         page={page}
         custs={options.custs}
+        setBillList={setBills}
         searchParams={getValues()}
         setIsLoading={setIsLoading}
         setIsFirst={setIsFirst}

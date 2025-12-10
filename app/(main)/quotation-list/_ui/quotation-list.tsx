@@ -62,6 +62,7 @@ export const QuotationList = () => {
   const onSubmit = async (data: QuotSearchValues) => {
     console.log(data);
     setIsLoading(true);
+    sessionStorage.setItem('quotListSearchParams', JSON.stringify(data));
     setIsFirst(false);
     setPage(1);
     const q = await getFilteredQuotList(data);
@@ -79,8 +80,6 @@ export const QuotationList = () => {
     const searchParams = searchPramsString ? JSON.parse(searchPramsString) : null;
 
     const getList = async () => {
-      // メモリ開放
-      sessionStorage.removeItem('quotListSearchParams');
       // 読み込み中
       setIsLoading(true);
       // 初期表示ではない
@@ -295,7 +294,6 @@ export const QuotationList = () => {
         isLoading={isLoading}
         isFirst={isFirst}
         page={page}
-        queries={getValues()}
         searchParams={getValues()}
         setQuotList={setQuotList}
         setIsLoading={setIsLoading}

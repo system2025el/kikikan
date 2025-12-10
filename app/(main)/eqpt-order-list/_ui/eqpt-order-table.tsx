@@ -35,14 +35,12 @@ export const EqptOrderTable = ({
   orderList,
   isLoading,
   page,
-  searchParams,
   setIsLoading,
   setPage,
 }: {
   orderList: EqptOrderListTableValues[];
   isLoading: boolean;
   page: number;
-  searchParams: EqptOrderSearchValues;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setPage: React.Dispatch<React.SetStateAction<number>>;
 }) => {
@@ -117,7 +115,6 @@ export const EqptOrderTable = ({
                         size="small"
                         sx={{ py: 0.2, px: 1, m: 0, width: 'auto' }}
                         onClick={() => {
-                          sessionStorage.setItem('orderListSearchParams', JSON.stringify(searchParams));
                           router.push(`/order/${order.juchuHeadId}/${'view'}`);
                         }}
                       >
@@ -145,7 +142,6 @@ export const EqptOrderTable = ({
                                   : dispColors.main,
                         }}
                         onClick={() => {
-                          sessionStorage.setItem('orderListSearchParams', JSON.stringify(searchParams));
                           router.push(
                             order.headKbn === 1
                               ? `/eq-main-order-detail/${order.juchuHeadId}/${order.kizaiHeadId}/view`

@@ -15,12 +15,10 @@ import { BillingStsSearchValues } from '../../billing-sts-list/_lib/types';
 export const CreateBillDialog = ({
   kokyakuId,
   tantouNam,
-  searchParams,
   setDialogOpen,
 }: {
   kokyakuId: number;
   tantouNam: string | null;
-  searchParams: BillingStsSearchValues;
   setDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
   const router = useRouter();
@@ -47,8 +45,6 @@ export const CreateBillDialog = ({
     date: Date | null;
     showDetailFlg: boolean;
   }) => {
-    console.log(data);
-    sessionStorage.setItem('billingStsSearchParams', JSON.stringify(searchParams));
     router.push(
       `bill-list/create?kokyakuId=${data.kokyaku.id}&date=${toJapanYMDString(data.date ?? undefined, '-')}&flg=${data.showDetailFlg}&tantou=${tantouNam}`
     );
