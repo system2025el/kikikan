@@ -53,20 +53,20 @@ const Page = async (props: { params: Promise<{ juchuHeadId: string; juchuKizaiHe
       yardShukoDat: juchuHeadData.juchuRange ? juchuHeadData.juchuRange[0] : null,
       yardNyukoDat: juchuHeadData.juchuRange ? juchuHeadData.juchuRange[1] : null,
     };
-    // 受注機材明細データ(初期値)
-    const newJuchuKizaiMeisaiData: JuchuKizaiMeisaiValues[] = [];
-    // 移動受注機材明細データ(初期値)
-    const newIdoJuchuKizaiMeisaiData: IdoJuchuKizaiMeisaiValues[] = [];
-    // 受注コンテナ明細データ(初期値)
-    const newJuchuContainerMeisaiData: JuchuContainerMeisaiValues[] = [];
-    // 機材在庫データ(初期値)
-    const newEqStockData: StockTableValues[][] = [];
-    // 出庫日(初期値)
-    const shukoDate = null;
-    // 入庫日(初期値)
-    const nyukoDate = null;
-    // 出庫日から入庫日(初期値)
-    const dateRange: string[] = [];
+    // // 受注機材明細データ(初期値)
+    // const newJuchuKizaiMeisaiData: JuchuKizaiMeisaiValues[] = [];
+    // // 移動受注機材明細データ(初期値)
+    // const newIdoJuchuKizaiMeisaiData: IdoJuchuKizaiMeisaiValues[] = [];
+    // // 受注コンテナ明細データ(初期値)
+    // const newJuchuContainerMeisaiData: JuchuContainerMeisaiValues[] = [];
+    // // 機材在庫データ(初期値)
+    // const newEqStockData: StockTableValues[][] = [];
+    // // 出庫日(初期値)
+    // const shukoDate = null;
+    // // 入庫日(初期値)
+    // const nyukoDate = null;
+    // // 出庫日から入庫日(初期値)
+    // const dateRange: string[] = [];
     // 受注本番日データ
     const newJuchuHonbanbiData: JuchuKizaiHonbanbiValues[] = [];
 

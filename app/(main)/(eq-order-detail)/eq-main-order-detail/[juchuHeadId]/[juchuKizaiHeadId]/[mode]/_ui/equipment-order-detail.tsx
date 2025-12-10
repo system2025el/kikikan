@@ -859,7 +859,7 @@ const EquipmentOrderDetail = (props: {
                   ...d,
                   zaikoQty:
                     Number(d.zaikoQty) +
-                    originPlanQty.get(d.kizaiId)! -
+                    (originPlanQty.get(d.kizaiId) ?? 0) -
                     (filterIdoJuchuKizaiMeisaiList.find((data) => data.kizaiId === d.kizaiId)?.planQty ?? 0),
                 }
               : d
@@ -1540,11 +1540,6 @@ const EquipmentOrderDetail = (props: {
     setIdoJuchuKizaiMeisaiList((prev) => [...prev, ...selectIdoEq]);
     setJuchuContainerMeisaiList((prev) => [...prev, ...selectContainer]);
     setEqStockList((prev) => [...prev, ...selectEqStockData]);
-    setOriginPlanQty((prev) => {
-      const newMap = new Map(prev);
-      filterKizaiData.map((d) => newMap.set(d.kizaiId, 0));
-      return newMap;
-    });
     setIsDetailLoading(false);
   };
 
@@ -1804,6 +1799,11 @@ const EquipmentOrderDetail = (props: {
                   </Button>
                 </Grid2>
                 <BackButton label={'戻る'} />
+                <Button
+                  onClick={() => {
+                    console.log(originPlanQty);
+                  }}
+                ></Button>
               </Grid2>
             </Box>
             {/*-------受注ヘッダー-------*/}
