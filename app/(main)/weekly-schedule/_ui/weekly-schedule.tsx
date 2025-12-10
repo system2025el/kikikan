@@ -5,7 +5,6 @@ import {
   Button,
   Container,
   Divider,
-  Grid2,
   Paper,
   Table,
   TableBody,
@@ -13,26 +12,12 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
-import {
-  Controller,
-  ControllerFieldState,
-  ControllerRenderProps,
-  FieldValues,
-  useForm,
-  UseFormStateReturn,
-} from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 
 import { weeklyColors } from '../../_lib/colors';
-import {
-  toJapanDayString,
-  toJapanHHmmString,
-  toJapanTimeString,
-  toJapanYMDAndDayString,
-  toJapanYMDString,
-} from '../../_lib/date-conversion';
+import { toJapanDayString, toJapanHHmmString, toJapanYMDAndDayString } from '../../_lib/date-conversion';
 import { FormDateX } from '../../_ui/date';
 import { LoadingOverlay } from '../../_ui/loading';
 import { LightTooltipWithText } from '../../(masters)/_ui/tables';
@@ -178,8 +163,7 @@ export const WeeklySchedule = () => {
                           key={index}
                           width={1}
                           sx={{
-                            borderBottom:
-                              date.timeDatas.length === 1 || index + 1 !== date.timeDatas.length ? 1 : undefined,
+                            borderBottom: 1, // date.timeDatas.length === 1 || index + 1 !== date.timeDatas.length ? 1 : undefined,
                             alignItems: 'start',
                           }}
                         >

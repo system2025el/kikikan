@@ -185,7 +185,7 @@ export const selectWeeklyList = async (date: string) => {
           /* スケジュール生成して外部結合 */
           (
               -- スケジュールの生成範囲 /*■変数箇所■*/
-              select $1::date + g.i as cal_dat from generate_series(0, 14) as g(i)
+              select $1::date + g.i as cal_dat from generate_series(0, 30) as g(i)
           ) as cal
         ON CAST(s_meisai.nyushuko_dat AS DATE) = cal.cal_dat    
         LEFT JOIN
