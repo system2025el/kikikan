@@ -30,7 +30,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { addMonths, setDate, subDays, subMonths } from 'date-fns';
+import { addMonths, set, setDate, subDays, subMonths } from 'date-fns';
 import dayjs, { Dayjs } from 'dayjs';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -2476,9 +2476,7 @@ const EquipmentOrderDetail = (props: {
                           <AddIcon fontSize="small" />
                           機材追加
                         </Button>
-                        <Button disabled={!edit} onClick={() => setSortDialogOpen(true)}>
-                          並び替え
-                        </Button>
+                        <Button /*disabled={!edit}*/ onClick={() => setSortDialogOpen(true)}>並び替え</Button>
 
                         <Dialog
                           open={sortDialogOpen}

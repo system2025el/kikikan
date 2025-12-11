@@ -1,11 +1,11 @@
 'use client';
 
 import { closestCenter, DndContext, DragEndEvent } from '@dnd-kit/core';
+import { restrictToParentElement } from '@dnd-kit/modifiers';
 import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import DragHandleIcon from '@mui/icons-material/DragHandle'; // ドラッグ操作を示すアイコン
+import DragHandleIcon from '@mui/icons-material/DragHandle';
 import { Button, DialogActions, DialogContent, DialogTitle, List, Paper } from '@mui/material';
-// MUI コンポーネント
 import ListItem from '@mui/material/ListItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
@@ -36,9 +36,20 @@ export const SortDialog = ({
 
   return (
     <Paper>
-      <DialogTitle>並び替え</DialogTitle>
+      <DialogTitle
+        sx={{
+          position: 'sticky',
+          top: 0,
+          backgroundColor: 'background.paper',
+          zIndex: 1,
+          borderBottom: '1px solid',
+          borderColor: 'divider',
+        }}
+      >
+        並び替え
+      </DialogTitle>
       <DialogContent dividers>
-        <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <DndContext collisionDetection={closestCenter} modifiers={[restrictToParentElement]} onDragEnd={handleDragEnd}>
           <SortableContext
             items={localItems.map((_, index) => `sortable-${index}`)}
             strategy={verticalListSortingStrategy}
@@ -72,12 +83,11 @@ export const SortDialog = ({
 };
 
 const SortableItem = ({ id, index, item }: { id: string; index: number; item: JuchuKizaiMeisaiValues }) => {
-  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: id });
+  const { attributes, listeners, setNodeRef, transform } = useSortable({ id: id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition,
-    marginBottom: 8,
+    marginBottom: 5,
   };
 
   return (
