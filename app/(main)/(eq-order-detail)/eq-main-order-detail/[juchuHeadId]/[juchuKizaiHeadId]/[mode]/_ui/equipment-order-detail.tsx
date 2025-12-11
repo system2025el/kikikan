@@ -2476,7 +2476,11 @@ const EquipmentOrderDetail = (props: {
                           <AddIcon fontSize="small" />
                           機材追加
                         </Button>
-                        <Button disabled={!edit} onClick={() => setSortDialogOpen(true)}>
+                        <Button
+                          disabled={!edit}
+                          onClick={() => setSortDialogOpen(true)}
+                          sx={{ display: juchuKizaiMeisaiList.length === 0 ? 'none' : 'inline-flex' }}
+                        >
                           並び替え
                         </Button>
 

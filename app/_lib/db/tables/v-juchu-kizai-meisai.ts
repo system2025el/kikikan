@@ -35,6 +35,7 @@ export const selectJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHead
     `;
     const values = [juchuHeadId, juchuKizaiHeadId];
     const result = await pool.query(queey, values);
+    //await pool.end();
     return result.rows;
     // return await supabase
     //   .schema(SCHEMA)
