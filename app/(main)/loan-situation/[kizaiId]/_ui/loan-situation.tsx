@@ -77,6 +77,7 @@ export const LoanSituation = (props: {
 
       if (filterLoanJuchuData.length === 0) {
         setEqStockList(eqStockData);
+        setIsLoading(false);
         return;
       }
 
