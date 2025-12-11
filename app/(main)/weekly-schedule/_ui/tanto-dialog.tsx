@@ -1,7 +1,10 @@
 'use client';
 
 import { Box, Button, Dialog, DialogTitle, Grid2, Stack, Typography } from '@mui/material';
+import { useEffect } from 'react';
 import { CheckboxElement, TextFieldElement, useForm } from 'react-hook-form-mui';
+
+import { useUserStore } from '@/app/_lib/stores/usestore';
 
 import { toJapanYMDAndDayString } from '../../_lib/date-conversion';
 import { CloseMasterDialogButton } from '../../_ui/buttons';
@@ -9,30 +12,57 @@ import { insertWeeklyData } from '../_lib/funcs';
 
 export const TantoDialog = ({
   open,
-  date,
+  datas,
   setOpen,
+  refetch,
 }: {
   open: boolean;
-  date: string;
+  datas: { dat: string; tantoNam: string | null; mem: string | null; holidayFlg: boolean };
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  refetch: () => void;
 }) => {
+  /* ログインユーザー */
+  const user = useUserStore((state) => state.user);
+
   /* useForm ----------------------------------------------------------------- */
-  const { handleSubmit, control, reset } = useForm({
-    defaultValues: { tantoNam: null, mem: null, holidayFlg: false },
+  const { reset, handleSubmit, control } = useForm<{
+    dat: string;
+    tantoNam: string | null;
+    mem: string | null;
+    holidayFlg: boolean;
+  }>({
+    defaultValues: { dat: '', tantoNam: null, mem: null, holidayFlg: false },
   });
 
   /* methods ----------------------------------------------------------------- */
-  const onSubmit = async (data: { tantoNam: string | null; mem: string | null; holidayFlg: boolean }) => {
-    await insertWeeklyData({ ...data, dat: date });
+  const onSubmit = async (data: { dat: string; tantoNam: string | null; mem: string | null; holidayFlg: boolean }) => {
+    await insertWeeklyData(
+      {
+        ...data,
+        dat: datas.dat,
+      },
+      user?.name ?? ''
+    );
     setOpen(false);
+    refetch();
   };
 
   /* useEffect --------------------------------------------------------------- */
+  useEffect(() => {
+    reset(datas);
+    console.log(datas);
+  }, [datas, reset]);
 
   return (
-    <Dialog open={open} onClose={() => setOpen(false)}>
+    <Dialog
+      open={open}
+      onClose={() => {
+        reset();
+        setOpen(false);
+      }}
+    >
       <DialogTitle display={'flex'} justifyContent={'space-between'}>
-        {toJapanYMDAndDayString(date)}
+        {toJapanYMDAndDayString(datas.dat)}
         <CloseMasterDialogButton handleCloseDialog={() => setOpen(false)} />
       </DialogTitle>
       <Grid2

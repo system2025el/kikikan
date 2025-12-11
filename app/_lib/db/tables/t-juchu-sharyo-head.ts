@@ -3,6 +3,8 @@
 import { PoolClient } from 'pg';
 import { set } from 'zod';
 
+import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
+
 import pool from '../postgres';
 import { SCHEMA } from '../supabase';
 import { JuchuSharyoHeadDBValues } from '../types/t-juchu-sharyo-head-type';

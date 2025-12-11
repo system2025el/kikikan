@@ -17,19 +17,20 @@ import {
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { CheckboxElement, TextFieldElement } from 'react-hook-form-mui';
-import { Stack } from 'rsuite';
 
 import { weeklyColors } from '../../_lib/colors';
 import { toJapanDayString, toJapanHHmmString, toJapanYMDAndDayString } from '../../_lib/date-conversion';
-import { CloseMasterDialogButton } from '../../_ui/buttons';
 import { FormDateX } from '../../_ui/date';
 import { LoadingOverlay } from '../../_ui/loading';
 import { LightTooltipWithText } from '../../(masters)/_ui/tables';
 import { getWeeklyScheduleList } from '../_lib/funcs';
-import { WeeklyScheduleValues } from '../_lib/types';
+import { WeeklyScheduleValues, WeeklyValues } from '../_lib/types';
 import { TantoDialog } from './tanto-dialog';
 
+/**
+ * Weekly スケジュール画面
+ * @returns {JSX.Element} Weekly スケジュール画面
+ */
 export const WeeklySchedule = () => {
   /* useState ------------------------------------------------------------ */
   /** 表示するスケジュールのリスト */
@@ -38,11 +39,16 @@ export const WeeklySchedule = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   /** 担当者入力ダイアログ開閉 */
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
-  /** 選ばれた日にちの文字列 */
-  const [selectedDate, setSelectedDate] = useState<string>('');
+  /** 選ばれた日にちの情報 */
+  const [selectedDatas, setSelectedDatas] = useState<WeeklyValues>({
+    dat: '',
+    tantoNam: null,
+    mem: null,
+    holidayFlg: false,
+  });
 
   /* useForm ------------------------------------------------------------- */
-  const { handleSubmit, control } = useForm<{ dat: Date }>({
+  const { handleSubmit, control, reset, getValues } = useForm<{ dat: Date }>({
     mode: 'onSubmit',
     defaultValues: { dat: new Date() },
   });
@@ -51,27 +57,40 @@ export const WeeklySchedule = () => {
   /** 再描画押下時処理 */
   const onSubmit = async (data: { dat: Date }) => {
     setIsLoading(true);
-    const list = await getWeeklyScheduleList(data.dat);
+    sessionStorage.setItem('weekly', JSON.stringify(data));
+    const list = await getWeeklyScheduleList(data);
     setScheList(list);
     setIsLoading(false);
   };
 
   /** テーブル上部の担当者・メモをクリックしたときの処理 */
-  const handleClickDateHead = (dat: string) => {
-    setSelectedDate(dat);
+  const handleClickDateHead = (data: WeeklyValues) => {
+    setSelectedDatas(data);
     setDialogOpen(true);
   };
 
   /* useEffect ----------------------------------------------------------- */
   /** 初期描画 */
   useEffect(() => {
-    const getSchedule = async () => {
-      const list = await getWeeklyScheduleList(new Date());
+    // メモリ上に検索条件があるか確認
+    const searchPramsString = sessionStorage.getItem('weekly');
+    const searchParams = searchPramsString ? JSON.parse(searchPramsString) : null;
+
+    const getSchedule = async (data: { dat: Date }) => {
+      const list = await getWeeklyScheduleList(data);
       setScheList(list);
       setIsLoading(false);
     };
-    getSchedule();
-  }, []);
+
+    if (searchParams) {
+      setIsLoading(true);
+      // 検索条件表示と検索
+      reset(searchParams);
+      getSchedule(searchParams);
+    } else {
+      getSchedule({ dat: new Date() });
+    }
+  }, [reset]);
 
   return (
     <Container disableGutters sx={{ minWidth: '100%' }}>
@@ -129,7 +148,14 @@ export const WeeklySchedule = () => {
                           : 'black',
                     }}
                     align="center"
-                    onClick={() => handleClickDateHead(date.calDat)}
+                    onClick={() =>
+                      handleClickDateHead({
+                        dat: date.calDat,
+                        mem: date.mem,
+                        tantoNam: date.tantoNam,
+                        holidayFlg: date.holidayFlg,
+                      })
+                    }
                   >
                     {toJapanYMDAndDayString(date.calDat)}
                   </TableCell>
@@ -142,9 +168,18 @@ export const WeeklySchedule = () => {
                   <TableCell
                     key={date.calDat}
                     sx={{ border: '1px solid black', px: 1, height: 20.1, bgcolor: 'white', color: 'black' }}
-                    onClick={() => handleClickDateHead(date.calDat)}
+                    onClick={() =>
+                      handleClickDateHead({
+                        dat: date.calDat,
+                        mem: date.mem,
+                        tantoNam: date.tantoNam,
+                        holidayFlg: date.holidayFlg,
+                      })
+                    }
                   >
-                    {date.mem ?? ''}
+                    <LightTooltipWithText maxWidth={290} variant="body2">
+                      {date.mem ?? ''}
+                    </LightTooltipWithText>
                   </TableCell>
                 ))}
             </TableRow>
@@ -162,16 +197,30 @@ export const WeeklySchedule = () => {
                       bgcolor: 'white',
                       color: 'black',
                     }}
-                    onClick={() => handleClickDateHead(date.calDat)}
+                    onClick={() =>
+                      handleClickDateHead({
+                        dat: date.calDat,
+                        mem: date.mem,
+                        tantoNam: date.tantoNam,
+                        holidayFlg: date.holidayFlg,
+                      })
+                    }
                   >
-                    {date.tantoNam ?? ''}
+                    <LightTooltipWithText maxWidth={295} variant="body2">
+                      {date.tantoNam ?? ''}
+                    </LightTooltipWithText>
                   </TableCell>
                 ))}
             </TableRow>
           </TableHead>
 
           {/** 担当者入力ダイアログ */}
-          <TantoDialog open={dialogOpen} date={selectedDate} setOpen={setDialogOpen} />
+          <TantoDialog
+            open={dialogOpen}
+            datas={selectedDatas}
+            setOpen={setDialogOpen}
+            refetch={() => onSubmit(getValues())}
+          />
 
           <TableBody>
             <TableRow>
