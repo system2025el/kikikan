@@ -46,7 +46,7 @@ type StockTableProps = {
 
 export const StockTable: React.FC<StockTableProps> = ({ eqStockList, dateRange, juchuHonbanbiList, ref }) => {
   return (
-    <TableContainer ref={ref} style={{ overflow: 'scroll' /*maxHeight: '80vh'*/ }}>
+    <TableContainer ref={ref} style={{ overflow: 'scroll', maxHeight: '80vh' }}>
       <Table stickyHeader>
         <TableHead>
           <TableRow>
@@ -201,7 +201,7 @@ export const EqTable: React.FC<EqTableProps> = ({
   };
 
   return (
-    <TableContainer ref={ref} style={{ overflow: 'scroll' /*maxHeight: '80vh'*/ }}>
+    <TableContainer ref={ref} style={{ overflow: 'scroll', maxHeight: '80vh' }}>
       <Table stickyHeader>
         <TableHead>
           <TableRow>
