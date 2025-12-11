@@ -32,7 +32,7 @@ import {
 } from '@mui/material';
 import { addMonths, set, setDate, subDays, subMonths } from 'date-fns';
 import dayjs, { Dayjs } from 'dayjs';
-import { useRouter } from 'next/navigation';
+import { redirect, useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -602,7 +602,8 @@ const EquipmentOrderDetail = (props: {
       );
 
       if (newJuchuKizaiHeadId) {
-        router.push(`/eq-main-order-detail/${data.juchuHeadId}/${newJuchuKizaiHeadId}/edit`);
+        redirect(`/eq-main-order-detail/${data.juchuHeadId}/${newJuchuKizaiHeadId}/edit`);
+        //router.push(`/eq-main-order-detail/${data.juchuHeadId}/${newJuchuKizaiHeadId}/edit`);
       } else {
         setSnackBarMessage('保存に失敗しました');
         setSnackBarOpen(true);

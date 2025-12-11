@@ -173,11 +173,9 @@ export const Stock = () => {
   /** 初期表示 */
   useEffect(() => {
     const getList = async () => {
-      setIsLoading(true);
       const bumonList = await getBumonsData();
       setBumons(bumonList);
       reset({ bumonId: bumonList[0].bumonId });
-      setIsLoading(false);
     };
     getList();
   }, [reset]);
