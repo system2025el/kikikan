@@ -643,10 +643,6 @@ export const Order = (props: {
                 <Delete fontSize="small" />
                 伝票削除
               </Button>
-              {/* <Button disabled={!edit} onClick={handleCopy}>
-                <ContentCopyIcon fontSize="small" />
-                コピー
-              </Button> */}
             </Grid2>
           </Grid2>
           <Divider />
