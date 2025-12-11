@@ -384,7 +384,13 @@ const EquipmentOrderDetail = (props: {
 
       setIsDetailLoading(false);
     };
+    if (saveKizaiHead) {
+      getData();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
+  useEffect(() => {
     const asyncProcess = async () => {
       if (!user || !props.edit) return;
 
@@ -401,11 +407,8 @@ const EquipmentOrderDetail = (props: {
       setIsLoading(false);
     };
     asyncProcess();
-    if (saveKizaiHead) {
-      getData();
-    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     const dirty = isDirty || otherDirty ? true : false;
@@ -603,7 +606,6 @@ const EquipmentOrderDetail = (props: {
 
       if (newJuchuKizaiHeadId) {
         redirect(`/eq-main-order-detail/${data.juchuHeadId}/${newJuchuKizaiHeadId}/edit`);
-        //router.push(`/eq-main-order-detail/${data.juchuHeadId}/${newJuchuKizaiHeadId}/edit`);
       } else {
         setSnackBarMessage('保存に失敗しました');
         setSnackBarOpen(true);

@@ -20,6 +20,7 @@ import {
   Divider,
   Fab,
   FormControl,
+  FormHelperText,
   Grid2,
   MenuItem,
   Modal,
@@ -30,7 +31,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { useRouter } from 'next/navigation';
+import { redirect, useRouter } from 'next/navigation';
 import { use, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
@@ -206,7 +207,7 @@ export const Order = (props: {
     };
     asyncProcess();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     setIsDirty(isDirty);
@@ -226,8 +227,13 @@ export const Order = (props: {
     if (data.juchuHeadId === 0) {
       const maxId = await getMaxId();
       const newOrderId = maxId ? maxId.juchu_head_id + 1 : 1;
-      await addJuchuHead(newOrderId, data, user.name);
-      router.push(`/order/${newOrderId}/edit`);
+      const saveResult = await addJuchuHead(newOrderId, data, user.name);
+      if (saveResult) {
+        redirect(`/order/${newOrderId}/edit`);
+      } else {
+        setSnackBarMessage('保存に失敗しました');
+        setSnackBarOpen(true);
+      }
       // 更新
     } else {
       const updateResult = await updJuchuHead(data);
@@ -713,8 +719,13 @@ export const Order = (props: {
                   <Controller
                     name="nyuryokuUser"
                     control={control}
-                    render={({ field }) => (
-                      <Select {...field} defaultValue={props.juchuHeadData.nyuryokuUser} disabled={!edit}>
+                    render={({ field, fieldState }) => (
+                      <Select
+                        {...field}
+                        defaultValue={props.juchuHeadData.nyuryokuUser}
+                        disabled={!edit}
+                        error={!!fieldState.error}
+                      >
                         {userList.map((u) => (
                           <MenuItem key={u.id} value={u.name}>
                             {u.name}
@@ -723,8 +734,8 @@ export const Order = (props: {
                       </Select>
                     )}
                   />
+                  <FormHelperText sx={{ color: 'error.main' }}>{errors.nyuryokuUser?.message}</FormHelperText>
                 </FormControl>
-                {/*<TextFieldElement name="nyuryokuUser" control={control} disabled={!edit}></TextFieldElement>*/}
               </Box>
               <Box sx={styles.container}>
                 <Typography mr={2}>出庫日/入庫日</Typography>
@@ -1034,7 +1045,7 @@ const styles: { [key: string]: React.CSSProperties } = {
   // コンテナ
   container: {
     display: 'flex',
-    alignItems: 'center',
+    alignItems: 'baseline',
     margin: 1,
     marginLeft: 2,
   },
