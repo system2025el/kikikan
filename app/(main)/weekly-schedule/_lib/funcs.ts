@@ -1,19 +1,20 @@
 'use server';
 
 import { selectWeeklyList } from '@/app/_lib/db/tables/t-juchu-sharyo-head';
+import { upsertTWeekly } from '@/app/_lib/db/tables/t-weekly';
+import { TWeeklyValues } from '@/app/_lib/db/types/t-weekly-type';
 
-import { WeeklyScheduleValues } from './types';
+import { toJapanYMDString } from '../../_lib/date-conversion';
+import { WeeklyScheduleValues, WeeklyValues } from './types';
 
 /**
  * Weeklyスケジュールを取得する関数
  * @param date
  * @returns
  */
-export const getWeeklyScheduleList = async (date: Date): Promise<WeeklyScheduleValues[]> => {
+export const getWeeklyScheduleList = async (query: { dat: Date }): Promise<WeeklyScheduleValues[]> => {
   try {
-    const data = await selectWeeklyList(date.toISOString());
-
-    // console.log('===============================', data);
+    const data = await selectWeeklyList(toJapanYMDString(query.dat, '-'));
 
     type sharyoTime = {
       juchuHeadId: number;
@@ -34,7 +35,7 @@ export const getWeeklyScheduleList = async (date: Date): Promise<WeeklyScheduleV
         cal_dat: string;
         weekly_mem: string | null;
         tanto_nam: string | null;
-        holiday_flg: number | null;
+        holiday_flg: boolean | null;
         juchuSharyoMap: Record<string, sharyoTime>;
       }
     > = {};
@@ -48,7 +49,7 @@ export const getWeeklyScheduleList = async (date: Date): Promise<WeeklyScheduleV
           cal_dat: row.cal_dat,
           weekly_mem: row.weekly_mem ?? null,
           tanto_nam: row.tanto_nam ?? null,
-          holiday_flg: row.holiday_flg ? Number(row.holiday_flg) : null,
+          holiday_flg: row.holiday_flg ? Boolean(row.holiday_flg) : null,
           juchuSharyoMap: {},
         };
       }
@@ -97,18 +98,10 @@ export const getWeeklyScheduleList = async (date: Date): Promise<WeeklyScheduleV
         calDat: dayObj.cal_dat,
         mem: dayObj.weekly_mem,
         tantoNam: dayObj.tanto_nam,
-        holidayFlg: dayObj.holiday_flg,
+        holidayFlg: Boolean(dayObj.holiday_flg),
         timeDatas: Object.values(dayObj.juchuSharyoMap),
       };
     });
-
-    // console.log(
-    //   '=============================================結果＝＝＝',
-    //   resultData.map((d) => ({
-    //     ...d,
-    //     sharyoTimes: d.timeDatas.map((t) => `${t.juchuSharyoId}-${t.koenNam}-${t.sharyoIds}-${t.nyushukoDat}`),
-    //   }))
-    // );
 
     return resultData;
   } catch (e) {
@@ -116,15 +109,25 @@ export const getWeeklyScheduleList = async (date: Date): Promise<WeeklyScheduleV
   }
 };
 
-/** 日付に対するシフト担当者、メモ、祝日フラグを挿入する関数 */
-export const insertWeeklyData = async (data: {
-  dat: string;
-  mem: string | null;
-  tantoNam: string | null;
-  holidayFlg: boolean;
-}) => {
+/**
+ * 日付に対するシフト担当者、メモ、祝日フラグを成型する関数
+ * @param  data フォームのデータ
+ * @param {string} user ログインユーザ名
+ */
+export const insertWeeklyData = async (data: WeeklyValues, user: string) => {
+  const now = new Date().toISOString();
+  const newData: TWeeklyValues = {
+    weekly_dat: toJapanYMDString(data.dat, '-'),
+    mem: data.mem,
+    tanto_nam: data.tantoNam,
+    holiday_flg: Number(data.holidayFlg),
+    add_dat: now,
+    add_user: user,
+    upd_dat: now,
+    upd_user: user,
+  };
   try {
-    console.log(data);
+    await upsertTWeekly(newData);
   } catch (e) {
     throw e;
   }

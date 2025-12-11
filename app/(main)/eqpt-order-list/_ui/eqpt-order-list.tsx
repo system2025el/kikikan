@@ -87,41 +87,30 @@ export const EqptOrderList = () => {
     const searchParams = searchPramsString ? JSON.parse(searchPramsString) : null;
     console.log('検索条件＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝', searchParams);
 
-    const get = async () => {
+    const getList = async (data: EqptOrderSearchValues) => {
+      const [o, c, l] = await Promise.all([getFilteredOrderList(data), getCustomerSelection(), getLocsSelection()]);
+      setOrderList(o);
+      setCustomers(c);
+      setLocs(l);
+      setIsLoading(false);
+    };
+
+    // メモリ上に検索条件があれば実行
+    if (searchParams) {
       // 読み込み中
       setIsLoading(true);
       // ページ初期化
       setPage(1);
       // 検索条件表示と検索
       reset(searchParams);
-      const q = await getFilteredOrderList(searchParams);
-      if (q) {
-        setOrderList(q);
-      }
-      setIsLoading(false);
-    };
-
-    // 初期表示
-    const getList = async () => {
-      const [o, c, l] = await Promise.all([
-        getFilteredOrderList({
-          radio: 'shuko',
-          selectedDate: { value: '4', range: { from: null, to: null } },
-          kokyaku: FAKE_NEW_ID,
-          listSort: { sort: 'shuko', order: 'asc' },
-        }),
-        getCustomerSelection(),
-        getLocsSelection(),
-      ]);
-      setOrderList(o);
-      setCustomers(c);
-      setLocs(l);
-      setIsLoading(false);
-    };
-    getList();
-    // メモリ上に検索条件があれば実行
-    if (searchParams) {
-      get();
+      getList(searchParams);
+    } else {
+      getList({
+        radio: 'shuko',
+        selectedDate: { value: '4', range: { from: null, to: null } },
+        kokyaku: FAKE_NEW_ID,
+        listSort: { sort: 'shuko', order: 'asc' },
+      });
     }
   }, [reset]);
 
