@@ -2476,7 +2476,9 @@ const EquipmentOrderDetail = (props: {
                           <AddIcon fontSize="small" />
                           機材追加
                         </Button>
-                        <Button /*disabled={!edit}*/ onClick={() => setSortDialogOpen(true)}>並び替え</Button>
+                        <Button disabled={!edit} onClick={() => setSortDialogOpen(true)}>
+                          並び替え
+                        </Button>
 
                         <Dialog
                           open={sortDialogOpen}
