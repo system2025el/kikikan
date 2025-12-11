@@ -175,9 +175,11 @@ export const addJuchuHead = async (juchuHeadId: number, juchuHeadData: OrderValu
     } else {
       console.log('New order added successfully:', newData);
       await revalidatePath('/eqpt-order-list');
+      return true;
     }
   } catch (e) {
     console.error('Exception while adding new order:', e);
+    return false;
   }
 };
 
