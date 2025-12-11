@@ -30,7 +30,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { addMonths, setDate, subDays, subMonths } from 'date-fns';
+import { addMonths, set, setDate, subDays, subMonths } from 'date-fns';
 import dayjs, { Dayjs } from 'dayjs';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -74,6 +74,7 @@ import { DateSelectDialog } from './date-selection-dialog';
 import { ContainerTable, EqTable, IdoEqTable, StockTable } from './equipment-order-detail-table';
 import { EqptSelectionDialog } from './equipment-selection-dailog';
 import { SeparationDialog } from './separation-dialog';
+import { SortDialog } from './sort-dialog';
 
 const EquipmentOrderDetail = (props: {
   juchuHeadData: DetailOerValues;
@@ -204,6 +205,8 @@ const EquipmentOrderDetail = (props: {
   const [copyDialogOpen, setCopyDialogOpen] = useState(false);
   // 分離ダイアログ制御
   const [separationDialogOpen, setSeparationDialogOpen] = useState(false);
+  // 並び替えダイアログ制御
+  const [sortDialogOpen, setSortDialogOpen] = useState(false);
   // 日付選択カレンダーダイアログ制御
   const [dateSelectionDialogOpne, setDateSelectionDialogOpne] = useState(false);
   // 機材削除ダイアログ制御
@@ -1775,6 +1778,19 @@ const EquipmentOrderDetail = (props: {
     }
   };
 
+  /**
+   * 並び替え処理
+   * @param updatedMeisaiList 並び替え後の明細リスト
+   */
+  const handleSortConfirmed = (updatedMeisaiList: JuchuKizaiMeisaiValues[]) => {
+    setSortDialogOpen(false);
+    setJuchuKizaiMeisaiList(updatedMeisaiList);
+    setEqStockList((prev) => {
+      const map = Object.fromEntries(prev.map((b) => [b[0].kizaiId, b]));
+      return updatedMeisaiList.map((d) => map[d.kizaiId]);
+    });
+  };
+
   // 本番日入力ダイアログ開閉
   const handleOpenDateDialog = () => {
     setDateSelectionDialogOpne(true);
@@ -2455,12 +2471,31 @@ const EquipmentOrderDetail = (props: {
                         },
                       }}
                     >
-                      <Box my={1} mx={2}>
+                      <Grid2 container my={1} mx={2} spacing={2}>
                         <Button disabled={!edit} onClick={handleOpenEqDialog}>
                           <AddIcon fontSize="small" />
                           機材追加
                         </Button>
-                      </Box>
+                        <Button /*disabled={!edit}*/ onClick={() => setSortDialogOpen(true)}>並び替え</Button>
+
+                        <Dialog
+                          open={sortDialogOpen}
+                          slotProps={{
+                            paper: {
+                              sx: {
+                                maxWidth: 'none',
+                              },
+                            },
+                          }}
+                          sx={{ zIndex: 1201 }}
+                        >
+                          <SortDialog
+                            juchuKizaiMeisai={juchuKizaiMeisaiList}
+                            onClose={() => setSortDialogOpen(false)}
+                            onSave={handleSortConfirmed}
+                          />
+                        </Dialog>
+                      </Grid2>
                       <Box
                         display={
                           Object.keys(juchuKizaiMeisaiList.filter((d) => !d.delFlag)).length > 0 ? 'block' : 'none'
