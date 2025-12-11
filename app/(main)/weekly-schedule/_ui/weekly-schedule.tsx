@@ -17,6 +17,7 @@ import {
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import { TextFieldElement } from 'react-hook-form-mui';
 
 import { weeklyColors } from '../../_lib/colors';
 import { toJapanDayString, toJapanHHmmString, toJapanYMDAndDayString } from '../../_lib/date-conversion';
@@ -24,7 +25,7 @@ import { FormDateX } from '../../_ui/date';
 import { LoadingOverlay } from '../../_ui/loading';
 import { LightTooltipWithText } from '../../(masters)/_ui/tables';
 import { getWeeklyScheduleList } from '../_lib/funcs';
-import { WeeklyScheduleValues, WeeklyValues } from '../_lib/types';
+import { WeeklyScheduleValues, WeeklySearchValues, WeeklyValues } from '../_lib/types';
 import { TantoDialog } from './tanto-dialog';
 
 /**
@@ -48,14 +49,18 @@ export const WeeklySchedule = () => {
   });
 
   /* useForm ------------------------------------------------------------- */
-  const { handleSubmit, control, reset, getValues } = useForm<{ dat: Date }>({
+  const { handleSubmit, control, reset, getValues } = useForm<WeeklySearchValues>({
     mode: 'onSubmit',
-    defaultValues: { dat: new Date() },
+    defaultValues: {
+      startDate: new Date(),
+      endDate: null,
+      dateCount: null,
+    },
   });
 
   /* methods ------------------------------------------------------------- */
   /** 再描画押下時処理 */
-  const onSubmit = async (data: { dat: Date }) => {
+  const onSubmit = async (data: WeeklySearchValues) => {
     setIsLoading(true);
     sessionStorage.setItem('weekly', JSON.stringify(data));
     const list = await getWeeklyScheduleList(data);
@@ -76,7 +81,7 @@ export const WeeklySchedule = () => {
     const searchPramsString = sessionStorage.getItem('weekly');
     const searchParams = searchPramsString ? JSON.parse(searchPramsString) : null;
 
-    const getSchedule = async (data: { dat: Date }) => {
+    const getSchedule = async (data: WeeklySearchValues) => {
       const list = await getWeeklyScheduleList(data);
       setScheList(list);
       setIsLoading(false);
@@ -88,7 +93,7 @@ export const WeeklySchedule = () => {
       reset(searchParams);
       getSchedule(searchParams);
     } else {
-      getSchedule({ dat: new Date() });
+      getSchedule({ startDate: new Date(), endDate: null, dateCount: null });
     }
   }, [reset]);
 
@@ -104,18 +109,49 @@ export const WeeklySchedule = () => {
         <Box sx={styles.boxStyle}>
           表示開始日
           <Controller
-            name="dat"
+            name="startDate"
             control={control}
             render={({ field, fieldState: { error } }) => (
               <FormDateX
                 value={field.value}
                 onChange={field.onChange}
-                sx={{ width: 160 }}
+                sx={{ width: 200, mr: 2, ml: 1 }}
                 error={!!error}
                 helperText={error?.message}
-                notClearable
               />
             )}
+          />
+          表示終了日
+          <Controller
+            name="endDate"
+            control={control}
+            render={({ field, fieldState: { error } }) => (
+              <FormDateX
+                value={field.value}
+                onChange={field.onChange}
+                sx={{ width: 200, mr: 2, ml: 1 }}
+                error={!!error}
+                helperText={error?.message}
+              />
+            )}
+          />
+          表示日数
+          <TextFieldElement
+            name="dateCount"
+            control={control}
+            sx={{
+              width: 60,
+              mr: 2,
+              ml: 1,
+              '& .MuiInputBase-input': {
+                textAlign: 'right',
+              },
+              '& input[type=number]::-webkit-inner-spin-button': {
+                WebkitAppearance: 'none',
+                margin: 0,
+              },
+            }}
+            type="number"
           />
           <Button type="submit" sx={{ ml: 2 }}>
             再取得

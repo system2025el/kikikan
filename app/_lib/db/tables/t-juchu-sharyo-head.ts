@@ -1,9 +1,11 @@
 'use server';
 
+import { count } from 'console';
 import { PoolClient } from 'pg';
 import { set } from 'zod';
 
 import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
+import { WeeklySearchValues } from '@/app/(main)/weekly-schedule/_lib/types';
 
 import pool from '../postgres';
 import { SCHEMA } from '../supabase';
@@ -145,7 +147,7 @@ export const deleteJuchuSharyoHead = async (
  * @param date 指定日
  * @returns 日付ごとの配列
  */
-export const selectWeeklyList = async (date: string) => {
+export const selectWeeklyList = async (queries: { start: string; count: number }) => {
   try {
     const query = `
         SELECT   
@@ -187,7 +189,7 @@ export const selectWeeklyList = async (date: string) => {
           /* スケジュール生成して外部結合 */
           (
               -- スケジュールの生成範囲 /*■変数箇所■*/
-              select $1::date + g.i as cal_dat from generate_series(0, 30) as g(i)
+              select $2::date + g.i as cal_dat from generate_series(0, $1) as g(i)
           ) as cal
         ON CAST(s_meisai.nyushuko_dat AS DATE) = cal.cal_dat    
         LEFT JOIN
@@ -196,7 +198,7 @@ export const selectWeeklyList = async (date: string) => {
         ORDER BY cal.cal_dat, s_meisai.nyushuko_dat;
     `;
 
-    const values = [date];
+    const values = [queries.count, queries.start];
 
     return (await pool.query(query, values)).rows;
   } catch (e) {

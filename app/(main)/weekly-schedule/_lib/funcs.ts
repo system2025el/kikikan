@@ -1,20 +1,55 @@
 'use server';
 
+import dayjs from 'dayjs';
+import timezone from 'dayjs/plugin/timezone';
+import utc from 'dayjs/plugin/utc';
+
 import { selectWeeklyList } from '@/app/_lib/db/tables/t-juchu-sharyo-head';
 import { upsertTWeekly } from '@/app/_lib/db/tables/t-weekly';
 import { TWeeklyValues } from '@/app/_lib/db/types/t-weekly-type';
 
 import { toJapanYMDString } from '../../_lib/date-conversion';
-import { WeeklyScheduleValues, WeeklyValues } from './types';
+import { WeeklyScheduleValues, WeeklySearchValues, WeeklyValues } from './types';
+
+// .tz()を使う準備
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 /**
  * Weeklyスケジュールを取得する関数
  * @param date
  * @returns
  */
-export const getWeeklyScheduleList = async (query: { dat: Date }): Promise<WeeklyScheduleValues[]> => {
+export const getWeeklyScheduleList = async (query: WeeklySearchValues): Promise<WeeklyScheduleValues[]> => {
+  const { startDate, endDate, dateCount } = query;
+  const DEFAULT_COUNT = 30;
+  let count: number;
+  let date: string;
+
+  if (startDate && endDate) {
+    // start, endどちらも入力されているとき
+    count = dayjs(endDate).diff(dayjs(startDate), 'day');
+    date = toJapanYMDString(startDate, '-');
+  } else if (!startDate && endDate) {
+    // endだけ入力されているとき
+    count = dateCount && dateCount !== 0 ? dateCount - 1 : DEFAULT_COUNT;
+    /** endDateから表示日数分前の日付 */
+    date = dayjs(endDate).tz('Asia/Tokyo').subtract(count, 'day').format(`YYYY-MM-DD`);
+  } else if (!endDate && startDate) {
+    // startだけ入力されているとき
+    count = dateCount && dateCount !== 0 ? dateCount - 1 : DEFAULT_COUNT;
+    date = toJapanYMDString(startDate, '-');
+  } else {
+    // 全てない場合は今日で31日表示
+    count = dateCount && dateCount !== 0 ? dateCount - 1 : DEFAULT_COUNT;
+    date = toJapanYMDString(new Date(), '-');
+  }
   try {
-    const data = await selectWeeklyList(toJapanYMDString(query.dat, '-'));
+    // データ取得実行
+    const data = await selectWeeklyList({
+      start: date,
+      count: count,
+    });
 
     type sharyoTime = {
       juchuHeadId: number;

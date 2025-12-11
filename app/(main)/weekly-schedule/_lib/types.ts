@@ -19,9 +19,10 @@ export type WeeklyScheduleValues = {
   }[];
 };
 
-export type WeeklySearch = {
+export type WeeklySearchValues = {
   startDate: Date | null;
   endDate: Date | null;
+  dateCount: number | null;
 };
 
 /**
