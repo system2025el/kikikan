@@ -24,9 +24,12 @@ import { EqptImportType, KizaiImportTypes, RfidImportTypes, TanabanImportTypes }
  * @param data エクセルから取得したデータの配列
  */
 export const ImportEqptRfidData = async (data: EqptImportType[], user: string) => {
-  console.log(data);
+  // console.log(data);
+  console.log('=================== インポートするよ ====================');
   // 現在時刻
   const now = toJapanTimeStampString();
+
+  console.log('=================== データの整理開始 ====================');
   /* 重複のない棚番用データ */
   const tanabanList: TanabanImportTypes[] = Array.from(
     new Map(
@@ -112,6 +115,8 @@ export const ImportEqptRfidData = async (data: EqptImportType[], user: string) =
         .map((v) => [v.rfid_tag_id, v])
     ).values()
   );
+
+  console.log('=================== データの整理終了 ====================');
 
   /* トランザクション */
   const connection = await pool.connect();
