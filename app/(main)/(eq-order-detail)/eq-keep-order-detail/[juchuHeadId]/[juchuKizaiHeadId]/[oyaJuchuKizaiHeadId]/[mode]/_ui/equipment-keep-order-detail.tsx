@@ -246,7 +246,13 @@ export const EquipmentKeepOrderDetail = (props: {
 
       setIsDetailLoading(false);
     };
+    if (saveKizaiHead) {
+      getData();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
+  useEffect(() => {
     const asyncProcess = async () => {
       if (!user || !props.edit) return;
 
@@ -263,11 +269,8 @@ export const EquipmentKeepOrderDetail = (props: {
       setIsLoading(false);
     };
     asyncProcess();
-    if (saveKizaiHead) {
-      getData();
-    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     const dirty = isDirty || otherDirty ? true : false;

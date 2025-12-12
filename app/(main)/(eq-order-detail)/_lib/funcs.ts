@@ -108,7 +108,10 @@ export const getDetailJuchuHead = async (juchuHeadId: number) => {
       juchuDat: juchuData.data.juchu_dat ? new Date(juchuData.data.juchu_dat) : new Date(),
       juchuRange:
         juchuData.data.juchu_str_dat && juchuData.data.juchu_end_dat
-          ? [new Date(juchuData.data.juchu_str_dat), new Date(juchuData.data.juchu_end_dat)]
+          ? [
+              new Date(toJapanTimeString(juchuData.data.juchu_str_dat)),
+              new Date(toJapanTimeString(juchuData.data.juchu_end_dat)),
+            ]
           : null,
       nyuryokuUser: juchuData.data.nyuryoku_user ?? '',
       koenNam: juchuData.data.koen_nam ?? '',
