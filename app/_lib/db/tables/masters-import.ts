@@ -20,14 +20,22 @@ export const checkRfid = async (list: RfidImportTypes[], connection: PoolClient,
   if (!Array.isArray(list) || list.length === 0) {
     return [];
   }
+  console.log('=================== RFIDマスタはじめ ====================');
+
   try {
     // インポートしたRFIDタグIDリスト
     const rfidTagIds = list.map((v) => v.rfid_tag_id);
+
+    console.log('=================== 既存タグSELECTはじめ ====================');
+
     // m_rfidから既存のRFIDタグIDを取得
     const existingTagsResult = await connection.query(
       `SELECT rfid_tag_id FROM ${SCHEMA}.v_rfid WHERE rfid_tag_id = ANY($1::text[]);`,
       [rfidTagIds]
     );
+
+    console.log('=================== SELECT終了 ====================');
+
     // 既存のRFIDタグIDを取得
     const existingRfidTags = new Set(existingTagsResult.rows.map((row) => row.rfid_tag_id));
 
@@ -194,7 +202,7 @@ export const checkRfid = async (list: RfidImportTypes[], connection: PoolClient,
 
     console.log('RFIDマスタ処理した');
   } catch (e) {
-    console.error(e);
+    console.error('例外が発生：DBエラーrfid', e);
     throw new Error('例外が発生：DBエラーrfid');
   }
 };
@@ -210,6 +218,8 @@ export const checkKizai = async (list: KizaiImportTypes[], connection: PoolClien
   if (!Array.isArray(list) || list.length === 0) {
     return [];
   }
+  console.log('=================== 機材マスタインポート開始 ====================');
+
   // 一時テーブル用のインポートしたデータ準備
   const allColumns = Object.keys(list[0]);
   // パラメータ上限対策：チャンクサイズ設定（1行約15カラム * 2000行 = 30,000パラメータ < 65535）
@@ -220,10 +230,13 @@ export const checkKizai = async (list: KizaiImportTypes[], connection: PoolClien
   // 更新があったかどうかのフラグ
   let hasUpdates = false;
 
+  console.log('=================== ループ開始 ====================');
+
   try {
     for (let i = 0; i < list.length; i += CHUNK_SIZE) {
       // 今回処理するデータを切り出し
       const chunk = list.slice(i, i + CHUNK_SIZE);
+      console.log(`=================== ループ${i + 1}回目のSELECT ====================`);
 
       // ループの都度最新の最大IDを取得する、前のループでINSERTされた分を考慮
       const maxKizaiIdResult = await connection.query(`SELECT COALESCE(MAX(kizai_id), 0) FROM ${SCHEMA}.m_kizai;`);
@@ -313,7 +326,7 @@ export const checkKizai = async (list: KizaiImportTypes[], connection: PoolClien
 
     return allResultRows;
   } catch (e) {
-    console.log(e);
+    console.log('例外が発生：DBエラーkizai', e);
     throw new Error('例外が発生：DBエラーkizai');
   }
 };

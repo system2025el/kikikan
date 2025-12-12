@@ -370,7 +370,6 @@ const VehicleOrderDetail = ({
               変更
             </Button>
           </Grid2>
-          <BackButton label={'戻る'} />
         </Grid2>
         {/* 受注ヘッダ ---------------------------------------------------------------------------------- */}
         <Accordion
