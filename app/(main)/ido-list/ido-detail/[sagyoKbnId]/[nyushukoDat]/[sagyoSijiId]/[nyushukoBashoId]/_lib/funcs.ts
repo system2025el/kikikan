@@ -55,7 +55,7 @@ export const getIdoDen = async (sagyoKbnId: number, sagyoSijiId: number, sagyoDe
     }
 
     const idoDetailTableList: IdoDetailTableValues[] = data.map((d) => ({
-      idoDenId: d.ido_den_id ?? 0,
+      idoDenId: 0,
       sagyoKbnId: sagyoKbnId,
       nyushukoDat: sagyoDenDat,
       sagyosijiId: sagyoSijiId,
@@ -74,7 +74,7 @@ export const getIdoDen = async (sagyoKbnId: number, sagyoSijiId: number, sagyoDe
       diffQty: d.diff_qty ?? 0,
       ctnFlg: d.ctn_flg === 1 ? true : false,
       delFlag: false,
-      saveFlag: d.ido_den_id !== null ? true : false,
+      saveFlag: d.ido_flg === 1 ? true : false,
     }));
 
     return idoDetailTableList;
@@ -132,7 +132,7 @@ export const addIdoDen = async (addIdoDenData: IdoDetailTableValues[], userNam: 
  */
 export const updIdoDen = async (updIdoDenData: IdoDetailTableValues[], userNam: string, connection: PoolClient) => {
   const updateIdoShukoData: IdoDen[] = updIdoDenData.map((d) => ({
-    ido_den_id: 0,
+    ido_den_id: d.idoDenId,
     kizai_id: d.kizaiId,
     plan_qty: d.planQty,
     sagyo_den_dat: d.nyushukoDat,
@@ -144,7 +144,7 @@ export const updIdoDen = async (updIdoDenData: IdoDetailTableValues[], userNam: 
   }));
 
   const updateIdoNyukoData: IdoDen[] = updIdoDenData.map((d) => ({
-    ido_den_id: 0,
+    ido_den_id: d.idoDenId,
     kizai_id: d.kizaiId,
     plan_qty: d.planQty,
     sagyo_den_dat: d.nyushukoDat,
@@ -171,9 +171,14 @@ export const updIdoDen = async (updIdoDenData: IdoDetailTableValues[], userNam: 
  * @param deleteIds 削除移動伝票id
  * @param connection
  */
-export const delIdoDen = async (deleteIds: number[], connection: PoolClient) => {
+export const delIdoDen = async (
+  deleteData: { sagyo_siji_id: number; sagyo_den_dat: string; kizai_id: number }[],
+  connection: PoolClient
+) => {
   try {
-    await deleteIdoDen(deleteIds, connection);
+    for (const data of deleteData) {
+      await deleteIdoDen(data, connection);
+    }
   } catch (e) {
     throw e;
   }
@@ -293,7 +298,7 @@ export const saveIdoDen = async (idoDenData: IdoDetailTableValues[], userNam: st
 
   let newIdoDenId = await getIdoDenMaxId();
   const saveIdoDenData = idoDenData.map((data) =>
-    data.idoDenId === 0 && !data.delFlag ? { ...data, idoDenId: ++newIdoDenId } : data
+    !data.saveFlag && !data.delFlag ? { ...data, idoDenId: ++newIdoDenId } : data
   );
 
   const addIdoDenData = saveIdoDenData.filter((d) => !d.saveFlag && !d.delFlag);
@@ -303,8 +308,12 @@ export const saveIdoDen = async (idoDenData: IdoDetailTableValues[], userNam: st
   try {
     // 削除
     if (delIdoDenData.length > 0) {
-      const deleteIds = delIdoDenData.map((data) => data.idoDenId);
-      await delIdoDen(deleteIds, connection);
+      const deleteData = delIdoDenData.map((d) => ({
+        sagyo_siji_id: d.sagyosijiId,
+        sagyo_den_dat: d.nyushukoDat,
+        kizai_id: d.kizaiId,
+      }));
+      await delIdoDen(deleteData, connection);
     }
     // 追加
     if (addIdoDenData.length > 0) {

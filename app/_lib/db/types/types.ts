@@ -2828,6 +2828,7 @@ export type Database = {
           ctn_flg: number | null;
           diff_qty: number | null;
           eda_cod: string | null;
+          ido_flg: number | null;
           juchu_flg: number | null;
           kizai_id: number | null;
           kizai_mem: string | null;

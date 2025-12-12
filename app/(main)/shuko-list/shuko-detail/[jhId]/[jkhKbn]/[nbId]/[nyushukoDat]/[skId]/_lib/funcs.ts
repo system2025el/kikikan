@@ -149,9 +149,9 @@ export const updShukoDetail = async (
       const upsertJuchuMeisaiResult = await upsJuchuCtnMeisai(ctnData, userNam, connection);
       console.log('コンテナ明細UPSERT', upsertJuchuMeisaiResult);
 
-      // 入出庫伝票追加更新
-      const upsertShukoDenResult = await upsNyushukoDen(ctnData, userNam, connection);
-      console.log('入出庫伝票UPSERT', upsertShukoDenResult);
+      // 入出庫伝票更新
+      const upsertShukoDenResult = await updNyushukoDen(ctnData, userNam, connection);
+      console.log('入出庫伝票更新', upsertShukoDenResult);
     }
 
     // 入出庫確定追加
@@ -207,13 +207,13 @@ export const upsJuchuCtnMeisai = async (
 };
 
 /**
- * 入出庫伝票追加更新
+ * 入出庫伝票更新
  * @param shukoDetailTableData 出庫テーブルデータ
  * @param userNam ユーザー名
  * @param connection
  * @returns
  */
-export const upsNyushukoDen = async (
+export const updNyushukoDen = async (
   shukoDetailTableData: ShukoDetailTableValues[],
   userNam: string,
   connection: PoolClient
@@ -255,9 +255,11 @@ export const upsNyushukoDen = async (
   const mergeData = [...updCtnShukoCheckData, ...updCtnNyukoCheckData];
 
   try {
-    await upsertNyushukoDen(mergeData, connection);
+    for (const data of mergeData) {
+      await updateNyushukoDen(data, connection);
+    }
 
-    console.log('nyushuko den upsert successfully:', mergeData);
+    console.log('nyushuko den update successfully:', mergeData);
     return true;
   } catch (e) {
     console.error('Exception while updating nyushuko den:', e);

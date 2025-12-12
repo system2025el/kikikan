@@ -64,7 +64,9 @@ export const updateIdoDen = async (data: IdoDen, connection: PoolClient) => {
 
   const allKeys = Object.keys(data) as (keyof typeof data)[];
 
-  const updateKeys = allKeys.filter((key) => !(whereKeys as readonly string[]).includes(key));
+  const updateKeys = allKeys.filter(
+    (key) => !(whereKeys as readonly string[]).includes(key) && !(key === 'ido_den_id')
+  );
 
   if (updateKeys.length === 0) {
     throw new Error('No columns to update.');
@@ -107,15 +109,20 @@ export const updateIdoDen = async (data: IdoDen, connection: PoolClient) => {
  * @param deleteIds 移動伝票削除対象id
  * @param connection
  */
-export const deleteIdoDen = async (deleteIds: number[], connection: PoolClient) => {
+export const deleteIdoDen = async (
+  deleteData: { sagyo_siji_id: number; sagyo_den_dat: string; kizai_id: number },
+  connection: PoolClient
+) => {
   const query = `
     DELETE FROM
       ${SCHEMA}.t_ido_den
     WHERE
-      ido_den_id = ANY($1)
+      sagyo_siji_id = $1
+      AND sagyo_den_dat = $2
+      AND kizai_id = $3
   `;
 
-  const values = [deleteIds];
+  const values = [deleteData.sagyo_siji_id, deleteData.sagyo_den_dat, deleteData.kizai_id];
 
   try {
     await connection.query(query, values);
