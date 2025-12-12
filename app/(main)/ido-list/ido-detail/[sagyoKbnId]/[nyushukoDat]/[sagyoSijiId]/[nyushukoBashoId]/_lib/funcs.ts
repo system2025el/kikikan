@@ -132,7 +132,7 @@ export const addIdoDen = async (addIdoDenData: IdoDetailTableValues[], userNam: 
  */
 export const updIdoDen = async (updIdoDenData: IdoDetailTableValues[], userNam: string, connection: PoolClient) => {
   const updateIdoShukoData: IdoDen[] = updIdoDenData.map((d) => ({
-    ido_den_id: d.idoDenId,
+    ido_den_id: 0,
     kizai_id: d.kizaiId,
     plan_qty: d.planQty,
     sagyo_den_dat: d.nyushukoDat,
@@ -144,7 +144,7 @@ export const updIdoDen = async (updIdoDenData: IdoDetailTableValues[], userNam: 
   }));
 
   const updateIdoNyukoData: IdoDen[] = updIdoDenData.map((d) => ({
-    ido_den_id: d.idoDenId,
+    ido_den_id: 0,
     kizai_id: d.kizaiId,
     plan_qty: d.planQty,
     sagyo_den_dat: d.nyushukoDat,

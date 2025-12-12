@@ -190,7 +190,7 @@ export const upsJuchuCtnMeisai = async (
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
     kizai_id: d.kizaiId,
     plan_kizai_qty: (d.resultQty ?? 0) + (d.resultAdjQty ?? 0),
-    shozoku_id: d.nyushukoShubetuId ?? 0,
+    shozoku_id: d.nyushukoBashoId,
     dsp_ord_num: d.dspOrdNumMeisai,
     indent_num: d.indentNum,
     add_dat: toJapanTimeString(),

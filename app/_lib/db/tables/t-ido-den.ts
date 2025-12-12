@@ -60,7 +60,7 @@ export const insertIdoDen = async (data: IdoDen[], connection: PoolClient) => {
  * @param connection
  */
 export const updateIdoDen = async (data: IdoDen, connection: PoolClient) => {
-  const whereKeys = ['ido_den_id', 'sagyo_kbn_id', 'sagyo_siji_id', 'sagyo_den_dat', 'sagyo_id', 'kizai_id'] as const;
+  const whereKeys = ['sagyo_kbn_id', 'sagyo_siji_id', 'sagyo_den_dat', 'sagyo_id', 'kizai_id'] as const;
 
   const allKeys = Object.keys(data) as (keyof typeof data)[];
 
