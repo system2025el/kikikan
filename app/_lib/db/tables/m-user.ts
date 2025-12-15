@@ -16,7 +16,7 @@ import { MUserDBValues } from '../types/m-use-type';
 export const selectActiveUsers = async () => {
   try {
     return await supabase
-      .schema('dev6')
+      .schema(SCHEMA)
       .from('m_user')
       .select('user_nam, shain_cod')
       .neq('del_flg', 1)

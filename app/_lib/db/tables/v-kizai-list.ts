@@ -87,18 +87,18 @@ export const selectFilteredEqpts = async (queries: {
   //   v_kizai_qty.rfid_kics_qty,
   //   v_kizai_qty.rfid_yard_qty
   // from
-  //   dev6.m_kizai
-  //   left join dev6.m_shozoku on m_shozoku.shozoku_id = m_kizai.shozoku_id
+  //   ${SCHEMA}.m_kizai
+  //   left join ${SCHEMA}.m_shozoku on m_shozoku.shozoku_id = m_kizai.shozoku_id
   //   and m_shozoku.del_flg = 0
-  //   left join dev6.m_bumon on m_bumon.bumon_id = m_kizai.bumon_id
+  //   left join ${SCHEMA}.m_bumon on m_bumon.bumon_id = m_kizai.bumon_id
   //   and m_bumon.del_flg = 0
-  //   left join dev6.m_shukei_bumon on m_shukei_bumon.shukei_bumon_id = m_kizai.shukei_bumon_id
+  //   left join ${SCHEMA}.m_shukei_bumon on m_shukei_bumon.shukei_bumon_id = m_kizai.shukei_bumon_id
   //   and m_shukei_bumon.del_flg = 0
-  //   left join dev6.m_dai_bumon on m_dai_bumon.dai_bumon_id = m_bumon.dai_bumon_id
+  //   left join ${SCHEMA}.m_dai_bumon on m_dai_bumon.dai_bumon_id = m_bumon.dai_bumon_id
   //   and m_shukei_bumon.shukei_bumon_id = m_kizai.shukei_bumon_id
   //   and m_dai_bumon.del_flg = 0
-  //   left join dev6.v_kizai_qty on v_kizai_qty.kizai_id = m_kizai.kizai_id
-  //   left join dev6.m_section on m_section.section_id = COALESCE(m_kizai.section_num, 0)
+  //   left join ${SCHEMA}.v_kizai_qty on v_kizai_qty.kizai_id = m_kizai.kizai_id
+  //   left join ${SCHEMA}.m_section on m_section.section_id = COALESCE(m_kizai.section_num, 0)
   //   and m_section.del_flg = 0
   // order by
   //   (

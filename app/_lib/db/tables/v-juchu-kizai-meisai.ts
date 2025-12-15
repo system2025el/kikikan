@@ -186,9 +186,9 @@ select
     ,1 as ctn_flg
     ,v_juchu_ctn_meisai.dsp_ord_num
 from 
-    dev6.v_juchu_kizai_head_lst
+    ${SCHEMA}.v_juchu_kizai_head_lst
 
-    left join  dev6.v_juchu_ctn_meisai on
+    left join  ${SCHEMA}.v_juchu_ctn_meisai on
         v_juchu_kizai_head_lst.juchu_head_id = v_juchu_ctn_meisai.juchu_head_id
         and
         v_juchu_kizai_head_lst.juchu_kizai_head_id = v_juchu_ctn_meisai.juchu_kizai_head_id

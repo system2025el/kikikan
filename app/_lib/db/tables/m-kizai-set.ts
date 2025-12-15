@@ -157,3 +157,19 @@ export const updateEqptSetDB = async (data: MKizaiSetDBValues) => {
     throw e;
   }
 };
+
+/**
+ *
+ * @param idList
+ */
+export const deleteEqptSets = async (idList: { kizai_id: number; set_kizai_id: number }[]) => {
+  try {
+    await supabase
+      .schema(SCHEMA)
+      .from('m_kizai_set')
+      .delete()
+      .or(idList.map((p) => `(kizai_id.eq.${p.kizai_id},set_kizai_id.eq.${p.set_kizai_id})`).join(','));
+  } catch (e) {
+    throw e;
+  }
+};

@@ -134,7 +134,7 @@ export const EqptSetsMasterDialog = ({
     }
   };
 
-  /* セット機材無ダイアログで灰を押したときの処理 */
+  /* セット機材無ダイアログではいを押したときの処理 */
   const handleConfirmDelete = async () => {
     if (isNew) {
       // 新規の時はダイアログを閉じるだけ

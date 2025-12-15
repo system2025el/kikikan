@@ -166,23 +166,23 @@ export const selectWeeklyList = async (queries: { start: string; count: number }
           juchu.koen_nam,
           kokyaku.kokyaku_nam
         FROM
-          dev6.t_juchu_sharyo_head as s_head
+          ${SCHEMA}.t_juchu_sharyo_head as s_head
         LEFT JOIN
-          dev6.t_juchu_sharyo_meisai as s_meisai
+          ${SCHEMA}.t_juchu_sharyo_meisai as s_meisai
         ON 
           s_head.juchu_head_id = s_meisai.juchu_head_id
         AND
           s_head.juchu_sharyo_head_id = s_meisai.juchu_sharyo_head_id
         LEFT JOIN
-          dev6.t_juchu_head as juchu
+          ${SCHEMA}.t_juchu_head as juchu
         ON
           juchu.juchu_head_id = s_meisai.juchu_head_id
         LEFT JOIN
-          dev6.m_kokyaku as kokyaku
+          ${SCHEMA}.m_kokyaku as kokyaku
         ON
           kokyaku.kokyaku_id = juchu.kokyaku_id
         LEFT JOIN
-          dev6.m_sharyo as sharyo
+          ${SCHEMA}.m_sharyo as sharyo
         ON
           sharyo.sharyo_id = s_meisai.sharyo_id
         RIGHT OUTER JOIN 
@@ -193,7 +193,7 @@ export const selectWeeklyList = async (queries: { start: string; count: number }
           ) as cal
         ON CAST(s_meisai.nyushuko_dat AS DATE) = cal.cal_dat    
         LEFT JOIN
-          dev6.t_weekly
+          ${SCHEMA}.t_weekly
         ON cal.cal_dat = t_weekly.weekly_dat
         ORDER BY cal.cal_dat, s_meisai.nyushuko_dat;
     `;
