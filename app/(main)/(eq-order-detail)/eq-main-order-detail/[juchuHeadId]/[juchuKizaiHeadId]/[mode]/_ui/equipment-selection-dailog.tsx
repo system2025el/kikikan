@@ -71,6 +71,7 @@ export const EqptSelectionDialog = ({
   /* methods ------------------------------ */
   /* 確定ボタン押下時 */
   const handleClickConfirm = async () => {
+    setIsLoading(true);
     // 選ばれた機材IDの配列からセットオプションの存在確認
     const setList = await checkSetoptions(selectedEqptIds);
     if (setList.length !== 0) {
@@ -78,6 +79,7 @@ export const EqptSelectionDialog = ({
       // セット有機材IDリスト
       setEqptsWSet(setList);
       setBundleDialogOpen(true);
+      setIsLoading(false);
     } else {
       // セットオプションがない時
       // 親機材(blankQty: 0)として配列に保持する
@@ -179,7 +181,11 @@ export const EqptSelectionDialog = ({
           </Box>
         </Paper>
         <Box display={'flex'} p={0.5} justifyContent={'end'}>
-          <Button onClick={() => handleClickConfirm()} disabled={selectedEqptIds.length === 0 ? true : false}>
+          <Button
+            onClick={() => handleClickConfirm()}
+            disabled={selectedEqptIds.length === 0 ? true : false}
+            loading={isLoading}
+          >
             確定
           </Button>
           {eqptsWSet.length > 0 && (
@@ -281,6 +287,7 @@ const BundleDialog = ({
 
   /** 確定ボタン押下時 */
   const handleClickConfirm = async () => {
+    setIsLoading(true);
     console.log('-------------------------セットオプションダイアログ確定ボタン');
     // 今機材が選択されてたら配列にpush
     if (selected && selected.length > 0) {
@@ -394,12 +401,14 @@ const BundleDialog = ({
         {isLoading ? <></> : oyaKizaiNam}
         <Stack spacing={2}>
           <Box>
-            <Button sx={{ bgcolor: green[500] }} onClick={() => handleClickAnother()}>
+            <Button sx={{ bgcolor: green[500] }} onClick={() => handleClickAnother()} loading={isLoading}>
               別セット選択
             </Button>
           </Box>
           <Box>
-            <Button onClick={() => handleClickConfirm()}>確定</Button>
+            <Button onClick={() => handleClickConfirm()} loading={isLoading}>
+              確定
+            </Button>
           </Box>
         </Stack>
       </DialogTitle>
