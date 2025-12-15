@@ -9,7 +9,7 @@ export type Database = {
     PostgrestVersion: '12.2.3 (519615d)';
   };
   /*dev6*/
-  dev7: {
+  dev6: {
     Tables: {
       m_bumon: {
         Row: {

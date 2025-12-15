@@ -25,6 +25,7 @@ import { eqptSetMHeader } from '../_lib/datas';
 import { getFilteredEqptSets } from '../_lib/funcs';
 import { EqptSetsMasterTableValues } from '../_lib/types';
 import { EqptSetsMasterDialog } from './eqpt-set-master-dialog';
+import { deleteEqptSets } from '@/app/_lib/db/tables/m-kizai-set';
 
 /**
  * 機材セットマスタ画面

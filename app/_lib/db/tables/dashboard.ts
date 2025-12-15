@@ -1,7 +1,7 @@
 'use server';
 import pool from '../postgres';
 
-const SCHEMA = 'dev7';
+const SCHEMA = 'dev6';
 
 /**
  * 出庫日未定（0時 or NULL）の機材データを取得する
