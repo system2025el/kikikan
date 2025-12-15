@@ -16,19 +16,15 @@ import {
   TableRow,
   TextField,
 } from '@mui/material';
-import { SetStateAction, useEffect, useState } from 'react';
-import { UseFieldArrayReturn, UseFormSetValue } from 'react-hook-form';
+import { SetStateAction, useEffect, useMemo, useState } from 'react';
+import { UseFormSetValue } from 'react-hook-form';
 
 import { CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
-import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 import { getSelectedEqpts } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/funcs';
-import {
-  EqptSelection,
-  SelectedEqptsValues,
-} from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
+import { EqptSelection } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
 
-import { getEqptsForOyaEqptSelection, getEqptsForSetEqptSelection } from '../_lib/funcs';
+import { getEqptsForSetEqptSelection } from '../_lib/funcs';
 import { EqptSetsMasterDialogValues } from '../_lib/types';
 
 export const EqptSetSelectionDialog = ({
@@ -86,8 +82,18 @@ export const EqptSetSelectionDialog = ({
         mem: match?.mem ?? null,
       };
     });
-    setValue('setEqptList', setList);
+    setValue('setEqptList', setList, { shouldDirty: true });
   };
+
+  /* useMemo ------------------------------------------------ */
+  /** 表示する機材リスト */
+  const list = useMemo(
+    () =>
+      search && search.trim() !== ''
+        ? options.filter((d) => d.kizaiNam.toLowerCase().includes(search.toLowerCase()))
+        : options,
+    [search, options]
+  );
 
   /* useEffect --------------------------------------------- */
   useEffect(() => {
@@ -125,12 +131,11 @@ export const EqptSetSelectionDialog = ({
         <Box pb={1} width={'100%'}>
           <Stack justifyContent={'center'}>
             <TextField
-              value={search}
+              value={search ?? ''}
               onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                 setSearch(event.target.value);
               }}
             />
-            <Button>検索</Button>
           </Stack>
           <TableContainer sx={{ width: 500, my: 1, maxHeight: '80vh' }}>
             {isLoading ? (
@@ -146,10 +151,10 @@ export const EqptSetSelectionDialog = ({
                 </TableHead>
 
                 <TableBody>
-                  {options!.map((row, index) => {
+                  {list!.map((row, index) => {
                     const isItemSelected = selected.includes(row.kizaiId);
                     const labelId = `enhanced-table-checkbox-${index}`;
-                    const nextRow = options![index + 1];
+                    const nextRow = list![index + 1];
                     const rows = [];
                     rows.push(
                       <TableRow

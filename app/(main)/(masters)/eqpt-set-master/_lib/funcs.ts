@@ -80,10 +80,18 @@ export const getChosenEqptSet = async (id: number) => {
  * @param data フォームで取得した機材セット情報
  */
 export const addNewEqptSet = async (data: EqptSetsMasterDialogValues, user: string) => {
+  const insertData = data.setEqptList.map((d) => ({
+    kizai_id: data.eqptId,
+    set_kizai_id: d.id,
+    add_dat: new Date().toISOString(),
+    add_user: user,
+  }));
+
   try {
-    await insertNewEqptSet(data, user);
-    console.log('data : ', data);
-    await revalidatePath('/eqpt-set-master');
+    if (insertData.length > 0) {
+      await insertNewEqptSet(insertData);
+      await revalidatePath('/eqpt-set-master');
+    }
   } catch (error) {
     console.log('DB接続エラー', error);
     throw error;
