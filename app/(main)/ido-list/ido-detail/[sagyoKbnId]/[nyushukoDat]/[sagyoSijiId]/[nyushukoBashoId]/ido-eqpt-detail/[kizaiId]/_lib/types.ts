@@ -1,5 +1,5 @@
 export type IdoEqptDetailValues = {
-  idoDenId: number;
+  //idoDenId: number;
   sagyoKbnId: number;
   sagyoSijiId: number;
   sagyoDenDat: string;
@@ -17,7 +17,7 @@ export type IdoEqptDetailValues = {
 };
 
 export type IdoEqptDetailTableValues = {
-  idoDenId: number;
+  //idoDenId: number;
   rfidElNum: number | null;
   rfidTagId: string;
   rfidKizaiSts: number | null;

@@ -30,7 +30,7 @@ export const getIdoDenDetail = async (
     }
 
     const idoEqptDetailData: IdoEqptDetailValues = {
-      idoDenId: data.ido_den_id ?? 0,
+      //idoDenId: data.ido_den_id ?? 0,
       sagyoKbnId: sagyoKbnId,
       sagyoSijiId: sagyoSijiId,
       sagyoDenDat: sagyoDenDat,
@@ -117,7 +117,7 @@ export const delIdoResult = async (idoDenDetailData: IdoEqptDetailValues, delete
     console.log('delete ido result', deleteTagIds);
 
     const updateIdoDenData: IdoDen = {
-      ido_den_id: idoDenDetailData.idoDenId,
+      ido_den_id: /*idoDenDetailData.idoDenId*/ 0,
       kizai_id: idoDenDetailData.kizaiId,
       result_qty: idoDenDetailData.resultQty && idoDenDetailData.resultQty - deleteTagIds.length,
       sagyo_den_dat: idoDenDetailData.sagyoDenDat,
@@ -156,7 +156,7 @@ export const updIdoResultAdjQty = async (
   const connection = await pool.connect();
 
   const updateData: IdoDen = {
-    ido_den_id: idoDenDetailData.idoDenId,
+    ido_den_id: /*idoDenDetailData.idoDenId*/ 0,
     kizai_id: idoDenDetailData.kizaiId,
     result_adj_qty: resultAdjQty,
     sagyo_den_dat: idoDenDetailData.sagyoDenDat,

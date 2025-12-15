@@ -1,5 +1,6 @@
 'use server';
 
+import dayjs from 'dayjs';
 import { PoolClient, QueryResult } from 'pg';
 
 import { selectDic } from '@/app/_lib/db/tables/m-dic';
@@ -109,8 +110,8 @@ export const getDetailJuchuHead = async (juchuHeadId: number) => {
       juchuRange:
         juchuData.data.juchu_str_dat && juchuData.data.juchu_end_dat
           ? [
-              new Date(toJapanTimeString(juchuData.data.juchu_str_dat)),
-              new Date(toJapanTimeString(juchuData.data.juchu_end_dat)),
+              dayjs.tz(juchuData.data.juchu_str_dat, 'Asia/Tokyo').toDate(),
+              dayjs.tz(juchuData.data.juchu_end_dat, 'Asia/Tokyo').toDate(),
             ]
           : null,
       nyuryokuUser: juchuData.data.nyuryoku_user ?? '',

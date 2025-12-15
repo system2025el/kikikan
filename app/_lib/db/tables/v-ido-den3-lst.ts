@@ -39,7 +39,7 @@ export const selectIdoDenOne = async (
       .schema(SCHEMA)
       .from('v_ido_den3_lst')
       .select(
-        'ido_den_id, kizai_id, kizai_nam, plan_qty, result_qty, result_adj_qty, ctn_flg, bld_cod, tana_cod, eda_cod, kizai_mem'
+        'kizai_id, kizai_nam, plan_qty, result_qty, result_adj_qty, ctn_flg, bld_cod, tana_cod, eda_cod, kizai_mem'
       )
       .eq('sagyo_kbn_id', sagyoKbnId)
       .eq('sagyo_siji_id', sagyoSijiId)
