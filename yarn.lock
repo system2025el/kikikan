@@ -3679,10 +3679,10 @@ stylis@4.2.0:
   resolved "https://registry.yarnpkg.com/stylis/-/stylis-4.2.0.tgz#79daee0208964c8fe695a42fcffcac633a211a51"
   integrity sha512-Orov6g6BB1sDfYgzWfTHDOxamtX1bE/zo104Dh9e6fqJ3PooipYyfJ0pUmrZO2wAvO8YbEyeFrkV91XTsGMSrw==
 
-supabase@^2.64.2:
-  version "2.64.2"
-  resolved "https://registry.yarnpkg.com/supabase/-/supabase-2.64.2.tgz#1ef442828cedb966e6016fa51c207536c101ba2c"
-  integrity sha512-EugYwwNGIcJSuyPPvUR02KYn5YqM9M/ZdgEbWZli1J4HQZafazVYsCGCpApRozzUG314tZBsMylNCZzc9nfvRw==
+supabase@^2.66.0:
+  version "2.66.0"
+  resolved "https://registry.yarnpkg.com/supabase/-/supabase-2.66.0.tgz#ea76c1de572602fd2e631ff93fd20f2017535eb9"
+  integrity sha512-hWaS3XL0G8Ir/mBVgzkMwpAS10mO6KL6tBxhy55nF2Fg3moR6CGN7ST21hLVS3R/kuV64I5GJyUoCz2ZUGWFgg==
   dependencies:
     bin-links "^6.0.0"
     https-proxy-agent "^7.0.2"

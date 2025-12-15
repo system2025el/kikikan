@@ -16,7 +16,7 @@ export const selectIdoDen = async (sagyoKbnId: number, sagyoSijiId: number, sagy
       .schema(SCHEMA)
       .from('v_ido_den3_lst')
       .select(
-        'ido_den_id, juchu_flg, kizai_id, kizai_nam, kizai_shozoku_id, rfid_yard_qty, rfid_kics_qty, plan_juchu_qty, plan_low_qty, plan_qty, result_qty, result_adj_qty, diff_qty, ctn_flg'
+        'ido_flg, juchu_flg, kizai_id, kizai_nam, kizai_shozoku_id, rfid_yard_qty, rfid_kics_qty, plan_juchu_qty, plan_low_qty, plan_qty, result_qty, result_adj_qty, diff_qty, ctn_flg'
       )
       .eq('sagyo_kbn_id', sagyoKbnId)
       .eq('sagyo_siji_id', sagyoSijiId)
