@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 
 import { selectActiveEqpts, selectActiveEqptsForSet } from '@/app/_lib/db/tables/m-kizai';
 import {
+  delEqptSetListPg,
   insertNewEqptSet,
   selectFilteredEqptSets,
   selectOneEqptSet,
@@ -16,6 +17,7 @@ import { EqptSelection } from '@/app/(main)/(eq-order-detail)/eq-main-order-deta
 import { FAKE_NEW_ID } from '../../_lib/constants';
 import { emptyEqptSet } from './datas';
 import { EqptSetsMasterDialogValues, EqptSetsMasterTableValues } from './types';
+import pool from '@/app/_lib/db/postgres';
 
 /**
  * 機材セットマスタのデータを取得する関数、引数無は全取得
@@ -103,22 +105,41 @@ export const addNewEqptSet = async (data: EqptSetsMasterDialogValues, user: stri
  * @param data フォームに入力されている情報
  * @param id 更新する機材セットマスタID
  */
-export const updateEqptSet = async (rawData: EqptSetsMasterDialogValues, id: number, user: string) => {
-  const date = toJapanTimeStampString();
-  const updateData = {
-    kizai_id: id,
-    set_kizai_id: id,
-    del_flg: Number(rawData.delFlg),
-    // mem: rawData.mem,
-    upd_dat: date,
-    upd_user: user,
-  };
+export const updateEqptSet = async (newData: EqptSetsMasterDialogValues, currentSetIds: number[], user: string) => {
+  console.log('新しい', newData, '元の', currentSetIds);
+  const now = new Date().toISOString();
+  // 削除対象のセット機材IDリストを生成
+  const delList = currentSetIds.filter((c) => !newData.setEqptList.map((n) => n.id).includes(c));
+  console.log(delList);
+
+  const connection = await pool.connect();
+
+  // const updateData = {
+  //   kizai_id: newData.eqptId,
+  //   set_kizai_id: newData.eqptId,
+  //   del_flg: Number(newData.delFlg),
+  //   upd_dat: now,
+  //   upd_user: user,
+  // };
   try {
-    await updateEqptSetDB(updateData);
-    await revalidatePath('/eqpt-set-master');
+    await connection.query('BEGIN');
+
+    if (delList && delList.length > 0) {
+      await delEqptSetListPg(
+        delList.map((d) => ({ kizai_id: newData.eqptId, set_kizai_id: d })),
+        connection
+      );
+    }
+
+    // await updateEqptSetDB(updateData);
+    // await revalidatePath('/eqpt-set-master');
+    await connection.query('COMMIT');
   } catch (error) {
     console.log('例外が発生', error);
+    await connection.query('ROLLBACK');
     throw error;
+  } finally {
+    connection.release();
   }
 };
 

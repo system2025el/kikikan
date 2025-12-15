@@ -33,6 +33,7 @@ import { emptyEqptSet, formItems } from '../_lib/datas';
 import { addNewEqptSet, getChosenEqptSet, getEqptsForOyaEqptSelection, updateEqptSet } from '../_lib/funcs';
 import { EqptSetsMasterDialogSchema, EqptSetsMasterDialogValues } from '../_lib/types';
 import { EqptSetSelectionDialog } from './eqtp-selection-dialog';
+import { deleteEqptSets } from '@/app/_lib/db/tables/m-kizai-set';
 
 /**
  * 機材セットマスタ詳細ダイアログ
@@ -71,6 +72,8 @@ export const EqptSetsMasterDialog = ({
   const [options, setOptions] = useState<SelectTypes[]>([]);
   /** 機材名 */
   const [kizaiNam, setKizaiNam] = useState<string>('');
+  /** 元のセット機材のID配列 */
+  const [currentSetList, setCurrentSetList] = useState<number[]>([]);
 
   /** 機材選択ダイアログ開閉 */
   const [eqSelectOpen, setEqSelectOpen] = useState<boolean>(false);
@@ -109,7 +112,7 @@ export const EqptSetsMasterDialog = ({
         refetchEqptSets();
       } else {
         if (action === 'save') {
-          await updateEqptSet(data, oyaId, user?.name ?? '');
+          await updateEqptSet(data, currentSetList, user?.name ?? '');
           handleCloseDialog();
           refetchEqptSets();
         }
@@ -142,7 +145,7 @@ export const EqptSetsMasterDialog = ({
       handleCloseDialog();
     } else {
       // 編集時はセットマスタを削除する
-      ////////
+      deleteEqptSets(oyaId);
       setDeleteOpen(false);
       handleCloseDialog();
       await refetchEqptSets();
@@ -171,7 +174,7 @@ export const EqptSetsMasterDialog = ({
         const eqptSet1 = await getChosenEqptSet(oyaId);
         if (eqptSet1) {
           reset(eqptSet1); // 取得したデータでフォーム初期化
-          // }
+          setCurrentSetList(getValues('setEqptList').map((d) => d.id)); // 初期のセットリストをセット
           setIsLoading(false);
         }
       }

@@ -6,6 +6,7 @@ import { EqptSetsMasterDialogValues } from '@/app/(main)/(masters)/eqpt-set-mast
 import pool from '../postgres';
 import { SCHEMA, supabase } from '../supabase';
 import { MKizaiSetDBValues } from '../types/m-kizai-set-type';
+import { PoolClient } from 'pg';
 
 /**
  * 選択された機材のセット機材のIDリストを取得する関数
@@ -159,16 +160,50 @@ export const updateEqptSetDB = async (data: MKizaiSetDBValues) => {
 };
 
 /**
- *
- * @param idList
+ * 親機材が一致するセット機材全てを削除する関数
+ * @param {number} kizaiId 削除対象の親機材ID
  */
-export const deleteEqptSets = async (idList: { kizai_id: number; set_kizai_id: number }[]) => {
+export const deleteEqptSets = async (kizaiId: number) => {
+  console.log('削除削除削除');
   try {
-    await supabase
-      .schema(SCHEMA)
-      .from('m_kizai_set')
-      .delete()
-      .or(idList.map((p) => `(kizai_id.eq.${p.kizai_id},set_kizai_id.eq.${p.set_kizai_id})`).join(','));
+    await supabase.schema(SCHEMA).from('m_kizai_set').delete().eq('kizai_id', kizaiId).select('*');
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
+ * 親機材とセット機材のIDが一致する機材セットマスタを削除する関数
+ * @param {{ kizai_id: number; set_kizai_id: number }[]} idList
+ * @param {PoolClient} connection
+ */
+export const delEqptSetListPg = async (
+  idList: { kizai_id: number; set_kizai_id: number }[],
+  connection: PoolClient
+) => {
+  const cols = Object.keys(idList[0]);
+  const values = idList.flatMap((d) => Object.values(d));
+  const placeholders = idList
+    .map((_, rowIndex) => {
+      const start = rowIndex * cols.length + 1;
+      const group = Array.from({ length: cols.length }, (_, colIndex) => `$${start + colIndex}::int`);
+      return `(${group.join(',')})`;
+    })
+    .join(',');
+
+  const query = `
+      DELETE FROM
+        ${SCHEMA}.m_kizai_set
+      WHERE
+        (${cols.join(',')})
+      IN
+      (${placeholders})
+    `;
+
+  console.log('delete query', query);
+
+  try {
+    await connection.query(query, values);
   } catch (e) {
     throw e;
   }
