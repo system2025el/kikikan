@@ -130,17 +130,10 @@ export const EqptSetsMaster = () => {
             <MuiTablePagination arrayList={eqptSets ?? []} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
           </Grid2>
           <Grid2 container spacing={3}>
-            <Grid2 alignContent={'center'}>
-              <Typography color="error" variant="body2">
-                ※マスタは削除できません。登録画面で無効化してください
-              </Typography>
-            </Grid2>
-            <Grid2>
-              <Button onClick={() => handleOpenDialog(FAKE_NEW_ID)}>
-                <AddIcon fontSize="small" />
-                新規
-              </Button>
-            </Grid2>
+            <Button onClick={() => handleOpenDialog(FAKE_NEW_ID)}>
+              <AddIcon fontSize="small" />
+              新規
+            </Button>
           </Grid2>
         </Grid2>
         {isLoading ? (

@@ -120,7 +120,7 @@ export const selectOneEqptSet = async (id: number) => {
  * 機材セットマスタに新規挿入する関数
  * @param data 挿入するデータ
  */
-export const insertNewEqptSet = async (data: MKizaiSetDBValues[]) => {
+export const insertNewEqptSet = async (data: MKizaiSetDBValues[], connection: PoolClient) => {
   const cols = Object.keys(data[0]);
   const placeholders = data
     .map((_, rowIndex) => {
@@ -137,7 +137,7 @@ export const insertNewEqptSet = async (data: MKizaiSetDBValues[]) => {
         `;
 
   try {
-    await pool.query(query, values);
+    await connection.query(query, values);
   } catch (e) {
     throw e;
   }
@@ -148,13 +148,25 @@ export const insertNewEqptSet = async (data: MKizaiSetDBValues[]) => {
  * @param data 更新するデータ
  * @param id 更新する機材セットのset_kizai_id
  */
-export const updateEqptSetDB = async (data: MKizaiSetDBValues) => {
+export const updateEqptSetDB = async (data: MKizaiSetDBValues[], connection: PoolClient) => {
+  const cols = Object.keys(data[0]);
+  const values = data.flatMap((d) => Object.values(d));
+  const placeholders = data
+    .map((_, rowIndex) => {
+      const start = rowIndex * cols.length + 1;
+      const group = Array.from({ length: cols.length }, (_, colIndex) => `$${start + colIndex}`);
+      return `(${group.join(',')})`;
+    })
+    .join(',');
+  const upsetValues = cols.map((col) => `${col} = EXCLUDED.${col}`).join(', ');
+  const query = `
+    INSERT INTO ${SCHEMA}.m_kizai_set (${cols.join(',')})
+    VALUES ${placeholders}
+    ON CONFLICT (kizai_id, set_kizai_id)
+    DO UPDATE SET ${upsetValues};
+  `;
   try {
-    await supabase
-      .schema(SCHEMA)
-      .from('m_kizai_set')
-      .update({ ...data })
-      .eq('kizai_id', data.kizai_id);
+    connection.query(query, values);
   } catch (e) {
     throw e;
   }
