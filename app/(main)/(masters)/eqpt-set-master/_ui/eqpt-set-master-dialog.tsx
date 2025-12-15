@@ -21,6 +21,7 @@ import { useEffect, useState } from 'react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
+import { deleteEqptSets } from '@/app/_lib/db/tables/m-kizai-set';
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import { CloseMasterDialogButton, DeleteButton, MakeEditModeButton, SubmitButton } from '@/app/(main)/_ui/buttons';
 import { FormBox, SelectTypes } from '@/app/(main)/_ui/form-box';
@@ -33,7 +34,6 @@ import { emptyEqptSet, formItems } from '../_lib/datas';
 import { addNewEqptSet, getChosenEqptSet, getEqptsForOyaEqptSelection, updateEqptSet } from '../_lib/funcs';
 import { EqptSetsMasterDialogSchema, EqptSetsMasterDialogValues } from '../_lib/types';
 import { EqptSetSelectionDialog } from './eqtp-selection-dialog';
-import { deleteEqptSets } from '@/app/_lib/db/tables/m-kizai-set';
 
 /**
  * 機材セットマスタ詳細ダイアログ
@@ -180,7 +180,7 @@ export const EqptSetsMasterDialog = ({
       }
     };
     getThatOneEqptSet();
-  }, [oyaId, reset]);
+  }, [oyaId, reset, getValues]);
 
   return (
     <>

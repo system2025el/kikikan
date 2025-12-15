@@ -73,6 +73,7 @@ export const EqptSetSelectionDialog = ({
 
   /** 確定ボタン押下時処理 */
   const handleClickCnfirm = async () => {
+    setIsLoading(true);
     const selectedList = await getSelectedEqpts(selected);
     const setList: { id: number; nam: string; mem: string | null }[] = selectedList.map((newItem) => {
       const match = currentEqptList.find((c) => c.id === newItem.kizaiId);
@@ -112,6 +113,7 @@ export const EqptSetSelectionDialog = ({
         セット機材選択
         <Box>
           <Button
+            loading={isLoading}
             sx={{ mr: 3 }}
             onClick={() => {
               handleClickCnfirm();

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 
+import pool from '@/app/_lib/db/postgres';
 import { selectActiveEqpts, selectActiveEqptsForSet } from '@/app/_lib/db/tables/m-kizai';
 import {
   delEqptSetListPg,
@@ -17,7 +18,6 @@ import { EqptSelection } from '@/app/(main)/(eq-order-detail)/eq-main-order-deta
 import { FAKE_NEW_ID } from '../../_lib/constants';
 import { emptyEqptSet } from './datas';
 import { EqptSetsMasterDialogValues, EqptSetsMasterTableValues } from './types';
-import pool from '@/app/_lib/db/postgres';
 
 /**
  * 機材セットマスタのデータを取得する関数、引数無は全取得

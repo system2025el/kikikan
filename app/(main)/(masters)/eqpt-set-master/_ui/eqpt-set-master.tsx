@@ -16,6 +16,7 @@ import {
 import { useEffect, useState } from 'react';
 import { TextFieldElement, useForm } from 'react-hook-form-mui';
 
+import { deleteEqptSets } from '@/app/_lib/db/tables/m-kizai-set';
 import { Loading } from '@/app/(main)/_ui/loading';
 import { MuiTablePagination } from '@/app/(main)/_ui/table-pagination';
 
@@ -25,7 +26,6 @@ import { eqptSetMHeader } from '../_lib/datas';
 import { getFilteredEqptSets } from '../_lib/funcs';
 import { EqptSetsMasterTableValues } from '../_lib/types';
 import { EqptSetsMasterDialog } from './eqpt-set-master-dialog';
-import { deleteEqptSets } from '@/app/_lib/db/tables/m-kizai-set';
 
 /**
  * 機材セットマスタ画面
