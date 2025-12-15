@@ -17,10 +17,9 @@ import {
   TextField,
 } from '@mui/material';
 import { SetStateAction, useEffect, useMemo, useState } from 'react';
-import { UseFieldArrayReturn, UseFormSetValue } from 'react-hook-form';
+import { UseFormSetValue } from 'react-hook-form';
 
 import { CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
-import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 import { getSelectedEqpts } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/funcs';
 import { EqptSelection } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
@@ -163,7 +162,7 @@ export const EqptIsshikiSelectionDialog = ({
                   {list!.map((row, index) => {
                     const isItemSelected = selected.includes(row.kizaiId);
                     const labelId = `enhanced-table-checkbox-${index}`;
-                    const nextRow = options![index + 1];
+                    const nextRow = list![index + 1];
                     const rows = [];
                     rows.push(
                       <TableRow

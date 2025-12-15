@@ -1,9 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import DeleteIcon from '@mui/icons-material/Delete';
+import WarningIcon from '@mui/icons-material/Warning';
 import {
   Autocomplete,
   Box,
   Button,
+  Dialog,
+  DialogActions,
+  DialogContentText,
   DialogTitle,
   Grid2,
   lighten,
@@ -23,7 +27,6 @@ import { FormBox, SelectTypes } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { FAKE_NEW_ID } from '../../_lib/constants';
-import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { getEqptNam } from '../../rfid-master/[kizaiId]/_lib/funcs';
 import { emptyEqptSet, formItems } from '../_lib/datas';
@@ -60,7 +63,7 @@ export const EqptSetsMasterDialog = ({
   const [isNew, setIsNew] = useState(false);
   /* 未保存ダイアログ出すかどうか */
   const [dirtyOpen, setDirtyOpen] = useState(false);
-  /* 削除フラグ確認ダイアログ出すかどうか */
+  /* セット無ダイアログ開閉 */
   const [deleteOpen, setDeleteOpen] = useState(false);
   /* submit時のactions (save, delete) */
   const [action, setAction] = useState<'save' | 'delete' | 'restore' | undefined>(undefined);
@@ -88,8 +91,6 @@ export const EqptSetsMasterDialog = ({
     defaultValues: emptyEqptSet,
   });
 
-  /** 無効化の監視 */
-  const isDeleted = watch('delFlg');
   /** セット機材リストの監視 */
   const setList = watch('setEqptList');
 
@@ -98,26 +99,20 @@ export const EqptSetsMasterDialog = ({
   /* methods ---------------------------------------- */
   /* フォームを送信 */
   const onSubmit = async (data: EqptSetsMasterDialogValues) => {
-    console.log('isDarty : ', isDirty);
-    console.log(data);
-    if (oyaId === FAKE_NEW_ID) {
-      await addNewEqptSet(data, user?.name ?? '');
-      handleCloseDialog();
-      refetchEqptSets();
+    if (getValues('setEqptList').length === 0) {
+      setDeleteOpen(true);
     } else {
-      if (action === 'save') {
-        await updateEqptSet(data, oyaId, user?.name ?? '');
+      console.log(data);
+      if (isNew) {
+        await addNewEqptSet(data, user?.name ?? '');
         handleCloseDialog();
         refetchEqptSets();
-      } else if (action === 'delete') {
-        setDeleteOpen(true);
-        return;
-      } else if (action === 'restore') {
-        // 有効化ボタン
-        const values = await getValues();
-        await updateEqptSet({ ...values, delFlg: false }, oyaId, user?.name ?? '');
-        handleCloseDialog();
-        refetchEqptSets();
+      } else {
+        if (action === 'save') {
+          await updateEqptSet(data, oyaId, user?.name ?? '');
+          handleCloseDialog();
+          refetchEqptSets();
+        }
       }
     }
   };
@@ -139,13 +134,19 @@ export const EqptSetsMasterDialog = ({
     }
   };
 
-  /* 削除確認ダイアログで削除選択時 */
+  /* セット機材無ダイアログで灰を押したときの処理 */
   const handleConfirmDelete = async () => {
-    const values = await getValues();
-    await updateEqptSet({ ...values, delFlg: true }, oyaId, user?.name ?? '');
-    setDeleteOpen(false);
-    handleCloseDialog();
-    await refetchEqptSets();
+    if (isNew) {
+      // 新規の時はダイアログを閉じるだけ
+      setDeleteOpen(false);
+      handleCloseDialog();
+    } else {
+      // 編集時はセットマスタを削除する
+      ////////
+      setDeleteOpen(false);
+      handleCloseDialog();
+      await refetchEqptSets();
+    }
   };
 
   /* useEffect --------------------------------------- */
@@ -195,12 +196,13 @@ export const EqptSetsMasterDialog = ({
           {editable && !isNew && <Typography>編集モード</Typography>}
           {isNew && <Typography>新規登録</Typography>}
           <Stack>
-            <SubmitButton type="submit" disabled={isDirty ? false : true} onClick={() => setAction('save')} />
+            <SubmitButton type="submit" disabled={!isNew && !isDirty} onClick={() => setAction('save')} />
             {!isNew && (
               <>
                 <MakeEditModeButton handleEditable={() => setEditable(true)} disabled={editable ? true : false} />
               </>
             )}
+            {isDirty}
             <CloseMasterDialogButton handleCloseDialog={handleClickClose} />
           </Stack>
         </DialogTitle>
@@ -286,12 +288,21 @@ export const EqptSetsMasterDialog = ({
               handleCloseDirty={() => setDirtyOpen(false)}
               handleCloseAll={handleCloseDialog}
             />
-            <WillDeleteAlertDialog
-              open={deleteOpen}
-              data={'name'}
-              handleCloseDelete={() => setDeleteOpen(false)}
-              handleConfirmDelete={handleConfirmDelete}
-            />
+            <Dialog open={deleteOpen}>
+              <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
+                <WarningIcon color="error" />
+                <Box>セット機材が選ばれていません</Box>
+              </DialogTitle>
+              <DialogContentText m={2}>
+                {isNew ? `機材セットマスタは登録されません` : `機材セットマスタが一覧から削除されます`}
+              </DialogContentText>
+              <DialogActions>
+                <Button color="error" onClick={() => handleConfirmDelete()}>
+                  OK
+                </Button>
+                <Button onClick={() => setDeleteOpen(false)}>戻る</Button>
+              </DialogActions>
+            </Dialog>
           </>
         )}
       </form>

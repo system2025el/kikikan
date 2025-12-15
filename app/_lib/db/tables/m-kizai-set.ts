@@ -54,26 +54,9 @@ export const selectSetOptions = async (kizaiId: number) => {
 };
 
 /**
- * DBから有効な機材セットを取得する関数
- * @returns 有効な機材セットのidと名前の配列
- */
-export const selectActiveEqptSets = async () => {
-  try {
-    return await supabase
-      .schema(SCHEMA)
-      .from('m_kizai_set')
-      .select('kizai_set_id, kizai_set_nam')
-      .neq('del_flg', 1)
-      .order('kizai_set_nam');
-  } catch (e) {
-    throw e;
-  }
-};
-
-/**
- * kizai_set_namが一致する機材セットを取得する関数
+ * kizai_namが一致する機材セットを取得する関数
  * @param {string} query 機材セット名
- * @returns kizai_set_nameで検索された機材セットマスタの配列 検索無しなら全件
+ * @returns kizai_nameで検索された機材セットマスタの配列 検索無しなら全件
  */
 export const selectFilteredEqptSets = async (query: string) => {
   let queryString = `
@@ -88,7 +71,7 @@ export const selectFilteredEqptSets = async (query: string) => {
   const values = [];
 
   if (query && query.trim() !== '') {
-    queryString += ` WHERE k.kizai_nam ILIKE $1`;
+    queryString += ` WHERE k.kizai_nam ILIKE '%$1%'`;
     values.push(`%${query}%`);
   }
   queryString += ` GROUP BY s.kizai_id, k.kizai_nam, s.del_flg`;
@@ -101,9 +84,9 @@ export const selectFilteredEqptSets = async (query: string) => {
 };
 
 /**
- * kizai_set_idが一致する機材セットを取得する関数
- * @param id 探すkizai_set_id
- * @returns kizai_set_idが一致する機材セット
+ * set_kizai_idが一致する機材セットを取得する関数
+ * @param id 探すset_kizai_id
+ * @returns set_kizai_idが一致する機材セット
  */
 export const selectOneEqptSet = async (id: number) => {
   const query = `
@@ -124,7 +107,7 @@ export const selectOneEqptSet = async (id: number) => {
     //   .schema(SCHEMA)
     //   .from('m_kizai_set')
     //   .select('set_kizai_id, del_flg, mem')
-    //   .eq('kizai_set_id', id)
+    //   .eq('set_kizai_id', id)
     //   .single();
   } catch (e) {
     throw e;
@@ -135,21 +118,21 @@ export const selectOneEqptSet = async (id: number) => {
  * 機材セットマスタに新規挿入する関数
  * @param data 挿入するデータ
  */
-export const insertNewEqptSet = async (data: EqptSetsMasterDialogValues, user: string) => {
+export const insertNewEqptSet = async (data: MKizaiSetDBValues[]) => {
+  const cols = Object.keys(data[0]);
+  const placeholders = data
+    .map((_, rowIndex) => {
+      const start = rowIndex * cols.length + 1;
+      const group = Array.from({ length: cols.length }, (_, colIndex) => `$${start + colIndex}`);
+      return `(${group.join(',')})`;
+    })
+    .join(',');
+  const values = data.flatMap((d) => Object.values(d));
   const query = `
-          INSERT INTO ${SCHEMA}.m_kizai_set (
-            kizai_set_id, kizai_set_nam, del_flg, dsp_ord_num,
-            mem, add_dat, add_user
-          )
-          VALUES (
-            (SELECT coalesce(max(kizai_set_id),0) + 1 FROM ${SCHEMA}.m_kizai_set),
-            $1, $2,
-            (SELECT coalesce(max(dsp_ord_num),0) + 1 FROM ${SCHEMA}.m_kizai_set),
-            $3, $4, $5
-          );
+          INSERT INTO ${SCHEMA}.m_kizai_set (${cols.join(',')})
+      VALUES 
+        ${placeholders}
         `;
-  const date = toJapanTimeStampString();
-  const values = [Number(data.delFlg), /*data.mem,*/ date, user];
 
   try {
     await pool.query(query, values);
@@ -161,7 +144,7 @@ export const insertNewEqptSet = async (data: EqptSetsMasterDialogValues, user: s
 /**
  * 機材セットマスタを更新する関数
  * @param data 更新するデータ
- * @param id 更新する機材セットのkizai_set_id
+ * @param id 更新する機材セットのset_kizai_id
  */
 export const updateEqptSetDB = async (data: MKizaiSetDBValues) => {
   try {
