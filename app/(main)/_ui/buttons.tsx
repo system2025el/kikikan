@@ -8,6 +8,7 @@ import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import SaveAsIcon from '@mui/icons-material/SaveAs';
 import { Box, Button, IconButton } from '@mui/material';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 import { useDirty } from './dirty-context';
 
@@ -20,7 +21,11 @@ export const BackButton = ({ sx, label }: { sx?: object; label: string }) => {
   //const router = useRouter();
   const { requestBack } = useDirty();
 
+  const [back, setBack] = useState(false);
+
   const handleBack = () => {
+    if (back) return;
+    setBack(true);
     requestBack();
   };
 

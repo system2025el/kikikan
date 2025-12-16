@@ -67,6 +67,7 @@ export const EqptOrderList = () => {
   /* methods ---------------------------------------- */
   /** 検索押下時の処理 */
   const onSubmit = async (data: EqptOrderSearchValues) => {
+    console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
     setIsLoading(true);
     // 検索条件保持
     sessionStorage.setItem('orderListSearchParams', JSON.stringify(data));
@@ -265,7 +266,7 @@ export const EqptOrderList = () => {
                   />
                   <Grid2 size={'grow'} alignItems={'self-end'}>
                     <Box justifySelf={'end'}>
-                      <Button type="submit">
+                      <Button type="submit" loading={isLoading}>
                         <SearchIcon />
                         検索
                       </Button>

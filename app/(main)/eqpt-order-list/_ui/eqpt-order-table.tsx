@@ -16,7 +16,7 @@ import {
   Typography,
 } from '@mui/material';
 import { useRouter } from 'next/navigation';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import { dispColors } from '../../_lib/colors';
 import { toJapanTimeString, toJapanYMDString } from '../../_lib/date-conversion';
@@ -48,6 +48,8 @@ export const EqptOrderTable = ({
   const rowsPerPage = ROWS_PER_MASTER_TABLE_PAGE;
   /** ページルーター */
   const router = useRouter();
+
+  const [push, setPush] = useState(false);
 
   /** 表示するデータ */
   const list = useMemo(() => {
@@ -115,6 +117,8 @@ export const EqptOrderTable = ({
                         size="small"
                         sx={{ py: 0.2, px: 1, m: 0, width: 'auto' }}
                         onClick={() => {
+                          if (push) return;
+                          setPush(true);
                           router.push(`/order/${order.juchuHeadId}/${'view'}`);
                         }}
                       >
@@ -142,6 +146,8 @@ export const EqptOrderTable = ({
                                   : dispColors.main,
                         }}
                         onClick={() => {
+                          if (push) return;
+                          setPush(true);
                           router.push(
                             order.headKbn === 1
                               ? `/eq-main-order-detail/${order.juchuHeadId}/${order.kizaiHeadId}/view`

@@ -350,7 +350,9 @@ export const LoanSituation = (props: {
             </RadioGroup>
           </FormControl>
           <Box display={'flex'} justifyContent={'end'} p={2}>
-            <Button onClick={handleReload}>再表示</Button>
+            <Button onClick={handleReload} loading={isLoading}>
+              再表示
+            </Button>
           </Box>
         </Grid2>
       </Paper>
