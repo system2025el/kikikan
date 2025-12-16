@@ -121,3 +121,24 @@ export const updateIsshikiDB = async (data: MIsshikiDBValues) => {
     throw e;
   }
 };
+
+/**
+ * 一式マスタの無効化フラグを変更する関数
+ * @param {number} id 一式ID
+ * @param {0 | 1} flg 無効化フラグ
+ */
+export const updIsshikiDelFlgDB = async (
+  id: number,
+  data: {
+    del_flg: number;
+    upd_user: string;
+    upd_dat: string;
+  }
+) => {
+  try {
+    await supabase.schema(SCHEMA).from('m_issiki').update(data).eq('issiki_id', id);
+  } catch (e) {
+    console.error(e);
+    throw e;
+  }
+};

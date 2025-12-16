@@ -9,9 +9,12 @@ import {
   selectFilteredIsshikis,
   selectOneIsshiki,
   updateIsshikiDB,
+  updIsshikiDelFlgDB,
 } from '@/app/_lib/db/tables/m-issiki';
-import { insertNewIsshikiSetList } from '@/app/_lib/db/tables/m-issiki-set';
+import { delIsshikiSet, insertNewIsshikiSetList, updIsshikiSetDB } from '@/app/_lib/db/tables/m-issiki-set';
 import { checkExIsshiki, selectActiveEqpts, selectActiveEqptsForIsshiki } from '@/app/_lib/db/tables/m-kizai';
+import { MIsshikiSetDBValues } from '@/app/_lib/db/types/m-issiki-set-type';
+import { MIsshikiDBValues } from '@/app/_lib/db/types/m-issiki-type';
 import { toJapanTimeStampString } from '@/app/(main)/_lib/date-conversion';
 import { EqptSelection } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
 
@@ -66,7 +69,7 @@ export const getChosenIsshiki = async (id: number) => {
     // ダイアログ表示用に形成
     const isshikiDetails: IsshikisMasterDialogValues = {
       isshikiNam: rows[0].issiki_nam ?? '',
-      regAmt: rows[0].reg_amt,
+      regAmt: Number(rows[0].reg_amt),
       delFlg: Boolean(rows[0].del_flg),
       mem: rows[0].mem,
       kizaiList: rows[0].kizai_id ? rows.map((d) => ({ id: d.kizai_id, nam: d.kizai_nam })) : [],
@@ -80,7 +83,8 @@ export const getChosenIsshiki = async (id: number) => {
 
 /**
  * 一式マスタに新規登録する関数
- * @param data フォームで取得した一式情報
+ * @param {IsshikisMasterDialogValues} data フォームで取得した一式情報
+ * @param {string} user ログインユーザ名ざめい
  */
 export const addNewIsshiki = async (data: IsshikisMasterDialogValues, user: string) => {
   const now = new Date().toISOString();
@@ -100,14 +104,16 @@ export const addNewIsshiki = async (data: IsshikisMasterDialogValues, user: stri
 
   try {
     connection.query('BEGIN');
+    // 新規挿入した一式ID
     const newId = (await insertNewIsshiki(isshikiData, connection)).rows[0].issiki_id;
 
-    // 新規挿入した一式ID
+    // 挿入する一式セット機材のリスト
     const isshikiSetDatas =
       data.kizaiList.length > 0
         ? data.kizaiList.map((d) => ({ issiki_id: newId, kizai_id: d.id, mem: d.mem, add_dat: now, add_user: user }))
         : [];
 
+    // 一式セット機材のリストがあれば挿入実行
     if (isshikiSetDatas && isshikiSetDatas.length > 0) {
       await insertNewIsshikiSetList(isshikiSetDatas, connection);
     }
@@ -128,24 +134,88 @@ export const addNewIsshiki = async (data: IsshikisMasterDialogValues, user: stri
  * @param data フォームに入力されている情報
  * @param id 更新する一式マスタID
  */
-export const updateIsshiki = async (rawData: IsshikisMasterDialogValues, id: number, user: string) => {
-  const date = toJapanTimeStampString();
-  const updateData = {
-    issiki_id: id,
-    issiki_nam: rawData.isshikiNam,
-    reg_amt: rawData.regAmt,
-    del_flg: Number(rawData.delFlg),
-    mem: rawData.mem,
-    upd_dat: date,
-    upd_user: user,
-  };
-  console.log(updateData.issiki_nam);
+export const updateIsshiki = async (
+  newData: IsshikisMasterDialogValues,
+  currentData: IsshikisMasterDialogValues,
+  id: number,
+  user: string
+) => {
+  const now = new Date().toISOString();
+
+  // 一式マスタ(m_issiki)の差異
+  const isshikiDiff =
+    `${newData.isshikiNam}-${newData.regAmt}-${newData.mem}-${newData.delFlg}` !==
+    `${currentData.isshikiNam}-${currentData.regAmt}-${currentData.mem}-${currentData.delFlg}`;
+
+  const newList = newData.kizaiList;
+  const cList = currentData.kizaiList;
+
+  // 削除対象
+  const delList = cList
+    .filter((c) => !newList.map((n) => n.id).includes(c.id))
+    .map((d) => ({ issiki_id: id, kizai_id: d.id }));
+
+  // 更新対象
+  const updList: MIsshikiSetDBValues[] = newList
+    .filter((n) => cList.map((c) => c.id).includes(n.id))
+    .map((d) => ({
+      issiki_id: id,
+      kizai_id: d.id,
+      mem: d.mem,
+      upd_dat: now,
+      upd_user: user,
+    }));
+
+  // 新規登録対象
+  const insertList: MIsshikiSetDBValues[] = newList
+    .filter((n) => !cList.map((c) => c.id).includes(n.id))
+    .map((d) => ({
+      issiki_id: id,
+      kizai_id: d.id,
+      mem: d.mem,
+      add_dat: now,
+      add_user: user,
+    }));
+
+  // トランザクション
+  const connection = await pool.connect();
+
   try {
-    await updateIsshikiDB(updateData);
+    // トランザクション開始
+    await connection.query('BEGIN');
+    // 一式マスタ変更あれば更新
+    if (isshikiDiff) {
+      const updData: MIsshikiDBValues = {
+        issiki_id: id,
+        issiki_nam: newData.isshikiNam,
+        reg_amt: newData.regAmt,
+        del_flg: Number(newData.delFlg),
+        mem: newData.mem,
+        upd_dat: now,
+        upd_user: user,
+      };
+      await updateIsshikiDB(updData);
+    }
+    if (delList && delList.length > 0) {
+      // 削除実行
+      await delIsshikiSet(delList, connection);
+    }
+    if (insertList && insertList.length > 0) {
+      // 新規挿入実行
+      await insertNewIsshikiSetList(insertList, connection);
+    }
+    if (updList && updList.length > 0) {
+      // 更新実行
+      await updIsshikiSetDB(updList, connection);
+    }
+    await connection.query('COMMIT');
     await revalidatePath('/isshiki-master');
   } catch (error) {
     console.log('例外が発生', error);
+    await connection.query('ROLLBACK');
     throw error;
+  } finally {
+    connection.release();
   }
 };
 
@@ -179,6 +249,22 @@ export const checkExistingIsshiki = async (isshikiId: number, kizaiIds: number[]
     return data.map((d) => d.kizai_id);
   } catch (e) {
     console.error(e);
+    throw e;
+  }
+};
+
+/**
+ * 一覧で選択された一式の削除フラグを１にする関数
+ * @param {number[]} ids 選択された一式のヘッドIDの配列
+ * @param {string} user ログインユーザ名
+ */
+export const updIsshikiDelFlg = async (id: number, flg: boolean, user: string) => {
+  const data = { del_flg: flg ? 1 : 0, upd_user: user, upd_dat: new Date().toISOString() };
+  try {
+    console.log('Delete ::: ', id);
+    await updIsshikiDelFlgDB(id, data);
+    await revalidatePath('/isshiki-master');
+  } catch (e) {
     throw e;
   }
 };

@@ -101,7 +101,7 @@ export const selectOneEqptSet = async (id: number) => {
       set.kizai_id = $1
   `;
   try {
-    return pool.query(query, [id]);
+    return await pool.query(query, [id]);
     // return await supabase
     //   .schema(SCHEMA)
     //   .from('m_kizai_set')
@@ -163,7 +163,7 @@ export const updateEqptSetDB = async (data: MKizaiSetDBValues[], connection: Poo
     DO UPDATE SET ${upsetValues};
   `;
   try {
-    connection.query(query, values);
+    await connection.query(query, values);
   } catch (e) {
     throw e;
   }
