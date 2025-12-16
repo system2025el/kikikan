@@ -2,13 +2,16 @@
 
 import { revalidatePath } from 'next/cache';
 
+import pool from '@/app/_lib/db/postgres';
+import { SCHEMA, supabase } from '@/app/_lib/db/supabase';
 import {
   insertNewIsshiki,
   selectFilteredIsshikis,
   selectOneIsshiki,
   updateIsshikiDB,
 } from '@/app/_lib/db/tables/m-issiki';
-import { selectActiveEqpts, selectActiveEqptsForIsshiki } from '@/app/_lib/db/tables/m-kizai';
+import { insertNewIsshikiSetList } from '@/app/_lib/db/tables/m-issiki-set';
+import { checkExIsshiki, selectActiveEqpts, selectActiveEqptsForIsshiki } from '@/app/_lib/db/tables/m-kizai';
 import { toJapanTimeStampString } from '@/app/(main)/_lib/date-conversion';
 import { EqptSelection } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
 
@@ -80,13 +83,43 @@ export const getChosenIsshiki = async (id: number) => {
  * @param data フォームで取得した一式情報
  */
 export const addNewIsshiki = async (data: IsshikisMasterDialogValues, user: string) => {
+  const now = new Date().toISOString();
+
+  // 一式マスタに登録する情報
+  const isshikiData = {
+    issiki_id: FAKE_NEW_ID,
+    issiki_nam: data.isshikiNam,
+    reg_amt: data.regAmt,
+    del_flg: Number(data.delFlg),
+    mem: data.mem,
+    add_dat: now,
+    add_user: user,
+  };
+
+  const connection = await pool.connect();
+
   try {
-    await insertNewIsshiki(data, user);
-    console.log('data : ', data);
+    connection.query('BEGIN');
+    const newId = (await insertNewIsshiki(isshikiData, connection)).rows[0].issiki_id;
+
+    // 新規挿入した一式ID
+    const isshikiSetDatas =
+      data.kizaiList.length > 0
+        ? data.kizaiList.map((d) => ({ issiki_id: newId, kizai_id: d.id, mem: d.mem, add_dat: now, add_user: user }))
+        : [];
+
+    if (isshikiSetDatas && isshikiSetDatas.length > 0) {
+      await insertNewIsshikiSetList(isshikiSetDatas, connection);
+    }
+
     await revalidatePath('/isshiki-master');
+    connection.query('COMMIT');
   } catch (error) {
     console.log('DB接続エラー', error);
+    connection.query('ROLLBACK');
     throw error;
+  } finally {
+    connection.release();
   }
 };
 
@@ -130,6 +163,22 @@ export const getEqptsForEqptSelection = async (query: string = ''): Promise<Eqpt
     return data.rows;
   } catch (e) {
     console.error('例外が発生しました:', e);
+    throw e;
+  }
+};
+
+export const checkExistingIsshiki = async (isshikiId: number, kizaiIds: number[]) => {
+  try {
+    const { data, error } = await checkExIsshiki(isshikiId, kizaiIds);
+    if (error) {
+      console.error(error);
+    }
+    if (!data || data.length === 0) {
+      return [];
+    }
+    return data.map((d) => d.kizai_id);
+  } catch (e) {
+    console.error(e);
     throw e;
   }
 };

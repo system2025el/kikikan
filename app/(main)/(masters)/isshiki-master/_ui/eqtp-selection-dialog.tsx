@@ -15,16 +15,18 @@ import {
   TableHead,
   TableRow,
   TextField,
+  Typography,
 } from '@mui/material';
 import { SetStateAction, useEffect, useMemo, useState } from 'react';
 import { UseFormSetValue } from 'react-hook-form';
 
+import { checkExIsshiki } from '@/app/_lib/db/tables/m-kizai';
 import { CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
 import { Loading } from '@/app/(main)/_ui/loading';
 import { getSelectedEqpts } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/funcs';
 import { EqptSelection } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
 
-import { getEqptsForEqptSelection } from '../_lib/funcs';
+import { checkExistingIsshiki, getEqptsForEqptSelection } from '../_lib/funcs';
 import { IsshikisMasterDialogValues } from '../_lib/types';
 
 export const EqptIsshikiSelectionDialog = ({
@@ -52,6 +54,8 @@ export const EqptIsshikiSelectionDialog = ({
   const [selected, setSelected] = useState<number[]>([]);
   /** 検索単語 */
   const [search, setSearch] = useState<string | null>(null);
+  /** エラーの機材名の配列 */
+  const [dupeKizaiNamList, setDupeKizaiNamList] = useState<string[]>([]);
 
   /* methods -------------------------------------------------------- */
   /** 行押下時（選択時）の処理 */
@@ -73,16 +77,31 @@ export const EqptIsshikiSelectionDialog = ({
 
   /** 確定ボタン押下時処理 */
   const handleClickCnfirm = async () => {
-    const selectedList = await getSelectedEqpts(selected);
-    const setList: { id: number; nam: string; mem: string | null }[] = selectedList.map((newItem) => {
-      const match = currentEqptList.find((c) => c.id === newItem.kizaiId);
-      return {
-        id: newItem.kizaiId,
-        nam: newItem.kizaiNam ?? match?.nam ?? '',
-        mem: match?.mem ?? null,
-      };
-    });
-    setValue('kizaiList', setList);
+    setIsLoading(true);
+    // 他の一式マスタに使われていないかチェックする
+    const result = await checkExistingIsshiki(isshikiId, selected);
+    console.log(result);
+    if (!result || result.length === 0) {
+      const selectedList = await getSelectedEqpts(selected);
+      const setList: { id: number; nam: string; mem: string | null }[] = selectedList.map((newItem) => {
+        const match = currentEqptList.find((c) => c.id === newItem.kizaiId);
+        return {
+          id: newItem.kizaiId,
+          nam: newItem.kizaiNam ?? match?.nam ?? '',
+          mem: match?.mem ?? null,
+        };
+      });
+      setValue('kizaiList', setList, { shouldDirty: true });
+      setDupeKizaiNamList([]);
+      setSearch(null);
+      setIsLoading(false);
+      setOpen(false);
+    } else {
+      const dupEqptNames = (await getSelectedEqpts(result)).map((d) => d.kizaiNam);
+      console.log(dupeKizaiNamList);
+      setIsLoading(false);
+      setDupeKizaiNamList(dupEqptNames);
+    }
   };
 
   /* useMemo ------------------------------------------------ */
@@ -121,8 +140,6 @@ export const EqptIsshikiSelectionDialog = ({
             sx={{ mr: 3 }}
             onClick={() => {
               handleClickCnfirm();
-              setSearch(null);
-              setOpen(false);
             }}
           >
             確定
@@ -137,6 +154,11 @@ export const EqptIsshikiSelectionDialog = ({
       </DialogTitle>
       <DialogContent>
         <Box width={'100%'}>
+          {dupeKizaiNamList.length > 0 && (
+            <Typography variant="caption" color="error" whiteSpace={'normal'}>
+              {dupeKizaiNamList.join(', ')}は他の一式マスタに既に登録されています
+            </Typography>
+          )}
           <Stack justifyContent={'center'}>
             <TextField
               value={search ?? ''}
@@ -145,7 +167,12 @@ export const EqptIsshikiSelectionDialog = ({
               }}
             />
           </Stack>
-          <TableContainer component={Paper} variant="outlined" square sx={{ width: 500, my: 1, maxHeight: '70vh' }}>
+          <TableContainer
+            component={Paper}
+            variant="outlined"
+            square
+            sx={{ minWidth: 500, width: '100%', my: 1, maxHeight: '70vh' }}
+          >
             {isLoading ? (
               <Loading />
             ) : (

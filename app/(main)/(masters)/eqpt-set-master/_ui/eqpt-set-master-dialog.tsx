@@ -102,7 +102,7 @@ export const EqptSetsMasterDialog = ({
   /* methods ---------------------------------------- */
   /* フォームを送信 */
   const onSubmit = async (data: EqptSetsMasterDialogValues) => {
-    if (getValues('setEqptList').length === 0) {
+    if (setList.length === 0) {
       setDeleteOpen(true);
     } else {
       console.log(data);
@@ -174,13 +174,13 @@ export const EqptSetsMasterDialog = ({
         const eqptSet1 = await getChosenEqptSet(oyaId);
         if (eqptSet1) {
           reset(eqptSet1); // 取得したデータでフォーム初期化
-          setCurrentSetList(getValues('setEqptList').map((d) => d.id)); // 初期のセットリストをセット
+          setCurrentSetList(setList.map((d) => d.id)); // 初期のセットリストをセット
           setIsLoading(false);
         }
       }
     };
     getThatOneEqptSet();
-  }, [oyaId, reset, getValues]);
+  }, [oyaId, setList, reset, getValues]);
 
   return (
     <>
