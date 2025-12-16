@@ -204,7 +204,7 @@ export const Stock = () => {
                 </Select>
               )}
             />
-            <Button type="submit">
+            <Button type="submit" loading={isLoading}>
               <SearchIcon fontSize="small" />
               検索
             </Button>

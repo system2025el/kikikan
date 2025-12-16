@@ -97,7 +97,7 @@ export const LoanList = () => {
               <Typography>受注機材名キーワード</Typography>
               <TextFieldElement name="query" control={control} />
             </Grid2>
-            <Button type="submit">
+            <Button type="submit" loading={isLoading}>
               <SearchIcon fontSize="small" />
               検索
             </Button>
