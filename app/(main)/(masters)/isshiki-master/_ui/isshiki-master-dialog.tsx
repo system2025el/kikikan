@@ -14,7 +14,7 @@ import { FAKE_NEW_ID } from '../../_lib/constants';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
 import { emptyIsshiki, formItems } from '../_lib/datas';
-import { addNewIsshiki, getChosenIsshiki, updateIsshiki } from '../_lib/funcs';
+import { addNewIsshiki, getChosenIsshiki, updateIsshiki, updIsshikiDelFlg } from '../_lib/funcs';
 import { IsshikisMasterDialogSchema, IsshikisMasterDialogValues } from '../_lib/types';
 import { EqptIsshikiSelectionDialog } from './eqtp-selection-dialog';
 
@@ -68,7 +68,6 @@ export const IsshikisMasterDialog = ({
     watch,
     handleSubmit,
     reset,
-    getValues,
     setValue,
   } = isshikiForm;
 
@@ -88,7 +87,7 @@ export const IsshikisMasterDialog = ({
       refetchIsshikis();
     } else {
       if (action === 'save') {
-        await updateIsshiki(data, isshikiId, user?.name ?? '');
+        await updateIsshiki(data, currentIsshikiList ?? emptyIsshiki, isshikiId, user?.name ?? '');
         handleCloseDialog();
         refetchIsshikis();
       } else if (action === 'delete') {
@@ -96,8 +95,7 @@ export const IsshikisMasterDialog = ({
         return;
       } else if (action === 'restore') {
         // 有効化ボタン
-        const values = await getValues();
-        await updateIsshiki({ ...values, delFlg: false }, isshikiId, user?.name ?? '');
+        await updIsshikiDelFlg(isshikiId, false, user?.name ?? '');
         handleCloseDialog();
         refetchIsshikis();
       }
@@ -123,8 +121,7 @@ export const IsshikisMasterDialog = ({
 
   /* 削除確認ダイアログで削除選択時 */
   const handleConfirmDelete = async () => {
-    const values = await getValues();
-    await updateIsshiki({ ...values, delFlg: true }, isshikiId, user?.name ?? '');
+    await updIsshikiDelFlg(isshikiId, true, user?.name ?? '');
     setDeleteOpen(false);
     handleCloseDialog();
     await refetchIsshikis();
