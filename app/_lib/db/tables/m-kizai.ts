@@ -274,3 +274,22 @@ export const selectActiveEqptsForSet = async () => {
     throw e;
   }
 };
+
+/**
+ * 一式マスタIDが指定以外の機材IDが一致する一式機材を取得する関数
+ * @param {number} isshikiId 除外する一式マスタID
+ * @param {number[]} kizaiIds 探す機材IDの配列
+ */
+export const checkExIsshiki = async (isshikiId: number, kizaiIds: number[]) => {
+  try {
+    return await supabase
+      .schema(SCHEMA)
+      .from('m_issiki_set')
+      .select('kizai_id')
+      .neq('issiki_id', isshikiId)
+      .in('kizai_id', kizaiIds);
+  } catch (e) {
+    console.error(e);
+    throw e;
+  }
+};

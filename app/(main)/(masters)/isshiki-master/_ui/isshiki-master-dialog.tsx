@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
+import { checkExIsshiki } from '@/app/_lib/db/tables/m-kizai';
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import { FormBox, SelectTypes } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
@@ -47,6 +48,8 @@ export const IsshikisMasterDialog = ({
   const [deleteOpen, setDeleteOpen] = useState(false);
   /* submit時のactions (save, delete) */
   const [action, setAction] = useState<'save' | 'delete' | 'restore' | undefined>(undefined);
+  /** 元の一式機材詳細 */
+  const [currentIsshikiList, setCurrentIsshikiList] = useState<IsshikisMasterDialogValues>();
 
   /** 機材選択ダイアログ開閉 */
   const [eqSelectOpen, setEqSelectOpen] = useState<boolean>(false);
@@ -79,8 +82,6 @@ export const IsshikisMasterDialog = ({
   /* methods ---------------------------------------- */
   /* フォームを送信 */
   const onSubmit = async (data: IsshikisMasterDialogValues) => {
-    console.log('isDarty : ', isDirty);
-    console.log(data);
     if (isshikiId === FAKE_NEW_ID) {
       await addNewIsshiki(data, user?.name ?? '');
       handleCloseDialog();
@@ -143,6 +144,7 @@ export const IsshikisMasterDialog = ({
         const isshiki1 = await getChosenIsshiki(isshikiId);
         if (isshiki1) {
           reset(isshiki1); // 取得したデータでフォーム初期化
+          setCurrentIsshikiList(isshiki1);
           setIsLoading(false);
         }
       }
@@ -184,7 +186,17 @@ export const IsshikisMasterDialog = ({
                   control={control}
                   label={editable ? formItems[1].exsample : ''}
                   fullWidth
-                  sx={{ maxWidth: '90%' }}
+                  sx={{
+                    width: 150,
+                    '& .MuiInputBase-input': {
+                      textAlign: 'right',
+                    },
+                    '& input[type=number]::-webkit-inner-spin-button': {
+                      WebkitAppearance: 'none',
+                      margin: 0,
+                    },
+                  }}
+                  type="number"
                   disabled={editable ? false : true}
                 />
               </FormBox>

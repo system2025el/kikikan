@@ -1,10 +1,13 @@
 'use server';
 
+import { PoolClient } from 'pg';
+
 import { toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { IsshikisMasterDialogValues } from '@/app/(main)/(masters)/isshiki-master/_lib/types';
 
 import pool from '../postgres';
 import { SCHEMA, supabase } from '../supabase';
+import { MIsshikiSetDBValues } from '../types/m-issiki-set-type';
 import { MIsshikiDBValues } from '../types/m-issiki-type';
 
 /**
@@ -78,24 +81,25 @@ export const selectOneIsshiki = async (id: number) => {
  * 一式マスタに新規挿入する関数
  * @param data 挿入するデータ
  */
-export const insertNewIsshiki = async (data: IsshikisMasterDialogValues, user: string) => {
+export const insertNewIsshiki = async (data: MIsshikiDBValues, connection: PoolClient) => {
+  const values = [data.issiki_nam, data.reg_amt, data.mem, data.del_flg, data.add_dat, data.add_user];
   const query = `
           INSERT INTO ${SCHEMA}.m_issiki (
-            issiki_id, issiki_nam, del_flg, dsp_ord_num, reg_amt,
-            mem, add_dat, add_user
+            issiki_id, issiki_nam, reg_amt, dsp_ord_num, mem, del_flg,
+            add_dat, add_user
           )
           VALUES (
             (SELECT coalesce(max(issiki_id),0) + 1 FROM ${SCHEMA}.m_issiki),
             $1, $2,
             (SELECT coalesce(max(dsp_ord_num),0) + 1 FROM ${SCHEMA}.m_issiki),
             $3, $4, $5, $6
-          );
+          )
+          RETURNING
+           issiki_id;
         `;
-  const date = toJapanTimeStampString();
-  const values = [data.isshikiNam, Number(data.delFlg), data.regAmt, data.mem, date, user];
 
   try {
-    await pool.query(query, values);
+    return await connection.query(query, values);
   } catch (e) {
     throw e;
   }
