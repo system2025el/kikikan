@@ -31,6 +31,7 @@ export const SortDialog = ({
   onClose: () => void;
   onSave: (sortJuchuKizaiMeisai: JuchuKizaiMeisaiValues[]) => void;
 }) => {
+  const [isSave, setIsSave] = useState(false);
   const [localItems, setLocalItems] = useState<JuchuKizaiMeisaiValues[]>(juchuKizaiMeisai);
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -41,6 +42,11 @@ export const SortDialog = ({
     const newIndex = Number(String(over.id).replace('sortable-', ''));
 
     setLocalItems(arrayMove(localItems, oldIndex, newIndex));
+  };
+
+  const handleOK = () => {
+    setIsSave(true);
+    onSave(localItems);
   };
 
   return (
@@ -87,9 +93,11 @@ export const SortDialog = ({
                   items={localItems.map((_, index) => `sortable-${index}`)}
                   strategy={verticalListSortingStrategy}
                 >
-                  {localItems.map((data, index) => (
-                    <SortableItem key={`sortable-${index}`} id={`sortable-${index}`} index={index} item={data} />
-                  ))}
+                  {localItems
+                    .filter((d) => !d.delFlag)
+                    .map((data, index) => (
+                      <SortableItem key={`sortable-${index}`} id={`sortable-${index}`} index={index} item={data} />
+                    ))}
                 </SortableContext>
               </TableBody>
             </Table>
@@ -107,7 +115,7 @@ export const SortDialog = ({
           borderColor: 'divider',
         }}
       >
-        <Button variant="contained" onClick={() => onSave(localItems)}>
+        <Button variant="contained" onClick={handleOK} loading={isSave}>
           OK
         </Button>
         <Button onClick={onClose}>キャンセル</Button>

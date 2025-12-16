@@ -3,7 +3,7 @@
 import WarningIcon from '@mui/icons-material/Warning';
 import { Box, Button, Dialog, DialogActions, DialogContentText, DialogTitle } from '@mui/material';
 import { useRouter } from 'next/navigation';
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
 
@@ -114,6 +114,18 @@ export const useDirty = () => {
 };
 
 export const IsDirtyAlertDialog = ({ open, onClick }: { open: boolean; onClick: (result: boolean) => void }) => {
+  const [isSave, setIsSave] = useState(false);
+
+  const handleClick = (result: boolean) => {
+    setIsSave(true);
+    onClick(result);
+  };
+
+  useEffect(() => {
+    if (open) {
+      setIsSave(false);
+    }
+  }, [open]);
   return (
     <Dialog open={open}>
       <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
@@ -124,7 +136,9 @@ export const IsDirtyAlertDialog = ({ open, onClick }: { open: boolean; onClick: 
         入力内容を破棄しますか？
       </DialogContentText>
       <DialogActions>
-        <Button onClick={() => onClick(true)}>破棄</Button>
+        <Button onClick={() => handleClick(true)} loading={isSave}>
+          破棄
+        </Button>
         <Button onClick={() => onClick(false)}>戻る</Button>
       </DialogActions>
     </Dialog>

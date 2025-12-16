@@ -1380,6 +1380,7 @@ const EquipmentOrderDetail = (props: {
    */
   const handleResultDialog = async (result: boolean) => {
     if (result) {
+      setIsLoading(true);
       await delLock(1, props.juchuHeadData.juchuHeadId);
       setLockData(null);
       setEdit(false);
@@ -1388,6 +1389,7 @@ const EquipmentOrderDetail = (props: {
       setJuchuHonbanbiList(originJuchuHonbanbiList);
       setJuchuHonbanbiDeleteList([]);
       setJuchuKizaiMeisaiList(originJuchuKizaiMeisaiList);
+      setIdoJuchuKizaiMeisaiList(originIdoJuchuKizaiMeisaiList);
       setJuchuContainerMeisaiList(originJuchuContainerMeisaiList);
       // setOriginPlanQty(
       //   originJuchuKizaiMeisaiList.reduce((acc, current) => {
@@ -1404,6 +1406,7 @@ const EquipmentOrderDetail = (props: {
       // );
       setEqStockList(originEqStockList);
       setDirtyOpen(false);
+      setIsLoading(false);
     } else {
       setDirtyOpen(false);
     }
@@ -1790,7 +1793,7 @@ const EquipmentOrderDetail = (props: {
     setJuchuKizaiMeisaiList(updatedMeisaiList);
     setEqStockList((prev) => {
       const map = Object.fromEntries(prev.map((b) => [b[0].kizaiId, b]));
-      return updatedMeisaiList.map((d) => map[d.kizaiId]);
+      return updatedMeisaiList.filter((d) => !d.delFlag).map((d) => map[d.kizaiId]);
     });
   };
 
@@ -2372,7 +2375,7 @@ const EquipmentOrderDetail = (props: {
                 onClick={(e) => {
                   e.stopPropagation();
                 }}
-                disabled={!edit}
+                disabled={!edit || isLoading || isDetailLoading}
               >
                 <SaveAsIcon sx={{ mr: 1 }} />
                 保存
@@ -2390,8 +2393,10 @@ const EquipmentOrderDetail = (props: {
                 <Grid2 container spacing={2}>
                   <Button
                     disabled={
-                      juchuKizaiMeisaiList.filter((d) => !d.delFlag).length === 0 &&
-                      juchuContainerMeisaiList.filter((d) => !d.delFlag).length === 0
+                      (juchuKizaiMeisaiList.filter((d) => !d.delFlag).length === 0 &&
+                        juchuContainerMeisaiList.filter((d) => !d.delFlag).length === 0) ||
+                      isLoading ||
+                      isDetailLoading
                     }
                     onClick={handleOpenCopyDialog}
                   >
@@ -2403,7 +2408,9 @@ const EquipmentOrderDetail = (props: {
                       !edit ||
                       (juchuKizaiMeisaiList.filter((d) => !d.delFlag).length === 0 &&
                         juchuContainerMeisaiList.filter((d) => !d.delFlag).length === 0) ||
-                      fixFlag
+                      fixFlag ||
+                      isLoading ||
+                      isDetailLoading
                     }
                     onClick={handleOpenSeparationDialog}
                   >
@@ -2482,7 +2489,10 @@ const EquipmentOrderDetail = (props: {
                         <Button
                           disabled={!edit}
                           onClick={() => setSortDialogOpen(true)}
-                          sx={{ display: juchuKizaiMeisaiList.length === 0 ? 'none' : 'inline-flex' }}
+                          sx={{
+                            display:
+                              juchuKizaiMeisaiList.filter((d) => !d.delFlag).length === 0 ? 'none' : 'inline-flex',
+                          }}
                         >
                           並び替え
                         </Button>

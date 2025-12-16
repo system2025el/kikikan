@@ -1,5 +1,8 @@
+'use client';
+
 import WarningIcon from '@mui/icons-material/Warning';
 import { Box, Button, Dialog, DialogActions, DialogContentText, DialogTitle } from '@mui/material';
+import { useEffect, useState } from 'react';
 
 export const AlertDialog = ({
   open,
@@ -29,6 +32,19 @@ export const AlertDialog = ({
 };
 
 export const HeadDeleteConfirmDialog = ({ open, onClick }: { open: boolean; onClick: (result: boolean) => void }) => {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleClick = (result: boolean) => {
+    setIsLoading(true);
+    onClick(result);
+  };
+
+  useEffect(() => {
+    if (open) {
+      setIsLoading(false);
+    }
+  }, [open]);
+
   return (
     <Dialog open={open}>
       <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
@@ -39,7 +55,9 @@ export const HeadDeleteConfirmDialog = ({ open, onClick }: { open: boolean; onCl
         伝票を削除してもよろしいでしょうか？
       </DialogContentText>
       <DialogActions>
-        <Button onClick={() => onClick(true)}>削除</Button>
+        <Button onClick={() => handleClick(true)} loading={isLoading}>
+          削除
+        </Button>
         <Button onClick={() => onClick(false)}>戻る</Button>
       </DialogActions>
     </Dialog>
@@ -53,6 +71,19 @@ export const KizaiHeadDeleteConfirmDialog = ({
   open: boolean;
   onClick: (result: boolean) => void;
 }) => {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleClick = (result: boolean) => {
+    setIsLoading(true);
+    onClick(result);
+  };
+
+  useEffect(() => {
+    if (open) {
+      setIsLoading(false);
+    }
+  }, [open]);
+
   return (
     <Dialog open={open}>
       <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
@@ -63,7 +94,9 @@ export const KizaiHeadDeleteConfirmDialog = ({
         受注明細を削除してもよろしいでしょうか？
       </DialogContentText>
       <DialogActions>
-        <Button onClick={() => onClick(true)}>削除</Button>
+        <Button onClick={() => handleClick(true)} loading={isLoading}>
+          削除
+        </Button>
         <Button onClick={() => onClick(false)}>戻る</Button>
       </DialogActions>
     </Dialog>

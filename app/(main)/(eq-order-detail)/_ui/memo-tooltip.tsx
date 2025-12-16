@@ -12,6 +12,7 @@ import {
   Tooltip,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
+import { set } from 'zod';
 
 export const MemoTooltip = (props: {
   name: string;
@@ -22,19 +23,24 @@ export const MemoTooltip = (props: {
 }) => {
   const { name, memo, rowIndex, disabled, handleMemoChange } = props;
   const [open, setOpen] = useState(false);
+  const [isSave, setIsSave] = useState(false);
   const [equipmentMemo, setEquipmentMemo] = useState('');
 
   useEffect(() => {
     setEquipmentMemo(memo);
   }, [memo]);
 
-  const handleOpen = () => setOpen(true);
+  const handleOpen = () => {
+    setOpen(true);
+    setIsSave(false);
+  };
   const handleClose = () => {
     setEquipmentMemo(props.memo);
     setOpen(false);
   };
 
   const handleSave = () => {
+    setIsSave(true);
     handleMemoChange(rowIndex, equipmentMemo);
     setOpen(false);
   };
@@ -60,7 +66,7 @@ export const MemoTooltip = (props: {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleSave} variant="contained" disabled={disabled}>
+          <Button onClick={handleSave} variant="contained" disabled={disabled} loading={isSave}>
             保存
           </Button>
           <Button onClick={handleClose}>キャンセル</Button>

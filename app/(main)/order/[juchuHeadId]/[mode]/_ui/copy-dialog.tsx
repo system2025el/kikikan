@@ -188,7 +188,9 @@ export const CopyDialog = ({
         </Paper>
         <Box display={'flex'} justifyContent={'end'} my={1}>
           <Grid2 container spacing={2}>
-            <Button type="submit">確定</Button>
+            <Button type="submit" loading={isLoading}>
+              確定
+            </Button>
             <Button onClick={handleCloseCopyDialog}>戻る</Button>
           </Grid2>
         </Box>

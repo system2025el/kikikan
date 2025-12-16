@@ -52,6 +52,8 @@ export const DateSelectDialog = ({
   onClose,
   onSave,
 }: DateDialogProps) => {
+  // 保存中
+  const [isSave, setIsSave] = useState(false);
   // タブ
   const [value, setValue] = useState(10);
   // 仕込
@@ -197,7 +199,8 @@ export const DateSelectDialog = ({
   /**
    * 保存ボタン押下
    */
-  const handleSave = async () => {
+  const handleSave = () => {
+    setIsSave(true);
     const juchuHonbanbiData: JuchuKizaiHonbanbiValues[] = [...sikomi, ...rh, ...gp, ...honban];
     onSave(juchuHonbanbiData, deleteList);
   };
@@ -306,12 +309,12 @@ export const DateSelectDialog = ({
 
   return (
     <Container disableGutters sx={{ minWidth: '100%', p: 3, overflowY: 'auto' }} maxWidth={'xl'} ref={scrollRef}>
+      <Box display={'flex'} justifyContent={'end'} mb={1}>
+        <Button onClick={handleClose}>戻る</Button>
+      </Box>
       <Paper variant="outlined">
         <Box display="flex" justifyContent="space-between" alignItems="center" p={2}>
-          <Typography margin={1}>日付選択</Typography>
-          <Grid2 container spacing={1}>
-            <Button onClick={handleClose}>戻る</Button>
-          </Grid2>
+          <Typography>日付選択</Typography>
         </Box>
       </Paper>
       <Paper variant="outlined" sx={{ mt: 2 }}>
@@ -378,6 +381,7 @@ export const DateSelectDialog = ({
           onClick={() => {
             handleSave();
           }}
+          disabled={isSave}
         >
           <SaveAsIcon sx={{ mr: 1 }} />
           保存
