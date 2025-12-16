@@ -21,11 +21,7 @@ export const BackButton = ({ sx, label }: { sx?: object; label: string }) => {
   //const router = useRouter();
   const { requestBack } = useDirty();
 
-  const [back, setBack] = useState(false);
-
   const handleBack = () => {
-    if (back) return;
-    setBack(true);
     requestBack();
   };
 
