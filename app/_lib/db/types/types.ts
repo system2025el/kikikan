@@ -8,8 +8,7 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: '12.2.3 (519615d)';
   };
-  /*dev6*/
-  dev7: {
+  dev6 /*dev7*/ : {
     Tables: {
       m_bumon: {
         Row: {
@@ -4235,7 +4234,7 @@ export type CompositeTypes<
     : never;
 
 export const Constants = {
-  dev6: {
+  dev7: {
     Enums: {},
   },
 } as const;
