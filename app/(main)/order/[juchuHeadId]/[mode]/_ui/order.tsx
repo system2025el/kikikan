@@ -35,6 +35,7 @@ import { redirect, useRouter } from 'next/navigation';
 import { use, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
+import { set } from 'zod';
 
 import { deleteLock } from '@/app/_lib/db/tables/t-lock';
 import { useUserStore } from '@/app/_lib/stores/usestore';
@@ -507,6 +508,8 @@ export const Order = (props: {
             ? `/eq-keep-order-detail/${row.juchuHeadId}/${row.juchuKizaiHeadId}/${row.oyaJuchuKizaiHeadId}/${mode}`
             : `/eq-main-order-detail/${row.juchuHeadId}/${row.juchuKizaiHeadId}/${mode}`;
     if (!isDirty) {
+      if (isLoading) return;
+      setIsLoading(true);
       await deleteLock(1, props.juchuHeadData.juchuHeadId);
       router.push(path);
     } else {
@@ -526,6 +529,8 @@ export const Order = (props: {
    */
   const handleResultDialog = async (result: boolean) => {
     if (result && path) {
+      if (isLoading) return;
+      setIsLoading(true);
       await deleteLock(1, props.juchuHeadData.juchuHeadId);
       setLockData(null);
       setIsDirty(false);
@@ -621,7 +626,7 @@ export const Order = (props: {
           <Button disabled={lockData && lockData?.addUser !== user?.name ? true : false} onClick={handleEdit}>
             変更
           </Button>
-          <BackButton label={'戻る'} sx={{ display: save ? 'inline-flex' : 'none' }} />
+          <BackButton label={'戻る'} />
         </Grid2>
       </Box>
       {/* --------------------------------受注ヘッダー------------------------------------- */}
@@ -833,7 +838,7 @@ export const Order = (props: {
           </Box>
           {/** 固定ボタン 保存＆ページトップ */}
           <Box position={'fixed'} zIndex={1050} bottom={25} right={25} alignItems={'center'}>
-            <Fab variant="extended" color="primary" type="submit" sx={{ mr: 2 }}>
+            <Fab variant="extended" color="primary" type="submit" sx={{ mr: 2 }} disabled={!edit || isLoading}>
               <SaveAsIcon sx={{ mr: 1 }} />
               保存
             </Fab>

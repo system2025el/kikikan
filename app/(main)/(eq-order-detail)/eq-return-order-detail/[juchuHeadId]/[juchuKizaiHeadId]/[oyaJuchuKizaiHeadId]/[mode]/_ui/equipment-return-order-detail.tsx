@@ -1016,6 +1016,7 @@ export const EquipmentReturnOrderDetail = (props: {
    */
   const handleResultDialog = async (result: boolean) => {
     if (result) {
+      setIsLoading(true);
       await delLock(1, props.juchuHeadData.juchuHeadId);
       setLockData(null);
       setEdit(false);
@@ -1038,6 +1039,7 @@ export const EquipmentReturnOrderDetail = (props: {
       // );
       setEqStockList(originEqStockList);
       setDirtyOpen(false);
+      setIsLoading(false);
     } else {
       setDirtyOpen(false);
     }
@@ -1542,7 +1544,7 @@ export const EquipmentReturnOrderDetail = (props: {
                 onClick={(e) => {
                   e.stopPropagation();
                 }}
-                disabled={!edit}
+                disabled={!edit || isLoading || isDetailLoading}
               >
                 <SaveAsIcon sx={{ mr: 1 }} />
                 保存

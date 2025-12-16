@@ -714,7 +714,7 @@ export const EquipmentKeepOrderDetail = (props: {
    * 機材追加時
    * @param data 選択された機材データ
    */
-  const setEqpts = async (eqData: OyaJuchuKizaiMeisaiValues[], containerData: OyaJuchuContainerMeisaiValues[]) => {
+  const setEqpts = (eqData: OyaJuchuKizaiMeisaiValues[], containerData: OyaJuchuContainerMeisaiValues[]) => {
     // 同じ並び順のものははじくようにする
     const dspOrdNums = new Set(keepJuchuKizaiMeisaiList.filter((d) => !d.delFlag).map((d) => d.dspOrdNum));
     const filterEqData = eqData.filter((d) => !dspOrdNums.has(d.dspOrdNum));
@@ -774,6 +774,7 @@ export const EquipmentKeepOrderDetail = (props: {
    */
   const handleResultDialog = async (result: boolean) => {
     if (result) {
+      setIsLoading(true);
       await delLock(1, props.juchuHeadData.juchuHeadId);
       setLockData(null);
       setEdit(false);
@@ -781,6 +782,7 @@ export const EquipmentKeepOrderDetail = (props: {
       setKeepJuchuKizaiMeisaiList(originKeepJuchuKizaiMeisaiList);
       setKeepJuchuContainerMeisaiList(originKeepJuchuContainerMeisaiList);
       setDirtyOpen(false);
+      setIsLoading(false);
     } else {
       setDirtyOpen(false);
     }
@@ -1147,7 +1149,7 @@ export const EquipmentKeepOrderDetail = (props: {
                 onClick={(e) => {
                   e.stopPropagation();
                 }}
-                disabled={!edit}
+                disabled={!edit || isLoading || isDetailLoading}
               >
                 <SaveAsIcon sx={{ mr: 1 }} />
                 保存

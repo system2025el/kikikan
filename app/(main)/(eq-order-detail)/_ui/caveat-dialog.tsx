@@ -1,5 +1,9 @@
+'use client';
+
 import WarningIcon from '@mui/icons-material/Warning';
 import { Box, Button, Dialog, DialogActions, DialogContentText, DialogTitle } from '@mui/material';
+import { useEffect, useState } from 'react';
+import { set } from 'zod';
 
 export const AlertDialog = ({
   open,
@@ -29,6 +33,19 @@ export const AlertDialog = ({
 };
 
 export const MoveAlertDialog = ({ open, onClick }: { open: boolean; onClick: (result: boolean) => void }) => {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleClick = (result: boolean) => {
+    setIsLoading(true);
+    onClick(result);
+  };
+
+  useEffect(() => {
+    if (open) {
+      setIsLoading(false);
+    }
+  }, [open]);
+
   return (
     <Dialog open={open}>
       <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
@@ -39,7 +56,9 @@ export const MoveAlertDialog = ({ open, onClick }: { open: boolean; onClick: (re
         移動日を更新しますか？
       </DialogContentText>
       <DialogActions>
-        <Button onClick={() => onClick(true)}>更新</Button>
+        <Button onClick={() => handleClick(true)} loading={isLoading}>
+          更新
+        </Button>
         <Button onClick={() => onClick(false)}>戻る</Button>
       </DialogActions>
     </Dialog>
@@ -47,6 +66,18 @@ export const MoveAlertDialog = ({ open, onClick }: { open: boolean; onClick: (re
 };
 
 export const DeleteAlertDialog = ({ open, onClick }: { open: boolean; onClick: (result: boolean) => void }) => {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleClick = (result: boolean) => {
+    setIsLoading(true);
+    onClick(result);
+  };
+
+  useEffect(() => {
+    if (open) {
+      setIsLoading(false);
+    }
+  }, [open]);
   return (
     <Dialog open={open}>
       <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
@@ -57,7 +88,9 @@ export const DeleteAlertDialog = ({ open, onClick }: { open: boolean; onClick: (
         削除してもよろしいでしょうか？
       </DialogContentText>
       <DialogActions>
-        <Button onClick={() => onClick(true)}>削除</Button>
+        <Button onClick={() => handleClick(true)} loading={isLoading}>
+          削除
+        </Button>
         <Button onClick={() => onClick(false)}>戻る</Button>
       </DialogActions>
     </Dialog>

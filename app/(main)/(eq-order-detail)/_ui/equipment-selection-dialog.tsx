@@ -47,6 +47,7 @@ export const OyaEqSelectionDialog = ({
 
   /* 確定ボタン押下時 */
   const handleClickConfirm = () => {
+    setIsLoading(true);
     const selectEqData = oyaEqList.filter((data) => selected.includes(data.dspOrdNum));
     const selectContainerData = oyaContainerList.filter((data) => selected.includes(data.dspOrdNum));
     setEqpts(selectEqData, selectContainerData);
@@ -71,7 +72,9 @@ export const OyaEqSelectionDialog = ({
     <Container sx={{ p: 2 }}>
       <Box display={'flex'} justifyContent={'end'} my={1}>
         <Grid2 container spacing={2}>
-          <Button onClick={handleClickConfirm}>確定</Button>
+          <Button onClick={handleClickConfirm} loading={isLoading}>
+            確定
+          </Button>
           <Button onClick={() => onClose(false)}>戻る</Button>
         </Grid2>
       </Box>
