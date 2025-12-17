@@ -21,7 +21,7 @@ export const getAllEqptAndRfid = async () => {
         row.rfid_tag_id,
         row.rfid_kizai_sts,
         row.del_flg,
-        row.section_nam,
+        row.section_num,
         row.kizai_nam,
         row.el_num,
         row.shozoku_id,

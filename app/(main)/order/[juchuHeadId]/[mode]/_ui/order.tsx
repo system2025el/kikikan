@@ -187,12 +187,6 @@ export const Order = (props: {
   useEffect(() => {
     if (!user) return;
 
-    if (getValues('juchuHeadId') === 0) {
-      const data = { ...getValues(), nyuryokuUser: user.name };
-      reset(data);
-      return;
-    }
-
     const asyncProcess = async () => {
       setIsLoading(true);
       const lockData = await getLock(1, props.juchuHeadData.juchuHeadId);
@@ -206,7 +200,14 @@ export const Order = (props: {
       }
       setIsLoading(false);
     };
-    asyncProcess();
+
+    if (getValues('juchuHeadId') === 0) {
+      const data = { ...getValues(), nyuryokuUser: user.name };
+      reset(data);
+      return;
+    } else {
+      asyncProcess();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
