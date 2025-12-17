@@ -29,6 +29,15 @@ const lightTheme = createTheme(
       mode: 'light',
     },
     components: {
+      MuiInputBase: {
+        styleOverrides: {
+          input: {
+            '&:disabled': {
+              cursor: 'default',
+            },
+          },
+        },
+      },
       MuiTypography: {
         defaultProps: {
           whiteSpace: 'nowrap',
