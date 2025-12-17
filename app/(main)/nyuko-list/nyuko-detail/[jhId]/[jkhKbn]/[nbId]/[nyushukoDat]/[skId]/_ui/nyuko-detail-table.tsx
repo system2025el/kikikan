@@ -3,6 +3,7 @@
 import { Button, Link, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import { usePathname, useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 import { dispColors, statusColors } from '@/app/(main)/_lib/colors';
 
@@ -14,8 +15,12 @@ export const NyukoDetailTable = (props: { datas: NyukoDetailTableValues[] }) => 
   const router = useRouter();
   const path = usePathname();
 
+  // 処理中制御
+  const [isProcessing, setIsProcessing] = useState(false);
+
   const handleClick = (juchuKizaiHeadId: number | null, juchuKizaiMeisaiId: number | null, kizaiId: number | null) => {
-    if (juchuKizaiHeadId && juchuKizaiMeisaiId && kizaiId) {
+    if (juchuKizaiHeadId && juchuKizaiMeisaiId && kizaiId && !isProcessing) {
+      setIsProcessing(true);
       router.push(`${path}/nyuko-eqpt-detail/${juchuKizaiHeadId}/${juchuKizaiMeisaiId}/${kizaiId}`);
     }
   };

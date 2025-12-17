@@ -11,6 +11,8 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 import { dispColors } from '../../_lib/colors';
 import { toJapanTimeString } from '../../_lib/date-conversion';
@@ -18,6 +20,20 @@ import { NyukoTableValues } from '../_lib/types';
 
 export const NyukoListTable = (props: { datas: NyukoTableValues[] }) => {
   const { datas } = props;
+
+  const router = useRouter();
+
+  // 処理中制御
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const handleClickRow = (row: NyukoTableValues) => {
+    if (isProcessing) return;
+
+    setIsProcessing(true);
+    router.push(
+      `nyuko-list/nyuko-detail/${row.juchuHeadId}/${row.juchuKizaiHeadKbn}/${row.nyushukoBashoId}/${toJapanTimeString(row.nyushukoDat, '-')}/30`
+    );
+  };
 
   return (
     <TableContainer sx={{ overflow: 'auto', maxHeight: '80vh' }}>
@@ -42,12 +58,7 @@ export const NyukoListTable = (props: { datas: NyukoTableValues[] }) => {
               <TableCell align="left">{row.nyushukoBashoId === 1 ? 'K' : 'Y'}</TableCell>
               <TableCell align="left">{toJapanTimeString(row.nyushukoDat)}</TableCell>
               <TableCell align="center">
-                <Button
-                  variant="text"
-                  size="small"
-                  href={`nyuko-list/nyuko-detail/${row.juchuHeadId}/${row.juchuKizaiHeadKbn}/${row.nyushukoBashoId}/${toJapanTimeString(row.nyushukoDat, '-')}/30`}
-                  sx={{ py: 0, px: 1 }}
-                >
+                <Button variant="text" size="small" onClick={() => handleClickRow(row)} sx={{ py: 0, px: 1 }}>
                   {row.nchkSagyoStsNamShort}
                 </Button>
               </TableCell>

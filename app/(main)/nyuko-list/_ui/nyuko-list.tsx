@@ -15,6 +15,8 @@ import { NyukoListTable } from './nyuko-list-table';
 
 export const NyukoList = (/*props: { shukoData: NyukoTableValues[]}*/) => {
   const [isLoading, setIsLoading] = useState(true);
+  // 処理中制御
+  const [isProcessing, setIsProcessing] = useState(false);
   const [nyukoList, setNyukoList] = useState<NyukoTableValues[]>(/*props.shukoData*/ []);
   const [options, setOptions] = useState<SelectTypes[]>([]);
 
@@ -34,6 +36,7 @@ export const NyukoList = (/*props: { shukoData: NyukoTableValues[]}*/) => {
    * @param data 検索データ(受注番号、出庫日、出庫場所)
    */
   const onSubmit = async (data: NyukoListSearchValues) => {
+    if (isProcessing) return;
     setIsLoading(true);
     sessionStorage.setItem('nyukoListSearchParams', JSON.stringify(getValues()));
     const newNyukoList = await getNyukoList(data);
@@ -138,7 +141,7 @@ export const NyukoList = (/*props: { shukoData: NyukoTableValues[]}*/) => {
             </Grid2>
             <Grid2 size={'grow'} alignItems={'end'} justifyContent={'end'}>
               <Box alignSelf={'end'} justifySelf={'end'}>
-                <Button type="submit">
+                <Button type="submit" loading={isLoading}>
                   <SearchIcon fontSize="small" />
                   検索
                 </Button>

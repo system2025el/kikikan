@@ -12,7 +12,8 @@ import {
   Typography,
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
-import { Dispatch, SetStateAction, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Dispatch, SetStateAction, use, useState } from 'react';
 
 import { dispColors } from '../../_lib/colors';
 import { toJapanTimeString } from '../../_lib/date-conversion';
@@ -24,6 +25,11 @@ export const ShukoListTable = (props: {
 }) => {
   const { datas, onSelectionChange } = props;
 
+  const router = useRouter();
+
+  // 処理中制御
+  const [isProcessing, setIsProcessing] = useState(false);
+
   const [selected, setSelected] = useState<number[]>([]);
 
   const handleSelect = (index: number) => {
@@ -31,6 +37,15 @@ export const ShukoListTable = (props: {
 
     setSelected(newSelected);
     onSelectionChange(newSelected);
+  };
+
+  const handleClickRow = (row: ShukoTableValues, sagyoKbnId: number) => {
+    if (isProcessing) return;
+
+    setIsProcessing(true);
+    router.push(
+      `shuko-list/shuko-detail/${row.juchuHeadId}/${row.juchuKizaiHeadKbn}/${row.nyushukoBashoId}/${toJapanTimeString(row.nyushukoDat, '-')}/${sagyoKbnId}`
+    );
   };
 
   return (
@@ -97,22 +112,12 @@ export const ShukoListTable = (props: {
               <TableCell align="left">{row.nyushukoBashoId === 1 ? 'K' : 'Y'}</TableCell>
               <TableCell align="left">{toJapanTimeString(row.nyushukoDat)}</TableCell>
               <TableCell align="center">
-                <Button
-                  variant="text"
-                  size="small"
-                  href={`shuko-list/shuko-detail/${row.juchuHeadId}/${row.juchuKizaiHeadKbn}/${row.nyushukoBashoId}/${toJapanTimeString(row.nyushukoDat, '-')}/10`}
-                  sx={{ py: 0, px: 1 }}
-                >
+                <Button variant="text" size="small" onClick={() => handleClickRow(row, 10)} sx={{ py: 0, px: 1 }}>
                   {row.sstbSagyoStsNamShort}
                 </Button>
               </TableCell>
               <TableCell align="center">
-                <Button
-                  variant="text"
-                  size="small"
-                  href={`shuko-list/shuko-detail/${row.juchuHeadId}/${row.juchuKizaiHeadKbn}/${row.nyushukoBashoId}/${toJapanTimeString(row.nyushukoDat, '-')}/20`}
-                  sx={{ py: 0, px: 1 }}
-                >
+                <Button variant="text" size="small" onClick={() => handleClickRow(row, 20)} sx={{ py: 0, px: 1 }}>
                   {row.schkSagyoStsNamShort}
                 </Button>
               </TableCell>

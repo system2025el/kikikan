@@ -38,6 +38,8 @@ export const NyukoDetail = (props: {
   const user = useUserStore((state) => state.user);
 
   const [fixFlag, setFixFlag] = useState(props.fixFlag);
+  // 処理中制御
+  const [isProcessing, setIsProcessing] = useState(false);
 
   // スナックバー制御
   const [snackBarOpen, setSnackBarOpen] = useState(false);
@@ -49,7 +51,9 @@ export const NyukoDetail = (props: {
    * @returns
    */
   const handleDeparture = async () => {
-    if (!user) return;
+    if (!user || isProcessing) return;
+
+    setIsProcessing(true);
 
     const updateResult = await updNyukoDetail(nyukoDetailData, nyukoDetailTableData, user.name);
 
@@ -57,9 +61,11 @@ export const NyukoDetail = (props: {
       setFixFlag(true);
       setSnackBarMessage('到着しました');
       setSnackBarOpen(true);
+      setIsProcessing(false);
     } else {
       setSnackBarMessage('到着に失敗しました');
       setSnackBarOpen(true);
+      setIsProcessing(false);
     }
   };
 

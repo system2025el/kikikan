@@ -38,7 +38,10 @@ export const ShukoDetail = (props: {
   // user情報
   const user = useUserStore((state) => state.user);
 
+  // 出発済フラグ
   const [fixFlag, setFixFlag] = useState(props.fixFlag);
+  // 処理中制御
+  const [isProcessing, setIsProcessing] = useState(false);
 
   // 出発ボタンダイアログ制御
   const [departureOpen, setDepartureOpen] = useState(false);
@@ -54,7 +57,9 @@ export const ShukoDetail = (props: {
    * @returns
    */
   const handleDeparture = async () => {
-    if (!user) return;
+    if (!user || isProcessing) return;
+
+    setIsProcessing(true);
 
     const diffCheck = shukoDetailTableData.find(
       (data) =>
@@ -64,6 +69,7 @@ export const ShukoDetail = (props: {
 
     if (diffCheck) {
       setDepartureOpen(true);
+      setIsProcessing(false);
       return;
     }
 
@@ -73,9 +79,11 @@ export const ShukoDetail = (props: {
       setFixFlag(true);
       setSnackBarMessage('出発しました');
       setSnackBarOpen(true);
+      setIsProcessing(false);
     } else {
       setSnackBarMessage('出発に失敗しました');
       setSnackBarOpen(true);
+      setIsProcessing(false);
     }
   };
 
@@ -84,7 +92,9 @@ export const ShukoDetail = (props: {
    * @returns
    */
   const handleRelease = async () => {
-    if (!user) return;
+    if (!user || isProcessing) return;
+
+    setIsProcessing(true);
 
     const juchuKizaiHeadIds = [
       ...new Set(shukoDetailTableData.map((d) => d.juchuKizaiHeadId).filter((id) => id !== null)),
@@ -93,6 +103,7 @@ export const ShukoDetail = (props: {
 
     if (childJuchuKizaiHeadCount && childJuchuKizaiHeadCount > 0) {
       setReleaseOpen(true);
+      setIsProcessing(false);
       return;
     }
 
@@ -102,9 +113,11 @@ export const ShukoDetail = (props: {
       setFixFlag(false);
       setSnackBarMessage('出発解除しました');
       setSnackBarOpen(true);
+      setIsProcessing(false);
     } else {
       setSnackBarMessage('出発解除に失敗しました');
       setSnackBarOpen(true);
+      setIsProcessing(false);
     }
   };
 
