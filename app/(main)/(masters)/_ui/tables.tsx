@@ -88,14 +88,14 @@ export const MasterTable = ({
                 <TableCell
                   key={header.key}
                   align={typeof row[header.key] === 'number' ? 'right' : 'left'}
-                  sx={{ bgcolor: isHidden || isDeleted ? grey[300] : undefined, whiteSpace: 'nowrap' }}
+                  padding="none"
                 >
                   {header.key === 'name' ? (
                     <Button
                       variant="text"
-                      size="medium"
+                      size="small"
                       onClick={() => handleOpenDialog(row.id)}
-                      sx={{ p: 0, m: 0, minWidth: 0 }}
+                      sx={{ p: 0, paddingLeft: 1, m: 0, minWidth: 1, justifyContent: 'left' }}
                     >
                       <LightTooltipWithText variant={'button'} maxWidth={300}>
                         {row[header.key]}
@@ -212,9 +212,8 @@ export const MasterTableOfEqpt = ({
                   {header.key === 'name' ? (
                     <Button
                       variant="text"
-                      size="medium"
                       onClick={() => handleOpenDialog(row.id)}
-                      sx={{ p: 0, m: 0, minWidth: 0 }}
+                      sx={{ p: 0, paddingLeft: 1, m: 0, minWidth: 1, justifyContent: 'left' }}
                     >
                       <LightTooltipWithText variant={'button'} maxWidth={300}>
                         {row[header.key]}

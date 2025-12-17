@@ -188,7 +188,7 @@ export const UsersMaster = () => {
                           variant="text"
                           size="medium"
                           onClick={() => handleOpenDialog(l.mailAdr)}
-                          sx={{ p: 0, m: 0, minWidth: 0 }}
+                          sx={{ p: 0, paddingLeft: 1, m: 0, minWidth: 1, justifyContent: 'left' }}
                         >
                           <LightTooltipWithText variant={'button'} maxWidth={300}>
                             {l.tantouNam}
