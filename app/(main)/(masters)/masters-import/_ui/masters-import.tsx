@@ -140,7 +140,7 @@ export const ImportMaster = () => {
 
     if (eqptData.length !== 0) {
       try {
-        const CHUNK_SIZE = 1000;
+        const CHUNK_SIZE = 3000;
         for (let i = 0; i < eqptData.length; i += CHUNK_SIZE) {
           // 今回処理する分だけ切り出す
           const chunk = eqptData.slice(i, i + CHUNK_SIZE);
