@@ -115,7 +115,6 @@ export const getPdfData = async (
       item10: '',
       item11: juchuHeadData.kokyaku_tanto_nam ?? '',
       item12: kizaiData,
-      item13: '',
     };
 
     return pdjData;

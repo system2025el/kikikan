@@ -11,48 +11,19 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import { Dispatch, SetStateAction, useState } from 'react';
 
 import { dispColors } from '../../_lib/colors';
 import { toJapanTimeString } from '../../_lib/date-conversion';
 import { NyukoTableValues } from '../_lib/types';
 
-export const NyukoListTable = (props: {
-  datas: NyukoTableValues[];
-  onSelectionChange: Dispatch<SetStateAction<number[]>>;
-}) => {
-  const { datas, onSelectionChange } = props;
-  const [selected, setSelected] = useState<number[]>([]);
-  const handleSelect = (index: number) => {
-    const newSelected = selected.includes(index) ? selected.filter((item) => item !== index) : [...selected, index];
+export const NyukoListTable = (props: { datas: NyukoTableValues[] }) => {
+  const { datas } = props;
 
-    setSelected(newSelected);
-    onSelectionChange(newSelected);
-  };
   return (
     <TableContainer sx={{ overflow: 'auto', maxHeight: '80vh' }}>
       <Table stickyHeader size="small">
         <TableHead>
           <TableRow sx={{ whiteSpace: 'nowrap' }}>
-            <TableCell padding="checkbox">
-              <Checkbox
-                color="primary"
-                onChange={(e) => {
-                  const newSelected = e.target.checked && datas ? datas.map((_, index) => index) : [];
-                  setSelected(newSelected);
-                  onSelectionChange(newSelected);
-                }}
-                indeterminate={datas && selected.length > 0 && selected.length < datas.length}
-                checked={datas && datas.length > 0 && selected.length === datas.length}
-                sx={{
-                  '& .MuiSvgIcon-root': {
-                    backgroundColor: '#fff',
-                    borderRadius: '4px',
-                    transition: 'background-color 0.3s',
-                  },
-                }}
-              />
-            </TableCell>
             <TableCell align="center">受注番号</TableCell>
             <TableCell align="left">入庫場所</TableCell>
             <TableCell align="left">入庫日時</TableCell>
@@ -67,9 +38,6 @@ export const NyukoListTable = (props: {
         <TableBody>
           {datas.map((row, index) => (
             <TableRow key={index} sx={{ whiteSpace: 'nowrap', backgroundColor: row.nyukoFixFlg ? '#808080' : 'white' }}>
-              <TableCell padding="checkbox">
-                <Checkbox checked={selected.includes(index)} onChange={() => handleSelect(index)} />
-              </TableCell>
               <TableCell align="center">{row.juchuHeadId}</TableCell>
               <TableCell align="left">{row.nyushukoBashoId === 1 ? 'K' : 'Y'}</TableCell>
               <TableCell align="left">{toJapanTimeString(row.nyushukoDat)}</TableCell>

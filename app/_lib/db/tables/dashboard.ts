@@ -1,6 +1,7 @@
 'use server';
 import pool from '../postgres';
-import { SCHEMA } from '../supabase';
+
+const SCHEMA = 'dev6';
 
 /**
  * 出庫日未定（0時 or NULL）の機材データを取得する

@@ -20,11 +20,3 @@ export type NyukoTableValues = {
   nchkSagyoStsNamShort: string;
   nyukoFixFlg: boolean;
 };
-
-export type NyukoKizai = {
-  kizai_id: number;
-  kizai_nam: string;
-  planKizaiQty: number;
-  plan_yobi_qty: number;
-  plan_qty: number;
-};

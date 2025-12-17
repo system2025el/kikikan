@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 
 import { ShukoKizai } from '../../../_lib/types';
 
+// PDF出力用のモデル
 export type PdfModel = {
   item1: number; //受注番号
   item2: string; //年月日
@@ -17,7 +18,6 @@ export type PdfModel = {
   item10: string; //備考
   item11: string; //ご担当者様
   item12: ShukoKizai[]; //機材詳細
-  item13?: string;
 };
 
 // PDFデータ生成フック
@@ -158,7 +158,6 @@ export const usePdf = (): [(params: PdfModel[]) => Promise<Blob>] => {
       const rowHeight = 20;
       let currentY = 750;
       const pageWidth = 340;
-      const FONT_SIZE = 9;
       const colWidthsPerRow = [
         [45, pageWidth - 45], // 1行目
         [45, 80, 45, 80, 50, 40], // 2行目
@@ -167,85 +166,23 @@ export const usePdf = (): [(params: PdfModel[]) => Promise<Blob>] => {
         [45, 150, 45, 100], // 5行目
       ];
 
-      // 幅計算・省略用のヘルパー関数
-      // テキストの実際の幅を取得する
-      const getTextWidth = (text: string) => {
-        return customFont.widthOfTextAtSize(text, FONT_SIZE);
-      };
-
-      // 指定した幅(maxWidth)に収まるように「…」で省略する関数
-      const truncateToFit = (text: string, maxWidth: number) => {
-        if (!text) return '';
-
-        // そのままで収まるなら返す
-        if (getTextWidth(text) <= maxWidth) {
-          return text;
-        }
-
-        // 収まらない場合、収まるまで末尾を削る
-        let truncated = text;
-        const ellipsis = '…';
-
-        // "..."を含めた幅が maxWidth 以下になるまでループ
-        while (truncated.length > 0 && getTextWidth(truncated + ellipsis) > maxWidth) {
-          truncated = truncated.slice(0, -1);
-        }
-
-        return truncated + ellipsis;
-      };
-      // メインのフォーマット関数
-      const formatWithParens = (
-        title: string | null | undefined,
-        subtitle: string | null | undefined,
-        maxWidth: number
-      ) => {
-        const t = title ?? '';
-        const s = subtitle ?? '';
-        const fullString = `${t}（${s}）`;
-
-        // 全体が収まるならそのまま返す
-        if (getTextWidth(fullString) <= maxWidth) return fullString;
-
-        // タイトルの幅を確認
-        const tWidth = getTextWidth(t);
-
-        // 「（...）」などの記号分の幅
-        const decorationWidth = getTextWidth('（…）');
-
-        // サブタイトルに使える幅 = 全体幅 - タイトル - 記号
-        const subAvailableWidth = maxWidth - tWidth - decorationWidth;
-
-        // サブタイトルを入れる余地がある場合
-        if (subAvailableWidth > 0) {
-          const truncatedSub = truncateToFit(s, subAvailableWidth + getTextWidth('…'));
-          return `${t}（${truncatedSub}）`;
-        }
-
-        // タイトルすら長い、あるいはサブタイトルを入れる隙間がない場合は全体を省略
-        return truncateToFit(fullString, maxWidth);
-      };
-
       const contactName = param.item11;
       let displayContact = '';
 
       if (contactName) {
-        const suffix = ' 様';
-        const maxNameWidth = 90 - getTextWidth(suffix);
-
-        const namePart = truncateToFit(contactName, maxNameWidth);
-        displayContact = `${namePart}${suffix}`;
+        // 名前がある場合：長さチェック（9文字以上なら省略）
+        const namePart = contactName.length > 8 ? contactName.slice(0, 8) + '…' : contactName;
+        displayContact = `${namePart} 様`;
       } else {
+        // 名前がない場合：空文字にする（' 様'も表示されない）
         displayContact = '';
       }
-
-      const TITLE_MAX_WIDTH = 287;
-
       const rows = [
-        ['公 演 名', formatWithParens(param.item3, param.item13, TITLE_MAX_WIDTH)],
+        ['公 演 名', param.item3],
         ['貸 出 日', param.item5, '返 却 日', param.item6, '本番日数', param.item8 ?? ''],
         ['公演場所', param.item7],
         ['担　　当', param.item9],
-        ['備　　考', param.item10, '御担当者', displayContact ?? ''], // displayContactは上で計算済み
+        ['備　　考', param.item10, '御担当者', displayContact ?? ''],
       ];
 
       rows.forEach((row, rowIndex) => {
@@ -262,8 +199,6 @@ export const usePdf = (): [(params: PdfModel[]) => Promise<Blob>] => {
 
         row.forEach((cellText, colIndex) => {
           const cellWidth = colWidths[colIndex] || pageWidth;
-
-          // 背景色（偶数列のみ）
           if (colIndex % 2 === 0) {
             page.drawRectangle({
               x: colX,
@@ -273,7 +208,6 @@ export const usePdf = (): [(params: PdfModel[]) => Promise<Blob>] => {
               color: rgb(0.9, 0.9, 0.9),
             });
           }
-
           // 枠線
           page.drawRectangle({
             x: colX,
@@ -283,9 +217,8 @@ export const usePdf = (): [(params: PdfModel[]) => Promise<Blob>] => {
             borderColor: rgb(0, 0, 0),
             borderWidth: 1,
           });
-
           const textToDraw = String(cellText);
-          const textWidth = customFont.widthOfTextAtSize(textToDraw, FONT_SIZE);
+          const textWidth = customFont.widthOfTextAtSize(textToDraw, 9);
 
           let textX: number;
           if (typeof cellText === 'number') {
@@ -295,15 +228,13 @@ export const usePdf = (): [(params: PdfModel[]) => Promise<Blob>] => {
             // 文字列は左寄せ
             textX = colX + 5;
           }
-
           page.drawText(textToDraw, {
             x: textX,
-            y: currentY - rowHeight + 7, // Y位置調整
+            y: currentY - rowHeight + 7,
             font: customFont,
-            size: FONT_SIZE,
+            size: 9,
             color: rgb(0, 0, 0),
           });
-
           colX += cellWidth;
         });
 

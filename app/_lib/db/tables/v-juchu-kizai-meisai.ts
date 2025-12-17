@@ -149,8 +149,7 @@ export const selectPdfJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiH
 from 
     ${SCHEMA}.v_juchu_kizai_head_lst
 
-    --left join  ${SCHEMA}.v_juchu_kizai_meisai on-
-    inner join  ${SCHEMA}.v_juchu_kizai_meisai on
+    left join  ${SCHEMA}.v_juchu_kizai_meisai on
         v_juchu_kizai_head_lst.juchu_head_id = v_juchu_kizai_meisai.juchu_head_id
         and
         v_juchu_kizai_head_lst.juchu_kizai_head_id = v_juchu_kizai_meisai.juchu_kizai_head_id
@@ -189,8 +188,7 @@ select
 from 
     ${SCHEMA}.v_juchu_kizai_head_lst
 
-    --left join  ${SCHEMA}.v_juchu_ctn_meisai on
-    inner join  ${SCHEMA}.v_juchu_ctn_meisai on
+    left join  ${SCHEMA}.v_juchu_ctn_meisai on
         v_juchu_kizai_head_lst.juchu_head_id = v_juchu_ctn_meisai.juchu_head_id
         and
         v_juchu_kizai_head_lst.juchu_kizai_head_id = v_juchu_ctn_meisai.juchu_kizai_head_id
@@ -217,124 +215,6 @@ order by
   } catch (e) {
     console.error('selectPdfJuchuKizaiMeisai でエラーが発生しました:', e);
 
-    throw e;
-  }
-};
-
-/**
- * 納品書PDF用受注機材データ取得
- * @param juchuHeadId 受注ヘッダーid
- * @param juchuKizaiHeadIds 受注機材ヘッダーid
- * @param nyushukoBashoId 入出庫場所id
- * @returns
- */
-export const selectNyukoPdfJuchuKizaiMeisai = async (juchuHeadId: number, nyukoDat: string) => {
-  try {
-    const values = [juchuHeadId, nyukoDat];
-
-    // ---------------------------------------------------
-    // 入庫リスト印刷ボタンSQL
-    // ---------------------------------------------------
-    const headerQuery = `
-      SELECT 
-          v_juchu_kizai_head_lst.juchu_head_id
-          ,v_juchu_kizai_head_lst.YARD_nyuko_dat --YARDの場合
-
-          ,max(v_juchu_kizai_head_lst.juchu_honbanbi_calc_qty) as juchu_honbanbi_calc_qty
-      
-      FROM 
-          ${SCHEMA}.v_juchu_kizai_head_lst
-      
-      WHERE
-          v_juchu_kizai_head_lst.juchu_head_id = $1
-   --     AND v_juchu_kizai_head_lst.juchu_kizai_head_id in (1,2)    --入庫明細ビューから機材ヘッダーIDセット
-          AND v_juchu_kizai_head_lst.YARD_nyuko_dat = $2    --YARDの場合
-          AND v_juchu_kizai_head_lst.juchu_kizai_head_kbn IN (1,3) --通常、キープ
-      
-      GROUP BY
-          v_juchu_kizai_head_lst.juchu_head_id
-          ,v_juchu_kizai_head_lst.YARD_nyuko_dat --YARDの場合
-    `;
-
-    // ---------------------------------------------------
-    //--入庫リスト 明細部--
-    // ---------------------------------------------------
-    const meisaiQuery = `
-      SELECT 
-          v_juchu_kizai_head_lst.juchu_head_id
-          ,v_juchu_kizai_head_lst.yard_nyuko_dat 
-          ,v_juchu_kizai_meisai.kizai_id
-          ,v_juchu_kizai_meisai.kizai_nam
-          ,(coalesce( v_juchu_kizai_meisai.plan_kizai_qty,0)) + (coalesce(v_juchu_kizai_meisai.keep_qty,0)) as plan_qty
-          ,(coalesce(v_juchu_kizai_meisai.plan_yobi_qty,0)) as plan_yobi_qty
-          --ソート用カラム
-          ,v_juchu_kizai_head_lst.juchu_kizai_head_id
-          ,0 as ctn_flg
-          ,v_juchu_kizai_meisai.dsp_ord_num
-      
-      FROM 
-          ${SCHEMA}.v_juchu_kizai_head_lst
-          INNER JOIN ${SCHEMA}.v_juchu_kizai_meisai ON
-          v_juchu_kizai_head_lst.juchu_head_id = v_juchu_kizai_meisai.juchu_head_id
-          AND v_juchu_kizai_head_lst.juchu_kizai_head_id = v_juchu_kizai_meisai.juchu_kizai_head_id
-      
-          WHERE
-          v_juchu_kizai_head_lst.juchu_head_id = $1
-   --     AND v_juchu_kizai_head_lst.juchu_kizai_head_id in (1,2)    --入庫明細ビューから機材ヘッダーIDセット
-          AND v_juchu_kizai_head_lst.yard_nyuko_dat = $2   --YARDの場合
-          AND v_juchu_kizai_head_lst.juchu_kizai_head_kbn IN (1,3)   --通常、キープ
-
-   --コンテナも追加(YARD+YARD)     
-      UNION ALL
-
-      SELECT 
-          v_juchu_kizai_head_lst.juchu_head_id
-          ,v_juchu_kizai_head_lst.yard_nyuko_dat 
-          ,v_juchu_ctn_meisai.kizai_id
-          ,v_juchu_ctn_meisai.kizai_nam
-          ,(coalesce(v_juchu_ctn_meisai.kics_plan_kizai_qty,0)) + (coalesce(v_juchu_ctn_meisai.yard_plan_kizai_qty,0)) as plan_qty
-  --コンテナはYARD+YARD両方を合算
-          
-          ,0 as plan_yobi_qty
-
-  --ソート用カラム
-          ,v_juchu_kizai_head_lst.juchu_kizai_head_id
-          ,1 as ctn_flg
-          ,v_juchu_ctn_meisai.dsp_ord_num
-
-      FROM 
-          ${SCHEMA}.v_juchu_kizai_head_lst
-
-      INNER JOIN ${SCHEMA}.v_juchu_ctn_meisai ON
-          v_juchu_kizai_head_lst.juchu_head_id = v_juchu_ctn_meisai.juchu_head_id
-          AND v_juchu_kizai_head_lst.juchu_kizai_head_id = v_juchu_ctn_meisai.juchu_kizai_head_id
-
-      WHERE
-          v_juchu_kizai_head_lst.juchu_head_id = $1   --入庫明細から機材ヘッダーIDセット
-          AND v_juchu_kizai_head_lst.yard_nyuko_dat = $2   --YARD入庫日時
-          AND v_juchu_kizai_head_lst.juchu_kizai_head_kbn IN (1,3)   --通常、キープ
-       
-      ORDER BY
-          juchu_kizai_head_id
-          ,ctn_flg
-          ,dsp_ord_num
-    `;
-
-    // ---------------------------------------------------
-    // 2つのクエリを並行して実行する
-    // ---------------------------------------------------
-    const [headerResult, meisaiResult] = await Promise.all([
-      pool.query(headerQuery, values),
-      pool.query(meisaiQuery, values),
-    ]);
-
-    // 結果をまとめて返す
-    return {
-      header: headerResult.rows[0] || null,
-      meisai: meisaiResult.rows,
-    };
-  } catch (e) {
-    console.error('selectNyukoPdfJuchuKizaiMeisai でエラーが発生しました:', e);
     throw e;
   }
 };

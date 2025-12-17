@@ -80,7 +80,6 @@ export const ShukoList = (/*props: { shukoData: ShukoTableValues[] }*/) => {
     const pdfModels: PdfModel[] = [];
     // チェックされた行分データ取得
     for (const data of selectList) {
-      const headNamv = data.headNamv;
       const nyushukoDat = toJapanTimeStampString(data.nyushukoDat);
       const pdfData: PdfModel | null = await getPdfData(
         data.juchuHeadId,
@@ -89,7 +88,6 @@ export const ShukoList = (/*props: { shukoData: ShukoTableValues[] }*/) => {
         nyushukoDat
       );
       if (pdfData !== null) {
-        pdfData.item13 = headNamv;
         pdfModels.push(pdfData);
       }
     }
