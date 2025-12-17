@@ -387,8 +387,7 @@ export const RfidMaster = ({ kizaiId }: { kizaiId: number }) => {
                         >
                           <Button
                             variant="text"
-                            size="small"
-                            sx={{ py: 0.2, px: 0, m: 0, minWidth: 0 }}
+                            sx={{ p: 0, paddingLeft: 1, m: 0, minWidth: 1, justifyContent: 'left' }}
                             onClick={() => handleOpenDialog(row.rfidTagId)}
                           >
                             <Box minWidth={60}>{row.rfidTagId}</Box>

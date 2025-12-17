@@ -232,11 +232,10 @@ export const BillListTable = ({
                     >
                       {bill.ordNum}
                     </TableCell>
-                    <TableCell align="right">
+                    <TableCell align="right" padding="none" width={60}>
                       <Button
                         variant="text"
-                        size="small"
-                        sx={{ py: 0.2, px: 0, m: 0, minWidth: 0 }}
+                        sx={{ p: 0, m: 0, minWidth: 1, justifyContent: 'left' }}
                         onClick={() => {
                           console.log('テーブルで請求番号', bill.billHeadId, 'をクリック');
                           setIsLoading(true);
