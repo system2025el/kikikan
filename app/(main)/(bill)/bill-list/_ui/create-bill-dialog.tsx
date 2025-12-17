@@ -1,71 +1,70 @@
-import { Button, Dialog, DialogActions, DialogTitle, Grid2, Typography } from '@mui/material';
+import { Box, Button, Dialog, DialogActions, DialogTitle, Grid2, Typography } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { CheckboxElement, TextFieldElement } from 'react-hook-form-mui';
+import { CheckboxElement, SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
-import { toJapanTimeStampString, toJapanTimeString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
 import { FormDateX } from '@/app/(main)/_ui/date';
+import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
-import { getChosenCustomerName } from '@/app/(main)/(masters)/customers-master/_lib/funcs';
-
-import { BillingStsSearchValues } from '../../billing-sts-list/_lib/types';
 
 export const CreateBillDialog = ({
   kokyakuId,
   tantouNam,
+  custs,
+  open,
   setDialogOpen,
 }: {
   kokyakuId: number;
   tantouNam: string | null;
+  custs: SelectTypes[];
+  open: boolean;
   setDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
   const router = useRouter();
   /* useState ------------------------------------------------------------ */
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   /* useForm ------------------------------------------------------------ */
   const { control, handleSubmit, reset } = useForm<{
-    kokyaku: { id: number; name: string | null };
+    kokyaku: number;
     tantouNam: string | null;
     date: Date | null;
     showDetailFlg: boolean;
   }>({
     mode: 'onSubmit',
     reValidateMode: 'onChange',
-    defaultValues: { showDetailFlg: false },
+    defaultValues: { kokyaku: kokyakuId ?? undefined, tantouNam: tantouNam, showDetailFlg: false },
   });
 
   /* methods ------------------------------------------------------------- */
   /* 自動生成押下時 */
   const onSubmit = async (data: {
-    kokyaku: { id: number; name: string | null };
+    kokyaku: number;
     tantouNam: string | null;
     date: Date | null;
     showDetailFlg: boolean;
   }) => {
+    setIsLoading(true);
     router.push(
-      `bill-list/create?kokyakuId=${data.kokyaku.id}&date=${toJapanYMDString(data.date ?? undefined, '-')}&flg=${data.showDetailFlg}&tantou=${tantouNam}`
+      `bill-list/create?kokyakuId=${data.kokyaku}&date=${toJapanYMDString(data.date ?? undefined, '-')}&flg=${data.showDetailFlg}&tantou=${data.tantouNam}`
     );
   };
 
-  /* useEffect ----------------------------------------------------------- */
   useEffect(() => {
-    const getCustInfo = async () => {
-      const kokyakuNam = await getChosenCustomerName(kokyakuId);
-      reset({
-        kokyaku: { id: kokyakuId, name: kokyakuNam ?? null },
-        // date: new Date(toJapanTimeStampString()),
-        date: new Date(),
-        tantouNam: tantouNam,
-      });
-    };
-    getCustInfo();
-    setIsLoading(false);
-  }, [tantouNam, kokyakuId, reset]);
+    reset({ kokyaku: kokyakuId ?? undefined, tantouNam: tantouNam, showDetailFlg: false });
+  }, [kokyakuId, tantouNam, reset]);
+
   return (
-    <>
+    <Dialog
+      open={open}
+      onClose={() => {
+        reset();
+        setDialogOpen(false);
+      }}
+    >
       <DialogTitle display={'flex'} justifyContent={'end'}>
         <CloseMasterDialogButton
           handleCloseDialog={() => {
@@ -75,36 +74,25 @@ export const CreateBillDialog = ({
         />
       </DialogTitle>
       {isLoading ? (
-        <Loading />
+        <Box minWidth={300} minHeight={200}>
+          <Loading />
+        </Box>
       ) : (
         <form onSubmit={handleSubmit(onSubmit)}>
-          <Grid2 container direction={'column'} px={4} pt={4} spacing={2}>
+          <Grid2 container direction={'column'} px={4} pt={4} spacing={0.5} minWidth={300} minHeight={200}>
             <Grid2 display={'flex'} alignItems={'baseline'}>
               <Typography mr={9}>相手</Typography>
-              <TextFieldElement
-                name="kokyaku.name"
+              <SelectElement
+                name="kokyaku"
                 control={control}
-                sx={{
-                  width: 400,
-                  pointerEvents: 'none', // クリック不可にする
-                  backgroundColor: '#f5f5f5', // グレー背景で無効っぽく
-                  color: '#888',
-                }}
-                slotProps={{ input: { readOnly: true, onFocus: (e) => e.target.blur() } }}
+                options={custs}
+                sx={{ width: 400 }}
+                rules={{ required: '必須項目です。', min: { value: 1, message: '選択してください' } }}
               />
             </Grid2>
             <Grid2 display={'flex'} alignItems={'baseline'}>
               <Typography mr={3}>相手担当者</Typography>
-              <TextFieldElement
-                name="tantouNam"
-                control={control}
-                sx={{
-                  pointerEvents: 'none', // クリック不可にする
-                  backgroundColor: '#f5f5f5', // グレー背景で無効っぽく
-                  color: '#888',
-                }}
-                slotProps={{ input: { readOnly: true, onFocus: (e) => e.target.blur() } }}
-              />
+              <TextFieldElement name="tantouNam" control={control} />
             </Grid2>
             <Grid2 display={'flex'} alignItems={'baseline'}>
               <Typography mr={9}>年月日</Typography>
@@ -132,10 +120,12 @@ export const CreateBillDialog = ({
             </Grid2>
           </Grid2>
           <DialogActions>
-            <Button type="submit">自動生成</Button>
+            <Button type="submit" loading={isLoading}>
+              自動生成
+            </Button>
           </DialogActions>
         </form>
       )}
-    </>
+    </Dialog>
   );
 };

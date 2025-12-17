@@ -1,13 +1,15 @@
 'use client';
 
 import SearchIcon from '@mui/icons-material/Search';
-import { Box, Button, Container, Divider, Grid2, Paper, Typography } from '@mui/material';
+import { Box, Button, Container, Divider, Grid2, MenuItem, Paper, Select, Typography } from '@mui/material';
+import { grey } from '@mui/material/colors';
 import { useEffect, useState } from 'react';
-import { useForm, useWatch } from 'react-hook-form';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import { CheckboxButtonGroup, SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
-import { SelectTypes } from '@/app/(main)/_ui/form-box';
+import { selectNone, SelectTypes } from '@/app/(main)/_ui/form-box';
 import { LoadingOverlay } from '@/app/(main)/_ui/loading';
+import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 import { getCustomerSelection } from '@/app/(main)/(masters)/_lib/funcs';
 
 import { getFilteredBillingSituations } from '../_lib/funcs';
@@ -29,14 +31,14 @@ export const BillingStsList = () => {
   const [billSts, setBillSts] = useState<BillingStsTableValues[]>([]);
   /* テーブル初期表示 */
   const [isFirst, setIsFirst] = useState<boolean>(true);
-  /** */
+  /** 顧客選択肢 */
   const [custs, setCusts] = useState<SelectTypes[]>([]);
 
   /* useForm --------------------------------------------------------------- */
   const { control, reset, handleSubmit, getValues } = useForm<BillingStsSearchValues>({
     mode: 'onBlur',
     reValidateMode: 'onBlur',
-    defaultValues: { kokyaku: null, kokyakuTantoNam: null, sts: ['1'] },
+    defaultValues: { kokyaku: -100, kokyakuTantoNam: null, sts: ['1'] },
   });
 
   // const kokyakuId = getValues('kokyaku');
@@ -112,40 +114,37 @@ export const BillingStsList = () => {
         <Grid2
           container
           direction={'column'}
-          spacing={1}
+          spacing={0.5}
           width={'100%'}
-          p={2}
+          px={2}
+          py={0.5}
           component={'form'}
           onSubmit={handleSubmit(onSubmit)}
         >
           <Grid2 display={'flex'} alignItems={'baseline'}>
-            <Grid2 size={0.5}>
-              <Typography
-                color="error.main"
-                variant="body2"
-                pr={0.5}
-                display={{ xs: 'none', md: 'flex' }}
-                justifySelf={'end'}
-              >
-                *必須
-              </Typography>
-              <Typography color="error.main" variant="body2" pr={0.5} display={{ md: 'none' }} justifySelf={'end'}>
-                *
-              </Typography>
-            </Grid2>
             <Typography noWrap mr={9}>
               相手
             </Typography>
-            <SelectElement
+            <Controller
               name="kokyaku"
               control={control}
-              options={custs}
-              sx={{ width: 500 }}
-              rules={{ required: '必須項目です。' }}
+              defaultValue={0}
+              render={({ field }) => (
+                <Select {...field} sx={{ width: 400 }}>
+                  {[selectNone, ...custs].map((opt) => (
+                    <MenuItem
+                      key={opt.id}
+                      value={opt.id}
+                      sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
+                    >
+                      {opt.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+              )}
             />
           </Grid2>
           <Grid2 display={'flex'} alignItems={'baseline'}>
-            <Grid2 size={0.5} />
             <Typography noWrap mr={3}>
               相手担当者
             </Typography>
@@ -154,7 +153,6 @@ export const BillingStsList = () => {
 
           <Grid2 size={12} display={'flex'} alignItems={'baseline'}>
             <Grid2 container size={'grow'} alignItems={'baseline'}>
-              <Grid2 size={0.5} />
               <Typography noWrap mr={5}>
                 請求状況
               </Typography>
@@ -186,6 +184,7 @@ export const BillingStsList = () => {
       <BillingStsListTable
         isLoading={isLoading}
         page={page}
+        custs={custs}
         kokyakuId={Number(kokyakuId)}
         tantouNam={tantou}
         billSts={billSts}
