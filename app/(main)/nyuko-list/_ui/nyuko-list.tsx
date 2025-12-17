@@ -5,18 +5,22 @@ import { Box, Button, Divider, FormControl, Grid2, MenuItem, Paper, Select, Typo
 import { useEffect, useState } from 'react';
 import { CheckboxButtonGroup, Controller, TextFieldElement, useForm } from 'react-hook-form-mui';
 
+import { toJapanTimeStampString } from '../../_lib/date-conversion';
 import { TestDate } from '../../_ui/date';
 import { SelectTypes } from '../../_ui/form-box';
 import { Loading } from '../../_ui/loading';
 import { getSectionShortSelections } from '../../(masters)/sections-master/_lib/funcs';
-import { getNyukoList } from '../_lib/funcs';
+import { getNyukoList, getPdfData } from '../_lib/funcs';
 import { NyukoListSearchValues, NyukoTableValues } from '../_lib/types';
+import { PdfModel, usePdf } from '../hooks/usePdf';
 import { NyukoListTable } from './nyuko-list-table';
 
 export const NyukoList = (/*props: { shukoData: NyukoTableValues[]}*/) => {
   const [isLoading, setIsLoading] = useState(true);
   const [nyukoList, setNyukoList] = useState<NyukoTableValues[]>(/*props.shukoData*/ []);
   const [options, setOptions] = useState<SelectTypes[]>([]);
+  //PDF出力
+  const [selected, setSelected] = useState<number[]>([]);
 
   /* useForm ------------------- */
   const { control, handleSubmit, getValues, reset } = useForm<NyukoListSearchValues>({
@@ -45,6 +49,48 @@ export const NyukoList = (/*props: { shukoData: NyukoTableValues[]}*/) => {
   const getOptions = async () => {
     const radio = await getSectionShortSelections();
     setOptions(radio);
+  };
+
+  /* 員数票出力(PDF) ------------------- */
+  // PDFデータ生成フック
+  const [printShuko] = usePdf();
+
+  /**
+   * 納品書出力ボタン押下
+   */
+  const handleOutput = async () => {
+    console.log(selected);
+    // チェックされた行を取り出し
+    const selectList = selected.map((index) => nyukoList[index]);
+    console.log('selectList', selectList);
+
+    if (selectList.length === 0) return;
+
+    // PdfModelの配列
+    const pdfModels: PdfModel[] = [];
+    // チェックされた行分データ取得
+    for (const data of selectList) {
+      const headNamv = data.headNamv;
+      const nyushukoDat = toJapanTimeStampString(data.nyushukoDat);
+      const pdfData: PdfModel | null = await getPdfData(
+        data.juchuHeadId,
+        data.juchuKizaiHeadIdv,
+        data.nyushukoBashoId,
+        nyushukoDat
+      );
+      if (pdfData !== null) {
+        pdfData.item13 = headNamv;
+        pdfModels.push(pdfData);
+      }
+    }
+    console.log('pdfModels', pdfModels);
+
+    // PDF生成
+    const blob = await printShuko(pdfModels);
+
+    // ブラウザ表示
+    const url = URL.createObjectURL(blob);
+    window.open(url);
   };
 
   /* useEffect --------------------------------- */
@@ -151,11 +197,14 @@ export const NyukoList = (/*props: { shukoData: NyukoTableValues[]}*/) => {
           <Loading />
         ) : (
           <Box width={'100%'}>
-            <Box display={'flex'} alignItems={'center'} width={'100%'} p={1}>
+            <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} width={'100%'} p={1}>
               <Typography>全{nyukoList ? nyukoList.length : 0}件</Typography>
+              <Box>
+                <Button onClick={handleOutput}>員数票出力</Button>
+              </Box>
             </Box>
             {nyukoList.length > 0 ? (
-              <NyukoListTable datas={nyukoList} />
+              <NyukoListTable datas={nyukoList} onSelectionChange={setSelected} />
             ) : (
               <Typography p={1}>該当するデータがありません</Typography>
             )}
