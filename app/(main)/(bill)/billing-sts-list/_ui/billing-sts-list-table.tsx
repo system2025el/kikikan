@@ -34,6 +34,7 @@ import { useUserStore } from '@/app/_lib/stores/usestore';
 import { toJapanTimeStampString, toJapanTimeString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
 import { FormDateX } from '@/app/(main)/_ui/date';
+import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 import { MuiTablePagination } from '@/app/(main)/_ui/table-pagination';
 import { FAKE_NEW_ID, ROWS_PER_MASTER_TABLE_PAGE } from '@/app/(main)/(masters)/_lib/constants';
@@ -55,6 +56,7 @@ export const BillingStsListTable = ({
   tantouNam,
   billSts,
   isFirst,
+  custs,
   setPage,
   refetch,
 }: {
@@ -64,6 +66,7 @@ export const BillingStsListTable = ({
   tantouNam: string | null;
   billSts: BillingStsTableValues[];
   isFirst: boolean;
+  custs: SelectTypes[];
   setPage: React.Dispatch<React.SetStateAction<number>>;
   refetch: () => Promise<void>;
 }) => {
@@ -150,9 +153,15 @@ export const BillingStsListTable = ({
           </Table>
         </TableContainer>
       )}
-      <Dialog open={createOpen} onClose={() => setCreateOpen(false)}>
-        <CreateBillDialog kokyakuId={kokyakuId} tantouNam={tantouNam} setDialogOpen={setCreateOpen} />
-      </Dialog>
+
+      <CreateBillDialog
+        open={createOpen}
+        kokyakuId={kokyakuId}
+        tantouNam={tantouNam}
+        setDialogOpen={setCreateOpen}
+        custs={custs}
+      />
+
       <Snackbar
         open={snackBarOpen}
         autoHideDuration={6000}

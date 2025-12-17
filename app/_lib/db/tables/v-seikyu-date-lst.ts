@@ -15,13 +15,11 @@ import { SCHEMA, supabase } from '../supabase';
 export const selectFilteredBillingSituations = async (queries: BillingStsSearchValues) => {
   const { kokyaku, kokyakuTantoNam, sts } = queries;
 
-  const builder = supabase
-    .schema(SCHEMA)
-    .from('v_seikyu_date_lst')
-    .select('*')
-    .eq('kokyaku_id', kokyaku ?? FAKE_NEW_ID)
-    .eq('shuko_fix_flg', 1);
+  const builder = supabase.schema(SCHEMA).from('v_seikyu_date_lst').select('*').eq('shuko_fix_flg', 1);
 
+  if (kokyaku && kokyaku > 0) {
+    builder.eq('kokyaku_id', kokyaku ?? FAKE_NEW_ID);
+  }
   if (kokyakuTantoNam && kokyakuTantoNam.trim() !== '') {
     builder.eq('kokyaku_tanto_nam', kokyakuTantoNam);
   }
