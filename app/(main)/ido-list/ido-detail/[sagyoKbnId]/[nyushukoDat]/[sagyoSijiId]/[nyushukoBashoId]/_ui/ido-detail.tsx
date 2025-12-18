@@ -28,6 +28,7 @@ import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
 import { BackButton } from '@/app/(main)/_ui/buttons';
 import { TestDate } from '@/app/(main)/_ui/date';
 import { useDirty } from '@/app/(main)/_ui/dirty-context';
+import { LoadingOverlay } from '@/app/(main)/_ui/loading';
 
 import { addIdoFix, delIdoFix, getIdoDenMaxId, saveIdoDen } from '../_lib/funcs';
 import { IdoDetailTableValues, IdoDetailValues, SelectedIdoEqptsValues } from '../_lib/types';
@@ -50,6 +51,8 @@ export const IdoDetail = (props: {
   const [editFlag, setEditFlag] = useState(false);
   // 保存フラグ
   const [saveFlag, setSaveFlag] = useState(true);
+  // 処理中制御
+  const [isProcessing, setIsProcessing] = useState(false);
 
   // 移動明細リスト
   const [originIdoDetailList, setOriginIdoDetailList] = useState<IdoDetailTableValues[]>(props.idoDetailTableData);
@@ -101,10 +104,13 @@ export const IdoDetail = (props: {
    * @returns
    */
   const handleFix = async () => {
-    if (!user || idoDetailList.length === 0) return;
+    if (!user || isProcessing) return;
+
+    setIsProcessing(true);
 
     if (editFlag || !saveFlag) {
       setSaveOpen(true);
+      setIsProcessing(false);
       return;
     }
 
@@ -115,6 +121,7 @@ export const IdoDetail = (props: {
 
       if (diffCheck) {
         setDepartureOpen(true);
+        setIsProcessing(false);
         return;
       }
 
@@ -126,6 +133,8 @@ export const IdoDetail = (props: {
         user.name
       );
     } else {
+      setIsProcessing(true);
+
       result = await addIdoFix(
         70,
         idoDetailData.sagyoSijiId,
@@ -139,9 +148,11 @@ export const IdoDetail = (props: {
       setFixFlag(true);
       setSnackBarMessage(`${message}しました`);
       setSnackBarOpen(true);
+      setIsProcessing(false);
     } else {
       setSnackBarMessage(`${message}に失敗しました`);
       setSnackBarOpen(true);
+      setIsProcessing(false);
     }
   };
 
@@ -149,6 +160,10 @@ export const IdoDetail = (props: {
    * 出発解除ボタン押下時
    */
   const handleRelease = async () => {
+    if (isProcessing) return;
+
+    setIsProcessing(true);
+
     const result = await delIdoFix(
       60,
       idoDetailData.sagyoSijiId,
@@ -160,9 +175,11 @@ export const IdoDetail = (props: {
       setFixFlag(false);
       setSnackBarMessage('出発解除しました');
       setSnackBarOpen(true);
+      setIsProcessing(false);
     } else {
       setSnackBarMessage('出発解除に失敗しました');
       setSnackBarOpen(true);
+      setIsProcessing(false);
     }
   };
 
@@ -172,6 +189,8 @@ export const IdoDetail = (props: {
    */
   const handleSave = async () => {
     if (!user || idoDetailList.length === 0) return;
+
+    setIsProcessing(true);
 
     const updateData = await saveIdoDen(idoDetailList, user.name);
 
@@ -183,9 +202,11 @@ export const IdoDetail = (props: {
       setSaveFlag(true);
       setSnackBarMessage('保存しました');
       setSnackBarOpen(true);
+      setIsProcessing(false);
     } else {
       setSnackBarMessage('保存に失敗しました');
       setSnackBarOpen(true);
+      setIsProcessing(false);
     }
   };
 
@@ -269,7 +290,7 @@ export const IdoDetail = (props: {
           </Typography>
           <Grid2 container alignItems={'center'} spacing={2}>
             {fixFlag && <Typography>{idoDetailData.sagyoKbnId === 40 ? '出発済' : '到着済'}</Typography>}
-            <Button onClick={handleFix} disabled={fixFlag}>
+            <Button onClick={handleFix} disabled={fixFlag || idoDetailList.length === 0}>
               {idoDetailData.sagyoKbnId === 40 ? '出発' : '到着'}
             </Button>
             <Button
@@ -356,7 +377,7 @@ export const IdoDetail = (props: {
           variant="extended"
           color="primary"
           onClick={handleSave}
-          disabled={fixFlag}
+          disabled={fixFlag || !editFlag || isProcessing}
           sx={{ /*display: idoDetailData.sagyoKbnId === 40 ? 'inline-flex' : 'none',*/ mr: 2 }}
         >
           <SaveAsIcon sx={{ mr: 1 }} />

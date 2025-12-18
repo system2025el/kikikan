@@ -13,6 +13,7 @@ import {
 } from '@mui/material';
 import { purple } from '@mui/material/colors';
 import { usePathname, useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 import { dispColors, statusColors } from '@/app/(main)/_lib/colors';
 import { useDirty } from '@/app/(main)/_ui/dirty-context';
@@ -30,6 +31,9 @@ export const ShukoIdoDenTable = (props: {
   const router = useRouter();
   const path = usePathname();
 
+  // 処理中制御
+  const [isProcessing, setIsProcessing] = useState(false);
+
   // context
   const { requestNavigation } = useDirty();
 
@@ -38,6 +42,9 @@ export const ShukoIdoDenTable = (props: {
    * @param kizaiId 機材id
    */
   const handleClick = (kizaiId: number) => {
+    if (isProcessing) return;
+
+    setIsProcessing(true);
     requestNavigation(`${path}/ido-eqpt-detail/${kizaiId}`);
   };
 
@@ -114,7 +121,10 @@ export const ShukoIdoDenTable = (props: {
                 <TableCell
                   align="left"
                   onClick={row.saveFlag ? () => handleClick(row.kizaiId) : undefined}
-                  sx={{ cursor: 'pointer', '&:hover': { backgroundColor: dispColors.hover } }}
+                  sx={{
+                    cursor: row.saveFlag ? 'pointer' : 'text',
+                    '&:hover': { backgroundColor: row.saveFlag ? dispColors.hover : dispColors.main },
+                  }}
                 >
                   {row.kizaiNam}
                 </TableCell>
@@ -229,7 +239,10 @@ export const NyukoIdoDenTable = (props: { datas: IdoDetailTableValues[] }) => {
               <TableCell
                 align="left"
                 onClick={row.saveFlag ? () => handleClick(row.kizaiId) : undefined}
-                sx={{ cursor: 'pointer', '&:hover': { backgroundColor: dispColors.hover } }}
+                sx={{
+                  cursor: row.saveFlag ? 'pointer' : 'text',
+                  '&:hover': { backgroundColor: row.saveFlag ? dispColors.hover : dispColors.main },
+                }}
               >
                 {row.kizaiNam}
               </TableCell>

@@ -3,6 +3,7 @@
 import { Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import { grey, yellow } from '@mui/material/colors';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 import { IdoTableValues } from '../_lib/types';
 
@@ -10,6 +11,17 @@ export const IdoListTable = (props: { datas: IdoTableValues[] }) => {
   const router = useRouter();
 
   const { datas } = props;
+
+  // 処理中制御
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const handleClick = (sagyoKbnId: number, nyushukoDat: string, sagyoSijiId: number, nyushukoBashoId: number) => {
+    if (isProcessing) return;
+
+    setIsProcessing(true);
+    router.push(`ido-list/ido-detail/${sagyoKbnId}/${nyushukoDat}/${sagyoSijiId}/${nyushukoBashoId}`);
+  };
+
   return (
     <TableContainer sx={{ overflow: 'auto', maxHeight: '80vh', maxWidth: '70vw' }}>
       <Table stickyHeader size="small">
@@ -38,14 +50,14 @@ export const IdoListTable = (props: { datas: IdoTableValues[] }) => {
               {datas[0].shukoFixFlg === 1 ? '〇' : datas[0].shukoFixFlg === 0 ? '未' : '無し'}
             </TableCell>
             <TableCell align="center">
-              <Button onClick={() => router.push(`ido-list/ido-detail/40/${datas[0].nyushukoDat}/2/2`)}>詳細</Button>
+              <Button onClick={() => handleClick(40, datas[0].nyushukoDat, 2, 2)}>詳細</Button>
             </TableCell>
             <TableCell align="left">{datas[0].nchkSagyoStsNamShort}</TableCell>
             <TableCell align="left">
               {datas[0].nyukoFixFlg === 1 ? '〇' : datas[0].nyukoFixFlg === 0 ? '未' : '無し'}
             </TableCell>
             <TableCell align="center">
-              <Button onClick={() => router.push(`ido-list/ido-detail/50/${datas[0].nyushukoDat}/2/1`)}>詳細</Button>
+              <Button onClick={() => handleClick(50, datas[0].nyushukoDat, 2, 1)}>詳細</Button>
             </TableCell>
           </TableRow>
           <TableRow>
@@ -55,14 +67,14 @@ export const IdoListTable = (props: { datas: IdoTableValues[] }) => {
               {datas[1].shukoFixFlg === 1 ? '〇' : datas[1].shukoFixFlg === 0 ? '未' : '無し'}
             </TableCell>
             <TableCell align="center">
-              <Button onClick={() => router.push(`ido-list/ido-detail/40/${datas[1].nyushukoDat}/1/1`)}>詳細</Button>
+              <Button onClick={() => handleClick(40, datas[1].nyushukoDat, 1, 1)}>詳細</Button>
             </TableCell>
             <TableCell align="left">{datas[1].nchkSagyoStsNamShort}</TableCell>
             <TableCell align="left">
               {datas[1].nyukoFixFlg === 1 ? '〇' : datas[1].nyukoFixFlg === 0 ? '未' : '無し'}
             </TableCell>
             <TableCell align="center">
-              <Button onClick={() => router.push(`ido-list/ido-detail/50/${datas[1].nyushukoDat}/1/2`)}>詳細</Button>
+              <Button onClick={() => handleClick(50, datas[1].nyushukoDat, 1, 2)}>詳細</Button>
             </TableCell>
           </TableRow>
         </TableBody>

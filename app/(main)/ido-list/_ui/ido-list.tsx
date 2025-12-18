@@ -13,6 +13,7 @@ import { IdoTableValues } from '../_lib/types';
 import { IdoListTable } from './ido-list-table';
 
 export const IdoList = () => {
+  // ローディング制御
   const [isLoading, setIsLoading] = useState(true);
 
   const [idoList, setIdoList] = useState<IdoTableValues[]>([]);
@@ -89,7 +90,7 @@ export const IdoList = () => {
                 )}
               />
             </Box>
-            <Button type="submit">
+            <Button type="submit" loading={isLoading}>
               <SearchIcon fontSize="small" />
               検索
             </Button>
