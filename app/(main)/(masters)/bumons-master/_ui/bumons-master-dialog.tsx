@@ -74,12 +74,14 @@ export const BumonsMasterDialog = ({
   /* methods ---------------------------------------- */
   /* フォームを送信 */
   const onSubmit = async (data: BumonsMasterDialogValues) => {
+    setIsLoading(true);
     console.log('isDarty : ', isDirty);
     console.log(data);
     if (bumonId === FAKE_NEW_ID) {
       // 新規の時
       await addNewBumon(data, user?.name ?? '');
       handleCloseDialog();
+      setIsLoading(false);
       refetchBumons();
     } else {
       // 更新の時
@@ -87,8 +89,10 @@ export const BumonsMasterDialog = ({
         // 保存終了ボタン押したとき
         await updateBumon(data, bumonId, user?.name ?? '');
         handleCloseDialog();
+        setIsLoading(false);
         refetchBumons();
       } else if (action === 'delete') {
+        setIsLoading(false);
         // 削除ボタン押したとき
         setDeleteOpen(true);
         return;
@@ -97,6 +101,7 @@ export const BumonsMasterDialog = ({
         const values = await getValues();
         await updateBumon({ ...values, delFlg: false }, bumonId, user?.name ?? '');
         handleCloseDialog();
+        setIsLoading(false);
         refetchBumons();
       }
     }
@@ -121,10 +126,12 @@ export const BumonsMasterDialog = ({
 
   /* 削除確認ダイアログで削除選択時 */
   const handleConfirmDelete = async () => {
+    setIsLoading(true);
     const values = await getValues();
     await updateBumon({ ...values, delFlg: true }, bumonId, user?.name ?? '');
     setDeleteOpen(false);
     handleCloseDialog();
+    setIsLoading(false);
     await refetchBumons();
   };
 
@@ -161,6 +168,7 @@ export const BumonsMasterDialog = ({
           dialogTitle="部門マスタ登録"
           isNew={isNew}
           isDirty={isDirty}
+          push={isLoading}
           setAction={setAction}
           isDeleted={isDeleted!}
         />
@@ -243,10 +251,10 @@ export const BumonsMasterDialog = ({
             <WillDeleteAlertDialog
               open={deleteOpen}
               data={name}
+              push={isLoading}
               handleCloseDelete={() => setDeleteOpen(false)}
               handleConfirmDelete={handleConfirmDelete}
             />
-            handleConfirmDelete
           </>
         )}
       </form>

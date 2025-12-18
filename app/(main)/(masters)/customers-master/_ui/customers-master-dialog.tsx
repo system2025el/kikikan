@@ -75,12 +75,14 @@ export const CustomersMasterDialog = ({
   /* 関数 ---------------------------- */
   /* フォームを送信 */
   const onSubmit = async (data: CustomersMasterDialogValues) => {
+    setIsLoading(true);
     console.log('isDarty : ', isDirty);
     console.log(data);
     if (customerId === FAKE_NEW_ID) {
       // 新規の時
       await addNewCustomer(data, user?.name ?? '');
       handleCloseDialog();
+      setIsLoading(false);
       refetchCustomers();
     } else {
       // 更新の時
@@ -88,8 +90,10 @@ export const CustomersMasterDialog = ({
         // 保存終了ボタン押したとき
         await updateCustomer(data, customerId, user?.name ?? '');
         handleCloseDialog();
+        setIsLoading(false);
         refetchCustomers();
       } else if (action === 'delete') {
+        setIsLoading(false);
         // 削除ボタン押したとき
         setDeleteOpen(true);
         return;
@@ -98,6 +102,7 @@ export const CustomersMasterDialog = ({
         const values = await getValues();
         await updateCustomer({ ...values, delFlg: false }, customerId, user?.name ?? '');
         handleCloseDialog();
+        setIsLoading(false);
         refetchCustomers();
       }
     }
@@ -122,10 +127,12 @@ export const CustomersMasterDialog = ({
 
   /* 削除確認ダイアログで削除選択時 */
   const handleConfirmDelete = async () => {
+    setIsLoading(true);
     const values = await getValues();
     await updateCustomer({ ...values, delFlg: true }, customerId, user?.name ?? '');
     setDeleteOpen(false);
     handleCloseDialog();
+    setIsLoading(false);
     await refetchCustomers();
   };
 
@@ -159,6 +166,7 @@ export const CustomersMasterDialog = ({
         dialogTitle="顧客マスタ登録"
         isNew={isNew}
         isDirty={isDirty}
+        push={isLoading}
         setAction={setAction}
         isDeleted={isDeleted!}
       />
@@ -303,60 +311,6 @@ export const CustomersMasterDialog = ({
             <FormBox formItem={formItems[14]}>
               <CheckboxElement name="dspFlg" control={control} size="medium" disabled={editable ? false : true} />
             </FormBox>
-            {/* <Grid2>
-                <FormBox formItem={formItems[15]}>
-                  <TextFieldElement
-                    name="closeDay"
-                    control={control}
-                    label={editable ? formItems[15].exsample : ''}
-                    fullWidth
-                    sx={{
-                      maxWidth: '50%',
-                      '& .MuiInputBase-input': {
-                        textAlign: 'right',
-                      },
-                      '& input[type=number]::-webkit-inner-spin-button': {
-                        WebkitAppearance: 'none',
-                        margin: 0,
-                      },
-                    }}
-                    type="number"
-                    disabled={editable ? false : true}
-                  />
-                </FormBox>
-              </Grid2>
-              <Grid2>
-                <FormBox formItem={formItems[16]}>
-                  <TextFieldElement
-                    name="siteDay"
-                    control={control}
-                    label={editable ? formItems[16].exsample : ''}
-                    fullWidth
-                    sx={{
-                      maxWidth: '50%',
-                      '& .MuiInputBase-input': {
-                        textAlign: 'right',
-                      },
-                      '& input[type=number]::-webkit-inner-spin-button': {
-                        WebkitAppearance: 'none',
-                        margin: 0,
-                      },
-                    }}
-                    type="number"
-                    disabled={editable ? false : true}
-                  />
-                </FormBox>
-              </Grid2>
-              <Grid2>
-                <FormBox formItem={formItems[17]}>
-                  <CheckboxElement
-                    name="kizaiNebikiFlg"
-                    control={control}
-                    size="medium"
-                    disabled={editable ? false : true}
-                  />
-                </FormBox>
-              </Grid2> */}
           </Grid2>
           <IsDirtyAlertDialog
             open={dirtyOpen}
@@ -366,6 +320,7 @@ export const CustomersMasterDialog = ({
           <WillDeleteAlertDialog
             open={deleteOpen}
             data={name}
+            push={isLoading}
             handleCloseDelete={() => setDeleteOpen(false)}
             handleConfirmDelete={handleConfirmDelete}
           />

@@ -50,7 +50,6 @@ export const IsshikisMasterDialog = ({
   const [action, setAction] = useState<'save' | 'delete' | 'restore' | undefined>(undefined);
   /** 元の一式機材詳細 */
   const [currentIsshikiList, setCurrentIsshikiList] = useState<IsshikisMasterDialogValues>();
-
   /** 機材選択ダイアログ開閉 */
   const [eqSelectOpen, setEqSelectOpen] = useState<boolean>(false);
 
@@ -81,22 +80,27 @@ export const IsshikisMasterDialog = ({
   /* methods ---------------------------------------- */
   /* フォームを送信 */
   const onSubmit = async (data: IsshikisMasterDialogValues) => {
+    setIsLoading(true);
     if (isshikiId === FAKE_NEW_ID) {
       await addNewIsshiki(data, user?.name ?? '');
       handleCloseDialog();
+      setIsLoading(false);
       refetchIsshikis();
     } else {
       if (action === 'save') {
         await updateIsshiki(data, currentIsshikiList ?? emptyIsshiki, isshikiId, user?.name ?? '');
         handleCloseDialog();
+        setIsLoading(false);
         refetchIsshikis();
       } else if (action === 'delete') {
+        setIsLoading(false);
         setDeleteOpen(true);
         return;
       } else if (action === 'restore') {
         // 有効化ボタン
         await updIsshikiDelFlg(isshikiId, false, user?.name ?? '');
         handleCloseDialog();
+        setIsLoading(false);
         refetchIsshikis();
       }
     }
@@ -121,9 +125,11 @@ export const IsshikisMasterDialog = ({
 
   /* 削除確認ダイアログで削除選択時 */
   const handleConfirmDelete = async () => {
+    setIsLoading(true);
     await updIsshikiDelFlg(isshikiId, true, user?.name ?? '');
     setDeleteOpen(false);
     handleCloseDialog();
+    setIsLoading(false);
     await refetchIsshikis();
   };
 
@@ -160,6 +166,7 @@ export const IsshikisMasterDialog = ({
           isNew={isNew}
           isDirty={isDirty}
           setAction={setAction}
+          push={isLoading}
           isDeleted={isDeleted!}
         />
         {isLoading ? (
@@ -259,6 +266,7 @@ export const IsshikisMasterDialog = ({
             <WillDeleteAlertDialog
               open={deleteOpen}
               data={name}
+              push={isLoading}
               handleCloseDelete={() => setDeleteOpen(false)}
               handleConfirmDelete={handleConfirmDelete}
             />

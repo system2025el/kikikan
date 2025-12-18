@@ -67,12 +67,14 @@ export const ShukeibumonsMasterDialog = ({
   /* methods ---------------------------------------- */
   /* フォームを送信 */
   const onSubmit = async (data: ShukeibumonsMasterDialogValues) => {
+    setIsLoading(true);
     console.log('isDarty : ', isDirty);
     console.log(data);
     if (shukeibumonId === FAKE_NEW_ID) {
       // 新規の時
       await addNewShukeibumon(data, user?.name ?? '');
       handleCloseDialog();
+      setIsLoading(false);
       refetchShukeibumons();
     } else {
       // 更新の時
@@ -80,8 +82,10 @@ export const ShukeibumonsMasterDialog = ({
         // 保存終了ボタン押したとき
         await updateShukeibumon(data, shukeibumonId, user?.name ?? '');
         handleCloseDialog();
+        setIsLoading(false);
         refetchShukeibumons();
       } else if (action === 'delete') {
+        setIsLoading(false);
         // 削除ボタン押したとき
         setDeleteOpen(true);
         return;
@@ -90,6 +94,7 @@ export const ShukeibumonsMasterDialog = ({
         const values = await getValues();
         await updateShukeibumon({ ...values, delFlg: false }, shukeibumonId, user?.name ?? '');
         handleCloseDialog();
+        setIsLoading(false);
         refetchShukeibumons();
       }
     }
@@ -114,10 +119,12 @@ export const ShukeibumonsMasterDialog = ({
 
   /* 削除確認ダイアログで削除選択時 */
   const handleConfirmDelete = async () => {
+    setIsLoading(true);
     const values = await getValues();
     await updateShukeibumon({ ...values, delFlg: true }, shukeibumonId, user?.name ?? '');
     setDeleteOpen(false);
     handleCloseDialog();
+    setIsLoading(false);
     await refetchShukeibumons();
   };
 
@@ -152,6 +159,7 @@ export const ShukeibumonsMasterDialog = ({
         isNew={isNew}
         isDirty={isDirty}
         isDeleted={isDeleted!}
+        push={isLoading}
         setAction={setAction}
       />
       {isLoading ? ( //DB
@@ -191,6 +199,7 @@ export const ShukeibumonsMasterDialog = ({
           <WillDeleteAlertDialog
             open={deleteOpen}
             data={name}
+            push={isLoading}
             handleCloseDelete={() => setDeleteOpen(false)}
             handleConfirmDelete={handleConfirmDelete}
           />

@@ -38,12 +38,14 @@ export const WillDeleteAlertDialog = ({
   open,
   data,
   title,
+  push,
   handleCloseDelete,
   handleConfirmDelete,
 }: {
   open: boolean;
   data: string;
   title?: string;
+  push?: boolean;
   handleCloseDelete: () => void;
   handleConfirmDelete: () => void;
 }) => {
@@ -59,7 +61,7 @@ export const WillDeleteAlertDialog = ({
         {data}が{dispTitle}されます。
       </DialogContentText>
       <DialogActions>
-        <Button color="error" onClick={() => handleConfirmDelete()}>
+        <Button color="error" onClick={() => handleConfirmDelete()} loading={push ?? false}>
           {dispTitle}
         </Button>
         <Button onClick={() => handleCloseDelete()}>戻る</Button>

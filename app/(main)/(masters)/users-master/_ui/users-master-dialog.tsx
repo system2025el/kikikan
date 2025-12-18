@@ -87,32 +87,35 @@ export const UsersMasterDialog = ({
   /* methods ---------------------------- */
   /* フォームを送信 */
   const onSubmit = async (data: UsersMasterDialogValues) => {
-    console.log('isDarty : ', isDirty);
-    console.log(data);
+    setIsLoading(true);
+
     setCodErrorMsg(null);
     setAdrErrorMsg(null);
-
     if (currentMailAdr === String(FAKE_NEW_ID)) {
       // 新規処理
       // メールアドレスと社員コードの重複確認
       const adr = await checkMailAdr(data.mailAdr);
       if (adr.data) {
         setAdrErrorMsg('既に使われているメールアドレスです');
-      }
-      if (data.shainCod) {
-        const cod = await checkShainCod(data.shainCod);
-        if (cod.data) {
-          setCodErrorMsg(`既に使われている社員コードです`);
+        setIsLoading(false);
+
+        if (data.shainCod) {
+          const cod = await checkShainCod(data.shainCod);
+          if (cod.data) {
+            setCodErrorMsg(`既に使われている社員コードです`);
+            setIsLoading(false);
+          }
+          if (!adr.data && !cod.data) {
+            await addNewUser(data, user?.name ?? '');
+            handleCloseDialog();
+            setIsLoading(false);
+            refetchUsers();
+          }
         }
-        if (!adr.data && !cod.data) {
-          await addNewUser(data, user?.name ?? '');
-          handleCloseDialog();
-          refetchUsers();
-        }
-      }
-      if (!adr.data) {
+      } else {
         await addNewUser(data, user?.name ?? '');
         handleCloseDialog();
+        setIsLoading(false);
         refetchUsers();
       }
     } else {
@@ -124,11 +127,14 @@ export const UsersMasterDialog = ({
             const cod = await checkShainCod(data.shainCod);
             if (cod.data) {
               setCodErrorMsg(`既に使われている社員コードです`);
+              setIsLoading(false);
               setEditable(true);
             } else {
+              setIsLoading(false);
               setRestoreOpen(true);
             }
           } else {
+            setIsLoading(false);
             setRestoreOpen(true);
           }
         } else {
@@ -138,14 +144,22 @@ export const UsersMasterDialog = ({
             if (cod.data) {
               setCodErrorMsg(`既に使われている社員コードです`);
               setEditable(true);
+              setIsLoading(false);
+            } else {
+              await updateUser(currentMailAdr, data, user?.name ?? '');
+              handleCloseDialog();
+              setIsLoading(false);
+              refetchUsers();
             }
           } else {
             await updateUser(currentMailAdr, data, user?.name ?? '');
             handleCloseDialog();
+            setIsLoading(false);
             refetchUsers();
           }
         }
       } else if (action === 'delete') {
+        setIsLoading(false);
         // 無効化
         setDeleteOpen(true);
         return;
@@ -158,11 +172,14 @@ export const UsersMasterDialog = ({
             setCodErrorMsg(`既に使われている社員コードです`);
             setValue('delFlg', false);
             setWillRestore(true);
+            setIsLoading(false);
           } else {
+            setIsLoading(false);
             setRestoreOpen(true);
           }
         }
         if (!currentShainCod) {
+          setIsLoading(false);
           setRestoreOpen(true);
         }
       }
@@ -188,24 +205,29 @@ export const UsersMasterDialog = ({
 
   /* 無効化確認ダイアログで無効化選択時 */
   const handleConfirmDelete = async () => {
+    setIsLoading(true);
     await deleteUsers(currentMailAdr, user?.name ?? '');
     setDeleteOpen(false);
     handleCloseDialog();
+    setIsLoading(false);
     await refetchUsers();
   };
 
   /* 有効か確認ダイアログで有効化選択時 */
   const handleConfirmRestore = async () => {
+    setIsLoading(true);
     if (willRestore) {
       const shainCod = getValues('shainCod');
       await restoreUsersAndShainCod(currentMailAdr, shainCod ?? null, user?.name ?? '');
       setRestoreOpen(false);
       handleCloseDialog();
+      setIsLoading(false);
       await refetchUsers();
     } else {
       await restoreUsers(currentMailAdr, user?.name ?? '');
       setRestoreOpen(false);
       handleCloseDialog();
+      setIsLoading(false);
       await refetchUsers();
     }
   };
@@ -243,6 +265,7 @@ export const UsersMasterDialog = ({
           isNew={isNew}
           isDirty={isDirty}
           isDeleted={isDeleted!}
+          push={isLoading}
           setAction={setAction}
         />
         {isLoading ? (
@@ -386,7 +409,7 @@ export const UsersMasterDialog = ({
                 {mail}の認証情報が削除され、ログインできなくなります
               </DialogContentText>
               <DialogActions>
-                <Button color="error" onClick={() => handleConfirmDelete()}>
+                <Button color="error" onClick={() => handleConfirmDelete()} loading={isLoading}>
                   無効化
                 </Button>
                 <Button onClick={() => setDeleteOpen(false)}>戻る</Button>
@@ -407,7 +430,7 @@ export const UsersMasterDialog = ({
                 承認とログインを行ってください
               </DialogContentText>
               <DialogActions>
-                <Button color="error" onClick={() => handleConfirmRestore()}>
+                <Button color="error" onClick={() => handleConfirmRestore()} loading={isLoading}>
                   有効化
                 </Button>
                 <Button onClick={() => setRestoreOpen(false)}>戻る</Button>

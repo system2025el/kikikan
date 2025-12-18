@@ -65,12 +65,14 @@ export const BasesMasterDialog = ({
   /* methods ---------------------------------------- */
   /* フォームを送信 */
   const onSubmit = async (data: BasesMasterDialogValues) => {
+    setIsLoading(true);
     console.log('isDarty : ', isDirty);
     console.log(data);
     if (baseId === FAKE_NEW_ID) {
       // 新規登録
       await addNewBase(data, user?.name ?? '');
       handleCloseDialog();
+      setIsLoading(false);
       refetchBases();
     } else {
       // 更新
@@ -78,8 +80,10 @@ export const BasesMasterDialog = ({
         // 保存ボタン
         await updateBase(data, baseId, user?.name ?? '');
         handleCloseDialog();
+        setIsLoading(false);
         refetchBases();
       } else if (action === 'delete') {
+        setIsLoading(false);
         // 削除ボタン
         setDeleteOpen(true);
         return;
@@ -88,6 +92,7 @@ export const BasesMasterDialog = ({
         const values = await getValues();
         await updateBase({ ...values, delFlg: false }, baseId, user?.name ?? '');
         handleCloseDialog();
+        setIsLoading(false);
         refetchBases();
       }
     }
@@ -112,10 +117,12 @@ export const BasesMasterDialog = ({
 
   /* 削除確認ダイアログで削除選択時 */
   const handleConfirmDelete = async () => {
+    setIsLoading(true);
     const values = await getValues();
     await updateBase({ ...values, delFlg: true }, baseId, user?.name ?? '');
     setDeleteOpen(false);
     handleCloseDialog();
+    setIsLoading(false);
     await refetchBases();
   };
 
@@ -149,6 +156,7 @@ export const BasesMasterDialog = ({
         dialogTitle="所属マスタ登録"
         isDirty={isDirty}
         isNew={isNew}
+        push={isLoading}
         setAction={setAction}
         isDeleted={isDeleted!}
       />
@@ -189,6 +197,7 @@ export const BasesMasterDialog = ({
           <WillDeleteAlertDialog
             open={deleteOpen}
             data={name}
+            push={isLoading}
             handleCloseDelete={() => setDeleteOpen(false)}
             handleConfirmDelete={handleConfirmDelete}
           />

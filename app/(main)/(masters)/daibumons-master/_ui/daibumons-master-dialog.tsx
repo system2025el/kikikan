@@ -67,18 +67,22 @@ export const DaibumonsMasterDialog = ({
   /* methods ---------------------------------------- */
   /* フォームを送信 */
   const onSubmit = async (data: DaibumonsMasterDialogValues) => {
+    setIsLoading(true);
     console.log('isDarty : ', isDirty);
     console.log(data);
     if (daibumonId === FAKE_NEW_ID) {
       await addNewDaibumon(data, user?.name ?? '');
       handleCloseDialog();
+      setIsLoading(false);
       refetchDaibumons();
     } else {
       if (action === 'save') {
         await updateDaibumon(data, daibumonId, user?.name ?? '');
         handleCloseDialog();
+        setIsLoading(false);
         refetchDaibumons();
       } else if (action === 'delete') {
+        setIsLoading(false);
         setDeleteOpen(true);
         return;
       } else if (action === 'restore') {
@@ -86,6 +90,7 @@ export const DaibumonsMasterDialog = ({
         const values = await getValues();
         await updateDaibumon({ ...values, delFlg: false }, daibumonId, user?.name ?? '');
         handleCloseDialog();
+        setIsLoading(false);
         refetchDaibumons();
       }
     }
@@ -110,10 +115,12 @@ export const DaibumonsMasterDialog = ({
 
   /* 削除確認ダイアログで削除選択時 */
   const handleConfirmDelete = async () => {
+    setIsLoading(true);
     const values = await getValues();
     await updateDaibumon({ ...values, delFlg: true }, daibumonId, user?.name ?? '');
     setDeleteOpen(false);
     handleCloseDialog();
+    setIsLoading(false);
     await refetchDaibumons();
   };
 
@@ -149,6 +156,7 @@ export const DaibumonsMasterDialog = ({
           dialogTitle="大部門マスタ登録"
           isNew={isNew}
           isDirty={isDirty}
+          push={isLoading}
           setAction={setAction}
           isDeleted={isDeleted!}
         />
@@ -189,6 +197,7 @@ export const DaibumonsMasterDialog = ({
             <WillDeleteAlertDialog
               open={deleteOpen}
               data={name}
+              push={isLoading}
               handleCloseDelete={() => setDeleteOpen(false)}
               handleConfirmDelete={handleConfirmDelete}
             />

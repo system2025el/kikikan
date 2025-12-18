@@ -15,6 +15,7 @@ export const MasterDialogTitle = ({
   dialogTitle,
   isDirty,
   isDeleted,
+  push,
   handleClose,
   handleEditable,
   setAction,
@@ -24,6 +25,7 @@ export const MasterDialogTitle = ({
   isDirty: boolean;
   dialogTitle: string;
   isDeleted: boolean;
+  push: boolean;
   handleEditable: () => void;
   handleClose: () => void;
   setAction: React.Dispatch<React.SetStateAction<'save' | 'delete' | 'restore' | undefined>>;
@@ -52,7 +54,7 @@ export const MasterDialogTitle = ({
         {editable && !isNew && <Typography>編集モード</Typography>}
         {isNew && <Typography>新規登録</Typography>}
         <Stack>
-          <SubmitButton type="submit" disabled={isDirty ? false : true} onClick={() => setAction('save')} />
+          <SubmitButton type="submit" disabled={isDirty ? false : true} onClick={() => setAction('save')} push={push} />
           {!isNew && (
             <>
               <MakeEditModeButton handleEditable={handleEditable} disabled={editable ? true : false} />
@@ -61,6 +63,7 @@ export const MasterDialogTitle = ({
                 type="submit"
                 onClick={isDeleted ? () => setAction('restore') : () => setAction('delete')}
                 isDeleted={isDeleted}
+                push={push}
               />
             </>
           )}
