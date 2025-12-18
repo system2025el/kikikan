@@ -82,6 +82,7 @@ export const ShukoList = (/*props: { shukoData: ShukoTableValues[] }*/) => {
     for (const data of selectList) {
       const headNamv = data.headNamv;
       const nyushukoDat = toJapanTimeStampString(data.nyushukoDat);
+
       const pdfData: PdfModel | null = await getPdfData(
         data.juchuHeadId,
         data.juchuKizaiHeadIdv,

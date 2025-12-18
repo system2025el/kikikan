@@ -86,10 +86,11 @@ export const getPdfData = async (
     console.log('juchuKizaiHeadData', juchuKizaiHeadData);
 
     // 関数を実行して結果オブジェクト { header, meisai } を受け取る
-    const nyukoResult = await selectNyukoPdfJuchuKizaiMeisai(juchuHeadId, nyushukoDat);
+    const nyukoResult = await selectNyukoPdfJuchuKizaiMeisai(juchuHeadId, nyushukoDat, nyushukoBashoId);
 
     // ここで .meisai (meisaiQueryの結果) を kizaiData に入れる
     const kizaiData: NyukoKizai[] = nyukoResult.meisai;
+    console.log('kizaiData', kizaiData);
 
     const sqlHeader = nyukoResult.header;
     console.log('sqlHeader', sqlHeader);
