@@ -99,7 +99,9 @@ export const getPdfData = async (
           }).yard_nyuko_dat;
     console.log('nyukoDat', nyukoDat);
 
-    const kizaiData: ShukoKizai[] = (await selectPdfJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadIds, nyushukoDat)).rows;
+    const kizaiData: ShukoKizai[] = (
+      await selectPdfJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadIds, nyushukoDat, nyushukoBashoId)
+    ).rows;
     console.log('kizaiData', kizaiData);
 
     const pdjData: PdfModel = {
@@ -117,7 +119,7 @@ export const getPdfData = async (
       item12: kizaiData,
       item13: '',
     };
-
+    console.log('pdjData', pdjData);
     return pdjData;
   } catch (e) {
     console.error(e);

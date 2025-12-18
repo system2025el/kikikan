@@ -126,14 +126,21 @@ export const selectReturnJuchuKizaiMeisai = async (juchuHeadId: number, juchuKiz
  * @param juchuHeadId 受注ヘッダーid
  * @param juchuKizaiHeadIds 受注機材ヘッダーid
  * @param nyushukoBashoId 入出庫場所id
+ * @param shukoDat 出庫時間
  * @returns
  */
-export const selectPdfJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadIds: string, shukoDat: string) => {
+export const selectPdfJuchuKizaiMeisai = async (
+  juchuHeadId: number,
+  juchuKizaiHeadIds: string,
+  shukoDat: string,
+  nyushukoBashoId: number
+) => {
   try {
+    const shukoBasho = nyushukoBashoId === 1 ? 'kics' : 'yard';
     const query = `select 
 
     v_juchu_kizai_head_lst.juchu_head_id
-    ,v_juchu_kizai_head_lst.yard_shuko_dat 
+    ,v_juchu_kizai_head_lst.${shukoBasho}_shuko_dat --$4
 
     ,v_juchu_kizai_meisai.kizai_id
     ,v_juchu_kizai_meisai.kizai_nam
@@ -161,7 +168,7 @@ where
     v_juchu_kizai_head_lst.juchu_kizai_head_id=any(string_to_array($2, ',')::int[])    --出庫明細から機材ヘッダーIDセット
   
     and
-    v_juchu_kizai_head_lst.yard_shuko_dat = $3   
+    v_juchu_kizai_head_lst.${shukoBasho}_shuko_dat = $3   --$4
     
     and
     v_juchu_kizai_head_lst.juchu_kizai_head_kbn in (1,3)    --通常、キープ
@@ -171,7 +178,7 @@ union all
 select 
 
     v_juchu_kizai_head_lst.juchu_head_id
-    ,v_juchu_kizai_head_lst.yard_shuko_dat 
+    ,v_juchu_kizai_head_lst.${shukoBasho}_shuko_dat  --$4
 
     ,v_juchu_ctn_meisai.kizai_id
     ,v_juchu_ctn_meisai.kizai_nam
@@ -200,7 +207,7 @@ where
     and
     v_juchu_kizai_head_lst.juchu_kizai_head_id=any(string_to_array($2, ',')::int[])    --出庫明細から機材ヘッダーIDセット
     and
-    v_juchu_kizai_head_lst.yard_shuko_dat = $3   
+    v_juchu_kizai_head_lst.${shukoBasho}_shuko_dat = $3    --$4
     
     and
     v_juchu_kizai_head_lst.juchu_kizai_head_kbn in (1,3)    --通常、キープ
@@ -228,17 +235,21 @@ order by
  * @param nyushukoBashoId 入出庫場所id
  * @returns
  */
-export const selectNyukoPdfJuchuKizaiMeisai = async (juchuHeadId: number, nyukoDat: string) => {
+export const selectNyukoPdfJuchuKizaiMeisai = async (
+  juchuHeadId: number,
+  nyukoDat: string,
+  nyushukoBashoId: number
+) => {
   try {
     const values = [juchuHeadId, nyukoDat];
-
+    const nyukoBasho = nyushukoBashoId === 1 ? 'kics' : 'yard';
     // ---------------------------------------------------
     // 入庫リスト印刷ボタンSQL
     // ---------------------------------------------------
     const headerQuery = `
       SELECT 
           v_juchu_kizai_head_lst.juchu_head_id
-          ,v_juchu_kizai_head_lst.YARD_nyuko_dat --YARDの場合
+          ,v_juchu_kizai_head_lst.${nyukoBasho}_nyuko_dat --YARDの場合
 
           ,max(v_juchu_kizai_head_lst.juchu_honbanbi_calc_qty) as juchu_honbanbi_calc_qty
       
@@ -248,12 +259,12 @@ export const selectNyukoPdfJuchuKizaiMeisai = async (juchuHeadId: number, nyukoD
       WHERE
           v_juchu_kizai_head_lst.juchu_head_id = $1
    --     AND v_juchu_kizai_head_lst.juchu_kizai_head_id in (1,2)    --入庫明細ビューから機材ヘッダーIDセット
-          AND v_juchu_kizai_head_lst.YARD_nyuko_dat = $2    --YARDの場合
+          AND v_juchu_kizai_head_lst.${nyukoBasho}_nyuko_dat = $2    --YARDの場合
           AND v_juchu_kizai_head_lst.juchu_kizai_head_kbn IN (1,3) --通常、キープ
       
       GROUP BY
           v_juchu_kizai_head_lst.juchu_head_id
-          ,v_juchu_kizai_head_lst.YARD_nyuko_dat --YARDの場合
+          ,v_juchu_kizai_head_lst.${nyukoBasho}_nyuko_dat --YARDの場合
     `;
 
     // ---------------------------------------------------
@@ -262,7 +273,7 @@ export const selectNyukoPdfJuchuKizaiMeisai = async (juchuHeadId: number, nyukoD
     const meisaiQuery = `
       SELECT 
           v_juchu_kizai_head_lst.juchu_head_id
-          ,v_juchu_kizai_head_lst.yard_nyuko_dat 
+          ,v_juchu_kizai_head_lst.${nyukoBasho}_nyuko_dat 
           ,v_juchu_kizai_meisai.kizai_id
           ,v_juchu_kizai_meisai.kizai_nam
           ,(coalesce( v_juchu_kizai_meisai.plan_kizai_qty,0)) + (coalesce(v_juchu_kizai_meisai.keep_qty,0)) as plan_qty
@@ -281,7 +292,7 @@ export const selectNyukoPdfJuchuKizaiMeisai = async (juchuHeadId: number, nyukoD
           WHERE
           v_juchu_kizai_head_lst.juchu_head_id = $1
    --     AND v_juchu_kizai_head_lst.juchu_kizai_head_id in (1,2)    --入庫明細ビューから機材ヘッダーIDセット
-          AND v_juchu_kizai_head_lst.yard_nyuko_dat = $2   --YARDの場合
+          AND v_juchu_kizai_head_lst.${nyukoBasho}_nyuko_dat = $2   --YARDの場合
           AND v_juchu_kizai_head_lst.juchu_kizai_head_kbn IN (1,3)   --通常、キープ
 
    --コンテナも追加(YARD+YARD)     
@@ -289,7 +300,7 @@ export const selectNyukoPdfJuchuKizaiMeisai = async (juchuHeadId: number, nyukoD
 
       SELECT 
           v_juchu_kizai_head_lst.juchu_head_id
-          ,v_juchu_kizai_head_lst.yard_nyuko_dat 
+          ,v_juchu_kizai_head_lst.${nyukoBasho}_nyuko_dat 
           ,v_juchu_ctn_meisai.kizai_id
           ,v_juchu_ctn_meisai.kizai_nam
           ,(coalesce(v_juchu_ctn_meisai.kics_plan_kizai_qty,0)) + (coalesce(v_juchu_ctn_meisai.yard_plan_kizai_qty,0)) as plan_qty
@@ -311,7 +322,7 @@ export const selectNyukoPdfJuchuKizaiMeisai = async (juchuHeadId: number, nyukoD
 
       WHERE
           v_juchu_kizai_head_lst.juchu_head_id = $1   --入庫明細から機材ヘッダーIDセット
-          AND v_juchu_kizai_head_lst.yard_nyuko_dat = $2   --YARD入庫日時
+          AND v_juchu_kizai_head_lst.${nyukoBasho}_nyuko_dat = $2   --YARD入庫日時
           AND v_juchu_kizai_head_lst.juchu_kizai_head_kbn IN (1,3)   --通常、キープ
        
       ORDER BY
