@@ -281,7 +281,7 @@ export const QuotationList = () => {
               />
             </Grid2>
             <Grid2 alignSelf={'end'} justifySelf={'end'}>
-              <Button type="submit">
+              <Button type="submit" loading={isLoading}>
                 <SearchIcon />
                 検索
               </Button>

@@ -24,6 +24,8 @@ export const CreateQuotDialog = ({
   const router = useRouter();
   /** ローディング */
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  /** 処理中 */
+  const [isProcessing, setIsProcessing] = useState(false);
 
   /* methods ------------------------------------- */
   /** 自動生成ボタン押下 */
@@ -70,12 +72,16 @@ export const CreateQuotDialog = ({
           />
         </Stack>
         <DialogActions>
-          <Button type="submit">自動生成</Button>
+          <Button type="submit" loading={isLoading}>
+            自動生成
+          </Button>
           <Button
             onClick={() => {
-              setDialogOpen(false);
+              setIsLoading(true);
+              //setDialogOpen(false);
               router.push('/quotation-list/create');
             }}
+            loading={isLoading}
           >
             手動生成
           </Button>

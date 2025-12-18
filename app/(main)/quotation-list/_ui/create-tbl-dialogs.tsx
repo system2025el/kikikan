@@ -81,6 +81,7 @@ export const SecondDialogPage = ({
   const hasRun = useRef(false);
   const [checked, setChecked] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   /* 表示する明細ヘッド名リスト */
   const [meisaiHeadNamList, setMeisaiHeadNamList] = useState<
@@ -176,9 +177,11 @@ export const SecondDialogPage = ({
                 meisaiHeadNamList.map((l) => (
                   <ListItem key={l.juchuKizaiHeadId} disablePadding>
                     <ListItemButton
-                      onClick={() =>
-                        handleClickHeadNam(l.juchuHeadId, l.juchuKizaiHeadId, l.headNam, l.nebikiAmt, checked)
-                      }
+                      onClick={() => {
+                        if (isProcessing) return;
+                        setIsProcessing(true);
+                        handleClickHeadNam(l.juchuHeadId, l.juchuKizaiHeadId, l.headNam, l.nebikiAmt, checked);
+                      }}
                       dense
                     >
                       <ListItemText primary={l.headNam} />

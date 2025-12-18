@@ -24,7 +24,8 @@ import {
   Typography,
 } from '@mui/material';
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 import { Controller, FormProvider, useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
@@ -62,6 +63,8 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
   /* useState ----------------------------------------------------------------- */
   /** ローディング中かどうか */
   const [isLoading, setIsLoading] = useState(true);
+  /** 処理中かどうか */
+  const [isProcessing, setIsProcessing] = useState(false);
   /** 受注選択アコーディオン制御 */
   const [juchuExpanded, setJuchuExpanded] = useState(false);
   /** 見積ヘッダアコーディオン制御 */
@@ -148,10 +151,11 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
   /** 保存ボタン押下 */
   const onSubmit = async (data: QuotHeadValues) => {
     console.log('新規？', isNew, 'isDirty', isDirty);
+    setIsLoading(true);
     if (isNew) {
       // 登録された見積ヘッダID
       const id = await addQuot(data, user?.name ?? '');
-      setIsLoading(true);
+      //setIsLoading(true);
       router.replace(`/quotation-list/edit/${id}`);
     } else {
       const result = await updateQuot(data, user?.name ?? '');
@@ -160,6 +164,7 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
     setSnackBarMessage('保存しました');
     setSnackBarOpen(true);
     reset(data);
+    setIsLoading(false);
   };
 
   /** 編集モード変更 */
@@ -323,19 +328,29 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
 
   // ボタン押下
   const hundlePrintPdf = async () => {
-    // PDFデータ生成
-    const blob = await printQuotation(pdfModel);
-    // ダウンロードもしくはブラウザ表示するためのURL
-    const url = URL.createObjectURL(blob);
+    if (isProcessing) return;
 
-    // ダウンロードの場合
-    // const a = document.createElement('a');
-    // a.download = 'data.pdf';
-    // a.href = url;
-    // a.click();
+    setIsProcessing(true);
 
-    // 別タブ表示の場合
-    window.open(url);
+    try {
+      // PDFデータ生成
+      const blob = await printQuotation(pdfModel);
+      // ダウンロードもしくはブラウザ表示するためのURL
+      const url = URL.createObjectURL(blob);
+
+      // ダウンロードの場合
+      // const a = document.createElement('a');
+      // a.download = 'data.pdf';
+      // a.href = url;
+      // a.click();
+
+      // 別タブ表示の場合
+      window.open(url);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   useEffect(() => {
@@ -380,7 +395,7 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
             <Grid2 container display="flex" alignItems="center" justifyContent="space-between" p={1}>
               <Typography margin={1}>見積書</Typography>
               <Box>
-                <Button sx={{ margin: 1 }} onClick={hundlePrintPdf} disabled={isNew || isDirty}>
+                <Button sx={{ margin: 1 }} onClick={hundlePrintPdf} disabled={isNew || isDirty || isProcessing}>
                   <PrintIcon fontSize="small" sx={{ mr: 0.5 }} />
                   見積書印刷
                 </Button>
@@ -1008,7 +1023,7 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
           </Paper>
           {/** 固定ボタン 保存＆ページトップ */}
           <Box position={'fixed'} zIndex={1050} bottom={25} right={25} alignItems={'center'}>
-            <Fab variant="extended" color="primary" type="submit" sx={{ mr: 2 }} disabled={!editable}>
+            <Fab variant="extended" color="primary" type="submit" sx={{ mr: 2 }} disabled={!editable || isLoading}>
               <SaveAsIcon sx={{ mr: 1 }} />
               保存
             </Fab>
