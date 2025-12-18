@@ -85,14 +85,16 @@ export const MakeEditModeButton = ({ disabled, handleEditable }: { disabled: boo
 export const SubmitButton = ({
   type,
   disabled,
+  push,
   onClick,
 }: {
   type: 'submit' | undefined;
   disabled: boolean;
+  push: boolean;
   onClick: () => void;
 }) => {
   return (
-    <Button type={type} disabled={disabled} onClick={onClick} sx={{ alignItems: 'center' }}>
+    <Button type={type} disabled={disabled} onClick={onClick} sx={{ alignItems: 'center' }} loading={push}>
       <SaveAsIcon fontSize="small" />
       保存終了
     </Button>
@@ -103,16 +105,26 @@ export const DeleteButton = ({
   type,
   disabled,
   isDeleted,
+  push,
   onClick,
 }: {
   type: 'submit' | undefined;
   disabled: boolean;
   isDeleted: boolean;
+  push: boolean;
+
   onClick: () => void;
 }) => {
   return (
     <>
-      <Button type={type} disabled={disabled} color="error" onClick={onClick} sx={{ alignItems: 'center' }}>
+      <Button
+        type={type}
+        disabled={disabled}
+        color="error"
+        onClick={onClick}
+        sx={{ alignItems: 'center' }}
+        loading={push}
+      >
         {isDeleted ? (
           <>
             <CheckIcon fontSize="small" />

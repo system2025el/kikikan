@@ -82,12 +82,14 @@ export const EqMasterDialog = ({
   /* methods ---------------------------- */
   /* フォームを送信 */
   const onSubmit = async (data: EqptsMasterDialogValues) => {
+    setIsLoading(true);
     console.log('isDarty : ', isDirty);
     // console.log(data.shukeibumonId, '::::', data.rankAmt1);
     if (eqptId === FAKE_NEW_ID) {
       // 新規登録
       await addNewEqpt(data, user?.name ?? '');
       handleCloseDialog();
+      setIsLoading(false);
       refetchEqpts();
     } else {
       // 更新
@@ -95,8 +97,10 @@ export const EqMasterDialog = ({
         // 保存終了ボタン
         await updateEqpt(currentEqpt, data, eqptId, user?.name ?? '');
         handleCloseDialog();
+        setIsLoading(false);
         refetchEqpts();
       } else if (action === 'delete') {
+        setIsLoading(false);
         // 削除ボタン
         setDeleteOpen(true);
         return;
@@ -105,6 +109,7 @@ export const EqMasterDialog = ({
         const values = await getValues();
         await updateEqpt(currentEqpt, { ...values, delFlg: false }, eqptId, user?.name ?? '');
         handleCloseDialog();
+        setIsLoading(false);
         refetchEqpts();
       }
     }
@@ -129,10 +134,12 @@ export const EqMasterDialog = ({
 
   /* 削除確認ダイアログで削除選択時 */
   const handleConfirmDelete = async () => {
+    setIsLoading(true);
     const values = await getValues();
     await updateEqpt(currentEqpt, { ...values, delFlg: true }, eqptId, user?.name ?? '');
     setDeleteOpen(false);
     handleCloseDialog();
+    setIsLoading(false);
     await refetchEqpts();
   };
 
@@ -172,6 +179,7 @@ export const EqMasterDialog = ({
           isNew={isNew}
           isDirty={isDirty}
           isDeleted={isDeleted!}
+          push={isLoading}
           setAction={setAction}
         />
         {isLoading ? ( //DB
@@ -374,106 +382,6 @@ export const EqMasterDialog = ({
                   disabled={editable ? false : true}
                 />
               </FormBox>
-              {/* <FormBox formItem={formItems[17]}>
-                <TextFieldElement
-                  name="rankAmt1"
-                  control={control}
-                  label={editable ? formItems[17].exsample : ''}
-                  fullWidth
-                  sx={{
-                    maxWidth: '50%',
-                    '& .MuiInputBase-input': {
-                      textAlign: 'right',
-                    },
-                    '& input[type=number]::-webkit-inner-spin-button': {
-                      WebkitAppearance: 'none',
-                      margin: 0,
-                    },
-                  }}
-                  type="number"
-                  disabled={editable ? false : true}
-                />
-              </FormBox>
-              <FormBox formItem={formItems[18]}>
-                <TextFieldElement
-                  name="rankAmt2"
-                  control={control}
-                  label={editable ? formItems[18].exsample : ''}
-                  fullWidth
-                  sx={{
-                    maxWidth: '50%',
-                    '& .MuiInputBase-input': {
-                      textAlign: 'right',
-                    },
-                    '& input[type=number]::-webkit-inner-spin-button': {
-                      WebkitAppearance: 'none',
-                      margin: 0,
-                    },
-                  }}
-                  type="number"
-                  disabled={editable ? false : true}
-                />
-              </FormBox>
-              <FormBox formItem={formItems[19]}>
-                <TextFieldElement
-                  name="rankAmt3"
-                  control={control}
-                  label={editable ? formItems[19].exsample : ''}
-                  fullWidth
-                  sx={{
-                    maxWidth: '50%',
-                    '& .MuiInputBase-input': {
-                      textAlign: 'right',
-                    },
-                    '& input[type=number]::-webkit-inner-spin-button': {
-                      WebkitAppearance: 'none',
-                      margin: 0,
-                    },
-                  }}
-                  type="number"
-                  disabled={editable ? false : true}
-                />
-              </FormBox>
-              <FormBox formItem={formItems[20]}>
-                <TextFieldElement
-                  name="rankAmt4"
-                  control={control}
-                  label={editable ? formItems[20].exsample : ''}
-                  fullWidth
-                  sx={{
-                    maxWidth: '50%',
-                    '& .MuiInputBase-input': {
-                      textAlign: 'right',
-                    },
-                    '& input[type=number]::-webkit-inner-spin-button': {
-                      WebkitAppearance: 'none',
-                      margin: 0,
-                    },
-                  }}
-                  type="number"
-                  disabled={editable ? false : true}
-                />
-              </FormBox>
-              <FormBox formItem={formItems[21]}>
-                <TextFieldElement
-                  name="rankAmt5"
-                  control={control}
-                  label={editable ? formItems[21].exsample : ''}
-                  fullWidth
-                  sx={{
-                    maxWidth: '50%',
-                    '& .MuiInputBase-input': {
-                      textAlign: 'right',
-                    },
-                    '& input[type=number]::-webkit-inner-spin-button': {
-                      WebkitAppearance: 'none',
-                      margin: 0,
-                    },
-                  }}
-                  type="number"
-                  disabled={editable ? false : true}
-                />
-              </FormBox> */}
             </Grid2>
             <IsDirtyAlertDialog
               open={dirtyOpen}
@@ -483,6 +391,7 @@ export const EqMasterDialog = ({
             <WillDeleteAlertDialog
               open={deleteOpen}
               data={name}
+              push={isLoading}
               handleCloseDelete={() => setDeleteOpen(false)}
               handleConfirmDelete={handleConfirmDelete}
             />

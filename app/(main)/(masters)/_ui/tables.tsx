@@ -84,40 +84,45 @@ export const MasterTable = ({
               >
                 {row.tblDspId}
               </TableCell>
-              {headers.map((header) => (
-                <TableCell
-                  key={header.key}
-                  align={typeof row[header.key] === 'number' ? 'right' : 'left'}
-                  padding="none"
-                >
-                  {header.key === 'name' ? (
-                    <Button
-                      variant="text"
-                      size="small"
-                      onClick={() => handleOpenDialog(row.id)}
-                      sx={{ p: 0, paddingLeft: 1, m: 0, minWidth: 1, justifyContent: 'left' }}
-                    >
-                      <LightTooltipWithText variant={'button'} maxWidth={300}>
+              {headers.map((header) => {
+                const isHidden = row.dspFlg === false;
+                const isDeleted = row.delFlg === true;
+                return (
+                  <TableCell
+                    key={header.key}
+                    align={typeof row[header.key] === 'number' ? 'right' : 'left'}
+                    padding="none"
+                    sx={{ bgcolor: isHidden || isDeleted ? grey[300] : undefined, whiteSpace: 'nowrap' }}
+                  >
+                    {header.key === 'name' ? (
+                      <Button
+                        variant="text"
+                        size="small"
+                        onClick={() => handleOpenDialog(row.id)}
+                        sx={{ p: 0, paddingLeft: 1, m: 0, minWidth: 1, justifyContent: 'left' }}
+                      >
+                        <LightTooltipWithText variant={'button'} maxWidth={300}>
+                          {row[header.key]}
+                        </LightTooltipWithText>
+                      </Button>
+                    ) : header.key === 'address' ? (
+                      <LightTooltipWithText variant={'body2'} maxWidth={300}>
                         {row[header.key]}
                       </LightTooltipWithText>
-                    </Button>
-                  ) : header.key === 'address' ? (
-                    <LightTooltipWithText variant={'body2'} maxWidth={300}>
-                      {row[header.key]}
-                    </LightTooltipWithText>
-                  ) : header.key === 'mem' ? (
-                    <LightTooltipWithText variant={'body2'} maxWidth={300}>
-                      {row[header.key]}
-                    </LightTooltipWithText>
-                  ) : header.key === 'hidden' ? (
-                    <>{isHidden && <>非表示</>}</>
-                  ) : header.key === 'deleted' ? (
-                    <>{isDeleted && <>無効</>}</>
-                  ) : (
-                    <>{row[header.key]}</>
-                  )}
-                </TableCell>
-              ))}
+                    ) : header.key === 'mem' ? (
+                      <LightTooltipWithText variant={'body2'} maxWidth={300}>
+                        {row[header.key]}
+                      </LightTooltipWithText>
+                    ) : header.key === 'hidden' ? (
+                      <>{isHidden && <>非表示</>}</>
+                    ) : header.key === 'deleted' ? (
+                      <>{isDeleted && <>無効</>}</>
+                    ) : (
+                      <>{row[header.key]}</>
+                    )}
+                  </TableCell>
+                );
+              })}
               {/* <TableCell sx={{ bgcolor: isHidden || isDeleted ? grey[300] : undefined, width: 100 }} align="center">
                 <IconButton
                   sx={{ bgcolor: 'primary.main', color: 'white' }}

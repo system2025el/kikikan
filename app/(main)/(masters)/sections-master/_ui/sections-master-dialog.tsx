@@ -67,12 +67,14 @@ export const SectionsMasterDialog = ({
   /* methods ---------------------------------------- */
   /* フォームを送信 */
   const onSubmit = async (data: SectionsMasterDialogValues) => {
+    setIsLoading(true);
     console.log('isDarty : ', isDirty);
     console.log(data);
     if (sectionId === FAKE_NEW_ID) {
       // 新規の時
       await addNewSection(data, user?.name ?? '');
       handleCloseDialog();
+      setIsLoading(false);
       refetchSections();
     } else {
       // 更新の時
@@ -80,8 +82,10 @@ export const SectionsMasterDialog = ({
         // 保存終了ボタン押したとき
         await updateSection(data, sectionId, user?.name ?? '');
         handleCloseDialog();
+        setIsLoading(false);
         refetchSections();
       } else if (action === 'delete') {
+        setIsLoading(false);
         // 削除ボタン押したとき
         setDeleteOpen(true);
         return;
@@ -90,6 +94,7 @@ export const SectionsMasterDialog = ({
         const values = await getValues();
         await updateSection({ ...values, delFlg: false }, sectionId, user?.name ?? '');
         handleCloseDialog();
+        setIsLoading(false);
         refetchSections();
       }
     }
@@ -114,10 +119,12 @@ export const SectionsMasterDialog = ({
 
   /* 削除確認ダイアログで削除選択時 */
   const handleConfirmDelete = async () => {
+    setIsLoading(true);
     const values = await getValues();
     await updateSection({ ...values, delFlg: true }, sectionId, user?.name ?? '');
     setDeleteOpen(false);
     handleCloseDialog();
+    setIsLoading(false);
     await refetchSections();
   };
 
@@ -152,6 +159,7 @@ export const SectionsMasterDialog = ({
           dialogTitle="部門マスタ登録"
           isNew={isNew}
           isDirty={isDirty}
+          push={isLoading}
           setAction={setAction}
           isDeleted={isDeleted!}
         />
@@ -202,6 +210,7 @@ export const SectionsMasterDialog = ({
             <WillDeleteAlertDialog
               open={deleteOpen}
               data={name}
+              push={isLoading}
               handleCloseDelete={() => setDeleteOpen(false)}
               handleConfirmDelete={handleConfirmDelete}
             />

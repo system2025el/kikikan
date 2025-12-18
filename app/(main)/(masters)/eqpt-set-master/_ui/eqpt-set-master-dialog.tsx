@@ -86,7 +86,6 @@ export const EqptSetsMasterDialog = ({
     handleSubmit,
     reset,
     setValue,
-    getValues,
   } = useForm({
     mode: 'onChange',
     reValidateMode: 'onChange',
@@ -107,14 +106,18 @@ export const EqptSetsMasterDialog = ({
     } else {
       console.log(data);
       if (isNew) {
+        setIsLoading(true);
         await addNewEqptSet(data, user?.name ?? '');
         handleCloseDialog();
         refetchEqptSets();
+        setIsLoading(false);
       } else {
         if (action === 'save') {
+          setIsLoading(true);
           await updateEqptSet(data, currentSetList, user?.name ?? '');
           handleCloseDialog();
           refetchEqptSets();
+          setIsLoading(false);
         }
       }
     }
@@ -139,14 +142,17 @@ export const EqptSetsMasterDialog = ({
 
   /* セット機材無ダイアログではいを押したときの処理 */
   const handleConfirmDelete = async () => {
+    setIsLoading(true);
     if (isNew) {
       // 新規の時はダイアログを閉じるだけ
       setDeleteOpen(false);
+      setIsLoading(false);
       handleCloseDialog();
     } else {
       // 編集時はセットマスタを削除する
       deleteEqptSets(oyaId);
       setDeleteOpen(false);
+      setIsLoading(false);
       handleCloseDialog();
       await refetchEqptSets();
     }
@@ -174,13 +180,13 @@ export const EqptSetsMasterDialog = ({
         const eqptSet1 = await getChosenEqptSet(oyaId);
         if (eqptSet1) {
           reset(eqptSet1); // 取得したデータでフォーム初期化
-          setCurrentSetList(setList.map((d) => d.id)); // 初期のセットリストをセット
+          setCurrentSetList(eqptSet1.setEqptList.map((d) => d.id)); // 初期のセットリストをセット
           setIsLoading(false);
         }
       }
     };
     getThatOneEqptSet();
-  }, [oyaId, setList, reset, getValues]);
+  }, [oyaId, reset]);
 
   return (
     <>
@@ -199,7 +205,12 @@ export const EqptSetsMasterDialog = ({
           {editable && !isNew && <Typography>編集モード</Typography>}
           {isNew && <Typography>新規登録</Typography>}
           <Stack>
-            <SubmitButton type="submit" disabled={!isNew && !isDirty} onClick={() => setAction('save')} />
+            <SubmitButton
+              type="submit"
+              disabled={!isNew && !isDirty}
+              onClick={() => setAction('save')}
+              push={isLoading}
+            />
             {!isNew && (
               <>
                 <MakeEditModeButton handleEditable={() => setEditable(true)} disabled={editable ? true : false} />
@@ -300,7 +311,7 @@ export const EqptSetsMasterDialog = ({
                 {isNew ? `機材セットマスタは登録されません` : `機材セットマスタが一覧から削除されます`}
               </DialogContentText>
               <DialogActions>
-                <Button color="error" onClick={() => handleConfirmDelete()}>
+                <Button color="error" onClick={() => handleConfirmDelete()} loading={isLoading}>
                   OK
                 </Button>
                 <Button onClick={() => setDeleteOpen(false)}>戻る</Button>

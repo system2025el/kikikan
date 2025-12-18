@@ -82,6 +82,7 @@ export const RfidMasterDialog = ({
   /* methods ---------------------------- */
   /* フォームを送信 */
   const onSubmit = async (data: RfidsMasterDialogValues) => {
+    setIsLoading(true);
     console.log('isDarty : ', isDirty);
     setTagMessage('');
     setElMessage('');
@@ -102,6 +103,7 @@ export const RfidMasterDialog = ({
       if (!tagResult.data && !elNumResult.data) {
         await addNewRfid(data, kizaiId, user?.name ?? '');
         handleCloseDialog();
+        setIsLoading(false);
         refetchRfids();
       }
     } else {
@@ -117,8 +119,10 @@ export const RfidMasterDialog = ({
           // 保存終了ボタン
           await updateRfid(currentRfid, data, kizaiId, user?.name ?? '');
           handleCloseDialog();
+          setIsLoading(false);
           refetchRfids();
         } else if (action === 'delete') {
+          setIsLoading(false);
           // 削除ボタン
           setDeleteOpen(true);
           return;
@@ -126,6 +130,7 @@ export const RfidMasterDialog = ({
           // 有効化ボタン
           await updRfidDelFlg(getValues('tagId'), false, user?.name ?? '');
           handleCloseDialog();
+          setIsLoading(false);
           refetchRfids();
         }
       }
@@ -151,9 +156,11 @@ export const RfidMasterDialog = ({
 
   /* 削除確認ダイアログで削除選択時 */
   const handleConfirmDelete = async () => {
+    setIsLoading(true);
     await updRfidDelFlg(getValues('tagId'), true, user?.name ?? '');
     setDeleteOpen(false);
     handleCloseDialog();
+    setIsLoading(false);
     await refetchRfids();
   };
 
@@ -193,6 +200,7 @@ export const RfidMasterDialog = ({
           isNew={isNew}
           isDirty={isDirty}
           isDeleted={isDeleted!}
+          push={isLoading}
           setAction={setAction}
         />
         {isLoading ? ( //DB
@@ -297,6 +305,7 @@ export const RfidMasterDialog = ({
             <WillDeleteAlertDialog
               open={deleteOpen}
               data={name}
+              push={isLoading}
               handleCloseDelete={() => setDeleteOpen(false)}
               handleConfirmDelete={handleConfirmDelete}
             />

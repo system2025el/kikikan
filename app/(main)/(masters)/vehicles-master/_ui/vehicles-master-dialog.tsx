@@ -65,18 +65,22 @@ export const VehiclesMasterDialog = ({
   /* methods ---------------------- */
   /* フォームを送信 */
   const onSubmit = async (data: VehsMasterDialogValues) => {
+    setIsLoading(true);
     console.log('isDarty : ', isDirty);
     console.log(data);
     if (vehicleId === FAKE_NEW_ID) {
       await addNewVeh(data, user?.name ?? '');
       handleCloseDialog();
+      setIsLoading(false);
       refetchVehs();
     } else {
       if (action === 'save') {
         await updateVeh(data, vehicleId, user?.name ?? '');
         handleCloseDialog();
+        setIsLoading(false);
         refetchVehs();
       } else if (action === 'delete') {
+        setIsLoading(false);
         setDeleteOpen(true);
         return;
       } else if (action === 'restore') {
@@ -84,6 +88,7 @@ export const VehiclesMasterDialog = ({
         const values = await getValues();
         await updateVeh({ ...values, delFlg: false }, vehicleId, user?.name ?? '');
         handleCloseDialog();
+        setIsLoading(false);
         refetchVehs();
       }
     }
@@ -108,10 +113,12 @@ export const VehiclesMasterDialog = ({
 
   /* 削除確認ダイアログで削除選択時 */
   const handleConfirmDelete = async () => {
+    setIsLoading(true);
     const values = await getValues();
     await updateVeh({ ...values, delFlg: true }, vehicleId, user?.name ?? '');
     setDeleteOpen(false);
     handleCloseDialog();
+    setIsLoading(false);
     await refetchVehs();
   };
 
@@ -147,6 +154,7 @@ export const VehiclesMasterDialog = ({
           isNew={isNew}
           isDirty={isDirty}
           isDeleted={isDeleted!}
+          push={isLoading}
           setAction={setAction}
         />
         {isLoading ? ( //DB
@@ -189,6 +197,7 @@ export const VehiclesMasterDialog = ({
             <WillDeleteAlertDialog
               open={deleteOpen}
               data={name}
+              push={isLoading}
               handleCloseDelete={() => setDeleteOpen(false)}
               handleConfirmDelete={handleConfirmDelete}
             />
