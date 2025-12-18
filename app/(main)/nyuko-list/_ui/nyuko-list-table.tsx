@@ -11,12 +11,8 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-<<<<<<< HEAD
-import { Dispatch, SetStateAction, useState } from 'react';
-=======
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
->>>>>>> button
+import { Dispatch, SetStateAction, useState } from 'react';
 
 import { dispColors } from '../../_lib/colors';
 import { toJapanTimeString } from '../../_lib/date-conversion';
@@ -27,19 +23,20 @@ export const NyukoListTable = (props: {
   onSelectionChange: Dispatch<SetStateAction<number[]>>;
 }) => {
   const { datas, onSelectionChange } = props;
-  const [selected, setSelected] = useState<number[]>([]);
-  const handleSelect = (index: number) => {
-    const newSelected = selected.includes(index) ? selected.filter((item) => item !== index) : [...selected, index];
 
-<<<<<<< HEAD
-    setSelected(newSelected);
-    onSelectionChange(newSelected);
-  };
-=======
   const router = useRouter();
 
   // 処理中制御
   const [isProcessing, setIsProcessing] = useState(false);
+
+  const [selected, setSelected] = useState<number[]>([]);
+
+  const handleSelect = (index: number) => {
+    const newSelected = selected.includes(index) ? selected.filter((item) => item !== index) : [...selected, index];
+
+    setSelected(newSelected);
+    onSelectionChange(newSelected);
+  };
 
   const handleClickRow = (row: NyukoTableValues) => {
     if (isProcessing) return;
@@ -50,7 +47,6 @@ export const NyukoListTable = (props: {
     );
   };
 
->>>>>>> button
   return (
     <TableContainer sx={{ overflow: 'auto', maxHeight: '80vh' }}>
       <Table stickyHeader size="small">
