@@ -24,8 +24,6 @@ export const CreateQuotDialog = ({
   const router = useRouter();
   /** ローディング */
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  /** 処理中 */
-  const [isProcessing, setIsProcessing] = useState(false);
 
   /* methods ------------------------------------- */
   /** 自動生成ボタン押下 */

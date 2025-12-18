@@ -68,6 +68,8 @@ export const QuotationListTable = ({
   const inputRef = useRef<HTMLInputElement>(null);
 
   /* useState ------------------------------------- */
+  /** 処理中 */
+  const [isProcessing, setIsProcessing] = useState(false);
   /** ダイアログの開閉 */
   const [dialogOpen, setDialogOpen] = useState(false);
   /** 削除ダイアログの開閉 */
@@ -171,9 +173,11 @@ export const QuotationListTable = ({
               <Grid2>
                 <Button
                   onClick={() => {
+                    setIsProcessing(true);
                     router.push(`quotation-list/copy?mituId=${selectedIds[0]}`);
                   }}
                   disabled={selectedIds.length !== 1}
+                  loading={isProcessing}
                 >
                   <ContentCopyIcon fontSize="small" />
                   見積コピー
