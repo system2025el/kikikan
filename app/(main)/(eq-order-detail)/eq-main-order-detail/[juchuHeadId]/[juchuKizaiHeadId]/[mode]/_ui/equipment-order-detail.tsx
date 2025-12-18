@@ -1828,7 +1828,7 @@ const EquipmentOrderDetail = (props: {
                     <Typography>出庫済</Typography>
                   </Box>
                 )}
-                <Grid2 container alignItems={'center'} spacing={1}>
+                <Grid2 container display={saveKizaiHead ? 'flex' : 'none'} alignItems={'center'} spacing={1}>
                   {!edit || (lockData !== null && lockData?.addUser !== user?.name) || fixFlag ? (
                     <Typography>閲覧モード</Typography>
                   ) : (

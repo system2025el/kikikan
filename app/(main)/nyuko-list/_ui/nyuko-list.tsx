@@ -184,7 +184,7 @@ export const NyukoList = (/*props: { shukoData: NyukoTableValues[]}*/) => {
             </Grid2>
             <Grid2 size={'grow'} alignItems={'end'} justifyContent={'end'}>
               <Box alignSelf={'end'} justifySelf={'end'}>
-                <Button type="submit">
+                <Button type="submit" loading={isLoading}>
                   <SearchIcon fontSize="small" />
                   検索
                 </Button>

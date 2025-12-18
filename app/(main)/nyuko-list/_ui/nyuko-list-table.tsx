@@ -11,7 +11,12 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
+<<<<<<< HEAD
 import { Dispatch, SetStateAction, useState } from 'react';
+=======
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+>>>>>>> button
 
 import { dispColors } from '../../_lib/colors';
 import { toJapanTimeString } from '../../_lib/date-conversion';
@@ -26,9 +31,26 @@ export const NyukoListTable = (props: {
   const handleSelect = (index: number) => {
     const newSelected = selected.includes(index) ? selected.filter((item) => item !== index) : [...selected, index];
 
+<<<<<<< HEAD
     setSelected(newSelected);
     onSelectionChange(newSelected);
   };
+=======
+  const router = useRouter();
+
+  // 処理中制御
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const handleClickRow = (row: NyukoTableValues) => {
+    if (isProcessing) return;
+
+    setIsProcessing(true);
+    router.push(
+      `nyuko-list/nyuko-detail/${row.juchuHeadId}/${row.juchuKizaiHeadKbn}/${row.nyushukoBashoId}/${toJapanTimeString(row.nyushukoDat, '-')}/30`
+    );
+  };
+
+>>>>>>> button
   return (
     <TableContainer sx={{ overflow: 'auto', maxHeight: '80vh' }}>
       <Table stickyHeader size="small">
@@ -74,12 +96,7 @@ export const NyukoListTable = (props: {
               <TableCell align="left">{row.nyushukoBashoId === 1 ? 'K' : 'Y'}</TableCell>
               <TableCell align="left">{toJapanTimeString(row.nyushukoDat)}</TableCell>
               <TableCell align="center">
-                <Button
-                  variant="text"
-                  size="small"
-                  href={`nyuko-list/nyuko-detail/${row.juchuHeadId}/${row.juchuKizaiHeadKbn}/${row.nyushukoBashoId}/${toJapanTimeString(row.nyushukoDat, '-')}/30`}
-                  sx={{ py: 0, px: 1 }}
-                >
+                <Button variant="text" size="small" onClick={() => handleClickRow(row)} sx={{ py: 0, px: 1 }}>
                   {row.nchkSagyoStsNamShort}
                 </Button>
               </TableCell>

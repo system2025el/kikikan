@@ -610,7 +610,7 @@ export const Order = (props: {
 
   return (
     <Container disableGutters sx={{ minWidth: '100%', pb: 10 }} maxWidth={'xl'}>
-      <Box display={'flex'} justifyContent={'end'} mb={1}>
+      <Box display={save ? 'flex' : 'none'} justifyContent={'end'} mb={1}>
         {lockData !== null && lockData.addUser !== user?.name && (
           <Grid2 container alignItems={'center'} spacing={2} px={4}>
             <Typography>{lockData.addDat && toJapanTimeString(new Date(lockData.addDat))}</Typography>

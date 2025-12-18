@@ -41,6 +41,8 @@ export const IdoEqptDetail = (props: {
 
   // ローディング
   const [isLoading, setIsLoading] = useState(false);
+  // 処理中制御
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const [idoEqptDetailList, setIdoEqptDetailList] = useState<IdoEqptDetailTableValues[]>(props.idoEqptDetailData);
 
@@ -87,16 +89,18 @@ export const IdoEqptDetail = (props: {
    * @param data 補正数
    */
   const onSubmit = async (data: { resultAdjQty: number }) => {
-    if (isDirty && user) {
-      console.log(data);
+    if (user && !isProcessing) {
+      setIsProcessing(true);
       const updateResult = await updIdoResultAdjQty(idoDenDetailData, data.resultAdjQty, user.name);
       if (updateResult) {
         setSnackBarMessage('保存しました');
         setSnackBarOpen(true);
         reset(data);
+        setIsProcessing(false);
       } else {
         setSnackBarMessage('保存に失敗しました');
         setSnackBarOpen(true);
+        setIsProcessing(false);
       }
     }
   };
@@ -174,7 +178,12 @@ export const IdoEqptDetail = (props: {
           </Grid2>
           <Grid2 container alignItems={'center'} spacing={5} p={1}>
             <Typography>全{idoEqptDetailList.length}件</Typography>
-            <Button color="error" onClick={handleDelete} disabled={fixFlag}>
+            <Button
+              color="error"
+              onClick={handleDelete}
+              disabled={fixFlag || selected.length === 0}
+              loading={isLoading}
+            >
               クリア
             </Button>
             <Box display={'flex'} alignItems={'center'}>
@@ -209,7 +218,13 @@ export const IdoEqptDetail = (props: {
           </Grid2>
           {/** 固定ボタン 保存＆ページトップ */}
           <Box position={'fixed'} zIndex={1050} bottom={25} right={25} alignItems={'center'}>
-            <Fab variant="extended" color="primary" type="submit" sx={{ mr: 2 }} disabled={fixFlag}>
+            <Fab
+              variant="extended"
+              color="primary"
+              type="submit"
+              sx={{ mr: 2 }}
+              disabled={fixFlag || !isDirty || isProcessing}
+            >
               <SaveAsIcon sx={{ mr: 1 }} />
               保存
             </Fab>
@@ -233,7 +248,9 @@ export const IdoEqptDetail = (props: {
           実績をクリアしてよろしいでしょうか？
         </DialogContentText>
         <DialogActions>
-          <Button onClick={() => handleResult(true)}>クリア</Button>
+          <Button onClick={() => handleResult(true)} loading={isLoading}>
+            クリア
+          </Button>
           <Button onClick={() => handleResult(false)}>戻る</Button>
         </DialogActions>
       </Dialog>

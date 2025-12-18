@@ -122,7 +122,6 @@ export const getPdfData = async (
     console.log('pdjData', pdjData);
     return pdjData;
   } catch (e) {
-    console.error(e);
-    return null;
+    throw e;
   }
 };
