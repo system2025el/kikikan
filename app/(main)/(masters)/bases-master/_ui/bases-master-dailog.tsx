@@ -1,11 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Grid2 } from '@mui/material';
-import { SetStateAction, useEffect, useState } from 'react';
-import { CheckboxElement, TextareaAutosizeElement, TextFieldElement, useForm } from 'react-hook-form-mui';
+import { useEffect, useState } from 'react';
+import { TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
 
-import { FormBox, FormItemsType } from '../../../_ui/form-box';
+import { FormBox } from '../../../_ui/form-box';
 import { Loading } from '../../../_ui/loading';
 import { FAKE_NEW_ID } from '../../_lib/constants';
 import { MasterDialogTitle } from '../../_ui/dialog-title';

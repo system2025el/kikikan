@@ -121,7 +121,7 @@ export const UsersMaster = () => {
               <TextFieldElement name="query" control={control} helperText={'名前の部分一致検索'} />
             </Stack>
             <Box alignSelf={'end'}>
-              <Button type="submit">
+              <Button type="submit" loading={isLoading}>
                 <SearchIcon />
                 検索
               </Button>

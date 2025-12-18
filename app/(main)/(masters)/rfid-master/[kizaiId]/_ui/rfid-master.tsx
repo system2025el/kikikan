@@ -167,6 +167,7 @@ export const RfidMaster = ({ kizaiId }: { kizaiId: number }) => {
    */
   const handleClickSave = async () => {
     if (!theRfids) return;
+    setIsLoading(true);
     // 更新される予定のRFIDマスタリスト
     const updateList = theRfids.filter((newItem) => {
       const currentItem = currentRfids?.find((current) => current.rfidTagId === newItem.rfidTagId);
@@ -218,6 +219,7 @@ export const RfidMaster = ({ kizaiId }: { kizaiId: number }) => {
     }
     setSnackBarOpen(true);
     setSaved(true);
+    setIsLoading(true);
   };
 
   /* useEffect -------------------------------------------------------------- */
@@ -246,6 +248,7 @@ export const RfidMaster = ({ kizaiId }: { kizaiId: number }) => {
             <Button
               onClick={() => handleClickSave()}
               sx={{ alignItems: 'center' }}
+              loading={isLoading}
               disabled={
                 !theRfids || JSON.stringify(currentRfids) === JSON.stringify(theRfids) || saved /*|| isAllSame*/
               }

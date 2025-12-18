@@ -10,12 +10,14 @@ export const Section = ({
   masterName,
   fileName,
   fileInputId,
+  push,
   handleFileUpload,
   handleImport,
 }: {
   masterName: string;
   fileName: string;
   fileInputId: string;
+  push: boolean;
   handleFileUpload: (event: React.ChangeEvent<HTMLInputElement>, type: 'eqpt' | 'customer' | '') => void;
   handleImport: () => void;
 }) => {
@@ -26,7 +28,7 @@ export const Section = ({
       </Box>
       <Divider sx={{ mx: 1 }} />
       <Grid2 container width={'100%'} display={'flex'} p={2} alignItems={'center'}>
-        <Grid2 size={2}></Grid2>
+        <Grid2 size={2} />
         <Grid2 size={2} justifyItems={'center'}>
           <Box>
             <input
@@ -48,12 +50,12 @@ export const Section = ({
         </Grid2>
         <Grid2 size={2} justifyItems={'center'}>
           <Box>
-            <Button size="medium" onClick={() => handleImport()}>
+            <Button size="medium" onClick={() => handleImport()} loading={push}>
               登録
             </Button>
           </Box>
         </Grid2>
-        <Grid2 size={2}></Grid2>
+        <Grid2 size={2} />
       </Grid2>
     </Paper>
   );

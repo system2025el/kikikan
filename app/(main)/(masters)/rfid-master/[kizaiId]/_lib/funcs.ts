@@ -3,11 +3,11 @@
 import { revalidatePath } from 'next/cache';
 import { connection } from 'next/server';
 
-import pool from '@/app/_lib/db/postgres';
+import pool, { refreshVRfid } from '@/app/_lib/db/postgres';
 import { SCHEMA, supabase } from '@/app/_lib/db/supabase';
 import { selectOneEqpt } from '@/app/_lib/db/tables/m-kizai';
 import { updateMasterUpdates } from '@/app/_lib/db/tables/m-master-update';
-import { insertNewRfid, upDateRfidDB, updateRfidTagDelFlgs } from '@/app/_lib/db/tables/m-rfid';
+import { insertNewRfid, upDateRfidDB, updateRfidTagDelFlgs, updRfidDelFlgDB } from '@/app/_lib/db/tables/m-rfid';
 import { insertNewRfidSts, updateRfidTagStsDB } from '@/app/_lib/db/tables/t-rfid-status-result';
 import { selectOneRfid, selectRfidsOfTheKizai } from '@/app/_lib/db/tables/v-rfid';
 import { MRfidDBValues } from '@/app/_lib/db/types/m-rfid-type';
@@ -139,6 +139,7 @@ export const addNewRfid = async (data: RfidsMasterDialogValues, kizaiId: number,
 
     throw error;
   } finally {
+    refreshVRfid();
     // なんにしてもpool解放
     connection.release();
   }
@@ -213,6 +214,7 @@ export const updateRfid = async (
     await connection.query('ROLLBACK');
     throw error;
   } finally {
+    refreshVRfid();
     // なんにしてもpool解放
     connection.release();
   }
@@ -261,6 +263,26 @@ export const updateRfidTagSts = async (
     await connection.query('ROLLBACK');
     throw e;
   } finally {
+    refreshVRfid();
     connection.release();
+  }
+};
+
+/**
+ * RFIDマスタの有効化無効化をするフラグ
+ * @param {string} tagId RFIDタグID
+ * @param {boolean} flg 無効化フラグ
+ * @param {string} user ログインユーザ名
+ */
+export const updRfidDelFlg = async (tagId: string, flg: boolean, user: string) => {
+  const data = { del_flg: flg ? 1 : 0, upd_dat: new Date().toISOString(), upd_user: user };
+  try {
+    await updRfidDelFlgDB(tagId, data);
+    await revalidatePath('/rfid-master');
+    await revalidatePath('/eqpt-master');
+  } catch (e) {
+    throw e;
+  } finally {
+    refreshVRfid();
   }
 };

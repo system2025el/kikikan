@@ -1,5 +1,7 @@
 import { Pool } from 'pg';
 
+import { SCHEMA } from './supabase';
+
 // const pool = new Pool({
 //   connectionString: process.env.DATABASE_URL,
 // });
@@ -15,3 +17,10 @@ export const pool =
   }));
 
 export default pool;
+
+/**
+ * マテリアライズドビューのv_rfidを更新する関数
+ */
+export const refreshVRfid = () => {
+  pool.query(`refresh materialized view ${SCHEMA}.v_rfid;`);
+};

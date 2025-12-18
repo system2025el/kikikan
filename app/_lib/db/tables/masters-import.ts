@@ -6,6 +6,7 @@ import {
   TanabanImportTypes,
 } from '@/app/(main)/(masters)/masters-import/_lib/types';
 
+import { refreshVRfid } from '../postgres';
 import { SCHEMA } from '../supabase';
 import { updateMasterUpdates } from './m-master-update';
 
@@ -204,6 +205,8 @@ export const checkRfid = async (list: RfidImportTypes[], connection: PoolClient,
   } catch (e) {
     console.error('例外が発生：DBエラーrfid', e);
     throw new Error('例外が発生：DBエラーrfid');
+  } finally {
+    refreshVRfid();
   }
 };
 

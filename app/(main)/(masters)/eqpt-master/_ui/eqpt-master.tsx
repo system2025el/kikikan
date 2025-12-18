@@ -211,7 +211,7 @@ export const EqptMaster = () => {
             </Grid2>
             <Grid2 size={1}>
               <Box mt={1} alignSelf={'end'} justifySelf={'end'}>
-                <Button type="submit">
+                <Button type="submit" loading={isLoading}>
                   <SearchIcon />
                   検索
                 </Button>

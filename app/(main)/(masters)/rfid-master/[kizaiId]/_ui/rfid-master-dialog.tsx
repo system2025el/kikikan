@@ -21,7 +21,7 @@ import { getRfidKizaiStsSelection, getShozokuSelection } from '../../../_lib/fun
 import { MasterDialogTitle } from '../../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../../_ui/dialogs';
 import { emptyRfid, formItems } from '../_lib/datas';
-import { addNewRfid, getChosenRfid, updateRfid } from '../_lib/funcs';
+import { addNewRfid, getChosenRfid, updateRfid, updRfidDelFlg } from '../_lib/funcs';
 import { RfidsMasterDialogSchema, RfidsMasterDialogValues } from '../_lib/types';
 
 export const RfidMasterDialog = ({
@@ -124,8 +124,7 @@ export const RfidMasterDialog = ({
           return;
         } else if (action === 'restore') {
           // 有効化ボタン
-          const values = await getValues();
-          await updateRfid(currentRfid, { ...values, delFlg: false }, kizaiId, user?.name ?? '');
+          await updRfidDelFlg(getValues('tagId'), false, user?.name ?? '');
           handleCloseDialog();
           refetchRfids();
         }
@@ -152,8 +151,7 @@ export const RfidMasterDialog = ({
 
   /* 削除確認ダイアログで削除選択時 */
   const handleConfirmDelete = async () => {
-    const values = await getValues();
-    await updateRfid(currentRfid, { ...values, delFlg: true }, kizaiId, user?.name ?? '');
+    await updRfidDelFlg(getValues('tagId'), true, user?.name ?? '');
     setDeleteOpen(false);
     handleCloseDialog();
     await refetchRfids();
