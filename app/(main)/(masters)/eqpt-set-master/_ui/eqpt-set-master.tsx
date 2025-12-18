@@ -112,7 +112,7 @@ export const EqptSetsMaster = () => {
               <TextFieldElement name="query" control={control} helperText={''} />
             </Stack>
             <Box alignSelf={'end'}>
-              <Button type="submit">
+              <Button type="submit" loading={isLoading}>
                 <SearchIcon />
                 検索
               </Button>

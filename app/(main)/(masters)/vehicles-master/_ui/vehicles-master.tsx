@@ -84,7 +84,7 @@ export const VehiclesMaster = () => {
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
       <Paper variant="outlined">
         <Box width={'100%'} display={'flex'} p={2}>
-          <Typography>車両マスタ検索</Typography>
+          <Typography>車両マスタ</Typography>
         </Box>
       </Paper>
       <Box>

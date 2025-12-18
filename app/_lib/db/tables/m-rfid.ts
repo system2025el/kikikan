@@ -2,8 +2,7 @@
 
 import { PoolClient } from 'pg';
 
-import { toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
-import { RfidsMasterDialogValues } from '@/app/(main)/(masters)/rfid-master/[kizaiId]/_lib/types';
+import { toJapanTimeStampString } from '@/app/(main)/_lib/date-conversion';
 
 import pool from '../postgres';
 import { SCHEMA, supabase } from '../supabase';
@@ -147,6 +146,19 @@ export const updateRfidTagDelFlgs = async (
 
   try {
     await connection.query(query, values);
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
+ * RFIDマスタの無効化フラグを更新する関数
+ * @param {string} tagId RFIDタグID
+ * @param {{ del_flg: number; upd_dat: string; upd_user: string }} data 更新するデータ
+ */
+export const updRfidDelFlgDB = async (tagId: string, data: { del_flg: number; upd_dat: string; upd_user: string }) => {
+  try {
+    await supabase.schema(SCHEMA).from('m_rfid').update(data).like('rfid_tag_id', tagId);
   } catch (e) {
     throw e;
   }

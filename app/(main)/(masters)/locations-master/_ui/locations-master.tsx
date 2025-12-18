@@ -109,7 +109,7 @@ export const LocationsMaster = () => {
                 <TextFieldElement name="query" control={control} helperText={'場所、住所、Tel、Faxから検索'} />
               </Stack>
               <Box alignSelf={'end'}>
-                <Button type="submit">
+                <Button type="submit" loading={isLoading}>
                   <SearchIcon />
                   検索
                 </Button>

@@ -90,7 +90,7 @@ export const BasesMaster = () => {
               </Typography>
             </Grid2>
             <Grid2>
-              <Button onClick={() => handleOpenDialog(FAKE_NEW_ID)}>
+              <Button onClick={() => handleOpenDialog(FAKE_NEW_ID)} loading={isLoading}>
                 <AddIcon fontSize="small" />
                 新規
               </Button>

@@ -17,18 +17,23 @@ export const ExportMaster = () => {
   const [snackBarOpen, setSnackBarOpen] = useState(false);
   /** スナックバーのメッセージ */
   const [snackBarMessage, setSnackBarMessage] = useState('ファイルが選択されていません');
+  /** 連打制御 */
+  const [push, setPush] = useState<boolean>(false);
 
   /* methods ---------------------------------------------- */
   /** エクスポートボタン押下時 */
   const exportFile = async () => {
+    setPush(true);
     const data = await getAllEqptAndRfid();
     if (data) {
       writeFileXLSX(data.workbook, `RFID機材表_${data.date}.xlsx`);
       setSnackBarMessage(`RFID機材表_${data.date}.xlsxをエクスポートしました`);
       setSnackBarOpen(true);
+      setPush(false);
     } else {
       setSnackBarMessage(`エクスポートエラー: データがありません`);
       setSnackBarOpen(true);
+      setPush(false);
     }
   };
 
@@ -42,7 +47,7 @@ export const ExportMaster = () => {
           <Divider sx={{ mx: 1 }} />
           <Grid2 container width={'100%'} display={'flex'} p={2} alignItems={'center'}>
             <Box>
-              <Button size="medium" onClick={() => exportFile()}>
+              <Button size="medium" onClick={() => exportFile()} loading={push}>
                 エクセルエクスポート
               </Button>
             </Box>

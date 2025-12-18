@@ -33,10 +33,13 @@ export const ImportMaster = () => {
   const [snackBarOpen, setSnackBarOpen] = useState(false);
   /** スナックバーのメッセージ */
   const [snackBarMessage, setSnackBarMessage] = useState('ファイルが選択されていません');
+  /** 連打制御 */
+  const [push, setPush] = useState<boolean>(false);
 
   /* methods ----------------------------------------------------- */
   /** ファイルを選んでデータをオブジェクト化 */
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, type: 'eqpt' | 'customer' | '') => {
+    setPush(true);
     const file = event.target.files?.[0];
     if (!file) {
       setSnackBarMessage('ファイルが選択されていません。');
@@ -120,14 +123,17 @@ export const ImportMaster = () => {
           setEqptData(parsedEqptData);
           setSnackBarMessage(`${file.name}を読み込みました。`);
           setSnackBarOpen(true);
+          setPush(false);
         } else {
           setSnackBarMessage(`${file.name}の ${errorRows.join(', ')}行目 にエラーがあります`);
           setSnackBarOpen(true);
+          setPush(false);
         }
       } else {
         // // type === 'customer'
         setCustomerFileName(file.name);
         // setSnackBarOpen(true);
+        setPush(false);
       }
     };
     reader.readAsArrayBuffer(file);
@@ -136,8 +142,8 @@ export const ImportMaster = () => {
 
   /* 機材インポートの登録ボタン押下時 */
   const handleImportEqpt = async () => {
-    console.log('RFID機材マスタデータをインポート:', eqptData);
-
+    console.log('おされたあああああ');
+    setPush(true);
     if (eqptData.length !== 0) {
       try {
         const CHUNK_SIZE = 3000;
@@ -156,10 +162,12 @@ export const ImportMaster = () => {
         setSnackBarMessage('データの登録中にエラーが発生しました。');
         setSnackBarOpen(true);
       }
+      setPush(false);
     } else {
       // データがない時
       setSnackBarMessage('登録するデータがありません。');
       setSnackBarOpen(true);
+      setPush(false);
     }
   };
 
@@ -172,6 +180,7 @@ export const ImportMaster = () => {
           handleFileUpload={handleFileUpload}
           handleImport={handleImportEqpt}
           fileInputId="eqpts-excel-file"
+          push={push}
         />
       </Stack>
       <Snackbar
