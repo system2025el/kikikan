@@ -20,7 +20,8 @@ export const selectFilteredQuot = async ({
   const builder = supabase
     .schema(SCHEMA)
     .from('v_mitu_lst')
-    .select(`mitu_head_id, juchu_head_id, sts_nam, mitu_head_nam, koen_nam, kokyaku_nam, mitu_dat, nyuryoku_user`);
+    .select(`mitu_head_id, juchu_head_id, sts_nam, mitu_head_nam, koen_nam, kokyaku_nam, mitu_dat, nyuryoku_user`)
+    .order('mitu_head_id', { ascending: false });
   // 見積番号あり
   if (mituId) {
     builder.eq('mitu_head_id', mituId);

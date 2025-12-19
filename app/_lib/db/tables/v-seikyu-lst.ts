@@ -55,7 +55,7 @@ export const selectFilteredBills = async (queries: BillSearchValues) => {
       kokyaku_nam,
       seikyu_dat
     ORDER BY
-      seikyu_dat, seikyu_head_id;
+      seikyu_head_id DESC, seikyu_dat DESC;
   `;
 
   try {
