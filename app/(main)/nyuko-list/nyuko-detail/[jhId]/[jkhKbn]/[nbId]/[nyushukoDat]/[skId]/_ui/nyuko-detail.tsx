@@ -75,7 +75,7 @@ export const NyukoDetail = (props: {
         <BackButton label={'戻る'} />
       </Box>
       <Paper variant="outlined">
-        <Box display={'flex'} justifyContent={'space-between'} alignItems="center" p={2}>
+        <Box display={'flex'} justifyContent={'space-between'} alignItems="center" px={2}>
           <Typography fontSize={'large'}>入庫明細(チェック)</Typography>
           <Grid2 container alignItems={'center'} spacing={2}>
             {fixFlag && <Typography>到着済</Typography>}

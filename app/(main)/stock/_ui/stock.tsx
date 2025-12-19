@@ -183,7 +183,7 @@ export const Stock = () => {
   return (
     <Paper>
       <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Typography p={2}>在庫確認</Typography>
+        <Typography px={2}>在庫確認</Typography>
       </Box>
       <Divider />
       <Box>

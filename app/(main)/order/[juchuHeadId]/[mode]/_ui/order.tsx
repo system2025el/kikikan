@@ -514,7 +514,9 @@ export const Order = (props: {
     if (!isDirty) {
       if (isLoading) return;
       setIsLoading(true);
-      await deleteLock(1, props.juchuHeadData.juchuHeadId);
+      if (lockData && lockData.addUser === user?.name) {
+        await deleteLock(1, props.juchuHeadData.juchuHeadId);
+      }
       router.push(path);
     } else {
       setPath(path);
@@ -861,7 +863,18 @@ export const Order = (props: {
       {/* --------------------------------受注明細（機材）------------------------------------- */}
       {save && (
         <Accordion sx={{ marginTop: 2, borderRadius: 1, overflow: 'hidden' }} defaultExpanded variant="outlined">
-          <AccordionSummary expandIcon={<ExpandMoreIcon />} component="div">
+          <AccordionSummary
+            expandIcon={<ExpandMoreIcon />}
+            component="div"
+            sx={{
+              minHeight: '30px',
+              maxHeight: '30px',
+              '&.Mui-expanded': {
+                minHeight: '30px',
+                maxHeight: '30px',
+              },
+            }}
+          >
             <Grid2 container alignItems="center" justifyContent="space-between" sx={{ width: '100%' }} spacing={1}>
               <Grid2>
                 <Typography>受注機材ヘッダー一覧</Typography>
@@ -962,7 +975,18 @@ export const Order = (props: {
       {/* -------------------------車両----------------------------------- */}
       {save && (
         <Accordion sx={{ marginTop: 2, borderRadius: 1, overflow: 'hidden' }} defaultExpanded variant="outlined">
-          <AccordionSummary expandIcon={<ExpandMoreIcon />} component="div">
+          <AccordionSummary
+            expandIcon={<ExpandMoreIcon />}
+            component="div"
+            sx={{
+              minHeight: '30px',
+              maxHeight: '30px',
+              '&.Mui-expanded': {
+                minHeight: '30px',
+                maxHeight: '30px',
+              },
+            }}
+          >
             <Grid2 container alignItems="center" justifyContent="space-between" sx={{ width: '100%' }} spacing={1}>
               <Grid2>
                 <Typography>受注車両ヘッダー一覧</Typography>
