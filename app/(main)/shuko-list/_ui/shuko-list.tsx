@@ -48,7 +48,7 @@ export const ShukoList = (/*props: { shukoData: ShukoTableValues[] }*/) => {
     mode: 'onSubmit',
     defaultValues: {
       juchuHeadId: null,
-      shukoDat: new Date(),
+      shukoDat: { from: new Date(), to: new Date() },
       shukoBasho: 0,
       section: [],
     },
@@ -151,14 +151,14 @@ export const ShukoList = (/*props: { shukoData: ShukoTableValues[] }*/) => {
   return (
     <Box>
       <Paper variant="outlined">
-        <Box alignItems="center" p={2}>
+        <Box alignItems="center" px={2}>
           <Typography>出庫検索・出庫一覧</Typography>
         </Box>
         <Divider />
         <form onSubmit={handleSubmit(onSubmit)}>
-          <Grid2 container alignItems={'center'} px={2} py={1} spacing={2}>
+          <Grid2 container alignItems={'center'} p={0.5} px={2} spacing={1}>
             <Grid2 display={'flex'} alignItems={'center'}>
-              <Typography mr={2}>受注番号</Typography>
+              <Typography mr={1}>受注番号</Typography>
               <TextFieldElement
                 name="juchuHeadId"
                 control={control}
@@ -177,9 +177,23 @@ export const ShukoList = (/*props: { shukoData: ShukoTableValues[] }*/) => {
               />
             </Grid2>
             <Grid2 display={'flex'} alignItems={'center'} width={'fit-content'}>
-              <Typography mr={2}>出庫日</Typography>
+              <Typography mr={1}>出庫日</Typography>
               <Controller
-                name="shukoDat"
+                name="shukoDat.from"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <TestDate
+                    onBlur={field.onBlur}
+                    date={field.value}
+                    onChange={(newDate) => field.onChange(newDate?.toDate())}
+                    fieldstate={fieldState}
+                    onClear={() => field.onChange(null)}
+                  />
+                )}
+              />
+              ～
+              <Controller
+                name="shukoDat.to"
                 control={control}
                 render={({ field, fieldState }) => (
                   <TestDate
@@ -193,7 +207,7 @@ export const ShukoList = (/*props: { shukoData: ShukoTableValues[] }*/) => {
               />
             </Grid2>
             <Grid2 display={'flex'} alignItems={'center'}>
-              <Typography mr={2}>出庫場所</Typography>
+              <Typography mr={1}>出庫場所</Typography>
               <FormControl size="small" sx={{ width: 120 }}>
                 <Controller
                   name="shukoBasho"
@@ -209,7 +223,7 @@ export const ShukoList = (/*props: { shukoData: ShukoTableValues[] }*/) => {
               </FormControl>
             </Grid2>
             <Grid2 display={'flex'} alignItems={'center'}>
-              <Typography noWrap mr={2}>
+              <Typography noWrap mr={1}>
                 課
               </Typography>
               <Box border={1} borderColor={'divider'} borderRadius={1} pl={1}>
@@ -231,7 +245,7 @@ export const ShukoList = (/*props: { shukoData: ShukoTableValues[] }*/) => {
           <Loading />
         ) : (
           <Box width={'100%'}>
-            <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} width={'100%'} p={1}>
+            <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} width={'100%'} p={0.5}>
               <Typography>全{shukoList ? shukoList.length : 0}件</Typography>
               <Box>
                 <Button onClick={handleOutput} disabled={selected.length === 0} loading={isProcessing}>

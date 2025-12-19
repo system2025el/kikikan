@@ -27,7 +27,7 @@ export const NyukoList = (/*props: { shukoData: NyukoTableValues[]}*/) => {
     mode: 'onSubmit',
     defaultValues: {
       juchuHeadId: null,
-      nyukoDat: new Date(),
+      nyukoDat: { from: new Date(), to: new Date() },
       nyukoBasho: 0,
       section: [],
     },
@@ -117,14 +117,14 @@ export const NyukoList = (/*props: { shukoData: NyukoTableValues[]}*/) => {
   return (
     <Box>
       <Paper variant="outlined">
-        <Box alignItems="center" p={2}>
+        <Box alignItems="center" px={2}>
           <Typography>入庫検索・入庫一覧</Typography>
         </Box>
         <Divider />
         <form onSubmit={handleSubmit(onSubmit)}>
-          <Grid2 container alignItems={'center'} px={2} py={1} spacing={2}>
+          <Grid2 container alignItems={'center'} p={0.5} px={2} spacing={1}>
             <Grid2 display={'flex'} alignItems={'center'}>
-              <Typography mr={2}>受注番号</Typography>
+              <Typography mr={1}>受注番号</Typography>
               <TextFieldElement
                 name="juchuHeadId"
                 control={control}
@@ -143,9 +143,23 @@ export const NyukoList = (/*props: { shukoData: NyukoTableValues[]}*/) => {
               />
             </Grid2>
             <Grid2 display={'flex'} alignItems={'center'} width={'fit-content'}>
-              <Typography mr={2}>入庫日</Typography>
+              <Typography mr={1}>入庫日</Typography>
               <Controller
-                name="nyukoDat"
+                name="nyukoDat.from"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <TestDate
+                    onBlur={field.onBlur}
+                    date={field.value}
+                    onChange={(newDate) => field.onChange(newDate?.toDate())}
+                    fieldstate={fieldState}
+                    onClear={() => field.onChange(null)}
+                  />
+                )}
+              />
+              ～
+              <Controller
+                name="nyukoDat.to"
                 control={control}
                 render={({ field, fieldState }) => (
                   <TestDate
@@ -159,7 +173,7 @@ export const NyukoList = (/*props: { shukoData: NyukoTableValues[]}*/) => {
               />
             </Grid2>
             <Grid2 display={'flex'} alignItems={'center'}>
-              <Typography mr={2}>入庫場所</Typography>
+              <Typography mr={1}>入庫場所</Typography>
               <FormControl size="small" sx={{ width: 120 }}>
                 <Controller
                   name="nyukoBasho"
@@ -175,14 +189,14 @@ export const NyukoList = (/*props: { shukoData: NyukoTableValues[]}*/) => {
               </FormControl>
             </Grid2>
             <Grid2 display={'flex'} alignItems={'center'}>
-              <Typography noWrap mr={2}>
+              <Typography noWrap mr={1}>
                 課
               </Typography>
               <Box border={1} borderColor={'divider'} borderRadius={1} pl={1}>
                 <CheckboxButtonGroup name="section" control={control} options={options} row />
               </Box>
             </Grid2>
-            <Grid2 size={'grow'} alignItems={'end'} justifyContent={'end'}>
+            <Grid2 size={12} alignItems={'end'} justifyContent={'end'}>
               <Box alignSelf={'end'} justifySelf={'end'}>
                 <Button type="submit" loading={isLoading}>
                   <SearchIcon fontSize="small" />
@@ -197,7 +211,7 @@ export const NyukoList = (/*props: { shukoData: NyukoTableValues[]}*/) => {
           <Loading />
         ) : (
           <Box width={'100%'}>
-            <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} width={'100%'} p={1}>
+            <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} width={'100%'} p={0.5}>
               <Typography>全{nyukoList ? nyukoList.length : 0}件</Typography>
               <Box>
                 <Button onClick={handleOutput}>員数票出力</Button>
