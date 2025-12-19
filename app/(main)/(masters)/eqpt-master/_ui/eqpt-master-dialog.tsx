@@ -209,10 +209,34 @@ export const EqMasterDialog = ({
                 </Box>
               </FormBox>
               <FormBox formItem={formItems[2]}>
-                <TextField value={kizaiQty.ng ? String(kizaiQty.ng ?? 0) : ''} disabled />
+                <TextField
+                  value={kizaiQty.ng ? String(kizaiQty.ng ?? 0) : ''}
+                  disabled
+                  sx={{
+                    '& .MuiInputBase-input': {
+                      textAlign: 'right',
+                    },
+                    '& input[type=number]::-webkit-inner-spin-button': {
+                      WebkitAppearance: 'none',
+                      margin: 0,
+                    },
+                  }}
+                />
               </FormBox>
               <FormBox formItem={formItems[3]}>
-                <TextField value={kizaiQty.yuko ? String(kizaiQty.yuko ?? 0) : ''} disabled />
+                <TextField
+                  value={kizaiQty.yuko ? String(kizaiQty.yuko ?? 0) : ''}
+                  disabled
+                  sx={{
+                    '& .MuiInputBase-input': {
+                      textAlign: 'right',
+                    },
+                    '& input[type=number]::-webkit-inner-spin-button': {
+                      WebkitAppearance: 'none',
+                      margin: 0,
+                    },
+                  }}
+                />
               </FormBox>
               <FormBox formItem={formItems[4]}>
                 <Controller

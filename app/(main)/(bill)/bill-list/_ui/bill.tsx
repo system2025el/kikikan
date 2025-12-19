@@ -382,6 +382,13 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
                           pointerEvents: 'none', // クリック不可にする
                           backgroundColor: '#f5f5f5', // グレー背景で無効っぽく
                           color: '#888',
+                          '& .MuiInputBase-input': {
+                            textAlign: 'right',
+                          },
+                          '& input[type=number]::-webkit-inner-spin-button': {
+                            WebkitAppearance: 'none',
+                            margin: 0,
+                          },
                         }}
                         slotProps={{ input: { readOnly: true, onFocus: (e) => e.target.blur() } }}
                         disabled={!editable}

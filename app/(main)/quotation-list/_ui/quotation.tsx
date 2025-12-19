@@ -437,7 +437,20 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
                   <Grid2 container mx={2} my={1} spacing={6}>
                     <Grid2 display="flex" alignItems="center">
                       <Typography marginRight={5}>受注番号</Typography>
-                      <TextField value={order.juchuHeadId ?? ''} disabled sx={{ width: 120 }} />
+                      <TextField
+                        value={order.juchuHeadId ?? ''}
+                        disabled
+                        sx={{
+                          width: 120,
+                          '& .MuiInputBase-input': {
+                            textAlign: 'right',
+                          },
+                          '& input[type=number]::-webkit-inner-spin-button': {
+                            WebkitAppearance: 'none',
+                            margin: 0,
+                          },
+                        }}
+                      />
                     </Grid2>
                     <Grid2 display="flex" alignItems="center">
                       <Typography marginRight={3}>受注ステータス</Typography>
@@ -484,7 +497,20 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
                   </Box>
                   <Box sx={styles.container}>
                     <Typography marginRight={3}>受注値引き</Typography>
-                    <TextField value={order.nebikiAmt ?? ''} disabled sx={{ width: 300 }} />
+                    <TextField
+                      value={order.nebikiAmt ?? ''}
+                      disabled
+                      sx={{
+                        width: 300,
+                        '& .MuiInputBase-input': {
+                          textAlign: 'right',
+                        },
+                        '& input[type=number]::-webkit-inner-spin-button': {
+                          WebkitAppearance: 'none',
+                          margin: 0,
+                        },
+                      }}
+                    />
                   </Box>
                   <Box sx={styles.container}>
                     <Typography marginRight={7}>税区分</Typography>
@@ -523,6 +549,13 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
                           pointerEvents: 'none', // クリック不可にする
                           backgroundColor: '#f5f5f5', // グレー背景で無効っぽく
                           color: '#888',
+                          '& .MuiInputBase-input': {
+                            textAlign: 'right',
+                          },
+                          '& input[type=number]::-webkit-inner-spin-button': {
+                            WebkitAppearance: 'none',
+                            margin: 0,
+                          },
                         }}
                         slotProps={{ input: { readOnly: true, onFocus: (e) => e.target.blur() } }}
                         disabled={!editable}
