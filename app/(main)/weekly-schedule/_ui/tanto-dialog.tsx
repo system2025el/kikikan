@@ -1,7 +1,7 @@
 'use client';
 
 import { Box, Button, Dialog, DialogTitle, Grid2, Stack, Typography } from '@mui/material';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { CheckboxElement, TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
@@ -24,18 +24,28 @@ export const TantoDialog = ({
   /* ログインユーザー */
   const user = useUserStore((state) => state.user);
 
+  /* useState ---------------------------------------------------------------- */
+  /** 処理中 */
+  const [isProcessing, setIsProcessing] = useState(false);
+
   /* useForm ----------------------------------------------------------------- */
-  const { reset, handleSubmit, control } = useForm<{
+  const {
+    reset,
+    handleSubmit,
+    control,
+    formState: { isDirty },
+  } = useForm<{
     dat: string;
     tantoNam: string | null;
     mem: string | null;
     holidayFlg: boolean;
   }>({
-    defaultValues: { dat: '', tantoNam: null, mem: null, holidayFlg: false },
+    defaultValues: { dat: '', tantoNam: '', mem: '', holidayFlg: false },
   });
 
   /* methods ----------------------------------------------------------------- */
   const onSubmit = async (data: { dat: string; tantoNam: string | null; mem: string | null; holidayFlg: boolean }) => {
+    setIsProcessing(true);
     await insertWeeklyData(
       {
         ...data,
@@ -44,6 +54,7 @@ export const TantoDialog = ({
       user?.name ?? ''
     );
     setOpen(false);
+    setIsProcessing(false);
     refetch();
   };
 
@@ -87,7 +98,9 @@ export const TantoDialog = ({
           <CheckboxElement name="holidayFlg" control={control} />
         </Grid2>
         <Box display={'flex'} justifyContent={'end'} width={'100%'}>
-          <Button type="submit">保存</Button>
+          <Button type="submit" loading={isProcessing} disabled={!isDirty}>
+            保存
+          </Button>
         </Box>
       </Grid2>
     </Dialog>
