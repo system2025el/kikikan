@@ -33,12 +33,12 @@ export const supabase = createClient<Database>(process.env.SUPABASE_URL!, proces
 });
 
 // お客様テストデータ用
-export const SCHEMA = 'dev6';
-export type schema = 'dev6';
+// export const SCHEMA = 'dev6';
+// export type schema = 'dev6';
 
 // 開発用
-// export const SCHEMA = 'dev7';
-// export type schema = 'dev7';
+export const SCHEMA = 'dev7';
+export type schema = 'dev7';
 
 /**
  * 絶対にクライアントで使わないでください。
