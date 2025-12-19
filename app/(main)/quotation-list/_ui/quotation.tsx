@@ -332,6 +332,8 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
 
     setIsProcessing(true);
 
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
     try {
       // PDFデータ生成
       const blob = await printQuotation(pdfModel);
@@ -395,7 +397,7 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
             <Grid2 container display="flex" alignItems="center" justifyContent="space-between" p={1}>
               <Typography margin={1}>見積書</Typography>
               <Box>
-                <Button sx={{ margin: 1 }} onClick={hundlePrintPdf} disabled={isNew || isDirty || isProcessing}>
+                <Button sx={{ margin: 1 }} onClick={hundlePrintPdf} disabled={isNew || isDirty} loading={isProcessing}>
                   <PrintIcon fontSize="small" sx={{ mr: 0.5 }} />
                   見積書印刷
                 </Button>
