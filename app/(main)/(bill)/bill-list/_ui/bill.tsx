@@ -278,6 +278,9 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
 
     setIsProcessing(true);
 
+    // PDF作成処理でボタン制御がかからないのでメインスレッドを一旦空ける
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
     try {
       // PDFデータ生成
       const blob = await printBill(pdfModel);

@@ -332,6 +332,7 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
 
     setIsProcessing(true);
 
+    // PDF作成処理でボタン制御がかからないのでメインスレッドを一旦空ける
     await new Promise((resolve) => setTimeout(resolve, 100));
 
     try {
