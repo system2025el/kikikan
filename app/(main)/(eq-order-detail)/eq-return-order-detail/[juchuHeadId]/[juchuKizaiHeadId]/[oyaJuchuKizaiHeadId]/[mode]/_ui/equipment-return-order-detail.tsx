@@ -53,7 +53,7 @@ import { LockValues } from '@/app/(main)/_lib/types';
 import { BackButton } from '@/app/(main)/_ui/buttons';
 import { Calendar, DateTime, TestDate } from '@/app/(main)/_ui/date';
 import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
-import { Loading } from '@/app/(main)/_ui/loading';
+import { Loading, LoadingOverlay } from '@/app/(main)/_ui/loading';
 import { getStockList } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 import {
   DetailOerValues,
@@ -1151,10 +1151,8 @@ export const EquipmentReturnOrderDetail = (props: {
 
   return (
     <>
-      {!user || isLoading ? (
-        <Box height={'90vh'}>
-          <Loading />
-        </Box>
+      {isLoading ? (
+        <LoadingOverlay />
       ) : (
         <Container disableGutters sx={{ minWidth: '100%', pb: 10 }} maxWidth={'xl'}>
           <form onSubmit={handleSubmit(onSubmit)}>
@@ -1169,10 +1167,10 @@ export const EquipmentReturnOrderDetail = (props: {
                 )}
                 {nyukoFixFlag && (
                   <Box display={'flex'} alignItems={'center'}>
-                    <Typography>入庫済</Typography>
+                    <Typography>到着済</Typography>
                   </Box>
                 )}
-                <Grid2 container alignItems={'center'} spacing={1}>
+                <Grid2 container display={saveKizaiHead ? 'flex' : 'none'} alignItems={'center'} spacing={1}>
                   {!edit || (lockData !== null && lockData?.addUser !== user?.name) ? (
                     <Typography>閲覧モード</Typography>
                   ) : (

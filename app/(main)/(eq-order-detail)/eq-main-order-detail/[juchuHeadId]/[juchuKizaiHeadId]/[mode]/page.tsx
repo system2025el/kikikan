@@ -28,10 +28,7 @@ const Page = async (props: { params: Promise<{ juchuHeadId: string; juchuKizaiHe
   }
 
   // 出発フラグ
-  console.time();
   const fixFlag = await getNyushukoFixFlag(juchuHeadId, juchuKizaiHeadId, 60);
-  console.log('-----------------------------出発フラグ--------------------------');
-  console.timeEnd();
 
   // 編集モード(edit:編集、view:閲覧)
   const edit = params.mode === 'edit' && !fixFlag ? true : false;
@@ -47,7 +44,7 @@ const Page = async (props: { params: Promise<{ juchuHeadId: string; juchuKizaiHe
       nebikiAmt: null,
       nebikiRat: null,
       mem: null,
-      headNam: '',
+      headNam: juchuHeadData.koenNam,
       kicsShukoDat: null,
       kicsNyukoDat: null,
       yardShukoDat: juchuHeadData.juchuRange ? juchuHeadData.juchuRange[0] : null,
@@ -90,10 +87,7 @@ const Page = async (props: { params: Promise<{ juchuHeadId: string; juchuKizaiHe
     // 既存
   } else {
     // 受注機材ヘッダーデータ
-    console.time();
     const juchuKizaiHeadData = await getJuchuKizaiHead(juchuHeadId, juchuKizaiHeadId);
-    console.log('---------------------受注機材ヘッダー---------------------');
-    console.timeEnd();
 
     if (!juchuKizaiHeadData) {
       return <div>受注機材情報が見つかりません。</div>;
@@ -149,10 +143,7 @@ const Page = async (props: { params: Promise<{ juchuHeadId: string; juchuKizaiHe
     // console.timeEnd();
 
     // 受注本番日データ
-    console.time();
     const juchuHonbanbiData = await getHonbanbi(juchuHeadId, juchuKizaiHeadId);
-    console.log('-----------------------------受注機材本番日--------------------------');
-    console.timeEnd();
 
     return (
       <EquipmentOrderDetail
