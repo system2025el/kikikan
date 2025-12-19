@@ -69,7 +69,7 @@ export const IdoList = () => {
   return (
     <Box>
       <Paper variant="outlined">
-        <Box alignItems="center" p={2}>
+        <Box alignItems="center" px={2}>
           <Typography>移動検索</Typography>
         </Box>
         <Divider />

@@ -1,7 +1,7 @@
 'use client';
 
 import SearchIcon from '@mui/icons-material/Search';
-import { Box, Button, Divider, FormControl, Grid2, MenuItem, Paper, Select, Typography } from '@mui/material';
+import { Box, Button, Divider, FormControl, Grid2, MenuItem, Paper, Select, Snackbar, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { CheckboxButtonGroup, Controller, TextFieldElement, useForm } from 'react-hook-form-mui';
 
@@ -16,11 +16,20 @@ import { PdfModel, usePdf } from '../nyuko/_lib/hooks/usePdf';
 import { NyukoListTable } from './nyuko-list-table';
 
 export const NyukoList = (/*props: { shukoData: NyukoTableValues[]}*/) => {
+  // ローディング制御
   const [isLoading, setIsLoading] = useState(true);
+  // 処理中制御
+  const [isProcessing, setIsProcessing] = useState(false);
+  // 出庫一覧データ
   const [nyukoList, setNyukoList] = useState<NyukoTableValues[]>(/*props.shukoData*/ []);
+  // 課選択肢
   const [options, setOptions] = useState<SelectTypes[]>([]);
   //PDF出力
   const [selected, setSelected] = useState<number[]>([]);
+  // スナックバー制御
+  const [snackBarOpen, setSnackBarOpen] = useState(false);
+  // スナックバーメッセージ
+  const [snackBarMessage, setSnackBarMessage] = useState('');
 
   /* useForm ------------------- */
   const { control, handleSubmit, getValues, reset } = useForm<NyukoListSearchValues>({
@@ -59,6 +68,10 @@ export const NyukoList = (/*props: { shukoData: NyukoTableValues[]}*/) => {
    * 納品書出力ボタン押下
    */
   const handleOutput = async () => {
+    if (isProcessing) return;
+
+    setIsProcessing(true);
+
     console.log(selected);
     // チェックされた行を取り出し
     const selectList = selected.map((index) => nyukoList[index]);
@@ -68,29 +81,38 @@ export const NyukoList = (/*props: { shukoData: NyukoTableValues[]}*/) => {
 
     // PdfModelの配列
     const pdfModels: PdfModel[] = [];
-    // チェックされた行分データ取得
-    for (const data of selectList) {
-      const headNamv = data.headNamv;
-      const nyushukoDat = toJapanTimeStampString(data.nyushukoDat);
-      const pdfData: PdfModel | null = await getPdfData(
-        data.juchuHeadId,
-        data.juchuKizaiHeadIdv,
-        data.nyushukoBashoId,
-        nyushukoDat
-      );
-      if (pdfData !== null) {
-        pdfData.item13 = headNamv;
-        pdfModels.push(pdfData);
+
+    try {
+      // チェックされた行分データ取得
+      for (const data of selectList) {
+        const headNamv = data.headNamv;
+        const nyushukoDat = toJapanTimeStampString(data.nyushukoDat);
+        const pdfData: PdfModel | null = await getPdfData(
+          data.juchuHeadId,
+          data.juchuKizaiHeadIdv,
+          data.nyushukoBashoId,
+          nyushukoDat
+        );
+        if (pdfData !== null) {
+          pdfData.item13 = headNamv;
+          pdfModels.push(pdfData);
+        }
       }
+      console.log('pdfModels', pdfModels);
+
+      // PDF生成
+      const blob = await printShuko(pdfModels);
+
+      // ブラウザ表示
+      const url = URL.createObjectURL(blob);
+      window.open(url);
+    } catch (e) {
+      console.error(e);
+      setSnackBarMessage('納品書の出力に失敗しました');
+      setSnackBarOpen(true);
+    } finally {
+      setIsProcessing(false);
     }
-    console.log('pdfModels', pdfModels);
-
-    // PDF生成
-    const blob = await printShuko(pdfModels);
-
-    // ブラウザ表示
-    const url = URL.createObjectURL(blob);
-    window.open(url);
   };
 
   /* useEffect --------------------------------- */
@@ -214,7 +236,9 @@ export const NyukoList = (/*props: { shukoData: NyukoTableValues[]}*/) => {
             <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} width={'100%'} p={0.5}>
               <Typography>全{nyukoList ? nyukoList.length : 0}件</Typography>
               <Box>
-                <Button onClick={handleOutput}>員数票出力</Button>
+                <Button onClick={handleOutput} disabled={selected.length === 0} loading={isProcessing}>
+                  員数票出力
+                </Button>
               </Box>
             </Box>
             {nyukoList.length > 0 ? (
@@ -225,6 +249,14 @@ export const NyukoList = (/*props: { shukoData: NyukoTableValues[]}*/) => {
           </Box>
         )}
       </Paper>
+      <Snackbar
+        open={snackBarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackBarOpen(false)}
+        message={snackBarMessage}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={{ marginTop: '65px' }}
+      />
     </Box>
   );
 };

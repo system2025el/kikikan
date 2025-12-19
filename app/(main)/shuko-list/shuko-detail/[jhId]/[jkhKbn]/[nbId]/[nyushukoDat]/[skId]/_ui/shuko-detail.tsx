@@ -127,7 +127,7 @@ export const ShukoDetail = (props: {
         <BackButton label={'戻る'} />
       </Box>
       <Paper variant="outlined">
-        <Box display={'flex'} justifyContent={'space-between'} alignItems="center" p={2}>
+        <Box display={'flex'} justifyContent={'space-between'} alignItems="center" px={2}>
           <Typography fontSize={'large'}>
             出庫明細({shukoDetailData.sagyoKbnId === 20 ? 'チェック' : 'スタンバイ'})
           </Typography>

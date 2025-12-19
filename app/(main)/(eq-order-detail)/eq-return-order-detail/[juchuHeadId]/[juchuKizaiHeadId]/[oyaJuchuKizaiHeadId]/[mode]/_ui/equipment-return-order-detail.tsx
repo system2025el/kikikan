@@ -111,7 +111,7 @@ export const EquipmentReturnOrderDetail = (props: {
   const [otherDirty, setOtherDirty] = useState(false);
 
   // ローディング
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   // 機材明細ローディング
   const [isDetailLoading, setIsDetailLoading] = useState(false);
   // 編集モード(true:編集、false:閲覧)
@@ -217,7 +217,6 @@ export const EquipmentReturnOrderDetail = (props: {
 
   /* useForm ------------------------- */
   const {
-    watch,
     control,
     handleSubmit,
     reset,
@@ -328,10 +327,8 @@ export const EquipmentReturnOrderDetail = (props: {
   }, []);
 
   useEffect(() => {
+    if (!user) return;
     const asyncProcess = async () => {
-      if (!user || !props.edit) return;
-
-      setIsLoading(true);
       const lockData = await getLock(1, props.juchuHeadData.juchuHeadId);
       setLockData(lockData);
       if (lockData === null) {
@@ -343,7 +340,11 @@ export const EquipmentReturnOrderDetail = (props: {
       }
       setIsLoading(false);
     };
-    asyncProcess();
+    if (props.edit) {
+      asyncProcess();
+    } else {
+      setIsLoading(false);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 

@@ -284,7 +284,7 @@ export const IdoDetail = (props: {
         <BackButton label={'戻る'} />
       </Box>
       <Paper variant="outlined">
-        <Box display={'flex'} justifyContent={'space-between'} alignItems="center" p={2}>
+        <Box display={'flex'} justifyContent={'space-between'} alignItems="center" px={2}>
           <Typography fontSize={'large'}>
             移動明細({idoDetailData.sagyoKbnId === 40 ? '移動出庫' : '移動入庫'})
           </Typography>
@@ -321,7 +321,7 @@ export const IdoDetail = (props: {
         <Divider />
         {idoDetailData.sagyoKbnId === 40 ? (
           <Box width={'100%'}>
-            <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} p={2}>
+            <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} px={2}>
               <Box alignItems={'center'}>
                 <Typography>手動指示</Typography>
                 <Box py={1}>

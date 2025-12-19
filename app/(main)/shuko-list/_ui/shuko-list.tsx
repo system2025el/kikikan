@@ -83,6 +83,7 @@ export const ShukoList = (/*props: { shukoData: ShukoTableValues[] }*/) => {
     if (isProcessing) return;
 
     setIsProcessing(true);
+
     console.log(selected);
     // チェックされた行を取り出し
     const selectList = selected.map((index) => shukoList[index]);

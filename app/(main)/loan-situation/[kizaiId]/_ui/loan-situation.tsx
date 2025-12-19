@@ -303,7 +303,7 @@ export const LoanSituation = (props: {
   return (
     <Box>
       <Paper variant="outlined">
-        <Box display="flex" justifyContent="space-between" alignItems="center" p={2} width="100%">
+        <Box display="flex" justifyContent="space-between" alignItems="center" px={2} width="100%">
           <Typography>貸出状況</Typography>
         </Box>
         <Divider />

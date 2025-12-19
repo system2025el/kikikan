@@ -86,7 +86,7 @@ export const LoanList = () => {
     <Box>
       {/*貸出状況検索*/}
       <Paper variant="outlined">
-        <Grid2 container spacing={2} alignItems="center" p={2}>
+        <Grid2 container spacing={2} alignItems="center" px={2}>
           <Typography>貸出状況</Typography>
           <Typography>機材検索</Typography>
         </Grid2>
