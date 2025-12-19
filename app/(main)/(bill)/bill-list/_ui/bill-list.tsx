@@ -228,7 +228,7 @@ export const BillList = () => {
               />
             </Grid2>
             <Grid2 alignSelf={'end'}>
-              <Button type="submit">
+              <Button type="submit" loading={isLoading}>
                 <SearchIcon />
                 検索
               </Button>

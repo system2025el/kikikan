@@ -147,7 +147,11 @@ export const BillListTable = ({
         </Grid2>
         <Grid2 container spacing={1}>
           <Grid2 container spacing={1}>
-            <Button color="error" onClick={() => setDeleteDialogOpen(true)} disabled={selectedIds.length === 0}>
+            <Button
+              color="error"
+              onClick={() => setDeleteDialogOpen(true)}
+              disabled={selectedIds.length === 0 || isLoading}
+            >
               <DeleteIcon fontSize="small" />
               削除
             </Button>
@@ -157,7 +161,7 @@ export const BillListTable = ({
               onClick={() => {
                 router.push(`bill-list/copy?seikyuId=${selectedIds[0]}`);
               }}
-              disabled={selectedIds.length !== 1}
+              disabled={selectedIds.length !== 1 || isLoading}
             >
               <ContentCopyIcon fontSize="small" />
               コピー
@@ -235,6 +239,7 @@ export const BillListTable = ({
                     <TableCell align="right" padding="none" width={60}>
                       <Button
                         variant="text"
+                        disabled={isLoading}
                         sx={{ p: 0, m: 0, minWidth: 1, justifyContent: 'left' }}
                         onClick={() => {
                           console.log('テーブルで請求番号', bill.billHeadId, 'をクリック');
