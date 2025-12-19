@@ -46,7 +46,7 @@ import { LockValues } from '@/app/(main)/_lib/types';
 import { BackButton } from '@/app/(main)/_ui/buttons';
 import DateX, { RSuiteDateRangePicker, TestDate } from '@/app/(main)/_ui/date';
 import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
-import { Loading } from '@/app/(main)/_ui/loading';
+import { Loading, LoadingOverlay } from '@/app/(main)/_ui/loading';
 import { SelectTable } from '@/app/(main)/_ui/table';
 import { WillDeleteAlertDialog } from '@/app/(main)/(masters)/_ui/dialogs';
 import { equipmentRows, users, vehicleHeaders, vehicleRows } from '@/app/(main)/order/[juchuHeadId]/[mode]/_lib/data';
@@ -299,6 +299,7 @@ export const Order = (props: {
   // 機材入力ボタン押下
   const handleAddEq = async () => {
     if (!isDirty) {
+      setIsLoading(true);
       await deleteLock(1, props.juchuHeadData.juchuHeadId);
       router.push(`/eq-main-order-detail/${props.juchuHeadData.juchuHeadId}/0/edit`);
     } else {
@@ -317,6 +318,7 @@ export const Order = (props: {
         (selectEqHeader.yardShukoDat ? selectEqHeader.yardShukoFixFlg === 1 : true)
       ) {
         if (!isDirty) {
+          setIsLoading(true);
           await deleteLock(1, props.juchuHeadData.juchuHeadId);
           router.push(
             `/eq-return-order-detail/${props.juchuHeadData.juchuHeadId}/0/${selectEqHeader.juchuKizaiHeadId}/edit`
@@ -349,6 +351,7 @@ export const Order = (props: {
         (selectEqHeader.yardShukoDat ? selectEqHeader.yardShukoFixFlg === 1 : true)
       ) {
         if (!isDirty) {
+          setIsLoading(true);
           await deleteLock(1, props.juchuHeadData.juchuHeadId);
           router.push(
             `/eq-keep-order-detail/${props.juchuHeadData.juchuHeadId}/0/${selectEqHeader.juchuKizaiHeadId}/edit`
@@ -601,12 +604,7 @@ export const Order = (props: {
     setSharyoHeadDeleteOpen(false);
   };
 
-  if (user === null || isLoading)
-    return (
-      <Box height={'90vh'}>
-        <Loading />
-      </Box>
-    );
+  if (isLoading) return <LoadingOverlay />;
 
   return (
     <Container disableGutters sx={{ minWidth: '100%', pb: 10 }} maxWidth={'xl'}>
@@ -633,25 +631,22 @@ export const Order = (props: {
       {/* --------------------------------受注ヘッダー------------------------------------- */}
       <Paper variant="outlined">
         <form onSubmit={handleSubmit(onSubmit)}>
-          <Grid2 container display="flex" alignItems="center" justifyContent="space-between" p={2}>
+          <Grid2 container display="flex" alignItems="center" justifyContent="space-between" px={2}>
             <Grid2>
               <Typography>受注ヘッダー</Typography>
             </Grid2>
-            <Grid2 container spacing={1}>
+            <Grid2 container spacing={1} sx={{ display: save ? 'inline-flex' : 'none' }}>
               <Button
-                onClick={() => router.push(`/quotation-list/create?juchuId=${getValues('juchuHeadId')}`)}
+                onClick={() => {
+                  setIsLoading(true);
+                  router.push(`/quotation-list/create?juchuId=${getValues('juchuHeadId')}`);
+                }}
                 disabled={isDirty}
-                sx={{ display: save ? 'inline-flex' : 'none' }}
               >
                 <CreateIcon fontSize="small" />
                 見積作成
               </Button>
-              <Button
-                color="error"
-                onClick={() => setHeadDeleteOpen(true)}
-                disabled={!edit}
-                sx={{ display: save ? 'inline-flex' : 'none' }}
-              >
+              <Button color="error" onClick={() => setHeadDeleteOpen(true)} disabled={!edit}>
                 <Delete fontSize="small" />
                 伝票削除
               </Button>
@@ -873,21 +868,14 @@ export const Order = (props: {
               </Grid2>
               <Grid2 container display="flex" alignItems="center" spacing={1}>
                 <Typography>合計金額</Typography>
-                <TextField
+                <Typography
                   sx={{
                     width: '40%',
                     minWidth: '90px',
-                    '& .MuiInputBase-input': {
-                      textAlign: 'right',
-                      padding: 1,
-                    },
                   }}
-                  value={`¥${priceTotal.toLocaleString()}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                  }}
-                  disabled
-                ></TextField>
+                >
+                  ¥{priceTotal.toLocaleString()}
+                </Typography>
               </Grid2>
               <Grid2 container spacing={1}>
                 <Button
@@ -901,7 +889,6 @@ export const Order = (props: {
                   機材入力
                 </Button>
                 <Button
-                  //href="/order/equipment-return-order-detail"
                   color="error"
                   onClick={(e) => {
                     e.stopPropagation();
@@ -998,7 +985,7 @@ export const Order = (props: {
                     console.log(selectedVehs);
                     setSharyoHeadDeleteOpen(true);
                   }}
-                  disabled={!edit}
+                  disabled={!edit || selectedVehs.length === 0}
                 >
                   <Delete fontSize="small" />
                   受注明細削除

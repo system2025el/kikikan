@@ -31,16 +31,10 @@ const Page = async (props: {
   }
 
   // 出庫フラグ
-  console.time();
   const shukoFixFlag = await getNyushukoFixFlag(juchuHeadId, juchuKizaiHeadId, 60);
-  console.log('-----------------------------出発フラグ--------------------------');
-  console.timeEnd();
 
   // 入庫フラグ
-  console.time();
   const nyukoFixFlag = await getNyushukoFixFlag(juchuHeadId, juchuKizaiHeadId, 70);
-  console.log('-----------------------------出発フラグ--------------------------');
-  console.timeEnd();
 
   // 編集モード(edit:編集、view:閲覧)
   const edit = params.mode === 'edit' && !shukoFixFlag ? true : false;
@@ -68,7 +62,7 @@ const Page = async (props: {
       juchuKizaiHeadId: juchuKizaiHeadId,
       juchuKizaiHeadKbn: 3,
       mem: null,
-      headNam: '',
+      headNam: juchuHeadData.koenNam,
       oyaJuchuKizaiHeadId: oyaJuchuKizaiHeadId,
       kicsShukoDat: null,
       kicsNyukoDat: null,
@@ -105,10 +99,7 @@ const Page = async (props: {
     // 既存
   } else {
     // キープ受注機材ヘッダーデータ
-    console.time();
     const keepJuchuKizaiHeadData = await getKeepJuchuKizaiHead(juchuHeadId, juchuKizaiHeadId);
-    console.log('---------------------受注機材ヘッダーキープ---------------------');
-    console.timeEnd();
 
     if (!keepJuchuKizaiHeadData) {
       return <div>受注機材情報が見つかりません。</div>;

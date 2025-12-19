@@ -56,10 +56,7 @@ const Page = async (props: {
   const stockTableHeaderDateRange = getRange(oyaShukoDate, oyaNyukoDate);
 
   // 入庫フラグ
-  console.time();
   const nyukoFixFlag = await getNyushukoFixFlag(juchuHeadId, juchuKizaiHeadId, 70);
-  console.log('-----------------------------出発フラグ--------------------------');
-  console.timeEnd();
 
   // 新規
   if (juchuKizaiHeadId === 0) {
@@ -73,7 +70,7 @@ const Page = async (props: {
       juchuHonbanbiQty: oyaJuchuHonbanbiQty ?? 0,
       //nebikiAmt: null,
       mem: null,
-      headNam: '',
+      headNam: juchuHeadData.koenNam,
       oyaJuchuKizaiHeadId: oyaJuchuKizaiHeadId,
       kicsNyukoDat: null,
       yardNyukoDat: null,
@@ -111,10 +108,7 @@ const Page = async (props: {
     // 既存
   } else {
     // 返却受注機材ヘッダーデータ
-    console.time();
     const returnJuchuKizaiHeadData = await getReturnJuchuKizaiHead(juchuHeadId, juchuKizaiHeadId);
-    console.log('---------------------受注機材ヘッダー---------------------');
-    console.timeEnd();
 
     if (!returnJuchuKizaiHeadData) {
       return <div>受注機材情報が見つかりません。</div>;
