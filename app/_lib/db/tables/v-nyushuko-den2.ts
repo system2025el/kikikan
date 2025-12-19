@@ -1,9 +1,17 @@
+import dayjs from 'dayjs';
+import timezone from 'dayjs/plugin/timezone';
+import utc from 'dayjs/plugin/utc';
+
 import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { NyukoListSearchValues } from '@/app/(main)/nyuko-list/_lib/types';
 import { ShukoListSearchValues } from '@/app/(main)/shuko-list/_lib/types';
 
 import pool from '../postgres';
 import { SCHEMA, supabase } from '../supabase';
+
+// .tz()を使う準備
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 export const selectFilteredShukoList = async (queries: ShukoListSearchValues) => {
   let query = `
@@ -35,9 +43,25 @@ export const selectFilteredShukoList = async (queries: ShukoListSearchValues) =>
   if (queries.shukoBasho !== 0) {
     query += ` AND d2.nyushuko_basho_id = ${queries.shukoBasho}`;
   }
-  if (queries.shukoDat !== null) {
-    query += ` AND d2.nyushuko_dat::text LIKE '%${toJapanYMDString(queries.shukoDat, '-')}%'`;
+
+  // '指定期間'
+  if (queries.shukoDat.from && queries.shukoDat.to) {
+    // 指定日がどちらも入ってる場合
+    const startOfDay = dayjs(queries.shukoDat.from).tz('Asia/Tokyo').startOf('day').toISOString();
+    const startOfnextDay = dayjs(queries.shukoDat.to).tz('Asia/Tokyo').add(1, 'day').startOf('day').toISOString();
+    query += ` AND d2.nyushuko_dat >= '${startOfDay}' AND d2.nyushuko_dat < '${startOfnextDay}'`;
+  } else if (queries.shukoDat.from) {
+    // fromだけの場合
+    const startOfDay = dayjs(queries.shukoDat.from).tz('Asia/Tokyo').startOf('day').toISOString();
+    console.log('start of the day: ', startOfDay);
+    query += ` AND d2.nyushuko_dat >= '${startOfDay}'`;
+  } else if (queries.shukoDat.to) {
+    // toだけの場合
+    const startOfnextDay = dayjs(queries.shukoDat.to).tz('Asia/Tokyo').add(1, 'day').startOf('day').toISOString();
+    console.log('start of the next day: ', startOfnextDay);
+    query += ` AND d2.nyushuko_dat < '${startOfnextDay}'`;
   }
+
   if (queries.section && queries.section.length !== 0) {
     const likeClouds = queries.section.map((d) => ` d2.section_namv::TEXT LIKE '%${d}%'`).join(' OR');
     query += ` AND (${likeClouds})`;
@@ -80,8 +104,23 @@ export const selectFilteredNyukoList = async (queries: NyukoListSearchValues) =>
   if (queries.nyukoBasho !== 0) {
     query += ` AND d2.nyushuko_basho_id = ${queries.nyukoBasho}`;
   }
-  if (queries.nyukoDat !== null) {
-    query += ` AND d2.nyushuko_dat::text LIKE '%${toJapanYMDString(queries.nyukoDat, '-')}%'`;
+
+  // '指定期間'
+  if (queries.nyukoDat.from && queries.nyukoDat.to) {
+    // 指定日がどちらも入ってる場合
+    const startOfDay = dayjs(queries.nyukoDat.from).tz('Asia/Tokyo').startOf('day').toISOString();
+    const startOfnextDay = dayjs(queries.nyukoDat.to).tz('Asia/Tokyo').add(1, 'day').startOf('day').toISOString();
+    query += ` AND d2.nyushuko_dat >= '${startOfDay}' AND d2.nyushuko_dat < '${startOfnextDay}'`;
+  } else if (queries.nyukoDat.from) {
+    // fromだけの場合
+    const startOfDay = dayjs(queries.nyukoDat.from).tz('Asia/Tokyo').startOf('day').toISOString();
+    console.log('start of the day: ', startOfDay);
+    query += ` AND d2.nyushuko_dat >= '${startOfDay}'`;
+  } else if (queries.nyukoDat.to) {
+    // toだけの場合
+    const startOfnextDay = dayjs(queries.nyukoDat.to).tz('Asia/Tokyo').add(1, 'day').startOf('day').toISOString();
+    console.log('start of the next day: ', startOfnextDay);
+    query += ` AND d2.nyushuko_dat < '${startOfnextDay}'`;
   }
   if (queries.section && queries.section.length !== 0) {
     const likeClouds = queries.section.map((d) => ` d2.section_namv::TEXT LIKE '%${d}%'`).join(' OR');

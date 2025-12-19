@@ -1,6 +1,7 @@
 export type NyukoListSearchValues = {
   juchuHeadId: number | null;
-  nyukoDat: Date | null;
+  nyukoDat: { from: Date | null; to: Date | null };
+
   nyukoBasho: number;
   section: string[];
 };

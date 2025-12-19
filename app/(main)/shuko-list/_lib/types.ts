@@ -1,6 +1,6 @@
 export type ShukoListSearchValues = {
   juchuHeadId: number | null;
-  shukoDat: Date | null;
+  shukoDat: { from: Date | null; to: Date | null };
   shukoBasho: number;
   section: string[];
 };
