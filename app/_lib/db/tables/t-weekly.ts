@@ -23,8 +23,17 @@ export const upsertTWeekly = async (data: TWeeklyValues) => {
       await supabase.schema(SCHEMA).from('t_weekly').update(rest).eq('weekly_dat', data.weekly_dat);
     } else {
       const { upd_dat, upd_user, ...rest } = data;
-      // 新規挿入
-      await supabase.schema(SCHEMA).from('t_weekly').insert(rest);
+
+      if (
+        !(
+          (!rest.mem || rest.mem.trim() === '') &&
+          (!rest.tanto_nam || rest.tanto_nam.trim() === '') &&
+          rest.holiday_flg === 0
+        )
+      ) {
+        // 新規挿入
+        await supabase.schema(SCHEMA).from('t_weekly').insert(rest);
+      }
     }
   } catch (e) {
     throw e;

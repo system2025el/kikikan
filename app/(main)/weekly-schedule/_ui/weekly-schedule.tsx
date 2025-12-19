@@ -13,6 +13,7 @@ import {
   TableHead,
   TableRow,
 } from '@mui/material';
+import { Luckiest_Guy } from 'next/font/google';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
@@ -52,7 +53,7 @@ export const WeeklySchedule = () => {
     defaultValues: {
       startDate: new Date(),
       endDate: null,
-      dateCount: null,
+      dateCount: 31,
     },
   });
 
@@ -91,7 +92,7 @@ export const WeeklySchedule = () => {
       reset(searchParams);
       getSchedule(searchParams);
     } else {
-      getSchedule({ startDate: new Date(), endDate: null, dateCount: null });
+      getSchedule({ startDate: new Date(), endDate: null, dateCount: 31 });
     }
   }, [reset]);
 
@@ -151,7 +152,7 @@ export const WeeklySchedule = () => {
             }}
             type="number"
           />
-          <Button type="submit" sx={{ ml: 2 }}>
+          <Button type="submit" sx={{ ml: 2 }} loading={isLoading}>
             再取得
           </Button>
         </Box>

@@ -62,6 +62,8 @@ export const BillListTable = ({
   const router = useRouter();
 
   /* useState -------------------------------------------------- */
+  /** 処理中 */
+  const [isProcessing, setIsProcessing] = useState(false);
   /** 削除ダイアログの開閉 */
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   /** 選択された請求Idの配列 */
@@ -147,11 +149,7 @@ export const BillListTable = ({
         </Grid2>
         <Grid2 container spacing={1}>
           <Grid2 container spacing={1}>
-            <Button
-              color="error"
-              onClick={() => setDeleteDialogOpen(true)}
-              disabled={selectedIds.length === 0 || isLoading}
-            >
+            <Button color="error" onClick={() => setDeleteDialogOpen(true)} disabled={selectedIds.length === 0}>
               <DeleteIcon fontSize="small" />
               削除
             </Button>
@@ -159,9 +157,11 @@ export const BillListTable = ({
           <Grid2 container spacing={1}>
             <Button
               onClick={() => {
+                setIsProcessing(true);
                 router.push(`bill-list/copy?seikyuId=${selectedIds[0]}`);
               }}
-              disabled={selectedIds.length !== 1 || isLoading}
+              disabled={selectedIds.length !== 1}
+              loading={isProcessing}
             >
               <ContentCopyIcon fontSize="small" />
               コピー
