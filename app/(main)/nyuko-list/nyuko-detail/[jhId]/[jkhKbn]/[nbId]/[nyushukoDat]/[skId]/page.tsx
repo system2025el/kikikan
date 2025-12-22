@@ -13,28 +13,26 @@ const Page = async (props: {
 }) => {
   const params = await props.params;
 
-  const nyukoDetailData = await getNyukoDetail(
-    Number(params.jhId),
-    Number(params.jkhKbn),
-    Number(params.nbId),
-    decodeURIComponent(params.nyushukoDat),
-    Number(params.skId)
-  );
+  // 入庫詳細、入庫詳細テーブルデータ
+  const [nyukoDetailData, nyukoDetailTableData] = await Promise.all([
+    getNyukoDetail(
+      Number(params.jhId),
+      Number(params.jkhKbn),
+      Number(params.nbId),
+      decodeURIComponent(params.nyushukoDat),
+      Number(params.skId)
+    ),
+    getNyukoDetailTable(
+      Number(params.jhId),
+      Number(params.jkhKbn),
+      Number(params.nbId),
+      decodeURIComponent(params.nyushukoDat),
+      Number(params.skId)
+    ),
+  ]);
 
-  if (!nyukoDetailData) {
-    return <div>エラー</div>;
-  }
-
-  const nyukoDetailTableData = await getNyukoDetailTable(
-    nyukoDetailData.juchuHeadId,
-    nyukoDetailData.juchuKizaiHeadKbn,
-    nyukoDetailData.nyushukoBashoId,
-    nyukoDetailData.nyushukoDat,
-    nyukoDetailData.sagyoKbnId
-  );
-
-  if (!nyukoDetailTableData) {
-    return <div>エラー</div>;
+  if (!nyukoDetailData || !nyukoDetailTableData) {
+    return <div>入庫明細が見つかりません。</div>;
   }
 
   const fixFlag = await getNyukoFixFlag(

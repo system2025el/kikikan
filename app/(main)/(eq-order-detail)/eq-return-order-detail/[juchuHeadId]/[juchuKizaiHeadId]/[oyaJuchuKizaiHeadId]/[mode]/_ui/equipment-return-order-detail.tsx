@@ -88,14 +88,9 @@ export const EquipmentReturnOrderDetail = (props: {
   juchuHeadData: DetailOerValues;
   oyaJuchuKizaiNyushukoData: OyaJuchuKizaiNyushukoValues;
   returnJuchuKizaiHeadData: ReturnJuchuKizaiHeadValues;
-  // returnJuchuKizaiMeisaiData: ReturnJuchuKizaiMeisaiValues[] | undefined;
-  // returnJuchuContainerMeisaiData: ReturnJuchuContainerMeisaiValues[] | undefined;
-  // eqStockData: StockTableValues[][] | undefined;
   oyaShukoDate: Date;
   oyaNyukoDate: Date;
   stockTableHeaderDateRange: string[];
-  // returnNyukoDate: Date | null;
-  // dateRange: string[];
   edit: boolean;
   nyukoFixFlag: boolean;
 }) => {
@@ -265,19 +260,19 @@ export const EquipmentReturnOrderDetail = (props: {
       // 受注機材ヘッダーデータ
       const juchuKizaiHeadData = getValues();
 
-      // 返却受注機材明細データ
-      const returnJuchuKizaiMeisaiData = await getReturnJuchuKizaiMeisai(
-        juchuKizaiHeadData.juchuHeadId,
-        juchuKizaiHeadData.juchuKizaiHeadId,
-        juchuKizaiHeadData.oyaJuchuKizaiHeadId
-      );
-
-      // 返却受注コンテナ明細データ
-      const returnJuchuContainerMeisaiData = await getReturnJuchuContainerMeisai(
-        juchuKizaiHeadData.juchuHeadId,
-        juchuKizaiHeadData.juchuKizaiHeadId,
-        juchuKizaiHeadData.oyaJuchuKizaiHeadId
-      );
+      // 返却受注機材明細データ、返却受注コンテナ明細データ
+      const [returnJuchuKizaiMeisaiData, returnJuchuContainerMeisaiData] = await Promise.all([
+        getReturnJuchuKizaiMeisai(
+          juchuKizaiHeadData.juchuHeadId,
+          juchuKizaiHeadData.juchuKizaiHeadId,
+          juchuKizaiHeadData.oyaJuchuKizaiHeadId
+        ),
+        getReturnJuchuContainerMeisai(
+          juchuKizaiHeadData.juchuHeadId,
+          juchuKizaiHeadData.juchuKizaiHeadId,
+          juchuKizaiHeadData.oyaJuchuKizaiHeadId
+        ),
+      ]);
 
       // 返却入庫日
       const returnNyukoDate = getNyukoDate(
@@ -288,12 +283,15 @@ export const EquipmentReturnOrderDetail = (props: {
       const dateRange = getRange(returnNyukoDate, oyaNyukoDate);
 
       // 機材在庫データ
-      const updatedEqStockData = await updateEqStock(
-        juchuKizaiHeadData?.juchuHeadId,
-        juchuKizaiHeadData?.juchuKizaiHeadId,
-        returnNyukoDate,
-        returnJuchuKizaiMeisaiData
-      );
+      const updatedEqStockData =
+        returnJuchuKizaiMeisaiData.length > 0
+          ? await updateEqStock(
+              juchuKizaiHeadData?.juchuHeadId,
+              juchuKizaiHeadData?.juchuKizaiHeadId,
+              returnNyukoDate,
+              returnJuchuKizaiMeisaiData
+            )
+          : [];
 
       setOriginReturnJuchuKizaiMeisaiList(returnJuchuKizaiMeisaiData);
       setReturnJuchuKizaiMeisaiList(returnJuchuKizaiMeisaiData);

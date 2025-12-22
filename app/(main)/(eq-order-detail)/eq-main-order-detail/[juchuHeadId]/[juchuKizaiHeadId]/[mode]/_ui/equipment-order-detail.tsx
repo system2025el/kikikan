@@ -79,13 +79,6 @@ import { SortDialog } from './sort-dialog';
 const EquipmentOrderDetail = (props: {
   juchuHeadData: DetailOerValues;
   juchuKizaiHeadData: JuchuKizaiHeadValues;
-  // juchuKizaiMeisaiData: JuchuKizaiMeisaiValues[] | undefined;
-  // idoJuchuKizaiMeisaiData: IdoJuchuKizaiMeisaiValues[] | undefined;
-  // juchuContainerMeisaiData: JuchuContainerMeisaiValues[];
-  // shukoDate: Date | null;
-  // nyukoDate: Date | null;
-  // dateRange: string[];
-  // eqStockData: StockTableValues[][] | undefined;
   juchuHonbanbiData: JuchuKizaiHonbanbiValues[] | undefined;
   edit: boolean;
   fixFlag: boolean;
@@ -225,17 +218,6 @@ const EquipmentOrderDetail = (props: {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
-  // // 合計金額
-  // const [priceTotal, setPriceTotal] = useState(
-  //   juchuKizaiMeisaiList!.reduce(
-  //     (sum, row) =>
-  //       props.juchuKizaiHeadData.juchuHonbanbiQty && row.planKizaiQty
-  //         ? sum + row.kizaiTankaAmt * row.planKizaiQty * props.juchuKizaiHeadData.juchuHonbanbiQty
-  //         : 0,
-  //     0
-  //   )
-  // );
-
   // 編集中かどうか
   const [isNebikiRatEditing, setIsNebikiRatEditing] = useState(false);
   // 編集中かどうか
@@ -316,23 +298,12 @@ const EquipmentOrderDetail = (props: {
       // 受注機材ヘッダーデータ
       const juchuKizaiHeadData = getValues();
 
-      // 受注機材明細データ
-      const juchuKizaiMeisaiData = await getJuchuKizaiMeisai(
-        juchuKizaiHeadData.juchuHeadId,
-        juchuKizaiHeadData.juchuKizaiHeadId
-      );
-
-      // 移動受注機材明細データ
-      const idoJuchuKizaiMeisaiData = await getIdoJuchuKizaiMeisai(
-        juchuKizaiHeadData.juchuHeadId,
-        juchuKizaiHeadData.juchuKizaiHeadId
-      );
-
-      // 受注コンテナ明細データ
-      const juchuContainerMeisaiData = await getJuchuContainerMeisai(
-        juchuKizaiHeadData.juchuHeadId,
-        juchuKizaiHeadData.juchuKizaiHeadId
-      );
+      // 受注機材明細データ、移動受注機材明細データ、受注コンテナ明細データ
+      const [juchuKizaiMeisaiData, idoJuchuKizaiMeisaiData, juchuContainerMeisaiData] = await Promise.all([
+        getJuchuKizaiMeisai(juchuKizaiHeadData.juchuHeadId, juchuKizaiHeadData.juchuKizaiHeadId),
+        getIdoJuchuKizaiMeisai(juchuKizaiHeadData.juchuHeadId, juchuKizaiHeadData.juchuKizaiHeadId),
+        getJuchuContainerMeisai(juchuKizaiHeadData.juchuHeadId, juchuKizaiHeadData.juchuKizaiHeadId),
+      ]);
 
       // 出庫日
       const shukoDate = getShukoDate(
@@ -349,12 +320,15 @@ const EquipmentOrderDetail = (props: {
       const dateRange = getRange(shukoDate, nyukoDate);
 
       // 機材在庫データ
-      const updatedEqStockData = await updateEqStock(
-        juchuKizaiHeadData?.juchuHeadId,
-        juchuKizaiHeadData?.juchuKizaiHeadId,
-        shukoDate,
-        juchuKizaiMeisaiData ?? []
-      );
+      const updatedEqStockData =
+        juchuKizaiMeisaiData.length > 0
+          ? await updateEqStock(
+              juchuKizaiHeadData?.juchuHeadId,
+              juchuKizaiHeadData?.juchuKizaiHeadId,
+              shukoDate,
+              juchuKizaiMeisaiData
+            )
+          : [];
 
       setOriginJuchuKizaiMeisaiList(juchuKizaiMeisaiData ?? []);
       setJuchuKizaiMeisaiList(juchuKizaiMeisaiData ?? []);

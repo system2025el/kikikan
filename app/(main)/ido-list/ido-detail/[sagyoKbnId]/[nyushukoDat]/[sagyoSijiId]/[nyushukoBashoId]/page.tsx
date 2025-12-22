@@ -35,10 +35,13 @@ const Page = async (props: {
     nyushukoBashoId: nyushukoBashoId,
   };
 
-  const idoDenData = await getIdoDen(sagyoKbnId, sagyoSijiId, nyushukoDat, nyushukoBashoId);
-
   const fixKbn = sagyoKbnId === 40 ? 60 : 70;
-  const fixFlag = await getIdoFix(fixKbn, sagyoSijiId, nyushukoDat, nyushukoBashoId);
+
+  // 移動伝票データ、完了フラグ
+  const [idoDenData, fixFlag] = await Promise.all([
+    getIdoDen(sagyoKbnId, sagyoSijiId, nyushukoDat, nyushukoBashoId),
+    getIdoFix(fixKbn, sagyoSijiId, nyushukoDat, nyushukoBashoId),
+  ]);
 
   return <IdoDetail idoDetailData={idoDetailData} idoDetailTableData={idoDenData} fixFlag={fixFlag} />;
 };

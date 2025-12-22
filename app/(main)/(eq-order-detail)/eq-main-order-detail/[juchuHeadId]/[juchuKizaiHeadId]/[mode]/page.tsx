@@ -20,15 +20,16 @@ const Page = async (props: { params: Promise<{ juchuHeadId: string; juchuKizaiHe
   const juchuHeadId = Number(params.juchuHeadId);
   // 受注機材ヘッダーid
   const juchuKizaiHeadId = Number(params.juchuKizaiHeadId);
-  // 受注ヘッダーデータ
-  const juchuHeadData = await getDetailJuchuHead(Number(params.juchuHeadId));
+
+  // 受注ヘッダーデータ、出発フラグ
+  const [juchuHeadData, fixFlag] = await Promise.all([
+    getDetailJuchuHead(juchuHeadId),
+    getNyushukoFixFlag(juchuHeadId, juchuKizaiHeadId, 60),
+  ]);
 
   if (!juchuHeadData) {
     return <div>受注情報が見つかりません。</div>;
   }
-
-  // 出発フラグ
-  const fixFlag = await getNyushukoFixFlag(juchuHeadId, juchuKizaiHeadId, 60);
 
   // 編集モード(edit:編集、view:閲覧)
   const edit = params.mode === 'edit' && !fixFlag ? true : false;
@@ -50,20 +51,6 @@ const Page = async (props: { params: Promise<{ juchuHeadId: string; juchuKizaiHe
       yardShukoDat: juchuHeadData.juchuRange ? juchuHeadData.juchuRange[0] : null,
       yardNyukoDat: juchuHeadData.juchuRange ? juchuHeadData.juchuRange[1] : null,
     };
-    // // 受注機材明細データ(初期値)
-    // const newJuchuKizaiMeisaiData: JuchuKizaiMeisaiValues[] = [];
-    // // 移動受注機材明細データ(初期値)
-    // const newIdoJuchuKizaiMeisaiData: IdoJuchuKizaiMeisaiValues[] = [];
-    // // 受注コンテナ明細データ(初期値)
-    // const newJuchuContainerMeisaiData: JuchuContainerMeisaiValues[] = [];
-    // // 機材在庫データ(初期値)
-    // const newEqStockData: StockTableValues[][] = [];
-    // // 出庫日(初期値)
-    // const shukoDate = null;
-    // // 入庫日(初期値)
-    // const nyukoDate = null;
-    // // 出庫日から入庫日(初期値)
-    // const dateRange: string[] = [];
     // 受注本番日データ
     const newJuchuHonbanbiData: JuchuKizaiHonbanbiValues[] = [];
 
@@ -71,13 +58,6 @@ const Page = async (props: { params: Promise<{ juchuHeadId: string; juchuKizaiHe
       <EquipmentOrderDetail
         juchuHeadData={juchuHeadData}
         juchuKizaiHeadData={newJuchuKizaiHeadData}
-        // juchuKizaiMeisaiData={newJuchuKizaiMeisaiData}
-        // idoJuchuKizaiMeisaiData={newIdoJuchuKizaiMeisaiData}
-        // juchuContainerMeisaiData={newJuchuContainerMeisaiData}
-        // shukoDate={shukoDate}
-        // nyukoDate={nyukoDate}
-        // dateRange={dateRange}
-        // eqStockData={newEqStockData}
         juchuHonbanbiData={newJuchuHonbanbiData}
         edit={edit}
         fixFlag={fixFlag}
@@ -86,27 +66,20 @@ const Page = async (props: { params: Promise<{ juchuHeadId: string; juchuKizaiHe
 
     // 既存
   } else {
-    // 受注機材ヘッダーデータ
-    const juchuKizaiHeadData = await getJuchuKizaiHead(juchuHeadId, juchuKizaiHeadId);
+    // 受注機材ヘッダーデータ、受注本番日データ
+    const [juchuKizaiHeadData, juchuHonbanbiData] = await Promise.all([
+      getJuchuKizaiHead(juchuHeadId, juchuKizaiHeadId),
+      getHonbanbi(juchuHeadId, juchuKizaiHeadId),
+    ]);
 
     if (!juchuKizaiHeadData) {
       return <div>受注機材情報が見つかりません。</div>;
     }
 
-    // 受注本番日データ
-    const juchuHonbanbiData = await getHonbanbi(juchuHeadId, juchuKizaiHeadId);
-
     return (
       <EquipmentOrderDetail
         juchuHeadData={juchuHeadData}
         juchuKizaiHeadData={juchuKizaiHeadData}
-        // juchuKizaiMeisaiData={juchuKizaiMeisaiData}
-        // idoJuchuKizaiMeisaiData={idoJuchuKizaiMeisaiData}
-        // juchuContainerMeisaiData={juchuContainerMeisaiData}
-        // shukoDate={shukoDate}
-        // nyukoDate={nyukoDate}
-        // dateRange={dateRange}
-        // eqStockData={eqStockData}
         juchuHonbanbiData={juchuHonbanbiData}
         edit={edit}
         fixFlag={fixFlag}

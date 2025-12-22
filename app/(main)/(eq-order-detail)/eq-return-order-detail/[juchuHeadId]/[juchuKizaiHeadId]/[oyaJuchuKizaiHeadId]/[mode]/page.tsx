@@ -34,10 +34,13 @@ const Page = async (props: {
   const oyaJuchuKizaiHeadId = Number(params.oyaJuchuKizaiHeadId);
   // 編集モード(edit:編集、view:閲覧)
   const edit = params.mode === 'edit' ? true : false;
-  // 受注ヘッダーデータ
-  const juchuHeadData = await getDetailJuchuHead(juchuHeadId);
-  // 親受注機材入出庫データ
-  const oyaJuchuKizaiNyushukoData = await getJuchuKizaiNyushuko(juchuHeadId, oyaJuchuKizaiHeadId);
+
+  // 受注ヘッダーデータ、親受注機材入出庫データ、入庫フラグ
+  const [juchuHeadData, oyaJuchuKizaiNyushukoData, nyukoFixFlag] = await Promise.all([
+    getDetailJuchuHead(juchuHeadId),
+    getJuchuKizaiNyushuko(juchuHeadId, oyaJuchuKizaiHeadId),
+    getNyushukoFixFlag(juchuHeadId, juchuKizaiHeadId, 70),
+  ]);
 
   if (!juchuHeadData || !oyaJuchuKizaiNyushukoData) {
     return <div>受注情報が見つかりません。</div>;
@@ -54,9 +57,6 @@ const Page = async (props: {
 
   // 在庫テーブルヘッダー用日付範囲
   const stockTableHeaderDateRange = getRange(oyaShukoDate, oyaNyukoDate);
-
-  // 入庫フラグ
-  const nyukoFixFlag = await getNyushukoFixFlag(juchuHeadId, juchuKizaiHeadId, 70);
 
   // 新規
   if (juchuKizaiHeadId === 0) {
@@ -75,31 +75,15 @@ const Page = async (props: {
       kicsNyukoDat: null,
       yardNyukoDat: null,
     };
-    // // 返却受注機材明細データ(初期値)
-    // const newReturnJuchuKizaiMeisaiData: ReturnJuchuKizaiMeisaiValues[] = [];
-    // // 返却受注コンテナ明細データ(初期値)
-    // const newReturnJuchuContainerMeisaiData: ReturnJuchuContainerMeisaiValues[] = [];
-    // // 機材在庫データ(初期値)
-    // const newEqStockData: StockTableValues[][] = [];
-
-    // // 返却入庫日(初期値)
-    // const returnNyukoDate = null;
-    // // 返却入庫日から親入庫日(初期値)
-    // const dateRange: string[] = [];
 
     return (
       <EquipmentReturnOrderDetail
         juchuHeadData={juchuHeadData}
         oyaJuchuKizaiNyushukoData={oyaJuchuKizaiNyushukoData}
         returnJuchuKizaiHeadData={newReturnJuchuKizaiHeadData}
-        // returnJuchuKizaiMeisaiData={newReturnJuchuKizaiMeisaiData}
-        // returnJuchuContainerMeisaiData={newReturnJuchuContainerMeisaiData}
-        // eqStockData={newEqStockData}
         oyaShukoDate={oyaShukoDate}
         oyaNyukoDate={oyaNyukoDate}
         stockTableHeaderDateRange={stockTableHeaderDateRange}
-        // returnNyukoDate={returnNyukoDate}
-        // dateRange={dateRange}
         edit={edit}
         nyukoFixFlag={nyukoFixFlag}
       />
@@ -113,66 +97,15 @@ const Page = async (props: {
     if (!returnJuchuKizaiHeadData) {
       return <div>受注機材情報が見つかりません。</div>;
     }
-    // // 返却受注機材明細データ
-    // console.time();
-    // const returnJuchuKizaiMeisaiData = await getReturnJuchuKizaiMeisai(
-    //   juchuHeadId,
-    //   juchuKizaiHeadId,
-    //   oyaJuchuKizaiHeadId
-    // );
-    // console.log('----------------------------受注機材明細---------------------------------');
-    // console.timeEnd();
-
-    // // 返却受注コンテナ明細データ
-    // console.time();
-    // const returnJuchuContainerMeisaiData = await getReturnJuchuContainerMeisai(
-    //   juchuHeadId,
-    //   juchuKizaiHeadId,
-    //   oyaJuchuKizaiHeadId
-    // );
-    // console.log('----------------------------受注コンテナ明細---------------------------------');
-    // console.timeEnd();
-
-    // // 返却入庫日
-    // const returnNyukoDate = getNyukoDate(
-    //   returnJuchuKizaiHeadData.kicsNyukoDat && new Date(returnJuchuKizaiHeadData.kicsNyukoDat),
-    //   returnJuchuKizaiHeadData.yardNyukoDat && new Date(returnJuchuKizaiHeadData.yardNyukoDat)
-    // );
-    // // 出庫日から入庫日
-    // const dateRange = getRange(returnNyukoDate, oyaNyukoDate);
-    // // 受注機材idリスト
-    // const ids = returnJuchuKizaiMeisaiData?.map((data) => data.kizaiId);
-    // // 機材在庫データ
-    // const eqStockData: StockTableValues[][] = [];
-    // console.time();
-    // if (ids) {
-    //   if (!returnNyukoDate) return <div>データに不備があります。</div>;
-    //   for (let i = 0; i < ids.length; i++) {
-    //     const stock: StockTableValues[] = await getStockList(
-    //       returnJuchuKizaiHeadData?.juchuHeadId,
-    //       returnJuchuKizaiHeadData?.juchuKizaiHeadId,
-    //       ids[i],
-    //       subDays(returnNyukoDate, 1)
-    //     );
-    //     eqStockData.push(stock);
-    //   }
-    // }
-    // console.log('--------------------------在庫リスト----------------------------');
-    // console.timeEnd();
 
     return (
       <EquipmentReturnOrderDetail
         juchuHeadData={juchuHeadData}
         oyaJuchuKizaiNyushukoData={oyaJuchuKizaiNyushukoData}
         returnJuchuKizaiHeadData={returnJuchuKizaiHeadData}
-        // returnJuchuKizaiMeisaiData={returnJuchuKizaiMeisaiData}
-        // returnJuchuContainerMeisaiData={returnJuchuContainerMeisaiData}
-        // eqStockData={eqStockData}
         oyaShukoDate={oyaShukoDate}
         oyaNyukoDate={oyaNyukoDate}
         stockTableHeaderDateRange={stockTableHeaderDateRange}
-        // returnNyukoDate={returnNyukoDate}
-        // dateRange={dateRange}
         edit={edit}
         nyukoFixFlag={nyukoFixFlag}
       />

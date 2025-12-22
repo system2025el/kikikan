@@ -65,12 +65,13 @@ export const LoanSituation = (props: {
     const getData = async () => {
       // ヘッダー開始日
       const strDat = subDays(new Date(), 1);
-      // 機材在庫データ
-      const eqStockData: LoanStockTableValues[] = await getLoanStockData(kizaiData.kizaiId, strDat);
-      // ヘッダー開始日から終了日までに該当する受注ヘッダーidリスト
-      const confirmJuchuHeadIds = await confirmJuchuHeadId(strDat);
-      // 貸出受注データ
-      const loanJuchuData = await getLoanJuchuData(kizaiData.kizaiId);
+
+      // 機材在庫データ、ヘッダー開始日から終了日までに該当する受注ヘッダーidリスト、貸出受注データ
+      const [eqStockData, confirmJuchuHeadIds, loanJuchuData] = await Promise.all([
+        getLoanStockData(kizaiData.kizaiId, strDat),
+        confirmJuchuHeadId(strDat),
+        getLoanJuchuData(kizaiData.kizaiId),
+      ]);
 
       // 該当する受注ヘッダーidリストに含まれる貸出受注データのみ抽出
       const filterLoanJuchuData = loanJuchuData.filter((d) => confirmJuchuHeadIds.includes(d.juchuHeadId));
@@ -166,15 +167,13 @@ export const LoanSituation = (props: {
       setIsLoading(true);
       // ヘッダー開始日
       const strDat = subDays(date.toDate(), 1);
-      console.log('-------------------strDat-----------------', strDat);
-      // 機材在庫データ
-      const eqStockData: LoanStockTableValues[] = await getLoanStockData(props.kizaiData.kizaiId, strDat);
-      // ヘッダー開始日から終了日までに該当する受注ヘッダーidリスト
-      const confirmJuchuHeadIds = await confirmJuchuHeadId(strDat);
-      console.log('-------------------confirmJuchuHeadIds-----------------', confirmJuchuHeadIds);
-      // 貸出受注データ
-      const loanJuchuData = await getLoanJuchuData(props.kizaiData.kizaiId);
-      console.log('-------------------loanJuchuData-----------------', loanJuchuData);
+
+      // 機材在庫データ、ヘッダー開始日から終了日までに該当する受注ヘッダーidリスト、貸出受注データ
+      const [eqStockData, confirmJuchuHeadIds, loanJuchuData] = await Promise.all([
+        getLoanStockData(kizaiData.kizaiId, strDat),
+        confirmJuchuHeadId(strDat),
+        getLoanJuchuData(kizaiData.kizaiId),
+      ]);
 
       // 該当する受注ヘッダーidリストに含まれる貸出受注データのみ抽出
       const filterLoanJuchuData = loanJuchuData.filter((d) => confirmJuchuHeadIds.includes(d.juchuHeadId));

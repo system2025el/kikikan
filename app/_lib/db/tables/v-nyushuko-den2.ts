@@ -136,7 +136,7 @@ export const selectFilteredNyukoList = async (queries: NyukoListSearchValues) =>
   }
 };
 
-export const selectNyukoOne = async (
+export const selectNyushukoOne = async (
   juchuHeadId: number,
   juchuKizaiHeadKbn: number,
   nyushukoBashoId: number,

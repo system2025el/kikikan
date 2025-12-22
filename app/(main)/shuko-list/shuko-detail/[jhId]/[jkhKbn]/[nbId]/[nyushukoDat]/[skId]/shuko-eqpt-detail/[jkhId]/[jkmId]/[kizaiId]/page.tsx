@@ -18,28 +18,31 @@ const Page = async (props: {
 
   const date = decodeURIComponent(params.nyushukoDat);
 
-  const shukoEqptDetailData: ShukoEqptDetailValues | null = await getShukoEqptDetail(
-    Number(params.jhId),
-    Number(params.jkhId),
-    Number(params.jkmId),
-    Number(params.nbId),
-    date,
-    Number(params.skId),
-    Number(params.kizaiId)
-  );
+  // 出庫機材詳細データ、出庫機材詳細テーブルデータ
+  const [shukoEqptDetailData, shukoEqptDetailTableData] = await Promise.all([
+    getShukoEqptDetail(
+      Number(params.jhId),
+      Number(params.jkhId),
+      Number(params.jkmId),
+      Number(params.nbId),
+      date,
+      Number(params.skId),
+      Number(params.kizaiId)
+    ),
+    getShukoEqptDetailTable(
+      Number(params.jhId),
+      Number(params.jkhId),
+      Number(params.jkmId),
+      Number(params.nbId),
+      date,
+      Number(params.skId),
+      Number(params.kizaiId)
+    ),
+  ]);
+
   if (!shukoEqptDetailData) {
     return <div>データが見つかりません</div>;
   }
-
-  const shukoEqptDetailTableData: ShukoEqptDetailTableValues[] = await getShukoEqptDetailTable(
-    Number(params.jhId),
-    Number(params.jkhId),
-    Number(params.jkmId),
-    Number(params.nbId),
-    date,
-    Number(params.skId),
-    Number(params.kizaiId)
-  );
 
   const fixFlag = await getShukoFixFlag(
     Number(params.jhId),
