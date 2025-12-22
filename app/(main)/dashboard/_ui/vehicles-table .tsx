@@ -46,15 +46,15 @@ export const VehiclesTable = ({ orders }: { orders: DashboardTableValues[] }) =>
           </TableRow>
         </TableHead>
         <TableBody>
-          {orders.map((order) => (
-            <TableRow key={order.juchuHeadId} hover>
+          {orders.map((order, index) => (
+            <TableRow key={index} hover>
               {/* <TableCell align="right" sx={{ minWidth: 0, whiteSpace: 'nowrap' }}> */}
               <TableCell>
                 <Button
                   variant="text"
                   size="small"
                   // sx={{ py: 0.2, px: 1, m: 0, width: 'auto' }}
-                  href={`/order/${order.juchuHeadId}/${'view'}`}
+                  onClick={() => window.open(`/order/${order.juchuHeadId}/${'view'}`)}
                 >
                   {order.juchuHeadId}
                 </Button>
@@ -79,7 +79,7 @@ export const VehiclesTable = ({ orders }: { orders: DashboardTableValues[] }) =>
                             ? dispColors.keep
                             : dispColors.main,
                   }}
-                  href={`/eq-main-order-detail/${order.juchuHeadId}/${order.kizaiHeadId}/view`}
+                  onClick={() => window.open(`/eq-main-order-detail/${order.juchuHeadId}/${order.kizaiHeadId}/view`)}
                 >
                   <LightTooltipWithText variant={'button'} maxWidth={300}>
                     {order.headNam}
