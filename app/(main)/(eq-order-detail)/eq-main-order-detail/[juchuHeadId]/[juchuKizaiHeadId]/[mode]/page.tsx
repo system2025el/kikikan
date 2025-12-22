@@ -92,55 +92,6 @@ const Page = async (props: { params: Promise<{ juchuHeadId: string; juchuKizaiHe
     if (!juchuKizaiHeadData) {
       return <div>受注機材情報が見つかりません。</div>;
     }
-    // // 受注機材明細データ
-    // console.time();
-    // const juchuKizaiMeisaiData = await getJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId);
-    // console.log('----------------------------受注機材明細---------------------------------');
-    // console.timeEnd();
-
-    // // 移動受注機材明細データ
-    // console.time();
-    // const idoJuchuKizaiMeisaiData = await getIdoJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId);
-    // console.log('----------------------------受注機材明細---------------------------------');
-    // console.timeEnd();
-
-    // // 受注コンテナ明細データ
-    // console.time();
-    // const juchuContainerMeisaiData = await getJuchuContainerMeisai(juchuHeadId, juchuKizaiHeadId);
-    // console.log('----------------------------受注コンテナ明細---------------------------------');
-    // console.timeEnd();
-
-    // // 出庫日
-    // const shukoDate = getShukoDate(
-    //   juchuKizaiHeadData.kicsShukoDat && new Date(juchuKizaiHeadData.kicsShukoDat),
-    //   juchuKizaiHeadData.yardShukoDat && new Date(juchuKizaiHeadData.yardShukoDat)
-    // );
-    // // 入庫日
-    // const nyukoDate = getNyukoDate(
-    //   juchuKizaiHeadData.kicsNyukoDat && new Date(juchuKizaiHeadData.kicsNyukoDat),
-    //   juchuKizaiHeadData.yardNyukoDat && new Date(juchuKizaiHeadData.yardNyukoDat)
-    // );
-    // // 出庫日から入庫日
-    // const dateRange = getRange(shukoDate, nyukoDate);
-    // // 受注機材idリスト
-    // const ids = juchuKizaiMeisaiData?.map((data) => data.kizaiId);
-    // // 機材在庫データ
-    // const eqStockData: StockTableValues[][] = [];
-    // console.time();
-    // if (ids) {
-    //   if (!shukoDate) return <div>データに不備があります。</div>;
-    //   for (let i = 0; i < ids.length; i++) {
-    //     const stock: StockTableValues[] = await getStockList(
-    //       juchuKizaiHeadData?.juchuHeadId,
-    //       juchuKizaiHeadData?.juchuKizaiHeadId,
-    //       ids[i],
-    //       subDays(shukoDate, 1)
-    //     );
-    //     eqStockData.push(stock);
-    //   }
-    // }
-    // console.log('--------------------------在庫リスト----------------------------');
-    // console.timeEnd();
 
     // 受注本番日データ
     const juchuHonbanbiData = await getHonbanbi(juchuHeadId, juchuKizaiHeadId);
