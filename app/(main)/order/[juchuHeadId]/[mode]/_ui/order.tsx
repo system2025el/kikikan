@@ -94,7 +94,7 @@ export const Order = (props: {
   const save = props.juchuHeadData.juchuHeadId !== 0 ? true : false;
 
   // 画面全体ローディング
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   // 受注機材ヘッダー一覧ローディング
   const [isJuchuKizaiLoading, setIsJuchuKizaiLoading] = useState(false);
 
@@ -188,7 +188,6 @@ export const Order = (props: {
     if (!user) return;
 
     const asyncProcess = async () => {
-      setIsLoading(true);
       const lockData = await getLock(1, props.juchuHeadData.juchuHeadId);
       setLockData(lockData);
       if (props.edit && lockData === null) {
@@ -204,7 +203,7 @@ export const Order = (props: {
     if (getValues('juchuHeadId') === 0) {
       const data = { ...getValues(), nyuryokuUser: user.name };
       reset(data);
-      return;
+      setIsLoading(false);
     } else {
       asyncProcess();
     }

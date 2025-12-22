@@ -49,8 +49,6 @@ export const EqptOrderTable = ({
   /** ページルーター */
   const router = useRouter();
 
-  const [push, setPush] = useState(false);
-
   /** 表示するデータ */
   const list = useMemo(() => {
     return rowsPerPage > 0
@@ -102,9 +100,7 @@ export const EqptOrderTable = ({
                         size="small"
                         sx={{ py: 0.2, px: 1, m: 0, width: 'auto' }}
                         onClick={() => {
-                          if (push) return;
-                          setPush(true);
-                          router.push(`/order/${order.juchuHeadId}/${'view'}`);
+                          window.open(`/order/${order.juchuHeadId}/${'view'}`);
                         }}
                       >
                         {order.juchuHeadId}
@@ -130,9 +126,7 @@ export const EqptOrderTable = ({
                                   : dispColors.main,
                         }}
                         onClick={() => {
-                          if (push) return;
-                          setPush(true);
-                          router.push(
+                          window.open(
                             order.headKbn === 1
                               ? `/eq-main-order-detail/${order.juchuHeadId}/${order.kizaiHeadId}/view`
                               : order.headKbn === 2

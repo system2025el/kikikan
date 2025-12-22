@@ -118,7 +118,7 @@ export const EqptOrderList = () => {
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
       <Paper variant="outlined">
-        <Box width={'100%'} display={'flex'} p={2}>
+        <Box width={'100%'} display={'flex'} px={2}>
           <Typography>受注明細検索</Typography>
         </Box>
         <Divider />

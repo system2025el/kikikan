@@ -184,7 +184,7 @@ export const IdoEqptDetail = (props: {
               disabled={fixFlag || selected.length === 0}
               loading={isLoading}
             >
-              クリア
+              実績クリア
             </Button>
             <Box display={'flex'} alignItems={'center'}>
               <Typography mr={2}>補正数</Typography>
