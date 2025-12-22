@@ -107,7 +107,16 @@ export const BillingStsList = () => {
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
       {isFirst && isLoading && <LoadingOverlay />}
       <Paper variant="outlined">
-        <Box width={'100%'} display={'flex'} p={2}>
+        <Box
+          width={'100%'}
+          display={'flex'}
+          alignItems={'center'}
+          px={2}
+          sx={{
+            minHeight: '30px',
+            maxHeight: '30px',
+          }}
+        >
           <Typography noWrap>受注請求状況検索</Typography>
         </Box>
         <Divider />

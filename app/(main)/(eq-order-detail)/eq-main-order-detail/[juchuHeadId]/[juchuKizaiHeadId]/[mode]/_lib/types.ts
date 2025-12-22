@@ -13,8 +13,8 @@ export const JuchuKizaiHeadSchema = z
       .max(9999999999, { message: validationMessages.maxNumberLength(10) })
       .nullable(),
     nebikiRat: z
-      .number()
-      .int()
+      .number({ message: validationMessages.number() })
+      .int({ message: validationMessages.int() })
       .max(999, { message: validationMessages.maxNumberLength(3) })
       .nullable(),
     mem: z.string().nullable(),

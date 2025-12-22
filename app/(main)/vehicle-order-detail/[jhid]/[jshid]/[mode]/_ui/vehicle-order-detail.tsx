@@ -370,6 +370,9 @@ const VehicleOrderDetail = ({
               変更
             </Button>
           </Grid2>
+          <Grid2>
+            <Button onClick={() => window.close()}>閉じる</Button>
+          </Grid2>
         </Grid2>
         {/* 受注ヘッダ ---------------------------------------------------------------------------------- */}
         <Accordion

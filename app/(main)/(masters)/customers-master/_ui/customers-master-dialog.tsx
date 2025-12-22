@@ -1,10 +1,11 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Grid2, Typography } from '@mui/material';
+import { Grid2, TextField, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import {
   CheckboxElement,
+  Controller,
   SelectElement,
   TextareaAutosizeElement,
   TextFieldElement,
@@ -196,21 +197,32 @@ export const CustomersMasterDialog = ({
               />
             </FormBox>
             <FormBox formItem={formItems[2]}>
-              <TextFieldElement
+              <Controller
                 name="nebikiRat"
                 control={control}
-                type="number"
-                sx={{
-                  width: 120,
-                  '& .MuiInputBase-input': {
-                    textAlign: 'right',
-                  },
-                  '& input[type=number]::-webkit-inner-spin-button': {
-                    WebkitAppearance: 'none',
-                    margin: 0,
-                  },
-                }}
                 disabled={editable ? false : true}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    onChange={(e) => {
+                      const raw = e.target.value;
+                      if (/^\d*$/.test(raw)) {
+                        field.onChange(raw === '' ? '' : Number(raw));
+                      }
+                    }}
+                    type="number"
+                    sx={{
+                      width: 120,
+                      '& .MuiInputBase-input': {
+                        textAlign: 'right',
+                      },
+                      '& input[type=number]::-webkit-inner-spin-button': {
+                        WebkitAppearance: 'none',
+                        margin: 0,
+                      },
+                    }}
+                  />
+                )}
               />
               <Typography>%</Typography>
             </FormBox>

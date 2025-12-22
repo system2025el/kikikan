@@ -127,6 +127,13 @@ export const addNewUser = async (data: UsersMasterDialogValues, user: string) =>
       password: 'password',
       options: { emailRedirectTo: `${getUrl()}` },
     });
+
+    // const { error } = await supabase.auth.signInWithOtp({
+    //   email: data.mailAdr,
+    //   options: {
+    //     emailRedirectTo: `${getUrl()}`,
+    //   },
+    // });
     console.log('できた');
     await revalidatePath('/users-master');
     if (error) {

@@ -395,10 +395,20 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
       <FormProvider {...quotForm}>
         <form onSubmit={handleSubmit(onSubmit)}>
           <Paper variant="outlined">
-            <Grid2 container display="flex" alignItems="center" justifyContent="space-between" p={1}>
-              <Typography margin={1}>見積書</Typography>
+            <Grid2
+              container
+              display="flex"
+              alignItems="center"
+              justifyContent="space-between"
+              sx={{
+                minHeight: '30px',
+                maxHeight: '30px',
+                px: 2,
+              }}
+            >
+              <Typography>見積書</Typography>
               <Box>
-                <Button sx={{ margin: 1 }} onClick={hundlePrintPdf} disabled={isNew || isDirty} loading={isProcessing}>
+                <Button onClick={hundlePrintPdf} disabled={isNew || isDirty} loading={isProcessing}>
                   <PrintIcon fontSize="small" sx={{ mr: 0.5 }} />
                   見積書印刷
                 </Button>
@@ -417,7 +427,17 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
             }}
             variant="outlined"
           >
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon />}
+              sx={{
+                minHeight: '30px',
+                maxHeight: '30px',
+                '&.Mui-expanded': {
+                  minHeight: '30px',
+                  maxHeight: '30px',
+                },
+              }}
+            >
               <Grid2 container alignItems={'center'} width={'100%'}>
                 <Grid2 size={3}>
                   <Typography component="span">受注選択</Typography>
@@ -430,11 +450,11 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
                 )}
               </Grid2>
             </AccordionSummary>
-            <AccordionDetails sx={{ padding: 0, pb: 1 }}>
+            <AccordionDetails sx={{ padding: 0, pb: 0.5 }}>
               <Divider />
               <Grid2 container>
                 <Grid2 size={6.5}>
-                  <Grid2 container mx={2} my={1} spacing={6}>
+                  <Grid2 container mx={2} my={0.5} spacing={6}>
                     <Grid2 display="flex" alignItems="center">
                       <Typography marginRight={5}>受注番号</Typography>
                       <TextField
@@ -531,14 +551,24 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
             }}
             variant="outlined"
           >
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon />}
+              sx={{
+                minHeight: '30px',
+                maxHeight: '30px',
+                '&.Mui-expanded': {
+                  minHeight: '30px',
+                  maxHeight: '30px',
+                },
+              }}
+            >
               <Typography component="span">見積ヘッダー</Typography>
             </AccordionSummary>
-            <AccordionDetails sx={{ padding: 0, pb: 1 }}>
+            <AccordionDetails sx={{ padding: 0, pb: 0.5 }}>
               <Divider />
               <Grid2 container>
                 <Grid2 size={6.5}>
-                  <Grid2 container mx={2} my={1} spacing={6}>
+                  <Grid2 container mx={2} my={0.5} spacing={6}>
                     <Grid2 display="flex" alignItems="center">
                       <Typography marginRight={5}>見積番号</Typography>
                       <TextFieldElement
@@ -711,14 +741,22 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
           </Accordion>
           {/* 見積明細 ----------------------------------------------------------------------------------*/}
           <Paper sx={{ marginTop: 1 }} variant="outlined">
-            <Box p={1}>
-              <Typography margin={1}>見積明細</Typography>
+            <Box
+              display={'flex'}
+              px={2}
+              alignItems={'center'}
+              sx={{
+                minHeight: '30px',
+                maxHeight: '30px',
+              }}
+            >
+              <Typography>見積明細</Typography>
             </Box>
             <Box sx={{ padding: 0, pb: 1 }}>
               <Divider />
               {/* 機材費テーブル ------------------------------------------------------------ */}
               <Box margin={0.5} padding={0.8} borderBottom={1} borderColor={'divider'}>
-                <Typography variant="h6" pt={1} pl={2}>
+                <Typography variant="h6" pl={2}>
                   機材費
                 </Typography>
                 {kizaiFields.fields.map((field, index) => (
@@ -797,7 +835,7 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
               </Box>
               {/* 人件費テーブル ------------------------------------------------------------ */}
               <Box margin={0.5} padding={0.8} borderTop={1} borderBottom={1} borderColor={'divider'}>
-                <Typography variant="h6" pt={1} pl={2}>
+                <Typography variant="h6" pl={2}>
                   人件費
                 </Typography>
                 {laborFields.fields.map((field, index) => (
@@ -829,7 +867,7 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
               </Box>
               {/* その他テーブル ------------------------------------------------------------ */}
               <Box margin={0.5} padding={0.8} borderTop={1} borderColor={'divider'}>
-                <Typography variant="h6" pt={1} pl={2}>
+                <Typography variant="h6" pl={2}>
                   その他
                 </Typography>
                 {otherFields.fields.map((field, index) => (
@@ -861,7 +899,7 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
             </Box>
           </Paper>
           {/* まとめ ------------------------------------------------------------------------------------ */}
-          <Paper sx={{ marginTop: 2, pt: 1 }} variant="outlined">
+          <Paper sx={{ marginTop: 1, pt: 0.5 }} variant="outlined">
             <Box margin={0.5} padding={0.8}>
               <Grid2 container display={'flex'} alignItems={'baseline'} spacing={0.5}>
                 <Grid2 size={1} alignItems={'baseline'}>
@@ -1090,7 +1128,7 @@ const styles: { [key: string]: React.CSSProperties } = {
   container: {
     display: 'flex',
     alignItems: 'center',
-    margin: 1,
+    margin: 0.5,
     marginLeft: 2,
   },
 };
