@@ -1,4 +1,4 @@
-import { getShukoDetail, getShukoFixFlag } from './_lib/funcs';
+import { getShukoDetail, getShukoDetailTable, getShukoFixFlag } from './_lib/funcs';
 import { ShukoDetailValues } from './_lib/types';
 import { ShukoDetail } from './_ui/shuko-detail';
 
@@ -13,28 +13,31 @@ const Page = async (props: {
 }) => {
   const params = await props.params;
 
-  const shukoDetailData: ShukoDetailValues = {
-    juchuHeadId: Number(params.jhId),
-    juchuKizaiHeadKbn: Number(params.jkhKbn),
-    nyushukoBashoId: Number(params.nbId),
-    nyushukoDat: decodeURIComponent(params.nyushukoDat),
-    sagyoKbnId: Number(params.skId),
-  };
+  // 出庫詳細、出庫詳細テーブルデータ
+  const [shukoDetailData, shukoDetailTableData] = await Promise.all([
+    getShukoDetail(
+      Number(params.jhId),
+      Number(params.jkhKbn),
+      Number(params.nbId),
+      decodeURIComponent(params.nyushukoDat),
+      Number(params.skId)
+    ),
+    getShukoDetailTable(
+      Number(params.jhId),
+      Number(params.jkhKbn),
+      Number(params.nbId),
+      decodeURIComponent(params.nyushukoDat),
+      Number(params.skId)
+    ),
+  ]);
 
-  const shukoDetailTableData = await getShukoDetail(
-    shukoDetailData.juchuHeadId,
-    shukoDetailData.juchuKizaiHeadKbn,
-    shukoDetailData.nyushukoBashoId,
-    shukoDetailData.nyushukoDat,
-    shukoDetailData.sagyoKbnId
-  );
-  if (!shukoDetailTableData || shukoDetailTableData.length <= 0) {
+  if (!shukoDetailData || !shukoDetailTableData) {
     return <div>出庫明細が見つかりません。</div>;
   }
 
   const fixFlag = await getShukoFixFlag(
     Number(params.jhId),
-    shukoDetailTableData[0].juchuKizaiHeadId!,
+    shukoDetailData.juchuKizaiHeadIds[0],
     60,
     shukoDetailData.nyushukoDat,
     Number(params.nbId)

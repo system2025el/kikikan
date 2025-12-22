@@ -12,29 +12,27 @@ const Page = async (props: {
 }) => {
   const params = await props.params;
 
-  const idoDenDetailData = await getIdoDenDetail(
-    Number(params.sagyoKbnId),
-    Number(params.sagyoSijiId),
-    params.nyushukoDat,
-    Number(params.nyushukoBashoId),
-    Number(params.kizaiId)
-  );
-
-  const idoEqptDetailData = await getIdoEqptDetail(
-    Number(params.sagyoKbnId),
-    Number(params.sagyoSijiId),
-    params.nyushukoDat,
-    Number(params.nyushukoBashoId),
-    Number(params.kizaiId)
-  );
-
+  // 区分
   const fixKbn = Number(params.sagyoKbnId) === 40 ? 60 : 70;
-  const fixFlag = await getIdoFix(
-    fixKbn,
-    Number(params.sagyoSijiId),
-    params.nyushukoDat,
-    Number(params.nyushukoBashoId)
-  );
+
+  // 移動伝票データ、移動機材詳細データ、完了フラグ
+  const [idoDenDetailData, idoEqptDetailData, fixFlag] = await Promise.all([
+    getIdoDenDetail(
+      Number(params.sagyoKbnId),
+      Number(params.sagyoSijiId),
+      params.nyushukoDat,
+      Number(params.nyushukoBashoId),
+      Number(params.kizaiId)
+    ),
+    getIdoEqptDetail(
+      Number(params.sagyoKbnId),
+      Number(params.sagyoSijiId),
+      params.nyushukoDat,
+      Number(params.nyushukoBashoId),
+      Number(params.kizaiId)
+    ),
+    getIdoFix(fixKbn, Number(params.sagyoSijiId), params.nyushukoDat, Number(params.nyushukoBashoId)),
+  ]);
 
   return <IdoEqptDetail idoDenDetailData={idoDenDetailData} idoEqptDetailData={idoEqptDetailData} fixFlag={fixFlag} />;
 };

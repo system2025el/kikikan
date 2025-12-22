@@ -13,7 +13,7 @@ import {
   selectSagyoIdFilterNyushukoFixFlag,
   updateNyushukoFix,
 } from '@/app/_lib/db/tables/t-nyushuko-fix';
-import { selectNyukoOne } from '@/app/_lib/db/tables/v-nyushuko-den2';
+import { selectNyushukoOne } from '@/app/_lib/db/tables/v-nyushuko-den2';
 import { selectNyushukoDetail } from '@/app/_lib/db/tables/v-nyushuko-den2-lst';
 import { JuchuCtnMeisai } from '@/app/_lib/db/types/t_juchu_ctn_meisai-type';
 import { JuchuKizaiMeisai } from '@/app/_lib/db/types/t-juchu-kizai-meisai-type';
@@ -40,7 +40,7 @@ export const getNyukoDetail = async (
   sagyoKbnId: number
 ) => {
   try {
-    const { data, error } = await selectNyukoOne(juchuHeadId, juchuKizaiHeadKbn, nyushukoBashoId, nyushukoDat, 2);
+    const { data, error } = await selectNyushukoOne(juchuHeadId, juchuKizaiHeadKbn, nyushukoBashoId, nyushukoDat, 2);
 
     if (error) {
       console.error('getNyukoDetail error : ', error);

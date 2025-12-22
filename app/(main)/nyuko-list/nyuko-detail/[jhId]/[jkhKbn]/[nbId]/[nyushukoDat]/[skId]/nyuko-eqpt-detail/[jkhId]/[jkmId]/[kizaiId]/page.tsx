@@ -17,30 +17,31 @@ const Page = async (props: {
   const params = await props.params;
 
   const date = decodeURIComponent(params.nyushukoDat);
-  console.log('a');
 
-  const nyukoEqptDetailData: NyukoEqptDetailValues | null = await getNyukoEqptDetail(
-    Number(params.jhId),
-    Number(params.jkhId),
-    Number(params.jkmId),
-    Number(params.nbId),
-    date,
-    Number(params.skId),
-    Number(params.kizaiId)
-  );
+  // 入庫機材詳細データ、入庫機材詳細テーブルデータ
+  const [nyukoEqptDetailData, nyukoEqptDetailTableData] = await Promise.all([
+    getNyukoEqptDetail(
+      Number(params.jhId),
+      Number(params.jkhId),
+      Number(params.jkmId),
+      Number(params.nbId),
+      date,
+      Number(params.skId),
+      Number(params.kizaiId)
+    ),
+    getNyukoEqptDetailTable(
+      Number(params.jhId),
+      Number(params.jkhId),
+      Number(params.jkmId),
+      Number(params.nbId),
+      date,
+      Number(params.skId),
+      Number(params.kizaiId)
+    ),
+  ]);
   if (!nyukoEqptDetailData) {
     return <div>データが見つかりません</div>;
   }
-
-  const nyukoEqptDetailTableData: NyukoEqptDetailTableValues[] = await getNyukoEqptDetailTable(
-    Number(params.jhId),
-    Number(params.jkhId),
-    Number(params.jkmId),
-    Number(params.nbId),
-    date,
-    Number(params.skId),
-    Number(params.kizaiId)
-  );
 
   const fixFlag = await getNyukoFixFlag(
     Number(params.jhId),
