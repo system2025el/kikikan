@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { TextFieldElement, useForm } from 'react-hook-form-mui';
 
-import { supabase } from '@/app/_lib/db/supabase';
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 import { getChosenUser } from '@/app/(main)/(masters)/users-master/_lib/funcs';
@@ -78,7 +77,7 @@ const Login = () => {
           {/* <TextField type="password" fullWidth /> */}
         </Box>
         <Box display="flex" width={'30%'} justifyContent="flex-end">
-          <Button type="submit" /*onClick={handleMockClick}*/>次へ</Button>
+          <Button /*type="submit"*/ onClick={handleMockClick}>次へ</Button>
         </Box>
       </Stack>
     </form>
