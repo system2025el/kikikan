@@ -20,21 +20,18 @@ const Page = async (props: {
   const juchuKizaiHeadId = Number(params.juchuKizaiHeadId);
   // 親受注機材ヘッダーid
   const oyaJuchuKizaiHeadId = Number(params.oyaJuchuKizaiHeadId);
-  // 受注ヘッダーデータ
-  const juchuHeadData = await getDetailJuchuHead(juchuHeadId);
-  // 親受注機材入出庫データ
-  const oyaJuchuKizaiNyushukoData = await getJuchuKizaiNyushuko(juchuHeadId, oyaJuchuKizaiHeadId);
-  console.log('oyaJuchuKizaiNyushukoData', oyaJuchuKizaiNyushukoData);
+
+  // 受注ヘッダーデータ、親受注機材入出庫データ、出庫フラグ、入庫フラグ
+  const [juchuHeadData, oyaJuchuKizaiNyushukoData, shukoFixFlag, nyukoFixFlag] = await Promise.all([
+    getDetailJuchuHead(juchuHeadId),
+    getJuchuKizaiNyushuko(juchuHeadId, oyaJuchuKizaiHeadId),
+    getNyushukoFixFlag(juchuHeadId, juchuKizaiHeadId, 60),
+    getNyushukoFixFlag(juchuHeadId, juchuKizaiHeadId, 70),
+  ]);
 
   if (!juchuHeadData || !oyaJuchuKizaiNyushukoData) {
     return <div>受注情報が見つかりません。</div>;
   }
-
-  // 出庫フラグ
-  const shukoFixFlag = await getNyushukoFixFlag(juchuHeadId, juchuKizaiHeadId, 60);
-
-  // 入庫フラグ
-  const nyukoFixFlag = await getNyushukoFixFlag(juchuHeadId, juchuKizaiHeadId, 70);
 
   // 編集モード(edit:編集、view:閲覧)
   const edit = params.mode === 'edit' && !shukoFixFlag ? true : false;
@@ -69,28 +66,14 @@ const Page = async (props: {
       yardShukoDat: null,
       yardNyukoDat: null,
     };
-    // // キープ受注機材明細データ(初期値)
-    // const newKeepJuchuKizaiMeisaiData: KeepJuchuKizaiMeisaiValues[] = [];
-
-    // // キープ受注コンテナ明細データ(初期値)
-    // const newKeepJuchuContainerMeisaiData: KeepJuchuContainerMeisaiValues[] = [];
-
-    // // キープ出庫日(初期値)
-    // const keepShukoDate = null;
-    // // キープ入庫日(初期値)
-    // const keepNyukoDate = null;
 
     return (
       <EquipmentKeepOrderDetail
         juchuHeadData={juchuHeadData}
         oyaJuchuKizaiHeadData={oyaJuchuKizaiNyushukoData}
         keepJuchuKizaiHeadData={newKeepJuchuKizaiHeadData}
-        // keepJuchuKizaiMeisaiData={newKeepJuchuKizaiMeisaiData}
-        // keepJuchuContainerMeisaiData={newKeepJuchuContainerMeisaiData}
         oyaShukoDate={oyaShukoDate}
         oyaNyukoDate={oyaNyukoDate}
-        // keepShukoDate={keepShukoDate}
-        // keepNyukoDate={keepNyukoDate}
         edit={edit}
         shukoFixFlag={shukoFixFlag}
         nyukoFixFlag={nyukoFixFlag}
@@ -105,44 +88,13 @@ const Page = async (props: {
       return <div>受注機材情報が見つかりません。</div>;
     }
 
-    // // キープ受注機材明細データ
-    // console.time();
-    // const juchuKizaiMeisaiData = await getKeepJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId, oyaJuchuKizaiHeadId);
-    // console.log('----------------------------受注機材明細---------------------------------');
-    // console.timeEnd();
-
-    // // キープ受注コンテナ明細データ
-    // console.time();
-    // const keepJuchuContainerMeisaiData = await getKeepJuchuContainerMeisai(
-    //   juchuHeadId,
-    //   juchuKizaiHeadId,
-    //   oyaJuchuKizaiHeadId
-    // );
-    // console.log('----------------------------受注コンテナ明細---------------------------------');
-    // console.timeEnd();
-
-    // // キープ出庫日
-    // const keepShukoDate = getShukoDate(
-    //   keepJuchuKizaiHeadData.kicsShukoDat && new Date(keepJuchuKizaiHeadData.kicsShukoDat),
-    //   keepJuchuKizaiHeadData.yardShukoDat && new Date(keepJuchuKizaiHeadData.yardShukoDat)
-    // );
-    // // キープ入庫日
-    // const keepNyukoDate = getNyukoDate(
-    //   keepJuchuKizaiHeadData.kicsNyukoDat && new Date(keepJuchuKizaiHeadData.kicsNyukoDat),
-    //   keepJuchuKizaiHeadData.yardNyukoDat && new Date(keepJuchuKizaiHeadData.yardNyukoDat)
-    // );
-
     return (
       <EquipmentKeepOrderDetail
         juchuHeadData={juchuHeadData}
         oyaJuchuKizaiHeadData={oyaJuchuKizaiNyushukoData}
         keepJuchuKizaiHeadData={keepJuchuKizaiHeadData}
-        // keepJuchuKizaiMeisaiData={juchuKizaiMeisaiData}
-        // keepJuchuContainerMeisaiData={keepJuchuContainerMeisaiData}
         oyaShukoDate={oyaShukoDate}
         oyaNyukoDate={oyaNyukoDate}
-        // keepShukoDate={keepShukoDate}
-        // keepNyukoDate={keepNyukoDate}
         edit={edit}
         shukoFixFlag={shukoFixFlag}
         nyukoFixFlag={nyukoFixFlag}

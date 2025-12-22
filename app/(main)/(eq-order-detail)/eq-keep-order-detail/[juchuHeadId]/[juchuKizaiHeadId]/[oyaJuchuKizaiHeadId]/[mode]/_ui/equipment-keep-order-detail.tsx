@@ -73,12 +73,8 @@ export const EquipmentKeepOrderDetail = (props: {
   juchuHeadData: DetailOerValues;
   oyaJuchuKizaiHeadData: OyaJuchuKizaiNyushukoValues;
   keepJuchuKizaiHeadData: KeepJuchuKizaiHeadValues;
-  // keepJuchuKizaiMeisaiData: KeepJuchuKizaiMeisaiValues[] | undefined;
-  // keepJuchuContainerMeisaiData: KeepJuchuContainerMeisaiValues[] | undefined;
   oyaShukoDate: Date;
   oyaNyukoDate: Date;
-  // keepShukoDate: Date | null;
-  // keepNyukoDate: Date | null;
   edit: boolean;
   shukoFixFlag: boolean;
   nyukoFixFlag: boolean;
@@ -211,19 +207,19 @@ export const EquipmentKeepOrderDetail = (props: {
       // 受注機材ヘッダーデータ
       const juchuKizaiHeadData = getValues();
 
-      // キープ受注機材明細データ
-      const juchuKizaiMeisaiData = await getKeepJuchuKizaiMeisai(
-        juchuKizaiHeadData.juchuHeadId,
-        juchuKizaiHeadData.juchuKizaiHeadId,
-        juchuKizaiHeadData.oyaJuchuKizaiHeadId
-      );
-
-      // キープ受注コンテナ明細データ
-      const keepJuchuContainerMeisaiData = await getKeepJuchuContainerMeisai(
-        juchuKizaiHeadData.juchuHeadId,
-        juchuKizaiHeadData.juchuKizaiHeadId,
-        juchuKizaiHeadData.oyaJuchuKizaiHeadId
-      );
+      // キープ受注機材明細データ、キープ受注コンテナ明細データ
+      const [juchuKizaiMeisaiData, keepJuchuContainerMeisaiData] = await Promise.all([
+        getKeepJuchuKizaiMeisai(
+          juchuKizaiHeadData.juchuHeadId,
+          juchuKizaiHeadData.juchuKizaiHeadId,
+          juchuKizaiHeadData.oyaJuchuKizaiHeadId
+        ),
+        getKeepJuchuContainerMeisai(
+          juchuKizaiHeadData.juchuHeadId,
+          juchuKizaiHeadData.juchuKizaiHeadId,
+          juchuKizaiHeadData.oyaJuchuKizaiHeadId
+        ),
+      ]);
 
       // キープ出庫日
       const keepShukoDate = getShukoDate(
