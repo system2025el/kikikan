@@ -107,7 +107,16 @@ export const BillList = () => {
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
       {isFirst && isLoading && <LoadingOverlay />}
       <Paper variant="outlined">
-        <Box width={'100%'} display={'flex'} p={2}>
+        <Box
+          width={'100%'}
+          display={'flex'}
+          alignItems={'center'}
+          px={2}
+          sx={{
+            minHeight: '30px',
+            maxHeight: '30px',
+          }}
+        >
           <Typography noWrap>請求検索</Typography>
         </Box>
         <Divider />
@@ -116,9 +125,10 @@ export const BillList = () => {
           onSubmit={handleSubmit(onSubmit)}
           container
           direction={'column'}
-          spacing={1}
+          spacing={0.5}
           width={'100%'}
-          p={2}
+          px={2}
+          py={0.5}
         >
           <Grid2 container spacing={1}>
             <Grid2 size={{ sm: 12, md: 3 }} sx={styles.container}>

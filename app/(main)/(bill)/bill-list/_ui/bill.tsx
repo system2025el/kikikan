@@ -341,10 +341,20 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
         <FormProvider {...billForm}>
           <form onSubmit={handleSubmit(onSubmit)}>
             <Paper variant="outlined">
-              <Grid2 container display="flex" alignItems="center" justifyContent="space-between" p={1}>
-                <Typography margin={1}>請求書</Typography>
+              <Grid2
+                container
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
+                px={2}
+                sx={{
+                  minHeight: '30px',
+                  maxHeight: '30px',
+                }}
+              >
+                <Typography>請求書</Typography>
                 <Box>
-                  <Button sx={{ margin: 1 }} onClick={hundlePrintPdf} disabled={isNew || isDirty || isProcessing}>
+                  <Button onClick={hundlePrintPdf} disabled={isNew || isDirty || isProcessing}>
                     <PrintIcon fontSize="small" sx={{ mr: 0.5 }} />
                     請求書印刷
                   </Button>
@@ -365,7 +375,17 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
               }}
               variant="outlined"
             >
-              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <AccordionSummary
+                expandIcon={<ExpandMoreIcon />}
+                sx={{
+                  minHeight: '30px',
+                  maxHeight: '30px',
+                  '&.Mui-expanded': {
+                    minHeight: '30px',
+                    maxHeight: '30px',
+                  },
+                }}
+              >
                 <Typography component="span">請求ヘッダー</Typography>
               </AccordionSummary>
               <AccordionDetails sx={{ padding: 0, pb: 1 }}>
@@ -505,8 +525,16 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
 
             {/* 請求明細 ----------------------------------------------------------------------------------*/}
             <Paper sx={{ marginTop: 1 }} variant="outlined">
-              <Box p={1}>
-                <Typography margin={1}>請求明細</Typography>
+              <Box
+                display={'flex'}
+                alignItems={'center'}
+                px={2}
+                sx={{
+                  minHeight: '30px',
+                  maxHeight: '30px',
+                }}
+              >
+                <Typography>請求明細</Typography>
               </Box>
               <Box sx={{ padding: 0, pb: 1 }}>
                 <Divider />
@@ -576,7 +604,7 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
             </Paper>
 
             {/* まとめ ------------------------------------------------------------------------------------ */}
-            <Paper sx={{ marginTop: 2 }} variant="outlined">
+            <Paper sx={{ marginTop: 1 }} variant="outlined">
               <Box margin={0.5} padding={0.8}>
                 <Grid2 container display={'flex'} alignItems={'center'} spacing={1} my={0.5}>
                   <Grid2 size={0.5} justifyItems={'end'}>

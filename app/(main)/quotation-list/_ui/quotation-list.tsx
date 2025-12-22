@@ -118,16 +118,26 @@ export const QuotationList = () => {
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
       {isFirst && isLoading && <LoadingOverlay />}
       <Paper variant="outlined">
-        <Box width={'100%'} display={'flex'} p={2}>
+        <Box
+          width={'100%'}
+          display={'flex'}
+          alignItems={'center'}
+          sx={{
+            minHeight: '30px',
+            maxHeight: '30px',
+          }}
+          px={2}
+        >
           <Typography noWrap>見積検索</Typography>
         </Box>
         <Divider />
         <Grid2
           container
           direction={'column'}
-          spacing={1}
+          spacing={0.5}
           width={'100%'}
-          p={2}
+          py={1}
+          px={2}
           component={'form'}
           onSubmit={handleSubmit(onSubmit)}
         >
