@@ -729,18 +729,20 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
               drawColumnLine();
 
               let displayAmt: number | null = null;
-              let nameToDisplay: string | null = detail.nebikiNam ?? null; // 名称の表示を制御する変数を追加
-
+              let nebikiNamDisplay: string | null = detail.nebikiNam ?? null; // 名称の表示を制御する変数を追加
+              if (nebikiNamDisplay && nebikiNamDisplay.length >= 6) {
+                nebikiNamDisplay = nebikiNamDisplay.slice(0, 5) + '…';
+              }
               // nebikiAmt が存在し、0 でない場合のみ、値引き額を計算して表示
               if (detail.nebikiAmt && Number(detail.nebikiAmt) !== 0) {
                 // 値引き額を数値化してマイナス符号を付ける
                 displayAmt = -Math.abs(Number(detail.nebikiAmt));
               } else {
                 // displayAmtがnullの場合（つまり値引き額がない場合）、名称もnullにする
-                nameToDisplay = null;
+                nebikiNamDisplay = null;
               }
               // drawShokei(備考2, 制御された名称, 制御された金額)
-              drawShokei(detail.biko2, nameToDisplay, displayAmt);
+              drawShokei(detail.biko2, nebikiNamDisplay, displayAmt);
               drawUnderLine();
               index++;
             }
@@ -748,7 +750,11 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
             // 小計行3
             checkPageBreak(rowHeight);
             drawColumnLine();
-            drawShokei(detail.biko3, detail.nebikiAftNam, detail.nebikiAftAmt);
+            let nebikiAftNamDisplay: string | null = detail.nebikiAftNam ?? null;
+            if (nebikiAftNamDisplay && nebikiAftNamDisplay.length >= 6) {
+              nebikiAftNamDisplay = nebikiAftNamDisplay.slice(0, 5) + '…';
+            }
+            drawShokei(detail.biko3, nebikiAftNamDisplay, detail.nebikiAftAmt);
             drawUnderLine();
             index++;
 
@@ -768,7 +774,12 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
           checkPageBreak(rowHeight);
           drawColumnLine();
           // drawShokei('', '機材費', param.kizaiChukeiAmt);
-          drawShokei('', param.kizaiChukeiMei, param.kizaiChukeiAmt);
+          let kizaiChukeiMeiDisplay: string | null = param.kizaiChukeiMei ?? null; // 名称の表示を制御する変数を追加
+          if (kizaiChukeiMeiDisplay && kizaiChukeiMeiDisplay.length >= 6) {
+            console.log('');
+            kizaiChukeiMeiDisplay = kizaiChukeiMeiDisplay.slice(0, 5) + '…';
+          }
+          drawShokei('', kizaiChukeiMeiDisplay, param.kizaiChukeiAmt);
           drawUnderLine();
           index++;
 
@@ -834,18 +845,20 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
               drawColumnLine();
 
               let displayAmt: number | null = null;
-              let nameToDisplay: string | null = detail.nebikiNam ?? null; // 名称の表示を制御する変数を追加
-
+              let nebikiNamDisplay: string | null = detail.nebikiAftNam ?? null;
+              if (nebikiNamDisplay && nebikiNamDisplay.length >= 6) {
+                nebikiNamDisplay = nebikiNamDisplay.slice(0, 5) + '…';
+              }
               // nebikiAmt が存在し、0 でない場合のみ、値引き額を計算して表示
               if (detail.nebikiAmt && Number(detail.nebikiAmt) !== 0) {
                 // 値引き額を数値化してマイナス符号を付ける
                 displayAmt = -Math.abs(Number(detail.nebikiAmt));
               } else {
                 // displayAmtがnullの場合（つまり値引き額がない場合）、名称もnullにする
-                nameToDisplay = null;
+                nebikiNamDisplay = null;
               }
               // drawShokei(備考2, 制御された名称, 制御された金額)
-              drawShokei(detail.biko2, nameToDisplay, displayAmt);
+              drawShokei(detail.biko2, nebikiNamDisplay, displayAmt);
               drawUnderLine();
               index++;
             }
@@ -853,7 +866,11 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
             // 小計行3
             checkPageBreak(rowHeight);
             drawColumnLine();
-            drawShokei(detail.biko3, detail.nebikiAftNam, detail.nebikiAftAmt);
+            let nebikiAftNamDisplay: string | null = detail.nebikiAftNam ?? null;
+            if (nebikiAftNamDisplay && nebikiAftNamDisplay.length >= 6) {
+              nebikiAftNamDisplay = nebikiAftNamDisplay.slice(0, 5) + '…';
+            }
+            drawShokei(detail.biko3, nebikiAftNamDisplay, detail.nebikiAftAmt);
             drawUnderLine();
             index++;
 
@@ -868,13 +885,6 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
             end: { x: width - whiteSpace, y: startY - rowHeight * index - 2 }, // 通常の下線より少し上
             thickness: 1,
           });
-
-          // 人件費の合計
-          // checkPageBreak(rowHeight);
-          // drawColumnLine();
-          // drawShokei('', '人件費', 0);
-          // drawUnderLine();
-          // index++;
 
           // 空行
           checkPageBreak(rowHeight);
@@ -938,18 +948,21 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
               drawColumnLine();
 
               let displayAmt: number | null = null;
-              let nameToDisplay: string | null = detail.nebikiNam ?? null; // 名称の表示を制御する変数を追加
 
+              let nebikiNamDisplay: string | null = detail.nebikiAftNam ?? null;
+              if (nebikiNamDisplay && nebikiNamDisplay.length >= 6) {
+                nebikiNamDisplay = nebikiNamDisplay.slice(0, 5) + '…';
+              }
               // nebikiAmt が存在し、0 でない場合のみ、値引き額を計算して表示
               if (detail.nebikiAmt && Number(detail.nebikiAmt) !== 0) {
                 // 値引き額を数値化してマイナス符号を付ける
                 displayAmt = -Math.abs(Number(detail.nebikiAmt));
               } else {
                 // displayAmtがnullの場合（つまり値引き額がない場合）、名称もnullにする
-                nameToDisplay = null;
+                nebikiNamDisplay = null;
               }
               // drawShokei(備考2, 制御された名称, 制御された金額)
-              drawShokei(detail.biko2, nameToDisplay, displayAmt);
+              drawShokei(detail.biko2, nebikiNamDisplay, displayAmt);
               drawUnderLine();
               index++;
             }
@@ -957,7 +970,11 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
             // 小計行3
             checkPageBreak(rowHeight);
             drawColumnLine();
-            drawShokei(detail.biko3, detail.nebikiAftNam, detail.nebikiAftAmt);
+            let nebikiAftNamDisplay: string | null = detail.nebikiAftNam ?? null;
+            if (nebikiAftNamDisplay && nebikiAftNamDisplay.length >= 6) {
+              nebikiAftNamDisplay = nebikiAftNamDisplay.slice(0, 5) + '…';
+            }
+            drawShokei(detail.biko3, nebikiAftNamDisplay, detail.nebikiAftAmt);
             drawUnderLine();
             index++;
 
@@ -972,13 +989,6 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
             end: { x: width - whiteSpace, y: startY - rowHeight * index - 2 }, // 通常の下線より少し上
             thickness: 1,
           });
-
-          // 諸経費の合計
-          // checkPageBreak(rowHeight);
-          // drawColumnLine();
-          // drawShokei('', '諸経費', 0);
-          // drawUnderLine();
-          // index++;
 
           // 空行
           checkPageBreak(rowHeight);
