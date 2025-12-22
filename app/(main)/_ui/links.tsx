@@ -168,7 +168,7 @@ export default function NavLinks() {
                 backgroundColor: isSelected(text.url) ? currentPgColor : undefined,
               }}
             >
-              <ListItemButton /*href={text.url}*/ onClick={() => requestNavigation(text.url)} dense>
+              <ListItemButton /*href={text.url}*/ onClick={async () => await requestNavigation(text.url)} dense>
                 <ListItemText
                   primary={text.name}
                   sx={{ color: isSelected(text.url) ? 'primary.dark' : undefined, pl: 8 }}
@@ -196,7 +196,7 @@ export default function NavLinks() {
                 backgroundColor: isSelected(text.url) ? currentPgColor : undefined,
               }}
             >
-              <ListItemButton onClick={() => requestNavigation(text.url)} dense>
+              <ListItemButton onClick={async () => await requestNavigation(text.url)} dense>
                 <ListItemText
                   primary={text.name}
                   sx={{ color: isSelected(text.url) ? 'primary.dark' : undefined, pl: 8 }}
@@ -225,7 +225,7 @@ export default function NavLinks() {
                   backgroundColor: isSelected(text.url) ? currentPgColor : undefined,
                 }}
               >
-                <ListItemButton onClick={() => requestNavigation(text.url)} dense>
+                <ListItemButton onClick={async () => await requestNavigation(text.url)} dense>
                   <ListItemText
                     primary={text.name}
                     sx={{ color: isSelected(text.url) ? 'primary.dark' : undefined, pl: 8 }}
@@ -255,7 +255,7 @@ export default function NavLinks() {
                 backgroundColor: isSelected(text.url) ? currentPgColor : undefined,
               }}
             >
-              <ListItemButton onClick={() => requestNavigation(text.url)} dense>
+              <ListItemButton onClick={async () => await requestNavigation(text.url)} dense>
                 <ListItemText
                   primary={text.name}
                   sx={{ color: isSelected(text.url) ? 'primary.dark' : undefined, pl: 8 }}
