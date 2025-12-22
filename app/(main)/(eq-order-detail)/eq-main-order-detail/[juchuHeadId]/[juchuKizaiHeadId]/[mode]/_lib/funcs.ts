@@ -2155,11 +2155,11 @@ export const juchuMeisaiCopy = async (
     await revalidatePath('/shuko-list');
     await revalidatePath('/nyuko-list');
 
-    return true;
+    return newJuchuKizaiHeadId;
   } catch (e) {
     console.error(e);
     await connection.query('ROLLBACK');
-    return false;
+    return null;
   } finally {
     connection.release();
   }

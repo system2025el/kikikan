@@ -441,6 +441,8 @@ export const Order = (props: {
         const juchuKizaiHeadDatas = await getJuchuKizaiHeadList(getValues('juchuHeadId'));
         setEqHeaderList(juchuKizaiHeadDatas);
         setIsJuchuKizaiLoading(false);
+      } else {
+        window.open(`/order/${data.juchuHeadid}/view`);
       }
     } else {
       setSnackBarMessage('コピーに失敗しました');
@@ -627,7 +629,6 @@ export const Order = (props: {
           <Button disabled={lockData && lockData?.addUser !== user?.name ? true : false} onClick={handleEdit}>
             変更
           </Button>
-          <BackButton label={'戻る'} />
         </Grid2>
       </Box>
       {/* --------------------------------受注ヘッダー------------------------------------- */}
@@ -640,8 +641,7 @@ export const Order = (props: {
             <Grid2 container spacing={1} sx={{ display: save ? 'inline-flex' : 'none' }}>
               <Button
                 onClick={() => {
-                  setIsLoading(true);
-                  router.push(`/quotation-list/create?juchuId=${getValues('juchuHeadId')}`);
+                  window.open(`/quotation-list/create?juchuId=${getValues('juchuHeadId')}`);
                 }}
                 disabled={isDirty}
               >

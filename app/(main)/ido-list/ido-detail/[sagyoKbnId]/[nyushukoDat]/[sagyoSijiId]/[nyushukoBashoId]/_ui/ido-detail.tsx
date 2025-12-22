@@ -378,7 +378,7 @@ export const IdoDetail = (props: {
           color="primary"
           onClick={handleSave}
           disabled={fixFlag || isProcessing}
-          sx={{ /*display: idoDetailData.sagyoKbnId === 40 ? 'inline-flex' : 'none',*/ mr: 2 }}
+          sx={{ display: idoDetailData.sagyoKbnId === 40 ? 'inline-flex' : 'none', mr: 2 }}
         >
           <SaveAsIcon sx={{ mr: 1 }} />
           保存

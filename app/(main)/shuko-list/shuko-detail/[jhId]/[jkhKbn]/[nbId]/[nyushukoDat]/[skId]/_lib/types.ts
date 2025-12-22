@@ -35,3 +35,8 @@ export type ShukoDetailTableValues = {
   dspOrdNumMeisai: number | null;
   indentNum: number;
 };
+
+export type NyukoValues = {
+  juchuKizaiHeadId: number;
+  nyushukoDat: string;
+};
