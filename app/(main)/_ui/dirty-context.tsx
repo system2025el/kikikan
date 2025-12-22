@@ -85,12 +85,12 @@ export const DirtyProvider = ({ children }: { children: React.ReactNode }) => {
     setPendingPath(null);
   };
 
-  const handleResult = (result: boolean) => {
+  const handleResult = async (result: boolean) => {
     if (result) {
       if (pendingPath) {
-        confirmNavigation();
+        await confirmNavigation();
       } else {
-        confirmBack();
+        await confirmBack();
       }
     } else {
       cancelNavigation();

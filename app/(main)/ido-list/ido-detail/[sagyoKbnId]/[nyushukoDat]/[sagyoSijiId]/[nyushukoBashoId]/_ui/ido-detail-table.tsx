@@ -41,11 +41,11 @@ export const ShukoIdoDenTable = (props: {
    * 機材名押下時
    * @param kizaiId 機材id
    */
-  const handleClick = (kizaiId: number) => {
+  const handleClick = async (kizaiId: number) => {
     if (isProcessing) return;
 
     setIsProcessing(true);
-    requestNavigation(`${path}/ido-eqpt-detail/${kizaiId}`);
+    await requestNavigation(`${path}/ido-eqpt-detail/${kizaiId}`);
   };
 
   return (
