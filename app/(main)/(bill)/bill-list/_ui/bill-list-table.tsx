@@ -59,11 +59,8 @@ export const BillListTable = ({
 }) => {
   /** テーブル1ページの行数 */
   const rowsPerPage = ROWS_PER_MASTER_TABLE_PAGE;
-  const router = useRouter();
 
   /* useState -------------------------------------------------- */
-  /** 処理中 */
-  const [isProcessing, setIsProcessing] = useState(false);
   /** 削除ダイアログの開閉 */
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   /** 選択された請求Idの配列 */
@@ -157,11 +154,9 @@ export const BillListTable = ({
           <Grid2 container spacing={1}>
             <Button
               onClick={() => {
-                setIsProcessing(true);
-                router.push(`bill-list/copy?seikyuId=${selectedIds[0]}`);
+                window.open(`bill-list/copy?seikyuId=${selectedIds[0]}`);
               }}
               disabled={selectedIds.length !== 1}
-              loading={isProcessing}
             >
               <ContentCopyIcon fontSize="small" />
               コピー
@@ -243,9 +238,7 @@ export const BillListTable = ({
                         sx={{ p: 0, m: 0, minWidth: 1, justifyContent: 'left' }}
                         onClick={() => {
                           console.log('テーブルで請求番号', bill.billHeadId, 'をクリック');
-                          setIsLoading(true);
-                          setIsFirst(true);
-                          router.push(`/bill-list/edit/${bill.billHeadId}`);
+                          window.open(`/bill-list/edit/${bill.billHeadId}`);
                         }}
                       >
                         <Box minWidth={60}>{bill.billHeadId}</Box>

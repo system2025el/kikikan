@@ -68,8 +68,6 @@ export const QuotationListTable = ({
   const inputRef = useRef<HTMLInputElement>(null);
 
   /* useState ------------------------------------- */
-  /** 処理中 */
-  const [isProcessing, setIsProcessing] = useState(false);
   /** ダイアログの開閉 */
   const [dialogOpen, setDialogOpen] = useState(false);
   /** 削除ダイアログの開閉 */
@@ -173,11 +171,9 @@ export const QuotationListTable = ({
               <Grid2>
                 <Button
                   onClick={() => {
-                    setIsProcessing(true);
-                    router.push(`quotation-list/copy?mituId=${selectedIds[0]}`);
+                    window.open(`quotation-list/copy?mituId=${selectedIds[0]}`);
                   }}
                   disabled={selectedIds.length !== 1}
-                  loading={isProcessing}
                 >
                   <ContentCopyIcon fontSize="small" />
                   見積コピー
@@ -213,8 +209,8 @@ export const QuotationListTable = ({
                     />
                   </TableCell>
                   <TableCell padding="none" />
-                  <TableCell align="right">見積番号</TableCell>
-                  <TableCell align="right">受注番号</TableCell>
+                  <TableCell align="center">見積番号</TableCell>
+                  <TableCell align="center">受注番号</TableCell>
                   <TableCell>
                     <Typography noWrap variant={'body2'} fontWeight={500}>
                       見積ステータス
@@ -260,22 +256,35 @@ export const QuotationListTable = ({
                       >
                         {quotation.ordNum}
                       </TableCell>
-                      <TableCell align="right">
+                      <TableCell align="center">
                         <Button
                           variant="text"
                           size="small"
                           sx={{ py: 0.2, px: 0, m: 0, minWidth: 0 }}
                           onClick={() => {
                             console.log('テーブルで見積番号', quotation.mituHeadId, 'をクリック');
-                            setIsLoading(true);
-                            setIsFirst(true);
-                            router.push(`/quotation-list/edit/${quotation.mituHeadId}`);
+                            window.open(`/quotation-list/edit/${quotation.mituHeadId}`);
                           }}
                         >
                           <Box minWidth={60}>{quotation.mituHeadId}</Box>
                         </Button>
                       </TableCell>
-                      <TableCell align="right">{quotation.juchuHeadId > 0 ? quotation.juchuHeadId : '-'}</TableCell>
+                      <TableCell align="center">
+                        {quotation.juchuHeadId > 0 ? (
+                          <Button
+                            variant="text"
+                            size="small"
+                            sx={{ py: 0.2, px: 0, m: 0, minWidth: 1 }}
+                            onClick={() => {
+                              window.open(`/order/${quotation.juchuHeadId}/view`);
+                            }}
+                          >
+                            {quotation.juchuHeadId}
+                          </Button>
+                        ) : (
+                          '-'
+                        )}
+                      </TableCell>
                       <TableCell sx={{ whiteSpace: 'nowrap' }}>{quotation.mituStsNam}</TableCell>
                       <TableCell>
                         <LightTooltipWithText variant={'body2'} maxWidth={200}>

@@ -37,7 +37,7 @@ export const selectActiveCustomers = async () => {
       .select('kokyaku_id, kokyaku_nam')
       .neq('dsp_flg', 0)
       .neq('del_flg', 1)
-      .order('kokyaku_nam');
+      .order('kana');
   } catch (e) {
     throw e;
   }
@@ -53,7 +53,7 @@ export const selectFilteredCustomers = async (query: string) => {
     .schema(SCHEMA)
     .from('m_kokyaku')
     .select('kokyaku_id, kokyaku_nam, adr_shozai, adr_tatemono, adr_sonota, tel, fax, mem, dsp_flg, del_flg')
-    .order('kokyaku_nam');
+    .order('kana');
 
   // queryが存在する場合のみあいまい検索、顧客名、顧客名かな、住所、電話番号、fax番号
   if (query && query.trim() !== '') {

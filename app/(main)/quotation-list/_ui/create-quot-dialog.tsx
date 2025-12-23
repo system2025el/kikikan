@@ -6,8 +6,6 @@ import { useRef, useState } from 'react';
 import { TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { CloseMasterDialogButton } from '../../_ui/buttons';
-import { LoadingOverlay } from '../../_ui/loading';
-import { QuotSearchValues } from '../_lib/types';
 
 /**
  * 見積書作成確認ダイアログ
@@ -21,28 +19,24 @@ export const CreateQuotDialog = ({
   inputRef: React.RefObject<HTMLInputElement | null>;
   setDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
-  const router = useRouter();
-  /** ローディング */
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-
-  /* methods ------------------------------------- */
-  /** 自動生成ボタン押下 */
-  const onSubmit = (data: { juchuHeadId: number | null }) => {
-    console.log(data.juchuHeadId, 'の見積もりを自動生成');
-    setIsLoading(true);
-    router.push(`/quotation-list/create?juchuId=${data.juchuHeadId}`);
-  };
-
   /* useForm ------------------------------------- */
-  const { control, handleSubmit } = useForm<{ juchuHeadId: number | null }>({
+  const { control, handleSubmit, reset } = useForm<{ juchuHeadId: number | null }>({
     mode: 'onSubmit',
     reValidateMode: 'onSubmit',
     defaultValues: { juchuHeadId: null },
   });
 
+  /* methods ------------------------------------- */
+  /** 自動生成ボタン押下 */
+  const onSubmit = (data: { juchuHeadId: number | null }) => {
+    console.log(data.juchuHeadId, 'の見積もりを自動生成');
+    window.open(`/quotation-list/create?juchuId=${data.juchuHeadId}`);
+    reset();
+    setDialogOpen(false);
+  };
+
   return (
     <>
-      {isLoading && <LoadingOverlay />}
       <DialogTitle display={'flex'} justifyContent={'space-between'}>
         受注番号から自動生成
         <CloseMasterDialogButton handleCloseDialog={() => setDialogOpen(false)} />
@@ -70,16 +64,12 @@ export const CreateQuotDialog = ({
           />
         </Stack>
         <DialogActions>
-          <Button type="submit" loading={isLoading}>
-            自動生成
-          </Button>
+          <Button type="submit">自動生成</Button>
           <Button
             onClick={() => {
-              setIsLoading(true);
-              //setDialogOpen(false);
-              router.push('/quotation-list/create');
+              setDialogOpen(false);
+              window.open('/quotation-list/create');
             }}
-            loading={isLoading}
           >
             手動生成
           </Button>
