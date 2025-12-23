@@ -6,6 +6,7 @@ import { PoolClient } from 'pg';
 import pool from '@/app/_lib/db/postgres';
 import { selectJuchuContainerMeisaiMaxId, upsertJuchuContainerMeisai } from '@/app/_lib/db/tables/t-juchu-ctn-meisai';
 import { selectChildJuchuKizaiHeadConfirm } from '@/app/_lib/db/tables/t-juchu-kizai-head';
+import { selectJuchuKizaiNyushukoConfirm } from '@/app/_lib/db/tables/t-juchu-kizai-nyushuko';
 import { updateNyushukoDen, upsertNyushukoDen } from '@/app/_lib/db/tables/t-nyushuko-den';
 import {
   deleteShukoFix,
@@ -19,7 +20,7 @@ import { NyushukoDen } from '@/app/_lib/db/types/t-nyushuko-den-type';
 import { NyushukoFix } from '@/app/_lib/db/types/t-nyushuko-fix-type';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
-import { ShukoDetailTableValues, ShukoDetailValues } from './types';
+import { NyukoValues, ShukoDetailTableValues, ShukoDetailValues } from './types';
 
 /**
  * 出庫明細取得
@@ -194,9 +195,30 @@ export const updShukoDetail = async (
       const upsertJuchuMeisaiResult = await upsJuchuCtnMeisai(ctnData, userNam, connection);
       console.log('コンテナ明細UPSERT', upsertJuchuMeisaiResult);
 
-      // 入出庫伝票更新
-      const upsertShukoDenResult = await updNyushukoDen(ctnData, userNam, connection);
-      console.log('入出庫伝票更新', upsertShukoDenResult);
+      // 入出庫伝票追加更新
+      const juchuKizaiHeadIds = [
+        ...new Set(shukoDetailTableData.map((d) => d.juchuKizaiHeadId).filter((id) => id !== null)),
+      ];
+      const nyukoDatas: NyukoValues[] = [];
+      for (const juchuKizaiHeadId of juchuKizaiHeadIds) {
+        // 入庫日取得
+        const { data: nyukoDat, error: nyukoDataError } = await selectJuchuKizaiNyushukoConfirm({
+          juchu_head_id: shukoDetailData.juchuHeadId,
+          juchu_kizai_head_id: juchuKizaiHeadId,
+          nyushuko_shubetu_id: 2,
+          nyushuko_basho_id: shukoDetailData.nyushukoBashoId,
+        });
+        if (nyukoDataError) {
+          throw nyukoDataError;
+        }
+        const nyukoData: NyukoValues = {
+          juchuKizaiHeadId: juchuKizaiHeadId,
+          nyushukoDat: nyukoDat.nyushuko_dat,
+        };
+        nyukoDatas.push(nyukoData);
+      }
+      const upsertShukoDenResult = await upsNyushukoDen(ctnData, nyukoDatas, userNam, connection);
+      console.log('入出庫伝票追加更新', upsertShukoDenResult);
     }
 
     // 入出庫確定追加
@@ -252,18 +274,19 @@ export const upsJuchuCtnMeisai = async (
 };
 
 /**
- * 入出庫伝票更新
+ * 入出庫伝票追加更新
  * @param shukoDetailTableData 出庫テーブルデータ
  * @param userNam ユーザー名
  * @param connection
  * @returns
  */
-export const updNyushukoDen = async (
+export const upsNyushukoDen = async (
   shukoDetailTableData: ShukoDetailTableValues[],
+  nyukoDatas: NyukoValues[],
   userNam: string,
   connection: PoolClient
 ) => {
-  const updCtnShukoCheckData: NyushukoDen[] = shukoDetailTableData.map((d) => ({
+  const upsCtnShukoCheckData: NyushukoDen[] = shukoDetailTableData.map((d) => ({
     juchu_head_id: d.juchuHeadId,
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
@@ -280,13 +303,13 @@ export const updNyushukoDen = async (
     upd_user: null,
   }));
 
-  const updCtnNyukoCheckData: NyushukoDen[] = shukoDetailTableData.map((d) => ({
+  const upsCtnNyukoCheckData: NyushukoDen[] = shukoDetailTableData.map((d) => ({
     juchu_head_id: d.juchuHeadId,
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
     kizai_id: d.kizaiId,
     plan_qty: (d.resultQty ?? 0) + (d.resultAdjQty ?? 0),
-    sagyo_den_dat: d.nyushukoDat,
+    sagyo_den_dat: nyukoDatas.find((data) => data.juchuKizaiHeadId === d.juchuKizaiHeadId)!.nyushukoDat,
     sagyo_id: d.nyushukoBashoId,
     sagyo_kbn_id: 30,
     dsp_ord_num: d.dspOrdNumMeisai,
@@ -297,14 +320,12 @@ export const updNyushukoDen = async (
     upd_user: null,
   }));
 
-  const mergeData = [...updCtnShukoCheckData, ...updCtnNyukoCheckData];
+  const mergeData = [...upsCtnShukoCheckData, ...upsCtnNyukoCheckData];
 
   try {
-    for (const data of mergeData) {
-      await updateNyushukoDen(data, connection);
-    }
+    await upsertNyushukoDen(mergeData, connection);
 
-    console.log('nyushuko den update successfully:', mergeData);
+    console.log('nyushuko den upsert successfully:', mergeData);
     return true;
   } catch (e) {
     console.error('Exception while updating nyushuko den:', e);

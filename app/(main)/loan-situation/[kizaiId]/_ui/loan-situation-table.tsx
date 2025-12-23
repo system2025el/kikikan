@@ -76,8 +76,8 @@ export const LoanSituationTable = (props: LoanSituationTableProps) => {
               <TableCell style={styles.row}>
                 <Button
                   variant="text"
-                  href={`/order/${row.juchuHeadId}/${'view'}`}
                   sx={{ p: 0, height: '15px', m: 0, minWidth: 0, width: 1 }}
+                  onClick={() => window.open(`/order/${row.juchuHeadId}/view`)}
                 >
                   {row.juchuHeadId}
                 </Button>

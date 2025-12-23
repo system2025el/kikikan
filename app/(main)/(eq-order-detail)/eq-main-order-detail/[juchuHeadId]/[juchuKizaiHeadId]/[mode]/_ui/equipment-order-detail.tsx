@@ -102,6 +102,8 @@ const EquipmentOrderDetail = (props: {
   const [isDetailLoading, setIsDetailLoading] = useState(false);
   // 編集モード(true:編集、false:閲覧)
   const [edit, setEdit] = useState(props.edit);
+  // 遷移先path
+  const [path, setPath] = useState<string | null>(null);
 
   // ロックデータ
   const [lockData, setLockData] = useState<LockValues | null>(null);
@@ -507,6 +509,21 @@ const EquipmentOrderDetail = (props: {
       } else if (lockData !== null && lockData.addUser === user.name) {
         setEdit(true);
       }
+    }
+  };
+
+  /**
+   * 戻るボタン押下
+   */
+  const back = () => {
+    const mode = edit ? 'edit' : 'view';
+    const path = `/order/${props.juchuHeadData.juchuHeadId}/${mode}`;
+    if (!isDirty && !otherDirty) {
+      setIsLoading(true);
+      router.push(path);
+    } else {
+      setPath(path);
+      setDirtyOpen(true);
     }
   };
 
@@ -1357,32 +1374,38 @@ const EquipmentOrderDetail = (props: {
   const handleResultDialog = async (result: boolean) => {
     if (result) {
       setIsLoading(true);
-      await delLock(1, props.juchuHeadData.juchuHeadId);
-      setLockData(null);
-      setEdit(false);
-      reset();
-      setSelectDate(shukoDate ? shukoDate : new Date());
-      setJuchuHonbanbiList(originJuchuHonbanbiList);
-      setJuchuHonbanbiDeleteList([]);
-      setJuchuKizaiMeisaiList(originJuchuKizaiMeisaiList);
-      setIdoJuchuKizaiMeisaiList(originIdoJuchuKizaiMeisaiList);
-      setJuchuContainerMeisaiList(originJuchuContainerMeisaiList);
-      // setOriginPlanQty(
-      //   originJuchuKizaiMeisaiList.reduce((acc, current) => {
-      //     const key = current.kizaiId;
-      //     const total = acc.get(key);
-      //     if (total) {
-      //       const currentTotal = total + current.planQty;
-      //       acc.set(key, currentTotal);
-      //     } else {
-      //       acc.set(key, current.planQty);
-      //     }
-      //     return acc;
-      //   }, new Map<number, number>())
-      // );
-      setEqStockList(originEqStockList);
-      setDirtyOpen(false);
-      setIsLoading(false);
+      if (path) {
+        router.push(path);
+        setPath(null);
+      } else {
+        setIsLoading(true);
+        await delLock(1, props.juchuHeadData.juchuHeadId);
+        setLockData(null);
+        setEdit(false);
+        reset();
+        setSelectDate(shukoDate ? shukoDate : new Date());
+        setJuchuHonbanbiList(originJuchuHonbanbiList);
+        setJuchuHonbanbiDeleteList([]);
+        setJuchuKizaiMeisaiList(originJuchuKizaiMeisaiList);
+        setIdoJuchuKizaiMeisaiList(originIdoJuchuKizaiMeisaiList);
+        setJuchuContainerMeisaiList(originJuchuContainerMeisaiList);
+        // setOriginPlanQty(
+        //   originJuchuKizaiMeisaiList.reduce((acc, current) => {
+        //     const key = current.kizaiId;
+        //     const total = acc.get(key);
+        //     if (total) {
+        //       const currentTotal = total + current.planQty;
+        //       acc.set(key, currentTotal);
+        //     } else {
+        //       acc.set(key, current.planQty);
+        //     }
+        //     return acc;
+        //   }, new Map<number, number>())
+        // );
+        setEqStockList(originEqStockList);
+        setDirtyOpen(false);
+        setIsLoading(false);
+      }
     } else {
       setDirtyOpen(false);
     }
@@ -1622,7 +1645,7 @@ const EquipmentOrderDetail = (props: {
     console.log('idoList', idoList);
 
     // コピー処理
-    const copyResult = await juchuMeisaiCopy(
+    const newJuchuKizaiHeadId = await juchuMeisaiCopy(
       newJuchuKizaiHead,
       shukoDate,
       nyukoDate,
@@ -1634,10 +1657,11 @@ const EquipmentOrderDetail = (props: {
       userNam
     );
 
-    if (copyResult) {
+    if (newJuchuKizaiHeadId) {
       setCopyDialogOpen(false);
       setSnackBarMessage('コピーしました');
       setSnackBarOpen(true);
+      window.open(`/eq-main-order-detail/${props.juchuHeadData.juchuHeadId}/${newJuchuKizaiHeadId}/view`);
     } else {
       setSnackBarMessage('コピーに失敗しました');
       setSnackBarOpen(true);
@@ -1709,7 +1733,7 @@ const EquipmentOrderDetail = (props: {
     console.log('idoList', idoList);
 
     // 分離処理
-    const separationResult = await juchuMeisaiCopy(
+    const newJuchuKizaiHeadId = await juchuMeisaiCopy(
       newJuchuKizaiHead,
       shukoDate,
       nyukoDate,
@@ -1721,7 +1745,7 @@ const EquipmentOrderDetail = (props: {
       userNam
     );
 
-    if (separationResult) {
+    if (newJuchuKizaiHeadId) {
       const selectDspOrdNum = [...selectEq.map((d) => d.dspOrdNum), ...selectCtn.map((d) => d.dspOrdNum)];
       setJuchuKizaiMeisaiList((prev) =>
         prev.map((data) =>
@@ -1754,6 +1778,7 @@ const EquipmentOrderDetail = (props: {
       setSeparationDialogOpen(false);
       setSnackBarMessage('分離しました');
       setSnackBarOpen(true);
+      window.open(`/eq-main-order-detail/${props.juchuHeadData.juchuHeadId}/${newJuchuKizaiHeadId}/view`);
     } else {
       setSnackBarMessage('分離に失敗しました');
       setSnackBarOpen(true);
@@ -1815,7 +1840,7 @@ const EquipmentOrderDetail = (props: {
                     変更
                   </Button>
                 </Grid2>
-                <BackButton label={'戻る'} />
+                <Button onClick={back}>仮戻る</Button>
               </Grid2>
             </Box>
             {/*-------受注ヘッダー-------*/}

@@ -111,6 +111,8 @@ export const EquipmentReturnOrderDetail = (props: {
   const [isDetailLoading, setIsDetailLoading] = useState(false);
   // 編集モード(true:編集、false:閲覧)
   const [edit, setEdit] = useState(props.edit);
+  // 遷移先path
+  const [path, setPath] = useState<string | null>(null);
 
   // ロックデータ
   const [lockData, setLockData] = useState<LockValues | null>(null);
@@ -423,6 +425,21 @@ export const EquipmentReturnOrderDetail = (props: {
       } else if (lockData !== null && lockData.addUser === user.name) {
         setEdit(true);
       }
+    }
+  };
+
+  /**
+   * 戻るボタン押下
+   */
+  const back = () => {
+    const mode = edit ? 'edit' : 'view';
+    const path = `/order/${props.juchuHeadData.juchuHeadId}/${mode}`;
+    if (!isDirty && !otherDirty) {
+      setIsLoading(true);
+      router.push(path);
+    } else {
+      setPath(path);
+      setDirtyOpen(true);
     }
   };
 
@@ -1016,29 +1033,34 @@ export const EquipmentReturnOrderDetail = (props: {
   const handleResultDialog = async (result: boolean) => {
     if (result) {
       setIsLoading(true);
-      await delLock(1, props.juchuHeadData.juchuHeadId);
-      setLockData(null);
-      setEdit(false);
-      reset();
-      setSelectDate(oyaShukoDate ?? new Date());
-      setReturnJuchuKizaiMeisaiList(originReturnJuchuKizaiMeisaiList);
-      setReturnJuchuContainerMeisaiList(originReturnJuchuContainerMeisaiList);
-      // setOriginReturnPlanQty(
-      //   originReturnJuchuKizaiMeisaiList.reduce((acc, current) => {
-      //     const key = current.kizaiId;
-      //     const total = acc.get(key);
-      //     if (total) {
-      //       const currentTotal = total + current.planQty;
-      //       acc.set(key, currentTotal);
-      //     } else {
-      //       acc.set(key, current.planQty);
-      //     }
-      //     return acc;
-      //   }, new Map<number, number>())
-      // );
-      setEqStockList(originEqStockList);
-      setDirtyOpen(false);
-      setIsLoading(false);
+      if (path) {
+        router.push(path);
+        setPath(null);
+      } else {
+        await delLock(1, props.juchuHeadData.juchuHeadId);
+        setLockData(null);
+        setEdit(false);
+        reset();
+        setSelectDate(oyaShukoDate ?? new Date());
+        setReturnJuchuKizaiMeisaiList(originReturnJuchuKizaiMeisaiList);
+        setReturnJuchuContainerMeisaiList(originReturnJuchuContainerMeisaiList);
+        // setOriginReturnPlanQty(
+        //   originReturnJuchuKizaiMeisaiList.reduce((acc, current) => {
+        //     const key = current.kizaiId;
+        //     const total = acc.get(key);
+        //     if (total) {
+        //       const currentTotal = total + current.planQty;
+        //       acc.set(key, currentTotal);
+        //     } else {
+        //       acc.set(key, current.planQty);
+        //     }
+        //     return acc;
+        //   }, new Map<number, number>())
+        // );
+        setEqStockList(originEqStockList);
+        setDirtyOpen(false);
+        setIsLoading(false);
+      }
     } else {
       setDirtyOpen(false);
     }
@@ -1179,7 +1201,7 @@ export const EquipmentReturnOrderDetail = (props: {
                     変更
                   </Button>
                 </Grid2>
-                <BackButton label={'戻る'} />
+                <Button onClick={back}>仮戻る</Button>
               </Grid2>
             </Box>
             {/*受注ヘッダー*/}
