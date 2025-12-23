@@ -12,3 +12,11 @@ export const login = async (data: UserValues) => {
     throw e;
   }
 };
+
+export const setSession = async (access_token: string, refresh_token: string) => {
+  supabase.auth.setSession({ access_token, refresh_token }).then(({ data, error }) => {
+    if (data.session) {
+      return data.session;
+    }
+  });
+};
