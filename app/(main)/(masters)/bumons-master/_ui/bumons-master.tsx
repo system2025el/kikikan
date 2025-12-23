@@ -112,11 +112,11 @@ export const BumonsMaster = () => {
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
       <Paper variant="outlined">
-        <Box width={'100%'} display={'flex'} p={2}>
+        <Box width={'100%'} display={'flex'} px={2} sx={{ minHeight: '30px', maxHeight: '30px' }} alignItems={'center'}>
           <Typography>部門マスタ検索</Typography>
         </Box>
         <Divider />
-        <Box width={'100%'} px={2} py={1}>
+        <Box width={'100%'} px={2} py={0.5}>
           <form onSubmit={handleSubmit(onSubmit)}>
             <Stack alignItems={'center'}>
               <Typography noWrap width={140}>
@@ -124,8 +124,8 @@ export const BumonsMaster = () => {
               </Typography>
               <TextFieldElement name="query" control={control} />
             </Stack>
-            <Stack justifyContent={'space-between'} alignItems={'start'} mt={1}>
-              <Stack mt={1} spacing={1}>
+            <Stack justifyContent={'space-between'} alignItems={'start'} mt={0.5}>
+              <Stack mt={0.5} spacing={1}>
                 <Typography noWrap width={140}>
                   大部門名
                 </Typography>

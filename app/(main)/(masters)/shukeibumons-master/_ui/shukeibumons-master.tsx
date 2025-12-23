@@ -98,11 +98,11 @@ export const ShukeibumonsMaster = () => {
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
       <Paper variant="outlined">
-        <Box width={'100%'} display={'flex'} p={2}>
+        <Box width={'100%'} display={'flex'} px={2} sx={{ minHeight: '30px', maxHeight: '30px' }} alignItems={'center'}>
           <Typography>集計部門マスタ検索</Typography>
         </Box>
         <Divider />
-        <Box width={'100%'} px={2} py={1} component={'form'} onSubmit={handleSubmit(onSubmit)}>
+        <Box width={'100%'} px={2} py={0.5} component={'form'} onSubmit={handleSubmit(onSubmit)}>
           <Stack justifyContent={'space-between'} alignItems={'start'}>
             <Stack alignItems={'baseline'}>
               <Typography noWrap width={200}>
