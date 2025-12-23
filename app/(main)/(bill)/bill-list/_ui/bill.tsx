@@ -336,7 +336,7 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
               変更
             </Button>
           </Grid2>
-          <BackButton label={'戻る'} />
+          <Button onClick={() => window.close()}>閉じる</Button>
         </Grid2>
         <FormProvider {...billForm}>
           <form onSubmit={handleSubmit(onSubmit)}>
@@ -388,7 +388,7 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
               >
                 <Typography component="span">請求ヘッダー</Typography>
               </AccordionSummary>
-              <AccordionDetails sx={{ padding: 0, pb: 1 }}>
+              <AccordionDetails sx={{ padding: 0 }}>
                 <Divider />
                 <Grid2 container direction={'column'} spacing={1} my={1}>
                   <Grid2 container spacing={1}>
@@ -536,7 +536,7 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
               >
                 <Typography>請求明細</Typography>
               </Box>
-              <Box sx={{ padding: 0, pb: 1 }}>
+              <Box sx={{ padding: 0 }}>
                 <Divider />
                 <Box margin={0.5} padding={0.8}>
                   {meisaiHeadFields.fields.map((field, index) => (

@@ -390,7 +390,7 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
             変更
           </Button>
         </Grid2>
-        <BackButton label={'戻る'} />
+        <Button onClick={() => window.close()}>閉じる</Button>
       </Grid2>
       <FormProvider {...quotForm}>
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -450,7 +450,7 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
                 )}
               </Grid2>
             </AccordionSummary>
-            <AccordionDetails sx={{ padding: 0, pb: 0.5 }}>
+            <AccordionDetails sx={{ padding: 0 }}>
               <Divider />
               <Grid2 container>
                 <Grid2 size={6.5}>
@@ -564,7 +564,7 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
             >
               <Typography component="span">見積ヘッダー</Typography>
             </AccordionSummary>
-            <AccordionDetails sx={{ padding: 0, pb: 0.5 }}>
+            <AccordionDetails sx={{ padding: 0 }}>
               <Divider />
               <Grid2 container>
                 <Grid2 size={6.5}>
@@ -752,7 +752,7 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
             >
               <Typography>見積明細</Typography>
             </Box>
-            <Box sx={{ padding: 0, pb: 1 }}>
+            <Box sx={{ padding: 0 }}>
               <Divider />
               {/* 機材費テーブル ------------------------------------------------------------ */}
               <Box margin={0.5} padding={0.8} borderBottom={1} borderColor={'divider'}>
