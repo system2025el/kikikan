@@ -128,18 +128,18 @@ export const EqptMaster = () => {
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
       <Paper variant="outlined">
-        <Box width={'100%'} display={'flex'} p={2}>
+        <Box width={'100%'} display={'flex'} px={2} sx={{ minHeight: '30px', maxHeight: '30px' }} alignItems={'center'}>
           <Typography>機材マスタ一覧</Typography>
         </Box>
         <Divider />
-        <Box width={'100%'} px={2} py={1} component={'form'} onSubmit={handleSubmit(onSubmit)}>
+        <Box width={'100%'} px={2} py={0.5} component={'form'} onSubmit={handleSubmit(onSubmit)}>
           <Stack justifyContent={'space-between'} alignItems={'start'}>
             <Stack>
               <Typography noWrap>機材名キーワード</Typography>
               <TextFieldElement name={'query'} control={control} />
             </Stack>
           </Stack>
-          <Grid2 container justifyContent={'space-between'} alignItems={'start'} mt={1} spacing={1}>
+          <Grid2 container justifyContent={'space-between'} alignItems={'start'} mt={0.5} spacing={1}>
             <Grid2 size={{ sm: 12, md: 4 }} display={'flex'} alignItems={'center'}>
               <Typography width={100}>部門</Typography>
               <Controller
@@ -204,7 +204,7 @@ export const EqptMaster = () => {
               />
             </Grid2>
           </Grid2>
-          <Grid2 container alignItems={'center'} justifyContent={'space-between'} mt={1}>
+          <Grid2 container alignItems={'center'} justifyContent={'space-between'} mt={0.5}>
             <Grid2 size={'grow'} display={'flex'} alignItems={'center'}>
               <Typography width={100}>NG有</Typography>
               <CheckboxElement name="ngFlg" control={control} />

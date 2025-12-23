@@ -70,7 +70,7 @@ export const BasesMaster = () => {
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
       <Paper variant="outlined">
-        <Box width={'100%'} display={'flex'} p={2}>
+        <Box width={'100%'} display={'flex'} px={2} sx={{ minHeight: '30px', maxHeight: '30px' }} alignItems={'center'}>
           <Typography>拠点マスタ検索</Typography>
         </Box>
       </Paper>

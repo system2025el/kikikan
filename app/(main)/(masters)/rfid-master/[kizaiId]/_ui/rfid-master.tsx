@@ -241,8 +241,18 @@ export const RfidMaster = ({ kizaiId }: { kizaiId: number }) => {
 
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
+      <Grid2 container display={'flex'} justifyContent={'end'} mb={0.5}>
+        <Button onClick={() => window.close()}>閉じる</Button>
+      </Grid2>
       <Paper variant="outlined">
-        <Box width={'100%'} display={'flex'} p={2} justifyContent={'space-between'} alignItems={'center'}>
+        <Box
+          width={'100%'}
+          display={'flex'}
+          px={2}
+          justifyContent={'space-between'}
+          alignItems={'center'}
+          sx={{ minHeight: '30px', maxHeight: '30px' }}
+        >
           <Typography>機材詳細</Typography>
           <Box>
             <Button
@@ -259,7 +269,7 @@ export const RfidMaster = ({ kizaiId }: { kizaiId: number }) => {
           </Box>
         </Box>
         <Divider />
-        <Box width={'100%'} pb={1}>
+        <Box width={'100%'} pb={0.5}>
           <Box sx={styles.container}>
             <Typography mr={3}>機材名</Typography>
             <TextField value={kizaiNam} disabled />
@@ -471,6 +481,6 @@ const styles: { [key: string]: React.CSSProperties } = {
     alignItems: 'center',
     marginLeft: 2,
     marginRight: 2,
-    marginTop: 1,
+    marginTop: 0.5,
   },
 };
