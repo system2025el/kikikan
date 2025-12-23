@@ -313,7 +313,7 @@ export const DateSelectDialog = ({
         <Button onClick={handleClose}>戻る</Button>
       </Box>
       <Paper variant="outlined">
-        <Box display="flex" justifyContent="space-between" alignItems="center" p={2}>
+        <Box display="flex" justifyContent="space-between" alignItems="center" px={2}>
           <Typography>日付選択</Typography>
         </Box>
       </Paper>
@@ -325,7 +325,7 @@ export const DateSelectDialog = ({
             <Tab value={30} label="GP" sx={{ bgcolor: 'lightgreen' }} />
             <Tab value={40} label="本番" sx={{ bgcolor: 'pink' }} />
           </Tabs>
-          <Box ml={20}>
+          <Box ml={10}>
             <RSuiteDateRangePicker
               value={dateRange}
               minDate={shukoDate}

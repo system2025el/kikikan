@@ -161,7 +161,7 @@ export const EqptSelectionDialog = ({
           <Button onClick={() => handleCloseDialog()}>戻る</Button>
         </Box>
         <Paper variant="outlined">
-          <Box width={'100%'} display={'flex'} p={2}>
+          <Box width={'100%'} display={'flex'} px={2}>
             <Typography>機材選択</Typography>
           </Box>
           <Divider />

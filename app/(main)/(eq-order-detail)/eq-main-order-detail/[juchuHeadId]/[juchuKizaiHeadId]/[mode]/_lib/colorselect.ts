@@ -16,11 +16,15 @@ export const getStockRowBackgroundColor = (
 ): string => {
   const cellDate = toJapanYMDString(date);
 
+  if (cellDate === dateRange[dateRange.length - 1]) return 'yellow';
+  if (cellDate === dateRange[0]) return 'lightblue';
+
   if (juchuHonbanbiList.some((date) => toJapanYMDString(date.juchuHonbanbiDat) === cellDate)) {
-    const shubetuId = juchuHonbanbiList.find(
-      (date) => toJapanYMDString(date.juchuHonbanbiDat) === cellDate
-    )?.juchuHonbanbiShubetuId;
-    switch (shubetuId) {
+    const shubetuIds = juchuHonbanbiList
+      .filter((date) => toJapanYMDString(date.juchuHonbanbiDat) === cellDate)
+      .sort((a, b) => b.juchuHonbanbiShubetuId - a.juchuHonbanbiShubetuId);
+
+    switch (shubetuIds[0].juchuHonbanbiShubetuId) {
       case 40:
         return 'pink';
       case 30:
@@ -33,8 +37,7 @@ export const getStockRowBackgroundColor = (
         return 'white';
     }
   }
-  if (cellDate === dateRange[dateRange.length - 1]) return 'yellow';
-  if (cellDate === dateRange[0]) return 'lightblue';
+
   if (dateRange.includes(cellDate)) return '#ACB9CA';
   return 'white';
 };

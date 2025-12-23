@@ -31,7 +31,7 @@ import { TantoDialog } from './tanto-dialog';
  * Weekly スケジュール画面
  * @returns {JSX.Element} Weekly スケジュール画面
  */
-export const WeeklySchedule = () => {
+export const Schedule = () => {
   /* useState ------------------------------------------------------------ */
   /** 表示するスケジュールのリスト */
   const [scheList, setScheList] = useState<WeeklyScheduleValues[]>([]);
@@ -104,7 +104,7 @@ export const WeeklySchedule = () => {
         variant="outlined"
         sx={{ mb: 1, px: 2, display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}
       >
-        Weekly スケジュール
+        スケジュール
         <Box sx={styles.boxStyle}>
           表示開始日
           <Controller

@@ -2,7 +2,7 @@
 
 import WarningIcon from '@mui/icons-material/Warning';
 import { Box, Button, Dialog, DialogActions, DialogContentText, DialogTitle } from '@mui/material';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { createContext, useContext, useEffect, useState } from 'react';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
@@ -24,13 +24,23 @@ const DirtyContext = createContext<DirtyContextType | undefined>(undefined);
 
 export const DirtyProvider = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
+  const pathname = usePathname();
   const user = useUserStore((state) => state.user);
   const [isDirty, setIsDirty] = useState(false);
   const [lock, setLock] = useState<LockValues | null>(null);
   const [pendingPath, setPendingPath] = useState<string | null>(null);
   const [showDialog, setShowDialog] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  useEffect(() => {
+    setShowDialog(false);
+    setPendingPath(null);
+    setIsProcessing(false);
+  }, [pathname]);
 
   const requestNavigation = async (path: string) => {
+    if (isProcessing) return;
+    setIsProcessing(true);
     if (isDirty) {
       setPendingPath(path);
       setShowDialog(true);
@@ -39,7 +49,6 @@ export const DirtyProvider = ({ children }: { children: React.ReactNode }) => {
         await delLock(lock.lockShubetu, lock.headId);
         setLock(null);
       }
-      setIsDirty(false);
       router.push(path);
     }
   };
@@ -50,14 +59,14 @@ export const DirtyProvider = ({ children }: { children: React.ReactNode }) => {
       setLock(null);
     }
     if (pendingPath) {
-      setShowDialog(false);
       setIsDirty(false);
       router.push(pendingPath);
-      setPendingPath(null);
     }
   };
 
   const requestBack = async () => {
+    if (isProcessing) return;
+    setIsProcessing(true);
     if (isDirty) {
       setShowDialog(true);
     } else {
@@ -65,7 +74,6 @@ export const DirtyProvider = ({ children }: { children: React.ReactNode }) => {
         await delLock(lock.lockShubetu, lock.headId);
         setLock(null);
       }
-      setIsDirty(false);
       router.back();
     }
   };
@@ -75,7 +83,6 @@ export const DirtyProvider = ({ children }: { children: React.ReactNode }) => {
       await delLock(lock.lockShubetu, lock.headId);
       setLock(null);
     }
-    setShowDialog(false);
     setIsDirty(false);
     router.back();
   };
@@ -116,9 +123,9 @@ export const useDirty = () => {
 export const IsDirtyAlertDialog = ({ open, onClick }: { open: boolean; onClick: (result: boolean) => void }) => {
   const [isSave, setIsSave] = useState(false);
 
-  const handleClick = (result: boolean) => {
+  const handleClick = async (result: boolean) => {
     setIsSave(true);
-    onClick(result);
+    await onClick(result);
   };
 
   useEffect(() => {
