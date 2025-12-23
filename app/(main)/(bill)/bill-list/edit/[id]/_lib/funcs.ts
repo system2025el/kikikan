@@ -99,13 +99,15 @@ export const updateBill = async (data: BillHeadValues, user: string): Promise<nu
   // 請求完了日リスト（請求済み期間）
   const seikyuDatList: SeikyuDatJuchuKizai[] =
     meisaiHeads.length > 0
-      ? meisaiHeads.map((d) => ({
-          juchu_head_id: d.juchu_head_id!,
-          juchu_kizai_head_id: d.juchu_kizai_head_id!,
-          seikyu_dat: d.seikyu_end_dat!,
-          add_dat: toJapanTimeStampString(),
-          add_user: user,
-        }))
+      ? meisaiHeads
+          .filter((m) => m.juchu_head_id && m.juchu_head_id > 0 && m.juchu_kizai_head_id && m.juchu_kizai_head_id > 0)
+          .map((d) => ({
+            juchu_head_id: d.juchu_head_id!,
+            juchu_kizai_head_id: d.juchu_kizai_head_id!,
+            seikyu_dat: d.seikyu_end_dat!,
+            add_dat: toJapanTimeStampString(),
+            add_user: user,
+          }))
       : [];
 
   try {
