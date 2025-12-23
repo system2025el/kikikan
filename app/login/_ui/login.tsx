@@ -80,17 +80,17 @@ const Login = () => {
 
         <Box width={'30%'}>
           <Typography>ログインID（メールアドレス）</Typography>
-          <TextFieldElement name="email" control={control} type="email" required fullWidth />
-          {/* <TextField type="email" fullWidth /> */}
+          {/* <TextFieldElement name="email" control={control} type="email" required fullWidth /> */}
+          <TextField type="email" fullWidth />
         </Box>
         <Box width={'30%'}>
           <Typography>パスワード</Typography>
-          <TextFieldElement name="password" control={control} type="password" required fullWidth />
-          {/* <TextField type="password" fullWidth /> */}
+          {/* <TextFieldElement name="password" control={control} type="password" required fullWidth /> */}
+          <TextField type="password" fullWidth />
         </Box>
         <Box display="flex" width={'30%'} justifyContent="flex-end">
-          <Button type="submit">次へ</Button>
-          {/* <Button onClick={handleMockClick}>次へ</Button> */}
+          {/* <Button type="submit">次へ</Button> */}
+          <Button onClick={handleMockClick}>次へ</Button>
         </Box>
       </Stack>
     </form>
