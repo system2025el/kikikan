@@ -21,13 +21,8 @@ export const BackButton = ({ sx, label }: { sx?: object; label: string }) => {
   //const router = useRouter();
   const { requestBack } = useDirty();
 
-  const [isProcessing, setIsProcessing] = useState(false);
-
   const handleBack = async () => {
-    if (isProcessing) return;
-    setIsProcessing(true);
     await requestBack();
-    setIsProcessing(false);
   };
 
   return (
