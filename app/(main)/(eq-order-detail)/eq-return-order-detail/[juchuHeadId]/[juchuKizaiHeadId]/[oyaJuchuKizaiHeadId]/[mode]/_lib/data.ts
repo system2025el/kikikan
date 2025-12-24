@@ -1,0 +1,60 @@
+export const data = [
+  {
+    id: 1,
+    name: 'SHARPY PLUS',
+    memo: '',
+    place: 'K',
+    issue: 1,
+    return: 0,
+  },
+  {
+    id: 2,
+    name: 'ROBIN T2 Profile',
+    memo: '',
+    place: 'K',
+    issue: 2,
+    return: 0,
+  },
+  {
+    id: 3,
+    name: 'Sharpy X Spot',
+    memo: '',
+    place: 'K',
+    issue: 3,
+    return: 0,
+  },
+  {
+    id: 4,
+    name: 'VL6000 Beam',
+    memo: '',
+    place: 'Y',
+    issue: 4,
+    return: 0,
+  },
+  {
+    id: 5,
+    name: 'Arolla Profile MP',
+    memo: '',
+    place: 'Y',
+    issue: 5,
+    return: 0,
+  },
+  {
+    id: 6,
+    name: '20D電源BOX 3相専用（12口）',
+    memo: '',
+    place: 'Y',
+    issue: 6,
+    return: 0,
+  },
+  {
+    id: 7,
+    name: 'XXXXXXXXXXXX',
+    memo: '',
+    place: 'Y',
+    issue: 7,
+    return: 0,
+  },
+];
+
+export const stock = [148, 55, 26, 27, 28, 44, 45];

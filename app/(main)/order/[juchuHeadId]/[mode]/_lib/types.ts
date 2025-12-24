@@ -1,0 +1,217 @@
+import { z } from 'zod';
+
+import { validationMessages } from '@/app/(main)/_lib/validation-messages';
+
+export const KokyakuSchema = z.object({
+  kokyakuId: z.number({ message: validationMessages.required() }),
+  kokyakuNam: z
+    .string({ message: validationMessages.required() })
+    .min(1, { message: validationMessages.required() })
+    .max(20, { message: validationMessages.maxStringLength(20) }),
+  // kokyakuRank: z.number(),
+});
+
+export type KokyakuValues = z.infer<typeof KokyakuSchema>;
+
+export const OrderSchema = z.object({
+  juchuHeadId: z.number(),
+  delFlg: z.number(),
+  juchuSts: z.number(),
+  juchuDat: z.date({ message: validationMessages.required() }),
+  juchuRange: z.tuple([z.date(), z.date()]).nullable(),
+  nyuryokuUser: z.string({ message: validationMessages.required() }).min(1, { message: validationMessages.required() }),
+  koenNam: z
+    .string({ message: validationMessages.required() })
+    .min(1, { message: validationMessages.required() })
+    .max(40, { message: validationMessages.maxStringLength(40) }),
+  koenbashoNam: z
+    .string()
+    .max(40, { message: validationMessages.maxStringLength(40) })
+    .nullable(),
+  kokyaku: KokyakuSchema,
+  kokyakuTantoNam: z
+    .string()
+    .max(16, { message: validationMessages.maxStringLength(16) })
+    .nullable(),
+  mem: z.string().nullable(),
+  // nebikiAmt: z
+  //   .number()
+  //   .max(9999999999, { message: validationMessages.maxNumberLength(10) })
+  //   .int({ message: validationMessages.int() })
+
+  //   .nullable(),
+  zeiKbn: z.number(),
+});
+
+export type OrderValues = z.infer<typeof OrderSchema>;
+
+export type EqTableValues = {
+  juchuHeadId: number;
+  juchuKizaiHeadId: number;
+  headNam: string;
+  kicsShukoDat: string | null;
+  kicsNyukoDat: string | null;
+  yardShukoDat: string | null;
+  yardNyukoDat: string | null;
+  sikomibi: number | null;
+  rihabi: number | null;
+  genebi: number | null;
+  honbanbi: number | null;
+  juchuHonbanbiCalcQty: number | null;
+  shokei: number | null;
+  nebikiAmt: number | null;
+  nebikiRat: number | null;
+  oyaJuchuKizaiHeadId: number | null;
+  htKbn: number;
+  juchuKizaiHeadKbn: number;
+  mem: string | null;
+  kicsShukoFixFlg: number | null;
+  yardShukoFixFlg: number | null;
+};
+
+export type VehicleTableValues = {
+  juchuHeadId: number;
+  sharyoHeadId: number;
+  sharyoHeadNam: string;
+  basho: string | null;
+  shubetsuId: number;
+  shubetuNam: string;
+  nyushukoDat: string;
+  headMem: string | null;
+};
+
+export type CustomersDialogValues = {
+  kokyakuId: number;
+  kokyakuNam: string;
+  // kokyakuRank: number;
+  adrShozai: string;
+  adrTatemono: string;
+  adrSonota: string;
+  tel: string;
+  fax: string;
+  mem: string;
+  dspFlg: boolean;
+  tblDspId: number;
+  delFlg?: boolean;
+};
+
+export type LocsDialogValues = {
+  adrShozai: string | null;
+  adrSonota: string | null;
+  adrTatemono: string | null;
+  delFlg: boolean | null;
+  dspFlg: boolean | null;
+  tblDspId: number;
+  fax: string | null;
+  locId: number;
+  locNam: string;
+  mem: string | null;
+  tel: string | null;
+};
+
+export const BaseCopyDialogSchema = z.object({
+  juchuHeadid: z.string().optional(),
+  headNam: z.string({ message: validationMessages.required() }).min(1, { message: validationMessages.required() }),
+  kicsShukoDat: z.date().nullable(),
+  kicsNyukoDat: z.date().nullable(),
+  yardShukoDat: z.date().nullable(),
+  yardNyukoDat: z.date().nullable(),
+});
+
+export type CopyDialogValue = z.infer<typeof BaseCopyDialogSchema>;
+
+export const CopyDialogSchema = (origin: EqTableValues | null) =>
+  z.object({
+    juchuHeadid: z.string().optional(),
+    headNam: z
+      .string({ message: validationMessages.required() })
+      .min(1, { message: validationMessages.required() })
+      .max(20, { message: validationMessages.maxStringLength(20) }),
+    kicsShukoDat:
+      origin && origin.kicsShukoDat ? z.date({ message: validationMessages.required() }) : z.date().nullable(),
+    kicsNyukoDat:
+      origin && origin.kicsNyukoDat ? z.date({ message: validationMessages.required() }) : z.date().nullable(),
+    yardShukoDat:
+      origin && origin.yardShukoDat ? z.date({ message: validationMessages.required() }) : z.date().nullable(),
+    yardNyukoDat:
+      origin && origin.yardNyukoDat ? z.date({ message: validationMessages.required() }) : z.date().nullable(),
+  });
+
+export type CopyJuchuKizaiHeadValue = {
+  juchuHeadId: number;
+  mem: string | null;
+  headNam: string;
+  kicsShukoDat: Date | null;
+  kicsNyukoDat: Date | null;
+  yardShukoDat: Date | null;
+  yardNyukoDat: Date | null;
+  juchuKizaiHeadKbn: number;
+  juchuKizaiHeadId: number;
+  juchuHonbanbiQty: number | null;
+  nebikiAmt: number | null;
+  nebikiRat: number | null;
+};
+
+export type CopyJuchuKizaiHonbanbiValues = {
+  juchuHeadId: number;
+  juchuKizaiHeadId: number;
+  juchuHonbanbiShubetuId: number;
+  juchuHonbanbiDat: Date;
+  mem: string | null;
+  juchuHonbanbiAddQty: number | null;
+};
+
+export type CopyJuchuKizaiMeisaiValues = {
+  juchuHeadId: number;
+  juchuKizaiHeadId: number;
+  juchuKizaiMeisaiId: number;
+  mShozokuId: number;
+  shozokuId: number;
+  mem: string | null;
+  mem2: string | null;
+  kizaiId: number;
+  kizaiTankaAmt: number;
+  kizaiNam: string;
+  planKizaiQty: number;
+  planYobiQty: number;
+  planQty: number;
+  dspOrdNum: number;
+  indentNum: number;
+  delFlag: boolean;
+  saveFlag: boolean;
+};
+
+export type CopyIdoJuchuKizaiMeisaiValues = {
+  juchuHeadId: number;
+  juchuKizaiHeadId: number;
+  idoDenId: number | null;
+  sagyoDenDat: Date | null;
+  sagyoSijiId: number | null;
+  mShozokuId: number;
+  shozokuId: number;
+  shozokuNam: string;
+  kizaiId: number;
+  kizaiNam: string;
+  kizaiQty: number;
+  planKizaiQty: number;
+  planYobiQty: number;
+  planQty: number;
+  delFlag: boolean;
+  saveFlag: boolean;
+};
+
+export type CopyJuchuContainerMeisaiValues = {
+  juchuHeadId: number;
+  juchuKizaiHeadId: number;
+  juchuKizaiMeisaiId: number;
+  kizaiId: number;
+  kizaiNam: string;
+  planKicsKizaiQty: number;
+  planYardKizaiQty: number;
+  planQty: number;
+  mem: string | null;
+  dspOrdNum: number;
+  indentNum: number;
+  delFlag: boolean;
+  saveFlag: boolean;
+};

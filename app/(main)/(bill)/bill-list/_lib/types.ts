@@ -1,0 +1,177 @@
+import z from 'zod';
+
+import { validationMessages } from '@/app/(main)/_lib/validation-messages';
+
+/**
+ * 請求一覧表示テーブルのタイプ
+ */
+export type BillsListTableValues = {
+  billHeadId: number;
+  billingSts: string | null;
+  billHeadNam: string | null;
+  kokyaku: string | null;
+  seikyuDat: string | null;
+};
+
+/**
+ * 見積書画面に表示する受注のタイプ
+ */
+export type JuchuValues = {
+  juchuHeadId: number | undefined | null;
+  delFlg?: number;
+  juchuSts: string | undefined | null;
+  juchuDat: Date | undefined | null;
+  juchuRange: { strt: Date | undefined | null; end: Date | undefined | null };
+  nyuryokuUser: string | undefined | null;
+  koenNam: string | undefined | null;
+  koenbashoNam: string | undefined | null;
+  kokyaku: { id: number | undefined | null; name: string | undefined | null };
+  kokyakuTantoNam: string | undefined | null;
+  mem: string | undefined | null;
+  nebikiAmt: number | undefined | null;
+  zeiKbn?: string | undefined | null;
+};
+
+/**
+ * 請求明細ヘッドのzodSchema
+ */
+const billMeisaiHeadSchema = z
+  .object({
+    seikyuMeisaiHeadId: z.number().int().nullish(),
+    juchuHeadId: z.number().int().nullish(),
+    juchuKizaiHeadId: z.number().int().nullish(),
+    seikyuRange: z.object({ strt: z.date().nullish(), end: z.date().nullish() }),
+    koenNam: z
+      .string()
+      .max(40, { message: validationMessages.maxStringLength(40) })
+      .nullish(),
+    koenbashoNam: z
+      .string()
+      .max(40, { message: validationMessages.maxStringLength(40) })
+      .nullish(),
+    kokyakuTantoNam: z
+      .string()
+      .max(16, { message: validationMessages.maxStringLength(16) })
+      .nullish(),
+    seikyuMeisaiHeadNam: z
+      .string()
+      .max(50, { message: validationMessages.maxStringLength(50) })
+      .nullish(),
+    nebikiAmt: z
+      .number({ message: validationMessages.number() })
+      .int({ message: validationMessages.int() })
+      .max(9999999999, { message: validationMessages.maxNumberLength(10) })
+      .nullish(),
+    nebikiAftAmt: z
+      .number()
+      .max(9999999999, { message: validationMessages.maxNumberLength(10) })
+      .nullish(),
+    zeiFlg: z.boolean(),
+    meisai: z.array(
+      z.object({
+        id: z.number().nullish(),
+        nam: z
+          .string()
+          .max(50, { message: validationMessages.maxStringLength(50) })
+          .nullish(),
+        qty: z
+          .number({ message: validationMessages.number() })
+          .max(9999, { message: validationMessages.maxNumberLength(4) })
+          .nullish(),
+        honbanbiQty: z
+          .number({ message: validationMessages.number() })
+          .max(999, { message: validationMessages.maxNumberLength(3) })
+          .nullish(),
+        tankaAmt: z
+          .number({ message: validationMessages.number() })
+          .max(9999999999, { message: validationMessages.maxNumberLength(10) })
+          .nullish(),
+        shokeiAmt: z
+          .number({ message: validationMessages.number() })
+          .max(9999999999, { message: validationMessages.maxNumberLength(10) })
+          .nullish(),
+      })
+    ),
+  })
+  .nullish();
+
+export type BillMeisaiHeadsValues = z.infer<typeof billMeisaiHeadSchema>;
+
+/**
+ * 請求書全体のzodSchema
+ */
+export const BillHeadSchema = z.object({
+  seikyuHeadId: z.number().int().nullish(),
+  seikyuSts: z.number().int().nullish(),
+  seikyuDat: z.date().nullish(),
+  aite: z.object({ id: z.number(), nam: z.string().max(50, { message: validationMessages.maxStringLength(50) }) }),
+  seikyuHeadNam: z
+    .string()
+    .max(50, { message: validationMessages.maxStringLength(50) })
+    .nullish(),
+  kokyaku: z
+    .string()
+    .max(50, { message: validationMessages.maxStringLength(50) })
+    .nullish(),
+  adr1: z
+    .string()
+    .max(8, { message: validationMessages.maxStringLength(8) })
+    .nullish(),
+  adr2: z.object({
+    shozai: z
+      .string()
+      .max(50, { message: validationMessages.maxStringLength(50) })
+      .nullish(),
+    tatemono: z
+      .string()
+      .max(50, { message: validationMessages.maxStringLength(50) })
+      .nullish(),
+    sonota: z
+      .string()
+      .max(50, { message: validationMessages.maxStringLength(50) })
+      .nullish(),
+  }),
+  nyuryokuUser: z
+    .string()
+    .max(20, { message: validationMessages.maxStringLength(20) })
+    .nullish(),
+  kizaiChukeiAmt: z
+    .number()
+    .max(9999999999, { message: validationMessages.maxNumberLength(10) })
+    .nullish(),
+  chukeiAmt: z
+    .number()
+    .max(9999999999, { message: validationMessages.maxNumberLength(10) })
+    .nullish(),
+  preTaxGokeiAmt: z
+    .number()
+    .max(9999999999, { message: validationMessages.maxNumberLength(10) })
+    .nullish(),
+  zeiAmt: z
+    .number({ message: validationMessages.number() })
+    .max(9999999999, { message: validationMessages.maxNumberLength(10) })
+    .nullish(),
+  zeiRat: z
+    .number({ message: validationMessages.number() })
+    .max(999, { message: validationMessages.maxNumberLength(3) })
+    .nullish(),
+  gokeiAmt: z
+    .number({ message: validationMessages.number() })
+    .int({ message: validationMessages.int() })
+    .max(9999999999, { message: validationMessages.maxNumberLength(10) })
+    .nullish(),
+  meisaiHeads: z.array(billMeisaiHeadSchema),
+});
+
+/**
+ * 明細書全体のタイプ
+ */
+export type BillHeadValues = z.infer<typeof BillHeadSchema>;
+
+export type BillSearchValues = {
+  billId: number | null;
+  billingSts: number | null;
+  range: { str: Date | null; end: Date | null };
+  kokyaku: string | null;
+  seikyuHeadNam: string | null;
+};

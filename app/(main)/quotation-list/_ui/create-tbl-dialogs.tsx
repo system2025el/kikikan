@@ -1,0 +1,209 @@
+import {
+  Box,
+  Button,
+  Card,
+  Checkbox,
+  DialogActions,
+  DialogTitle,
+  FormControlLabel,
+  FormGroup,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  Snackbar,
+  Stack,
+  Typography,
+} from '@mui/material';
+import { useEffect, useRef, useState } from 'react';
+import { UseFieldArrayReturn } from 'react-hook-form-mui';
+
+import { CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
+import { Loading } from '@/app/(main)/_ui/loading';
+
+import { getJuchuIsshikiMeisai, getJuchuKizaiHeadNamListForQuot, getJuchuKizaiMeisaiList } from '../_lib/funcs';
+import { QuotHeadValues } from '../_lib/types';
+
+/**
+ * 明細を機材明細から作成するか確認するダイアログ
+ * @param param0
+ * @returns  {JSX.Element} 明細を機材明細から作成するか確認するダイアログコンポーネント
+ */
+export const FirstDialogPage = ({
+  handleClose,
+  addKizaiTbl,
+  toSecondPage,
+}: {
+  handleClose: () => void;
+  addKizaiTbl: () => void;
+  toSecondPage: React.Dispatch<React.SetStateAction<boolean>>;
+}) => {
+  return (
+    <>
+      <DialogTitle display={'flex'} justifyContent={'flex-end'}>
+        <CloseMasterDialogButton handleCloseDialog={() => handleClose()} />
+      </DialogTitle>
+      <Stack p={4}> 機材明細から自動生成しますか？</Stack>
+      <DialogActions>
+        <Button onClick={() => toSecondPage(true)}>はい</Button>
+        <Button
+          onClick={() => {
+            addKizaiTbl();
+            handleClose();
+          }}
+        >
+          いいえ
+        </Button>
+      </DialogActions>
+    </>
+  );
+};
+
+/**
+ * 明細作成する受注機材ヘッダを選択するダイアログ
+ * @param param0
+ * @returns  {JSX.Element}
+ */
+export const SecondDialogPage = ({
+  juchuId,
+  field,
+  handleClose,
+  setSnackBarOpen,
+  setSnackBarMessage,
+}: {
+  juchuId: number | null | undefined;
+  field: UseFieldArrayReturn<QuotHeadValues>;
+  handleClose: () => void;
+  setSnackBarOpen: () => void;
+  setSnackBarMessage: React.Dispatch<React.SetStateAction<string>>;
+}) => {
+  /* debug用、レンダリング回数取得に使用 */
+  const hasRun = useRef(false);
+  const [checked, setChecked] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  /* 表示する明細ヘッド名リスト */
+  const [meisaiHeadNamList, setMeisaiHeadNamList] = useState<
+    { juchuHeadId: number; juchuKizaiHeadId: number; nebikiAmt: number | null; headNam: string }[]
+  >([]);
+
+  /* methods ------------------------------------------------ */
+  /* ヘッダが選ばれたときの処理 */
+  const handleClickHeadNam = async (
+    juchuId: number,
+    kizaiHeadId: number,
+    headNam: string,
+    nebikiAmt: number | null,
+    checked: boolean
+  ) => {
+    console.log(kizaiHeadId, checked);
+    if (checked) {
+      // 一式表示
+      const data = await getJuchuIsshikiMeisai(juchuId, kizaiHeadId);
+      field.append({
+        mituMeisaiHeadNam: headNam,
+        headNamDspFlg: false,
+        mituMeisaiKbn: 0,
+        nebikiNam: '値引き',
+        nebikiAmt: nebikiAmt,
+        nebikiAftNam: '機材費',
+        meisai: data,
+      });
+    } else {
+      // 全表示
+      const data = await getJuchuKizaiMeisaiList(juchuId, kizaiHeadId);
+      console.log(data);
+      // 取得した内容をテーブル内の明細に入れる
+      field.append({
+        mituMeisaiHeadNam: headNam,
+        headNamDspFlg: false,
+        mituMeisaiKbn: 0,
+        nebikiNam: '値引き',
+        nebikiAmt: nebikiAmt,
+        nebikiAftNam: '機材費',
+        meisai: data,
+      });
+    }
+    handleClose();
+  };
+
+  /* useEffect ---------------------------------------------- */
+  useEffect(() => {
+    if (!hasRun.current) {
+      hasRun.current = true;
+      if (!juchuId) {
+        // 受注機材Idが選ばれてない時にダイアログ閉じて何もしない
+        setSnackBarMessage(`受注番号が選ばれていません`);
+        setSnackBarOpen();
+        handleClose();
+        return;
+      }
+      /* 受注ヘッダIDから表示する受注機材ヘッダを取得する */
+      const getList = async () => {
+        const list = await getJuchuKizaiHeadNamListForQuot(juchuId);
+        setMeisaiHeadNamList(list);
+        setIsLoading(false);
+      };
+      getList();
+      console.log(meisaiHeadNamList);
+    }
+  }, [handleClose, juchuId, meisaiHeadNamList, setSnackBarMessage, setSnackBarOpen]);
+
+  return (
+    <>
+      <DialogTitle display={'flex'} justifyContent={'flex-end'}>
+        <CloseMasterDialogButton
+          handleCloseDialog={() => {
+            handleClose();
+          }}
+        />
+      </DialogTitle>
+      <Box p={4}>
+        <Stack>
+          <FormGroup>
+            <FormControlLabel
+              control={<Checkbox value={checked} onChange={() => setChecked(!checked)} />}
+              label=" 一式表示を有効にする"
+            />
+          </FormGroup>
+        </Stack>
+        <Card variant="outlined">
+          {isLoading ? (
+            <Loading />
+          ) : (
+            <List>
+              {meisaiHeadNamList.length > 0 ? (
+                meisaiHeadNamList.map((l) => (
+                  <ListItem key={l.juchuKizaiHeadId} disablePadding>
+                    <ListItemButton
+                      onClick={() => {
+                        if (isProcessing) return;
+                        setIsProcessing(true);
+                        handleClickHeadNam(l.juchuHeadId, l.juchuKizaiHeadId, l.headNam, l.nebikiAmt, checked);
+                      }}
+                      dense
+                    >
+                      <ListItemText primary={l.headNam} />
+                    </ListItemButton>
+                  </ListItem>
+                ))
+              ) : (
+                <Typography>明細がありません</Typography>
+              )}
+            </List>
+          )}
+        </Card>
+      </Box>
+      <DialogActions>
+        <Button
+          onClick={() => {
+            handleClose();
+          }}
+        >
+          キャンセル
+        </Button>
+      </DialogActions>
+    </>
+  );
+};

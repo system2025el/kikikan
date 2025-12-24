@@ -1,0 +1,365 @@
+'use server';
+
+import dayjs from 'dayjs';
+import timezone from 'dayjs/plugin/timezone';
+import utc from 'dayjs/plugin/utc';
+import { revalidatePath } from 'next/cache';
+
+import { selectActiveSeikyuSts } from '@/app/_lib/db/tables/m-seikyu-sts';
+import { selectChosenSeikyu, updBillHeadDelFlg } from '@/app/_lib/db/tables/t-seikyu-head';
+import { selectBillMeisai } from '@/app/_lib/db/tables/t-seikyu-meisai';
+import { selectBillMeisaiHead } from '@/app/_lib/db/tables/t-seikyu-meisai-head';
+import {
+  selectJuchuKizaiHeadNamListFormBill,
+  selectJuchuKizaiMeisaiDetailsForBill,
+  selectJuchuKizaiMeisaiHeadForBill,
+} from '@/app/_lib/db/tables/v-seikyu-date-lst';
+import { selectFilteredBills } from '@/app/_lib/db/tables/v-seikyu-lst';
+import { SeikyuMeisaiHead } from '@/app/_lib/db/types/t-seikyu-meisai-head-type';
+import { SeikyuMeisai } from '@/app/_lib/db/types/t-seikyu-meisai-type';
+import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
+import { SelectTypes } from '@/app/(main)/_ui/form-box';
+import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
+
+import { BillHeadValues, BillMeisaiHeadsValues, BillSearchValues, BillsListTableValues } from './types';
+
+// .tz()を使う準備
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+/**
+ * 選択肢用請求ステータスを取得する関数
+ * @returns 選択肢用の請求ステータスの配列
+ */
+export const getBillingStsSelection = async (): Promise<SelectTypes[]> => {
+  try {
+    const { data, error } = await selectActiveSeikyuSts();
+    if (error) {
+      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
+      throw error;
+    }
+    if (!data || data.length === 0) {
+      return [];
+    }
+    return data.map((d) => ({ id: d.sts_id, label: d.sts_nam }));
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
+ * 請求一覧に表示するリストを取得・成形する関数
+ * @param queries 検索条件
+ * @returns
+ */
+export const getFilteredBills = async (
+  queries: BillSearchValues = {
+    billId: null,
+    billingSts: FAKE_NEW_ID,
+    range: {
+      str: null,
+      end: null,
+    },
+    kokyaku: '未選択',
+    seikyuHeadNam: null,
+  }
+): Promise<BillsListTableValues[]> => {
+  try {
+    const { rows } = await selectFilteredBills(queries);
+    if (!rows || rows.length === 0) {
+      return [];
+    }
+    return rows.map((d) => ({
+      billHeadId: d.seikyu_head_id,
+      billingSts: d.sts_nam,
+      billHeadNam: d.seikyu_head_nam,
+      kokyaku: d.kokyaku_nam,
+      seikyuDat: d.seikyu_dat,
+    }));
+  } catch (e) {
+    console.error('例外が発生', e);
+    throw e;
+  }
+};
+
+/**
+ * 選択された見積IDの見積書情報を取得する関数
+ * @param seikyuId 選択された見積ヘッドID
+ */
+export const getChosenBill = async (seikyuId: number) => {
+  // 明細のデータ変換をする
+  const transformMeisaiHead = (head: SeikyuMeisaiHead, meisais: SeikyuMeisai[]) => ({
+    juchuHeadId: head.juchu_head_id,
+    juchuKizaiHeadId: head.juchu_kizai_head_id,
+    seikyuMeisaiHeadId: head.seikyu_meisai_head_id,
+    seikyuMeisaiHeadNam: head.seikyu_meisai_head_nam,
+    seikyuRange: {
+      strt: head.seikyu_str_dat ? new Date(head.seikyu_str_dat) : null,
+      end: head.seikyu_end_dat ? new Date(head.seikyu_end_dat) : null,
+    },
+    koenNam: head.koen_nam,
+    koenbashoNam: head.koenbasho_nam,
+    kokyakuTantoNam: head.kokyaku_tanto_nam,
+    nebikiAmt: head.nebiki_amt,
+    zeiFlg: Boolean(head.zei_flg),
+    meisai: meisais.map((m) => ({
+      id: m.seikyu_meisai_id,
+      nam: m.seikyu_meisai_nam,
+      qty: m.meisai_qty,
+      honbanbiQty: m.meisai_honbanbi_qty,
+      tankaAmt: m.meisai_tanka_amt,
+    })),
+  });
+  try {
+    // 見積ヘッドの取得
+    const { data: seikyuData, error: seikyuError } = await selectChosenSeikyu(seikyuId);
+    if (seikyuError) {
+      console.error(seikyuError);
+      throw new Error('DBエラー：t_seikyu_head');
+    }
+    console.log(seikyuData);
+
+    // 受注情報と明細情報を並列を取得
+    const [meisaiHeadResult, meisaiResult] = await Promise.all([
+      selectBillMeisaiHead(seikyuData.seikyu_head_id),
+      selectBillMeisai(seikyuData.seikyu_head_id),
+    ]);
+
+    const { data: meisaiHeads, error: meisaiHeadError } = meisaiHeadResult;
+    const { data: meisais, error: meisaiError } = meisaiResult;
+    if (meisaiHeadError || meisaiError) {
+      console.error(meisaiHeadError?.message, meisaiError?.message);
+      throw new Error('DBエラー：明細取得時');
+    }
+    // 明細をヘッダIDごとにグループ化
+    const meisaisByHeadId = meisais.reduce((acc: Record<number, SeikyuMeisai[]>, current: SeikyuMeisai) => {
+      const headId = current.seikyu_meisai_head_id;
+      if (!acc[headId]) {
+        acc[headId] = [];
+      }
+      acc[headId].push(current);
+      return acc;
+    }, {});
+
+    const meisaisList = meisaiHeads.map((d) => {
+      const associatedMeisais = meisaisByHeadId[d.seikyu_meisai_head_id] || [];
+      return transformMeisaiHead(d, associatedMeisais);
+    });
+
+    // const meisaisList = meisaiHeads.reduce((acc, head) => {
+    //   const associatedMeisais = meisaisByHeadId[head.seikyu_meisai_head_id] || [];
+    //   const transformedHead = transformMeisaiHead(head, associatedMeisais);
+
+    //   switch (head.seikyu_meisai_head_kbn) {
+    //     case 0: // kizai
+    //       acc.kizai.push(transformedHead);
+    //       break;
+    //     case 1: // labor
+    //       acc.labor.push(transformedHead);
+    //       break;
+    //     case 2: // other
+    //       acc.other.push(transformedHead);
+    //       break;
+    //   }
+    //   return acc;
+    // }, initialKbnMeisais);
+
+    // 見積の全情報
+    const allData: BillHeadValues = {
+      seikyuHeadId: seikyuData.seikyu_head_id,
+      seikyuSts: seikyuData.seikyu_sts,
+      seikyuDat: seikyuData.seikyu_dat ? new Date(seikyuData.seikyu_dat) : null,
+      seikyuHeadNam: seikyuData.seikyu_head_nam,
+      kokyaku: seikyuData.kokyaku_nam,
+      nyuryokuUser: seikyuData.nyuryoku_user,
+      aite: { id: seikyuData.kokyaku_id ?? FAKE_NEW_ID, nam: seikyuData.kokyaku_nam ?? '' },
+      adr1: seikyuData.adr_post,
+      adr2: { shozai: seikyuData.adr_shozai, tatemono: seikyuData.adr_tatemono, sonota: seikyuData.adr_sonota },
+      // seikyuRange:
+      //   seikyuData.seikyu_str_dat && seikyuData.seikyu_end_dat
+      //     ? { strt: new Date(seikyuData.seikyu_str_dat), end: new Date(seikyuData.seikyu_end_dat) }
+      //     : { strt: null, end: null },
+      // kokyakuTantoNam: seikyuData.kokyaku_tanto_nam,
+      // koenNam: seikyuData.koen_nam,
+      // koenbashoNam: seikyuData.koenbasho_nam,
+      // seikyuHonbanbiQty: seikyuData.seikyu_honbanbi_qty,
+      zeiRat: seikyuData.zei_rat,
+      meisaiHeads: meisaisList, // 整形済みのデータを代入
+    };
+    return allData;
+  } catch (e) {
+    console.error('例外が発生しました', e);
+    throw e;
+  }
+};
+
+/**
+ * 請求のテーブル追加ダイアログ内の機材ヘッド名表示
+ * @param queries
+ */
+export const getJuchuKizaiHeadNamListForBill = async (queries: {
+  kokyaku: { id: number; nam: string };
+  tantou: string | null;
+  juchuId: number | null;
+  dat: Date;
+}) => {
+  try {
+    const { data, error } = await selectJuchuKizaiHeadNamListFormBill(queries);
+    if (error) {
+      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
+      throw error;
+    }
+    if (!data || data.length === 0) {
+      return [];
+    }
+    return data.map((d) => ({
+      juchuHeadId: d.juchu_head_id ?? FAKE_NEW_ID,
+      juchuKizaiHeadId: d.juchu_kizai_head_id ?? FAKE_NEW_ID,
+      headNam: d.head_nam ?? '',
+    }));
+  } catch (e) {
+    console.error('例外が発生しました', e);
+    throw e;
+  }
+};
+
+/**
+ * テーブル追加時に選んだ機材明細の合算した情報を取得し成型する関数
+ * @param juchuHeadId 受注ヘッダID
+ * @param kizaiHeadId 機材明細ヘッダID
+ * @param dat 年月日
+ * @returns テーブル追加時に選んだ機材明細の合算した情報
+ */
+export const getJuchuKizaiMeisaiHeadForBill = async (juchuHeadId: number, kizaiHeadId: number, dat: Date) => {
+  try {
+    const data = await selectJuchuKizaiMeisaiHeadForBill(juchuHeadId, kizaiHeadId, dat);
+    if (!data) {
+      console.error('例題が発生');
+    }
+    const d = data.rows[0];
+    console.log('☆☆☆☆☆☆☆☆☆', d);
+    return data.rows.map((j) => ({
+      juchuHeadId: j.juchu_head_id,
+      juchuKizaiHeadId: j.juchu_kizai_head_id,
+      seikyuMeisaiHeadNam: j.head_nam,
+      koenNam: j.koen_nam,
+      seikyuRange: {
+        strt:
+          j.seikyu_dat && toJapanYMDString(j.seikyu_dat) !== toJapanYMDString(j.shuko_dat)
+            ? dayjs(j.seikyu_dat).tz('Asia/Tokyo').add(1, 'day').startOf('day').toDate()
+            : new Date(j.shuko_dat),
+        end: new Date(j.nyuko_dat) > new Date(dat) ? new Date(dat) : new Date(j.nyuko_dat),
+      },
+      koenbashoNam: j.koenbasho_nam,
+      kokyakuTantoNam: j.kokyaku_tanto_nam,
+      zeiFlg: false,
+      meisai: Array.isArray(data.rows)
+        ? data.rows.filter(
+            (m) =>
+              m.juchu_head_id === j.juchu_head_id && m.juchu_kizai_head_id === j.juchu_kizai_head_id && m.shokei_amt
+          ).length === 0
+          ? []
+          : data.rows
+              .filter(
+                (m) =>
+                  m.juchu_head_id === j.juchu_head_id && m.juchu_kizai_head_id === j.juchu_kizai_head_id && m.shokei_amt
+              )
+              .map((m) => ({
+                nam: `${m.head_nam}一式`,
+                qty: 1,
+                honbanbiQty: (Number(m.honbanbi_qty) ?? 0) + (Number(m.add_dat_qty) ?? 0),
+                tankaAmt: Number(m.shokei_amt),
+                shokeiAmt: Math.round(1 * (Number(m.honbanbi_qty) + Number(m.add_dat_qty)) * Number(m.shokei_amt)),
+                ...m,
+              }))
+        : [],
+    }));
+  } catch (e) {
+    console.error('例外が発生しました', e);
+    throw e;
+  }
+};
+
+/**
+ * 請求で選ばれたの受注の詳細な明細を取得する関数
+ * @param juchuHeadId 受注ヘッダーID
+ * @param kizaiHeadId 受注機材ヘッダーID
+ * @param dat 請求期間
+ * @returns
+ */
+export const getJuchuKizaiMeisaiDetailsForBill = async (juchuHeadId: number, kizaiHeadId: number, dat: Date) => {
+  try {
+    const data = await selectJuchuKizaiMeisaiDetailsForBill(juchuHeadId, kizaiHeadId, dat);
+    console.log(data.rows);
+
+    if (!data) {
+      console.error('例題が発生');
+
+      throw new Error('DB取得エラー');
+    }
+    if (!data.rows || data.rows.length === 0) {
+      return [];
+    }
+    // juchus.rowsをグループ化して整形
+    const groupedResult = data.rows.reduce<Record<string, BillMeisaiHeadsValues>>((acc, currentRow) => {
+      // グループ化するためのユニークなキー
+      const groupKey = `${currentRow.juchu_head_id}-${currentRow.juchu_kizai_head_id}`;
+
+      // まだこのグループの親オブジェクトが作られていなければ作成
+      if (!acc[groupKey]) {
+        acc[groupKey] = {
+          juchuHeadId: currentRow.juchu_head_id,
+          juchuKizaiHeadId: currentRow.juchu_kizai_head_id,
+          seikyuMeisaiHeadNam: currentRow.head_nam,
+          koenNam: currentRow.koen_nam,
+          seikyuRange: {
+            strt:
+              currentRow.seikyu_dat &&
+              toJapanYMDString(currentRow.seikyu_dat) !== toJapanYMDString(currentRow.shuko_dat)
+                ? dayjs(currentRow.seikyu_dat).tz('Asia/Tokyo').add(1, 'day').startOf('day').toDate()
+                : new Date(currentRow.shuko_dat),
+            end: new Date(currentRow.nyuko_dat) > new Date(dat) ? new Date(dat) : new Date(currentRow.nyuko_dat),
+          },
+          koenbashoNam: currentRow.koenbasho_nam,
+          kokyakuTantoNam: currentRow.kokyaku_tanto_nam,
+          zeiFlg: false,
+          meisai: [], // 明細を入れるための空配列
+        };
+      }
+      // 現在の行を明細データとして整形し、meisai配列に追加
+      const honbanbiQty = (Number(currentRow.honbanbi_qty) || 0) + (Number(currentRow.add_dat_qty) || 0);
+      const tankaAmt = Number(currentRow.kizai_tanka_amt) || 0;
+      const planQty = Number(currentRow.plan_qty) || 0;
+
+      acc[groupKey].meisai.push({
+        nam: currentRow.kizai_nam ? `${' * '.repeat(currentRow.indent_num ?? 0)}${currentRow.kizai_nam}` : null,
+        qty: planQty,
+        honbanbiQty: honbanbiQty,
+        tankaAmt: tankaAmt,
+        shokeiAmt: Math.round(planQty * honbanbiQty * tankaAmt),
+      });
+
+      return acc;
+    }, {});
+
+    // reduceの結果はオブジェクトなので、最後にObject.values()で配列に変換します
+    return Object.values(groupedResult);
+  } catch (e) {
+    console.error('例外が発生しました', e);
+    throw e;
+  }
+};
+
+/**
+ * 一覧で選択された請求の削除フラグを１にする関数
+ * @param {number[]} ids 選択された請求のヘッドIDの配列
+ */
+export const updBillDelFlg = async (ids: number[]) => {
+  try {
+    console.log('Delete ::: ', ids);
+    await updBillHeadDelFlg(ids);
+    await revalidatePath('/bill-list');
+  } catch (e) {
+    throw e;
+  }
+};

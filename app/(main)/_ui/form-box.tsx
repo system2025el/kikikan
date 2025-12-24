@@ -1,0 +1,46 @@
+import { Grid2, Typography } from '@mui/material';
+
+import { FAKE_NEW_ID } from '../(masters)/_lib/constants';
+
+/**
+ * フォームなどをきれいに配置したいときの共通コンポーネント
+ * @param
+ * @returns
+ */
+export const FormBox = ({
+  children,
+  formItem,
+  required,
+  align,
+}: {
+  children: React.ReactNode;
+  formItem: FormItemsType;
+  required?: boolean;
+  align?: string;
+}) => {
+  return (
+    <Grid2 container spacing={1} direction={'row'} width={'100%'} alignItems={align ?? 'center'}>
+      <Grid2 size={1}>
+        {required && (
+          <Typography color="error" align="right">
+            *必須
+          </Typography>
+        )}
+      </Grid2>
+      <Grid2 size={2}>
+        <Typography ml={3}>{formItem.label}</Typography>
+      </Grid2>
+      <Grid2 size={'grow'} alignItems={'center'} display={'flex'}>
+        {children}
+      </Grid2>
+      <Grid2 size={3}>
+        <Typography variant="body2">{formItem.constraints}</Typography>
+      </Grid2>
+    </Grid2>
+  );
+};
+
+export type FormItemsType = { label: string; constraints: string; exsample: string; other?: string };
+
+export type SelectTypes = { id: number | string; label: string; grpId?: number; grpNam?: string };
+export const selectNone: SelectTypes = { id: FAKE_NEW_ID, label: '未選択' };

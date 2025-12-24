@@ -1,13 +1,18 @@
 'use client';
 
-import { useMediaQuery } from '@mui/material';
+import { blue, grey } from '@mui/material/colors';
 import CssBaseline from '@mui/material/CssBaseline';
+import { jaJP } from '@mui/material/locale';
 import type { Palette } from '@mui/material/styles';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
 import { createTheme } from '@mui/material/styles';
 import type { TypographyOptions } from '@mui/material/styles/createTypography';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
-/** @type {TypographyOptions | ((palette: Palette) => TypographyOptions)} typography */
+// import { useMediaQuery } from '@mui/material';
+
+/** @type {TypographyOptions | ((palette: Palette) = TypographyOptions)} typography */
 const typography: TypographyOptions | ((palette: Palette) => TypographyOptions) = {
   fontFamily: 'var(--font-noto-sans-jp)',
 };
@@ -15,22 +20,129 @@ const typography: TypographyOptions | ((palette: Palette) => TypographyOptions) 
 const cssVariables = true;
 
 /** @type {Theme} lightTheme */
-const lightTheme = createTheme({
-  typography,
-  cssVariables,
-  palette: {
-    mode: 'light',
+const lightTheme = createTheme(
+  {
+    typography,
+    cssVariables,
+    palette: {
+      text: { disabled: 'black' },
+      mode: 'light',
+    },
+    components: {
+      MuiInputBase: {
+        styleOverrides: {
+          input: {
+            '&:disabled': {
+              cursor: 'default',
+            },
+          },
+        },
+      },
+      MuiTypography: {
+        defaultProps: {
+          whiteSpace: 'nowrap',
+        },
+      },
+      MuiOutlinedInput: {
+        styleOverrides: {
+          root: {
+            '&.Mui-disabled': {
+              backgroundColor: grey[200], // 任意のカラー
+            },
+            '&.Mui-readOnly': {
+              backgroundColor: grey[200], // 任意のカラー
+            },
+          },
+          // ここを消すかcssVariablesを消すかのどちらかです。delete 。CSS 変数ベースのスタイリングとChrome の :-webkit-autofill の相性が不安定
+          input: {
+            '&:-webkit-autofill': {
+              WebkitBoxShadow: '0 0 0 100px #e8eaf6 inset',
+              WebkitTextFillColor: '#000000',
+              caretColor: '#000000',
+            },
+          },
+        },
+      },
+      MuiTableCell: {
+        styleOverrides: {
+          head: ({ theme }) => ({
+            backgroundColor: theme.palette.primary.light,
+            color: theme.palette.primary.contrastText,
+            paddingLeft: 8,
+            paddingRight: 8,
+          }),
+          body: {
+            paddingLeft: 8,
+            paddingRight: 8,
+          },
+        },
+      },
+      MuiSelect: {
+        defaultProps: {
+          size: 'small',
+        },
+      },
+      MuiInputLabel: {
+        defaultProps: {
+          size: 'small',
+        },
+      },
+      MuiRadio: {
+        defaultProps: {
+          size: 'small',
+        },
+        styleOverrides: {
+          root: { padding: 2 },
+        },
+      },
+      MuiButton: {
+        defaultProps: {
+          size: 'small',
+          variant: 'contained',
+          sx: { whiteSpace: 'nowrap', minWidth: 'max-content', textTransform: 'none' },
+        },
+      },
+      MuiStack: {
+        defaultProps: {
+          direction: 'row',
+          justifyContent: 'flex-start',
+          alignItems: 'center',
+          spacing: 1,
+        },
+      },
+      MuiCheckbox: {
+        defaultProps: {
+          size: 'small',
+        },
+      },
+      MuiTextField: {
+        defaultProps: {
+          size: 'small',
+          sx: {
+            bgcolor: 'white',
+          },
+        },
+      },
+      MuiPagination: {
+        defaultProps: {
+          size: 'small',
+          variant: 'outlined',
+          shape: 'rounded',
+        },
+      },
+    },
   },
-});
+  jaJP
+);
 
 /** @type {Theme} darkTheme */
-const darkTheme = createTheme({
-  typography,
-  cssVariables,
-  palette: {
-    mode: 'dark',
-  },
-});
+// const darkTheme = createTheme({
+//   typography,
+//   cssVariables,
+//   palette: {
+//     mode: 'dark',
+//   },
+// });
 
 /**
  * ThemeProvider
@@ -40,15 +152,26 @@ const darkTheme = createTheme({
 const ThemeProvider = ({ children }: Readonly<{ children: React.ReactNode }>) => {
   /* カラースキーム
   ---------------------------------------------------------------------------------------------------- */
-  const mode = useMediaQuery('(prefers-color-scheme: dark)') ? 'dark' : 'light';
+  // const mode = useMediaQuery('(prefers-color-scheme: dark)') ? 'dark' : 'light';
 
   /* jsx
   ---------------------------------------------------------------------------------------------------- */
   return (
-    // <MuiThemeProvider theme={lightTheme}>
-    <MuiThemeProvider theme={mode === 'dark' ? darkTheme : lightTheme}>
-      <CssBaseline />
-      {children}
+    // <MuiThemeProvider theme={mode === 'dark' ? darkTheme : lightTheme}>
+    <MuiThemeProvider theme={lightTheme}>
+      {' '}
+      <LocalizationProvider
+        dateAdapter={AdapterDayjs}
+        dateFormats={{ year: 'YYYY年', month: 'MM' }} // カレンダー内の年一覧のフォーマット
+        adapterLocale="ja"
+        localeText={{
+          previousMonth: '前月を表示',
+          nextMonth: '翌月を表示',
+        }}
+      >
+        <CssBaseline />
+        {children}
+      </LocalizationProvider>
     </MuiThemeProvider>
   );
 };

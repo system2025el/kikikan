@@ -1,0 +1,76 @@
+const data = [
+  {
+    id: 1,
+    name: 'SHARPY PLUS',
+    date: null,
+    memo: '',
+    place: 'K',
+    all: 148,
+    order: 0,
+    spare: 0,
+    total: 0,
+  },
+  {
+    id: 2,
+    name: 'ROBIN T2 Profile',
+    date: null,
+    memo: '',
+    place: 'K',
+    all: 55,
+    order: 0,
+    spare: 0,
+    total: 0,
+  },
+  {
+    id: 3,
+    name: 'Sharpy X Spot',
+    date: null,
+    memo: '',
+    place: 'K',
+    all: 26,
+    order: 0,
+    spare: 0,
+    total: 0,
+  },
+  {
+    id: 4,
+    name: 'VL6000 Beam',
+    date: null,
+    memo: '',
+    place: 'Y',
+    all: 27,
+    order: 0,
+    spare: 0,
+    total: 0,
+  },
+  {
+    id: 5,
+    name: 'Arolla Profile MP',
+    date: null,
+    memo: '',
+    place: 'Y',
+    all: 28,
+    order: 0,
+    spare: 0,
+    total: 0,
+  },
+  {
+    id: 6,
+    name: '20D電源BOX 3相専用（12口）',
+    date: null,
+    memo: '',
+    place: 'Y',
+    all: 44,
+    order: 0,
+    spare: 0,
+    total: 0,
+  },
+];
+
+const stock = [148, 55, 26, 27, 28, 44, 45];
+
+const cellWidths = ['65%', '5%', '5%', '5%', '5%', '5%', '5%', '5%'];
+
+const header = ['機材名', 'メモ', '在庫場所', '全', '受注数', '予備数', '合計'];
+
+export { cellWidths, data, header, stock };
