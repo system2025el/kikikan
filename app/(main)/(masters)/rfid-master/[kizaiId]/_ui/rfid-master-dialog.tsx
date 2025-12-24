@@ -1,5 +1,17 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Box, Button, Grid2, MenuItem, Select, TextField, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContentText,
+  DialogTitle,
+  Grid2,
+  MenuItem,
+  Select,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { grey } from '@mui/material/colors';
 import { useEffect, useState } from 'react';
 import {
@@ -49,6 +61,8 @@ export const RfidMasterDialog = ({
   const [dirtyOpen, setDirtyOpen] = useState(false);
   /* 削除フラグ確認ダイアログ出すかどうか */
   const [deleteOpen, setDeleteOpen] = useState(false);
+  /* NG系メモ必須ダイアログ出すかどうか */
+  const [memOpen, setMemOpen] = useState(false);
   /* submit時のactions (save, delete) */
   const [action, setAction] = useState<'save' | 'delete' | 'restore' | undefined>(undefined);
   /* フォーム内のセレクトoptions */
@@ -56,9 +70,9 @@ export const RfidMasterDialog = ({
     shozoku: SelectTypes[];
     sts: SelectTypes[];
   }>({ shozoku: [], sts: [] });
-  /*  */
+  /* タグID重複メッセージ */
   const [tagMessage, setTagMessage] = useState<string>('');
-  /*  */
+  /* ELナンバー重複メッセージ */
   const [elMessage, setElMessage] = useState<string>('');
 
   /* useForm ------------------------- */
@@ -83,55 +97,60 @@ export const RfidMasterDialog = ({
   /* フォームを送信 */
   const onSubmit = async (data: RfidsMasterDialogValues) => {
     setIsLoading(true);
-    console.log('isDarty : ', isDirty);
-    setTagMessage('');
-    setElMessage('');
-    if (rfidId === String(FAKE_NEW_ID)) {
-      // 新規登録 -----------------------------
-      const [tagResult, elNumResult] = await Promise.all([selectOneRfid(data.tagId), selectElNumExists(data.elNum!)]);
-      console.log(tagResult, elMessage);
-      if (tagResult.data) {
-        setTagMessage('このRFIDはすでに存在しています');
-      } else {
-        setTagMessage('');
-      }
-      if (elNumResult.data) {
-        setElMessage('このEL No.は既に存在しています');
-      } else {
-        setElMessage('');
-      }
-      if (!tagResult.data && !elNumResult.data) {
-        await addNewRfid(data, kizaiId, user?.name ?? '');
-        handleCloseDialog();
-        setIsLoading(false);
-        refetchRfids();
-      }
+    if (data.rfidKizaiSts >= 100 && (!data.mem || data.mem.trim() === '')) {
+      setIsLoading(false);
+      // RFIDステータスが100以上（NG系でメモが空の時）メモ必須ダイアログ表示
+      setMemOpen(true);
     } else {
-      // 更新 -----------------------------
-      const elNumResult = await selectElNumExists(data.elNum);
-      if (elNumResult.data && currentRfid.elNum !== data.elNum) {
-        setElMessage('このEL No.は既に存在しています');
+      setTagMessage('');
+      setElMessage('');
+      if (rfidId === String(FAKE_NEW_ID)) {
+        // 新規登録 -----------------------------
+        const [tagResult, elNumResult] = await Promise.all([selectOneRfid(data.tagId), selectElNumExists(data.elNum!)]);
+        console.log(tagResult, elMessage);
+        if (tagResult.data) {
+          setTagMessage('このRFIDはすでに存在しています');
+        } else {
+          setTagMessage('');
+        }
+        if (elNumResult.data) {
+          setElMessage('このEL No.は既に存在しています');
+        } else {
+          setElMessage('');
+        }
+        if (!tagResult.data && !elNumResult.data) {
+          await addNewRfid(data, kizaiId, user?.name ?? '');
+          handleCloseDialog();
+          setIsLoading(false);
+          refetchRfids();
+        }
       } else {
-        setElMessage('');
-      }
-      if (!elNumResult.data || currentRfid.elNum === data.elNum) {
-        if (action === 'save') {
-          // 保存終了ボタン
-          await updateRfid(currentRfid, data, kizaiId, user?.name ?? '');
-          handleCloseDialog();
-          setIsLoading(false);
-          refetchRfids();
-        } else if (action === 'delete') {
-          setIsLoading(false);
-          // 削除ボタン
-          setDeleteOpen(true);
-          return;
-        } else if (action === 'restore') {
-          // 有効化ボタン
-          await updRfidDelFlg(getValues('tagId'), false, user?.name ?? '');
-          handleCloseDialog();
-          setIsLoading(false);
-          refetchRfids();
+        // 更新 -----------------------------
+        const elNumResult = await selectElNumExists(data.elNum);
+        if (elNumResult.data && currentRfid.elNum !== data.elNum) {
+          setElMessage('このEL No.は既に存在しています');
+        } else {
+          setElMessage('');
+        }
+        if (!elNumResult.data || currentRfid.elNum === data.elNum) {
+          if (action === 'save') {
+            // 保存終了ボタン
+            await updateRfid(currentRfid, data, kizaiId, user?.name ?? '');
+            handleCloseDialog();
+            setIsLoading(false);
+            refetchRfids();
+          } else if (action === 'delete') {
+            setIsLoading(false);
+            // 削除ボタン
+            setDeleteOpen(true);
+            return;
+          } else if (action === 'restore') {
+            // 有効化ボタン
+            await updRfidDelFlg(getValues('tagId'), false, user?.name ?? '');
+            handleCloseDialog();
+            setIsLoading(false);
+            refetchRfids();
+          }
         }
       }
     }
@@ -309,6 +328,22 @@ export const RfidMasterDialog = ({
               handleCloseDelete={() => setDeleteOpen(false)}
               handleConfirmDelete={handleConfirmDelete}
             />
+            <Dialog open={memOpen} onClose={() => setMemOpen(false)}>
+              <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
+                <Box>メモを記入してください</Box>
+              </DialogTitle>
+              <DialogContentText m={2}>
+                機材ステータスで 「
+                {selectOptions.sts
+                  .filter((d) => Number(d.id) > 100)
+                  .map((d) => d.label)
+                  .join(', ')}
+                」を選択時はメモを入力してください。
+              </DialogContentText>
+              <DialogActions>
+                <Button onClick={() => setMemOpen(false)}>はい</Button>
+              </DialogActions>
+            </Dialog>
           </>
         )}
       </form>

@@ -59,14 +59,23 @@ export const quotMeisaiHeadSchema = z.object({
     .nullish(),
   mituMeisaiKbn: z.number(),
   headNamDspFlg: z.boolean(),
-  nebikiNam: z.string().nullish(),
+  nebikiNam: z
+    .string()
+    .max(20, { message: validationMessages.maxStringLength(20) })
+    .nullish(),
   nebikiAmt: z
     .number()
     .int({ message: validationMessages.int() })
     .max(9999999999, { message: validationMessages.maxNumberLength(10) })
     .nullish(),
-  nebikiAftNam: z.string().nullish(),
-  shokeiMei: z.string().nullish(),
+  nebikiAftNam: z
+    .string()
+    .max(20, { message: validationMessages.maxStringLength(20) })
+    .nullish(),
+  shokeiMei: z
+    .string()
+    .max(20, { message: validationMessages.maxStringLength(20) })
+    .nullish(),
   shokeiAmt: z
     .number({ message: validationMessages.number() })
     .max(9999999999, { message: validationMessages.maxNumberLength(10) })

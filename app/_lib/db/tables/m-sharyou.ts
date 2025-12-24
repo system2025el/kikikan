@@ -11,7 +11,13 @@ import { MSharyoDBValues } from '../types/m-sharyo-type';
  */
 export const selectActiveVehs = async () => {
   try {
-    return supabase.schema(SCHEMA).from('m_sharyo').select('sharyo_id, sharyo_nam').neq('del_flg', 1).neq('dsp_flg', 0);
+    return supabase
+      .schema(SCHEMA)
+      .from('m_sharyo')
+      .select('sharyo_id, sharyo_nam')
+      .neq('del_flg', 1)
+      .neq('dsp_flg', 0)
+      .order('sharyo_nam');
   } catch (e) {
     throw e;
   }

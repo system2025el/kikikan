@@ -41,9 +41,18 @@ const billMeisaiHeadSchema = z
     juchuHeadId: z.number().int().nullish(),
     juchuKizaiHeadId: z.number().int().nullish(),
     seikyuRange: z.object({ strt: z.date().nullish(), end: z.date().nullish() }),
-    koenNam: z.string().nullish(),
-    koenbashoNam: z.string().nullish(),
-    kokyakuTantoNam: z.string().nullish(),
+    koenNam: z
+      .string()
+      .max(40, { message: validationMessages.maxStringLength(40) })
+      .nullish(),
+    koenbashoNam: z
+      .string()
+      .max(40, { message: validationMessages.maxStringLength(40) })
+      .nullish(),
+    kokyakuTantoNam: z
+      .string()
+      .max(16, { message: validationMessages.maxStringLength(16) })
+      .nullish(),
     seikyuMeisaiHeadNam: z
       .string()
       .max(50, { message: validationMessages.maxStringLength(50) })

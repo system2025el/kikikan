@@ -47,6 +47,8 @@ export const SelectFilteredUsers = async (searchQuery: string) => {
     query += `WHERE m.user_nam ILIKE $1`;
     params.push(`%${searchQuery}%`);
   }
+  query += ` ORDER BY m.user_nam`;
+
   try {
     return await pool.query(query, params);
   } catch (e) {
