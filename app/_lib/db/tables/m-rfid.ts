@@ -115,31 +115,31 @@ export const upDateRfidDB = async (data: MRfidDBValues, connection: PoolClient) 
  * @param connection トランザクション
  */
 export const updateRfidTagDelFlgs = async (
-  data: { rfid_tag_id: string; del_flg: number }[],
+  data: { rfid_tag_id: string; del_flg: number; mem: string | null }[],
   connection: PoolClient,
-  kizaiId: number,
   user: string
 ) => {
   console.log('無効化有効化： ', data);
-  const now = toJapanTimeStampString();
+  const now = new Date().toISOString();
   // RFIDタグ管理テーブル側準備
   const placeholders = data
     .map((_, index) => {
-      const start = index * 4 + 1;
-      return `($${start}, $${start + 1}, $${start + 2}, $${start + 3})`;
+      const start = index * 5 + 1;
+      return `($${start}, $${start + 1}, $${start + 2}, $${start + 3}, $${start + 4})`;
     })
     .join(',');
-  const values = data.flatMap((v) => [v.rfid_tag_id, v.del_flg, now, user]);
+  const values = data.flatMap((v) => [v.rfid_tag_id, v.del_flg, v.mem, now, user]);
   const query = `
           UPDATE ${SCHEMA}.m_rfid AS r
           SET
               del_flg = v.del_flg::integer,
+              mem = v.mem::text,
               upd_dat = v.upd_dat::timestamp,
               upd_user = v.upd_user::varchar
           FROM (
             VALUES
               ${placeholders}
-          ) AS v (rfid_tag_id, del_flg, upd_dat, upd_user)
+          ) AS v (rfid_tag_id, del_flg, mem, upd_dat, upd_user)
           WHERE
               r.rfid_tag_id = v.rfid_tag_id;
           `;

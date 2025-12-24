@@ -7,6 +7,10 @@ import {
   Checkbox,
   Container,
   Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   Divider,
   Grid2,
   MenuItem,
@@ -71,6 +75,12 @@ export const RfidMaster = ({ kizaiId }: { kizaiId: number }) => {
   const [openId, setOpenID] = useState<string>(String(FAKE_NEW_ID));
   /* 詳細ダイアログの開閉状態 */
   const [dialogOpen, setDialogOpen] = useState(false);
+  /** NGメモ必須ダイアログの開閉状態 */
+  const [memOpen, setMemOpen] = useState(false);
+  /** NGメモ */
+  const [ngMem, setNgMem] = useState<string>('');
+  /** NGメモエラーメッセージ */
+  const [errorMsg, setErrorMsg] = useState<string>('');
 
   /* methods ------------------------------------------- */
   /** 詳細ダイアログを開く関数 */
@@ -126,13 +136,6 @@ export const RfidMaster = ({ kizaiId }: { kizaiId: number }) => {
   /** テーブル最後のページ用の空データの長さ */
   const emptyRows = theRfids && page > 1 ? Math.max(0, page * rowsPerPage - theRfids.length) : 0;
 
-  // /* 元のステータスと一致してるかどうか */
-  //  const isAllSame = rfids?.every((original) => {
-  //   const newItem = theRfids && theRfids.find((item) => item.rfidTagId === original.rfidTagId);
-  //   if (!newItem) return false;
-  //   return original.stsId === newItem.stsId && original.stsNam === newItem.stsNam;
-  // });
-
   /* methods ------------------------------------------ */
   /**
    * 適用ボタン押下時の処理
@@ -141,6 +144,38 @@ export const RfidMaster = ({ kizaiId }: { kizaiId: number }) => {
    */
   const handleClickAdapt = (tagList: string[], selectedSts: SelectTypes) => {
     console.log('タグリスト', tagList, 'ステータス', selectedSts, '最初のリスト', theRfids);
+    if (Number(selectedSts.id) < 100) {
+      const newList = theRfids
+        ? theRfids.map((r) => {
+            if (tagList.includes(r.rfidTagId)) {
+              return {
+                ...r,
+                stsId: Number(selectedSts.id),
+                stsNam: selectedSts.label,
+              };
+            }
+            return r;
+          })
+        : [];
+      // 表示する配列を更新
+      setTheRfids(newList);
+      setSaved(false);
+    } else {
+      setMemOpen(true);
+    }
+  };
+
+  /**
+   * NG系
+   * @param tagList
+   * @param selectedSts
+   */
+  const handleNgMem = (tagList: string[], selectedSts: SelectTypes) => {
+    if (!ngMem || ngMem.trim() === '') {
+      setErrorMsg('必須です');
+      return;
+    }
+    setMemOpen(false);
     const newList = theRfids
       ? theRfids.map((r) => {
           if (tagList.includes(r.rfidTagId)) {
@@ -148,6 +183,7 @@ export const RfidMaster = ({ kizaiId }: { kizaiId: number }) => {
               ...r,
               stsId: Number(selectedSts.id),
               stsNam: selectedSts.label,
+              mem: !r.mem || r.mem.trim() === '' ? ngMem.substring(0, 200) : `${ngMem}，${r.mem}`.substring(0, 200),
             };
           }
           return r;
@@ -156,10 +192,8 @@ export const RfidMaster = ({ kizaiId }: { kizaiId: number }) => {
     // 表示する配列を更新
     setTheRfids(newList);
     setSaved(false);
-    // if (isAllSame) {
-    //   setSnackBarMessage('保存済みの内容です。');
-    //   setSnackBarOpen(true);
-    // }
+    setErrorMsg('');
+    setNgMem('');
   };
 
   /**
@@ -174,16 +208,18 @@ export const RfidMaster = ({ kizaiId }: { kizaiId: number }) => {
       if (!currentItem) {
         return true;
       }
-      return currentItem.stsId !== newItem.stsId || currentItem.stsNam !== newItem.stsNam;
+      return (
+        currentItem.stsId !== newItem.stsId || currentItem.stsNam !== newItem.stsNam || currentItem.mem !== newItem.mem
+      );
     });
     console.log(updateList);
-    if (updateList.length === 0) {
+    if (updateList.length <= 0) {
       setSnackBarMessage('保存済みの内容です。');
-    }
-    if (updateList.length > 0) {
+      setIsLoading(false);
+    } else {
       // 無効化フラグを変化させるタグ配列
       console.log('△△△△△△△', updateList, '←←←', currentRfids);
-      const changeDelFlgList = updateList.reduce(
+      const changeDelFlgList: { rfidTagId: string; delFlg: number; mem: string | null }[] = updateList.reduce(
         (acc, l) => {
           const current = currentRfids?.find((c) => c.rfidTagId === l.rfidTagId);
           if (!current) {
@@ -192,25 +228,25 @@ export const RfidMaster = ({ kizaiId }: { kizaiId: number }) => {
           if (current.stsId === null || current.stsId === undefined || l.stsId === null || l.stsId === undefined) {
             return acc;
           }
-
           // 無効化 : 元が101（NG） 以下 AND 新が101より大きい
           if (current.stsId <= 101 && l.stsId > 101) {
-            acc.push({ rfidTagId: l.rfidTagId, delFlg: 1 });
+            acc.push({ rfidTagId: l.rfidTagId, delFlg: 1, mem: l.mem });
           }
           // 有効化 : 元が101（NG）より大きい AND 新が101以下
           else if (current.stsId > 101 && l.stsId <= 101) {
-            acc.push({ rfidTagId: l.rfidTagId, delFlg: 0 });
+            acc.push({ rfidTagId: l.rfidTagId, delFlg: 0, mem: l.mem });
+          } else if (l.stsId >= 100) {
+            acc.push({ rfidTagId: l.rfidTagId, delFlg: Number(l.delFlg), mem: l.mem });
           }
           // 他は除外
           return acc;
         },
-        [] as { rfidTagId: string; delFlg: number }[]
+        [] as { rfidTagId: string; delFlg: number; mem: string | null }[]
       );
 
       await updateRfidTagSts(
         updateList.map((d) => ({ tagId: d.rfidTagId, sts: d.stsId ?? 0, shozokuId: d.shozokuId })),
         user?.name ?? '',
-        kizaiId,
         changeDelFlgList
       );
       setSnackBarMessage('保存しました');
@@ -457,6 +493,48 @@ export const RfidMaster = ({ kizaiId }: { kizaiId: number }) => {
             refetchRfids={refetchRfids}
             kizaiId={kizaiId}
           />
+        </Dialog>
+        <Dialog open={memOpen} onClose={() => setMemOpen(false)}>
+          <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
+            <Box>メモを記入してください</Box>
+          </DialogTitle>
+          <DialogContentText m={2} mb={0}>
+            機材ステータスで 「{selectedSts?.label}」を選択時はメモを入力してください。
+            <br />
+            先頭に追加されます。
+            <br />
+            全体で200文字を超えた文字は削除されます。
+          </DialogContentText>
+          <DialogContent sx={{ display: 'flex', justifyContent: 'center' }}>
+            <Box>
+              <TextField
+                value={ngMem}
+                sx={{ width: 400 }}
+                onChange={(e) => {
+                  setNgMem(e.target.value);
+                  if (e.target.value.trim().length === 0) {
+                    setErrorMsg('必須です');
+                  } else if (e.target.value.trim().length > 200) {
+                    setErrorMsg('200文字までで入力してください');
+                  } else {
+                    setErrorMsg('');
+                  }
+                }}
+                error={errorMsg.trim().length > 0}
+              />
+              {errorMsg.trim().length > 0 && (
+                <>
+                  <br />
+                  <Typography variant="caption" color="error">
+                    {errorMsg}
+                  </Typography>
+                </>
+              )}
+            </Box>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => handleNgMem(selectedTags, selectedSts!)}>適用</Button>
+          </DialogActions>
         </Dialog>
       </Box>
       <Snackbar

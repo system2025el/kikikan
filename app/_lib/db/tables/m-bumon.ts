@@ -20,7 +20,7 @@ export const selectActiveBumons = async () => {
       .from('m_bumon')
       .select('bumon_id, bumon_nam')
       .neq('del_flg', 1)
-      .order('dsp_ord_num');
+      .order('bumon_nam');
   } catch (e) {
     throw e;
   }

@@ -139,7 +139,9 @@ export const addNewRfid = async (data: RfidsMasterDialogValues, kizaiId: number,
 
     throw error;
   } finally {
-    refreshVRfid();
+    refreshVRfid().catch((err) => {
+      console.error('バックグラウンドでのマテビュー更新に失敗:', err);
+    });
     // なんにしてもpool解放
     connection.release();
   }
@@ -214,8 +216,9 @@ export const updateRfid = async (
     await connection.query('ROLLBACK');
     throw error;
   } finally {
-    refreshVRfid();
-    // なんにしてもpool解放
+    refreshVRfid().catch((err) => {
+      console.error('バックグラウンドでのマテビュー更新に失敗:', err);
+    }); // なんにしてもpool解放
     connection.release();
   }
 };
@@ -227,10 +230,9 @@ export const updateRfid = async (
 export const updateRfidTagSts = async (
   data: { tagId: string; sts: number; shozokuId: number }[],
   user: string,
-  kizaiId: number,
-  delList: { rfidTagId: string; delFlg: number }[]
+  delList: { rfidTagId: string; delFlg: number; mem: string | null }[]
 ) => {
-  const updateList = data.map((d) => ({
+  const updateStsList = data.map((d) => ({
     rfid_tag_id: d.tagId,
     rfid_kizai_sts: d.sts,
     shozoku_id: d.shozokuId,
@@ -245,15 +247,15 @@ export const updateRfidTagSts = async (
         delList.map((l) => ({
           rfid_tag_id: l.rfidTagId,
           del_flg: l.delFlg,
+          mem: l.mem ? l.mem.substring(0, 200) : l.mem,
         })),
         connection,
-        kizaiId,
         user
       );
       await updateMasterUpdates('m_rfid', connection);
     }
 
-    await updateRfidTagStsDB(updateList, user, connection);
+    await updateRfidTagStsDB(updateStsList, user, connection);
     await revalidatePath('/rfid-master');
     await revalidatePath('/eqpt-master');
     console.log(data);
@@ -263,7 +265,9 @@ export const updateRfidTagSts = async (
     await connection.query('ROLLBACK');
     throw e;
   } finally {
-    refreshVRfid();
+    refreshVRfid().catch((err) => {
+      console.error('バックグラウンドでのマテビュー更新に失敗:', err);
+    });
     connection.release();
   }
 };
@@ -283,6 +287,8 @@ export const updRfidDelFlg = async (tagId: string, flg: boolean, user: string) =
   } catch (e) {
     throw e;
   } finally {
-    refreshVRfid();
+    refreshVRfid().catch((err) => {
+      console.error('バックグラウンドでのマテビュー更新に失敗:', err);
+    });
   }
 };

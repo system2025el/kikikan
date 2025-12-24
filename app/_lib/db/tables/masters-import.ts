@@ -206,7 +206,9 @@ export const checkRfid = async (list: RfidImportTypes[], connection: PoolClient,
     console.error('例外が発生：DBエラーrfid', e);
     throw new Error('例外が発生：DBエラーrfid');
   } finally {
-    refreshVRfid();
+    refreshVRfid().catch((err) => {
+      console.error('バックグラウンドでのマテビュー更新に失敗:', err);
+    });
   }
 };
 

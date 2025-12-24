@@ -4,6 +4,11 @@ import { supabase } from '@/app/_lib/db/supabase';
 
 import { UserValues } from './types';
 
+/**
+ * supabase ログイン処理
+ * @param {UserValues} data
+ * @returns {Promise<AuthTokenResponsePassword>} ログイン処理結果
+ */
 export const login = async (data: UserValues) => {
   try {
     return await supabase.auth.signInWithPassword({ email: data.email, password: data.password });
@@ -13,6 +18,11 @@ export const login = async (data: UserValues) => {
   }
 };
 
+/**
+ * supabase セッションのセット処理
+ * @param {string} access_token
+ * @param {string} refresh_token
+ */
 export const setSession = async (access_token: string, refresh_token: string) => {
   supabase.auth.setSession({ access_token, refresh_token }).then(({ data, error }) => {
     if (data.session) {
