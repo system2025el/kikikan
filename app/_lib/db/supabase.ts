@@ -15,6 +15,7 @@ import { Database } from './types/types';
  * ---------------------------解除する場合
  * REVOKE USAGE ON SCHEMA dev5 FROM anon;
  * REVOKE SELECT ON ALL TABLES IN SCHEMA dev5 FROM anon;
+ * 
  * -- 未来のテーブルに許可しない
  * ALTER DEFAULT PRIVILEGES IN SCHEMA dev5
  * REVOKE SELECT, INSERT, UPDATE, DELETE ON TABLES FROM your_user_or_role;
