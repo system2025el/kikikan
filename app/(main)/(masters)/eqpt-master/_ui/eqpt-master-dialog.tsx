@@ -201,6 +201,15 @@ export const EqMasterDialog = ({
                 <TextField
                   value={kizaiQty ? String(Number(kizaiQty.yuko ?? 0) + Number(kizaiQty.ng ?? 0)) : ''}
                   disabled
+                  sx={{
+                    '& .MuiInputBase-input': {
+                      textAlign: 'right',
+                    },
+                    '& input[type=number]::-webkit-inner-spin-button': {
+                      WebkitAppearance: 'none',
+                      margin: 0,
+                    },
+                  }}
                 />
                 <Box ml={1}>
                   <Button onClick={() => window.open(`/rfid-master/${eqptId}`)} disabled={isNew}>
