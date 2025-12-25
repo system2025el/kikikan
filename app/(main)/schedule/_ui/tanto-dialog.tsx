@@ -1,5 +1,6 @@
 'use client';
 
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Box, Button, Dialog, DialogTitle, Grid2, Stack, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { CheckboxElement, TextFieldElement, useForm } from 'react-hook-form-mui';
@@ -9,7 +10,13 @@ import { useUserStore } from '@/app/_lib/stores/usestore';
 import { toJapanYMDAndDayString } from '../../_lib/date-conversion';
 import { CloseMasterDialogButton } from '../../_ui/buttons';
 import { insertWeeklyData } from '../_lib/funcs';
+import { WeeklySchema, WeeklyValues } from '../_lib/types';
 
+/**
+ * スケジュールの日直・メモ・祝日フラグを決めるダイアログ
+ * @param param0
+ * @returns {JSX.Element} ダイアログコンポーネント
+ */
 export const TantoDialog = ({
   open,
   datas,
@@ -17,7 +24,7 @@ export const TantoDialog = ({
   refetch,
 }: {
   open: boolean;
-  datas: { dat: string; tantoNam: string | null; mem: string | null; holidayFlg: boolean };
+  datas: WeeklyValues;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   refetch: () => void;
 }) => {
@@ -33,18 +40,16 @@ export const TantoDialog = ({
     reset,
     handleSubmit,
     control,
-    formState: { isDirty },
-  } = useForm<{
-    dat: string;
-    tantoNam: string | null;
-    mem: string | null;
-    holidayFlg: boolean;
-  }>({
+    formState: { isDirty, errors },
+  } = useForm<WeeklyValues>({
+    mode: 'onChange',
+    reValidateMode: 'onChange',
+    resolver: zodResolver(WeeklySchema),
     defaultValues: { dat: '', tantoNam: '', mem: '', holidayFlg: false },
   });
 
   /* methods ----------------------------------------------------------------- */
-  const onSubmit = async (data: { dat: string; tantoNam: string | null; mem: string | null; holidayFlg: boolean }) => {
+  const onSubmit = async (data: WeeklyValues) => {
     setIsProcessing(true);
     await insertWeeklyData(
       {
@@ -71,9 +76,10 @@ export const TantoDialog = ({
         reset();
         setOpen(false);
       }}
+      fullWidth
     >
       <DialogTitle display={'flex'} justifyContent={'space-between'}>
-        {toJapanYMDAndDayString(datas.dat)}
+        {datas.dat}
         <CloseMasterDialogButton handleCloseDialog={() => setOpen(false)} />
       </DialogTitle>
       <Grid2
@@ -86,12 +92,12 @@ export const TantoDialog = ({
         mx={4}
       >
         <Grid2 display={'flex'} alignItems={'center'}>
-          <Typography mr={5}>担当者</Typography>
-          <TextFieldElement name="tantoNam" control={control} />
+          <Typography mr={5}>日直</Typography>
+          <TextFieldElement name="tantoNam" control={control} fullWidth />
         </Grid2>
         <Grid2 display={'flex'} alignItems={'center'}>
-          <Typography mr={7}>メモ</Typography>
-          <TextFieldElement name="mem" control={control} />
+          <Typography mr={5}>メモ</Typography>
+          <TextFieldElement name="mem" control={control} multiline fullWidth />
         </Grid2>
         <Grid2 display={'flex'} alignItems={'center'}>
           <Typography mr={1}>祝日フラグ</Typography>

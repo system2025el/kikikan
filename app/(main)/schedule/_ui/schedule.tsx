@@ -13,7 +13,6 @@ import {
   TableHead,
   TableRow,
 } from '@mui/material';
-import { Luckiest_Guy } from 'next/font/google';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
@@ -37,7 +36,7 @@ export const Schedule = () => {
   const [scheList, setScheList] = useState<WeeklyScheduleValues[]>([]);
   /** ローディング */
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  /** 担当者入力ダイアログ開閉 */
+  /** 日直入力ダイアログ開閉 */
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
   /** 選ばれた日にちの情報 */
   const [selectedDatas, setSelectedDatas] = useState<WeeklyValues>({
@@ -67,7 +66,7 @@ export const Schedule = () => {
     setIsLoading(false);
   };
 
-  /** テーブル上部の担当者・メモをクリックしたときの処理 */
+  /** テーブル上部の日直・メモをクリックしたときの処理 */
   const handleClickDateHead = (data: WeeklyValues) => {
     setSelectedDatas(data);
     setDialogOpen(true);
@@ -185,7 +184,7 @@ export const Schedule = () => {
                     align="center"
                     onClick={() =>
                       handleClickDateHead({
-                        dat: date.calDat,
+                        dat: toJapanYMDAndDayString(date.calDat),
                         mem: date.mem,
                         tantoNam: date.tantoNam,
                         holidayFlg: date.holidayFlg,
@@ -202,19 +201,41 @@ export const Schedule = () => {
                 scheList.map((date) => (
                   <TableCell
                     key={date.calDat}
-                    sx={{ border: '1px solid black', px: 1, height: 20.1, bgcolor: 'white', color: 'black' }}
+                    sx={{
+                      border: '1px solid black',
+                      px: 1,
+                      bgcolor: 'white',
+                      color: 'black',
+                      verticalAlign: 'top',
+                      maxHeight: 40.2,
+                      minHeight: 20.1,
+                      minWidth: 300,
+                      width: 300,
+                      maxWidth: 300,
+                    }}
                     onClick={() =>
                       handleClickDateHead({
-                        dat: date.calDat,
+                        dat: toJapanYMDAndDayString(date.calDat),
                         mem: date.mem,
                         tantoNam: date.tantoNam,
                         holidayFlg: date.holidayFlg,
                       })
                     }
                   >
-                    <LightTooltipWithText maxWidth={290} variant="body2">
+                    <Box
+                      component="div"
+                      sx={{
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                      }}
+                      fontSize={'0.875rem'}
+                      fontWeight={'normal'}
+                    >
                       {date.mem ?? ''}
-                    </LightTooltipWithText>
+                    </Box>
                   </TableCell>
                 ))}
             </TableRow>
@@ -234,7 +255,7 @@ export const Schedule = () => {
                     }}
                     onClick={() =>
                       handleClickDateHead({
-                        dat: date.calDat,
+                        dat: toJapanYMDAndDayString(date.calDat),
                         mem: date.mem,
                         tantoNam: date.tantoNam,
                         holidayFlg: date.holidayFlg,
@@ -249,7 +270,7 @@ export const Schedule = () => {
             </TableRow>
           </TableHead>
 
-          {/** 担当者入力ダイアログ */}
+          {/** 日直入力ダイアログ */}
           <TantoDialog
             open={dialogOpen}
             datas={selectedDatas}
