@@ -113,7 +113,7 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
   const currentGokeiAmt = useWatch({ control, name: 'gokeiAmt' });
 
   // context
-  const { setIsDirty, setLock } = useDirty();
+  const { setIsDirty /*setLock*/ } = useDirty();
   // ブラウザバック、F5、×ボタンでページを離れた際のhook
   useUnsavedChangesWarning(isDirty);
 
@@ -152,7 +152,7 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
       const lockData = await getLock(3, bill.seikyuHeadId ?? 0);
       setLockData(lockData);
       if (lockData === null) {
-        await addLock(3, bill.seikyuHeadId ?? 0, user.name);
+        await addLock(3, bill.seikyuHeadId ?? 0, new Date().toISOString(), user.name, user.email);
         const newLockData = await getLock(3, bill.seikyuHeadId ?? 0);
         setLockData(newLockData);
         setEditable(true);
@@ -194,7 +194,7 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
       const lockData = await getLock(3, bill.seikyuHeadId ?? 0);
       setLockData(lockData);
       if (lockData === null) {
-        await addLock(3, bill.seikyuHeadId ?? 0, user?.name ?? '');
+        await addLock(3, bill.seikyuHeadId ?? 0, new Date().toISOString(), user?.name ?? '', user?.email ?? '');
         const newLockData = await getLock(3, bill.seikyuHeadId ?? 0);
         setLockData(newLockData);
       } else if (lockData !== null && lockData.addUser !== user?.name) {
@@ -247,10 +247,10 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
     }
   }, [meisaiHeads, currentChukei, currentPreTaxGokei, zeiRat, currentZeiAmt, currentGokeiAmt, setValue]);
 
-  // ロック
-  useEffect(() => {
-    setLock(lockData);
-  }, [lockData, setLock]);
+  // // ロック
+  // useEffect(() => {
+  //   setLock(lockData);
+  // }, [lockData, setLock]);
 
   // 変更あるかどうか
   useEffect(() => {

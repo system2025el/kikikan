@@ -45,12 +45,12 @@ const Page = async (props: { params: Promise<{ juchuHeadId: string; mode: string
     );
     // 既存
   } else {
-    // 受注ヘッダーデータ
-    const juchuHeadData = await getJuchuHead(juchuHeadId);
-    // 受注機材ヘッダーデータ
-    const juchuKizaiHeadDatas = await getJuchuKizaiHeadList(juchuHeadId);
-    // 受注車両ヘッダーデータ
-    const juchuSharyoHeadDatas = await getJuchuSharyoHeadList(juchuHeadId);
+    // 受注ヘッダーデータ、受注機材ヘッダーデータ、受注車両ヘッダーデータ
+    const [juchuHeadData, juchuKizaiHeadDatas, juchuSharyoHeadDatas] = await Promise.all([
+      getJuchuHead(juchuHeadId),
+      getJuchuKizaiHeadList(juchuHeadId),
+      getJuchuSharyoHeadList(juchuHeadId),
+    ]);
 
     if (!juchuHeadData) {
       return <div>受注情報が見つかりません。</div>;

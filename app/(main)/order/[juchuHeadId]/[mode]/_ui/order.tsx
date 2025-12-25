@@ -37,11 +37,11 @@ import { Controller, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 import { set } from 'zod';
 
-import { deleteLock } from '@/app/_lib/db/tables/t-lock';
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { getNyukoDate, getRange, getShukoDate } from '@/app/(main)/_lib/date-funcs';
 import { addLock, getLock } from '@/app/(main)/_lib/funcs';
+import { lockCheck, lockRelease } from '@/app/(main)/_lib/lock';
 import { LockValues } from '@/app/(main)/_lib/types';
 import { BackButton } from '@/app/(main)/_ui/buttons';
 import DateX, { RSuiteDateRangePicker, TestDate } from '@/app/(main)/_ui/date';
@@ -97,6 +97,8 @@ export const Order = (props: {
   const [isLoading, setIsLoading] = useState(true);
   // 受注機材ヘッダー一覧ローディング
   const [isJuchuKizaiLoading, setIsJuchuKizaiLoading] = useState(false);
+  // 処理中
+  const [isProcessing, setIsProcessing] = useState(false);
 
   // 編集モード(true:編集、false:閲覧)
   const [edit, setEdit] = useState(props.edit);
@@ -126,6 +128,10 @@ export const Order = (props: {
   const [kizaiHeadDeleteOpen, setKizaiHeadDeleteOpen] = useState(false);
   // 受注車両ヘッダー削除ダイアログ制御
   const [sharyoHeadDeleteOpen, setSharyoHeadDeleteOpen] = useState(false);
+  // 公演場所選択ダイアログ
+  const [locationDialogOpen, setLocationDialogOpen] = useState(false);
+  // 相手選択ダイアログ
+  const [customerDialogOpen, setCustomerDialogOpen] = useState(false);
   // スナックバー制御
   const [snackBarOpen, setSnackBarOpen] = useState(false);
   // スナックバーメッセージ
@@ -141,7 +147,7 @@ export const Order = (props: {
   const [path, setPath] = useState<string | null>(null);
 
   // context
-  const { setIsDirty, setLock } = useDirty();
+  const { setIsDirty } = useDirty();
   // 合計金額
   const priceTotal = eqHeaderList!.reduce((sum, row) => sum + (row.shokei ?? 0), 0);
 
@@ -188,13 +194,9 @@ export const Order = (props: {
     if (!user) return;
 
     const asyncProcess = async () => {
-      const lockData = await getLock(1, props.juchuHeadData.juchuHeadId);
+      const lockData = await lockCheck(1, props.juchuHeadData.juchuHeadId, user.name, user.email);
       setLockData(lockData);
-      if (props.edit && lockData === null) {
-        await addLock(1, props.juchuHeadData.juchuHeadId, user.name);
-        const newLockData = await getLock(1, props.juchuHeadData.juchuHeadId);
-        setLockData(newLockData);
-      } else if (props.edit && lockData !== null && lockData.addUser !== user.name) {
+      if (lockData) {
         setEdit(false);
       }
       setIsLoading(false);
@@ -204,8 +206,10 @@ export const Order = (props: {
       const data = { ...getValues(), nyuryokuUser: user.name };
       reset(data);
       setIsLoading(false);
-    } else {
+    } else if (props.edit) {
       asyncProcess();
+    } else {
+      setIsLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
@@ -214,175 +218,265 @@ export const Order = (props: {
     setIsDirty(isDirty);
   }, [isDirty, setIsDirty]);
 
-  useEffect(() => {
-    setLock(lockData);
-  }, [lockData, setLock]);
+  const lock = async () => {
+    if (!user) return;
+    const lockData = await lockCheck(1, getValues('juchuHeadId'), user.name, user.email);
+    setLockData(lockData);
+
+    if (!lockData) return true;
+
+    setEdit(false);
+
+    setAlertOpen(false);
+    setDirtyOpen(false);
+    setHeadDeleteOpen(false);
+    setCopyOpen(false);
+    setKizaiHeadDeleteOpen(false);
+    setSharyoHeadDeleteOpen(false);
+    setLocationDialogOpen(false);
+    setCustomerDialogOpen(false);
+
+    setAlertTitle('編集中');
+    setAlertMessage(`${lockData.addUser}が編集中です`);
+    setAlertOpen(true);
+    // 受注ヘッダーデータ、受注機材ヘッダーデータ、受注車両ヘッダーデータ
+    const [juchuHeadData, juchuKizaiHeadDatas, juchuSharyoHeadDatas] = await Promise.all([
+      getJuchuHead(getValues('juchuHeadId')),
+      getJuchuKizaiHeadList(getValues('juchuHeadId')),
+      getJuchuSharyoHeadList(getValues('juchuHeadId')),
+    ]);
+    reset(juchuHeadData);
+    setEqHeaderList(juchuKizaiHeadDatas);
+    setVehicleHeaderList(juchuSharyoHeadDatas);
+    return false;
+  };
 
   // 保存ボタン押下
   const onSubmit = async (data: OrderValues) => {
     console.log('update : 開始');
-    if (!user) return;
-    setIsLoading(true);
 
-    // 新規
-    if (data.juchuHeadId === 0) {
-      const maxId = await getMaxId();
-      const newOrderId = maxId ? maxId.juchu_head_id + 1 : 1;
-      const saveResult = await addJuchuHead(newOrderId, data, user.name);
-      if (saveResult) {
-        redirect(`/order/${newOrderId}/edit`);
+    if (!user || isProcessing) return;
+    setIsProcessing(true);
+
+    const lockResult = await lock();
+
+    if (lockResult) {
+      setIsLoading(true);
+
+      // 新規
+      if (data.juchuHeadId === 0) {
+        const maxId = await getMaxId();
+        const newOrderId = maxId ? maxId.juchu_head_id + 1 : 1;
+        const saveResult = await addJuchuHead(newOrderId, data, user.name);
+        if (saveResult) {
+          redirect(`/order/${newOrderId}/edit`);
+        } else {
+          setSnackBarMessage('保存に失敗しました');
+          setSnackBarOpen(true);
+        }
+        // 更新
       } else {
-        setSnackBarMessage('保存に失敗しました');
-        setSnackBarOpen(true);
-      }
-      // 更新
-    } else {
-      const updateResult = await updJuchuHead(data);
-      if (updateResult) {
-        reset(data);
-        setIsLoading(false);
-        setSnackBarMessage('保存しました');
-        setSnackBarOpen(true);
-      } else {
-        setIsLoading(false);
-        setSnackBarMessage('保存に失敗しました');
-        setSnackBarOpen(true);
+        const updateResult = await updJuchuHead(data);
+        if (updateResult) {
+          reset(data);
+          setIsLoading(false);
+          setSnackBarMessage('保存しました');
+          setSnackBarOpen(true);
+        } else {
+          setIsLoading(false);
+          setSnackBarMessage('保存に失敗しました');
+          setSnackBarOpen(true);
+        }
       }
     }
+    setIsProcessing(false);
   };
 
   // 編集モード変更
   const handleEdit = async () => {
+    if (!user) return;
     // 編集→閲覧
     if (edit) {
       if (isDirty) {
         setDirtyOpen(true);
         return;
       }
-
-      await deleteLock(1, props.juchuHeadData.juchuHeadId);
-      setLockData(null);
+      await lockRelease(1, props.juchuHeadData.juchuHeadId, user.name, user.email);
       setEdit(false);
       // 閲覧→編集
     } else {
-      if (!user) return;
-      const lockData = await getLock(1, props.juchuHeadData.juchuHeadId);
-      setLockData(lockData);
-      if (lockData === null) {
-        await addLock(1, props.juchuHeadData.juchuHeadId, user.name);
-        const newLockData = await getLock(1, props.juchuHeadData.juchuHeadId);
-        setLockData(newLockData);
-        setEdit(true);
-      } else if (lockData !== null && lockData.addUser === user.name) {
+      const lockResult = await lock();
+
+      if (lockResult) {
         setEdit(true);
       }
     }
   };
 
   // 伝票削除ボタン押下
-  const handleHeadDelete = async (result: boolean) => {
-    if (result) {
-      setIsLoading(true);
-      const deleteResult = await delJuchuHead(getValues('juchuHeadId'));
+  const handleHeadDeleteDialogOpen = async () => {
+    if (isProcessing) return;
+    setIsProcessing(true);
 
-      if (!deleteResult) {
-        setSnackBarMessage('削除に失敗しました');
-        setSnackBarOpen(true);
-        setIsLoading(false);
-      }
-    } else {
-      setHeadDeleteOpen(false);
+    const lockResult = await lock();
+
+    if (lockResult) {
+      setHeadDeleteOpen(true);
     }
+    setIsProcessing(false);
+  };
+
+  // 伝票削除処理
+  const handleHeadDelete = async (result: boolean) => {
+    if (isProcessing) return;
+    setIsProcessing(true);
+
+    const lockResult = await lock();
+
+    if (lockResult) {
+      if (result) {
+        setIsLoading(true);
+        const deleteResult = await delJuchuHead(getValues('juchuHeadId'));
+
+        if (!deleteResult) {
+          setSnackBarMessage('削除に失敗しました');
+          setSnackBarOpen(true);
+          setIsLoading(false);
+        }
+      } else {
+        setHeadDeleteOpen(false);
+      }
+    }
+    setIsProcessing(false);
   };
 
   // 機材入力ボタン押下
   const handleAddEq = async () => {
-    if (!isDirty) {
-      setIsLoading(true);
-      await deleteLock(1, props.juchuHeadData.juchuHeadId);
-      router.push(`/eq-main-order-detail/${props.juchuHeadData.juchuHeadId}/0/edit`);
-    } else {
-      setPath(`/eq-main-order-detail/${props.juchuHeadData.juchuHeadId}/0/edit`);
-      setDirtyOpen(true);
+    if (isProcessing) return;
+    setIsProcessing(true);
+
+    const lockResult = await lock();
+
+    if (lockResult) {
+      if (!isDirty) {
+        setIsLoading(true);
+        router.push(`/eq-main-order-detail/${props.juchuHeadData.juchuHeadId}/0/edit`);
+      } else {
+        setPath(`/eq-main-order-detail/${props.juchuHeadData.juchuHeadId}/0/edit`);
+        setDirtyOpen(true);
+      }
     }
+    setIsProcessing(false);
   };
 
   // 返却入力ボタン押下
   const handleAddReturn = async () => {
-    if (selectEqHeader) {
-      if (
-        selectEqHeader &&
-        selectEqHeader.juchuKizaiHeadKbn === 1 &&
-        (selectEqHeader.kicsShukoDat ? selectEqHeader.kicsShukoFixFlg === 1 : true) &&
-        (selectEqHeader.yardShukoDat ? selectEqHeader.yardShukoFixFlg === 1 : true)
-      ) {
-        if (!isDirty) {
-          setIsLoading(true);
-          await deleteLock(1, props.juchuHeadData.juchuHeadId);
-          router.push(
-            `/eq-return-order-detail/${props.juchuHeadData.juchuHeadId}/0/${selectEqHeader.juchuKizaiHeadId}/edit`
-          );
+    if (isProcessing) return;
+    setIsProcessing(true);
+
+    const lockResult = await lock();
+
+    if (lockResult) {
+      if (selectEqHeader) {
+        if (
+          selectEqHeader &&
+          selectEqHeader.juchuKizaiHeadKbn === 1 &&
+          (selectEqHeader.kicsShukoDat ? selectEqHeader.kicsShukoFixFlg === 1 : true) &&
+          (selectEqHeader.yardShukoDat ? selectEqHeader.yardShukoFixFlg === 1 : true)
+        ) {
+          if (!isDirty) {
+            setIsLoading(true);
+            router.push(
+              `/eq-return-order-detail/${props.juchuHeadData.juchuHeadId}/0/${selectEqHeader.juchuKizaiHeadId}/edit`
+            );
+          } else {
+            setPath(
+              `/eq-return-order-detail/${props.juchuHeadData.juchuHeadId}/0/${selectEqHeader.juchuKizaiHeadId}/edit`
+            );
+            setDirtyOpen(true);
+          }
         } else {
-          setPath(
-            `/eq-return-order-detail/${props.juchuHeadData.juchuHeadId}/0/${selectEqHeader.juchuKizaiHeadId}/edit`
-          );
-          setDirtyOpen(true);
+          setAlertTitle('選択項目を確認してください');
+          setAlertMessage('出発済のメイン明細を選択してください');
+          setAlertOpen(true);
         }
       } else {
         setAlertTitle('選択項目を確認してください');
         setAlertMessage('出発済のメイン明細を選択してください');
         setAlertOpen(true);
       }
-    } else {
-      setAlertTitle('選択項目を確認してください');
-      setAlertMessage('出発済のメイン明細を選択してください');
-      setAlertOpen(true);
     }
+    setIsProcessing(false);
   };
 
   // キープ入力ボタン押下
   const handleAddKeep = async () => {
-    if (selectEqHeader) {
-      if (
-        selectEqHeader &&
-        selectEqHeader.juchuKizaiHeadKbn === 1 &&
-        (selectEqHeader.kicsShukoDat ? selectEqHeader.kicsShukoFixFlg === 1 : true) &&
-        (selectEqHeader.yardShukoDat ? selectEqHeader.yardShukoFixFlg === 1 : true)
-      ) {
-        if (!isDirty) {
-          setIsLoading(true);
-          await deleteLock(1, props.juchuHeadData.juchuHeadId);
-          router.push(
-            `/eq-keep-order-detail/${props.juchuHeadData.juchuHeadId}/0/${selectEqHeader.juchuKizaiHeadId}/edit`
-          );
+    if (isProcessing) return;
+    setIsProcessing(true);
+
+    const lockResult = await lock();
+
+    if (lockResult) {
+      if (selectEqHeader) {
+        if (
+          selectEqHeader &&
+          selectEqHeader.juchuKizaiHeadKbn === 1 &&
+          (selectEqHeader.kicsShukoDat ? selectEqHeader.kicsShukoFixFlg === 1 : true) &&
+          (selectEqHeader.yardShukoDat ? selectEqHeader.yardShukoFixFlg === 1 : true)
+        ) {
+          if (!isDirty) {
+            setIsLoading(true);
+            router.push(
+              `/eq-keep-order-detail/${props.juchuHeadData.juchuHeadId}/0/${selectEqHeader.juchuKizaiHeadId}/edit`
+            );
+          } else {
+            setPath(
+              `/eq-keep-order-detail/${props.juchuHeadData.juchuHeadId}/0/${selectEqHeader.juchuKizaiHeadId}/edit`
+            );
+            setDirtyOpen(true);
+          }
         } else {
-          setPath(`/eq-keep-order-detail/${props.juchuHeadData.juchuHeadId}/0/${selectEqHeader.juchuKizaiHeadId}/edit`);
-          setDirtyOpen(true);
+          setAlertTitle('選択項目を確認してください');
+          setAlertMessage('出発済のメイン明細を選択してください');
+          setAlertOpen(true);
         }
       } else {
         setAlertTitle('選択項目を確認してください');
         setAlertMessage('出発済のメイン明細を選択してください');
         setAlertOpen(true);
       }
-    } else {
-      setAlertTitle('選択項目を確認してください');
-      setAlertMessage('出発済のメイン明細を選択してください');
-      setAlertOpen(true);
     }
+    setIsProcessing(false);
   };
 
   // コピーボタン押下
   const handleOpenCopyDialog = async () => {
-    if (selectEqHeader && selectEqHeader.juchuKizaiHeadKbn === 1) {
-      setCopyOpen(true);
-    } else {
-      setAlertTitle('選択項目を確認してください');
-      setAlertMessage('メイン明細を選択してください');
-      setAlertOpen(true);
+    if (isProcessing) return;
+    setIsProcessing(true);
+
+    const lockResult = await lock();
+
+    if (lockResult) {
+      if (selectEqHeader && selectEqHeader.juchuKizaiHeadKbn === 1) {
+        setCopyOpen(true);
+      } else {
+        setAlertTitle('選択項目を確認してください');
+        setAlertMessage('メイン明細を選択してください');
+        setAlertOpen(true);
+      }
     }
+    setIsProcessing(false);
   };
-  const handleCloseCopyDialog = () => {
-    setCopyOpen(false);
+  const handleCloseCopyDialog = async () => {
+    if (isProcessing) return;
+    setIsProcessing(true);
+
+    const lockResult = await lock();
+
+    if (lockResult) {
+      setCopyOpen(false);
+    }
+    setIsProcessing(false);
   };
 
   /**
@@ -390,87 +484,105 @@ export const Order = (props: {
    * @param result ボタン押下結果
    */
   const handleCopyConfirmed = async (data: CopyDialogValue) => {
-    if (!user || !selectEqHeader) return;
+    if (!user || !selectEqHeader || isProcessing) return;
+    setIsProcessing(true);
 
-    // ユーザー名
-    const userNam = user.name;
-    // 受注ヘッダーid
-    const newJuchuHeadId = data.juchuHeadid ? Number(data.juchuHeadid) : getValues('juchuHeadId');
+    const lockResult = await lock();
 
-    const checkJuchuHeadId = await getJuchuHead(newJuchuHeadId);
-    if (!checkJuchuHeadId) {
-      setSnackBarMessage('受注番号がありません');
-      setSnackBarOpen(true);
-      return false;
-    }
+    if (lockResult) {
+      // ユーザー名
+      const userNam = user.name;
+      // 受注ヘッダーid
+      const newJuchuHeadId = data.juchuHeadid ? Number(data.juchuHeadid) : getValues('juchuHeadId');
 
-    // 出庫日
-    const shukoDate = getShukoDate(
-      data.kicsShukoDat && new Date(data.kicsShukoDat),
-      data.yardShukoDat && new Date(data.yardShukoDat)
-    );
-    // 入庫日
-    const nyukoDate = getNyukoDate(
-      data.kicsNyukoDat && new Date(data.kicsNyukoDat),
-      data.yardNyukoDat && new Date(data.yardNyukoDat)
-    );
-    // 出庫日から入庫日
-    const dateRange = getRange(shukoDate, nyukoDate);
-
-    if (!shukoDate || !nyukoDate) {
-      return;
-    }
-
-    const copyResult = await copyJuchuKizaiHeadMeisai(
-      selectEqHeader,
-      newJuchuHeadId,
-      data,
-      shukoDate,
-      nyukoDate,
-      dateRange,
-      userNam
-    );
-
-    if (copyResult) {
-      setCopyOpen(false);
-      setSnackBarMessage('コピーしました');
-      setSnackBarOpen(true);
-      if (!data.juchuHeadid || Number(data.juchuHeadid) === getValues('juchuHeadId')) {
-        setIsJuchuKizaiLoading(true);
-        const juchuKizaiHeadDatas = await getJuchuKizaiHeadList(getValues('juchuHeadId'));
-        setEqHeaderList(juchuKizaiHeadDatas);
-        setIsJuchuKizaiLoading(false);
-      } else {
-        window.open(`/order/${data.juchuHeadid}/view`);
+      const checkJuchuHeadId = await getJuchuHead(newJuchuHeadId);
+      if (!checkJuchuHeadId) {
+        setSnackBarMessage('受注番号がありません');
+        setSnackBarOpen(true);
+        setIsProcessing(false);
+        return false;
       }
-    } else {
-      setSnackBarMessage('コピーに失敗しました');
-      setSnackBarOpen(true);
-    }
 
-    return true;
+      // 出庫日
+      const shukoDate = getShukoDate(
+        data.kicsShukoDat && new Date(data.kicsShukoDat),
+        data.yardShukoDat && new Date(data.yardShukoDat)
+      );
+      // 入庫日
+      const nyukoDate = getNyukoDate(
+        data.kicsNyukoDat && new Date(data.kicsNyukoDat),
+        data.yardNyukoDat && new Date(data.yardNyukoDat)
+      );
+      // 出庫日から入庫日
+      const dateRange = getRange(shukoDate, nyukoDate);
+
+      if (!shukoDate || !nyukoDate) {
+        setIsProcessing(false);
+        return;
+      }
+
+      const copyResult = await copyJuchuKizaiHeadMeisai(
+        selectEqHeader,
+        newJuchuHeadId,
+        data,
+        shukoDate,
+        nyukoDate,
+        dateRange,
+        userNam
+      );
+
+      if (copyResult) {
+        setCopyOpen(false);
+        setSnackBarMessage('コピーしました');
+        setSnackBarOpen(true);
+        if (!data.juchuHeadid || Number(data.juchuHeadid) === getValues('juchuHeadId')) {
+          setIsJuchuKizaiLoading(true);
+          const juchuKizaiHeadDatas = await getJuchuKizaiHeadList(getValues('juchuHeadId'));
+          setEqHeaderList(juchuKizaiHeadDatas);
+          setIsJuchuKizaiLoading(false);
+        } else {
+          window.open(`/order/${data.juchuHeadid}/view`);
+        }
+      } else {
+        setSnackBarMessage('コピーに失敗しました');
+        setSnackBarOpen(true);
+      }
+      setIsProcessing(false);
+      return true;
+    }
+    setIsProcessing(false);
   };
 
   // 受注明細削除ボタン押下
   const handleKizaiHeadDeleteCheck = async () => {
-    if (!selectEqHeader || !eqHeaderList) {
-      setAlertTitle('選択項目を確認してください');
-      setAlertMessage('受注明細を1つ選択してください');
-      setAlertOpen(true);
-      return;
+    if (isProcessing) return;
+    setIsProcessing(true);
+
+    const lockResult = await lock();
+
+    if (lockResult) {
+      if (!selectEqHeader || !eqHeaderList) {
+        setAlertTitle('選択項目を確認してください');
+        setAlertMessage('受注明細を1つ選択してください');
+        setAlertOpen(true);
+        setIsProcessing(false);
+        return;
+      }
+
+      // 選択されたデータの子データ
+      const childData = eqHeaderList.find((d) => d.oyaJuchuKizaiHeadId === selectEqHeader.juchuKizaiHeadId);
+
+      if (childData) {
+        setAlertTitle('選択項目を確認してください');
+        setAlertMessage('返却、キープが紐づいている場合は削除できません');
+        setAlertOpen(true);
+        setIsProcessing(false);
+        return;
+      }
+
+      setKizaiHeadDeleteOpen(true);
     }
-
-    // 選択されたデータの子データ
-    const childData = eqHeaderList.find((d) => d.oyaJuchuKizaiHeadId === selectEqHeader.juchuKizaiHeadId);
-
-    if (childData) {
-      setAlertTitle('選択項目を確認してください');
-      setAlertMessage('返却、キープが紐づいている場合は削除できません');
-      setAlertOpen(true);
-      return;
-    }
-
-    setKizaiHeadDeleteOpen(true);
+    setIsProcessing(false);
   };
 
   /**
@@ -478,24 +590,32 @@ export const Order = (props: {
    * @param result ボタン押下結果
    */
   const handleKizaiHeadDelete = async (result: boolean) => {
-    setKizaiHeadDeleteOpen(false);
-    if (result && selectEqHeader) {
-      setIsJuchuKizaiLoading(true);
+    if (isProcessing) return;
+    setIsProcessing(true);
 
-      const deleteResult = await delJuchuMeisai(selectEqHeader.juchuHeadId, selectEqHeader.juchuKizaiHeadId);
+    const lockResult = await lock();
 
-      if (deleteResult) {
-        setEqHeaderList((prev) => prev?.filter((data) => data.juchuKizaiHeadId !== selectEqHeader.juchuKizaiHeadId));
-        setSelectEq(null);
-        setSelectEqHeader(null);
-        setSnackBarMessage('削除しました');
-        setSnackBarOpen(true);
-      } else {
-        setSnackBarMessage('削除に失敗しました');
-        setSnackBarOpen(true);
+    if (lockResult) {
+      setKizaiHeadDeleteOpen(false);
+      if (result && selectEqHeader) {
+        setIsJuchuKizaiLoading(true);
+
+        const deleteResult = await delJuchuMeisai(selectEqHeader.juchuHeadId, selectEqHeader.juchuKizaiHeadId);
+
+        if (deleteResult) {
+          setEqHeaderList((prev) => prev?.filter((data) => data.juchuKizaiHeadId !== selectEqHeader.juchuKizaiHeadId));
+          setSelectEq(null);
+          setSelectEqHeader(null);
+          setSnackBarMessage('削除しました');
+          setSnackBarOpen(true);
+        } else {
+          setSnackBarMessage('削除に失敗しました');
+          setSnackBarOpen(true);
+        }
+        setIsJuchuKizaiLoading(false);
       }
-      setIsJuchuKizaiLoading(false);
     }
+    setIsProcessing(false);
   };
 
   /**
@@ -516,7 +636,6 @@ export const Order = (props: {
       if (isLoading) return;
       setIsLoading(true);
       if (lockData && lockData.addUser === user?.name) {
-        await deleteLock(1, props.juchuHeadData.juchuHeadId);
       }
       router.push(path);
     } else {
@@ -527,7 +646,49 @@ export const Order = (props: {
 
   // 車両入力ボタン押下
   const handleAddVehicle = async () => {
-    window.open(`/vehicle-order-detail/${props.juchuHeadData.juchuHeadId}/0/edit`);
+    if (isProcessing) return;
+    setIsProcessing(true);
+
+    const lockResult = await lock();
+
+    if (lockResult) {
+      window.open(`/vehicle-order-detail/${props.juchuHeadData.juchuHeadId}/0/edit`);
+    }
+    setIsProcessing(false);
+  };
+
+  const handleHeadDeleteVehsDialogOpen = async () => {
+    if (isProcessing) return;
+    setIsProcessing(true);
+
+    const lockResult = await lock();
+
+    if (lockResult) {
+      setSharyoHeadDeleteOpen(true);
+    }
+    setIsProcessing(false);
+  };
+
+  // 車両明細削除処理
+  const handleDeleteVehs = async () => {
+    if (isProcessing) return;
+    setIsProcessing(true);
+
+    const lockResult = await lock();
+
+    if (lockResult) {
+      await delJuchuSharyoMeisais(
+        selectedVehs.map((d) => ({
+          juchuHeadId: props.juchuHeadData.juchuHeadId,
+          sharyoHeadId: d,
+        }))
+      );
+      const newVehHeads = await getJuchuSharyoHeadList(props.juchuHeadData.juchuHeadId);
+      setVehicleHeaderList(newVehHeads);
+      setSelectedVehs([]);
+      setSharyoHeadDeleteOpen(false);
+    }
+    setIsProcessing(false);
   };
 
   /**
@@ -535,17 +696,21 @@ export const Order = (props: {
    * @param result ボタン押下結果
    */
   const handleResultDialog = async (result: boolean) => {
+    if (!user || isProcessing) return;
+    setIsProcessing(true);
+
     if (result && path) {
-      if (isLoading) return;
-      setIsLoading(true);
-      await deleteLock(1, props.juchuHeadData.juchuHeadId);
-      setLockData(null);
-      setIsDirty(false);
-      router.push(path);
-      setPath(null);
+      const lockResult = await lock();
+      if (lockResult) {
+        if (isLoading) return;
+        setIsLoading(true);
+        setLockData(null);
+        setIsDirty(false);
+        router.push(path);
+        setPath(null);
+      }
     } else if (result && !path) {
-      await deleteLock(1, props.juchuHeadData.juchuHeadId);
-      setLockData(null);
+      await lockRelease(1, props.juchuHeadData.juchuHeadId, user.name, user.email);
       setEdit(false);
       reset();
       setDirtyOpen(false);
@@ -553,58 +718,93 @@ export const Order = (props: {
       setDirtyOpen(false);
       setPath(null);
     }
+
+    setIsProcessing(false);
   };
 
+  // 受注機材ヘッダー一覧ラジオボタンクリック
   const handleEqSelectionChange = (selectedId: number) => {
     const selectData = eqHeaderList?.find((d) => d.juchuKizaiHeadId === selectedId);
     setSelectEq(selectedId);
     setSelectEqHeader(selectData!);
   };
 
-  // 公演場所選択ダイアログ
-  const [locationDialogOpen, setLocationDialogOpen] = useState(false);
-  const handleOpenLocationDialog = () => {
-    setLocationDialogOpen(true);
+  // 公演場所検索ボタン押下
+  const handleOpenLocationDialog = async () => {
+    if (isProcessing) return;
+    setIsProcessing(true);
+
+    const lockResult = await lock();
+
+    if (lockResult) {
+      setLocationDialogOpen(true);
+    }
+    setIsProcessing(false);
   };
-  const handleCloseLocationDailog = () => {
-    setLocationDialogOpen(false);
+  const handleCloseLocationDailog = async () => {
+    if (isProcessing) return;
+    setIsProcessing(true);
+
+    const lockResult = await lock();
+
+    if (lockResult) {
+      setLocationDialogOpen(false);
+    }
+    setIsProcessing(false);
   };
 
   // 公演場所選択ダイアログで公演場所選択
-  const handleLocSelect = (loc: string) => {
-    setValue('koenbashoNam', loc, { shouldDirty: true });
-    handleCloseLocationDailog();
+  const handleLocSelect = async (loc: string) => {
+    if (isProcessing) return;
+    setIsProcessing(true);
+
+    const lockResult = await lock();
+
+    if (lockResult) {
+      setValue('koenbashoNam', loc, { shouldDirty: true });
+      setLocationDialogOpen(false);
+    }
+    setIsProcessing(false);
   };
 
-  // 相手選択ダイアログ
-  const [customerDialogOpen, setCustomerDialogOpen] = useState(false);
-  const handleOpenCustomerDialog = () => {
-    setCustomerDialogOpen(true);
+  // 顧客検索ボタン押下
+  const handleOpenCustomerDialog = async () => {
+    if (isProcessing) return;
+    setIsProcessing(true);
+
+    const lockResult = await lock();
+
+    if (lockResult) {
+      setCustomerDialogOpen(true);
+    }
+    setIsProcessing(false);
   };
-  const handleCloseCustomerDialog = () => {
-    setCustomerDialogOpen(false);
+  const handleCloseCustomerDialog = async () => {
+    if (isProcessing) return;
+    setIsProcessing(true);
+
+    const lockResult = await lock();
+
+    if (lockResult) {
+      setCustomerDialogOpen(false);
+    }
+    setIsProcessing(false);
   };
 
   // 相手選択ダイアログで相手選択
-  const handleCustSelect = (customer: KokyakuValues) => {
-    setValue('kokyaku.kokyakuId', customer.kokyakuId, { shouldDirty: true });
-    setValue('kokyaku.kokyakuNam', customer.kokyakuNam, { shouldDirty: true });
-    clearErrors('kokyaku.kokyakuNam');
-    handleCloseCustomerDialog();
-  };
+  const handleCustSelect = async (customer: KokyakuValues) => {
+    if (isProcessing) return;
+    setIsProcessing(true);
 
-  // 車両明細削除処理
-  const handleDeleteVehs = async () => {
-    await delJuchuSharyoMeisais(
-      selectedVehs.map((d) => ({
-        juchuHeadId: props.juchuHeadData.juchuHeadId,
-        sharyoHeadId: d,
-      }))
-    );
-    const newVehHeads = await getJuchuSharyoHeadList(props.juchuHeadData.juchuHeadId);
-    setVehicleHeaderList(newVehHeads);
-    setSelectedVehs([]);
-    setSharyoHeadDeleteOpen(false);
+    const lockResult = await lock();
+
+    if (lockResult) {
+      setValue('kokyaku.kokyakuId', customer.kokyakuId, { shouldDirty: true });
+      setValue('kokyaku.kokyakuNam', customer.kokyakuNam, { shouldDirty: true });
+      clearErrors('kokyaku.kokyakuNam');
+      setCustomerDialogOpen(false);
+    }
+    setIsProcessing(false);
   };
 
   if (isLoading) return <LoadingOverlay />;
@@ -612,7 +812,7 @@ export const Order = (props: {
   return (
     <Container disableGutters sx={{ minWidth: '100%', pb: 10 }} maxWidth={'xl'}>
       <Box display={save ? 'flex' : 'none'} justifyContent={'end'} mb={1}>
-        {lockData !== null && lockData.addUser !== user?.name && (
+        {lockData && (
           <Grid2 container alignItems={'center'} spacing={2} px={4}>
             <Typography>{lockData.addDat && toJapanTimeString(new Date(lockData.addDat))}</Typography>
             <Typography>{lockData.addUser}</Typography>
@@ -620,12 +820,8 @@ export const Order = (props: {
           </Grid2>
         )}
         <Grid2 container alignItems={'center'} spacing={2}>
-          {!edit || (lockData !== null && lockData?.addUser !== user?.name) ? (
-            <Typography>閲覧モード</Typography>
-          ) : (
-            <Typography>編集モード</Typography>
-          )}
-          <Button disabled={lockData && lockData?.addUser !== user?.name ? true : false} onClick={handleEdit}>
+          {!edit ? <Typography>閲覧モード</Typography> : <Typography>編集モード</Typography>}
+          <Button disabled={!!lockData} onClick={handleEdit}>
             変更
           </Button>
         </Grid2>
@@ -647,7 +843,7 @@ export const Order = (props: {
                 <CreateIcon fontSize="small" />
                 見積作成
               </Button>
-              <Button color="error" onClick={() => setHeadDeleteOpen(true)} disabled={!edit}>
+              <Button color="error" onClick={handleHeadDeleteDialogOpen} disabled={!edit}>
                 <Delete fontSize="small" />
                 伝票削除
               </Button>
@@ -849,6 +1045,7 @@ export const Order = (props: {
           <LocationSelectDialog
             handleLocSelect={handleLocSelect}
             handleCloseLocationDialog={handleCloseLocationDailog}
+            lock={lock}
           />
         </Dialog>
         {/* 相手検索ダイアログ */}
@@ -856,6 +1053,7 @@ export const Order = (props: {
           <CustomerSelectionDialog
             handleCustSelect={handleCustSelect}
             handleCloseCustDialog={handleCloseCustomerDialog}
+            lock={lock}
           />
         </Dialog>
       </Paper>
@@ -1006,7 +1204,7 @@ export const Order = (props: {
                   onClick={(e) => {
                     e.stopPropagation();
                     console.log(selectedVehs);
-                    setSharyoHeadDeleteOpen(true);
+                    handleHeadDeleteVehsDialogOpen();
                   }}
                   disabled={!edit || selectedVehs.length === 0}
                 >

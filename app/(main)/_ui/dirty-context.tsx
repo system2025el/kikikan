@@ -7,7 +7,6 @@ import { createContext, useContext, useEffect, useState } from 'react';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
 
-import { delLock } from '../_lib/funcs';
 import { LockValues } from '../_lib/types';
 
 //import { IsDirtyAlertDialog } from '../order/[juchu_head_id]/[mode]/_ui/caveat-dialog';
@@ -15,7 +14,7 @@ import { LockValues } from '../_lib/types';
 type DirtyContextType = {
   isDirty: boolean;
   setIsDirty: (val: boolean) => void;
-  setLock: (val: LockValues | null) => void;
+  //setLock: (val: LockValues | null) => void;
   requestNavigation: (path: string) => void;
   requestBack: () => void;
 };
@@ -25,9 +24,9 @@ const DirtyContext = createContext<DirtyContextType | undefined>(undefined);
 export const DirtyProvider = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   const pathname = usePathname();
-  const user = useUserStore((state) => state.user);
+  //const user = useUserStore((state) => state.user);
   const [isDirty, setIsDirty] = useState(false);
-  const [lock, setLock] = useState<LockValues | null>(null);
+  //const [lock, setLock] = useState<LockValues | null>(null);
   const [pendingPath, setPendingPath] = useState<string | null>(null);
   const [showDialog, setShowDialog] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -45,19 +44,19 @@ export const DirtyProvider = ({ children }: { children: React.ReactNode }) => {
       setPendingPath(path);
       setShowDialog(true);
     } else {
-      if (lock && lock.addUser === user?.name) {
-        await delLock(lock.lockShubetu, lock.headId);
-        setLock(null);
-      }
+      // if (lock && lock.addUser === user?.name) {
+      //   await delLock(lock.lockShubetu, lock.headId);
+      //   setLock(null);
+      // }
       router.push(path);
     }
   };
 
   const confirmNavigation = async () => {
-    if (lock && lock.addUser === user?.name) {
-      await delLock(lock.lockShubetu, lock.headId);
-      setLock(null);
-    }
+    // if (lock && lock.addUser === user?.name) {
+    //   await delLock(lock.lockShubetu, lock.headId);
+    //   setLock(null);
+    // }
     if (pendingPath) {
       setIsDirty(false);
       router.push(pendingPath);
@@ -70,19 +69,19 @@ export const DirtyProvider = ({ children }: { children: React.ReactNode }) => {
     if (isDirty) {
       setShowDialog(true);
     } else {
-      if (lock && lock.addUser === user?.name) {
-        await delLock(lock.lockShubetu, lock.headId);
-        setLock(null);
-      }
+      // if (lock && lock.addUser === user?.name) {
+      //   await delLock(lock.lockShubetu, lock.headId);
+      //   setLock(null);
+      // }
       router.back();
     }
   };
 
   const confirmBack = async () => {
-    if (lock && lock.addUser === user?.name) {
-      await delLock(lock.lockShubetu, lock.headId);
-      setLock(null);
-    }
+    // if (lock && lock.addUser === user?.name) {
+    //   await delLock(lock.lockShubetu, lock.headId);
+    //   setLock(null);
+    // }
     setIsDirty(false);
     router.back();
   };
@@ -105,7 +104,7 @@ export const DirtyProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <DirtyContext.Provider value={{ isDirty, setIsDirty, setLock, requestNavigation, requestBack }}>
+    <DirtyContext.Provider value={{ isDirty, setIsDirty, /*setLock,*/ requestNavigation, requestBack }}>
       {children}
       <IsDirtyAlertDialog open={showDialog} onClick={handleResult} />
     </DirtyContext.Provider>

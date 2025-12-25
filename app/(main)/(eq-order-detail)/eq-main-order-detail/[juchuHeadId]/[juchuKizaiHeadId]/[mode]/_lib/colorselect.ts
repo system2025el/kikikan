@@ -16,9 +16,6 @@ export const getStockRowBackgroundColor = (
 ): string => {
   const cellDate = toJapanYMDString(date);
 
-  if (cellDate === dateRange[dateRange.length - 1]) return 'yellow';
-  if (cellDate === dateRange[0]) return 'lightblue';
-
   if (juchuHonbanbiList.some((date) => toJapanYMDString(date.juchuHonbanbiDat) === cellDate)) {
     const shubetuIds = juchuHonbanbiList
       .filter((date) => toJapanYMDString(date.juchuHonbanbiDat) === cellDate)
@@ -38,6 +35,8 @@ export const getStockRowBackgroundColor = (
     }
   }
 
+  if (cellDate === dateRange[dateRange.length - 1]) return 'yellow';
+  if (cellDate === dateRange[0]) return 'lightblue';
   if (dateRange.includes(cellDate)) return '#ACB9CA';
   return 'white';
 };

@@ -37,6 +37,24 @@ export const insertLock = async (data: Lock) => {
 };
 
 /**
+ * ロック情報更新
+ * @param data
+ * @returns
+ */
+export const updateLock = async (data: Lock) => {
+  try {
+    return await supabase
+      .schema(SCHEMA)
+      .from('t_lock')
+      .update(data)
+      .eq('lock_shubetu', data.lock_shubetu)
+      .eq('head_id', data.head_id);
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
  * ロック情報削除
  * @param lockShubetu ロック種別
  * @param headId ヘッダーid
