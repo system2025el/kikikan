@@ -174,7 +174,20 @@ export const EqptOrderList = () => {
                   <Typography noWrap minWidth={90}>
                     受注番号
                   </Typography>
-                  <TextFieldElement name="juchuId" control={control} sx={{ width: 120 }} />
+                  <TextFieldElement
+                    name="juchuId"
+                    control={control}
+                    sx={{
+                      width: 120,
+                      '& .MuiInputBase-input': {
+                        textAlign: 'right',
+                      },
+                      '& input[type=number]::-webkit-inner-spin-button': {
+                        WebkitAppearance: 'none',
+                        margin: 0,
+                      },
+                    }}
+                  />
                 </Stack>
                 <Stack direction="row" spacing={2} sx={styles.container}>
                   <Typography noWrap minWidth={90}>
