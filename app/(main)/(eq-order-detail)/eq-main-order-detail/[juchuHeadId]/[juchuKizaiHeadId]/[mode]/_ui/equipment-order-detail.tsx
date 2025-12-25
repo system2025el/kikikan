@@ -721,7 +721,7 @@ const EquipmentOrderDetail = (props: {
         );
 
         if (newJuchuKizaiHeadId) {
-          redirect(`/eq-main-order-detail/${data.juchuHeadId}/${newJuchuKizaiHeadId}/edit`);
+          router.replace(`/eq-main-order-detail/${data.juchuHeadId}/${newJuchuKizaiHeadId}/edit`);
         } else {
           setSnackBarMessage('保存に失敗しました');
           setSnackBarOpen(true);

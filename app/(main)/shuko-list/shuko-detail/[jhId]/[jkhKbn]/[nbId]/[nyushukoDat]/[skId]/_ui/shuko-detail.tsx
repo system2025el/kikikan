@@ -1,5 +1,6 @@
 'use client';
 
+import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 import WarningIcon from '@mui/icons-material/Warning';
 import {
   Box,
@@ -16,6 +17,7 @@ import {
   Typography,
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { set } from 'zod';
 
@@ -37,6 +39,8 @@ export const ShukoDetail = (props: {
 
   // user情報
   const user = useUserStore((state) => state.user);
+
+  const router = useRouter();
 
   // 出発済フラグ
   const [fixFlag, setFixFlag] = useState(props.fixFlag);
@@ -80,6 +84,7 @@ export const ShukoDetail = (props: {
       setSnackBarMessage('出発しました');
       setSnackBarOpen(true);
       setIsProcessing(false);
+      router.push('/shuko-list');
     } else {
       setSnackBarMessage('出発に失敗しました');
       setSnackBarOpen(true);
@@ -114,6 +119,7 @@ export const ShukoDetail = (props: {
       setSnackBarMessage('出発解除しました');
       setSnackBarOpen(true);
       setIsProcessing(false);
+      router.push('/shuko-list');
     } else {
       setSnackBarMessage('出発解除に失敗しました');
       setSnackBarOpen(true);
@@ -124,7 +130,18 @@ export const ShukoDetail = (props: {
   return (
     <Box>
       <Box display={'flex'} justifyContent={'end'} mb={1}>
-        <BackButton label={'戻る'} />
+        <Button
+          onClick={() => {
+            if (isProcessing) return;
+            setIsProcessing(true);
+            router.push('/shuko-list');
+          }}
+        >
+          <Box display={'flex'} alignItems={'center'}>
+            <ArrowLeftIcon fontSize="small" />
+            出庫一覧
+          </Box>
+        </Button>
       </Box>
       <Paper variant="outlined">
         <Box display={'flex'} justifyContent={'space-between'} alignItems="center" px={2}>

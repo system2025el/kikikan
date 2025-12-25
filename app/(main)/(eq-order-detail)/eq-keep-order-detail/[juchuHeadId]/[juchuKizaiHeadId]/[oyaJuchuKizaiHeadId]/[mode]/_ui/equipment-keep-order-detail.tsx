@@ -501,7 +501,7 @@ export const EquipmentKeepOrderDetail = (props: {
         const newJuchuKizaiHeadId = await saveNewKeepJuchuKizaiHead(data, userNam);
 
         if (newJuchuKizaiHeadId) {
-          router.push(
+          router.replace(
             `/eq-keep-order-detail/${data.juchuHeadId}/${newJuchuKizaiHeadId}/${data.oyaJuchuKizaiHeadId}/edit`
           );
         } else {

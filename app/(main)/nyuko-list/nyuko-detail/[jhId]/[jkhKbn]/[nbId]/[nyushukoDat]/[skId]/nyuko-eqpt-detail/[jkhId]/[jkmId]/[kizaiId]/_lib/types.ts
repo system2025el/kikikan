@@ -2,6 +2,7 @@ export type NyukoEqptDetailValues = {
   juchuHeadId: number;
   juchuKizaiHeadId: number;
   juchuKizaiMeisaiId: number;
+  juchuKizaiHeadKbnId: number;
   nyushukoBashoId: number;
   nyushukoDat: string;
   sagyoKbnId: number;

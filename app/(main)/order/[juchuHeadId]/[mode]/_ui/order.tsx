@@ -269,7 +269,7 @@ export const Order = (props: {
         const newOrderId = maxId ? maxId.juchu_head_id + 1 : 1;
         const saveResult = await addJuchuHead(newOrderId, data, user.name);
         if (saveResult) {
-          redirect(`/order/${newOrderId}/edit`);
+          router.replace(`/order/${newOrderId}/edit`);
         } else {
           setSnackBarMessage('保存に失敗しました');
           setSnackBarOpen(true);

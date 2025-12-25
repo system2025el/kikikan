@@ -634,7 +634,7 @@ export const EquipmentReturnOrderDetail = (props: {
         const newJuchuKizaiHeadId = await saveNewReturnJuchuKizaiHead(data, updateDateRange, userNam);
 
         if (newJuchuKizaiHeadId) {
-          router.push(
+          router.replace(
             `/eq-return-order-detail/${data.juchuHeadId}/${newJuchuKizaiHeadId}/${data.oyaJuchuKizaiHeadId}/edit`
           );
         } else {

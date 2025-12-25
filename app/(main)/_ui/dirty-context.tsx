@@ -23,7 +23,7 @@ const DirtyContext = createContext<DirtyContextType | undefined>(undefined);
 
 export const DirtyProvider = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
-  const pathname = usePathname();
+  //const pathname = usePathname();
   //const user = useUserStore((state) => state.user);
   const [isDirty, setIsDirty] = useState(false);
   //const [lock, setLock] = useState<LockValues | null>(null);
@@ -31,15 +31,15 @@ export const DirtyProvider = ({ children }: { children: React.ReactNode }) => {
   const [showDialog, setShowDialog] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  useEffect(() => {
-    setShowDialog(false);
-    setPendingPath(null);
-    setIsProcessing(false);
-  }, [pathname]);
+  // useEffect(() => {
+  //   setShowDialog(false);
+  //   setPendingPath(null);
+  //   setIsProcessing(false);
+  // }, [pathname]);
 
   const requestNavigation = async (path: string) => {
-    if (isProcessing) return;
-    setIsProcessing(true);
+    // if (isProcessing) return;
+    // setIsProcessing(true);
     if (isDirty) {
       setPendingPath(path);
       setShowDialog(true);
@@ -60,12 +60,14 @@ export const DirtyProvider = ({ children }: { children: React.ReactNode }) => {
     if (pendingPath) {
       setIsDirty(false);
       router.push(pendingPath);
+      setShowDialog(false);
+      setPendingPath(null);
     }
   };
 
   const requestBack = async () => {
-    if (isProcessing) return;
-    setIsProcessing(true);
+    // if (isProcessing) return;
+    // setIsProcessing(true);
     if (isDirty) {
       setShowDialog(true);
     } else {
@@ -84,6 +86,7 @@ export const DirtyProvider = ({ children }: { children: React.ReactNode }) => {
     // }
     setIsDirty(false);
     router.back();
+    setShowDialog(false);
   };
 
   const cancelNavigation = () => {

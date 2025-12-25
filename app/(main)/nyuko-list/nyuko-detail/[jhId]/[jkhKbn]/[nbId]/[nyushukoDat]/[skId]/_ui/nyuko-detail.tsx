@@ -1,6 +1,6 @@
 'use client';
 
-import WarningIcon from '@mui/icons-material/Warning';
+import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 import {
   Box,
   Button,
@@ -16,6 +16,7 @@ import {
   Typography,
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
@@ -36,6 +37,8 @@ export const NyukoDetail = (props: {
 
   // user情報
   const user = useUserStore((state) => state.user);
+
+  const router = useRouter();
 
   const [fixFlag, setFixFlag] = useState(props.fixFlag);
   // 処理中制御
@@ -62,6 +65,7 @@ export const NyukoDetail = (props: {
       setSnackBarMessage('到着しました');
       setSnackBarOpen(true);
       setIsProcessing(false);
+      router.push('/nyuko-list');
     } else {
       setSnackBarMessage('到着に失敗しました');
       setSnackBarOpen(true);
@@ -72,7 +76,18 @@ export const NyukoDetail = (props: {
   return (
     <Box>
       <Box display={'flex'} justifyContent={'end'} mb={1}>
-        <BackButton label={'戻る'} />
+        <Button
+          onClick={() => {
+            if (isProcessing) return;
+            setIsProcessing(true);
+            router.push('/nyuko-list');
+          }}
+        >
+          <Box display={'flex'} alignItems={'center'}>
+            <ArrowLeftIcon fontSize="small" />
+            入庫一覧
+          </Box>
+        </Button>
       </Box>
       <Paper variant="outlined">
         <Box display={'flex'} justifyContent={'space-between'} alignItems="center" px={2}>

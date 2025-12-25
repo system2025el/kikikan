@@ -89,7 +89,16 @@ export const NyukoListTable = (props: {
               <TableCell padding="checkbox">
                 <Checkbox checked={selected.includes(index)} onChange={() => handleSelect(index)} />
               </TableCell>
-              <TableCell align="center">{row.juchuHeadId}</TableCell>
+              <TableCell align="center">
+                <Button
+                  variant="text"
+                  size="small"
+                  onClick={() => window.open(`/order/${row.juchuHeadId}/view`)}
+                  sx={{ py: 0, px: 1 }}
+                >
+                  {row.juchuHeadId}
+                </Button>
+              </TableCell>
               <TableCell align="left">{row.nyushukoBashoId === 1 ? 'K' : 'Y'}</TableCell>
               <TableCell align="left">{toJapanTimeString(row.nyushukoDat)}</TableCell>
               <TableCell align="center">
