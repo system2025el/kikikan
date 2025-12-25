@@ -1,8 +1,10 @@
 'use server';
 
-import { deleteLock, insertLock, selectLock } from '@/app/_lib/db/tables/t-lock';
+import dayjs from 'dayjs';
 
-import { toJapanTimeString } from './date-conversion';
+import { deleteLock, insertLock, selectLock, updateLock } from '@/app/_lib/db/tables/t-lock';
+
+import { toJapanTimeStampString, toJapanTimeString } from './date-conversion';
 import { LockValues } from './types';
 
 /**
@@ -29,8 +31,9 @@ export const getLock = async (lockShubetu: number, headId: number) => {
     const lockData: LockValues = {
       lockShubetu: data.lock_shubetu,
       headId: data.head_id,
-      addDat: data.add_dat ? new Date(data.add_dat) : new Date(),
+      addDat: data.add_dat ?? '',
       addUser: data.add_user ?? '',
+      mail_adr: data.mail_adr ?? '',
     };
     return lockData;
   } catch (e) {
@@ -44,16 +47,38 @@ export const getLock = async (lockShubetu: number, headId: number) => {
  * @param lockShubetu ロック種別
  * @param headId ヘッダーid
  */
-export const addLock = async (lockShubetu: number, headId: number, userNam: string) => {
+export const addLock = async (lockShubetu: number, headId: number, date: string, userNam: string, mailAdr: string) => {
   const lockData = {
     lock_shubetu: lockShubetu,
     head_id: headId,
-    add_dat: toJapanTimeString(),
+    add_dat: date,
     add_user: userNam,
+    mail_adr: mailAdr,
   };
   const { error } = await insertLock(lockData);
   if (error) {
     console.error('Error adding lock:', error.message);
+  }
+};
+
+/**
+ * ロック情報更新
+ * @param lockShubetu
+ * @param headId
+ * @param userNam
+ * @param mailAdr
+ */
+export const updLock = async (lockShubetu: number, headId: number, date: string, userNam: string, mailAdr: string) => {
+  const lockData = {
+    lock_shubetu: lockShubetu,
+    head_id: headId,
+    add_dat: date,
+    add_user: userNam,
+    mail_adr: mailAdr,
+  };
+  const { error } = await updateLock(lockData);
+  if (error) {
+    console.error('Error update lock:', error.message);
   }
 };
 

@@ -36,6 +36,7 @@ export const EqptSelectionDialog = ({
   // rank,
   setEqpts,
   handleCloseDialog,
+  lock,
 }: {
   // rank: number;
   /**
@@ -46,6 +47,7 @@ export const EqptSelectionDialog = ({
   setEqpts: (data: SelectedEqptsValues[]) => void;
   /** 機材選択ダイアログ閉じる関数 */
   handleCloseDialog: () => void;
+  lock: () => Promise<boolean | React.JSX.Element | undefined>;
 }) => {
   /** 機材明細画面に渡す機材の配列 */
   const selectedEqptList: SelectedEqptsValues[] = [];
@@ -86,7 +88,7 @@ export const EqptSelectionDialog = ({
       const data = await getSelectedEqpts(selectedEqptIds);
       console.log('最終的に渡される機材の配列データ: ', data!);
       setEqpts(data!);
-      handleCloseDialog();
+      //handleCloseDialog();
     }
   };
 
@@ -128,16 +130,20 @@ export const EqptSelectionDialog = ({
     setIsLoading(true);
     setSearching(true);
     setSelectedBumon(-100);
-    if (data.query.trim() === '') {
-      const a = await getEqptsForEqptSelection('');
-      console.log('機材リスト[0]: ', a![0]);
-      setTheEqpts(a!);
-    } else {
-      const a = await getEqptsForEqptSelection(data.query);
-      console.log('機材リスト[0]: ', a![0]);
-      setTheEqpts(a!);
+    const lockResult = await lock();
+
+    if (lockResult) {
+      if (data.query.trim() === '') {
+        const a = await getEqptsForEqptSelection('');
+        console.log('機材リスト[0]: ', a![0]);
+        setTheEqpts(a!);
+      } else {
+        const a = await getEqptsForEqptSelection(data.query);
+        console.log('機材リスト[0]: ', a![0]);
+        setTheEqpts(a!);
+      }
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   /* useeffect -------------------------------------- */

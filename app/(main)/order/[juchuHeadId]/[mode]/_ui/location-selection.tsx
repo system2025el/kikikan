@@ -35,8 +35,9 @@ import { LocsDialogValues } from '../_lib/types';
 export const LocationSelectDialog = (props: {
   handleLocSelect: (locNam: string) => void;
   handleCloseLocationDialog: () => void;
+  lock: () => Promise<boolean | undefined>;
 }) => {
-  const { handleLocSelect, handleCloseLocationDialog } = props;
+  const { handleLocSelect, handleCloseLocationDialog, lock } = props;
   /* useState ------------------ */
   const [locs, setLocs] = useState<LocsDialogValues[]>();
   /* DBのローディング */
@@ -62,9 +63,13 @@ export const LocationSelectDialog = (props: {
   /* 検索ボタン押下 */
   const onSubmit = async (data: { query: string | undefined }) => {
     setIsLoading(true);
-    const newList = await getFilteredOrderLocs(data.query!);
-    setLocs(newList);
-    setIsLoading(false);
+    const lockResult = await lock();
+
+    if (lockResult) {
+      const newList = await getFilteredOrderLocs(data.query!);
+      setLocs(newList);
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -82,10 +87,12 @@ export const LocationSelectDialog = (props: {
   return (
     <>
       <Container disableGutters sx={{ minWidth: '100%', p: 3 }} maxWidth={'xl'}>
+        <Box justifySelf={'end'} mb={0.5}>
+          <Button onClick={() => handleCloseLocationDialog()}>戻る</Button>
+        </Box>
         <Paper variant="outlined">
-          <Box width={'100%'} display={'flex'} p={2} justifyContent={'space-between'} alignItems={'center'}>
+          <Box width={'100%'} display={'flex'} px={2} justifyContent={'space-between'} alignItems={'center'}>
             <Typography>公演場所選択</Typography>
-            <Button onClick={() => handleCloseLocationDialog()}>戻る</Button>
           </Box>
           <Divider />
           <Box width={'100%'} p={2}>
@@ -96,7 +103,7 @@ export const LocationSelectDialog = (props: {
                   <TextFieldElement name="query" control={control} helperText={'場所、住所、Tel、Faxから検索'} />
                 </Stack>
                 <Box alignSelf={'end'}>
-                  <Button type="submit">
+                  <Button type="submit" loading={isLoading}>
                     <SearchIcon />
                     検索
                   </Button>

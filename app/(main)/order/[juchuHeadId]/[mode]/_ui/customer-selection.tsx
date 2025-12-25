@@ -35,8 +35,9 @@ import { CustomersDialogValues, KokyakuValues } from '../_lib/types';
 export const CustomerSelectionDialog = (props: {
   handleCustSelect: (customer: KokyakuValues) => void;
   handleCloseCustDialog: () => void;
+  lock: () => Promise<boolean | undefined>;
 }) => {
-  const { handleCustSelect, handleCloseCustDialog } = props;
+  const { handleCustSelect, handleCloseCustDialog, lock } = props;
   const [custs, setCusts] = useState<CustomersDialogValues[]>();
   const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -59,9 +60,13 @@ export const CustomerSelectionDialog = (props: {
   /* 検索ボタン押下 */
   const onSubmit = async (data: { query: string | undefined }) => {
     setIsLoading(true);
-    const newList = await getFilteredOrderCustomers(data.query!);
-    setCusts(newList);
-    setIsLoading(false);
+    const lockResult = await lock();
+
+    if (lockResult) {
+      const newList = await getFilteredOrderCustomers(data.query!);
+      setCusts(newList);
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -79,10 +84,12 @@ export const CustomerSelectionDialog = (props: {
   return (
     <>
       <Container disableGutters sx={{ minWidth: '100%', p: 3 }} maxWidth={'xl'}>
+        <Box justifySelf={'end'} mb={0.5}>
+          <Button onClick={() => handleCloseCustDialog()}>戻る</Button>
+        </Box>
         <Paper variant="outlined">
-          <Box width={'100%'} display={'flex'} p={2} justifyContent={'space-between'} alignItems={'center'}>
+          <Box width={'100%'} display={'flex'} px={2} justifyContent={'space-between'} alignItems={'center'}>
             <Typography>相手選択</Typography>
-            <Button onClick={() => handleCloseCustDialog()}>戻る</Button>
           </Box>
           <Divider />
           <Box width={'100%'} p={2}>
@@ -93,7 +100,7 @@ export const CustomerSelectionDialog = (props: {
                   <TextFieldElement name="query" control={control} helperText={'場所、住所、Tel、Faxから検索'} />
                 </Stack>
                 <Box alignSelf={'end'}>
-                  <Button type="submit">
+                  <Button type="submit" loading={isLoading}>
                     <SearchIcon />
                     検索
                   </Button>
