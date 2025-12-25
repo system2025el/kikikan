@@ -5,6 +5,7 @@ import AddIcon from '@mui/icons-material/Add';
 import AltRouteIcon from '@mui/icons-material/AltRoute';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -2196,7 +2197,12 @@ const EquipmentOrderDetail = (props: {
                     変更
                   </Button>
                 </Grid2>
-                <Button onClick={back}>仮戻る</Button>
+                <Button onClick={back}>
+                  <Box display={'flex'} alignItems={'center'}>
+                    <ArrowLeftIcon fontSize="small" />
+                    受注
+                  </Box>
+                </Button>
               </Grid2>
             </Box>
             {/*-------受注ヘッダー-------*/}
