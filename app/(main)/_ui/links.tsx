@@ -144,6 +144,7 @@ export default function NavLinks() {
       setIsLoading(false);
     }, 1500);
   };
+
   return (
     <List dense sx={{ pt: 0 }}>
       {/* ダッシュボード */}
