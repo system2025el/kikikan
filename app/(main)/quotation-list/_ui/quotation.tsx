@@ -143,7 +143,7 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
   const currentGokeiAmt = useWatch({ control, name: 'gokeiAmt' });
 
   // context
-  const { setIsDirty, setLock } = useDirty();
+  const { setIsDirty /*setLock*/ } = useDirty();
   // ブラウザバック、F5、×ボタンでページを離れた際のhook
   useUnsavedChangesWarning(isDirty);
 
@@ -184,7 +184,7 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
       const lockData = await getLock(2, quot.mituHeadId ?? 0);
       setLockData(lockData);
       if (lockData === null) {
-        await addLock(2, quot.mituHeadId ?? 0, user.name);
+        await addLock(2, quot.mituHeadId ?? 0, new Date().toISOString(), user.name, user.email);
         const newLockData = await getLock(2, quot.mituHeadId ?? 0);
         setLockData(newLockData);
         setEditable(true);
@@ -248,7 +248,7 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
       const lockData = await getLock(2, quot.mituHeadId ?? 0);
       setLockData(lockData);
       if (lockData === null) {
-        await addLock(2, quot.mituHeadId ?? 0, user?.name ?? '');
+        await addLock(2, quot.mituHeadId ?? 0, new Date().toISOString(), user?.name ?? '', user?.email ?? '');
         const newLockData = await getLock(2, quot.mituHeadId ?? 0);
         setLockData(newLockData);
       } else if (lockData !== null && lockData.addUser !== user?.name) {
@@ -301,10 +301,10 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
     }
   }, [chukeiSum, sum, zei, currentChukei, currentPreTaxGokei, currentZeiAmt, currentGokeiAmt, setValue]);
 
-  // ロック
-  useEffect(() => {
-    setLock(lockData);
-  }, [lockData, setLock]);
+  // // ロック
+  // useEffect(() => {
+  //   setLock(lockData);
+  // }, [lockData, setLock]);
 
   // 変更あるかどうか
   useEffect(() => {
@@ -648,7 +648,7 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
                       name="kokyaku"
                       control={control}
                       disabled={!editable}
-                      render={({ field }) => (
+                      render={({ field, fieldState }) => (
                         <Autocomplete
                           {...field}
                           onChange={(_, value) => {
@@ -658,7 +658,9 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
                           freeSolo
                           autoSelect
                           sx={{ width: 300 }}
-                          renderInput={(params) => <TextField {...params} />}
+                          renderInput={(params) => (
+                            <TextField {...params} error={!!fieldState.error} helperText={fieldState.error?.message} />
+                          )}
                           options={options.custs}
                           getOptionLabel={(option) => (typeof option === 'string' ? option : option.label)}
                         />

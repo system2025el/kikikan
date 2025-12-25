@@ -1,5 +1,9 @@
+import z3, { z } from 'zod';
+
+import { validationMessages } from '../../_lib/validation-messages';
+
 /**
- * Weeklyスケジュールの表示用の型
+ * スケジュールの表示用の型
  */
 export type WeeklyScheduleValues = {
   calDat: string;
@@ -26,11 +30,22 @@ export type WeeklySearchValues = {
 };
 
 /**
- * weekly の担当者・メモ・祝日フラグフォームの型
+ * スケジュール用のスキーマ
  */
-export type WeeklyValues = {
-  dat: string;
-  tantoNam: string | null;
-  mem: string | null;
-  holidayFlg: boolean;
-};
+export const WeeklySchema = z.object({
+  dat: z.string().max(20),
+  tantoNam: z
+    .string()
+    .max(200, { message: validationMessages.maxStringLength(200) })
+    .nullable(),
+  mem: z
+    .string()
+    .max(200, { message: validationMessages.maxStringLength(200) })
+    .nullable(),
+  holidayFlg: z.boolean(),
+});
+
+/**
+ * スケジュール の日直・メモ・祝日フラグフォームの型
+ */
+export type WeeklyValues = z.infer<typeof WeeklySchema>;

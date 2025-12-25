@@ -1,4 +1,6 @@
 'use client';
+
+import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import SaveAsIcon from '@mui/icons-material/SaveAs';
 import WarningIcon from '@mui/icons-material/Warning';
@@ -17,6 +19,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
@@ -40,6 +43,9 @@ export const ShukoEqptDetail = (props: {
 
   // user情報
   const user = useUserStore((state) => state.user);
+
+  const router = useRouter();
+
   // ローディング
   const [isLoading, setIsLoading] = useState(false);
   // 処理中制御
@@ -75,7 +81,7 @@ export const ShukoEqptDetail = (props: {
   });
 
   // context
-  const { setIsDirty } = useDirty();
+  const { setIsDirty, requestNavigation } = useDirty();
   // ブラウザバック、F5、×ボタンでページを離れた際のhook
   useUnsavedChangesWarning(isDirty);
 
@@ -111,12 +117,21 @@ export const ShukoEqptDetail = (props: {
         setSnackBarOpen(true);
         reset(data);
         setIsProcessing(false);
+        router.push(
+          `/shuko-list/shuko-detail/${shukoEqptDetailData.juchuHeadId}/${shukoEqptDetailData.juchuKizaiHeadKbnId}/${shukoEqptDetailData.nyushukoBashoId}/${new Date(shukoEqptDetailData.nyushukoDat).toISOString()}/${shukoEqptDetailData.sagyoKbnId}`
+        );
       } else {
         setSnackBarMessage('保存に失敗しました');
         setSnackBarOpen(true);
         setIsProcessing(false);
       }
     }
+  };
+
+  // 出庫明細ボタン押下
+  const handleBack = () => {
+    const path = `/shuko-list/shuko-detail/${shukoEqptDetailData.juchuHeadId}/${shukoEqptDetailData.juchuKizaiHeadKbnId}/${shukoEqptDetailData.nyushukoBashoId}/${new Date(shukoEqptDetailData.nyushukoDat).toISOString()}/${shukoEqptDetailData.sagyoKbnId}`;
+    requestNavigation(path);
   };
 
   /**
@@ -168,7 +183,12 @@ export const ShukoEqptDetail = (props: {
     <Box>
       <Grid2 container justifyContent={'end'} alignItems={'center'} spacing={2} mb={1}>
         {fixFlag && <Typography>出発済</Typography>}
-        <BackButton label={'戻る'} />
+        <Button onClick={handleBack}>
+          <Box display={'flex'} alignItems={'center'}>
+            <ArrowLeftIcon fontSize="small" />
+            出庫明細
+          </Box>
+        </Button>
       </Grid2>
       <Paper variant="outlined">
         <form onSubmit={handleSubmit(onSubmit)}>

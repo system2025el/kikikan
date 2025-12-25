@@ -24,6 +24,7 @@ const Page = async (props: {
       Number(params.jhId),
       Number(params.jkhId),
       Number(params.jkmId),
+      Number(params.jkhKbn),
       Number(params.nbId),
       date,
       Number(params.skId),

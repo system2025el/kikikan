@@ -89,17 +89,19 @@ export default function NavLinks() {
 
   /* useState -------------------------------------------- */
   /* 受注管理開閉 */
-  const [orderOpen, setorderOpen] = useState(true);
+  const [orderOpen, setorderOpen] = useState<boolean>(true);
   /* プリントアウト開閉 */
-  const [printOpen, setprintOpen] = useState(true);
+  const [printOpen, setprintOpen] = useState<boolean>(true);
   /* マスタ管理開閉 */
-  const [masterOpen, setmasterOpen] = useState(true);
+  const [masterOpen, setmasterOpen] = useState<boolean>(true);
   /* 設定開閉 */
-  const [settingOpen, setsettingOpen] = useState(true);
+  const [settingOpen, setsettingOpen] = useState<boolean>(true);
   /* 入出庫管理開閉 */
-  const [stockIOOpen, setStockIOOpen] = useState(true);
+  const [stockIOOpen, setStockIOOpen] = useState<boolean>(true);
   /* ログアウト開閉 */
   // const [loginOpen, setroginOpen] = useState(true);
+  /** 連打制御 */
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   /* methods ----------------------------------------- */
   /** 現ページとのpath比較 */
@@ -134,14 +136,25 @@ export default function NavLinks() {
   //   setroginOpen(!loginOpen);
   // };
 
+  /** サイドバークリックされたときの処理 */
+  const handleNavigation = async (pathname: string) => {
+    setIsLoading(true);
+    await requestNavigation(pathname);
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 1500);
+  };
+
   return (
     <List dense sx={{ pt: 0 }}>
       {/* ダッシュボード */}
       <ListItemButton
         href="/dashboard"
+        onClick={() => handleNavigation('/dashboard')}
         sx={{
           backgroundColor: pathname === '/dashboard' ? currentPgColor : undefined,
         }}
+        disabled={isLoading}
       >
         <ListItemIcon>
           <StopSharpIcon />
@@ -168,7 +181,7 @@ export default function NavLinks() {
                 backgroundColor: isSelected(text.url) ? currentPgColor : undefined,
               }}
             >
-              <ListItemButton /*href={text.url}*/ onClick={async () => await requestNavigation(text.url)} dense>
+              <ListItemButton onClick={async () => handleNavigation(text.url)} dense disabled={isLoading}>
                 <ListItemText
                   primary={text.name}
                   sx={{ color: isSelected(text.url) ? 'primary.dark' : undefined, pl: 8 }}
@@ -196,7 +209,7 @@ export default function NavLinks() {
                 backgroundColor: isSelected(text.url) ? currentPgColor : undefined,
               }}
             >
-              <ListItemButton onClick={async () => await requestNavigation(text.url)} dense>
+              <ListItemButton onClick={async () => handleNavigation(text.url)} dense disabled={isLoading}>
                 <ListItemText
                   primary={text.name}
                   sx={{ color: isSelected(text.url) ? 'primary.dark' : undefined, pl: 8 }}
@@ -225,7 +238,7 @@ export default function NavLinks() {
                   backgroundColor: isSelected(text.url) ? currentPgColor : undefined,
                 }}
               >
-                <ListItemButton onClick={async () => await requestNavigation(text.url)} dense>
+                <ListItemButton onClick={async () => handleNavigation(text.url)} dense disabled={isLoading}>
                   <ListItemText
                     primary={text.name}
                     sx={{ color: isSelected(text.url) ? 'primary.dark' : undefined, pl: 8 }}
@@ -255,7 +268,7 @@ export default function NavLinks() {
                 backgroundColor: isSelected(text.url) ? currentPgColor : undefined,
               }}
             >
-              <ListItemButton onClick={async () => await requestNavigation(text.url)} dense>
+              <ListItemButton onClick={async () => handleNavigation(text.url)} dense disabled={isLoading}>
                 <ListItemText
                   primary={text.name}
                   sx={{ color: isSelected(text.url) ? 'primary.dark' : undefined, pl: 8 }}

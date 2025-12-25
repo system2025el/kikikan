@@ -29,6 +29,7 @@ type DateDialogProps = {
   scrollRef: React.RefObject<HTMLDivElement | null>;
   onClose: () => void;
   onSave: (juchuHonbanbiList: JuchuKizaiHonbanbiValues[], juchuHonbanbiDeleteList: JuchuKizaiHonbanbiValues[]) => void;
+  lock: () => Promise<boolean | React.JSX.Element | undefined>;
 };
 
 const TabPanel = (props: TabPanelProps) => {
@@ -51,6 +52,7 @@ export const DateSelectDialog = ({
   scrollRef,
   onClose,
   onSave,
+  lock,
 }: DateDialogProps) => {
   // 保存中
   const [isSave, setIsSave] = useState(false);
@@ -217,76 +219,80 @@ export const DateSelectDialog = ({
    * 追加ボタン押下
    * @param value タブ値
    */
-  const handleAddInput = (value: number) => {
+  const handleAddInput = async (value: number) => {
     if (dateRange !== null) {
-      // カレンダーで選択された日付
-      const newDates = getRange(dateRange[0], dateRange[1]);
+      const lockResult = await lock();
 
-      switch (value) {
-        // 仕込
-        case 10:
-          const updatedSikomi: JuchuKizaiHonbanbiValues[] = newDates.map((d) => ({
-            juchuHeadId: juchuHeadId,
-            juchuKizaiHeadId: juchuKizaiHeadId,
-            juchuHonbanbiShubetuId: 10,
-            juchuHonbanbiDat: new Date(d),
-            mem: '',
-            juchuHonbanbiAddQty: 0,
-          }));
-          setSikomi((prev) => {
-            const existDate = new Set(prev.map((d) => toJapanYMDString(d.juchuHonbanbiDat)));
-            const unique = updatedSikomi.filter((d) => !existDate.has(toJapanYMDString(d.juchuHonbanbiDat)));
-            return [...prev, ...unique].sort((a, b) => a.juchuHonbanbiDat.getTime() - b.juchuHonbanbiDat.getTime());
-          });
-          break;
-        // rh
-        case 20:
-          const updatedRh: JuchuKizaiHonbanbiValues[] = newDates.map((d) => ({
-            juchuHeadId: juchuHeadId,
-            juchuKizaiHeadId: juchuKizaiHeadId,
-            juchuHonbanbiShubetuId: 20,
-            juchuHonbanbiDat: new Date(d),
-            mem: '',
-            juchuHonbanbiAddQty: 0,
-          }));
-          setRh((prev) => {
-            const existDate = new Set(prev.map((d) => toJapanYMDString(d.juchuHonbanbiDat)));
-            const unique = updatedRh.filter((d) => !existDate.has(toJapanYMDString(d.juchuHonbanbiDat)));
-            return [...prev, ...unique].sort((a, b) => a.juchuHonbanbiDat.getTime() - b.juchuHonbanbiDat.getTime());
-          });
-          break;
-        // gp
-        case 30:
-          const updatedGp: JuchuKizaiHonbanbiValues[] = newDates.map((d) => ({
-            juchuHeadId: juchuHeadId,
-            juchuKizaiHeadId: juchuKizaiHeadId,
-            juchuHonbanbiShubetuId: 30,
-            juchuHonbanbiDat: new Date(d),
-            mem: '',
-            juchuHonbanbiAddQty: 0,
-          }));
-          setGp((prev) => {
-            const existDate = new Set(prev.map((d) => toJapanYMDString(d.juchuHonbanbiDat)));
-            const unique = updatedGp.filter((d) => !existDate.has(toJapanYMDString(d.juchuHonbanbiDat)));
-            return [...prev, ...unique].sort((a, b) => a.juchuHonbanbiDat.getTime() - b.juchuHonbanbiDat.getTime());
-          });
-          break;
-        // 本番
-        case 40:
-          const updatedHonban: JuchuKizaiHonbanbiValues[] = newDates.map((d) => ({
-            juchuHeadId: juchuHeadId,
-            juchuKizaiHeadId: juchuKizaiHeadId,
-            juchuHonbanbiShubetuId: 40,
-            juchuHonbanbiDat: new Date(d),
-            mem: '',
-            juchuHonbanbiAddQty: 0,
-          }));
-          setHonban((prev) => {
-            const existDate = new Set(prev.map((d) => toJapanYMDString(d.juchuHonbanbiDat)));
-            const unique = updatedHonban.filter((d) => !existDate.has(toJapanYMDString(d.juchuHonbanbiDat)));
-            return [...prev, ...unique].sort((a, b) => a.juchuHonbanbiDat.getTime() - b.juchuHonbanbiDat.getTime());
-          });
-          break;
+      if (lockResult) {
+        // カレンダーで選択された日付
+        const newDates = getRange(dateRange[0], dateRange[1]);
+
+        switch (value) {
+          // 仕込
+          case 10:
+            const updatedSikomi: JuchuKizaiHonbanbiValues[] = newDates.map((d) => ({
+              juchuHeadId: juchuHeadId,
+              juchuKizaiHeadId: juchuKizaiHeadId,
+              juchuHonbanbiShubetuId: 10,
+              juchuHonbanbiDat: new Date(d),
+              mem: '',
+              juchuHonbanbiAddQty: 0,
+            }));
+            setSikomi((prev) => {
+              const existDate = new Set(prev.map((d) => toJapanYMDString(d.juchuHonbanbiDat)));
+              const unique = updatedSikomi.filter((d) => !existDate.has(toJapanYMDString(d.juchuHonbanbiDat)));
+              return [...prev, ...unique].sort((a, b) => a.juchuHonbanbiDat.getTime() - b.juchuHonbanbiDat.getTime());
+            });
+            break;
+          // rh
+          case 20:
+            const updatedRh: JuchuKizaiHonbanbiValues[] = newDates.map((d) => ({
+              juchuHeadId: juchuHeadId,
+              juchuKizaiHeadId: juchuKizaiHeadId,
+              juchuHonbanbiShubetuId: 20,
+              juchuHonbanbiDat: new Date(d),
+              mem: '',
+              juchuHonbanbiAddQty: 0,
+            }));
+            setRh((prev) => {
+              const existDate = new Set(prev.map((d) => toJapanYMDString(d.juchuHonbanbiDat)));
+              const unique = updatedRh.filter((d) => !existDate.has(toJapanYMDString(d.juchuHonbanbiDat)));
+              return [...prev, ...unique].sort((a, b) => a.juchuHonbanbiDat.getTime() - b.juchuHonbanbiDat.getTime());
+            });
+            break;
+          // gp
+          case 30:
+            const updatedGp: JuchuKizaiHonbanbiValues[] = newDates.map((d) => ({
+              juchuHeadId: juchuHeadId,
+              juchuKizaiHeadId: juchuKizaiHeadId,
+              juchuHonbanbiShubetuId: 30,
+              juchuHonbanbiDat: new Date(d),
+              mem: '',
+              juchuHonbanbiAddQty: 0,
+            }));
+            setGp((prev) => {
+              const existDate = new Set(prev.map((d) => toJapanYMDString(d.juchuHonbanbiDat)));
+              const unique = updatedGp.filter((d) => !existDate.has(toJapanYMDString(d.juchuHonbanbiDat)));
+              return [...prev, ...unique].sort((a, b) => a.juchuHonbanbiDat.getTime() - b.juchuHonbanbiDat.getTime());
+            });
+            break;
+          // 本番
+          case 40:
+            const updatedHonban: JuchuKizaiHonbanbiValues[] = newDates.map((d) => ({
+              juchuHeadId: juchuHeadId,
+              juchuKizaiHeadId: juchuKizaiHeadId,
+              juchuHonbanbiShubetuId: 40,
+              juchuHonbanbiDat: new Date(d),
+              mem: '',
+              juchuHonbanbiAddQty: 0,
+            }));
+            setHonban((prev) => {
+              const existDate = new Set(prev.map((d) => toJapanYMDString(d.juchuHonbanbiDat)));
+              const unique = updatedHonban.filter((d) => !existDate.has(toJapanYMDString(d.juchuHonbanbiDat)));
+              return [...prev, ...unique].sort((a, b) => a.juchuHonbanbiDat.getTime() - b.juchuHonbanbiDat.getTime());
+            });
+            break;
+        }
       }
     }
   };

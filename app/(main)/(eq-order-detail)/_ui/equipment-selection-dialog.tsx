@@ -29,7 +29,7 @@ export const OyaEqSelectionDialog = ({
   juchuHeadId: number;
   oyaJuchuKizaiHeadId: number;
   setEqpts: (eqData: OyaJuchuKizaiMeisaiValues[], containerData: OyaJuchuContainerMeisaiValues[]) => void;
-  onClose: (result: boolean) => void;
+  onClose: () => void;
 }) => {
   // 親機材リスト
   const [oyaEqList, setOyaEqList] = useState<OyaJuchuKizaiMeisaiValues[]>([]);
@@ -51,7 +51,7 @@ export const OyaEqSelectionDialog = ({
     const selectEqData = oyaEqList.filter((data) => selected.includes(data.dspOrdNum));
     const selectContainerData = oyaContainerList.filter((data) => selected.includes(data.dspOrdNum));
     setEqpts(selectEqData, selectContainerData);
-    onClose(false);
+    onClose();
   };
 
   /* useeffect -------------------------------------- */
@@ -75,7 +75,7 @@ export const OyaEqSelectionDialog = ({
           <Button onClick={handleClickConfirm} loading={isLoading}>
             確定
           </Button>
-          <Button onClick={() => onClose(false)}>戻る</Button>
+          <Button onClick={onClose}>戻る</Button>
         </Grid2>
       </Box>
       <Paper variant="outlined">

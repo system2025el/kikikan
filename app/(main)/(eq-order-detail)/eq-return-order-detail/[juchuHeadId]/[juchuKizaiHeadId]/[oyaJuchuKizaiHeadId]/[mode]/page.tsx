@@ -36,20 +36,20 @@ const Page = async (props: {
   const edit = params.mode === 'edit' ? true : false;
 
   // 受注ヘッダーデータ、親受注機材入出庫データ、入庫フラグ
-  const [juchuHeadData, oyaJuchuKizaiNyushukoData, nyukoFixFlag] = await Promise.all([
+  const [juchuHeadData, oyaJuchuKizaiHeadData, nyukoFixFlag] = await Promise.all([
     getDetailJuchuHead(juchuHeadId),
     getJuchuKizaiNyushuko(juchuHeadId, oyaJuchuKizaiHeadId),
     getNyushukoFixFlag(juchuHeadId, juchuKizaiHeadId, 70),
   ]);
 
-  if (!juchuHeadData || !oyaJuchuKizaiNyushukoData) {
+  if (!juchuHeadData || !oyaJuchuKizaiHeadData) {
     return <div>受注情報が見つかりません。</div>;
   }
 
   // 親出庫日
-  const oyaShukoDate = getShukoDate(oyaJuchuKizaiNyushukoData.kicsShukoDat, oyaJuchuKizaiNyushukoData.yardShukoDat);
+  const oyaShukoDate = getShukoDate(oyaJuchuKizaiHeadData.kicsShukoDat, oyaJuchuKizaiHeadData.yardShukoDat);
   // 親入庫日
-  const oyaNyukoDate = getNyukoDate(oyaJuchuKizaiNyushukoData.kicsNyukoDat, oyaJuchuKizaiNyushukoData.yardNyukoDat);
+  const oyaNyukoDate = getNyukoDate(oyaJuchuKizaiHeadData.kicsNyukoDat, oyaJuchuKizaiHeadData.yardNyukoDat);
 
   if (!oyaShukoDate || !oyaNyukoDate) {
     return <div>受注情報が見つかりません。</div>;
@@ -79,7 +79,7 @@ const Page = async (props: {
     return (
       <EquipmentReturnOrderDetail
         juchuHeadData={juchuHeadData}
-        oyaJuchuKizaiNyushukoData={oyaJuchuKizaiNyushukoData}
+        oyaJuchuKizaiHeadData={oyaJuchuKizaiHeadData}
         returnJuchuKizaiHeadData={newReturnJuchuKizaiHeadData}
         oyaShukoDate={oyaShukoDate}
         oyaNyukoDate={oyaNyukoDate}
@@ -101,7 +101,7 @@ const Page = async (props: {
     return (
       <EquipmentReturnOrderDetail
         juchuHeadData={juchuHeadData}
-        oyaJuchuKizaiNyushukoData={oyaJuchuKizaiNyushukoData}
+        oyaJuchuKizaiHeadData={oyaJuchuKizaiHeadData}
         returnJuchuKizaiHeadData={returnJuchuKizaiHeadData}
         oyaShukoDate={oyaShukoDate}
         oyaNyukoDate={oyaNyukoDate}

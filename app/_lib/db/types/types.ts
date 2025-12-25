@@ -1783,18 +1783,21 @@ export type Database = {
           add_user: string | null;
           head_id: number;
           lock_shubetu: number;
+          mail_adr: string | null;
         };
         Insert: {
           add_dat?: string | null;
           add_user?: string | null;
           head_id: number;
           lock_shubetu: number;
+          mail_adr?: string | null;
         };
         Update: {
           add_dat?: string | null;
           add_user?: string | null;
           head_id?: number;
           lock_shubetu?: number;
+          mail_adr?: string | null;
         };
         Relationships: [];
       };

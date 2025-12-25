@@ -7,6 +7,7 @@ import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import PrintIcon from '@mui/icons-material/Print';
 import SaveAsIcon from '@mui/icons-material/SaveAs';
+import WarningIcon from '@mui/icons-material/Warning';
 import {
   Accordion,
   AccordionDetails,
@@ -17,6 +18,7 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
+  DialogContentText,
   DialogTitle,
   Divider,
   Fab,
@@ -44,12 +46,14 @@ import { useUserStore } from '@/app/_lib/stores/usestore';
 import { toJapanTimeString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { addLock, delLock, getLock } from '@/app/(main)/_lib/funcs';
 import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
+import { lockCheck, lockRelease } from '@/app/(main)/_lib/lock';
 import { LockValues } from '@/app/(main)/_lib/types';
 import { BackButton, CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
 import { DateTime, TestDate } from '@/app/(main)/_ui/date';
 import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
 import { selectNone, SelectTypes } from '@/app/(main)/_ui/form-box';
 import { LoadingOverlay } from '@/app/(main)/_ui/loading';
+import { getDetailJuchuHead } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 import { DetailOerValues } from '@/app/(main)/(eq-order-detail)/_lib/types';
 import {
   IdoJuchuKizaiMeisaiValues,
@@ -98,6 +102,8 @@ const VehicleOrderDetail = ({
   const searchParams = useSearchParams();
 
   /* useState ----------------------------------------------------- */
+  /** 受注ヘッダーデータ */
+  const [juchuHead, setJuchuHead] = useState(juchuHeadData);
   /** 選択肢 */
   const [options, setOptions] = useState<{ kbn: SelectTypes[]; basho: SelectTypes[]; vehs: SelectTypes[] }>({
     kbn: [],
@@ -110,6 +116,8 @@ const VehicleOrderDetail = ({
   const [sharyoExpanded, setSharyoExpanded] = useState<boolean>(true);
   /** ローディング */
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  /** 処理中 */
+  const [isProcessing, setIsProcessing] = useState(false);
   /** 変更前の車両明細 */
   const [currentMeisai, setCurrentMeisai] = useState<JuchuSharyoHeadValues>();
   // 編集モード(true:編集、false:閲覧)
@@ -118,6 +126,8 @@ const VehicleOrderDetail = ({
   const [lockData, setLockData] = useState<LockValues | null>(null);
   // 編集内容が未保存ダイアログ制御
   const [dirtyOpen, setDirtyOpen] = useState(false);
+  // ロック中ダイアログ制御
+  const [lockOpen, setLockOpen] = useState(false);
 
   /* スナックバーの表示するかしないか */
   const [snackBarOpen, setSnackBarOpen] = useState(false);
@@ -158,11 +168,76 @@ const VehicleOrderDetail = ({
   const sharyoMeisai = useFieldArray({ control, name: 'meisai' });
 
   // context
-  const { setIsDirty, setLock } = useDirty();
+  const { setIsDirty /*setLock*/ } = useDirty();
   // ブラウザバック、F5、×ボタンでページを離れた際のhook
   useUnsavedChangesWarning(isDirty);
 
   /* methods -------------------------------------------------------- */
+  /** ロック制御 */
+  const lock = async () => {
+    if (!user) return;
+    const lockData = await lockCheck(1, getValues('juchuHeadId'), user.name, user.email);
+    setLockData(lockData);
+
+    if (!lockData) return true;
+
+    setEditable(false);
+    setMemOpen(false);
+
+    setLockOpen(true);
+    setIsLoading(true);
+
+    /** 受注ヘッダーデータ */
+    const juchuHead = await getDetailJuchuHead(getValues('juchuHeadId'));
+    if (!juchuHead) {
+      return <div>受注情報が見つかりません。</div>;
+    }
+    // データ取得実行
+    getOptions();
+    setJuchuHead(juchuHead);
+
+    if (sharyoHeadId > 0) {
+      const meisais = await getChosenJuchuSharyoMeisais(juchuHead.juchuHeadId, sharyoHeadId);
+      reset(meisais);
+      setCurrentMeisai(meisais);
+    } else {
+      // 受注機材から自動生成対応
+      /** 入出庫種別ID */
+      const kbn = searchParams.get('kbn');
+      /** 入出庫日時（ISOString想定） */
+      const date = searchParams.get('date');
+      /** 入出庫場所ID */
+      const basho = searchParams.get('basho');
+      // それぞれあればセット
+      if (kbn && kbn.trim() !== '') {
+        setValue('nyushukoKbn', Number(kbn), { shouldDirty: false });
+      }
+      if (date && date.trim() !== '') {
+        setValue('nyushukoDat', new Date(date), { shouldDirty: false });
+      }
+      if (basho && basho.trim() !== '') {
+        setValue('nyushukoBashoId', Number(basho), { shouldDirty: false });
+      }
+      if (sharyoHeadId === 0) {
+        setValue(
+          'headNam',
+          juchuHead.koenbashoNam && juchuHead.koenbashoNam.trim() !== '' ? `${juchuHead.koenbashoNam}行き` : '',
+          { shouldDirty: true }
+        );
+      }
+      setValue(
+        'meisai',
+        [
+          { sharyoId: FAKE_NEW_ID, sharyoQty: null, sharyoMem: null },
+          { sharyoId: FAKE_NEW_ID, sharyoQty: null, sharyoMem: null },
+        ],
+        { shouldDirty: false }
+      );
+    }
+    setIsLoading(false);
+    return false;
+  };
+
   /** 選択肢の取得 */
   const getOptions = async () => {
     const v = await getVehsSelections();
@@ -178,18 +253,26 @@ const VehicleOrderDetail = ({
   };
 
   /** 保存ボタン押下時処理 */
-  const onSubmit = (data: JuchuSharyoHeadValues) => {
-    /** メモだけ書かれた明細がないか */
-    const memOnly = data.meisai.some(
-      (item) => item.sharyoMem !== null && (item.sharyoId === null || item.sharyoQty === null)
-    );
-    if (memOnly) {
-      // あればダイアログ開いて確認
-      setMemOpen(true);
-    } else {
-      // 無ければ保存
-      handleSave(data);
+  const onSubmit = async (data: JuchuSharyoHeadValues) => {
+    if (isProcessing) return;
+    setIsProcessing(true);
+
+    const lockResult = await lock();
+
+    if (lockResult) {
+      /** メモだけ書かれた明細がないか */
+      const memOnly = data.meisai.some(
+        (item) => item.sharyoMem !== null && (item.sharyoId === null || item.sharyoQty === null)
+      );
+      if (memOnly) {
+        // あればダイアログ開いて確認
+        setMemOpen(true);
+      } else {
+        // 無ければ保存
+        handleSave(data);
+      }
     }
+    setIsProcessing(false);
   };
 
   /** フォーム送信処理 */
@@ -210,7 +293,7 @@ const VehicleOrderDetail = ({
       setCurrentMeisai(newData);
       await getOptions();
       /** 車両明細取得 */
-      const meisais = await getChosenJuchuSharyoMeisais(juchuHeadData.juchuHeadId, sharyoHeadId);
+      const meisais = await getChosenJuchuSharyoMeisais(juchuHead.juchuHeadId, sharyoHeadId);
       reset(meisais);
       setCurrentMeisai(meisais);
       setIsLoading(false);
@@ -223,26 +306,20 @@ const VehicleOrderDetail = ({
    * 編集モード変更
    */
   const handleEdit = async () => {
+    if (!user) return;
     // 編集→閲覧
     if (editable) {
       if (isDirty) {
         setDirtyOpen(true);
         return;
       }
-      await delLock(1, juchuHeadData.juchuHeadId);
-      setLockData(null);
+      await lockRelease(1, juchuHead.juchuHeadId, user.name, user.email);
       setEditable(false);
       // 閲覧→編集
     } else {
-      if (!user) return;
-      const lockData = await getLock(1, juchuHeadData.juchuHeadId);
-      setLockData(lockData);
-      if (lockData === null) {
-        await addLock(1, juchuHeadData.juchuHeadId, user.name);
-        const newLockData = await getLock(1, juchuHeadData.juchuHeadId);
-        setLockData(newLockData);
-        setEditable(true);
-      } else if (lockData !== null && lockData.addUser === user.name) {
+      const lockResult = await lock();
+
+      if (lockResult) {
         setEditable(true);
       }
     }
@@ -254,7 +331,7 @@ const VehicleOrderDetail = ({
    */
   const handleResultDialog = async (result: boolean) => {
     if (result) {
-      await delLock(1, juchuHeadData.juchuHeadId);
+      await delLock(1, juchuHead.juchuHeadId);
       setLockData(null);
       setEditable(false);
       reset();
@@ -268,28 +345,28 @@ const VehicleOrderDetail = ({
   useEffect(() => {
     /** 車両明細取得 */
     const getMeisais = async () => {
-      const meisais = await getChosenJuchuSharyoMeisais(juchuHeadData.juchuHeadId, sharyoHeadId);
+      const meisais = await getChosenJuchuSharyoMeisais(juchuHead.juchuHeadId, sharyoHeadId);
       reset(meisais);
       setCurrentMeisai(meisais);
       setIsLoading(false);
     };
 
-    /** ロック確認 */
-    const asyncProcess = async () => {
-      const lockData = await getLock(1, juchuHeadData.juchuHeadId);
-      setLockData(lockData);
-      if (lockData === null) {
-        await addLock(1, juchuHeadData.juchuHeadId, user?.name ?? '');
-        const newLockData = await getLock(1, juchuHeadData.juchuHeadId);
-        setLockData(newLockData);
-      } else if (lockData !== null && lockData.addUser !== user?.name) {
-        setEditable(false);
-      }
-    };
+    // /** ロック確認 */
+    // const asyncProcess = async () => {
+    //   const lockData = await getLock(1, juchuHeadData.juchuHeadId);
+    //   setLockData(lockData);
+    //   if (lockData === null) {
+    //     await addLock(1, juchuHeadData.juchuHeadId, user?.name ?? '');
+    //     const newLockData = await getLock(1, juchuHeadData.juchuHeadId);
+    //     setLockData(newLockData);
+    //   } else if (lockData !== null && lockData.addUser !== user?.name) {
+    //     setEditable(false);
+    //   }
+    // };
 
-    if (sharyoHeadId !== 0) {
-      asyncProcess();
-    }
+    // if (sharyoHeadId !== 0) {
+    //   asyncProcess();
+    // }
 
     // データ取得実行
     getOptions();
@@ -320,24 +397,35 @@ const VehicleOrderDetail = ({
       if (sharyoHeadId === 0) {
         setValue(
           'headNam',
-          juchuHeadData.koenbashoNam && juchuHeadData.koenbashoNam.trim() !== ''
-            ? `${juchuHeadData.koenbashoNam}行き`
-            : '',
+          juchuHead.koenbashoNam && juchuHead.koenbashoNam.trim() !== '' ? `${juchuHead.koenbashoNam}行き` : '',
           { shouldDirty: true }
         );
       }
       setIsLoading(false);
     }
-  }, [sharyoHeadId, juchuHeadData.juchuHeadId, juchuHeadData.koenbashoNam, user?.name, searchParams, reset, setValue]);
+  }, [sharyoHeadId, juchuHead.juchuHeadId, juchuHead.koenbashoNam, /*user?.name,*/ searchParams, reset, setValue]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const asyncProcess = async () => {
+      const lockData = await lockCheck(1, juchuHead.juchuHeadId, user.name, user.email);
+      setLockData(lockData);
+      if (lockData) {
+        setEditable(false);
+      }
+      setIsLoading(false);
+    };
+
+    if (sharyoHeadId !== 0) {
+      asyncProcess();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   useEffect(() => {
     console.log(sharyoError);
   }, [sharyoError]);
-
-  // ロック
-  useEffect(() => {
-    setLock(lockData);
-  }, [lockData, setLock]);
 
   // 変更あるかどうか
   useEffect(() => {
@@ -350,7 +438,7 @@ const VehicleOrderDetail = ({
       {isLoading && <LoadingOverlay />}
       <form onSubmit={handleSubmit(onSubmit)}>
         <Grid2 container spacing={4} display={'flex'} justifyContent={'end'} mb={1}>
-          {lockData !== null && lockData.addUser !== user?.name && (
+          {lockData && (
             <Grid2 container alignItems={'center'} spacing={2}>
               <Typography>{lockData.addDat && toJapanTimeString(new Date(lockData.addDat))}</Typography>
               <Typography>{lockData.addUser}</Typography>
@@ -358,15 +446,8 @@ const VehicleOrderDetail = ({
             </Grid2>
           )}
           <Grid2 container alignItems={'center'} spacing={1}>
-            {!editable || (lockData !== null && lockData?.addUser !== user?.name) ? (
-              <Typography>閲覧モード</Typography>
-            ) : (
-              <Typography>編集モード</Typography>
-            )}
-            <Button
-              disabled={lockData && lockData?.addUser !== user?.name ? true : false || juchuHeadData.juchuHeadId === 0}
-              onClick={handleEdit}
-            >
+            {!editable ? <Typography>閲覧モード</Typography> : <Typography>編集モード</Typography>}
+            <Button disabled={!!lockData || juchuHead.juchuHeadId === 0} onClick={handleEdit}>
               変更
             </Button>
           </Grid2>
@@ -403,7 +484,7 @@ const VehicleOrderDetail = ({
               {!juchuExpanded && (
                 <Grid2 size={'grow'} alignItems={'center'} display={'flex'}>
                   <Typography marginRight={2}>公演名</Typography>
-                  <Typography>{juchuHeadData.koenNam}</Typography>
+                  <Typography>{juchuHead.koenNam}</Typography>
                 </Grid2>
               )}
             </Grid2>
@@ -418,12 +499,12 @@ const VehicleOrderDetail = ({
                       <Typography marginRight={3} whiteSpace="nowrap">
                         受注番号
                       </Typography>
-                      <TextField value={juchuHeadData.juchuHeadId} disabled sx={{ width: 120 }} />
+                      <TextField value={juchuHead.juchuHeadId} disabled sx={{ width: 120 }} />
                     </Grid2>
                     <Grid2 display="flex" direction="row" alignItems="center">
                       <Typography mr={2}>受注ステータス</Typography>
                       <FormControl size="small" sx={{ width: 120 }}>
-                        <Select value={juchuHeadData.juchuSts} disabled>
+                        <Select value={juchuHead.juchuSts} disabled>
                           <MenuItem value={0}>入力中</MenuItem>
                           <MenuItem value={1}>仮受注</MenuItem>
                           <MenuItem value={2}>処理中</MenuItem>
@@ -440,13 +521,13 @@ const VehicleOrderDetail = ({
                   <Typography marginRight={5} whiteSpace="nowrap">
                     受注日
                   </Typography>
-                  <TextField value={juchuHeadData.juchuDat ? toJapanYMDString(juchuHeadData.juchuDat) : ''} disabled />
+                  <TextField value={juchuHead.juchuDat ? toJapanYMDString(juchuHead.juchuDat) : ''} disabled />
                 </Box>
                 <Box sx={styles.container}>
                   <Typography marginRight={5} whiteSpace="nowrap">
                     入力者
                   </Typography>
-                  <TextField value={juchuHeadData.nyuryokuUser} disabled />
+                  <TextField value={juchuHead.nyuryokuUser} disabled />
                 </Box>
               </Grid2>
               <Grid2>
@@ -454,19 +535,19 @@ const VehicleOrderDetail = ({
                   <Typography marginRight={5} whiteSpace="nowrap">
                     公演名
                   </Typography>
-                  <TextField value={juchuHeadData.koenNam} disabled />
+                  <TextField value={juchuHead.koenNam} disabled />
                 </Box>
                 <Box sx={styles.container}>
                   <Typography marginRight={3} whiteSpace="nowrap">
                     公演場所
                   </Typography>
-                  <TextField value={juchuHeadData.koenbashoNam ? juchuHeadData.koenbashoNam : ''} disabled />
+                  <TextField value={juchuHead.koenbashoNam ? juchuHead.koenbashoNam : ''} disabled />
                 </Box>
                 <Box sx={styles.container}>
                   <Typography marginRight={7} whiteSpace="nowrap">
                     相手
                   </Typography>
-                  <TextField value={juchuHeadData.kokyaku.kokyakuNam} disabled />
+                  <TextField value={juchuHead.kokyaku.kokyakuNam} disabled />
                 </Box>
               </Grid2>
             </Grid2>
@@ -671,11 +752,33 @@ const VehicleOrderDetail = ({
         </DialogTitle>
         <DialogContent>車両がないメモは保存されません</DialogContent>
         <DialogActions>
-          <Button onClick={() => setMemOpen(false)}>戻る</Button>
           <Button
-            onClick={() => {
-              handleSave(getValues());
-              setMemOpen(false);
+            onClick={async () => {
+              if (isProcessing) return;
+              setIsProcessing(true);
+
+              const lockResult = await lock();
+
+              if (lockResult) {
+                setMemOpen(false);
+              }
+              setIsProcessing(false);
+            }}
+          >
+            戻る
+          </Button>
+          <Button
+            onClick={async () => {
+              if (isProcessing) return;
+              setIsProcessing(true);
+
+              const lockResult = await lock();
+
+              if (lockResult) {
+                handleSave(getValues());
+                setMemOpen(false);
+              }
+              setIsProcessing(false);
             }}
           >
             はい
@@ -683,6 +786,19 @@ const VehicleOrderDetail = ({
         </DialogActions>
       </Dialog>
       <IsDirtyAlertDialog open={dirtyOpen} onClick={handleResultDialog} />
+
+      <Dialog open={lockOpen}>
+        <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
+          <WarningIcon color="error" />
+          <Box>編集中</Box>
+        </DialogTitle>
+        <DialogContentText m={2} p={2}>
+          {lockData?.addUser}が編集中です
+        </DialogContentText>
+        <DialogActions>
+          <Button onClick={() => setLockOpen(false)}>確認</Button>
+        </DialogActions>
+      </Dialog>
 
       <Snackbar
         open={snackBarOpen}
