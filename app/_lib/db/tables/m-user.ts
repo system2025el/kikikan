@@ -110,11 +110,13 @@ export const upDateUserDB = async (data: MUserDBValues, connection: PoolClient) 
     .map((key, index) => `"${key}" = $${index + 2}`) // $1はWHERE句で使うため、$2から開始
     .join(', ');
   const query = `
-    UPDATE "${SCHEMA}"."m_user"
+    UPDATE ${SCHEMA}.m_user
     SET ${updSet}
-    WHERE "mail_adr" = $1
+    WHERE mail_adr = $1
     RETURNING *;
   `;
+
+  console.log(query);
 
   const values = [data.mail_adr, ...Object.values(rest)];
   try {
