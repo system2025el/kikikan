@@ -178,6 +178,7 @@ export const updateUser = async (currentEmail: string, data: UsersMasterDialogVa
     await connection.query('BEGIN');
     // マスタ更新する
     await upDateUserDB(updateData, connection);
+    await connection.query('COMMIT');
   } catch (error) {
     console.log('例外が発生', error);
     await connection.query('ROLLBACK');
