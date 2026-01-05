@@ -136,6 +136,7 @@ export const ShukoDetail = (props: {
             setIsProcessing(true);
             router.push('/shuko-list');
           }}
+          disabled={isProcessing}
         >
           <Box display={'flex'} alignItems={'center'}>
             <ArrowLeftIcon fontSize="small" />

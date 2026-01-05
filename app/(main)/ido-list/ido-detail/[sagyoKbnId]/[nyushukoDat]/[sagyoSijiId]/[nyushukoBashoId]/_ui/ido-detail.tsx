@@ -1,6 +1,7 @@
 'use client';
 
 import AddIcon from '@mui/icons-material/Add';
+import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import SaveAsIcon from '@mui/icons-material/SaveAs';
 import WarningIcon from '@mui/icons-material/Warning';
@@ -19,6 +20,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
@@ -44,6 +46,8 @@ export const IdoDetail = (props: {
 
   // user情報
   const user = useUserStore((state) => state.user);
+
+  const router = useRouter();
 
   // 出発、到着フラグ
   const [fixFlag, setFixFlag] = useState(props.fixFlag);
@@ -75,7 +79,7 @@ export const IdoDetail = (props: {
   const [snackBarMessage, setSnackBarMessage] = useState('');
 
   // context
-  const { setIsDirty } = useDirty();
+  const { setIsDirty, requestNavigation, isPending } = useDirty();
   // ブラウザバック、F5、×ボタンでページを離れた際のhook
   useUnsavedChangesWarning(editFlag);
 
@@ -149,6 +153,7 @@ export const IdoDetail = (props: {
       setSnackBarMessage(`${message}しました`);
       setSnackBarOpen(true);
       setIsProcessing(false);
+      router.push('/ido-list');
     } else {
       setSnackBarMessage(`${message}に失敗しました`);
       setSnackBarOpen(true);
@@ -176,6 +181,7 @@ export const IdoDetail = (props: {
       setSnackBarMessage('出発解除しました');
       setSnackBarOpen(true);
       setIsProcessing(false);
+      router.push('/ido-list');
     } else {
       setSnackBarMessage('出発解除に失敗しました');
       setSnackBarOpen(true);
@@ -278,10 +284,22 @@ export const IdoDetail = (props: {
     setIdoDetailList((prev) => [...prev, ...selectIdoEqpt]);
   };
 
+  // 移動検索ボタン押下
+  const handleBack = () => {
+    if (isPending) return;
+    const path = '/ido-list';
+    requestNavigation(path);
+  };
+
   return (
     <Box>
       <Box display={'flex'} justifyContent={'end'} mb={1}>
-        <BackButton label={'戻る'} />
+        <Button onClick={handleBack} disabled={isPending}>
+          <Box display={'flex'} alignItems={'center'}>
+            <ArrowLeftIcon fontSize="small" />
+            移動検索
+          </Box>
+        </Button>
       </Box>
       <Paper variant="outlined">
         <Box display={'flex'} justifyContent={'space-between'} alignItems="center" px={2}>
