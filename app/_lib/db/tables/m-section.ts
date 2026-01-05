@@ -1,6 +1,5 @@
 'use server';
 
-import { toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { SectionsMasterDialogValues } from '@/app/(main)/(masters)/sections-master/_lib/types';
 
 import pool from '../postgres';
@@ -82,7 +81,7 @@ export const insertNewSection = async (data: SectionsMasterDialogValues, user: s
       $4, $5, $6
     );
   `;
-  const date = toJapanTimeStampString();
+  const date = new Date().toISOString();
   const values = [data.sectionNam, data.sectionNamShort, Number(data.delFlg), data.mem, date, user];
 
   try {

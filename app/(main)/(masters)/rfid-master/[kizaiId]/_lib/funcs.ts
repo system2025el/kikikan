@@ -1,7 +1,6 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { connection } from 'next/server';
 
 import pool, { refreshVRfid } from '@/app/_lib/db/postgres';
 import { SCHEMA, supabase } from '@/app/_lib/db/supabase';
@@ -12,10 +11,9 @@ import { insertNewRfidSts, updateRfidTagStsDB } from '@/app/_lib/db/tables/t-rfi
 import { selectOneRfid, selectRfidsOfTheKizai } from '@/app/_lib/db/tables/v-rfid';
 import { MRfidDBValues } from '@/app/_lib/db/types/m-rfid-type';
 import { RfidStatusResultValues } from '@/app/_lib/db/types/t-rfid-status-result-type';
-import { toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { FAKE_NEW_ID } from '../../../_lib/constants';
-import { fakeToNull, nullToFake } from '../../../_lib/value-converters';
+import { nullToFake } from '../../../_lib/value-converters';
 import { emptyRfid } from './datas';
 import { RfidsMasterDialogValues, RfidsMasterTableValues } from './types';
 
@@ -107,6 +105,7 @@ export const getChosenRfid = async (id: string) => {
  * @param data フォームで取得したRFID情報
  */
 export const addNewRfid = async (data: RfidsMasterDialogValues, kizaiId: number, user: string) => {
+  const now = new Date().toISOString();
   console.log('RFIDマスタを追加する');
   const insertData: MRfidDBValues = {
     kizai_id: kizaiId,
@@ -114,14 +113,14 @@ export const addNewRfid = async (data: RfidsMasterDialogValues, kizaiId: number,
     el_num: data.elNum,
     mem: data.mem,
     del_flg: 0,
-    add_dat: toJapanTimeStampString(),
+    add_dat: now,
     add_user: user,
   };
   const insertStsData: RfidStatusResultValues = {
     rfid_tag_id: data.tagId,
     shozoku_id: data.shozokuId,
     rfid_kizai_sts: data.rfidKizaiSts,
-    upd_dat: toJapanTimeStampString(),
+    upd_dat: now,
     upd_user: user,
   };
   const connection = await pool.connect();
@@ -159,7 +158,7 @@ export const updateRfid = async (
   user: string
 ) => {
   /** 現在時刻 */
-  const now = toJapanTimeStampString();
+  const now = new Date().toISOString();
   const masterChanged =
     JSON.stringify({ tagId: current.tagId, elNum: current.elNum, mem: current.mem, delFlg: current.delFlg }) !==
       JSON.stringify({

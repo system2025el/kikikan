@@ -1,13 +1,11 @@
 'use server';
 
-import { toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 import { BumonsMasterDialogValues } from '@/app/(main)/(masters)/bumons-master/_lib/types';
 
 import pool from '../postgres';
 import { SCHEMA, supabase } from '../supabase';
 import { MBumonDBValues } from '../types/m-bumon-type';
-import { MDaibumonDBValues } from '../types/m-daibumon-type';
 
 /**
  * DBから有効な部門を取得する関数
@@ -91,7 +89,7 @@ export const insertNewBumon = async (data: BumonsMasterDialogValues, user: strin
     );
   `;
 
-  const date = toJapanTimeStampString();
+  const date = new Date().toISOString();
   const values = [
     data.bumonNam,
     Number(data.delFlg),

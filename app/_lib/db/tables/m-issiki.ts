@@ -2,12 +2,8 @@
 
 import { PoolClient } from 'pg';
 
-import { toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
-import { IsshikisMasterDialogValues } from '@/app/(main)/(masters)/isshiki-master/_lib/types';
-
 import pool from '../postgres';
 import { SCHEMA, supabase } from '../supabase';
-import { MIsshikiSetDBValues } from '../types/m-issiki-set-type';
 import { MIsshikiDBValues } from '../types/m-issiki-type';
 
 /**

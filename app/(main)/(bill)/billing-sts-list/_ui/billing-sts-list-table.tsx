@@ -2,8 +2,6 @@
 
 import { KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
 import AddIcon from '@mui/icons-material/Add';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import WarningIcon from '@mui/icons-material/Warning';
 import {
   Box,
   Button,
@@ -12,7 +10,6 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogContentText,
   DialogTitle,
   Divider,
   Grid2,
@@ -31,7 +28,7 @@ import {
 import { useMemo, useState } from 'react';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
-import { toJapanTimeStampString, toJapanTimeString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
 import { FormDateX } from '@/app/(main)/_ui/date';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
@@ -42,7 +39,7 @@ import { LightTooltipWithText } from '@/app/(main)/(masters)/_ui/tables';
 
 import { CreateBillDialog } from '../../bill-list/_ui/create-bill-dialog';
 import { changeSeikyuDat } from '../_lib/funcs';
-import { BillingStsSearchValues, BillingStsTableValues } from '../_lib/types';
+import { BillingStsTableValues } from '../_lib/types';
 
 /**
  * 受注請求助教一覧テーブル
@@ -198,8 +195,6 @@ const BillingStsRow = ({ juchu, refetch }: { juchu: BillingStsTableValues; refet
   }>({
     juchuId: FAKE_NEW_ID,
     kziHeadId: FAKE_NEW_ID,
-    // shukoDat: new Date(toJapanTimeStampString()),
-    // nyukoDat: new Date(toJapanTimeStampString()),
     shukoDat: new Date(),
     nyukoDat: new Date(),
     currentDat: null,

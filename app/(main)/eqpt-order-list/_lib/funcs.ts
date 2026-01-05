@@ -6,7 +6,7 @@ import utc from 'dayjs/plugin/utc';
 
 import { selectFilteredKizaiHead } from '@/app/_lib/db/tables/v-juchu-kizai-head-lst';
 
-import { toJapanTimeStampString, toJapanTimeString, toJapanYMDString } from '../../_lib/date-conversion';
+import { toJapanTimeString } from '../../_lib/date-conversion';
 import { FAKE_NEW_ID } from '../../(masters)/_lib/constants';
 import { EqptOrderListTableValues, EqptOrderSearchValues } from './types';
 

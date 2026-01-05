@@ -1,15 +1,7 @@
 'use server';
 
-import dayjs from 'dayjs';
-
 import pool from '@/app/_lib/db/postgres';
-import { supabase } from '@/app/_lib/db/supabase';
-import {
-  toJapanTimeStampString,
-  toJapanTimeString,
-  toJapanYMDString,
-  toTimeStampString,
-} from '@/app/(main)/_lib/date-conversion';
+import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 
 export const getTimeTest = async (data: {
   id: number | null;

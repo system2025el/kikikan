@@ -2,7 +2,6 @@
 
 import { PoolClient } from 'pg';
 
-import { toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 import { fakeToNull } from '@/app/(main)/(masters)/_lib/value-converters';
 import { EqptsMasterDialogValues } from '@/app/(main)/(masters)/eqpt-master/_lib/types';
@@ -43,7 +42,7 @@ export const insertNewEqpt = async (data: EqptsMasterDialogValues, connection: P
       $10, $11, $12, $13, $14, $15, $16, $17, $18, $19::varchar -- , $20, $21, $22, $23
     );
   `;
-  const date = toJapanTimeStampString();
+  const date = new Date().toISOString();
   const values = [
     data.kizaiNam,
     Number(data.delFlg),

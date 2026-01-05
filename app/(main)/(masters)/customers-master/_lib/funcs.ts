@@ -8,7 +8,6 @@ import {
   selectOneCustomer,
   upDateCustomerDB,
 } from '@/app/_lib/db/tables/m-kokyaku';
-import { toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { FAKE_NEW_ID } from '../../_lib/constants';
 import { emptyCustomer } from './datas';
@@ -178,7 +177,7 @@ export const addNewCustomer = async (data: CustomersMasterDialogValues, user: st
  * @param id 更新する顧客マスタID
  */
 export const updateCustomer = async (rawData: CustomersMasterDialogValues, id: number, user: string) => {
-  const date = toJapanTimeStampString();
+  const date = new Date().toISOString();
   const updateData = {
     kokyaku_id: id,
     kokyaku_nam: rawData.kokyakuNam,

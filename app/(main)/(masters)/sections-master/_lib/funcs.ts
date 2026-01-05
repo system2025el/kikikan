@@ -9,8 +9,6 @@ import {
   selectOneSection,
   upDateSectionDB,
 } from '@/app/_lib/db/tables/m-section';
-import { toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
-import { SelectTypes } from '@/app/(main)/_ui/form-box';
 
 import { emptySection } from './datas';
 import { SectionsMasterDialogValues, SectionsMasterTableValues } from './types';
@@ -138,7 +136,7 @@ export const addNewSection = async (data: SectionsMasterDialogValues, user: stri
  * @param id 更新する課マスタID
  */
 export const updateSection = async (rawData: SectionsMasterDialogValues, id: number, user: string) => {
-  const date = toJapanTimeStampString();
+  const date = new Date().toISOString();
   const updateDate = {
     section_id: id,
     section_nam: rawData.sectionNam,
