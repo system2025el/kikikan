@@ -81,7 +81,7 @@ export const ShukoEqptDetail = (props: {
   });
 
   // context
-  const { setIsDirty, requestNavigation } = useDirty();
+  const { setIsDirty, requestNavigation, isPending } = useDirty();
   // ブラウザバック、F5、×ボタンでページを離れた際のhook
   useUnsavedChangesWarning(isDirty);
 
@@ -130,6 +130,7 @@ export const ShukoEqptDetail = (props: {
 
   // 出庫明細ボタン押下
   const handleBack = () => {
+    if (isPending) return;
     const path = `/shuko-list/shuko-detail/${shukoEqptDetailData.juchuHeadId}/${shukoEqptDetailData.juchuKizaiHeadKbnId}/${shukoEqptDetailData.nyushukoBashoId}/${new Date(shukoEqptDetailData.nyushukoDat).toISOString()}/${shukoEqptDetailData.sagyoKbnId}`;
     requestNavigation(path);
   };
@@ -183,7 +184,7 @@ export const ShukoEqptDetail = (props: {
     <Box>
       <Grid2 container justifyContent={'end'} alignItems={'center'} spacing={2} mb={1}>
         {fixFlag && <Typography>出発済</Typography>}
-        <Button onClick={handleBack}>
+        <Button onClick={handleBack} disabled={isPending}>
           <Box display={'flex'} alignItems={'center'}>
             <ArrowLeftIcon fontSize="small" />
             出庫明細
@@ -239,7 +240,7 @@ export const ShukoEqptDetail = (props: {
                 render={({ field }) => (
                   <TextField
                     {...field}
-                    type="number"
+                    type="text"
                     onChange={(e) => {
                       if (/^\d*$/.test(e.target.value)) {
                         field.onChange(Number(e.target.value));
@@ -256,6 +257,7 @@ export const ShukoEqptDetail = (props: {
                       },
                     }}
                     disabled={fixFlag}
+                    onFocus={(e) => e.target.select()}
                   />
                 )}
               />

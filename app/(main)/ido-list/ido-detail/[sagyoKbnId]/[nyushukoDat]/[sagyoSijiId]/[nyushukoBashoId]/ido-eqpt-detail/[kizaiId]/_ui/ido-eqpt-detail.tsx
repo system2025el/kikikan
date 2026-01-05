@@ -1,5 +1,6 @@
 'use client';
 
+import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import SaveAsIcon from '@mui/icons-material/SaveAs';
 import WarningIcon from '@mui/icons-material/Warning';
@@ -18,11 +19,14 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
+import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
 import { BackButton } from '@/app/(main)/_ui/buttons';
+import { useDirty } from '@/app/(main)/_ui/dirty-context';
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { delIdoResult, updIdoResultAdjQty } from '../_lib/funcs';
@@ -38,6 +42,8 @@ export const IdoEqptDetail = (props: {
 
   // user情報
   const user = useUserStore((state) => state.user);
+
+  const router = useRouter();
 
   // ローディング
   const [isLoading, setIsLoading] = useState(false);
@@ -70,6 +76,15 @@ export const IdoEqptDetail = (props: {
     },
   });
 
+  // context
+  const { setIsDirty, requestNavigation, isPending } = useDirty();
+  // ブラウザバック、F5、×ボタンでページを離れた際のhook
+  useUnsavedChangesWarning(isDirty);
+
+  useEffect(() => {
+    setIsDirty(isDirty);
+  }, [isDirty, setIsDirty]);
+
   /**
    * 棚番作成
    * @param a bldCod
@@ -97,6 +112,9 @@ export const IdoEqptDetail = (props: {
         setSnackBarOpen(true);
         reset(data);
         setIsProcessing(false);
+        router.push(
+          `/ido-list/ido-detail/${idoDenDetailData.sagyoKbnId}/${idoDenDetailData.sagyoDenDat}/${idoDenDetailData.sagyoSijiId}/${idoDenDetailData.sagyoId}`
+        );
       } else {
         setSnackBarMessage('保存に失敗しました');
         setSnackBarOpen(true);
@@ -142,11 +160,23 @@ export const IdoEqptDetail = (props: {
     }
   };
 
+  // 移動明細ボタン押下
+  const handleBack = () => {
+    if (isPending) return;
+    const path = `/ido-list/ido-detail/${idoDenDetailData.sagyoKbnId}/${idoDenDetailData.sagyoDenDat}/${idoDenDetailData.sagyoSijiId}/${idoDenDetailData.sagyoId}`;
+    requestNavigation(path);
+  };
+
   return (
     <Box>
       <Grid2 container justifyContent={'end'} alignItems={'center'} spacing={2} mb={1}>
         {fixFlag && <Typography>{idoDenDetailData.sagyoKbnId === 40 ? '出発済' : '到着済'}</Typography>}
-        <BackButton label={'戻る'} />
+        <Button onClick={handleBack} disabled={isPending}>
+          <Box display={'flex'} alignItems={'center'}>
+            <ArrowLeftIcon fontSize="small" />
+            移動明細
+          </Box>
+        </Button>
       </Grid2>
       <Paper variant="outlined">
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -194,7 +224,7 @@ export const IdoEqptDetail = (props: {
                 render={({ field }) => (
                   <TextField
                     {...field}
-                    type="number"
+                    type="text"
                     onChange={(e) => {
                       if (/^\d*$/.test(e.target.value)) {
                         field.onChange(Number(e.target.value));
@@ -211,6 +241,7 @@ export const IdoEqptDetail = (props: {
                       },
                     }}
                     disabled={fixFlag}
+                    onFocus={(e) => e.target.select()}
                   />
                 )}
               />

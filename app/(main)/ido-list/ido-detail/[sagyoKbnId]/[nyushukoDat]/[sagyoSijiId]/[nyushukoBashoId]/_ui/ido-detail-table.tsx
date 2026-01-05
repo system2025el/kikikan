@@ -41,11 +41,11 @@ export const ShukoIdoDenTable = (props: {
    * 機材名押下時
    * @param kizaiId 機材id
    */
-  const handleClick = async (kizaiId: number) => {
+  const handleClick = (kizaiId: number) => {
     if (isProcessing) return;
 
     setIsProcessing(true);
-    await requestNavigation(`${path}/ido-eqpt-detail/${kizaiId}`);
+    requestNavigation(`${path}/ido-eqpt-detail/${kizaiId}`);
   };
 
   return (
@@ -160,6 +160,7 @@ export const ShukoIdoDenTable = (props: {
                         inputMode: 'numeric',
                       },
                     }}
+                    onFocus={(e) => e.target.select()}
                   />
                 </TableCell>
                 <TableCell align="right">{row.resultQty}</TableCell>

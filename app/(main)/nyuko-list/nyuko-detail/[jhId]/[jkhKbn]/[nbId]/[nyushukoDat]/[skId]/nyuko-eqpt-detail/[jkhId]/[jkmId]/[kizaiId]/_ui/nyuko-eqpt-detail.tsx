@@ -80,7 +80,7 @@ export const NyukoEqptDetail = (props: {
   });
 
   // context
-  const { setIsDirty, requestNavigation } = useDirty();
+  const { setIsDirty, requestNavigation, isPending } = useDirty();
   // ブラウザバック、F5、×ボタンでページを離れた際のhook
   useUnsavedChangesWarning(isDirty);
 
@@ -114,6 +114,7 @@ export const NyukoEqptDetail = (props: {
 
   // 入庫明細ボタン押下
   const handleBack = () => {
+    if (isPending) return;
     const path = `/nyuko-list/nyuko-detail/${nyukoEqptDetailData.juchuHeadId}/${nyukoEqptDetailData.juchuKizaiHeadKbnId}/${nyukoEqptDetailData.nyushukoBashoId}/${new Date(nyukoEqptDetailData.nyushukoDat).toISOString()}/${nyukoEqptDetailData.sagyoKbnId}`;
     requestNavigation(path);
   };
@@ -167,7 +168,7 @@ export const NyukoEqptDetail = (props: {
     <Box>
       <Grid2 container justifyContent={'end'} alignItems={'center'} spacing={2} mb={1}>
         {fixFlag && <Typography>到着済</Typography>}
-        <Button onClick={handleBack}>
+        <Button onClick={handleBack} disabled={isPending}>
           <Box display={'flex'} alignItems={'center'}>
             <ArrowLeftIcon fontSize="small" />
             入庫明細
@@ -216,7 +217,7 @@ export const NyukoEqptDetail = (props: {
                 render={({ field }) => (
                   <TextField
                     {...field}
-                    type="number"
+                    type="text"
                     onChange={(e) => {
                       if (/^\d*$/.test(e.target.value)) {
                         field.onChange(Number(e.target.value));
@@ -233,6 +234,7 @@ export const NyukoEqptDetail = (props: {
                       },
                     }}
                     disabled={fixFlag}
+                    onFocus={(e) => e.target.select()}
                   />
                 )}
               />
