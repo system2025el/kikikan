@@ -158,7 +158,7 @@ export const LocationsMaster = () => {
                   ...l,
                   id: l.locId,
                   name: l.locNam,
-                  address: `${l.adrShozai}${l.adrTatemono}${l.adrSonota}`,
+                  address: `${l.adrShozai ?? ''}${l.adrTatemono ?? ''}${l.adrSonota ?? ''}`,
                 }))}
                 handleOpenDialog={handleOpenDialog}
                 page={page}
