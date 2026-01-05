@@ -3,7 +3,6 @@
 import { revalidatePath } from 'next/cache';
 
 import pool from '@/app/_lib/db/postgres';
-import { SCHEMA, supabase } from '@/app/_lib/db/supabase';
 import {
   insertNewIsshiki,
   selectFilteredIsshikis,
@@ -12,10 +11,9 @@ import {
   updIsshikiDelFlgDB,
 } from '@/app/_lib/db/tables/m-issiki';
 import { delIsshikiSet, insertNewIsshikiSetList, updIsshikiSetDB } from '@/app/_lib/db/tables/m-issiki-set';
-import { checkExIsshiki, selectActiveEqpts, selectActiveEqptsForIsshiki } from '@/app/_lib/db/tables/m-kizai';
+import { checkExIsshiki, selectActiveEqpts } from '@/app/_lib/db/tables/m-kizai';
 import { MIsshikiSetDBValues } from '@/app/_lib/db/types/m-issiki-set-type';
 import { MIsshikiDBValues } from '@/app/_lib/db/types/m-issiki-type';
-import { toJapanTimeStampString } from '@/app/(main)/_lib/date-conversion';
 import { EqptSelection } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
 
 import { FAKE_NEW_ID } from '../../_lib/constants';

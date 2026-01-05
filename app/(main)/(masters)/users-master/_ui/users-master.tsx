@@ -202,7 +202,9 @@ export const UsersMaster = () => {
                         {l.shainCod ?? ''}
                       </TableCell>
                       <TableCell sx={{ bgcolor: isDeleted ? grey[300] : undefined, whiteSpace: 'nowrap' }}>
-                        {l.mem}
+                        <LightTooltipWithText variant={'body2'} maxWidth={300}>
+                          {l.mem}
+                        </LightTooltipWithText>
                       </TableCell>
                       <TableCell sx={{ bgcolor: isDeleted ? grey[300] : undefined, whiteSpace: 'nowrap' }}>
                         {l.lastLogin}

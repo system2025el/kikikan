@@ -1,6 +1,5 @@
 'use server';
 
-import { toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { DaibumonsMasterDialogValues } from '@/app/(main)/(masters)/daibumons-master/_lib/types';
 
 import pool from '../postgres';
@@ -82,7 +81,7 @@ export const insertNewDaibumon = async (data: DaibumonsMasterDialogValues, user:
             $3, $4, $5
           );
         `;
-  const date = toJapanTimeStampString();
+  const date = new Date().toISOString();
   const values = [data.daibumonNam, Number(data.delFlg), data.mem, date, user];
 
   try {

@@ -11,7 +11,7 @@ import { insertQuotMeisaiHead } from '@/app/_lib/db/tables/t-mitu-meisai-head';
 import { MituHead } from '@/app/_lib/db/types/t-mitu-head-types';
 import { MituMeisaiHead } from '@/app/_lib/db/types/t-mitu-meisai-head-type';
 import { MituMeisai } from '@/app/_lib/db/types/t-mitu-meisai-type';
-import { toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 
 import { QuotHeadValues } from '../../_lib/types';
@@ -43,6 +43,8 @@ export const addQuot = async (data: QuotHeadValues, user: string): Promise<numbe
       mituMeisaiHeadId: l.mituMeisaiHeadId,
     }))
   );
+
+  const now = new Date().toISOString();
 
   try {
     console.log('新規START');
@@ -82,7 +84,7 @@ export const addQuot = async (data: QuotHeadValues, user: string): Promise<numbe
       zei_rat: data.zeiRat,
       gokei_mei: data.gokeiMei,
       gokei_amt: data.gokeiAmt,
-      add_dat: toJapanTimeStampString(),
+      add_dat: now,
       add_user: user,
       kizai_chukei_mei: data.kizaiChukeiMei,
     };
@@ -101,7 +103,7 @@ export const addQuot = async (data: QuotHeadValues, user: string): Promise<numbe
       biko_1: l.biko1,
       biko_2: l.biko2,
       biko_3: l.biko3,
-      add_dat: toJapanTimeStampString(),
+      add_dat: now,
       add_user: user,
     }));
     // 明細
@@ -115,7 +117,7 @@ export const addQuot = async (data: QuotHeadValues, user: string): Promise<numbe
       meisai_tanka_amt: l.tankaAmt ?? 0,
       shokei_amt: l.shokeiAmt,
       dsp_ord_num: index + 1,
-      add_dat: toJapanTimeStampString(),
+      add_dat: now,
       add_user: user,
     }));
     if (quotHead) {

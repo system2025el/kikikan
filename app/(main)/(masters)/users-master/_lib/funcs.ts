@@ -14,7 +14,7 @@ import {
 } from '@/app/_lib/db/tables/m-user';
 import { MUserDBValues } from '@/app/_lib/db/types/m-use-type';
 import { getUrl } from '@/app/_lib/url';
-import { toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { emptyUser } from './datas';
 import { UsersMasterDialogValues, UsersMasterTableValues } from './types';
@@ -109,7 +109,7 @@ export const addNewUser = async (data: UsersMasterDialogValues, user: string) =>
     permission: permissionNum === 255 ? 65535 : permissionNum,
     del_flg: Number(data.delFlg),
     mem: data.mem ?? null,
-    add_dat: toJapanTimeStampString(),
+    add_dat: new Date().toISOString(),
     add_user: user,
   };
   const connection = await pool.connect();
@@ -156,7 +156,7 @@ export const addNewUser = async (data: UsersMasterDialogValues, user: string) =>
  * @param id 更新する担当者マスタID
  */
 export const updateUser = async (currentEmail: string, data: UsersMasterDialogValues, user: string) => {
-  const date = toJapanTimeStampString();
+  const date = new Date().toISOString();
   // permissionを10進数に変換する
   const p = data.psermission;
   const permissionNum = parseInt(p.juchu + p.nyushuko + p.masters + p.ht + p.loginSetting, 2);
@@ -195,7 +195,7 @@ export const deleteUsers = async (mailAdr: string, user: string) => {
   const delData = {
     mail_adr: mailAdr,
     del_flg: 1,
-    upd_dat: toJapanTimeStampString(),
+    upd_dat: new Date().toISOString(),
     upd_user: user,
   };
 
@@ -236,7 +236,7 @@ export const restoreUsers = async (mailAdr: string, user: string) => {
   const delData = {
     mail_adr: mailAdr,
     del_flg: 0,
-    upd_dat: toJapanTimeStampString(),
+    upd_dat: new Date().toISOString(),
     upd_user: user,
   };
 
@@ -274,7 +274,7 @@ export const restoreUsersAndShainCod = async (mailAdr: string, shainCod: string 
   const delData = {
     mail_adr: mailAdr,
     del_flg: 0,
-    upd_dat: toJapanTimeStampString(),
+    upd_dat: new Date().toISOString(),
     upd_user: user,
     shain_cod: shainCod,
   };
