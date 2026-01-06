@@ -19,7 +19,6 @@ import { useRouter } from 'next/navigation';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { dispColors } from '../../_lib/colors';
-import { toJapanTimeString, toJapanYMDString } from '../../_lib/date-conversion';
 import { Loading } from '../../_ui/loading';
 import { MuiTablePagination } from '../../_ui/table-pagination';
 import { ROWS_PER_MASTER_TABLE_PAGE } from '../../(masters)/_lib/constants';

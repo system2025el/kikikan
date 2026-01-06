@@ -11,7 +11,6 @@ import { deleteNyushukoResult } from '@/app/_lib/db/tables/t-nyushuko-result';
 import { selectNyushukoDetailOne } from '@/app/_lib/db/tables/v-nyushuko-den2-lst';
 import { selectNyushukoEqptDetail } from '@/app/_lib/db/tables/v-nyushuko-den2-result';
 import { NyushukoDen } from '@/app/_lib/db/types/t-nyushuko-den-type';
-import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { NyukoEqptDetailValues } from './types';
 import { NyukoEqptDetailTableValues } from './types';
@@ -186,7 +185,7 @@ export const delNyukoResult = async (
       sagyo_id: nyukoEqptDetailData.nyushukoBashoId,
       kizai_id: nyukoEqptDetailData.kizaiId,
       result_qty: nyukoEqptDetailData.resultQty - deleteData.length,
-      upd_dat: toJapanTimeString(),
+      upd_dat: new Date().toISOString(),
       upd_user: userNam,
     };
 
@@ -227,7 +226,7 @@ export const updNyukoResultAdjQty = async (
     sagyo_id: nyukoEqptDetailData.nyushukoBashoId,
     kizai_id: nyukoEqptDetailData.kizaiId,
     result_adj_qty: resultAdjQty,
-    upd_dat: toJapanTimeString(),
+    upd_dat: new Date().toISOString(),
     upd_user: userNam,
   };
   try {

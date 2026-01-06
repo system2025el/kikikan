@@ -10,7 +10,6 @@ import { deleteIdoResult } from '@/app/_lib/db/tables/t-ido-result';
 import { selectIdoDenOne } from '@/app/_lib/db/tables/v-ido-den3-lst';
 import { selectIdoEqptDetail } from '@/app/_lib/db/tables/v-ido-den3-result';
 import { IdoDen } from '@/app/_lib/db/types/t-ido-den-type';
-import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { IdoEqptDetailTableValues, IdoEqptDetailValues } from './types';
 
@@ -124,7 +123,7 @@ export const delIdoResult = async (idoDenDetailData: IdoEqptDetailValues, delete
       sagyo_id: idoDenDetailData.sagyoId,
       sagyo_kbn_id: idoDenDetailData.sagyoKbnId,
       sagyo_siji_id: idoDenDetailData.sagyoSijiId,
-      upd_dat: toJapanTimeString(),
+      upd_dat: new Date().toISOString(),
       upd_user: userNam,
     };
 
@@ -163,7 +162,7 @@ export const updIdoResultAdjQty = async (
     sagyo_id: idoDenDetailData.sagyoId,
     sagyo_kbn_id: idoDenDetailData.sagyoKbnId,
     sagyo_siji_id: idoDenDetailData.sagyoSijiId,
-    upd_dat: toJapanTimeString(),
+    upd_dat: new Date().toISOString(),
     upd_user: userNam,
   };
 

@@ -2,7 +2,6 @@
 
 import { PoolClient } from 'pg';
 
-import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { UsersMasterDialogValues } from '@/app/(main)/(masters)/users-master/_lib/types';
 
 import pool from '../postgres';

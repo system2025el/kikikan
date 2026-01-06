@@ -43,7 +43,6 @@ export const NyukoListTable = (props: {
 
     setIsProcessing(true);
     router.push(
-      // `nyuko-list/nyuko-detail/${row.juchuHeadId}/${row.juchuKizaiHeadKbn}/${row.nyushukoBashoId}/${toJapanTimeString(row.nyushukoDat, '-')}/30`
       `nyuko-list/nyuko-detail/${row.juchuHeadId}/${row.juchuKizaiHeadKbn}/${row.nyushukoBashoId}/${new Date(row.nyushukoDat).toISOString()}/30`
     );
   };
