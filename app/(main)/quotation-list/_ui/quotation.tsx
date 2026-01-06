@@ -24,8 +24,7 @@ import {
   Typography,
 } from '@mui/material';
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { flushSync } from 'react-dom';
+import { useEffect, useMemo, useState } from 'react';
 import { Controller, FormProvider, useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
@@ -38,7 +37,6 @@ import { LoadingOverlay } from '@/app/(main)/_ui/loading';
 import { addLock, delLock, getLock } from '../../_lib/funcs';
 import { useUnsavedChangesWarning } from '../../_lib/hook';
 import { LockValues } from '../../_lib/types';
-import { BackButton } from '../../_ui/buttons';
 import { IsDirtyAlertDialog, useDirty } from '../../_ui/dirty-context';
 import { getCustomerSelection } from '../../(masters)/_lib/funcs';
 import { getMituStsSelection, getUsersSelection } from '../_lib/funcs';
@@ -654,6 +652,9 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
                           onChange={(_, value) => {
                             const label = typeof value === 'string' ? value : (value?.label ?? '');
                             field.onChange(label);
+                            if (value && typeof value !== 'string') {
+                              setValue('kokyakuId', Number(value.id), { shouldDirty: false });
+                            }
                           }}
                           freeSolo
                           autoSelect

@@ -146,6 +146,7 @@ export const QuotHeadSchema = z.object({
     .string()
     .max(50, { message: validationMessages.maxStringLength(50) })
     .nullish(),
+  kokyakuId: z.number().nullish(),
   nyuryokuUser: z
     .string()
     .max(20, { message: validationMessages.maxStringLength(20) })
