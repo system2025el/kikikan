@@ -16,7 +16,7 @@ import { MUserDBValues } from '@/app/_lib/db/types/m-use-type';
 import { getUrl } from '@/app/_lib/url';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
-import { emptyUser, htRadio, juchuRadio, loginSettingRadio, mastersRadio, nyushukoRadio } from './datas';
+import { emptyUser, htRadio, juchuRadio, loginSettingRadio, mastersRadio, nyushukoRadio, permission } from './datas';
 import { UsersMasterDialogValues, UsersMasterTableValues } from './types';
 
 /**
@@ -84,11 +84,11 @@ export const getChosenUser = async (mailAdr: string) => {
       //         loginSetting: biString.slice(7, 8),
       //       },
       psermission: {
-        juchu: rows[0].permission & juchuRadio[2].id,
-        nyushuko: rows[0].permission & nyushukoRadio[2].id,
-        masters: rows[0].permission & mastersRadio[2].id,
-        ht: rows[0].permission & htRadio[1].id,
-        loginSetting: rows[0].permission & loginSettingRadio[1].id,
+        juchu: rows[0].permission & permission.juchu_full,
+        nyushuko: rows[0].permission & permission.nyushuko_full,
+        masters: rows[0].permission & permission.mst_full,
+        ht: rows[0].permission & permission.ht,
+        loginSetting: rows[0].permission & permission.login,
       },
       mem: rows[0].mem,
       lastLoginAt: !rows[0].last_sign_in_at ? null : toJapanTimeString(rows[0].last_sign_in_at),
@@ -109,12 +109,12 @@ export const addNewUser = async (data: UsersMasterDialogValues, user: string) =>
   console.log(data.tantouNam);
   const p = data.psermission;
   //const permissionNum = parseInt(p.juchu + p.nyushuko + p.masters + p.ht + p.loginSetting, 2);
-  const permissionNum = p.juchu + p.nyushuko + p.masters + p.ht + p.loginSetting;
+  const permissionNum = p.juchu | p.nyushuko | p.masters | p.ht | p.loginSetting;
   const insertData: MUserDBValues = {
     user_nam: data.tantouNam,
     shain_cod: data.shainCod ?? null,
     mail_adr: data.mailAdr,
-    permission: permissionNum === 255 ? 65535 : permissionNum,
+    permission: permissionNum,
     del_flg: Number(data.delFlg),
     mem: data.mem ?? null,
     add_dat: new Date().toISOString(),
@@ -168,14 +168,14 @@ export const updateUser = async (currentEmail: string, data: UsersMasterDialogVa
   // permissionを10進数に変換する
   const p = data.psermission;
   //const permissionNum = parseInt(p.juchu + p.nyushuko + p.masters + p.ht + p.loginSetting , 2);
-  const permissionNum = p.juchu + p.nyushuko + p.masters + p.ht + p.loginSetting;
+  const permissionNum = p.juchu | p.nyushuko | p.masters | p.ht | p.loginSetting;
 
   // 更新データ
   const updateData: MUserDBValues = {
     user_nam: data.tantouNam,
     shain_cod: data.shainCod ?? null,
     mail_adr: currentEmail,
-    permission: permissionNum === 255 ? 65535 : permissionNum,
+    permission: permissionNum,
     del_flg: Number(data.delFlg),
     mem: data.mem ?? null,
     upd_dat: date,

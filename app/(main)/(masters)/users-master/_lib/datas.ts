@@ -65,30 +65,46 @@ export const radioPair = [
   { id: '1', label: '参照更新' },
 ];
 
+export const permission = {
+  none: 0,
+  juchu_ref: 1,
+  juchu_upd: 2,
+  juchu_full: 1 | 2,
+  nyushuko_ref: 4,
+  nyushuko_upd: 8,
+  nyushuko_full: 4 | 8,
+  mst_ref: 16,
+  mst_upd: 32,
+  mst_full: 16 | 32,
+  ht: 64,
+  login: 128,
+  system: 65535,
+} as const;
+
 export const juchuRadio = [
-  { id: 0, label: '無し' },
-  { id: 1, label: '参照のみ' },
-  { id: 3, label: '参照更新' },
+  { id: permission.none, label: '無し' },
+  { id: permission.juchu_ref, label: '参照のみ' },
+  { id: permission.juchu_full, label: '参照更新' },
 ];
 
 export const nyushukoRadio = [
-  { id: 0, label: '無し' },
-  { id: 4, label: '参照のみ' },
-  { id: 12, label: '参照更新' },
+  { id: permission.none, label: '無し' },
+  { id: permission.nyushuko_ref, label: '参照のみ' },
+  { id: permission.nyushuko_full, label: '参照更新' },
 ];
 
 export const mastersRadio = [
-  { id: 0, label: '無し' },
-  { id: 16, label: '参照のみ' },
-  { id: 48, label: '参照更新' },
+  { id: permission.none, label: '無し' },
+  { id: permission.mst_ref, label: '参照のみ' },
+  { id: permission.mst_full, label: '参照更新' },
 ];
 
 export const htRadio = [
-  { id: 0, label: '無し' },
-  { id: 64, label: '参照更新' },
+  { id: permission.none, label: '無し' },
+  { id: permission.ht, label: '参照更新' },
 ];
 
 export const loginSettingRadio = [
-  { id: 0, label: '無し' },
-  { id: 128, label: '参照更新' },
+  { id: permission.none, label: '無し' },
+  { id: permission.login, label: '参照更新' },
 ];
