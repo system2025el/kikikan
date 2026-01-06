@@ -654,6 +654,8 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
                             field.onChange(label);
                             if (value && typeof value !== 'string') {
                               setValue('kokyakuId', Number(value.id), { shouldDirty: false });
+                            } else {
+                              setValue('kokyakuId', null, { shouldDirty: false });
                             }
                           }}
                           freeSolo
