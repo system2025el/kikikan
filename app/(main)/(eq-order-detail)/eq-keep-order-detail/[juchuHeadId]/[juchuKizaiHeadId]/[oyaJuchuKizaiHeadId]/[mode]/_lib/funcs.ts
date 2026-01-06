@@ -47,9 +47,6 @@ import { JuchuCtnMeisai } from '@/app/_lib/db/types/t_juchu_ctn_meisai-type';
 import { JuchuKizaiHead } from '@/app/_lib/db/types/t-juchu-kizai-head-type';
 import { JuchuKizaiMeisai } from '@/app/_lib/db/types/t-juchu-kizai-meisai-type';
 import { NyushukoDen } from '@/app/_lib/db/types/t-nyushuko-den-type';
-import { NyushukoFix } from '@/app/_lib/db/types/t-nyushuko-fix-type';
-import { Database } from '@/app/_lib/db/types/types';
-import { toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import {
   addDummyNyushukoDen,
   addJuchuKizaiNyushuko,
@@ -659,7 +656,7 @@ export const addKeepJuchuKizaiHead = async (
     head_nam: keepJuchuKizaiHeadData.headNam,
     oya_juchu_kizai_head_id: keepJuchuKizaiHeadData.oyaJuchuKizaiHeadId,
     ht_kbn: 0,
-    add_dat: toJapanTimeString(),
+    add_dat: new Date().toISOString(),
     add_user: userNam,
   };
   try {
@@ -691,7 +688,7 @@ export const updKeepJuchuKizaiHead = async (
     head_nam: juchuKizaiHeadData.headNam,
     oya_juchu_kizai_head_id: juchuKizaiHeadData.oyaJuchuKizaiHeadId,
     ht_kbn: 0,
-    upd_dat: toJapanTimeString(),
+    upd_dat: new Date().toISOString(),
     upd_user: userNam,
   };
 
@@ -773,7 +770,7 @@ export const addKeepJuchuKizaiMeisai = async (
     keep_qty: d.keepQty,
     dsp_ord_num: d.dspOrdNum,
     indent_num: d.indentNum,
-    add_dat: toJapanTimeString(),
+    add_dat: new Date().toISOString(),
     add_user: userNam,
     shozoku_id: d.shozokuId,
   }));
@@ -808,7 +805,7 @@ export const updKeepJuchuKizaiMeisai = async (
     keep_qty: d.keepQty,
     dsp_ord_num: d.dspOrdNum,
     indent_num: d.indentNum,
-    upd_dat: toJapanTimeString(),
+    upd_dat: new Date().toISOString(),
     upd_user: userNam,
     shozoku_id: d.shozokuId,
   }));
@@ -924,7 +921,7 @@ export const addKeepJuchuContainerMeisai = async (
     mem: d.mem,
     dsp_ord_num: d.dspOrdNum,
     indent_num: d.indentNum,
-    add_dat: toJapanTimeString(),
+    add_dat: new Date().toISOString(),
     add_user: userNam,
   }));
 
@@ -938,7 +935,7 @@ export const addKeepJuchuContainerMeisai = async (
     mem: d.mem,
     dsp_ord_num: d.dspOrdNum,
     indent_num: d.indentNum,
-    add_dat: toJapanTimeString(),
+    add_dat: new Date().toISOString(),
     add_user: userNam,
   }));
 
@@ -975,7 +972,7 @@ export const updKeepJuchuContainerMeisai = async (
     mem: d.mem,
     dsp_ord_num: d.dspOrdNum,
     indent_num: d.indentNum,
-    upd_dat: toJapanTimeString(),
+    upd_dat: new Date().toISOString(),
     upd_user: userNam,
   }));
 
@@ -989,7 +986,7 @@ export const updKeepJuchuContainerMeisai = async (
     mem: d.mem,
     dsp_ord_num: d.dspOrdNum,
     indent_num: d.indentNum,
-    upd_dat: toJapanTimeString(),
+    upd_dat: new Date().toISOString(),
     upd_user: userNam,
   }));
 
@@ -1046,13 +1043,13 @@ export const addShukoDen = async (
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
     sagyo_kbn_id: 10,
-    sagyo_den_dat: toJapanTimeStampString(shukoDat),
+    sagyo_den_dat: shukoDat.toISOString(),
     sagyo_id: sagyoId,
     kizai_id: d.kizaiId,
     plan_qty: d.keepQty,
     dsp_ord_num: d.dspOrdNum,
     indent_num: d.indentNum,
-    add_dat: toJapanTimeString(),
+    add_dat: new Date().toISOString(),
     add_user: userNam,
   }));
 
@@ -1061,13 +1058,13 @@ export const addShukoDen = async (
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
     sagyo_kbn_id: 20,
-    sagyo_den_dat: toJapanTimeStampString(shukoDat),
+    sagyo_den_dat: shukoDat.toISOString(),
     sagyo_id: sagyoId,
     kizai_id: d.kizaiId,
     plan_qty: d.keepQty,
     dsp_ord_num: d.dspOrdNum,
     indent_num: d.indentNum,
-    add_dat: toJapanTimeString(),
+    add_dat: new Date().toISOString(),
     add_user: userNam,
   }));
 
@@ -1103,13 +1100,13 @@ export const updShukoDen = async (
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
     sagyo_kbn_id: 10,
-    sagyo_den_dat: toJapanTimeStampString(shukoDat),
+    sagyo_den_dat: shukoDat.toISOString(),
     sagyo_id: sagyoId,
     kizai_id: d.kizaiId,
     plan_qty: d.keepQty,
     dsp_ord_num: d.dspOrdNum,
     indent_num: d.indentNum,
-    add_dat: toJapanTimeString(),
+    add_dat: new Date().toISOString(),
     add_user: userNam,
   }));
 
@@ -1118,13 +1115,13 @@ export const updShukoDen = async (
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
     sagyo_kbn_id: 20,
-    sagyo_den_dat: toJapanTimeStampString(shukoDat),
+    sagyo_den_dat: shukoDat.toISOString(),
     sagyo_id: sagyoId,
     kizai_id: d.kizaiId,
     plan_qty: d.keepQty,
     dsp_ord_num: d.dspOrdNum,
     indent_num: d.indentNum,
-    add_dat: toJapanTimeString(),
+    add_dat: new Date().toISOString(),
     add_user: userNam,
   }));
 
@@ -1163,14 +1160,14 @@ export const addNyukoDen = async (
     sagyo_kbn_id: 30,
     sagyo_den_dat:
       d.shozokuId === 1
-        ? toJapanTimeStampString(juchuKizaiHeadData.kicsNyukoDat as Date)
-        : toJapanTimeStampString(juchuKizaiHeadData.yardNyukoDat as Date),
+        ? juchuKizaiHeadData.kicsNyukoDat!.toISOString()
+        : juchuKizaiHeadData.yardNyukoDat!.toISOString(),
     sagyo_id: d.shozokuId,
     kizai_id: d.kizaiId,
     plan_qty: d.keepQty,
     dsp_ord_num: d.dspOrdNum,
     indent_num: d.indentNum,
-    add_dat: toJapanTimeString(),
+    add_dat: new Date().toISOString(),
     add_user: userNam,
   }));
 
@@ -1205,14 +1202,14 @@ export const updNyukoDen = async (
     sagyo_kbn_id: 30,
     sagyo_den_dat:
       d.shozokuId === 1
-        ? toJapanTimeStampString(juchuKizaiHeadData.kicsNyukoDat as Date)
-        : toJapanTimeStampString(juchuKizaiHeadData.yardNyukoDat as Date),
+        ? juchuKizaiHeadData.kicsNyukoDat!.toISOString()
+        : juchuKizaiHeadData.yardNyukoDat!.toISOString(),
     sagyo_id: d.shozokuId,
     kizai_id: d.kizaiId,
     plan_qty: d.keepQty,
     dsp_ord_num: d.dspOrdNum,
     indent_num: d.indentNum,
-    add_dat: toJapanTimeString(),
+    add_dat: new Date().toISOString(),
     add_user: userNam,
   }));
 
@@ -1249,13 +1246,13 @@ export const addCtnShukoDen = async (
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
     sagyo_kbn_id: 10,
-    sagyo_den_dat: toJapanTimeStampString(shukoDat),
+    sagyo_den_dat: shukoDat.toISOString(),
     sagyo_id: sagyoId,
     kizai_id: d.kizaiId,
     plan_qty: sagyoId === 1 ? d.kicsKeepQty : d.yardKeepQty,
     dsp_ord_num: d.dspOrdNum,
     indent_num: d.indentNum,
-    add_dat: toJapanTimeString(),
+    add_dat: new Date().toISOString(),
     add_user: userNam,
   }));
 
@@ -1264,13 +1261,13 @@ export const addCtnShukoDen = async (
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
     sagyo_kbn_id: 20,
-    sagyo_den_dat: toJapanTimeStampString(shukoDat),
+    sagyo_den_dat: shukoDat.toISOString(),
     sagyo_id: sagyoId,
     kizai_id: d.kizaiId,
     plan_qty: sagyoId === 1 ? d.kicsKeepQty : d.yardKeepQty,
     dsp_ord_num: d.dspOrdNum,
     indent_num: d.indentNum,
-    add_dat: toJapanTimeString(),
+    add_dat: new Date().toISOString(),
     add_user: userNam,
   }));
 
@@ -1308,13 +1305,13 @@ export const updCtnShukoDen = async (
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
     sagyo_kbn_id: 10,
-    sagyo_den_dat: toJapanTimeStampString(shukoDat),
+    sagyo_den_dat: shukoDat.toISOString(),
     sagyo_id: sagyoId,
     kizai_id: d.kizaiId,
     plan_qty: sagyoId === 1 ? d.kicsKeepQty : d.yardKeepQty,
     dsp_ord_num: d.dspOrdNum,
     indent_num: d.indentNum,
-    add_dat: toJapanTimeString(),
+    add_dat: new Date().toISOString(),
     add_user: userNam,
   }));
 
@@ -1323,13 +1320,13 @@ export const updCtnShukoDen = async (
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
     sagyo_kbn_id: 20,
-    sagyo_den_dat: toJapanTimeStampString(shukoDat),
+    sagyo_den_dat: shukoDat.toISOString(),
     sagyo_id: sagyoId,
     kizai_id: d.kizaiId,
     plan_qty: sagyoId === 1 ? d.kicsKeepQty : d.yardKeepQty,
     dsp_ord_num: d.dspOrdNum,
     indent_num: d.indentNum,
-    add_dat: toJapanTimeString(),
+    add_dat: new Date().toISOString(),
     add_user: userNam,
   }));
 
@@ -1369,13 +1366,13 @@ export const addCtnNyukoDen = async (
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
     sagyo_kbn_id: 30,
-    sagyo_den_dat: toJapanTimeStampString(nyukoDat),
+    sagyo_den_dat: nyukoDat.toISOString(),
     sagyo_id: sagyoId,
     kizai_id: d.kizaiId,
     plan_qty: sagyoId === 1 ? d.kicsKeepQty : d.yardKeepQty,
     dsp_ord_num: d.dspOrdNum,
     indent_num: d.indentNum,
-    add_dat: toJapanTimeString(),
+    add_dat: new Date().toISOString(),
     add_user: userNam,
   }));
 
@@ -1411,13 +1408,13 @@ export const updCtnNyukoDen = async (
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
     sagyo_kbn_id: 30,
-    sagyo_den_dat: toJapanTimeStampString(nyukoDat),
+    sagyo_den_dat: nyukoDat.toISOString(),
     sagyo_id: sagyoId,
     kizai_id: d.kizaiId,
     plan_qty: sagyoId === 1 ? d.kicsKeepQty : d.yardKeepQty,
     dsp_ord_num: d.dspOrdNum,
     indent_num: d.indentNum,
-    upd_dat: toJapanTimeString(),
+    upd_dat: new Date().toISOString(),
     upd_user: userNam,
   }));
 
@@ -1562,300 +1559,6 @@ export const delCtnNyukoDen = async (
     throw e;
   }
 };
-
-// /**
-//  * キープコンテナ入出庫伝票更新
-//  * @param keepJuchuKizaiHeadData キープ受注機材ヘッダーデータ
-//  * @param keepJuchuContainerMeisaiData キープ受注コンテナ明細データ
-//  * @param userNam ユーザー名
-//  */
-// export const updKeepContainerNyushukoDen = async (
-//   keepJuchuKizaiHeadData: KeepJuchuKizaiHeadValues,
-//   keepJuchuContainerMeisaiData: KeepJuchuContainerMeisaiValues[],
-//   userNam: string,
-//   connection: PoolClient
-// ) => {
-//   for (const data of keepJuchuContainerMeisaiData) {
-//     const kicsData =
-//       !data.delFlag && data.kicsKeepQty
-//         ? [
-//             {
-//               juchu_head_id: data.juchuHeadId,
-//               juchu_kizai_head_id: data.juchuKizaiHeadId,
-//               juchu_kizai_meisai_id: data.juchuKizaiMeisaiId,
-//               sagyo_kbn_id: 10,
-//               sagyo_den_dat: toJapanTimeStampString(keepJuchuKizaiHeadData.kicsShukoDat as Date),
-//               sagyo_id: 1,
-//               kizai_id: data.kizaiId,
-//               plan_qty: data.kicsKeepQty,
-//               dspOrdNum: data.dspOrdNum,
-//               indentNum: data.indentNum,
-//             },
-//             {
-//               juchu_head_id: data.juchuHeadId,
-//               juchu_kizai_head_id: data.juchuKizaiHeadId,
-//               juchu_kizai_meisai_id: data.juchuKizaiMeisaiId,
-//               sagyo_kbn_id: 20,
-//               sagyo_den_dat: toJapanTimeStampString(keepJuchuKizaiHeadData.kicsShukoDat as Date),
-//               sagyo_id: 1,
-//               kizai_id: data.kizaiId,
-//               plan_qty: data.kicsKeepQty,
-//               dspOrdNum: data.dspOrdNum,
-//               indentNum: data.indentNum,
-//             },
-//             {
-//               juchu_head_id: data.juchuHeadId,
-//               juchu_kizai_head_id: data.juchuKizaiHeadId,
-//               juchu_kizai_meisai_id: data.juchuKizaiMeisaiId,
-//               sagyo_kbn_id: 30,
-//               sagyo_den_dat: toJapanTimeStampString(keepJuchuKizaiHeadData.kicsNyukoDat as Date),
-//               sagyo_id: 1,
-//               kizai_id: data.kizaiId,
-//               plan_qty: data.kicsKeepQty,
-//               dspOrdNum: data.dspOrdNum,
-//               indentNum: data.indentNum,
-//             },
-//           ]
-//         : null;
-//     const yardData =
-//       !data.delFlag && data.yardKeepQty
-//         ? [
-//             {
-//               juchu_head_id: data.juchuHeadId,
-//               juchu_kizai_head_id: data.juchuKizaiHeadId,
-//               juchu_kizai_meisai_id: data.juchuKizaiMeisaiId,
-//               sagyo_kbn_id: 10,
-//               sagyo_den_dat: toJapanTimeStampString(keepJuchuKizaiHeadData.yardShukoDat as Date),
-//               sagyo_id: 2,
-//               kizai_id: data.kizaiId,
-//               plan_qty: data.yardKeepQty,
-//               dspOrdNum: data.dspOrdNum,
-//               indentNum: data.indentNum,
-//             },
-//             {
-//               juchu_head_id: data.juchuHeadId,
-//               juchu_kizai_head_id: data.juchuKizaiHeadId,
-//               juchu_kizai_meisai_id: data.juchuKizaiMeisaiId,
-//               sagyo_kbn_id: 20,
-//               sagyo_den_dat: toJapanTimeStampString(keepJuchuKizaiHeadData.yardShukoDat as Date),
-//               sagyo_id: 2,
-//               kizai_id: data.kizaiId,
-//               plan_qty: data.yardKeepQty,
-//               dspOrdNum: data.dspOrdNum,
-//               indentNum: data.indentNum,
-//             },
-//             {
-//               juchu_head_id: data.juchuHeadId,
-//               juchu_kizai_head_id: data.juchuKizaiHeadId,
-//               juchu_kizai_meisai_id: data.juchuKizaiMeisaiId,
-//               sagyo_kbn_id: 30,
-//               sagyo_den_dat: toJapanTimeStampString(keepJuchuKizaiHeadData.yardNyukoDat as Date),
-//               sagyo_id: 2,
-//               kizai_id: data.kizaiId,
-//               plan_qty: data.yardKeepQty,
-//               dspOrdNum: data.dspOrdNum,
-//               indentNum: data.indentNum,
-//             },
-//           ]
-//         : null;
-//     const kicsConfirmData = {
-//       juchu_head_id: data.juchuHeadId,
-//       juchu_kizai_head_id: data.juchuKizaiHeadId,
-//       juchu_kizai_meisai_id: data.juchuKizaiMeisaiId,
-//       kizai_id: data.kizaiId,
-//       sagyo_id: 1,
-//     };
-//     const yardConfirmData = {
-//       juchu_head_id: data.juchuHeadId,
-//       juchu_kizai_head_id: data.juchuKizaiHeadId,
-//       juchu_kizai_meisai_id: data.juchuKizaiMeisaiId,
-//       kizai_id: data.kizaiId,
-//       sagyo_id: 2,
-//     };
-
-//     try {
-//       const kicsConfirmResult = await selectContainerNyushukoDenConfirm(kicsConfirmData);
-//       const yardConfirmResult = await selectContainerNyushukoDenConfirm(yardConfirmData);
-
-//       if (kicsConfirmResult.data && kicsConfirmResult.data.length > 0 && kicsData) {
-//         for (const data of kicsData) {
-//           await updateNyushukoDen(
-//             {
-//               ...data,
-//               upd_dat: toJapanTimeString(),
-//               upd_user: userNam,
-//             },
-//             connection
-//           );
-//         }
-//       } else if (kicsConfirmResult.data && kicsConfirmResult.data.length > 0 && !kicsData) {
-//         await deleteContainerNyushukoDen(kicsConfirmData, connection);
-//       } else if (kicsConfirmResult!.data && kicsData) {
-//         await insertNyushukoDen(
-//           kicsData.map((d) => ({
-//             ...d,
-//             add_dat: toJapanTimeString(),
-//             add_user: userNam,
-//           })),
-//           connection
-//         );
-//       }
-//       if (yardConfirmResult.data && yardConfirmResult.data.length > 0 && yardData) {
-//         for (const data of yardData) {
-//           await updateNyushukoDen(
-//             {
-//               ...data,
-//               upd_dat: toJapanTimeString(),
-//               upd_user: userNam,
-//             },
-//             connection
-//           );
-//         }
-//       } else if (yardConfirmResult.data && yardConfirmResult.data.length > 0 && !yardData) {
-//         await deleteContainerNyushukoDen(yardConfirmData, connection);
-//       } else if (yardConfirmResult!.data && yardData) {
-//         await insertNyushukoDen(
-//           yardData.map((d) => ({
-//             ...d,
-//             add_dat: toJapanTimeString(),
-//             add_user: userNam,
-//           })),
-//           connection
-//         );
-//       }
-//       console.log('keep container nyushuko den updated successfully:', data);
-//     } catch (e) {
-//       throw e;
-//     }
-//   }
-//   return true;
-// };
-
-// /**
-//  * キープ入出庫確定更新
-//  * @param data キープ受注機材ヘッダーデータ
-//  * @param kics KICS機材判定
-//  * @param yard YARD機材判定
-//  * @param userNam ユーザー名
-//  * @returns
-//  */
-// export const updKeepNyushukoFix = async (
-//   data: KeepJuchuKizaiHeadValues,
-//   kics: boolean,
-//   yard: boolean,
-//   userNam: string,
-//   connection: PoolClient
-// ) => {
-//   const kicsData: NyushukoFix[] = [
-//     {
-//       juchu_head_id: data.juchuHeadId,
-//       juchu_kizai_head_id: data.juchuKizaiHeadId,
-//       sagyo_kbn_id: 60,
-//       sagyo_den_dat: toJapanTimeStampString(data.kicsShukoDat as Date),
-//       sagyo_id: 1,
-//     },
-//     {
-//       juchu_head_id: data.juchuHeadId,
-//       juchu_kizai_head_id: data.juchuKizaiHeadId,
-//       sagyo_kbn_id: 70,
-//       sagyo_den_dat: toJapanTimeStampString(data.kicsNyukoDat as Date),
-//       sagyo_id: 1,
-//     },
-//   ];
-//   const yardData: NyushukoFix[] = [
-//     {
-//       juchu_head_id: data.juchuHeadId,
-//       juchu_kizai_head_id: data.juchuKizaiHeadId,
-//       sagyo_kbn_id: 60,
-//       sagyo_den_dat: toJapanTimeStampString(data.yardShukoDat as Date),
-//       sagyo_id: 2,
-//     },
-//     {
-//       juchu_head_id: data.juchuHeadId,
-//       juchu_kizai_head_id: data.juchuKizaiHeadId,
-//       sagyo_kbn_id: 70,
-//       sagyo_den_dat: toJapanTimeStampString(data.yardNyukoDat as Date),
-//       sagyo_id: 2,
-//     },
-//   ];
-
-//   const kicsConfirmData = {
-//     juchu_head_id: data.juchuHeadId,
-//     juchu_kizai_head_id: data.juchuKizaiHeadId,
-//     sagyo_id: 1,
-//   };
-//   const yardConfirmData = {
-//     juchu_head_id: data.juchuHeadId,
-//     juchu_kizai_head_id: data.juchuKizaiHeadId,
-//     sagyo_id: 2,
-//   };
-
-//   try {
-//     const kicsConfirmResult = await selectNyushukoFixConfirm(kicsConfirmData);
-//     const yardConfirmResult = await selectNyushukoFixConfirm(yardConfirmData);
-
-//     // KICS更新
-//     if (kicsConfirmResult.data && kicsConfirmResult.data.length > 0 && kics) {
-//       for (const data of kicsData) {
-//         await updateNyushukoFix(
-//           {
-//             ...data,
-//             upd_dat: toJapanTimeString(),
-//             upd_user: userNam,
-//           },
-//           connection
-//         );
-//       }
-//       // KICS削除
-//     } else if (kicsConfirmResult.data && kicsConfirmResult.data.length > 0 && !kics) {
-//       await deleteNyushukoFix(kicsConfirmData, connection);
-//       // KICS追加
-//     } else if (kicsConfirmResult!.data && kics) {
-//       await insertNyushukoFix(
-//         kicsData.map((d) => ({
-//           ...d,
-//           sagyo_fix_flg: 0,
-//           add_dat: toJapanTimeString(),
-//           add_user: userNam,
-//         })),
-//         connection
-//       );
-//     }
-
-//     // YARD更新
-//     if (yardConfirmResult.data && yardConfirmResult.data.length > 0 && yard) {
-//       for (const data of yardData) {
-//         await updateNyushukoFix(
-//           {
-//             ...data,
-//             upd_dat: toJapanTimeString(),
-//             upd_user: userNam,
-//           },
-//           connection
-//         );
-//       }
-//       // YARD削除
-//     } else if (yardConfirmResult.data && yardConfirmResult.data.length > 0 && !yard) {
-//       await deleteNyushukoFix(yardConfirmData, connection);
-//       // YARD追加
-//     } else if (yardConfirmResult!.data && yard) {
-//       await insertNyushukoFix(
-//         yardData.map((d) => ({
-//           ...d,
-//           sagyo_fix_flg: 0,
-//           add_dat: toJapanTimeString(),
-//           add_user: userNam,
-//         })),
-//         connection
-//       );
-//     }
-//     console.log('keep nyushuko fix updated successfully:', data);
-//     return true;
-//   } catch (e) {
-//     console.error(e);
-//     throw e;
-//   }
-// };
 
 /**
  * 入出庫実績削除

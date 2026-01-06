@@ -19,7 +19,6 @@ import {
 import { selectJuchuSharyoHeadList } from '@/app/_lib/db/tables/v-juchu-sharyo-head-lst';
 import { JuchuSharyoHeadDBValues } from '@/app/_lib/db/types/t-juchu-sharyo-head-type';
 import { JuchuSharyoMeisaiDBValues } from '@/app/_lib/db/types/t-juchu-sharyo-meisai-type';
-import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 import { fakeToNull, nullToFake } from '@/app/(main)/(masters)/_lib/value-converters';

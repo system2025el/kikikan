@@ -18,7 +18,6 @@ import { selectNyushukoDetail } from '@/app/_lib/db/tables/v-nyushuko-den2-lst';
 import { JuchuCtnMeisai } from '@/app/_lib/db/types/t_juchu_ctn_meisai-type';
 import { NyushukoDen } from '@/app/_lib/db/types/t-nyushuko-den-type';
 import { NyushukoFix } from '@/app/_lib/db/types/t-nyushuko-fix-type';
-import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { NyukoValues, ShukoDetailTableValues, ShukoDetailValues } from './types';
 
@@ -260,7 +259,7 @@ export const upsJuchuCtnMeisai = async (
     shozoku_id: d.nyushukoBashoId,
     dsp_ord_num: d.dspOrdNumMeisai,
     indent_num: d.indentNum,
-    add_dat: toJapanTimeString(),
+    add_dat: new Date().toISOString(),
     add_user: userNam,
   }));
   try {
@@ -297,7 +296,7 @@ export const upsNyushukoDen = async (
     sagyo_kbn_id: 20,
     dsp_ord_num: d.dspOrdNumMeisai,
     indent_num: d.indentNum,
-    add_dat: toJapanTimeString(),
+    add_dat: new Date().toISOString(),
     add_user: userNam,
     upd_dat: null,
     upd_user: null,
@@ -314,7 +313,7 @@ export const upsNyushukoDen = async (
     sagyo_kbn_id: 30,
     dsp_ord_num: d.dspOrdNumMeisai,
     indent_num: d.indentNum,
-    add_dat: toJapanTimeString(),
+    add_dat: new Date().toISOString(),
     add_user: userNam,
     upd_dat: null,
     upd_user: null,
@@ -357,7 +356,7 @@ export const addShukoFix = async (
     sagyo_den_dat: shukoDetailData.nyushukoDat,
     sagyo_id: shukoDetailData.nyushukoBashoId,
     sagyo_fix_flg: 1,
-    upd_dat: toJapanTimeString(),
+    upd_dat: new Date().toISOString(),
     upd_user: userNam,
   }));
 

@@ -67,7 +67,7 @@ import { JuchuKizaiMeisai } from '@/app/_lib/db/types/t-juchu-kizai-meisai-type'
 import { JuchuKizaiNyushuko } from '@/app/_lib/db/types/t-juchu-kizai-nyushuko-type';
 import { NyushukoDen } from '@/app/_lib/db/types/t-nyushuko-den-type';
 
-import { toJapanTimeStampString, toJapanTimeString, toJapanYMDString } from '../../_lib/date-conversion';
+import { toJapanYMDString } from '../../_lib/date-conversion';
 import {
   JuchuContainerMeisaiValues,
   JuchuKizaiHeadValues,
@@ -239,8 +239,8 @@ export const addJuchuKizaiNyushuko = async (
       juchu_kizai_head_id: juchuKizaiHeadId,
       nyushuko_shubetu_id: i === 0 || i === 1 ? 1 : 2,
       nyushuko_basho_id: i === 0 || i === 2 ? 1 : 2,
-      nyushuko_dat: toJapanTimeString(currentDate),
-      add_dat: toJapanTimeString(),
+      nyushuko_dat: currentDate.toISOString(),
+      add_dat: new Date().toISOString(),
       add_user: userNam,
     };
 
@@ -281,7 +281,7 @@ export const updJuchuKizaiNyushuko = async (
             juchu_kizai_head_id: juchuKizaiHeadId,
             nyushuko_shubetu_id: i === 0 || i === 1 ? 1 : 2,
             nyushuko_basho_id: i === 0 || i === 2 ? 1 : 2,
-            nyushuko_dat: toJapanTimeString(currentDate),
+            nyushuko_dat: currentDate.toISOString(),
           }
         : null;
 
@@ -297,13 +297,13 @@ export const updJuchuKizaiNyushuko = async (
 
       // 更新
       if (selectData.data && data) {
-        await updateJuchuKizaiNyushuko({ ...data, upd_dat: toJapanTimeString(), upd_user: userNam }, connection);
+        await updateJuchuKizaiNyushuko({ ...data, upd_dat: new Date().toISOString(), upd_user: userNam }, connection);
         // 削除
       } else if (selectData.data && !data) {
         await deleteJuchuKizaiNyushuko(confirmData, connection);
         // 追加
       } else if (!selectData.data && data) {
-        await insertJuchuKizaiNyushuko({ ...data, add_dat: toJapanTimeString(), add_user: userNam }, connection);
+        await insertJuchuKizaiNyushuko({ ...data, add_dat: new Date().toISOString(), add_user: userNam }, connection);
       }
       console.log('kizai nyushuko updated successfully:', data);
     } catch (e) {
@@ -536,7 +536,7 @@ export const addAllHonbanbi = async (
     juchu_honbanbi_dat: toJapanYMDString(d.juchuHonbanbiDat, '-'),
     mem: d.mem ? d.mem : null,
     juchu_honbanbi_add_qty: d.juchuHonbanbiAddQty,
-    add_dat: toJapanTimeString(),
+    add_dat: new Date().toISOString(),
     add_user: userNam,
   }));
   try {
@@ -610,13 +610,13 @@ export const addDummyNyushukoDen = async (
       juchu_kizai_head_id: juchuKizaiHeadId,
       juchu_kizai_meisai_id: 0,
       sagyo_kbn_id: 30,
-      sagyo_den_dat: toJapanTimeStampString(date),
+      sagyo_den_dat: date.toISOString(),
       sagyo_id: sagyoId,
       kizai_id: 0,
       plan_qty: 0,
       dsp_ord_num: 0,
       indent_num: 0,
-      add_dat: toJapanTimeString(),
+      add_dat: new Date().toISOString(),
       add_user: userNam,
     },
   ];
