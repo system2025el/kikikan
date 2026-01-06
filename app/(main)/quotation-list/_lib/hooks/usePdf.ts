@@ -230,6 +230,15 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
       //lineHeight: 10,
       //opacity: 1,
     });
+    page.drawText(`顧客番号: ${param.kokyakuId ?? ''}`, {
+      x: 470,
+      y: 717,
+      font: customFont, // カスタムフォントの設定
+      size: 10,
+      //color: rgb(0, 0, 0),
+      //lineHeight: 10,
+      //opacity: 1,
+    });
 
     /* ヘッダー枠線
      * -----------------------------------------------------------------*/
