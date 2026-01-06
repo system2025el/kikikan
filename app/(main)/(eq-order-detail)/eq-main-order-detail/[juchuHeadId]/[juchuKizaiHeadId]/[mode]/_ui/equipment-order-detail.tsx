@@ -2343,7 +2343,7 @@ const EquipmentOrderDetail = (props: {
               <AccordionDetails sx={{ padding: 0 }}>
                 <Divider />
                 <Grid2 container alignItems="baseline" spacing={1} py={1} px={2}>
-                  <Typography>機材明細名</Typography>
+                  <Typography>受注明細名</Typography>
                   <TextFieldElement name="headNam" control={control} disabled={!edit}></TextFieldElement>
                 </Grid2>
                 <Grid2 container alignItems="baseline" spacing={2} py={1} px={2}>

@@ -1,7 +1,7 @@
 import { Row } from '../_ui/order-table';
 
 const equipmentHeaders = [
-  { key: 'name', label: '機材明細名' },
+  { key: 'name', label: '受注明細名' },
   { key: 'status', label: '作業ステータス' },
   { key: 'issue', label: '出庫' },
   { key: 'return', label: '入庫' },
