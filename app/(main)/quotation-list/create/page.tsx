@@ -1,6 +1,4 @@
-import { toJapanYMDString } from '../../_lib/date-conversion';
-import { getCustomerSelection } from '../../(masters)/_lib/funcs';
-import { getMituStsSelection, getOrderForQuotation, getUsersSelection } from '../_lib/funcs';
+import { getOrderForQuotation } from '../_lib/funcs';
 import { JuchuValues, QuotHeadValues } from '../_lib/types';
 import { Quotation } from '../_ui/quotation';
 
@@ -23,6 +21,7 @@ const Page = async ({ searchParams }: { searchParams: Promise<{ [key: string]: s
         mituSts: null,
         mituDat: new Date(),
         mituHeadNam: null,
+        kokyakuId: order.kokyaku.id,
         kokyaku: order.kokyaku.name,
         nyuryokuUser: null,
         mituRange: { strt: order.juchuRange.strt, end: order.juchuRange.end },

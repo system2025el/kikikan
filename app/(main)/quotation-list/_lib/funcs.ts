@@ -2,19 +2,16 @@
 
 import { revalidatePath } from 'next/cache';
 
-import pool from '@/app/_lib/db/postgres';
-import { SCHEMA } from '@/app/_lib/db/supabase';
 import { selectActiveMituSts } from '@/app/_lib/db/tables/m-mitu-sts';
 import { selectActiveUsers } from '@/app/_lib/db/tables/m-user';
 import { selectChosenMitu, updQuotHeadDelFlg } from '@/app/_lib/db/tables/t-mitu-head';
 import { selectQuotMeisai } from '@/app/_lib/db/tables/t-mitu-meisai';
 import { selectQuotMeisaiHead } from '@/app/_lib/db/tables/t-mitu-meisai-head';
-import { selectJuchuKizaiHeadList, selectJuchuKizaiHeadNamList } from '@/app/_lib/db/tables/v-juchu-kizai-head-lst';
+import { selectJuchuKizaiHeadNamList } from '@/app/_lib/db/tables/v-juchu-kizai-head-lst';
 import { selectJuchu } from '@/app/_lib/db/tables/v-juchu-lst';
 import { selectKizaiHeadListForMitu } from '@/app/_lib/db/tables/v-mitu-kizai';
 import { selectKizaiHeadListWithIsshikiForMitu } from '@/app/_lib/db/tables/v-mitu-kizai-isshiki';
 import { selectFilteredQuot } from '@/app/_lib/db/tables/v-mitu-lst';
-import { MituHead } from '@/app/_lib/db/types/t-mitu-head-types';
 import { MituMeisaiHead } from '@/app/_lib/db/types/t-mitu-meisai-head-type';
 import { MituMeisai } from '@/app/_lib/db/types/t-mitu-meisai-type';
 import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
@@ -271,6 +268,7 @@ export const getChosenQuot = async (mituId: number) => {
       mituSts: mituData.mitu_sts,
       mituDat: mituData.mitu_dat ? new Date(mituData.mitu_dat) : null,
       mituHeadNam: mituData.mitu_head_nam,
+      kokyakuId: mituData.kokyaku_id,
       kokyaku: mituData.kokyaku_nam,
       nyuryokuUser: mituData.nyuryoku_user,
       mituRange:
