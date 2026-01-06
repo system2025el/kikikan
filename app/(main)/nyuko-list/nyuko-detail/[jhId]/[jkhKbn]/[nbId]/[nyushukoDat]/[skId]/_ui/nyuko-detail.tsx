@@ -121,7 +121,7 @@ export const NyukoDetail = (props: {
               <TextField value={nyukoDetailData.nyushukoBashoId === 1 ? 'KICS' : 'YARD'} disabled />
             </Box>
             <Box display={'flex'} alignItems={'center'}>
-              <Typography mr={2}>機材明細名</Typography>
+              <Typography mr={2}>受注明細名</Typography>
               <TextField value={nyukoDetailData.headNamv ?? ''} disabled />
             </Box>
           </Grid2>

@@ -1581,7 +1581,7 @@ export const EquipmentReturnOrderDetail = (props: {
                 <Divider />
                 <Grid2 container alignItems="center" spacing={2} p={2}>
                   <Grid2 container alignItems="baseline">
-                    <Typography>機材明細名</Typography>
+                    <Typography>受注明細名</Typography>
                     <TextFieldElement name="headNam" control={control} disabled={!edit}></TextFieldElement>
                   </Grid2>
                   {/* <Grid2 container alignItems="center">

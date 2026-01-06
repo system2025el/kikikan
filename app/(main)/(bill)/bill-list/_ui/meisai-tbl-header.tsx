@@ -123,7 +123,7 @@ export const MeisaiTblHeader = ({
           />
         </Grid2>
         <Grid2 sx={styles.container} size={4}>
-          <Typography marginRight={1}>機材明細番号</Typography>
+          <Typography marginRight={1}>受注明細番号</Typography>
           <TextFieldElement
             name={`meisaiHeads.${index}.juchuKizaiHeadId`}
             control={control}

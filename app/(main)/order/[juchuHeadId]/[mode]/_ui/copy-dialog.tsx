@@ -91,7 +91,7 @@ export const CopyDialog = ({
               />
             </Grid2>
             <Grid2 container alignItems={'baseline'}>
-              <Typography>機材明細名</Typography>
+              <Typography>受注明細名</Typography>
               <TextFieldElement name="headNam" control={control} />
             </Grid2>
             <Box>

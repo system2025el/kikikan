@@ -284,7 +284,7 @@ const BillingStsRow = ({ juchu, refetch }: { juchu: BillingStsTableValues; refet
                       bgcolor: theme.palette.primary.dark,
                     })}
                   >
-                    機材明細名
+                    受注明細名
                   </TableCell>
                   <TableCell
                     sx={(theme) => ({

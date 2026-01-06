@@ -78,7 +78,7 @@ export const NyukoListTable = (props: {
             <TableCell align="center">チェック</TableCell>
             <TableCell align="left">公演名</TableCell>
             <TableCell align="left">公演場所</TableCell>
-            <TableCell align="left">機材明細名</TableCell>
+            <TableCell align="left">受注明細名</TableCell>
             <TableCell align="left">顧客名</TableCell>
             <TableCell align="left">課</TableCell>
           </TableRow>
