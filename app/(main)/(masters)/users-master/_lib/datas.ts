@@ -16,7 +16,7 @@ export const emptyUser: UsersMasterDialogValues = {
   mailAdr: '',
   tantouNam: '',
   delFlg: false,
-  psermission: { juchu: '00', nyushuko: '00', masters: '00', ht: '0', loginSetting: '0' },
+  psermission: { juchu: 0, nyushuko: 0, masters: 0, ht: 0, loginSetting: 0 },
   lastLoginAt: null,
 };
 
@@ -63,4 +63,32 @@ export const radioTrio = [
 export const radioPair = [
   { id: '0', label: '無し' },
   { id: '1', label: '参照更新' },
+];
+
+export const juchuRadio = [
+  { id: 0, label: '無し' },
+  { id: 1, label: '参照のみ' },
+  { id: 3, label: '参照更新' },
+];
+
+export const nyushukoRadio = [
+  { id: 0, label: '無し' },
+  { id: 4, label: '参照のみ' },
+  { id: 12, label: '参照更新' },
+];
+
+export const mastersRadio = [
+  { id: 0, label: '無し' },
+  { id: 16, label: '参照のみ' },
+  { id: 48, label: '参照更新' },
+];
+
+export const htRadio = [
+  { id: 0, label: '無し' },
+  { id: 64, label: '参照更新' },
+];
+
+export const loginSettingRadio = [
+  { id: 0, label: '無し' },
+  { id: 128, label: '参照更新' },
 ];

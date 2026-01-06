@@ -14,7 +14,17 @@ import { Loading } from '@/app/(main)/_ui/loading';
 import { FAKE_NEW_ID } from '../../_lib/constants';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
-import { emptyUser, formItems, radioPair, radioTrio } from '../_lib/datas';
+import {
+  emptyUser,
+  formItems,
+  htRadio,
+  juchuRadio,
+  loginSettingRadio,
+  mastersRadio,
+  nyushukoRadio,
+  radioPair,
+  radioTrio,
+} from '../_lib/datas';
 import {
   addNewUser,
   deleteUsers,
@@ -330,8 +340,10 @@ export const UsersMasterDialog = ({
                     <RadioButtonGroup
                       name="psermission.juchu"
                       control={control}
-                      options={radioTrio}
+                      options={juchuRadio}
+                      valueKey="id"
                       disabled={editable ? false : true}
+                      type="number"
                       row
                     />
                   </Grid2>
@@ -341,8 +353,10 @@ export const UsersMasterDialog = ({
                     <RadioButtonGroup
                       name="psermission.nyushuko"
                       control={control}
-                      options={radioTrio}
+                      options={nyushukoRadio}
+                      valueKey="id"
                       disabled={editable ? false : true}
+                      type="number"
                       row
                     />
                   </Grid2>
@@ -351,8 +365,10 @@ export const UsersMasterDialog = ({
                     <RadioButtonGroup
                       name="psermission.masters"
                       control={control}
-                      options={radioTrio}
+                      options={mastersRadio}
+                      valueKey="id"
                       disabled={editable ? false : true}
+                      type="number"
                       row
                     />
                   </Grid2>
@@ -361,8 +377,10 @@ export const UsersMasterDialog = ({
                     <RadioButtonGroup
                       name="psermission.loginSetting"
                       control={control}
-                      options={radioPair}
+                      options={loginSettingRadio}
+                      valueKey="id"
                       disabled={editable ? false : true}
+                      type="number"
                       row
                     />
                   </Grid2>
@@ -371,8 +389,10 @@ export const UsersMasterDialog = ({
                     <RadioButtonGroup
                       name="psermission.ht"
                       control={control}
-                      options={radioPair}
+                      options={htRadio}
+                      valueKey="id"
                       disabled={editable ? false : true}
+                      type="number"
                       row
                     />
                   </Grid2>

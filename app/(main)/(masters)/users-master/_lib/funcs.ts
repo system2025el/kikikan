@@ -16,7 +16,7 @@ import { MUserDBValues } from '@/app/_lib/db/types/m-use-type';
 import { getUrl } from '@/app/_lib/url';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
-import { emptyUser } from './datas';
+import { emptyUser, htRadio, juchuRadio, loginSettingRadio, mastersRadio, nyushukoRadio } from './datas';
 import { UsersMasterDialogValues, UsersMasterTableValues } from './types';
 
 /**
@@ -60,29 +60,36 @@ export const getChosenUser = async (mailAdr: string) => {
       return emptyUser;
     }
     // permissionを２進数に戻す
-    const biString = rows[0].permission.toString(2).padStart(8, 0);
+    //const biString = rows[0].permission.toString(2).padStart(8, 0);
 
     const UserDetails: UsersMasterDialogValues = {
       mailAdr: rows[0].mail_adr,
       tantouNam: rows[0].user_nam,
       delFlg: Boolean(rows[0].del_flg),
       shainCod: rows[0].shain_cod,
-      psermission:
-        rows[0].permission === 65535
-          ? {
-              juchu: '11',
-              nyushuko: '11',
-              masters: '11',
-              ht: '1',
-              loginSetting: '1',
-            }
-          : {
-              juchu: biString.slice(0, 2),
-              nyushuko: biString.slice(2, 4),
-              masters: biString.slice(4, 6),
-              ht: biString.slice(6, 7),
-              loginSetting: biString.slice(7, 8),
-            },
+      // psermission:
+      //   rows[0].permission === 65535
+      //     ? {
+      //         juchu: '11',
+      //         nyushuko: '11',
+      //         masters: '11',
+      //         ht: '1',
+      //         loginSetting: '1',
+      //       }
+      //     : {
+      //         juchu: biString.slice(0, 2),
+      //         nyushuko: biString.slice(2, 4),
+      //         masters: biString.slice(4, 6),
+      //         ht: biString.slice(6, 7),
+      //         loginSetting: biString.slice(7, 8),
+      //       },
+      psermission: {
+        juchu: rows[0].permission & juchuRadio[2].id,
+        nyushuko: rows[0].permission & nyushukoRadio[2].id,
+        masters: rows[0].permission & mastersRadio[2].id,
+        ht: rows[0].permission & htRadio[1].id,
+        loginSetting: rows[0].permission & loginSettingRadio[1].id,
+      },
       mem: rows[0].mem,
       lastLoginAt: !rows[0].last_sign_in_at ? null : toJapanTimeString(rows[0].last_sign_in_at),
     };
@@ -101,7 +108,8 @@ export const getChosenUser = async (mailAdr: string) => {
 export const addNewUser = async (data: UsersMasterDialogValues, user: string) => {
   console.log(data.tantouNam);
   const p = data.psermission;
-  const permissionNum = parseInt(p.juchu + p.nyushuko + p.masters + p.ht + p.loginSetting, 2);
+  //const permissionNum = parseInt(p.juchu + p.nyushuko + p.masters + p.ht + p.loginSetting, 2);
+  const permissionNum = p.juchu + p.nyushuko + p.masters + p.ht + p.loginSetting;
   const insertData: MUserDBValues = {
     user_nam: data.tantouNam,
     shain_cod: data.shainCod ?? null,
@@ -159,7 +167,8 @@ export const updateUser = async (currentEmail: string, data: UsersMasterDialogVa
   const date = new Date().toISOString();
   // permissionを10進数に変換する
   const p = data.psermission;
-  const permissionNum = parseInt(p.juchu + p.nyushuko + p.masters + p.ht + p.loginSetting, 2);
+  //const permissionNum = parseInt(p.juchu + p.nyushuko + p.masters + p.ht + p.loginSetting , 2);
+  const permissionNum = p.juchu + p.nyushuko + p.masters + p.ht + p.loginSetting;
 
   // 更新データ
   const updateData: MUserDBValues = {
