@@ -537,7 +537,18 @@ export const usePdf = (): [(param: BillHeadValues) => Promise<Blob>] => {
           item.tankaAmt ?? 0,
           item.shokeiAmt ?? 0,
         ]),
-        ['', '', ''],
+        ...(meisai?.nebikiAmt && meisai.nebikiAmt !== 0
+          ? [
+              [
+                '',
+                '         値引き',
+                {
+                  text: `￥-${Number(meisai.nebikiAmt).toLocaleString()}`,
+                  color: 'red', // ここで赤字のフラグを持たせる
+                },
+              ],
+            ]
+          : [['', '', '']]),
         ['伝　票　計', meisai?.nebikiAftAmt],
       ];
       // --- 明細テーブル描画 ---
@@ -602,9 +613,28 @@ export const usePdf = (): [(param: BillHeadValues) => Promise<Blob>] => {
           const cellWidth = currentRowWidths[colIndex];
           if (!cellWidth) return;
 
-          let textToDraw = String(cellText);
-          if (typeof cellText === 'number') textToDraw = cellText.toLocaleString();
-          if (rowIndex === tableData.length - 1 && colIndex === 1) textToDraw = '￥' + textToDraw;
+          let textToDraw = '';
+          let textColor = rgb(0, 0, 0); // 基本は黒
+
+          if (typeof cellText === 'object' && cellText !== null) {
+            // オブジェクト（値引き）の場合
+            textToDraw = cellText.text;
+            if (cellText.color === 'red') {
+              textColor = rgb(1, 0, 0); // 赤色を設定
+            }
+          } else if (typeof cellText === 'number') {
+            // 数値の場合
+            textToDraw = cellText.toLocaleString();
+          } else {
+            // 文字列の場合
+            textToDraw = String(cellText ?? '');
+          }
+
+          // 伝票計の￥マーク付与
+          if (rowIndex === tableData.length - 1 && colIndex === 1) {
+            if (!textToDraw.startsWith('￥')) textToDraw = '￥' + textToDraw;
+          }
+          // ------------------------------
 
           // 背景と枠
           currentPage.drawRectangle({
@@ -620,25 +650,25 @@ export const usePdf = (): [(param: BillHeadValues) => Promise<Blob>] => {
           const textWidth = customFont.widthOfTextAtSize(textToDraw, fontSize);
           let textX: number;
 
-          // 数値は右寄せ、それ以外は中央寄せ
+          // 右寄せ・中央寄せの判定
           if (rowIndex === 0) {
-            // ヘッダー中央寄せ
-            textX = colX + (cellWidth - textWidth) / 2;
-          } else if (rowIndex === tableData.length - 1 && colIndex === 0) {
-            // 伝票計 中央寄せ
-            textX = colX + (cellWidth - textWidth) / 2;
-          } else if (typeof cellText === 'number') {
-            textX = colX + cellWidth - textWidth - 5; // 右寄せ
+            textX = colX + (cellWidth - textWidth) / 2; // ヘッダー中央
+          } else if (rowIndex === summaryRowIndex && colIndex === 0) {
+            textX = colX + (cellWidth - textWidth) / 2; // 伝票計ラベル中央
+          } else if (typeof cellText === 'number' || (typeof cellText === 'object' && cellText !== null)) {
+            // 数値、または値引きオブジェクトは右寄せ
+            textX = colX + cellWidth - textWidth - 5;
           } else {
-            textX = colX + 2; // 左寄せ
+            textX = colX + 2; // その他は左寄せ
           }
 
+          // テキスト描画
           currentPage.drawText(textToDraw, {
             x: textX,
             y: drawPositionY - rowHeight + (rowHeight - fontSize) / 2 + 1,
             font: customFont,
             size: fontSize,
-            color: rgb(0, 0, 0),
+            color: textColor, // 判定した色を適用
           });
 
           colX += cellWidth;
