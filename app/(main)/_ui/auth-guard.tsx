@@ -7,7 +7,7 @@ import { useUserStore } from '@/app/_lib/stores/usestore';
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const user = useUserStore((state) => state.user);
-  //const clearUser = useUserStore((state) => state.clearUser);
+  const clearUser = useUserStore((state) => state.clearUser);
   const router = useRouter();
   const [isHydrated, setIsHydrated] = useState(false);
 
@@ -15,36 +15,34 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     setIsHydrated(true);
   }, []);
 
-  // useEffect(() => {
-  //   const handleStorageChange = (event: StorageEvent) => {
-  //     // 1. 他のタブで 'user-storage' キーに変更があったか
-  //     if (event.key === 'user-storage') {
-  //       // 2. 値が null (削除) または 中身が空 (ログアウト) かをチェック
-  //       // Zustand persist は空になると '{"state":{"user":null},"version":0}' のような文字列を入れます
-  //       if (!event.newValue || event.newValue.includes('"user":null')) {
-  //         clearUser();
-  //         router.replace('/login');
-  //       }
-  //     }
-  //   };
+  useEffect(() => {
+    const handleStorageChange = (event: StorageEvent) => {
+      // 他のタブで 'user-storage' キーに変更があったかチェック
+      if (event.key === 'user-storage') {
+        if (!event.newValue || event.newValue.includes('"user":null')) {
+          clearUser();
+          router.replace('/login');
+        }
+      }
+    };
 
-  //   // 他のタブでのlocalStorage操作を監視
-  //   window.addEventListener('storage', handleStorageChange);
+    // 他のタブでのlocalStorage操作を監視
+    window.addEventListener('storage', handleStorageChange);
 
-  //   // さらに、タブに戻ってきた時にも念のため同期（ブラウザバック対策）
-  //   const handleFocus = () => {
-  //     if (!localStorage.getItem('user-storage') && user) {
-  //       clearUser();
-  //       router.replace('/login');
-  //     }
-  //   };
-  //   window.addEventListener('focus', handleFocus);
+    // さらに、タブに戻ってきた時にも念のため同期（ブラウザバック対策）
+    const handleFocus = () => {
+      if (!localStorage.getItem('user-storage') && user) {
+        clearUser();
+        router.replace('/login');
+      }
+    };
+    window.addEventListener('focus', handleFocus);
 
-  //   return () => {
-  //     window.removeEventListener('storage', handleStorageChange);
-  //     window.removeEventListener('focus', handleFocus);
-  //   };
-  // }, [user, clearUser, router]);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [user, clearUser, router]);
 
   useEffect(() => {
     // ハイドレーション（ストレージ読み込み）が終わるまで何もしない
