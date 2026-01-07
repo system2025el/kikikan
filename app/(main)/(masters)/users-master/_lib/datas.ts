@@ -1,3 +1,4 @@
+import { permission } from '@/app/(main)/_lib/permission';
 import { FormItemsType } from '@/app/(main)/_ui/form-box';
 
 import { UsersMasterDialogValues, UsersMasterTableValues } from './types';
@@ -16,7 +17,7 @@ export const emptyUser: UsersMasterDialogValues = {
   mailAdr: '',
   tantouNam: '',
   delFlg: false,
-  psermission: { juchu: 0, nyushuko: 0, masters: 0, ht: 0, loginSetting: 0 },
+  permission: { juchu: 0, nyushuko: 0, masters: 0, ht: 0, loginSetting: 0 },
   lastLoginAt: null,
 };
 
@@ -64,22 +65,6 @@ export const radioPair = [
   { id: '0', label: '無し' },
   { id: '1', label: '参照更新' },
 ];
-
-export const permission = {
-  none: 0,
-  juchu_ref: 1,
-  juchu_upd: 2,
-  juchu_full: 1 | 2,
-  nyushuko_ref: 4,
-  nyushuko_upd: 8,
-  nyushuko_full: 4 | 8,
-  mst_ref: 16,
-  mst_upd: 32,
-  mst_full: 16 | 32,
-  ht: 64,
-  login: 128,
-  system: 65535,
-} as const;
 
 export const juchuRadio = [
   { id: permission.none, label: '無し' },

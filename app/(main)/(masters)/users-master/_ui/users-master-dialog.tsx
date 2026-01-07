@@ -338,7 +338,7 @@ export const UsersMasterDialog = ({
                   <Grid2 sx={styles.container}>
                     <Typography mr={8}>受注系画面</Typography>
                     <RadioButtonGroup
-                      name="psermission.juchu"
+                      name="permission.juchu"
                       control={control}
                       options={juchuRadio}
                       valueKey="id"
@@ -351,7 +351,7 @@ export const UsersMasterDialog = ({
                     <Typography mr={6}>入出庫系画面</Typography>
 
                     <RadioButtonGroup
-                      name="psermission.nyushuko"
+                      name="permission.nyushuko"
                       control={control}
                       options={nyushukoRadio}
                       valueKey="id"
@@ -363,7 +363,7 @@ export const UsersMasterDialog = ({
                   <Grid2 sx={styles.container}>
                     <Typography mr={2}>業務マスタ系画面</Typography>
                     <RadioButtonGroup
-                      name="psermission.masters"
+                      name="permission.masters"
                       control={control}
                       options={mastersRadio}
                       valueKey="id"
@@ -375,7 +375,7 @@ export const UsersMasterDialog = ({
                   <Grid2 sx={styles.container}>
                     <Typography mr={6}>ログイン管理</Typography>
                     <RadioButtonGroup
-                      name="psermission.loginSetting"
+                      name="permission.loginSetting"
                       control={control}
                       options={loginSettingRadio}
                       valueKey="id"
@@ -387,7 +387,7 @@ export const UsersMasterDialog = ({
                   <Grid2 sx={styles.container}>
                     <Typography mr={6}>ハンディ作業</Typography>
                     <RadioButtonGroup
-                      name="psermission.ht"
+                      name="permission.ht"
                       control={control}
                       options={htRadio}
                       valueKey="id"

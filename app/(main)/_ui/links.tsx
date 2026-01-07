@@ -16,6 +16,9 @@ import {
 import { usePathname, useRouter } from 'next/navigation';
 import { Fragment, useState } from 'react';
 
+import { useUserStore } from '@/app/_lib/stores/usestore';
+import { permission } from '@/app/(main)/_lib/permission';
+
 import { useDirty } from './dirty-context';
 
 /* サイドバーの中身のタイプ */
@@ -47,13 +50,13 @@ const masterList: MenuItem[] = [
   // { name: '拠点マスタ', url: '/bases-master' },
   // { name: '権限マスタ', url: '/' },
   { name: '一式マスタ', url: '/isshiki-master' },
-  { name: '担当者マスタ', url: '/users-master' },
+  //{ name: '担当者マスタ', url: '/users-master' },
   { name: '機材セットマスタ', url: '/eqpt-set-master' },
   { name: 'マスタインポート', url: '/masters-import' },
   { name: 'マスタエクスポート', url: '/masters-export' },
 ];
 /* 設定リスト */
-const settingList: MenuItem[] = [];
+const settingList: MenuItem[] = [{ name: '担当者マスタ', url: '/users-master' }];
 /* 入出庫管理リスト */
 const stockIOList: MenuItem[] = [
   { name: '出庫', url: '/shuko-list' },
@@ -76,6 +79,7 @@ export default function NavLinks() {
   const pathname = usePathname();
   /*  */
   const router = useRouter();
+  const user = useUserStore((state) => state.user);
   const { isDirty } = useDirty();
   const { requestNavigation, isPending } = useDirty();
 
@@ -163,14 +167,22 @@ export default function NavLinks() {
         </ListItemText>
       </ListItemButton>
       {/* 受注管理 */}
-      <ListItemButton onClick={orderClick}>
+      <ListItemButton
+        onClick={orderClick}
+        sx={{ display: user!.permission.juchu & permission.juchu_ref ? 'flex' : 'none' }}
+      >
         <ListItemIcon>
           <StopSharpIcon />
         </ListItemIcon>
         <ListItemText>受注管理</ListItemText>
         {orderOpen ? <ExpandLess /> : <ExpandMore />}
       </ListItemButton>
-      <Collapse in={orderOpen} timeout="auto" unmountOnExit>
+      <Collapse
+        in={orderOpen}
+        timeout="auto"
+        unmountOnExit
+        sx={{ display: user!.permission.juchu & permission.juchu_ref ? 'flex' : 'none' }}
+      >
         <List component="div" disablePadding>
           {orderList.map((text) => (
             <ListItem
@@ -178,6 +190,8 @@ export default function NavLinks() {
               disablePadding
               sx={{
                 backgroundColor: isSelected(text.url) ? currentPgColor : undefined,
+                display:
+                  text.name === '新規受注' ? (user!.permission.juchu & permission.juchu_upd ? 'flex' : 'none') : 'flex',
               }}
             >
               <ListItemButton onClick={() => handleNavigation(text.url)} dense disabled={isPending}>
@@ -191,14 +205,22 @@ export default function NavLinks() {
         </List>
       </Collapse>
       {/* 入出庫管理 */}
-      <ListItemButton onClick={stockIOClick}>
+      <ListItemButton
+        onClick={stockIOClick}
+        sx={{ display: user!.permission.nyushuko & permission.nyushuko_ref ? 'flex' : 'none' }}
+      >
         <ListItemIcon>
           <StopSharpIcon />
         </ListItemIcon>
         <ListItemText>入出庫管理</ListItemText>
         {stockIOOpen ? <ExpandLess /> : <ExpandMore />}
       </ListItemButton>
-      <Collapse in={stockIOOpen} timeout="auto" unmountOnExit>
+      <Collapse
+        in={stockIOOpen}
+        timeout="auto"
+        unmountOnExit
+        sx={{ display: user!.permission.nyushuko & permission.nyushuko_ref ? 'flex' : 'none' }}
+      >
         <List disablePadding>
           {stockIOList.map((text) => (
             <ListItem
@@ -219,14 +241,22 @@ export default function NavLinks() {
         </List>
       </Collapse>
       {/* マスタ管理 */}
-      <ListItemButton onClick={masterClick}>
+      <ListItemButton
+        onClick={masterClick}
+        sx={{ display: user!.permission.masters & permission.mst_ref ? 'flex' : 'none' }}
+      >
         <ListItemIcon>
           <StopSharpIcon />
         </ListItemIcon>
         <ListItemText>マスタ管理</ListItemText>
         {masterOpen ? <ExpandLess /> : <ExpandMore />}
       </ListItemButton>
-      <Collapse in={masterOpen} timeout="auto" unmountOnExit>
+      <Collapse
+        in={masterOpen}
+        timeout="auto"
+        unmountOnExit
+        sx={{ display: user!.permission.masters & permission.mst_ref ? 'flex' : 'none' }}
+      >
         <List component="div" disablePadding>
           {masterList.map((text, index) => (
             <Fragment key={text.name}>
@@ -250,14 +280,22 @@ export default function NavLinks() {
         </List>
       </Collapse>
       {/* 設定 */}
-      <ListItemButton onClick={settingClick}>
+      <ListItemButton
+        onClick={settingClick}
+        sx={{ display: user!.permission.loginSetting & permission.login ? 'flex' : 'none' }}
+      >
         <ListItemIcon>
           <StopSharpIcon />
         </ListItemIcon>
-        <ListItemText>設定</ListItemText>
+        <ListItemText>ログイン管理</ListItemText>
         {settingOpen ? <ExpandLess /> : <ExpandMore />}
       </ListItemButton>
-      <Collapse in={settingOpen} timeout="auto" unmountOnExit>
+      <Collapse
+        in={settingOpen}
+        timeout="auto"
+        unmountOnExit
+        sx={{ display: user!.permission.loginSetting & permission.login ? 'flex' : 'none' }}
+      >
         <List component="div" disablePadding>
           {settingList.map((text) => (
             <ListItem

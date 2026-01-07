@@ -11,6 +11,7 @@ import { jaJP } from 'rsuite/esm/locales';
 import { notoSansJp } from '@/app/_ui/fonts';
 import ThemeProvider from '@/app/_ui/theme-provider';
 
+import AuthGuard from './_ui/auth-guard';
 import { DirtyProvider } from './_ui/dirty-context';
 import Sidebar from './_ui/sidebar';
 
@@ -29,11 +30,13 @@ const Layout = ({ children }: Readonly<{ children: React.ReactNode }>) => {
   /* jsx
   ---------------------------------------------------------------------------------------------------- */
   return (
-    <CustomProvider locale={jaJP}>
-      <DirtyProvider>
-        <Sidebar>{children}</Sidebar>
-      </DirtyProvider>
-    </CustomProvider>
+    <AuthGuard>
+      <CustomProvider locale={jaJP}>
+        <DirtyProvider>
+          <Sidebar>{children}</Sidebar>
+        </DirtyProvider>
+      </CustomProvider>
+    </AuthGuard>
   );
 };
 export default Layout;

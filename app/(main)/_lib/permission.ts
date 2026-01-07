@@ -1,0 +1,15 @@
+export const permission = {
+  none: 0,
+  juchu_ref: 1,
+  juchu_upd: 2,
+  juchu_full: 1 | 2,
+  nyushuko_ref: 4,
+  nyushuko_upd: 8,
+  nyushuko_full: 4 | 8,
+  mst_ref: 16,
+  mst_upd: 32,
+  mst_full: 16 | 32,
+  ht: 64,
+  login: 128,
+  system: 65535,
+} as const;

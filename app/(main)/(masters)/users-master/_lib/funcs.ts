@@ -15,8 +15,9 @@ import {
 import { MUserDBValues } from '@/app/_lib/db/types/m-use-type';
 import { getUrl } from '@/app/_lib/url';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
+import { permission } from '@/app/(main)/_lib/permission';
 
-import { emptyUser, htRadio, juchuRadio, loginSettingRadio, mastersRadio, nyushukoRadio, permission } from './datas';
+import { emptyUser, htRadio, juchuRadio, loginSettingRadio, mastersRadio, nyushukoRadio } from './datas';
 import { UsersMasterDialogValues, UsersMasterTableValues } from './types';
 
 /**
@@ -83,7 +84,7 @@ export const getChosenUser = async (mailAdr: string) => {
       //         ht: biString.slice(6, 7),
       //         loginSetting: biString.slice(7, 8),
       //       },
-      psermission: {
+      permission: {
         juchu: rows[0].permission & permission.juchu_full,
         nyushuko: rows[0].permission & permission.nyushuko_full,
         masters: rows[0].permission & permission.mst_full,
@@ -93,7 +94,7 @@ export const getChosenUser = async (mailAdr: string) => {
       mem: rows[0].mem,
       lastLoginAt: !rows[0].last_sign_in_at ? null : toJapanTimeString(rows[0].last_sign_in_at),
     };
-    console.log(UserDetails.psermission);
+    console.log(UserDetails.permission);
     return UserDetails;
   } catch (e) {
     console.error('例外が発生しました:', e);
@@ -107,7 +108,7 @@ export const getChosenUser = async (mailAdr: string) => {
  */
 export const addNewUser = async (data: UsersMasterDialogValues, user: string) => {
   console.log(data.tantouNam);
-  const p = data.psermission;
+  const p = data.permission;
   //const permissionNum = parseInt(p.juchu + p.nyushuko + p.masters + p.ht + p.loginSetting, 2);
   const permissionNum = p.juchu | p.nyushuko | p.masters | p.ht | p.loginSetting;
   const insertData: MUserDBValues = {
@@ -166,7 +167,7 @@ export const addNewUser = async (data: UsersMasterDialogValues, user: string) =>
 export const updateUser = async (currentEmail: string, data: UsersMasterDialogValues, user: string) => {
   const date = new Date().toISOString();
   // permissionを10進数に変換する
-  const p = data.psermission;
+  const p = data.permission;
   //const permissionNum = parseInt(p.juchu + p.nyushuko + p.masters + p.ht + p.loginSetting , 2);
   const permissionNum = p.juchu | p.nyushuko | p.masters | p.ht | p.loginSetting;
 
