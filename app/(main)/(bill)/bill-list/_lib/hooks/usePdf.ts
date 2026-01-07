@@ -18,14 +18,13 @@ export const usePdf = (): [(param: BillHeadValues) => Promise<Blob>] => {
     setFont(fontBytes);
   };
 
-  // イメージの読み込み
   const setupImage = async () => {
-    const imageBytes = await fetch('/images/sign.bank.png').then((res) => res.arrayBuffer());
+    const imageBytes = await fetch('/images/請求書署名.png').then((res) => res.arrayBuffer());
     setImage(imageBytes);
   };
 
   const setupLog = async () => {
-    const logBytes = await fetch('/images/log.png').then((res) => res.arrayBuffer());
+    const logBytes = await fetch('/images/請求書ロゴ.png').then((res) => res.arrayBuffer());
     setLog(logBytes);
   };
 

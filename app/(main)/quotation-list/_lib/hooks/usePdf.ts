@@ -23,7 +23,7 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
 
   // イメージの読み込み
   const setupImage = async () => {
-    const imageBytes = await fetch('/images/sign.png').then((res) => res.arrayBuffer());
+    const imageBytes = await fetch('/images/見積書署名.png').then((res) => res.arrayBuffer());
     setImage(imageBytes);
   };
 
@@ -472,7 +472,7 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
     const pngImage = await pdfDoc.embedPng(image);
     pngImage.scale(1);
     page.drawImage(pngImage, {
-      x: 360,
+      x: 350,
       y: 630,
       width: 200,
       height: 75,

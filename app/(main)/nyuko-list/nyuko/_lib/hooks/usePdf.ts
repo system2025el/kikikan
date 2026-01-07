@@ -36,7 +36,7 @@ export const usePdf = (): [(params: PdfModel[]) => Promise<Blob>] => {
 
   // イメージの読み込み
   const setupImage = async () => {
-    const imageBytes = await fetch('/images/sign.png').then((res) => res.arrayBuffer());
+    const imageBytes = await fetch('/images/納品書署名.png').then((res) => res.arrayBuffer());
     setImage(imageBytes);
   };
 
