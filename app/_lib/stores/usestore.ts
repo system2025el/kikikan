@@ -5,6 +5,13 @@ type User = {
   id: number;
   name: string;
   email: string;
+  permission: {
+    juchu: number;
+    nyushuko: number;
+    masters: number;
+    loginSetting: number;
+    ht: number;
+  };
 };
 
 type UserState = {
