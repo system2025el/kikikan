@@ -147,7 +147,7 @@ export const Order = (props: {
   const [path, setPath] = useState<string | null>(null);
 
   // context
-  const { setIsDirty } = useDirty();
+  const { setIsDirty, requestNavigation } = useDirty();
   // 合計金額
   const priceTotal = eqHeaderList!.reduce((sum, row) => sum + (row.shokei ?? 0), 0);
 
@@ -358,13 +358,16 @@ export const Order = (props: {
     const lockResult = await lock();
 
     if (lockResult) {
-      if (!isDirty) {
-        setIsLoading(true);
-        router.push(`/eq-main-order-detail/${props.juchuHeadData.juchuHeadId}/0/edit`);
-      } else {
-        setPath(`/eq-main-order-detail/${props.juchuHeadData.juchuHeadId}/0/edit`);
-        setDirtyOpen(true);
-      }
+      const path = `/eq-main-order-detail/${props.juchuHeadData.juchuHeadId}/0/edit`;
+      // if (!isDirty) {
+      //   setIsLoading(true);
+      //   router.push(path);
+      // } else {
+      //   setPath(path);
+      //   setDirtyOpen(true);
+      // }
+      if (!isDirty) setIsLoading(true);
+      requestNavigation(path);
     }
     setIsProcessing(false);
   };
@@ -384,17 +387,16 @@ export const Order = (props: {
           (selectEqHeader.kicsShukoDat ? selectEqHeader.kicsShukoFixFlg === 1 : true) &&
           (selectEqHeader.yardShukoDat ? selectEqHeader.yardShukoFixFlg === 1 : true)
         ) {
-          if (!isDirty) {
-            setIsLoading(true);
-            router.push(
-              `/eq-return-order-detail/${props.juchuHeadData.juchuHeadId}/0/${selectEqHeader.juchuKizaiHeadId}/edit`
-            );
-          } else {
-            setPath(
-              `/eq-return-order-detail/${props.juchuHeadData.juchuHeadId}/0/${selectEqHeader.juchuKizaiHeadId}/edit`
-            );
-            setDirtyOpen(true);
-          }
+          const path = `/eq-return-order-detail/${props.juchuHeadData.juchuHeadId}/0/${selectEqHeader.juchuKizaiHeadId}/edit`;
+          // if (!isDirty) {
+          //   setIsLoading(true);
+          //   router.push(path);
+          // } else {
+          //   setPath(path);
+          //   setDirtyOpen(true);
+          // }
+          if (!isDirty) setIsLoading(true);
+          requestNavigation(path);
         } else {
           setAlertTitle('選択項目を確認してください');
           setAlertMessage('出発済のメイン明細を選択してください');
@@ -424,17 +426,16 @@ export const Order = (props: {
           (selectEqHeader.kicsShukoDat ? selectEqHeader.kicsShukoFixFlg === 1 : true) &&
           (selectEqHeader.yardShukoDat ? selectEqHeader.yardShukoFixFlg === 1 : true)
         ) {
-          if (!isDirty) {
-            setIsLoading(true);
-            router.push(
-              `/eq-keep-order-detail/${props.juchuHeadData.juchuHeadId}/0/${selectEqHeader.juchuKizaiHeadId}/edit`
-            );
-          } else {
-            setPath(
-              `/eq-keep-order-detail/${props.juchuHeadData.juchuHeadId}/0/${selectEqHeader.juchuKizaiHeadId}/edit`
-            );
-            setDirtyOpen(true);
-          }
+          const path = `/eq-keep-order-detail/${props.juchuHeadData.juchuHeadId}/0/${selectEqHeader.juchuKizaiHeadId}/edit`;
+          // if (!isDirty) {
+          //   setIsLoading(true);
+          //   router.push(path);
+          // } else {
+          //   setPath(path);
+          //   setDirtyOpen(true);
+          // }
+          if (!isDirty) setIsLoading(true);
+          requestNavigation(path);
         } else {
           setAlertTitle('選択項目を確認してください');
           setAlertMessage('出発済のメイン明細を選択してください');
@@ -632,16 +633,16 @@ export const Order = (props: {
           : row.juchuKizaiHeadKbn === 3
             ? `/eq-keep-order-detail/${row.juchuHeadId}/${row.juchuKizaiHeadId}/${row.oyaJuchuKizaiHeadId}/${mode}`
             : `/eq-main-order-detail/${row.juchuHeadId}/${row.juchuKizaiHeadId}/${mode}`;
-    if (!isDirty) {
-      if (isLoading) return;
-      setIsLoading(true);
-      if (lockData && lockData.addUser === user?.name) {
-      }
-      router.push(path);
-    } else {
-      setPath(path);
-      setDirtyOpen(true);
-    }
+    // if (!isDirty) {
+    //   if (isLoading) return;
+    //   setIsLoading(true);
+    //   router.push(path);
+    // } else {
+    //   setPath(path);
+    //   setDirtyOpen(true);
+    // }
+    if (!isDirty) setIsLoading(true);
+    requestNavigation(path);
   };
 
   // 車両入力ボタン押下
@@ -699,17 +700,17 @@ export const Order = (props: {
     if (!user || isProcessing) return;
     setIsProcessing(true);
 
-    if (result && path) {
-      const lockResult = await lock();
-      if (lockResult) {
-        if (isLoading) return;
-        setIsLoading(true);
-        setLockData(null);
-        setIsDirty(false);
-        router.push(path);
-        setPath(null);
-      }
-    } else if (result && !path) {
+    // if (result && path) {
+    //   const lockResult = await lock();
+    //   if (lockResult) {
+    //     if (isLoading) return;
+    //     setIsLoading(true);
+    //     setLockData(null);
+    //     setIsDirty(false);
+    //     router.push(path);
+    //     setPath(null);
+    //   }
+    /*} else*/ if (result /*&& !path*/) {
       await lockRelease(1, props.juchuHeadData.juchuHeadId, user.name, user.email);
       setEdit(false);
       reset();
