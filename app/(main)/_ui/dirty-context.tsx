@@ -5,12 +5,6 @@ import { Box, Button, Dialog, DialogActions, DialogContentText, DialogTitle } fr
 import { usePathname, useRouter } from 'next/navigation';
 import { createContext, useContext, useEffect, useState, useTransition } from 'react';
 
-import { useUserStore } from '@/app/_lib/stores/usestore';
-
-import { LockValues } from '../_lib/types';
-
-//import { IsDirtyAlertDialog } from '../order/[juchu_head_id]/[mode]/_ui/caveat-dialog';
-
 type DirtyContextType = {
   isDirty: boolean;
   setIsDirty: (val: boolean) => void;
@@ -152,7 +146,9 @@ export const IsDirtyAlertDialog = ({ open, onClick }: { open: boolean; onClick: 
         <Button onClick={() => handleClick(true)} loading={isSave}>
           破棄
         </Button>
-        <Button onClick={() => onClick(false)}>戻る</Button>
+        <Button onClick={() => onClick(false)} disabled={isSave}>
+          戻る
+        </Button>
       </DialogActions>
     </Dialog>
   );

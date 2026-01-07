@@ -149,7 +149,6 @@ export default function NavLinks() {
     <List dense sx={{ pt: 0 }}>
       {/* ダッシュボード */}
       <ListItemButton
-        href="/dashboard"
         onClick={() => handleNavigation('/dashboard')}
         sx={{
           backgroundColor: pathname === '/dashboard' ? currentPgColor : undefined,
@@ -181,7 +180,7 @@ export default function NavLinks() {
                 backgroundColor: isSelected(text.url) ? currentPgColor : undefined,
               }}
             >
-              <ListItemButton onClick={async () => handleNavigation(text.url)} dense disabled={isPending}>
+              <ListItemButton onClick={() => handleNavigation(text.url)} dense disabled={isPending}>
                 <ListItemText
                   primary={text.name}
                   sx={{ color: isSelected(text.url) ? 'primary.dark' : undefined, pl: 8 }}
@@ -209,7 +208,7 @@ export default function NavLinks() {
                 backgroundColor: isSelected(text.url) ? currentPgColor : undefined,
               }}
             >
-              <ListItemButton onClick={async () => handleNavigation(text.url)} dense disabled={isPending}>
+              <ListItemButton onClick={() => handleNavigation(text.url)} dense disabled={isPending}>
                 <ListItemText
                   primary={text.name}
                   sx={{ color: isSelected(text.url) ? 'primary.dark' : undefined, pl: 8 }}
@@ -238,7 +237,7 @@ export default function NavLinks() {
                   backgroundColor: isSelected(text.url) ? currentPgColor : undefined,
                 }}
               >
-                <ListItemButton onClick={async () => handleNavigation(text.url)} dense disabled={isPending}>
+                <ListItemButton onClick={() => handleNavigation(text.url)} dense disabled={isPending}>
                   <ListItemText
                     primary={text.name}
                     sx={{ color: isSelected(text.url) ? 'primary.dark' : undefined, pl: 8 }}
@@ -268,7 +267,7 @@ export default function NavLinks() {
                 backgroundColor: isSelected(text.url) ? currentPgColor : undefined,
               }}
             >
-              <ListItemButton onClick={async () => handleNavigation(text.url)} dense disabled={isPending}>
+              <ListItemButton onClick={() => handleNavigation(text.url)} dense disabled={isPending}>
                 <ListItemText
                   primary={text.name}
                   sx={{ color: isSelected(text.url) ? 'primary.dark' : undefined, pl: 8 }}
@@ -304,7 +303,7 @@ export default function NavLinks() {
           ))}
         </List>
       </Collapse> */}
-      <ListItemButton href="/">
+      <ListItemButton onClick={() => handleNavigation('/')} disabled={isPending}>
         <ListItemIcon>
           <StopSharpIcon />
         </ListItemIcon>
