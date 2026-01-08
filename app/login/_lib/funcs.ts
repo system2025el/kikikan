@@ -30,3 +30,8 @@ export const setSession = async (access_token: string, refresh_token: string) =>
     }
   });
 };
+
+/* ログアウトクリック時 */
+export const handleLogout = async () => {
+  await supabase.auth.signOut();
+};

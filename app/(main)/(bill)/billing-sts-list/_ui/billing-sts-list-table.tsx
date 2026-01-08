@@ -128,7 +128,6 @@ export const BillingStsListTable = ({
               <TableRow sx={{ whiteSpace: 'nowrap' }}>
                 <TableCell padding="none" />
                 <TableCell padding="none" />
-                <TableCell padding="none" />
                 <TableCell align="right">受注番号</TableCell>
                 <TableCell>相手</TableCell>
                 <TableCell>相手担当者</TableCell>
@@ -143,7 +142,7 @@ export const BillingStsListTable = ({
               ))}
               {emptyRows > 0 && (
                 <TableRow style={{ height: 30 * emptyRows }}>
-                  <TableCell colSpan={10} />
+                  <TableCell colSpan={7} />
                 </TableRow>
               )}
             </TableBody>
@@ -221,9 +220,6 @@ const BillingStsRow = ({ juchu, refetch }: { juchu: BillingStsTableValues; refet
   return (
     <>
       <TableRow>
-        <TableCell padding="checkbox" width={48}>
-          <Checkbox color="primary" />
-        </TableCell>
         <TableCell padding="none" width={48} align="center">
           <IconButton onClick={() => setOpen(!open)} sx={{ padding: 0 }}>
             {open ? <KeyboardArrowUp fontSize="small" /> : <KeyboardArrowDown fontSize="small" />}
@@ -267,7 +263,7 @@ const BillingStsRow = ({ juchu, refetch }: { juchu: BillingStsTableValues; refet
         <TableCell />
       </TableRow>
       <TableRow sx={{ whiteSpace: 'nowrap' }}>
-        <TableCell colSpan={4} />
+        <TableCell colSpan={3} />
         <TableCell colSpan={7}>
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Table stickyHeader size="small" padding="none">
