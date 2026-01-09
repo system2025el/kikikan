@@ -11,7 +11,7 @@ import {
   useForm,
 } from 'react-hook-form-mui';
 
-import { useUserStore } from '@/app/_lib/stores/usestore';
+import { User, useUserStore } from '@/app/_lib/stores/usestore';
 
 import { FormBox, selectNone, SelectTypes } from '../../../_ui/form-box';
 import { Loading } from '../../../_ui/loading';
@@ -24,17 +24,16 @@ import { addNewEqpt, getChosenEqpt, updateEqpt } from '../_lib/funcs';
 import { EqptsMasterDialogSchema, EqptsMasterDialogValues } from '../_lib/types';
 
 export const EqMasterDialog = ({
+  user,
   eqptId,
   handleClose,
   refetchEqpts,
 }: {
+  user: User | null;
   eqptId: number;
   handleClose: () => void;
   refetchEqpts: () => Promise<void>;
 }) => {
-  // ログインユーザ
-  const user = useUserStore((state) => state.user);
-
   /* useState --------------------- */
   /* eqpt更新前の */
   const [currentEqpt, setCurrentEqpt] = useState<EqptsMasterDialogValues>(emptyEqpt);
@@ -172,6 +171,7 @@ export const EqMasterDialog = ({
     <>
       <form onSubmit={handleSubmit(onSubmit)}>
         <MasterDialogTitle
+          user={user}
           editable={editable}
           handleEditable={() => setEditable(true)}
           handleClose={handleClickClose}

@@ -5,7 +5,7 @@ import { Grid2 } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { CheckboxElement, TextareaAutosizeElement, TextFieldElement, useForm } from 'react-hook-form-mui';
 
-import { useUserStore } from '@/app/_lib/stores/usestore';
+import { User, useUserStore } from '@/app/_lib/stores/usestore';
 import { FormBox } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 
@@ -22,17 +22,16 @@ import { LocsMasterDialogSchema, LocsMasterDialogValues } from '../_lib/types';
  * @returns {JSX.Element} 公演場所マスタの詳細ダイアログコンポーネント
  */
 export const LocationsMasterDialog = ({
+  user,
   locationId,
   handleClose,
   refetchLocs,
 }: {
+  user: User | null;
   locationId: number;
   handleClose: () => void;
   refetchLocs: () => Promise<void>;
 }) => {
-  // ログインユーザ
-  const user = useUserStore((state) => state.user);
-
   /* useState --------------------- */
   /** DBのローディング状態 */
   const [isLoading, setIsLoading] = useState(true);
@@ -156,6 +155,7 @@ export const LocationsMasterDialog = ({
     <>
       <form onSubmit={handleSubmit(onSubmit)}>
         <MasterDialogTitle
+          user={user}
           editable={editable}
           isNew={isNew}
           handleEditable={() => setEditable(true)}

@@ -31,8 +31,10 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
+import { permission } from '@/app/(main)/_lib/permission';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
+import { PermissionGuard } from '@/app/(main)/_ui/permission-guard';
 import { MuiTablePagination } from '@/app/(main)/_ui/table-pagination';
 
 import { FAKE_NEW_ID, ROWS_PER_MASTER_TABLE_PAGE } from '../../../_lib/constants';
@@ -276,276 +278,293 @@ export const RfidMaster = ({ kizaiId }: { kizaiId: number }) => {
   }, [kizaiId]);
 
   return (
-    <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
-      <Grid2 container display={'flex'} justifyContent={'end'} mb={0.5}>
-        <Button onClick={() => window.close()}>閉じる</Button>
-      </Grid2>
-      <Paper variant="outlined">
-        <Box
-          width={'100%'}
-          display={'flex'}
-          px={2}
-          justifyContent={'space-between'}
-          alignItems={'center'}
-          sx={{ minHeight: '30px', maxHeight: '30px' }}
-        >
-          <Typography>機材詳細</Typography>
-          <Box>
-            <Button
-              onClick={() => handleClickSave()}
-              sx={{ alignItems: 'center' }}
-              loading={isLoading}
-              disabled={
-                !theRfids || JSON.stringify(currentRfids) === JSON.stringify(theRfids) || saved /*|| isAllSame*/
-              }
-            >
-              <SaveAsIcon fontSize="small" sx={{ mr: 0.5 }} />
-              保存
-            </Button>
-          </Box>
-        </Box>
-        <Divider />
-        <Box width={'100%'} pb={0.5}>
-          <Box sx={styles.container}>
-            <Typography mr={3}>機材名</Typography>
-            <TextField value={kizaiNam} disabled />
-          </Box>
-          <Box sx={styles.container}>
-            <Typography mr={3}>機材ステータス一括変更</Typography>
-            <Select
-              value={selectedSts?.id ?? ''}
-              onChange={(event) => {
-                const selectedId = Number(event.target.value);
-                const selectedObj = stsOption?.find((s) => Number(s.id) === selectedId);
-                setSelectedSts(selectedObj ?? undefined);
-              }}
-              sx={{ width: 200 }}
-            >
-              {stsOption?.map((s) => (
-                <MenuItem key={s.id} value={Number(s.id)}>
-                  {s.label}
-                </MenuItem>
-              ))}
-            </Select>
-            <Button
-              sx={{ ml: 1 }}
-              onClick={() => handleClickAdapt(selectedTags, selectedSts!)}
-              disabled={typeof selectedSts?.id !== 'number' || selectedTags.length === 0}
-            >
-              適用
-            </Button>
-          </Box>
-        </Box>
-      </Paper>
-      <Box>
-        <Typography pt={1} pl={2}>
-          RFID一覧
-        </Typography>
-        <Divider />
-        <Grid2 container mt={0.5} mx={0.5} justifyContent={'space-between'} alignItems={'center'}>
-          <Grid2 spacing={1}>
-            <MuiTablePagination arrayList={theRfids ?? []} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
-          </Grid2>
-          <Grid2 container spacing={3}>
-            <Grid2>
-              <Button onClick={() => handleOpenDialog(String(FAKE_NEW_ID))}>
-                <AddIcon fontSize="small" />
-                新規
+    <PermissionGuard category={'masters'} required={permission.mst_ref}>
+      <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
+        <Grid2 container display={'flex'} justifyContent={'end'} mb={0.5}>
+          <Button onClick={() => window.close()}>閉じる</Button>
+        </Grid2>
+        <Paper variant="outlined">
+          <Box
+            width={'100%'}
+            display={'flex'}
+            px={2}
+            justifyContent={'space-between'}
+            alignItems={'center'}
+            sx={{ minHeight: '30px', maxHeight: '30px' }}
+          >
+            <Typography>機材詳細</Typography>
+            <Box>
+              <Button
+                onClick={() => handleClickSave()}
+                sx={{ alignItems: 'center' }}
+                loading={isLoading}
+                disabled={
+                  !theRfids ||
+                  JSON.stringify(currentRfids) === JSON.stringify(theRfids) ||
+                  saved /*|| isAllSame*/ ||
+                  !((user?.permission.masters ?? 0) & permission.mst_upd)
+                }
+              >
+                <SaveAsIcon fontSize="small" sx={{ mr: 0.5 }} />
+                保存
               </Button>
+            </Box>
+          </Box>
+          <Divider />
+          <Box width={'100%'} pb={0.5}>
+            <Box sx={styles.container}>
+              <Typography mr={3}>機材名</Typography>
+              <TextField value={kizaiNam} disabled />
+            </Box>
+            <Box sx={styles.container}>
+              <Typography mr={3}>機材ステータス一括変更</Typography>
+              <Select
+                value={selectedSts?.id ?? ''}
+                onChange={(event) => {
+                  const selectedId = Number(event.target.value);
+                  const selectedObj = stsOption?.find((s) => Number(s.id) === selectedId);
+                  setSelectedSts(selectedObj ?? undefined);
+                }}
+                sx={{ width: 200 }}
+              >
+                {stsOption?.map((s) => (
+                  <MenuItem key={s.id} value={Number(s.id)}>
+                    {s.label}
+                  </MenuItem>
+                ))}
+              </Select>
+              <Button
+                sx={{ ml: 1 }}
+                onClick={() => handleClickAdapt(selectedTags, selectedSts!)}
+                disabled={
+                  typeof selectedSts?.id !== 'number' ||
+                  selectedTags.length === 0 ||
+                  !((user?.permission.masters ?? 0) & permission.mst_upd)
+                }
+              >
+                適用
+              </Button>
+            </Box>
+          </Box>
+        </Paper>
+        <Box>
+          <Typography pt={1} pl={2}>
+            RFID一覧
+          </Typography>
+          <Divider />
+          <Grid2 container mt={0.5} mx={0.5} justifyContent={'space-between'} alignItems={'center'}>
+            <Grid2 spacing={1}>
+              <MuiTablePagination arrayList={theRfids ?? []} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
+            </Grid2>
+            <Grid2 container spacing={3}>
+              <Grid2>
+                <Button
+                  onClick={() => handleOpenDialog(String(FAKE_NEW_ID))}
+                  disabled={!((user?.permission.masters ?? 0) & permission.mst_upd)}
+                >
+                  <AddIcon fontSize="small" />
+                  新規
+                </Button>
+              </Grid2>
             </Grid2>
           </Grid2>
-        </Grid2>
-        {isLoading ? (
-          <Loading />
-        ) : !theRfids || theRfids!.length === 0 ? (
-          <Typography>該当するRFIDタグがありません</Typography>
-        ) : (
-          <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
-            {isLoading ? (
-              <Loading />
-            ) : !list || list.length === 0 ? (
-              <Typography justifySelf={'center'}>該当する見積がありません</Typography>
-            ) : (
-              <Table stickyHeader size="small" padding="none">
-                <TableHead>
-                  <TableRow sx={{ whiteSpace: 'nowrap' }}>
-                    <TableCell padding="checkbox">
-                      <Checkbox
-                        color="primary"
-                        onChange={handleSelectAllClick}
-                        indeterminate={selectedTags.length > 0 && selectedTags.length < theRfids.length}
-                        checked={theRfids.length > 0 && selectedTags.length === theRfids.length}
-                        sx={{
-                          '& .MuiSvgIcon-root': {
-                            backgroundColor: '#fff',
-                            borderRadius: '4px',
-                            transition: 'background-color 0.3s',
-                          },
-                        }}
-                      />
-                    </TableCell>
-                    <TableCell padding="checkbox" />
-                    <TableCell align="right">EL No.</TableCell>
-                    <TableCell>RFIDタグID</TableCell>
-                    <TableCell>ステータス</TableCell>
-                    <TableCell>メモ</TableCell>
-                    <TableCell>最終在庫場所</TableCell>
-                    <TableCell>更新日時</TableCell>
-                    <TableCell>担当者</TableCell>
-                    <TableCell>無効</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {list!.map((row) => {
-                    const isItemSelected = selectedTags.includes(row.rfidTagId);
-
-                    return (
-                      <TableRow key={row.rfidTagId} selected={isItemSelected}>
-                        <TableCell
-                          padding="checkbox"
-                          onClick={(event) => handleSelectRfidTags(event, row.rfidTagId)}
-                          tabIndex={-1}
-                          sx={{ cursor: 'pointer', bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap' }}
-                        >
-                          <Checkbox
-                            color="primary"
-                            checked={isItemSelected}
-                            sx={{
-                              '& .MuiSvgIcon-root': {
-                                backgroundColor: '#fff',
-                                borderRadius: '4px',
-                                transition: 'background-color 0.3s',
-                              },
-                            }}
-                          />
-                        </TableCell>
-                        <TableCell
-                          align="right"
-                          sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap' }}
-                        >
-                          {row.tblDspId}
-                        </TableCell>
-                        <TableCell
-                          align="right"
-                          sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap', width: 100 }}
-                        >
-                          {row.elNum}
-                        </TableCell>
-                        <TableCell
-                          sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap', width: 250 }}
-                        >
-                          <Button
-                            variant="text"
-                            sx={{ p: 0, paddingLeft: 1, m: 0, minWidth: 1, justifyContent: 'left' }}
-                            onClick={() => handleOpenDialog(row.rfidTagId)}
-                          >
-                            <Box minWidth={60}>{row.rfidTagId}</Box>
-                          </Button>
-                        </TableCell>
-                        <TableCell
-                          sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap', width: 250 }}
-                        >
-                          {row.stsNam}
-                        </TableCell>
-                        <TableCell sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap' }}>
-                          <LightTooltipWithText variant={'body2'} maxWidth={400}>
-                            {row.mem}
-                          </LightTooltipWithText>
-                        </TableCell>
-                        <TableCell sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap' }}>
-                          <LightTooltipWithText variant={'body2'} maxWidth={400}>
-                            {row.shozokuNam}
-                          </LightTooltipWithText>
-                        </TableCell>
-                        <TableCell sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap' }}>
-                          <LightTooltipWithText variant={'body2'} maxWidth={400}>
-                            {row.updDat ? toJapanTimeString(row.updDat) : ''}
-                          </LightTooltipWithText>
-                        </TableCell>
-                        <TableCell sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap' }}>
-                          <LightTooltipWithText variant={'body2'} maxWidth={400}>
-                            {row.updUser}
-                          </LightTooltipWithText>
-                        </TableCell>
-                        <TableCell
-                          sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap', width: 50 }}
-                        >
-                          {row.delFlg ? '無効' : ''}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                  {emptyRows > 0 && (
-                    <TableRow style={{ height: 30 * emptyRows }}>
-                      <TableCell colSpan={7} />
+          {isLoading ? (
+            <Loading />
+          ) : !theRfids || theRfids!.length === 0 ? (
+            <Typography>該当するRFIDタグがありません</Typography>
+          ) : (
+            <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
+              {isLoading ? (
+                <Loading />
+              ) : !list || list.length === 0 ? (
+                <Typography justifySelf={'center'}>該当する見積がありません</Typography>
+              ) : (
+                <Table stickyHeader size="small" padding="none">
+                  <TableHead>
+                    <TableRow sx={{ whiteSpace: 'nowrap' }}>
+                      <TableCell padding="checkbox">
+                        <Checkbox
+                          color="primary"
+                          onChange={handleSelectAllClick}
+                          indeterminate={selectedTags.length > 0 && selectedTags.length < theRfids.length}
+                          checked={theRfids.length > 0 && selectedTags.length === theRfids.length}
+                          sx={{
+                            '& .MuiSvgIcon-root': {
+                              backgroundColor: '#fff',
+                              borderRadius: '4px',
+                              transition: 'background-color 0.3s',
+                            },
+                          }}
+                        />
+                      </TableCell>
+                      <TableCell padding="checkbox" />
+                      <TableCell align="right">EL No.</TableCell>
+                      <TableCell>RFIDタグID</TableCell>
+                      <TableCell>ステータス</TableCell>
+                      <TableCell>メモ</TableCell>
+                      <TableCell>最終在庫場所</TableCell>
+                      <TableCell>更新日時</TableCell>
+                      <TableCell>担当者</TableCell>
+                      <TableCell>無効</TableCell>
                     </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            )}
-          </TableContainer>
-        )}
+                  </TableHead>
+                  <TableBody>
+                    {list!.map((row) => {
+                      const isItemSelected = selectedTags.includes(row.rfidTagId);
 
-        <Dialog open={dialogOpen} fullScreen>
-          <RfidMasterDialog
-            handleClose={handleCloseDialog}
-            rfidId={openId}
-            refetchRfids={refetchRfids}
-            kizaiId={kizaiId}
-          />
-        </Dialog>
-        <Dialog open={memOpen} onClose={() => setMemOpen(false)}>
-          <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
-            <Box>メモを記入してください</Box>
-          </DialogTitle>
-          <DialogContentText m={2} mb={0}>
-            機材ステータスで 「{selectedSts?.label}」を選択時はメモを入力してください。
-            <br />
-            先頭に追加されます。
-            <br />
-            全体で200文字を超えた文字は削除されます。
-          </DialogContentText>
-          <DialogContent sx={{ display: 'flex', justifyContent: 'center' }}>
-            <Box>
-              <TextField
-                value={ngMem}
-                sx={{ width: 400 }}
-                onChange={(e) => {
-                  setNgMem(e.target.value);
-                  if (e.target.value.trim().length === 0) {
-                    setErrorMsg('必須です');
-                  } else if (e.target.value.trim().length > 200) {
-                    setErrorMsg('200文字までで入力してください');
-                  } else {
-                    setErrorMsg('');
-                  }
-                }}
-                error={errorMsg.trim().length > 0}
-              />
-              {errorMsg.trim().length > 0 && (
-                <>
-                  <br />
-                  <Typography variant="caption" color="error">
-                    {errorMsg}
-                  </Typography>
-                </>
+                      return (
+                        <TableRow key={row.rfidTagId} selected={isItemSelected}>
+                          <TableCell
+                            padding="checkbox"
+                            onClick={(event) => handleSelectRfidTags(event, row.rfidTagId)}
+                            tabIndex={-1}
+                            sx={{
+                              cursor: 'pointer',
+                              bgcolor: row.delFlg ? grey[300] : undefined,
+                              whiteSpace: 'nowrap',
+                            }}
+                          >
+                            <Checkbox
+                              color="primary"
+                              checked={isItemSelected}
+                              sx={{
+                                '& .MuiSvgIcon-root': {
+                                  backgroundColor: '#fff',
+                                  borderRadius: '4px',
+                                  transition: 'background-color 0.3s',
+                                },
+                              }}
+                            />
+                          </TableCell>
+                          <TableCell
+                            align="right"
+                            sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap' }}
+                          >
+                            {row.tblDspId}
+                          </TableCell>
+                          <TableCell
+                            align="right"
+                            sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap', width: 100 }}
+                          >
+                            {row.elNum}
+                          </TableCell>
+                          <TableCell
+                            sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap', width: 250 }}
+                          >
+                            <Button
+                              variant="text"
+                              sx={{ p: 0, paddingLeft: 1, m: 0, minWidth: 1, justifyContent: 'left' }}
+                              onClick={() => handleOpenDialog(row.rfidTagId)}
+                            >
+                              <Box minWidth={60}>{row.rfidTagId}</Box>
+                            </Button>
+                          </TableCell>
+                          <TableCell
+                            sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap', width: 250 }}
+                          >
+                            {row.stsNam}
+                          </TableCell>
+                          <TableCell sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap' }}>
+                            <LightTooltipWithText variant={'body2'} maxWidth={400}>
+                              {row.mem}
+                            </LightTooltipWithText>
+                          </TableCell>
+                          <TableCell sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap' }}>
+                            <LightTooltipWithText variant={'body2'} maxWidth={400}>
+                              {row.shozokuNam}
+                            </LightTooltipWithText>
+                          </TableCell>
+                          <TableCell sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap' }}>
+                            <LightTooltipWithText variant={'body2'} maxWidth={400}>
+                              {row.updDat ? toJapanTimeString(row.updDat) : ''}
+                            </LightTooltipWithText>
+                          </TableCell>
+                          <TableCell sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap' }}>
+                            <LightTooltipWithText variant={'body2'} maxWidth={400}>
+                              {row.updUser}
+                            </LightTooltipWithText>
+                          </TableCell>
+                          <TableCell
+                            sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap', width: 50 }}
+                          >
+                            {row.delFlg ? '無効' : ''}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                    {emptyRows > 0 && (
+                      <TableRow style={{ height: 30 * emptyRows }}>
+                        <TableCell colSpan={7} />
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
               )}
-            </Box>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => handleNgMem(selectedTags, selectedSts!)}>適用</Button>
-          </DialogActions>
-        </Dialog>
-      </Box>
-      <Snackbar
-        open={snackBarOpen}
-        autoHideDuration={6000}
-        onClose={() => setSnackBarOpen(false)}
-        message={snackBarMessage}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-        sx={{ marginTop: '65px' }}
-      />
-    </Container>
+            </TableContainer>
+          )}
+
+          <Dialog open={dialogOpen} fullScreen>
+            <RfidMasterDialog
+              user={user}
+              handleClose={handleCloseDialog}
+              rfidId={openId}
+              refetchRfids={refetchRfids}
+              kizaiId={kizaiId}
+            />
+          </Dialog>
+          <Dialog open={memOpen} onClose={() => setMemOpen(false)}>
+            <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
+              <Box>メモを記入してください</Box>
+            </DialogTitle>
+            <DialogContentText m={2} mb={0}>
+              機材ステータスで 「{selectedSts?.label}」を選択時はメモを入力してください。
+              <br />
+              先頭に追加されます。
+              <br />
+              全体で200文字を超えた文字は削除されます。
+            </DialogContentText>
+            <DialogContent sx={{ display: 'flex', justifyContent: 'center' }}>
+              <Box>
+                <TextField
+                  value={ngMem}
+                  sx={{ width: 400 }}
+                  onChange={(e) => {
+                    setNgMem(e.target.value);
+                    if (e.target.value.trim().length === 0) {
+                      setErrorMsg('必須です');
+                    } else if (e.target.value.trim().length > 200) {
+                      setErrorMsg('200文字までで入力してください');
+                    } else {
+                      setErrorMsg('');
+                    }
+                  }}
+                  error={errorMsg.trim().length > 0}
+                />
+                {errorMsg.trim().length > 0 && (
+                  <>
+                    <br />
+                    <Typography variant="caption" color="error">
+                      {errorMsg}
+                    </Typography>
+                  </>
+                )}
+              </Box>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => handleNgMem(selectedTags, selectedSts!)}>適用</Button>
+            </DialogActions>
+          </Dialog>
+        </Box>
+        <Snackbar
+          open={snackBarOpen}
+          autoHideDuration={6000}
+          onClose={() => setSnackBarOpen(false)}
+          message={snackBarMessage}
+          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+          sx={{ marginTop: '65px' }}
+        />
+      </Container>
+    </PermissionGuard>
   );
 };
 

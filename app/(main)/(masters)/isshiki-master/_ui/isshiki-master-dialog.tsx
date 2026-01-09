@@ -6,7 +6,8 @@ import { useFieldArray, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
 import { checkExIsshiki } from '@/app/_lib/db/tables/m-kizai';
-import { useUserStore } from '@/app/_lib/stores/usestore';
+import { User, useUserStore } from '@/app/_lib/stores/usestore';
+import { permission } from '@/app/(main)/_lib/permission';
 import { FormBox, SelectTypes } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 
@@ -24,17 +25,16 @@ import { EqptIsshikiSelectionDialog } from './eqtp-selection-dialog';
  * @returns {JSX.Element} 一式マスタ詳細ダイアログコンポーネント
  */
 export const IsshikisMasterDialog = ({
+  user,
   isshikiId,
   handleClose,
   refetchIsshikis,
 }: {
+  user: User | null;
   isshikiId: number;
   handleClose: () => void;
   refetchIsshikis: () => void;
 }) => {
-  // ログインユーザ
-  const user = useUserStore((state) => state.user);
-
   /* useState -------------------------------------- */
   /* DBのローディング状態 */
   const [isLoading, setIsLoading] = useState(true);
@@ -159,6 +159,7 @@ export const IsshikisMasterDialog = ({
     <>
       <form onSubmit={handleSubmit(onSubmit)}>
         <MasterDialogTitle
+          user={user}
           editable={editable}
           handleEditable={() => setEditable(true)}
           handleClose={handleClickClose}
@@ -219,7 +220,10 @@ export const IsshikisMasterDialog = ({
               </FormBox>
               <FormBox formItem={formItems[3]} align="baseline">
                 <Box width={'100%'} border={1} borderColor={'divider'} p={1}>
-                  <Button onClick={() => setEqSelectOpen(true)} disabled={editable ? false : true}>
+                  <Button
+                    onClick={() => setEqSelectOpen(true)}
+                    disabled={editable ? false : true || !((user?.permission.masters ?? 0) & permission.mst_upd)}
+                  >
                     機材選択
                   </Button>
                   <EqptIsshikiSelectionDialog
@@ -238,7 +242,7 @@ export const IsshikisMasterDialog = ({
                         onClick={() => {
                           kizaisField.remove(index);
                         }}
-                        disabled={editable ? false : true}
+                        disabled={editable ? false : true || !((user?.permission.masters ?? 0) & permission.mst_upd)}
                       >
                         <DeleteIcon fontSize="small" />
                       </Button>

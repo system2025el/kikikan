@@ -22,7 +22,8 @@ import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
 import { deleteEqptSets } from '@/app/_lib/db/tables/m-kizai-set';
-import { useUserStore } from '@/app/_lib/stores/usestore';
+import { User, useUserStore } from '@/app/_lib/stores/usestore';
+import { permission } from '@/app/(main)/_lib/permission';
 import { CloseMasterDialogButton, DeleteButton, MakeEditModeButton, SubmitButton } from '@/app/(main)/_ui/buttons';
 import { FormBox, SelectTypes } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
@@ -41,16 +42,16 @@ import { EqptSetSelectionDialog } from './eqtp-selection-dialog';
  * @returns {JSX.Element} 機材セットマスタ詳細ダイアログコンポーネント
  */
 export const EqptSetsMasterDialog = ({
+  user,
   oyaId,
   handleClose,
   refetchEqptSets,
 }: {
+  user: User | null;
   oyaId: number;
   handleClose: () => void;
   refetchEqptSets: () => void;
 }) => {
-  // ログインユーザ
-  const user = useUserStore((state) => state.user);
   /* useTheme */
   const theme = useTheme();
   const colorOfThis = lighten(theme.palette.primary.main, 0.5);
@@ -207,13 +208,16 @@ export const EqptSetsMasterDialog = ({
           <Stack>
             <SubmitButton
               type="submit"
-              disabled={!isNew && !isDirty}
+              disabled={(!isNew && !isDirty) || !((user?.permission.masters ?? 0) & permission.mst_upd)}
               onClick={() => setAction('save')}
               push={isLoading}
             />
             {!isNew && (
               <>
-                <MakeEditModeButton handleEditable={() => setEditable(true)} disabled={editable ? true : false} />
+                <MakeEditModeButton
+                  handleEditable={() => setEditable(true)}
+                  disabled={editable ? true : false || !((user?.permission.masters ?? 0) & permission.mst_upd)}
+                />
               </>
             )}
             {isDirty}
@@ -258,7 +262,10 @@ export const EqptSetsMasterDialog = ({
               </FormBox>
               <FormBox formItem={formItems[1]} align="baseline">
                 <Box width={'100%'} border={1} borderColor={'divider'} p={1}>
-                  <Button onClick={() => setEqSelectOpen(true)} disabled={editable ? false : true}>
+                  <Button
+                    onClick={() => setEqSelectOpen(true)}
+                    disabled={editable ? false : true || !((user?.permission.masters ?? 0) & permission.mst_upd)}
+                  >
                     機材選択
                   </Button>
                   <EqptSetSelectionDialog
@@ -277,7 +284,7 @@ export const EqptSetsMasterDialog = ({
                         onClick={() => {
                           setField.remove(index);
                         }}
-                        disabled={editable ? false : true}
+                        disabled={editable ? false : true || !((user?.permission.masters ?? 0) & permission.mst_upd)}
                       >
                         <DeleteIcon fontSize="small" />
                       </Button>

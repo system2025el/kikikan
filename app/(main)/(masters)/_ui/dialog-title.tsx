@@ -2,6 +2,9 @@
 
 import { DialogTitle, lighten, Stack, Toolbar, Typography, useTheme } from '@mui/material';
 
+import { User } from '@/app/_lib/stores/usestore';
+
+import { permission } from '../../_lib/permission';
 import { CloseMasterDialogButton, DeleteButton, MakeEditModeButton, SubmitButton } from '../../_ui/buttons';
 
 /**
@@ -10,6 +13,7 @@ import { CloseMasterDialogButton, DeleteButton, MakeEditModeButton, SubmitButton
  * @returns {JSX.Element} マスタ系統一の詳細ダイアログタイトル
  */
 export const MasterDialogTitle = ({
+  user,
   editable,
   isNew,
   dialogTitle,
@@ -20,6 +24,7 @@ export const MasterDialogTitle = ({
   handleEditable,
   setAction,
 }: {
+  user: User | null;
   editable: boolean;
   isNew: boolean;
   isDirty: boolean;
@@ -54,12 +59,20 @@ export const MasterDialogTitle = ({
         {editable && !isNew && <Typography>編集モード</Typography>}
         {isNew && <Typography>新規登録</Typography>}
         <Stack>
-          <SubmitButton type="submit" disabled={isDirty ? false : true} onClick={() => setAction('save')} push={push} />
+          <SubmitButton
+            type="submit"
+            disabled={isDirty ? false : true || !((user?.permission.masters ?? 0) & permission.mst_upd)}
+            onClick={() => setAction('save')}
+            push={push}
+          />
           {!isNew && (
             <>
-              <MakeEditModeButton handleEditable={handleEditable} disabled={editable ? true : false} />
+              <MakeEditModeButton
+                handleEditable={handleEditable}
+                disabled={editable ? true : false || !((user?.permission.masters ?? 0) & permission.mst_upd)}
+              />
               <DeleteButton
-                disabled={isNew ? true : false}
+                disabled={isNew ? true : false || !((user?.permission.masters ?? 0) & permission.mst_upd)}
                 type="submit"
                 onClick={isDeleted ? () => setAction('restore') : () => setAction('delete')}
                 isDeleted={isDeleted}

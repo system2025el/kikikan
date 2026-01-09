@@ -24,7 +24,7 @@ import {
 } from 'react-hook-form-mui';
 
 import { selectElNumExists, selectOneRfid } from '@/app/_lib/db/tables/v-rfid';
-import { useUserStore } from '@/app/_lib/stores/usestore';
+import { User, useUserStore } from '@/app/_lib/stores/usestore';
 
 import { FormBox, selectNone, SelectTypes } from '../../../../_ui/form-box';
 import { Loading } from '../../../../_ui/loading';
@@ -37,17 +37,18 @@ import { addNewRfid, getChosenRfid, updateRfid, updRfidDelFlg } from '../_lib/fu
 import { RfidsMasterDialogSchema, RfidsMasterDialogValues } from '../_lib/types';
 
 export const RfidMasterDialog = ({
+  user,
   rfidId,
   kizaiId,
   handleClose,
   refetchRfids,
 }: {
+  user: User | null;
   rfidId: string;
   kizaiId: number;
   handleClose: () => void;
   refetchRfids: () => Promise<void>;
 }) => {
-  const user = useUserStore((state) => state.user);
   /* useState --------------------- */
   /* rfid更新前の */
   const [currentRfid, setCurrentRfid] = useState<RfidsMasterDialogValues>(emptyRfid);
@@ -212,6 +213,7 @@ export const RfidMasterDialog = ({
     <>
       <form onSubmit={handleSubmit(onSubmit)}>
         <MasterDialogTitle
+          user={user}
           editable={editable}
           handleEditable={() => setEditable(true)}
           handleClose={handleClickClose}
