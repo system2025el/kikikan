@@ -36,8 +36,10 @@ import { LoadingOverlay } from '@/app/(main)/_ui/loading';
 
 import { addLock, delLock, getLock } from '../../_lib/funcs';
 import { useUnsavedChangesWarning } from '../../_lib/hook';
+import { permission } from '../../_lib/permission';
 import { LockValues } from '../../_lib/types';
 import { IsDirtyAlertDialog, useDirty } from '../../_ui/dirty-context';
+import { PermissionGuard } from '../../_ui/permission-guard';
 import { getCustomerSelection } from '../../(masters)/_lib/funcs';
 import { getMituStsSelection, getUsersSelection } from '../_lib/funcs';
 import { usePdf } from '../_lib/hooks/usePdf';
@@ -361,105 +363,176 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
   /* ---------------------------------------------------------------------- */
 
   return (
-    <Container disableGutters sx={{ minWidth: '100%', pb: 10 }} maxWidth={'xl'}>
-      <Grid2 container spacing={4} display={'flex'} justifyContent={'end'} mb={1}>
-        {lockData !== null && lockData.addUser !== user?.name && (
-          <Grid2 container alignItems={'center'} spacing={2}>
-            <Typography>{lockData.addDat && toJapanTimeString(new Date(lockData.addDat))}</Typography>
-            <Typography>{lockData.addUser}</Typography>
-            <Typography>編集中</Typography>
-          </Grid2>
-        )}
-        {/* {fixFlag && (
+    <PermissionGuard category={'juchu'} required={isNew ? permission.juchu_upd : permission.juchu_ref}>
+      <Container disableGutters sx={{ minWidth: '100%', pb: 10 }} maxWidth={'xl'}>
+        <Grid2 container spacing={4} display={'flex'} justifyContent={'end'} mb={1}>
+          {lockData !== null && lockData.addUser !== user?.name && (
+            <Grid2 container alignItems={'center'} spacing={2}>
+              <Typography>{lockData.addDat && toJapanTimeString(new Date(lockData.addDat))}</Typography>
+              <Typography>{lockData.addUser}</Typography>
+              <Typography>編集中</Typography>
+            </Grid2>
+          )}
+          {/* {fixFlag && (
           <Box display={'flex'} alignItems={'center'}>
             <Typography>出庫済</Typography>
           </Box>
         )} */}
-        <Grid2 container alignItems={'center'} spacing={1}>
-          {!editable || (lockData !== null && lockData?.addUser !== user?.name) ? (
-            <Typography>閲覧モード</Typography>
-          ) : (
-            <Typography>編集モード</Typography>
-          )}
-          <Button
-            disabled={(lockData && lockData?.addUser !== user?.name ? true : false) && isNew}
-            onClick={handleEdit}
-          >
-            変更
-          </Button>
-        </Grid2>
-        <Button onClick={() => window.close()}>閉じる</Button>
-      </Grid2>
-      <FormProvider {...quotForm}>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <Paper variant="outlined">
-            <Grid2
-              container
-              display="flex"
-              alignItems="center"
-              justifyContent="space-between"
-              sx={{
-                minHeight: '30px',
-                maxHeight: '30px',
-                px: 2,
-              }}
+          <Grid2 container alignItems={'center'} spacing={1}>
+            {!editable || (lockData !== null && lockData?.addUser !== user?.name) ? (
+              <Typography>閲覧モード</Typography>
+            ) : (
+              <Typography>編集モード</Typography>
+            )}
+            <Button
+              disabled={
+                ((lockData && lockData?.addUser !== user?.name ? true : false) && isNew) ||
+                user?.permission.juchu === permission.juchu_ref
+              }
+              onClick={handleEdit}
             >
-              <Typography>見積書</Typography>
-              <Box>
-                <Button onClick={hundlePrintPdf} disabled={isNew || isDirty} loading={isProcessing}>
-                  <PrintIcon fontSize="small" sx={{ mr: 0.5 }} />
-                  見積書印刷
-                </Button>
-              </Box>
-            </Grid2>
-          </Paper>
-          {isLoading && <LoadingOverlay />}
-          {/* 受注選択 ---------------------------------------------------------------------------------- */}
-          <Accordion
-            expanded={juchuExpanded}
-            onChange={() => setJuchuExpanded(!juchuExpanded)}
-            sx={{
-              borderRadius: 1,
-              overflow: 'hidden',
-              marginTop: 1,
-            }}
-            variant="outlined"
-          >
-            <AccordionSummary
-              expandIcon={<ExpandMoreIcon />}
-              sx={{
-                minHeight: '30px',
-                maxHeight: '30px',
-                '&.Mui-expanded': {
+              変更
+            </Button>
+          </Grid2>
+          <Button onClick={() => window.close()}>閉じる</Button>
+        </Grid2>
+        <FormProvider {...quotForm}>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <Paper variant="outlined">
+              <Grid2
+                container
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
+                sx={{
                   minHeight: '30px',
                   maxHeight: '30px',
-                },
-              }}
-            >
-              <Grid2 container alignItems={'center'} width={'100%'}>
-                <Grid2 size={3}>
-                  <Typography component="span">受注選択</Typography>
-                </Grid2>
-                {!juchuExpanded && (
-                  <Grid2 size={'grow'} alignItems={'center'} display={'flex'}>
-                    <Typography marginRight={2}>公演名</Typography>
-                    <Typography>{order.koenNam}</Typography>
-                  </Grid2>
-                )}
+                  px: 2,
+                }}
+              >
+                <Typography>見積書</Typography>
+                <Box>
+                  <Button
+                    onClick={hundlePrintPdf}
+                    disabled={isNew || isDirty || user?.permission.juchu === permission.juchu_ref}
+                    loading={isProcessing}
+                  >
+                    <PrintIcon fontSize="small" sx={{ mr: 0.5 }} />
+                    見積書印刷
+                  </Button>
+                </Box>
               </Grid2>
-            </AccordionSummary>
-            <AccordionDetails sx={{ padding: 0 }}>
-              <Divider />
-              <Grid2 container>
-                <Grid2 size={6.5}>
-                  <Grid2 container mx={2} my={0.5} spacing={6}>
-                    <Grid2 display="flex" alignItems="center">
-                      <Typography marginRight={5}>受注番号</Typography>
+            </Paper>
+            {isLoading && <LoadingOverlay />}
+            {/* 受注選択 ---------------------------------------------------------------------------------- */}
+            <Accordion
+              expanded={juchuExpanded}
+              onChange={() => setJuchuExpanded(!juchuExpanded)}
+              sx={{
+                borderRadius: 1,
+                overflow: 'hidden',
+                marginTop: 1,
+              }}
+              variant="outlined"
+            >
+              <AccordionSummary
+                expandIcon={<ExpandMoreIcon />}
+                sx={{
+                  minHeight: '30px',
+                  maxHeight: '30px',
+                  '&.Mui-expanded': {
+                    minHeight: '30px',
+                    maxHeight: '30px',
+                  },
+                }}
+              >
+                <Grid2 container alignItems={'center'} width={'100%'}>
+                  <Grid2 size={3}>
+                    <Typography component="span">受注選択</Typography>
+                  </Grid2>
+                  {!juchuExpanded && (
+                    <Grid2 size={'grow'} alignItems={'center'} display={'flex'}>
+                      <Typography marginRight={2}>公演名</Typography>
+                      <Typography>{order.koenNam}</Typography>
+                    </Grid2>
+                  )}
+                </Grid2>
+              </AccordionSummary>
+              <AccordionDetails sx={{ padding: 0 }}>
+                <Divider />
+                <Grid2 container>
+                  <Grid2 size={6.5}>
+                    <Grid2 container mx={2} my={0.5} spacing={6}>
+                      <Grid2 display="flex" alignItems="center">
+                        <Typography marginRight={5}>受注番号</Typography>
+                        <TextField
+                          value={order.juchuHeadId ?? ''}
+                          disabled
+                          sx={{
+                            width: 120,
+                            '& .MuiInputBase-input': {
+                              textAlign: 'right',
+                            },
+                            '& input[type=number]::-webkit-inner-spin-button': {
+                              WebkitAppearance: 'none',
+                              margin: 0,
+                            },
+                          }}
+                        />
+                      </Grid2>
+                      <Grid2 display="flex" alignItems="center">
+                        <Typography marginRight={3}>受注ステータス</Typography>
+                        <TextField value={order.juchuSts ?? ''} disabled sx={{ width: 180 }} />
+                      </Grid2>
+                    </Grid2>
+                    <Box sx={styles.container}>
+                      <Typography marginRight={7}>受注日</Typography>
+                      <TextField value={order.juchuDat ? toJapanYMDString(order.juchuDat) : ''} disabled />
+                    </Box>
+                    <Box sx={styles.container}>
+                      <Typography marginRight={7}>入力者</Typography>
+                      <TextField value={order.nyuryokuUser ?? ''} disabled />
+                    </Box>
+                    <Box sx={styles.container}>
+                      <Typography marginRight={5}>受注開始</Typography>
                       <TextField
-                        value={order.juchuHeadId ?? ''}
+                        value={order.juchuRange.strt ? toJapanYMDString(order.juchuRange.strt) : ''}
+                        disabled
+                      />
+                    </Box>
+                    <Box sx={styles.container}>
+                      <Typography marginRight={5}>受注終了</Typography>
+                      <TextField value={order.juchuRange.end ? toJapanYMDString(order.juchuRange.end) : ''} disabled />
+                    </Box>
+                  </Grid2>
+                  <Grid2 size={5.5}>
+                    <Box sx={styles.container}>
+                      <Typography marginRight={7}>公演名</Typography>
+                      <TextField value={order.koenNam ?? ''} disabled sx={{ width: 300 }} />
+                    </Box>
+                    <Box sx={styles.container}>
+                      <Typography marginRight={5}>公演場所</Typography>
+                      <TextField value={order.koenbashoNam ?? ''} disabled sx={{ width: 300 }} />
+                    </Box>
+                    <Box sx={styles.container}>
+                      <Typography marginRight={9}>相手</Typography>
+                      <TextField value={order.kokyaku.name ?? ''} disabled sx={{ width: 300 }} />
+                    </Box>
+                    <Box sx={styles.container}>
+                      <Typography marginRight={7}>担当者</Typography>
+                      <TextField value={order.kokyakuTantoNam ?? ''} disabled sx={{ width: 300 }} />
+                    </Box>
+                    <Box sx={styles.container}>
+                      <Typography marginRight={5}>受注メモ</Typography>
+                      <TextField multiline value={order.mem ?? ''} disabled sx={{ width: 300 }} />
+                    </Box>
+                    <Box sx={styles.container}>
+                      <Typography marginRight={3}>受注値引き</Typography>
+                      <TextField
+                        value={order.nebikiAmt ?? ''}
                         disabled
                         sx={{
-                          width: 120,
+                          width: 300,
                           '& .MuiInputBase-input': {
                             textAlign: 'right',
                           },
@@ -469,114 +542,210 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
                           },
                         }}
                       />
-                    </Grid2>
-                    <Grid2 display="flex" alignItems="center">
-                      <Typography marginRight={3}>受注ステータス</Typography>
-                      <TextField value={order.juchuSts ?? ''} disabled sx={{ width: 180 }} />
-                    </Grid2>
+                    </Box>
+                    <Box sx={styles.container}>
+                      <Typography marginRight={7}>税区分</Typography>
+                      <TextField value={order.zeiKbn ?? ''} disabled sx={{ width: 120 }} />
+                    </Box>
                   </Grid2>
-                  <Box sx={styles.container}>
-                    <Typography marginRight={7}>受注日</Typography>
-                    <TextField value={order.juchuDat ? toJapanYMDString(order.juchuDat) : ''} disabled />
-                  </Box>
-                  <Box sx={styles.container}>
-                    <Typography marginRight={7}>入力者</Typography>
-                    <TextField value={order.nyuryokuUser ?? ''} disabled />
-                  </Box>
-                  <Box sx={styles.container}>
-                    <Typography marginRight={5}>受注開始</Typography>
-                    <TextField value={order.juchuRange.strt ? toJapanYMDString(order.juchuRange.strt) : ''} disabled />
-                  </Box>
-                  <Box sx={styles.container}>
-                    <Typography marginRight={5}>受注終了</Typography>
-                    <TextField value={order.juchuRange.end ? toJapanYMDString(order.juchuRange.end) : ''} disabled />
-                  </Box>
                 </Grid2>
-                <Grid2 size={5.5}>
-                  <Box sx={styles.container}>
-                    <Typography marginRight={7}>公演名</Typography>
-                    <TextField value={order.koenNam ?? ''} disabled sx={{ width: 300 }} />
-                  </Box>
-                  <Box sx={styles.container}>
-                    <Typography marginRight={5}>公演場所</Typography>
-                    <TextField value={order.koenbashoNam ?? ''} disabled sx={{ width: 300 }} />
-                  </Box>
-                  <Box sx={styles.container}>
-                    <Typography marginRight={9}>相手</Typography>
-                    <TextField value={order.kokyaku.name ?? ''} disabled sx={{ width: 300 }} />
-                  </Box>
-                  <Box sx={styles.container}>
-                    <Typography marginRight={7}>担当者</Typography>
-                    <TextField value={order.kokyakuTantoNam ?? ''} disabled sx={{ width: 300 }} />
-                  </Box>
-                  <Box sx={styles.container}>
-                    <Typography marginRight={5}>受注メモ</Typography>
-                    <TextField multiline value={order.mem ?? ''} disabled sx={{ width: 300 }} />
-                  </Box>
-                  <Box sx={styles.container}>
-                    <Typography marginRight={3}>受注値引き</Typography>
-                    <TextField
-                      value={order.nebikiAmt ?? ''}
-                      disabled
-                      sx={{
-                        width: 300,
-                        '& .MuiInputBase-input': {
-                          textAlign: 'right',
-                        },
-                        '& input[type=number]::-webkit-inner-spin-button': {
-                          WebkitAppearance: 'none',
-                          margin: 0,
-                        },
-                      }}
-                    />
-                  </Box>
-                  <Box sx={styles.container}>
-                    <Typography marginRight={7}>税区分</Typography>
-                    <TextField value={order.zeiKbn ?? ''} disabled sx={{ width: 120 }} />
-                  </Box>
-                </Grid2>
-              </Grid2>
-            </AccordionDetails>
-          </Accordion>
-          {/* 見積ヘッダー ----------------------------------------------------------------------------------*/}
-          <Accordion
-            expanded={mitsuExpanded}
-            onChange={() => setMitsuExpanded(!mitsuExpanded)}
-            sx={{
-              borderRadius: 1,
-              overflow: 'hidden',
-              marginTop: 1,
-            }}
-            variant="outlined"
-          >
-            <AccordionSummary
-              expandIcon={<ExpandMoreIcon />}
+              </AccordionDetails>
+            </Accordion>
+            {/* 見積ヘッダー ----------------------------------------------------------------------------------*/}
+            <Accordion
+              expanded={mitsuExpanded}
+              onChange={() => setMitsuExpanded(!mitsuExpanded)}
               sx={{
-                minHeight: '30px',
-                maxHeight: '30px',
-                '&.Mui-expanded': {
+                borderRadius: 1,
+                overflow: 'hidden',
+                marginTop: 1,
+              }}
+              variant="outlined"
+            >
+              <AccordionSummary
+                expandIcon={<ExpandMoreIcon />}
+                sx={{
                   minHeight: '30px',
                   maxHeight: '30px',
-                },
-              }}
-            >
-              <Typography component="span">見積ヘッダー</Typography>
-            </AccordionSummary>
-            <AccordionDetails sx={{ padding: 0 }}>
-              <Divider />
-              <Grid2 container>
-                <Grid2 size={6.5}>
-                  <Grid2 container mx={2} my={0.5} spacing={6}>
-                    <Grid2 display="flex" alignItems="center">
-                      <Typography marginRight={5}>見積番号</Typography>
+                  '&.Mui-expanded': {
+                    minHeight: '30px',
+                    maxHeight: '30px',
+                  },
+                }}
+              >
+                <Typography component="span">見積ヘッダー</Typography>
+              </AccordionSummary>
+              <AccordionDetails sx={{ padding: 0 }}>
+                <Divider />
+                <Grid2 container>
+                  <Grid2 size={6.5}>
+                    <Grid2 container mx={2} my={0.5} spacing={6}>
+                      <Grid2 display="flex" alignItems="center">
+                        <Typography marginRight={5}>見積番号</Typography>
+                        <TextFieldElement
+                          name="mituHeadId"
+                          control={control}
+                          sx={{
+                            width: 120,
+                            pointerEvents: 'none', // クリック不可にする
+                            backgroundColor: '#f5f5f5', // グレー背景で無効っぽく
+                            color: '#888',
+                            '& .MuiInputBase-input': {
+                              textAlign: 'right',
+                            },
+                            '& input[type=number]::-webkit-inner-spin-button': {
+                              WebkitAppearance: 'none',
+                              margin: 0,
+                            },
+                          }}
+                          slotProps={{ input: { readOnly: true, onFocus: (e) => e.target.blur() } }}
+                          disabled={!editable}
+                        />
+                      </Grid2>
+                      <Grid2 display="flex" direction="row" alignItems="center">
+                        <Typography marginRight={3}>見積ステータス</Typography>
+                        <SelectElement
+                          name="mituSts"
+                          control={control}
+                          sx={{ width: 180 }}
+                          options={options.mituSts}
+                          disabled={!editable}
+                        />
+                      </Grid2>
+                    </Grid2>
+                    <Box sx={styles.container}>
+                      <Typography marginRight={5}>見積件名</Typography>
+                      <TextFieldElement name="mituHeadNam" control={control} sx={{ width: 300 }} disabled={!editable} />
+                    </Box>
+                    <Box sx={styles.container}>
+                      <Typography marginRight={7}>見積日</Typography>
+                      <Controller
+                        name="mituDat"
+                        control={control}
+                        render={({ field, fieldState: { error } }) => (
+                          <FormDateX
+                            value={field.value}
+                            onChange={field.onChange}
+                            sx={{ width: 242.5 }}
+                            error={!!error}
+                            helperText={error?.message}
+                            disabled={!editable}
+                          />
+                        )}
+                      />
+                    </Box>
+                    <Box sx={styles.container}>
+                      <Typography marginRight={3}>見積作成者</Typography>
+                      <Controller
+                        name="nyuryokuUser"
+                        control={control}
+                        disabled={!editable}
+                        render={({ field }) => (
+                          <Autocomplete
+                            {...field}
+                            options={options.users}
+                            getOptionLabel={(option) => option.label}
+                            value={options.users.find((opt: SelectTypes) => opt.label === field.value) || null}
+                            onChange={(_, value) => field.onChange(value?.label ?? '')}
+                            renderInput={(params) => <TextField {...params} />}
+                            sx={{ width: 242.5 }}
+                          />
+                        )}
+                      />
+                    </Box>
+                    <Box sx={styles.container}>
+                      <Typography marginRight={7}>見積先</Typography>
+                      <Controller
+                        name="kokyaku"
+                        control={control}
+                        disabled={!editable}
+                        render={({ field, fieldState }) => (
+                          <Autocomplete
+                            {...field}
+                            onChange={(_, value) => {
+                              const label = typeof value === 'string' ? value : (value?.label ?? '');
+                              field.onChange(label);
+                              if (value && typeof value !== 'string') {
+                                setValue('kokyakuId', Number(value.id), { shouldDirty: false });
+                              } else {
+                                setValue('kokyakuId', null, { shouldDirty: false });
+                              }
+                            }}
+                            freeSolo
+                            autoSelect
+                            sx={{ width: 300 }}
+                            renderInput={(params) => (
+                              <TextField
+                                {...params}
+                                error={!!fieldState.error}
+                                helperText={fieldState.error?.message}
+                              />
+                            )}
+                            options={options.custs}
+                            getOptionLabel={(option) => (typeof option === 'string' ? option : option.label)}
+                          />
+                        )}
+                      />
+                    </Box>
+                    <Box sx={styles.container}>
+                      <Typography marginRight={1}>見積先担当者</Typography>
+                      <TextFieldElement name="kokyakuTantoNam" control={control} disabled={!editable} />
+                    </Box>
+                  </Grid2>
+                  <Grid2 size={5.5}>
+                    <Box sx={styles.container}>
+                      <Typography marginRight={7}>作品名</Typography>
+                      <TextFieldElement name="koenNam" control={control} sx={{ width: 300 }} disabled={!editable} />
+                    </Box>
+                    <Box sx={styles.container}>
+                      <Typography marginRight={5}>実施場所</Typography>
                       <TextFieldElement
-                        name="mituHeadId"
+                        name="koenbashoNam"
+                        control={control}
+                        sx={{ width: 300 }}
+                        disabled={!editable}
+                      />
+                    </Box>
+                    <Box sx={styles.container}>
+                      <Typography marginRight={5}>貸出期間</Typography>
+                      <Controller
+                        name="mituRange.strt"
+                        control={control}
+                        disabled={!editable}
+                        render={({ field, fieldState: { error } }) => (
+                          <FormDateX
+                            value={field.value}
+                            onChange={field.onChange}
+                            sx={{ width: 242.5 }}
+                            error={!!error}
+                            helperText={error?.message}
+                            disabled={!editable}
+                          />
+                        )}
+                      />
+                      ～
+                      <Controller
+                        name="mituRange.end"
+                        control={control}
+                        render={({ field, fieldState: { error } }) => (
+                          <FormDateX
+                            value={field.value}
+                            onChange={field.onChange}
+                            sx={{ width: 242.5 }}
+                            error={!!error}
+                            helperText={error?.message}
+                            disabled={!editable}
+                          />
+                        )}
+                      />
+                    </Box>
+                    <Box sx={styles.container}>
+                      <Typography marginRight={5}>本番日数</Typography>
+                      <TextFieldElement
+                        name="mituHonbanbiQty"
                         control={control}
                         sx={{
                           width: 120,
-                          pointerEvents: 'none', // クリック不可にする
-                          backgroundColor: '#f5f5f5', // グレー背景で無効っぽく
-                          color: '#888',
                           '& .MuiInputBase-input': {
                             textAlign: 'right',
                           },
@@ -585,145 +754,348 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
                             margin: 0,
                           },
                         }}
-                        slotProps={{ input: { readOnly: true, onFocus: (e) => e.target.blur() } }}
+                        type="number"
                         disabled={!editable}
                       />
-                    </Grid2>
-                    <Grid2 display="flex" direction="row" alignItems="center">
-                      <Typography marginRight={3}>見積ステータス</Typography>
-                      <SelectElement
-                        name="mituSts"
-                        control={control}
-                        sx={{ width: 180 }}
-                        options={options.mituSts}
-                        disabled={!editable}
-                      />
-                    </Grid2>
+                    </Box>
+                    <Box sx={styles.container}>
+                      <Typography marginRight={9}>備考</Typography>
+                      <TextFieldElement name="biko" control={control} sx={{ width: 300 }} disabled={!editable} />
+                    </Box>
                   </Grid2>
-                  <Box sx={styles.container}>
-                    <Typography marginRight={5}>見積件名</Typography>
-                    <TextFieldElement name="mituHeadNam" control={control} sx={{ width: 300 }} disabled={!editable} />
+                </Grid2>
+              </AccordionDetails>
+            </Accordion>
+            {/* 見積明細 ----------------------------------------------------------------------------------*/}
+            <Paper sx={{ marginTop: 1 }} variant="outlined">
+              <Box
+                display={'flex'}
+                px={2}
+                alignItems={'center'}
+                sx={{
+                  minHeight: '30px',
+                  maxHeight: '30px',
+                }}
+              >
+                <Typography>見積明細</Typography>
+              </Box>
+              <Box sx={{ padding: 0 }}>
+                <Divider />
+                {/* 機材費テーブル ------------------------------------------------------------ */}
+                <Box margin={0.5} padding={0.8} borderBottom={1} borderColor={'divider'}>
+                  <Typography variant="h6" pl={2}>
+                    機材費
+                  </Typography>
+                  {kizaiFields.fields.map((field, index) => (
+                    <Box key={field.id} p={1}>
+                      <MeisaiTblHeader index={index} sectionNam="kizai" sectionFields={kizaiFields} editable={editable}>
+                        <MeisaiLines index={index} sectionNam="kizai" editable={editable} />
+                      </MeisaiTblHeader>
+                    </Box>
+                  ))}
+                  <Box m={1}>
+                    <Button size="small" onClick={() => setKizaimeisaiaddDialogOpen(true)} disabled={!editable}>
+                      <AddIcon fontSize="small" />
+                      テーブル
+                    </Button>
                   </Box>
-                  <Box sx={styles.container}>
-                    <Typography marginRight={7}>見積日</Typography>
-                    <Controller
-                      name="mituDat"
-                      control={control}
-                      render={({ field, fieldState: { error } }) => (
-                        <FormDateX
-                          value={field.value}
-                          onChange={field.onChange}
-                          sx={{ width: 242.5 }}
-                          error={!!error}
-                          helperText={error?.message}
-                          disabled={!editable}
-                        />
-                      )}
-                    />
-                  </Box>
-                  <Box sx={styles.container}>
-                    <Typography marginRight={3}>見積作成者</Typography>
-                    <Controller
-                      name="nyuryokuUser"
-                      control={control}
+                  <Dialog
+                    open={kizaiMeisaiaddDialogOpen}
+                    onClose={() => {
+                      setKizaimeisaiaddDialogOpen(false);
+                      setShowSecond(false);
+                    }}
+                    slotProps={{
+                      transition: {
+                        onExited: () => {
+                          setShowSecond(false);
+                        },
+                      },
+                    }}
+                    fullWidth
+                  >
+                    {!showSecond && (
+                      <FirstDialogPage
+                        handleClose={() => setKizaimeisaiaddDialogOpen(false)}
+                        addKizaiTbl={() =>
+                          kizaiFields.append({
+                            mituMeisaiHeadNam: null,
+                            headNamDspFlg: false,
+                            mituMeisaiKbn: 0,
+                            nebikiNam: '値引き',
+                            nebikiAftNam: '機材費',
+                          })
+                        }
+                        toSecondPage={setShowSecond}
+                      />
+                    )}
+                    {showSecond && (
+                      <SecondDialogPage
+                        field={kizaiFields}
+                        handleClose={() => setKizaimeisaiaddDialogOpen(false)}
+                        juchuId={order.juchuHeadId}
+                        setSnackBarOpen={() => setSnackBarOpen(true)}
+                        setSnackBarMessage={setSnackBarMessage}
+                      />
+                    )}
+                  </Dialog>
+                  <Grid2 container px={2} alignItems={'center'} spacing={0.5}>
+                    <Grid2 size={'grow'} />
+                    <Grid2 size={4.5}>
+                      <Divider sx={{ my: 1 }} />
+                    </Grid2>
+                    <Grid2 size={1} />
+                  </Grid2>
+                  <Grid2 container px={2} alignItems={'center'} spacing={0.5}>
+                    <Grid2 size={'grow'} />
+                    <Grid2 size={1} textAlign={'end'}>
+                      機材費：
+                    </Grid2>
+                    <Grid2 size={1.5}>
+                      <TextFieldElement name="kizaiChukeiMei" control={control} disabled={!editable} />
+                    </Grid2>
+                    <Grid2 size={2}>
+                      <ReadOnlyYenNumberElement name="kizaiChukeiAmt" />
+                    </Grid2>
+                    <Grid2 size={1} />
+                  </Grid2>
+                </Box>
+                {/* 人件費テーブル ------------------------------------------------------------ */}
+                <Box margin={0.5} padding={0.8} borderTop={1} borderBottom={1} borderColor={'divider'}>
+                  <Typography variant="h6" pl={2}>
+                    人件費
+                  </Typography>
+                  {laborFields.fields.map((field, index) => (
+                    <Box key={field.id} p={1}>
+                      {/* {index > 0 && <Divider sx={{ mx: 5 }} />} */}
+                      <MeisaiTblHeader index={index} sectionNam="labor" sectionFields={laborFields} editable={editable}>
+                        <MeisaiLines index={index} sectionNam="labor" editable={editable} />
+                      </MeisaiTblHeader>
+                    </Box>
+                  ))}
+                  <Box m={1}>
+                    <Button
+                      size="small"
+                      onClick={() =>
+                        laborFields.append({
+                          headNamDspFlg: false,
+                          mituMeisaiHeadNam: null,
+                          mituMeisaiKbn: 1,
+                          nebikiNam: '値引き',
+                          nebikiAftNam: '人件費',
+                        })
+                      }
                       disabled={!editable}
-                      render={({ field }) => (
-                        <Autocomplete
-                          {...field}
-                          options={options.users}
-                          getOptionLabel={(option) => option.label}
-                          value={options.users.find((opt: SelectTypes) => opt.label === field.value) || null}
-                          onChange={(_, value) => field.onChange(value?.label ?? '')}
-                          renderInput={(params) => <TextField {...params} />}
-                          sx={{ width: 242.5 }}
-                        />
-                      )}
-                    />
+                    >
+                      <AddIcon fontSize="small" />
+                      テーブル
+                    </Button>
                   </Box>
-                  <Box sx={styles.container}>
-                    <Typography marginRight={7}>見積先</Typography>
-                    <Controller
-                      name="kokyaku"
-                      control={control}
+                </Box>
+                {/* その他テーブル ------------------------------------------------------------ */}
+                <Box margin={0.5} padding={0.8} borderTop={1} borderColor={'divider'}>
+                  <Typography variant="h6" pl={2}>
+                    その他
+                  </Typography>
+                  {otherFields.fields.map((field, index) => (
+                    <Box key={field.id} p={1}>
+                      <MeisaiTblHeader index={index} sectionNam="other" sectionFields={otherFields} editable={editable}>
+                        <MeisaiLines index={index} sectionNam="other" editable={editable} />
+                      </MeisaiTblHeader>
+                    </Box>
+                  ))}
+                  <Box m={1}>
+                    <Button
+                      size="small"
+                      onClick={() =>
+                        otherFields.append({
+                          headNamDspFlg: false,
+                          mituMeisaiHeadNam: null,
+                          mituMeisaiKbn: 2,
+                          nebikiNam: '値引き',
+                          nebikiAftNam: 'その他',
+                        })
+                      }
                       disabled={!editable}
+                    >
+                      <AddIcon fontSize="small" />
+                      テーブル
+                    </Button>
+                  </Box>
+                </Box>
+              </Box>
+            </Paper>
+            {/* まとめ ------------------------------------------------------------------------------------ */}
+            <Paper sx={{ marginTop: 1, pt: 0.5 }} variant="outlined">
+              <Box margin={0.5} padding={0.8}>
+                <Grid2 container display={'flex'} alignItems={'baseline'} spacing={0.5}>
+                  <Grid2 size={1} alignItems={'baseline'}>
+                    <Typography textAlign={'center'}>コメント</Typography>
+                  </Grid2>
+                  <Grid2 size={6}>
+                    <TextFieldElement name="comment" control={control} multiline fullWidth disabled={!editable} />
+                  </Grid2>
+                  <Grid2 size={'grow'} />
+                </Grid2>
+                <Grid2 container display={'flex'} alignItems={'center'} spacing={0.5} my={0.5}>
+                  <Grid2 size={'grow'} />
+                  <Grid2 size={1.5}>
+                    <TextFieldElement name="chukeiMei" control={control} disabled={!editable} />
+                  </Grid2>
+                  <Grid2 size={2}>
+                    <ReadOnlyYenNumberElement name="chukeiAmt" />
+                  </Grid2>
+                  <Grid2 size={1} />
+                </Grid2>
+                <Grid2 container display={'flex'} alignItems={'center'} spacing={0.5} my={0.5}>
+                  <Grid2 size={'grow'} />
+                  <Grid2 size={1.5}>
+                    <TextFieldElement name="tokuNebikiMei" control={control} disabled={!editable} />
+                  </Grid2>
+                  <Grid2 size={2}>
+                    <Controller
+                      name={'tokuNebikiAmt'}
+                      control={control}
                       render={({ field, fieldState }) => (
-                        <Autocomplete
+                        <TextField
                           {...field}
-                          onChange={(_, value) => {
-                            const label = typeof value === 'string' ? value : (value?.label ?? '');
-                            field.onChange(label);
-                            if (value && typeof value !== 'string') {
-                              setValue('kokyakuId', Number(value.id), { shouldDirty: false });
-                            } else {
-                              setValue('kokyakuId', null, { shouldDirty: false });
+                          value={
+                            nebikiEditing
+                              ? (field.value ?? '')
+                              : typeof field.value === 'number' && !isNaN(field.value)
+                                ? `¥-${Math.abs(field.value).toLocaleString()}`
+                                : `¥0`
+                          }
+                          type="text"
+                          onFocus={(e) => {
+                            setNebikiEditing(true);
+                            const rawValue = String(field.value ?? '');
+                            setTimeout(() => {
+                              e.target.value = rawValue;
+                            }, 1);
+                          }}
+                          onBlur={(e) => {
+                            const rawValue = e.target.value.replace(/[¥,]/g, '');
+                            const numericValue = Math.abs(Number(rawValue));
+                            field.onChange(numericValue);
+                            setNebikiEditing(false);
+                          }}
+                          onChange={(e) => {
+                            const raw = e.target.value.replace(/[^\d]/g, '');
+                            if (/^\d*$/.test(raw)) {
+                              field.onChange(Number(raw));
+                              e.target.value = raw;
                             }
                           }}
-                          freeSolo
-                          autoSelect
-                          sx={{ width: 300 }}
-                          renderInput={(params) => (
-                            <TextField {...params} error={!!fieldState.error} helperText={fieldState.error?.message} />
-                          )}
-                          options={options.custs}
-                          getOptionLabel={(option) => (typeof option === 'string' ? option : option.label)}
+                          sx={(theme) => ({
+                            '.MuiOutlinedInput-notchedOutline': {
+                              borderColor: fieldState.error?.message && theme.palette.error.main,
+                            },
+                            '.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                              borderColor: fieldState.error?.message && theme.palette.error.main,
+                            },
+                            '&:hover .MuiOutlinedInput-notchedOutline': {
+                              borderColor: fieldState.error?.message && theme.palette.error.main,
+                            },
+                            '& .MuiInputBase-input': {
+                              textAlign: 'right',
+                            },
+                            '.MuiFormHelperText-root': {
+                              color: theme.palette.error.main,
+                            },
+                            '& input[type=number]::-webkit-inner-spin-button': {
+                              WebkitAppearance: 'none',
+                              margin: 0,
+                            },
+                          })}
+                          helperText={fieldState.error?.message}
+                          disabled={!editable}
                         />
                       )}
                     />
-                  </Box>
-                  <Box sx={styles.container}>
-                    <Typography marginRight={1}>見積先担当者</Typography>
-                    <TextFieldElement name="kokyakuTantoNam" control={control} disabled={!editable} />
-                  </Box>
+                  </Grid2>
+                  <Grid2 size={1} />
                 </Grid2>
-                <Grid2 size={5.5}>
-                  <Box sx={styles.container}>
-                    <Typography marginRight={7}>作品名</Typography>
-                    <TextFieldElement name="koenNam" control={control} sx={{ width: 300 }} disabled={!editable} />
-                  </Box>
-                  <Box sx={styles.container}>
-                    <Typography marginRight={5}>実施場所</Typography>
-                    <TextFieldElement name="koenbashoNam" control={control} sx={{ width: 300 }} disabled={!editable} />
-                  </Box>
-                  <Box sx={styles.container}>
-                    <Typography marginRight={5}>貸出期間</Typography>
+                <Grid2 container display={'flex'} alignItems={'center'} spacing={0.5} my={0.5}>
+                  <Grid2 size={'grow'} />
+                  <Grid2 size={1.5} justifyItems={'end'}>
+                    <Typography>合計</Typography>
+                  </Grid2>
+                  <Grid2 size={2}>
+                    <ReadOnlyYenNumberElement name="preTaxGokeiAmt" />
+                  </Grid2>
+                  <Grid2 size={1} />
+                </Grid2>
+                <Grid2 container display={'flex'} alignItems={'center'} spacing={0.5} my={0.5}>
+                  <Grid2 size={'grow'} />
+                  <Grid2 size={1.5} justifyItems={'end'}>
+                    <Typography>消費税</Typography>
+                  </Grid2>
+                  <Grid2 size={2}>
                     <Controller
-                      name="mituRange.strt"
+                      name="zeiAmt"
                       control={control}
-                      disabled={!editable}
-                      render={({ field, fieldState: { error } }) => (
-                        <FormDateX
-                          value={field.value}
-                          onChange={field.onChange}
-                          sx={{ width: 242.5 }}
-                          error={!!error}
-                          helperText={error?.message}
+                      render={({ field, fieldState }) => (
+                        <TextField
+                          {...field}
+                          value={
+                            zeiEditing
+                              ? (field.value ?? '')
+                              : typeof field.value === 'number' && !isNaN(field.value)
+                                ? `¥${Math.abs(field.value).toLocaleString()}`
+                                : `¥0`
+                          }
+                          type="text"
+                          onFocus={(e) => {
+                            setZeiEditing(true);
+                            const rawValue = String(field.value ?? '');
+                            e.target.value = rawValue;
+                          }}
+                          onBlur={(e) => {
+                            const rawValue = e.target.value.replace(/[¥,]/g, '');
+                            const numericValue = Math.abs(Number(rawValue));
+                            field.onChange(numericValue);
+                            setZeiEditing(false);
+                          }}
+                          onChange={(e) => {
+                            const raw = e.target.value.replace(/[^\d]/g, '');
+                            if (/^\d*$/.test(raw)) {
+                              field.onChange(Number(raw));
+                              e.target.value = raw;
+                            }
+                          }}
+                          sx={(theme) => ({
+                            '.MuiOutlinedInput-notchedOutline': {
+                              borderColor: fieldState.error?.message && theme.palette.error.main,
+                            },
+                            '.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                              borderColor: fieldState.error?.message && theme.palette.error.main,
+                            },
+                            '&:hover .MuiOutlinedInput-notchedOutline': {
+                              borderColor: fieldState.error?.message && theme.palette.error.main,
+                            },
+                            '& .MuiInputBase-input': {
+                              textAlign: 'right',
+                            },
+                            '.MuiFormHelperText-root': {
+                              color: theme.palette.error.main,
+                            },
+                            '& input[type=number]::-webkit-inner-spin-button': {
+                              WebkitAppearance: 'none',
+                              margin: 0,
+                            },
+                          })}
+                          helperText={fieldState.error?.message}
                           disabled={!editable}
                         />
                       )}
                     />
-                    ～
-                    <Controller
-                      name="mituRange.end"
-                      control={control}
-                      render={({ field, fieldState: { error } }) => (
-                        <FormDateX
-                          value={field.value}
-                          onChange={field.onChange}
-                          sx={{ width: 242.5 }}
-                          error={!!error}
-                          helperText={error?.message}
-                          disabled={!editable}
-                        />
-                      )}
-                    />
-                  </Box>
-                  <Box sx={styles.container}>
-                    <Typography marginRight={5}>本番日数</Typography>
+                  </Grid2>
+                  <Grid2 size={1} display={'flex'}>
                     <TextFieldElement
-                      name="mituHonbanbiQty"
+                      name="zeiRat"
                       control={control}
                       sx={{
-                        width: 120,
                         '& .MuiInputBase-input': {
                           textAlign: 'right',
                         },
@@ -735,393 +1107,44 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
                       type="number"
                       disabled={!editable}
                     />
-                  </Box>
-                  <Box sx={styles.container}>
-                    <Typography marginRight={9}>備考</Typography>
-                    <TextFieldElement name="biko" control={control} sx={{ width: 300 }} disabled={!editable} />
-                  </Box>
-                </Grid2>
-              </Grid2>
-            </AccordionDetails>
-          </Accordion>
-          {/* 見積明細 ----------------------------------------------------------------------------------*/}
-          <Paper sx={{ marginTop: 1 }} variant="outlined">
-            <Box
-              display={'flex'}
-              px={2}
-              alignItems={'center'}
-              sx={{
-                minHeight: '30px',
-                maxHeight: '30px',
-              }}
-            >
-              <Typography>見積明細</Typography>
-            </Box>
-            <Box sx={{ padding: 0 }}>
-              <Divider />
-              {/* 機材費テーブル ------------------------------------------------------------ */}
-              <Box margin={0.5} padding={0.8} borderBottom={1} borderColor={'divider'}>
-                <Typography variant="h6" pl={2}>
-                  機材費
-                </Typography>
-                {kizaiFields.fields.map((field, index) => (
-                  <Box key={field.id} p={1}>
-                    <MeisaiTblHeader index={index} sectionNam="kizai" sectionFields={kizaiFields} editable={editable}>
-                      <MeisaiLines index={index} sectionNam="kizai" editable={editable} />
-                    </MeisaiTblHeader>
-                  </Box>
-                ))}
-                <Box m={1}>
-                  <Button size="small" onClick={() => setKizaimeisaiaddDialogOpen(true)} disabled={!editable}>
-                    <AddIcon fontSize="small" />
-                    テーブル
-                  </Button>
-                </Box>
-                <Dialog
-                  open={kizaiMeisaiaddDialogOpen}
-                  onClose={() => {
-                    setKizaimeisaiaddDialogOpen(false);
-                    setShowSecond(false);
-                  }}
-                  slotProps={{
-                    transition: {
-                      onExited: () => {
-                        setShowSecond(false);
-                      },
-                    },
-                  }}
-                  fullWidth
-                >
-                  {!showSecond && (
-                    <FirstDialogPage
-                      handleClose={() => setKizaimeisaiaddDialogOpen(false)}
-                      addKizaiTbl={() =>
-                        kizaiFields.append({
-                          mituMeisaiHeadNam: null,
-                          headNamDspFlg: false,
-                          mituMeisaiKbn: 0,
-                          nebikiNam: '値引き',
-                          nebikiAftNam: '機材費',
-                        })
-                      }
-                      toSecondPage={setShowSecond}
-                    />
-                  )}
-                  {showSecond && (
-                    <SecondDialogPage
-                      field={kizaiFields}
-                      handleClose={() => setKizaimeisaiaddDialogOpen(false)}
-                      juchuId={order.juchuHeadId}
-                      setSnackBarOpen={() => setSnackBarOpen(true)}
-                      setSnackBarMessage={setSnackBarMessage}
-                    />
-                  )}
-                </Dialog>
-                <Grid2 container px={2} alignItems={'center'} spacing={0.5}>
-                  <Grid2 size={'grow'} />
-                  <Grid2 size={4.5}>
-                    <Divider sx={{ my: 1 }} />
+                    <Typography alignSelf={'center'}>%</Typography>
                   </Grid2>
-                  <Grid2 size={1} />
                 </Grid2>
-                <Grid2 container px={2} alignItems={'center'} spacing={0.5}>
+                <Grid2 container display={'flex'} alignItems={'center'} spacing={0.5} my={0.5}>
                   <Grid2 size={'grow'} />
-                  <Grid2 size={1} textAlign={'end'}>
-                    機材費：
-                  </Grid2>
-                  <Grid2 size={1.5}>
-                    <TextFieldElement name="kizaiChukeiMei" control={control} disabled={!editable} />
+                  <Grid2 size={1.5} justifyItems={'end'}>
+                    <Typography>合計金額</Typography>
                   </Grid2>
                   <Grid2 size={2}>
-                    <ReadOnlyYenNumberElement name="kizaiChukeiAmt" />
+                    <ReadOnlyYenNumberElement name="gokeiAmt" />
                   </Grid2>
                   <Grid2 size={1} />
                 </Grid2>
               </Box>
-              {/* 人件費テーブル ------------------------------------------------------------ */}
-              <Box margin={0.5} padding={0.8} borderTop={1} borderBottom={1} borderColor={'divider'}>
-                <Typography variant="h6" pl={2}>
-                  人件費
-                </Typography>
-                {laborFields.fields.map((field, index) => (
-                  <Box key={field.id} p={1}>
-                    {/* {index > 0 && <Divider sx={{ mx: 5 }} />} */}
-                    <MeisaiTblHeader index={index} sectionNam="labor" sectionFields={laborFields} editable={editable}>
-                      <MeisaiLines index={index} sectionNam="labor" editable={editable} />
-                    </MeisaiTblHeader>
-                  </Box>
-                ))}
-                <Box m={1}>
-                  <Button
-                    size="small"
-                    onClick={() =>
-                      laborFields.append({
-                        headNamDspFlg: false,
-                        mituMeisaiHeadNam: null,
-                        mituMeisaiKbn: 1,
-                        nebikiNam: '値引き',
-                        nebikiAftNam: '人件費',
-                      })
-                    }
-                    disabled={!editable}
-                  >
-                    <AddIcon fontSize="small" />
-                    テーブル
-                  </Button>
-                </Box>
-              </Box>
-              {/* その他テーブル ------------------------------------------------------------ */}
-              <Box margin={0.5} padding={0.8} borderTop={1} borderColor={'divider'}>
-                <Typography variant="h6" pl={2}>
-                  その他
-                </Typography>
-                {otherFields.fields.map((field, index) => (
-                  <Box key={field.id} p={1}>
-                    <MeisaiTblHeader index={index} sectionNam="other" sectionFields={otherFields} editable={editable}>
-                      <MeisaiLines index={index} sectionNam="other" editable={editable} />
-                    </MeisaiTblHeader>
-                  </Box>
-                ))}
-                <Box m={1}>
-                  <Button
-                    size="small"
-                    onClick={() =>
-                      otherFields.append({
-                        headNamDspFlg: false,
-                        mituMeisaiHeadNam: null,
-                        mituMeisaiKbn: 2,
-                        nebikiNam: '値引き',
-                        nebikiAftNam: 'その他',
-                      })
-                    }
-                    disabled={!editable}
-                  >
-                    <AddIcon fontSize="small" />
-                    テーブル
-                  </Button>
-                </Box>
-              </Box>
+            </Paper>
+            {/** 固定ボタン 保存＆ページトップ */}
+            <Box position={'fixed'} zIndex={1050} bottom={25} right={25} alignItems={'center'}>
+              <Fab variant="extended" color="primary" type="submit" sx={{ mr: 2 }} disabled={!editable || isLoading}>
+                <SaveAsIcon sx={{ mr: 1 }} />
+                保存
+              </Fab>
+              <Fab color="primary" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+                <ArrowUpwardIcon />
+              </Fab>
             </Box>
-          </Paper>
-          {/* まとめ ------------------------------------------------------------------------------------ */}
-          <Paper sx={{ marginTop: 1, pt: 0.5 }} variant="outlined">
-            <Box margin={0.5} padding={0.8}>
-              <Grid2 container display={'flex'} alignItems={'baseline'} spacing={0.5}>
-                <Grid2 size={1} alignItems={'baseline'}>
-                  <Typography textAlign={'center'}>コメント</Typography>
-                </Grid2>
-                <Grid2 size={6}>
-                  <TextFieldElement name="comment" control={control} multiline fullWidth disabled={!editable} />
-                </Grid2>
-                <Grid2 size={'grow'} />
-              </Grid2>
-              <Grid2 container display={'flex'} alignItems={'center'} spacing={0.5} my={0.5}>
-                <Grid2 size={'grow'} />
-                <Grid2 size={1.5}>
-                  <TextFieldElement name="chukeiMei" control={control} disabled={!editable} />
-                </Grid2>
-                <Grid2 size={2}>
-                  <ReadOnlyYenNumberElement name="chukeiAmt" />
-                </Grid2>
-                <Grid2 size={1} />
-              </Grid2>
-              <Grid2 container display={'flex'} alignItems={'center'} spacing={0.5} my={0.5}>
-                <Grid2 size={'grow'} />
-                <Grid2 size={1.5}>
-                  <TextFieldElement name="tokuNebikiMei" control={control} disabled={!editable} />
-                </Grid2>
-                <Grid2 size={2}>
-                  <Controller
-                    name={'tokuNebikiAmt'}
-                    control={control}
-                    render={({ field, fieldState }) => (
-                      <TextField
-                        {...field}
-                        value={
-                          nebikiEditing
-                            ? (field.value ?? '')
-                            : typeof field.value === 'number' && !isNaN(field.value)
-                              ? `¥-${Math.abs(field.value).toLocaleString()}`
-                              : `¥0`
-                        }
-                        type="text"
-                        onFocus={(e) => {
-                          setNebikiEditing(true);
-                          const rawValue = String(field.value ?? '');
-                          setTimeout(() => {
-                            e.target.value = rawValue;
-                          }, 1);
-                        }}
-                        onBlur={(e) => {
-                          const rawValue = e.target.value.replace(/[¥,]/g, '');
-                          const numericValue = Math.abs(Number(rawValue));
-                          field.onChange(numericValue);
-                          setNebikiEditing(false);
-                        }}
-                        onChange={(e) => {
-                          const raw = e.target.value.replace(/[^\d]/g, '');
-                          if (/^\d*$/.test(raw)) {
-                            field.onChange(Number(raw));
-                            e.target.value = raw;
-                          }
-                        }}
-                        sx={(theme) => ({
-                          '.MuiOutlinedInput-notchedOutline': {
-                            borderColor: fieldState.error?.message && theme.palette.error.main,
-                          },
-                          '.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                            borderColor: fieldState.error?.message && theme.palette.error.main,
-                          },
-                          '&:hover .MuiOutlinedInput-notchedOutline': {
-                            borderColor: fieldState.error?.message && theme.palette.error.main,
-                          },
-                          '& .MuiInputBase-input': {
-                            textAlign: 'right',
-                          },
-                          '.MuiFormHelperText-root': {
-                            color: theme.palette.error.main,
-                          },
-                          '& input[type=number]::-webkit-inner-spin-button': {
-                            WebkitAppearance: 'none',
-                            margin: 0,
-                          },
-                        })}
-                        helperText={fieldState.error?.message}
-                        disabled={!editable}
-                      />
-                    )}
-                  />
-                </Grid2>
-                <Grid2 size={1} />
-              </Grid2>
-              <Grid2 container display={'flex'} alignItems={'center'} spacing={0.5} my={0.5}>
-                <Grid2 size={'grow'} />
-                <Grid2 size={1.5} justifyItems={'end'}>
-                  <Typography>合計</Typography>
-                </Grid2>
-                <Grid2 size={2}>
-                  <ReadOnlyYenNumberElement name="preTaxGokeiAmt" />
-                </Grid2>
-                <Grid2 size={1} />
-              </Grid2>
-              <Grid2 container display={'flex'} alignItems={'center'} spacing={0.5} my={0.5}>
-                <Grid2 size={'grow'} />
-                <Grid2 size={1.5} justifyItems={'end'}>
-                  <Typography>消費税</Typography>
-                </Grid2>
-                <Grid2 size={2}>
-                  <Controller
-                    name="zeiAmt"
-                    control={control}
-                    render={({ field, fieldState }) => (
-                      <TextField
-                        {...field}
-                        value={
-                          zeiEditing
-                            ? (field.value ?? '')
-                            : typeof field.value === 'number' && !isNaN(field.value)
-                              ? `¥${Math.abs(field.value).toLocaleString()}`
-                              : `¥0`
-                        }
-                        type="text"
-                        onFocus={(e) => {
-                          setZeiEditing(true);
-                          const rawValue = String(field.value ?? '');
-                          e.target.value = rawValue;
-                        }}
-                        onBlur={(e) => {
-                          const rawValue = e.target.value.replace(/[¥,]/g, '');
-                          const numericValue = Math.abs(Number(rawValue));
-                          field.onChange(numericValue);
-                          setZeiEditing(false);
-                        }}
-                        onChange={(e) => {
-                          const raw = e.target.value.replace(/[^\d]/g, '');
-                          if (/^\d*$/.test(raw)) {
-                            field.onChange(Number(raw));
-                            e.target.value = raw;
-                          }
-                        }}
-                        sx={(theme) => ({
-                          '.MuiOutlinedInput-notchedOutline': {
-                            borderColor: fieldState.error?.message && theme.palette.error.main,
-                          },
-                          '.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                            borderColor: fieldState.error?.message && theme.palette.error.main,
-                          },
-                          '&:hover .MuiOutlinedInput-notchedOutline': {
-                            borderColor: fieldState.error?.message && theme.palette.error.main,
-                          },
-                          '& .MuiInputBase-input': {
-                            textAlign: 'right',
-                          },
-                          '.MuiFormHelperText-root': {
-                            color: theme.palette.error.main,
-                          },
-                          '& input[type=number]::-webkit-inner-spin-button': {
-                            WebkitAppearance: 'none',
-                            margin: 0,
-                          },
-                        })}
-                        helperText={fieldState.error?.message}
-                        disabled={!editable}
-                      />
-                    )}
-                  />
-                </Grid2>
-                <Grid2 size={1} display={'flex'}>
-                  <TextFieldElement
-                    name="zeiRat"
-                    control={control}
-                    sx={{
-                      '& .MuiInputBase-input': {
-                        textAlign: 'right',
-                      },
-                      '& input[type=number]::-webkit-inner-spin-button': {
-                        WebkitAppearance: 'none',
-                        margin: 0,
-                      },
-                    }}
-                    type="number"
-                    disabled={!editable}
-                  />
-                  <Typography alignSelf={'center'}>%</Typography>
-                </Grid2>
-              </Grid2>
-              <Grid2 container display={'flex'} alignItems={'center'} spacing={0.5} my={0.5}>
-                <Grid2 size={'grow'} />
-                <Grid2 size={1.5} justifyItems={'end'}>
-                  <Typography>合計金額</Typography>
-                </Grid2>
-                <Grid2 size={2}>
-                  <ReadOnlyYenNumberElement name="gokeiAmt" />
-                </Grid2>
-                <Grid2 size={1} />
-              </Grid2>
-            </Box>
-          </Paper>
-          {/** 固定ボタン 保存＆ページトップ */}
-          <Box position={'fixed'} zIndex={1050} bottom={25} right={25} alignItems={'center'}>
-            <Fab variant="extended" color="primary" type="submit" sx={{ mr: 2 }} disabled={!editable || isLoading}>
-              <SaveAsIcon sx={{ mr: 1 }} />
-              保存
-            </Fab>
-            <Fab color="primary" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-              <ArrowUpwardIcon />
-            </Fab>
-          </Box>
-        </form>
-      </FormProvider>
-      <IsDirtyAlertDialog open={dirtyOpen} onClick={handleResultDialog} />
-      <Snackbar
-        open={snackBarOpen}
-        autoHideDuration={6000}
-        onClose={() => setSnackBarOpen(false)}
-        message={snackBarMessage}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-        sx={{ marginTop: '65px' }}
-      />
-    </Container>
+          </form>
+        </FormProvider>
+        <IsDirtyAlertDialog open={dirtyOpen} onClick={handleResultDialog} />
+        <Snackbar
+          open={snackBarOpen}
+          autoHideDuration={6000}
+          onClose={() => setSnackBarOpen(false)}
+          message={snackBarMessage}
+          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+          sx={{ marginTop: '65px' }}
+        />
+      </Container>
+    </PermissionGuard>
   );
 };
 

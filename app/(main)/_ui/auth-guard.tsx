@@ -5,6 +5,8 @@ import { useEffect, useState } from 'react';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
 
+import { LoadingOverlay } from './loading';
+
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const user = useUserStore((state) => state.user);
   const clearUser = useUserStore((state) => state.clearUser);
@@ -61,9 +63,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
 
   // 2. ユーザー情報がないなら、リダイレクト中なので何も出さない
   // これにより、一瞬でも Sidebar やページ中身が見えるのを防ぎます
-  if (!user) {
-    return null;
-  }
+  if (!user) return null;
 
   // ログインしている場合のみ、中身を表示
   return <>{children}</>;
