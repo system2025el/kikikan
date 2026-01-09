@@ -21,8 +21,10 @@ import { useState } from 'react';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import { statusColors } from '@/app/(main)/_lib/colors';
+import { permission } from '@/app/(main)/_lib/permission';
 import { BackButton } from '@/app/(main)/_ui/buttons';
 import { DateTime, TestDate } from '@/app/(main)/_ui/date';
+import { PermissionGuard } from '@/app/(main)/_ui/permission-guard';
 
 import { updNyukoDetail } from '../_lib/funcs';
 import { NyukoDetailTableValues, NyukoDetailValues } from '../_lib/types';
@@ -74,102 +76,107 @@ export const NyukoDetail = (props: {
   };
 
   return (
-    <Box>
-      <Box display={'flex'} justifyContent={'end'} mb={1}>
-        <Button
-          onClick={() => {
-            if (isProcessing) return;
-            setIsProcessing(true);
-            router.push('/nyuko-list');
-          }}
-          disabled={isProcessing}
-        >
-          <Box display={'flex'} alignItems={'center'}>
-            <ArrowLeftIcon fontSize="small" />
-            入庫一覧
+    <PermissionGuard category={'nyushuko'} required={permission.nyushuko_ref}>
+      <Box>
+        <Box display={'flex'} justifyContent={'end'} mb={1}>
+          <Button
+            onClick={() => {
+              if (isProcessing) return;
+              setIsProcessing(true);
+              router.push('/nyuko-list');
+            }}
+            disabled={isProcessing}
+          >
+            <Box display={'flex'} alignItems={'center'}>
+              <ArrowLeftIcon fontSize="small" />
+              入庫一覧
+            </Box>
+          </Button>
+        </Box>
+        <Paper variant="outlined">
+          <Box display={'flex'} justifyContent={'space-between'} alignItems="center" px={2}>
+            <Typography fontSize={'large'}>入庫明細(チェック)</Typography>
+            <Grid2 container alignItems={'center'} spacing={2}>
+              {fixFlag && <Typography>到着済</Typography>}
+              <Button
+                onClick={handleDeparture}
+                disabled={fixFlag || user?.permission.nyushuko === permission.nyushuko_ref}
+              >
+                到着
+              </Button>
+            </Grid2>
           </Box>
-        </Button>
+          <Divider />
+          <Grid2 container spacing={1} p={1}>
+            <Grid2 container size={{ xs: 12, sm: 12, md: 6 }} direction={'column'} p={{ sx: 1, sm: 1, md: 1 }}>
+              <Box display={'flex'} alignItems={'center'}>
+                <Typography mr={4}>受注番号</Typography>
+                <TextField value={nyukoDetailData.juchuHeadId} disabled />
+              </Box>
+              <Box display={'flex'} alignItems={'center'}>
+                <Typography mr={4}>入庫日時</Typography>
+                <DateTime
+                  date={nyukoDetailData.nyushukoDat ? new Date(nyukoDetailData.nyushukoDat) : null}
+                  onChange={() => {}}
+                  onAccept={() => {}}
+                  disabled
+                />
+              </Box>
+              <Box display={'flex'} alignItems={'center'}>
+                <Typography mr={4}>入庫場所</Typography>
+                <TextField value={nyukoDetailData.nyushukoBashoId === 1 ? 'KICS' : 'YARD'} disabled />
+              </Box>
+              <Box display={'flex'} alignItems={'center'}>
+                <Typography mr={2}>受注明細名</Typography>
+                <TextField value={nyukoDetailData.headNamv ?? ''} disabled />
+              </Box>
+            </Grid2>
+            <Grid2 container size={{ xs: 12, sm: 12, md: 6 }} direction={'column'} p={{ sx: 1, sm: 1, md: 1 }}>
+              <Box display={'flex'} alignItems={'center'}>
+                <Typography mr={6}>公演名</Typography>
+                <TextField value={nyukoDetailData.koenNam ?? ''} fullWidth disabled />
+              </Box>
+              <Box display={'flex'} alignItems={'center'}>
+                <Typography mr={4}>公演場所</Typography>
+                <TextField value={nyukoDetailData.koenbashoNam ?? ''} fullWidth disabled />
+              </Box>
+              <Box display={'flex'} alignItems={'center'}>
+                <Typography mr={6}>顧客名</Typography>
+                <TextField value={nyukoDetailData.kokyakuNam ?? ''} fullWidth disabled />
+              </Box>
+            </Grid2>
+          </Grid2>
+          <Divider />
+          <Box width={'100%'}>
+            <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} width={'60vw'} pl={1} py={0.5}>
+              <Typography>全{nyukoDetailTableData ? nyukoDetailTableData.length : 0}件</Typography>
+              <Box display={'flex'} alignItems={'center'}>
+                <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.completed }}>
+                  済
+                </Typography>
+                <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.lack }}>
+                  不足
+                </Typography>
+                <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.excess }}>
+                  過剰
+                </Typography>
+                <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.ctn }}>
+                  コンテナ
+                </Typography>
+              </Box>
+            </Box>
+            {nyukoDetailTableData.length > 0 && <NyukoDetailTable datas={nyukoDetailTableData} />}
+          </Box>
+        </Paper>
+        <Snackbar
+          open={snackBarOpen}
+          autoHideDuration={6000}
+          onClose={() => setSnackBarOpen(false)}
+          message={snackBarMessage}
+          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+          sx={{ marginTop: '65px' }}
+        />
       </Box>
-      <Paper variant="outlined">
-        <Box display={'flex'} justifyContent={'space-between'} alignItems="center" px={2}>
-          <Typography fontSize={'large'}>入庫明細(チェック)</Typography>
-          <Grid2 container alignItems={'center'} spacing={2}>
-            {fixFlag && <Typography>到着済</Typography>}
-            <Button onClick={handleDeparture} disabled={fixFlag}>
-              到着
-            </Button>
-          </Grid2>
-        </Box>
-        <Divider />
-        <Grid2 container spacing={1} p={1}>
-          <Grid2 container size={{ xs: 12, sm: 12, md: 6 }} direction={'column'} p={{ sx: 1, sm: 1, md: 1 }}>
-            <Box display={'flex'} alignItems={'center'}>
-              <Typography mr={4}>受注番号</Typography>
-              <TextField value={nyukoDetailData.juchuHeadId} disabled />
-            </Box>
-            <Box display={'flex'} alignItems={'center'}>
-              <Typography mr={4}>入庫日時</Typography>
-              <DateTime
-                date={nyukoDetailData.nyushukoDat ? new Date(nyukoDetailData.nyushukoDat) : null}
-                onChange={() => {}}
-                onAccept={() => {}}
-                disabled
-              />
-            </Box>
-            <Box display={'flex'} alignItems={'center'}>
-              <Typography mr={4}>入庫場所</Typography>
-              <TextField value={nyukoDetailData.nyushukoBashoId === 1 ? 'KICS' : 'YARD'} disabled />
-            </Box>
-            <Box display={'flex'} alignItems={'center'}>
-              <Typography mr={2}>受注明細名</Typography>
-              <TextField value={nyukoDetailData.headNamv ?? ''} disabled />
-            </Box>
-          </Grid2>
-          <Grid2 container size={{ xs: 12, sm: 12, md: 6 }} direction={'column'} p={{ sx: 1, sm: 1, md: 1 }}>
-            <Box display={'flex'} alignItems={'center'}>
-              <Typography mr={6}>公演名</Typography>
-              <TextField value={nyukoDetailData.koenNam ?? ''} fullWidth disabled />
-            </Box>
-            <Box display={'flex'} alignItems={'center'}>
-              <Typography mr={4}>公演場所</Typography>
-              <TextField value={nyukoDetailData.koenbashoNam ?? ''} fullWidth disabled />
-            </Box>
-            <Box display={'flex'} alignItems={'center'}>
-              <Typography mr={6}>顧客名</Typography>
-              <TextField value={nyukoDetailData.kokyakuNam ?? ''} fullWidth disabled />
-            </Box>
-          </Grid2>
-        </Grid2>
-        <Divider />
-        <Box width={'100%'}>
-          <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} width={'60vw'} pl={1} py={0.5}>
-            <Typography>全{nyukoDetailTableData ? nyukoDetailTableData.length : 0}件</Typography>
-            <Box display={'flex'} alignItems={'center'}>
-              <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.completed }}>
-                済
-              </Typography>
-              <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.lack }}>
-                不足
-              </Typography>
-              <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.excess }}>
-                過剰
-              </Typography>
-              <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.ctn }}>
-                コンテナ
-              </Typography>
-            </Box>
-          </Box>
-          {nyukoDetailTableData.length > 0 && <NyukoDetailTable datas={nyukoDetailTableData} />}
-        </Box>
-      </Paper>
-      <Snackbar
-        open={snackBarOpen}
-        autoHideDuration={6000}
-        onClose={() => setSnackBarOpen(false)}
-        message={snackBarMessage}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-        sx={{ marginTop: '65px' }}
-      />
-    </Box>
+    </PermissionGuard>
   );
 };

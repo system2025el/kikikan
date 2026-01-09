@@ -14,15 +14,19 @@ import {
 import { useRouter } from 'next/navigation';
 import { Dispatch, SetStateAction, useState } from 'react';
 
+import { User } from '@/app/_lib/stores/usestore';
+
 import { dispColors } from '../../_lib/colors';
 import { toJapanTimeString } from '../../_lib/date-conversion';
+import { permission } from '../../_lib/permission';
 import { NyukoTableValues } from '../_lib/types';
 
 export const NyukoListTable = (props: {
+  user: User | null;
   datas: NyukoTableValues[];
   onSelectionChange: Dispatch<SetStateAction<number[]>>;
 }) => {
-  const { datas, onSelectionChange } = props;
+  const { user, datas, onSelectionChange } = props;
 
   const router = useRouter();
 
@@ -94,6 +98,7 @@ export const NyukoListTable = (props: {
                   size="small"
                   onClick={() => window.open(`/order/${row.juchuHeadId}/view`)}
                   sx={{ py: 0, px: 1 }}
+                  disabled={!(user && user.permission.juchu & permission.juchu_ref)}
                 >
                   {row.juchuHeadId}
                 </Button>
