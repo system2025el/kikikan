@@ -27,6 +27,9 @@ import {
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
+import { useUserStore } from '@/app/_lib/stores/usestore';
+
+import { permission } from '../../_lib/permission';
 import { Loading } from '../../_ui/loading';
 import { MuiTablePagination } from '../../_ui/table-pagination';
 import { ROWS_PER_MASTER_TABLE_PAGE } from '../../(masters)/_lib/constants';
@@ -66,6 +69,7 @@ export const QuotationListTable = ({
   const router = useRouter();
   /** ダイアログ開いたときにフォーカス管理するRef */
   const inputRef = useRef<HTMLInputElement>(null);
+  const user = useUserStore((state) => state.user);
 
   /* useState ------------------------------------- */
   /** ダイアログの開閉 */
@@ -155,13 +159,17 @@ export const QuotationListTable = ({
           <Grid2 container spacing={1}>
             <Grid2 container spacing={1}>
               <Grid2>
-                <Button onClick={() => setDialogOpen(true)}>
+                <Button onClick={() => setDialogOpen(true)} disabled={user?.permission.juchu === permission.juchu_ref}>
                   <AddIcon fontSize="small" />
                   新規見積
                 </Button>
               </Grid2>
               <Grid2>
-                <Button color="error" onClick={() => setDeleteDialogOpen(true)} disabled={selectedIds.length === 0}>
+                <Button
+                  color="error"
+                  onClick={() => setDeleteDialogOpen(true)}
+                  disabled={selectedIds.length === 0 || user?.permission.juchu === permission.juchu_ref}
+                >
                   <DeleteIcon fontSize="small" />
                   見積削除
                 </Button>
@@ -173,7 +181,7 @@ export const QuotationListTable = ({
                   onClick={() => {
                     window.open(`quotation-list/copy?mituId=${selectedIds[0]}`);
                   }}
-                  disabled={selectedIds.length !== 1}
+                  disabled={selectedIds.length !== 1 || user?.permission.juchu === permission.juchu_ref}
                 >
                   <ContentCopyIcon fontSize="small" />
                   見積コピー

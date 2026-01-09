@@ -17,9 +17,11 @@ import { grey } from '@mui/material/colors';
 import { useEffect, useState } from 'react';
 import { Controller, TextFieldElement, useForm } from 'react-hook-form-mui';
 
+import { permission } from '../../_lib/permission';
 import { FormDateX } from '../../_ui/date';
 import { selectNone, SelectTypes } from '../../_ui/form-box';
 import { LoadingOverlay } from '../../_ui/loading';
+import { PermissionGuard } from '../../_ui/permission-guard';
 import { FAKE_NEW_ID } from '../../(masters)/_lib/constants';
 import { getCustomerSelection } from '../../(masters)/_lib/funcs';
 import { getFilteredQuotList, getMituStsSelection, getUsersSelection } from '../_lib/funcs';
@@ -115,172 +117,88 @@ export const QuotationList = () => {
   }, [reset]);
 
   return (
-    <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
-      {isFirst && isLoading && <LoadingOverlay />}
-      <Paper variant="outlined">
-        <Box
-          width={'100%'}
-          display={'flex'}
-          alignItems={'center'}
-          sx={{
-            minHeight: '30px',
-            maxHeight: '30px',
-          }}
-          px={2}
-        >
-          <Typography noWrap>見積検索</Typography>
-        </Box>
-        <Divider />
-        <Grid2
-          container
-          direction={'column'}
-          spacing={0.5}
-          width={'100%'}
-          py={1}
-          px={2}
-          component={'form'}
-          onSubmit={handleSubmit(onSubmit)}
-        >
-          <Grid2 container spacing={1}>
-            <Grid2 size={{ sm: 12, md: 3 }} sx={styles.container}>
-              <Typography noWrap mr={7}>
-                見積番号
-              </Typography>
-              <TextFieldElement
-                name="mituId"
-                control={control}
-                type="number"
-                sx={{
-                  width: 120,
-                  '& .MuiInputBase-input': {
-                    textAlign: 'right',
-                  },
-                  '& input[type=number]::-webkit-inner-spin-button': {
-                    WebkitAppearance: 'none',
-                    margin: 0,
-                  },
-                }}
-              />
-            </Grid2>
-            <Grid2 size={{ sm: 12, md: 6 }} sx={styles.container}>
-              <Typography noWrap mr={5}>
-                受注番号
-              </Typography>
-              <TextFieldElement
-                name="juchuId"
-                control={control}
-                type="number"
-                sx={{
-                  width: 120,
-                  '& .MuiInputBase-input': {
-                    textAlign: 'right',
-                  },
-                  '& input[type=number]::-webkit-inner-spin-button': {
-                    WebkitAppearance: 'none',
-                    margin: 0,
-                  },
-                }}
-              />
-            </Grid2>
-          </Grid2>
-          <Grid2 sx={styles.container}>
-            <Typography noWrap mr={1}>
-              見積ステータス
-            </Typography>
-            <Controller
-              name="mituSts"
-              control={control}
-              render={({ field }) => (
-                <Select {...field} sx={{ width: 250 }}>
-                  {[selectNone, ...options.sts].map((opt) => (
-                    <MenuItem
-                      key={opt.id}
-                      value={opt.id}
-                      sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
-                    >
-                      {opt.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-              )}
-            />
-          </Grid2>
-          <Grid2 sx={styles.container}>
-            <Typography noWrap mr={7}>
-              見積件名
-            </Typography>
-            <TextFieldElement name="mituHeadNam" control={control} sx={{ width: 300 }} />
-          </Grid2>
-          <Grid2 sx={styles.container}>
-            <Typography noWrap mr={7}>
-              見積相手
-            </Typography>
-            <Controller
-              name="kokyaku"
-              control={control}
-              render={({ field }) => (
-                <Autocomplete
-                  {...field}
-                  onChange={(_, value) => {
-                    const label = typeof value === 'string' ? value : (value?.label ?? '');
-                    field.onChange(label);
+    <PermissionGuard category={'juchu'} required={permission.juchu_ref}>
+      <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
+        {isFirst && isLoading && <LoadingOverlay />}
+        <Paper variant="outlined">
+          <Box
+            width={'100%'}
+            display={'flex'}
+            alignItems={'center'}
+            sx={{
+              minHeight: '30px',
+              maxHeight: '30px',
+            }}
+            px={2}
+          >
+            <Typography noWrap>見積検索</Typography>
+          </Box>
+          <Divider />
+          <Grid2
+            container
+            direction={'column'}
+            spacing={0.5}
+            width={'100%'}
+            py={1}
+            px={2}
+            component={'form'}
+            onSubmit={handleSubmit(onSubmit)}
+          >
+            <Grid2 container spacing={1}>
+              <Grid2 size={{ sm: 12, md: 3 }} sx={styles.container}>
+                <Typography noWrap mr={7}>
+                  見積番号
+                </Typography>
+                <TextFieldElement
+                  name="mituId"
+                  control={control}
+                  type="number"
+                  sx={{
+                    width: 120,
+                    '& .MuiInputBase-input': {
+                      textAlign: 'right',
+                    },
+                    '& input[type=number]::-webkit-inner-spin-button': {
+                      WebkitAppearance: 'none',
+                      margin: 0,
+                    },
                   }}
-                  freeSolo
-                  autoSelect
-                  sx={{ width: 300 }}
-                  renderInput={(params) => <TextField {...params} />}
-                  options={options.custs}
-                  getOptionLabel={(option) => (typeof option === 'string' ? option : option.label)}
                 />
-              )}
-            />
-          </Grid2>
-          <Grid2 sx={styles.container}>
-            <Typography noWrap mr={9}>
-              見積日
-            </Typography>
-            <Controller
-              control={control}
-              name="mituDat.strt"
-              render={({ field, fieldState: { error } }) => (
-                <FormDateX
-                  value={field.value}
-                  onChange={field.onChange}
-                  sx={{ mr: 1 }}
-                  error={!!error}
-                  helperText={error?.message}
+              </Grid2>
+              <Grid2 size={{ sm: 12, md: 6 }} sx={styles.container}>
+                <Typography noWrap mr={5}>
+                  受注番号
+                </Typography>
+                <TextFieldElement
+                  name="juchuId"
+                  control={control}
+                  type="number"
+                  sx={{
+                    width: 120,
+                    '& .MuiInputBase-input': {
+                      textAlign: 'right',
+                    },
+                    '& input[type=number]::-webkit-inner-spin-button': {
+                      WebkitAppearance: 'none',
+                      margin: 0,
+                    },
+                  }}
                 />
-              )}
-            />
-            <span>～</span>
-            <Controller
-              control={control}
-              name="mituDat.end"
-              render={({ field, fieldState: { error } }) => (
-                <FormDateX
-                  value={field.value}
-                  onChange={field.onChange}
-                  sx={{ ml: 1 }}
-                  error={!!error}
-                  helperText={error?.message}
-                />
-              )}
-            />
-          </Grid2>
-          <Grid2 container justifyContent={'space-between'}>
+              </Grid2>
+            </Grid2>
             <Grid2 sx={styles.container}>
-              <Typography noWrap mr={9}>
-                入力者
+              <Typography noWrap mr={1}>
+                見積ステータス
               </Typography>
               <Controller
-                name="nyuryokuUser"
+                name="mituSts"
                 control={control}
                 render={({ field }) => (
                   <Select {...field} sx={{ width: 250 }}>
-                    {[selectNone, ...options.nyuryokuUser].map((opt) => (
+                    {[selectNone, ...options.sts].map((opt) => (
                       <MenuItem
                         key={opt.id}
-                        value={opt.label}
+                        value={opt.id}
                         sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
                       >
                         {opt.label}
@@ -290,27 +208,113 @@ export const QuotationList = () => {
                 )}
               />
             </Grid2>
-            <Grid2 alignSelf={'end'} justifySelf={'end'}>
-              <Button type="submit" loading={isLoading}>
-                <SearchIcon />
-                検索
-              </Button>
+            <Grid2 sx={styles.container}>
+              <Typography noWrap mr={7}>
+                見積件名
+              </Typography>
+              <TextFieldElement name="mituHeadNam" control={control} sx={{ width: 300 }} />
+            </Grid2>
+            <Grid2 sx={styles.container}>
+              <Typography noWrap mr={7}>
+                見積相手
+              </Typography>
+              <Controller
+                name="kokyaku"
+                control={control}
+                render={({ field }) => (
+                  <Autocomplete
+                    {...field}
+                    onChange={(_, value) => {
+                      const label = typeof value === 'string' ? value : (value?.label ?? '');
+                      field.onChange(label);
+                    }}
+                    freeSolo
+                    autoSelect
+                    sx={{ width: 300 }}
+                    renderInput={(params) => <TextField {...params} />}
+                    options={options.custs}
+                    getOptionLabel={(option) => (typeof option === 'string' ? option : option.label)}
+                  />
+                )}
+              />
+            </Grid2>
+            <Grid2 sx={styles.container}>
+              <Typography noWrap mr={9}>
+                見積日
+              </Typography>
+              <Controller
+                control={control}
+                name="mituDat.strt"
+                render={({ field, fieldState: { error } }) => (
+                  <FormDateX
+                    value={field.value}
+                    onChange={field.onChange}
+                    sx={{ mr: 1 }}
+                    error={!!error}
+                    helperText={error?.message}
+                  />
+                )}
+              />
+              <span>～</span>
+              <Controller
+                control={control}
+                name="mituDat.end"
+                render={({ field, fieldState: { error } }) => (
+                  <FormDateX
+                    value={field.value}
+                    onChange={field.onChange}
+                    sx={{ ml: 1 }}
+                    error={!!error}
+                    helperText={error?.message}
+                  />
+                )}
+              />
+            </Grid2>
+            <Grid2 container justifyContent={'space-between'}>
+              <Grid2 sx={styles.container}>
+                <Typography noWrap mr={9}>
+                  入力者
+                </Typography>
+                <Controller
+                  name="nyuryokuUser"
+                  control={control}
+                  render={({ field }) => (
+                    <Select {...field} sx={{ width: 250 }}>
+                      {[selectNone, ...options.nyuryokuUser].map((opt) => (
+                        <MenuItem
+                          key={opt.id}
+                          value={opt.label}
+                          sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
+                        >
+                          {opt.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  )}
+                />
+              </Grid2>
+              <Grid2 alignSelf={'end'} justifySelf={'end'}>
+                <Button type="submit" loading={isLoading}>
+                  <SearchIcon />
+                  検索
+                </Button>
+              </Grid2>
             </Grid2>
           </Grid2>
-        </Grid2>
-      </Paper>
-      <QuotationListTable
-        quots={quotList}
-        isLoading={isLoading}
-        isFirst={isFirst}
-        page={page}
-        searchParams={getValues()}
-        setQuotList={setQuotList}
-        setIsLoading={setIsLoading}
-        setIsFirst={setIsFirst}
-        setPage={setPage}
-      />
-    </Container>
+        </Paper>
+        <QuotationListTable
+          quots={quotList}
+          isLoading={isLoading}
+          isFirst={isFirst}
+          page={page}
+          searchParams={getValues()}
+          setQuotList={setQuotList}
+          setIsLoading={setIsLoading}
+          setIsFirst={setIsFirst}
+          setPage={setPage}
+        />
+      </Container>
+    </PermissionGuard>
   );
 };
 
