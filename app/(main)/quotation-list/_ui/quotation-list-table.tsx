@@ -69,6 +69,7 @@ export const QuotationListTable = ({
   const router = useRouter();
   /** ダイアログ開いたときにフォーカス管理するRef */
   const inputRef = useRef<HTMLInputElement>(null);
+  /** ユーザー情報 */
   const user = useUserStore((state) => state.user);
 
   /* useState ------------------------------------- */

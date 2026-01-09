@@ -27,10 +27,12 @@ import { useUserStore } from '@/app/_lib/stores/usestore';
 import { statusColors } from '@/app/(main)/_lib/colors';
 import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { useUnsavedChangesWarning } from '@/app/(main)/_lib/hook';
+import { permission } from '@/app/(main)/_lib/permission';
 import { BackButton } from '@/app/(main)/_ui/buttons';
 import { TestDate } from '@/app/(main)/_ui/date';
 import { useDirty } from '@/app/(main)/_ui/dirty-context';
 import { LoadingOverlay } from '@/app/(main)/_ui/loading';
+import { PermissionGuard } from '@/app/(main)/_ui/permission-guard';
 
 import { addIdoFix, delIdoFix, getIdoDenMaxId, saveIdoDen } from '../_lib/funcs';
 import { IdoDetailTableValues, IdoDetailValues, SelectedIdoEqptsValues } from '../_lib/types';
@@ -292,167 +294,184 @@ export const IdoDetail = (props: {
   };
 
   return (
-    <Box>
-      <Box display={'flex'} justifyContent={'end'} mb={1}>
-        <Button onClick={handleBack} disabled={isPending}>
-          <Box display={'flex'} alignItems={'center'}>
-            <ArrowLeftIcon fontSize="small" />
-            移動検索
-          </Box>
-        </Button>
-      </Box>
-      <Paper variant="outlined">
-        <Box display={'flex'} justifyContent={'space-between'} alignItems="center" px={2}>
-          <Typography fontSize={'large'}>
-            移動明細({idoDetailData.sagyoKbnId === 40 ? '移動出庫' : '移動入庫'})
-          </Typography>
-          <Grid2 container alignItems={'center'} spacing={2}>
-            {fixFlag && <Typography>{idoDetailData.sagyoKbnId === 40 ? '出発済' : '到着済'}</Typography>}
-            <Button onClick={handleFix} disabled={fixFlag || idoDetailList.length === 0}>
-              {idoDetailData.sagyoKbnId === 40 ? '出発' : '到着'}
-            </Button>
-            <Button
-              color="error"
-              onClick={handleRelease}
-              disabled={!fixFlag}
-              sx={{ display: idoDetailData.sagyoKbnId === 40 ? 'inline-flex' : 'none' }}
-            >
-              出発解除
-            </Button>
-          </Grid2>
+    <PermissionGuard category={'nyushuko'} required={permission.nyushuko_ref}>
+      <Box>
+        <Box display={'flex'} justifyContent={'end'} mb={1}>
+          <Button onClick={handleBack} disabled={isPending}>
+            <Box display={'flex'} alignItems={'center'}>
+              <ArrowLeftIcon fontSize="small" />
+              移動検索
+            </Box>
+          </Button>
         </Box>
-        <Divider />
-        <Grid2 container size={{ xs: 12, sm: 12, md: 6 }} direction={'column'} p={{ sx: 1, sm: 1, md: 2 }} spacing={1}>
-          <Box display={'flex'} alignItems={'center'}>
-            <Typography mr={3}>移動予定日</Typography>
-            <TestDate date={new Date(idoDetailData.nyushukoDat)} onChange={() => {}} disabled />
+        <Paper variant="outlined">
+          <Box display={'flex'} justifyContent={'space-between'} alignItems="center" px={2}>
+            <Typography fontSize={'large'}>
+              移動明細({idoDetailData.sagyoKbnId === 40 ? '移動出庫' : '移動入庫'})
+            </Typography>
+            <Grid2 container alignItems={'center'} spacing={2}>
+              {fixFlag && <Typography>{idoDetailData.sagyoKbnId === 40 ? '出発済' : '到着済'}</Typography>}
+              <Button
+                onClick={handleFix}
+                disabled={
+                  fixFlag || idoDetailList.length === 0 || user?.permission.nyushuko === permission.nyushuko_ref
+                }
+              >
+                {idoDetailData.sagyoKbnId === 40 ? '出発' : '到着'}
+              </Button>
+              <Button
+                color="error"
+                onClick={handleRelease}
+                disabled={!fixFlag || user?.permission.nyushuko === permission.nyushuko_ref}
+                sx={{ display: idoDetailData.sagyoKbnId === 40 ? 'inline-flex' : 'none' }}
+              >
+                出発解除
+              </Button>
+            </Grid2>
           </Box>
-          <Box display={'flex'} alignItems={'center'}>
-            <Typography mr={5}>移動指示</Typography>
-            <TextField value={idoDetailData.sagyoSijiId === 1 ? 'KICS→YARD' : 'YARD→KICS'} disabled />
-          </Box>
-          <Box display={'flex'} alignItems={'center'}>
-            <Typography mr={5}>作業場所</Typography>
-            <TextField value={idoDetailData.nyushukoBashoId === 1 ? 'KICS' : 'YARD'} disabled />
-          </Box>
-        </Grid2>
-        <Divider />
-        {idoDetailData.sagyoKbnId === 40 ? (
-          <Box width={'100%'}>
-            <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} px={2}>
-              <Box alignItems={'center'}>
-                <Typography>手動指示</Typography>
-                <Box py={1}>
-                  <Button onClick={() => setIdoEqSelectionDialogOpen(true)} disabled={fixFlag}>
-                    <AddIcon fontSize="small" />
-                    機材追加
-                  </Button>
+          <Divider />
+          <Grid2
+            container
+            size={{ xs: 12, sm: 12, md: 6 }}
+            direction={'column'}
+            p={{ sx: 1, sm: 1, md: 2 }}
+            spacing={1}
+          >
+            <Box display={'flex'} alignItems={'center'}>
+              <Typography mr={3}>移動予定日</Typography>
+              <TestDate date={new Date(idoDetailData.nyushukoDat)} onChange={() => {}} disabled />
+            </Box>
+            <Box display={'flex'} alignItems={'center'}>
+              <Typography mr={5}>移動指示</Typography>
+              <TextField value={idoDetailData.sagyoSijiId === 1 ? 'KICS→YARD' : 'YARD→KICS'} disabled />
+            </Box>
+            <Box display={'flex'} alignItems={'center'}>
+              <Typography mr={5}>作業場所</Typography>
+              <TextField value={idoDetailData.nyushukoBashoId === 1 ? 'KICS' : 'YARD'} disabled />
+            </Box>
+          </Grid2>
+          <Divider />
+          {idoDetailData.sagyoKbnId === 40 ? (
+            <Box width={'100%'}>
+              <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} px={2}>
+                <Box alignItems={'center'}>
+                  <Typography>手動指示</Typography>
+                  <Box py={1}>
+                    <Button
+                      onClick={() => setIdoEqSelectionDialogOpen(true)}
+                      disabled={fixFlag || user?.permission.nyushuko === permission.nyushuko_ref}
+                    >
+                      <AddIcon fontSize="small" />
+                      機材追加
+                    </Button>
+                  </Box>
+                </Box>
+                <Box display={'flex'} alignItems={'center'}>
+                  <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.completed }}>
+                    済
+                  </Typography>
+                  <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.lack }}>
+                    不足
+                  </Typography>
+                  <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.ctn }}>
+                    コンテナ
+                  </Typography>
                 </Box>
               </Box>
-              <Box display={'flex'} alignItems={'center'}>
-                <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.completed }}>
-                  済
-                </Typography>
-                <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.lack }}>
-                  不足
-                </Typography>
-                <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.ctn }}>
-                  コンテナ
-                </Typography>
-              </Box>
+              {idoDetailList.filter((d) => !d.delFlag).length > 0 && (
+                <ShukoIdoDenTable
+                  user={user}
+                  datas={idoDetailList}
+                  handleCellChange={handleCellChange}
+                  handleIdoDenDelete={handleIdoDenDelete}
+                  fixFlag={fixFlag}
+                />
+              )}
             </Box>
-            {idoDetailList.filter((d) => !d.delFlag).length > 0 && (
-              <ShukoIdoDenTable
-                datas={idoDetailList}
-                handleCellChange={handleCellChange}
-                handleIdoDenDelete={handleIdoDenDelete}
-                fixFlag={fixFlag}
-              />
-            )}
-          </Box>
-        ) : (
-          <Box width={'100%'} pb={3}>
-            <Box display={'flex'} justifyContent={'end'} alignItems={'center'} width={'60vw'} p={2}>
-              <Box display={'flex'} alignItems={'center'}>
-                <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.completed }}>
-                  済
-                </Typography>
-                <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.lack }}>
-                  不足
-                </Typography>
-                <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.ctn }}>
-                  コンテナ
-                </Typography>
+          ) : (
+            <Box width={'100%'} pb={3}>
+              <Box display={'flex'} justifyContent={'end'} alignItems={'center'} width={'60vw'} p={2}>
+                <Box display={'flex'} alignItems={'center'}>
+                  <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.completed }}>
+                    済
+                  </Typography>
+                  <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.lack }}>
+                    不足
+                  </Typography>
+                  <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.ctn }}>
+                    コンテナ
+                  </Typography>
+                </Box>
               </Box>
+              {idoDetailList.filter((d) => !d.delFlag).length > 0 && <NyukoIdoDenTable datas={idoDetailList} />}
             </Box>
-            {idoDetailList.filter((d) => !d.delFlag).length > 0 && <NyukoIdoDenTable datas={idoDetailList} />}
-          </Box>
-        )}
-      </Paper>
-      {/** 固定ボタン 保存＆ページトップ */}
-      <Box position={'fixed'} zIndex={1050} bottom={25} right={25} alignItems={'center'}>
-        <Fab
-          variant="extended"
-          color="primary"
-          onClick={handleSave}
-          disabled={fixFlag || isProcessing}
-          sx={{ display: idoDetailData.sagyoKbnId === 40 ? 'inline-flex' : 'none', mr: 2 }}
-        >
-          <SaveAsIcon sx={{ mr: 1 }} />
-          保存
-        </Fab>
-        <Fab color="primary" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-          <ArrowUpwardIcon />
-        </Fab>
+          )}
+        </Paper>
+        {/** 固定ボタン 保存＆ページトップ */}
+        <Box position={'fixed'} zIndex={1050} bottom={25} right={25} alignItems={'center'}>
+          <Fab
+            variant="extended"
+            color="primary"
+            onClick={handleSave}
+            disabled={fixFlag || isProcessing || user?.permission.nyushuko === permission.nyushuko_ref}
+            sx={{ display: idoDetailData.sagyoKbnId === 40 ? 'inline-flex' : 'none', mr: 2 }}
+          >
+            <SaveAsIcon sx={{ mr: 1 }} />
+            保存
+          </Fab>
+          <Fab color="primary" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+            <ArrowUpwardIcon />
+          </Fab>
+        </Box>
+        <Dialog open={idoEqSelectionDialogOpen} fullScreen>
+          <IdoEqptSelectionDialog setEqpts={setEqpts} handleCloseDialog={() => setIdoEqSelectionDialogOpen(false)} />
+        </Dialog>
+        <Dialog open={deleteOpen}>
+          <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
+            <WarningIcon color="error" />
+            <Box>削除</Box>
+          </DialogTitle>
+          <DialogContentText m={2} p={2}>
+            削除してもよろしいでしょうか？
+          </DialogContentText>
+          <DialogActions>
+            <Button onClick={() => handleDeleteResult(true)}>削除</Button>
+            <Button onClick={() => handleDeleteResult(false)}>戻る</Button>
+          </DialogActions>
+        </Dialog>
+        <Dialog open={departureOpen}>
+          <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
+            <WarningIcon color="error" />
+            <Box>不足があります</Box>
+          </DialogTitle>
+          <DialogContentText m={2} p={2}>
+            不足があるため、出発できません
+          </DialogContentText>
+          <DialogActions>
+            <Button onClick={() => setDepartureOpen(false)}>確認</Button>
+          </DialogActions>
+        </Dialog>
+        <Dialog open={saveOpen}>
+          <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
+            <WarningIcon color="error" />
+            <Box>出発できません</Box>
+          </DialogTitle>
+          <DialogContentText m={2} p={2}>
+            未保存のデータがあるため、出発できません
+          </DialogContentText>
+          <DialogActions>
+            <Button onClick={() => setSaveOpen(false)}>確認</Button>
+          </DialogActions>
+        </Dialog>
+        <Snackbar
+          open={snackBarOpen}
+          autoHideDuration={6000}
+          onClose={() => setSnackBarOpen(false)}
+          message={snackBarMessage}
+          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+          sx={{ marginTop: '65px' }}
+        />
       </Box>
-      <Dialog open={idoEqSelectionDialogOpen} fullScreen>
-        <IdoEqptSelectionDialog setEqpts={setEqpts} handleCloseDialog={() => setIdoEqSelectionDialogOpen(false)} />
-      </Dialog>
-      <Dialog open={deleteOpen}>
-        <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
-          <WarningIcon color="error" />
-          <Box>削除</Box>
-        </DialogTitle>
-        <DialogContentText m={2} p={2}>
-          削除してもよろしいでしょうか？
-        </DialogContentText>
-        <DialogActions>
-          <Button onClick={() => handleDeleteResult(true)}>削除</Button>
-          <Button onClick={() => handleDeleteResult(false)}>戻る</Button>
-        </DialogActions>
-      </Dialog>
-      <Dialog open={departureOpen}>
-        <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
-          <WarningIcon color="error" />
-          <Box>不足があります</Box>
-        </DialogTitle>
-        <DialogContentText m={2} p={2}>
-          不足があるため、出発できません
-        </DialogContentText>
-        <DialogActions>
-          <Button onClick={() => setDepartureOpen(false)}>確認</Button>
-        </DialogActions>
-      </Dialog>
-      <Dialog open={saveOpen}>
-        <DialogTitle alignContent={'center'} display={'flex'} alignItems={'center'}>
-          <WarningIcon color="error" />
-          <Box>出発できません</Box>
-        </DialogTitle>
-        <DialogContentText m={2} p={2}>
-          未保存のデータがあるため、出発できません
-        </DialogContentText>
-        <DialogActions>
-          <Button onClick={() => setSaveOpen(false)}>確認</Button>
-        </DialogActions>
-      </Dialog>
-      <Snackbar
-        open={snackBarOpen}
-        autoHideDuration={6000}
-        onClose={() => setSnackBarOpen(false)}
-        message={snackBarMessage}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-        sx={{ marginTop: '65px' }}
-      />
-    </Box>
+    </PermissionGuard>
   );
 };

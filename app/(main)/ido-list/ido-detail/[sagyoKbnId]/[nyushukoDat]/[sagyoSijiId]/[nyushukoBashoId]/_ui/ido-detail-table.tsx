@@ -15,18 +15,21 @@ import { purple } from '@mui/material/colors';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
 
+import { User } from '@/app/_lib/stores/usestore';
 import { dispColors, statusColors } from '@/app/(main)/_lib/colors';
+import { permission } from '@/app/(main)/_lib/permission';
 import { useDirty } from '@/app/(main)/_ui/dirty-context';
 
 import { IdoDetailTableValues } from '../_lib/types';
 
 export const ShukoIdoDenTable = (props: {
+  user: User | null;
   datas: IdoDetailTableValues[];
   handleCellChange: (kizaiId: number, planQty: number) => void;
   handleIdoDenDelete: (kizaiId: number) => void;
   fixFlag: boolean;
 }) => {
-  const { datas, handleCellChange, handleIdoDenDelete, fixFlag } = props;
+  const { user, datas, handleCellChange, handleIdoDenDelete, fixFlag } = props;
 
   const router = useRouter();
   const path = usePathname();
@@ -112,7 +115,7 @@ export const ShukoIdoDenTable = (props: {
                       display: row.juchuFlg === 0 ? 'inline-block' : 'none',
                       color: 'red',
                     }}
-                    disabled={fixFlag}
+                    disabled={fixFlag || user?.permission.nyushuko === permission.nyushuko_ref}
                   >
                     <Delete fontSize="small" />
                   </IconButton>
@@ -142,7 +145,7 @@ export const ShukoIdoDenTable = (props: {
                         handleCellChange(row.kizaiId, Number(e.target.value));
                       }
                     }}
-                    disabled={fixFlag}
+                    disabled={fixFlag || user?.permission.nyushuko === permission.nyushuko_ref}
                     sx={{
                       width: 50,
                       '& .MuiInputBase-input': {

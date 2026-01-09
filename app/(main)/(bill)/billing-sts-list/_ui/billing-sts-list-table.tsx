@@ -29,6 +29,7 @@ import { useMemo, useState } from 'react';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
+import { permission } from '@/app/(main)/_lib/permission';
 import { CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
 import { FormDateX } from '@/app/(main)/_ui/date';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
@@ -69,6 +70,8 @@ export const BillingStsListTable = ({
 }) => {
   /** テーブル1ページの行数 */
   const rowsPerPage = ROWS_PER_MASTER_TABLE_PAGE;
+  /** ユーザー情報 */
+  const user = useUserStore((state) => state.user);
 
   const list = useMemo(
     () => (rowsPerPage > 0 ? billSts.slice((page - 1) * rowsPerPage, page * rowsPerPage) : billSts),
@@ -107,6 +110,7 @@ export const BillingStsListTable = ({
                     setCreateOpen(true);
                   }
                 }}
+                disabled={user?.permission.juchu === permission.juchu_ref}
               >
                 <AddIcon fontSize="small" />
                 新規

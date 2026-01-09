@@ -6,8 +6,10 @@ import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
 import { toJapanYMDString } from '../../_lib/date-conversion';
+import { permission } from '../../_lib/permission';
 import { TestDate } from '../../_ui/date';
 import { Loading } from '../../_ui/loading';
+import { PermissionGuard } from '../../_ui/permission-guard';
 import { getIdoList } from '../_lib/funcs';
 import { IdoTableValues } from '../_lib/types';
 import { IdoListTable } from './ido-list-table';
@@ -67,46 +69,48 @@ export const IdoList = () => {
   }, []);
 
   return (
-    <Box>
-      <Paper variant="outlined">
-        <Box alignItems="center" px={2}>
-          <Typography>移動検索</Typography>
-        </Box>
-        <Divider />
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <Grid2 container alignItems={'center'} p={2} spacing={4}>
-            <Box display={'flex'} alignItems={'center'} width={'fit-content'}>
-              <Typography mr={2}>移動日</Typography>
-              <Controller
-                name="idoDat"
-                control={control}
-                render={({ field, fieldState }) => (
-                  <TestDate
-                    onBlur={field.onBlur}
-                    date={field.value}
-                    onChange={(newDate) => field.onChange(newDate?.toDate())}
-                    fieldstate={fieldState}
-                  />
-                )}
-              />
-            </Box>
-            <Button type="submit" loading={isLoading}>
-              <SearchIcon fontSize="small" />
-              検索
-            </Button>
-          </Grid2>
-        </form>
-        <Divider />
-        {isLoading ? (
-          <Loading />
-        ) : idoList.length > 0 ? (
-          <Box width={'100%'} mt={4}>
-            <IdoListTable datas={idoList} />
+    <PermissionGuard category={'nyushuko'} required={permission.nyushuko_ref}>
+      <Box>
+        <Paper variant="outlined">
+          <Box alignItems="center" px={2}>
+            <Typography>移動検索</Typography>
           </Box>
-        ) : (
-          <div>エラー</div>
-        )}
-      </Paper>
-    </Box>
+          <Divider />
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <Grid2 container alignItems={'center'} p={2} spacing={4}>
+              <Box display={'flex'} alignItems={'center'} width={'fit-content'}>
+                <Typography mr={2}>移動日</Typography>
+                <Controller
+                  name="idoDat"
+                  control={control}
+                  render={({ field, fieldState }) => (
+                    <TestDate
+                      onBlur={field.onBlur}
+                      date={field.value}
+                      onChange={(newDate) => field.onChange(newDate?.toDate())}
+                      fieldstate={fieldState}
+                    />
+                  )}
+                />
+              </Box>
+              <Button type="submit" loading={isLoading}>
+                <SearchIcon fontSize="small" />
+                検索
+              </Button>
+            </Grid2>
+          </form>
+          <Divider />
+          {isLoading ? (
+            <Loading />
+          ) : idoList.length > 0 ? (
+            <Box width={'100%'} mt={4}>
+              <IdoListTable datas={idoList} />
+            </Box>
+          ) : (
+            <div>エラー</div>
+          )}
+        </Paper>
+      </Box>
+    </PermissionGuard>
   );
 };
