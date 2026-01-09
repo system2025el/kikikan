@@ -7,8 +7,10 @@ import { useEffect, useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { CheckboxButtonGroup, SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
+import { permission } from '@/app/(main)/_lib/permission';
 import { selectNone, SelectTypes } from '@/app/(main)/_ui/form-box';
 import { LoadingOverlay } from '@/app/(main)/_ui/loading';
+import { PermissionGuard } from '@/app/(main)/_ui/permission-guard';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 import { getCustomerSelection } from '@/app/(main)/(masters)/_lib/funcs';
 
@@ -104,103 +106,105 @@ export const BillingStsList = () => {
   }, [reset]);
 
   return (
-    <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
-      {isFirst && isLoading && <LoadingOverlay />}
-      <Paper variant="outlined">
-        <Box
-          width={'100%'}
-          display={'flex'}
-          alignItems={'center'}
-          px={2}
-          sx={{
-            minHeight: '30px',
-            maxHeight: '30px',
-          }}
-        >
-          <Typography noWrap>受注請求状況検索</Typography>
-        </Box>
-        <Divider />
-        <Grid2
-          container
-          direction={'column'}
-          spacing={0.5}
-          width={'100%'}
-          px={2}
-          py={0.5}
-          component={'form'}
-          onSubmit={handleSubmit(onSubmit)}
-        >
-          <Grid2 display={'flex'} alignItems={'baseline'}>
-            <Typography noWrap mr={9}>
-              相手
-            </Typography>
-            <Controller
-              name="kokyaku"
-              control={control}
-              defaultValue={0}
-              render={({ field }) => (
-                <Select {...field} sx={{ width: 400 }}>
-                  {[selectNone, ...custs].map((opt) => (
-                    <MenuItem
-                      key={opt.id}
-                      value={opt.id}
-                      sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
-                    >
-                      {opt.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-              )}
-            />
-          </Grid2>
-          <Grid2 display={'flex'} alignItems={'baseline'}>
-            <Typography noWrap mr={3}>
-              相手担当者
-            </Typography>
-            <TextFieldElement name="kokyakuTantoNam" control={control} type="text" sx={{ width: 200 }} />
-          </Grid2>
-
-          <Grid2 size={12} display={'flex'} alignItems={'baseline'}>
-            <Grid2 container size={'grow'} alignItems={'baseline'}>
-              <Typography noWrap mr={5}>
-                請求状況
+    <PermissionGuard category={'juchu'} required={permission.juchu_ref}>
+      <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
+        {isFirst && isLoading && <LoadingOverlay />}
+        <Paper variant="outlined">
+          <Box
+            width={'100%'}
+            display={'flex'}
+            alignItems={'center'}
+            px={2}
+            sx={{
+              minHeight: '30px',
+              maxHeight: '30px',
+            }}
+          >
+            <Typography noWrap>受注請求状況検索</Typography>
+          </Box>
+          <Divider />
+          <Grid2
+            container
+            direction={'column'}
+            spacing={0.5}
+            width={'100%'}
+            px={2}
+            py={0.5}
+            component={'form'}
+            onSubmit={handleSubmit(onSubmit)}
+          >
+            <Grid2 display={'flex'} alignItems={'baseline'}>
+              <Typography noWrap mr={9}>
+                相手
               </Typography>
-              <CheckboxButtonGroup
-                name="sts"
+              <Controller
+                name="kokyaku"
                 control={control}
-                options={[
-                  {
-                    id: '1',
-                    label: '請求未完了',
-                  },
-                  {
-                    id: '2',
-                    label: '請求完了',
-                  },
-                ]}
-                row
+                defaultValue={0}
+                render={({ field }) => (
+                  <Select {...field} sx={{ width: 400 }}>
+                    {[selectNone, ...custs].map((opt) => (
+                      <MenuItem
+                        key={opt.id}
+                        value={opt.id}
+                        sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
+                      >
+                        {opt.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                )}
               />
             </Grid2>
-            <Grid2 alignSelf={'end'}>
-              <Button type="submit" loading={isLoading}>
-                <SearchIcon />
-                検索
-              </Button>
+            <Grid2 display={'flex'} alignItems={'baseline'}>
+              <Typography noWrap mr={3}>
+                相手担当者
+              </Typography>
+              <TextFieldElement name="kokyakuTantoNam" control={control} type="text" sx={{ width: 200 }} />
+            </Grid2>
+
+            <Grid2 size={12} display={'flex'} alignItems={'baseline'}>
+              <Grid2 container size={'grow'} alignItems={'baseline'}>
+                <Typography noWrap mr={5}>
+                  請求状況
+                </Typography>
+                <CheckboxButtonGroup
+                  name="sts"
+                  control={control}
+                  options={[
+                    {
+                      id: '1',
+                      label: '請求未完了',
+                    },
+                    {
+                      id: '2',
+                      label: '請求完了',
+                    },
+                  ]}
+                  row
+                />
+              </Grid2>
+              <Grid2 alignSelf={'end'}>
+                <Button type="submit" loading={isLoading}>
+                  <SearchIcon />
+                  検索
+                </Button>
+              </Grid2>
             </Grid2>
           </Grid2>
-        </Grid2>
-      </Paper>
-      <BillingStsListTable
-        isLoading={isLoading}
-        page={page}
-        custs={custs}
-        kokyakuId={Number(kokyakuId)}
-        tantouNam={tantou}
-        billSts={billSts}
-        isFirst={isFirst}
-        setPage={setPage}
-        refetch={refetch}
-      />
-    </Container>
+        </Paper>
+        <BillingStsListTable
+          isLoading={isLoading}
+          page={page}
+          custs={custs}
+          kokyakuId={Number(kokyakuId)}
+          tantouNam={tantou}
+          billSts={billSts}
+          isFirst={isFirst}
+          setPage={setPage}
+          refetch={refetch}
+        />
+      </Container>
+    </PermissionGuard>
   );
 };

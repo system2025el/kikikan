@@ -25,7 +25,9 @@ import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form-mui';
 
+import { useUserStore } from '@/app/_lib/stores/usestore';
 import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
+import { permission } from '@/app/(main)/_lib/permission';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 import { MuiTablePagination } from '@/app/(main)/_ui/table-pagination';
@@ -59,6 +61,8 @@ export const BillListTable = ({
 }) => {
   /** テーブル1ページの行数 */
   const rowsPerPage = ROWS_PER_MASTER_TABLE_PAGE;
+  /** ユーザー情報 */
+  const user = useUserStore((state) => state.user);
 
   /* useState -------------------------------------------------- */
   /** 削除ダイアログの開閉 */
@@ -146,7 +150,11 @@ export const BillListTable = ({
         </Grid2>
         <Grid2 container spacing={1}>
           <Grid2 container spacing={1}>
-            <Button color="error" onClick={() => setDeleteDialogOpen(true)} disabled={selectedIds.length === 0}>
+            <Button
+              color="error"
+              onClick={() => setDeleteDialogOpen(true)}
+              disabled={selectedIds.length === 0 || user?.permission.juchu === permission.juchu_ref}
+            >
               <DeleteIcon fontSize="small" />
               削除
             </Button>
@@ -156,7 +164,7 @@ export const BillListTable = ({
               onClick={() => {
                 window.open(`bill-list/copy?seikyuId=${selectedIds[0]}`);
               }}
-              disabled={selectedIds.length !== 1}
+              disabled={selectedIds.length !== 1 || user?.permission.juchu === permission.juchu_ref}
             >
               <ContentCopyIcon fontSize="small" />
               コピー

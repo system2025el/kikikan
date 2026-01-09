@@ -58,7 +58,7 @@ const Login = () => {
       name: 'test_user',
       email: 'test@example,com',
       permission: {
-        juchu: 3,
+        juchu: 0,
         nyushuko: 12,
         masters: 48,
         loginSetting: 128,
