@@ -12,7 +12,7 @@ import {
   useForm,
 } from 'react-hook-form-mui';
 
-import { useUserStore } from '@/app/_lib/stores/usestore';
+import { User, useUserStore } from '@/app/_lib/stores/usestore';
 import { FormBox } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 
@@ -29,17 +29,16 @@ import { CustomersMasterDialogValues, CustomersMaterDialogSchema } from '../_lib
  * @returns {JSX.Element} 顧客ダイアログ
  */
 export const CustomersMasterDialog = ({
+  user,
   customerId,
   handleClose,
   refetchCustomers,
 }: {
+  user: User | null;
   customerId: number;
   handleClose: () => void;
   refetchCustomers: () => void;
 }) => {
-  // ログインユーザ
-  const user = useUserStore((state) => state.user);
-
   /* useState --------------------- */
   /** 顧客リスト */
   /** DBのローディング状態 */
@@ -161,6 +160,7 @@ export const CustomersMasterDialog = ({
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <MasterDialogTitle
+        user={user}
         editable={editable}
         handleEditable={() => setEditable(true)}
         handleClose={handleClickClose}

@@ -265,6 +265,12 @@ export default function NavLinks() {
                 disablePadding
                 sx={{
                   backgroundColor: isSelected(text.url) ? currentPgColor : undefined,
+                  display:
+                    text.name === 'マスタインポート' || text.name === 'マスタエクスポート'
+                      ? user!.permission.masters & permission.mst_upd
+                        ? 'flex'
+                        : 'none'
+                      : 'flex',
                 }}
               >
                 <ListItemButton onClick={() => handleNavigation(text.url)} dense disabled={isPending}>
@@ -274,7 +280,7 @@ export default function NavLinks() {
                   />
                 </ListItemButton>
               </ListItem>
-              {index === 9 && <Divider sx={{ ml: 8 }} />}
+              {index === 9 && !!(user!.permission.masters & permission.mst_upd) && <Divider sx={{ ml: 8 }} />}
             </Fragment>
           ))}
         </List>

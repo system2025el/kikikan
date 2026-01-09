@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { CheckboxElement, TextareaAutosizeElement, TextFieldElement } from 'react-hook-form-mui';
 
-import { useUserStore } from '@/app/_lib/stores/usestore';
+import { User, useUserStore } from '@/app/_lib/stores/usestore';
 import { FormBox } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 
@@ -21,17 +21,16 @@ import { ShukeibumonsMasterDialogSchema, ShukeibumonsMasterDialogValues } from '
  * @returns {JSX.Element} 集計部門マスタ詳細ダイアログ
  */
 export const ShukeibumonsMasterDialog = ({
+  user,
   shukeibumonId,
   handleClose,
   refetchShukeibumons,
 }: {
+  user: User | null;
   shukeibumonId: number;
   handleClose: () => void;
   refetchShukeibumons: () => void;
 }) => {
-  // ログインユーザ
-  const user = useUserStore((state) => state.user);
-
   /* useState -------------------------------------- */
   /* DBのローディング状態 */
   const [isLoading, setIsLoading] = useState(true);
@@ -152,6 +151,7 @@ export const ShukeibumonsMasterDialog = ({
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <MasterDialogTitle
+        user={user}
         editable={editable}
         handleEditable={() => setEditable(true)}
         handleClose={handleClickClose}

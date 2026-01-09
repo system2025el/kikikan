@@ -114,7 +114,7 @@ export const LocationSelectDialog = (props: {
         </Paper>
         {/*  ---------- ↑検索 ↓場所テーブル-------------- */}
         <Stack mt={1} mx={0.5} justifyContent={'space-between'}>
-          <MuiTablePagination arrayList={list ? list : []} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
+          <MuiTablePagination arrayList={locs ?? []} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
         </Stack>
         {isLoading ? (
           <Loading />
