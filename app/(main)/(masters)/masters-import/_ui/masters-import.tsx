@@ -1,13 +1,12 @@
 'use client';
 
-import { Box, Container, Snackbar, Stack } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { Container, Snackbar, Stack } from '@mui/material';
+import { useState } from 'react';
 import { read, utils } from 'xlsx';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
-import { BackButton } from '@/app/(main)/_ui/buttons';
 
-import { ImportEqptRfidData, sendLogServer } from '../_lib/funcs';
+import { ImportEqptRfidData } from '../_lib/funcs';
 import { EqptImportRowType, EqptImportType, eqptSchema, parseNumber } from '../_lib/types';
 import { Section } from './section';
 
@@ -85,7 +84,7 @@ export const ImportMaster = () => {
             rfid_kizai_sts: parseNumber(row[1]),
             del_flg: parseNumber(row[2]),
             section_nam: String(row[3] ?? ''),
-            kizai_nam: String(row[4]),
+            kizai_nam: row[4] ? String(row[4]) : undefined,
             el_num: parseNumber(row[5]),
             shozoku_id: parseNumber(row[6]),
             bld_cod: String(row[7] ?? ''),

@@ -31,7 +31,7 @@ export const checkRfid = async (list: RfidImportTypes[], connection: PoolClient,
 
     // m_rfidから既存のRFIDタグIDを取得
     const existingTagsResult = await connection.query(
-      `SELECT rfid_tag_id FROM ${SCHEMA}.v_rfid WHERE rfid_tag_id = ANY($1::text[]);`,
+      `SELECT rfid_tag_id FROM ${SCHEMA}.m_rfid WHERE rfid_tag_id = ANY($1::text[]);`,
       [rfidTagIds]
     );
 
