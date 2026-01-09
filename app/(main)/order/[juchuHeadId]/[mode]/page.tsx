@@ -1,7 +1,7 @@
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import { Order } from '@/app/(main)/order/[juchuHeadId]/[mode]/_ui/order';
 
-import { getJuchuHead, getJuchuKizaiHeadList, getJuchuSharyoHeadList } from './_lib/funcs';
+import { getFilteredUsers, getJuchuHead, getJuchuKizaiHeadList, getJuchuSharyoHeadList } from './_lib/funcs';
 import { EqTableValues, OrderValues, VehicleTableValues } from './_lib/types';
 
 const Page = async (props: { params: Promise<{ juchuHeadId: string; mode: string }> }) => {
@@ -10,6 +10,8 @@ const Page = async (props: { params: Promise<{ juchuHeadId: string; mode: string
   const juchuHeadId = Number(params.juchuHeadId);
   // 編集モード(edit:編集、view:閲覧)
   const edit = params.mode === 'edit' ? true : false;
+
+  const userList = await getFilteredUsers('');
 
   // 新規
   if (juchuHeadId === 0) {
@@ -40,6 +42,7 @@ const Page = async (props: { params: Promise<{ juchuHeadId: string; mode: string
         juchuHeadData={newJuchuHeadData}
         juchuKizaiHeadDatas={newJuchuKizaiHeadData}
         juchusharyoHeadDatas={newJuchuSharyoHeadData}
+        userList={userList}
         edit={edit}
       />
     );
@@ -60,6 +63,7 @@ const Page = async (props: { params: Promise<{ juchuHeadId: string; mode: string
         juchuHeadData={juchuHeadData}
         juchuKizaiHeadDatas={juchuKizaiHeadDatas}
         juchusharyoHeadDatas={juchuSharyoHeadDatas}
+        userList={userList}
         edit={edit}
       />
     );

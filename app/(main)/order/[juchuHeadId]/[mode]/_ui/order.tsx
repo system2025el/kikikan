@@ -72,6 +72,7 @@ import {
   KokyakuValues,
   OrderSchema,
   OrderValues,
+  UsersValue,
   VehicleTableValues,
 } from '../_lib/types';
 import { AlertDialog, HeadDeleteConfirmDialog, KizaiHeadDeleteConfirmDialog } from './caveat-dialog';
@@ -84,6 +85,7 @@ export const Order = (props: {
   juchuHeadData: OrderValues;
   juchuKizaiHeadDatas: EqTableValues[] | undefined;
   juchusharyoHeadDatas: VehicleTableValues[] | undefined;
+  userList: UsersValue[];
   edit: boolean;
   //lockData: LockValues | null;
 }) => {
@@ -91,7 +93,7 @@ export const Order = (props: {
   // user情報
   const user = useUserStore((state) => state.user);
   // userList
-  const userList = users;
+  const userList = props.userList;
   // 保存フラグ
   const save = props.juchuHeadData.juchuHeadId !== 0 ? true : false;
 
@@ -934,8 +936,8 @@ export const Order = (props: {
                           error={!!fieldState.error}
                         >
                           {userList.map((u) => (
-                            <MenuItem key={u.id} value={u.name}>
-                              {u.name}
+                            <MenuItem key={u.mailAdr} value={u.tantouNam}>
+                              {u.tantouNam}
                             </MenuItem>
                           ))}
                         </Select>
