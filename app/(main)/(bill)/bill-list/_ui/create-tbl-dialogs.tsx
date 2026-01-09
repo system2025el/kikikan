@@ -11,26 +11,15 @@ import {
   ListItem,
   ListItemButton,
   ListItemText,
-  Snackbar,
   Stack,
   Typography,
 } from '@mui/material';
-import { useEffect, useRef, useState } from 'react';
-import {
-  Controller,
-  TextFieldElement,
-  useFieldArray,
-  UseFieldArrayReturn,
-  useForm,
-  useFormContext,
-} from 'react-hook-form-mui';
+import { useState } from 'react';
+import { Controller, TextFieldElement, UseFieldArrayReturn, useForm } from 'react-hook-form-mui';
 
-import { selectJuchuKizaiMeisaiHeadForBill } from '@/app/_lib/db/tables/v-seikyu-date-lst';
-import { toJapanTimeStampString, toJapanTimeString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
 import { FormDateX } from '@/app/(main)/_ui/date';
 import { Loading } from '@/app/(main)/_ui/loading';
-import { getJuchuIsshikiMeisai, getJuchuKizaiMeisaiList } from '@/app/(main)/quotation-list/_lib/funcs';
 
 import {
   getJuchuKizaiHeadNamListForBill,
@@ -111,7 +100,6 @@ export const SecondDialogPage = ({
       kokyaku: { id: kokyakuId, nam: kokyakuNam },
       tantou: null,
       juchuId: null,
-      // dat: new Date(toJapanTimeStampString()),
       dat: new Date(),
     },
   });

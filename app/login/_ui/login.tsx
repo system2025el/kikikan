@@ -16,6 +16,7 @@ import { UserSchema, UserValues } from '../_lib/types';
 const Login = () => {
   const router = useRouter();
   const setUser = useUserStore((state) => state.setUser);
+  const clearUser = useUserStore((state) => state.clearUser);
 
   const [error, setError] = useState<string>('');
 
@@ -37,6 +38,7 @@ const Login = () => {
         id: FAKE_NEW_ID,
         name: user.tantouNam,
         email: user.mailAdr,
+        permission: user.permission,
       };
       setUser(storeUser);
       router.push('/dashboard');
@@ -55,6 +57,13 @@ const Login = () => {
       id: 1,
       name: 'test_user',
       email: 'test@example,com',
+      permission: {
+        juchu: 3,
+        nyushuko: 12,
+        masters: 48,
+        loginSetting: 128,
+        ht: 64,
+      },
     };
 
     setUser(mockUser);
@@ -69,6 +78,8 @@ const Login = () => {
     if (access_token && refresh_token) {
       setSession(access_token, refresh_token);
     }
+    clearUser();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

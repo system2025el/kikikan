@@ -1,3 +1,4 @@
+import { permission } from '@/app/(main)/_lib/permission';
 import { FormItemsType } from '@/app/(main)/_ui/form-box';
 
 import { UsersMasterDialogValues, UsersMasterTableValues } from './types';
@@ -16,7 +17,7 @@ export const emptyUser: UsersMasterDialogValues = {
   mailAdr: '',
   tantouNam: '',
   delFlg: false,
-  psermission: { juchu: '00', nyushuko: '00', masters: '00', ht: '0', loginSetting: '0' },
+  permission: { juchu: 0, nyushuko: 0, masters: 0, ht: 0, loginSetting: 0 },
   lastLoginAt: null,
 };
 
@@ -63,4 +64,32 @@ export const radioTrio = [
 export const radioPair = [
   { id: '0', label: '無し' },
   { id: '1', label: '参照更新' },
+];
+
+export const juchuRadio = [
+  { id: permission.none, label: '無し' },
+  { id: permission.juchu_ref, label: '参照のみ' },
+  { id: permission.juchu_full, label: '参照更新' },
+];
+
+export const nyushukoRadio = [
+  { id: permission.none, label: '無し' },
+  { id: permission.nyushuko_ref, label: '参照のみ' },
+  { id: permission.nyushuko_full, label: '参照更新' },
+];
+
+export const mastersRadio = [
+  { id: permission.none, label: '無し' },
+  { id: permission.mst_ref, label: '参照のみ' },
+  { id: permission.mst_full, label: '参照更新' },
+];
+
+export const htRadio = [
+  { id: permission.none, label: '無し' },
+  { id: permission.ht, label: '参照更新' },
+];
+
+export const loginSettingRadio = [
+  { id: permission.none, label: '無し' },
+  { id: permission.login, label: '参照更新' },
 ];

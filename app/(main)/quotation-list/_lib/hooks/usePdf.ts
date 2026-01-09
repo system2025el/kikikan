@@ -23,7 +23,7 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
 
   // イメージの読み込み
   const setupImage = async () => {
-    const imageBytes = await fetch('/images/sign.png').then((res) => res.arrayBuffer());
+    const imageBytes = await fetch('/images/見積書署名.png').then((res) => res.arrayBuffer());
     setImage(imageBytes);
   };
 
@@ -223,6 +223,15 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
 
     page.drawText('下記の通り御見積申し上げます。', {
       x: 50,
+      y: 717,
+      font: customFont, // カスタムフォントの設定
+      size: 10,
+      //color: rgb(0, 0, 0),
+      //lineHeight: 10,
+      //opacity: 1,
+    });
+    page.drawText(`顧客番号: ${param.kokyakuId ?? ''}`, {
+      x: 470,
       y: 717,
       font: customFont, // カスタムフォントの設定
       size: 10,
@@ -463,7 +472,7 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
     const pngImage = await pdfDoc.embedPng(image);
     pngImage.scale(1);
     page.drawImage(pngImage, {
-      x: 360,
+      x: 350,
       y: 630,
       width: 200,
       height: 75,

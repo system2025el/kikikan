@@ -23,9 +23,11 @@ import dayjs, { Dayjs } from 'dayjs';
 import { useEffect, useRef, useState } from 'react';
 
 import {} from '@/app/(main)/_lib/date-conversion';
+import { permission } from '@/app/(main)/_lib/permission';
 import { BackButton } from '@/app/(main)/_ui/buttons';
 import { Calendar } from '@/app/(main)/_ui/date';
 import { Loading } from '@/app/(main)/_ui/loading';
+import { PermissionGuard } from '@/app/(main)/_ui/permission-guard';
 
 import { confirmJuchuHeadId, getLoanJuchuData, getLoanStockData, getLoanUseData } from '../_lib/funcs';
 import { LoanJuchu, LoanKizai, LoanStockTableValues, LoanUseTableValues } from '../_lib/types';
@@ -300,103 +302,105 @@ export const LoanSituation = (props: {
   };
 
   return (
-    <Box>
-      <Paper variant="outlined">
-        <Box display="flex" justifyContent="space-between" alignItems="center" px={2} width="100%">
-          <Typography>貸出状況</Typography>
-        </Box>
-        <Divider />
-        <Grid2 container alignItems={'center'} px={2} py={0.5} spacing={2}>
-          <Typography>機材名</Typography>
-          <TextField value={kizaiData.kizaiNam} sx={{ minWidth: 400 }} disabled />
-          <Typography ml={2}>保有数</Typography>
-          <TextField
-            disabled
-            value={kizaiData.kizaiQty}
-            sx={{
-              maxWidth: 100,
-              '& .MuiInputBase-input': {
-                textAlign: 'right',
-              },
-            }}
-          />
-          <Typography ml={2}>NG数</Typography>
-          <TextField
-            disabled
-            value={kizaiData.ngQty}
-            sx={{
-              maxWidth: 100,
-              '& .MuiInputBase-input': {
-                textAlign: 'right',
-              },
-            }}
-          />
-          <Typography ml={2}>定価</Typography>
-          <TextField
-            value={`¥${kizaiData.regAmt.toLocaleString()}`}
-            disabled
-            sx={{
-              maxWidth: 120,
-              '& .MuiInputBase-input': {
-                textAlign: 'right',
-              },
-            }}
-          />
-          <FormControl sx={{ ml: 3 }}>
-            <RadioGroup value={sortValue} onChange={handleRadioChange} row>
-              <FormControlLabel value="shuko" control={<Radio />} label="出庫日順" />
-              <FormControlLabel value="nyuko" control={<Radio />} label="入庫日順" />
-            </RadioGroup>
-          </FormControl>
-          <Box display={'flex'} justifyContent={'end'} p={2}>
-            <Button onClick={handleReload} loading={isLoading}>
-              再表示
-            </Button>
+    <PermissionGuard category={'juchu'} required={permission.juchu_ref}>
+      <Box>
+        <Paper variant="outlined">
+          <Box display="flex" justifyContent="space-between" alignItems="center" px={2} width="100%">
+            <Typography>貸出状況</Typography>
           </Box>
-        </Grid2>
-      </Paper>
-      {isLoading ? (
-        <Loading />
-      ) : (
-        <Grid2 container>
-          <Grid2
-            size={{
-              xs: 'auto',
-              sm: 'auto',
-              md: 'auto',
-              lg: 'auto',
-            }}
-          >
-            <Box height={31} mt={1} mb={0.5} />
-            <LoanSituationTable rows={loanJuchuList} ref={leftRef} />
-          </Grid2>
-          <Grid2 overflow="auto" size={{ xs: 'grow', sm: 'grow', md: 'grow' }}>
-            <Box display={'flex'} alignItems={'center'} height={31} mt={1} mb={0.5}>
-              <Box display={loanJuchuList.length > 0 ? 'flex' : 'none'} alignItems={'end'} mr={2}>
-                <Typography fontSize={'small'}>使用数</Typography>
-              </Box>
-              <Button onClick={handleBackDateChange}>
-                <ArrowBackIosNewIcon fontSize="small" />
-              </Button>
-              <Button variant="outlined" onClick={handleClick}>
-                日付選択
-              </Button>
-              <Popper open={open} anchorEl={anchorEl} placement="bottom-start" sx={{ zIndex: 1202 }}>
-                <ClickAwayListener onClickAway={handleClickAway}>
-                  <Paper elevation={3} sx={{ mt: 1 }}>
-                    <Calendar date={selectDate} onChange={handleDateChange} />
-                  </Paper>
-                </ClickAwayListener>
-              </Popper>
-              <Button onClick={handleForwardDateChange}>
-                <ArrowForwardIosIcon fontSize="small" />
+          <Divider />
+          <Grid2 container alignItems={'center'} px={2} py={0.5} spacing={2}>
+            <Typography>機材名</Typography>
+            <TextField value={kizaiData.kizaiNam} sx={{ minWidth: 400 }} disabled />
+            <Typography ml={2}>保有数</Typography>
+            <TextField
+              disabled
+              value={kizaiData.kizaiQty}
+              sx={{
+                maxWidth: 100,
+                '& .MuiInputBase-input': {
+                  textAlign: 'right',
+                },
+              }}
+            />
+            <Typography ml={2}>NG数</Typography>
+            <TextField
+              disabled
+              value={kizaiData.ngQty}
+              sx={{
+                maxWidth: 100,
+                '& .MuiInputBase-input': {
+                  textAlign: 'right',
+                },
+              }}
+            />
+            <Typography ml={2}>定価</Typography>
+            <TextField
+              value={`¥${kizaiData.regAmt.toLocaleString()}`}
+              disabled
+              sx={{
+                maxWidth: 120,
+                '& .MuiInputBase-input': {
+                  textAlign: 'right',
+                },
+              }}
+            />
+            <FormControl sx={{ ml: 3 }}>
+              <RadioGroup value={sortValue} onChange={handleRadioChange} row>
+                <FormControlLabel value="shuko" control={<Radio />} label="出庫日順" />
+                <FormControlLabel value="nyuko" control={<Radio />} label="入庫日順" />
+              </RadioGroup>
+            </FormControl>
+            <Box display={'flex'} justifyContent={'end'} p={2}>
+              <Button onClick={handleReload} loading={isLoading}>
+                再表示
               </Button>
             </Box>
-            <UseTable eqUseList={eqUseList} eqStockList={eqStockList} ref={rightRef} />
           </Grid2>
-        </Grid2>
-      )}
-    </Box>
+        </Paper>
+        {isLoading ? (
+          <Loading />
+        ) : (
+          <Grid2 container>
+            <Grid2
+              size={{
+                xs: 'auto',
+                sm: 'auto',
+                md: 'auto',
+                lg: 'auto',
+              }}
+            >
+              <Box height={31} mt={1} mb={0.5} />
+              <LoanSituationTable rows={loanJuchuList} ref={leftRef} />
+            </Grid2>
+            <Grid2 overflow="auto" size={{ xs: 'grow', sm: 'grow', md: 'grow' }}>
+              <Box display={'flex'} alignItems={'center'} height={31} mt={1} mb={0.5}>
+                <Box display={loanJuchuList.length > 0 ? 'flex' : 'none'} alignItems={'end'} mr={2}>
+                  <Typography fontSize={'small'}>使用数</Typography>
+                </Box>
+                <Button onClick={handleBackDateChange}>
+                  <ArrowBackIosNewIcon fontSize="small" />
+                </Button>
+                <Button variant="outlined" onClick={handleClick}>
+                  日付選択
+                </Button>
+                <Popper open={open} anchorEl={anchorEl} placement="bottom-start" sx={{ zIndex: 1202 }}>
+                  <ClickAwayListener onClickAway={handleClickAway}>
+                    <Paper elevation={3} sx={{ mt: 1 }}>
+                      <Calendar date={selectDate} onChange={handleDateChange} />
+                    </Paper>
+                  </ClickAwayListener>
+                </Popper>
+                <Button onClick={handleForwardDateChange}>
+                  <ArrowForwardIosIcon fontSize="small" />
+                </Button>
+              </Box>
+              <UseTable eqUseList={eqUseList} eqStockList={eqStockList} ref={rightRef} />
+            </Grid2>
+          </Grid2>
+        )}
+      </Box>
+    </PermissionGuard>
   );
 };
 

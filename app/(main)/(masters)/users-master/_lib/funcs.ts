@@ -14,9 +14,10 @@ import {
 } from '@/app/_lib/db/tables/m-user';
 import { MUserDBValues } from '@/app/_lib/db/types/m-use-type';
 import { getUrl } from '@/app/_lib/url';
-import { toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
+import { permission } from '@/app/(main)/_lib/permission';
 
-import { emptyUser } from './datas';
+import { emptyUser, htRadio, juchuRadio, loginSettingRadio, mastersRadio, nyushukoRadio } from './datas';
 import { UsersMasterDialogValues, UsersMasterTableValues } from './types';
 
 /**
@@ -60,33 +61,40 @@ export const getChosenUser = async (mailAdr: string) => {
       return emptyUser;
     }
     // permissionを２進数に戻す
-    const biString = rows[0].permission.toString(2).padStart(8, 0);
+    //const biString = rows[0].permission.toString(2).padStart(8, 0);
 
     const UserDetails: UsersMasterDialogValues = {
       mailAdr: rows[0].mail_adr,
       tantouNam: rows[0].user_nam,
       delFlg: Boolean(rows[0].del_flg),
       shainCod: rows[0].shain_cod,
-      psermission:
-        rows[0].permission === 65535
-          ? {
-              juchu: '11',
-              nyushuko: '11',
-              masters: '11',
-              ht: '1',
-              loginSetting: '1',
-            }
-          : {
-              juchu: biString.slice(0, 2),
-              nyushuko: biString.slice(2, 4),
-              masters: biString.slice(4, 6),
-              ht: biString.slice(6, 7),
-              loginSetting: biString.slice(7, 8),
-            },
+      // psermission:
+      //   rows[0].permission === 65535
+      //     ? {
+      //         juchu: '11',
+      //         nyushuko: '11',
+      //         masters: '11',
+      //         ht: '1',
+      //         loginSetting: '1',
+      //       }
+      //     : {
+      //         juchu: biString.slice(0, 2),
+      //         nyushuko: biString.slice(2, 4),
+      //         masters: biString.slice(4, 6),
+      //         ht: biString.slice(6, 7),
+      //         loginSetting: biString.slice(7, 8),
+      //       },
+      permission: {
+        juchu: rows[0].permission & permission.juchu_full,
+        nyushuko: rows[0].permission & permission.nyushuko_full,
+        masters: rows[0].permission & permission.mst_full,
+        ht: rows[0].permission & permission.ht,
+        loginSetting: rows[0].permission & permission.login,
+      },
       mem: rows[0].mem,
       lastLoginAt: !rows[0].last_sign_in_at ? null : toJapanTimeString(rows[0].last_sign_in_at),
     };
-    console.log(UserDetails.psermission);
+    console.log(UserDetails.permission);
     return UserDetails;
   } catch (e) {
     console.error('例外が発生しました:', e);
@@ -100,16 +108,17 @@ export const getChosenUser = async (mailAdr: string) => {
  */
 export const addNewUser = async (data: UsersMasterDialogValues, user: string) => {
   console.log(data.tantouNam);
-  const p = data.psermission;
-  const permissionNum = parseInt(p.juchu + p.nyushuko + p.masters + p.ht + p.loginSetting, 2);
+  const p = data.permission;
+  //const permissionNum = parseInt(p.juchu + p.nyushuko + p.masters + p.ht + p.loginSetting, 2);
+  const permissionNum = p.juchu | p.nyushuko | p.masters | p.ht | p.loginSetting;
   const insertData: MUserDBValues = {
     user_nam: data.tantouNam,
     shain_cod: data.shainCod ?? null,
     mail_adr: data.mailAdr,
-    permission: permissionNum === 255 ? 65535 : permissionNum,
+    permission: permissionNum,
     del_flg: Number(data.delFlg),
     mem: data.mem ?? null,
-    add_dat: toJapanTimeStampString(),
+    add_dat: new Date().toISOString(),
     add_user: user,
   };
   const connection = await pool.connect();
@@ -156,17 +165,18 @@ export const addNewUser = async (data: UsersMasterDialogValues, user: string) =>
  * @param id 更新する担当者マスタID
  */
 export const updateUser = async (currentEmail: string, data: UsersMasterDialogValues, user: string) => {
-  const date = toJapanTimeStampString();
+  const date = new Date().toISOString();
   // permissionを10進数に変換する
-  const p = data.psermission;
-  const permissionNum = parseInt(p.juchu + p.nyushuko + p.masters + p.ht + p.loginSetting, 2);
+  const p = data.permission;
+  //const permissionNum = parseInt(p.juchu + p.nyushuko + p.masters + p.ht + p.loginSetting , 2);
+  const permissionNum = p.juchu | p.nyushuko | p.masters | p.ht | p.loginSetting;
 
   // 更新データ
   const updateData: MUserDBValues = {
     user_nam: data.tantouNam,
     shain_cod: data.shainCod ?? null,
     mail_adr: currentEmail,
-    permission: permissionNum === 255 ? 65535 : permissionNum,
+    permission: permissionNum,
     del_flg: Number(data.delFlg),
     mem: data.mem ?? null,
     upd_dat: date,
@@ -178,6 +188,7 @@ export const updateUser = async (currentEmail: string, data: UsersMasterDialogVa
     await connection.query('BEGIN');
     // マスタ更新する
     await upDateUserDB(updateData, connection);
+    await connection.query('COMMIT');
   } catch (error) {
     console.log('例外が発生', error);
     await connection.query('ROLLBACK');
@@ -195,7 +206,7 @@ export const deleteUsers = async (mailAdr: string, user: string) => {
   const delData = {
     mail_adr: mailAdr,
     del_flg: 1,
-    upd_dat: toJapanTimeStampString(),
+    upd_dat: new Date().toISOString(),
     upd_user: user,
   };
 
@@ -236,7 +247,7 @@ export const restoreUsers = async (mailAdr: string, user: string) => {
   const delData = {
     mail_adr: mailAdr,
     del_flg: 0,
-    upd_dat: toJapanTimeStampString(),
+    upd_dat: new Date().toISOString(),
     upd_user: user,
   };
 
@@ -274,7 +285,7 @@ export const restoreUsersAndShainCod = async (mailAdr: string, shainCod: string 
   const delData = {
     mail_adr: mailAdr,
     del_flg: 0,
-    upd_dat: toJapanTimeStampString(),
+    upd_dat: new Date().toISOString(),
     upd_user: user,
     shain_cod: shainCod,
   };

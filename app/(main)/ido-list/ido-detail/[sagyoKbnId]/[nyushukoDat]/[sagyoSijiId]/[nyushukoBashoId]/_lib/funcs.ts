@@ -13,7 +13,6 @@ import { selectIdoDen } from '@/app/_lib/db/tables/v-ido-den3-lst';
 import { selectChosenIdoEqptsDetails } from '@/app/_lib/db/tables/v-kizai-list';
 import { IdoDen } from '@/app/_lib/db/types/t-ido-den-type';
 import { IdoFix } from '@/app/_lib/db/types/t-ido-fix-type';
-import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { IdoDetailTableValues, IdoEqptSelection, SelectedIdoEqptsValues } from './types';
 
@@ -99,7 +98,7 @@ export const addIdoDen = async (addIdoDenData: IdoDetailTableValues[], userNam: 
     sagyo_id: d.nyushukoBashoId,
     sagyo_kbn_id: 40,
     sagyo_siji_id: d.sagyosijiId,
-    add_dat: toJapanTimeString(),
+    add_dat: new Date().toISOString(),
     add_user: userNam,
   }));
 
@@ -111,7 +110,7 @@ export const addIdoDen = async (addIdoDenData: IdoDetailTableValues[], userNam: 
     sagyo_id: d.sagyosijiId === 1 ? 2 : 1,
     sagyo_kbn_id: 50,
     sagyo_siji_id: d.sagyosijiId,
-    add_dat: toJapanTimeString(),
+    add_dat: new Date().toISOString(),
     add_user: userNam,
   }));
 
@@ -139,7 +138,7 @@ export const updIdoDen = async (updIdoDenData: IdoDetailTableValues[], userNam: 
     sagyo_id: d.nyushukoBashoId,
     sagyo_kbn_id: 40,
     sagyo_siji_id: d.sagyosijiId,
-    upd_dat: toJapanTimeString(),
+    upd_dat: new Date().toISOString(),
     upd_user: userNam,
   }));
 
@@ -151,7 +150,7 @@ export const updIdoDen = async (updIdoDenData: IdoDetailTableValues[], userNam: 
     sagyo_id: d.sagyosijiId === 1 ? 2 : 1,
     sagyo_kbn_id: 50,
     sagyo_siji_id: d.sagyosijiId,
-    upd_dat: toJapanTimeString(),
+    upd_dat: new Date().toISOString(),
     upd_user: userNam,
   }));
 
@@ -255,7 +254,7 @@ export const addIdoFix = async (
     sagyo_id: sagyoId,
     sagyo_kbn_id: sagyoKbnId,
     sagyo_siji_id: sagyoSijiId,
-    upd_dat: toJapanTimeString(),
+    upd_dat: new Date().toISOString(),
     upd_user: userNam,
   };
 

@@ -19,7 +19,6 @@ import { JuchuCtnMeisai } from '@/app/_lib/db/types/t_juchu_ctn_meisai-type';
 import { JuchuKizaiMeisai } from '@/app/_lib/db/types/t-juchu-kizai-meisai-type';
 import { NyushukoDen } from '@/app/_lib/db/types/t-nyushuko-den-type';
 import { NyushukoFix } from '@/app/_lib/db/types/t-nyushuko-fix-type';
-import { toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { NyukoDetailTableValues, NyukoDetailValues } from './types';
 
@@ -349,14 +348,11 @@ export const upsJuchuKizaiMeisai = async (
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
     keep_qty: d.juchuKizaiHeadKbn === 3 ? (d.resultQty ?? 0) + (d.resultAdjQty ?? 0) : null,
     kizai_id: d.kizaiId,
-    plan_kizai_qty:
-      /*d.juchuKizaiHeadKbn === 1
-        ? (d.resultQty ?? 0) + (d.resultAdjQty ?? 0)
-        :*/ d.juchuKizaiHeadKbn === 2 ? -1 * ((d.resultQty ?? 0) + (d.resultAdjQty ?? 0)) : null,
+    plan_kizai_qty: d.juchuKizaiHeadKbn === 2 ? -1 * ((d.resultQty ?? 0) + (d.resultAdjQty ?? 0)) : null,
     shozoku_id: d.nyushukoShubetuId ?? 0,
     dsp_ord_num: d.dspOrdNumMeisai,
     indent_num: d.indentNum,
-    add_dat: toJapanTimeStampString(),
+    add_dat: new Date().toISOString(),
     add_user: userNam,
     upd_dat: null,
     upd_user: null,
@@ -387,12 +383,13 @@ export const upsJuchuCtnMeisai = async (
     juchu_head_id: d.juchuHeadId,
     juchu_kizai_head_id: d.juchuKizaiHeadId,
     juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
+    keep_qty: d.juchuKizaiHeadKbn === 3 ? (d.resultQty ?? 0) + (d.resultAdjQty ?? 0) : null,
     kizai_id: d.kizaiId,
-    plan_kizai_qty: (d.resultQty ?? 0) + (d.resultAdjQty ?? 0),
+    plan_kizai_qty: d.juchuKizaiHeadKbn === 2 ? -1 * ((d.resultQty ?? 0) + (d.resultAdjQty ?? 0)) : null,
     shozoku_id: d.nyushukoShubetuId ?? 0,
     dsp_ord_num: d.dspOrdNumMeisai,
     indent_num: d.indentNum,
-    add_dat: toJapanTimeStampString(),
+    add_dat: new Date().toISOString(),
     add_user: userNam,
   }));
   try {
@@ -428,7 +425,7 @@ export const updNyukoDen = async (
     sagyo_kbn_id: 30,
     dsp_ord_num: d.dspOrdNumMeisai,
     indent_num: d.indentNum,
-    add_dat: toJapanTimeStampString(),
+    add_dat: new Date().toISOString(),
     add_user: userNam,
     upd_dat: null,
     upd_user: null,
@@ -471,7 +468,7 @@ export const upsShukoDen = async (
     sagyo_kbn_id: 10,
     dsp_ord_num: d.dspOrdNumMeisai,
     indent_num: d.indentNum,
-    add_dat: toJapanTimeStampString(),
+    add_dat: new Date().toISOString(),
     add_user: userNam,
     upd_dat: null,
     upd_user: null,
@@ -488,7 +485,7 @@ export const upsShukoDen = async (
     sagyo_kbn_id: 20,
     dsp_ord_num: d.dspOrdNumMeisai,
     indent_num: d.indentNum,
-    add_dat: toJapanTimeStampString(),
+    add_dat: new Date().toISOString(),
     add_user: userNam,
     upd_dat: null,
     upd_user: null,
@@ -530,7 +527,7 @@ export const updOyaNyukoDen = async (
     sagyo_kbn_id: 30,
     dsp_ord_num: d.dspOrdNumMeisai,
     indent_num: d.indentNum,
-    upd_dat: toJapanTimeStampString(),
+    upd_dat: new Date().toISOString(),
     upd_user: userNam,
   }));
 
@@ -569,7 +566,7 @@ export const addNyukoFix = async (
     sagyo_den_dat: nyukoDetailData.nyushukoDat,
     sagyo_id: nyukoDetailData.nyushukoBashoId,
     sagyo_fix_flg: 1,
-    upd_dat: toJapanTimeStampString(),
+    upd_dat: new Date().toISOString(),
     upd_user: userNam,
   }));
 

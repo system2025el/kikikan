@@ -1,6 +1,5 @@
 'use server';
 
-import { toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { ShukeibumonsMasterDialogValues } from '@/app/(main)/(masters)/shukeibumons-master/_lib/types';
 
 import pool from '../postgres';
@@ -82,7 +81,7 @@ export const insertNewShukeibumon = async (data: ShukeibumonsMasterDialogValues,
       $3, $4, $5
     );
   `;
-  const date = toJapanTimeStampString();
+  const date = new Date().toISOString();
   const values = [data.shukeibumonNam, Number(data.delFlg), data.mem, date, user];
 
   try {

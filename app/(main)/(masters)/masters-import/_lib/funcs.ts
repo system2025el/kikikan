@@ -11,7 +11,6 @@ import {
   checkShukeibumon,
   checkTanaban,
 } from '@/app/_lib/db/tables/masters-import';
-import { toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { EqptImportType, KizaiImportTypes, RfidImportTypes, TanabanImportTypes } from './types';
 
@@ -27,7 +26,7 @@ export const ImportEqptRfidData = async (data: EqptImportType[], user: string) =
   // console.log(data);
   console.log('=================== インポートするよ ====================');
   // 現在時刻
-  const now = toJapanTimeStampString();
+  const now = new Date().toISOString();
 
   console.log('=================== データの整理開始 ====================');
   /* 重複のない棚番用データ */

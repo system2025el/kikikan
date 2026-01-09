@@ -2,8 +2,6 @@
 
 import { PoolClient } from 'pg';
 
-import { toJapanTimeStampString } from '@/app/(main)/_lib/date-conversion';
-
 import pool from '../postgres';
 import { SCHEMA, supabase } from '../supabase';
 import { MRfidDBValues } from '../types/m-rfid-type';

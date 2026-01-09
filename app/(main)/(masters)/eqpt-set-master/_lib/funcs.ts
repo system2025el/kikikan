@@ -11,11 +11,9 @@ import {
   selectOneEqptSet,
   updateEqptSetDB,
 } from '@/app/_lib/db/tables/m-kizai-set';
-import { toJapanTimeStampString } from '@/app/(main)/_lib/date-conversion';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { EqptSelection } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
 
-import { FAKE_NEW_ID } from '../../_lib/constants';
 import { emptyEqptSet } from './datas';
 import { EqptSetsMasterDialogValues, EqptSetsMasterTableValues } from './types';
 

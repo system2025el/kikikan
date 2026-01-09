@@ -21,8 +21,10 @@ import dayjs, { Dayjs } from 'dayjs';
 import { useEffect, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
+import { permission } from '../../_lib/permission';
 import { Calendar } from '../../_ui/date';
 import { Loading } from '../../_ui/loading';
+import { PermissionGuard } from '../../_ui/permission-guard';
 import { FAKE_NEW_ID } from '../../(masters)/_lib/constants';
 import { getBumonsData, getEqData, getEqStockData } from '../_lib/funcs';
 import { Bumon, EqTableValues, StockTableValues } from '../_lib/types';
@@ -181,79 +183,81 @@ export const Stock = () => {
   }, [reset]);
 
   return (
-    <Paper>
-      <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Typography px={2}>在庫確認</Typography>
-      </Box>
-      <Divider />
-      <Box>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <Grid2 container alignItems="center" p={2} spacing={2}>
-            <Typography>部門</Typography>
-            <Controller
-              name="bumonId"
-              control={control}
-              render={({ field }) => (
-                <Select {...field} sx={{ minWidth: 250 }}>
-                  {bumons.length > 0 &&
-                    bumons.map((d: Bumon) => (
-                      <MenuItem key={d.bumonId} value={d.bumonId}>
-                        {d.bumonNam}
-                      </MenuItem>
-                    ))}
-                </Select>
-              )}
-            />
-            <Button type="submit" loading={isLoading}>
-              <SearchIcon fontSize="small" />
-              検索
-            </Button>
-          </Grid2>
-        </form>
-      </Box>
-      {isLoading ? (
-        <Loading />
-      ) : (
-        <Box display={eqList.length > 0 ? 'flex' : 'none'} flexDirection="row" width="100%">
-          <Box
-            sx={{
-              width: {
-                xs: '40%',
-                sm: '40%',
-                md: '40%',
-                lg: 'min-content',
-              },
-              mt: 5.8,
-            }}
-          >
-            <EqTable eqList={eqList} ref={leftRef} />
-          </Box>
-          <Box overflow="auto" sx={{ width: { xs: '60%', sm: '60%', md: 'auto' } }}>
-            <Box display="flex" my={1}>
-              <Box display={'flex'} alignItems={'end'} mr={2}>
-                <Typography fontSize={'small'}>在庫数</Typography>
-              </Box>
-              <Button onClick={handleBackDateChange}>
-                <ArrowBackIosNewIcon fontSize="small" />
-              </Button>
-              <Button variant="outlined" onClick={handleClick}>
-                日付選択
-              </Button>
-              <Popper open={open} anchorEl={anchorEl} placement="bottom-start" sx={{ zIndex: 1202 }}>
-                <ClickAwayListener onClickAway={handleClickAway}>
-                  <Paper elevation={3} sx={{ mt: 1 }}>
-                    <Calendar date={selectDate} onChange={handleDateChange} />
-                  </Paper>
-                </ClickAwayListener>
-              </Popper>
-              <Button onClick={handleForwardDateChange}>
-                <ArrowForwardIosIcon fontSize="small" />
-              </Button>
-            </Box>
-            <EqStockTable eqStockList={eqStockList} ref={rightRef} />
-          </Box>
+    <PermissionGuard category={'juchu'} required={permission.juchu_ref}>
+      <Paper>
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Typography px={2}>在庫確認</Typography>
         </Box>
-      )}
-    </Paper>
+        <Divider />
+        <Box>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <Grid2 container alignItems="center" p={2} spacing={2}>
+              <Typography>部門</Typography>
+              <Controller
+                name="bumonId"
+                control={control}
+                render={({ field }) => (
+                  <Select {...field} sx={{ minWidth: 250 }}>
+                    {bumons.length > 0 &&
+                      bumons.map((d: Bumon) => (
+                        <MenuItem key={d.bumonId} value={d.bumonId}>
+                          {d.bumonNam}
+                        </MenuItem>
+                      ))}
+                  </Select>
+                )}
+              />
+              <Button type="submit" loading={isLoading}>
+                <SearchIcon fontSize="small" />
+                検索
+              </Button>
+            </Grid2>
+          </form>
+        </Box>
+        {isLoading ? (
+          <Loading />
+        ) : (
+          <Box display={eqList.length > 0 ? 'flex' : 'none'} flexDirection="row" width="100%">
+            <Box
+              sx={{
+                width: {
+                  xs: '40%',
+                  sm: '40%',
+                  md: '40%',
+                  lg: 'min-content',
+                },
+                mt: 5.8,
+              }}
+            >
+              <EqTable eqList={eqList} ref={leftRef} />
+            </Box>
+            <Box overflow="auto" sx={{ width: { xs: '60%', sm: '60%', md: 'auto' } }}>
+              <Box display="flex" my={1}>
+                <Box display={'flex'} alignItems={'end'} mr={2}>
+                  <Typography fontSize={'small'}>在庫数</Typography>
+                </Box>
+                <Button onClick={handleBackDateChange}>
+                  <ArrowBackIosNewIcon fontSize="small" />
+                </Button>
+                <Button variant="outlined" onClick={handleClick}>
+                  日付選択
+                </Button>
+                <Popper open={open} anchorEl={anchorEl} placement="bottom-start" sx={{ zIndex: 1202 }}>
+                  <ClickAwayListener onClickAway={handleClickAway}>
+                    <Paper elevation={3} sx={{ mt: 1 }}>
+                      <Calendar date={selectDate} onChange={handleDateChange} />
+                    </Paper>
+                  </ClickAwayListener>
+                </Popper>
+                <Button onClick={handleForwardDateChange}>
+                  <ArrowForwardIosIcon fontSize="small" />
+                </Button>
+              </Box>
+              <EqStockTable eqStockList={eqStockList} ref={rightRef} />
+            </Box>
+          </Box>
+        )}
+      </Paper>
+    </PermissionGuard>
   );
 };

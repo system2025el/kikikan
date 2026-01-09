@@ -4,7 +4,6 @@ import dayjs from 'dayjs';
 
 import { deleteLock, insertLock, selectLock, updateLock } from '@/app/_lib/db/tables/t-lock';
 
-import { toJapanTimeStampString, toJapanTimeString } from './date-conversion';
 import { LockValues } from './types';
 
 /**

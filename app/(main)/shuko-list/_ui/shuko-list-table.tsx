@@ -15,15 +15,19 @@ import { grey } from '@mui/material/colors';
 import { useRouter } from 'next/navigation';
 import { Dispatch, SetStateAction, use, useState } from 'react';
 
+import { User, useUserStore } from '@/app/_lib/stores/usestore';
+
 import { dispColors } from '../../_lib/colors';
 import { toJapanTimeString } from '../../_lib/date-conversion';
+import { permission } from '../../_lib/permission';
 import { ShukoTableValues } from '../_lib/types';
 
 export const ShukoListTable = (props: {
+  user: User | null;
   datas: ShukoTableValues[];
   onSelectionChange: Dispatch<SetStateAction<number[]>>;
 }) => {
-  const { datas, onSelectionChange } = props;
+  const { user, datas, onSelectionChange } = props;
 
   const router = useRouter();
 
@@ -80,7 +84,7 @@ export const ShukoListTable = (props: {
             <TableCell align="center">チェック</TableCell>
             <TableCell align="left">公演名</TableCell>
             <TableCell align="left">公演場所</TableCell>
-            <TableCell align="left">機材明細名</TableCell>
+            <TableCell align="left">受注明細名</TableCell>
             <TableCell align="left">顧客名</TableCell>
             <TableCell align="left">課</TableCell>
           </TableRow>
@@ -115,6 +119,7 @@ export const ShukoListTable = (props: {
                   size="small"
                   onClick={() => window.open(`/order/${row.juchuHeadId}/view`)}
                   sx={{ py: 0, px: 1 }}
+                  disabled={!(user && user.permission.juchu & permission.juchu_ref)}
                 >
                   {row.juchuHeadId}
                 </Button>

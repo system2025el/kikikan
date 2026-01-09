@@ -3,12 +3,11 @@
 import { revalidatePath } from 'next/cache';
 
 import pool from '@/app/_lib/db/postgres';
-import { insertNewEqpt, selectActiveEqpts, selectOneEqpt, upDateEqptDB } from '@/app/_lib/db/tables/m-kizai';
+import { insertNewEqpt, selectOneEqpt, upDateEqptDB } from '@/app/_lib/db/tables/m-kizai';
 import { insertEqptHistory } from '@/app/_lib/db/tables/m-kizai-his';
 import { updateMasterUpdates } from '@/app/_lib/db/tables/m-master-update';
 import { selectCountOfTheEqpt } from '@/app/_lib/db/tables/m-rfid';
 import { selectFilteredEqpts } from '@/app/_lib/db/tables/v-kizai-list';
-import { toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { FAKE_NEW_ID } from '../../_lib/constants';
 import { getBumonsSelection, getDaibumonsSelection, getShukeibumonsSelection } from '../../_lib/funcs';
@@ -163,7 +162,7 @@ export const updateEqpt = async (
   id: number,
   user: string
 ) => {
-  const date = toJapanTimeStampString();
+  const date = new Date().toISOString();
   const updateData = {
     kizai_id: id,
     kizai_nam: rawData.kizaiNam,

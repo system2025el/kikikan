@@ -9,7 +9,6 @@ import {
   selectOneShozoku,
   upDateShozokuDB,
 } from '@/app/_lib/db/tables/m-shozoku';
-import { toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 
 import { emptyBase } from './datas';
@@ -114,7 +113,7 @@ export const addNewBase = async (data: BasesMasterDialogValues, user: string) =>
  * @param id 更新する所属マスタID
  */
 export const updateBase = async (rawData: BasesMasterDialogValues, id: number, user: string) => {
-  const date = toJapanTimeStampString();
+  const date = new Date().toISOString();
   const updateData = {
     shozoku_id: id,
     shozoku_nam: rawData.shozokuNam,

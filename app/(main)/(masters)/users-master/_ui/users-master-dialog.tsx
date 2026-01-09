@@ -14,7 +14,17 @@ import { Loading } from '@/app/(main)/_ui/loading';
 import { FAKE_NEW_ID } from '../../_lib/constants';
 import { MasterDialogTitle } from '../../_ui/dialog-title';
 import { IsDirtyAlertDialog, WillDeleteAlertDialog } from '../../_ui/dialogs';
-import { emptyUser, formItems, radioPair, radioTrio } from '../_lib/datas';
+import {
+  emptyUser,
+  formItems,
+  htRadio,
+  juchuRadio,
+  loginSettingRadio,
+  mastersRadio,
+  nyushukoRadio,
+  radioPair,
+  radioTrio,
+} from '../_lib/datas';
 import {
   addNewUser,
   deleteUsers,
@@ -328,10 +338,12 @@ export const UsersMasterDialog = ({
                   <Grid2 sx={styles.container}>
                     <Typography mr={8}>受注系画面</Typography>
                     <RadioButtonGroup
-                      name="psermission.juchu"
+                      name="permission.juchu"
                       control={control}
-                      options={radioTrio}
+                      options={juchuRadio}
+                      valueKey="id"
                       disabled={editable ? false : true}
+                      type="number"
                       row
                     />
                   </Grid2>
@@ -339,40 +351,48 @@ export const UsersMasterDialog = ({
                     <Typography mr={6}>入出庫系画面</Typography>
 
                     <RadioButtonGroup
-                      name="psermission.nyushuko"
+                      name="permission.nyushuko"
                       control={control}
-                      options={radioTrio}
+                      options={nyushukoRadio}
+                      valueKey="id"
                       disabled={editable ? false : true}
+                      type="number"
                       row
                     />
                   </Grid2>
                   <Grid2 sx={styles.container}>
                     <Typography mr={2}>業務マスタ系画面</Typography>
                     <RadioButtonGroup
-                      name="psermission.masters"
+                      name="permission.masters"
                       control={control}
-                      options={radioTrio}
+                      options={mastersRadio}
+                      valueKey="id"
                       disabled={editable ? false : true}
+                      type="number"
                       row
                     />
                   </Grid2>
                   <Grid2 sx={styles.container}>
                     <Typography mr={6}>ログイン管理</Typography>
                     <RadioButtonGroup
-                      name="psermission.loginSetting"
+                      name="permission.loginSetting"
                       control={control}
-                      options={radioPair}
+                      options={loginSettingRadio}
+                      valueKey="id"
                       disabled={editable ? false : true}
+                      type="number"
                       row
                     />
                   </Grid2>
                   <Grid2 sx={styles.container}>
                     <Typography mr={6}>ハンディ作業</Typography>
                     <RadioButtonGroup
-                      name="psermission.ht"
+                      name="permission.ht"
                       control={control}
-                      options={radioPair}
+                      options={htRadio}
+                      valueKey="id"
                       disabled={editable ? false : true}
+                      type="number"
                       row
                     />
                   </Grid2>

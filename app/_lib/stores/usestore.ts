@@ -1,10 +1,17 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { createJSONStorage, persist } from 'zustand/middleware';
 
-type User = {
+export type User = {
   id: number;
   name: string;
   email: string;
+  permission: {
+    juchu: number;
+    nyushuko: number;
+    masters: number;
+    loginSetting: number;
+    ht: number;
+  };
 };
 
 type UserState = {
@@ -22,6 +29,7 @@ export const useUserStore = create<UserState>()(
     }),
     {
       name: 'user-storage', // localStorage key
+      //storage: createJSONStorage(() => sessionStorage),
     }
   )
 );

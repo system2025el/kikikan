@@ -8,7 +8,6 @@ import {
   selectOneShukeibumon,
   upDateShukeibumonDB,
 } from '@/app/_lib/db/tables/m-shukeibumon';
-import { toJapanTimeStampString, toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 
 import { emptyShukeibumon } from './datas';
 import { ShukeibumonsMasterDialogValues, ShukeibumonsMasterTableValues } from './types';
@@ -95,7 +94,7 @@ export const addNewShukeibumon = async (data: ShukeibumonsMasterDialogValues, us
  * @param id 更新する集計部門マスタID
  */
 export const updateShukeibumon = async (rawData: ShukeibumonsMasterDialogValues, id: number, user: string) => {
-  const date = toJapanTimeStampString();
+  const date = new Date().toISOString();
   const updateData = {
     shukei_bumon_id: id,
     shukei_bumon_nam: rawData.shukeibumonNam,

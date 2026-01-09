@@ -176,19 +176,12 @@ export const CustomersMasterDialog = ({
       ) : (
         <>
           <Grid2 container spacing={1} p={5} direction={'column'} justifyContent={'center'} width={'100%'}>
-            <FormBox formItem={formItems[0]} required>
-              <TextFieldElement
-                name="kokyakuNam"
-                control={control}
-                label={editable ? formItems[0].exsample : ''}
-                fullWidth
-                sx={{ maxWidth: '90%' }}
-                disabled={editable ? false : true}
-              />
+            <FormBox formItem={formItems[0]}>
+              <TextField value={customerId === -100 ? '' : customerId} disabled />
             </FormBox>
             <FormBox formItem={formItems[1]} required>
               <TextFieldElement
-                name="kana"
+                name="kokyakuNam"
                 control={control}
                 label={editable ? formItems[1].exsample : ''}
                 fullWidth
@@ -196,7 +189,17 @@ export const CustomersMasterDialog = ({
                 disabled={editable ? false : true}
               />
             </FormBox>
-            <FormBox formItem={formItems[2]}>
+            <FormBox formItem={formItems[2]} required>
+              <TextFieldElement
+                name="kana"
+                control={control}
+                label={editable ? formItems[2].exsample : ''}
+                fullWidth
+                sx={{ maxWidth: '90%' }}
+                disabled={editable ? false : true}
+              />
+            </FormBox>
+            <FormBox formItem={formItems[3]}>
               <Controller
                 name="nebikiRat"
                 control={control}
@@ -226,29 +229,19 @@ export const CustomersMasterDialog = ({
               />
               <Typography>%</Typography>
             </FormBox>
-            <FormBox formItem={formItems[5]}>
+            <FormBox formItem={formItems[6]}>
               <TextFieldElement
                 name="adrPost"
                 control={control}
-                label={editable ? formItems[5].exsample : ''}
+                label={editable ? formItems[6].exsample : ''}
                 fullWidth
                 sx={{ maxWidth: '50%' }}
                 disabled={editable ? false : true}
               />
             </FormBox>
-            <FormBox formItem={formItems[6]}>
-              <TextFieldElement
-                name="adrShozai"
-                control={control}
-                label={editable ? formItems[6].exsample : ''}
-                fullWidth
-                sx={{ maxWidth: '90%' }}
-                disabled={editable ? false : true}
-              />
-            </FormBox>
             <FormBox formItem={formItems[7]}>
               <TextFieldElement
-                name="adrTatemono"
+                name="adrShozai"
                 control={control}
                 label={editable ? formItems[7].exsample : ''}
                 fullWidth
@@ -258,7 +251,7 @@ export const CustomersMasterDialog = ({
             </FormBox>
             <FormBox formItem={formItems[8]}>
               <TextFieldElement
-                name="adrSonota"
+                name="adrTatemono"
                 control={control}
                 label={editable ? formItems[8].exsample : ''}
                 fullWidth
@@ -268,17 +261,17 @@ export const CustomersMasterDialog = ({
             </FormBox>
             <FormBox formItem={formItems[9]}>
               <TextFieldElement
-                name="tel"
+                name="adrSonota"
                 control={control}
                 label={editable ? formItems[9].exsample : ''}
                 fullWidth
-                sx={{ maxWidth: '50%' }}
+                sx={{ maxWidth: '90%' }}
                 disabled={editable ? false : true}
               />
             </FormBox>
             <FormBox formItem={formItems[10]}>
               <TextFieldElement
-                name="telMobile"
+                name="tel"
                 control={control}
                 label={editable ? formItems[10].exsample : ''}
                 fullWidth
@@ -288,7 +281,7 @@ export const CustomersMasterDialog = ({
             </FormBox>
             <FormBox formItem={formItems[11]}>
               <TextFieldElement
-                name="fax"
+                name="telMobile"
                 control={control}
                 label={editable ? formItems[11].exsample : ''}
                 fullWidth
@@ -298,21 +291,31 @@ export const CustomersMasterDialog = ({
             </FormBox>
             <FormBox formItem={formItems[12]}>
               <TextFieldElement
-                name="mail"
+                name="fax"
                 control={control}
                 label={editable ? formItems[12].exsample : ''}
+                fullWidth
+                sx={{ maxWidth: '50%' }}
+                disabled={editable ? false : true}
+              />
+            </FormBox>
+            <FormBox formItem={formItems[13]}>
+              <TextFieldElement
+                name="mail"
+                control={control}
+                label={editable ? formItems[13].exsample : ''}
                 fullWidth
                 sx={{ maxWidth: '90%' }}
                 disabled={editable ? false : true}
                 type="email"
               />
             </FormBox>
-            <FormBox formItem={formItems[13]}>
+            <FormBox formItem={formItems[14]}>
               <TextFieldElement
                 multiline
                 name="mem"
                 control={control}
-                label={editable ? formItems[13].exsample : ''}
+                label={editable ? formItems[14].exsample : ''}
                 fullWidth
                 minRows={3}
                 maxRows={3}
@@ -320,7 +323,7 @@ export const CustomersMasterDialog = ({
                 disabled={editable ? false : true}
               />
             </FormBox>
-            <FormBox formItem={formItems[14]}>
+            <FormBox formItem={formItems[15]}>
               <CheckboxElement name="dspFlg" control={control} size="medium" disabled={editable ? false : true} />
             </FormBox>
           </Grid2>

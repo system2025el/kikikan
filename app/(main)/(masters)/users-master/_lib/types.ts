@@ -12,12 +12,12 @@ export const UsersMaterDialogSchema = z.object({
     .max(100, { message: validationMessages.maxStringLength(100) })
     .min(1, { message: validationMessages.required() }),
   shainCod: string().nullish(),
-  psermission: z.object({
-    juchu: string(),
-    nyushuko: string(),
-    masters: string(),
-    loginSetting: string(),
-    ht: string(),
+  permission: z.object({
+    juchu: z.number(),
+    nyushuko: z.number(),
+    masters: z.number(),
+    loginSetting: z.number(),
+    ht: z.number(),
   }),
   mem: z
     .string()

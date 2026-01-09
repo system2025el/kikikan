@@ -98,7 +98,7 @@ export const selectFilteredJuchusForBill = async (queries: {
         SELECT
           juchu_head_id,
           juchu_kizai_head_id,
-          sum((plan_kizai_qty + plan_yobi_qty) * kizai_tanka_amt) as shokei_amt
+          sum(plan_kizai_qty * kizai_tanka_amt) as shokei_amt
         FROM
           ${SCHEMA}.t_juchu_kizai_meisai
         GROUP BY
@@ -192,7 +192,7 @@ export const selectFilteredJuchuDetailsForBill = async (queries: {
         ) as add_dat_qty,
         kizai.kizai_nam,
         meisai.kizai_tanka_amt,
-        (meisai.plan_kizai_qty + meisai.plan_yobi_qty) as plan_qty,
+        meisai.plan_kizai_qty as plan_qty,
         COALESCE(meisai.indent_num, 0) as indent_num
       FROM
         ${SCHEMA}.v_seikyu_date_lst as v
@@ -324,7 +324,7 @@ export const selectJuchuKizaiMeisaiHeadForBill = async (juchuId: number, kizaiHe
         SELECT
             juchu_head_id,
             juchu_kizai_head_id,
-            sum((plan_kizai_qty + plan_yobi_qty) * kizai_tanka_amt) as shokei_amt
+            sum(plan_kizai_qty * kizai_tanka_amt) as shokei_amt
         FROM
             ${SCHEMA}.t_juchu_kizai_meisai
         GROUP BY
@@ -401,7 +401,7 @@ export const selectJuchuKizaiMeisaiDetailsForBill = async (juchuId: number, kiza
       kizai.kizai_nam,
       meisai.kizai_tanka_amt,
       COALESCE(meisai.indent_num, 0) as indent_num,
-      (meisai.plan_kizai_qty + meisai.plan_yobi_qty) as plan_qty
+      meisai.plan_kizai_qty as plan_qty
     FROM
       ${SCHEMA}.v_seikyu_date_lst as v
     LEFT JOIN

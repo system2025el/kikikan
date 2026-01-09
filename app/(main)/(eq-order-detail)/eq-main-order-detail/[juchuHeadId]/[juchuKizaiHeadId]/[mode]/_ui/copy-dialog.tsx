@@ -82,7 +82,7 @@ export const CopyDialog = ({
         {isLoading && <LoadingOverlay />}
         <Paper variant="outlined">
           <Grid2 container alignItems={'baseline'} spacing={2} p={1}>
-            <Typography>機材明細名</Typography>
+            <Typography>受注明細名</Typography>
             <TextFieldElement name="headNam" control={control} />
           </Grid2>
           <Divider />

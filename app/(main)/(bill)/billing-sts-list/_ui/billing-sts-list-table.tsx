@@ -2,8 +2,6 @@
 
 import { KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
 import AddIcon from '@mui/icons-material/Add';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import WarningIcon from '@mui/icons-material/Warning';
 import {
   Box,
   Button,
@@ -12,7 +10,6 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogContentText,
   DialogTitle,
   Divider,
   Grid2,
@@ -31,7 +28,8 @@ import {
 import { useMemo, useState } from 'react';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
-import { toJapanTimeStampString, toJapanTimeString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
+import { permission } from '@/app/(main)/_lib/permission';
 import { CloseMasterDialogButton } from '@/app/(main)/_ui/buttons';
 import { FormDateX } from '@/app/(main)/_ui/date';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
@@ -42,7 +40,7 @@ import { LightTooltipWithText } from '@/app/(main)/(masters)/_ui/tables';
 
 import { CreateBillDialog } from '../../bill-list/_ui/create-bill-dialog';
 import { changeSeikyuDat } from '../_lib/funcs';
-import { BillingStsSearchValues, BillingStsTableValues } from '../_lib/types';
+import { BillingStsTableValues } from '../_lib/types';
 
 /**
  * 受注請求助教一覧テーブル
@@ -72,6 +70,8 @@ export const BillingStsListTable = ({
 }) => {
   /** テーブル1ページの行数 */
   const rowsPerPage = ROWS_PER_MASTER_TABLE_PAGE;
+  /** ユーザー情報 */
+  const user = useUserStore((state) => state.user);
 
   const list = useMemo(
     () => (rowsPerPage > 0 ? billSts.slice((page - 1) * rowsPerPage, page * rowsPerPage) : billSts),
@@ -110,6 +110,7 @@ export const BillingStsListTable = ({
                     setCreateOpen(true);
                   }
                 }}
+                disabled={user?.permission.juchu === permission.juchu_ref}
               >
                 <AddIcon fontSize="small" />
                 新規
@@ -131,7 +132,6 @@ export const BillingStsListTable = ({
               <TableRow sx={{ whiteSpace: 'nowrap' }}>
                 <TableCell padding="none" />
                 <TableCell padding="none" />
-                <TableCell padding="none" />
                 <TableCell align="right">受注番号</TableCell>
                 <TableCell>相手</TableCell>
                 <TableCell>相手担当者</TableCell>
@@ -146,7 +146,7 @@ export const BillingStsListTable = ({
               ))}
               {emptyRows > 0 && (
                 <TableRow style={{ height: 30 * emptyRows }}>
-                  <TableCell colSpan={10} />
+                  <TableCell colSpan={7} />
                 </TableRow>
               )}
             </TableBody>
@@ -198,8 +198,6 @@ const BillingStsRow = ({ juchu, refetch }: { juchu: BillingStsTableValues; refet
   }>({
     juchuId: FAKE_NEW_ID,
     kziHeadId: FAKE_NEW_ID,
-    // shukoDat: new Date(toJapanTimeStampString()),
-    // nyukoDat: new Date(toJapanTimeStampString()),
     shukoDat: new Date(),
     nyukoDat: new Date(),
     currentDat: null,
@@ -226,9 +224,6 @@ const BillingStsRow = ({ juchu, refetch }: { juchu: BillingStsTableValues; refet
   return (
     <>
       <TableRow>
-        <TableCell padding="checkbox" width={48}>
-          <Checkbox color="primary" />
-        </TableCell>
         <TableCell padding="none" width={48} align="center">
           <IconButton onClick={() => setOpen(!open)} sx={{ padding: 0 }}>
             {open ? <KeyboardArrowUp fontSize="small" /> : <KeyboardArrowDown fontSize="small" />}
@@ -272,7 +267,7 @@ const BillingStsRow = ({ juchu, refetch }: { juchu: BillingStsTableValues; refet
         <TableCell />
       </TableRow>
       <TableRow sx={{ whiteSpace: 'nowrap' }}>
-        <TableCell colSpan={4} />
+        <TableCell colSpan={3} />
         <TableCell colSpan={7}>
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Table stickyHeader size="small" padding="none">
@@ -289,7 +284,7 @@ const BillingStsRow = ({ juchu, refetch }: { juchu: BillingStsTableValues; refet
                       bgcolor: theme.palette.primary.dark,
                     })}
                   >
-                    機材明細名
+                    受注明細名
                   </TableCell>
                   <TableCell
                     sx={(theme) => ({

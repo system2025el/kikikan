@@ -51,6 +51,11 @@ export const emptyCustomer: CustomersMasterDialogValues = {
 /*  */
 export const formItems: FormItemsType[] = [
   {
+    label: '顧客番号',
+    exsample: '',
+    constraints: '',
+  },
+  {
     label: '顧客名',
     exsample: '例）㈱エンジニア･ライティング',
     constraints: '100文字まで',
