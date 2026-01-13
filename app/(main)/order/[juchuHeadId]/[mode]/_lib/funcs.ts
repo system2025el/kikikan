@@ -1,5 +1,4 @@
 'use server';
-
 import { subDays } from 'date-fns';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
@@ -53,6 +52,7 @@ import { JuchuKizaiNyushuko } from '@/app/_lib/db/types/t-juchu-kizai-nyushuko-t
 import { NyushukoDen } from '@/app/_lib/db/types/t-nyushuko-den-type';
 import { toJapanTimeString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { getShukoDate } from '@/app/(main)/_lib/date-funcs';
+import { permission } from '@/app/(main)/_lib/permission';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 
 import {
@@ -1484,7 +1484,7 @@ export const getFilteredUsers = async (query: string = '') => {
       return [];
     }
     const filteredUsers: UsersValue[] = rows
-      .filter((d) => d.del_flg !== 1)
+      .filter((d) => d.del_flg !== 1 && d.permission & permission.juchu_upd)
       .map((d, index) => ({
         tantouNam: d.user_nam,
         mailAdr: d.mail_adr,

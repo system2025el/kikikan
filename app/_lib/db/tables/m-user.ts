@@ -33,7 +33,7 @@ export const selectActiveUsers = async () => {
 export const SelectFilteredUsers = async (searchQuery: string) => {
   let query = `
   SELECT
-    m.mail_adr, m.user_nam, m.del_flg, m.shain_cod, m.mem, u.last_sign_in_at
+    m.mail_adr, m.user_nam, m.permission, m.del_flg, m.shain_cod, m.mem, u.last_sign_in_at
   FROM
     ${SCHEMA}.m_user as m
   LEFT JOIN
