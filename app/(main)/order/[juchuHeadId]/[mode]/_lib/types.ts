@@ -7,7 +7,7 @@ export const KokyakuSchema = z.object({
   kokyakuNam: z
     .string({ message: validationMessages.required() })
     .min(1, { message: validationMessages.required() })
-    .max(20, { message: validationMessages.maxStringLength(20) }),
+    .max(100, { message: validationMessages.maxStringLength(100) }),
   // kokyakuRank: z.number(),
 });
 
