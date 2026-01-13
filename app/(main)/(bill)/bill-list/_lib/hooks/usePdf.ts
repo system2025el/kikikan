@@ -149,15 +149,19 @@ export const usePdf = (): [(param: BillHeadValues) => Promise<Blob>] => {
     });
 
     /* ---------------- 取引先：住所+ 会社名 + 御中 ---------------- */
-    const clientInfoX = 80; // 左端からの位置
-    let clientInfoY = 785; // Y座標の開始位置
+    // 単位変換: 1mm = 2.83465pt
+    const mmToPt = 2.83465;
+
+    const clientInfoX = 22 * mmToPt;
+    let clientInfoY = 842 - 18 * mmToPt; //16mm+2
+    const formatSize = 10;
 
     // 郵便番号
     page.drawText(String(param.adr1), {
       x: clientInfoX,
       y: clientInfoY,
       font: customFont,
-      size: 9,
+      size: formatSize,
     });
 
     // 住所
@@ -166,41 +170,55 @@ export const usePdf = (): [(param: BillHeadValues) => Promise<Blob>] => {
       x: clientInfoX,
       y: clientInfoY,
       font: customFont,
-      size: 9,
+      size: formatSize,
     });
-    //ビル名等
-    clientInfoY -= 15; // 1行下にずらす
+
+    // ビル名等
+    clientInfoY -= 15;
     page.drawText(String(param.adr2.tatemono), {
       x: clientInfoX,
       y: clientInfoY,
       font: customFont,
-      size: 9,
-    });
-    //その他
-    clientInfoY -= 15; // 少し間隔をあけて1行下にずらす
-    page.drawText(String(param.adr2.sonota ?? ''), {
-      x: clientInfoX,
-      y: clientInfoY,
-      font: customFont,
-      size: 9,
+      size: formatSize,
     });
 
+    // その他（あれば）
+    if (param.adr2.sonota) {
+      clientInfoY -= 15;
+      page.drawText(String(param.adr2.sonota), {
+        x: clientInfoX,
+        y: clientInfoY,
+        font: customFont,
+        size: formatSize,
+      });
+    }
+
+    clientInfoY -= 25;
+
+    // --- 設定値 ---
+    const maxWidth = 250; // 窓の幅に合わせて調整
+    const companyName = `${param.aite.nam}御中`;
+    const namTextWidth = customFont.widthOfTextAtSize(companyName, formatSize);
+    let drawSize = formatSize;
+
+    if (namTextWidth > maxWidth) {
+      drawSize = (maxWidth / namTextWidth) * formatSize;
+    }
     // 会社名
-    clientInfoY -= 25; // 少し間隔をあけて1行下にずらす
-    page.drawText(`${param.aite.nam}御中`, {
+    page.drawText(companyName, {
       x: clientInfoX,
       y: clientInfoY,
       font: customFont,
-      size: 9,
+      size: drawSize,
     });
 
     // 顧客番号
     clientInfoY -= 75; // 1行下にずらす
     page.drawText(`顧客番号：${param.aite.id} `, {
-      x: clientInfoX - 45,
-      y: clientInfoY,
+      x: 35,
+      y: clientInfoY - 20,
       font: customFont,
-      size: 10,
+      size: 11,
     });
 
     /* ---------------- 請求額 ---------------- */
