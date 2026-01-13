@@ -19,8 +19,11 @@ import { grey } from '@mui/material/colors';
 import { useEffect, useState } from 'react';
 import { CheckboxElement, Controller, TextFieldElement, useForm } from 'react-hook-form-mui';
 
+import { useUserStore } from '@/app/_lib/stores/usestore';
+import { permission } from '@/app/(main)/_lib/permission';
 import { selectNone, SelectTypes } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
+import { PermissionGuard } from '@/app/(main)/_ui/permission-guard';
 import { MuiTablePagination } from '@/app/(main)/_ui/table-pagination';
 
 import { FAKE_NEW_ID, ROWS_PER_MASTER_TABLE_PAGE } from '../../_lib/constants';
@@ -33,6 +36,8 @@ import { EqMasterDialog } from './eqpt-master-dialog';
 export const EqptMaster = () => {
   /* テーブル1ページの行数 */
   const rowsPerPage = ROWS_PER_MASTER_TABLE_PAGE;
+  /* user情報 */
+  const user = useUserStore((state) => state.user);
   /* useState ------------------------------------------------- */
   /** 表示する機材の配列 */
   const [eqpts, setEqpts] = useState<EqptsMasterTableValues[]>([]);
@@ -126,147 +131,158 @@ export const EqptMaster = () => {
   }, []);
 
   return (
-    <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
-      <Paper variant="outlined">
-        <Box width={'100%'} display={'flex'} px={2} sx={{ minHeight: '30px', maxHeight: '30px' }} alignItems={'center'}>
-          <Typography>機材マスタ一覧</Typography>
-        </Box>
-        <Divider />
-        <Box width={'100%'} px={2} py={0.5} component={'form'} onSubmit={handleSubmit(onSubmit)}>
-          <Stack justifyContent={'space-between'} alignItems={'start'}>
-            <Stack>
-              <Typography noWrap>機材名キーワード</Typography>
-              <TextFieldElement name={'query'} control={control} />
+    <PermissionGuard category={'masters'} required={permission.mst_ref}>
+      <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
+        <Paper variant="outlined">
+          <Box
+            width={'100%'}
+            display={'flex'}
+            px={2}
+            sx={{ minHeight: '30px', maxHeight: '30px' }}
+            alignItems={'center'}
+          >
+            <Typography>機材マスタ一覧</Typography>
+          </Box>
+          <Divider />
+          <Box width={'100%'} px={2} py={0.5} component={'form'} onSubmit={handleSubmit(onSubmit)}>
+            <Stack justifyContent={'space-between'} alignItems={'start'}>
+              <Stack>
+                <Typography noWrap>機材名キーワード</Typography>
+                <TextFieldElement name={'query'} control={control} />
+              </Stack>
             </Stack>
-          </Stack>
-          <Grid2 container justifyContent={'space-between'} alignItems={'start'} mt={0.5} spacing={1}>
-            <Grid2 size={{ sm: 12, md: 4 }} display={'flex'} alignItems={'center'}>
-              <Typography width={100}>部門</Typography>
-              <Controller
-                name="bumonQuery"
-                control={control}
-                defaultValue={0}
-                render={({ field }) => (
-                  <Select {...field} sx={{ width: 250 }}>
-                    {[selectNone, ...options!.b!].map((opt) => (
-                      <MenuItem
-                        key={opt.id}
-                        value={opt.id}
-                        sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
-                      >
-                        {opt.label}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                )}
-              />
+            <Grid2 container justifyContent={'space-between'} alignItems={'start'} mt={0.5} spacing={1}>
+              <Grid2 size={{ sm: 12, md: 4 }} display={'flex'} alignItems={'center'}>
+                <Typography width={100}>部門</Typography>
+                <Controller
+                  name="bumonQuery"
+                  control={control}
+                  defaultValue={0}
+                  render={({ field }) => (
+                    <Select {...field} sx={{ width: 250 }}>
+                      {[selectNone, ...options!.b!].map((opt) => (
+                        <MenuItem
+                          key={opt.id}
+                          value={opt.id}
+                          sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
+                        >
+                          {opt.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  )}
+                />
+              </Grid2>
+              <Grid2 size={{ sm: 12, md: 4 }} display={'flex'} alignItems={'center'}>
+                <Typography width={100}>大部門</Typography>
+                <Controller
+                  name="daibumonQuery"
+                  control={control}
+                  defaultValue={0}
+                  render={({ field }) => (
+                    <Select {...field} sx={{ width: 250 }}>
+                      {[selectNone, ...options!.d!].map((opt) => (
+                        <MenuItem
+                          key={opt.id}
+                          value={opt.id}
+                          sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
+                        >
+                          {opt.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  )}
+                />
+              </Grid2>
+              <Grid2 size={{ sm: 12, md: 4 }} display={'flex'} alignItems={'center'}>
+                <Typography width={100}>集計部門</Typography>
+                <Controller
+                  name="shukeiQuery"
+                  control={control}
+                  defaultValue={0}
+                  render={({ field }) => (
+                    <Select {...field} sx={{ width: 250 }}>
+                      {[selectNone, ...options!.s!].map((opt) => (
+                        <MenuItem
+                          key={opt.id}
+                          value={opt.id}
+                          sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
+                        >
+                          {opt.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  )}
+                />
+              </Grid2>
             </Grid2>
-            <Grid2 size={{ sm: 12, md: 4 }} display={'flex'} alignItems={'center'}>
-              <Typography width={100}>大部門</Typography>
-              <Controller
-                name="daibumonQuery"
-                control={control}
-                defaultValue={0}
-                render={({ field }) => (
-                  <Select {...field} sx={{ width: 250 }}>
-                    {[selectNone, ...options!.d!].map((opt) => (
-                      <MenuItem
-                        key={opt.id}
-                        value={opt.id}
-                        sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
-                      >
-                        {opt.label}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                )}
-              />
+            <Grid2 container alignItems={'center'} justifyContent={'space-between'} mt={0.5}>
+              <Grid2 size={'grow'} display={'flex'} alignItems={'center'}>
+                <Typography width={100}>NG有</Typography>
+                <CheckboxElement name="ngFlg" control={control} />
+              </Grid2>
+              <Grid2 size={1}>
+                <Box mt={1} alignSelf={'end'} justifySelf={'end'}>
+                  <Button type="submit" loading={isLoading}>
+                    <SearchIcon />
+                    検索
+                  </Button>
+                </Box>
+              </Grid2>
             </Grid2>
-            <Grid2 size={{ sm: 12, md: 4 }} display={'flex'} alignItems={'center'}>
-              <Typography width={100}>集計部門</Typography>
-              <Controller
-                name="shukeiQuery"
-                control={control}
-                defaultValue={0}
-                render={({ field }) => (
-                  <Select {...field} sx={{ width: 250 }}>
-                    {[selectNone, ...options!.s!].map((opt) => (
-                      <MenuItem
-                        key={opt.id}
-                        value={opt.id}
-                        sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
-                      >
-                        {opt.label}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                )}
-              />
+          </Box>
+        </Paper>
+        <Box>
+          <Typography pt={1} pl={2}>
+            一覧
+          </Typography>
+          <Divider />
+          <Grid2 container mt={0.5} mx={0.5} justifyContent={'space-between'} alignItems={'center'}>
+            <Grid2 spacing={1}>
+              <MuiTablePagination arrayList={eqpts ?? []} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
             </Grid2>
-          </Grid2>
-          <Grid2 container alignItems={'center'} justifyContent={'space-between'} mt={0.5}>
-            <Grid2 size={'grow'} display={'flex'} alignItems={'center'}>
-              <Typography width={100}>NG有</Typography>
-              <CheckboxElement name="ngFlg" control={control} />
-            </Grid2>
-            <Grid2 size={1}>
-              <Box mt={1} alignSelf={'end'} justifySelf={'end'}>
-                <Button type="submit" loading={isLoading}>
-                  <SearchIcon />
-                  検索
+            <Grid2 container spacing={3}>
+              <Grid2 alignContent={'center'}>
+                <Typography color="error" variant="body2">
+                  ※マスタは削除できません。登録画面で無効化してください
+                </Typography>
+              </Grid2>
+              <Grid2>
+                <Button
+                  onClick={() => handleOpenDialog(FAKE_NEW_ID)}
+                  disabled={!((user?.permission.masters ?? 0) & permission.mst_upd)}
+                >
+                  <AddIcon fontSize="small" />
+                  新規
                 </Button>
-              </Box>
+              </Grid2>
             </Grid2>
           </Grid2>
-        </Box>
-      </Paper>
-      <Box>
-        <Typography pt={1} pl={2}>
-          一覧
-        </Typography>
-        <Divider />
-        <Grid2 container mt={0.5} mx={0.5} justifyContent={'space-between'} alignItems={'center'}>
-          <Grid2 spacing={1}>
-            <MuiTablePagination arrayList={eqpts ?? []} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
-          </Grid2>
-          <Grid2 container spacing={3}>
-            <Grid2 alignContent={'center'}>
-              <Typography color="error" variant="body2">
-                ※マスタは削除できません。登録画面で無効化してください
-              </Typography>
-            </Grid2>
-            <Grid2>
-              <Button onClick={() => handleOpenDialog(FAKE_NEW_ID)}>
-                <AddIcon fontSize="small" />
-                新規
-              </Button>
-            </Grid2>
-          </Grid2>
-        </Grid2>
-        {isLoading ? (
-          <Loading />
-        ) : !eqpts || eqpts.length === 0 ? (
-          <Typography>該当するデータがありません</Typography>
-        ) : (
-          <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
-            <MasterTableOfEqpt
-              headers={eqptMHeader}
-              datas={eqpts.map((l) => ({
-                ...l,
-                id: l.kizaiId,
-                name: l.kizaiNam,
-              }))}
-              page={page}
-              rowsPerPage={rowsPerPage}
-              handleOpenDialog={handleOpenDialog}
-            />
-          </TableContainer>
-        )}
+          {isLoading ? (
+            <Loading />
+          ) : !eqpts || eqpts.length === 0 ? (
+            <Typography>該当するデータがありません</Typography>
+          ) : (
+            <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
+              <MasterTableOfEqpt
+                headers={eqptMHeader}
+                datas={eqpts.map((l) => ({
+                  ...l,
+                  id: l.kizaiId,
+                  name: l.kizaiNam,
+                }))}
+                page={page}
+                rowsPerPage={rowsPerPage}
+                handleOpenDialog={handleOpenDialog}
+              />
+            </TableContainer>
+          )}
 
-        <Dialog open={dialogOpen} fullScreen>
-          <EqMasterDialog handleClose={handleCloseDialog} eqptId={openId} refetchEqpts={refetchEqpts} />
-        </Dialog>
-      </Box>
-    </Container>
+          <Dialog open={dialogOpen} fullScreen>
+            <EqMasterDialog user={user} handleClose={handleCloseDialog} eqptId={openId} refetchEqpts={refetchEqpts} />
+          </Dialog>
+        </Box>
+      </Container>
+    </PermissionGuard>
   );
 };

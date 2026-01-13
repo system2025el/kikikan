@@ -215,3 +215,8 @@ export type CopyJuchuContainerMeisaiValues = {
   delFlag: boolean;
   saveFlag: boolean;
 };
+
+export type UsersValue = {
+  tantouNam: string;
+  mailAdr: string;
+};

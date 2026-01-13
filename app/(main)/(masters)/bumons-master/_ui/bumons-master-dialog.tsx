@@ -4,7 +4,7 @@ import { grey } from '@mui/material/colors';
 import { useEffect, useState } from 'react';
 import { Controller, TextareaAutosizeElement, TextFieldElement, useForm } from 'react-hook-form-mui';
 
-import { useUserStore } from '@/app/_lib/stores/usestore';
+import { User, useUserStore } from '@/app/_lib/stores/usestore';
 import { Loading } from '@/app/(main)/_ui/loading';
 
 import { FormBox, selectNone, SelectTypes } from '../../../_ui/form-box';
@@ -22,17 +22,16 @@ import { BumonsMasterDialogSchema, BumonsMasterDialogValues } from '../_lib/type
  * @returns {JSX.Element} 部門マスタ詳細ダイアログコンポーネント
  */
 export const BumonsMasterDialog = ({
+  user,
   bumonId,
   handleClose,
   refetchBumons,
 }: {
+  user: User | null;
   bumonId: number;
   handleClose: () => void;
   refetchBumons: () => void;
 }) => {
-  // ログインユーザ
-  const user = useUserStore((state) => state.user);
-
   /* useState -------------------------------------- */
   /* 部門 */
   /* DBのローディング状態 */
@@ -162,6 +161,7 @@ export const BumonsMasterDialog = ({
     <>
       <form onSubmit={handleSubmit(onSubmit)}>
         <MasterDialogTitle
+          user={user}
           editable={editable}
           handleEditable={() => setEditable(true)}
           handleClose={handleClickClose}

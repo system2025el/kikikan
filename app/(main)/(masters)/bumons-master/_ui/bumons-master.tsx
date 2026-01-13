@@ -19,8 +19,11 @@ import { grey } from '@mui/material/colors';
 import { useEffect, useState } from 'react';
 import { Controller, TextFieldElement, useForm } from 'react-hook-form-mui';
 
+import { useUserStore } from '@/app/_lib/stores/usestore';
+import { permission } from '@/app/(main)/_lib/permission';
 import { selectNone, SelectTypes } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
+import { PermissionGuard } from '@/app/(main)/_ui/permission-guard';
 import { MuiTablePagination } from '@/app/(main)/_ui/table-pagination';
 
 import { FAKE_NEW_ID, ROWS_PER_MASTER_TABLE_PAGE } from '../../_lib/constants';
@@ -38,6 +41,8 @@ import { BumonsMasterDialog } from './bumons-master-dialog';
 export const BumonsMaster = () => {
   /** 1ページごとの表示数 */
   const rowsPerPage = ROWS_PER_MASTER_TABLE_PAGE;
+  /* user情報 */
+  const user = useUserStore((state) => state.user);
 
   /* useState -------------------------------------- */
   /** 表示する部門の配列 */
@@ -110,118 +115,134 @@ export const BumonsMaster = () => {
   }, []);
 
   return (
-    <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
-      <Paper variant="outlined">
-        <Box width={'100%'} display={'flex'} px={2} sx={{ minHeight: '30px', maxHeight: '30px' }} alignItems={'center'}>
-          <Typography>部門マスタ検索</Typography>
-        </Box>
-        <Divider />
-        <Box width={'100%'} px={2} py={0.5}>
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <Stack alignItems={'center'}>
-              <Typography noWrap width={140}>
-                部門名キーワード
-              </Typography>
-              <TextFieldElement name="query" control={control} />
-            </Stack>
-            <Stack justifyContent={'space-between'} alignItems={'start'} mt={0.5}>
-              <Stack mt={0.5} spacing={1}>
+    <PermissionGuard category={'masters'} required={permission.mst_ref}>
+      <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
+        <Paper variant="outlined">
+          <Box
+            width={'100%'}
+            display={'flex'}
+            px={2}
+            sx={{ minHeight: '30px', maxHeight: '30px' }}
+            alignItems={'center'}
+          >
+            <Typography>部門マスタ検索</Typography>
+          </Box>
+          <Divider />
+          <Box width={'100%'} px={2} py={0.5}>
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <Stack alignItems={'center'}>
                 <Typography noWrap width={140}>
-                  大部門名
+                  部門名キーワード
                 </Typography>
-                <Controller
-                  name="daibumonQuery"
-                  control={control}
-                  defaultValue={0}
-                  render={({ field }) => (
-                    <Select {...field} sx={{ width: 250 }}>
-                      {[selectNone, ...options!.d].map((opt) => (
-                        <MenuItem
-                          key={opt.id}
-                          value={opt.id}
-                          sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
-                        >
-                          {opt.label}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  )}
-                />
-                <Box width={50}></Box>
-                <Typography noWrap width={100}>
-                  集計部門名
-                </Typography>
-                <Controller
-                  name="shukeiQuery"
-                  control={control}
-                  defaultValue={0}
-                  render={({ field }) => (
-                    <Select {...field} sx={{ width: 250 }}>
-                      {[selectNone, ...options!.s].map((opt) => (
-                        <MenuItem
-                          key={opt.id}
-                          value={opt.id}
-                          sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
-                        >
-                          {opt.label}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  )}
-                />
+                <TextFieldElement name="query" control={control} />
               </Stack>
-              <Box alignSelf={'end'}>
-                <Button type="submit" loading={isLoading}>
-                  <SearchIcon />
-                  検索
+              <Stack justifyContent={'space-between'} alignItems={'start'} mt={0.5}>
+                <Stack mt={0.5} spacing={1}>
+                  <Typography noWrap width={140}>
+                    大部門名
+                  </Typography>
+                  <Controller
+                    name="daibumonQuery"
+                    control={control}
+                    defaultValue={0}
+                    render={({ field }) => (
+                      <Select {...field} sx={{ width: 250 }}>
+                        {[selectNone, ...options!.d].map((opt) => (
+                          <MenuItem
+                            key={opt.id}
+                            value={opt.id}
+                            sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
+                          >
+                            {opt.label}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    )}
+                  />
+                  <Box width={50}></Box>
+                  <Typography noWrap width={100}>
+                    集計部門名
+                  </Typography>
+                  <Controller
+                    name="shukeiQuery"
+                    control={control}
+                    defaultValue={0}
+                    render={({ field }) => (
+                      <Select {...field} sx={{ width: 250 }}>
+                        {[selectNone, ...options!.s].map((opt) => (
+                          <MenuItem
+                            key={opt.id}
+                            value={opt.id}
+                            sx={opt.id === FAKE_NEW_ID ? { color: grey[600] } : undefined}
+                          >
+                            {opt.label}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    )}
+                  />
+                </Stack>
+                <Box alignSelf={'end'}>
+                  <Button type="submit" loading={isLoading}>
+                    <SearchIcon />
+                    検索
+                  </Button>
+                </Box>
+              </Stack>
+            </form>
+          </Box>
+        </Paper>
+        <Box>
+          <Typography pt={1} pl={2}>
+            一覧
+          </Typography>
+          <Divider />
+          <Grid2 container mt={0.5} mx={0.5} justifyContent={'space-between'} alignItems={'center'}>
+            <Grid2 spacing={1}>
+              <MuiTablePagination arrayList={bumons ?? []} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
+            </Grid2>
+            <Grid2 container spacing={3}>
+              <Grid2 alignContent={'center'}>
+                <Typography color="error" variant="body2">
+                  ※マスタは削除できません。登録画面で無効化してください
+                </Typography>
+              </Grid2>
+              <Grid2>
+                <Button
+                  onClick={() => handleOpenDialog(FAKE_NEW_ID)}
+                  disabled={!((user?.permission.masters ?? 0) & permission.mst_upd)}
+                >
+                  <AddIcon fontSize="small" />
+                  新規
                 </Button>
-              </Box>
-            </Stack>
-          </form>
-        </Box>
-      </Paper>
-      <Box>
-        <Typography pt={1} pl={2}>
-          一覧
-        </Typography>
-        <Divider />
-        <Grid2 container mt={0.5} mx={0.5} justifyContent={'space-between'} alignItems={'center'}>
-          <Grid2 spacing={1}>
-            <MuiTablePagination arrayList={bumons ?? []} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
-          </Grid2>
-          <Grid2 container spacing={3}>
-            <Grid2 alignContent={'center'}>
-              <Typography color="error" variant="body2">
-                ※マスタは削除できません。登録画面で無効化してください
-              </Typography>
-            </Grid2>
-            <Grid2>
-              <Button onClick={() => handleOpenDialog(FAKE_NEW_ID)}>
-                <AddIcon fontSize="small" />
-                新規
-              </Button>
+              </Grid2>
             </Grid2>
           </Grid2>
-        </Grid2>
-        {isLoading ? (
-          <Loading />
-        ) : !bumons || bumons.length === 0 ? (
-          <Typography>該当するデータがありません</Typography>
-        ) : (
-          <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
-            <MasterTable
-              headers={bumonsMHeader}
-              datas={bumons.map((l) => ({ ...l, id: l.bumonId, name: l.bumonNam }))}
-              handleOpenDialog={handleOpenDialog}
-              page={page}
-              rowsPerPage={rowsPerPage}
+          {isLoading ? (
+            <Loading />
+          ) : !bumons || bumons.length === 0 ? (
+            <Typography>該当するデータがありません</Typography>
+          ) : (
+            <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
+              <MasterTable
+                headers={bumonsMHeader}
+                datas={bumons.map((l) => ({ ...l, id: l.bumonId, name: l.bumonNam }))}
+                handleOpenDialog={handleOpenDialog}
+                page={page}
+                rowsPerPage={rowsPerPage}
+              />
+            </TableContainer>
+          )}
+          <Dialog open={dialogOpen} fullScreen>
+            <BumonsMasterDialog
+              user={user}
+              handleClose={handleCloseDialog}
+              bumonId={openId}
+              refetchBumons={refetchBumons}
             />
-          </TableContainer>
-        )}
-        <Dialog open={dialogOpen} fullScreen>
-          <BumonsMasterDialog handleClose={handleCloseDialog} bumonId={openId} refetchBumons={refetchBumons} />
-        </Dialog>
-      </Box>
-    </Container>
+          </Dialog>
+        </Box>
+      </Container>
+    </PermissionGuard>
   );
 };

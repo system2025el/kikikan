@@ -44,9 +44,13 @@ export const CustomerSelectionDialog = (props: {
   const rowsPerPage = 50;
 
   // 表示するデータ
+  // const list = useMemo(
+  //   () => (rowsPerPage > 0 && custs ? custs.slice((page - 1) * rowsPerPage, page * rowsPerPage) : custs),
+  //   [custs, page]
+  // );
   const list = useMemo(
-    () => (rowsPerPage > 0 && custs ? custs.slice((page - 1) * rowsPerPage, page * rowsPerPage + rowsPerPage) : custs),
-    [custs, page]
+    () => (custs && rowsPerPage > 0 ? custs.slice((page - 1) * rowsPerPage, page * rowsPerPage) : custs),
+    [page, rowsPerPage, custs]
   );
   // テーブル最後のページ用の空データの長さ
   const emptyRows = page > 1 && custs ? Math.max(0, page * rowsPerPage - custs.length) : 0;
@@ -112,7 +116,7 @@ export const CustomerSelectionDialog = (props: {
         </Paper>
         {/* ↑検索 ↓テーブル */}
         <Stack mt={1} mx={0.5} justifyContent={'space-between'}>
-          <MuiTablePagination arrayList={list ? list : []} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
+          <MuiTablePagination arrayList={custs ?? []} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
         </Stack>
         {isLoading ? (
           <Loading />

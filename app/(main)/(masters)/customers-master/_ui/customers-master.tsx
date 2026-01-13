@@ -16,7 +16,10 @@ import {
 import { useEffect, useState } from 'react';
 import { TextFieldElement, useForm } from 'react-hook-form-mui';
 
+import { useUserStore } from '@/app/_lib/stores/usestore';
+import { permission } from '@/app/(main)/_lib/permission';
 import { Loading } from '@/app/(main)/_ui/loading';
+import { PermissionGuard } from '@/app/(main)/_ui/permission-guard';
 import { MuiTablePagination } from '@/app/(main)/_ui/table-pagination';
 
 import { FAKE_NEW_ID, ROWS_PER_MASTER_TABLE_PAGE } from '../../_lib/constants';
@@ -32,6 +35,8 @@ import { CustomersMasterDialog } from './customers-master-dialog';
 export const CustomersMaster = () => {
   /* 1ページごとの表示数 */
   const rowsPerPage = ROWS_PER_MASTER_TABLE_PAGE;
+  /* user情報 */
+  const user = useUserStore((state) => state.user);
 
   /* useState ------------------------------ */
   /** 表示する顧客の配列 */
@@ -93,82 +98,94 @@ export const CustomersMaster = () => {
   }, []);
 
   return (
-    <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
-      <Paper variant="outlined">
-        <Box width={'100%'} display={'flex'} px={2} sx={{ minHeight: '30px', maxHeight: '30px' }} alignItems={'center'}>
-          <Typography>顧客マスタ検索</Typography>
-        </Box>
-        <Divider />
-        <Box width={'100%'} px={2} py={0.5} component={'form'} onSubmit={handleSubmit(onSubmit)}>
-          <Stack justifyContent={'space-between'} alignItems={'start'}>
-            <Stack alignItems={'baseline'}>
-              <Typography>顧客キーワード</Typography>
-              <TextFieldElement
-                name="query"
-                control={control}
-                helperText={'社名、かな、住所、TEL、FAX、メモから部分一致検索'}
-              />
+    <PermissionGuard category={'masters'} required={permission.mst_ref}>
+      <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
+        <Paper variant="outlined">
+          <Box
+            width={'100%'}
+            display={'flex'}
+            px={2}
+            sx={{ minHeight: '30px', maxHeight: '30px' }}
+            alignItems={'center'}
+          >
+            <Typography>顧客マスタ検索</Typography>
+          </Box>
+          <Divider />
+          <Box width={'100%'} px={2} py={0.5} component={'form'} onSubmit={handleSubmit(onSubmit)}>
+            <Stack justifyContent={'space-between'} alignItems={'start'}>
+              <Stack alignItems={'baseline'}>
+                <Typography>顧客キーワード</Typography>
+                <TextFieldElement
+                  name="query"
+                  control={control}
+                  helperText={'社名、かな、住所、TEL、FAX、メモから部分一致検索'}
+                />
+              </Stack>
+              <Box alignSelf={'end'}>
+                <Button type="submit" loading={isLoading}>
+                  <SearchIcon />
+                  検索
+                </Button>
+              </Box>
             </Stack>
-            <Box alignSelf={'end'}>
-              <Button type="submit" loading={isLoading}>
-                <SearchIcon />
-                検索
-              </Button>
-            </Box>
-          </Stack>
-        </Box>
-      </Paper>
-      <Box>
-        <Typography pt={1} pl={2}>
-          一覧
-        </Typography>
-        <Divider />
-        <Grid2 container mt={0.5} mx={0.5} justifyContent={'space-between'} alignItems={'center'}>
-          <Grid2 spacing={1}>
-            <MuiTablePagination arrayList={customers ?? []} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
-          </Grid2>
-          <Grid2 container spacing={3}>
-            <Grid2 alignContent={'center'}>
-              <Typography color="error" variant="body2">
-                ※マスタは削除できません。登録画面で無効化してください
-              </Typography>
+          </Box>
+        </Paper>
+        <Box>
+          <Typography pt={1} pl={2}>
+            一覧
+          </Typography>
+          <Divider />
+          <Grid2 container mt={0.5} mx={0.5} justifyContent={'space-between'} alignItems={'center'}>
+            <Grid2 spacing={1}>
+              <MuiTablePagination arrayList={customers ?? []} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
             </Grid2>
-            <Grid2>
-              <Button onClick={() => handleOpenDialog(FAKE_NEW_ID)}>
-                <AddIcon fontSize="small" />
-                新規
-              </Button>
+            <Grid2 container spacing={3}>
+              <Grid2 alignContent={'center'}>
+                <Typography color="error" variant="body2">
+                  ※マスタは削除できません。登録画面で無効化してください
+                </Typography>
+              </Grid2>
+              <Grid2>
+                <Button
+                  onClick={() => handleOpenDialog(FAKE_NEW_ID)}
+                  disabled={!((user?.permission.masters ?? 0) & permission.mst_upd)}
+                >
+                  <AddIcon fontSize="small" />
+                  新規
+                </Button>
+              </Grid2>
             </Grid2>
           </Grid2>
-        </Grid2>
-        {isLoading ? (
-          <Loading />
-        ) : customers && customers.length > 0 ? (
-          <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
-            <MasterTable
-              headers={cMHeader}
-              datas={customers.map((l) => ({
-                ...l,
-                id: l.kokyakuId,
-                name: l.kokyakuNam,
-                address: [l.adrShozai, l.adrTatemono, l.adrSonota].filter(Boolean).join(' '),
-              }))}
-              page={page}
-              rowsPerPage={rowsPerPage}
-              handleOpenDialog={handleOpenDialog}
+          {isLoading ? (
+            <Loading />
+          ) : customers && customers.length > 0 ? (
+            <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
+              <MasterTable
+                headers={cMHeader}
+                datas={customers.map((l) => ({
+                  ...l,
+                  id: l.kokyakuId,
+                  name: l.kokyakuNam,
+                  address: [l.adrShozai, l.adrTatemono, l.adrSonota].filter(Boolean).join(' '),
+                }))}
+                page={page}
+                rowsPerPage={rowsPerPage}
+                handleOpenDialog={handleOpenDialog}
+              />
+            </TableContainer>
+          ) : (
+            <Typography>該当するデータがありません</Typography>
+          )}
+          <Dialog open={dialogOpen} fullScreen>
+            <CustomersMasterDialog
+              user={user}
+              customerId={openId}
+              handleClose={handleCloseDialog}
+              refetchCustomers={refetchCustomers}
             />
-          </TableContainer>
-        ) : (
-          <Typography>該当するデータがありません</Typography>
-        )}
-        <Dialog open={dialogOpen} fullScreen>
-          <CustomersMasterDialog
-            customerId={openId}
-            handleClose={handleCloseDialog}
-            refetchCustomers={refetchCustomers}
-          />
-        </Dialog>
-      </Box>
-    </Container>
+          </Dialog>
+        </Box>
+      </Container>
+    </PermissionGuard>
   );
 };

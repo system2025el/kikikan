@@ -9,6 +9,7 @@ import pool from '@/app/_lib/db/postgres';
 import { selectMeisaiEqts } from '@/app/_lib/db/tables/m-kizai';
 import { selectFilteredLocs } from '@/app/_lib/db/tables/m-koenbasho';
 import { selectFilteredCustomers, selectKokyaku } from '@/app/_lib/db/tables/m-kokyaku';
+import { SelectFilteredUsers } from '@/app/_lib/db/tables/m-user';
 import {
   deleteIdoDenJuchuFromOrder,
   insertIdoDenJuchu,
@@ -65,6 +66,7 @@ import {
   EqTableValues,
   LocsDialogValues,
   OrderValues,
+  UsersValue,
   VehicleTableValues,
 } from './types';
 
@@ -361,19 +363,21 @@ export const getFilteredOrderCustomers = async (query: string) => {
       if (!data || data.length === 0) {
         return [];
       } else {
-        const filteredCustomers: CustomersDialogValues[] = data.map((d, index) => ({
-          kokyakuId: d.kokyaku_id,
-          kokyakuNam: d.kokyaku_nam,
-          // kokyakuRank: d.kokyaku_rank,
-          adrShozai: d.adr_shozai ?? '',
-          adrTatemono: d.adr_tatemono ?? '',
-          adrSonota: d.adr_sonota ?? '',
-          tel: d.tel ?? '',
-          fax: d.fax ?? '',
-          mem: d.mem ?? '',
-          dspFlg: Boolean(d.dsp_flg),
-          tblDspId: index + 1,
-        }));
+        const filteredCustomers: CustomersDialogValues[] = data
+          .filter((d) => d.del_flg !== 1)
+          .map((d, index) => ({
+            kokyakuId: d.kokyaku_id,
+            kokyakuNam: d.kokyaku_nam,
+            // kokyakuRank: d.kokyaku_rank,
+            adrShozai: d.adr_shozai ?? '',
+            adrTatemono: d.adr_tatemono ?? '',
+            adrSonota: d.adr_sonota ?? '',
+            tel: d.tel ?? '',
+            fax: d.fax ?? '',
+            mem: d.mem ?? '',
+            dspFlg: Boolean(d.dsp_flg),
+            tblDspId: index + 1,
+          }));
         console.log(filteredCustomers.length);
         return filteredCustomers;
       }
@@ -401,19 +405,21 @@ export const getFilteredOrderLocs = async (query: string = '') => {
     if (!data || data.length === 0) {
       return [];
     }
-    const filteredLocs: LocsDialogValues[] = data.map((d, index) => ({
-      locId: d.koenbasho_id,
-      locNam: d.koenbasho_nam,
-      adrShozai: d.adr_shozai,
-      adrTatemono: d.adr_tatemono,
-      adrSonota: d.adr_sonota,
-      tel: d.tel,
-      fax: d.fax,
-      mem: d.mem,
-      dspFlg: Boolean(d.dsp_flg),
-      tblDspId: index + 1,
-      delFlg: Boolean(d.del_flg),
-    }));
+    const filteredLocs: LocsDialogValues[] = data
+      .filter((d) => d.del_flg !== 1)
+      .map((d, index) => ({
+        locId: d.koenbasho_id,
+        locNam: d.koenbasho_nam,
+        adrShozai: d.adr_shozai,
+        adrTatemono: d.adr_tatemono,
+        adrSonota: d.adr_sonota,
+        tel: d.tel,
+        fax: d.fax,
+        mem: d.mem,
+        dspFlg: Boolean(d.dsp_flg),
+        tblDspId: index + 1,
+        delFlg: Boolean(d.del_flg),
+      }));
     console.log(filteredLocs.length);
     return filteredLocs;
   } catch (e) {
@@ -1462,6 +1468,31 @@ export const addIdoDenJuchu = async (
     return true;
   } catch (e) {
     console.error('Exception while adding ido den:', e);
+    throw e;
+  }
+};
+
+/**
+ * ユーザー情報取得
+ * @param query
+ * @returns
+ */
+export const getFilteredUsers = async (query: string = '') => {
+  try {
+    const { rows } = await SelectFilteredUsers(query);
+    if (!rows || rows.length === 0) {
+      return [];
+    }
+    const filteredUsers: UsersValue[] = rows
+      .filter((d) => d.del_flg !== 1)
+      .map((d, index) => ({
+        tantouNam: d.user_nam,
+        mailAdr: d.mail_adr,
+      }));
+    console.log(filteredUsers.length);
+    return filteredUsers;
+  } catch (e) {
+    console.error('例外が発生しました:', e);
     throw e;
   }
 };

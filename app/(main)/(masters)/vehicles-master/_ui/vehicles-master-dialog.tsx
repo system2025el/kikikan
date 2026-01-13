@@ -3,7 +3,7 @@ import { Grid2 } from '@mui/material';
 import { JSX, useEffect, useState } from 'react';
 import { CheckboxElement, TextareaAutosizeElement, TextFieldElement, useForm } from 'react-hook-form-mui';
 
-import { useUserStore } from '@/app/_lib/stores/usestore';
+import { User, useUserStore } from '@/app/_lib/stores/usestore';
 
 import { FormBox } from '../../../_ui/form-box';
 import { Loading } from '../../../_ui/loading';
@@ -19,17 +19,16 @@ import { VehsMasterDialogSchema, VehsMasterDialogValues } from '../_lib/types';
  * @returns {JSX.Element} 車両マスタの詳細ダイアログのコンポーネント
  */
 export const VehiclesMasterDialog = ({
+  user,
   vehicleId,
   handleClose,
   refetchVehs,
 }: {
+  user: User | null;
   vehicleId: number;
   handleClose: () => void;
   refetchVehs: () => Promise<void>;
 }) => {
-  // ログインユーザ
-  const user = useUserStore((state) => state.user);
-
   /* useState --------------------- */
   /** DBのローディング状態 */
   const [isLoading, setIsLoading] = useState(true);
@@ -147,6 +146,7 @@ export const VehiclesMasterDialog = ({
     <>
       <form onSubmit={handleSubmit(onSubmit)}>
         <MasterDialogTitle
+          user={user}
           editable={editable}
           handleEditable={() => setEditable(true)}
           handleClose={handleClickClose}
