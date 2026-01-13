@@ -1,7 +1,6 @@
 'use server';
 
-import dayjs from 'dayjs';
-
+import { supabase } from '@/app/_lib/db/supabase';
 import { deleteLock, insertLock, selectLock, updateLock } from '@/app/_lib/db/tables/t-lock';
 
 import { LockValues } from './types';
@@ -92,4 +91,15 @@ export const delLock = async (lockShubetu: number, headId: number) => {
   if (error) {
     console.error('Error delete lock:', error.message);
   }
+};
+
+/**
+ * セッション情報確認
+ * @returns
+ */
+export const sessionCheck = async () => {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  return session;
 };

@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 
 import { useUserStore } from '@/app/_lib/stores/usestore';
 
+import { sessionCheck } from '../_lib/funcs';
 import { LoadingOverlay } from './loading';
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
@@ -51,9 +52,25 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     if (!isHydrated) return;
 
     // (main) の layout で使うなら、本来 user がいない時点でアウト
-    if (!user) {
-      router.replace('/login');
-    }
+    // if (!user) {
+    //   router.replace('/login');
+    // }
+
+    const checkAuth = async () => {
+      if (!user) {
+        console.log('ユーザー情報なし');
+        router.replace('/login');
+        return;
+      }
+
+      // const session = await sessionCheck();
+      // console.log('セッション情報 : ', session);
+      // if (!session) {
+      //   console.log('セッション情報なし');
+      //   router.replace('/login');
+      // }
+    };
+    checkAuth();
   }, [user, isHydrated, router]);
 
   // --- レンダリング・ブロック ---

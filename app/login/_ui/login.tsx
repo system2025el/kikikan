@@ -10,7 +10,7 @@ import { useUserStore } from '@/app/_lib/stores/usestore';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 import { getChosenUser } from '@/app/(main)/(masters)/users-master/_lib/funcs';
 
-import { login, setSession } from '../_lib/funcs';
+import { handleLogout, login, setSession } from '../_lib/funcs';
 import { UserSchema, UserValues } from '../_lib/types';
 
 const Login = () => {
@@ -41,6 +41,7 @@ const Login = () => {
         permission: user.permission,
       };
       setUser(storeUser);
+      //router.refresh();
       router.push('/dashboard');
     } // ログイン後のページへリダイレクト
 
@@ -78,7 +79,11 @@ const Login = () => {
     if (access_token && refresh_token) {
       setSession(access_token, refresh_token);
     }
+    // const initializeAuth = async () => {
+    //   await handleLogout();
     clearUser();
+    // };
+    // initializeAuth();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
