@@ -149,77 +149,97 @@ export const usePdf = (): [(param: BillHeadValues) => Promise<Blob>] => {
     });
 
     /* ---------------- 取引先：住所+ 会社名 + 御中 ---------------- */
-    // 単位変換: 1mm = 2.83465pt
     const mmToPt = 2.83465;
-
-    const clientInfoX = 22 * mmToPt;
-    let clientInfoY = 842 - 18 * mmToPt; //16mm+2
+    const maxWidth = 190; // 共通の最大幅
     const formatSize = 10;
+    const clientInfoX = 22 * mmToPt;
+    let clientInfoY = 842 - 18 * mmToPt;
+
+    // --- 【共通の描画関数】 ---
+    const drawTextWithAutoResize = (
+      text: string | number | undefined | null,
+      x: number,
+      y: number,
+      baseSize: number,
+      maxWidth: number
+    ) => {
+      if (!text) return y;
+
+      const stringText = String(text);
+      const textWidth = customFont.widthOfTextAtSize(stringText, baseSize);
+      let finalSize = baseSize;
+
+      if (textWidth > maxWidth) {
+        finalSize = (maxWidth / textWidth) * baseSize;
+      }
+
+      page.drawText(stringText, {
+        x: x,
+        y: y,
+        font: customFont,
+        size: finalSize,
+      });
+
+      return y;
+    };
 
     // 郵便番号
-    page.drawText(String(param.adr1), {
-      x: clientInfoX,
-      y: clientInfoY,
-      font: customFont,
-      size: formatSize,
-    });
+    drawTextWithAutoResize(param.adr1, clientInfoX, clientInfoY, formatSize, maxWidth);
 
     // 住所
-    clientInfoY -= 15; // 1行下にずらす
-    page.drawText(String(param.adr2.shozai), {
-      x: clientInfoX,
-      y: clientInfoY,
-      font: customFont,
-      size: formatSize,
-    });
+    clientInfoY -= 15;
+    drawTextWithAutoResize(param.adr2.shozai, clientInfoX, clientInfoY, formatSize, maxWidth);
 
     // ビル名等
     clientInfoY -= 15;
-    page.drawText(String(param.adr2.tatemono), {
-      x: clientInfoX,
-      y: clientInfoY,
-      font: customFont,
-      size: formatSize,
-    });
+    drawTextWithAutoResize(param.adr2.tatemono, clientInfoX, clientInfoY, formatSize, maxWidth);
 
-    // その他（あれば）
+    // その他
     if (param.adr2.sonota) {
       clientInfoY -= 15;
-      page.drawText(String(param.adr2.sonota), {
-        x: clientInfoX,
-        y: clientInfoY,
+      drawTextWithAutoResize(param.adr2.sonota, clientInfoX, clientInfoY, formatSize, maxWidth);
+      // 会社名
+      clientInfoY -= 10; // 会社名だけ少し間隔をあける
+      const companyName = `${param.aite.nam}御中`;
+      drawTextWithAutoResize(companyName, clientInfoX, clientInfoY, formatSize, maxWidth);
+
+      // 顧客番号
+      clientInfoY -= 75; // 1行下にずらす
+      page.drawText(`顧客番号：${param.aite.id} `, {
+        x: 35,
+        y: clientInfoY - 20,
         font: customFont,
-        size: formatSize,
+        size: 11,
+      });
+    } else {
+      // 会社名
+      clientInfoY -= 25; // 会社名だけ少し間隔をあける
+      const companyName = `${param.aite.nam}御中`;
+      drawTextWithAutoResize(companyName, clientInfoX, clientInfoY, formatSize, maxWidth);
+
+      // 顧客番号
+      clientInfoY -= 75; // 1行下にずらす
+      page.drawText(`顧客番号：${param.aite.id} `, {
+        x: 35,
+        y: clientInfoY - 20,
+        font: customFont,
+        size: 11,
       });
     }
 
-    clientInfoY -= 25;
+    // // 会社名
+    // clientInfoY -= 25; // 会社名だけ少し間隔をあける
+    // const companyName = `${param.aite.nam}御中`;
+    // drawTextWithAutoResize(companyName, clientInfoX, clientInfoY, formatSize, maxWidth);
 
-    // --- 設定値 ---
-    const maxWidth = 250; // 窓の幅に合わせて調整
-    const companyName = `${param.aite.nam}御中`;
-    const namTextWidth = customFont.widthOfTextAtSize(companyName, formatSize);
-    let drawSize = formatSize;
-
-    if (namTextWidth > maxWidth) {
-      drawSize = (maxWidth / namTextWidth) * formatSize;
-    }
-    // 会社名
-    page.drawText(companyName, {
-      x: clientInfoX,
-      y: clientInfoY,
-      font: customFont,
-      size: drawSize,
-    });
-
-    // 顧客番号
-    clientInfoY -= 75; // 1行下にずらす
-    page.drawText(`顧客番号：${param.aite.id} `, {
-      x: 35,
-      y: clientInfoY - 20,
-      font: customFont,
-      size: 11,
-    });
+    // // 顧客番号
+    // clientInfoY -= 75; // 1行下にずらす
+    // page.drawText(`顧客番号：${param.aite.id} `, {
+    //   x: 35,
+    //   y: clientInfoY - 20,
+    //   font: customFont,
+    //   size: 11,
+    // });
 
     /* ---------------- 請求額 ---------------- */
     // テーブルの基本設定
