@@ -41,8 +41,10 @@ const Page = async ({ searchParams }: { searchParams: Promise<{ [key: string]: s
     aite: { id: custs.kokyakuId, nam: custs.kokyakuNam },
     // seikyuDat: new Date(toJapanTimeStampString()),
     seikyuDat: new Date(),
-    adr1: custs.adrPost.trim(),
-    adr2: { shozai: custs.adrShozai, tatemono: custs.adrTatemono, sonota: custs.adrSonota },
+    adrPost: custs.adrPost.trim(),
+    adrShozai: custs.adrShozai,
+    adrTatemono: custs.adrTatemono,
+    adrSonota: custs.adrSonota,
     kokyaku: custs.kokyakuNam,
     meisaiHeads: juchus
       ? juchus.map((j) => ({
