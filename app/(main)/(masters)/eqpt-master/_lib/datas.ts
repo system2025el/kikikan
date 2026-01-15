@@ -137,7 +137,7 @@ export const formItems: FormItemsType[] = [
   {
     label: '定価',
     exsample: '例）10000',
-    constraints: '円貨',
+    constraints: '円貨（0～）',
   },
   // {
   //   label: '顧客ランク価格１',
