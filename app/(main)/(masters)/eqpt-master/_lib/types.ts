@@ -33,14 +33,8 @@ export const EqptsMasterDialogSchema = z.object({
     .string()
     .max(200, { message: validationMessages.maxStringLength(200) })
     .nullish(),
-  bumonId: z
-    .number()
-    .max(100, { message: validationMessages.maxStringLength(100) })
-    .optional(),
-  shukeibumonId: z
-    .number()
-    .max(100, { message: validationMessages.maxStringLength(100) })
-    .optional(),
+  bumonId: z.number().optional(),
+  shukeibumonId: z.number().optional(),
   dspFlg: z.boolean().optional(),
   ctnFlg: z.boolean().optional(),
   defDatQty: z.number().nullable(),
@@ -48,7 +42,7 @@ export const EqptsMasterDialogSchema = z.object({
     .number({ message: '定価を入力してください' })
     .int({ message: validationMessages.int() })
     .max(9999999999, { message: validationMessages.maxNumberLength(10) })
-    .min(1, { message: '定価を入力してください' }),
+    .min(0, { message: '定価を入力してください' }),
   // rankAmt1: z.number().nullable(),
   // rankAmt2: z.number().nullable(),
   // rankAmt3: z.number().nullable(),
