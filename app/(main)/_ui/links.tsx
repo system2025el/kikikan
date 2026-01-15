@@ -62,7 +62,7 @@ const stockIOList: MenuItem[] = [
   { name: '出庫', url: '/shuko-list' },
   { name: '入庫', url: '/nyuko-list' },
   { name: '移動', url: '/ido-list' },
-  { name: 'スケジュール', url: '/schedule' },
+  // { name: 'スケジュール', url: '/schedule' },
 ];
 /* ログアウトリスト */
 // const loginList: MenuItem[] = [{ name: 'ログアウト', url: '/' }];
@@ -165,6 +165,19 @@ export default function NavLinks() {
         <ListItemText sx={{ color: pathname === '/dashboard' ? 'primary.dark' : undefined }}>
           ダッシュボード
         </ListItemText>
+      </ListItemButton>
+      {/* スケジュール */}
+      <ListItemButton
+        onClick={() => handleNavigation('/schedule')}
+        sx={{
+          backgroundColor: pathname === '/schedule' ? currentPgColor : undefined,
+        }}
+        disabled={isPending}
+      >
+        <ListItemIcon>
+          <StopSharpIcon />
+        </ListItemIcon>
+        <ListItemText sx={{ color: pathname === '/schedule' ? 'primary.dark' : undefined }}>スケジュール</ListItemText>
       </ListItemButton>
       {/* 受注管理 */}
       <ListItemButton
