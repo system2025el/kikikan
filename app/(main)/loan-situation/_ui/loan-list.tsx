@@ -85,114 +85,113 @@ export const LoanList = () => {
   }, []);
 
   return (
-    <PermissionGuard category={'juchu'} required={permission.juchu_ref}>
-      <Box>
-        {/*貸出状況検索*/}
-        <Paper variant="outlined">
-          <Grid2 container spacing={2} alignItems="center" px={2}>
-            <Typography>貸出状況</Typography>
-            <Typography>機材検索</Typography>
-          </Grid2>
-          <Divider />
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <Grid2 container alignItems={'center'} p={2} spacing={2}>
-              <Grid2 container display={'flex'} alignItems={'center'}>
-                <Typography>受注機材名キーワード</Typography>
-                <TextFieldElement name="query" control={control} />
-              </Grid2>
-              <Button type="submit" loading={isLoading}>
-                <SearchIcon fontSize="small" />
-                検索
-              </Button>
+    <Box>
+      {/*貸出状況検索*/}
+      <Paper variant="outlined">
+        <Grid2 container spacing={2} alignItems="center" px={2}>
+          <Typography>貸出状況</Typography>
+          <Typography>機材検索</Typography>
+        </Grid2>
+        <Divider />
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <Grid2 container alignItems={'center'} p={2} spacing={2}>
+            <Grid2 container display={'flex'} alignItems={'center'}>
+              <Typography>受注機材名キーワード</Typography>
+              <TextFieldElement name="query" control={control} />
             </Grid2>
-          </form>
-        </Paper>
-        <Paper variant="outlined" sx={{ pt: 2, mt: 2 }}>
-          <Box pl={2}>
-            <MuiTablePagination arrayList={rows} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
-          </Box>
-          {isLoading ? (
-            <Loading />
-          ) : !rows || rows!.length === 0 ? (
-            <Typography ml={2}>該当するデータがありません</Typography>
-          ) : (
-            <TableContainer component={Paper} sx={{ maxHeight: '80vh', mt: 1 }} square>
-              <Table stickyHeader size="small">
-                <TableHead>
-                  <TableRow sx={{ whiteSpace: 'nowrap' }}>
-                    <TableCell padding="checkbox" style={styles.style}></TableCell>
-                    <TableCell align="left" style={styles.style}>
-                      機材名
+            <Button type="submit" loading={isLoading}>
+              <SearchIcon fontSize="small" />
+              検索
+            </Button>
+          </Grid2>
+        </form>
+      </Paper>
+      <Paper variant="outlined" sx={{ pt: 2, mt: 2 }}>
+        <Box pl={2}>
+          <MuiTablePagination arrayList={rows} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
+        </Box>
+        {isLoading ? (
+          <Loading />
+        ) : !rows || rows!.length === 0 ? (
+          <Typography ml={2}>該当するデータがありません</Typography>
+        ) : (
+          <TableContainer component={Paper} sx={{ maxHeight: '80vh', mt: 1 }} square>
+            <Table stickyHeader size="small">
+              <TableHead>
+                <TableRow sx={{ whiteSpace: 'nowrap' }}>
+                  <TableCell padding="checkbox" style={styles.style}></TableCell>
+                  <TableCell align="left" style={styles.style}>
+                    機材名
+                  </TableCell>
+                  <TableCell align="left" style={styles.style}>
+                    所属
+                  </TableCell>
+                  <TableCell align="right" style={styles.style}>
+                    保有数
+                  </TableCell>
+                  <TableCell align="right" style={styles.style}>
+                    NG数
+                  </TableCell>
+                  <TableCell align="left" style={styles.style}>
+                    部門
+                  </TableCell>
+                  <TableCell align="left" style={styles.style}>
+                    大部門
+                  </TableCell>
+                  <TableCell align="left" style={styles.style}>
+                    集計部門
+                  </TableCell>
+                  <TableCell align="right" style={styles.style}>
+                    定価
+                  </TableCell>
+                  <TableCell align="left" style={styles.style}>
+                    メモ
+                  </TableCell>
+                  {/* <TableCell /> */}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {list.map((loan, index) => (
+                  <TableRow key={loan.kizaiId} sx={{ whiteSpace: 'nowrap' }}>
+                    <TableCell align="center" padding="none">
+                      {index + 1}
                     </TableCell>
                     <TableCell align="left" style={styles.style}>
-                      所属
+                      <Button
+                        variant="text"
+                        onClick={() => window.open(`/loan-situation/${loan.kizaiId}`)}
+                        sx={{ justifyContent: 'start', p: 0 }}
+                      >
+                        {loan.kizaiNam}
+                      </Button>
+                    </TableCell>
+                    <TableCell align="left" style={styles.style}>
+                      {loan.shozokuNam === 'KICS' ? 'K' : loan.shozokuNam === 'YARD' ? 'Y' : 'その他'}
                     </TableCell>
                     <TableCell align="right" style={styles.style}>
-                      保有数
+                      {loan.kizaiQty}
                     </TableCell>
                     <TableCell align="right" style={styles.style}>
-                      NG数
+                      {loan.kizaiNgQty}
                     </TableCell>
                     <TableCell align="left" style={styles.style}>
-                      部門
+                      {loan.bumonNam}
                     </TableCell>
                     <TableCell align="left" style={styles.style}>
-                      大部門
+                      {loan.daibumonNam}
                     </TableCell>
                     <TableCell align="left" style={styles.style}>
-                      集計部門
+                      {loan.shukeibumonNam}
                     </TableCell>
                     <TableCell align="right" style={styles.style}>
-                      定価
+                      {loan.regAmt}
                     </TableCell>
                     <TableCell align="left" style={styles.style}>
-                      メモ
+                      <LightTooltipWithText variant={'body2'} maxWidth={280}>
+                        {loan.mem}
+                      </LightTooltipWithText>
                     </TableCell>
-                    {/* <TableCell /> */}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {list.map((loan, index) => (
-                    <TableRow key={loan.kizaiId} sx={{ whiteSpace: 'nowrap' }}>
-                      <TableCell align="center" padding="none">
-                        {index + 1}
-                      </TableCell>
-                      <TableCell align="left" style={styles.style}>
-                        <Button
-                          variant="text"
-                          onClick={() => window.open(`/loan-situation/${loan.kizaiId}`)}
-                          sx={{ justifyContent: 'start', p: 0 }}
-                        >
-                          {loan.kizaiNam}
-                        </Button>
-                      </TableCell>
-                      <TableCell align="left" style={styles.style}>
-                        {loan.shozokuNam === 'KICS' ? 'K' : loan.shozokuNam === 'YARD' ? 'Y' : 'その他'}
-                      </TableCell>
-                      <TableCell align="right" style={styles.style}>
-                        {loan.kizaiQty}
-                      </TableCell>
-                      <TableCell align="right" style={styles.style}>
-                        {loan.kizaiNgQty}
-                      </TableCell>
-                      <TableCell align="left" style={styles.style}>
-                        {loan.bumonNam}
-                      </TableCell>
-                      <TableCell align="left" style={styles.style}>
-                        {loan.daibumonNam}
-                      </TableCell>
-                      <TableCell align="left" style={styles.style}>
-                        {loan.shukeibumonNam}
-                      </TableCell>
-                      <TableCell align="right" style={styles.style}>
-                        {loan.regAmt}
-                      </TableCell>
-                      <TableCell align="left" style={styles.style}>
-                        <LightTooltipWithText variant={'body2'} maxWidth={280}>
-                          {loan.mem}
-                        </LightTooltipWithText>
-                      </TableCell>
-                      {/* <TableCell>
+                    {/* <TableCell>
                   <Box display={'flex'}>
                     <IconButton onClick={() => moveRow(index, -1)} disabled={index === 0}>
                       <ArrowUpwardIcon fontSize="small" />
@@ -202,15 +201,14 @@ export const LoanList = () => {
                     </IconButton>
                   </Box>
                 </TableCell> */}
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          )}
-        </Paper>
-      </Box>
-    </PermissionGuard>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
+      </Paper>
+    </Box>
   );
 };
 

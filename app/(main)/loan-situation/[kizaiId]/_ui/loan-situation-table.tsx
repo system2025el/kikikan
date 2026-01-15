@@ -12,7 +12,9 @@ import {
   TableRow,
 } from '@mui/material';
 
+import { useUserStore } from '@/app/_lib/stores/usestore';
 import { toJapanMDString } from '@/app/(main)/_lib/date-conversion';
+import { permission } from '@/app/(main)/_lib/permission';
 import { LightTooltipWithText } from '@/app/(main)/(masters)/_ui/tables';
 
 import { LoanJuchu, LoanStockTableValues, LoanUseTableValues } from '../_lib/types';
@@ -24,6 +26,9 @@ type LoanSituationTableProps = {
 
 export const LoanSituationTable = (props: LoanSituationTableProps) => {
   const { rows, ref } = props;
+
+  // user情報
+  const user = useUserStore((state) => state.user);
 
   return (
     <TableContainer
@@ -78,6 +83,7 @@ export const LoanSituationTable = (props: LoanSituationTableProps) => {
                   variant="text"
                   sx={{ p: 0, height: '15px', m: 0, minWidth: 0, width: 1 }}
                   onClick={() => window.open(`/order/${row.juchuHeadId}/view`)}
+                  disabled={user?.permission.juchu === permission.none}
                 >
                   {row.juchuHeadId}
                 </Button>

@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { PoolClient } from 'pg';
 
-import pool from '@/app/_lib/db/postgres';
+import pool, { refreshVRfid } from '@/app/_lib/db/postgres';
 import { selectJuchuContainerMeisaiMaxId, upsertJuchuContainerMeisai } from '@/app/_lib/db/tables/t-juchu-ctn-meisai';
 import { selectChildJuchuKizaiHeadConfirm } from '@/app/_lib/db/tables/t-juchu-kizai-head';
 import { selectJuchuKizaiNyushukoConfirm } from '@/app/_lib/db/tables/t-juchu-kizai-nyushuko';
@@ -235,6 +235,9 @@ export const updShukoDetail = async (
     await connection.query('ROLLBACK');
     return false;
   } finally {
+    refreshVRfid().catch((err) => {
+      console.error('バックグラウンドでのマテビュー更新に失敗:', err);
+    });
     connection.release();
   }
 };

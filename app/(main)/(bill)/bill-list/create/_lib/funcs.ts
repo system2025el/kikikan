@@ -183,7 +183,7 @@ export const addBill = async (data: BillHeadValues, user: string): Promise<numbe
     await connection.query('BEGIN');
     // 新請求ヘッドID
     const newSeikyuHeadId = await connection.query(`
-       SELECT coalesce(max(seikyu_head_id),0) + 1 as newid FROM ${SCHEMA}.t_seikyu_head
+       SELECT coalesce(max(seikyu_head_id),29999) + 1 as newid FROM ${SCHEMA}.t_seikyu_head WHERE seikyu_head_id > 30000
       `);
 
     console.log(newSeikyuHeadId.rows[0].newid);

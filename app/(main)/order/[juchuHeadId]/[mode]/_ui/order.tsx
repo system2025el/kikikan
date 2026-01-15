@@ -272,7 +272,7 @@ export const Order = (props: {
       // 新規
       if (data.juchuHeadId === 0) {
         const maxId = await getMaxId();
-        const newOrderId = maxId ? maxId.juchu_head_id + 1 : 1;
+        const newOrderId = maxId && maxId.juchu_head_id >= 90000 ? maxId.juchu_head_id + 1 : 90000;
         const saveResult = await addJuchuHead(newOrderId, data, user.name);
         if (saveResult) {
           router.replace(`/order/${newOrderId}/edit`);

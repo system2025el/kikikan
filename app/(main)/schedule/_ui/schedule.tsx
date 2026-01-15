@@ -98,303 +98,301 @@ export const Schedule = () => {
   }, [reset]);
 
   return (
-    <PermissionGuard category={'nyushuko'} required={permission.nyushuko_ref}>
-      <Container disableGutters sx={{ minWidth: '100%' }}>
-        <Paper
-          component={'form'}
-          onSubmit={handleSubmit(onSubmit)}
-          variant="outlined"
-          sx={{ mb: 1, px: 2, display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}
-        >
-          スケジュール
-          <Box sx={styles.boxStyle}>
-            表示開始日
-            <Controller
-              name="startDate"
-              control={control}
-              render={({ field, fieldState: { error } }) => (
-                <FormDateX
-                  value={field.value}
-                  onChange={field.onChange}
-                  sx={{ width: 200, mr: 2, ml: 1 }}
-                  error={!!error}
-                  helperText={error?.message}
-                />
-              )}
-            />
-            表示終了日
-            <Controller
-              name="endDate"
-              control={control}
-              render={({ field, fieldState: { error } }) => (
-                <FormDateX
-                  value={field.value}
-                  onChange={field.onChange}
-                  sx={{ width: 200, mr: 2, ml: 1 }}
-                  error={!!error}
-                  helperText={error?.message}
-                />
-              )}
-            />
-            表示日数
-            <TextFieldElement
-              name="dateCount"
-              control={control}
-              sx={{
-                width: 60,
-                mr: 2,
-                ml: 1,
-                '& .MuiInputBase-input': {
-                  textAlign: 'right',
-                },
-                '& input[type=number]::-webkit-inner-spin-button': {
-                  WebkitAppearance: 'none',
-                  margin: 0,
-                },
-              }}
-              type="number"
-            />
-            <Button type="submit" sx={{ ml: 2 }} loading={isLoading}>
-              再取得
-            </Button>
-          </Box>
-        </Paper>
-        <TableContainer>
-          {isLoading && <LoadingOverlay />}
-          <Table padding="none" sx={{ border: '2px solid black' }}>
-            <TableHead>
-              <TableRow>
-                {scheList &&
-                  scheList.length > 0 &&
-                  scheList.map((date, index) => (
-                    <TableCell
-                      key={date.calDat}
+    <Container disableGutters sx={{ minWidth: '100%' }}>
+      <Paper
+        component={'form'}
+        onSubmit={handleSubmit(onSubmit)}
+        variant="outlined"
+        sx={{ mb: 1, px: 2, display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}
+      >
+        スケジュール
+        <Box sx={styles.boxStyle}>
+          表示開始日
+          <Controller
+            name="startDate"
+            control={control}
+            render={({ field, fieldState: { error } }) => (
+              <FormDateX
+                value={field.value}
+                onChange={field.onChange}
+                sx={{ width: 200, mr: 2, ml: 1 }}
+                error={!!error}
+                helperText={error?.message}
+              />
+            )}
+          />
+          表示終了日
+          <Controller
+            name="endDate"
+            control={control}
+            render={({ field, fieldState: { error } }) => (
+              <FormDateX
+                value={field.value}
+                onChange={field.onChange}
+                sx={{ width: 200, mr: 2, ml: 1 }}
+                error={!!error}
+                helperText={error?.message}
+              />
+            )}
+          />
+          表示日数
+          <TextFieldElement
+            name="dateCount"
+            control={control}
+            sx={{
+              width: 60,
+              mr: 2,
+              ml: 1,
+              '& .MuiInputBase-input': {
+                textAlign: 'right',
+              },
+              '& input[type=number]::-webkit-inner-spin-button': {
+                WebkitAppearance: 'none',
+                margin: 0,
+              },
+            }}
+            type="number"
+          />
+          <Button type="submit" sx={{ ml: 2 }} loading={isLoading}>
+            再取得
+          </Button>
+        </Box>
+      </Paper>
+      <TableContainer>
+        {isLoading && <LoadingOverlay />}
+        <Table padding="none" sx={{ border: '2px solid black' }}>
+          <TableHead>
+            <TableRow>
+              {scheList &&
+                scheList.length > 0 &&
+                scheList.map((date, index) => (
+                  <TableCell
+                    key={date.calDat}
+                    sx={{
+                      border: '1px solid black',
+                      px: 1,
+                      whiteSpace: 'nowrap',
+                      minWidth: 300,
+                      maxWidth: 300,
+                      height: 20.1,
+                      bgcolor: 'white',
+                      color:
+                        toJapanDayString(date.calDat) === '土' ||
+                        toJapanDayString(date.calDat) === '日' ||
+                        date.holidayFlg
+                          ? 'red'
+                          : 'black',
+                    }}
+                    align="center"
+                    onClick={() =>
+                      handleClickDateHead({
+                        dat: toJapanYMDAndDayString(date.calDat),
+                        mem: date.mem,
+                        tantoNam: date.tantoNam,
+                        holidayFlg: date.holidayFlg,
+                      })
+                    }
+                  >
+                    {toJapanYMDAndDayString(date.calDat)}
+                  </TableCell>
+                ))}
+            </TableRow>
+            <TableRow>
+              {scheList &&
+                scheList.length > 0 &&
+                scheList.map((date) => (
+                  <TableCell
+                    key={date.calDat}
+                    sx={{
+                      border: '1px solid black',
+                      px: 1,
+                      bgcolor: 'white',
+                      color: 'black',
+                      verticalAlign: 'top',
+                      maxHeight: 40.2,
+                      minHeight: 20.1,
+                      minWidth: 300,
+                      width: 300,
+                      maxWidth: 300,
+                    }}
+                    onClick={() =>
+                      handleClickDateHead({
+                        dat: toJapanYMDAndDayString(date.calDat),
+                        mem: date.mem,
+                        tantoNam: date.tantoNam,
+                        holidayFlg: date.holidayFlg,
+                      })
+                    }
+                  >
+                    <Box
+                      component="div"
                       sx={{
-                        border: '1px solid black',
-                        px: 1,
-                        whiteSpace: 'nowrap',
-                        minWidth: 300,
-                        maxWidth: 300,
-                        height: 20.1,
-                        bgcolor: 'white',
-                        color:
-                          toJapanDayString(date.calDat) === '土' ||
-                          toJapanDayString(date.calDat) === '日' ||
-                          date.holidayFlg
-                            ? 'red'
-                            : 'black',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
                       }}
-                      align="center"
-                      onClick={() =>
-                        handleClickDateHead({
-                          dat: toJapanYMDAndDayString(date.calDat),
-                          mem: date.mem,
-                          tantoNam: date.tantoNam,
-                          holidayFlg: date.holidayFlg,
-                        })
-                      }
+                      fontSize={'0.875rem'}
+                      fontWeight={'normal'}
                     >
-                      {toJapanYMDAndDayString(date.calDat)}
-                    </TableCell>
-                  ))}
-              </TableRow>
-              <TableRow>
-                {scheList &&
-                  scheList.length > 0 &&
-                  scheList.map((date) => (
-                    <TableCell
-                      key={date.calDat}
-                      sx={{
-                        border: '1px solid black',
-                        px: 1,
-                        bgcolor: 'white',
-                        color: 'black',
-                        verticalAlign: 'top',
-                        maxHeight: 40.2,
-                        minHeight: 20.1,
-                        minWidth: 300,
-                        width: 300,
-                        maxWidth: 300,
-                      }}
-                      onClick={() =>
-                        handleClickDateHead({
-                          dat: toJapanYMDAndDayString(date.calDat),
-                          mem: date.mem,
-                          tantoNam: date.tantoNam,
-                          holidayFlg: date.holidayFlg,
-                        })
-                      }
-                    >
-                      <Box
-                        component="div"
-                        sx={{
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          display: '-webkit-box',
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: 'vertical',
-                        }}
-                        fontSize={'0.875rem'}
-                        fontWeight={'normal'}
-                      >
-                        {date.mem ?? ''}
-                      </Box>
-                    </TableCell>
-                  ))}
-              </TableRow>
-              <TableRow>
-                {scheList &&
-                  scheList.length > 0 &&
-                  scheList.map((date) => (
-                    <TableCell
-                      key={date.calDat}
-                      sx={{
-                        border: '1px solid black',
-                        borderBottom: '2px solid black',
-                        px: 1,
-                        height: 20.1,
-                        bgcolor: 'white',
-                        color: 'black',
-                      }}
-                      onClick={() =>
-                        handleClickDateHead({
-                          dat: toJapanYMDAndDayString(date.calDat),
-                          mem: date.mem,
-                          tantoNam: date.tantoNam,
-                          holidayFlg: date.holidayFlg,
-                        })
-                      }
-                    >
-                      <LightTooltipWithText maxWidth={295} variant="body2">
-                        {date.tantoNam ?? ''}
-                      </LightTooltipWithText>
-                    </TableCell>
-                  ))}
-              </TableRow>
-            </TableHead>
+                      {date.mem ?? ''}
+                    </Box>
+                  </TableCell>
+                ))}
+            </TableRow>
+            <TableRow>
+              {scheList &&
+                scheList.length > 0 &&
+                scheList.map((date) => (
+                  <TableCell
+                    key={date.calDat}
+                    sx={{
+                      border: '1px solid black',
+                      borderBottom: '2px solid black',
+                      px: 1,
+                      height: 20.1,
+                      bgcolor: 'white',
+                      color: 'black',
+                    }}
+                    onClick={() =>
+                      handleClickDateHead({
+                        dat: toJapanYMDAndDayString(date.calDat),
+                        mem: date.mem,
+                        tantoNam: date.tantoNam,
+                        holidayFlg: date.holidayFlg,
+                      })
+                    }
+                  >
+                    <LightTooltipWithText maxWidth={295} variant="body2">
+                      {date.tantoNam ?? ''}
+                    </LightTooltipWithText>
+                  </TableCell>
+                ))}
+            </TableRow>
+          </TableHead>
 
-            {/** 日直入力ダイアログ */}
-            <TantoDialog
-              open={dialogOpen}
-              datas={selectedDatas}
-              setOpen={setDialogOpen}
-              refetch={() => onSubmit(getValues())}
-            />
+          {/** 日直入力ダイアログ */}
+          <TantoDialog
+            open={dialogOpen}
+            datas={selectedDatas}
+            setOpen={setDialogOpen}
+            refetch={() => onSubmit(getValues())}
+          />
 
-            <TableBody>
-              <TableRow>
-                {scheList &&
-                  scheList.length > 0 &&
-                  scheList.map((date) => (
-                    <TableCell key={date.calDat} sx={{ border: '1px solid black', px: 0, verticalAlign: 'top' }}>
-                      {date.timeDatas &&
-                        date.timeDatas.length > 0 &&
-                        date.timeDatas.map((time, index) => (
-                          <Box
-                            key={index}
-                            width={1}
-                            sx={{
-                              borderBottom: 1, // date.timeDatas.length === 1 || index + 1 !== date.timeDatas.length ? 1 : undefined,
-                              alignItems: 'start',
-                            }}
-                          >
-                            <Box height={20.1} display={'flex'}>
-                              <Box justifyContent={'end'} width={50} sx={styles.boxStyle}>
-                                {time.nyushukoDat ? toJapanHHmmString(time.nyushukoDat) : ''}
-                              </Box>
-                              <Divider orientation="vertical" />
-                              <Box
-                                width={100}
-                                sx={styles.boxStyle}
-                                bgcolor={time.nyushukoShubetuId === 1 ? weeklyColors.shuko : weeklyColors.nyuko}
-                              >
-                                {time.nyushukoShubetuId === 1 ? '積み' : '降ろし'}
-                              </Box>
-                              <Divider orientation="vertical" />
-                              <Box
-                                width={150}
-                                sx={styles.boxStyle}
-                                bgcolor={
-                                  time.nyushukoBashoId === 1
-                                    ? weeklyColors.kics
-                                    : time.nyushukoBashoId === 3
-                                      ? weeklyColors.atsugi
-                                      : weeklyColors.yard
-                                }
-                              >
-                                <LightTooltipWithText variant={'body2'} maxWidth={150}>
-                                  {time.kokyakuNam}
-                                </LightTooltipWithText>
-                              </Box>
+          <TableBody>
+            <TableRow>
+              {scheList &&
+                scheList.length > 0 &&
+                scheList.map((date) => (
+                  <TableCell key={date.calDat} sx={{ border: '1px solid black', px: 0, verticalAlign: 'top' }}>
+                    {date.timeDatas &&
+                      date.timeDatas.length > 0 &&
+                      date.timeDatas.map((time, index) => (
+                        <Box
+                          key={index}
+                          width={1}
+                          sx={{
+                            borderBottom: 1, // date.timeDatas.length === 1 || index + 1 !== date.timeDatas.length ? 1 : undefined,
+                            alignItems: 'start',
+                          }}
+                        >
+                          <Box height={20.1} display={'flex'}>
+                            <Box justifyContent={'end'} width={50} sx={styles.boxStyle}>
+                              {time.nyushukoDat ? toJapanHHmmString(time.nyushukoDat) : ''}
                             </Box>
-                            <Divider variant="fullWidth" />
-                            <Box height={20.1} display={'flex'}>
-                              <Box justifyContent={'end'} width={50} sx={styles.boxStyle} />
-                              <Divider orientation="vertical" />
-                              <Box
-                                width={100}
-                                sx={styles.boxStyle}
-                                bgcolor={time.nyushukoShubetuId === 1 ? weeklyColors.shuko : weeklyColors.nyuko}
-                              >
-                                {time.sharyos[0]?.nam ?? ''}
-                                {time.sharyos[0]?.daisu > 1 ? ` ×${time.sharyos[0]?.daisu}` : ''}
-                              </Box>
-                              <Divider orientation="vertical" />
-                              <Box
-                                width={150}
-                                sx={styles.boxStyle}
-                                bgcolor={
-                                  time.nyushukoBashoId === 1
-                                    ? weeklyColors.kics
-                                    : time.nyushukoBashoId === 3
-                                      ? weeklyColors.atsugi
-                                      : weeklyColors.yard
-                                }
-                              >
-                                <LightTooltipWithText variant={'body2'} maxWidth={150}>
-                                  {time.koenNam}
-                                </LightTooltipWithText>
-                              </Box>
+                            <Divider orientation="vertical" />
+                            <Box
+                              width={100}
+                              sx={styles.boxStyle}
+                              bgcolor={time.nyushukoShubetuId === 1 ? weeklyColors.shuko : weeklyColors.nyuko}
+                            >
+                              {time.nyushukoShubetuId === 1 ? '積み' : '降ろし'}
                             </Box>
-                            <Divider />
-                            <Box height={20.1} display={'flex'}>
-                              <Box justifyContent={'end'} width={50} sx={styles.boxStyle} />
-                              <Divider orientation="vertical" />
-                              <Box
-                                width={100}
-                                sx={styles.boxStyle}
-                                bgcolor={time.nyushukoShubetuId === 1 ? weeklyColors.shuko : weeklyColors.nyuko}
-                              >
-                                {time.sharyos[1]?.nam ?? ''}
-                                {time.sharyos[1]?.daisu > 1 ? ` ×${time.sharyos[1]?.daisu}` : ''}
-                              </Box>
-                              <Divider orientation="vertical" />
-                              <Box
-                                width={150}
-                                sx={styles.boxStyle}
-                                bgcolor={
-                                  time.nyushukoBashoId === 1
-                                    ? weeklyColors.kics
-                                    : time.nyushukoBashoId === 3
-                                      ? weeklyColors.atsugi
-                                      : weeklyColors.yard
-                                }
-                              >
-                                <LightTooltipWithText variant={'body2'} maxWidth={150}>
-                                  {time.sharyoHeadNam}
-                                </LightTooltipWithText>
-                              </Box>
+                            <Divider orientation="vertical" />
+                            <Box
+                              width={150}
+                              sx={styles.boxStyle}
+                              bgcolor={
+                                time.nyushukoBashoId === 1
+                                  ? weeklyColors.kics
+                                  : time.nyushukoBashoId === 3
+                                    ? weeklyColors.atsugi
+                                    : weeklyColors.yard
+                              }
+                            >
+                              <LightTooltipWithText variant={'body2'} maxWidth={150}>
+                                {time.kokyakuNam}
+                              </LightTooltipWithText>
                             </Box>
                           </Box>
-                        ))}
-                    </TableCell>
-                  ))}
-              </TableRow>
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Container>
-    </PermissionGuard>
+                          <Divider variant="fullWidth" />
+                          <Box height={20.1} display={'flex'}>
+                            <Box justifyContent={'end'} width={50} sx={styles.boxStyle} />
+                            <Divider orientation="vertical" />
+                            <Box
+                              width={100}
+                              sx={styles.boxStyle}
+                              bgcolor={time.nyushukoShubetuId === 1 ? weeklyColors.shuko : weeklyColors.nyuko}
+                            >
+                              {time.sharyos[0]?.nam ?? ''}
+                              {time.sharyos[0]?.daisu > 1 ? ` ×${time.sharyos[0]?.daisu}` : ''}
+                            </Box>
+                            <Divider orientation="vertical" />
+                            <Box
+                              width={150}
+                              sx={styles.boxStyle}
+                              bgcolor={
+                                time.nyushukoBashoId === 1
+                                  ? weeklyColors.kics
+                                  : time.nyushukoBashoId === 3
+                                    ? weeklyColors.atsugi
+                                    : weeklyColors.yard
+                              }
+                            >
+                              <LightTooltipWithText variant={'body2'} maxWidth={150}>
+                                {time.koenNam}
+                              </LightTooltipWithText>
+                            </Box>
+                          </Box>
+                          <Divider />
+                          <Box height={20.1} display={'flex'}>
+                            <Box justifyContent={'end'} width={50} sx={styles.boxStyle} />
+                            <Divider orientation="vertical" />
+                            <Box
+                              width={100}
+                              sx={styles.boxStyle}
+                              bgcolor={time.nyushukoShubetuId === 1 ? weeklyColors.shuko : weeklyColors.nyuko}
+                            >
+                              {time.sharyos[1]?.nam ?? ''}
+                              {time.sharyos[1]?.daisu > 1 ? ` ×${time.sharyos[1]?.daisu}` : ''}
+                            </Box>
+                            <Divider orientation="vertical" />
+                            <Box
+                              width={150}
+                              sx={styles.boxStyle}
+                              bgcolor={
+                                time.nyushukoBashoId === 1
+                                  ? weeklyColors.kics
+                                  : time.nyushukoBashoId === 3
+                                    ? weeklyColors.atsugi
+                                    : weeklyColors.yard
+                              }
+                            >
+                              <LightTooltipWithText variant={'body2'} maxWidth={150}>
+                                {time.sharyoHeadNam}
+                              </LightTooltipWithText>
+                            </Box>
+                          </Box>
+                        </Box>
+                      ))}
+                  </TableCell>
+                ))}
+            </TableRow>
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Container>
   );
 };
 

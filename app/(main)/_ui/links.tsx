@@ -31,11 +31,14 @@ const orderList: MenuItem[] = [
   { name: '新規受注', url: '/order/0/edit' },
   // { name: '受注一覧', url: '/order-list' },
   { name: '受注明細一覧', url: '/eqpt-order-list' },
-  { name: '在庫確認', url: '/stock' },
-  { name: '貸出状況', url: '/loan-situation' },
   { name: '見積一覧', url: '/quotation-list' },
   { name: '請求一覧', url: '/bill-list' },
   { name: '請求状況一覧', url: '/billing-sts-list' },
+];
+/* 在庫管理 */
+const stockList: MenuItem[] = [
+  { name: '在庫確認', url: '/stock' },
+  { name: '貸出状況', url: '/loan-situation' },
 ];
 /* マスタ管理リスト */
 const masterList: MenuItem[] = [
@@ -62,7 +65,7 @@ const stockIOList: MenuItem[] = [
   { name: '出庫', url: '/shuko-list' },
   { name: '入庫', url: '/nyuko-list' },
   { name: '移動', url: '/ido-list' },
-  { name: 'スケジュール', url: '/schedule' },
+  // { name: 'スケジュール', url: '/schedule' },
 ];
 /* ログアウトリスト */
 // const loginList: MenuItem[] = [{ name: 'ログアウト', url: '/' }];
@@ -94,6 +97,8 @@ export default function NavLinks() {
   /* useState -------------------------------------------- */
   /* 受注管理開閉 */
   const [orderOpen, setorderOpen] = useState<boolean>(true);
+  /* 在庫管理開閉 */
+  const [stockOpen, setStockOpen] = useState<boolean>(true);
   /* プリントアウト開閉 */
   const [printOpen, setprintOpen] = useState<boolean>(true);
   /* マスタ管理開閉 */
@@ -118,6 +123,10 @@ export default function NavLinks() {
   /** 受注管理クリック時 */
   const orderClick = () => {
     setorderOpen(!orderOpen);
+  };
+  /** 受注管理クリック時 */
+  const stockClick = () => {
+    setStockOpen(!stockOpen);
   };
   /** プリントクリック時 */
   const printClick = () => {
@@ -166,6 +175,19 @@ export default function NavLinks() {
           ダッシュボード
         </ListItemText>
       </ListItemButton>
+      {/* スケジュール */}
+      <ListItemButton
+        onClick={() => handleNavigation('/schedule')}
+        sx={{
+          backgroundColor: pathname === '/schedule' ? currentPgColor : undefined,
+        }}
+        disabled={isPending}
+      >
+        <ListItemIcon>
+          <StopSharpIcon />
+        </ListItemIcon>
+        <ListItemText sx={{ color: pathname === '/schedule' ? 'primary.dark' : undefined }}>スケジュール</ListItemText>
+      </ListItemButton>
       {/* 受注管理 */}
       <ListItemButton
         onClick={orderClick}
@@ -192,6 +214,34 @@ export default function NavLinks() {
                 backgroundColor: isSelected(text.url) ? currentPgColor : undefined,
                 display:
                   text.name === '新規受注' ? (user!.permission.juchu & permission.juchu_upd ? 'flex' : 'none') : 'flex',
+              }}
+            >
+              <ListItemButton onClick={() => handleNavigation(text.url)} dense disabled={isPending}>
+                <ListItemText
+                  primary={text.name}
+                  sx={{ color: isSelected(text.url) ? 'primary.dark' : undefined, pl: 8 }}
+                />
+              </ListItemButton>
+            </ListItem>
+          ))}
+        </List>
+      </Collapse>
+      {/* 在庫管理 */}
+      <ListItemButton onClick={stockClick}>
+        <ListItemIcon>
+          <StopSharpIcon />
+        </ListItemIcon>
+        <ListItemText>在庫管理</ListItemText>
+        {stockOpen ? <ExpandLess /> : <ExpandMore />}
+      </ListItemButton>
+      <Collapse in={stockOpen} timeout="auto" unmountOnExit>
+        <List component="div" disablePadding>
+          {stockList.map((text) => (
+            <ListItem
+              key={text.name}
+              disablePadding
+              sx={{
+                backgroundColor: isSelected(text.url) ? currentPgColor : undefined,
               }}
             >
               <ListItemButton onClick={() => handleNavigation(text.url)} dense disabled={isPending}>

@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { PoolClient } from 'pg';
 
-import pool from '@/app/_lib/db/postgres';
+import pool, { refreshVRfid } from '@/app/_lib/db/postgres';
 import { selectActiveBumons } from '@/app/_lib/db/tables/m-bumon';
 import { selectActiveEqpts, selectBundledEqpts } from '@/app/_lib/db/tables/m-kizai';
 import { selectBundledEqptIds } from '@/app/_lib/db/tables/m-kizai-set';
@@ -265,6 +265,10 @@ export const addIdoFix = async (
   } catch (e) {
     console.error(e);
     return false;
+  } finally {
+    refreshVRfid().catch((err) => {
+      console.error('バックグラウンドでのマテビュー更新に失敗:', err);
+    });
   }
 };
 
