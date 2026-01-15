@@ -14,19 +14,19 @@ export const CustomersMaterDialogSchema = z.object({
   delFlg: z.boolean().optional(),
   adrPost: z
     .string()
-    .max(20, { message: validationMessages.maxStringLength(20) })
+    .max(8, { message: validationMessages.maxStringLength(8) })
     .nullish(),
   adrShozai: z
     .string()
-    .max(100, { message: validationMessages.maxStringLength(100) })
+    .max(40, { message: validationMessages.maxStringLength(40) })
     .nullish(),
   adrTatemono: z
     .string()
-    .max(100, { message: validationMessages.maxStringLength(100) })
+    .max(40, { message: validationMessages.maxStringLength(40) })
     .nullish(),
   adrSonota: z
     .string()
-    .max(100, { message: validationMessages.maxStringLength(100) })
+    .max(40, { message: validationMessages.maxStringLength(40) })
     .nullish(),
   tel: z
     .string()
