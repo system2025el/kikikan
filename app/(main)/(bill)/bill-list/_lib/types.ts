@@ -113,22 +113,24 @@ export const BillHeadSchema = z.object({
     .string()
     .max(50, { message: validationMessages.maxStringLength(50) })
     .nullish(),
-  adrPost: z
+  adr1: z
     .string()
     .max(8, { message: validationMessages.maxStringLength(8) })
     .nullish(),
-  adrShozai: z
-    .string()
-    .max(40, { message: validationMessages.maxStringLength(40) })
-    .nullish(),
-  adrTatemono: z
-    .string()
-    .max(40, { message: validationMessages.maxStringLength(40) })
-    .nullish(),
-  adrSonota: z
-    .string()
-    .max(40, { message: validationMessages.maxStringLength(40) })
-    .nullish(),
+  adr2: z.object({
+    shozai: z
+      .string()
+      .max(50, { message: validationMessages.maxStringLength(50) })
+      .nullish(),
+    tatemono: z
+      .string()
+      .max(50, { message: validationMessages.maxStringLength(50) })
+      .nullish(),
+    sonota: z
+      .string()
+      .max(50, { message: validationMessages.maxStringLength(50) })
+      .nullish(),
+  }),
   nyuryokuUser: z
     .string()
     .max(20, { message: validationMessages.maxStringLength(20) })

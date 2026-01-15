@@ -173,10 +173,8 @@ export const getChosenBill = async (seikyuId: number) => {
       kokyaku: seikyuData.kokyaku_nam,
       nyuryokuUser: seikyuData.nyuryoku_user,
       aite: { id: seikyuData.kokyaku_id ?? FAKE_NEW_ID, nam: seikyuData.kokyaku_nam ?? '' },
-      adrPost: seikyuData.adr_post,
-      adrShozai: seikyuData.adr_shozai,
-      adrTatemono: seikyuData.adr_tatemono,
-      adrSonota: seikyuData.adr_sonota,
+      adr1: seikyuData.adr_post,
+      adr2: { shozai: seikyuData.adr_shozai, tatemono: seikyuData.adr_tatemono, sonota: seikyuData.adr_sonota },
       // seikyuRange:
       //   seikyuData.seikyu_str_dat && seikyuData.seikyu_end_dat
       //     ? { strt: new Date(seikyuData.seikyu_str_dat), end: new Date(seikyuData.seikyu_end_dat) }

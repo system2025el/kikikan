@@ -493,24 +493,33 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
                     </Grid2>
                     <Grid2 sx={styles.container}>
                       <Typography marginRight={1}>請求先住所</Typography>
-                      <TextFieldElement
-                        name="adrPost"
+                      <TextFieldElement name="adr1" control={control} sx={{ width: 100, mr: 2 }} disabled={!editable} />
+                      <Controller
+                        name="adr2"
                         control={control}
-                        sx={{ width: 100, mr: 2 }}
-                        disabled={!editable}
+                        rules={{
+                          validate: (value) => {
+                            const totalLength =
+                              (value!.shozai ?? '').length +
+                              (value!.tatemono ?? '').length +
+                              (value!.sonota ?? '').length;
+                            return totalLength <= 80 || validationMessages.maxStringLength(80);
+                          },
+                        }}
+                        render={({ field, fieldState }) => (
+                          <TextField
+                            value={`${field.value!.shozai ?? ''} ${field.value!.tatemono ?? ''} ${field.value!.sonota ?? ''}`}
+                            onChange={(e) => {
+                              const [adrA, adrB] = e.target.value.split(' ');
+                              field.onChange({ adrA, adrB });
+                            }}
+                            error={!!fieldState.error}
+                            helperText={fieldState.error?.message}
+                            sx={{ width: 500 }}
+                            disabled={!editable}
+                          />
+                        )}
                       />
-                    </Grid2>
-                    <Grid2 sx={styles.container}>
-                      <Typography marginRight={1}>顧客住所（所在地）</Typography>
-                      <TextFieldElement name="adrShozai" control={control} sx={{ width: 500 }} disabled={!editable} />
-                    </Grid2>
-                    <Grid2 sx={styles.container}>
-                      <Typography marginRight={1}>顧客住所（建物名）</Typography>
-                      <TextFieldElement name="adrTatemono" control={control} sx={{ width: 500 }} disabled={!editable} />
-                    </Grid2>
-                    <Grid2 sx={styles.container}>
-                      <Typography marginRight={1}>顧客住所（その他）</Typography>
-                      <TextFieldElement name="adrSonota" control={control} sx={{ width: 500 }} disabled={!editable} />
                     </Grid2>
                     <Grid2 sx={styles.container}>
                       <Typography marginRight={3}>請求先名</Typography>

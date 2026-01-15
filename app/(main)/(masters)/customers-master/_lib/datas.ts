@@ -84,22 +84,22 @@ export const formItems: FormItemsType[] = [
   {
     label: '顧客住所（郵便番号）',
     exsample: '例）242-0018 ',
-    constraints: '8文字まで',
+    constraints: '20文字まで',
   },
   {
     label: '顧客住所（所在地）',
     exsample: '例）神奈川県大和市深見西9-99-99',
-    constraints: '40文字まで',
+    constraints: '100文字まで',
   },
   {
     label: '顧客住所（建物名）',
     exsample: '例）XXビル 11F',
-    constraints: '40文字まで',
+    constraints: '100文字まで',
   },
   {
     label: '顧客住所（その他）',
     exsample: 'その他の住所情報',
-    constraints: '40文字まで',
+    constraints: '100文字まで',
   },
   {
     label: '電話',
