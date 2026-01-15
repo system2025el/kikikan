@@ -854,7 +854,7 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
               drawColumnLine();
 
               let displayAmt: number | null = null;
-              let nebikiNamDisplay: string | null = detail.nebikiAftNam ?? null;
+              let nebikiNamDisplay: string | null = detail.nebikiNam ?? null;
               if (nebikiNamDisplay && nebikiNamDisplay.length >= 6) {
                 nebikiNamDisplay = nebikiNamDisplay.slice(0, 5) + '…';
               }
@@ -958,7 +958,7 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
 
               let displayAmt: number | null = null;
 
-              let nebikiNamDisplay: string | null = detail.nebikiAftNam ?? null;
+              let nebikiNamDisplay: string | null = detail.nebikiNam ?? null;
               if (nebikiNamDisplay && nebikiNamDisplay.length >= 6) {
                 nebikiNamDisplay = nebikiNamDisplay.slice(0, 5) + '…';
               }
