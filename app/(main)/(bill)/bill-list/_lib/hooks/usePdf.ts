@@ -184,20 +184,20 @@ export const usePdf = (): [(param: BillHeadValues) => Promise<Blob>] => {
     };
 
     // 郵便番号
-    drawTextWithAutoResize(param.adr1, clientInfoX, clientInfoY, formatSize, maxWidth);
+    drawTextWithAutoResize(param.adrPost, clientInfoX, clientInfoY, formatSize, maxWidth);
 
     // 住所
     clientInfoY -= 15;
-    drawTextWithAutoResize(param.adr2.shozai, clientInfoX, clientInfoY, formatSize, maxWidth);
+    drawTextWithAutoResize(param.adrShozai, clientInfoX, clientInfoY, formatSize, maxWidth);
 
     // ビル名等
     clientInfoY -= 15;
-    drawTextWithAutoResize(param.adr2.tatemono, clientInfoX, clientInfoY, formatSize, maxWidth);
+    drawTextWithAutoResize(param.adrTatemono, clientInfoX, clientInfoY, formatSize, maxWidth);
 
     // その他
-    if (param.adr2.sonota) {
+    if (param.adrSonota) {
       clientInfoY -= 15;
-      drawTextWithAutoResize(param.adr2.sonota, clientInfoX, clientInfoY, formatSize, maxWidth);
+      drawTextWithAutoResize(param.adrSonota, clientInfoX, clientInfoY, formatSize, maxWidth);
       // 会社名
       clientInfoY -= 10; // 会社名だけ少し間隔をあける
       const companyName = `${param.aite.nam}御中`;
