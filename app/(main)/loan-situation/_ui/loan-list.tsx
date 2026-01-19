@@ -160,7 +160,7 @@ export const LoanList = () => {
                       <Button
                         variant="text"
                         onClick={() => window.open(`/loan-situation/${loan.kizaiId}`)}
-                        sx={{ justifyContent: 'start', p: 0 }}
+                        sx={{ justifyContent: 'start', p: 0, textTransform: 'none' }}
                       >
                         {loan.kizaiNam}
                       </Button>
