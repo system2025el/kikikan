@@ -30,7 +30,7 @@ const Login = () => {
   const onSubmit = async (data: UserValues) => {
     console.log(data);
     //const { error } = await login(data);
-    const { error } = await supabase.auth.signInWithPassword({ email: data.email, password: data.password });
+    //const { error } = await supabase.auth.signInWithPassword({ email: data.email, password: data.password });
     if (error) {
       setError(`メールアドレスかパスワードがちがいます。${error}`);
     } else {
