@@ -11,6 +11,7 @@ export type QuotTableValues = {
   mituStsNam: string;
   mituHeadNam: string;
   koenNam: string;
+  koenbashoNam: string;
   kokyakuNam: string;
   mituDat: string;
   nyuryokuUser: string;

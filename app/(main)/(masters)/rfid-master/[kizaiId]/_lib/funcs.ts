@@ -86,7 +86,7 @@ export const getChosenRfid = async (id: string) => {
       return emptyRfid;
     }
     const RfidDetails: RfidsMasterDialogValues = {
-      elNum: data.el_num ?? 0,
+      elNum: data.el_num,
       delFlg: Boolean(data.del_flg),
       shozokuId: nullToFake(data.shozoku_id),
       mem: data.mem,

@@ -55,6 +55,7 @@ export const getFilteredQuotList = async (
       mituStsNam: d.sts_nam ?? '',
       mituHeadNam: d.mitu_head_nam ?? '',
       koenNam: d.koen_nam ?? '',
+      koenbashoNam: d.koenbasho_nam ?? '',
       kokyakuNam: d.kokyaku_nam ?? '',
       mituDat: d.mitu_dat ? toJapanYMDString(d.mitu_dat) : '',
       nyuryokuUser: d.nyuryoku_user ?? '',

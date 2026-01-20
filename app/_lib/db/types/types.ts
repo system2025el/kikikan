@@ -3366,6 +3366,7 @@ export type Database = {
         Row: {
           juchu_head_id: number | null;
           koen_nam: string | null;
+          koenbasho_nam: string | null;
           kokyaku_nam: string | null;
           mitu_dat: string | null;
           mitu_head_id: number | null;

@@ -4,7 +4,7 @@ import { RfidsMasterDialogValues, RfidsMasterTableValues } from './types';
 
 /*  */
 export const emptyRfid: RfidsMasterDialogValues = {
-  elNum: 0,
+  elNum: null,
   delFlg: false,
   shozokuId: 0,
   mem: '',
@@ -22,7 +22,7 @@ export const formItems: FormItemsType[] = [
   {
     label: 'EL No.',
     exsample: '',
-    constraints: '1以上の整数',
+    constraints: '整数',
   },
   {
     label: '入庫拠点',

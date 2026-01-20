@@ -228,6 +228,7 @@ export const QuotationListTable = ({
                   <TableCell>見積件名</TableCell>
                   <TableCell>見積相手</TableCell>
                   <TableCell>公演名</TableCell>
+                  <TableCell>公演場所</TableCell>
                   <TableCell>見積日</TableCell>
                   <TableCell>入力者</TableCell>
                 </TableRow>
@@ -308,6 +309,11 @@ export const QuotationListTable = ({
                       <TableCell>
                         <LightTooltipWithText variant={'body2'} maxWidth={200}>
                           {quotation.koenNam}
+                        </LightTooltipWithText>
+                      </TableCell>
+                      <TableCell>
+                        <LightTooltipWithText variant={'body2'} maxWidth={200}>
+                          {quotation.koenbashoNam}
                         </LightTooltipWithText>
                       </TableCell>
                       <TableCell sx={{ whiteSpace: 'nowrap' }}>{quotation.mituDat}</TableCell>
