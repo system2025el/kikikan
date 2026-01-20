@@ -39,7 +39,7 @@
     "react-hook-form": "^7.56.4",
     "react-hook-form-mui": "^7.6.1",
     "rsuite": "^5.80.0",
-    "supabase": "^2.66.0",
+    "supabase": "^2.72.8",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
     "zod": "^3.25.51",
     "zustand": "^5.0.6"

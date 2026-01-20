@@ -209,6 +209,7 @@ export const selectStockKizai = async (bumonId: number) => {
       .eq('bumon_id', bumonId)
       .eq('del_flg', 0)
       .eq('dsp_flg', 1)
+      .order('kizai_grp_cod')
       .order('dsp_ord_num');
   } catch (e) {
     throw e;

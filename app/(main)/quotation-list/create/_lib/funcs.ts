@@ -52,7 +52,7 @@ export const addQuot = async (data: QuotHeadValues, user: string): Promise<numbe
     await connection.query('BEGIN');
     // 新見積ヘッドID
     const newMituHeadId = await connection.query(`
-       SELECT coalesce(max(mitu_head_id),0) + 1 as newid FROM ${SCHEMA}.t_mitu_head
+       SELECT coalesce(max(mitu_head_id),109999) + 1 as newid FROM ${SCHEMA}.t_mitu_head WHERE mitu_head_id > 109999
       `);
     const kokyakuId = await connection.query(
       `SELECT kokyaku_id from ${SCHEMA}.m_kokyaku WHERE kokyaku_nam = '${data.kokyaku}'`
