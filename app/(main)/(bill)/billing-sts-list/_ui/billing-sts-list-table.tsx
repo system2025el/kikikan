@@ -51,7 +51,7 @@ export const BillingStsListTable = ({
   isLoading,
   page,
   //kokyakuId,
-  tantouNam,
+  //tantouNam,
   billSts,
   isFirst,
   custs,
@@ -61,7 +61,7 @@ export const BillingStsListTable = ({
   isLoading: boolean;
   page: number;
   //kokyakuId: number;
-  tantouNam: string | null;
+  //tantouNam: string | null;
   billSts: BillingStsTableValues[];
   isFirst: boolean;
   custs: SelectTypes[];

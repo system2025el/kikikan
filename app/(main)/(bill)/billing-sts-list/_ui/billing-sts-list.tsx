@@ -57,7 +57,7 @@ export const BillingStsList = () => {
 
   // const kokyakuId = getValues('kokyaku');
   //const kokyakuId = useWatch({ control, name: 'kokyaku' });
-  const tantou = useWatch({ control, name: 'kokyakuTantoNam' });
+  //const tantou = useWatch({ control, name: 'kokyakuTantoNam' });
 
   /* method --------------------------------------------------------------- */
   /* 検索ボタンを押したときの処理 */
@@ -233,7 +233,7 @@ export const BillingStsList = () => {
           page={page}
           custs={custs}
           //kokyakuId={Number(kokyakuId)}
-          tantouNam={tantou}
+          //tantouNam={tantou}
           billSts={billSts}
           isFirst={isFirst}
           setPage={setPage}
