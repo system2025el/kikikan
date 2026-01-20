@@ -60,7 +60,7 @@ export const getFilteredBills = async (
       str: null,
       end: null,
     },
-    kokyaku: '未選択',
+    kokyaku: '',
     seikyuHeadNam: null,
   }
 ): Promise<BillsListTableValues[]> => {

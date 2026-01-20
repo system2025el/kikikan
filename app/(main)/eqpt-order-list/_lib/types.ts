@@ -30,7 +30,8 @@ export type EqptOrderSearchValues = {
   radio: 'shuko' | 'nyuko';
   juchuId?: number | null;
   headNam?: string | null;
-  kokyaku?: number | null;
+  //kokyaku?: number | null;
+  kokyaku?: string | null;
   koenNam?: string | null;
   koenbashoNam?: string | null;
   listSort: { sort: string; order: string };

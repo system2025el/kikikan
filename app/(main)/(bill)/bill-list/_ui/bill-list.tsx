@@ -1,7 +1,19 @@
 'use client';
 
 import SearchIcon from '@mui/icons-material/Search';
-import { Box, Button, Container, Divider, Grid2, MenuItem, Paper, Select, TextField, Typography } from '@mui/material';
+import {
+  Autocomplete,
+  Box,
+  Button,
+  Container,
+  Divider,
+  Grid2,
+  MenuItem,
+  Paper,
+  Select,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { grey } from '@mui/material/colors';
 import { SetStateAction, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -46,7 +58,7 @@ export const BillList = () => {
         str: null,
         end: null,
       },
-      kokyaku: '未選択',
+      kokyaku: '',
       seikyuHeadNam: null,
     },
   });
@@ -218,11 +230,34 @@ export const BillList = () => {
             </Grid2>
 
             <Grid2 container sx={styles.container}>
-              <Grid2 display={'flex'} size={'grow'} alignItems={'baseline'}>
+              <Grid2 display={'flex'} size={'grow'} alignItems={'center'}>
                 <Typography noWrap mr={11}>
                   相手
                 </Typography>
                 <Controller
+                  name="kokyaku"
+                  control={control}
+                  render={({ field }) => (
+                    <Autocomplete
+                      {...field}
+                      getOptionKey={(option) => (typeof option === 'string' ? option : option.id)}
+                      onChange={(_, value) => {
+                        const label = typeof value === 'string' ? value : (value?.label ?? '');
+                        field.onChange(label);
+                      }}
+                      // onInputChange={(_, newInputValue) => {
+                      //   field.onChange(newInputValue);
+                      // }}
+                      freeSolo
+                      autoSelect
+                      sx={{ width: 300 }}
+                      renderInput={(params) => <TextField {...params} />}
+                      options={options.custs ?? []}
+                      getOptionLabel={(option) => (typeof option === 'string' ? option : option.label)}
+                    />
+                  )}
+                />
+                {/* <Controller
                   name="kokyaku"
                   control={control}
                   render={({ field }) => (
@@ -238,7 +273,7 @@ export const BillList = () => {
                       ))}
                     </Select>
                   )}
-                />
+                /> */}
               </Grid2>
               <Grid2 alignSelf={'end'}>
                 <Button type="submit" loading={isLoading}>

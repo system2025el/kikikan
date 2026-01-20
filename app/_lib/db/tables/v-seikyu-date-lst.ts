@@ -1,6 +1,7 @@
 'use server';
 
 import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
+import { escapeLikeString } from '@/app/(main)/_lib/escape-string';
 import { BillingStsSearchValues } from '@/app/(main)/(bill)/billing-sts-list/_lib/types';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 
@@ -17,8 +18,12 @@ export const selectFilteredBillingSituations = async (queries: BillingStsSearchV
 
   const builder = supabase.schema(SCHEMA).from('v_seikyu_date_lst').select('*').eq('shuko_fix_flg', 1);
 
-  if (kokyaku && kokyaku > 0) {
-    builder.eq('kokyaku_id', kokyaku ?? FAKE_NEW_ID);
+  // if (kokyaku && kokyaku > 0) {
+  //   builder.eq('kokyaku_id', kokyaku ?? FAKE_NEW_ID);
+  // }
+  if (kokyaku && kokyaku.trim() !== '') {
+    const escapedKokyaku = escapeLikeString(kokyaku);
+    builder.ilike('kokyaku_nam', `%${escapedKokyaku}%`);
   }
   if (kokyakuTantoNam && kokyakuTantoNam.trim() !== '') {
     builder.eq('kokyaku_tanto_nam', kokyakuTantoNam);

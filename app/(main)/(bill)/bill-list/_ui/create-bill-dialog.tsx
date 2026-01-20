@@ -1,4 +1,14 @@
-import { Box, Button, Dialog, DialogActions, DialogTitle, Grid2, Typography } from '@mui/material';
+import {
+  Autocomplete,
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogTitle,
+  Grid2,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { CheckboxElement, SelectElement, TextFieldElement } from 'react-hook-form-mui';
@@ -10,34 +20,34 @@ import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { Loading } from '@/app/(main)/_ui/loading';
 
 export const CreateBillDialog = ({
-  kokyakuId,
-  tantouNam,
+  //kokyakuId,
+  //tantouNam,
   custs,
   open,
   setDialogOpen,
 }: {
-  kokyakuId: number;
-  tantouNam: string | null;
+  //kokyakuId: number;
+  //tantouNam: string | null;
   custs: SelectTypes[];
   open: boolean;
   setDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
   /* useForm ------------------------------------------------------------ */
-  const { control, handleSubmit, reset } = useForm<{
-    kokyaku: number;
+  const { control, handleSubmit, reset, getValues } = useForm<{
+    kokyaku: number | null;
     tantouNam: string | null;
     date: Date | null;
     showDetailFlg: boolean;
   }>({
     mode: 'onSubmit',
     reValidateMode: 'onChange',
-    defaultValues: { kokyaku: kokyakuId ?? undefined, tantouNam: tantouNam, showDetailFlg: false },
+    defaultValues: { kokyaku: /*kokyakuId ?? undefined*/ null, tantouNam: /*tantouNam*/ null, showDetailFlg: false },
   });
 
   /* methods ------------------------------------------------------------- */
   /* 自動生成押下時 */
   const onSubmit = async (data: {
-    kokyaku: number;
+    kokyaku: number | null;
     tantouNam: string | null;
     date: Date | null;
     showDetailFlg: boolean;
@@ -49,9 +59,9 @@ export const CreateBillDialog = ({
     reset();
   };
 
-  useEffect(() => {
-    reset({ kokyaku: kokyakuId ?? undefined, tantouNam: tantouNam, showDetailFlg: false });
-  }, [kokyakuId, tantouNam, reset]);
+  // useEffect(() => {
+  //   reset({ kokyaku: kokyakuId ?? undefined, tantouNam: tantouNam, showDetailFlg: false });
+  // }, [kokyakuId, tantouNam, reset]);
 
   return (
     <Dialog
@@ -71,15 +81,43 @@ export const CreateBillDialog = ({
       </DialogTitle>
       <form onSubmit={handleSubmit(onSubmit)}>
         <Grid2 container direction={'column'} px={4} pt={4} spacing={0.5} minWidth={300} minHeight={200}>
-          <Grid2 display={'flex'} alignItems={'baseline'}>
-            <Typography mr={9}>相手</Typography>
-            <SelectElement
+          <Grid2 display={'flex'} alignItems={'flex-start'}>
+            <Typography mr={9} mt={1}>
+              相手
+            </Typography>
+            <Controller
+              name="kokyaku"
+              control={control}
+              rules={{ required: '必須項目です。' }}
+              render={({ field, fieldState }) => (
+                <Autocomplete
+                  {...field}
+                  value={custs.find((c) => c.id === field.value) || null}
+                  onChange={(_, newValue) => {
+                    field.onChange(newValue ? newValue.id : null);
+                  }}
+                  sx={{ width: 300 }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      inputRef={field.ref}
+                      error={!!fieldState.error}
+                      helperText={fieldState.error?.message}
+                    />
+                  )}
+                  options={custs ?? []}
+                  getOptionKey={(option) => option.id ?? undefined}
+                  getOptionLabel={(option) => option.label ?? ''}
+                />
+              )}
+            />
+            {/* <SelectElement
               name="kokyaku"
               control={control}
               options={custs}
               sx={{ width: 400 }}
               rules={{ required: '必須項目です。', min: { value: 1, message: '選択してください' } }}
-            />
+            /> */}
           </Grid2>
           <Grid2 display={'flex'} alignItems={'baseline'}>
             <Typography mr={3}>相手担当者</Typography>
