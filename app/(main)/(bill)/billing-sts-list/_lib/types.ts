@@ -19,7 +19,8 @@ export type BillingStsTableValues = {
 };
 
 export type BillingStsSearchValues = {
-  kokyaku: number | null;
+  //kokyaku: number | null;
+  kokyaku: string | null;
   kokyakuTantoNam: string | null;
   sts: string[];
 };

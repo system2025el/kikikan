@@ -4,6 +4,7 @@ import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
 
+import { escapeLikeString } from '@/app/(main)/_lib/escape-string';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 import { EqptOrderSearchValues } from '@/app/(main)/eqpt-order-list/_lib/types';
 
@@ -130,19 +131,30 @@ export const selectFilteredKizaiHead = async ({
         );
         break;
       }
+      // case '3': {
+      //   // '昨日'
+      //   const startOfYesterday = dayjs().tz('Asia/Tokyo').subtract(1, 'day').startOf('day').toISOString();
+      //   const startOfToday = dayjs().tz('Asia/Tokyo').startOf('day').toISOString();
+      //   builder.or(
+      //     // yardが昨日の範囲内
+      //     `and(yard_${dateColumn}.gte.${startOfYesterday},yard_${dateColumn}.lt.${startOfToday}),` +
+      //       // kicsが昨日の範囲内
+      //       `and(kics_${dateColumn}.gte.${startOfYesterday},kics_${dateColumn}.lt.${startOfToday})`
+      //   );
+      // }
+      // case '4': {
+      //   // '今日'
+      //   const startOfToday = dayjs().tz('Asia/Tokyo').startOf('day').toISOString();
+      //   const startOfTomorrow = dayjs().tz('Asia/Tokyo').add(1, 'day').startOf('day').toISOString();
+      //   builder.or(
+      //     // yardが今日の範囲内
+      //     `and(yard_${dateColumn}.gte.${startOfToday},yard_${dateColumn}.lt.${startOfTomorrow}),` +
+      //       // kicsが今日の範囲内
+      //       `and(kics_${dateColumn}.gte.${startOfToday},kics_${dateColumn}.lt.${startOfTomorrow})`
+      //   );
+      //   break;
+      // }
       case '3': {
-        // '昨日'
-        const startOfYesterday = dayjs().tz('Asia/Tokyo').subtract(1, 'day').startOf('day').toISOString();
-        const startOfToday = dayjs().tz('Asia/Tokyo').startOf('day').toISOString();
-        builder.or(
-          // yardが昨日の範囲内
-          `and(yard_${dateColumn}.gte.${startOfYesterday},yard_${dateColumn}.lt.${startOfToday}),` +
-            // kicsが昨日の範囲内
-            `and(kics_${dateColumn}.gte.${startOfYesterday},kics_${dateColumn}.lt.${startOfToday})`
-        );
-        break;
-      }
-      case '4': {
         // '今日'
         const startOfToday = dayjs().tz('Asia/Tokyo').startOf('day').toISOString();
         const startOfTomorrow = dayjs().tz('Asia/Tokyo').add(1, 'day').startOf('day').toISOString();
@@ -152,6 +164,11 @@ export const selectFilteredKizaiHead = async ({
             // kicsが今日の範囲内
             `and(kics_${dateColumn}.gte.${startOfToday},kics_${dateColumn}.lt.${startOfTomorrow})`
         );
+        break;
+      }
+      case '4': {
+        const startOfToday = dayjs().tz('Asia/Tokyo').startOf('day').toISOString();
+        builder.or(`yard_${dateColumn}.gte.${startOfToday},kics_${dateColumn}.gte.${startOfToday}`);
         break;
       }
       case '5': {
@@ -216,9 +233,13 @@ export const selectFilteredKizaiHead = async ({
     builder.ilike('head_nam', `%${headNam}%`);
   }
   // 顧客が選択されていたら
-  if (kokyaku && kokyaku !== FAKE_NEW_ID) {
-    builder.eq('kokyaku_id', kokyaku);
+  if (kokyaku && kokyaku.trim() !== '') {
+    const escapedKokyaku = escapeLikeString(kokyaku);
+    builder.ilike('kokyaku_nam', `%${escapedKokyaku}%`);
   }
+  // if (kokyaku && kokyaku !== FAKE_NEW_ID) {
+  //   builder.eq('kokyaku_id', kokyaku);
+  // }
   // 公演名が入っていたら
   if (koenNam && koenNam.trim() !== '') {
     builder.ilike('koen_nam', `%${koenNam}%`);

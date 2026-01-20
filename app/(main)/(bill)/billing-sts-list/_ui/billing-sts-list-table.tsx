@@ -50,7 +50,7 @@ import { BillingStsTableValues } from '../_lib/types';
 export const BillingStsListTable = ({
   isLoading,
   page,
-  kokyakuId,
+  //kokyakuId,
   tantouNam,
   billSts,
   isFirst,
@@ -60,7 +60,7 @@ export const BillingStsListTable = ({
 }: {
   isLoading: boolean;
   page: number;
-  kokyakuId: number;
+  //kokyakuId: number;
   tantouNam: string | null;
   billSts: BillingStsTableValues[];
   isFirst: boolean;
@@ -103,12 +103,13 @@ export const BillingStsListTable = ({
             <Grid2>
               <Button
                 onClick={() => {
-                  if (!kokyakuId || kokyakuId === 0) {
-                    setSnackBarMessage('検索で請求相手を選択してください');
-                    setSnackBarOpen(true);
-                  } else {
-                    setCreateOpen(true);
-                  }
+                  // if (!kokyakuId || kokyakuId === 0) {
+                  //   setSnackBarMessage('検索で請求相手を選択してください');
+                  //   setSnackBarOpen(true);
+                  // } else {
+                  //   setCreateOpen(true);
+                  // }
+                  setCreateOpen(true);
                 }}
                 disabled={user?.permission.juchu === permission.juchu_ref}
               >
@@ -156,8 +157,8 @@ export const BillingStsListTable = ({
 
       <CreateBillDialog
         open={createOpen}
-        kokyakuId={kokyakuId}
-        tantouNam={tantouNam}
+        //kokyakuId={kokyakuId}
+        //tantouNam={tantouNam}
         setDialogOpen={setCreateOpen}
         custs={custs}
       />

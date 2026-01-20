@@ -1,7 +1,19 @@
 'use client';
 
 import SearchIcon from '@mui/icons-material/Search';
-import { Box, Button, Container, Divider, Grid2, MenuItem, Paper, Select, Typography } from '@mui/material';
+import {
+  Autocomplete,
+  Box,
+  Button,
+  Container,
+  Divider,
+  Grid2,
+  MenuItem,
+  Paper,
+  Select,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { grey } from '@mui/material/colors';
 import { useEffect, useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
@@ -40,11 +52,11 @@ export const BillingStsList = () => {
   const { control, reset, handleSubmit, getValues } = useForm<BillingStsSearchValues>({
     mode: 'onBlur',
     reValidateMode: 'onBlur',
-    defaultValues: { kokyaku: -100, kokyakuTantoNam: null, sts: ['1'] },
+    defaultValues: { kokyaku: '', kokyakuTantoNam: null, sts: ['1'] },
   });
 
   // const kokyakuId = getValues('kokyaku');
-  const kokyakuId = useWatch({ control, name: 'kokyaku' });
+  //const kokyakuId = useWatch({ control, name: 'kokyaku' });
   const tantou = useWatch({ control, name: 'kokyakuTantoNam' });
 
   /* method --------------------------------------------------------------- */
@@ -133,11 +145,34 @@ export const BillingStsList = () => {
             component={'form'}
             onSubmit={handleSubmit(onSubmit)}
           >
-            <Grid2 display={'flex'} alignItems={'baseline'}>
+            <Grid2 display={'flex'} alignItems={'center'}>
               <Typography noWrap mr={9}>
                 相手
               </Typography>
               <Controller
+                name="kokyaku"
+                control={control}
+                render={({ field }) => (
+                  <Autocomplete
+                    {...field}
+                    getOptionKey={(option) => (typeof option === 'string' ? option : option.id)}
+                    onChange={(_, value) => {
+                      const label = typeof value === 'string' ? value : (value?.label ?? '');
+                      field.onChange(label);
+                    }}
+                    // onInputChange={(_, newInputValue) => {
+                    //   field.onChange(newInputValue);
+                    // }}
+                    freeSolo
+                    autoSelect
+                    sx={{ width: 300 }}
+                    renderInput={(params) => <TextField {...params} />}
+                    options={custs ?? []}
+                    getOptionLabel={(option) => (typeof option === 'string' ? option : option.label)}
+                  />
+                )}
+              />
+              {/* <Controller
                 name="kokyaku"
                 control={control}
                 defaultValue={0}
@@ -154,7 +189,7 @@ export const BillingStsList = () => {
                     ))}
                   </Select>
                 )}
-              />
+              /> */}
             </Grid2>
             <Grid2 display={'flex'} alignItems={'baseline'}>
               <Typography noWrap mr={3}>
@@ -197,7 +232,7 @@ export const BillingStsList = () => {
           isLoading={isLoading}
           page={page}
           custs={custs}
-          kokyakuId={Number(kokyakuId)}
+          //kokyakuId={Number(kokyakuId)}
           tantouNam={tantou}
           billSts={billSts}
           isFirst={isFirst}

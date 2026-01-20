@@ -23,7 +23,7 @@ export const getFilteredOrderList = async (
   query: EqptOrderSearchValues = {
     radio: 'shuko',
     selectedDate: { value: '4', range: { from: null, to: null } },
-    kokyaku: FAKE_NEW_ID,
+    kokyaku: '',
     listSort: { sort: 'shuko', order: 'asc' },
   }
 ): Promise<EqptOrderListTableValues[]> => {

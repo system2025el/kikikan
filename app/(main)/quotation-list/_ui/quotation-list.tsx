@@ -224,6 +224,7 @@ export const QuotationList = () => {
                 render={({ field }) => (
                   <Autocomplete
                     {...field}
+                    getOptionKey={(option) => (typeof option === 'string' ? option : option.id)}
                     onChange={(_, value) => {
                       const label = typeof value === 'string' ? value : (value?.label ?? '');
                       field.onChange(label);
