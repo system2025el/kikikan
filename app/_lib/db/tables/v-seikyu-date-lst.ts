@@ -26,7 +26,8 @@ export const selectFilteredBillingSituations = async (queries: BillingStsSearchV
     builder.ilike('kokyaku_nam', `%${escapedKokyaku}%`);
   }
   if (kokyakuTantoNam && kokyakuTantoNam.trim() !== '') {
-    builder.eq('kokyaku_tanto_nam', kokyakuTantoNam);
+    const escapedKokyakuTantoNam = escapeLikeString(kokyakuTantoNam);
+    builder.ilike('kokyaku_tanto_nam', `%${escapedKokyakuTantoNam}%`);
   }
   if (sts.length === 1 && sts[0] === '1') {
     builder.neq('seikyu_jokyo_total_sts_id', 9).neq('seikyu_jokyo_sts_id', 9);

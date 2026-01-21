@@ -44,8 +44,9 @@ export const selectFilteredBills = async (queries: BillSearchValues) => {
     query += ` AND kokyaku_nam ILIKE '%${escapedKokyaku}%'`;
   }
   // 請求書名
-  if (seikyuHeadNam) {
-    query += ` AND seikyu_head_nam ILIKE '%${seikyuHeadNam}%'`;
+  if (seikyuHeadNam && seikyuHeadNam.trim() !== '') {
+    const escapedSeikyuHeadNam = escapeLikeString(seikyuHeadNam);
+    query += ` AND seikyu_head_nam ILIKE '%${escapedSeikyuHeadNam}%'`;
   }
 
   // group by

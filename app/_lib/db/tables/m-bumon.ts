@@ -1,5 +1,6 @@
 'use server';
 
+import { escapeLikeString } from '@/app/(main)/_lib/escape-string';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 import { BumonsMasterDialogValues } from '@/app/(main)/(masters)/bumons-master/_lib/types';
 
@@ -37,7 +38,8 @@ export const selectFilteredBumons = async (queries: { q: string; d: number | nul
     .order('bumon_nam');
 
   if (queries.q && queries.q.trim() !== '') {
-    builder.ilike('bumon_nam', `%${queries.q}%`);
+    const escapedBumonNam = escapeLikeString(queries.q);
+    builder.ilike('bumon_nam', `%${escapedBumonNam}%`);
   }
   if (queries.d !== null && queries.d !== FAKE_NEW_ID) {
     builder.eq('dai_bumon_id', queries.d);

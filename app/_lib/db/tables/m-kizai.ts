@@ -2,6 +2,7 @@
 
 import { PoolClient } from 'pg';
 
+import { escapeLikeString } from '@/app/(main)/_lib/escape-string';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 import { fakeToNull } from '@/app/(main)/(masters)/_lib/value-converters';
 import { EqptsMasterDialogValues } from '@/app/(main)/(masters)/eqpt-master/_lib/types';
@@ -125,7 +126,8 @@ export const selectActiveEqpts = async (query: string) => {
   // queryチェック
   if (query && query.trim() !== '') {
     sqlQuery += ` AND k.kizai_nam ILIKE $${values.length + 1}`;
-    values.push(`%${query}%`);
+    const escapedQuery = escapeLikeString(query);
+    values.push(`%${escapedQuery}%`);
   }
   // ORDER BY
   sqlQuery += `

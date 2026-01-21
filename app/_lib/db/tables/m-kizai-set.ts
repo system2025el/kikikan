@@ -2,6 +2,8 @@
 
 import { PoolClient } from 'pg';
 
+import { escapeLikeString } from '@/app/(main)/_lib/escape-string';
+
 import pool from '../postgres';
 import { SCHEMA, supabase } from '../supabase';
 import { MKizaiSetDBValues } from '../types/m-kizai-set-type';
@@ -70,8 +72,9 @@ export const selectFilteredEqptSets = async (query: string) => {
   const values = [];
 
   if (query && query.trim() !== '') {
-    queryString += ` WHERE k.kizai_nam ILIKE '%$1%'`;
-    values.push(`%${query}%`);
+    queryString += ` WHERE k.kizai_nam ILIKE $1`;
+    const escapedQuery = escapeLikeString(query);
+    values.push(`%${escapedQuery}%`);
   }
   queryString += ` GROUP BY s.kizai_id, k.kizai_nam, s.del_flg`;
 

@@ -1,5 +1,6 @@
 'use server';
 
+import { escapeLikeString } from '@/app/(main)/_lib/escape-string';
 import { LocsMasterDialogValues } from '@/app/(main)/(masters)/locations-master/_lib/types';
 
 import pool from '../postgres';
@@ -37,8 +38,9 @@ export const selectFilteredLocs = async (query: string) => {
     .order('koenbasho_nam'); // 並び順
   // あいまい検索：公演場所名、かな、住所、電話番号、ファックス番号
   if (query && query.trim() !== '') {
+    const escapedQuery = escapeLikeString(query);
     builder.or(
-      `koenbasho_nam.ilike.%${query}%, kana.ilike.%${query}%, adr_shozai.ilike.%${query}%, adr_tatemono.ilike.%${query}%, adr_sonota.ilike.%${query}%, tel.ilike.%${query}%, fax.ilike.%${query}%`
+      `koenbasho_nam.ilike.%${escapedQuery}%, kana.ilike.%${escapedQuery}%, adr_shozai.ilike.%${escapedQuery}%, adr_tatemono.ilike.%${escapedQuery}%, adr_sonota.ilike.%${escapedQuery}%, tel.ilike.%${escapedQuery}%, fax.ilike.%${escapedQuery}%`
     );
   }
   try {
