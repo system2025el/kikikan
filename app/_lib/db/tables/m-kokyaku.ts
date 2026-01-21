@@ -1,5 +1,6 @@
 'use server';
 
+import { escapeLikeString } from '@/app/(main)/_lib/escape-string';
 import { CustomersMasterDialogValues } from '@/app/(main)/(masters)/customers-master/_lib/types';
 
 import pool from '../postgres';
@@ -56,8 +57,9 @@ export const selectFilteredCustomers = async (query: string) => {
 
   // queryが存在する場合のみあいまい検索、顧客名、顧客名かな、住所、電話番号、fax番号
   if (query && query.trim() !== '') {
+    const escapedQuery = escapeLikeString(query);
     builder.or(
-      `kokyaku_nam.ilike.%${query}%, kana.ilike.%${query}%, adr_shozai.ilike.%${query}%, adr_tatemono.ilike.%${query}%, adr_sonota.ilike.%${query}%, tel.ilike.%${query}%, fax.ilike.%${query}%`
+      `kokyaku_nam.ilike.%${escapedQuery}%, kana.ilike.%${escapedQuery}%, adr_shozai.ilike.%${escapedQuery}%, adr_tatemono.ilike.%${escapedQuery}%, adr_sonota.ilike.%${escapedQuery}%, tel.ilike.%${escapedQuery}%, fax.ilike.%${escapedQuery}%`
     );
   }
 

@@ -2,6 +2,7 @@
 
 import dayjs from 'dayjs';
 
+import { escapeLikeString } from '@/app/(main)/_lib/escape-string';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 import { OrderSearchValues } from '@/app/(main)/order-list/_lib/types';
 
@@ -28,7 +29,8 @@ export const selectFilteredEqpts = async (queries: {
     );
 
   if (queries.q && queries.q.trim() !== '') {
-    builder.ilike('kizai_nam', `%${queries.q}%`);
+    const escapedKizaiNam = escapeLikeString(queries.q);
+    builder.ilike('kizai_nam', `%${escapedKizaiNam}%`);
   }
   if (queries.b !== null && queries.b !== FAKE_NEW_ID) {
     builder.eq('bumon_id', queries.b);

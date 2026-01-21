@@ -230,7 +230,8 @@ export const selectFilteredKizaiHead = async ({
   }
   // 機材明細名が入っていたら
   if (headNam && headNam.trim() !== '') {
-    builder.ilike('head_nam', `%${headNam}%`);
+    const escapedHeadNam = escapeLikeString(headNam);
+    builder.ilike('head_nam', `%${escapedHeadNam}%`);
   }
   // 顧客が選択されていたら
   if (kokyaku && kokyaku.trim() !== '') {
@@ -242,11 +243,13 @@ export const selectFilteredKizaiHead = async ({
   // }
   // 公演名が入っていたら
   if (koenNam && koenNam.trim() !== '') {
-    builder.ilike('koen_nam', `%${koenNam}%`);
+    const escapedKoenNam = escapeLikeString(koenNam);
+    builder.ilike('koen_nam', `%${escapedKoenNam}%`);
   }
   // 公演場所が入っていたら
   if (koenbashoNam && koenbashoNam.trim() !== '') {
-    builder.ilike('koenbasho_nam', `%${koenbashoNam}%`);
+    const escapedKoenbashoNam = escapeLikeString(koenbashoNam);
+    builder.ilike('koenbasho_nam', `%${escapedKoenbashoNam}%`);
   }
 
   // ソート処理

@@ -1,5 +1,6 @@
 'use server';
 
+import { escapeLikeString } from '@/app/(main)/_lib/escape-string';
 import { DaibumonsMasterDialogValues } from '@/app/(main)/(masters)/daibumons-master/_lib/types';
 
 import pool from '../postgres';
@@ -36,7 +37,8 @@ export const selectFilteredDaibumons = async (query: string) => {
     .order('dai_bumon_nam'); // 並び順
 
   if (query && query.trim() !== '') {
-    builder.ilike('dai_bumon_nam', `%${query}%`);
+    const escapedQuery = escapeLikeString(query);
+    builder.ilike('dai_bumon_nam', `%${escapedQuery}%`);
   }
 
   try {

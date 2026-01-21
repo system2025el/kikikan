@@ -17,6 +17,7 @@ import { MituMeisai } from '@/app/_lib/db/types/t-mitu-meisai-type';
 import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 
+import { permission } from '../../_lib/permission';
 import { FAKE_NEW_ID } from '../../(masters)/_lib/constants';
 import { JuchuValues, QuotHeadValues, QuotMeisaiHeadValues, QuotSearchValues } from './types';
 
@@ -81,10 +82,12 @@ export const getUsersSelection = async () => {
       return [];
     }
     // 選択肢の型に成型する
-    const selectElements: SelectTypes[] = data.map((d) => ({
-      id: d.user_nam!,
-      label: d.user_nam,
-    }));
+    const selectElements: SelectTypes[] = data
+      .filter((d) => d.permission & permission.juchu_upd)
+      .map((d) => ({
+        id: d.user_nam!,
+        label: d.user_nam,
+      }));
     console.log('担当者が', selectElements.length, '件');
     return selectElements;
   } catch (e) {
