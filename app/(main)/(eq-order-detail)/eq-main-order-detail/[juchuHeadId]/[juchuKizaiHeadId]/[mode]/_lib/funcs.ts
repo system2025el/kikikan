@@ -1839,8 +1839,8 @@ export const getBumonsForEqptSelection = async () => {
       return [];
     }
     const selectElements = data.map((d, index) => ({
-      id: d.bumon_id,
-      label: d.bumon_nam,
+      id: d.bumon_id!,
+      label: d.bumon_nam ?? '',
       tblDspNum: index,
     }));
     console.log('部門が', selectElements.length, '件');
