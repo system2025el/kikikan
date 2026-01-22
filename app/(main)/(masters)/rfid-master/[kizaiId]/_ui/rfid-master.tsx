@@ -146,7 +146,7 @@ export const RfidMaster = ({ kizaiId }: { kizaiId: number }) => {
    */
   const handleClickAdapt = (tagList: string[], selectedSts: SelectTypes) => {
     console.log('タグリスト', tagList, 'ステータス', selectedSts, '最初のリスト', theRfids);
-    if (Number(selectedSts.id) < 100) {
+    if (Number(selectedSts.id) < 100 || Number(selectedSts.id) === 200) {
       const newList = theRfids
         ? theRfids.map((r) => {
             if (tagList.includes(r.rfidTagId)) {

@@ -2,7 +2,8 @@
 
 import { revalidatePath } from 'next/cache';
 
-import { insertNewBumon, selectFilteredBumons, selectOneBumon, upDateBumonDB } from '@/app/_lib/db/tables/m-bumon';
+import { insertNewBumon, selectOneBumon, upDateBumonDB } from '@/app/_lib/db/tables/m-bumon';
+import { selectFilteredBumons } from '@/app/_lib/db/tables/v_bumon_lst';
 
 import { FAKE_NEW_ID } from '../../_lib/constants';
 import { getDaibumonsSelection, getShukeibumonsSelection } from '../../_lib/funcs';
@@ -33,8 +34,8 @@ export const getFilteredBumons = async (
       return { data: [], options: options };
     }
     const filteredbumons: BumonsMasterTableValues[] = data.map((d, index) => ({
-      bumonId: d.bumon_id,
-      bumonNam: d.bumon_nam,
+      bumonId: d.bumon_id!,
+      bumonNam: d.bumon_nam!,
       mem: d.mem,
       tblDspId: index + 1,
       delFlg: Boolean(d.del_flg),

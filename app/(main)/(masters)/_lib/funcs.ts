@@ -2,7 +2,6 @@
 
 import pool from '@/app/_lib/db/postgres';
 import { SCHEMA, supabase } from '@/app/_lib/db/supabase';
-import { selectActiveBumons } from '@/app/_lib/db/tables/m-bumon';
 import { selectActiveDaibumons } from '@/app/_lib/db/tables/m-daibumon';
 import { selectBundledEqpts } from '@/app/_lib/db/tables/m-kizai';
 import { selectBundledEqptIds } from '@/app/_lib/db/tables/m-kizai-set';
@@ -10,6 +9,7 @@ import { selectActiveCustomers } from '@/app/_lib/db/tables/m-kokyaku';
 import { selectActiveSagyoSts } from '@/app/_lib/db/tables/m-sagyo-sts';
 import { selectActiveShozokus } from '@/app/_lib/db/tables/m-shozoku';
 import { selectActiveShukeibumons } from '@/app/_lib/db/tables/m-shukeibumon';
+import { selectActiveBumons } from '@/app/_lib/db/tables/v_bumon_lst';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 
 import { getSectionSelections, getSectionShortSelections } from '../sections-master/_lib/funcs';
@@ -84,8 +84,8 @@ export const getBumonsSelection = async () => {
     }
     // 選択肢の型に成型
     const selectElements: SelectTypes[] = data.map((d) => ({
-      id: d.bumon_id,
-      label: d.bumon_nam,
+      id: d.bumon_id!,
+      label: d.bumon_nam!,
     }));
     console.log('部門が', selectElements.length, '件');
     return selectElements;

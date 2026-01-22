@@ -2,8 +2,8 @@
 
 import { QueryResult } from 'pg';
 
-import { selectActiveBumons } from '@/app/_lib/db/tables/m-bumon';
 import { selectStockList } from '@/app/_lib/db/tables/stock-table';
+import { selectActiveBumons } from '@/app/_lib/db/tables/v_bumon_lst';
 import { selectStockKizai } from '@/app/_lib/db/tables/v-kizai-list';
 
 import { toJapanYMDString } from '../../_lib/date-conversion';
@@ -26,8 +26,8 @@ export const getBumonsData = async () => {
     }
 
     const bumons: Bumon[] = data.map((d) => ({
-      bumonId: d.bumon_id,
-      bumonNam: d.bumon_nam,
+      bumonId: d.bumon_id!,
+      bumonNam: d.bumon_nam!,
     }));
 
     return bumons;
