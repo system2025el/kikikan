@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 
 import pool from '@/app/_lib/db/postgres';
-import { selectActiveEqpts, selectActiveEqptsForSet } from '@/app/_lib/db/tables/m-kizai';
+import { selectActiveEqptsForSet } from '@/app/_lib/db/tables/m-kizai';
 import {
   delEqptSetListPg,
   insertNewEqptSet,
@@ -11,6 +11,7 @@ import {
   selectOneEqptSet,
   updateEqptSetDB,
 } from '@/app/_lib/db/tables/m-kizai-set';
+import { selectActiveEqpts } from '@/app/_lib/db/tables/v-kizai-list';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { EqptSelection } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
 

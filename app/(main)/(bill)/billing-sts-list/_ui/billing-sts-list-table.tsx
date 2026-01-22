@@ -401,9 +401,10 @@ const BillingStsRow = ({ juchu, refetch }: { juchu: BillingStsTableValues; refet
                   <FormDateX
                     value={newDat}
                     onChange={(date) => {
-                      const m = meisaiToUpd;
-                      const theDate = date! > m.nyukoDat ? m.nyukoDat : date! < m.shukoDat ? null : date!;
-                      setNewDat(theDate);
+                      // const m = meisaiToUpd;
+                      // const theDate = date! > m.nyukoDat ? m.nyukoDat : date! < m.shukoDat ? m.shukoDat : date!;
+                      // setNewDat(theDate);
+                      setNewDat(date);
                     }}
                     maxDate={meisaiToUpd.nyukoDat}
                     minDate={meisaiToUpd.shukoDat}

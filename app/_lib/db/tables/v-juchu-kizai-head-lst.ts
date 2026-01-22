@@ -167,6 +167,7 @@ export const selectFilteredKizaiHead = async ({
         break;
       }
       case '4': {
+        // '今日以降'
         const startOfToday = dayjs().tz('Asia/Tokyo').startOf('day').toISOString();
         builder.or(`yard_${dateColumn}.gte.${startOfToday},kics_${dateColumn}.gte.${startOfToday}`);
         break;

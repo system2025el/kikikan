@@ -21,6 +21,16 @@ export type BillingStsTableValues = {
 export type BillingStsSearchValues = {
   //kokyaku: number | null;
   kokyaku: string | null;
+  radioKokyaku: 'single' | 'multi';
+  unbilledCusts: string[];
+  selectedDate?: {
+    value: string;
+    range?: {
+      from: Date | null;
+      to: Date | null;
+    };
+  };
+  radio: 'shuko' | 'nyuko';
   kokyakuTantoNam: string | null;
   sts: string[];
 };

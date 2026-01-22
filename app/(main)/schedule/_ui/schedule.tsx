@@ -206,14 +206,16 @@ export const Schedule = () => {
                     sx={{
                       border: '1px solid black',
                       px: 1,
+                      whiteSpace: 'pre-wrap',
+                      wordBreak: 'break-all',
                       bgcolor: 'white',
                       color: 'black',
                       verticalAlign: 'top',
-                      maxHeight: 40.2,
-                      minHeight: 20.1,
-                      minWidth: 300,
-                      width: 300,
-                      maxWidth: 300,
+                      // maxHeight: 40.2,
+                      // minHeight: 20.1,
+                      // minWidth: 300,
+                      // width: 300,
+                      // maxWidth: 300,
                     }}
                     onClick={() =>
                       handleClickDateHead({
@@ -230,7 +232,7 @@ export const Schedule = () => {
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         display: '-webkit-box',
-                        WebkitLineClamp: 2,
+                        //WebkitLineClamp: 2,
                         WebkitBoxOrient: 'vertical',
                       }}
                       fontSize={'0.875rem'}
@@ -251,7 +253,9 @@ export const Schedule = () => {
                       border: '1px solid black',
                       borderBottom: '2px solid black',
                       px: 1,
-                      height: 20.1,
+                      whiteSpace: 'pre-wrap',
+                      wordBreak: 'break-all',
+                      //height: 20.1,
                       bgcolor: 'white',
                       color: 'black',
                     }}
@@ -264,9 +268,23 @@ export const Schedule = () => {
                       })
                     }
                   >
-                    <LightTooltipWithText maxWidth={295} variant="body2">
+                    <Box
+                      component="div"
+                      sx={{
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        display: '-webkit-box',
+                        //WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                      }}
+                      fontSize={'0.875rem'}
+                      fontWeight={'normal'}
+                    >
                       {date.tantoNam ?? ''}
-                    </LightTooltipWithText>
+                    </Box>
+                    {/* <LightTooltipWithText maxWidth={295} variant="body2">
+                    {date.tantoNam ?? ''}
+                    </LightTooltipWithText> */}
                   </TableCell>
                 ))}
             </TableRow>
