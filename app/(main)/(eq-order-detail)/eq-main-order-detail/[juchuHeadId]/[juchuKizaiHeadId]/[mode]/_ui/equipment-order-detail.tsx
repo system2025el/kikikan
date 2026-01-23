@@ -53,6 +53,7 @@ import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
 import { Loading, LoadingOverlay } from '@/app/(main)/_ui/loading';
 import { PermissionGuard } from '@/app/(main)/_ui/permission-guard';
 import {
+  getALLStockList,
   getDetailJuchuHead,
   getDic,
   getJuchuContainerMeisai,
@@ -951,26 +952,60 @@ const EquipmentOrderDetail = (props: {
     // 受注機材idリスト
     const ids = juchuKizaiMeisaiData.filter((d) => !d.delFlag).map((data) => data.kizaiId);
     // 機材在庫データ
-    const updatedEqStockData: StockTableValues[][] = [];
+    let updatedEqStockData: StockTableValues[][] = [];
     // id確認用セット
     const checkIds = new Set<number>();
-    if (ids && shukoDate) {
-      for (const id of ids) {
-        if (checkIds.has(id)) {
-          const stock = updatedEqStockData.find((d) => d[0].kizaiId === id);
-          updatedEqStockData.push(stock!);
-        } else {
-          checkIds.add(id);
-          const stock: StockTableValues[] = await getStockList(
-            juchuHeadId,
-            juchuKizaiHeadId,
-            id,
-            subDays(shukoDate, 1)
-          );
-          updatedEqStockData.push(stock);
+
+    const uniqueIds = Array.from(new Set(juchuKizaiMeisaiData.filter((d) => !d.delFlag).map((data) => data.kizaiId)));
+    // console.time();
+    // if (ids && shukoDate) {
+    //   for (const id of ids) {
+    //     if (checkIds.has(id)) {
+    //       const stock = updatedEqStockData.find((d) => d[0].kizaiId === id);
+    //       updatedEqStockData.push(stock!);
+    //     } else {
+    //       checkIds.add(id);
+    //       const stock: StockTableValues[] = await getStockList(
+    //         juchuHeadId,
+    //         juchuKizaiHeadId,
+    //         id,
+    //         subDays(shukoDate, 1)
+    //       );
+    //       updatedEqStockData.push(stock);
+    //     }
+    //   }
+    // }
+    // console.timeEnd();
+
+    console.time();
+    if (uniqueIds.length > 0 && shukoDate) {
+      // getStockList を「複数のIDを受け取れるように」修正し、一括取得する
+      const allStockData: StockTableValues[] = await getALLStockList(
+        juchuHeadId,
+        juchuKizaiHeadId,
+        uniqueIds, // 配列で渡す
+        subDays(shukoDate, 1)
+      );
+
+      // 取得したデータを元の ids の順番にマッピングする
+      const idToStockMap = new Map<number, StockTableValues[]>();
+      for (const row of allStockData) {
+        if (!idToStockMap.has(row.kizaiId)) {
+          idToStockMap.set(row.kizaiId, []);
         }
+        idToStockMap.get(row.kizaiId)!.push(row);
       }
+
+      updatedEqStockData = ids.map((id) => {
+        const stockArray = idToStockMap.get(id);
+        if (!stockArray) {
+          // データがない場合のフォールバック（空配列など）
+          return [];
+        }
+        return stockArray;
+      });
     }
+    console.timeEnd();
     return updatedEqStockData;
   };
 
