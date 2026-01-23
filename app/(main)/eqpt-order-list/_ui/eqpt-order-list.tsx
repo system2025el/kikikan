@@ -57,7 +57,7 @@ export const EqptOrderList = () => {
     defaultValues: {
       radio: 'shuko',
       selectedDate: { value: '4', range: { from: null, to: null } },
-      kokyaku: FAKE_NEW_ID,
+      kokyaku: '',
       koenbashoNam: '',
       listSort: { sort: 'shuko', order: 'asc' },
     },
@@ -68,7 +68,6 @@ export const EqptOrderList = () => {
   /* methods ---------------------------------------- */
   /** 検索押下時の処理 */
   const onSubmit = async (data: EqptOrderSearchValues) => {
-    console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
     setIsLoading(true);
     // 検索条件保持
     sessionStorage.setItem('orderListSearchParams', JSON.stringify(data));
@@ -110,7 +109,7 @@ export const EqptOrderList = () => {
       getList({
         radio: 'shuko',
         selectedDate: { value: '4', range: { from: null, to: null } },
-        kokyaku: FAKE_NEW_ID,
+        kokyaku: '',
         listSort: { sort: 'shuko', order: 'asc' },
       });
     }
@@ -205,6 +204,29 @@ export const EqptOrderList = () => {
                       name="kokyaku"
                       control={control}
                       render={({ field }) => (
+                        <Autocomplete
+                          {...field}
+                          getOptionKey={(option) => (typeof option === 'string' ? option : option.id)}
+                          onChange={(_, value) => {
+                            const label = typeof value === 'string' ? value : (value?.label ?? '');
+                            field.onChange(label);
+                          }}
+                          // onInputChange={(_, newInputValue) => {
+                          //   field.onChange(newInputValue);
+                          // }}
+                          freeSolo
+                          autoSelect
+                          sx={{ width: 300 }}
+                          renderInput={(params) => <TextField {...params} />}
+                          options={customers ?? []}
+                          getOptionLabel={(option) => (typeof option === 'string' ? option : option.label)}
+                        />
+                      )}
+                    />
+                    {/* <Controller
+                      name="kokyaku"
+                      control={control}
+                      render={({ field }) => (
                         <Select {...field} sx={{ width: 300 }}>
                           {[selectNone, ...(customers ?? [])].map((opt) => (
                             <MenuItem
@@ -217,7 +239,7 @@ export const EqptOrderList = () => {
                           ))}
                         </Select>
                       )}
-                    />
+                    /> */}
                   </Stack>
                 </Grid2>
                 <Grid2 container direction={'column'} size={'grow'}>

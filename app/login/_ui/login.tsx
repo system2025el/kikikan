@@ -29,7 +29,8 @@ const Login = () => {
 
   const onSubmit = async (data: UserValues) => {
     console.log(data);
-    const { error } = await login(data);
+    //const { error } = await login(data);
+    //const { error } = await supabase.auth.signInWithPassword({ email: data.email, password: data.password });
     if (error) {
       setError(`メールアドレスかパスワードがちがいます。${error}`);
     } else {
@@ -41,7 +42,7 @@ const Login = () => {
         permission: user.permission,
       };
       setUser(storeUser);
-      //router.refresh();
+      router.refresh();
       router.push('/dashboard');
     } // ログイン後のページへリダイレクト
 
@@ -72,18 +73,19 @@ const Login = () => {
   };
 
   useEffect(() => {
-    const hash = window.location.hash;
-    const params = new URLSearchParams(hash.slice(1)); // '#' を除いてパース！
-    const access_token = params.get('access_token');
-    const refresh_token = params.get('refresh_token');
-    if (access_token && refresh_token) {
-      setSession(access_token, refresh_token);
-    }
-    // const initializeAuth = async () => {
-    //   await handleLogout();
-    clearUser();
-    // };
-    // initializeAuth();
+    // const hash = window.location.hash;
+    // const params = new URLSearchParams(hash.slice(1)); // '#' を除いてパース！
+    // const access_token = params.get('access_token');
+    // const refresh_token = params.get('refresh_token');
+    // if (access_token && refresh_token) {
+    //   setSession(access_token, refresh_token);
+    // }
+    const initializeAuth = async () => {
+      //await handleLogout();
+      //await supabase.auth.signOut();
+      clearUser();
+    };
+    initializeAuth();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

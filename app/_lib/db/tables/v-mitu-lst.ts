@@ -1,6 +1,7 @@
 'use server';
 
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
+import { escapeLikeString } from '@/app/(main)/_lib/escape-string';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 import { QuotSearchValues } from '@/app/(main)/quotation-list/_lib/types';
 
@@ -20,7 +21,9 @@ export const selectFilteredQuot = async ({
   const builder = supabase
     .schema(SCHEMA)
     .from('v_mitu_lst')
-    .select(`mitu_head_id, juchu_head_id, sts_nam, mitu_head_nam, koen_nam, kokyaku_nam, mitu_dat, nyuryoku_user`)
+    .select(
+      `mitu_head_id, juchu_head_id, sts_nam, mitu_head_nam, koen_nam, koenbasho_nam, kokyaku_nam, mitu_dat, nyuryoku_user`
+    )
     .order('mitu_head_id', { ascending: false });
   // 見積番号あり
   if (mituId) {
@@ -36,11 +39,13 @@ export const selectFilteredQuot = async ({
   }
   // 見積件名あり
   if (mituHeadNam && mituHeadNam.trim() !== '') {
-    builder.ilike('mitu_head_nam', `%${mituHeadNam}%`);
+    const escapedMituHeadNam = escapeLikeString(mituHeadNam);
+    builder.ilike('mitu_head_nam', `%${escapedMituHeadNam}%`);
   }
   // 見積相手あり
   if (kokyaku && kokyaku.trim() !== '') {
-    builder.ilike('kokyaku_nam', `%${kokyaku}%`);
+    const escapedkokyaku = escapeLikeString(kokyaku);
+    builder.ilike('kokyaku_nam', `%${escapedkokyaku}%`);
   }
   // 入力者あり
   if (nyuryokuUser && nyuryokuUser.trim() !== '未選択') {

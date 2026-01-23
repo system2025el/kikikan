@@ -10,10 +10,9 @@ export const RfidsMasterDialogSchema = z.object({
     .refine((val) => /^[a-zA-Z0-9]+$/.test(val), {
       message: '半角英数字のみで入力してください',
     }),
-  elNum: z
-    .number({ message: '入力してください' })
-    .int({ message: validationMessages.int() })
-    .min(1, { message: '1以上の整数で入力してください' }),
+  elNum: z.number(/*{ message: '入力してください' }*/).nullish(),
+  // .int({ message: validationMessages.int() })
+  // .min(1, { message: '1以上の整数で入力してください' }),
   shozokuId: z.number({ message: '選択してください' }).min(1, { message: '選択してください' }),
   rfidKizaiSts: number(),
   mem: z

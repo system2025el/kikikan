@@ -2,6 +2,7 @@
 
 import { PoolClient } from 'pg';
 
+import { escapeLikeString } from '@/app/(main)/_lib/escape-string';
 import { UsersMasterDialogValues } from '@/app/(main)/(masters)/users-master/_lib/types';
 
 import pool from '../postgres';
@@ -17,7 +18,7 @@ export const selectActiveUsers = async () => {
     return await supabase
       .schema(SCHEMA)
       .from('m_user')
-      .select('user_nam, shain_cod')
+      .select('user_nam, shain_cod, permission')
       .neq('del_flg', 1)
       .order('user_nam');
   } catch (e) {
@@ -44,7 +45,8 @@ export const SelectFilteredUsers = async (searchQuery: string) => {
   // 検索条件あれば
   if (searchQuery && searchQuery.trim() !== '') {
     query += `WHERE m.user_nam ILIKE $1`;
-    params.push(`%${searchQuery}%`);
+    const escapedQuery = escapeLikeString(searchQuery);
+    params.push(`%${escapedQuery}%`);
   }
   query += ` ORDER BY m.user_nam`;
 

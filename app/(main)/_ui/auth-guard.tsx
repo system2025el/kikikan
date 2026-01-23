@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
+import { supabase } from '@/app/_lib/db/supabase';
 import { useUserStore } from '@/app/_lib/stores/usestore';
 
 import { sessionCheck } from '../_lib/funcs';
@@ -63,9 +64,13 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      // const session = await sessionCheck();
-      // console.log('セッション情報 : ', session);
-      // if (!session) {
+      //const session = await sessionCheck();
+
+      // const {
+      //   data: { user: sessionUser },
+      // } = await supabase.auth.getUser();
+      // console.log('セッション情報 : ', sessionUser);
+      // if (!sessionUser) {
       //   console.log('セッション情報なし');
       //   router.replace('/login');
       // }

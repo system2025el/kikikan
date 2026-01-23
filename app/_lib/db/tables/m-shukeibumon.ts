@@ -1,5 +1,6 @@
 'use server';
 
+import { escapeLikeString } from '@/app/(main)/_lib/escape-string';
 import { ShukeibumonsMasterDialogValues } from '@/app/(main)/(masters)/shukeibumons-master/_lib/types';
 
 import pool from '../postgres';
@@ -36,7 +37,8 @@ export const selectFilteredShukeibumons = async (query: string) => {
     .order('shukei_bumon_nam'); // 並び順
 
   if (query && query.trim() !== '') {
-    builder.ilike('shukei_bumon_nam', `%${query}%`);
+    const escapedQuery = escapeLikeString(query);
+    builder.ilike('shukei_bumon_nam', `%${escapedQuery}%`);
   }
 
   try {

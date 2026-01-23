@@ -1,22 +1,41 @@
 'use client';
 
 import SearchIcon from '@mui/icons-material/Search';
-import { Box, Button, Container, Divider, Grid2, MenuItem, Paper, Select, Typography } from '@mui/material';
+import {
+  Autocomplete,
+  Box,
+  Button,
+  Chip,
+  Container,
+  Dialog,
+  Divider,
+  Grid2,
+  MenuItem,
+  Paper,
+  Select,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { grey } from '@mui/material/colors';
 import { useEffect, useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
-import { CheckboxButtonGroup, SelectElement, TextFieldElement } from 'react-hook-form-mui';
+import { CheckboxButtonGroup, RadioButtonGroup, SelectElement, TextFieldElement } from 'react-hook-form-mui';
+import { set } from 'zod';
 
 import { permission } from '@/app/(main)/_lib/permission';
+import { FormDateX } from '@/app/(main)/_ui/date';
 import { selectNone, SelectTypes } from '@/app/(main)/_ui/form-box';
 import { LoadingOverlay } from '@/app/(main)/_ui/loading';
 import { PermissionGuard } from '@/app/(main)/_ui/permission-guard';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 import { getCustomerSelection } from '@/app/(main)/(masters)/_lib/funcs';
 
+import { radioData } from '../_lib/datas';
 import { getFilteredBillingSituations } from '../_lib/funcs';
 import { BillingStsSearchValues, BillingStsTableValues } from '../_lib/types';
 import { BillingStsListTable } from './billing-sts-list-table';
+import { UnbilledCustsDialog } from './unbilled-Custs-dialog';
 
 /**
  * 受注請求状況一覧画面
@@ -35,17 +54,31 @@ export const BillingStsList = () => {
   const [isFirst, setIsFirst] = useState<boolean>(true);
   /** 顧客選択肢 */
   const [custs, setCusts] = useState<SelectTypes[]>([]);
+  // /** 未請求顧客 */
+  // const [unbilledCusts, setUnbilledCusts] = useState<string[]>([]);
+  /** 未請求顧客ダイアログ開閉 */
+  const [unbilledCustsDialog, setUnbilledCustsDialog] = useState<boolean>(false);
 
   /* useForm --------------------------------------------------------------- */
-  const { control, reset, handleSubmit, getValues } = useForm<BillingStsSearchValues>({
+  const { control, reset, handleSubmit, getValues, setValue, watch } = useForm<BillingStsSearchValues>({
     mode: 'onBlur',
     reValidateMode: 'onBlur',
-    defaultValues: { kokyaku: -100, kokyakuTantoNam: null, sts: ['1'] },
+    defaultValues: {
+      kokyaku: '',
+      radioKokyaku: 'single',
+      unbilledCusts: [],
+      radio: 'shuko',
+      selectedDate: { value: '4', range: { from: null, to: null } },
+      kokyakuTantoNam: null,
+      sts: ['1'],
+    },
   });
 
+  const selectedDateValue = watch('selectedDate.value');
+  const selectRadioKokyakuValue = watch('radioKokyaku');
   // const kokyakuId = getValues('kokyaku');
-  const kokyakuId = useWatch({ control, name: 'kokyaku' });
-  const tantou = useWatch({ control, name: 'kokyakuTantoNam' });
+  //const kokyakuId = useWatch({ control, name: 'kokyaku' });
+  //const tantou = useWatch({ control, name: 'kokyakuTantoNam' });
 
   /* method --------------------------------------------------------------- */
   /* 検索ボタンを押したときの処理 */
@@ -66,6 +99,16 @@ export const BillingStsList = () => {
     const theSts = await getFilteredBillingSituations(getValues());
     setBillSts(theSts);
     setIsLoading(false);
+  };
+
+  const handleCloseUnbilledCustsDialog = async () => {
+    setUnbilledCustsDialog(false);
+  };
+
+  const handleConfirmed = (selectedCusts: string[]) => {
+    console.log(selectedCusts);
+    setValue('unbilledCusts', selectedCusts);
+    setUnbilledCustsDialog(false);
   };
 
   /** useEffect ------------------------------------------------------------- */
@@ -133,11 +176,49 @@ export const BillingStsList = () => {
             component={'form'}
             onSubmit={handleSubmit(onSubmit)}
           >
-            <Grid2 display={'flex'} alignItems={'baseline'}>
-              <Typography noWrap mr={9}>
+            <Grid2 display={'flex'} alignItems={'center'}>
+              <RadioButtonGroup
+                control={control}
+                name="radioKokyaku"
+                options={[
+                  { id: 'single', label: '相手' },
+                  { id: 'multi', label: '複数' },
+                ]}
+                row
+              />
+              {/* <Typography noWrap mr={9}>
                 相手
-              </Typography>
-              <Controller
+              </Typography> */}
+              {selectRadioKokyakuValue === 'single' ? (
+                <Controller
+                  name="kokyaku"
+                  control={control}
+                  render={({ field }) => (
+                    <Autocomplete
+                      {...field}
+                      getOptionKey={(option) => (typeof option === 'string' ? option : option.id)}
+                      onChange={(_, value) => {
+                        const label = typeof value === 'string' ? value : (value?.label ?? '');
+                        field.onChange(label);
+                      }}
+                      // onInputChange={(_, newInputValue) => {
+                      //   field.onChange(newInputValue);
+                      // }}
+                      freeSolo
+                      autoSelect
+                      sx={{ width: 300 }}
+                      renderInput={(params) => <TextField {...params} />}
+                      options={custs ?? []}
+                      getOptionLabel={(option) => (typeof option === 'string' ? option : option.label)}
+                    />
+                  )}
+                />
+              ) : (
+                <Button onClick={() => setUnbilledCustsDialog(true)}>未請求顧客</Button>
+              )}
+              <TextFieldElement name="unbilledCusts" control={control} type="hidden" sx={{ display: 'none' }} />
+
+              {/* <Controller
                 name="kokyaku"
                 control={control}
                 defaultValue={0}
@@ -154,7 +235,7 @@ export const BillingStsList = () => {
                     ))}
                   </Select>
                 )}
-              />
+              /> */}
             </Grid2>
             <Grid2 display={'flex'} alignItems={'baseline'}>
               <Typography noWrap mr={3}>
@@ -162,7 +243,50 @@ export const BillingStsList = () => {
               </Typography>
               <TextFieldElement name="kokyakuTantoNam" control={control} type="text" sx={{ width: 200 }} />
             </Grid2>
-
+            <Grid2 container spacing={1}>
+              <SelectElement
+                name="radio"
+                label="検索条件"
+                control={control}
+                options={[
+                  { id: 'shuko', label: '出庫日が' },
+                  { id: 'nyuko', label: '入庫日が' },
+                ]}
+                sx={{ bgcolor: 'white', minWidth: 150 }}
+              />
+              <Grid2 container sx={{ display: 'flex', alignItems: 'center' }} ml={1}>
+                <RadioButtonGroup control={control} name="selectedDate.value" options={radioData} row />
+                {selectedDateValue === '7' && (
+                  <Stack direction="row" spacing={2} alignItems="center">
+                    <Controller
+                      control={control}
+                      name="selectedDate.range.from"
+                      render={({ field, fieldState: { error } }) => (
+                        <FormDateX
+                          value={field.value}
+                          onChange={field.onChange}
+                          error={!!error}
+                          helperText={error?.message}
+                        />
+                      )}
+                    />
+                    <span>～</span>
+                    <Controller
+                      control={control}
+                      name="selectedDate.range.to"
+                      render={({ field, fieldState: { error } }) => (
+                        <FormDateX
+                          value={field.value}
+                          onChange={field.onChange}
+                          error={!!error}
+                          helperText={error?.message}
+                        />
+                      )}
+                    />
+                  </Stack>
+                )}
+              </Grid2>
+            </Grid2>
             <Grid2 size={12} display={'flex'} alignItems={'baseline'}>
               <Grid2 container size={'grow'} alignItems={'baseline'}>
                 <Typography noWrap mr={5}>
@@ -197,14 +321,21 @@ export const BillingStsList = () => {
           isLoading={isLoading}
           page={page}
           custs={custs}
-          kokyakuId={Number(kokyakuId)}
-          tantouNam={tantou}
+          //kokyakuId={Number(kokyakuId)}
+          //tantouNam={tantou}
           billSts={billSts}
           isFirst={isFirst}
           setPage={setPage}
           refetch={refetch}
         />
       </Container>
+      <Dialog open={unbilledCustsDialog}>
+        <UnbilledCustsDialog
+          unbilledCusts={getValues('unbilledCusts')}
+          handleConfirmed={handleConfirmed}
+          onClose={handleCloseUnbilledCustsDialog}
+        />
+      </Dialog>
     </PermissionGuard>
   );
 };

@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 
 import { upsertSeikyuDat } from '@/app/_lib/db/tables/t-seikyu-date-juchu-kizai';
-import { selectFilteredBillingSituations } from '@/app/_lib/db/tables/v-seikyu-date-lst';
+import { selectFilteredBillingSituations, selectUnbilledCusts } from '@/app/_lib/db/tables/v-seikyu-date-lst';
 import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 
@@ -15,7 +15,15 @@ import { BillingStsSearchValues, BillingStsTableValues } from './types';
  * @returns 受注請求状況一覧テーブルに表示する配列
  */
 export const getFilteredBillingSituations = async (
-  queries: BillingStsSearchValues
+  queries: BillingStsSearchValues = {
+    kokyaku: '',
+    radioKokyaku: 'single',
+    unbilledCusts: [],
+    radio: 'shuko',
+    selectedDate: { value: '4', range: { from: null, to: null } },
+    kokyakuTantoNam: null,
+    sts: ['1'],
+  }
 ): Promise<BillingStsTableValues[]> => {
   if (!queries.sts.includes('1') && !queries.sts.includes('2')) {
     return []; // 空配列を返す
@@ -83,6 +91,25 @@ export const changeSeikyuDat = async (
     await revalidatePath('/billing-sts-list');
   } catch (e) {
     console.error(e);
+    throw e;
+  }
+};
+
+export const getUnbilledCusts = async (query: string) => {
+  try {
+    const { data, error } = await selectUnbilledCusts(query);
+    if (error) {
+      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
+      throw error;
+    }
+    if (!data || data.length === 0) {
+      return [];
+    }
+
+    const uniqueCusts = [...new Set(data.map((d) => d.kokyaku_nam ?? ''))];
+
+    return uniqueCusts;
+  } catch (e) {
     throw e;
   }
 };

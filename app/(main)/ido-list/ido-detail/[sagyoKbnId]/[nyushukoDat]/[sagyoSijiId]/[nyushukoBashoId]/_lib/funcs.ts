@@ -4,13 +4,13 @@ import { revalidatePath } from 'next/cache';
 import { PoolClient } from 'pg';
 
 import pool, { refreshVRfid } from '@/app/_lib/db/postgres';
-import { selectActiveBumons } from '@/app/_lib/db/tables/m-bumon';
-import { selectActiveEqpts, selectBundledEqpts } from '@/app/_lib/db/tables/m-kizai';
+import { selectBundledEqpts } from '@/app/_lib/db/tables/m-kizai';
 import { selectBundledEqptIds } from '@/app/_lib/db/tables/m-kizai-set';
 import { deleteIdoDen, insertIdoDen, selectIdoDenMaxId, updateIdoDen } from '@/app/_lib/db/tables/t-ido-den';
 import { deleteIdoFix, insertIdoFix, selectIdoFix, selectIdoFixMaxId } from '@/app/_lib/db/tables/t-ido-fix';
+import { selectActiveBumons } from '@/app/_lib/db/tables/v_bumon_lst';
 import { selectIdoDen } from '@/app/_lib/db/tables/v-ido-den3-lst';
-import { selectChosenIdoEqptsDetails } from '@/app/_lib/db/tables/v-kizai-list';
+import { selectActiveEqpts, selectChosenIdoEqptsDetails } from '@/app/_lib/db/tables/v-kizai-list';
 import { IdoDen } from '@/app/_lib/db/types/t-ido-den-type';
 import { IdoFix } from '@/app/_lib/db/types/t-ido-fix-type';
 
@@ -357,8 +357,8 @@ export const getIdoBumonsForEqptSelection = async () => {
       return [];
     }
     const selectElements = data.map((d, index) => ({
-      id: d.bumon_id,
-      label: d.bumon_nam,
+      id: d.bumon_id!,
+      label: d.bumon_nam!,
       tblDspNum: index,
     }));
     console.log('部門が', selectElements.length, '件');

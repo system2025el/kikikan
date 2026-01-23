@@ -219,7 +219,7 @@ export const EqMasterDialog = ({
               </FormBox>
               <FormBox formItem={formItems[2]}>
                 <TextField
-                  value={kizaiQty.ng ? String(kizaiQty.ng ?? 0) : ''}
+                  value={kizaiQty.ng ? String(kizaiQty.ng ?? 0) : 0}
                   disabled
                   sx={{
                     '& .MuiInputBase-input': {
@@ -234,7 +234,7 @@ export const EqMasterDialog = ({
               </FormBox>
               <FormBox formItem={formItems[3]}>
                 <TextField
-                  value={kizaiQty.yuko ? String(kizaiQty.yuko ?? 0) : ''}
+                  value={kizaiQty.yuko ? String(kizaiQty.yuko ?? 0) : 0}
                   disabled
                   sx={{
                     '& .MuiInputBase-input': {

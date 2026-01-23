@@ -92,12 +92,12 @@ export const TantoDialog = ({
         mx={4}
       >
         <Grid2 display={'flex'} alignItems={'center'}>
-          <Typography mr={5}>日直</Typography>
-          <TextFieldElement name="tantoNam" control={control} fullWidth />
-        </Grid2>
-        <Grid2 display={'flex'} alignItems={'center'}>
           <Typography mr={5}>メモ</Typography>
           <TextFieldElement name="mem" control={control} multiline fullWidth />
+        </Grid2>
+        <Grid2 display={'flex'} alignItems={'center'}>
+          <Typography mr={5}>日直</Typography>
+          <TextFieldElement name="tantoNam" control={control} multiline fullWidth />
         </Grid2>
         <Grid2 display={'flex'} alignItems={'center'}>
           <Typography mr={1}>祝日フラグ</Typography>

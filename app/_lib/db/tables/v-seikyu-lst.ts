@@ -1,6 +1,7 @@
 'use server';
 
 import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
+import { escapeLikeString } from '@/app/(main)/_lib/escape-string';
 import { BillSearchValues } from '@/app/(main)/(bill)/bill-list/_lib/types';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 
@@ -38,12 +39,14 @@ export const selectFilteredBills = async (queries: BillSearchValues) => {
     }
   }
   // 請求相手名
-  if (kokyaku && kokyaku.trim() !== '' && kokyaku !== '未選択') {
-    query += ` AND kokyaku_nam ILIKE '${kokyaku}'`;
+  if (kokyaku && kokyaku.trim() !== '' /*&& kokyaku !== '未選択'*/) {
+    const escapedKokyaku = escapeLikeString(kokyaku);
+    query += ` AND kokyaku_nam ILIKE '%${escapedKokyaku}%'`;
   }
   // 請求書名
-  if (seikyuHeadNam) {
-    query += ` AND seikyu_head_nam ILIKE '%${seikyuHeadNam}%'`;
+  if (seikyuHeadNam && seikyuHeadNam.trim() !== '') {
+    const escapedSeikyuHeadNam = escapeLikeString(seikyuHeadNam);
+    query += ` AND seikyu_head_nam ILIKE '%${escapedSeikyuHeadNam}%'`;
   }
 
   // group by

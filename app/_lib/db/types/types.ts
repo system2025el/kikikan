@@ -2490,6 +2490,22 @@ export type Database = {
       };
     };
     Views: {
+      v_bumon_lst: {
+        Row: {
+          bumon_id: number | null;
+          bumon_nam: string | null;
+          dai_bumon_id: number | null;
+          del_flg: number | null;
+          kizai_grp_cod: number | null;
+          kizai_id_qty: number | null;
+          kizai_ng_qty: number | null;
+          kizai_ok_qty: number | null;
+          kizai_qty: number | null;
+          mem: string | null;
+          shukei_bumon_id: number | null;
+        };
+        Relationships: [];
+      };
       v_chk_oya_juchu_kizai: {
         Row: {
           juchu_head_id: number | null;
@@ -3366,6 +3382,7 @@ export type Database = {
         Row: {
           juchu_head_id: number | null;
           koen_nam: string | null;
+          koenbasho_nam: string | null;
           kokyaku_nam: string | null;
           mitu_dat: string | null;
           mitu_head_id: number | null;

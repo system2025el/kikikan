@@ -62,7 +62,7 @@ export const EqTable = (props: EqTableProps) => {
                 <Button
                   variant="text"
                   onClick={() => window.open(`/loan-situation/${row.kizaiId}`)}
-                  sx={{ p: 0, m: 0, justifyContent: 'start', height: 20 }}
+                  sx={{ p: 0, m: 0, justifyContent: 'start', height: 20, textTransform: 'none' }}
                 >
                   {row.kizaiNam}
                 </Button>

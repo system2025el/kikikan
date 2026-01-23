@@ -11,7 +11,8 @@ import {
   updIsshikiDelFlgDB,
 } from '@/app/_lib/db/tables/m-issiki';
 import { delIsshikiSet, insertNewIsshikiSetList, updIsshikiSetDB } from '@/app/_lib/db/tables/m-issiki-set';
-import { checkExIsshiki, selectActiveEqpts } from '@/app/_lib/db/tables/m-kizai';
+import { checkExIsshiki } from '@/app/_lib/db/tables/m-kizai';
+import { selectActiveEqpts } from '@/app/_lib/db/tables/v-kizai-list';
 import { MIsshikiSetDBValues } from '@/app/_lib/db/types/m-issiki-set-type';
 import { MIsshikiDBValues } from '@/app/_lib/db/types/m-issiki-type';
 import { EqptSelection } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';

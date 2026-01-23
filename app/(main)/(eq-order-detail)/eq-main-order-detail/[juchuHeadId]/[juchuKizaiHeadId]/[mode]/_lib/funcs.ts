@@ -4,8 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { PoolClient } from 'pg';
 
 import pool from '@/app/_lib/db/postgres';
-import { selectActiveBumons } from '@/app/_lib/db/tables/m-bumon';
-import { selectActiveEqpts, selectBundledEqpts, selectMeisaiEqts, selectOneEqpt } from '@/app/_lib/db/tables/m-kizai';
+import { selectBundledEqpts, selectMeisaiEqts, selectOneEqpt } from '@/app/_lib/db/tables/m-kizai';
 import { selectBundledEqptIds, selectSetOptions } from '@/app/_lib/db/tables/m-kizai-set';
 import {
   deleteIdoDenJuchu,
@@ -54,9 +53,10 @@ import {
   updateNyushukoFix,
 } from '@/app/_lib/db/tables/t-nyushuko-fix';
 import { deleteKizaiIdNyushukoResult } from '@/app/_lib/db/tables/t-nyushuko-result';
+import { selectActiveBumons } from '@/app/_lib/db/tables/v_bumon_lst';
 import { selectJuchuKizaiMeisai } from '@/app/_lib/db/tables/v-juchu-kizai-meisai';
 import { selectIdoJuchuKizaiMeisai } from '@/app/_lib/db/tables/v-juchu-kizai-meisai-sum';
-import { selectChosenEqptsDetails } from '@/app/_lib/db/tables/v-kizai-list';
+import { selectActiveEqpts, selectChosenEqptsDetails } from '@/app/_lib/db/tables/v-kizai-list';
 import { JuchuCtnMeisai } from '@/app/_lib/db/types/t_juchu_ctn_meisai-type';
 import { IdoDenJuchu } from '@/app/_lib/db/types/t-ido-den-juchu-type';
 import { IdoDen } from '@/app/_lib/db/types/t-ido-den-type';
@@ -1839,8 +1839,8 @@ export const getBumonsForEqptSelection = async () => {
       return [];
     }
     const selectElements = data.map((d, index) => ({
-      id: d.bumon_id,
-      label: d.bumon_nam,
+      id: d.bumon_id!,
+      label: d.bumon_nam ?? '',
       tblDspNum: index,
     }));
     console.log('部門が', selectElements.length, '件');

@@ -29,7 +29,7 @@ export const getLoanKizaiData = async (kizaiId: number) => {
       kizaiId: data.kizai_id,
       kizaiNam: data.kizai_nam ?? '',
       regAmt: data.reg_amt ?? 0,
-      kizaiQty: data.kizai_qty ?? 0,
+      kizaiQty: (data.kizai_qty ?? 0) + (data.kizai_ng_qty ?? 0),
       ngQty: data.kizai_ng_qty ?? 0,
     };
     return kizaiData;

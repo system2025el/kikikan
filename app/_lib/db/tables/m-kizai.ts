@@ -2,6 +2,7 @@
 
 import { PoolClient } from 'pg';
 
+import { escapeLikeString } from '@/app/(main)/_lib/escape-string';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 import { fakeToNull } from '@/app/(main)/(masters)/_lib/value-converters';
 import { EqptsMasterDialogValues } from '@/app/(main)/(masters)/eqpt-master/_lib/types';
@@ -97,48 +98,49 @@ export const upDateEqptDB = async (data: MKizaiDBValues, connection: PoolClient)
   }
 };
 
-/**
- * 有効な機材を取得する関数
- * @param query kizai_nam
- * @returns 有効な機材の配列（機材選択用）
- */
-export const selectActiveEqpts = async (query: string) => {
-  let sqlQuery = `
-    SELECT
-      k.kizai_id as "kizaiId",
-      k.kizai_nam as "kizaiNam",
-      s.shozoku_nam as "shozokuNam",
-      k.bumon_id as "bumonId",
-      k.kizai_grp_cod as "kizaiGrpCod",
-      k.ctn_flg as "ctnFlg"
-    FROM
-      ${SCHEMA}.m_kizai as k
-    INNER JOIN
-      ${SCHEMA}.m_shozoku as s
-    ON
-      k.shozoku_id = s.shozoku_id
-    WHERE
-      k.del_flg <> 1
-      AND k.dsp_flg <> 0
-  `;
-  const values = [];
-  // queryチェック
-  if (query && query.trim() !== '') {
-    sqlQuery += ` AND k.kizai_nam ILIKE $${values.length + 1}`;
-    values.push(`%${query}%`);
-  }
-  // ORDER BY
-  sqlQuery += `
-    ORDER BY
-      k.kizai_grp_cod,
-      k.dsp_ord_num;
-  `;
-  try {
-    return await pool.query(sqlQuery, values);
-  } catch (e) {
-    throw e;
-  }
-};
+// /**
+//  * 有効な機材を取得する関数
+//  * @param query kizai_nam
+//  * @returns 有効な機材の配列（機材選択用）
+//  */
+// export const selectActiveEqpts = async (query: string) => {
+//   let sqlQuery = `
+//     SELECT
+//       k.kizai_id as "kizaiId",
+//       k.kizai_nam as "kizaiNam",
+//       s.shozoku_nam as "shozokuNam",
+//       k.bumon_id as "bumonId",
+//       k.kizai_grp_cod as "kizaiGrpCod",
+//       k.ctn_flg as "ctnFlg"
+//     FROM
+//       ${SCHEMA}.m_kizai as k
+//     INNER JOIN
+//       ${SCHEMA}.m_shozoku as s
+//     ON
+//       k.shozoku_id = s.shozoku_id
+//     WHERE
+//       k.del_flg <> 1
+//       AND k.dsp_flg <> 0
+//   `;
+//   const values = [];
+//   // queryチェック
+//   if (query && query.trim() !== '') {
+//     sqlQuery += ` AND k.kizai_nam ILIKE $${values.length + 1}`;
+//     const escapedQuery = escapeLikeString(query);
+//     values.push(`%${escapedQuery}%`);
+//   }
+//   // ORDER BY
+//   sqlQuery += `
+//     ORDER BY
+//       k.kizai_grp_cod,
+//       k.dsp_ord_num;
+//   `;
+//   try {
+//     return await pool.query(sqlQuery, values);
+//   } catch (e) {
+//     throw e;
+//   }
+// };
 
 /**
  * セットになっている機材リストを取得する関数
