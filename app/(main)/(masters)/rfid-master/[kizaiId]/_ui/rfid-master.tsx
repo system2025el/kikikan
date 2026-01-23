@@ -131,12 +131,12 @@ export const RfidMaster = ({ kizaiId }: { kizaiId: number }) => {
 
   /* useMemo ------------------------------------------------- */
   /** 表示するRFIDタグリスト */
-  const list = useMemo(
-    () => (theRfids && rowsPerPage > 0 ? theRfids.slice((page - 1) * rowsPerPage, page * rowsPerPage) : theRfids),
-    [page, rowsPerPage, theRfids]
-  );
-  /** テーブル最後のページ用の空データの長さ */
-  const emptyRows = theRfids && page > 1 ? Math.max(0, page * rowsPerPage - theRfids.length) : 0;
+  // const list = useMemo(
+  //   () => (theRfids && rowsPerPage > 0 ? theRfids.slice((page - 1) * rowsPerPage, page * rowsPerPage) : theRfids),
+  //   [page, rowsPerPage, theRfids]
+  // );
+  // /** テーブル最後のページ用の空データの長さ */
+  // const emptyRows = theRfids && page > 1 ? Math.max(0, page * rowsPerPage - theRfids.length) : 0;
 
   /* methods ------------------------------------------ */
   /**
@@ -352,22 +352,22 @@ export const RfidMaster = ({ kizaiId }: { kizaiId: number }) => {
             RFID一覧
           </Typography>
           <Divider />
-          <Grid2 container mt={0.5} mx={0.5} justifyContent={'space-between'} alignItems={'center'}>
-            <Grid2 spacing={1}>
+          {/* <Grid2 container mt={0.5} mx={0.5} justifyContent={'space-between'} alignItems={'center'}> */}
+          {/* <Grid2 spacing={1}>
               <MuiTablePagination arrayList={theRfids ?? []} rowsPerPage={rowsPerPage} page={page} setPage={setPage} />
-            </Grid2>
-            <Grid2 container spacing={3}>
-              <Grid2>
-                <Button
-                  onClick={() => handleOpenDialog(String(FAKE_NEW_ID))}
-                  disabled={!((user?.permission.masters ?? 0) & permission.mst_upd)}
-                >
-                  <AddIcon fontSize="small" />
-                  新規
-                </Button>
-              </Grid2>
-            </Grid2>
+            </Grid2> */}
+          <Grid2 container mt={0.5} justifyContent={'end'}>
+            {/* <Grid2> */}
+            <Button
+              onClick={() => handleOpenDialog(String(FAKE_NEW_ID))}
+              disabled={!((user?.permission.masters ?? 0) & permission.mst_upd)}
+            >
+              <AddIcon fontSize="small" />
+              新規
+            </Button>
+            {/* </Grid2> */}
           </Grid2>
+          {/* </Grid2> */}
           {isLoading ? (
             <Loading />
           ) : !theRfids || theRfids!.length === 0 ? (
@@ -376,7 +376,7 @@ export const RfidMaster = ({ kizaiId }: { kizaiId: number }) => {
             <TableContainer component={Paper} square sx={{ maxHeight: '86vh', mt: 0.5 }}>
               {isLoading ? (
                 <Loading />
-              ) : !list || list.length === 0 ? (
+              ) : /*!list || list.length === 0*/ !theRfids || theRfids.length === 0 ? (
                 <Typography justifySelf={'center'}>該当する見積がありません</Typography>
               ) : (
                 <Table stickyHeader size="small" padding="none">
@@ -409,94 +409,96 @@ export const RfidMaster = ({ kizaiId }: { kizaiId: number }) => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {list!.map((row) => {
-                      const isItemSelected = selectedTags.includes(row.rfidTagId);
+                    {
+                      /*list!*/ theRfids.map((row) => {
+                        const isItemSelected = selectedTags.includes(row.rfidTagId);
 
-                      return (
-                        <TableRow key={row.rfidTagId} selected={isItemSelected}>
-                          <TableCell
-                            padding="checkbox"
-                            onClick={(event) => handleSelectRfidTags(event, row.rfidTagId)}
-                            tabIndex={-1}
-                            sx={{
-                              cursor: 'pointer',
-                              bgcolor: row.delFlg ? grey[300] : undefined,
-                              whiteSpace: 'nowrap',
-                            }}
-                          >
-                            <Checkbox
-                              color="primary"
-                              checked={isItemSelected}
+                        return (
+                          <TableRow key={row.rfidTagId} selected={isItemSelected}>
+                            <TableCell
+                              padding="checkbox"
+                              onClick={(event) => handleSelectRfidTags(event, row.rfidTagId)}
+                              tabIndex={-1}
                               sx={{
-                                '& .MuiSvgIcon-root': {
-                                  backgroundColor: '#fff',
-                                  borderRadius: '4px',
-                                  transition: 'background-color 0.3s',
-                                },
+                                cursor: 'pointer',
+                                bgcolor: row.delFlg ? grey[300] : undefined,
+                                whiteSpace: 'nowrap',
                               }}
-                            />
-                          </TableCell>
-                          <TableCell
-                            align="right"
-                            sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap' }}
-                          >
-                            {row.tblDspId}
-                          </TableCell>
-                          <TableCell
-                            align="right"
-                            sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap', width: 100 }}
-                          >
-                            {row.elNum}
-                          </TableCell>
-                          <TableCell
-                            sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap', width: 250 }}
-                          >
-                            <Button
-                              variant="text"
-                              sx={{ p: 0, paddingLeft: 1, m: 0, minWidth: 1, justifyContent: 'left' }}
-                              onClick={() => handleOpenDialog(row.rfidTagId)}
                             >
-                              <Box minWidth={60}>{row.rfidTagId}</Box>
-                            </Button>
-                          </TableCell>
-                          <TableCell
-                            sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap', width: 250 }}
-                          >
-                            {row.stsNam}
-                          </TableCell>
-                          <TableCell sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap' }}>
-                            <LightTooltipWithText variant={'body2'} maxWidth={400}>
-                              {row.mem}
-                            </LightTooltipWithText>
-                          </TableCell>
-                          <TableCell sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap' }}>
-                            <LightTooltipWithText variant={'body2'} maxWidth={400}>
-                              {row.shozokuNam}
-                            </LightTooltipWithText>
-                          </TableCell>
-                          <TableCell sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap' }}>
-                            <LightTooltipWithText variant={'body2'} maxWidth={400}>
-                              {row.updDat ? toJapanTimeString(row.updDat) : ''}
-                            </LightTooltipWithText>
-                          </TableCell>
-                          <TableCell sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap' }}>
-                            <LightTooltipWithText variant={'body2'} maxWidth={400}>
-                              {row.updUser}
-                            </LightTooltipWithText>
-                          </TableCell>
-                          <TableCell
-                            sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap', width: 50 }}
-                          >
-                            {row.delFlg ? '無効' : ''}
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                    {emptyRows > 0 && (
+                              <Checkbox
+                                color="primary"
+                                checked={isItemSelected}
+                                sx={{
+                                  '& .MuiSvgIcon-root': {
+                                    backgroundColor: '#fff',
+                                    borderRadius: '4px',
+                                    transition: 'background-color 0.3s',
+                                  },
+                                }}
+                              />
+                            </TableCell>
+                            <TableCell
+                              align="right"
+                              sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap' }}
+                            >
+                              {row.tblDspId}
+                            </TableCell>
+                            <TableCell
+                              align="right"
+                              sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap', width: 100 }}
+                            >
+                              {row.elNum}
+                            </TableCell>
+                            <TableCell
+                              sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap', width: 250 }}
+                            >
+                              <Button
+                                variant="text"
+                                sx={{ p: 0, paddingLeft: 1, m: 0, minWidth: 1, justifyContent: 'left' }}
+                                onClick={() => handleOpenDialog(row.rfidTagId)}
+                              >
+                                <Box minWidth={60}>{row.rfidTagId}</Box>
+                              </Button>
+                            </TableCell>
+                            <TableCell
+                              sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap', width: 250 }}
+                            >
+                              {row.stsNam}
+                            </TableCell>
+                            <TableCell sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap' }}>
+                              <LightTooltipWithText variant={'body2'} maxWidth={400}>
+                                {row.mem}
+                              </LightTooltipWithText>
+                            </TableCell>
+                            <TableCell sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap' }}>
+                              <LightTooltipWithText variant={'body2'} maxWidth={400}>
+                                {row.shozokuNam}
+                              </LightTooltipWithText>
+                            </TableCell>
+                            <TableCell sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap' }}>
+                              <LightTooltipWithText variant={'body2'} maxWidth={400}>
+                                {row.updDat ? toJapanTimeString(row.updDat) : ''}
+                              </LightTooltipWithText>
+                            </TableCell>
+                            <TableCell sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap' }}>
+                              <LightTooltipWithText variant={'body2'} maxWidth={400}>
+                                {row.updUser}
+                              </LightTooltipWithText>
+                            </TableCell>
+                            <TableCell
+                              sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap', width: 50 }}
+                            >
+                              {row.delFlg ? '無効' : ''}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })
+                    }
+                    {/* {emptyRows > 0 && (
                       <TableRow style={{ height: 30 * emptyRows }}>
                         <TableCell colSpan={7} />
                       </TableRow>
-                    )}
+                    )} */}
                   </TableBody>
                 </Table>
               )}
