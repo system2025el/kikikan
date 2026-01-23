@@ -5,7 +5,7 @@ import { PoolClient, QueryResult } from 'pg';
 
 import { selectDic } from '@/app/_lib/db/tables/m-dic';
 import { selectKokyaku } from '@/app/_lib/db/tables/m-kokyaku';
-import { selectDetailStockList } from '@/app/_lib/db/tables/stock-table';
+import { selectDetailStockList, selectStockListBulk } from '@/app/_lib/db/tables/stock-table';
 import {
   deleteJuchuContainerMeisai,
   insertJuchuContainerMeisai,
@@ -504,6 +504,37 @@ export const getStockList = async (juchuHeadId: number, juchuKizaiHeadId: number
       juchuHeadId,
       juchuKizaiHeadId,
       kizaiId,
+      stringDate
+    );
+    const data: StockTableValues[] = result.rows;
+    return data;
+  } catch (e) {
+    console.error(e);
+    return [];
+  }
+};
+
+/**
+ * 機材在庫テーブル一括データ取得
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param kizaiId 機材id
+ * @param planQty 使用数
+ * @param date 開始日
+ * @returns 機材在庫テーブル用データ
+ */
+export const getALLStockList = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  kizaiIds: number[],
+  date: Date
+) => {
+  const stringDate = toJapanYMDString(date, '-');
+  try {
+    const result: QueryResult<StockTableValues> = await selectStockListBulk(
+      juchuHeadId,
+      juchuKizaiHeadId,
+      kizaiIds,
       stringDate
     );
     const data: StockTableValues[] = result.rows;
