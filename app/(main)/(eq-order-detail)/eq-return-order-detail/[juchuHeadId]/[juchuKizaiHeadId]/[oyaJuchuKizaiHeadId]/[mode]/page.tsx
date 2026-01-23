@@ -3,7 +3,7 @@ import { subDays } from 'date-fns';
 import { getNyukoDate, getRange, getShukoDate } from '@/app/(main)/_lib/date-funcs';
 import { StockTableValues } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
 
-import { getDetailJuchuHead, getJuchuKizaiNyushuko, getNyushukoFixFlag, getStockList } from '../../../../../_lib/funcs';
+import { getDetailJuchuHead, getJuchuKizaiNyushuko, getNyushukoFixFlag } from '../../../../../_lib/funcs';
 import {
   getJuchuHonbanbiQty,
   getReturnJuchuContainerMeisai,

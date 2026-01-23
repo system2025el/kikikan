@@ -2,7 +2,7 @@
 
 import { QueryResult } from 'pg';
 
-import { selectStockList } from '@/app/_lib/db/tables/stock-table';
+import { selectStockListBulk } from '@/app/_lib/db/tables/stock-table';
 import { selectActiveBumons } from '@/app/_lib/db/tables/v_bumon_lst';
 import { selectStockKizai } from '@/app/_lib/db/tables/v-kizai-list';
 
@@ -66,16 +66,34 @@ export const getEqData = async (bumonId: number) => {
   }
 };
 
+// /**
+//  * 機材在庫情報取得
+//  * @param kizaiId 機材id
+//  * @param date 日付
+//  * @returns 在庫データ
+//  */
+// export const getEqStockData = async (kizaiId: number, date: Date) => {
+//   const stringDate = toJapanYMDString(date, '-');
+//   try {
+//     const result: QueryResult<StockTableValues> = await selectStockList(kizaiId, stringDate);
+//     const data: StockTableValues[] = result.rows;
+//     return data;
+//   } catch (e) {
+//     console.error(e);
+//     return [];
+//   }
+// };
+
 /**
- * 機材在庫情報取得
- * @param kizaiId 機材id
- * @param date 日付
- * @returns 在庫データ
+ * 複数機材在庫情報一括取得
+ * @param kizaiIds
+ * @param date
+ * @returns
  */
-export const getEqStockData = async (kizaiId: number, date: Date) => {
+export const getAllStockData = async (kizaiIds: number[], date: Date) => {
   const stringDate = toJapanYMDString(date, '-');
   try {
-    const result: QueryResult<StockTableValues> = await selectStockList(kizaiId, stringDate);
+    const result: QueryResult<StockTableValues> = await selectStockListBulk(kizaiIds, stringDate);
     const data: StockTableValues[] = result.rows;
     return data;
   } catch (e) {

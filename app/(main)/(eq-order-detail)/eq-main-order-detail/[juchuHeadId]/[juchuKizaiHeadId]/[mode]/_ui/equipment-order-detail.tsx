@@ -58,7 +58,6 @@ import {
   getDic,
   getJuchuContainerMeisai,
   getNyushukoFixFlag,
-  getStockList,
 } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 import { DetailOerValues } from '@/app/(main)/(eq-order-detail)/_lib/types';
 
@@ -954,10 +953,7 @@ const EquipmentOrderDetail = (props: {
     // 機材在庫データ
     let updatedEqStockData: StockTableValues[][] = [];
     // id確認用セット
-    const checkIds = new Set<number>();
-
-    const uniqueIds = Array.from(new Set(juchuKizaiMeisaiData.filter((d) => !d.delFlag).map((data) => data.kizaiId)));
-    // console.time();
+    //const checkIds = new Set<number>();
     // if (ids && shukoDate) {
     //   for (const id of ids) {
     //     if (checkIds.has(id)) {
@@ -975,19 +971,16 @@ const EquipmentOrderDetail = (props: {
     //     }
     //   }
     // }
-    // console.timeEnd();
 
-    console.time();
+    const uniqueIds = Array.from(new Set(juchuKizaiMeisaiData.filter((d) => !d.delFlag).map((data) => data.kizaiId)));
     if (uniqueIds.length > 0 && shukoDate) {
-      // getStockList を「複数のIDを受け取れるように」修正し、一括取得する
       const allStockData: StockTableValues[] = await getALLStockList(
         juchuHeadId,
         juchuKizaiHeadId,
-        uniqueIds, // 配列で渡す
+        uniqueIds,
         subDays(shukoDate, 1)
       );
 
-      // 取得したデータを元の ids の順番にマッピングする
       const idToStockMap = new Map<number, StockTableValues[]>();
       for (const row of allStockData) {
         if (!idToStockMap.has(row.kizaiId)) {
@@ -999,13 +992,11 @@ const EquipmentOrderDetail = (props: {
       updatedEqStockData = ids.map((id) => {
         const stockArray = idToStockMap.get(id);
         if (!stockArray) {
-          // データがない場合のフォールバック（空配列など）
           return [];
         }
         return stockArray;
       });
     }
-    console.timeEnd();
     return updatedEqStockData;
   };
 
@@ -1743,30 +1734,68 @@ const EquipmentOrderDetail = (props: {
 
       const newIds = selectEq.map((data) => data.kizaiId);
       // 機材在庫データ
-      const selectEqStockData: StockTableValues[][] = [];
-      for (const id of newIds) {
-        if (kizaiIds.has(id)) {
-          const stock = eqStockListRef.current.find((d) => d[0].kizaiId === id);
-          selectEqStockData.push(stock!);
-        } else {
-          const stock: StockTableValues[] = await getStockList(
-            getValues('juchuHeadId'),
-            getValues('juchuKizaiHeadId'),
-            id,
-            subDays(selectDate, 1)
-          );
-          if (originPlanQty.get(id)) {
-            const updateStock = stock.map((d) =>
-              dateRange.includes(toJapanYMDString(d.calDat))
-                ? { ...d, zaikoQty: d.zaikoQty + originPlanQty.get(id)! }
-                : d
-            );
-            selectEqStockData.push(updateStock);
-          } else {
-            selectEqStockData.push(stock);
-          }
-        }
+      // const selectEqStockData: StockTableValues[][] = [];
+      // for (const id of newIds) {
+      //   if (kizaiIds.has(id)) {
+      //     const stock = eqStockListRef.current.find((d) => d[0].kizaiId === id);
+      //     selectEqStockData.push(stock!);
+      //   } else {
+      //     const stock: StockTableValues[] = await getStockList(
+      //       getValues('juchuHeadId'),
+      //       getValues('juchuKizaiHeadId'),
+      //       id,
+      //       subDays(selectDate, 1)
+      //     );
+      //     if (originPlanQty.get(id)) {
+      //       const updateStock = stock.map((d) =>
+      //         dateRange.includes(toJapanYMDString(d.calDat))
+      //           ? { ...d, zaikoQty: d.zaikoQty + originPlanQty.get(id)! }
+      //           : d
+      //       );
+      //       selectEqStockData.push(updateStock);
+      //     } else {
+      //       selectEqStockData.push(stock);
+      //     }
+      //   }
+      // }
+
+      const fetchTargetIds = Array.from(new Set(newIds.filter((id) => !kizaiIds.has(id))));
+
+      let bulkStockData: StockTableValues[] = [];
+      if (fetchTargetIds.length > 0) {
+        bulkStockData = await getALLStockList(
+          getValues('juchuHeadId'),
+          getValues('juchuKizaiHeadId'),
+          fetchTargetIds,
+          subDays(selectDate, 1)
+        );
       }
+
+      const bulkStockMap = new Map<number, StockTableValues[]>();
+      for (const row of bulkStockData) {
+        if (!bulkStockMap.has(row.kizaiId)) bulkStockMap.set(row.kizaiId, []);
+        bulkStockMap.get(row.kizaiId)!.push(row);
+      }
+
+      const selectEqStockData: StockTableValues[][] = newIds.map((id) => {
+        let stock: StockTableValues[];
+
+        if (kizaiIds.has(id)) {
+          const refStock = eqStockListRef.current.find((d) => d[0]?.kizaiId === id);
+          stock = refStock ? [...refStock] : [];
+        } else {
+          stock = bulkStockMap.get(id) || [];
+        }
+
+        const originQty = originPlanQty.get(id);
+        if (originQty && stock.length > 0) {
+          return stock.map((d) =>
+            dateRange.includes(toJapanYMDString(d.calDat)) ? { ...d, zaikoQty: d.zaikoQty + originQty } : d
+          );
+        }
+
+        return stock;
+      });
 
       const selectIdoEq: IdoJuchuKizaiMeisaiValues[] = filterKizaiData.map((d) => ({
         juchuHeadId: getValues('juchuHeadId'),

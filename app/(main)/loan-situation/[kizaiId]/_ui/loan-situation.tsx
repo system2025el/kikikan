@@ -29,7 +29,7 @@ import { Calendar } from '@/app/(main)/_ui/date';
 import { Loading } from '@/app/(main)/_ui/loading';
 import { PermissionGuard } from '@/app/(main)/_ui/permission-guard';
 
-import { confirmJuchuHeadId, getLoanJuchuData, getLoanStockData, getLoanUseData } from '../_lib/funcs';
+import { confirmJuchuHeadId, getAllLoanUseData, getLoanJuchuData, getLoanStockData } from '../_lib/funcs';
 import { LoanJuchu, LoanKizai, LoanStockTableValues, LoanUseTableValues } from '../_lib/types';
 import { LoanSituationTable, UseTable } from './loan-situation-table';
 
@@ -97,11 +97,23 @@ export const LoanSituation = (props: {
 
       const juchuHeadIds = filterLoanJuchuData.map((d) => d.juchuHeadId);
 
-      const eqUseData: LoanUseTableValues[][] = [];
-      for (const juchuHeadId of juchuHeadIds) {
-        const data: LoanUseTableValues[] = await getLoanUseData(juchuHeadId, kizaiData.kizaiId, strDat);
-        eqUseData.push(data);
+      // const eqUseData: LoanUseTableValues[][] = [];
+      // for (const juchuHeadId of juchuHeadIds) {
+      //   const data: LoanUseTableValues[] = await getLoanUseData(juchuHeadId, kizaiData.kizaiId, strDat);
+      //   eqUseData.push(data);
+      // }
+
+      const allLoanUseData: LoanUseTableValues[] = await getAllLoanUseData(juchuHeadIds, kizaiData.kizaiId, strDat);
+
+      const loanUseMap = new Map<number, LoanUseTableValues[]>();
+      for (const row of allLoanUseData) {
+        if (!loanUseMap.has(row.juchuHeadId)) {
+          loanUseMap.set(row.juchuHeadId, []);
+        }
+        loanUseMap.get(row.juchuHeadId)!.push(row);
       }
+
+      const eqUseData: LoanUseTableValues[][] = juchuHeadIds.map((id) => loanUseMap.get(id) || []);
 
       setLoanJuchuList(filterLoanJuchuData);
       setEqUseList(eqUseData);
@@ -216,11 +228,24 @@ export const LoanSituation = (props: {
 
       const juchuHeadIds = filterLoanJuchuData.map((d) => d.juchuHeadId);
 
-      const eqUseData: LoanUseTableValues[][] = [];
-      for (const juchuHeadId of juchuHeadIds) {
-        const data: LoanUseTableValues[] = await getLoanUseData(juchuHeadId, props.kizaiData.kizaiId, strDat);
-        eqUseData.push(data);
+      // const eqUseData: LoanUseTableValues[][] = [];
+      // for (const juchuHeadId of juchuHeadIds) {
+      //   const data: LoanUseTableValues[] = await getLoanUseData(juchuHeadId, props.kizaiData.kizaiId, strDat);
+      //   eqUseData.push(data);
+      // }
+
+      const allLoanUseData: LoanUseTableValues[] = await getAllLoanUseData(juchuHeadIds, kizaiData.kizaiId, strDat);
+
+      const loanUseMap = new Map<number, LoanUseTableValues[]>();
+      for (const row of allLoanUseData) {
+        if (!loanUseMap.has(row.juchuHeadId)) {
+          loanUseMap.set(row.juchuHeadId, []);
+        }
+        loanUseMap.get(row.juchuHeadId)!.push(row);
       }
+
+      const eqUseData: LoanUseTableValues[][] = juchuHeadIds.map((id) => loanUseMap.get(id) || []);
+
       setLoanJuchuList(filterLoanJuchuData);
       setEqUseList(eqUseData);
       setEqStockList(eqStockData);
@@ -277,15 +302,30 @@ export const LoanSituation = (props: {
       });
     }
     const juchuHeadIds = loanJuchuList.map((d) => d.juchuHeadId);
-    const updatedEqUseData: LoanUseTableValues[][] = [];
-    for (const juchuHeadId of juchuHeadIds) {
-      const data: LoanUseTableValues[] = await getLoanUseData(
-        juchuHeadId,
-        props.kizaiData.kizaiId,
-        subDays(selectDate, 1)
-      );
-      updatedEqUseData.push(data);
+    // const updatedEqUseData: LoanUseTableValues[][] = [];
+    // for (const juchuHeadId of juchuHeadIds) {
+    //   const data: LoanUseTableValues[] = await getLoanUseData(
+    //     juchuHeadId,
+    //     props.kizaiData.kizaiId,
+    //     subDays(selectDate, 1)
+    //   );
+    //   updatedEqUseData.push(data);
+    // }
+    const allLoanUseData: LoanUseTableValues[] = await getAllLoanUseData(
+      juchuHeadIds,
+      kizaiData.kizaiId,
+      subDays(selectDate, 1)
+    );
+
+    const loanUseMap = new Map<number, LoanUseTableValues[]>();
+    for (const row of allLoanUseData) {
+      if (!loanUseMap.has(row.juchuHeadId)) {
+        loanUseMap.set(row.juchuHeadId, []);
+      }
+      loanUseMap.get(row.juchuHeadId)!.push(row);
     }
+
+    const updatedEqUseData: LoanUseTableValues[][] = juchuHeadIds.map((id) => loanUseMap.get(id) || []);
     setEqUseList(updatedEqUseData);
     setIsLoading(false);
   };

@@ -15,6 +15,7 @@ export type LoanJuchu = {
 };
 
 export type LoanUseTableValues = {
+  juchuHeadId: number;
   calDat: Date;
   kizaiId: number;
   kizaiQty: number;
