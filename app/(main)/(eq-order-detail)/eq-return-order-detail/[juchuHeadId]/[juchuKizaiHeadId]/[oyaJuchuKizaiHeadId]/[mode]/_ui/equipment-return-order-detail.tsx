@@ -59,10 +59,10 @@ import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
 import { Loading, LoadingOverlay } from '@/app/(main)/_ui/loading';
 import { PermissionGuard } from '@/app/(main)/_ui/permission-guard';
 import {
+  getALLStockList,
   getDetailJuchuHead,
   getJuchuKizaiNyushuko,
   getNyushukoFixFlag,
-  getStockList,
 } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 import {
   DetailOerValues,
@@ -839,25 +839,51 @@ export const EquipmentReturnOrderDetail = (props: {
     // 受注機材idリスト
     const ids = juchuKizaiMeisaiData.filter((d) => !d.delFlag).map((data) => data.kizaiId);
     // 機材在庫データ
-    const updatedEqStockData: StockTableValues[][] = [];
+    let updatedEqStockData: StockTableValues[][] = [];
     // id確認用セット
-    const checkIds = new Set<number>();
-    if (ids && nyukoDate) {
-      for (const id of ids) {
-        if (checkIds.has(id)) {
-          const stock = updatedEqStockData.find((d) => d[0].kizaiId === id);
-          updatedEqStockData.push(stock!);
-        } else {
-          checkIds.add(id);
-          const stock: StockTableValues[] = await getStockList(
-            juchuHeadId,
-            juchuKizaiHeadId,
-            id,
-            subDays(nyukoDate, 1)
-          );
-          updatedEqStockData.push(stock);
+    // const checkIds = new Set<number>();
+    // if (ids && nyukoDate) {
+    //   for (const id of ids) {
+    //     if (checkIds.has(id)) {
+    //       const stock = updatedEqStockData.find((d) => d[0].kizaiId === id);
+    //       updatedEqStockData.push(stock!);
+    //     } else {
+    //       checkIds.add(id);
+    //       const stock: StockTableValues[] = await getStockList(
+    //         juchuHeadId,
+    //         juchuKizaiHeadId,
+    //         id,
+    //         subDays(nyukoDate, 1)
+    //       );
+    //       updatedEqStockData.push(stock);
+    //     }
+    //   }
+    // }
+
+    const uniqueIds = Array.from(new Set(juchuKizaiMeisaiData.filter((d) => !d.delFlag).map((data) => data.kizaiId)));
+    if (uniqueIds.length > 0 && nyukoDate) {
+      const allStockData: StockTableValues[] = await getALLStockList(
+        juchuHeadId,
+        juchuKizaiHeadId,
+        uniqueIds,
+        subDays(nyukoDate, 1)
+      );
+
+      const idToStockMap = new Map<number, StockTableValues[]>();
+      for (const row of allStockData) {
+        if (!idToStockMap.has(row.kizaiId)) {
+          idToStockMap.set(row.kizaiId, []);
         }
+        idToStockMap.get(row.kizaiId)!.push(row);
       }
+
+      updatedEqStockData = ids.map((id) => {
+        const stockArray = idToStockMap.get(id);
+        if (!stockArray) {
+          return [];
+        }
+        return stockArray;
+      });
     }
     return updatedEqStockData;
   };
@@ -1322,30 +1348,68 @@ export const EquipmentReturnOrderDetail = (props: {
 
       const newIds = newReturnJuchuKizaiMeisaiData.map((data) => data.kizaiId);
       // 機材在庫データ
-      const selectEqStockData: StockTableValues[][] = [];
-      for (const id of newIds) {
-        if (eqIds.has(id)) {
-          const stock = eqStockListRef.current.find((d) => d[0].kizaiId === id);
-          selectEqStockData.push(stock!);
-        } else {
-          const stock: StockTableValues[] = await getStockList(
-            getValues('juchuHeadId'),
-            getValues('juchuKizaiHeadId'),
-            id,
-            subDays(selectDate, 1)
-          );
-          if (originReturnPlanQty.get(id)) {
-            const updateStock = stock.map((d) =>
-              dateRange.includes(toJapanYMDString(d.calDat))
-                ? { ...d, zaikoQty: d.zaikoQty - originReturnPlanQty.get(id)! }
-                : d
-            );
-            selectEqStockData.push(updateStock);
-          } else {
-            selectEqStockData.push(stock);
-          }
-        }
+      // const selectEqStockData: StockTableValues[][] = [];
+      // for (const id of newIds) {
+      //   if (eqIds.has(id)) {
+      //     const stock = eqStockListRef.current.find((d) => d[0].kizaiId === id);
+      //     selectEqStockData.push(stock!);
+      //   } else {
+      //     const stock: StockTableValues[] = await getStockList(
+      //       getValues('juchuHeadId'),
+      //       getValues('juchuKizaiHeadId'),
+      //       id,
+      //       subDays(selectDate, 1)
+      //     );
+      //     if (originReturnPlanQty.get(id)) {
+      //       const updateStock = stock.map((d) =>
+      //         dateRange.includes(toJapanYMDString(d.calDat))
+      //           ? { ...d, zaikoQty: d.zaikoQty - originReturnPlanQty.get(id)! }
+      //           : d
+      //       );
+      //       selectEqStockData.push(updateStock);
+      //     } else {
+      //       selectEqStockData.push(stock);
+      //     }
+      //   }
+      // }
+
+      const fetchTargetIds = Array.from(new Set(newIds.filter((id) => !eqIds.has(id))));
+
+      let bulkStockData: StockTableValues[] = [];
+      if (fetchTargetIds.length > 0) {
+        bulkStockData = await getALLStockList(
+          getValues('juchuHeadId'),
+          getValues('juchuKizaiHeadId'),
+          fetchTargetIds,
+          subDays(selectDate, 1)
+        );
       }
+
+      const bulkStockMap = new Map<number, StockTableValues[]>();
+      for (const row of bulkStockData) {
+        if (!bulkStockMap.has(row.kizaiId)) bulkStockMap.set(row.kizaiId, []);
+        bulkStockMap.get(row.kizaiId)!.push(row);
+      }
+
+      const selectEqStockData: StockTableValues[][] = newIds.map((id) => {
+        let stock: StockTableValues[];
+
+        if (eqIds.has(id)) {
+          const refStock = eqStockListRef.current.find((d) => d[0]?.kizaiId === id);
+          stock = refStock ? [...refStock] : [];
+        } else {
+          stock = bulkStockMap.get(id) || [];
+        }
+
+        const originQty = originReturnPlanQty.get(id);
+        if (originQty && stock.length > 0) {
+          return stock.map((d) =>
+            dateRange.includes(toJapanYMDString(d.calDat)) ? { ...d, zaikoQty: d.zaikoQty + originQty } : d
+          );
+        }
+
+        return stock;
+      });
       // ソート後の機材id
       const sortKizaiId = [...returnJuchuKizaiMeisaiList, ...newReturnJuchuKizaiMeisaiData]
         .sort((a, b) => a.dspOrdNum - b.dspOrdNum)

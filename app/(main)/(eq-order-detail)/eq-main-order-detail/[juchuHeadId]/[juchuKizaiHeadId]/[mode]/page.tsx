@@ -2,7 +2,7 @@ import { subDays } from 'date-fns';
 
 import { getNyukoDate, getRange, getShukoDate } from '@/app/(main)/_lib/date-funcs';
 
-import { getDetailJuchuHead, getJuchuContainerMeisai, getNyushukoFixFlag, getStockList } from '../../../../_lib/funcs';
+import { getDetailJuchuHead, getJuchuContainerMeisai, getNyushukoFixFlag } from '../../../../_lib/funcs';
 import { getHonbanbi, getIdoJuchuKizaiMeisai, getJuchuKizaiHead, getJuchuKizaiMeisai } from './_lib/funcs';
 import {
   IdoJuchuKizaiMeisaiValues,

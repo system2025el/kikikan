@@ -2,7 +2,7 @@
 
 import { QueryResult } from 'pg';
 
-import { selectStockList, selectUseList } from '@/app/_lib/db/tables/stock-table';
+import { selectStockList, selectUseListBulk } from '@/app/_lib/db/tables/stock-table';
 import { selectLoanJuchuData } from '@/app/_lib/db/tables/v-juchu-kizai-den';
 import { selectJuchuHeadIds } from '@/app/_lib/db/tables/v-juchu-lst';
 import { selectLoanKizai } from '@/app/_lib/db/tables/v-kizai-list';
@@ -102,18 +102,36 @@ export const confirmJuchuHeadId = async (strDat: Date) => {
   }
 };
 
+// /**
+//  * 貸出状況用使用データ取得
+//  * @param juchuHeadId 受注ヘッダーid
+//  * @param kizaiId 機材id
+//  * @param date 日付
+//  * @returns 貸出状況用使用データ
+//  */
+// export const getLoanUseData = async (juchuHeadId: number, kizaiId: number, date: Date) => {
+//   const stringDate = toJapanYMDString(date, '-');
+//   try {
+//     const result: QueryResult<LoanUseTableValues> = await selectUseList(juchuHeadId, kizaiId, stringDate);
+//     const data: LoanUseTableValues[] = result.rows;
+//     return data;
+//   } catch (e) {
+//     console.error(e);
+//     throw e;
+//   }
+// };
+
 /**
- * 貸出状況用使用データ取得
+ * 複数貸出状況用使用データ一括取得
  * @param juchuHeadId 受注ヘッダーid
  * @param kizaiId 機材id
  * @param date 日付
  * @returns 貸出状況用使用データ
  */
-export const getLoanUseData = async (juchuHeadId: number, kizaiId: number, date: Date) => {
+export const getAllLoanUseData = async (juchuHeadIds: number[], kizaiId: number, date: Date) => {
   const stringDate = toJapanYMDString(date, '-');
   try {
-    //console.log('DB Connected');
-    const result: QueryResult<LoanUseTableValues> = await selectUseList(juchuHeadId, kizaiId, stringDate);
+    const result: QueryResult<LoanUseTableValues> = await selectUseListBulk(juchuHeadIds, kizaiId, stringDate);
     const data: LoanUseTableValues[] = result.rows;
     return data;
   } catch (e) {

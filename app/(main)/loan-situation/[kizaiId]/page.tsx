@@ -1,6 +1,6 @@
 import { addDays, subDays } from 'date-fns';
 
-import { confirmJuchuHeadId, getLoanJuchuData, getLoanKizaiData, getLoanStockData, getLoanUseData } from './_lib/funcs';
+import { confirmJuchuHeadId, getLoanJuchuData, getLoanKizaiData } from './_lib/funcs';
 import { LoanStockTableValues, LoanUseTableValues } from './_lib/types';
 import { LoanSituation } from './_ui/loan-situation';
 

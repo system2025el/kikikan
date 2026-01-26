@@ -26,7 +26,7 @@ import { Calendar } from '../../_ui/date';
 import { Loading } from '../../_ui/loading';
 import { PermissionGuard } from '../../_ui/permission-guard';
 import { FAKE_NEW_ID } from '../../(masters)/_lib/constants';
-import { getBumonsData, getEqData, getEqStockData } from '../_lib/funcs';
+import { getAllStockData, getBumonsData, getEqData } from '../_lib/funcs';
 import { Bumon, EqTableValues, StockTableValues } from '../_lib/types';
 import { EqStockTable, EqTable } from './stock-table';
 
@@ -115,11 +115,26 @@ export const Stock = () => {
     const newEqList = await getEqData(data.bumonId);
     console.log(newEqList);
     const kizaiIds = newEqList.map((data) => data.kizaiId);
-    const newEqStockList: StockTableValues[][] = [];
-    for (const kizaiId of kizaiIds) {
-      const stock: StockTableValues[] = await getEqStockData(kizaiId, subDays(selectDate, 1));
-      newEqStockList.push(stock);
+    // const newEqStockList: StockTableValues[][] = [];
+    // for (const kizaiId of kizaiIds) {
+    //   const stock: StockTableValues[] = await getEqStockData(kizaiId, subDays(selectDate, 1));
+    //   newEqStockList.push(stock);
+    // }
+
+    const uniqueKizaiIds = Array.from(new Set(kizaiIds));
+
+    const allStockData: StockTableValues[] = await getAllStockData(uniqueKizaiIds, subDays(selectDate, 1));
+
+    const stockMap = new Map<number, StockTableValues[]>();
+    for (const row of allStockData) {
+      if (!stockMap.has(row.kizaiId)) {
+        stockMap.set(row.kizaiId, []);
+      }
+      stockMap.get(row.kizaiId)!.push(row);
     }
+
+    const newEqStockList: StockTableValues[][] = kizaiIds.map((id) => stockMap.get(id) || []);
+
     setEqList(newEqList);
     setEqStockList(newEqStockList);
     setIsLoading(false);
@@ -138,11 +153,26 @@ export const Stock = () => {
     if (view === 'day') {
       setIsLoading(true);
       const kizaiIds = eqList.map((data) => data.kizaiId);
-      const newEqStockList: StockTableValues[][] = [];
-      for (const kizaiId of kizaiIds) {
-        const stock: StockTableValues[] = await getEqStockData(kizaiId, subDays(date.toDate(), 1));
-        newEqStockList.push(stock);
+      // const newEqStockList: StockTableValues[][] = [];
+      // for (const kizaiId of kizaiIds) {
+      //   const stock: StockTableValues[] = await getEqStockData(kizaiId, subDays(date.toDate(), 1));
+      //   newEqStockList.push(stock);
+      // }
+
+      const uniqueKizaiIds = Array.from(new Set(kizaiIds));
+
+      const allStockData: StockTableValues[] = await getAllStockData(uniqueKizaiIds, subDays(selectDate, 1));
+
+      const stockMap = new Map<number, StockTableValues[]>();
+      for (const row of allStockData) {
+        if (!stockMap.has(row.kizaiId)) {
+          stockMap.set(row.kizaiId, []);
+        }
+        stockMap.get(row.kizaiId)!.push(row);
       }
+
+      const newEqStockList: StockTableValues[][] = kizaiIds.map((id) => stockMap.get(id) || []);
+
       setEqStockList(newEqStockList);
       setAnchorEl(null);
       setIsLoading(false);
