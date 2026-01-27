@@ -1864,6 +1864,7 @@ export const checkSetoptions = async (idList: number[]): Promise<number[]> => {
     //   console.error('例外発生', setIdError);
     //   throw setIdError;
     // }
+    console.log(setIdList);
     if (!setIdList || setIdList.length === 0) return [];
     // return setIdList.map((d) => d.kizai_id);
     return Array.from(new Set(setIdList.map((d) => d.kizai_id)));

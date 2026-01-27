@@ -32,7 +32,7 @@ export const selectActiveEqpts = async (query: string) => {
   const values = [];
   // queryチェック
   if (query && query.trim() !== '') {
-    sqlQuery += ` AND k.kizai_nam ILIKE $${values.length + 1}`;
+    sqlQuery += ` AND kizai_nam ILIKE $${values.length + 1}`;
     const escapedQuery = escapeLikeString(query);
     values.push(`%${escapedQuery}%`);
   }
