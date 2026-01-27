@@ -62,7 +62,7 @@ export const selectSetOptions = async (kizaiId: number) => {
 export const selectFilteredEqptSets = async (query: string) => {
   let queryString = `
     SELECT
-      s.kizai_id, k.kizai_nam, s.del_flg
+      s.kizai_id, k.kizai_nam, s.del_flg, k.kizai_grp_cod, k.dsp_ord_num
     FROM
       ${SCHEMA}.m_kizai_set as s
     LEFT JOIN
@@ -76,7 +76,10 @@ export const selectFilteredEqptSets = async (query: string) => {
     const escapedQuery = escapeLikeString(query);
     values.push(`%${escapedQuery}%`);
   }
-  queryString += ` GROUP BY s.kizai_id, k.kizai_nam, s.del_flg`;
+  queryString += `
+    GROUP BY s.kizai_id, k.kizai_nam, s.del_flg,k.kizai_grp_cod, k.dsp_ord_num
+    ORDER BY k.kizai_grp_cod, k.dsp_ord_num;
+  `;
 
   try {
     return await pool.query(queryString, values);

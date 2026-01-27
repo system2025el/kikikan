@@ -239,7 +239,7 @@ export const EqptSetsMasterDialog = ({
                     render={({ field }) => (
                       <Autocomplete
                         {...field}
-                        options={options.sort((a, b) => a.grpId! - b.grpId!)}
+                        options={options}
                         groupBy={(option) => option.grpNam!}
                         getOptionLabel={(option) => option.label ?? ''}
                         getOptionKey={(option) => option.id ?? FAKE_NEW_ID}

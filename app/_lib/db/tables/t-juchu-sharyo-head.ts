@@ -195,6 +195,8 @@ export const selectWeeklyList = async (queries: { start: string; count: number }
         LEFT JOIN
           ${SCHEMA}.t_weekly
         ON cal.cal_dat = t_weekly.weekly_dat
+        WHERE juchu.del_flg = 0
+        OR juchu.del_flg IS NULL
         ORDER BY cal.cal_dat, s_meisai.nyushuko_dat;
     `;
 

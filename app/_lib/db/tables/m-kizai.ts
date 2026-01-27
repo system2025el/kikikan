@@ -247,20 +247,16 @@ export const selectActiveEqptsForIsshiki = async (query: number | null) => {
 export const selectActiveEqptsForSet = async () => {
   const sqlQuery = `
   SELECT
-    k.kizai_id as "kizaiId",
-    k.kizai_nam as "kizaiNam",
-    k.bumon_id as "bumonId",
-    b.bumon_nam as "bumonNam"
+    k.kizai_id,
+    k.kizai_nam,
+    k.kizai_grp_cod,
+    k.ctn_flg
   FROM
     ${SCHEMA}.m_kizai as k
   LEFT JOIN
     ${SCHEMA}.m_kizai_set as set
   ON
     k.kizai_id = set.kizai_id
-  LEFT JOIN
-    ${SCHEMA}.m_bumon as b
-  ON
-    b.bumon_id = k.bumon_id
   WHERE
     k.del_flg <> 1
   AND
