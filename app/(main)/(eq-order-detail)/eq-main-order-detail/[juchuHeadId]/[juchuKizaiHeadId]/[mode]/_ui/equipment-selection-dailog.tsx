@@ -76,6 +76,7 @@ export const EqptSelectionDialog = ({
     setIsLoading(true);
     // 選ばれた機材IDの配列からセットオプションの存在確認
     const setList = await checkSetoptions(selectedEqptIds);
+    console.log('aaaaaaaaaaaaaaaaaaaaaaaa', setList);
     if (setList.length !== 0) {
       // セットオプション付きの機材があるとき
       // セット有機材IDリスト

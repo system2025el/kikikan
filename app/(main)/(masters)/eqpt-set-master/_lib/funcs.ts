@@ -179,12 +179,29 @@ export const updateEqptSet = async (newData: EqptSetsMasterDialogValues, current
  */
 export const getEqptsForOyaEqptSelection = async (): Promise<SelectTypes[]> => {
   try {
-    const data = await selectActiveEqptsForSet();
-    if (!data || data.rowCount === 0) {
+    const { rows } = await selectActiveEqptsForSet();
+
+    if (!rows || rows.length === 0) {
       return [];
     }
-    console.log('=========================================', data.rows);
-    return data.rows.map((d) => ({ id: d.kizaiId, label: d.kizaiNam, grpId: d.bumonId, grpNam: d.bumonNam }));
+    console.log(
+      '=========================================',
+      rows.filter((d) => d.ctn_flg === 1)
+    );
+    return rows
+      .map((d) => ({
+        id: d.kizai_id,
+        label: d.kizai_nam,
+        grpId: Number(d.kizai_grp_cod),
+        grpNam: d.ctn_flg === 1 ? 'カゴ' : (d.kizai_grp_cod ?? ''),
+      }))
+      .sort((a, b) => {
+        const isAKago = a.grpNam === 'カゴ';
+        const isBKago = b.grpNam === 'カゴ';
+        if (isAKago && !isBKago) return 1; // aがカゴなら後ろへ
+        if (!isAKago && isBKago) return -1; // bがカゴならaを前へ
+        return (a.grpId ?? 0) - (b.grpId ?? 0);
+      });
   } catch (e) {
     console.error('例外が発生しました:', e);
     throw e;

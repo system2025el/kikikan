@@ -174,7 +174,14 @@ export const selectWeeklyList = async (queries: { start: string; count: number }
         AND
           s_head.juchu_sharyo_head_id = s_meisai.juchu_sharyo_head_id
         LEFT JOIN
-          ${SCHEMA}.t_juchu_head as juchu
+          (
+            SELECT
+              juchu_head_id, kokyaku_id, koen_nam, del_flg 
+            FROM
+              ${SCHEMA}.t_juchu_head
+            WHERE
+              del_flg != 1
+          ) as juchu
         ON
           juchu.juchu_head_id = s_meisai.juchu_head_id
         LEFT JOIN
