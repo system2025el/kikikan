@@ -15,9 +15,15 @@ import { MKizaiSetDBValues } from '../types/m-kizai-set-type';
  */
 export const selectBundledEqptIds = async (idList: number[]) => {
   const query = `
-  SELECT kizai_id, set_kizai_id
-  FROM "${SCHEMA}"."m_kizai_set"
-  WHERE kizai_id = ANY($1)
+  SELECT s.kizai_id, s.set_kizai_id, k.kizai_grp_cod, s.dsp_ord_num
+  FROM "${SCHEMA}"."m_kizai_set" as s
+  LEFT JOIN
+      ${SCHEMA}.v_kizai_lst as k
+  ON s.kizai_id = k.kizai_id
+  WHERE s.kizai_id = ANY($1)
+  ORDER BY
+    k.kizai_grp_cod,
+    k.dsp_ord_num
 `;
   try {
     // return await supabase.schema(SCHEMA).from('m_kizai_set').select('kizai_id, set_kizai_id').in('kizai_id', idList);
@@ -66,7 +72,7 @@ export const selectFilteredEqptSets = async (query: string) => {
     FROM
       ${SCHEMA}.m_kizai_set as s
     LEFT JOIN
-      ${SCHEMA}.m_kizai as k
+      ${SCHEMA}.v_kizai_lst as k
     ON s.kizai_id = k.kizai_id
   `;
   const values = [];
