@@ -6,6 +6,7 @@ import {
   Container,
   Divider,
   Paper,
+  Snackbar,
   Table,
   TableBody,
   TableCell,
@@ -47,6 +48,10 @@ export const Schedule = () => {
     mem: null,
     holidayFlg: false,
   });
+  /** スナックバーの表示するかしないか */
+  const [snackBarOpen, setSnackBarOpen] = useState(false);
+  /** スナックバーのメッセージ */
+  const [snackBarMessage, setSnackBarMessage] = useState('');
 
   /* useForm ------------------------------------------------------------- */
   const { handleSubmit, control, reset, getValues } = useForm<WeeklySearchValues>({
@@ -63,9 +68,15 @@ export const Schedule = () => {
   const onSubmit = async (data: WeeklySearchValues) => {
     setIsLoading(true);
     sessionStorage.setItem('weekly', JSON.stringify(data));
-    const list = await getWeeklyScheduleList(data);
-    setScheList(list);
-    setIsLoading(false);
+    try {
+      const list = await getWeeklyScheduleList(data);
+      setScheList(list);
+      setIsLoading(false);
+    } catch (e) {
+      setIsLoading(false);
+      setSnackBarMessage('データ取得エラー');
+      setSnackBarOpen(true);
+    }
   };
 
   /** テーブル上部の日直・メモをクリックしたときの処理 */
@@ -86,14 +97,19 @@ export const Schedule = () => {
       setScheList(list);
       setIsLoading(false);
     };
-
-    if (searchParams) {
-      setIsLoading(true);
-      // 検索条件表示と検索
-      reset(searchParams);
-      getSchedule(searchParams);
-    } else {
-      getSchedule({ startDate: new Date(), endDate: null, dateCount: 31 });
+    try {
+      if (searchParams) {
+        setIsLoading(true);
+        // 検索条件表示と検索
+        reset(searchParams);
+        getSchedule(searchParams);
+      } else {
+        getSchedule({ startDate: new Date(), endDate: null, dateCount: 31 });
+      }
+    } catch (e) {
+      setIsLoading(false);
+      setSnackBarMessage('データ取得エラー');
+      setSnackBarOpen(true);
     }
   }, [reset]);
 
@@ -410,6 +426,14 @@ export const Schedule = () => {
           </TableBody>
         </Table>
       </TableContainer>
+      <Snackbar
+        open={snackBarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackBarOpen(false)}
+        message={snackBarMessage}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={{ marginTop: '65px' }}
+      />
     </Container>
   );
 };

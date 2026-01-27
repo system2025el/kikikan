@@ -174,7 +174,14 @@ export const selectWeeklyList = async (queries: { start: string; count: number }
         AND
           s_head.juchu_sharyo_head_id = s_meisai.juchu_sharyo_head_id
         LEFT JOIN
-          ${SCHEMA}.t_juchu_head as juchu
+          (
+            SELECT
+              juchu_head_id, kokyaku_id, koen_nam, del_flg 
+            FROM
+              ${SCHEMA}.t_juchu_head
+            WHERE
+              del_flg != 1
+          ) as juchu
         ON
           juchu.juchu_head_id = s_meisai.juchu_head_id
         LEFT JOIN
@@ -195,8 +202,6 @@ export const selectWeeklyList = async (queries: { start: string; count: number }
         LEFT JOIN
           ${SCHEMA}.t_weekly
         ON cal.cal_dat = t_weekly.weekly_dat
-        WHERE juchu.del_flg = 0
-        OR juchu.del_flg IS NULL
         ORDER BY cal.cal_dat, s_meisai.nyushuko_dat;
     `;
 
