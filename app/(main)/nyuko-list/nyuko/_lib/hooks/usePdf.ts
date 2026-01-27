@@ -201,8 +201,8 @@ export const usePdf = (): [(params: PdfModel[]) => Promise<Blob>] => {
         maxWidth: number
       ) => {
         const t = title ?? '';
-        const s = subtitle ?? '';
-        const fullString = `${t}（${s}）`;
+        const s = subtitle?.trim() ?? '';
+        const fullString = s ? `${t}（${s}）` : `${t}`;
 
         // 全体が収まるならそのまま返す
         if (getTextWidth(fullString) <= maxWidth) return fullString;

@@ -18,7 +18,7 @@ import {
   Typography,
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { RadioButtonGroup, SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
@@ -51,6 +51,8 @@ export const EqptOrderList = () => {
   const [customers, setCustomers] = useState<SelectTypes[] | undefined>([]);
   /** */
   const [locs, setLocs] = useState<SelectTypes[] | undefined>([]);
+
+  const [error, setError] = useState<Error | null>(null);
 
   /* useForm ------------------------------------------ */
   const { control, handleSubmit, reset, getValues, watch } = useForm<EqptOrderSearchValues>({
@@ -114,6 +116,8 @@ export const EqptOrderList = () => {
       });
     }
   }, [reset]);
+
+  if (error) throw error;
 
   return (
     <PermissionGuard category={'juchu'} required={permission.juchu_ref}>
