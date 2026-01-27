@@ -18,10 +18,9 @@ export const JuchuKizaiHeadSchema = z
       .max(999, { message: validationMessages.maxNumberLength(3) })
       .nullable(),
     mem: z.string().nullable(),
-    headNam: z
-      .string({ message: validationMessages.required() })
-      .min(1, { message: validationMessages.required() })
-      .max(20, { message: validationMessages.maxStringLength(20) }),
+    headNam: z.string(/*{ message: validationMessages.required() }*/).nullable(),
+    // .min(1, { message: validationMessages.required() })
+    // .max(20, { message: validationMessages.maxStringLength(20) }),
     kicsShukoDat: z.date().nullable(),
     kicsNyukoDat: z.date().nullable(),
     yardShukoDat: z.date().nullable(),

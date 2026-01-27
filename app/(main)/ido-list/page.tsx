@@ -10,7 +10,6 @@ const Page = async () => {
   // if (!idoData) {
   //   return <div>エラー</div>;
   // }
-
   return <IdoList />;
 };
 export default Page;
