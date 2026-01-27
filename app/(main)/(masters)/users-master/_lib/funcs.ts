@@ -3,8 +3,8 @@
 import { revalidatePath } from 'next/cache';
 
 import pool from '@/app/_lib/db/postgres';
-import { supabase /*supabaseAdmin*/ } from '@/app/_lib/db/supabase';
-import { supabaseAdmin } from '@/app/_lib/db/supabase-admin';
+import { supabase /*supabaseAdmin*/, supabaseAdmin } from '@/app/_lib/db/supabase';
+//import { supabaseAdmin } from '@/app/_lib/db/supabase-admin';
 import {
   insertNewUser,
   SelectFilteredUsers,
@@ -131,11 +131,11 @@ export const addNewUser = async (data: UsersMasterDialogValues, user: string) =>
       console.log(result);
     }
     // 認証メール送信
-    console.log(`${getUrl()}login`);
+    console.log(`${getUrl()}signup`);
     const { error } = await supabase.auth.signUp({
       email: data.mailAdr,
       password: 'password',
-      options: { emailRedirectTo: `${getUrl()}login` },
+      options: { emailRedirectTo: /*`${getUrl()}login`*/ `${getUrl()}signup` },
     });
 
     // const { error } = await supabase.auth.signInWithOtp({
@@ -258,11 +258,11 @@ export const restoreUsers = async (mailAdr: string, user: string) => {
     // 担当者マスタ更新
     await updMUserDelFlg(delData, connection);
     // 認証メール送信
-    console.log(`${getUrl()}login`);
+    console.log(`${getUrl()}signup`);
     const { error } = await supabase.auth.signUp({
       email: mailAdr,
       password: 'password',
-      options: { emailRedirectTo: `${getUrl()}login` },
+      options: { emailRedirectTo: /*`${getUrl()}login`*/ `${getUrl()}signup` },
     });
     if (error) {
       console.error('削除失敗:', error.message);
@@ -297,11 +297,11 @@ export const restoreUsersAndShainCod = async (mailAdr: string, shainCod: string 
     // 担当者マスタ更新
     await updMUserDelFlgAndShainCod(delData, connection);
     // 認証メール送信
-    console.log(`${getUrl()}login`);
+    console.log(`${getUrl()}signup`);
     const { error } = await supabase.auth.signUp({
       email: mailAdr,
       password: 'password',
-      options: { emailRedirectTo: `${getUrl()}login` },
+      options: { emailRedirectTo: /*`${getUrl()}login`*/ `${getUrl()}signup` },
     });
     if (error) {
       console.error('削除失敗:', error.message);

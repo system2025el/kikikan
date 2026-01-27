@@ -45,6 +45,7 @@ type StockTableProps = {
 };
 
 export const StockTable: React.FC<StockTableProps> = ({ eqStockList, dateRange, juchuHonbanbiList, ref }) => {
+  console.log('stockテーブル描写');
   return (
     <TableContainer ref={ref} style={{ overflow: 'scroll', maxHeight: '80vh' }}>
       <Table stickyHeader>
@@ -99,11 +100,10 @@ export type StockTableRowProps = {
 
 const StockTableRow = React.memo(
   ({ row, index, dateRange, juchuHonbanbiList }: StockTableRowProps) => {
-    console.log('date側描画', index);
+    console.log('stock側描写', index);
     return (
       <TableRow>
         {row.map((cell, colIndex) => {
-          console.log('stock側描写');
           return (
             <TableCell
               key={colIndex}
@@ -199,6 +199,8 @@ export const EqTable: React.FC<EqTableProps> = ({
   const handleYobiRef = (rowIndex: number) => (el: HTMLInputElement | null) => {
     inputYobiRefs.current[rowIndex] = el;
   };
+
+  console.log('eqテーブル描写');
 
   return (
     <TableContainer ref={ref} style={{ overflow: 'scroll', maxHeight: '80vh' }}>
