@@ -166,14 +166,6 @@ export const selectWeeklyList = async (queries: { start: string; count: number }
           juchu.koen_nam,
           kokyaku.kokyaku_nam
         FROM
-          ${SCHEMA}.t_juchu_sharyo_head as s_head
-        LEFT JOIN
-          ${SCHEMA}.t_juchu_sharyo_meisai as s_meisai
-        ON 
-          s_head.juchu_head_id = s_meisai.juchu_head_id
-        AND
-          s_head.juchu_sharyo_head_id = s_meisai.juchu_sharyo_head_id
-        LEFT JOIN
           (
             SELECT
               juchu_head_id, kokyaku_id, koen_nam, del_flg 
@@ -182,8 +174,16 @@ export const selectWeeklyList = async (queries: { start: string; count: number }
             WHERE
               del_flg != 1
           ) as juchu
+        LEFT JOIN
+          ${SCHEMA}.t_juchu_sharyo_head as s_head
         ON
-          juchu.juchu_head_id = s_meisai.juchu_head_id
+          juchu.juchu_head_id = s_head.juchu_head_id
+        LEFT JOIN
+          ${SCHEMA}.t_juchu_sharyo_meisai as s_meisai
+        ON 
+          s_head.juchu_head_id = s_meisai.juchu_head_id
+        AND
+          s_head.juchu_sharyo_head_id = s_meisai.juchu_sharyo_head_id
         LEFT JOIN
           ${SCHEMA}.m_kokyaku as kokyaku
         ON
