@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Grid2 } from '@mui/material';
+import { Grid2, Snackbar } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { CheckboxElement, TextareaAutosizeElement, TextFieldElement } from 'react-hook-form-mui';
@@ -34,6 +34,8 @@ export const ShukeibumonsMasterDialog = ({
   /* useState -------------------------------------- */
   /* DBのローディング状態 */
   const [isLoading, setIsLoading] = useState(true);
+  // エラーハンドリング
+  const [error, setError] = useState<Error | null>(null);
   /* ダイアログでの編集モードかどうか */
   const [editable, setEditable] = useState(false);
   /* 新規作成かどうか */
@@ -44,6 +46,10 @@ export const ShukeibumonsMasterDialog = ({
   const [deleteOpen, setDeleteOpen] = useState(false);
   /* submit時のactions (save, delete) */
   const [action, setAction] = useState<'save' | 'delete' | 'restore' | undefined>(undefined);
+  // スナックバー制御
+  const [snackBarOpen, setSnackBarOpen] = useState(false);
+  // スナックバーメッセージ
+  const [snackBarMessage, setSnackBarMessage] = useState('');
 
   /* useForm ----------------------------------------- */
   const {
@@ -71,17 +77,31 @@ export const ShukeibumonsMasterDialog = ({
     console.log(data);
     if (shukeibumonId === FAKE_NEW_ID) {
       // 新規の時
-      await addNewShukeibumon(data, user?.name ?? '');
+      try {
+        await addNewShukeibumon(data, user?.name ?? '');
+      } catch (e) {
+        setSnackBarMessage('保存に失敗しました');
+        setSnackBarOpen(true);
+        return;
+      } finally {
+        setIsLoading(false);
+      }
       handleCloseDialog();
-      setIsLoading(false);
       refetchShukeibumons();
     } else {
       // 更新の時
       if (action === 'save') {
         // 保存終了ボタン押したとき
-        await updateShukeibumon(data, shukeibumonId, user?.name ?? '');
+        try {
+          await updateShukeibumon(data, shukeibumonId, user?.name ?? '');
+        } catch (e) {
+          setSnackBarMessage('保存に失敗しました');
+          setSnackBarOpen(true);
+          return;
+        } finally {
+          setIsLoading(false);
+        }
         handleCloseDialog();
-        setIsLoading(false);
         refetchShukeibumons();
       } else if (action === 'delete') {
         setIsLoading(false);
@@ -91,9 +111,16 @@ export const ShukeibumonsMasterDialog = ({
       } else if (action === 'restore') {
         // 有効化ボタン
         const values = await getValues();
-        await updateShukeibumon({ ...values, delFlg: false }, shukeibumonId, user?.name ?? '');
+        try {
+          await updateShukeibumon({ ...values, delFlg: false }, shukeibumonId, user?.name ?? '');
+        } catch (e) {
+          setSnackBarMessage('有効化に失敗しました');
+          setSnackBarOpen(true);
+          return;
+        } finally {
+          setIsLoading(false);
+        }
         handleCloseDialog();
-        setIsLoading(false);
         refetchShukeibumons();
       }
     }
@@ -120,10 +147,17 @@ export const ShukeibumonsMasterDialog = ({
   const handleConfirmDelete = async () => {
     setIsLoading(true);
     const values = await getValues();
-    await updateShukeibumon({ ...values, delFlg: true }, shukeibumonId, user?.name ?? '');
-    setDeleteOpen(false);
+    try {
+      await updateShukeibumon({ ...values, delFlg: true }, shukeibumonId, user?.name ?? '');
+    } catch (e) {
+      setSnackBarMessage('無効化に失敗しました');
+      setSnackBarOpen(true);
+      return;
+    } finally {
+      setDeleteOpen(false);
+      setIsLoading(false);
+    }
     handleCloseDialog();
-    setIsLoading(false);
     await refetchShukeibumons();
   };
 
@@ -138,9 +172,13 @@ export const ShukeibumonsMasterDialog = ({
         setIsLoading(false);
         setIsNew(true);
       } else {
-        const shukeibumon1 = await getChosenShukeibumon(shukeibumonId);
-        if (shukeibumon1) {
-          reset(shukeibumon1); // 取得したデータでフォーム初期化
+        try {
+          const shukeibumon1 = await getChosenShukeibumon(shukeibumonId);
+          if (shukeibumon1) {
+            reset(shukeibumon1); // 取得したデータでフォーム初期化
+          }
+        } catch (e) {
+          setError(e instanceof Error ? e : new Error(String(e)));
         }
         setIsLoading(false);
       }
@@ -148,63 +186,75 @@ export const ShukeibumonsMasterDialog = ({
     getThatOneShukeibumon();
   }, [shukeibumonId, reset]);
 
+  if (error) throw error;
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <MasterDialogTitle
-        user={user}
-        editable={editable}
-        handleEditable={() => setEditable(true)}
-        handleClose={handleClickClose}
-        dialogTitle="集計部門マスタ登録"
-        isNew={isNew}
-        isDirty={isDirty}
-        isDeleted={isDeleted!}
-        push={isLoading}
-        setAction={setAction}
+    <>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <MasterDialogTitle
+          user={user}
+          editable={editable}
+          handleEditable={() => setEditable(true)}
+          handleClose={handleClickClose}
+          dialogTitle="集計部門マスタ登録"
+          isNew={isNew}
+          isDirty={isDirty}
+          isDeleted={isDeleted!}
+          push={isLoading}
+          setAction={setAction}
+        />
+        {isLoading ? ( //DB
+          <Loading />
+        ) : (
+          <>
+            <Grid2 container spacing={1} p={5} direction={'column'} justifyContent={'center'} width={'100%'}>
+              <FormBox formItem={formItems[0]} required>
+                <TextFieldElement
+                  name="shukeibumonNam"
+                  control={control}
+                  label={editable ? formItems[0].exsample : ''}
+                  fullWidth
+                  sx={{ maxWidth: '90%' }}
+                  disabled={editable ? false : true}
+                />
+              </FormBox>
+              <FormBox formItem={formItems[2]}>
+                <TextFieldElement
+                  multiline
+                  name="mem"
+                  control={control}
+                  label={editable ? formItems[2].exsample : ''}
+                  fullWidth
+                  minRows={3}
+                  maxRows={3}
+                  sx={{ maxWidth: '90%' }}
+                  disabled={editable ? false : true}
+                />
+              </FormBox>
+            </Grid2>
+            <IsDirtyAlertDialog
+              open={dirtyOpen}
+              handleCloseDirty={() => setDirtyOpen(false)}
+              handleCloseAll={handleCloseDialog}
+            />
+            <WillDeleteAlertDialog
+              open={deleteOpen}
+              data={name}
+              push={isLoading}
+              handleCloseDelete={() => setDeleteOpen(false)}
+              handleConfirmDelete={handleConfirmDelete}
+            />
+          </>
+        )}
+      </form>
+      <Snackbar
+        open={snackBarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackBarOpen(false)}
+        message={snackBarMessage}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={{ marginTop: '65px' }}
       />
-      {isLoading ? ( //DB
-        <Loading />
-      ) : (
-        <>
-          <Grid2 container spacing={1} p={5} direction={'column'} justifyContent={'center'} width={'100%'}>
-            <FormBox formItem={formItems[0]} required>
-              <TextFieldElement
-                name="shukeibumonNam"
-                control={control}
-                label={editable ? formItems[0].exsample : ''}
-                fullWidth
-                sx={{ maxWidth: '90%' }}
-                disabled={editable ? false : true}
-              />
-            </FormBox>
-            <FormBox formItem={formItems[2]}>
-              <TextFieldElement
-                multiline
-                name="mem"
-                control={control}
-                label={editable ? formItems[2].exsample : ''}
-                fullWidth
-                minRows={3}
-                maxRows={3}
-                sx={{ maxWidth: '90%' }}
-                disabled={editable ? false : true}
-              />
-            </FormBox>
-          </Grid2>
-          <IsDirtyAlertDialog
-            open={dirtyOpen}
-            handleCloseDirty={() => setDirtyOpen(false)}
-            handleCloseAll={handleCloseDialog}
-          />
-          <WillDeleteAlertDialog
-            open={deleteOpen}
-            data={name}
-            push={isLoading}
-            handleCloseDelete={() => setDeleteOpen(false)}
-            handleConfirmDelete={handleConfirmDelete}
-          />
-        </>
-      )}
-    </form>
+    </>
   );
 };

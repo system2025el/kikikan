@@ -33,6 +33,8 @@ export const VehiclesMaster = () => {
   const [page, setPage] = useState(1);
   /** ローディング */
   const [isLoading, setIsLoading] = useState(true);
+  // エラーハンドリング
+  const [error, setError] = useState<Error | null>(null);
   /* useState ------------------------------- */
   /* ダイアログ開く車両のID、閉じるとき、未選択でFAKE_NEW_IDとする */
   const [openId, setOpenID] = useState<number>(FAKE_NEW_ID);
@@ -52,8 +54,12 @@ export const VehiclesMaster = () => {
   /* 情報が変わったときに更新される */
   const refetchVehs = async () => {
     setIsLoading(true);
-    const updated = await getFilteredVehs();
-    setVehs(updated);
+    try {
+      const updated = await getFilteredVehs();
+      setVehs(updated);
+    } catch (e) {
+      setError(e instanceof Error ? e : new Error(String(e)));
+    }
     setIsLoading(false);
   };
 
@@ -78,12 +84,18 @@ export const VehiclesMaster = () => {
   useEffect(() => {
     const getList = async () => {
       setIsLoading(true);
-      const dataList = await getFilteredVehs();
-      setVehs(dataList);
+      try {
+        const dataList = await getFilteredVehs();
+        setVehs(dataList);
+      } catch (e) {
+        setError(e instanceof Error ? e : new Error(String(e)));
+      }
       setIsLoading(false);
     };
     getList();
   }, []);
+
+  if (error) throw error;
 
   return (
     <PermissionGuard category={'masters'} required={permission.mst_ref}>

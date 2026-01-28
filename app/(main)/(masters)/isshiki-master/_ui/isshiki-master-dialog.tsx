@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { Box, Button, Grid2, Stack, Typography } from '@mui/material';
+import { Box, Button, Grid2, Snackbar, Stack, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
@@ -38,6 +38,8 @@ export const IsshikisMasterDialog = ({
   /* useState -------------------------------------- */
   /* DBのローディング状態 */
   const [isLoading, setIsLoading] = useState(true);
+  // エラーハンドリング
+  const [error, setError] = useState<Error | null>(null);
   /* ダイアログでの編集モードかどうか */
   const [editable, setEditable] = useState(false);
   /* 新規作成かどうか */
@@ -52,6 +54,10 @@ export const IsshikisMasterDialog = ({
   const [currentIsshikiList, setCurrentIsshikiList] = useState<IsshikisMasterDialogValues>();
   /** 機材選択ダイアログ開閉 */
   const [eqSelectOpen, setEqSelectOpen] = useState<boolean>(false);
+  // スナックバー制御
+  const [snackBarOpen, setSnackBarOpen] = useState(false);
+  // スナックバーメッセージ
+  const [snackBarMessage, setSnackBarMessage] = useState('');
 
   /* useForm ----------------------------------------- */
   const isshikiForm = useForm({
@@ -82,15 +88,29 @@ export const IsshikisMasterDialog = ({
   const onSubmit = async (data: IsshikisMasterDialogValues) => {
     setIsLoading(true);
     if (isshikiId === FAKE_NEW_ID) {
-      await addNewIsshiki(data, user?.name ?? '');
+      try {
+        await addNewIsshiki(data, user?.name ?? '');
+      } catch (e) {
+        setSnackBarMessage('保存に失敗しました');
+        setSnackBarOpen(true);
+        return;
+      } finally {
+        setIsLoading(false);
+      }
       handleCloseDialog();
-      setIsLoading(false);
       refetchIsshikis();
     } else {
       if (action === 'save') {
-        await updateIsshiki(data, currentIsshikiList ?? emptyIsshiki, isshikiId, user?.name ?? '');
+        try {
+          await updateIsshiki(data, currentIsshikiList ?? emptyIsshiki, isshikiId, user?.name ?? '');
+        } catch (e) {
+          setSnackBarMessage('保存に失敗しました');
+          setSnackBarOpen(true);
+          return;
+        } finally {
+          setIsLoading(false);
+        }
         handleCloseDialog();
-        setIsLoading(false);
         refetchIsshikis();
       } else if (action === 'delete') {
         setIsLoading(false);
@@ -98,9 +118,16 @@ export const IsshikisMasterDialog = ({
         return;
       } else if (action === 'restore') {
         // 有効化ボタン
-        await updIsshikiDelFlg(isshikiId, false, user?.name ?? '');
+        try {
+          await updIsshikiDelFlg(isshikiId, false, user?.name ?? '');
+        } catch (e) {
+          setSnackBarMessage('有効化に失敗しました');
+          setSnackBarOpen(true);
+          return;
+        } finally {
+          setIsLoading(false);
+        }
         handleCloseDialog();
-        setIsLoading(false);
         refetchIsshikis();
       }
     }
@@ -126,10 +153,17 @@ export const IsshikisMasterDialog = ({
   /* 削除確認ダイアログで削除選択時 */
   const handleConfirmDelete = async () => {
     setIsLoading(true);
-    await updIsshikiDelFlg(isshikiId, true, user?.name ?? '');
-    setDeleteOpen(false);
+    try {
+      await updIsshikiDelFlg(isshikiId, true, user?.name ?? '');
+    } catch (e) {
+      setSnackBarMessage('無効化に失敗しました');
+      setSnackBarOpen(true);
+      return;
+    } finally {
+      setDeleteOpen(false);
+      setIsLoading(false);
+    }
     handleCloseDialog();
-    setIsLoading(false);
     await refetchIsshikis();
   };
 
@@ -144,16 +178,22 @@ export const IsshikisMasterDialog = ({
         setIsLoading(false);
         setIsNew(true);
       } else {
-        const isshiki1 = await getChosenIsshiki(isshikiId);
-        if (isshiki1) {
-          reset(isshiki1); // 取得したデータでフォーム初期化
-          setCurrentIsshikiList(isshiki1);
-          setIsLoading(false);
+        try {
+          const isshiki1 = await getChosenIsshiki(isshikiId);
+          if (isshiki1) {
+            reset(isshiki1); // 取得したデータでフォーム初期化
+            setCurrentIsshikiList(isshiki1);
+          }
+        } catch (e) {
+          setError(e instanceof Error ? e : new Error(String(e)));
         }
+        setIsLoading(false);
       }
     };
     getThatOneIsshiki();
   }, [isshikiId, reset]);
+
+  if (error) throw error;
 
   return (
     <>
@@ -277,6 +317,14 @@ export const IsshikisMasterDialog = ({
           </>
         )}
       </form>
+      <Snackbar
+        open={snackBarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackBarOpen(false)}
+        message={snackBarMessage}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={{ marginTop: '65px' }}
+      />
     </>
   );
 };

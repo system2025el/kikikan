@@ -145,7 +145,8 @@ export const getAllSelections = async (): Promise<{
     return { d: daibumons, s: shukeibumons, b: bumons, shozoku: shozoku, section: section };
   } catch (error) {
     console.error('Error fetching all selections:', error);
-    return { d: [], s: [], b: [], shozoku: [], section: [] };
+    throw error;
+    //return { d: [], s: [], b: [], shozoku: [], section: [] };
   }
 };
 
@@ -186,7 +187,8 @@ export const getAllBumonDSSelections = async (): Promise<{
     return { d: daibumons!, s: shukeibumons! };
   } catch (error) {
     console.error('Error fetching all selections:', error);
-    return { d: [], s: [] };
+    throw error;
+    //return { d: [], s: [] };
   }
 };
 

@@ -46,6 +46,8 @@ export const LocationsMaster = () => {
   const [page, setPage] = useState(1);
   /** ローディング */
   const [isLoading, setIsLoading] = useState(true);
+  // エラーハンドリング
+  const [error, setError] = useState<Error | null>(null);
   /* ダイアログ開く公演場所のID、閉じるとき、未選択でFAKE_NEW_IDとする */
   const [openId, setOpenID] = useState<number>(FAKE_NEW_ID);
   /* 詳細ダイアログの開閉状態 */
@@ -62,9 +64,13 @@ export const LocationsMaster = () => {
   const onSubmit = async (data: { query: string | undefined }) => {
     setIsLoading(true);
     console.log('data : ', data, 'locs : ', locs);
-    const newList = await getFilteredLocs(data.query!);
-    setPage(1);
-    setLocs(newList);
+    try {
+      const newList = await getFilteredLocs(data.query!);
+      setPage(1);
+      setLocs(newList);
+    } catch (e) {
+      setError(e instanceof Error ? e : new Error(String(e)));
+    }
     setIsLoading(false);
     console.log('Locs : ', locs);
   };
@@ -82,8 +88,12 @@ export const LocationsMaster = () => {
   const refetchLocs = async () => {
     setIsLoading(true);
     const searchParams = getValues();
-    const updated = await getFilteredLocs(searchParams.query);
-    setLocs(updated);
+    try {
+      const updated = await getFilteredLocs(searchParams.query);
+      setLocs(updated);
+    } catch (e) {
+      setError(e instanceof Error ? e : new Error(String(e)));
+    }
     setIsLoading(false);
   };
 
@@ -92,12 +102,18 @@ export const LocationsMaster = () => {
   useEffect(() => {
     const getList = async () => {
       setIsLoading(true);
-      const dataList = await getFilteredLocs();
-      setLocs(dataList);
+      try {
+        const dataList = await getFilteredLocs();
+        setLocs(dataList);
+      } catch (e) {
+        setError(e instanceof Error ? e : new Error(String(e)));
+      }
       setIsLoading(false);
     };
     getList();
   }, []);
+
+  if (error) throw error;
 
   return (
     <>

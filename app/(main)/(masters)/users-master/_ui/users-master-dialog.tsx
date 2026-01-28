@@ -2,7 +2,17 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import WarningIcon from '@mui/icons-material/Warning';
-import { Box, Button, Dialog, DialogActions, DialogContentText, DialogTitle, Grid2, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContentText,
+  DialogTitle,
+  Grid2,
+  Snackbar,
+  Typography,
+} from '@mui/material';
 import { useEffect, useState } from 'react';
 import { RadioButtonGroup, TextFieldElement, useForm } from 'react-hook-form-mui';
 
@@ -54,6 +64,8 @@ export const UsersMasterDialog = ({
   /* useState --------------------- */
   /** DBのローディング状態 */
   const [isLoading, setIsLoading] = useState(true);
+  // エラーハンドリング
+  const [error, setError] = useState<Error | null>(null);
   /* ダイアログでの編集モードかどうか */
   const [editable, setEditable] = useState(false);
   /* 新規作成かどうか */
@@ -74,6 +86,10 @@ export const UsersMasterDialog = ({
   const [codErrorMsg, setCodErrorMsg] = useState<string | null>(null);
   /* 元の社員番号 */
   const [currentShainCod, setCurrentShainCod] = useState<string | null>(null);
+  // スナックバー制御
+  const [snackBarOpen, setSnackBarOpen] = useState(false);
+  // スナックバーメッセージ
+  const [snackBarMessage, setSnackBarMessage] = useState('');
 
   /* useForm ------------------------- */
   const {
@@ -97,6 +113,7 @@ export const UsersMasterDialog = ({
   /* methods ---------------------------- */
   /* フォームを送信 */
   const onSubmit = async (data: UsersMasterDialogValues) => {
+    console.log(data);
     setIsLoading(true);
 
     setCodErrorMsg(null);
@@ -104,69 +121,70 @@ export const UsersMasterDialog = ({
     if (currentMailAdr === String(FAKE_NEW_ID)) {
       // 新規処理
       // メールアドレスと社員コードの重複確認
-      const adr = await checkMailAdr(data.mailAdr);
-      if (adr.data) {
-        setAdrErrorMsg('既に使われているメールアドレスです');
-        setIsLoading(false);
-
-        if (data.shainCod) {
-          const cod = await checkShainCod(data.shainCod);
+      try {
+        const adr = await checkMailAdr(data.mailAdr);
+        // 社員コードは入力されていれば重複チェック
+        const cod = data.shainCod ? await checkShainCod(data.shainCod) : { data: null };
+        if (!adr.data && !cod.data) {
+          await addNewUser(data, user?.name ?? '');
+          handleCloseDialog();
+          refetchUsers();
+        } else {
+          if (adr.data) {
+            setAdrErrorMsg('既に使われているメールアドレスです');
+          }
           if (cod.data) {
             setCodErrorMsg(`既に使われている社員コードです`);
-            setIsLoading(false);
-          }
-          if (!adr.data && !cod.data) {
-            await addNewUser(data, user?.name ?? '');
-            handleCloseDialog();
-            setIsLoading(false);
-            refetchUsers();
           }
         }
-      } else {
-        await addNewUser(data, user?.name ?? '');
-        handleCloseDialog();
+      } catch (e) {
+        setSnackBarMessage('保存に失敗しました');
+        setSnackBarOpen(true);
+        return;
+      } finally {
         setIsLoading(false);
-        refetchUsers();
       }
     } else {
       // 更新処理
       if (action === 'save') {
-        if (willRestore) {
-          // 有効化処理
-          if (data.shainCod) {
-            const cod = await checkShainCod(data.shainCod);
-            if (cod.data) {
-              setCodErrorMsg(`既に使われている社員コードです`);
-              setIsLoading(false);
-              setEditable(true);
+        try {
+          if (willRestore) {
+            // 有効化処理
+            if (data.shainCod) {
+              const cod = await checkShainCod(data.shainCod);
+              if (cod.data) {
+                setCodErrorMsg(`既に使われている社員コードです`);
+                setEditable(true);
+              } else {
+                setRestoreOpen(true);
+              }
             } else {
-              setIsLoading(false);
               setRestoreOpen(true);
             }
           } else {
-            setIsLoading(false);
-            setRestoreOpen(true);
-          }
-        } else {
-          // 保存処理
-          if (data.shainCod && data.shainCod !== currentShainCod) {
-            const cod = await checkShainCod(data.shainCod);
-            if (cod.data) {
-              setCodErrorMsg(`既に使われている社員コードです`);
-              setEditable(true);
-              setIsLoading(false);
+            // 保存処理
+            if (data.shainCod && data.shainCod !== currentShainCod) {
+              const cod = await checkShainCod(data.shainCod);
+              if (cod.data) {
+                setCodErrorMsg(`既に使われている社員コードです`);
+                setEditable(true);
+              } else {
+                await updateUser(currentMailAdr, data, user?.name ?? '');
+                handleCloseDialog();
+                refetchUsers();
+              }
             } else {
               await updateUser(currentMailAdr, data, user?.name ?? '');
               handleCloseDialog();
-              setIsLoading(false);
               refetchUsers();
             }
-          } else {
-            await updateUser(currentMailAdr, data, user?.name ?? '');
-            handleCloseDialog();
-            setIsLoading(false);
-            refetchUsers();
           }
+        } catch (e) {
+          setSnackBarMessage('保存に失敗しました');
+          setSnackBarOpen(true);
+          return;
+        } finally {
+          setIsLoading(false);
         }
       } else if (action === 'delete') {
         setIsLoading(false);
@@ -176,21 +194,25 @@ export const UsersMasterDialog = ({
       } else if (action === 'restore') {
         // 有効化
         // 社員コードの重複確認
-        if (currentShainCod) {
-          const cod = await checkShainCod(currentShainCod);
-          if (cod.data) {
-            setCodErrorMsg(`既に使われている社員コードです`);
-            setValue('delFlg', false);
-            setWillRestore(true);
-            setIsLoading(false);
+        try {
+          if (currentShainCod) {
+            const cod = await checkShainCod(currentShainCod);
+            if (cod.data) {
+              setCodErrorMsg(`既に使われている社員コードです`);
+              setValue('delFlg', false);
+              setWillRestore(true);
+            } else {
+              setRestoreOpen(true);
+            }
           } else {
-            setIsLoading(false);
             setRestoreOpen(true);
           }
-        }
-        if (!currentShainCod) {
+        } catch (e) {
+          setSnackBarMessage('有効化に失敗しました');
+          setSnackBarOpen(true);
+          return;
+        } finally {
           setIsLoading(false);
-          setRestoreOpen(true);
         }
       }
     }
@@ -216,30 +238,40 @@ export const UsersMasterDialog = ({
   /* 無効化確認ダイアログで無効化選択時 */
   const handleConfirmDelete = async () => {
     setIsLoading(true);
-    await deleteUsers(currentMailAdr, user?.name ?? '');
-    setDeleteOpen(false);
+    try {
+      await deleteUsers(currentMailAdr, user?.name ?? '');
+    } catch (e) {
+      setSnackBarMessage('無効化に失敗しました');
+      setSnackBarOpen(true);
+      return;
+    } finally {
+      setDeleteOpen(false);
+      setIsLoading(false);
+    }
     handleCloseDialog();
-    setIsLoading(false);
     await refetchUsers();
   };
 
   /* 有効か確認ダイアログで有効化選択時 */
   const handleConfirmRestore = async () => {
     setIsLoading(true);
-    if (willRestore) {
-      const shainCod = getValues('shainCod');
-      await restoreUsersAndShainCod(currentMailAdr, shainCod ?? null, user?.name ?? '');
+    try {
+      if (willRestore) {
+        const shainCod = getValues('shainCod');
+        await restoreUsersAndShainCod(currentMailAdr, shainCod ?? null, user?.name ?? '');
+      } else {
+        await restoreUsers(currentMailAdr, user?.name ?? '');
+      }
+    } catch (e) {
+      setSnackBarMessage('有効化に失敗しました');
+      setSnackBarOpen(true);
+      return;
+    } finally {
       setRestoreOpen(false);
-      handleCloseDialog();
       setIsLoading(false);
-      await refetchUsers();
-    } else {
-      await restoreUsers(currentMailAdr, user?.name ?? '');
-      setRestoreOpen(false);
-      handleCloseDialog();
-      setIsLoading(false);
-      await refetchUsers();
     }
+    handleCloseDialog();
+    await refetchUsers();
   };
 
   /* useEffect --------------------------------------- */
@@ -253,16 +285,22 @@ export const UsersMasterDialog = ({
         setIsLoading(false);
         setIsNew(true);
       } else {
-        const user1 = await getChosenUser(currentMailAdr);
-        if (user1) {
-          reset(user1); // 取得したデータでフォーム初期化
-          setCurrentShainCod(user1.shainCod ?? null);
+        try {
+          const user1 = await getChosenUser(currentMailAdr);
+          if (user1) {
+            reset(user1); // 取得したデータでフォーム初期化
+            setCurrentShainCod(user1.shainCod ?? null);
+          }
+        } catch (e) {
+          setError(e instanceof Error ? e : new Error(String(e)));
         }
         setIsLoading(false);
       }
     };
     getThatOneUser();
   }, [currentMailAdr, reset]);
+
+  if (error) throw error;
 
   return (
     <>
@@ -291,7 +329,7 @@ export const UsersMasterDialog = ({
                   label={editable ? formItems[0].exsample : ''}
                   fullWidth
                   sx={{ maxWidth: '90%' }}
-                  disabled={editable ? false : true}
+                  disabled={!editable}
                 />
               </FormBox>
               <FormBox formItem={formItems[1]} required>
@@ -460,6 +498,14 @@ export const UsersMasterDialog = ({
           </>
         )}
       </form>
+      <Snackbar
+        open={snackBarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackBarOpen(false)}
+        message={snackBarMessage}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={{ marginTop: '65px' }}
+      />
     </>
   );
 };

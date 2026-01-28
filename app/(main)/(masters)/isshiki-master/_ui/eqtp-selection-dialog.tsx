@@ -7,6 +7,7 @@ import {
   DialogTitle,
   Divider,
   Paper,
+  Snackbar,
   Stack,
   Table,
   TableBody,
@@ -48,6 +49,8 @@ export const EqptIsshikiSelectionDialog = ({
 }) => {
   /** ローディング */
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  // エラーハンドリング
+  const [error, setError] = useState<Error | null>(null);
   /** 選択肢の機材リスト */
   const [options, setOptions] = useState<EqptSelection[]>([]);
   /** 選択制御用の機材の配列 */
@@ -56,6 +59,10 @@ export const EqptIsshikiSelectionDialog = ({
   const [search, setSearch] = useState<string | null>(null);
   /** エラーの機材名の配列 */
   const [dupeKizaiNamList, setDupeKizaiNamList] = useState<string[]>([]);
+  // スナックバー制御
+  const [snackBarOpen, setSnackBarOpen] = useState(false);
+  // スナックバーメッセージ
+  const [snackBarMessage, setSnackBarMessage] = useState('');
 
   /* methods -------------------------------------------------------- */
   /** 行押下時（選択時）の処理 */
@@ -79,28 +86,33 @@ export const EqptIsshikiSelectionDialog = ({
   const handleClickCnfirm = async () => {
     setIsLoading(true);
     // 他の一式マスタに使われていないかチェックする
-    const result = await checkExistingIsshiki(isshikiId, selected);
-    console.log(result);
-    if (!result || result.length === 0) {
-      const selectedList = await getSelectedEqpts(selected);
-      const setList: { id: number; nam: string; mem: string | null }[] = selectedList.map((newItem) => {
-        const match = currentEqptList.find((c) => c.id === newItem.kizaiId);
-        return {
-          id: newItem.kizaiId,
-          nam: newItem.kizaiNam ?? match?.nam ?? '',
-          mem: match?.mem ?? null,
-        };
-      });
-      setValue('kizaiList', setList, { shouldDirty: true });
-      setDupeKizaiNamList([]);
-      setSearch(null);
+    try {
+      const result = await checkExistingIsshiki(isshikiId, selected);
+      console.log(result);
+      if (!result || result.length === 0) {
+        const selectedList = await getSelectedEqpts(selected);
+        const setList: { id: number; nam: string; mem: string | null }[] = selectedList.map((newItem) => {
+          const match = currentEqptList.find((c) => c.id === newItem.kizaiId);
+          return {
+            id: newItem.kizaiId,
+            nam: newItem.kizaiNam ?? match?.nam ?? '',
+            mem: match?.mem ?? null,
+          };
+        });
+        setValue('kizaiList', setList, { shouldDirty: true });
+        setDupeKizaiNamList([]);
+        setSearch(null);
+        setOpen(false);
+      } else {
+        const dupEqptNames = (await getSelectedEqpts(result)).map((d) => d.kizaiNam);
+        console.log(dupeKizaiNamList);
+        setDupeKizaiNamList(dupEqptNames);
+      }
+    } catch (e) {
+      setSnackBarMessage('機材選択に失敗しました');
+      setSnackBarOpen(true);
+    } finally {
       setIsLoading(false);
-      setOpen(false);
-    } else {
-      const dupEqptNames = (await getSelectedEqpts(result)).map((d) => d.kizaiNam);
-      console.log(dupeKizaiNamList);
-      setIsLoading(false);
-      setDupeKizaiNamList(dupEqptNames);
     }
   };
 
@@ -117,13 +129,19 @@ export const EqptIsshikiSelectionDialog = ({
   /* useEffect --------------------------------------------- */
   useEffect(() => {
     const getEq = async () => {
-      const o = await getEqptsForEqptSelection();
-      setOptions(o);
-      setSelected(currentEqptList.map((d) => d.id));
+      try {
+        const o = await getEqptsForEqptSelection();
+        setOptions(o);
+        setSelected(currentEqptList.map((d) => d.id));
+      } catch (e) {
+        setError(e instanceof Error ? e : new Error(String(e)));
+      }
       setIsLoading(false);
     };
     getEq();
   }, [currentEqptList, isshikiId]);
+
+  if (error) throw error;
 
   return (
     <Dialog
@@ -237,6 +255,14 @@ export const EqptIsshikiSelectionDialog = ({
           </TableContainer>
         </Box>
       </DialogContent>
+      <Snackbar
+        open={snackBarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackBarOpen(false)}
+        message={snackBarMessage}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={{ marginTop: '65px' }}
+      />
     </Dialog>
   );
 };

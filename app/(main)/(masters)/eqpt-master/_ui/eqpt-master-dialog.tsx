@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Box, Button, Grid2, MenuItem, Select, TextField, Typography } from '@mui/material';
+import { Box, Button, Grid2, MenuItem, Select, Snackbar, TextField, Typography } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import { useEffect, useState } from 'react';
 import {
@@ -39,6 +39,8 @@ export const EqMasterDialog = ({
   const [currentEqpt, setCurrentEqpt] = useState<EqptsMasterDialogValues>(emptyEqpt);
   /** DBのローディング状態 */
   const [isLoading, setIsLoading] = useState(true);
+  // エラーハンドリング
+  const [error, setError] = useState<Error | null>(null);
   /* ダイアログでの編集モードかどうか */
   const [editable, setEditable] = useState(false);
   /* 新規作成かどうか */
@@ -59,6 +61,10 @@ export const EqMasterDialog = ({
   }>({ d: [], s: [], b: [], shozoku: [], section: [] });
   /* 保有数 */
   const [kizaiQty, setKizaiQty] = useState<{ yuko: number; ng: number }>({ yuko: 0, ng: 0 });
+  // スナックバー制御
+  const [snackBarOpen, setSnackBarOpen] = useState(false);
+  // スナックバーメッセージ
+  const [snackBarMessage, setSnackBarMessage] = useState('');
 
   /* useForm ------------------------- */
   const {
@@ -86,17 +92,31 @@ export const EqMasterDialog = ({
     // console.log(data.shukeibumonId, '::::', data.rankAmt1);
     if (eqptId === FAKE_NEW_ID) {
       // 新規登録
-      await addNewEqpt(data, user?.name ?? '');
+      try {
+        await addNewEqpt(data, user?.name ?? '');
+      } catch (e) {
+        setSnackBarMessage('保存に失敗しました');
+        setSnackBarOpen(true);
+        return;
+      } finally {
+        setIsLoading(false);
+      }
       handleCloseDialog();
-      setIsLoading(false);
       refetchEqpts();
     } else {
       // 更新
       if (action === 'save') {
         // 保存終了ボタン
-        await updateEqpt(currentEqpt, data, eqptId, user?.name ?? '');
+        try {
+          await updateEqpt(currentEqpt, data, eqptId, user?.name ?? '');
+        } catch (e) {
+          setSnackBarMessage('保存に失敗しました');
+          setSnackBarOpen(true);
+          return;
+        } finally {
+          setIsLoading(false);
+        }
         handleCloseDialog();
-        setIsLoading(false);
         refetchEqpts();
       } else if (action === 'delete') {
         setIsLoading(false);
@@ -106,9 +126,16 @@ export const EqMasterDialog = ({
       } else if (action === 'restore') {
         // 有効化ボタン
         const values = await getValues();
-        await updateEqpt(currentEqpt, { ...values, delFlg: false }, eqptId, user?.name ?? '');
+        try {
+          await updateEqpt(currentEqpt, { ...values, delFlg: false }, eqptId, user?.name ?? '');
+        } catch (e) {
+          setSnackBarMessage('有効化に失敗しました');
+          setSnackBarOpen(true);
+          return;
+        } finally {
+          setIsLoading(false);
+        }
         handleCloseDialog();
-        setIsLoading(false);
         refetchEqpts();
       }
     }
@@ -135,10 +162,17 @@ export const EqMasterDialog = ({
   const handleConfirmDelete = async () => {
     setIsLoading(true);
     const values = await getValues();
-    await updateEqpt(currentEqpt, { ...values, delFlg: true }, eqptId, user?.name ?? '');
-    setDeleteOpen(false);
+    try {
+      await updateEqpt(currentEqpt, { ...values, delFlg: true }, eqptId, user?.name ?? '');
+    } catch (e) {
+      setSnackBarMessage('無効化に失敗しました');
+      setSnackBarOpen(true);
+      return;
+    } finally {
+      setDeleteOpen(false);
+      setIsLoading(false);
+    }
     handleCloseDialog();
-    setIsLoading(false);
     await refetchEqpts();
   };
 
@@ -146,26 +180,32 @@ export const EqMasterDialog = ({
   useEffect(() => {
     console.log('★★★★★★★★★★★★★★★★★★★★★');
     const getThatOneEqpt = async () => {
-      const a = await getAllSelections();
-      setSelectOptions(a);
-      if (eqptId === FAKE_NEW_ID) {
-        // 新規追加モード
-        reset(emptyEqpt); // フォーム初期化
-        setEditable(true); // 編集モードにする
-        setIsLoading(false);
-        setIsNew(true);
-      } else {
-        const eqpt1 = await getChosenEqpt(eqptId);
-        if (eqpt1) {
-          setKizaiQty(eqpt1.qty);
-          setCurrentEqpt(eqpt1.data);
-          reset(eqpt1.data); // 取得したデータでフォーム初期化
+      try {
+        const a = await getAllSelections();
+        setSelectOptions(a);
+        if (eqptId === FAKE_NEW_ID) {
+          // 新規追加モード
+          reset(emptyEqpt); // フォーム初期化
+          setEditable(true); // 編集モードにする
+          setIsLoading(false);
+          setIsNew(true);
+        } else {
+          const eqpt1 = await getChosenEqpt(eqptId);
+          if (eqpt1) {
+            setKizaiQty(eqpt1.qty);
+            setCurrentEqpt(eqpt1.data);
+            reset(eqpt1.data); // 取得したデータでフォーム初期化
+          }
+          setIsLoading(false);
         }
-        setIsLoading(false);
+      } catch (e) {
+        setError(e instanceof Error ? e : new Error(String(e)));
       }
     };
     getThatOneEqpt();
   }, [eqptId, reset]);
+
+  if (error) throw error;
 
   return (
     <>
@@ -431,6 +471,14 @@ export const EqMasterDialog = ({
           </>
         )}
       </form>
+      <Snackbar
+        open={snackBarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackBarOpen(false)}
+        message={snackBarMessage}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={{ marginTop: '65px' }}
+      />
     </>
   );
 };
