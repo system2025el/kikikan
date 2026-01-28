@@ -9,10 +9,6 @@ const Page = async (props: { params: Promise<{ kizaiId: string }> }) => {
   const kizaiId = Number(params.kizaiId);
 
   const kizaiData = await getLoanKizaiData(kizaiId);
-  console.log('-------------------kizaiData-----------------', kizaiData);
-  if (!kizaiData) {
-    return <div>選択された機材が存在しません。</div>;
-  }
 
   // // ヘッダー開始日
   // const strDat = subDays(new Date(), 1);

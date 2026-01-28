@@ -34,6 +34,8 @@ export const LoanList = () => {
 
   /* useState -------------------------------------- */
   const [isLoading, setIsLoading] = useState(true);
+  // エラーハンドリング
+  const [error, setError] = useState<Error | null>(null);
   const [page, setPage] = useState(1);
   const [rows, setRows] = useState<LoanEqTableValues[]>([]);
 
@@ -47,10 +49,14 @@ export const LoanList = () => {
   const onSubmit = async (data: { query: string | undefined }) => {
     setIsLoading(true);
     console.log('data : ', data);
-    const newList = await getFilteredEqpts(data.query!);
-    setPage(1);
-    setRows(newList);
-    console.log('newList : ', newList);
+    try {
+      const newList = await getFilteredEqpts(data.query!);
+      setPage(1);
+      setRows(newList);
+      console.log('newList : ', newList);
+    } catch (e) {
+      setError(e instanceof Error ? e : new Error(String(e)));
+    }
     setIsLoading(false);
   };
 
@@ -76,13 +82,19 @@ export const LoanList = () => {
   useEffect(() => {
     const getList = async () => {
       setIsLoading(true);
-      const eqpts = await getFilteredEqpts();
-      const data = eqpts.filter((d) => !d.delFlg && d.dspFlg);
-      setRows(data);
+      try {
+        const eqpts = await getFilteredEqpts();
+        const data = eqpts.filter((d) => !d.delFlg && d.dspFlg);
+        setRows(data);
+      } catch (e) {
+        setError(e instanceof Error ? e : new Error(String(e)));
+      }
       setIsLoading(false);
     };
     getList();
   }, []);
+
+  if (error) throw error;
 
   return (
     <Box>

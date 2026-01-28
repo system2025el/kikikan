@@ -33,6 +33,8 @@ import { EqStockTable, EqTable } from './stock-table';
 export const Stock = () => {
   // ローディング
   const [isLoading, setIsLoading] = useState(false);
+  // エラーハンドリング
+  const [error, setError] = useState<Error | null>(null);
 
   // 部門リスト
   const [bumons, setBumons] = useState<Bumon[]>([]);
@@ -112,32 +114,36 @@ export const Stock = () => {
     if (!data.bumonId) return;
     setIsLoading(true);
     console.log(data.bumonId);
-    const newEqList = await getEqData(data.bumonId);
-    console.log(newEqList);
-    const kizaiIds = newEqList.map((data) => data.kizaiId);
-    // const newEqStockList: StockTableValues[][] = [];
-    // for (const kizaiId of kizaiIds) {
-    //   const stock: StockTableValues[] = await getEqStockData(kizaiId, subDays(selectDate, 1));
-    //   newEqStockList.push(stock);
-    // }
+    try {
+      const newEqList = await getEqData(data.bumonId);
+      console.log(newEqList);
+      const kizaiIds = newEqList.map((data) => data.kizaiId);
+      // const newEqStockList: StockTableValues[][] = [];
+      // for (const kizaiId of kizaiIds) {
+      //   const stock: StockTableValues[] = await getEqStockData(kizaiId, subDays(selectDate, 1));
+      //   newEqStockList.push(stock);
+      // }
 
-    const uniqueKizaiIds = Array.from(new Set(kizaiIds));
+      const uniqueKizaiIds = Array.from(new Set(kizaiIds));
 
-    const allStockData: StockTableValues[] = await getAllStockData(uniqueKizaiIds, subDays(selectDate, 1));
+      const allStockData: StockTableValues[] = await getAllStockData(uniqueKizaiIds, subDays(selectDate, 1));
 
-    const stockMap = new Map<number, StockTableValues[]>();
-    for (const row of allStockData) {
-      if (!stockMap.has(row.kizaiId)) {
-        stockMap.set(row.kizaiId, []);
+      const stockMap = new Map<number, StockTableValues[]>();
+      for (const row of allStockData) {
+        if (!stockMap.has(row.kizaiId)) {
+          stockMap.set(row.kizaiId, []);
+        }
+        stockMap.get(row.kizaiId)!.push(row);
       }
-      stockMap.get(row.kizaiId)!.push(row);
+
+      const newEqStockList: StockTableValues[][] = kizaiIds.map((id) => stockMap.get(id) || []);
+
+      setEqList(newEqList);
+      setEqStockList(newEqStockList);
+      setIsLoading(false);
+    } catch (e) {
+      setError(e instanceof Error ? e : new Error(String(e)));
     }
-
-    const newEqStockList: StockTableValues[][] = kizaiIds.map((id) => stockMap.get(id) || []);
-
-    setEqList(newEqList);
-    setEqStockList(newEqStockList);
-    setIsLoading(false);
   };
 
   /**
@@ -161,21 +167,25 @@ export const Stock = () => {
 
       const uniqueKizaiIds = Array.from(new Set(kizaiIds));
 
-      const allStockData: StockTableValues[] = await getAllStockData(uniqueKizaiIds, subDays(selectDate, 1));
+      try {
+        const allStockData: StockTableValues[] = await getAllStockData(uniqueKizaiIds, subDays(selectDate, 1));
 
-      const stockMap = new Map<number, StockTableValues[]>();
-      for (const row of allStockData) {
-        if (!stockMap.has(row.kizaiId)) {
-          stockMap.set(row.kizaiId, []);
+        const stockMap = new Map<number, StockTableValues[]>();
+        for (const row of allStockData) {
+          if (!stockMap.has(row.kizaiId)) {
+            stockMap.set(row.kizaiId, []);
+          }
+          stockMap.get(row.kizaiId)!.push(row);
         }
-        stockMap.get(row.kizaiId)!.push(row);
+
+        const newEqStockList: StockTableValues[][] = kizaiIds.map((id) => stockMap.get(id) || []);
+
+        setEqStockList(newEqStockList);
+        setAnchorEl(null);
+        setIsLoading(false);
+      } catch (e) {
+        setError(e instanceof Error ? e : new Error(String(e)));
       }
-
-      const newEqStockList: StockTableValues[][] = kizaiIds.map((id) => stockMap.get(id) || []);
-
-      setEqStockList(newEqStockList);
-      setAnchorEl(null);
-      setIsLoading(false);
     }
   };
 
@@ -205,12 +215,18 @@ export const Stock = () => {
   /** 初期表示 */
   useEffect(() => {
     const getList = async () => {
-      const bumonList = await getBumonsData();
-      setBumons(bumonList);
-      reset({ bumonId: bumonList[0].bumonId });
+      try {
+        const bumonList = await getBumonsData();
+        setBumons(bumonList);
+        reset({ bumonId: bumonList[0].bumonId });
+      } catch (e) {
+        setError(e instanceof Error ? e : new Error(String(e)));
+      }
     };
     getList();
   }, [reset]);
+
+  if (error) throw error;
 
   return (
     <Paper>
