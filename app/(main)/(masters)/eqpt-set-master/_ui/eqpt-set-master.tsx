@@ -48,6 +48,8 @@ export const EqptSetsMaster = () => {
   const [page, setPage] = useState(1);
   /** DBのローディング */
   const [isLoading, setIsLoading] = useState(true);
+  // エラーハンドリング
+  const [error, setError] = useState<Error | null>(null);
   /* ダイアログ開く機材セットのID、閉じるとき、未選択でFAKE_NEW_IDとする */
   const [openId, setOpenID] = useState<number>(FAKE_NEW_ID);
   /* 詳細ダイアログの開閉状態 */
@@ -64,9 +66,13 @@ export const EqptSetsMaster = () => {
   const onSubmit = async (data: { query?: string | undefined }) => {
     setIsLoading(true);
     console.log('data : ', data);
-    const newList = await getFilteredEqptSets(data.query!);
-    setPage(1);
-    setEqptSets(newList);
+    try {
+      const newList = await getFilteredEqptSets(data.query!);
+      setPage(1);
+      setEqptSets(newList);
+    } catch (e) {
+      setError(e instanceof Error ? e : new Error(String(e)));
+    }
     setIsLoading(false);
     console.log('theLocs : ', eqptSets, '検索終了検索終了');
   };
@@ -84,8 +90,12 @@ export const EqptSetsMaster = () => {
   const refetchEqptSets = async () => {
     setIsLoading(true);
     const searchParams = getValues();
-    const updated = await getFilteredEqptSets(searchParams.query);
-    setEqptSets(updated);
+    try {
+      const updated = await getFilteredEqptSets(searchParams.query);
+      setEqptSets(updated);
+    } catch (e) {
+      setError(e instanceof Error ? e : new Error(String(e)));
+    }
     setIsLoading(false);
   };
 
@@ -94,12 +104,18 @@ export const EqptSetsMaster = () => {
   useEffect(() => {
     const getList = async () => {
       setIsLoading(true);
-      const dataList = await getFilteredEqptSets();
-      setEqptSets(dataList);
+      try {
+        const dataList = await getFilteredEqptSets();
+        setEqptSets(dataList);
+      } catch (e) {
+        setError(e instanceof Error ? e : new Error(String(e)));
+      }
       setIsLoading(false);
     };
     getList();
   }, []);
+
+  if (error) throw error;
 
   return (
     <PermissionGuard category={'masters'} required={permission.mst_ref}>

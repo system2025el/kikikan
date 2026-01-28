@@ -37,12 +37,18 @@ export const BasesMasterDialog = ({
   const [dirtyOpen, setDirtyOpen] = useState(false);
   /* DBのローディング状態 */
   const [isLoading, setIsLoading] = useState(true);
+  // エラーハンドリング
+  const [error, setError] = useState<Error | null>(null);
   /* ダイアログでの編集モードかどうか */
   const [editable, setEditable] = useState(false);
   /* 削除フラグ確認ダイアログ出すかどうか */
   const [deleteOpen, setDeleteOpen] = useState(false);
   /* submit時のactions (save, delete) */
   const [action, setAction] = useState<'save' | 'delete' | 'restore' | undefined>(undefined);
+  // スナックバー制御
+  const [snackBarOpen, setSnackBarOpen] = useState(false);
+  // スナックバーメッセージ
+  const [snackBarMessage, setSnackBarMessage] = useState('');
 
   /* useForm ----------------------------------------- */
   const {
@@ -70,17 +76,31 @@ export const BasesMasterDialog = ({
     console.log(data);
     if (baseId === FAKE_NEW_ID) {
       // 新規登録
-      await addNewBase(data, user?.name ?? '');
+      try {
+        await addNewBase(data, user?.name ?? '');
+      } catch (e) {
+        setSnackBarMessage('保存に失敗しました');
+        setSnackBarOpen(true);
+        return;
+      } finally {
+        setIsLoading(false);
+      }
       handleCloseDialog();
-      setIsLoading(false);
       refetchBases();
     } else {
       // 更新
       if (action === 'save') {
         // 保存ボタン
-        await updateBase(data, baseId, user?.name ?? '');
+        try {
+          await updateBase(data, baseId, user?.name ?? '');
+        } catch (e) {
+          setSnackBarMessage('保存に失敗しました');
+          setSnackBarOpen(true);
+          return;
+        } finally {
+          setIsLoading(false);
+        }
         handleCloseDialog();
-        setIsLoading(false);
         refetchBases();
       } else if (action === 'delete') {
         setIsLoading(false);
@@ -90,9 +110,16 @@ export const BasesMasterDialog = ({
       } else if (action === 'restore') {
         // 有効化ボタン
         const values = await getValues();
-        await updateBase({ ...values, delFlg: false }, baseId, user?.name ?? '');
+        try {
+          await updateBase({ ...values, delFlg: false }, baseId, user?.name ?? '');
+        } catch (e) {
+          setSnackBarMessage('有効化に失敗しました');
+          setSnackBarOpen(true);
+          return;
+        } finally {
+          setIsLoading(false);
+        }
         handleCloseDialog();
-        setIsLoading(false);
         refetchBases();
       }
     }
@@ -119,10 +146,17 @@ export const BasesMasterDialog = ({
   const handleConfirmDelete = async () => {
     setIsLoading(true);
     const values = await getValues();
-    await updateBase({ ...values, delFlg: true }, baseId, user?.name ?? '');
-    setDeleteOpen(false);
+    try {
+      await updateBase({ ...values, delFlg: true }, baseId, user?.name ?? '');
+    } catch (e) {
+      setSnackBarMessage('無効化に失敗しました');
+      setSnackBarOpen(true);
+      return;
+    } finally {
+      setDeleteOpen(false);
+      setIsLoading(false);
+    }
     handleCloseDialog();
-    setIsLoading(false);
     await refetchBases();
   };
 
@@ -137,15 +171,21 @@ export const BasesMasterDialog = ({
         setIsLoading(false);
         setIsNew(true);
       } else {
-        const base1 = await getChosenBase(baseId);
-        if (base1) {
-          reset(base1); // 取得したデータでフォーム初期化
+        try {
+          const base1 = await getChosenBase(baseId);
+          if (base1) {
+            reset(base1); // 取得したデータでフォーム初期化
+          }
+        } catch (e) {
+          setError(e instanceof Error ? e : new Error(String(e)));
         }
         setIsLoading(false);
       }
     };
     getThatOneBase();
   }, [baseId, reset]);
+
+  if (error) throw error;
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>

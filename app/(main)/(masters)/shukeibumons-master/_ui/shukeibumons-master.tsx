@@ -47,6 +47,8 @@ export const ShukeibumonsMaster = () => {
   const [page, setPage] = useState(1);
   /** ローディング */
   const [isLoading, setIsLoading] = useState(true);
+  // エラーハンドリング
+  const [error, setError] = useState<Error | null>(null);
   /* ダイアログ開く集計部門のID、閉じるとき、未選択でFAKE_NEW_IDとする */
   const [openId, setOpenID] = useState<number>(FAKE_NEW_ID);
   /* 詳細ダイアログの開閉状態 */
@@ -63,9 +65,13 @@ export const ShukeibumonsMaster = () => {
   const onSubmit = async (data: { query: string | undefined }) => {
     setIsLoading(true);
     console.log('data : ', data);
-    const newList = await getFilteredShukeibumons(data.query!);
-    setPage(1);
-    setShukeibumons(newList);
+    try {
+      const newList = await getFilteredShukeibumons(data.query!);
+      setPage(1);
+      setShukeibumons(newList);
+    } catch (e) {
+      setError(e instanceof Error ? e : new Error(String(e)));
+    }
     setIsLoading(false);
     console.log('theLocs : ', shukeibumons);
   };
@@ -83,8 +89,12 @@ export const ShukeibumonsMaster = () => {
   const refetchShukeibumons = async () => {
     setIsLoading(true);
     const searchParams = getValues();
-    const updated = await getFilteredShukeibumons(searchParams.query);
-    setShukeibumons(updated);
+    try {
+      const updated = await getFilteredShukeibumons(searchParams.query);
+      setShukeibumons(updated);
+    } catch (e) {
+      setError(e instanceof Error ? e : new Error(String(e)));
+    }
     setIsLoading(false);
   };
 
@@ -93,12 +103,18 @@ export const ShukeibumonsMaster = () => {
   useEffect(() => {
     const getList = async () => {
       setIsLoading(true);
-      const dataList = await getFilteredShukeibumons();
-      setShukeibumons(dataList);
+      try {
+        const dataList = await getFilteredShukeibumons();
+        setShukeibumons(dataList);
+      } catch (e) {
+        setError(e instanceof Error ? e : new Error(String(e)));
+      }
       setIsLoading(false);
     };
     getList();
   }, []);
+
+  if (error) throw error;
 
   return (
     <PermissionGuard category={'masters'} required={permission.mst_ref}>

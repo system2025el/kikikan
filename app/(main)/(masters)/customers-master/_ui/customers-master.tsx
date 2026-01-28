@@ -45,6 +45,8 @@ export const CustomersMaster = () => {
   const [page, setPage] = useState(1);
   /** DBのローディング */
   const [isLoading, setIsLoading] = useState(true);
+  // エラーハンドリング
+  const [error, setError] = useState<Error | null>(null);
   /* ダイアログ開く顧客のID、閉じるとき、未選択でFAKE_NEW_IDとする */
   const [openId, setOpenID] = useState(FAKE_NEW_ID);
   /** 顧客詳細ダイアログの開閉状態 */
@@ -61,9 +63,13 @@ export const CustomersMaster = () => {
   const onSubmit = async (data: { query: string | undefined }) => {
     setIsLoading(true);
     console.log('data : ', data);
-    const newList = await getFilteredCustomers(data.query!);
-    setPage(1);
-    setCustomers(newList);
+    try {
+      const newList = await getFilteredCustomers(data.query!);
+      setPage(1);
+      setCustomers(newList);
+    } catch (e) {
+      setError(e instanceof Error ? e : new Error(String(e)));
+    }
     setIsLoading(false);
     console.log('theLocs : ', customers);
   };
@@ -80,8 +86,12 @@ export const CustomersMaster = () => {
   const refetchCustomers = async () => {
     setIsLoading(true);
     const searchParams = getValues();
-    const updated = await getFilteredCustomers(searchParams.query);
-    setCustomers(updated);
+    try {
+      const updated = await getFilteredCustomers(searchParams.query);
+      setCustomers(updated);
+    } catch (e) {
+      setError(e instanceof Error ? e : new Error(String(e)));
+    }
     setIsLoading(false);
   };
 
@@ -90,12 +100,18 @@ export const CustomersMaster = () => {
   useEffect(() => {
     const getList = async () => {
       setIsLoading(true);
-      const dataList = await getFilteredCustomers();
-      setCustomers(dataList);
+      try {
+        const dataList = await getFilteredCustomers();
+        setCustomers(dataList);
+      } catch (e) {
+        setError(e instanceof Error ? e : new Error(String(e)));
+      }
       setIsLoading(false);
     };
     getList();
   }, []);
+
+  if (error) throw error;
 
   return (
     <PermissionGuard category={'masters'} required={permission.mst_ref}>

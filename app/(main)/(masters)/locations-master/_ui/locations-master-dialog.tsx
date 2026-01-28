@@ -1,7 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Grid2 } from '@mui/material';
+import { Grid2, Snackbar } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { CheckboxElement, TextareaAutosizeElement, TextFieldElement, useForm } from 'react-hook-form-mui';
 
@@ -35,6 +35,8 @@ export const LocationsMasterDialog = ({
   /* useState --------------------- */
   /** DBのローディング状態 */
   const [isLoading, setIsLoading] = useState(true);
+  // エラーハンドリング
+  const [error, setError] = useState<Error | null>(null);
   /* ダイアログでの編集モードかどうか */
   const [editable, setEditable] = useState(false);
   /* 新規作成かどうか */
@@ -45,6 +47,10 @@ export const LocationsMasterDialog = ({
   const [deleteOpen, setDeleteOpen] = useState(false);
   /* submit時のactions (save, delete) */
   const [action, setAction] = useState<'save' | 'delete' | 'restore' | undefined>(undefined);
+  // スナックバー制御
+  const [snackBarOpen, setSnackBarOpen] = useState(false);
+  // スナックバーメッセージ
+  const [snackBarMessage, setSnackBarMessage] = useState('');
 
   /* useForm ------------------------- */
   const {
@@ -74,17 +80,31 @@ export const LocationsMasterDialog = ({
 
     if (locationId === FAKE_NEW_ID) {
       // 新規の時
-      await addNewLoc(data, user?.name ?? '');
+      try {
+        await addNewLoc(data, user?.name ?? '');
+      } catch (e) {
+        setSnackBarMessage('保存に失敗しました');
+        setSnackBarOpen(true);
+        return;
+      } finally {
+        setIsLoading(false);
+      }
       handleCloseDialog();
-      setIsLoading(false);
       refetchLocs();
     } else {
       // 更新の時
       if (action === 'save') {
         // 保存終了ボタン押したとき
-        await updateLoc(data, locationId, user?.name ?? '');
+        try {
+          await updateLoc(data, locationId, user?.name ?? '');
+        } catch (e) {
+          setSnackBarMessage('保存に失敗しました');
+          setSnackBarOpen(true);
+          return;
+        } finally {
+          setIsLoading(false);
+        }
         handleCloseDialog();
-        setIsLoading(false);
         refetchLocs();
       } else if (action === 'delete') {
         setIsLoading(false);
@@ -94,9 +114,16 @@ export const LocationsMasterDialog = ({
       } else if (action === 'restore') {
         // 有効化ボタン
         const values = await getValues();
-        await updateLoc({ ...values, delFlg: false }, locationId, user?.name ?? '');
+        try {
+          await updateLoc({ ...values, delFlg: false }, locationId, user?.name ?? '');
+        } catch (e) {
+          setSnackBarMessage('有効化に失敗しました');
+          setSnackBarOpen(true);
+          return;
+        } finally {
+          setIsLoading(false);
+        }
         handleCloseDialog();
-        setIsLoading(false);
         refetchLocs();
       }
     }
@@ -123,10 +150,17 @@ export const LocationsMasterDialog = ({
   const handleConfirmDelete = async () => {
     setIsLoading(true);
     const values = await getValues();
-    await updateLoc({ ...values, delFlg: true }, locationId, user?.name ?? '');
-    setDeleteOpen(false);
+    try {
+      await updateLoc({ ...values, delFlg: true }, locationId, user?.name ?? '');
+    } catch (e) {
+      setSnackBarMessage('無効化に失敗しました');
+      setSnackBarOpen(true);
+      return;
+    } finally {
+      setDeleteOpen(false);
+      setIsLoading(false);
+    }
     handleCloseDialog();
-    setIsLoading(false);
     await refetchLocs();
   };
 
@@ -141,15 +175,21 @@ export const LocationsMasterDialog = ({
         setIsLoading(false);
         setIsNew(true);
       } else {
-        const loc1 = await getChosenLoc(locationId);
-        if (loc1) {
-          reset(loc1); // 取得したデータでフォーム初期化
+        try {
+          const loc1 = await getChosenLoc(locationId);
+          if (loc1) {
+            reset(loc1); // 取得したデータでフォーム初期化
+          }
+        } catch (e) {
+          setError(e instanceof Error ? e : new Error(String(e)));
         }
         setIsLoading(false);
       }
     };
     getThatOneloc();
   }, [locationId, reset]);
+
+  if (error) throw error;
 
   return (
     <>
@@ -309,6 +349,14 @@ export const LocationsMasterDialog = ({
           </>
         )}
       </form>
+      <Snackbar
+        open={snackBarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackBarOpen(false)}
+        message={snackBarMessage}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={{ marginTop: '65px' }}
+      />
     </>
   );
 };

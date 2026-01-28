@@ -26,14 +26,17 @@ export const ExportMaster = () => {
   /** エクスポートボタン押下時 */
   const exportFile = async () => {
     setPush(true);
-    const data = await getAllEqptAndRfid();
-    if (data) {
-      writeFileXLSX(data.workbook, `RFID機材表_${data.date}.xlsx`);
-      setSnackBarMessage(`RFID機材表_${data.date}.xlsxをエクスポートしました`);
-      setSnackBarOpen(true);
-      setPush(false);
-    } else {
-      setSnackBarMessage(`エクスポートエラー: データがありません`);
+    try {
+      const data = await getAllEqptAndRfid();
+      if (data) {
+        writeFileXLSX(data.workbook, `RFID機材表_${data.date}.xlsx`);
+        setSnackBarMessage(`RFID機材表_${data.date}.xlsxをエクスポートしました`);
+      } else {
+        setSnackBarMessage(`エクスポートエラー: データがありません`);
+      }
+    } catch (e) {
+      setSnackBarMessage(`エクスポートエラー: エクスポートに失敗しました`);
+    } finally {
       setSnackBarOpen(true);
       setPush(false);
     }

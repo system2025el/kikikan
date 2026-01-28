@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Grid2 } from '@mui/material';
+import { Grid2, Snackbar } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
@@ -34,6 +34,8 @@ export const DaibumonsMasterDialog = ({
   /* useState -------------------------------------- */
   /* DBのローディング状態 */
   const [isLoading, setIsLoading] = useState(true);
+  // エラーハンドリング
+  const [error, setError] = useState<Error | null>(null);
   /* ダイアログでの編集モードかどうか */
   const [editable, setEditable] = useState(false);
   /* 新規作成かどうか */
@@ -44,6 +46,10 @@ export const DaibumonsMasterDialog = ({
   const [deleteOpen, setDeleteOpen] = useState(false);
   /* submit時のactions (save, delete) */
   const [action, setAction] = useState<'save' | 'delete' | 'restore' | undefined>(undefined);
+  // スナックバー制御
+  const [snackBarOpen, setSnackBarOpen] = useState(false);
+  // スナックバーメッセージ
+  const [snackBarMessage, setSnackBarMessage] = useState('');
 
   /* useForm ----------------------------------------- */
   const {
@@ -70,15 +76,29 @@ export const DaibumonsMasterDialog = ({
     console.log('isDarty : ', isDirty);
     console.log(data);
     if (daibumonId === FAKE_NEW_ID) {
-      await addNewDaibumon(data, user?.name ?? '');
+      try {
+        await addNewDaibumon(data, user?.name ?? '');
+      } catch (e) {
+        setSnackBarMessage('保存に失敗しました');
+        setSnackBarOpen(true);
+        return;
+      } finally {
+        setIsLoading(false);
+      }
       handleCloseDialog();
-      setIsLoading(false);
       refetchDaibumons();
     } else {
       if (action === 'save') {
-        await updateDaibumon(data, daibumonId, user?.name ?? '');
+        try {
+          await updateDaibumon(data, daibumonId, user?.name ?? '');
+        } catch (e) {
+          setSnackBarMessage('保存に失敗しました');
+          setSnackBarOpen(true);
+          return;
+        } finally {
+          setIsLoading(false);
+        }
         handleCloseDialog();
-        setIsLoading(false);
         refetchDaibumons();
       } else if (action === 'delete') {
         setIsLoading(false);
@@ -87,9 +107,16 @@ export const DaibumonsMasterDialog = ({
       } else if (action === 'restore') {
         // 有効化ボタン
         const values = await getValues();
-        await updateDaibumon({ ...values, delFlg: false }, daibumonId, user?.name ?? '');
+        try {
+          await updateDaibumon({ ...values, delFlg: false }, daibumonId, user?.name ?? '');
+        } catch (e) {
+          setSnackBarMessage('有効化に失敗しました');
+          setSnackBarOpen(true);
+          return;
+        } finally {
+          setIsLoading(false);
+        }
         handleCloseDialog();
-        setIsLoading(false);
         refetchDaibumons();
       }
     }
@@ -116,10 +143,17 @@ export const DaibumonsMasterDialog = ({
   const handleConfirmDelete = async () => {
     setIsLoading(true);
     const values = await getValues();
-    await updateDaibumon({ ...values, delFlg: true }, daibumonId, user?.name ?? '');
-    setDeleteOpen(false);
+    try {
+      await updateDaibumon({ ...values, delFlg: true }, daibumonId, user?.name ?? '');
+    } catch (e) {
+      setSnackBarMessage('無効化に失敗しました');
+      setSnackBarOpen(true);
+      return;
+    } finally {
+      setDeleteOpen(false);
+      setIsLoading(false);
+    }
     handleCloseDialog();
-    setIsLoading(false);
     await refetchDaibumons();
   };
 
@@ -134,16 +168,22 @@ export const DaibumonsMasterDialog = ({
         setIsLoading(false);
         setIsNew(true);
       } else {
-        const daibumon1 = await getChosenDaibumon(daibumonId);
-        if (daibumon1) {
-          reset(daibumon1); // 取得したデータでフォーム初期化
-          // }
-          setIsLoading(false);
+        try {
+          const daibumon1 = await getChosenDaibumon(daibumonId);
+          if (daibumon1) {
+            reset(daibumon1); // 取得したデータでフォーム初期化
+            // }
+          }
+        } catch (e) {
+          setError(e instanceof Error ? e : new Error(String(e)));
         }
+        setIsLoading(false);
       }
     };
     getThatOneDaibumon();
   }, [daibumonId, reset]);
+
+  if (error) throw error;
 
   return (
     <>
@@ -204,6 +244,14 @@ export const DaibumonsMasterDialog = ({
           </>
         )}
       </form>
+      <Snackbar
+        open={snackBarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackBarOpen(false)}
+        message={snackBarMessage}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={{ marginTop: '65px' }}
+      />
     </>
   );
 };

@@ -53,6 +53,8 @@ export const BumonsMaster = () => {
   const [page, setPage] = useState(1);
   /** ローディング */
   const [isLoading, setIsLoading] = useState(true);
+  // エラーハンドリング
+  const [error, setError] = useState<Error | null>(null);
   /** ダイアログ開く部門のID、閉じるとき、未選択でFAKE_NEW_IDとする */
   const [openId, setOpenID] = useState<number>(FAKE_NEW_ID);
   /** 詳細ダイアログの開閉状態 */
@@ -69,13 +71,17 @@ export const BumonsMaster = () => {
   const onSubmit = async (data: { query: string | undefined; daibumonQuery: number; shukeiQuery: number }) => {
     setIsLoading(true);
     console.log('data : ', data);
-    const newList = await getFilteredBumons({
-      q: data.query!,
-      d: data.daibumonQuery === FAKE_NEW_ID ? null : data.daibumonQuery,
-      s: data.shukeiQuery === FAKE_NEW_ID ? null : data.shukeiQuery,
-    });
-    setPage(1);
-    setBumons(newList?.data);
+    try {
+      const newList = await getFilteredBumons({
+        q: data.query!,
+        d: data.daibumonQuery === FAKE_NEW_ID ? null : data.daibumonQuery,
+        s: data.shukeiQuery === FAKE_NEW_ID ? null : data.shukeiQuery,
+      });
+      setPage(1);
+      setBumons(newList?.data);
+    } catch (e) {
+      setError(e instanceof Error ? e : new Error(String(e)));
+    }
     setIsLoading(false);
     console.log('theLocs : ', bumons);
   };
@@ -92,12 +98,16 @@ export const BumonsMaster = () => {
   const refetchBumons = async () => {
     setIsLoading(true);
     const searchParams = getValues();
-    const updated = await getFilteredBumons({
-      q: searchParams.query!,
-      d: searchParams.daibumonQuery === FAKE_NEW_ID ? null : searchParams.daibumonQuery,
-      s: searchParams.shukeiQuery === FAKE_NEW_ID ? null : searchParams.shukeiQuery,
-    });
-    setBumons(updated?.data);
+    try {
+      const updated = await getFilteredBumons({
+        q: searchParams.query!,
+        d: searchParams.daibumonQuery === FAKE_NEW_ID ? null : searchParams.daibumonQuery,
+        s: searchParams.shukeiQuery === FAKE_NEW_ID ? null : searchParams.shukeiQuery,
+      });
+      setBumons(updated?.data);
+    } catch (e) {
+      setError(e instanceof Error ? e : new Error(String(e)));
+    }
     setIsLoading(false);
   };
 
@@ -106,13 +116,19 @@ export const BumonsMaster = () => {
   useEffect(() => {
     const getList = async () => {
       setIsLoading(true);
-      const dataList = await getFilteredBumons();
-      setBumons(dataList.data);
-      setOptions(dataList.options);
+      try {
+        const dataList = await getFilteredBumons();
+        setBumons(dataList.data);
+        setOptions(dataList.options);
+      } catch (e) {
+        setError(e instanceof Error ? e : new Error(String(e)));
+      }
       setIsLoading(false);
     };
     getList();
   }, []);
+
+  if (error) throw error;
 
   return (
     <PermissionGuard category={'masters'} required={permission.mst_ref}>

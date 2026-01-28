@@ -34,6 +34,8 @@ export const IsshikisMaster = () => {
   const [page, setPage] = useState(1);
   /** DBのローディング */
   const [isLoading, setIsLoading] = useState(true);
+  // エラーハンドリング
+  const [error, setError] = useState<Error | null>(null);
   /* ダイアログ開く一式のID、閉じるとき、未選択でFAKE_NEW_IDとする */
   const [openId, setOpenID] = useState<number>(FAKE_NEW_ID);
   /* 詳細ダイアログの開閉状態 */
@@ -53,8 +55,12 @@ export const IsshikisMaster = () => {
   /* 情報が変わったときに更新される */
   const refetchIsshikis = async () => {
     setIsLoading(true);
-    const updated = await getFilteredIsshikis();
-    setIsshikis(updated);
+    try {
+      const updated = await getFilteredIsshikis();
+      setIsshikis(updated);
+    } catch (e) {
+      setError(e instanceof Error ? e : new Error(String(e)));
+    }
     setIsLoading(false);
   };
 
@@ -63,12 +69,18 @@ export const IsshikisMaster = () => {
   useEffect(() => {
     const getList = async () => {
       setIsLoading(true);
-      const dataList = await getFilteredIsshikis();
-      setIsshikis(dataList);
+      try {
+        const dataList = await getFilteredIsshikis();
+        setIsshikis(dataList);
+      } catch (e) {
+        setError(e instanceof Error ? e : new Error(String(e)));
+      }
       setIsLoading(false);
     };
     getList();
   }, []);
+
+  if (error) throw error;
 
   return (
     <PermissionGuard category={'masters'} required={permission.mst_ref}>

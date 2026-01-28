@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Grid2, MenuItem, Select } from '@mui/material';
+import { Grid2, MenuItem, Select, Snackbar } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import { useEffect, useState } from 'react';
 import { Controller, TextareaAutosizeElement, TextFieldElement, useForm } from 'react-hook-form-mui';
@@ -36,6 +36,8 @@ export const BumonsMasterDialog = ({
   /* 部門 */
   /* DBのローディング状態 */
   const [isLoading, setIsLoading] = useState(true);
+  // エラーハンドリング
+  const [error, setError] = useState<Error | null>(null);
   /* ダイアログでの編集モードかどうか */
   const [editable, setEditable] = useState(false);
   /* 新規作成かどうか */
@@ -51,6 +53,10 @@ export const BumonsMasterDialog = ({
     d: SelectTypes[];
     s: SelectTypes[];
   }>({ d: [], s: [] });
+  // スナックバー制御
+  const [snackBarOpen, setSnackBarOpen] = useState(false);
+  // スナックバーメッセージ
+  const [snackBarMessage, setSnackBarMessage] = useState('');
 
   /* useForm ----------------------------------------- */
   const {
@@ -78,17 +84,31 @@ export const BumonsMasterDialog = ({
     console.log(data);
     if (bumonId === FAKE_NEW_ID) {
       // 新規の時
-      await addNewBumon(data, user?.name ?? '');
+      try {
+        await addNewBumon(data, user?.name ?? '');
+      } catch (e) {
+        setSnackBarMessage('保存に失敗しました');
+        setSnackBarOpen(true);
+        return;
+      } finally {
+        setIsLoading(false);
+      }
       handleCloseDialog();
-      setIsLoading(false);
       refetchBumons();
     } else {
       // 更新の時
       if (action === 'save') {
         // 保存終了ボタン押したとき
-        await updateBumon(data, bumonId, user?.name ?? '');
+        try {
+          await updateBumon(data, bumonId, user?.name ?? '');
+        } catch (e) {
+          setSnackBarMessage('保存に失敗しました');
+          setSnackBarOpen(true);
+          return;
+        } finally {
+          setIsLoading(false);
+        }
         handleCloseDialog();
-        setIsLoading(false);
         refetchBumons();
       } else if (action === 'delete') {
         setIsLoading(false);
@@ -98,9 +118,16 @@ export const BumonsMasterDialog = ({
       } else if (action === 'restore') {
         // 有効化ボタン
         const values = await getValues();
-        await updateBumon({ ...values, delFlg: false }, bumonId, user?.name ?? '');
+        try {
+          await updateBumon({ ...values, delFlg: false }, bumonId, user?.name ?? '');
+        } catch (e) {
+          setSnackBarMessage('有効化に失敗しました');
+          setSnackBarOpen(true);
+          return;
+        } finally {
+          setIsLoading(false);
+        }
         handleCloseDialog();
-        setIsLoading(false);
         refetchBumons();
       }
     }
@@ -127,10 +154,17 @@ export const BumonsMasterDialog = ({
   const handleConfirmDelete = async () => {
     setIsLoading(true);
     const values = await getValues();
-    await updateBumon({ ...values, delFlg: true }, bumonId, user?.name ?? '');
-    setDeleteOpen(false);
+    try {
+      await updateBumon({ ...values, delFlg: true }, bumonId, user?.name ?? '');
+    } catch (e) {
+      setSnackBarMessage('無効化に失敗しました');
+      setSnackBarOpen(true);
+      return;
+    } finally {
+      setDeleteOpen(false);
+      setIsLoading(false);
+    }
     handleCloseDialog();
-    setIsLoading(false);
     await refetchBumons();
   };
 
@@ -138,24 +172,30 @@ export const BumonsMasterDialog = ({
   useEffect(() => {
     console.log('★★★★★★★★★★★★★★★★★★★★★');
     const getThatOnebumon = async () => {
-      const a = await getAllBumonDSSelections();
-      setSelectOptions(a!);
-      if (bumonId === FAKE_NEW_ID) {
-        // 新規追加モード
-        reset(emptyBumon); // フォーム初期化
-        setEditable(true); // 編集モードにする
-        setIsLoading(false);
-        setIsNew(true);
-      } else {
-        const bumon1 = await getChosenbumon(bumonId);
-        if (bumon1) {
-          reset(bumon1); // 取得したデータでフォーム初期化
+      try {
+        const a = await getAllBumonDSSelections();
+        setSelectOptions(a!);
+        if (bumonId === FAKE_NEW_ID) {
+          // 新規追加モード
+          reset(emptyBumon); // フォーム初期化
+          setEditable(true); // 編集モードにする
+          setIsLoading(false);
+          setIsNew(true);
+        } else {
+          const bumon1 = await getChosenbumon(bumonId);
+          if (bumon1) {
+            reset(bumon1); // 取得したデータでフォーム初期化
+          }
+          setIsLoading(false);
         }
-        setIsLoading(false);
+      } catch (e) {
+        setError(e instanceof Error ? e : new Error(String(e)));
       }
     };
     getThatOnebumon();
   }, [bumonId, reset]);
+
+  if (error) throw error;
 
   return (
     <>
@@ -258,6 +298,14 @@ export const BumonsMasterDialog = ({
           </>
         )}
       </form>
+      <Snackbar
+        open={snackBarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackBarOpen(false)}
+        message={snackBarMessage}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={{ marginTop: '65px' }}
+      />
     </>
   );
 };
