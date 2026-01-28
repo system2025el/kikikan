@@ -42,6 +42,9 @@ export const getNyukoDetail = async (
     const { data, error } = await selectNyushukoOne(juchuHeadId, juchuKizaiHeadKbn, nyushukoBashoId, nyushukoDat, 2);
 
     if (error) {
+      if (error.code === 'PGRST116') {
+        return null;
+      }
       console.error('getNyukoDetail error : ', error);
       throw error;
     }
@@ -63,6 +66,7 @@ export const getNyukoDetail = async (
     return nyukoDetailData;
   } catch (e) {
     console.error(e);
+    throw e;
   }
 };
 
@@ -121,6 +125,7 @@ export const getNyukoDetailTable = async (
     return nyukoDetailTableData;
   } catch (e) {
     console.error(e);
+    throw e;
   }
 };
 

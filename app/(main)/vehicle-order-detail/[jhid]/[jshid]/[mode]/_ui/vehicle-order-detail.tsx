@@ -397,7 +397,7 @@ const VehicleOrderDetail = ({
       if (sharyoHeadId === 0) {
         setValue(
           'headNam',
-          juchuHead.koenbashoNam && juchuHead.koenbashoNam.trim() !== '' ? `${juchuHead.koenbashoNam}行き` : '',
+          juchuHead.koenbashoNam && juchuHead.koenbashoNam.trim() !== '' ? `${juchuHead.koenbashoNam}` : '',
           { shouldDirty: true }
         );
       }

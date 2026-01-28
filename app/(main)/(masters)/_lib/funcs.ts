@@ -109,10 +109,12 @@ export const getShozokuSelection = async () => {
     if (!data || data.length === 0) {
       return [];
     }
-    const selectElements: SelectTypes[] = data.map((d) => ({
-      id: d.shozoku_id,
-      label: d.shozoku_nam,
-    }));
+    const selectElements: SelectTypes[] = data
+      .filter((d) => d.shozoku_id === 1 || d.shozoku_id === 2)
+      .map((d) => ({
+        id: d.shozoku_id,
+        label: d.shozoku_nam,
+      }));
     console.log('所属', selectElements.length, '件');
     return selectElements;
   } catch (e) {

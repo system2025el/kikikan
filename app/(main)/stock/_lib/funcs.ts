@@ -62,7 +62,7 @@ export const getEqData = async (bumonId: number) => {
     return eqList;
   } catch (e) {
     console.error(e);
-    return [];
+    throw e;
   }
 };
 
@@ -98,6 +98,6 @@ export const getAllStockData = async (kizaiIds: number[], date: Date) => {
     return data;
   } catch (e) {
     console.error(e);
-    return [];
+    throw e;
   }
 };

@@ -45,6 +45,9 @@ export const getShukoEqptDetail = async (
     );
 
     if (error) {
+      if (error.code === 'PGRST116') {
+        return null;
+      }
       console.error('getShukoEqptDetail error : ', error);
       throw error;
     }
@@ -73,7 +76,7 @@ export const getShukoEqptDetail = async (
     return shukoEqptDetaildata;
   } catch (e) {
     console.error(e);
-    return null;
+    throw e;
   }
 };
 
@@ -128,7 +131,7 @@ export const getShukoEqptDetailTable = async (
     return shukoEqptDetailTableData;
   } catch (e) {
     console.error(e);
-    return [];
+    throw e;
   }
 };
 

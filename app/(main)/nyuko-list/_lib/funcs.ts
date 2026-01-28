@@ -43,7 +43,7 @@ export const getNyukoList = async (queries: NyukoListSearchValues) => {
     return nyukoList;
   } catch (e) {
     console.error(e);
-    return [];
+    throw e;
   }
 };
 
@@ -136,6 +136,6 @@ export const getPdfData = async (
     return pdjData;
   } catch (e) {
     console.error(e);
-    return null;
+    throw e;
   }
 };

@@ -27,6 +27,9 @@ export const NyukoList = (/*props: { shukoData: NyukoTableValues[]}*/) => {
   const [isLoading, setIsLoading] = useState(true);
   // 処理中制御
   const [isProcessing, setIsProcessing] = useState(false);
+  // エラーハンドリング
+  const [error, setError] = useState<Error | null>(null);
+
   // 出庫一覧データ
   const [nyukoList, setNyukoList] = useState<NyukoTableValues[]>(/*props.shukoData*/ []);
   // 課選択肢
@@ -56,15 +59,23 @@ export const NyukoList = (/*props: { shukoData: NyukoTableValues[]}*/) => {
   const onSubmit = async (data: NyukoListSearchValues) => {
     setIsLoading(true);
     sessionStorage.setItem('nyukoListSearchParams', JSON.stringify(getValues()));
-    const newNyukoList = await getNyukoList(data);
-    setNyukoList(newNyukoList);
+    try {
+      const newNyukoList = await getNyukoList(data);
+      setNyukoList(newNyukoList);
+    } catch (e) {
+      setError(e instanceof Error ? e : new Error(String(e)));
+    }
     setIsLoading(false);
   };
 
   /** 選択肢の取得 */
   const getOptions = async () => {
-    const radio = await getSectionShortSelections();
-    setOptions(radio);
+    try {
+      const radio = await getSectionShortSelections();
+      setOptions(radio);
+    } catch (e) {
+      setError(e instanceof Error ? e : new Error(String(e)));
+    }
   };
 
   /* 員数票出力(PDF) ------------------- */
@@ -129,8 +140,12 @@ export const NyukoList = (/*props: { shukoData: NyukoTableValues[]}*/) => {
     getOptions();
 
     const getList = async (searchParams: NyukoListSearchValues) => {
-      const newNyukoList = await getNyukoList(searchParams);
-      setNyukoList(newNyukoList);
+      try {
+        const newNyukoList = await getNyukoList(searchParams);
+        setNyukoList(newNyukoList);
+      } catch (e) {
+        setError(e instanceof Error ? e : new Error(String(e)));
+      }
       setIsLoading(false);
     };
 
@@ -142,6 +157,8 @@ export const NyukoList = (/*props: { shukoData: NyukoTableValues[]}*/) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  if (error) throw error;
 
   return (
     <PermissionGuard category={'nyushuko'} required={permission.nyushuko_ref}>

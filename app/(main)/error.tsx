@@ -2,12 +2,23 @@
 
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import { Box, Button, Paper, Typography } from '@mui/material';
-import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { startTransition, useEffect } from 'react';
 
 const Error = ({ error, reset }: { error: Error; reset: () => void }) => {
+  const router = useRouter();
+
   useEffect(() => {
     console.error('Error:', error);
   }, [error]);
+
+  const handleReset = () => {
+    startTransition(() => {
+      router.refresh();
+
+      reset();
+    });
+  };
 
   return (
     <Box
@@ -59,7 +70,7 @@ const Error = ({ error, reset }: { error: Error; reset: () => void }) => {
         <Button
           variant="contained"
           size="large"
-          onClick={() => reset()}
+          onClick={handleReset}
           sx={{
             px: 4,
             py: 1.5,

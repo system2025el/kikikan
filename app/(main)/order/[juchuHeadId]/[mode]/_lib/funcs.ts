@@ -320,6 +320,7 @@ export const getJuchuKizaiHeadList = async (juchuHeadId: number) => {
     return result;
   } catch (e) {
     console.error('Exception while selecting eqlist:', e);
+    throw e;
   }
 };
 
@@ -343,7 +344,6 @@ export const getJuchuSharyoHeadList = async (juchuHeadId: number) => {
       nyushukoDat: d.nyushuko_dat ? toJapanTimeString(d.nyushuko_dat) : '',
       headMem: d.mem,
     }));
-
     return sharyoData;
   } catch (e) {
     throw e;

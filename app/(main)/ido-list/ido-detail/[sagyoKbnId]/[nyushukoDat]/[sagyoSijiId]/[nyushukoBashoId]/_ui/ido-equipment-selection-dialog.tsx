@@ -12,6 +12,7 @@ import {
   Divider,
   Grid2,
   Paper,
+  Snackbar,
   Stack,
   Table,
   TableBody,
@@ -54,6 +55,10 @@ export const IdoEqptSelectionDialog = ({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   /* セットオプションのデータ配列 */
   const [bundles, setBundles] = useState<IdoEqptSelection[]>([]);
+  // スナックバー制御
+  const [snackBarOpen, setSnackBarOpen] = useState(false);
+  // スナックバーメッセージ
+  const [snackBarMessage, setSnackBarMessage] = useState('');
 
   /* useform ------------------------------- */
   const { handleSubmit, control } = useForm({ defaultValues: { query: '' } });
@@ -61,16 +66,24 @@ export const IdoEqptSelectionDialog = ({
   /* methods ------------------------------ */
   /* 確定ボタン押下時 */
   const handleClickConfirm = async () => {
-    const setList = await checkSetoptions(selectedEqptIds);
-    if (setList.length !== 0) {
-      setBundles(setList);
-      setBundleDialogOpen(true);
-    } else {
-      // selectedEqptIdsが今回選んだ全機材であるので、idをもとに機材情報を取得しダイアログを閉じたい
-      const data = await getIdoSelectedEqpts(selectedEqptIds);
-      console.log('最終的に渡される機材の配列データ: ', data!);
-      setEqpts(data!);
-      handleCloseDialog();
+    setIsLoading(true);
+    try {
+      const setList = await checkSetoptions(selectedEqptIds);
+      if (setList.length !== 0) {
+        setBundles(setList);
+        setBundleDialogOpen(true);
+      } else {
+        // selectedEqptIdsが今回選んだ全機材であるので、idをもとに機材情報を取得しダイアログを閉じたい
+        const data = await getIdoSelectedEqpts(selectedEqptIds);
+        console.log('最終的に渡される機材の配列データ: ', data!);
+        setEqpts(data!);
+        handleCloseDialog();
+      }
+    } catch (e) {
+      setSnackBarMessage('データ取得に失敗しました');
+      setSnackBarOpen(true);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -113,14 +126,19 @@ export const IdoEqptSelectionDialog = ({
     setIsLoading(true);
     setSearching(true);
     setSelectedBumon(-100);
-    if (data.query.trim() === '') {
-      const a = await getIdoEqptsForEqptSelection('');
-      console.log('機材リスト[0]: ', a![0]);
-      setTheEqpts(a!);
-    } else {
-      const a = await getIdoEqptsForEqptSelection(data.query);
-      console.log('機材リスト[0]: ', a![0]);
-      setTheEqpts(a!);
+    try {
+      if (data.query.trim() === '') {
+        const a = await getIdoEqptsForEqptSelection('');
+        console.log('機材リスト[0]: ', a![0]);
+        setTheEqpts(a!);
+      } else {
+        const a = await getIdoEqptsForEqptSelection(data.query);
+        console.log('機材リスト[0]: ', a![0]);
+        setTheEqpts(a!);
+      }
+    } catch (e) {
+      setSnackBarMessage('データ取得に失敗しました');
+      setSnackBarOpen(true);
     }
     setIsLoading(false);
   };
@@ -130,9 +148,14 @@ export const IdoEqptSelectionDialog = ({
     setIsLoading(true);
     setSearching(false);
     const getEqpts = async () => {
-      const a = await getIdoEqptsForEqptSelection('');
-      console.log('最初の機材リスト[0]: ', a![0]);
-      setTheEqpts(a!);
+      try {
+        const a = await getIdoEqptsForEqptSelection('');
+        console.log('最初の機材リスト[0]: ', a![0]);
+        setTheEqpts(a!);
+      } catch (e) {
+        setSnackBarMessage('データ取得に失敗しました');
+        setSnackBarOpen(true);
+      }
     };
     getEqpts();
     setIsLoading(false);
@@ -167,7 +190,11 @@ export const IdoEqptSelectionDialog = ({
           </Box>
         </Paper>
         <Box display={'flex'} p={0.5} justifyContent={'end'}>
-          <Button onClick={() => handleClickConfirm()} disabled={selectedEqptIds.length === 0 ? true : false}>
+          <Button
+            onClick={() => handleClickConfirm()}
+            disabled={selectedEqptIds.length === 0 ? true : false}
+            loading={isLoading}
+          >
             確定
           </Button>
           <Dialog open={bundleDialogOpen} onClose={() => setBundleDialogOpen(false)}>
@@ -197,6 +224,13 @@ export const IdoEqptSelectionDialog = ({
           </Grid2>
         </Grid2>
       </Container>
+      <Snackbar
+        open={snackBarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackBarOpen(false)}
+        message={snackBarMessage}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      />
     </>
   );
 };
@@ -222,6 +256,10 @@ const IdoBundleDialog = ({
   /* useState ------------------------------------------ */
   /* 選択される機材のidのリスト */
   const [selected, setSelected] = useState<number[]>([]);
+  // スナックバー制御
+  const [snackBarOpen, setSnackBarOpen] = useState(false);
+  // スナックバーメッセージ
+  const [snackBarMessage, setSnackBarMessage] = useState('');
 
   /* methods -------------------------------------------------------- */
   /* 行押下時（選択時）の処理 */
@@ -243,10 +281,15 @@ const IdoBundleDialog = ({
 
   /* 確定ボタン押下時 */
   const handleClickConfirm = async () => {
-    const data = await getIdoSelectedEqpts([...selectedEqpts, ...selected]);
-    console.log('最終的に渡される機材の配列データ: ', data!);
-    setEqpts(data!);
-    handleClose();
+    try {
+      const data = await getIdoSelectedEqpts([...selectedEqpts, ...selected]);
+      console.log('最終的に渡される機材の配列データ: ', data!);
+      setEqpts(data!);
+      handleClose();
+    } catch (e) {
+      setSnackBarMessage('データ取得に失敗しました');
+      setSnackBarOpen(true);
+    }
   };
 
   return (
@@ -315,6 +358,13 @@ const IdoBundleDialog = ({
           )}
         </TableContainer>
       </DialogContent>
+      <Snackbar
+        open={snackBarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackBarOpen(false)}
+        message={snackBarMessage}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      />
     </>
   );
 };
