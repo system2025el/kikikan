@@ -25,7 +25,7 @@ export const formItems: FormItemsType[] = [
     constraints: '整数',
   },
   {
-    label: '入庫拠点',
+    label: '最終在庫場所',
     exsample: '',
     constraints: 'リスト選択',
   },
