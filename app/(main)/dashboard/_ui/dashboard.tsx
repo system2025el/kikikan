@@ -18,6 +18,7 @@ export const Dashboard = () => {
     .format('YYYY/MM/DD');
 
   const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<Error | null>(null);
   const [unsetShukoTimeOrders, setUnsetShukoTimeOrders] = useState<DashboardTableValues[]>([]);
   const [unsetTimeOrders, setUnsetTimeOrders] = useState<DashboardTableValues[]>([]);
   const [shortageEqpts, setShortageEqpts] = useState<MinusZaikoValues[]>([]);
@@ -43,6 +44,7 @@ export const Dashboard = () => {
       }
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error);
+      setError(error instanceof Error ? error : new Error(String(error)));
     } finally {
       setLoading(false);
     }
@@ -56,6 +58,8 @@ export const Dashboard = () => {
     fetchDashboardData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  if (error) throw error;
 
   return (
     <>

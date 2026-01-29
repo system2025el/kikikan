@@ -55,7 +55,7 @@ export const Schedule = () => {
 
   /* useForm ------------------------------------------------------------- */
   const { handleSubmit, control, reset, getValues } = useForm<WeeklySearchValues>({
-    mode: 'onSubmit',
+    mode: 'onBlur',
     defaultValues: {
       startDate: new Date(),
       endDate: null,
@@ -168,6 +168,12 @@ export const Schedule = () => {
               },
             }}
             type="number"
+            rules={{
+              max: {
+                value: 200,
+                message: '',
+              },
+            }}
           />
           <Button type="submit" sx={{ ml: 2 }} loading={isLoading}>
             再取得
@@ -274,6 +280,7 @@ export const Schedule = () => {
                       //height: 20.1,
                       bgcolor: 'white',
                       color: 'black',
+                      verticalAlign: 'top',
                     }}
                     onClick={() =>
                       handleClickDateHead({
