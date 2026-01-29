@@ -51,7 +51,7 @@ export const EqptOrderList = () => {
   const [customers, setCustomers] = useState<SelectTypes[] | undefined>([]);
   /** */
   const [locs, setLocs] = useState<SelectTypes[] | undefined>([]);
-
+  // エラーハンドリング
   const [error, setError] = useState<Error | null>(null);
 
   /* useForm ------------------------------------------ */
@@ -74,10 +74,14 @@ export const EqptOrderList = () => {
     // 検索条件保持
     sessionStorage.setItem('orderListSearchParams', JSON.stringify(data));
     setPage(1);
-    const orders = await getFilteredOrderList(data);
-    if (orders) {
-      setOrderList(orders);
-      setIsLoading(false);
+    try {
+      const orders = await getFilteredOrderList(data);
+      if (orders) {
+        setOrderList(orders);
+        setIsLoading(false);
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e : new Error(String(e)));
     }
     setIsLoading(false);
   };
@@ -91,11 +95,15 @@ export const EqptOrderList = () => {
     console.log('検索条件＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝', searchParams);
 
     const getList = async (data: EqptOrderSearchValues) => {
-      const [o, c, l] = await Promise.all([getFilteredOrderList(data), getCustomerSelection(), getLocsSelection()]);
-      setOrderList(o);
-      setCustomers(c);
-      setLocs(l);
-      setIsLoading(false);
+      try {
+        const [o, c, l] = await Promise.all([getFilteredOrderList(data), getCustomerSelection(), getLocsSelection()]);
+        setOrderList(o);
+        setCustomers(c);
+        setLocs(l);
+        setIsLoading(false);
+      } catch (e) {
+        setError(e instanceof Error ? e : new Error(String(e)));
+      }
     };
 
     // メモリ上に検索条件があれば実行

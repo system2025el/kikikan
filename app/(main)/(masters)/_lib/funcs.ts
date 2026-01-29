@@ -109,10 +109,12 @@ export const getShozokuSelection = async () => {
     if (!data || data.length === 0) {
       return [];
     }
-    const selectElements: SelectTypes[] = data.map((d) => ({
-      id: d.shozoku_id,
-      label: d.shozoku_nam,
-    }));
+    const selectElements: SelectTypes[] = data
+      .filter((d) => d.shozoku_id === 1 || d.shozoku_id === 2)
+      .map((d) => ({
+        id: d.shozoku_id,
+        label: d.shozoku_nam,
+      }));
     console.log('所属', selectElements.length, '件');
     return selectElements;
   } catch (e) {
@@ -143,7 +145,8 @@ export const getAllSelections = async (): Promise<{
     return { d: daibumons, s: shukeibumons, b: bumons, shozoku: shozoku, section: section };
   } catch (error) {
     console.error('Error fetching all selections:', error);
-    return { d: [], s: [], b: [], shozoku: [], section: [] };
+    throw error;
+    //return { d: [], s: [], b: [], shozoku: [], section: [] };
   }
 };
 
@@ -184,7 +187,8 @@ export const getAllBumonDSSelections = async (): Promise<{
     return { d: daibumons!, s: shukeibumons! };
   } catch (error) {
     console.error('Error fetching all selections:', error);
-    return { d: [], s: [] };
+    throw error;
+    //return { d: [], s: [] };
   }
 };
 

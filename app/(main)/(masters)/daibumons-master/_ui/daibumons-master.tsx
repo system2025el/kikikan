@@ -47,6 +47,8 @@ export const DaibumonsMaster = () => {
   const [page, setPage] = useState(1);
   /** DBのローディング */
   const [isLoading, setIsLoading] = useState(true);
+  // エラーハンドリング
+  const [error, setError] = useState<Error | null>(null);
   /* ダイアログ開く大部門のID、閉じるとき、未選択でFAKE_NEW_IDとする */
   const [openId, setOpenID] = useState<number>(FAKE_NEW_ID);
   /* 詳細ダイアログの開閉状態 */
@@ -63,9 +65,13 @@ export const DaibumonsMaster = () => {
   const onSubmit = async (data: { query?: string | undefined }) => {
     setIsLoading(true);
     console.log('data : ', data);
-    const newList = await getFilteredDaibumons(data.query!);
-    setPage(1);
-    setDaibumons(newList);
+    try {
+      const newList = await getFilteredDaibumons(data.query!);
+      setPage(1);
+      setDaibumons(newList);
+    } catch (e) {
+      setError(e instanceof Error ? e : new Error(String(e)));
+    }
     setIsLoading(false);
     console.log('theLocs : ', daibumons, '検索終了検索終了');
   };
@@ -83,8 +89,12 @@ export const DaibumonsMaster = () => {
   const refetchDaibumons = async () => {
     setIsLoading(true);
     const searchParams = getValues();
-    const updated = await getFilteredDaibumons(searchParams.query);
-    setDaibumons(updated);
+    try {
+      const updated = await getFilteredDaibumons(searchParams.query);
+      setDaibumons(updated);
+    } catch (e) {
+      setError(e instanceof Error ? e : new Error(String(e)));
+    }
     setIsLoading(false);
   };
 
@@ -93,12 +103,18 @@ export const DaibumonsMaster = () => {
   useEffect(() => {
     const getList = async () => {
       setIsLoading(true);
-      const dataList = await getFilteredDaibumons();
-      setDaibumons(dataList);
+      try {
+        const dataList = await getFilteredDaibumons();
+        setDaibumons(dataList);
+      } catch (e) {
+        setError(e instanceof Error ? e : new Error(String(e)));
+      }
       setIsLoading(false);
     };
     getList();
   }, []);
+
+  if (error) throw error;
 
   return (
     <PermissionGuard category={'masters'} required={permission.mst_ref}>

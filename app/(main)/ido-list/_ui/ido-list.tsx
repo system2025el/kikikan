@@ -17,6 +17,8 @@ import { IdoListTable } from './ido-list-table';
 export const IdoList = () => {
   // ローディング制御
   const [isLoading, setIsLoading] = useState(true);
+  // エラーハンドリング
+  const [error, setError] = useState<Error | null>(null);
 
   const [idoList, setIdoList] = useState<IdoTableValues[]>([]);
 
@@ -35,9 +37,11 @@ export const IdoList = () => {
   const onSubmit = async (data: { idoDat: Date }) => {
     setIsLoading(true);
     sessionStorage.setItem('idoListSearchParams', JSON.stringify(getValues()));
-    const idoData = await getIdoList(toJapanYMDString(data.idoDat, '-'));
-    if (idoData) {
+    try {
+      const idoData = await getIdoList(toJapanYMDString(data.idoDat, '-'));
       setIdoList(idoData);
+    } catch (e) {
+      setError(e instanceof Error ? e : new Error(String(e)));
     }
     setIsLoading(false);
   };
@@ -51,11 +55,12 @@ export const IdoList = () => {
     const getList = async (searchParams: { idoDat: Date }) => {
       setIsLoading(true);
       const date = toJapanYMDString(searchParams.idoDat, '-');
-      const idoData = await getIdoList(date);
-      if (!idoData) {
-        return <div>エラー</div>;
+      try {
+        const idoData = await getIdoList(date);
+        setIdoList(idoData);
+      } catch (e) {
+        setError(e instanceof Error ? e : new Error(String(e)));
       }
-      setIdoList(idoData);
       setIsLoading(false);
     };
 
@@ -67,6 +72,8 @@ export const IdoList = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  if (error) throw error;
 
   return (
     <PermissionGuard category={'nyushuko'} required={permission.nyushuko_ref}>

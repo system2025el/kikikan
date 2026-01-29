@@ -43,6 +43,8 @@ export const LoanSituation = (props: {
 
   // ローディング
   const [isLoading, setIsLoading] = useState(true);
+  // エラーハンドリング
+  const [error, setError] = useState<Error | null>(null);
   // 貸出受注データリスト
   const [loanJuchuList, setLoanJuchuList] = useState<LoanJuchu[]>(/*props.loanJuchuData*/ []);
   // 機材使用リスト
@@ -68,56 +70,60 @@ export const LoanSituation = (props: {
       // ヘッダー開始日
       const strDat = subDays(new Date(), 1);
 
-      // 機材在庫データ、ヘッダー開始日から終了日までに該当する受注ヘッダーidリスト、貸出受注データ
-      const [eqStockData, confirmJuchuHeadIds, loanJuchuData] = await Promise.all([
-        getLoanStockData(kizaiData.kizaiId, strDat),
-        confirmJuchuHeadId(strDat),
-        getLoanJuchuData(kizaiData.kizaiId),
-      ]);
+      try {
+        // 機材在庫データ、ヘッダー開始日から終了日までに該当する受注ヘッダーidリスト、貸出受注データ
+        const [eqStockData, confirmJuchuHeadIds, loanJuchuData] = await Promise.all([
+          getLoanStockData(kizaiData.kizaiId, strDat),
+          confirmJuchuHeadId(strDat),
+          getLoanJuchuData(kizaiData.kizaiId),
+        ]);
 
-      // 該当する受注ヘッダーidリストに含まれる貸出受注データのみ抽出
-      const filterLoanJuchuData = loanJuchuData.filter((d) => confirmJuchuHeadIds.includes(d.juchuHeadId));
+        // 該当する受注ヘッダーidリストに含まれる貸出受注データのみ抽出
+        const filterLoanJuchuData = loanJuchuData.filter((d) => confirmJuchuHeadIds.includes(d.juchuHeadId));
 
-      if (filterLoanJuchuData.length === 0) {
-        setEqStockList(eqStockData);
-        setIsLoading(false);
-        return;
-      }
-
-      filterLoanJuchuData.sort((a, b) => {
-        const dateA = a.shukoDat ? new Date(a.shukoDat).getTime() : null;
-        const dateB = b.shukoDat ? new Date(b.shukoDat).getTime() : null;
-
-        if (dateA === null && dateB === null) return 0;
-        if (dateA === null) return 1;
-        if (dateB === null) return -1;
-
-        return dateA - dateB;
-      });
-
-      const juchuHeadIds = filterLoanJuchuData.map((d) => d.juchuHeadId);
-
-      // const eqUseData: LoanUseTableValues[][] = [];
-      // for (const juchuHeadId of juchuHeadIds) {
-      //   const data: LoanUseTableValues[] = await getLoanUseData(juchuHeadId, kizaiData.kizaiId, strDat);
-      //   eqUseData.push(data);
-      // }
-
-      const allLoanUseData: LoanUseTableValues[] = await getAllLoanUseData(juchuHeadIds, kizaiData.kizaiId, strDat);
-
-      const loanUseMap = new Map<number, LoanUseTableValues[]>();
-      for (const row of allLoanUseData) {
-        if (!loanUseMap.has(row.juchuHeadId)) {
-          loanUseMap.set(row.juchuHeadId, []);
+        if (filterLoanJuchuData.length === 0) {
+          setEqStockList(eqStockData);
+          setIsLoading(false);
+          return;
         }
-        loanUseMap.get(row.juchuHeadId)!.push(row);
+
+        filterLoanJuchuData.sort((a, b) => {
+          const dateA = a.shukoDat ? new Date(a.shukoDat).getTime() : null;
+          const dateB = b.shukoDat ? new Date(b.shukoDat).getTime() : null;
+
+          if (dateA === null && dateB === null) return 0;
+          if (dateA === null) return 1;
+          if (dateB === null) return -1;
+
+          return dateA - dateB;
+        });
+
+        const juchuHeadIds = filterLoanJuchuData.map((d) => d.juchuHeadId);
+
+        // const eqUseData: LoanUseTableValues[][] = [];
+        // for (const juchuHeadId of juchuHeadIds) {
+        //   const data: LoanUseTableValues[] = await getLoanUseData(juchuHeadId, kizaiData.kizaiId, strDat);
+        //   eqUseData.push(data);
+        // }
+
+        const allLoanUseData: LoanUseTableValues[] = await getAllLoanUseData(juchuHeadIds, kizaiData.kizaiId, strDat);
+
+        const loanUseMap = new Map<number, LoanUseTableValues[]>();
+        for (const row of allLoanUseData) {
+          if (!loanUseMap.has(row.juchuHeadId)) {
+            loanUseMap.set(row.juchuHeadId, []);
+          }
+          loanUseMap.get(row.juchuHeadId)!.push(row);
+        }
+
+        const eqUseData: LoanUseTableValues[][] = juchuHeadIds.map((id) => loanUseMap.get(id) || []);
+
+        setLoanJuchuList(filterLoanJuchuData);
+        setEqUseList(eqUseData);
+        setEqStockList(eqStockData);
+      } catch (e) {
+        setError(e instanceof Error ? e : new Error(String(e)));
       }
-
-      const eqUseData: LoanUseTableValues[][] = juchuHeadIds.map((id) => loanUseMap.get(id) || []);
-
-      setLoanJuchuList(filterLoanJuchuData);
-      setEqUseList(eqUseData);
-      setEqStockList(eqStockData);
 
       setIsLoading(false);
     };
@@ -182,74 +188,78 @@ export const LoanSituation = (props: {
       // ヘッダー開始日
       const strDat = subDays(date.toDate(), 1);
 
-      // 機材在庫データ、ヘッダー開始日から終了日までに該当する受注ヘッダーidリスト、貸出受注データ
-      const [eqStockData, confirmJuchuHeadIds, loanJuchuData] = await Promise.all([
-        getLoanStockData(kizaiData.kizaiId, strDat),
-        confirmJuchuHeadId(strDat),
-        getLoanJuchuData(kizaiData.kizaiId),
-      ]);
+      try {
+        // 機材在庫データ、ヘッダー開始日から終了日までに該当する受注ヘッダーidリスト、貸出受注データ
+        const [eqStockData, confirmJuchuHeadIds, loanJuchuData] = await Promise.all([
+          getLoanStockData(kizaiData.kizaiId, strDat),
+          confirmJuchuHeadId(strDat),
+          getLoanJuchuData(kizaiData.kizaiId),
+        ]);
 
-      // 該当する受注ヘッダーidリストに含まれる貸出受注データのみ抽出
-      const filterLoanJuchuData = loanJuchuData.filter((d) => confirmJuchuHeadIds.includes(d.juchuHeadId));
-      console.log('-------------------filterLoanJuchuData-----------------', filterLoanJuchuData);
+        // 該当する受注ヘッダーidリストに含まれる貸出受注データのみ抽出
+        const filterLoanJuchuData = loanJuchuData.filter((d) => confirmJuchuHeadIds.includes(d.juchuHeadId));
+        console.log('-------------------filterLoanJuchuData-----------------', filterLoanJuchuData);
 
-      if (filterLoanJuchuData.length === 0) {
-        setLoanJuchuList([]);
-        setEqUseList([]);
+        if (filterLoanJuchuData.length === 0) {
+          setLoanJuchuList([]);
+          setEqUseList([]);
+          setEqStockList(eqStockData);
+          setAnchorEl(null);
+          setIsLoading(false);
+          return;
+        }
+
+        if (sortValue === 'shuko') {
+          filterLoanJuchuData.sort((a, b) => {
+            const dateA = a.shukoDat ? new Date(a.shukoDat).getTime() : null;
+            const dateB = b.shukoDat ? new Date(b.shukoDat).getTime() : null;
+
+            if (dateA === null && dateB === null) return 0;
+            if (dateA === null) return 1;
+            if (dateB === null) return -1;
+
+            return dateA - dateB;
+          });
+        } else {
+          filterLoanJuchuData.sort((a, b) => {
+            const dateA = a.nyukoDat ? new Date(a.nyukoDat).getTime() : null;
+            const dateB = b.nyukoDat ? new Date(b.nyukoDat).getTime() : null;
+
+            if (dateA === null && dateB === null) return 0;
+            if (dateA === null) return 1;
+            if (dateB === null) return -1;
+
+            return dateA - dateB;
+          });
+        }
+
+        const juchuHeadIds = filterLoanJuchuData.map((d) => d.juchuHeadId);
+
+        // const eqUseData: LoanUseTableValues[][] = [];
+        // for (const juchuHeadId of juchuHeadIds) {
+        //   const data: LoanUseTableValues[] = await getLoanUseData(juchuHeadId, props.kizaiData.kizaiId, strDat);
+        //   eqUseData.push(data);
+        // }
+
+        const allLoanUseData: LoanUseTableValues[] = await getAllLoanUseData(juchuHeadIds, kizaiData.kizaiId, strDat);
+
+        const loanUseMap = new Map<number, LoanUseTableValues[]>();
+        for (const row of allLoanUseData) {
+          if (!loanUseMap.has(row.juchuHeadId)) {
+            loanUseMap.set(row.juchuHeadId, []);
+          }
+          loanUseMap.get(row.juchuHeadId)!.push(row);
+        }
+
+        const eqUseData: LoanUseTableValues[][] = juchuHeadIds.map((id) => loanUseMap.get(id) || []);
+
+        setLoanJuchuList(filterLoanJuchuData);
+        setEqUseList(eqUseData);
         setEqStockList(eqStockData);
         setAnchorEl(null);
-        setIsLoading(false);
-        return;
+      } catch (e) {
+        setError(e instanceof Error ? e : new Error(String(e)));
       }
-
-      if (sortValue === 'shuko') {
-        filterLoanJuchuData.sort((a, b) => {
-          const dateA = a.shukoDat ? new Date(a.shukoDat).getTime() : null;
-          const dateB = b.shukoDat ? new Date(b.shukoDat).getTime() : null;
-
-          if (dateA === null && dateB === null) return 0;
-          if (dateA === null) return 1;
-          if (dateB === null) return -1;
-
-          return dateA - dateB;
-        });
-      } else {
-        filterLoanJuchuData.sort((a, b) => {
-          const dateA = a.nyukoDat ? new Date(a.nyukoDat).getTime() : null;
-          const dateB = b.nyukoDat ? new Date(b.nyukoDat).getTime() : null;
-
-          if (dateA === null && dateB === null) return 0;
-          if (dateA === null) return 1;
-          if (dateB === null) return -1;
-
-          return dateA - dateB;
-        });
-      }
-
-      const juchuHeadIds = filterLoanJuchuData.map((d) => d.juchuHeadId);
-
-      // const eqUseData: LoanUseTableValues[][] = [];
-      // for (const juchuHeadId of juchuHeadIds) {
-      //   const data: LoanUseTableValues[] = await getLoanUseData(juchuHeadId, props.kizaiData.kizaiId, strDat);
-      //   eqUseData.push(data);
-      // }
-
-      const allLoanUseData: LoanUseTableValues[] = await getAllLoanUseData(juchuHeadIds, kizaiData.kizaiId, strDat);
-
-      const loanUseMap = new Map<number, LoanUseTableValues[]>();
-      for (const row of allLoanUseData) {
-        if (!loanUseMap.has(row.juchuHeadId)) {
-          loanUseMap.set(row.juchuHeadId, []);
-        }
-        loanUseMap.get(row.juchuHeadId)!.push(row);
-      }
-
-      const eqUseData: LoanUseTableValues[][] = juchuHeadIds.map((id) => loanUseMap.get(id) || []);
-
-      setLoanJuchuList(filterLoanJuchuData);
-      setEqUseList(eqUseData);
-      setEqStockList(eqStockData);
-      setAnchorEl(null);
       setIsLoading(false);
     }
   };
@@ -311,22 +321,27 @@ export const LoanSituation = (props: {
     //   );
     //   updatedEqUseData.push(data);
     // }
-    const allLoanUseData: LoanUseTableValues[] = await getAllLoanUseData(
-      juchuHeadIds,
-      kizaiData.kizaiId,
-      subDays(selectDate, 1)
-    );
 
-    const loanUseMap = new Map<number, LoanUseTableValues[]>();
-    for (const row of allLoanUseData) {
-      if (!loanUseMap.has(row.juchuHeadId)) {
-        loanUseMap.set(row.juchuHeadId, []);
+    try {
+      const allLoanUseData: LoanUseTableValues[] = await getAllLoanUseData(
+        juchuHeadIds,
+        kizaiData.kizaiId,
+        subDays(selectDate, 1)
+      );
+
+      const loanUseMap = new Map<number, LoanUseTableValues[]>();
+      for (const row of allLoanUseData) {
+        if (!loanUseMap.has(row.juchuHeadId)) {
+          loanUseMap.set(row.juchuHeadId, []);
+        }
+        loanUseMap.get(row.juchuHeadId)!.push(row);
       }
-      loanUseMap.get(row.juchuHeadId)!.push(row);
-    }
 
-    const updatedEqUseData: LoanUseTableValues[][] = juchuHeadIds.map((id) => loanUseMap.get(id) || []);
-    setEqUseList(updatedEqUseData);
+      const updatedEqUseData: LoanUseTableValues[][] = juchuHeadIds.map((id) => loanUseMap.get(id) || []);
+      setEqUseList(updatedEqUseData);
+    } catch (e) {
+      setError(e instanceof Error ? e : new Error(String(e)));
+    }
     setIsLoading(false);
   };
 
@@ -340,6 +355,8 @@ export const LoanSituation = (props: {
   const handleClickAway = () => {
     setAnchorEl(null);
   };
+
+  if (error) throw error;
 
   return (
     <Box>

@@ -49,6 +49,8 @@ export const UsersMaster = () => {
   const [page, setPage] = useState(1);
   /** ローディング */
   const [isLoading, setIsLoading] = useState(true);
+  // エラーハンドリング
+  const [error, setError] = useState<Error | null>(null);
   /* ダイアログ開く顧客のID、閉じるとき、未選択でFAKE_NEW_IDとする */
   const [openId, setOpenID] = useState(String(FAKE_NEW_ID));
   /* 顧客詳細ダイアログの開閉状態 */
@@ -72,9 +74,13 @@ export const UsersMaster = () => {
   const onSubmit = async (data: { query: string | undefined }) => {
     setIsLoading(true);
     console.log('data : ', data);
-    const newList = await getFilteredUsers(data.query!);
-    setPage(1);
-    setUsers(newList);
+    try {
+      const newList = await getFilteredUsers(data.query!);
+      setPage(1);
+      setUsers(newList);
+    } catch (e) {
+      setError(e instanceof Error ? e : new Error(String(e)));
+    }
     setIsLoading(false);
     console.log('theLocs : ', users);
   };
@@ -92,8 +98,12 @@ export const UsersMaster = () => {
   const refetchUsers = async () => {
     setIsLoading(true);
     const searchParams = getValues();
-    const updated = await getFilteredUsers(searchParams.query);
-    setUsers(updated);
+    try {
+      const updated = await getFilteredUsers(searchParams.query);
+      setUsers(updated);
+    } catch (e) {
+      setError(e instanceof Error ? e : new Error(String(e)));
+    }
     setIsLoading(false);
   };
 
@@ -102,12 +112,18 @@ export const UsersMaster = () => {
   useEffect(() => {
     const getList = async () => {
       setIsLoading(true);
-      const dataList = await getFilteredUsers();
-      setUsers(dataList);
+      try {
+        const dataList = await getFilteredUsers();
+        setUsers(dataList);
+      } catch (e) {
+        setError(e instanceof Error ? e : new Error(String(e)));
+      }
       setIsLoading(false);
     };
     getList();
   }, []);
+
+  if (error) throw error;
 
   return (
     <PermissionGuard category={'loginSetting'} required={permission.login}>

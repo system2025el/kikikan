@@ -41,6 +41,9 @@ export const getShukoDetail = async (
     const { data, error } = await selectNyushukoOne(juchuHeadId, juchuKizaiHeadKbn, nyushukoBashoId, nyushukoDat, 1);
 
     if (error) {
+      if (error.code === 'PGRST116') {
+        return null;
+      }
       console.error('getShukoDetail error : ', error);
       throw error;
     }
@@ -62,6 +65,7 @@ export const getShukoDetail = async (
     return nyukoDetailData;
   } catch (e) {
     console.error(e);
+    throw e;
   }
 };
 
@@ -121,7 +125,7 @@ export const getShukoDetailTable = async (
     return shukoDetailTableData;
   } catch (e) {
     console.error(e);
-    return null;
+    throw e;
   }
 };
 

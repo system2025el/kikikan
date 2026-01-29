@@ -45,6 +45,9 @@ export const getNyukoEqptDetail = async (
     );
 
     if (error) {
+      if (error.code === 'PGRST116') {
+        return null;
+      }
       console.error('getNyukoEqptDetail error : ', error);
       throw error;
     }
@@ -73,7 +76,7 @@ export const getNyukoEqptDetail = async (
     return nyukoEqptDetailData;
   } catch (e) {
     console.error(e);
-    return null;
+    throw e;
   }
 };
 
@@ -128,7 +131,7 @@ export const getNyukoEqptDetailTable = async (
     return nyukoEqptDetailTableData;
   } catch (e) {
     console.error(e);
-    return [];
+    throw e;
   }
 };
 

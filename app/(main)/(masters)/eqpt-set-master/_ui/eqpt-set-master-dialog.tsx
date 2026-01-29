@@ -11,6 +11,7 @@ import {
   DialogTitle,
   Grid2,
   lighten,
+  Snackbar,
   Stack,
   TextField,
   Toolbar,
@@ -59,6 +60,8 @@ export const EqptSetsMasterDialog = ({
   /* useState -------------------------------------- */
   /* DBのローディング状態 */
   const [isLoading, setIsLoading] = useState(true);
+  // エラーハンドリング
+  const [error, setError] = useState<Error | null>(null);
   /* ダイアログでの編集モードかどうか */
   const [editable, setEditable] = useState(false);
   /* 新規作成かどうか */
@@ -78,6 +81,10 @@ export const EqptSetsMasterDialog = ({
 
   /** 機材選択ダイアログ開閉 */
   const [eqSelectOpen, setEqSelectOpen] = useState<boolean>(false);
+  // スナックバー制御
+  const [snackBarOpen, setSnackBarOpen] = useState(false);
+  // スナックバーメッセージ
+  const [snackBarMessage, setSnackBarMessage] = useState('');
 
   /* useForm ----------------------------------------- */
   const {
@@ -105,22 +112,25 @@ export const EqptSetsMasterDialog = ({
     if (setList.length === 0) {
       setDeleteOpen(true);
     } else {
+      setIsLoading(true);
       console.log(data);
-      if (isNew) {
-        setIsLoading(true);
-        await addNewEqptSet(data, user?.name ?? '');
-        handleCloseDialog();
-        refetchEqptSets();
-        setIsLoading(false);
-      } else {
-        if (action === 'save') {
-          setIsLoading(true);
-          await updateEqptSet(data, currentSetList, user?.name ?? '');
-          handleCloseDialog();
-          refetchEqptSets();
-          setIsLoading(false);
+      try {
+        if (isNew) {
+          await addNewEqptSet(data, user?.name ?? '');
+        } else {
+          if (action === 'save') {
+            await updateEqptSet(data, currentSetList, user?.name ?? '');
+          }
         }
+      } catch (e) {
+        setSnackBarMessage('保存に失敗しました');
+        setSnackBarOpen(true);
+        return;
+      } finally {
+        setIsLoading(false);
       }
+      handleCloseDialog();
+      refetchEqptSets();
     }
   };
 
@@ -151,9 +161,16 @@ export const EqptSetsMasterDialog = ({
       handleCloseDialog();
     } else {
       // 編集時はセットマスタを削除する
-      deleteEqptSets(oyaId);
-      setDeleteOpen(false);
-      setIsLoading(false);
+      try {
+        await deleteEqptSets(oyaId);
+      } catch (e) {
+        setSnackBarMessage('削除に失敗しました');
+        setSnackBarOpen(true);
+        return;
+      } finally {
+        setDeleteOpen(false);
+        setIsLoading(false);
+      }
       handleCloseDialog();
       await refetchEqptSets();
     }
@@ -163,31 +180,37 @@ export const EqptSetsMasterDialog = ({
   useEffect(() => {
     console.log('★★★★★★★★★★★★★★★★★★★★★');
     const getThatOneEqptSet = async () => {
-      if (oyaId === FAKE_NEW_ID) {
-        // 新規追加モード
-        const op = await getEqptsForOyaEqptSelection();
-        if (!op) {
-          setOptions([]);
-        } else {
-          setOptions(op);
-        }
-        reset(emptyEqptSet); // フォーム初期化
-        setEditable(true); // 編集モードにする
-        setIsLoading(false);
-        setIsNew(true);
-      } else {
-        const oyaEqptNam = await getEqptNam(oyaId);
-        setKizaiNam(oyaEqptNam);
-        const eqptSet1 = await getChosenEqptSet(oyaId);
-        if (eqptSet1) {
-          reset(eqptSet1); // 取得したデータでフォーム初期化
-          setCurrentSetList(eqptSet1.setEqptList.map((d) => d.id)); // 初期のセットリストをセット
+      try {
+        if (oyaId === FAKE_NEW_ID) {
+          // 新規追加モード
+          const op = await getEqptsForOyaEqptSelection();
+          if (!op) {
+            setOptions([]);
+          } else {
+            setOptions(op);
+          }
+          reset(emptyEqptSet); // フォーム初期化
+          setEditable(true); // 編集モードにする
           setIsLoading(false);
+          setIsNew(true);
+        } else {
+          const oyaEqptNam = await getEqptNam(oyaId);
+          setKizaiNam(oyaEqptNam);
+          const eqptSet1 = await getChosenEqptSet(oyaId);
+          if (eqptSet1) {
+            reset(eqptSet1); // 取得したデータでフォーム初期化
+            setCurrentSetList(eqptSet1.setEqptList.map((d) => d.id)); // 初期のセットリストをセット
+            setIsLoading(false);
+          }
         }
+      } catch (e) {
+        setError(e instanceof Error ? e : new Error(String(e)));
       }
     };
     getThatOneEqptSet();
   }, [oyaId, reset]);
+
+  if (error) throw error;
 
   return (
     <>
@@ -327,6 +350,14 @@ export const EqptSetsMasterDialog = ({
           </>
         )}
       </form>
+      <Snackbar
+        open={snackBarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackBarOpen(false)}
+        message={snackBarMessage}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={{ marginTop: '65px' }}
+      />
     </>
   );
 };

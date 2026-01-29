@@ -77,6 +77,6 @@ export const getIdoList = async (sagyoDenDat: string) => {
     return idoData;
   } catch (e) {
     console.error(e);
-    return null;
+    throw e;
   }
 };

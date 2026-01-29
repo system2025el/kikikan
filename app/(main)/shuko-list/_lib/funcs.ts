@@ -43,7 +43,7 @@ export const getShukoList = async (queries: ShukoListSearchValues) => {
     return shukoList;
   } catch (e) {
     console.error(e);
-    return [];
+    throw e;
   }
 };
 

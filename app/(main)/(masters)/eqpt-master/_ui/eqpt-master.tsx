@@ -45,6 +45,8 @@ export const EqptMaster = () => {
   const [page, setPage] = useState(1);
   /** ローディング */
   const [isLoading, setIsLoading] = useState(true);
+  // エラーハンドリング
+  const [error, setError] = useState<Error | null>(null);
   /** 選択肢 */
   const [options, setOptions] = useState<{ d: SelectTypes[]; s: SelectTypes[]; b: SelectTypes[] }>({
     d: [],
@@ -79,15 +81,19 @@ export const EqptMaster = () => {
   }) => {
     setIsLoading(true);
     console.log('data : ', data);
-    const newList = await getFilteredEqpts({
-      q: data.query!,
-      d: data.daibumonQuery === FAKE_NEW_ID ? null : data.daibumonQuery,
-      s: data.shukeiQuery === FAKE_NEW_ID ? null : data.shukeiQuery,
-      b: data.bumonQuery === FAKE_NEW_ID ? null : data.bumonQuery,
-      ngFlg: data.ngFlg,
-    });
-    setPage(1);
-    setEqpts(newList?.data);
+    try {
+      const newList = await getFilteredEqpts({
+        q: data.query!,
+        d: data.daibumonQuery === FAKE_NEW_ID ? null : data.daibumonQuery,
+        s: data.shukeiQuery === FAKE_NEW_ID ? null : data.shukeiQuery,
+        b: data.bumonQuery === FAKE_NEW_ID ? null : data.bumonQuery,
+        ngFlg: data.ngFlg,
+      });
+      setPage(1);
+      setEqpts(newList?.data);
+    } catch (e) {
+      setError(e instanceof Error ? e : new Error(String(e)));
+    }
     setIsLoading(false);
     console.log('theEqpt : ', eqpts);
   };
@@ -105,14 +111,18 @@ export const EqptMaster = () => {
   const refetchEqpts = async () => {
     setIsLoading(true);
     const searchParams = getValues();
-    const updated = await getFilteredEqpts({
-      q: searchParams.query!,
-      d: searchParams.daibumonQuery === FAKE_NEW_ID ? null : searchParams.daibumonQuery,
-      s: searchParams.shukeiQuery === FAKE_NEW_ID ? null : searchParams.shukeiQuery,
-      b: searchParams.bumonQuery === FAKE_NEW_ID ? null : searchParams.bumonQuery,
-      ngFlg: searchParams.ngFlg,
-    });
-    setEqpts(updated?.data);
+    try {
+      const updated = await getFilteredEqpts({
+        q: searchParams.query!,
+        d: searchParams.daibumonQuery === FAKE_NEW_ID ? null : searchParams.daibumonQuery,
+        s: searchParams.shukeiQuery === FAKE_NEW_ID ? null : searchParams.shukeiQuery,
+        b: searchParams.bumonQuery === FAKE_NEW_ID ? null : searchParams.bumonQuery,
+        ngFlg: searchParams.ngFlg,
+      });
+      setEqpts(updated?.data);
+    } catch (e) {
+      setError(e instanceof Error ? e : new Error(String(e)));
+    }
     setIsLoading(false);
   };
 
@@ -122,13 +132,19 @@ export const EqptMaster = () => {
     const getList = async () => {
       setIsLoading(true);
       console.log('testtestestestessteste');
-      const dataList = await getFilteredEqpts();
-      setEqpts(dataList.data);
-      setOptions(dataList.options);
+      try {
+        const dataList = await getFilteredEqpts();
+        setEqpts(dataList.data);
+        setOptions(dataList.options);
+      } catch (e) {
+        setError(e instanceof Error ? e : new Error(String(e)));
+      }
       setIsLoading(false);
     };
     getList();
   }, []);
+
+  if (error) throw error;
 
   return (
     <PermissionGuard category={'masters'} required={permission.mst_ref}>

@@ -31,6 +31,8 @@ export const BasesMaster = () => {
   const [page, setPage] = useState(1);
   /** ローディング */
   const [isLoading, setIsLoading] = useState(true);
+  // エラーハンドリング
+  const [error, setError] = useState<Error | null>(null);
   /* ダイアログ開く顧客のID、閉じるとき、未選択でFAKE_NEW_IDとする */
   const [openId, setOpenID] = useState<number>(FAKE_NEW_ID);
   /* 詳細ダイアログの開閉状態 */
@@ -50,8 +52,12 @@ export const BasesMaster = () => {
   /* 情報が変わったときに更新される */
   const refetchBases = async () => {
     setIsLoading(true);
-    const updated = await getFilteredBases();
-    setBases(updated);
+    try {
+      const updated = await getFilteredBases();
+      setBases(updated);
+    } catch (e) {
+      setError(e instanceof Error ? e : new Error(String(e)));
+    }
     setIsLoading(false);
   };
 
@@ -60,12 +66,18 @@ export const BasesMaster = () => {
   useEffect(() => {
     const getList = async () => {
       setIsLoading(true);
-      const dataList = await getFilteredBases();
-      setBases(dataList);
+      try {
+        const dataList = await getFilteredBases();
+        setBases(dataList);
+      } catch (e) {
+        setError(e instanceof Error ? e : new Error(String(e)));
+      }
       setIsLoading(false);
     };
     getList();
   }, []);
+
+  if (error) throw error;
 
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
