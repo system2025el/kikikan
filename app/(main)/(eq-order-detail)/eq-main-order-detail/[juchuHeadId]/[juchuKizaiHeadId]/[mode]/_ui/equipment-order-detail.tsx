@@ -461,19 +461,37 @@ const EquipmentOrderDetail = (props: {
         return acc;
       }, new Map<number, { planKizaiQty: number; planYobiQty: number; planQty: number }>());
 
+    // setIdoJuchuKizaiMeisaiList((prev) =>
+    //   prev.map((d) =>
+    //     sum.get(d.kizaiId) && !d.delFlag
+    //       ? {
+    //           ...d,
+    //           planKizaiQty: sum.get(d.kizaiId)!.planKizaiQty,
+    //           planYobiQty: sum.get(d.kizaiId)!.planYobiQty,
+    //           planQty: sum.get(d.kizaiId)!.planQty,
+    //         }
+    //       : !d.delFlag
+    //         ? { ...d, delFlag: true }
+    //         : d
+    //   )
+    // );
+
     setIdoJuchuKizaiMeisaiList((prev) =>
-      prev
-        .filter((d) => !d.delFlag)
-        .map((d) =>
-          sum.get(d.kizaiId)
-            ? {
-                ...d,
-                planKizaiQty: sum.get(d.kizaiId)!.planKizaiQty,
-                planYobiQty: sum.get(d.kizaiId)!.planYobiQty,
-                planQty: sum.get(d.kizaiId)!.planQty,
-              }
-            : { ...d, delFlag: true }
-        )
+      prev.map((d) => {
+        const s = sum.get(d.kizaiId);
+        if (s && !d.delFlag) {
+          return {
+            ...d,
+            planKizaiQty: s.planKizaiQty,
+            planYobiQty: s.planYobiQty,
+            planQty: s.planQty,
+          };
+        }
+        if (!s && !d.delFlag) {
+          return { ...d, delFlag: true };
+        }
+        return d;
+      })
     );
 
     // const updatedPriceTotal = juchuKizaiMeisaiList
@@ -831,8 +849,12 @@ const EquipmentOrderDetail = (props: {
             // 出庫日から入庫日更新
             setDateRange(updateDateRange);
 
-            // 受注機材明細、機材在庫テーブル更新
-            const juchuKizaiMeisaiData = await getJuchuKizaiMeisai(data.juchuHeadId, data.juchuKizaiHeadId);
+            // 受注機材明細データ、移動受注機材明細データ、受注コンテナ明細データ
+            const [juchuKizaiMeisaiData, idoJuchuKizaiMeisaiData, juchuCtnMeisaiData] = await Promise.all([
+              getJuchuKizaiMeisai(data.juchuHeadId, data.juchuKizaiHeadId),
+              getIdoJuchuKizaiMeisai(data.juchuHeadId, data.juchuKizaiHeadId),
+              getJuchuContainerMeisai(data.juchuHeadId, data.juchuKizaiHeadId),
+            ]);
             if (juchuKizaiMeisaiData) {
               setJuchuKizaiMeisaiList(juchuKizaiMeisaiData);
               setOriginJuchuKizaiMeisaiList(juchuKizaiMeisaiData);
@@ -858,9 +880,11 @@ const EquipmentOrderDetail = (props: {
               setOriginEqStockList(updatedEqStockData);
               setEqStockList(updatedEqStockData);
             }
+            // 移動受注機材明細更新
+            setIdoJuchuKizaiMeisaiList(idoJuchuKizaiMeisaiData);
+            setOriginIdoJuchuKizaiMeisaiList(idoJuchuKizaiMeisaiData);
 
             // 受注コンテナ明細更新
-            const juchuCtnMeisaiData = await getJuchuContainerMeisai(data.juchuHeadId, data.juchuKizaiHeadId);
             setJuchuContainerMeisaiList(juchuCtnMeisaiData);
             setOriginJuchuContainerMeisaiList(juchuCtnMeisaiData);
           } else if (checkJuchuKizaiHead) {
@@ -885,8 +909,12 @@ const EquipmentOrderDetail = (props: {
             setOriginEqStockList(updatedEqStockData);
             setEqStockList(updatedEqStockData);
           } else if (checkJuchuKizaiMeisai || checkJuchuContainerMeisai) {
-            // 受注機材明細、機材在庫テーブル更新
-            const juchuKizaiMeisaiData = await getJuchuKizaiMeisai(data.juchuHeadId, data.juchuKizaiHeadId);
+            // 受注機材明細データ、移動受注機材明細データ、受注コンテナ明細データ
+            const [juchuKizaiMeisaiData, idoJuchuKizaiMeisaiData, juchuCtnMeisaiData] = await Promise.all([
+              getJuchuKizaiMeisai(data.juchuHeadId, data.juchuKizaiHeadId),
+              getIdoJuchuKizaiMeisai(data.juchuHeadId, data.juchuKizaiHeadId),
+              getJuchuContainerMeisai(data.juchuHeadId, data.juchuKizaiHeadId),
+            ]);
             if (juchuKizaiMeisaiData) {
               setJuchuKizaiMeisaiList(juchuKizaiMeisaiData);
               setOriginJuchuKizaiMeisaiList(juchuKizaiMeisaiData);
@@ -912,11 +940,13 @@ const EquipmentOrderDetail = (props: {
               setOriginEqStockList(updatedEqStockData);
               setEqStockList(updatedEqStockData);
             }
+            // 移動受注機材明細更新
+            setIdoJuchuKizaiMeisaiList(idoJuchuKizaiMeisaiData);
+            setOriginIdoJuchuKizaiMeisaiList(idoJuchuKizaiMeisaiData);
 
             // 受注コンテナ明細更新
-            const juchuContainerMeisaiData = await getJuchuContainerMeisai(data.juchuHeadId, data.juchuKizaiHeadId);
-            setOriginJuchuContainerMeisaiList(juchuContainerMeisaiData);
-            setJuchuContainerMeisaiList(juchuContainerMeisaiData);
+            setOriginJuchuContainerMeisaiList(juchuCtnMeisaiData);
+            setJuchuContainerMeisaiList(juchuCtnMeisaiData);
           }
           if (checkIdoJuchuKizaiMeisai) {
             setOriginIdoJuchuKizaiMeisaiList(idoJuchuKizaiMeisaiList);
@@ -1811,7 +1841,12 @@ const EquipmentOrderDetail = (props: {
         mShozokuId: d.shozokuId,
         shozokuId:
           d.shozokuId === 1 && kicsIdoDat !== null ? 2 : d.shozokuId === 2 && yardIdoDat !== null ? 1 : d.shozokuId,
-        shozokuNam: d.shozokuNam,
+        shozokuNam:
+          d.shozokuId === 1 && kicsIdoDat !== null
+            ? 'YARD'
+            : d.shozokuId === 2 && yardIdoDat !== null
+              ? 'KICS'
+              : d.shozokuNam,
         kizaiId: d.kizaiId,
         kizaiNam: d.kizaiNam,
         kizaiQty: d.kizaiQty,
