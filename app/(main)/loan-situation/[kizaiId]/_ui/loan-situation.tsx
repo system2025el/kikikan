@@ -198,7 +198,6 @@ export const LoanSituation = (props: {
 
         // 該当する受注ヘッダーidリストに含まれる貸出受注データのみ抽出
         const filterLoanJuchuData = loanJuchuData.filter((d) => confirmJuchuHeadIds.includes(d.juchuHeadId));
-        console.log('-------------------filterLoanJuchuData-----------------', filterLoanJuchuData);
 
         if (filterLoanJuchuData.length === 0) {
           setLoanJuchuList([]);
@@ -288,41 +287,64 @@ export const LoanSituation = (props: {
    */
   const handleReload = async () => {
     setIsLoading(true);
-    if (sortValue === 'shuko') {
-      loanJuchuList.sort((a, b) => {
-        const dateA = a.shukoDat ? new Date(a.shukoDat).getTime() : null;
-        const dateB = b.shukoDat ? new Date(b.shukoDat).getTime() : null;
 
-        if (dateA === null && dateB === null) return 0;
-        if (dateA === null) return 1;
-        if (dateB === null) return -1;
-
-        return dateA - dateB;
-      });
-    } else {
-      loanJuchuList.sort((a, b) => {
-        const dateA = a.nyukoDat ? new Date(a.nyukoDat).getTime() : null;
-        const dateB = b.nyukoDat ? new Date(b.nyukoDat).getTime() : null;
-
-        if (dateA === null && dateB === null) return 0;
-        if (dateA === null) return 1;
-        if (dateB === null) return -1;
-
-        return dateA - dateB;
-      });
-    }
-    const juchuHeadIds = loanJuchuList.map((d) => d.juchuHeadId);
-    // const updatedEqUseData: LoanUseTableValues[][] = [];
-    // for (const juchuHeadId of juchuHeadIds) {
-    //   const data: LoanUseTableValues[] = await getLoanUseData(
-    //     juchuHeadId,
-    //     props.kizaiData.kizaiId,
-    //     subDays(selectDate, 1)
-    //   );
-    //   updatedEqUseData.push(data);
-    // }
+    // ヘッダー開始日
+    const strDat = subDays(selectDate, 1);
 
     try {
+      // 機材在庫データ、ヘッダー開始日から終了日までに該当する受注ヘッダーidリスト、貸出受注データ
+      const [eqStockData, confirmJuchuHeadIds, loanJuchuData] = await Promise.all([
+        getLoanStockData(kizaiData.kizaiId, strDat),
+        confirmJuchuHeadId(strDat),
+        getLoanJuchuData(kizaiData.kizaiId),
+      ]);
+
+      // 該当する受注ヘッダーidリストに含まれる貸出受注データのみ抽出
+      const filterLoanJuchuData = loanJuchuData.filter((d) => confirmJuchuHeadIds.includes(d.juchuHeadId));
+
+      if (filterLoanJuchuData.length === 0) {
+        setLoanJuchuList([]);
+        setEqUseList([]);
+        setEqStockList(eqStockData);
+        setAnchorEl(null);
+        setIsLoading(false);
+        return;
+      }
+
+      if (sortValue === 'shuko') {
+        filterLoanJuchuData.sort((a, b) => {
+          const dateA = a.shukoDat ? new Date(a.shukoDat).getTime() : null;
+          const dateB = b.shukoDat ? new Date(b.shukoDat).getTime() : null;
+
+          if (dateA === null && dateB === null) return 0;
+          if (dateA === null) return 1;
+          if (dateB === null) return -1;
+
+          return dateA - dateB;
+        });
+      } else {
+        filterLoanJuchuData.sort((a, b) => {
+          const dateA = a.nyukoDat ? new Date(a.nyukoDat).getTime() : null;
+          const dateB = b.nyukoDat ? new Date(b.nyukoDat).getTime() : null;
+
+          if (dateA === null && dateB === null) return 0;
+          if (dateA === null) return 1;
+          if (dateB === null) return -1;
+
+          return dateA - dateB;
+        });
+      }
+      const juchuHeadIds = filterLoanJuchuData.map((d) => d.juchuHeadId);
+      // const updatedEqUseData: LoanUseTableValues[][] = [];
+      // for (const juchuHeadId of juchuHeadIds) {
+      //   const data: LoanUseTableValues[] = await getLoanUseData(
+      //     juchuHeadId,
+      //     props.kizaiData.kizaiId,
+      //     subDays(selectDate, 1)
+      //   );
+      //   updatedEqUseData.push(data);
+      // }
+
       const allLoanUseData: LoanUseTableValues[] = await getAllLoanUseData(
         juchuHeadIds,
         kizaiData.kizaiId,
@@ -338,7 +360,11 @@ export const LoanSituation = (props: {
       }
 
       const updatedEqUseData: LoanUseTableValues[][] = juchuHeadIds.map((id) => loanUseMap.get(id) || []);
+
+      setLoanJuchuList(filterLoanJuchuData);
       setEqUseList(updatedEqUseData);
+      setEqStockList(eqStockData);
+      setAnchorEl(null);
     } catch (e) {
       setError(e instanceof Error ? e : new Error(String(e)));
     }
