@@ -20,6 +20,7 @@ import { User, useUserStore } from '@/app/_lib/stores/usestore';
 import { dispColors } from '../../_lib/colors';
 import { toJapanTimeString } from '../../_lib/date-conversion';
 import { permission } from '../../_lib/permission';
+import { LoadingOverlay } from '../../_ui/loading';
 import { ShukoTableValues } from '../_lib/types';
 
 export const ShukoListTable = (props: {
@@ -31,6 +32,8 @@ export const ShukoListTable = (props: {
 
   const router = useRouter();
 
+  // ローディング
+  const [isLoading, setIsLoading] = useState(false);
   // 処理中制御
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -47,6 +50,7 @@ export const ShukoListTable = (props: {
     if (isProcessing) return;
 
     setIsProcessing(true);
+    setIsLoading(true);
     router.push(
       // `shuko-list/shuko-detail/${row.juchuHeadId}/${row.juchuKizaiHeadKbn}/${row.nyushukoBashoId}/${new Date(row.nyushukoDat).toISOString()}/${sagyoKbnId}`
       `shuko-list/shuko-detail/${row.juchuHeadId}/${row.juchuKizaiHeadKbn}/${row.nyushukoBashoId}/${new Date(row.nyushukoDat).toISOString()}/${sagyoKbnId}`
@@ -55,6 +59,7 @@ export const ShukoListTable = (props: {
 
   return (
     <TableContainer sx={{ overflow: 'auto', maxHeight: '80vh' }}>
+      {isLoading && <LoadingOverlay />}
       <Table stickyHeader size="small" /*padding="none"*/>
         <TableHead>
           <TableRow sx={{ whiteSpace: 'nowrap' }}>
