@@ -103,6 +103,8 @@ export const Order = (props: {
   const [isJuchuKizaiLoading, setIsJuchuKizaiLoading] = useState(false);
   // 処理中
   const [isProcessing, setIsProcessing] = useState(false);
+  // エラーハンドリング
+  const [isError, setIsError] = useState<Error | null>(null);
 
   // 編集モード(true:編集、false:閲覧)
   const [edit, setEdit] = useState(props.edit);
@@ -197,10 +199,14 @@ export const Order = (props: {
   useEffect(() => {
     const asyncProcess = async () => {
       if (!user) return;
-      const lockData = await lockCheck(1, props.juchuHeadData.juchuHeadId, user.name, user.email);
-      setLockData(lockData);
-      if (lockData) {
-        setEdit(false);
+      try {
+        const lockData = await lockCheck(1, props.juchuHeadData.juchuHeadId, user.name, user.email);
+        setLockData(lockData);
+        if (lockData) {
+          setEdit(false);
+        }
+      } catch (e) {
+        setIsError(e instanceof Error ? e : new Error(String(e)));
       }
       setIsLoading(false);
     };
@@ -224,37 +230,46 @@ export const Order = (props: {
     setIsDirty(isDirty);
   }, [isDirty, setIsDirty]);
 
+  // ロック制御
   const lock = async () => {
     if (!user) return;
-    const lockData = await lockCheck(1, getValues('juchuHeadId'), user.name, user.email);
-    setLockData(lockData);
 
-    if (!lockData) return true;
+    try {
+      const lockData = await lockCheck(1, getValues('juchuHeadId'), user.name, user.email);
+      setLockData(lockData);
 
-    setEdit(false);
+      if (!lockData) return true;
 
-    setAlertOpen(false);
-    setDirtyOpen(false);
-    setHeadDeleteOpen(false);
-    setCopyOpen(false);
-    setKizaiHeadDeleteOpen(false);
-    setSharyoHeadDeleteOpen(false);
-    setLocationDialogOpen(false);
-    setCustomerDialogOpen(false);
+      setEdit(false);
 
-    setAlertTitle('編集中');
-    setAlertMessage(`${lockData.addUser}が編集中です`);
-    setAlertOpen(true);
-    // 受注ヘッダーデータ、受注機材ヘッダーデータ、受注車両ヘッダーデータ
-    const [juchuHeadData, juchuKizaiHeadDatas, juchuSharyoHeadDatas] = await Promise.all([
-      getJuchuHead(getValues('juchuHeadId')),
-      getJuchuKizaiHeadList(getValues('juchuHeadId')),
-      getJuchuSharyoHeadList(getValues('juchuHeadId')),
-    ]);
-    reset(juchuHeadData);
-    setEqHeaderList(juchuKizaiHeadDatas);
-    setVehicleHeaderList(juchuSharyoHeadDatas);
-    return false;
+      setAlertOpen(false);
+      setDirtyOpen(false);
+      setHeadDeleteOpen(false);
+      setCopyOpen(false);
+      setKizaiHeadDeleteOpen(false);
+      setSharyoHeadDeleteOpen(false);
+      setLocationDialogOpen(false);
+      setCustomerDialogOpen(false);
+
+      setAlertTitle('編集中');
+      setAlertMessage(`${lockData.addUser}が編集中です`);
+      setAlertOpen(true);
+      // 受注ヘッダーデータ、受注機材ヘッダーデータ、受注車両ヘッダーデータ
+      const [juchuHeadData, juchuKizaiHeadDatas, juchuSharyoHeadDatas] = await Promise.all([
+        getJuchuHead(getValues('juchuHeadId')),
+        getJuchuKizaiHeadList(getValues('juchuHeadId')),
+        getJuchuSharyoHeadList(getValues('juchuHeadId')),
+      ]);
+      if (!juchuHeadData) {
+        return <div>受注情報が見つかりません。</div>;
+      }
+      reset(juchuHeadData);
+      setEqHeaderList(juchuKizaiHeadDatas);
+      setVehicleHeaderList(juchuSharyoHeadDatas);
+      return false;
+    } catch (e) {
+      throw e;
+    }
   };
 
   // 保存ボタン押下
@@ -263,38 +278,47 @@ export const Order = (props: {
 
     if (!user || isProcessing) return;
     setIsProcessing(true);
+    setIsLoading(true);
 
-    const lockResult = await lock();
+    try {
+      const lockResult = await lock();
+      if (!lockResult) {
+        setIsProcessing(false);
+        setIsLoading(false);
+        return;
+      }
+    } catch (e) {
+      setIsProcessing(false);
+      setIsLoading(false);
+      setSnackBarMessage('サーバー接続エラー');
+      setSnackBarOpen(true);
+      return;
+    }
 
-    if (lockResult) {
-      setIsLoading(true);
-
-      // 新規
-      if (data.juchuHeadId === 0) {
-        const maxId = await getMaxId();
-        const newOrderId = maxId && maxId.juchu_head_id >= 90000 ? maxId.juchu_head_id + 1 : 90000;
-        const saveResult = await addJuchuHead(newOrderId, data, user.name);
-        if (saveResult) {
-          router.replace(`/order/${newOrderId}/edit`);
-        } else {
-          setSnackBarMessage('保存に失敗しました');
-          setSnackBarOpen(true);
-        }
-        // 更新
+    // 新規
+    if (data.juchuHeadId === 0) {
+      const newOrderId = await addJuchuHead(data, user.name);
+      if (newOrderId) {
+        router.replace(`/order/${newOrderId}/edit`);
       } else {
-        const updateResult = await updJuchuHead(data);
-        if (updateResult) {
-          reset(data);
-          setIsLoading(false);
-          setSnackBarMessage('保存しました');
-          setSnackBarOpen(true);
-        } else {
-          setIsLoading(false);
-          setSnackBarMessage('保存に失敗しました');
-          setSnackBarOpen(true);
-        }
+        setSnackBarMessage('保存に失敗しました');
+        setSnackBarOpen(true);
+      }
+      // 更新
+    } else {
+      const updateResult = await updJuchuHead(data);
+      if (updateResult) {
+        reset(data);
+        setIsLoading(false);
+        setSnackBarMessage('保存しました');
+        setSnackBarOpen(true);
+      } else {
+        setIsLoading(false);
+        setSnackBarMessage('保存に失敗しました');
+        setSnackBarOpen(true);
       }
     }
+
     setIsProcessing(false);
   };
 
@@ -307,14 +331,24 @@ export const Order = (props: {
         setDirtyOpen(true);
         return;
       }
-      await lockRelease(1, props.juchuHeadData.juchuHeadId, user.name, user.email);
+      try {
+        await lockRelease(1, props.juchuHeadData.juchuHeadId, user.name, user.email);
+      } catch (e) {
+        setSnackBarMessage('ロック解除に失敗しました');
+        setSnackBarOpen(true);
+      }
       setEdit(false);
       // 閲覧→編集
     } else {
-      const lockResult = await lock();
+      try {
+        const lockResult = await lock();
 
-      if (lockResult) {
-        setEdit(true);
+        if (lockResult) {
+          setEdit(true);
+        }
+      } catch (e) {
+        setSnackBarMessage('サーバー接続エラー');
+        setSnackBarOpen(true);
       }
     }
   };
@@ -324,10 +358,15 @@ export const Order = (props: {
     if (isProcessing) return;
     setIsProcessing(true);
 
-    const lockResult = await lock();
+    try {
+      const lockResult = await lock();
 
-    if (lockResult) {
-      setHeadDeleteOpen(true);
+      if (lockResult) {
+        setHeadDeleteOpen(true);
+      }
+    } catch (e) {
+      setSnackBarMessage('サーバー接続エラー');
+      setSnackBarOpen(true);
     }
     setIsProcessing(false);
   };
@@ -337,21 +376,26 @@ export const Order = (props: {
     if (isProcessing) return;
     setIsProcessing(true);
 
-    const lockResult = await lock();
+    try {
+      const lockResult = await lock();
 
-    if (lockResult) {
-      if (result) {
-        setIsLoading(true);
-        const deleteResult = await delJuchuHead(getValues('juchuHeadId'));
+      if (lockResult) {
+        if (result) {
+          setIsLoading(true);
+          const deleteResult = await delJuchuHead(getValues('juchuHeadId'));
 
-        if (!deleteResult) {
-          setSnackBarMessage('削除に失敗しました');
-          setSnackBarOpen(true);
-          setIsLoading(false);
+          if (!deleteResult) {
+            setSnackBarMessage('削除に失敗しました');
+            setSnackBarOpen(true);
+            setIsLoading(false);
+          }
+        } else {
+          setHeadDeleteOpen(false);
         }
-      } else {
-        setHeadDeleteOpen(false);
       }
+    } catch (e) {
+      setSnackBarMessage('サーバー接続エラー');
+      setSnackBarOpen(true);
     }
     setIsProcessing(false);
   };
@@ -361,19 +405,24 @@ export const Order = (props: {
     if (isProcessing) return;
     setIsProcessing(true);
 
-    const lockResult = await lock();
+    try {
+      const lockResult = await lock();
 
-    if (lockResult) {
-      const path = `/eq-main-order-detail/${props.juchuHeadData.juchuHeadId}/0/edit`;
-      // if (!isDirty) {
-      //   setIsLoading(true);
-      //   router.push(path);
-      // } else {
-      //   setPath(path);
-      //   setDirtyOpen(true);
-      // }
-      if (!isDirty) setIsLoading(true);
-      requestNavigation(path);
+      if (lockResult) {
+        const path = `/eq-main-order-detail/${props.juchuHeadData.juchuHeadId}/0/edit`;
+        // if (!isDirty) {
+        //   setIsLoading(true);
+        //   router.push(path);
+        // } else {
+        //   setPath(path);
+        //   setDirtyOpen(true);
+        // }
+        if (!isDirty) setIsLoading(true);
+        requestNavigation(path);
+      }
+    } catch (e) {
+      setSnackBarMessage('サーバー接続エラー');
+      setSnackBarOpen(true);
     }
     setIsProcessing(false);
   };
@@ -383,36 +432,41 @@ export const Order = (props: {
     if (isProcessing) return;
     setIsProcessing(true);
 
-    const lockResult = await lock();
+    try {
+      const lockResult = await lock();
 
-    if (lockResult) {
-      if (selectEqHeader) {
-        if (
-          selectEqHeader &&
-          selectEqHeader.juchuKizaiHeadKbn === 1 &&
-          (selectEqHeader.kicsShukoDat ? selectEqHeader.kicsShukoFixFlg === 1 : true) &&
-          (selectEqHeader.yardShukoDat ? selectEqHeader.yardShukoFixFlg === 1 : true)
-        ) {
-          const path = `/eq-return-order-detail/${props.juchuHeadData.juchuHeadId}/0/${selectEqHeader.juchuKizaiHeadId}/edit`;
-          // if (!isDirty) {
-          //   setIsLoading(true);
-          //   router.push(path);
-          // } else {
-          //   setPath(path);
-          //   setDirtyOpen(true);
-          // }
-          if (!isDirty) setIsLoading(true);
-          requestNavigation(path);
+      if (lockResult) {
+        if (selectEqHeader) {
+          if (
+            selectEqHeader &&
+            selectEqHeader.juchuKizaiHeadKbn === 1 &&
+            (selectEqHeader.kicsShukoDat ? selectEqHeader.kicsShukoFixFlg === 1 : true) &&
+            (selectEqHeader.yardShukoDat ? selectEqHeader.yardShukoFixFlg === 1 : true)
+          ) {
+            const path = `/eq-return-order-detail/${props.juchuHeadData.juchuHeadId}/0/${selectEqHeader.juchuKizaiHeadId}/edit`;
+            // if (!isDirty) {
+            //   setIsLoading(true);
+            //   router.push(path);
+            // } else {
+            //   setPath(path);
+            //   setDirtyOpen(true);
+            // }
+            if (!isDirty) setIsLoading(true);
+            requestNavigation(path);
+          } else {
+            setAlertTitle('選択項目を確認してください');
+            setAlertMessage('出発済のメイン明細を選択してください');
+            setAlertOpen(true);
+          }
         } else {
           setAlertTitle('選択項目を確認してください');
           setAlertMessage('出発済のメイン明細を選択してください');
           setAlertOpen(true);
         }
-      } else {
-        setAlertTitle('選択項目を確認してください');
-        setAlertMessage('出発済のメイン明細を選択してください');
-        setAlertOpen(true);
       }
+    } catch (e) {
+      setSnackBarMessage('サーバー接続エラー');
+      setSnackBarOpen(true);
     }
     setIsProcessing(false);
   };
@@ -422,36 +476,41 @@ export const Order = (props: {
     if (isProcessing) return;
     setIsProcessing(true);
 
-    const lockResult = await lock();
+    try {
+      const lockResult = await lock();
 
-    if (lockResult) {
-      if (selectEqHeader) {
-        if (
-          selectEqHeader &&
-          selectEqHeader.juchuKizaiHeadKbn === 1 &&
-          (selectEqHeader.kicsShukoDat ? selectEqHeader.kicsShukoFixFlg === 1 : true) &&
-          (selectEqHeader.yardShukoDat ? selectEqHeader.yardShukoFixFlg === 1 : true)
-        ) {
-          const path = `/eq-keep-order-detail/${props.juchuHeadData.juchuHeadId}/0/${selectEqHeader.juchuKizaiHeadId}/edit`;
-          // if (!isDirty) {
-          //   setIsLoading(true);
-          //   router.push(path);
-          // } else {
-          //   setPath(path);
-          //   setDirtyOpen(true);
-          // }
-          if (!isDirty) setIsLoading(true);
-          requestNavigation(path);
+      if (lockResult) {
+        if (selectEqHeader) {
+          if (
+            selectEqHeader &&
+            selectEqHeader.juchuKizaiHeadKbn === 1 &&
+            (selectEqHeader.kicsShukoDat ? selectEqHeader.kicsShukoFixFlg === 1 : true) &&
+            (selectEqHeader.yardShukoDat ? selectEqHeader.yardShukoFixFlg === 1 : true)
+          ) {
+            const path = `/eq-keep-order-detail/${props.juchuHeadData.juchuHeadId}/0/${selectEqHeader.juchuKizaiHeadId}/edit`;
+            // if (!isDirty) {
+            //   setIsLoading(true);
+            //   router.push(path);
+            // } else {
+            //   setPath(path);
+            //   setDirtyOpen(true);
+            // }
+            if (!isDirty) setIsLoading(true);
+            requestNavigation(path);
+          } else {
+            setAlertTitle('選択項目を確認してください');
+            setAlertMessage('出発済のメイン明細を選択してください');
+            setAlertOpen(true);
+          }
         } else {
           setAlertTitle('選択項目を確認してください');
           setAlertMessage('出発済のメイン明細を選択してください');
           setAlertOpen(true);
         }
-      } else {
-        setAlertTitle('選択項目を確認してください');
-        setAlertMessage('出発済のメイン明細を選択してください');
-        setAlertOpen(true);
       }
+    } catch (e) {
+      setSnackBarMessage('サーバー接続エラー');
+      setSnackBarOpen(true);
     }
     setIsProcessing(false);
   };
@@ -461,16 +520,21 @@ export const Order = (props: {
     if (isProcessing) return;
     setIsProcessing(true);
 
-    const lockResult = await lock();
+    try {
+      const lockResult = await lock();
 
-    if (lockResult) {
-      if (selectEqHeader && selectEqHeader.juchuKizaiHeadKbn === 1) {
-        setCopyOpen(true);
-      } else {
-        setAlertTitle('選択項目を確認してください');
-        setAlertMessage('メイン明細を選択してください');
-        setAlertOpen(true);
+      if (lockResult) {
+        if (selectEqHeader && selectEqHeader.juchuKizaiHeadKbn === 1) {
+          setCopyOpen(true);
+        } else {
+          setAlertTitle('選択項目を確認してください');
+          setAlertMessage('メイン明細を選択してください');
+          setAlertOpen(true);
+        }
       }
+    } catch (e) {
+      setSnackBarMessage('サーバー接続エラー');
+      setSnackBarOpen(true);
     }
     setIsProcessing(false);
   };
@@ -478,11 +542,12 @@ export const Order = (props: {
     if (isProcessing) return;
     setIsProcessing(true);
 
-    const lockResult = await lock();
+    // const lockResult = await lock();
 
-    if (lockResult) {
-      setCopyOpen(false);
-    }
+    // if (lockResult) {
+    //   setCopyOpen(false);
+    // }
+    setCopyOpen(false);
     setIsProcessing(false);
   };
 
@@ -494,68 +559,73 @@ export const Order = (props: {
     if (!user || !selectEqHeader || isProcessing) return;
     setIsProcessing(true);
 
-    const lockResult = await lock();
+    try {
+      const lockResult = await lock();
 
-    if (lockResult) {
-      // ユーザー名
-      const userNam = user.name;
-      // 受注ヘッダーid
-      const newJuchuHeadId = data.juchuHeadid ? Number(data.juchuHeadid) : getValues('juchuHeadId');
+      if (lockResult) {
+        // ユーザー名
+        const userNam = user.name;
+        // 受注ヘッダーid
+        const newJuchuHeadId = data.juchuHeadid ? Number(data.juchuHeadid) : getValues('juchuHeadId');
 
-      const checkJuchuHeadId = await getJuchuHead(newJuchuHeadId);
-      if (!checkJuchuHeadId) {
-        setSnackBarMessage('受注番号がありません');
-        setSnackBarOpen(true);
-        setIsProcessing(false);
-        return false;
-      }
-
-      // 出庫日
-      const shukoDate = getShukoDate(
-        data.kicsShukoDat && new Date(data.kicsShukoDat),
-        data.yardShukoDat && new Date(data.yardShukoDat)
-      );
-      // 入庫日
-      const nyukoDate = getNyukoDate(
-        data.kicsNyukoDat && new Date(data.kicsNyukoDat),
-        data.yardNyukoDat && new Date(data.yardNyukoDat)
-      );
-      // 出庫日から入庫日
-      const dateRange = getRange(shukoDate, nyukoDate);
-
-      if (!shukoDate || !nyukoDate) {
-        setIsProcessing(false);
-        return;
-      }
-
-      const copyResult = await copyJuchuKizaiHeadMeisai(
-        selectEqHeader,
-        newJuchuHeadId,
-        data,
-        shukoDate,
-        nyukoDate,
-        dateRange,
-        userNam
-      );
-
-      if (copyResult) {
-        setCopyOpen(false);
-        setSnackBarMessage('コピーしました');
-        setSnackBarOpen(true);
-        if (!data.juchuHeadid || Number(data.juchuHeadid) === getValues('juchuHeadId')) {
-          setIsJuchuKizaiLoading(true);
-          const juchuKizaiHeadDatas = await getJuchuKizaiHeadList(getValues('juchuHeadId'));
-          setEqHeaderList(juchuKizaiHeadDatas);
-          setIsJuchuKizaiLoading(false);
-        } else {
-          window.open(`/order/${data.juchuHeadid}/view`);
+        const checkJuchuHeadId = await getJuchuHead(newJuchuHeadId);
+        if (!checkJuchuHeadId) {
+          setSnackBarMessage('受注番号がありません');
+          setSnackBarOpen(true);
+          setIsProcessing(false);
+          return false;
         }
-      } else {
-        setSnackBarMessage('コピーに失敗しました');
-        setSnackBarOpen(true);
+
+        // 出庫日
+        const shukoDate = getShukoDate(
+          data.kicsShukoDat && new Date(data.kicsShukoDat),
+          data.yardShukoDat && new Date(data.yardShukoDat)
+        );
+        // 入庫日
+        const nyukoDate = getNyukoDate(
+          data.kicsNyukoDat && new Date(data.kicsNyukoDat),
+          data.yardNyukoDat && new Date(data.yardNyukoDat)
+        );
+        // 出庫日から入庫日
+        const dateRange = getRange(shukoDate, nyukoDate);
+
+        if (!shukoDate || !nyukoDate) {
+          setIsProcessing(false);
+          return;
+        }
+
+        const copyResult = await copyJuchuKizaiHeadMeisai(
+          selectEqHeader,
+          newJuchuHeadId,
+          data,
+          shukoDate,
+          nyukoDate,
+          dateRange,
+          userNam
+        );
+
+        if (copyResult) {
+          setCopyOpen(false);
+          setSnackBarMessage('コピーしました');
+          setSnackBarOpen(true);
+          if (!data.juchuHeadid || Number(data.juchuHeadid) === getValues('juchuHeadId')) {
+            setIsJuchuKizaiLoading(true);
+            const juchuKizaiHeadDatas = await getJuchuKizaiHeadList(getValues('juchuHeadId'));
+            setEqHeaderList(juchuKizaiHeadDatas);
+            setIsJuchuKizaiLoading(false);
+          } else {
+            window.open(`/order/${data.juchuHeadid}/view`);
+          }
+        } else {
+          setSnackBarMessage('コピーに失敗しました');
+          setSnackBarOpen(true);
+        }
+        setIsProcessing(false);
+        return true;
       }
-      setIsProcessing(false);
-      return true;
+    } catch (e) {
+      setSnackBarMessage('サーバー接続エラー');
+      setSnackBarOpen(true);
     }
     setIsProcessing(false);
   };
@@ -565,29 +635,34 @@ export const Order = (props: {
     if (isProcessing) return;
     setIsProcessing(true);
 
-    const lockResult = await lock();
+    try {
+      const lockResult = await lock();
 
-    if (lockResult) {
-      if (!selectEqHeader || !eqHeaderList) {
-        setAlertTitle('選択項目を確認してください');
-        setAlertMessage('受注明細を1つ選択してください');
-        setAlertOpen(true);
-        setIsProcessing(false);
-        return;
+      if (lockResult) {
+        if (!selectEqHeader || !eqHeaderList) {
+          setAlertTitle('選択項目を確認してください');
+          setAlertMessage('受注明細を1つ選択してください');
+          setAlertOpen(true);
+          setIsProcessing(false);
+          return;
+        }
+
+        // 選択されたデータの子データ
+        const childData = eqHeaderList.find((d) => d.oyaJuchuKizaiHeadId === selectEqHeader.juchuKizaiHeadId);
+
+        if (childData) {
+          setAlertTitle('選択項目を確認してください');
+          setAlertMessage('返却、キープが紐づいている場合は削除できません');
+          setAlertOpen(true);
+          setIsProcessing(false);
+          return;
+        }
+
+        setKizaiHeadDeleteOpen(true);
       }
-
-      // 選択されたデータの子データ
-      const childData = eqHeaderList.find((d) => d.oyaJuchuKizaiHeadId === selectEqHeader.juchuKizaiHeadId);
-
-      if (childData) {
-        setAlertTitle('選択項目を確認してください');
-        setAlertMessage('返却、キープが紐づいている場合は削除できません');
-        setAlertOpen(true);
-        setIsProcessing(false);
-        return;
-      }
-
-      setKizaiHeadDeleteOpen(true);
+    } catch (e) {
+      setSnackBarMessage('サーバー接続エラー');
+      setSnackBarOpen(true);
     }
     setIsProcessing(false);
   };
@@ -600,27 +675,34 @@ export const Order = (props: {
     if (isProcessing) return;
     setIsProcessing(true);
 
-    const lockResult = await lock();
+    try {
+      const lockResult = await lock();
 
-    if (lockResult) {
-      setKizaiHeadDeleteOpen(false);
-      if (result && selectEqHeader) {
-        setIsJuchuKizaiLoading(true);
+      if (lockResult) {
+        setKizaiHeadDeleteOpen(false);
+        if (result && selectEqHeader) {
+          setIsJuchuKizaiLoading(true);
 
-        const deleteResult = await delJuchuMeisai(selectEqHeader.juchuHeadId, selectEqHeader.juchuKizaiHeadId);
+          const deleteResult = await delJuchuMeisai(selectEqHeader.juchuHeadId, selectEqHeader.juchuKizaiHeadId);
 
-        if (deleteResult) {
-          setEqHeaderList((prev) => prev?.filter((data) => data.juchuKizaiHeadId !== selectEqHeader.juchuKizaiHeadId));
-          setSelectEq(null);
-          setSelectEqHeader(null);
-          setSnackBarMessage('削除しました');
-          setSnackBarOpen(true);
-        } else {
-          setSnackBarMessage('削除に失敗しました');
-          setSnackBarOpen(true);
+          if (deleteResult) {
+            setEqHeaderList((prev) =>
+              prev?.filter((data) => data.juchuKizaiHeadId !== selectEqHeader.juchuKizaiHeadId)
+            );
+            setSelectEq(null);
+            setSelectEqHeader(null);
+            setSnackBarMessage('削除しました');
+            setSnackBarOpen(true);
+          } else {
+            setSnackBarMessage('削除に失敗しました');
+            setSnackBarOpen(true);
+          }
+          setIsJuchuKizaiLoading(false);
         }
-        setIsJuchuKizaiLoading(false);
       }
+    } catch (e) {
+      setSnackBarMessage('サーバー接続エラー');
+      setSnackBarOpen(true);
     }
     setIsProcessing(false);
   };
@@ -656,10 +738,15 @@ export const Order = (props: {
     if (isProcessing) return;
     setIsProcessing(true);
 
-    const lockResult = await lock();
+    try {
+      const lockResult = await lock();
 
-    if (lockResult) {
-      window.open(`/vehicle-order-detail/${props.juchuHeadData.juchuHeadId}/0/edit`);
+      if (lockResult) {
+        window.open(`/vehicle-order-detail/${props.juchuHeadData.juchuHeadId}/0/edit`);
+      }
+    } catch (e) {
+      setSnackBarMessage('サーバー接続エラー');
+      setSnackBarOpen(true);
     }
     setIsProcessing(false);
   };
@@ -668,10 +755,15 @@ export const Order = (props: {
     if (isProcessing) return;
     setIsProcessing(true);
 
-    const lockResult = await lock();
+    try {
+      const lockResult = await lock();
 
-    if (lockResult) {
-      setSharyoHeadDeleteOpen(true);
+      if (lockResult) {
+        setSharyoHeadDeleteOpen(true);
+      }
+    } catch (e) {
+      setSnackBarMessage('サーバー接続エラー');
+      setSnackBarOpen(true);
     }
     setIsProcessing(false);
   };
@@ -681,9 +773,21 @@ export const Order = (props: {
     if (isProcessing) return;
     setIsProcessing(true);
 
-    const lockResult = await lock();
+    try {
+      const lockResult = await lock();
+      if (!lockResult) {
+        setIsProcessing(false);
+        return;
+      }
+    } catch (e) {
+      setSharyoHeadDeleteOpen(false);
+      setIsProcessing(false);
+      setSnackBarMessage('サーバー接続エラー');
+      setSnackBarOpen(true);
+      return;
+    }
 
-    if (lockResult) {
+    try {
       await delJuchuSharyoMeisais(
         selectedVehs.map((d) => ({
           juchuHeadId: props.juchuHeadData.juchuHeadId,
@@ -693,8 +797,11 @@ export const Order = (props: {
       const newVehHeads = await getJuchuSharyoHeadList(props.juchuHeadData.juchuHeadId);
       setVehicleHeaderList(newVehHeads);
       setSelectedVehs([]);
-      setSharyoHeadDeleteOpen(false);
+    } catch (e) {
+      setSnackBarMessage('車両明細削除に失敗しました');
+      setSnackBarOpen(true);
     }
+    setSharyoHeadDeleteOpen(false);
     setIsProcessing(false);
   };
 
@@ -717,7 +824,12 @@ export const Order = (props: {
     //     setPath(null);
     //   }
     /*} else*/ if (result /*&& !path*/) {
-      await lockRelease(1, props.juchuHeadData.juchuHeadId, user.name, user.email);
+      try {
+        await lockRelease(1, props.juchuHeadData.juchuHeadId, user.name, user.email);
+      } catch (e) {
+        setSnackBarMessage('ロック解除に失敗しました');
+        setSnackBarOpen(true);
+      }
       setEdit(false);
       reset();
       setDirtyOpen(false);
@@ -741,10 +853,15 @@ export const Order = (props: {
     if (isProcessing) return;
     setIsProcessing(true);
 
-    const lockResult = await lock();
+    try {
+      const lockResult = await lock();
 
-    if (lockResult) {
-      setLocationDialogOpen(true);
+      if (lockResult) {
+        setLocationDialogOpen(true);
+      }
+    } catch (e) {
+      setSnackBarMessage('サーバー接続エラー');
+      setSnackBarOpen(true);
     }
     setIsProcessing(false);
   };
@@ -752,11 +869,12 @@ export const Order = (props: {
     if (isProcessing) return;
     setIsProcessing(true);
 
-    const lockResult = await lock();
+    // const lockResult = await lock();
 
-    if (lockResult) {
-      setLocationDialogOpen(false);
-    }
+    // if (lockResult) {
+    //   setLocationDialogOpen(false);
+    // }
+    setLocationDialogOpen(false);
     setIsProcessing(false);
   };
 
@@ -765,11 +883,16 @@ export const Order = (props: {
     if (isProcessing) return;
     setIsProcessing(true);
 
-    const lockResult = await lock();
+    try {
+      const lockResult = await lock();
 
-    if (lockResult) {
-      setValue('koenbashoNam', loc, { shouldDirty: true });
-      setLocationDialogOpen(false);
+      if (lockResult) {
+        setValue('koenbashoNam', loc, { shouldDirty: true });
+        setLocationDialogOpen(false);
+      }
+    } catch (e) {
+      setSnackBarMessage('サーバー接続エラー');
+      setSnackBarOpen(true);
     }
     setIsProcessing(false);
   };
@@ -779,10 +902,15 @@ export const Order = (props: {
     if (isProcessing) return;
     setIsProcessing(true);
 
-    const lockResult = await lock();
+    try {
+      const lockResult = await lock();
 
-    if (lockResult) {
-      setCustomerDialogOpen(true);
+      if (lockResult) {
+        setCustomerDialogOpen(true);
+      }
+    } catch (e) {
+      setSnackBarMessage('サーバー接続エラー');
+      setSnackBarOpen(true);
     }
     setIsProcessing(false);
   };
@@ -790,11 +918,12 @@ export const Order = (props: {
     if (isProcessing) return;
     setIsProcessing(true);
 
-    const lockResult = await lock();
+    // const lockResult = await lock();
 
-    if (lockResult) {
-      setCustomerDialogOpen(false);
-    }
+    // if (lockResult) {
+    //   setCustomerDialogOpen(false);
+    // }
+    setCustomerDialogOpen(false);
     setIsProcessing(false);
   };
 
@@ -803,18 +932,25 @@ export const Order = (props: {
     if (isProcessing) return;
     setIsProcessing(true);
 
-    const lockResult = await lock();
+    try {
+      const lockResult = await lock();
 
-    if (lockResult) {
-      setValue('kokyaku.kokyakuId', customer.kokyakuId, { shouldDirty: true });
-      setValue('kokyaku.kokyakuNam', customer.kokyakuNam, { shouldDirty: true });
-      clearErrors('kokyaku.kokyakuNam');
-      setCustomerDialogOpen(false);
+      if (lockResult) {
+        setValue('kokyaku.kokyakuId', customer.kokyakuId, { shouldDirty: true });
+        setValue('kokyaku.kokyakuNam', customer.kokyakuNam, { shouldDirty: true });
+        clearErrors('kokyaku.kokyakuNam');
+        setCustomerDialogOpen(false);
+      }
+    } catch (e) {
+      setSnackBarMessage('サーバー接続エラー');
+      setSnackBarOpen(true);
     }
     setIsProcessing(false);
   };
 
   if (isLoading) return <LoadingOverlay />;
+
+  if (isError) throw isError;
 
   return (
     <PermissionGuard

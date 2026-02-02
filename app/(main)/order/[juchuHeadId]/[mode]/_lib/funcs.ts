@@ -79,7 +79,10 @@ export const getJuchuHead = async (juchuHeadId: number) => {
   try {
     const juchuData = await selectJuchuHead(juchuHeadId);
 
-    if (juchuData.error || !juchuData.data) {
+    if (juchuData.error) {
+      if (juchuData.error.code === 'PGRST116') {
+        return null;
+      }
       console.error('GetOrder juchu error : ', juchuData.error, juchuHeadId);
       throw new Error('受注ヘッダーが存在しません');
     }
@@ -91,7 +94,10 @@ export const getJuchuHead = async (juchuHeadId: number) => {
 
     const kokyakuData = await selectKokyaku(juchuData.data.kokyaku_id);
 
-    if (kokyakuData.error || !kokyakuData.data) {
+    if (kokyakuData.error) {
+      if (kokyakuData.error.code === 'PGRST116') {
+        return null;
+      }
       console.error('GetOrder kokyaku error : ', kokyakuData.error);
       throw new Error('顧客が存在しません');
     }
@@ -121,6 +127,7 @@ export const getJuchuHead = async (juchuHeadId: number) => {
     return order;
   } catch (e) {
     console.log(e);
+    throw e;
   }
 };
 
@@ -141,6 +148,7 @@ export const getMaxId = async () => {
     return data;
   } catch (e) {
     console.error(e);
+    throw e;
   }
 };
 
@@ -148,27 +156,30 @@ export const getMaxId = async () => {
  * 受注ヘッダー情報新規追加
  * @param juchuHeadId 受注ヘッダーid
  */
-export const addJuchuHead = async (juchuHeadId: number, juchuHeadData: OrderValues, userNam: string) => {
-  const newData: JuchuHead = {
-    juchu_head_id: juchuHeadId,
-    del_flg: juchuHeadData.delFlg,
-    juchu_sts: juchuHeadData.juchuSts,
-    juchu_dat: toJapanYMDString(juchuHeadData.juchuDat, '-'),
-    juchu_str_dat: juchuHeadData.juchuRange && toJapanYMDString(juchuHeadData.juchuRange[0], '-'),
-    juchu_end_dat: juchuHeadData.juchuRange && toJapanYMDString(juchuHeadData.juchuRange[1], '-'),
-    nyuryoku_user: juchuHeadData.nyuryokuUser,
-    koen_nam: juchuHeadData.koenNam,
-    koenbasho_nam: juchuHeadData.koenbashoNam,
-    kokyaku_id: juchuHeadData.kokyaku.kokyakuId,
-    kokyaku_tanto_nam: juchuHeadData.kokyakuTantoNam,
-    mem: juchuHeadData.mem,
-    // nebiki_amt: juchuHeadData.nebikiAmt,
-    zei_kbn: juchuHeadData.zeiKbn,
-    add_dat: new Date().toISOString(),
-    add_user: userNam,
-  };
-
+export const addJuchuHead = async (juchuHeadData: OrderValues, userNam: string) => {
   try {
+    const maxId = await getMaxId();
+    const newOrderId = maxId && maxId.juchu_head_id >= 90000 ? maxId.juchu_head_id + 1 : 90000;
+
+    const newData: JuchuHead = {
+      juchu_head_id: newOrderId,
+      del_flg: juchuHeadData.delFlg,
+      juchu_sts: juchuHeadData.juchuSts,
+      juchu_dat: toJapanYMDString(juchuHeadData.juchuDat, '-'),
+      juchu_str_dat: juchuHeadData.juchuRange && toJapanYMDString(juchuHeadData.juchuRange[0], '-'),
+      juchu_end_dat: juchuHeadData.juchuRange && toJapanYMDString(juchuHeadData.juchuRange[1], '-'),
+      nyuryoku_user: juchuHeadData.nyuryokuUser,
+      koen_nam: juchuHeadData.koenNam,
+      koenbasho_nam: juchuHeadData.koenbashoNam,
+      kokyaku_id: juchuHeadData.kokyaku.kokyakuId,
+      kokyaku_tanto_nam: juchuHeadData.kokyakuTantoNam,
+      mem: juchuHeadData.mem,
+      // nebiki_amt: juchuHeadData.nebikiAmt,
+      zei_kbn: juchuHeadData.zeiKbn,
+      add_dat: new Date().toISOString(),
+      add_user: userNam,
+    };
+
     const { error } = await insertJuchuHead(newData);
 
     if (error) {
@@ -177,7 +188,7 @@ export const addJuchuHead = async (juchuHeadId: number, juchuHeadData: OrderValu
     } else {
       console.log('New order added successfully:', newData);
       await revalidatePath('/eqpt-order-list');
-      return true;
+      return newOrderId;
     }
   } catch (e) {
     console.error('Exception while adding new order:', e);
@@ -387,6 +398,7 @@ export const getFilteredOrderCustomers = async (query: string) => {
     }
   } catch (e) {
     console.error('例外が発生しました:', e);
+    throw e;
   }
 };
 

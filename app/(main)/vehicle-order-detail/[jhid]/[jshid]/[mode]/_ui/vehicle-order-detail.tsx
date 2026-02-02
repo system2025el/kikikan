@@ -118,6 +118,9 @@ const VehicleOrderDetail = ({
   const [isLoading, setIsLoading] = useState<boolean>(true);
   /** 処理中 */
   const [isProcessing, setIsProcessing] = useState(false);
+  // エラーハンドリング
+  const [isError, setIsError] = useState<Error | null>(null);
+
   /** 変更前の車両明細 */
   const [currentMeisai, setCurrentMeisai] = useState<JuchuSharyoHeadValues>();
   // 編集モード(true:編集、false:閲覧)
@@ -176,80 +179,88 @@ const VehicleOrderDetail = ({
   /** ロック制御 */
   const lock = async () => {
     if (!user) return;
-    const lockData = await lockCheck(1, getValues('juchuHeadId'), user.name, user.email);
-    setLockData(lockData);
+    try {
+      const lockData = await lockCheck(1, getValues('juchuHeadId'), user.name, user.email);
+      setLockData(lockData);
 
-    if (!lockData) return true;
+      if (!lockData) return true;
 
-    setEditable(false);
-    setMemOpen(false);
+      setEditable(false);
+      setMemOpen(false);
 
-    setLockOpen(true);
-    setIsLoading(true);
+      setLockOpen(true);
+      setIsLoading(true);
 
-    /** 受注ヘッダーデータ */
-    const juchuHead = await getDetailJuchuHead(getValues('juchuHeadId'));
-    if (!juchuHead) {
-      return <div>受注情報が見つかりません。</div>;
-    }
-    // データ取得実行
-    getOptions();
-    setJuchuHead(juchuHead);
-
-    if (sharyoHeadId > 0) {
-      const meisais = await getChosenJuchuSharyoMeisais(juchuHead.juchuHeadId, sharyoHeadId);
-      reset(meisais);
-      setCurrentMeisai(meisais);
-    } else {
-      // 受注機材から自動生成対応
-      /** 入出庫種別ID */
-      const kbn = searchParams.get('kbn');
-      /** 入出庫日時（ISOString想定） */
-      const date = searchParams.get('date');
-      /** 入出庫場所ID */
-      const basho = searchParams.get('basho');
-      // それぞれあればセット
-      if (kbn && kbn.trim() !== '') {
-        setValue('nyushukoKbn', Number(kbn), { shouldDirty: false });
+      /** 受注ヘッダーデータ */
+      const juchuHead = await getDetailJuchuHead(getValues('juchuHeadId'));
+      if (!juchuHead) {
+        return <div>受注情報が見つかりません。</div>;
       }
-      if (date && date.trim() !== '') {
-        setValue('nyushukoDat', new Date(date), { shouldDirty: false });
-      }
-      if (basho && basho.trim() !== '') {
-        setValue('nyushukoBashoId', Number(basho), { shouldDirty: false });
-      }
-      if (sharyoHeadId === 0) {
+      // データ取得実行
+      getOptions();
+      setJuchuHead(juchuHead);
+
+      if (sharyoHeadId > 0) {
+        const meisais = await getChosenJuchuSharyoMeisais(juchuHead.juchuHeadId, sharyoHeadId);
+        reset(meisais);
+        setCurrentMeisai(meisais);
+      } else {
+        // 受注機材から自動生成対応
+        /** 入出庫種別ID */
+        const kbn = searchParams.get('kbn');
+        /** 入出庫日時（ISOString想定） */
+        const date = searchParams.get('date');
+        /** 入出庫場所ID */
+        const basho = searchParams.get('basho');
+        // それぞれあればセット
+        if (kbn && kbn.trim() !== '') {
+          setValue('nyushukoKbn', Number(kbn), { shouldDirty: false });
+        }
+        if (date && date.trim() !== '') {
+          setValue('nyushukoDat', new Date(date), { shouldDirty: false });
+        }
+        if (basho && basho.trim() !== '') {
+          setValue('nyushukoBashoId', Number(basho), { shouldDirty: false });
+        }
+        if (sharyoHeadId === 0) {
+          setValue(
+            'headNam',
+            juchuHead.koenbashoNam && juchuHead.koenbashoNam.trim() !== '' ? `${juchuHead.koenbashoNam}行き` : '',
+            { shouldDirty: true }
+          );
+        }
         setValue(
-          'headNam',
-          juchuHead.koenbashoNam && juchuHead.koenbashoNam.trim() !== '' ? `${juchuHead.koenbashoNam}行き` : '',
-          { shouldDirty: true }
+          'meisai',
+          [
+            { sharyoId: FAKE_NEW_ID, sharyoQty: null, sharyoMem: null },
+            { sharyoId: FAKE_NEW_ID, sharyoQty: null, sharyoMem: null },
+          ],
+          { shouldDirty: false }
         );
       }
-      setValue(
-        'meisai',
-        [
-          { sharyoId: FAKE_NEW_ID, sharyoQty: null, sharyoMem: null },
-          { sharyoId: FAKE_NEW_ID, sharyoQty: null, sharyoMem: null },
-        ],
-        { shouldDirty: false }
-      );
+      setIsLoading(false);
+      return false;
+    } catch (e) {
+      throw e;
     }
-    setIsLoading(false);
-    return false;
   };
 
   /** 選択肢の取得 */
   const getOptions = async () => {
-    const v = await getVehsSelections();
-    const base = await getBasesSelections();
-    setOptions({
-      kbn: [
-        { id: 'shuko', label: '出庫' },
-        { id: 'nyuko', label: '入庫' },
-      ],
-      basho: base,
-      vehs: v,
-    });
+    try {
+      const v = await getVehsSelections();
+      const base = await getBasesSelections();
+      setOptions({
+        kbn: [
+          { id: 'shuko', label: '出庫' },
+          { id: 'nyuko', label: '入庫' },
+        ],
+        basho: base,
+        vehs: v,
+      });
+    } catch (e) {
+      setIsError(e instanceof Error ? e : new Error(String(e)));
+    }
   };
 
   /** 保存ボタン押下時処理 */
@@ -257,20 +268,25 @@ const VehicleOrderDetail = ({
     if (isProcessing) return;
     setIsProcessing(true);
 
-    const lockResult = await lock();
+    try {
+      const lockResult = await lock();
 
-    if (lockResult) {
-      /** メモだけ書かれた明細がないか */
-      const memOnly = data.meisai.some(
-        (item) => item.sharyoMem !== null && (item.sharyoId === null || item.sharyoQty === null)
-      );
-      if (memOnly) {
-        // あればダイアログ開いて確認
-        setMemOpen(true);
-      } else {
-        // 無ければ保存
-        handleSave(data);
+      if (lockResult) {
+        /** メモだけ書かれた明細がないか */
+        const memOnly = data.meisai.some(
+          (item) => item.sharyoMem !== null && (item.sharyoId === null || item.sharyoQty === null)
+        );
+        if (memOnly) {
+          // あればダイアログ開いて確認
+          setMemOpen(true);
+        } else {
+          // 無ければ保存
+          handleSave(data);
+        }
       }
+    } catch (e) {
+      setSnackBarMessage('サーバー接続エラー');
+      setSnackBarOpen(true);
     }
     setIsProcessing(false);
   };
@@ -278,26 +294,32 @@ const VehicleOrderDetail = ({
   /** フォーム送信処理 */
   const handleSave = async (data: JuchuSharyoHeadValues) => {
     setIsLoading(true);
-    if (sharyoHeadId <= 0) {
-      // 新規登録
-      const newId = await addNewJuchuSharyoHead(data, user?.name ?? '');
-      setSnackBarMessage('保存しました');
-      setSnackBarOpen(true);
-      router.replace(`/vehicle-order-detail/${data.juchuHeadId}/${Number(newId)}/edit`);
-    } else {
-      // 更新処理
-      if (!currentMeisai) return;
-      updateJuchuSharyoHead(data, currentMeisai!, user?.name ?? '');
-      const newData = getValues();
-      reset(newData);
-      setCurrentMeisai(newData);
-      await getOptions();
-      /** 車両明細取得 */
-      const meisais = await getChosenJuchuSharyoMeisais(juchuHead.juchuHeadId, sharyoHeadId);
-      reset(meisais);
-      setCurrentMeisai(meisais);
-      setIsLoading(false);
-      setSnackBarMessage('保存しました');
+
+    try {
+      if (sharyoHeadId <= 0) {
+        // 新規登録
+        const newId = await addNewJuchuSharyoHead(data, user?.name ?? '');
+        setSnackBarMessage('保存しました');
+        setSnackBarOpen(true);
+        router.replace(`/vehicle-order-detail/${data.juchuHeadId}/${Number(newId)}/edit`);
+      } else {
+        // 更新処理
+        if (!currentMeisai) return;
+        updateJuchuSharyoHead(data, currentMeisai!, user?.name ?? '');
+        const newData = getValues();
+        reset(newData);
+        setCurrentMeisai(newData);
+        //await getOptions();
+        /** 車両明細取得 */
+        const meisais = await getChosenJuchuSharyoMeisais(juchuHead.juchuHeadId, sharyoHeadId);
+        reset(meisais);
+        setCurrentMeisai(meisais);
+        setIsLoading(false);
+        setSnackBarMessage('保存しました');
+        setSnackBarOpen(true);
+      }
+    } catch (e) {
+      setSnackBarMessage('保存に失敗しました');
       setSnackBarOpen(true);
     }
   };
@@ -313,14 +335,24 @@ const VehicleOrderDetail = ({
         setDirtyOpen(true);
         return;
       }
-      await lockRelease(1, juchuHead.juchuHeadId, user.name, user.email);
+      try {
+        await lockRelease(1, juchuHead.juchuHeadId, user.name, user.email);
+      } catch (e) {
+        setSnackBarMessage('ロック解除に失敗しました');
+        setSnackBarOpen(true);
+      }
       setEditable(false);
       // 閲覧→編集
     } else {
-      const lockResult = await lock();
+      try {
+        const lockResult = await lock();
 
-      if (lockResult) {
-        setEditable(true);
+        if (lockResult) {
+          setEditable(true);
+        }
+      } catch (e) {
+        setSnackBarMessage('サーバー接続エラー');
+        setSnackBarOpen(true);
       }
     }
   };
@@ -330,8 +362,16 @@ const VehicleOrderDetail = ({
    * @param result 結果
    */
   const handleResultDialog = async (result: boolean) => {
+    if (!user || isProcessing) return;
+    setIsProcessing(true);
+
     if (result) {
-      await delLock(1, juchuHead.juchuHeadId);
+      try {
+        await lockRelease(1, juchuHead.juchuHeadId, user.name, user.email);
+      } catch (e) {
+        setSnackBarMessage('ロック解除に失敗しました');
+        setSnackBarOpen(true);
+      }
       setLockData(null);
       setEditable(false);
       reset();
@@ -345,9 +385,13 @@ const VehicleOrderDetail = ({
   useEffect(() => {
     /** 車両明細取得 */
     const getMeisais = async () => {
-      const meisais = await getChosenJuchuSharyoMeisais(juchuHead.juchuHeadId, sharyoHeadId);
-      reset(meisais);
-      setCurrentMeisai(meisais);
+      try {
+        const meisais = await getChosenJuchuSharyoMeisais(juchuHead.juchuHeadId, sharyoHeadId);
+        reset(meisais);
+        setCurrentMeisai(meisais);
+      } catch (e) {
+        setIsError(e instanceof Error ? e : new Error(String(e)));
+      }
       setIsLoading(false);
     };
 
@@ -409,10 +453,14 @@ const VehicleOrderDetail = ({
     if (!user) return;
 
     const asyncProcess = async () => {
-      const lockData = await lockCheck(1, juchuHead.juchuHeadId, user.name, user.email);
-      setLockData(lockData);
-      if (lockData) {
-        setEditable(false);
+      try {
+        const lockData = await lockCheck(1, juchuHead.juchuHeadId, user.name, user.email);
+        setLockData(lockData);
+        if (lockData) {
+          setEditable(false);
+        }
+      } catch (e) {
+        setIsError(e instanceof Error ? e : new Error(String(e)));
       }
       setIsLoading(false);
     };
@@ -432,6 +480,8 @@ const VehicleOrderDetail = ({
     const dirty = isDirty;
     setIsDirty(dirty);
   }, [isDirty, setIsDirty]);
+
+  if (isError) throw isError;
 
   return (
     <Container disableGutters sx={{ minWidth: '100%' }} maxWidth={'xl'}>
