@@ -486,6 +486,9 @@ export const getJuchuHonbanbiQty = async (juchuHeadId: number, juchuKizaiHeadId:
   try {
     const { data, error } = await selectJuchuHonbanbiQty(juchuHeadId, juchuKizaiHeadId);
     if (error) {
+      if (error.code === 'PGRST116') {
+        return null;
+      }
       console.error('getJuchuHonbanbiQty error : ', error);
       throw error;
     }
@@ -493,6 +496,7 @@ export const getJuchuHonbanbiQty = async (juchuHeadId: number, juchuKizaiHeadId:
     return data.juchu_honbanbi_qty;
   } catch (e) {
     console.error(e);
+    throw e;
   }
 };
 
@@ -505,9 +509,17 @@ export const getJuchuHonbanbiQty = async (juchuHeadId: number, juchuKizaiHeadId:
 export const getReturnJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
   try {
     const { data, error } = await selectReturnJuchuKizaiHead(juchuHeadId, juchuKizaiHeadId);
-    if (error || data?.oya_juchu_kizai_head_id === null) {
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return null;
+      }
       console.error('GetEqHeader juchuKizaiHead error : ', error);
       throw error;
+    }
+
+    if (data?.oya_juchu_kizai_head_id === null) {
+      console.error('親受注機材ヘッダーidが存在しません');
+      return null;
     }
 
     const juchuDate = await getJuchuKizaiNyushuko(juchuHeadId, juchuKizaiHeadId);
@@ -531,6 +543,7 @@ export const getReturnJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHea
     return returnJucuKizaiHeadData;
   } catch (e) {
     console.error(e);
+    throw e;
   }
 };
 

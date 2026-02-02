@@ -87,7 +87,6 @@ export const EqptSelectionDialog = ({
         // セット有機材IDリスト
         setEqptsWSet(setList);
         setBundleDialogOpen(true);
-        setIsLoading(false);
       } else {
         // セットオプションがない時
         // 親機材(blankQty: 0)として配列に保持する
@@ -100,6 +99,7 @@ export const EqptSelectionDialog = ({
       setSnackBarMessage('サーバー接続エラー');
       setSnackBarOpen(true);
     }
+    setIsLoading(false);
   };
 
   /** セットオプションダイアログを閉じる */

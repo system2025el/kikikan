@@ -605,9 +605,18 @@ export const saveKeepJuchuKizai = async (
 export const getKeepJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
   try {
     const { data, error } = await selectKeepJuchuKizaiHead(juchuHeadId, juchuKizaiHeadId);
-    if (error || data?.oya_juchu_kizai_head_id === null) {
+    if (error) {
+      if (error.code === 'PGRST116') {
+        console.error('受注ヘッダーが存在しません');
+        return null;
+      }
       console.error('GetEqHeader juchuKizaiHead error : ', error);
       throw error;
+    }
+
+    if (data.oya_juchu_kizai_head_id === null) {
+      console.error('親受注機材ヘッダーidが存在しません');
+      return null;
     }
 
     const juchuDate = await getJuchuKizaiNyushuko(juchuHeadId, juchuKizaiHeadId);
@@ -631,6 +640,7 @@ export const getKeepJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHeadI
     return keepJucuKizaiHeadData;
   } catch (e) {
     console.error(e);
+    throw e;
   }
 };
 
