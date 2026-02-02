@@ -657,6 +657,7 @@ export const getJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHeadId: n
     return jucuKizaiHeadData;
   } catch (e) {
     console.error(e);
+    throw e;
   }
 };
 
@@ -1659,6 +1660,7 @@ export const getHonbanbi = async (juchuHeadId: number, juchuKizaiHeadId: number)
     return juchuKizaiHonbanbiData;
   } catch (e) {
     console.error(e);
+    throw e;
   }
 };
 
