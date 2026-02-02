@@ -38,17 +38,17 @@ export const getShukoDetail = async (
   sagyoKbnId: number
 ) => {
   try {
-    const { data, error } = await selectNyushukoOne(juchuHeadId, juchuKizaiHeadKbn, nyushukoBashoId, nyushukoDat, 1);
+    // const { data, error } = await selectNyushukoOne(juchuHeadId, juchuKizaiHeadKbn, nyushukoBashoId, nyushukoDat, 1);
 
-    if (error) {
-      if (error.code === 'PGRST116') {
-        return null;
-      }
-      console.error('getShukoDetail error : ', error);
-      throw error;
-    }
+    // if (error) {
+    //   if (error.code === 'PGRST116') {
+    //     return null;
+    //   }
+    //   console.error('getShukoDetail error : ', error);
+    //   throw error;
+    // }
 
-    // const data = await selectNyushukoOne(juchuHeadId, juchuKizaiHeadKbn, nyushukoBashoId, nyushukoDat, 1);
+    const data = await selectNyushukoOne(juchuHeadId, juchuKizaiHeadKbn, nyushukoBashoId, nyushukoDat, 1);
 
     const nyukoDetailData: ShukoDetailValues = {
       juchuHeadId: juchuHeadId,
@@ -56,12 +56,12 @@ export const getShukoDetail = async (
       nyushukoBashoId: nyushukoBashoId,
       nyushukoDat: nyushukoDat,
       sagyoKbnId: sagyoKbnId,
-      juchuKizaiHeadIds: data.juchu_kizai_head_idv?.split(',').map((id: string) => parseInt(id)) || [],
+      juchuKizaiHeadIds: data[0].juchu_kizai_head_idv?.split(',').map((id: string) => parseInt(id)) || [],
       nyushukoShubetuId: 1,
-      headNamv: data.head_namv,
-      koenNam: data.koen_nam,
-      koenbashoNam: data.koenbasho_nam,
-      kokyakuNam: data.kokyaku_nam,
+      headNamv: data[0].head_namv,
+      koenNam: data[0].koen_nam,
+      koenbashoNam: data[0].koenbasho_nam,
+      kokyakuNam: data[0].kokyaku_nam,
     };
 
     return nyukoDetailData;

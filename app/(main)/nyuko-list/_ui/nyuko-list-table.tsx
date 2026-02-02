@@ -19,6 +19,7 @@ import { User } from '@/app/_lib/stores/usestore';
 import { dispColors } from '../../_lib/colors';
 import { toJapanTimeString } from '../../_lib/date-conversion';
 import { permission } from '../../_lib/permission';
+import { LoadingOverlay } from '../../_ui/loading';
 import { NyukoTableValues } from '../_lib/types';
 
 export const NyukoListTable = (props: {
@@ -30,6 +31,8 @@ export const NyukoListTable = (props: {
 
   const router = useRouter();
 
+  // ローディング
+  const [isLoading, setIsLoading] = useState(false);
   // 処理中制御
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -46,6 +49,7 @@ export const NyukoListTable = (props: {
     if (isProcessing) return;
 
     setIsProcessing(true);
+    setIsLoading(true);
     router.push(
       `nyuko-list/nyuko-detail/${row.juchuHeadId}/${row.juchuKizaiHeadKbn}/${row.nyushukoBashoId}/${new Date(row.nyushukoDat).toISOString()}/30`
     );
@@ -53,6 +57,7 @@ export const NyukoListTable = (props: {
 
   return (
     <TableContainer sx={{ overflow: 'auto', maxHeight: '80vh' }}>
+      {isLoading && <LoadingOverlay />}
       <Table stickyHeader size="small">
         <TableHead>
           <TableRow sx={{ whiteSpace: 'nowrap' }}>
