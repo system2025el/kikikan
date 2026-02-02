@@ -656,7 +656,7 @@ const EquipmentOrderDetail = (props: {
       try {
         await lockRelease(1, juchuHeadData.juchuHeadId, user.name, user.email);
       } catch (e) {
-        setSnackBarMessage('サーバー接続エラー');
+        setSnackBarMessage('ロック解除に失敗しました');
         setSnackBarOpen(true);
       }
       setEdit(false);
@@ -997,9 +997,8 @@ const EquipmentOrderDetail = (props: {
         setSnackBarMessage('保存に失敗しました');
         setSnackBarOpen(true);
       }
-      setIsLoading(false);
     }
-
+    setIsLoading(false);
     setIsProcessing(false);
   };
 
@@ -1157,19 +1156,24 @@ const EquipmentOrderDetail = (props: {
     if (isProcessing) return;
     setIsProcessing(true);
 
-    const lockResult = await lock();
+    try {
+      const lockResult = await lock();
 
-    if (lockResult) {
-      setJuchuKizaiMeisaiList((prev) => {
-        const visibleIndex = prev
-          .map((data, index) => (!data.delFlag ? index : null))
-          .filter((index) => index !== null) as number[];
+      if (lockResult) {
+        setJuchuKizaiMeisaiList((prev) => {
+          const visibleIndex = prev
+            .map((data, index) => (!data.delFlag ? index : null))
+            .filter((index) => index !== null) as number[];
 
-        const index = visibleIndex[rowIndex];
-        if (index === undefined) return prev;
+          const index = visibleIndex[rowIndex];
+          if (index === undefined) return prev;
 
-        return prev.map((data, i) => (i === index ? { ...data, mem: memo } : data));
-      });
+          return prev.map((data, i) => (i === index ? { ...data, mem: memo } : data));
+        });
+      }
+    } catch (e) {
+      setSnackBarMessage('サーバー接続エラー');
+      setSnackBarOpen(true);
     }
     setIsProcessing(false);
   };
@@ -1765,9 +1769,8 @@ const EquipmentOrderDetail = (props: {
       try {
         await lockRelease(1, juchuHeadData.juchuHeadId, user.name, user.email);
       } catch (e) {
-        setSnackBarMessage('サーバー接続エラー');
+        setSnackBarMessage('ロック解除に失敗しました');
         setSnackBarOpen(true);
-        return;
       }
       setEdit(false);
       reset();
@@ -2021,11 +2024,12 @@ const EquipmentOrderDetail = (props: {
     if (isProcessing) return;
     setIsProcessing(true);
 
-    const lockResult = await lock();
+    // const lockResult = await lock();
 
-    if (lockResult) {
-      setEqSelectionDialogOpen(false);
-    }
+    // if (lockResult) {
+    //   setEqSelectionDialogOpen(false);
+    // }
+    setEqSelectionDialogOpen(false);
     setIsProcessing(false);
   };
 

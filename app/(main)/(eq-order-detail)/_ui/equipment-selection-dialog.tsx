@@ -11,6 +11,7 @@ import {
   ListItemIcon,
   ListItemText,
   Paper,
+  Snackbar,
   Typography,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
@@ -39,6 +40,10 @@ export const OyaEqSelectionDialog = ({
   const [selected, setSelected] = useState<number[]>([]);
   // Loadingかどうか
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  // スナックバー制御
+  const [snackBarOpen, setSnackBarOpen] = useState(false);
+  // スナックバーメッセージ
+  const [snackBarMessage, setSnackBarMessage] = useState('');
 
   const handleToggle = (id: number) => {
     const newSelected = selected.includes(id) ? selected.filter((item) => item !== id) : [...selected, id];
@@ -57,11 +62,16 @@ export const OyaEqSelectionDialog = ({
   /* useeffect -------------------------------------- */
   useEffect(() => {
     const getOyaEqpts = async () => {
-      const oyaEq = await getOyaJuchuKizaiMeisai(juchuHeadId, oyaJuchuKizaiHeadId);
-      const oyaContainer = await getOyaJuchuContainerMeisai(juchuHeadId, oyaJuchuKizaiHeadId);
-      console.log('親機材リスト: ', oyaEq);
-      setOyaEqList(oyaEq ?? []);
-      setOyaContainerList(oyaContainer ?? []);
+      try {
+        const oyaEq = await getOyaJuchuKizaiMeisai(juchuHeadId, oyaJuchuKizaiHeadId);
+        const oyaContainer = await getOyaJuchuContainerMeisai(juchuHeadId, oyaJuchuKizaiHeadId);
+        console.log('親機材リスト: ', oyaEq);
+        setOyaEqList(oyaEq ?? []);
+        setOyaContainerList(oyaContainer ?? []);
+      } catch (e) {
+        setSnackBarMessage('サーバー接続エラー');
+        setSnackBarOpen(true);
+      }
       setIsLoading(false);
     };
     getOyaEqpts();
@@ -122,6 +132,14 @@ export const OyaEqSelectionDialog = ({
           </List>
         )}
       </Paper>
+      <Snackbar
+        open={snackBarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackBarOpen(false)}
+        message={snackBarMessage}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={{ marginTop: '65px' }}
+      />
     </Container>
   );
 };
