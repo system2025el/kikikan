@@ -9,6 +9,7 @@ import {
   Dialog,
   Divider,
   Paper,
+  Snackbar,
   Stack,
   Table,
   TableBody,
@@ -35,13 +36,17 @@ import { LocsDialogValues } from '../_lib/types';
 export const LocationSelectDialog = (props: {
   handleLocSelect: (locNam: string) => void;
   handleCloseLocationDialog: () => void;
-  lock: () => Promise<boolean | undefined>;
+  lock: () => Promise<boolean | React.JSX.Element | undefined>;
 }) => {
   const { handleLocSelect, handleCloseLocationDialog, lock } = props;
   /* useState ------------------ */
   const [locs, setLocs] = useState<LocsDialogValues[]>();
   /* DBのローディング */
   const [isLoading, setIsLoading] = useState(true);
+  // スナックバー制御
+  const [snackBarOpen, setSnackBarOpen] = useState(false);
+  // スナックバーメッセージ
+  const [snackBarMessage, setSnackBarMessage] = useState('');
 
   const [page, setPage] = useState(1);
   const rowsPerPage = 50;
@@ -63,21 +68,31 @@ export const LocationSelectDialog = (props: {
   /* 検索ボタン押下 */
   const onSubmit = async (data: { query: string | undefined }) => {
     setIsLoading(true);
-    const lockResult = await lock();
+    try {
+      const lockResult = await lock();
 
-    if (lockResult) {
-      const newList = await getFilteredOrderLocs(data.query!);
-      setLocs(newList);
-      setIsLoading(false);
+      if (lockResult) {
+        const newList = await getFilteredOrderLocs(data.query!);
+        setLocs(newList);
+      }
+    } catch (e) {
+      setSnackBarMessage('サーバー接続エラー');
+      setSnackBarOpen(true);
     }
+    setIsLoading(false);
   };
 
   useEffect(() => {
     // ダイアログが開いた瞬間（ここで最新をとる）
     const getLocs = async () => {
       setIsLoading(true);
-      const data = await getFilteredOrderLocs('');
-      setLocs(data);
+      try {
+        const data = await getFilteredOrderLocs('');
+        setLocs(data);
+      } catch (e) {
+        setSnackBarMessage('サーバー接続エラー');
+        setSnackBarOpen(true);
+      }
       setIsLoading(false);
     };
 
@@ -156,6 +171,14 @@ export const LocationSelectDialog = (props: {
           </TableContainer>
         )}
       </Container>
+      <Snackbar
+        open={snackBarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackBarOpen(false)}
+        message={snackBarMessage}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={{ marginTop: '65px' }}
+      />
     </>
   );
 };
