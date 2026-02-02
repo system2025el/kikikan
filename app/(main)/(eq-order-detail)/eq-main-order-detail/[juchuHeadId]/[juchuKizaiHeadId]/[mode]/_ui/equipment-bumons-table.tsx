@@ -1,6 +1,6 @@
 'use client';
 
-import { alpha, useTheme } from '@mui/material';
+import { alpha, Snackbar, useTheme } from '@mui/material';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -36,11 +36,21 @@ export const EqptBumonsTable = ({ selected, handleClick }: { selected: number; h
   >([]);
   /** ローディング */
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  // スナックバー制御
+  const [snackBarOpen, setSnackBarOpen] = useState(false);
+  // スナックバーメッセージ
+  const [snackBarMessage, setSnackBarMessage] = useState('');
+
   /* useeffect ------------------------ */
   useEffect(() => {
     const getBumons = async () => {
-      const abumons = await getBumonsForEqptSelection();
-      setBumons(abumons!);
+      try {
+        const abumons = await getBumonsForEqptSelection();
+        setBumons(abumons!);
+      } catch (e) {
+        setSnackBarMessage('サーバー接続エラー');
+        setSnackBarOpen(true);
+      }
       setIsLoading(false);
     };
     getBumons();
@@ -76,6 +86,14 @@ export const EqptBumonsTable = ({ selected, handleClick }: { selected: number; h
           </TableBody>
         </Table>
       )}
+      <Snackbar
+        open={snackBarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackBarOpen(false)}
+        message={snackBarMessage}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={{ marginTop: '65px' }}
+      />
     </TableContainer>
   );
 };

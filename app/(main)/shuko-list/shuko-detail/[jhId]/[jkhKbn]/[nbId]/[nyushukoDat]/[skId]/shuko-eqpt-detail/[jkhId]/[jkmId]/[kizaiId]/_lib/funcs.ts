@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
 import { QueryResult } from 'pg';
 
 import pool from '@/app/_lib/db/postgres';
@@ -236,7 +237,7 @@ export const updShukoResultAdjQty = async (
     await updateResultAdjQty(updateData);
 
     revalidatePath(
-      `shuko-list/shuko-detail/${shukoEqptDetailData.juchuHeadId}/${shukoEqptDetailData.nyushukoBashoId}/${shukoEqptDetailData.nyushukoDat}/${shukoEqptDetailData.sagyoKbnId}`
+      `shuko-list/shuko-detail/${shukoEqptDetailData.juchuHeadId}/${shukoEqptDetailData.juchuKizaiHeadKbnId}/${shukoEqptDetailData.nyushukoBashoId}/${shukoEqptDetailData.nyushukoDat}/${shukoEqptDetailData.sagyoKbnId}`
     );
     return true;
   } catch (e) {

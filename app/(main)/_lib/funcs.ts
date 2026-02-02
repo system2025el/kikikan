@@ -36,7 +36,7 @@ export const getLock = async (lockShubetu: number, headId: number) => {
     return lockData;
   } catch (e) {
     console.error(e);
-    return null;
+    throw e;
   }
 };
 

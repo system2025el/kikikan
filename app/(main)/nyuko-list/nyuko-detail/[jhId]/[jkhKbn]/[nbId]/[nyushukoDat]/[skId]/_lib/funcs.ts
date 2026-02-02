@@ -13,7 +13,7 @@ import {
   selectSagyoIdFilterNyushukoFixFlag,
   updateNyushukoFix,
 } from '@/app/_lib/db/tables/t-nyushuko-fix';
-import { selectNyushukoOne } from '@/app/_lib/db/tables/v-nyushuko-den2';
+import { selectNyushukoOne } from '@/app/_lib/db/tables/v-nyushuko-den2-head';
 import { selectNyushukoDetail } from '@/app/_lib/db/tables/v-nyushuko-den2-lst';
 import { JuchuCtnMeisai } from '@/app/_lib/db/types/t_juchu_ctn_meisai-type';
 import { JuchuKizaiMeisai } from '@/app/_lib/db/types/t-juchu-kizai-meisai-type';

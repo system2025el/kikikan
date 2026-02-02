@@ -86,21 +86,27 @@ export const getDetailJuchuHead = async (juchuHeadId: number) => {
   try {
     const juchuData = await selectJuchuHead(juchuHeadId);
 
-    if (juchuData.error || !juchuData.data) {
-      console.error('GetOrder juchu error : ', juchuData.error);
-      throw new Error('受注ヘッダーが存在しません');
+    if (juchuData.error) {
+      if (juchuData.error.code === 'PGRST116') {
+        console.error('受注ヘッダーが存在しません', juchuData.error);
+        return null;
+      }
+      throw new Error('DB接続エラー');
     }
 
     if (!juchuData.data.kokyaku_id) {
-      console.error('GetOrder juchu error : ', juchuData.error);
-      throw new Error('不正な受注ヘッダーです');
+      console.error('不正な受注ヘッダーです');
+      return null;
     }
 
     const kokyakuData = await selectKokyaku(juchuData.data.kokyaku_id);
 
-    if (kokyakuData.error || !kokyakuData.data) {
-      console.error('GetOrder kokyaku error : ', kokyakuData.error);
-      throw new Error('顧客が存在しません');
+    if (kokyakuData.error) {
+      if (kokyakuData.error.code === 'PGRST116') {
+        console.error('顧客が存在しません');
+        return null;
+      }
+      throw new Error('DB接続エラー');
     }
     const order: DetailOerValues = {
       juchuHeadId: juchuData.data.juchu_head_id,
@@ -132,6 +138,7 @@ export const getDetailJuchuHead = async (juchuHeadId: number) => {
     return order;
   } catch (e) {
     console.log(e);
+    throw e;
   }
 };
 
@@ -165,6 +172,9 @@ export const getDic = async (dicId: number) => {
     const { data, error } = await selectDic(dicId);
 
     if (error) {
+      if (error.code === 'PGRST116') {
+        return '';
+      }
       console.error('getDic error: ', error);
       throw error;
     }
@@ -210,6 +220,7 @@ export const getJuchuKizaiNyushuko = async (juchuHeadId: number, juchuKizaiHeadI
     return juchuKizaiNyushukoData;
   } catch (e) {
     console.error(e);
+    throw e;
   }
 };
 
@@ -540,7 +551,7 @@ export const getALLStockList = async (
     return data;
   } catch (e) {
     console.error(e);
-    return [];
+    throw e;
   }
 };
 
@@ -612,7 +623,7 @@ export const getNyushukoFixFlag = async (juchuHeadId: number, juchuKizaiHeadId: 
     return result;
   } catch (e) {
     console.error(e);
-    return false;
+    throw e;
   }
 };
 

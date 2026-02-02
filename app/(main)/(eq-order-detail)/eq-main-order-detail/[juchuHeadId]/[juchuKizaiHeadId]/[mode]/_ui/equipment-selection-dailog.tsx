@@ -10,6 +10,7 @@ import {
   Divider,
   Grid2,
   Paper,
+  Snackbar,
   Stack,
   Table,
   TableBody,
@@ -66,6 +67,10 @@ export const EqptSelectionDialog = ({
   const [eqptsWSet, setEqptsWSet] = useState<number[]>([]);
   /* セットオプションのダイアログ開閉 */
   const [bundleDialogOpen, setBundleDialogOpen] = useState(false);
+  // スナックバー制御
+  const [snackBarOpen, setSnackBarOpen] = useState(false);
+  // スナックバーメッセージ
+  const [snackBarMessage, setSnackBarMessage] = useState('');
 
   /* useform ------------------------------- */
   const { handleSubmit, control, watch, getValues } = useForm({ defaultValues: { query: '' } });
@@ -75,20 +80,25 @@ export const EqptSelectionDialog = ({
   const handleClickConfirm = async () => {
     setIsLoading(true);
     // 選ばれた機材IDの配列からセットオプションの存在確認
-    const setList = await checkSetoptions(selectedEqptIds);
-    if (setList.length !== 0) {
-      // セットオプション付きの機材があるとき
-      // セット有機材IDリスト
-      setEqptsWSet(setList);
-      setBundleDialogOpen(true);
-      setIsLoading(false);
-    } else {
-      // セットオプションがない時
-      // 親機材(blankQty: 0)として配列に保持する
-      const data = await getSelectedEqpts(selectedEqptIds);
-      console.log('最終的に渡される機材の配列データ: ', data!);
-      setEqpts(data!);
-      //handleCloseDialog();
+    try {
+      const setList = await checkSetoptions(selectedEqptIds);
+      if (setList.length !== 0) {
+        // セットオプション付きの機材があるとき
+        // セット有機材IDリスト
+        setEqptsWSet(setList);
+        setBundleDialogOpen(true);
+        setIsLoading(false);
+      } else {
+        // セットオプションがない時
+        // 親機材(blankQty: 0)として配列に保持する
+        const data = await getSelectedEqpts(selectedEqptIds);
+        console.log('最終的に渡される機材の配列データ: ', data!);
+        setEqpts(data!);
+        //handleCloseDialog();
+      }
+    } catch (e) {
+      setSnackBarMessage('サーバー接続エラー');
+      setSnackBarOpen(true);
     }
   };
 
@@ -130,31 +140,41 @@ export const EqptSelectionDialog = ({
     setIsLoading(true);
     setSearching(true);
     setSelectedBumon(-100);
-    const lockResult = await lock();
 
-    if (lockResult) {
-      if (data.query.trim() === '') {
-        const a = await getEqptsForEqptSelection('');
-        console.log('機材リスト[0]: ', a![0]);
-        setTheEqpts(a!);
-      } else {
-        const a = await getEqptsForEqptSelection(data.query);
-        console.log('機材リスト[0]: ', a![0]);
-        setTheEqpts(a!);
+    try {
+      const lockResult = await lock();
+
+      if (lockResult) {
+        if (data.query.trim() === '') {
+          const a = await getEqptsForEqptSelection('');
+          console.log('機材リスト[0]: ', a![0]);
+          setTheEqpts(a!);
+        } else {
+          const a = await getEqptsForEqptSelection(data.query);
+          console.log('機材リスト[0]: ', a![0]);
+          setTheEqpts(a!);
+        }
       }
-      setIsLoading(false);
+    } catch (e) {
+      setSnackBarMessage('サーバー接続エラー');
+      setSnackBarOpen(true);
     }
+    setIsLoading(false);
   };
 
   /* useeffect -------------------------------------- */
   useEffect(() => {
     setIsLoading(true);
     setSearching(false);
-    console.log('★★★★★★★★★★★★★★★★★★★★★');
     const getEqpts = async () => {
-      const a = await getEqptsForEqptSelection('');
-      console.log('最初の機材リスト[0]: ', a![0]);
-      setTheEqpts(a!);
+      try {
+        const a = await getEqptsForEqptSelection('');
+        console.log('最初の機材リスト[0]: ', a![0]);
+        setTheEqpts(a!);
+      } catch (e) {
+        setSnackBarMessage('サーバー接続エラー');
+        setSnackBarOpen(true);
+      }
     };
     getEqpts();
     setIsLoading(false);
@@ -227,6 +247,14 @@ export const EqptSelectionDialog = ({
           </Grid2>
         </Grid2>
       </Container>
+      <Snackbar
+        open={snackBarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackBarOpen(false)}
+        message={snackBarMessage}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={{ marginTop: '65px' }}
+      />
     </>
   );
 };

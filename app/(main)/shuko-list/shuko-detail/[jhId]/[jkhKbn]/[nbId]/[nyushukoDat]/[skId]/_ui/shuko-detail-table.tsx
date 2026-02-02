@@ -38,6 +38,7 @@ export const ShukoDetailTable = (props: { datas: ShukoDetailTableValues[] }) => 
             <TableCell align="right" sx={{ pr: 3 }}>
               差異
             </TableCell>
+            <TableCell align="left">連絡メモ</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -82,6 +83,9 @@ export const ShukoDetailTable = (props: { datas: ShukoDetailTableValues[] }) => 
                 }}
               >
                 {row.diff}
+              </TableCell>
+              <TableCell align="left" sx={{ whiteSpace: 'pre-wrap' }}>
+                {row.mem2}
               </TableCell>
             </TableRow>
           ))}
