@@ -13,7 +13,7 @@ import {
   insertNyushukoFix,
   selectSagyoIdFilterNyushukoFixFlag,
 } from '@/app/_lib/db/tables/t-nyushuko-fix';
-import { selectNyushukoOne } from '@/app/_lib/db/tables/v-nyushuko-den2';
+import { selectNyushukoOne } from '@/app/_lib/db/tables/v-nyushuko-den2-head';
 import { selectNyushukoDetail } from '@/app/_lib/db/tables/v-nyushuko-den2-lst';
 import { JuchuCtnMeisai } from '@/app/_lib/db/types/t_juchu_ctn_meisai-type';
 import { NyushukoDen } from '@/app/_lib/db/types/t-nyushuko-den-type';
@@ -48,13 +48,15 @@ export const getShukoDetail = async (
       throw error;
     }
 
+    // const data = await selectNyushukoOne(juchuHeadId, juchuKizaiHeadKbn, nyushukoBashoId, nyushukoDat, 1);
+
     const nyukoDetailData: ShukoDetailValues = {
       juchuHeadId: juchuHeadId,
       juchuKizaiHeadKbn: juchuKizaiHeadKbn,
       nyushukoBashoId: nyushukoBashoId,
       nyushukoDat: nyushukoDat,
       sagyoKbnId: sagyoKbnId,
-      juchuKizaiHeadIds: data.juchu_kizai_head_idv?.split(',').map((id) => parseInt(id)) || [],
+      juchuKizaiHeadIds: data.juchu_kizai_head_idv?.split(',').map((id: string) => parseInt(id)) || [],
       nyushukoShubetuId: 1,
       headNamv: data.head_namv,
       koenNam: data.koen_nam,
@@ -120,6 +122,7 @@ export const getShukoDetailTable = async (
       ctnFlg: d.ctn_flg,
       dspOrdNumMeisai: d.dsp_ord_num_meisai,
       indentNum: d.indent_num ?? 0,
+      mem2: d.mem2 ?? '',
     }));
 
     return shukoDetailTableData;
