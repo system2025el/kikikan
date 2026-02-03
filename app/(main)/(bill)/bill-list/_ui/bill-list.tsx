@@ -42,6 +42,8 @@ export const BillList = () => {
   const [isFirst, setIsFirst] = useState<boolean>(true);
   /* ローディング状態 */
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  /* エラーハンドリング */
+  const [isError, setIsError] = useState<Error | null>(null);
   /* ページ  */
   const [page, setPage] = useState<number>(1);
   /** 選択肢一覧 */
@@ -71,10 +73,14 @@ export const BillList = () => {
     sessionStorage.setItem('billListSearchParams', JSON.stringify(getValues()));
     setIsFirst(false);
     setPage(1);
-    const q = await getFilteredBills(data);
-    if (q) {
-      setBills(q);
-      setIsLoading(false);
+    try {
+      const q = await getFilteredBills(data);
+      if (q) {
+        setBills(q);
+        setIsLoading(false);
+      }
+    } catch (e) {
+      setIsError(e instanceof Error ? e : new Error(String(e)));
     }
     setIsLoading(false);
   };
@@ -91,18 +97,26 @@ export const BillList = () => {
       // 初期表示ではない
       setIsFirst(false);
 
-      // 検索
-      const q = await getFilteredBills(getValues());
-      if (q) {
-        setBills(q);
+      try {
+        // 検索
+        const q = await getFilteredBills(getValues());
+        if (q) {
+          setBills(q);
+        }
+      } catch (e) {
+        setIsError(e instanceof Error ? e : new Error(String(e)));
       }
       setIsLoading(false);
     };
 
     const getOptions = async () => {
-      // 選択肢取得
-      const [custs, sts] = await Promise.all([getCustomerSelection(), getBillingStsSelection()]);
-      setOptions({ custs: custs, sts: sts });
+      try {
+        // 選択肢取得
+        const [custs, sts] = await Promise.all([getCustomerSelection(), getBillingStsSelection()]);
+        setOptions({ custs: custs, sts: sts });
+      } catch (e) {
+        setIsError(e instanceof Error ? e : new Error(String(e)));
+      }
     };
 
     // 選択肢取得
@@ -116,6 +130,8 @@ export const BillList = () => {
     }
     setIsLoading(false);
   }, [getValues, reset]);
+
+  if (isError) throw isError;
 
   return (
     <PermissionGuard category={'juchu'} required={permission.juchu_ref}>

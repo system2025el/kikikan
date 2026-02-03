@@ -10,6 +10,7 @@ import {
   Divider,
   Grid2,
   Paper,
+  Snackbar,
   Stack,
   Table,
   TableBody,
@@ -38,6 +39,10 @@ export const UnbilledCustsDialog = (props: {
   const [custs, setCusts] = useState<string[]>([]);
 
   const [selectCusts, setSelectCusts] = useState<string[]>(unbilledCusts ?? []);
+  /* スナックバーの表示するかしないか */
+  const [snackBarOpen, setSnackBarOpen] = useState(false);
+  /* スナックバーのメッセージ */
+  const [snackBarMessage, setSnackBarMessage] = useState('');
 
   console.log('unbilledCusts:', unbilledCusts);
 
@@ -51,15 +56,20 @@ export const UnbilledCustsDialog = (props: {
   const onSubmit = async (data: { query: string }) => {
     setIsLoading(true);
 
-    const newList = await getUnbilledCusts(data.query!);
-    newList.sort((a, b) => {
-      const aSelected = selectCusts.includes(a);
-      const bselected = selectCusts.includes(b);
-      if (aSelected && !bselected) return -1;
-      if (!aSelected && bselected) return 1;
-      return 0;
-    });
-    setCusts(newList);
+    try {
+      const newList = await getUnbilledCusts(data.query!);
+      newList.sort((a, b) => {
+        const aSelected = selectCusts.includes(a);
+        const bselected = selectCusts.includes(b);
+        if (aSelected && !bselected) return -1;
+        if (!aSelected && bselected) return 1;
+        return 0;
+      });
+      setCusts(newList);
+    } catch (e) {
+      setSnackBarMessage('顧客情報の取得に失敗しました');
+      setSnackBarOpen(true);
+    }
     setIsLoading(false);
   };
 
@@ -79,16 +89,21 @@ export const UnbilledCustsDialog = (props: {
     // ダイアログが開いた瞬間に fetch（ここで最新をとる）
     const getCusts = async () => {
       setIsLoading(true);
-      const data = await getUnbilledCusts('');
-      data.sort((a, b) => {
-        const aSelected = selectCusts.includes(a);
-        const bselected = selectCusts.includes(b);
-        if (aSelected && !bselected) return -1;
-        if (!aSelected && bselected) return 1;
-        return 0;
-      });
-      //setSelectCusts(selectedCusts);
-      setCusts(data);
+      try {
+        const data = await getUnbilledCusts('');
+        data.sort((a, b) => {
+          const aSelected = selectCusts.includes(a);
+          const bselected = selectCusts.includes(b);
+          if (aSelected && !bselected) return -1;
+          if (!aSelected && bselected) return 1;
+          return 0;
+        });
+        //setSelectCusts(selectedCusts);
+        setCusts(data);
+      } catch (e) {
+        setSnackBarMessage('顧客情報の取得に失敗しました');
+        setSnackBarOpen(true);
+      }
       setIsLoading(false);
     };
 
@@ -161,6 +176,14 @@ export const UnbilledCustsDialog = (props: {
           </Grid2>
         </Box>
       </Container>
+      <Snackbar
+        open={snackBarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackBarOpen(false)}
+        message={snackBarMessage}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={{ marginTop: '65px' }}
+      />
     </>
   );
 };
