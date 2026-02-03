@@ -114,26 +114,36 @@ export const SecondDialogPage = ({
   }) => {
     setIsLoading(true);
     console.log(data);
-    const meisaiNamList = await getJuchuKizaiHeadNamListForBill(data);
-    setMeisaiHeadNamList(meisaiNamList.map((d) => ({ ...d, dat: data.dat })));
+    try {
+      const meisaiNamList = await getJuchuKizaiHeadNamListForBill(data);
+      setMeisaiHeadNamList(meisaiNamList.map((d) => ({ ...d, dat: data.dat })));
+    } catch (e) {
+      setSnackBarMessage('検索に失敗しました');
+      setSnackBarOpen();
+    }
     setIsLoading(false);
   };
 
   /** ヘッダが選ばれたときの処理 */
   const handleClickHeadNam = async (juchuId: number, kizaiHeadId: number, checked: boolean, dat: Date) => {
     console.log(kizaiHeadId, checked);
-    if (checked) {
-      // 詳細表示処理
-      const data = await getJuchuKizaiMeisaiDetailsForBill(juchuId, kizaiHeadId, dat);
-      headsField.append(data);
-    } else {
-      // まとめて表示処理
-      const data = await getJuchuKizaiMeisaiHeadForBill(juchuId, kizaiHeadId, dat);
-      console.log(data);
-      // 取得した内容をテーブル内の明細に入れる
-      headsField.append(data);
+    try {
+      if (checked) {
+        // 詳細表示処理
+        const data = await getJuchuKizaiMeisaiDetailsForBill(juchuId, kizaiHeadId, dat);
+        headsField.append(data);
+      } else {
+        // まとめて表示処理
+        const data = await getJuchuKizaiMeisaiHeadForBill(juchuId, kizaiHeadId, dat);
+        console.log(data);
+        // 取得した内容をテーブル内の明細に入れる
+        headsField.append(data);
+      }
+      handleClose();
+    } catch (e) {
+      setSnackBarMessage('明細の取得に失敗しました');
+      setSnackBarOpen();
     }
-    handleClose();
   };
 
   /* useEffect ---------------------------------------------- */
