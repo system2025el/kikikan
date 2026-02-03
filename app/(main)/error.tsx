@@ -3,7 +3,9 @@
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import { Box, Button, Paper, Typography } from '@mui/material';
 import { useRouter } from 'next/navigation';
-import { startTransition, useEffect } from 'react';
+import { startTransition, useEffect, useState } from 'react';
+
+import { LoadingOverlay } from './_ui/loading';
 
 const Error = ({ error, reset }: { error: Error; reset: () => void }) => {
   const router = useRouter();
@@ -15,7 +17,6 @@ const Error = ({ error, reset }: { error: Error; reset: () => void }) => {
   const handleReset = () => {
     startTransition(() => {
       router.refresh();
-
       reset();
     });
   };
@@ -69,7 +70,6 @@ const Error = ({ error, reset }: { error: Error; reset: () => void }) => {
 
         <Button
           variant="contained"
-          size="large"
           onClick={handleReset}
           sx={{
             px: 4,
