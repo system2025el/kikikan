@@ -90,7 +90,12 @@ export const MeisaiLines = ({
                     { id: 'サブチーフ', label: 'サブチーフ' },
                     { id: 'システム', label: 'システム' },
                     { id: '機材テク', label: '機材テク' },
-                    { id: '...', label: '...' },
+                    { id: '卓OP', label: '卓OP' },
+                    { id: '卓ケア', label: '卓ケア' },
+                    { id: 'PINチーフ', label: 'PINチーフ' },
+                    { id: 'PIN', label: 'PIN' },
+                    { id: 'ROBOテク', label: 'ROBOテク' },
+                    { id: '現地', label: '現地' },
                   ]}
                   sx={{ width: 242.5 }}
                   disabled={!editable}
