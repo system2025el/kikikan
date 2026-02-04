@@ -256,6 +256,7 @@ export const Schedule = () => {
                         display: '-webkit-box',
                         //WebkitLineClamp: 2,
                         WebkitBoxOrient: 'vertical',
+                        lineHeight: '0.75rem',
                       }}
                       fontSize={'0.5rem'}
                       fontWeight={'normal'}
@@ -299,6 +300,7 @@ export const Schedule = () => {
                         display: '-webkit-box',
                         //WebkitLineClamp: 2,
                         WebkitBoxOrient: 'vertical',
+                        lineHeight: '0.75rem',
                       }}
                       fontSize={'0.5rem'}
                       fontWeight={'normal'}
