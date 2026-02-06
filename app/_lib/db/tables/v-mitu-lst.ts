@@ -22,7 +22,7 @@ export const selectFilteredQuot = async ({
     .schema(SCHEMA)
     .from('v_mitu_lst')
     .select(
-      `mitu_head_id, juchu_head_id, sts_nam, mitu_head_nam, koen_nam, koenbasho_nam, kokyaku_nam, mitu_dat, nyuryoku_user`
+      `mitu_head_id, juchu_head_id, sts_nam, mitu_head_nam, koen_nam, koenbasho_nam, kokyaku_nam, mitu_dat, nyuryoku_user, mitu_str_dat, mitu_end_dat`
     )
     .order('mitu_head_id', { ascending: false });
   // 見積番号あり

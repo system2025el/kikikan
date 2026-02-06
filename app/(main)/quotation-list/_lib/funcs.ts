@@ -60,6 +60,7 @@ export const getFilteredQuotList = async (
       kokyakuNam: d.kokyaku_nam ?? '',
       mituDat: d.mitu_dat ? toJapanYMDString(d.mitu_dat) : '',
       nyuryokuUser: d.nyuryoku_user ?? '',
+      mituRange: `${d.mitu_str_dat ? toJapanYMDString(d.mitu_str_dat) : ''} ${d.mitu_str_dat || d.mitu_end_dat ? ' ～ ' : ''} ${d.mitu_end_dat ? toJapanYMDString(d.mitu_end_dat) : ''}`,
     }));
   } catch (e) {
     console.error('例外が発生しました:', e);
