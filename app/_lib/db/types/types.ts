@@ -3385,8 +3385,10 @@ export type Database = {
           koenbasho_nam: string | null;
           kokyaku_nam: string | null;
           mitu_dat: string | null;
+          mitu_end_dat: string | null;
           mitu_head_id: number | null;
           mitu_head_nam: string | null;
+          mitu_str_dat: string | null;
           mitu_sts: number | null;
           nyuryoku_user: string | null;
           sts_nam: string | null;

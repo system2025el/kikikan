@@ -837,7 +837,7 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
                         addKizaiTbl={() =>
                           kizaiFields.append({
                             mituMeisaiHeadNam: null,
-                            headNamDspFlg: false,
+                            headNamDspFlg: true,
                             mituMeisaiKbn: 0,
                             nebikiNam: '値引き',
                             nebikiAftNam: '機材費',
