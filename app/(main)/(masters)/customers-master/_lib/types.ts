@@ -11,6 +11,10 @@ export const CustomersMaterDialogSchema = z.object({
     .string()
     .max(100, { message: validationMessages.maxStringLength(100) })
     .min(1, { message: validationMessages.required() }),
+  keisho: z
+    .string()
+    .max(10, { message: validationMessages.maxStringLength(10) })
+    .nullish(),
   delFlg: z.boolean().optional(),
   adrPost: z
     .string()
