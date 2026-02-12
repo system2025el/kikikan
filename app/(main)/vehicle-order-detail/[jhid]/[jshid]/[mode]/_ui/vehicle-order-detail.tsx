@@ -733,7 +733,19 @@ const VehicleOrderDetail = ({
                     disabled={!editable}
                     render={({ field, fieldState: { error } }) => (
                       <FormControl error={!!error} sx={{ minWidth: { sm: '60vw', md: '30vw' }, ml: { sm: 5, md: 0 } }}>
-                        <Select {...field} value={field.value ?? ''}>
+                        <Select
+                          {...field}
+                          value={field.value ?? ''}
+                          onChange={(e) => {
+                            field.onChange(e);
+                            const val = e.target.value;
+                            if (val && val === FAKE_NEW_ID) {
+                              setValue(`meisai.${index}.sharyoQty`, null);
+                            } else if (val && val !== FAKE_NEW_ID) {
+                              setValue(`meisai.${index}.sharyoQty`, 1);
+                            }
+                          }}
+                        >
                           {[selectNone, ...options.vehs].map((opt) => (
                             <MenuItem
                               key={opt.id}

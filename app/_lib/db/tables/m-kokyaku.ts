@@ -81,7 +81,7 @@ export const selectOneCustomer = async (id: number) => {
       .schema(SCHEMA)
       .from('m_kokyaku')
       .select(
-        'kokyaku_id, kokyaku_nam, kana, nebiki_rat, del_flg, adr_post, adr_shozai, adr_tatemono, adr_sonota, tel, tel_mobile, fax, mail, mem, dsp_flg'
+        'kokyaku_id, kokyaku_nam, kana, keisho, nebiki_rat, del_flg, adr_post, adr_shozai, adr_tatemono, adr_sonota, tel, tel_mobile, fax, mail, mem, dsp_flg'
       )
       .eq('kokyaku_id', id)
       .single();

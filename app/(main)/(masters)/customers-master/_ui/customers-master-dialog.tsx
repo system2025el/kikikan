@@ -270,6 +270,16 @@ export const CustomersMasterDialog = ({
                 />
                 <Typography>%</Typography>
               </FormBox>
+              <FormBox formItem={formItems[5]}>
+                <TextFieldElement
+                  name="keisho"
+                  control={control}
+                  label={editable ? formItems[5].exsample : ''}
+                  fullWidth
+                  sx={{ maxWidth: '50%' }}
+                  disabled={editable ? false : true}
+                />
+              </FormBox>
               <FormBox formItem={formItems[6]}>
                 <TextFieldElement
                   name="adrPost"
