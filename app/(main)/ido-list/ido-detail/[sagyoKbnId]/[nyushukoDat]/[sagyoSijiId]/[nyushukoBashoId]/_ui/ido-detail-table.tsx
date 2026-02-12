@@ -99,7 +99,7 @@ export const ShukoIdoDenTable = (props: {
                 sx={{
                   whiteSpace: 'nowrap',
                   backgroundColor:
-                    row.diffQty === 0 && row.planQty !== 0
+                    row.diffQty === 0 /*&& row.planQty !== 0*/
                       ? statusColors.completed
                       : row.ctnFlg
                         ? statusColors.ctn
@@ -172,7 +172,7 @@ export const ShukoIdoDenTable = (props: {
                   align="right"
                   sx={{
                     backgroundColor:
-                      row.diffQty === 0 && row.planQty !== 0
+                      row.diffQty === 0 /*&& row.planQty !== 0*/
                         ? statusColors.completed
                         : row.diffQty > 0
                           ? statusColors.excess

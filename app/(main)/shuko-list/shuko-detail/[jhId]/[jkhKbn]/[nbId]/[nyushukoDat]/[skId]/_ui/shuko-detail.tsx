@@ -26,9 +26,17 @@ import { statusColors } from '@/app/(main)/_lib/colors';
 import { permission } from '@/app/(main)/_lib/permission';
 import { BackButton } from '@/app/(main)/_ui/buttons';
 import { DateTime, TestDate } from '@/app/(main)/_ui/date';
+import { LoadingOverlay } from '@/app/(main)/_ui/loading';
 import { PermissionGuard } from '@/app/(main)/_ui/permission-guard';
 
-import { confirmChildJuchuKizaiHead, delShukoFix, getShukoDetail, updShukoDetail } from '../_lib/funcs';
+import {
+  confirmChildJuchuKizaiHead,
+  delShukoFix,
+  getShukoDetail,
+  getShukoDetailTable,
+  updShukoAdjust,
+  updShukoDetail,
+} from '../_lib/funcs';
 import { ShukoDetailTableValues, ShukoDetailValues } from '../_lib/types';
 import { ShukoDetailTable } from './shuko-detail-table';
 
@@ -37,7 +45,7 @@ export const ShukoDetail = (props: {
   shukoDetailTableData: ShukoDetailTableValues[];
   fixFlag: boolean;
 }) => {
-  const { shukoDetailData, shukoDetailTableData } = props;
+  const { shukoDetailData } = props;
 
   // user情報
   const user = useUserStore((state) => state.user);
@@ -46,8 +54,13 @@ export const ShukoDetail = (props: {
 
   // 出発済フラグ
   const [fixFlag, setFixFlag] = useState(props.fixFlag);
+  // ローディング
+  const [isLoading, setIsLoading] = useState(false);
   // 処理中制御
   const [isProcessing, setIsProcessing] = useState(false);
+
+  // 出庫データ
+  const [shukoDetailList, setShukoDetailList] = useState<ShukoDetailTableValues[]>(props.shukoDetailTableData);
 
   // 出発ボタンダイアログ制御
   const [departureOpen, setDepartureOpen] = useState(false);
@@ -67,7 +80,7 @@ export const ShukoDetail = (props: {
 
     setIsProcessing(true);
 
-    const diffCheck = shukoDetailTableData.find(
+    const diffCheck = shukoDetailList.find(
       (data) =>
         (data.juchuKizaiHeadKbn !== 3 && !data.ctnFlg && data.diff !== 0) ||
         (data.juchuKizaiHeadKbn === 3 && data.diff !== 0)
@@ -79,7 +92,7 @@ export const ShukoDetail = (props: {
       return;
     }
 
-    const updateResult = await updShukoDetail(shukoDetailData, shukoDetailTableData, user.name);
+    const updateResult = await updShukoDetail(shukoDetailData, shukoDetailList, user.name);
 
     if (updateResult) {
       setFixFlag(true);
@@ -103,9 +116,7 @@ export const ShukoDetail = (props: {
 
     setIsProcessing(true);
 
-    const juchuKizaiHeadIds = [
-      ...new Set(shukoDetailTableData.map((d) => d.juchuKizaiHeadId).filter((id) => id !== null)),
-    ];
+    const juchuKizaiHeadIds = [...new Set(shukoDetailList.map((d) => d.juchuKizaiHeadId).filter((id) => id !== null))];
     const childJuchuKizaiHeadCount = await confirmChildJuchuKizaiHead(shukoDetailData.juchuHeadId, juchuKizaiHeadIds);
 
     if (childJuchuKizaiHeadCount && childJuchuKizaiHeadCount > 0) {
@@ -114,7 +125,7 @@ export const ShukoDetail = (props: {
       return;
     }
 
-    const updateResult = await delShukoFix(shukoDetailData, shukoDetailTableData);
+    const updateResult = await delShukoFix(shukoDetailData, shukoDetailList);
 
     if (updateResult) {
       setFixFlag(false);
@@ -129,9 +140,47 @@ export const ShukoDetail = (props: {
     }
   };
 
+  /**
+   * 一括補正ボタン押下
+   * @returns
+   */
+  const handleAdjust = async () => {
+    if (!user || isProcessing) return;
+
+    setIsProcessing(true);
+
+    const adjustData = shukoDetailList.filter((data) => data.diff !== 0 && data.diff < 0);
+
+    if (adjustData.length === 0) {
+      setIsProcessing(false);
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await updShukoAdjust(adjustData, user.name);
+      const updatedShukoDetailTableData = await getShukoDetailTable(
+        shukoDetailData.juchuHeadId,
+        shukoDetailData.juchuKizaiHeadKbn,
+        shukoDetailData.nyushukoBashoId,
+        shukoDetailData.nyushukoDat,
+        shukoDetailData.sagyoKbnId
+      );
+      setShukoDetailList(updatedShukoDetailTableData);
+      setSnackBarMessage('一括補正しました');
+      setSnackBarOpen(true);
+    } catch (e) {
+      setSnackBarMessage('一括補正に失敗しました');
+      setSnackBarOpen(true);
+    }
+    setIsLoading(false);
+    setIsProcessing(false);
+  };
+
   return (
     <PermissionGuard category={'nyushuko'} required={permission.nyushuko_ref}>
       <Box>
+        {isLoading && <LoadingOverlay />}
         <Box display={'flex'} justifyContent={'end'} mb={1}>
           <Button
             onClick={() => {
@@ -214,7 +263,7 @@ export const ShukoDetail = (props: {
           <Divider />
           <Box width={'100%'}>
             <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} width={'60vw'} pl={1} py={0.5}>
-              <Typography>全{shukoDetailTableData ? shukoDetailTableData.length : 0}件</Typography>
+              <Typography>全{shukoDetailList ? shukoDetailList.length : 0}件</Typography>
               <Box display={'flex'} alignItems={'center'}>
                 <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.completed }}>
                   済
@@ -228,9 +277,16 @@ export const ShukoDetail = (props: {
                 <Typography minWidth={50} textAlign={'center'} sx={{ backgroundColor: statusColors.ctn }}>
                   コンテナ
                 </Typography>
+                <Button
+                  onClick={handleAdjust}
+                  disabled={!shukoDetailList.find((data) => data.diff !== 0) || fixFlag}
+                  sx={{ ml: 2 }}
+                >
+                  一括補正
+                </Button>
               </Box>
             </Box>
-            {shukoDetailTableData.length > 0 && <ShukoDetailTable datas={shukoDetailTableData} />}
+            {shukoDetailList.length > 0 && <ShukoDetailTable datas={shukoDetailList} />}
           </Box>
         </Paper>
         <Dialog open={departureOpen}>
