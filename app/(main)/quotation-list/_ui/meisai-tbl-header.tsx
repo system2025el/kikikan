@@ -4,7 +4,7 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Box, Button, Grid2, Stack, TextField, Typography } from '@mui/material';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   CheckboxElement,
   Control,
@@ -64,6 +64,25 @@ export const MeisaiTblHeader = ({
   );
   const nebikiAft = useMemo(() => Math.round(shokeiSum - (nebikiAmt ?? 0)), [shokeiSum, nebikiAmt]);
 
+  /* ref */
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  /* 一括変更ボタン押下 */
+  const handleBulkChange = () => {
+    const newValue = Number(inputRef.current?.value);
+    if (!inputRef.current?.value || isNaN(newValue) || !meisaiList) return;
+
+    const updatedMeisai = meisaiList.map((item) => ({
+      ...item,
+      honbanbiQty: newValue,
+    }));
+
+    setValue(`meisaiHeads.${sectionNam}.${index}.meisai`, updatedMeisai, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+  };
+
   /* useEffect ---------------------------------------------------- */
   useEffect(() => {
     // 計算結果が現在の値と異なる場合のみ更新
@@ -94,7 +113,27 @@ export const MeisaiTblHeader = ({
           />
         </Grid2>
         <Grid2 size={'grow'} justifyItems={'end'}>
-          <Box>
+          <Box display={'flex'} alignItems={'end'}>
+            <Grid2 container alignItems={'end'} spacing={1} mr={1}>
+              <TextField
+                type="number"
+                sx={{
+                  width: '60px',
+                  '& .MuiInputBase-input': {
+                    textAlign: 'right',
+                  },
+                  '& input[type=number]::-webkit-inner-spin-button': {
+                    WebkitAppearance: 'none',
+                    margin: 0,
+                  },
+                }}
+                inputRef={inputRef}
+                onFocus={(e) => e.target.select()}
+              />
+              <Button onClick={handleBulkChange} disabled={!editable}>
+                本番日数一括変更
+              </Button>
+            </Grid2>
             <Button
               color="error"
               onClick={() => {
@@ -139,7 +178,7 @@ export const MeisaiTblHeader = ({
         </Grid2>
         <Grid2 size={0.8}>
           <Typography variant="body2" fontWeight={500}>
-            使用日
+            本番日数
           </Typography>
         </Grid2>
         <Grid2 size={1.5}>
