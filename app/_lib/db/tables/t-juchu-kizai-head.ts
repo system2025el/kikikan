@@ -5,6 +5,7 @@ import { PoolClient } from 'pg';
 import { KeepJuchuKizaiHeadValues } from '@/app/(main)/(eq-order-detail)/eq-keep-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[oyaJuchuKizaiHeadId]/[mode]/_lib/types';
 import { JuchuKizaiHeadValues } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
 
+import pool from '../postgres';
 import { SCHEMA, supabase } from '../supabase';
 import { JuchuKizaiHead } from '../types/t-juchu-kizai-head-type';
 
@@ -127,6 +128,24 @@ export const selectJuchuHonbanbiQty = async (juchuHeadId: number, juchuKizaiHead
       .eq('juchu_head_id', juchuHeadId)
       .eq('juchu_kizai_head_id', juchuKizaiHeadId)
       .single();
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
+ * 受注本番日最大値取得
+ * @param juchuId 受注ヘッダーid
+ * @returns
+ */
+export const selectMaxJuchuHonbanbiQty = async (juchuId: number) => {
+  try {
+    return await supabase
+      .schema(SCHEMA)
+      .from('t_juchu_kizai_head')
+      .select('juchu_honbanbi_qty')
+      .eq('juchu_head_id', juchuId)
+      .order('juchu_honbanbi_qty', { ascending: false, nullsFirst: false });
   } catch (e) {
     throw e;
   }

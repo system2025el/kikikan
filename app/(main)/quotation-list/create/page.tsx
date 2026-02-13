@@ -1,4 +1,4 @@
-import { getOrderForQuotation } from '../_lib/funcs';
+import { getMaxHonbanbiQty, getOrderForQuotation } from '../_lib/funcs';
 import { JuchuValues, QuotHeadValues } from '../_lib/types';
 import { Quotation } from '../_ui/quotation';
 
@@ -7,10 +7,12 @@ const Page = async ({ searchParams }: { searchParams: Promise<{ [key: string]: s
   const juchuId = Number(searchParam.juchuId);
 
   let order: JuchuValues | null = null;
+  let honbanbiQty: number | null = null;
 
   if (juchuId) {
     // もし受注IDがあれば、DBから関連データを取得して初期値とする
     order = await getOrderForQuotation(juchuId);
+    honbanbiQty = await getMaxHonbanbiQty(juchuId);
   }
 
   /** 見積初期値 */
@@ -28,7 +30,7 @@ const Page = async ({ searchParams }: { searchParams: Promise<{ [key: string]: s
         kokyakuTantoNam: order.kokyakuTantoNam,
         koenNam: order.koenNam,
         koenbashoNam: order.koenbashoNam,
-        mituHonbanbiQty: null,
+        mituHonbanbiQty: honbanbiQty,
         biko: null,
         kizaiChukeiMei: '中計',
         chukeiMei: '中計',
