@@ -277,8 +277,8 @@ export const selectFilteredJuchuDetailsForBill = async (queries: {
             sh.juchu_head_id = v.juchu_head_id
           AND
             sh.juchu_kizai_head_id = v.juchu_kizai_head_id
-          AND
-            sh.juchu_honbanbi_shubetu_id = 40
+          --AND
+            --sh.juchu_honbanbi_shubetu_id = 40
           AND
             sh.juchu_honbanbi_dat >= COALESCE(v.seikyu_dat, v.shuko_dat)
           AND
