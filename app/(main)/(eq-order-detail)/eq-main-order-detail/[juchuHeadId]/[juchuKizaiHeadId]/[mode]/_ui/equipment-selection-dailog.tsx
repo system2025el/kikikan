@@ -5,6 +5,7 @@ import {
   Checkbox,
   Container,
   Dialog,
+  DialogActions,
   DialogContent,
   DialogTitle,
   Divider,
@@ -29,12 +30,13 @@ import { Loading } from '@/app/(main)/_ui/loading';
 
 import { bundleData } from '../_lib/eqdata';
 import { checkSetoptions, getEqptsForEqptSelection, getSelectedEqpts, getSetOptions } from '../_lib/funcs';
-import { EqptSelection, SelectedEqptsValues } from '../_lib/types';
+import { EqptSelection, JuchuKizaiMeisaiValues, SelectedEqptsValues } from '../_lib/types';
 import { EqptBumonsTable } from './equipment-bumons-table';
 import { EqptTable } from './equipments-table';
 
 export const EqptSelectionDialog = ({
   // rank,
+  eqpts,
   setEqpts,
   handleCloseDialog,
   lock,
@@ -45,6 +47,7 @@ export const EqptSelectionDialog = ({
    * @param {SelectedEqptsValues[]} data
    * @returns
    */
+  eqpts: JuchuKizaiMeisaiValues[];
   setEqpts: (data: SelectedEqptsValues[]) => void;
   /** 機材選択ダイアログ閉じる関数 */
   handleCloseDialog: () => void;
@@ -63,10 +66,14 @@ export const EqptSelectionDialog = ({
   const [searching, setSearching] = useState<boolean>(false);
   /* Loadingかどうか */
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  /* 受注明細に重複のある機材配列 */
+  const [duplicateEqpts, setDuplicateEqpts] = useState<JuchuKizaiMeisaiValues[]>([]);
   /* セットオプション有機材のデータ配列 */
   const [eqptsWSet, setEqptsWSet] = useState<number[]>([]);
   /* セットオプションのダイアログ開閉 */
   const [bundleDialogOpen, setBundleDialogOpen] = useState(false);
+  /* 重複機材のダイアログ開閉 */
+  const [duplicateDialogOpen, setDuplicateDialogOpen] = useState(false);
   // スナックバー制御
   const [snackBarOpen, setSnackBarOpen] = useState(false);
   // スナックバーメッセージ
@@ -79,25 +86,43 @@ export const EqptSelectionDialog = ({
   /* 確定ボタン押下時 */
   const handleClickConfirm = async () => {
     setIsLoading(true);
-    // 選ばれた機材IDの配列からセットオプションの存在確認
-    try {
-      const setList = await checkSetoptions(selectedEqptIds);
-      if (setList.length !== 0) {
-        // セットオプション付きの機材があるとき
-        // セット有機材IDリスト
-        setEqptsWSet(setList);
-        setBundleDialogOpen(true);
-      } else {
-        // セットオプションがない時
-        // 親機材(blankQty: 0)として配列に保持する
-        const data = await getSelectedEqpts(selectedEqptIds);
-        console.log('最終的に渡される機材の配列データ: ', data!);
-        setEqpts(data!);
-        //handleCloseDialog();
+
+    // 機材明細の重複機材排除
+    const uniqueIds = new Set();
+    const uniqueEqList = eqpts.filter((d) => {
+      if (uniqueIds.has(d.kizaiId)) {
+        return false;
       }
-    } catch (e) {
-      setSnackBarMessage('サーバー接続エラー');
-      setSnackBarOpen(true);
+      uniqueIds.add(d.kizaiId);
+      return true;
+    });
+    // 選ばれた機材IDの配列から、機材明細の重複機材を抽出
+    const DuplicateEqpts = uniqueEqList.filter((eqpt) => selectedEqptIds.includes(eqpt.kizaiId));
+
+    if (DuplicateEqpts.length > 0) {
+      setDuplicateEqpts(DuplicateEqpts);
+      setDuplicateDialogOpen(true);
+    } else {
+      // 選ばれた機材IDの配列からセットオプションの存在確認
+      try {
+        const setList = await checkSetoptions(selectedEqptIds);
+        if (setList.length !== 0) {
+          // セットオプション付きの機材があるとき
+          // セット有機材IDリスト
+          setEqptsWSet(setList);
+          setBundleDialogOpen(true);
+        } else {
+          // セットオプションがない時
+          // 親機材(blankQty: 0)として配列に保持する
+          const data = await getSelectedEqpts(selectedEqptIds);
+          console.log('最終的に渡される機材の配列データ: ', data!);
+          setEqpts(data!);
+          //handleCloseDialog();
+        }
+      } catch (e) {
+        setSnackBarMessage('サーバー接続エラー');
+        setSnackBarOpen(true);
+      }
     }
     setIsLoading(false);
   };
@@ -214,6 +239,18 @@ export const EqptSelectionDialog = ({
           >
             確定
           </Button>
+          <DuplicateDialog
+            open={duplicateDialogOpen}
+            selectedEqptIds={selectedEqptIds}
+            duplicateEqpts={duplicateEqpts}
+            setSelectedEqptIds={setSelectedEqptIds}
+            setEqptsWSet={setEqptsWSet}
+            setBundleDialogOpen={setBundleDialogOpen}
+            setEqpts={setEqpts}
+            handleCloseDialog={() => setDuplicateDialogOpen(false)}
+            setSnackBarOpen={setSnackBarOpen}
+            setSnackBarMessage={setSnackBarMessage}
+          />
           {eqptsWSet.length > 0 && (
             <BundleDialog
               open={bundleDialogOpen}
@@ -505,6 +542,99 @@ const BundleDialog = ({
           )}
         </TableContainer>
       </DialogContent>
+    </Dialog>
+  );
+};
+
+/* 重複機材確認ダイアログ */
+const DuplicateDialog = ({
+  open,
+  selectedEqptIds,
+  duplicateEqpts,
+  setSelectedEqptIds,
+  setEqptsWSet,
+  setBundleDialogOpen,
+  setEqpts,
+  handleCloseDialog,
+  setSnackBarOpen,
+  setSnackBarMessage,
+}: {
+  open: boolean;
+  selectedEqptIds: number[];
+  duplicateEqpts: JuchuKizaiMeisaiValues[];
+  setSelectedEqptIds: React.Dispatch<SetStateAction<number[]>>;
+  setEqptsWSet: (data: number[]) => void;
+  setBundleDialogOpen: React.Dispatch<SetStateAction<boolean>>;
+  setEqpts: (data: SelectedEqptsValues[]) => void;
+  handleCloseDialog: () => void;
+  setSnackBarOpen: React.Dispatch<SetStateAction<boolean>>;
+  setSnackBarMessage: React.Dispatch<SetStateAction<string>>;
+}) => {
+  /* 今開いてる機材ID配列のインデックス */
+  const [currentIndex, setCurrentIndex] = useState(0);
+  /* ローディング */
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (!open) {
+      setCurrentIndex(0);
+      //setIsLoading(false);
+    }
+  }, [open]);
+
+  /* はい・いいえボタン押下時 */
+  const handleClick = async (result: boolean) => {
+    setIsLoading(true);
+
+    try {
+      let updatedSelectedEqptIds = [...selectedEqptIds];
+      if (!result) {
+        updatedSelectedEqptIds = selectedEqptIds.filter((id) => id !== duplicateEqpts[currentIndex].kizaiId);
+        setSelectedEqptIds(updatedSelectedEqptIds);
+      }
+
+      if (currentIndex + 1 < duplicateEqpts.length) {
+        setCurrentIndex((prev) => prev + 1);
+      } else if (updatedSelectedEqptIds.length > 0) {
+        // 選ばれた機材IDの配列からセットオプションの存在確認
+        const setList = await checkSetoptions(updatedSelectedEqptIds);
+        if (setList.length !== 0) {
+          // セットオプション付きの機材があるとき
+          // セット有機材IDリスト
+          setEqptsWSet(setList);
+          handleCloseDialog();
+          setBundleDialogOpen(true);
+        } else {
+          // セットオプションがない時
+          // 親機材(blankQty: 0)として配列に保持する
+          const data = await getSelectedEqpts(updatedSelectedEqptIds);
+          handleCloseDialog();
+          setEqpts(data!);
+        }
+      } else {
+        handleCloseDialog();
+      }
+    } catch (e) {
+      setSnackBarMessage('サーバー接続エラー');
+      setSnackBarOpen(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  return (
+    <Dialog open={open}>
+      <DialogTitle>{duplicateEqpts[currentIndex]?.kizaiNam ?? 'aaaaa'}</DialogTitle>
+      <DialogContent>
+        <Typography>重複機材を追加してもよろしいでしょうか？</Typography>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => handleClick(true)} loading={isLoading}>
+          はい
+        </Button>
+        <Button onClick={() => handleClick(false)} loading={isLoading}>
+          いいえ
+        </Button>
+      </DialogActions>
     </Dialog>
   );
 };

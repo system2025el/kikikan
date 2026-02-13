@@ -3103,6 +3103,7 @@ const EquipmentOrderDetail = (props: {
                 <Dialog open={EqSelectionDialogOpen} fullScreen>
                   <EqptSelectionDialog
                     // rank={juchuHeadData.kokyaku.kokyakuRank}
+                    eqpts={juchuKizaiMeisaiList}
                     setEqpts={setEqpts}
                     handleCloseDialog={handleCloseEqDialog}
                     lock={lock}
