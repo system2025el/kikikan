@@ -32,7 +32,7 @@ const Page = async (props: { params: Promise<{ juchuHeadId: string; juchuKizaiHe
   }
 
   // 編集モード(edit:編集、view:閲覧)
-  const edit = params.mode === 'edit' && !fixFlag ? true : false;
+  const edit = params.mode === 'edit' ? true : false;
 
   // 新規
   if (juchuKizaiHeadId === 0) {

@@ -62,6 +62,7 @@ export const TabPanelUI = ({
                   margin: 0,
                 },
               }}
+              onFocus={(e) => e.target.select()}
             />
           </Grid2>
           <Grid2 size={4} maxWidth={250}>

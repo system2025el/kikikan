@@ -132,6 +132,7 @@ StockTableRow.displayName = 'StockTableRow';
 type EqTableProps = {
   rows: JuchuKizaiMeisaiValues[];
   edit: boolean;
+  fixFlag: boolean;
   handleCellChange: (
     rowIndex: number,
     kizaiId: number,
@@ -148,6 +149,7 @@ type EqTableProps = {
 export const EqTable: React.FC<EqTableProps> = ({
   rows,
   edit,
+  fixFlag,
   handleCellChange,
   handleMeisaiDelete,
   handleMemoChange,
@@ -235,6 +237,7 @@ export const EqTable: React.FC<EqTableProps> = ({
               row={row}
               rowIndex={rowIndex}
               edit={edit}
+              fixFlag={fixFlag}
               handleOrderRef={handleOrderRef(rowIndex)}
               handleYobiRef={handleYobiRef(rowIndex)}
               handleMeisaiDelete={handleMeisaiDelete}
@@ -255,6 +258,7 @@ type EqTableRowProps = {
   row: JuchuKizaiMeisaiValues;
   rowIndex: number;
   edit: boolean;
+  fixFlag: boolean;
   handleOrderRef: (el: HTMLInputElement | null) => void;
   handleYobiRef: (el: HTMLInputElement | null) => void;
   handleMeisaiDelete: (rowIndex: number, row: JuchuKizaiMeisaiValues) => void;
@@ -276,6 +280,7 @@ const EqTableRow = React.memo(
     row,
     rowIndex,
     edit,
+    fixFlag,
     handleOrderRef,
     handleYobiRef,
     handleMeisaiDelete,
@@ -293,7 +298,7 @@ const EqTableRow = React.memo(
           <IconButton
             onClick={() => handleMeisaiDelete(rowIndex, row)}
             sx={{ padding: 0, color: 'red' }}
-            disabled={!edit}
+            disabled={!edit || fixFlag}
           >
             <Delete fontSize="small" />
           </IconButton>
@@ -304,7 +309,7 @@ const EqTableRow = React.memo(
             memo={row.mem ? row.mem : ''}
             handleMemoChange={handleMemoChange}
             rowIndex={rowIndex}
-            disabled={!edit}
+            disabled={!edit || fixFlag}
           />
         </TableCell>
         <TableCell style={styles.row} align="left" size="small">
@@ -356,7 +361,7 @@ const EqTableRow = React.memo(
               handleOrderKeyDown(e, rowIndex);
             }}
             onFocus={(e) => e.target.select()}
-            disabled={!edit}
+            disabled={!edit || fixFlag}
           />
         </TableCell>
         <TableCell style={styles.row} align="right" size="small">
@@ -399,7 +404,7 @@ const EqTableRow = React.memo(
               handleYobiKeyDown(e, rowIndex);
             }}
             onFocus={(e) => e.target.select()}
-            disabled={!edit}
+            disabled={!edit || fixFlag}
           />
         </TableCell>
         <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
@@ -411,14 +416,16 @@ const EqTableRow = React.memo(
             memo={row.mem2 ?? ''}
             handleMemoChange={handleMemo2Change}
             rowIndex={rowIndex}
-            disabled={!edit}
+            disabled={!edit || fixFlag}
           />
         </TableCell>
       </TableRow>
     );
   },
   (prevProps, nextProps) => {
-    return prevProps.row === nextProps.row && prevProps.edit === nextProps.edit;
+    return (
+      prevProps.row === nextProps.row && prevProps.edit === nextProps.edit && prevProps.fixFlag === nextProps.fixFlag
+    );
   }
 );
 
@@ -427,11 +434,18 @@ EqTableRow.displayName = 'EqTableRow';
 type IdoEqTableProps = {
   rows: IdoJuchuKizaiMeisaiValues[];
   edit: boolean;
+  fixFlag: boolean;
   handleCellDateChange: (kizaiId: number, date: Dayjs | null) => void;
   handleCellDateClear: (kizaiId: number) => void;
 };
 
-export const IdoEqTable: React.FC<IdoEqTableProps> = ({ rows, edit, handleCellDateChange, handleCellDateClear }) => {
+export const IdoEqTable: React.FC<IdoEqTableProps> = ({
+  rows,
+  edit,
+  fixFlag,
+  handleCellDateChange,
+  handleCellDateClear,
+}) => {
   const visibleRows = rows.filter((row) => !row.delFlag);
 
   return (
@@ -490,7 +504,7 @@ export const IdoEqTable: React.FC<IdoEqTableProps> = ({ rows, edit, handleCellDa
                     date={row.sagyoDenDat}
                     onChange={(date) => handleCellDateChange(row.kizaiId, date)}
                     onClear={() => handleCellDateClear(row.kizaiId)}
-                    disabled={!edit}
+                    disabled={!edit || fixFlag}
                   />
                   {row.sagyoSijiId && <Typography>{row.sagyoSijiId === 1 ? 'K→Y' : 'Y→K'}</Typography>}
                 </Box>

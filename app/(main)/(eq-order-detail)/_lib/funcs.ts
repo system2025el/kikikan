@@ -49,7 +49,12 @@ import {
   deleteAllShukoCtnResult,
   deleteKizaiIdNyushukoCtnResult,
 } from '@/app/_lib/db/tables/t-nyushuko-ctn-result';
-import { deleteAllNyushukoDen, insertNyushukoDen } from '@/app/_lib/db/tables/t-nyushuko-den';
+import {
+  deleteAllKicsOrYardNyukoDen,
+  deleteAllKicsOrYardShukoDen,
+  deleteAllNyushukoDen,
+  insertNyushukoDen,
+} from '@/app/_lib/db/tables/t-nyushuko-den';
 import { selectNyushukoFixFlag } from '@/app/_lib/db/tables/t-nyushuko-fix';
 import {
   deleteAllNyukoResult,
@@ -682,6 +687,46 @@ export const addDummyNyushukoDen = async (
 export const delAllNyushukoDen = async (juchuHeadId: number, juchuKizaiHeadId: number, connection: PoolClient) => {
   try {
     await deleteAllNyushukoDen(juchuHeadId, juchuKizaiHeadId, connection);
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
+ * KICS/YARD出庫伝票全削除
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param sagyoId 作業id
+ * @param connection
+ */
+export const delAllKicsOrYardShukoDen = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  sagyoId: number,
+  connection: PoolClient
+) => {
+  try {
+    await deleteAllKicsOrYardShukoDen(juchuHeadId, juchuKizaiHeadId, sagyoId, connection);
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
+ * KICS/YARD入庫伝票全削除
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param sagyoId 作業id
+ * @param connection
+ */
+export const delAllKicsOrYardNyukoDen = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  sagyoId: number,
+  connection: PoolClient
+) => {
+  try {
+    await deleteAllKicsOrYardNyukoDen(juchuHeadId, juchuKizaiHeadId, sagyoId, connection);
   } catch (e) {
     throw e;
   }

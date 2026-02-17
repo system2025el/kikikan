@@ -332,6 +332,38 @@ export const deleteAllShukoDen = async (juchuHeadId: number, juchuKizaiHeadId: n
 };
 
 /**
+ * KICS/YARD出庫伝票全削除
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param sagyoId 出庫区分ID
+ * @param connection
+ */
+export const deleteAllKicsOrYardShukoDen = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  sagyoId: number,
+  connection: PoolClient
+) => {
+  const query = `
+    DELETE FROM
+      ${SCHEMA}.t_nyushuko_den
+    WHERE
+      juchu_head_id = $1
+      AND juchu_kizai_head_id = $2
+      AND sagyo_id = $3
+      AND sagyo_kbn_id = ANY($4)
+  `;
+
+  const values = [juchuHeadId, juchuKizaiHeadId, sagyoId, [10, 20]];
+
+  try {
+    await connection.query(query, values);
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
  * 入庫伝票全削除
  * @param juchuHeadId 受注ヘッダーid
  * @param juchuKizaiHeadId 受注機材ヘッダーid
@@ -348,6 +380,38 @@ export const deleteAllNyukoDen = async (juchuHeadId: number, juchuKizaiHeadId: n
   `;
 
   const values = [juchuHeadId, juchuKizaiHeadId, 30];
+
+  try {
+    await connection.query(query, values);
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
+ * KICS/YARD入庫伝票全削除
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @param sagyoId 出庫区分ID
+ * @param connection
+ */
+export const deleteAllKicsOrYardNyukoDen = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  sagyoId: number,
+  connection: PoolClient
+) => {
+  const query = `
+    DELETE FROM
+      ${SCHEMA}.t_nyushuko_den
+    WHERE
+      juchu_head_id = $1
+      AND juchu_kizai_head_id = $2
+      AND sagyo_id = $3
+      AND sagyo_kbn_id = $4
+  `;
+
+  const values = [juchuHeadId, juchuKizaiHeadId, sagyoId, 30];
 
   try {
     await connection.query(query, values);

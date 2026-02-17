@@ -726,6 +726,7 @@ const EquipmentOrderDetail = (props: {
    * @returns
    */
   const onSubmit = async (data: JuchuKizaiHeadValues) => {
+    console.log('保存データ', data);
     if (!user || isProcessing) return;
     setIsProcessing(true);
     setIsLoading(true);
@@ -831,8 +832,12 @@ const EquipmentOrderDetail = (props: {
 
       // 更新判定
       const checkJuchuKizaiHead = isDirty;
-      const checkKicsDat = dirtyFields.kicsShukoDat || dirtyFields.kicsNyukoDat ? true : false;
-      const checkYardDat = dirtyFields.yardShukoDat || dirtyFields.yardNyukoDat ? true : false;
+      // const checkKicsDat = dirtyFields.kicsShukoDat || dirtyFields.kicsNyukoDat ? true : false;
+      // const checkYardDat = dirtyFields.yardShukoDat || dirtyFields.yardNyukoDat ? true : false;
+      const checkKicsShukoDat = dirtyFields.kicsShukoDat ? true : false;
+      const checkKicsNyukoDat = dirtyFields.kicsNyukoDat ? true : false;
+      const checkYardShukoDat = dirtyFields.yardShukoDat ? true : false;
+      const checkYardNyukoDat = dirtyFields.yardNyukoDat ? true : false;
       const checkJuchuHonbanbi = JSON.stringify(originJuchuHonbanbiList) !== JSON.stringify(juchuHonbanbiList);
       const checkJuchuKizaiMeisai =
         JSON.stringify(originJuchuKizaiMeisaiList) !==
@@ -846,8 +851,12 @@ const EquipmentOrderDetail = (props: {
 
       const updateResult = await saveJuchuKizai(
         checkJuchuKizaiHead,
-        checkKicsDat,
-        checkYardDat,
+        // checkKicsDat,
+        // checkYardDat,
+        checkKicsShukoDat,
+        checkKicsNyukoDat,
+        checkYardShukoDat,
+        checkYardNyukoDat,
         checkJuchuHonbanbi,
         checkJuchuKizaiMeisai,
         checkIdoJuchuKizaiMeisai,
@@ -2505,9 +2514,9 @@ const EquipmentOrderDetail = (props: {
                     </Box>
                   )}
                   <Grid2 container display={saveKizaiHead ? 'flex' : 'none'} alignItems={'center'} spacing={1}>
-                    {!edit || fixFlag ? <Typography>閲覧モード</Typography> : <Typography>編集モード</Typography>}
+                    {!edit ? <Typography>閲覧モード</Typography> : <Typography>編集モード</Typography>}
                     <Button
-                      disabled={!!lockData || fixFlag || user?.permission.juchu === permission.juchu_ref}
+                      disabled={!!lockData || user?.permission.juchu === permission.juchu_ref}
                       onClick={handleEdit}
                     >
                       変更
@@ -2660,7 +2669,14 @@ const EquipmentOrderDetail = (props: {
                   <Divider />
                   <Grid2 container alignItems="baseline" spacing={1} py={1} px={2}>
                     <Typography>受注明細名</Typography>
-                    <TextFieldElement name="headNam" control={control} disabled={!edit}></TextFieldElement>
+                    <TextFieldElement
+                      name="headNam"
+                      control={control}
+                      disabled={!edit}
+                      slotProps={{
+                        input: { readOnly: fixFlag },
+                      }}
+                    ></TextFieldElement>
                   </Grid2>
                   <Grid2 container alignItems="baseline" spacing={2} py={1} px={2}>
                     <Grid2 container direction={'column'} spacing={1}>
@@ -2729,7 +2745,7 @@ const EquipmentOrderDetail = (props: {
                                 },
                               }}
                               helperText={fieldState.error?.message}
-                              disabled={!edit}
+                              disabled={!edit || fixFlag}
                             />
                           )}
                         />
@@ -2822,7 +2838,7 @@ const EquipmentOrderDetail = (props: {
                                   },
                                 }}
                                 helperText={fieldState.error?.message}
-                                disabled={!edit}
+                                disabled={!edit || fixFlag}
                               />
                             )}
                           />
@@ -2864,7 +2880,7 @@ const EquipmentOrderDetail = (props: {
                                 onChange={handleKicsShukoChange}
                                 onAccept={handleKicsShukoAccept}
                                 fieldstate={fieldState}
-                                disabled={!edit}
+                                disabled={!edit || fixFlag}
                                 onClear={handleKicsClear}
                               />
                               <Button
@@ -2873,7 +2889,7 @@ const EquipmentOrderDetail = (props: {
                                     `/vehicle-order-detail/${juchuHeadData.juchuHeadId}/0/edit?kbn=1&date=${field.value?.toISOString()}&basho=1`
                                   )
                                 }
-                                disabled={!field.value ? true : false || !edit}
+                                disabled={!field.value ? true : false || !edit || fixFlag}
                               >
                                 車両
                               </Button>
@@ -2898,7 +2914,7 @@ const EquipmentOrderDetail = (props: {
                                 onChange={handleYardShukoChange}
                                 onAccept={handleYardShukoAccept}
                                 fieldstate={fieldState}
-                                disabled={!edit}
+                                disabled={!edit || fixFlag}
                                 onClear={handleYardClear}
                               />
                               <Button
@@ -2907,7 +2923,7 @@ const EquipmentOrderDetail = (props: {
                                     `/vehicle-order-detail/${juchuHeadData.juchuHeadId}/0/edit?kbn=1&date=${field.value?.toISOString()}&basho=2`
                                   )
                                 }
-                                disabled={!field.value ? true : false || !edit}
+                                disabled={!field.value ? true : false || !edit || fixFlag}
                               >
                                 車両
                               </Button>
@@ -2947,7 +2963,7 @@ const EquipmentOrderDetail = (props: {
                                     `/vehicle-order-detail/${juchuHeadData.juchuHeadId}/0/edit?kbn=2&date=${field.value?.toISOString()}&basho=1`
                                   )
                                 }
-                                disabled={!field.value ? true : false || !edit}
+                                disabled={!field.value ? true : false || !edit || fixFlag}
                               >
                                 車両
                               </Button>
@@ -2984,7 +3000,7 @@ const EquipmentOrderDetail = (props: {
                                     `/vehicle-order-detail/${juchuHeadData.juchuHeadId}/0/edit?kbn=2&date=${field.value?.toISOString()}&basho=2`
                                   )
                                 }
-                                disabled={!field.value ? true : false || !edit}
+                                disabled={!field.value ? true : false || !edit || fixFlag}
                               >
                                 車両
                               </Button>
@@ -3026,7 +3042,7 @@ const EquipmentOrderDetail = (props: {
                       multiline
                       rows={3}
                       fullWidth
-                      disabled={!edit}
+                      disabled={!edit || fixFlag}
                       // sx={{
                       //   '& .MuiInputBase-root': {
                       //     resize: 'both',
@@ -3164,12 +3180,12 @@ const EquipmentOrderDetail = (props: {
                         }}
                       >
                         <Grid2 container my={1} mx={2} spacing={2}>
-                          <Button disabled={!edit} onClick={handleOpenEqDialog}>
+                          <Button disabled={!edit || fixFlag} onClick={handleOpenEqDialog}>
                             <AddIcon fontSize="small" />
                             機材追加
                           </Button>
                           <Button
-                            disabled={!edit}
+                            disabled={!edit || fixFlag}
                             onClick={handleOpenSortDialog}
                             sx={{
                               display:
@@ -3205,6 +3221,7 @@ const EquipmentOrderDetail = (props: {
                           <EqTable
                             rows={juchuKizaiMeisaiList}
                             edit={edit}
+                            fixFlag={fixFlag}
                             handleCellChange={handleCellChange}
                             handleMeisaiDelete={handleEqMeisaiDelete}
                             handleMemoChange={handleMemoChange}
@@ -3256,6 +3273,7 @@ const EquipmentOrderDetail = (props: {
                       <IdoEqTable
                         rows={idoJuchuKizaiMeisaiList}
                         edit={edit}
+                        fixFlag={fixFlag}
                         handleCellDateChange={handleCellDateChange}
                         handleCellDateClear={handleCellDateClear}
                       />
