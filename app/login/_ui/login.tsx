@@ -30,21 +30,25 @@ const Login = () => {
   const onSubmit = async (data: UserValues) => {
     console.log(data);
     //const { error } = await login(data);
-    //const { error } = await supabase.auth.signInWithPassword({ email: data.email, password: data.password });
-    if (error) {
-      setError(`メールアドレスかパスワードがちがいます。${error}`);
-    } else {
-      const user = await getChosenUser(data.email);
-      const storeUser = {
-        id: FAKE_NEW_ID,
-        name: user.tantouNam,
-        email: user.mailAdr,
-        permission: user.permission,
-      };
-      setUser(storeUser);
-      router.refresh();
-      router.push('/dashboard');
-    } // ログイン後のページへリダイレクト
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email: data.email, password: data.password });
+      if (error) {
+        setError(`メールアドレスかパスワードがちがいます。${error}`);
+      } else {
+        const user = await getChosenUser(data.email);
+        const storeUser = {
+          id: FAKE_NEW_ID,
+          name: user.tantouNam,
+          email: user.mailAdr,
+          permission: user.permission,
+        };
+        setUser(storeUser);
+        router.refresh();
+        router.push('/dashboard');
+      } // ログイン後のページへリダイレクト
+    } catch (e) {
+      setError(`ログインに失敗しました。${e}`);
+    }
 
     // if (true) {
     //   // OKの場合。
@@ -81,8 +85,8 @@ const Login = () => {
     //   setSession(access_token, refresh_token);
     // }
     const initializeAuth = async () => {
-      //await handleLogout();
-      //await supabase.auth.signOut();
+      // await handleLogout();
+      await supabase.auth.signOut();
       clearUser();
     };
     initializeAuth();
@@ -98,17 +102,17 @@ const Login = () => {
 
         <Box width={'30%'}>
           <Typography>ログインID（メールアドレス）</Typography>
-          {/* <TextFieldElement name="email" control={control} type="email" required fullWidth /> */}
-          <TextField type="email" fullWidth />
+          <TextFieldElement name="email" control={control} type="email" required fullWidth />
+          {/* <TextField type="email" fullWidth /> */}
         </Box>
         <Box width={'30%'}>
           <Typography>パスワード</Typography>
-          {/* <TextFieldElement name="password" control={control} type="password" required fullWidth /> */}
-          <TextField type="password" fullWidth />
+          <TextFieldElement name="password" control={control} type="password" required fullWidth />
+          {/* <TextField type="password" fullWidth /> */}
         </Box>
         <Box display="flex" width={'30%'} justifyContent="flex-end">
-          {/* <Button type="submit">次へ</Button> */}
-          <Button onClick={handleMockClick}>次へ</Button>
+          <Button type="submit">次へ</Button>
+          {/* <Button onClick={handleMockClick}>次へ</Button> */}
         </Box>
       </Stack>
     </form>

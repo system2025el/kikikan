@@ -53,9 +53,9 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     if (!isHydrated) return;
 
     // (main) の layout で使うなら、本来 user がいない時点でアウト
-    // if (!user) {
-    //   router.replace('/login');
-    // }
+    if (!user) {
+      router.replace('/login');
+    }
 
     const checkAuth = async () => {
       if (!user) {
@@ -64,16 +64,16 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      //const session = await sessionCheck();
+      // const session = await sessionCheck();
 
-      // const {
-      //   data: { user: sessionUser },
-      // } = await supabase.auth.getUser();
-      // console.log('セッション情報 : ', sessionUser);
-      // if (!sessionUser) {
-      //   console.log('セッション情報なし');
-      //   router.replace('/login');
-      // }
+      const {
+        data: { user: sessionUser },
+      } = await supabase.auth.getUser();
+      console.log('セッション情報 : ', sessionUser);
+      if (!sessionUser) {
+        console.log('セッション情報なし');
+        router.replace('/login');
+      }
     };
     checkAuth();
   }, [user, isHydrated, router]);

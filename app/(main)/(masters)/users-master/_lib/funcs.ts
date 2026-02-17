@@ -3,8 +3,8 @@
 import { revalidatePath } from 'next/cache';
 
 import pool from '@/app/_lib/db/postgres';
-import { supabase /*supabaseAdmin*/, supabaseAdmin } from '@/app/_lib/db/supabase';
-//import { supabaseAdmin } from '@/app/_lib/db/supabase-admin';
+import { supabase /*supabaseAdmin*/ } from '@/app/_lib/db/supabase';
+import { supabaseAdmin } from '@/app/_lib/db/supabase-admin';
 import {
   insertNewUser,
   SelectFilteredUsers,
