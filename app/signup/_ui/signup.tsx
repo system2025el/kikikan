@@ -32,48 +32,48 @@ export const Signup = () => {
       return;
     }
 
-    // const {
-    //   data: { user },
-    //   error: userError,
-    // } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
 
-    // if (userError || !user) {
-    //   setError('セッションが切断されました。再度メールから開き直してください。');
-    //   return;
-    // }
+    if (userError || !user) {
+      setError('セッションが切断されました。再度メールから開き直してください。');
+      return;
+    }
 
-    // if (user?.email === data.email) {
-    //   const { error: updateError } = await supabase.auth.updateUser({ password: data.password });
+    if (user?.email === data.email) {
+      const { error: updateError } = await supabase.auth.updateUser({ password: data.password });
 
-    //   if (updateError) {
-    //     setError(`更新に失敗しました: ${updateError.message}`);
-    //   } else {
-    //     await supabase.auth.signOut();
-    //     router.push('/login');
-    //   }
-    // } else {
-    //   setError('入力されたメールアドレスが登録情報と一致しません。');
-    // }
+      if (updateError) {
+        setError(`登録に失敗しました: ${updateError.message}`);
+      } else {
+        await supabase.auth.signOut();
+        router.push('/login');
+      }
+    } else {
+      setError('入力されたメールアドレスが登録情報と一致しません。');
+    }
   };
 
   useEffect(() => {
     const handleCallback = async () => {
-      // const { searchParams } = new URL(window.location.href);
-      // const code = searchParams.get('code');
-      // if (code) {
-      //   const { error } = await supabase.auth.exchangeCodeForSession(code);
-      //   if (error) {
-      //     setError('認証コードが無効または期限切れです。');
-      //   }
-      // } else {
-      //   const {
-      //     data: { session },
-      //   } = await supabase.auth.getSession();
-      //   if (!session) {
-      //     setError('認証セッションが見つかりません。メールのリンクからアクセスしてください。');
-      //   }
-      // }
-      // setIsProcessing(false);
+      const { searchParams } = new URL(window.location.href);
+      const code = searchParams.get('code');
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
+        if (error) {
+          setError('認証コードが無効または期限切れです。');
+        }
+      } else {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        if (!session) {
+          setError('認証セッションが見つかりません。メールのリンクからアクセスしてください。');
+        }
+      }
+      setIsProcessing(false);
     };
 
     handleCallback();
@@ -101,7 +101,7 @@ export const Signup = () => {
           <TextFieldElement name="checkPassword" control={control} type="password" required fullWidth />
         </Box>
         <Box display="flex" width={'30%'} justifyContent="flex-end">
-          <Button type="submit">次へ</Button>
+          <Button type="submit">登録</Button>
         </Box>
       </Stack>
     </form>
