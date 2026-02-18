@@ -519,6 +519,49 @@ export const deleteNyukoDen = async (
 };
 
 /**
+ * 入庫伝票削除(KICS/YARD)
+ * @param data 入庫伝票削除データ
+ * @param connection
+ */
+export const deleteKicsOrYardNyukoDen = async (
+  data: {
+    juchu_head_id: number;
+    juchu_kizai_head_id: number;
+    juchu_kizai_meisai_id: number;
+    kizai_id: number;
+    sagyo_id: number;
+  },
+  connection: PoolClient
+) => {
+  const query = `
+    DELETE FROM
+      ${SCHEMA}.t_nyushuko_den
+    WHERE
+      juchu_head_id = $1
+      AND juchu_kizai_head_id = $2
+      AND juchu_kizai_meisai_id = $3
+      AND sagyo_kbn_id = $4
+      AND kizai_id = $5
+      AND sagyo_id = $6
+  `;
+
+  const values = [
+    data.juchu_head_id,
+    data.juchu_kizai_head_id,
+    data.juchu_kizai_meisai_id,
+    30,
+    data.kizai_id,
+    data.sagyo_id,
+  ];
+
+  try {
+    await connection.query(query, values);
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
  * コンテナ入出庫伝票確認
  * @param data コンテナ入出庫伝票確認データ
  * @returns

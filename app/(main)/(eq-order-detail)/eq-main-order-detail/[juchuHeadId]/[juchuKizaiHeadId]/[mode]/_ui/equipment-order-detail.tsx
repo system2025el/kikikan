@@ -789,35 +789,20 @@ const EquipmentOrderDetail = (props: {
 
       // 更新
     } else {
-      const kicsMeisai = juchuKizaiMeisaiList.filter((d) => d.shozokuId === 1 && !d.delFlag);
-      const yardMeisai = juchuKizaiMeisaiList.filter((d) => d.shozokuId === 2 && !d.delFlag);
+      // const kicsMeisai = juchuKizaiMeisaiList.filter((d) => d.shozokuId === 1 && !d.delFlag);
+      // const yardMeisai = juchuKizaiMeisaiList.filter((d) => d.shozokuId === 2 && !d.delFlag);
       const kicsContainer = juchuContainerMeisaiList.filter((d) => d.planKicsKizaiQty > 0 && !d.delFlag);
       const yardContainer = juchuContainerMeisaiList.filter((d) => d.planYardKizaiQty > 0 && !d.delFlag);
 
-      if (
-        ((kicsMeisai.length > 0 || kicsContainer.length > 0) && (!data.kicsShukoDat || !data.kicsNyukoDat)) ||
-        ((yardMeisai.length > 0 || yardContainer.length > 0) && (!data.yardShukoDat || !data.yardNyukoDat))
-      ) {
-        if ((kicsMeisai.length > 0 || kicsContainer.length > 0) && !data.kicsShukoDat) {
+      if ((kicsContainer.length > 0 && !data.kicsShukoDat) || (yardContainer.length > 0 && !data.yardShukoDat)) {
+        if (kicsContainer.length > 0 && !data.kicsShukoDat) {
           setError('kicsShukoDat', {
             type: 'manual',
             message: '',
           });
         }
-        if ((kicsMeisai.length > 0 || kicsContainer.length > 0) && !data.kicsNyukoDat) {
-          setError('kicsNyukoDat', {
-            type: 'manual',
-            message: '',
-          });
-        }
-        if ((yardMeisai.length > 0 || yardContainer.length > 0) && !data.yardShukoDat) {
+        if (yardContainer.length > 0 && !data.yardShukoDat) {
           setError('yardShukoDat', {
-            type: 'manual',
-            message: '',
-          });
-        }
-        if ((yardMeisai.length > 0 || yardContainer.length > 0) && !data.yardNyukoDat) {
-          setError('yardNyukoDat', {
             type: 'manual',
             message: '',
           });
@@ -830,10 +815,44 @@ const EquipmentOrderDetail = (props: {
         return;
       }
 
+      // if (
+      //   ((kicsMeisai.length > 0 || kicsContainer.length > 0) && (!data.kicsShukoDat || !data.kicsNyukoDat)) ||
+      //   ((yardMeisai.length > 0 || yardContainer.length > 0) && (!data.yardShukoDat || !data.yardNyukoDat))
+      // ) {
+      //   if ((kicsMeisai.length > 0 || kicsContainer.length > 0) && !data.kicsShukoDat) {
+      //     setError('kicsShukoDat', {
+      //       type: 'manual',
+      //       message: '',
+      //     });
+      //   }
+      //   if ((kicsMeisai.length > 0 || kicsContainer.length > 0) && !data.kicsNyukoDat) {
+      //     setError('kicsNyukoDat', {
+      //       type: 'manual',
+      //       message: '',
+      //     });
+      //   }
+      //   if ((yardMeisai.length > 0 || yardContainer.length > 0) && !data.yardShukoDat) {
+      //     setError('yardShukoDat', {
+      //       type: 'manual',
+      //       message: '',
+      //     });
+      //   }
+      //   if ((yardMeisai.length > 0 || yardContainer.length > 0) && !data.yardNyukoDat) {
+      //     setError('yardNyukoDat', {
+      //       type: 'manual',
+      //       message: '',
+      //     });
+      //   }
+      //   setAlertTitle('入出庫日時が入力されていません');
+      //   setAlertMessage('入出庫日時を入力してください');
+      //   setAlertOpen(true);
+      //   setIsLoading(false);
+      //   setIsProcessing(false);
+      //   return;
+      // }
+
       // 更新判定
       const checkJuchuKizaiHead = isDirty;
-      // const checkKicsDat = dirtyFields.kicsShukoDat || dirtyFields.kicsNyukoDat ? true : false;
-      // const checkYardDat = dirtyFields.yardShukoDat || dirtyFields.yardNyukoDat ? true : false;
       const checkKicsShukoDat = dirtyFields.kicsShukoDat ? true : false;
       const checkKicsNyukoDat = dirtyFields.kicsNyukoDat ? true : false;
       const checkYardShukoDat = dirtyFields.yardShukoDat ? true : false;
@@ -851,8 +870,6 @@ const EquipmentOrderDetail = (props: {
 
       const updateResult = await saveJuchuKizai(
         checkJuchuKizaiHead,
-        // checkKicsDat,
-        // checkYardDat,
         checkKicsShukoDat,
         checkKicsNyukoDat,
         checkYardShukoDat,
@@ -861,8 +878,6 @@ const EquipmentOrderDetail = (props: {
         checkJuchuKizaiMeisai,
         checkIdoJuchuKizaiMeisai,
         checkJuchuContainerMeisai,
-        defaultValues?.kicsShukoDat,
-        defaultValues?.yardShukoDat,
         data,
         updateShukoDate,
         updateNyukoDate,
@@ -2255,9 +2270,11 @@ const EquipmentOrderDetail = (props: {
 
     // 機材id
     const ids = [...new Set(selectEq.map((d) => d.kizaiId))];
+    // 移動対象機材
+    const idoData = idoJuchuKizaiMeisaiList.filter((d) => ids.includes(d.kizaiId) && !d.delFlag && d.sagyoDenDat);
     // 選択された機材に対する移動データ
-    const selectIdoList = idoJuchuKizaiMeisaiList
-      .filter((d) => ids.includes(d.kizaiId) && !d.delFlag && d.sagyoDenDat)
+    const selectIdoList = idoData
+      .filter((d) => ids.includes(d.kizaiId))
       .map((d) => ({ ...d, planKizaiQty: 0, planYobiQty: 0, planQty: 0 }));
     console.log('selectIdoList', selectIdoList);
 
@@ -2314,7 +2331,7 @@ const EquipmentOrderDetail = (props: {
         : data
     );
 
-    const updateIdoJuchuKizaiMeisaiList = idoJuchuKizaiMeisaiList.map((data) =>
+    const updateIdoJuchuKizaiMeisaiList = idoData.map((data) =>
       ids.includes(data.kizaiId)
         ? {
             ...data,
