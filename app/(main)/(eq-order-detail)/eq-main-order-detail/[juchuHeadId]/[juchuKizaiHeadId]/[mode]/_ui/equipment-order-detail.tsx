@@ -2855,7 +2855,10 @@ const EquipmentOrderDetail = (props: {
                                   },
                                 }}
                                 helperText={fieldState.error?.message}
-                                disabled={!edit || fixFlag}
+                                disabled={!edit}
+                                slotProps={{
+                                  input: { readOnly: fixFlag },
+                                }}
                               />
                             )}
                           />
@@ -3059,7 +3062,10 @@ const EquipmentOrderDetail = (props: {
                       multiline
                       rows={3}
                       fullWidth
-                      disabled={!edit || fixFlag}
+                      disabled={!edit}
+                      slotProps={{
+                        input: { readOnly: fixFlag },
+                      }}
                       // sx={{
                       //   '& .MuiInputBase-root': {
                       //     resize: 'both',

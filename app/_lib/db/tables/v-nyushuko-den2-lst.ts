@@ -29,6 +29,33 @@ export const selectNyushukoDetail = async (
   }
 };
 
+export const selectCtnNyushukoDetail = async (
+  juchuHeadId: number,
+  juchuKizaiHeadId: number,
+  juchuKizaiHeadKbn: number,
+  nyushukoBashoId: number,
+  nyushukoDat: string,
+  sagyoKbnId: number
+) => {
+  try {
+    return await supabase
+      .schema(SCHEMA)
+      .from('v_nyushuko_den2_lst')
+      .select('juchu_kizai_head_id, kizai_id, plan_qty')
+      .eq('juchu_head_id', juchuHeadId)
+      .eq('juchu_kizai_head_id', juchuKizaiHeadId)
+      .eq('juchu_kizai_head_kbnv', juchuKizaiHeadKbn.toString())
+      .eq('nyushuko_basho_id', nyushukoBashoId)
+      .eq('nyushuko_dat', nyushukoDat)
+      .eq('sagyo_kbn_id', sagyoKbnId)
+      .eq('ctn_flg', 1)
+      .order('juchu_kizai_head_id')
+      .order('dsp_ord_num_meisai');
+  } catch (e) {
+    throw e;
+  }
+};
+
 export const selectNyushukoDetailOne = async (
   juchuHeadId: number,
   juchuKizaiHeadId: number,

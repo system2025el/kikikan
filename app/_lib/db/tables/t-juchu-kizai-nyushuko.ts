@@ -33,18 +33,31 @@ export const selectJuchuKizaiNyushukoConfirm = async (data: {
   juchu_head_id: number;
   juchu_kizai_head_id: number;
   nyushuko_shubetu_id: number;
-  nyushuko_basho_id: number;
+  nyushuko_basho_id?: number;
 }) => {
+  const builder = supabase
+    .schema(SCHEMA)
+    .from('t_juchu_kizai_nyushuko')
+    .select('*')
+    .eq('juchu_head_id', data.juchu_head_id)
+    .eq('juchu_kizai_head_id', data.juchu_kizai_head_id)
+    .eq('nyushuko_shubetu_id', data.nyushuko_shubetu_id);
+
+  if (data.nyushuko_basho_id) {
+    builder.eq('nyushuko_basho_id', data.nyushuko_basho_id);
+    builder.single();
+  }
   try {
-    return await supabase
-      .schema(SCHEMA)
-      .from('t_juchu_kizai_nyushuko')
-      .select('*')
-      .eq('juchu_head_id', data.juchu_head_id)
-      .eq('juchu_kizai_head_id', data.juchu_kizai_head_id)
-      .eq('nyushuko_shubetu_id', data.nyushuko_shubetu_id)
-      .eq('nyushuko_basho_id', data.nyushuko_basho_id)
-      .single();
+    return await builder;
+    // return await supabase
+    //   .schema(SCHEMA)
+    //   .from('t_juchu_kizai_nyushuko')
+    //   .select('*')
+    //   .eq('juchu_head_id', data.juchu_head_id)
+    //   .eq('juchu_kizai_head_id', data.juchu_kizai_head_id)
+    //   .eq('nyushuko_shubetu_id', data.nyushuko_shubetu_id)
+    //   .eq('nyushuko_basho_id', data.nyushuko_basho_id)
+    //   .single();
   } catch (e) {
     throw e;
   }
