@@ -103,7 +103,7 @@ export const SecondDialogPage = ({
       const data = await getJuchuIsshikiMeisai(juchuId, kizaiHeadId);
       field.append({
         mituMeisaiHeadNam: headNam,
-        headNamDspFlg: false,
+        headNamDspFlg: true,
         mituMeisaiKbn: 0,
         nebikiNam: '値引き',
         nebikiAmt: nebikiAmt,
@@ -117,7 +117,7 @@ export const SecondDialogPage = ({
       // 取得した内容をテーブル内の明細に入れる
       field.append({
         mituMeisaiHeadNam: headNam,
-        headNamDspFlg: false,
+        headNamDspFlg: true,
         mituMeisaiKbn: 0,
         nebikiNam: '値引き',
         nebikiAmt: nebikiAmt,

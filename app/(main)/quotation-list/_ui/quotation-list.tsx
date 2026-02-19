@@ -36,6 +36,8 @@ export const QuotationList = () => {
   const [page, setPage] = useState<number>(1);
   /* ローディングかどうか */
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  // エラーハンドリング
+  const [isError, setIsError] = useState<Error | null>(null);
   /* テーブル初期表示 */
   const [isFirst, setIsFirst] = useState<boolean>(true);
   /* 選択肢 */
@@ -67,10 +69,14 @@ export const QuotationList = () => {
     sessionStorage.setItem('quotListSearchParams', JSON.stringify(data));
     setIsFirst(false);
     setPage(1);
-    const q = await getFilteredQuotList(data);
-    if (q) {
-      setQuotList(q);
-      setIsLoading(false);
+    try {
+      const q = await getFilteredQuotList(data);
+      if (q) {
+        setQuotList(q);
+        setIsLoading(false);
+      }
+    } catch (e) {
+      setIsError(e instanceof Error ? e : new Error(String(e)));
     }
     setIsLoading(false);
   };
@@ -87,22 +93,30 @@ export const QuotationList = () => {
       // 初期表示ではない
       setIsFirst(false);
 
-      // 検索
-      const q = await getFilteredQuotList(searchParams);
-      if (q) {
-        setQuotList(q);
+      try {
+        // 検索
+        const q = await getFilteredQuotList(searchParams);
+        if (q) {
+          setQuotList(q);
+        }
+      } catch (e) {
+        setIsError(e instanceof Error ? e : new Error(String(e)));
       }
       setIsLoading(false);
     };
 
     const getOptions = async () => {
-      // 選択肢取得
-      const [sts, custs, nyuryokuUser] = await Promise.all([
-        getMituStsSelection(),
-        getCustomerSelection(),
-        getUsersSelection(),
-      ]);
-      setOptions({ sts: sts, custs: custs, nyuryokuUser: nyuryokuUser });
+      try {
+        // 選択肢取得
+        const [sts, custs, nyuryokuUser] = await Promise.all([
+          getMituStsSelection(),
+          getCustomerSelection(),
+          getUsersSelection(),
+        ]);
+        setOptions({ sts: sts, custs: custs, nyuryokuUser: nyuryokuUser });
+      } catch (e) {
+        setIsError(e instanceof Error ? e : new Error(String(e)));
+      }
     };
 
     // 選択肢取得
@@ -115,6 +129,8 @@ export const QuotationList = () => {
     }
     setIsLoading(false);
   }, [reset]);
+
+  if (isError) throw isError;
 
   return (
     <PermissionGuard category={'juchu'} required={permission.juchu_ref}>

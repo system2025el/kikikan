@@ -60,11 +60,15 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
   const user = useUserStore((state) => state.user);
   /** ページのルーター */
   const router = useRouter();
+  /** 全体の編集状態 */
+  const editable = !!((user?.permission.juchu ?? 0) & permission.juchu_upd);
   /* useState ----------------------------------------------------------------- */
   /** ローディング中かどうか */
   const [isLoading, setIsLoading] = useState(true);
   /** 処理中かどうか */
   const [isProcessing, setIsProcessing] = useState(false);
+  // エラーハンドリング
+  const [isError, setIsError] = useState<Error | null>(null);
   /** 受注選択アコーディオン制御 */
   const [juchuExpanded, setJuchuExpanded] = useState(false);
   /** 見積ヘッダアコーディオン制御 */
@@ -85,12 +89,12 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
   /** スナックバーのメッセージ */
   const [snackBarMessage, setSnackBarMessage] = useState('');
   /** 編集内容が未保存ダイアログ制御 */
-  const [dirtyOpen, setDirtyOpen] = useState(false);
+  // const [dirtyOpen, setDirtyOpen] = useState(false);
 
   /** ロックデータ */
-  const [lockData, setLockData] = useState<LockValues | null>(null);
+  //const [lockData, setLockData] = useState<LockValues | null>(null);
   /** 全体の編集状態 */
-  const [editable, setEditable] = useState(isNew ? true : false);
+  //const [editable, setEditable] = useState(isNew ? true : false);
 
   /** 値引きの編集状態 */
   const [nebikiEditing, setNebikiEditing] = useState(false);
@@ -152,65 +156,70 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
   const onSubmit = async (data: QuotHeadValues) => {
     console.log('新規？', isNew, 'isDirty', isDirty);
     setIsLoading(true);
-    if (isNew) {
-      // 登録された見積ヘッダID
-      const id = await addQuot(data, user?.name ?? '');
-      //setIsLoading(true);
-      router.replace(`/quotation-list/edit/${id}`);
-    } else {
-      const result = await updateQuot(data, user?.name ?? '');
-      console.log('更新したのは', result, '番の見積');
+    try {
+      if (isNew) {
+        // 登録された見積ヘッダID
+        const id = await addQuot(data, user?.name ?? '');
+        //setIsLoading(true);
+        router.replace(`/quotation-list/edit/${id}`);
+      } else {
+        const result = await updateQuot(data, user?.name ?? '');
+        console.log('更新したのは', result, '番の見積');
+      }
+      setSnackBarMessage('保存しました');
+      setSnackBarOpen(true);
+      reset(data);
+    } catch (e) {
+      setSnackBarMessage('保存に失敗しました');
+      setSnackBarOpen(true);
     }
-    setSnackBarMessage('保存しました');
-    setSnackBarOpen(true);
-    reset(data);
     setIsLoading(false);
   };
 
   /** 編集モード変更 */
-  const handleEdit = async () => {
-    // 編集→閲覧
-    if (editable) {
-      if (isDirty) {
-        setDirtyOpen(true);
-        return;
-      }
-      await delLock(2, quot.mituHeadId ?? 0);
-      setLockData(null);
-      setEditable(false);
-      // 閲覧→編集
-    } else {
-      if (!user) return;
-      const lockData = await getLock(2, quot.mituHeadId ?? 0);
-      setLockData(lockData);
-      if (lockData === null) {
-        await addLock(2, quot.mituHeadId ?? 0, new Date().toISOString(), user.name, user.email);
-        const newLockData = await getLock(2, quot.mituHeadId ?? 0);
-        setLockData(newLockData);
-        setEditable(true);
-      } else if (lockData !== null && lockData.addUser === user.name) {
-        setEditable(true);
-      }
-    }
-  };
+  // const handleEdit = async () => {
+  //   // 編集→閲覧
+  //   if (editable) {
+  //     if (isDirty) {
+  //       setDirtyOpen(true);
+  //       return;
+  //     }
+  //     await delLock(2, quot.mituHeadId ?? 0);
+  //     setLockData(null);
+  //     setEditable(false);
+  //     // 閲覧→編集
+  //   } else {
+  //     if (!user) return;
+  //     const lockData = await getLock(2, quot.mituHeadId ?? 0);
+  //     setLockData(lockData);
+  //     if (lockData === null) {
+  //       await addLock(2, quot.mituHeadId ?? 0, new Date().toISOString(), user.name, user.email);
+  //       const newLockData = await getLock(2, quot.mituHeadId ?? 0);
+  //       setLockData(newLockData);
+  //       setEditable(true);
+  //     } else if (lockData !== null && lockData.addUser === user.name) {
+  //       setEditable(true);
+  //     }
+  //   }
+  // };
 
   /**
    * 警告ダイアログの押下ボタンによる処理
    * @param result 結果
    */
-  const handleResultDialog = async (result: boolean) => {
-    if (result) {
-      if (!isNew) {
-        await delLock(2, quot.mituHeadId ?? 0);
-        setLockData(null);
-      }
-      setEditable(false);
-      reset();
-      setDirtyOpen(false);
-    } else {
-      setDirtyOpen(false);
-    }
-  };
+  // const handleResultDialog = async (result: boolean) => {
+  //   if (result) {
+  //     if (!isNew) {
+  //       //await delLock(2, quot.mituHeadId ?? 0);
+  //       //setLockData(null);
+  //     }
+  //     //setEditable(false);
+  //     reset();
+  //     setDirtyOpen(false);
+  //   } else {
+  //     setDirtyOpen(false);
+  //   }
+  // };
 
   /* useMemo ---------------------------------------------------------- */
   const kChukei = useMemo(
@@ -234,27 +243,31 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
   /** 初期表示とログインユーザを取得とセット */
   useEffect(() => {
     const getOptions = async () => {
-      // 選択肢取得
-      const [users, mituSts, custs] = await Promise.all([
-        getUsersSelection(),
-        getMituStsSelection(),
-        getCustomerSelection(),
-      ]);
-      setOptions({ users: users, mituSts: mituSts, custs: custs });
+      try {
+        // 選択肢取得
+        const [users, mituSts, custs] = await Promise.all([
+          getUsersSelection(),
+          getMituStsSelection(),
+          getCustomerSelection(),
+        ]);
+        setOptions({ users: users, mituSts: mituSts, custs: custs });
+      } catch (e) {
+        setIsError(e instanceof Error ? e : new Error(String(e)));
+      }
     };
 
     /** ロック確認 */
-    const asyncProcess = async () => {
-      const lockData = await getLock(2, quot.mituHeadId ?? 0);
-      setLockData(lockData);
-      if (lockData === null) {
-        await addLock(2, quot.mituHeadId ?? 0, new Date().toISOString(), user?.name ?? '', user?.email ?? '');
-        const newLockData = await getLock(2, quot.mituHeadId ?? 0);
-        setLockData(newLockData);
-      } else if (lockData !== null && lockData.addUser !== user?.name) {
-        setEditable(false);
-      }
-    };
+    // const asyncProcess = async () => {
+    //   const lockData = await getLock(2, quot.mituHeadId ?? 0);
+    //   setLockData(lockData);
+    //   if (lockData === null) {
+    //     await addLock(2, quot.mituHeadId ?? 0, new Date().toISOString(), user?.name ?? '', user?.email ?? '');
+    //     const newLockData = await getLock(2, quot.mituHeadId ?? 0);
+    //     setLockData(newLockData);
+    //   } else if (lockData !== null && lockData.addUser !== user?.name) {
+    //     setEditable(false);
+    //   }
+    // };
 
     getOptions();
 
@@ -265,7 +278,7 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
       }
     } else {
       // 編集でログインユーザがあるときロックデータを確認する
-      if (user && quot.mituHeadId) asyncProcess();
+      //if (user && quot.mituHeadId) asyncProcess();
     }
     setTimeout(() => {
       setIsLoading(false);
@@ -351,6 +364,8 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
       window.open(url);
     } catch (e) {
       console.error(e);
+      setSnackBarMessage('見積書の印刷に失敗しました');
+      setSnackBarOpen(true);
     } finally {
       setIsProcessing(false);
     }
@@ -360,25 +375,27 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
     setPdfModel(quot);
   }, [quot]); // <- 変更の契機
 
+  if (isError) throw isError;
+
   /* ---------------------------------------------------------------------- */
 
   return (
     <PermissionGuard category={'juchu'} required={isNew ? permission.juchu_upd : permission.juchu_ref}>
       <Container disableGutters sx={{ minWidth: '100%', pb: 10 }} maxWidth={'xl'}>
         <Grid2 container spacing={4} display={'flex'} justifyContent={'end'} mb={1}>
-          {lockData !== null && lockData.addUser !== user?.name && (
+          {/* {lockData !== null && lockData.addUser !== user?.name && (
             <Grid2 container alignItems={'center'} spacing={2}>
               <Typography>{lockData.addDat && toJapanTimeString(new Date(lockData.addDat))}</Typography>
               <Typography>{lockData.addUser}</Typography>
               <Typography>編集中</Typography>
             </Grid2>
-          )}
+          )} */}
           {/* {fixFlag && (
           <Box display={'flex'} alignItems={'center'}>
             <Typography>出庫済</Typography>
           </Box>
         )} */}
-          <Grid2 container alignItems={'center'} spacing={1}>
+          {/* <Grid2 container alignItems={'center'} spacing={1}>
             {!editable || (lockData !== null && lockData?.addUser !== user?.name) ? (
               <Typography>閲覧モード</Typography>
             ) : (
@@ -393,7 +410,7 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
             >
               変更
             </Button>
-          </Grid2>
+          </Grid2> */}
           <Button onClick={() => window.close()}>閉じる</Button>
         </Grid2>
         <FormProvider {...quotForm}>
@@ -820,7 +837,7 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
                         addKizaiTbl={() =>
                           kizaiFields.append({
                             mituMeisaiHeadNam: null,
-                            headNamDspFlg: false,
+                            headNamDspFlg: true,
                             mituMeisaiKbn: 0,
                             nebikiNam: '値引き',
                             nebikiAftNam: '機材費',
@@ -1134,7 +1151,7 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
             </Box>
           </form>
         </FormProvider>
-        <IsDirtyAlertDialog open={dirtyOpen} onClick={handleResultDialog} />
+        {/* <IsDirtyAlertDialog open={dirtyOpen} onClick={handleResultDialog} /> */}
         <Snackbar
           open={snackBarOpen}
           autoHideDuration={6000}

@@ -143,7 +143,13 @@ export const BillingStsListTable = ({
             </TableHead>
             <TableBody>
               {list.map((j, index) => (
-                <BillingStsRow key={index} juchu={j} refetch={refetch} />
+                <BillingStsRow
+                  key={index}
+                  juchu={j}
+                  refetch={refetch}
+                  setSnackBarOpen={() => setSnackBarOpen(true)}
+                  setSnackBarMessage={setSnackBarMessage}
+                />
               ))}
               {emptyRows > 0 && (
                 <TableRow style={{ height: 30 * emptyRows }}>
@@ -180,7 +186,17 @@ export const BillingStsListTable = ({
  * @param param0 受注請求状況の一覧
  * @returns {JSX.Element} 開閉するテーブルの行のコンポーネント
  */
-const BillingStsRow = ({ juchu, refetch }: { juchu: BillingStsTableValues; refetch: () => Promise<void> }) => {
+const BillingStsRow = ({
+  juchu,
+  refetch,
+  setSnackBarOpen,
+  setSnackBarMessage,
+}: {
+  juchu: BillingStsTableValues;
+  refetch: () => Promise<void>;
+  setSnackBarOpen: () => void;
+  setSnackBarMessage: React.Dispatch<React.SetStateAction<string>>;
+}) => {
   /* ログインユーザー */
   const user = useUserStore((state) => state.user);
 
@@ -216,10 +232,15 @@ const BillingStsRow = ({ juchu, refetch }: { juchu: BillingStsTableValues; refet
       kziHeadId: m.kziHeadId,
       newDat: newDat! > m.nyukoDat ? m.nyukoDat : newDat! < m.shukoDat ? m.shukoDat : newDat!,
     };
-    await changeSeikyuDat(changeTo, user?.name ?? '');
-    refetch();
-    setOpen(true);
-    setChangeDatOpen(false);
+    try {
+      await changeSeikyuDat(changeTo, user?.name ?? '');
+      refetch();
+      setOpen(true);
+      setChangeDatOpen(false);
+    } catch (e) {
+      setSnackBarMessage('変更に失敗しました');
+      setSnackBarOpen();
+    }
   };
 
   return (
@@ -355,8 +376,10 @@ const BillingStsRow = ({ juchu, refetch }: { juchu: BillingStsTableValues; refet
                       sx={{
                         borderBottom: index + 1 === juchu.heads.length ? 'none' : undefined,
                         py: 0.5,
+                        cursor: user?.permission.juchu === permission.juchu_ref ? 'default' : 'pointer',
                       }}
                       onClick={() => {
+                        if (user?.permission.juchu === permission.juchu_ref) return;
                         setNewDat(h.seikyuDat ? new Date(h.seikyuDat) : null);
                         setMeisaiToUpd({
                           juchuId: juchu.juchuId,

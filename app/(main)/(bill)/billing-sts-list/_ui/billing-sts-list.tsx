@@ -46,6 +46,8 @@ export const BillingStsList = () => {
   /* useState --------------------------------------------------------------- */
   /* ローディング */
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  /* エラーハンドリング */
+  const [isError, setIsError] = useState<Error | null>(null);
   /* ページ */
   const [page, setPage] = useState<number>(1);
   /* 受注請求状況一覧 */
@@ -88,16 +90,24 @@ export const BillingStsList = () => {
     sessionStorage.setItem('billingStsSearchParams', JSON.stringify(data));
     setIsFirst(false);
     console.log(data);
-    const theSts = await getFilteredBillingSituations(data);
-    setBillSts(theSts);
+    try {
+      const theSts = await getFilteredBillingSituations(data);
+      setBillSts(theSts);
+    } catch (e) {
+      setIsError(e instanceof Error ? e : new Error(String(e)));
+    }
     setIsLoading(false);
   };
 
   /* 再検索関数 */
   const refetch = async () => {
     setIsLoading(true);
-    const theSts = await getFilteredBillingSituations(getValues());
-    setBillSts(theSts);
+    try {
+      const theSts = await getFilteredBillingSituations(getValues());
+      setBillSts(theSts);
+    } catch (e) {
+      setIsError(e instanceof Error ? e : new Error(String(e)));
+    }
     setIsLoading(false);
   };
 
@@ -122,18 +132,26 @@ export const BillingStsList = () => {
       // 初期表示ではない
       setIsFirst(false);
 
-      // 検索
-      const q = await getFilteredBillingSituations(searchParams);
-      if (q) {
-        setBillSts(q);
+      try {
+        // 検索
+        const q = await getFilteredBillingSituations(searchParams);
+        if (q) {
+          setBillSts(q);
+        }
+      } catch (e) {
+        setIsError(e instanceof Error ? e : new Error(String(e)));
       }
       setIsLoading(false);
     };
 
     const getOptions = async () => {
-      // 選択肢取得
-      const [clist] = await Promise.all([getCustomerSelection()]);
-      setCusts(clist);
+      try {
+        // 選択肢取得
+        const [clist] = await Promise.all([getCustomerSelection()]);
+        setCusts(clist);
+      } catch (e) {
+        setIsError(e instanceof Error ? e : new Error(String(e)));
+      }
     };
 
     // 選択肢取得
@@ -147,6 +165,8 @@ export const BillingStsList = () => {
 
     setIsLoading(false);
   }, [reset]);
+
+  if (isError) throw isError;
 
   return (
     <PermissionGuard category={'juchu'} required={permission.juchu_ref}>

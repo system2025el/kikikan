@@ -194,8 +194,8 @@ export const Schedule = () => {
                       border: '1px solid black',
                       px: 1,
                       whiteSpace: 'nowrap',
-                      minWidth: 300,
-                      maxWidth: 300,
+                      minWidth: 160,
+                      maxWidth: 160,
                       height: 20.1,
                       bgcolor: 'white',
                       color:
@@ -256,8 +256,9 @@ export const Schedule = () => {
                         display: '-webkit-box',
                         //WebkitLineClamp: 2,
                         WebkitBoxOrient: 'vertical',
+                        lineHeight: '0.75rem',
                       }}
-                      fontSize={'0.875rem'}
+                      fontSize={'0.5rem'}
                       fontWeight={'normal'}
                     >
                       {date.mem ?? ''}
@@ -299,8 +300,9 @@ export const Schedule = () => {
                         display: '-webkit-box',
                         //WebkitLineClamp: 2,
                         WebkitBoxOrient: 'vertical',
+                        lineHeight: '0.75rem',
                       }}
-                      fontSize={'0.875rem'}
+                      fontSize={'0.5rem'}
                       fontWeight={'normal'}
                     >
                       {date.tantoNam ?? ''}
@@ -339,20 +341,21 @@ export const Schedule = () => {
                           }}
                         >
                           <Box height={20.1} display={'flex'}>
-                            <Box justifyContent={'end'} width={50} sx={styles.boxStyle}>
+                            <Box justifyContent={'end'} width={25} sx={styles.boxStyle} fontSize={'0.5rem'}>
                               {time.nyushukoDat ? toJapanHHmmString(time.nyushukoDat) : ''}
                             </Box>
                             <Divider orientation="vertical" />
                             <Box
-                              width={100}
+                              width={60}
                               sx={styles.boxStyle}
                               bgcolor={time.nyushukoShubetuId === 1 ? weeklyColors.shuko : weeklyColors.nyuko}
+                              fontSize={'0.5rem'}
                             >
                               {time.nyushukoShubetuId === 1 ? '積み' : '降ろし'}
                             </Box>
                             <Divider orientation="vertical" />
                             <Box
-                              width={150}
+                              width={75}
                               sx={styles.boxStyle}
                               bgcolor={
                                 time.nyushukoBashoId === 1
@@ -362,26 +365,27 @@ export const Schedule = () => {
                                     : weeklyColors.yard
                               }
                             >
-                              <LightTooltipWithText variant={'body2'} maxWidth={150}>
+                              <LightTooltipWithText variant={'0.50rem'} maxWidth={75}>
                                 {time.kokyakuNam}
                               </LightTooltipWithText>
                             </Box>
                           </Box>
                           <Divider variant="fullWidth" />
                           <Box height={20.1} display={'flex'}>
-                            <Box justifyContent={'end'} width={50} sx={styles.boxStyle} />
+                            <Box justifyContent={'end'} width={25} sx={styles.boxStyle} />
                             <Divider orientation="vertical" />
                             <Box
-                              width={100}
+                              width={60}
                               sx={styles.boxStyle}
                               bgcolor={time.nyushukoShubetuId === 1 ? weeklyColors.shuko : weeklyColors.nyuko}
+                              fontSize={'0.5rem'}
                             >
                               {time.sharyos[0]?.nam ?? ''}
                               {time.sharyos[0]?.daisu > 1 ? ` ×${time.sharyos[0]?.daisu}` : ''}
                             </Box>
                             <Divider orientation="vertical" />
                             <Box
-                              width={150}
+                              width={75}
                               sx={styles.boxStyle}
                               bgcolor={
                                 time.nyushukoBashoId === 1
@@ -391,26 +395,27 @@ export const Schedule = () => {
                                     : weeklyColors.yard
                               }
                             >
-                              <LightTooltipWithText variant={'body2'} maxWidth={150}>
+                              <LightTooltipWithText variant={'0.50rem'} maxWidth={75}>
                                 {time.koenNam}
                               </LightTooltipWithText>
                             </Box>
                           </Box>
                           <Divider />
                           <Box height={20.1} display={'flex'}>
-                            <Box justifyContent={'end'} width={50} sx={styles.boxStyle} />
+                            <Box justifyContent={'end'} width={25} sx={styles.boxStyle} />
                             <Divider orientation="vertical" />
                             <Box
-                              width={100}
+                              width={60}
                               sx={styles.boxStyle}
                               bgcolor={time.nyushukoShubetuId === 1 ? weeklyColors.shuko : weeklyColors.nyuko}
+                              fontSize={'0.5rem'}
                             >
                               {time.sharyos[1]?.nam ?? ''}
                               {time.sharyos[1]?.daisu > 1 ? ` ×${time.sharyos[1]?.daisu}` : ''}
                             </Box>
                             <Divider orientation="vertical" />
                             <Box
-                              width={150}
+                              width={75}
                               sx={styles.boxStyle}
                               bgcolor={
                                 time.nyushukoBashoId === 1
@@ -420,7 +425,7 @@ export const Schedule = () => {
                                     : weeklyColors.yard
                               }
                             >
-                              <LightTooltipWithText variant={'body2'} maxWidth={150}>
+                              <LightTooltipWithText variant={'0.50rem'} maxWidth={75}>
                                 {time.sharyoHeadNam}
                               </LightTooltipWithText>
                             </Box>

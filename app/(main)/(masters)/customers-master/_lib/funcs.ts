@@ -67,6 +67,7 @@ export const getChosenCustomer = async (id: number) => {
     const CustomerDetails: CustomersMasterDialogValues = {
       kokyakuNam: data.kokyaku_nam,
       kana: data.kana,
+      keisho: data.keisho,
       nebikiRat: data.nebiki_rat,
       delFlg: Boolean(data.del_flg),
       // keisho: data.keisho,

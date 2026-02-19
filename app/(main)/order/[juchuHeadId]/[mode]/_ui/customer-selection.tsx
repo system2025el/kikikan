@@ -10,6 +10,7 @@ import {
   Divider,
   Grid2,
   Paper,
+  Snackbar,
   Stack,
   Table,
   TableBody,
@@ -35,12 +36,16 @@ import { CustomersDialogValues, KokyakuValues } from '../_lib/types';
 export const CustomerSelectionDialog = (props: {
   handleCustSelect: (customer: KokyakuValues) => void;
   handleCloseCustDialog: () => void;
-  lock: () => Promise<boolean | undefined>;
+  lock: () => Promise<boolean | React.JSX.Element | undefined>;
 }) => {
   const { handleCustSelect, handleCloseCustDialog, lock } = props;
   const [custs, setCusts] = useState<CustomersDialogValues[]>();
   const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
+  // スナックバー制御
+  const [snackBarOpen, setSnackBarOpen] = useState(false);
+  // スナックバーメッセージ
+  const [snackBarMessage, setSnackBarMessage] = useState('');
   const rowsPerPage = 50;
 
   // 表示するデータ
@@ -64,21 +69,31 @@ export const CustomerSelectionDialog = (props: {
   /* 検索ボタン押下 */
   const onSubmit = async (data: { query: string | undefined }) => {
     setIsLoading(true);
-    const lockResult = await lock();
+    try {
+      const lockResult = await lock();
 
-    if (lockResult) {
-      const newList = await getFilteredOrderCustomers(data.query!);
-      setCusts(newList);
-      setIsLoading(false);
+      if (lockResult) {
+        const newList = await getFilteredOrderCustomers(data.query!);
+        setCusts(newList);
+      }
+    } catch (e) {
+      setSnackBarMessage('サーバー接続エラー');
+      setSnackBarOpen(true);
     }
+    setIsLoading(false);
   };
 
   useEffect(() => {
     // ダイアログが開いた瞬間に fetch（ここで最新をとる）
     const getCusts = async () => {
       setIsLoading(true);
-      const data = await getFilteredOrderCustomers('');
-      setCusts(data);
+      try {
+        const data = await getFilteredOrderCustomers('');
+        setCusts(data);
+      } catch (e) {
+        setSnackBarMessage('サーバー接続エラー');
+        setSnackBarOpen(true);
+      }
       setIsLoading(false);
     };
 
@@ -171,6 +186,14 @@ export const CustomerSelectionDialog = (props: {
           </TableContainer>
         )}
       </Container>
+      <Snackbar
+        open={snackBarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackBarOpen(false)}
+        message={snackBarMessage}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={{ marginTop: '65px' }}
+      />
     </>
   );
 };

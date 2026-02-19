@@ -4,7 +4,7 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Box, Button, Grid2, Stack, TextField, Typography } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   CheckboxElement,
   Controller,
@@ -53,6 +53,25 @@ export const MeisaiTblHeader = ({
   const nebikiAmt = useWatch({ control, name: `meisaiHeads.${index}.nebikiAmt` });
   const currentNebikiAftAmt = useWatch({ control, name: `meisaiHeads.${index}.nebikiAftAmt` });
 
+  /* ref */
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  /* 一括変更ボタン押下 */
+  const handleBulkChange = () => {
+    const newValue = Number(inputRef.current?.value);
+    if (!inputRef.current?.value || isNaN(newValue) || !meisaiList) return;
+
+    const updatedMeisai = meisaiList.map((item) => ({
+      ...item,
+      honbanbiQty: newValue,
+    }));
+
+    setValue(`meisaiHeads.${index}.meisai`, updatedMeisai, {
+      shouldDirty: true, // フォームが変更されたことを親に通知
+      shouldValidate: true, // バリデーションを走らせる
+    });
+  };
+
   useEffect(() => {
     const sum = (meisaiList ?? []).reduce((acc, item) => acc + (item.shokeiAmt ?? 0), 0);
 
@@ -74,7 +93,27 @@ export const MeisaiTblHeader = ({
           />
         </Grid2>
         <Grid2 size={'grow'} justifyItems={'end'}>
-          <Box>
+          <Box display={'flex'} alignItems={'end'}>
+            <Grid2 container alignItems={'end'} spacing={1} mr={1}>
+              <TextField
+                type="number"
+                sx={{
+                  width: '60px',
+                  '& .MuiInputBase-input': {
+                    textAlign: 'right',
+                  },
+                  '& input[type=number]::-webkit-inner-spin-button': {
+                    WebkitAppearance: 'none',
+                    margin: 0,
+                  },
+                }}
+                inputRef={inputRef}
+                onFocus={(e) => e.target.select()}
+              />
+              <Button onClick={handleBulkChange} disabled={!editable}>
+                本番日数一括変更
+              </Button>
+            </Grid2>
             <Button
               color="error"
               onClick={() => {

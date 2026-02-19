@@ -62,10 +62,15 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
   /* ログイン中のユーザー */
   const user = useUserStore((state) => state.user);
   const router = useRouter();
+
+  /** 全体の編集状態 */
+  const editable = !!((user?.permission.juchu ?? 0) & permission.juchu_upd);
   /* useState ----------------------------------------------------------------- */
   /* ローディング中かどうか */
   const [isLoading, setIsLoading] = useState(true); /** 処理中かどうか */
   const [isProcessing, setIsProcessing] = useState(false);
+  /* エラーハンドリング */
+  const [isError, setIsError] = useState<Error | null>(null);
   /** 選択肢 */
   const [options, setOptions] = useState<{ users: SelectTypes[]; sts: SelectTypes[] }>({ users: [], sts: [] });
   // 請求ヘッダアコーディオン制御
@@ -79,13 +84,13 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
   const [snackBarOpen, setSnackBarOpen] = useState(false);
   /* スナックバーのメッセージ */
   const [snackBarMessage, setSnackBarMessage] = useState('');
-  /** 編集内容が未保存ダイアログ制御 */
-  const [dirtyOpen, setDirtyOpen] = useState(false);
+  // /** 編集内容が未保存ダイアログ制御 */
+  // const [dirtyOpen, setDirtyOpen] = useState(false);
 
-  /** ロックデータ */
-  const [lockData, setLockData] = useState<LockValues | null>(null);
-  /** 全体の編集状態 */
-  const [editable, setEditable] = useState(isNew ? true : false);
+  // /** ロックデータ */
+  // const [lockData, setLockData] = useState<LockValues | null>(null);
+  // /** 全体の編集状態 */
+  // const [editable, setEditable] = useState(isNew ? true : false);
 
   /* useForm -------------------------------------------------------------- */
   const billForm = useForm<BillHeadValues>({
@@ -124,85 +129,94 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
   const onSubmit = async (data: BillHeadValues) => {
     console.log('新規？', isNew, 'isDirty', isDirty);
     setIsLoading(true);
-    if (isNew) {
-      const id = await addBill(data, user?.name ?? '');
-      // setIsLoading(true);
-      router.replace(`/bill-list/edit/${id}`);
-    } else {
-      await updateBill(data, user?.name ?? '');
+    try {
+      if (isNew) {
+        const id = await addBill(data, user?.name ?? '');
+        // setIsLoading(true);
+        router.replace(`/bill-list/edit/${id}`);
+      } else {
+        await updateBill(data, user?.name ?? '');
+      }
+      setSnackBarMessage('保存しました');
+      setSnackBarOpen(true);
+      reset(data);
+    } catch (e) {
+      setSnackBarMessage('保存に失敗しました');
+      setSnackBarOpen(true);
     }
-    setSnackBarMessage('保存しました');
-    setSnackBarOpen(true);
-    reset(data);
     setIsLoading(false);
   };
 
-  /** 編集モード変更 */
-  const handleEdit = async () => {
-    // 編集→閲覧
-    if (editable) {
-      if (isDirty) {
-        setDirtyOpen(true);
-        return;
-      }
-      await delLock(3, bill.seikyuHeadId ?? 0);
-      setLockData(null);
-      setEditable(false);
-      // 閲覧→編集
-    } else {
-      if (!user) return;
-      const lockData = await getLock(3, bill.seikyuHeadId ?? 0);
-      setLockData(lockData);
-      if (lockData === null) {
-        await addLock(3, bill.seikyuHeadId ?? 0, new Date().toISOString(), user.name, user.email);
-        const newLockData = await getLock(3, bill.seikyuHeadId ?? 0);
-        setLockData(newLockData);
-        setEditable(true);
-      } else if (lockData !== null && lockData.addUser === user.name) {
-        setEditable(true);
-      }
-    }
-  };
+  // /** 編集モード変更 */
+  // const handleEdit = async () => {
+  //   // 編集→閲覧
+  //   if (editable) {
+  //     if (isDirty) {
+  //       setDirtyOpen(true);
+  //       return;
+  //     }
+  //     await delLock(3, bill.seikyuHeadId ?? 0);
+  //     setLockData(null);
+  //     setEditable(false);
+  //     // 閲覧→編集
+  //   } else {
+  //     if (!user) return;
+  //     const lockData = await getLock(3, bill.seikyuHeadId ?? 0);
+  //     setLockData(lockData);
+  //     if (lockData === null) {
+  //       await addLock(3, bill.seikyuHeadId ?? 0, new Date().toISOString(), user.name, user.email);
+  //       const newLockData = await getLock(3, bill.seikyuHeadId ?? 0);
+  //       setLockData(newLockData);
+  //       setEditable(true);
+  //     } else if (lockData !== null && lockData.addUser === user.name) {
+  //       setEditable(true);
+  //     }
+  //   }
+  // };
 
-  /**
-   * 警告ダイアログの押下ボタンによる処理
-   * @param result 結果
-   */
-  const handleResultDialog = async (result: boolean) => {
-    if (result) {
-      if (!isNew) {
-        await delLock(3, bill.seikyuHeadId ?? 0);
-        setLockData(null);
-      }
-      setEditable(false);
-      reset();
-      setDirtyOpen(false);
-    } else {
-      setDirtyOpen(false);
-    }
-  };
+  // /**
+  //  * 警告ダイアログの押下ボタンによる処理
+  //  * @param result 結果
+  //  */
+  // const handleResultDialog = async (result: boolean) => {
+  //   if (result) {
+  //     if (!isNew) {
+  //       await delLock(3, bill.seikyuHeadId ?? 0);
+  //       setLockData(null);
+  //     }
+  //     setEditable(false);
+  //     reset();
+  //     setDirtyOpen(false);
+  //   } else {
+  //     setDirtyOpen(false);
+  //   }
+  // };
 
   /* useEffect ------------------------------------------------------------ */
   // 初期表示とログインユーザを取得とセット
   useEffect(() => {
     console.log('請求画面開いた', bill, 'isNew?', isNew, user?.name);
     const getOptions = async () => {
-      const [users, sts] = await Promise.all([getUsersSelection(), getBillingStsSelection()]);
-      setOptions({ users: users, sts: sts });
-    };
-
-    /** ロック確認 */
-    const asyncProcess = async () => {
-      const lockData = await getLock(3, bill.seikyuHeadId ?? 0);
-      setLockData(lockData);
-      if (lockData === null) {
-        await addLock(3, bill.seikyuHeadId ?? 0, new Date().toISOString(), user?.name ?? '', user?.email ?? '');
-        const newLockData = await getLock(3, bill.seikyuHeadId ?? 0);
-        setLockData(newLockData);
-      } else if (lockData !== null && lockData.addUser !== user?.name) {
-        setEditable(false);
+      try {
+        const [users, sts] = await Promise.all([getUsersSelection(), getBillingStsSelection()]);
+        setOptions({ users: users, sts: sts });
+      } catch (e) {
+        setIsError(e instanceof Error ? e : new Error(String(e)));
       }
     };
+
+    // /** ロック確認 */
+    // const asyncProcess = async () => {
+    //   const lockData = await getLock(3, bill.seikyuHeadId ?? 0);
+    //   setLockData(lockData);
+    //   if (lockData === null) {
+    //     await addLock(3, bill.seikyuHeadId ?? 0, new Date().toISOString(), user?.name ?? '', user?.email ?? '');
+    //     const newLockData = await getLock(3, bill.seikyuHeadId ?? 0);
+    //     setLockData(newLockData);
+    //   } else if (lockData !== null && lockData.addUser !== user?.name) {
+    //     setEditable(false);
+    //   }
+    // };
 
     getOptions();
 
@@ -214,7 +228,7 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
       }
     } else {
       // 編集でログインユーザがあるときロックデータを確認する
-      if (user && bill.seikyuHeadId) asyncProcess();
+      // if (user && bill.seikyuHeadId) asyncProcess();
     }
     setTimeout(() => {
       setIsLoading(false);
@@ -299,6 +313,8 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
       window.open(url);
     } catch (e) {
       console.error(e);
+      setSnackBarMessage('請求書の印刷に失敗しました');
+      setSnackBarOpen(true);
     } finally {
       setIsProcessing(false);
     }
@@ -308,25 +324,27 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
   //   setPdfModel(bill);
   // }, [bill]); // <- 変更の契機
 
+  if (isError) throw isError;
+
   /* ---------------------------------------------------------------------- */
   return (
     <>
       <PermissionGuard category={'juchu'} required={isNew ? permission.juchu_upd : permission.juchu_ref}>
         <Container disableGutters sx={{ minWidth: '100%', pb: 10 }} maxWidth={'xl'}>
           <Grid2 container spacing={4} display={'flex'} justifyContent={'end'} mb={1}>
-            {lockData !== null && lockData.addUser !== user?.name && (
+            {/* {lockData !== null && lockData.addUser !== user?.name && (
               <Grid2 container alignItems={'center'} spacing={2}>
                 <Typography>{lockData.addDat && toJapanTimeString(new Date(lockData.addDat))}</Typography>
                 <Typography>{lockData.addUser}</Typography>
                 <Typography>編集中</Typography>
               </Grid2>
-            )}
+            )} */}
             {/* {fixFlag && (
                  <Box display={'flex'} alignItems={'center'}>
                    <Typography>出庫済</Typography>
                  </Box>
                )} */}
-            <Grid2 container alignItems={'center'} spacing={1}>
+            {/* <Grid2 container alignItems={'center'} spacing={1}>
               {!editable || (lockData !== null && lockData?.addUser !== user?.name) ? (
                 <Typography>閲覧モード</Typography>
               ) : (
@@ -341,7 +359,7 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
               >
                 変更
               </Button>
-            </Grid2>
+            </Grid2> */}
             <Button onClick={() => window.close()}>閉じる</Button>
           </Grid2>
           <FormProvider {...billForm}>
@@ -663,7 +681,7 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
               </Box>
             </form>
           </FormProvider>
-          <IsDirtyAlertDialog open={dirtyOpen} onClick={handleResultDialog} />
+          {/* <IsDirtyAlertDialog open={dirtyOpen} onClick={handleResultDialog} /> */}
           <Snackbar
             open={snackBarOpen}
             autoHideDuration={6000}

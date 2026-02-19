@@ -47,7 +47,7 @@ export const NyukoDetailTable = (props: { datas: NyukoDetailTableValues[] }) => 
               sx={{
                 whiteSpace: 'nowrap',
                 backgroundColor:
-                  row.diff === 0 && row.planQty !== 0 //&& row.ctnFlg !== 1
+                  row.diff === 0 /*&& row.planQty !== 0 && row.ctnFlg !== 1*/
                     ? statusColors.completed
                     : row.ctnFlg === 1
                       ? statusColors.ctn
@@ -70,7 +70,7 @@ export const NyukoDetailTable = (props: { datas: NyukoDetailTableValues[] }) => 
                 sx={{
                   pr: 3,
                   backgroundColor:
-                    row.diff === 0 && row.planQty !== 0
+                    row.diff === 0 /*&& row.planQty !== 0*/
                       ? statusColors.completed
                       : row.diff > 0
                         ? statusColors.excess

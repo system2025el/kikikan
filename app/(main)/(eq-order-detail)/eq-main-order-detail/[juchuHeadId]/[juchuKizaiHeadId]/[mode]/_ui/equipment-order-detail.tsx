@@ -68,6 +68,7 @@ import {
   getJuchuKizaiHead,
   getJuchuKizaiMeisai,
   juchuMeisaiCopy,
+  juchuMeisaiseparation,
   saveJuchuKizai,
   saveNewJuchuKizaiHead,
 } from '../_lib/funcs';
@@ -427,8 +428,10 @@ const EquipmentOrderDetail = (props: {
       JSON.stringify(originJuchuHonbanbiList) === JSON.stringify(juchuHonbanbiList)
     ) {
       setOtherDirty(false);
+      console.log('変更なし');
     } else {
       setOtherDirty(true);
+      console.log('変更あり');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [juchuKizaiMeisaiList, juchuContainerMeisaiList, juchuHonbanbiList]);
@@ -656,7 +659,7 @@ const EquipmentOrderDetail = (props: {
       try {
         await lockRelease(1, juchuHeadData.juchuHeadId, user.name, user.email);
       } catch (e) {
-        setSnackBarMessage('サーバー接続エラー');
+        setSnackBarMessage('ロック解除に失敗しました');
         setSnackBarOpen(true);
       }
       setEdit(false);
@@ -997,9 +1000,8 @@ const EquipmentOrderDetail = (props: {
         setSnackBarMessage('保存に失敗しました');
         setSnackBarOpen(true);
       }
-      setIsLoading(false);
     }
-
+    setIsLoading(false);
     setIsProcessing(false);
   };
 
@@ -1157,19 +1159,24 @@ const EquipmentOrderDetail = (props: {
     if (isProcessing) return;
     setIsProcessing(true);
 
-    const lockResult = await lock();
+    try {
+      const lockResult = await lock();
 
-    if (lockResult) {
-      setJuchuKizaiMeisaiList((prev) => {
-        const visibleIndex = prev
-          .map((data, index) => (!data.delFlag ? index : null))
-          .filter((index) => index !== null) as number[];
+      if (lockResult) {
+        setJuchuKizaiMeisaiList((prev) => {
+          const visibleIndex = prev
+            .map((data, index) => (!data.delFlag ? index : null))
+            .filter((index) => index !== null) as number[];
 
-        const index = visibleIndex[rowIndex];
-        if (index === undefined) return prev;
+          const index = visibleIndex[rowIndex];
+          if (index === undefined) return prev;
 
-        return prev.map((data, i) => (i === index ? { ...data, mem: memo } : data));
-      });
+          return prev.map((data, i) => (i === index ? { ...data, mem: memo } : data));
+        });
+      }
+    } catch (e) {
+      setSnackBarMessage('サーバー接続エラー');
+      setSnackBarOpen(true);
     }
     setIsProcessing(false);
   };
@@ -1765,9 +1772,8 @@ const EquipmentOrderDetail = (props: {
       try {
         await lockRelease(1, juchuHeadData.juchuHeadId, user.name, user.email);
       } catch (e) {
-        setSnackBarMessage('サーバー接続エラー');
+        setSnackBarMessage('ロック解除に失敗しました');
         setSnackBarOpen(true);
-        return;
       }
       setEdit(false);
       reset();
@@ -2021,11 +2027,12 @@ const EquipmentOrderDetail = (props: {
     if (isProcessing) return;
     setIsProcessing(true);
 
-    const lockResult = await lock();
+    // const lockResult = await lock();
 
-    if (lockResult) {
-      setEqSelectionDialogOpen(false);
-    }
+    // if (lockResult) {
+    //   setEqSelectionDialogOpen(false);
+    // }
+    setEqSelectionDialogOpen(false);
     setIsProcessing(false);
   };
 
@@ -2048,6 +2055,7 @@ const EquipmentOrderDetail = (props: {
     if (otherDirty || isDirty) {
       setAlertTitle('保存されていません');
       setAlertMessage('1度保存をしてください');
+      setIsProcessing(false);
       setAlertOpen(true);
       return;
     }
@@ -2176,8 +2184,10 @@ const EquipmentOrderDetail = (props: {
 
       if (lockResult) {
         if (otherDirty || isDirty) {
+          console.log(otherDirty, isDirty);
           setAlertTitle('保存されていません');
           setAlertMessage('1度保存をしてください');
+          setIsProcessing(false);
           setAlertOpen(true);
           return;
         }
@@ -2187,7 +2197,6 @@ const EquipmentOrderDetail = (props: {
       setIsProcessing(false);
       setSnackBarMessage('サーバー接続エラー');
       setSnackBarOpen(true);
-      return;
     }
     setIsProcessing(false);
   };
@@ -2270,8 +2279,45 @@ const EquipmentOrderDetail = (props: {
     );
     console.log('idoList', idoList);
 
+    // 元データ更新
+    const selectDspOrdNum = [...selectEq.map((d) => d.dspOrdNum), ...selectCtn.map((d) => d.dspOrdNum)];
+    const updateJuchuKizaiMeisaiList = juchuKizaiMeisaiList.map((data) =>
+      selectDspOrdNum.includes(data.dspOrdNum)
+        ? {
+            ...data,
+            planKizaiQty: data.planKizaiQty - selectEq.find((d) => d.dspOrdNum === data.dspOrdNum)!.planKizaiQty,
+            planYobiQty: data.planYobiQty - selectEq.find((d) => d.dspOrdNum === data.dspOrdNum)!.planYobiQty,
+            planQty: data.planQty - selectEq.find((d) => d.dspOrdNum === data.dspOrdNum)!.planQty,
+          }
+        : data
+    );
+
+    const updateJuchuContainerMeisaiList = juchuContainerMeisaiList.map((data) =>
+      selectDspOrdNum.includes(data.dspOrdNum)
+        ? {
+            ...data,
+            planKicsKizaiQty:
+              data.planKicsKizaiQty - selectCtn.find((d) => d.dspOrdNum === data.dspOrdNum)!.planKicsKizaiQty,
+            planYardKizaiQty:
+              data.planYardKizaiQty - selectCtn.find((d) => d.dspOrdNum === data.dspOrdNum)!.planYardKizaiQty,
+            planQty: data.planQty - selectCtn.find((d) => d.dspOrdNum === data.dspOrdNum)!.planQty,
+          }
+        : data
+    );
+
+    const updateIdoJuchuKizaiMeisaiList = idoJuchuKizaiMeisaiList.map((data) =>
+      ids.includes(data.kizaiId)
+        ? {
+            ...data,
+            planKizaiQty: data.planKizaiQty - idoList.find((d) => d.kizaiId === data.kizaiId)!.planKizaiQty,
+            planYobiQty: data.planYobiQty - idoList.find((d) => d.kizaiId === data.kizaiId)!.planYobiQty,
+            planQty: data.planQty - idoList.find((d) => d.kizaiId === data.kizaiId)!.planQty,
+          }
+        : data
+    );
+
     // 分離処理
-    const newJuchuKizaiHeadId = await juchuMeisaiCopy(
+    const newJuchuKizaiHeadId = await juchuMeisaiseparation(
       newJuchuKizaiHead,
       shukoDate,
       nyukoDate,
@@ -2279,39 +2325,20 @@ const EquipmentOrderDetail = (props: {
       selectEq,
       selectCtn,
       idoList,
+      updateJuchuKizaiMeisaiList,
+      updateJuchuContainerMeisaiList,
+      updateIdoJuchuKizaiMeisaiList,
       juchuHonbanbiList,
       userNam
     );
 
     if (newJuchuKizaiHeadId) {
-      const selectDspOrdNum = [...selectEq.map((d) => d.dspOrdNum), ...selectCtn.map((d) => d.dspOrdNum)];
-      setJuchuKizaiMeisaiList((prev) =>
-        prev.map((data) =>
-          selectDspOrdNum.includes(data.dspOrdNum)
-            ? {
-                ...data,
-                planKizaiQty: data.planKizaiQty - selectEq.find((d) => d.dspOrdNum === data.dspOrdNum)!.planKizaiQty,
-                planYobiQty: data.planYobiQty - selectEq.find((d) => d.dspOrdNum === data.dspOrdNum)!.planYobiQty,
-                planQty: data.planQty - selectEq.find((d) => d.dspOrdNum === data.dspOrdNum)!.planQty,
-              }
-            : data
-        )
-      );
-
-      setJuchuContainerMeisaiList((prev) =>
-        prev.map((data) =>
-          selectDspOrdNum.includes(data.dspOrdNum)
-            ? {
-                ...data,
-                planKicsKizaiQty:
-                  data.planKicsKizaiQty - selectCtn.find((d) => d.dspOrdNum === data.dspOrdNum)!.planKicsKizaiQty,
-                planYardKizaiQty:
-                  data.planYardKizaiQty - selectCtn.find((d) => d.dspOrdNum === data.dspOrdNum)!.planYardKizaiQty,
-                planQty: data.planQty - selectCtn.find((d) => d.dspOrdNum === data.dspOrdNum)!.planQty,
-              }
-            : data
-        )
-      );
+      setOriginJuchuKizaiMeisaiList(updateJuchuKizaiMeisaiList);
+      setJuchuKizaiMeisaiList(updateJuchuKizaiMeisaiList);
+      setOriginJuchuContainerMeisaiList(updateJuchuContainerMeisaiList);
+      setJuchuContainerMeisaiList(updateJuchuContainerMeisaiList);
+      setOriginIdoJuchuKizaiMeisaiList(updateIdoJuchuKizaiMeisaiList);
+      setIdoJuchuKizaiMeisaiList(updateIdoJuchuKizaiMeisaiList);
 
       setSeparationDialogOpen(false);
       setSnackBarMessage('分離しました');
@@ -3076,6 +3103,7 @@ const EquipmentOrderDetail = (props: {
                 <Dialog open={EqSelectionDialogOpen} fullScreen>
                   <EqptSelectionDialog
                     // rank={juchuHeadData.kokyaku.kokyakuRank}
+                    eqpts={juchuKizaiMeisaiList}
                     setEqpts={setEqpts}
                     handleCloseDialog={handleCloseEqDialog}
                     lock={lock}
@@ -3107,6 +3135,7 @@ const EquipmentOrderDetail = (props: {
                     paper: {
                       sx: {
                         maxWidth: 'none',
+                        minWidth: 'none',
                       },
                     },
                   }}

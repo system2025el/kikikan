@@ -103,6 +103,7 @@ FROM (
       )
     WHERE
       v_juchu_sharyo_head_lst.nyushuko_dat IS NULL --車両の出庫日がNULL
+      AND v_juchu_kizai_head_lst.kokyaku_id <> 1013 --(株)エンジニア・ライティングを除外
   ) AS juchu_kizai_head_lst
   RIGHT OUTER JOIN
   /* スケジュール生成して外部結合 */

@@ -86,6 +86,9 @@ const DateX = (props: { sx?: object; disabled?: boolean }) => {
             ...sx,
           },
         },
+        toolbar: {
+          hidden: true,
+        },
         calendarHeader: { format: 'YYYY年MM月' },
       }} // カレンダーヘッダーのフォーマット
       defaultValue={today}
@@ -157,6 +160,9 @@ export const TestDate = (props: {
               </>
             ),
           },
+        },
+        toolbar: {
+          hidden: true,
         },
         calendarHeader: { format: 'YYYY年MM月' },
       }} // カレンダーヘッダーのフォーマット
@@ -258,6 +264,9 @@ export const DateTime = (props: {
               </>
             ),
           },
+        },
+        toolbar: {
+          hidden: true,
         },
         calendarHeader: { format: 'YYYY年MM月' },
         // popper: {
@@ -426,6 +435,9 @@ export const FormDateX = ({
                 onFocus: (e: React.FocusEvent<HTMLInputElement>) => e.target.blur(), // フォーカスを外す
               }
             : undefined,
+        },
+        toolbar: {
+          hidden: true,
         },
         calendarHeader: { format: 'YYYY年MM月' },
       }} // カレンダーヘッダーのフォーマット

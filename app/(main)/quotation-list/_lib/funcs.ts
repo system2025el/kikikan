@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 
 import { selectActiveMituSts } from '@/app/_lib/db/tables/m-mitu-sts';
 import { selectActiveUsers } from '@/app/_lib/db/tables/m-user';
+import { selectMaxJuchuHonbanbiQty } from '@/app/_lib/db/tables/t-juchu-kizai-head';
 import { selectChosenMitu, updQuotHeadDelFlg } from '@/app/_lib/db/tables/t-mitu-head';
 import { selectQuotMeisai } from '@/app/_lib/db/tables/t-mitu-meisai';
 import { selectQuotMeisaiHead } from '@/app/_lib/db/tables/t-mitu-meisai-head';
@@ -60,6 +61,7 @@ export const getFilteredQuotList = async (
       kokyakuNam: d.kokyaku_nam ?? '',
       mituDat: d.mitu_dat ? toJapanYMDString(d.mitu_dat) : '',
       nyuryokuUser: d.nyuryoku_user ?? '',
+      mituRange: `${d.mitu_str_dat ? toJapanYMDString(d.mitu_str_dat) : ''} ${d.mitu_str_dat || d.mitu_end_dat ? ' ～ ' : ''} ${d.mitu_end_dat ? toJapanYMDString(d.mitu_end_dat) : ''}`,
     }));
   } catch (e) {
     console.error('例外が発生しました:', e);
@@ -153,6 +155,23 @@ export const getOrderForQuotation = async (id: number): Promise<JuchuValues | nu
     };
     console.log('GetOrder order : ', order);
     return order;
+  } catch (e) {
+    console.error('例外が発生しました', e);
+    throw e;
+  }
+};
+
+/**
+ * 受注本番日最大値を取得する関数
+ * @param juchuId 受注ヘッダーid
+ */
+export const getMaxHonbanbiQty = async (juchuId: number) => {
+  try {
+    const { data, error } = await selectMaxJuchuHonbanbiQty(juchuId);
+    if (error) {
+      throw error;
+    }
+    return data[0].juchu_honbanbi_qty ?? null;
   } catch (e) {
     console.error('例外が発生しました', e);
     throw e;

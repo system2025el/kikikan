@@ -76,7 +76,7 @@ export const delIsshikiSet = async (idList: { issiki_id: number; kizai_id: numbe
 
   const query = `
       DELETE FROM
-        ${SCHEMA}.m_kizai_set
+        ${SCHEMA}.m_issiki_set
       WHERE
         (${cols.join(',')})
       IN

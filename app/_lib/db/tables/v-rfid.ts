@@ -49,7 +49,7 @@ export const selectRfidsOfTheKizai = async (kizaiId: number) => {
     ON r.shozoku_id = shozoku.shozoku_id
     WHERE
       r.kizai_id = $1
-    ORDER BY r.rfid_tag_id
+    ORDER BY r.el_num
   `;
   try {
     return await pool.query(query, [kizaiId]);

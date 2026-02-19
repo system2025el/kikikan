@@ -229,6 +229,7 @@ export const QuotationListTable = ({
                   <TableCell>見積相手</TableCell>
                   <TableCell>公演名</TableCell>
                   <TableCell>公演場所</TableCell>
+                  <TableCell>貸出期間</TableCell>
                   <TableCell>見積日</TableCell>
                   <TableCell>入力者</TableCell>
                 </TableRow>
@@ -316,6 +317,7 @@ export const QuotationListTable = ({
                           {quotation.koenbashoNam}
                         </LightTooltipWithText>
                       </TableCell>
+                      <TableCell sx={{ whiteSpace: 'nowrap' }}>{quotation.mituRange}</TableCell>
                       <TableCell sx={{ whiteSpace: 'nowrap' }}>{quotation.mituDat}</TableCell>
                       <TableCell sx={{ whiteSpace: 'nowrap' }}>{quotation.nyuryokuUser}</TableCell>
                     </TableRow>

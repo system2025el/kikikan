@@ -221,7 +221,7 @@ export const SeparationDialog = ({
                 sx={{
                   overflow: 'auto',
                   maxHeight: '60vh',
-                  maxWidth: separationCtn.length > 0 ? '60%' : '100%',
+                  maxWidth: 'fit-content' /*separationCtn.length > 0 ? '50%' : '100%'*/,
                   mr: separationCtn.length > 0 ? 2 : 0,
                 }}
               >
@@ -247,7 +247,7 @@ export const SeparationDialog = ({
                   </TableHead>
                   <TableBody>
                     {separationEq.map((row, index) => (
-                      <TableRow hover key={index}>
+                      <TableRow hover key={index} sx={{ whiteSpace: 'nowrap' }}>
                         <TableCell padding="checkbox">
                           <Checkbox
                             checked={selectedEq.includes(row.dspOrdNum)}
@@ -279,7 +279,7 @@ export const SeparationDialog = ({
                               },
                             }}
                             sx={{
-                              width: '60px',
+                              width: '50px',
                               '& .MuiInputBase-input': {
                                 padding: 1,
                                 textAlign: 'right',
@@ -318,7 +318,7 @@ export const SeparationDialog = ({
                               },
                             }}
                             sx={{
-                              width: '60px',
+                              width: '50px',
                               '& .MuiInputBase-input': {
                                 padding: 1,
                                 textAlign: 'right',
@@ -343,7 +343,11 @@ export const SeparationDialog = ({
             )}
             {separationCtn.length > 0 && (
               <TableContainer
-                sx={{ overflow: 'auto', maxHeight: '60vh', maxWidth: separationEq.length > 0 ? '40%' : '100%' }}
+                sx={{
+                  overflow: 'auto',
+                  maxHeight: '60vh',
+                  maxWidth: 'fit-content' /*separationEq.length > 0 ? '50%' : '100%'*/,
+                }}
               >
                 <Table stickyHeader aria-labelledby="tableTitle" size="small">
                   <TableHead sx={{ bgcolor: 'primary.light' }}>
@@ -367,7 +371,7 @@ export const SeparationDialog = ({
                   </TableHead>
                   <TableBody>
                     {separationCtn.map((row, index) => (
-                      <TableRow hover key={index}>
+                      <TableRow hover key={index} sx={{ whiteSpace: 'nowrap' }}>
                         <TableCell padding="checkbox">
                           <Checkbox
                             checked={selectedCtn.includes(row.dspOrdNum)}
@@ -399,7 +403,7 @@ export const SeparationDialog = ({
                               },
                             }}
                             sx={{
-                              width: '60px',
+                              width: '50px',
                               '& .MuiInputBase-input': {
                                 padding: 1,
                                 textAlign: 'right',
@@ -438,7 +442,7 @@ export const SeparationDialog = ({
                               },
                             }}
                             sx={{
-                              width: '60px',
+                              width: '50px',
                               '& .MuiInputBase-input': {
                                 padding: 1,
                                 textAlign: 'right',

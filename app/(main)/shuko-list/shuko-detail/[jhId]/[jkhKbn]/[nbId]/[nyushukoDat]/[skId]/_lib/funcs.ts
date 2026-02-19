@@ -449,3 +449,40 @@ export const confirmChildJuchuKizaiHead = async (juchuHeadId: number, juchuKizai
     throw e;
   }
 };
+
+export const updShukoAdjust = async (adjustData: ShukoDetailTableValues[], userNam: string) => {
+  const updateData: NyushukoDen[] = adjustData.map((d) => ({
+    juchu_head_id: d.juchuHeadId,
+    juchu_kizai_head_id: d.juchuKizaiHeadId,
+    juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
+    kizai_id: d.kizaiId,
+    plan_qty: d.planQty,
+    result_adj_qty: (d.planQty ?? 0) - (d.resultQty ?? 0),
+    sagyo_den_dat: d.nyushukoDat,
+    sagyo_id: d.nyushukoBashoId,
+    sagyo_kbn_id: d.sagyoKbnId ?? 0,
+    dsp_ord_num: d.dspOrdNumMeisai,
+    indent_num: d.indentNum,
+    upd_dat: new Date().toISOString(),
+    upd_user: userNam,
+  }));
+  const connection = await pool.connect();
+  try {
+    for (const data of updateData) {
+      await updateNyushukoDen(data, connection);
+    }
+
+    console.log('nyushuko den adjust update successfully:', updateData);
+
+    await connection.query('COMMIT');
+  } catch (e) {
+    console.error('Exception while updating nyushuko den adjust:', e);
+    await connection.query('ROLLBACK');
+    throw e;
+  } finally {
+    refreshVRfid().catch((err) => {
+      console.error('バックグラウンドでのマテビュー更新に失敗:', err);
+    });
+    connection.release();
+  }
+};
