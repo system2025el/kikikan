@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { PoolClient } from 'pg';
 
 import pool from '@/app/_lib/db/postgres';
+import { selectMeisaiEqts } from '@/app/_lib/db/tables/m-kizai';
 import {
   deleteJuchuContainerMeisai,
   insertJuchuContainerMeisai,
@@ -238,24 +239,27 @@ export const saveReturnJuchuKizai = async (
       const deleteReturnJuchuKizaiMeisaiData = newReturnJuchuKizaiMeisaiData.filter(
         (data) => data.delFlag && data.saveFlag
       );
-      // 削除
-      if (deleteReturnJuchuKizaiMeisaiData.length > 0) {
-        const deleteMeisaiResult = await delReturnJuchuKizaiMeisai(deleteReturnJuchuKizaiMeisaiData, connection);
-        console.log('受注機材明細削除', deleteMeisaiResult);
-      }
-      // 追加
-      if (addReturnJuchuKizaiMeisaiData.length > 0) {
-        const addMeisaiResult = await addReturnJuchuKizaiMeisai(addReturnJuchuKizaiMeisaiData, userNam, connection);
-        console.log('受注機材明細追加', addMeisaiResult);
-      }
-      // 更新
-      if (updateReturnJuchuKizaiMeisaiData.length > 0) {
-        const updateMeisaiResult = await updReturnJuchuKizaiMeisai(
-          updateReturnJuchuKizaiMeisaiData,
-          userNam,
-          connection
-        );
-        console.log('受注機材明細更新', updateMeisaiResult);
+
+      if (checkJuchuKizaiMeisai) {
+        // 削除
+        if (deleteReturnJuchuKizaiMeisaiData.length > 0) {
+          const deleteMeisaiResult = await delReturnJuchuKizaiMeisai(deleteReturnJuchuKizaiMeisaiData, connection);
+          console.log('受注機材明細削除', deleteMeisaiResult);
+        }
+        // 追加
+        if (addReturnJuchuKizaiMeisaiData.length > 0) {
+          const addMeisaiResult = await addReturnJuchuKizaiMeisai(addReturnJuchuKizaiMeisaiData, userNam, connection);
+          console.log('受注機材明細追加', addMeisaiResult);
+        }
+        // 更新
+        if (updateReturnJuchuKizaiMeisaiData.length > 0) {
+          const updateMeisaiResult = await updReturnJuchuKizaiMeisai(
+            updateReturnJuchuKizaiMeisaiData,
+            userNam,
+            connection
+          );
+          console.log('受注機材明細更新', updateMeisaiResult);
+        }
       }
 
       // 受注コンテナ明細id最大値
@@ -282,34 +286,37 @@ export const saveReturnJuchuKizai = async (
       const deleteReturnJuchuContainerMeisaiData = newReturnJuchuContainerMeisaiData.filter(
         (data) => data.delFlag && data.saveFlag
       );
-      // 削除
-      if (deleteReturnJuchuContainerMeisaiData.length > 0) {
-        const deleteKizaiIds = deleteReturnJuchuContainerMeisaiData.map((data) => data.kizaiId);
-        const deleteContainerMeisaiResult = await delReturnJuchuContainerMeisai(
-          data.juchuHeadId,
-          data.juchuKizaiHeadId,
-          deleteKizaiIds,
-          connection
-        );
-        console.log('返却受注コンテナ明細削除', deleteContainerMeisaiResult);
-      }
-      // 追加
-      if (addReturnJuchuContainerMeisaiData.length > 0) {
-        const addContainerMeisaiResult = await addReturnJuchuContainerMeisai(
-          addReturnJuchuContainerMeisaiData,
-          userNam,
-          connection
-        );
-        console.log('返却受注コンテナ明細追加', addContainerMeisaiResult);
-      }
-      // 更新
-      if (updateReturnJuchuContainerMeisaiData.length > 0) {
-        const updateContainerMeisaiResult = await updReturnJuchuContainerMeisai(
-          updateReturnJuchuContainerMeisaiData,
-          userNam,
-          connection
-        );
-        console.log('返却受注コンテナ明細更新', updateContainerMeisaiResult);
+
+      if (checkJuchuContainerMeisai) {
+        // 削除
+        if (deleteReturnJuchuContainerMeisaiData.length > 0) {
+          const deleteKizaiIds = deleteReturnJuchuContainerMeisaiData.map((data) => data.kizaiId);
+          const deleteContainerMeisaiResult = await delReturnJuchuContainerMeisai(
+            data.juchuHeadId,
+            data.juchuKizaiHeadId,
+            deleteKizaiIds,
+            connection
+          );
+          console.log('返却受注コンテナ明細削除', deleteContainerMeisaiResult);
+        }
+        // 追加
+        if (addReturnJuchuContainerMeisaiData.length > 0) {
+          const addContainerMeisaiResult = await addReturnJuchuContainerMeisai(
+            addReturnJuchuContainerMeisaiData,
+            userNam,
+            connection
+          );
+          console.log('返却受注コンテナ明細追加', addContainerMeisaiResult);
+        }
+        // 更新
+        if (updateReturnJuchuContainerMeisaiData.length > 0) {
+          const updateContainerMeisaiResult = await updReturnJuchuContainerMeisai(
+            updateReturnJuchuContainerMeisaiData,
+            userNam,
+            connection
+          );
+          console.log('返却受注コンテナ明細更新', updateContainerMeisaiResult);
+        }
       }
 
       // 入庫伝票
@@ -636,6 +643,15 @@ export const getReturnJuchuKizaiMeisai = async (
       throw returnError;
     }
 
+    const eqIds = [...new Set(returnData.map((data) => data.kizai_id))];
+
+    const { data: mKizai, error: mKizaiError } = await selectMeisaiEqts(eqIds);
+
+    if (mKizaiError) {
+      console.error('GetEqList eqShozokuId error : ', mKizaiError);
+      throw mKizaiError;
+    }
+
     const { data: eqTanka, error: eqTankaError } = await selectJuchuKizaiMeisaiKizaiTanka(
       juchuHeadId,
       juchuKizaiHeadId
@@ -655,6 +671,7 @@ export const getReturnJuchuKizaiMeisai = async (
       juchuHeadId: d.juchu_head_id,
       juchuKizaiHeadId: d.juchu_kizai_head_id,
       juchuKizaiMeisaiId: d.juchu_kizai_meisai_id,
+      mShozokuId: mKizai.find((data) => data.kizai_id === d.kizai_id)?.shozoku_id ?? 0,
       shozokuId: d.shozoku_id,
       shozokuNam: d.shozoku_nam ?? '',
       mem: d.mem,

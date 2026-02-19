@@ -619,7 +619,11 @@ export const ReturnContainerTable = (props: {
                   value={row.planKicsKizaiQty}
                   type="text"
                   onChange={(e) => {
-                    if (/^\d*$/.test(e.target.value) && Number(e.target.value) <= (row.oyaPlanKicsKizaiQty ?? 0)) {
+                    if (
+                      /^\d*$/.test(e.target.value) &&
+                      Number(e.target.value) + row.planYardKizaiQty <=
+                        (row.oyaPlanKicsKizaiQty ?? 0) + (row.oyaPlanYardKizaiQty ?? 0)
+                    ) {
                       handleContainerCellChange(rowIndex, Number(e.target.value), row.planYardKizaiQty);
                     }
                   }}
@@ -667,7 +671,11 @@ export const ReturnContainerTable = (props: {
                   value={row.planYardKizaiQty}
                   type="text"
                   onChange={(e) => {
-                    if (/^\d*$/.test(e.target.value) && Number(e.target.value) <= (row.oyaPlanYardKizaiQty ?? 0)) {
+                    if (
+                      /^\d*$/.test(e.target.value) &&
+                      Number(e.target.value) + row.planKicsKizaiQty <=
+                        (row.oyaPlanKicsKizaiQty ?? 0) + (row.oyaPlanYardKizaiQty ?? 0)
+                    ) {
                       handleContainerCellChange(rowIndex, row.planKicsKizaiQty, Number(e.target.value));
                     }
                   }}

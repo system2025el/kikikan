@@ -544,11 +544,12 @@ export const IdoEqTable: React.FC<IdoEqTableProps> = ({
 export const ContainerTable = (props: {
   rows: JuchuContainerMeisaiValues[];
   edit: boolean;
+  fixFlag: boolean;
   handleContainerMemoChange: (rowIndex: number, memo: string) => void;
   handleContainerCellChange: (rowIndex: number, kicsValue: number, yardValue: number) => void;
   handleMeisaiDelete: (row: JuchuContainerMeisaiValues) => void;
 }) => {
-  const { rows, edit, handleContainerMemoChange, handleContainerCellChange, handleMeisaiDelete } = props;
+  const { rows, edit, fixFlag, handleContainerMemoChange, handleContainerCellChange, handleMeisaiDelete } = props;
 
   const inputKicsRefs = useRef<(HTMLInputElement | null)[]>([]);
   const inputYardRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -640,7 +641,7 @@ export const ContainerTable = (props: {
                   memo={row.mem ? row.mem : ''}
                   handleMemoChange={handleContainerMemoChange}
                   rowIndex={rowIndex}
-                  disabled={!edit}
+                  disabled={!edit || fixFlag}
                 />
               </TableCell>
               <TableCell style={styles.row} align="left" size="small">
@@ -693,7 +694,7 @@ export const ContainerTable = (props: {
                     handleKicsKeyDown(e, rowIndex);
                   }}
                   onFocus={(e) => e.target.select()}
-                  disabled={!edit}
+                  disabled={!edit || fixFlag}
                 />
               </TableCell>
               <TableCell style={styles.row} align="right" size="small">
@@ -737,7 +738,7 @@ export const ContainerTable = (props: {
                     handleYardKeyDown(e, rowIndex);
                   }}
                   onFocus={(e) => e.target.select()}
-                  disabled={!edit}
+                  disabled={!edit || fixFlag}
                 />
               </TableCell>
               <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>

@@ -4,6 +4,7 @@ import dayjs from 'dayjs';
 import { PoolClient, QueryResult } from 'pg';
 
 import { selectDic } from '@/app/_lib/db/tables/m-dic';
+import { selectMeisaiEqts } from '@/app/_lib/db/tables/m-kizai';
 import { selectKokyaku } from '@/app/_lib/db/tables/m-kokyaku';
 import { selectDetailStockListBulk } from '@/app/_lib/db/tables/stock-table';
 import {
@@ -353,6 +354,15 @@ export const getOyaJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHead
       return true;
     });
 
+    const eqIds = [...new Set(eqList.map((data) => data.kizai_id))];
+
+    const { data: mKizai, error: mKizaiError } = await selectMeisaiEqts(eqIds);
+
+    if (mKizaiError) {
+      console.error('GetEqList eqShozokuId error : ', mKizaiError);
+      throw mKizaiError;
+    }
+
     const { data: eqTanka, error: eqTankaError } = await selectJuchuKizaiMeisaiKizaiTanka(
       juchuHeadId,
       juchuKizaiHeadId
@@ -366,6 +376,7 @@ export const getOyaJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHead
       juchuHeadId: d.juchu_head_id,
       juchuKizaiHeadId: d.juchu_kizai_head_id,
       juchuKizaiMeisaiId: d.juchu_kizai_meisai_id,
+      mShozokuId: mKizai.find((data) => data.kizai_id === d.kizai_id)?.shozoku_id ?? 0,
       shozokuId: d.shozoku_id,
       shozokuNam: d.shozoku_nam ?? '',
       kizaiId: d.kizai_id,

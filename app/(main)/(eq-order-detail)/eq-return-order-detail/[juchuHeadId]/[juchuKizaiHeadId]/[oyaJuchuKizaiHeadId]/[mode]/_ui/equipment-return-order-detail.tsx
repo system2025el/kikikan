@@ -686,34 +686,55 @@ export const EquipmentReturnOrderDetail = (props: {
 
       // 更新
     } else {
-      const kicsMeisai = returnJuchuKizaiMeisaiList.filter((d) => d.shozokuId === 1 && !d.delFlag);
-      const yardMeisai = returnJuchuKizaiMeisaiList.filter((d) => d.shozokuId === 2 && !d.delFlag);
+      // const kicsMeisai = returnJuchuKizaiMeisaiList.filter((d) => d.shozokuId === 1 && !d.delFlag);
+      // const yardMeisai = returnJuchuKizaiMeisaiList.filter((d) => d.shozokuId === 2 && !d.delFlag);
       const kicsContainer = returnJuchuContainerMeisaiList.filter((d) => d.planKicsKizaiQty && !d.delFlag);
       const yardContainer = returnJuchuContainerMeisaiList.filter((d) => d.planYardKizaiQty && !d.delFlag);
 
-      if (
-        ((kicsMeisai.length > 0 || kicsContainer.length > 0) && !data.kicsNyukoDat) ||
-        ((yardMeisai.length > 0 || yardContainer.length > 0) && !data.yardNyukoDat)
-      ) {
-        if ((kicsMeisai.length > 0 || kicsContainer.length > 0) && !data.kicsNyukoDat) {
+      if ((kicsContainer.length > 0 && !data.kicsNyukoDat) || (yardContainer.length > 0 && !data.yardNyukoDat)) {
+        if (kicsContainer.length > 0 && !data.kicsNyukoDat) {
           setError('kicsNyukoDat', {
             type: 'manual',
             message: '',
           });
         }
-        if ((yardMeisai.length > 0 || yardContainer.length > 0) && !data.yardNyukoDat) {
+        if (yardContainer.length > 0 && !data.yardNyukoDat) {
           setError('yardNyukoDat', {
             type: 'manual',
             message: '',
           });
         }
-        setAlertTitle('入出庫日時が入力されていません');
-        setAlertMessage('入出庫日時を入力してください');
+        setAlertTitle('入庫日時が入力されていません');
+        setAlertMessage('入庫日時を入力してください');
         setAlertOpen(true);
         setIsLoading(false);
         setIsProcessing(false);
         return;
       }
+
+      // if (
+      //   ((kicsMeisai.length > 0 || kicsContainer.length > 0) && !data.kicsNyukoDat) ||
+      //   ((yardMeisai.length > 0 || yardContainer.length > 0) && !data.yardNyukoDat)
+      // ) {
+      //   if ((kicsMeisai.length > 0 || kicsContainer.length > 0) && !data.kicsNyukoDat) {
+      //     setError('kicsNyukoDat', {
+      //       type: 'manual',
+      //       message: '',
+      //     });
+      //   }
+      //   if ((yardMeisai.length > 0 || yardContainer.length > 0) && !data.yardNyukoDat) {
+      //     setError('yardNyukoDat', {
+      //       type: 'manual',
+      //       message: '',
+      //     });
+      //   }
+      //   setAlertTitle('入出庫日時が入力されていません');
+      //   setAlertMessage('入出庫日時を入力してください');
+      //   setAlertOpen(true);
+      //   setIsLoading(false);
+      //   setIsProcessing(false);
+      //   return;
+      // }
 
       // 更新判定
       const checkJuchuKizaiHead = isDirty;
@@ -1305,6 +1326,16 @@ export const EquipmentReturnOrderDetail = (props: {
         if (yardNyukoDat === null) {
           clearErrors('yardNyukoDat');
         }
+
+        setReturnJuchuKizaiMeisaiList((prev) =>
+          prev.map((d) =>
+            newDate && !yardNyukoDat
+              ? { ...d, shozokuId: 1 }
+              : !newDate && yardNyukoDat
+                ? { ...d, shozokuId: 2 }
+                : { ...d, shozokuId: d.mShozokuId }
+          )
+        );
       }
     } catch (e) {
       setSnackBarMessage('サーバー接続エラー');
@@ -1342,6 +1373,16 @@ export const EquipmentReturnOrderDetail = (props: {
         if (kicsNyukoDat === null) {
           clearErrors('kicsNyukoDat');
         }
+
+        setReturnJuchuKizaiMeisaiList((prev) =>
+          prev.map((d) =>
+            kicsNyukoDat && !newDate
+              ? { ...d, shozokuId: 1 }
+              : !kicsNyukoDat && newDate
+                ? { ...d, shozokuId: 2 }
+                : { ...d, shozokuId: d.mShozokuId }
+          )
+        );
       }
     } catch (e) {
       setSnackBarMessage('サーバー接続エラー');
@@ -1423,6 +1464,8 @@ export const EquipmentReturnOrderDetail = (props: {
 
       if (lockResult) {
         setIsDetailLoading(true);
+        const kicsDat = getValues('kicsNyukoDat');
+        const yardDat = getValues('yardNyukoDat');
         // 同じ並び順のものははじくようにする
         const eqIds = new Set(returnJuchuKizaiMeisaiList.filter((d) => !d.delFlag).map((d) => d.kizaiId));
         const dspOrdNums = new Set(returnJuchuKizaiMeisaiList.filter((d) => !d.delFlag).map((d) => d.dspOrdNum));
@@ -1431,7 +1474,8 @@ export const EquipmentReturnOrderDetail = (props: {
           juchuHeadId: getValues('juchuHeadId'),
           juchuKizaiHeadId: getValues('juchuKizaiHeadId'),
           juchuKizaiMeisaiId: 0,
-          shozokuId: d.shozokuId,
+          mShozokuId: d.mShozokuId,
+          shozokuId: kicsDat && !yardDat ? 1 : !kicsDat && yardDat ? 2 : d.mShozokuId,
           shozokuNam: d.shozokuNam,
           mem: '',
           kizaiId: d.kizaiId,
@@ -1511,10 +1555,11 @@ export const EquipmentReturnOrderDetail = (props: {
           return stock;
         });
         // ソート後の機材id
-        const sortKizaiId = [...returnJuchuKizaiMeisaiList, ...newReturnJuchuKizaiMeisaiData]
+        const sortKizaiId = [...returnJuchuKizaiMeisaiList.filter((d) => !d.delFlag), ...newReturnJuchuKizaiMeisaiData]
           .sort((a, b) => a.dspOrdNum - b.dspOrdNum)
           .map((d) => d.kizaiId);
 
+        console.log('aaaaaaaaaaaaaaaaaaaaaa', sortKizaiId);
         const containerIds = new Set(returnJuchuContainerMeisaiList.filter((d) => !d.delFlag).map((d) => d.kizaiId));
         const filterContainerData = containerData.filter((d) => !containerIds.has(d.kizaiId));
         const newReturnJuchuContainerMeisaiData: ReturnJuchuContainerMeisaiValues[] = filterContainerData.map((d) => ({
@@ -1906,6 +1951,12 @@ export const EquipmentReturnOrderDetail = (props: {
                                 onClear={() => {
                                   field.onChange(null);
                                   trigger(['kicsNyukoDat', 'yardNyukoDat']);
+                                  const yardNyukoDat = getValues('yardNyukoDat');
+                                  setReturnJuchuKizaiMeisaiList((prev) =>
+                                    prev.map((d) =>
+                                      yardNyukoDat ? { ...d, shozokuId: 2 } : { ...d, shozokuId: d.mShozokuId }
+                                    )
+                                  );
                                 }}
                               />
                             )}
@@ -1928,6 +1979,12 @@ export const EquipmentReturnOrderDetail = (props: {
                                 onClear={() => {
                                   field.onChange(null);
                                   trigger(['kicsNyukoDat', 'yardNyukoDat']);
+                                  const kicsNyukoDat = getValues('kicsNyukoDat');
+                                  setReturnJuchuKizaiMeisaiList((prev) =>
+                                    prev.map((d) =>
+                                      kicsNyukoDat ? { ...d, shozokuId: 1 } : { ...d, shozokuId: d.mShozokuId }
+                                    )
+                                  );
                                 }}
                               />
                             )}

@@ -3309,6 +3309,7 @@ const EquipmentOrderDetail = (props: {
                       <ContainerTable
                         rows={juchuContainerMeisaiList}
                         edit={edit}
+                        fixFlag={fixFlag}
                         handleContainerMemoChange={handleContainerMemoChange}
                         handleContainerCellChange={handleContainerCellChange}
                         handleMeisaiDelete={handleCtnMeisaiDelete}
