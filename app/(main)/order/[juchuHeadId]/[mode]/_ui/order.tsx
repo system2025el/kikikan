@@ -234,6 +234,8 @@ export const Order = (props: {
   const lock = async () => {
     if (!user) return;
 
+    if (getValues('juchuHeadId') === 0) return true;
+
     try {
       const lockData = await lockCheck(1, getValues('juchuHeadId'), user.name, user.email);
       setLockData(lockData);
