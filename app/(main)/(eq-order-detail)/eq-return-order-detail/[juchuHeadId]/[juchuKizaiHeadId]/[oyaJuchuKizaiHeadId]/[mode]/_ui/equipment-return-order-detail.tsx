@@ -680,6 +680,7 @@ export const EquipmentReturnOrderDetail = (props: {
           `/eq-return-order-detail/${data.juchuHeadId}/${newJuchuKizaiHeadId}/${data.oyaJuchuKizaiHeadId}/edit`
         );
       } else {
+        setIsLoading(false);
         setSnackBarMessage('保存に失敗しました');
         setSnackBarOpen(true);
       }
@@ -869,19 +870,20 @@ export const EquipmentReturnOrderDetail = (props: {
             setReturnJuchuContainerMeisaiList(returnJuchuContainerMeisaiData ?? []);
           }
           setOtherDirty(false);
-
+          setIsLoading(false);
           setSnackBarMessage('保存しました');
           setSnackBarOpen(true);
         } catch (e) {
+          setIsLoading(false);
           setSnackBarMessage('データの再取得に失敗しました');
           setSnackBarOpen(true);
         }
       } else {
+        setIsLoading(false);
         setSnackBarMessage('保存に失敗しました');
         setSnackBarOpen(true);
       }
     }
-    setIsLoading(false);
     setIsProcessing(false);
   };
 

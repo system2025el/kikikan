@@ -544,6 +544,7 @@ export const EquipmentKeepOrderDetail = (props: {
           `/eq-keep-order-detail/${data.juchuHeadId}/${newJuchuKizaiHeadId}/${data.oyaJuchuKizaiHeadId}/edit`
         );
       } else {
+        setIsLoading(false);
         setSnackBarMessage('保存に失敗しました');
         setSnackBarOpen(true);
       }
@@ -646,19 +647,20 @@ export const EquipmentKeepOrderDetail = (props: {
             setKeepJuchuContainerMeisaiList(keepJuchuContainerMeisaiData ?? []);
           }
           setOtherDirty(false);
-
+          setIsLoading(false);
           setSnackBarMessage('保存しました');
           setSnackBarOpen(true);
         } catch (e) {
+          setIsLoading(false);
           setSnackBarMessage('データの再取得に失敗しました');
           setSnackBarOpen(true);
         }
       } else {
+        setIsLoading(false);
         setSnackBarMessage('保存に失敗しました');
         setSnackBarOpen(true);
       }
     }
-    setIsLoading(false);
     setIsProcessing(false);
   };
 

@@ -303,6 +303,7 @@ export const Order = (props: {
       if (newOrderId) {
         router.replace(`/order/${newOrderId}/edit`);
       } else {
+        setIsLoading(false);
         setSnackBarMessage('保存に失敗しました');
         setSnackBarOpen(true);
       }

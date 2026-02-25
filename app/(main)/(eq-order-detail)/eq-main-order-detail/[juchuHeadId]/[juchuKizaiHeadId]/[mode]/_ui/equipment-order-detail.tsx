@@ -783,6 +783,7 @@ const EquipmentOrderDetail = (props: {
       if (newJuchuKizaiHeadId) {
         router.replace(`/eq-main-order-detail/${data.juchuHeadId}/${newJuchuKizaiHeadId}/edit`);
       } else {
+        setIsLoading(false);
         setSnackBarMessage('保存に失敗しました');
         setSnackBarOpen(true);
       }
@@ -1013,19 +1014,20 @@ const EquipmentOrderDetail = (props: {
             setOriginIdoJuchuKizaiMeisaiList(idoJuchuKizaiMeisaiList);
           }
           setOtherDirty(false);
-
+          setIsLoading(false);
           setSnackBarMessage('保存しました');
           setSnackBarOpen(true);
         } catch (e) {
+          setIsLoading(false);
           setSnackBarMessage('データの再取得に失敗しました');
           setSnackBarOpen(true);
         }
       } else {
+        setIsLoading(false);
         setSnackBarMessage('保存に失敗しました');
         setSnackBarOpen(true);
       }
     }
-    setIsLoading(false);
     setIsProcessing(false);
   };
 

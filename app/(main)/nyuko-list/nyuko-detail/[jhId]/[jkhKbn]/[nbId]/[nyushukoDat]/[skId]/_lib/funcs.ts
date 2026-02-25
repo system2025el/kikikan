@@ -6,13 +6,22 @@ import { PoolClient } from 'pg';
 import pool, { refreshVRfid } from '@/app/_lib/db/postgres';
 import { selectJuchuContainerMeisaiMaxId, upsertJuchuContainerMeisai } from '@/app/_lib/db/tables/t-juchu-ctn-meisai';
 import { selectJuchuKizaiMeisaiMaxId, upsertJuchuKizaiMeisai } from '@/app/_lib/db/tables/t-juchu-kizai-meisai';
-import { selectJuchuKizaiNyushukoConfirm } from '@/app/_lib/db/tables/t-juchu-kizai-nyushuko';
-import { updateNyushukoDen, updateOyaNyukoDen, upsertNyushukoDen } from '@/app/_lib/db/tables/t-nyushuko-den';
+import {
+  selectJuchuKizaiNyushukoConfirm,
+  selectOyaJuchuKizaiNyushukoConfirm,
+} from '@/app/_lib/db/tables/t-juchu-kizai-nyushuko';
+import {
+  updateNyushukoDen,
+  updateOyaCtnNyukoDen,
+  updateOyaKizaiNyukoDen,
+  upsertNyushukoDen,
+} from '@/app/_lib/db/tables/t-nyushuko-den';
 import {
   insertNyushukoFix,
   selectSagyoIdFilterNyushukoFixFlag,
   updateNyushukoFix,
 } from '@/app/_lib/db/tables/t-nyushuko-fix';
+import { selectJuchuContainerMeisai } from '@/app/_lib/db/tables/v-juchu-ctn-meisai';
 import { selectNyushukoOne } from '@/app/_lib/db/tables/v-nyushuko-den2-head';
 import { selectNyushukoDetail } from '@/app/_lib/db/tables/v-nyushuko-den2-lst';
 import { JuchuCtnMeisai } from '@/app/_lib/db/types/t_juchu_ctn_meisai-type';
@@ -225,8 +234,39 @@ export const updReturnNyukoDetail = async (
     // 返却入庫伝票更新
     await updNyukoDen(nyukoDetailTableData, userNam, connection);
 
-    // 親入子伝票更新
-    await updOyaNyukoDen(nyukoDetailTableData, userNam, connection);
+    // 親機材入庫伝票更新
+    await updOyaKizaiNyukoDen(kizaiData, userNam, connection);
+
+    const juchuKizaiHeadIds = [...new Set(nyukoDetailTableData.filter((d) => d.ctnFlg).map((d) => d.juchuKizaiHeadId))];
+    for (const juchuKizaiHeadId of juchuKizaiHeadIds) {
+      const juchuCtnNyukoData = ctnData.filter((d) => d.juchuKizaiHeadId === juchuKizaiHeadId);
+      const juchuCtnMeisaiData = await getReturnJuchuContainerMeisai(nyukoDetailData.juchuHeadId, juchuKizaiHeadId);
+
+      // 入庫日確認
+      const nyukoDat = await selectOyaJuchuKizaiNyushukoConfirm(
+        {
+          juchu_head_id: nyukoDetailData.juchuHeadId,
+          juchu_kizai_head_id: juchuKizaiHeadId,
+          nyushuko_shubetu_id: 2,
+        },
+        connection
+      );
+
+      if (nyukoDat && nyukoDat.length === 2) {
+        // 親コンテナ入庫伝票更新
+        await updOyaCtnNyukoDen(juchuCtnNyukoData, juchuCtnMeisaiData, 1, 1, userNam, connection);
+        await updOyaCtnNyukoDen(juchuCtnNyukoData, juchuCtnMeisaiData, 2, 2, userNam, connection);
+      } else if (nyukoDat && nyukoDat.length === 1) {
+        await updOyaCtnNyukoDen(
+          juchuCtnNyukoData,
+          juchuCtnMeisaiData,
+          nyukoDat[0].nyushuko_basho_id,
+          3,
+          userNam,
+          connection
+        );
+      }
+    }
 
     // 機材明細追加更新
     if (kizaiData && kizaiData.length > 0) {
@@ -281,7 +321,7 @@ export const updKeepNyukoDetail = async (
       });
 
       if (shukoDat.data) {
-        await upsShukoDen(nyukoDetailTableData, shukoDat.data.nyushuko_dat, userNam, connection);
+        await upsShukoDen(nyukoDetailTableData, shukoDat.data[0].nyushuko_dat, userNam, connection);
       }
     }
 
@@ -515,13 +555,13 @@ export const upsShukoDen = async (
 };
 
 /**
- * 親入庫伝票更新
+ * 親機材入庫伝票更新
  * @param nyukoDetailTableData 入庫テーブルデータ
  * @param userNam ユーザー名
  * @param connection
  * @returns
  */
-export const updOyaNyukoDen = async (
+export const updOyaKizaiNyukoDen = async (
   nyukoDetailTableData: NyukoDetailTableValues[],
   userNam: string,
   connection: PoolClient
@@ -543,7 +583,60 @@ export const updOyaNyukoDen = async (
 
   try {
     for (const data of updateNyukoData) {
-      await updateOyaNyukoDen(data, connection);
+      await updateOyaKizaiNyukoDen(data, connection);
+    }
+    console.log('oya nyuko den update successfully:', updateNyukoData);
+  } catch (e) {
+    console.error('Exception while updating nyushuko den:', e);
+    throw e;
+  }
+};
+
+/**
+ * 親コンテナ入庫伝票更新
+ * @param nyukoDetailTableData 入庫テーブルデータ
+ * @param userNam ユーザー名
+ * @param connection
+ * @returns
+ */
+export const updOyaCtnNyukoDen = async (
+  nyukoDetailTableData: NyukoDetailTableValues[],
+  juchuContainerMeisaiData: {
+    juchuHeadId: number;
+    juchuKizaiHeadId: number;
+    juchuKizaiMeisaiId: number;
+    kizaiId: number;
+    planKicsKizaiQty: number;
+    planYardKizaiQty: number;
+  }[],
+  sagyoId: number,
+  planQtyId: number,
+  userNam: string,
+  connection: PoolClient
+) => {
+  const updateNyukoData: NyushukoDen[] = nyukoDetailTableData.map((d) => ({
+    juchu_head_id: d.juchuHeadId,
+    juchu_kizai_head_id: d.juchuKizaiHeadId,
+    juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
+    kizai_id: d.kizaiId,
+    plan_qty:
+      planQtyId === 1
+        ? juchuContainerMeisaiData.find((c) => c.kizaiId === d.kizaiId)?.planKicsKizaiQty
+        : planQtyId === 2
+          ? juchuContainerMeisaiData.find((c) => c.kizaiId === d.kizaiId)?.planYardKizaiQty
+          : d.planQty,
+    sagyo_den_dat: d.nyushukoDat,
+    sagyo_id: sagyoId,
+    sagyo_kbn_id: 30,
+    dsp_ord_num: d.dspOrdNumMeisai,
+    indent_num: d.indentNum,
+    upd_dat: new Date().toISOString(),
+    upd_user: userNam,
+  }));
+
+  try {
+    for (const data of updateNyukoData) {
+      await updateOyaCtnNyukoDen(data, connection);
     }
     console.log('oya nyuko den update successfully:', updateNyukoData);
   } catch (e) {
@@ -586,4 +679,31 @@ export const addNyukoFix = async (
   } catch (e) {
     throw e;
   }
+};
+
+/**
+ * 返却受注コンテナ明細データ取得
+ * @param juchuHeadId 受注ヘッダーid
+ * @param juchuKizaiHeadId 受注機材ヘッダーid
+ * @returns 返却受注コンテナ明細データ
+ */
+export const getReturnJuchuContainerMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
+  const { data: containerData, error: containerError } = await selectJuchuContainerMeisai(
+    juchuHeadId,
+    juchuKizaiHeadId
+  );
+  if (containerError) {
+    console.error('GetReturnContainerList return containerList error : ', containerError);
+    throw containerError;
+  }
+
+  const returnJuchuContainerMeisaiData = containerData.map((d) => ({
+    juchuHeadId: d.juchu_head_id ?? 0,
+    juchuKizaiHeadId: d.juchu_kizai_head_id ?? 0,
+    juchuKizaiMeisaiId: d.juchu_kizai_meisai_id ?? 0,
+    kizaiId: d.kizai_id ?? 0,
+    planKicsKizaiQty: d.kics_plan_kizai_qty ? -1 * d.kics_plan_kizai_qty : 0,
+    planYardKizaiQty: d.yard_plan_kizai_qty ? -1 * d.yard_plan_kizai_qty : 0,
+  }));
+  return returnJuchuContainerMeisaiData;
 };

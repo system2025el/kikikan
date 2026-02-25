@@ -64,6 +64,45 @@ export const selectJuchuKizaiNyushukoConfirm = async (data: {
 };
 
 /**
+ * 親受注機材入出庫データ確認
+ * @param confirmData 受注機材入出庫確認データ
+ * @returns
+ */
+export const selectOyaJuchuKizaiNyushukoConfirm = async (
+  data: {
+    juchu_head_id: number;
+    juchu_kizai_head_id: number;
+    nyushuko_shubetu_id: number;
+  },
+  connection: PoolClient
+) => {
+  const query = `
+    SELECT *
+    FROM 
+      ${SCHEMA}.t_juchu_kizai_nyushuko
+    WHERE
+      juchu_head_id = $1
+      AND juchu_kizai_head_id = (
+        SELECT 
+          oya_juchu_kizai_head_id 
+        FROM 
+          ${SCHEMA}.t_juchu_kizai_head 
+        WHERE 
+          juchu_head_id = $1 
+          AND juchu_kizai_head_id = $2
+      )
+      AND nyushuko_shubetu_id = $3
+  `;
+
+  const values = [data.juchu_head_id, data.juchu_kizai_head_id, data.nyushuko_shubetu_id];
+  try {
+    return (await connection.query(query, values)).rows;
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
  * 受注機材入出庫新規追加
  * @param juchuKizaiHeadId 受注機材ヘッダーid
  * @param juchuKizaiHeadData 受注機材ヘッダーデータ

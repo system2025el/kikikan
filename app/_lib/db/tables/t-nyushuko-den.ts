@@ -150,11 +150,58 @@ export const updateNyushukoDenFromKizaiMeisai = async (data: NyushukoDen, connec
 };
 
 /**
- * 親入庫伝票更新
+ * 親機材入庫伝票更新
  * @param data 入出庫伝票データ
  * @param connection
  */
-export const updateOyaNyukoDen = async (data: NyushukoDen, connection: PoolClient) => {
+export const updateOyaKizaiNyukoDen = async (data: NyushukoDen, connection: PoolClient) => {
+  const query = `
+    UPDATE
+      ${SCHEMA}.t_nyushuko_den
+    SET
+      plan_qty = plan_qty - $1,
+      upd_dat = $2,
+      upd_user = $3
+    WHERE
+      juchu_head_id = $4
+      AND juchu_kizai_head_id = (
+        SELECT 
+          oya_juchu_kizai_head_id 
+        FROM 
+          ${SCHEMA}.t_juchu_kizai_head 
+        WHERE 
+          juchu_head_id = $4 
+          AND juchu_kizai_head_id = $5
+      )
+      AND sagyo_kbn_id = $6
+      AND kizai_id = $7
+      AND dsp_ord_num = $8
+  `;
+
+  const values = [
+    data.plan_qty,
+    data.upd_dat,
+    data.upd_user,
+    data.juchu_head_id,
+    data.juchu_kizai_head_id,
+    data.sagyo_kbn_id,
+    data.kizai_id,
+    data.dsp_ord_num,
+  ];
+
+  try {
+    await connection.query(query, values);
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
+ * 親コンテナ入庫伝票更新
+ * @param data 入出庫伝票データ
+ * @param connection
+ */
+export const updateOyaCtnNyukoDen = async (data: NyushukoDen, connection: PoolClient) => {
   const query = `
     UPDATE
       ${SCHEMA}.t_nyushuko_den
