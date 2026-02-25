@@ -438,6 +438,7 @@ export const saveReturnJuchuKizai = async (
             ctnNyukoData,
             data.kicsNyukoDat,
             1,
+            1,
             userNam,
             connection
           );
@@ -446,6 +447,7 @@ export const saveReturnJuchuKizai = async (
           const upsertYardCtnNyukoDenResult = await upsCtnNyukoDen(
             ctnNyukoData,
             data.yardNyukoDat,
+            2,
             2,
             userNam,
             connection
@@ -464,7 +466,14 @@ export const saveReturnJuchuKizai = async (
         // KICSコンテナ入庫明細
         const ctnNyukoData = newReturnJuchuContainerMeisaiData.filter((d) => !d.delFlag);
         if (ctnNyukoData.length > 0) {
-          const upsertCtnNyukoDenResult = await upsCtnNyukoDen(ctnNyukoData, data.kicsNyukoDat, 1, userNam, connection);
+          const upsertCtnNyukoDenResult = await upsCtnNyukoDen(
+            ctnNyukoData,
+            data.kicsNyukoDat,
+            1,
+            3,
+            userNam,
+            connection
+          );
           console.log('KICSコンテナ入庫伝票追加更新', upsertCtnNyukoDenResult);
         }
       } else if (!data.kicsNyukoDat && data.yardNyukoDat) {
@@ -479,7 +488,14 @@ export const saveReturnJuchuKizai = async (
         // YARDコンテナ入庫明細
         const ctnNyukoData = newReturnJuchuContainerMeisaiData.filter((d) => !d.delFlag);
         if (ctnNyukoData.length > 0) {
-          const upsertCtnNyukoDenResult = await upsCtnNyukoDen(ctnNyukoData, data.yardNyukoDat, 2, userNam, connection);
+          const upsertCtnNyukoDenResult = await upsCtnNyukoDen(
+            ctnNyukoData,
+            data.yardNyukoDat,
+            2,
+            3,
+            userNam,
+            connection
+          );
           console.log('YARDコンテナ入庫伝票追加更新', upsertCtnNyukoDenResult);
         }
       }
@@ -1263,6 +1279,7 @@ export const upsCtnNyukoDen = async (
   juchuContainerMeisaiData: ReturnJuchuContainerMeisaiValues[],
   nyukoDat: Date,
   sagyoId: number,
+  planQtyId: number,
   userNam: string,
   connection: PoolClient
 ) => {
@@ -1274,7 +1291,7 @@ export const upsCtnNyukoDen = async (
     sagyo_den_dat: nyukoDat.toISOString(),
     sagyo_id: sagyoId,
     kizai_id: d.kizaiId,
-    plan_qty: sagyoId === 1 ? d.planKicsKizaiQty : d.planYardKizaiQty,
+    plan_qty: planQtyId === 1 ? d.planKicsKizaiQty : planQtyId === 2 ? d.planYardKizaiQty : d.planQty,
     dsp_ord_num: d.dspOrdNum,
     indent_num: d.indentNum,
     add_dat: new Date().toISOString(),

@@ -688,29 +688,29 @@ export const EquipmentReturnOrderDetail = (props: {
     } else {
       // const kicsMeisai = returnJuchuKizaiMeisaiList.filter((d) => d.shozokuId === 1 && !d.delFlag);
       // const yardMeisai = returnJuchuKizaiMeisaiList.filter((d) => d.shozokuId === 2 && !d.delFlag);
-      const kicsContainer = returnJuchuContainerMeisaiList.filter((d) => d.planKicsKizaiQty && !d.delFlag);
-      const yardContainer = returnJuchuContainerMeisaiList.filter((d) => d.planYardKizaiQty && !d.delFlag);
+      // const kicsContainer = returnJuchuContainerMeisaiList.filter((d) => d.planKicsKizaiQty && !d.delFlag);
+      // const yardContainer = returnJuchuContainerMeisaiList.filter((d) => d.planYardKizaiQty && !d.delFlag);
 
-      if ((kicsContainer.length > 0 && !data.kicsNyukoDat) || (yardContainer.length > 0 && !data.yardNyukoDat)) {
-        if (kicsContainer.length > 0 && !data.kicsNyukoDat) {
-          setError('kicsNyukoDat', {
-            type: 'manual',
-            message: '',
-          });
-        }
-        if (yardContainer.length > 0 && !data.yardNyukoDat) {
-          setError('yardNyukoDat', {
-            type: 'manual',
-            message: '',
-          });
-        }
-        setAlertTitle('入庫日時が入力されていません');
-        setAlertMessage('入庫日時を入力してください');
-        setAlertOpen(true);
-        setIsLoading(false);
-        setIsProcessing(false);
-        return;
-      }
+      // if ((kicsContainer.length > 0 && !data.kicsNyukoDat) || (yardContainer.length > 0 && !data.yardNyukoDat)) {
+      //   if (kicsContainer.length > 0 && !data.kicsNyukoDat) {
+      //     setError('kicsNyukoDat', {
+      //       type: 'manual',
+      //       message: '',
+      //     });
+      //   }
+      //   if (yardContainer.length > 0 && !data.yardNyukoDat) {
+      //     setError('yardNyukoDat', {
+      //       type: 'manual',
+      //       message: '',
+      //     });
+      //   }
+      //   setAlertTitle('入庫日時が入力されていません');
+      //   setAlertMessage('入庫日時を入力してください');
+      //   setAlertOpen(true);
+      //   setIsLoading(false);
+      //   setIsProcessing(false);
+      //   return;
+      // }
 
       // if (
       //   ((kicsMeisai.length > 0 || kicsContainer.length > 0) && !data.kicsNyukoDat) ||
