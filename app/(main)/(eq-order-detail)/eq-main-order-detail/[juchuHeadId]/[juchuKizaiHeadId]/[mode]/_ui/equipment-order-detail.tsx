@@ -244,6 +244,38 @@ const EquipmentOrderDetail = (props: {
   // 編集中かどうか
   const [isNebikiAmtEditing, setIsNebikiAmtEditing] = useState(false);
 
+  const juchuColorMap = useMemo(() => {
+    const map = new Map<string, string>();
+
+    const sorted = [...juchuHonbanbiList].sort((a, b) => a.juchuHonbanbiShubetuId - b.juchuHonbanbiShubetuId);
+
+    sorted.forEach((item) => {
+      const dateKey = toJapanYMDString(item.juchuHonbanbiDat);
+      let color = 'white';
+
+      switch (item.juchuHonbanbiShubetuId) {
+        case 40:
+          color = 'pink';
+          break;
+        case 30:
+          color = 'lightgreen';
+          break;
+        case 20:
+          color = 'orange';
+          break;
+        case 10:
+          color = 'mediumpurple';
+          break;
+      }
+
+      if (color !== 'white') {
+        map.set(dateKey, color);
+      }
+    });
+
+    return map;
+  }, [juchuHonbanbiList]);
+
   // context
   const { setIsDirty /*setLock*/ } = useDirty();
 
@@ -3284,7 +3316,8 @@ const EquipmentOrderDetail = (props: {
                         <StockTable
                           eqStockList={eqStockList}
                           dateRange={dateRange}
-                          juchuHonbanbiList={juchuHonbanbiList}
+                          //juchuHonbanbiList={juchuHonbanbiList}
+                          juchuColorMap={juchuColorMap}
                           ref={rightRef}
                         />
                       </Box>

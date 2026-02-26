@@ -12,31 +12,42 @@ export const getDateHeaderBackgroundColor = (date: string, dateRange: string[]):
 export const getStockRowBackgroundColor = (
   date: Date,
   dateRange: string[],
-  juchuHonbanbiList: JuchuKizaiHonbanbiValues[]
+  //juchuHonbanbiList: JuchuKizaiHonbanbiValues[]
+  juchuColorMap: Map<string, string>
 ): string => {
+  // const cellDate = toJapanYMDString(date);
+
+  // if (juchuHonbanbiList.some((date) => toJapanYMDString(date.juchuHonbanbiDat) === cellDate)) {
+  //   const shubetuIds = juchuHonbanbiList
+  //     .filter((date) => toJapanYMDString(date.juchuHonbanbiDat) === cellDate)
+  //     .sort((a, b) => b.juchuHonbanbiShubetuId - a.juchuHonbanbiShubetuId);
+
+  //   switch (shubetuIds[0].juchuHonbanbiShubetuId) {
+  //     case 40:
+  //       return 'pink';
+  //     case 30:
+  //       return 'lightgreen';
+  //     case 20:
+  //       return 'orange';
+  //     case 10:
+  //       return 'mediumpurple';
+  //     default:
+  //       return 'white';
+  //   }
+  // }
+
+  // if (cellDate === dateRange[dateRange.length - 1]) return 'yellow';
+  // if (cellDate === dateRange[0]) return 'lightblue';
+  // if (dateRange.includes(cellDate)) return '#ACB9CA';
+  // return 'white';
   const cellDate = toJapanYMDString(date);
 
-  if (juchuHonbanbiList.some((date) => toJapanYMDString(date.juchuHonbanbiDat) === cellDate)) {
-    const shubetuIds = juchuHonbanbiList
-      .filter((date) => toJapanYMDString(date.juchuHonbanbiDat) === cellDate)
-      .sort((a, b) => b.juchuHonbanbiShubetuId - a.juchuHonbanbiShubetuId);
-
-    switch (shubetuIds[0].juchuHonbanbiShubetuId) {
-      case 40:
-        return 'pink';
-      case 30:
-        return 'lightgreen';
-      case 20:
-        return 'orange';
-      case 10:
-        return 'mediumpurple';
-      default:
-        return 'white';
-    }
-  }
+  const juchuColor = juchuColorMap.get(cellDate);
+  if (juchuColor) return juchuColor;
 
   if (cellDate === dateRange[dateRange.length - 1]) return 'yellow';
   if (cellDate === dateRange[0]) return 'lightblue';
   if (dateRange.includes(cellDate)) return '#ACB9CA';
+
   return 'white';
 };

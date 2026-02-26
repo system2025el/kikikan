@@ -40,11 +40,17 @@ import {
 type StockTableProps = {
   eqStockList: StockTableValues[][];
   dateRange: string[];
-  juchuHonbanbiList: JuchuKizaiHonbanbiValues[];
+  //juchuHonbanbiList: JuchuKizaiHonbanbiValues[];
+  juchuColorMap: Map<string, string>;
   ref: React.RefObject<HTMLDivElement | null>;
 };
 
-export const StockTable: React.FC<StockTableProps> = ({ eqStockList, dateRange, juchuHonbanbiList, ref }) => {
+export const StockTable: React.FC<StockTableProps> = ({
+  eqStockList,
+  dateRange,
+  /*juchuHonbanbiList*/ juchuColorMap,
+  ref,
+}) => {
   console.log('stockテーブル描写');
   return (
     <TableContainer ref={ref} style={{ overflow: 'scroll', maxHeight: '80vh' }}>
@@ -82,7 +88,8 @@ export const StockTable: React.FC<StockTableProps> = ({ eqStockList, dateRange, 
                 row={row}
                 index={rowIndex}
                 dateRange={dateRange}
-                juchuHonbanbiList={juchuHonbanbiList}
+                //juchuHonbanbiList={juchuHonbanbiList}
+                juchuColorMap={juchuColorMap}
               />
             ))}
         </TableBody>
@@ -95,11 +102,12 @@ export type StockTableRowProps = {
   row: StockTableValues[];
   index: number;
   dateRange: string[];
-  juchuHonbanbiList: JuchuKizaiHonbanbiValues[];
+  //juchuHonbanbiList: JuchuKizaiHonbanbiValues[];
+  juchuColorMap: Map<string, string>;
 };
 
 const StockTableRow = React.memo(
-  ({ row, index, dateRange, juchuHonbanbiList }: StockTableRowProps) => {
+  ({ row, index, dateRange, /*juchuHonbanbiList*/ juchuColorMap }: StockTableRowProps) => {
     console.log('stock側描写', index);
     return (
       <TableRow>
@@ -110,7 +118,7 @@ const StockTableRow = React.memo(
               align={typeof cell === 'number' ? 'right' : 'left'}
               style={styles.row}
               sx={{
-                bgcolor: getStockRowBackgroundColor(cell.calDat, dateRange, juchuHonbanbiList),
+                bgcolor: getStockRowBackgroundColor(cell.calDat, dateRange, /*juchuHonbanbiList*/ juchuColorMap),
                 color: cell.zaikoQty < 0 ? 'red' : 'black',
               }}
               size="small"
@@ -123,7 +131,11 @@ const StockTableRow = React.memo(
     );
   },
   (prevProps, nextProps) => {
-    return prevProps.row === nextProps.row && prevProps.juchuHonbanbiList === nextProps.juchuHonbanbiList;
+    return (
+      prevProps.row === nextProps.row &&
+      /*prevProps.juchuHonbanbiList === nextProps.juchuHonbanbiList*/ prevProps.juchuColorMap ===
+        nextProps.juchuColorMap
+    );
   }
 );
 
