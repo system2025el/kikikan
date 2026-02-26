@@ -60,6 +60,7 @@ import {
   getNyushukoFixFlag,
 } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 import { DetailOerValues } from '@/app/(main)/(eq-order-detail)/_lib/types';
+import { HonbanbiColorValues } from '@/app/(main)/(eq-order-detail)/eq-keep-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[oyaJuchuKizaiHeadId]/[mode]/_lib/types';
 
 import { AlertDialog, DeleteAlertDialog, MoveAlertDialog } from '../../../../../_ui/caveat-dialog';
 import {
@@ -95,6 +96,7 @@ const EquipmentOrderDetail = (props: {
   juchuHonbanbiData: JuchuKizaiHonbanbiValues[] | undefined;
   edit: boolean;
   fixFlag: boolean;
+  honbanbiColor: HonbanbiColorValues[];
 }) => {
   const router = useRouter();
   /** ダイアログ上部に戻るためのref */
@@ -244,6 +246,16 @@ const EquipmentOrderDetail = (props: {
   // 編集中かどうか
   const [isNebikiAmtEditing, setIsNebikiAmtEditing] = useState(false);
 
+  // 本番日種別Map
+  const shubetuColorMap = useMemo(() => {
+    const map = new Map<number, string>();
+    props.honbanbiColor.forEach((d) => {
+      map.set(d.colorId, d.colorNam);
+    });
+    return map;
+  }, [props.honbanbiColor]);
+
+  // 在庫テーブル背景色
   const juchuColorMap = useMemo(() => {
     const map = new Map<string, string>();
 
@@ -251,22 +263,8 @@ const EquipmentOrderDetail = (props: {
 
     sorted.forEach((item) => {
       const dateKey = toJapanYMDString(item.juchuHonbanbiDat);
-      let color = 'white';
 
-      switch (item.juchuHonbanbiShubetuId) {
-        case 40:
-          color = 'pink';
-          break;
-        case 30:
-          color = 'lightgreen';
-          break;
-        case 20:
-          color = 'orange';
-          break;
-        case 10:
-          color = 'mediumpurple';
-          break;
-      }
+      const color = shubetuColorMap.get(item.juchuHonbanbiShubetuId) || 'white';
 
       if (color !== 'white') {
         map.set(dateKey, color);
@@ -274,7 +272,7 @@ const EquipmentOrderDetail = (props: {
     });
 
     return map;
-  }, [juchuHonbanbiList]);
+  }, [juchuHonbanbiList, shubetuColorMap]);
 
   // context
   const { setIsDirty /*setLock*/ } = useDirty();
@@ -3317,6 +3315,7 @@ const EquipmentOrderDetail = (props: {
                           eqStockList={eqStockList}
                           dateRange={dateRange}
                           //juchuHonbanbiList={juchuHonbanbiList}
+                          shubetuColorMap={shubetuColorMap}
                           juchuColorMap={juchuColorMap}
                           ref={rightRef}
                         />
@@ -3385,7 +3384,7 @@ const EquipmentOrderDetail = (props: {
                     justifyContent={'center'}
                     ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
                     width={75}
-                    bgcolor={'mediumpurple'}
+                    bgcolor={shubetuColorMap.get(10)}
                   >
                     <Typography fontSize={'small'} py={1} px={3} sx={{ color: 'white' }}>
                       仕込
@@ -3434,7 +3433,7 @@ const EquipmentOrderDetail = (props: {
                     ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
                     mt={4}
                     width={75}
-                    bgcolor={'orange'}
+                    bgcolor={shubetuColorMap.get(20)}
                   >
                     <Typography fontSize={'small'} py={1} px={3} sx={{ color: 'white' }}>
                       RH
@@ -3491,7 +3490,7 @@ const EquipmentOrderDetail = (props: {
                     ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
                     mt={4}
                     width={75}
-                    bgcolor={'lightgreen'}
+                    bgcolor={shubetuColorMap.get(30)}
                   >
                     <Typography fontSize={'small'} py={1} px={3} sx={{ color: 'white' }}>
                       GP
@@ -3548,7 +3547,7 @@ const EquipmentOrderDetail = (props: {
                     ml={{ xs: 10, sm: 17, md: 17, lg: 17 }}
                     mt={4}
                     width={75}
-                    bgcolor={'pink'}
+                    bgcolor={shubetuColorMap.get(40)}
                   >
                     <Typography fontSize={'small'} py={1} px={3} sx={{ color: 'white' }}>
                       本番

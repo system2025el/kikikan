@@ -4,6 +4,7 @@ import dayjs from 'dayjs';
 import { PoolClient, QueryResult } from 'pg';
 
 import { selectDic } from '@/app/_lib/db/tables/m-dic';
+import { selectColor } from '@/app/_lib/db/tables/m-honbanbi-color';
 import { selectMeisaiEqts } from '@/app/_lib/db/tables/m-kizai';
 import { selectKokyaku } from '@/app/_lib/db/tables/m-kokyaku';
 import { selectDetailStockListBulk } from '@/app/_lib/db/tables/stock-table';
@@ -74,6 +75,7 @@ import { JuchuKizaiNyushuko } from '@/app/_lib/db/types/t-juchu-kizai-nyushuko-t
 import { NyushukoDen } from '@/app/_lib/db/types/t-nyushuko-den-type';
 
 import { toJapanYMDString } from '../../_lib/date-conversion';
+import { HonbanbiColorValues } from '../eq-keep-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[oyaJuchuKizaiHeadId]/[mode]/_lib/types';
 import {
   JuchuContainerMeisaiValues,
   JuchuKizaiHeadValues,
@@ -829,6 +831,27 @@ export const delAllNyukoResult = async (
     await deleteAllNyukoResult(juchuHeadId, juchuKizaiHeadId, sagyoId, connection);
     await deleteAllNyukoCtnResult(juchuHeadId, juchuKizaiHeadId, sagyoId, connection);
     return true;
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
+ * 本番日背景色取得
+ * @returns
+ */
+export const getColor = async () => {
+  try {
+    const { data, error } = await selectColor();
+    if (error) {
+      throw Error;
+    }
+
+    const honbanbiColor: HonbanbiColorValues[] = data.map((d) => ({
+      colorId: d.clolor_id,
+      colorNam: d.color_nam,
+    }));
+    return honbanbiColor;
   } catch (e) {
     throw e;
   }

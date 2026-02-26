@@ -125,7 +125,7 @@ const ReturnStockTableRow = React.memo(
           return (
             <TableCell
               key={colIndex}
-              align={typeof cell === 'number' ? 'right' : 'left'}
+              align={'right'}
               style={styles.row}
               sx={{
                 //bgcolor: getStockRowBackgroundColor(cell.calDat, dateRange, test),

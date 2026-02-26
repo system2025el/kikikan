@@ -41,6 +41,7 @@ type StockTableProps = {
   eqStockList: StockTableValues[][];
   dateRange: string[];
   //juchuHonbanbiList: JuchuKizaiHonbanbiValues[];
+  shubetuColorMap: Map<number, string>;
   juchuColorMap: Map<string, string>;
   ref: React.RefObject<HTMLDivElement | null>;
 };
@@ -48,6 +49,7 @@ type StockTableProps = {
 export const StockTable: React.FC<StockTableProps> = ({
   eqStockList,
   dateRange,
+  shubetuColorMap,
   /*juchuHonbanbiList*/ juchuColorMap,
   ref,
 }) => {
@@ -89,6 +91,7 @@ export const StockTable: React.FC<StockTableProps> = ({
                 index={rowIndex}
                 dateRange={dateRange}
                 //juchuHonbanbiList={juchuHonbanbiList}
+                shubetuColorMap={shubetuColorMap}
                 juchuColorMap={juchuColorMap}
               />
             ))}
@@ -103,11 +106,12 @@ export type StockTableRowProps = {
   index: number;
   dateRange: string[];
   //juchuHonbanbiList: JuchuKizaiHonbanbiValues[];
+  shubetuColorMap: Map<number, string>;
   juchuColorMap: Map<string, string>;
 };
 
 const StockTableRow = React.memo(
-  ({ row, index, dateRange, /*juchuHonbanbiList*/ juchuColorMap }: StockTableRowProps) => {
+  ({ row, index, dateRange, shubetuColorMap, /*juchuHonbanbiList*/ juchuColorMap }: StockTableRowProps) => {
     console.log('stock側描写', index);
     return (
       <TableRow>
@@ -115,10 +119,15 @@ const StockTableRow = React.memo(
           return (
             <TableCell
               key={colIndex}
-              align={typeof cell === 'number' ? 'right' : 'left'}
+              align={'right'}
               style={styles.row}
               sx={{
-                bgcolor: getStockRowBackgroundColor(cell.calDat, dateRange, /*juchuHonbanbiList*/ juchuColorMap),
+                bgcolor: getStockRowBackgroundColor(
+                  cell.calDat,
+                  dateRange,
+                  shubetuColorMap,
+                  /*juchuHonbanbiList*/ juchuColorMap
+                ),
                 color: cell.zaikoQty < 0 ? 'red' : 'black',
               }}
               size="small"

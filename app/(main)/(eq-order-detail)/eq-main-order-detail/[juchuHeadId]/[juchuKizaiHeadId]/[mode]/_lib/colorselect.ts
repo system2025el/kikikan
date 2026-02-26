@@ -13,6 +13,7 @@ export const getStockRowBackgroundColor = (
   date: Date,
   dateRange: string[],
   //juchuHonbanbiList: JuchuKizaiHonbanbiValues[]
+  shubetuColorMap: Map<number, string>,
   juchuColorMap: Map<string, string>
 ): string => {
   // const cellDate = toJapanYMDString(date);
@@ -45,9 +46,9 @@ export const getStockRowBackgroundColor = (
   const juchuColor = juchuColorMap.get(cellDate);
   if (juchuColor) return juchuColor;
 
-  if (cellDate === dateRange[dateRange.length - 1]) return 'yellow';
-  if (cellDate === dateRange[0]) return 'lightblue';
-  if (dateRange.includes(cellDate)) return '#ACB9CA';
+  if (cellDate === dateRange[dateRange.length - 1]) return shubetuColorMap.get(3) ?? 'yellow';
+  if (cellDate === dateRange[0]) return shubetuColorMap.get(2) ?? 'lightblue';
+  if (dateRange.includes(cellDate)) return shubetuColorMap.get(1) ?? '#ACB9CA';
 
   return 'white';
 };

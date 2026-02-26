@@ -64,3 +64,8 @@ export type KeepJuchuContainerMeisaiValues = {
   delFlag: boolean;
   saveFlag: boolean;
 };
+
+export type HonbanbiColorValues = {
+  colorId: number;
+  colorNam: string;
+};
