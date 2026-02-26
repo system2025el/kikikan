@@ -61,7 +61,13 @@ export const MasterDialogTitle = ({
         <Stack>
           <SubmitButton
             type="submit"
-            disabled={isDirty ? false : true || !((user?.permission.masters ?? 0) & permission.mst_upd)}
+            disabled={
+              isDirty
+                ? false
+                : true || dialogTitle === '担当者マスタ登録'
+                  ? !((user?.permission.loginSetting ?? 0) & permission.login)
+                  : !((user?.permission.masters ?? 0) & permission.mst_upd)
+            }
             onClick={() => setAction('save')}
             push={push}
           />
@@ -69,10 +75,22 @@ export const MasterDialogTitle = ({
             <>
               <MakeEditModeButton
                 handleEditable={handleEditable}
-                disabled={editable ? true : false || !((user?.permission.masters ?? 0) & permission.mst_upd)}
+                disabled={
+                  editable
+                    ? true
+                    : false || dialogTitle === '担当者マスタ登録'
+                      ? !((user?.permission.loginSetting ?? 0) & permission.login)
+                      : !((user?.permission.masters ?? 0) & permission.mst_upd)
+                }
               />
               <DeleteButton
-                disabled={isNew ? true : false || !((user?.permission.masters ?? 0) & permission.mst_upd)}
+                disabled={
+                  isNew
+                    ? true
+                    : false || dialogTitle === '担当者マスタ登録'
+                      ? !((user?.permission.loginSetting ?? 0) & permission.login)
+                      : !((user?.permission.masters ?? 0) & permission.mst_upd)
+                }
                 type="submit"
                 onClick={isDeleted ? () => setAction('restore') : () => setAction('delete')}
                 isDeleted={isDeleted}

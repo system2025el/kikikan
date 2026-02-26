@@ -14,7 +14,7 @@ import {
   selectSagyoIdFilterNyushukoFixFlag,
 } from '@/app/_lib/db/tables/t-nyushuko-fix';
 import { selectNyushukoOne } from '@/app/_lib/db/tables/v-nyushuko-den2-head';
-import { selectNyushukoDetail } from '@/app/_lib/db/tables/v-nyushuko-den2-lst';
+import { selectCtnNyushukoDetail, selectNyushukoDetail } from '@/app/_lib/db/tables/v-nyushuko-den2-lst';
 import { JuchuCtnMeisai } from '@/app/_lib/db/types/t_juchu_ctn_meisai-type';
 import { NyushukoDen } from '@/app/_lib/db/types/t-nyushuko-den-type';
 import { NyushukoFix } from '@/app/_lib/db/types/t-nyushuko-fix-type';
@@ -201,30 +201,85 @@ export const updShukoDetail = async (
       const upsertJuchuMeisaiResult = await upsJuchuCtnMeisai(ctnData, userNam, connection);
       console.log('コンテナ明細UPSERT', upsertJuchuMeisaiResult);
 
-      // 入出庫伝票追加更新
+      // コンテナ出庫伝票追加更新
+      const upsertShukoDenResult = await upsShukoDen(ctnData, userNam, connection);
+      console.log('出庫伝票追加更新', upsertShukoDenResult);
+
+      // 受注機材ヘッダーid
       const juchuKizaiHeadIds = [
         ...new Set(shukoDetailTableData.map((d) => d.juchuKizaiHeadId).filter((id) => id !== null)),
       ];
-      const nyukoDatas: NyukoValues[] = [];
+
       for (const juchuKizaiHeadId of juchuKizaiHeadIds) {
+        // 出庫日取得
+        const { data: shukoDat, error: shukoDataError } = await selectJuchuKizaiNyushukoConfirm({
+          juchu_head_id: shukoDetailData.juchuHeadId,
+          juchu_kizai_head_id: juchuKizaiHeadId,
+          nyushuko_shubetu_id: 1,
+        });
         // 入庫日取得
         const { data: nyukoDat, error: nyukoDataError } = await selectJuchuKizaiNyushukoConfirm({
           juchu_head_id: shukoDetailData.juchuHeadId,
           juchu_kizai_head_id: juchuKizaiHeadId,
           nyushuko_shubetu_id: 2,
-          nyushuko_basho_id: shukoDetailData.nyushukoBashoId,
+          //nyushuko_basho_id: shukoDetailData.nyushukoBashoId,
         });
+        if (shukoDataError) {
+          throw shukoDataError;
+        }
         if (nyukoDataError) {
           throw nyukoDataError;
         }
-        const nyukoData: NyukoValues = {
-          juchuKizaiHeadId: juchuKizaiHeadId,
-          nyushukoDat: nyukoDat.nyushuko_dat,
-        };
-        nyukoDatas.push(nyukoData);
+
+        if (nyukoDat.length === 2) {
+          const nyushukoDat = nyukoDat.find((d) => d.nyushuko_basho_id === shukoDetailData.nyushukoBashoId);
+          if (nyushukoDat) {
+            const upsertNyukoDenResult = await upsNyukoDen(
+              ctnData,
+              null,
+              nyushukoDat.nyushuko_dat,
+              nyushukoDat.nyushuko_basho_id,
+              userNam,
+              connection
+            );
+            console.log('入庫伝票追加更新', upsertNyukoDenResult);
+          }
+        } else if (nyukoDat.length === 1 && shukoDat.length === 2) {
+          const otherShukoDat = shukoDat.find((d) => d.nyushuko_basho_id !== shukoDetailData.nyushukoBashoId);
+          if (!otherShukoDat) return;
+
+          const { data: otherShukoData, error: otherShukoDataError } = await selectCtnNyushukoDetail(
+            shukoDetailData.juchuHeadId,
+            juchuKizaiHeadId,
+            shukoDetailData.juchuKizaiHeadKbn,
+            otherShukoDat.nyushuko_basho_id,
+            otherShukoDat.nyushuko_dat,
+            shukoDetailData.sagyoKbnId
+          );
+
+          if (otherShukoDataError) throw otherShukoDataError;
+
+          const upsertNyukoDenResult = await upsNyukoDen(
+            ctnData,
+            otherShukoData,
+            nyukoDat[0].nyushuko_dat,
+            nyukoDat[0].nyushuko_basho_id,
+            userNam,
+            connection
+          );
+          console.log('入庫伝票追加更新', upsertNyukoDenResult);
+        } else if (nyukoDat.length === 1 && shukoDat.length === 1) {
+          const upsertNyukoDenResult = await upsNyukoDen(
+            ctnData,
+            null,
+            nyukoDat[0].nyushuko_dat,
+            nyukoDat[0].nyushuko_basho_id,
+            userNam,
+            connection
+          );
+          console.log('入庫伝票追加更新', upsertNyukoDenResult);
+        }
       }
-      const upsertShukoDenResult = await upsNyushukoDen(ctnData, nyukoDatas, userNam, connection);
-      console.log('入出庫伝票追加更新', upsertShukoDenResult);
     }
 
     // 入出庫確定追加
@@ -338,6 +393,87 @@ export const upsNyushukoDen = async (
     return true;
   } catch (e) {
     console.error('Exception while updating nyushuko den:', e);
+    throw e;
+  }
+};
+
+/**
+ * 出庫伝票追加更新
+ * @param shukoDetailTableData
+ * @param userNam
+ * @param connection
+ * @returns
+ */
+export const upsShukoDen = async (
+  shukoDetailTableData: ShukoDetailTableValues[],
+  userNam: string,
+  connection: PoolClient
+) => {
+  const upsCtnShukoCheckData: NyushukoDen[] = shukoDetailTableData.map((d) => ({
+    juchu_head_id: d.juchuHeadId,
+    juchu_kizai_head_id: d.juchuKizaiHeadId,
+    juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
+    kizai_id: d.kizaiId,
+    plan_qty: (d.resultQty ?? 0) + (d.resultAdjQty ?? 0),
+    sagyo_den_dat: d.nyushukoDat,
+    sagyo_id: d.nyushukoBashoId,
+    sagyo_kbn_id: 20,
+    dsp_ord_num: d.dspOrdNumMeisai,
+    indent_num: d.indentNum,
+    add_dat: new Date().toISOString(),
+    add_user: userNam,
+    upd_dat: null,
+    upd_user: null,
+  }));
+
+  try {
+    await upsertNyushukoDen(upsCtnShukoCheckData, connection);
+
+    console.log('shuko den upsert successfully:', upsCtnShukoCheckData);
+    return true;
+  } catch (e) {
+    console.error('Exception while updating shuko den:', e);
+    throw e;
+  }
+};
+
+export const upsNyukoDen = async (
+  shukoDetailTableData: ShukoDetailTableValues[],
+  otherShukoData: { juchu_kizai_head_id: number | null; kizai_id: number | null; plan_qty: number | null }[] | null,
+  nyukoDat: string,
+  nyushukoBashoId: number,
+  userNam: string,
+  connection: PoolClient
+) => {
+  const upsCtnNyukoCheckData: NyushukoDen[] = shukoDetailTableData.map((d) => ({
+    juchu_head_id: d.juchuHeadId,
+    juchu_kizai_head_id: d.juchuKizaiHeadId,
+    juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
+    kizai_id: d.kizaiId,
+    plan_qty: otherShukoData
+      ? (d.resultQty ?? 0) +
+        (d.resultAdjQty ?? 0) +
+        (otherShukoData.find((data) => data.juchu_kizai_head_id === d.juchuKizaiHeadId && data.kizai_id === d.kizaiId)
+          ?.plan_qty ?? 0)
+      : (d.resultQty ?? 0) + (d.resultAdjQty ?? 0),
+    sagyo_den_dat: nyukoDat,
+    sagyo_id: nyushukoBashoId,
+    sagyo_kbn_id: 30,
+    dsp_ord_num: d.dspOrdNumMeisai,
+    indent_num: d.indentNum,
+    add_dat: new Date().toISOString(),
+    add_user: userNam,
+    upd_dat: null,
+    upd_user: null,
+  }));
+
+  try {
+    await upsertNyushukoDen(upsCtnNyukoCheckData, connection);
+
+    console.log('nyuko den upsert successfully:', upsCtnNyukoCheckData);
+    return true;
+  } catch (e) {
+    console.error('Exception while updating nyuko den:', e);
     throw e;
   }
 };

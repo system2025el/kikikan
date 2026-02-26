@@ -33,18 +33,70 @@ export const selectJuchuKizaiNyushukoConfirm = async (data: {
   juchu_head_id: number;
   juchu_kizai_head_id: number;
   nyushuko_shubetu_id: number;
-  nyushuko_basho_id: number;
+  nyushuko_basho_id?: number;
 }) => {
+  const builder = supabase
+    .schema(SCHEMA)
+    .from('t_juchu_kizai_nyushuko')
+    .select('*')
+    .eq('juchu_head_id', data.juchu_head_id)
+    .eq('juchu_kizai_head_id', data.juchu_kizai_head_id)
+    .eq('nyushuko_shubetu_id', data.nyushuko_shubetu_id);
+
+  if (data.nyushuko_basho_id) {
+    builder.eq('nyushuko_basho_id', data.nyushuko_basho_id);
+    builder.single();
+  }
   try {
-    return await supabase
-      .schema(SCHEMA)
-      .from('t_juchu_kizai_nyushuko')
-      .select('*')
-      .eq('juchu_head_id', data.juchu_head_id)
-      .eq('juchu_kizai_head_id', data.juchu_kizai_head_id)
-      .eq('nyushuko_shubetu_id', data.nyushuko_shubetu_id)
-      .eq('nyushuko_basho_id', data.nyushuko_basho_id)
-      .single();
+    return await builder;
+    // return await supabase
+    //   .schema(SCHEMA)
+    //   .from('t_juchu_kizai_nyushuko')
+    //   .select('*')
+    //   .eq('juchu_head_id', data.juchu_head_id)
+    //   .eq('juchu_kizai_head_id', data.juchu_kizai_head_id)
+    //   .eq('nyushuko_shubetu_id', data.nyushuko_shubetu_id)
+    //   .eq('nyushuko_basho_id', data.nyushuko_basho_id)
+    //   .single();
+  } catch (e) {
+    throw e;
+  }
+};
+
+/**
+ * 親受注機材入出庫データ確認
+ * @param confirmData 受注機材入出庫確認データ
+ * @returns
+ */
+export const selectOyaJuchuKizaiNyushukoConfirm = async (
+  data: {
+    juchu_head_id: number;
+    juchu_kizai_head_id: number;
+    nyushuko_shubetu_id: number;
+  },
+  connection: PoolClient
+) => {
+  const query = `
+    SELECT *
+    FROM 
+      ${SCHEMA}.t_juchu_kizai_nyushuko
+    WHERE
+      juchu_head_id = $1
+      AND juchu_kizai_head_id = (
+        SELECT 
+          oya_juchu_kizai_head_id 
+        FROM 
+          ${SCHEMA}.t_juchu_kizai_head 
+        WHERE 
+          juchu_head_id = $1 
+          AND juchu_kizai_head_id = $2
+      )
+      AND nyushuko_shubetu_id = $3
+  `;
+
+  const values = [data.juchu_head_id, data.juchu_kizai_head_id, data.nyushuko_shubetu_id];
+  try {
+    return (await connection.query(query, values)).rows;
   } catch (e) {
     throw e;
   }

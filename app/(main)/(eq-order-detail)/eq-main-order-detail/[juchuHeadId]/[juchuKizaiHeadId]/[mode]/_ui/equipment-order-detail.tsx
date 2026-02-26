@@ -244,6 +244,38 @@ const EquipmentOrderDetail = (props: {
   // 編集中かどうか
   const [isNebikiAmtEditing, setIsNebikiAmtEditing] = useState(false);
 
+  const juchuColorMap = useMemo(() => {
+    const map = new Map<string, string>();
+
+    const sorted = [...juchuHonbanbiList].sort((a, b) => a.juchuHonbanbiShubetuId - b.juchuHonbanbiShubetuId);
+
+    sorted.forEach((item) => {
+      const dateKey = toJapanYMDString(item.juchuHonbanbiDat);
+      let color = 'white';
+
+      switch (item.juchuHonbanbiShubetuId) {
+        case 40:
+          color = 'pink';
+          break;
+        case 30:
+          color = 'lightgreen';
+          break;
+        case 20:
+          color = 'orange';
+          break;
+        case 10:
+          color = 'mediumpurple';
+          break;
+      }
+
+      if (color !== 'white') {
+        map.set(dateKey, color);
+      }
+    });
+
+    return map;
+  }, [juchuHonbanbiList]);
+
   // context
   const { setIsDirty /*setLock*/ } = useDirty();
 
@@ -726,6 +758,7 @@ const EquipmentOrderDetail = (props: {
    * @returns
    */
   const onSubmit = async (data: JuchuKizaiHeadValues) => {
+    console.log('保存データ', data);
     if (!user || isProcessing) return;
     setIsProcessing(true);
     setIsLoading(true);
@@ -782,41 +815,27 @@ const EquipmentOrderDetail = (props: {
       if (newJuchuKizaiHeadId) {
         router.replace(`/eq-main-order-detail/${data.juchuHeadId}/${newJuchuKizaiHeadId}/edit`);
       } else {
+        setIsLoading(false);
         setSnackBarMessage('保存に失敗しました');
         setSnackBarOpen(true);
       }
 
       // 更新
     } else {
-      const kicsMeisai = juchuKizaiMeisaiList.filter((d) => d.shozokuId === 1 && !d.delFlag);
-      const yardMeisai = juchuKizaiMeisaiList.filter((d) => d.shozokuId === 2 && !d.delFlag);
+      // const kicsMeisai = juchuKizaiMeisaiList.filter((d) => d.shozokuId === 1 && !d.delFlag);
+      // const yardMeisai = juchuKizaiMeisaiList.filter((d) => d.shozokuId === 2 && !d.delFlag);
       const kicsContainer = juchuContainerMeisaiList.filter((d) => d.planKicsKizaiQty > 0 && !d.delFlag);
       const yardContainer = juchuContainerMeisaiList.filter((d) => d.planYardKizaiQty > 0 && !d.delFlag);
 
-      if (
-        ((kicsMeisai.length > 0 || kicsContainer.length > 0) && (!data.kicsShukoDat || !data.kicsNyukoDat)) ||
-        ((yardMeisai.length > 0 || yardContainer.length > 0) && (!data.yardShukoDat || !data.yardNyukoDat))
-      ) {
-        if ((kicsMeisai.length > 0 || kicsContainer.length > 0) && !data.kicsShukoDat) {
+      if ((kicsContainer.length > 0 && !data.kicsShukoDat) || (yardContainer.length > 0 && !data.yardShukoDat)) {
+        if (kicsContainer.length > 0 && !data.kicsShukoDat) {
           setError('kicsShukoDat', {
             type: 'manual',
             message: '',
           });
         }
-        if ((kicsMeisai.length > 0 || kicsContainer.length > 0) && !data.kicsNyukoDat) {
-          setError('kicsNyukoDat', {
-            type: 'manual',
-            message: '',
-          });
-        }
-        if ((yardMeisai.length > 0 || yardContainer.length > 0) && !data.yardShukoDat) {
+        if (yardContainer.length > 0 && !data.yardShukoDat) {
           setError('yardShukoDat', {
-            type: 'manual',
-            message: '',
-          });
-        }
-        if ((yardMeisai.length > 0 || yardContainer.length > 0) && !data.yardNyukoDat) {
-          setError('yardNyukoDat', {
             type: 'manual',
             message: '',
           });
@@ -829,10 +848,48 @@ const EquipmentOrderDetail = (props: {
         return;
       }
 
+      // if (
+      //   ((kicsMeisai.length > 0 || kicsContainer.length > 0) && (!data.kicsShukoDat || !data.kicsNyukoDat)) ||
+      //   ((yardMeisai.length > 0 || yardContainer.length > 0) && (!data.yardShukoDat || !data.yardNyukoDat))
+      // ) {
+      //   if ((kicsMeisai.length > 0 || kicsContainer.length > 0) && !data.kicsShukoDat) {
+      //     setError('kicsShukoDat', {
+      //       type: 'manual',
+      //       message: '',
+      //     });
+      //   }
+      //   if ((kicsMeisai.length > 0 || kicsContainer.length > 0) && !data.kicsNyukoDat) {
+      //     setError('kicsNyukoDat', {
+      //       type: 'manual',
+      //       message: '',
+      //     });
+      //   }
+      //   if ((yardMeisai.length > 0 || yardContainer.length > 0) && !data.yardShukoDat) {
+      //     setError('yardShukoDat', {
+      //       type: 'manual',
+      //       message: '',
+      //     });
+      //   }
+      //   if ((yardMeisai.length > 0 || yardContainer.length > 0) && !data.yardNyukoDat) {
+      //     setError('yardNyukoDat', {
+      //       type: 'manual',
+      //       message: '',
+      //     });
+      //   }
+      //   setAlertTitle('入出庫日時が入力されていません');
+      //   setAlertMessage('入出庫日時を入力してください');
+      //   setAlertOpen(true);
+      //   setIsLoading(false);
+      //   setIsProcessing(false);
+      //   return;
+      // }
+
       // 更新判定
       const checkJuchuKizaiHead = isDirty;
-      const checkKicsDat = dirtyFields.kicsShukoDat || dirtyFields.kicsNyukoDat ? true : false;
-      const checkYardDat = dirtyFields.yardShukoDat || dirtyFields.yardNyukoDat ? true : false;
+      const checkKicsShukoDat = dirtyFields.kicsShukoDat ? true : false;
+      const checkKicsNyukoDat = dirtyFields.kicsNyukoDat ? true : false;
+      const checkYardShukoDat = dirtyFields.yardShukoDat ? true : false;
+      const checkYardNyukoDat = dirtyFields.yardNyukoDat ? true : false;
       const checkJuchuHonbanbi = JSON.stringify(originJuchuHonbanbiList) !== JSON.stringify(juchuHonbanbiList);
       const checkJuchuKizaiMeisai =
         JSON.stringify(originJuchuKizaiMeisaiList) !==
@@ -846,14 +903,14 @@ const EquipmentOrderDetail = (props: {
 
       const updateResult = await saveJuchuKizai(
         checkJuchuKizaiHead,
-        checkKicsDat,
-        checkYardDat,
+        checkKicsShukoDat,
+        checkKicsNyukoDat,
+        checkYardShukoDat,
+        checkYardNyukoDat,
         checkJuchuHonbanbi,
         checkJuchuKizaiMeisai,
         checkIdoJuchuKizaiMeisai,
         checkJuchuContainerMeisai,
-        defaultValues?.kicsShukoDat,
-        defaultValues?.yardShukoDat,
         data,
         updateShukoDate,
         updateNyukoDate,
@@ -989,19 +1046,20 @@ const EquipmentOrderDetail = (props: {
             setOriginIdoJuchuKizaiMeisaiList(idoJuchuKizaiMeisaiList);
           }
           setOtherDirty(false);
-
+          setIsLoading(false);
           setSnackBarMessage('保存しました');
           setSnackBarOpen(true);
         } catch (e) {
+          setIsLoading(false);
           setSnackBarMessage('データの再取得に失敗しました');
           setSnackBarOpen(true);
         }
       } else {
+        setIsLoading(false);
         setSnackBarMessage('保存に失敗しました');
         setSnackBarOpen(true);
       }
     }
-    setIsLoading(false);
     setIsProcessing(false);
   };
 
@@ -2246,9 +2304,11 @@ const EquipmentOrderDetail = (props: {
 
     // 機材id
     const ids = [...new Set(selectEq.map((d) => d.kizaiId))];
+    // 移動対象機材
+    const idoData = idoJuchuKizaiMeisaiList.filter((d) => ids.includes(d.kizaiId) && !d.delFlag && d.sagyoDenDat);
     // 選択された機材に対する移動データ
-    const selectIdoList = idoJuchuKizaiMeisaiList
-      .filter((d) => ids.includes(d.kizaiId) && !d.delFlag && d.sagyoDenDat)
+    const selectIdoList = idoData
+      .filter((d) => ids.includes(d.kizaiId))
       .map((d) => ({ ...d, planKizaiQty: 0, planYobiQty: 0, planQty: 0 }));
     console.log('selectIdoList', selectIdoList);
 
@@ -2305,7 +2365,7 @@ const EquipmentOrderDetail = (props: {
         : data
     );
 
-    const updateIdoJuchuKizaiMeisaiList = idoJuchuKizaiMeisaiList.map((data) =>
+    const updateIdoJuchuKizaiMeisaiList = idoData.map((data) =>
       ids.includes(data.kizaiId)
         ? {
             ...data,
@@ -2505,9 +2565,9 @@ const EquipmentOrderDetail = (props: {
                     </Box>
                   )}
                   <Grid2 container display={saveKizaiHead ? 'flex' : 'none'} alignItems={'center'} spacing={1}>
-                    {!edit || fixFlag ? <Typography>閲覧モード</Typography> : <Typography>編集モード</Typography>}
+                    {!edit ? <Typography>閲覧モード</Typography> : <Typography>編集モード</Typography>}
                     <Button
-                      disabled={!!lockData || fixFlag || user?.permission.juchu === permission.juchu_ref}
+                      disabled={!!lockData || user?.permission.juchu === permission.juchu_ref}
                       onClick={handleEdit}
                     >
                       変更
@@ -2660,7 +2720,14 @@ const EquipmentOrderDetail = (props: {
                   <Divider />
                   <Grid2 container alignItems="baseline" spacing={1} py={1} px={2}>
                     <Typography>受注明細名</Typography>
-                    <TextFieldElement name="headNam" control={control} disabled={!edit}></TextFieldElement>
+                    <TextFieldElement
+                      name="headNam"
+                      control={control}
+                      disabled={!edit}
+                      slotProps={{
+                        input: { readOnly: fixFlag },
+                      }}
+                    ></TextFieldElement>
                   </Grid2>
                   <Grid2 container alignItems="baseline" spacing={2} py={1} px={2}>
                     <Grid2 container direction={'column'} spacing={1}>
@@ -2729,7 +2796,7 @@ const EquipmentOrderDetail = (props: {
                                 },
                               }}
                               helperText={fieldState.error?.message}
-                              disabled={!edit}
+                              disabled={!edit || fixFlag}
                             />
                           )}
                         />
@@ -2823,6 +2890,9 @@ const EquipmentOrderDetail = (props: {
                                 }}
                                 helperText={fieldState.error?.message}
                                 disabled={!edit}
+                                slotProps={{
+                                  input: { readOnly: fixFlag },
+                                }}
                               />
                             )}
                           />
@@ -2864,7 +2934,7 @@ const EquipmentOrderDetail = (props: {
                                 onChange={handleKicsShukoChange}
                                 onAccept={handleKicsShukoAccept}
                                 fieldstate={fieldState}
-                                disabled={!edit}
+                                disabled={!edit || fixFlag}
                                 onClear={handleKicsClear}
                               />
                               <Button
@@ -2873,7 +2943,7 @@ const EquipmentOrderDetail = (props: {
                                     `/vehicle-order-detail/${juchuHeadData.juchuHeadId}/0/edit?kbn=1&date=${field.value?.toISOString()}&basho=1`
                                   )
                                 }
-                                disabled={!field.value ? true : false || !edit}
+                                disabled={!field.value ? true : false || !edit || fixFlag}
                               >
                                 車両
                               </Button>
@@ -2898,7 +2968,7 @@ const EquipmentOrderDetail = (props: {
                                 onChange={handleYardShukoChange}
                                 onAccept={handleYardShukoAccept}
                                 fieldstate={fieldState}
-                                disabled={!edit}
+                                disabled={!edit || fixFlag}
                                 onClear={handleYardClear}
                               />
                               <Button
@@ -2907,7 +2977,7 @@ const EquipmentOrderDetail = (props: {
                                     `/vehicle-order-detail/${juchuHeadData.juchuHeadId}/0/edit?kbn=1&date=${field.value?.toISOString()}&basho=2`
                                   )
                                 }
-                                disabled={!field.value ? true : false || !edit}
+                                disabled={!field.value ? true : false || !edit || fixFlag}
                               >
                                 車両
                               </Button>
@@ -2947,7 +3017,7 @@ const EquipmentOrderDetail = (props: {
                                     `/vehicle-order-detail/${juchuHeadData.juchuHeadId}/0/edit?kbn=2&date=${field.value?.toISOString()}&basho=1`
                                   )
                                 }
-                                disabled={!field.value ? true : false || !edit}
+                                disabled={!field.value ? true : false || !edit || fixFlag}
                               >
                                 車両
                               </Button>
@@ -2984,7 +3054,7 @@ const EquipmentOrderDetail = (props: {
                                     `/vehicle-order-detail/${juchuHeadData.juchuHeadId}/0/edit?kbn=2&date=${field.value?.toISOString()}&basho=2`
                                   )
                                 }
-                                disabled={!field.value ? true : false || !edit}
+                                disabled={!field.value ? true : false || !edit || fixFlag}
                               >
                                 車両
                               </Button>
@@ -3027,6 +3097,9 @@ const EquipmentOrderDetail = (props: {
                       rows={3}
                       fullWidth
                       disabled={!edit}
+                      slotProps={{
+                        input: { readOnly: fixFlag },
+                      }}
                       // sx={{
                       //   '& .MuiInputBase-root': {
                       //     resize: 'both',
@@ -3164,12 +3237,12 @@ const EquipmentOrderDetail = (props: {
                         }}
                       >
                         <Grid2 container my={1} mx={2} spacing={2}>
-                          <Button disabled={!edit} onClick={handleOpenEqDialog}>
+                          <Button disabled={!edit || fixFlag} onClick={handleOpenEqDialog}>
                             <AddIcon fontSize="small" />
                             機材追加
                           </Button>
                           <Button
-                            disabled={!edit}
+                            disabled={!edit || fixFlag}
                             onClick={handleOpenSortDialog}
                             sx={{
                               display:
@@ -3205,6 +3278,7 @@ const EquipmentOrderDetail = (props: {
                           <EqTable
                             rows={juchuKizaiMeisaiList}
                             edit={edit}
+                            fixFlag={fixFlag}
                             handleCellChange={handleCellChange}
                             handleMeisaiDelete={handleEqMeisaiDelete}
                             handleMemoChange={handleMemoChange}
@@ -3242,7 +3316,8 @@ const EquipmentOrderDetail = (props: {
                         <StockTable
                           eqStockList={eqStockList}
                           dateRange={dateRange}
-                          juchuHonbanbiList={juchuHonbanbiList}
+                          //juchuHonbanbiList={juchuHonbanbiList}
+                          juchuColorMap={juchuColorMap}
                           ref={rightRef}
                         />
                       </Box>
@@ -3256,6 +3331,7 @@ const EquipmentOrderDetail = (props: {
                       <IdoEqTable
                         rows={idoJuchuKizaiMeisaiList}
                         edit={edit}
+                        fixFlag={fixFlag}
                         handleCellDateChange={handleCellDateChange}
                         handleCellDateClear={handleCellDateClear}
                       />
@@ -3268,6 +3344,7 @@ const EquipmentOrderDetail = (props: {
                       <ContainerTable
                         rows={juchuContainerMeisaiList}
                         edit={edit}
+                        fixFlag={fixFlag}
                         handleContainerMemoChange={handleContainerMemoChange}
                         handleContainerCellChange={handleContainerCellChange}
                         handleMeisaiDelete={handleCtnMeisaiDelete}

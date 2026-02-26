@@ -234,6 +234,8 @@ export const Order = (props: {
   const lock = async () => {
     if (!user) return;
 
+    if (getValues('juchuHeadId') === 0) return true;
+
     try {
       const lockData = await lockCheck(1, getValues('juchuHeadId'), user.name, user.email);
       setLockData(lockData);
@@ -301,6 +303,7 @@ export const Order = (props: {
       if (newOrderId) {
         router.replace(`/order/${newOrderId}/edit`);
       } else {
+        setIsLoading(false);
         setSnackBarMessage('保存に失敗しました');
         setSnackBarOpen(true);
       }

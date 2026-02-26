@@ -5,5 +5,6 @@
 export const getUrl = () => {
   let url = process.env.VERCEL_URL ?? 'http://localhost:3000/';
   url = url.startsWith('http') ? url : `https://${url}`;
+  console.log('URL:', url);
   return url.endsWith('/') ? url : `${url}/`;
 };

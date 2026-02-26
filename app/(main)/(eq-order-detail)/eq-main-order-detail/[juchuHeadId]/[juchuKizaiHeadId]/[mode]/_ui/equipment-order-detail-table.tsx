@@ -40,11 +40,17 @@ import {
 type StockTableProps = {
   eqStockList: StockTableValues[][];
   dateRange: string[];
-  juchuHonbanbiList: JuchuKizaiHonbanbiValues[];
+  //juchuHonbanbiList: JuchuKizaiHonbanbiValues[];
+  juchuColorMap: Map<string, string>;
   ref: React.RefObject<HTMLDivElement | null>;
 };
 
-export const StockTable: React.FC<StockTableProps> = ({ eqStockList, dateRange, juchuHonbanbiList, ref }) => {
+export const StockTable: React.FC<StockTableProps> = ({
+  eqStockList,
+  dateRange,
+  /*juchuHonbanbiList*/ juchuColorMap,
+  ref,
+}) => {
   console.log('stockテーブル描写');
   return (
     <TableContainer ref={ref} style={{ overflow: 'scroll', maxHeight: '80vh' }}>
@@ -82,7 +88,8 @@ export const StockTable: React.FC<StockTableProps> = ({ eqStockList, dateRange, 
                 row={row}
                 index={rowIndex}
                 dateRange={dateRange}
-                juchuHonbanbiList={juchuHonbanbiList}
+                //juchuHonbanbiList={juchuHonbanbiList}
+                juchuColorMap={juchuColorMap}
               />
             ))}
         </TableBody>
@@ -95,11 +102,12 @@ export type StockTableRowProps = {
   row: StockTableValues[];
   index: number;
   dateRange: string[];
-  juchuHonbanbiList: JuchuKizaiHonbanbiValues[];
+  //juchuHonbanbiList: JuchuKizaiHonbanbiValues[];
+  juchuColorMap: Map<string, string>;
 };
 
 const StockTableRow = React.memo(
-  ({ row, index, dateRange, juchuHonbanbiList }: StockTableRowProps) => {
+  ({ row, index, dateRange, /*juchuHonbanbiList*/ juchuColorMap }: StockTableRowProps) => {
     console.log('stock側描写', index);
     return (
       <TableRow>
@@ -110,7 +118,7 @@ const StockTableRow = React.memo(
               align={typeof cell === 'number' ? 'right' : 'left'}
               style={styles.row}
               sx={{
-                bgcolor: getStockRowBackgroundColor(cell.calDat, dateRange, juchuHonbanbiList),
+                bgcolor: getStockRowBackgroundColor(cell.calDat, dateRange, /*juchuHonbanbiList*/ juchuColorMap),
                 color: cell.zaikoQty < 0 ? 'red' : 'black',
               }}
               size="small"
@@ -123,7 +131,11 @@ const StockTableRow = React.memo(
     );
   },
   (prevProps, nextProps) => {
-    return prevProps.row === nextProps.row && prevProps.juchuHonbanbiList === nextProps.juchuHonbanbiList;
+    return (
+      prevProps.row === nextProps.row &&
+      /*prevProps.juchuHonbanbiList === nextProps.juchuHonbanbiList*/ prevProps.juchuColorMap ===
+        nextProps.juchuColorMap
+    );
   }
 );
 
@@ -132,6 +144,7 @@ StockTableRow.displayName = 'StockTableRow';
 type EqTableProps = {
   rows: JuchuKizaiMeisaiValues[];
   edit: boolean;
+  fixFlag: boolean;
   handleCellChange: (
     rowIndex: number,
     kizaiId: number,
@@ -148,6 +161,7 @@ type EqTableProps = {
 export const EqTable: React.FC<EqTableProps> = ({
   rows,
   edit,
+  fixFlag,
   handleCellChange,
   handleMeisaiDelete,
   handleMemoChange,
@@ -235,6 +249,7 @@ export const EqTable: React.FC<EqTableProps> = ({
               row={row}
               rowIndex={rowIndex}
               edit={edit}
+              fixFlag={fixFlag}
               handleOrderRef={handleOrderRef(rowIndex)}
               handleYobiRef={handleYobiRef(rowIndex)}
               handleMeisaiDelete={handleMeisaiDelete}
@@ -255,6 +270,7 @@ type EqTableRowProps = {
   row: JuchuKizaiMeisaiValues;
   rowIndex: number;
   edit: boolean;
+  fixFlag: boolean;
   handleOrderRef: (el: HTMLInputElement | null) => void;
   handleYobiRef: (el: HTMLInputElement | null) => void;
   handleMeisaiDelete: (rowIndex: number, row: JuchuKizaiMeisaiValues) => void;
@@ -276,6 +292,7 @@ const EqTableRow = React.memo(
     row,
     rowIndex,
     edit,
+    fixFlag,
     handleOrderRef,
     handleYobiRef,
     handleMeisaiDelete,
@@ -293,7 +310,7 @@ const EqTableRow = React.memo(
           <IconButton
             onClick={() => handleMeisaiDelete(rowIndex, row)}
             sx={{ padding: 0, color: 'red' }}
-            disabled={!edit}
+            disabled={!edit || fixFlag}
           >
             <Delete fontSize="small" />
           </IconButton>
@@ -304,7 +321,7 @@ const EqTableRow = React.memo(
             memo={row.mem ? row.mem : ''}
             handleMemoChange={handleMemoChange}
             rowIndex={rowIndex}
-            disabled={!edit}
+            disabled={!edit || fixFlag}
           />
         </TableCell>
         <TableCell style={styles.row} align="left" size="small">
@@ -356,7 +373,7 @@ const EqTableRow = React.memo(
               handleOrderKeyDown(e, rowIndex);
             }}
             onFocus={(e) => e.target.select()}
-            disabled={!edit}
+            disabled={!edit || fixFlag}
           />
         </TableCell>
         <TableCell style={styles.row} align="right" size="small">
@@ -399,7 +416,7 @@ const EqTableRow = React.memo(
               handleYobiKeyDown(e, rowIndex);
             }}
             onFocus={(e) => e.target.select()}
-            disabled={!edit}
+            disabled={!edit || fixFlag}
           />
         </TableCell>
         <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
@@ -411,14 +428,16 @@ const EqTableRow = React.memo(
             memo={row.mem2 ?? ''}
             handleMemoChange={handleMemo2Change}
             rowIndex={rowIndex}
-            disabled={!edit}
+            disabled={!edit || fixFlag}
           />
         </TableCell>
       </TableRow>
     );
   },
   (prevProps, nextProps) => {
-    return prevProps.row === nextProps.row && prevProps.edit === nextProps.edit;
+    return (
+      prevProps.row === nextProps.row && prevProps.edit === nextProps.edit && prevProps.fixFlag === nextProps.fixFlag
+    );
   }
 );
 
@@ -427,11 +446,18 @@ EqTableRow.displayName = 'EqTableRow';
 type IdoEqTableProps = {
   rows: IdoJuchuKizaiMeisaiValues[];
   edit: boolean;
+  fixFlag: boolean;
   handleCellDateChange: (kizaiId: number, date: Dayjs | null) => void;
   handleCellDateClear: (kizaiId: number) => void;
 };
 
-export const IdoEqTable: React.FC<IdoEqTableProps> = ({ rows, edit, handleCellDateChange, handleCellDateClear }) => {
+export const IdoEqTable: React.FC<IdoEqTableProps> = ({
+  rows,
+  edit,
+  fixFlag,
+  handleCellDateChange,
+  handleCellDateClear,
+}) => {
   const visibleRows = rows.filter((row) => !row.delFlag);
 
   return (
@@ -490,7 +516,7 @@ export const IdoEqTable: React.FC<IdoEqTableProps> = ({ rows, edit, handleCellDa
                     date={row.sagyoDenDat}
                     onChange={(date) => handleCellDateChange(row.kizaiId, date)}
                     onClear={() => handleCellDateClear(row.kizaiId)}
-                    disabled={!edit}
+                    disabled={!edit || fixFlag}
                   />
                   {row.sagyoSijiId && <Typography>{row.sagyoSijiId === 1 ? 'K→Y' : 'Y→K'}</Typography>}
                 </Box>
@@ -530,11 +556,12 @@ export const IdoEqTable: React.FC<IdoEqTableProps> = ({ rows, edit, handleCellDa
 export const ContainerTable = (props: {
   rows: JuchuContainerMeisaiValues[];
   edit: boolean;
+  fixFlag: boolean;
   handleContainerMemoChange: (rowIndex: number, memo: string) => void;
   handleContainerCellChange: (rowIndex: number, kicsValue: number, yardValue: number) => void;
   handleMeisaiDelete: (row: JuchuContainerMeisaiValues) => void;
 }) => {
-  const { rows, edit, handleContainerMemoChange, handleContainerCellChange, handleMeisaiDelete } = props;
+  const { rows, edit, fixFlag, handleContainerMemoChange, handleContainerCellChange, handleMeisaiDelete } = props;
 
   const inputKicsRefs = useRef<(HTMLInputElement | null)[]>([]);
   const inputYardRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -626,7 +653,7 @@ export const ContainerTable = (props: {
                   memo={row.mem ? row.mem : ''}
                   handleMemoChange={handleContainerMemoChange}
                   rowIndex={rowIndex}
-                  disabled={!edit}
+                  disabled={!edit || fixFlag}
                 />
               </TableCell>
               <TableCell style={styles.row} align="left" size="small">
@@ -679,7 +706,7 @@ export const ContainerTable = (props: {
                     handleKicsKeyDown(e, rowIndex);
                   }}
                   onFocus={(e) => e.target.select()}
-                  disabled={!edit}
+                  disabled={!edit || fixFlag}
                 />
               </TableCell>
               <TableCell style={styles.row} align="right" size="small">
@@ -723,7 +750,7 @@ export const ContainerTable = (props: {
                     handleYardKeyDown(e, rowIndex);
                   }}
                   onFocus={(e) => e.target.select()}
-                  disabled={!edit}
+                  disabled={!edit || fixFlag}
                 />
               </TableCell>
               <TableCell style={styles.row} align="right" size="small" sx={{ bgcolor: grey[200] }}>
