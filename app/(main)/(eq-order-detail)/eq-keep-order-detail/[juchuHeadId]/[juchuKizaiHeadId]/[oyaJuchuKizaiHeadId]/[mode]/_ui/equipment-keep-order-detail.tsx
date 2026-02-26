@@ -983,6 +983,16 @@ export const EquipmentKeepOrderDetail = (props: {
         if (yardNyukoDat === null) {
           clearErrors('yardNyukoDat');
         }
+
+        setKeepJuchuKizaiMeisaiList((prev) =>
+          prev.map((d) =>
+            newDate && !yardNyukoDat
+              ? { ...d, shozokuId: 1 }
+              : !newDate && yardNyukoDat
+                ? { ...d, shozokuId: 2 }
+                : { ...d, shozokuId: d.mShozokuId }
+          )
+        );
       }
     } catch (e) {
       setSnackBarMessage('サーバー接続エラー');
@@ -1020,6 +1030,16 @@ export const EquipmentKeepOrderDetail = (props: {
         if (kicsNyukoDat === null) {
           clearErrors('kicsNyukoDat');
         }
+
+        setKeepJuchuKizaiMeisaiList((prev) =>
+          prev.map((d) =>
+            kicsNyukoDat && !newDate
+              ? { ...d, shozokuId: 1 }
+              : !kicsNyukoDat && newDate
+                ? { ...d, shozokuId: 2 }
+                : { ...d, shozokuId: d.mShozokuId }
+          )
+        );
       }
     } catch (e) {
       setSnackBarMessage('サーバー接続エラー');
@@ -1040,14 +1060,17 @@ export const EquipmentKeepOrderDetail = (props: {
       const lockResult = await lock();
 
       if (lockResult) {
+        const kicsDat = getValues('kicsNyukoDat');
+        const yardDat = getValues('yardNyukoDat');
         // 同じ並び順のものははじくようにする
         const dspOrdNums = new Set(keepJuchuKizaiMeisaiList.filter((d) => !d.delFlag).map((d) => d.dspOrdNum));
         const filterEqData = eqData.filter((d) => !dspOrdNums.has(d.dspOrdNum));
-        const newOyaJuchuKizaiMeisaiData: KeepJuchuKizaiMeisaiValues[] = filterEqData.map((d) => ({
+        const newKeepJuchuKizaiMeisaiData: KeepJuchuKizaiMeisaiValues[] = filterEqData.map((d) => ({
           juchuHeadId: getValues('juchuHeadId'),
           juchuKizaiHeadId: getValues('juchuKizaiHeadId'),
           juchuKizaiMeisaiId: 0,
-          shozokuId: d.shozokuId,
+          mShozokuId: d.mShozokuId,
+          shozokuId: kicsDat && !yardDat ? 1 : !kicsDat && yardDat ? 2 : d.mShozokuId,
           shozokuNam: d.shozokuNam,
           mem: '',
           kizaiId: d.kizaiId,
@@ -1081,7 +1104,7 @@ export const EquipmentKeepOrderDetail = (props: {
         }));
 
         setKeepJuchuKizaiMeisaiList((prev) =>
-          [...prev, ...newOyaJuchuKizaiMeisaiData].sort((a, b) => a.dspOrdNum - b.dspOrdNum)
+          [...prev, ...newKeepJuchuKizaiMeisaiData].sort((a, b) => a.dspOrdNum - b.dspOrdNum)
         );
         setKeepJuchuContainerMeisaiList((prev) =>
           [...prev, ...newKeepJuchuContainerMeisaiData].sort((a, b) => a.dspOrdNum - b.dspOrdNum)
@@ -1410,6 +1433,12 @@ export const EquipmentKeepOrderDetail = (props: {
                               onClear={() => {
                                 field.onChange(null);
                                 trigger(['kicsNyukoDat', 'yardNyukoDat']);
+                                const yardNyukoDat = getValues('yardNyukoDat');
+                                setKeepJuchuKizaiMeisaiList((prev) =>
+                                  prev.map((d) =>
+                                    yardNyukoDat ? { ...d, shozokuId: 2 } : { ...d, shozokuId: d.mShozokuId }
+                                  )
+                                );
                               }}
                             />
                           )}
@@ -1432,6 +1461,12 @@ export const EquipmentKeepOrderDetail = (props: {
                               onClear={() => {
                                 field.onChange(null);
                                 trigger(['kicsNyukoDat', 'yardNyukoDat']);
+                                const kicsNyukoDat = getValues('kicsNyukoDat');
+                                setKeepJuchuKizaiMeisaiList((prev) =>
+                                  prev.map((d) =>
+                                    kicsNyukoDat ? { ...d, shozokuId: 1 } : { ...d, shozokuId: d.mShozokuId }
+                                  )
+                                );
                               }}
                             />
                           )}

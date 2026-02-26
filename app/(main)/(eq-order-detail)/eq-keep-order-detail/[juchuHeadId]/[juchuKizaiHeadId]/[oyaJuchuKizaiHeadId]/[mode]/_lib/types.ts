@@ -33,6 +33,7 @@ export type KeepJuchuKizaiMeisaiValues = {
   juchuHeadId: number;
   juchuKizaiHeadId: number;
   juchuKizaiMeisaiId: number;
+  mShozokuId: number;
   shozokuId: number;
   shozokuNam: string;
   mem: string | null;

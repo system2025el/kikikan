@@ -366,12 +366,12 @@ export const saveReturnJuchuKizai = async (
         console.log('KICS入庫実績全削除', deleteAllKicsNyukoResultResult);
 
         if (data.kicsNyukoDat && data.yardNyukoDat && !checkYardDat) {
-          const yardShukoData = newReturnJuchuKizaiMeisaiData.filter((d) => !d.delFlag && d.mShozokuId === 1);
+          const kicsNyukoData = newReturnJuchuKizaiMeisaiData.filter((d) => !d.delFlag && d.mShozokuId === 1);
 
-          if (yardShukoData.length) {
-            await delReturnKicsOrYardNyukoDen(yardShukoData, 2, connection);
+          if (kicsNyukoData.length) {
+            await delReturnKicsOrYardNyukoDen(kicsNyukoData, 2, connection);
 
-            await delNyukoResult(yardShukoData, 2, connection);
+            await delNyukoResult(kicsNyukoData, 2, connection);
           }
         }
 
@@ -399,12 +399,12 @@ export const saveReturnJuchuKizai = async (
         console.log('YARD入庫実績全削除', deleteAllYardNyukoResultResult);
 
         if (data.kicsNyukoDat && data.yardNyukoDat && !checkKicsDat) {
-          const kicsShukoData = newReturnJuchuKizaiMeisaiData.filter((d) => !d.delFlag && d.mShozokuId === 2);
+          const yardNyukoData = newReturnJuchuKizaiMeisaiData.filter((d) => !d.delFlag && d.mShozokuId === 2);
 
-          if (kicsShukoData.length) {
-            await delReturnKicsOrYardNyukoDen(kicsShukoData, 1, connection);
+          if (yardNyukoData.length) {
+            await delReturnKicsOrYardNyukoDen(yardNyukoData, 1, connection);
 
-            await delNyukoResult(kicsShukoData, 1, connection);
+            await delNyukoResult(yardNyukoData, 1, connection);
           }
         }
 

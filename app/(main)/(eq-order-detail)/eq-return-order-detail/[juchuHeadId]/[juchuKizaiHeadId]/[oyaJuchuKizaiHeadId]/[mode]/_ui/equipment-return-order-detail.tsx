@@ -1465,7 +1465,6 @@ export const EquipmentReturnOrderDetail = (props: {
       const lockResult = await lock();
 
       if (lockResult) {
-        setIsDetailLoading(true);
         const kicsDat = getValues('kicsNyukoDat');
         const yardDat = getValues('yardNyukoDat');
         // 同じ並び順のものははじくようにする
@@ -1561,7 +1560,6 @@ export const EquipmentReturnOrderDetail = (props: {
           .sort((a, b) => a.dspOrdNum - b.dspOrdNum)
           .map((d) => d.kizaiId);
 
-        console.log('aaaaaaaaaaaaaaaaaaaaaa', sortKizaiId);
         const containerIds = new Set(returnJuchuContainerMeisaiList.filter((d) => !d.delFlag).map((d) => d.kizaiId));
         const filterContainerData = containerData.filter((d) => !containerIds.has(d.kizaiId));
         const newReturnJuchuContainerMeisaiData: ReturnJuchuContainerMeisaiValues[] = filterContainerData.map((d) => ({
