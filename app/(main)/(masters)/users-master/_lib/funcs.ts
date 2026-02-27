@@ -206,7 +206,7 @@ export const updateUser = async (currentEmail: string, data: UsersMasterDialogVa
 export const deleteUsers = async (mailAdr: string, user: string) => {
   const connection = await pool.connect();
   try {
-    const { data: users, error: listError } = await supabaseAdmin.auth.admin.listUsers();
+    const { data: users, error: listError } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 });
     if (listError) {
       console.error(listError);
       throw listError;
