@@ -220,7 +220,7 @@ export const IdoEqptDetail = (props: {
                 実績クリア
               </Button>
               <Box display={'flex'} alignItems={'center'}>
-                <Typography mr={2}>補正数</Typography>
+                <Typography mr={2}>移動補正数</Typography>
                 <Controller
                   name="resultAdjQty"
                   control={control}
