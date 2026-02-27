@@ -4,13 +4,19 @@ import { revalidatePath } from 'next/cache';
 
 import pool from '@/app/_lib/db/postgres';
 import {
+  deleteIsshikiMaster,
   insertNewIsshiki,
   selectFilteredIsshikis,
   selectOneIsshiki,
   updateIsshikiDB,
   updIsshikiDelFlgDB,
 } from '@/app/_lib/db/tables/m-issiki';
-import { delIsshikiSet, insertNewIsshikiSetList, updIsshikiSetDB } from '@/app/_lib/db/tables/m-issiki-set';
+import {
+  deleteIsshikiSetByIssikiId,
+  delIsshikiSet,
+  insertNewIsshikiSetList,
+  updIsshikiSetDB,
+} from '@/app/_lib/db/tables/m-issiki-set';
 import { checkExIsshiki } from '@/app/_lib/db/tables/m-kizai';
 import { selectActiveEqpts } from '@/app/_lib/db/tables/v-kizai-list';
 import { MIsshikiSetDBValues } from '@/app/_lib/db/types/m-issiki-set-type';
@@ -265,5 +271,28 @@ export const updIsshikiDelFlg = async (id: number, flg: boolean, user: string) =
     await revalidatePath('/isshiki-master');
   } catch (e) {
     throw e;
+  }
+};
+
+/**
+ * 一式マスタ削除
+ * @param ids
+ */
+export const delIsshikiMaster = async (ids: number[]) => {
+  const connection = await pool.connect();
+
+  try {
+    await connection.query('BEGIN');
+
+    await deleteIsshikiSetByIssikiId(ids, connection);
+    await deleteIsshikiMaster(ids, connection);
+
+    await connection.query('COMMIT');
+    await revalidatePath('/isshiki-master');
+  } catch (e) {
+    await connection.query('ROLLBACK');
+    throw e;
+  } finally {
+    connection.release();
   }
 };

@@ -138,3 +138,20 @@ export const updIsshikiDelFlgDB = async (
     throw e;
   }
 };
+
+export const deleteIsshikiMaster = async (ids: number[], connection: PoolClient) => {
+  const query = `
+    DELETE FROM
+      ${SCHEMA}.m_issiki
+    WHERE
+      issiki_id = ANY($1)
+  `;
+
+  const values = [ids];
+
+  try {
+    await connection.query(query, values);
+  } catch (e) {
+    throw e;
+  }
+};

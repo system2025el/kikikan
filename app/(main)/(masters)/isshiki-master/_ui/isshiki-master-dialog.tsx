@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Box, Button, Grid2, Snackbar, Stack, Typography } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
@@ -29,11 +29,15 @@ export const IsshikisMasterDialog = ({
   isshikiId,
   handleClose,
   refetchIsshikis,
+  setSnackBarOpen,
+  setSnackBarMessage,
 }: {
   user: User | null;
   isshikiId: number;
   handleClose: () => void;
   refetchIsshikis: () => void;
+  setSnackBarOpen: Dispatch<SetStateAction<boolean>>;
+  setSnackBarMessage: Dispatch<SetStateAction<string>>;
 }) => {
   /* useState -------------------------------------- */
   /* DBのローディング状態 */
@@ -54,10 +58,10 @@ export const IsshikisMasterDialog = ({
   const [currentIsshikiList, setCurrentIsshikiList] = useState<IsshikisMasterDialogValues>();
   /** 機材選択ダイアログ開閉 */
   const [eqSelectOpen, setEqSelectOpen] = useState<boolean>(false);
-  // スナックバー制御
-  const [snackBarOpen, setSnackBarOpen] = useState(false);
-  // スナックバーメッセージ
-  const [snackBarMessage, setSnackBarMessage] = useState('');
+  // // スナックバー制御
+  // const [snackBarOpen, setSnackBarOpen] = useState(false);
+  // // スナックバーメッセージ
+  // const [snackBarMessage, setSnackBarMessage] = useState('');
 
   /* useForm ----------------------------------------- */
   const isshikiForm = useForm({
@@ -317,14 +321,14 @@ export const IsshikisMasterDialog = ({
           </>
         )}
       </form>
-      <Snackbar
+      {/* <Snackbar
         open={snackBarOpen}
         autoHideDuration={6000}
         onClose={() => setSnackBarOpen(false)}
         message={snackBarMessage}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
         sx={{ marginTop: '65px' }}
-      />
+      /> */}
     </>
   );
 };
