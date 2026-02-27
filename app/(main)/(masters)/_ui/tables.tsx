@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Button, styled, Tooltip, tooltipClasses, TooltipProps, Typography } from '@mui/material';
+import { Box, Button, Checkbox, styled, Tooltip, tooltipClasses, TooltipProps, Typography } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -243,6 +243,154 @@ export const MasterTableOfEqpt = ({
         {emptyRows > 0 && (
           <TableRow style={{ height: 25 * emptyRows }}>
             <TableCell colSpan={headers.length + 2} />
+          </TableRow>
+        )}
+      </TableBody>
+    </Table>
+  );
+};
+
+/**
+ * 一式マスタ専用テーブルコンポーネント
+ * @param param0
+ * @returns
+ */
+export const MasterTableOfIsshiki = ({
+  headers,
+  datas,
+  selectedIds,
+  page,
+  rowsPerPage,
+  handleOpenDialog,
+  handleSelectAllClick,
+  handleSelect,
+}: {
+  headers: MasterHeader[];
+  datas: MasterRow[];
+  selectedIds: number[];
+  page: number;
+  rowsPerPage: number;
+  handleOpenDialog: (id: number) => void;
+  handleSelectAllClick: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  handleSelect: (id: number) => void;
+}) => {
+  const [rows, setRows] = useState(datas);
+
+  /* 表示するリスト */
+  const list = useMemo(
+    () => (rows && rowsPerPage > 0 ? rows.slice((page - 1) * rowsPerPage, page * rowsPerPage) : rows),
+    [page, rowsPerPage, rows]
+  );
+  const emptyRows = page > 1 ? Math.max(0, page * rowsPerPage - rows!.length) : 0;
+
+  return (
+    <Table sx={{ minWidth: '100%' }} aria-labelledby="tableTitle" padding="none" stickyHeader>
+      <TableHead sx={{ bgcolor: 'primary.light' }}>
+        <TableRow sx={{ whiteSpace: 'nowrap' }}>
+          <TableCell padding="checkbox">
+            <Checkbox
+              color="primary"
+              onChange={handleSelectAllClick}
+              indeterminate={selectedIds.length > 0 && selectedIds.length < datas.length}
+              checked={datas.length > 0 && selectedIds.length === datas.length}
+              sx={{
+                '& .MuiSvgIcon-root': {
+                  backgroundColor: '#fff',
+                  borderRadius: '4px',
+                  transition: 'background-color 0.3s',
+                },
+              }}
+            />
+          </TableCell>
+          <TableCell width={50} />
+          {headers.map((header) => (
+            <TableCell key={header.key} align={typeof rows[0][header.key] === 'number' ? 'right' : 'left'}>
+              {header.label}
+            </TableCell>
+          ))}
+        </TableRow>
+      </TableHead>
+      <TableBody>
+        {list.map((row) => {
+          const isHidden = row.dspFlg === false;
+          const isDeleted = row.delFlg === true;
+          const isItemSelected = selectedIds.includes(row.id);
+          return (
+            <TableRow hover key={row.tblDspId}>
+              <TableCell
+                padding="checkbox"
+                onClick={() => handleSelect(row.id)}
+                tabIndex={-1}
+                sx={{ cursor: 'pointer', whiteSpace: 'nowrap' }}
+              >
+                <Checkbox
+                  color="primary"
+                  checked={isItemSelected}
+                  sx={{
+                    '& .MuiSvgIcon-root': {
+                      backgroundColor: '#fff',
+                      borderRadius: '4px',
+                      transition: 'background-color 0.3s',
+                    },
+                  }}
+                />
+              </TableCell>
+              <TableCell
+                width={50}
+                sx={{
+                  bgcolor: isHidden || isDeleted ? grey[300] : undefined,
+                  paddingLeft: 1,
+                  paddingRight: 1,
+                  textAlign: 'end',
+                }}
+              >
+                {row.tblDspId}
+              </TableCell>
+              {headers.map((header) => {
+                const isHidden = row.dspFlg === false;
+                const isDeleted = row.delFlg === true;
+                return (
+                  <TableCell
+                    key={header.key}
+                    align={typeof row[header.key] === 'number' ? 'right' : 'left'}
+                    padding="none"
+                    sx={{ bgcolor: isHidden || isDeleted ? grey[300] : undefined, whiteSpace: 'nowrap' }}
+                  >
+                    {header.key === 'name' ? (
+                      <Button
+                        variant="text"
+                        size="small"
+                        onClick={() => handleOpenDialog(row.id)}
+                        sx={{ p: 0, paddingLeft: 1, m: 0, minWidth: 1, justifyContent: 'left' }}
+                      >
+                        <LightTooltipWithText variant={'button'} maxWidth={300}>
+                          {row[header.key]}
+                        </LightTooltipWithText>
+                      </Button>
+                    ) : header.key === 'address' ? (
+                      <LightTooltipWithText variant={'body2'} maxWidth={300}>
+                        {row[header.key]}
+                      </LightTooltipWithText>
+                    ) : header.key === 'mem' ? (
+                      <LightTooltipWithText variant={'body2'} maxWidth={300}>
+                        {row[header.key]}
+                      </LightTooltipWithText>
+                    ) : header.key === 'hidden' ? (
+                      <>{isHidden && <>非表示</>}</>
+                    ) : header.key === 'deleted' ? (
+                      <>{isDeleted && <>無効</>}</>
+                    ) : (
+                      <>{row[header.key]}</>
+                    )}
+                  </TableCell>
+                );
+              })}
+            </TableRow>
+          );
+        })}
+        {emptyRows > 0 && (
+          <TableRow style={{ height: 25 * emptyRows }}>
+            <TableCell colSpan={headers.length + 1} />
           </TableRow>
         )}
       </TableBody>

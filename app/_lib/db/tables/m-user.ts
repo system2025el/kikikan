@@ -50,7 +50,7 @@ export const SelectFilteredUsers = async (searchQuery: string) => {
   }
   // 数字以外の文字がある場合は最後に持っていき、複数ある場合はそれらで数値以外を除去してソート
   query += `ORDER BY (m.shain_cod ~ '^[0-9]+$') DESC, 
-    NULLIF(regexp_replace(m.shain_cod, '[^0-9]', '', 'g'), '')::bigint ASC NULLS LAST
+    LPAD(regexp_replace(m.shain_cod, '[^0-9]', '', 'g'), 50, '0') ASC
   `;
 
   try {
