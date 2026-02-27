@@ -204,13 +204,6 @@ export const updateUser = async (currentEmail: string, data: UsersMasterDialogVa
  * @param data
  */
 export const deleteUsers = async (mailAdr: string, user: string) => {
-  const delData = {
-    mail_adr: mailAdr,
-    del_flg: 1,
-    upd_dat: new Date().toISOString(),
-    upd_user: user,
-  };
-
   const connection = await pool.connect();
   try {
     const { data: users, error: listError } = await supabaseAdmin.auth.admin.listUsers();
@@ -218,22 +211,33 @@ export const deleteUsers = async (mailAdr: string, user: string) => {
       console.error(listError);
       throw listError;
     }
-    const targetUser = users?.users.find((u) => u.email === mailAdr);
-    const userId = targetUser?.id;
-    await connection.query('BEGIN');
-    await updMUserDelFlg(delData, connection);
-    if (userId) {
-      const { error } = await supabaseAdmin.auth.admin.deleteUser(userId);
-      if (error) {
-        console.error('削除失敗:', error.message);
-        await connection.query('ROLLBACK');
-        throw error;
-      }
-      await connection.query('COMMIT');
+    const targetUser = users.users.find((u) => u.email === mailAdr);
+    if (!targetUser) {
+      throw new Error('指定されたメールアドレスのユーザーが見つかりません。');
     }
-    await connection.query('ROLLBACK');
+
+    const userId = targetUser.id;
+    const delData = {
+      mail_adr: mailAdr,
+      del_flg: 1,
+      upd_dat: new Date().toISOString(),
+      upd_user: user,
+    };
+
+    await connection.query('BEGIN');
+
+    await updMUserDelFlg(delData, connection);
+
+    const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(userId);
+    if (deleteError) {
+      console.error('削除失敗:', deleteError.message);
+      throw deleteError;
+    }
+    await connection.query('COMMIT');
+    console.log('削除成功', userId);
   } catch (e) {
     await connection.query('ROLLBACK');
+    console.error('削除失敗', e);
     throw e;
   } finally {
     connection.release();
