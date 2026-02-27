@@ -170,7 +170,7 @@ export const Schedule = () => {
             type="number"
             rules={{
               max: {
-                value: 200,
+                value: 90,
                 message: '',
               },
             }}
