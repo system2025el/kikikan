@@ -512,7 +512,10 @@ const styles: { [key: string]: React.CSSProperties } = {
   header: {
     border: '1px solid grey',
     whiteSpace: 'nowrap',
-    padding: 0,
+    paddingTop: 0,
+    paddingBottom: 0,
+    paddingLeft: 4,
+    paddingRight: 4,
   },
   // 行
   row: {
@@ -521,7 +524,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     height: '26px',
     paddingTop: 0,
     paddingBottom: 0,
-    paddingLeft: 1,
-    paddingRight: 1,
+    paddingLeft: 4,
+    paddingRight: 4,
   },
 };

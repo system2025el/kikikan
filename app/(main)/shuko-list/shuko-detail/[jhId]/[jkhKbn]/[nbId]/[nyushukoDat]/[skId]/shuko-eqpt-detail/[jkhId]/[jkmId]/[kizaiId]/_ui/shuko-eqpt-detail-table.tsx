@@ -4,7 +4,7 @@ import { Checkbox, Table, TableBody, TableCell, TableContainer, TableHead, Table
 import { grey } from '@mui/material/colors';
 import { Dispatch, SetStateAction } from 'react';
 
-import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
+import { toJapanTimeString, toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 
 import { ShukoEqptDetailTableValues } from '../_lib/types';
 
@@ -39,8 +39,8 @@ export const ShukoEqptDetailTable = (props: {
             <TableCell align="left">RFIDタグID</TableCell>
             <TableCell align="left">ステータス</TableCell>
             <TableCell align="left">メモ</TableCell>
-            <TableCell align="left">在庫場所</TableCell>
-            <TableCell align="left">更新日時</TableCell>
+            <TableCell align="left">作業場所</TableCell>
+            <TableCell align="left">作業日時</TableCell>
             <TableCell align="left">担当者</TableCell>
             <TableCell align="left">無効</TableCell>
           </TableRow>
@@ -59,7 +59,7 @@ export const ShukoEqptDetailTable = (props: {
               <TableCell align="left">{row.rfidStsNam}</TableCell>
               <TableCell align="left">{row.rfidMem}</TableCell>
               <TableCell align="left">{row.nyushukoBashoId === 1 ? 'K' : 'Y'}</TableCell>
-              <TableCell align="left">{row.rfidDat && toJapanYMDString(row.rfidDat)}</TableCell>
+              <TableCell align="left">{row.rfidDat && toJapanTimeString(row.rfidDat)}</TableCell>
               <TableCell align="left">{row.rfidUser}</TableCell>
               <TableCell align="left">{row.rfidDelFlg === 1 && '無効'}</TableCell>
             </TableRow>

@@ -197,7 +197,7 @@ export const ShukoEqptDetail = (props: {
         <Paper variant="outlined">
           <form onSubmit={handleSubmit(onSubmit)}>
             <Box display={'flex'} justifyContent={'space-between'} alignItems="center" px={2}>
-              <Typography fontSize={'large'}>機材詳細</Typography>
+              <Typography fontSize={'large'}>出庫詳細</Typography>
               {/* <Button type="submit">保存</Button> */}
             </Box>
             <Divider />

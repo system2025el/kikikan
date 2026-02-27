@@ -51,8 +51,8 @@ export const EqTable = (props: EqTableProps) => {
                   height: 25,
                   paddingTop: 0,
                   paddingBottom: 0,
-                  paddingLeft: 1,
-                  paddingRight: 1,
+                  paddingLeft: '4px',
+                  paddingRight: '4px',
                   bgcolor: index % 2 === 1 ? borderColor : undefined,
                 }}
               >
@@ -126,7 +126,7 @@ export const EqStockTable = (props: EqStockTableProps) => {
                       border: '1px solid black',
                       height: 25,
                       py: 0,
-                      px: 1,
+                      px: '4px',
                       color: Number(cell.zaikoQty) < 0 ? red[500] : undefined,
                       bgcolor: rowIndex % 2 === 1 ? borderColor : undefined,
                     }}
@@ -161,7 +161,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     height: 25,
     paddingTop: 0,
     paddingBottom: 0,
-    paddingLeft: 1,
-    paddingRight: 1,
+    paddingLeft: 4,
+    paddingRight: 4,
   },
 };
