@@ -184,7 +184,7 @@ export const IdoEqptDetail = (props: {
         <Paper variant="outlined">
           <form onSubmit={handleSubmit(onSubmit)}>
             <Box display={'flex'} justifyContent={'space-between'} alignItems="center" px={2}>
-              <Typography fontSize={'large'}>移動詳細(RFIDタグ)</Typography>
+              <Typography fontSize={'large'}>移動詳細</Typography>
               {/* <Button type="submit">保存</Button> */}
             </Box>
             <Divider />
