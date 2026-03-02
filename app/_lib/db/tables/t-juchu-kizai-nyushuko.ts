@@ -77,7 +77,10 @@ export const selectOyaJuchuKizaiNyushukoConfirm = async (
   connection: PoolClient
 ) => {
   const query = `
-    SELECT *
+    SELECT
+      juchu_head_id,
+      juchu_kizai_head_id,
+      nyushuko_basho_id
     FROM 
       ${SCHEMA}.t_juchu_kizai_nyushuko
     WHERE

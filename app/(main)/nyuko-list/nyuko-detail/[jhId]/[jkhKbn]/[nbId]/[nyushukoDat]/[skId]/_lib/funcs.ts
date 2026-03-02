@@ -240,10 +240,9 @@ export const updReturnNyukoDetail = async (
     const juchuKizaiHeadIds = [...new Set(nyukoDetailTableData.filter((d) => d.ctnFlg).map((d) => d.juchuKizaiHeadId))];
     for (const juchuKizaiHeadId of juchuKizaiHeadIds) {
       const juchuCtnNyukoData = ctnData.filter((d) => d.juchuKizaiHeadId === juchuKizaiHeadId);
-      const juchuCtnMeisaiData = await getReturnJuchuContainerMeisai(nyukoDetailData.juchuHeadId, juchuKizaiHeadId);
 
-      // 入庫日確認
-      const nyukoDat = await selectOyaJuchuKizaiNyushukoConfirm(
+      // 親入庫日確認
+      const oyaNyukoDat = await selectOyaJuchuKizaiNyushukoConfirm(
         {
           juchu_head_id: nyukoDetailData.juchuHeadId,
           juchu_kizai_head_id: juchuKizaiHeadId,
@@ -252,16 +251,42 @@ export const updReturnNyukoDetail = async (
         connection
       );
 
-      if (nyukoDat && nyukoDat.length === 2) {
+      if (!oyaNyukoDat || oyaNyukoDat.length === 0) {
+        throw new Error('親入庫日が見つかりません');
+      }
+
+      const oyaJuchuCtnMeisaiData = await getOyaJuchuContainerMeisai(
+        nyukoDetailData.juchuHeadId,
+        oyaNyukoDat[0].juchu_kizai_head_id
+      );
+
+      if (oyaNyukoDat && oyaNyukoDat.length === 2) {
         // 親コンテナ入庫伝票更新
-        await updOyaCtnNyukoDen(juchuCtnNyukoData, juchuCtnMeisaiData, 1, 1, userNam, connection);
-        await updOyaCtnNyukoDen(juchuCtnNyukoData, juchuCtnMeisaiData, 2, 2, userNam, connection);
-      } else if (nyukoDat && nyukoDat.length === 1) {
         await updOyaCtnNyukoDen(
           juchuCtnNyukoData,
-          juchuCtnMeisaiData,
-          nyukoDat[0].nyushuko_basho_id,
-          3,
+          oyaJuchuCtnMeisaiData,
+          nyukoDetailData.nyushukoBashoId,
+          1,
+          oyaNyukoDat.length,
+          userNam,
+          connection
+        );
+        await updOyaCtnNyukoDen(
+          juchuCtnNyukoData,
+          oyaJuchuCtnMeisaiData,
+          nyukoDetailData.nyushukoBashoId,
+          2,
+          oyaNyukoDat.length,
+          userNam,
+          connection
+        );
+      } else if (oyaNyukoDat && oyaNyukoDat.length === 1) {
+        await updOyaCtnNyukoDen(
+          juchuCtnNyukoData,
+          oyaJuchuCtnMeisaiData,
+          nyukoDetailData.nyushukoBashoId,
+          oyaNyukoDat[0].nyushuko_basho_id,
+          oyaNyukoDat.length,
           userNam,
           connection
         );
@@ -436,7 +461,7 @@ export const upsJuchuCtnMeisai = async (
     keep_qty: d.juchuKizaiHeadKbn === 3 ? (d.resultQty ?? 0) + (d.resultAdjQty ?? 0) : null,
     kizai_id: d.kizaiId,
     plan_kizai_qty: d.juchuKizaiHeadKbn === 2 ? -1 * ((d.resultQty ?? 0) + (d.resultAdjQty ?? 0)) : null,
-    shozoku_id: d.nyushukoShubetuId ?? 0,
+    shozoku_id: d.nyushukoBashoId ?? 0,
     dsp_ord_num: d.dspOrdNumMeisai,
     indent_num: d.indentNum,
     add_dat: new Date().toISOString(),
@@ -601,7 +626,7 @@ export const updOyaKizaiNyukoDen = async (
  */
 export const updOyaCtnNyukoDen = async (
   nyukoDetailTableData: NyukoDetailTableValues[],
-  juchuContainerMeisaiData: {
+  oyaJuchuContainerMeisaiData: {
     juchuHeadId: number;
     juchuKizaiHeadId: number;
     juchuKizaiMeisaiId: number;
@@ -610,29 +635,63 @@ export const updOyaCtnNyukoDen = async (
     planYardKizaiQty: number;
   }[],
   sagyoId: number,
-  planQtyId: number,
+  oyaSagyoId: number,
+  oyaNyukoDatLength: number,
   userNam: string,
   connection: PoolClient
 ) => {
-  const updateNyukoData: NyushukoDen[] = nyukoDetailTableData.map((d) => ({
-    juchu_head_id: d.juchuHeadId,
-    juchu_kizai_head_id: d.juchuKizaiHeadId,
-    juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
-    kizai_id: d.kizaiId,
-    plan_qty:
-      planQtyId === 1
-        ? juchuContainerMeisaiData.find((c) => c.kizaiId === d.kizaiId)?.planKicsKizaiQty
-        : planQtyId === 2
-          ? juchuContainerMeisaiData.find((c) => c.kizaiId === d.kizaiId)?.planYardKizaiQty
-          : d.planQty,
-    sagyo_den_dat: d.nyushukoDat,
-    sagyo_id: sagyoId,
-    sagyo_kbn_id: 30,
-    dsp_ord_num: d.dspOrdNumMeisai,
-    indent_num: d.indentNum,
-    upd_dat: new Date().toISOString(),
-    upd_user: userNam,
-  }));
+  // const updateNyukoData: NyushukoDen[] = nyukoDetailTableData.map((d) => ({
+  //   juchu_head_id: d.juchuHeadId,
+  //   juchu_kizai_head_id: d.juchuKizaiHeadId,
+  //   juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
+  //   kizai_id: d.kizaiId,
+  //   plan_qty:
+  //     planQtyId === 1
+  //       ? juchuContainerMeisaiData.find((c) => c.kizaiId === d.kizaiId)?.planKicsKizaiQty
+  //       : planQtyId === 2
+  //         ? juchuContainerMeisaiData.find((c) => c.kizaiId === d.kizaiId)?.planYardKizaiQty
+  //         : d.planQty,
+  //   sagyo_den_dat: d.nyushukoDat,
+  //   sagyo_id: sagyoId,
+  //   sagyo_kbn_id: 30,
+  //   dsp_ord_num: d.dspOrdNumMeisai,
+  //   indent_num: d.indentNum,
+  //   upd_dat: new Date().toISOString(),
+  //   upd_user: userNam,
+  // }));
+
+  const updateNyukoData: NyushukoDen[] = nyukoDetailTableData.map((d) => {
+    const oyaPlanQty =
+      sagyoId === 1
+        ? (oyaJuchuContainerMeisaiData.find((c) => c.kizaiId === d.kizaiId)?.planKicsKizaiQty ?? 0)
+        : (oyaJuchuContainerMeisaiData.find((c) => c.kizaiId === d.kizaiId)?.planYardKizaiQty ?? 0);
+    const planQty =
+      sagyoId === oyaSagyoId && oyaNyukoDatLength === 2 && oyaPlanQty < (d.resultQty ?? 0) + (d.resultAdjQty ?? 0)
+        ? oyaPlanQty
+        : sagyoId === oyaSagyoId && oyaNyukoDatLength === 2 && oyaPlanQty >= (d.resultQty ?? 0) + (d.resultAdjQty ?? 0)
+          ? (d.resultQty ?? 0) + (d.resultAdjQty ?? 0)
+          : sagyoId !== oyaSagyoId && oyaNyukoDatLength === 2 && oyaPlanQty < (d.resultQty ?? 0) + (d.resultAdjQty ?? 0)
+            ? (d.resultQty ?? 0) + (d.resultAdjQty ?? 0) - oyaPlanQty
+            : sagyoId !== oyaSagyoId &&
+                oyaNyukoDatLength === 2 &&
+                oyaPlanQty >= (d.resultQty ?? 0) + (d.resultAdjQty ?? 0)
+              ? 0
+              : (d.resultQty ?? 0) + (d.resultAdjQty ?? 0);
+    return {
+      juchu_head_id: d.juchuHeadId,
+      juchu_kizai_head_id: d.juchuKizaiHeadId,
+      juchu_kizai_meisai_id: d.juchuKizaiMeisaiId,
+      kizai_id: d.kizaiId,
+      plan_qty: planQty,
+      sagyo_den_dat: d.nyushukoDat,
+      sagyo_id: oyaSagyoId,
+      sagyo_kbn_id: 30,
+      dsp_ord_num: d.dspOrdNumMeisai,
+      indent_num: d.indentNum,
+      upd_dat: new Date().toISOString(),
+      upd_user: userNam,
+    };
+  });
 
   try {
     for (const data of updateNyukoData) {
@@ -682,28 +741,28 @@ export const addNyukoFix = async (
 };
 
 /**
- * 返却受注コンテナ明細データ取得
+ * 親受注コンテナ明細データ取得
  * @param juchuHeadId 受注ヘッダーid
  * @param juchuKizaiHeadId 受注機材ヘッダーid
  * @returns 返却受注コンテナ明細データ
  */
-export const getReturnJuchuContainerMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
+export const getOyaJuchuContainerMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
   const { data: containerData, error: containerError } = await selectJuchuContainerMeisai(
     juchuHeadId,
     juchuKizaiHeadId
   );
   if (containerError) {
-    console.error('GetReturnContainerList return containerList error : ', containerError);
+    console.error('GetOyaContainerList containerList error : ', containerError);
     throw containerError;
   }
 
-  const returnJuchuContainerMeisaiData = containerData.map((d) => ({
+  const oyaJuchuContainerMeisaiData = containerData.map((d) => ({
     juchuHeadId: d.juchu_head_id ?? 0,
     juchuKizaiHeadId: d.juchu_kizai_head_id ?? 0,
     juchuKizaiMeisaiId: d.juchu_kizai_meisai_id ?? 0,
     kizaiId: d.kizai_id ?? 0,
-    planKicsKizaiQty: d.kics_plan_kizai_qty ? -1 * d.kics_plan_kizai_qty : 0,
-    planYardKizaiQty: d.yard_plan_kizai_qty ? -1 * d.yard_plan_kizai_qty : 0,
+    planKicsKizaiQty: d.kics_plan_kizai_qty ? d.kics_plan_kizai_qty : 0,
+    planYardKizaiQty: d.yard_plan_kizai_qty ? d.yard_plan_kizai_qty : 0,
   }));
-  return returnJuchuContainerMeisaiData;
+  return oyaJuchuContainerMeisaiData;
 };

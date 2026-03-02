@@ -137,6 +137,9 @@ export const addNewUser = async (data: UsersMasterDialogValues, user: string) =>
       password: 'password',
       options: { emailRedirectTo: /*`${getUrl()}login`*/ `${getUrl()}signup` },
     });
+    // const { error } = await supabaseAdmin.auth.admin.inviteUserByEmail(data.mailAdr, {
+    //   redirectTo: `${getUrl()}signup`,
+    // });
 
     // const { error } = await supabase.auth.signInWithOtp({
     //   email: data.mailAdr,
@@ -268,9 +271,12 @@ export const restoreUsers = async (mailAdr: string, user: string) => {
       password: 'password',
       options: { emailRedirectTo: /*`${getUrl()}login`*/ `${getUrl()}signup` },
     });
+    // const { error } = await supabaseAdmin.auth.admin.inviteUserByEmail(mailAdr, {
+    //   redirectTo: `${getUrl()}signup`,
+    // });
+
     if (error) {
-      console.error('削除失敗:', error.message);
-      await connection.query('ROLLBACK');
+      console.error('登録失敗:', error.message);
       throw error;
     }
     await connection.query('COMMIT');
