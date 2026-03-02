@@ -5,7 +5,7 @@ import { IsshikisMasterDialogValues } from './types';
 /* 一式マスタテーブルヘッダー */
 export const isshikiMHeader = [
   { key: 'name', label: '名称' },
-  { key: 'regAmt', label: '単価' },
+  // { key: 'regAmt', label: '単価' },
   { key: 'mem', label: 'メモ' },
   { key: 'hidden', label: '表示' },
   { key: 'deleted', label: '無効' },
@@ -14,7 +14,7 @@ export const isshikiMHeader = [
 /* 新規登録用の初期化値（空の一式） */
 export const emptyIsshiki: IsshikisMasterDialogValues = {
   isshikiNam: '',
-  regAmt: null,
+  // regAmt: null,
   delFlg: false,
   mem: '',
   kizaiList: [],

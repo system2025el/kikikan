@@ -229,7 +229,7 @@ export const IsshikisMasterDialog = ({
                   disabled={editable ? false : true}
                 />
               </FormBox>
-              <FormBox formItem={formItems[1]} required>
+              {/* <FormBox formItem={formItems[1]} required>
                 <TextFieldElement
                   name="regAmt"
                   control={control}
@@ -248,7 +248,7 @@ export const IsshikisMasterDialog = ({
                   type="number"
                   disabled={editable ? false : true}
                 />
-              </FormBox>
+              </FormBox> */}
               <FormBox formItem={formItems[2]}>
                 <TextFieldElement
                   multiline

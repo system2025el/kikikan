@@ -10,11 +10,11 @@ export const IsshikisMasterDialogSchema = z.object({
     .string()
     .max(100, { message: validationMessages.maxStringLength(100) })
     .min(1, { message: validationMessages.required() }),
-  regAmt: z
-    .number({ message: validationMessages.number() })
-    .int({ message: validationMessages.int() })
-    .max(9999999999, { message: validationMessages.maxNumberLength(10) })
-    .nullish(),
+  // regAmt: z
+  //   .number({ message: validationMessages.number() })
+  //   .int({ message: validationMessages.int() })
+  //   .max(9999999999, { message: validationMessages.maxNumberLength(10) })
+  //   .nullish(),
   delFlg: z.boolean().optional(),
   mem: z
     .string()
@@ -34,7 +34,7 @@ export type IsshikisMasterDialogValues = z.infer<typeof IsshikisMasterDialogSche
 export type IsshikisMasterTableValues = {
   isshikiId: number;
   isshikiNam: string;
-  regAmt: number | null;
+  // regAmt: number | null;
   delFlg: boolean | null;
   mem: string | null;
   tblDspId: number;
