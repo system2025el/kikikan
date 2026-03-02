@@ -414,7 +414,11 @@ export const KeepContainerTable = (props: {
                   value={row.kicsKeepQty}
                   type="text"
                   onChange={(e) => {
-                    if (/^\d*$/.test(e.target.value) && Number(e.target.value) <= (row.oyaPlanKicsKizaiQty ?? 0)) {
+                    if (
+                      /^\d*$/.test(e.target.value) &&
+                      Number(e.target.value) + row.yardKeepQty <=
+                        (row.oyaPlanKicsKizaiQty ?? 0) + (row.oyaPlanYardKizaiQty ?? 0)
+                    ) {
                       handleContainerCellChange(rowIndex, Number(e.target.value), row.yardKeepQty);
                     }
                   }}
@@ -458,7 +462,11 @@ export const KeepContainerTable = (props: {
                   value={row.yardKeepQty}
                   type="text"
                   onChange={(e) => {
-                    if (/^\d*$/.test(e.target.value) && Number(e.target.value) <= (row.oyaPlanYardKizaiQty ?? 0)) {
+                    if (
+                      /^\d*$/.test(e.target.value) &&
+                      Number(e.target.value) + row.kicsKeepQty <=
+                        (row.oyaPlanKicsKizaiQty ?? 0) + (row.oyaPlanYardKizaiQty ?? 0)
+                    ) {
                       handleContainerCellChange(rowIndex, row.kicsKeepQty, Number(e.target.value));
                     }
                   }}

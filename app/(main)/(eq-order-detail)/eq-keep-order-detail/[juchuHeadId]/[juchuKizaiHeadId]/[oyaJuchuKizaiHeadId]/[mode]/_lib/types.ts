@@ -25,7 +25,31 @@ export const KeepJuchuKizaiHeadSchema = z
   .refine((data) => data.kicsNyukoDat || data.yardNyukoDat, {
     message: validationMessages.required(),
     path: ['yardNyukoDat'],
-  });
+  })
+  .refine(
+    (data) => {
+      if (data.kicsShukoDat && !data.kicsNyukoDat) {
+        return false;
+      }
+      return true;
+    },
+    {
+      message: '',
+      path: ['kicsNyukoDat'],
+    }
+  )
+  .refine(
+    (data) => {
+      if (data.yardShukoDat && !data.yardNyukoDat) {
+        return false;
+      }
+      return true;
+    },
+    {
+      message: '',
+      path: ['yardNyukoDat'],
+    }
+  );
 
 export type KeepJuchuKizaiHeadValues = z.infer<typeof KeepJuchuKizaiHeadSchema>;
 

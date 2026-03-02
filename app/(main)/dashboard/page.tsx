@@ -4,10 +4,10 @@ import { Metadata } from 'next';
 
 import { Dashboard } from './_ui/dashboard';
 
-// export const metadata: Metadata = {
-//   title: 'ダッシュボード',
-//   description: 'ダッシュボードページです',
-// };
+export const metadata: Metadata = {
+  title: 'ダッシュボード',
+  description: 'ダッシュボードページです',
+};
 
 const Page = () => {
   return (

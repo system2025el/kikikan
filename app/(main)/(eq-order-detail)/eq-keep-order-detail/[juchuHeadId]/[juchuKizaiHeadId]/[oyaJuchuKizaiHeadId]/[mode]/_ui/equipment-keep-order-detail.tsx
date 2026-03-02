@@ -551,22 +551,19 @@ export const EquipmentKeepOrderDetail = (props: {
 
       // 更新
     } else {
-      const kicsMeisai = keepJuchuKizaiMeisaiList.filter((d) => d.shozokuId === 1 && !d.delFlag);
-      const yardMeisai = keepJuchuKizaiMeisaiList.filter((d) => d.shozokuId === 2 && !d.delFlag);
+      // const kicsMeisai = keepJuchuKizaiMeisaiList.filter((d) => d.shozokuId === 1 && !d.delFlag);
+      // const yardMeisai = keepJuchuKizaiMeisaiList.filter((d) => d.shozokuId === 2 && !d.delFlag);
       const kicsContainer = keepJuchuContainerMeisaiList.filter((d) => d.kicsKeepQty && !d.delFlag);
       const yardContainer = keepJuchuContainerMeisaiList.filter((d) => d.yardKeepQty && !d.delFlag);
 
-      if (
-        ((kicsMeisai.length > 0 || kicsContainer.length > 0) && !data.kicsNyukoDat) ||
-        ((yardMeisai.length > 0 || yardContainer.length > 0) && !data.yardNyukoDat)
-      ) {
-        if ((kicsMeisai.length > 0 || kicsContainer.length > 0) && !data.kicsNyukoDat) {
+      if ((kicsContainer.length > 0 && !data.kicsNyukoDat) || (yardContainer.length > 0 && !data.yardNyukoDat)) {
+        if (kicsContainer.length > 0 && !data.kicsNyukoDat) {
           setError('kicsNyukoDat', {
             type: 'manual',
             message: '',
           });
         }
-        if ((yardMeisai.length > 0 || yardContainer.length > 0) && !data.yardNyukoDat) {
+        if (yardContainer.length > 0 && !data.yardNyukoDat) {
           setError('yardNyukoDat', {
             type: 'manual',
             message: '',
@@ -579,6 +576,30 @@ export const EquipmentKeepOrderDetail = (props: {
         setIsProcessing(false);
         return;
       }
+
+      // if (
+      //   ((kicsMeisai.length > 0 || kicsContainer.length > 0) && !data.kicsNyukoDat) ||
+      //   ((yardMeisai.length > 0 || yardContainer.length > 0) && !data.yardNyukoDat)
+      // ) {
+      //   if ((kicsMeisai.length > 0 || kicsContainer.length > 0) && !data.kicsNyukoDat) {
+      //     setError('kicsNyukoDat', {
+      //       type: 'manual',
+      //       message: '',
+      //     });
+      //   }
+      //   if ((yardMeisai.length > 0 || yardContainer.length > 0) && !data.yardNyukoDat) {
+      //     setError('yardNyukoDat', {
+      //       type: 'manual',
+      //       message: '',
+      //     });
+      //   }
+      //   setAlertTitle('入出庫日時が入力されていません');
+      //   setAlertMessage('入出庫日時を入力してください');
+      //   setAlertOpen(true);
+      //   setIsLoading(false);
+      //   setIsProcessing(false);
+      //   return;
+      // }
 
       // 更新判定
       const checkJuchuKizaiHead = isDirty;
@@ -1424,8 +1445,8 @@ export const EquipmentKeepOrderDetail = (props: {
                           render={({ field, fieldState }) => (
                             <DateTime
                               date={field.value}
-                              // maxDate={keepShukoDate ? keepShukoDate : (oyaShukoDate ?? undefined)}
-                              // minDate={oyaShukoDate ?? undefined}
+                              minDate={oyaShukoDate ?? undefined}
+                              maxDate={oyaNyukoDate ?? undefined}
                               onChange={handleKicsNyukoChange}
                               onAccept={handleKicsNyukoAccept}
                               fieldstate={fieldState}
@@ -1452,8 +1473,8 @@ export const EquipmentKeepOrderDetail = (props: {
                           render={({ field, fieldState }) => (
                             <DateTime
                               date={field.value}
-                              // maxDate={keepShukoDate ? keepShukoDate : (oyaShukoDate ?? undefined)}
-                              // minDate={oyaNyukoDate ?? undefined}
+                              minDate={oyaShukoDate ?? undefined}
+                              maxDate={oyaNyukoDate ?? undefined}
                               onChange={handleYardNyukoChange}
                               onAccept={handleYardNyukoAccept}
                               fieldstate={fieldState}
@@ -1483,15 +1504,15 @@ export const EquipmentKeepOrderDetail = (props: {
                           render={({ field, fieldState }) => (
                             <DateTime
                               date={field.value}
-                              // maxDate={oyaShukoDate ?? undefined}
-                              // minDate={keepNyukoDate ? keepNyukoDate : (oyaNyukoDate ?? undefined)}
+                              minDate={oyaShukoDate ?? undefined}
+                              maxDate={oyaNyukoDate ?? undefined}
                               onChange={handleKicsShukoChange}
                               onAccept={handleKicsShukoAccept}
                               fieldstate={fieldState}
                               disabled={!edit}
                               onClear={() => {
                                 field.onChange(null);
-                                trigger(['kicsShukoDat', 'yardShukoDat']);
+                                trigger(['kicsNyukoDat', 'kicsShukoDat', 'yardShukoDat']);
                               }}
                             />
                           )}
@@ -1505,15 +1526,15 @@ export const EquipmentKeepOrderDetail = (props: {
                           render={({ field, fieldState }) => (
                             <DateTime
                               date={field.value}
-                              // maxDate={oyaShukoDate ?? undefined}
-                              // minDate={keepNyukoDate ? keepNyukoDate : (oyaNyukoDate ?? undefined)}
+                              minDate={oyaShukoDate ?? undefined}
+                              maxDate={oyaNyukoDate ?? undefined}
                               onChange={handleYardShukoChange}
                               onAccept={handleYardShukoAccept}
                               fieldstate={fieldState}
                               disabled={!edit}
                               onClear={() => {
                                 field.onChange(null);
-                                trigger(['kicsShukoDat', 'yardShukoDat']);
+                                trigger(['yardNyukoDat', 'kicsShukoDat', 'yardShukoDat']);
                               }}
                             />
                           )}
