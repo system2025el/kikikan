@@ -689,29 +689,29 @@ export const EquipmentReturnOrderDetail = (props: {
     } else {
       // const kicsMeisai = returnJuchuKizaiMeisaiList.filter((d) => d.shozokuId === 1 && !d.delFlag);
       // const yardMeisai = returnJuchuKizaiMeisaiList.filter((d) => d.shozokuId === 2 && !d.delFlag);
-      // const kicsContainer = returnJuchuContainerMeisaiList.filter((d) => d.planKicsKizaiQty && !d.delFlag);
-      // const yardContainer = returnJuchuContainerMeisaiList.filter((d) => d.planYardKizaiQty && !d.delFlag);
+      const kicsContainer = returnJuchuContainerMeisaiList.filter((d) => d.planKicsKizaiQty && !d.delFlag);
+      const yardContainer = returnJuchuContainerMeisaiList.filter((d) => d.planYardKizaiQty && !d.delFlag);
 
-      // if ((kicsContainer.length > 0 && !data.kicsNyukoDat) || (yardContainer.length > 0 && !data.yardNyukoDat)) {
-      //   if (kicsContainer.length > 0 && !data.kicsNyukoDat) {
-      //     setError('kicsNyukoDat', {
-      //       type: 'manual',
-      //       message: '',
-      //     });
-      //   }
-      //   if (yardContainer.length > 0 && !data.yardNyukoDat) {
-      //     setError('yardNyukoDat', {
-      //       type: 'manual',
-      //       message: '',
-      //     });
-      //   }
-      //   setAlertTitle('入庫日時が入力されていません');
-      //   setAlertMessage('入庫日時を入力してください');
-      //   setAlertOpen(true);
-      //   setIsLoading(false);
-      //   setIsProcessing(false);
-      //   return;
-      // }
+      if ((kicsContainer.length > 0 && !data.kicsNyukoDat) || (yardContainer.length > 0 && !data.yardNyukoDat)) {
+        if (kicsContainer.length > 0 && !data.kicsNyukoDat) {
+          setError('kicsNyukoDat', {
+            type: 'manual',
+            message: '',
+          });
+        }
+        if (yardContainer.length > 0 && !data.yardNyukoDat) {
+          setError('yardNyukoDat', {
+            type: 'manual',
+            message: '',
+          });
+        }
+        setAlertTitle('入庫日時が入力されていません');
+        setAlertMessage('入庫日時を入力してください');
+        setAlertOpen(true);
+        setIsLoading(false);
+        setIsProcessing(false);
+        return;
+      }
 
       // if (
       //   ((kicsMeisai.length > 0 || kicsContainer.length > 0) && !data.kicsNyukoDat) ||
@@ -1942,8 +1942,20 @@ export const EquipmentReturnOrderDetail = (props: {
                             render={({ field, fieldState }) => (
                               <DateTime
                                 date={field.value}
-                                minDate={oyaJuchuKizaiHeadData.kicsShukoDat ?? undefined}
-                                maxDate={oyaJuchuKizaiHeadData.kicsNyukoDat ?? undefined}
+                                minDate={
+                                  oyaJuchuKizaiHeadData.kicsShukoDat
+                                    ? oyaJuchuKizaiHeadData.kicsShukoDat
+                                    : oyaJuchuKizaiHeadData.yardShukoDat
+                                      ? oyaJuchuKizaiHeadData.yardShukoDat
+                                      : undefined
+                                }
+                                maxDate={
+                                  oyaJuchuKizaiHeadData.kicsNyukoDat
+                                    ? oyaJuchuKizaiHeadData.kicsNyukoDat
+                                    : oyaJuchuKizaiHeadData.yardNyukoDat
+                                      ? oyaJuchuKizaiHeadData.yardNyukoDat
+                                      : undefined
+                                }
                                 onChange={handleKicsNyukoChange}
                                 onAccept={handleKicsNyukoAccept}
                                 fieldstate={fieldState}
@@ -1970,8 +1982,20 @@ export const EquipmentReturnOrderDetail = (props: {
                             render={({ field, fieldState }) => (
                               <DateTime
                                 date={field.value}
-                                minDate={oyaJuchuKizaiHeadData.yardShukoDat ?? undefined}
-                                maxDate={oyaJuchuKizaiHeadData.yardNyukoDat ?? undefined}
+                                minDate={
+                                  oyaJuchuKizaiHeadData.yardShukoDat
+                                    ? oyaJuchuKizaiHeadData.yardShukoDat
+                                    : oyaJuchuKizaiHeadData.kicsShukoDat
+                                      ? oyaJuchuKizaiHeadData.kicsShukoDat
+                                      : undefined
+                                }
+                                maxDate={
+                                  oyaJuchuKizaiHeadData.yardNyukoDat
+                                    ? oyaJuchuKizaiHeadData.yardNyukoDat
+                                    : oyaJuchuKizaiHeadData.kicsNyukoDat
+                                      ? oyaJuchuKizaiHeadData.kicsNyukoDat
+                                      : undefined
+                                }
                                 onChange={handleYardNyukoChange}
                                 onAccept={handleYardNyukoAccept}
                                 fieldstate={fieldState}
