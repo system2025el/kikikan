@@ -38,6 +38,7 @@ export const getNyukoList = async (queries: NyukoListSearchValues) => {
       nchkSagyoStsId: d.nchk_sagyo_sts_id,
       nchkSagyoStsNamShort: d.nchk_sagyo_sts_nam_short,
       nyukoFixFlg: d.nyuko_fix_flg === 1 ? true : false,
+      nyuryokuUser: d.nyuryoku_user,
     }));
 
     return nyukoList;

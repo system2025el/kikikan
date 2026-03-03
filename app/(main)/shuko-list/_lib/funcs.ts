@@ -38,6 +38,7 @@ export const getShukoList = async (queries: ShukoListSearchValues) => {
       schkSagyoStsId: d.schk_sagyo_sts_id,
       schkSagyoStsNamShort: d.schk_sagyo_sts_nam_short,
       shukoFixFlg: d.shuko_fix_flg === 1 ? true : false,
+      nyuryokuUser: d.nyuryoku_user,
     }));
 
     return shukoList;

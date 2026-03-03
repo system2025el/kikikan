@@ -199,7 +199,7 @@ export const ShukoDetail = (props: {
         <Paper variant="outlined">
           <Box display={'flex'} justifyContent={'space-between'} alignItems="center" px={2}>
             <Typography fontSize={'large'}>
-              出庫明細({shukoDetailData.sagyoKbnId === 20 ? 'チェック' : 'スタンバイ'})
+              出庫明細({shukoDetailData.sagyoKbnId === 20 ? '最終確認' : 'ピッキング'})
             </Typography>
             <Grid2 container alignItems={'center'} spacing={2}>
               {fixFlag && <Typography>出発済</Typography>}
