@@ -153,21 +153,21 @@ export const selectFilteredEqpts = async (queries: {
   //   m_kizai.kizai_nam;
   //   `;
 
-  if (queries.q && queries.q.trim() !== '') {
-    builder.ilike('kizai_nam', `%${queries.q}%`);
-  }
-  if (queries.b !== null && queries.b !== FAKE_NEW_ID) {
-    builder.eq('bumon_id', queries.b);
-  }
-  if (queries.d !== null && queries.d !== FAKE_NEW_ID) {
-    builder.eq('dai_bumon_id', queries.d);
-  }
-  if (queries.s !== null && queries.s !== FAKE_NEW_ID) {
-    builder.eq('shukei_bumon_id', queries.s);
-  }
-  if (queries.ngFlg) {
-    builder.gt('kizai_ng_qty', 0);
-  }
+  // if (queries.q && queries.q.trim() !== '') {
+  //   builder.ilike('kizai_nam', `%${queries.q}%`);
+  // }
+  // if (queries.b !== null && queries.b !== FAKE_NEW_ID) {
+  //   builder.eq('bumon_id', queries.b);
+  // }
+  // if (queries.d !== null && queries.d !== FAKE_NEW_ID) {
+  //   builder.eq('dai_bumon_id', queries.d);
+  // }
+  // if (queries.s !== null && queries.s !== FAKE_NEW_ID) {
+  //   builder.eq('shukei_bumon_id', queries.s);
+  // }
+  // if (queries.ngFlg) {
+  //   builder.gt('kizai_ng_qty', 0);
+  // }
 
   try {
     // return await pool.query(query);

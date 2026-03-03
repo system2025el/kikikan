@@ -43,9 +43,9 @@ export const getFilteredBillingSituations = async (
       juchuId: d.juchu_head_id ?? FAKE_NEW_ID,
       kziHeadId: d.juchu_kizai_head_id ?? FAKE_NEW_ID,
       headNam: d.head_nam ?? '',
-      shukoDat: d.shuko_dat ?? '',
-      nyukoDat: d.nyuko_dat ?? '',
-      seikyuDat: d.seikyu_dat ?? null,
+      shukoDat: d.shuko_dat ? toJapanYMDString(d.shuko_dat) : '',
+      nyukoDat: d.nyuko_dat ? toJapanYMDString(d.nyuko_dat) : '',
+      seikyuDat: d.seikyu_dat ? toJapanYMDString(d.seikyu_dat) : null,
     }));
     const uniqueData = Array.from(new Map(data.map((d) => [JSON.stringify(d.juchu_head_id), d])).values());
     return uniqueData.map((d, index) => ({
