@@ -7,7 +7,7 @@ import { supabase /*supabaseAdmin*/ } from '@/app/_lib/db/supabase';
 import { supabaseAdmin } from '@/app/_lib/db/supabase-admin';
 import {
   insertNewUser,
-  SelectFilteredUsers,
+  selectFilteredUsers,
   selectOneUser,
   upDateUserDB,
   updMUserDelFlg,
@@ -28,7 +28,7 @@ import { UsersMasterDialogValues, UsersMasterTableValues } from './types';
  */
 export const getFilteredUsers = async (query: string = '') => {
   try {
-    const { rows } = await SelectFilteredUsers(query);
+    const { rows } = await selectFilteredUsers(query);
     if (!rows || rows.length === 0) {
       return [];
     }

@@ -14,13 +14,25 @@ import { MUserDBValues } from '../types/m-use-type';
  * @returns {{user_nam, shain_cod}[]} 有効な担当者リスト
  */
 export const selectActiveUsers = async () => {
+  const query = `
+    SELECT
+      m.user_nam, m.shain_cod, m.permission
+    FROM
+      ${SCHEMA}.m_user as m
+    WHERE
+      del_flg <> 1
+    ORDER BY
+      (m.shain_cod ~ '^[0-9]+$') DESC, 
+      LPAD(regexp_replace(m.shain_cod, '[^0-9]', '', 'g'), 50, '0') ASC
+  `;
   try {
-    return await supabase
-      .schema(SCHEMA)
-      .from('m_user')
-      .select('user_nam, shain_cod, permission')
-      .neq('del_flg', 1)
-      .order('user_nam');
+    // return await supabase
+    //   .schema(SCHEMA)
+    //   .from('m_user')
+    //   .select('user_nam, shain_cod, permission')
+    //   .neq('del_flg', 1)
+    //   .order('user_nam');
+    return (await pool.query(query)).rows;
   } catch (e) {
     throw e;
   }
@@ -31,15 +43,15 @@ export const selectActiveUsers = async () => {
  * @param query 検索キーワード
  * @returns {Promise<UsersDialogValues[]>} 公演場所マスタテーブルに表示するデータ（ 検索キーワードが空の場合は全て ）
  */
-export const SelectFilteredUsers = async (searchQuery: string) => {
+export const selectFilteredUsers = async (searchQuery: string) => {
   let query = `
-  SELECT
-    m.mail_adr, m.user_nam, m.permission, m.del_flg, m.shain_cod, m.mem, u.last_sign_in_at
-  FROM
-    ${SCHEMA}.m_user as m
-  LEFT JOIN
-    auth.users as u
-  ON m.mail_adr = u.email
+    SELECT
+      m.mail_adr, m.user_nam, m.permission, m.del_flg, m.shain_cod, m.mem, u.last_sign_in_at
+    FROM
+      ${SCHEMA}.m_user as m
+    LEFT JOIN
+      auth.users as u
+    ON m.mail_adr = u.email
   `;
   const params = [];
   // 検索条件あれば
