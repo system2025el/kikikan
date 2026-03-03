@@ -439,7 +439,7 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
                         />
                       </Grid2>
                       <Grid2 sx={styles.container}>
-                        <Typography marginRight={1}>相手</Typography>
+                        <Typography marginRight={1}>顧客</Typography>
                         <TextFieldElement
                           name="aite.nam"
                           control={control}

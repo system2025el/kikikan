@@ -104,7 +104,7 @@ export const BillingStsListTable = ({
               <Button
                 onClick={() => {
                   // if (!kokyakuId || kokyakuId === 0) {
-                  //   setSnackBarMessage('検索で請求相手を選択してください');
+                  //   setSnackBarMessage('検索で顧客を選択してください');
                   //   setSnackBarOpen(true);
                   // } else {
                   //   setCreateOpen(true);
@@ -134,8 +134,8 @@ export const BillingStsListTable = ({
                 <TableCell padding="none" />
                 <TableCell padding="none" />
                 <TableCell align="right">受注番号</TableCell>
-                <TableCell>相手</TableCell>
-                <TableCell>相手担当者</TableCell>
+                <TableCell>顧客</TableCell>
+                <TableCell>顧客担当者</TableCell>
                 <TableCell>公演名</TableCell>
                 <TableCell>請求状況</TableCell>
                 <TableCell />

@@ -83,7 +83,7 @@ export const CreateBillDialog = ({
         <Grid2 container direction={'column'} px={4} pt={4} spacing={0.5} minWidth={300} minHeight={200}>
           <Grid2 display={'flex'} alignItems={'flex-start'}>
             <Typography mr={9} mt={1}>
-              相手
+              顧客
             </Typography>
             <Controller
               name="kokyaku"
@@ -120,7 +120,7 @@ export const CreateBillDialog = ({
             /> */}
           </Grid2>
           <Grid2 display={'flex'} alignItems={'baseline'}>
-            <Typography mr={3}>相手担当者</Typography>
+            <Typography mr={3}>顧客担当者</Typography>
             <TextFieldElement name="tantouNam" control={control} />
           </Grid2>
           <Grid2 display={'flex'} alignItems={'baseline'}>
