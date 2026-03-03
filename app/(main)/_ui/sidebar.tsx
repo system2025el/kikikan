@@ -100,9 +100,9 @@ const Sidebar = ({ children }: Props) => {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6">RFID機材管理システム</Typography>
-          <Typography margin={2} fontSize="small">
+          {/* <Typography margin={2} fontSize="small">
             <BreadCrumbs />
-          </Typography>
+          </Typography> */}
           <Box display={'flex'} justifyContent={'end'} width={'100vw'}>
             <Typography fontSize={'small'}>{user !== null ? `ログイン: ${user?.name}` : ''}</Typography>
           </Box>
