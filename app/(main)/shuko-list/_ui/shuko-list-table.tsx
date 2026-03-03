@@ -82,16 +82,17 @@ export const ShukoListTable = (props: {
                 }}
               />
             </TableCell>
+            <TableCell align="left">課</TableCell>
             <TableCell align="center">受注番号</TableCell>
             <TableCell align="left">出庫場所</TableCell>
             <TableCell align="left">出庫日時</TableCell>
-            <TableCell align="center">スタンバイ</TableCell>
-            <TableCell align="center">チェック</TableCell>
+            <TableCell align="center">ピッキング</TableCell>
+            <TableCell align="center">最終確認</TableCell>
+            <TableCell align="left">入力者</TableCell>
             <TableCell align="left">公演名</TableCell>
+            <TableCell align="left">受注明細</TableCell>
             <TableCell align="left">公演場所</TableCell>
-            <TableCell align="left">受注明細名</TableCell>
             <TableCell align="left">顧客名</TableCell>
-            <TableCell align="left">課</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -103,21 +104,22 @@ export const ShukoListTable = (props: {
                 backgroundColor: row.shukoFixFlg
                   ? '#808080'
                   : row.sstbSagyoStsId === 11 && row.schkSagyoStsId === 0
-                    ? '#fff0f5' // スタンバイ△・チェック未 lavenderblush
+                    ? '#fff0f5' // ピッキング△・最終確認未 lavenderblush
                     : row.sstbSagyoStsId === 12 && row.schkSagyoStsId === 0
-                      ? '#f0ffff' // スタンバイ〇・チェック未 azure
+                      ? '#f0ffff' // ピッキング〇・最終確認未 azure
                       : row.sstbSagyoStsId === 12 && row.schkSagyoStsId === 21
-                        ? '#87cefa' // スタンバイ〇・チェック△ lightskyblue
+                        ? '#87cefa' // ピッキング〇・最終確認△ lightskyblue
                         : row.sstbSagyoStsId === 12 && row.schkSagyoStsId === 22
-                          ? '#66cdaa' // スタンバイ〇・チェック〇 mediumaquamarine
+                          ? '#66cdaa' // ピッキング〇・最終確認〇 mediumaquamarine
                           : row.sstbSagyoStsId < 12 && row.schkSagyoStsId > 20
-                            ? '#ffff00' // スタンバイが未or△の時に、チェックが△or〇 黄色
+                            ? '#ffff00' // ピッキングが未or△の時に、最終確認が△or〇 黄色
                             : 'white',
               }}
             >
               <TableCell padding="checkbox">
                 <Checkbox checked={selected.includes(index)} onChange={() => handleSelect(index)} />
               </TableCell>
+              <TableCell align="left">{row.sectionNamv}</TableCell>
               <TableCell align="center">
                 <Button
                   variant="text"
@@ -141,8 +143,8 @@ export const ShukoListTable = (props: {
                   {row.schkSagyoStsNamShort}
                 </Button>
               </TableCell>
+              <TableCell align="left">{row.nyuryokuUser}</TableCell>
               <TableCell align="left">{row.koenNam}</TableCell>
-              <TableCell align="left">{row.koenbashoNam}</TableCell>
               <TableCell align="left">
                 <Typography
                   variant="body2"
@@ -159,8 +161,8 @@ export const ShukoListTable = (props: {
                   {row.headNamv}
                 </Typography>
               </TableCell>
+              <TableCell align="left">{row.koenbashoNam}</TableCell>
               <TableCell align="left">{row.kokyakuNam}</TableCell>
-              <TableCell align="left">{row.sectionNamv}</TableCell>
             </TableRow>
           ))}
         </TableBody>

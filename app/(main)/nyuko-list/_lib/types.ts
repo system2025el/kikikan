@@ -20,6 +20,7 @@ export type NyukoTableValues = {
   nchkSagyoStsId: number;
   nchkSagyoStsNamShort: string;
   nyukoFixFlg: boolean;
+  nyuryokuUser: string;
 };
 
 export type NyukoKizai = {
