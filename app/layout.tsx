@@ -7,9 +7,18 @@ import React from 'react';
 import { notoSansJp } from './_ui/fonts';
 import ThemeProvider from './_ui/theme-provider';
 
+// /** @type {Metadata} metadata */
+// export const metadata: Metadata = {
+//   title: '機材管理',
+//   description: '',
+// };
+
 /** @type {Metadata} metadata */
 export const metadata: Metadata = {
-  title: '機材管理',
+  title: {
+    template: '%s - 機材管理',
+    default: '機材管理',
+  },
   description: '',
 };
 

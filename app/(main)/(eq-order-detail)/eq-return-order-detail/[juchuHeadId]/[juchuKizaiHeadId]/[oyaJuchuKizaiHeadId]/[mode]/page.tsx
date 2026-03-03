@@ -1,4 +1,5 @@
 import { subDays } from 'date-fns';
+import { Metadata } from 'next';
 
 import { getNyukoDate, getRange, getShukoDate } from '@/app/(main)/_lib/date-funcs';
 import { StockTableValues } from '@/app/(main)/(eq-order-detail)/eq-main-order-detail/[juchuHeadId]/[juchuKizaiHeadId]/[mode]/_lib/types';
@@ -16,6 +17,11 @@ import {
   ReturnJuchuKizaiMeisaiValues,
 } from './_lib/types';
 import { EquipmentReturnOrderDetail } from './_ui/equipment-return-order-detail';
+
+export const metadata: Metadata = {
+  title: '受注明細',
+  description: '受注明細(返却)ページです',
+};
 
 const Page = async (props: {
   params: Promise<{

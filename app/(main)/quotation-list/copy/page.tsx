@@ -1,6 +1,13 @@
+import { Metadata } from 'next';
+
 import { getChosenQuot } from '../_lib/funcs';
 import { QuotHeadValues } from '../_lib/types';
 import { Quotation } from '../_ui/quotation';
+
+export const metadata: Metadata = {
+  title: '見積',
+  description: '見積(コピー)ページです',
+};
 
 /**
  * 見積のコピーページ

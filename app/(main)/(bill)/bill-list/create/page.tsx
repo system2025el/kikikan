@@ -1,9 +1,16 @@
+import { Metadata } from 'next';
+
 import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
 import { getChosenCustomerIdAndName } from '@/app/(main)/(masters)/customers-master/_lib/funcs';
 
 import { BillHeadValues } from '../_lib/types';
 import { Bill } from '../_ui/bill';
 import { getJuchusForBill } from './_lib/funcs';
+
+export const metadata: Metadata = {
+  title: '請求',
+  description: '請求(新規)ページです',
+};
 
 const Page = async ({ searchParams }: { searchParams: Promise<{ [key: string]: string | undefined }> }) => {
   const searchParam = await searchParams;
