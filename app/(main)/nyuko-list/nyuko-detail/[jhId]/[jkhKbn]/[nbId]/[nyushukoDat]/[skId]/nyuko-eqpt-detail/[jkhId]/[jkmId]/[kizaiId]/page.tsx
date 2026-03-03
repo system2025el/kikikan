@@ -1,6 +1,13 @@
+import { Metadata } from 'next';
+
 import { getNyukoEqptDetail, getNyukoEqptDetailTable, getNyukoFixFlag } from './_lib/funcs';
 import { NyukoEqptDetailTableValues, NyukoEqptDetailValues } from './_lib/types';
 import { NyukoEqptDetail } from './_ui/nyuko-eqpt-detail';
+
+export const metadata: Metadata = {
+  title: '入庫詳細',
+  description: '入庫詳細ページです',
+};
 
 const Page = async (props: {
   params: Promise<{

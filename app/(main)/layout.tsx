@@ -15,15 +15,15 @@ import AuthGuard from './_ui/auth-guard';
 import { DirtyProvider } from './_ui/dirty-context';
 import Sidebar from './_ui/sidebar';
 
-/** @type {Metadata} metadata */
-export const metadata: Metadata = {
-  title: '機材管理',
-  // title: {
-  //   template: '機材管理 | %s',
-  //   default: '機材管理',
-  // },
-  description: '',
-};
+// /** @type {Metadata} metadata */
+// export const metadata: Metadata = {
+//   //title: '機材管理',
+//   title: {
+//     template: '機材管理 - %s',
+//     default: '機材管理',
+//   },
+//   description: '',
+// };
 
 /**
  * Layout

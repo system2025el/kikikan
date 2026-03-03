@@ -1,9 +1,16 @@
+import { Metadata } from 'next';
+
 import { getNyukoDate, getShukoDate } from '@/app/(main)/_lib/date-funcs';
 
 import { getDetailJuchuHead, getJuchuKizaiNyushuko, getNyushukoFixFlag } from '../../../../../_lib/funcs';
 import { getKeepJuchuContainerMeisai, getKeepJuchuKizaiHead, getKeepJuchuKizaiMeisai } from './_lib/funcs';
 import { KeepJuchuContainerMeisaiValues, KeepJuchuKizaiHeadValues, KeepJuchuKizaiMeisaiValues } from './_lib/types';
 import { EquipmentKeepOrderDetail } from './_ui/equipment-keep-order-detail';
+
+export const metadata: Metadata = {
+  title: '受注明細',
+  description: '受注明細(キープ)ページです',
+};
 
 const Page = async (props: {
   params: Promise<{

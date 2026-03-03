@@ -1,6 +1,13 @@
+import { Metadata } from 'next';
+
 import { getMaxHonbanbiQty, getOrderForQuotation } from '../_lib/funcs';
 import { JuchuValues, QuotHeadValues } from '../_lib/types';
 import { Quotation } from '../_ui/quotation';
+
+export const metadata: Metadata = {
+  title: '見積',
+  description: '見積(新規)ページです',
+};
 
 const Page = async ({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) => {
   const searchParam = await searchParams;

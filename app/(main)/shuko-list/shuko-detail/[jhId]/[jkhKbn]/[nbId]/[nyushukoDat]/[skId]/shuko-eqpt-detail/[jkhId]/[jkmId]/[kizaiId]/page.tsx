@@ -1,6 +1,13 @@
+import { Metadata } from 'next';
+
 import { getShukoEqptDetail, getShukoEqptDetailTable, getShukoFixFlag } from './_lib/funcs';
 import { ShukoEqptDetailTableValues, ShukoEqptDetailValues } from './_lib/types';
 import { ShukoEqptDetail } from './_ui/shuko-eqpt-detail';
+
+export const metadata: Metadata = {
+  title: '出庫詳細',
+  description: '出庫詳細ページです',
+};
 
 const Page = async (props: {
   params: Promise<{
