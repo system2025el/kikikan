@@ -75,11 +75,12 @@ export const getFilteredQuotList = async (
  */
 export const getUsersSelection = async () => {
   try {
-    const { data, error } = await selectActiveUsers();
-    if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
-    }
+    // const { data, error } = await selectActiveUsers();
+    const data = await selectActiveUsers();
+    // if (error) {
+    //   console.error('DB情報取得エラー', error.message, error.cause, error.hint);
+    //   throw error;
+    // }
     if (!data || data.length === 0) {
       return [];
     }

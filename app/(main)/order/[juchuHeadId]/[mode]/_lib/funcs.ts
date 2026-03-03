@@ -8,7 +8,7 @@ import pool from '@/app/_lib/db/postgres';
 import { selectMeisaiEqts } from '@/app/_lib/db/tables/m-kizai';
 import { selectFilteredLocs } from '@/app/_lib/db/tables/m-koenbasho';
 import { selectFilteredCustomers, selectKokyaku } from '@/app/_lib/db/tables/m-kokyaku';
-import { SelectFilteredUsers } from '@/app/_lib/db/tables/m-user';
+import { selectActiveUsers } from '@/app/_lib/db/tables/m-user';
 import {
   deleteIdoDenJuchuFromOrder,
   insertIdoDenJuchu,
@@ -1489,9 +1489,9 @@ export const addIdoDenJuchu = async (
  * @param query
  * @returns
  */
-export const getFilteredUsers = async (query: string = '') => {
+export const getUsers = async () => {
   try {
-    const { rows } = await SelectFilteredUsers(query);
+    const rows = await selectActiveUsers();
     if (!rows || rows.length === 0) {
       return [];
     }
