@@ -231,8 +231,8 @@ export const QuotationList = () => {
               <TextFieldElement name="mituHeadNam" control={control} sx={{ width: 300 }} />
             </Grid2>
             <Grid2 sx={styles.container}>
-              <Typography noWrap mr={7}>
-                見積相手
+              <Typography noWrap mr={11}>
+                顧客
               </Typography>
               <Controller
                 name="kokyaku"

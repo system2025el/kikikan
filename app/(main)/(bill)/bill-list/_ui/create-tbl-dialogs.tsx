@@ -160,7 +160,7 @@ export const SecondDialogPage = ({
       </DialogTitle>
       <Box p={4}>
         <Box sx={styles.container}>
-          <Typography mr={7}>相手</Typography>
+          <Typography mr={7}>顧客</Typography>
           <TextFieldElement
             name="kokyaku.nam"
             control={control}
@@ -174,7 +174,7 @@ export const SecondDialogPage = ({
           />
         </Box>
         <Box sx={styles.container}>
-          <Typography mr={1}>相手担当者</Typography>
+          <Typography mr={1}>顧客担当者</Typography>
           <TextFieldElement name="tantou" control={control} />
         </Box>
         <Box sx={styles.container}>

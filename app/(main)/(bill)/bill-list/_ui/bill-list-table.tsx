@@ -202,7 +202,7 @@ export const BillListTable = ({
                 <TableCell align="right">請求番号</TableCell>
                 <TableCell>請求ステータス</TableCell>
                 <TableCell>請求書名</TableCell>
-                <TableCell>請求相手</TableCell>
+                <TableCell>顧客</TableCell>
                 <TableCell>請求発行日</TableCell>
               </TableRow>
             </TableHead>

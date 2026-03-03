@@ -42,7 +42,7 @@ export const selectFilteredQuot = async ({
     const escapedMituHeadNam = escapeLikeString(mituHeadNam);
     builder.ilike('mitu_head_nam', `%${escapedMituHeadNam}%`);
   }
-  // 見積相手あり
+  // 顧客あり
   if (kokyaku && kokyaku.trim() !== '') {
     const escapedkokyaku = escapeLikeString(kokyaku);
     builder.ilike('kokyaku_nam', `%${escapedkokyaku}%`);

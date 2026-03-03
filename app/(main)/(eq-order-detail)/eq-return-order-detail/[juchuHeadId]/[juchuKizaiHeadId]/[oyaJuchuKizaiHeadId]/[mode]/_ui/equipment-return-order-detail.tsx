@@ -1773,7 +1773,7 @@ export const EquipmentReturnOrderDetail = (props: {
                       </Box>
                       <Box sx={styles.container}>
                         <Typography marginRight={7} whiteSpace="nowrap">
-                          相手
+                          顧客
                         </Typography>
                         <TextField value={juchuHeadData.kokyaku.kokyakuNam} disabled></TextField>
                       </Box>

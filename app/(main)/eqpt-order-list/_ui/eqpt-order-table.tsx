@@ -85,7 +85,7 @@ export const EqptOrderTable = ({
                   <TableCell align="left">受注明細名</TableCell>
                   <TableCell align="left">公演名</TableCell>
                   <TableCell align="left">公演場所</TableCell>
-                  <TableCell align="left">顧客名</TableCell>
+                  <TableCell align="left">顧客</TableCell>
                   <TableCell align="left">出庫日時</TableCell>
                   <TableCell align="left">入庫日時</TableCell>
                 </TableRow>

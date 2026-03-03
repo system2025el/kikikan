@@ -532,7 +532,7 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
                       <TextField value={order.koenbashoNam ?? ''} disabled sx={{ width: 300 }} />
                     </Box>
                     <Box sx={styles.container}>
-                      <Typography marginRight={9}>相手</Typography>
+                      <Typography marginRight={9}>顧客</Typography>
                       <TextField value={order.kokyaku.name ?? ''} disabled sx={{ width: 300 }} />
                     </Box>
                     <Box sx={styles.container}>

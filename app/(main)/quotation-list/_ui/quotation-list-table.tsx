@@ -226,7 +226,7 @@ export const QuotationListTable = ({
                     </Typography>
                   </TableCell>
                   <TableCell>見積件名</TableCell>
-                  <TableCell>見積相手</TableCell>
+                  <TableCell>顧客</TableCell>
                   <TableCell>公演名</TableCell>
                   <TableCell>公演場所</TableCell>
                   <TableCell>貸出期間</TableCell>

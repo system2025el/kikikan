@@ -248,7 +248,7 @@ export const BillList = () => {
             <Grid2 container sx={styles.container}>
               <Grid2 display={'flex'} size={'grow'} alignItems={'center'}>
                 <Typography noWrap mr={11}>
-                  相手
+                  顧客
                 </Typography>
                 <Controller
                   name="kokyaku"

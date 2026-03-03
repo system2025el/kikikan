@@ -1348,7 +1348,7 @@ export const EquipmentKeepOrderDetail = (props: {
                       </Box>
                       <Box sx={styles.container}>
                         <Typography marginRight={7} whiteSpace="nowrap">
-                          相手
+                          顧客
                         </Typography>
                         <TextField defaultValue={juchuHeadData.kokyaku.kokyakuNam} disabled></TextField>
                       </Box>
