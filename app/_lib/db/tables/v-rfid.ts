@@ -36,6 +36,8 @@ export const selectRfidsOfTheKizai = async (kizaiId: number) => {
       r.shozoku_id,
       r.del_flg,
       r.el_num,
+      r.add_dat,
+      r.add_user,
       r.upd_dat,
       r.upd_user,
       shozoku.shozoku_nam

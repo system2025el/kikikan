@@ -39,6 +39,8 @@ export const getRfidsOfTheKizai = async (kizaiId: number) => {
       mem: d.mem,
       tblDspId: index + 1,
       delFlg: Boolean(d.del_flg),
+      addDat: d.add_dat,
+      addUser: d.add_user,
       updDat: d.upd_dat,
       updUser: d.upd_user,
     }));
