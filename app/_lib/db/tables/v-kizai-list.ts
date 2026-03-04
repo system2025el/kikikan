@@ -65,7 +65,7 @@ export const selectFilteredEqpts = async (queries: {
     .schema(SCHEMA)
     .from('v_kizai_lst')
     .select(
-      'kizai_id, kizai_nam, kizai_qty, kizai_ng_qty, shozoku_nam, mem, bumon_nam, dai_bumon_nam, shukei_bumon_nam, reg_amt, dsp_flg, del_flg'
+      'kizai_id, kizai_nam, kizai_qty, kizai_ng_qty, shozoku_nam, mem, bumon_nam, dai_bumon_nam, shukei_bumon_nam, reg_amt, dsp_flg, del_flg, rfid_kics_qty, rfid_yard_qty'
     );
 
   if (queries.q && queries.q.trim() !== '') {
