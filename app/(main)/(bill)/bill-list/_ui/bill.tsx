@@ -41,6 +41,7 @@ import { IsDirtyAlertDialog, useDirty } from '@/app/(main)/_ui/dirty-context';
 import { SelectTypes } from '@/app/(main)/_ui/form-box';
 import { LoadingOverlay } from '@/app/(main)/_ui/loading';
 import { PermissionGuard } from '@/app/(main)/_ui/permission-guard';
+import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 import { getUsersSelection } from '@/app/(main)/quotation-list/_lib/funcs';
 
 import { getBillingStsSelection } from '../_lib/funcs';
@@ -499,8 +500,20 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
                           <Autocomplete
                             {...field}
                             options={options.users}
-                            getOptionLabel={(option) => option.label}
-                            value={options.users.find((opt: SelectTypes) => opt.label === field.value) || null}
+                            // getOptionLabel={(option) => option.label}
+                            getOptionLabel={(option) => {
+                              const label = option.label;
+                              const exists = options.users.some((u) => u.label === label);
+                              return exists ? label : `${label}`;
+                            }}
+                            isOptionEqualToValue={(option, value) => {
+                              return option.label === value.label;
+                            }}
+                            // value={options.users.find((opt: SelectTypes) => opt.label === field.value) || null}
+                            value={
+                              options.users.find((opt) => opt.label === field.value) ||
+                              (field.value ? ({ id: FAKE_NEW_ID, label: field.value } as SelectTypes) : null)
+                            }
                             onChange={(_, value) => field.onChange(value?.label ?? '')}
                             renderInput={(params) => <TextField {...params} />}
                             sx={{ width: 242.5 }}
