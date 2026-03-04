@@ -1073,6 +1073,10 @@ export const Order = (props: {
                           defaultValue={props.juchuHeadData.nyuryokuUser}
                           disabled={!edit}
                           error={!!fieldState.error}
+                          renderValue={(selected) => {
+                            const user = userList.find((u) => u.tantouNam === selected);
+                            return user ? user.tantouNam : `${selected}`;
+                          }}
                         >
                           {userList.map((u) => (
                             <MenuItem key={u.mailAdr} value={u.tantouNam}>
