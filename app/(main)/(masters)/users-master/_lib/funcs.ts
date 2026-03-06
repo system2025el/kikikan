@@ -135,7 +135,11 @@ export const addNewUser = async (data: UsersMasterDialogValues, user: string) =>
     const { error } = await supabase.auth.signUp({
       email: data.mailAdr,
       password: 'password',
-      options: { emailRedirectTo: /*`${getUrl()}login`*/ `${getUrl()}signup` },
+      // 開発用
+      // options: { emailRedirectTo: /*`${getUrl()}login`*/ `${getUrl()}signup` },
+
+      // 本番用
+      options: { emailRedirectTo: /*`${getUrl()}login`*/ `https://kikikan-psi.vercel.app/signup` },
     });
     // const { error } = await supabaseAdmin.auth.admin.inviteUserByEmail(data.mailAdr, {
     //   redirectTo: `${getUrl()}signup`,
@@ -269,7 +273,11 @@ export const restoreUsers = async (mailAdr: string, user: string) => {
     const { error } = await supabase.auth.signUp({
       email: mailAdr,
       password: 'password',
-      options: { emailRedirectTo: /*`${getUrl()}login`*/ `${getUrl()}signup` },
+      // 開発用
+      // options: { emailRedirectTo: /*`${getUrl()}login`*/ `${getUrl()}signup` },
+
+      // 本番用
+      options: { emailRedirectTo: /*`${getUrl()}login`*/ `https://kikikan-psi.vercel.app/signup` },
     });
     // const { error } = await supabaseAdmin.auth.admin.inviteUserByEmail(mailAdr, {
     //   redirectTo: `${getUrl()}signup`,
@@ -311,7 +319,11 @@ export const restoreUsersAndShainCod = async (mailAdr: string, shainCod: string 
     const { error } = await supabase.auth.signUp({
       email: mailAdr,
       password: 'password',
-      options: { emailRedirectTo: /*`${getUrl()}login`*/ `${getUrl()}signup` },
+      // 開発用
+      // options: { emailRedirectTo: /*`${getUrl()}login`*/ `${getUrl()}signup` },
+
+      // 本番用
+      options: { emailRedirectTo: /*`${getUrl()}login`*/ `https://kikikan-psi.vercel.app/signup` },
     });
     if (error) {
       console.error('削除失敗:', error.message);
