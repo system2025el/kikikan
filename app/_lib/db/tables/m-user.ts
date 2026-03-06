@@ -56,7 +56,7 @@ export const selectFilteredUsers = async (searchQuery: string) => {
   const params = [];
   // 検索条件あれば
   if (searchQuery && searchQuery.trim() !== '') {
-    query += `WHERE m.user_nam ILIKE $1`;
+    query += `WHERE m.user_nam ILIKE $1 `;
     const escapedQuery = escapeLikeString(searchQuery);
     params.push(`%${escapedQuery}%`);
   }
