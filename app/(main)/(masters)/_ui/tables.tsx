@@ -471,6 +471,8 @@ export const LightTooltipWithText = ({
     <Box display={'flex'}>
       <LightTooltip
         title={children}
+        enterTouchDelay={0}
+        leaveTouchDelay={3000}
         slotProps={{
           transition: { timeout: 1500 },
         }}
