@@ -5,6 +5,7 @@ import {
   Button,
   Container,
   Divider,
+  Grid2,
   Paper,
   Snackbar,
   Table,
@@ -13,6 +14,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  Typography,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -119,66 +121,75 @@ export const Schedule = () => {
         component={'form'}
         onSubmit={handleSubmit(onSubmit)}
         variant="outlined"
-        sx={{ mb: 1, px: 2, display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}
+        //sx={{ mb: 1, px: 2, display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}
       >
-        スケジュール
-        <Box sx={styles.boxStyle}>
-          表示開始日
-          <Controller
-            name="startDate"
-            control={control}
-            render={({ field, fieldState: { error } }) => (
-              <FormDateX
-                value={field.value}
-                onChange={field.onChange}
-                sx={{ width: 200, mr: 2, ml: 1 }}
-                error={!!error}
-                helperText={error?.message}
-              />
-            )}
-          />
-          表示終了日
-          <Controller
-            name="endDate"
-            control={control}
-            render={({ field, fieldState: { error } }) => (
-              <FormDateX
-                value={field.value}
-                onChange={field.onChange}
-                sx={{ width: 200, mr: 2, ml: 1 }}
-                error={!!error}
-                helperText={error?.message}
-              />
-            )}
-          />
-          表示日数
-          <TextFieldElement
-            name="dateCount"
-            control={control}
-            sx={{
-              width: 60,
-              mr: 2,
-              ml: 1,
-              '& .MuiInputBase-input': {
-                textAlign: 'right',
-              },
-              '& input[type=number]::-webkit-inner-spin-button': {
-                WebkitAppearance: 'none',
-                margin: 0,
-              },
-            }}
-            type="number"
-            rules={{
-              max: {
-                value: 90,
-                message: '',
-              },
-            }}
-          />
-          <Button type="submit" sx={{ ml: 2 }} loading={isLoading}>
-            再取得
-          </Button>
-        </Box>
+        <Grid2>
+          <Typography px={2}>スケジュール</Typography>
+        </Grid2>
+        <Divider />
+        <Grid2 container sx={styles.boxStyle} spacing={1} px={2} mt={{ xs: 1, md: 0 }}>
+          <Grid2 sx={styles.boxStyle}>
+            <Typography>表示開始日</Typography>
+            <Controller
+              name="startDate"
+              control={control}
+              render={({ field, fieldState: { error } }) => (
+                <FormDateX
+                  value={field.value}
+                  onChange={field.onChange}
+                  sx={{ width: 200, mr: 2, ml: 1 }}
+                  error={!!error}
+                  helperText={error?.message}
+                />
+              )}
+            />
+          </Grid2>
+          <Grid2 sx={styles.boxStyle}>
+            <Typography>表示終了日</Typography>
+            <Controller
+              name="endDate"
+              control={control}
+              render={({ field, fieldState: { error } }) => (
+                <FormDateX
+                  value={field.value}
+                  onChange={field.onChange}
+                  sx={{ width: 200, mr: 2, ml: 1 }}
+                  error={!!error}
+                  helperText={error?.message}
+                />
+              )}
+            />
+          </Grid2>
+          <Grid2 sx={styles.boxStyle}>
+            <Typography>表示日数</Typography>
+            <TextFieldElement
+              name="dateCount"
+              control={control}
+              sx={{
+                width: 60,
+                mr: 1,
+                ml: 1,
+                '& .MuiInputBase-input': {
+                  textAlign: 'right',
+                },
+                '& input[type=number]::-webkit-inner-spin-button': {
+                  WebkitAppearance: 'none',
+                  margin: 0,
+                },
+              }}
+              type="number"
+              rules={{
+                max: {
+                  value: 90,
+                  message: '',
+                },
+              }}
+            />
+            <Button type="submit" sx={{ ml: 2 }} loading={isLoading}>
+              再取得
+            </Button>
+          </Grid2>
+        </Grid2>
       </Paper>
       <TableContainer>
         {isLoading && <LoadingOverlay />}
@@ -194,8 +205,8 @@ export const Schedule = () => {
                       border: '1px solid black',
                       px: 1,
                       whiteSpace: 'nowrap',
-                      minWidth: 160,
-                      maxWidth: 160,
+                      minWidth: 230,
+                      maxWidth: 230,
                       height: 20.1,
                       bgcolor: 'white',
                       color:
@@ -256,9 +267,9 @@ export const Schedule = () => {
                         display: '-webkit-box',
                         //WebkitLineClamp: 2,
                         WebkitBoxOrient: 'vertical',
-                        lineHeight: '0.75rem',
+                        lineHeight: '0.825rem',
                       }}
-                      fontSize={'0.5rem'}
+                      //fontSize={'0.75rem'}
                       fontWeight={'normal'}
                     >
                       {date.mem ?? ''}
@@ -300,9 +311,9 @@ export const Schedule = () => {
                         display: '-webkit-box',
                         //WebkitLineClamp: 2,
                         WebkitBoxOrient: 'vertical',
-                        lineHeight: '0.75rem',
+                        lineHeight: '0.825rem',
                       }}
-                      fontSize={'0.5rem'}
+                      //fontSize={'0.75rem'}
                       fontWeight={'normal'}
                     >
                       {date.tantoNam ?? ''}
@@ -341,21 +352,21 @@ export const Schedule = () => {
                           }}
                         >
                           <Box height={20.1} display={'flex'}>
-                            <Box justifyContent={'end'} width={25} sx={styles.boxStyle} fontSize={'0.5rem'}>
+                            <Box justifyContent={'end'} width={37} sx={styles.boxStyle} /*fontSize={'0.75rem'}*/>
                               {time.nyushukoDat ? toJapanHHmmString(time.nyushukoDat) : ''}
                             </Box>
                             <Divider orientation="vertical" />
                             <Box
-                              width={60}
+                              width={43}
                               sx={styles.boxStyle}
                               bgcolor={time.nyushukoShubetuId === 1 ? weeklyColors.shuko : weeklyColors.nyuko}
-                              fontSize={'0.5rem'}
+                              //fontSize={'0.75rem'}
                             >
                               {time.nyushukoShubetuId === 1 ? '積み' : '降ろし'}
                             </Box>
                             <Divider orientation="vertical" />
                             <Box
-                              width={75}
+                              width={150}
                               sx={styles.boxStyle}
                               bgcolor={
                                 time.nyushukoBashoId === 1
@@ -365,27 +376,27 @@ export const Schedule = () => {
                                     : weeklyColors.yard
                               }
                             >
-                              <LightTooltipWithText variant={'0.50rem'} maxWidth={75}>
+                              <LightTooltipWithText variant={'body2'} maxWidth={150}>
                                 {time.kokyakuNam}
                               </LightTooltipWithText>
                             </Box>
                           </Box>
                           <Divider variant="fullWidth" />
                           <Box height={20.1} display={'flex'}>
-                            <Box justifyContent={'end'} width={25} sx={styles.boxStyle} />
+                            <Box justifyContent={'end'} width={37} sx={styles.boxStyle} />
                             <Divider orientation="vertical" />
                             <Box
-                              width={60}
+                              width={43}
                               sx={styles.boxStyle}
                               bgcolor={time.nyushukoShubetuId === 1 ? weeklyColors.shuko : weeklyColors.nyuko}
-                              fontSize={'0.5rem'}
+                              //fontSize={'0.75rem'}
                             >
                               {time.sharyos[0]?.nam ?? ''}
-                              {time.sharyos[0]?.daisu > 1 ? ` ×${time.sharyos[0]?.daisu}` : ''}
+                              {time.sharyos[0]?.daisu > 1 ? `×${time.sharyos[0]?.daisu}` : ''}
                             </Box>
                             <Divider orientation="vertical" />
                             <Box
-                              width={75}
+                              width={150}
                               sx={styles.boxStyle}
                               bgcolor={
                                 time.nyushukoBashoId === 1
@@ -395,27 +406,27 @@ export const Schedule = () => {
                                     : weeklyColors.yard
                               }
                             >
-                              <LightTooltipWithText variant={'0.50rem'} maxWidth={75}>
+                              <LightTooltipWithText variant={'body2'} maxWidth={150}>
                                 {time.koenNam}
                               </LightTooltipWithText>
                             </Box>
                           </Box>
                           <Divider />
                           <Box height={20.1} display={'flex'}>
-                            <Box justifyContent={'end'} width={25} sx={styles.boxStyle} />
+                            <Box justifyContent={'end'} width={37} sx={styles.boxStyle} />
                             <Divider orientation="vertical" />
                             <Box
-                              width={60}
+                              width={43}
                               sx={styles.boxStyle}
                               bgcolor={time.nyushukoShubetuId === 1 ? weeklyColors.shuko : weeklyColors.nyuko}
-                              fontSize={'0.5rem'}
+                              //fontSize={'0.75rem'}
                             >
                               {time.sharyos[1]?.nam ?? ''}
-                              {time.sharyos[1]?.daisu > 1 ? ` ×${time.sharyos[1]?.daisu}` : ''}
+                              {time.sharyos[1]?.daisu > 1 ? `×${time.sharyos[1]?.daisu}` : ''}
                             </Box>
                             <Divider orientation="vertical" />
                             <Box
-                              width={75}
+                              width={150}
                               sx={styles.boxStyle}
                               bgcolor={
                                 time.nyushukoBashoId === 1
@@ -425,7 +436,7 @@ export const Schedule = () => {
                                     : weeklyColors.yard
                               }
                             >
-                              <LightTooltipWithText variant={'0.50rem'} maxWidth={75}>
+                              <LightTooltipWithText variant={'body2'} maxWidth={150}>
                                 {time.sharyoHeadNam}
                               </LightTooltipWithText>
                             </Box>
