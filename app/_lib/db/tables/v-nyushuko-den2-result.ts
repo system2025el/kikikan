@@ -24,8 +24,8 @@ export const selectNyushukoEqptDetail = async (
       .eq('nyushuko_basho_id', nyushukoBashoId)
       .eq('nyushuko_dat', nyushukoDat)
       .eq('sagyo_kbn_id', sagyoKbnId)
-      .eq('kizai_id', kizaiId)
-      .order('rfid_tag_id');
+      .eq('kizai_id', kizaiId);
+    // .order('rfid_tag_id');
   } catch (e) {
     throw e;
   }

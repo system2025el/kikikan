@@ -184,7 +184,7 @@ export const IdoEqptDetail = (props: {
         <Paper variant="outlined">
           <form onSubmit={handleSubmit(onSubmit)}>
             <Box display={'flex'} justifyContent={'space-between'} alignItems="center" px={2}>
-              <Typography fontSize={'large'}>移動詳細(RFIDタグ)</Typography>
+              <Typography fontSize={'large'}>移動詳細</Typography>
               {/* <Button type="submit">保存</Button> */}
             </Box>
             <Divider />
@@ -220,7 +220,7 @@ export const IdoEqptDetail = (props: {
                 実績クリア
               </Button>
               <Box display={'flex'} alignItems={'center'}>
-                <Typography mr={2}>補正数</Typography>
+                <Typography mr={2}>移動補正数</Typography>
                 <Controller
                   name="resultAdjQty"
                   control={control}

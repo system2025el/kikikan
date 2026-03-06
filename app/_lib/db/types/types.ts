@@ -3464,6 +3464,8 @@ export type Database = {
           juchu_head_id: number | null;
           juchu_kizai_head_idv: string | null;
           juchu_kizai_head_kbnv: string | null;
+          kics_nyuko_dat: string | null;
+          kics_shuko_dat: string | null;
           koen_nam: string | null;
           koenbasho_nam: string | null;
           kokyaku_nam: string | null;
@@ -3471,6 +3473,7 @@ export type Database = {
           nchk_sagyo_sts_nam: string | null;
           nchk_sagyo_sts_nam_short: string | null;
           nyuko_fix_flg: number | null;
+          nyuryoku_user: string | null;
           nyushuko_basho_id: number | null;
           nyushuko_dat: string | null;
           nyushuko_shubetu_id: number | null;
@@ -3479,10 +3482,13 @@ export type Database = {
           schk_sagyo_sts_nam_short: string | null;
           section_namv: string | null;
           shozoku_nam: string | null;
+          shozoku_nam_short: string | null;
           shuko_fix_flg: number | null;
           sstb_sagyo_sts_id: number | null;
           sstb_sagyo_sts_nam: string | null;
           sstb_sagyo_sts_nam_short: string | null;
+          yard_nyuko_dat: string | null;
+          yard_shuko_dat: string | null;
         };
         Relationships: [];
       };

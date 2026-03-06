@@ -75,11 +75,12 @@ export const getFilteredQuotList = async (
  */
 export const getUsersSelection = async () => {
   try {
-    const { data, error } = await selectActiveUsers();
-    if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
-    }
+    // const { data, error } = await selectActiveUsers();
+    const data = await selectActiveUsers();
+    // if (error) {
+    //   console.error('DB情報取得エラー', error.message, error.cause, error.hint);
+    //   throw error;
+    // }
     if (!data || data.length === 0) {
       return [];
     }
@@ -223,7 +224,11 @@ export const getChosenQuot = async (mituId: number) => {
     ]);
 
     const { data: juchuData, error: juchuError } = juchuResult;
-    if (juchuError) throw new Error('DBエラー：v_juchu_lst');
+    if (juchuError) {
+      if (juchuError.code !== 'PGRST116') {
+        throw new Error('DBエラー：v_juchu_lst');
+      }
+    }
     const { data: meisaiHeads, error: meisaiHeadError } = meisaiHeadResult;
     const { data: meisais, error: meisaiError } = meisaiResult;
     if (meisaiHeadError || meisaiError) throw new Error('DBエラー：明細取得時');

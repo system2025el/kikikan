@@ -125,7 +125,7 @@ const ReturnStockTableRow = React.memo(
           return (
             <TableCell
               key={colIndex}
-              align={typeof cell === 'number' ? 'right' : 'left'}
+              align={'right'}
               style={styles.row}
               sx={{
                 //bgcolor: getStockRowBackgroundColor(cell.calDat, dateRange, test),
@@ -619,7 +619,11 @@ export const ReturnContainerTable = (props: {
                   value={row.planKicsKizaiQty}
                   type="text"
                   onChange={(e) => {
-                    if (/^\d*$/.test(e.target.value) && Number(e.target.value) <= (row.oyaPlanKicsKizaiQty ?? 0)) {
+                    if (
+                      /^\d*$/.test(e.target.value) &&
+                      Number(e.target.value) + (row.planYardKizaiQty ?? 0) <=
+                        (row.oyaPlanKicsKizaiQty ?? 0) + (row.oyaPlanYardKizaiQty ?? 0)
+                    ) {
                       handleContainerCellChange(rowIndex, Number(e.target.value), row.planYardKizaiQty);
                     }
                   }}
@@ -667,7 +671,11 @@ export const ReturnContainerTable = (props: {
                   value={row.planYardKizaiQty}
                   type="text"
                   onChange={(e) => {
-                    if (/^\d*$/.test(e.target.value) && Number(e.target.value) <= (row.oyaPlanYardKizaiQty ?? 0)) {
+                    if (
+                      /^\d*$/.test(e.target.value) &&
+                      Number(e.target.value) + (row.planKicsKizaiQty ?? 0) <=
+                        (row.oyaPlanKicsKizaiQty ?? 0) + (row.oyaPlanYardKizaiQty ?? 0)
+                    ) {
                       handleContainerCellChange(rowIndex, row.planKicsKizaiQty, Number(e.target.value));
                     }
                   }}
@@ -728,7 +736,10 @@ const styles: { [key: string]: React.CSSProperties } = {
   header: {
     border: '1px solid grey',
     whiteSpace: 'nowrap',
-    padding: 0,
+    paddingTop: 0,
+    paddingBottom: 0,
+    paddingLeft: 4,
+    paddingRight: 4,
   },
   // 行
   row: {
@@ -737,7 +748,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     height: '26px',
     paddingTop: 0,
     paddingBottom: 0,
-    paddingLeft: 1,
-    paddingRight: 1,
+    paddingLeft: 4,
+    paddingRight: 4,
   },
 };

@@ -32,7 +32,7 @@ import { MuiTablePagination } from '../../../../_ui/table-pagination';
 import { getFilteredOrderCustomers } from '../_lib/funcs';
 import { CustomersDialogValues, KokyakuValues } from '../_lib/types';
 
-/** 新規受注の相手選択ダイアログ（全画面） */
+/** 新規受注の顧客選択ダイアログ（全画面） */
 export const CustomerSelectionDialog = (props: {
   handleCustSelect: (customer: KokyakuValues) => void;
   handleCloseCustDialog: () => void;
@@ -108,7 +108,7 @@ export const CustomerSelectionDialog = (props: {
         </Box>
         <Paper variant="outlined">
           <Box width={'100%'} display={'flex'} px={2} justifyContent={'space-between'} alignItems={'center'}>
-            <Typography>相手選択</Typography>
+            <Typography>顧客選択</Typography>
           </Box>
           <Divider />
           <Box width={'100%'} p={2}>
@@ -142,7 +142,7 @@ export const CustomerSelectionDialog = (props: {
             <Table stickyHeader padding="none">
               <TableHead>
                 <TableRow>
-                  <TableCell>場所</TableCell>
+                  <TableCell>顧客名</TableCell>
                   <TableCell>住所</TableCell>
                   <TableCell>TEL</TableCell>
                   <TableCell>FAX</TableCell>

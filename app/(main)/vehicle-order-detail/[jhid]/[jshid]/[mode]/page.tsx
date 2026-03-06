@@ -1,9 +1,15 @@
+import { Metadata } from 'next';
 import { Suspense } from 'react';
 
 import { LoadingOverlay } from '@/app/(main)/_ui/loading';
 import { getDetailJuchuHead } from '@/app/(main)/(eq-order-detail)/_lib/funcs';
 
 import VehicleOrderDetail from './_ui/vehicle-order-detail';
+
+export const metadata: Metadata = {
+  title: '車両明細',
+  description: '車両明細ページです',
+};
 
 const Page = async (props: {
   params: Promise<{

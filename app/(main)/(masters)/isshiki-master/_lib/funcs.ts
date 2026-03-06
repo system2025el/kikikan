@@ -4,13 +4,19 @@ import { revalidatePath } from 'next/cache';
 
 import pool from '@/app/_lib/db/postgres';
 import {
+  deleteIsshikiMaster,
   insertNewIsshiki,
   selectFilteredIsshikis,
   selectOneIsshiki,
   updateIsshikiDB,
   updIsshikiDelFlgDB,
 } from '@/app/_lib/db/tables/m-issiki';
-import { delIsshikiSet, insertNewIsshikiSetList, updIsshikiSetDB } from '@/app/_lib/db/tables/m-issiki-set';
+import {
+  deleteIsshikiSetByIssikiId,
+  delIsshikiSet,
+  insertNewIsshikiSetList,
+  updIsshikiSetDB,
+} from '@/app/_lib/db/tables/m-issiki-set';
 import { checkExIsshiki } from '@/app/_lib/db/tables/m-kizai';
 import { selectActiveEqpts } from '@/app/_lib/db/tables/v-kizai-list';
 import { MIsshikiSetDBValues } from '@/app/_lib/db/types/m-issiki-set-type';
@@ -68,7 +74,7 @@ export const getChosenIsshiki = async (id: number) => {
     // ダイアログ表示用に形成
     const isshikiDetails: IsshikisMasterDialogValues = {
       isshikiNam: rows[0].issiki_nam ?? '',
-      regAmt: Number(rows[0].reg_amt),
+      // regAmt: Number(rows[0].reg_amt),
       delFlg: Boolean(rows[0].del_flg),
       mem: rows[0].mem,
       kizaiList: rows[0].kizai_id ? rows.map((d) => ({ id: d.kizai_id, nam: d.kizai_nam })) : [],
@@ -92,7 +98,7 @@ export const addNewIsshiki = async (data: IsshikisMasterDialogValues, user: stri
   const isshikiData = {
     issiki_id: FAKE_NEW_ID,
     issiki_nam: data.isshikiNam,
-    reg_amt: data.regAmt,
+    // reg_amt: data.regAmt,
     del_flg: Number(data.delFlg),
     mem: data.mem,
     add_dat: now,
@@ -142,9 +148,12 @@ export const updateIsshiki = async (
   const now = new Date().toISOString();
 
   // 一式マスタ(m_issiki)の差異
+  // const isshikiDiff =
+  //   `${newData.isshikiNam}-${newData.regAmt}-${newData.mem}-${newData.delFlg}` !==
+  //   `${currentData.isshikiNam}-${currentData.regAmt}-${currentData.mem}-${currentData.delFlg}`;
   const isshikiDiff =
-    `${newData.isshikiNam}-${newData.regAmt}-${newData.mem}-${newData.delFlg}` !==
-    `${currentData.isshikiNam}-${currentData.regAmt}-${currentData.mem}-${currentData.delFlg}`;
+    `${newData.isshikiNam}-${newData.mem}-${newData.delFlg}` !==
+    `${currentData.isshikiNam}-${currentData.mem}-${currentData.delFlg}`;
 
   const newList = newData.kizaiList;
   const cList = currentData.kizaiList;
@@ -187,7 +196,7 @@ export const updateIsshiki = async (
       const updData: MIsshikiDBValues = {
         issiki_id: id,
         issiki_nam: newData.isshikiNam,
-        reg_amt: newData.regAmt,
+        // reg_amt: newData.regAmt,
         del_flg: Number(newData.delFlg),
         mem: newData.mem,
         upd_dat: now,
@@ -265,5 +274,28 @@ export const updIsshikiDelFlg = async (id: number, flg: boolean, user: string) =
     await revalidatePath('/isshiki-master');
   } catch (e) {
     throw e;
+  }
+};
+
+/**
+ * 一式マスタ削除
+ * @param ids
+ */
+export const delIsshikiMaster = async (ids: number[]) => {
+  const connection = await pool.connect();
+
+  try {
+    await connection.query('BEGIN');
+
+    await deleteIsshikiSetByIssikiId(ids, connection);
+    await deleteIsshikiMaster(ids, connection);
+
+    await connection.query('COMMIT');
+    await revalidatePath('/isshiki-master');
+  } catch (e) {
+    await connection.query('ROLLBACK');
+    throw e;
+  } finally {
+    connection.release();
   }
 };

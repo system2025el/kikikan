@@ -50,7 +50,7 @@ export const supabase = createClient<Database>(
 );
 
 // ログインあり(サーバーサイド)
-// export const supabase = async () => {
+// export const createClient = async () => {
 //   const cookieStore = await cookies();
 
 //   // 以前の get/set/remove を個別に書く形式から、

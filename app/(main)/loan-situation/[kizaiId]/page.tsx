@@ -1,8 +1,14 @@
 import { addDays, subDays } from 'date-fns';
+import { Metadata } from 'next';
 
 import { confirmJuchuHeadId, getLoanJuchuData, getLoanKizaiData } from './_lib/funcs';
 import { LoanStockTableValues, LoanUseTableValues } from './_lib/types';
 import { LoanSituation } from './_ui/loan-situation';
+
+export const metadata: Metadata = {
+  title: '貸出状況',
+  description: '貸出状況ページです',
+};
 
 const Page = async (props: { params: Promise<{ kizaiId: string }> }) => {
   const params = await props.params;

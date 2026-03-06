@@ -201,13 +201,13 @@ export const BillingStsList = () => {
                 control={control}
                 name="radioKokyaku"
                 options={[
-                  { id: 'single', label: '相手' },
+                  { id: 'single', label: '顧客' },
                   { id: 'multi', label: '複数' },
                 ]}
                 row
               />
               {/* <Typography noWrap mr={9}>
-                相手
+                顧客
               </Typography> */}
               {selectRadioKokyakuValue === 'single' ? (
                 <Controller
@@ -259,7 +259,7 @@ export const BillingStsList = () => {
             </Grid2>
             <Grid2 display={'flex'} alignItems={'baseline'}>
               <Typography noWrap mr={3}>
-                相手担当者
+                顧客担当者
               </Typography>
               <TextFieldElement name="kokyakuTantoNam" control={control} type="text" sx={{ width: 200 }} />
             </Grid2>

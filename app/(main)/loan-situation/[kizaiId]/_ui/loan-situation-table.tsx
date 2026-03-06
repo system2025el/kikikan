@@ -170,7 +170,7 @@ export const UseTable = (props: UseTableProps) => {
                     height: 15,
                     lineHeight: '1rem',
                     py: 0,
-                    px: 0.5,
+                    px: '4px',
                     color: cell.zaikoQty < 0 ? 'red' : 'black',
                     bgcolor: 'white',
                     fontWeight: 400,
@@ -217,7 +217,7 @@ export const UseTable = (props: UseTableProps) => {
                       border: '1px solid black',
                       height: 25,
                       py: 0,
-                      px: 0.5,
+                      px: '4px',
                       minWidth: 0,
                     }}
                   >
@@ -240,7 +240,7 @@ export const UseTable = (props: UseTableProps) => {
                     lineHeight: '1rem',
                     fontSize: '0.875rem',
                     py: 0,
-                    px: 0.5,
+                    px: '4px',
                     color: cell.zaikoQty < 0 ? 'red' : 'black',
                     bgcolor: 'white',
                     minWidth: 0,

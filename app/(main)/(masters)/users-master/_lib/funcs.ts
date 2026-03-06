@@ -7,7 +7,7 @@ import { supabase /*supabaseAdmin*/ } from '@/app/_lib/db/supabase';
 import { supabaseAdmin } from '@/app/_lib/db/supabase-admin';
 import {
   insertNewUser,
-  SelectFilteredUsers,
+  selectFilteredUsers,
   selectOneUser,
   upDateUserDB,
   updMUserDelFlg,
@@ -28,7 +28,7 @@ import { UsersMasterDialogValues, UsersMasterTableValues } from './types';
  */
 export const getFilteredUsers = async (query: string = '') => {
   try {
-    const { rows } = await SelectFilteredUsers(query);
+    const { rows } = await selectFilteredUsers(query);
     if (!rows || rows.length === 0) {
       return [];
     }
@@ -135,8 +135,15 @@ export const addNewUser = async (data: UsersMasterDialogValues, user: string) =>
     const { error } = await supabase.auth.signUp({
       email: data.mailAdr,
       password: 'password',
-      options: { emailRedirectTo: /*`${getUrl()}login`*/ `${getUrl()}signup` },
+      // 開発用
+      // options: { emailRedirectTo: /*`${getUrl()}login`*/ `${getUrl()}signup` },
+
+      // 本番用
+      options: { emailRedirectTo: /*`${getUrl()}login`*/ `https://kikikan-psi.vercel.app/signup` },
     });
+    // const { error } = await supabaseAdmin.auth.admin.inviteUserByEmail(data.mailAdr, {
+    //   redirectTo: `${getUrl()}signup`,
+    // });
 
     // const { error } = await supabase.auth.signInWithOtp({
     //   email: data.mailAdr,
@@ -204,36 +211,40 @@ export const updateUser = async (currentEmail: string, data: UsersMasterDialogVa
  * @param data
  */
 export const deleteUsers = async (mailAdr: string, user: string) => {
-  const delData = {
-    mail_adr: mailAdr,
-    del_flg: 1,
-    upd_dat: new Date().toISOString(),
-    upd_user: user,
-  };
-
   const connection = await pool.connect();
   try {
-    const { data: users, error: listError } = await supabaseAdmin.auth.admin.listUsers();
+    const { data: users, error: listError } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 });
     if (listError) {
       console.error(listError);
       throw listError;
     }
-    const targetUser = users?.users.find((u) => u.email === mailAdr);
-    const userId = targetUser?.id;
-    await connection.query('BEGIN');
-    await updMUserDelFlg(delData, connection);
-    if (userId) {
-      const { error } = await supabaseAdmin.auth.admin.deleteUser(userId);
-      if (error) {
-        console.error('削除失敗:', error.message);
-        await connection.query('ROLLBACK');
-        throw error;
-      }
-      await connection.query('COMMIT');
+    const targetUser = users.users.find((u) => u.email === mailAdr);
+    if (!targetUser) {
+      throw new Error('指定されたメールアドレスのユーザーが見つかりません。');
     }
-    await connection.query('ROLLBACK');
+
+    const userId = targetUser.id;
+    const delData = {
+      mail_adr: mailAdr,
+      del_flg: 1,
+      upd_dat: new Date().toISOString(),
+      upd_user: user,
+    };
+
+    await connection.query('BEGIN');
+
+    await updMUserDelFlg(delData, connection);
+
+    const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(userId);
+    if (deleteError) {
+      console.error('削除失敗:', deleteError.message);
+      throw deleteError;
+    }
+    await connection.query('COMMIT');
+    console.log('削除成功', userId);
   } catch (e) {
     await connection.query('ROLLBACK');
+    console.error('削除失敗', e);
     throw e;
   } finally {
     connection.release();
@@ -262,11 +273,18 @@ export const restoreUsers = async (mailAdr: string, user: string) => {
     const { error } = await supabase.auth.signUp({
       email: mailAdr,
       password: 'password',
-      options: { emailRedirectTo: /*`${getUrl()}login`*/ `${getUrl()}signup` },
+      // 開発用
+      // options: { emailRedirectTo: /*`${getUrl()}login`*/ `${getUrl()}signup` },
+
+      // 本番用
+      options: { emailRedirectTo: /*`${getUrl()}login`*/ `https://kikikan-psi.vercel.app/signup` },
     });
+    // const { error } = await supabaseAdmin.auth.admin.inviteUserByEmail(mailAdr, {
+    //   redirectTo: `${getUrl()}signup`,
+    // });
+
     if (error) {
-      console.error('削除失敗:', error.message);
-      await connection.query('ROLLBACK');
+      console.error('登録失敗:', error.message);
       throw error;
     }
     await connection.query('COMMIT');
@@ -301,7 +319,11 @@ export const restoreUsersAndShainCod = async (mailAdr: string, shainCod: string 
     const { error } = await supabase.auth.signUp({
       email: mailAdr,
       password: 'password',
-      options: { emailRedirectTo: /*`${getUrl()}login`*/ `${getUrl()}signup` },
+      // 開発用
+      // options: { emailRedirectTo: /*`${getUrl()}login`*/ `${getUrl()}signup` },
+
+      // 本番用
+      options: { emailRedirectTo: /*`${getUrl()}login`*/ `https://kikikan-psi.vercel.app/signup` },
     });
     if (error) {
       console.error('削除失敗:', error.message);

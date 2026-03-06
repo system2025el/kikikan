@@ -65,6 +65,8 @@ export const getFilteredEqpts = async (
       dspFlg: Boolean(d.dsp_flg),
       tblDspId: index + 1,
       delFlg: Boolean(d.del_flg),
+      rfidKicsQty: d.rfid_kics_qty ?? 0,
+      rfidYardQty: d.rfid_yard_qty ?? 0,
     }));
     console.log('機材マスタリストを取得した');
     return { data: filteredEqpts, options: options };

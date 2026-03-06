@@ -1,8 +1,15 @@
+import { Metadata } from 'next';
+
 import { getUsersSelection } from '@/app/(main)/quotation-list/_lib/funcs';
 
 import { getChosenBill } from '../_lib/funcs';
 import { BillHeadValues } from '../_lib/types';
 import { Bill } from '../_ui/bill';
+
+export const metadata: Metadata = {
+  title: '請求',
+  description: '請求(コピー)ページです',
+};
 
 const Page = async ({ searchParams }: { searchParams: Promise<{ [key: string]: string | undefined }> }) => {
   const searchParam = await searchParams;

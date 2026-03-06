@@ -49,6 +49,10 @@ export const usePdf = (): [(params: PdfModel[]) => Promise<Blob>] => {
   // PDF生成関数
   const printShuko = async (params: PdfModel[]): Promise<Blob> => {
     const pdfDoc = await PDFDocument.create();
+
+    const tabTitle = '納品書 - 機材管理';
+    pdfDoc.setTitle(tabTitle);
+
     pdfDoc.registerFontkit(fontkit);
     const customFont = await pdfDoc.embedFont(font);
 

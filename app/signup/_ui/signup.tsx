@@ -49,7 +49,7 @@ export const Signup = () => {
         setError(`登録に失敗しました: ${updateError.message}`);
       } else {
         await supabase.auth.signOut();
-        router.push('/login');
+        router.replace('/login');
       }
     } else {
       setError('入力されたメールアドレスが登録情報と一致しません。');

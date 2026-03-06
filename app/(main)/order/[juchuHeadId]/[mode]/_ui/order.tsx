@@ -136,7 +136,7 @@ export const Order = (props: {
   const [sharyoHeadDeleteOpen, setSharyoHeadDeleteOpen] = useState(false);
   // 公演場所選択ダイアログ
   const [locationDialogOpen, setLocationDialogOpen] = useState(false);
-  // 相手選択ダイアログ
+  // 顧客選択ダイアログ
   const [customerDialogOpen, setCustomerDialogOpen] = useState(false);
   // スナックバー制御
   const [snackBarOpen, setSnackBarOpen] = useState(false);
@@ -234,6 +234,8 @@ export const Order = (props: {
   const lock = async () => {
     if (!user) return;
 
+    if (getValues('juchuHeadId') === 0) return true;
+
     try {
       const lockData = await lockCheck(1, getValues('juchuHeadId'), user.name, user.email);
       setLockData(lockData);
@@ -301,6 +303,7 @@ export const Order = (props: {
       if (newOrderId) {
         router.replace(`/order/${newOrderId}/edit`);
       } else {
+        setIsLoading(false);
         setSnackBarMessage('保存に失敗しました');
         setSnackBarOpen(true);
       }
@@ -927,7 +930,7 @@ export const Order = (props: {
     setIsProcessing(false);
   };
 
-  // 相手選択ダイアログで相手選択
+  // 顧客選択ダイアログで顧客選択
   const handleCustSelect = async (customer: KokyakuValues) => {
     if (isProcessing) return;
     setIsProcessing(true);
@@ -1070,6 +1073,10 @@ export const Order = (props: {
                           defaultValue={props.juchuHeadData.nyuryokuUser}
                           disabled={!edit}
                           error={!!fieldState.error}
+                          renderValue={(selected) => {
+                            const user = userList.find((u) => u.tantouNam === selected);
+                            return user ? user.tantouNam : `${selected}`;
+                          }}
                         >
                           {userList.map((u) => (
                             <MenuItem key={u.mailAdr} value={u.tantouNam}>
@@ -1195,7 +1202,7 @@ export const Order = (props: {
               lock={lock}
             />
           </Dialog>
-          {/* 相手検索ダイアログ */}
+          {/* 顧客検索ダイアログ */}
           <Dialog open={customerDialogOpen} fullScreen>
             <CustomerSelectionDialog
               handleCustSelect={handleCustSelect}

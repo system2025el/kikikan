@@ -40,6 +40,7 @@ import { permission } from '../../_lib/permission';
 import { LockValues } from '../../_lib/types';
 import { IsDirtyAlertDialog, useDirty } from '../../_ui/dirty-context';
 import { PermissionGuard } from '../../_ui/permission-guard';
+import { FAKE_NEW_ID } from '../../(masters)/_lib/constants';
 import { getCustomerSelection } from '../../(masters)/_lib/funcs';
 import { getMituStsSelection, getUsersSelection } from '../_lib/funcs';
 import { usePdf } from '../_lib/hooks/usePdf';
@@ -532,7 +533,7 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
                       <TextField value={order.koenbashoNam ?? ''} disabled sx={{ width: 300 }} />
                     </Box>
                     <Box sx={styles.container}>
-                      <Typography marginRight={9}>相手</Typography>
+                      <Typography marginRight={9}>顧客</Typography>
                       <TextField value={order.kokyaku.name ?? ''} disabled sx={{ width: 300 }} />
                     </Box>
                     <Box sx={styles.container}>
@@ -661,8 +662,20 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
                           <Autocomplete
                             {...field}
                             options={options.users}
-                            getOptionLabel={(option) => option.label}
-                            value={options.users.find((opt: SelectTypes) => opt.label === field.value) || null}
+                            // getOptionLabel={(option) => option.label}
+                            getOptionLabel={(option) => {
+                              const label = option.label;
+                              const exists = options.users.some((u) => u.label === label);
+                              return exists ? label : `${label}`;
+                            }}
+                            isOptionEqualToValue={(option, value) => {
+                              return option.label === value.label;
+                            }}
+                            // value={options.users.find((opt: SelectTypes) => opt.label === field.value) || null}
+                            value={
+                              options.users.find((opt) => opt.label === field.value) ||
+                              (field.value ? ({ id: FAKE_NEW_ID, label: field.value } as SelectTypes) : null)
+                            }
                             onChange={(_, value) => field.onChange(value?.label ?? '')}
                             renderInput={(params) => <TextField {...params} />}
                             sx={{ width: 242.5 }}

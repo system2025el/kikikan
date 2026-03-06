@@ -25,7 +25,31 @@ export const KeepJuchuKizaiHeadSchema = z
   .refine((data) => data.kicsNyukoDat || data.yardNyukoDat, {
     message: validationMessages.required(),
     path: ['yardNyukoDat'],
-  });
+  })
+  .refine(
+    (data) => {
+      if (data.kicsShukoDat && !data.kicsNyukoDat) {
+        return false;
+      }
+      return true;
+    },
+    {
+      message: '',
+      path: ['kicsNyukoDat'],
+    }
+  )
+  .refine(
+    (data) => {
+      if (data.yardShukoDat && !data.yardNyukoDat) {
+        return false;
+      }
+      return true;
+    },
+    {
+      message: '',
+      path: ['yardNyukoDat'],
+    }
+  );
 
 export type KeepJuchuKizaiHeadValues = z.infer<typeof KeepJuchuKizaiHeadSchema>;
 
@@ -33,6 +57,7 @@ export type KeepJuchuKizaiMeisaiValues = {
   juchuHeadId: number;
   juchuKizaiHeadId: number;
   juchuKizaiMeisaiId: number;
+  mShozokuId: number;
   shozokuId: number;
   shozokuNam: string;
   mem: string | null;
@@ -62,4 +87,9 @@ export type KeepJuchuContainerMeisaiValues = {
   indentNum: number;
   delFlag: boolean;
   saveFlag: boolean;
+};
+
+export type HonbanbiColorValues = {
+  colorId: number;
+  colorNam: string;
 };

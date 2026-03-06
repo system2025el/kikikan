@@ -78,6 +78,8 @@ export type EqptsMasterTableValues = {
   shozokuNam: string | null;
   shukeibumonNam: string | null;
   tblDspId: number;
+  rfidKicsQty: number;
+  rfidYardQty: number;
 };
 //{
 //   kizaiId: number | null;

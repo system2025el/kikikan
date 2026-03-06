@@ -21,6 +21,7 @@ export type ShukoTableValues = {
   schkSagyoStsId: number;
   schkSagyoStsNamShort: string;
   shukoFixFlg: boolean;
+  nyuryokuUser: string;
 };
 
 export type ShukoKizai = {

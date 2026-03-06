@@ -1,8 +1,9 @@
 import { subDays } from 'date-fns';
+import { Metadata } from 'next';
 
 import { getNyukoDate, getRange, getShukoDate } from '@/app/(main)/_lib/date-funcs';
 
-import { getDetailJuchuHead, getJuchuContainerMeisai, getNyushukoFixFlag } from '../../../../_lib/funcs';
+import { getColor, getDetailJuchuHead, getJuchuContainerMeisai, getNyushukoFixFlag } from '../../../../_lib/funcs';
 import { getHonbanbi, getIdoJuchuKizaiMeisai, getJuchuKizaiHead, getJuchuKizaiMeisai } from './_lib/funcs';
 import {
   IdoJuchuKizaiMeisaiValues,
@@ -14,6 +15,11 @@ import {
 } from './_lib/types';
 import EquipmentOrderDetail from './_ui/equipment-order-detail';
 
+export const metadata: Metadata = {
+  title: '受注明細',
+  description: '受注明細(メイン)ページです',
+};
+
 const Page = async (props: { params: Promise<{ juchuHeadId: string; juchuKizaiHeadId: string; mode: string }> }) => {
   const params = await props.params;
   // 受注ヘッダid
@@ -21,10 +27,11 @@ const Page = async (props: { params: Promise<{ juchuHeadId: string; juchuKizaiHe
   // 受注機材ヘッダーid
   const juchuKizaiHeadId = Number(params.juchuKizaiHeadId);
 
-  // 受注ヘッダーデータ、出発フラグ
-  const [juchuHeadData, fixFlag] = await Promise.all([
+  // 受注ヘッダーデータ、出発フラグ、本番日背景色
+  const [juchuHeadData, fixFlag, honbanbiColor] = await Promise.all([
     getDetailJuchuHead(juchuHeadId),
     getNyushukoFixFlag(juchuHeadId, juchuKizaiHeadId, 60),
+    getColor(),
   ]);
 
   if (!juchuHeadData) {
@@ -32,7 +39,7 @@ const Page = async (props: { params: Promise<{ juchuHeadId: string; juchuKizaiHe
   }
 
   // 編集モード(edit:編集、view:閲覧)
-  const edit = params.mode === 'edit' && !fixFlag ? true : false;
+  const edit = params.mode === 'edit' ? true : false;
 
   // 新規
   if (juchuKizaiHeadId === 0) {
@@ -61,6 +68,7 @@ const Page = async (props: { params: Promise<{ juchuHeadId: string; juchuKizaiHe
         juchuHonbanbiData={newJuchuHonbanbiData}
         edit={edit}
         fixFlag={fixFlag}
+        honbanbiColor={honbanbiColor}
       />
     );
 
@@ -83,6 +91,7 @@ const Page = async (props: { params: Promise<{ juchuHeadId: string; juchuKizaiHe
         juchuHonbanbiData={juchuHonbanbiData}
         edit={edit}
         fixFlag={fixFlag}
+        honbanbiColor={honbanbiColor}
       />
     );
   }

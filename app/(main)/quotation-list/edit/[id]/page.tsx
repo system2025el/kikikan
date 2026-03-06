@@ -1,6 +1,13 @@
+import { Metadata } from 'next';
+
 import { getChosenQuot } from '../../_lib/funcs';
 import { QuotHeadValues } from '../../_lib/types';
 import { Quotation } from '../../_ui/quotation';
+
+export const metadata: Metadata = {
+  title: '見積',
+  description: '見積(編集)ページです',
+};
 
 const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
   const param = await params;

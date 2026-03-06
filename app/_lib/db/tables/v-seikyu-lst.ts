@@ -38,7 +38,7 @@ export const selectFilteredBills = async (queries: BillSearchValues) => {
       query += ` AND seikyu_dat <= '${toJapanYMDString(range.end)}'`;
     }
   }
-  // 請求相手名
+  // 顧客名
   if (kokyaku && kokyaku.trim() !== '' /*&& kokyaku !== '未選択'*/) {
     const escapedKokyaku = escapeLikeString(kokyaku);
     query += ` AND kokyaku_nam ILIKE '%${escapedKokyaku}%'`;

@@ -12,6 +12,8 @@ export const eqptMHeader = [
   { key: 'kizaiQty', label: '保有数' },
   { key: 'ngQty', label: 'NG数' },
   { key: 'yukoQty', label: '有効数' },
+  { key: 'rfidYardQty', label: 'Y在庫数' },
+  { key: 'rfidKicsQty', label: 'K在庫数' },
   { key: 'bumonNam', label: '部門' },
   { key: 'daibumonNam', label: '大部門' },
   { key: 'shukeibumonNam', label: '集計部門' },

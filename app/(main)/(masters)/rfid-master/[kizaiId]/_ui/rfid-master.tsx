@@ -477,12 +477,16 @@ export const RfidMaster = ({ kizaiId }: { kizaiId: number }) => {
                             </TableCell>
                             <TableCell sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap' }}>
                               <LightTooltipWithText variant={'body2'} maxWidth={400}>
-                                {row.updDat ? toJapanTimeString(row.updDat) : ''}
+                                {row.updDat
+                                  ? toJapanTimeString(row.updDat)
+                                  : row.addDat
+                                    ? toJapanTimeString(row.addDat)
+                                    : ''}
                               </LightTooltipWithText>
                             </TableCell>
                             <TableCell sx={{ bgcolor: row.delFlg ? grey[300] : undefined, whiteSpace: 'nowrap' }}>
                               <LightTooltipWithText variant={'body2'} maxWidth={400}>
-                                {row.updUser}
+                                {row.updUser ?? row.addUser}
                               </LightTooltipWithText>
                             </TableCell>
                             <TableCell

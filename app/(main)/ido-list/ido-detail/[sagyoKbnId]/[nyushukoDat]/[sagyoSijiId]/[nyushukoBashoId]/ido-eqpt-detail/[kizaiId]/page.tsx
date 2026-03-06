@@ -1,5 +1,12 @@
+import { Metadata } from 'next';
+
 import { getIdoDenDetail, getIdoEqptDetail, getIdoFix } from './_lib/funcs';
 import { IdoEqptDetail } from './_ui/ido-eqpt-detail';
+
+export const metadata: Metadata = {
+  title: '移動詳細',
+  description: '移動詳細ページです',
+};
 
 const Page = async (props: {
   params: Promise<{

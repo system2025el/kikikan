@@ -28,6 +28,7 @@ export type OyaJuchuKizaiMeisaiValues = {
   juchuHeadId: number;
   juchuKizaiHeadId: number;
   juchuKizaiMeisaiId: number;
+  mShozokuId: number;
   shozokuId: number;
   shozokuNam: string;
   kizaiId: number;

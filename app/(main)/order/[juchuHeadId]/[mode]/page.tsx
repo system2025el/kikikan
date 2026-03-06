@@ -1,8 +1,15 @@
+import { Metadata } from 'next';
+
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import { Order } from '@/app/(main)/order/[juchuHeadId]/[mode]/_ui/order';
 
-import { getFilteredUsers, getJuchuHead, getJuchuKizaiHeadList, getJuchuSharyoHeadList } from './_lib/funcs';
+import { getJuchuHead, getJuchuKizaiHeadList, getJuchuSharyoHeadList, getUsers } from './_lib/funcs';
 import { EqTableValues, OrderValues, VehicleTableValues } from './_lib/types';
+
+export const metadata: Metadata = {
+  title: '受注',
+  description: '受注ページです',
+};
 
 const Page = async (props: { params: Promise<{ juchuHeadId: string; mode: string }> }) => {
   const params = await props.params;
@@ -11,7 +18,7 @@ const Page = async (props: { params: Promise<{ juchuHeadId: string; mode: string
   // 編集モード(edit:編集、view:閲覧)
   const edit = params.mode === 'edit' ? true : false;
 
-  const userList = await getFilteredUsers('');
+  const userList = await getUsers();
 
   // 新規
   if (juchuHeadId === 0) {

@@ -65,7 +65,7 @@ export const selectFilteredEqpts = async (queries: {
     .schema(SCHEMA)
     .from('v_kizai_lst')
     .select(
-      'kizai_id, kizai_nam, kizai_qty, kizai_ng_qty, shozoku_nam, mem, bumon_nam, dai_bumon_nam, shukei_bumon_nam, reg_amt, dsp_flg, del_flg'
+      'kizai_id, kizai_nam, kizai_qty, kizai_ng_qty, shozoku_nam, mem, bumon_nam, dai_bumon_nam, shukei_bumon_nam, reg_amt, dsp_flg, del_flg, rfid_kics_qty, rfid_yard_qty'
     );
 
   if (queries.q && queries.q.trim() !== '') {
@@ -153,21 +153,21 @@ export const selectFilteredEqpts = async (queries: {
   //   m_kizai.kizai_nam;
   //   `;
 
-  if (queries.q && queries.q.trim() !== '') {
-    builder.ilike('kizai_nam', `%${queries.q}%`);
-  }
-  if (queries.b !== null && queries.b !== FAKE_NEW_ID) {
-    builder.eq('bumon_id', queries.b);
-  }
-  if (queries.d !== null && queries.d !== FAKE_NEW_ID) {
-    builder.eq('dai_bumon_id', queries.d);
-  }
-  if (queries.s !== null && queries.s !== FAKE_NEW_ID) {
-    builder.eq('shukei_bumon_id', queries.s);
-  }
-  if (queries.ngFlg) {
-    builder.gt('kizai_ng_qty', 0);
-  }
+  // if (queries.q && queries.q.trim() !== '') {
+  //   builder.ilike('kizai_nam', `%${queries.q}%`);
+  // }
+  // if (queries.b !== null && queries.b !== FAKE_NEW_ID) {
+  //   builder.eq('bumon_id', queries.b);
+  // }
+  // if (queries.d !== null && queries.d !== FAKE_NEW_ID) {
+  //   builder.eq('dai_bumon_id', queries.d);
+  // }
+  // if (queries.s !== null && queries.s !== FAKE_NEW_ID) {
+  //   builder.eq('shukei_bumon_id', queries.s);
+  // }
+  // if (queries.ngFlg) {
+  //   builder.gt('kizai_ng_qty', 0);
+  // }
 
   try {
     // return await pool.query(query);
