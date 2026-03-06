@@ -1,5 +1,6 @@
 'use client';
 
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import {
   Button,
   Checkbox,
@@ -86,6 +87,7 @@ export const ShukoListTable = (props: {
             <TableCell align="center">受注番号</TableCell>
             <TableCell align="left">出庫場所</TableCell>
             <TableCell align="left">出庫日時</TableCell>
+            <TableCell align="center">入庫</TableCell>
             <TableCell align="center">ピッキング</TableCell>
             <TableCell align="center">最終確認</TableCell>
             <TableCell align="left">入力者</TableCell>
@@ -133,6 +135,27 @@ export const ShukoListTable = (props: {
               </TableCell>
               <TableCell align="left">{row.nyushukoBashoId === 1 ? 'K' : 'Y'}</TableCell>
               <TableCell align="left">{toJapanTimeString(row.nyushukoDat)}</TableCell>
+              <TableCell align="center">
+                <Button
+                  variant="text"
+                  size="small"
+                  onClick={() => {
+                    sessionStorage.setItem(
+                      'nyukoListSearchParams',
+                      JSON.stringify({
+                        juchuHeadId: row.juchuHeadId,
+                        nyukoDat: { from: null, to: null },
+                        nyukoBasho: 0,
+                        section: [],
+                      })
+                    );
+                    router.push('nyuko-list');
+                  }}
+                  sx={{ py: 0, px: 1 }}
+                >
+                  <LocalShippingIcon fontSize="small" sx={{ transform: 'scaleX(-1)' }} />
+                </Button>
+              </TableCell>
               <TableCell align="center">
                 <Button variant="text" size="small" onClick={() => handleClickRow(row, 10)} sx={{ py: 0, px: 1 }}>
                   {row.sstbSagyoStsNamShort}

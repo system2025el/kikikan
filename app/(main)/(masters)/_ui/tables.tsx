@@ -435,7 +435,7 @@ export const LightTooltipWithText = ({
   maxWidth,
 }: {
   children: React.ReactNode;
-  variant: 'body2' | 'button' | '0.50rem' | '0.70rem';
+  variant: 'body2' | 'button' | '0.50rem' | '0.70rem' | '0.75rem';
   maxWidth: number;
 }) => {
   const textRef = React.useRef<HTMLSpanElement>(null);
@@ -455,7 +455,14 @@ export const LightTooltipWithText = ({
     whiteSpace: 'nowrap',
     display: 'inline-block',
     verticalAlign: 'middle',
-    fontSize: variant === '0.50rem' ? '0.50rem' : variant === '0.70rem' ? '0.70rem' : '0.875rem',
+    fontSize:
+      variant === '0.50rem'
+        ? '0.50rem'
+        : variant === '0.70rem'
+          ? '0.70rem'
+          : variant === '0.75rem'
+            ? '0.75rem'
+            : '0.875rem',
     fontWeight: variant === 'button' ? 500 : 'normal',
     textTransform: 'none',
   } as const;
