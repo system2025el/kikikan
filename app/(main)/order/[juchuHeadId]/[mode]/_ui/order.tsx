@@ -661,6 +661,14 @@ export const Order = (props: {
           return;
         }
 
+        if (selectEqHeader.kicsShukoFixFlg || selectEqHeader.yardShukoFixFlg) {
+          setAlertTitle('選択項目を確認してください');
+          setAlertMessage('出発済の受注明細は削除できません');
+          setAlertOpen(true);
+          setIsProcessing(false);
+          return;
+        }
+
         setKizaiHeadDeleteOpen(true);
       }
     } catch (e) {
