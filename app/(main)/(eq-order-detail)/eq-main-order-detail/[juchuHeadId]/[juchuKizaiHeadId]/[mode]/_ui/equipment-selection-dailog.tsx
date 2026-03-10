@@ -90,7 +90,7 @@ export const EqptSelectionDialog = ({
     // 機材明細の重複機材排除
     const uniqueIds = new Set();
     const uniqueEqList = eqpts.filter((d) => {
-      if (uniqueIds.has(d.kizaiId)) {
+      if (uniqueIds.has(d.kizaiId) || d.delFlag) {
         return false;
       }
       uniqueIds.add(d.kizaiId);
