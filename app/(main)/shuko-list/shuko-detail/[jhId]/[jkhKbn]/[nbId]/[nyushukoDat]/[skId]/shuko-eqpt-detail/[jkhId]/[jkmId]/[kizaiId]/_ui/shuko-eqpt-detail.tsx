@@ -229,7 +229,7 @@ export const ShukoEqptDetail = (props: {
               <Typography>出庫予定数</Typography>
               <Typography>{shukoEqptDetailData.planQty}</Typography>
             </Grid2>
-            <Grid2 container alignItems={'center'} spacing={5} p={1}>
+            <Grid2 container alignItems={'center'} spacing={3} px={2} py={1}>
               <Typography>全{shukoEqptDetailList.length}件</Typography>
               <Button
                 color="error"
@@ -254,7 +254,7 @@ export const ShukoEqptDetail = (props: {
                         }
                       }}
                       sx={{
-                        width: 150,
+                        width: 100,
                         '& .MuiInputBase-input': {
                           textAlign: 'right',
                         },

@@ -202,7 +202,7 @@ export const NyukoEqptDetail = (props: {
               <Typography>入庫予定数</Typography>
               <Typography>{nyukoEqptDetailData.planQty}</Typography>
             </Grid2>
-            <Grid2 container alignItems={'center'} spacing={5} p={1}>
+            <Grid2 container alignItems={'center'} spacing={2} px={2} py={1}>
               <Typography>全{nyukoEqptDetailList.length}件</Typography>
               <Button
                 color="error"
@@ -227,7 +227,7 @@ export const NyukoEqptDetail = (props: {
                         }
                       }}
                       sx={{
-                        width: 150,
+                        width: 100,
                         '& .MuiInputBase-input': {
                           textAlign: 'right',
                         },
@@ -241,6 +241,13 @@ export const NyukoEqptDetail = (props: {
                     />
                   )}
                 />
+              </Box>
+              <Box>
+                <Typography color="error" fontSize={'small'} sx={{ whiteSpace: 'pre-line', wordBreak: 'break-all' }}>
+                  {
+                    '※入庫で補正すると、RFIDで仕訳するY在庫数とK在庫数が正しくなくなります。\n　入庫場所を修正する場合は、ハンディのタグ管理か、機材のRFIDマスタで修正してください。'
+                  }
+                </Typography>
               </Box>
             </Grid2>
             {/** 固定ボタン 保存＆ページトップ */}

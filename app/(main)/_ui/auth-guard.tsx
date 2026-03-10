@@ -78,6 +78,42 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     checkAuth();
   }, [user, isHydrated, router]);
 
+  // useEffect(() => {
+  //   if (!isHydrated) return;
+
+  //   const {
+  //     data: { subscription },
+  //   } = supabase.auth.onAuthStateChange((event, session) => {
+  //     if (event === 'SIGNED_OUT') {
+  //       clearUser();
+  //       router.replace('/login');
+  //     }
+  //   });
+
+  //   const checkAuth = async () => {
+  //     if (!user) {
+  //       router.replace('/login');
+  //       return;
+  //     }
+
+  //     const {
+  //       data: { user: sessionUser },
+  //       error,
+  //     } = await supabase.auth.getUser();
+
+  //     if (error || !sessionUser) {
+  //       console.error('Auth error or session missing:', error);
+
+  //       clearUser();
+  //       router.replace('/login');
+  //     }
+  //   };
+
+  //   checkAuth();
+
+  //   return () => subscription.unsubscribe();
+  // }, [isHydrated, user, router, clearUser]);
+
   // --- レンダリング・ブロック ---
 
   // 1. ハイドレーションが終わるまで何も出さない
