@@ -59,7 +59,7 @@ export const selectFilteredCustomers = async (query: string) => {
   if (query && query.trim() !== '') {
     const escapedQuery = escapeLikeString(query);
     builder.or(
-      `kokyaku_nam.ilike.%${escapedQuery}%, kana.ilike.%${escapedQuery}%, adr_shozai.ilike.%${escapedQuery}%, adr_tatemono.ilike.%${escapedQuery}%, adr_sonota.ilike.%${escapedQuery}%, tel.ilike.%${escapedQuery}%, fax.ilike.%${escapedQuery}%`
+      `kokyaku_nam.ilike."%${escapedQuery}%", kana.ilike."%${escapedQuery}%", adr_shozai.ilike."%${escapedQuery}%", adr_tatemono.ilike."%${escapedQuery}%", adr_sonota.ilike."%${escapedQuery}%", tel.ilike."%${escapedQuery}%", fax.ilike."%${escapedQuery}%"`
     );
   }
 
