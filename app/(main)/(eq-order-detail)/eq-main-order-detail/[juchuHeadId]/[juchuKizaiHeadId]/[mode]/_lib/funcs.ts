@@ -175,7 +175,6 @@ export const addJuchuKizaiHead = async (
   try {
     await insertJuchuKizaiHead(newData, connection);
 
-    console.log('New juchuKizaiHead added successfully:', newData);
     return true;
   } catch (e) {
     console.error('Error adding new juchuKizaiHead:', e);
@@ -211,7 +210,6 @@ export const updJuchuKizaiHead = async (
 
   try {
     await updateJuchuKizaiHead(updateData, connection);
-    console.log('juchu kizai head updated successfully');
     return true;
   } catch (e) {
     throw e;
@@ -376,7 +374,6 @@ export const addJuchuKizaiMeisai = async (
   try {
     await insertJuchuKizaiMeisai(newData, connection);
 
-    console.log('kizai meisai added successfully:', newData);
     return true;
   } catch (e) {
     console.error('Exception while adding kizai meisai:', e);
@@ -416,7 +413,6 @@ export const updJuchuKizaiMeisai = async (
   try {
     for (const data of updateData) {
       await updateJuchuKizaiMeisai(data, connection);
-      console.log('juchu kizai meisai updated successfully:', data);
     }
     return true;
   } catch (e) {
@@ -443,7 +439,6 @@ export const delJuchuKizaiMeisai = async (juchuKizaiMeisaiData: JuchuKizaiMeisai
     for (const data of deleteData) {
       await deleteJuchuKizaiMeisai(data, connection);
     }
-    console.log('juchu kizai meisai delete successfully:', deleteData);
     return true;
   } catch (e) {
     throw e;
@@ -493,7 +488,6 @@ export const addJuchuContainerMeisai = async (
 
   try {
     await insertJuchuContainerMeisai(mergeData, connection);
-    console.log('container meisai added successfully:', mergeData);
     return true;
   } catch (e) {
     console.error('Exception while adding container meisai:', e);
@@ -545,7 +539,6 @@ export const updJuchuContainerMeisai = async (
   try {
     for (const data of mergeData) {
       await updateJuchuContainerMeisai(data, connection);
-      console.log('juchu container meisai updated successfully:', data);
     }
     return true;
   } catch (e) {
@@ -665,7 +658,6 @@ export const addNyushukoDen = async (
   try {
     await insertNyushukoDen(mergeData, connection);
 
-    console.log('nyushuko den added successfully:', mergeData);
     return true;
   } catch (e) {
     console.error('Exception while adding nyushuko den:', e);
@@ -722,7 +714,6 @@ export const addShukoDen = async (
 
   try {
     await insertNyushukoDen(mergeData, connection);
-    console.log('shuko den added successfully:', mergeData);
   } catch (e) {
     console.error('Exception while adding shuko den:', e);
     throw e;
@@ -761,7 +752,6 @@ export const addNyukoDen = async (
 
   try {
     await insertNyushukoDen(newData, connection);
-    console.log('nyuko den added successfully:', newData);
   } catch (e) {
     console.error('Exception while adding nyuko den:', e);
     throw e;
@@ -861,7 +851,6 @@ export const updNyushukoDen = async (
     for (const data of mergeData) {
       await updateNyushukoDenFromKizaiMeisai(data, connection);
     }
-    console.log('nyushuko den updated successfully:', mergeData);
     return true;
   } catch (e) {
     console.error('Exception while updating nyushuko den:', e);
@@ -917,8 +906,6 @@ export const upsShukoDen = async (
 
   try {
     await upsertNyushukoDen(mergeData, connection);
-
-    console.log('shuko den upsert successfully:', mergeData);
   } catch (e) {
     console.error('Exception while updating shuko den:', e);
     throw e;
@@ -957,8 +944,6 @@ export const upsNyukoDen = async (
 
   try {
     await upsertNyushukoDen(newData, connection);
-
-    console.log('nyuko den upsert successfully:', newData);
   } catch (e) {
     console.error('Exception while updating nyuko den:', e);
     throw e;
@@ -983,7 +968,6 @@ export const delNyushukoDen = async (juchuKizaiMeisaiData: JuchuKizaiMeisaiValue
     for (const data of deleteData) {
       await deleteNyushukoDen(data, connection);
     }
-    console.log('nyushuko den delete successfully:', deleteData);
     return true;
   } catch (e) {
     throw e;
@@ -1007,7 +991,6 @@ export const delKicsOrYardShukoDen = async (
     for (const data of deleteData) {
       await deleteKicsOrYardShukoDen(data, connection);
     }
-    console.log('shuko den delete successfully:', deleteData);
   } catch (e) {
     throw e;
   }
@@ -1030,7 +1013,6 @@ export const delKicsOrYardNyukoDen = async (
     for (const data of deleteData) {
       await deleteKicsOrYardNyukoDen(data, connection);
     }
-    console.log('shuko den delete successfully:', deleteData);
   } catch (e) {
     throw e;
   }
@@ -1104,7 +1086,6 @@ export const addCtnNyushukoDen = async (
   try {
     await insertNyushukoDen(mergeData, connection);
 
-    console.log('ctn nyushuko den added successfully:', mergeData);
     return true;
   } catch (e) {
     console.error('Exception while adding ctn nyushuko den:', e);
@@ -1163,7 +1144,6 @@ export const addCtnShukoDen = async (
   try {
     await insertNyushukoDen(mergeData, connection);
 
-    console.log('ctn shuko den added successfully:', mergeData);
     return true;
   } catch (e) {
     console.error('Exception while adding ctn shuko den:', e);
@@ -1206,7 +1186,6 @@ export const addCtnNyukoDen = async (
   try {
     await insertNyushukoDen(newCtnNyukoData, connection);
 
-    console.log('ctn nyuko den added successfully:', newCtnNyukoData);
     return true;
   } catch (e) {
     console.error('Exception while adding ctn nyuko den:', e);
@@ -1282,7 +1261,6 @@ export const updCtnNyushukoDen = async (
     for (const data of mergeData) {
       await updateNyushukoDen(data, connection);
     }
-    console.log('ctn nyushuko den updated successfully:', mergeData);
     return true;
   } catch (e) {
     console.error('Exception while updating ctn nyushuko den:', e);
@@ -1343,7 +1321,6 @@ export const updCtnShukoDen = async (
       await updateNyushukoDen(data, connection);
     }
 
-    console.log('ctn shuko den update successfully:', mergeData);
     return true;
   } catch (e) {
     console.error('Exception while updating ctn shuko den:', e);
@@ -1379,7 +1356,6 @@ export const updCtnNyukoDen = async (
       await updateNyushukoDen(data, connection);
     }
 
-    console.log('ctn nyuko den update successfully:', updCtnNyukoData);
     return true;
   } catch (e) {
     console.error('Exception while adding ctn nyuko den:', e);
@@ -1435,8 +1411,6 @@ export const upsCtnShukoDen = async (
 
   try {
     await upsertNyushukoDen(mergeData, connection);
-
-    console.log('ctn shuko den upsert successfully:', mergeData);
   } catch (e) {
     console.error('Exception while updating ctn shuko den:', e);
     throw e;
@@ -1476,8 +1450,6 @@ export const upsCtnNyukoDen = async (
 
   try {
     await upsertNyushukoDen(upsertCtnNyukoData, connection);
-
-    console.log('ctn nyuko den upsert successfully:', upsertCtnNyukoData);
   } catch (e) {
     console.error('Exception while updating ctn nyuko den:', e);
     throw e;
@@ -1505,7 +1477,6 @@ export const delCtnNyushukoDen = async (
     for (const data of deleteData) {
       await deleteNyushukoDen(data, connection);
     }
-    console.log('ctn nyushuko den delete successfully:', deleteData);
     return true;
   } catch (e) {
     throw e;
@@ -1534,7 +1505,6 @@ export const delKicsOrYardCtnNyukoDen = async (
     for (const data of deleteData) {
       await deleteKicsOrYardNyukoDen(data, connection);
     }
-    console.log('ctn nyuko den delete successfully:', deleteData);
     return true;
   } catch (e) {
     throw e;
@@ -1653,7 +1623,6 @@ export const getIdoDenJuchuMaxId = async () => {
       }
       throw error;
     }
-    console.log('getIdoDenJuchuMaxId: ', data);
     return data.ido_den_id;
   } catch (e) {
     console.error(e);
@@ -1706,7 +1675,6 @@ export const addIdoDenJuchu = async (
 
   try {
     await insertIdoDenJuchu(mergeData, connection);
-    console.log('ido den added successfully:', mergeData);
     return true;
   } catch (e) {
     console.error('Exception while adding ido den:', e);
@@ -1768,7 +1736,6 @@ export const updIdoDenJuchu = async (
     for (const data of updateData) {
       await updateIdoDenJuchu(data, connection);
     }
-    console.log('ido den updated successfully:', updateData);
     return true;
   } catch (e) {
     console.error('Exception while updating ido den:', e);
@@ -1877,7 +1844,6 @@ export const addHonbanbi = async (
   };
   try {
     await insertHonbanbi(newData, connection);
-    console.log('honbanbi add successfully:', newData);
     return true;
   } catch (e) {
     throw e;
@@ -1912,7 +1878,6 @@ export const updNyushukoHonbanbi = async (
 
   try {
     await updateNyushukoHonbanbi(updateData, connection);
-    console.log('honbanbi updated successfully:', updateData);
     return true;
   } catch (e) {
     throw e;
@@ -1947,7 +1912,6 @@ export const updHonbanbi = async (
 
   try {
     await updateHonbanbi(updateData, connection);
-    console.log('honbanbi updated successfully:', updateData);
     return true;
   } catch (e) {
     throw e;
@@ -1999,7 +1963,6 @@ export const getBumonsForEqptSelection = async () => {
       label: d.bumon_nam ?? '',
       tblDspNum: index,
     }));
-    console.log('部門が', selectElements.length, '件');
     return selectElements;
   } catch (e) {
     console.error('例外が発生しました:', e);
@@ -2020,7 +1983,6 @@ export const checkSetoptions = async (idList: number[]): Promise<number[]> => {
     //   console.error('例外発生', setIdError);
     //   throw setIdError;
     // }
-    console.log(setIdList);
     if (!setIdList || setIdList.length === 0) return [];
     // return setIdList.map((d) => d.kizai_id);
     return Array.from(new Set(setIdList.map((d) => d.kizai_id)));
@@ -2162,7 +2124,6 @@ export const juchuMeisaiCopy = async (
 
     // 受注機材ヘッダー追加
     const headResult = await addJuchuKizaiHead(newJuchuKizaiHeadId, juchuKizaiHeadData, 1, userNam, connection);
-    console.log('受注機材ヘッダー追加', headResult);
 
     // 受注機材入出庫追加
     const nyushukoResult = await addJuchuKizaiNyushuko(
@@ -2175,7 +2136,6 @@ export const juchuMeisaiCopy = async (
       userNam,
       connection
     );
-    console.log('受注機材入出庫追加', nyushukoResult);
 
     // 受注機材本番日(入出庫、使用中)追加
     const addJuchuSiyouHonbanbiData: JuchuKizaiHonbanbiValues[] = dateRange.map((d) => ({
@@ -2212,7 +2172,6 @@ export const juchuMeisaiCopy = async (
       userNam,
       connection
     );
-    console.log('入出庫、使用本番日追加', addHonbanbiResult);
 
     // 並び順
     let dspOrdNum = 1;
@@ -2231,11 +2190,9 @@ export const juchuMeisaiCopy = async (
 
       // 受注機材明細追加
       const addMeisaiResult = await addJuchuKizaiMeisai(newJuchuKizaiMeisai, userNam, connection);
-      console.log('受注機材明細追加', addMeisaiResult);
 
       // 機材入出庫伝票追加
       const addNyushukoDenResult = await addNyushukoDen(juchuKizaiHeadData, newJuchuKizaiMeisai, userNam, connection);
-      console.log('入出庫伝票追加', addNyushukoDenResult);
     }
 
     // 受注コンテナ明細
@@ -2252,7 +2209,6 @@ export const juchuMeisaiCopy = async (
 
       // 受注コンテナ明細追加
       const addCtnMeisaiResult = await addJuchuContainerMeisai(newJuchuCtnMeisai, userNam, connection);
-      console.log('受注コンテナ明細追加', addCtnMeisaiResult);
 
       // コンテナ入出庫伝票追加
       if (juchuKizaiHeadData.kicsShukoDat && juchuKizaiHeadData.kicsNyukoDat) {
@@ -2264,7 +2220,6 @@ export const juchuMeisaiCopy = async (
           userNam,
           connection
         );
-        console.log('KICSコンテナ入出庫伝票追加', addCtnNyushukoDenResult);
       }
       if (juchuKizaiHeadData.yardShukoDat && juchuKizaiHeadData.yardNyukoDat) {
         const addCtnNyushukoDenResult = await addCtnNyushukoDen(
@@ -2275,7 +2230,6 @@ export const juchuMeisaiCopy = async (
           userNam,
           connection
         );
-        console.log('YARDコンテナ入出庫伝票追加', addCtnNyushukoDenResult);
       }
     }
 
@@ -2288,7 +2242,6 @@ export const juchuMeisaiCopy = async (
 
       // 移動受注機材明細追加
       const addIdoDenResult = await addIdoDenJuchu(newIdoDenId, newIdoList, userNam, connection);
-      console.log('移動伝票受注追加', addIdoDenResult);
     }
 
     // 受注本番日追加
@@ -2301,7 +2254,6 @@ export const juchuMeisaiCopy = async (
           userNam,
           connection
         );
-        console.log('受注機材本番日追加', addHonbanbiResult);
       }
     }
 
@@ -2364,7 +2316,6 @@ export const juchuMeisaiseparation = async (
 
     // 受注機材ヘッダー追加
     const headResult = await addJuchuKizaiHead(newJuchuKizaiHeadId, juchuKizaiHeadData, 1, userNam, connection);
-    console.log('受注機材ヘッダー追加', headResult);
 
     // 受注機材入出庫追加
     const nyushukoResult = await addJuchuKizaiNyushuko(
@@ -2377,7 +2328,6 @@ export const juchuMeisaiseparation = async (
       userNam,
       connection
     );
-    console.log('受注機材入出庫追加', nyushukoResult);
 
     // 受注機材本番日(入出庫、使用中)追加
     const addJuchuSiyouHonbanbiData: JuchuKizaiHonbanbiValues[] = dateRange.map((d) => ({

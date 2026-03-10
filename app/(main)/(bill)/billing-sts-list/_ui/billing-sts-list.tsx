@@ -89,7 +89,6 @@ export const BillingStsList = () => {
     // 検索条件保持
     sessionStorage.setItem('billingStsSearchParams', JSON.stringify(data));
     setIsFirst(false);
-    console.log(data);
     try {
       const theSts = await getFilteredBillingSituations(data);
       setBillSts(theSts);
@@ -116,7 +115,6 @@ export const BillingStsList = () => {
   };
 
   const handleConfirmed = (selectedCusts: string[]) => {
-    console.log(selectedCusts);
     setValue('unbilledCusts', selectedCusts);
     setUnbilledCustsDialog(false);
   };

@@ -36,7 +36,6 @@ export const getJuchusForBill = async (queries: {
   flg: boolean;
   tantouNam: string | null;
 }): Promise<BillMeisaiHeadsValues[]> => {
-  console.log('新規だよ', queries);
   const { kokyakuId, date, flg, tantouNam } = queries;
   try {
     if (flg) {
@@ -52,7 +51,6 @@ export const getJuchusForBill = async (queries: {
       if (!juchus.rows || juchus.rows.length === 0) {
         return [];
       }
-      console.log('受注情報', juchus.rows);
       // juchus.rowsをグループ化して整形
       const groupedResult = juchus.rows.reduce((acc, currentRow) => {
         // グループ化するためのユニークなキー
@@ -103,7 +101,6 @@ export const getJuchusForBill = async (queries: {
       if (!juchus.rows || juchus.rows.length === 0) {
         return [];
       }
-      console.log('受注情報', juchus.rows);
       return juchus.rows.map((j) => ({
         juchuHeadId: j.juchu_head_id,
         juchuKizaiHeadId: j.juchu_kizai_head_id,
@@ -178,7 +175,6 @@ export const addBill = async (data: BillHeadValues, user: string): Promise<numbe
   const now = new Date().toISOString();
 
   try {
-    console.log('新規START');
     // トランザクション開始
     await connection.query('BEGIN');
     // 新請求ヘッドID
@@ -186,7 +182,6 @@ export const addBill = async (data: BillHeadValues, user: string): Promise<numbe
        SELECT coalesce(max(seikyu_head_id),29999) + 1 as newid FROM ${SCHEMA}.t_seikyu_head WHERE seikyu_head_id > 29999
       `);
 
-    console.log(newSeikyuHeadId.rows[0].newid);
     // 請求ヘッド
     const billHead: SeikyuHead = {
       seikyu_head_id: newSeikyuHeadId.rows[0].newid,

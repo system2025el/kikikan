@@ -67,7 +67,6 @@ export const updateBill = async (data: BillHeadValues, user: string): Promise<nu
     upd_user: user,
   };
   // 明細ヘッド
-  console.log(`======================================${meisaiheadList}`);
   const meisaiHeads = meisaiheadList.map((l, index) => ({
     seikyu_head_id: data.seikyuHeadId!,
     seikyu_meisai_head_id: l.seikyuMeisaiHeadId,
@@ -117,7 +116,6 @@ export const updateBill = async (data: BillHeadValues, user: string): Promise<nu
       : [];
 
   try {
-    console.log('更新START');
     // トランザクション開始
     await connection.query('BEGIN');
     if (billHead) {
@@ -149,7 +147,6 @@ export const updateBill = async (data: BillHeadValues, user: string): Promise<nu
 
       // 請求ヘッダ新規挿入
       if (insertMHeadList.length > 0) {
-        console.log('-------------------', insertMHeadList, '----------------------');
         // 新規処理実行
         await insertBillMeisaiHead(
           insertMHeadList.map(({ meisai, ...rest }) => rest),
@@ -222,13 +219,11 @@ export const updateBill = async (data: BillHeadValues, user: string): Promise<nu
       const existingMeisaiIds = await connection.query(
         `SELECT seikyu_head_id, seikyu_meisai_head_id, seikyu_meisai_id FROM ${SCHEMA}.t_seikyu_meisai WHERE seikyu_head_id = ${data.seikyuHeadId}`
       );
-      console.log('今あるやつ', existingMeisaiIds.rows);
       const formedMeisai = updateMeisaiList.map((d) => ({
         seikyu_head_id: d.seikyu_head_id,
         seikyu_meisai_head_id: d.seikyu_meisai_head_id,
         seikyu_meisai_id: d.seikyu_meisai_id,
       }));
-      console.log('フォームから来たやつ', formedMeisai);
 
       const meisaiToDelete: {
         seikyu_head_id: number;

@@ -99,16 +99,28 @@ export const BillListTable = ({
   /* methods ------------------------------------------------------------- */
   /** 削除ボタン押下時処理 */
   const handleClickDelete = async (billIds: number[]) => {
-    await updBillDelFlg(billIds);
+    try {
+      await updBillDelFlg(billIds);
+    } catch (e) {
+      setSnackBarMessage(`削除に失敗しました`);
+      setSnackBarOpen(true);
+      return;
+    }
     setSelectedIds([]);
     setDeleteDialogOpen(false);
     setSnackBarMessage(`請求を${billIds.length}件削除しました`);
     setSnackBarOpen(true);
     setIsLoading(true);
-    const b = await getFilteredBills(searchParams);
-    console.log(b);
-    setBillList(b);
-    setIsLoading(false);
+    try {
+      const b = await getFilteredBills(searchParams);
+      setBillList(b);
+    } catch (e) {
+      setSnackBarMessage(`再取得に失敗しました`);
+      setSnackBarOpen(true);
+      return;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   /** チェックボックス押下（選択時）の処理 */
@@ -245,7 +257,6 @@ export const BillListTable = ({
                         disabled={isLoading}
                         sx={{ p: 0, m: 0, minWidth: 1, justifyContent: 'left' }}
                         onClick={() => {
-                          console.log('テーブルで請求番号', bill.billHeadId, 'をクリック');
                           window.open(`/bill-list/edit/${bill.billHeadId}`);
                         }}
                       >

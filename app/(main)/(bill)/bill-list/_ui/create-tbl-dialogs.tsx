@@ -113,7 +113,6 @@ export const SecondDialogPage = ({
     dat: Date;
   }) => {
     setIsLoading(true);
-    console.log(data);
     try {
       const meisaiNamList = await getJuchuKizaiHeadNamListForBill(data);
       setMeisaiHeadNamList(meisaiNamList.map((d) => ({ ...d, dat: data.dat })));
@@ -126,7 +125,6 @@ export const SecondDialogPage = ({
 
   /** ヘッダが選ばれたときの処理 */
   const handleClickHeadNam = async (juchuId: number, kizaiHeadId: number, checked: boolean, dat: Date) => {
-    console.log(kizaiHeadId, checked);
     try {
       if (checked) {
         // 詳細表示処理
@@ -135,7 +133,6 @@ export const SecondDialogPage = ({
       } else {
         // まとめて表示処理
         const data = await getJuchuKizaiMeisaiHeadForBill(juchuId, kizaiHeadId, dat);
-        console.log(data);
         // 取得した内容をテーブル内の明細に入れる
         headsField.append(data);
       }

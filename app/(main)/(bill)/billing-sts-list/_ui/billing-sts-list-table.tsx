@@ -225,7 +225,6 @@ const BillingStsRow = ({
   /* methods ------------------------------------------------------- */
   /* 請求完了日を変更する処理 */
   const handleChangeDat = async () => {
-    console.log('current::::: ', meisaiToUpd.currentDat, ', new :::::::', newDat);
     const m = meisaiToUpd;
     const changeTo = {
       juchuId: m.juchuId,

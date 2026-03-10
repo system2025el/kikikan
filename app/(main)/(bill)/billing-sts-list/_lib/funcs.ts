@@ -37,7 +37,6 @@ export const getFilteredBillingSituations = async (
     if (!data || data.length === 0) {
       return [];
     }
-    console.log(data);
 
     const heads = data.map((d) => ({
       juchuId: d.juchu_head_id ?? FAKE_NEW_ID,

@@ -142,10 +142,9 @@ export const getDetailJuchuHead = async (juchuHeadId: number) => {
       nebikiAmt: juchuData.data.nebiki_amt,
       zeiKbn: juchuData.data.zei_kbn ?? 2,
     };
-    console.log('GetOrder order : ', order);
     return order;
   } catch (e) {
-    console.log(e);
+    console.error('getDetailJuchuHead error:', e);
     throw e;
   }
 };
@@ -163,7 +162,6 @@ export const getJuchuKizaiHeadMaxId = async (juchuHeadId: number) => {
       }
       throw error;
     }
-    console.log('GetMaxId : ', data);
     return data;
   } catch (e) {
     console.error(e);
@@ -270,7 +268,6 @@ export const addJuchuKizaiNyushuko = async (
       throw e;
     }
   }
-  console.log('kizai Nyushuko added successfully:', dates);
   return true;
 };
 
@@ -324,7 +321,6 @@ export const updJuchuKizaiNyushuko = async (
       } else if (!selectData.data && data) {
         await insertJuchuKizaiNyushuko({ ...data, add_dat: new Date().toISOString(), add_user: userNam }, connection);
       }
-      console.log('kizai nyushuko updated successfully:', data);
     } catch (e) {
       console.error('Exception while updating kizai nyushuko:', e);
       throw e;
@@ -391,7 +387,7 @@ export const getOyaJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHead
     }));
     return juchuKizaiMeisaiData;
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 };
 
@@ -600,7 +596,6 @@ export const addAllHonbanbi = async (
   }));
   try {
     await insertAllHonbanbi(newData, connection);
-    console.log('honbanbi add all successfully:', newData);
     return true;
   } catch (e) {
     console.error('Error Add honbanbi:', e);
@@ -683,7 +678,6 @@ export const addDummyNyushukoDen = async (
   try {
     await insertNyushukoDen(dummyData, connection);
 
-    console.log('dummy nyushuko den added successfully:', dummyData);
     return true;
   } catch (e) {
     console.error('Exception while adding dummy nyushuko den:', e);

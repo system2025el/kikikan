@@ -117,7 +117,6 @@ export const getChosenBill = async (seikyuId: number) => {
       console.error(seikyuError);
       throw new Error('DBエラー：t_seikyu_head');
     }
-    console.log(seikyuData);
 
     // 受注情報と明細情報を並列を取得
     const [meisaiHeadResult, meisaiResult] = await Promise.all([
@@ -239,7 +238,6 @@ export const getJuchuKizaiMeisaiHeadForBill = async (juchuHeadId: number, kizaiH
       console.error('例題が発生');
     }
     const d = data.rows[0];
-    console.log('☆☆☆☆☆☆☆☆☆', d);
     return data.rows.map((j) => ({
       juchuHeadId: j.juchu_head_id,
       juchuKizaiHeadId: j.juchu_kizai_head_id,
@@ -292,7 +290,6 @@ export const getJuchuKizaiMeisaiHeadForBill = async (juchuHeadId: number, kizaiH
 export const getJuchuKizaiMeisaiDetailsForBill = async (juchuHeadId: number, kizaiHeadId: number, dat: Date) => {
   try {
     const data = await selectJuchuKizaiMeisaiDetailsForBill(juchuHeadId, kizaiHeadId, dat);
-    console.log(data.rows);
 
     if (!data) {
       console.error('例題が発生');
@@ -358,10 +355,10 @@ export const getJuchuKizaiMeisaiDetailsForBill = async (juchuHeadId: number, kiz
  */
 export const updBillDelFlg = async (ids: number[]) => {
   try {
-    console.log('Delete ::: ', ids);
     await updBillHeadDelFlg(ids);
     await revalidatePath('/bill-list');
   } catch (e) {
+    console.error(e);
     throw e;
   }
 };

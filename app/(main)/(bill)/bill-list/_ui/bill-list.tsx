@@ -67,7 +67,6 @@ export const BillList = () => {
 
   /** 検索ボタン押下 */
   const onSubmit = async (data: BillSearchValues) => {
-    console.log('検索ーーーーーーーーーーーーーーーー', data);
     setIsLoading(true);
     // 検索条件保持
     sessionStorage.setItem('billListSearchParams', JSON.stringify(getValues()));
