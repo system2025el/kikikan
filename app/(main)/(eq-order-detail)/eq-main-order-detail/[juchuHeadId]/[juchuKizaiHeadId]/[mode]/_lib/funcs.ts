@@ -2364,7 +2364,6 @@ export const juchuMeisaiseparation = async (
       userNam,
       connection
     );
-    console.log('入出庫、使用本番日追加', addHonbanbiResult);
 
     // 並び順
     let dspOrdNum = 1;
@@ -2383,11 +2382,9 @@ export const juchuMeisaiseparation = async (
 
       // 受注機材明細追加
       const addMeisaiResult = await addJuchuKizaiMeisai(newJuchuKizaiMeisai, userNam, connection);
-      console.log('受注機材明細追加', addMeisaiResult);
 
       // 機材入出庫伝票追加
       const addNyushukoDenResult = await addNyushukoDen(juchuKizaiHeadData, newJuchuKizaiMeisai, userNam, connection);
-      console.log('入出庫伝票追加', addNyushukoDenResult);
 
       // 元受注機材明細更新
       await updJuchuKizaiMeisai(updateEq, userNam, connection);
@@ -2410,7 +2407,6 @@ export const juchuMeisaiseparation = async (
 
       // 受注コンテナ明細追加
       const addCtnMeisaiResult = await addJuchuContainerMeisai(newJuchuCtnMeisai, userNam, connection);
-      console.log('受注コンテナ明細追加', addCtnMeisaiResult);
 
       // 元受注コンテナ明細更新
       await updJuchuContainerMeisai(updateCtn, userNam, connection);
@@ -2424,7 +2420,6 @@ export const juchuMeisaiseparation = async (
           userNam,
           connection
         );
-        console.log('KICSコンテナ出庫伝票追加', addKicsCtnShukoDenResult);
 
         // 元コンテナ出庫伝票更新(KICS)
         await updCtnShukoDen(updateCtn, juchuKizaiHeadData.kicsShukoDat, 1, userNam, connection);
@@ -2439,7 +2434,6 @@ export const juchuMeisaiseparation = async (
           userNam,
           connection
         );
-        console.log('YARDコンテナ出庫伝票追加', addYardCtnShukoDenResult);
 
         // 元コンテナ出庫伝票更新(YARD)
         await updCtnShukoDen(updateCtn, juchuKizaiHeadData.yardShukoDat, 2, userNam, connection);
@@ -2456,7 +2450,6 @@ export const juchuMeisaiseparation = async (
             userNam,
             connection
           );
-          console.log('KICSコンテナ入庫伝票追加', addKicsCtnNyukoDenResult);
 
           // コンテナ入庫伝票追加(YARD)
           const addYardCtnNyukoDenResult = await addCtnNyukoDen(
@@ -2467,7 +2460,6 @@ export const juchuMeisaiseparation = async (
             userNam,
             connection
           );
-          console.log('YARDコンテナ入庫伝票追加', addYardCtnNyukoDenResult);
 
           // 元コンテナ入庫伝票更新(KICS)
           await updCtnNyukoDen(updateCtn, juchuKizaiHeadData.kicsNyukoDat, 1, 1, userNam, connection);
@@ -2484,7 +2476,6 @@ export const juchuMeisaiseparation = async (
             userNam,
             connection
           );
-          console.log('KICSコンテナ入庫伝票追加更新', addKicsCtnNyukoDenResult);
 
           // 元コンテナ入庫伝票更新(KICS)
           await updCtnNyukoDen(updateCtn, juchuKizaiHeadData.kicsNyukoDat, 1, 1, userNam, connection);
@@ -2498,7 +2489,6 @@ export const juchuMeisaiseparation = async (
             userNam,
             connection
           );
-          console.log('YARDコンテナ入庫伝票追加', addYardCtnNyukoDenResult);
 
           // 元コンテナ入庫伝票更新(YARD)
           await updCtnNyukoDen(updateCtn, juchuKizaiHeadData.yardNyukoDat, 2, 2, userNam, connection);
@@ -2514,7 +2504,6 @@ export const juchuMeisaiseparation = async (
             userNam,
             connection
           );
-          console.log('KICSコンテナ入庫伝票追加', addKicsCtnNyukoDenResult);
 
           // 元コンテナ入庫伝票更新(KICS)
           await updCtnNyukoDen(updateCtn, juchuKizaiHeadData.kicsNyukoDat, 1, 3, userNam, connection);
@@ -2528,7 +2517,6 @@ export const juchuMeisaiseparation = async (
             userNam,
             connection
           );
-          console.log('KICSコンテナ入庫伝票追加', addKicsCtnNyukoDenResult);
 
           // 元コンテナ入庫伝票更新(KICS)
           await updCtnNyukoDen(updateCtn, juchuKizaiHeadData.kicsNyukoDat, 1, 1, userNam, connection);
@@ -2542,7 +2530,6 @@ export const juchuMeisaiseparation = async (
             userNam,
             connection
           );
-          console.log('KICSコンテナ入庫伝票追加', addKicsCtnNyukoDenResult);
 
           // 元コンテナ入庫伝票更新(KICS)
           await updCtnNyukoDen(updateCtn, juchuKizaiHeadData.kicsNyukoDat, 1, 2, userNam, connection);
@@ -2558,7 +2545,6 @@ export const juchuMeisaiseparation = async (
             userNam,
             connection
           );
-          console.log('YARDコンテナ入庫伝票追加', addYardCtnNyukoDenResult);
 
           // 元コンテナ入庫伝票更新(YARD)
           await updCtnNyukoDen(updateCtn, juchuKizaiHeadData.yardNyukoDat, 2, 3, userNam, connection);
@@ -2572,7 +2558,6 @@ export const juchuMeisaiseparation = async (
             userNam,
             connection
           );
-          console.log('YARDコンテナ入庫伝票追加', addYardCtnNyukoDenResult);
 
           // 元コンテナ入庫伝票更新(YARD)
           await updCtnNyukoDen(updateCtn, juchuKizaiHeadData.yardNyukoDat, 2, 1, userNam, connection);
@@ -2586,7 +2571,6 @@ export const juchuMeisaiseparation = async (
             userNam,
             connection
           );
-          console.log('YARDコンテナ入庫伝票追加', addYardCtnNyukoDenResult);
 
           // 元コンテナ入庫伝票更新(YARD)
           await updCtnNyukoDen(updateCtn, juchuKizaiHeadData.yardNyukoDat, 2, 2, userNam, connection);
@@ -2603,7 +2587,6 @@ export const juchuMeisaiseparation = async (
 
       // 移動受注機材明細追加
       const addIdoDenResult = await addIdoDenJuchu(newIdoDenId, newIdoList, userNam, connection);
-      console.log('移動伝票受注追加', addIdoDenResult);
 
       // 元移動受注機材明細更新
       await updIdoDenJuchu(updateIdoList, userNam, connection);
@@ -2619,7 +2602,6 @@ export const juchuMeisaiseparation = async (
           userNam,
           connection
         );
-        console.log('受注機材本番日追加', addHonbanbiResult);
       }
     }
 
@@ -2665,7 +2647,6 @@ export const saveNewJuchuKizaiHead = async (
 
     // 受注機材ヘッダー追加
     const headResult = await addJuchuKizaiHead(newJuchuKizaiHeadId, data, 1, userNam, connection);
-    console.log('受注機材ヘッダー追加', headResult);
     // 受注機材入出庫追加
     const nyushukoResult = await addJuchuKizaiNyushuko(
       data.juchuHeadId,
@@ -2677,7 +2658,6 @@ export const saveNewJuchuKizaiHead = async (
       userNam,
       connection
     );
-    console.log('受注機材入出庫追加', nyushukoResult);
     // 受注機材本番日(入出庫、使用中)追加
     const addJuchuSiyouHonbanbiData: JuchuKizaiHonbanbiValues[] = updateDateRange.map((d) => ({
       juchuHeadId: data.juchuHeadId,
@@ -2713,7 +2693,6 @@ export const saveNewJuchuKizaiHead = async (
       userNam,
       connection
     );
-    console.log('入出庫、使用本番日追加', addHonbanbiResult);
 
     await connection.query('COMMIT');
 
@@ -2776,7 +2755,6 @@ export const saveJuchuKizai = async (
     if (checkJuchuKizaiHead) {
       // 受注機材ヘッダー更新
       const headResult = await updJuchuKizaiHead(data, userNam, connection);
-      console.log('受注機材ヘッダー更新', headResult);
 
       // 受注機材入出庫更新
       const nyushukoResult = await updJuchuKizaiNyushuko(
@@ -2789,7 +2767,6 @@ export const saveJuchuKizai = async (
         userNam,
         connection
       );
-      console.log('受注機材入出庫更新', nyushukoResult);
 
       // 受注機材本番日(使用中)更新
       const addJuchuSiyouHonbanbiData: JuchuKizaiHonbanbiValues[] = updateDateRange.map((d) => ({
@@ -2800,9 +2777,7 @@ export const saveJuchuKizai = async (
         mem: '',
         juchuHonbanbiAddQty: 0,
       }));
-      console.log('受注機材本番日(使用中)更新データ', addJuchuSiyouHonbanbiData);
       const deleteSiyouHonbanbiResult = await delSiyouHonbanbi(data.juchuHeadId, data.juchuKizaiHeadId, connection);
-      console.log('受注機材本番日(使用日)削除', deleteSiyouHonbanbiResult);
       const addSiyouHonbanbiResult = await addAllHonbanbi(
         data.juchuHeadId,
         data.juchuKizaiHeadId,
@@ -2810,7 +2785,6 @@ export const saveJuchuKizai = async (
         userNam,
         connection
       );
-      console.log('受注機材本番日(使用日)更新', addSiyouHonbanbiResult);
 
       // 受注機材本番日(出庫、入庫)更新
       const updateNyushukoHonbanbiData: JuchuKizaiHonbanbiValues[] = [
@@ -2839,7 +2813,6 @@ export const saveJuchuKizai = async (
           userNam,
           connection
         );
-        console.log('入出庫本番日更新', nyushukoHonbanbiResult);
       }
     }
 
@@ -2853,7 +2826,6 @@ export const saveJuchuKizai = async (
           item.juchuHonbanbiDat,
           connection
         );
-        console.log('受注機材本番日削除', deleteHonbanbiResult);
       }
 
       for (const item of juchuHonbanbiList) {
@@ -2871,7 +2843,6 @@ export const saveJuchuKizai = async (
             userNam,
             connection
           );
-          console.log('受注機材本番日更新', updateHonbanbiResult);
         } else {
           const addHonbanbiResult = await addHonbanbi(
             data.juchuHeadId,
@@ -2880,7 +2851,6 @@ export const saveJuchuKizai = async (
             userNam,
             connection
           );
-          console.log('受注機材本番日追加', addHonbanbiResult);
         }
       }
     }
@@ -2917,19 +2887,15 @@ export const saveJuchuKizai = async (
       if (checkJuchuKizaiMeisai) {
         // 削除
         if (deleteJuchuKizaiMeisaiData.length > 0) {
-          console.log('deleteJuchuKizaiMeisaiData', deleteJuchuKizaiMeisaiData);
           const deleteMeisaiResult = await delJuchuKizaiMeisai(deleteJuchuKizaiMeisaiData, connection);
-          console.log('受注機材明細削除', deleteMeisaiResult);
         }
         // 追加
         if (addJuchuKizaiMeisaiData.length > 0) {
           const addMeisaiResult = await addJuchuKizaiMeisai(addJuchuKizaiMeisaiData, userNam, connection);
-          console.log('受注機材明細追加', addMeisaiResult);
         }
         // 更新
         if (updateJuchuKizaiMeisaiData.length > 0) {
           const updateMeisaiResult = await updJuchuKizaiMeisai(updateJuchuKizaiMeisaiData, userNam, connection);
-          console.log('受注機材明細更新', updateMeisaiResult);
         }
       }
 
@@ -2970,12 +2936,10 @@ export const saveJuchuKizai = async (
             deleteKizaiiIds,
             connection
           );
-          console.log('受注コンテナ明細削除', deleteCtnMeisaiResult);
         }
         // 追加
         if (addJuchuContainerMeisaiData.length > 0) {
           const addCtnMeisaiResult = await addJuchuContainerMeisai(addJuchuContainerMeisaiData, userNam, connection);
-          console.log('受注コンテナ明細追加', addCtnMeisaiResult);
         }
         // 更新
         if (updateJuchuContainerMeisaiData.length > 0) {
@@ -2984,22 +2948,18 @@ export const saveJuchuKizai = async (
             userNam,
             connection
           );
-          console.log('受注コンテナ明細更新', updateContainerMeisaiResult);
         }
       }
 
       // 機材入出庫伝票、入出庫実績削除
       if (deleteJuchuKizaiMeisaiData.length > 0) {
         const deleteNyushukoDenResult = await delNyushukoDen(deleteJuchuKizaiMeisaiData, connection);
-        console.log('削除機材入出庫伝票削除', deleteNyushukoDenResult);
 
         const deleteNyushukoResultResult = await delNyushukoResult(deleteJuchuKizaiMeisaiData, connection);
-        console.log('削除機材入出庫実績削除', deleteNyushukoResultResult);
       }
       // コンテナ入出庫伝票、入出庫実績削除
       if (deleteJuchuContainerMeisaiData.length > 0) {
         const deleteCtnNyushukoDenResult = await delCtnNyushukoDen(deleteJuchuContainerMeisaiData, connection);
-        console.log('コンテナ入出庫伝票削除', deleteCtnNyushukoDenResult);
 
         const deleteIds = deleteJuchuContainerMeisaiData.map((d) => d.kizaiId);
         if (deleteIds.length > 0) {
@@ -3009,7 +2969,6 @@ export const saveJuchuKizai = async (
             deleteIds,
             connection
           );
-          console.log('削除コンテナ入出庫実績削除', deleteKicsContainerNyushukoResultResult);
         }
       }
 
@@ -3020,7 +2979,6 @@ export const saveJuchuKizai = async (
           1,
           connection
         );
-        console.log('KICS出庫伝票全削除', deleteAllKicsShukoDenResult);
 
         const deleteAllKicsShukoResultResult = await delAllShukoResult(
           data.juchuHeadId,
@@ -3028,7 +2986,6 @@ export const saveJuchuKizai = async (
           1,
           connection
         );
-        console.log('KICS出庫実績全削除', deleteAllKicsShukoResultResult);
 
         if (data.kicsShukoDat && data.yardShukoDat && !checkYardShukoDat) {
           const kicsShukoData = newJuchuKizaiMeisaiData.filter((d) => !d.delFlag && d.shozokuId === 1);
@@ -3046,7 +3003,6 @@ export const saveJuchuKizai = async (
           2,
           connection
         );
-        console.log('YARD出庫伝票全削除', deleteAllYardShukoDenResult);
 
         const deleteAllYardShukoResultResult = await delAllShukoResult(
           data.juchuHeadId,
@@ -3054,7 +3010,6 @@ export const saveJuchuKizai = async (
           2,
           connection
         );
-        console.log('YARD出庫実績全削除', deleteAllYardShukoResultResult);
 
         if (data.kicsShukoDat && data.yardShukoDat && !checkKicsShukoDat) {
           const yardShukoData = newJuchuKizaiMeisaiData.filter((d) => !d.delFlag && d.shozokuId === 2);
@@ -3073,7 +3028,6 @@ export const saveJuchuKizai = async (
           1,
           connection
         );
-        console.log('KICS入庫伝票全削除', deleteAllKicsNyukoDenResult);
 
         const deleteAllKicsNyukoResultResult = await delAllNyukoResult(
           data.juchuHeadId,
@@ -3081,7 +3035,6 @@ export const saveJuchuKizai = async (
           1,
           connection
         );
-        console.log('KICS入庫実績全削除', deleteAllKicsNyukoResultResult);
 
         if (data.kicsNyukoDat && data.yardNyukoDat && !checkYardNyukoDat) {
           const kicsNyukoData = newJuchuKizaiMeisaiData.filter((d) => !d.delFlag && d.mShozokuId === 1);
@@ -3100,7 +3053,6 @@ export const saveJuchuKizai = async (
           2,
           connection
         );
-        console.log('YARD入庫伝票全削除', deleteAllYardNyukoDenResult);
 
         const deleteAllYardNyukoResultResult = await delAllNyukoResult(
           data.juchuHeadId,
@@ -3108,7 +3060,6 @@ export const saveJuchuKizai = async (
           2,
           connection
         );
-        console.log('YARD入庫実績全削除', deleteAllYardNyukoResultResult);
 
         if (data.kicsNyukoDat && data.yardNyukoDat && !checkKicsNyukoDat) {
           const yardNyukoData = newJuchuKizaiMeisaiData.filter((d) => !d.delFlag && d.mShozokuId === 2);
@@ -3125,7 +3076,6 @@ export const saveJuchuKizai = async (
         const deleteJuchuCtnMeisai = newJuchuContainerMeisaiData.filter((d) => !d.delFlag);
         if (deleteJuchuCtnMeisai.length > 0) {
           const deleteCtnNyukoDenResult = await delKicsOrYardCtnNyukoDen(deleteJuchuCtnMeisai, 1, connection);
-          console.log('KICSコンテナ入庫伝票削除', deleteCtnNyukoDenResult);
         }
       }
 
@@ -3133,7 +3083,6 @@ export const saveJuchuKizai = async (
         const deleteJuchuCtnMeisai = newJuchuContainerMeisaiData.filter((d) => !d.delFlag);
         if (deleteJuchuCtnMeisai.length > 0) {
           const deleteCtnNyukoDenResult = await delKicsOrYardCtnNyukoDen(deleteJuchuCtnMeisai, 2, connection);
-          console.log('YARDコンテナ入庫伝票削除', deleteCtnNyukoDenResult);
         }
       }
 
@@ -3143,7 +3092,6 @@ export const saveJuchuKizai = async (
 
         if (kicsShukoData.length > 0) {
           const upsertKicsShukoDenResult = await upsShukoDen(kicsShukoData, data.kicsShukoDat, 1, userNam, connection);
-          console.log('KICS出庫伝票追加更新', upsertKicsShukoDenResult);
         }
 
         const KicsCtnShukoData = newJuchuContainerMeisaiData.filter((d) => !d.delFlag);
@@ -3155,7 +3103,6 @@ export const saveJuchuKizai = async (
             userNam,
             connection
           );
-          console.log('KICSコンテナ出庫伝票追加更新', upsertKicsCtnShukoDenResult);
         }
       }
 
@@ -3171,7 +3118,6 @@ export const saveJuchuKizai = async (
             userNam,
             connection
           );
-          console.log('YARD出庫伝票追加更新', upsertShukoDenResult);
         }
 
         const upsertYardJuchuCtnMeisaiData = newJuchuContainerMeisaiData.filter((d) => !d.delFlag);
@@ -3183,7 +3129,6 @@ export const saveJuchuKizai = async (
             userNam,
             connection
           );
-          console.log('YARDコンテナ出庫伝票追加更新', upsertCtnShukoDenResult);
         }
       }
 
@@ -3196,12 +3141,10 @@ export const saveJuchuKizai = async (
 
         if (kicsNyukoData.length > 0) {
           const upsertKicsNyukoDenResult = await upsNyukoDen(kicsNyukoData, data.kicsNyukoDat, 1, userNam, connection);
-          console.log('KICS入庫伝票追加更新', upsertKicsNyukoDenResult);
         }
 
         if (yardNyukoData.length > 0) {
           const upsertYardNyukoDenResult = await upsNyukoDen(yardNyukoData, data.yardNyukoDat, 2, userNam, connection);
-          console.log('YARD入庫伝票追加更新', upsertYardNyukoDenResult);
         }
 
         // コンテナ入庫明細
@@ -3216,7 +3159,6 @@ export const saveJuchuKizai = async (
               userNam,
               connection
             );
-            console.log('KICSコンテナ入庫伝票追加更新', upsertKicsCtnNyukoDenResult);
 
             const upsertYardCtnNyukoDenResult = await upsCtnNyukoDen(
               ctnNyukoData,
@@ -3226,7 +3168,6 @@ export const saveJuchuKizai = async (
               userNam,
               connection
             );
-            console.log('YARDコンテナ入庫伝票追加更新', upsertYardCtnNyukoDenResult);
           } else if (data.kicsShukoDat && !data.yardShukoDat) {
             const upsertKicsCtnNyukoDenResult = await upsCtnNyukoDen(
               ctnNyukoData,
@@ -3236,7 +3177,6 @@ export const saveJuchuKizai = async (
               userNam,
               connection
             );
-            console.log('KICSコンテナ入庫伝票追加更新', upsertKicsCtnNyukoDenResult);
           } else if (!data.kicsShukoDat && data.yardShukoDat) {
             const upsertYardCtnNyukoDenResult = await upsCtnNyukoDen(
               ctnNyukoData,
@@ -3246,7 +3186,6 @@ export const saveJuchuKizai = async (
               userNam,
               connection
             );
-            console.log('YARDコンテナ入庫伝票追加更新', upsertYardCtnNyukoDenResult);
           }
         }
       } else if (data.kicsNyukoDat && !data.yardNyukoDat) {
@@ -3255,7 +3194,6 @@ export const saveJuchuKizai = async (
 
         if (kicsNyukoData.length > 0) {
           const upsertKicsNyukoDenResult = await upsNyukoDen(kicsNyukoData, data.kicsNyukoDat, 1, userNam, connection);
-          console.log('KICS入庫伝票追加更新', upsertKicsNyukoDenResult);
         }
 
         // KICSコンテナ入庫明細
@@ -3270,7 +3208,6 @@ export const saveJuchuKizai = async (
               userNam,
               connection
             );
-            console.log('KICSコンテナ入庫伝票追加更新', upsertCtnNyukoDenResult);
           } else if (data.kicsShukoDat && !data.yardShukoDat) {
             const upsertCtnNyukoDenResult = await upsCtnNyukoDen(
               ctnNyukoData,
@@ -3280,7 +3217,6 @@ export const saveJuchuKizai = async (
               userNam,
               connection
             );
-            console.log('KICSコンテナ入庫伝票追加更新', upsertCtnNyukoDenResult);
           } else if (!data.kicsShukoDat && data.yardShukoDat) {
             const upsertCtnNyukoDenResult = await upsCtnNyukoDen(
               ctnNyukoData,
@@ -3290,7 +3226,6 @@ export const saveJuchuKizai = async (
               userNam,
               connection
             );
-            console.log('KICSコンテナ入庫伝票追加更新', upsertCtnNyukoDenResult);
           }
         }
       } else if (!data.kicsNyukoDat && data.yardNyukoDat) {
@@ -3299,7 +3234,6 @@ export const saveJuchuKizai = async (
 
         if (yardNyukoData.length > 0) {
           const upsertNyukoDenResult = await upsNyukoDen(yardNyukoData, data.yardNyukoDat, 2, userNam, connection);
-          console.log('YARD入庫伝票追加更新', upsertNyukoDenResult);
         }
 
         // YARDコンテナ入庫明細
@@ -3314,7 +3248,6 @@ export const saveJuchuKizai = async (
               userNam,
               connection
             );
-            console.log('YARDコンテナ入庫伝票追加更新', upsertCtnNyukoDenResult);
           } else if (data.kicsShukoDat && !data.yardShukoDat) {
             const upsertCtnNyukoDenResult = await upsCtnNyukoDen(
               ctnNyukoData,
@@ -3324,7 +3257,6 @@ export const saveJuchuKizai = async (
               userNam,
               connection
             );
-            console.log('YARDコンテナ入庫伝票追加更新', upsertCtnNyukoDenResult);
           } else if (!data.kicsShukoDat && data.yardShukoDat) {
             const upsertCtnNyukoDenResult = await upsCtnNyukoDen(
               ctnNyukoData,
@@ -3334,7 +3266,6 @@ export const saveJuchuKizai = async (
               userNam,
               connection
             );
-            console.log('YARDコンテナ入庫伝票追加更新', upsertCtnNyukoDenResult);
           }
         }
       }
@@ -3355,19 +3286,16 @@ export const saveJuchuKizai = async (
       if (deleteIdoKizaiData.length > 0) {
         const deleteIdoDenIds = deleteIdoKizaiData.map((data) => data.idoDenId);
         const deleteIdoDenResult = await delIdoDenJuchu(deleteIdoDenIds as number[], connection);
-        console.log('移動伝票受注削除', deleteIdoDenResult);
       }
       // 追加
       if (addIdoKizaiData.length > 0) {
         const idoDenMaxId = await getIdoDenJuchuMaxId();
         const newIdoDenId = idoDenMaxId ? idoDenMaxId + 1 : 1;
         const addIdoDenResult = await addIdoDenJuchu(newIdoDenId, addIdoKizaiData, userNam, connection);
-        console.log('移動伝票受注追加', addIdoDenResult);
       }
       // 更新
       if (updateIdoKizaiData.length > 0) {
         const updateIdoDenResult = await updIdoDenJuchu(updateIdoKizaiData, userNam, connection);
-        console.log('移動伝票受注更新', updateIdoDenResult);
       }
     }
 

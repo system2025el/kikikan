@@ -35,7 +35,6 @@ export const getFilteredShukeibumons = async (query: string = '') => {
       tblDspId: index + 1,
       delFlg: Boolean(d.del_flg),
     }));
-    console.log(filteredShukeibumons.length);
     return filteredShukeibumons;
   } catch (e) {
     console.error('例外が発生しました:', e);
@@ -78,12 +77,11 @@ export const getChosenShukeibumon = async (id: number) => {
 export const addNewShukeibumon = async (data: ShukeibumonsMasterDialogValues, user: string) => {
   try {
     await insertNewShukeibumon(data, user);
-    console.log('data : ', data);
     await revalidatePath('/bumons-master');
     await revalidatePath('/shukeibumons-master');
     await revalidatePath('/eqpt-master');
   } catch (error) {
-    console.log('DB接続エラー', error);
+    console.error('DB接続エラー', error);
     throw error;
   }
 };
@@ -103,14 +101,13 @@ export const updateShukeibumon = async (rawData: ShukeibumonsMasterDialogValues,
     upd_dat: date,
     upd_user: user,
   };
-  console.log(updateData.shukei_bumon_nam);
   try {
     await upDateShukeibumonDB(updateData);
     await revalidatePath('/bumons-master');
     await revalidatePath('/shukeibumons-master');
     await revalidatePath('/eqpt-master');
   } catch (error) {
-    console.log('例外が発生', error);
+    console.error('例外が発生', error);
     throw error;
   }
 };

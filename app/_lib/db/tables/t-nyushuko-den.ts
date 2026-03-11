@@ -12,7 +12,6 @@ import { NyushukoDen } from '../types/t-nyushuko-den-type';
  */
 export const insertNyushukoDen = async (data: NyushukoDen[], connection: PoolClient) => {
   if (!data || data.length === 0) {
-    console.log('入出庫伝票データがありません。');
     return;
   }
 

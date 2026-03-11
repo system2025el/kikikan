@@ -50,11 +50,8 @@ export const ImportMaster = () => {
     // ファイル読み込み
     const reader = new FileReader();
     reader.onload = (e) => {
-      console.log('ファイル読み込み成功');
-
       const arrayBuffer = e.target?.result;
       if (!arrayBuffer || typeof arrayBuffer === 'string') {
-        console.log('ファイルの読み込みに失敗しました');
         setSnackBarMessage('ファイルの読み込みに失敗しました。');
         setSnackBarOpen(true);
         return;
@@ -70,7 +67,6 @@ export const ImportMaster = () => {
       }
       const jsonData: EqptImportRowType[] = utils.sheet_to_json(worksheet, { header: 1 });
       const dataRows = jsonData.slice(1);
-      console.log('Excel内容 (生データ):', dataRows);
 
       if (type === 'eqpt') {
         const parsedEqptData: EqptImportType[] = [];
@@ -143,7 +139,6 @@ export const ImportMaster = () => {
 
   /* 機材インポートの登録ボタン押下時 */
   const handleImportEqpt = async () => {
-    console.log('おされたあああああ');
     setPush(true);
     if (eqptData.length !== 0) {
       try {

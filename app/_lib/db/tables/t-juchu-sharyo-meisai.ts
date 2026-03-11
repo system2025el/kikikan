@@ -28,7 +28,6 @@ export const insertJuchuSharyoMeisai = async (data: JuchuSharyoMeisaiDBValues[],
     RETURNING *;
 `;
   try {
-    console.log(query);
     return await connection.query(query, values);
   } catch (e) {
     throw e;
@@ -63,7 +62,6 @@ export const deleteJuchuSharyoMeisais = async (
       (${placeholders})
   `;
 
-  console.log(query);
   try {
     await connection.query(query, values);
   } catch (e) {

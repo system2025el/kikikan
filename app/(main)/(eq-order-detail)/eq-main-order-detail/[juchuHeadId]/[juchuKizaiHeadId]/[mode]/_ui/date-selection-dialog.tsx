@@ -307,7 +307,6 @@ export const DateSelectDialog = ({
 
   /** ダイアログ上部へ */
   const scrollToTop = () => {
-    console.log('ref==============================', scrollRef);
     if (scrollRef.current) {
       scrollRef.current.scrollTop = 0;
     }

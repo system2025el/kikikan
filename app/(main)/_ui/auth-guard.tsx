@@ -59,7 +59,6 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
 
     const checkAuth = async () => {
       if (!user) {
-        console.log('ユーザー情報なし');
         router.replace('/login');
         return;
       }
@@ -69,9 +68,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
       const {
         data: { user: sessionUser },
       } = await supabase.auth.getUser();
-      console.log('セッション情報 : ', sessionUser);
       if (!sessionUser) {
-        console.log('セッション情報なし');
         router.replace('/login');
       }
     };

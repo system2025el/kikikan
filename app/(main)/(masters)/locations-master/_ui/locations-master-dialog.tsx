@@ -74,9 +74,6 @@ export const LocationsMasterDialog = ({
   /* フォームを送信 */
   const onSubmit = async (data: LocsMasterDialogValues) => {
     setIsLoading(true);
-    console.log('isDarty : ', isDirty);
-    console.log('action is : ', action);
-    console.log(data);
 
     if (locationId === FAKE_NEW_ID) {
       // 新規の時
@@ -138,7 +135,6 @@ export const LocationsMasterDialog = ({
 
   /* ×ぼたんを押したとき */
   const handleClickClose = () => {
-    console.log('isDirty : ', isDirty);
     if (isDirty) {
       setDirtyOpen(true);
     } else {
@@ -166,7 +162,6 @@ export const LocationsMasterDialog = ({
 
   /* useEffect --------------------------------------- */
   useEffect(() => {
-    console.log('★★★★★★★★★★★★★★★★★★★★★');
     const getThatOneloc = async () => {
       if (locationId === FAKE_NEW_ID) {
         // 新規追加モード

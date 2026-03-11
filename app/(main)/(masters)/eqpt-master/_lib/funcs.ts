@@ -68,7 +68,6 @@ export const getFilteredEqpts = async (
       rfidKicsQty: d.rfid_kics_qty ?? 0,
       rfidYardQty: d.rfid_yard_qty ?? 0,
     }));
-    console.log('機材マスタリストを取得した');
     return { data: filteredEqpts, options: options };
   } catch (e) {
     console.error('例外が発生しました:', e);
@@ -134,7 +133,6 @@ export const getChosenEqpt = async (id: number) => {
  * @param data フォームで取得した機材情報
  */
 export const addNewEqpt = async (data: EqptsMasterDialogValues, user: string) => {
-  console.log('機材マスタを追加する');
   const connection = await pool.connect();
   try {
     await connection.query('BEGIN');
@@ -146,7 +144,7 @@ export const addNewEqpt = async (data: EqptsMasterDialogValues, user: string) =>
   } catch (error) {
     await connection.query('ROLLBACK');
 
-    console.log('DB接続エラー', error);
+    console.error('DB接続エラー', error);
     throw error;
   } finally {
     connection.release();
@@ -191,7 +189,6 @@ export const updateEqpt = async (
     upd_dat: date,
     upd_user: user,
   };
-  console.log(updateData.kizai_nam);
   const connection = await pool.connect();
   try {
     await connection.query('BEGIN');
@@ -202,7 +199,7 @@ export const updateEqpt = async (
     await connection.query('COMMIT');
   } catch (error) {
     await connection.query('ROLLBACK');
-    console.log('例外が発生しました', error);
+    console.error('例外が発生しました', error);
     throw error;
   } finally {
     await connection.release();

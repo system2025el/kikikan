@@ -73,7 +73,6 @@ export const UsersMaster = () => {
   /** 検索ボタン押下 */
   const onSubmit = async (data: { query: string | undefined }) => {
     setIsLoading(true);
-    console.log('data : ', data);
     try {
       const newList = await getFilteredUsers(data.query!);
       setPage(1);
@@ -82,7 +81,6 @@ export const UsersMaster = () => {
       setError(e instanceof Error ? e : new Error(String(e)));
     }
     setIsLoading(false);
-    console.log('theLocs : ', users);
   };
 
   /** 詳細ダイアログを開く関数 */

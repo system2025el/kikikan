@@ -178,7 +178,6 @@ export const delshukoResult = async (
         connection
       );
     }
-    console.log('delete nyushuko result', deleteData);
 
     const updateNyushukoDenData: NyushukoDen = {
       juchu_head_id: shukoEqptDetailData.juchuHeadId,
@@ -194,7 +193,6 @@ export const delshukoResult = async (
     };
 
     await updateNyushukoDen(updateNyushukoDenData, connection);
-    console.log('update nyushuko den result_qty', shukoEqptDetailData.resultQty - deleteData.length);
 
     await await connection.query('COMMIT');
     revalidatePath(

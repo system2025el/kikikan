@@ -33,7 +33,6 @@ export const getDaibumonsSelection = async () => {
       id: d.dai_bumon_id,
       label: d.dai_bumon_nam,
     }));
-    console.log('大部門が', selectElements.length, '件');
     return selectElements;
   } catch (e) {
     console.error('例外が発生しました:', e);
@@ -60,7 +59,6 @@ export const getShukeibumonsSelection = async () => {
       id: d.shukei_bumon_id,
       label: d.shukei_bumon_nam,
     }));
-    console.log('集計部門が', selectElements.length, '件');
     return selectElements;
   } catch (e) {
     console.error('例外が発生しました:', e);
@@ -87,7 +85,6 @@ export const getBumonsSelection = async () => {
       id: d.bumon_id!,
       label: d.bumon_nam!,
     }));
-    console.log('部門が', selectElements.length, '件');
     return selectElements;
   } catch (e) {
     console.error('例外が発生しました:', e);
@@ -115,7 +112,6 @@ export const getShozokuSelection = async () => {
         id: d.shozoku_id,
         label: d.shozoku_nam,
       }));
-    console.log('所属', selectElements.length, '件');
     return selectElements;
   } catch (e) {
     console.error('例外が発生しました:', e);
@@ -210,7 +206,6 @@ export const getCustomerSelection = async (): Promise<SelectTypes[]> => {
       id: d.kokyaku_id,
       label: d.kokyaku_nam,
     }));
-    console.log('顧客が', selectElements.length, '件');
     return selectElements;
   } catch (e) {
     console.error('例外が発生', e);
@@ -236,7 +231,6 @@ export const getRfidKizaiStsSelection = async () => {
       id: d.sts_id,
       label: d.sts_nam,
     }));
-    console.log('Rfid作業ステータスが', selectElements.length, '件');
     return selectElements;
   } catch (e) {
     console.error('例外が発生', e);

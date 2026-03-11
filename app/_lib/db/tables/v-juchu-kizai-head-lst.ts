@@ -210,12 +210,12 @@ export const selectFilteredKizaiHead = async ({
         } else if (selectedDate.range?.from) {
           // fromだけの場合
           const startOfDay = dayjs(selectedDate.range.from).tz('Asia/Tokyo').startOf('day').toISOString();
-          console.log('start of the day: ', startOfDay);
+
           builder.or(`yard_${dateColumn}.gte.${startOfDay},kics_${dateColumn}.gte.${startOfDay}`);
         } else if (selectedDate.range?.to) {
           // toだけの場合
           const nextDay = dayjs(selectedDate.range.to).tz('Asia/Tokyo').add(1, 'day').startOf('day').toISOString();
-          console.log('start of the next day: ', nextDay);
+
           builder.or(`yard_${dateColumn}.lt.${nextDay},kics_${dateColumn}.lt.${nextDay}`);
         }
         break;

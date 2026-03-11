@@ -35,7 +35,6 @@ export const getFilteredDaibumons = async (query: string = '') => {
       tblDspId: index + 1,
       delFlg: Boolean(d.del_flg),
     }));
-    console.log('大部門マスタ', filteredDaibumons.length, '件');
     return filteredDaibumons;
   } catch (e) {
     console.error('例外が発生しました:', e);
@@ -78,12 +77,11 @@ export const getChosenDaibumon = async (id: number) => {
 export const addNewDaibumon = async (data: DaibumonsMasterDialogValues, user: string) => {
   try {
     await insertNewDaibumon(data, user);
-    console.log('data : ', data);
     await revalidatePath('/bumons-master');
     await revalidatePath('/daibumons-master');
     await revalidatePath('/eqpt-master');
   } catch (error) {
-    console.log('DB接続エラー', error);
+    console.error('DB接続エラー', error);
     throw error;
   }
 };
@@ -103,14 +101,13 @@ export const updateDaibumon = async (rawData: DaibumonsMasterDialogValues, id: n
     upd_dat: date,
     upd_user: user,
   };
-  console.log(updateData.dai_bumon_nam);
   try {
     await updateDaibumonDB(updateData);
     await revalidatePath('/bumons-master');
     await revalidatePath('/daibumons-master');
     await revalidatePath('/eqpt-master');
   } catch (error) {
-    console.log('例外が発生', error);
+    console.error('例外が発生', error);
     throw error;
   }
 };

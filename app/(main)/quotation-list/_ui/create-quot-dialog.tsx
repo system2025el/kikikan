@@ -29,7 +29,6 @@ export const CreateQuotDialog = ({
   /* methods ------------------------------------- */
   /** 自動生成ボタン押下 */
   const onSubmit = (data: { juchuHeadId: number | null }) => {
-    console.log(data.juchuHeadId, 'の見積もりを自動生成');
     window.open(`/quotation-list/create?juchuId=${data.juchuHeadId}`);
     reset();
     setDialogOpen(false);

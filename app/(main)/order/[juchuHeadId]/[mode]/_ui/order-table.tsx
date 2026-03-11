@@ -64,7 +64,6 @@ export const OrderEqTable: React.FC<OrderEqTableProps> = ({
   };
 
   // const moveRow = (index: number, direction: number) => {
-  //   console.log(index);
   //   const newIndex = index + direction;
   //   if (newIndex < 0 || newIndex >= rows.length) return;
 
@@ -176,7 +175,6 @@ export const OrderVehicleTable: React.FC<OrderVehicleTableProps> = ({ selected, 
   };
 
   // const moveRow = (index: number, direction: number) => {
-  //   console.log(index);
   //   const newIndex = index + direction;
   //   if (newIndex < 0 || newIndex >= rows.length) return;
 

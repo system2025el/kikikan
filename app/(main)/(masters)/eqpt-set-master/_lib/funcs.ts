@@ -41,7 +41,6 @@ export const getFilteredEqptSets = async (query: string = '') => {
       tblDspId: index + 1,
       delFlg: Boolean(d.del_flg),
     }));
-    console.log('機材セットマスタ', filteredEqptSets.length, '件');
     return filteredEqptSets;
   } catch (e) {
     console.error('例外が発生しました:', e);
@@ -95,7 +94,7 @@ export const addNewEqptSet = async (data: EqptSetsMasterDialogValues, user: stri
       await revalidatePath('/eqpt-set-master');
     }
   } catch (error) {
-    console.log('DB接続エラー', error);
+    console.error('DB接続エラー', error);
     throw error;
   } finally {
     connection.release();
@@ -108,13 +107,11 @@ export const addNewEqptSet = async (data: EqptSetsMasterDialogValues, user: stri
  * @param id 更新する機材セットマスタID
  */
 export const updateEqptSet = async (newData: EqptSetsMasterDialogValues, currentSetIds: number[], user: string) => {
-  console.log('新しい', newData, '元の', currentSetIds);
   const now = new Date().toISOString();
   // 削除対象のセット機材IDリストを生成
   const delList = currentSetIds
     .filter((c) => !newData.setEqptList.map((n) => n.id).includes(c))
     .map((d) => ({ kizai_id: newData.eqptId, set_kizai_id: d }));
-  console.log(delList);
 
   // 更新対象
   const updList = newData.setEqptList
@@ -165,7 +162,7 @@ export const updateEqptSet = async (newData: EqptSetsMasterDialogValues, current
       // await revalidatePath('/eqpt-set-master');
       await connection.query('COMMIT');
   } catch (error) {
-    console.log('例外が発生', error);
+    console.error('例外が発生', error);
     await connection.query('ROLLBACK');
     throw error;
   } finally {
@@ -184,10 +181,7 @@ export const getEqptsForOyaEqptSelection = async (): Promise<SelectTypes[]> => {
     if (!rows || rows.length === 0) {
       return [];
     }
-    console.log(
-      '=========================================',
-      rows.filter((d) => d.ctn_flg === 1)
-    );
+
     return rows
       .map((d) => ({
         id: d.kizai_id,

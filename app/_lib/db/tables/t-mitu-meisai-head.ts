@@ -10,7 +10,6 @@ import { MituMeisaiHead } from '../types/t-mitu-meisai-head-type';
  * @param connection
  */
 export const insertQuotMeisaiHead = async (data: MituMeisaiHead[], connection: PoolClient) => {
-  console.log('見積明細ヘッド新規：', data);
   if (!data || Object.keys(data).length === 0) {
     throw new Error('見積明細ヘッダーが空です。');
   }
@@ -106,9 +105,7 @@ export const deleteQuotMeisaiHeads = async (
   const values = ids.flatMap((d) => [d.mitu_head_id, d.mitu_meisai_head_id]);
 
   const query = `DELETE FROM ${SCHEMA}.t_mitu_meisai_head WHERE (mitu_head_id, mitu_meisai_head_id) IN (${placeholders})`;
-  console.log('☆☆☆☆☆', query, values);
   try {
-    console.log('消したいやつ', ids);
     await connection.query(query, values);
   } catch (e) {
     throw e;

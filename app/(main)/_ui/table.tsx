@@ -60,7 +60,6 @@ export const SelectTable: React.FC<TableProps> = ({ headers, datas, onSelectionC
   };
 
   const moveRow = (index: number, direction: number) => {
-    console.log(index);
     const newIndex = index + direction;
     if (newIndex < 0 || newIndex >= rows.length) return;
 

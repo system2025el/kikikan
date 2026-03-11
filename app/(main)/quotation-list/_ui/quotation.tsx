@@ -155,7 +155,6 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
   /* methods ------------------------------------------------------ */
   /** 保存ボタン押下 */
   const onSubmit = async (data: QuotHeadValues) => {
-    console.log('新規？', isNew, 'isDirty', isDirty);
     setIsLoading(true);
     try {
       if (isNew) {
@@ -165,7 +164,6 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
         router.replace(`/quotation-list/edit/${id}`);
       } else {
         const result = await updateQuot(data, user?.name ?? '');
-        console.log('更新したのは', result, '番の見積');
       }
       setSnackBarMessage('保存しました');
       setSnackBarOpen(true);
@@ -327,11 +325,11 @@ export const Quotation = ({ order, isNew, quot }: { order: JuchuValues; isNew: b
   }, [isDirty, setIsDirty]);
 
   // デバッグ用
-  useEffect(() => {
-    if (Object.keys(errors).length > 0) {
-      console.log('入力エラー', Object.entries(errors));
-    }
-  }, [errors]);
+  // useEffect(() => {
+  //   if (Object.keys(errors).length > 0) {
+  //     console.log('入力エラー', Object.entries(errors));
+  //   }
+  // }, [errors]);
 
   /* print pdf ------------------------------------------------------------ */
 

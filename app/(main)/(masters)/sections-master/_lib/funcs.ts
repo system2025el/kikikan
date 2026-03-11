@@ -80,7 +80,6 @@ export const getFilteredSections = async (query: string = '') => {
       tblDspId: index + 1,
       delFlg: Boolean(d.del_flg),
     }));
-    console.log(filteredSections.length);
     return filteredSections;
   } catch (e) {
     console.error('例外が発生しました:', e);
@@ -125,7 +124,7 @@ export const addNewSection = async (data: SectionsMasterDialogValues, user: stri
     await insertNewSection(data, user);
     await revalidatePath('/sections-master');
   } catch (error) {
-    console.log('DB接続エラー', error);
+    console.error('DB接続エラー', error);
     throw error;
   }
 };
@@ -151,7 +150,7 @@ export const updateSection = async (rawData: SectionsMasterDialogValues, id: num
     await upDateSectionDB(updateDate);
     await revalidatePath('/sections-master');
   } catch (error) {
-    console.log('例外が発生しました', error);
+    console.error('例外が発生しました', error);
     throw error;
   }
 };

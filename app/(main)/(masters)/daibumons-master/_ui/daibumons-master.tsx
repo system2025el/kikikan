@@ -64,7 +64,6 @@ export const DaibumonsMaster = () => {
   /** 検索ボタン押下 */
   const onSubmit = async (data: { query?: string | undefined }) => {
     setIsLoading(true);
-    console.log('data : ', data);
     try {
       const newList = await getFilteredDaibumons(data.query!);
       setPage(1);
@@ -73,7 +72,6 @@ export const DaibumonsMaster = () => {
       setError(e instanceof Error ? e : new Error(String(e)));
     }
     setIsLoading(false);
-    console.log('theLocs : ', daibumons, '検索終了検索終了');
   };
 
   /* 詳細ダイアログを開く関数 */

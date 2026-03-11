@@ -83,8 +83,6 @@ export const delIsshikiSet = async (idList: { issiki_id: number; kizai_id: numbe
       (${placeholders})
     `;
 
-  console.log('delete query', query);
-
   try {
     await connection.query(query, values);
   } catch (e) {

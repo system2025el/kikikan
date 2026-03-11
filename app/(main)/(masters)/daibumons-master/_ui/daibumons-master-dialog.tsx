@@ -73,8 +73,6 @@ export const DaibumonsMasterDialog = ({
   /* フォームを送信 */
   const onSubmit = async (data: DaibumonsMasterDialogValues) => {
     setIsLoading(true);
-    console.log('isDarty : ', isDirty);
-    console.log(data);
     if (daibumonId === FAKE_NEW_ID) {
       try {
         await addNewDaibumon(data, user?.name ?? '');
@@ -131,7 +129,6 @@ export const DaibumonsMasterDialog = ({
 
   /* ×ぼたんを押したとき */
   const handleClickClose = () => {
-    console.log('isDirty : ', isDirty);
     if (isDirty) {
       setDirtyOpen(true);
     } else {
@@ -159,7 +156,6 @@ export const DaibumonsMasterDialog = ({
 
   /* useEffect --------------------------------------- */
   useEffect(() => {
-    console.log('★★★★★★★★★★★★★★★★★★★★★');
     const getThatOneDaibumon = async () => {
       if (daibumonId === FAKE_NEW_ID) {
         // 新規追加モード

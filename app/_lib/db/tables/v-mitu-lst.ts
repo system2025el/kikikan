@@ -16,7 +16,6 @@ export const selectFilteredQuot = async ({
   mituDat,
   nyuryokuUser,
 }: QuotSearchValues) => {
-  console.log('チェック☆☆☆☆☆☆☆☆☆☆', nyuryokuUser, '  ', kokyaku, '  ', mituHeadNam);
   /* 検索ビルダー */
   const builder = supabase
     .schema(SCHEMA)

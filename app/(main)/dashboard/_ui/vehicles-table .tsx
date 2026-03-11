@@ -22,7 +22,6 @@ import { DashboardTableValues } from '../_lib/types';
  * 車両未設定テーブル
  */
 export const VehiclesTable = ({ orders }: { orders: DashboardTableValues[] }) => {
-  console.log('orders(車両)', orders);
   // データがない場合の表示
   if (!orders || orders.length === 0) {
     return (

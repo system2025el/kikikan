@@ -132,8 +132,6 @@ export const upDateUserDB = async (data: MUserDBValues, connection: PoolClient) 
     RETURNING *;
   `;
 
-  console.log(query);
-
   const values = [data.mail_adr, ...Object.values(rest)];
   try {
     await connection.query(query, values);

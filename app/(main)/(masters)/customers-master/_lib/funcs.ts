@@ -41,7 +41,6 @@ export const getFilteredCustomers = async (query: string | undefined = '') => {
       tblDspId: index + 1,
       delFlg: Boolean(d.del_flg),
     }));
-    console.log(filteredCustomers.length);
     return filteredCustomers;
   } catch (e) {
     console.error('例外が発生しました:', e);
@@ -85,7 +84,6 @@ export const getChosenCustomer = async (id: number) => {
       // siteDay: data.site_day,
       // kizaiNebikiFlg: Boolean(data.kizai_nebiki_flg),
     };
-    console.log(CustomerDetails.delFlg);
     return CustomerDetails;
   } catch (e) {
     console.error('例外が発生しました:', e);
@@ -149,7 +147,6 @@ export const getChosenCustomerIdAndName = async (id: number) => {
       // siteDay: data.site_day,
       // kizaiNebikiFlg: Boolean(data.kizai_nebiki_flg),
     };
-    console.log(CustomerDetails.delFlg);
     return CustomerDetails;
   } catch (e) {
     console.error('例外が発生しました:', e);
@@ -162,12 +159,11 @@ export const getChosenCustomerIdAndName = async (id: number) => {
  * @param data フォームで取得した顧客情報
  */
 export const addNewCustomer = async (data: CustomersMasterDialogValues, user: string) => {
-  console.log(data.kokyakuNam);
   try {
     await insertNewCustomer(data, user);
     await revalidatePath('/customers-master');
   } catch (error) {
-    console.log('DB接続エラー', error);
+    console.error('DB接続エラー', error);
     throw error;
   }
 };
@@ -202,12 +198,11 @@ export const updateCustomer = async (rawData: CustomersMasterDialogValues, id: n
     upd_dat: date,
     upd_user: user,
   };
-  console.log(updateData.kokyaku_nam);
   try {
     await upDateCustomerDB(updateData);
     await revalidatePath('/customer-master');
   } catch (error) {
-    console.log('例外が発生', error);
+    console.error('例外が発生', error);
     throw error;
   }
 };
@@ -228,7 +223,6 @@ export const getChosenCustomerName = async (id: number) => {
       return null;
     }
     const CustomerNam: string = data.kokyaku_nam;
-    console.log(CustomerNam);
     return CustomerNam;
   } catch (e) {
     console.error('例外が発生しました:', e);

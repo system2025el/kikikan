@@ -20,7 +20,6 @@ import { MinusZaikoValues } from '../_lib/types';
  */
 export const EqptTable = ({ eqpts }: { eqpts: MinusZaikoValues[] }) => {
   // データがない場合の表示
-  console.log('eqpts', eqpts);
   if (!eqpts || eqpts.length === 0) {
     return (
       <Typography variant="body2" color="textSecondary" sx={{ p: 2, textAlign: 'center' }}>

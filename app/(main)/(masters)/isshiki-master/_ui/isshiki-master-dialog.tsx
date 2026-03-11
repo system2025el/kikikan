@@ -146,7 +146,6 @@ export const IsshikisMasterDialog = ({
 
   /* ×ぼたんを押したとき */
   const handleClickClose = () => {
-    console.log('isDirty : ', isDirty);
     if (isDirty) {
       setDirtyOpen(true);
     } else {
@@ -173,7 +172,6 @@ export const IsshikisMasterDialog = ({
 
   /* useEffect --------------------------------------- */
   useEffect(() => {
-    console.log('★★★★★★★★★★★★★★★★★★★★★');
     const getThatOneIsshiki = async () => {
       if (isshikiId === FAKE_NEW_ID) {
         // 新規追加モード

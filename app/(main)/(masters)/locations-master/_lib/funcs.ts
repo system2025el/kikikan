@@ -58,7 +58,6 @@ export const getFilteredLocs = async (query: string = '') => {
       tblDspId: index + 1,
       delFlg: Boolean(d.del_flg),
     }));
-    console.log(filteredLocs.length);
     return filteredLocs;
   } catch (e) {
     console.error('例外が発生しました:', e);
@@ -95,7 +94,6 @@ export const getChosenLoc = async (id: number) => {
       telMobile: data.tel_mobile,
       delFlg: Boolean(data.del_flg),
     };
-    console.log(locDetails.delFlg);
     return locDetails;
   } catch (e) {
     console.error('例外が発生しました:', e);
@@ -108,12 +106,11 @@ export const getChosenLoc = async (id: number) => {
  * @param data フォームで取得した公演場所情報
  */
 export const addNewLoc = async (data: LocsMasterDialogValues, user: string) => {
-  console.log(data.locNam);
   try {
     await insertNewLoc(data, user);
     await revalidatePath('/locations-master');
   } catch (error) {
-    console.log('DB接続エラー', error);
+    console.error('DB接続エラー', error);
     throw error;
   }
 };
@@ -143,12 +140,11 @@ export const updateLoc = async (data: LocsMasterDialogValues, id: number, user: 
     upd_dat: date,
     upd_user: user,
   };
-  console.log(updateData.koenbasho_nam);
   try {
     await upDateLocDB(updateData);
     await revalidatePath('/locations-master');
   } catch (error) {
-    console.log('例外が発生', error);
+    console.error('例外が発生', error);
     throw error;
   }
 };

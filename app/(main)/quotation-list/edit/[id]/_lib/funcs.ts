@@ -75,7 +75,6 @@ export const updateQuot = async (data: QuotHeadValues, user: string): Promise<nu
     kizai_chukei_mei: data.kizaiChukeiMei,
   };
   // 明細ヘッド
-  console.log(`======================================${meisaiheadList}`);
   const meisaiHeads = meisaiheadList.map((l, index) => ({
     mitu_head_id: data.mituHeadId!,
     mitu_meisai_head_id: l.mituMeisaiHeadId,
@@ -112,7 +111,6 @@ export const updateQuot = async (data: QuotHeadValues, user: string): Promise<nu
   }));
 
   try {
-    console.log('更新START');
     // トランザクション開始
     await connection.query('BEGIN');
     if (quotHead) {
@@ -144,7 +142,6 @@ export const updateQuot = async (data: QuotHeadValues, user: string): Promise<nu
 
       // 見積ヘッダ新規挿入
       if (insertMHeadList.length > 0) {
-        console.log('-------------------', insertMHeadList, '----------------------');
         // 新規処理実行
         await insertQuotMeisaiHead(
           insertMHeadList.map(({ meisai, ...rest }) => rest),
@@ -217,13 +214,11 @@ export const updateQuot = async (data: QuotHeadValues, user: string): Promise<nu
       const existingMeisaiIds = await connection.query(
         `SELECT mitu_head_id, mitu_meisai_head_id, mitu_meisai_id FROM ${SCHEMA}.t_mitu_meisai WHERE mitu_head_id = ${data.mituHeadId}`
       );
-      console.log('今あるやつ', existingMeisaiIds.rows);
       const formedMeisai = updateMeisaiList.map((d) => ({
         mitu_head_id: d.mitu_head_id,
         mitu_meisai_head_id: d.mitu_meisai_head_id,
         mitu_meisai_id: d.mitu_meisai_id,
       }));
-      console.log('フォームから来たやつ', formedMeisai);
 
       const meisaiToDelete: {
         mitu_head_id: number;

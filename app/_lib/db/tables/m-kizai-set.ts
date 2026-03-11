@@ -26,8 +26,6 @@ export const selectBundledEqptIds = async (idList: number[]) => {
     k.dsp_ord_num
 `;
   try {
-    // return await supabase.schema(SCHEMA).from('m_kizai_set').select('kizai_id, set_kizai_id').in('kizai_id', idList);
-
     return await pool.query(query, [idList]);
   } catch (e) {
     throw e;
@@ -186,7 +184,6 @@ export const updateEqptSetDB = async (data: MKizaiSetDBValues[], connection: Poo
  * @param {number} kizaiId 削除対象の親機材ID
  */
 export const deleteEqptSets = async (kizaiId: number) => {
-  console.log('削除削除削除');
   try {
     await supabase.schema(SCHEMA).from('m_kizai_set').delete().eq('kizai_id', kizaiId).select('*');
   } catch (e) {
@@ -221,8 +218,6 @@ export const delEqptSetListPg = async (
       IN
       (${placeholders})
     `;
-
-  console.log('delete query', query);
 
   try {
     await connection.query(query, values);

@@ -70,7 +70,6 @@ export const BumonsMaster = () => {
   /** 検索ボタン押下 */
   const onSubmit = async (data: { query: string | undefined; daibumonQuery: number; shukeiQuery: number }) => {
     setIsLoading(true);
-    console.log('data : ', data);
     try {
       const newList = await getFilteredBumons({
         q: data.query!,
@@ -83,7 +82,6 @@ export const BumonsMaster = () => {
       setError(e instanceof Error ? e : new Error(String(e)));
     }
     setIsLoading(false);
-    console.log('theLocs : ', bumons);
   };
   /** 選んだ部門ダイアログを開く関数 */
   const handleOpenDialog = (id: number) => {

@@ -117,7 +117,6 @@ export const updateRfidTagDelFlgs = async (
   connection: PoolClient,
   user: string
 ) => {
-  console.log('無効化有効化： ', data);
   const now = new Date().toISOString();
   // RFIDタグ管理テーブル側準備
   const placeholders = data

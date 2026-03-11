@@ -14,7 +14,6 @@ dayjs.extend(timezone);
 export const getAllEqptAndRfid = async () => {
   try {
     const data = await selectAllRfidWithKizai();
-    console.log('I got a datalist from db', data.rowCount);
     // データをAOAけいしきに
     if (data && data.rows) {
       const aoaData = data.rows.map((row) => [

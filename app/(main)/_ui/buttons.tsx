@@ -67,7 +67,6 @@ export const MakeEditModeButton = ({ disabled, handleEditable }: { disabled: boo
       disabled={disabled}
       onClick={() => {
         handleEditable();
-        console.log('pushEdit');
       }}
       sx={{ alignItems: 'center' }}
     >

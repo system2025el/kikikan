@@ -68,8 +68,6 @@ export const SectionsMasterDialog = ({
   /* フォームを送信 */
   const onSubmit = async (data: SectionsMasterDialogValues) => {
     setIsLoading(true);
-    console.log('isDarty : ', isDirty);
-    console.log(data);
     if (sectionId === FAKE_NEW_ID) {
       // 新規の時
       await addNewSection(data, user?.name ?? '');
@@ -109,7 +107,6 @@ export const SectionsMasterDialog = ({
 
   /* ×ぼたんを押したとき */
   const handleClickClose = () => {
-    console.log('isDirty : ', isDirty);
     if (isDirty) {
       setDirtyOpen(true);
     } else {
@@ -130,7 +127,6 @@ export const SectionsMasterDialog = ({
 
   /* useEffect --------------------------------------- */
   useEffect(() => {
-    console.log('★★★★★★★★★★★★★★★★★★★★★');
     const getThatOneSection = async () => {
       if (sectionId === FAKE_NEW_ID) {
         // 新規追加モード

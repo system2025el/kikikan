@@ -40,7 +40,6 @@ export const getFilteredBumons = async (
       tblDspId: index + 1,
       delFlg: Boolean(d.del_flg),
     }));
-    console.log(filteredbumons.length);
     return { data: filteredbumons, options: options };
   } catch (e) {
     console.error('例外が発生しました:', e);
@@ -89,7 +88,7 @@ export const addNewBumon = async (data: BumonsMasterDialogValues, user: string) 
     await revalidatePath('/shukeibumons-master');
     await revalidatePath('/eqpt-master');
   } catch (error) {
-    console.log('DB接続エラー', error);
+    console.error('DB接続エラー', error);
     throw error;
   }
 };
@@ -119,7 +118,7 @@ export const updateBumon = async (rawData: BumonsMasterDialogValues, id: number,
     await revalidatePath('/shukeibumons-master');
     await revalidatePath('/eqpt-master');
   } catch (error) {
-    console.log('例外が発生しました', error);
+    console.error('例外が発生しました', error);
     throw error;
   }
 };

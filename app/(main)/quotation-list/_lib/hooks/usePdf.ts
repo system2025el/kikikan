@@ -36,7 +36,6 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
 
   // PDF生成関数
   const printQuotation = async (param: QuotHeadValues): Promise<Blob> => {
-    console.log('param', param);
     // PDFドキュメント作成
     const pdfDoc = await PDFDocument.create();
 
@@ -394,7 +393,6 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
     });
 
     const lines = formatTextArray(param.biko ?? '', customFont, fontSize, maxWidth);
-    console.log('lines', lines);
 
     const originalText = lines[0] ?? ''; //配列の最初を取得
     const actualLines = originalText.split('\n'); //文字列を分割して新しい配列を作成
@@ -785,7 +783,6 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
           // drawShokei('', '機材費', param.kizaiChukeiAmt);
           let kizaiChukeiMeiDisplay: string | null = param.kizaiChukeiMei ?? null; // 名称の表示を制御する変数を追加
           if (kizaiChukeiMeiDisplay && kizaiChukeiMeiDisplay.length >= 6) {
-            console.log('');
             kizaiChukeiMeiDisplay = kizaiChukeiMeiDisplay.slice(0, 5) + '…';
           }
           drawShokei('', kizaiChukeiMeiDisplay, param.kizaiChukeiAmt);
@@ -1010,7 +1007,6 @@ export const usePdf = (): [(param: QuotHeadValues) => Promise<Blob>] => {
 
     function checkPageBreak(nextHeight: number) {
       // 判定
-      console.log(startY - rowHeight * index - whiteSpace - nextHeight);
       if (0 < startY - rowHeight * index - whiteSpace - nextHeight) {
         return;
       }

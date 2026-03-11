@@ -80,8 +80,6 @@ export const BumonsMasterDialog = ({
   /* フォームを送信 */
   const onSubmit = async (data: BumonsMasterDialogValues) => {
     setIsLoading(true);
-    console.log('isDarty : ', isDirty);
-    console.log(data);
     if (bumonId === FAKE_NEW_ID) {
       // 新規の時
       try {
@@ -142,7 +140,6 @@ export const BumonsMasterDialog = ({
 
   /* ×ぼたんを押したとき */
   const handleClickClose = () => {
-    console.log('isDirty : ', isDirty);
     if (isDirty) {
       setDirtyOpen(true);
     } else {
@@ -170,7 +167,6 @@ export const BumonsMasterDialog = ({
 
   /* useEffect --------------------------------------- */
   useEffect(() => {
-    console.log('★★★★★★★★★★★★★★★★★★★★★');
     const getThatOnebumon = async () => {
       try {
         const a = await getAllBumonDSSelections();

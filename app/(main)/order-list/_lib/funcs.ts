@@ -17,8 +17,6 @@ export const getFilteredOrderList = async (
     listSort: { sort: 'shuko', order: 'asc' },
   }
 ): Promise<OrderListTableValues[]> => {
-  console.log(query);
-
   try {
     //
     const { data, error } = await selectFilteredJuchus(query);

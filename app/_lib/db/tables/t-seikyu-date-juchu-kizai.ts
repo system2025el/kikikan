@@ -13,7 +13,6 @@ import { SeikyuDatJuchuKizai } from '../types/t-seikyu-date-juchu-kizai-type';
  */
 export const upsertSeikyuDat = async (newData: SeikyuDatJuchuKizai) => {
   try {
-    console.log('できてますか？', newData);
     await supabase
       .schema(SCHEMA)
       .from('t_seikyu_date_juchu_kizai')
@@ -32,11 +31,9 @@ export const upsertSeikyuDat = async (newData: SeikyuDatJuchuKizai) => {
  * @param {SeikyuDatJuchuKizai} newData t_seikyu_date_juchu_kizaiの型
  */
 export const delAndInsertSeikyuDat = async (data: SeikyuDatJuchuKizai[], connection: PoolClient) => {
-  console.log('受注請求日時リスト', data);
   if (!data || Object.keys(data).length === 0) {
     throw new Error('受注請求日時リストが空です。');
   }
-  console.log('請求完了日を更新するよ');
   // select準備
   const selectPlaceholders = data
     .map((_, index) => {
@@ -56,14 +53,12 @@ export const delAndInsertSeikyuDat = async (data: SeikyuDatJuchuKizai[], connect
   try {
     // もともとある場合の請求完了日を取得
     const { rows } = await connection.query(selectQuery, selectValues);
-    console.log('もともとの請求日情報', rows);
     const insertData = data.filter((d) => {
       const match = rows.find(
         (r) => d.juchu_head_id === r.juchu_head_id && d.juchu_kizai_head_id === r.juchu_kizai_head_id
       );
       return !match || new Date(d.seikyu_dat) > new Date(match.seikyu_dat);
     });
-    console.log('挿入する予定の請求日情報', insertData);
 
     if (insertData.length === 0) {
       return;

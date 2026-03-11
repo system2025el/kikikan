@@ -153,7 +153,6 @@ export const updNyukoDetail = async (
   userNam: string
 ) => {
   if (nyukoDetailTableData.length === 0) {
-    console.log('No data to update');
     return;
   }
 
@@ -436,7 +435,6 @@ export const upsJuchuKizaiMeisai = async (
   try {
     await upsertJuchuKizaiMeisai(upsertKizaiData, connection);
 
-    console.log('juchu kizai meisai upsert successfully:', upsertKizaiData);
     return true;
   } catch (e) {
     throw e;
@@ -470,7 +468,6 @@ export const upsJuchuCtnMeisai = async (
   try {
     await upsertJuchuContainerMeisai(upsertCtnData, connection);
 
-    console.log('juchu ctn meisai upsert successfully:', upsertCtnData);
     return true;
   } catch (e) {
     throw e;
@@ -511,7 +508,6 @@ export const updNyukoDen = async (
       await updateNyushukoDen(data, connection);
     }
 
-    console.log('nyuko den update successfully:', upsertNyukoData);
     return true;
   } catch (e) {
     console.error('Exception while updating nyushuko den:', e);
@@ -571,7 +567,6 @@ export const upsShukoDen = async (
   try {
     await upsertNyushukoDen(mergeData, connection);
 
-    console.log('shuko den upsert successfully:', mergeData);
     return true;
   } catch (e) {
     console.error('Exception while updating nyushuko den:', e);
@@ -610,7 +605,6 @@ export const updOyaKizaiNyukoDen = async (
     for (const data of updateNyukoData) {
       await updateOyaKizaiNyukoDen(data, connection);
     }
-    console.log('oya nyuko den update successfully:', updateNyukoData);
   } catch (e) {
     console.error('Exception while updating nyushuko den:', e);
     throw e;
@@ -697,7 +691,6 @@ export const updOyaCtnNyukoDen = async (
     for (const data of updateNyukoData) {
       await updateOyaCtnNyukoDen(data, connection);
     }
-    console.log('oya nyuko den update successfully:', updateNyukoData);
   } catch (e) {
     console.error('Exception while updating nyushuko den:', e);
     throw e;
@@ -734,7 +727,6 @@ export const addNyukoFix = async (
 
   try {
     await insertNyushukoFix(newFixData, connection);
-    console.log('nyushuko fix add successfully:', newFixData);
   } catch (e) {
     throw e;
   }

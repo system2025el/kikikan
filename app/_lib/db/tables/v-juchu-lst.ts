@@ -83,7 +83,6 @@ export const selectFilteredJuchus = async (
     listSort: { sort: 'shuko', order: 'asc' },
   }
 ) => {
-  console.log(query);
   const { criteria, selectedDate, customer, listSort, stageName, orderStartDate, orderFinishDate } = query;
   // 基本のクエリ
   const builder = supabase.schema(SCHEMA).from('v_juchu_lst').select(`
@@ -152,12 +151,10 @@ export const selectFilteredJuchus = async (
 
       case '7': // '指定期間'
         if (selectedDate.range?.from) {
-          console.log('始まり！！！！！！', toJapanYMDString(selectedDate.range?.from, '-'));
           builder.gte(dateColumn, toJapanYMDString(selectedDate.range.from, '-'));
         }
         if (selectedDate.range?.to) {
           const nextDay = dayjs(selectedDate.range.to).tz('Asia/Tokyo').add(1, 'day').startOf('day').toDate();
-          console.log('終わりの次の日！！！！！！', toJapanYMDString(nextDay, '-'));
           builder.lt(dateColumn, toJapanYMDString(nextDay, '-'));
         }
         break;

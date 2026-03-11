@@ -14,7 +14,6 @@ export const getIdoList = async (sagyoDenDat: string) => {
   const idoData: IdoTableValues[] = [];
   try {
     const ykData = await selectFilteredIdoList(sagyoDenDat, 2);
-    console.log('ykData: ', ykData.length);
 
     if (ykData.length > 0) {
       const ykIdoData: IdoTableValues = {
@@ -45,7 +44,6 @@ export const getIdoList = async (sagyoDenDat: string) => {
     }
 
     const kyData = await selectFilteredIdoList(sagyoDenDat, 1);
-    console.log('kyData: ', kyData.length);
 
     if (kyData.length > 0) {
       const kyIdoData: IdoTableValues = {

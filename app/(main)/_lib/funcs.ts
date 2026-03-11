@@ -15,12 +15,8 @@ export const getLock = async (lockShubetu: number, headId: number) => {
   try {
     const { data, error } = await selectLock(lockShubetu, headId);
 
-    console.log('GetLock data : ', data);
-
     if (error) {
-      console.log(error.code);
       if (error.code === 'PGRST116') {
-        console.log('ロックデータなし');
         return null;
       }
       console.error('Error lock:', error.message);

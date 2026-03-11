@@ -31,7 +31,6 @@ export const getFilteredVehs = async (query: string = '') => {
       tblDspId: index + 1,
       delFlg: Boolean(d.del_flg),
     }));
-    console.log(filteredVehs.length, '行');
     return filteredVehs;
   } catch (e) {
     console.error('例外が発生しました:', e);
@@ -60,7 +59,6 @@ export const getChosenVeh = async (id: number) => {
       dspFlg: Boolean(data.dsp_flg),
       delFlg: Boolean(data.del_flg),
     };
-    console.log(VehDetails.delFlg);
     return VehDetails;
   } catch (e) {
     console.error('例外が発生しました:', e);
@@ -73,12 +71,11 @@ export const getChosenVeh = async (id: number) => {
  * @param data フォームで取得した車両情報
  */
 export const addNewVeh = async (data: VehsMasterDialogValues, user: string) => {
-  console.log(data.sharyoNam);
   try {
     await insertNewVeh(data, user);
     await revalidatePath('/vehicles-master');
   } catch (error) {
-    console.log('DB接続エラー', error);
+    console.error('DB接続エラー', error);
     throw error;
   }
 };
@@ -103,7 +100,7 @@ export const updateVeh = async (data: VehsMasterDialogValues, id: number, user: 
     await upDateVehDB(updateData);
     await revalidatePath('/vehicles-master');
   } catch (error) {
-    console.log('例外が発生', error);
+    console.error('例外が発生', error);
     throw error;
   }
 };

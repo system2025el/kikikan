@@ -113,7 +113,6 @@ export const delIdoResult = async (idoDenDetailData: IdoEqptDetailValues, delete
         connection
       );
     }
-    console.log('delete ido result', deleteTagIds);
 
     const updateIdoDenData: IdoDen = {
       ido_den_id: /*idoDenDetailData.idoDenId*/ 0,
@@ -128,10 +127,6 @@ export const delIdoResult = async (idoDenDetailData: IdoEqptDetailValues, delete
     };
 
     await updateIdoDen(updateIdoDenData, connection);
-    console.log(
-      'update ido den result_qty',
-      idoDenDetailData.planQty && idoDenDetailData.planQty - deleteTagIds.length
-    );
 
     await await connection.query('COMMIT');
     revalidatePath(

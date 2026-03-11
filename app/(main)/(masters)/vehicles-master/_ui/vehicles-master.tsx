@@ -73,10 +73,8 @@ export const VehiclesMaster = () => {
   // /* 検索ボタン押下 */
   // const onSubmit = async (data: { query: string | undefined }) => {
   //   setIsLoading(true);
-  //   console.log('data : ', data);
   //   // const newList = await getFilteredVehs(data.query!);
   //   // setVehs(newList);
-  //   console.log('Vehs : ', Vehs);
   // };
 
   /* useEffect ----------------------------------- */

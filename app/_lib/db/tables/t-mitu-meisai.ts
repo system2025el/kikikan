@@ -7,7 +7,6 @@ import { SCHEMA, supabase } from '../supabase';
 import { MituMeisai } from '../types/t-mitu-meisai-type';
 
 export const insertQuotMeisai = async (data: MituMeisai[], connection: PoolClient) => {
-  console.log('見積明細新規：', data);
   if (!data || Object.keys(data).length === 0) {
     throw new Error('見積明細が空です。');
   }
@@ -104,9 +103,7 @@ export const deleteQuotMeisai = async (
   const values = ids.flatMap((d) => [d.mitu_head_id, d.mitu_meisai_head_id, d.mitu_meisai_id]);
 
   const query = `DELETE FROM ${SCHEMA}.t_mitu_meisai WHERE (mitu_head_id, mitu_meisai_head_id, mitu_meisai_id) IN (${placeholders})`;
-  console.log('☆☆☆☆☆', query, values);
   try {
-    console.log('消したいやつ', ids);
     await connection.query(query, values);
   } catch (e) {
     throw e;

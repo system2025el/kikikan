@@ -71,8 +71,6 @@ export const VehiclesMasterDialog = ({
   /* フォームを送信 */
   const onSubmit = async (data: VehsMasterDialogValues) => {
     setIsLoading(true);
-    console.log('isDarty : ', isDirty);
-    console.log(data);
     if (vehicleId === FAKE_NEW_ID) {
       try {
         await addNewVeh(data, user?.name ?? '');
@@ -129,7 +127,6 @@ export const VehiclesMasterDialog = ({
 
   /* ×ぼたんを押したとき */
   const handleClickClose = () => {
-    console.log('isDirty : ', isDirty);
     if (isDirty) {
       setDirtyOpen(true);
     } else {
@@ -157,7 +154,6 @@ export const VehiclesMasterDialog = ({
 
   /* useEffect --------------------------------------- */
   useEffect(() => {
-    console.log('★★★★★★★★★★★★★★★★★★★★★');
     const getThatOneVeh = async () => {
       if (vehicleId === FAKE_NEW_ID) {
         // 新規追加モード

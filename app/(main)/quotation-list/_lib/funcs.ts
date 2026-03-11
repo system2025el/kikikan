@@ -42,7 +42,6 @@ export const getFilteredQuotList = async (
   }
 ) => {
   try {
-    console.log('デバッグ中▼▼', queries);
     const { data, error } = await selectFilteredQuot(queries);
     if (error) {
       console.error(error.message, error.cause, error.hint);
@@ -91,7 +90,6 @@ export const getUsersSelection = async () => {
         id: d.user_nam!,
         label: d.user_nam,
       }));
-    console.log('担当者が', selectElements.length, '件');
     return selectElements;
   } catch (e) {
     console.error('担当者取得DBエラー', e);
@@ -118,7 +116,6 @@ export const getMituStsSelection = async () => {
       id: d.sts_id!,
       label: d.sts_nam,
     }));
-    console.log('mitu_stsが', selectElements.length, '件');
     return selectElements;
   } catch (e) {
     console.error('例外が発生しました', e);
@@ -154,7 +151,6 @@ export const getOrderForQuotation = async (id: number): Promise<JuchuValues | nu
       nebikiAmt: juchuData.nebiki_amt,
       zeiKbn: juchuData.zei_nam,
     };
-    console.log('GetOrder order : ', order);
     return order;
   } catch (e) {
     console.error('例外が発生しました', e);
@@ -214,7 +210,6 @@ export const getChosenQuot = async (mituId: number) => {
       console.error(mituError);
       throw new Error('DBエラー：t_mitu_head');
     }
-    console.log(mituData);
 
     // 受注情報と明細情報を並列を取得
     const [juchuResult, meisaiHeadResult, meisaiResult] = await Promise.all([
@@ -319,8 +314,6 @@ export const getChosenQuot = async (mituId: number) => {
       gokeiAmt: mituData.gokei_amt,
       meisaiHeads: kbnMeisais, // 整形済みのデータを代入
     };
-    console.log(juchus);
-    console.log({ m: allData, j: juchus });
     return { m: allData, j: juchus };
   } catch (e) {
     console.error('例外が発生しました', e);
@@ -343,7 +336,6 @@ export const getJuchuKizaiHeadNamListForQuot = async (juchuId: number) => {
     if (!data || data.length === 0) {
       return [];
     }
-    console.log('明細名リスト', data.length, '件');
     return data.map((d) => ({
       juchuHeadId: d.juchu_head_id,
       juchuKizaiHeadId: d.juchu_kizai_head_id,
@@ -372,7 +364,6 @@ export const getJuchuKizaiMeisaiList = async (juchuId: number, kizaiHeadId: numb
     if (!data || data.length === 0) {
       return [];
     }
-    console.log('明細☆☆☆☆☆☆☆☆', data);
     return data.map((d) => ({
       nam: d.kizai_nam,
       qty: d.plan_kizai_qty,
@@ -404,7 +395,6 @@ export const getJuchuIsshikiMeisai = async (juchuId: number, kizaiHeadId: number
     if (!data || data.length === 0) {
       return [];
     }
-    console.log('一式有効明細☆☆☆☆☆☆☆☆', data);
     return data.map((d) => ({
       nam: d.kizai_nam,
       qty: d.plan_kizai_qty,
@@ -426,7 +416,6 @@ export const getJuchuIsshikiMeisai = async (juchuId: number, kizaiHeadId: number
  */
 export const updQuotDelFlg = async (ids: number[]) => {
   try {
-    console.log('Delete ::: ', ids);
     await updQuotHeadDelFlg(ids);
     await revalidatePath('/quotation-list');
   } catch (e) {

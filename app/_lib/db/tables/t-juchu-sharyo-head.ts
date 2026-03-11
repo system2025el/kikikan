@@ -71,7 +71,6 @@ export const insertJuchuSharyoHead = async (data: JuchuSharyoHeadDBValues, conne
     RETURNING juchu_sharyo_head_id;
   `;
   try {
-    console.log(query);
     return await connection.query(query, values);
   } catch (e) {
     throw e;
@@ -132,8 +131,6 @@ export const deleteJuchuSharyoHead = async (
     IN
       (${placeholders})
   `;
-
-  console.log(query);
 
   try {
     await connection.query(query, values);

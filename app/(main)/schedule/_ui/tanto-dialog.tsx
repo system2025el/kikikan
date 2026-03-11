@@ -66,7 +66,6 @@ export const TantoDialog = ({
   /* useEffect --------------------------------------------------------------- */
   useEffect(() => {
     reset(datas);
-    console.log(datas);
   }, [datas, reset]);
 
   return (

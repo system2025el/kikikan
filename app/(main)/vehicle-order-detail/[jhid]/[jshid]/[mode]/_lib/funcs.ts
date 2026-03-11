@@ -57,7 +57,6 @@ export const getChosenJuchuSharyoMeisais = async (
 ): Promise<JuchuSharyoHeadValues> => {
   try {
     const { rows } = await selectJuchuSharyoMeisai(juchuHeadId, sharyoHeadId);
-    console.log('==============================================', rows);
 
     const meisaiList =
       rows.length === 2
@@ -156,10 +155,8 @@ export const addNewJuchuSharyoHead = async (data: JuchuSharyoHeadValues, user: s
       add_user: user,
     }));
 
-    console.log('=========================================', sharyoMeisai);
     if (sharyoMeisai && sharyoMeisai.length > 0) {
       const { rows } = await insertJuchuSharyoMeisai(sharyoMeisai, connection);
-      console.log(rows.length, '件の明細を登録');
     }
     await connection.query('COMMIT');
     return sharyoHeadId;
@@ -220,7 +217,6 @@ export const updateJuchuSharyoHead = async (
   const connection = await pool.connect();
   try {
     await connection.query('BEGIN');
-    console.log('===============================head diff', headDiff, '======================meisai diff', meisaiDiff);
 
     // ヘッダに差異があれば更新
     if (headDiff) {
@@ -239,8 +235,6 @@ export const updateJuchuSharyoHead = async (
 
     // 明細に差異があるとき
     if (meisaiDiff) {
-      console.log('==========================meisais ', newMeisaiData);
-
       /** 明細の行数差 (元 - 新) */
       const meisaiLengthDiff = currentMeisaiData.length - newMeisaiData.length;
 
@@ -250,14 +244,12 @@ export const updateJuchuSharyoHead = async (
         const delMeisais: { juchu_head_id: number; juchu_sharyo_head_id: number; juchu_sharyo_meisai_id: number }[] =
           [];
         Array.from({ length: meisaiLengthDiff }, (_, i) => meisaiLengthDiff + 1 - i).forEach((n) => {
-          console.log(n);
           delMeisais.push({
             juchu_head_id: newData.juchuHeadId,
             juchu_sharyo_head_id: newData.juchuShryoHeadId,
             juchu_sharyo_meisai_id: n,
           });
         });
-        console.log('======================del data', delMeisais);
 
         if (delMeisais && delMeisais.length > 0)
           // 削除実行
@@ -280,18 +272,14 @@ export const updateJuchuSharyoHead = async (
         upd_dat: now,
         upd_user: user,
       }));
-      console.log('newMeisaiList:::新しいデータ', newMeisaiList);
 
       /** もともとそんざいする明細ID配列 */
       const currentIds = new Set<number>(currentMeisaiData.map((_, i) => i + 1));
-      console.log('currentIds::::::古いデータの明細ID', currentIds);
 
       /** 挿入用データ配列 */
       const insertList = newMeisaiList.filter((p) => !currentIds.has(p.juchu_sharyo_meisai_id));
       /** 更新用データ配列 */
       const updList = newMeisaiList.filter((p) => currentIds.has(p.juchu_sharyo_meisai_id));
-
-      console.log('insert:', insertList, '   upd:', updList);
 
       // insertListあれば挿入
       if (insertList && insertList.length > 0) {

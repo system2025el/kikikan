@@ -38,7 +38,6 @@ export const MasterTable = ({
   const [rows, setRows] = useState(datas);
 
   // const moveRow = (index: number, direction: number) => {
-  //   console.log(index);
   //   const newIndex = index + direction;
   //   if (newIndex < 0 || newIndex >= rows.length) return;
 

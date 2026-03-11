@@ -12,7 +12,6 @@ import { SeikyuHead } from '../types/t-seikyu-head-type';
  * @returns 新規登録した請求ヘッダID
  */
 export const insertBillHead = async (data: SeikyuHead, connection: PoolClient) => {
-  console.log('請求ヘッド新規：', data);
   if (!data || Object.keys(data).length === 0) {
     throw new Error('請求ヘッダーが空です。');
   }
@@ -45,9 +44,9 @@ export const updateBillHead = async (data: SeikyuHead, connection: PoolClient) =
     throw new Error('請求ヘッダーが空です。');
   }
   const quotHeadCols = Object.keys(data);
-  console.log(quotHeadCols);
+
   const quotValues = Object.values(data);
-  console.log(quotValues);
+
   const placeholders = quotValues.map((_, i) => `$${i + 1}`).join(', ');
   const upsetValues = quotHeadCols.filter((i) => i !== 'seikyu_head_id').map((col) => `${col} = EXCLUDED.${col}`);
 

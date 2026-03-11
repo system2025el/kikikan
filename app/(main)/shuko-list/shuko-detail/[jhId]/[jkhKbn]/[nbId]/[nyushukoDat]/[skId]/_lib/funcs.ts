@@ -199,11 +199,9 @@ export const updShukoDetail = async (
     if (shukoDetailTableData[0].juchuKizaiHeadKbn !== 3 && ctnData && ctnData.length > 0) {
       // コンテナ明細追加更新
       const upsertJuchuMeisaiResult = await upsJuchuCtnMeisai(ctnData, userNam, connection);
-      console.log('コンテナ明細UPSERT', upsertJuchuMeisaiResult);
 
       // コンテナ出庫伝票追加更新
       const upsertShukoDenResult = await upsShukoDen(ctnData, userNam, connection);
-      console.log('出庫伝票追加更新', upsertShukoDenResult);
 
       // 受注機材ヘッダーid
       const juchuKizaiHeadIds = [
@@ -242,7 +240,6 @@ export const updShukoDetail = async (
               userNam,
               connection
             );
-            console.log('入庫伝票追加更新', upsertNyukoDenResult);
           }
         } else if (nyukoDat.length === 1 && shukoDat.length === 2) {
           const otherShukoDat = shukoDat.find((d) => d.nyushuko_basho_id !== shukoDetailData.nyushukoBashoId);
@@ -267,7 +264,6 @@ export const updShukoDetail = async (
             userNam,
             connection
           );
-          console.log('入庫伝票追加更新', upsertNyukoDenResult);
         } else if (nyukoDat.length === 1 && shukoDat.length === 1) {
           const upsertNyukoDenResult = await upsNyukoDen(
             ctnData,
@@ -277,14 +273,12 @@ export const updShukoDetail = async (
             userNam,
             connection
           );
-          console.log('入庫伝票追加更新', upsertNyukoDenResult);
         }
       }
     }
 
     // 入出庫確定追加
     const addNyushukoFixResult = await addShukoFix(shukoDetailData, shukoDetailTableData, userNam, connection);
-    console.log('入出庫確定追加', addNyushukoFixResult);
 
     await connection.query('COMMIT');
 
@@ -330,7 +324,6 @@ export const upsJuchuCtnMeisai = async (
   try {
     await upsertJuchuContainerMeisai(upsertCtnData, connection);
 
-    console.log('juchu ctn meisai upsert successfully:', upsertCtnData);
     return true;
   } catch (e) {
     throw e;
@@ -389,7 +382,6 @@ export const upsNyushukoDen = async (
   try {
     await upsertNyushukoDen(mergeData, connection);
 
-    console.log('nyushuko den upsert successfully:', mergeData);
     return true;
   } catch (e) {
     console.error('Exception while updating nyushuko den:', e);
@@ -429,7 +421,6 @@ export const upsShukoDen = async (
   try {
     await upsertNyushukoDen(upsCtnShukoCheckData, connection);
 
-    console.log('shuko den upsert successfully:', upsCtnShukoCheckData);
     return true;
   } catch (e) {
     console.error('Exception while updating shuko den:', e);
@@ -470,7 +461,6 @@ export const upsNyukoDen = async (
   try {
     await upsertNyushukoDen(upsCtnNyukoCheckData, connection);
 
-    console.log('nyuko den upsert successfully:', upsCtnNyukoCheckData);
     return true;
   } catch (e) {
     console.error('Exception while updating nyuko den:', e);
@@ -508,7 +498,6 @@ export const addShukoFix = async (
 
   try {
     await insertNyushukoFix(newFixData, connection);
-    console.log('nyushuko fix add successfully:', newFixData);
     return true;
   } catch (e) {
     throw e;
@@ -550,7 +539,6 @@ export const delShukoFix = async (
     for (const data of deleteFixData) {
       await deleteShukoFix(data, connection);
     }
-    console.log('nyushuko fix delete successfully:', deleteFixData);
 
     await connection.query('COMMIT');
 
@@ -607,8 +595,6 @@ export const updShukoAdjust = async (adjustData: ShukoDetailTableValues[], userN
     for (const data of updateData) {
       await updateNyushukoDen(data, connection);
     }
-
-    console.log('nyushuko den adjust update successfully:', updateData);
 
     await connection.query('COMMIT');
   } catch (e) {

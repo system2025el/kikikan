@@ -52,7 +52,6 @@ export const getFilteredIsshikis = async () => {
       delFlg: Boolean(d.del_flg),
       kizaiList: [],
     }));
-    console.log('一式マスタ', filteredIsshikis.length, '件');
     return filteredIsshikis;
   } catch (e) {
     console.error('例外が発生しました:', e);
@@ -126,7 +125,7 @@ export const addNewIsshiki = async (data: IsshikisMasterDialogValues, user: stri
     await revalidatePath('/isshiki-master');
     connection.query('COMMIT');
   } catch (error) {
-    console.log('DB接続エラー', error);
+    console.error('DB接続エラー', error);
     connection.query('ROLLBACK');
     throw error;
   } finally {
@@ -219,7 +218,7 @@ export const updateIsshiki = async (
     await connection.query('COMMIT');
     await revalidatePath('/isshiki-master');
   } catch (error) {
-    console.log('例外が発生', error);
+    console.error('例外が発生', error);
     await connection.query('ROLLBACK');
     throw error;
   } finally {
@@ -269,7 +268,6 @@ export const checkExistingIsshiki = async (isshikiId: number, kizaiIds: number[]
 export const updIsshikiDelFlg = async (id: number, flg: boolean, user: string) => {
   const data = { del_flg: flg ? 1 : 0, upd_user: user, upd_dat: new Date().toISOString() };
   try {
-    console.log('Delete ::: ', id);
     await updIsshikiDelFlgDB(id, data);
     await revalidatePath('/isshiki-master');
   } catch (e) {

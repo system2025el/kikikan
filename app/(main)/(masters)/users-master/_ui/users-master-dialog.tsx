@@ -113,7 +113,6 @@ export const UsersMasterDialog = ({
   /* methods ---------------------------- */
   /* フォームを送信 */
   const onSubmit = async (data: UsersMasterDialogValues) => {
-    console.log(data);
     setIsLoading(true);
 
     setCodErrorMsg(null);
@@ -227,7 +226,6 @@ export const UsersMasterDialog = ({
 
   /* ×ぼたんを押したとき */
   const handleClickClose = () => {
-    console.log('isDirty : ', isDirty);
     if (isDirty) {
       setDirtyOpen(true);
     } else {
@@ -276,7 +274,6 @@ export const UsersMasterDialog = ({
 
   /* useEffect --------------------------------------- */
   useEffect(() => {
-    console.log('★★★★★★★★★★★★★★★★★★★★★');
     const getThatOneUser = async () => {
       if (currentMailAdr === String(FAKE_NEW_ID)) {
         // 新規追加モード

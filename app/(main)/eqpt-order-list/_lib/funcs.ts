@@ -27,8 +27,6 @@ export const getFilteredOrderList = async (
     listSort: { sort: 'shuko', order: 'asc' },
   }
 ): Promise<EqptOrderListTableValues[]> => {
-  console.log('ーーーーー機材明細一覧の時間確認', query);
-
   try {
     //
     const { data, error } = await selectFilteredKizaiHead(query);

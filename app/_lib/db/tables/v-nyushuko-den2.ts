@@ -54,12 +54,12 @@ export const selectFilteredShukoList = async (queries: ShukoListSearchValues) =>
   } else if (queries.shukoDat.from) {
     // fromだけの場合
     const startOfDay = dayjs(queries.shukoDat.from).tz('Asia/Tokyo').startOf('day').toISOString();
-    console.log('start of the day: ', startOfDay);
+
     query += ` AND d2.nyushuko_dat >= '${startOfDay}'`;
   } else if (queries.shukoDat.to) {
     // toだけの場合
     const startOfnextDay = dayjs(queries.shukoDat.to).tz('Asia/Tokyo').add(1, 'day').startOf('day').toISOString();
-    console.log('start of the next day: ', startOfnextDay);
+
     query += ` AND d2.nyushuko_dat < '${startOfnextDay}'`;
   }
 
@@ -116,12 +116,12 @@ export const selectFilteredNyukoList = async (queries: NyukoListSearchValues) =>
   } else if (queries.nyukoDat.from) {
     // fromだけの場合
     const startOfDay = dayjs(queries.nyukoDat.from).tz('Asia/Tokyo').startOf('day').toISOString();
-    console.log('start of the day: ', startOfDay);
+
     query += ` AND d2.nyushuko_dat >= '${startOfDay}'`;
   } else if (queries.nyukoDat.to) {
     // toだけの場合
     const startOfnextDay = dayjs(queries.nyukoDat.to).tz('Asia/Tokyo').add(1, 'day').startOf('day').toISOString();
-    console.log('start of the next day: ', startOfnextDay);
+
     query += ` AND d2.nyushuko_dat < '${startOfnextDay}'`;
   }
   if (queries.section && queries.section.length !== 0) {

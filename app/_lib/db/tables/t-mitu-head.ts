@@ -11,7 +11,6 @@ import { MituHead } from '../types/t-mitu-head-types';
  * @returns 新規登録した見積ヘッダID
  */
 export const insertQuotHead = async (data: MituHead, connection: PoolClient) => {
-  console.log('見積ヘッド新規：', data);
   if (!data || Object.keys(data).length === 0) {
     throw new Error('見積ヘッダーが空です。');
   }
@@ -44,9 +43,9 @@ export const updateQuotHead = async (data: MituHead, connection: PoolClient) => 
     throw new Error('見積ヘッダーが空です。');
   }
   const quotHeadCols = Object.keys(data);
-  console.log(quotHeadCols);
+
   const quotValues = Object.values(data);
-  console.log(quotValues);
+
   const placeholders = quotValues.map((_, i) => `$${i + 1}`).join(', ');
   const upsetValues = quotHeadCols.filter((i) => i !== 'mitu_head_id').map((col) => `${col} = EXCLUDED.${col}`);
 

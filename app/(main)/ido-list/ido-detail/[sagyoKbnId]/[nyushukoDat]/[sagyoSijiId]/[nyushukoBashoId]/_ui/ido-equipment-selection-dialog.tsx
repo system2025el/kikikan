@@ -75,7 +75,6 @@ export const IdoEqptSelectionDialog = ({
       } else {
         // selectedEqptIdsが今回選んだ全機材であるので、idをもとに機材情報を取得しダイアログを閉じたい
         const data = await getIdoSelectedEqpts(selectedEqptIds);
-        console.log('最終的に渡される機材の配列データ: ', data!);
         setEqpts(data!);
         handleCloseDialog();
       }
@@ -122,18 +121,15 @@ export const IdoEqptSelectionDialog = ({
 
   /* 検索ボタン押下時処理 */
   const onSubmit = async (data: { query: string }) => {
-    console.log('Push search', data.query);
     setIsLoading(true);
     setSearching(true);
     setSelectedBumon(-100);
     try {
       if (data.query.trim() === '') {
         const a = await getIdoEqptsForEqptSelection('');
-        console.log('機材リスト[0]: ', a![0]);
         setTheEqpts(a!);
       } else {
         const a = await getIdoEqptsForEqptSelection(data.query);
-        console.log('機材リスト[0]: ', a![0]);
         setTheEqpts(a!);
       }
     } catch (e) {
@@ -150,7 +146,6 @@ export const IdoEqptSelectionDialog = ({
     const getEqpts = async () => {
       try {
         const a = await getIdoEqptsForEqptSelection('');
-        console.log('最初の機材リスト[0]: ', a![0]);
         setTheEqpts(a!);
       } catch (e) {
         setSnackBarMessage('データ取得に失敗しました');
@@ -283,7 +278,6 @@ const IdoBundleDialog = ({
   const handleClickConfirm = async () => {
     try {
       const data = await getIdoSelectedEqpts([...selectedEqpts, ...selected]);
-      console.log('最終的に渡される機材の配列データ: ', data!);
       setEqpts(data!);
       handleClose();
     } catch (e) {

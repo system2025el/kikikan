@@ -10,7 +10,6 @@ import { SeikyuMeisaiHead } from '../types/t-seikyu-meisai-head-type';
  * @param connection
  */
 export const insertBillMeisaiHead = async (data: SeikyuMeisaiHead[], connection: PoolClient) => {
-  console.log('請求明細ヘッド新規：', data);
   if (!data || Object.keys(data).length === 0) {
     throw new Error('請求明細ヘッダーが空です。');
   }
@@ -110,9 +109,7 @@ export const deleteBillMeisaiHeads = async (
   const values = ids.flatMap((d) => [d.seikyu_head_id, d.seikyu_meisai_head_id]);
 
   const query = `DELETE FROM ${SCHEMA}.t_seikyu_meisai_head WHERE (seikyu_head_id, seikyu_meisai_head_id) IN (${placeholders})`;
-  console.log('☆☆☆☆☆', query, values);
   try {
-    console.log('消したいやつ', ids);
     await connection.query(query, values);
   } catch (e) {
     throw e;
