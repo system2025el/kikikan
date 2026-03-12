@@ -164,6 +164,7 @@ export const insertWeeklyData = async (data: WeeklyValues, user: string) => {
   try {
     await upsertTWeekly(newData);
   } catch (e) {
+    console.error(e);
     throw e;
   }
 };

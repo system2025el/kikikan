@@ -51,7 +51,7 @@ WHERE test.juchu_head_id IS NOT NULL;
   try {
     return await pool.query(query, [startDate, daysParam]);
   } catch (e) {
-    throw e;
+    throw new Error('[selectshukoTimeList] DBエラー:', { cause: e });
   }
 };
 
@@ -124,7 +124,7 @@ WHERE test.juchu_head_id IS NOT NULL;
   try {
     return await pool.query(query, [startDate, daysParam]);
   } catch (e) {
-    throw e;
+    throw new Error('[selectVehiclesList] DBエラー:', { cause: e });
   }
 };
 
@@ -194,6 +194,6 @@ export const selectMinusZaikoList = async (startDate: string, totalDays: number)
   try {
     return await pool.query(query, [startDate, daysParam]);
   } catch (e) {
-    throw e;
+    throw new Error('[selectMinusZaikoList] DBエラー:', { cause: e });
   }
 };

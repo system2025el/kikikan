@@ -136,7 +136,7 @@ export const ImportEqptRfidData = async (data: EqptImportType[], user: string) =
     // エラーでロールバック
     await connection.query('ROLLBACK');
     console.error('インポートエラー', e);
-    throw new Error('例外が発生：DBエラー,ROLLBACK');
+    throw e;
   } finally {
     // なんにしてもpool解放
     connection.release();

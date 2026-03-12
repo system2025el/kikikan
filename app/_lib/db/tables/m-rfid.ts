@@ -20,7 +20,7 @@ export const selectCountOfTheEqpt = async (id: number) => {
       .eq('kizai_id', id)
       .single();
   } catch (e) {
-    throw e;
+    throw new Error('[selectCountOfTheEqpt] DBエラー:', { cause: e });
   }
 };
 
@@ -66,7 +66,7 @@ export const selectAllRfidWithKizai = async () => {
   try {
     return await pool.query(query);
   } catch (e) {
-    throw e;
+    throw new Error('[selectAllRfidWithKizai] DBエラー:', { cause: e });
   }
 };
 
@@ -82,7 +82,7 @@ export const insertNewRfid = async (data: MRfidDBValues, connection: PoolClient)
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[insertNewRfid] DBエラー:', { cause: e });
   }
 };
 
@@ -103,7 +103,7 @@ export const upDateRfidDB = async (data: MRfidDBValues, connection: PoolClient) 
   try {
     await connection.query(query, [...values, data.rfid_tag_id]);
   } catch (e) {
-    throw e;
+    throw new Error('[upDateRfidDB] DBエラー:', { cause: e });
   }
 };
 
@@ -144,7 +144,7 @@ export const updateRfidTagDelFlgs = async (
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[updateRfidTagDelFlgs] DBエラー:', { cause: e });
   }
 };
 
@@ -155,8 +155,8 @@ export const updateRfidTagDelFlgs = async (
  */
 export const updRfidDelFlgDB = async (tagId: string, data: { del_flg: number; upd_dat: string; upd_user: string }) => {
   try {
-    await supabase.schema(SCHEMA).from('m_rfid').update(data).like('rfid_tag_id', tagId);
+    return await supabase.schema(SCHEMA).from('m_rfid').update(data).like('rfid_tag_id', tagId);
   } catch (e) {
-    throw e;
+    throw new Error('[updRfidDelFlgDB] DBエラー:', { cause: e });
   }
 };

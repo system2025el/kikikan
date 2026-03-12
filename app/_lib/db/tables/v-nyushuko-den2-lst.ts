@@ -25,7 +25,7 @@ export const selectNyushukoDetail = async (
       .order('juchu_kizai_head_id')
       .order('dsp_ord_num_meisai');
   } catch (e) {
-    throw e;
+    throw new Error('[selectNyushukoDetail] DBエラー:', { cause: e });
   }
 };
 
@@ -52,7 +52,7 @@ export const selectCtnNyushukoDetail = async (
       .order('juchu_kizai_head_id')
       .order('dsp_ord_num_meisai');
   } catch (e) {
-    throw e;
+    throw new Error('[selectCtnNyushukoDetail] DBエラー:', { cause: e });
   }
 };
 
@@ -81,6 +81,6 @@ export const selectNyushukoDetailOne = async (
       .eq('kizai_id', kizaiId)
       .single();
   } catch (e) {
-    throw e;
+    throw new Error('[selectNyushukoDetailOne] DBエラー:', { cause: e });
   }
 };

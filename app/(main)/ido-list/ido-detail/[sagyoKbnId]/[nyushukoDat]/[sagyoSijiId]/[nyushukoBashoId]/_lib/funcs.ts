@@ -27,7 +27,7 @@ export const getIdoDenMaxId = async () => {
       if (error.code === 'PGRST116') {
         return 0;
       }
-      throw error;
+      throw new Error('[selectIdoDenMaxId] DBエラー:', { cause: error });
     }
     return data.ido_den_id;
   } catch (e) {
@@ -48,8 +48,7 @@ export const getIdoDen = async (sagyoKbnId: number, sagyoSijiId: number, sagyoDe
   try {
     const { data, error } = await selectIdoDen(sagyoKbnId, sagyoSijiId, sagyoDenDat, sagyoId);
     if (error) {
-      console.error('getIdoDen error : ', error);
-      throw error;
+      throw new Error('[selectIdoDen] DBエラー:', { cause: error });
     }
 
     const idoDetailTableList: IdoDetailTableValues[] = data.map((d) => ({
@@ -193,7 +192,7 @@ export const getIdoFixMaxId = async () => {
       if (error.code === 'PGRST116') {
         return 0;
       }
-      throw error;
+      throw new Error('[selectIdoFixMaxId] DBエラー:', { cause: error });
     }
     return data.ido_den_id;
   } catch (e) {
@@ -217,7 +216,7 @@ export const getIdoFix = async (sagyoKbnId: number, sagyoSijiId: number, sagyoDe
       if (error.code === 'PGRST116') {
         return false;
       }
-      throw error;
+      throw new Error('[selectIdoFix] DBエラー:', { cause: error });
     }
 
     return true;
@@ -257,7 +256,10 @@ export const addIdoFix = async (
   };
 
   try {
-    await insertIdoFix(newData);
+    const { error } = await insertIdoFix(newData);
+    if (error) {
+      throw new Error('[insertIdoFix] DBエラー:', { cause: error });
+    }
     return true;
   } catch (e) {
     console.error(e);
@@ -279,7 +281,10 @@ export const addIdoFix = async (
  */
 export const delIdoFix = async (sagyoKbnId: number, sagyoSijiId: number, sagyoDenDatDat: string, sagyoId: number) => {
   try {
-    await deleteIdoFix(sagyoKbnId, sagyoSijiId, sagyoDenDatDat, sagyoId);
+    const { error } = await deleteIdoFix(sagyoKbnId, sagyoSijiId, sagyoDenDatDat, sagyoId);
+    if (error) {
+      throw new Error('[deleteIdoFix] DBエラー:', { cause: error });
+    }
     return true;
   } catch (e) {
     console.error(e);
@@ -295,17 +300,16 @@ export const delIdoFix = async (sagyoKbnId: number, sagyoSijiId: number, sagyoDe
  */
 export const saveIdoDen = async (idoDenData: IdoDetailTableValues[], userNam: string) => {
   const connection = await pool.connect();
-
-  let newIdoDenId = await getIdoDenMaxId();
-  const saveIdoDenData = idoDenData.map((data) =>
-    !data.saveFlag && !data.delFlag ? { ...data, idoDenId: ++newIdoDenId } : data
-  );
-
-  const addIdoDenData = saveIdoDenData.filter((d) => !d.saveFlag && !d.delFlag);
-  const updIdoDenData = saveIdoDenData.filter((d) => d.saveFlag && !d.delFlag);
-  const delIdoDenData = saveIdoDenData.filter((d) => d.saveFlag && d.delFlag);
-
   try {
+    let newIdoDenId = await getIdoDenMaxId();
+    const saveIdoDenData = idoDenData.map((data) =>
+      !data.saveFlag && !data.delFlag ? { ...data, idoDenId: ++newIdoDenId } : data
+    );
+
+    const addIdoDenData = saveIdoDenData.filter((d) => !d.saveFlag && !d.delFlag);
+    const updIdoDenData = saveIdoDenData.filter((d) => d.saveFlag && !d.delFlag);
+    const delIdoDenData = saveIdoDenData.filter((d) => d.saveFlag && d.delFlag);
+
     // 削除
     if (delIdoDenData.length > 0) {
       const deleteData = delIdoDenData.map((d) => ({
@@ -346,8 +350,7 @@ export const getIdoBumonsForEqptSelection = async () => {
   try {
     const { data, error } = await selectActiveBumons();
     if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[selectActiveBumons] DBエラー:', { cause: error });
     }
     if (!data || data.length === 0) {
       return [];
@@ -359,7 +362,7 @@ export const getIdoBumonsForEqptSelection = async () => {
     }));
     return selectElements;
   } catch (e) {
-    console.error('例外が発生しました:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -385,7 +388,7 @@ export const checkSetoptions = async (idList: number[]) => {
     }
     return data.rows;
   } catch (e) {
-    console.error('例外が発生しました:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -403,7 +406,7 @@ export const getIdoEqptsForEqptSelection = async (query: string = ''): Promise<I
     }
     return data.rows;
   } catch (e) {
-    console.error('例外が発生しました:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -417,8 +420,7 @@ export const getIdoSelectedEqpts = async (idList: number[]) => {
   try {
     const { data, error } = await selectChosenIdoEqptsDetails(idList);
     if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[selectChosenIdoEqptsDetails] DBエラー:', { cause: error });
     }
     if (!data) return [];
     const selectedEqpts: SelectedIdoEqptsValues[] = data.map((d) => ({
@@ -434,7 +436,7 @@ export const getIdoSelectedEqpts = async (idList: number[]) => {
     }));
     return selectedEqpts;
   } catch (e) {
-    console.error('例外が発生しました:', e);
+    console.error(e);
     throw e;
   }
 };

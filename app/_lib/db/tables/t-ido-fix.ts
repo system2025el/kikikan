@@ -21,7 +21,7 @@ export const selectIdoFixMaxId = async () => {
       .limit(1)
       .single();
   } catch (e) {
-    throw e;
+    throw new Error('[selectIdoFixMaxId] DBエラー:', { cause: e });
   }
 };
 
@@ -54,7 +54,7 @@ export const selectIdoFix = async (
       .limit(1)
       .single();
   } catch (e) {
-    throw e;
+    throw new Error('[selectIdoFix] DBエラー:', { cause: e });
   }
 };
 
@@ -67,7 +67,7 @@ export const insertIdoFix = async (data: IdoFix) => {
   try {
     return await supabase.schema(SCHEMA).from('t_ido_fix').insert(data);
   } catch (e) {
-    throw e;
+    throw new Error('[insertIdoFix] DBエラー:', { cause: e });
   }
 };
 
@@ -83,7 +83,7 @@ export const deleteIdoFix = async (
   sagyoId: number
 ) => {
   try {
-    await supabase
+    return await supabase
       .schema(SCHEMA)
       .from('t_ido_fix')
       .delete()
@@ -92,6 +92,6 @@ export const deleteIdoFix = async (
       .eq('sagyo_den_dat', sagyoDenDatDat)
       .eq('sagyo_id', sagyoId);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteIdoFix] DBエラー:', { cause: e });
   }
 };

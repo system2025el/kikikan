@@ -13,6 +13,6 @@ export const updateMasterUpdates = async (masterNam: string, connection: PoolCli
   try {
     await supabase.schema(SCHEMA).from('m_master_update').update({ upd_dat: date }).eq('master_nam', masterNam);
   } catch (e) {
-    throw e;
+    throw new Error('[updateMasterUpdates] DBエラー:', { cause: e });
   }
 };

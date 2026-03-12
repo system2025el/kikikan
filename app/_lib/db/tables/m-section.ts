@@ -19,7 +19,7 @@ export const selectActiveSections = async () => {
       .neq('del_flg', 1)
       .order('section_id');
   } catch (e) {
-    throw e;
+    throw new Error('[selectActiveSections] DBエラー:', { cause: e });
   }
 };
 
@@ -42,7 +42,7 @@ export const selectFilteredSections = async (query: string) => {
   try {
     return await builder;
   } catch (e) {
-    throw e;
+    throw new Error('[selectFilteredSections] DBエラー:', { cause: e });
   }
 };
 
@@ -60,7 +60,7 @@ export const selectOneSection = async (id: number) => {
       .eq('section_id', id)
       .single();
   } catch (e) {
-    throw e;
+    throw new Error('[selectOneSection] DBエラー:', { cause: e });
   }
 };
 
@@ -87,7 +87,7 @@ export const insertNewSection = async (data: SectionsMasterDialogValues, user: s
   try {
     await pool.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[insertNewSection] DBエラー:', { cause: e });
   }
 };
 
@@ -98,12 +98,12 @@ export const insertNewSection = async (data: SectionsMasterDialogValues, user: s
  */
 export const upDateSectionDB = async (data: MSectionDBValues) => {
   try {
-    await supabase
+    return await supabase
       .schema(SCHEMA)
       .from('m_section')
       .update({ ...data })
       .eq('section_id', data.section_id);
   } catch (e) {
-    throw e;
+    throw new Error('[upDateSectionDB] DBエラー:', { cause: e });
   }
 };

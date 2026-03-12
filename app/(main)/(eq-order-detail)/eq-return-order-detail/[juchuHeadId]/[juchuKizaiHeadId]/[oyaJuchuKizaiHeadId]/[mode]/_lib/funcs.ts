@@ -500,8 +500,7 @@ export const getJuchuHonbanbiQty = async (juchuHeadId: number, juchuKizaiHeadId:
       if (error.code === 'PGRST116') {
         return null;
       }
-      console.error('getJuchuHonbanbiQty error : ', error);
-      throw error;
+      throw new Error('[selectJuchuHonbanbiQty] DBエラー:', { cause: error });
     }
 
     return data.juchu_honbanbi_qty;
@@ -524,8 +523,7 @@ export const getReturnJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHea
       if (error.code === 'PGRST116') {
         return null;
       }
-      console.error('GetEqHeader juchuKizaiHead error : ', error);
-      throw error;
+      throw new Error('[selectReturnJuchuKizaiHead] DBエラー:', { cause: error });
     }
 
     if (data?.oya_juchu_kizai_head_id === null) {
@@ -621,7 +619,7 @@ export const updReturnJuchuKizaiHead = async (
     await updateReturnJuchuKizaiHead(updateData, connection);
     return true;
   } catch (e) {
-    console.error('Exception while updating juchu kizai head:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -640,8 +638,7 @@ export const getReturnJuchuKizaiMeisai = async (
   try {
     const { data: returnData, error: returnError } = await selectReturnJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId);
     if (returnError) {
-      console.error('GetKeeoEqList keep eqList error : ', returnError);
-      throw returnError;
+      throw new Error('[selectReturnJuchuKizaiMeisai] DBエラー:', { cause: returnError });
     }
 
     const eqIds = [...new Set(returnData.map((data) => data.kizai_id))];
@@ -649,8 +646,7 @@ export const getReturnJuchuKizaiMeisai = async (
     const { data: mKizai, error: mKizaiError } = await selectMeisaiEqts(eqIds);
 
     if (mKizaiError) {
-      console.error('GetEqList eqShozokuId error : ', mKizaiError);
-      throw mKizaiError;
+      throw new Error('[selectMeisaiEqts] DBエラー:', { cause: mKizaiError });
     }
 
     const { data: eqTanka, error: eqTankaError } = await selectJuchuKizaiMeisaiKizaiTanka(
@@ -658,14 +654,12 @@ export const getReturnJuchuKizaiMeisai = async (
       juchuKizaiHeadId
     );
     if (eqTankaError) {
-      console.error('GetEqHeader eqTanka error : ', eqTankaError);
-      throw eqTankaError;
+      throw new Error('[selectJuchuKizaiMeisaiKizaiTanka] DBエラー:', { cause: eqTankaError });
     }
 
     const { data: oyaData, error: oyaError } = await selectOyaJuchuKizaiMeisai(juchuHeadId, oyaJuchuKizaiHeadId);
     if (oyaError) {
-      console.error('GetKeeoEqList oya eqList error : ', oyaError);
-      throw oyaError;
+      throw new Error('[selectOyaJuchuKizaiMeisai] DBエラー:', { cause: oyaError });
     }
 
     const returnJuchuKizaiMeisaiData: ReturnJuchuKizaiMeisaiValues[] = returnData.map((d) => ({
@@ -723,7 +717,7 @@ export const addReturnJuchuKizaiMeisai = async (
     await insertJuchuKizaiMeisai(newData, connection);
     return true;
   } catch (e) {
-    console.error('Exception while adding return kizai meisai:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -760,7 +754,7 @@ export const updReturnJuchuKizaiMeisai = async (
     }
     return true;
   } catch (e) {
-    console.error('Exception while updating keep juchu kizai meisai:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -809,14 +803,12 @@ export const getReturnJuchuContainerMeisai = async (
       juchuKizaiHeadId
     );
     if (containerError) {
-      console.error('GetReturnContainerList return containerList error : ', containerError);
-      throw containerError;
+      throw new Error('[selectJuchuContainerMeisai] DBエラー:', { cause: containerError });
     }
 
     const { data: oyaData, error: oyaError } = await selectJuchuContainerMeisai(juchuHeadId, oyaJuchuKizaiHeadId);
     if (oyaError) {
-      console.error('GetReturnCOntainerList oya containerList error : ', oyaError);
-      throw oyaError;
+      throw new Error('[selectJuchuContainerMeisai] DBエラー:', { cause: oyaError });
     }
 
     const returnJuchuContainerMeisaiData: ReturnJuchuContainerMeisaiValues[] = containerData.map((d) => ({
@@ -888,7 +880,7 @@ export const addReturnJuchuContainerMeisai = async (
     await insertJuchuContainerMeisai(mergeData, connection);
     return true;
   } catch (e) {
-    console.error('Exception while adding return container meisai:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -940,7 +932,7 @@ export const updReturnJuchuContainerMeisai = async (
     }
     return true;
   } catch (e) {
-    console.error('Exception while updating return juchu container meisai:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -999,7 +991,7 @@ export const addReturnNyushukoDen = async (
     await insertNyushukoDen(newReturnNyukoCheckData, connection);
     return true;
   } catch (e) {
-    console.error('Exception while adding return nyushuko den:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -1041,7 +1033,7 @@ export const updReturnNyushukoDen = async (
     }
     return true;
   } catch (e) {
-    console.error('Exception while updating return nyushuko den:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -1079,7 +1071,7 @@ export const upsNyukoDen = async (
   try {
     await upsertNyushukoDen(newData, connection);
   } catch (e) {
-    console.error('Exception while updating nyuko den:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -1173,7 +1165,7 @@ export const addCtnNyukoDen = async (
     await insertNyushukoDen(newCtnNyukoCheckData, connection);
     return true;
   } catch (e) {
-    console.error('Exception while adding return ctn nyuko den:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -1215,7 +1207,7 @@ export const updCtnNyukoDen = async (
     }
     return true;
   } catch (e) {
-    console.error('Exception while update return ctn nyuko den:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -1254,7 +1246,7 @@ export const upsCtnNyukoDen = async (
   try {
     await upsertNyushukoDen(upsertCtnNyukoData, connection);
   } catch (e) {
-    console.error('Exception while updating ctn nyuko den:', e);
+    console.error(e);
     throw e;
   }
 };

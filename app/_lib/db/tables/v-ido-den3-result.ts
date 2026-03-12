@@ -22,6 +22,6 @@ export const selectIdoEqptDetail = async (
       .eq('nyushuko_basho_id', sagyoId)
       .eq('kizai_id', kizaiId);
   } catch (e) {
-    throw e;
+    throw new Error('[selectIdoEqptDetail] DBエラー:', { cause: e });
   }
 };

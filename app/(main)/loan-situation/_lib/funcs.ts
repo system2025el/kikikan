@@ -14,8 +14,7 @@ export const getFilteredEqpts = async (query: string = '') => {
     const { data, error } = await selectFilteredEqpts({ q: query, d: null, s: null, b: null });
 
     if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[selectFilteredEqpts] DBエラー:', { cause: error });
     }
     if (!data || data.length === 0) {
       return [];
@@ -36,7 +35,7 @@ export const getFilteredEqpts = async (query: string = '') => {
     }));
     return filteredEqpts;
   } catch (e) {
-    console.error('例外が発生しました:', e);
+    console.error(e);
     throw e;
   }
 };

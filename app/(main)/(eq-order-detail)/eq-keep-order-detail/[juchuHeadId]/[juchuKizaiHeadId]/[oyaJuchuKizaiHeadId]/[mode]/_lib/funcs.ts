@@ -789,8 +789,7 @@ export const getKeepJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHeadI
         console.error('受注ヘッダーが存在しません');
         return null;
       }
-      console.error('GetEqHeader juchuKizaiHead error : ', error);
-      throw error;
+      throw new Error('[selectKeepJuchuKizaiHead] DBエラー:', { cause: error });
     }
 
     if (data.oya_juchu_kizai_head_id === null) {
@@ -883,7 +882,7 @@ export const updKeepJuchuKizaiHead = async (
     await updateKeepJuchuKizaiHead(updateData, connection);
     return true;
   } catch (e) {
-    console.error('Exception while updating juchu kizai head:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -902,8 +901,7 @@ export const getKeepJuchuKizaiMeisai = async (
   try {
     const { data: keepData, error: keepError } = await selectKeepJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId);
     if (keepError) {
-      console.error('GetKeeoEqList keep eqList error : ', keepError);
-      throw keepError;
+      throw new Error('[selectKeepJuchuKizaiMeisai] DBエラー:', { cause: keepError });
     }
 
     const eqIds = [...new Set(keepData.map((data) => data.kizai_id))];
@@ -911,14 +909,12 @@ export const getKeepJuchuKizaiMeisai = async (
     const { data: mKizai, error: mKizaiError } = await selectMeisaiEqts(eqIds);
 
     if (mKizaiError) {
-      console.error('GetEqList eqShozokuId error : ', mKizaiError);
-      throw mKizaiError;
+      throw new Error('[selectMeisaiEqts] DBエラー:', { cause: mKizaiError });
     }
 
     const { data: oyaData, error: oyaError } = await selectOyaJuchuKizaiMeisai(juchuHeadId, oyaJuchuKizaiHeadId);
     if (oyaError) {
-      console.error('GetKeeoEqList oya eqList error : ', oyaError);
-      throw oyaError;
+      throw new Error('[selectOyaJuchuKizaiMeisai] DBエラー:', { cause: oyaError });
     }
 
     const keepJuchuKizaiMeisaiData: KeepJuchuKizaiMeisaiValues[] = keepData.map((d) => ({
@@ -975,7 +971,7 @@ export const addKeepJuchuKizaiMeisai = async (
     await insertJuchuKizaiMeisai(newData, connection);
     return true;
   } catch (e) {
-    console.error('Exception while adding keep kizai meisai:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -1011,7 +1007,7 @@ export const updKeepJuchuKizaiMeisai = async (
     }
     return true;
   } catch (e) {
-    console.error('Exception while updating keep juchu kizai meisai:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -1060,14 +1056,12 @@ export const getKeepJuchuContainerMeisai = async (
       juchuKizaiHeadId
     );
     if (containerError) {
-      console.error('GetKeepContainerList keep containerList error : ', containerError);
-      throw containerError;
+      throw new Error('[selectJuchuContainerMeisai] DBエラー:', { cause: containerError });
     }
 
     const { data: oyaData, error: oyaError } = await selectJuchuContainerMeisai(juchuHeadId, oyaJuchuKizaiHeadId);
     if (oyaError) {
-      console.error('GetKeepCOntainerList oya containerList error : ', oyaError);
-      throw oyaError;
+      throw new Error('[selectJuchuContainerMeisai] DBエラー:', { cause: oyaError });
     }
 
     const keepJuchuContainerMeisaiData: KeepJuchuContainerMeisaiValues[] = containerData.map((d) => ({
@@ -1138,7 +1132,7 @@ export const addKeepJuchuContainerMeisai = async (
     await insertJuchuContainerMeisai(mergeData, connection);
     return true;
   } catch (e) {
-    console.error('Exception while adding keep container meisai:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -1190,7 +1184,7 @@ export const updKeepJuchuContainerMeisai = async (
     }
     return true;
   } catch (e) {
-    console.error('Exception while updating keep juchu container meisai:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -1265,7 +1259,7 @@ export const addShukoDen = async (
     await insertNyushukoDen(mergeData, connection);
     return true;
   } catch (e) {
-    console.error('Exception while adding keep shuko den:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -1323,7 +1317,7 @@ export const updShukoDen = async (
     }
     return true;
   } catch (e) {
-    console.error('Exception while updating keep shuko den:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -1364,7 +1358,7 @@ export const addNyukoDen = async (
     await insertNyushukoDen(newData, connection);
     return true;
   } catch (e) {
-    console.error('Exception while adding keep nyuko den:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -1407,7 +1401,7 @@ export const updNyukoDen = async (
     }
     return true;
   } catch (e) {
-    console.error('Exception while updating keep nyuko den:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -1461,7 +1455,7 @@ export const upsShukoDen = async (
   try {
     await upsertNyushukoDen(mergeData, connection);
   } catch (e) {
-    console.error('Exception while updating shuko den:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -1499,7 +1493,7 @@ export const upsNyukoDen = async (
   try {
     await upsertNyushukoDen(newData, connection);
   } catch (e) {
-    console.error('Exception while updating nyuko den:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -1557,7 +1551,7 @@ export const addCtnShukoDen = async (
 
     return true;
   } catch (e) {
-    console.error('Exception while adding ctn shuko den:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -1617,7 +1611,7 @@ export const updCtnShukoDen = async (
 
     return true;
   } catch (e) {
-    console.error('Exception while update ctn shuko den:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -1658,7 +1652,7 @@ export const addCtnNyukoDen = async (
 
     return true;
   } catch (e) {
-    console.error('Exception while adding ctn nyuko den:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -1700,7 +1694,7 @@ export const updCtnNyukoDen = async (
     }
     return true;
   } catch (e) {
-    console.error('Exception while update ctn nyuko den:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -1754,7 +1748,7 @@ export const upsCtnShukoDen = async (
   try {
     await upsertNyushukoDen(mergeData, connection);
   } catch (e) {
-    console.error('Exception while updating ctn shuko den:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -1792,7 +1786,7 @@ export const upsCtnNyukoDen = async (
   try {
     await upsertNyushukoDen(upsertCtnNyukoData, connection);
   } catch (e) {
-    console.error('Exception while updating ctn nyuko den:', e);
+    console.error(e);
     throw e;
   }
 };

@@ -21,7 +21,7 @@ export const selectIdoDenMaxId = async () => {
       .limit(1)
       .single();
   } catch (e) {
-    throw e;
+    throw new Error('[selectIdoDenMaxId] DBエラー:', { cause: e });
   }
 };
 
@@ -50,7 +50,7 @@ export const insertIdoDen = async (data: IdoDen[], connection: PoolClient) => {
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[insertIdoDen] DBエラー:', { cause: e });
   }
 };
 
@@ -100,7 +100,7 @@ export const updateIdoDen = async (data: IdoDen, connection: PoolClient) => {
   try {
     await connection.query(query, allValues);
   } catch (e) {
-    throw e;
+    throw new Error('[updateIdoDen] DBエラー:', { cause: e });
   }
 };
 
@@ -127,6 +127,6 @@ export const deleteIdoDen = async (
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteIdoDen] DBエラー:', { cause: e });
   }
 };

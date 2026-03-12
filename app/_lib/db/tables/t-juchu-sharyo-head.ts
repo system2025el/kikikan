@@ -38,7 +38,7 @@ export const selectJuchuSharyoMeisai = async (juchuHeadId: number, sharyoHeadId:
   try {
     return pool.query(query, [juchuHeadId, sharyoHeadId]);
   } catch (e) {
-    throw e;
+    throw new Error('[selectJuchuSharyoMeisai] DBエラー:', { cause: e });
   }
 };
 
@@ -73,7 +73,7 @@ export const insertJuchuSharyoHead = async (data: JuchuSharyoHeadDBValues, conne
   try {
     return await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[insertJuchuSharyoHead] DBエラー:', { cause: e });
   }
 };
 
@@ -100,7 +100,7 @@ export const updJuchuSharyoHeadDB = async (data: JuchuSharyoHeadDBValues, connec
   try {
     await connection.query(query, [...values, juchu_head_id, juchu_sharyo_head_id]);
   } catch (e) {
-    throw e;
+    throw new Error('[updJuchuSharyoHeadDB] DBエラー:', { cause: e });
   }
 };
 
@@ -135,7 +135,7 @@ export const deleteJuchuSharyoHead = async (
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteJuchuSharyoHead] DBエラー:', { cause: e });
   }
 };
 
@@ -206,6 +206,6 @@ export const selectWeeklyList = async (queries: { start: string; count: number }
 
     return (await pool.query(query, values)).rows;
   } catch (e) {
-    throw e;
+    throw new Error('[selectWeeklyList] DBエラー:', { cause: e });
   }
 };

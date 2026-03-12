@@ -48,8 +48,7 @@ export const getNyukoEqptDetail = async (
       if (error.code === 'PGRST116') {
         return null;
       }
-      console.error('getNyukoEqptDetail error : ', error);
-      throw error;
+      throw new Error('[selectNyushukoDetailOne] DBエラー:', { cause: error });
     }
 
     const nyukoEqptDetailData: NyukoEqptDetailValues = {
@@ -110,8 +109,7 @@ export const getNyukoEqptDetailTable = async (
     );
 
     if (error) {
-      console.error('getNyukoEqptDetailTable error : ', error);
-      throw error;
+      throw new Error('[selectNyushukoEqptDetail] DBエラー:', { cause: error });
     }
 
     const nyukoEqptDetailTableData: NyukoEqptDetailTableValues[] = data.map((d) => ({
@@ -272,7 +270,7 @@ export const getNyukoFixFlag = async (
       if (error.code === 'PGRST116') {
         return false;
       }
-      throw error;
+      throw new Error('[selectSagyoIdFilterNyushukoFixFlag] DBエラー:', { cause: error });
     }
 
     return data.sagyo_fix_flg === 0 ? false : true;

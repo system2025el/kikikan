@@ -59,6 +59,6 @@ export const insertEqptHistory = async (data: EqptsMasterDialogValues, id: numbe
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[insertEqptHistory] DBエラー:', { cause: e });
   }
 };

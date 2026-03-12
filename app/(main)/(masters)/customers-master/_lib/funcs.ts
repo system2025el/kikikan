@@ -22,8 +22,7 @@ export const getFilteredCustomers = async (query: string | undefined = '') => {
   try {
     const { data, error } = await selectFilteredCustomers(query);
     if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[selectFilteredCustomers] DBエラー:', { cause: error });
     }
     if (!data || data.length === 0) {
       return [];
@@ -43,7 +42,7 @@ export const getFilteredCustomers = async (query: string | undefined = '') => {
     }));
     return filteredCustomers;
   } catch (e) {
-    console.error('例外が発生しました:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -57,8 +56,7 @@ export const getChosenCustomer = async (id: number) => {
   try {
     const { data, error } = await selectOneCustomer(id);
     if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[selectOneCustomer] DBエラー:', { cause: error });
     }
     if (!data) {
       return emptyCustomer;
@@ -86,7 +84,7 @@ export const getChosenCustomer = async (id: number) => {
     };
     return CustomerDetails;
   } catch (e) {
-    console.error('例外が発生しました:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -100,8 +98,7 @@ export const getChosenCustomerIdAndName = async (id: number) => {
   try {
     const { data, error } = await selectOneCustomer(id);
     if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[selectOneCustomer] DBエラー:', { cause: error });
     }
     if (!data) {
       return {
@@ -149,7 +146,7 @@ export const getChosenCustomerIdAndName = async (id: number) => {
     };
     return CustomerDetails;
   } catch (e) {
-    console.error('例外が発生しました:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -163,7 +160,7 @@ export const addNewCustomer = async (data: CustomersMasterDialogValues, user: st
     await insertNewCustomer(data, user);
     await revalidatePath('/customers-master');
   } catch (error) {
-    console.error('DB接続エラー', error);
+    console.error(error);
     throw error;
   }
 };
@@ -202,7 +199,7 @@ export const updateCustomer = async (rawData: CustomersMasterDialogValues, id: n
     await upDateCustomerDB(updateData);
     await revalidatePath('/customer-master');
   } catch (error) {
-    console.error('例外が発生', error);
+    console.error(error);
     throw error;
   }
 };
@@ -216,8 +213,7 @@ export const getChosenCustomerName = async (id: number) => {
   try {
     const { data, error } = await selectOneCustomer(id);
     if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[selectOneCustomer] DBエラー:', { cause: error });
     }
     if (!data) {
       return null;
@@ -225,7 +221,7 @@ export const getChosenCustomerName = async (id: number) => {
     const CustomerNam: string = data.kokyaku_nam;
     return CustomerNam;
   } catch (e) {
-    console.error('例外が発生しました:', e);
+    console.error(e);
     throw e;
   }
 };

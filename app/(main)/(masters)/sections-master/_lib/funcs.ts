@@ -21,8 +21,7 @@ export const getSectionShortSelections = async () => {
   try {
     const { data, error } = await selectActiveSections();
     if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[selectActiveSections] DBエラー:', { cause: error });
     }
     if (!data || data.length === 0) {
       return [];
@@ -30,7 +29,7 @@ export const getSectionShortSelections = async () => {
 
     return data.map((d) => ({ id: d.section_nam_short, label: d.section_nam_short }));
   } catch (e) {
-    console.error('例外が発生しました:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -43,8 +42,7 @@ export const getSectionSelections = async () => {
   try {
     const { data, error } = await selectActiveSections();
     if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[selectActiveSections] DBエラー:', { cause: error });
     }
     if (!data || data.length === 0) {
       return [];
@@ -52,7 +50,7 @@ export const getSectionSelections = async () => {
 
     return data.map((d) => ({ id: d.section_id, label: d.section_nam }));
   } catch (e) {
-    console.error('例外が発生しました:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -66,8 +64,7 @@ export const getFilteredSections = async (query: string = '') => {
   try {
     const { data, error } = await selectFilteredSections(query);
     if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[selectFilteredSections] DBエラー:', { cause: error });
     }
     if (!data || data.length === 0) {
       return [];
@@ -82,7 +79,7 @@ export const getFilteredSections = async (query: string = '') => {
     }));
     return filteredSections;
   } catch (e) {
-    console.error('例外が発生しました:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -96,8 +93,7 @@ export const getChosenSection = async (id: number) => {
   try {
     const { data, error } = await selectOneSection(id);
     if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[selectOneSection] DBエラー:', { cause: error });
     }
     if (!data) {
       return emptySection;
@@ -110,7 +106,7 @@ export const getChosenSection = async (id: number) => {
     };
     return sectionDetails;
   } catch (e) {
-    console.error('例外が発生しました:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -124,7 +120,7 @@ export const addNewSection = async (data: SectionsMasterDialogValues, user: stri
     await insertNewSection(data, user);
     await revalidatePath('/sections-master');
   } catch (error) {
-    console.error('DB接続エラー', error);
+    console.error(error);
     throw error;
   }
 };
@@ -147,10 +143,13 @@ export const updateSection = async (rawData: SectionsMasterDialogValues, id: num
   };
 
   try {
-    await upDateSectionDB(updateDate);
+    const { error } = await upDateSectionDB(updateDate);
+    if (error) {
+      throw new Error('[upDateSectionDB] DBエラー:', { cause: error });
+    }
     await revalidatePath('/sections-master');
   } catch (error) {
-    console.error('例外が発生しました', error);
+    console.error(error);
     throw error;
   }
 };

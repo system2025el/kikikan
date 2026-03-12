@@ -32,7 +32,7 @@ export const insertBillMeisaiHead = async (data: SeikyuMeisaiHead[], connection:
   try {
     await connection.query(query, billValues);
   } catch (e) {
-    throw e;
+    throw new Error('[insertBillMeisaiHead] DBエラー:', { cause: e });
   }
 };
 
@@ -66,7 +66,7 @@ export const updateBillMeisaiHead = async (data: SeikyuMeisaiHead[], connection:
   try {
     await connection.query(updateQuery, updateMeisaiHeadValues);
   } catch (e) {
-    throw e;
+    throw new Error('[updateBillMeisaiHead] DBエラー:', { cause: e });
   }
 };
 
@@ -90,7 +90,7 @@ export const selectBillMeisaiHead = async (id: number) => {
       .eq('seikyu_head_id', id)
       .order('dsp_ord_num');
   } catch (e) {
-    throw e;
+    throw new Error('[selectBillMeisaiHead] DBエラー:', { cause: e });
   }
 };
 
@@ -112,6 +112,6 @@ export const deleteBillMeisaiHeads = async (
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteBillMeisaiHeads] DBエラー:', { cause: e });
   }
 };

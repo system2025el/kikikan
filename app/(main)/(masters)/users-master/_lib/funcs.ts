@@ -43,7 +43,7 @@ export const getFilteredUsers = async (query: string = '') => {
     }));
     return filteredUsers;
   } catch (e) {
-    console.error('例外が発生しました:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -96,7 +96,7 @@ export const getChosenUser = async (mailAdr: string) => {
     };
     return UserDetails;
   } catch (e) {
-    console.error('例外が発生しました:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -147,7 +147,7 @@ export const addNewUser = async (data: UsersMasterDialogValues, user: string) =>
     }
     await connection.query('COMMIT');
   } catch (error) {
-    console.error('DB接続エラー', error);
+    console.error(error);
     await connection.query('ROLLBACK');
     throw error;
   } finally {
@@ -185,7 +185,7 @@ export const updateUser = async (currentEmail: string, data: UsersMasterDialogVa
     await upDateUserDB(updateData, connection);
     await connection.query('COMMIT');
   } catch (error) {
-    console.error('例外が発生', error);
+    console.error(error);
     await connection.query('ROLLBACK');
     throw error;
   } finally {
@@ -202,8 +202,7 @@ export const deleteUsers = async (mailAdr: string, user: string) => {
   try {
     const { data: users, error: listError } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 });
     if (listError) {
-      console.error(listError);
-      throw listError;
+      throw new Error('[supabaseAdmin.auth.admin.listUsers] DBエラー:', { cause: listError });
     }
     const targetUser = users.users.find((u) => u.email === mailAdr);
     if (!targetUser) {
@@ -224,8 +223,7 @@ export const deleteUsers = async (mailAdr: string, user: string) => {
 
     const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(userId);
     if (deleteError) {
-      console.error('削除失敗:', deleteError.message);
-      throw deleteError;
+      throw new Error('[supabaseAdmin.auth.admin.deleteUser] DBエラー:', { cause: deleteError });
     }
     await connection.query('COMMIT');
   } catch (e) {
@@ -271,12 +269,12 @@ export const restoreUsers = async (mailAdr: string, user: string) => {
     // });
 
     if (error) {
-      console.error('登録失敗:', error.message);
-      throw error;
+      throw new Error('[supabase.auth.signUp] DBエラー:', { cause: error });
     }
     await connection.query('COMMIT');
   } catch (e) {
     await connection.query('ROLLBACK');
+    console.error('登録失敗', e);
     throw e;
   } finally {
     connection.release();
@@ -318,13 +316,12 @@ export const restoreUsersAndShainCod = async (mailAdr: string, shainCod: string 
     // });
 
     if (error) {
-      console.error('登録失敗:', error.message);
-      await connection.query('ROLLBACK');
-      throw error;
+      throw new Error('[supabase.auth.signUp] DBエラー:', { cause: error });
     }
     await connection.query('COMMIT');
   } catch (e) {
     await connection.query('ROLLBACK');
+    console.error('登録失敗', e);
     throw e;
   } finally {
     connection.release();

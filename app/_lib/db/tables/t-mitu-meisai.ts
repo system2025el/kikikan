@@ -29,7 +29,7 @@ export const insertQuotMeisai = async (data: MituMeisai[], connection: PoolClien
   try {
     await connection.query(query, quotValues);
   } catch (e) {
-    throw e;
+    throw new Error('[insertQuotMeisai] DBエラー:', { cause: e });
   }
 };
 
@@ -64,7 +64,7 @@ export const updateQuotMeisai = async (data: MituMeisai[], connection: PoolClien
     // 更新処理実行
     await connection.query(updateQuery, updateMeisaiValues);
   } catch (e) {
-    throw e;
+    throw new Error('[updateQuotMeisai] DBエラー:', { cause: e });
   }
 };
 /**
@@ -83,7 +83,7 @@ export const selectQuotMeisai = async (id: number) => {
       .eq('mitu_head_id', id)
       .order('dsp_ord_num');
   } catch (e) {
-    throw e;
+    throw new Error('[selectQuotMeisai] DBエラー:', { cause: e });
   }
 };
 
@@ -106,6 +106,6 @@ export const deleteQuotMeisai = async (
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteQuotMeisai] DBエラー:', { cause: e });
   }
 };

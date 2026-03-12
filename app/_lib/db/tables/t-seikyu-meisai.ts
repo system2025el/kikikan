@@ -27,7 +27,7 @@ export const insertBillMeisai = async (data: SeikyuMeisai[], connection: PoolCli
   try {
     await connection.query(query, billValues);
   } catch (e) {
-    throw e;
+    throw new Error('[insertBillMeisai] DBエラー:', { cause: e });
   }
 };
 
@@ -62,7 +62,7 @@ export const updateBillMeisai = async (data: SeikyuMeisai[], connection: PoolCli
     // 更新処理実行
     await connection.query(updateQuery, updateMeisaiValues);
   } catch (e) {
-    throw e;
+    throw new Error('[updateBillMeisai] DBエラー:', { cause: e });
   }
 };
 /**
@@ -81,7 +81,7 @@ export const selectBillMeisai = async (id: number) => {
       .eq('seikyu_head_id', id)
       .order('dsp_ord_num');
   } catch (e) {
-    throw e;
+    throw new Error('[selectBillMeisai] DBエラー:', { cause: e });
   }
 };
 
@@ -104,6 +104,6 @@ export const deleteBillMeisai = async (
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteBillMeisai] DBエラー:', { cause: e });
   }
 };

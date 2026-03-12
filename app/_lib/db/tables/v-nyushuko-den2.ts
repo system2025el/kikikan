@@ -73,7 +73,7 @@ export const selectFilteredShukoList = async (queries: ShukoListSearchValues) =>
   try {
     return (await pool.query(query)).rows;
   } catch (e) {
-    throw e;
+    throw new Error('[selectFilteredShukoList] DBエラー:', { cause: e });
   }
 };
 
@@ -134,7 +134,7 @@ export const selectFilteredNyukoList = async (queries: NyukoListSearchValues) =>
   try {
     return (await pool.query(query)).rows;
   } catch (e) {
-    throw e;
+    throw new Error('[selectFilteredNyukoList] DBエラー:', { cause: e });
   }
 };
 

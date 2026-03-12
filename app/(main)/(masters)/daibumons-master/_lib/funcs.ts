@@ -21,8 +21,7 @@ export const getFilteredDaibumons = async (query: string = '') => {
   try {
     const { data, error } = await selectFilteredDaibumons(query);
     if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[selectFilteredDaibumons] DBエラー:', { cause: error });
     }
     if (!data || data.length === 0) {
       return [];
@@ -37,7 +36,7 @@ export const getFilteredDaibumons = async (query: string = '') => {
     }));
     return filteredDaibumons;
   } catch (e) {
-    console.error('例外が発生しました:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -51,8 +50,7 @@ export const getChosenDaibumon = async (id: number) => {
   try {
     const { data, error } = await selectOneDaibumon(id);
     if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[selectOneDaibumon] DBエラー:', { cause: error });
     }
     if (!data) {
       return emptyDaibumon;
@@ -65,7 +63,7 @@ export const getChosenDaibumon = async (id: number) => {
     };
     return daibumonDetails;
   } catch (e) {
-    console.error('予期せぬ例外が発生しました:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -81,7 +79,7 @@ export const addNewDaibumon = async (data: DaibumonsMasterDialogValues, user: st
     await revalidatePath('/daibumons-master');
     await revalidatePath('/eqpt-master');
   } catch (error) {
-    console.error('DB接続エラー', error);
+    console.error(error);
     throw error;
   }
 };
@@ -107,7 +105,7 @@ export const updateDaibumon = async (rawData: DaibumonsMasterDialogValues, id: n
     await revalidatePath('/daibumons-master');
     await revalidatePath('/eqpt-master');
   } catch (error) {
-    console.error('例外が発生', error);
+    console.error(error);
     throw error;
   }
 };

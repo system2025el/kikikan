@@ -33,6 +33,7 @@ export const getShukoList = async (startDate: string, totalDays: number) => {
     }));
     return EqTableData;
   } catch (e) {
+    console.error(e);
     throw e;
   }
 };
@@ -67,7 +68,7 @@ export const getVehiclesList = async (startDate: string, totalDays: number) => {
     }));
     return EqTableData;
   } catch (e) {
-    console.error('Exception while selecting dashboard eqlist:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -104,7 +105,7 @@ export const getMinusZaikoList = async (startDate: string, totalDays: number): P
 
     return MinusZikoData;
   } catch (e) {
-    console.error('Exception while selecting minus zaiko list:', e);
+    console.error(e);
     throw e;
   }
 };

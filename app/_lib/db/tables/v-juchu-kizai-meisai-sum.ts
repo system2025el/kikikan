@@ -48,6 +48,6 @@ export const selectIdoJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiH
     //   .eq('juchu_kizai_head_id', juchuKizaiHeadId)
     //   .not('kizai_id', 'is', null);
   } catch (e) {
-    throw e;
+    throw new Error('[selectIdoJuchuKizaiMeisai] DBエラー:', { cause: e });
   }
 };

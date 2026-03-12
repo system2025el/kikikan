@@ -59,6 +59,6 @@ export const selectFilteredQuot = async ({
   try {
     return await builder;
   } catch (e) {
-    throw e;
+    throw new Error('[selectFilteredQuot] DBエラー:', { cause: e });
   }
 };

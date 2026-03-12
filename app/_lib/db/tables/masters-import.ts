@@ -193,8 +193,7 @@ export const checkRfid = async (list: RfidImportTypes[], connection: PoolClient,
       await updateMasterUpdates('m_rfid', connection);
     }
   } catch (e) {
-    console.error('例外が発生：DBエラーrfid', e);
-    throw new Error('例外が発生：DBエラーrfid');
+    throw new Error('[checkRfid] DBエラー:', { cause: e });
   } finally {
     refreshVRfid().catch((err) => {
       console.error('バックグラウンドでのマテビュー更新に失敗:', err);
@@ -317,8 +316,7 @@ export const checkKizai = async (list: KizaiImportTypes[], connection: PoolClien
 
     return allResultRows;
   } catch (e) {
-    console.error('例外が発生：DBエラーkizai', e);
-    throw new Error('例外が発生：DBエラーkizai');
+    throw new Error('[checkKizai] DBエラー:', { cause: e });
   }
 };
 
@@ -368,7 +366,7 @@ export const checkDaibumon = async (list: string[], connection: PoolClient, user
     }
     return [];
   } catch (e) {
-    throw new Error('例外が発生：DBエラーdaibumon');
+    throw new Error('[checkDaibumon] DBエラー:', { cause: e });
   }
 };
 
@@ -419,7 +417,7 @@ export const checkShukeibumon = async (list: string[], connection: PoolClient, u
     }
     return [];
   } catch (e) {
-    throw new Error('例外が発生：DBエラーshukeibumon');
+    throw new Error('[checkShukeibumon] DBエラー:', { cause: e });
   }
 };
 
@@ -497,7 +495,7 @@ export const checkBumon = async (
     }
     return [];
   } catch (e) {
-    throw new Error('例外が発生：DBエラーbumon');
+    throw new Error('[checkBumon] DBエラー:', { cause: e });
   }
 };
 
@@ -545,7 +543,6 @@ export const checkTanaban = async (list: TanabanImportTypes[], connection: PoolC
 
     return result.rows;
   } catch (e) {
-    console.error('棚番マスタでエラー', e);
-    throw new Error('例外が発生：DBエラーtanaban');
+    throw new Error('[checkTanaban] DBエラー:', { cause: e });
   }
 };

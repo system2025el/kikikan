@@ -30,6 +30,6 @@ export const deleteIdoResult = async (
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteIdoResult] DBエラー:', { cause: e });
   }
 };

@@ -96,8 +96,7 @@ export const getShukoDetailTable = async (
     );
 
     if (error) {
-      console.error('getShukoDetailTable error : ', error);
-      throw error;
+      throw new Error('[selectNyushukoDetail] DBエラー:', { cause: error });
     }
 
     const shukoDetailTableData: ShukoDetailTableValues[] = data.map((d) => ({
@@ -183,7 +182,6 @@ export const updShukoDetail = async (
   userNam: string
 ) => {
   if (shukoDetailTableData.length === 0) {
-    console.error('No data to update');
     return;
   }
 
@@ -223,10 +221,10 @@ export const updShukoDetail = async (
           //nyushuko_basho_id: shukoDetailData.nyushukoBashoId,
         });
         if (shukoDataError) {
-          throw shukoDataError;
+          throw new Error('[selectJuchuKizaiNyushukoConfirm] DBエラー:', { cause: shukoDataError });
         }
         if (nyukoDataError) {
-          throw nyukoDataError;
+          throw new Error('[selectJuchuKizaiNyushukoConfirm] DBエラー:', { cause: nyukoDataError });
         }
 
         if (nyukoDat.length === 2) {
@@ -384,7 +382,7 @@ export const upsNyushukoDen = async (
 
     return true;
   } catch (e) {
-    console.error('Exception while updating nyushuko den:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -423,7 +421,7 @@ export const upsShukoDen = async (
 
     return true;
   } catch (e) {
-    console.error('Exception while updating shuko den:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -463,7 +461,7 @@ export const upsNyukoDen = async (
 
     return true;
   } catch (e) {
-    console.error('Exception while updating nyuko den:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -518,7 +516,6 @@ export const delShukoFix = async (
   const connection = await pool.connect();
 
   if (shukoDetailTableData.length === 0) {
-    console.error('No data to update');
     return;
   }
 
@@ -564,12 +561,12 @@ export const confirmChildJuchuKizaiHead = async (juchuHeadId: number, juchuKizai
     const { count, error } = await selectChildJuchuKizaiHeadConfirm(juchuHeadId, juchuKizaiHeadIdv);
 
     if (error) {
-      console.error('confirmChildJuchuKizaiHead error : ', error);
-      throw error;
+      throw new Error('[selectChildJuchuKizaiHeadConfirm] DBエラー:', { cause: error });
     }
 
     return count;
   } catch (e) {
+    console.error(e);
     throw e;
   }
 };
@@ -598,7 +595,7 @@ export const updShukoAdjust = async (adjustData: ShukoDetailTableValues[], userN
 
     await connection.query('COMMIT');
   } catch (e) {
-    console.error('Exception while updating nyushuko den adjust:', e);
+    console.error(e);
     await connection.query('ROLLBACK');
     throw e;
   } finally {

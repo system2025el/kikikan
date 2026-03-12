@@ -21,7 +21,7 @@ export const selectIdoDenJuchuMaxId = async () => {
       .limit(1)
       .single();
   } catch (e) {
-    throw e;
+    throw new Error('[selectIdoDenJuchuMaxId] DBエラー:', { cause: e });
   }
 };
 
@@ -53,7 +53,7 @@ export const insertIdoDenJuchu = async (data: IdoDenJuchu[], connection: PoolCli
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[insertIdoDenJuchu] DBエラー:', { cause: e });
   }
 };
 
@@ -110,7 +110,7 @@ export const updateIdoDenJuchu = async (data: IdoDenJuchu, connection: PoolClien
   try {
     await connection.query(query, allValues);
   } catch (e) {
-    throw e;
+    throw new Error('[updateIdoDenJuchu] DBエラー:', { cause: e });
   }
 };
 
@@ -131,7 +131,7 @@ export const deleteIdoDenJuchu = async (idoDenIds: number[], connection: PoolCli
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteIdoDenJuchu] DBエラー:', { cause: e });
   }
 };
 
@@ -153,6 +153,6 @@ export const deleteIdoDenJuchuFromOrder = async (
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteIdoDenJuchuFromOrder] DBエラー:', { cause: e });
   }
 };

@@ -114,8 +114,7 @@ export const getJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHeadId: n
     const juchuKizaiHeadData = await selectJuchuKizaiHead(juchuHeadId, juchuKizaiHeadId);
 
     if (juchuKizaiHeadData.error) {
-      console.error('GetEqHeader juchuKizaiHead error : ', juchuKizaiHeadData.error);
-      throw juchuKizaiHeadData.error;
+      throw new Error('[selectJuchuKizaiHead] DBエラー:', { cause: juchuKizaiHeadData.error });
     }
 
     const juchuDate = await getJuchuKizaiNyushuko(juchuHeadId, juchuKizaiHeadId);
@@ -177,7 +176,7 @@ export const addJuchuKizaiHead = async (
 
     return true;
   } catch (e) {
-    console.error('Error adding new juchuKizaiHead:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -243,8 +242,7 @@ export const getJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId:
     const { data: mKizai, error: mKizaiError } = await selectMeisaiEqts(eqIds);
 
     if (mKizaiError) {
-      console.error('GetEqList eqShozokuId error : ', mKizaiError);
-      throw mKizaiError;
+      throw new Error('[selectMeisaiEqts] DBエラー:', { cause: mKizaiError });
     }
 
     const { data: eqTanka, error: eqTankaError } = await selectJuchuKizaiMeisaiKizaiTanka(
@@ -252,8 +250,7 @@ export const getJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHeadId:
       juchuKizaiHeadId
     );
     if (eqTankaError) {
-      console.error('GetEqHeader eqTanka error : ', eqTankaError);
-      throw eqTankaError;
+      throw new Error('[selectJuchuKizaiMeisaiKizaiTanka] DBエラー:', { cause: eqTankaError });
     }
 
     const juchuKizaiMeisaiData: JuchuKizaiMeisaiValues[] = uniqueEqList.map((d, i) => ({
@@ -313,8 +310,7 @@ export const getIdoJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHead
     const { data: mKizai, error: mKizaiError } = await selectMeisaiEqts(eqIds);
 
     if (mKizaiError) {
-      console.error('GetEqList eqShozokuId error : ', mKizaiError);
-      throw mKizaiError;
+      throw new Error('[selectMeisaiEqts] DBエラー:', { cause: mKizaiError });
     }
 
     const juchuKizaiMeisaiData: IdoJuchuKizaiMeisaiValues[] = uniqueEqList.map((d) => ({
@@ -376,7 +372,7 @@ export const addJuchuKizaiMeisai = async (
 
     return true;
   } catch (e) {
-    console.error('Exception while adding kizai meisai:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -416,7 +412,7 @@ export const updJuchuKizaiMeisai = async (
     }
     return true;
   } catch (e) {
-    console.error('Exception while updating juchu kizai meisai:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -490,7 +486,7 @@ export const addJuchuContainerMeisai = async (
     await insertJuchuContainerMeisai(mergeData, connection);
     return true;
   } catch (e) {
-    console.error('Exception while adding container meisai:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -542,7 +538,7 @@ export const updJuchuContainerMeisai = async (
     }
     return true;
   } catch (e) {
-    console.error('Exception while updating juchu container meisai:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -660,7 +656,7 @@ export const addNyushukoDen = async (
 
     return true;
   } catch (e) {
-    console.error('Exception while adding nyushuko den:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -715,7 +711,7 @@ export const addShukoDen = async (
   try {
     await insertNyushukoDen(mergeData, connection);
   } catch (e) {
-    console.error('Exception while adding shuko den:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -753,7 +749,7 @@ export const addNyukoDen = async (
   try {
     await insertNyushukoDen(newData, connection);
   } catch (e) {
-    console.error('Exception while adding nyuko den:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -853,7 +849,7 @@ export const updNyushukoDen = async (
     }
     return true;
   } catch (e) {
-    console.error('Exception while updating nyushuko den:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -907,7 +903,7 @@ export const upsShukoDen = async (
   try {
     await upsertNyushukoDen(mergeData, connection);
   } catch (e) {
-    console.error('Exception while updating shuko den:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -945,7 +941,7 @@ export const upsNyukoDen = async (
   try {
     await upsertNyushukoDen(newData, connection);
   } catch (e) {
-    console.error('Exception while updating nyuko den:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -1088,7 +1084,7 @@ export const addCtnNyushukoDen = async (
 
     return true;
   } catch (e) {
-    console.error('Exception while adding ctn nyushuko den:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -1146,7 +1142,7 @@ export const addCtnShukoDen = async (
 
     return true;
   } catch (e) {
-    console.error('Exception while adding ctn shuko den:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -1188,7 +1184,7 @@ export const addCtnNyukoDen = async (
 
     return true;
   } catch (e) {
-    console.error('Exception while adding ctn nyuko den:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -1263,7 +1259,7 @@ export const updCtnNyushukoDen = async (
     }
     return true;
   } catch (e) {
-    console.error('Exception while updating ctn nyushuko den:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -1323,7 +1319,7 @@ export const updCtnShukoDen = async (
 
     return true;
   } catch (e) {
-    console.error('Exception while updating ctn shuko den:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -1358,7 +1354,7 @@ export const updCtnNyukoDen = async (
 
     return true;
   } catch (e) {
-    console.error('Exception while adding ctn nyuko den:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -1412,7 +1408,7 @@ export const upsCtnShukoDen = async (
   try {
     await upsertNyushukoDen(mergeData, connection);
   } catch (e) {
-    console.error('Exception while updating ctn shuko den:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -1451,7 +1447,7 @@ export const upsCtnNyukoDen = async (
   try {
     await upsertNyushukoDen(upsertCtnNyukoData, connection);
   } catch (e) {
-    console.error('Exception while updating ctn nyuko den:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -1677,7 +1673,7 @@ export const addIdoDenJuchu = async (
     await insertIdoDenJuchu(mergeData, connection);
     return true;
   } catch (e) {
-    console.error('Exception while adding ido den:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -1738,7 +1734,7 @@ export const updIdoDenJuchu = async (
     }
     return true;
   } catch (e) {
-    console.error('Exception while updating ido den:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -1765,8 +1761,7 @@ export const getHonbanbi = async (juchuHeadId: number, juchuKizaiHeadId: number)
   try {
     const { data, error } = await selectHonbanbi(juchuHeadId, juchuKizaiHeadId);
     if (error) {
-      console.error('GetHonbanbi honbanbi error : ', error);
-      throw error;
+      throw new Error('[selectHonbanbi] DBエラー:', { cause: error });
     }
 
     const juchuKizaiHonbanbiData: JuchuKizaiHonbanbiValues[] = data.map((d) => ({
@@ -1952,8 +1947,7 @@ export const getBumonsForEqptSelection = async () => {
   try {
     const { data, error } = await selectActiveBumons();
     if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[selectActiveBumons] DBエラー:', { cause: error });
     }
     if (!data || data.length === 0) {
       return [];
@@ -1965,7 +1959,7 @@ export const getBumonsForEqptSelection = async () => {
     }));
     return selectElements;
   } catch (e) {
-    console.error('例外が発生しました:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -1987,7 +1981,7 @@ export const checkSetoptions = async (idList: number[]): Promise<number[]> => {
     // return setIdList.map((d) => d.kizai_id);
     return Array.from(new Set(setIdList.map((d) => d.kizai_id)));
   } catch (e) {
-    console.error('例外が発生しました:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -2005,7 +1999,7 @@ export const getEqptsForEqptSelection = async (query: string = ''): Promise<Eqpt
     }
     return data.rows;
   } catch (e) {
-    console.error('例外が発生しました:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -2021,8 +2015,7 @@ export const getSelectedEqpts = async (idList: number[] /* rank: number*/) => {
   try {
     const { data, error } = await selectChosenEqptsDetails(idList);
     if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[selectChosenEqptsDetails] DBエラー:', { cause: error });
     }
     if (!data) return [];
     const selectedEqpts: SelectedEqptsValues[] = data.map((d) => ({
@@ -2051,7 +2044,7 @@ export const getSelectedEqpts = async (idList: number[] /* rank: number*/) => {
     }));
     return selectedEqpts;
   } catch (e) {
-    console.error('例外が発生しました:', e);
+    console.error(e);
     throw e;
   }
 };

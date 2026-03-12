@@ -18,14 +18,14 @@ export const getLocsSelection = async (): Promise<SelectTypes[]> => {
   try {
     const { data, error } = await selectActiveLocations();
     if (error) {
-      console.error('例外発生', error);
-      throw error;
+      throw new Error('[selectActiveLocations] DBエラー:', { cause: error });
     }
     if (!data || data.length === 0) {
       return [];
     }
     return data.map((d) => ({ id: d.koenbasho_id, label: d.koenbasho_nam }));
   } catch (e) {
+    console.error(e);
     throw e;
   }
 };
@@ -39,8 +39,7 @@ export const getFilteredLocs = async (query: string = '') => {
   try {
     const { data, error } = await selectFilteredLocs(query);
     if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[selectFilteredLocs] DBエラー:', { cause: error });
     }
     if (!data || data.length === 0) {
       return [];
@@ -60,7 +59,7 @@ export const getFilteredLocs = async (query: string = '') => {
     }));
     return filteredLocs;
   } catch (e) {
-    console.error('例外が発生しました:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -74,8 +73,7 @@ export const getChosenLoc = async (id: number) => {
   try {
     const { data, error } = await selectOneLoc(id);
     if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[selectOneLoc] DBエラー:', { cause: error });
     }
     if (!data) {
       return emptyLoc;
@@ -96,7 +94,7 @@ export const getChosenLoc = async (id: number) => {
     };
     return locDetails;
   } catch (e) {
-    console.error('例外が発生しました:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -110,7 +108,7 @@ export const addNewLoc = async (data: LocsMasterDialogValues, user: string) => {
     await insertNewLoc(data, user);
     await revalidatePath('/locations-master');
   } catch (error) {
-    console.error('DB接続エラー', error);
+    console.error(error);
     throw error;
   }
 };
@@ -144,7 +142,7 @@ export const updateLoc = async (data: LocsMasterDialogValues, id: number, user: 
     await upDateLocDB(updateData);
     await revalidatePath('/locations-master');
   } catch (error) {
-    console.error('例外が発生', error);
+    console.error(error);
     throw error;
   }
 };

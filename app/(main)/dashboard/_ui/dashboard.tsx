@@ -43,7 +43,6 @@ export const Dashboard = () => {
         setShortageEqpts(shortageData as MinusZaikoValues[]);
       }
     } catch (error) {
-      console.error('Failed to fetch dashboard data:', error);
       setError(error instanceof Error ? error : new Error(String(error)));
     } finally {
       setLoading(false);

@@ -17,7 +17,7 @@ export const selectOneRfid = async (id: string) => {
       .eq('rfid_tag_id', id)
       .maybeSingle();
   } catch (e) {
-    throw e;
+    throw new Error('[selectOneRfid] DBエラー:', { cause: e });
   }
 };
 
@@ -56,7 +56,7 @@ export const selectRfidsOfTheKizai = async (kizaiId: number) => {
   try {
     return await pool.query(query, [kizaiId]);
   } catch (e) {
-    throw e;
+    throw new Error('[selectRfidsOfTheKizai] DBエラー:', { cause: e });
   }
 };
 
@@ -70,6 +70,6 @@ export const selectElNumExists = async (elNum: number) => {
   try {
     return await builder;
   } catch (e) {
-    throw e;
+    throw new Error('[selectElNumExists] DBエラー:', { cause: e });
   }
 };

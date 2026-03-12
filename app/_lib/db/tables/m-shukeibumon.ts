@@ -20,7 +20,7 @@ export const selectActiveShukeibumons = async () => {
       .neq('del_flg', 1)
       .order('shukei_bumon_nam');
   } catch (e) {
-    throw e;
+    throw new Error('[selectActiveShukeibumons] DBエラー:', { cause: e });
   }
 };
 
@@ -44,7 +44,7 @@ export const selectFilteredShukeibumons = async (query: string) => {
   try {
     return await builder;
   } catch (e) {
-    throw e;
+    throw new Error('[selectFilteredShukeibumons] DBエラー:', { cause: e });
   }
 };
 
@@ -62,7 +62,7 @@ export const selectOneShukeibumon = async (id: number) => {
       .eq('shukei_bumon_id', id)
       .single();
   } catch (e) {
-    throw e;
+    throw new Error('[selectOneShukeibumon] DBエラー:', { cause: e });
   }
 };
 
@@ -89,7 +89,7 @@ export const insertNewShukeibumon = async (data: ShukeibumonsMasterDialogValues,
   try {
     await pool.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[insertNewShukeibumon] DBエラー:', { cause: e });
   }
 };
 
@@ -100,12 +100,12 @@ export const insertNewShukeibumon = async (data: ShukeibumonsMasterDialogValues,
  */
 export const upDateShukeibumonDB = async (data: MShukeibumonDBValues) => {
   try {
-    await supabase
+    return await supabase
       .schema(SCHEMA)
       .from('m_shukei_bumon')
       .update({ ...data })
       .eq('shukei_bumon_id', data.shukei_bumon_id);
   } catch (e) {
-    throw e;
+    throw new Error('[upDateShukeibumonDB] DBエラー:', { cause: e });
   }
 };

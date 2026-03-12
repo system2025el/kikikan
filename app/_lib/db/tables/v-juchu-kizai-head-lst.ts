@@ -30,7 +30,7 @@ export const selectJuchuKizaiHeadList = async (juchuHeadId: number) => {
       .eq('juchu_head_id', juchuHeadId)
       .not('juchu_kizai_head_id', 'is', null);
   } catch (e) {
-    throw e;
+    throw new Error('[selectJuchuKizaiHeadList] DBエラー:', { cause: e });
   }
 };
 
@@ -49,7 +49,7 @@ export const selectJuchuKizaiHeadNamList = async (juchuHeadId: number) => {
       .eq('juchu_kizai_head_kbn', 1)
       .not('juchu_kizai_head_id', 'is', null);
   } catch (e) {
-    throw e;
+    throw new Error('[selectJuchuKizaiHeadNamList] DBエラー:', { cause: e });
   }
 };
 
@@ -67,7 +67,7 @@ export const selectPdfJuchuKizaiHead = async (
       .eq('juchu_head_id', juchuHeadId)
       .in('juchu_kizai_head_id', ids);
   } catch (e) {
-    throw e;
+    throw new Error('[selectPdfJuchuKizaiHead] DBエラー:', { cause: e });
   }
 };
 
@@ -275,6 +275,6 @@ export const selectFilteredKizaiHead = async ({
   try {
     return await builder;
   } catch (e) {
-    throw e;
+    throw new Error('[selectFilteredKizaiHead] DBエラー:', { cause: e });
   }
 };

@@ -27,8 +27,7 @@ export const getFilteredBumons = async (
     const { data, error } = bumons;
     const options = { d: doptions, s: soptions };
     if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[selectFilteredBumons] DBエラー:', { cause: error });
     }
     if (!data || data.length === 0) {
       return { data: [], options: options };
@@ -42,7 +41,7 @@ export const getFilteredBumons = async (
     }));
     return { data: filteredbumons, options: options };
   } catch (e) {
-    console.error('例外が発生しました:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -56,8 +55,7 @@ export const getChosenbumon = async (id: number) => {
   try {
     const { data, error } = await selectOneBumon(id);
     if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[selectOneBumon] DBエラー:', { cause: error });
     }
     if (!data) {
       return emptyBumon;
@@ -71,7 +69,7 @@ export const getChosenbumon = async (id: number) => {
     };
     return bumonDetails;
   } catch (e) {
-    console.error('例外が発生しました:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -88,7 +86,7 @@ export const addNewBumon = async (data: BumonsMasterDialogValues, user: string) 
     await revalidatePath('/shukeibumons-master');
     await revalidatePath('/eqpt-master');
   } catch (error) {
-    console.error('DB接続エラー', error);
+    console.error(error);
     throw error;
   }
 };
@@ -118,7 +116,7 @@ export const updateBumon = async (rawData: BumonsMasterDialogValues, id: number,
     await revalidatePath('/shukeibumons-master');
     await revalidatePath('/eqpt-master');
   } catch (error) {
-    console.error('例外が発生しました', error);
+    console.error(error);
     throw error;
   }
 };

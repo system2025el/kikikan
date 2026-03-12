@@ -48,7 +48,7 @@ export const selectJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHead
     //   .not('kizai_id', 'is', null)
     //   .order('dsp_ord_num');
   } catch (e) {
-    throw e;
+    throw new Error('[selectJuchuKizaiMeisai] DBエラー:', { cause: e });
   }
 };
 
@@ -71,7 +71,7 @@ export const selectOyaJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiH
       .not('kizai_id', 'is', null)
       .order('dsp_ord_num');
   } catch (e) {
-    throw e;
+    throw new Error('[selectOyaJuchuKizaiMeisai] DBエラー:', { cause: e });
   }
 };
 
@@ -94,7 +94,7 @@ export const selectKeepJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizai
       .not('kizai_id', 'is', null)
       .order('dsp_ord_num');
   } catch (e) {
-    throw e;
+    throw new Error('[selectKeepJuchuKizaiMeisai] DBエラー:', { cause: e });
   }
 };
 
@@ -117,7 +117,7 @@ export const selectReturnJuchuKizaiMeisai = async (juchuHeadId: number, juchuKiz
       .not('kizai_id', 'is', null)
       .order('dsp_ord_num');
   } catch (e) {
-    throw e;
+    throw new Error('[selectReturnJuchuKizaiMeisai] DBエラー:', { cause: e });
   }
 };
 
@@ -222,9 +222,7 @@ order by
     const result = await pool.query(query, values);
     return result;
   } catch (e) {
-    console.error('selectPdfJuchuKizaiMeisai でエラーが発生しました:', e);
-
-    throw e;
+    throw new Error('[selectPdfJuchuKizaiMeisai] DBエラー:', { cause: e });
   }
 };
 
@@ -345,7 +343,6 @@ export const selectNyukoPdfJuchuKizaiMeisai = async (
       meisai: meisaiResult.rows,
     };
   } catch (e) {
-    console.error('selectNyukoPdfJuchuKizaiMeisai でエラーが発生しました:', e);
-    throw e;
+    throw new Error('[selectNyukoPdfJuchuKizaiMeisai] DBエラー:', { cause: e });
   }
 };

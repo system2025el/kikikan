@@ -134,7 +134,6 @@ export const ShukoList = (/*props: { shukoData: ShukoTableValues[] }*/) => {
       const url = URL.createObjectURL(blob);
       window.open(url);
     } catch (e) {
-      console.error(e);
       setSnackBarMessage('納品書の出力に失敗しました');
       setSnackBarOpen(true);
     } finally {

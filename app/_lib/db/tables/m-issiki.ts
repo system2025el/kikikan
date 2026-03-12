@@ -19,7 +19,7 @@ export const selectActiveIsshikis = async () => {
       .neq('del_flg', 1)
       .order('issiki_nam');
   } catch (e) {
-    throw e;
+    throw new Error('[selectActiveIsshikis] DBエラー:', { cause: e });
   }
 };
 
@@ -38,7 +38,7 @@ export const selectFilteredIsshikis = async () => {
   try {
     return await builder;
   } catch (e) {
-    throw e;
+    throw new Error('[selectFilteredIsshikis] DBエラー:', { cause: e });
   }
 };
 
@@ -69,7 +69,7 @@ export const selectOneIsshiki = async (id: number) => {
     // return await supabase.schema(SCHEMA).from('m_issiki_set').select('kizai_id').eq('issiki_id', id);
     return await pool.query(query, [id]);
   } catch (e) {
-    throw e;
+    throw new Error('[selectOneIsshiki] DBエラー:', { cause: e });
   }
 };
 
@@ -97,7 +97,7 @@ export const insertNewIsshiki = async (data: MIsshikiDBValues, connection: PoolC
   try {
     return await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[insertNewIsshiki] DBエラー:', { cause: e });
   }
 };
 
@@ -114,7 +114,7 @@ export const updateIsshikiDB = async (data: MIsshikiDBValues) => {
       .update({ ...data })
       .eq('issiki_id', data.issiki_id);
   } catch (e) {
-    throw e;
+    throw new Error('[updateIsshikiDB] DBエラー:', { cause: e });
   }
 };
 
@@ -134,8 +134,7 @@ export const updIsshikiDelFlgDB = async (
   try {
     await supabase.schema(SCHEMA).from('m_issiki').update(data).eq('issiki_id', id);
   } catch (e) {
-    console.error(e);
-    throw e;
+    throw new Error('[updIsshikiDelFlgDB] DBエラー:', { cause: e });
   }
 };
 
@@ -152,6 +151,6 @@ export const deleteIsshikiMaster = async (ids: number[], connection: PoolClient)
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteIsshikiMaster] DBエラー:', { cause: e });
   }
 };

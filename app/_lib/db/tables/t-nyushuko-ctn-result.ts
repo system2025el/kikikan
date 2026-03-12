@@ -43,7 +43,7 @@ export const deleteNyushukoCtnResult = async (
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteNyushukoCtnResult] DBエラー:', { cause: e });
   }
 };
 
@@ -67,7 +67,7 @@ export const deleteKizaiIdNyushukoCtnResult = async (
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteKizaiIdNyushukoCtnResult] DBエラー:', { cause: e });
   }
 };
 
@@ -91,7 +91,7 @@ export const deleteAllNyushukoCtnResult = async (
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteAllNyushukoCtnResult] DBエラー:', { cause: e });
   }
 };
 
@@ -116,7 +116,7 @@ export const deleteAllShukoCtnResult = async (
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteAllShukoCtnResult] DBエラー:', { cause: e });
   }
 };
 
@@ -141,7 +141,7 @@ export const deleteAllNyukoCtnResult = async (
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteAllNyukoCtnResult] DBエラー:', { cause: e });
   }
 };
 
@@ -163,6 +163,6 @@ export const deleteNyushukoCtnResultFromOrder = async (
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteNyushukoCtnResultFromOrder] DBエラー:', { cause: e });
   }
 };

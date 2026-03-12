@@ -29,7 +29,7 @@ export const insertBillHead = async (data: SeikyuHead, connection: PoolClient) =
   try {
     return await connection.query(query, quotValues);
   } catch (e) {
-    throw e;
+    throw new Error('[insertBillHead] DBエラー:', { cause: e });
   }
 };
 
@@ -60,7 +60,7 @@ export const updateBillHead = async (data: SeikyuHead, connection: PoolClient) =
   try {
     return await connection.query(updateQuery, quotValues);
   } catch (e) {
-    throw e;
+    throw new Error('[updateBillHead] DBエラー:', { cause: e });
   }
 };
 
@@ -84,7 +84,7 @@ export const selectChosenSeikyu = async (id: number) => {
       .eq('seikyu_head_id', id)
       .single();
   } catch (e) {
-    throw e;
+    throw new Error('[selectChosenSeikyu] DBエラー:', { cause: e });
   }
 };
 
@@ -96,6 +96,6 @@ export const updBillHeadDelFlg = async (ids: number[]) => {
   try {
     await supabase.schema(SCHEMA).from('t_seikyu_head').update({ del_flg: 1 }).in('seikyu_head_id', ids);
   } catch (e) {
-    throw e;
+    throw new Error('[updBillHeadDelFlg] DBエラー:', { cause: e });
   }
 };

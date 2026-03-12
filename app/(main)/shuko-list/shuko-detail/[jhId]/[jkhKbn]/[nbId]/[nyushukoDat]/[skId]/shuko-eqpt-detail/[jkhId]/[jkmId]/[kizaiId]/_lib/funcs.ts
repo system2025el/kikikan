@@ -49,8 +49,7 @@ export const getShukoEqptDetail = async (
       if (error.code === 'PGRST116') {
         return null;
       }
-      console.error('getShukoEqptDetail error : ', error);
-      throw error;
+      throw new Error('[selectNyushukoDetailOne] DBエラー:', { cause: error });
     }
 
     const shukoEqptDetaildata: ShukoEqptDetailValues = {
@@ -111,8 +110,7 @@ export const getShukoEqptDetailTable = async (
     );
 
     if (error) {
-      console.error('getShukoEqptDetailTable error : ', error);
-      throw error;
+      throw new Error('[selectNyushukoEqptDetail] DBエラー:', { cause: error });
     }
 
     const shukoEqptDetailTableData: ShukoEqptDetailTableValues[] = data.map((d) => ({
@@ -232,7 +230,10 @@ export const updShukoResultAdjQty = async (
     upd_user: userNam,
   };
   try {
-    await updateResultAdjQty(updateData);
+    const { error } = await updateResultAdjQty(updateData);
+    if (error) {
+      throw new Error('[updateResultAdjQty] DBエラー:', { cause: error });
+    }
 
     revalidatePath(
       `shuko-list/shuko-detail/${shukoEqptDetailData.juchuHeadId}/${shukoEqptDetailData.juchuKizaiHeadKbnId}/${shukoEqptDetailData.nyushukoBashoId}/${shukoEqptDetailData.nyushukoDat}/${shukoEqptDetailData.sagyoKbnId}`

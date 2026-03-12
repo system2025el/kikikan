@@ -23,7 +23,7 @@ export const selectIdoDen = async (sagyoKbnId: number, sagyoSijiId: number, sagy
       .eq('nyushuko_dat', sagyoDenDat)
       .eq('nyushuko_basho_id', sagyoId);
   } catch (e) {
-    throw e;
+    throw new Error('[selectIdoDen] DBエラー:', { cause: e });
   }
 };
 
@@ -48,6 +48,6 @@ export const selectIdoDenOne = async (
       .eq('kizai_id', kizaiId)
       .single();
   } catch (e) {
-    throw e;
+    throw new Error('[selectIdoDenOne] DBエラー:', { cause: e });
   }
 };

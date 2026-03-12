@@ -15,6 +15,6 @@ export const selectActiveSeikyuSts = async () => {
       .neq('del_flg', 1)
       .order('sts_id');
   } catch (e) {
-    throw e;
+    throw new Error('[selectActiveSeikyuSts] DBエラー:', { cause: e });
   }
 };

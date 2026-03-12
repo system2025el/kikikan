@@ -22,7 +22,7 @@ export const upsertSeikyuDat = async (newData: SeikyuDatJuchuKizai) => {
 
     await supabase.schema(SCHEMA).from('t_seikyu_date_juchu_kizai').insert(newData);
   } catch (e) {
-    throw e;
+    throw new Error('[upsertSeikyuDat] DBエラー:', { cause: e });
   }
 };
 
@@ -98,6 +98,6 @@ export const delAndInsertSeikyuDat = async (data: SeikyuDatJuchuKizai[], connect
     // 実行
     await connection.query(insertQuery, insertValues);
   } catch (e) {
-    throw e;
+    throw new Error('[delAndInsertSeikyuDat] DBエラー:', { cause: e });
   }
 };

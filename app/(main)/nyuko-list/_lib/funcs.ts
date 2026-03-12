@@ -63,8 +63,7 @@ export const getPdfData = async (
   try {
     const { data: juchuHeadData, error: juchuHeadDataError } = await selectPdfJuchuHead(juchuHeadId);
     if (juchuHeadDataError) {
-      console.error('getPdfData selectPdfJuchuHead error : ', juchuHeadDataError);
-      throw new Error(juchuHeadDataError.message);
+      throw new Error('[selectPdfJuchuHead] DBエラー:', { cause: juchuHeadDataError });
     }
 
     const { data: juchuKizaiHeadData, error: juchuKizaiHeadDataError } = await selectPdfJuchuKizaiHead(
@@ -73,8 +72,7 @@ export const getPdfData = async (
       nyushukoBashoId
     );
     if (juchuKizaiHeadDataError) {
-      console.error('getPdfData selectPdfJuchuKizaiHead error : ', juchuKizaiHeadDataError);
-      throw new Error(juchuKizaiHeadDataError.message);
+      throw new Error('[selectPdfJuchuKizaiHead] DBエラー:', { cause: juchuKizaiHeadDataError });
     }
 
     // 関数を実行して結果オブジェクト { header, meisai } を受け取る

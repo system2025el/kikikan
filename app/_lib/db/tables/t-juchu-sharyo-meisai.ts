@@ -30,7 +30,7 @@ export const insertJuchuSharyoMeisai = async (data: JuchuSharyoMeisaiDBValues[],
   try {
     return await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[insertJuchuSharyoMeisai] DBエラー:', { cause: e });
   }
 };
 
@@ -65,7 +65,7 @@ export const deleteJuchuSharyoMeisais = async (
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteJuchuSharyoMeisais] DBエラー:', { cause: e });
   }
 };
 
@@ -95,6 +95,6 @@ export const upsertJuchuSharyoMeisai = async (data: JuchuSharyoMeisaiDBValues[],
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[upsertJuchuSharyoMeisai] DBエラー:', { cause: e });
   }
 };

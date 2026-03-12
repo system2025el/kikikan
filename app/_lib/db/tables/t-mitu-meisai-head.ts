@@ -32,7 +32,7 @@ export const insertQuotMeisaiHead = async (data: MituMeisaiHead[], connection: P
   try {
     await connection.query(query, quotValues);
   } catch (e) {
-    throw e;
+    throw new Error('[insertQuotMeisaiHead] DBエラー:', { cause: e });
   }
 };
 
@@ -66,7 +66,7 @@ export const updateQuoteMeisaiHead = async (data: MituMeisaiHead[], connection: 
   try {
     await connection.query(updateQuery, updateMeisaiHeadValues);
   } catch (e) {
-    throw e;
+    throw new Error('[updateQuoteMeisaiHead] DBエラー:', { cause: e });
   }
 };
 
@@ -86,7 +86,7 @@ export const selectQuotMeisaiHead = async (id: number) => {
       .eq('mitu_head_id', id)
       .order('dsp_ord_num');
   } catch (e) {
-    throw e;
+    throw new Error('[selectQuotMeisaiHead] DBエラー:', { cause: e });
   }
 };
 
@@ -108,6 +108,6 @@ export const deleteQuotMeisaiHeads = async (
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteQuotMeisaiHeads] DBエラー:', { cause: e });
   }
 };

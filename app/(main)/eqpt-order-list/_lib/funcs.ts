@@ -31,8 +31,7 @@ export const getFilteredOrderList = async (
     //
     const { data, error } = await selectFilteredKizaiHead(query);
     if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[selectFilteredKizaiHead] DBエラー:', { cause: error });
     }
     if (!data || data.length === 0) {
       return [];
@@ -52,7 +51,7 @@ export const getFilteredOrderList = async (
       yNyukoDat: d.yard_nyuko_dat ? toJapanTimeString(d.yard_nyuko_dat) : '-',
     }));
   } catch (e) {
-    console.error('例外が発生しました:', e);
+    console.error(e);
     throw e;
   } finally {
   }

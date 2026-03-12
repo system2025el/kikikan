@@ -41,6 +41,6 @@ export const selectNyushukoOne = async (
     const result = await pool.query(queey, values);
     return result.rows;
   } catch (e) {
-    throw e;
+    throw new Error('[selectNyushukoOne] DBエラー:', { cause: e });
   }
 };

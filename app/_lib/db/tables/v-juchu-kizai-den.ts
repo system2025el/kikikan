@@ -10,6 +10,6 @@ export const selectLoanJuchuData = async (kizaiId: number) => {
       )
       .eq('kizai_id', kizaiId);
   } catch (e) {
-    throw e;
+    throw new Error('[selectLoanJuchuData] DBエラー:', { cause: e });
   }
 };

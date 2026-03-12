@@ -20,7 +20,7 @@ export const selectActiveVehs = async () => {
       .neq('dsp_flg', 0)
       .order('sharyo_nam');
   } catch (e) {
-    throw e;
+    throw new Error('[selectActiveVehs] DBエラー:', { cause: e });
   }
 };
 
@@ -38,7 +38,7 @@ export const SelectFilteredVehs = async (/*query: string*/) => {
   try {
     return await builder;
   } catch (e) {
-    throw e;
+    throw new Error('[SelectFilteredVehs] DBエラー:', { cause: e });
   }
 };
 
@@ -56,7 +56,7 @@ export const selectOneVeh = async (id: number) => {
       .eq('sharyo_id', id)
       .single();
   } catch (e) {
-    throw e;
+    throw new Error('[selectOneVeh] DBエラー:', { cause: e });
   }
 };
 
@@ -82,7 +82,7 @@ export const insertNewVeh = async (data: VehsMasterDialogValues, user: string) =
   try {
     await pool.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[insertNewVeh] DBエラー:', { cause: e });
   }
 };
 
@@ -93,12 +93,12 @@ export const insertNewVeh = async (data: VehsMasterDialogValues, user: string) =
  */
 export const upDateVehDB = async (data: MSharyoDBValues) => {
   try {
-    await supabase
+    return await supabase
       .schema(SCHEMA)
       .from('m_sharyo')
       .update({ ...data })
       .eq('sharyo_id', data.sharyo_id);
   } catch (e) {
-    throw e;
+    throw new Error('[upDateVehDB] DBエラー:', { cause: e });
   }
 };

@@ -19,7 +19,7 @@ export const selectLock = async (lockShubetu: number, headId: number) => {
       .eq('head_id', headId)
       .single();
   } catch (e) {
-    throw e;
+    throw new Error('[selectLock] DBエラー:', { cause: e });
   }
 };
 
@@ -32,7 +32,7 @@ export const insertLock = async (data: Lock) => {
   try {
     return await supabase.schema(SCHEMA).from('t_lock').insert(data);
   } catch (e) {
-    throw e;
+    throw new Error('[insertLock] DBエラー:', { cause: e });
   }
 };
 
@@ -50,7 +50,7 @@ export const updateLock = async (data: Lock) => {
       .eq('lock_shubetu', data.lock_shubetu)
       .eq('head_id', data.head_id);
   } catch (e) {
-    throw e;
+    throw new Error('[updateLock] DBエラー:', { cause: e });
   }
 };
 
@@ -63,6 +63,6 @@ export const deleteLock = async (lockShubetu: number, headId: number) => {
   try {
     return await supabase.schema(SCHEMA).from('t_lock').delete().eq('lock_shubetu', lockShubetu).eq('head_id', headId);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteLock] DBエラー:', { cause: e });
   }
 };

@@ -96,10 +96,10 @@ export const getDetailJuchuHead = async (juchuHeadId: number) => {
 
     if (juchuData.error) {
       if (juchuData.error.code === 'PGRST116') {
-        console.error('受注ヘッダーが存在しません', juchuData.error);
+        console.error('受注ヘッダーが存在しません');
         return null;
       }
-      throw new Error('DB接続エラー');
+      throw new Error('[selectJuchuHead] DBエラー:', { cause: juchuData.error });
     }
 
     if (!juchuData.data.kokyaku_id) {
@@ -114,7 +114,7 @@ export const getDetailJuchuHead = async (juchuHeadId: number) => {
         console.error('顧客が存在しません');
         return null;
       }
-      throw new Error('DB接続エラー');
+      throw new Error('[selectKokyaku] DBエラー:', { cause: kokyakuData.error });
     }
     const order: DetailOerValues = {
       juchuHeadId: juchuData.data.juchu_head_id,
@@ -160,11 +160,12 @@ export const getJuchuKizaiHeadMaxId = async (juchuHeadId: number) => {
       if (error.code === 'PGRST116') {
         return null;
       }
-      throw error;
+      throw new Error('[selectJuchuKizaiHeadMaxId] DBエラー:', { cause: error });
     }
     return data;
   } catch (e) {
     console.error(e);
+    throw e;
   }
 };
 
@@ -181,12 +182,12 @@ export const getDic = async (dicId: number) => {
       if (error.code === 'PGRST116') {
         return '';
       }
-      console.error('getDic error: ', error);
-      throw error;
+      throw new Error('[selectDic] DBエラー:', { cause: error });
     }
 
     return data.dic_val as string;
   } catch (e) {
+    console.error(e);
     throw e;
   }
 };
@@ -201,8 +202,7 @@ export const getJuchuKizaiNyushuko = async (juchuHeadId: number, juchuKizaiHeadI
   try {
     const { data, error } = await selectJuchuKizaiNyushuko(juchuHeadId, juchuKizaiHeadId);
     if (error) {
-      console.error('GetEqHeader juchuDate error: ', error);
-      throw error;
+      throw new Error('[selectJuchuKizaiNyushuko] DBエラー:', { cause: error });
     }
 
     const kicsShukoDat =
@@ -264,7 +264,7 @@ export const addJuchuKizaiNyushuko = async (
     try {
       await insertJuchuKizaiNyushuko(newData, connection);
     } catch (e) {
-      console.error('Exception while adding kizai Nyushuko:', e);
+      console.error(e);
       throw e;
     }
   }
@@ -322,7 +322,7 @@ export const updJuchuKizaiNyushuko = async (
         await insertJuchuKizaiNyushuko({ ...data, add_dat: new Date().toISOString(), add_user: userNam }, connection);
       }
     } catch (e) {
-      console.error('Exception while updating kizai nyushuko:', e);
+      console.error(e);
       throw e;
     }
   }
@@ -339,8 +339,7 @@ export const getOyaJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHead
   try {
     const { data: eqList, error: eqListError } = await selectOyaJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadId);
     if (eqListError) {
-      console.error('GetEqList eqList error : ', eqListError);
-      throw eqListError;
+      throw new Error('[selectOyaJuchuKizaiMeisai] DBエラー:', { cause: eqListError });
     }
 
     const uniqueIds = new Set();
@@ -357,8 +356,7 @@ export const getOyaJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHead
     const { data: mKizai, error: mKizaiError } = await selectMeisaiEqts(eqIds);
 
     if (mKizaiError) {
-      console.error('GetEqList eqShozokuId error : ', mKizaiError);
-      throw mKizaiError;
+      throw new Error('[selectMeisaiEqts] DBエラー:', { cause: mKizaiError });
     }
 
     const { data: eqTanka, error: eqTankaError } = await selectJuchuKizaiMeisaiKizaiTanka(
@@ -366,8 +364,7 @@ export const getOyaJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHead
       juchuKizaiHeadId
     );
     if (eqTankaError) {
-      console.error('GetEqHeader eqTanka error : ', eqTankaError);
-      throw eqTankaError;
+      throw new Error('[selectJuchuKizaiMeisaiKizaiTanka] DBエラー:', { cause: eqTankaError });
     }
 
     const juchuKizaiMeisaiData: OyaJuchuKizaiMeisaiValues[] = uniqueEqList.map((d) => ({
@@ -388,6 +385,7 @@ export const getOyaJuchuKizaiMeisai = async (juchuHeadId: number, juchuKizaiHead
     return juchuKizaiMeisaiData;
   } catch (e) {
     console.error(e);
+    throw e;
   }
 };
 
@@ -447,8 +445,7 @@ export const getJuchuContainerMeisai = async (juchuHeadId: number, juchuKizaiHea
     );
 
     if (containerError) {
-      console.error('GetJuchuContainerMeisai containerData error : ', containerError);
-      throw containerError;
+      throw new Error('[selectJuchuContainerMeisai] DBエラー:', { cause: containerError });
     }
 
     const juchuContainerMeisaiData: JuchuContainerMeisaiValues[] = containerData.map((d) => ({
@@ -488,8 +485,7 @@ export const getOyaJuchuContainerMeisai = async (juchuHeadId: number, juchuKizai
     );
 
     if (containerError) {
-      console.error('getOyaJuchuContainerMeisai error : ', containerError);
-      throw containerError;
+      throw new Error('[selectOyaJuchuContainerMeisai] DBエラー:', { cause: containerError });
     }
 
     const oyaJuchuContainerMeisaiData: OyaJuchuContainerMeisaiValues[] = containerData.map((d) => ({
@@ -598,7 +594,7 @@ export const addAllHonbanbi = async (
     await insertAllHonbanbi(newData, connection);
     return true;
   } catch (e) {
-    console.error('Error Add honbanbi:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -629,8 +625,7 @@ export const getNyushukoFixFlag = async (juchuHeadId: number, juchuKizaiHeadId: 
   try {
     const { data, error } = await selectNyushukoFixFlag(juchuHeadId, juchuKizaiHeadId, sagyoKbnId);
     if (error) {
-      console.error('getNyushukoFixFlag error: ', error);
-      throw error;
+      throw new Error('[selectNyushukoFixFlag] DBエラー:', { cause: error });
     }
     const result = data.find((d) => d.sagyo_fix_flg === 1) ? true : false;
     return result;
@@ -680,7 +675,7 @@ export const addDummyNyushukoDen = async (
 
     return true;
   } catch (e) {
-    console.error('Exception while adding dummy nyushuko den:', e);
+    console.error(e);
     throw e;
   }
 };

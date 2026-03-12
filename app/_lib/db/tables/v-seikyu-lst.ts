@@ -64,6 +64,6 @@ export const selectFilteredBills = async (queries: BillSearchValues) => {
   try {
     return await pool.query(query);
   } catch (e) {
-    throw e;
+    throw new Error('[selectFilteredBills] DBエラー:', { cause: e });
   }
 };

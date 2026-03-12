@@ -17,8 +17,7 @@ export const getFilteredVehs = async (query: string = '') => {
     const { data, error } = await SelectFilteredVehs(/*query*/);
 
     if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[SelectFilteredVehs] DBエラー:', { cause: error });
     }
     if (!data || data.length === 0) {
       return [];
@@ -33,7 +32,7 @@ export const getFilteredVehs = async (query: string = '') => {
     }));
     return filteredVehs;
   } catch (e) {
-    console.error('例外が発生しました:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -47,8 +46,7 @@ export const getChosenVeh = async (id: number) => {
   try {
     const { data, error } = await selectOneVeh(id);
     if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[selectOneVeh] DBエラー:', { cause: error });
     }
     if (!data) {
       return emptyVeh;
@@ -61,7 +59,7 @@ export const getChosenVeh = async (id: number) => {
     };
     return VehDetails;
   } catch (e) {
-    console.error('例外が発生しました:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -75,7 +73,7 @@ export const addNewVeh = async (data: VehsMasterDialogValues, user: string) => {
     await insertNewVeh(data, user);
     await revalidatePath('/vehicles-master');
   } catch (error) {
-    console.error('DB接続エラー', error);
+    console.error(error);
     throw error;
   }
 };
@@ -97,10 +95,13 @@ export const updateVeh = async (data: VehsMasterDialogValues, id: number, user: 
     upd_user: user,
   };
   try {
-    await upDateVehDB(updateData);
+    const { error } = await upDateVehDB(updateData);
+    if (error) {
+      throw new Error('[upDateVehDB] DBエラー:', { cause: error });
+    }
     await revalidatePath('/vehicles-master');
   } catch (error) {
-    console.error('例外が発生', error);
+    console.error(error);
     throw error;
   }
 };

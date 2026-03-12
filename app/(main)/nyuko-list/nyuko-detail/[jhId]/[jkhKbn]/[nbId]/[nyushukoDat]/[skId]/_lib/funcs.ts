@@ -105,8 +105,7 @@ export const getNyukoDetailTable = async (
     );
 
     if (error) {
-      console.error('getNyukoDetailTable error : ', error);
-      throw error;
+      throw new Error('[selectNyushukoDetail] DBエラー:', { cause: error });
     }
 
     const nyukoDetailTableData: NyukoDetailTableValues[] = data.map((d) => ({
@@ -510,7 +509,7 @@ export const updNyukoDen = async (
 
     return true;
   } catch (e) {
-    console.error('Exception while updating nyushuko den:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -569,7 +568,7 @@ export const upsShukoDen = async (
 
     return true;
   } catch (e) {
-    console.error('Exception while updating nyushuko den:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -606,7 +605,7 @@ export const updOyaKizaiNyukoDen = async (
       await updateOyaKizaiNyukoDen(data, connection);
     }
   } catch (e) {
-    console.error('Exception while updating nyushuko den:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -692,7 +691,7 @@ export const updOyaCtnNyukoDen = async (
       await updateOyaCtnNyukoDen(data, connection);
     }
   } catch (e) {
-    console.error('Exception while updating nyushuko den:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -739,22 +738,26 @@ export const addNyukoFix = async (
  * @returns 返却受注コンテナ明細データ
  */
 export const getOyaJuchuContainerMeisai = async (juchuHeadId: number, juchuKizaiHeadId: number) => {
-  const { data: containerData, error: containerError } = await selectJuchuContainerMeisai(
-    juchuHeadId,
-    juchuKizaiHeadId
-  );
-  if (containerError) {
-    console.error('GetOyaContainerList containerList error : ', containerError);
-    throw containerError;
-  }
+  try {
+    const { data: containerData, error: containerError } = await selectJuchuContainerMeisai(
+      juchuHeadId,
+      juchuKizaiHeadId
+    );
+    if (containerError) {
+      throw new Error('[selectJuchuContainerMeisai] DBエラー:', { cause: containerError });
+    }
 
-  const oyaJuchuContainerMeisaiData = containerData.map((d) => ({
-    juchuHeadId: d.juchu_head_id ?? 0,
-    juchuKizaiHeadId: d.juchu_kizai_head_id ?? 0,
-    juchuKizaiMeisaiId: d.juchu_kizai_meisai_id ?? 0,
-    kizaiId: d.kizai_id ?? 0,
-    planKicsKizaiQty: d.kics_plan_kizai_qty ? d.kics_plan_kizai_qty : 0,
-    planYardKizaiQty: d.yard_plan_kizai_qty ? d.yard_plan_kizai_qty : 0,
-  }));
-  return oyaJuchuContainerMeisaiData;
+    const oyaJuchuContainerMeisaiData = containerData.map((d) => ({
+      juchuHeadId: d.juchu_head_id ?? 0,
+      juchuKizaiHeadId: d.juchu_kizai_head_id ?? 0,
+      juchuKizaiMeisaiId: d.juchu_kizai_meisai_id ?? 0,
+      kizaiId: d.kizai_id ?? 0,
+      planKicsKizaiQty: d.kics_plan_kizai_qty ? d.kics_plan_kizai_qty : 0,
+      planYardKizaiQty: d.yard_plan_kizai_qty ? d.yard_plan_kizai_qty : 0,
+    }));
+    return oyaJuchuContainerMeisaiData;
+  } catch (e) {
+    console.error(e);
+    throw e;
+  }
 };

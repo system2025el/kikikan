@@ -28,7 +28,7 @@ export const insertQuotHead = async (data: MituHead, connection: PoolClient) => 
   try {
     return await connection.query(query, quotValues);
   } catch (e) {
-    throw e;
+    throw new Error('[insertQuotHead] DBエラー:', { cause: e });
   }
 };
 
@@ -59,7 +59,7 @@ export const updateQuotHead = async (data: MituHead, connection: PoolClient) => 
   try {
     return await connection.query(updateQuery, quotValues);
   } catch (e) {
-    throw e;
+    throw new Error('[updateQuotHead] DBエラー:', { cause: e });
   }
 };
 
@@ -83,8 +83,7 @@ export const selectChosenMitu = async (id: number) => {
       .eq('mitu_head_id', id)
       .single();
   } catch (e) {
-    console.error(e);
-    throw e;
+    throw new Error('[selectChosenMitu] DBエラー:', { cause: e });
   }
 };
 
@@ -96,6 +95,6 @@ export const updQuotHeadDelFlg = async (ids: number[]) => {
   try {
     await supabase.schema(SCHEMA).from('t_mitu_head').update({ del_flg: 1 }).in('mitu_head_id', ids);
   } catch (e) {
-    throw e;
+    throw new Error('[updQuotHeadDelFlg] DBエラー:', { cause: e });
   }
 };

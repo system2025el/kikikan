@@ -30,7 +30,7 @@ export const insertNewIsshikiSetList = async (data: MIsshikiSetDBValues[], conne
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[insertNewIsshikiSetList] DBエラー:', { cause: e });
   }
 };
 
@@ -59,7 +59,7 @@ export const updIsshikiSetDB = async (data: MIsshikiSetDBValues[], connection: P
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[updIsshikiSetDB] DBエラー:', { cause: e });
   }
 };
 
@@ -86,7 +86,7 @@ export const delIsshikiSet = async (idList: { issiki_id: number; kizai_id: numbe
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[delIsshikiSet] DBエラー:', { cause: e });
   }
 };
 
@@ -103,6 +103,6 @@ export const deleteIsshikiSetByIssikiId = async (ids: number[], connection: Pool
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteIsshikiSetByIssikiId] DBエラー:', { cause: e });
   }
 };

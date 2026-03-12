@@ -32,7 +32,7 @@ const Login = () => {
     try {
       const { error } = await supabase.auth.signInWithPassword({ email: data.email, password: data.password });
       if (error) {
-        setError(`メールアドレスかパスワードがちがいます。${error}`);
+        setError('メールアドレスかパスワードがちがいます。');
       } else {
         const user = await getChosenUser(data.email);
         const storeUser = {
@@ -46,7 +46,7 @@ const Login = () => {
         router.push('/dashboard');
       } // ログイン後のページへリダイレクト
     } catch (e) {
-      setError(`ログインに失敗しました。${e}`);
+      setError(`ログインに失敗しました。`);
     }
 
     // if (true) {

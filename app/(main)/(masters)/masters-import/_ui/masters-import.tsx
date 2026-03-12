@@ -62,7 +62,6 @@ export const ImportMaster = () => {
       if (!worksheet) {
         setSnackBarMessage(`指定されたシート(${sheetName})が見つかりませんでした`);
         setSnackBarOpen(true);
-        console.error('指定されたシートが見つかりませんでした');
         return;
       }
       const jsonData: EqptImportRowType[] = utils.sheet_to_json(worksheet, { header: 1 });
@@ -109,7 +108,6 @@ export const ImportMaster = () => {
             setEqptFileName(file.name);
             parsedEqptData.push(result.data);
           } else {
-            console.error(`${file.name}の行 ${index + 1} でバリデーションエラー:`, result.error.issues);
             hasError = true;
             errorRows.push(index + 1);
             // sendLogServer(index + 1, result.error.issues);
@@ -154,7 +152,6 @@ export const ImportMaster = () => {
         setSnackBarOpen(true);
         setEqptData([]);
       } catch (error) {
-        console.error('データの登録中にエラーが発生しました:', error);
         setSnackBarMessage('データの登録中にエラーが発生しました。');
         setSnackBarOpen(true);
       }

@@ -39,8 +39,7 @@ export const getFilteredEqpts = async (
     const { data, error } = kizai;
     const options = { d: doptions, s: soptions, b: boption };
     if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[selectFilteredEqpts] DBエラー:', { cause: error });
     }
     if (!data || data.length === 0) {
       return { data: [], options: options };
@@ -70,7 +69,7 @@ export const getFilteredEqpts = async (
     }));
     return { data: filteredEqpts, options: options };
   } catch (e) {
-    console.error('例外が発生しました:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -86,8 +85,7 @@ export const getChosenEqpt = async (id: number) => {
     const [kizai, qty] = await Promise.all([selectOneEqpt(id), getEqptsQty(id)]);
     const { data, error } = kizai;
     if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[selectOneEqpt] DBエラー:', { cause: error });
     }
     if (!data) {
       return { data: emptyEqpt, qty: qty };
@@ -123,7 +121,7 @@ export const getChosenEqpt = async (id: number) => {
 
     return { data: EqptDetails, qty: qty };
   } catch (e) {
-    console.error('例外が発生しました:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -144,7 +142,7 @@ export const addNewEqpt = async (data: EqptsMasterDialogValues, user: string) =>
   } catch (error) {
     await connection.query('ROLLBACK');
 
-    console.error('DB接続エラー', error);
+    console.error(error);
     throw error;
   } finally {
     connection.release();
@@ -199,7 +197,7 @@ export const updateEqpt = async (
     await connection.query('COMMIT');
   } catch (error) {
     await connection.query('ROLLBACK');
-    console.error('例外が発生しました', error);
+    console.error(error);
     throw error;
   } finally {
     await connection.release();
@@ -214,13 +212,12 @@ export const updateEqpt = async (
 export const getEqptsQty = async (id: number) => {
   try {
     const { data, error } = await selectCountOfTheEqpt(id);
-    if (error || error) {
-      console.error('DB情報取得エラー', error?.message, error?.message);
-      throw new Error('保有数取得エラー');
+    if (error) {
+      throw new Error('[selectCountOfTheEqpt] DBエラー:', { cause: error });
     }
     return { yuko: data.kizai_qty ?? 0, ng: data.kizai_ng_qty ?? 0 };
   } catch (e) {
-    console.error('例外が発生しました:', e);
+    console.error(e);
     throw e;
   }
 };

@@ -31,7 +31,7 @@ export const selectJuchu = async (id: number) => {
       .eq('juchu_head_id', id)
       .single();
   } catch (e) {
-    throw e;
+    throw new Error('[selectJuchu] DBエラー:', { cause: e });
   }
 };
 
@@ -54,7 +54,7 @@ export const selectJuchuHeadIds = async (strDat: string) => {
 
     return await pool.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[selectJuchuHeadIds] DBエラー:', { cause: e });
   }
 };
 
@@ -67,7 +67,7 @@ export const selectPdfJuchuHead = async (juchuHeadId: number) => {
       .eq('juchu_head_id', juchuHeadId)
       .single();
   } catch (e) {
-    throw e;
+    throw new Error('[selectPdfJuchuHead] DBエラー:', { cause: e });
   }
 };
 
@@ -194,6 +194,6 @@ export const selectFilteredJuchus = async (
   try {
     return await builder;
   } catch (e) {
-    throw e;
+    throw new Error('[selectFilteredJuchus] DBエラー:', { cause: e });
   }
 };

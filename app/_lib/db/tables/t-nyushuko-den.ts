@@ -35,7 +35,7 @@ export const insertNyushukoDen = async (data: NyushukoDen[], connection: PoolCli
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[insertNyushukoDen] DBエラー:', { cause: e });
   }
 };
 
@@ -90,7 +90,7 @@ export const updateNyushukoDen = async (data: NyushukoDen, connection: PoolClien
   try {
     await connection.query(query, allValues);
   } catch (e) {
-    throw e;
+    throw new Error('[updateNyushukoDen] DBエラー:', { cause: e });
   }
 };
 
@@ -144,7 +144,7 @@ export const updateNyushukoDenFromKizaiMeisai = async (data: NyushukoDen, connec
   try {
     await connection.query(query, allValues);
   } catch (e) {
-    throw e;
+    throw new Error('[updateNyushukoDenFromKizaiMeisai] DBエラー:', { cause: e });
   }
 };
 
@@ -191,7 +191,7 @@ export const updateOyaKizaiNyukoDen = async (data: NyushukoDen, connection: Pool
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[updateOyaKizaiNyukoDen] DBエラー:', { cause: e });
   }
 };
 
@@ -240,7 +240,7 @@ export const updateOyaCtnNyukoDen = async (data: NyushukoDen, connection: PoolCl
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[updateOyaCtnNyukoDen] DBエラー:', { cause: e });
   }
 };
 
@@ -324,7 +324,7 @@ export const upsertNyushukoDen = async (data: NyushukoDen[], connection: PoolCli
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[upsertNyushukoDen] DBエラー:', { cause: e });
   }
 };
 
@@ -348,7 +348,7 @@ export const deleteAllNyushukoDen = async (juchuHeadId: number, juchuKizaiHeadId
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteAllNyushukoDen] DBエラー:', { cause: e });
   }
 };
 
@@ -373,7 +373,7 @@ export const deleteAllShukoDen = async (juchuHeadId: number, juchuKizaiHeadId: n
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteAllShukoDen] DBエラー:', { cause: e });
   }
 };
 
@@ -405,7 +405,7 @@ export const deleteAllKicsOrYardShukoDen = async (
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteAllKicsOrYardShukoDen] DBエラー:', { cause: e });
   }
 };
 
@@ -430,7 +430,7 @@ export const deleteAllNyukoDen = async (juchuHeadId: number, juchuKizaiHeadId: n
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteAllNyukoDen] DBエラー:', { cause: e });
   }
 };
 
@@ -462,7 +462,7 @@ export const deleteAllKicsOrYardNyukoDen = async (
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteAllKicsOrYardNyukoDen] DBエラー:', { cause: e });
   }
 };
 
@@ -492,7 +492,7 @@ export const deleteNyushukoDen = async (
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteNyushukoDen] DBエラー:', { cause: e });
   }
 };
 
@@ -526,7 +526,7 @@ export const deleteShukoDen = async (
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteShukoDen] DBエラー:', { cause: e });
   }
 };
 
@@ -560,7 +560,7 @@ export const deleteNyukoDen = async (
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteNyukoDen] DBエラー:', { cause: e });
   }
 };
 
@@ -603,7 +603,7 @@ export const deleteKicsOrYardShukoDen = async (
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteKicsOrYardShukoDen] DBエラー:', { cause: e });
   }
 };
 
@@ -646,7 +646,7 @@ export const deleteKicsOrYardNyukoDen = async (
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteKicsOrYardNyukoDen] DBエラー:', { cause: e });
   }
 };
 
@@ -673,7 +673,7 @@ export const selectContainerNyushukoDenConfirm = async (data: {
       .eq('kizai_id', data.kizai_id)
       .eq('sagyo_id', data.sagyo_id);
   } catch (e) {
-    throw e;
+    throw new Error('[selectContainerNyushukoDenConfirm] DBエラー:', { cause: e });
   }
 };
 
@@ -712,7 +712,7 @@ export const deleteContainerNyushukoDen = async (
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteContainerNyushukoDen] DBエラー:', { cause: e });
   }
 };
 
@@ -766,7 +766,7 @@ export const updateResultAdjQty = async (data: NyushukoDen) => {
   //       ${whereClause}
   //   `;
   try {
-    await supabase
+    return await supabase
       .schema(SCHEMA)
       .from('t_nyushuko_den')
       .update(data)
@@ -778,7 +778,7 @@ export const updateResultAdjQty = async (data: NyushukoDen) => {
       .eq('kizai_id', data.kizai_id)
       .eq('sagyo_id', data.sagyo_id);
   } catch (e) {
-    throw e;
+    throw new Error('[updateResultAdjQty] DBエラー:', { cause: e });
   }
 };
 
@@ -800,6 +800,6 @@ export const deleteNyushukoDenFromOrder = async (
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteNyushukoDenFromOrder] DBエラー:', { cause: e });
   }
 };
