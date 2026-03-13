@@ -19,73 +19,38 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     setIsHydrated(true);
   }, []);
 
-  useEffect(() => {
-    const handleStorageChange = (event: StorageEvent) => {
-      // 他のタブで 'user-storage' キーに変更があったかチェック
-      if (event.key === 'user-storage') {
-        if (!event.newValue || event.newValue.includes('"user":null')) {
-          clearUser();
-          router.replace('/login');
-        }
-      }
-    };
-
-    // 他のタブでのlocalStorage操作を監視
-    window.addEventListener('storage', handleStorageChange);
-
-    // さらに、タブに戻ってきた時にも念のため同期（ブラウザバック対策）
-    const handleFocus = () => {
-      if (!localStorage.getItem('user-storage') && user) {
-        clearUser();
-        router.replace('/login');
-      }
-    };
-    window.addEventListener('focus', handleFocus);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('focus', handleFocus);
-    };
-  }, [user, clearUser, router]);
-
-  useEffect(() => {
-    // ハイドレーション（ストレージ読み込み）が終わるまで何もしない
-    if (!isHydrated) return;
-
-    // (main) の layout で使うなら、本来 user がいない時点でアウト
-    if (!user) {
-      router.replace('/login');
-    }
-
-    const checkAuth = async () => {
-      if (!user) {
-        router.replace('/login');
-        return;
-      }
-
-      // const session = await sessionCheck();
-
-      const {
-        data: { user: sessionUser },
-      } = await supabase.auth.getUser();
-      if (!sessionUser) {
-        router.replace('/login');
-      }
-    };
-    checkAuth();
-  }, [user, isHydrated, router]);
-
   // useEffect(() => {
-  //   if (!isHydrated) return;
+  //   const handleStorageChange = (event: StorageEvent) => {
+  //     // 他のタブで 'user-storage' キーに変更があったかチェック
+  //     if (event.key === 'user-storage') {
+  //       if (!event.newValue || event.newValue.includes('"user":null')) {
+  //         clearUser();
+  //         router.replace('/login');
+  //       }
+  //     }
+  //   };
 
-  //   const {
-  //     data: { subscription },
-  //   } = supabase.auth.onAuthStateChange((event, session) => {
-  //     if (event === 'SIGNED_OUT') {
+  //   // 他のタブでのlocalStorage操作を監視
+  //   window.addEventListener('storage', handleStorageChange);
+
+  //   // さらに、タブに戻ってきた時にも念のため同期（ブラウザバック対策）
+  //   const handleFocus = () => {
+  //     if (!localStorage.getItem('user-storage') && user) {
   //       clearUser();
   //       router.replace('/login');
   //     }
-  //   });
+  //   };
+  //   window.addEventListener('focus', handleFocus);
+
+  //   return () => {
+  //     window.removeEventListener('storage', handleStorageChange);
+  //     window.removeEventListener('focus', handleFocus);
+  //   };
+  // }, [user, clearUser, router]);
+
+  // useEffect(() => {
+  //   // ハイドレーション（ストレージ読み込み）が終わるまで何もしない
+  //   if (!isHydrated) return;
 
   //   const checkAuth = async () => {
   //     if (!user) {
@@ -93,23 +58,53 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
   //       return;
   //     }
 
+  //     // const session = await sessionCheck();
+
   //     const {
   //       data: { user: sessionUser },
-  //       error,
   //     } = await supabase.auth.getUser();
-
-  //     if (error || !sessionUser) {
-  //       console.error('Auth error or session missing:', error);
-
-  //       clearUser();
+  //     if (!sessionUser) {
   //       router.replace('/login');
   //     }
   //   };
-
   //   checkAuth();
+  // }, [user, isHydrated, router]);
 
-  //   return () => subscription.unsubscribe();
-  // }, [isHydrated, user, router, clearUser]);
+  useEffect(() => {
+    if (!isHydrated) return;
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT') {
+        clearUser();
+        router.replace('/login');
+      }
+    });
+
+    const checkAuth = async () => {
+      if (!user) {
+        await supabase.auth.signOut();
+        router.replace('/login');
+        return;
+      }
+
+      const {
+        data: { user: sessionUser },
+        error,
+      } = await supabase.auth.getUser();
+
+      if (error || !sessionUser) {
+        clearUser();
+        await supabase.auth.signOut();
+        router.replace('/login');
+      }
+    };
+
+    checkAuth();
+
+    return () => subscription.unsubscribe();
+  }, [isHydrated, user, router, clearUser]);
 
   // --- レンダリング・ブロック ---
 

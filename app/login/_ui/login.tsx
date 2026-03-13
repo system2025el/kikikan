@@ -16,10 +16,12 @@ import { UserSchema, UserValues } from '../_lib/types';
 
 const Login = () => {
   const router = useRouter();
+  const user = useUserStore((state) => state.user);
   const setUser = useUserStore((state) => state.setUser);
   const clearUser = useUserStore((state) => state.clearUser);
 
   const [error, setError] = useState<string>('');
+  const [isHydrated, setIsHydrated] = useState(false);
 
   const { control, handleSubmit } = useForm({
     mode: 'onSubmit',
@@ -27,6 +29,10 @@ const Login = () => {
     resolver: zodResolver(UserSchema),
     defaultValues: { email: '', password: '' },
   });
+
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
 
   const onSubmit = async (data: UserValues) => {
     //const { error } = await login(data);
@@ -82,22 +88,35 @@ const Login = () => {
     router.push('/dashboard');
   };
 
+  // useEffect(() => {
+  //   // const hash = window.location.hash;
+  //   // const params = new URLSearchParams(hash.slice(1)); // '#' を除いてパース！
+  //   // const access_token = params.get('access_token');
+  //   // const refresh_token = params.get('refresh_token');
+  //   // if (access_token && refresh_token) {
+  //   //   setSession(access_token, refresh_token);
+  //   // }
+  //   const initializeAuth = async () => {
+  //     // await handleLogout();
+  //     await supabase.auth.signOut();
+  //     clearUser();
+  //   };
+  //   initializeAuth();
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, []);
+
   useEffect(() => {
-    // const hash = window.location.hash;
-    // const params = new URLSearchParams(hash.slice(1)); // '#' を除いてパース！
-    // const access_token = params.get('access_token');
-    // const refresh_token = params.get('refresh_token');
-    // if (access_token && refresh_token) {
-    //   setSession(access_token, refresh_token);
-    // }
-    const initializeAuth = async () => {
-      // await handleLogout();
-      await supabase.auth.signOut();
-      clearUser();
+    if (!isHydrated) return;
+    const checkUser = async () => {
+      const {
+        data: { user: authUser },
+      } = await supabase.auth.getUser();
+      if (authUser && user) {
+        router.push('/dashboard');
+      }
     };
-    initializeAuth();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    checkUser();
+  }, [isHydrated, user, router, clearUser]);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
