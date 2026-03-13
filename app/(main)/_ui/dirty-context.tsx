@@ -5,6 +5,10 @@ import { Box, Button, Dialog, DialogActions, DialogContentText, DialogTitle } fr
 import { usePathname, useRouter } from 'next/navigation';
 import { createContext, useContext, useEffect, useState, useTransition } from 'react';
 
+import { supabase } from '@/app/_lib/db/supabase';
+import { serverErrorLog } from '@/app/_lib/funcs';
+import { useUserStore } from '@/app/_lib/stores/usestore';
+
 type DirtyContextType = {
   isDirty: boolean;
   setIsDirty: (val: boolean) => void;
@@ -18,6 +22,7 @@ const DirtyContext = createContext<DirtyContextType | undefined>(undefined);
 
 export const DirtyProvider = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
+  const clearUser = useUserStore((state) => state.clearUser);
   //const pathname = usePathname();
   //const user = useUserStore((state) => state.user);
   const [isDirty, setIsDirty] = useState(false);
@@ -37,8 +42,12 @@ export const DirtyProvider = ({ children }: { children: React.ReactNode }) => {
       //   setLock(null);
       // }
 
-      startTransition(() => {
-        router.push(path);
+      startTransition(async () => {
+        if (path === '/login') {
+          await executeLogout();
+        } else {
+          router.push(path);
+        }
       });
     }
   };
@@ -50,12 +59,35 @@ export const DirtyProvider = ({ children }: { children: React.ReactNode }) => {
     // }
     if (isPending) return;
     if (pendingPath) {
-      startTransition(() => {
+      startTransition(async () => {
         setIsDirty(false);
-        router.push(pendingPath);
         setShowDialog(false);
+
+        if (pendingPath === '/login') {
+          await executeLogout();
+        } else {
+          router.push(pendingPath);
+        }
+
         setPendingPath(null);
       });
+    }
+  };
+
+  const executeLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        throw new Error(`[supabase.auth.signOut] エラー: ${error.message}`);
+      }
+      clearUser();
+
+      router.refresh();
+      router.replace('/login');
+    } catch (e) {
+      const errorLog = e as Error;
+      await serverErrorLog(errorLog.message);
+      console.error('ログアウトエラー：', e);
     }
   };
 

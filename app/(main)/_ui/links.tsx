@@ -397,7 +397,7 @@ export default function NavLinks() {
           ))}
         </List>
       </Collapse> */}
-      <ListItemButton onClick={() => handleNavigation('/')} disabled={isPending}>
+      <ListItemButton onClick={() => handleNavigation('/login')} disabled={isPending}>
         <ListItemIcon>
           <StopSharpIcon />
         </ListItemIcon>
