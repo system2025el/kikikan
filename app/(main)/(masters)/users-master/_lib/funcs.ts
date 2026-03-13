@@ -58,7 +58,8 @@ export const getChosenUser = async (mailAdr: string) => {
     const { rows } = await selectOneUser(mailAdr);
 
     if (!rows || rows.length === 0) {
-      return emptyUser;
+      console.error('ユーザが見つかりません');
+      return null;
     }
     // permissionを２進数に戻す
     //const biString = rows[0].permission.toString(2).padStart(8, 0);

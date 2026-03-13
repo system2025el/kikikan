@@ -1,5 +1,5 @@
 'use server';
 
-export const serverErrorLog = (errorLog: Error) => {
-  console.error(errorLog);
+export const serverErrorLog = async (errorMessage: string) => {
+  console.error(errorMessage);
 };

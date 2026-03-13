@@ -32,14 +32,16 @@ const Login = () => {
     //const { error } = await login(data);
     try {
       const { error } = await supabase.auth.signInWithPassword({ email: data.email, password: data.password });
+      const user = await getChosenUser(data.email);
       if (error) {
-        const errorLog = new Error('[supabase.auth.signInWithPassword] DBエラー:', { cause: error });
-        serverErrorLog(errorLog);
+        const errorLog = new Error('[supabase.auth.signInWithPassword] DBエラー');
+        serverErrorLog(errorLog.message);
+        setError('メールアドレスかパスワードがちがいます。');
+      } else if (!user) {
         setError('メールアドレスかパスワードがちがいます。');
       } else {
-        const user = await getChosenUser(data.email);
         const storeUser = {
-          id: FAKE_NEW_ID,
+          id: user.shainCod ?? '',
           name: user.tantouNam,
           email: user.mailAdr,
           permission: user.permission,
@@ -49,8 +51,8 @@ const Login = () => {
         router.push('/dashboard');
       } // ログイン後のページへリダイレクト
     } catch (e) {
-      const errorLog = new Error('ログインエラー:', { cause: e });
-      serverErrorLog(errorLog);
+      const errorLog = e as Error;
+      await serverErrorLog(errorLog.message);
       setError(`ログインに失敗しました。`);
     }
 
@@ -64,7 +66,7 @@ const Login = () => {
 
   const handleMockClick = () => {
     const mockUser = {
-      id: 1,
+      id: '1',
       name: 'test_user',
       email: 'test@example,com',
       permission: {
