@@ -28,7 +28,7 @@ export const getWeeklyScheduleList = async (query: WeeklySearchValues): Promise<
 
   if (startDate && endDate) {
     // start, endどちらも入力されているとき
-    count = dayjs(endDate).tz('Asia/Tokyo').diff(dayjs(startDate), 'day') + 1;
+    count = dayjs(endDate).tz('Asia/Tokyo').diff(dayjs(startDate), 'day');
     date = toJapanYMDString(startDate, '-');
   } else if (!startDate && endDate) {
     // endだけ入力されているとき
