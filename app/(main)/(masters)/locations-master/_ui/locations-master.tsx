@@ -63,7 +63,6 @@ export const LocationsMaster = () => {
   /** 検索ボタン押下 */
   const onSubmit = async (data: { query: string | undefined }) => {
     setIsLoading(true);
-    console.log('data : ', data, 'locs : ', locs);
     try {
       const newList = await getFilteredLocs(data.query!);
       setPage(1);
@@ -72,7 +71,6 @@ export const LocationsMaster = () => {
       setError(e instanceof Error ? e : new Error(String(e)));
     }
     setIsLoading(false);
-    console.log('Locs : ', locs);
   };
 
   /** 詳細ダイアログを開く関数 */

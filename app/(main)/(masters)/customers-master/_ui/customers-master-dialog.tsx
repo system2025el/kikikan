@@ -82,8 +82,6 @@ export const CustomersMasterDialog = ({
   /* フォームを送信 */
   const onSubmit = async (data: CustomersMasterDialogValues) => {
     setIsLoading(true);
-    console.log('isDarty : ', isDirty);
-    console.log(data);
     if (customerId === FAKE_NEW_ID) {
       // 新規の時
       try {
@@ -144,7 +142,6 @@ export const CustomersMasterDialog = ({
 
   /* ×ぼたんを押したとき */
   const handleClickClose = () => {
-    console.log('isDirty : ', isDirty);
     if (isDirty) {
       setDirtyOpen(true);
     } else {
@@ -172,7 +169,6 @@ export const CustomersMasterDialog = ({
 
   /* useEffect --------------------------------------- */
   useEffect(() => {
-    console.log('★★★★★★★★★★★★★★★★★★★★★');
     const getThatOneCustomer = async () => {
       if (customerId === FAKE_NEW_ID) {
         // 新規追加モード

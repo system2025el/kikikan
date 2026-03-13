@@ -88,12 +88,12 @@ export const selectFilteredBillingSituations = async (queries: BillingStsSearchV
         } else if (selectedDate.range?.from) {
           // fromだけの場合
           const startOfDay = dayjs(selectedDate.range.from).tz('Asia/Tokyo').startOf('day').toISOString();
-          console.log('start of the day: ', startOfDay);
+
           builder.or(`${dateColumn}.gte.${startOfDay},${dateColumn}.gte.${startOfDay}`);
         } else if (selectedDate.range?.to) {
           // toだけの場合
           const nextDay = dayjs(selectedDate.range.to).tz('Asia/Tokyo').add(1, 'day').startOf('day').toISOString();
-          console.log('start of the next day: ', nextDay);
+
           builder.or(`${dateColumn}.lt.${nextDay},${dateColumn}.lt.${nextDay}`);
         }
         break;
@@ -125,7 +125,7 @@ export const selectFilteredBillingSituations = async (queries: BillingStsSearchV
   try {
     return await builder;
   } catch (e) {
-    throw e;
+    throw new Error('[selectFilteredBillingSituations] DBエラー:', { cause: e });
   }
 };
 
@@ -140,7 +140,7 @@ export const selectFilteredJuchusForBill = async (queries: {
   tantouNam: string | null;
 }) => {
   const { kokyakuId, date, tantouNam } = queries;
-  console.log(queries);
+
   let query = `
     SELECT
       v.juchu_head_id,
@@ -225,7 +225,7 @@ export const selectFilteredJuchusForBill = async (queries: {
   try {
     return await pool.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[selectFilteredJuchusForBill] DBエラー:', { cause: e });
   }
 };
 
@@ -240,7 +240,7 @@ export const selectFilteredJuchuDetailsForBill = async (queries: {
   tantouNam: string | null;
 }) => {
   const { kokyakuId, date, tantouNam } = queries;
-  console.log(queries);
+
   let query = `
       SELECT
         v.juchu_head_id,
@@ -322,7 +322,7 @@ export const selectFilteredJuchuDetailsForBill = async (queries: {
   try {
     return await pool.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[selectFilteredJuchuDetailsForBill] DBエラー:', { cause: e });
   }
 };
 
@@ -355,7 +355,7 @@ export const selectJuchuKizaiHeadNamListFormBill = async (queries: {
   try {
     return await builder;
   } catch (e) {
-    throw e;
+    throw new Error('[selectJuchuKizaiHeadNamListFormBill] DBエラー:', { cause: e });
   }
 };
 
@@ -437,7 +437,7 @@ export const selectJuchuKizaiMeisaiHeadForBill = async (juchuId: number, kizaiHe
   try {
     return await pool.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[selectJuchuKizaiMeisaiHeadForBill] DBエラー:', { cause: e });
   }
 };
 
@@ -516,7 +516,7 @@ export const selectJuchuKizaiMeisaiDetailsForBill = async (juchuId: number, kiza
   try {
     return await pool.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[selectJuchuKizaiMeisaiDetailsForBill] DBエラー:', { cause: e });
   }
 };
 
@@ -535,6 +535,6 @@ export const selectUnbilledCusts = async (query: string) => {
   try {
     return await builder;
   } catch (e) {
-    throw e;
+    throw new Error('[selectUnbilledCusts] DBエラー:', { cause: e });
   }
 };

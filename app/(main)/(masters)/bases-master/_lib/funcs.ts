@@ -23,13 +23,14 @@ export const getBasesSelections = async (): Promise<SelectTypes[]> => {
     const { data, error } = await selectActiveShozokus();
 
     if (error) {
-      console.error(error.message, error.hint, error.cause, error.details);
+      throw new Error('[selectActiveShozokus] DBエラー:', { cause: error });
     }
     if (!data || data.length === 0) {
       return [];
     }
     return data.map((d) => ({ id: d.shozoku_id, label: d.shozoku_nam }));
   } catch (e) {
+    console.error(e);
     throw e;
   }
 };
@@ -43,8 +44,7 @@ export const getFilteredBases = async (query: string = '') => {
   try {
     const { data, error } = await selectFilteredShozokus(query);
     if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[selectFilteredShozokus] DBエラー:', { cause: error });
     }
     if (!data || data.length === 0) {
       return [];
@@ -56,10 +56,9 @@ export const getFilteredBases = async (query: string = '') => {
       tblDspId: index + 1,
       delFlg: Boolean(d.del_flg),
     }));
-    console.log(filteredBases.length, '行');
     return filteredBases;
   } catch (e) {
-    console.error('例外が発生しました:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -73,8 +72,7 @@ export const getChosenBase = async (id: number) => {
   try {
     const { data, error } = await selectOneShozoku(id);
     if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[selectOneShozoku] DBエラー:', { cause: error });
     }
     if (!data) {
       return emptyBase;
@@ -85,10 +83,9 @@ export const getChosenBase = async (id: number) => {
       mem: data.mem,
       delFlg: Boolean(data.del_flg),
     };
-    console.log(baseDetails.delFlg);
     return baseDetails;
   } catch (e) {
-    console.error('例外が発生しました:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -102,7 +99,7 @@ export const addNewBase = async (data: BasesMasterDialogValues, user: string) =>
     await insertNewShozoku(data, user);
     await revalidatePath('/bases-master');
   } catch (error) {
-    console.log('DB接続エラー', error);
+    console.error(error);
     throw error;
   }
 };
@@ -123,13 +120,12 @@ export const updateBase = async (rawData: BasesMasterDialogValues, id: number, u
     upd_dat: date,
     upd_user: user,
   };
-  console.log(updateData.shozoku_nam);
 
   try {
     await upDateShozokuDB(updateData);
     await revalidatePath('/bases-master');
   } catch (error) {
-    console.log('例外が発生', error);
+    console.error(error);
     throw error;
   }
 };

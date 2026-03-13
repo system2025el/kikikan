@@ -115,7 +115,6 @@ export const EqptSelectionDialog = ({
           // セットオプションがない時
           // 親機材(blankQty: 0)として配列に保持する
           const data = await getSelectedEqpts(selectedEqptIds);
-          console.log('最終的に渡される機材の配列データ: ', data!);
           setEqpts(data!);
           //handleCloseDialog();
         }
@@ -161,7 +160,6 @@ export const EqptSelectionDialog = ({
 
   /** 検索ボタン押下時処理 */
   const onSubmit = async (data: { query: string }) => {
-    console.log('Push search', data.query);
     setIsLoading(true);
     setSearching(true);
     setSelectedBumon(-100);
@@ -172,11 +170,9 @@ export const EqptSelectionDialog = ({
       if (lockResult) {
         if (data.query.trim() === '') {
           const a = await getEqptsForEqptSelection('');
-          console.log('機材リスト[0]: ', a![0]);
           setTheEqpts(a!);
         } else {
           const a = await getEqptsForEqptSelection(data.query);
-          console.log('機材リスト[0]: ', a![0]);
           setTheEqpts(a!);
         }
       }
@@ -194,7 +190,6 @@ export const EqptSelectionDialog = ({
     const getEqpts = async () => {
       try {
         const a = await getEqptsForEqptSelection('');
-        console.log('最初の機材リスト[0]: ', a![0]);
         setTheEqpts(a!);
       } catch (e) {
         setSnackBarMessage('サーバー接続エラー');
@@ -359,7 +354,6 @@ const BundleDialog = ({
   /** 確定ボタン押下時 */
   const handleClickConfirm = async () => {
     setIsLoading(true);
-    console.log('-------------------------セットオプションダイアログ確定ボタン');
     // 今機材が選択されてたら配列にpush
     if (selected && selected.length > 0) {
       const sets = await getSelectedEqpts(selected);
@@ -371,7 +365,6 @@ const BundleDialog = ({
     setSelected([]);
 
     // セットあり機材IDリストの長さでダイアログ続けるか判断
-    console.log('今のインデックス: ', currentIndex, ' 元の親機材の長さ: ', eqptsWSet.length);
     if (currentIndex + 1 < eqptsWSet.length) {
       setIsLoading(true);
       setCurrentIndex(currentIndex + 1);
@@ -384,9 +377,7 @@ const BundleDialog = ({
       // setIsLoading(false);
       // // 選択された機材配列に親機材をpush
       // selectedEqptListRef.current.push(...oya);
-      // console.log('初期表示の時の親機材', selectedEqptListRef.current);
     } else {
-      console.log('選ばれたデータ、親子どっちも', selectedEqptListRef.current);
       handleConfirmAll(selectedEqptListRef.current);
     }
   };
@@ -428,7 +419,6 @@ const BundleDialog = ({
 
           selectedEqptListRef.current.push(...solo);
           selectedEqptListRef.current.push(...oya);
-          console.log('初期表示の時の親機材', selectedEqptListRef.current);
           setIsLoading(false);
         };
         getSet();
@@ -457,7 +447,6 @@ const BundleDialog = ({
         setOyakizaiNam(sets.eqptNam);
         // 選択された機材配列に親機材をpush
         selectedEqptListRef.current.push(...oya);
-        console.log('次の親機材', selectedEqptListRef.current);
         setIsLoading(false);
       };
       getSet();

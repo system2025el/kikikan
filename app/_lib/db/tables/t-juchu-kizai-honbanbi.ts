@@ -24,7 +24,7 @@ export const selectHonbanbi = async (juchuHeadId: number, juchuKizaiHeadId: numb
       .in('juchu_honbanbi_shubetu_id', [10, 20, 30, 40])
       .order('juchu_honbanbi_dat');
   } catch (e) {
-    throw e;
+    throw new Error('[selectHonbanbi] DBエラー:', { cause: e });
   }
 };
 
@@ -52,7 +52,7 @@ export const selectHonbanbiConfirm = async (
       .eq('juchu_honbanbi_dat', juchuHonbanbiDat)
       .single();
   } catch (e) {
-    throw e;
+    throw new Error('[selectHonbanbiConfirm] DBエラー:', { cause: e });
   }
 };
 
@@ -79,7 +79,7 @@ export const insertHonbanbi = async (data: JuchuKizaiHonbanbi, connection: PoolC
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[insertHonbanbi] DBエラー:', { cause: e });
   }
 };
 
@@ -112,7 +112,7 @@ export const insertAllHonbanbi = async (data: JuchuKizaiHonbanbi[], connection: 
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[insertAllHonbanbi] DBエラー:', { cause: e });
   }
 };
 
@@ -163,7 +163,7 @@ export const updateNyushukoHonbanbi = async (data: JuchuKizaiHonbanbi, connectio
   try {
     await connection.query(query, allValues);
   } catch (e) {
-    throw e;
+    throw new Error('[updateNyushukoHonbanbi] DBエラー:', { cause: e });
   }
 };
 
@@ -219,7 +219,7 @@ export const updateHonbanbi = async (data: JuchuKizaiHonbanbi, connection: PoolC
   try {
     await connection.query(query, allValues);
   } catch (e) {
-    throw e;
+    throw new Error('[updateHonbanbi] DBエラー:', { cause: e });
   }
 };
 
@@ -251,7 +251,7 @@ export const deleteHonbanbi = async (
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteHonbanbi] DBエラー:', { cause: e });
   }
 };
 
@@ -276,7 +276,7 @@ export const deleteSiyouHonbanbi = async (juchuHeadId: number, juchuKizaiHeadId:
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteSiyouHonbanbi] DBエラー:', { cause: e });
   }
 };
 
@@ -298,6 +298,6 @@ export const deleteJuchuKizaiHonbanbiFromOrder = async (
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteJuchuKizaiHonbanbiFromOrder] DBエラー:', { cause: e });
   }
 };

@@ -117,7 +117,6 @@ export type ReturnStockTableRowProps = {
 
 const ReturnStockTableRow = React.memo(
   ({ row, index, dateRange }: ReturnStockTableRowProps) => {
-    console.log('stock側描画', index);
     const test: JuchuKizaiHonbanbiValues[] = [];
     return (
       <TableRow>
@@ -128,7 +127,6 @@ const ReturnStockTableRow = React.memo(
               align={'right'}
               style={styles.row}
               sx={{
-                //bgcolor: getStockRowBackgroundColor(cell.calDat, dateRange, test),
                 color: cell.zaikoQty < 0 ? 'red' : 'black',
               }}
               size="small"
@@ -170,7 +168,6 @@ export const ReturnEqTable: React.FC<ReturnEqTableProps> = ({
   const visibleRows = rows.filter((row) => !row.delFlag);
 
   const handleOrderKeyDown = (e: React.KeyboardEvent, rowIndex: number) => {
-    console.log(e.key);
     if (e.key === 'Enter') {
       e.preventDefault();
       inputOrderRefs.current[rowIndex + 1]?.focus();
@@ -316,8 +313,6 @@ const ReturnEqTableRow = React.memo(
     handleOrderKeyDown,
     handleYobiKeyDown,
   }: ReturnEqTableRowProps) => {
-    console.log('描画', rowIndex);
-
     return (
       <TableRow>
         <TableCell sx={{ padding: 0, border: '1px solid black' }}>

@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { supabase } from '@/app/_lib/db/supabase';
+import { serverErrorLog } from '@/app/_lib/funcs';
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 import { getChosenUser } from '@/app/(main)/(masters)/users-master/_lib/funcs';
@@ -28,16 +29,19 @@ const Login = () => {
   });
 
   const onSubmit = async (data: UserValues) => {
-    console.log(data);
     //const { error } = await login(data);
     try {
       const { error } = await supabase.auth.signInWithPassword({ email: data.email, password: data.password });
+      const user = await getChosenUser(data.email);
       if (error) {
-        setError(`メールアドレスかパスワードがちがいます。${error}`);
+        const errorLog = new Error('[supabase.auth.signInWithPassword] DBエラー');
+        serverErrorLog(errorLog.message);
+        setError('メールアドレスかパスワードがちがいます。');
+      } else if (!user) {
+        setError('メールアドレスかパスワードがちがいます。');
       } else {
-        const user = await getChosenUser(data.email);
         const storeUser = {
-          id: FAKE_NEW_ID,
+          id: user.shainCod ?? '',
           name: user.tantouNam,
           email: user.mailAdr,
           permission: user.permission,
@@ -47,7 +51,9 @@ const Login = () => {
         router.push('/dashboard');
       } // ログイン後のページへリダイレクト
     } catch (e) {
-      setError(`ログインに失敗しました。${e}`);
+      const errorLog = e as Error;
+      await serverErrorLog(errorLog.message);
+      setError(`ログインに失敗しました。`);
     }
 
     // if (true) {
@@ -60,7 +66,7 @@ const Login = () => {
 
   const handleMockClick = () => {
     const mockUser = {
-      id: 1,
+      id: '1',
       name: 'test_user',
       email: 'test@example,com',
       permission: {

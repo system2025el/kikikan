@@ -17,14 +17,11 @@ export const getFilteredOrderList = async (
     listSort: { sort: 'shuko', order: 'asc' },
   }
 ): Promise<OrderListTableValues[]> => {
-  console.log(query);
-
   try {
     //
     const { data, error } = await selectFilteredJuchus(query);
     if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[selectFilteredJuchus] DBエラー:', { cause: error });
     }
     if (!data || data.length === 0) {
       return [];
@@ -40,7 +37,7 @@ export const getFilteredOrderList = async (
       kokyakuNam: d.kokyaku_nam ?? '',
     }));
   } catch (e) {
-    console.error('例外が発生しました:', e);
+    console.error(e);
     throw e;
   } finally {
   }

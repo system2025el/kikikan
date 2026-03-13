@@ -68,7 +68,7 @@ export const selectOneBumon = async (id: number) => {
       .eq('bumon_id', id)
       .single();
   } catch (e) {
-    throw e;
+    throw new Error('[selectOneBumon] DBエラー:', { cause: e });
   }
 };
 
@@ -105,7 +105,7 @@ export const insertNewBumon = async (data: BumonsMasterDialogValues, user: strin
   try {
     await pool.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[insertNewBumon] DBエラー:', { cause: e });
   }
 };
 
@@ -122,6 +122,6 @@ export const upDateBumonDB = async (data: MBumonDBValues) => {
       .update({ ...data })
       .eq('bumon_id', data.bumon_id);
   } catch (e) {
-    throw e;
+    throw new Error('[upDateBumonDB] DBエラー:', { cause: e });
   }
 };

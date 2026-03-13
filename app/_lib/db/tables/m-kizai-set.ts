@@ -26,11 +26,9 @@ export const selectBundledEqptIds = async (idList: number[]) => {
     k.dsp_ord_num
 `;
   try {
-    // return await supabase.schema(SCHEMA).from('m_kizai_set').select('kizai_id, set_kizai_id').in('kizai_id', idList);
-
     return await pool.query(query, [idList]);
   } catch (e) {
-    throw e;
+    throw new Error('[selectBundledEqptIds] DBエラー:', { cause: e });
   }
 };
 
@@ -56,7 +54,7 @@ export const selectSetOptions = async (kizaiId: number) => {
   try {
     return await pool.query(query, [kizaiId]);
   } catch (e) {
-    throw e;
+    throw new Error('[selectSetOptions] DBエラー:', { cause: e });
   }
 };
 
@@ -90,7 +88,7 @@ export const selectFilteredEqptSets = async (query: string) => {
   try {
     return await pool.query(queryString, values);
   } catch (e) {
-    throw e;
+    throw new Error('[selectFilteredEqptSets] DBエラー:', { cause: e });
   }
 };
 
@@ -121,7 +119,7 @@ export const selectOneEqptSet = async (id: number) => {
     //   .eq('set_kizai_id', id)
     //   .single();
   } catch (e) {
-    throw e;
+    throw new Error('[selectOneEqptSet] DBエラー:', { cause: e });
   }
 };
 
@@ -148,7 +146,7 @@ export const insertNewEqptSet = async (data: MKizaiSetDBValues[], connection: Po
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[insertNewEqptSet] DBエラー:', { cause: e });
   }
 };
 
@@ -177,7 +175,7 @@ export const updateEqptSetDB = async (data: MKizaiSetDBValues[], connection: Poo
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[updateEqptSetDB] DBエラー:', { cause: e });
   }
 };
 
@@ -186,11 +184,10 @@ export const updateEqptSetDB = async (data: MKizaiSetDBValues[], connection: Poo
  * @param {number} kizaiId 削除対象の親機材ID
  */
 export const deleteEqptSets = async (kizaiId: number) => {
-  console.log('削除削除削除');
   try {
     await supabase.schema(SCHEMA).from('m_kizai_set').delete().eq('kizai_id', kizaiId).select('*');
   } catch (e) {
-    throw e;
+    throw new Error('[deleteEqptSets] DBエラー:', { cause: e });
   }
 };
 
@@ -222,11 +219,9 @@ export const delEqptSetListPg = async (
       (${placeholders})
     `;
 
-  console.log('delete query', query);
-
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[delEqptSetListPg] DBエラー:', { cause: e });
   }
 };

@@ -18,7 +18,7 @@ export const selectActiveBumons = async () => {
       .neq('del_flg', 1)
       .order('kizai_grp_cod');
   } catch (e) {
-    throw e;
+    throw new Error('[selectActiveBumons] DBエラー:', { cause: e });
   }
 };
 
@@ -47,6 +47,6 @@ export const selectFilteredBumons = async (queries: { q: string; d: number | nul
   try {
     return await builder;
   } catch (e) {
-    throw e;
+    throw new Error('[selectFilteredBumons] DBエラー:', { cause: e });
   }
 };

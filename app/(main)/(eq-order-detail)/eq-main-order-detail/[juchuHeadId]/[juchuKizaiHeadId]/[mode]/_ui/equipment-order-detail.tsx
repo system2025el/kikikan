@@ -458,10 +458,8 @@ const EquipmentOrderDetail = (props: {
       JSON.stringify(originJuchuHonbanbiList) === JSON.stringify(juchuHonbanbiList)
     ) {
       setOtherDirty(false);
-      console.log('変更なし');
     } else {
       setOtherDirty(true);
-      console.log('変更あり');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [juchuKizaiMeisaiList, juchuContainerMeisaiList, juchuHonbanbiList]);
@@ -756,7 +754,6 @@ const EquipmentOrderDetail = (props: {
    * @returns
    */
   const onSubmit = async (data: JuchuKizaiHeadValues) => {
-    console.log('保存データ', data);
     if (!user || isProcessing) return;
     setIsProcessing(true);
     setIsLoading(true);
@@ -791,7 +788,6 @@ const EquipmentOrderDetail = (props: {
     );
     // 出庫日から入庫日
     const updateDateRange = getRange(updateShukoDate, updateNyukoDate);
-    console.log('出庫日から入庫日', updateDateRange);
 
     if (!updateShukoDate || !updateNyukoDate) {
       setIsLoading(false);
@@ -2167,7 +2163,6 @@ const EquipmentOrderDetail = (props: {
 
     // 受注機材ヘッダー
     const newJuchuKizaiHead = { ...getValues(), headNam: headNam };
-    console.log('newJuchuKizaiHead', newJuchuKizaiHead);
 
     // 機材id
     const ids = [...new Set(selectEq.map((d) => d.kizaiId))];
@@ -2175,7 +2170,6 @@ const EquipmentOrderDetail = (props: {
     const selectIdoList = idoJuchuKizaiMeisaiList
       .filter((d) => ids.includes(d.kizaiId) && !d.delFlag && d.sagyoDenDat)
       .map((d) => ({ ...d, planKizaiQty: 0, planYobiQty: 0, planQty: 0 }));
-    console.log('selectIdoList', selectIdoList);
 
     const sum = selectEq
       .filter((d) => !d.delFlag)
@@ -2202,7 +2196,6 @@ const EquipmentOrderDetail = (props: {
           }
         : { ...d, delFlag: true }
     );
-    console.log('idoList', idoList);
 
     // コピー処理
     const newJuchuKizaiHeadId = await juchuMeisaiCopy(
@@ -2240,7 +2233,6 @@ const EquipmentOrderDetail = (props: {
 
       if (lockResult) {
         if (otherDirty || isDirty) {
-          console.log(otherDirty, isDirty);
           setAlertTitle('保存されていません');
           setAlertMessage('1度保存をしてください');
           setIsProcessing(false);
@@ -2298,7 +2290,6 @@ const EquipmentOrderDetail = (props: {
 
     // 受注機材ヘッダー
     const newJuchuKizaiHead = { ...getValues(), headNam: headNam };
-    console.log('newJuchuKizaiHead', newJuchuKizaiHead);
 
     // 機材id
     const ids = [...new Set(selectEq.map((d) => d.kizaiId))];
@@ -2308,7 +2299,6 @@ const EquipmentOrderDetail = (props: {
     const selectIdoList = idoData
       .filter((d) => ids.includes(d.kizaiId))
       .map((d) => ({ ...d, planKizaiQty: 0, planYobiQty: 0, planQty: 0 }));
-    console.log('selectIdoList', selectIdoList);
 
     const sum = selectEq
       .filter((d) => !d.delFlag)
@@ -2335,7 +2325,6 @@ const EquipmentOrderDetail = (props: {
           }
         : { ...d, delFlag: true }
     );
-    console.log('idoList', idoList);
 
     // 元データ更新
     const selectDspOrdNum = [...selectEq.map((d) => d.dspOrdNum), ...selectCtn.map((d) => d.dspOrdNum)];

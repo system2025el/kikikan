@@ -34,7 +34,7 @@ export const selectActiveUsers = async () => {
     //   .order('user_nam');
     return (await pool.query(query)).rows;
   } catch (e) {
-    throw e;
+    throw new Error('[selectActiveUsers] DBエラー:', { cause: e });
   }
 };
 
@@ -68,7 +68,7 @@ export const selectFilteredUsers = async (searchQuery: string) => {
   try {
     return await pool.query(query, params);
   } catch (e) {
-    throw e;
+    throw new Error('[selectFilteredUsers] DBエラー:', { cause: e });
   }
 };
 
@@ -91,7 +91,7 @@ export const selectOneUser = async (mailAdr: string) => {
   try {
     return await pool.query(query, [mailAdr]);
   } catch (e) {
-    throw e;
+    throw new Error('[selectOneUser] DBエラー:', { cause: e });
   }
 };
 
@@ -110,7 +110,7 @@ export const insertNewUser = async (data: MUserDBValues, connection: PoolClient)
   try {
     return await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[insertNewUser] DBエラー:', { cause: e });
   }
 };
 
@@ -132,13 +132,11 @@ export const upDateUserDB = async (data: MUserDBValues, connection: PoolClient) 
     RETURNING *;
   `;
 
-  console.log(query);
-
   const values = [data.mail_adr, ...Object.values(rest)];
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[upDateUserDB] DBエラー:', { cause: e });
   }
 };
 
@@ -164,7 +162,7 @@ export const updMUserDelFlg = async (
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[updMUserDelFlg] DBエラー:', { cause: e });
   }
 };
 
@@ -191,7 +189,7 @@ export const updMUserDelFlgAndShainCod = async (
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[updMUserDelFlgAndShainCod] DBエラー:', { cause: e });
   }
 };
 
@@ -209,7 +207,7 @@ export const checkShainCod = async (cod: string) => {
       .neq('del_flg', 1)
       .maybeSingle();
   } catch (e) {
-    throw e;
+    throw new Error('[checkShainCod] DBエラー:', { cause: e });
   }
 };
 
@@ -221,6 +219,6 @@ export const checkMailAdr = async (adr: string) => {
   try {
     return await supabase.schema(SCHEMA).from('m_user').select('*').eq('mail_adr', adr).maybeSingle();
   } catch (e) {
-    throw e;
+    throw new Error('[checkMailAdr] DBエラー:', { cause: e });
   }
 };

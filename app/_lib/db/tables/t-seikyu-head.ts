@@ -12,7 +12,6 @@ import { SeikyuHead } from '../types/t-seikyu-head-type';
  * @returns 新規登録した請求ヘッダID
  */
 export const insertBillHead = async (data: SeikyuHead, connection: PoolClient) => {
-  console.log('請求ヘッド新規：', data);
   if (!data || Object.keys(data).length === 0) {
     throw new Error('請求ヘッダーが空です。');
   }
@@ -30,7 +29,7 @@ export const insertBillHead = async (data: SeikyuHead, connection: PoolClient) =
   try {
     return await connection.query(query, quotValues);
   } catch (e) {
-    throw e;
+    throw new Error('[insertBillHead] DBエラー:', { cause: e });
   }
 };
 
@@ -45,9 +44,9 @@ export const updateBillHead = async (data: SeikyuHead, connection: PoolClient) =
     throw new Error('請求ヘッダーが空です。');
   }
   const quotHeadCols = Object.keys(data);
-  console.log(quotHeadCols);
+
   const quotValues = Object.values(data);
-  console.log(quotValues);
+
   const placeholders = quotValues.map((_, i) => `$${i + 1}`).join(', ');
   const upsetValues = quotHeadCols.filter((i) => i !== 'seikyu_head_id').map((col) => `${col} = EXCLUDED.${col}`);
 
@@ -61,7 +60,7 @@ export const updateBillHead = async (data: SeikyuHead, connection: PoolClient) =
   try {
     return await connection.query(updateQuery, quotValues);
   } catch (e) {
-    throw e;
+    throw new Error('[updateBillHead] DBエラー:', { cause: e });
   }
 };
 
@@ -85,7 +84,7 @@ export const selectChosenSeikyu = async (id: number) => {
       .eq('seikyu_head_id', id)
       .single();
   } catch (e) {
-    throw e;
+    throw new Error('[selectChosenSeikyu] DBエラー:', { cause: e });
   }
 };
 
@@ -97,6 +96,6 @@ export const updBillHeadDelFlg = async (ids: number[]) => {
   try {
     await supabase.schema(SCHEMA).from('t_seikyu_head').update({ del_flg: 1 }).in('seikyu_head_id', ids);
   } catch (e) {
-    throw e;
+    throw new Error('[updBillHeadDelFlg] DBエラー:', { cause: e });
   }
 };

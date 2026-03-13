@@ -36,7 +36,6 @@ export const usePdf = (): [(param: BillHeadValues) => Promise<Blob>] => {
   }, []);
 
   const printBill = async (param: BillHeadValues): Promise<Blob> => {
-    console.log('param', param);
     // PDFドキュメント作成
     const pdfDoc = await PDFDocument.create();
 
@@ -478,7 +477,6 @@ export const usePdf = (): [(param: BillHeadValues) => Promise<Blob>] => {
 
           // テキスト
           const textToDraw = String(cellText);
-          console.log('textToDraw', textToDraw);
           const textWidth = customFont.widthOfTextAtSize(textToDraw, 9);
           let textX: number;
           if (colIndex % 2 === 0) {

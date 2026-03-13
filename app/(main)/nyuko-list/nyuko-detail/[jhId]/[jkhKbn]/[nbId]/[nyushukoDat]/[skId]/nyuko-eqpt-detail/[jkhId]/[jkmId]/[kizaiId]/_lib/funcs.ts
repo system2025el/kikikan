@@ -48,8 +48,7 @@ export const getNyukoEqptDetail = async (
       if (error.code === 'PGRST116') {
         return null;
       }
-      console.error('getNyukoEqptDetail error : ', error);
-      throw error;
+      throw new Error('[selectNyushukoDetailOne] DBエラー:', { cause: error });
     }
 
     const nyukoEqptDetailData: NyukoEqptDetailValues = {
@@ -110,8 +109,7 @@ export const getNyukoEqptDetailTable = async (
     );
 
     if (error) {
-      console.error('getNyukoEqptDetailTable error : ', error);
-      throw error;
+      throw new Error('[selectNyushukoEqptDetail] DBエラー:', { cause: error });
     }
 
     const nyukoEqptDetailTableData: NyukoEqptDetailTableValues[] = data.map((d) => ({
@@ -177,7 +175,6 @@ export const delNyukoResult = async (
         connection
       );
     }
-    console.log('delete nyushuko result', deleteData);
 
     const updateNyushukoDenData: NyushukoDen = {
       juchu_head_id: nyukoEqptDetailData.juchuHeadId,
@@ -193,7 +190,6 @@ export const delNyukoResult = async (
     };
 
     await updateNyushukoDen(updateNyushukoDenData, connection);
-    console.log('update nyushuko den result_qty', nyukoEqptDetailData.resultQty - deleteData.length);
 
     await await connection.query('COMMIT');
     revalidatePath(
@@ -274,7 +270,7 @@ export const getNyukoFixFlag = async (
       if (error.code === 'PGRST116') {
         return false;
       }
-      throw error;
+      throw new Error('[selectSagyoIdFilterNyushukoFixFlag] DBエラー:', { cause: error });
     }
 
     return data.sagyo_fix_flg === 0 ? false : true;

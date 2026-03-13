@@ -72,8 +72,6 @@ export const BasesMasterDialog = ({
   /* フォームを送信 */
   const onSubmit = async (data: BasesMasterDialogValues) => {
     setIsLoading(true);
-    console.log('isDarty : ', isDirty);
-    console.log(data);
     if (baseId === FAKE_NEW_ID) {
       // 新規登録
       try {
@@ -134,7 +132,6 @@ export const BasesMasterDialog = ({
 
   /* ×ぼたんを押したとき */
   const handleClickClose = () => {
-    console.log('isDirty : ', isDirty);
     if (isDirty) {
       setDirtyOpen(true);
     } else {
@@ -162,7 +159,6 @@ export const BasesMasterDialog = ({
 
   /* useEffect --------------------------------------- */
   useEffect(() => {
-    console.log('★★★★★★★★★★★★★★★★★★★★★');
     const getThatOneBase = async () => {
       if (baseId === FAKE_NEW_ID) {
         // 新規追加モード

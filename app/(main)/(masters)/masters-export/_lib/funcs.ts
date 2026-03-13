@@ -14,7 +14,6 @@ dayjs.extend(timezone);
 export const getAllEqptAndRfid = async () => {
   try {
     const data = await selectAllRfidWithKizai();
-    console.log('I got a datalist from db', data.rowCount);
     // データをAOAけいしきに
     if (data && data.rows) {
       const aoaData = data.rows.map((row) => [
@@ -101,7 +100,7 @@ export const getAllEqptAndRfid = async () => {
       return { workbook, date };
     }
   } catch (e) {
-    console.error('例外が発生', e);
+    console.error(e);
     throw e;
   }
 };

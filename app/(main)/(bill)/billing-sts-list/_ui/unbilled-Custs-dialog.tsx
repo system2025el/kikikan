@@ -44,8 +44,6 @@ export const UnbilledCustsDialog = (props: {
   /* スナックバーのメッセージ */
   const [snackBarMessage, setSnackBarMessage] = useState('');
 
-  console.log('unbilledCusts:', unbilledCusts);
-
   /* useForm ------------------- */
   const { control, handleSubmit } = useForm({
     mode: 'onSubmit',

@@ -64,7 +64,6 @@ export const QuotationList = () => {
   /* methods ------------------------------------------ */
   /* 検索ボタン押下時処理 */
   const onSubmit = async (data: QuotSearchValues) => {
-    console.log(data);
     setIsLoading(true);
     sessionStorage.setItem('quotListSearchParams', JSON.stringify(data));
     setIsFirst(false);

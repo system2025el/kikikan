@@ -20,7 +20,7 @@ export const selectOneEqpt = async (id: number) => {
   try {
     return await supabase.schema(SCHEMA).from('m_kizai').select('*').eq('kizai_id', id).single();
   } catch (e) {
-    throw e;
+    throw new Error('[selectOneEqpt] DBエラー:', { cause: e });
   }
 };
 
@@ -73,7 +73,7 @@ export const insertNewEqpt = async (data: EqptsMasterDialogValues, connection: P
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[insertNewEqpt] DBエラー:', { cause: e });
   }
 };
 
@@ -94,7 +94,7 @@ export const upDateEqptDB = async (data: MKizaiDBValues, connection: PoolClient)
   try {
     await connection.query(query, [...values, data.kizai_id]);
   } catch (e) {
-    throw e;
+    throw new Error('[upDateEqptDB] DBエラー:', { cause: e });
   }
 };
 
@@ -173,7 +173,7 @@ export const selectBundledEqpts = async (setIds: number[]) => {
   try {
     return await pool.query(query, setIds);
   } catch (e) {
-    throw e;
+    throw new Error('[selectBundledEqpts] DBエラー:', { cause: e });
   }
 };
 
@@ -187,7 +187,7 @@ export const selectMeisaiEqts = async (ids: number[]) => {
       .eq('del_flg', 0)
       .eq('dsp_flg', 1);
   } catch (e) {
-    throw e;
+    throw new Error('[selectMeisaiEqts] DBエラー:', { cause: e });
   }
 };
 
@@ -236,7 +236,7 @@ export const selectActiveEqptsForIsshiki = async (query: number | null) => {
   try {
     return await pool.query(sqlQuery);
   } catch (e) {
-    throw e;
+    throw new Error('[selectActiveEqptsForIsshiki] DBエラー:', { cause: e });
   }
 };
 
@@ -268,7 +268,7 @@ export const selectActiveEqptsForSet = async () => {
   try {
     return await pool.query(sqlQuery);
   } catch (e) {
-    throw e;
+    throw new Error('[selectActiveEqptsForSet] DBエラー:', { cause: e });
   }
 };
 
@@ -286,7 +286,6 @@ export const checkExIsshiki = async (isshikiId: number, kizaiIds: number[]) => {
       .neq('issiki_id', isshikiId)
       .in('kizai_id', kizaiIds);
   } catch (e) {
-    console.error(e);
-    throw e;
+    throw new Error('[checkExIsshiki] DBエラー:', { cause: e });
   }
 };

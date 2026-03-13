@@ -16,6 +16,6 @@ export const selectKizaiHeadListWithIsshikiForMitu = async (juchuHeadId: number,
       .eq('juchu_kizai_head_id', kizaiHeadId)
       .not('juchu_kizai_head_id', 'is', null);
   } catch (e) {
-    throw e;
+    throw new Error('[selectKizaiHeadListWithIsshikiForMitu] DBエラー:', { cause: e });
   }
 };

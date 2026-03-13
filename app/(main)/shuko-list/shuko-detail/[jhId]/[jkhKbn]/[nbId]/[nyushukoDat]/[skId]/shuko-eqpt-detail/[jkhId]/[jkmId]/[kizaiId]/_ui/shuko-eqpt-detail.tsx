@@ -112,7 +112,7 @@ export const ShukoEqptDetail = (props: {
   const onSubmit = async (data: { resultAdjQty: number }) => {
     if (user && !isProcessing) {
       setIsProcessing(true);
-      console.log(data);
+
       const updateResult = await updShukoResultAdjQty(shukoEqptDetailData, data.resultAdjQty, user.name);
       if (updateResult) {
         setSnackBarMessage('保存しました');

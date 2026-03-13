@@ -634,7 +634,6 @@ export const EquipmentReturnOrderDetail = (props: {
    * @returns
    */
   const onSubmit = async (data: ReturnJuchuKizaiHeadValues) => {
-    console.log('保存開始');
     if (!user || isProcessing) return;
     setIsProcessing(true);
     setIsLoading(true);
@@ -659,10 +658,8 @@ export const EquipmentReturnOrderDetail = (props: {
 
     // 返却入庫日
     const updateNyukoDate = getNyukoDate(data.kicsNyukoDat, data.yardNyukoDat);
-    console.log(updateNyukoDate, oyaNyukoDate);
     // 返却入庫日から親入庫日
     const updateDateRange = getRange(updateNyukoDate, oyaNyukoDate);
-    console.log('返却入庫日から親入庫日', updateDateRange);
 
     if (!updateNyukoDate) {
       setIsLoading(false);

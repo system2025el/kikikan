@@ -73,8 +73,6 @@ export const ShukeibumonsMasterDialog = ({
   /* フォームを送信 */
   const onSubmit = async (data: ShukeibumonsMasterDialogValues) => {
     setIsLoading(true);
-    console.log('isDarty : ', isDirty);
-    console.log(data);
     if (shukeibumonId === FAKE_NEW_ID) {
       // 新規の時
       try {
@@ -135,7 +133,6 @@ export const ShukeibumonsMasterDialog = ({
 
   /* ×ぼたんを押したとき */
   const handleClickClose = () => {
-    console.log('isDirty : ', isDirty);
     if (isDirty) {
       setDirtyOpen(true);
     } else {
@@ -163,7 +160,6 @@ export const ShukeibumonsMasterDialog = ({
 
   /* useEffect --------------------------------------- */
   useEffect(() => {
-    console.log('★★★★★★★★★★★★★★★★★★★★★');
     const getThatOneShukeibumon = async () => {
       if (shukeibumonId === FAKE_NEW_ID) {
         // 新規追加モード

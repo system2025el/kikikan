@@ -50,11 +50,8 @@ export const ImportMaster = () => {
     // ファイル読み込み
     const reader = new FileReader();
     reader.onload = (e) => {
-      console.log('ファイル読み込み成功');
-
       const arrayBuffer = e.target?.result;
       if (!arrayBuffer || typeof arrayBuffer === 'string') {
-        console.log('ファイルの読み込みに失敗しました');
         setSnackBarMessage('ファイルの読み込みに失敗しました。');
         setSnackBarOpen(true);
         return;
@@ -65,12 +62,10 @@ export const ImportMaster = () => {
       if (!worksheet) {
         setSnackBarMessage(`指定されたシート(${sheetName})が見つかりませんでした`);
         setSnackBarOpen(true);
-        console.error('指定されたシートが見つかりませんでした');
         return;
       }
       const jsonData: EqptImportRowType[] = utils.sheet_to_json(worksheet, { header: 1 });
       const dataRows = jsonData.slice(1);
-      console.log('Excel内容 (生データ):', dataRows);
 
       if (type === 'eqpt') {
         const parsedEqptData: EqptImportType[] = [];
@@ -113,7 +108,6 @@ export const ImportMaster = () => {
             setEqptFileName(file.name);
             parsedEqptData.push(result.data);
           } else {
-            console.error(`${file.name}の行 ${index + 1} でバリデーションエラー:`, result.error.issues);
             hasError = true;
             errorRows.push(index + 1);
             // sendLogServer(index + 1, result.error.issues);
@@ -143,7 +137,6 @@ export const ImportMaster = () => {
 
   /* 機材インポートの登録ボタン押下時 */
   const handleImportEqpt = async () => {
-    console.log('おされたあああああ');
     setPush(true);
     if (eqptData.length !== 0) {
       try {
@@ -159,7 +152,6 @@ export const ImportMaster = () => {
         setSnackBarOpen(true);
         setEqptData([]);
       } catch (error) {
-        console.error('データの登録中にエラーが発生しました:', error);
         setSnackBarMessage('データの登録中にエラーが発生しました。');
         setSnackBarOpen(true);
       }

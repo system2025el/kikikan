@@ -6,6 +6,6 @@ export const selectDic = async (dicId: number) => {
   try {
     return await supabase.schema(SCHEMA).from('m_dic').select('dic_val').eq('dic_id', dicId).single();
   } catch (e) {
-    throw e;
+    throw new Error('[selectDic] DBエラー:', { cause: e });
   }
 };

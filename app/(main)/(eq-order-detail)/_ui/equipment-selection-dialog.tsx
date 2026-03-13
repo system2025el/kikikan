@@ -65,7 +65,6 @@ export const OyaEqSelectionDialog = ({
       try {
         const oyaEq = await getOyaJuchuKizaiMeisai(juchuHeadId, oyaJuchuKizaiHeadId);
         const oyaContainer = await getOyaJuchuContainerMeisai(juchuHeadId, oyaJuchuKizaiHeadId);
-        console.log('親機材リスト: ', oyaEq);
         setOyaEqList(oyaEq ?? []);
         setOyaContainerList(oyaContainer ?? []);
       } catch (e) {

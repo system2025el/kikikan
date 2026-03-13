@@ -20,7 +20,7 @@ export const selectJuchuKizaiNyushuko = async (juchuHeadId: number, juchuKizaiHe
       .eq('juchu_head_id', juchuHeadId)
       .eq('juchu_kizai_head_id', juchuKizaiHeadId);
   } catch (e) {
-    throw e;
+    throw new Error('[selectJuchuKizaiNyushuko] DBエラー:', { cause: e });
   }
 };
 
@@ -59,7 +59,7 @@ export const selectJuchuKizaiNyushukoConfirm = async (data: {
     //   .eq('nyushuko_basho_id', data.nyushuko_basho_id)
     //   .single();
   } catch (e) {
-    throw e;
+    throw new Error('[selectJuchuKizaiNyushukoConfirm] DBエラー:', { cause: e });
   }
 };
 
@@ -101,7 +101,7 @@ export const selectOyaJuchuKizaiNyushukoConfirm = async (
   try {
     return (await connection.query(query, values)).rows;
   } catch (e) {
-    throw e;
+    throw new Error('[selectOyaJuchuKizaiNyushukoConfirm] DBエラー:', { cause: e });
   }
 };
 
@@ -127,7 +127,7 @@ export const insertJuchuKizaiNyushuko = async (data: JuchuKizaiNyushuko, connect
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[insertJuchuKizaiNyushuko] DBエラー:', { cause: e });
   }
 };
 
@@ -176,7 +176,7 @@ export const updateJuchuKizaiNyushuko = async (data: JuchuKizaiNyushuko, connect
   try {
     await connection.query(query, allValues);
   } catch (e) {
-    throw e;
+    throw new Error('[updateJuchuKizaiNyushuko] DBエラー:', { cause: e });
   }
 };
 
@@ -209,7 +209,7 @@ export const deleteJuchuKizaiNyushuko = async (
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteJuchuKizaiNyushuko] DBエラー:', { cause: e });
   }
 };
 
@@ -231,6 +231,6 @@ export const deleteJuchuKizaiNyushukoFromOrder = async (
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteJuchuKizaiNyushukoFromOrder] DBエラー:', { cause: e });
   }
 };

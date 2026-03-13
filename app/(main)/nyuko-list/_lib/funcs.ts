@@ -18,7 +18,6 @@ import { NyukoKizai, NyukoListSearchValues, NyukoTableValues } from './types';
 export const getNyukoList = async (queries: NyukoListSearchValues) => {
   try {
     const data = await selectFilteredNyukoList(queries);
-    console.log(data);
 
     if (!data) {
       return [];
@@ -61,19 +60,11 @@ export const getPdfData = async (
   nyushukoBashoId: number,
   nyushukoDat: string
 ) => {
-  console.log('---押下時渡されたデータ---');
-  console.log('juchuHeadId', juchuHeadId);
-  console.log('juchuKizaiHeadIds', juchuKizaiHeadIds);
-  console.log('nyushukoBashoId', nyushukoBashoId);
-  console.log('nyushukoDat', nyushukoDat);
-
   try {
     const { data: juchuHeadData, error: juchuHeadDataError } = await selectPdfJuchuHead(juchuHeadId);
     if (juchuHeadDataError) {
-      console.error('getPdfData selectPdfJuchuHead error : ', juchuHeadDataError);
-      throw new Error(juchuHeadDataError.message);
+      throw new Error('[selectPdfJuchuHead] DBエラー:', { cause: juchuHeadDataError });
     }
-    console.log('juchuHeadData', juchuHeadData);
 
     const { data: juchuKizaiHeadData, error: juchuKizaiHeadDataError } = await selectPdfJuchuKizaiHead(
       juchuHeadId,
@@ -81,28 +72,22 @@ export const getPdfData = async (
       nyushukoBashoId
     );
     if (juchuKizaiHeadDataError) {
-      console.error('getPdfData selectPdfJuchuKizaiHead error : ', juchuKizaiHeadDataError);
-      throw new Error(juchuKizaiHeadDataError.message);
+      throw new Error('[selectPdfJuchuKizaiHead] DBエラー:', { cause: juchuKizaiHeadDataError });
     }
-    console.log('juchuKizaiHeadData', juchuKizaiHeadData);
 
     // 関数を実行して結果オブジェクト { header, meisai } を受け取る
     const nyukoResult = await selectNyukoPdfJuchuKizaiMeisai(juchuHeadId, nyushukoDat, nyushukoBashoId);
 
     // ここで .meisai (meisaiQueryの結果) を kizaiData に入れる
     const kizaiData: NyukoKizai[] = nyukoResult.meisai;
-    console.log('kizaiData', kizaiData);
 
     const sqlHeader = nyukoResult.header;
-    console.log('sqlHeader', sqlHeader);
 
     const honbanbiCalcQty =
       sqlHeader?.juchu_honbanbi_calc_qty ??
       juchuKizaiHeadData.reduce((max, current) => {
         return (current.juchu_honbanbi_calc_qty ?? 0) > (max.juchu_honbanbi_calc_qty ?? 0) ? current : max;
       }, juchuKizaiHeadData[0] || {}).juchu_honbanbi_calc_qty;
-
-    console.log('honbanbiCalcQty', honbanbiCalcQty);
 
     const shukoDat =
       nyushukoBashoId === 1
@@ -112,8 +97,6 @@ export const getPdfData = async (
         : juchuKizaiHeadData.reduce((min, current) => {
             return new Date(current.yard_shuko_dat ?? '') < new Date(min.yard_shuko_dat ?? '') ? current : min;
           }, juchuKizaiHeadData[0] || {}).yard_shuko_dat;
-
-    console.log('shukoDat', shukoDat);
 
     // ---------------------------------------------------------
     // PDFデータの生成

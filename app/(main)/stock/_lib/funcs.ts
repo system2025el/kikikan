@@ -18,8 +18,7 @@ export const getBumonsData = async () => {
     const { data, error } = await selectActiveBumons();
 
     if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[selectActiveBumons] DBエラー:', { cause: error });
     }
     if (!data || data.length === 0) {
       return [];
@@ -47,8 +46,7 @@ export const getEqData = async (bumonId: number) => {
     const { data, error } = await selectStockKizai(bumonId);
 
     if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[selectStockKizai] DBエラー:', { cause: error });
     }
 
     const eqList: EqTableValues[] = data.map((d) => ({

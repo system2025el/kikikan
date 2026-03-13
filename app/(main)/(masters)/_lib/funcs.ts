@@ -22,8 +22,7 @@ export const getDaibumonsSelection = async () => {
   try {
     const { data, error } = await selectActiveDaibumons();
     if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[selectActiveDaibumons] DBエラー:', { cause: error });
     }
     if (!data || data.length === 0) {
       return [];
@@ -33,10 +32,9 @@ export const getDaibumonsSelection = async () => {
       id: d.dai_bumon_id,
       label: d.dai_bumon_nam,
     }));
-    console.log('大部門が', selectElements.length, '件');
     return selectElements;
   } catch (e) {
-    console.error('例外が発生しました:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -49,8 +47,7 @@ export const getShukeibumonsSelection = async () => {
   try {
     const { data, error } = await selectActiveShukeibumons();
     if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[selectActiveShukeibumons] DBエラー:', { cause: error });
     }
     if (!data || data.length === 0) {
       return [];
@@ -60,10 +57,9 @@ export const getShukeibumonsSelection = async () => {
       id: d.shukei_bumon_id,
       label: d.shukei_bumon_nam,
     }));
-    console.log('集計部門が', selectElements.length, '件');
     return selectElements;
   } catch (e) {
-    console.error('例外が発生しました:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -76,8 +72,7 @@ export const getBumonsSelection = async () => {
   try {
     const { data, error } = await selectActiveBumons();
     if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[selectActiveBumons] DBエラー:', { cause: error });
     }
     if (!data || data.length === 0) {
       return [];
@@ -87,10 +82,9 @@ export const getBumonsSelection = async () => {
       id: d.bumon_id!,
       label: d.bumon_nam!,
     }));
-    console.log('部門が', selectElements.length, '件');
     return selectElements;
   } catch (e) {
-    console.error('例外が発生しました:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -103,8 +97,7 @@ export const getShozokuSelection = async () => {
   try {
     const { data, error } = await selectActiveShozokus();
     if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[selectActiveShozokus] DBエラー:', { cause: error });
     }
     if (!data || data.length === 0) {
       return [];
@@ -115,10 +108,9 @@ export const getShozokuSelection = async () => {
         id: d.shozoku_id,
         label: d.shozoku_nam,
       }));
-    console.log('所属', selectElements.length, '件');
     return selectElements;
   } catch (e) {
-    console.error('例外が発生しました:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -144,7 +136,7 @@ export const getAllSelections = async (): Promise<{
     ]);
     return { d: daibumons, s: shukeibumons, b: bumons, shozoku: shozoku, section: section };
   } catch (error) {
-    console.error('Error fetching all selections:', error);
+    console.error(error);
     throw error;
     //return { d: [], s: [], b: [], shozoku: [], section: [] };
   }
@@ -168,7 +160,7 @@ export const getAllBumonSelections = async (): Promise<{
 
     return { d: daibumons!, s: shukeibumons!, b: bumons! };
   } catch (error) {
-    console.error('Error fetching all selections:', error);
+    console.error(error);
     return { d: [], s: [], b: [] };
   }
 };
@@ -186,7 +178,7 @@ export const getAllBumonDSSelections = async (): Promise<{
 
     return { d: daibumons!, s: shukeibumons! };
   } catch (error) {
-    console.error('Error fetching all selections:', error);
+    console.error(error);
     throw error;
     //return { d: [], s: [] };
   }
@@ -200,8 +192,7 @@ export const getCustomerSelection = async (): Promise<SelectTypes[]> => {
   try {
     const { data, error } = await selectActiveCustomers();
     if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[selectActiveCustomers] DBエラー:', { cause: error });
     }
     if (!data || data.length === 0) {
       return [];
@@ -210,10 +201,9 @@ export const getCustomerSelection = async (): Promise<SelectTypes[]> => {
       id: d.kokyaku_id,
       label: d.kokyaku_nam,
     }));
-    console.log('顧客が', selectElements.length, '件');
     return selectElements;
   } catch (e) {
-    console.error('例外が発生', e);
+    console.error(e);
     throw e;
   }
 };
@@ -226,8 +216,7 @@ export const getRfidKizaiStsSelection = async () => {
   try {
     const { data, error } = await selectActiveSagyoSts();
     if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[selectActiveSagyoSts] DBエラー:', { cause: error });
     }
     if (!data || data.length === 0) {
       return [];
@@ -236,10 +225,9 @@ export const getRfidKizaiStsSelection = async () => {
       id: d.sts_id,
       label: d.sts_nam,
     }));
-    console.log('Rfid作業ステータスが', selectElements.length, '件');
     return selectElements;
   } catch (e) {
-    console.error('例外が発生', e);
+    console.error(e);
     throw e;
   }
 };

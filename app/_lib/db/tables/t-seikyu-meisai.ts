@@ -5,7 +5,6 @@ import { SCHEMA, supabase } from '../supabase';
 import { SeikyuMeisai } from '../types/t-seikyu-meisai-type';
 
 export const insertBillMeisai = async (data: SeikyuMeisai[], connection: PoolClient) => {
-  console.log('請求明細新規：', data);
   if (!data || Object.keys(data).length === 0) {
     throw new Error('請求明細が空です。');
   }
@@ -28,7 +27,7 @@ export const insertBillMeisai = async (data: SeikyuMeisai[], connection: PoolCli
   try {
     await connection.query(query, billValues);
   } catch (e) {
-    throw e;
+    throw new Error('[insertBillMeisai] DBエラー:', { cause: e });
   }
 };
 
@@ -63,7 +62,7 @@ export const updateBillMeisai = async (data: SeikyuMeisai[], connection: PoolCli
     // 更新処理実行
     await connection.query(updateQuery, updateMeisaiValues);
   } catch (e) {
-    throw e;
+    throw new Error('[updateBillMeisai] DBエラー:', { cause: e });
   }
 };
 /**
@@ -82,7 +81,7 @@ export const selectBillMeisai = async (id: number) => {
       .eq('seikyu_head_id', id)
       .order('dsp_ord_num');
   } catch (e) {
-    throw e;
+    throw new Error('[selectBillMeisai] DBエラー:', { cause: e });
   }
 };
 
@@ -102,11 +101,9 @@ export const deleteBillMeisai = async (
   const values = ids.flatMap((d) => [d.seikyu_head_id, d.seikyu_meisai_head_id, d.seikyu_meisai_id]);
 
   const query = `DELETE FROM ${SCHEMA}.t_seikyu_meisai WHERE (seikyu_head_id, seikyu_meisai_head_id, seikyu_meisai_id) IN (${placeholders})`;
-  console.log('☆☆☆☆☆', query, values);
   try {
-    console.log('消したいやつ', ids);
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteBillMeisai] DBエラー:', { cause: e });
   }
 };

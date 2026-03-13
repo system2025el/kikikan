@@ -113,10 +113,8 @@ export const Stock = () => {
   const onSubmit = async (data: { bumonId: number }) => {
     if (!data.bumonId) return;
     setIsLoading(true);
-    console.log(data.bumonId);
     try {
       const newEqList = await getEqData(data.bumonId);
-      console.log(newEqList);
       const kizaiIds = newEqList.map((data) => data.kizaiId);
       // const newEqStockList: StockTableValues[][] = [];
       // for (const kizaiId of kizaiIds) {

@@ -80,7 +80,6 @@ export const EqptMaster = () => {
     ngFlg: boolean;
   }) => {
     setIsLoading(true);
-    console.log('data : ', data);
     try {
       const newList = await getFilteredEqpts({
         q: data.query!,
@@ -95,7 +94,6 @@ export const EqptMaster = () => {
       setError(e instanceof Error ? e : new Error(String(e)));
     }
     setIsLoading(false);
-    console.log('theEqpt : ', eqpts);
   };
 
   /** 詳細ダイアログを開く関数 */
@@ -131,7 +129,6 @@ export const EqptMaster = () => {
   useEffect(() => {
     const getList = async () => {
       setIsLoading(true);
-      console.log('testtestestestessteste');
       try {
         const dataList = await getFilteredEqpts();
         setEqpts(dataList.data);

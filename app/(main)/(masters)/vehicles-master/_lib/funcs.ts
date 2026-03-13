@@ -17,8 +17,7 @@ export const getFilteredVehs = async (query: string = '') => {
     const { data, error } = await SelectFilteredVehs(/*query*/);
 
     if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[SelectFilteredVehs] DBエラー:', { cause: error });
     }
     if (!data || data.length === 0) {
       return [];
@@ -31,10 +30,9 @@ export const getFilteredVehs = async (query: string = '') => {
       tblDspId: index + 1,
       delFlg: Boolean(d.del_flg),
     }));
-    console.log(filteredVehs.length, '行');
     return filteredVehs;
   } catch (e) {
-    console.error('例外が発生しました:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -48,8 +46,7 @@ export const getChosenVeh = async (id: number) => {
   try {
     const { data, error } = await selectOneVeh(id);
     if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[selectOneVeh] DBエラー:', { cause: error });
     }
     if (!data) {
       return emptyVeh;
@@ -60,10 +57,9 @@ export const getChosenVeh = async (id: number) => {
       dspFlg: Boolean(data.dsp_flg),
       delFlg: Boolean(data.del_flg),
     };
-    console.log(VehDetails.delFlg);
     return VehDetails;
   } catch (e) {
-    console.error('例外が発生しました:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -73,12 +69,11 @@ export const getChosenVeh = async (id: number) => {
  * @param data フォームで取得した車両情報
  */
 export const addNewVeh = async (data: VehsMasterDialogValues, user: string) => {
-  console.log(data.sharyoNam);
   try {
     await insertNewVeh(data, user);
     await revalidatePath('/vehicles-master');
   } catch (error) {
-    console.log('DB接続エラー', error);
+    console.error(error);
     throw error;
   }
 };
@@ -100,10 +95,13 @@ export const updateVeh = async (data: VehsMasterDialogValues, id: number, user: 
     upd_user: user,
   };
   try {
-    await upDateVehDB(updateData);
+    const { error } = await upDateVehDB(updateData);
+    if (error) {
+      throw new Error('[upDateVehDB] DBエラー:', { cause: error });
+    }
     await revalidatePath('/vehicles-master');
   } catch (error) {
-    console.log('例外が発生', error);
+    console.error(error);
     throw error;
   }
 };

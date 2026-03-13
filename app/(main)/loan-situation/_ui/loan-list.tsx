@@ -48,12 +48,10 @@ export const LoanList = () => {
   /* 検索ボタン押下時 */
   const onSubmit = async (data: { query: string | undefined }) => {
     setIsLoading(true);
-    console.log('data : ', data);
     try {
       const newList = await getFilteredEqpts(data.query!);
       setPage(1);
       setRows(newList);
-      console.log('newList : ', newList);
     } catch (e) {
       setError(e instanceof Error ? e : new Error(String(e)));
     }
@@ -62,7 +60,6 @@ export const LoanList = () => {
 
   // 行移動
   // const moveRow = (index: number, direction: number) => {
-  //   console.log(index);
   //   const newIndex = index + direction;
   //   if (newIndex < 0 || newIndex >= rows.length) return;
 

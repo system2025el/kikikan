@@ -24,8 +24,7 @@ export const getIdoDenDetail = async (
     const { data, error } = await selectIdoDenOne(sagyoKbnId, sagyoSijiId, sagyoDenDat, sagyoId, kizaiId);
 
     if (error) {
-      console.error('getIdoEqptDetail error : ', error);
-      throw error;
+      throw new Error('[selectIdoDenOne] DBエラー:', { cause: error });
     }
 
     const idoEqptDetailData: IdoEqptDetailValues = {
@@ -64,8 +63,7 @@ export const getIdoEqptDetail = async (
     const { data, error } = await selectIdoEqptDetail(sagyoKbnId, sagyoSijiId, sagyoDenDat, sagyoId, kizaiId);
 
     if (error) {
-      console.error('getIdoEqptDetail error : ', error);
-      throw error;
+      throw new Error('[selectIdoEqptDetail] DBエラー:', { cause: error });
     }
 
     const idoEqptDetailData: IdoEqptDetailTableValues[] = data.map((d) => ({
@@ -113,7 +111,6 @@ export const delIdoResult = async (idoDenDetailData: IdoEqptDetailValues, delete
         connection
       );
     }
-    console.log('delete ido result', deleteTagIds);
 
     const updateIdoDenData: IdoDen = {
       ido_den_id: /*idoDenDetailData.idoDenId*/ 0,
@@ -128,10 +125,6 @@ export const delIdoResult = async (idoDenDetailData: IdoEqptDetailValues, delete
     };
 
     await updateIdoDen(updateIdoDenData, connection);
-    console.log(
-      'update ido den result_qty',
-      idoDenDetailData.planQty && idoDenDetailData.planQty - deleteTagIds.length
-    );
 
     await await connection.query('COMMIT');
     revalidatePath(
@@ -195,7 +188,7 @@ export const getIdoFix = async (sagyoKbnId: number, sagyoSijiId: number, sagyoDe
       if (error.code === 'PGRST116') {
         return false;
       }
-      throw error;
+      throw new Error('[selectIdoFix] DBエラー:', { cause: error });
     }
 
     return true;

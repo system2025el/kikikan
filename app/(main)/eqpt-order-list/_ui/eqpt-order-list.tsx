@@ -92,7 +92,6 @@ export const EqptOrderList = () => {
     // メモリ上に検索条件があるか確認
     const searchPramsString = sessionStorage.getItem('orderListSearchParams');
     const searchParams = searchPramsString ? JSON.parse(searchPramsString) : null;
-    console.log('検索条件＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝', searchParams);
 
     const getList = async (data: EqptOrderSearchValues) => {
       try {

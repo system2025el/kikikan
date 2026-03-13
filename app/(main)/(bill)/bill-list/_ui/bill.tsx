@@ -128,7 +128,6 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
   /* methods ------------------------------------------------------ */
   /* 保存ボタン押下 */
   const onSubmit = async (data: BillHeadValues) => {
-    console.log('新規？', isNew, 'isDirty', isDirty);
     setIsLoading(true);
     try {
       if (isNew) {
@@ -196,7 +195,6 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
   /* useEffect ------------------------------------------------------------ */
   // 初期表示とログインユーザを取得とセット
   useEffect(() => {
-    console.log('請求画面開いた', bill, 'isNew?', isNew, user?.name);
     const getOptions = async () => {
       try {
         const [users, sts] = await Promise.all([getUsersSelection(), getBillingStsSelection()]);
@@ -224,7 +222,6 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
     if (isNew) {
       // 新規なら入力者をログインアカウントから取得する
       if (user?.name) {
-        console.log({ ...bill, nyuryokuUser: user.name });
         setValue('nyuryokuUser', user.name);
       }
     } else {

@@ -160,8 +160,6 @@ const KeepEqTableRow = React.memo(
     handleKeepRef,
     handleKeyDown,
   }: KeepEqTableRowProps) => {
-    console.log('描画', rowIndex);
-
     return (
       <TableRow>
         <TableCell sx={{ padding: 0, border: '1px solid black' }}>

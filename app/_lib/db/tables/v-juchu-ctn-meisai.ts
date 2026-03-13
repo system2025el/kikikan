@@ -13,7 +13,7 @@ export const selectJuchuContainerMeisai = async (juchuHeadId: number, juchuKizai
       .not('kizai_id', 'is', null)
       .order('dsp_ord_num');
   } catch (e) {
-    throw e;
+    throw new Error('[selectJuchuContainerMeisai] DBエラー:', { cause: e });
   }
 };
 
@@ -30,6 +30,6 @@ export const selectOyaJuchuContainerMeisai = async (juchuHeadId: number, juchuKi
       .not('kizai_id', 'is', null)
       .order('dsp_ord_num');
   } catch (e) {
-    throw e;
+    throw new Error('[selectOyaJuchuContainerMeisai] DBエラー:', { cause: e });
   }
 };

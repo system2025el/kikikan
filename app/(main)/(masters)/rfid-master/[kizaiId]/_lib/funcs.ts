@@ -44,10 +44,9 @@ export const getRfidsOfTheKizai = async (kizaiId: number) => {
       updDat: d.upd_dat,
       updUser: d.upd_user,
     }));
-    console.log('機材マスタリストを取得した');
     return filteredRfids;
   } catch (e) {
-    console.error('例外が発生しました:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -61,12 +60,11 @@ export const getEqptNam = async (id: number): Promise<string> => {
   try {
     const { data, error } = await selectOneEqpt(id);
     if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[selectOneEqpt] DBエラー:', { cause: error });
     }
     return data.kizai_nam ?? '';
   } catch (e) {
-    console.error('例外が発生しました:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -81,8 +79,7 @@ export const getChosenRfid = async (id: string) => {
     const { data, error } = await selectOneRfid(id);
 
     if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[selectOneRfid] DBエラー:', { cause: error });
     }
     if (!data) {
       return emptyRfid;
@@ -97,7 +94,7 @@ export const getChosenRfid = async (id: string) => {
     };
     return RfidDetails;
   } catch (e) {
-    console.error('例外が発生しました:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -108,7 +105,6 @@ export const getChosenRfid = async (id: string) => {
  */
 export const addNewRfid = async (data: RfidsMasterDialogValues, kizaiId: number, user: string) => {
   const now = new Date().toISOString();
-  console.log('RFIDマスタを追加する');
   const insertData: MRfidDBValues = {
     kizai_id: kizaiId,
     rfid_tag_id: data.tagId,
@@ -135,7 +131,7 @@ export const addNewRfid = async (data: RfidsMasterDialogValues, kizaiId: number,
     await revalidatePath(`/rfid-master/${kizaiId}`);
     await revalidatePath('/eqpt-master');
   } catch (error) {
-    console.log('DB接続エラー', error);
+    console.error(error);
     await connection.query('ROLLBACK');
 
     throw error;
@@ -197,7 +193,6 @@ export const updateRfid = async (
     upd_user: user,
   };
 
-  console.log(updateData);
   const connection = await pool.connect();
   try {
     connection.query('BEGIN');
@@ -213,7 +208,7 @@ export const updateRfid = async (
     await revalidatePath(`/rfid-master/${kizaiId}`);
     await revalidatePath('/eqpt-master');
   } catch (error) {
-    console.log('例外が発生しました', error);
+    console.error(error);
     await connection.query('ROLLBACK');
     throw error;
   } finally {
@@ -239,7 +234,6 @@ export const updateRfidTagSts = async (
     shozoku_id: d.shozokuId,
   }));
   const connection = await pool.connect();
-  console.log('======================================================', delList);
   try {
     await connection.query('BEGIN');
 
@@ -259,10 +253,9 @@ export const updateRfidTagSts = async (
     await updateRfidTagStsDB(updateStsList, user, connection);
     await revalidatePath('/rfid-master');
     await revalidatePath('/eqpt-master');
-    console.log(data);
     await connection.query('COMMIT');
   } catch (e) {
-    console.error('例外が発生しました:', e);
+    console.error(e);
     await connection.query('ROLLBACK');
     throw e;
   } finally {
@@ -282,10 +275,14 @@ export const updateRfidTagSts = async (
 export const updRfidDelFlg = async (tagId: string, flg: boolean, user: string) => {
   const data = { del_flg: flg ? 1 : 0, upd_dat: new Date().toISOString(), upd_user: user };
   try {
-    await updRfidDelFlgDB(tagId, data);
+    const { error } = await updRfidDelFlgDB(tagId, data);
+    if (error) {
+      throw new Error('[updRfidDelFlgDB] DBエラー:', { cause: error });
+    }
     await revalidatePath('/rfid-master');
     await revalidatePath('/eqpt-master');
   } catch (e) {
+    console.error(e);
     throw e;
   } finally {
     refreshVRfid().catch((err) => {

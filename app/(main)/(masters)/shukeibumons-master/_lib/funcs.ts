@@ -21,8 +21,7 @@ export const getFilteredShukeibumons = async (query: string = '') => {
   try {
     const { data, error } = await selectFilteredShukeibumons(query);
     if (error) {
-      console.error('DB情報取得エラー:', error);
-      throw error;
+      throw new Error('[selectFilteredShukeibumons] DBエラー:', { cause: error });
     }
     if (!data || data.length === 0) {
       return [];
@@ -35,10 +34,9 @@ export const getFilteredShukeibumons = async (query: string = '') => {
       tblDspId: index + 1,
       delFlg: Boolean(d.del_flg),
     }));
-    console.log(filteredShukeibumons.length);
     return filteredShukeibumons;
   } catch (e) {
-    console.error('例外が発生しました:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -52,8 +50,7 @@ export const getChosenShukeibumon = async (id: number) => {
   try {
     const { data, error } = await selectOneShukeibumon(id);
     if (error) {
-      console.error('DB情報取得エラー:', error);
-      throw error;
+      throw new Error('[selectOneShukeibumon] DBエラー:', { cause: error });
     }
     if (!data) {
       return emptyShukeibumon;
@@ -66,7 +63,7 @@ export const getChosenShukeibumon = async (id: number) => {
     };
     return ShukeibumonDetails;
   } catch (e) {
-    console.error('例外が発生しました:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -78,12 +75,11 @@ export const getChosenShukeibumon = async (id: number) => {
 export const addNewShukeibumon = async (data: ShukeibumonsMasterDialogValues, user: string) => {
   try {
     await insertNewShukeibumon(data, user);
-    console.log('data : ', data);
     await revalidatePath('/bumons-master');
     await revalidatePath('/shukeibumons-master');
     await revalidatePath('/eqpt-master');
   } catch (error) {
-    console.log('DB接続エラー', error);
+    console.error(error);
     throw error;
   }
 };
@@ -103,14 +99,16 @@ export const updateShukeibumon = async (rawData: ShukeibumonsMasterDialogValues,
     upd_dat: date,
     upd_user: user,
   };
-  console.log(updateData.shukei_bumon_nam);
   try {
-    await upDateShukeibumonDB(updateData);
+    const { error } = await upDateShukeibumonDB(updateData);
+    if (error) {
+      throw new Error('[upDateShukeibumonDB] DBエラー:', { cause: error });
+    }
     await revalidatePath('/bumons-master');
     await revalidatePath('/shukeibumons-master');
     await revalidatePath('/eqpt-master');
   } catch (error) {
-    console.log('例外が発生', error);
+    console.error(error);
     throw error;
   }
 };

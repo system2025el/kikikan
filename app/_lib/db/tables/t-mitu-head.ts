@@ -11,7 +11,6 @@ import { MituHead } from '../types/t-mitu-head-types';
  * @returns 新規登録した見積ヘッダID
  */
 export const insertQuotHead = async (data: MituHead, connection: PoolClient) => {
-  console.log('見積ヘッド新規：', data);
   if (!data || Object.keys(data).length === 0) {
     throw new Error('見積ヘッダーが空です。');
   }
@@ -29,7 +28,7 @@ export const insertQuotHead = async (data: MituHead, connection: PoolClient) => 
   try {
     return await connection.query(query, quotValues);
   } catch (e) {
-    throw e;
+    throw new Error('[insertQuotHead] DBエラー:', { cause: e });
   }
 };
 
@@ -44,9 +43,9 @@ export const updateQuotHead = async (data: MituHead, connection: PoolClient) => 
     throw new Error('見積ヘッダーが空です。');
   }
   const quotHeadCols = Object.keys(data);
-  console.log(quotHeadCols);
+
   const quotValues = Object.values(data);
-  console.log(quotValues);
+
   const placeholders = quotValues.map((_, i) => `$${i + 1}`).join(', ');
   const upsetValues = quotHeadCols.filter((i) => i !== 'mitu_head_id').map((col) => `${col} = EXCLUDED.${col}`);
 
@@ -60,7 +59,7 @@ export const updateQuotHead = async (data: MituHead, connection: PoolClient) => 
   try {
     return await connection.query(updateQuery, quotValues);
   } catch (e) {
-    throw e;
+    throw new Error('[updateQuotHead] DBエラー:', { cause: e });
   }
 };
 
@@ -84,8 +83,7 @@ export const selectChosenMitu = async (id: number) => {
       .eq('mitu_head_id', id)
       .single();
   } catch (e) {
-    console.error(e);
-    throw e;
+    throw new Error('[selectChosenMitu] DBエラー:', { cause: e });
   }
 };
 
@@ -97,6 +95,6 @@ export const updQuotHeadDelFlg = async (ids: number[]) => {
   try {
     await supabase.schema(SCHEMA).from('t_mitu_head').update({ del_flg: 1 }).in('mitu_head_id', ids);
   } catch (e) {
-    throw e;
+    throw new Error('[updQuotHeadDelFlg] DBエラー:', { cause: e });
   }
 };
