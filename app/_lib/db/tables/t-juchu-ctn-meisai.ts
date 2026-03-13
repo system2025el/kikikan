@@ -27,7 +27,7 @@ export const selectJuchuContainerMeisaiMaxId = async (juchuHeadId: number, juchu
       .limit(1)
       .single();
   } catch (e) {
-    throw e;
+    throw new Error('[selectJuchuContainerMeisaiMaxId] DBエラー:', { cause: e });
   }
 };
 
@@ -57,7 +57,7 @@ export const insertJuchuContainerMeisai = async (data: JuchuCtnMeisai[], connect
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[insertJuchuContainerMeisai] DBエラー:', { cause: e });
   }
 };
 
@@ -105,7 +105,7 @@ export const updateJuchuContainerMeisai = async (data: JuchuCtnMeisai, connectio
   try {
     await connection.query(query, allValues);
   } catch (e) {
-    throw e;
+    throw new Error('[updateJuchuContainerMeisai] DBエラー:', { cause: e });
   }
 };
 
@@ -171,7 +171,7 @@ export const upsertJuchuContainerMeisai = async (data: JuchuCtnMeisai[], connect
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[upsertJuchuContainerMeisai] DBエラー:', { cause: e });
   }
 };
 
@@ -202,7 +202,7 @@ export const deleteJuchuContainerMeisai = async (
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteJuchuContainerMeisai] DBエラー:', { cause: e });
   }
 };
 
@@ -224,6 +224,6 @@ export const deleteJuchuCtnMeisaiFromOrder = async (
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteJuchuCtnMeisaiFromOrder] DBエラー:', { cause: e });
   }
 };

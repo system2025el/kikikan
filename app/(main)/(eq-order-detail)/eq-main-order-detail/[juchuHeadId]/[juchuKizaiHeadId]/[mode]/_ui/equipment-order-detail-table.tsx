@@ -53,7 +53,6 @@ export const StockTable: React.FC<StockTableProps> = ({
   /*juchuHonbanbiList*/ juchuColorMap,
   ref,
 }) => {
-  console.log('stockテーブル描写');
   return (
     <TableContainer ref={ref} style={{ overflow: 'scroll', maxHeight: '80vh' }}>
       <Table stickyHeader>
@@ -105,14 +104,12 @@ export type StockTableRowProps = {
   row: StockTableValues[];
   index: number;
   dateRange: string[];
-  //juchuHonbanbiList: JuchuKizaiHonbanbiValues[];
   shubetuColorMap: Map<number, string>;
   juchuColorMap: Map<string, string>;
 };
 
 const StockTableRow = React.memo(
-  ({ row, index, dateRange, shubetuColorMap, /*juchuHonbanbiList*/ juchuColorMap }: StockTableRowProps) => {
-    console.log('stock側描写', index);
+  ({ row, index, dateRange, shubetuColorMap, juchuColorMap }: StockTableRowProps) => {
     return (
       <TableRow>
         {row.map((cell, colIndex) => {
@@ -122,12 +119,7 @@ const StockTableRow = React.memo(
               align={'right'}
               style={styles.row}
               sx={{
-                bgcolor: getStockRowBackgroundColor(
-                  cell.calDat,
-                  dateRange,
-                  shubetuColorMap,
-                  /*juchuHonbanbiList*/ juchuColorMap
-                ),
+                bgcolor: getStockRowBackgroundColor(cell.calDat, dateRange, shubetuColorMap, juchuColorMap),
                 color: cell.zaikoQty < 0 ? 'red' : 'black',
               }}
               size="small"
@@ -140,11 +132,7 @@ const StockTableRow = React.memo(
     );
   },
   (prevProps, nextProps) => {
-    return (
-      prevProps.row === nextProps.row &&
-      /*prevProps.juchuHonbanbiList === nextProps.juchuHonbanbiList*/ prevProps.juchuColorMap ===
-        nextProps.juchuColorMap
-    );
+    return prevProps.row === nextProps.row && prevProps.juchuColorMap === nextProps.juchuColorMap;
   }
 );
 
@@ -183,7 +171,6 @@ export const EqTable: React.FC<EqTableProps> = ({
   const visibleRows = rows.filter((row) => !row.delFlag);
 
   const handleOrderKeyDown = (e: React.KeyboardEvent, rowIndex: number) => {
-    console.log(e.key);
     if (e.key === 'Enter') {
       e.preventDefault();
       inputOrderRefs.current[rowIndex + 1]?.focus();
@@ -222,8 +209,6 @@ export const EqTable: React.FC<EqTableProps> = ({
   const handleYobiRef = (rowIndex: number) => (el: HTMLInputElement | null) => {
     inputYobiRefs.current[rowIndex] = el;
   };
-
-  console.log('eqテーブル描写');
 
   return (
     <TableContainer ref={ref} style={{ overflow: 'scroll', maxHeight: '80vh' }}>
@@ -311,8 +296,6 @@ const EqTableRow = React.memo(
     handleOrderKeyDown,
     handleYobiKeyDown,
   }: EqTableRowProps) => {
-    console.log('描画', rowIndex);
-
     return (
       <TableRow>
         <TableCell sx={{ padding: 0, border: '1px solid black' }}>

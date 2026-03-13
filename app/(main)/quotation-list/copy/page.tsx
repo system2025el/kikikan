@@ -16,7 +16,6 @@ export const metadata: Metadata = {
  */
 const Page = async ({ searchParams }: { searchParams: Promise<{ [key: string]: string | undefined }> }) => {
   const searchParam = await searchParams;
-  console.log(searchParam);
 
   const data = await getChosenQuot(Number(searchParam.mituId));
   const quot: QuotHeadValues = {

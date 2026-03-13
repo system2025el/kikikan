@@ -43,7 +43,7 @@ export const deleteNyushukoResult = async (
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteNyushukoResult] DBエラー:', { cause: e });
   }
 };
 
@@ -69,7 +69,7 @@ export const deleteKizaiIdNyushukoResult = async (
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteKizaiIdNyushukoResult] DBエラー:', { cause: e });
   }
 };
 
@@ -93,7 +93,7 @@ export const deleteAllNyushukoResult = async (
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteAllNyushukoResult] DBエラー:', { cause: e });
   }
 };
 
@@ -118,7 +118,7 @@ export const deleteAllShukoResult = async (
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteAllShukoResult] DBエラー:', { cause: e });
   }
 };
 
@@ -143,7 +143,7 @@ export const deleteAllNyukoResult = async (
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteAllNyukoResult] DBエラー:', { cause: e });
   }
 };
 
@@ -170,7 +170,7 @@ export const deleteKizaiIdShukoResult = async (
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteKizaiIdShukoResult] DBエラー:', { cause: e });
   }
 };
 
@@ -197,7 +197,7 @@ export const deleteKizaiIdNyukoResult = async (
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteKizaiIdNyukoResult] DBエラー:', { cause: e });
   }
 };
 
@@ -226,7 +226,7 @@ export const deleteShukoResult = async (
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteShukoResult] DBエラー:', { cause: e });
   }
 };
 
@@ -255,7 +255,7 @@ export const deleteNyukoResult = async (
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteNyukoResult] DBエラー:', { cause: e });
   }
 };
 
@@ -277,6 +277,6 @@ export const deleteNyushukoResultFromOrder = async (
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteNyushukoResultFromOrder] DBエラー:', { cause: e });
   }
 };

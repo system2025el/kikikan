@@ -103,7 +103,6 @@ export const QuotationListTable = ({
     setSnackBarOpen(true);
     setIsLoading(true);
     const q = await getFilteredQuotList(searchParams);
-    console.log(q);
     setQuotList(q);
     setIsLoading(false);
   };
@@ -273,7 +272,6 @@ export const QuotationListTable = ({
                           size="small"
                           sx={{ py: 0.2, px: 0, m: 0, minWidth: 0 }}
                           onClick={() => {
-                            console.log('テーブルで見積番号', quotation.mituHeadId, 'をクリック');
                             window.open(`/quotation-list/edit/${quotation.mituHeadId}`);
                           }}
                         >

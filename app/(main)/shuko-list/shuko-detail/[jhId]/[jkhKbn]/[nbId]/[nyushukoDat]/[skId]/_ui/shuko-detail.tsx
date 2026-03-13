@@ -80,6 +80,11 @@ export const ShukoDetail = (props: {
 
     setIsProcessing(true);
 
+    if (shukoDetailList.length === 0) {
+      setIsProcessing(false);
+      return;
+    }
+
     const diffCheck = shukoDetailList.find(
       (data) =>
         (data.juchuKizaiHeadKbn !== 3 && !data.ctnFlg && data.diff !== 0) ||
@@ -116,13 +121,24 @@ export const ShukoDetail = (props: {
 
     setIsProcessing(true);
 
-    const juchuKizaiHeadIds = [...new Set(shukoDetailList.map((d) => d.juchuKizaiHeadId).filter((id) => id !== null))];
-    const childJuchuKizaiHeadCount = await confirmChildJuchuKizaiHead(shukoDetailData.juchuHeadId, juchuKizaiHeadIds);
-
-    if (childJuchuKizaiHeadCount && childJuchuKizaiHeadCount > 0) {
-      setReleaseOpen(true);
+    if (shukoDetailList.length === 0) {
       setIsProcessing(false);
       return;
+    }
+
+    const juchuKizaiHeadIds = [...new Set(shukoDetailList.map((d) => d.juchuKizaiHeadId).filter((id) => id !== null))];
+    try {
+      const childJuchuKizaiHeadCount = await confirmChildJuchuKizaiHead(shukoDetailData.juchuHeadId, juchuKizaiHeadIds);
+
+      if (childJuchuKizaiHeadCount && childJuchuKizaiHeadCount > 0) {
+        setReleaseOpen(true);
+        setIsProcessing(false);
+        return;
+      }
+    } catch (e) {
+      setSnackBarMessage('出発解除に失敗しました');
+      setSnackBarOpen(true);
+      setIsProcessing(false);
     }
 
     const updateResult = await delShukoFix(shukoDetailData, shukoDetailList);

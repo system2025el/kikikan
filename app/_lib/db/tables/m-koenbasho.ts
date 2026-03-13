@@ -21,7 +21,7 @@ export const selectActiveLocations = async () => {
       .neq('del_flg', 1)
       .order('koenbasho_nam');
   } catch (e) {
-    throw e;
+    throw new Error('[selectActiveLocations] DBエラー:', { cause: e });
   }
 };
 
@@ -46,7 +46,7 @@ export const selectFilteredLocs = async (query: string) => {
   try {
     return await builder;
   } catch (e) {
-    throw e;
+    throw new Error('[selectFilteredLocs] DBエラー:', { cause: e });
   }
 };
 
@@ -66,7 +66,7 @@ export const selectOneLoc = async (id: number) => {
       .eq('koenbasho_id', id)
       .single();
   } catch (e) {
-    throw e;
+    throw new Error('[selectOneLoc] DBエラー:', { cause: e });
   }
 };
 
@@ -110,7 +110,7 @@ export const insertNewLoc = async (data: LocsMasterDialogValues, user: string) =
   try {
     await pool.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[insertNewLoc] DBエラー:', { cause: e });
   }
 };
 
@@ -127,6 +127,6 @@ export const upDateLocDB = async (data: MKoenbashoDBValues) => {
       .update({ ...data })
       .eq('koenbasho_id', data.koenbasho_id);
   } catch (e) {
-    throw e;
+    throw new Error('[upDateLocDB] DBエラー:', { cause: e });
   }
 };

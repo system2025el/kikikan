@@ -60,6 +60,11 @@ export const NyukoDetail = (props: {
 
     setIsProcessing(true);
 
+    if (nyukoDetailTableData.length === 0) {
+      setIsProcessing(false);
+      return;
+    }
+
     const updateResult = await updNyukoDetail(nyukoDetailData, nyukoDetailTableData, user.name);
 
     if (updateResult) {

@@ -15,16 +15,11 @@ export const getLock = async (lockShubetu: number, headId: number) => {
   try {
     const { data, error } = await selectLock(lockShubetu, headId);
 
-    console.log('GetLock data : ', data);
-
     if (error) {
-      console.log(error.code);
       if (error.code === 'PGRST116') {
-        console.log('ロックデータなし');
         return null;
       }
-      console.error('Error lock:', error.message);
-      throw new Error('ロック取得異常');
+      throw new Error('[selectLock] DBエラー:', { cause: error });
     }
     const lockData: LockValues = {
       lockShubetu: data.lock_shubetu,
@@ -53,9 +48,16 @@ export const addLock = async (lockShubetu: number, headId: number, date: string,
     add_user: userNam,
     mail_adr: mailAdr,
   };
-  const { error } = await insertLock(lockData);
-  if (error) {
-    console.error('Error adding lock:', error.message);
+
+  try {
+    const { error } = await insertLock(lockData);
+
+    if (error) {
+      throw new Error('[insertLock] DBエラー:', { cause: error });
+    }
+  } catch (e) {
+    console.error(e);
+    throw e;
   }
 };
 
@@ -74,9 +76,15 @@ export const updLock = async (lockShubetu: number, headId: number, date: string,
     add_user: userNam,
     mail_adr: mailAdr,
   };
-  const { error } = await updateLock(lockData);
-  if (error) {
-    console.error('Error update lock:', error.message);
+
+  try {
+    const { error } = await updateLock(lockData);
+    if (error) {
+      throw new Error('[updateLock] DBエラー:', { cause: error });
+    }
+  } catch (e) {
+    console.error(e);
+    throw e;
   }
 };
 
@@ -86,10 +94,15 @@ export const updLock = async (lockShubetu: number, headId: number, date: string,
  * @param headId ヘッダーid
  */
 export const delLock = async (lockShubetu: number, headId: number) => {
-  const { error } = await deleteLock(lockShubetu, headId);
+  try {
+    const { error } = await deleteLock(lockShubetu, headId);
 
-  if (error) {
-    console.error('Error delete lock:', error.message);
+    if (error) {
+      throw new Error('[deleteLock] DBエラー:', { cause: error });
+    }
+  } catch (e) {
+    console.error(e);
+    throw e;
   }
 };
 

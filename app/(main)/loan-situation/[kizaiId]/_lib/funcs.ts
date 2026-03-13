@@ -21,8 +21,7 @@ export const getLoanKizaiData = async (kizaiId: number) => {
     const { data, error } = await selectLoanKizai(kizaiId);
 
     if (error) {
-      console.error(error.message);
-      throw error;
+      throw new Error('[selectLoanKizai] DBエラー:', { cause: error });
     }
 
     const kizaiData: LoanKizai = {
@@ -49,8 +48,7 @@ export const getLoanJuchuData = async (kizaiId: number) => {
     const { data, error } = await selectLoanJuchuData(kizaiId);
 
     if (error) {
-      console.error(error.message);
-      throw error;
+      throw new Error('[selectLoanJuchuData] DBエラー:', { cause: error });
     }
 
     const seen = new Set();

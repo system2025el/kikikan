@@ -13,7 +13,6 @@ export const upsertTWeekly = async (data: TWeeklyValues) => {
       .eq('weekly_dat', data.weekly_dat);
 
     if (error) {
-      console.error('weekly error', error);
       throw error;
     }
 
@@ -36,6 +35,6 @@ export const upsertTWeekly = async (data: TWeeklyValues) => {
       }
     }
   } catch (e) {
-    throw e;
+    throw new Error('[upsertTWeekly] DBエラー:', { cause: e });
   }
 };

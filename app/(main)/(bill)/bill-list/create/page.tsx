@@ -14,7 +14,6 @@ export const metadata: Metadata = {
 
 const Page = async ({ searchParams }: { searchParams: Promise<{ [key: string]: string | undefined }> }) => {
   const searchParam = await searchParams;
-  console.log(searchParam);
   const { kokyakuId, date, flg, tantou } = searchParam;
 
   const custs = await getChosenCustomerIdAndName(Number(kokyakuId));
@@ -64,10 +63,6 @@ const Page = async ({ searchParams }: { searchParams: Promise<{ [key: string]: s
     zeiRat: 10,
     gokeiAmt: chukei,
   };
-  console.log(
-    '請求書新規作成：',
-    bill.meisaiHeads?.map((d) => d?.seikyuRange)
-  );
   return <Bill isNew={true} bill={bill} />;
 };
 

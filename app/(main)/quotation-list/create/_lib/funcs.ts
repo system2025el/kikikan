@@ -47,7 +47,6 @@ export const addQuot = async (data: QuotHeadValues, user: string): Promise<numbe
   const now = new Date().toISOString();
 
   try {
-    console.log('新規START');
     // トランザクション開始
     await connection.query('BEGIN');
     // 新見積ヘッドID
@@ -57,8 +56,6 @@ export const addQuot = async (data: QuotHeadValues, user: string): Promise<numbe
     const kokyakuId = await connection.query(
       `SELECT kokyaku_id from ${SCHEMA}.m_kokyaku WHERE kokyaku_nam = '${data.kokyaku}'`
     );
-    console.log('☆☆☆☆☆☆☆☆☆☆☆', kokyakuId);
-    console.log(newMituHeadId.rows[0].newid);
     // 見積ヘッド
     const quotHead: MituHead = {
       mitu_head_id: newMituHeadId.rows[0].newid,
@@ -135,7 +132,7 @@ export const addQuot = async (data: QuotHeadValues, user: string): Promise<numbe
     }
     return null;
   } catch (e) {
-    console.error('例外が発生', e);
+    console.error(e);
     // エラーでロールバック
     await connection.query('ROLLBACK');
     throw e;

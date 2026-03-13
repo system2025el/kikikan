@@ -47,7 +47,7 @@ export const updateRfidTagStsDB = async (
   try {
     await connection.query(query, [...values, now, user]);
   } catch (e) {
-    throw e;
+    throw new Error('[updateRfidTagStsDB] DBエラー:', { cause: e });
   }
 };
 
@@ -64,7 +64,7 @@ export const insertNewRfidSts = async (data: RfidStatusResultValues, connection:
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[insertNewRfidSts] DBエラー:', { cause: e });
   }
 };
 
@@ -82,6 +82,6 @@ export const selectOneRfidStatusResult = async (id: string) => {
       .eq('rfid_tag_id', id)
       .maybeSingle();
   } catch (e) {
-    throw e;
+    throw new Error('[selectOneRfidStatusResult] DBエラー:', { cause: e });
   }
 };

@@ -45,7 +45,7 @@ export const selectActiveEqpts = async (query: string) => {
   try {
     return await pool.query(sqlQuery, values);
   } catch (e) {
-    throw e;
+    throw new Error('[selectActiveEqpts] DBエラー:', { cause: e });
   }
 };
 
@@ -173,7 +173,7 @@ export const selectFilteredEqpts = async (queries: {
     // return await pool.query(query);
     return await builder;
   } catch (e) {
-    throw e;
+    throw new Error('[selectFilteredEqpts] DBエラー:', { cause: e });
   }
 };
 
@@ -194,7 +194,7 @@ export const selectChosenEqptsDetails = async (idList: number[]) => {
       .order('kizai_grp_cod')
       .order('dsp_ord_num');
   } catch (e) {
-    throw e;
+    throw new Error('[selectChosenEqptsDetails] DBエラー:', { cause: e });
   }
 };
 
@@ -215,7 +215,7 @@ export const selectChosenIdoEqptsDetails = async (idList: number[]) => {
       .order('kizai_grp_cod')
       .order('dsp_ord_num');
   } catch (e) {
-    throw e;
+    throw new Error('[selectChosenIdoEqptsDetails] DBエラー:', { cause: e });
   }
 };
 
@@ -233,7 +233,7 @@ export const selectLoanKizai = async (kizaiId: number) => {
       .eq('kizai_id', kizaiId)
       .single();
   } catch (e) {
-    throw e;
+    throw new Error('[selectLoanKizai] DBエラー:', { cause: e });
   }
 };
 
@@ -254,6 +254,6 @@ export const selectStockKizai = async (bumonId: number) => {
       .order('kizai_grp_cod')
       .order('dsp_ord_num');
   } catch (e) {
-    throw e;
+    throw new Error('[selectStockKizai] DBエラー:', { cause: e });
   }
 };

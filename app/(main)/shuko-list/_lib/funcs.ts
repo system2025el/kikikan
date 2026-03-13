@@ -61,18 +61,11 @@ export const getPdfData = async (
   nyushukoBashoId: number,
   nyushukoDat: string
 ) => {
-  console.log('---押下時渡されたデータ---');
-  console.log('juchuHeadId', juchuHeadId);
-  console.log('juchuKizaiHeadIds', juchuKizaiHeadIds);
-  console.log('nyushukoBashoId', nyushukoBashoId);
-  console.log('nyushukoDat', nyushukoDat);
   try {
     const { data: juchuHeadData, error: juchuHeadDataError } = await selectPdfJuchuHead(juchuHeadId);
     if (juchuHeadDataError) {
-      console.error('getPdfData selectPdfJuchuHead error : ', juchuHeadDataError);
-      throw new Error(juchuHeadDataError.message);
+      throw new Error('[selectPdfJuchuHead] DBエラー:', { cause: juchuHeadDataError });
     }
-    console.log('juchuHeadData', juchuHeadData);
 
     const { data: juchuKizaiHeadData, error: juchuKizaiHeadDataError } = await selectPdfJuchuKizaiHead(
       juchuHeadId,
@@ -80,15 +73,12 @@ export const getPdfData = async (
       nyushukoBashoId
     );
     if (juchuKizaiHeadDataError) {
-      console.error('getPdfData selectPdfJuchuKizaiHead error : ', juchuKizaiHeadDataError);
-      throw new Error(juchuKizaiHeadDataError.message);
+      throw new Error('[selectPdfJuchuKizaiHead] DBエラー:', { cause: juchuKizaiHeadDataError });
     }
-    console.log('juchuKizaiHeadData', juchuKizaiHeadData);
 
     const honbanbiCalcQty = juchuKizaiHeadData.reduce((max, current) => {
       return (current.juchu_honbanbi_calc_qty ?? 0) > (max.juchu_honbanbi_calc_qty ?? 0) ? current : max;
     }).juchu_honbanbi_calc_qty;
-    console.log('honbanbiCalcQty', honbanbiCalcQty);
 
     const nyukoDat =
       nyushukoBashoId === 1
@@ -98,12 +88,10 @@ export const getPdfData = async (
         : juchuKizaiHeadData.reduce((min, current) => {
             return new Date(current.yard_nyuko_dat ?? '') < new Date(min.yard_nyuko_dat ?? '') ? current : min;
           }).yard_nyuko_dat;
-    console.log('nyukoDat', nyukoDat);
 
     const kizaiData: ShukoKizai[] = (
       await selectPdfJuchuKizaiMeisai(juchuHeadId, juchuKizaiHeadIds, nyushukoDat, nyushukoBashoId)
     ).rows;
-    console.log('kizaiData', kizaiData);
 
     const pdjData: PdfModel = {
       item1: juchuHeadData.juchu_head_id,
@@ -120,9 +108,9 @@ export const getPdfData = async (
       item12: kizaiData,
       item13: '',
     };
-    console.log('pdjData', pdjData);
     return pdjData;
   } catch (e) {
+    console.error(e);
     throw e;
   }
 };

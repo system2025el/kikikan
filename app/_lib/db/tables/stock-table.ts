@@ -104,44 +104,44 @@ export const selectDetailStockListBulk = async (
   try {
     const query = `
       WITH target_days AS (
-    -- 指定日から90日分のカレンダーを作成
-    SELECT $4::date + g.i AS cal_dat 
-    FROM generate_series(0, 90) AS g(i)
-),
-target_kizai AS (
-    -- 対象の機材情報を一度に取得（$1は機材IDの配列 [1, 2, 3...]）
-    SELECT kizai_id, kizai_qty 
-    FROM ${SCHEMA}.v_kizai_qty 
-    WHERE kizai_id = ANY($1) 
-)
-SELECT 
-    d.cal_dat AS "calDat",
-    k.kizai_id AS "kizaiId",
-    k.kizai_qty AS "kizaiQty",
-    COALESCE(v.juchu_qty, 0)::integer AS "juchuQty",
-    COALESCE(v.zaiko_qty, k.kizai_qty)::integer AS "zaikoQty",
-    COALESCE(h.juchu_honbanbi_shubetu_id, 0) AS "juchuHonbanbiShubetuId",
-    COALESCE(h.juchu_honbanbi_shubetu_color, 'white') AS "juchuHonbanbiColor"
-FROM 
-    target_days d
-CROSS JOIN 
-    target_kizai k -- 日付と機材の全組み合わせを作成
-LEFT JOIN 
-    ${SCHEMA}.v_zaiko_qty v ON v.plan_dat = d.cal_dat AND v.kizai_id = k.kizai_id
-LEFT JOIN 
-    ${SCHEMA}.v_honbanbi_juchu_kizai h ON h.plan_dat = d.cal_dat 
-    AND h.kizai_id = k.kizai_id
-    AND h.juchu_head_id = $2 
-    AND h.juchu_kizai_head_id = $3
-ORDER BY 
-    k.kizai_id, d.cal_dat;
+        -- 指定日から90日分のカレンダーを作成
+        SELECT $4::date + g.i AS cal_dat 
+        FROM generate_series(0, 90) AS g(i)
+      ),
+        target_kizai AS (
+            -- 対象の機材情報を一度に取得（$1は機材IDの配列 [1, 2, 3...]）
+            SELECT kizai_id, kizai_qty 
+            FROM ${SCHEMA}.v_kizai_qty 
+            WHERE kizai_id = ANY($1) 
+        )
+        SELECT 
+            d.cal_dat AS "calDat",
+            k.kizai_id AS "kizaiId",
+            k.kizai_qty AS "kizaiQty",
+            COALESCE(v.juchu_qty, 0)::integer AS "juchuQty",
+            COALESCE(v.zaiko_qty, k.kizai_qty)::integer AS "zaikoQty",
+            COALESCE(h.juchu_honbanbi_shubetu_id, 0) AS "juchuHonbanbiShubetuId",
+            COALESCE(h.juchu_honbanbi_shubetu_color, 'white') AS "juchuHonbanbiColor"
+        FROM 
+            target_days d
+        CROSS JOIN 
+            target_kizai k -- 日付と機材の全組み合わせを作成
+        LEFT JOIN 
+            ${SCHEMA}.v_zaiko_qty v ON v.plan_dat = d.cal_dat AND v.kizai_id = k.kizai_id
+        LEFT JOIN 
+            ${SCHEMA}.v_honbanbi_juchu_kizai h ON h.plan_dat = d.cal_dat 
+            AND h.kizai_id = k.kizai_id
+            AND h.juchu_head_id = $2 
+            AND h.juchu_kizai_head_id = $3
+        ORDER BY 
+            k.kizai_id, d.cal_dat;
     `;
 
     const values = [kizaiIds, juchuHeadId, juchuKizaiHeadId, date];
 
     return await pool.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[selectDetailStockListBulk] DBエラー:', { cause: e });
   }
 };
 
@@ -283,7 +283,7 @@ ORDER BY
 
     return await pool.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[selectUseListBulk] DBエラー:', { cause: e });
   }
 };
 
@@ -355,7 +355,7 @@ ORDER BY
 
     return await pool.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[selectStockList] DBエラー:', { cause: e });
   }
 };
 
@@ -400,6 +400,6 @@ ORDER BY
 
     return await pool.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[selectStockListBulk] DBエラー:', { cause: e });
   }
 };

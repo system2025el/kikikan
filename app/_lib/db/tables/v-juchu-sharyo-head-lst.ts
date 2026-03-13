@@ -16,6 +16,6 @@ export const selectJuchuSharyoHeadList = async (juchuHeadId: number) => {
       .eq('juchu_head_id', juchuHeadId)
       .not('juchu_sharyo_head_id', 'is', null);
   } catch (e) {
-    throw e;
+    throw new Error('[selectJuchuSharyoHeadList] DBエラー:', { cause: e });
   }
 };

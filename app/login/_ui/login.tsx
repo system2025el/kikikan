@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { supabase } from '@/app/_lib/db/supabase';
+import { serverErrorLog } from '@/app/_lib/funcs';
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 import { getChosenUser } from '@/app/(main)/(masters)/users-master/_lib/funcs';
@@ -15,10 +16,12 @@ import { UserSchema, UserValues } from '../_lib/types';
 
 const Login = () => {
   const router = useRouter();
+  const user = useUserStore((state) => state.user);
   const setUser = useUserStore((state) => state.setUser);
   const clearUser = useUserStore((state) => state.clearUser);
 
   const [error, setError] = useState<string>('');
+  const [isHydrated, setIsHydrated] = useState(false);
 
   const { control, handleSubmit } = useForm({
     mode: 'onSubmit',
@@ -27,17 +30,24 @@ const Login = () => {
     defaultValues: { email: '', password: '' },
   });
 
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
   const onSubmit = async (data: UserValues) => {
-    console.log(data);
     //const { error } = await login(data);
     try {
       const { error } = await supabase.auth.signInWithPassword({ email: data.email, password: data.password });
+      const user = await getChosenUser(data.email);
       if (error) {
-        setError(`メールアドレスかパスワードがちがいます。${error}`);
+        const errorLog = new Error('[supabase.auth.signInWithPassword] DBエラー');
+        serverErrorLog(errorLog.message);
+        setError('メールアドレスかパスワードがちがいます。');
+      } else if (!user) {
+        setError('メールアドレスかパスワードがちがいます。');
       } else {
-        const user = await getChosenUser(data.email);
         const storeUser = {
-          id: FAKE_NEW_ID,
+          id: user.shainCod ?? '',
           name: user.tantouNam,
           email: user.mailAdr,
           permission: user.permission,
@@ -47,7 +57,9 @@ const Login = () => {
         router.push('/dashboard');
       } // ログイン後のページへリダイレクト
     } catch (e) {
-      setError(`ログインに失敗しました。${e}`);
+      const errorLog = e as Error;
+      await serverErrorLog(errorLog.message);
+      setError(`ログインに失敗しました。`);
     }
 
     // if (true) {
@@ -60,7 +72,7 @@ const Login = () => {
 
   const handleMockClick = () => {
     const mockUser = {
-      id: 1,
+      id: '1',
       name: 'test_user',
       email: 'test@example,com',
       permission: {
@@ -76,22 +88,35 @@ const Login = () => {
     router.push('/dashboard');
   };
 
+  // useEffect(() => {
+  //   // const hash = window.location.hash;
+  //   // const params = new URLSearchParams(hash.slice(1)); // '#' を除いてパース！
+  //   // const access_token = params.get('access_token');
+  //   // const refresh_token = params.get('refresh_token');
+  //   // if (access_token && refresh_token) {
+  //   //   setSession(access_token, refresh_token);
+  //   // }
+  //   const initializeAuth = async () => {
+  //     // await handleLogout();
+  //     await supabase.auth.signOut();
+  //     clearUser();
+  //   };
+  //   initializeAuth();
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, []);
+
   useEffect(() => {
-    // const hash = window.location.hash;
-    // const params = new URLSearchParams(hash.slice(1)); // '#' を除いてパース！
-    // const access_token = params.get('access_token');
-    // const refresh_token = params.get('refresh_token');
-    // if (access_token && refresh_token) {
-    //   setSession(access_token, refresh_token);
-    // }
-    const initializeAuth = async () => {
-      // await handleLogout();
-      await supabase.auth.signOut();
-      clearUser();
+    if (!isHydrated) return;
+    const checkUser = async () => {
+      const {
+        data: { user: authUser },
+      } = await supabase.auth.getUser();
+      if (authUser && user) {
+        router.push('/dashboard');
+      }
     };
-    initializeAuth();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    checkUser();
+  }, [isHydrated, user, router, clearUser]);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>

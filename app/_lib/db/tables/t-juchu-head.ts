@@ -19,7 +19,7 @@ export const selectMaxId = async () => {
       .limit(1)
       .single();
   } catch (e) {
-    throw e;
+    throw new Error('[selectMaxId] DBエラー:', { cause: e });
   }
 };
 
@@ -40,7 +40,7 @@ export const selectJuchuHead = async (juchuHeadId: number) => {
       .eq('del_flg', 0)
       .single();
   } catch (e) {
-    throw e;
+    throw new Error('[selectJuchuHead] DBエラー:', { cause: e });
   }
 };
 
@@ -52,7 +52,7 @@ export const insertJuchuHead = async (data: JuchuHead) => {
   try {
     return await supabase.schema(SCHEMA).from('t_juchu_head').insert(data);
   } catch (e) {
-    throw e;
+    throw new Error('[insertJuchuHead] DBエラー:', { cause: e });
   }
 };
 
@@ -65,6 +65,6 @@ export const updateJuchuHead = async (data: JuchuHead) => {
   try {
     return await supabase.schema(SCHEMA).from('t_juchu_head').update(data).eq('juchu_head_id', data.juchu_head_id);
   } catch (e) {
-    throw e;
+    throw new Error('[updateJuchuHead] DBエラー:', { cause: e });
   }
 };

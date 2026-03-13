@@ -23,12 +23,9 @@ import { EqptImportType, KizaiImportTypes, RfidImportTypes, TanabanImportTypes }
  * @param data エクセルから取得したデータの配列
  */
 export const ImportEqptRfidData = async (data: EqptImportType[], user: string) => {
-  // console.log(data);
-  console.log('=================== インポートするよ ====================');
   // 現在時刻
   const now = new Date().toISOString();
 
-  console.log('=================== データの整理開始 ====================');
   /* 重複のない棚番用データ */
   const tanabanList: TanabanImportTypes[] = Array.from(
     new Map(
@@ -115,8 +112,6 @@ export const ImportEqptRfidData = async (data: EqptImportType[], user: string) =
     ).values()
   );
 
-  console.log('=================== データの整理終了 ====================');
-
   /* トランザクション */
   const connection = await pool.connect();
 
@@ -125,24 +120,23 @@ export const ImportEqptRfidData = async (data: EqptImportType[], user: string) =
     await connection.query('BEGIN');
 
     const tanabans = await checkTanaban(tanabanList, connection, user, now);
-    console.log('棚番', tanabans.length, '件追加');
+
     const daibumons = await checkDaibumon(daibumonNamList, connection, user, now);
-    console.log('大部門', daibumons.length, '件追加');
+
     const shukeibumons = await checkShukeibumon(shukeibumonNamList, connection, user, now);
-    console.log('集計部門', shukeibumons.length, '件追加');
+
     const bumons = await checkBumon(bumonNamList, connection, user, now);
-    console.log('部門', bumons.length, '件追加');
+
     const kizais = await checkKizai(kizaiMasterList, connection, user, now);
-    console.log('機材マスタ', kizais.length, '件追加');
+
     await checkRfid(rfidList, connection, user, now);
     // すべて成功でコミット
     await connection.query('COMMIT');
   } catch (e) {
-    console.error('例外が発生', e);
     // エラーでロールバック
     await connection.query('ROLLBACK');
-    console.log('インポートエラー', e);
-    throw new Error('例外が発生：DBエラー,ROLLBACK');
+    console.error('インポートエラー', e);
+    throw e;
   } finally {
     // なんにしてもpool解放
     connection.release();

@@ -19,7 +19,7 @@ export const selectActiveShozokus = async () => {
       .neq('del_flg', 1)
       .order('shozoku_id');
   } catch (e) {
-    throw e;
+    throw new Error('[selectActiveShozokus] DBエラー:', { cause: e });
   }
 };
 
@@ -41,7 +41,7 @@ export const selectFilteredShozokus = async (query: string) => {
   try {
     return await builder;
   } catch (e) {
-    throw e;
+    throw new Error('[selectFilteredShozokus] DBエラー:', { cause: e });
   }
 };
 
@@ -59,7 +59,7 @@ export const selectOneShozoku = async (id: number) => {
       .eq('shozoku_id', id)
       .single();
   } catch (e) {
-    throw e;
+    throw new Error('[selectOneShozoku] DBエラー:', { cause: e });
   }
 };
 
@@ -85,7 +85,7 @@ export const insertNewShozoku = async (data: BasesMasterDialogValues, user: stri
   try {
     await pool.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[insertNewShozoku] DBエラー:', { cause: e });
   }
 };
 
@@ -102,6 +102,6 @@ export const upDateShozokuDB = async (data: MShozokuDBValues) => {
       .update({ ...data })
       .eq('shozoku_id', data.shozoku_id);
   } catch (e) {
-    throw e;
+    throw new Error('[upDateShozokuDB] DBエラー:', { cause: e });
   }
 };

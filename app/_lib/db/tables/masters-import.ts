@@ -21,13 +21,10 @@ export const checkRfid = async (list: RfidImportTypes[], connection: PoolClient,
   if (!Array.isArray(list) || list.length === 0) {
     return [];
   }
-  console.log('=================== RFIDマスタはじめ ====================');
 
   try {
     // インポートしたRFIDタグIDリスト
     const rfidTagIds = list.map((v) => v.rfid_tag_id);
-
-    console.log('=================== 既存タグSELECTはじめ ====================');
 
     // m_rfidから既存のRFIDタグIDを取得
     const existingTagsResult = await connection.query(
@@ -35,14 +32,11 @@ export const checkRfid = async (list: RfidImportTypes[], connection: PoolClient,
       [rfidTagIds]
     );
 
-    console.log('=================== SELECT終了 ====================');
-
     // 既存のRFIDタグIDを取得
     const existingRfidTags = new Set(existingTagsResult.rows.map((row) => row.rfid_tag_id));
 
     // 新規登録するデータ(削除フラグが0)
     const insertList = list.filter((v) => !existingRfidTags.has(v.rfid_tag_id) && v.del_flg === 0);
-    console.log('新規登録対象', insertList.length, '件');
     // 新規登録するデータがあれば新規登録処理
     if (insertList.length > 0) {
       // ■ チャンク設定
@@ -119,7 +113,6 @@ export const checkRfid = async (list: RfidImportTypes[], connection: PoolClient,
           `;
 
         // INSERT実行 (分割ごとに実行) ---
-        // console.log(`Processing chunk: ${i} to ${i + chunk.length}`);
         await connection.query(insertMasterQuery, [...insertMasterValues, date, user]);
         await connection.query(insertStsQuery, [...insertStsValues, date, user]);
       }
@@ -160,7 +153,6 @@ export const checkRfid = async (list: RfidImportTypes[], connection: PoolClient,
     //     `,
     //   list.flatMap((v) => [v.rfid_tag_id, v.kizai_nam, v.rfid_kizai_sts, v.del_flg, v.shozoku_id, v.mem, v.el_num])
     // );
-    // console.log('更新対象', differnces.rows);
     // const updateList = differnces.rows;
 
     // 削除フラグが1の時
@@ -200,11 +192,8 @@ export const checkRfid = async (list: RfidImportTypes[], connection: PoolClient,
 
       await updateMasterUpdates('m_rfid', connection);
     }
-
-    console.log('RFIDマスタ処理した');
   } catch (e) {
-    console.error('例外が発生：DBエラーrfid', e);
-    throw new Error('例外が発生：DBエラーrfid');
+    throw new Error('[checkRfid] DBエラー:', { cause: e });
   } finally {
     refreshVRfid().catch((err) => {
       console.error('バックグラウンドでのマテビュー更新に失敗:', err);
@@ -223,7 +212,6 @@ export const checkKizai = async (list: KizaiImportTypes[], connection: PoolClien
   if (!Array.isArray(list) || list.length === 0) {
     return [];
   }
-  console.log('=================== 機材マスタインポート開始 ====================');
 
   // 一時テーブル用のインポートしたデータ準備
   const allColumns = Object.keys(list[0]);
@@ -235,13 +223,10 @@ export const checkKizai = async (list: KizaiImportTypes[], connection: PoolClien
   // 更新があったかどうかのフラグ
   let hasUpdates = false;
 
-  console.log('=================== ループ開始 ====================');
-
   try {
     for (let i = 0; i < list.length; i += CHUNK_SIZE) {
       // 今回処理するデータを切り出し
       const chunk = list.slice(i, i + CHUNK_SIZE);
-      console.log(`=================== ループ${i + 1}回目のSELECT ====================`);
 
       // ループの都度最新の最大IDを取得する、前のループでINSERTされた分を考慮
       const maxKizaiIdResult = await connection.query(`SELECT COALESCE(MAX(kizai_id), 0) FROM ${SCHEMA}.m_kizai;`);
@@ -331,8 +316,7 @@ export const checkKizai = async (list: KizaiImportTypes[], connection: PoolClien
 
     return allResultRows;
   } catch (e) {
-    console.log('例外が発生：DBエラーkizai', e);
-    throw new Error('例外が発生：DBエラーkizai');
+    throw new Error('[checkKizai] DBエラー:', { cause: e });
   }
 };
 
@@ -382,7 +366,7 @@ export const checkDaibumon = async (list: string[], connection: PoolClient, user
     }
     return [];
   } catch (e) {
-    throw new Error('例外が発生：DBエラーdaibumon');
+    throw new Error('[checkDaibumon] DBエラー:', { cause: e });
   }
 };
 
@@ -433,7 +417,7 @@ export const checkShukeibumon = async (list: string[], connection: PoolClient, u
     }
     return [];
   } catch (e) {
-    throw new Error('例外が発生：DBエラーshukeibumon');
+    throw new Error('[checkShukeibumon] DBエラー:', { cause: e });
   }
 };
 
@@ -511,7 +495,7 @@ export const checkBumon = async (
     }
     return [];
   } catch (e) {
-    throw new Error('例外が発生：DBエラーbumon');
+    throw new Error('[checkBumon] DBエラー:', { cause: e });
   }
 };
 
@@ -559,7 +543,6 @@ export const checkTanaban = async (list: TanabanImportTypes[], connection: PoolC
 
     return result.rows;
   } catch (e) {
-    console.error('棚番マスタでエラー', e);
-    throw new Error('例外が発生：DBエラーtanaban');
+    throw new Error('[checkTanaban] DBエラー:', { cause: e });
   }
 };

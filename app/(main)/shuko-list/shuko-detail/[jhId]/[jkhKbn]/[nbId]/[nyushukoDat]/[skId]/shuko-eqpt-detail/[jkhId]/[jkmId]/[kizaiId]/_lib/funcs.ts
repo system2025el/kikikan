@@ -49,8 +49,7 @@ export const getShukoEqptDetail = async (
       if (error.code === 'PGRST116') {
         return null;
       }
-      console.error('getShukoEqptDetail error : ', error);
-      throw error;
+      throw new Error('[selectNyushukoDetailOne] DBエラー:', { cause: error });
     }
 
     const shukoEqptDetaildata: ShukoEqptDetailValues = {
@@ -111,8 +110,7 @@ export const getShukoEqptDetailTable = async (
     );
 
     if (error) {
-      console.error('getShukoEqptDetailTable error : ', error);
-      throw error;
+      throw new Error('[selectNyushukoEqptDetail] DBエラー:', { cause: error });
     }
 
     const shukoEqptDetailTableData: ShukoEqptDetailTableValues[] = data.map((d) => ({
@@ -178,7 +176,6 @@ export const delshukoResult = async (
         connection
       );
     }
-    console.log('delete nyushuko result', deleteData);
 
     const updateNyushukoDenData: NyushukoDen = {
       juchu_head_id: shukoEqptDetailData.juchuHeadId,
@@ -194,7 +191,6 @@ export const delshukoResult = async (
     };
 
     await updateNyushukoDen(updateNyushukoDenData, connection);
-    console.log('update nyushuko den result_qty', shukoEqptDetailData.resultQty - deleteData.length);
 
     await await connection.query('COMMIT');
     revalidatePath(
@@ -234,7 +230,10 @@ export const updShukoResultAdjQty = async (
     upd_user: userNam,
   };
   try {
-    await updateResultAdjQty(updateData);
+    const { error } = await updateResultAdjQty(updateData);
+    if (error) {
+      throw new Error('[updateResultAdjQty] DBエラー:', { cause: error });
+    }
 
     revalidatePath(
       `shuko-list/shuko-detail/${shukoEqptDetailData.juchuHeadId}/${shukoEqptDetailData.juchuKizaiHeadKbnId}/${shukoEqptDetailData.nyushukoBashoId}/${shukoEqptDetailData.nyushukoDat}/${shukoEqptDetailData.sagyoKbnId}`

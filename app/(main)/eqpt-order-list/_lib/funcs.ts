@@ -27,14 +27,11 @@ export const getFilteredOrderList = async (
     listSort: { sort: 'shuko', order: 'asc' },
   }
 ): Promise<EqptOrderListTableValues[]> => {
-  console.log('ーーーーー機材明細一覧の時間確認', query);
-
   try {
     //
     const { data, error } = await selectFilteredKizaiHead(query);
     if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[selectFilteredKizaiHead] DBエラー:', { cause: error });
     }
     if (!data || data.length === 0) {
       return [];
@@ -54,7 +51,7 @@ export const getFilteredOrderList = async (
       yNyukoDat: d.yard_nyuko_dat ? toJapanTimeString(d.yard_nyuko_dat) : '-',
     }));
   } catch (e) {
-    console.error('例外が発生しました:', e);
+    console.error(e);
     throw e;
   } finally {
   }

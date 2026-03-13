@@ -21,8 +21,7 @@ export const getFilteredDaibumons = async (query: string = '') => {
   try {
     const { data, error } = await selectFilteredDaibumons(query);
     if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[selectFilteredDaibumons] DBエラー:', { cause: error });
     }
     if (!data || data.length === 0) {
       return [];
@@ -35,10 +34,9 @@ export const getFilteredDaibumons = async (query: string = '') => {
       tblDspId: index + 1,
       delFlg: Boolean(d.del_flg),
     }));
-    console.log('大部門マスタ', filteredDaibumons.length, '件');
     return filteredDaibumons;
   } catch (e) {
-    console.error('例外が発生しました:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -52,8 +50,7 @@ export const getChosenDaibumon = async (id: number) => {
   try {
     const { data, error } = await selectOneDaibumon(id);
     if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[selectOneDaibumon] DBエラー:', { cause: error });
     }
     if (!data) {
       return emptyDaibumon;
@@ -66,7 +63,7 @@ export const getChosenDaibumon = async (id: number) => {
     };
     return daibumonDetails;
   } catch (e) {
-    console.error('予期せぬ例外が発生しました:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -78,12 +75,11 @@ export const getChosenDaibumon = async (id: number) => {
 export const addNewDaibumon = async (data: DaibumonsMasterDialogValues, user: string) => {
   try {
     await insertNewDaibumon(data, user);
-    console.log('data : ', data);
     await revalidatePath('/bumons-master');
     await revalidatePath('/daibumons-master');
     await revalidatePath('/eqpt-master');
   } catch (error) {
-    console.log('DB接続エラー', error);
+    console.error(error);
     throw error;
   }
 };
@@ -103,14 +99,13 @@ export const updateDaibumon = async (rawData: DaibumonsMasterDialogValues, id: n
     upd_dat: date,
     upd_user: user,
   };
-  console.log(updateData.dai_bumon_nam);
   try {
     await updateDaibumonDB(updateData);
     await revalidatePath('/bumons-master');
     await revalidatePath('/daibumons-master');
     await revalidatePath('/eqpt-master');
   } catch (error) {
-    console.log('例外が発生', error);
+    console.error(error);
     throw error;
   }
 };

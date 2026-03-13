@@ -59,7 +59,6 @@ export const usePdf = (): [(params: PdfModel[]) => Promise<Blob>] => {
 
     // 各注文情報ごとにページを生成
     for (const param of params) {
-      console.log('params', params);
       let page = pdfDoc.addPage();
 
       /* ---------------- ヘッダー：納品書 ---------------- */

@@ -35,14 +35,14 @@ export const getBillingStsSelection = async (): Promise<SelectTypes[]> => {
   try {
     const { data, error } = await selectActiveSeikyuSts();
     if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[selectActiveSeikyuSts] DBエラー:', { cause: error });
     }
     if (!data || data.length === 0) {
       return [];
     }
     return data.map((d) => ({ id: d.sts_id, label: d.sts_nam }));
   } catch (e) {
+    console.error(e);
     throw e;
   }
 };
@@ -77,7 +77,7 @@ export const getFilteredBills = async (
       seikyuDat: d.seikyu_dat,
     }));
   } catch (e) {
-    console.error('例外が発生', e);
+    console.error(e);
     throw e;
   }
 };
@@ -114,10 +114,8 @@ export const getChosenBill = async (seikyuId: number) => {
     // 見積ヘッドの取得
     const { data: seikyuData, error: seikyuError } = await selectChosenSeikyu(seikyuId);
     if (seikyuError) {
-      console.error(seikyuError);
-      throw new Error('DBエラー：t_seikyu_head');
+      throw new Error('[selectChosenSeikyu] DBエラー:', { cause: seikyuError });
     }
-    console.log(seikyuData);
 
     // 受注情報と明細情報を並列を取得
     const [meisaiHeadResult, meisaiResult] = await Promise.all([
@@ -127,9 +125,11 @@ export const getChosenBill = async (seikyuId: number) => {
 
     const { data: meisaiHeads, error: meisaiHeadError } = meisaiHeadResult;
     const { data: meisais, error: meisaiError } = meisaiResult;
-    if (meisaiHeadError || meisaiError) {
-      console.error(meisaiHeadError?.message, meisaiError?.message);
-      throw new Error('DBエラー：明細取得時');
+    if (meisaiHeadError) {
+      throw new Error('[selectBillMeisaiHead] DBエラー:', { cause: meisaiHeadError });
+    }
+    if (meisaiError) {
+      throw new Error('[selectBillMeisai] DBエラー:', { cause: meisaiError });
     }
     // 明細をヘッダIDごとにグループ化
     const meisaisByHeadId = meisais.reduce((acc: Record<number, SeikyuMeisai[]>, current: SeikyuMeisai) => {
@@ -190,7 +190,7 @@ export const getChosenBill = async (seikyuId: number) => {
     };
     return allData;
   } catch (e) {
-    console.error('例外が発生しました', e);
+    console.error(e);
     throw e;
   }
 };
@@ -208,8 +208,7 @@ export const getJuchuKizaiHeadNamListForBill = async (queries: {
   try {
     const { data, error } = await selectJuchuKizaiHeadNamListFormBill(queries);
     if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[selectJuchuKizaiHeadNamListFormBill] DB情報取得エラー:', { cause: error });
     }
     if (!data || data.length === 0) {
       return [];
@@ -220,7 +219,7 @@ export const getJuchuKizaiHeadNamListForBill = async (queries: {
       headNam: d.head_nam ?? '',
     }));
   } catch (e) {
-    console.error('例外が発生しました', e);
+    console.error(e);
     throw e;
   }
 };
@@ -236,10 +235,9 @@ export const getJuchuKizaiMeisaiHeadForBill = async (juchuHeadId: number, kizaiH
   try {
     const data = await selectJuchuKizaiMeisaiHeadForBill(juchuHeadId, kizaiHeadId, dat);
     if (!data) {
-      console.error('例題が発生');
+      console.error('例外が発生');
     }
     const d = data.rows[0];
-    console.log('☆☆☆☆☆☆☆☆☆', d);
     return data.rows.map((j) => ({
       juchuHeadId: j.juchu_head_id,
       juchuKizaiHeadId: j.juchu_kizai_head_id,
@@ -277,7 +275,7 @@ export const getJuchuKizaiMeisaiHeadForBill = async (juchuHeadId: number, kizaiH
         : [],
     }));
   } catch (e) {
-    console.error('例外が発生しました', e);
+    console.error(e);
     throw e;
   }
 };
@@ -292,12 +290,9 @@ export const getJuchuKizaiMeisaiHeadForBill = async (juchuHeadId: number, kizaiH
 export const getJuchuKizaiMeisaiDetailsForBill = async (juchuHeadId: number, kizaiHeadId: number, dat: Date) => {
   try {
     const data = await selectJuchuKizaiMeisaiDetailsForBill(juchuHeadId, kizaiHeadId, dat);
-    console.log(data.rows);
 
     if (!data) {
-      console.error('例題が発生');
-
-      throw new Error('DB取得エラー');
+      throw new Error('[selectJuchuKizaiMeisaiDetailsForBills] DBエラー:', { cause: '空データ' });
     }
     if (!data.rows || data.rows.length === 0) {
       return [];
@@ -347,7 +342,7 @@ export const getJuchuKizaiMeisaiDetailsForBill = async (juchuHeadId: number, kiz
     // reduceの結果はオブジェクトなので、最後にObject.values()で配列に変換します
     return Object.values(groupedResult);
   } catch (e) {
-    console.error('例外が発生しました', e);
+    console.error(e);
     throw e;
   }
 };
@@ -358,10 +353,10 @@ export const getJuchuKizaiMeisaiDetailsForBill = async (juchuHeadId: number, kiz
  */
 export const updBillDelFlg = async (ids: number[]) => {
   try {
-    console.log('Delete ::: ', ids);
     await updBillHeadDelFlg(ids);
     await revalidatePath('/bill-list');
   } catch (e) {
+    console.error(e);
     throw e;
   }
 };

@@ -97,7 +97,6 @@ export const SecondDialogPage = ({
     nebikiAmt: number | null,
     checked: boolean
   ) => {
-    console.log(kizaiHeadId, checked);
     if (checked) {
       // 一式表示
       const data = await getJuchuIsshikiMeisai(juchuId, kizaiHeadId);
@@ -113,7 +112,6 @@ export const SecondDialogPage = ({
     } else {
       // 全表示
       const data = await getJuchuKizaiMeisaiList(juchuId, kizaiHeadId);
-      console.log(data);
       // 取得した内容をテーブル内の明細に入れる
       field.append({
         mituMeisaiHeadNam: headNam,
@@ -146,7 +144,6 @@ export const SecondDialogPage = ({
         setIsLoading(false);
       };
       getList();
-      console.log(meisaiHeadNamList);
     }
   }, [handleClose, juchuId, meisaiHeadNamList, setSnackBarMessage, setSnackBarOpen]);
 

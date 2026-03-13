@@ -88,8 +88,6 @@ export const EqMasterDialog = ({
   /* フォームを送信 */
   const onSubmit = async (data: EqptsMasterDialogValues) => {
     setIsLoading(true);
-    console.log('isDarty : ', isDirty);
-    // console.log(data.shukeibumonId, '::::', data.rankAmt1);
     if (eqptId === FAKE_NEW_ID) {
       // 新規登録
       try {
@@ -150,7 +148,6 @@ export const EqMasterDialog = ({
 
   /* ×ぼたんを押したとき */
   const handleClickClose = () => {
-    console.log('isDirty : ', isDirty);
     if (isDirty) {
       setDirtyOpen(true);
     } else {
@@ -178,7 +175,6 @@ export const EqMasterDialog = ({
 
   /* useEffect --------------------------------------- */
   useEffect(() => {
-    console.log('★★★★★★★★★★★★★★★★★★★★★');
     const getThatOneEqpt = async () => {
       try {
         const a = await getAllSelections();

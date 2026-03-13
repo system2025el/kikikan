@@ -42,11 +42,9 @@ export const getFilteredQuotList = async (
   }
 ) => {
   try {
-    console.log('デバッグ中▼▼', queries);
     const { data, error } = await selectFilteredQuot(queries);
     if (error) {
-      console.error(error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[selectFilteredQuot] DBエラー:', { cause: error });
     }
     if (!data || data.length === 0) {
       return [];
@@ -64,7 +62,7 @@ export const getFilteredQuotList = async (
       mituRange: `${d.mitu_str_dat ? toJapanYMDString(d.mitu_str_dat) : ''} ${d.mitu_str_dat || d.mitu_end_dat ? ' ～ ' : ''} ${d.mitu_end_dat ? toJapanYMDString(d.mitu_end_dat) : ''}`,
     }));
   } catch (e) {
-    console.error('例外が発生しました:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -91,10 +89,9 @@ export const getUsersSelection = async () => {
         id: d.user_nam!,
         label: d.user_nam,
       }));
-    console.log('担当者が', selectElements.length, '件');
     return selectElements;
   } catch (e) {
-    console.error('担当者取得DBエラー', e);
+    console.error(e);
     throw e;
   }
 };
@@ -107,8 +104,7 @@ export const getMituStsSelection = async () => {
   try {
     const { data, error } = await selectActiveMituSts();
     if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[selectActiveMituSts] DBエラー:', { cause: error });
     }
     if (!data || data.length === 0) {
       return [];
@@ -118,10 +114,9 @@ export const getMituStsSelection = async () => {
       id: d.sts_id!,
       label: d.sts_nam,
     }));
-    console.log('mitu_stsが', selectElements.length, '件');
     return selectElements;
   } catch (e) {
-    console.error('例外が発生しました', e);
+    console.error(e);
     throw e;
   }
 };
@@ -135,7 +130,10 @@ export const getOrderForQuotation = async (id: number): Promise<JuchuValues | nu
   try {
     const { data: juchuData, error } = await selectJuchu(id);
     if (error) {
-      return null;
+      if (error.code === 'PGRST116') {
+        return null;
+      }
+      throw new Error('[selectJuchu] DBエラー:', { cause: error });
     }
     const order: JuchuValues = {
       juchuHeadId: juchuData.juchu_head_id,
@@ -154,10 +152,9 @@ export const getOrderForQuotation = async (id: number): Promise<JuchuValues | nu
       nebikiAmt: juchuData.nebiki_amt,
       zeiKbn: juchuData.zei_nam,
     };
-    console.log('GetOrder order : ', order);
     return order;
   } catch (e) {
-    console.error('例外が発生しました', e);
+    console.error(e);
     throw e;
   }
 };
@@ -170,11 +167,11 @@ export const getMaxHonbanbiQty = async (juchuId: number) => {
   try {
     const { data, error } = await selectMaxJuchuHonbanbiQty(juchuId);
     if (error) {
-      throw error;
+      throw new Error('[selectMaxJuchuHonbanbiQty] DBエラー:', { cause: error });
     }
     return data[0].juchu_honbanbi_qty ?? null;
   } catch (e) {
-    console.error('例外が発生しました', e);
+    console.error(e);
     throw e;
   }
 };
@@ -211,10 +208,8 @@ export const getChosenQuot = async (mituId: number) => {
     // 見積ヘッドの取得
     const { data: mituData, error: mituError } = await selectChosenMitu(mituId);
     if (mituError) {
-      console.error(mituError);
-      throw new Error('DBエラー：t_mitu_head');
+      throw new Error('[selectChosenMitu] DBエラー:', { cause: mituError });
     }
-    console.log(mituData);
 
     // 受注情報と明細情報を並列を取得
     const [juchuResult, meisaiHeadResult, meisaiResult] = await Promise.all([
@@ -226,12 +221,13 @@ export const getChosenQuot = async (mituId: number) => {
     const { data: juchuData, error: juchuError } = juchuResult;
     if (juchuError) {
       if (juchuError.code !== 'PGRST116') {
-        throw new Error('DBエラー：v_juchu_lst');
+        throw new Error('[selectJuchu] DBエラー:', { cause: juchuError });
       }
     }
     const { data: meisaiHeads, error: meisaiHeadError } = meisaiHeadResult;
     const { data: meisais, error: meisaiError } = meisaiResult;
-    if (meisaiHeadError || meisaiError) throw new Error('DBエラー：明細取得時');
+    if (meisaiHeadError) throw new Error('[selectQuotMeisaiHead] DBエラー:', { cause: meisaiHeadError });
+    if (meisaiError) throw new Error('[selectQuotMeisai] DBエラー:', { cause: meisaiError });
 
     // 受注情報の整形
     const juchus: JuchuValues | null = juchuData
@@ -319,11 +315,9 @@ export const getChosenQuot = async (mituId: number) => {
       gokeiAmt: mituData.gokei_amt,
       meisaiHeads: kbnMeisais, // 整形済みのデータを代入
     };
-    console.log(juchus);
-    console.log({ m: allData, j: juchus });
     return { m: allData, j: juchus };
   } catch (e) {
-    console.error('例外が発生しました', e);
+    console.error(e);
     throw e;
   }
 };
@@ -337,13 +331,11 @@ export const getJuchuKizaiHeadNamListForQuot = async (juchuId: number) => {
   try {
     const { data, error } = await selectJuchuKizaiHeadNamList(juchuId);
     if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[selectJuchuKizaiHeadList] DBエラー:', { cause: error });
     }
     if (!data || data.length === 0) {
       return [];
     }
-    console.log('明細名リスト', data.length, '件');
     return data.map((d) => ({
       juchuHeadId: d.juchu_head_id,
       juchuKizaiHeadId: d.juchu_kizai_head_id,
@@ -351,7 +343,7 @@ export const getJuchuKizaiHeadNamListForQuot = async (juchuId: number) => {
       nebikiAmt: d.nebiki_amt,
     }));
   } catch (e) {
-    console.error('例外が発生しました', e);
+    console.error(e);
     throw e;
   }
 };
@@ -366,13 +358,11 @@ export const getJuchuKizaiMeisaiList = async (juchuId: number, kizaiHeadId: numb
   try {
     const { data, error } = await selectKizaiHeadListForMitu(juchuId, kizaiHeadId);
     if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[selectKizaiHeadListForMitu] DBエラー:', { cause: error });
     }
     if (!data || data.length === 0) {
       return [];
     }
-    console.log('明細☆☆☆☆☆☆☆☆', data);
     return data.map((d) => ({
       nam: d.kizai_nam,
       qty: d.plan_kizai_qty,
@@ -383,7 +373,7 @@ export const getJuchuKizaiMeisaiList = async (juchuId: number, kizaiHeadId: numb
       ),
     }));
   } catch (e) {
-    console.error('例外が発生しました', e);
+    console.error(e);
     throw e;
   }
 };
@@ -398,13 +388,11 @@ export const getJuchuIsshikiMeisai = async (juchuId: number, kizaiHeadId: number
   try {
     const { data, error } = await selectKizaiHeadListWithIsshikiForMitu(juchuId, kizaiHeadId);
     if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[selectKizaiHeadListWithIsshikiForMitu] DBエラー:', { cause: error });
     }
     if (!data || data.length === 0) {
       return [];
     }
-    console.log('一式有効明細☆☆☆☆☆☆☆☆', data);
     return data.map((d) => ({
       nam: d.kizai_nam,
       qty: d.plan_kizai_qty,
@@ -415,7 +403,7 @@ export const getJuchuIsshikiMeisai = async (juchuId: number, kizaiHeadId: number
       ),
     }));
   } catch (e) {
-    console.error('例外が発生しました', e);
+    console.error(e);
     throw e;
   }
 };
@@ -426,7 +414,6 @@ export const getJuchuIsshikiMeisai = async (juchuId: number, kizaiHeadId: number
  */
 export const updQuotDelFlg = async (ids: number[]) => {
   try {
-    console.log('Delete ::: ', ids);
     await updQuotHeadDelFlg(ids);
     await revalidatePath('/quotation-list');
   } catch (e) {

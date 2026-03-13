@@ -21,7 +21,7 @@ export const selectKokyaku = async (kokyaku_id: number) => {
       .eq('kokyaku_id', kokyaku_id)
       .single();
   } catch (e) {
-    throw e;
+    throw new Error('[selectKokyaku] DBエラー:', { cause: e });
   }
 };
 
@@ -39,7 +39,7 @@ export const selectActiveCustomers = async () => {
       .neq('del_flg', 1)
       .order('kana');
   } catch (e) {
-    throw e;
+    throw new Error('[selectActiveCustomers] DBエラー:', { cause: e });
   }
 };
 
@@ -66,7 +66,7 @@ export const selectFilteredCustomers = async (query: string) => {
   try {
     return await builder;
   } catch (e) {
-    throw e;
+    throw new Error('[selectFilteredCustomers] DBエラー:', { cause: e });
   }
 };
 
@@ -86,7 +86,7 @@ export const selectOneCustomer = async (id: number) => {
       .eq('kokyaku_id', id)
       .single();
   } catch (e) {
-    throw e;
+    throw new Error('[selectOneCustomer] DBエラー:', { cause: e });
   }
 };
 
@@ -131,7 +131,7 @@ export const insertNewCustomer = async (data: CustomersMasterDialogValues, user:
   try {
     await pool.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[insertNewCustomer] DBエラー:', { cause: e });
   }
 };
 
@@ -148,6 +148,6 @@ export const upDateCustomerDB = async (data: MKokyakuDBValues) => {
       .update({ ...data })
       .eq('kokyaku_id', data.kokyaku_id);
   } catch (e) {
-    throw e;
+    throw new Error('[upDateCustomerDB] DBエラー:', { cause: e });
   }
 };

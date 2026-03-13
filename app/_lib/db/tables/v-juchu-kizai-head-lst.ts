@@ -30,7 +30,7 @@ export const selectJuchuKizaiHeadList = async (juchuHeadId: number) => {
       .eq('juchu_head_id', juchuHeadId)
       .not('juchu_kizai_head_id', 'is', null);
   } catch (e) {
-    throw e;
+    throw new Error('[selectJuchuKizaiHeadList] DBエラー:', { cause: e });
   }
 };
 
@@ -49,7 +49,7 @@ export const selectJuchuKizaiHeadNamList = async (juchuHeadId: number) => {
       .eq('juchu_kizai_head_kbn', 1)
       .not('juchu_kizai_head_id', 'is', null);
   } catch (e) {
-    throw e;
+    throw new Error('[selectJuchuKizaiHeadNamList] DBエラー:', { cause: e });
   }
 };
 
@@ -67,7 +67,7 @@ export const selectPdfJuchuKizaiHead = async (
       .eq('juchu_head_id', juchuHeadId)
       .in('juchu_kizai_head_id', ids);
   } catch (e) {
-    throw e;
+    throw new Error('[selectPdfJuchuKizaiHead] DBエラー:', { cause: e });
   }
 };
 
@@ -210,12 +210,12 @@ export const selectFilteredKizaiHead = async ({
         } else if (selectedDate.range?.from) {
           // fromだけの場合
           const startOfDay = dayjs(selectedDate.range.from).tz('Asia/Tokyo').startOf('day').toISOString();
-          console.log('start of the day: ', startOfDay);
+
           builder.or(`yard_${dateColumn}.gte.${startOfDay},kics_${dateColumn}.gte.${startOfDay}`);
         } else if (selectedDate.range?.to) {
           // toだけの場合
           const nextDay = dayjs(selectedDate.range.to).tz('Asia/Tokyo').add(1, 'day').startOf('day').toISOString();
-          console.log('start of the next day: ', nextDay);
+
           builder.or(`yard_${dateColumn}.lt.${nextDay},kics_${dateColumn}.lt.${nextDay}`);
         }
         break;
@@ -275,6 +275,6 @@ export const selectFilteredKizaiHead = async ({
   try {
     return await builder;
   } catch (e) {
-    throw e;
+    throw new Error('[selectFilteredKizaiHead] DBエラー:', { cause: e });
   }
 };

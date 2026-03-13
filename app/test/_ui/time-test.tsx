@@ -12,7 +12,6 @@ export const TimeTest = () => {
   const form = useForm<{ id: number; created: Date | null; shuko: Date | null }>({});
   const { handleSubmit: fhandleSubmit, setValue: fsetvalue, control: fcontrol, watch: fwatch } = form;
   const fonSubmit = async (data: { id: number; created: Date | null; shuko: Date | null }) => {
-    console.log(data);
     await insertTimeTest(data);
   };
 
@@ -21,9 +20,7 @@ export const TimeTest = () => {
   });
   const { handleSubmit: shandleSubmit, setValue: ssetvalue, control: scontrol, watch: swatch } = search;
   const sonSubmit = async (data: { id: number | null; created: Date | null; shuko: Date | null }) => {
-    console.log(data);
     const d: { id: number; created: Date | null; shuko: Date | null }[] = await getTimeTest(data);
-    console.log(d);
     if (d) {
       setTestlist(d);
     }

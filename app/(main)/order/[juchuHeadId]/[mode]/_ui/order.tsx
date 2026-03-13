@@ -276,8 +276,6 @@ export const Order = (props: {
 
   // 保存ボタン押下
   const onSubmit = async (data: OrderValues) => {
-    console.log('update : 開始');
-
     if (!user || isProcessing) return;
     setIsProcessing(true);
     setIsLoading(true);
@@ -1365,7 +1363,6 @@ export const Order = (props: {
                     color="error"
                     onClick={(e) => {
                       e.stopPropagation();
-                      console.log(selectedVehs);
                       handleHeadDeleteVehsDialogOpen();
                     }}
                     disabled={!edit || selectedVehs.length === 0}

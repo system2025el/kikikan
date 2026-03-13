@@ -494,7 +494,6 @@ export const EquipmentKeepOrderDetail = (props: {
    * @returns
    */
   const onSubmit = async (data: KeepJuchuKizaiHeadValues) => {
-    console.log('保存開始', data);
     if (!user || isProcessing) return;
     setIsProcessing(true);
     setIsLoading(true);
@@ -886,7 +885,6 @@ export const EquipmentKeepOrderDetail = (props: {
               .filter((index) => index !== null) as number[];
 
             const index = visibleIndex[deleteCtnIndex];
-            console.log(index);
             if (index === undefined) return prev;
 
             return prev.map((data, i) => (i === index ? { ...data, delFlag: true } : data));

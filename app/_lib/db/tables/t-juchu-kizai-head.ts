@@ -26,7 +26,7 @@ export const selectJuchuKizaiHeadMaxId = async (juchuHeadId: number) => {
       .limit(1)
       .single();
   } catch (e) {
-    throw e;
+    throw new Error('[selectJuchuKizaiHeadMaxId] DBエラー:', { cause: e });
   }
 };
 
@@ -48,7 +48,7 @@ export const selectJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHeadId
       .eq('juchu_kizai_head_id', juchuKizaiHeadId)
       .single();
   } catch (e) {
-    throw e;
+    throw new Error('[selectJuchuKizaiHead] DBエラー:', { cause: e });
   }
 };
 
@@ -68,7 +68,7 @@ export const selectKeepJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHe
       .eq('juchu_kizai_head_id', juchuKizaiHeadId)
       .single();
   } catch (e) {
-    throw e;
+    throw new Error('[selectKeepJuchuKizaiHead] DBエラー:', { cause: e });
   }
 };
 
@@ -90,7 +90,7 @@ export const selectReturnJuchuKizaiHead = async (juchuHeadId: number, juchuKizai
       .eq('juchu_kizai_head_id', juchuKizaiHeadId)
       .single();
   } catch (e) {
-    throw e;
+    throw new Error('[selectReturnJuchuKizaiHead] DBエラー:', { cause: e });
   }
 };
 
@@ -109,7 +109,7 @@ export const selectChildJuchuKizaiHeadConfirm = async (juchuHeadId: number, juch
       .in('oya_juchu_kizai_head_id', juchuKizaiHeadIdv)
       .neq('juchu_kizai_head_kbn', 1);
   } catch (e) {
-    throw e;
+    throw new Error('[selectChildJuchuKizaiHeadConfirm] DBエラー:', { cause: e });
   }
 };
 
@@ -129,7 +129,7 @@ export const selectJuchuHonbanbiQty = async (juchuHeadId: number, juchuKizaiHead
       .eq('juchu_kizai_head_id', juchuKizaiHeadId)
       .single();
   } catch (e) {
-    throw e;
+    throw new Error('[selectJuchuHonbanbiQty] DBエラー:', { cause: e });
   }
 };
 
@@ -147,7 +147,7 @@ export const selectMaxJuchuHonbanbiQty = async (juchuId: number) => {
       .eq('juchu_head_id', juchuId)
       .order('juchu_honbanbi_qty', { ascending: false, nullsFirst: false });
   } catch (e) {
-    throw e;
+    throw new Error('[selectMaxJuchuHonbanbiQty] DBエラー:', { cause: e });
   }
 };
 
@@ -173,7 +173,7 @@ export const insertJuchuKizaiHead = async (data: JuchuKizaiHead, connection: Poo
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[insertJuchuKizaiHead] DBエラー:', { cause: e });
   }
 };
 
@@ -197,7 +197,7 @@ export const insertKeepJuchuKizaiHead = async (data: JuchuKizaiHead, connection:
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[insertKeepJuchuKizaiHead] DBエラー:', { cause: e });
   }
 };
 
@@ -221,7 +221,7 @@ export const insertReturnJuchuKizaiHead = async (data: JuchuKizaiHead, connectio
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[insertReturnJuchuKizaiHead] DBエラー:', { cause: e });
   }
 };
 
@@ -270,7 +270,7 @@ export const updateJuchuKizaiHead = async (data: JuchuKizaiHead, connection: Poo
   try {
     await connection.query(query, allValues);
   } catch (e) {
-    throw e;
+    throw new Error('[updateJuchuKizaiHead] DBエラー:', { cause: e });
   }
 };
 
@@ -319,7 +319,7 @@ export const updateKeepJuchuKizaiHead = async (data: JuchuKizaiHead, connection:
   try {
     await connection.query(query, allValues);
   } catch (e) {
-    throw e;
+    throw new Error('[updateKeepJuchuKizaiHead] DBエラー:', { cause: e });
   }
 };
 
@@ -368,7 +368,7 @@ export const updateReturnJuchuKizaiHead = async (data: JuchuKizaiHead, connectio
   try {
     await connection.query(query, allValues);
   } catch (e) {
-    throw e;
+    throw new Error('[updateReturnJuchuKizaiHead] DBエラー:', { cause: e });
   }
 };
 
@@ -392,6 +392,6 @@ export const deleteJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHeadId
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteJuchuKizaiHead] DBエラー:', { cause: e });
   }
 };

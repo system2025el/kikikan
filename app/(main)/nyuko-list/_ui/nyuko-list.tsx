@@ -90,10 +90,8 @@ export const NyukoList = (/*props: { shukoData: NyukoTableValues[]}*/) => {
 
     setIsProcessing(true);
 
-    console.log(selected);
     // チェックされた行を取り出し
     const selectList = selected.map((index) => nyukoList[index]);
-    console.log('selectList', selectList);
 
     if (selectList.length === 0) return;
 
@@ -116,7 +114,6 @@ export const NyukoList = (/*props: { shukoData: NyukoTableValues[]}*/) => {
           pdfModels.push(pdfData);
         }
       }
-      console.log('pdfModels', pdfModels);
 
       // PDF生成
       const blob = await printShuko(pdfModels);
@@ -125,7 +122,6 @@ export const NyukoList = (/*props: { shukoData: NyukoTableValues[]}*/) => {
       const url = URL.createObjectURL(blob);
       window.open(url);
     } catch (e) {
-      console.error(e);
       setSnackBarMessage('納品書の出力に失敗しました');
       setSnackBarOpen(true);
     } finally {

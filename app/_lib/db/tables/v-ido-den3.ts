@@ -12,7 +12,6 @@ import { SCHEMA, supabase } from '../supabase';
  * @returns
  */
 export const selectFilteredIdoList = async (sagyoDenDat: string, sagyoSijiId: number) => {
-  console.log(sagyoDenDat);
   const query = `
     SELECT 
         distinct 
@@ -42,6 +41,6 @@ export const selectFilteredIdoList = async (sagyoDenDat: string, sagyoSijiId: nu
   try {
     return (await pool.query(query)).rows;
   } catch (e) {
-    throw e;
+    throw new Error('[selectFilteredIdoList] DBエラー:', { cause: e });
   }
 };

@@ -23,7 +23,7 @@ export const selectNyushukoFixFlag = async (juchuHeadId: number, juchuKizaiHeadI
       .eq('juchu_kizai_head_id', juchuKizaiHeadId)
       .eq('sagyo_kbn_id', sagyoKbnId);
   } catch (e) {
-    throw e;
+    throw new Error('[selectNyushukoFixFlag] DBエラー:', { cause: e });
   }
 };
 
@@ -55,7 +55,7 @@ export const selectSagyoIdFilterNyushukoFixFlag = async (
       .eq('sagyo_id', sagyoId)
       .single();
   } catch (e) {
-    throw e;
+    throw new Error('[selectSagyoIdFilterNyushukoFixFlag] DBエラー:', { cause: e });
   }
 };
 
@@ -78,7 +78,7 @@ export const selectNyushukoFixConfirm = async (data: {
       .eq('juchu_kizai_head_id', data.juchu_kizai_head_id)
       .eq('sagyo_id', data.sagyo_id);
   } catch (e) {
-    throw e;
+    throw new Error('[selectNyushukoFixConfirm] DBエラー:', { cause: e });
   }
 };
 
@@ -108,7 +108,7 @@ export const insertNyushukoFix = async (data: NyushukoFix[], connection: PoolCli
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[insertNyushukoFix] DBエラー:', { cause: e });
   }
 };
 
@@ -156,7 +156,7 @@ export const updateNyushukoFix = async (data: NyushukoFix, connection: PoolClien
   try {
     await connection.query(query, allValues);
   } catch (e) {
-    throw e;
+    throw new Error('[updateNyushukoFix] DBエラー:', { cause: e });
   }
 };
 
@@ -193,7 +193,7 @@ export const deleteNyushukoFix = async (
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteNyushukoFix] DBエラー:', { cause: e });
   }
 };
 
@@ -231,7 +231,7 @@ export const deleteShukoFix = async (
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteShukoFix] DBエラー:', { cause: e });
   }
 };
 
@@ -253,6 +253,6 @@ export const deleteNyushukoFixFromOrder = async (
   try {
     await connection.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[deleteNyushukoFixFromOrder] DBエラー:', { cause: e });
   }
 };

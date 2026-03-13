@@ -61,12 +61,10 @@ export const SectionsMaster = () => {
   /** 検索ボタン押下 */
   const onSubmit = async (data: { query: string | undefined }) => {
     setIsLoading(true);
-    console.log('data : ', data);
     const newList = await getFilteredSections(data.query);
     setPage(1);
     setSections(newList);
     setIsLoading(false);
-    console.log('theLocs : ', sections);
   };
   /** 選んだ課ダイアログを開く関数 */
   const handleOpenDialog = (id: number) => {

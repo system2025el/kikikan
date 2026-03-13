@@ -27,6 +27,6 @@ export const selectNyushukoEqptDetail = async (
       .eq('kizai_id', kizaiId);
     // .order('rfid_tag_id');
   } catch (e) {
-    throw e;
+    throw new Error('[selectNyushukoEqptDetail] DBエラー:', { cause: e });
   }
 };

@@ -23,7 +23,6 @@ export const getTimeTest = async (data: {
   if (data.shuko) {
     query += ` AND created_at >= '${toJapanYMDString(data.shuko)}' `;
   }
-  console.log(query);
   return (await pool.query(query)).rows;
 };
 
@@ -31,6 +30,6 @@ export const insertTimeTest = async (data: { id: number; created: Date | null; s
   const shukodat = data.shuko ? toJapanYMDString(data.shuko) : null;
   const query = `
     INSERT INTO test_takahashi.time_test VALUES(${data.id}, ${data.created ? `'${data.created.toISOString()}'` : null}, ${data.shuko ? `'${shukodat}'` : null})`;
-  console.log(query);
+
   await pool.query(query);
 };

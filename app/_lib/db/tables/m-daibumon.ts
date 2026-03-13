@@ -20,7 +20,7 @@ export const selectActiveDaibumons = async () => {
       .neq('del_flg', 1)
       .order('dai_bumon_nam');
   } catch (e) {
-    throw e;
+    throw new Error('[selectActiveDaibumons] DBエラー:', { cause: e });
   }
 };
 
@@ -44,7 +44,7 @@ export const selectFilteredDaibumons = async (query: string) => {
   try {
     return await builder;
   } catch (e) {
-    throw e;
+    throw new Error('[selectFilteredDaibumons] DBエラー:', { cause: e });
   }
 };
 
@@ -62,7 +62,7 @@ export const selectOneDaibumon = async (id: number) => {
       .eq('dai_bumon_id', id)
       .single();
   } catch (e) {
-    throw e;
+    throw new Error('[selectOneDaibumon] DBエラー:', { cause: e });
   }
 };
 
@@ -89,7 +89,7 @@ export const insertNewDaibumon = async (data: DaibumonsMasterDialogValues, user:
   try {
     await pool.query(query, values);
   } catch (e) {
-    throw e;
+    throw new Error('[insertNewDaibumon] DBエラー:', { cause: e });
   }
 };
 
@@ -106,6 +106,6 @@ export const updateDaibumonDB = async (data: MDaibumonDBValues) => {
       .update({ ...data })
       .eq('dai_bumon_id', data.dai_bumon_id);
   } catch (e) {
-    throw e;
+    throw new Error('[updateDaibumonDB] DBエラー:', { cause: e });
   }
 };

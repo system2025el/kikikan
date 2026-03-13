@@ -145,7 +145,6 @@ export const RfidMaster = ({ kizaiId }: { kizaiId: number }) => {
    * @param {SelectTypes} selectedSts 選ばれている作業ステータス
    */
   const handleClickAdapt = (tagList: string[], selectedSts: SelectTypes) => {
-    console.log('タグリスト', tagList, 'ステータス', selectedSts, '最初のリスト', theRfids);
     if (Number(selectedSts.id) < 100 || Number(selectedSts.id) === 200) {
       const newList = theRfids
         ? theRfids.map((r) => {
@@ -214,13 +213,11 @@ export const RfidMaster = ({ kizaiId }: { kizaiId: number }) => {
         currentItem.stsId !== newItem.stsId || currentItem.stsNam !== newItem.stsNam || currentItem.mem !== newItem.mem
       );
     });
-    console.log(updateList);
     if (updateList.length <= 0) {
       setSnackBarMessage('保存済みの内容です。');
       setIsLoading(false);
     } else {
       // 無効化フラグを変化させるタグ配列
-      console.log('△△△△△△△', updateList, '←←←', currentRfids);
       const changeDelFlgList: { rfidTagId: string; delFlg: number; mem: string | null }[] = updateList.reduce(
         (acc, l) => {
           const current = currentRfids?.find((c) => c.rfidTagId === l.rfidTagId);

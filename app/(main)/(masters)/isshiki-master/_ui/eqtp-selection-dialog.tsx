@@ -88,7 +88,6 @@ export const EqptIsshikiSelectionDialog = ({
     // 他の一式マスタに使われていないかチェックする
     try {
       const result = await checkExistingIsshiki(isshikiId, selected);
-      console.log(result);
       if (!result || result.length === 0) {
         const selectedList = await getSelectedEqpts(selected);
         const setList: { id: number; nam: string; mem: string | null }[] = selectedList.map((newItem) => {
@@ -105,7 +104,6 @@ export const EqptIsshikiSelectionDialog = ({
         setOpen(false);
       } else {
         const dupEqptNames = (await getSelectedEqpts(result)).map((d) => d.kizaiNam);
-        console.log(dupeKizaiNamList);
         setDupeKizaiNamList(dupEqptNames);
       }
     } catch (e) {

@@ -36,8 +36,7 @@ export const getFilteredIsshikis = async () => {
   try {
     const { data, error } = await selectFilteredIsshikis();
     if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[selectFilteredIsshikis] DBエラー:', { cause: error });
     }
     if (!data || data.length === 0) {
       return [];
@@ -52,10 +51,9 @@ export const getFilteredIsshikis = async () => {
       delFlg: Boolean(d.del_flg),
       kizaiList: [],
     }));
-    console.log('一式マスタ', filteredIsshikis.length, '件');
     return filteredIsshikis;
   } catch (e) {
-    console.error('例外が発生しました:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -81,7 +79,7 @@ export const getChosenIsshiki = async (id: number) => {
     };
     return isshikiDetails;
   } catch (e) {
-    console.error('予期せぬ例外が発生しました:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -126,7 +124,7 @@ export const addNewIsshiki = async (data: IsshikisMasterDialogValues, user: stri
     await revalidatePath('/isshiki-master');
     connection.query('COMMIT');
   } catch (error) {
-    console.log('DB接続エラー', error);
+    console.error(error);
     connection.query('ROLLBACK');
     throw error;
   } finally {
@@ -219,7 +217,7 @@ export const updateIsshiki = async (
     await connection.query('COMMIT');
     await revalidatePath('/isshiki-master');
   } catch (error) {
-    console.log('例外が発生', error);
+    console.error(error);
     await connection.query('ROLLBACK');
     throw error;
   } finally {
@@ -240,7 +238,7 @@ export const getEqptsForEqptSelection = async (query: string = ''): Promise<Eqpt
     }
     return data.rows;
   } catch (e) {
-    console.error('例外が発生しました:', e);
+    console.error(e);
     throw e;
   }
 };
@@ -249,7 +247,7 @@ export const checkExistingIsshiki = async (isshikiId: number, kizaiIds: number[]
   try {
     const { data, error } = await checkExIsshiki(isshikiId, kizaiIds);
     if (error) {
-      console.error(error);
+      throw new Error('[checkExIsshiki] DBエラー:', { cause: error });
     }
     if (!data || data.length === 0) {
       return [];
@@ -269,10 +267,10 @@ export const checkExistingIsshiki = async (isshikiId: number, kizaiIds: number[]
 export const updIsshikiDelFlg = async (id: number, flg: boolean, user: string) => {
   const data = { del_flg: flg ? 1 : 0, upd_user: user, upd_dat: new Date().toISOString() };
   try {
-    console.log('Delete ::: ', id);
     await updIsshikiDelFlgDB(id, data);
     await revalidatePath('/isshiki-master');
   } catch (e) {
+    console.error(e);
     throw e;
   }
 };

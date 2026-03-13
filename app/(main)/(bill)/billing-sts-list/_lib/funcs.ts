@@ -31,13 +31,11 @@ export const getFilteredBillingSituations = async (
   try {
     const { data, error } = await selectFilteredBillingSituations({ ...queries, kokyaku: queries.kokyaku });
     if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[selectFilteredBillingSituations] DBエラー:', { cause: error });
     }
     if (!data || data.length === 0) {
       return [];
     }
-    console.log(data);
 
     const heads = data.map((d) => ({
       juchuId: d.juchu_head_id ?? FAKE_NEW_ID,
@@ -58,6 +56,7 @@ export const getFilteredBillingSituations = async (
       heads: heads.filter((h) => d.juchu_head_id === h.juchuId).map((h, i) => ({ ...h, ordNum: i + 1 })),
     }));
   } catch (e) {
+    console.error(e);
     throw e;
   }
 };
@@ -99,8 +98,7 @@ export const getUnbilledCusts = async (query: string) => {
   try {
     const { data, error } = await selectUnbilledCusts(query);
     if (error) {
-      console.error('DB情報取得エラー', error.message, error.cause, error.hint);
-      throw error;
+      throw new Error('[selectUnbilledCusts] DBエラー:', { cause: error });
     }
     if (!data || data.length === 0) {
       return [];
@@ -110,6 +108,7 @@ export const getUnbilledCusts = async (query: string) => {
 
     return uniqueCusts;
   } catch (e) {
+    console.error(e);
     throw e;
   }
 };

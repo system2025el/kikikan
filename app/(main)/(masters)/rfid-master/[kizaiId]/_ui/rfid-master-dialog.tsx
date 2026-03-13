@@ -97,7 +97,6 @@ export const RfidMasterDialog = ({
   /* methods ---------------------------- */
   /* フォームを送信 */
   const onSubmit = async (data: RfidsMasterDialogValues) => {
-    console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaa', data);
     setIsLoading(true);
     if (data.rfidKizaiSts >= 100 && (!data.mem || data.mem.trim() === '')) {
       setIsLoading(false);
@@ -110,7 +109,6 @@ export const RfidMasterDialog = ({
         // 新規登録 -----------------------------
         //const [tagResult, elNumResult] = await Promise.all([selectOneRfid(data.tagId), selectElNumExists(data.elNum!)]);
         const tagResult = await selectOneRfid(data.tagId);
-        console.log(tagResult, elMessage);
         if (tagResult.data) {
           setTagMessage('このRFIDはすでに存在しています');
         } else {
@@ -168,7 +166,6 @@ export const RfidMasterDialog = ({
 
   /* ×ぼたんを押したとき */
   const handleClickClose = () => {
-    console.log('isDirty : ', isDirty);
     if (isDirty) {
       setDirtyOpen(true);
     } else {
@@ -188,7 +185,6 @@ export const RfidMasterDialog = ({
 
   /* useEffect --------------------------------------- */
   useEffect(() => {
-    console.log('★★★★★★★★★★★★★★★★★★★★★');
     const getThatOneRfid = async () => {
       const [shozoku, sts] = await Promise.all([getShozokuSelection(), getRfidKizaiStsSelection()]);
       setSelectOptions({ shozoku: shozoku, sts: sts });

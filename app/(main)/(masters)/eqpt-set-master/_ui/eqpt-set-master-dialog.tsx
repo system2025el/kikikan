@@ -113,7 +113,6 @@ export const EqptSetsMasterDialog = ({
       setDeleteOpen(true);
     } else {
       setIsLoading(true);
-      console.log(data);
       try {
         if (isNew) {
           await addNewEqptSet(data, user?.name ?? '');
@@ -143,7 +142,6 @@ export const EqptSetsMasterDialog = ({
 
   /* ×ぼたんを押したとき */
   const handleClickClose = () => {
-    console.log('isDirty : ', isDirty);
     if (isDirty) {
       setDirtyOpen(true);
     } else {
@@ -178,7 +176,6 @@ export const EqptSetsMasterDialog = ({
 
   /* useEffect --------------------------------------- */
   useEffect(() => {
-    console.log('★★★★★★★★★★★★★★★★★★★★★');
     const getThatOneEqptSet = async () => {
       try {
         if (oyaId === FAKE_NEW_ID) {

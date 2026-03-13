@@ -62,7 +62,6 @@ export const CustomersMaster = () => {
   /** 検索ボタン押下 */
   const onSubmit = async (data: { query: string | undefined }) => {
     setIsLoading(true);
-    console.log('data : ', data);
     try {
       const newList = await getFilteredCustomers(data.query!);
       setPage(1);
@@ -71,7 +70,6 @@ export const CustomersMaster = () => {
       setError(e instanceof Error ? e : new Error(String(e)));
     }
     setIsLoading(false);
-    console.log('theLocs : ', customers);
   };
   /** 顧客詳細ダイアログを開く関数 */
   const handleOpenDialog = (id: number) => {
