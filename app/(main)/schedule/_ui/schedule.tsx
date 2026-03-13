@@ -16,8 +16,9 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
+import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
 import { weeklyColors } from '../../_lib/colors';
@@ -56,7 +57,7 @@ export const Schedule = () => {
   const [snackBarMessage, setSnackBarMessage] = useState('');
 
   /* useForm ------------------------------------------------------------- */
-  const { handleSubmit, control, reset, getValues } = useForm<WeeklySearchValues>({
+  const { handleSubmit, control, reset, getValues, setValue } = useForm<WeeklySearchValues>({
     mode: 'onBlur',
     defaultValues: {
       startDate: new Date(),
@@ -64,6 +65,23 @@ export const Schedule = () => {
       dateCount: 31,
     },
   });
+
+  const startDate = useWatch({ control, name: 'startDate' });
+  const endDate = useWatch({ control, name: 'endDate' });
+
+  useEffect(() => {
+    if (startDate && endDate) {
+      // 終了日 - 開始日の計算
+      const start = dayjs(startDate).tz('Asia/Tokyo').startOf('day');
+      const end = dayjs(endDate).tz('Asia/Tokyo').startOf('day');
+      const count = end.diff(start, 'day') + 1;
+      console.log(count);
+
+      if (count > 0) {
+        setValue('dateCount', count, { shouldValidate: true });
+      }
+    }
+  }, [startDate, endDate, setValue]);
 
   /* methods ------------------------------------------------------------- */
   /** 再描画押下時処理 */
@@ -140,6 +158,8 @@ export const Schedule = () => {
                   sx={{ width: 200, mr: 2, ml: 1 }}
                   error={!!error}
                   helperText={error?.message}
+                  minDate={endDate ? dayjs(endDate).subtract(89, 'day').toDate() : undefined}
+                  maxDate={endDate ? endDate : undefined}
                 />
               )}
             />
@@ -156,6 +176,8 @@ export const Schedule = () => {
                   sx={{ width: 200, mr: 2, ml: 1 }}
                   error={!!error}
                   helperText={error?.message}
+                  minDate={startDate ? startDate : undefined}
+                  maxDate={startDate ? dayjs(startDate).add(89, 'day').toDate() : undefined}
                 />
               )}
             />
