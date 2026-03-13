@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { TextFieldElement, useForm } from 'react-hook-form-mui';
 
 import { supabase } from '@/app/_lib/db/supabase';
+import { serverErrorLog } from '@/app/_lib/funcs';
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import { FAKE_NEW_ID } from '@/app/(main)/(masters)/_lib/constants';
 import { getChosenUser } from '@/app/(main)/(masters)/users-master/_lib/funcs';
@@ -32,6 +33,8 @@ const Login = () => {
     try {
       const { error } = await supabase.auth.signInWithPassword({ email: data.email, password: data.password });
       if (error) {
+        const errorLog = new Error('[supabase.auth.signInWithPassword] DBエラー:', { cause: error });
+        serverErrorLog(errorLog);
         setError('メールアドレスかパスワードがちがいます。');
       } else {
         const user = await getChosenUser(data.email);
@@ -46,6 +49,8 @@ const Login = () => {
         router.push('/dashboard');
       } // ログイン後のページへリダイレクト
     } catch (e) {
+      const errorLog = new Error('ログインエラー:', { cause: e });
+      serverErrorLog(errorLog);
       setError(`ログインに失敗しました。`);
     }
 
