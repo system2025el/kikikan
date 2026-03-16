@@ -62,8 +62,10 @@ export const Schedule = () => {
   const { handleSubmit, control, reset, getValues, setValue } = useForm<WeeklySearchValues>({
     mode: 'onBlur',
     defaultValues: {
-      startDate: new Date(),
-      endDate: dayjs(new Date()).add(30, 'day').toDate(),
+      startDate: new Date(new Date().setHours(0, 0, 0, 0)),
+      endDate: dayjs(new Date(new Date().setHours(0, 0, 0, 0)))
+        .add(30, 'day')
+        .toDate(),
       //dateCount: 31,
     },
     resolver: zodResolver(WeeklySearchSchema),
@@ -124,10 +126,15 @@ export const Schedule = () => {
       if (searchParams) {
         setIsLoading(true);
         // 検索条件表示と検索
-        reset(searchParams);
+        reset({ startDate: new Date(searchParams.startDate), endDate: new Date(searchParams.endDate) });
         getSchedule(searchParams);
       } else {
-        getSchedule({ startDate: new Date(), endDate: dayjs(new Date()).add(30, 'day').toDate() /*, dateCount: 31*/ });
+        getSchedule({
+          startDate: new Date(new Date().setHours(0, 0, 0, 0)),
+          endDate: dayjs(new Date(new Date().setHours(0, 0, 0, 0)))
+            .add(30, 'day')
+            .toDate() /*, dateCount: 31*/,
+        });
       }
     } catch (e) {
       setIsLoading(false);
@@ -148,7 +155,7 @@ export const Schedule = () => {
           <Typography px={2}>スケジュール</Typography>
         </Grid2>
         <Divider />
-        <Grid2 container sx={styles.boxStyle} spacing={1} px={2} mt={{ xs: 1, md: 0 }}>
+        <Grid2 container sx={styles.boxStyle} spacing={1} py={0.5} px={2} mt={{ xs: 1, md: 0 }}>
           <Grid2 sx={styles.boxStyle}>
             <Typography>表示開始日</Typography>
             <Controller
@@ -160,7 +167,7 @@ export const Schedule = () => {
                   onChange={field.onChange}
                   sx={{ width: 160, mr: 2, ml: 1 }}
                   error={!!error}
-                  //helperText={error?.message}
+                  helperText={error?.message}
                   minDate={endDate ? dayjs(endDate).subtract(89, 'day').toDate() : undefined}
                   maxDate={endDate ? endDate : undefined}
                   notClearable
@@ -179,7 +186,7 @@ export const Schedule = () => {
                   onChange={field.onChange}
                   sx={{ width: 160, mr: 2, ml: 1 }}
                   error={!!error}
-                  //helperText={error?.message}
+                  helperText={error?.message}
                   minDate={startDate ? startDate : undefined}
                   maxDate={startDate ? dayjs(startDate).add(89, 'day').toDate() : undefined}
                   notClearable

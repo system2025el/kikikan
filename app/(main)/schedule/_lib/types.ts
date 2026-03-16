@@ -23,10 +23,21 @@ export type WeeklyScheduleValues = {
   }[];
 };
 
-export const WeeklySearchSchema = z.object({
-  startDate: z.date(),
-  endDate: z.date(),
-});
+export const WeeklySearchSchema = z
+  .object({
+    startDate: z.date(),
+    endDate: z.date(),
+  })
+  .refine(
+    (data) => {
+      if (data.startDate > data.endDate) return false;
+      return true;
+    },
+    {
+      message: '',
+      path: ['endDate'],
+    }
+  );
 
 export type WeeklySearchValues = z.infer<typeof WeeklySearchSchema>;
 
