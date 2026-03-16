@@ -81,6 +81,7 @@ const Login = () => {
         masters: 48,
         loginSetting: 128,
         ht: 64,
+        schedule: 256,
       },
     };
 

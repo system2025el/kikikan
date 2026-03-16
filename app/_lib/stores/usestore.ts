@@ -11,6 +11,7 @@ export type User = {
     masters: number;
     loginSetting: number;
     ht: number;
+    schedule: number;
   };
 };
 

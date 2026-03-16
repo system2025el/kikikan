@@ -34,6 +34,7 @@ import {
   nyushukoRadio,
   radioPair,
   radioTrio,
+  scheduleRadio,
 } from '../_lib/datas';
 import {
   addNewUser,
@@ -426,6 +427,18 @@ export const UsersMasterDialog = ({
                       name="permission.ht"
                       control={control}
                       options={htRadio}
+                      valueKey="id"
+                      disabled={editable ? false : true}
+                      type="number"
+                      row
+                    />
+                  </Grid2>
+                  <Grid2 sx={styles.container}>
+                    <Typography mr={2}>スケジュール管理</Typography>
+                    <RadioButtonGroup
+                      name="permission.schedule"
+                      control={control}
+                      options={scheduleRadio}
                       valueKey="id"
                       disabled={editable ? false : true}
                       type="number"
