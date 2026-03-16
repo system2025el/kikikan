@@ -269,6 +269,7 @@ export const Schedule = () => {
                     sx={{
                       border: '1px solid black',
                       px: 1,
+                      py: 0.5,
                       whiteSpace: 'pre-wrap',
                       wordBreak: 'break-all',
                       bgcolor: 'white',
@@ -297,7 +298,8 @@ export const Schedule = () => {
                         display: '-webkit-box',
                         //WebkitLineClamp: 2,
                         WebkitBoxOrient: 'vertical',
-                        lineHeight: '0.825rem',
+                        // lineHeight: '0.825rem',
+                        lineHeight: '1.1rem',
                       }}
                       //fontSize={'0.75rem'}
                       fontWeight={'normal'}
@@ -317,6 +319,7 @@ export const Schedule = () => {
                       border: '1px solid black',
                       borderBottom: '2px solid black',
                       px: 1,
+                      py: 0.5,
                       whiteSpace: 'pre-wrap',
                       wordBreak: 'break-all',
                       //height: 20.1,
@@ -341,7 +344,8 @@ export const Schedule = () => {
                         display: '-webkit-box',
                         //WebkitLineClamp: 2,
                         WebkitBoxOrient: 'vertical',
-                        lineHeight: '0.825rem',
+                        // lineHeight: '0.825rem',
+                        lineHeight: '1.1rem',
                       }}
                       //fontSize={'0.75rem'}
                       fontWeight={'normal'}
