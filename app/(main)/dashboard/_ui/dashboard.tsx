@@ -5,6 +5,8 @@ import { alpha, Box, Button, CircularProgress, Divider, Paper, Stack, Typography
 import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
 
+import { getUrl } from '@/app/_lib/url';
+
 import { getMinusZaikoList, getShukoList, getVehiclesList } from '../_lib/funcs';
 import { DashboardTableValues, MinusZaikoValues } from '../_lib/types';
 import { EqptTable } from './eqpt-table';
@@ -73,6 +75,7 @@ export const Dashboard = () => {
           <Button startIcon={<UpdateIcon />} onClick={handleReload} disabled={loading}>
             {loading ? '更新中...' : '再表示'}
           </Button>
+          <Button onClick={() => console.log(getUrl())}>AAA</Button>
         </Box>
         <Divider />
 
