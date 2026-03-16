@@ -252,6 +252,7 @@ export const Schedule = () => {
                         date.holidayFlg
                           ? 'red'
                           : 'black',
+                      cursor: 'pointer',
                     }}
                     align="center"
                     onClick={() =>
@@ -282,6 +283,7 @@ export const Schedule = () => {
                       bgcolor: 'white',
                       color: 'black',
                       verticalAlign: 'top',
+                      cursor: 'pointer',
                       // maxHeight: 40.2,
                       // minHeight: 20.1,
                       // minWidth: 300,
@@ -333,6 +335,7 @@ export const Schedule = () => {
                       bgcolor: 'white',
                       color: 'black',
                       verticalAlign: 'top',
+                      cursor: 'pointer',
                     }}
                     onClick={() =>
                       handleClickDateHead({
