@@ -1,5 +1,7 @@
 'use client';
 
+import { zodResolver } from '@hookform/resolvers/zod';
+import UpdateIcon from '@mui/icons-material/Update';
 import {
   Box,
   Button,
@@ -29,7 +31,7 @@ import { LoadingOverlay } from '../../_ui/loading';
 import { PermissionGuard } from '../../_ui/permission-guard';
 import { LightTooltipWithText } from '../../(masters)/_ui/tables';
 import { getWeeklyScheduleList } from '../_lib/funcs';
-import { WeeklyScheduleValues, WeeklySearchValues, WeeklyValues } from '../_lib/types';
+import { WeeklyScheduleValues, WeeklySearchSchema, WeeklySearchValues, WeeklyValues } from '../_lib/types';
 import { TantoDialog } from './tanto-dialog';
 
 /**
@@ -61,27 +63,28 @@ export const Schedule = () => {
     mode: 'onBlur',
     defaultValues: {
       startDate: new Date(),
-      endDate: null,
-      dateCount: 31,
+      endDate: dayjs(new Date()).add(30, 'day').toDate(),
+      //dateCount: 31,
     },
+    resolver: zodResolver(WeeklySearchSchema),
   });
 
   const startDate = useWatch({ control, name: 'startDate' });
   const endDate = useWatch({ control, name: 'endDate' });
 
-  useEffect(() => {
-    if (startDate && endDate) {
-      // 終了日 - 開始日の計算
-      const start = dayjs(startDate).tz('Asia/Tokyo').startOf('day');
-      const end = dayjs(endDate).tz('Asia/Tokyo').startOf('day');
-      const count = end.diff(start, 'day') + 1;
-      console.log(count);
+  // useEffect(() => {
+  //   if (startDate && endDate) {
+  //     // 終了日 - 開始日の計算
+  //     const start = dayjs(startDate).tz('Asia/Tokyo').startOf('day');
+  //     const end = dayjs(endDate).tz('Asia/Tokyo').startOf('day');
+  //     const count = end.diff(start, 'day') + 1;
+  //     console.log(count);
 
-      if (count > 0) {
-        setValue('dateCount', count, { shouldValidate: true });
-      }
-    }
-  }, [startDate, endDate, setValue]);
+  //     if (count > 0) {
+  //       setValue('dateCount', count, { shouldValidate: true });
+  //     }
+  //   }
+  // }, [startDate, endDate, setValue]);
 
   /* methods ------------------------------------------------------------- */
   /** 再描画押下時処理 */
@@ -124,7 +127,7 @@ export const Schedule = () => {
         reset(searchParams);
         getSchedule(searchParams);
       } else {
-        getSchedule({ startDate: new Date(), endDate: null, dateCount: 31 });
+        getSchedule({ startDate: new Date(), endDate: dayjs(new Date()).add(30, 'day').toDate() /*, dateCount: 31*/ });
       }
     } catch (e) {
       setIsLoading(false);
@@ -155,11 +158,12 @@ export const Schedule = () => {
                 <FormDateX
                   value={field.value}
                   onChange={field.onChange}
-                  sx={{ width: 200, mr: 2, ml: 1 }}
+                  sx={{ width: 160, mr: 2, ml: 1 }}
                   error={!!error}
-                  helperText={error?.message}
+                  //helperText={error?.message}
                   minDate={endDate ? dayjs(endDate).subtract(89, 'day').toDate() : undefined}
                   maxDate={endDate ? endDate : undefined}
+                  notClearable
                 />
               )}
             />
@@ -173,16 +177,17 @@ export const Schedule = () => {
                 <FormDateX
                   value={field.value}
                   onChange={field.onChange}
-                  sx={{ width: 200, mr: 2, ml: 1 }}
+                  sx={{ width: 160, mr: 2, ml: 1 }}
                   error={!!error}
-                  helperText={error?.message}
+                  //helperText={error?.message}
                   minDate={startDate ? startDate : undefined}
                   maxDate={startDate ? dayjs(startDate).add(89, 'day').toDate() : undefined}
+                  notClearable
                 />
               )}
             />
           </Grid2>
-          <Grid2 sx={styles.boxStyle}>
+          {/* <Grid2 sx={styles.boxStyle}>
             <Typography>表示日数</Typography>
             <TextFieldElement
               name="dateCount"
@@ -210,7 +215,10 @@ export const Schedule = () => {
             <Button type="submit" sx={{ ml: 2 }} loading={isLoading}>
               再取得
             </Button>
-          </Grid2>
+          </Grid2> */}
+          <Button type="submit" startIcon={<UpdateIcon />} loading={isLoading}>
+            再表示
+          </Button>
         </Grid2>
       </Paper>
       <TableContainer>
