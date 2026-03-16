@@ -1,5 +1,7 @@
 'use client';
 
+import { zodResolver } from '@hookform/resolvers/zod';
+import UpdateIcon from '@mui/icons-material/Update';
 import {
   Box,
   Button,
@@ -16,8 +18,9 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
+import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
 
 import { weeklyColors } from '../../_lib/colors';
@@ -28,7 +31,7 @@ import { LoadingOverlay } from '../../_ui/loading';
 import { PermissionGuard } from '../../_ui/permission-guard';
 import { LightTooltipWithText } from '../../(masters)/_ui/tables';
 import { getWeeklyScheduleList } from '../_lib/funcs';
-import { WeeklyScheduleValues, WeeklySearchValues, WeeklyValues } from '../_lib/types';
+import { WeeklyScheduleValues, WeeklySearchSchema, WeeklySearchValues, WeeklyValues } from '../_lib/types';
 import { TantoDialog } from './tanto-dialog';
 
 /**
@@ -56,14 +59,34 @@ export const Schedule = () => {
   const [snackBarMessage, setSnackBarMessage] = useState('');
 
   /* useForm ------------------------------------------------------------- */
-  const { handleSubmit, control, reset, getValues } = useForm<WeeklySearchValues>({
+  const { handleSubmit, control, reset, getValues, setValue } = useForm<WeeklySearchValues>({
     mode: 'onBlur',
     defaultValues: {
-      startDate: new Date(),
-      endDate: null,
-      dateCount: 31,
+      startDate: new Date(new Date().setHours(0, 0, 0, 0)),
+      endDate: dayjs(new Date(new Date().setHours(0, 0, 0, 0)))
+        .add(30, 'day')
+        .toDate(),
+      //dateCount: 31,
     },
+    resolver: zodResolver(WeeklySearchSchema),
   });
+
+  const startDate = useWatch({ control, name: 'startDate' });
+  const endDate = useWatch({ control, name: 'endDate' });
+
+  // useEffect(() => {
+  //   if (startDate && endDate) {
+  //     // 終了日 - 開始日の計算
+  //     const start = dayjs(startDate).tz('Asia/Tokyo').startOf('day');
+  //     const end = dayjs(endDate).tz('Asia/Tokyo').startOf('day');
+  //     const count = end.diff(start, 'day') + 1;
+  //     console.log(count);
+
+  //     if (count > 0) {
+  //       setValue('dateCount', count, { shouldValidate: true });
+  //     }
+  //   }
+  // }, [startDate, endDate, setValue]);
 
   /* methods ------------------------------------------------------------- */
   /** 再描画押下時処理 */
@@ -103,10 +126,15 @@ export const Schedule = () => {
       if (searchParams) {
         setIsLoading(true);
         // 検索条件表示と検索
-        reset(searchParams);
+        reset({ startDate: new Date(searchParams.startDate), endDate: new Date(searchParams.endDate) });
         getSchedule(searchParams);
       } else {
-        getSchedule({ startDate: new Date(), endDate: null, dateCount: 31 });
+        getSchedule({
+          startDate: new Date(new Date().setHours(0, 0, 0, 0)),
+          endDate: dayjs(new Date(new Date().setHours(0, 0, 0, 0)))
+            .add(30, 'day')
+            .toDate() /*, dateCount: 31*/,
+        });
       }
     } catch (e) {
       setIsLoading(false);
@@ -127,7 +155,7 @@ export const Schedule = () => {
           <Typography px={2}>スケジュール</Typography>
         </Grid2>
         <Divider />
-        <Grid2 container sx={styles.boxStyle} spacing={1} px={2} mt={{ xs: 1, md: 0 }}>
+        <Grid2 container sx={styles.boxStyle} spacing={1} py={0.5} px={2} mt={{ xs: 1, md: 0 }}>
           <Grid2 sx={styles.boxStyle}>
             <Typography>表示開始日</Typography>
             <Controller
@@ -137,9 +165,12 @@ export const Schedule = () => {
                 <FormDateX
                   value={field.value}
                   onChange={field.onChange}
-                  sx={{ width: 200, mr: 2, ml: 1 }}
+                  sx={{ width: 160, mr: 2, ml: 1 }}
                   error={!!error}
                   helperText={error?.message}
+                  minDate={endDate ? dayjs(endDate).subtract(89, 'day').toDate() : undefined}
+                  maxDate={endDate ? endDate : undefined}
+                  notClearable
                 />
               )}
             />
@@ -153,14 +184,17 @@ export const Schedule = () => {
                 <FormDateX
                   value={field.value}
                   onChange={field.onChange}
-                  sx={{ width: 200, mr: 2, ml: 1 }}
+                  sx={{ width: 160, mr: 2, ml: 1 }}
                   error={!!error}
                   helperText={error?.message}
+                  minDate={startDate ? startDate : undefined}
+                  maxDate={startDate ? dayjs(startDate).add(89, 'day').toDate() : undefined}
+                  notClearable
                 />
               )}
             />
           </Grid2>
-          <Grid2 sx={styles.boxStyle}>
+          {/* <Grid2 sx={styles.boxStyle}>
             <Typography>表示日数</Typography>
             <TextFieldElement
               name="dateCount"
@@ -188,7 +222,10 @@ export const Schedule = () => {
             <Button type="submit" sx={{ ml: 2 }} loading={isLoading}>
               再取得
             </Button>
-          </Grid2>
+          </Grid2> */}
+          <Button type="submit" startIcon={<UpdateIcon />} loading={isLoading}>
+            再表示
+          </Button>
         </Grid2>
       </Paper>
       <TableContainer>
@@ -215,6 +252,7 @@ export const Schedule = () => {
                         date.holidayFlg
                           ? 'red'
                           : 'black',
+                      cursor: 'pointer',
                     }}
                     align="center"
                     onClick={() =>
@@ -239,11 +277,13 @@ export const Schedule = () => {
                     sx={{
                       border: '1px solid black',
                       px: 1,
+                      py: 0.5,
                       whiteSpace: 'pre-wrap',
                       wordBreak: 'break-all',
                       bgcolor: 'white',
                       color: 'black',
                       verticalAlign: 'top',
+                      cursor: 'pointer',
                       // maxHeight: 40.2,
                       // minHeight: 20.1,
                       // minWidth: 300,
@@ -267,7 +307,8 @@ export const Schedule = () => {
                         display: '-webkit-box',
                         //WebkitLineClamp: 2,
                         WebkitBoxOrient: 'vertical',
-                        lineHeight: '0.825rem',
+                        // lineHeight: '0.825rem',
+                        lineHeight: '1.1rem',
                       }}
                       //fontSize={'0.75rem'}
                       fontWeight={'normal'}
@@ -287,12 +328,14 @@ export const Schedule = () => {
                       border: '1px solid black',
                       borderBottom: '2px solid black',
                       px: 1,
+                      py: 0.5,
                       whiteSpace: 'pre-wrap',
                       wordBreak: 'break-all',
                       //height: 20.1,
                       bgcolor: 'white',
                       color: 'black',
                       verticalAlign: 'top',
+                      cursor: 'pointer',
                     }}
                     onClick={() =>
                       handleClickDateHead({
@@ -311,7 +354,8 @@ export const Schedule = () => {
                         display: '-webkit-box',
                         //WebkitLineClamp: 2,
                         WebkitBoxOrient: 'vertical',
-                        lineHeight: '0.825rem',
+                        // lineHeight: '0.825rem',
+                        lineHeight: '1.1rem',
                       }}
                       //fontSize={'0.75rem'}
                       fontWeight={'normal'}

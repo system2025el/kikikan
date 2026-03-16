@@ -20,6 +20,7 @@ export const UsersMaterDialogSchema = z
       masters: z.number(),
       loginSetting: z.number(),
       ht: z.number(),
+      schedule: z.number(),
     }),
     mem: z
       .string()

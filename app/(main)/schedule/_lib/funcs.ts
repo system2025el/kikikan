@@ -21,29 +21,32 @@ dayjs.extend(timezone);
  * @returns
  */
 export const getWeeklyScheduleList = async (query: WeeklySearchValues): Promise<WeeklyScheduleValues[]> => {
-  const { startDate, endDate, dateCount } = query;
-  const DEFAULT_COUNT = 30;
-  let count: number;
-  let date: string;
+  const { startDate, endDate /*, dateCount*/ } = query;
+  // const DEFAULT_COUNT = 30;
+  // let count: number;
+  // let date: string;
 
-  if (startDate && endDate) {
-    // start, endどちらも入力されているとき
-    count = dayjs(endDate).tz('Asia/Tokyo').diff(dayjs(startDate), 'day') + 1;
-    date = toJapanYMDString(startDate, '-');
-  } else if (!startDate && endDate) {
-    // endだけ入力されているとき
-    count = dateCount && dateCount !== 0 ? dateCount - 1 : DEFAULT_COUNT;
-    /** endDateから表示日数分前の日付 */
-    date = dayjs(endDate).tz('Asia/Tokyo').subtract(count, 'day').format(`YYYY-MM-DD`);
-  } else if (!endDate && startDate) {
-    // startだけ入力されているとき
-    count = dateCount && dateCount !== 0 ? dateCount - 1 : DEFAULT_COUNT;
-    date = toJapanYMDString(startDate, '-');
-  } else {
-    // 全てない場合は今日で31日表示
-    count = dateCount && dateCount !== 0 ? dateCount - 1 : DEFAULT_COUNT;
-    date = toJapanYMDString(new Date(), '-');
-  }
+  const date = toJapanYMDString(startDate, '-');
+  const count = dayjs(endDate).tz('Asia/Tokyo').diff(dayjs(startDate), 'day');
+
+  // if (startDate && endDate) {
+  //   // start, endどちらも入力されているとき
+  //   count = dayjs(endDate).tz('Asia/Tokyo').diff(dayjs(startDate), 'day');
+  //   date = toJapanYMDString(startDate, '-');
+  // } else if (!startDate && endDate) {
+  //   // endだけ入力されているとき
+  //   count = dateCount && dateCount !== 0 ? dateCount - 1 : DEFAULT_COUNT;
+  //   /** endDateから表示日数分前の日付 */
+  //   date = dayjs(endDate).tz('Asia/Tokyo').subtract(count, 'day').format(`YYYY-MM-DD`);
+  // } else if (!endDate && startDate) {
+  //   // startだけ入力されているとき
+  //   count = dateCount && dateCount !== 0 ? dateCount - 1 : DEFAULT_COUNT;
+  //   date = toJapanYMDString(startDate, '-');
+  // } else {
+  //   // 全てない場合は今日で31日表示
+  //   count = dateCount && dateCount !== 0 ? dateCount - 1 : DEFAULT_COUNT;
+  //   date = toJapanYMDString(new Date(), '-');
+  // }
   try {
     // データ取得実行
     const data = await selectWeeklyList({

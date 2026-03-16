@@ -11,5 +11,6 @@ export const permission = {
   mst_full: 16 | 32,
   ht: 64,
   login: 128,
+  sche_upd: 256,
   system: 65535,
 } as const;

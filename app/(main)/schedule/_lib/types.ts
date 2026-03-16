@@ -23,11 +23,29 @@ export type WeeklyScheduleValues = {
   }[];
 };
 
-export type WeeklySearchValues = {
-  startDate: Date | null;
-  endDate: Date | null;
-  dateCount: number | null;
-};
+export const WeeklySearchSchema = z
+  .object({
+    startDate: z.date(),
+    endDate: z.date(),
+  })
+  .refine(
+    (data) => {
+      if (data.startDate > data.endDate) return false;
+      return true;
+    },
+    {
+      message: '',
+      path: ['endDate'],
+    }
+  );
+
+export type WeeklySearchValues = z.infer<typeof WeeklySearchSchema>;
+
+// export type WeeklySearchValues = {
+//   startDate: Date | null;
+//   endDate: Date | null;
+//   dateCount: number | null;
+// };
 
 /**
  * スケジュール用のスキーマ

@@ -91,6 +91,7 @@ export const getChosenUser = async (mailAdr: string) => {
         masters: rows[0].permission & permission.mst_full,
         ht: rows[0].permission & permission.ht,
         loginSetting: rows[0].permission & permission.login,
+        schedule: rows[0].permission & permission.sche_upd,
       },
       mem: rows[0].mem,
       lastLoginAt: !rows[0].last_sign_in_at ? null : toJapanTimeString(rows[0].last_sign_in_at),
@@ -109,7 +110,7 @@ export const getChosenUser = async (mailAdr: string) => {
 export const addNewUser = async (data: UsersMasterDialogValues, user: string) => {
   const p = data.permission;
   //const permissionNum = parseInt(p.juchu + p.nyushuko + p.masters + p.ht + p.loginSetting, 2);
-  const permissionNum = p.juchu | p.nyushuko | p.masters | p.ht | p.loginSetting;
+  const permissionNum = p.juchu | p.nyushuko | p.masters | p.ht | p.loginSetting | p.schedule;
   const insertData: MUserDBValues = {
     user_nam: data.tantouNam,
     shain_cod: data.shainCod ?? null,
@@ -131,10 +132,10 @@ export const addNewUser = async (data: UsersMasterDialogValues, user: string) =>
       email: data.mailAdr,
       password: 'password',
       // 開発用
-      // options: { emailRedirectTo: /*`${getUrl()}login`*/ `${getUrl()}signup` },
+      options: { emailRedirectTo: /*`${getUrl()}login`*/ `${getUrl()}signup` },
 
       // 本番用
-      options: { emailRedirectTo: /*`${getUrl()}login`*/ `https://kikikan-psi.vercel.app/signup` },
+      // options: { emailRedirectTo: /*`${getUrl()}login`*/ `https://kikikan-psi.vercel.app/signup` },
     });
 
     // 招待
@@ -166,7 +167,7 @@ export const updateUser = async (currentEmail: string, data: UsersMasterDialogVa
   // permissionを10進数に変換する
   const p = data.permission;
   //const permissionNum = parseInt(p.juchu + p.nyushuko + p.masters + p.ht + p.loginSetting , 2);
-  const permissionNum = p.juchu | p.nyushuko | p.masters | p.ht | p.loginSetting;
+  const permissionNum = p.juchu | p.nyushuko | p.masters | p.ht | p.loginSetting | p.schedule;
 
   // 更新データ
   const updateData: MUserDBValues = {
@@ -258,10 +259,10 @@ export const restoreUsers = async (mailAdr: string, user: string) => {
       email: mailAdr,
       password: 'password',
       // 開発用
-      // options: { emailRedirectTo: /*`${getUrl()}login`*/ `${getUrl()}signup` },
+      options: { emailRedirectTo: /*`${getUrl()}login`*/ `${getUrl()}signup` },
 
       // 本番用
-      options: { emailRedirectTo: /*`${getUrl()}login`*/ `https://kikikan-psi.vercel.app/signup` },
+      // options: { emailRedirectTo: /*`${getUrl()}login`*/ `https://kikikan-psi.vercel.app/signup` },
     });
 
     // 招待
@@ -305,10 +306,10 @@ export const restoreUsersAndShainCod = async (mailAdr: string, shainCod: string 
       email: mailAdr,
       password: 'password',
       // 開発用
-      // options: { emailRedirectTo: /*`${getUrl()}login`*/ `${getUrl()}signup` },
+      options: { emailRedirectTo: /*`${getUrl()}login`*/ `${getUrl()}signup` },
 
       // 本番用
-      options: { emailRedirectTo: /*`${getUrl()}login`*/ `https://kikikan-psi.vercel.app/signup` },
+      // options: { emailRedirectTo: /*`${getUrl()}login`*/ `https://kikikan-psi.vercel.app/signup` },
     });
 
     // 招待
