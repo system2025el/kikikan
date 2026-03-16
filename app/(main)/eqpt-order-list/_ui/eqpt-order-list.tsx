@@ -144,13 +144,14 @@ export const EqptOrderList = () => {
                   options={[
                     { id: 'shuko', label: '出庫日が' },
                     { id: 'nyuko', label: '入庫日が' },
+                    { id: 'juchu', label: '受注日が' },
                   ]}
                   sx={{ bgcolor: 'white', minWidth: 150 }}
                 />
               </Grid2>
               <Grid2 container spacing={2} sx={styles.container} ml={1}>
                 <RadioButtonGroup control={control} name="selectedDate.value" options={radioData} row />
-                {selectedDateValue === '7' && (
+                {selectedDateValue === '8' && (
                   <Stack direction="row" spacing={2} alignItems="center">
                     <Controller
                       control={control}

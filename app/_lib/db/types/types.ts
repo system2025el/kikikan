@@ -2565,6 +2565,7 @@ export type Database = {
           juchu_head_id: number | null;
           juchu_honbanbi_shubetu_color: string | null;
           juchu_honbanbi_shubetu_id: number | null;
+          juchu_kizai_head_id: number | null;
           kizai_id: number | null;
           plan_dat: string | null;
         };
@@ -3071,6 +3072,7 @@ export type Database = {
       v_juchu_kizai_dat_qty_kasi: {
         Row: {
           juchu_head_id: number | null;
+          juchu_kizai_head_id: number | null;
           juchu_qty: number | null;
           kizai_id: number | null;
           plan_dat: string | null;
@@ -3114,6 +3116,7 @@ export type Database = {
           head_nam: string;
           honbanbi: number | null;
           ht_kbn: number | null;
+          juchu_dat: string | null;
           juchu_head_id: number;
           juchu_honbanbi_calc_qty: number | null;
           juchu_kizai_head_id: number;
@@ -3846,6 +3849,7 @@ export type Database = {
       v_zaiko_qty_kasi: {
         Row: {
           juchu_head_id: number | null;
+          juchu_kizai_head_id: number | null;
           juchu_qty: number | null;
           kizai_id: number | null;
           kizai_qty: number | null;

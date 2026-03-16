@@ -86,6 +86,7 @@ export const EqptOrderTable = ({
                   <TableCell align="left">公演名</TableCell>
                   <TableCell align="left">公演場所</TableCell>
                   <TableCell align="left">顧客</TableCell>
+                  <TableCell align="left">受注日</TableCell>
                   <TableCell align="left">出庫日時</TableCell>
                   <TableCell align="left">入庫日時</TableCell>
                 </TableRow>
@@ -154,6 +155,11 @@ export const EqptOrderTable = ({
                     <TableCell>
                       <LightTooltipWithText variant={'body2'} maxWidth={300}>
                         {order.kokyakuNam}
+                      </LightTooltipWithText>
+                    </TableCell>
+                    <TableCell>
+                      <LightTooltipWithText variant={'body2'} maxWidth={300}>
+                        {order.juchuDat}
                       </LightTooltipWithText>
                     </TableCell>
                     <TableCell>

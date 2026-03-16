@@ -14,6 +14,7 @@ export type EqptOrderListTableValues = {
   yNyukoDat: string | null;
   kShukoDat: string | null;
   kNyukoDat: string | null;
+  juchuDat: string | null;
 };
 
 /**
@@ -27,7 +28,7 @@ export type EqptOrderSearchValues = {
       to: Date | null;
     };
   };
-  radio: 'shuko' | 'nyuko';
+  radio: 'shuko' | 'nyuko' | 'juchu';
   juchuId?: number | null;
   headNam?: string | null;
   //kokyaku?: number | null;

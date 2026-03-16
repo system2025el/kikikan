@@ -91,7 +91,7 @@ export const selectFilteredKizaiHead = async ({
     .schema(SCHEMA)
     .from('v_juchu_kizai_head_lst')
     .select(
-      `juchu_head_id, juchu_kizai_head_id, juchu_kizai_head_kbn, kokyaku_nam, koen_nam, koenbasho_nam, head_nam, kics_shuko_dat, kics_nyuko_dat, yard_shuko_dat, yard_nyuko_dat, oya_juchu_kizai_head_id`
+      `juchu_head_id, juchu_kizai_head_id, juchu_kizai_head_kbn, kokyaku_nam, koen_nam, koenbasho_nam, head_nam, juchu_dat, kics_shuko_dat, kics_nyuko_dat, yard_shuko_dat, yard_nyuko_dat, oya_juchu_kizai_head_id`
     );
 
   // 検索条件日付
@@ -103,120 +103,135 @@ export const selectFilteredKizaiHead = async ({
     case 'nyuko': // '入庫日が'
       dateColumn = 'nyuko_dat';
       break;
+    case 'juchu': // '受注日が'
+      dateColumn = 'juchu_dat';
+      break;
   }
 
   if (dateColumn) {
     switch (selectedDate?.value) {
       case '1': {
         // '先月全て'
-        const startOfLastMonth = dayjs().tz('Asia/Tokyo').subtract(1, 'month').startOf('month').toISOString();
-        const startOfThisMonth = dayjs().tz('Asia/Tokyo').add(1, 'month').startOf('month').toISOString();
+        const startOfLastMonth = dayjs().tz('Asia/Tokyo').subtract(1, 'month').startOf('month');
+        const startOfThisMonth = dayjs().tz('Asia/Tokyo').startOf('month');
         builder.or(
-          // yardが先月の範囲
-          `and(yard_${dateColumn}.gte.${startOfLastMonth},yard_${dateColumn}.lt.${startOfThisMonth}),` +
-            // kicsが先月の範囲
-            `and(kics_${dateColumn}.gte.${startOfLastMonth},kics_${dateColumn}.lt.${startOfThisMonth})`
+          dateColumn === 'juchu_dat'
+            ? `and(${dateColumn}.gte.${startOfLastMonth.format('YYYY-MM-DD')},${dateColumn}.lt.${startOfThisMonth.format('YYYY-MM-DD')})`
+            : // yardが先月の範囲
+              `and(yard_${dateColumn}.gte.${startOfLastMonth.toISOString()},yard_${dateColumn}.lt.${startOfThisMonth.toISOString()}),` +
+                // kicsが先月の範囲
+                `and(kics_${dateColumn}.gte.${startOfLastMonth.toISOString()},kics_${dateColumn}.lt.${startOfThisMonth.toISOString()})`
         );
         break;
       }
       case '2': {
         // '今月全て'
-        const startOfThisMonth = dayjs().tz('Asia/Tokyo').startOf('month').toISOString();
-        const startOfNextMonth = dayjs().tz('Asia/Tokyo').add(1, 'month').startOf('month').toISOString();
+        const startOfThisMonth = dayjs().tz('Asia/Tokyo').startOf('month');
+        const startOfNextMonth = dayjs().tz('Asia/Tokyo').add(1, 'month').startOf('month');
         builder.or(
-          // yardが今月の範囲
-          `and(yard_${dateColumn}.gte.${startOfThisMonth},yard_${dateColumn}.lt.${startOfNextMonth}),` +
-            // kicsが今月の範囲
-            `and(kics_${dateColumn}.gte.${startOfThisMonth},kics_${dateColumn}.lt.${startOfNextMonth})`
+          dateColumn === 'juchu_dat'
+            ? `and(${dateColumn}.gte.${startOfThisMonth.format('YYYY-MM-DD')},${dateColumn}.lt.${startOfNextMonth.format('YYYY-MM-DD')})`
+            : // yardが今月の範囲
+              `and(yard_${dateColumn}.gte.${startOfThisMonth.toISOString()},yard_${dateColumn}.lt.${startOfNextMonth.toISOString()}),` +
+                // kicsが今月の範囲
+                `and(kics_${dateColumn}.gte.${startOfThisMonth.toISOString()},kics_${dateColumn}.lt.${startOfNextMonth.toISOString()})`
         );
         break;
       }
-      // case '3': {
-      //   // '昨日'
-      //   const startOfYesterday = dayjs().tz('Asia/Tokyo').subtract(1, 'day').startOf('day').toISOString();
-      //   const startOfToday = dayjs().tz('Asia/Tokyo').startOf('day').toISOString();
-      //   builder.or(
-      //     // yardが昨日の範囲内
-      //     `and(yard_${dateColumn}.gte.${startOfYesterday},yard_${dateColumn}.lt.${startOfToday}),` +
-      //       // kicsが昨日の範囲内
-      //       `and(kics_${dateColumn}.gte.${startOfYesterday},kics_${dateColumn}.lt.${startOfToday})`
-      //   );
-      // }
-      // case '4': {
-      //   // '今日'
-      //   const startOfToday = dayjs().tz('Asia/Tokyo').startOf('day').toISOString();
-      //   const startOfTomorrow = dayjs().tz('Asia/Tokyo').add(1, 'day').startOf('day').toISOString();
-      //   builder.or(
-      //     // yardが今日の範囲内
-      //     `and(yard_${dateColumn}.gte.${startOfToday},yard_${dateColumn}.lt.${startOfTomorrow}),` +
-      //       // kicsが今日の範囲内
-      //       `and(kics_${dateColumn}.gte.${startOfToday},kics_${dateColumn}.lt.${startOfTomorrow})`
-      //   );
-      //   break;
-      // }
       case '3': {
-        // '今日'
-        const startOfToday = dayjs().tz('Asia/Tokyo').startOf('day').toISOString();
-        const startOfTomorrow = dayjs().tz('Asia/Tokyo').add(1, 'day').startOf('day').toISOString();
+        // '昨日'
+        const startOfYesterday = dayjs().tz('Asia/Tokyo').subtract(1, 'day').startOf('day');
+        const startOfToday = dayjs().tz('Asia/Tokyo').startOf('day');
         builder.or(
-          // yardが今日の範囲内
-          `and(yard_${dateColumn}.gte.${startOfToday},yard_${dateColumn}.lt.${startOfTomorrow}),` +
-            // kicsが今日の範囲内
-            `and(kics_${dateColumn}.gte.${startOfToday},kics_${dateColumn}.lt.${startOfTomorrow})`
+          dateColumn === 'juchu_dat'
+            ? `and(${dateColumn}.gte.${startOfYesterday.format('YYYY-MM-DD')},${dateColumn}.lt.${startOfToday.format('YYYY-MM-DD')})`
+            : // yardが昨日の範囲内
+              `and(yard_${dateColumn}.gte.${startOfYesterday.toISOString()},yard_${dateColumn}.lt.${startOfToday.toISOString()}),` +
+                // kicsが昨日の範囲内
+                `and(kics_${dateColumn}.gte.${startOfYesterday.toISOString()},kics_${dateColumn}.lt.${startOfToday.toISOString()})`
         );
-        break;
       }
       case '4': {
-        // '今日以降'
-        const startOfToday = dayjs().tz('Asia/Tokyo').startOf('day').toISOString();
-        builder.or(`yard_${dateColumn}.gte.${startOfToday},kics_${dateColumn}.gte.${startOfToday}`);
+        // '今日'
+        const startOfToday = dayjs().tz('Asia/Tokyo').startOf('day');
+        const startOfTomorrow = dayjs().tz('Asia/Tokyo').add(1, 'day').startOf('day');
+        builder.or(
+          dateColumn === 'juchu_dat'
+            ? `and(${dateColumn}.gte.${startOfToday.format('YYYY-MM-DD')},${dateColumn}.lt.${startOfTomorrow.format('YYYY-MM-DD')})`
+            : // yardが今日の範囲内
+              `and(yard_${dateColumn}.gte.${startOfToday.toISOString()},yard_${dateColumn}.lt.${startOfTomorrow.toISOString()}),` +
+                // kicsが今日の範囲内
+                `and(kics_${dateColumn}.gte.${startOfToday.toISOString()},kics_${dateColumn}.lt.${startOfTomorrow.toISOString()})`
+        );
         break;
       }
       case '5': {
-        // '明日'
-        const startOfTomorrow = dayjs().tz('Asia/Tokyo').add(1, 'day').startOf('day').toISOString();
-        const startOfDayAfterTomorrow = dayjs().tz('Asia/Tokyo').add(2, 'day').startOf('day').toISOString();
+        // '今日以降'
+        const startOfToday = dayjs().tz('Asia/Tokyo').startOf('day');
         builder.or(
-          // yardが明日の範囲内
-          `and(yard_${dateColumn}.gte.${startOfTomorrow},yard_${dateColumn}.lt.${startOfDayAfterTomorrow}),` +
-            // kicsが明日の範囲内
-            `and(kics_${dateColumn}.gte.${startOfTomorrow},kics_${dateColumn}.lt.${startOfDayAfterTomorrow})`
+          dateColumn === 'juchu_dat'
+            ? `${dateColumn}.gte.${startOfToday.format('YYYY-MM-DD')}`
+            : `yard_${dateColumn}.gte.${startOfToday.toISOString()},kics_${dateColumn}.gte.${startOfToday.toISOString()}`
         );
         break;
       }
       case '6': {
-        // '明日以降'
-        const tomorrowAndAfter = dayjs().tz('Asia/Tokyo').add(1, 'day').startOf('day').toISOString();
-        builder.or(`yard_${dateColumn}.gte.${tomorrowAndAfter},kics_${dateColumn}.gte.${tomorrowAndAfter}`);
-
+        // '明日'
+        const startOfTomorrow = dayjs().tz('Asia/Tokyo').add(1, 'day').startOf('day');
+        const startOfDayAfterTomorrow = dayjs().tz('Asia/Tokyo').add(2, 'day').startOf('day');
+        builder.or(
+          dateColumn === 'juchu_dat'
+            ? `and(${dateColumn}.gte.${startOfTomorrow.format('YYYY-MM-DD')},${dateColumn}.lt.${startOfDayAfterTomorrow.format('YYYY-MM-DD')})`
+            : // yardが明日の範囲内
+              `and(yard_${dateColumn}.gte.${startOfTomorrow.toISOString()},yard_${dateColumn}.lt.${startOfDayAfterTomorrow.toISOString()}),` +
+                // kicsが明日の範囲内
+                `and(kics_${dateColumn}.gte.${startOfTomorrow.toISOString()},kics_${dateColumn}.lt.${startOfDayAfterTomorrow.toISOString()})`
+        );
         break;
       }
       case '7': {
+        // '明日以降'
+        const tomorrowAndAfter = dayjs().tz('Asia/Tokyo').add(1, 'day').startOf('day');
+        builder.or(
+          dateColumn === 'juchu_dat'
+            ? `${dateColumn}.gte.${tomorrowAndAfter.format('YYYY-MM-DD')}`
+            : `yard_${dateColumn}.gte.${tomorrowAndAfter.toISOString()},kics_${dateColumn}.gte.${tomorrowAndAfter.toISOString()}`
+        );
+
+        break;
+      }
+      case '8': {
         // '指定期間'
         if (selectedDate.range?.from && selectedDate.range.to) {
           // 指定日がどちらも入ってる場合
-          const startOfDay = dayjs(selectedDate.range.from).tz('Asia/Tokyo').startOf('day').toISOString();
-          const startOfnextDay = dayjs(selectedDate.range.to)
-            .tz('Asia/Tokyo')
-            .add(1, 'day')
-            .startOf('day')
-            .toISOString();
+          const startOfDay = dayjs(selectedDate.range.from).tz('Asia/Tokyo').startOf('day');
+          const startOfnextDay = dayjs(selectedDate.range.to).tz('Asia/Tokyo').add(1, 'day').startOf('day');
           builder.or(
-            // yardが今日の範囲内
-            `and(yard_${dateColumn}.gte.${startOfDay},yard_${dateColumn}.lt.${startOfnextDay}),` +
-              // kicsが今日の範囲内
-              `and(kics_${dateColumn}.gte.${startOfDay},kics_${dateColumn}.lt.${startOfnextDay})`
+            dateColumn === 'juchu_dat'
+              ? `and(${dateColumn}.gte.${startOfDay.format('YYYY-MM-DD')},${dateColumn}.lt.${startOfnextDay.format('YYYY-MM-DD')})`
+              : // yardが今日の範囲内
+                `and(yard_${dateColumn}.gte.${startOfDay.toISOString()},yard_${dateColumn}.lt.${startOfnextDay.toISOString()}),` +
+                  // kicsが今日の範囲内
+                  `and(kics_${dateColumn}.gte.${startOfDay.toISOString()},kics_${dateColumn}.lt.${startOfnextDay.toISOString()})`
           );
         } else if (selectedDate.range?.from) {
           // fromだけの場合
-          const startOfDay = dayjs(selectedDate.range.from).tz('Asia/Tokyo').startOf('day').toISOString();
+          const startOfDay = dayjs(selectedDate.range.from).tz('Asia/Tokyo').startOf('day');
 
-          builder.or(`yard_${dateColumn}.gte.${startOfDay},kics_${dateColumn}.gte.${startOfDay}`);
+          builder.or(
+            dateColumn === 'juchu_dat'
+              ? `${dateColumn}.gte.${startOfDay.format('YYYY-MM-DD')}`
+              : `yard_${dateColumn}.gte.${startOfDay.toISOString()},kics_${dateColumn}.gte.${startOfDay.toISOString()}`
+          );
         } else if (selectedDate.range?.to) {
           // toだけの場合
-          const nextDay = dayjs(selectedDate.range.to).tz('Asia/Tokyo').add(1, 'day').startOf('day').toISOString();
+          const nextDay = dayjs(selectedDate.range.to).tz('Asia/Tokyo').add(1, 'day').startOf('day');
 
-          builder.or(`yard_${dateColumn}.lt.${nextDay},kics_${dateColumn}.lt.${nextDay}`);
+          builder.or(
+            dateColumn === 'juchu_dat'
+              ? `${dateColumn}.lt.${nextDay.format('YYYY-MM-DD')}`
+              : `yard_${dateColumn}.lt.${nextDay.toISOString()},kics_${dateColumn}.lt.${nextDay.toISOString()}`
+          );
         }
         break;
       }
