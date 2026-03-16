@@ -8,6 +8,7 @@ import { CheckboxElement, TextFieldElement, useForm } from 'react-hook-form-mui'
 import { useUserStore } from '@/app/_lib/stores/usestore';
 
 import { toJapanYMDAndDayString } from '../../_lib/date-conversion';
+import { permission } from '../../_lib/permission';
 import { CloseMasterDialogButton } from '../../_ui/buttons';
 import { insertWeeklyData } from '../_lib/funcs';
 import { WeeklySchema, WeeklyValues } from '../_lib/types';
@@ -92,18 +93,38 @@ export const TantoDialog = ({
       >
         <Grid2 display={'flex'} alignItems={'center'}>
           <Typography mr={5}>メモ</Typography>
-          <TextFieldElement name="mem" control={control} multiline fullWidth />
+          <TextFieldElement
+            name="mem"
+            control={control}
+            multiline
+            fullWidth
+            disabled={!(user?.permission.schedule === permission.sche_upd)}
+          />
         </Grid2>
         <Grid2 display={'flex'} alignItems={'center'}>
           <Typography mr={5}>日直</Typography>
-          <TextFieldElement name="tantoNam" control={control} multiline fullWidth />
+          <TextFieldElement
+            name="tantoNam"
+            control={control}
+            multiline
+            fullWidth
+            disabled={!(user?.permission.schedule === permission.sche_upd)}
+          />
         </Grid2>
         <Grid2 display={'flex'} alignItems={'center'}>
           <Typography mr={1}>祝日フラグ</Typography>
-          <CheckboxElement name="holidayFlg" control={control} />
+          <CheckboxElement
+            name="holidayFlg"
+            control={control}
+            disabled={!(user!.permission.schedule & permission.sche_upd)}
+          />
         </Grid2>
         <Box display={'flex'} justifyContent={'end'} width={'100%'}>
-          <Button type="submit" loading={isProcessing} disabled={!isDirty}>
+          <Button
+            type="submit"
+            loading={isProcessing}
+            disabled={!isDirty || !(user?.permission.schedule === permission.sche_upd)}
+          >
             保存
           </Button>
         </Box>

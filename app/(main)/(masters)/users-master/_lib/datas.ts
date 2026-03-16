@@ -17,7 +17,7 @@ export const emptyUser: UsersMasterDialogValues = {
   mailAdr: '',
   tantouNam: '',
   delFlg: false,
-  permission: { juchu: 0, nyushuko: 0, masters: 0, ht: 0, loginSetting: 0 },
+  permission: { juchu: 0, nyushuko: 0, masters: 0, ht: 0, loginSetting: 0, schedule: 0 },
   lastLoginAt: null,
 };
 
@@ -92,4 +92,9 @@ export const htRadio = [
 export const loginSettingRadio = [
   { id: permission.none, label: '無し' },
   { id: permission.login, label: '参照更新' },
+];
+
+export const scheduleRadio = [
+  { id: permission.none, label: '無し' },
+  { id: permission.sche_upd, label: '参照更新' },
 ];
