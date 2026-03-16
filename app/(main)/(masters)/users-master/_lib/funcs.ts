@@ -132,10 +132,10 @@ export const addNewUser = async (data: UsersMasterDialogValues, user: string) =>
       email: data.mailAdr,
       password: 'password',
       // 開発用
-      options: { emailRedirectTo: /*`${getUrl()}login`*/ `${getUrl()}signup` },
+      // options: { emailRedirectTo: /*`${getUrl()}login`*/ `${getUrl()}signup` },
 
       // 本番用
-      // options: { emailRedirectTo: /*`${getUrl()}login`*/ `https://kikikan-psi.vercel.app/signup` },
+      options: { emailRedirectTo: /*`${getUrl()}login`*/ `https://kikikan-psi.vercel.app/signup` },
     });
 
     // 招待
@@ -259,10 +259,10 @@ export const restoreUsers = async (mailAdr: string, user: string) => {
       email: mailAdr,
       password: 'password',
       // 開発用
-      options: { emailRedirectTo: /*`${getUrl()}login`*/ `${getUrl()}signup` },
+      // options: { emailRedirectTo: /*`${getUrl()}login`*/ `${getUrl()}signup` },
 
       // 本番用
-      // options: { emailRedirectTo: /*`${getUrl()}login`*/ `https://kikikan-psi.vercel.app/signup` },
+      options: { emailRedirectTo: /*`${getUrl()}login`*/ `https://kikikan-psi.vercel.app/signup` },
     });
 
     // 招待
@@ -306,10 +306,10 @@ export const restoreUsersAndShainCod = async (mailAdr: string, shainCod: string 
       email: mailAdr,
       password: 'password',
       // 開発用
-      options: { emailRedirectTo: /*`${getUrl()}login`*/ `${getUrl()}signup` },
+      // options: { emailRedirectTo: /*`${getUrl()}login`*/ `${getUrl()}signup` },
 
       // 本番用
-      // options: { emailRedirectTo: /*`${getUrl()}login`*/ `https://kikikan-psi.vercel.app/signup` },
+      options: { emailRedirectTo: /*`${getUrl()}login`*/ `https://kikikan-psi.vercel.app/signup` },
     });
 
     // 招待
