@@ -6,7 +6,7 @@ import utc from 'dayjs/plugin/utc';
 
 import { selectFilteredKizaiHead } from '@/app/_lib/db/tables/v-juchu-kizai-head-lst';
 
-import { toJapanTimeString } from '../../_lib/date-conversion';
+import { toJapanTimeString, toJapanYMDString } from '../../_lib/date-conversion';
 import { FAKE_NEW_ID } from '../../(masters)/_lib/constants';
 import { EqptOrderListTableValues, EqptOrderSearchValues } from './types';
 
@@ -49,6 +49,7 @@ export const getFilteredOrderList = async (
       kNyukoDat: d.kics_nyuko_dat ? toJapanTimeString(d.kics_nyuko_dat) : '-',
       yShukoDat: d.yard_shuko_dat ? toJapanTimeString(d.yard_shuko_dat) : '-',
       yNyukoDat: d.yard_nyuko_dat ? toJapanTimeString(d.yard_nyuko_dat) : '-',
+      juchuDat: d.juchu_dat ? toJapanYMDString(d.juchu_dat) : '',
     }));
   } catch (e) {
     console.error(e);
