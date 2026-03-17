@@ -51,17 +51,35 @@ export const getLoanJuchuData = async (kizaiId: number) => {
       throw new Error('[selectLoanJuchuData] DBエラー:', { cause: error });
     }
 
-    const seen = new Set();
-    const uniqueData = data.filter((d) => {
-      if (seen.has(d.juchu_head_id)) return false;
-      seen.add(d.juchu_head_id);
-      return true;
-    });
+    // const seen = new Set();
+    // const uniqueData = data.filter((d) => {
+    //   if (seen.has(d.juchu_head_id)) return false;
+    //   seen.add(d.juchu_head_id);
+    //   return true;
+    // });
 
-    const loanJuchuData: LoanJuchu[] = uniqueData.map((d) => ({
+    // const loanJuchuData: LoanJuchu[] = uniqueData.map((d) => ({
+    //   juchuHeadId: d.juchu_head_id,
+    //   juchuKizaiHeadId: d.juchu_kizai_head_id,
+    //   kizaiId: kizaiId,
+    //   koenNam: d.koen_nam,
+    //   shukoDat: getShukoDate(
+    //     d.kics_shuko_dat ? new Date(d.kics_shuko_dat) : null,
+    //     d.yard_shuko_dat ? new Date(d.yard_shuko_dat) : null
+    //   ),
+    //   nyukoDat: getNyukoDate(
+    //     d.kics_nyuko_dat ? new Date(d.kics_nyuko_dat) : null,
+    //     d.yard_nyuko_dat ? new Date(d.yard_nyuko_dat) : null
+    //   ),
+    // }));
+
+    const loanJuchuData: LoanJuchu[] = data.map((d) => ({
       juchuHeadId: d.juchu_head_id,
+      juchuKizaiHeadId: d.juchu_kizai_head_id,
+      juchuKizaiHeadKbn: d.juchu_kizai_head_kbn,
       kizaiId: kizaiId,
       koenNam: d.koen_nam,
+      headNam: d.head_nam ?? '',
       shukoDat: getShukoDate(
         d.kics_shuko_dat ? new Date(d.kics_shuko_dat) : null,
         d.yard_shuko_dat ? new Date(d.yard_shuko_dat) : null
@@ -126,10 +144,20 @@ export const confirmJuchuHeadId = async (strDat: Date) => {
  * @param date 日付
  * @returns 貸出状況用使用データ
  */
-export const getAllLoanUseData = async (juchuHeadIds: number[], kizaiId: number, date: Date) => {
+export const getAllLoanUseData = async (
+  targetIds: { juchuHeadId: number; juchuKizaiHeadId: number }[],
+  kizaiId: number,
+  date: Date
+) => {
   const stringDate = toJapanYMDString(date, '-');
   try {
-    const result: QueryResult<LoanUseTableValues> = await selectUseListBulk(juchuHeadIds, kizaiId, stringDate);
+    const result: QueryResult<LoanUseTableValues> = await selectUseListBulk(
+      // juchuHeadIds,
+      // juchuKizaiHeadIds,
+      targetIds,
+      kizaiId,
+      stringDate
+    );
     const data: LoanUseTableValues[] = result.rows;
     return data;
   } catch (e) {

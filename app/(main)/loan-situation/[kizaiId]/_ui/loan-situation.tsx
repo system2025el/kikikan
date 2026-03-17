@@ -2,6 +2,7 @@
 
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import UpdateIcon from '@mui/icons-material/Update';
 import {
   Box,
   Button,
@@ -98,7 +99,12 @@ export const LoanSituation = (props: {
           return dateA - dateB;
         });
 
-        const juchuHeadIds = filterLoanJuchuData.map((d) => d.juchuHeadId);
+        // const juchuHeadIds = filterLoanJuchuData.map((d) => d.juchuHeadId);
+
+        const targetIds = filterLoanJuchuData.map((d) => ({
+          juchuHeadId: d.juchuHeadId,
+          juchuKizaiHeadId: d.juchuKizaiHeadId,
+        }));
 
         // const eqUseData: LoanUseTableValues[][] = [];
         // for (const juchuHeadId of juchuHeadIds) {
@@ -106,17 +112,38 @@ export const LoanSituation = (props: {
         //   eqUseData.push(data);
         // }
 
-        const allLoanUseData: LoanUseTableValues[] = await getAllLoanUseData(juchuHeadIds, kizaiData.kizaiId, strDat);
+        const allLoanUseData: LoanUseTableValues[] = await getAllLoanUseData(
+          // juchuHeadIds,
+          targetIds,
+          kizaiData.kizaiId,
+          strDat
+        );
 
-        const loanUseMap = new Map<number, LoanUseTableValues[]>();
+        // const loanUseMap = new Map<number, LoanUseTableValues[]>();
+        // for (const row of allLoanUseData) {
+        //   if (!loanUseMap.has(row.juchuHeadId)) {
+        //     loanUseMap.set(row.juchuHeadId, []);
+        //   }
+        //   loanUseMap.get(row.juchuHeadId)!.push(row);
+        // }
+
+        // const eqUseData: LoanUseTableValues[][] = juchuHeadIds.map((id) => loanUseMap.get(id) || []);
+
+        const loanUseMap = new Map<string, LoanUseTableValues[]>();
         for (const row of allLoanUseData) {
-          if (!loanUseMap.has(row.juchuHeadId)) {
-            loanUseMap.set(row.juchuHeadId, []);
+          // 受注IDと受注機材IDをハイフンなどで連結して一意のキーを作る
+          const key = `${row.juchuHeadId}-${row.juchuKizaiHeadId}`;
+
+          if (!loanUseMap.has(key)) {
+            loanUseMap.set(key, []);
           }
-          loanUseMap.get(row.juchuHeadId)!.push(row);
+          loanUseMap.get(key)!.push(row);
         }
 
-        const eqUseData: LoanUseTableValues[][] = juchuHeadIds.map((id) => loanUseMap.get(id) || []);
+        const eqUseData: LoanUseTableValues[][] = targetIds.map((pair) => {
+          const key = `${pair.juchuHeadId}-${pair.juchuKizaiHeadId}`;
+          return loanUseMap.get(key) || [];
+        });
 
         setLoanJuchuList(filterLoanJuchuData);
         setEqUseList(eqUseData);
@@ -232,7 +259,12 @@ export const LoanSituation = (props: {
           });
         }
 
-        const juchuHeadIds = filterLoanJuchuData.map((d) => d.juchuHeadId);
+        // const juchuHeadIds = filterLoanJuchuData.map((d) => d.juchuHeadId);
+
+        const targetIds = filterLoanJuchuData.map((d) => ({
+          juchuHeadId: d.juchuHeadId,
+          juchuKizaiHeadId: d.juchuKizaiHeadId,
+        }));
 
         // const eqUseData: LoanUseTableValues[][] = [];
         // for (const juchuHeadId of juchuHeadIds) {
@@ -240,17 +272,38 @@ export const LoanSituation = (props: {
         //   eqUseData.push(data);
         // }
 
-        const allLoanUseData: LoanUseTableValues[] = await getAllLoanUseData(juchuHeadIds, kizaiData.kizaiId, strDat);
+        const allLoanUseData: LoanUseTableValues[] = await getAllLoanUseData(
+          // juchuHeadIds,
+          targetIds,
+          kizaiData.kizaiId,
+          strDat
+        );
 
-        const loanUseMap = new Map<number, LoanUseTableValues[]>();
+        // const loanUseMap = new Map<number, LoanUseTableValues[]>();
+        // for (const row of allLoanUseData) {
+        //   if (!loanUseMap.has(row.juchuHeadId)) {
+        //     loanUseMap.set(row.juchuHeadId, []);
+        //   }
+        //   loanUseMap.get(row.juchuHeadId)!.push(row);
+        // }
+
+        // const eqUseData: LoanUseTableValues[][] = juchuHeadIds.map((id) => loanUseMap.get(id) || []);
+
+        const loanUseMap = new Map<string, LoanUseTableValues[]>();
         for (const row of allLoanUseData) {
-          if (!loanUseMap.has(row.juchuHeadId)) {
-            loanUseMap.set(row.juchuHeadId, []);
+          // 受注IDと受注機材IDをハイフンなどで連結して一意のキーを作る
+          const key = `${row.juchuHeadId}-${row.juchuKizaiHeadId}`;
+
+          if (!loanUseMap.has(key)) {
+            loanUseMap.set(key, []);
           }
-          loanUseMap.get(row.juchuHeadId)!.push(row);
+          loanUseMap.get(key)!.push(row);
         }
 
-        const eqUseData: LoanUseTableValues[][] = juchuHeadIds.map((id) => loanUseMap.get(id) || []);
+        const eqUseData: LoanUseTableValues[][] = targetIds.map((pair) => {
+          const key = `${pair.juchuHeadId}-${pair.juchuKizaiHeadId}`;
+          return loanUseMap.get(key) || [];
+        });
 
         setLoanJuchuList(filterLoanJuchuData);
         setEqUseList(eqUseData);
@@ -334,7 +387,13 @@ export const LoanSituation = (props: {
           return dateA - dateB;
         });
       }
-      const juchuHeadIds = filterLoanJuchuData.map((d) => d.juchuHeadId);
+      // const juchuHeadIds = filterLoanJuchuData.map((d) => d.juchuHeadId);
+
+      const targetIds = filterLoanJuchuData.map((d) => ({
+        juchuHeadId: d.juchuHeadId,
+        juchuKizaiHeadId: d.juchuKizaiHeadId,
+      }));
+
       // const updatedEqUseData: LoanUseTableValues[][] = [];
       // for (const juchuHeadId of juchuHeadIds) {
       //   const data: LoanUseTableValues[] = await getLoanUseData(
@@ -346,20 +405,37 @@ export const LoanSituation = (props: {
       // }
 
       const allLoanUseData: LoanUseTableValues[] = await getAllLoanUseData(
-        juchuHeadIds,
+        // juchuHeadIds,
+        targetIds,
         kizaiData.kizaiId,
         subDays(selectDate, 1)
       );
 
-      const loanUseMap = new Map<number, LoanUseTableValues[]>();
+      // const loanUseMap = new Map<number, LoanUseTableValues[]>();
+      // for (const row of allLoanUseData) {
+      //   if (!loanUseMap.has(row.juchuHeadId)) {
+      //     loanUseMap.set(row.juchuHeadId, []);
+      //   }
+      //   loanUseMap.get(row.juchuHeadId)!.push(row);
+      // }
+
+      // const updatedEqUseData: LoanUseTableValues[][] = juchuHeadIds.map((id) => loanUseMap.get(id) || []);
+
+      const loanUseMap = new Map<string, LoanUseTableValues[]>();
       for (const row of allLoanUseData) {
-        if (!loanUseMap.has(row.juchuHeadId)) {
-          loanUseMap.set(row.juchuHeadId, []);
+        // 受注IDと受注機材IDをハイフンなどで連結して一意のキーを作る
+        const key = `${row.juchuHeadId}-${row.juchuKizaiHeadId}`;
+
+        if (!loanUseMap.has(key)) {
+          loanUseMap.set(key, []);
         }
-        loanUseMap.get(row.juchuHeadId)!.push(row);
+        loanUseMap.get(key)!.push(row);
       }
 
-      const updatedEqUseData: LoanUseTableValues[][] = juchuHeadIds.map((id) => loanUseMap.get(id) || []);
+      const updatedEqUseData: LoanUseTableValues[][] = targetIds.map((pair) => {
+        const key = `${pair.juchuHeadId}-${pair.juchuKizaiHeadId}`;
+        return loanUseMap.get(key) || [];
+      });
 
       setLoanJuchuList(filterLoanJuchuData);
       setEqUseList(updatedEqUseData);
@@ -391,50 +467,60 @@ export const LoanSituation = (props: {
           <Typography>貸出状況</Typography>
         </Box>
         <Divider />
-        <Grid2 container alignItems={'center'} px={2} py={0.5} spacing={2}>
-          <Typography>機材名</Typography>
-          <TextField value={kizaiData.kizaiNam} sx={{ minWidth: 400 }} disabled />
-          <Typography ml={2}>保有数</Typography>
-          <TextField
-            disabled
-            value={kizaiData.kizaiQty}
-            sx={{
-              maxWidth: 100,
-              '& .MuiInputBase-input': {
-                textAlign: 'right',
-              },
-            }}
-          />
-          <Typography ml={2}>NG数</Typography>
-          <TextField
-            disabled
-            value={kizaiData.ngQty}
-            sx={{
-              maxWidth: 100,
-              '& .MuiInputBase-input': {
-                textAlign: 'right',
-              },
-            }}
-          />
-          <Typography ml={2}>定価</Typography>
-          <TextField
-            value={`¥${kizaiData.regAmt.toLocaleString()}`}
-            disabled
-            sx={{
-              maxWidth: 120,
-              '& .MuiInputBase-input': {
-                textAlign: 'right',
-              },
-            }}
-          />
-          <FormControl sx={{ ml: 3 }}>
-            <RadioGroup value={sortValue} onChange={handleRadioChange} row>
-              <FormControlLabel value="shuko" control={<Radio />} label="出庫日順" />
-              <FormControlLabel value="nyuko" control={<Radio />} label="入庫日順" />
-            </RadioGroup>
-          </FormControl>
-          <Box display={'flex'} justifyContent={'end'} p={2}>
-            <Button onClick={handleReload} loading={isLoading}>
+        <Grid2 container alignItems={'center'} px={2} py={1} spacing={3}>
+          <Box display={'flex'} alignItems={'center'}>
+            <Typography mr={1}>機材名</Typography>
+            <TextField value={kizaiData.kizaiNam} sx={{ minWidth: 400 }} disabled />
+          </Box>
+          <Box display={'flex'} alignItems={'center'}>
+            <Typography mr={1}>保有数</Typography>
+            <TextField
+              disabled
+              value={kizaiData.kizaiQty}
+              sx={{
+                maxWidth: 100,
+                '& .MuiInputBase-input': {
+                  textAlign: 'right',
+                },
+              }}
+            />
+          </Box>
+          <Box display={'flex'} alignItems={'center'}>
+            <Typography mr={1}>NG数</Typography>
+            <TextField
+              disabled
+              value={kizaiData.ngQty}
+              sx={{
+                maxWidth: 100,
+                '& .MuiInputBase-input': {
+                  textAlign: 'right',
+                },
+              }}
+            />
+          </Box>
+          <Box display={'flex'} alignItems={'center'}>
+            <Typography mr={1}>定価</Typography>
+            <TextField
+              value={`¥${kizaiData.regAmt.toLocaleString()}`}
+              disabled
+              sx={{
+                maxWidth: 120,
+                '& .MuiInputBase-input': {
+                  textAlign: 'right',
+                },
+              }}
+            />
+          </Box>
+          <Box display={'flex'} alignItems={'center'}>
+            <FormControl sx={{ ml: 1 }}>
+              <RadioGroup value={sortValue} onChange={handleRadioChange} row>
+                <FormControlLabel value="shuko" control={<Radio />} label="出庫日順" />
+                <FormControlLabel value="nyuko" control={<Radio />} label="入庫日順" />
+              </RadioGroup>
+            </FormControl>
+          </Box>
+          <Box display={'flex'} justifyContent={'end'}>
+            <Button startIcon={<UpdateIcon />} onClick={handleReload} loading={isLoading}>
               再表示
             </Button>
           </Box>
