@@ -22,7 +22,7 @@ import {
 } from '@mui/material';
 import { addDays, addMonths, set, subDays, subMonths } from 'date-fns';
 import dayjs, { Dayjs } from 'dayjs';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import {} from '@/app/(main)/_lib/date-conversion';
 import { permission } from '@/app/(main)/_lib/permission';
@@ -42,6 +42,11 @@ export const LoanSituation = (props: {
   // eqStockData: LoanStockTableValues[];
 }) => {
   const { kizaiData } = props;
+
+  // ref
+  const leftRef = useRef<HTMLDivElement>(null);
+  const rightRef = useRef<HTMLDivElement>(null);
+  const isSyncing = useRef(false);
 
   // ローディング
   const [isLoading, setIsLoading] = useState(true);
@@ -67,51 +72,12 @@ export const LoanSituation = (props: {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
-  // ref
-  const leftRef = useRef<HTMLDivElement>(null);
-  const rightRef = useRef<HTMLDivElement>(null);
-  const isSyncing = useRef(false);
-
-  useEffect(() => {
-    const getInitialData = async () => {
-      // ヘッダー開始日
-      const strDat = subDays(new Date(), 1);
-
-      try {
-        await getData(strDat);
-      } catch (e) {
-        setError(e instanceof Error ? e : new Error(String(e)));
-      }
-
-      setIsLoading(false);
-    };
-    getInitialData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    const left = leftRef.current;
-    const right = rightRef.current;
-
-    if (left && right) {
-      left.addEventListener('scroll', () => syncScroll('left'));
-      right.addEventListener('scroll', () => syncScroll('right'));
-    }
-
-    return () => {
-      if (left && right) {
-        left.removeEventListener('scroll', () => syncScroll('left'));
-        right.removeEventListener('scroll', () => syncScroll('right'));
-      }
-    };
-  }, [loanJuchuList, eqUseList, isLoading]);
-
   /**
    * 同期スクロール処理
    * @param source
    * @returns
    */
-  const syncScroll = (source: 'left' | 'right') => {
+  const syncScroll = useCallback((source: 'left' | 'right') => {
     if (isSyncing.current) return;
     isSyncing.current = true;
 
@@ -131,7 +97,7 @@ export const LoanSituation = (props: {
     requestAnimationFrame(() => {
       isSyncing.current = false;
     });
-  };
+  }, []);
 
   // 貸出状況取得
   const getData = async (strDat: Date) => {
@@ -213,7 +179,7 @@ export const LoanSituation = (props: {
       const allLoanUseData: LoanUseTableValues[] = await getAllLoanUseData(
         targetIds,
         kizaiData.kizaiId,
-        subDays(selectDate, 1)
+        subDays(strDat, 1)
       );
 
       const loanUseMap = new Map<string, LoanUseTableValues[]>();
@@ -311,6 +277,40 @@ export const LoanSituation = (props: {
   const handleClickAway = () => {
     setAnchorEl(null);
   };
+
+  useEffect(() => {
+    const getInitialData = async () => {
+      // ヘッダー開始日
+      const strDat = subDays(new Date(), 1);
+
+      try {
+        await getData(strDat);
+      } catch (e) {
+        setError(e instanceof Error ? e : new Error(String(e)));
+      }
+
+      setIsLoading(false);
+    };
+    getInitialData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const left = leftRef.current;
+    const right = rightRef.current;
+
+    if (left && right) {
+      left.addEventListener('scroll', () => syncScroll('left'));
+      right.addEventListener('scroll', () => syncScroll('right'));
+    }
+
+    return () => {
+      if (left && right) {
+        left.removeEventListener('scroll', () => syncScroll('left'));
+        right.removeEventListener('scroll', () => syncScroll('right'));
+      }
+    };
+  }, [loanJuchuList, eqUseList, isLoading, syncScroll]);
 
   if (error) throw error;
 
