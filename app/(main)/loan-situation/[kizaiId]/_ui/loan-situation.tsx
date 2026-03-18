@@ -24,7 +24,7 @@ import { addDays, addMonths, set, subDays, subMonths } from 'date-fns';
 import dayjs, { Dayjs } from 'dayjs';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import {} from '@/app/(main)/_lib/date-conversion';
+import { toJapanMDString } from '@/app/(main)/_lib/date-conversion';
 import { permission } from '@/app/(main)/_lib/permission';
 import { BackButton } from '@/app/(main)/_ui/buttons';
 import { Calendar } from '@/app/(main)/_ui/date';
@@ -176,11 +176,7 @@ export const LoanSituation = (props: {
       }));
 
       // 使用数取得
-      const allLoanUseData: LoanUseTableValues[] = await getAllLoanUseData(
-        targetIds,
-        kizaiData.kizaiId,
-        subDays(strDat, 1)
-      );
+      const allLoanUseData: LoanUseTableValues[] = await getAllLoanUseData(targetIds, kizaiData.kizaiId, strDat);
 
       const loanUseMap = new Map<string, LoanUseTableValues[]>();
       for (const row of allLoanUseData) {
