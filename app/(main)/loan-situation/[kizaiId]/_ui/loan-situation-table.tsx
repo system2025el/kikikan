@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  Box,
   Button,
   Paper,
   Table,
@@ -80,7 +81,7 @@ export const LoanSituationTable = (props: LoanSituationTableProps) => {
         </TableHead>
         <TableBody>
           {rows.map((row, index) => (
-            <TableRow key={index}>
+            <TableRow key={index} hover>
               <TableCell style={styles.row}>
                 <Button
                   variant="text"
@@ -109,7 +110,7 @@ export const LoanSituationTable = (props: LoanSituationTableProps) => {
                   {row.koenNam}
                 </LightTooltipWithText>
               </TableCell>
-              <TableCell
+              {/* <TableCell
                 style={{
                   border: '1px solid black',
                   whiteSpace: 'nowrap',
@@ -122,10 +123,36 @@ export const LoanSituationTable = (props: LoanSituationTableProps) => {
                   minWidth: 0,
                 }}
                 sx={{ minWidth: 0, color: row.juchuKizaiHeadKbn === 2 ? 'red' : 'primary' }}
-              >
-                <LightTooltipWithText variant="body2" maxWidth={130}>
+              > */}
+              <TableCell style={styles.row}>
+                <Button
+                  variant="text"
+                  sx={{
+                    px: 0.1,
+                    height: '15px',
+                    m: 0,
+                    minWidth: 0,
+                    width: 1,
+                    color: row.juchuKizaiHeadKbn === 2 ? 'red' : 'primary',
+                    justifyContent: 'start',
+                  }}
+                  onClick={() => {
+                    const path =
+                      row.juchuKizaiHeadKbn === 1
+                        ? `/eq-main-order-detail/${row.juchuHeadId}/${row.juchuKizaiHeadId}/view`
+                        : `/eq-return-order-detail/${row.juchuHeadId}/${row.juchuKizaiHeadId}/${row.oyaJuchuKizaiHeadId}/view`;
+                    window.open(path);
+                  }}
+                  disabled={user?.permission.juchu === permission.none}
+                >
+                  <LightTooltipWithText variant="body2" maxWidth={130}>
+                    {row.juchuKizaiHeadKbn !== 1 && <Box component="span" sx={{ ml: 1.5 }} />}
+                    {row.headNam}
+                  </LightTooltipWithText>
+                </Button>
+                {/* <LightTooltipWithText variant="body2" maxWidth={130}>
                   {row.headNam}
-                </LightTooltipWithText>
+                </LightTooltipWithText> */}
               </TableCell>
               <TableCell style={styles.row} sx={{ textAlign: 'center' }}>
                 {row.shukoDat ? toJapanMDString(row.shukoDat) : ''}
