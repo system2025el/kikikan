@@ -8,14 +8,19 @@ export type LoanKizai = {
 
 export type LoanJuchu = {
   juchuHeadId: number;
+  juchuKizaiHeadId: number;
+  juchuKizaiHeadKbn: number | null;
   kizaiId: number;
   koenNam: string;
+  headNam: string;
   shukoDat: Date | null;
   nyukoDat: Date | null;
+  oyaJuchuKizaiHeadId: number | null;
 };
 
 export type LoanUseTableValues = {
   juchuHeadId: number;
+  juchuKizaiHeadId: number;
   calDat: Date;
   kizaiId: number;
   kizaiQty: number;

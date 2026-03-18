@@ -3085,11 +3085,11 @@ export type Database = {
         Row: {
           bld_cod: string | null;
           ctn_flg: number | null;
-          dsp_ord_num: number | null;
           eda_cod: string | null;
-          indent_num: number | null;
+          head_nam: string | null;
           juchu_head_id: number;
           juchu_kizai_head_id: number;
+          juchu_kizai_head_kbn: number | null;
           juchu_kizai_meisai_id: number | null;
           juchu_mem: string | null;
           juchu_sts: number | null;

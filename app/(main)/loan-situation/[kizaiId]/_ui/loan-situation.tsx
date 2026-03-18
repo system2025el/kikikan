@@ -2,6 +2,7 @@
 
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import UpdateIcon from '@mui/icons-material/Update';
 import {
   Box,
   Button,
@@ -15,6 +16,7 @@ import {
   Popper,
   Radio,
   RadioGroup,
+  Snackbar,
   TextField,
   Typography,
 } from '@mui/material';
@@ -56,6 +58,11 @@ export const LoanSituation = (props: {
   // ラジオボタン選択値
   const [sortValue, setSortValue] = useState<string>('shuko');
 
+  // スナックバー制御
+  const [snackBarOpen, setSnackBarOpen] = useState(false);
+  // スナックバーメッセージ
+  const [snackBarMessage, setSnackBarMessage] = useState('');
+
   // ポッパー制御
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -66,68 +73,19 @@ export const LoanSituation = (props: {
   const isSyncing = useRef(false);
 
   useEffect(() => {
-    const getData = async () => {
+    const getInitialData = async () => {
       // ヘッダー開始日
       const strDat = subDays(new Date(), 1);
 
       try {
-        // 機材在庫データ、ヘッダー開始日から終了日までに該当する受注ヘッダーidリスト、貸出受注データ
-        const [eqStockData, confirmJuchuHeadIds, loanJuchuData] = await Promise.all([
-          getLoanStockData(kizaiData.kizaiId, strDat),
-          confirmJuchuHeadId(strDat),
-          getLoanJuchuData(kizaiData.kizaiId),
-        ]);
-
-        // 該当する受注ヘッダーidリストに含まれる貸出受注データのみ抽出
-        const filterLoanJuchuData = loanJuchuData.filter((d) => confirmJuchuHeadIds.includes(d.juchuHeadId));
-
-        if (filterLoanJuchuData.length === 0) {
-          setEqStockList(eqStockData);
-          setIsLoading(false);
-          return;
-        }
-
-        filterLoanJuchuData.sort((a, b) => {
-          const dateA = a.shukoDat ? new Date(a.shukoDat).getTime() : null;
-          const dateB = b.shukoDat ? new Date(b.shukoDat).getTime() : null;
-
-          if (dateA === null && dateB === null) return 0;
-          if (dateA === null) return 1;
-          if (dateB === null) return -1;
-
-          return dateA - dateB;
-        });
-
-        const juchuHeadIds = filterLoanJuchuData.map((d) => d.juchuHeadId);
-
-        // const eqUseData: LoanUseTableValues[][] = [];
-        // for (const juchuHeadId of juchuHeadIds) {
-        //   const data: LoanUseTableValues[] = await getLoanUseData(juchuHeadId, kizaiData.kizaiId, strDat);
-        //   eqUseData.push(data);
-        // }
-
-        const allLoanUseData: LoanUseTableValues[] = await getAllLoanUseData(juchuHeadIds, kizaiData.kizaiId, strDat);
-
-        const loanUseMap = new Map<number, LoanUseTableValues[]>();
-        for (const row of allLoanUseData) {
-          if (!loanUseMap.has(row.juchuHeadId)) {
-            loanUseMap.set(row.juchuHeadId, []);
-          }
-          loanUseMap.get(row.juchuHeadId)!.push(row);
-        }
-
-        const eqUseData: LoanUseTableValues[][] = juchuHeadIds.map((id) => loanUseMap.get(id) || []);
-
-        setLoanJuchuList(filterLoanJuchuData);
-        setEqUseList(eqUseData);
-        setEqStockList(eqStockData);
+        await getData(strDat);
       } catch (e) {
         setError(e instanceof Error ? e : new Error(String(e)));
       }
 
       setIsLoading(false);
     };
-    getData();
+    getInitialData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -175,6 +133,113 @@ export const LoanSituation = (props: {
     });
   };
 
+  // 貸出状況取得
+  const getData = async (strDat: Date) => {
+    try {
+      // 機材在庫データ、ヘッダー開始日から終了日までに該当する受注ヘッダーidリスト、貸出受注データ
+      const [eqStockData, confirmJuchuHeadIds, loanJuchuData] = await Promise.all([
+        getLoanStockData(kizaiData.kizaiId, strDat),
+        confirmJuchuHeadId(strDat),
+        getLoanJuchuData(kizaiData.kizaiId),
+      ]);
+
+      // 該当する受注ヘッダーidリストに含まれる貸出受注データのみ抽出
+      const filterLoanJuchuData = loanJuchuData.filter((d) => confirmJuchuHeadIds.includes(d.juchuHeadId));
+
+      if (filterLoanJuchuData.length === 0) {
+        setLoanJuchuList([]);
+        setEqUseList([]);
+        setEqStockList(eqStockData);
+        return;
+      }
+
+      // ラジオボタンで選択されている出庫日or入庫日順にソート
+      if (sortValue === 'shuko') {
+        filterLoanJuchuData.sort((a, b) => {
+          const dateA = a.shukoDat ? new Date(a.shukoDat).getTime() : null;
+          const dateB = b.shukoDat ? new Date(b.shukoDat).getTime() : null;
+
+          if (dateA === null && dateB === null) return 0;
+          if (dateA === null) return 1;
+          if (dateB === null) return -1;
+
+          return dateA - dateB;
+        });
+      } else {
+        filterLoanJuchuData.sort((a, b) => {
+          const dateA = a.nyukoDat ? new Date(a.nyukoDat).getTime() : null;
+          const dateB = b.nyukoDat ? new Date(b.nyukoDat).getTime() : null;
+
+          if (dateA === null && dateB === null) return 0;
+          if (dateA === null) return 1;
+          if (dateB === null) return -1;
+
+          return dateA - dateB;
+        });
+      }
+
+      // 返却明細は親明細と並ぶようソート
+      const childrenMap: { [key: string]: LoanJuchu[] } = {};
+      const parents = [];
+      // 親データと子データで分ける
+      for (const data of filterLoanJuchuData) {
+        if (data.oyaJuchuKizaiHeadId === null) {
+          parents.push(data);
+        } else {
+          // 受注番号と親受注機材番号でキー作成
+          if (!childrenMap[data.oyaJuchuKizaiHeadId]) {
+            childrenMap[`${data.juchuHeadId}-${data.oyaJuchuKizaiHeadId}`] = [];
+          }
+          childrenMap[`${data.juchuHeadId}-${data.oyaJuchuKizaiHeadId}`].push(data);
+        }
+      }
+
+      const sortFilterLoanJuchuData = [];
+      // 子データがあれば連番で追加
+      for (const parent of parents) {
+        sortFilterLoanJuchuData.push(parent);
+        const children = childrenMap[`${parent.juchuHeadId}-${parent.juchuKizaiHeadId}`];
+        if (children) {
+          sortFilterLoanJuchuData.push(...children);
+        }
+      }
+
+      const targetIds = sortFilterLoanJuchuData.map((d) => ({
+        juchuHeadId: d.juchuHeadId,
+        juchuKizaiHeadId: d.juchuKizaiHeadId,
+      }));
+
+      // 使用数取得
+      const allLoanUseData: LoanUseTableValues[] = await getAllLoanUseData(
+        targetIds,
+        kizaiData.kizaiId,
+        subDays(selectDate, 1)
+      );
+
+      const loanUseMap = new Map<string, LoanUseTableValues[]>();
+      for (const row of allLoanUseData) {
+        // 受注番号と受注機材番号でキー作成
+        const key = `${row.juchuHeadId}-${row.juchuKizaiHeadId}`;
+
+        if (!loanUseMap.has(key)) {
+          loanUseMap.set(key, []);
+        }
+        loanUseMap.get(key)!.push(row);
+      }
+
+      const eqUseData: LoanUseTableValues[][] = targetIds.map((pair) => {
+        const key = `${pair.juchuHeadId}-${pair.juchuKizaiHeadId}`;
+        return loanUseMap.get(key) || [];
+      });
+
+      setLoanJuchuList(sortFilterLoanJuchuData);
+      setEqUseList(eqUseData);
+      setEqStockList(eqStockData);
+    } catch (e) {
+      throw e;
+    }
+  };
+
   /**
    * 日付選択カレンダー選択時
    * @param date カレンダー選択日付
@@ -189,76 +254,12 @@ export const LoanSituation = (props: {
       const strDat = subDays(date.toDate(), 1);
 
       try {
-        // 機材在庫データ、ヘッダー開始日から終了日までに該当する受注ヘッダーidリスト、貸出受注データ
-        const [eqStockData, confirmJuchuHeadIds, loanJuchuData] = await Promise.all([
-          getLoanStockData(kizaiData.kizaiId, strDat),
-          confirmJuchuHeadId(strDat),
-          getLoanJuchuData(kizaiData.kizaiId),
-        ]);
-
-        // 該当する受注ヘッダーidリストに含まれる貸出受注データのみ抽出
-        const filterLoanJuchuData = loanJuchuData.filter((d) => confirmJuchuHeadIds.includes(d.juchuHeadId));
-
-        if (filterLoanJuchuData.length === 0) {
-          setLoanJuchuList([]);
-          setEqUseList([]);
-          setEqStockList(eqStockData);
-          setAnchorEl(null);
-          setIsLoading(false);
-          return;
-        }
-
-        if (sortValue === 'shuko') {
-          filterLoanJuchuData.sort((a, b) => {
-            const dateA = a.shukoDat ? new Date(a.shukoDat).getTime() : null;
-            const dateB = b.shukoDat ? new Date(b.shukoDat).getTime() : null;
-
-            if (dateA === null && dateB === null) return 0;
-            if (dateA === null) return 1;
-            if (dateB === null) return -1;
-
-            return dateA - dateB;
-          });
-        } else {
-          filterLoanJuchuData.sort((a, b) => {
-            const dateA = a.nyukoDat ? new Date(a.nyukoDat).getTime() : null;
-            const dateB = b.nyukoDat ? new Date(b.nyukoDat).getTime() : null;
-
-            if (dateA === null && dateB === null) return 0;
-            if (dateA === null) return 1;
-            if (dateB === null) return -1;
-
-            return dateA - dateB;
-          });
-        }
-
-        const juchuHeadIds = filterLoanJuchuData.map((d) => d.juchuHeadId);
-
-        // const eqUseData: LoanUseTableValues[][] = [];
-        // for (const juchuHeadId of juchuHeadIds) {
-        //   const data: LoanUseTableValues[] = await getLoanUseData(juchuHeadId, props.kizaiData.kizaiId, strDat);
-        //   eqUseData.push(data);
-        // }
-
-        const allLoanUseData: LoanUseTableValues[] = await getAllLoanUseData(juchuHeadIds, kizaiData.kizaiId, strDat);
-
-        const loanUseMap = new Map<number, LoanUseTableValues[]>();
-        for (const row of allLoanUseData) {
-          if (!loanUseMap.has(row.juchuHeadId)) {
-            loanUseMap.set(row.juchuHeadId, []);
-          }
-          loanUseMap.get(row.juchuHeadId)!.push(row);
-        }
-
-        const eqUseData: LoanUseTableValues[][] = juchuHeadIds.map((id) => loanUseMap.get(id) || []);
-
-        setLoanJuchuList(filterLoanJuchuData);
-        setEqUseList(eqUseData);
-        setEqStockList(eqStockData);
-        setAnchorEl(null);
+        await getData(strDat);
       } catch (e) {
-        setError(e instanceof Error ? e : new Error(String(e)));
+        setSnackBarMessage('データの取得に失敗しました');
+        setSnackBarOpen(true);
       }
+      setAnchorEl(null);
       setIsLoading(false);
     }
   };
@@ -292,81 +293,10 @@ export const LoanSituation = (props: {
     const strDat = subDays(selectDate, 1);
 
     try {
-      // 機材在庫データ、ヘッダー開始日から終了日までに該当する受注ヘッダーidリスト、貸出受注データ
-      const [eqStockData, confirmJuchuHeadIds, loanJuchuData] = await Promise.all([
-        getLoanStockData(kizaiData.kizaiId, strDat),
-        confirmJuchuHeadId(strDat),
-        getLoanJuchuData(kizaiData.kizaiId),
-      ]);
-
-      // 該当する受注ヘッダーidリストに含まれる貸出受注データのみ抽出
-      const filterLoanJuchuData = loanJuchuData.filter((d) => confirmJuchuHeadIds.includes(d.juchuHeadId));
-
-      if (filterLoanJuchuData.length === 0) {
-        setLoanJuchuList([]);
-        setEqUseList([]);
-        setEqStockList(eqStockData);
-        setAnchorEl(null);
-        setIsLoading(false);
-        return;
-      }
-
-      if (sortValue === 'shuko') {
-        filterLoanJuchuData.sort((a, b) => {
-          const dateA = a.shukoDat ? new Date(a.shukoDat).getTime() : null;
-          const dateB = b.shukoDat ? new Date(b.shukoDat).getTime() : null;
-
-          if (dateA === null && dateB === null) return 0;
-          if (dateA === null) return 1;
-          if (dateB === null) return -1;
-
-          return dateA - dateB;
-        });
-      } else {
-        filterLoanJuchuData.sort((a, b) => {
-          const dateA = a.nyukoDat ? new Date(a.nyukoDat).getTime() : null;
-          const dateB = b.nyukoDat ? new Date(b.nyukoDat).getTime() : null;
-
-          if (dateA === null && dateB === null) return 0;
-          if (dateA === null) return 1;
-          if (dateB === null) return -1;
-
-          return dateA - dateB;
-        });
-      }
-      const juchuHeadIds = filterLoanJuchuData.map((d) => d.juchuHeadId);
-      // const updatedEqUseData: LoanUseTableValues[][] = [];
-      // for (const juchuHeadId of juchuHeadIds) {
-      //   const data: LoanUseTableValues[] = await getLoanUseData(
-      //     juchuHeadId,
-      //     props.kizaiData.kizaiId,
-      //     subDays(selectDate, 1)
-      //   );
-      //   updatedEqUseData.push(data);
-      // }
-
-      const allLoanUseData: LoanUseTableValues[] = await getAllLoanUseData(
-        juchuHeadIds,
-        kizaiData.kizaiId,
-        subDays(selectDate, 1)
-      );
-
-      const loanUseMap = new Map<number, LoanUseTableValues[]>();
-      for (const row of allLoanUseData) {
-        if (!loanUseMap.has(row.juchuHeadId)) {
-          loanUseMap.set(row.juchuHeadId, []);
-        }
-        loanUseMap.get(row.juchuHeadId)!.push(row);
-      }
-
-      const updatedEqUseData: LoanUseTableValues[][] = juchuHeadIds.map((id) => loanUseMap.get(id) || []);
-
-      setLoanJuchuList(filterLoanJuchuData);
-      setEqUseList(updatedEqUseData);
-      setEqStockList(eqStockData);
-      setAnchorEl(null);
+      await getData(strDat);
     } catch (e) {
-      setError(e instanceof Error ? e : new Error(String(e)));
+      setSnackBarMessage('データの取得に失敗しました');
+      setSnackBarOpen(true);
     }
     setIsLoading(false);
   };
@@ -391,50 +321,60 @@ export const LoanSituation = (props: {
           <Typography>貸出状況</Typography>
         </Box>
         <Divider />
-        <Grid2 container alignItems={'center'} px={2} py={0.5} spacing={2}>
-          <Typography>機材名</Typography>
-          <TextField value={kizaiData.kizaiNam} sx={{ minWidth: 400 }} disabled />
-          <Typography ml={2}>保有数</Typography>
-          <TextField
-            disabled
-            value={kizaiData.kizaiQty}
-            sx={{
-              maxWidth: 100,
-              '& .MuiInputBase-input': {
-                textAlign: 'right',
-              },
-            }}
-          />
-          <Typography ml={2}>NG数</Typography>
-          <TextField
-            disabled
-            value={kizaiData.ngQty}
-            sx={{
-              maxWidth: 100,
-              '& .MuiInputBase-input': {
-                textAlign: 'right',
-              },
-            }}
-          />
-          <Typography ml={2}>定価</Typography>
-          <TextField
-            value={`¥${kizaiData.regAmt.toLocaleString()}`}
-            disabled
-            sx={{
-              maxWidth: 120,
-              '& .MuiInputBase-input': {
-                textAlign: 'right',
-              },
-            }}
-          />
-          <FormControl sx={{ ml: 3 }}>
-            <RadioGroup value={sortValue} onChange={handleRadioChange} row>
-              <FormControlLabel value="shuko" control={<Radio />} label="出庫日順" />
-              <FormControlLabel value="nyuko" control={<Radio />} label="入庫日順" />
-            </RadioGroup>
-          </FormControl>
-          <Box display={'flex'} justifyContent={'end'} p={2}>
-            <Button onClick={handleReload} loading={isLoading}>
+        <Grid2 container alignItems={'center'} px={2} py={1} spacing={3}>
+          <Box display={'flex'} alignItems={'center'}>
+            <Typography mr={1}>機材名</Typography>
+            <TextField value={kizaiData.kizaiNam} sx={{ minWidth: 400 }} disabled />
+          </Box>
+          <Box display={'flex'} alignItems={'center'}>
+            <Typography mr={1}>保有数</Typography>
+            <TextField
+              disabled
+              value={kizaiData.kizaiQty}
+              sx={{
+                maxWidth: 100,
+                '& .MuiInputBase-input': {
+                  textAlign: 'right',
+                },
+              }}
+            />
+          </Box>
+          <Box display={'flex'} alignItems={'center'}>
+            <Typography mr={1}>NG数</Typography>
+            <TextField
+              disabled
+              value={kizaiData.ngQty}
+              sx={{
+                maxWidth: 100,
+                '& .MuiInputBase-input': {
+                  textAlign: 'right',
+                },
+              }}
+            />
+          </Box>
+          <Box display={'flex'} alignItems={'center'}>
+            <Typography mr={1}>定価</Typography>
+            <TextField
+              value={`¥${kizaiData.regAmt.toLocaleString()}`}
+              disabled
+              sx={{
+                maxWidth: 120,
+                '& .MuiInputBase-input': {
+                  textAlign: 'right',
+                },
+              }}
+            />
+          </Box>
+          <Box display={'flex'} alignItems={'center'}>
+            <FormControl sx={{ ml: 1 }}>
+              <RadioGroup value={sortValue} onChange={handleRadioChange} row>
+                <FormControlLabel value="shuko" control={<Radio />} label="出庫日順" />
+                <FormControlLabel value="nyuko" control={<Radio />} label="入庫日順" />
+              </RadioGroup>
+            </FormControl>
+          </Box>
+          <Box display={'flex'} justifyContent={'end'}>
+            <Button startIcon={<UpdateIcon />} onClick={handleReload} loading={isLoading}>
               再表示
             </Button>
           </Box>
@@ -481,6 +421,14 @@ export const LoanSituation = (props: {
           </Grid2>
         </Grid2>
       )}
+      <Snackbar
+        open={snackBarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackBarOpen(false)}
+        message={snackBarMessage}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={{ marginTop: '65px' }}
+      />
     </Box>
   );
 };
