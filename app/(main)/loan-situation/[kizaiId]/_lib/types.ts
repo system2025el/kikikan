@@ -15,6 +15,7 @@ export type LoanJuchu = {
   headNam: string;
   shukoDat: Date | null;
   nyukoDat: Date | null;
+  oyaJuchuKizaiHeadId: number | null;
 };
 
 export type LoanUseTableValues = {

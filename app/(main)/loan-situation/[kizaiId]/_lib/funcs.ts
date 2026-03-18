@@ -88,6 +88,7 @@ export const getLoanJuchuData = async (kizaiId: number) => {
         d.kics_nyuko_dat ? new Date(d.kics_nyuko_dat) : null,
         d.yard_nyuko_dat ? new Date(d.yard_nyuko_dat) : null
       ),
+      oyaJuchuKizaiHeadId: d.oya_juchu_kizai_head_id,
     }));
 
     return loanJuchuData;
