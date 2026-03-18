@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  Box,
   Button,
   Paper,
   Table,
@@ -55,7 +56,7 @@ export const LoanSituationTable = (props: LoanSituationTableProps) => {
                 fontWeight: 400,
                 minWidth: 0,
               }}
-              colSpan={4}
+              colSpan={5}
             >
               在庫数
             </TableCell>
@@ -68,6 +69,9 @@ export const LoanSituationTable = (props: LoanSituationTableProps) => {
               公演名
             </TableCell>
             <TableCell align="left" style={styles.header}>
+              受注明細名
+            </TableCell>
+            <TableCell align="left" style={styles.header}>
               出庫日
             </TableCell>
             <TableCell align="left" style={styles.header}>
@@ -76,8 +80,8 @@ export const LoanSituationTable = (props: LoanSituationTableProps) => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map((row) => (
-            <TableRow key={row.juchuHeadId}>
+          {rows.map((row, index) => (
+            <TableRow key={index} hover>
               <TableCell style={styles.row}>
                 <Button
                   variant="text"
@@ -96,18 +100,66 @@ export const LoanSituationTable = (props: LoanSituationTableProps) => {
                   height: 25,
                   paddingTop: 0,
                   paddingBottom: 0,
-                  paddingLeft: 0.1,
-                  paddingRight: 0.1,
+                  paddingLeft: 1,
+                  paddingRight: 1,
                   minWidth: 0,
                 }}
                 sx={{ minWidth: 0 }}
               >
-                <LightTooltipWithText variant="body2" maxWidth={150}>
+                <LightTooltipWithText variant="body2" maxWidth={130}>
                   {row.koenNam}
                 </LightTooltipWithText>
               </TableCell>
-              <TableCell style={styles.row}>{row.shukoDat ? toJapanMDString(row.shukoDat) : ''}</TableCell>
-              <TableCell style={styles.row}>{row.nyukoDat ? toJapanMDString(row.nyukoDat) : ''}</TableCell>
+              {/* <TableCell
+                style={{
+                  border: '1px solid black',
+                  whiteSpace: 'nowrap',
+                  width: 1,
+                  height: 25,
+                  paddingTop: 0,
+                  paddingBottom: 0,
+                  paddingLeft: 1,
+                  paddingRight: 1,
+                  minWidth: 0,
+                }}
+                sx={{ minWidth: 0, color: row.juchuKizaiHeadKbn === 2 ? 'red' : 'primary' }}
+              > */}
+              <TableCell style={styles.row}>
+                <Button
+                  variant="text"
+                  sx={{
+                    px: 0.1,
+                    height: '15px',
+                    m: 0,
+                    minWidth: 0,
+                    width: 1,
+                    color: row.juchuKizaiHeadKbn === 2 ? 'red' : 'primary',
+                    justifyContent: 'start',
+                  }}
+                  onClick={() => {
+                    const path =
+                      row.juchuKizaiHeadKbn === 1
+                        ? `/eq-main-order-detail/${row.juchuHeadId}/${row.juchuKizaiHeadId}/view`
+                        : `/eq-return-order-detail/${row.juchuHeadId}/${row.juchuKizaiHeadId}/${row.oyaJuchuKizaiHeadId}/view`;
+                    window.open(path);
+                  }}
+                  disabled={user?.permission.juchu === permission.none}
+                >
+                  <LightTooltipWithText variant="body2" maxWidth={130}>
+                    {row.juchuKizaiHeadKbn !== 1 && <Box component="span" sx={{ ml: 1.5 }} />}
+                    {row.headNam}
+                  </LightTooltipWithText>
+                </Button>
+                {/* <LightTooltipWithText variant="body2" maxWidth={130}>
+                  {row.headNam}
+                </LightTooltipWithText> */}
+              </TableCell>
+              <TableCell style={styles.row} sx={{ textAlign: 'center' }}>
+                {row.shukoDat ? toJapanMDString(row.shukoDat) : ''}
+              </TableCell>
+              <TableCell style={styles.row} sx={{ textAlign: 'center' }}>
+                {row.nyukoDat ? toJapanMDString(row.nyukoDat) : ''}
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -128,7 +180,7 @@ export const LoanSituationTable = (props: LoanSituationTableProps) => {
                 minWidth: 0,
                 fontSize: '0.875rem',
               }}
-              colSpan={4}
+              colSpan={5}
             >
               在庫数
             </TableCell>
@@ -215,6 +267,7 @@ export const UseTable = (props: UseTableProps) => {
                     sx={{
                       bgcolor: cell.juchuHonbanbiColor,
                       border: '1px solid black',
+                      color: cell.planQty < 0 ? 'red' : 'black',
                       height: 25,
                       py: 0,
                       px: '4px',
@@ -268,8 +321,8 @@ const styles: { [key: string]: React.CSSProperties } = {
     whiteSpace: 'nowrap',
     paddingTop: 0,
     paddingBottom: 0,
-    paddingLeft: 0.1,
-    paddingRight: 0.1,
+    paddingLeft: 1,
+    paddingRight: 1,
     width: 1,
     minWidth: 0,
   },
@@ -281,8 +334,8 @@ const styles: { [key: string]: React.CSSProperties } = {
     height: 15,
     paddingTop: 0,
     paddingBottom: 0,
-    paddingLeft: 0.1,
-    paddingRight: 0.1,
+    paddingLeft: 1,
+    paddingRight: 1,
     minWidth: 0,
   },
 };

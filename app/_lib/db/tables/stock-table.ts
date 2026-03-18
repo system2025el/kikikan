@@ -235,51 +235,108 @@ export const selectDetailStockListBulk = async (
  * @param date
  * @returns
  */
-export const selectUseListBulk = async (juchuHeadIds: number[], kizaiId: number, date: string) => {
+export const selectUseListBulk = async (
+  //   juchuHeadIds: number[],
+  //   juchuKizaiHeadIds: number[],
+  targetIds: { juchuHeadId: number; juchuKizaiHeadId: number }[],
+  kizaiId: number,
+  date: string
+) => {
   try {
+    // const query = `
+    //   WITH target_days AS (
+    //     -- スケジュール範囲の生成
+    //     SELECT $4::date + g.i AS cal_dat
+    //     FROM generate_series(0, 90) AS g(i)
+    //   ),
+    //   target_juchu AS (
+    //     -- 受注IDのリスト
+    //     SELECT
+    //         unnest($2::integer[]) AS juchu_head_id
+    //   ),
+    //   kizai_master AS (
+    //     -- 機材マスタ情報の取得 ($1 は単一の機材ID)
+    //     SELECT kizai_id, kizai_qty
+    //     FROM ${SCHEMA}.v_kizai_qty
+    //     WHERE kizai_id = $1
+    //   )
+    //   SELECT
+    //     cal.cal_dat AS "calDat",
+    //     tj.juchu_head_id AS "juchuHeadId", -- 追加：どの受注のデータか識別用
+    //     km.kizai_id AS "kizaiId",
+    //     km.kizai_qty AS "kizaiQty",
+    //     COALESCE(v.plan_qty, 0)::integer AS "planQty",
+    //     COALESCE(v.zaiko_qty, km.kizai_qty)::integer AS "zaikoQty",
+    //     COALESCE(h.juchu_honbanbi_shubetu_color, 'white') AS "juchuHonbanbiColor"
+    //   FROM
+    //     target_days cal
+    //   CROSS JOIN
+    //     target_juchu tj -- 日付 × 全受注ID の組み合わせを作成
+    //   CROSS JOIN
+    //     kizai_master km
+    //   LEFT JOIN
+    //     ${SCHEMA}.v_zaiko_qty_kasi v ON v.plan_dat = cal.cal_dat
+    //     AND v.kizai_id = km.kizai_id
+    //     AND v.juchu_head_id = tj.juchu_head_id
+    //   LEFT JOIN
+    //     ${SCHEMA}.v_honbanbi_kasi_jokyo h ON h.plan_dat = cal.cal_dat
+    //     AND h.kizai_id = km.kizai_id
+    //     AND h.juchu_head_id = tj.juchu_head_id
+    //   ORDER BY
+    //     tj.juchu_head_id, cal.cal_dat;
+    // `;
+
+    const juchuHeadIds = targetIds.map((d) => d.juchuHeadId);
+    const juchuKizaiHeadIds = targetIds.map((d) => d.juchuKizaiHeadId);
+
     const query = `
       WITH target_days AS (
-    -- スケジュール範囲の生成
-    SELECT $3::date + g.i AS cal_dat 
-    FROM generate_series(0, 90) AS g(i)
-),
-target_juchu AS (
-    -- 受注IDのリスト
-    SELECT unnest($2::integer[]) AS juchu_head_id
-),
-kizai_master AS (
-    -- 機材マスタ情報の取得 ($1 は単一の機材ID)
-    SELECT kizai_id, kizai_qty 
-    FROM ${SCHEMA}.v_kizai_qty 
-    WHERE kizai_id = $1
-)
-SELECT 
-    cal.cal_dat AS "calDat",
-    tj.juchu_head_id AS "juchuHeadId", -- 追加：どの受注のデータか識別用
-    km.kizai_id AS "kizaiId",
-    km.kizai_qty AS "kizaiQty",
-    COALESCE(v.plan_qty, 0)::integer AS "planQty",
-    COALESCE(v.zaiko_qty, km.kizai_qty)::integer AS "zaikoQty",
-    COALESCE(h.juchu_honbanbi_shubetu_color, 'white') AS "juchuHonbanbiColor"
-FROM 
-    target_days cal
-CROSS JOIN 
-    target_juchu tj -- 日付 × 全受注ID の組み合わせを作成
-CROSS JOIN 
-    kizai_master km
-LEFT JOIN 
-    ${SCHEMA}.v_zaiko_qty_kasi v ON v.plan_dat = cal.cal_dat 
-    AND v.kizai_id = km.kizai_id
-    AND v.juchu_head_id = tj.juchu_head_id
-LEFT JOIN 
-    ${SCHEMA}.v_honbanbi_kasi_jokyo h ON h.plan_dat = cal.cal_dat 
-    AND h.kizai_id = km.kizai_id
-    AND h.juchu_head_id = tj.juchu_head_id
-ORDER BY 
-    tj.juchu_head_id, cal.cal_dat;
+        SELECT $4::date + g.i AS cal_dat 
+        FROM generate_series(0, 90) AS g(i)
+      ),
+      target_juchu AS (
+        -- 2つの配列を同時に unnest してペア（行）を作成
+        SELECT 
+          unnest($2::integer[]) AS juchu_head_id,
+          unnest($3::integer[]) AS juchu_kizai_head_id
+      ),
+      kizai_master AS (
+        SELECT kizai_id, kizai_qty 
+        FROM ${SCHEMA}.v_kizai_qty 
+        WHERE kizai_id = $1
+      )
+      SELECT 
+        cal.cal_dat AS "calDat",
+        tj.juchu_head_id AS "juchuHeadId",
+        tj.juchu_kizai_head_id AS "juchuKizaiHeadId",
+        km.kizai_id AS "kizaiId",
+        km.kizai_qty AS "kizaiQty",
+        COALESCE(v.plan_qty, 0)::integer AS "planQty",
+        COALESCE(v.zaiko_qty, km.kizai_qty)::integer AS "zaikoQty",
+        COALESCE(h.juchu_honbanbi_shubetu_color, 'white') AS "juchuHonbanbiColor"
+      FROM 
+        target_days cal
+      CROSS JOIN 
+        target_juchu tj -- 日付 × (受注ID + 受注機材ID) の組み合わせ
+      CROSS JOIN 
+        kizai_master km
+      LEFT JOIN 
+        ${SCHEMA}.v_zaiko_qty_kasi v ON v.plan_dat = cal.cal_dat 
+        AND v.kizai_id = km.kizai_id
+        -- ペアの両方で結合
+        AND v.juchu_head_id = tj.juchu_head_id
+        AND v.juchu_kizai_head_id = tj.juchu_kizai_head_id
+      LEFT JOIN 
+        ${SCHEMA}.v_honbanbi_kasi_jokyo h ON h.plan_dat = cal.cal_dat 
+        AND h.kizai_id = km.kizai_id
+        -- ペアの両方で結合
+        AND h.juchu_head_id = tj.juchu_head_id
+        AND h.juchu_kizai_head_id = tj.juchu_kizai_head_id
+      ORDER BY 
+        tj.juchu_head_id, tj.juchu_kizai_head_id, cal.cal_dat;
     `;
 
-    const values = [kizaiId, juchuHeadIds, date];
+    const values = [kizaiId, juchuHeadIds, juchuKizaiHeadIds, date];
 
     return await pool.query(query, values);
   } catch (e) {
