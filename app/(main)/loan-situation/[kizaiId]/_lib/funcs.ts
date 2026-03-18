@@ -152,13 +152,7 @@ export const getAllLoanUseData = async (
 ) => {
   const stringDate = toJapanYMDString(date, '-');
   try {
-    const result: QueryResult<LoanUseTableValues> = await selectUseListBulk(
-      // juchuHeadIds,
-      // juchuKizaiHeadIds,
-      targetIds,
-      kizaiId,
-      stringDate
-    );
+    const result: QueryResult<LoanUseTableValues> = await selectUseListBulk(targetIds, kizaiId, stringDate);
     const data: LoanUseTableValues[] = result.rows;
     return data;
   } catch (e) {
