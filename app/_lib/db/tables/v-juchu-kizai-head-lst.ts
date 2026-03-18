@@ -150,6 +150,7 @@ export const selectFilteredKizaiHead = async ({
                 // kicsが昨日の範囲内
                 `and(kics_${dateColumn}.gte.${startOfYesterday.toISOString()},kics_${dateColumn}.lt.${startOfToday.toISOString()})`
         );
+        break;
       }
       case '4': {
         // '今日'

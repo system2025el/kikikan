@@ -112,7 +112,6 @@ export const EqptOrderTable = ({
                         size="medium"
                         sx={{
                           px: 0,
-                          paddingLeft: 1,
                           m: 0,
                           minWidth: 1,
                           justifyContent: 'left',
