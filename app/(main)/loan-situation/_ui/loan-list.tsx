@@ -15,6 +15,7 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
+import { grey } from '@mui/material/colors';
 import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { TextFieldElement } from 'react-hook-form-mui';
@@ -161,7 +162,10 @@ export const LoanList = () => {
               </TableHead>
               <TableBody>
                 {list.map((loan, index) => (
-                  <TableRow key={loan.kizaiId} sx={{ whiteSpace: 'nowrap' }}>
+                  <TableRow
+                    key={loan.kizaiId}
+                    sx={{ bgcolor: loan.delFlg || !loan.dspFlg ? grey[300] : 'white', whiteSpace: 'nowrap' }}
+                  >
                     <TableCell align="center" padding="none">
                       {index + 1}
                     </TableCell>
