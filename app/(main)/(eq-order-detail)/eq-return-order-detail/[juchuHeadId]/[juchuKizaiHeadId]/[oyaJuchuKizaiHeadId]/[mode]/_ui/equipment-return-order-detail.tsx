@@ -2129,6 +2129,7 @@ export const EquipmentReturnOrderDetail = (props: {
                           <ReturnEqTable
                             rows={returnJuchuKizaiMeisaiList}
                             edit={edit}
+                            returnNyukoDate={returnNyukoDate}
                             handleCellChange={handleCellChange}
                             handleMeisaiDelete={handleEqMeisaiDelete}
                             handleMemoChange={handleMemoChange}

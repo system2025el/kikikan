@@ -10,9 +10,12 @@ export const metadata: Metadata = {
   description: '貸出状況ページです',
 };
 
-const Page = async (props: { params: Promise<{ kizaiId: string }> }) => {
+const Page = async (props: { params: Promise<{ kizaiId: string }>; searchParams: Promise<{ date?: string }> }) => {
   const params = await props.params;
   const kizaiId = Number(params.kizaiId);
+
+  const searchParams = await props.searchParams;
+  const date = searchParams.date;
 
   const kizaiData = await getLoanKizaiData(kizaiId);
 
@@ -54,6 +57,7 @@ const Page = async (props: { params: Promise<{ kizaiId: string }> }) => {
   return (
     <LoanSituation
       kizaiData={kizaiData}
+      date={date}
       // loanJuchuData={filterLoanJuchuData}
       // eqUseData={eqUseData}
       // eqStockData={eqStockData}

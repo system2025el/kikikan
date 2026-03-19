@@ -37,11 +37,12 @@ import { LoanSituationTable, UseTable } from './loan-situation-table';
 
 export const LoanSituation = (props: {
   kizaiData: LoanKizai;
+  date: string | undefined;
   // loanJuchuData: LoanJuchu[];
   // eqUseData: LoanUseTableValues[][];
   // eqStockData: LoanStockTableValues[];
 }) => {
-  const { kizaiData } = props;
+  const { kizaiData, date } = props;
 
   // ref
   const leftRef = useRef<HTMLDivElement>(null);
@@ -59,7 +60,7 @@ export const LoanSituation = (props: {
   // 機材在庫リスト
   const [eqStockList, setEqStockList] = useState<LoanStockTableValues[]>(/*props.eqStockData*/ []);
   // カレンダー選択日
-  const [selectDate, setSelectDate] = useState<Date>(new Date());
+  const [selectDate, setSelectDate] = useState<Date>(date ? new Date(date) : new Date());
   // ラジオボタン選択値
   const [sortValue, setSortValue] = useState<string>('shuko');
 
@@ -273,7 +274,7 @@ export const LoanSituation = (props: {
   useEffect(() => {
     const getInitialData = async () => {
       // ヘッダー開始日
-      const strDat = subDays(new Date(), 1);
+      const strDat = subDays(selectDate, 1);
 
       try {
         await getData(strDat);
