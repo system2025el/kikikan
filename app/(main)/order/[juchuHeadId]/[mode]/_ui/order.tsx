@@ -374,7 +374,7 @@ export const Order = (props: {
 
   // 伝票削除処理
   const handleHeadDelete = async (result: boolean) => {
-    if (isProcessing) return;
+    if (isProcessing || !user) return;
     setIsProcessing(true);
 
     try {
@@ -383,7 +383,7 @@ export const Order = (props: {
       if (lockResult) {
         if (result) {
           setIsLoading(true);
-          const deleteResult = await delJuchuHead(getValues('juchuHeadId'));
+          const deleteResult = await delJuchuHead(getValues('juchuHeadId'), user.name);
 
           if (!deleteResult) {
             setSnackBarMessage('削除に失敗しました');

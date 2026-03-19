@@ -1,7 +1,7 @@
 import { addDays, subDays } from 'date-fns';
 import { Metadata } from 'next';
 
-import { confirmJuchuHeadId, getLoanJuchuData, getLoanKizaiData } from './_lib/funcs';
+import { getLoanJuchuData, getLoanKizaiData } from './_lib/funcs';
 import { LoanStockTableValues, LoanUseTableValues } from './_lib/types';
 import { LoanSituation } from './_ui/loan-situation';
 
