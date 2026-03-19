@@ -31,17 +31,18 @@ import { Calendar } from '@/app/(main)/_ui/date';
 import { Loading } from '@/app/(main)/_ui/loading';
 import { PermissionGuard } from '@/app/(main)/_ui/permission-guard';
 
-import { confirmJuchuHeadId, getAllLoanUseData, getLoanJuchuData, getLoanStockData } from '../_lib/funcs';
+import { getAllLoanUseData, getLoanJuchuData, getLoanStockData } from '../_lib/funcs';
 import { LoanJuchu, LoanKizai, LoanStockTableValues, LoanUseTableValues } from '../_lib/types';
 import { LoanSituationTable, UseTable } from './loan-situation-table';
 
 export const LoanSituation = (props: {
   kizaiData: LoanKizai;
+  date: string | undefined;
   // loanJuchuData: LoanJuchu[];
   // eqUseData: LoanUseTableValues[][];
   // eqStockData: LoanStockTableValues[];
 }) => {
-  const { kizaiData } = props;
+  const { kizaiData, date } = props;
 
   // ref
   const leftRef = useRef<HTMLDivElement>(null);
@@ -59,7 +60,7 @@ export const LoanSituation = (props: {
   // 機材在庫リスト
   const [eqStockList, setEqStockList] = useState<LoanStockTableValues[]>(/*props.eqStockData*/ []);
   // カレンダー選択日
-  const [selectDate, setSelectDate] = useState<Date>(new Date());
+  const [selectDate, setSelectDate] = useState<Date>(date ? new Date(date) : new Date());
   // ラジオボタン選択値
   const [sortValue, setSortValue] = useState<string>('shuko');
 
@@ -102,17 +103,13 @@ export const LoanSituation = (props: {
   // 貸出状況取得
   const getData = async (strDat: Date) => {
     try {
-      // 機材在庫データ、ヘッダー開始日から終了日までに該当する受注ヘッダーidリスト、貸出受注データ
-      const [eqStockData, confirmJuchuHeadIds, loanJuchuData] = await Promise.all([
+      // 機材在庫データ、ヘッダー開始日から終了日までに該当する貸出受注データ
+      const [eqStockData, loanJuchuData] = await Promise.all([
         getLoanStockData(kizaiData.kizaiId, strDat),
-        confirmJuchuHeadId(strDat),
-        getLoanJuchuData(kizaiData.kizaiId),
+        getLoanJuchuData(kizaiData.kizaiId, strDat),
       ]);
 
-      // 該当する受注ヘッダーidリストに含まれる貸出受注データのみ抽出
-      const filterLoanJuchuData = loanJuchuData.filter((d) => confirmJuchuHeadIds.includes(d.juchuHeadId));
-
-      if (filterLoanJuchuData.length === 0) {
+      if (loanJuchuData.length === 0) {
         setLoanJuchuList([]);
         setEqUseList([]);
         setEqStockList(eqStockData);
@@ -121,7 +118,7 @@ export const LoanSituation = (props: {
 
       // ラジオボタンで選択されている出庫日or入庫日順にソート
       if (sortValue === 'shuko') {
-        filterLoanJuchuData.sort((a, b) => {
+        loanJuchuData.sort((a, b) => {
           const dateA = a.shukoDat ? new Date(a.shukoDat).getTime() : null;
           const dateB = b.shukoDat ? new Date(b.shukoDat).getTime() : null;
 
@@ -132,7 +129,7 @@ export const LoanSituation = (props: {
           return dateA - dateB;
         });
       } else {
-        filterLoanJuchuData.sort((a, b) => {
+        loanJuchuData.sort((a, b) => {
           const dateA = a.nyukoDat ? new Date(a.nyukoDat).getTime() : null;
           const dateB = b.nyukoDat ? new Date(b.nyukoDat).getTime() : null;
 
@@ -148,7 +145,7 @@ export const LoanSituation = (props: {
       const childrenMap: { [key: string]: LoanJuchu[] } = {};
       const parents = [];
       // 親データと子データで分ける
-      for (const data of filterLoanJuchuData) {
+      for (const data of loanJuchuData) {
         if (data.oyaJuchuKizaiHeadId === null) {
           parents.push(data);
         } else {
@@ -277,7 +274,7 @@ export const LoanSituation = (props: {
   useEffect(() => {
     const getInitialData = async () => {
       // ヘッダー開始日
-      const strDat = subDays(new Date(), 1);
+      const strDat = subDays(selectDate, 1);
 
       try {
         await getData(strDat);

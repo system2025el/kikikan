@@ -142,6 +142,7 @@ type EqTableProps = {
   rows: JuchuKizaiMeisaiValues[];
   edit: boolean;
   fixFlag: boolean;
+  shukoDate: Date | null;
   handleCellChange: (
     rowIndex: number,
     kizaiId: number,
@@ -159,6 +160,7 @@ export const EqTable: React.FC<EqTableProps> = ({
   rows,
   edit,
   fixFlag,
+  shukoDate,
   handleCellChange,
   handleMeisaiDelete,
   handleMemoChange,
@@ -244,6 +246,7 @@ export const EqTable: React.FC<EqTableProps> = ({
               rowIndex={rowIndex}
               edit={edit}
               fixFlag={fixFlag}
+              shukoDate={shukoDate}
               handleOrderRef={handleOrderRef(rowIndex)}
               handleYobiRef={handleYobiRef(rowIndex)}
               handleMeisaiDelete={handleMeisaiDelete}
@@ -265,6 +268,7 @@ type EqTableRowProps = {
   rowIndex: number;
   edit: boolean;
   fixFlag: boolean;
+  shukoDate: Date | null;
   handleOrderRef: (el: HTMLInputElement | null) => void;
   handleYobiRef: (el: HTMLInputElement | null) => void;
   handleMeisaiDelete: (rowIndex: number, row: JuchuKizaiMeisaiValues) => void;
@@ -287,6 +291,7 @@ const EqTableRow = React.memo(
     rowIndex,
     edit,
     fixFlag,
+    shukoDate,
     handleOrderRef,
     handleYobiRef,
     handleMeisaiDelete,
@@ -320,7 +325,9 @@ const EqTableRow = React.memo(
           <Button
             variant="text"
             sx={{ p: 0, justifyContent: 'start', textTransform: 'none' }}
-            onClick={() => window.open(`/loan-situation/${row.kizaiId}`)}
+            onClick={() =>
+              window.open(`/loan-situation/${row.kizaiId}?date=${shukoDate ? shukoDate.toISOString() : ''}`)
+            }
           >
             {row.kizaiNam}
           </Button>

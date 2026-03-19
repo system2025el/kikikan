@@ -233,10 +233,12 @@ export const updJuchuHead = async (data: OrderValues) => {
  * @param juchuHeadId 受注ヘッダーid
  * @returns
  */
-export const delJuchuHead = async (juchuHeadId: number) => {
+export const delJuchuHead = async (juchuHeadId: number, userNam: string) => {
   const deleteData: JuchuHead = {
     juchu_head_id: juchuHeadId,
     del_flg: 1,
+    upd_dat: new Date().toISOString(),
+    upd_user: userNam,
   };
   try {
     const { error } = await updateJuchuHead(deleteData);
