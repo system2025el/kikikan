@@ -179,6 +179,7 @@ export const updateCustomer = async (rawData: CustomersMasterDialogValues, id: n
     kokyaku_rank: 0,
     nebiki_rat: rawData.nebikiRat,
     del_flg: Number(rawData.delFlg),
+    keisho: rawData.keisho,
     adr_post: rawData.adrPost,
     adr_shozai: rawData.adrShozai,
     adr_tatemono: rawData.adrTatemono,
