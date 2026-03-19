@@ -97,7 +97,7 @@ export const selectOneCustomer = async (id: number) => {
 export const insertNewCustomer = async (data: CustomersMasterDialogValues, user: string) => {
   const query = `
   INSERT INTO ${SCHEMA}.m_kokyaku (
-    kokyaku_id, kokyaku_nam, kana, kokyaku_rank, del_flg, dsp_ord_num,
+    kokyaku_id, kokyaku_nam, kana, kokyaku_rank, del_flg, dsp_ord_num, keisho,
     adr_post, adr_shozai, adr_tatemono, adr_sonota,
     tel, tel_mobile, fax, mail,
     mem, dsp_flg, add_dat, add_user
@@ -106,7 +106,7 @@ export const insertNewCustomer = async (data: CustomersMasterDialogValues, user:
     (SELECT coalesce(max(kokyaku_id),0) + 1 FROM ${SCHEMA}.m_kokyaku),
     $1, $2, $3, $4,
     (SELECT coalesce(max(dsp_ord_num),0) + 1 FROM ${SCHEMA}.m_kokyaku),
-    $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16
+    $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17
   );
 `;
   const date = new Date().toISOString();
@@ -115,6 +115,7 @@ export const insertNewCustomer = async (data: CustomersMasterDialogValues, user:
     data.kana,
     0,
     Number(data.delFlg),
+    data.keisho,
     data.adrPost,
     data.adrShozai,
     data.adrTatemono,
