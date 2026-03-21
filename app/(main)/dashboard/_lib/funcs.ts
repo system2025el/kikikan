@@ -33,7 +33,14 @@ export const getShukoList = async (startDate: string, totalDays: number) => {
     }));
     return EqTableData;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -68,7 +75,14 @@ export const getVehiclesList = async (startDate: string, totalDays: number) => {
     }));
     return EqTableData;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -105,7 +119,14 @@ export const getMinusZaikoList = async (startDate: string, totalDays: number): P
 
     return MinusZikoData;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };

@@ -113,7 +113,14 @@ export const saveNewKeepJuchuKizaiHead = async (data: KeepJuchuKizaiHeadValues, 
 
     return newJuchuKizaiHeadId;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     await connection.query('ROLLBACK');
     return null;
   } finally {
@@ -491,7 +498,14 @@ export const saveKeepJuchuKizai = async (
 
     return true;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     await connection.query('ROLLBACK');
     return false;
   } finally {
@@ -540,7 +554,14 @@ export const getKeepJuchuKizaiHead = async (juchuHeadId: number, juchuKizaiHeadI
 
     return keepJucuKizaiHeadData;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -574,7 +595,14 @@ export const addKeepJuchuKizaiHead = async (
     await insertKeepJuchuKizaiHead(newData, connection);
     return true;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -606,7 +634,14 @@ export const updKeepJuchuKizaiHead = async (
     await updateKeepJuchuKizaiHead(updateData, connection);
     return true;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -661,7 +696,14 @@ export const getKeepJuchuKizaiMeisai = async (
     }));
     return keepJuchuKizaiMeisaiData;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -695,7 +737,14 @@ export const addKeepJuchuKizaiMeisai = async (
     await insertJuchuKizaiMeisai(newData, connection);
     return true;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -731,7 +780,14 @@ export const updKeepJuchuKizaiMeisai = async (
     }
     return true;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -806,7 +862,14 @@ export const getKeepJuchuContainerMeisai = async (
     }));
     return keepJuchuContainerMeisaiData;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -856,7 +919,14 @@ export const addKeepJuchuContainerMeisai = async (
     await insertJuchuContainerMeisai(mergeData, connection);
     return true;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -908,7 +978,14 @@ export const updKeepJuchuContainerMeisai = async (
     }
     return true;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -983,7 +1060,14 @@ export const addShukoDen = async (
     await insertNyushukoDen(mergeData, connection);
     return true;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -1041,7 +1125,14 @@ export const updShukoDen = async (
     }
     return true;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -1082,7 +1173,14 @@ export const addNyukoDen = async (
     await insertNyushukoDen(newData, connection);
     return true;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -1125,7 +1223,14 @@ export const updNyukoDen = async (
     }
     return true;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -1179,7 +1284,14 @@ export const upsShukoDen = async (
   try {
     await upsertNyushukoDen(mergeData, connection);
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -1217,7 +1329,14 @@ export const upsNyukoDen = async (
   try {
     await upsertNyushukoDen(newData, connection);
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -1275,7 +1394,14 @@ export const addCtnShukoDen = async (
 
     return true;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -1335,7 +1461,14 @@ export const updCtnShukoDen = async (
 
     return true;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -1376,7 +1509,14 @@ export const addCtnNyukoDen = async (
 
     return true;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -1418,7 +1558,14 @@ export const updCtnNyukoDen = async (
     }
     return true;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -1472,7 +1619,14 @@ export const upsCtnShukoDen = async (
   try {
     await upsertNyushukoDen(mergeData, connection);
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -1510,7 +1664,14 @@ export const upsCtnNyukoDen = async (
   try {
     await upsertNyushukoDen(upsertCtnNyukoData, connection);
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };

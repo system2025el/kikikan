@@ -56,7 +56,14 @@ export const getFilteredBillingSituations = async (
       heads: heads.filter((h) => d.juchu_head_id === h.juchuId).map((h, i) => ({ ...h, ordNum: i + 1 })),
     }));
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -89,7 +96,14 @@ export const changeSeikyuDat = async (
     await upsertSeikyuDat(upsertData);
     await revalidatePath('/billing-sts-list');
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -108,7 +122,14 @@ export const getUnbilledCusts = async (query: string) => {
 
     return uniqueCusts;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };

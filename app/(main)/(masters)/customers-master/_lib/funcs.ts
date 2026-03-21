@@ -42,7 +42,14 @@ export const getFilteredCustomers = async (query: string | undefined = '') => {
     }));
     return filteredCustomers;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -84,7 +91,14 @@ export const getChosenCustomer = async (id: number) => {
     };
     return CustomerDetails;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -146,7 +160,14 @@ export const getChosenCustomerIdAndName = async (id: number) => {
     };
     return CustomerDetails;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -159,9 +180,16 @@ export const addNewCustomer = async (data: CustomersMasterDialogValues, user: st
   try {
     await insertNewCustomer(data, user);
     await revalidatePath('/customers-master');
-  } catch (error) {
-    console.error(error);
-    throw error;
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
+    throw e;
   }
 };
 
@@ -199,9 +227,16 @@ export const updateCustomer = async (rawData: CustomersMasterDialogValues, id: n
   try {
     await upDateCustomerDB(updateData);
     await revalidatePath('/customer-master');
-  } catch (error) {
-    console.error(error);
-    throw error;
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
+    throw e;
   }
 };
 
@@ -222,7 +257,14 @@ export const getChosenCustomerName = async (id: number) => {
     const CustomerNam: string = data.kokyaku_nam;
     return CustomerNam;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };

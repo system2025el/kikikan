@@ -30,7 +30,14 @@ export const getBasesSelections = async (): Promise<SelectTypes[]> => {
     }
     return data.map((d) => ({ id: d.shozoku_id, label: d.shozoku_nam }));
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -58,7 +65,14 @@ export const getFilteredBases = async (query: string = '') => {
     }));
     return filteredBases;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -85,7 +99,14 @@ export const getChosenBase = async (id: number) => {
     };
     return baseDetails;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -98,9 +119,16 @@ export const addNewBase = async (data: BasesMasterDialogValues, user: string) =>
   try {
     await insertNewShozoku(data, user);
     await revalidatePath('/bases-master');
-  } catch (error) {
-    console.error(error);
-    throw error;
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
+    throw e;
   }
 };
 
@@ -124,8 +152,15 @@ export const updateBase = async (rawData: BasesMasterDialogValues, id: number, u
   try {
     await upDateShozokuDB(updateData);
     await revalidatePath('/bases-master');
-  } catch (error) {
-    console.error(error);
-    throw error;
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
+    throw e;
   }
 };

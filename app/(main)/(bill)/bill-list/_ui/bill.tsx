@@ -53,6 +53,7 @@ import { FirstDialogPage, SecondDialogPage } from './create-tbl-dialogs';
 import { MeisaiLines } from './meisai';
 import { MeisaiTblHeader } from './meisai-tbl-header';
 import { ReadOnlyYenNumberElement } from './yen';
+import { serverErrorLog } from '@/app/_lib/funcs';
 
 /**
  * 請求書作成画面
@@ -310,7 +311,8 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
       // 別タブ表示の場合
       window.open(url);
     } catch (e) {
-      console.error(e);
+      const errorLog = e as Error;
+      await serverErrorLog(errorLog.message);
       setSnackBarMessage('請求書の印刷に失敗しました');
       setSnackBarOpen(true);
     } finally {

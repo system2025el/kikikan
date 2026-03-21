@@ -33,7 +33,14 @@ export const getLoanKizaiData = async (kizaiId: number) => {
     };
     return kizaiData;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -100,7 +107,14 @@ export const confirmJuchuHeadId = async (strDat: Date) => {
     const data: number[] = result.rows.map((row) => row.juchuHeadId);
     return data;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -142,7 +156,14 @@ export const getAllLoanUseData = async (
     const data: LoanUseTableValues[] = result.rows;
     return data;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -160,7 +181,14 @@ export const getLoanStockData = async (kizaiId: number, date: Date) => {
     const data: LoanStockTableValues[] = result.rows;
     return data;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };

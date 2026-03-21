@@ -43,7 +43,14 @@ export const getFilteredEqptSets = async (query: string = '') => {
     }));
     return filteredEqptSets;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -70,7 +77,14 @@ export const getChosenEqptSet = async (id: number) => {
     };
     return eqptSetDetails;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -93,9 +107,16 @@ export const addNewEqptSet = async (data: EqptSetsMasterDialogValues, user: stri
       await insertNewEqptSet(insertData, connection);
       await revalidatePath('/eqpt-set-master');
     }
-  } catch (error) {
-    console.error(error);
-    throw error;
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
+    throw e;
   } finally {
     connection.release();
   }
@@ -161,10 +182,17 @@ export const updateEqptSet = async (newData: EqptSetsMasterDialogValues, current
       // await updateEqptSetDB(updateData);
       // await revalidatePath('/eqpt-set-master');
       await connection.query('COMMIT');
-  } catch (error) {
-    console.error(error);
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     await connection.query('ROLLBACK');
-    throw error;
+    throw e;
   } finally {
     connection.release();
   }
@@ -197,7 +225,14 @@ export const getEqptsForOyaEqptSelection = async (): Promise<SelectTypes[]> => {
         return (a.grpId ?? 0) - (b.grpId ?? 0);
       });
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -208,17 +243,20 @@ export const getEqptsForOyaEqptSelection = async (): Promise<SelectTypes[]> => {
  */
 export const getEqptsForSetEqptSelection = async (): Promise<EqptSelection[]> => {
   try {
-    try {
-      const data = await selectActiveEqpts('');
-      if (!data || data.rowCount === 0) {
-        return [];
-      }
-      return data.rows;
-    } catch (e) {
-      console.error(e);
-      throw e;
+    const data = await selectActiveEqpts('');
+    if (!data || data.rowCount === 0) {
+      return [];
     }
+    return data.rows;
   } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };

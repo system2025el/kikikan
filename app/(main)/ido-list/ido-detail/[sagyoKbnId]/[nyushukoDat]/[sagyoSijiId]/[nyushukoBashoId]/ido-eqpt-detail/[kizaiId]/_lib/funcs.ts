@@ -47,7 +47,14 @@ export const getIdoDenDetail = async (
 
     return idoEqptDetailData;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -80,7 +87,14 @@ export const getIdoEqptDetail = async (
 
     return idoEqptDetailData;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -132,7 +146,14 @@ export const delIdoResult = async (idoDenDetailData: IdoEqptDetailValues, delete
     );
     return true;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     await connection.query('ROLLBACK');
     return false;
   } finally {
@@ -166,7 +187,14 @@ export const updIdoResultAdjQty = async (
     );
     return true;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     return false;
   } finally {
     connection.release();
@@ -193,7 +221,14 @@ export const getIdoFix = async (sagyoKbnId: number, sagyoSijiId: number, sagyoDe
 
     return true;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };

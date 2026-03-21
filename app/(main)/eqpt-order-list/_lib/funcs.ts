@@ -52,7 +52,14 @@ export const getFilteredOrderList = async (
       juchuDat: d.juchu_dat ? toJapanYMDString(d.juchu_dat) : '',
     }));
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   } finally {
   }
