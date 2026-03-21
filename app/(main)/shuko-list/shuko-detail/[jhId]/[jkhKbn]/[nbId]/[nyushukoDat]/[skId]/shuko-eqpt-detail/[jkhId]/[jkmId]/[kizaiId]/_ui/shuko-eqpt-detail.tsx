@@ -87,10 +87,6 @@ export const ShukoEqptDetail = (props: {
   // ブラウザバック、F5、×ボタンでページを離れた際のhook
   useUnsavedChangesWarning(isDirty);
 
-  useEffect(() => {
-    setIsDirty(isDirty);
-  }, [isDirty, setIsDirty]);
-
   /**
    * 棚番作成
    * @param a bldCod
@@ -181,6 +177,10 @@ export const ShukoEqptDetail = (props: {
   const handleSelect = (selected: number[]) => {
     setSelected(selected);
   };
+
+  useEffect(() => {
+    setIsDirty(isDirty);
+  }, [isDirty, setIsDirty]);
 
   return (
     <PermissionGuard category={'nyushuko'} required={permission.nyushuko_ref}>

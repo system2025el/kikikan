@@ -10,16 +10,16 @@ import { LoadingOverlay } from './_ui/loading';
 const Error = ({ error, reset }: { error: Error; reset: () => void }) => {
   const router = useRouter();
 
-  useEffect(() => {
-    console.error('Error:', error);
-  }, [error]);
-
   const handleReset = () => {
     startTransition(() => {
       router.refresh();
       reset();
     });
   };
+
+  useEffect(() => {
+    console.error('Error:', error);
+  }, [error]);
 
   return (
     <Box

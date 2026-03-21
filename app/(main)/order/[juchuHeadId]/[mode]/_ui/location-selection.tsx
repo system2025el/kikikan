@@ -39,6 +39,9 @@ export const LocationSelectDialog = (props: {
   lock: () => Promise<boolean | React.JSX.Element | undefined>;
 }) => {
   const { handleLocSelect, handleCloseLocationDialog, lock } = props;
+
+  const rowsPerPage = 50;
+
   /* useState ------------------ */
   const [locs, setLocs] = useState<LocsDialogValues[]>();
   /* DBのローディング */
@@ -49,7 +52,6 @@ export const LocationSelectDialog = (props: {
   const [snackBarMessage, setSnackBarMessage] = useState('');
 
   const [page, setPage] = useState(1);
-  const rowsPerPage = 50;
 
   // 表示するデータ
   const list = useMemo(

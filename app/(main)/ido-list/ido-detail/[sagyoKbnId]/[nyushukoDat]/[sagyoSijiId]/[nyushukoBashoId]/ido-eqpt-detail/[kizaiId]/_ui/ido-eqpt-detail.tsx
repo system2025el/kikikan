@@ -83,10 +83,6 @@ export const IdoEqptDetail = (props: {
   // ブラウザバック、F5、×ボタンでページを離れた際のhook
   useUnsavedChangesWarning(isDirty);
 
-  useEffect(() => {
-    setIsDirty(isDirty);
-  }, [isDirty, setIsDirty]);
-
   /**
    * 棚番作成
    * @param a bldCod
@@ -168,6 +164,10 @@ export const IdoEqptDetail = (props: {
     const path = `/ido-list/ido-detail/${idoDenDetailData.sagyoKbnId}/${idoDenDetailData.sagyoDenDat}/${idoDenDetailData.sagyoSijiId}/${idoDenDetailData.sagyoId}`;
     requestNavigation(path);
   };
+
+  useEffect(() => {
+    setIsDirty(isDirty);
+  }, [isDirty, setIsDirty]);
 
   return (
     <PermissionGuard category={'nyushuko'} required={permission.nyushuko_ref}>

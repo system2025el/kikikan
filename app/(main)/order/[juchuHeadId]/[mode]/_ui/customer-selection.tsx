@@ -39,6 +39,9 @@ export const CustomerSelectionDialog = (props: {
   lock: () => Promise<boolean | React.JSX.Element | undefined>;
 }) => {
   const { handleCustSelect, handleCloseCustDialog, lock } = props;
+
+  const rowsPerPage = 50;
+
   const [custs, setCusts] = useState<CustomersDialogValues[]>();
   const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -46,7 +49,6 @@ export const CustomerSelectionDialog = (props: {
   const [snackBarOpen, setSnackBarOpen] = useState(false);
   // スナックバーメッセージ
   const [snackBarMessage, setSnackBarMessage] = useState('');
-  const rowsPerPage = 50;
 
   // 表示するデータ
   // const list = useMemo(

@@ -218,103 +218,6 @@ export const EquipmentKeepOrderDetail = (props: {
   // ブラウザバック、F5、×ボタンでページを離れた際のhook
   useUnsavedChangesWarning(isDirty || otherDirty ? true : false);
 
-  /**
-   * useEffect
-   */
-  useEffect(() => {
-    const getData = async () => {
-      setIsDetailLoading(true);
-
-      // 受注機材ヘッダーデータ
-      const juchuKizaiHeadData = getValues();
-
-      try {
-        // キープ受注機材明細データ、キープ受注コンテナ明細データ
-        const [juchuKizaiMeisaiData, keepJuchuContainerMeisaiData] = await Promise.all([
-          getKeepJuchuKizaiMeisai(
-            juchuKizaiHeadData.juchuHeadId,
-            juchuKizaiHeadData.juchuKizaiHeadId,
-            juchuKizaiHeadData.oyaJuchuKizaiHeadId
-          ),
-          getKeepJuchuContainerMeisai(
-            juchuKizaiHeadData.juchuHeadId,
-            juchuKizaiHeadData.juchuKizaiHeadId,
-            juchuKizaiHeadData.oyaJuchuKizaiHeadId
-          ),
-        ]);
-
-        // キープ出庫日
-        const keepShukoDate = getShukoDate(
-          juchuKizaiHeadData.kicsShukoDat && new Date(juchuKizaiHeadData.kicsShukoDat),
-          juchuKizaiHeadData.yardShukoDat && new Date(juchuKizaiHeadData.yardShukoDat)
-        );
-        // キープ入庫日
-        const keepNyukoDate = getNyukoDate(
-          juchuKizaiHeadData.kicsNyukoDat && new Date(juchuKizaiHeadData.kicsNyukoDat),
-          juchuKizaiHeadData.yardNyukoDat && new Date(juchuKizaiHeadData.yardNyukoDat)
-        );
-
-        setOriginKeepJuchuKizaiMeisaiList(juchuKizaiMeisaiData);
-        setKeepJuchuKizaiMeisaiList(juchuKizaiMeisaiData);
-        setOriginKeepJuchuContainerMeisaiList(keepJuchuContainerMeisaiData);
-        setKeepJuchuContainerMeisaiList(keepJuchuContainerMeisaiData);
-        setKeepShukoDate(keepShukoDate);
-        setKeepNyukoDate(keepNyukoDate);
-      } catch (e) {
-        setIsError(e instanceof Error ? e : new Error(String(e)));
-      }
-      setIsDetailLoading(false);
-    };
-    if (saveKizaiHead && user && user.permission.juchu !== permission.none) {
-      getData();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    if (!user) return;
-    const asyncProcess = async () => {
-      try {
-        const lockData = await lockCheck(1, juchuHeadData.juchuHeadId, user.name, user.email);
-        setLockData(lockData);
-        if (lockData) {
-          setEdit(false);
-        }
-      } catch (e) {
-        setIsError(e instanceof Error ? e : new Error(String(e)));
-      }
-      setIsLoading(false);
-    };
-
-    if (user?.permission.juchu === permission.juchu_ref) setEdit(false);
-
-    if (props.edit && user?.permission.juchu && !!(user?.permission.juchu & permission.juchu_upd)) {
-      asyncProcess();
-    } else {
-      setIsLoading(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
-
-  useEffect(() => {
-    const dirty = isDirty || otherDirty ? true : false;
-    setIsDirty(dirty);
-  }, [isDirty, otherDirty, setIsDirty]);
-
-  useEffect(() => {
-    const filterJuchuKizaiMeisaiList = keepJuchuKizaiMeisaiList.filter((data) => !data.delFlag);
-    const filterJuchuContainerMeisaiList = keepJuchuContainerMeisaiList.filter((data) => !data.delFlag);
-    if (
-      JSON.stringify(originKeepJuchuKizaiMeisaiList) === JSON.stringify(filterJuchuKizaiMeisaiList) &&
-      JSON.stringify(originKeepJuchuContainerMeisaiList) === JSON.stringify(filterJuchuContainerMeisaiList)
-    ) {
-      setOtherDirty(false);
-    } else {
-      setOtherDirty(true);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [keepJuchuKizaiMeisaiList, keepJuchuContainerMeisaiList]);
-
   // ロック制御
   const lock = async () => {
     if (!user) return;
@@ -1208,6 +1111,103 @@ export const EquipmentKeepOrderDetail = (props: {
   const handleExpansion = () => {
     setExpanded((prevExpanded) => !prevExpanded);
   };
+
+  /**
+   * useEffect
+   */
+  useEffect(() => {
+    const getData = async () => {
+      setIsDetailLoading(true);
+
+      // 受注機材ヘッダーデータ
+      const juchuKizaiHeadData = getValues();
+
+      try {
+        // キープ受注機材明細データ、キープ受注コンテナ明細データ
+        const [juchuKizaiMeisaiData, keepJuchuContainerMeisaiData] = await Promise.all([
+          getKeepJuchuKizaiMeisai(
+            juchuKizaiHeadData.juchuHeadId,
+            juchuKizaiHeadData.juchuKizaiHeadId,
+            juchuKizaiHeadData.oyaJuchuKizaiHeadId
+          ),
+          getKeepJuchuContainerMeisai(
+            juchuKizaiHeadData.juchuHeadId,
+            juchuKizaiHeadData.juchuKizaiHeadId,
+            juchuKizaiHeadData.oyaJuchuKizaiHeadId
+          ),
+        ]);
+
+        // キープ出庫日
+        const keepShukoDate = getShukoDate(
+          juchuKizaiHeadData.kicsShukoDat && new Date(juchuKizaiHeadData.kicsShukoDat),
+          juchuKizaiHeadData.yardShukoDat && new Date(juchuKizaiHeadData.yardShukoDat)
+        );
+        // キープ入庫日
+        const keepNyukoDate = getNyukoDate(
+          juchuKizaiHeadData.kicsNyukoDat && new Date(juchuKizaiHeadData.kicsNyukoDat),
+          juchuKizaiHeadData.yardNyukoDat && new Date(juchuKizaiHeadData.yardNyukoDat)
+        );
+
+        setOriginKeepJuchuKizaiMeisaiList(juchuKizaiMeisaiData);
+        setKeepJuchuKizaiMeisaiList(juchuKizaiMeisaiData);
+        setOriginKeepJuchuContainerMeisaiList(keepJuchuContainerMeisaiData);
+        setKeepJuchuContainerMeisaiList(keepJuchuContainerMeisaiData);
+        setKeepShukoDate(keepShukoDate);
+        setKeepNyukoDate(keepNyukoDate);
+      } catch (e) {
+        setIsError(e instanceof Error ? e : new Error(String(e)));
+      }
+      setIsDetailLoading(false);
+    };
+    if (saveKizaiHead && user && user.permission.juchu !== permission.none) {
+      getData();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    const asyncProcess = async () => {
+      try {
+        const lockData = await lockCheck(1, juchuHeadData.juchuHeadId, user.name, user.email);
+        setLockData(lockData);
+        if (lockData) {
+          setEdit(false);
+        }
+      } catch (e) {
+        setIsError(e instanceof Error ? e : new Error(String(e)));
+      }
+      setIsLoading(false);
+    };
+
+    if (user?.permission.juchu === permission.juchu_ref) setEdit(false);
+
+    if (props.edit && user?.permission.juchu && !!(user?.permission.juchu & permission.juchu_upd)) {
+      asyncProcess();
+    } else {
+      setIsLoading(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  useEffect(() => {
+    const dirty = isDirty || otherDirty ? true : false;
+    setIsDirty(dirty);
+  }, [isDirty, otherDirty, setIsDirty]);
+
+  useEffect(() => {
+    const filterJuchuKizaiMeisaiList = keepJuchuKizaiMeisaiList.filter((data) => !data.delFlag);
+    const filterJuchuContainerMeisaiList = keepJuchuContainerMeisaiList.filter((data) => !data.delFlag);
+    if (
+      JSON.stringify(originKeepJuchuKizaiMeisaiList) === JSON.stringify(filterJuchuKizaiMeisaiList) &&
+      JSON.stringify(originKeepJuchuContainerMeisaiList) === JSON.stringify(filterJuchuContainerMeisaiList)
+    ) {
+      setOtherDirty(false);
+    } else {
+      setOtherDirty(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [keepJuchuKizaiMeisaiList, keepJuchuContainerMeisaiList]);
 
   if (isError) throw isError;
 

@@ -26,10 +26,6 @@ export const MemoTooltip = (props: {
   const [isSave, setIsSave] = useState(false);
   const [equipmentMemo, setEquipmentMemo] = useState('');
 
-  useEffect(() => {
-    setEquipmentMemo(memo);
-  }, [memo]);
-
   const handleOpen = () => {
     setOpen(true);
     setIsSave(false);
@@ -44,6 +40,10 @@ export const MemoTooltip = (props: {
     handleMemoChange(rowIndex, equipmentMemo);
     setOpen(false);
   };
+
+  useEffect(() => {
+    setEquipmentMemo(memo);
+  }, [memo]);
 
   return (
     <>
