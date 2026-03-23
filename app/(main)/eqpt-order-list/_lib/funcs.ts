@@ -22,7 +22,7 @@ dayjs.extend(timezone);
 export const getFilteredOrderList = async (
   query: EqptOrderSearchValues = {
     radio: 'shuko',
-    selectedDate: { value: '4', range: { from: null, to: null } },
+    selectedDate: { value: '5', range: { from: null, to: null } },
     kokyaku: '',
     listSort: { sort: 'shuko', order: 'asc' },
   }
