@@ -196,40 +196,6 @@ export const Order = (props: {
   // ブラウザバック、F5、×ボタンでページを離れた際のhook
   useUnsavedChangesWarning(isDirty);
 
-  useEffect(() => {
-    const asyncProcess = async () => {
-      if (!user) return;
-      try {
-        const lockData = await lockCheck(1, props.juchuHeadData.juchuHeadId, user.name, user.email);
-        setLockData(lockData);
-        if (lockData) {
-          setEdit(false);
-        }
-      } catch (e) {
-        setIsError(e instanceof Error ? e : new Error(String(e)));
-      }
-      setIsLoading(false);
-    };
-
-    if (user?.permission.juchu === permission.juchu_ref) setEdit(false);
-
-    if (getValues('juchuHeadId') === 0) {
-      if (!user) return;
-      const data = { ...getValues(), nyuryokuUser: user.name };
-      reset(data);
-      setIsLoading(false);
-    } else if (props.edit && user?.permission.juchu && !!(user?.permission.juchu & permission.juchu_upd)) {
-      asyncProcess();
-    } else {
-      setIsLoading(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
-
-  useEffect(() => {
-    setIsDirty(isDirty);
-  }, [isDirty, setIsDirty]);
-
   // ロック制御
   const lock = async () => {
     if (!user) return;
@@ -956,6 +922,40 @@ export const Order = (props: {
     }
     setIsProcessing(false);
   };
+
+  useEffect(() => {
+    const asyncProcess = async () => {
+      if (!user) return;
+      try {
+        const lockData = await lockCheck(1, props.juchuHeadData.juchuHeadId, user.name, user.email);
+        setLockData(lockData);
+        if (lockData) {
+          setEdit(false);
+        }
+      } catch (e) {
+        setIsError(e instanceof Error ? e : new Error(String(e)));
+      }
+      setIsLoading(false);
+    };
+
+    if (user?.permission.juchu === permission.juchu_ref) setEdit(false);
+
+    if (getValues('juchuHeadId') === 0) {
+      if (!user) return;
+      const data = { ...getValues(), nyuryokuUser: user.name };
+      reset(data);
+      setIsLoading(false);
+    } else if (props.edit && user?.permission.juchu && !!(user?.permission.juchu & permission.juchu_upd)) {
+      asyncProcess();
+    } else {
+      setIsLoading(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  useEffect(() => {
+    setIsDirty(isDirty);
+  }, [isDirty, setIsDirty]);
 
   if (isLoading) return <LoadingOverlay />;
 

@@ -69,7 +69,14 @@ export const getFilteredEqpts = async (
     }));
     return { data: filteredEqpts, options: options };
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -121,7 +128,14 @@ export const getChosenEqpt = async (id: number) => {
 
     return { data: EqptDetails, qty: qty };
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -139,11 +153,18 @@ export const addNewEqpt = async (data: EqptsMasterDialogValues, user: string) =>
     await connection.query('COMMIT');
 
     await revalidatePath('/eqpt-master');
-  } catch (error) {
+  } catch (e) {
     await connection.query('ROLLBACK');
 
-    console.error(error);
-    throw error;
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
+    throw e;
   } finally {
     connection.release();
   }
@@ -195,10 +216,17 @@ export const updateEqpt = async (
     await updateMasterUpdates('m_kizai', connection);
     await revalidatePath('/eqpt-master');
     await connection.query('COMMIT');
-  } catch (error) {
+  } catch (e) {
     await connection.query('ROLLBACK');
-    console.error(error);
-    throw error;
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
+    throw e;
   } finally {
     await connection.release();
   }
@@ -217,7 +245,14 @@ export const getEqptsQty = async (id: number) => {
     }
     return { yuko: data.kizai_qty ?? 0, ng: data.kizai_ng_qty ?? 0 };
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };

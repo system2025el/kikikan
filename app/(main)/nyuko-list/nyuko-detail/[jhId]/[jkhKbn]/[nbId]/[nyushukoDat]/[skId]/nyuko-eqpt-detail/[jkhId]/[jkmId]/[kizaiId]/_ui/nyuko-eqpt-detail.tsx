@@ -86,10 +86,6 @@ export const NyukoEqptDetail = (props: {
   // ブラウザバック、F5、×ボタンでページを離れた際のhook
   useUnsavedChangesWarning(isDirty);
 
-  useEffect(() => {
-    setIsDirty(isDirty);
-  }, [isDirty, setIsDirty]);
-
   /**
    * 保存ボタン押下
    * @param data 補正数
@@ -165,6 +161,10 @@ export const NyukoEqptDetail = (props: {
   const handleSelect = (selected: number[]) => {
     setSelected(selected);
   };
+
+  useEffect(() => {
+    setIsDirty(isDirty);
+  }, [isDirty, setIsDirty]);
 
   return (
     <PermissionGuard category={'nyushuko'} required={permission.nyushuko_ref}>

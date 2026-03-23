@@ -42,7 +42,14 @@ export const getBillingStsSelection = async (): Promise<SelectTypes[]> => {
     }
     return data.map((d) => ({ id: d.sts_id, label: d.sts_nam }));
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -77,7 +84,14 @@ export const getFilteredBills = async (
       seikyuDat: d.seikyu_dat,
     }));
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -190,7 +204,14 @@ export const getChosenBill = async (seikyuId: number) => {
     };
     return allData;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -219,7 +240,14 @@ export const getJuchuKizaiHeadNamListForBill = async (queries: {
       headNam: d.head_nam ?? '',
     }));
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -275,7 +303,14 @@ export const getJuchuKizaiMeisaiHeadForBill = async (juchuHeadId: number, kizaiH
         : [],
     }));
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -342,7 +377,14 @@ export const getJuchuKizaiMeisaiDetailsForBill = async (juchuHeadId: number, kiz
     // reduceの結果はオブジェクトなので、最後にObject.values()で配列に変換します
     return Object.values(groupedResult);
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -356,7 +398,14 @@ export const updBillDelFlg = async (ids: number[]) => {
     await updBillHeadDelFlg(ids);
     await revalidatePath('/bill-list');
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };

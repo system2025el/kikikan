@@ -34,7 +34,14 @@ export const getDaibumonsSelection = async () => {
     }));
     return selectElements;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -59,7 +66,14 @@ export const getShukeibumonsSelection = async () => {
     }));
     return selectElements;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -84,7 +98,14 @@ export const getBumonsSelection = async () => {
     }));
     return selectElements;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -110,7 +131,14 @@ export const getShozokuSelection = async () => {
       }));
     return selectElements;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -135,9 +163,16 @@ export const getAllSelections = async (): Promise<{
       getSectionSelections(),
     ]);
     return { d: daibumons, s: shukeibumons, b: bumons, shozoku: shozoku, section: section };
-  } catch (error) {
-    console.error(error);
-    throw error;
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
+    throw e;
     //return { d: [], s: [], b: [], shozoku: [], section: [] };
   }
 };
@@ -159,8 +194,15 @@ export const getAllBumonSelections = async (): Promise<{
     ]);
 
     return { d: daibumons!, s: shukeibumons!, b: bumons! };
-  } catch (error) {
-    console.error(error);
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     return { d: [], s: [], b: [] };
   }
 };
@@ -177,9 +219,16 @@ export const getAllBumonDSSelections = async (): Promise<{
     const [daibumons, shukeibumons] = await Promise.all([getDaibumonsSelection(), getShukeibumonsSelection()]);
 
     return { d: daibumons!, s: shukeibumons! };
-  } catch (error) {
-    console.error(error);
-    throw error;
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
+    throw e;
     //return { d: [], s: [] };
   }
 };
@@ -203,7 +252,14 @@ export const getCustomerSelection = async (): Promise<SelectTypes[]> => {
     }));
     return selectElements;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -227,7 +283,14 @@ export const getRfidKizaiStsSelection = async () => {
     }));
     return selectElements;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
