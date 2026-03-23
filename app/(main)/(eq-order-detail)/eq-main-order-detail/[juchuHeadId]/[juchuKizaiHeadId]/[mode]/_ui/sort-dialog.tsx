@@ -132,7 +132,7 @@ const SortableItem = ({ id, index, item }: { id: string; index: number; item: Ju
   };
 
   return (
-    <TableRow ref={setNodeRef} style={style} {...attributes} {...listeners}>
+    <TableRow ref={setNodeRef} style={style} {...attributes} {...listeners} hover>
       <TableCell style={styles.row}>
         <DragHandleIcon sx={{ cursor: 'move' }} />
       </TableCell>

@@ -244,7 +244,7 @@ const BillingStsRow = ({
 
   return (
     <>
-      <TableRow>
+      <TableRow hover>
         <TableCell padding="none" width={48} align="center">
           <IconButton onClick={() => setOpen(!open)} sx={{ padding: 0 }}>
             {open ? <KeyboardArrowUp fontSize="small" /> : <KeyboardArrowDown fontSize="small" />}
@@ -332,7 +332,7 @@ const BillingStsRow = ({
               </TableHead>
               <TableBody>
                 {juchu.heads.map((h, index) => (
-                  <TableRow key={index}>
+                  <TableRow key={index} hover>
                     <TableCell
                       sx={{
                         borderBottom: index + 1 === juchu.heads.length ? 'none' : undefined,

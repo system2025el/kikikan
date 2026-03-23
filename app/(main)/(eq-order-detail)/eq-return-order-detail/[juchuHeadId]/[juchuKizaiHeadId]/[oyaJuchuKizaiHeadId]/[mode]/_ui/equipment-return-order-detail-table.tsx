@@ -319,7 +319,7 @@ const ReturnEqTableRow = React.memo(
     handleYobiKeyDown,
   }: ReturnEqTableRowProps) => {
     return (
-      <TableRow>
+      <TableRow hover>
         <TableCell sx={{ padding: 0, border: '1px solid black' }}>
           <IconButton
             onClick={() => handleMeisaiDelete(rowIndex, row)}

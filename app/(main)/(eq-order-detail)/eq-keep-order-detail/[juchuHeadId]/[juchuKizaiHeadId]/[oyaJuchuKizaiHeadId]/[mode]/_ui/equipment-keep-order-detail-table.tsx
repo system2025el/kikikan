@@ -166,7 +166,7 @@ const KeepEqTableRow = React.memo(
     handleKeyDown,
   }: KeepEqTableRowProps) => {
     return (
-      <TableRow>
+      <TableRow hover>
         <TableCell sx={{ padding: 0, border: '1px solid black' }}>
           <IconButton
             onClick={() => handleMeisaiDelete(rowIndex)}

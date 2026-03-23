@@ -42,7 +42,7 @@ export const EqTable = (props: EqTableProps) => {
         </TableHead>
         <TableBody>
           {eqList.map((row, index) => (
-            <TableRow key={row.kizaiId}>
+            <TableRow key={row.kizaiId} hover>
               <TableCell
                 align="right"
                 sx={{

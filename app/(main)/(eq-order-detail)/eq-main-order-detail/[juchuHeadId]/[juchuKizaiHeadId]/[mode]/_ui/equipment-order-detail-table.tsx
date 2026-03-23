@@ -302,7 +302,7 @@ const EqTableRow = React.memo(
     handleYobiKeyDown,
   }: EqTableRowProps) => {
     return (
-      <TableRow>
+      <TableRow hover>
         <TableCell sx={{ padding: 0, border: '1px solid black' }}>
           <IconButton
             onClick={() => handleMeisaiDelete(rowIndex, row)}
@@ -490,7 +490,7 @@ export const IdoEqTable: React.FC<IdoEqTableProps> = ({
         </TableHead>
         <TableBody>
           {visibleRows.map((row, rowIndex) => (
-            <TableRow key={rowIndex}>
+            <TableRow key={rowIndex} hover>
               <TableCell
                 align="right"
                 size="small"
@@ -633,7 +633,7 @@ export const ContainerTable = (props: {
         </TableHead>
         <TableBody>
           {visibleRows.map((row, rowIndex) => (
-            <TableRow key={rowIndex}>
+            <TableRow key={rowIndex} hover>
               <TableCell align="center" width={'min-content'} sx={{ padding: 0, border: '1px solid black' }}>
                 <IconButton onClick={() => handleMeisaiDelete(row)} sx={{ padding: 0, color: 'red' }} disabled={!edit}>
                   <Delete fontSize="small" />

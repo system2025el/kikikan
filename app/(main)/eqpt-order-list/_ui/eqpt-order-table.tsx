@@ -93,7 +93,7 @@ export const EqptOrderTable = ({
               </TableHead>
               <TableBody>
                 {list.map((order, index) => (
-                  <TableRow key={index}>
+                  <TableRow key={index} hover>
                     <TableCell align="right" sx={{ minWidth: 0, whiteSpace: 'nowrap' }}>
                       <Button
                         variant="text"
