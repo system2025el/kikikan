@@ -3,7 +3,7 @@
 import { QueryResult } from 'pg';
 
 import { selectStockList, selectUseListBulk } from '@/app/_lib/db/tables/stock-table';
-import { selectLoanJuchuData } from '@/app/_lib/db/tables/v-juchu-kizai-den';
+import { selectLoanJuchuData, selectLoanJuchuReturnData } from '@/app/_lib/db/tables/v-juchu-kizai-den';
 import { selectJuchuHeadIds } from '@/app/_lib/db/tables/v-juchu-lst';
 import { selectLoanKizai } from '@/app/_lib/db/tables/v-kizai-list';
 import { toJapanYMDString } from '@/app/(main)/_lib/date-conversion';
@@ -56,6 +56,52 @@ export const getLoanJuchuData = async (kizaiId: number, strDat: Date) => {
 
     if (error) {
       throw new Error('[selectLoanJuchuData] DBエラー:', { cause: error });
+    }
+
+    const loanJuchuData: LoanJuchu[] = data.map((d) => ({
+      juchuHeadId: d.juchu_head_id,
+      juchuKizaiHeadId: d.juchu_kizai_head_id,
+      juchuKizaiHeadKbn: d.juchu_kizai_head_kbn,
+      kizaiId: kizaiId,
+      koenNam: d.koen_nam,
+      headNam: d.head_nam ?? '',
+      shukoDat: getShukoDate(
+        d.kics_shuko_dat ? new Date(d.kics_shuko_dat) : null,
+        d.yard_shuko_dat ? new Date(d.yard_shuko_dat) : null
+      ),
+      nyukoDat: getNyukoDate(
+        d.kics_nyuko_dat ? new Date(d.kics_nyuko_dat) : null,
+        d.yard_nyuko_dat ? new Date(d.yard_nyuko_dat) : null
+      ),
+      oyaJuchuKizaiHeadId: d.oya_juchu_kizai_head_id,
+    }));
+
+    return loanJuchuData;
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      console.error(`[STACK]`, e.stack);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
+    throw e;
+  }
+};
+
+/**
+ * 貸出状況用受注返却データ取得
+ * @param kizaiId 機材id
+ * @returns 受注データ
+ */
+export const getLoanJuchuReturnData = async (kizaiId: number, strDat: Date) => {
+  try {
+    const { data, error } = await selectLoanJuchuReturnData(kizaiId, strDat);
+
+    if (error) {
+      throw new Error('[selectLoanJuchuReturnData] DBエラー:', { cause: error });
     }
 
     const loanJuchuData: LoanJuchu[] = data.map((d) => ({

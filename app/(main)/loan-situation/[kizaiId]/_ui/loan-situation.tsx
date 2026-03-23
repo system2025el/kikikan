@@ -31,7 +31,7 @@ import { Calendar } from '@/app/(main)/_ui/date';
 import { Loading } from '@/app/(main)/_ui/loading';
 import { PermissionGuard } from '@/app/(main)/_ui/permission-guard';
 
-import { getAllLoanUseData, getLoanJuchuData, getLoanStockData } from '../_lib/funcs';
+import { getAllLoanUseData, getLoanJuchuData, getLoanJuchuReturnData, getLoanStockData } from '../_lib/funcs';
 import { LoanJuchu, LoanKizai, LoanStockTableValues, LoanUseTableValues } from '../_lib/types';
 import { LoanSituationTable, UseTable } from './loan-situation-table';
 
@@ -103,22 +103,39 @@ export const LoanSituation = (props: {
   // 貸出状況取得
   const getData = async (strDat: Date) => {
     try {
-      // 機材在庫データ、ヘッダー開始日から終了日までに該当する貸出受注データ
-      const [eqStockData, loanJuchuData] = await Promise.all([
+      // 機材在庫データ、ヘッダー開始日から終了日までに該当する貸出受注(メイン)、(返却)データ
+      const [eqStockData, loanJuchuData, loanJuchuReturnData] = await Promise.all([
         getLoanStockData(kizaiData.kizaiId, strDat),
         getLoanJuchuData(kizaiData.kizaiId, strDat),
+        getLoanJuchuReturnData(kizaiData.kizaiId, strDat),
       ]);
 
-      if (loanJuchuData.length === 0) {
+      const mergeLoanJuchuData = [...loanJuchuData, ...loanJuchuReturnData];
+
+      if (mergeLoanJuchuData.length === 0) {
         setLoanJuchuList([]);
         setEqUseList([]);
         setEqStockList(eqStockData);
         return;
       }
 
+      // 重複排除
+      const uniqueData = Array.from(
+        mergeLoanJuchuData
+          .reduce((map, item) => {
+            const key = `${item.juchuHeadId}-${item.juchuKizaiHeadId}`;
+
+            if (!map.has(key)) {
+              map.set(key, item);
+            }
+            return map;
+          }, new Map())
+          .values()
+      );
+
       // ラジオボタンで選択されている出庫日or入庫日順にソート
       if (sortValue === 'shuko') {
-        loanJuchuData.sort((a, b) => {
+        uniqueData.sort((a, b) => {
           const dateA = a.shukoDat ? new Date(a.shukoDat).getTime() : null;
           const dateB = b.shukoDat ? new Date(b.shukoDat).getTime() : null;
 
@@ -129,7 +146,7 @@ export const LoanSituation = (props: {
           return dateA - dateB;
         });
       } else {
-        loanJuchuData.sort((a, b) => {
+        uniqueData.sort((a, b) => {
           const dateA = a.nyukoDat ? new Date(a.nyukoDat).getTime() : null;
           const dateB = b.nyukoDat ? new Date(b.nyukoDat).getTime() : null;
 
@@ -145,7 +162,7 @@ export const LoanSituation = (props: {
       const childrenMap: { [key: string]: LoanJuchu[] } = {};
       const parents = [];
       // 親データと子データで分ける
-      for (const data of loanJuchuData) {
+      for (const data of uniqueData) {
         if (data.oyaJuchuKizaiHeadId === null) {
           parents.push(data);
         } else {
