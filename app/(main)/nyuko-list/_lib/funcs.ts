@@ -7,6 +7,7 @@ import { selectPdfJuchuHead } from '@/app/_lib/db/tables/v-juchu-lst';
 import { selectFilteredNyukoList, selectFilteredShukoList } from '@/app/_lib/db/tables/v-nyushuko-den2';
 
 import { toJapanYMDString } from '../../_lib/date-conversion';
+import { getDic } from '../../_lib/funcs';
 import { PdfModel } from '../nyuko/_lib/hooks/usePdf';
 import { NyukoKizai, NyukoListSearchValues, NyukoTableValues } from './types';
 
@@ -88,6 +89,60 @@ export const getPdfData = async (
     // ここで .meisai (meisaiQueryの結果) を kizaiData に入れる
     const kizaiData: NyukoKizai[] = nyukoResult.meisai;
 
+    // オプション機材のインデント文字
+    const indentChara = await getDic(1);
+
+    // セット機材のインデックスを特定
+    const setKizaiIndices = new Set<number>();
+    kizaiData.forEach((item, index) => {
+      if (item.kizai_nam.startsWith(indentChara)) {
+        setKizaiIndices.add(index);
+        if (index > 0) setKizaiIndices.add(index - 1);
+      }
+    });
+
+    // 合計対象のデータMap
+    const summaryMap = new Map<number, NyukoKizai>();
+
+    // 合計対象のうち最初に現れた位置を記録するMap
+    const firstMap = new Map<number, number>();
+
+    kizaiData.forEach((item, index) => {
+      // セット機材は合計しない
+      if (!setKizaiIndices.has(index)) {
+        const existing = summaryMap.get(item.kizai_id);
+        // 既にあるものは合計
+        if (existing) {
+          existing.planKizaiQty += item.planKizaiQty;
+          existing.plan_yobi_qty += item.plan_yobi_qty;
+          existing.plan_qty += item.plan_qty;
+          // 最初のものはMapに追加して位置を記録
+        } else {
+          summaryMap.set(item.kizai_id, { ...item });
+          firstMap.set(item.kizai_id, index);
+        }
+      }
+    });
+
+    // セット機材データと合計データ
+    const mergeKizaiData: { index: number; data: NyukoKizai }[] = [];
+
+    // セット機材データを追加
+    setKizaiIndices.forEach((i) => {
+      if (kizaiData[i]) {
+        mergeKizaiData.push({ index: i, data: { ...kizaiData[i] } });
+      }
+    });
+
+    // 合体データを追加（最初に現れたインデックスを使用）
+    summaryMap.forEach((item, kizaiId) => {
+      const originalIndex = firstMap.get(kizaiId)!;
+      mergeKizaiData.push({ index: originalIndex, data: item });
+    });
+
+    // 元のインデックス順に並べる
+    const sortKizaiData = mergeKizaiData.sort((a, b) => a.index - b.index).map((item) => item.data);
+
     const sqlHeader = nyukoResult.header;
 
     const honbanbiCalcQty =
@@ -120,7 +175,7 @@ export const getPdfData = async (
       item9: juchuHeadData.nyuryoku_user ?? '',
       item10: '',
       item11: juchuHeadData.kokyaku_tanto_nam ?? '',
-      item12: kizaiData,
+      item12: sortKizaiData,
       item13: '',
     };
 
