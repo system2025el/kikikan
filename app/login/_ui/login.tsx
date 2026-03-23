@@ -30,10 +30,6 @@ const Login = () => {
     defaultValues: { email: '', password: '' },
   });
 
-  useEffect(() => {
-    setIsHydrated(true);
-  }, []);
-
   const onSubmit = async (data: UserValues) => {
     //const { error } = await login(data);
     try {
@@ -105,6 +101,10 @@ const Login = () => {
   //   initializeAuth();
   //   // eslint-disable-next-line react-hooks/exhaustive-deps
   // }, []);
+
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
 
   useEffect(() => {
     if (!isHydrated) return;

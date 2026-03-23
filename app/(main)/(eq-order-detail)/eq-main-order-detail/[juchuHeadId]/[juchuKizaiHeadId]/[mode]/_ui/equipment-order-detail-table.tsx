@@ -142,6 +142,7 @@ type EqTableProps = {
   rows: JuchuKizaiMeisaiValues[];
   edit: boolean;
   fixFlag: boolean;
+  shukoDate: Date | null;
   handleCellChange: (
     rowIndex: number,
     kizaiId: number,
@@ -159,6 +160,7 @@ export const EqTable: React.FC<EqTableProps> = ({
   rows,
   edit,
   fixFlag,
+  shukoDate,
   handleCellChange,
   handleMeisaiDelete,
   handleMemoChange,
@@ -244,6 +246,7 @@ export const EqTable: React.FC<EqTableProps> = ({
               rowIndex={rowIndex}
               edit={edit}
               fixFlag={fixFlag}
+              shukoDate={shukoDate}
               handleOrderRef={handleOrderRef(rowIndex)}
               handleYobiRef={handleYobiRef(rowIndex)}
               handleMeisaiDelete={handleMeisaiDelete}
@@ -265,6 +268,7 @@ type EqTableRowProps = {
   rowIndex: number;
   edit: boolean;
   fixFlag: boolean;
+  shukoDate: Date | null;
   handleOrderRef: (el: HTMLInputElement | null) => void;
   handleYobiRef: (el: HTMLInputElement | null) => void;
   handleMeisaiDelete: (rowIndex: number, row: JuchuKizaiMeisaiValues) => void;
@@ -287,6 +291,7 @@ const EqTableRow = React.memo(
     rowIndex,
     edit,
     fixFlag,
+    shukoDate,
     handleOrderRef,
     handleYobiRef,
     handleMeisaiDelete,
@@ -297,7 +302,7 @@ const EqTableRow = React.memo(
     handleYobiKeyDown,
   }: EqTableRowProps) => {
     return (
-      <TableRow>
+      <TableRow hover>
         <TableCell sx={{ padding: 0, border: '1px solid black' }}>
           <IconButton
             onClick={() => handleMeisaiDelete(rowIndex, row)}
@@ -320,7 +325,9 @@ const EqTableRow = React.memo(
           <Button
             variant="text"
             sx={{ p: 0, justifyContent: 'start', textTransform: 'none' }}
-            onClick={() => window.open(`/loan-situation/${row.kizaiId}`)}
+            onClick={() =>
+              window.open(`/loan-situation/${row.kizaiId}?date=${shukoDate ? shukoDate.toISOString() : ''}`)
+            }
           >
             {row.kizaiNam}
           </Button>
@@ -439,6 +446,7 @@ type IdoEqTableProps = {
   rows: IdoJuchuKizaiMeisaiValues[];
   edit: boolean;
   fixFlag: boolean;
+  shukoDate: Date | null;
   handleCellDateChange: (kizaiId: number, date: Dayjs | null) => void;
   handleCellDateClear: (kizaiId: number) => void;
 };
@@ -447,6 +455,7 @@ export const IdoEqTable: React.FC<IdoEqTableProps> = ({
   rows,
   edit,
   fixFlag,
+  shukoDate,
   handleCellDateChange,
   handleCellDateClear,
 }) => {
@@ -483,7 +492,7 @@ export const IdoEqTable: React.FC<IdoEqTableProps> = ({
         </TableHead>
         <TableBody>
           {visibleRows.map((row, rowIndex) => (
-            <TableRow key={rowIndex}>
+            <TableRow key={rowIndex} hover>
               <TableCell
                 align="right"
                 size="small"
@@ -520,7 +529,9 @@ export const IdoEqTable: React.FC<IdoEqTableProps> = ({
                 <Button
                   variant="text"
                   sx={{ p: 0, justifyContent: 'start', textTransform: 'none' }}
-                  onClick={() => window.open(`/loan-situation/${row.kizaiId}`)}
+                  onClick={() =>
+                    window.open(`/loan-situation/${row.kizaiId}?date=${shukoDate ? shukoDate.toISOString() : ''}`)
+                  }
                 >
                   {row.kizaiNam}
                 </Button>
@@ -549,11 +560,13 @@ export const ContainerTable = (props: {
   rows: JuchuContainerMeisaiValues[];
   edit: boolean;
   fixFlag: boolean;
+  shukoDate: Date | null;
   handleContainerMemoChange: (rowIndex: number, memo: string) => void;
   handleContainerCellChange: (rowIndex: number, kicsValue: number, yardValue: number) => void;
   handleMeisaiDelete: (row: JuchuContainerMeisaiValues) => void;
 }) => {
-  const { rows, edit, fixFlag, handleContainerMemoChange, handleContainerCellChange, handleMeisaiDelete } = props;
+  const { rows, edit, fixFlag, shukoDate, handleContainerMemoChange, handleContainerCellChange, handleMeisaiDelete } =
+    props;
 
   const inputKicsRefs = useRef<(HTMLInputElement | null)[]>([]);
   const inputYardRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -626,7 +639,7 @@ export const ContainerTable = (props: {
         </TableHead>
         <TableBody>
           {visibleRows.map((row, rowIndex) => (
-            <TableRow key={rowIndex}>
+            <TableRow key={rowIndex} hover>
               <TableCell align="center" width={'min-content'} sx={{ padding: 0, border: '1px solid black' }}>
                 <IconButton onClick={() => handleMeisaiDelete(row)} sx={{ padding: 0, color: 'red' }} disabled={!edit}>
                   <Delete fontSize="small" />
@@ -652,7 +665,9 @@ export const ContainerTable = (props: {
                 <Button
                   variant="text"
                   sx={{ p: 0, justifyContent: 'start', textTransform: 'none' }}
-                  onClick={() => window.open(`/loan-situation/${row.kizaiId}`)}
+                  onClick={() =>
+                    window.open(`/loan-situation/${row.kizaiId}?date=${shukoDate ? shukoDate.toISOString() : ''}`)
+                  }
                 >
                   {row.kizaiNam}
                 </Button>

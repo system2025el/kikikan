@@ -31,7 +31,14 @@ export const getIdoDenMaxId = async () => {
     }
     return data.ido_den_id;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -76,7 +83,14 @@ export const getIdoDen = async (sagyoKbnId: number, sagyoSijiId: number, sagyoDe
 
     return idoDetailTableList;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -196,7 +210,14 @@ export const getIdoFixMaxId = async () => {
     }
     return data.ido_den_id;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -221,7 +242,14 @@ export const getIdoFix = async (sagyoKbnId: number, sagyoSijiId: number, sagyoDe
 
     return true;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -262,7 +290,14 @@ export const addIdoFix = async (
     }
     return true;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     return false;
   } finally {
     refreshVRfid().catch((err) => {
@@ -287,7 +322,14 @@ export const delIdoFix = async (sagyoKbnId: number, sagyoSijiId: number, sagyoDe
     }
     return true;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     return false;
   }
 };
@@ -334,7 +376,14 @@ export const saveIdoDen = async (idoDenData: IdoDetailTableValues[], userNam: st
     const updateIdoDenData = saveIdoDenData.filter((d) => !d.delFlag).map((d) => ({ ...d, saveFlag: true }));
     return updateIdoDenData;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     await connection.query('ROLLBACK');
     return null;
   } finally {
@@ -362,7 +411,14 @@ export const getIdoBumonsForEqptSelection = async () => {
     }));
     return selectElements;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -388,7 +444,14 @@ export const checkSetoptions = async (idList: number[]) => {
     }
     return data.rows;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -406,7 +469,14 @@ export const getIdoEqptsForEqptSelection = async (query: string = ''): Promise<I
     }
     return data.rows;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -436,7 +506,14 @@ export const getIdoSelectedEqpts = async (idList: number[]) => {
     }));
     return selectedEqpts;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };

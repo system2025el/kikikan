@@ -46,7 +46,7 @@ export const IdoEqptDetailTable = (props: {
         </TableHead>
         <TableBody>
           {datas.map((row, index) => (
-            <TableRow key={row.rfidTagId} sx={{ backgroundColor: row.rfidDelFlg === 1 ? grey[300] : 'white' }}>
+            <TableRow key={row.rfidTagId} sx={{ backgroundColor: row.rfidDelFlg === 1 ? grey[300] : 'white' }} hover>
               <TableCell align="center" padding="none">
                 {index + 1}
               </TableCell>

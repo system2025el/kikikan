@@ -222,7 +222,7 @@ export const BillListTable = ({
               {list.map((bill, index) => {
                 const isItemSelected = selectedIds.includes(bill.billHeadId);
                 return (
-                  <TableRow key={index}>
+                  <TableRow key={index} hover>
                     <TableCell
                       padding="checkbox"
                       onClick={(event) => handleSelectBillIds(event, bill.billHeadId)}

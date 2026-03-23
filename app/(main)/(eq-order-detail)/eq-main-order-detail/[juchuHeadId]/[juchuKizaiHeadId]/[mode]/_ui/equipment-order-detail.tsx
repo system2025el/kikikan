@@ -176,19 +176,6 @@ const EquipmentOrderDetail = (props: {
     }
     return acc;
   }, new Map<number, number>());
-  // const [originPlanQty, setOriginPlanQty] = useState<Map<number, number>>(
-  //   juchuKizaiMeisaiList.reduce((acc, current) => {
-  //     const key = current.kizaiId;
-  //     const total = acc.get(key);
-  //     if (total) {
-  //       const currentTotal = total + current.planQty;
-  //       acc.set(key, currentTotal);
-  //     } else {
-  //       acc.set(key, current.planQty);
-  //     }
-  //     return acc;
-  //   }, new Map<number, number>())
-  // );
   // 削除機材
   const [deleteEq, setDeleteEq] = useState<{ rowIndex: number; row: JuchuKizaiMeisaiValues } | null>(null);
   // 削除コンテナ
@@ -329,222 +316,12 @@ const EquipmentOrderDetail = (props: {
 
   // 割引率（金額）
   const waribikiRatAmt = priceTotal * ((nebikiRat ?? 0) / 100);
-  // const waribikiRatAmt = useMemo(() => priceTotal * ((nebikiRat ?? 0) / 100), [priceTotal, nebikiRat]);
 
   // 割引後金額（割引金額）
   const nebikiAftAmt = priceTotal - (nebikiAmt ?? 0);
-  // const nebikiAftAmt = useMemo(() => {
-  //   return priceTotal - (nebikiAmt ?? 0);
-  // }, [priceTotal, nebikiAmt]);
 
   // ブラウザバック、F5、×ボタンでページを離れた際のhook
   useUnsavedChangesWarning(isDirty || otherDirty ? true : false);
-
-  /**
-   * useEffect
-   */
-  useEffect(() => {
-    const getData = async () => {
-      setIsDetailLoading(true);
-      // 受注機材ヘッダーデータ
-      const juchuKizaiHeadData = getValues();
-
-      try {
-        // 受注機材明細データ、移動受注機材明細データ、受注コンテナ明細データ
-        const [juchuKizaiMeisaiData, idoJuchuKizaiMeisaiData, juchuContainerMeisaiData] = await Promise.all([
-          getJuchuKizaiMeisai(juchuKizaiHeadData.juchuHeadId, juchuKizaiHeadData.juchuKizaiHeadId),
-          getIdoJuchuKizaiMeisai(juchuKizaiHeadData.juchuHeadId, juchuKizaiHeadData.juchuKizaiHeadId),
-          getJuchuContainerMeisai(juchuKizaiHeadData.juchuHeadId, juchuKizaiHeadData.juchuKizaiHeadId),
-        ]);
-
-        // 出庫日
-        const shukoDate = getShukoDate(
-          juchuKizaiHeadData.kicsShukoDat && new Date(juchuKizaiHeadData.kicsShukoDat),
-          juchuKizaiHeadData.yardShukoDat && new Date(juchuKizaiHeadData.yardShukoDat)
-        );
-        // 入庫日
-        const nyukoDate = getNyukoDate(
-          juchuKizaiHeadData.kicsNyukoDat && new Date(juchuKizaiHeadData.kicsNyukoDat),
-          juchuKizaiHeadData.yardNyukoDat && new Date(juchuKizaiHeadData.yardNyukoDat)
-        );
-
-        // 出庫日から入庫日
-        const dateRange = getRange(shukoDate, nyukoDate);
-
-        // 機材在庫データ
-        const updatedEqStockData =
-          juchuKizaiMeisaiData.length > 0
-            ? await updateEqStock(
-                juchuKizaiHeadData?.juchuHeadId,
-                juchuKizaiHeadData?.juchuKizaiHeadId,
-                shukoDate,
-                juchuKizaiMeisaiData
-              )
-            : [];
-
-        setOriginJuchuKizaiMeisaiList(juchuKizaiMeisaiData ?? []);
-        setJuchuKizaiMeisaiList(juchuKizaiMeisaiData ?? []);
-        setOriginIdoJuchuKizaiMeisaiList(idoJuchuKizaiMeisaiData);
-        setIdoJuchuKizaiMeisaiList(idoJuchuKizaiMeisaiData);
-        setOriginJuchuContainerMeisaiList(juchuContainerMeisaiData);
-        setJuchuContainerMeisaiList(juchuContainerMeisaiData);
-        setShukoDate(shukoDate);
-        setNyukoDate(nyukoDate);
-        setSelectDate(shukoDate ?? new Date());
-        setDateRange(dateRange);
-        setOriginEqStockList(updatedEqStockData);
-        setEqStockList(updatedEqStockData);
-        // setOriginPlanQty(
-        //   juchuKizaiMeisaiData.reduce((acc, current) => {
-        //     const key = current.kizaiId;
-        //     const total = acc.get(key);
-        //     if (total) {
-        //       const currentTotal = total + current.planQty;
-        //       acc.set(key, currentTotal);
-        //     } else {
-        //       acc.set(key, current.planQty);
-        //     }
-        //     return acc;
-        //   }, new Map<number, number>())
-        // );
-      } catch (e) {
-        setIsError(e instanceof Error ? e : new Error(String(e)));
-      }
-      setIsDetailLoading(false);
-    };
-    if (saveKizaiHead && user && user.permission.juchu !== permission.none) {
-      getData();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    if (!user) return;
-    const asyncProcess = async () => {
-      try {
-        const lockData = await lockCheck(1, juchuHeadData.juchuHeadId, user.name, user.email);
-        setLockData(lockData);
-        if (lockData) {
-          setEdit(false);
-        }
-      } catch (e) {
-        setIsError(e instanceof Error ? e : new Error(String(e)));
-      }
-      setIsLoading(false);
-    };
-
-    if (user?.permission.juchu === permission.juchu_ref) setEdit(false);
-
-    if (props.edit && user?.permission.juchu && !!(user?.permission.juchu & permission.juchu_upd)) {
-      asyncProcess();
-    } else {
-      setIsLoading(false);
-    }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
-
-  useEffect(() => {
-    const dirty = isDirty || otherDirty ? true : false;
-    setIsDirty(dirty);
-  }, [isDirty, otherDirty, setIsDirty]);
-
-  useEffect(() => {
-    const filterJuchuKizaiMeisaiList = juchuKizaiMeisaiList.filter((data) => !data.delFlag);
-    const filterJuchuContainerMeisaiList = juchuContainerMeisaiList.filter((data) => !data.delFlag);
-    if (
-      JSON.stringify(originJuchuKizaiMeisaiList) === JSON.stringify(filterJuchuKizaiMeisaiList) &&
-      JSON.stringify(originJuchuContainerMeisaiList) === JSON.stringify(filterJuchuContainerMeisaiList) &&
-      JSON.stringify(originJuchuHonbanbiList) === JSON.stringify(juchuHonbanbiList)
-    ) {
-      setOtherDirty(false);
-    } else {
-      setOtherDirty(true);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [juchuKizaiMeisaiList, juchuContainerMeisaiList, juchuHonbanbiList]);
-
-  useEffect(() => {
-    eqStockListRef.current = eqStockList;
-  }, [eqStockList]);
-
-  useEffect(() => {
-    const left = leftRef.current;
-    const right = rightRef.current;
-
-    if (left && right) {
-      left.addEventListener('scroll', () => syncScroll('left'));
-      right.addEventListener('scroll', () => syncScroll('right'));
-    }
-
-    return () => {
-      if (left && right) {
-        left.removeEventListener('scroll', () => syncScroll('left'));
-        right.removeEventListener('scroll', () => syncScroll('right'));
-      }
-    };
-  }, [juchuKizaiMeisaiList, isLoading, isDetailLoading]);
-
-  useEffect(() => {
-    // 機材idをキーとして受注数、予備数、合計数の各合計値算出
-    const sum = juchuKizaiMeisaiList
-      .filter((d) => !d.delFlag)
-      .reduce((acc, current) => {
-        const key = current.kizaiId;
-        const currentTotals = acc.get(key) ?? { planKizaiQty: 0, planYobiQty: 0, planQty: 0 };
-        currentTotals.planKizaiQty += current.planKizaiQty;
-        currentTotals.planYobiQty += current.planYobiQty;
-        currentTotals.planQty += current.planQty;
-
-        acc.set(key, currentTotals);
-
-        return acc;
-      }, new Map<number, { planKizaiQty: number; planYobiQty: number; planQty: number }>());
-
-    // setIdoJuchuKizaiMeisaiList((prev) =>
-    //   prev.map((d) =>
-    //     sum.get(d.kizaiId) && !d.delFlag
-    //       ? {
-    //           ...d,
-    //           planKizaiQty: sum.get(d.kizaiId)!.planKizaiQty,
-    //           planYobiQty: sum.get(d.kizaiId)!.planYobiQty,
-    //           planQty: sum.get(d.kizaiId)!.planQty,
-    //         }
-    //       : !d.delFlag
-    //         ? { ...d, delFlag: true }
-    //         : d
-    //   )
-    // );
-
-    setIdoJuchuKizaiMeisaiList((prev) =>
-      prev.map((d) => {
-        const s = sum.get(d.kizaiId);
-        if (s && !d.delFlag) {
-          return {
-            ...d,
-            planKizaiQty: s.planKizaiQty,
-            planYobiQty: s.planYobiQty,
-            planQty: s.planQty,
-          };
-        }
-        if (!s && !d.delFlag) {
-          return { ...d, delFlag: true };
-        }
-        return d;
-      })
-    );
-
-    // const updatedPriceTotal = juchuKizaiMeisaiList
-    //   .filter((data) => !data.delFlag)
-    //   .reduce(
-    //     (sum, row) =>
-    //       getValues('juchuHonbanbiQty') !== null
-    //         ? sum + row.kizaiTankaAmt * row.planKizaiQty * (getValues('juchuHonbanbiQty') ?? 0)
-    //         : 0,
-    //     0
-    //   );
-    // setPriceTotal(updatedPriceTotal);
-  }, [getValues, juchuKizaiMeisaiList]);
 
   // ロック制御
   const lock = async () => {
@@ -946,19 +723,7 @@ const EquipmentOrderDetail = (props: {
             if (juchuKizaiMeisaiData) {
               setJuchuKizaiMeisaiList(juchuKizaiMeisaiData);
               setOriginJuchuKizaiMeisaiList(juchuKizaiMeisaiData);
-              // setOriginPlanQty(
-              //   juchuKizaiMeisaiData.reduce((acc, current) => {
-              //     const key = current.kizaiId;
-              //     const total = acc.get(key);
-              //     if (total) {
-              //       const currentTotal = total + current.planQty;
-              //       acc.set(key, currentTotal);
-              //     } else {
-              //       acc.set(key, current.planQty);
-              //     }
-              //     return acc;
-              //   }, new Map<number, number>())
-              // );
+
               const updatedEqStockData = await updateEqStock(
                 data.juchuHeadId,
                 data.juchuKizaiHeadId,
@@ -1006,19 +771,7 @@ const EquipmentOrderDetail = (props: {
             if (juchuKizaiMeisaiData) {
               setJuchuKizaiMeisaiList(juchuKizaiMeisaiData);
               setOriginJuchuKizaiMeisaiList(juchuKizaiMeisaiData);
-              // setOriginPlanQty(
-              //   juchuKizaiMeisaiData.reduce((acc, current) => {
-              //     const key = current.kizaiId;
-              //     const total = acc.get(key);
-              //     if (total) {
-              //       const currentTotal = total + current.planQty;
-              //       acc.set(key, currentTotal);
-              //     } else {
-              //       acc.set(key, current.planQty);
-              //     }
-              //     return acc;
-              //   }, new Map<number, number>())
-              // );
+
               const updatedEqStockData = await updateEqStock(
                 data.juchuHeadId,
                 data.juchuKizaiHeadId,
@@ -1835,19 +1588,6 @@ const EquipmentOrderDetail = (props: {
       setJuchuKizaiMeisaiList(originJuchuKizaiMeisaiList);
       setIdoJuchuKizaiMeisaiList(originIdoJuchuKizaiMeisaiList);
       setJuchuContainerMeisaiList(originJuchuContainerMeisaiList);
-      // setOriginPlanQty(
-      //   originJuchuKizaiMeisaiList.reduce((acc, current) => {
-      //     const key = current.kizaiId;
-      //     const total = acc.get(key);
-      //     if (total) {
-      //       const currentTotal = total + current.planQty;
-      //       acc.set(key, currentTotal);
-      //     } else {
-      //       acc.set(key, current.planQty);
-      //     }
-      //     return acc;
-      //   }, new Map<number, number>())
-      // );
       setEqStockList(originEqStockList);
       setDirtyOpen(false);
     } else {
@@ -2504,14 +2244,10 @@ const EquipmentOrderDetail = (props: {
         const honbanbiQty = updatedHonbanbiList.filter((data) => data.juchuHonbanbiShubetuId === 40).length;
         const addHonbanbiQty = updatedHonbanbiList.reduce((sum, data) => sum + (data.juchuHonbanbiAddQty ?? 0), 0);
         const updatedJuchuHonbanbiQty = honbanbiQty + addHonbanbiQty;
-        // const updatedPriceTotal = juchuKizaiMeisaiList
-        //   .filter((data) => !data.delFlag)
-        //   .reduce((sum, row) => sum + row.kizaiTankaAmt * (row.planKizaiQty ?? 0) * updatedJuchuHonbanbiQty, 0);
 
         if (getValues('juchuHonbanbiQty') !== updatedJuchuHonbanbiQty) {
           setValue('juchuHonbanbiQty', updatedJuchuHonbanbiQty, { shouldDirty: true });
         }
-        // setPriceTotal(updatedPriceTotal);
         setJuchuHonbanbiList(updatedHonbanbiList);
         setJuchuHonbanbiDeleteList(updatedHonbanbiDeleteList);
 
@@ -2523,6 +2259,173 @@ const EquipmentOrderDetail = (props: {
     }
     setIsProcessing(false);
   };
+
+  /**
+   * useEffect
+   */
+  useEffect(() => {
+    const getData = async () => {
+      setIsDetailLoading(true);
+      // 受注機材ヘッダーデータ
+      const juchuKizaiHeadData = getValues();
+
+      try {
+        // 受注機材明細データ、移動受注機材明細データ、受注コンテナ明細データ
+        const [juchuKizaiMeisaiData, idoJuchuKizaiMeisaiData, juchuContainerMeisaiData] = await Promise.all([
+          getJuchuKizaiMeisai(juchuKizaiHeadData.juchuHeadId, juchuKizaiHeadData.juchuKizaiHeadId),
+          getIdoJuchuKizaiMeisai(juchuKizaiHeadData.juchuHeadId, juchuKizaiHeadData.juchuKizaiHeadId),
+          getJuchuContainerMeisai(juchuKizaiHeadData.juchuHeadId, juchuKizaiHeadData.juchuKizaiHeadId),
+        ]);
+
+        // 出庫日
+        const shukoDate = getShukoDate(
+          juchuKizaiHeadData.kicsShukoDat && new Date(juchuKizaiHeadData.kicsShukoDat),
+          juchuKizaiHeadData.yardShukoDat && new Date(juchuKizaiHeadData.yardShukoDat)
+        );
+        // 入庫日
+        const nyukoDate = getNyukoDate(
+          juchuKizaiHeadData.kicsNyukoDat && new Date(juchuKizaiHeadData.kicsNyukoDat),
+          juchuKizaiHeadData.yardNyukoDat && new Date(juchuKizaiHeadData.yardNyukoDat)
+        );
+
+        // 出庫日から入庫日
+        const dateRange = getRange(shukoDate, nyukoDate);
+
+        // 機材在庫データ
+        const updatedEqStockData =
+          juchuKizaiMeisaiData.length > 0
+            ? await updateEqStock(
+                juchuKizaiHeadData?.juchuHeadId,
+                juchuKizaiHeadData?.juchuKizaiHeadId,
+                shukoDate,
+                juchuKizaiMeisaiData
+              )
+            : [];
+
+        setOriginJuchuKizaiMeisaiList(juchuKizaiMeisaiData ?? []);
+        setJuchuKizaiMeisaiList(juchuKizaiMeisaiData ?? []);
+        setOriginIdoJuchuKizaiMeisaiList(idoJuchuKizaiMeisaiData);
+        setIdoJuchuKizaiMeisaiList(idoJuchuKizaiMeisaiData);
+        setOriginJuchuContainerMeisaiList(juchuContainerMeisaiData);
+        setJuchuContainerMeisaiList(juchuContainerMeisaiData);
+        setShukoDate(shukoDate);
+        setNyukoDate(nyukoDate);
+        setSelectDate(shukoDate ?? new Date());
+        setDateRange(dateRange);
+        setOriginEqStockList(updatedEqStockData);
+        setEqStockList(updatedEqStockData);
+      } catch (e) {
+        setIsError(e instanceof Error ? e : new Error(String(e)));
+      }
+      setIsDetailLoading(false);
+    };
+    if (saveKizaiHead && user && user.permission.juchu !== permission.none) {
+      getData();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    const asyncProcess = async () => {
+      try {
+        const lockData = await lockCheck(1, juchuHeadData.juchuHeadId, user.name, user.email);
+        setLockData(lockData);
+        if (lockData) {
+          setEdit(false);
+        }
+      } catch (e) {
+        setIsError(e instanceof Error ? e : new Error(String(e)));
+      }
+      setIsLoading(false);
+    };
+
+    if (user?.permission.juchu === permission.juchu_ref) setEdit(false);
+
+    if (props.edit && user?.permission.juchu && !!(user?.permission.juchu & permission.juchu_upd)) {
+      asyncProcess();
+    } else {
+      setIsLoading(false);
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  useEffect(() => {
+    const dirty = isDirty || otherDirty ? true : false;
+    setIsDirty(dirty);
+  }, [isDirty, otherDirty, setIsDirty]);
+
+  useEffect(() => {
+    const filterJuchuKizaiMeisaiList = juchuKizaiMeisaiList.filter((data) => !data.delFlag);
+    const filterJuchuContainerMeisaiList = juchuContainerMeisaiList.filter((data) => !data.delFlag);
+    if (
+      JSON.stringify(originJuchuKizaiMeisaiList) === JSON.stringify(filterJuchuKizaiMeisaiList) &&
+      JSON.stringify(originJuchuContainerMeisaiList) === JSON.stringify(filterJuchuContainerMeisaiList) &&
+      JSON.stringify(originJuchuHonbanbiList) === JSON.stringify(juchuHonbanbiList)
+    ) {
+      setOtherDirty(false);
+    } else {
+      setOtherDirty(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [juchuKizaiMeisaiList, juchuContainerMeisaiList, juchuHonbanbiList]);
+
+  useEffect(() => {
+    eqStockListRef.current = eqStockList;
+  }, [eqStockList]);
+
+  useEffect(() => {
+    const left = leftRef.current;
+    const right = rightRef.current;
+
+    if (left && right) {
+      left.addEventListener('scroll', () => syncScroll('left'));
+      right.addEventListener('scroll', () => syncScroll('right'));
+    }
+
+    return () => {
+      if (left && right) {
+        left.removeEventListener('scroll', () => syncScroll('left'));
+        right.removeEventListener('scroll', () => syncScroll('right'));
+      }
+    };
+  }, [juchuKizaiMeisaiList, isLoading, isDetailLoading]);
+
+  useEffect(() => {
+    // 機材idをキーとして受注数、予備数、合計数の各合計値算出
+    const sum = juchuKizaiMeisaiList
+      .filter((d) => !d.delFlag)
+      .reduce((acc, current) => {
+        const key = current.kizaiId;
+        const currentTotals = acc.get(key) ?? { planKizaiQty: 0, planYobiQty: 0, planQty: 0 };
+        currentTotals.planKizaiQty += current.planKizaiQty;
+        currentTotals.planYobiQty += current.planYobiQty;
+        currentTotals.planQty += current.planQty;
+
+        acc.set(key, currentTotals);
+
+        return acc;
+      }, new Map<number, { planKizaiQty: number; planYobiQty: number; planQty: number }>());
+
+    setIdoJuchuKizaiMeisaiList((prev) =>
+      prev.map((d) => {
+        const s = sum.get(d.kizaiId);
+        if (s && !d.delFlag) {
+          return {
+            ...d,
+            planKizaiQty: s.planKizaiQty,
+            planYobiQty: s.planYobiQty,
+            planQty: s.planQty,
+          };
+        }
+        if (!s && !d.delFlag) {
+          return { ...d, delFlag: true };
+        }
+        return d;
+      })
+    );
+  }, [getValues, juchuKizaiMeisaiList]);
 
   if (isError) throw isError;
 
@@ -3266,6 +3169,7 @@ const EquipmentOrderDetail = (props: {
                             rows={juchuKizaiMeisaiList}
                             edit={edit}
                             fixFlag={fixFlag}
+                            shukoDate={shukoDate}
                             handleCellChange={handleCellChange}
                             handleMeisaiDelete={handleEqMeisaiDelete}
                             handleMemoChange={handleMemoChange}
@@ -3320,6 +3224,7 @@ const EquipmentOrderDetail = (props: {
                         rows={idoJuchuKizaiMeisaiList}
                         edit={edit}
                         fixFlag={fixFlag}
+                        shukoDate={shukoDate}
                         handleCellDateChange={handleCellDateChange}
                         handleCellDateClear={handleCellDateClear}
                       />
@@ -3333,6 +3238,7 @@ const EquipmentOrderDetail = (props: {
                         rows={juchuContainerMeisaiList}
                         edit={edit}
                         fixFlag={fixFlag}
+                        shukoDate={shukoDate}
                         handleContainerMemoChange={handleContainerMemoChange}
                         handleContainerCellChange={handleContainerCellChange}
                         handleMeisaiDelete={handleCtnMeisaiDelete}

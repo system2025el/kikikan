@@ -41,7 +41,14 @@ export const getFilteredBumons = async (
     }));
     return { data: filteredbumons, options: options };
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -69,7 +76,14 @@ export const getChosenbumon = async (id: number) => {
     };
     return bumonDetails;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -85,9 +99,16 @@ export const addNewBumon = async (data: BumonsMasterDialogValues, user: string) 
     await revalidatePath('/daibumons-master');
     await revalidatePath('/shukeibumons-master');
     await revalidatePath('/eqpt-master');
-  } catch (error) {
-    console.error(error);
-    throw error;
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
+    throw e;
   }
 };
 
@@ -115,8 +136,15 @@ export const updateBumon = async (rawData: BumonsMasterDialogValues, id: number,
     await revalidatePath('/daibumons-master');
     await revalidatePath('/shukeibumons-master');
     await revalidatePath('/eqpt-master');
-  } catch (error) {
-    console.error(error);
-    throw error;
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
+    throw e;
   }
 };

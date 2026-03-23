@@ -41,7 +41,14 @@ export const getVehsSelections = async (): Promise<SelectTypes[]> => {
     }
     return data.map((d) => ({ id: d.sharyo_id, label: d.sharyo_nam }));
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };

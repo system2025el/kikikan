@@ -43,7 +43,14 @@ export const getFilteredUsers = async (query: string = '') => {
     }));
     return filteredUsers;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -98,7 +105,14 @@ export const getChosenUser = async (mailAdr: string) => {
     };
     return UserDetails;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -148,10 +162,17 @@ export const addNewUser = async (data: UsersMasterDialogValues, user: string) =>
       throw error;
     }
     await connection.query('COMMIT');
-  } catch (error) {
-    console.error(error);
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     await connection.query('ROLLBACK');
-    throw error;
+    throw e;
   } finally {
     connection.release();
   }
@@ -186,10 +207,17 @@ export const updateUser = async (currentEmail: string, data: UsersMasterDialogVa
     // マスタ更新する
     await upDateUserDB(updateData, connection);
     await connection.query('COMMIT');
-  } catch (error) {
-    console.error(error);
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     await connection.query('ROLLBACK');
-    throw error;
+    throw e;
   } finally {
     connection.release();
   }

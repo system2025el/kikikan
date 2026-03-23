@@ -30,7 +30,14 @@ export const getLock = async (lockShubetu: number, headId: number) => {
     };
     return lockData;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -56,7 +63,14 @@ export const addLock = async (lockShubetu: number, headId: number, date: string,
       throw new Error('[insertLock] DBエラー:', { cause: error });
     }
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -83,7 +97,14 @@ export const updLock = async (lockShubetu: number, headId: number, date: string,
       throw new Error('[updateLock] DBエラー:', { cause: error });
     }
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -101,7 +122,14 @@ export const delLock = async (lockShubetu: number, headId: number) => {
       throw new Error('[deleteLock] DBエラー:', { cause: error });
     }
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };

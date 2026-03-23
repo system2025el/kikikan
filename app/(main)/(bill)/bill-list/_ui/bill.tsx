@@ -28,6 +28,7 @@ import { useEffect, useState } from 'react';
 import { Controller, FormProvider, useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { SelectElement, TextFieldElement } from 'react-hook-form-mui';
 
+import { serverErrorLog } from '@/app/_lib/funcs';
 import { useUserStore } from '@/app/_lib/stores/usestore';
 import { toJapanTimeString } from '@/app/(main)/_lib/date-conversion';
 import { addLock, delLock, getLock } from '@/app/(main)/_lib/funcs';
@@ -310,7 +311,8 @@ export const Bill = ({ isNew, bill }: { isNew: boolean; bill: BillHeadValues }) 
       // 別タブ表示の場合
       window.open(url);
     } catch (e) {
-      console.error(e);
+      const errorLog = e as Error;
+      await serverErrorLog(errorLog.message);
       setSnackBarMessage('請求書の印刷に失敗しました');
       setSnackBarOpen(true);
     } finally {

@@ -62,7 +62,14 @@ export const getFilteredQuotList = async (
       mituRange: `${d.mitu_str_dat ? toJapanYMDString(d.mitu_str_dat) : ''} ${d.mitu_str_dat || d.mitu_end_dat ? ' ～ ' : ''} ${d.mitu_end_dat ? toJapanYMDString(d.mitu_end_dat) : ''}`,
     }));
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -91,7 +98,14 @@ export const getUsersSelection = async () => {
       }));
     return selectElements;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -116,7 +130,14 @@ export const getMituStsSelection = async () => {
     }));
     return selectElements;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -154,7 +175,14 @@ export const getOrderForQuotation = async (id: number): Promise<JuchuValues | nu
     };
     return order;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -171,7 +199,14 @@ export const getMaxHonbanbiQty = async (juchuId: number) => {
     }
     return data[0].juchu_honbanbi_qty ?? null;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -317,7 +352,14 @@ export const getChosenQuot = async (mituId: number) => {
     };
     return { m: allData, j: juchus };
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -343,7 +385,14 @@ export const getJuchuKizaiHeadNamListForQuot = async (juchuId: number) => {
       nebikiAmt: d.nebiki_amt,
     }));
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -373,7 +422,14 @@ export const getJuchuKizaiMeisaiList = async (juchuId: number, kizaiHeadId: numb
       ),
     }));
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -403,7 +459,14 @@ export const getJuchuIsshikiMeisai = async (juchuId: number, kizaiHeadId: number
       ),
     }));
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };

@@ -46,7 +46,14 @@ export const getRfidsOfTheKizai = async (kizaiId: number) => {
     }));
     return filteredRfids;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -64,7 +71,14 @@ export const getEqptNam = async (id: number): Promise<string> => {
     }
     return data.kizai_nam ?? '';
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -94,7 +108,14 @@ export const getChosenRfid = async (id: string) => {
     };
     return RfidDetails;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -130,11 +151,18 @@ export const addNewRfid = async (data: RfidsMasterDialogValues, kizaiId: number,
     await connection.query('COMMIT');
     await revalidatePath(`/rfid-master/${kizaiId}`);
     await revalidatePath('/eqpt-master');
-  } catch (error) {
-    console.error(error);
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     await connection.query('ROLLBACK');
 
-    throw error;
+    throw e;
   } finally {
     refreshVRfid().catch((err) => {
       console.error('バックグラウンドでのマテビュー更新に失敗:', err);
@@ -207,10 +235,17 @@ export const updateRfid = async (
 
     await revalidatePath(`/rfid-master/${kizaiId}`);
     await revalidatePath('/eqpt-master');
-  } catch (error) {
-    console.error(error);
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     await connection.query('ROLLBACK');
-    throw error;
+    throw e;
   } finally {
     refreshVRfid().catch((err) => {
       console.error('バックグラウンドでのマテビュー更新に失敗:', err);
@@ -255,7 +290,14 @@ export const updateRfidTagSts = async (
     await revalidatePath('/eqpt-master');
     await connection.query('COMMIT');
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     await connection.query('ROLLBACK');
     throw e;
   } finally {
@@ -282,7 +324,14 @@ export const updRfidDelFlg = async (tagId: string, flg: boolean, user: string) =
     await revalidatePath('/rfid-master');
     await revalidatePath('/eqpt-master');
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   } finally {
     refreshVRfid().catch((err) => {

@@ -33,7 +33,14 @@ export const getLoanKizaiData = async (kizaiId: number) => {
     };
     return kizaiData;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -43,35 +50,13 @@ export const getLoanKizaiData = async (kizaiId: number) => {
  * @param kizaiId 機材id
  * @returns 受注データ
  */
-export const getLoanJuchuData = async (kizaiId: number) => {
+export const getLoanJuchuData = async (kizaiId: number, strDat: Date) => {
   try {
-    const { data, error } = await selectLoanJuchuData(kizaiId);
+    const { data, error } = await selectLoanJuchuData(kizaiId, strDat);
 
     if (error) {
       throw new Error('[selectLoanJuchuData] DBエラー:', { cause: error });
     }
-
-    // const seen = new Set();
-    // const uniqueData = data.filter((d) => {
-    //   if (seen.has(d.juchu_head_id)) return false;
-    //   seen.add(d.juchu_head_id);
-    //   return true;
-    // });
-
-    // const loanJuchuData: LoanJuchu[] = uniqueData.map((d) => ({
-    //   juchuHeadId: d.juchu_head_id,
-    //   juchuKizaiHeadId: d.juchu_kizai_head_id,
-    //   kizaiId: kizaiId,
-    //   koenNam: d.koen_nam,
-    //   shukoDat: getShukoDate(
-    //     d.kics_shuko_dat ? new Date(d.kics_shuko_dat) : null,
-    //     d.yard_shuko_dat ? new Date(d.yard_shuko_dat) : null
-    //   ),
-    //   nyukoDat: getNyukoDate(
-    //     d.kics_nyuko_dat ? new Date(d.kics_nyuko_dat) : null,
-    //     d.yard_nyuko_dat ? new Date(d.yard_nyuko_dat) : null
-    //   ),
-    // }));
 
     const loanJuchuData: LoanJuchu[] = data.map((d) => ({
       juchuHeadId: d.juchu_head_id,
@@ -93,7 +78,15 @@ export const getLoanJuchuData = async (kizaiId: number) => {
 
     return loanJuchuData;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      console.error(`[STACK]`, e.stack);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -114,7 +107,14 @@ export const confirmJuchuHeadId = async (strDat: Date) => {
     const data: number[] = result.rows.map((row) => row.juchuHeadId);
     return data;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -156,7 +156,14 @@ export const getAllLoanUseData = async (
     const data: LoanUseTableValues[] = result.rows;
     return data;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -174,7 +181,14 @@ export const getLoanStockData = async (kizaiId: number, date: Date) => {
     const data: LoanStockTableValues[] = result.rows;
     return data;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };

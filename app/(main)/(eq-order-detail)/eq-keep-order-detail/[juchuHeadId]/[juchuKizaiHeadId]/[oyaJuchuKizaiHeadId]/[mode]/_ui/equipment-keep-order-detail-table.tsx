@@ -32,6 +32,7 @@ type KeepEqTableProps = {
   rows: KeepJuchuKizaiMeisaiValues[];
   edit: boolean;
   shukoFixFlag: boolean;
+  oyaShukoDate: Date | null;
   handleMeisaiDelete: (rowIndex: number) => void;
   handleMemoChange: (rowIndex: number, memo: string) => void;
   handleCellChange: (rowIndex: number, keepValue: number) => void;
@@ -41,6 +42,7 @@ export const KeepEqTable: React.FC<KeepEqTableProps> = ({
   rows,
   edit,
   shukoFixFlag,
+  oyaShukoDate,
   handleMeisaiDelete,
   handleMemoChange,
   handleCellChange,
@@ -123,6 +125,7 @@ export const KeepEqTable: React.FC<KeepEqTableProps> = ({
               rowIndex={rowIndex}
               edit={edit}
               shukoFixFlag={shukoFixFlag}
+              oyaShukoDate={oyaShukoDate}
               handleMeisaiDelete={handleMeisaiDelete}
               handleKeepRef={handleKeepRef(rowIndex)}
               handleMemoChange={handleMemoChange}
@@ -141,6 +144,7 @@ type KeepEqTableRowProps = {
   rowIndex: number;
   edit: boolean;
   shukoFixFlag: boolean;
+  oyaShukoDate: Date | null;
   handleMeisaiDelete: (rowIndex: number) => void;
   handleKeepRef: (el: HTMLInputElement | null) => void;
   handleMemoChange: (rowIndex: number, memo: string) => void;
@@ -154,6 +158,7 @@ const KeepEqTableRow = React.memo(
     rowIndex,
     edit,
     shukoFixFlag,
+    oyaShukoDate,
     handleMeisaiDelete,
     handleMemoChange,
     handleCellChange,
@@ -161,7 +166,7 @@ const KeepEqTableRow = React.memo(
     handleKeyDown,
   }: KeepEqTableRowProps) => {
     return (
-      <TableRow>
+      <TableRow hover>
         <TableCell sx={{ padding: 0, border: '1px solid black' }}>
           <IconButton
             onClick={() => handleMeisaiDelete(rowIndex)}
@@ -190,7 +195,9 @@ const KeepEqTableRow = React.memo(
           <Button
             variant="text"
             sx={{ p: 0, justifyContent: 'start', textTransform: 'none' }}
-            onClick={() => window.open(`/loan-situation/${row.kizaiId}`)}
+            onClick={() =>
+              window.open(`/loan-situation/${row.kizaiId}?date=${oyaShukoDate ? oyaShukoDate.toISOString() : ''}`)
+            }
           >
             {row.kizaiNam}
           </Button>
@@ -261,11 +268,20 @@ export const KeepContainerTable = (props: {
   rows: KeepJuchuContainerMeisaiValues[];
   edit: boolean;
   nyukoFixFlag: boolean;
+  oyaShukoDate: Date | null;
   handleContainerMemoChange: (rowIndex: number, memo: string) => void;
   handleContainerCellChange: (rowIndex: number, kicsValue: number, yardValue: number) => void;
   handleMeisaiDelete: (rowIndex: number) => void;
 }) => {
-  const { rows, edit, nyukoFixFlag, handleContainerMemoChange, handleContainerCellChange, handleMeisaiDelete } = props;
+  const {
+    rows,
+    edit,
+    nyukoFixFlag,
+    oyaShukoDate,
+    handleContainerMemoChange,
+    handleContainerCellChange,
+    handleMeisaiDelete,
+  } = props;
 
   const inputKicsRefs = useRef<(HTMLInputElement | null)[]>([]);
   const inputYardRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -395,7 +411,9 @@ export const KeepContainerTable = (props: {
                 <Button
                   variant="text"
                   sx={{ p: 0, justifyContent: 'start', textTransform: 'none' }}
-                  onClick={() => window.open(`/loan-situation/${row.kizaiId}`)}
+                  onClick={() =>
+                    window.open(`/loan-situation/${row.kizaiId}?date=${oyaShukoDate ? oyaShukoDate.toISOString() : ''}`)
+                  }
                 >
                   {row.kizaiNam}
                 </Button>

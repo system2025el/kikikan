@@ -32,7 +32,14 @@ export const getFilteredVehs = async (query: string = '') => {
     }));
     return filteredVehs;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -59,7 +66,14 @@ export const getChosenVeh = async (id: number) => {
     };
     return VehDetails;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -72,9 +86,16 @@ export const addNewVeh = async (data: VehsMasterDialogValues, user: string) => {
   try {
     await insertNewVeh(data, user);
     await revalidatePath('/vehicles-master');
-  } catch (error) {
-    console.error(error);
-    throw error;
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
+    throw e;
   }
 };
 
@@ -100,8 +121,15 @@ export const updateVeh = async (data: VehsMasterDialogValues, id: number, user: 
       throw new Error('[upDateVehDB] DBエラー:', { cause: error });
     }
     await revalidatePath('/vehicles-master');
-  } catch (error) {
-    console.error(error);
-    throw error;
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
+    throw e;
   }
 };

@@ -53,7 +53,14 @@ export const getFilteredIsshikis = async () => {
     }));
     return filteredIsshikis;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -79,7 +86,14 @@ export const getChosenIsshiki = async (id: number) => {
     };
     return isshikiDetails;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -123,10 +137,17 @@ export const addNewIsshiki = async (data: IsshikisMasterDialogValues, user: stri
 
     await revalidatePath('/isshiki-master');
     connection.query('COMMIT');
-  } catch (error) {
-    console.error(error);
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     connection.query('ROLLBACK');
-    throw error;
+    throw e;
   } finally {
     connection.release();
   }
@@ -216,10 +237,17 @@ export const updateIsshiki = async (
     }
     await connection.query('COMMIT');
     await revalidatePath('/isshiki-master');
-  } catch (error) {
-    console.error(error);
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     await connection.query('ROLLBACK');
-    throw error;
+    throw e;
   } finally {
     connection.release();
   }
@@ -238,7 +266,14 @@ export const getEqptsForEqptSelection = async (query: string = ''): Promise<Eqpt
     }
     return data.rows;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -254,7 +289,14 @@ export const checkExistingIsshiki = async (isshikiId: number, kizaiIds: number[]
     }
     return data.map((d) => d.kizai_id);
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -270,7 +312,14 @@ export const updIsshikiDelFlg = async (id: number, flg: boolean, user: string) =
     await updIsshikiDelFlgDB(id, data);
     await revalidatePath('/isshiki-master');
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };

@@ -288,7 +288,14 @@ export const updateBill = async (data: BillHeadValues, user: string): Promise<nu
     }
     return null;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     // エラーでロールバック
     await connection.query('ROLLBACK');
     throw e;

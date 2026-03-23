@@ -237,7 +237,7 @@ export const QuotationListTable = ({
                 {list.map((quotation, index) => {
                   const isItemSelected = selectedIds.includes(quotation.mituHeadId);
                   return (
-                    <TableRow key={index}>
+                    <TableRow key={index} hover>
                       <TableCell
                         padding="checkbox"
                         onClick={(event) => handleSelectQuotIds(event, quotation.mituHeadId)}

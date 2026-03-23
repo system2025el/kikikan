@@ -29,7 +29,14 @@ export const getSectionShortSelections = async () => {
 
     return data.map((d) => ({ id: d.section_nam_short, label: d.section_nam_short }));
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -50,7 +57,14 @@ export const getSectionSelections = async () => {
 
     return data.map((d) => ({ id: d.section_id, label: d.section_nam }));
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -79,7 +93,14 @@ export const getFilteredSections = async (query: string = '') => {
     }));
     return filteredSections;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -106,7 +127,14 @@ export const getChosenSection = async (id: number) => {
     };
     return sectionDetails;
   } catch (e) {
-    console.error(e);
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
     throw e;
   }
 };
@@ -119,9 +147,16 @@ export const addNewSection = async (data: SectionsMasterDialogValues, user: stri
   try {
     await insertNewSection(data, user);
     await revalidatePath('/sections-master');
-  } catch (error) {
-    console.error(error);
-    throw error;
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
+    throw e;
   }
 };
 
@@ -148,8 +183,15 @@ export const updateSection = async (rawData: SectionsMasterDialogValues, id: num
       throw new Error('[upDateSectionDB] DBエラー:', { cause: error });
     }
     await revalidatePath('/sections-master');
-  } catch (error) {
-    console.error(error);
-    throw error;
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(`[ERROR] ${e.message}`);
+      if (e.cause) {
+        console.error(`[CAUSE]`, e.cause);
+      }
+    } else {
+      console.error(e);
+    }
+    throw e;
   }
 };

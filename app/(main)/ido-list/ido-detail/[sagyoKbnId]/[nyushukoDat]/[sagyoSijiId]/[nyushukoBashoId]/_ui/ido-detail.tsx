@@ -85,26 +85,6 @@ export const IdoDetail = (props: {
   // ブラウザバック、F5、×ボタンでページを離れた際のhook
   useUnsavedChangesWarning(editFlag);
 
-  useEffect(() => {
-    const unsavedData = originIdoDetailList.filter((d) => !d.saveFlag);
-    if (unsavedData.length > 0) {
-      setSaveFlag(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    const filterIdoDetailList = idoDetailList.filter((d) => !d.delFlag);
-    if (JSON.stringify(originIdoDetailList) !== JSON.stringify(filterIdoDetailList)) {
-      setEditFlag(true);
-      setIsDirty(true);
-    } else {
-      setEditFlag(false);
-      setIsDirty(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [idoDetailList]);
-
   /**
    * 出発、到着ボタン押下
    * @returns
@@ -292,6 +272,26 @@ export const IdoDetail = (props: {
     const path = '/ido-list';
     requestNavigation(path);
   };
+
+  useEffect(() => {
+    const unsavedData = originIdoDetailList.filter((d) => !d.saveFlag);
+    if (unsavedData.length > 0) {
+      setSaveFlag(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const filterIdoDetailList = idoDetailList.filter((d) => !d.delFlag);
+    if (JSON.stringify(originIdoDetailList) !== JSON.stringify(filterIdoDetailList)) {
+      setEditFlag(true);
+      setIsDirty(true);
+    } else {
+      setEditFlag(false);
+      setIsDirty(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [idoDetailList]);
 
   return (
     <PermissionGuard category={'nyushuko'} required={permission.nyushuko_ref}>
