@@ -82,8 +82,8 @@ export const EqptOrderTable = ({
               <TableHead>
                 <TableRow sx={{ whiteSpace: 'nowrap' }}>
                   <TableCell align="right">受注番号</TableCell>
-                  <TableCell align="left">受注明細名</TableCell>
                   <TableCell align="left">公演名</TableCell>
+                  <TableCell align="left">受注明細名</TableCell>
                   <TableCell align="left">公演場所</TableCell>
                   <TableCell align="left">顧客</TableCell>
                   <TableCell align="left">受注日</TableCell>
@@ -105,6 +105,11 @@ export const EqptOrderTable = ({
                       >
                         {order.juchuHeadId}
                       </Button>
+                    </TableCell>
+                    <TableCell>
+                      <LightTooltipWithText variant={'body2'} maxWidth={200}>
+                        {order.koenNam}
+                      </LightTooltipWithText>
                     </TableCell>
                     <TableCell sx={{ minWidth: 0, whiteSpace: 'nowrap' }}>
                       <Button
@@ -140,11 +145,6 @@ export const EqptOrderTable = ({
                           {order.headNam}
                         </LightTooltipWithText>
                       </Button>
-                    </TableCell>
-                    <TableCell>
-                      <LightTooltipWithText variant={'body2'} maxWidth={200}>
-                        {order.koenNam}
-                      </LightTooltipWithText>
                     </TableCell>
                     <TableCell>
                       <LightTooltipWithText variant={'body2'} maxWidth={200}>
