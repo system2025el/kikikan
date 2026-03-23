@@ -446,6 +446,7 @@ type IdoEqTableProps = {
   rows: IdoJuchuKizaiMeisaiValues[];
   edit: boolean;
   fixFlag: boolean;
+  shukoDate: Date | null;
   handleCellDateChange: (kizaiId: number, date: Dayjs | null) => void;
   handleCellDateClear: (kizaiId: number) => void;
 };
@@ -454,6 +455,7 @@ export const IdoEqTable: React.FC<IdoEqTableProps> = ({
   rows,
   edit,
   fixFlag,
+  shukoDate,
   handleCellDateChange,
   handleCellDateClear,
 }) => {
@@ -527,7 +529,9 @@ export const IdoEqTable: React.FC<IdoEqTableProps> = ({
                 <Button
                   variant="text"
                   sx={{ p: 0, justifyContent: 'start', textTransform: 'none' }}
-                  onClick={() => window.open(`/loan-situation/${row.kizaiId}`)}
+                  onClick={() =>
+                    window.open(`/loan-situation/${row.kizaiId}?date=${shukoDate ? shukoDate.toISOString() : ''}`)
+                  }
                 >
                   {row.kizaiNam}
                 </Button>
@@ -556,11 +560,13 @@ export const ContainerTable = (props: {
   rows: JuchuContainerMeisaiValues[];
   edit: boolean;
   fixFlag: boolean;
+  shukoDate: Date | null;
   handleContainerMemoChange: (rowIndex: number, memo: string) => void;
   handleContainerCellChange: (rowIndex: number, kicsValue: number, yardValue: number) => void;
   handleMeisaiDelete: (row: JuchuContainerMeisaiValues) => void;
 }) => {
-  const { rows, edit, fixFlag, handleContainerMemoChange, handleContainerCellChange, handleMeisaiDelete } = props;
+  const { rows, edit, fixFlag, shukoDate, handleContainerMemoChange, handleContainerCellChange, handleMeisaiDelete } =
+    props;
 
   const inputKicsRefs = useRef<(HTMLInputElement | null)[]>([]);
   const inputYardRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -659,7 +665,9 @@ export const ContainerTable = (props: {
                 <Button
                   variant="text"
                   sx={{ p: 0, justifyContent: 'start', textTransform: 'none' }}
-                  onClick={() => window.open(`/loan-situation/${row.kizaiId}`)}
+                  onClick={() =>
+                    window.open(`/loan-situation/${row.kizaiId}?date=${shukoDate ? shukoDate.toISOString() : ''}`)
+                  }
                 >
                   {row.kizaiNam}
                 </Button>

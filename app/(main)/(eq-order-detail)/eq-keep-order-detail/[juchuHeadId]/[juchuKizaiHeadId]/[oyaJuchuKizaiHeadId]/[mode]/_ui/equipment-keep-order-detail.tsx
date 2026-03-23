@@ -1637,6 +1637,7 @@ export const EquipmentKeepOrderDetail = (props: {
                         rows={keepJuchuContainerMeisaiList}
                         edit={edit}
                         nyukoFixFlag={nyukoFixFlag}
+                        oyaShukoDate={oyaShukoDate}
                         handleContainerMemoChange={handleKeepContainerMemoChange}
                         handleContainerCellChange={handleKeepContainerCellChange}
                         handleMeisaiDelete={handleCtnMeisaiDelete}

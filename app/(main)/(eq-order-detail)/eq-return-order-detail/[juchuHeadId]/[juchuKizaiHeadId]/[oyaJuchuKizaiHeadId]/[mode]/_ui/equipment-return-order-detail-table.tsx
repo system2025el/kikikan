@@ -471,11 +471,13 @@ ReturnEqTableRow.displayName = 'ReturnEqTableRow';
 export const ReturnContainerTable = (props: {
   rows: ReturnJuchuContainerMeisaiValues[];
   edit: boolean;
+  returnNyukoDate: Date | null;
   handleContainerMemoChange: (rowIndex: number, memo: string) => void;
   handleContainerCellChange: (rowIndex: number, kicsValue: number, yardValue: number) => void;
   handleMeisaiDelete: (row: ReturnJuchuContainerMeisaiValues) => void;
 }) => {
-  const { rows, edit, handleContainerMemoChange, handleContainerCellChange, handleMeisaiDelete } = props;
+  const { rows, edit, returnNyukoDate, handleContainerMemoChange, handleContainerCellChange, handleMeisaiDelete } =
+    props;
 
   const inputKicsRefs = useRef<(HTMLInputElement | null)[]>([]);
   const inputYardRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -604,7 +606,11 @@ export const ReturnContainerTable = (props: {
                 <Button
                   variant="text"
                   sx={{ p: 0, justifyContent: 'start', textTransform: 'none' }}
-                  onClick={() => window.open(`/loan-situation/${row.kizaiId}`)}
+                  onClick={() =>
+                    window.open(
+                      `/loan-situation/${row.kizaiId}?date=${returnNyukoDate ? returnNyukoDate.toISOString() : ''}`
+                    )
+                  }
                 >
                   {row.kizaiNam}
                 </Button>
