@@ -2099,6 +2099,7 @@ export const EquipmentReturnOrderDetail = (props: {
                       <ReturnContainerTable
                         rows={returnJuchuContainerMeisaiList}
                         edit={edit}
+                        returnNyukoDate={returnNyukoDate}
                         handleContainerMemoChange={handleReturnContainerMemoChange}
                         handleContainerCellChange={handleReturnContainerCellChange}
                         handleMeisaiDelete={handleCtnMeisaiDelete}

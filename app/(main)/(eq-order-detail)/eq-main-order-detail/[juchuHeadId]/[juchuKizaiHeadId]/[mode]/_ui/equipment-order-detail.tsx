@@ -3224,6 +3224,7 @@ const EquipmentOrderDetail = (props: {
                         rows={idoJuchuKizaiMeisaiList}
                         edit={edit}
                         fixFlag={fixFlag}
+                        shukoDate={shukoDate}
                         handleCellDateChange={handleCellDateChange}
                         handleCellDateClear={handleCellDateClear}
                       />
@@ -3237,6 +3238,7 @@ const EquipmentOrderDetail = (props: {
                         rows={juchuContainerMeisaiList}
                         edit={edit}
                         fixFlag={fixFlag}
+                        shukoDate={shukoDate}
                         handleContainerMemoChange={handleContainerMemoChange}
                         handleContainerCellChange={handleContainerCellChange}
                         handleMeisaiDelete={handleCtnMeisaiDelete}

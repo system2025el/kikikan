@@ -165,6 +165,7 @@ export const LoanList = () => {
                   <TableRow
                     key={loan.kizaiId}
                     sx={{ bgcolor: loan.delFlg || !loan.dspFlg ? grey[300] : 'white', whiteSpace: 'nowrap' }}
+                    hover
                   >
                     <TableCell align="center" padding="none">
                       {index + 1}
