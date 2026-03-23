@@ -1621,6 +1621,7 @@ export const EquipmentKeepOrderDetail = (props: {
                           rows={keepJuchuKizaiMeisaiList}
                           edit={edit}
                           shukoFixFlag={shukoFixFlag}
+                          oyaShukoDate={oyaShukoDate}
                           handleMeisaiDelete={handleEqMeisaiDelete}
                           handleMemoChange={handleMemoChange}
                           handleCellChange={handleCellChange}
