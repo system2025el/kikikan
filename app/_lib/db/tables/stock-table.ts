@@ -400,7 +400,7 @@ SELECT
 FROM 
     target_days d
 CROSS JOIN 
-    kizai_info k  -- ここで1回だけ結合
+    kizai_info k
 LEFT JOIN 
     ${SCHEMA}.v_zaiko_qty v ON v.plan_dat = d.cal_dat 
     AND v.kizai_id = k.kizai_id
