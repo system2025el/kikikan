@@ -58,7 +58,7 @@ export const EqptOrderList = () => {
   const { control, handleSubmit, reset, getValues, watch } = useForm<EqptOrderSearchValues>({
     defaultValues: {
       radio: 'shuko',
-      selectedDate: { value: '4', range: { from: null, to: null } },
+      selectedDate: { value: '5', range: { from: null, to: null } },
       kokyaku: '',
       koenbashoNam: '',
       listSort: { sort: 'shuko', order: 'asc' },
@@ -117,7 +117,7 @@ export const EqptOrderList = () => {
     } else {
       getList({
         radio: 'shuko',
-        selectedDate: { value: '4', range: { from: null, to: null } },
+        selectedDate: { value: '5', range: { from: null, to: null } },
         kokyaku: '',
         listSort: { sort: 'shuko', order: 'asc' },
       });
