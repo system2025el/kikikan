@@ -83,9 +83,12 @@ export const getPdfData = async (
       throw new Error('[selectPdfJuchuKizaiHead] DBエラー:', { cause: juchuKizaiHeadDataError });
     }
 
-    const honbanbiCalcQty = juchuKizaiHeadData.reduce((max, current) => {
-      return (current.juchu_honbanbi_calc_qty ?? 0) > (max.juchu_honbanbi_calc_qty ?? 0) ? current : max;
-    }).juchu_honbanbi_calc_qty;
+    const honbanbiCalcQty =
+      juchuKizaiHeadData[0].juchu_kizai_head_kbn !== 1
+        ? null
+        : juchuKizaiHeadData.reduce((max, current) => {
+            return (current.juchu_honbanbi_calc_qty ?? 0) > (max.juchu_honbanbi_calc_qty ?? 0) ? current : max;
+          }).juchu_honbanbi_calc_qty;
 
     const nyukoDat =
       nyushukoBashoId === 1
@@ -108,7 +111,7 @@ export const getPdfData = async (
       item5: toJapanYMDString(nyushukoDat),
       item6: nyukoDat ? toJapanYMDString(nyukoDat) : '',
       item7: juchuHeadData.koenbasho_nam ?? '',
-      item8: honbanbiCalcQty ?? 0,
+      item8: honbanbiCalcQty,
       item9: juchuHeadData.nyuryoku_user ?? '',
       item10: '',
       item11: juchuHeadData.kokyaku_tanto_nam ?? '',

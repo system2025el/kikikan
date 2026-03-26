@@ -84,17 +84,34 @@ export const getPdfData = async (
     }
 
     // 関数を実行して結果オブジェクト { header, meisai } を受け取る
-    const nyukoResult = await selectNyukoPdfJuchuKizaiMeisai(juchuHeadId, nyushukoDat, nyushukoBashoId);
+    const nyukoResult = await selectNyukoPdfJuchuKizaiMeisai(
+      juchuHeadId,
+      juchuKizaiHeadIds,
+      nyushukoDat,
+      nyushukoBashoId
+    );
 
     // ここで .meisai (meisaiQueryの結果) を kizaiData に入れる
     const kizaiData: NyukoKizai[] = nyukoResult.meisai;
+
+    const updatedKizaiData = kizaiData.map((item) => {
+      if (item.juchu_kizai_head_kbn === 2) {
+        return {
+          ...item,
+          planKizaiQty: item.planKizaiQty * -1,
+          plan_yobi_qty: item.plan_yobi_qty * -1,
+          plan_qty: item.plan_qty * -1,
+        };
+      }
+      return item;
+    });
 
     // オプション機材のインデント文字
     const indentChara = await getDic(1);
 
     // セット機材のインデックスを特定
     const setKizaiIndices = new Set<number>();
-    kizaiData.forEach((item, index) => {
+    updatedKizaiData.forEach((item, index) => {
       if (item.kizai_nam.startsWith(indentChara)) {
         setKizaiIndices.add(index);
         if (index > 0) setKizaiIndices.add(index - 1);
@@ -107,7 +124,7 @@ export const getPdfData = async (
     // 合計対象のうち最初に現れた位置を記録するMap
     const firstMap = new Map<number, number>();
 
-    kizaiData.forEach((item, index) => {
+    updatedKizaiData.forEach((item, index) => {
       // セット機材は合計しない
       if (!setKizaiIndices.has(index)) {
         const existing = summaryMap.get(item.kizai_id);
@@ -129,8 +146,8 @@ export const getPdfData = async (
 
     // セット機材データを追加
     setKizaiIndices.forEach((i) => {
-      if (kizaiData[i]) {
-        mergeKizaiData.push({ index: i, data: { ...kizaiData[i] } });
+      if (updatedKizaiData[i]) {
+        mergeKizaiData.push({ index: i, data: { ...updatedKizaiData[i] } });
       }
     });
 
@@ -146,10 +163,12 @@ export const getPdfData = async (
     const sqlHeader = nyukoResult.header;
 
     const honbanbiCalcQty =
-      sqlHeader?.juchu_honbanbi_calc_qty ??
-      juchuKizaiHeadData.reduce((max, current) => {
-        return (current.juchu_honbanbi_calc_qty ?? 0) > (max.juchu_honbanbi_calc_qty ?? 0) ? current : max;
-      }, juchuKizaiHeadData[0] || {}).juchu_honbanbi_calc_qty;
+      sqlHeader.juchu_kizai_head_kbn !== 1
+        ? null
+        : /*(sqlHeader?.juchu_honbanbi_calc_qty ??*/
+          juchuKizaiHeadData.reduce((max, current) => {
+            return (current.juchu_honbanbi_calc_qty ?? 0) > (max.juchu_honbanbi_calc_qty ?? 0) ? current : max;
+          }, juchuKizaiHeadData[0] || {}).juchu_honbanbi_calc_qty; /*)*/
 
     const shukoDat =
       nyushukoBashoId === 1
@@ -171,7 +190,7 @@ export const getPdfData = async (
       item5: shukoDat ? toJapanYMDString(shukoDat) : '',
       item6: toJapanYMDString(nyushukoDat),
       item7: juchuHeadData.koenbasho_nam ?? '',
-      item8: honbanbiCalcQty ?? 0,
+      item8: honbanbiCalcQty,
       item9: juchuHeadData.nyuryoku_user ?? '',
       item10: '',
       item11: juchuHeadData.kokyaku_tanto_nam ?? '',

@@ -63,7 +63,9 @@ export const selectPdfJuchuKizaiHead = async (
     return await supabase
       .schema(SCHEMA)
       .from('v_juchu_kizai_head_lst')
-      .select('juchu_honbanbi_calc_qty, kics_shuko_dat, kics_nyuko_dat, yard_shuko_dat, yard_nyuko_dat')
+      .select(
+        'juchu_honbanbi_calc_qty, kics_shuko_dat, kics_nyuko_dat, yard_shuko_dat, yard_nyuko_dat, juchu_kizai_head_kbn'
+      )
       .eq('juchu_head_id', juchuHeadId)
       .in('juchu_kizai_head_id', ids);
   } catch (e) {
