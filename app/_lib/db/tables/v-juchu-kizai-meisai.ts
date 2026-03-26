@@ -235,11 +235,13 @@ order by
  */
 export const selectNyukoPdfJuchuKizaiMeisai = async (
   juchuHeadId: number,
+  juchuKizaiHeadIds: string,
   nyukoDat: string,
   nyushukoBashoId: number
 ) => {
+  const ids = juchuKizaiHeadIds.split(',').map(Number);
   try {
-    const values = [juchuHeadId, nyukoDat];
+    const values = [juchuHeadId, ids, nyukoDat];
     const nyukoBasho = nyushukoBashoId === 1 ? 'kics' : 'yard';
     // ---------------------------------------------------
     // 入庫リスト印刷ボタンSQL
@@ -247,6 +249,7 @@ export const selectNyukoPdfJuchuKizaiMeisai = async (
     const headerQuery = `
       SELECT 
           v_juchu_kizai_head_lst.juchu_head_id
+          ,v_juchu_kizai_head_lst.juchu_kizai_head_kbn
           ,v_juchu_kizai_head_lst.${nyukoBasho}_nyuko_dat --YARDの場合
 
           ,max(v_juchu_kizai_head_lst.juchu_honbanbi_calc_qty) as juchu_honbanbi_calc_qty
@@ -256,12 +259,13 @@ export const selectNyukoPdfJuchuKizaiMeisai = async (
       
       WHERE
           v_juchu_kizai_head_lst.juchu_head_id = $1
-   --     AND v_juchu_kizai_head_lst.juchu_kizai_head_id in (1,2)    --入庫明細ビューから機材ヘッダーIDセット
-          AND v_juchu_kizai_head_lst.${nyukoBasho}_nyuko_dat = $2    --YARDの場合
-          AND v_juchu_kizai_head_lst.juchu_kizai_head_kbn IN (1,3) --通常、キープ
+          AND v_juchu_kizai_head_lst.juchu_kizai_head_id = ANY ($2)   --入庫明細ビューから機材ヘッダーIDセット
+          AND v_juchu_kizai_head_lst.${nyukoBasho}_nyuko_dat = $3    --YARDの場合
+          --AND v_juchu_kizai_head_lst.juchu_kizai_head_kbn IN (1,3) --通常、キープ
       
       GROUP BY
           v_juchu_kizai_head_lst.juchu_head_id
+          ,v_juchu_kizai_head_lst.juchu_kizai_head_kbn
           ,v_juchu_kizai_head_lst.${nyukoBasho}_nyuko_dat --YARDの場合
     `;
 
@@ -271,6 +275,7 @@ export const selectNyukoPdfJuchuKizaiMeisai = async (
     const meisaiQuery = `
       SELECT 
           v_juchu_kizai_head_lst.juchu_head_id
+          ,v_juchu_kizai_head_lst.juchu_kizai_head_kbn
           ,v_juchu_kizai_head_lst.${nyukoBasho}_nyuko_dat 
           ,v_juchu_kizai_meisai.kizai_id
           ,v_juchu_kizai_meisai.kizai_nam
@@ -289,15 +294,16 @@ export const selectNyukoPdfJuchuKizaiMeisai = async (
       
           WHERE
           v_juchu_kizai_head_lst.juchu_head_id = $1
-   --     AND v_juchu_kizai_head_lst.juchu_kizai_head_id in (1,2)    --入庫明細ビューから機材ヘッダーIDセット
-          AND v_juchu_kizai_head_lst.${nyukoBasho}_nyuko_dat = $2   --YARDの場合
-          AND v_juchu_kizai_head_lst.juchu_kizai_head_kbn IN (1,3)   --通常、キープ
+          AND v_juchu_kizai_head_lst.juchu_kizai_head_id = ANY ($2)    --入庫明細ビューから機材ヘッダーIDセット
+          AND v_juchu_kizai_head_lst.${nyukoBasho}_nyuko_dat = $3   --YARDの場合
+          --AND v_juchu_kizai_head_lst.juchu_kizai_head_kbn IN (1,3)   --通常、キープ
 
    --コンテナも追加(YARD+YARD)     
       UNION ALL
 
       SELECT 
           v_juchu_kizai_head_lst.juchu_head_id
+          ,v_juchu_kizai_head_lst.juchu_kizai_head_kbn
           ,v_juchu_kizai_head_lst.${nyukoBasho}_nyuko_dat 
           ,v_juchu_ctn_meisai.kizai_id
           ,v_juchu_ctn_meisai.kizai_nam
@@ -320,8 +326,9 @@ export const selectNyukoPdfJuchuKizaiMeisai = async (
 
       WHERE
           v_juchu_kizai_head_lst.juchu_head_id = $1   --入庫明細から機材ヘッダーIDセット
-          AND v_juchu_kizai_head_lst.${nyukoBasho}_nyuko_dat = $2   --YARD入庫日時
-          AND v_juchu_kizai_head_lst.juchu_kizai_head_kbn IN (1,3)   --通常、キープ
+          AND v_juchu_kizai_head_lst.juchu_kizai_head_id = ANY ($2)
+          AND v_juchu_kizai_head_lst.${nyukoBasho}_nyuko_dat = $3   --YARD入庫日時
+          --AND v_juchu_kizai_head_lst.juchu_kizai_head_kbn IN (1,3)   --通常、キープ
        
       ORDER BY
           juchu_kizai_head_id

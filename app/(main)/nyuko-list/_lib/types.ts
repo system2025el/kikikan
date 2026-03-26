@@ -24,6 +24,7 @@ export type NyukoTableValues = {
 };
 
 export type NyukoKizai = {
+  juchu_kizai_head_kbn: number;
   kizai_id: number;
   kizai_nam: string;
   planKizaiQty: number;
